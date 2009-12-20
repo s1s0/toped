@@ -65,7 +65,7 @@ Calbr::edge Calbr::drcEdge::getZoom() const
 	return ret;
 }
 
-void Calbr::drcEdge::addError(/*laydata::tdtdesign* atdb, */word la)
+void Calbr::drcEdge::addError(/*laydata::TdtDesign* atdb, */word la)
 {
    _render->addLine(_coords);
 }
@@ -86,7 +86,7 @@ void Calbr::drcPolygon::addCoord(long x, long y)
    _coords.push_back(pt);
 }
 
-void Calbr::drcPolygon::addError(/*laydata::tdtdesign* atdb, */word la)
+void Calbr::drcPolygon::addError(/*laydata::TdtDesign* atdb, */word la)
 {
    _render->addPoly(_coords);
 }

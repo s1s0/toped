@@ -262,7 +262,7 @@ tellstdfunc::stdZOOMALL::stdZOOMALL(telldata::typeID retype, bool eor) :
 {}
 
 int tellstdfunc::stdZOOMALL::execute() {
-   laydata::tdtdesign* ATDB = DATC->lockDB();
+   laydata::TdtDesign* ATDB = DATC->lockDB();
       DBbox* ovl  = DEBUG_NEW DBbox(ATDB->activeoverlap());
    DATC->unlockDB();
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
@@ -278,7 +278,7 @@ tellstdfunc::stdZOOMVISIBLE::stdZOOMVISIBLE(telldata::typeID retype, bool eor) :
 {}
 
 int tellstdfunc::stdZOOMVISIBLE::execute() {
-   laydata::tdtdesign* ATDB = DATC->lockDB();
+   laydata::TdtDesign* ATDB = DATC->lockDB();
       DBbox* ovl  = DEBUG_NEW DBbox(ATDB->visibleOverlap());
    DATC->unlockDB();
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);

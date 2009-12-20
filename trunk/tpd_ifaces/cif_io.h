@@ -308,7 +308,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
 
    class CifExportFile : public DbExportFile {
       public:
-                        CifExportFile(std::string, laydata::tdtcell*, USMap*, bool, bool);
+                        CifExportFile(std::string, laydata::TdtCell*, USMap*, bool, bool);
          virtual       ~CifExportFile();
          virtual void   definitionStart(std::string);
          virtual void   definitionFinish();
@@ -333,20 +333,20 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
 
    class Cif2Ted {
       public:
-                              Cif2Ted(CifFile*, laydata::tdtlibdir*, SIMap*, real);
+                              Cif2Ted(CifFile*, laydata::TdtLibDir*, SIMap*, real);
          void                 top_structure(std::string, bool, bool);
       protected:
          void                 child_structure(const CIFHierTree*, bool);
          void                 convert_prep(const CIFHierTree* item, bool);
-         void                 convert(CifStructure*, laydata::tdtcell*);
-         void                 box ( CifBox*     ,laydata::tdtlayer*, std::string );
-         void                 poly( CifPoly*    ,laydata::tdtlayer*, std::string );
-         void                 wire( CifWire*    ,laydata::tdtlayer*, std::string );
-         void                 ref ( CifRef*     ,laydata::tdtcell*);
-         void                 lbll( CifLabelLoc*,laydata::tdtlayer*, std::string );
-         void                 lbls( CifLabelSig*,laydata::tdtlayer*, std::string );
+         void                 convert(CifStructure*, laydata::TdtCell*);
+         void                 box ( CifBox*     ,laydata::TdtLayer*, std::string );
+         void                 poly( CifPoly*    ,laydata::TdtLayer*, std::string );
+         void                 wire( CifWire*    ,laydata::TdtLayer*, std::string );
+         void                 ref ( CifRef*     ,laydata::TdtCell*);
+         void                 lbll( CifLabelLoc*,laydata::TdtLayer*, std::string );
+         void                 lbls( CifLabelSig*,laydata::TdtLayer*, std::string );
          CifFile*             _src_lib;
-         laydata::tdtlibdir*  _tdt_db;
+         laydata::TdtLibDir*  _tdt_db;
          SIMap*               _cif_layers;
          real                 _crosscoeff;
          real                 _dbucoeff;

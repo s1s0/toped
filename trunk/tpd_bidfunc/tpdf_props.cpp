@@ -241,7 +241,7 @@ void tellstdfunc::stdHIDELAYER::undo() {
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    bool        hide  = getBoolValue(UNDOPstack,true);
    word        layno = getWordValue(UNDOPstack,true);
-   laydata::tdtdesign* ATDB = DATC->lockDB();
+   laydata::TdtDesign* ATDB = DATC->lockDB();
    DATC->hideLayer(layno, hide);
    ATDB->select_fromList(get_ttlaylist(pl));
    DATC->unlockDB();
@@ -254,16 +254,16 @@ int tellstdfunc::stdHIDELAYER::execute() {
    bool        hide  = getBoolValue();
    word        layno = getWordValue();
    if (layno != DATC->curlay()) {
-      laydata::tdtdesign* ATDB = DATC->lockDB();
+      laydata::TdtDesign* ATDB = DATC->lockDB();
 
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::ttint(layno));
       UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
-      laydata::selectList *listselected = ATDB->shapesel();
-      laydata::selectList *todslct = DEBUG_NEW laydata::selectList();
+      laydata::SelectList *listselected = ATDB->shapesel();
+      laydata::SelectList *todslct = DEBUG_NEW laydata::SelectList();
       if (hide && (listselected->end() != listselected->find(layno)))
       {
-         (*todslct)[layno] = DEBUG_NEW laydata::dataList(*((*listselected)[layno]));
+         (*todslct)[layno] = DEBUG_NEW laydata::DataList(*((*listselected)[layno]));
          UNDOPstack.push_front(make_ttlaylist(todslct));
          ATDB->unselect_fromList(todslct);
       }
@@ -308,7 +308,7 @@ void tellstdfunc::stdHIDELAYERS::undo() {
    bool        hide  = getBoolValue(UNDOPstack,true);
    telldata::ttlist *sl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    telldata::ttint *laynumber;
-   laydata::tdtdesign* ATDB = DATC->lockDB();
+   laydata::TdtDesign* ATDB = DATC->lockDB();
    for (unsigned i = 0; i < sl->size() ; i++) {
       laynumber = static_cast<telldata::ttint*>((sl->mlist())[i]);
       DATC->hideLayer(laynumber->value(), hide);
@@ -327,9 +327,9 @@ int tellstdfunc::stdHIDELAYERS::execute()
    UNDOcmdQ.push_front(this);
    telldata::ttlist* undolaylist = DEBUG_NEW telldata::ttlist(telldata::tn_int);
    telldata::ttint *laynumber;
-   laydata::tdtdesign* ATDB = DATC->lockDB();
-   laydata::selectList *listselected = ATDB->shapesel();
-   laydata::selectList *todslct = DEBUG_NEW laydata::selectList();
+   laydata::TdtDesign* ATDB = DATC->lockDB();
+   laydata::SelectList *listselected = ATDB->shapesel();
+   laydata::SelectList *todslct = DEBUG_NEW laydata::SelectList();
    // "preliminary" pass - to collect the selected shapes in the layers, targeted
    // for locking and to issue some warning messages if appropriate
    for (unsigned i = 0; i < sl->size() ; i++)
@@ -348,7 +348,7 @@ int tellstdfunc::stdHIDELAYERS::execute()
       else if (hide ^ DATC->layerHidden(laynumber->value()))
       {
          if (hide && (listselected->end() != listselected->find(laynumber->value())))
-            (*todslct)[laynumber->value()] = DEBUG_NEW laydata::dataList(*((*listselected)[laynumber->value()]));
+            (*todslct)[laynumber->value()] = DEBUG_NEW laydata::DataList(*((*listselected)[laynumber->value()]));
          TpdPost::layer_status(tui::BT_LAYER_HIDE, laynumber->value(), hide);
          undolaylist->add(DEBUG_NEW telldata::ttint(*laynumber));
       }
@@ -532,7 +532,7 @@ void tellstdfunc::stdLOCKLAYER::undo() {
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    bool        lock  = getBoolValue(UNDOPstack, true);
    word        layno = getWordValue(UNDOPstack, true);
-   laydata::tdtdesign* ATDB = DATC->lockDB();
+   laydata::TdtDesign* ATDB = DATC->lockDB();
    DATC->lockLayer(layno, lock);
    ATDB->select_fromList(get_ttlaylist(pl));
    DATC->unlockDB();
@@ -547,15 +547,15 @@ int tellstdfunc::stdLOCKLAYER::execute()
    word        layno = getWordValue();
    if (layno != DATC->curlay())
    {
-      laydata::tdtdesign* ATDB = DATC->lockDB();
+      laydata::TdtDesign* ATDB = DATC->lockDB();
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::ttint(layno));
       UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!lock));
-      laydata::selectList *listselected = ATDB->shapesel();
-      laydata::selectList *todslct = DEBUG_NEW laydata::selectList();
+      laydata::SelectList *listselected = ATDB->shapesel();
+      laydata::SelectList *todslct = DEBUG_NEW laydata::SelectList();
       if (lock && (listselected->end() != listselected->find(layno)))
       {
-         (*todslct)[layno] = DEBUG_NEW laydata::dataList(*((*listselected)[layno]));
+         (*todslct)[layno] = DEBUG_NEW laydata::DataList(*((*listselected)[layno]));
          UNDOPstack.push_front(make_ttlaylist(todslct));
          ATDB->unselect_fromList(todslct);
       }
@@ -600,7 +600,7 @@ void tellstdfunc::stdLOCKLAYERS::undo() {
    bool        lock  = getBoolValue(UNDOPstack,true);
    telldata::ttlist *sl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    telldata::ttint *laynumber;
-   laydata::tdtdesign* ATDB = DATC->lockDB();
+   laydata::TdtDesign* ATDB = DATC->lockDB();
    for (unsigned i = 0; i < sl->size() ; i++) {
       laynumber = static_cast<telldata::ttint*>((sl->mlist())[i]);
       DATC->lockLayer(laynumber->value(), lock);
@@ -619,9 +619,9 @@ int tellstdfunc::stdLOCKLAYERS::execute()
    UNDOcmdQ.push_front(this);
    telldata::ttlist* undolaylist = DEBUG_NEW telldata::ttlist(telldata::tn_int);
    telldata::ttint *laynumber;
-   laydata::tdtdesign* ATDB = DATC->lockDB();
-   laydata::selectList *listselected = ATDB->shapesel();
-   laydata::selectList *todslct = DEBUG_NEW laydata::selectList();
+   laydata::TdtDesign* ATDB = DATC->lockDB();
+   laydata::SelectList *listselected = ATDB->shapesel();
+   laydata::SelectList *todslct = DEBUG_NEW laydata::SelectList();
    // "preliminary" pass - to collect the selected shapes in the layers, targeted
    // for locking and to issue some warning messages if appropriate
    for (unsigned i = 0; i < sl->size() ; i++)
@@ -640,7 +640,7 @@ int tellstdfunc::stdLOCKLAYERS::execute()
       else if (lock ^ DATC->layerLocked(laynumber->value()))
       {
          if (lock && (listselected->end() != listselected->find(laynumber->value())))
-            (*todslct)[laynumber->value()] = DEBUG_NEW laydata::dataList(*((*listselected)[laynumber->value()]));
+            (*todslct)[laynumber->value()] = DEBUG_NEW laydata::DataList(*((*listselected)[laynumber->value()]));
          TpdPost::layer_status(tui::BT_LAYER_LOCK, laynumber->value(), lock);
          undolaylist->add(DEBUG_NEW telldata::ttint(*laynumber));
       }
@@ -812,7 +812,7 @@ void tellstdfunc::stdLOADLAYSTAT::undo() {
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    std::string sname  = getStringValue(UNDOPstack, true);
    DATC->popLayerStatus();
-   laydata::tdtdesign* ATDB = DATC->lockDB();
+   laydata::TdtDesign* ATDB = DATC->lockDB();
    ATDB->select_fromList(get_ttlaylist(pl));
    DATC->unlockDB();
    delete pl;
@@ -829,18 +829,18 @@ int tellstdfunc::stdLOADLAYSTAT::execute()
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(sname));
       // the list containing all deselected shapes
-      laydata::selectList *todslct = DEBUG_NEW laydata::selectList();
+      laydata::SelectList *todslct = DEBUG_NEW laydata::SelectList();
       WordSet hll(hidel); // combined locked and hidden layers
       hll.insert(lockl.begin(), lockl.end());
 
-      laydata::tdtdesign* ATDB = DATC->lockDB();
-         laydata::selectList *listselected = ATDB->shapesel();
+      laydata::TdtDesign* ATDB = DATC->lockDB();
+         laydata::SelectList *listselected = ATDB->shapesel();
          // first thing is to pick-up the selected shapes of the layers which
          // will be locked or hidden
          for (WordSet::const_iterator CL = hll.begin(); CL != hll.end(); CL++)
          {
             if (listselected->end() != listselected->find(*CL))
-               (*todslct)[*CL] = DEBUG_NEW laydata::dataList(*((*listselected)[*CL]));
+               (*todslct)[*CL] = DEBUG_NEW laydata::DataList(*((*listselected)[*CL]));
          }
          UNDOPstack.push_front(make_ttlaylist(todslct));
          // Now unselect the shapes in the target layers

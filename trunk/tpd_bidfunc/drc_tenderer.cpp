@@ -41,7 +41,7 @@ extern wxWindow*                 TopedCanvasW;
 
 extern const wxEventType         wxEVT_CANVAS_ZOOM;
 
-Calbr::drcTenderer::drcTenderer(laydata::drclibrary* library)
+Calbr::drcTenderer::drcTenderer(laydata::DrcLibrary* library)
 {
 	_ATDB = library;
 }
@@ -58,7 +58,7 @@ void Calbr::drcTenderer::setError(unsigned int numError)
 void Calbr::drcTenderer::startWriting()
 {
    _startDrawing = true;
-	_DRCCell = DEBUG_NEW laydata::tdtcell("drc");
+	_DRCCell = DEBUG_NEW laydata::TdtCell("drc");
 	DATC->setState(layprop::DB);	
 }
 
@@ -87,7 +87,7 @@ void Calbr::drcTenderer::addPoly(const CoordsVector   &coords)
          _miny = std::min(it->y, _miny);
          plDB->push_back(TP(it->x, it->y, DBscale));
       }
-		laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(_DRCCell->securelayer(_numError));
+		laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(_DRCCell->securelayer(_numError));
 		DATC->addUnpublishedLay(_numError);
 		dwl->addpoly(*plDB, false);
 		delete plDB;
@@ -121,7 +121,7 @@ void Calbr::drcTenderer::addLine(const edge &edge)
 
    real      w = 0.01;   //width of line
 
-	laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(_DRCCell->securelayer(_numError));
+	laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(_DRCCell->securelayer(_numError));
 	DATC->addUnpublishedLay(_numError);
 	dwl->addwire(*plDB, static_cast<word>(rint(w * DBscale)), false);
    delete plDB;

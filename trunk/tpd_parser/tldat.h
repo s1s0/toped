@@ -40,7 +40,7 @@
 #define TLUNKNOWN_TYPE(op) (op == telldata::tn_composite)
 
 namespace laydata {
-   class tdtdata;
+   class TdtData;
 }
 //=============================================================================
 // TELL types
@@ -237,7 +237,7 @@ namespace telldata {
    public:
                            ttlayout(): tell_var(tn_layout), _data(NULL),
                                                       _layer(ERR_LAY), _selp(NULL) {};
-                           ttlayout(laydata::tdtdata* pdat, unsigned lay, SGBitSet* selp = NULL):
+                           ttlayout(laydata::TdtData* pdat, unsigned lay, SGBitSet* selp = NULL):
                              tell_var(tn_layout), _data(pdat), _layer(lay), _selp(selp) {};
                            ttlayout(const ttlayout& cobj);
       const ttlayout&      operator = (const ttlayout&);
@@ -245,12 +245,12 @@ namespace telldata {
       void                 echo(std::string&, real);
       void                 assign(tell_var*);
       tell_var*            selfcopy() const {return DEBUG_NEW ttlayout(*this);};
-      laydata::tdtdata*    data() const     {return _data;};
+      laydata::TdtData*    data() const     {return _data;};
       unsigned             layer() const    {return _layer;};
       SGBitSet*            selp() const     {return _selp;};
       virtual             ~ttlayout()       {if (_selp) delete _selp;}
    private:
-      laydata::tdtdata*   _data;
+      laydata::TdtData*   _data;
       unsigned            _layer;
       SGBitSet*           _selp; // selected points;
    };

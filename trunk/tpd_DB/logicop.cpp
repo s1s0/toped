@@ -304,7 +304,7 @@ bool logicop::logic::OR(pcollection& plycol) {
    while (!lclcol.empty())
    {
       pointlist* csh = lclcol.front();
-      laydata::valid_poly check(*csh);
+      laydata::ValidPoly check(*csh);
       delete csh; lclcol.pop_front();
       if (check.valid())
          lclvalidated.push_back(DEBUG_NEW pointlist(check.get_validated()));
@@ -401,7 +401,7 @@ pointlist* logicop::logic::hole2simple(const pointlist& outside, const pointlist
    cleanupDumped(outshape);
    cleanupDumped(inshape);
    // Validate the resulting polygon
-   laydata::valid_poly check(*shgen);
+   laydata::ValidPoly check(*shgen);
 //   delete shgen;
    if (!check.valid()) {
       std::ostringstream ost;

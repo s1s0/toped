@@ -649,7 +649,7 @@ void layprop::DrawProperties::setLineProps(bool selected) const
    }
 }
 
-void  layprop::DrawProperties::blockfill(laydata::cellrefstack* refstack)
+void  layprop::DrawProperties::blockfill(laydata::CellRefStack* refstack)
 {
    _blockfill = true;
    _refstack = refstack;
@@ -661,7 +661,7 @@ void  layprop::DrawProperties::unblockfill()
    _refstack = NULL;
 }
 
-void  layprop::DrawProperties::pushref(const laydata::tdtcellref* cref)
+void  layprop::DrawProperties::pushref(const laydata::TdtCellRef* cref)
 {
    assert(cref);
    if (_refstack)
@@ -671,7 +671,7 @@ void  layprop::DrawProperties::pushref(const laydata::tdtcellref* cref)
    }
 }
 
-byte layprop::DrawProperties::popref(const laydata::tdtcellref* cref)
+byte layprop::DrawProperties::popref(const laydata::TdtCellRef* cref)
 {
    assert(cref);
    if (_refstack && !_refstack->empty())
@@ -979,7 +979,7 @@ layprop::DrawProperties::~DrawProperties() {
       delete [] FMI->second;
    for (lineMAP::iterator LMI = _lineset.begin(); LMI != _lineset.end(); LMI++)
       delete LMI->second;
-//   if (NULL != _refstack) d elete _refstack; -> deleted in editobject
+//   if (NULL != _refstack) d elete _refstack; -> deleted in EditObject
    delete fontLib;
 }
 

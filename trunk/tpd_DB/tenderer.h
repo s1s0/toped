@@ -29,13 +29,13 @@
    objective in terms of quality and speed. The Toped rENDERER (TENDERER) is the first
    serious attempt in this project to utilize the power of todays graphic hardware via
    openGL library. The original rendering (which is preserved) is implementing the
-   simplest possible redering approach and is using the most basic openGL functions to
+   simplest possible rendering approach and is using the most basic openGL functions to
    achieve maximum compatibility. The goal of the TopRend is to be a base for future
    updates in terms of graphic effects, 3D rendering, shaders etc.
 
-   It must be clear that the main rendering acceleration is comming from the structure
-   of the Toped database. The quadtree dominates by far any other rendering optimisation
-   esspecially on big databases where the speed really matters. This is the main reason
+   It must be clear that the main rendering acceleration is coming from the structure
+   of the Toped database. The QuadTree dominates by far any other rendering optimization
+   especially on big databases where the speed really matters. This is the main reason
    behind the fact that the original renderer demonstrates comparable results with
    TopRend. There are virtually no enhancements possible there though. It should be
    noted also that each rendering view in this context is unique. Indeed, when the user
@@ -43,18 +43,18 @@
    predicted. Different objects will be streamed out depending on the location and
    size of the visual window, but also depending on the current visual properties -
    colors, lines, fills, layer status, cell depth, visual details etc. The assumption
-   though (and I hope it's a fact) is that the overall ammout of the data is optimal
+   though (and I hope it's a fact) is that the overall amount of the data is optimal
    with respect to the quality of the image.
 
-   Both renderers are sinking data from the Toped quadtree data base and depend heavily
+   Both renderers are sinking data from the Toped QuadTree data base and depend heavily
    on its property to filter-out quickly and effectively all invisible objects. The
    Toped DB is generally a hierarchical cell tree. Each cell contains a linear list
-   of layers which in turn contains a quadtree of the layout objects. The main task
+   of layers which in turn contains a QuadTree of the layout objects. The main task
    of the TopRend is to convert the data stream from the DB traversing into arrays
-   of vertexes (VBOs) convinient for the graphical hardware.
+   of vertexes (VBOs) convenient for the graphical hardware.
 
    This is done in 3 steps:
-      1. Traversing and sorting - data comming from the Toped DB traversing is sorted
+      1. Traversing and sorting - data coming from the Toped DB traversing is sorted
          in the dedicated structures. Also some vital data statistics is done and some
          references gathered which will be used during the following steps
       2. VBO generation - the buffers are created and the sorted data is copied there.
@@ -250,7 +250,7 @@ namespace tenderer {
    /**
       Represents non-convex polygons - most of the poly objects in the DB. Inherits
       TenderCnvx. The only addition is the tesselation data (_tdata) which is
-      utilised if the object is to be filled.
+      utilized if the object is to be filled.
    */
    class TenderNcvx : public TenderCnvx {
       public:
@@ -266,7 +266,7 @@ namespace tenderer {
    /**
       Holds the wires from the data base. This class is not quite trivial and it
       causes all kinds of troubles in the overall class hierarchy. It inherits
-      TenderNcvx (is it a good idea?). Teoretically in the general case this is a
+      TenderNcvx (is it a good idea?). Theoretically in the general case this is a
       non-convex polygon. The wire as a DB object is very specific though. Only the
       central line is stored. The contour is calculated if required on the fly from
       the build-in methods called from the constructor. Instead of using general
@@ -299,14 +299,14 @@ namespace tenderer {
    /**
       Very small pure virtual class which primary purpose is to minimize the
       memory usage of the TopRend by reusing the vertex data. It also optimises
-      the ammount of data transfered to the graphic card as a whole.
+      the amount of data transfered to the graphic card as a whole.
       Here is the idea.
 
       In most of the rendering cases there will be no data selected in the
       active cell so this class will not be used at all. When a data is
       selected though, the graphical objects have to be rendered twice - once
       as normal objects and the second time - to highlight them in some way.
-      There are several ways to acieve this:
+      There are several ways to achieve this:
          - to store the selected objects in a separate tree during traversing
          and sorting and then to render them separately. This however implies
          that the memory usage and data transfer to the GPU will be doubled
@@ -318,17 +318,17 @@ namespace tenderer {
          actually most of the time. Besides it will (theoretically) slow down
          the processing, because will introduce conditional statements in all
          stages of the object processing.
-         - The introduction of this class is an attempt to utilise the best of
+         - The introduction of this class is an attempt to utilize the best of
          the ideas above, but without their drawbacks. A selected object with
          the corresponding selection related fields will be generated only on
          demand. The classes which deal with selected objects will inherit
          their respective parents and this class which will bring the
          additional selection related fields and methods. Selected objects
          will be rendered twice. Once - together with all other objects and
-         then once again - to highligh them. Note though, that it will happen
+         then once again - to highlight them. Note though, that it will happen
          virtually without additional memory usage, because the second pass
          will reuse the data in their parent objects and will just index it.
-         The ammount of additional data to the GPU is also minimised,
+         The amount of additional data to the GPU is also minimized,
          because the only additional data transfered is the index array of
          the selected vertexes. Vertex data is already there and will be reused.
    */
@@ -361,7 +361,7 @@ namespace tenderer {
       to generate the indexes for the contour (_cdata) data of its primary parent.
       Implements the virtual methods of its parents. Doesn't have any own fields or
       methods.
-      The reimplementation of the cDataCopy() method inherited from the primary parent
+      The re-implementation of the cDataCopy() method inherited from the primary parent
       worths to be mentioned. It updates the inherited _offset field which is vital
       for the consequent indexing of the selected vertexes.
    */
@@ -380,7 +380,7 @@ namespace tenderer {
       is to generate the indexes for the contour (_cdata) data of its primary parent.
       Implements the virtual methods of its parents. Doesn't have any own fields or
       methods.
-      The reimplementation of the cDataCopy() has the same function as described in
+      The re-implementation of the cDataCopy() has the same function as described in
       TenderSCnvx class
    */
    class TenderSNcvx : public TenderNcvx, public TenderSelected  {
@@ -396,12 +396,12 @@ namespace tenderer {
    /**
       Holds a selected or partially selected wires. Like its primary parent this is
       not quite trivial class. Because of the specifics of the wire storage it has
-      to store an additional VBO offset parameter for the cetral line. Note that
-      unlike other selected objects, this one is indexing primary the cetral line
-      data (_ldata) of its parent and in addition the countour data (_cdata) in
+      to store an additional VBO offset parameter for the central line. Note that
+      unlike other selected objects, this one is indexing primary the central line
+      data (_ldata) of its parent and in addition the contour data (_cdata) in
       some of the selection cases. The class implements all virtual methods of its
       parents.
-      Here the reimplementation of two methods has to be highlighted. cDataCopy()
+      Here the re-implementation of two methods has to be highlighted. cDataCopy()
       updates inherited _offset field. lDataCopy in turn updates _loffset field.
       Both of them vital for proper indexing of the selected vertexes.
    */
@@ -456,7 +456,7 @@ namespace tenderer {
       wire objects which generate their contour data during the construction. Each
       object is sorted in exactly one bin depending whether it's going to be filled
       or not. The exception as always is the wire object which also goes to the
-      line bin because of its cetral line.
+      line bin because of its central line.
       \verbatim
       ---------------------------------------------------------------
       | TopRend   |    not filled      |        filled      |        |
@@ -470,7 +470,7 @@ namespace tenderer {
       --------------------------------------------------------------
       \endverbatim
 
-      The sorting step gathers also essential data staticstics which will be used
+      The sorting step gathers also essential data statistics which will be used
       later to constitute the virtual buffers, to copy the data into the
       appropriate locations of the corresponding buffers and to draw the appropriate
       portions of the data using the appropriate openGL functions. This data is
@@ -481,18 +481,18 @@ namespace tenderer {
       vertexes, and the offset of each first object vertex in the buffer
 
       If the non-convex data is to be filled, it is sorted further in another four
-      index bins. The data statistics is also split further into four to accomodate
-      that additional level of detail. This is nessesary because the polygon
+      index bins. The data statistics is also split further into four to accommodate
+      that additional level of detail. This is necessary because the polygon
       tesselation generates 3 types of index data. In addition the wire tesselation
       is using yet another type of index data and all the above has to be sorted and
       stored. The array fields _alindxs[4], _alobjix[4], _sizesix[4], _firstix[4]
       hold a position for each of the four index bins. They represent the overall
-      ammount of indexes, the total number of indexed objects, the size of each
+      amount of indexes, the total number of indexed objects, the size of each
       object in terms of indexes and the offset of each first object index in the
       buffer.It has to be noted also that the openGL tesselation (used for
       non-convex polygons) produces a number of chunks of index data and each of
       them can be of any of the first 3 types. Wire tesselation produces a single
-      chunk and it is always from one and the same type.  The table below summarises
+      chunk and it is always from one and the same type.  The table below summaries
       the indexing.
 
       \verbatim
@@ -590,7 +590,7 @@ namespace tenderer {
 
          TenderRef*        _refCell;
          // collected data lists
-         SliceObjects      _cont_data; //! Countour data
+         SliceObjects      _cont_data; //! Contour data
          SliceWires        _line_data; //! Line data
          SliceObjects      _cnvx_data; //! Convex polygon data (Only boxes are here at the moment. TODO - all convex polygons)
          SlicePolygons     _ncvx_data; //! Non convex data
@@ -618,10 +618,10 @@ namespace tenderer {
    /**
       Very small class which holds the reusable TenderTV chunks. Here is what it is.
       The view usually contains relatively small number of cells which are referenced
-      multiply times. They do contain the same data, but it should be visualised
+      multiply times. They do contain the same data, but it should be visualized
       using different translation matrices. The simplest case is an array of cells
       object. It would be really a waste of CPU time to traverse those cells every
-      time they are referenced. This also means that the ammount of processing data
+      time they are referenced. This also means that the amount of processing data
       will be determined by the number of references, not by the number of unique
       cells which in turn will slow-down the rendering and will consume much more
       memory and bandwidth to transfer it to the GPU.
@@ -642,7 +642,7 @@ namespace tenderer {
       chunk doesn't exists, then a TenderTV object is created, but it is also
       registered as "reusable" and the traversing continues as normal.
 
-      This class requires only a draw() method which takes care to replace themporary
+      This class requires only a draw() method which takes care to replace temporary
       the translation matrix of the referenced TenderTV and then calls TenderTV::draw()
    */
    class TenderReTV {
@@ -660,7 +660,7 @@ namespace tenderer {
    /**
       TENDER LAYer represents a DB layer in the rendering view. It generates,
       stores and sorts all the TenderTV objects (one per DB cell) and also
-      initialises the corresponding virtual buffers (the vertex and eventually
+      Initializes the corresponding virtual buffers (the vertex and eventually
       the index) for this layer. This class is responsible also for gathering of
       the selected data indexes.
 
@@ -672,13 +672,13 @@ namespace tenderer {
       If the data is selected then an object of the overloaded class is created
       and a reference to it is stored in _slct_data list as well.
 
-      TenderLay keeps track of the total current ammount of vertexes
-      (_num_total_points) and indexes (_num_total_indexs) in order to initialise
+      TenderLay keeps track of the total current amount of vertexes
+      (_num_total_points) and indexes (_num_total_indexs) in order to initialize
       properly the offset fields of the generated TenderTV objects. When a new
       slice of class TenderTV is created, the current slice is post processed
       (method ppSlice()) in order to update the fields mentioned above. The
       final values stored in those fields are used later to reserve a proper
-      ammount of memory for the VBO's belonging to this layer.
+      amount of memory for the VBO's belonging to this layer.
 
       The rendering of the selected objects is done in this class. TenderTV does
       hold the object vertex data, but it is completely unaware of selection
@@ -686,14 +686,14 @@ namespace tenderer {
       selected only in one of the generated TenderTV objects, because only one
       of them eventually belongs to the active cell. Having an additional VBO
       per TenderTV object for selected data would be a waste of course, because
-      all but one of them will be empty anyway. Instead a sigle VBO is generated
+      all but one of them will be empty anyway. Instead a single VBO is generated
       for the entire rendering view with the indexes of all selected vertexes in
       the active cell across all layers.
 
       Selected objects will be rendered twice. Once - together with all other
       objects in the TenderTV objects and again here, in this class in order to
       highlight them. An object can be fully or partially selected and depending
-      on this it shall be rendered using the corresponding data strucutre:
+      on this it shall be rendered using the corresponding data structure:
 
       \verbatim
        --------------------------------------------------------------
@@ -710,12 +710,12 @@ namespace tenderer {
       In the manner similar to TenderTV class, TenderLay sorts the selected objects
       in three "bins" and gathers some statistics about each of them. One position
       per bin is stored in each of the array fields (_asindxs[3], _asobjix[3],
-      _sizslix[3], _fstslix[3]) representing the overall ammount of indexes, the
+      _sizslix[3], _fstslix[3]) representing the overall amount of indexes, the
       total number of indexed objects, the size of each object in terms of indexes
       and the offset of each first object index in the buffer. Additionally every
-      selected object will need to store the offset of its vertex data whithin the
+      selected object will need to store the offset of its vertex data within the
       slice representing the active cell in the vertex buffer. This is done by the
-      selected objects themselfs when vertex VBOs are collected via the
+      selected objects themselves when vertex VBOs are collected via the
       re-implementation of cDataCopy virtual methods in the TenderS* classes.
       TenderLay doesn't take part in this process, TenderTV class is not aware of
       it either - it happens "naturally" thanks to the class hierarchy.
@@ -736,7 +736,7 @@ namespace tenderer {
 
       The drawing of the corresponding portion of the selected data buffer is done
       also in this class by the drawSelected() method. For this we need the vertex
-      buffer and a proper offset in it which will point to the begining of the data
+      buffer and a proper offset in it which will point to the beginning of the data
       slice belonging to the active cell. This offset is captured during the data
       traversing in the field _stv_array_offset. Having done that, the drawing is
       now trivial
@@ -809,7 +809,7 @@ namespace tenderer {
    };
 
    /**
-      Responsible for visualising the overlap boxes of the references. Relatively
+      Responsible for visualizing the overlap boxes of the references. Relatively
       trivial class. One object of this class should be created only. All reference
       boxes are processed in a single VBO. This includes the selected ones.
    */
@@ -832,7 +832,7 @@ namespace tenderer {
          GLsizei*          _sizesvx; //! array of sizes for vertex sets
          GLsizei*          _firstvx; //! array of first vertexes
          // index related data for selected boxes
-         unsigned          _asindxs; //! total number of selected vertixes
+         unsigned          _asindxs; //! total number of selected vertexes
          unsigned          _asobjix; //! total number of objects that will be drawn with index related functions
          GLsizei*          _sizslix; //! array of sizes for indexes sets
          GLsizei*          _fstslix; //! array of first indexes
@@ -848,7 +848,7 @@ namespace tenderer {
       All render views are initiated using an object of this class. There should be
       only one object of this class at a time. The class must be destroyed before
       the next rendering view is invoked. The data gathered for the previous view
-      must be considered invalid. The object strucutre created by this class is
+      must be considered invalid. The object structure created by this class is
       shown in the documentation of the module.
    */
    class TopRend {
@@ -873,17 +873,17 @@ namespace tenderer {
          bool              collect();
          void              draw();
 
-			//return layno if _state == DB or predefined layer in other case
-			unsigned				getTenderLay(unsigned layno);
-			//set state of DrawProperties
-			void					setState(layprop::drawprop_state state) {_drawprop->setState(state);};
+         //return layno if _state == DB or predefined layer in other case
+         unsigned          getTenderLay(unsigned layno);
+         //set state of DrawProperties
+         void              setState(layprop::drawprop_state state) {_drawprop->setState(state);};
          // temporary!
          bool              layerHidden(unsigned layno) const {return  _drawprop->layerHidden(layno)    ;}
          const CTM&        ScrCTM() const                {return  _drawprop->ScrCTM()              ;}
          const DBbox&      clipRegion() const            {return  _drawprop->clipRegion()          ;}
-         void              pushref(const laydata::tdtcellref* ref)
+         void              pushref(const laydata::TdtCellRef* ref)
                                                          {        _drawprop->pushref(ref)          ;}
-         byte              popref(const laydata::tdtcellref* ref)
+         byte              popref(const laydata::TdtCellRef* ref)
                                                          {return  _drawprop->popref(ref)           ;}
          bool              adjustTextOrientation() const {return  _drawprop->adjustTextOrientation();}
       private:

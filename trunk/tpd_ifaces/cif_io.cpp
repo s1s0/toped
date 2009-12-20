@@ -446,7 +446,7 @@ void CIFin::CifFile::closeFile()
 }
 
 //=============================================================================
-CIFin::CifExportFile::CifExportFile(std::string fn, laydata::tdtcell* topcell,
+CIFin::CifExportFile::CifExportFile(std::string fn, laydata::TdtCell* topcell,
    USMap* laymap, bool recur, bool verbose) :  DbExportFile(fn, topcell, recur),
       _laymap(laymap), _verbose(verbose), _lastcellnum(0)
 {
@@ -657,7 +657,7 @@ CIFin::CifExportFile::~CifExportFile()
 //-----------------------------------------------------------------------------
 // class Cif2Ted
 //-----------------------------------------------------------------------------
-CIFin::Cif2Ted::Cif2Ted(CIFin::CifFile* src_lib, laydata::tdtlibdir* tdt_db,
+CIFin::Cif2Ted::Cif2Ted(CIFin::CifFile* src_lib, laydata::TdtLibDir* tdt_db,
       SIMap* cif_layers, real techno) : _src_lib (src_lib), _tdt_db(tdt_db),
                                     _cif_layers(cif_layers), _techno(techno)
 {
@@ -707,7 +707,7 @@ void CIFin::Cif2Ted::convert_prep(const CIFin::CIFHierTree* item, bool overwrite
    CIFin::CifStructure* src_structure = const_cast<CIFin::CifStructure*>(item->GetItem());
    std::string gname = src_structure->name();
    // check that destination structure with this name exists
-   laydata::tdtcell* dst_structure = static_cast<laydata::tdtcell*>((*_tdt_db)()->checkcell(gname));
+   laydata::TdtCell* dst_structure = static_cast<laydata::TdtCell*>((*_tdt_db)()->checkcell(gname));
    std::ostringstream ost; ost << "CIF import: ";
    if (NULL != dst_structure)
    {
@@ -736,7 +736,7 @@ void CIFin::Cif2Ted::convert_prep(const CIFin::CIFHierTree* item, bool overwrite
 }
 
 
-void CIFin::Cif2Ted::convert(CIFin::CifStructure* src, laydata::tdtcell* dst)
+void CIFin::Cif2Ted::convert(CIFin::CifStructure* src, laydata::TdtCell* dst)
 {
    _crosscoeff = _dbucoeff * src->a() / src->b();
    CIFin::CifLayer* swl = src->firstLayer();
@@ -744,8 +744,8 @@ void CIFin::Cif2Ted::convert(CIFin::CifStructure* src, laydata::tdtcell* dst)
    {
       if (_cif_layers->end() != _cif_layers->find(swl->name()))
       {
-         laydata::tdtlayer* dwl =
-               static_cast<laydata::tdtlayer*>(dst->securelayer((*_cif_layers)[swl->name()]));
+         laydata::TdtLayer* dwl =
+               static_cast<laydata::TdtLayer*>(dst->securelayer((*_cif_layers)[swl->name()]));
          CIFin::CifData* wd = swl->firstData();
          while ( wd ) // loop trough data
          {
@@ -779,7 +779,7 @@ void CIFin::Cif2Ted::convert(CIFin::CifStructure* src, laydata::tdtcell* dst)
    dst->resort();
 }
 
-void CIFin::Cif2Ted::box ( CIFin::CifBox* wd, laydata::tdtlayer* wl, std::string layname)
+void CIFin::Cif2Ted::box ( CIFin::CifBox* wd, laydata::TdtLayer* wl, std::string layname)
 {
    pointlist pl;   pl.reserve(4);
    real cX, cY;
@@ -813,7 +813,7 @@ void CIFin::Cif2Ted::box ( CIFin::CifBox* wd, laydata::tdtlayer* wl, std::string
       pl[3] *=  tmx;
    }
 
-   laydata::valid_poly check(pl);
+   laydata::ValidPoly check(pl);
 
    if (!check.valid())
    {
@@ -827,7 +827,7 @@ void CIFin::Cif2Ted::box ( CIFin::CifBox* wd, laydata::tdtlayer* wl, std::string
    else              wl->addpoly(pl,false);
 }
 
-void CIFin::Cif2Ted::poly( CIFin::CifPoly* wd, laydata::tdtlayer* wl, std::string layname)
+void CIFin::Cif2Ted::poly( CIFin::CifPoly* wd, laydata::TdtLayer* wl, std::string layname)
 {
    pointlist pl;
    pl.reserve(wd->poly()->size());
@@ -837,7 +837,7 @@ void CIFin::Cif2Ted::poly( CIFin::CifPoly* wd, laydata::tdtlayer* wl, std::strin
       pnt *= _crosscoeff;
       pl.push_back(pnt);
    }
-   laydata::valid_poly check(pl);
+   laydata::ValidPoly check(pl);
 
    if (!check.valid())
    {
@@ -851,7 +851,7 @@ void CIFin::Cif2Ted::poly( CIFin::CifPoly* wd, laydata::tdtlayer* wl, std::strin
    else              wl->addpoly(pl,false);
 }
 
-void CIFin::Cif2Ted::wire( CIFin::CifWire* wd, laydata::tdtlayer* wl, std::string layname)
+void CIFin::Cif2Ted::wire( CIFin::CifWire* wd, laydata::TdtLayer* wl, std::string layname)
 {
    pointlist pl;
    pl.reserve(wd->poly()->size());
@@ -861,7 +861,7 @@ void CIFin::Cif2Ted::wire( CIFin::CifWire* wd, laydata::tdtlayer* wl, std::strin
       pnt *= _crosscoeff;
       pl.push_back(pnt);
    }
-   laydata::valid_wire check(pl, wd->width());
+   laydata::ValidWire check(pl, wd->width());
 
    if (!check.valid())
    {
@@ -873,7 +873,7 @@ void CIFin::Cif2Ted::wire( CIFin::CifWire* wd, laydata::tdtlayer* wl, std::strin
    wl->addwire(pl, wd->width(),false);
 }
 
-void CIFin::Cif2Ted::ref ( CIFin::CifRef* wd, laydata::tdtcell* dst)
+void CIFin::Cif2Ted::ref ( CIFin::CifRef* wd, laydata::TdtCell* dst)
 {
    CifStructure* refd = _src_lib->getStructure(wd->cell());
    std::string cell_name = refd->name();
@@ -891,7 +891,7 @@ void CIFin::Cif2Ted::ref ( CIFin::CifRef* wd, laydata::tdtcell* dst)
    }
 }
 
-void CIFin::Cif2Ted::lbll( CIFin::CifLabelLoc* wd, laydata::tdtlayer* wl, std::string )
+void CIFin::Cif2Ted::lbll( CIFin::CifLabelLoc* wd, laydata::TdtLayer* wl, std::string )
 {
    // CIF doesn't have a concept of texts (as GDS)
    // text size and placement are just the default
@@ -906,7 +906,7 @@ void CIFin::Cif2Ted::lbll( CIFin::CifLabelLoc* wd, laydata::tdtlayer* wl, std::s
               );
 }
 
-void CIFin::Cif2Ted::lbls( CIFin::CifLabelSig*,laydata::tdtlayer*, std::string )
+void CIFin::Cif2Ted::lbls( CIFin::CifLabelSig*,laydata::TdtLayer*, std::string )
 {
 }
 

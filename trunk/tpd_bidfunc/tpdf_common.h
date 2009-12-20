@@ -144,19 +144,19 @@ namespace tellstdfunc {
                                     word rows = 0
                                    );
    pointlist*           t2tpoints(telldata::ttlist *, real);
-   telldata::ttlist*    make_ttlaylist(laydata::selectList*);
-   telldata::ttlist*    make_ttlaylist(laydata::atticList*);
-   laydata::selectList* get_ttlaylist(telldata::ttlist* llist);
-   laydata::atticList*  get_shlaylist(telldata::ttlist* llist);
+   telldata::ttlist*    make_ttlaylist(laydata::SelectList*);
+   telldata::ttlist*    make_ttlaylist(laydata::AtticList*);
+   laydata::SelectList* get_ttlaylist(telldata::ttlist* llist);
+   laydata::AtticList*  get_shlaylist(telldata::ttlist* llist);
    void                 clean_ttlaylist(telldata::ttlist* llist);
-   void                 clean_atticlist(laydata::atticList*, bool destroy = false);
+   void                 clean_atticlist(laydata::AtticList*, bool destroy = false);
    void                 UpdateLV();
    void                 RefreshGL();
    void                 gridON(byte No, bool status);
-   void                 updateLayerDefinitions(laydata::tdtlibdir*, nameList&, int);
+   void                 updateLayerDefinitions(laydata::TdtLibDir*, nameList&, int);
    void                 initFuncLib(wxFrame*, wxWindow*);
-   laydata::selectList* filter_selist(const laydata::selectList*, word mask);
-   laydata::atticList*  replace_str(laydata::atticList*, std::string);
+   laydata::SelectList* filter_selist(const laydata::SelectList*, word mask);
+   laydata::AtticList*  replace_str(laydata::AtticList*, std::string);
 //   void                 makeGdsLays(ExtLayers&);
 
 }

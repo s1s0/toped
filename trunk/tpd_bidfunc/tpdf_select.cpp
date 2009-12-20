@@ -50,7 +50,7 @@ void tellstdfunc::stdSELECT::undo() {
    real DBscale = DATC->DBscale();
    TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
    TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
-   laydata::tdtdesign* ATDB = DATC->lockDB();
+   laydata::TdtDesign* ATDB = DATC->lockDB();
       ATDB->unselect_inBox(p1DB, p2DB);
    DATC->unlockDB();
    delete w;delete p1DB; delete p2DB;
@@ -65,7 +65,7 @@ int tellstdfunc::stdSELECT::execute() {
    real DBscale = DATC->DBscale();
    TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
    TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
-   laydata::tdtdesign* ATDB = DATC->lockDB();
+   laydata::TdtDesign* ATDB = DATC->lockDB();
       ATDB->select_inBox(p1DB, p2DB);
       OPstack.push(make_ttlaylist(ATDB->shapesel()));
    DATC->unlockDB();
@@ -104,7 +104,7 @@ void tellstdfunc::stdSELECT_TL::undo() {
 
 int tellstdfunc::stdSELECT_TL::execute() {
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
-   laydata::tdtdesign* ATDB = DATC->lockDB();
+   laydata::TdtDesign* ATDB = DATC->lockDB();
       ATDB->select_fromList(get_ttlaylist(pl));
       OPstack.push(make_ttlaylist(ATDB->shapesel()));
    DATC->unlockDB();
@@ -127,7 +127,7 @@ void tellstdfunc::stdSELECTIN::undo_cleanup() {
 void tellstdfunc::stdSELECTIN::undo() {
    TEUNDO_DEBUG("select(point) UNDO");
    telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
-   laydata::tdtdesign* ATDB = DATC->lockDB();
+   laydata::TdtDesign* ATDB = DATC->lockDB();
       ATDB->unselect_fromList(get_ttlaylist(selected));
    DATC->unlockDB();
    delete selected;
@@ -140,15 +140,15 @@ int tellstdfunc::stdSELECTIN::execute() {
    telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    real DBscale = DATC->DBscale();
    TP* p1DB = DEBUG_NEW TP(p1->x(), p1->y(), DBscale);
-   laydata::tdtdesign* ATDB = DATC->lockDB();
-      laydata::atticList* selectedl = ATDB->change_select(p1DB,true);
+   laydata::TdtDesign* ATDB = DATC->lockDB();
+      laydata::AtticList* selectedl = ATDB->change_select(p1DB,true);
    DATC->unlockDB();
    if (NULL != selectedl) {
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(make_ttlaylist(selectedl));
       OPstack.push(make_ttlaylist(selectedl));
       LogFile << LogFile.getFN() << "("<< *p1 << ");"; LogFile.flush();
-      for(laydata::atticList::iterator CI = selectedl->begin();CI != selectedl->end(); CI++) 
+      for(laydata::AtticList::iterator CI = selectedl->begin();CI != selectedl->end(); CI++) 
          delete CI->second;
       delete selectedl;
    }
@@ -175,7 +175,7 @@ void tellstdfunc::stdPNTSELECT::undo() {
    real DBscale = DATC->DBscale();
    TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
    TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
-   laydata::tdtdesign* ATDB = DATC->lockDB();
+   laydata::TdtDesign* ATDB = DATC->lockDB();
       ATDB->unselect_inBox(p1DB, p2DB,true);
    DATC->unlockDB();   
    delete w; delete p1DB; delete p2DB;
@@ -190,7 +190,7 @@ int tellstdfunc::stdPNTSELECT::execute() {
    real DBscale = DATC->DBscale();
    TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
    TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
-   laydata::tdtdesign* ATDB = DATC->lockDB();
+   laydata::TdtDesign* ATDB = DATC->lockDB();
       ATDB->select_inBox(p1DB, p2DB,true);
       OPstack.push(make_ttlaylist(ATDB->shapesel()));
    DATC->unlockDB();   
@@ -230,7 +230,7 @@ void tellstdfunc::stdUNSELECT::undo() {
    real DBscale = DATC->DBscale();
    TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
    TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
-   laydata::tdtdesign* ATDB = DATC->lockDB();
+   laydata::TdtDesign* ATDB = DATC->lockDB();
       ATDB->select_inBox(p1DB, p2DB);
    DATC->unlockDB();
    delete w; delete p1DB; delete p2DB;
@@ -245,7 +245,7 @@ int tellstdfunc::stdUNSELECT::execute() {
    real DBscale = DATC->DBscale();
    TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
    TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
-   laydata::tdtdesign* ATDB = DATC->lockDB();
+   laydata::TdtDesign* ATDB = DATC->lockDB();
       ATDB->unselect_inBox(p1DB, p2DB);
       OPstack.push(make_ttlaylist(ATDB->shapesel()));
    DATC->unlockDB();
@@ -284,7 +284,7 @@ void tellstdfunc::stdUNSELECT_TL::undo_cleanup() {
 
 int tellstdfunc::stdUNSELECT_TL::execute() {
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
-   laydata::tdtdesign* ATDB = DATC->lockDB();
+   laydata::TdtDesign* ATDB = DATC->lockDB();
       ATDB->unselect_fromList(get_ttlaylist(pl));
       OPstack.push(make_ttlaylist(ATDB->shapesel()));
    DATC->unlockDB();   
@@ -307,7 +307,7 @@ void tellstdfunc::stdUNSELECTIN::undo_cleanup() {
 void tellstdfunc::stdUNSELECTIN::undo() {
    TEUNDO_DEBUG("unselect(point) UNDO");
    telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
-   laydata::tdtdesign* ATDB = DATC->lockDB();
+   laydata::TdtDesign* ATDB = DATC->lockDB();
       ATDB->select_fromList(get_ttlaylist(selected));
    DATC->unlockDB();   
    delete selected;
@@ -320,8 +320,8 @@ int tellstdfunc::stdUNSELECTIN::execute() {
    telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    real DBscale = DATC->DBscale();
    TP* p1DB = DEBUG_NEW TP(p1->x(), p1->y(), DBscale);
-   laydata::tdtdesign* ATDB = DATC->lockDB();
-      laydata::atticList* selectedl = ATDB->change_select(p1DB,false);
+   laydata::TdtDesign* ATDB = DATC->lockDB();
+      laydata::AtticList* selectedl = ATDB->change_select(p1DB,false);
    DATC->unlockDB();   
    if (NULL != selectedl) {
       UNDOcmdQ.push_front(this);
@@ -353,7 +353,7 @@ void tellstdfunc::stdPNTUNSELECT::undo() {
    real DBscale = DATC->DBscale();
    TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
    TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
-   laydata::tdtdesign* ATDB = DATC->lockDB();
+   laydata::TdtDesign* ATDB = DATC->lockDB();
       ATDB->select_inBox(p1DB, p2DB,true);
    DATC->unlockDB();
    delete w; delete p1DB; delete p2DB;
@@ -368,7 +368,7 @@ int tellstdfunc::stdPNTUNSELECT::execute() {
    real DBscale = DATC->DBscale();
    TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
    TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
-   laydata::tdtdesign* ATDB = DATC->lockDB();
+   laydata::TdtDesign* ATDB = DATC->lockDB();
       ATDB->unselect_inBox(p1DB, p2DB,true);
       OPstack.push(make_ttlaylist(ATDB->shapesel()));
    DATC->unlockDB();
@@ -403,7 +403,7 @@ void tellstdfunc::stdSELECTALL::undo_cleanup() {
 void tellstdfunc::stdSELECTALL::undo() {
    TEUNDO_DEBUG("select_all() UNDO");
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
-   laydata::tdtdesign* ATDB = DATC->lockDB();
+   laydata::TdtDesign* ATDB = DATC->lockDB();
       ATDB->unselect_all();
       ATDB->select_fromList(get_ttlaylist(pl));
    DATC->unlockDB();
@@ -413,7 +413,7 @@ void tellstdfunc::stdSELECTALL::undo() {
 
 int tellstdfunc::stdSELECTALL::execute() {
    UNDOcmdQ.push_front(this);
-   laydata::tdtdesign* ATDB = DATC->lockDB();
+   laydata::TdtDesign* ATDB = DATC->lockDB();
       UNDOPstack.push_front(make_ttlaylist(ATDB->shapesel()));
       ATDB->select_all();
       OPstack.push(make_ttlaylist(ATDB->shapesel()));
@@ -436,7 +436,7 @@ void tellstdfunc::stdUNSELECTALL::undo_cleanup() {
 void tellstdfunc::stdUNSELECTALL::undo() {
    TEUNDO_DEBUG("unselect_all() UNDO");
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
-   laydata::tdtdesign* ATDB = DATC->lockDB();
+   laydata::TdtDesign* ATDB = DATC->lockDB();
       ATDB->select_fromList(get_ttlaylist(pl));
    DATC->unlockDB();   
    delete (pl);
@@ -445,7 +445,7 @@ void tellstdfunc::stdUNSELECTALL::undo() {
 
 int tellstdfunc::stdUNSELECTALL::execute() {
    UNDOcmdQ.push_front(this);
-   laydata::tdtdesign* ATDB = DATC->lockDB();
+   laydata::TdtDesign* ATDB = DATC->lockDB();
       UNDOPstack.push_front(make_ttlaylist(ATDB->shapesel()));
       ATDB->unselect_all();
    DATC->unlockDB();   
@@ -467,7 +467,7 @@ int tellstdfunc::stdREPORTSLCTD::execute() {
    else
    {
       real DBscale = DATC->DBscale();
-      laydata::tdtdesign* ATDB = DATC->lockDB();
+      laydata::TdtDesign* ATDB = DATC->lockDB();
          ATDB->report_selected(DBscale);
       DATC->unlockDB();
    }

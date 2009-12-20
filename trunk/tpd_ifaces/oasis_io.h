@@ -311,7 +311,7 @@ namespace Oasis {
          byte              skimCell(OasisInFile&, bool);
          void              linkReferences(OasisInFile&);
          OASHierTree*      hierOut(OASHierTree*, Cell*);
-         void              import(OasisInFile&, laydata::tdtcell*, laydata::tdtlibdir*, const LayerMapExt&);
+         void              import(OasisInFile&, laydata::TdtCell*, laydata::TdtLibDir*, const LayerMapExt&);
          void              collectLayers(ExtLayers&, bool);
 
          std::string       name() const            { return _name;         }
@@ -328,13 +328,13 @@ namespace Oasis {
          void              skimCTrapezoid(OasisInFile&);
          void              skimText(OasisInFile&);
          void              skimReference(OasisInFile&, bool);
-         void              readRectangle(OasisInFile&, laydata::tdtcell*, const LayerMapExt&);
-         void              readPolygon(OasisInFile&, laydata::tdtcell*, const LayerMapExt&);
-         void              readPath(OasisInFile&, laydata::tdtcell*, const LayerMapExt&);
-         void              readTrapezoid(OasisInFile&, laydata::tdtcell*, const LayerMapExt&, byte);
-         void              readCTrapezoid(OasisInFile&, laydata::tdtcell*, const LayerMapExt&);
-         void              readText(OasisInFile&, laydata::tdtcell*, const LayerMapExt&);
-         void              readReference(OasisInFile&, laydata::tdtcell*, laydata::tdtlibdir*, bool);
+         void              readRectangle(OasisInFile&, laydata::TdtCell*, const LayerMapExt&);
+         void              readPolygon(OasisInFile&, laydata::TdtCell*, const LayerMapExt&);
+         void              readPath(OasisInFile&, laydata::TdtCell*, const LayerMapExt&);
+         void              readTrapezoid(OasisInFile&, laydata::TdtCell*, const LayerMapExt&, byte);
+         void              readCTrapezoid(OasisInFile&, laydata::TdtCell*, const LayerMapExt&);
+         void              readText(OasisInFile&, laydata::TdtCell*, const LayerMapExt&);
+         void              readReference(OasisInFile&, laydata::TdtCell*, laydata::TdtLibDir*, bool);
          PointList         readPointList(OasisInFile&);
          void              readRepetitions(OasisInFile&);
          void              readExtensions(OasisInFile&);
@@ -470,13 +470,13 @@ namespace Oasis {
 
    class Oas2Ted {
    public:
-                              Oas2Ted(OasisInFile*, laydata::tdtlibdir* , const LayerMapExt&);
+                              Oas2Ted(OasisInFile*, laydata::TdtLibDir* , const LayerMapExt&);
       void                    run(const nameList&, bool, bool);
    protected:
       void                    preTraverseChildren(const OASHierTree*);
       void                    convert(Cell*, bool);
       OasisInFile*            _src_lib;
-      laydata::tdtlibdir*     _tdt_db;
+      laydata::TdtLibDir*     _tdt_db;
       const LayerMapExt&      _theLayMap;
       real                    _coeff; // DBU difference
       OasisCellList           _convertList;

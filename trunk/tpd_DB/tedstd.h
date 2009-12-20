@@ -97,30 +97,30 @@ namespace laydata {
       shp_null       = 0x80, // 0 area - points are not forming a polygon
    } shape_status;
 
-   class tdtdata;
-   class editobject;
-   class tdtcell;
-   class tdtdefaultcell;
-   class tdtcellref;
-   class tdtdesign;
-   class tdtlibrary;
-   class tdtlibdir;
-   typedef  std::pair<tdtdata*, SGBitSet>           selectDataPair;
-   typedef  std::list<selectDataPair>               dataList;
-   typedef  std::map<unsigned, dataList*>           selectList;
-   typedef  std::list<tdtdata*>                     shapeList;
-   typedef  std::map<unsigned,shapeList*>           atticList;
-   typedef  std::map<std::string, tdtdefaultcell*>  cellList;
-   typedef  tdtdefaultcell*                         CellDefin;
-   typedef  std::deque<const tdtcellref*>           cellrefstack;
-   typedef  std::deque<editobject*>                 editcellstack;
-   typedef  std::list<const cellList*>              LibCellLists;
-   typedef  std::list<tdtdefaultcell*>              CellDefList;
+   class TdtData;
+   class EditObject;
+   class TdtCell;
+   class TdtDefaultCell;
+   class TdtCellRef;
+   class TdtDesign;
+   class TdtLibrary;
+   class TdtLibDir;
+   typedef  std::pair<TdtData*, SGBitSet>           SelectDataPair;
+   typedef  std::list<SelectDataPair>               DataList;
+   typedef  std::map<unsigned, DataList*>           SelectList;
+   typedef  std::list<TdtData*>                     ShapeList;
+   typedef  std::map<unsigned,ShapeList*>           AtticList;
+   typedef  std::map<std::string, TdtDefaultCell*>  CellList;
+   typedef  TdtDefaultCell*                         CellDefin;
+   typedef  std::deque<const TdtCellRef*>           CellRefStack;
+   typedef  std::deque<EditObject*>                 EditCellStack;
+   typedef  std::list<const CellList*>              LibCellLists;
+   typedef  std::list<TdtDefaultCell*>              CellDefList;
 
    //==============================================================================
-   class validator {
+   class Validator {
    public:
-                           validator(pointlist& plist) : _status(shp_OK),
+                           Validator(pointlist& plist) : _status(shp_OK),
                                                             _plist(plist) {};
       bool                 valid()           {return _status < shp_cross;}
       bool                 recoverable()     {return _status < shp_null;}
@@ -129,8 +129,8 @@ namespace laydata {
       pointlist&           get_validated()   {return _plist;}
       word                 numpoints()       {return _plist.size();}
       virtual std::string  failtype() = 0;
-      virtual tdtdata*     replacement() = 0;
-      virtual             ~validator() {};
+      virtual TdtData*     replacement() = 0;
+      virtual             ~Validator() {};
    protected:
       byte                 _status;
       pointlist&           _plist;
@@ -139,8 +139,8 @@ namespace laydata {
 //==============================================================================
    class   TEDfile {
    public:
-                           TEDfile(const char*, laydata::tdtlibdir*); // for reading
-                           TEDfile(std::string&, laydata::tdtlibdir*); // for writing
+                           TEDfile(const char*, laydata::TdtLibDir*); // for reading
+                           TEDfile(std::string&, laydata::TdtLibDir*); // for writing
       void                 closeF() {fclose(_file);};
       void                 read(int libRef);
       void                 cleanup();
@@ -164,10 +164,10 @@ namespace laydata {
       void                 get_cellchildnames(NameSet&);
       bool                 status() const  {return _status;};
       word                 numread() const {return _numread;};
-      tdtlibrary*          design() const  {return _design;};
+      TdtLibrary*          design() const  {return _design;};
       time_t               created() const {return _created;};
       time_t               lastUpdated() const {return _lastUpdated;};
-      const laydata::tdtlibdir* TEDLIB()   {return _TEDLIB;}
+      const laydata::TdtLibDir* TEDLIB()   {return _TEDLIB;}
       word                 revision()      {return _revision;}
       word                 subrevision()   {return _subrevision;}
    protected:
@@ -185,9 +185,9 @@ namespace laydata {
       word                 _subrevision;
       time_t               _created;
       time_t               _lastUpdated;
-      tdtlibrary*          _design;
+      TdtLibrary*          _design;
       NameSet              _childnames;
-      laydata::tdtlibdir*  _TEDLIB;       // catalog of available TDT libraries
+      laydata::TdtLibDir*  _TEDLIB;       // catalog of available TDT libraries
 
    };
 
@@ -215,7 +215,7 @@ namespace laydata {
 
 class DbExportFile {
    public:
-                              DbExportFile(std::string fn, laydata::tdtcell* topcell, bool recur) :
+                              DbExportFile(std::string fn, laydata::TdtCell* topcell, bool recur) :
                                  _fileName(fn), _topcell(topcell), _recur(recur), _DBU(1e-9), _UU(1e-3) {};
       virtual                ~DbExportFile() {};
       virtual void            definitionStart(std::string) = 0;
@@ -231,13 +231,13 @@ class DbExportFile {
       virtual void            aref(const std::string&, const CTM&, const laydata::ArrayProperties&) = 0;
       virtual bool            checkCellWritten(std::string) const = 0;
       virtual void            registerCellWritten(std::string) = 0;
-      const laydata::tdtcell* topcell() const   {return _topcell; }
+      const laydata::TdtCell* topcell() const   {return _topcell; }
       bool                    recur() const     {return _recur;   }
       real                    DBU() const       {return _DBU;     }
       real                    UU() const        {return _UU;      }
    protected:
       std::string             _fileName;  //! Output file name - including the path
-      laydata::tdtcell*       _topcell;
+      laydata::TdtCell*       _topcell;
       bool                    _recur;
       real                    _DBU;
       real                    _UU;

@@ -742,8 +742,8 @@ byte Oasis::Cell::skimCell(OasisInFile& ofn, bool refnum)
    } while (true);
 }
 
-void Oasis::Cell::import(OasisInFile& ofn, laydata::tdtcell* dst_cell,
-                           laydata::tdtlibdir* tdt_db, const LayerMapExt& theLayMap)
+void Oasis::Cell::import(OasisInFile& ofn, laydata::TdtCell* dst_cell,
+                           laydata::TdtLibDir* tdt_db, const LayerMapExt& theLayMap)
 {
    ofn.setPosition(_filePos);
    initModals();
@@ -800,7 +800,7 @@ void Oasis::Cell::collectLayers(ExtLayers& layers_map, bool hier)
 }
 
 //------------------------------------------------------------------------------
-void Oasis::Cell::readRectangle(OasisInFile& ofn, laydata::tdtcell* dst_cell, const LayerMapExt& theLayMap)
+void Oasis::Cell::readRectangle(OasisInFile& ofn, laydata::TdtCell* dst_cell, const LayerMapExt& theLayMap)
 {
    const byte Smask   = 0x80;
    const byte Wmask   = 0x40;
@@ -835,7 +835,7 @@ void Oasis::Cell::readRectangle(OasisInFile& ofn, laydata::tdtcell* dst_cell, co
 
    if ( theLayMap.getTdtLay(tdtlaynum, _mod_layer(), _mod_datatype() ) )
    {
-      laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(tdtlaynum));
+      laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->securelayer(tdtlaynum));
       if ((0 == _mod_gwidth()) || (0 == _mod_gheight()))
       {
          std::ostringstream winfo;
@@ -863,7 +863,7 @@ void Oasis::Cell::readRectangle(OasisInFile& ofn, laydata::tdtcell* dst_cell, co
 }
 
 //------------------------------------------------------------------------------
-void Oasis::Cell::readPolygon(OasisInFile& ofn, laydata::tdtcell* dst_cell, const LayerMapExt& theLayMap)
+void Oasis::Cell::readPolygon(OasisInFile& ofn, laydata::TdtCell* dst_cell, const LayerMapExt& theLayMap)
 {
    const byte Pmask   = 0x20;
    const byte Xmask   = 0x10;
@@ -892,7 +892,7 @@ void Oasis::Cell::readPolygon(OasisInFile& ofn, laydata::tdtcell* dst_cell, cons
 
    if ( theLayMap.getTdtLay(tdtlaynum, _mod_layer(), _mod_datatype() ) )
    {
-      laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(tdtlaynum));
+      laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->securelayer(tdtlaynum));
       if (info & Rmask)
       {
          int4b* rptpnt = _mod_repete().lcarray();
@@ -901,7 +901,7 @@ void Oasis::Cell::readPolygon(OasisInFile& ofn, laydata::tdtcell* dst_cell, cons
          {
             pointlist laypl;
             _mod_pplist().calcPoints(laypl, _mod_gx()+rptpnt[2*rcnt],_mod_gy()+rptpnt[2*rcnt+1]);
-            laydata::valid_poly check(laypl);
+            laydata::ValidPoly check(laypl);
             if (!check.valid())
             {
                std::ostringstream ost;
@@ -918,7 +918,7 @@ void Oasis::Cell::readPolygon(OasisInFile& ofn, laydata::tdtcell* dst_cell, cons
       {
          pointlist laypl;
          _mod_pplist().calcPoints(laypl, _mod_gx(),_mod_gy());
-         laydata::valid_poly check(laypl);
+         laydata::ValidPoly check(laypl);
          if (!check.valid())
          {
             std::ostringstream ost;
@@ -934,7 +934,7 @@ void Oasis::Cell::readPolygon(OasisInFile& ofn, laydata::tdtcell* dst_cell, cons
 }
 
 //------------------------------------------------------------------------------
-void Oasis::Cell::readPath(OasisInFile& ofn, laydata::tdtcell* dst_cell, const LayerMapExt& theLayMap)
+void Oasis::Cell::readPath(OasisInFile& ofn, laydata::TdtCell* dst_cell, const LayerMapExt& theLayMap)
 {
    const byte Emask   = 0x80;
    const byte Wmask   = 0x40;
@@ -967,7 +967,7 @@ void Oasis::Cell::readPath(OasisInFile& ofn, laydata::tdtcell* dst_cell, const L
 
    if ( theLayMap.getTdtLay(tdtlaynum, _mod_layer(), _mod_datatype() ) )
    {
-      laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(tdtlaynum));
+      laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->securelayer(tdtlaynum));
       if (0 == _mod_pathhw())
       {
          std::ostringstream winfo;
@@ -994,7 +994,7 @@ void Oasis::Cell::readPath(OasisInFile& ofn, laydata::tdtcell* dst_cell, const L
                }
                if (pathConvertResult)
                {
-                  laydata::valid_wire check(laypl, 2*_mod_pathhw());
+                  laydata::ValidWire check(laypl, 2*_mod_pathhw());
                   if (!check.valid())
                   {
                      std::ostringstream ost;
@@ -1031,7 +1031,7 @@ void Oasis::Cell::readPath(OasisInFile& ofn, laydata::tdtcell* dst_cell, const L
          }
          if (pathConvertResult)
          {
-            laydata::valid_wire check(laypl, 2*_mod_pathhw());
+            laydata::ValidWire check(laypl, 2*_mod_pathhw());
             if (!check.valid())
             {
                std::ostringstream ost;
@@ -1055,7 +1055,7 @@ void Oasis::Cell::readPath(OasisInFile& ofn, laydata::tdtcell* dst_cell, const L
    }
 }
 
-void Oasis::Cell::readTrapezoid(OasisInFile& ofn, laydata::tdtcell* dst_cell, const LayerMapExt& theLayMap, byte type)
+void Oasis::Cell::readTrapezoid(OasisInFile& ofn, laydata::TdtCell* dst_cell, const LayerMapExt& theLayMap, byte type)
 {
    const byte Omask   = 0x80;
    const byte Wmask   = 0x40;
@@ -1097,7 +1097,7 @@ void Oasis::Cell::readTrapezoid(OasisInFile& ofn, laydata::tdtcell* dst_cell, co
 
    if ( theLayMap.getTdtLay(tdtlaynum, _mod_layer(), _mod_datatype() ) )
    {
-      laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(tdtlaynum));
+      laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->securelayer(tdtlaynum));
       if (info & Rmask)
       {
          int4b* rptpnt = _mod_repete().lcarray();
@@ -1146,7 +1146,7 @@ void Oasis::Cell::readTrapezoid(OasisInFile& ofn, laydata::tdtcell* dst_cell, co
    }
 }
 
-void Oasis::Cell::readCTrapezoid(OasisInFile& ofn, laydata::tdtcell* dst_cell, const LayerMapExt& theLayMap)
+void Oasis::Cell::readCTrapezoid(OasisInFile& ofn, laydata::TdtCell* dst_cell, const LayerMapExt& theLayMap)
 {
    const byte Tmask   = 0x80;
    const byte Wmask   = 0x40;
@@ -1200,7 +1200,7 @@ void Oasis::Cell::readCTrapezoid(OasisInFile& ofn, laydata::tdtcell* dst_cell, c
 
    if ( theLayMap.getTdtLay(tdtlaynum, _mod_layer(), _mod_datatype() ) )
    {
-      laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(tdtlaynum));
+      laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->securelayer(tdtlaynum));
       if (info & Rmask)
       {
          //read the repetition record from the input stream
@@ -1233,7 +1233,7 @@ void Oasis::Cell::readCTrapezoid(OasisInFile& ofn, laydata::tdtcell* dst_cell, c
    }
 }
 //------------------------------------------------------------------------------
-void Oasis::Cell::readText(OasisInFile& ofn, laydata::tdtcell* dst_cell, const LayerMapExt& theLayMap)
+void Oasis::Cell::readText(OasisInFile& ofn, laydata::TdtCell* dst_cell, const LayerMapExt& theLayMap)
 {
    const byte Cmask   = 0x40;
    const byte Nmask   = 0x20;
@@ -1262,7 +1262,7 @@ void Oasis::Cell::readText(OasisInFile& ofn, laydata::tdtcell* dst_cell, const L
    //
    if ( theLayMap.getTdtLay(tdtlaynum, _mod_tlayer(), _mod_tdatatype() ) )
    {
-      laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(tdtlaynum));
+      laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->securelayer(tdtlaynum));
       if (info & Rmask)
       {
          int4b* rptpnt = _mod_repete().lcarray();
@@ -1291,8 +1291,8 @@ void Oasis::Cell::readText(OasisInFile& ofn, laydata::tdtcell* dst_cell, const L
    }
 }
 
-void Oasis::Cell::readReference(OasisInFile& ofn, laydata::tdtcell* dst_cell,
-                                laydata::tdtlibdir* tdt_db, bool exma)
+void Oasis::Cell::readReference(OasisInFile& ofn, laydata::TdtCell* dst_cell,
+                                laydata::TdtLibDir* tdt_db, bool exma)
 {
    const byte Cmask   = 0x80;
    const byte Nmask   = 0x40;
@@ -2421,7 +2421,7 @@ void Oasis::readDelta(OasisInFile& ofb, int4b& deltaX, int4b& deltaY)
 //-----------------------------------------------------------------------------
 // class Oas2Ted
 //-----------------------------------------------------------------------------
-Oasis::Oas2Ted::Oas2Ted(OasisInFile* src_lib, laydata::tdtlibdir* tdt_db, const LayerMapExt& theLayMap) :
+Oasis::Oas2Ted::Oas2Ted(OasisInFile* src_lib, laydata::TdtLibDir* tdt_db, const LayerMapExt& theLayMap) :
       _src_lib(src_lib), _tdt_db(tdt_db), _theLayMap(theLayMap),
                _coeff((*_tdt_db)()->UU() / src_lib->libUnits()), _conversionLength(0)
 {}
@@ -2496,7 +2496,7 @@ void Oasis::Oas2Ted::convert(Oasis::Cell* src_structure, bool overwrite)
 {
    std::string gname = src_structure->name();
    // check that destination structure with this name exists
-   laydata::tdtcell* dst_structure = static_cast<laydata::tdtcell*>((*_tdt_db)()->checkcell(gname));
+   laydata::TdtCell* dst_structure = static_cast<laydata::TdtCell*>((*_tdt_db)()->checkcell(gname));
    std::ostringstream ost; ost << "OASIS import: ";
    if (NULL != dst_structure)
    {
@@ -2517,7 +2517,7 @@ void Oasis::Oas2Ted::convert(Oasis::Cell* src_structure, bool overwrite)
       ost << "Structure " << gname << "...";
       tell_log(console::MT_INFO,ost.str());
       // first create a new cell
-      dst_structure = DEBUG_NEW laydata::tdtcell(gname);
+      dst_structure = DEBUG_NEW laydata::TdtCell(gname);
       // call the cell converter
       src_structure->import(*_src_lib, dst_structure, _tdt_db, _theLayMap);
       // and finally - register the cell

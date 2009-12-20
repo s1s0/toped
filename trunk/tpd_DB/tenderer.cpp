@@ -1559,7 +1559,7 @@ tenderer::TopRend::TopRend( layprop::DrawProperties* drawprop, real UU ) :
       _cslctd_array_offset(0u), _num_ogl_buffers(0u), _ogl_buffers(NULL),
       _activeCS(NULL)
 {
-   // Initialise the cell (CTM) stack
+   // Initialize the cell (CTM) stack
    _cellStack.push(DEBUG_NEW TenderRef());
 }
 
@@ -1773,7 +1773,7 @@ bool tenderer::TopRend::collect()
       unsigned int* sindex_array = (unsigned int*)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
       for (DataLay::const_iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
       {
-         if (0 == CLAY->second->total_slctdx()) 
+         if (0 == CLAY->second->total_slctdx())
             continue;
          CLAY->second->collectSelected(sindex_array);
       }

@@ -342,7 +342,7 @@ void browsers::CellBrowser::collectInfo( bool hier)
 
 void browsers::CellBrowser::updateFlat()
 {
-   laydata::tdtdesign* design;
+   laydata::TdtDesign* design;
    wxTreeItemId temp, nroot;
    laydata::LibCellLists *cll;
    laydata::LibCellLists::iterator curlib;
@@ -361,7 +361,7 @@ void browsers::CellBrowser::updateFlat()
       cll = DATC->getCells(TARGETDB_LIB);
       for (curlib = cll->begin(); curlib != cll->end(); curlib++)
       {
-         laydata::cellList::const_iterator CL;
+         laydata::CellList::const_iterator CL;
          for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
          {
             wxTreeItemId cellitem = AppendItem(_dbroot, wxString( CL->first.c_str(),  wxConvUTF8));
@@ -385,7 +385,7 @@ void browsers::CellBrowser::updateFlat()
       cll = DATC->getCells(libID);
       for (curlib = cll->begin(); curlib != cll->end(); curlib++)
       {
-         laydata::cellList::const_iterator CL;
+         laydata::CellList::const_iterator CL;
          for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
          {
             wxTreeItemId cellitem = AppendItem(libroot, wxString( CL->first.c_str(),  wxConvUTF8));
@@ -398,14 +398,14 @@ void browsers::CellBrowser::updateFlat()
    // And now - deal with the undefined cells
    if (rootexists)
    {
-      const laydata::cellList& cellList= DATC->TEDLIB()->getUndefinedCells();
+      const laydata::CellList& cellList= DATC->TEDLIB()->getUndefinedCells();
       if (cellList.size() != 0)
       {
          // the type ...
          _undefRoot = AppendItem(GetRootItem(), wxString("Undefined Cells", wxConvUTF8));
          SetItemImage(_undefRoot,BICN_LIBRARYDB,wxTreeItemIcon_Normal); //@FIXME <-- HERE - one more lib icon for undefined cells!
          // ... and the cells
-         for(laydata::cellList::const_iterator it=cellList.begin(); it!= cellList.end(); it++)
+         for(laydata::CellList::const_iterator it=cellList.begin(); it!= cellList.end(); it++)
          {
             wxTreeItemId cellitem = AppendItem(_undefRoot, wxString( (*it).first.c_str(),  wxConvUTF8));
             SetItemImage(cellitem,BICN_UNDEFCELL,wxTreeItemIcon_Normal);
@@ -417,7 +417,7 @@ void browsers::CellBrowser::updateFlat()
 
 void browsers::CellBrowser::updateHier()
 {
-   laydata::tdtdesign* design;
+   laydata::TdtDesign* design;
    bool rootexists = true;
    try
    {
@@ -466,14 +466,14 @@ void browsers::CellBrowser::updateHier()
    // And now - deal with the undefined cells
    if (rootexists)
    {
-      const laydata::cellList& cellList= DATC->TEDLIB()->getUndefinedCells();
+      const laydata::CellList& cellList= DATC->TEDLIB()->getUndefinedCells();
       if (cellList.size() != 0)
       {
          // the type ...
          _undefRoot = AppendItem(GetRootItem(), wxString("Undefined Cells", wxConvUTF8));
          SetItemImage(_undefRoot,BICN_LIBRARYDB,wxTreeItemIcon_Normal); //@FIXME <-- HERE - one more lib icon for undefined cells!
          // ... and the cells
-         for(laydata::cellList::const_iterator it=cellList.begin(); it!= cellList.end(); it++)
+         for(laydata::CellList::const_iterator it=cellList.begin(); it!= cellList.end(); it++)
          {
             wxTreeItemId cellitem = AppendItem(_undefRoot, wxString( (*it).first.c_str(),  wxConvUTF8));
             SetItemImage(cellitem,BICN_UNDEFCELL,wxTreeItemIcon_Normal);
@@ -734,7 +734,7 @@ void browsers::CellBrowser::onTellRemoveCell(wxString cellname, wxString parentn
          if (checkCorrupted(findChildItem(cellname, item, _dbroot))) return;
          // copy all children
          // This part is "in case". The thing is that children should have been
-         // removed already, by tdtcell::removePrep
+         // removed already, by TdtCell::removePrep
          wxTreeItemIdValue cookie;
          wxTreeItemId child = GetFirstChild(item,cookie);
          while (child.IsOk())

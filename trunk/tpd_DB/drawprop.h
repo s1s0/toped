@@ -265,10 +265,10 @@ namespace layprop {
          const CTM&                 ScrCTM() const       {return  _ScrCTM;}
          const DBbox&               clipRegion() const   {return _clipRegion;}
          console::ACTIVE_OP         currentop() const    {return _currentop;}
-         void                       blockfill(laydata::cellrefstack*);
+         void                       blockfill(laydata::CellRefStack*);
          void                       unblockfill();
-         void                       pushref(const laydata::tdtcellref*);
-         byte                       popref(const laydata::tdtcellref*);
+         void                       pushref(const laydata::TdtCellRef*);
+         byte                       popref(const laydata::TdtCellRef*);
          void                       initCTMstack()       {_transtack.push(CTM());}
          void                       clearCTMstack()      {while (!_transtack.empty()) _transtack.pop();}
          void                       pushCTM(CTM& last)   {_transtack.push(last);}
@@ -323,7 +323,7 @@ namespace layprop {
          const LayerSettings*       findLayerSettings(unsigned) const;
       private:
          bool                       _blockfill;
-         laydata::cellrefstack*     _refstack;
+         laydata::CellRefStack*     _refstack;
          ctmstack                   _transtack;
          unsigned                   _drawinglayer;
          console::ACTIVE_OP         _currentop;
