@@ -39,21 +39,21 @@ public:
                              ~DataCenter();
    bool                       GDSparse(std::string);
    void                       GDSexport(const LayerMapExt&, std::string&, bool);
-   void                       GDSexport(laydata::tdtcell*, const LayerMapExt&, bool, std::string&, bool);
+   void                       GDSexport(laydata::TdtCell*, const LayerMapExt&, bool, std::string&, bool);
    void                       importGDScell(const nameList&, const LayerMapExt&, bool recur, bool over);
    void                       GDSclose();
    void                       CIFclose();
    void                       OASclose();
    CIFin::CifStatusType       CIFparse(std::string filename);
    void                       CIFexport(USMap*, bool, std::string&);
-   void                       CIFexport(laydata::tdtcell*, USMap*, bool, bool, std::string&);
+   void                       CIFexport(laydata::TdtCell*, USMap*, bool, bool, std::string&);
    bool                       cifGetLayers(nameList&);
    bool                       gdsGetLayers(ExtLayers&);
    bool                       oasGetLayers(ExtLayers&);
    void                       CIFimport(const nameList&, SIMap*, bool, bool, real);
    bool                       OASParse(std::string);
    void                       importOAScell(const nameList&, const LayerMapExt&, bool recur, bool over);
-   void                       PSexport(laydata::tdtcell*, std::string&);
+   void                       PSexport(laydata::TdtCell*, std::string&);
    bool                       TDTread(std::string);
    int                        TDTloadlib(std::string);
    bool                       TDTunloadlib(std::string);
@@ -61,15 +61,15 @@ public:
    bool                       TDTcheckwrite(const TpdTime&, const TpdTime&, bool&);
    bool                       TDTcheckread(const std::string, const TpdTime&, const TpdTime&, bool&);
    void                       newDesign(std::string, time_t);
-   laydata::tdtdesign*        lockDB(bool checkACTcell = true);
-   laydata::drclibrary*       lockDRC(void);
+   laydata::TdtDesign*        lockDB(bool checkACTcell = true);
+   laydata::DrcLibrary*       lockDRC(void);
    bool                       lockGds(GDSin::GdsInFile*&);
    bool                       lockCif(CIFin::CifFile*&);
    bool                       lockOas(Oasis::OasisInFile*&);
    void                       bpAddGdsTab();
    void                       bpAddCifTab();
    void                       bpAddOasTab();
-   laydata::tdtlibrary*       getLib(int libID) {return _TEDLIB.getLib(libID);}
+   laydata::TdtLibrary*       getLib(int libID) {return _TEDLIB.getLib(libID);}
    int                        getLastLibRefNo() {return _TEDLIB.getLastLibRefNo();}
    bool                       getCellNamePair(std::string name, laydata::CellDefin& strdefn);
    void                       unlockDB();
@@ -85,8 +85,8 @@ public:
    void                       mouseRotate();
    void                       tmp_draw(const CTM&, TP, TP);
    void                       render(const CTM&);
-   const laydata::cellList&   cells();
-   laydata::tdtlibdir*        TEDLIB() {return &_TEDLIB;}
+   const laydata::CellList&   cells();
+   laydata::TdtLibDir*        TEDLIB() {return &_TEDLIB;}
    laydata::LibCellLists*     getCells(int libID);
    unsigned int               numselected()           {return (NULL != _TEDLIB()) ? _TEDLIB()->numselected() : 0 ;}
    void                       defaultlayer(word layno){_properties.defaultLayer(layno);}
@@ -202,8 +202,8 @@ private:
    bool                       _drawruler;    // draw a ruler while composing a shape interactively
    std::string                _localDir;
    std::string                _globalDir;
-   laydata::tdtlibdir         _TEDLIB;       // catalog of available TDT libraries
-   laydata::drclibrary*       _DRCDB;		//DRC data
+   laydata::TdtLibDir         _TEDLIB;       // catalog of available TDT libraries
+   laydata::DrcLibrary*       _DRCDB;		//DRC data
    GDSin::GdsInFile*          _GDSDB;        // GDS parsed data
    CIFin::CifFile*            _CIFDB;        // CIF parsed data
    Oasis::OasisInFile*        _OASDB;        // OASIS parsed data

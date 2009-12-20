@@ -1030,7 +1030,7 @@ void tui::LayoutCanvas::OnCMRotate(wxCommandEvent&)
 
 tui::LayoutCanvas::~LayoutCanvas(){
    delete crossCur;
-//   delete (laydata::tdtdata::tessellObj);
+//   delete (laydata::TdtData::tessellObj);
 }
 
 void* tui::DrawThread::Entry()

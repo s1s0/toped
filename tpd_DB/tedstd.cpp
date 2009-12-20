@@ -80,7 +80,7 @@ PSegment* PSegment::parallel(TP p)
 //-----------------------------------------------------------------------------
 // class TEDfile
 //-----------------------------------------------------------------------------
-laydata::TEDfile::TEDfile(const char* filename, laydata::tdtlibdir* tedlib)  // reading
+laydata::TEDfile::TEDfile(const char* filename, laydata::TdtLibDir* tedlib)  // reading
 {
    _numread = 0;_position = 0;_design = NULL;
    _TEDLIB = tedlib;
@@ -124,15 +124,15 @@ void laydata::TEDfile::read(int libRef)
    real          UU = getReal();
    tell_log(console::MT_DESIGNNAME, name);
    if (libRef > 0)
-      _design = DEBUG_NEW tdtlibrary(name, DBU, UU, libRef);
+      _design = DEBUG_NEW TdtLibrary(name, DBU, UU, libRef);
    else
-      _design = DEBUG_NEW tdtdesign(name,_created, _lastUpdated, DBU,UU);
+      _design = DEBUG_NEW TdtDesign(name,_created, _lastUpdated, DBU,UU);
    _design->read(this);
-   //Design end marker is read already in tdtdesign so don't search it here
+   //Design end marker is read already in TdtDesign so don't search it here
    //byte designend = getByte();
 }
 
-laydata::TEDfile::TEDfile(std::string& filename, laydata::tdtlibdir* tedlib)
+laydata::TEDfile::TEDfile(std::string& filename, laydata::TdtLibDir* tedlib)
 { //writing
    _design = (*tedlib)();
    _revision=TED_CUR_REVISION;_subrevision=TED_CUR_SUBREVISION;
@@ -147,7 +147,7 @@ laydata::TEDfile::TEDfile(std::string& filename, laydata::tdtlibdir* tedlib)
    putString(TED_LEADSTRING);
    putRevision();
    putTime();
-   static_cast<laydata::tdtdesign*>(_design)->write(this);
+   static_cast<laydata::TdtDesign*>(_design)->write(this);
    fclose(_file);
 }
 
@@ -280,7 +280,7 @@ void laydata::TEDfile::putReal(const real data) {
 
 void laydata::TEDfile::putTime()
 {
-   time_t ctime = static_cast<laydata::tdtdesign*>(_design)->created();
+   time_t ctime = static_cast<laydata::TdtDesign*>(_design)->created();
    tm* broken_time = localtime(&ctime);
    putByte(tedf_TIMECREATED);
    put4b(broken_time->tm_mday);
@@ -291,7 +291,7 @@ void laydata::TEDfile::putTime()
    put4b(broken_time->tm_sec);
    //
    _lastUpdated = time(NULL);
-   static_cast<laydata::tdtdesign*>(_design)->_lastUpdated = _lastUpdated;
+   static_cast<laydata::TdtDesign*>(_design)->_lastUpdated = _lastUpdated;
    broken_time = localtime(&_lastUpdated);
    putByte(tedf_TIMEUPDATED);
    put4b(broken_time->tm_mday);
@@ -349,7 +349,7 @@ laydata::CellDefin laydata::TEDfile::linkcellref(std::string cellname)
 {
    // register the name of the referenced cell in the list of children
    _childnames.insert(cellname);
-   cellList::const_iterator striter = _design->_cells.find(cellname);
+   CellList::const_iterator striter = _design->_cells.find(cellname);
    laydata::CellDefin celldef = NULL;
    // link the cells instances with their definitions
    if (_design->_cells.end() == striter)

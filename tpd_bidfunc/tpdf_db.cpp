@@ -82,7 +82,7 @@ int tellstdfunc::TDTread::execute()
    {
       if (DATC->TDTread(filename))
       {
-         laydata::tdtdesign* ATDB = DATC->lockDB(false);
+         laydata::TdtDesign* ATDB = DATC->lockDB(false);
             // time stamps
             TpdTime timec(ATDB->created());
             TpdTime timeu(ATDB->lastUpdated());
@@ -139,7 +139,7 @@ int tellstdfunc::TDTreadIFF::execute()
       if (DATC->TDTcheckread(filename, timeCreated, timeSaved, start_ignoring))
       {
          DATC->TDTread(filename);
-         laydata::tdtdesign* ATDB = DATC->lockDB(false);
+         laydata::TdtDesign* ATDB = DATC->lockDB(false);
             // time stamps
             TpdTime timec(ATDB->created());
             TpdTime timeu(ATDB->lastUpdated());
@@ -188,7 +188,7 @@ int tellstdfunc::TDTloadlib::execute()
       int libID = DATC->TDTloadlib(filename);
       if (0 <= libID)
       {
-         laydata::tdtlibrary* LTDB = DATC->getLib(libID);
+         laydata::TdtLibrary* LTDB = DATC->getLib(libID);
          // Gatering the used layers & update the layer definitions
          laydata::TDTHierTree* root = LTDB->hiertree()->GetFirstRoot(libID);
          do
@@ -248,7 +248,7 @@ tellstdfunc::TDTsave::TDTsave(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::TDTsave::execute()
 {
-   laydata::tdtdesign* ATDB = DATC->lockDB(false);
+   laydata::TdtDesign* ATDB = DATC->lockDB(false);
       ATDB->try_unselect_all();
       DATC->TDTwrite();
       TpdTime timec(ATDB->created());
@@ -276,7 +276,7 @@ int tellstdfunc::TDTsaveIFF::execute() {
    }
    else
    {
-      laydata::tdtdesign* ATDB = DATC->lockDB(false);
+      laydata::TdtDesign* ATDB = DATC->lockDB(false);
          ATDB->try_unselect_all();
          bool stop_ignoring = false;
          if (DATC->TDTcheckwrite(timeCreated, timeSaved, stop_ignoring))
@@ -305,7 +305,7 @@ int tellstdfunc::TDTsaveas::execute()
    std::string filename = getStringValue();
    if (expandFileName(filename))
    {
-      laydata::tdtdesign* ATDB = DATC->lockDB(false);
+      laydata::TdtDesign* ATDB = DATC->lockDB(false);
          ATDB->try_unselect_all();
          DATC->TDTwrite(filename.c_str());
          TpdTime timec(ATDB->created());
@@ -604,9 +604,9 @@ int tellstdfunc::GDSexportTOP::execute()
    }
    if (expandFileName(filename))
    {
-      laydata::tdtcell *excell = NULL;
-      laydata::tdtdesign* ATDB = DATC->lockDB(false);
-         excell = static_cast<laydata::tdtcell*>(ATDB->checkcell(cellname));
+      laydata::TdtCell *excell = NULL;
+      laydata::TdtDesign* ATDB = DATC->lockDB(false);
+         excell = static_cast<laydata::TdtCell*>(ATDB->checkcell(cellname));
 
          if (NULL != excell)
          {
@@ -699,9 +699,9 @@ int tellstdfunc::PSexportTOP::execute()
    std::string cellname = getStringValue();
    if (expandFileName(filename))
    {
-      laydata::tdtcell *excell = NULL;
-      laydata::tdtdesign* ATDB = DATC->lockDB(false);
-         excell = static_cast<laydata::tdtcell*>(ATDB->checkcell(cellname));
+      laydata::TdtCell *excell = NULL;
+      laydata::TdtDesign* ATDB = DATC->lockDB(false);
+         excell = static_cast<laydata::TdtCell*>(ATDB->checkcell(cellname));
          if (NULL != excell)
             DATC->PSexport(excell, filename);
       DATC->unlockDB();
@@ -1199,9 +1199,9 @@ int tellstdfunc::CIFexportTOP::execute()
 
    if (expandFileName(filename))
    {
-      laydata::tdtcell *excell = NULL;
-      laydata::tdtdesign* ATDB = DATC->lockDB(false);
-         excell = static_cast<laydata::tdtcell*>(ATDB->checkcell(cellname));
+      laydata::TdtCell *excell = NULL;
+      laydata::TdtDesign* ATDB = DATC->lockDB(false);
+         excell = static_cast<laydata::TdtCell*>(ATDB->checkcell(cellname));
          if (NULL != excell)
          {
             DATC->CIFexport(excell, cifLays, recur, verbose, filename);
@@ -1490,7 +1490,7 @@ int tellstdfunc::DRCCalibreimport::execute()
    }
    else
    {
-		laydata::drclibrary* drcDesign = DATC->lockDRC();
+		laydata::DrcLibrary* drcDesign = DATC->lockDRC();
 		DRCData = DEBUG_NEW Calbr::CalbrFile(filename, 
 			new Calbr::drcTenderer(drcDesign));
 

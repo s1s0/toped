@@ -65,7 +65,7 @@ int tellstdfunc::stdGETLAYTEXTSTR::execute()
    }
    else
    {
-      OPstack.push(DEBUG_NEW telldata::ttstring(static_cast<laydata::tdttext*>(tx->data())->text()));
+      OPstack.push(DEBUG_NEW telldata::ttstring(static_cast<laydata::TdtText*>(tx->data())->text()));
       delete tx;
       return EXEC_NEXT;
    }
@@ -89,7 +89,7 @@ int tellstdfunc::stdGETLAYREFSTR::execute()
    }
    else
    {
-      OPstack.push(DEBUG_NEW telldata::ttstring(static_cast<laydata::tdtcellref*>(tx->data())->cellname()));
+      OPstack.push(DEBUG_NEW telldata::ttstring(static_cast<laydata::TdtCellRef*>(tx->data())->cellname()));
       delete tx;
       return EXEC_NEXT;
    }

@@ -50,13 +50,13 @@ DataCenter::DataCenter(const std::string& localDir, const std::string& globalDir
 	_GDSDB = NULL; _CIFDB = NULL;_OASDB = NULL; _DRCDB = NULL;//_TEDDB = NULL;
    _bpSync = NULL;
    // initializing the static cell hierarchy tree
-   laydata::tdtlibrary::initHierTreePtr();
+   laydata::TdtLibrary::initHierTreePtr();
    _tedfilename = "unnamed";
    _drawruler = false;
 }
 
 DataCenter::~DataCenter() {
-   laydata::tdtlibrary::clearEntireHierTree();
+   laydata::TdtLibrary::clearEntireHierTree();
    if (NULL != _GDSDB) delete _GDSDB;
    if (NULL != _CIFDB) delete _CIFDB;
    if (NULL != _OASDB) delete _OASDB;
@@ -125,7 +125,7 @@ bool DataCenter::TDTread(std::string filename)
    _TEDLIB.deleteDB();//Erase existing data
    _tedfilename = filename;
    _neversaved = false;
-   _TEDLIB.setDB(static_cast<laydata::tdtdesign*>(tempin.design()));
+   _TEDLIB.setDB(static_cast<laydata::TdtDesign*>(tempin.design()));
    _TEDLIB()->assign_properties(_properties);
    // Update Canvas scale
    _properties.setUU(_TEDLIB()->UU());
@@ -157,7 +157,7 @@ int DataCenter::TDTloadlib(std::string filename)
 bool DataCenter::TDTunloadlib(std::string libname)
 {
    // Unhook the library from the list of known DB's, get a pointer to it
-   laydata::tdtlibrary* tberased = _TEDLIB.removelibrary(libname);
+   laydata::TdtLibrary* tberased = _TEDLIB.removelibrary(libname);
    if ( NULL != tberased )
    {
       // Relink everything
@@ -221,7 +221,7 @@ void DataCenter::GDSexport(const LayerMapExt& layerMap, std::string& filename, b
    _TEDLIB()->GDSwrite(gdsex);
 }
 
-void DataCenter::GDSexport(laydata::tdtcell* cell, const LayerMapExt& layerMap, bool recur, std::string& filename, bool x2048)
+void DataCenter::GDSexport(laydata::TdtCell* cell, const LayerMapExt& layerMap, bool recur, std::string& filename, bool x2048)
 {
    GDSin::GdsExportFile gdsex(filename, cell, layerMap, recur);
    _TEDLIB()->GDSwrite(gdsex);
@@ -351,7 +351,7 @@ void DataCenter::CIFexport(USMap* laymap, bool verbose, std::string& filename)
    _TEDLIB()->CIFwrite(cifex);
 }
 
-void DataCenter::CIFexport(laydata::tdtcell* topcell, USMap* laymap, bool recur, bool verbose, std::string& filename)
+void DataCenter::CIFexport(laydata::TdtCell* topcell, USMap* laymap, bool recur, bool verbose, std::string& filename)
 {
    CIFin::CifExportFile cifex(filename, topcell, laymap, recur, verbose);
    _TEDLIB()->CIFwrite(cifex);
@@ -465,7 +465,7 @@ void DataCenter::importOAScell(const nameList& top_names, const LayerMapExt& lay
 }
 
 
-void DataCenter::PSexport(laydata::tdtcell* cell, std::string& filename)
+void DataCenter::PSexport(laydata::TdtCell* cell, std::string& filename)
 {
    //Get actual time
    PSFile psex(filename);
@@ -488,14 +488,14 @@ void DataCenter::newDesign(std::string name, time_t created)
       _TEDLIB()->clearHierTree();
       _TEDLIB.deleteDB();
    }
-   _TEDLIB.setDB(DEBUG_NEW laydata::tdtdesign(name, created, created));
+   _TEDLIB.setDB(DEBUG_NEW laydata::TdtDesign(name, created, created));
    _TEDLIB()->assign_properties(_properties);
    _tedfilename = _localDir + name + ".tdt";
    _neversaved = true;
    _properties.setUU(_TEDLIB()->UU());
 }
 
-laydata::tdtdesign*  DataCenter::lockDB(bool checkACTcell)
+laydata::TdtDesign*  DataCenter::lockDB(bool checkACTcell)
 {
    if (_TEDLIB())
    {
@@ -506,12 +506,12 @@ laydata::tdtdesign*  DataCenter::lockDB(bool checkACTcell)
    else throw EXPTNactive_DB();
 }
 
-laydata::drclibrary*  DataCenter::lockDRC(void)
+laydata::DrcLibrary*  DataCenter::lockDRC(void)
 {
 	if (!_TEDLIB()) throw EXPTNactive_DB();
    if (!_DRCDB)
    {
-		_DRCDB = DEBUG_NEW laydata::drclibrary("drc", _TEDLIB()->DBU(), _TEDLIB()->UU());
+		_DRCDB = DEBUG_NEW laydata::DrcLibrary("drc", _TEDLIB()->DBU(), _TEDLIB()->UU());
    }
 	while (wxMUTEX_NO_ERROR != DRCLock.TryLock());
    return _DRCDB;
@@ -680,15 +680,15 @@ void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,
       _TEDLIB()->check_active();
       switch (input_type)
       {
-         case console::op_dbox:   _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdttmpbox()  ); break;
-         case console::op_dpoly:  _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdttmppoly()) ; break;
+         case console::op_dbox:   _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::TdtTmpBox()  ); break;
+         case console::op_dpoly:  _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::TdtTmpPoly()) ; break;
          case console::op_cbind:
          {
             assert ("" != name);
             laydata::CellDefin strdefn;
             CTM eqm;
             VERIFY(DATC->getCellNamePair(name, strdefn));
-            _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdttmpcellref(strdefn, eqm) );
+            _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::TdtTmpCellRef(strdefn, eqm) );
             break;
          }
          case console::op_abind:
@@ -699,7 +699,7 @@ void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,
             CTM eqm;
             VERIFY(DATC->getCellNamePair(name, strdefn));
             laydata::ArrayProperties arrprops(stepX, stepY, cols, rows);
-            _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdttmpcellaref(strdefn, eqm, arrprops) );
+            _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::TdtTmpCellAref(strdefn, eqm, arrprops) );
             break;
          }
          case console::op_tbind:
@@ -707,14 +707,14 @@ void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,
             assert ("" != name);
             CTM eqm(trans);
             eqm.Scale(1/(UU()*OPENGL_FONT_UNIT), 1/(UU()*OPENGL_FONT_UNIT));
-            _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdttmptext(name, eqm) );
+            _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::TdtTmpText(name, eqm) );
             break;
          }
          case console::op_rotate: _TEDLIB()->set_tmpctm( trans );
          default:
          {
             if (0  < input_type)
-               _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::tdttmpwire(input_type) );
+               _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::TdtTmpWire(input_type) );
          }
       }
    }
@@ -799,7 +799,7 @@ void DataCenter::openGL_draw(const CTM& layCTM)
          _TEDLIB()->openGL_draw(_properties.drawprop());
          if(_DRCDB)
          {
-            laydata::tdtdefaultcell* dst_structure = _DRCDB->checkcell("drc");
+            laydata::TdtDefaultCell* dst_structure = _DRCDB->checkcell("drc");
             if (dst_structure)
             {
                dst_structure->openGL_draw(_properties.drawprop());
@@ -858,7 +858,7 @@ void DataCenter::openGL_render(const CTM& layCTM)
 			if(_DRCDB)
 			{
 				renderer.setState(layprop::DRC);
-				laydata::tdtdefaultcell* dst_structure = _DRCDB->checkcell("drc");
+				laydata::TdtDefaultCell* dst_structure = _DRCDB->checkcell("drc");
 				if (dst_structure)
 				{
 					dst_structure->openGL_render(renderer, CTM(), false, false);
@@ -908,7 +908,7 @@ void DataCenter::tmp_draw(const CTM& layCTM, TP base, TP newp)
 //   else throw EXPTNactive_DB();
 }
 
-const laydata::cellList& DataCenter::cells() {
+const laydata::CellList& DataCenter::cells() {
    if (_TEDLIB()) return _TEDLIB()->cells();
    else throw EXPTNactive_DB();
 };
@@ -1124,7 +1124,7 @@ void DataCenter::clearRulers()
 
 bool DataCenter::getCellNamePair(std::string name, laydata::CellDefin& strdefn)
 {
-   laydata::tdtdesign* ATDB = lockDB();
+   laydata::TdtDesign* ATDB = lockDB();
    if (ATDB->checkcell(name))
    {
       strdefn = ATDB->getcellnamepair(name);

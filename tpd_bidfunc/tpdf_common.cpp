@@ -54,7 +54,7 @@ telldata::ttint* tellstdfunc::CurrentLayer() {
 bool tellstdfunc::waitGUInput(int input_type, telldata::operandSTACK *OPstack,
    std::string name, const CTM trans, int4b stepX, int4b stepY, word cols, word rows)
 {
-   // Create a temporary object in the tdtdesign (only if a DEBUG_NEW object is created, i.e. box,wire,polygon,cell etc.)
+   // Create a temporary object in the TdtDesign (only if a DEBUG_NEW object is created, i.e. box,wire,polygon,cell etc.)
    try {DATC->mouseStart(input_type, name, trans, stepX, stepY, cols, rows);}
    catch (EXPTN) {return false;}
    // flag the prompt what type of data is expected & handle a pointer to
@@ -68,7 +68,7 @@ bool tellstdfunc::waitGUInput(int input_type, telldata::operandSTACK *OPstack,
    // force the thread in wait condition until the ted_prompt has our data
    Console->threadWaits4->Wait();
    // ... and continue when the thread is woken up
-   // Delete the temporary object in the tdtdesign
+   // Delete the temporary object in the TdtDesign
    DATC->mouseStop();
    // Stop the mouse stream from the canvas
    eventMOUSEIN.SetExtraLong(0);
@@ -91,15 +91,15 @@ pointlist* tellstdfunc::t2tpoints(telldata::ttlist *pl, real DBscale) {
 }
 
 //=============================================================================
-telldata::ttlist* tellstdfunc::make_ttlaylist(laydata::selectList* shapesel) {
+telldata::ttlist* tellstdfunc::make_ttlaylist(laydata::SelectList* shapesel) {
    telldata::ttlist* llist = DEBUG_NEW telldata::ttlist(telldata::tn_layout);
-   laydata::dataList* lslct;
+   laydata::DataList* lslct;
    SGBitSet pntl;
-   for (laydata::selectList::const_iterator CL = shapesel->begin(); 
+   for (laydata::SelectList::const_iterator CL = shapesel->begin(); 
                                             CL != shapesel->end(); CL++) {
       lslct = CL->second;
       // push each data reference into the TELL list
-      for (laydata::dataList::const_iterator CI = lslct->begin(); 
+      for (laydata::DataList::const_iterator CI = lslct->begin(); 
                                              CI != lslct->end(); CI++) {
          // copy the pointlist, because it will be deleted with the shapesel
          if (0 != CI->second.size()) pntl = SGBitSet(CI->second);
@@ -116,29 +116,29 @@ void tellstdfunc::clean_ttlaylist(telldata::ttlist* llist) {
    //  - First is kind of strange - data() method of telldata::ttlayout is defined
    // const, yet compiler doesn't complain that it is DELETED here
    //  - Second - the best place to clean-up the lists is of course inside
-   // telldata::ttlayout class, however they don't know anything about laydata::tdtdata
+   // telldata::ttlayout class, however they don't know anything about laydata::TdtData
    // though with a strange error message compiler claims that destructors will 
    // not be called - and I have no other choice but to belive it.
    // This of course is because of the separation of the project on modules
-   // The other possibility is to convert the list to (say) atticList and then
+   // The other possibility is to convert the list to (say) AtticList and then
    // to use the corresponding destroyer, but that seem to be much more convoluted
    // This looks weird - true, but is doing the job.
    // - Don't try to delete here selp (selected ponts). It is deleted naturally
    // by the destructor of the telldata::ttlayout class it doesn't have the visibility
-   // problem of laydata::tdtdata
+   // problem of laydata::TdtData
    for (word i = 0 ; i < llist->mlist().size(); i++) {
       delete (static_cast<telldata::ttlayout*>(llist->mlist()[i])->data());
    }
 }
 
 //==============================================================================
-void tellstdfunc::clean_atticlist(laydata::atticList* nlst, bool destroy)
+void tellstdfunc::clean_atticlist(laydata::AtticList* nlst, bool destroy)
 {
-   for (laydata::atticList::const_iterator CL = nlst->begin(); CL != nlst->end(); CL++) 
+   for (laydata::AtticList::const_iterator CL = nlst->begin(); CL != nlst->end(); CL++) 
    {
       if (destroy)
       {
-         for (laydata::shapeList::const_iterator DI = CL->second->begin(); DI != CL->second->end(); DI++) 
+         for (laydata::ShapeList::const_iterator DI = CL->second->begin(); DI != CL->second->end(); DI++) 
             delete (*DI);
       }
       CL->second->clear();
@@ -147,14 +147,14 @@ void tellstdfunc::clean_atticlist(laydata::atticList* nlst, bool destroy)
 }
 
 //=============================================================================
-telldata::ttlist* tellstdfunc::make_ttlaylist(laydata::atticList* shapesel) {
+telldata::ttlist* tellstdfunc::make_ttlaylist(laydata::AtticList* shapesel) {
    telldata::ttlist* llist = DEBUG_NEW telldata::ttlist(telldata::tn_layout);
-   laydata::shapeList* lslct;
-   for (laydata::atticList::const_iterator CL = shapesel->begin(); 
+   laydata::ShapeList* lslct;
+   for (laydata::AtticList::const_iterator CL = shapesel->begin(); 
                                             CL != shapesel->end(); CL++) {
       lslct = CL->second;
       // push each data reference into the TELL list
-      for (laydata::shapeList::const_iterator CI = lslct->begin(); 
+      for (laydata::ShapeList::const_iterator CI = lslct->begin(); 
                                              CI != lslct->end(); CI++)
       //   if (sh_deleted == (*CI)->status()) - doesn't seems to need it!
             llist->add(DEBUG_NEW telldata::ttlayout(*CI, CL->first));
@@ -163,32 +163,32 @@ telldata::ttlist* tellstdfunc::make_ttlaylist(laydata::atticList* shapesel) {
 }
 
 //=============================================================================
-laydata::selectList* tellstdfunc::get_ttlaylist(telldata::ttlist* llist) {
-   laydata::selectList* shapesel = DEBUG_NEW laydata::selectList();
+laydata::SelectList* tellstdfunc::get_ttlaylist(telldata::ttlist* llist) {
+   laydata::SelectList* shapesel = DEBUG_NEW laydata::SelectList();
    unsigned clayer;
    SGBitSet* pntl_o;
    for (word i = 0 ; i < llist->mlist().size(); i++) {
       clayer = static_cast<telldata::ttlayout*>(llist->mlist()[i])->layer();
       if (shapesel->end() == shapesel->find(clayer))
-         (*shapesel)[clayer] = DEBUG_NEW laydata::dataList();
+         (*shapesel)[clayer] = DEBUG_NEW laydata::DataList();
       pntl_o = static_cast<telldata::ttlayout*>(llist->mlist()[i])->selp();
 
       SGBitSet pntl_n;
       if (NULL != pntl_o)  pntl_n = SGBitSet(*pntl_o);
-      (*shapesel)[clayer]->push_back(laydata::selectDataPair(
+      (*shapesel)[clayer]->push_back(laydata::SelectDataPair(
         static_cast<telldata::ttlayout*>(llist->mlist()[i])->data(), pntl_n));
    }
    return shapesel;
 }
 
 //=============================================================================
-laydata::atticList* tellstdfunc::get_shlaylist(telldata::ttlist* llist) {
-   laydata::atticList* shapesel = DEBUG_NEW laydata::atticList();
+laydata::AtticList* tellstdfunc::get_shlaylist(telldata::ttlist* llist) {
+   laydata::AtticList* shapesel = DEBUG_NEW laydata::AtticList();
    unsigned clayer;
    for (word i = 0 ; i < llist->mlist().size(); i++) {
       clayer = static_cast<telldata::ttlayout*>(llist->mlist()[i])->layer();
       if (shapesel->end() == shapesel->find(clayer))
-         (*shapesel)[clayer] = DEBUG_NEW laydata::shapeList();
+         (*shapesel)[clayer] = DEBUG_NEW laydata::ShapeList();
       (*shapesel)[clayer]->push_back(static_cast<telldata::ttlayout*>
                                                 (llist->mlist()[i])->data());
    }
@@ -199,23 +199,23 @@ laydata::atticList* tellstdfunc::get_shlaylist(telldata::ttlist* llist) {
 /** Filters shapesel using the mask. Returns new list, containing copy of
 unfiltered components
 */
-laydata::selectList* tellstdfunc::filter_selist(const laydata::selectList* shapesel, word mask)
+laydata::SelectList* tellstdfunc::filter_selist(const laydata::SelectList* shapesel, word mask)
 {
-   laydata::selectList* filtered = DEBUG_NEW laydata::selectList();
+   laydata::SelectList* filtered = DEBUG_NEW laydata::SelectList();
 
-   for (laydata::selectList::const_iterator CL = shapesel->begin();
+   for (laydata::SelectList::const_iterator CL = shapesel->begin();
                                             CL != shapesel->end(); CL++)
    {
-      laydata::dataList* ssl = DEBUG_NEW laydata::dataList();
-      laydata::dataList* lslct = CL->second;
-      for (laydata::dataList::const_iterator CI = lslct->begin();
+      laydata::DataList* ssl = DEBUG_NEW laydata::DataList();
+      laydata::DataList* lslct = CL->second;
+      for (laydata::DataList::const_iterator CI = lslct->begin();
                                              CI != lslct->end(); CI++)
       {
          if (mask & (CI->first->ltype()))
          {
             SGBitSet pntl;
             if (0 != CI->second.size()) pntl = SGBitSet(CI->second);
-            ssl->push_back(laydata::selectDataPair(CI->first,pntl));
+            ssl->push_back(laydata::SelectDataPair(CI->first,pntl));
          }
       }
       if    (ssl->empty()) delete ssl;
@@ -225,20 +225,20 @@ laydata::selectList* tellstdfunc::filter_selist(const laydata::selectList* shape
 }
 
 //=============================================================================
-laydata::atticList* tellstdfunc::replace_str(laydata::atticList* shapesel, std::string newstr)
+laydata::AtticList* tellstdfunc::replace_str(laydata::AtticList* shapesel, std::string newstr)
 {
-   laydata::atticList* newtextlist = DEBUG_NEW laydata::atticList();
-   for (laydata::atticList::iterator CL = shapesel->begin();
+   laydata::AtticList* newtextlist = DEBUG_NEW laydata::AtticList();
+   for (laydata::AtticList::iterator CL = shapesel->begin();
                                             CL != shapesel->end(); CL++)
    {
-      laydata::shapeList* lslct  = CL->second;
-      laydata::shapeList* newlst = DEBUG_NEW laydata::shapeList();
-      for (laydata::shapeList::iterator CI = lslct->begin();
+      laydata::ShapeList* lslct  = CL->second;
+      laydata::ShapeList* newlst = DEBUG_NEW laydata::ShapeList();
+      for (laydata::ShapeList::iterator CI = lslct->begin();
                                              CI != lslct->end(); CI++)
       {
          assert(laydata::_lmtext == (*CI)->ltype());
          // using build-in copy constructor
-         laydata::tdttext* newtxt = DEBUG_NEW laydata::tdttext(*(static_cast<laydata::tdttext*>(*CI)));
+         laydata::TdtText* newtxt = DEBUG_NEW laydata::TdtText(*(static_cast<laydata::TdtText*>(*CI)));
          newtxt->replace_str(newstr);
          newlst->push_back(newtxt);
       }
@@ -286,7 +286,7 @@ void tellstdfunc::gridON(byte No, bool status) {
 }
 
 //=============================================================================
-void tellstdfunc::updateLayerDefinitions(laydata::tdtlibdir* LIBDIR, nameList& top_cells, int libID)
+void tellstdfunc::updateLayerDefinitions(laydata::TdtLibDir* LIBDIR, nameList& top_cells, int libID)
 {
    // get all the layers used in the design and define them using the default definition
    WordList ull;

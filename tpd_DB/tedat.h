@@ -41,23 +41,23 @@ namespace laydata {
        only the absolute minimum of data fields here or none at all. It was
        decided not to use the standard C++ containers for the layout objects.
        The main reason for this is the clipping algorithm and as a consequence
-       the quadTree class as a main data holder. In bref the tdtdata object
-       doesn't know neither about the layer it belongs to nor the quadTree it
+       the QuadTree class as a main data holder. In bref the TdtData object
+       doesn't know neither about the layer it belongs to nor the QuadTree it
        is sorted in. */
-   class tdtdata  {
+   class TdtData  {
    public:
    //! The default constructor.
-      tdtdata(SH_STATUS sel = sh_active) : _status(sel), _next(NULL) {};
+      TdtData(SH_STATUS sel = sh_active) : _status(sel), _next(NULL) {};
       //! Return the overlapping box of the object.
       virtual   DBbox      overlap()  const = 0;
       //! Return the overlapping box of the object.
       virtual   void       vlOverlap(const layprop::DrawProperties&, DBbox&) const {assert(false);}
    //! Move the object relatively using the input CTM
-      virtual   validator* move(const CTM&, SGBitSet& plst) = 0;
+      virtual   Validator* move(const CTM&, SGBitSet& plst) = 0;
    //! Rotate or flip (transfer the object using input CTM
       virtual   void       transfer(const CTM&) = 0;
    //! Copy the object and move it using the input CTM
-      virtual   tdtdata*   copy(const CTM&) = 0;
+      virtual   TdtData*   copy(const CTM&) = 0;
    //! A preparation for drawing - calculating all drawing objects using translation matrix stack.
       virtual   void       openGL_precalc(layprop::DrawProperties&, pointlist&) const = 0;
    //! Draw the outline of the objects
@@ -75,53 +75,53 @@ namespace laydata {
       virtual   void       motion_draw(const layprop::DrawProperties&, ctmqueue&, SGBitSet*) const = 0;
    //! Print an object description on the toped console.
       virtual   void       info(std::ostringstream&, real) const = 0;
-   //! Write the tdtdata object in TDT file.
+   //! Write the TdtData object in TDT file.
       virtual   void       write(TEDfile* const tedfile) const = 0;
-   //! Write the tdtdata object in GDS file.
+   //! Write the TdtData object in GDS file.
       virtual   void       GDSwrite(DbExportFile&) const = 0;
-   //! Write the tdtdata object in CIF file.
+   //! Write the TdtData object in CIF file.
       virtual   void       CIFwrite(DbExportFile&) const = 0;
-   //! Write the tdtdata object in PS file.
+   //! Write the TdtData object in PS file.
       virtual   void       PSwrite(PSFile&, const layprop::DrawProperties&) const = 0;
    //!
       virtual   bool       point_inside(const TP);
    //! shape cut with the input polygon
-      virtual   void       polycut(pointlist&, shapeList**) = 0;
+      virtual   void       polycut(pointlist&, ShapeList**) = 0;
    //! shrink/stretch
-      virtual   void       stretch(int bfactor, shapeList**) = 0;
+      virtual   void       stretch(int bfactor, ShapeList**) = 0;
    //!
       virtual  pointlist   shape2poly() const = 0;
-   //! Returns the next tdtdata object ot NULL if it doesn't exists
-      tdtdata*             next() const         {return _next;};
+   //! Returns the next TdtData object ot NULL if it doesn't exists
+      TdtData*             next() const         {return _next;};
    //! Changes the pointer to the next tdtddata object
-      void                 nextis(tdtdata* nxt) {_next = nxt;};
+      void                 nextis(TdtData* nxt) {_next = nxt;};
    //! Set the _selected flag in case the object is entirely overlaped by select_in box
-      void                 select_inBox(DBbox&, dataList*, bool);
-      void                 select_this(dataList*);
-      bool                 unselect(DBbox&, selectDataPair&, bool);
+      void                 select_inBox(DBbox&, DataList*, bool);
+      void                 select_this(DataList*);
+      bool                 unselect(DBbox&, SelectDataPair&, bool);
       void                 set_status(SH_STATUS s) {_status = s;};
       SH_STATUS            status() const {return _status;};
       virtual word         numpoints() const = 0;
-      virtual             ~tdtdata(){};
+      virtual             ~TdtData(){};
       virtual word         ltype() const = 0;
    protected:
       virtual void         select_points(DBbox&, SGBitSet&) = 0;
       virtual void         unselect_points(DBbox&, SGBitSet&) = 0;
       SH_STATUS            _status;
-   //! A pointer to the next tdtdata object
-      tdtdata*             _next;
+   //! A pointer to the next TdtData object
+      TdtData*             _next;
    };
 
 //==============================================================================
-   class tdtbox : public tdtdata   {
+   class TdtBox : public TdtData   {
       public:
-                           tdtbox(const TP& p1, const TP& p2);
-                           tdtbox(TEDfile* const tedfile);
-                           ~tdtbox();
+                           TdtBox(const TP& p1, const TP& p2);
+                           TdtBox(TEDfile* const tedfile);
+                           ~TdtBox();
          DBbox             overlap() const;
-         validator*        move(const CTM&, SGBitSet& plst);
+         Validator*        move(const CTM&, SGBitSet& plst);
          void              transfer(const CTM&);
-         tdtdata*          copy(const CTM&);
+         TdtData*          copy(const CTM&);
 
          void              openGL_precalc(layprop::DrawProperties&, pointlist&) const;
          void              openGL_drawline(layprop::DrawProperties&, const pointlist&) const;
@@ -137,8 +137,8 @@ namespace laydata {
          void              CIFwrite(DbExportFile&) const;
          void              PSwrite(PSFile&, const layprop::DrawProperties&) const;
          word              numpoints() const {return 4;};
-         void              polycut(pointlist&, shapeList**);
-         void              stretch(int bfactor, shapeList**);
+         void              polycut(pointlist&, ShapeList**);
+         void              stretch(int bfactor, ShapeList**);
          pointlist         shape2poly() const;
          word              ltype() const {return _lmbox;}
       protected:
@@ -161,16 +161,16 @@ namespace laydata {
    };
 
 //==============================================================================
-   class tdtpoly : public tdtdata   {
+   class TdtPoly : public TdtData   {
       public:
-                           tdtpoly(const pointlist& plist);
-                           tdtpoly(int4b* plist, unsigned psize);
-                           tdtpoly(TEDfile* const tedfile);
-                          ~tdtpoly();
+                           TdtPoly(const pointlist& plist);
+                           TdtPoly(int4b* plist, unsigned psize);
+                           TdtPoly(TEDfile* const tedfile);
+                          ~TdtPoly();
          DBbox             overlap() const;
-         validator*        move(const CTM&, SGBitSet& plst);
+         Validator*        move(const CTM&, SGBitSet& plst);
          void              transfer(const CTM&);
-         tdtdata*          copy(const CTM&);
+         TdtData*          copy(const CTM&);
 
          void              openGL_precalc(layprop::DrawProperties&, pointlist&) const;
          void              openGL_drawline(layprop::DrawProperties&, const pointlist&) const;
@@ -187,8 +187,8 @@ namespace laydata {
          void              PSwrite(PSFile&, const layprop::DrawProperties&) const;
          word              numpoints() const {return _psize;}
          bool              point_inside(const TP);
-         void              polycut(pointlist&, shapeList**);
-         void              stretch(int bfactor, shapeList**);
+         void              polycut(pointlist&, ShapeList**);
+         void              stretch(int bfactor, ShapeList**);
          pointlist         shape2poly() const;
          word              ltype() const {return _lmpoly;}
       private:
@@ -201,16 +201,16 @@ namespace laydata {
    };
 
 //==============================================================================
-   class tdtwire : public tdtdata   {
+   class TdtWire : public TdtData   {
       public:
-                           tdtwire(pointlist&, word);
-                           tdtwire(const int4b*, unsigned, word);
-                           tdtwire(TEDfile* const tedfile);
-                          ~tdtwire();
+                           TdtWire(pointlist&, word);
+                           TdtWire(const int4b*, unsigned, word);
+                           TdtWire(TEDfile* const tedfile);
+                          ~TdtWire();
          DBbox             overlap() const;
-         validator*        move(const CTM&, SGBitSet& plst);
+         Validator*        move(const CTM&, SGBitSet& plst);
          void              transfer(const CTM&);
-         tdtdata*          copy(const CTM&);
+         TdtData*          copy(const CTM&);
 
          void              openGL_precalc(layprop::DrawProperties&, pointlist&) const;
          void              openGL_drawline(layprop::DrawProperties&, const pointlist&) const;
@@ -227,8 +227,8 @@ namespace laydata {
          void              PSwrite(PSFile&, const layprop::DrawProperties&) const;
          word              numpoints() const {return _psize;}
          bool              point_inside(const TP);
-         void              polycut(pointlist&, shapeList**){};
-         void              stretch(int bfactor, shapeList**);
+         void              polycut(pointlist&, ShapeList**){};
+         void              stretch(int bfactor, ShapeList**);
          pointlist         shape2poly() const {return pointlist(); /*return empty list*/}
          word              ltype() const {return _lmwire;}
       private:
@@ -245,20 +245,20 @@ namespace laydata {
    };
 
 //==============================================================================
-   class tdtcellref : public tdtdata  {
+   class TdtCellRef : public TdtData  {
    public:
-                           tdtcellref(CellDefin str, CTM trans) : tdtdata(),
+                           TdtCellRef(CellDefin str, CTM trans) : TdtData(),
                                           _structure(str), _translation(trans) {};
-                           tdtcellref(TEDfile* const tedfile);
-//                          ~tdtcellref() {};
+                           TdtCellRef(TEDfile* const tedfile);
+//                          ~TdtCellRef() {};
       DBbox                overlap() const;
       virtual   void       vlOverlap(const layprop::DrawProperties&, DBbox&) const;
-      validator*           move(const CTM& trans, SGBitSet&) {
+      Validator*           move(const CTM& trans, SGBitSet&) {
                                             _translation *= trans; return NULL;};
       void                 transfer(const CTM& trans) {_translation *= trans;};
-      tdtdata*             copy(const CTM& trans) {return DEBUG_NEW tdtcellref(
+      TdtData*             copy(const CTM& trans) {return DEBUG_NEW TdtCellRef(
                                                _structure,_translation*trans);};
-//       tdtcellref*          getshapeover(TP);
+//       TdtCellRef*          getshapeover(TP);
       void                 openGL_precalc(layprop::DrawProperties&, pointlist&) const;
       void                 openGL_drawline(layprop::DrawProperties&, const pointlist&) const;
       void                 openGL_drawfill(layprop::DrawProperties&, const pointlist&) const;
@@ -273,14 +273,14 @@ namespace laydata {
       void                 GDSwrite(DbExportFile&) const;
       void                 CIFwrite(DbExportFile&) const;
       void                 PSwrite(PSFile&, const layprop::DrawProperties&) const;
-      virtual void         ungroup(tdtdesign*, tdtcell*, atticList*);
+      virtual void         ungroup(TdtDesign*, TdtCell*, AtticList*);
       std::string          cellname() const;
-      tdtcell*             cstructure() const;
-      tdtdefaultcell*      structure() const {return _structure;}
+      TdtCell*             cstructure() const;
+      TdtDefaultCell*      structure() const {return _structure;}
       word                 numpoints() const {return 1;};
       CTM                  translation() const {return _translation;};
-      void                 polycut(pointlist&, shapeList**) {};
-      void                 stretch(int bfactor, shapeList**) {};
+      void                 polycut(pointlist&, ShapeList**) {};
+      void                 stretch(int bfactor, ShapeList**) {};
       pointlist            shape2poly() const {return pointlist();/*return empty list*/}
       virtual ArrayProperties arrayprops() const {return ArrayProperties();}
       virtual word         ltype() const {return _lmref;}
@@ -294,15 +294,15 @@ namespace laydata {
    };
 
 //==============================================================================
-   class tdtcellaref : public tdtcellref  {
+   class TdtCellAref : public TdtCellRef  {
    public:
-                           tdtcellaref(CellDefin str, CTM trans, ArrayProperties& arrprops) :
-                              tdtcellref(str, trans), _arrprops(arrprops) {};
-                           tdtcellaref(TEDfile* const tedfile);
-//                          ~tdtcellaref() {};
+                           TdtCellAref(CellDefin str, CTM trans, ArrayProperties& arrprops) :
+                              TdtCellRef(str, trans), _arrprops(arrprops) {};
+                           TdtCellAref(TEDfile* const tedfile);
+//                          ~TdtCellAref() {};
       DBbox                overlap() const;
       DBbox                clear_overlap() const;
-      tdtdata*             copy(const CTM& trans) {return DEBUG_NEW tdtcellaref(
+      TdtData*             copy(const CTM& trans) {return DEBUG_NEW TdtCellAref(
                               _structure,_translation * trans, _arrprops);};
 
       void                 openGL_precalc(layprop::DrawProperties&, pointlist&) const;
@@ -318,7 +318,7 @@ namespace laydata {
       void                 GDSwrite(DbExportFile&) const;
       void                 CIFwrite(DbExportFile&) const;
       void                 PSwrite(PSFile&, const layprop::DrawProperties&) const;
-      void                 ungroup(tdtdesign*, tdtcell*, atticList*);
+      void                 ungroup(TdtDesign*, TdtCell*, AtticList*);
       ArrayProperties      arrayprops() const {return _arrprops;}
       word                 ltype() const {return _lmaref;}
    private:
@@ -326,16 +326,16 @@ namespace laydata {
    };
 
 //==============================================================================
-   class tdttext : public tdtdata  {
+   class TdtText : public TdtData  {
    public:
-                           tdttext(std::string text, CTM trans);
-                           tdttext(TEDfile* const tedfile);
-//                          ~tdttext() {};
+                           TdtText(std::string text, CTM trans);
+                           TdtText(TEDfile* const tedfile);
+//                          ~TdtText() {};
       DBbox                overlap() const;
-      validator*           move(const CTM& trans, SGBitSet&) {
+      Validator*           move(const CTM& trans, SGBitSet&) {
                                             _translation *= trans; return NULL;};
       void                 transfer(const CTM& trans)  {_translation *= trans;};
-      tdtdata*             copy(const CTM& trans) {return DEBUG_NEW tdttext(
+      TdtData*             copy(const CTM& trans) {return DEBUG_NEW TdtText(
                                                   _text,_translation * trans);};
       void                 openGL_precalc(layprop::DrawProperties&, pointlist&) const;
       void                 openGL_drawline(layprop::DrawProperties&, const pointlist&) const;
@@ -352,8 +352,8 @@ namespace laydata {
       void                 CIFwrite(DbExportFile&) const;
       void                 PSwrite(PSFile&, const layprop::DrawProperties&) const;
       word                 numpoints() const {return 1;};
-      void                 polycut(pointlist&, shapeList**) {};
-      void                 stretch(int bfactor, shapeList**) {};
+      void                 polycut(pointlist&, ShapeList**) {};
+      void                 stretch(int bfactor, ShapeList**) {};
       pointlist            shape2poly() const {return pointlist();/*return empty list*/}
       word                 ltype() const {return _lmtext;}
       const std::string    text() const {return _text;}
@@ -371,10 +371,10 @@ namespace laydata {
 
 //==============================================================================
 
-   class valid_box  : public validator {
+   class ValidBox  : public Validator {
    public:
-                        valid_box(pointlist&);
-      laydata::tdtdata* replacement();
+                        ValidBox(pointlist&);
+      laydata::TdtData* replacement();
       std::string       failtype();
       real              area() {return _area;}
    private:
@@ -382,10 +382,10 @@ namespace laydata {
    };
 
    //===========================================================================
-   class valid_poly : public validator {
+   class ValidPoly : public Validator {
    public:
-                        valid_poly(pointlist&);
-      laydata::tdtdata* replacement();
+                        ValidPoly(pointlist&);
+      laydata::TdtData* replacement();
       std::string       failtype();
    private:
       void              angles();
@@ -394,10 +394,10 @@ namespace laydata {
    };
 
    //===========================================================================
-   class valid_wire : public validator {
+   class ValidWire : public Validator {
    public:
-                        valid_wire(pointlist&, word);
-      laydata::tdtdata* replacement();
+                        ValidWire(pointlist&, word);
+      laydata::TdtData* replacement();
       std::string       failtype();
    private:
       void              angles();
@@ -410,31 +410,31 @@ namespace laydata {
 //   void draw_select_marks(const DBbox&, const CTM&);
 //   void draw_select_mark(const TP&);
 //   void draw_overlapping_box(const DBbox&, const CTM&, const GLushort);
-   tdtdata* polymerge(const pointlist&, const pointlist&);
-   tdtdata* createValidShape(pointlist*);
+   TdtData* polymerge(const pointlist&, const pointlist&);
+   TdtData* createValidShape(pointlist*);
 
 
 
 //==============================================================================
-   class tdttmpdata {
+   class TdtTmpData {
       public:
          virtual void      draw(const layprop::DrawProperties&, ctmqueue&) const = 0;
-         //! Add a point to the tdtdata object. Used to handle the objects under construction on the screen.
+         //! Add a point to the TdtData object. Used to handle the objects under construction on the screen.
          virtual void      addpoint(TP){assert(false);}
-         //! Removes a point from the tdtdata object. Used to handle the objects under construction on the screen.
+         //! Removes a point from the TdtData object. Used to handle the objects under construction on the screen.
          virtual void      rmpoint(TP&){assert(false);}
          //! Flips the object. Used to handle the objects under construction on the screen.
          virtual void      objFlip()   {assert(false);}
          //! Rotates the object. Used to handle the objects under construction on the screen.
          virtual void      objRotate() {assert(false);}
-         virtual          ~tdttmpdata(){};
+         virtual          ~TdtTmpData(){};
    };
 
 //==============================================================================
-   class tdttmpbox : public tdttmpdata {
+   class TdtTmpBox : public TdtTmpData {
       public:
-                           tdttmpbox() : _p1(NULL), _p2(NULL) {};
-                          ~tdttmpbox();
+                           TdtTmpBox() : _p1(NULL), _p2(NULL) {};
+                          ~TdtTmpBox();
          virtual void      draw(const layprop::DrawProperties&, ctmqueue& ) const;
          virtual void      addpoint(TP);
          virtual void      rmpoint(TP&);
@@ -444,10 +444,10 @@ namespace laydata {
    };
 
 //==============================================================================
-   class tdttmppoly : public tdttmpdata {
+   class TdtTmpPoly : public TdtTmpData {
       public:
-                           tdttmppoly() {};
-                          ~tdttmppoly() {};
+                           TdtTmpPoly() {};
+                          ~TdtTmpPoly() {};
          virtual void      draw(const layprop::DrawProperties&, ctmqueue& ) const;
          virtual void      addpoint(TP p)  {_plist.push_back(p);}
          virtual void      rmpoint(TP&);
@@ -456,10 +456,10 @@ namespace laydata {
    };
 
 //==============================================================================
-   class tdttmpwire : public tdttmpdata {
+   class TdtTmpWire : public TdtTmpData {
       public:
-                           tdttmpwire(word width) : _width(width)  {};
-                          ~tdttmpwire(){};
+                           TdtTmpWire(word width) : _width(width)  {};
+                          ~TdtTmpWire(){};
          virtual void      draw(const layprop::DrawProperties&, ctmqueue& ) const;
          virtual void      addpoint(TP p) {_plist.push_back(p);}
          virtual void      rmpoint(TP&);
@@ -473,11 +473,11 @@ namespace laydata {
    };
 
 //==============================================================================
-   class tdttmpcellref : public tdttmpdata {
+   class TdtTmpCellRef : public TdtTmpData {
       public:
-                           tdttmpcellref(CellDefin str, CTM trans) :
+                           TdtTmpCellRef(CellDefin str, CTM trans) :
                                        _structure(str), _translation(trans) {};
-                          ~tdttmpcellref(){};
+                          ~TdtTmpCellRef(){};
          virtual void      draw(const layprop::DrawProperties&, ctmqueue&) const;
          void              objFlip()   {_translation.FlipY(0.0)   ;}
          void              objRotate() {_translation.Rotate( 90.0);}
@@ -487,21 +487,21 @@ namespace laydata {
    };
 
 //==============================================================================
-   class tdttmpcellaref : public tdttmpcellref {
+   class TdtTmpCellAref : public TdtTmpCellRef {
       public:
-                           tdttmpcellaref(CellDefin str, CTM trans, ArrayProperties& arrprops) :
-                              tdttmpcellref(str, trans), _arrprops(arrprops) {};
-                          ~tdttmpcellaref(){};
+                           TdtTmpCellAref(CellDefin str, CTM trans, ArrayProperties& arrprops) :
+                              TdtTmpCellRef(str, trans), _arrprops(arrprops) {};
+                          ~TdtTmpCellAref(){};
          virtual void      draw(const layprop::DrawProperties&, ctmqueue&) const;
       private:
          ArrayProperties   _arrprops;
    };
 
 //==============================================================================
-   class tdttmptext : public tdttmpdata {
+   class TdtTmpText : public TdtTmpData {
       public:
-                           tdttmptext(std::string text, CTM trans);
-                          ~tdttmptext(){};
+                           TdtTmpText(std::string text, CTM trans);
+                          ~TdtTmpText(){};
          virtual void      draw(const layprop::DrawProperties&, ctmqueue&) const;
          void              objFlip()   {_translation.FlipY(0.0)   ;}
          void              objRotate() {_translation.Rotate( 90.0);}

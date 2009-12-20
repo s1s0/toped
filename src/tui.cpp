@@ -167,9 +167,9 @@ tui::getCellOpen::getCellOpen(wxFrame *parent, wxWindowID id, const wxString &ti
       wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
                                                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  {
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
-   laydata::tdtdesign* ATDB = DATC->lockDB(false);
-      laydata::cellList const cll = ATDB->cells();
-      laydata::cellList::const_iterator CL;
+   laydata::TdtDesign* ATDB = DATC->lockDB(false);
+      laydata::CellList const cll = ATDB->cells();
+      laydata::CellList::const_iterator CL;
       for (CL = cll.begin(); CL != cll.end(); CL++) {
          _nameList->Append(wxString(CL->first.c_str(), wxConvUTF8));
       }
@@ -202,7 +202,7 @@ tui::getCellRef::getCellRef(wxFrame *parent, wxWindowID id, const wxString &titl
       laydata::LibCellLists *cll = DATC->getCells(ALL_LIB);
       for (laydata::LibCellLists::iterator curlib = cll->begin(); curlib != cll->end(); curlib++)
       {
-         laydata::cellList::const_iterator CL;
+         laydata::CellList::const_iterator CL;
          for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
          {
             _nameList->Append(wxString(CL->first.c_str(), wxConvUTF8));
@@ -248,7 +248,7 @@ tui::getCellARef::getCellARef(wxFrame *parent, wxWindowID id, const wxString &ti
       laydata::LibCellLists *cll = DATC->getCells(ALL_LIB);
       for (laydata::LibCellLists::iterator curlib = cll->begin(); curlib != cll->end(); curlib++)
       {
-         laydata::cellList::const_iterator CL;
+         laydata::CellList::const_iterator CL;
          for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
          {
             _nameList->Append(wxString(CL->first.c_str(), wxConvUTF8));
@@ -375,7 +375,7 @@ tui::getLibList::getLibList(wxFrame *parent, wxWindowID id, const wxString &titl
 {
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
    DATC->lockDB(false);
-   laydata::tdtlibdir* LDR = DATC->TEDLIB();
+   laydata::TdtLibDir* LDR = DATC->TEDLIB();
 
    for (int curlib = 1; curlib < LDR->getLastLibRefNo(); curlib++)
    {
@@ -485,9 +485,9 @@ tui::getCIFexport::getCIFexport(wxFrame *parent, wxWindowID id, const wxString &
    _saveMap = DEBUG_NEW wxCheckBox(this, -1, wxT("Save Layer Map"));
    _slang = DEBUG_NEW wxCheckBox(this, -1, wxT("Verbose CIF slang"));
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
-   laydata::tdtdesign* ATDB = DATC->lockDB();
-      laydata::cellList const cll = ATDB->cells();
-      laydata::cellList::const_iterator CL;
+   laydata::TdtDesign* ATDB = DATC->lockDB();
+      laydata::CellList const cll = ATDB->cells();
+      laydata::CellList::const_iterator CL;
       for (CL = cll.begin(); CL != cll.end(); CL++) {
          _nameList->Append(wxString(CL->first.c_str(), wxConvUTF8));
       }
@@ -651,9 +651,9 @@ tui::getGDSexport::getGDSexport(wxFrame *parent, wxWindowID id, const wxString &
    _recursive->SetValue(true);
    _saveMap = DEBUG_NEW wxCheckBox(this, -1, wxT("Save Layer Map"));
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
-   laydata::tdtdesign* ATDB = DATC->lockDB();
-      laydata::cellList const cll = ATDB->cells();
-      laydata::cellList::const_iterator CL;
+   laydata::TdtDesign* ATDB = DATC->lockDB();
+      laydata::CellList const cll = ATDB->cells();
+      laydata::CellList::const_iterator CL;
       for (CL = cll.begin(); CL != cll.end(); CL++) {
          _nameList->Append(wxString(CL->first.c_str(), wxConvUTF8));
       }

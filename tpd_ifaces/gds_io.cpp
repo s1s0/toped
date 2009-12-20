@@ -623,8 +623,8 @@ GDSin::GdsLibrary::~GdsLibrary()
 //==============================================================================
 // class GdsStructure
 //==============================================================================
-void GDSin::GdsStructure::import(GdsInFile *cf, laydata::tdtcell* dst_cell,
-                                 laydata::tdtlibdir* tdt_db, const LayerMapExt& _theLayMap)
+void GDSin::GdsStructure::import(GdsInFile *cf, laydata::TdtCell* dst_cell,
+                                 laydata::TdtLibDir* tdt_db, const LayerMapExt& _theLayMap)
 {
    std::string strctName;
    //initializing
@@ -1027,7 +1027,7 @@ void GDSin::GdsStructure::skimNode(GdsInFile* cf)
    while (true);
 }
 
-void GDSin::GdsStructure::importBox(GdsInFile* cf, laydata::tdtcell* dst_cell, const LayerMapExt& theLayMap)
+void GDSin::GdsStructure::importBox(GdsInFile* cf, laydata::TdtCell* dst_cell, const LayerMapExt& theLayMap)
 {
    int2b       layer;
    int2b       singleType;
@@ -1063,7 +1063,7 @@ void GDSin::GdsStructure::importBox(GdsInFile* cf, laydata::tdtcell* dst_cell, c
                   for(word i = 0; i < numpoints; i++)
                      plist.push_back(GDSin::get_TP(cr, i));
 
-                  laydata::valid_poly check(plist);
+                  laydata::ValidPoly check(plist);
 
                   if (!check.valid())
                   {
@@ -1074,7 +1074,7 @@ void GDSin::GdsStructure::importBox(GdsInFile* cf, laydata::tdtcell* dst_cell, c
                          << " }";
                      tell_log(console::MT_ERROR, ost.str());
                   }
-                  laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(tdtlaynum));
+                  laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->securelayer(tdtlaynum));
                   if (check.box())  dwl->addbox(plist[0], plist[2], false);
                   else              dwl->addpoly(plist,false);
                }
@@ -1092,7 +1092,7 @@ void GDSin::GdsStructure::importBox(GdsInFile* cf, laydata::tdtcell* dst_cell, c
 
 }
 
-void GDSin::GdsStructure::importPoly(GdsInFile* cf, laydata::tdtcell* dst_cell, const LayerMapExt& theLayMap)
+void GDSin::GdsStructure::importPoly(GdsInFile* cf, laydata::TdtCell* dst_cell, const LayerMapExt& theLayMap)
 {
    int2b       layer;
    int2b       singleType;
@@ -1126,7 +1126,7 @@ void GDSin::GdsStructure::importPoly(GdsInFile* cf, laydata::tdtcell* dst_cell, 
                   for(word i = 0; i < numpoints; i++)
                      plist.push_back(GDSin::get_TP(cr, i));
 
-                  laydata::valid_poly check(plist);
+                  laydata::ValidPoly check(plist);
 
                   if (!check.valid())
                   {
@@ -1137,7 +1137,7 @@ void GDSin::GdsStructure::importPoly(GdsInFile* cf, laydata::tdtcell* dst_cell, 
                          << " }";
                      tell_log(console::MT_ERROR, ost.str());
                   }
-                  laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(tdtlaynum));
+                  laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->securelayer(tdtlaynum));
                   if (check.box())  dwl->addbox(plist[0], plist[2], false);
                   else              dwl->addpoly(plist,false);
                }
@@ -1154,7 +1154,7 @@ void GDSin::GdsStructure::importPoly(GdsInFile* cf, laydata::tdtcell* dst_cell, 
    while (true);
 }
 
-void GDSin::GdsStructure::importPath(GdsInFile* cf, laydata::tdtcell* dst_cell, const LayerMapExt& theLayMap)
+void GDSin::GdsStructure::importPath(GdsInFile* cf, laydata::TdtCell* dst_cell, const LayerMapExt& theLayMap)
 {
    int2b layer;
    int2b singleType;
@@ -1207,7 +1207,7 @@ void GDSin::GdsStructure::importPath(GdsInFile* cf, laydata::tdtcell* dst_cell, 
 
                   if (pathConvertResult)
                   {
-                     laydata::valid_wire check(plist, width);
+                     laydata::ValidWire check(plist, width);
 
                      if (!check.valid())
                      {
@@ -1218,7 +1218,7 @@ void GDSin::GdsStructure::importPath(GdsInFile* cf, laydata::tdtcell* dst_cell, 
                               << " }";
                         tell_log(console::MT_ERROR, ost.str());
                      }
-                     laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(tdtlaynum));
+                     laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->securelayer(tdtlaynum));
                      dwl->addwire(plist, width,false);
                   }
                   else
@@ -1243,7 +1243,7 @@ void GDSin::GdsStructure::importPath(GdsInFile* cf, laydata::tdtcell* dst_cell, 
    while (cr->recType() != gds_ENDEL);
 }
 
-void GDSin::GdsStructure::importText(GdsInFile* cf, laydata::tdtcell* dst_cell, real dbuu, const LayerMapExt& theLayMap)
+void GDSin::GdsStructure::importText(GdsInFile* cf, laydata::TdtCell* dst_cell, real dbuu, const LayerMapExt& theLayMap)
 {
    int2b       layer;
    int2b       singleType;
@@ -1309,7 +1309,7 @@ void GDSin::GdsStructure::importText(GdsInFile* cf, laydata::tdtcell* dst_cell, 
             case gds_ENDEL://end of element, exit point
                if ( theLayMap.getTdtLay(tdtlaynum, layer, singleType) )
                {
-                  laydata::tdtlayer* dwl = static_cast<laydata::tdtlayer*>(dst_cell->securelayer(tdtlaynum));
+                  laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->securelayer(tdtlaynum));
                   // @FIXME absolute magnification, absolute angle should be reflected somehow!!!
                   dwl->addtext(tString,
                               CTM( magnPoint,
@@ -1330,7 +1330,7 @@ void GDSin::GdsStructure::importText(GdsInFile* cf, laydata::tdtcell* dst_cell, 
    while (true);
 }
 
-void GDSin::GdsStructure::importSref(GdsInFile* cf, laydata::tdtcell* dst_cell, laydata::tdtlibdir* tdt_db, const LayerMapExt&)
+void GDSin::GdsStructure::importSref(GdsInFile* cf, laydata::TdtCell* dst_cell, laydata::TdtLibDir* tdt_db, const LayerMapExt&)
 {
    word           reflection     = 0;
    word           absMagn        = 0;
@@ -1400,7 +1400,7 @@ void GDSin::GdsStructure::importSref(GdsInFile* cf, laydata::tdtcell* dst_cell, 
    while (true);
 }
 
-void GDSin::GdsStructure::importAref(GdsInFile* cf, laydata::tdtcell* dst_cell, laydata::tdtlibdir* tdt_db, const LayerMapExt&)
+void GDSin::GdsStructure::importAref(GdsInFile* cf, laydata::TdtCell* dst_cell, laydata::TdtLibDir* tdt_db, const LayerMapExt&)
 {
    word           reflection     = 0;
    word           absMagn        = 0;
@@ -1515,7 +1515,7 @@ GDSin::GdsStructure::~GdsStructure()
 //-----------------------------------------------------------------------------
 // class Gds2Ted
 //-----------------------------------------------------------------------------
-GDSin::Gds2Ted::Gds2Ted(GDSin::GdsInFile* src_lib, laydata::tdtlibdir* tdt_db, const LayerMapExt& theLayMap) :
+GDSin::Gds2Ted::Gds2Ted(GDSin::GdsInFile* src_lib, laydata::TdtLibDir* tdt_db, const LayerMapExt& theLayMap) :
       _src_lib(src_lib), _tdt_db(tdt_db), _theLayMap(theLayMap),
                _coeff((*_tdt_db)()->UU() / src_lib->libUnits()), _conversionLength(0)
 {}
@@ -1589,7 +1589,7 @@ void GDSin::Gds2Ted::convert(GDSin::GdsStructure* src_structure, bool overwrite)
 {
    std::string gname = src_structure->strctName();
    // check that destination structure with this name exists
-   laydata::tdtcell* dst_structure = static_cast<laydata::tdtcell*>((*_tdt_db)()->checkcell(gname));
+   laydata::TdtCell* dst_structure = static_cast<laydata::TdtCell*>((*_tdt_db)()->checkcell(gname));
    std::ostringstream ost; ost << "GDS import: ";
    if (NULL != dst_structure)
    {
@@ -1610,7 +1610,7 @@ void GDSin::Gds2Ted::convert(GDSin::GdsStructure* src_structure, bool overwrite)
       ost << "Structure " << gname << "...";
       tell_log(console::MT_INFO,ost.str());
       // first create a new cell
-      dst_structure = DEBUG_NEW laydata::tdtcell(gname);
+      dst_structure = DEBUG_NEW laydata::TdtCell(gname);
       // call the cell converter
       src_structure->import(_src_lib, dst_structure, _tdt_db, _theLayMap);
       // and finally - register the cell
@@ -1814,7 +1814,7 @@ void GDSin::GdsOutFile::updateLastRecord()
 //-----------------------------------------------------------------------------
 // class GdsExportFile
 //-----------------------------------------------------------------------------
-GDSin::GdsExportFile::GdsExportFile(std::string fn, laydata::tdtcell* tcell,
+GDSin::GdsExportFile::GdsExportFile(std::string fn, laydata::TdtCell* tcell,
    const LayerMapExt& lmap, bool recur) : DbExportFile(fn, tcell, recur), GdsOutFile(fn), _laymap(lmap)
 {
 }
