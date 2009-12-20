@@ -1684,6 +1684,16 @@ void laydata::tdtcellref::draw_request(tenderer::TopRend& rend) const
    if (crchain) rend.pushref(this);
 }
 
+void laydata::tdtcellref::vlOverlap(const layprop::DrawProperties& prop, DBbox& vlOvl) const
+{
+   assert(NULL != structure());
+   DBbox strOverlap(structure()->updateVisibleOverlap(prop));
+   if (DEFAULT_OVL_BOX == strOverlap) return;
+   strOverlap = strOverlap * _translation;
+   strOverlap.normalize();
+   vlOvl.overlap(strOverlap);
+}
+
 void laydata::tdtcellref::draw_srequest(tenderer::TopRend& rend, const SGBitSet*) const
 {
    // get overlapping box of the structure ...

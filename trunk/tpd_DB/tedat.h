@@ -49,7 +49,9 @@ namespace laydata {
    //! The default constructor.
       tdtdata(SH_STATUS sel = sh_active) : _status(sel), _next(NULL) {};
       //! Return the overlapping box of the object.
-      virtual   DBbox      overlap()  const = 0; // why not DBbox& ????
+      virtual   DBbox      overlap()  const = 0;
+      //! Return the overlapping box of the object.
+      virtual   void       vlOverlap(const layprop::DrawProperties&, DBbox&) const {assert(false);}
    //! Move the object relatively using the input CTM
       virtual   validator* move(const CTM&, SGBitSet& plst) = 0;
    //! Rotate or flip (transfer the object using input CTM
@@ -250,6 +252,7 @@ namespace laydata {
                            tdtcellref(TEDfile* const tedfile);
 //                          ~tdtcellref() {};
       DBbox                overlap() const;
+      virtual   void       vlOverlap(const layprop::DrawProperties&, DBbox&) const;
       validator*           move(const CTM& trans, SGBitSet&) {
                                             _translation *= trans; return NULL;};
       void                 transfer(const CTM& trans) {_translation *= trans;};

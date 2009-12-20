@@ -43,6 +43,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(stdZOOMWIN       );
    TELL_STDCMD_CLASSB(stdZOOMWINb     , stdZOOMWIN    );
    TELL_STDCMD_CLASSA(stdZOOMALL       );
+   TELL_STDCMD_CLASSA(stdZOOMVISIBLE   );
    TELL_STDCMD_CLASSA(getPOINT         );
    TELL_STDCMD_CLASSA(getPOINTLIST     );
    TELL_STDCMD_CLASSA(stdDISTANCE      );
@@ -92,7 +93,7 @@ namespace tellstdfunc {
    theese operations (functions) should be called differently.
 3. The idea of "edit" operation is to have a manual oportunity to change the
    layout objects. It will be extremely usefull for text/ref/aref objects in
-   order to change the text/cell. Changing the layer will be possible 
+   order to change the text/cell. Changing the layer will be possible
    via this operation.
-   
+
 */

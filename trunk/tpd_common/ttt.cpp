@@ -99,19 +99,30 @@ void DBbox::overlap(int4b x, int4b y)
    if (_p2.y() < y) _p2._y = y;
 }
 
-void DBbox::overlap(const DBbox& bx) {
+void DBbox::overlap(const DBbox& bx)
+{
    if (DEFAULT_OVL_BOX == bx) return;
-   if (DEFAULT_OVL_BOX == (*this)) {
-      if (bx.p1().x() > bx.p2().x()) {
-         _p1._x = bx.p2().x(); _p2._x = bx.p1().x(); }
-      else {
-         _p1._x = bx.p1().x(); _p2._x = bx.p2().x(); }
-      if (bx.p1().y() > bx.p2().y()) {
-         _p1._y = bx.p2().y(); _p2._y = bx.p1().y(); }
-      else {
-         _p1._y = bx.p1().y(); _p2._y = bx.p2().y(); }
+   if (DEFAULT_OVL_BOX == (*this))
+   {
+      if (bx.p1().x() > bx.p2().x())
+      {
+         _p1._x = bx.p2().x(); _p2._x = bx.p1().x();
+      }
+      else
+      {
+         _p1._x = bx.p1().x(); _p2._x = bx.p2().x();
+      }
+      if (bx.p1().y() > bx.p2().y())
+      {
+         _p1._y = bx.p2().y(); _p2._y = bx.p1().y();
+      }
+      else
+      {
+         _p1._y = bx.p1().y(); _p2._y = bx.p2().y();
+      }
    }
-   else {
+   else
+   {
       overlap(bx.p1()); overlap(bx.p2());
    }
 }
@@ -125,15 +136,18 @@ DBbox DBbox::overlap(const CTM& op2)  const
    return result;
 }
 
-void DBbox::normalize() {
+void DBbox::normalize()
+{
    int4b swap;
-   if (_p1.x() > _p2.x()) {
+   if (_p1.x() > _p2.x())
+   {
       swap = _p1.x(); _p1._x = _p2.x(); _p2._x = swap;
    }
-   if (_p1.y() > _p2.y()) {
+   if (_p1.y() > _p2.y())
+   {
       swap = _p1.y(); _p1._y = _p2.y(); _p2._y = swap;
    }
-}   
+}
 
 int8b DBbox::cliparea(const DBbox& bx, bool calculate) const
 {
@@ -265,8 +279,8 @@ DBbox DBbox::getcorner(byte corner) {
       case 0: // NW
    return DBbox(_p1.x(), static_cast<int4b>(rint((_p2.y() + _p1.y()) / 2)),
                  static_cast<int4b>(rint((_p2.x() + _p1.x()) / 2)),_p2.y());
-      case 1: // NE           
-   return DBbox(static_cast<int4b>(rint((_p2.x() + _p1.x()) / 2)), 
+      case 1: // NE
+   return DBbox(static_cast<int4b>(rint((_p2.x() + _p1.x()) / 2)),
                  static_cast<int4b>(rint((_p2.y() + _p1.y()) / 2)),
                  _p2.x(),_p2.y());
       case 2: // SE
@@ -274,7 +288,7 @@ DBbox DBbox::getcorner(byte corner) {
                  _p2.x(), static_cast<int4b>(rint((_p2.y() + _p1.y()) / 2)));
       case 3: // SW
    return DBbox(_p1.x(),_p1.y(),
-                 static_cast<int4b>(rint((_p2.x() + _p1.x()) / 2)), 
+                 static_cast<int4b>(rint((_p2.x() + _p1.x()) / 2)),
                  static_cast<int4b>(rint((_p2.y() + _p1.y()) / 2)));
      default: assert(false);
    }
@@ -373,7 +387,7 @@ void SGBitSet::reset(word  bit)
 void SGBitSet::check_neighbours_set(bool wire)
 {
    word size;
-   if (wire) 
+   if (wire)
       if (_size > 2) size = _size - 2;
       else return;
    else size = _size;
@@ -396,7 +410,7 @@ bool SGBitSet::isallclear() const
    assert(_size);
    for(word i = 0; i <= _size / 8; i++)
       if (0x00 != _packet[i]) return false;
-   return true;   
+   return true;
 }
 
 bool SGBitSet::isallset() const
@@ -422,10 +436,10 @@ void SGBitSet::swap(word bitA, word bitB)
 
 void SGBitSet::clear()
 {
-   _size = 0; 
-   if (NULL != _packet) 
+   _size = 0;
+   if (NULL != _packet)
    {
-      delete [] _packet; 
+      delete [] _packet;
       _packet = NULL;
    }
 }
@@ -436,7 +450,7 @@ bool SGBitSet::operator == (const SGBitSet& sop) const
    else
    {
       word nb = _size / 8;
-      for (word i = 0; i <= nb; i++) 
+      for (word i = 0; i <= nb; i++)
          if (_packet[i] != sop._packet[i]) return false;
    }
    return true;
@@ -483,7 +497,7 @@ CTM CTM::Translate( const TP& pnt )
 }
 
 CTM CTM::Rotate(const real alfa) {// alfa - in degrees
-   double temp = (double) alfa; 
+   double temp = (double) alfa;
    double alfaG = (temp * M_PI / 180.0);// translate in radians
    return (*this *= CTM(cos(alfaG),sin(alfaG),-sin(alfaG),cos(alfaG),0,0));
 }
@@ -538,9 +552,9 @@ CTM CTM::operator * (const real factor) const
 
 CTM CTM::operator = (const CTM& op2)
 {
-   _a = op2.a();_b = op2.b();_c = op2.c();_d = op2.d(); 
+   _a = op2.a();_b = op2.b();_c = op2.c();_d = op2.d();
    _tx = op2.tx();_ty = op2.ty();
-   return *this; 
+   return *this;
 }
 
 void CTM::Decompose(TP& trans, real& rot, real& scale, bool& flipX) const
@@ -551,7 +565,7 @@ void CTM::Decompose(TP& trans, real& rot, real& scale, bool& flipX) const
    // flip values of these oprations.
    // Second presumption here is for the scale value returned. It is that
    // scX and scY are always the same
-   real scX = sqrt(_a * _a + _c * _c);   
+   real scX = sqrt(_a * _a + _c * _c);
 //   real scY = sqrt(_b * _b + _d * _d);
    scale = scX;
    // rotation
@@ -589,7 +603,7 @@ double round(double x)
 
 #endif
 
-//Return true, if argument - space or equivalent; 
+//Return true, if argument - space or equivalent;
 //else return false
 //space requires for split function
 bool space(char c)
@@ -597,7 +611,7 @@ bool space(char c)
    return (0 != isspace(c));
 }
 
-//Return false, if argument - space or equivalent; 
+//Return false, if argument - space or equivalent;
 //else return true
 //space requires for split function
 bool not_space(char c)
@@ -624,7 +638,7 @@ std::vector<std::string> split (const std::string& str, char delim)
 
       //Ignore delimiter
       i = std::find_if(i, str.end(), std::bind2nd (std::not_equal_to<char>() , delim));
-      //find out the end of next word 
+      //find out the end of next word
 
       iter j = std::find_if(i, str.end(), std::bind2nd (std::equal_to<char>() , delim));
 

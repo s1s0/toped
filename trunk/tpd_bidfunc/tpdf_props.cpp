@@ -274,7 +274,7 @@ int tellstdfunc::stdHIDELAYER::execute() {
       }
       DATC->hideLayer(layno, hide);
       DATC->unlockDB();
-
+      DATC->updateVisibleOverlap();
       TpdPost::layer_status(tui::BT_LAYER_HIDE, layno, hide);
       LogFile << LogFile.getFN() << "("<< layno << "," <<
                  LogFile._2bool(hide) << ");"; LogFile.flush();
