@@ -133,15 +133,15 @@ void laydata::tdtlibrary::registercellread(std::string cellname, tdtcell* cell) 
    {
    // There are several possiblirities here:
    // 1. Cell has been referenced before the definition takes place
-   // 2. The same case 1, but the reason is circular reference. 
+   // 2. The same case 1, but the reason is circular reference.
    // 3. Cell is defined more than once
-   // Case 3 seems to be just theoretical and we should abort the reading 
+   // Case 3 seems to be just theoretical and we should abort the reading
    // and retun with error in this case.
-   // Case 2 is really dangerous and once again theoretically we need to 
+   // Case 2 is really dangerous and once again theoretically we need to
    // break the circularity. This might happen however once the whole file
    // is parced
-   // Case 1 is quite OK, although, the write sequence should use the 
-   // cell structure tree and start the writing from the leaf cells. At the 
+   // Case 1 is quite OK, although, the write sequence should use the
+   // cell structure tree and start the writing from the leaf cells. At the
    // moment writing is in kind of alphabetical order and case 1 is more
    // than possible. In the future it might me appropriate to issue a warning
    // for possible circular reference.
@@ -238,7 +238,7 @@ void laydata::tdtlibrary::recreate_hierarchy(const laydata::tdtlibdir* libdir)
    }
 }
 
-laydata::CellDefin laydata::tdtlibrary::getcellnamepair(std::string name) const 
+laydata::CellDefin laydata::tdtlibrary::getcellnamepair(std::string name) const
 {
    cellList::const_iterator striter = _cells.find(name);
    if (_cells.end() == striter)
@@ -311,8 +311,8 @@ void laydata::tdtlibrary::cleanUnreferenced()
 cell is not deleted, but returned by the function.
 Cell must not be referenced otherwise the _hiertree will assert. Primary usage
 is to clear a default cell from the library of undefined cells when a new cell
-is created in the target DB with the same name. 
-There is no another valid usage, so the function will assert if called for 
+is created in the target DB with the same name.
+There is no another valid usage, so the function will assert if called for
 libraries other than UNDEFCELL_LIB.
 */
 laydata::tdtdefaultcell* laydata::tdtlibrary::displaceCell(const std::string& cell_name)
@@ -471,7 +471,7 @@ void laydata::tdtlibdir::relink()
       _libdirectory[i]->second->relink(this);
    }
    // finally - relink the active database
-   if (NULL !=_TEDDB) 
+   if (NULL !=_TEDDB)
       _TEDDB->relink(this);
 }
 
@@ -483,7 +483,7 @@ void laydata::tdtlibdir::reextract_hierarchy()
       _libdirectory[i]->second->recreate_hierarchy(this);
    }
    // finally - relink the active database
-   if (NULL !=_TEDDB) 
+   if (NULL !=_TEDDB)
       _TEDDB->recreate_hierarchy(this);
 }
 
@@ -493,7 +493,7 @@ TARGETDB_LIB. It starts searching from the library after \a libID .
 */
 bool laydata::tdtlibdir::getLibCellRNP(std::string name, laydata::CellDefin& strdefn, const int libID) const
 {
-   // start searching form the first library after the current 
+   // start searching form the first library after the current
    word first2search = (TARGETDB_LIB == libID) ? 1 : libID + 1;
    for (word i = first2search; i < _libdirectory.size(); i++)
    {
@@ -595,7 +595,7 @@ laydata::CellDefin laydata::tdtlibdir::linkcellref(std::string cellname, int lib
    {
       strdefn = striter->second;
    }
-   // Mark that the cell definition is referenced, i.e. it is not the top 
+   // Mark that the cell definition is referenced, i.e. it is not the top
    // of the tree (orphan flag in the tdtcell)
    assert(strdefn);
    strdefn->parentfound();
@@ -612,7 +612,7 @@ laydata::tdtdefaultcell* laydata::tdtlibdir::displaceUndefinedCell(std::string c
    return _libdirectory[UNDEFCELL_LIB]->second->displaceCell(cell_name);
 }
 
-/*! Ensures a themporary storage of an undefined cell which has been unlinked 
+/*! Ensures a themporary storage of an undefined cell which has been unlinked
 (unreferenced).
 */
 void laydata::tdtlibdir::holdUndefinedCell(tdtdefaultcell* udefrcell)
@@ -688,7 +688,7 @@ laydata::tdtcell* laydata::tdtdesign::addcell(std::string name, laydata::tdtlibd
 }
 
 /*! A ready created structure of tdtcell type is added to the cell list in the
-TARGETLIB_DB. Function will assert if a structure with this name is already 
+TARGETLIB_DB. Function will assert if a structure with this name is already
 listed in the _cells. Used in removecell undo
 */
 void laydata::tdtdesign::addthiscell(laydata::tdtcell* strdefn, laydata::tdtlibdir* libdir)
@@ -1173,11 +1173,11 @@ void laydata::tdtdesign::flip_selected( TP p, bool Xaxis) {
    }
 }
 
-void laydata::tdtdesign::delete_selected(laydata::atticList* fsel, 
-                                         laydata::tdtlibdir* libdir) 
+void laydata::tdtdesign::delete_selected(laydata::atticList* fsel,
+                                         laydata::tdtlibdir* libdir)
 {
-   //laydata::tdtdesign* ATDB 
-   if (_target.edit()->delete_selected(fsel, libdir)) 
+   //laydata::tdtdesign* ATDB
+   if (_target.edit()->delete_selected(fsel, libdir))
    {
       // needs validation
       do {} while(validate_cells());
@@ -1239,7 +1239,7 @@ bool laydata::tdtdesign::group_selected(std::string name, laydata::tdtlibdir* li
    return true;
 }
 
-laydata::shapeList* laydata::tdtdesign::ungroup_prep(laydata::tdtlibdir* libdir) 
+laydata::shapeList* laydata::tdtdesign::ungroup_prep(laydata::tdtlibdir* libdir)
 {
    //unlink the selected ref/aref's from the quadTree of the current cell
    return _target.edit()->ungroupPrep(libdir);
@@ -1311,13 +1311,23 @@ unsigned int laydata::tdtdesign::numselected() const
    else return 0;
 }
 
-DBbox laydata::tdtdesign::activeoverlap() {
+DBbox laydata::tdtdesign::activeoverlap()
+{
    DBbox ovl = _target.overlap();
    if (ovl == DEFAULT_OVL_BOX) ovl = DEFAULT_ZOOM_BOX;
    return ovl;
-//   if (_target.checkedit())
-//      return _target.edit()->overlap() * _ARTM;
-//   else return DEFAULT_OVL_BOX;
+}
+
+DBbox laydata::tdtdesign::visibleOverlap()
+{
+   DBbox ovl = _target.view()->cellVisibleOverlap();
+   if (ovl == DEFAULT_OVL_BOX) ovl = DEFAULT_ZOOM_BOX;
+   return ovl;
+}
+
+void laydata::tdtdesign::updateVisibleOverlap(layprop::DrawProperties& prop)
+{
+   _target.view()->updateVisibleOverlap(prop);
 }
 
 void laydata::tdtdesign::check_active() {
@@ -1375,15 +1385,15 @@ void laydata::drclibrary::registercellread(std::string cellname, tdtcell* cell) 
    {
    // There are several possiblirities here:
    // 1. Cell has been referenced before the definition takes place
-   // 2. The same case 1, but the reason is circular reference. 
+   // 2. The same case 1, but the reason is circular reference.
    // 3. Cell is defined more than once
-   // Case 3 seems to be just theoretical and we should abort the reading 
+   // Case 3 seems to be just theoretical and we should abort the reading
    // and retun with error in this case.
-   // Case 2 is really dangerous and once again theoretically we need to 
+   // Case 2 is really dangerous and once again theoretically we need to
    // break the circularity. This might happen however once the whole file
    // is parced
-   // Case 1 is quite OK, although, the write sequence should use the 
-   // cell structure tree and start the writing from the leaf cells. At the 
+   // Case 1 is quite OK, although, the write sequence should use the
+   // cell structure tree and start the writing from the leaf cells. At the
    // moment writing is in kind of alphabetical order and case 1 is more
    // than possible. In the future it might me appropriate to issue a warning
    // for possible circular reference.

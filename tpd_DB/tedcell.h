@@ -24,7 +24,7 @@
 //          $Date$
 //        $Author$
 //===========================================================================
-   
+
 #ifndef TEDCELL_H_INCLUDED
 #define TEDCELL_H_INCLUDED
 
@@ -47,7 +47,7 @@ namespace laydata {
 //==============================================================================
    /*!This class is holding the information about current cell - i.e. the cell
    that is currently a target of all toped operations. The complication comes
-   from edit in place operations like push/pop/top/previous as well as from the 
+   from edit in place operations like push/pop/top/previous as well as from the
    undo requirements of all open/edit cell operations.
    As a rule, if a cell has been opened with opencell() command, _activecell
    and _viewcell point to the same tdtcell object of the target cell, _ARTM is
@@ -104,6 +104,7 @@ namespace laydata {
          virtual void        relinkThis(std::string, laydata::CellDefin, laydata::tdtlibdir* libdir);
          virtual void        updateHierarchy(tdtlibdir*);
          virtual DBbox       cellOverlap() const;
+         virtual DBbox       updateVisibleOverlap(const layprop::DrawProperties&);
          virtual void        write(TEDfile* const, const cellList&, const TDTHierTree*) const;
          virtual void        GDSwrite(DbExportFile&, const cellList&, const TDTHierTree*) const;
          virtual void        CIFwrite(DbExportFile&, const cellList&, const TDTHierTree*) const;
@@ -128,7 +129,7 @@ namespace laydata {
    public:
                            tdtcell(std::string);
                            tdtcell(TEDfile* const, std::string, int);
-      virtual             ~tdtcell(); 
+      virtual             ~tdtcell();
       void                 openGL_draw(layprop::DrawProperties&,
                                                           bool active=false) const;
       void                 openGL_render(tenderer::TopRend&, const CTM&, bool, bool) const;
@@ -149,6 +150,7 @@ namespace laydata {
                                    const cellList* = NULL, const TDTHierTree* = NULL) const;
       TDTHierTree*         hierout(TDTHierTree*&, tdtcell*, cellList*, const tdtlibdir*);
       DBbox                cellOverlap() const {return _cellOverlap;}
+      DBbox                cellVisibleOverlap() const {return _vlOverlap;}
       void                 select_inBox(DBbox, layprop::ViewProperties&, bool pntsel = false);
 //      void                 select_inside(const TP);
       void                 select_fromList(selectList*, layprop::ViewProperties&);
@@ -187,6 +189,7 @@ namespace laydata {
       void                 report_selected(real) const;
       void                 collect_usedlays(const tdtlibdir*, bool, WordList&) const;
       bool                 overlapChanged(DBbox&, tdtdesign*);
+      DBbox                updateVisibleOverlap(const layprop::DrawProperties&);
    private:
       bool                 getshapeover(TP, layprop::ViewProperties&);
       void                 getCellOverlap();
@@ -200,7 +203,8 @@ namespace laydata {
       dataList*            secure_dataList(selectList&, unsigned);
       NameSet              _children;     //! for hierarchy list purposes
       selectList           _shapesel;     //! selected shapes
-      DBbox                _cellOverlap;   //! cell overlap
+      DBbox                _cellOverlap;  //! Overlap of the entire cell
+      DBbox                _vlOverlap;    //! Overlap of the currently visible layers only
    };
 }
 #endif

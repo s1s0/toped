@@ -797,14 +797,14 @@ void DataCenter::openGL_draw(const CTM& layCTM)
          // Thereis no need to check for an active cell. If there isn't one
          // the function will return silently.
          _TEDLIB()->openGL_draw(_properties.drawprop());
-			if(_DRCDB)
-			{
-				laydata::tdtdefaultcell* dst_structure = _DRCDB->checkcell("drc");
-				if (dst_structure)
-				{
-					dst_structure->openGL_draw(_properties.drawprop());
-				}
-			}
+         if(_DRCDB)
+         {
+            laydata::tdtdefaultcell* dst_structure = _DRCDB->checkcell("drc");
+            if (dst_structure)
+            {
+               dst_structure->openGL_draw(_properties.drawprop());
+            }
+         }
 #ifdef RENDER_PROFILING
          rendTimer.report("Total elapsed rendering time");
 #endif
@@ -1237,6 +1237,15 @@ laydata::LibCellLists* DataCenter::getCells(int libID)
    else if (libID < _TEDLIB.getLastLibRefNo())
       all_cells->push_back(&(_TEDLIB.getLib(libID)->cells()));
    return all_cells;
+}
+
+void DataCenter::updateVisibleOverlap()
+{
+   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   lockDB();
+   _TEDLIB()->updateVisibleOverlap(_properties.drawprop());
+   unlockDB();
+   VERIFY(wxMUTEX_NO_ERROR == PROPLock.Unlock());
 }
 
 void initDBLib(const std::string &localDir, const std::string &globalDir)

@@ -132,7 +132,7 @@ tellstdfunc::stdDISTANCE_D::stdDISTANCE_D(telldata::typeID retype, bool eor) :
 int tellstdfunc::stdDISTANCE_D::execute()
 {
    // generally there is no point having rulers without having
-   // active database and cell, besides rulers appears funny on the 
+   // active database and cell, besides rulers appears funny on the
    // screen because of the default settings of the layout canvas
    // That's the reason to have the lock/unlock here, i.e. to get an exception
    // if there is no active database & cell. This is done for the interacive
@@ -174,7 +174,7 @@ tellstdfunc::stdLONGCURSOR::stdLONGCURSOR(telldata::typeID retype, bool eor) :
 int tellstdfunc::stdLONGCURSOR::execute()
 {
    bool        longcur  = getBoolValue();
-   
+
    wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
    eventGRIDUPD.SetInt((longcur ? tui::STS_LONG_CURSOR : tui::STS_SHORT_CURSOR));
    wxPostEvent(TopedMainW, eventGRIDUPD);
@@ -201,7 +201,7 @@ int tellstdfunc::stdUNDO::execute() {
    else {
       std::string news = "UNDO buffer is empty";
       tell_log(console::MT_ERROR,news);
-   }   
+   }
    return EXEC_NEXT;
 }
 
@@ -228,7 +228,7 @@ int tellstdfunc::stdZOOMWIN::execute() {
    telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    telldata::ttpnt *p2 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    real DBscale = DATC->DBscale();
-   DBbox* box = DEBUG_NEW DBbox(TP(p1->x(), p1->y(), DBscale), 
+   DBbox* box = DEBUG_NEW DBbox(TP(p1->x(), p1->y(), DBscale),
                           TP(p2->x(), p2->y(), DBscale));
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(tui::ZOOM_WINDOW);
@@ -247,7 +247,7 @@ tellstdfunc::stdZOOMWINb::stdZOOMWINb(telldata::typeID retype, bool eor) :
 int tellstdfunc::stdZOOMWINb::execute() {
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
    real DBscale = DATC->DBscale();
-   DBbox* box = DEBUG_NEW DBbox(TP(w->p1().x(), w->p1().y(), DBscale), 
+   DBbox* box = DEBUG_NEW DBbox(TP(w->p1().x(), w->p1().y(), DBscale),
                           TP(w->p2().x(), w->p2().y(), DBscale));
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(tui::ZOOM_WINDOW);
@@ -264,6 +264,22 @@ tellstdfunc::stdZOOMALL::stdZOOMALL(telldata::typeID retype, bool eor) :
 int tellstdfunc::stdZOOMALL::execute() {
    laydata::tdtdesign* ATDB = DATC->lockDB();
       DBbox* ovl  = DEBUG_NEW DBbox(ATDB->activeoverlap());
+   DATC->unlockDB();
+   wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+   eventZOOM.SetInt(tui::ZOOM_WINDOW);
+   eventZOOM.SetClientData(static_cast<void*>(ovl));
+   wxPostEvent(TopedCanvasW, eventZOOM);
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::stdZOOMVISIBLE::stdZOOMVISIBLE(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
+{}
+
+int tellstdfunc::stdZOOMVISIBLE::execute() {
+   laydata::tdtdesign* ATDB = DATC->lockDB();
+      DBbox* ovl  = DEBUG_NEW DBbox(ATDB->visibleOverlap());
    DATC->unlockDB();
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(tui::ZOOM_WINDOW);
@@ -305,7 +321,7 @@ int tellstdfunc::getPOINTLIST::execute() {
    // flag the prompt that we expect a list of points & handle a pointer to
    // the operand stack
    Console->waitGUInput(&OPstack, console::op_dpoly, CTM());
-   // 
+   //
    wxCommandEvent eventMOUSEIN(wxEVT_MOUSE_INPUT);
    eventMOUSEIN.SetInt(-1);
    eventMOUSEIN.SetExtraLong(1);
@@ -324,15 +340,15 @@ UNDO/REDO operation - some preliminary thoughts
    Where to fit it. Two major possibilities here:
       - generating string commands and using the parser
       - Maintaining UNDO command stack and UNDO operand stack
-   1. At this moment seems that the first way has two major drawback - it will 
-   mess around with the threads. Undo will be a command that will have to 
-   reinvoke the parser to parse another command. The other thing that seems 
-   to be potentially hazardous is the maintanance of the operand stack - it 
+   1. At this moment seems that the first way has two major drawback - it will
+   mess around with the threads. Undo will be a command that will have to
+   reinvoke the parser to parse another command. The other thing that seems
+   to be potentially hazardous is the maintanance of the operand stack - it
    seems impossible  to execute properly undo/redo if it is included somewhere
-   in a function, script, file, preproc.definition or god knows where else in 
+   in a function, script, file, preproc.definition or god knows where else in
    the language.
    2. Separate UNDO command/operand stack. This solution seems much more robust
-   (and of course more complicated to implement). At least it is free of the 
+   (and of course more complicated to implement). At least it is free of the
    troubles described above (though have others maybe...)
    The table below is trying to clarify operations over normal and UNDO operand
    stacks and when they are executed.
@@ -350,13 +366,13 @@ UNDO/REDO operation - some preliminary thoughts
                     |      command            |  the limit of UNDO CMD_STACK
    ----------------------------------------------------------------------------
    What is needed for implementation...
-    Additional method (UNDO) in the cmdSTDFUNC. Thus undo will be executed 
-    in a similar way as normal commands, but one command at a time - when 
+    Additional method (UNDO) in the cmdSTDFUNC. Thus undo will be executed
+    in a similar way as normal commands, but one command at a time - when
     undo() command is invoked - and calling undo() method instead of execute()
-    This has a nasty drawback - all internal commands has to be implemented 
+    This has a nasty drawback - all internal commands has to be implemented
     separately and initialy this will swallow a lot of time. It seems to be
     flexible though and will require minimum amount of additional toped functions.
-       
+
 
 =========================================================================================
 |   TELL command   |   tellibin class  |  Docu  |   LOG  |  UNDO  |        Note         |
