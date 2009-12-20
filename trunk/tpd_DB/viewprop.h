@@ -113,16 +113,12 @@ namespace layprop {
       bool              isLayerExist(word);
       bool              isLayerExist(std::string);
       void              addUnpublishedLay(word);
-      const WordList&   upLayers() {_uplaylist.sort(); _uplaylist.unique(); return _uplaylist;}
-      void              clearUnpublishedLayers() {_uplaylist.clear();}
       void              addcolor(std::string name, byte R, byte G, byte B, byte A);
       void              addfill(std::string name, byte *ptrn);
       void              addline(std::string, std::string, word, byte, byte);
       void              hideLayer(unsigned layno, bool hide);
       void              lockLayer(unsigned layno, bool lock);
       void              fillLayer(unsigned layno, bool fill);
-      void              defaultLayer(word layno)  {_curlay = layno;}
-      word              curLay() const            {return _curlay;}
       bool              selectable(unsigned layno) const;
       const WordList    getLockedLayers(void);
       const WordList    getAllLayers(void);
@@ -144,23 +140,41 @@ namespace layprop {
       bool              loadLaysetStatus(const std::string&);
       bool              deleteLaysetStatus(const std::string&);
       bool              getLaysetStatus(const std::string&, WordSet&, WordSet&, WordSet&, unsigned);
+      void              setGdsLayMap(USMap* map);
+      void              setCifLayMap(USMap* map);
+      void              all_colors(nameList&) const;
+      void              all_fills(nameList&) const;
+      void              all_lines(nameList&) const;
       void              setstep(real st)                 {_step = st;}
       void              setautopan(bool status)          {_autopan = status;}
       void              setZeroCross(bool status)        {_zeroCross = status;}
       void              setmarker_angle(byte angle)      {_marker_angle = angle;}
+      void              setlayselmask(word lsm)          {_layselmask = lsm;}
+      void              addRuler(TP& p1, TP& p2)         {_supp_data.addRuler(p1,p2,_UU);}
+      void              clearRulers()                    {_supp_data.clearRulers();}
+      void              drawRulers(const CTM& layCTM)    {_supp_data.drawRulers(layCTM, stepDB());}
+      void              tmp_draw(const CTM& layCTM, const TP& base, const TP& newp)
+                                                         {_supp_data.tmp_draw( base, newp, _UU, layCTM, stepDB());}
+      void              mousePoint(const TP& lp)         {_supp_data.mousePoint(lp);}
+      void              mouseStop()                      {_supp_data.mouseStop();}
+      const WordList&   upLayers()                       {_uplaylist.sort(); _uplaylist.unique(); return _uplaylist;}
+      void              clearUnpublishedLayers()         {_uplaylist.clear();}
+      void              defaultLayer(word layno)         {_curlay = layno;}
       real              step() const                     {return _step;}
       int4b             stepDB() const                   {return (word)rint(_step*_DBscale);}
-      unsigned          getLayerNo(std::string name) const {return _drawprop.getLayerNo(name);}
-      std::string       getLayerName(unsigned layno) const {return _drawprop.getLayerName(layno);}
       real              UU() const                       {return _UU;}
       real              DBscale() const                  {return _DBscale;}
       bool              autopan() const                  {return _autopan;}
       bool              zeroCross() const                {return _zeroCross;}
       byte              marker_angle() const             {return _marker_angle;}
-      DrawProperties&   drawprop()                       {return _drawprop;} // <-- That's rubbish!!! It most likely makes a copy! @FIXME
-      DrawProperties*   drawprop_ptr()                   {return &_drawprop;}
       word              layselmask() const               {return _layselmask;}
-      void              setlayselmask(word lsm)          {_layselmask = lsm;}
+      const USMap*      getGdsLayMap() const             {return _gdsLayMap;}
+      const USMap*      getCifLayMap() const             {return _cifLayMap;}
+      word              curLay() const                   {return _curlay;}
+      unsigned          getLayerNo(std::string name) const {return _drawprop.getLayerNo(name);}
+      std::string       getLayerName(unsigned layno) const {return _drawprop.getLayerName(layno);}
+      DrawProperties&   drawprop()                       {return _drawprop;}
+      DrawProperties*   drawprop_ptr()                   {return &_drawprop;}
       void              setcellmarks_hidden(bool hide)   {_drawprop._cellmarks_hidden = hide;}
       void              settextmarks_hidden(bool hide)   {_drawprop._textmarks_hidden = hide;}
       void              setcellbox_hidden(bool hide)     {_drawprop._cellbox_hidden = hide;}
@@ -171,27 +185,11 @@ namespace layprop {
                                                          {_drawprop._currentop = actop;}
       void              setAdjustTextOrientation(bool ori)
                                                          {_drawprop._adjustTextOrientation = ori;}
-
-      void              addRuler(TP& p1, TP& p2)         {_supp_data.addRuler(p1,p2,_UU);}
-      void              clearRulers()                    {_supp_data.clearRulers();}
-      void              drawRulers(const CTM& layCTM)    {_supp_data.drawRulers(layCTM, stepDB());}
-      void              tmp_draw(const CTM& layCTM, const TP& base, const TP& newp)
-                                                         {_supp_data.tmp_draw( base, newp, _UU, layCTM, stepDB());}
-      void              mousePoint(const TP& lp)         {_supp_data.mousePoint(lp);}
-      void              mouseStop()                      {_supp_data.mouseStop();}
       console::ACTIVE_OP currentop() const               {return _drawprop.currentop();}
       void              all_layers(nameList& laylist) const {_drawprop.all_layers(laylist);}
-      void              setGdsLayMap(USMap* map);
-      void              setCifLayMap(USMap* map);
-      const USMap*      getGdsLayMap() const             {return _gdsLayMap;}
-      const USMap*      getCifLayMap() const             {return _cifLayMap;}
       void              loadLayoutFonts(std::string fft, bool vbo)
                                                          {_drawprop.loadLayoutFonts(fft, vbo);}
       bool              renderType()                     {return _drawprop.renderType();}
-      void              all_colors(nameList&) const;
-      void              all_fills(nameList&) const;
-      void              all_lines(nameList&) const;
-
    private:
       typedef std::deque<LayStateList>            LayStateHistory;
       typedef std::map<std::string, LayStateList> LayStateMap;

@@ -500,7 +500,7 @@ laydata::TdtDesign*  DataCenter::lockDB(bool checkACTcell)
    if (_TEDLIB())
    {
       if (checkACTcell) _TEDLIB()->check_active();
-      while (wxMUTEX_NO_ERROR != DBLock.TryLock());
+      while (wxMUTEX_NO_ERROR != _DBLock.TryLock());
       return _TEDLIB();
    }
    else throw EXPTNactive_DB();
@@ -513,23 +513,23 @@ laydata::DrcLibrary*  DataCenter::lockDRC(void)
    {
 		_DRCDB = DEBUG_NEW laydata::DrcLibrary("drc", _TEDLIB()->DBU(), _TEDLIB()->UU());
    }
-	while (wxMUTEX_NO_ERROR != DRCLock.TryLock());
+	while (wxMUTEX_NO_ERROR != _DRCLock.TryLock());
    return _DRCDB;
 }
 
 void DataCenter::unlockDB()
 {
-   VERIFY(wxMUTEX_NO_ERROR == DBLock.Unlock());
+   VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
 }
 
 void DataCenter::unlockDRC()
 {
-   VERIFY(wxMUTEX_NO_ERROR == DRCLock.Unlock());
+   VERIFY(wxMUTEX_NO_ERROR == _DRCLock.Unlock());
 }
 
 bool DataCenter::lockGds(GDSin::GdsInFile*& gds_db)
 {
-   if (wxMUTEX_DEAD_LOCK == GDSLock.Lock())
+   if (wxMUTEX_DEAD_LOCK == _GDSLock.Lock())
    {
       tell_log(console::MT_ERROR,"GDS Mutex deadlocked!");
       gds_db = _GDSDB;
@@ -545,7 +545,7 @@ bool DataCenter::lockGds(GDSin::GdsInFile*& gds_db)
 void DataCenter::unlockGds(GDSin::GdsInFile*& gds_db, bool throwexception)
 {
    _GDSDB = gds_db;
-   VERIFY(wxMUTEX_NO_ERROR == GDSLock.Unlock());
+   VERIFY(wxMUTEX_NO_ERROR == _GDSLock.Unlock());
    if(NULL != _bpSync)
       _bpSync->Signal();
    else if (throwexception && (NULL == gds_db))
@@ -555,7 +555,7 @@ void DataCenter::unlockGds(GDSin::GdsInFile*& gds_db, bool throwexception)
 
 bool DataCenter::lockCif(CIFin::CifFile*& cif_db)
 {
-   if (wxMUTEX_DEAD_LOCK == CIFLock.Lock())
+   if (wxMUTEX_DEAD_LOCK == _CIFLock.Lock())
    {
       tell_log(console::MT_ERROR,"CIF Mutex deadlocked!");
       cif_db = _CIFDB;
@@ -571,7 +571,7 @@ bool DataCenter::lockCif(CIFin::CifFile*& cif_db)
 void DataCenter::unlockCif(CIFin::CifFile*& cif_db, bool throwexception)
 {
    _CIFDB = cif_db;
-   VERIFY(wxMUTEX_NO_ERROR == CIFLock.Unlock());
+   VERIFY(wxMUTEX_NO_ERROR == _CIFLock.Unlock());
    if (NULL != _bpSync)
       _bpSync->Signal();
    else if (throwexception && (NULL == cif_db))
@@ -581,7 +581,7 @@ void DataCenter::unlockCif(CIFin::CifFile*& cif_db, bool throwexception)
 
 bool DataCenter::lockOas(Oasis::OasisInFile*& oasis_db)
 {
-   if (wxMUTEX_DEAD_LOCK == OASLock.Lock())
+   if (wxMUTEX_DEAD_LOCK == _OASLock.Lock())
    {
       tell_log(console::MT_ERROR,"OASIS Mutex deadlocked!");
       oasis_db = _OASDB;
@@ -597,7 +597,7 @@ bool DataCenter::lockOas(Oasis::OasisInFile*& oasis_db)
 void DataCenter::unlockOas(Oasis::OasisInFile*& oasis_db, bool throwexception)
 {
    _OASDB = oasis_db;
-   VERIFY(wxMUTEX_NO_ERROR == OASLock.Unlock());
+   VERIFY(wxMUTEX_NO_ERROR == _OASLock.Unlock());
    if (NULL != _bpSync)
       _bpSync->Signal();
    else if (throwexception && (NULL == oasis_db))
@@ -608,20 +608,20 @@ void DataCenter::unlockOas(Oasis::OasisInFile*& oasis_db, bool throwexception)
 void DataCenter::bpAddGdsTab()
 {
    // Lock the Mutex
-   if (wxMUTEX_DEAD_LOCK == GDSLock.Lock())
+   if (wxMUTEX_DEAD_LOCK == _GDSLock.Lock())
    {
       tell_log(console::MT_ERROR,"GDS Mutex deadlocked!");
       return;
    }
    // initialise the thread condition with the locked Mutex
-   _bpSync = new wxCondition(GDSLock);
+   _bpSync = new wxCondition(_GDSLock);
    // post a message to the main thread
    TpdPost::addGDStab();
    // Go to sleep and wait until the main thread finished
    // updating the browser panel
    _bpSync->Wait();
    // Wake-up & uplock the mutex
-   VERIFY(wxMUTEX_NO_ERROR == GDSLock.Unlock());
+   VERIFY(wxMUTEX_NO_ERROR == _GDSLock.Unlock());
    // clean-up behind & prepare for the consequent use
    delete _bpSync;
    _bpSync = NULL;
@@ -630,20 +630,20 @@ void DataCenter::bpAddGdsTab()
 void DataCenter::bpAddCifTab()
 {
    // Lock the Mutex
-   if (wxMUTEX_DEAD_LOCK == CIFLock.Lock())
+   if (wxMUTEX_DEAD_LOCK == _CIFLock.Lock())
    {
       tell_log(console::MT_ERROR,"CIF Mutex deadlocked!");
       return;
    }
-   // initialise the thread condition with the locked Mutex
-   _bpSync = new wxCondition(CIFLock);
+   // Initialize the thread condition with the locked Mutex
+   _bpSync = new wxCondition(_CIFLock);
    // post a message to the main thread
    TpdPost::addCIFtab();
-   // Go to sleep and wait untill the main thread finished
+   // Go to sleep and wait until the main thread finished
    // updating the browser panel
    _bpSync->Wait();
-   // Wake-up & uplock the mutex
-   VERIFY(wxMUTEX_NO_ERROR == CIFLock.Unlock());
+   // Wake-up & unlock the mutex
+   VERIFY(wxMUTEX_NO_ERROR == _CIFLock.Unlock());
    // clean-up behind & prepare for the consequent use
    delete _bpSync;
    _bpSync = NULL;
@@ -652,20 +652,20 @@ void DataCenter::bpAddCifTab()
 void DataCenter::bpAddOasTab()
 {
    // Lock the Mutex
-   if (wxMUTEX_DEAD_LOCK == OASLock.Lock())
+   if (wxMUTEX_DEAD_LOCK == _OASLock.Lock())
    {
       tell_log(console::MT_ERROR,"OASIS Mutex deadlocked!");
       return;
    }
    // initialise the thread condition with the locked Mutex
-   _bpSync = new wxCondition(OASLock);
+   _bpSync = new wxCondition(_OASLock);
    // post a message to the main thread
    TpdPost::addOAStab();
    // Go to sleep and wait until the main thread finished
    // updating the browser panel
    _bpSync->Wait();
    // Wake-up & uplock the mutex
-   VERIFY(wxMUTEX_NO_ERROR == OASLock.Unlock());
+   VERIFY(wxMUTEX_NO_ERROR == _OASLock.Unlock());
    // clean-up behind & prepare for the consequent use
    delete _bpSync;
    _bpSync = NULL;
@@ -773,7 +773,7 @@ void DataCenter::openGL_draw(const CTM& layCTM)
       // locked. This will block all redraw activities including UI
       // which have nothing to do with the DB. Drop a message in the log
       // and keep going!
-      if (wxMUTEX_NO_ERROR != PROPLock.TryLock())
+      if (wxMUTEX_NO_ERROR != _PROPLock.TryLock())
       {
          // If property DB is locked - we can't do much drawing even if the
          // DB is not locked. In the same time there should not be an operation
@@ -784,7 +784,7 @@ void DataCenter::openGL_draw(const CTM& layCTM)
       }
       _properties.drawGrid();
       _properties.drawZeroCross();
-      if (wxMUTEX_NO_ERROR != DBLock.TryLock())
+      if (wxMUTEX_NO_ERROR != _DBLock.TryLock())
       {
          // If DB is locked - skip the DB drawing, but draw all the property DB stuff
          tell_log(console::MT_INFO,std::string("DB busy. Viewport redraw skipped"));
@@ -808,10 +808,10 @@ void DataCenter::openGL_draw(const CTM& layCTM)
 #ifdef RENDER_PROFILING
          rendTimer.report("Total elapsed rendering time");
 #endif
-         VERIFY(wxMUTEX_NO_ERROR == DBLock.Unlock());
+         VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
       }
       _properties.drawRulers(layCTM);
-      PROPLock.Unlock();
+      _PROPLock.Unlock();
    }
 }
 
@@ -823,7 +823,7 @@ void DataCenter::openGL_render(const CTM& layCTM)
       // locked. This will block all redraw activities including UI
       // which have nothing to do with the DB. Drop a message in the log
       // and keep going!
-      if (wxMUTEX_NO_ERROR != PROPLock.TryLock())
+      if (wxMUTEX_NO_ERROR != _PROPLock.TryLock())
       {
          // If property DB is locked - we can't do much drawing even if the
          // DB is not locked. In the same time there should not be an operation
@@ -842,7 +842,7 @@ void DataCenter::openGL_render(const CTM& layCTM)
       }
 
       //       _properties.drawZeroCross(renderer);
-      if (wxMUTEX_NO_ERROR != DBLock.TryLock())
+      if (wxMUTEX_NO_ERROR != _DBLock.TryLock())
       {
          // If DB is locked - skip the DB drawing, but draw all the property DB stuff
          tell_log(console::MT_INFO,std::string("DB busy. Viewport redraw skipped"));
@@ -880,10 +880,10 @@ void DataCenter::openGL_render(const CTM& layCTM)
             rendTimer.report("    Total elapsed rendering time: ");
 #endif
          }
-         VERIFY(wxMUTEX_NO_ERROR == DBLock.Unlock());
+         VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
       }
       _properties.drawRulers(layCTM);
-      PROPLock.Unlock();
+      _PROPLock.Unlock();
    }
 }
 
@@ -893,16 +893,16 @@ void DataCenter::tmp_draw(const CTM& layCTM, TP base, TP newp)
    if ((console::op_line == currentop()) || _drawruler)
    {
       // ruller
-      while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+      while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
       _properties.tmp_draw(layCTM, base, newp);
-      PROPLock.Unlock();
+      _PROPLock.Unlock();
    }
    if ((console::op_line != currentop())  && (NULL !=_TEDLIB()))
    {
 //      _TEDDB->check_active();
-      while (wxMUTEX_NO_ERROR != DBLock.TryLock());
+      while (wxMUTEX_NO_ERROR != _DBLock.TryLock());
       _TEDLIB()->tmp_draw(_properties.drawprop(), base, newp);
-      VERIFY(wxMUTEX_NO_ERROR == DBLock.Unlock());
+      VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
    }
 //
 //   else throw EXPTNactive_DB();
@@ -918,36 +918,36 @@ bool DataCenter::addlayer(std::string name, unsigned layno, std::string col,
                                        std::string fill, std::string sline)
 {
    bool status;
-   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
    status = _properties.addlayer(name, layno, col, fill, sline);
-   PROPLock.Unlock();
+   _PROPLock.Unlock();
    return status;
 }
 
 bool DataCenter::addlayer(std::string name, unsigned layno)
 {
    bool status;
-   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
    status = _properties.addlayer(name, layno);
-   PROPLock.Unlock();
+   _PROPLock.Unlock();
    return status;
 }
 
 bool DataCenter::addlayer(unsigned layno)
 {
    bool status;
-   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
    status = _properties.addlayer(layno);
-   PROPLock.Unlock();
+   _PROPLock.Unlock();
    return status;
 }
 
 unsigned DataCenter::addlayer(std::string name)
 {
    unsigned layno;
-   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
    layno = _properties.addlayer(name);
-   PROPLock.Unlock();
+   _PROPLock.Unlock();
    return layno;
 }
 
@@ -964,162 +964,162 @@ bool  DataCenter::isLayerExist(std::string layname)
 void DataCenter::addline(std::string name, std::string col, word pattern,
                                       byte patscale, byte width)
 {
-   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
    _properties.addline(name, col, pattern, patscale, width);
-   PROPLock.Unlock();
+   _PROPLock.Unlock();
 }
 
 void DataCenter::addcolor(std::string name, byte R, byte G, byte B, byte A)
 {
-   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
    _properties.addcolor(name, R, G, B, A);
-   PROPLock.Unlock();
+   _PROPLock.Unlock();
 }
 
 void DataCenter::addfill(std::string name, byte *ptrn)
 {
-   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
    _properties.addfill(name, ptrn);
-   PROPLock.Unlock();
+   _PROPLock.Unlock();
 }
 
 void DataCenter::hideLayer(word layno, bool hide)
 {
-   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
    _properties.hideLayer(layno, hide);
-   PROPLock.Unlock();
+   _PROPLock.Unlock();
 }
 
 void DataCenter::lockLayer(word layno, bool lock)
 {
-   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
    _properties.lockLayer(layno, lock);
-   PROPLock.Unlock();
+   _PROPLock.Unlock();
 }
 
 void DataCenter::fillLayer(word layno, bool fill)
 {
-   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
    _properties.fillLayer(layno, fill);
-   PROPLock.Unlock();
+   _PROPLock.Unlock();
 }
 
 void DataCenter::pushLayerStatus()
 {
-   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
    _properties.pushLayerStatus();
-   PROPLock.Unlock();
+   _PROPLock.Unlock();
 }
 
 void DataCenter::popLayerStatus()
 {
-   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
    _properties.popLayerStatus();
-   PROPLock.Unlock();
+   _PROPLock.Unlock();
 }
 
 void DataCenter::popBackLayerStatus()
 {
-   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
    _properties.popBackLayerStatus();
-   PROPLock.Unlock();
+   _PROPLock.Unlock();
 }
 
 bool DataCenter::saveLaysetStatus(const std::string& sname)
 {
-   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
    bool stat = _properties.saveLaysetStatus(sname);
-   PROPLock.Unlock();
+   _PROPLock.Unlock();
    return stat;
 }
 
 bool DataCenter::saveLaysetStatus(const std::string& sname, const WordSet& hl, const WordSet& ll, const WordSet& fl, unsigned al)
 {
-   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
    bool stat = _properties.saveLaysetStatus(sname, hl, ll, fl, al);
-   PROPLock.Unlock();
+   _PROPLock.Unlock();
    return stat;
 }
 
 bool DataCenter::loadLaysetStatus(const std::string& sname)
 {
-   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
    bool stat = _properties.loadLaysetStatus(sname);
-   PROPLock.Unlock();
+   _PROPLock.Unlock();
    return stat;
 }
 
 bool DataCenter::deleteLaysetStatus(const std::string& sname)
 {
-   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
    bool stat = _properties.deleteLaysetStatus(sname);
-   PROPLock.Unlock();
+   _PROPLock.Unlock();
    return stat;
 }
 
 bool DataCenter::getLaysetStatus(const std::string& sname, WordSet& hl, WordSet& ll, WordSet& fl, unsigned al)
 {
-   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
    bool stat = _properties.getLaysetStatus(sname, hl, ll, fl, al);
-   PROPLock.Unlock();
+   _PROPLock.Unlock();
    return stat;
 }
 
 void DataCenter::setcellmarks_hidden(bool hide)
 {
-   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
    _properties.setcellmarks_hidden(hide);
-   PROPLock.Unlock();
+   _PROPLock.Unlock();
 }
 
 void DataCenter::settextmarks_hidden(bool hide)
 {
-   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
    _properties.settextmarks_hidden(hide);
-   PROPLock.Unlock();
+   _PROPLock.Unlock();
 }
 
 void DataCenter::setcellbox_hidden(bool hide)
 {
-   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
    _properties.setcellbox_hidden(hide);
-   PROPLock.Unlock();
+   _PROPLock.Unlock();
 }
 
 void DataCenter::settextbox_hidden(bool hide)
 {
-   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
    _properties.settextbox_hidden(hide);
-   PROPLock.Unlock();
+   _PROPLock.Unlock();
 }
 
 void DataCenter::setGrid(byte No, real step, std::string colname)
 {
-   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
    _properties.setGrid(No, step, colname);
-   PROPLock.Unlock();
+   _PROPLock.Unlock();
 }
 
 bool DataCenter::viewGrid(byte No, bool status)
 {
-   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
    status = _properties.viewGrid(No, status);
-   PROPLock.Unlock();
+   _PROPLock.Unlock();
    return status;
 }
 
 void DataCenter::addRuler(TP& p1, TP& p2)
 {
-   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
    _properties.addRuler(p1, p2);
-   PROPLock.Unlock();
+   _PROPLock.Unlock();
 }
 
 void DataCenter::clearRulers()
 {
-   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
    _properties.clearRulers();
-   PROPLock.Unlock();
+   _PROPLock.Unlock();
 }
 
 bool DataCenter::getCellNamePair(std::string name, laydata::CellDefin& strdefn)
@@ -1241,11 +1241,11 @@ laydata::LibCellLists* DataCenter::getCells(int libID)
 
 void DataCenter::updateVisibleOverlap()
 {
-   while (wxMUTEX_NO_ERROR != PROPLock.TryLock());
+   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
    lockDB();
    _TEDLIB()->updateVisibleOverlap(_properties.drawprop());
    unlockDB();
-   VERIFY(wxMUTEX_NO_ERROR == PROPLock.Unlock());
+   VERIFY(wxMUTEX_NO_ERROR == _PROPLock.Unlock());
 }
 
 void initDBLib(const std::string &localDir, const std::string &globalDir)
