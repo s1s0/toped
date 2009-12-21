@@ -35,6 +35,7 @@
 
 extern parsercmd::cmdBLOCK*      CMDBlock;
 extern DataCenter*               DATC;
+extern layprop::PropertyCenter*  PROPC;
 extern wxWindow*                 TopedCanvasW;
 extern wxFrame*                  TopedMainW;
 extern console::toped_logfile    LogFile;
@@ -50,7 +51,7 @@ tellstdfunc::stdPROPSAVE::stdPROPSAVE(telldata::typeID retype, bool eor) :
 int tellstdfunc::stdPROPSAVE::execute()
 {
    std::string fname = getStringValue();
-   DATC->saveProperties(fname);
+   PROPC->saveProperties(fname);
    return EXEC_NEXT;
 }
 
@@ -72,7 +73,7 @@ int tellstdfunc::stdLAYPROP::execute() {
    word        gdsN  = getWordValue();
    std::string name  = getStringValue();
    // error message - included in the method
-   DATC->addlayer(name, gdsN, col, fill, sline);
+   PROPC->addlayer(name, gdsN, col, fill, sline);
    TpdPost::layer_add(name,gdsN);
    LogFile << LogFile.getFN() << "(\""<< name << "\"," << gdsN << ",\"" <<
          col << "\",\"" << fill <<"\",\"" << sline <<"\");";LogFile.flush();
@@ -96,7 +97,7 @@ int tellstdfunc::stdLINEDEF::execute() {
    word pattern     = getWordValue();
    std::string col  = getStringValue();
    std::string name = getStringValue();
-   DATC->addline(name, col, pattern, patscale, width);
+   PROPC->addline(name, col, pattern, patscale, width);
    LogFile << LogFile.getFN() << "(\""<< name << "\" , \"" << col << "\","
          << pattern << " , " << patscale << " , " << width << ");";LogFile.flush();
    return EXEC_NEXT;
@@ -120,7 +121,7 @@ int tellstdfunc::stdCOLORDEF::execute() {
    byte         colR = getByteValue();
    std::string  name = getStringValue();
    // error message - included in the method
-   DATC->addcolor(name, colR, colG, colB, sat);
+   PROPC->addcolor(name, colR, colG, colB, sat);
    LogFile << LogFile.getFN() << "(\""<< name << "\"," << colR << "," <<
                        colG << "," << colB << "," << sat << ");";LogFile.flush();
    return EXEC_NEXT;
@@ -152,7 +153,7 @@ int tellstdfunc::stdFILLDEF::execute() {
          else ptrn[i] = cmpnt->value();
       }
       // error message - included in the method
-      DATC->addfill(name, ptrn);
+      PROPC->addfill(name, ptrn);
       LogFile << LogFile.getFN() << "(\""<< name << "\"," << *sl << ");";
       LogFile.flush();
    }
@@ -175,7 +176,7 @@ int tellstdfunc::stdGRIDDEF::execute()
    std::string  colname = getStringValue();
    real    step    = getOpValue();
    byte    no      = getByteValue();
-   DATC->setGrid(no,step,colname);
+   PROPC->setGrid(no,step,colname);
    LogFile << LogFile.getFN() << "(" << no << "," << step << ",\"" <<
                                               colname << "\");";LogFile.flush();
    RefreshGL();
@@ -242,7 +243,7 @@ void tellstdfunc::stdHIDELAYER::undo() {
    bool        hide  = getBoolValue(UNDOPstack,true);
    word        layno = getWordValue(UNDOPstack,true);
    laydata::TdtDesign* ATDB = DATC->lockDB();
-   DATC->hideLayer(layno, hide);
+   PROPC->hideLayer(layno, hide);
    ATDB->select_fromList(get_ttlaylist(pl));
    DATC->unlockDB();
    delete pl;
@@ -253,7 +254,7 @@ void tellstdfunc::stdHIDELAYER::undo() {
 int tellstdfunc::stdHIDELAYER::execute() {
    bool        hide  = getBoolValue();
    word        layno = getWordValue();
-   if (layno != DATC->curlay()) {
+   if (layno != PROPC->curLay()) {
       laydata::TdtDesign* ATDB = DATC->lockDB();
 
       UNDOcmdQ.push_front(this);
@@ -272,7 +273,7 @@ int tellstdfunc::stdHIDELAYER::execute() {
          UNDOPstack.push_front(make_ttlaylist(todslct));
          delete todslct;
       }
-      DATC->hideLayer(layno, hide);
+      PROPC->hideLayer(layno, hide);
       DATC->unlockDB();
       DATC->updateVisibleOverlap();
       TpdPost::layer_status(tui::BT_LAYER_HIDE, layno, hide);
@@ -311,7 +312,7 @@ void tellstdfunc::stdHIDELAYERS::undo() {
    laydata::TdtDesign* ATDB = DATC->lockDB();
    for (unsigned i = 0; i < sl->size() ; i++) {
       laynumber = static_cast<telldata::ttint*>((sl->mlist())[i]);
-      DATC->hideLayer(laynumber->value(), hide);
+      PROPC->hideLayer(laynumber->value(), hide);
       TpdPost::layer_status(tui::BT_LAYER_HIDE, laynumber->value(), hide);
    }
    ATDB->select_fromList(get_ttlaylist(pl));
@@ -341,11 +342,11 @@ int tellstdfunc::stdHIDELAYERS::execute()
          info << "Layer number "<< i <<" out of range ... ignored";
          tell_log(console::MT_WARNING,info.str());
       }
-      else if (laynumber->value() == DATC->curlay())
+      else if (laynumber->value() == PROPC->curLay())
       {
          tell_log(console::MT_WARNING,"Current layer ... ignored");
       }
-      else if (hide ^ DATC->layerHidden(laynumber->value()))
+      else if (hide ^ PROPC->layerHidden(laynumber->value()))
       {
          if (hide && (listselected->end() != listselected->find(laynumber->value())))
             (*todslct)[laynumber->value()] = DEBUG_NEW laydata::DataList(*((*listselected)[laynumber->value()]));
@@ -363,7 +364,7 @@ int tellstdfunc::stdHIDELAYERS::execute()
    for (unsigned i = 0; i < undolaylist->size(); i++)
    {
       telldata::ttint *laynumber = static_cast<telldata::ttint*>((undolaylist->mlist())[i]);
-      DATC->hideLayer(laynumber->value(), hide);
+      PROPC->hideLayer(laynumber->value(), hide);
    }
    DATC->unlockDB();
    LogFile << LogFile.getFN() << "("<< *sl << "," <<
@@ -387,7 +388,7 @@ void tellstdfunc::stdHIDECELLMARK::undo_cleanup() {
 void tellstdfunc::stdHIDECELLMARK::undo() {
    TEUNDO_DEBUG("hide_cellmarks( bool ) UNDO");
    bool        hide  = getBoolValue(UNDOPstack,true);
-   DATC->setcellmarks_hidden(hide);
+   PROPC->setcellmarks_hidden(hide);
    wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
    eventGRIDUPD.SetInt((hide ? tui::STS_CELLMARK_OFF : tui::STS_CELLMARK_ON));
    wxPostEvent(TopedCanvasW, eventGRIDUPD);
@@ -398,7 +399,7 @@ int tellstdfunc::stdHIDECELLMARK::execute() {
    bool        hide  = getBoolValue();
    UNDOcmdQ.push_front(this);
    UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
-   DATC->setcellmarks_hidden(hide);
+   PROPC->setcellmarks_hidden(hide);
    wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
    eventGRIDUPD.SetInt((hide ? tui::STS_CELLMARK_OFF : tui::STS_CELLMARK_ON));
    wxPostEvent(TopedCanvasW, eventGRIDUPD);
@@ -421,7 +422,7 @@ void tellstdfunc::stdHIDETEXTMARK::undo_cleanup() {
 void tellstdfunc::stdHIDETEXTMARK::undo() {
    TEUNDO_DEBUG("hide_textmarks( bool ) UNDO");
    bool        hide  = getBoolValue(UNDOPstack,true);
-   DATC->settextmarks_hidden(hide);
+   PROPC->settextmarks_hidden(hide);
    wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
    eventGRIDUPD.SetInt((hide ? tui::STS_TEXTMARK_OFF : tui::STS_TEXTMARK_ON));
    wxPostEvent(TopedCanvasW, eventGRIDUPD);
@@ -433,7 +434,7 @@ int tellstdfunc::stdHIDETEXTMARK::execute() {
    bool        hide  = getBoolValue();
    UNDOcmdQ.push_front(this);
    UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
-   DATC->settextmarks_hidden(hide);
+   PROPC->settextmarks_hidden(hide);
    wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
    eventGRIDUPD.SetInt((hide ? tui::STS_TEXTMARK_OFF : tui::STS_TEXTMARK_ON));
    wxPostEvent(TopedCanvasW, eventGRIDUPD);
@@ -456,7 +457,7 @@ void tellstdfunc::stdHIDECELLBOND::undo_cleanup() {
 void tellstdfunc::stdHIDECELLBOND::undo() {
    TEUNDO_DEBUG("hide_cellbox( bool ) UNDO");
    bool        hide  = getBoolValue(UNDOPstack,true);
-   DATC->setcellbox_hidden(hide);
+   PROPC->setcellbox_hidden(hide);
    wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
    eventGRIDUPD.SetInt((hide ? tui::STS_CELLBOX_OFF : tui::STS_CELLBOX_ON));
    wxPostEvent(TopedCanvasW, eventGRIDUPD);
@@ -468,7 +469,7 @@ int tellstdfunc::stdHIDECELLBOND::execute() {
    bool        hide  = getBoolValue();
    UNDOcmdQ.push_front(this);
    UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
-   DATC->setcellbox_hidden(hide);
+   PROPC->setcellbox_hidden(hide);
    wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
    eventGRIDUPD.SetInt((hide ? tui::STS_CELLBOX_OFF : tui::STS_CELLBOX_ON));
    wxPostEvent(TopedCanvasW, eventGRIDUPD);
@@ -491,7 +492,7 @@ void tellstdfunc::stdHIDETEXTBOND::undo_cleanup() {
 void tellstdfunc::stdHIDETEXTBOND::undo() {
    TEUNDO_DEBUG("hide_textbox( bool ) UNDO");
    bool        hide  = getBoolValue(UNDOPstack,true);
-   DATC->settextbox_hidden(hide);
+   PROPC->settextbox_hidden(hide);
    wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
    eventGRIDUPD.SetInt((hide ? tui::STS_TEXTBOX_OFF : tui::STS_TEXTBOX_ON));
    wxPostEvent(TopedCanvasW, eventGRIDUPD);
@@ -503,7 +504,7 @@ int tellstdfunc::stdHIDETEXTBOND::execute() {
    bool        hide  = getBoolValue();
    UNDOcmdQ.push_front(this);
    UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
-   DATC->settextbox_hidden(hide);
+   PROPC->settextbox_hidden(hide);
    wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
    eventGRIDUPD.SetInt((hide ? tui::STS_TEXTBOX_OFF : tui::STS_TEXTBOX_ON));
    wxPostEvent(TopedCanvasW, eventGRIDUPD);
@@ -533,7 +534,7 @@ void tellstdfunc::stdLOCKLAYER::undo() {
    bool        lock  = getBoolValue(UNDOPstack, true);
    word        layno = getWordValue(UNDOPstack, true);
    laydata::TdtDesign* ATDB = DATC->lockDB();
-   DATC->lockLayer(layno, lock);
+   PROPC->lockLayer(layno, lock);
    ATDB->select_fromList(get_ttlaylist(pl));
    DATC->unlockDB();
    delete pl;
@@ -545,7 +546,7 @@ int tellstdfunc::stdLOCKLAYER::execute()
 {
    bool        lock  = getBoolValue();
    word        layno = getWordValue();
-   if (layno != DATC->curlay())
+   if (layno != PROPC->curLay())
    {
       laydata::TdtDesign* ATDB = DATC->lockDB();
       UNDOcmdQ.push_front(this);
@@ -564,7 +565,7 @@ int tellstdfunc::stdLOCKLAYER::execute()
          UNDOPstack.push_front(make_ttlaylist(todslct));
          delete todslct;
       }
-      DATC->lockLayer(layno, lock);
+      PROPC->lockLayer(layno, lock);
       DATC->unlockDB();
       TpdPost::layer_status(tui::BT_LAYER_LOCK, layno, lock);
       LogFile << LogFile.getFN() << "("<< layno << "," <<
@@ -603,7 +604,7 @@ void tellstdfunc::stdLOCKLAYERS::undo() {
    laydata::TdtDesign* ATDB = DATC->lockDB();
    for (unsigned i = 0; i < sl->size() ; i++) {
       laynumber = static_cast<telldata::ttint*>((sl->mlist())[i]);
-      DATC->lockLayer(laynumber->value(), lock);
+      PROPC->lockLayer(laynumber->value(), lock);
       TpdPost::layer_status(tui::BT_LAYER_LOCK, laynumber->value(), lock);
    }
    ATDB->select_fromList(get_ttlaylist(pl));
@@ -633,11 +634,11 @@ int tellstdfunc::stdLOCKLAYERS::execute()
          info << "Layer number "<< i <<" out of range ... ignored";
          tell_log(console::MT_WARNING,info.str());
       }
-      else if (laynumber->value() == DATC->curlay())
+      else if (laynumber->value() == PROPC->curLay())
       {
          tell_log(console::MT_WARNING,"Current layer ... ignored");
       }
-      else if (lock ^ DATC->layerLocked(laynumber->value()))
+      else if (lock ^ PROPC->layerLocked(laynumber->value()))
       {
          if (lock && (listselected->end() != listselected->find(laynumber->value())))
             (*todslct)[laynumber->value()] = DEBUG_NEW laydata::DataList(*((*listselected)[laynumber->value()]));
@@ -655,7 +656,7 @@ int tellstdfunc::stdLOCKLAYERS::execute()
    for (unsigned i = 0; i < undolaylist->size(); i++)
    {
       telldata::ttint *laynumber = static_cast<telldata::ttint*>((undolaylist->mlist())[i]);
-      DATC->lockLayer(laynumber->value(), lock);
+      PROPC->lockLayer(laynumber->value(), lock);
    }
    DATC->unlockDB();
    LogFile << LogFile.getFN() << "("<< *sl << "," <<
@@ -683,7 +684,7 @@ void tellstdfunc::stdFILLLAYER::undo() {
    TEUNDO_DEBUG("filllayer( word , bool ) UNDO");
    bool        fill  = getBoolValue(UNDOPstack, true);
    word        layno = getWordValue(UNDOPstack, true);
-   DATC->fillLayer(layno, fill);
+   PROPC->fillLayer(layno, fill);
    TpdPost::layer_status(tui::BT_LAYER_FILL, layno, fill);
    UpdateLV();
 }
@@ -697,7 +698,7 @@ int tellstdfunc::stdFILLLAYER::execute()
       UNDOPstack.push_front(DEBUG_NEW telldata::ttint(layno));
       UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!fill));
 
-      DATC->fillLayer(layno, fill);
+      PROPC->fillLayer(layno, fill);
       TpdPost::layer_status(tui::BT_LAYER_FILL, layno, fill);
       LogFile << LogFile.getFN() << "("<< layno << "," <<
                  LogFile._2bool(fill) << ");"; LogFile.flush();
@@ -728,7 +729,7 @@ void tellstdfunc::stdFILLLAYERS::undo() {
    {
       telldata::ttint* laynumber = static_cast<telldata::ttint*>((sl->mlist())[i]);
       word lay = laynumber->value();
-      DATC->fillLayer(lay, fill);
+      PROPC->fillLayer(lay, fill);
       TpdPost::layer_status(tui::BT_LAYER_FILL, lay, fill);
    }
    delete sl;
@@ -745,7 +746,7 @@ int tellstdfunc::stdFILLLAYERS::execute()
       {
          telldata::ttint* laynumber = static_cast<telldata::ttint*>((sl->mlist())[i]);
          word lay = laynumber->value();
-         DATC->fillLayer(lay, fill);
+         PROPC->fillLayer(lay, fill);
          TpdPost::layer_status(tui::BT_LAYER_FILL, lay, fill);
 
       }
@@ -774,7 +775,7 @@ void tellstdfunc::stdSAVELAYSTAT::undo_cleanup()
 void tellstdfunc::stdSAVELAYSTAT::undo() {
    TEUNDO_DEBUG("savelaystat( string ) UNDO");
    std::string sname  = getStringValue(UNDOPstack, true);
-   VERIFY(DATC->deleteLaysetStatus(sname));
+   VERIFY(PROPC->deleteLaysetStatus(sname));
 }
 
 int tellstdfunc::stdSAVELAYSTAT::execute()
@@ -782,7 +783,7 @@ int tellstdfunc::stdSAVELAYSTAT::execute()
    std::string   sname  = getStringValue();
    UNDOcmdQ.push_front(this);
    UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(sname));
-   if (!DATC->saveLaysetStatus(sname))
+   if (!PROPC->saveLaysetStatus(sname))
    {
       std::stringstream info;
       info << "Layer set \"" << sname << "\" was redefined";
@@ -803,7 +804,7 @@ void tellstdfunc::stdLOADLAYSTAT::undo_cleanup()
 {
    getStringValue(UNDOPstack, false);
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
-   DATC->popBackLayerStatus();
+   PROPC->popBackLayerStatus();
    delete pl;
 }
 
@@ -811,7 +812,7 @@ void tellstdfunc::stdLOADLAYSTAT::undo() {
    TEUNDO_DEBUG("loadlaystat( string ) UNDO");
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    std::string sname  = getStringValue(UNDOPstack, true);
-   DATC->popLayerStatus();
+   PROPC->popLayerStatus();
    laydata::TdtDesign* ATDB = DATC->lockDB();
    ATDB->select_fromList(get_ttlaylist(pl));
    DATC->unlockDB();
@@ -824,7 +825,7 @@ int tellstdfunc::stdLOADLAYSTAT::execute()
    std::string   sname  = getStringValue();
    WordSet hidel, lockl, filll;
    unsigned activel = 0;
-   if (DATC->getLaysetStatus(sname, hidel, lockl, filll, activel))
+   if (PROPC->getLaysetStatus(sname, hidel, lockl, filll, activel))
    {
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(sname));
@@ -846,8 +847,8 @@ int tellstdfunc::stdLOADLAYSTAT::execute()
          // Now unselect the shapes in the target layers
          ATDB->unselect_fromList(todslct);
       DATC->unlockDB();
-      DATC->pushLayerStatus();
-      DATC->loadLaysetStatus(sname);
+      PROPC->pushLayerStatus();
+      PROPC->loadLaysetStatus(sname);
       LogFile << LogFile.getFN() << "(\""<< sname << "\");"; LogFile.flush();
    }
    else
@@ -898,7 +899,7 @@ void tellstdfunc::stdDELLAYSTAT::undo() {
    for (unsigned i = 0; i < undohidel->size() ; i++)
       hidel.insert(hidel.begin(), (static_cast<telldata::ttint*>((undohidel->mlist())[i]))->value());
    // ... restore the layer set ...
-   DATC->saveLaysetStatus(sname, hidel, lockl, filll, activel);
+   PROPC->saveLaysetStatus(sname, hidel, lockl, filll, activel);
    // ... and finally - clean-up
    delete undofilll;
    delete undolockl;
@@ -910,9 +911,9 @@ int tellstdfunc::stdDELLAYSTAT::execute()
    std::string   sname  = getStringValue();
    WordSet hidel, lockl, filll;
    unsigned activel = 0;
-   if (DATC->getLaysetStatus(sname, hidel, lockl, filll, activel))
+   if (PROPC->getLaysetStatus(sname, hidel, lockl, filll, activel))
    {
-      VERIFY(DATC->deleteLaysetStatus(sname));
+      VERIFY(PROPC->deleteLaysetStatus(sname));
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(sname));
       // Push the layer lists in tell form for undo
@@ -963,11 +964,11 @@ void tellstdfunc::stdGRID::undo() {
 int tellstdfunc::stdGRID::execute() {
    bool  visu     = getBoolValue();
    byte    no     = getByteValue();
-   if (NULL != DATC->grid(no))
+   if (NULL != PROPC->grid(no))
    {
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::ttint(no));
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(DATC->grid_visual(no)));
+      UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(PROPC->gridVisual(no)));
       gridON(no,visu);
       LogFile << LogFile.getFN() << "(" << no << "," << LogFile._2bool(visu) << ");";
       LogFile.flush();
@@ -991,16 +992,16 @@ void tellstdfunc::stdSTEP::undo_cleanup() {
 
 void tellstdfunc::stdSTEP::undo() {
    TEUNDO_DEBUG("step() UNDO");
-   DATC->setstep(getOpValue(UNDOPstack,true));
+   PROPC->setstep(getOpValue(UNDOPstack,true));
 }
 
 int tellstdfunc::stdSTEP::execute() {
    // prepare undo first
    UNDOcmdQ.push_front(this);
-   UNDOPstack.push_front(DEBUG_NEW telldata::ttreal(DATC->step()));
+   UNDOPstack.push_front(DEBUG_NEW telldata::ttreal(PROPC->step()));
    //
    real    step    = getOpValue();
-   DATC->setstep(step);
+   PROPC->setstep(step);
    LogFile << LogFile.getFN() << "(" << step << ");"; LogFile.flush();
    return EXEC_NEXT;
 }
@@ -1019,7 +1020,7 @@ void tellstdfunc::stdAUTOPAN::undo_cleanup() {
 void tellstdfunc::stdAUTOPAN::undo() {
    TEUNDO_DEBUG("autopan() UNDO");
    bool autop = getBoolValue(UNDOPstack, true);
-   DATC->setautopan(autop);
+   PROPC->setautopan(autop);
    wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
    eventGRIDUPD.SetInt(autop ? tui::STS_AUTOPAN_ON : tui::STS_AUTOPAN_OFF);
    wxPostEvent(TopedMainW, eventGRIDUPD);
@@ -1029,10 +1030,10 @@ void tellstdfunc::stdAUTOPAN::undo() {
 int tellstdfunc::stdAUTOPAN::execute() {
    // prepare undo first
    UNDOcmdQ.push_front(this);
-   UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(DATC->autopan()));
+   UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(PROPC->autopan()));
    //
    bool autop    = getBoolValue();
-   DATC->setautopan(autop);
+   PROPC->setautopan(autop);
    wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
    eventGRIDUPD.SetInt(autop ? tui::STS_AUTOPAN_ON : tui::STS_AUTOPAN_OFF);
    wxPostEvent(TopedMainW, eventGRIDUPD);
@@ -1054,7 +1055,7 @@ void tellstdfunc::stdZEROCROSS::undo_cleanup() {
 void tellstdfunc::stdZEROCROSS::undo() {
    TEUNDO_DEBUG("zerocross() UNDO");
    bool autop = getBoolValue(UNDOPstack, true);
-   DATC->setZeroCross(autop);
+   PROPC->setZeroCross(autop);
    wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
    eventGRIDUPD.SetInt(autop ? tui::STS_ZEROCROSS_ON : tui::STS_ZEROCROSS_OFF);
    wxPostEvent(TopedMainW, eventGRIDUPD);
@@ -1064,10 +1065,10 @@ void tellstdfunc::stdZEROCROSS::undo() {
 int tellstdfunc::stdZEROCROSS::execute() {
    // prepare undo first
    UNDOcmdQ.push_front(this);
-   UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(DATC->autopan()));
+   UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(PROPC->autopan()));
    //
    bool zeroc    = getBoolValue();
-   DATC->setZeroCross(zeroc);
+   PROPC->setZeroCross(zeroc);
    wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
    eventGRIDUPD.SetInt(zeroc ? tui::STS_ZEROCROSS_ON : tui::STS_ZEROCROSS_OFF);
    wxPostEvent(TopedMainW, eventGRIDUPD);
@@ -1090,7 +1091,7 @@ void tellstdfunc::stdSHAPEANGLE::undo_cleanup() {
 void tellstdfunc::stdSHAPEANGLE::undo() {
    TEUNDO_DEBUG("shapeangle() UNDO");
    byte angle    = getByteValue(UNDOPstack,true);
-   DATC->setmarker_angle(angle);
+   PROPC->setmarker_angle(angle);
 }
 
 int tellstdfunc::stdSHAPEANGLE::execute() {
@@ -1098,9 +1099,9 @@ int tellstdfunc::stdSHAPEANGLE::execute() {
    if ((angle == 0) || (angle == 45) || (angle == 90)) {
       // prepare undo first
       UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(DATC->marker_angle()));
+      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(PROPC->marker_angle()));
       //
-      DATC->setmarker_angle(angle);
+      PROPC->setmarker_angle(angle);
       wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
       if       (angle == 0)  eventGRIDUPD.SetInt(tui::STS_ANGLE_0);
       else if  (angle == 45) eventGRIDUPD.SetInt(tui::STS_ANGLE_45);
@@ -1157,7 +1158,7 @@ void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
       bool val;
       if (from_string<bool>(val, value, std::boolalpha))
       {
-         DATC->setAdjustTextOrientation(val);
+         PROPC->setAdjustTextOrientation(val);
       }
       else
       {

@@ -36,6 +36,7 @@
 #include "tuidefs.h"
 
 extern DataCenter*               DATC;
+extern layprop::PropertyCenter*  PROPC;
 extern console::toped_logfile    LogFile;
 extern console::ted_cmd*         Console;
 
@@ -62,7 +63,7 @@ nameList* tellstdfunc::stdECHO::callingConv(const telldata::typeMAP*) {
 }
 
 int tellstdfunc::stdECHO::execute() {
-   real DBscale = DATC->DBscale();
+   real DBscale = PROPC->DBscale();
    telldata::tell_var *p = OPstack.top();OPstack.pop();
    std::string news;
    p->echo(news, DBscale);
@@ -77,7 +78,7 @@ tellstdfunc::stdTELLSTATUS::stdTELLSTATUS(telldata::typeID retype, bool eor) :
 {}
 
 int tellstdfunc::stdTELLSTATUS::execute() {
-   real DBscale = DATC->DBscale();
+   real DBscale = PROPC->DBscale();
    telldata::tell_var *y;
    std::string news;
    while (OPstack.size()) {
@@ -109,9 +110,9 @@ int tellstdfunc::stdDISTANCE::execute()
       p2 = static_cast<telldata::ttpnt*>((pl->mlist())[i]);
       if (NULL != p1)
       {
-         TP ap1 = TP(p1->x(),p1->y(), DATC->DBscale());
-         TP ap2 = TP(p2->x(),p2->y(), DATC->DBscale());
-         DATC->addRuler(ap1,ap2);
+         TP ap1 = TP(p1->x(),p1->y(), PROPC->DBscale());
+         TP ap2 = TP(p2->x(),p2->y(), PROPC->DBscale());
+         PROPC->addRuler(ap1,ap2);
 /*         std::ostringstream info;
          info << "Distance {" << p1->x() << " , " << p1->y() <<"}  -  {"
                               << p2->x() << " , " << p2->y() <<"}  is ";
@@ -159,7 +160,7 @@ tellstdfunc::stdCLEARRULERS::stdCLEARRULERS(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdCLEARRULERS::execute()
 {
-   DATC->clearRulers();
+   PROPC->clearRulers();
    RefreshGL();
    return EXEC_NEXT;
 }
@@ -227,7 +228,7 @@ tellstdfunc::stdZOOMWIN::stdZOOMWIN(telldata::typeID retype, bool eor) :
 int tellstdfunc::stdZOOMWIN::execute() {
    telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    telldata::ttpnt *p2 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-   real DBscale = DATC->DBscale();
+   real DBscale = PROPC->DBscale();
    DBbox* box = DEBUG_NEW DBbox(TP(p1->x(), p1->y(), DBscale),
                           TP(p2->x(), p2->y(), DBscale));
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
@@ -246,7 +247,7 @@ tellstdfunc::stdZOOMWINb::stdZOOMWINb(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdZOOMWINb::execute() {
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
-   real DBscale = DATC->DBscale();
+   real DBscale = PROPC->DBscale();
    DBbox* box = DEBUG_NEW DBbox(TP(w->p1().x(), w->p1().y(), DBscale),
                           TP(w->p2().x(), w->p2().y(), DBscale));
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);

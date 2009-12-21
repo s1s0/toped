@@ -32,7 +32,7 @@
 #include "quadtree.h"
 
 namespace layprop {
-   class ViewProperties;
+   class PropertyCenter;
 }
 
 namespace laydata {
@@ -74,8 +74,8 @@ namespace laydata {
       const CTM                  rARTM() const     {return _ARTM.Reversed();};
       const CTM                  ARTM() const      {return _ARTM;};
       bool                       iscell() const    {return _activeref == NULL;};
-      layprop::ViewProperties&   viewprop() const  {return *_viewprop;}
-      void                       init_viewprop(layprop::ViewProperties* viewprop) {_viewprop = viewprop;}
+      layprop::PropertyCenter&   viewprop() const  {return *_viewprop;}
+      void                       init_viewprop(layprop::PropertyCenter* viewprop) {_viewprop = viewprop;}
       void                       reset();
       static EditCellStack       _editstack;    //! the stack of all previously edited (opened) cells
    private:
@@ -86,7 +86,7 @@ namespace laydata {
       TdtCellRef*                _activeref;    //! current topview reference - if edit in place is active
       CellRefStack*              _peditchain;   //! the path from _viewcell to the _activeref (_activecell)
       CTM                        _ARTM;         //! active reference (cell) translation matrix
-      static layprop::ViewProperties* _viewprop;
+      static layprop::PropertyCenter* _viewprop;
    };
 
 //==============================================================================
@@ -151,15 +151,15 @@ namespace laydata {
       TDTHierTree*         hierout(TDTHierTree*&, TdtCell*, CellList*, const TdtLibDir*);
       DBbox                cellOverlap() const {return _cellOverlap;}
       DBbox                cellVisibleOverlap() const {return _vlOverlap;}
-      void                 select_inBox(DBbox, layprop::ViewProperties&, bool pntsel = false);
+      void                 select_inBox(DBbox, layprop::PropertyCenter&, bool pntsel = false);
 //      void                 select_inside(const TP);
-      void                 select_fromList(SelectList*, layprop::ViewProperties&);
+      void                 select_fromList(SelectList*, layprop::PropertyCenter&);
 //      void                 select_all(bool select_locked = false);
-      void                 select_all(layprop::ViewProperties&);
+      void                 select_all(layprop::PropertyCenter&);
       void                 full_select();
       void                 select_this(TdtData*, unsigned);
-      void                 unselect_inBox(DBbox, bool, layprop::ViewProperties&);
-      void                 unselect_fromList(SelectList*, layprop::ViewProperties&);
+      void                 unselect_inBox(DBbox, bool, layprop::PropertyCenter&);
+      void                 unselect_fromList(SelectList*, layprop::PropertyCenter&);
       void                 unselect_all(bool destroy=false);
       bool                 addlist(TdtDesign*, AtticList*);
       bool                 copy_selected(TdtDesign*, const CTM&);
@@ -179,8 +179,8 @@ namespace laydata {
       bool                 cutpoly_selected(pointlist&, AtticList**);
       bool                 merge_selected(AtticList**);
       bool                 stretch_selected(int bfactor, AtticList**);
-      AtticList*           changeselect(TP, SH_STATUS status, layprop::ViewProperties&);
-      TdtCellRef*          getcellover(TP, ctmstack&, CellRefStack*, layprop::ViewProperties&);
+      AtticList*           changeselect(TP, SH_STATUS status, layprop::PropertyCenter&);
+      TdtCellRef*          getcellover(TP, ctmstack&, CellRefStack*, layprop::PropertyCenter&);
       SelectList*          shapesel()        {return &_shapesel;};
       SelectList*          copy_selist() const;
       void                 updateHierarchy(TdtLibDir*);
@@ -191,7 +191,7 @@ namespace laydata {
       bool                 overlapChanged(DBbox&, TdtDesign*);
       DBbox                updateVisibleOverlap(const layprop::DrawProperties&);
    private:
-      bool                 getshapeover(TP, layprop::ViewProperties&);
+      bool                 getshapeover(TP, layprop::PropertyCenter&);
       void                 getCellOverlap();
       void                 store_inAttic(AtticList&);
       dword                getFullySelected(DataList*) const;

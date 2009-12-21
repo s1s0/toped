@@ -37,7 +37,7 @@
 
 //! the stack of all previously edited (opened) cells
 laydata::EditCellStack      laydata::EditObject::_editstack;
-layprop::ViewProperties*    laydata::EditObject::_viewprop = NULL;
+layprop::PropertyCenter*    laydata::EditObject::_viewprop = NULL;
 
 // initializing the static variables
 laydata::TDTHierTree* laydata::TdtLibrary::_hiertree = NULL;

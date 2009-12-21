@@ -31,7 +31,6 @@
 #include "cif_io.h"
 #include "gds_io.h"
 #include "oasis_io.h"
-#include "viewprop.h"
 
 class DataCenter {
 public:
@@ -89,108 +88,19 @@ public:
    laydata::TdtLibDir*        TEDLIB() {return &_TEDLIB;}
    laydata::LibCellLists*     getCells(int libID);
    unsigned int               numselected()           {return (NULL != _TEDLIB()) ? _TEDLIB()->numselected() : 0 ;}
-   void                       defaultlayer(word layno){_properties.defaultLayer(layno);}
    void                       setcmdlayer(word layno) {_curcmdlay = layno;}
-   word                       curlay() const          {return _properties.curLay();}
    word                       curcmdlay() const       {return _curcmdlay;}
    std::string                tedfilename() const     {return _tedfilename;};
    bool                       neversaved()  const     {return _neversaved;};
    bool                       modified() const        {return _TEDLIB.modified();};
 
    //------------------------------------------------------------------------------------------------
-   bool                       addlayer(std::string, unsigned, std::string, std::string, std::string);
-   bool                       addlayer(std::string, unsigned);
-   bool                       addlayer(unsigned layno);
-   unsigned                   addlayer(std::string);
-   void                       addUnpublishedLay(word no) {_properties.addUnpublishedLay(no);};
-   bool                       isLayerExist(word);
-   bool                       isLayerExist(std::string);
-   void                       addline(std::string, std::string, word, byte, byte);
-   void                       addcolor(std::string, byte, byte, byte, byte);
-   void                       addfill(std::string, byte*);
-   void                       hideLayer(word, bool);
-   void                       lockLayer(word, bool);
-   void                       fillLayer(word, bool);
-   void                       pushLayerStatus();
-   void                       popLayerStatus();
-   void                       popBackLayerStatus();
-   bool                       saveLaysetStatus(const std::string&);
-   bool                       saveLaysetStatus(const std::string&, const WordSet&, const WordSet&, const WordSet&, unsigned);
-   bool                       loadLaysetStatus(const std::string&);
-   bool                       deleteLaysetStatus(const std::string&);
-   bool                       getLaysetStatus(const std::string&, WordSet&, WordSet&, WordSet&, unsigned);
-   void                       setcellmarks_hidden(bool);
-   void                       settextmarks_hidden(bool);
-   void                       setcellbox_hidden(bool);
-   void                       settextbox_hidden(bool);
-   void                       setGrid(byte, real, std::string);
-   bool                       viewGrid(byte, bool);
-   void                       addRuler(TP&, TP&);
-   void                       clearRulers();
    void                       switch_drawruler(bool st) {_drawruler = st;}
    bool                       drawruler() {return _drawruler;}
    LayerMapExt*               secureGdsLayMap(bool);
    LayerMapCif*               secureCifLayMap(bool);
    void                       updateVisibleOverlap();
-   bool                       autopan() const         {return _properties.autopan();}
-   bool                       zeroCross() const       {return _properties.zeroCross();}
-   const real                 step() const            {return _properties.step();}
-   const layprop::LayoutGrid* grid(byte gn) const     {return _properties.grid(gn);}
-   const int4b                stepDB() const          {return _properties.stepDB();}
-   const real                 UU() const              {return _properties.UU();}
-   const real                 DBscale() const         {return _properties.DBscale();}
-   unsigned                   getLayerNo(std::string name) const
-                                                      {return _properties.getLayerNo(name);}
-   std::string                getLayerName(word layno) const
-                                                      {return _properties.getLayerName(layno);}
-   byte                       marker_angle() const    {return _properties.marker_angle();}
-   bool                       layerHidden(word layno) {return _properties.drawprop().layerHidden(layno);}
-   bool                       layerLocked(word layno) {return _properties.drawprop().layerLocked(layno);}
-   const WordList             getAllLayers(void)      {return _properties.getAllLayers();};
-   const WordList             getLockedLayers(void)   {return _properties.getLockedLayers();};
-   bool                       grid_visual(word no)    {return grid(no)->visual();}
-   void                       setautopan(bool status) {_properties.setautopan(status);}
-   void                       setZeroCross(bool status) {_properties.setZeroCross(status);}
-   void                       setmarker_angle(byte angle)
-                                                      {_properties.setmarker_angle(angle);}
-   void                       setstep(real st)        {_properties.setstep(st);}
-   void                       setClipRegion(DBbox clipR)
-                                                      {_properties.setClipRegion(clipR);}
-   void                       setScrCTM(CTM ScrCTM)   {_properties.setScrCTM(ScrCTM);}
-   void                       setCurrentOp(console::ACTIVE_OP op)
-                                                      {_properties.setCurrentOp(op);}
-   void                       setState(layprop::drawprop_state state) {_properties.drawprop().setState(state);};
-   const console::ACTIVE_OP   currentop() const       {return _properties.currentop();}
-   void                       all_layers(nameList& laylist) const {_properties.all_layers(laylist);}
-   void                       all_colors(nameList& colist)  const {_properties.all_colors(colist); }
-   void                       all_fills(nameList& filist)   const {_properties.all_fills(filist);  }
-   void                       all_lines(nameList& linelist) const {_properties.all_lines(linelist);}
-   bool                       isFilled(unsigned layno) {return _properties.drawprop().isFilled(layno);}
-   const byte*                getFill(word layno) {return _properties.drawprop().getFill(layno);}
-   const byte*                getFill(std::string fill_name) {return _properties.drawprop().getFill(fill_name);}
-   const layprop::tellRGB&    getColor(word layno) {return _properties.drawprop().getColor(layno);}
-   const layprop::tellRGB&    getColor(std::string color_name) {return _properties.drawprop().getColor(color_name);}
-   const layprop::LineSettings* getLine(word layno) {return _properties.drawprop().getLine(layno);}
-   const layprop::LineSettings* getLine(std::string line_name) {return _properties.drawprop().getLine(line_name);}
-   const std::string          getColorName(word layno) {return _properties.drawprop().getColorName(layno);}
-   const std::string          getFillName(word layno) {return _properties.drawprop().getFillName(layno);}
-   const std::string          getLineName(word layno) {return _properties.drawprop().getLineName(layno);}
-   const WordList             upLayers() {return _properties.upLayers();}
-   void                       clearUnpublishedLayers() {_properties.clearUnpublishedLayers();}
-   const word                 layselmask() {return _properties.layselmask();}
-   void                       setlayselmask(word lsm) {_properties.setlayselmask(lsm);}
-   void                       setGdsLayMap(USMap* map)   {_properties.setGdsLayMap(map);}
-   void                       setCifLayMap(USMap* map)   {_properties.setCifLayMap(map);}
-   const USMap*               getGdsLayMap() const       {return _properties.getGdsLayMap();}
-   const USMap*               getCifLayMap() const       {return _properties.getCifLayMap();}
-   void                       saveProperties(std::string fname)
-                                                      {_properties.saveProperties(fname);}
-   std::string                globalDir(void) const
-                                                      {return _globalDir;}
-   void                       loadLayoutFonts(std::string ffn, bool vbo)
-                                                      {_properties.loadLayoutFonts(ffn, vbo);}
-   void                       setAdjustTextOrientation(bool ori)
-                                                      {_properties.setAdjustTextOrientation(ori);}
+   std::string                globalDir(void) const     {return _globalDir;}
 
 protected:
    std::string                _tedfilename;
@@ -202,18 +112,16 @@ private:
    bool                       _drawruler;    // draw a ruler while composing a shape interactively
    std::string                _localDir;
    std::string                _globalDir;
-   laydata::TdtLibDir         _TEDLIB;       // catalog of available TDT libraries
-   laydata::DrcLibrary*       _DRCDB;        //DRC data
-   GDSin::GdsInFile*          _GDSDB;        // GDS parsed data
-   CIFin::CifFile*            _CIFDB;        // CIF parsed data
-   Oasis::OasisInFile*        _OASDB;        // OASIS parsed data
-   layprop::ViewProperties    _properties;   // properties data base
-   wxMutex                    _DBLock;
-   wxMutex                    _DRCLock;
-   wxMutex                    _GDSLock;
-   wxMutex                    _CIFLock;
-   wxMutex                    _OASLock;
-   wxMutex                    _PROPLock;
+   laydata::TdtLibDir         _TEDLIB;       //! catalog of available TDT libraries
+   laydata::DrcLibrary*       _DRCDB;        //! DRC data
+   GDSin::GdsInFile*          _GDSDB;        //! GDS parsed data
+   CIFin::CifFile*            _CIFDB;        //! CIF parsed data
+   Oasis::OasisInFile*        _OASDB;        //! OASIS parsed data
+   wxMutex                    _DBLock;       //! Main stream DB Mutex
+   wxMutex                    _DRCLock;      //! DRC         DB Mutex
+   wxMutex                    _GDSLock;      //! GDSII       DB Mutex
+   wxMutex                    _CIFLock;      //! CIF         DB Mutex
+   wxMutex                    _OASLock;      //! OASIS       DB Mutex
    wxCondition*               _bpSync;       // Synchronization for cell browser panels
 
 };
@@ -337,7 +245,5 @@ private:
 // http://docs.wxwidgets.org/stable/wx_wxcondition.html#wxcondition
 // http://docs.wxwidgets.org/stable/wx_wxthread.html#wxthread
 //=============================================================================
-
-void initDBLib(const std::string&, const std::string&);
 
 #endif

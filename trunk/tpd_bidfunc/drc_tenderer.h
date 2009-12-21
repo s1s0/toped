@@ -13,16 +13,16 @@
 //                                                                          =
 //   This file is a part of Toped project (C) 2001-2007 Toped developers    =
 // ------------------------------------------------------------------------ =
-//           $URL: https://toped.googlecode.com/svn/trunk/tpd_ifaces/drc_tenderer.h $
+//           $URL$
 //        Created: Mon Mar 02 2009
 //     Originator: Sergey Gaitukevich - gaitukevich.s@toped.org.uk
 //    Description: Interlayer between CalbrFile and Toped database
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------
-//      $Revision: 1204 $
-//          $Date: 2009-08-26 23:20:02 +0800 (��, 26 ��� 2009) $
-//        $Author: gaitukevich.s $
+//      $Revision$
+//          $Date$
+//        $Author$
 //===========================================================================
 //      Comments :
 //===========================================================================

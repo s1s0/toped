@@ -152,7 +152,7 @@ namespace laydata {
       void           select_all()      const {       _target.edit()->select_all(_target.viewprop());};
       void           report_selected(real DBscale) const { _target.edit()->report_selected(DBscale);};
       std::string    activecellname()  const {return _target.name();};
-      void           assign_properties(layprop::ViewProperties& viewprop) {_target.init_viewprop(&viewprop);}
+      void           assign_properties(layprop::PropertyCenter& viewprop) {_target.init_viewprop(&viewprop);}
       //
       time_t         created()         const {return _created;}
       time_t         lastUpdated()     const {return _lastUpdated;}

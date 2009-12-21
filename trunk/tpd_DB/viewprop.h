@@ -85,27 +85,27 @@ namespace layprop {
 
    //==============================================================================
    /*! The most important facet of this class is that the only way to change \b any
-   drawing properties in Toped is to call a method of ViewProperties. It is important
+   drawing properties in Toped is to call a method of PropertyCenter. It is important
    to note however, that this does not imply that all possible drawing properties in
    Toped have fields in this class. Those properties are split actually over two classes
-   - ViewProperties holds the fields related to the layoutcanvas - list of grids, marker
+   - PropertyCenter holds the fields related to the layoutcanvas - list of grids, marker
    rules and restrictions etc.
    - DrawProperties is the place holder for design related properties - colors, fill patterns,
    layout layers.
 
    The idea behind this split is that DrawProperties is used as a read-only property holder
-   during drawing of the database, while ViewProperties fields are used by the layoutcanvas
+   during drawing of the database, while PropertyCenter fields are used by the layoutcanvas
    only. \n
    In the same time, to keep the properties thread safe DrawProperties does not posses with
    methods to change its own fields. Indeed, Toped has only one object of this class and the
-   only way to reach it is via ViewProperties. The latter has methods that can change the
+   only way to reach it is via PropertyCenter. The latter has methods that can change the
    fields of DrawProperties, but they are called in a thread safe manner.
    */
-   class ViewProperties {
+   class PropertyCenter {
    public:
       typedef  std::map<byte       , LayoutGrid*   >  gridlist;
-                        ViewProperties();
-                       ~ViewProperties();
+                        PropertyCenter();
+                       ~PropertyCenter();
       bool              addlayer(std::string, unsigned, std::string, std::string, std::string);
       bool              addlayer(std::string, unsigned);
       bool              addlayer(unsigned);
@@ -171,6 +171,8 @@ namespace layprop {
       const USMap*      getGdsLayMap() const             {return _gdsLayMap;}
       const USMap*      getCifLayMap() const             {return _cifLayMap;}
       word              curLay() const                   {return _curlay;}
+      bool              gridVisual(word no)             {return grid(no)->visual();}
+
       unsigned          getLayerNo(std::string name) const {return _drawprop.getLayerNo(name);}
       std::string       getLayerName(unsigned layno) const {return _drawprop.getLayerName(layno);}
       DrawProperties&   drawprop()                       {return _drawprop;}
@@ -190,6 +192,23 @@ namespace layprop {
       void              loadLayoutFonts(std::string fft, bool vbo)
                                                          {_drawprop.loadLayoutFonts(fft, vbo);}
       bool              renderType()                     {return _drawprop.renderType();}
+
+      void              setState(layprop::drawprop_state state)
+                                                         {_drawprop.setState(state);}
+      const byte*       getFill(word layno)              {return _drawprop.getFill(layno);}
+      const byte*       getFill(std::string fill_name)   {return _drawprop.getFill(fill_name);}
+      const tellRGB&    getColor(word layno)       {return _drawprop.getColor(layno);}
+      const tellRGB&    getColor(std::string color_name)
+                                                         {return _drawprop.getColor(color_name);}
+      bool              isFilled(unsigned layno)         {return _drawprop.isFilled(layno);}
+      bool              layerHidden(word layno)          {return _drawprop.layerHidden(layno);}
+      bool              layerLocked(word layno)          {return _drawprop.layerLocked(layno);}
+      const LineSettings* getLine(word layno)   {return _drawprop.getLine(layno);}
+      const LineSettings* getLine(std::string line_name) {return _drawprop.getLine(line_name);}
+      const std::string getColorName(word layno)         {return _drawprop.getColorName(layno);}
+      const std::string getFillName(word layno)          {return _drawprop.getFillName(layno);}
+      const std::string getLineName(word layno)          {return _drawprop.getLineName(layno);}
+
    private:
       typedef std::deque<LayStateList>            LayStateHistory;
       typedef std::map<std::string, LayStateList> LayStateMap;

@@ -31,6 +31,7 @@
 #include "datacenter.h"
 
 extern DataCenter*               DATC;
+extern layprop::PropertyCenter*  PROPC;
 extern console::toped_logfile    LogFile;
 extern const wxEventType         wxEVT_CANVAS_ZOOM;
 extern wxWindow*                 TopedCanvasW;
@@ -275,7 +276,7 @@ int tellstdfunc::stdOPENCELL::execute()
       if ("" != oldnm)  selected = make_ttlaylist(ATDB->shapesel());
       if (ATDB->opencell(nm))
       {
-         DATC->clearRulers();
+         PROPC->clearRulers();
          if (oldnm != "")
          {
             UNDOcmdQ.push_front(this);
@@ -337,7 +338,7 @@ void tellstdfunc::stdEDITPUSH::undo()
 int tellstdfunc::stdEDITPUSH::execute()
 {
    telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-   real DBscale = DATC->DBscale();
+   real DBscale = PROPC->DBscale();
    TP p1DB = TP(p1->x(), p1->y(), DBscale);
    laydata::TdtDesign* ATDB = DATC->lockDB();
       telldata::ttlist* selected = make_ttlaylist(ATDB->shapesel());
@@ -609,9 +610,9 @@ void tellstdfunc::stdUNGROUP::undo()
       // now get the list of the ungroupped cell ref's from the UNDO stack
       telldata::ttlist* pl1 = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       // and add them to the target cell
-      ATDB->addlist(get_shlaylist(pl1)); 
+      ATDB->addlist(get_shlaylist(pl1));
       // select the restored cell refs
-      ATDB->select_fromList(get_ttlaylist(pl1)); 
+      ATDB->select_fromList(get_ttlaylist(pl1));
       // now restore selection
       ATDB->select_fromList(savelist);
       // and add the list of restored cells to the selection

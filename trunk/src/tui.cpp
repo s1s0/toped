@@ -38,6 +38,7 @@
 #include "browsers.h"
 
 extern DataCenter*                DATC;
+extern layprop::PropertyCenter*  PROPC;
 
 #if wxCHECK_VERSION(2, 8, 0)
 #define tpdfOPEN wxFD_OPEN
@@ -52,9 +53,9 @@ BEGIN_EVENT_TABLE(tui::sgSpinButton, wxSpinButton)
    EVT_SPIN(-1, tui::sgSpinButton::OnSpin)
 END_EVENT_TABLE()
 
-tui::sgSpinButton::sgSpinButton(wxWindow *parent, wxTextCtrl* textW, const float step, 
+tui::sgSpinButton::sgSpinButton(wxWindow *parent, wxTextCtrl* textW, const float step,
    const float min, const float max, const float init, const int prec)
-  : wxSpinButton(parent, -1, wxDefaultPosition, wxDefaultSize), _wxText(textW), 
+  : wxSpinButton(parent, -1, wxDefaultPosition, wxDefaultSize), _wxText(textW),
     _step(step), _prec(prec) {
    SetRange((int) rint(min / _step),(int) rint(max / _step));
    SetValue((int) rint(init / _step));
@@ -101,7 +102,7 @@ tui::getSize::getSize(wxFrame *parent, wxWindowID id, const wxString &title,
 }
 
 //==============================================================================
-tui::getStep::getStep(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, 
+tui::getStep::getStep(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
    real init) : wxDialog(parent, id, title, pos, wxDefaultSize,
                                                       wxDEFAULT_DIALOG_STYLE)  {
    wxString ws;
@@ -120,7 +121,7 @@ tui::getStep::getStep(wxFrame *parent, wxWindowID id, const wxString &title, wxP
 }
 
 //==============================================================================
-tui::getGrid::getGrid(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, 
+tui::getGrid::getGrid(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
    real ig0, real ig1, real ig2 ) : wxDialog(parent, id, title, pos, wxDefaultSize,
                                                       wxDEFAULT_DIALOG_STYLE)  {
    wxString ws;
@@ -129,7 +130,7 @@ tui::getGrid::getGrid(wxFrame *parent, wxWindowID id, const wxString &title, wxP
    wxBoxSizer *g0sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    ws.sprintf(wxT("%.*f"), 3, ig0);
    _wxGrid0 = DEBUG_NEW wxTextCtrl( this, -1, ws, wxDefaultPosition, wxDefaultSize);
-   g0sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Grid 0:"), 
+   g0sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Grid 0:"),
                               wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
                                                 0, wxALL, 5);
    g0sizer->Add(_wxGrid0, 0, wxEXPAND | wxALL ,5 );
@@ -137,7 +138,7 @@ tui::getGrid::getGrid(wxFrame *parent, wxWindowID id, const wxString &title, wxP
    wxBoxSizer *g1sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    ws.sprintf(wxT("%.*f"), 3, ig1);
    _wxGrid1 = DEBUG_NEW wxTextCtrl( this, -1, ws, wxDefaultPosition, wxDefaultSize);
-   g1sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Grid 1:"), 
+   g1sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Grid 1:"),
                               wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
                                                 0, wxALL, 5);
    g1sizer->Add(_wxGrid1, 0, wxEXPAND | wxALL ,5 );
@@ -163,7 +164,7 @@ tui::getGrid::getGrid(wxFrame *parent, wxWindowID id, const wxString &title, wxP
 }
 
 //==============================================================================
-tui::getCellOpen::getCellOpen(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, 
+tui::getCellOpen::getCellOpen(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
       wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
                                                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  {
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
@@ -173,14 +174,14 @@ tui::getCellOpen::getCellOpen(wxFrame *parent, wxWindowID id, const wxString &ti
       for (CL = cll.begin(); CL != cll.end(); CL++) {
          _nameList->Append(wxString(CL->first.c_str(), wxConvUTF8));
       }
-   DATC->unlockDB();   
+   DATC->unlockDB();
    if (init != wxT("")) _nameList->SetStringSelection(init,true);
    // The window layout
    wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    // Buttons
    wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
-   button_sizer->Add(0,0,1); // 
+   button_sizer->Add(0,0,1); //
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
    // TOP sizer
    topsizer->Add(_nameList, 1, wxEXPAND );
@@ -192,7 +193,7 @@ tui::getCellOpen::getCellOpen(wxFrame *parent, wxWindowID id, const wxString &ti
 }
 
 //==============================================================================
-tui::getCellRef::getCellRef(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, 
+tui::getCellRef::getCellRef(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
       wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
                                                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  {
 //   _rotation = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
@@ -209,24 +210,24 @@ tui::getCellRef::getCellRef(wxFrame *parent, wxWindowID id, const wxString &titl
          }
       }
       delete cll;
-   DATC->unlockDB();   
+   DATC->unlockDB();
    if (init != wxT("")) _nameList->SetStringSelection(init,true);
    // The window layout
    wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    // First line up the important things
 //   wxBoxSizer *spin_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
-//   spin_sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Rotation:"), 
+//   spin_sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Rotation:"),
 //                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
 //                                                0, wxALL | wxALIGN_CENTER, 10);
 //   spin_sizer->Add(_rotation, 0, wxALL | wxALIGN_CENTER, 0);
 //   spin_sizer->Add(DEBUG_NEW sgSpinButton(this, _rotation, 90, 0, 360, 0, 0),
 //                                                  0, wxALL | wxALIGN_CENTER, 0);
-//   spin_sizer->Add(0,0,1); // 
+//   spin_sizer->Add(0,0,1); //
 //   spin_sizer->Add(_flip, 0, wxALL | wxALIGN_CENTER, 10);
    // Buttons
    wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
-   button_sizer->Add(0,0,1); // 
+   button_sizer->Add(0,0,1); //
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
    // TOP sizer
       topsizer->Add(_nameList, 1, wxEXPAND );
@@ -238,7 +239,7 @@ tui::getCellRef::getCellRef(wxFrame *parent, wxWindowID id, const wxString &titl
    topsizer->SetSizeHints( this );   // set size hints to honour minimum size
 }
 
-tui::getCellARef::getCellARef(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, 
+tui::getCellARef::getCellARef(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
       wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
                                                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  {
 //   _rotation = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
@@ -255,61 +256,61 @@ tui::getCellARef::getCellARef(wxFrame *parent, wxWindowID id, const wxString &ti
          }
       }
       delete cll;
-   DATC->unlockDB();   
+   DATC->unlockDB();
    if (init != wxT("")) _nameList->SetStringSelection(init,true);
    // The window layout
    wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    // First line up the important things
 //   wxBoxSizer *spin_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
-//   spin_sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Rotation:"), 
+//   spin_sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Rotation:"),
 //                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
 //                                                0, wxALL | wxALIGN_CENTER, 10);
 //   spin_sizer->Add(_rotation, 0, wxALL | wxALIGN_CENTER, 0);
 //   spin_sizer->Add(DEBUG_NEW sgSpinButton(this, _rotation, 90, 0, 360, 0, 0),
 //                                                  0, wxALL | wxALIGN_CENTER, 0);
-//   spin_sizer->Add(0,0,1); // 
+//   spin_sizer->Add(0,0,1); //
 //   spin_sizer->Add(_flip, 0, wxALL | wxALIGN_CENTER, 10);
    // Now Array specific controls
    _numX = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
    _numY = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
    wxBoxSizer* num_sizer =  DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
-   num_sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Rows:"), 
+   num_sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Rows:"),
                               wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
                                                 0, wxALL | wxALIGN_CENTER, 10);
    num_sizer->Add(_numX, 0, wxALL | wxALIGN_CENTER, 0);
    num_sizer->Add(DEBUG_NEW sgSpinButton(this, _numX, 1, 2, 200, 2, 0),
                                                   0, wxALL | wxALIGN_CENTER, 0);
-   num_sizer->Add(0,0,1); // 
-   num_sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Columns:"), 
+   num_sizer->Add(0,0,1); //
+   num_sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Columns:"),
                               wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
                                                 0, wxALL | wxALIGN_CENTER, 10);
    num_sizer->Add(_numY, 0, wxALL | wxALIGN_CENTER, 0);
    num_sizer->Add(DEBUG_NEW sgSpinButton(this, _numY, 1, 2, 200, 2, 0),
                                                   0, wxALL | wxALIGN_CENTER, 0);
-   num_sizer->Add(0,0,1); // 
+   num_sizer->Add(0,0,1); //
    //
    _stepX = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
    _stepY = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
    wxBoxSizer* step_sizer =  DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
-   step_sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("step X:"), 
+   step_sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("step X:"),
                               wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
                                                 0, wxALL | wxALIGN_CENTER, 10);
    step_sizer->Add(_stepX, 0, wxALL | wxALIGN_CENTER, 0);
-   step_sizer->Add(DEBUG_NEW sgSpinButton(this, _stepX, DATC->step(), 2, 200, 2, 3),
+   step_sizer->Add(DEBUG_NEW sgSpinButton(this, _stepX, PROPC->step(), 2, 200, 2, 3),
                                                   0, wxALL | wxALIGN_CENTER, 0);
-   step_sizer->Add(0,0,1); // 
-   step_sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("step Y:"), 
+   step_sizer->Add(0,0,1); //
+   step_sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("step Y:"),
                               wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
                                                 0, wxALL | wxALIGN_CENTER, 10);
    step_sizer->Add(_stepY, 0, wxALL | wxALIGN_CENTER, 0);
-   step_sizer->Add(DEBUG_NEW sgSpinButton(this, _stepY, DATC->step(), 2, 200, 2, 3),
+   step_sizer->Add(DEBUG_NEW sgSpinButton(this, _stepY, PROPC->step(), 2, 200, 2, 3),
                                                   0, wxALL | wxALIGN_CENTER, 0);
-   
-   step_sizer->Add(0,0,1); // 
+
+   step_sizer->Add(0,0,1); //
    // Buttons
    wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
-   button_sizer->Add(0,0,1); // 
+   button_sizer->Add(0,0,1); //
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
    // TOP sizer
       topsizer->Add(_nameList, 1, wxEXPAND );
@@ -322,10 +323,10 @@ tui::getCellARef::getCellARef(wxFrame *parent, wxWindowID id, const wxString &ti
 
    topsizer->SetSizeHints( this );   // set size hints to honour minimum size
 }
- 
-tui::getTextdlg::getTextdlg(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos) 
+
+tui::getTextdlg::getTextdlg(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos)
            : wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)  {
-   
+
    _size     = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
 //   _rotation = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
 //   _flip = DEBUG_NEW wxCheckBox(this, -1, wxT("Flip X"));
@@ -334,27 +335,27 @@ tui::getTextdlg::getTextdlg(wxFrame *parent, wxWindowID id, const wxString &titl
    wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    // First line up the important things
    wxBoxSizer *spin_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
-   
-   spin_sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Size:"), 
+
+   spin_sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Size:"),
                               wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
                                                 0, wxALL | wxALIGN_CENTER, 10);
    spin_sizer->Add(_size, 0, wxALL | wxALIGN_CENTER, 0);
-   spin_sizer->Add(DEBUG_NEW sgSpinButton(this, _size, DATC->step(), 1, 20, 2, 3),
+   spin_sizer->Add(DEBUG_NEW sgSpinButton(this, _size, PROPC->step(), 1, 20, 2, 3),
                                                   0, wxALL | wxALIGN_CENTER, 0);
-   spin_sizer->Add(0,0,1); // 
-   
-//   spin_sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Rotation:"), 
+   spin_sizer->Add(0,0,1); //
+
+//   spin_sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Rotation:"),
 //                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
 //                                                0, wxALL | wxALIGN_CENTER, 10);
 //   spin_sizer->Add(_rotation, 0, wxALL | wxALIGN_CENTER, 0);
 //   spin_sizer->Add(DEBUG_NEW sgSpinButton(this, _rotation, 90, 0, 360, 0, 0),
 //                                                  0, wxALL | wxALIGN_CENTER, 0);
-//   spin_sizer->Add(0,0,1); // 
+//   spin_sizer->Add(0,0,1); //
 //   spin_sizer->Add(_flip, 0, wxALL | wxALIGN_CENTER, 10);
    // Buttons
    wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
-   button_sizer->Add(0,0,1); // 
+   button_sizer->Add(0,0,1); //
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
    // TOP sizer
    topsizer->Add(_text, 1, wxEXPAND | wxALIGN_CENTER, 10 );
@@ -371,7 +372,7 @@ tui::getTextdlg::getTextdlg(wxFrame *parent, wxWindowID id, const wxString &titl
 //==============================================================================
 tui::getLibList::getLibList(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
                               wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
-                                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  
+                                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
 {
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
    DATC->lockDB(false);
@@ -402,7 +403,7 @@ tui::getLibList::getLibList(wxFrame *parent, wxWindowID id, const wxString &titl
 //==============================================================================
 tui::getCIFimport::getCIFimport(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
       wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
-                                                   wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  
+                                                   wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
 {
    _overwrite = DEBUG_NEW wxCheckBox(this, -1, wxT("Overwrite existing cells"));
    _overwrite->SetValue(true);
@@ -418,7 +419,7 @@ tui::getCIFimport::getCIFimport(wxFrame *parent, wxWindowID id, const wxString &
    if (DATC->lockCif(ACIFDB))
    {
       CIFin::CifStructure* cifs = ACIFDB->getFirstStructure();
-      while (cifs) 
+      while (cifs)
       {
          _nameList->Append(wxString(cifs->name().c_str(), wxConvUTF8));
          cifs = cifs->last();
@@ -446,7 +447,7 @@ tui::getCIFimport::getCIFimport(wxFrame *parent, wxWindowID id, const wxString &
    wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    //
    wxBoxSizer *lsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
-   
+
    wxBoxSizer *lsizer2 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    lsizer2->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Techno:"), wxDefaultPosition, wxDefaultSize),
                  0, wxLEFT | wxALIGN_CENTER_VERTICAL, 5);
@@ -463,7 +464,7 @@ tui::getCIFimport::getCIFimport(wxFrame *parent, wxWindowID id, const wxString &
    wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    button_sizer->Add(_recursive, 0, wxALL | wxALIGN_LEFT, 5);
    button_sizer->Add(_overwrite, 0, wxALL | wxALIGN_LEFT, 5);
-   button_sizer->Add(0,0,1); // 
+   button_sizer->Add(0,0,1); //
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
    // TOP sizer
@@ -478,7 +479,7 @@ tui::getCIFimport::getCIFimport(wxFrame *parent, wxWindowID id, const wxString &
 //==============================================================================
 tui::getCIFexport::getCIFexport(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
       wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
-                                                   wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  
+                                                   wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
 {
    _recursive = DEBUG_NEW wxCheckBox(this, -1, wxT("Export recursively"));
    _recursive->SetValue(true);
@@ -515,7 +516,7 @@ tui::getCIFexport::getCIFexport(wxFrame *parent, wxWindowID id, const wxString &
    wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    button_sizer->Add(_recursive, 0, wxALL | wxALIGN_LEFT, 5);
    button_sizer->Add(_slang    , 0, wxALL | wxALIGN_LEFT, 5);
-   button_sizer->Add(0,0,1); // 
+   button_sizer->Add(0,0,1); //
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
    // TOP sizer
@@ -530,7 +531,7 @@ tui::getCIFexport::getCIFexport(wxFrame *parent, wxWindowID id, const wxString &
 //==============================================================================
 tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
       wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
-                                                   wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  
+                                                   wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
 {
    _overwrite = DEBUG_NEW wxCheckBox(this, -1, wxT("Overwrite existing cells"));
    _recursive = DEBUG_NEW wxCheckBox(this, -1, wxT("Import recursively"));
@@ -573,7 +574,7 @@ tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &
    wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    button_sizer->Add(_recursive, 0, wxALL | wxALIGN_LEFT, 5);
    button_sizer->Add(_overwrite, 0, wxALL | wxALIGN_LEFT, 5);
-   button_sizer->Add(0,0,1); // 
+   button_sizer->Add(0,0,1); //
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
    // TOP sizer
@@ -588,7 +589,7 @@ tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &
 //==============================================================================
 tui::getOASimport::getOASimport(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
       wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
-                                                   wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  
+                                                   wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
 {
    _overwrite = DEBUG_NEW wxCheckBox(this, -1, wxT("Overwrite existing cells"));
    _recursive = DEBUG_NEW wxCheckBox(this, -1, wxT("Import recursively"));
@@ -631,7 +632,7 @@ tui::getOASimport::getOASimport(wxFrame *parent, wxWindowID id, const wxString &
    wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    button_sizer->Add(_recursive, 0, wxALL | wxALIGN_LEFT, 5);
    button_sizer->Add(_overwrite, 0, wxALL | wxALIGN_LEFT, 5);
-   button_sizer->Add(0,0,1); // 
+   button_sizer->Add(0,0,1); //
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
    // TOP sizer
@@ -680,7 +681,7 @@ tui::getGDSexport::getGDSexport(wxFrame *parent, wxWindowID id, const wxString &
    // Buttons
    wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    button_sizer->Add(_recursive, 0, wxALL | wxALIGN_LEFT, 5);
-   button_sizer->Add(0,0,1); // 
+   button_sizer->Add(0,0,1); //
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
    // TOP sizer
@@ -731,7 +732,7 @@ void tui::layset_sample::setColor(word layno)
    if (0 == layno)
       _color.Set(0,0,0);
    else
-      setColor(DATC->getColor(layno));
+      setColor(PROPC->getColor(layno));
 }
 
 void tui::layset_sample::setFill(const byte* fill)
@@ -779,7 +780,7 @@ void tui::layset_sample::setFill(word layno)
    if (0 == layno)
       _brush = wxBrush();
    else
-      setFill(DATC->getFill(layno));
+      setFill(PROPC->getFill(layno));
 }
 
 void tui::layset_sample::setLine(word layno)
@@ -787,7 +788,7 @@ void tui::layset_sample::setLine(word layno)
    if (0 == layno)
       _pen = wxPen();
    else
-      setLine(DATC->getLine(layno));
+      setLine(PROPC->getLine(layno));
 }
 
 void tui::layset_sample::setLine(const layprop::LineSettings* line)
@@ -896,10 +897,10 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
    if (init > 0)
    {
       _layno << init;
-      _layname = wxString(DATC->getLayerName(init).c_str(), wxConvUTF8);
-      init_color = wxString(DATC->getColorName(init).c_str(), wxConvUTF8);
-      init_fill = wxString(DATC->getFillName(init).c_str(), wxConvUTF8);
-      init_line = wxString(DATC->getLineName(init).c_str(), wxConvUTF8);
+      _layname = wxString(PROPC->getLayerName(init).c_str(), wxConvUTF8);
+      init_color = wxString(PROPC->getColorName(init).c_str(), wxConvUTF8);
+      init_fill = wxString(PROPC->getFillName(init).c_str(), wxConvUTF8);
+      init_line = wxString(PROPC->getLineName(init).c_str(), wxConvUTF8);
    }
    bool no_color = (wxT("") == init_color);
    bool no_fill = (wxT("") == init_fill);
@@ -916,7 +917,7 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
    _sample   = DEBUG_NEW layset_sample( this, -1, wxDefaultPosition, wxDefaultSize, init);
    nameList all_names;
    wxArrayString all_strings;
-   DATC->all_colors(all_names);
+   PROPC->all_colors(all_names);
    if (!all_names.empty())
    {
       for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
@@ -930,10 +931,10 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
    {
       _colors   = DEBUG_NEW wxComboBox( this, COLOR_COMBO, wxT("") , wxDefaultPosition, wxDefaultSize);
    }
-      
+
    all_names.clear();
    all_strings.Clear();
-   DATC->all_fills(all_names);
+   PROPC->all_fills(all_names);
    if (!all_names.empty())
    {
       for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
@@ -947,10 +948,10 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
    {
       _fills   = DEBUG_NEW wxComboBox( this, FILL_COMBO, wxT(""), wxDefaultPosition, wxDefaultSize);
    }
-   
+
    all_names.clear();
    all_strings.Clear();
-   DATC->all_lines(all_names);
+   PROPC->all_lines(all_names);
    if (!all_names.empty())
    {
       for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
@@ -1037,11 +1038,11 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
 void tui::defineLayer::OnColorChanged(wxCommandEvent& cmdevent)
 {
    wxString color_name = cmdevent.GetString();
-   const layprop::tellRGB color = DATC->getColor(std::string(color_name.mb_str(wxConvUTF8)));
+   const layprop::tellRGB color = PROPC->getColor(std::string(color_name.mb_str(wxConvUTF8)));
    _sample->setColor(color);
 
    //Next 2 strings need for Windows version
-   const byte* fill = DATC->getFill(std::string(_fillname.mb_str(wxConvUTF8)));
+   const byte* fill = PROPC->getFill(std::string(_fillname.mb_str(wxConvUTF8)));
    _sample->setFill(fill);
 
    _sample->Refresh();
@@ -1050,7 +1051,7 @@ void tui::defineLayer::OnColorChanged(wxCommandEvent& cmdevent)
 void tui::defineLayer::OnFillChanged(wxCommandEvent& cmdevent)
 {
    _fillname = cmdevent.GetString();
-   const byte* fill = DATC->getFill(std::string(_fillname.mb_str(wxConvUTF8)));
+   const byte* fill = PROPC->getFill(std::string(_fillname.mb_str(wxConvUTF8)));
    _sample->setFill(fill);
    _sample->Refresh();
 }
@@ -1058,7 +1059,7 @@ void tui::defineLayer::OnFillChanged(wxCommandEvent& cmdevent)
 void tui::defineLayer::OnLineChanged(wxCommandEvent& cmdevent)
 {
    wxString line_name = cmdevent.GetString();
-   const layprop::LineSettings* line = DATC->getLine(std::string(line_name.mb_str(wxConvUTF8)));
+   const layprop::LineSettings* line = PROPC->getLine(std::string(line_name.mb_str(wxConvUTF8)));
    _sample->setLine(line);
    _sample->Refresh();
 }
@@ -1074,9 +1075,9 @@ void tui::defineLayer::OnDefaultColor(wxCommandEvent& cmdevent)
    bool selected = (0 != cmdevent.GetInt());
    _colors->Enable(!selected);
    if (selected)
-      _sample->setColor(DATC->getColor(std::string("")));
+      _sample->setColor(PROPC->getColor(std::string("")));
    else
-      _sample->setColor(DATC->getColor(std::string(_colors->GetStringSelection().mb_str(wxConvUTF8))));
+      _sample->setColor(PROPC->getColor(std::string(_colors->GetStringSelection().mb_str(wxConvUTF8))));
    _sample->Refresh();
 }
 
@@ -1086,9 +1087,9 @@ void tui::defineLayer::OnDefaultPattern(wxCommandEvent& cmdevent)
    _fills->Enable(!selected);
    const byte* fill;
    if (selected)
-      fill = DATC->getFill(std::string(""));
+      fill = PROPC->getFill(std::string(""));
    else
-      fill = DATC->getFill(std::string(_fills->GetStringSelection().mb_str(wxConvUTF8)));
+      fill = PROPC->getFill(std::string(_fills->GetStringSelection().mb_str(wxConvUTF8)));
    _sample->setFill(fill);
    _sample->Refresh();
 }
@@ -1099,9 +1100,9 @@ void tui::defineLayer::OnDefaultLine(wxCommandEvent& cmdevent)
    _lines->Enable(!selected);
    const layprop::LineSettings* line;
    if (selected)
-      line = DATC->getLine(std::string(""));
+      line = PROPC->getLine(std::string(""));
    else
-      line = DATC->getLine(std::string(_lines->GetStringSelection().mb_str(wxConvUTF8)));
+      line = PROPC->getLine(std::string(_lines->GetStringSelection().mb_str(wxConvUTF8)));
    _sample->setLine(line);
    _sample->Refresh();
 }
@@ -1147,7 +1148,7 @@ END_EVENT_TABLE()
 tui::color_sample::color_sample(wxWindow *parent, wxWindowID id, wxPoint pos,
    wxSize size, std::string init) : wxWindow(parent, id, pos, size, wxSUNKEN_BORDER)
 {
-   setColor(DATC->getColor(init));
+   setColor(PROPC->getColor(init));
 }
 
 void tui::color_sample::setColor(const layprop::tellRGB& col)
@@ -1184,7 +1185,7 @@ tui::defineColor::defineColor(wxFrame *parent, wxWindowID id, const wxString &ti
 {
    std::string init_color;
    nameList all_names;
-   DATC->all_colors(all_names);
+   PROPC->all_colors(all_names);
    _colorList = DEBUG_NEW wxListBox(this, ID_ITEMLIST, wxDefaultPosition, wxSize(150,200), 0, NULL, wxLB_SORT);
    if (!all_names.empty())
    {
@@ -1194,7 +1195,7 @@ tui::defineColor::defineColor(wxFrame *parent, wxWindowID id, const wxString &ti
    for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
    {
       _colorList->Append(wxString(CI->c_str(), wxConvUTF8));
-      _allColors[*CI] = DEBUG_NEW layprop::tellRGB(DATC->getColor(*CI));
+      _allColors[*CI] = DEBUG_NEW layprop::tellRGB(PROPC->getColor(*CI));
    }
    // NOTE! Static boxes MUST be created before all other controls which are about to
    // be encircled by them. Otherwise the dialog box might work somewhere (Windows & fc8)
@@ -1256,7 +1257,7 @@ tui::defineColor::defineColor(wxFrame *parent, wxWindowID id, const wxString &ti
 
    // Buttons
    wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
-   button_sizer->Add(0,0,1); // 
+   button_sizer->Add(0,0,1); //
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK    , wxT("OK") ), 0, wxALL, 5 );
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel")  ), 0, wxALL, 5 );
 
@@ -1279,7 +1280,7 @@ void tui::defineColor::OnDefineColor(wxCommandEvent& cmdevent)
 {
    nameList all_names;
    wxColourData data;
-   DATC->all_colors(all_names);
+   PROPC->all_colors(all_names);
    word colnum = 0;
    const layprop::tellRGB* tell_color;
    for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
@@ -1305,7 +1306,7 @@ void tui::defineColor::OnDefineColor(wxCommandEvent& cmdevent)
    {
       wxColourData retData = dialog.GetColourData();
       wxColour col = retData.GetColour();
-   
+
       wxString channel;
       channel << col.Red();
       _c_red->SetValue(channel);channel.Clear();
@@ -1323,7 +1324,7 @@ void tui::defineColor::OnColorSelected(wxCommandEvent& cmdevent)
 {
     wxString color_name = cmdevent.GetString();
    const layprop::tellRGB* scol = getColor(std::string(color_name.mb_str(wxConvUTF8)));
-   
+
    wxString channel;
    channel << scol->red();
    _c_red->SetValue(channel);channel.Clear();
@@ -1333,7 +1334,7 @@ void tui::defineColor::OnColorSelected(wxCommandEvent& cmdevent)
    _c_blue->SetValue(channel);channel.Clear();
    channel << scol->alpha();
    _c_alpha->SetValue(channel);channel.Clear();
-   
+
    FindWindow(ID_BTNAPPLY)->Enable(false);
 }
 
@@ -1347,7 +1348,7 @@ void tui::defineColor::OnColorPropChanged(wxCommandEvent& WXUNUSED(event))
    unsigned long d_green;s_green.ToULong(&d_green);
    unsigned long d_blue;  s_blue.ToULong(&d_blue);
    unsigned long d_alpha;s_alpha.ToULong(&d_alpha);
-   
+
    _colorsample->setColor(layprop::tellRGB(d_red, d_green, d_blue, d_alpha));
    _colorsample->Refresh();
    FindWindow(ID_BTNAPPLY)->Enable(true);
@@ -1419,7 +1420,7 @@ void tui::defineColor::OnApply(wxCommandEvent& WXUNUSED(event))
    unsigned long d_green;s_green.ToULong(&d_green);
    unsigned long d_blue;  s_blue.ToULong(&d_blue);
    unsigned long d_alpha;s_alpha.ToULong(&d_alpha);
-   
+
    layprop::tellRGB* scol = DEBUG_NEW layprop::tellRGB(d_red, d_green, d_blue, d_alpha);
    std::string ss_name(s_name.mb_str(wxConvUTF8));
    if (_allColors.end() != _allColors.find(ss_name))
@@ -1570,33 +1571,33 @@ tui::drawFillDef::drawFillDef(wxWindow *parent, wxWindowID id, const wxString &t
                                    wxDefaultPosition, wxDefaultSize,
                                    WXSIZEOF(brushsize), brushsize);
 
-   
+
    wxBoxSizer *vsizer1 = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    vsizer1->Add( _radioBrushSize , 0, wxALL, 5);
    vsizer1->Add(DEBUG_NEW wxButton( this, ID_BTNCLEAR , wxT(" Clear ") , wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT ),
                 0, wxALL | wxALIGN_RIGHT, 5);
    vsizer1->Add(DEBUG_NEW wxButton( this, ID_BTNFILL  , wxT(" Fill  "), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT ),
                 0, wxALL | wxALIGN_RIGHT, 5);
-   
+
    _sampleDraw = DEBUG_NEW pattern_canvas(this, -1, wxDefaultPosition, wxSize(256,256), init);
-   
+
    wxBoxSizer *hsizer1 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    hsizer1->Add( _sampleDraw , 0, wxALL, 5);
    hsizer1->Add( vsizer1   , 0, wxEXPAND);
-   
+
    wxBoxSizer *hsizer2 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    hsizer2->Add(0,0,1);
    hsizer2->Add(DEBUG_NEW wxButton( this, wxID_OK    , wxT("OK") ), 0, wxALL, 5);
    hsizer2->Add(DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 5);
-   
+
    wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    topsizer->Add( hsizer1 , 0, wxEXPAND);
    topsizer->Add( hsizer2 , 0, wxEXPAND);
-   
+
    SetSizer( topsizer );      // use the sizer for layout
 
    topsizer->SetSizeHints( this );   // set size hints to honour minimum size
-   
+
 }
 
 void tui::drawFillDef::OnClear(wxCommandEvent& WXUNUSED(event))
@@ -1638,7 +1639,7 @@ END_EVENT_TABLE()
 tui::fill_sample::fill_sample(wxWindow *parent, wxWindowID id, wxPoint pos,
    wxSize size, std::string init) : wxWindow(parent, id, pos, size, wxSUNKEN_BORDER)
 {
-   setFill(DATC->getFill(init));
+   setFill(PROPC->getFill(init));
 }
 
 void tui::fill_sample::setFill(const byte* fill)
@@ -1681,9 +1682,9 @@ tui::defineFill::defineFill(wxFrame *parent, wxWindowID id, const wxString &titl
       wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)
 {
    nameList all_names;
-   DATC->all_fills(all_names);
+   PROPC->all_fills(all_names);
    _fillList = DEBUG_NEW wxListBox(this, ID_ITEMLIST, wxDefaultPosition, wxSize(150,200), 0, NULL, wxLB_SORT);
-   std::string init_color; 
+   std::string init_color;
    if (!all_names.empty())
    {
       init_color = *(all_names.begin());
@@ -1692,7 +1693,7 @@ tui::defineFill::defineFill(wxFrame *parent, wxWindowID id, const wxString &titl
    {
       _fillList->Append(wxString(CI->c_str(), wxConvUTF8));
       byte* pat = DEBUG_NEW byte[128];
-      fillcopy(DATC->getFill(*CI), pat);
+      fillcopy(PROPC->getFill(*CI), pat);
       _allFills[*CI] = pat;
    }
    // NOTE! Static boxes MUST be created before all other controls which are about to
@@ -1717,7 +1718,7 @@ tui::defineFill::defineFill(wxFrame *parent, wxWindowID id, const wxString &titl
 
    // Buttons
    wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
-   button_sizer->Add(0,0,1); // 
+   button_sizer->Add(0,0,1); //
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK    , wxT("OK") ), 0, wxALL, 5 );
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel")  ), 0, wxALL, 5 );
 
@@ -1809,7 +1810,7 @@ void tui::defineFill::OnDefineFill(wxCommandEvent& cmdevent)
       {
          fillcopy(_current_pattern, _allFills[ss_name]);
       }
-      
+
    }
 }
 
@@ -1837,8 +1838,8 @@ tui::defineFill::~defineFill()
 
 
 //==========================================================================
-tui::nameCboxRecords::nameCboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz, 
-            const SIMap& inlays, wxArrayString& all_strings, int row_height) 
+tui::nameCboxRecords::nameCboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
+            const SIMap& inlays, wxArrayString& all_strings, int row_height)
             : wxPanel(parent, wxID_ANY, pnt, sz)
 {
    _cifMap = DATC->secureCifLayMap(true);
@@ -1848,7 +1849,7 @@ tui::nameCboxRecords::nameCboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
       wxString cifln  = wxString(CNM->first.c_str(), wxConvUTF8);
       word tdtLay;
       if (!_cifMap->getTdtLay(tdtLay, CNM->first)) tdtLay = CNM->second;
-      wxString wxics  = wxString(DATC->getLayerName(tdtLay).c_str(), wxConvUTF8);
+      wxString wxics  = wxString(PROPC->getLayerName(tdtLay).c_str(), wxConvUTF8);
 
       wxCheckBox* dwciflay  = DEBUG_NEW wxCheckBox( this, wxID_ANY, cifln,
          wxPoint(  5,(row_height+5)*rowno + 5), wxSize(100,row_height) );
@@ -1870,10 +1871,10 @@ SIMap* tui::nameCboxRecords::getTheMap()
       // the user didn't put a tdt correspondence for this CIF layer - so we'll try to use the CIF name
       if ("" == layname)
          layname = std::string(CNM->_ciflay->GetLabel().mb_str(wxConvUTF8));
-      unsigned layno = DATC->getLayerNo(layname);
+      unsigned layno = PROPC->getLayerNo(layname);
       if (ERR_LAY == layno)
       {
-         layno = DATC->addlayer(layname);
+         layno = PROPC->addlayer(layname);
          TpdPost::layer_add(layname, layno);
       }
       (*cif_lay_map)[std::string(CNM->_ciflay->GetLabel().mb_str(wxConvUTF8))] = layno;
@@ -1890,8 +1891,8 @@ USMap* tui::nameCboxRecords::getTheFullMap()
 }
 
 //==========================================================================
-tui::nameCbox3Records::nameCbox3Records( wxWindow *parent, wxPoint pnt, wxSize sz, 
-            const ExtLayers& inlays, wxArrayString& all_strings, int row_height) 
+tui::nameCbox3Records::nameCbox3Records( wxWindow *parent, wxPoint pnt, wxSize sz,
+            const ExtLayers& inlays, wxArrayString& all_strings, int row_height)
             : wxPanel(parent, wxID_ANY, pnt, sz)
 {
    _gdsLayMap = DATC->secureGdsLayMap(true);
@@ -1906,7 +1907,7 @@ tui::nameCbox3Records::nameCbox3Records( wxWindow *parent, wxPoint pnt, wxSize s
          sGdsDtype << *CTP;
          word wTdtLay;
          if (!_gdsLayMap->getTdtLay( wTdtLay, CNM->first, *CTP)) wTdtLay = CNM->first;
-         wxString sTdtLay(DATC->getLayerName(CNM->first).c_str(), wxConvUTF8);
+         wxString sTdtLay(PROPC->getLayerName(CNM->first).c_str(), wxConvUTF8);
 
          wxCheckBox* dwgdslay  = DEBUG_NEW wxCheckBox( this, wxID_ANY, sGdsLay,
             wxPoint(  5,(row_height+5)*rowno + 5), wxSize(55,row_height), wxALIGN_LEFT );
@@ -1935,7 +1936,7 @@ USMap* tui::nameCbox3Records::getTheMap()
          CNM->_gdslay->GetLabel().ToLong(&lint);
          layno = lint;
       }
-      else layno = DATC->getLayerNo(layname);
+      else layno = PROPC->getLayerNo(layname);
       std::ostringstream gdslaytype;
       if (gds_lay_map->end() != gds_lay_map->find(layno))
          gdslaytype << (*gds_lay_map)[layno] << ","
@@ -1966,7 +1967,7 @@ tui::nameCboxList::nameCboxList(wxWindow* parent, wxWindowID id, wxPoint pnt, wx
 {
    // collect all defined layers
    nameList all_names;
-   DATC->all_layers(all_names);
+   PROPC->all_layers(all_names);
    wxArrayString all_strings;
    int line_height = (int)(GetFont().GetPointSize() * 2.5);
    for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
@@ -2009,7 +2010,7 @@ tui::nameCbox3List::nameCbox3List(wxWindow* parent, wxWindowID id, wxPoint pnt, 
 {
    // collect all defined layers
    nameList all_names;
-   DATC->all_layers(all_names);
+   PROPC->all_layers(all_names);
    wxArrayString all_strings;
    int line_height = (int)(GetFont().GetPointSize() * 2.5);
    for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
@@ -2043,7 +2044,7 @@ void tui::nameCbox3List::OnSize( wxSizeEvent &WXUNUSED(event) )
 }
 
 //==========================================================================
-tui::nameEboxRecords::nameEboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz, 
+tui::nameEboxRecords::nameEboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
             const WordList& inlays, wxArrayString& all_strings, int row_height)
             : wxPanel(parent, wxID_ANY, pnt, sz)
 {
@@ -2052,7 +2053,7 @@ tui::nameEboxRecords::nameEboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
    for (WordList::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
    {
       word layno = *CNM;
-      wxString tpdlay  = wxString(DATC->getLayerName(*CNM).c_str(), wxConvUTF8);
+      wxString tpdlay  = wxString(PROPC->getLayerName(*CNM).c_str(), wxConvUTF8);
       wxString ciflay;
       std::string cifName;
       if ( _cifMap->getCifLay(cifName, layno) )
@@ -2078,7 +2079,7 @@ USMap* tui::nameEboxRecords::getTheMap()
       if (!CNM->_tdtlay->GetValue()) continue;
       std::string layname = std::string(CNM->_tdtlay->GetLabel().mb_str(wxConvUTF8));
       assert("" != layname);
-      unsigned layno = DATC->getLayerNo(layname);
+      unsigned layno = PROPC->getLayerNo(layname);
       assert(layno);
       (*cif_lay_map)[layno] = std::string(CNM->_ciflay->GetValue().mb_str(wxConvUTF8));
    }
@@ -2103,7 +2104,7 @@ tui::nameEboxList::nameEboxList(wxWindow* parent, wxWindowID id, wxPoint pnt, wx
 {
    // collect all defined layers
    nameList all_names;
-   DATC->all_layers(all_names);
+   PROPC->all_layers(all_names);
    wxArrayString all_strings;
    int line_height = (int)(GetFont().GetPointSize() * 2.5);
    for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
@@ -2137,7 +2138,7 @@ void tui::nameEboxList::OnSize( wxSizeEvent &WXUNUSED(event) )
 }
 
 //==========================================================================
-tui::nameEbox3Records::nameEbox3Records( wxWindow *parent, wxPoint pnt, wxSize sz, 
+tui::nameEbox3Records::nameEbox3Records( wxWindow *parent, wxPoint pnt, wxSize sz,
             const WordList& inlays, wxArrayString& all_strings, int row_height)
             : wxPanel(parent, wxID_ANY, pnt, sz)
 {
@@ -2151,7 +2152,7 @@ tui::nameEbox3Records::nameEbox3Records( wxWindow *parent, wxPoint pnt, wxSize s
          wGdsLay  = *CNM;
          wGdsType = 0;
       }
-      wxString tpdlay  = wxString(DATC->getLayerName(*CNM).c_str(), wxConvUTF8);
+      wxString tpdlay  = wxString(PROPC->getLayerName(*CNM).c_str(), wxConvUTF8);
       wxString gdslay, gdstype;
       gdslay << wGdsLay;
       gdstype <<wGdsType;
@@ -2176,7 +2177,7 @@ USMap* tui::nameEbox3Records::getTheMap()
       if (!CNM->_tdtlay->GetValue()) continue;
       std::string layname = std::string(CNM->_tdtlay->GetLabel().mb_str(wxConvUTF8));
       assert("" != layname);
-      unsigned layno = DATC->getLayerNo(layname);
+      unsigned layno = PROPC->getLayerNo(layname);
       assert(layno);
       std::ostringstream gdslaytype;
       gdslaytype <<  std::string(CNM->_gdslay->GetValue().mb_str(wxConvUTF8)) << ";"
@@ -2204,7 +2205,7 @@ tui::nameEbox3List::nameEbox3List(wxWindow* parent, wxWindowID id, wxPoint pnt, 
 {
    // collect all defined layers
    nameList all_names;
-   DATC->all_layers(all_names);
+   PROPC->all_layers(all_names);
    wxArrayString all_strings;
    int line_height = (int)(GetFont().GetPointSize() * 2.5);
    for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
@@ -2276,7 +2277,7 @@ tui::cadenceConvert::cadenceConvert(wxFrame *parent, wxWindowID id, const wxStri
       vertSizer->Add(displaySizer, 0, wxEXPAND ); // no border and centre horizontally
       vertSizer->Add(techSizer, 0, wxEXPAND/*wxALIGN_CENTER*/ );
       vertSizer->Add(outputSizer, 0, wxEXPAND/*wxALIGN_CENTER*/ );
-   
+
    topSizer->Add(vertSizer, 0, wxEXPAND);
    topSizer->Add(10,10,0);
    topSizer->Add(DEBUG_NEW wxButton( this, ID_BTNCONVERT, wxT("Convert") ), 0, wxALIGN_CENTER , 0 );
@@ -2290,7 +2291,7 @@ void  tui::cadenceConvert::onDisplayAdd(wxCommandEvent& evt)
    wxFileDialog dlg(this, wxT("Select a display file"), wxT(""), wxT(""),
       wxT("Display files (*.drf)|*.drf|All files(*.*)|*.*"),
       tpdfOPEN);
-   if (wxID_OK == dlg.ShowModal()) 
+   if (wxID_OK == dlg.ShowModal())
    {
       wxString filename = dlg.GetPath();
       wxString ost;
@@ -2303,7 +2304,7 @@ void  tui::cadenceConvert::onTechAdd(wxCommandEvent& evt)
    wxFileDialog dlg(this, wxT("Select a tech file"), wxT(""), wxT(""),
       wxT("All files(*.*)|*.*"),
       tpdfOPEN);
-   if (wxID_OK == dlg.ShowModal()) 
+   if (wxID_OK == dlg.ShowModal())
    {
       wxString filename = dlg.GetPath();
       wxString ost;
@@ -2316,7 +2317,7 @@ void  tui::cadenceConvert::onOutputFile(wxCommandEvent& evt)
    wxFileDialog dlg(this, wxT("Select output tell file"), wxT(""), wxT(""),
       wxT("tell files (*.tll)|*.tll|All files(*.*)|*.*"),
       tpdfSAVE|wxFD_OVERWRITE_PROMPT);
-   if (wxID_OK == dlg.ShowModal()) 
+   if (wxID_OK == dlg.ShowModal())
    {
       wxString filename = dlg.GetPath();
       wxString ost;
@@ -2358,7 +2359,7 @@ void tui::cadenceConvert::onConvert(wxCommandEvent& evt)
       str.Append(wxT("virtuoso2tll.ss "));
 #endif
 
-      //prepare command line arguments 
+      //prepare command line arguments
       wxString strtemp = _outputFile->GetValue();
       str.Append(strtemp);
       str.Append(wxT(" "));

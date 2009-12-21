@@ -524,7 +524,7 @@ void laydata::TdtCell::motion_draw(const layprop::DrawProperties& drawprop,
    }
 }
 
-bool laydata::TdtCell::getshapeover(TP pnt, layprop::ViewProperties& viewprop)
+bool laydata::TdtCell::getshapeover(TP pnt, layprop::PropertyCenter& viewprop)
 {
    laydata::TdtData* shape = NULL;
    typedef LayerList::const_iterator LCI;
@@ -535,7 +535,7 @@ bool laydata::TdtCell::getshapeover(TP pnt, layprop::ViewProperties& viewprop)
    return false;
 }
 
-laydata::AtticList* laydata::TdtCell::changeselect(TP pnt, SH_STATUS status, layprop::ViewProperties& viewprop)
+laydata::AtticList* laydata::TdtCell::changeselect(TP pnt, SH_STATUS status, layprop::PropertyCenter& viewprop)
 {
    laydata::TdtData* prev = NULL, *shape = NULL;
    unsigned prevlay;
@@ -585,7 +585,7 @@ laydata::AtticList* laydata::TdtCell::changeselect(TP pnt, SH_STATUS status, lay
    else return NULL;
 }
 
-laydata::TdtCellRef* laydata::TdtCell::getcellover(TP pnt, ctmstack& transtack, CellRefStack* refstack, layprop::ViewProperties& viewprop)
+laydata::TdtCellRef* laydata::TdtCell::getcellover(TP pnt, ctmstack& transtack, CellRefStack* refstack, layprop::PropertyCenter& viewprop)
 {
     if (_layers.end() == _layers.find(REF_LAY)) return NULL;
     laydata::TdtData *cellobj = NULL;
@@ -818,7 +818,7 @@ DBbox laydata::TdtCell::updateVisibleOverlap(const layprop::DrawProperties& prop
    return _vlOverlap;
 }
 
-void laydata::TdtCell::select_inBox(DBbox select_in, layprop::ViewProperties& viewprop, bool pntsel)
+void laydata::TdtCell::select_inBox(DBbox select_in, layprop::PropertyCenter& viewprop, bool pntsel)
 {
    // check that current cell is within
    if (0ll != select_in.cliparea(_cellOverlap))
@@ -842,7 +842,7 @@ void laydata::TdtCell::select_inBox(DBbox select_in, layprop::ViewProperties& vi
    }
 }
 
-void laydata::TdtCell::unselect_inBox(DBbox select_in, bool pntsel, layprop::ViewProperties& viewprop)
+void laydata::TdtCell::unselect_inBox(DBbox select_in, bool pntsel, layprop::PropertyCenter& viewprop)
 {
    // check that current cell is within
    if (0ll != select_in.cliparea(_cellOverlap))
@@ -870,7 +870,7 @@ void laydata::TdtCell::unselect_inBox(DBbox select_in, bool pntsel, layprop::Vie
    }
 }
 
-void laydata::TdtCell::select_fromList(SelectList* slist, layprop::ViewProperties& viewprop)
+void laydata::TdtCell::select_fromList(SelectList* slist, layprop::PropertyCenter& viewprop)
 {
    DataList* ssl;
    for (SelectList::const_iterator CL = slist->begin(); CL != slist->end(); CL++)
@@ -891,7 +891,7 @@ void laydata::TdtCell::select_fromList(SelectList* slist, layprop::ViewPropertie
    delete slist;
 }
 
- void laydata::TdtCell::unselect_fromList(SelectList* unslist, layprop::ViewProperties& viewprop) {
+ void laydata::TdtCell::unselect_fromList(SelectList* unslist, layprop::PropertyCenter& viewprop) {
    DataList* lslct = NULL;
    DataList::iterator CI;
    // for every layer in the unselect list
@@ -1426,7 +1426,7 @@ bool laydata::TdtCell::destroy_this(laydata::TdtLibDir* libdir, TdtData* ds, uns
    return overlapChanged(old_overlap, (*libdir)());
 }
 
-void laydata::TdtCell::select_all(layprop::ViewProperties& viewprop)
+void laydata::TdtCell::select_all(layprop::PropertyCenter& viewprop)
 {
    // This method might be called redundant, because the result of the
    // call select_inBox(overlap(),...) will produce the same results.
