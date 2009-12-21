@@ -94,7 +94,7 @@ namespace layprop {
          bool              hidden()   const {return _hidden;}
          bool              locked()   const {return _locked;}
          void              fillLayer(bool filled)  {_filled = filled;};
-         friend class ViewProperties;
+         friend class PropertyCenter;
       private:
          std::string       _name;
          std::string       _color;
@@ -245,7 +245,7 @@ namespace layprop {
    - locked properties - these are the properties that stay constant during the
    drawing process. It is important to note that the class can not change
    those properties, despite the fact that these are fields of its own. Instead
-   a friend class ViewProperties is doing this. The reason for this is primarily
+   a friend class PropertyCenter is doing this. The reason for this is primarily
    thread safety.
    - Changeable properties - these are changed during the drawing process - for
    example current drawing layer, colors etc.
@@ -301,7 +301,7 @@ namespace layprop {
          bool                       isCellBoxHidden()    {return _cellbox_hidden;}
          bool                       adjustTextOrientation() const
                                                          {return _adjustTextOrientation;}
-         friend class ViewProperties;
+         friend class PropertyCenter;
       protected:
          laySetList                 _laysetDB;
          laySetList                 _laysetDRC;

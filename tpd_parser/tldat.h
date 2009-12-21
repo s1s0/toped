@@ -216,8 +216,6 @@ namespace telldata {
    class ttstring: public tell_var {
    public:
                            ttstring() : tell_var(tn_string) {}
-                           ttstring(char* value) :
-                                              tell_var(tn_layout), _value(value) {}
                            ttstring(const std::string& value):
                                               tell_var(tn_string), _value(value) {};
                            ttstring(const ttstring& cobj) :

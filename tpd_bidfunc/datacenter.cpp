@@ -37,7 +37,8 @@
 #include "tenderer.h"
 
 // Global variables
-DataCenter*                      DATC = NULL;
+DataCenter*                      DATC  = NULL;
+extern layprop::PropertyCenter*  PROPC;
 extern const wxEventType         wxEVT_CMD_BROWSER;
 
 //-----------------------------------------------------------------------------
@@ -47,7 +48,7 @@ DataCenter::DataCenter(const std::string& localDir, const std::string& globalDir
 {
    _localDir = localDir;
    _globalDir = globalDir;
-	_GDSDB = NULL; _CIFDB = NULL;_OASDB = NULL; _DRCDB = NULL;//_TEDDB = NULL;
+   _GDSDB = NULL; _CIFDB = NULL;_OASDB = NULL; _DRCDB = NULL;//_TEDDB = NULL;
    _bpSync = NULL;
    // initializing the static cell hierarchy tree
    laydata::TdtLibrary::initHierTreePtr();
@@ -126,9 +127,9 @@ bool DataCenter::TDTread(std::string filename)
    _tedfilename = filename;
    _neversaved = false;
    _TEDLIB.setDB(static_cast<laydata::TdtDesign*>(tempin.design()));
-   _TEDLIB()->assign_properties(_properties);
+   _TEDLIB()->assign_properties(*PROPC);//TODO <-- This shoudn't be needed anymore having a global variable
    // Update Canvas scale
-   _properties.setUU(_TEDLIB()->UU());
+   PROPC->setUU(_TEDLIB()->UU());
    return true;
 }
 
@@ -469,8 +470,8 @@ void DataCenter::PSexport(laydata::TdtCell* cell, std::string& filename)
 {
    //Get actual time
    PSFile psex(filename);
-   _properties.drawprop().PSwrite(psex);
-   _TEDLIB()->PSwrite(psex, cell, _properties.drawprop());
+   PROPC->drawprop().PSwrite(psex);
+   _TEDLIB()->PSwrite(psex, cell, PROPC->drawprop());
 //   gdsex.closeFile();
 }
 
@@ -489,10 +490,10 @@ void DataCenter::newDesign(std::string name, time_t created)
       _TEDLIB.deleteDB();
    }
    _TEDLIB.setDB(DEBUG_NEW laydata::TdtDesign(name, created, created));
-   _TEDLIB()->assign_properties(_properties);
+   _TEDLIB()->assign_properties(*PROPC);//TODO <-- This shoudn't be needed anymore having a global variable
    _tedfilename = _localDir + name + ".tdt";
    _neversaved = true;
-   _properties.setUU(_TEDLIB()->UU());
+   PROPC->setUU(_TEDLIB()->UU());
 }
 
 laydata::TdtDesign*  DataCenter::lockDB(bool checkACTcell)
@@ -613,14 +614,14 @@ void DataCenter::bpAddGdsTab()
       tell_log(console::MT_ERROR,"GDS Mutex deadlocked!");
       return;
    }
-   // initialise the thread condition with the locked Mutex
+   // Initialize the thread condition with the locked Mutex
    _bpSync = new wxCondition(_GDSLock);
    // post a message to the main thread
    TpdPost::addGDStab();
    // Go to sleep and wait until the main thread finished
    // updating the browser panel
    _bpSync->Wait();
-   // Wake-up & uplock the mutex
+   // Wake-up & unlock the mutex
    VERIFY(wxMUTEX_NO_ERROR == _GDSLock.Unlock());
    // clean-up behind & prepare for the consequent use
    delete _bpSync;
@@ -706,7 +707,7 @@ void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,
          {
             assert ("" != name);
             CTM eqm(trans);
-            eqm.Scale(1/(UU()*OPENGL_FONT_UNIT), 1/(UU()*OPENGL_FONT_UNIT));
+            eqm.Scale(1/(PROPC->UU()*OPENGL_FONT_UNIT), 1/(PROPC->UU()*OPENGL_FONT_UNIT));
             _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::TdtTmpText(name, eqm) );
             break;
          }
@@ -723,26 +724,26 @@ void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,
 
 void DataCenter::mousePoint(TP p)
 {
-   if ((console::op_line == currentop()) || _drawruler)
-      _properties.mousePoint(p);
-   if ((NULL != _TEDLIB()) && (console::op_cbind != currentop())
-                           && (console::op_abind != currentop())
-                           && (console::op_tbind != currentop())
-                           && (console::op_line  != currentop()) )
+   if ((console::op_line == PROPC->currentop()) || _drawruler)
+      PROPC->mousePoint(p);
+   if ((NULL != _TEDLIB()) && (console::op_cbind != PROPC->currentop())
+                           && (console::op_abind != PROPC->currentop())
+                           && (console::op_tbind != PROPC->currentop())
+                           && (console::op_line  != PROPC->currentop()) )
       _TEDLIB()->mousePoint(p);
 }
 
 void DataCenter::mousePointCancel(TP& lp)
 {
-   if (console::op_line == currentop()) return;
+   if (console::op_line == PROPC->currentop()) return;
    if (_TEDLIB())
       _TEDLIB()->mousePointCancel(lp);
 }
 
 void DataCenter::mouseStop()
 {
-   if (console::op_line == currentop())
-      _properties.mouseStop();
+   if (console::op_line == PROPC->currentop())
+      PROPC->mouseStop();
    else if (_TEDLIB()) _TEDLIB()->mouseStop();
    else throw EXPTNactive_DB();
 }
@@ -759,7 +760,7 @@ void DataCenter::mouseRotate()
 
 void DataCenter::render(const CTM& layCTM)
 {
-   if (_properties.renderType())
+   if (PROPC->renderType())
       openGL_render(layCTM);
    else
       openGL_draw(layCTM);
@@ -773,17 +774,17 @@ void DataCenter::openGL_draw(const CTM& layCTM)
       // locked. This will block all redraw activities including UI
       // which have nothing to do with the DB. Drop a message in the log
       // and keep going!
-      if (wxMUTEX_NO_ERROR != _PROPLock.TryLock())
-      {
-         // If property DB is locked - we can't do much drawing even if the
-         // DB is not locked. In the same time there should not be an operation
-         // which holds the property DB lock for a long time. So it should be
-         // rather an exception
-         tell_log(console::MT_INFO,std::string("Property DB busy. Viewport redraw skipped"));
-         return;
-      }
-      _properties.drawGrid();
-      _properties.drawZeroCross();
+//      if (wxMUTEX_NO_ERROR != _PROPLock.TryLock())
+//      {
+//         // If property DB is locked - we can't do much drawing even if the
+//         // DB is not locked. In the same time there should not be an operation
+//         // which holds the property DB lock for a long time. So it should be
+//         // rather an exception
+//         tell_log(console::MT_INFO,std::string("Property DB busy. Viewport redraw skipped"));
+//         return;
+//      }
+      PROPC->drawGrid();
+      PROPC->drawZeroCross();
       if (wxMUTEX_NO_ERROR != _DBLock.TryLock())
       {
          // If DB is locked - skip the DB drawing, but draw all the property DB stuff
@@ -794,15 +795,15 @@ void DataCenter::openGL_draw(const CTM& layCTM)
 #ifdef RENDER_PROFILING
          HiResTimer rendTimer;
 #endif
-         // Thereis no need to check for an active cell. If there isn't one
+         // There is no need to check for an active cell. If there isn't one
          // the function will return silently.
-         _TEDLIB()->openGL_draw(_properties.drawprop());
+         _TEDLIB()->openGL_draw(PROPC->drawprop());
          if(_DRCDB)
          {
             laydata::TdtDefaultCell* dst_structure = _DRCDB->checkcell("drc");
             if (dst_structure)
             {
-               dst_structure->openGL_draw(_properties.drawprop());
+               dst_structure->openGL_draw(PROPC->drawprop());
             }
          }
 #ifdef RENDER_PROFILING
@@ -810,8 +811,8 @@ void DataCenter::openGL_draw(const CTM& layCTM)
 #endif
          VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
       }
-      _properties.drawRulers(layCTM);
-      _PROPLock.Unlock();
+      PROPC->drawRulers(layCTM);
+//      _PROPLock.Unlock();
    }
 }
 
@@ -823,20 +824,20 @@ void DataCenter::openGL_render(const CTM& layCTM)
       // locked. This will block all redraw activities including UI
       // which have nothing to do with the DB. Drop a message in the log
       // and keep going!
-      if (wxMUTEX_NO_ERROR != _PROPLock.TryLock())
-      {
-         // If property DB is locked - we can't do much drawing even if the
-         // DB is not locked. In the same time there should not be an operation
-         // which holds the property DB lock for a long time. So it should be
-         // rather an exception
-         tell_log(console::MT_INFO,std::string("Property DB busy. Viewport redraw skipped"));
-         return;
-      }
-      tenderer::TopRend renderer( _properties.drawprop_ptr(), _properties.UU());
+//      if (wxMUTEX_NO_ERROR != _PROPLock.TryLock())
+//      {
+//         // If property DB is locked - we can't do much drawing even if the
+//         // DB is not locked. In the same time there should not be an operation
+//         // which holds the property DB lock for a long time. So it should be
+//         // rather an exception
+//         tell_log(console::MT_INFO,std::string("Property DB busy. Viewport redraw skipped"));
+//         return;
+//      }
+      tenderer::TopRend renderer( PROPC->drawprop_ptr(), PROPC->UU());
       // render the grid
       for (byte gridNo = 0; gridNo < 3; gridNo++)
       {
-         const layprop::LayoutGrid* cgrid = _properties.grid(gridNo);
+         const layprop::LayoutGrid* cgrid = PROPC->grid(gridNo);
          if ((NULL !=  cgrid) && cgrid->visual())
             renderer.Grid(cgrid->step(), cgrid->color());
       }
@@ -855,17 +856,17 @@ void DataCenter::openGL_render(const CTM& layCTM)
          // Thereis no need to check for an active cell. If there isn't one
          // the function will return silently.
          _TEDLIB()->openGL_render(renderer);
-			if(_DRCDB)
-			{
-				renderer.setState(layprop::DRC);
-				laydata::TdtDefaultCell* dst_structure = _DRCDB->checkcell("drc");
-				if (dst_structure)
-				{
-					dst_structure->openGL_render(renderer, CTM(), false, false);
-				}
-				renderer.setState(layprop::DB);
-			}
-			//_DRCDB->openGL_draw(_properties.drawprop());
+         if(_DRCDB)
+         {
+            renderer.setState(layprop::DRC);
+            laydata::TdtDefaultCell* dst_structure = _DRCDB->checkcell("drc");
+            if (dst_structure)
+            {
+               dst_structure->openGL_render(renderer, CTM(), false, false);
+            }
+            renderer.setState(layprop::DB);
+         }
+         //_DRCDB->openGL_draw(_properties.drawprop());
 #ifdef RENDER_PROFILING
          rendTimer.report("Time elapsed for data traversing: ");
 #endif
@@ -882,26 +883,24 @@ void DataCenter::openGL_render(const CTM& layCTM)
          }
          VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
       }
-      _properties.drawRulers(layCTM);
-      _PROPLock.Unlock();
+      PROPC->drawRulers(layCTM);
+//      _PROPLock.Unlock();
    }
 }
 
 
 void DataCenter::tmp_draw(const CTM& layCTM, TP base, TP newp)
 {
-   if ((console::op_line == currentop()) || _drawruler)
+   if ((console::op_line == PROPC->currentop()) || _drawruler)
    {
       // ruller
-      while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-      _properties.tmp_draw(layCTM, base, newp);
-      _PROPLock.Unlock();
+      PROPC->tmp_draw(layCTM, base, newp);
    }
-   if ((console::op_line != currentop())  && (NULL !=_TEDLIB()))
+   if ((console::op_line != PROPC->currentop())  && (NULL !=_TEDLIB()))
    {
 //      _TEDDB->check_active();
       while (wxMUTEX_NO_ERROR != _DBLock.TryLock());
-      _TEDLIB()->tmp_draw(_properties.drawprop(), base, newp);
+      _TEDLIB()->tmp_draw(PROPC->drawprop(), base, newp);
       VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
    }
 //
@@ -912,215 +911,6 @@ const laydata::CellList& DataCenter::cells() {
    if (_TEDLIB()) return _TEDLIB()->cells();
    else throw EXPTNactive_DB();
 };
-
-
-bool DataCenter::addlayer(std::string name, unsigned layno, std::string col,
-                                       std::string fill, std::string sline)
-{
-   bool status;
-   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-   status = _properties.addlayer(name, layno, col, fill, sline);
-   _PROPLock.Unlock();
-   return status;
-}
-
-bool DataCenter::addlayer(std::string name, unsigned layno)
-{
-   bool status;
-   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-   status = _properties.addlayer(name, layno);
-   _PROPLock.Unlock();
-   return status;
-}
-
-bool DataCenter::addlayer(unsigned layno)
-{
-   bool status;
-   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-   status = _properties.addlayer(layno);
-   _PROPLock.Unlock();
-   return status;
-}
-
-unsigned DataCenter::addlayer(std::string name)
-{
-   unsigned layno;
-   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-   layno = _properties.addlayer(name);
-   _PROPLock.Unlock();
-   return layno;
-}
-
-bool  DataCenter::isLayerExist(word layno)
-{
-   return _properties.isLayerExist(layno);
-}
-
-bool  DataCenter::isLayerExist(std::string layname)
-{
-   return _properties.isLayerExist(layname);
-}
-
-void DataCenter::addline(std::string name, std::string col, word pattern,
-                                      byte patscale, byte width)
-{
-   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-   _properties.addline(name, col, pattern, patscale, width);
-   _PROPLock.Unlock();
-}
-
-void DataCenter::addcolor(std::string name, byte R, byte G, byte B, byte A)
-{
-   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-   _properties.addcolor(name, R, G, B, A);
-   _PROPLock.Unlock();
-}
-
-void DataCenter::addfill(std::string name, byte *ptrn)
-{
-   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-   _properties.addfill(name, ptrn);
-   _PROPLock.Unlock();
-}
-
-void DataCenter::hideLayer(word layno, bool hide)
-{
-   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-   _properties.hideLayer(layno, hide);
-   _PROPLock.Unlock();
-}
-
-void DataCenter::lockLayer(word layno, bool lock)
-{
-   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-   _properties.lockLayer(layno, lock);
-   _PROPLock.Unlock();
-}
-
-void DataCenter::fillLayer(word layno, bool fill)
-{
-   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-   _properties.fillLayer(layno, fill);
-   _PROPLock.Unlock();
-}
-
-void DataCenter::pushLayerStatus()
-{
-   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-   _properties.pushLayerStatus();
-   _PROPLock.Unlock();
-}
-
-void DataCenter::popLayerStatus()
-{
-   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-   _properties.popLayerStatus();
-   _PROPLock.Unlock();
-}
-
-void DataCenter::popBackLayerStatus()
-{
-   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-   _properties.popBackLayerStatus();
-   _PROPLock.Unlock();
-}
-
-bool DataCenter::saveLaysetStatus(const std::string& sname)
-{
-   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-   bool stat = _properties.saveLaysetStatus(sname);
-   _PROPLock.Unlock();
-   return stat;
-}
-
-bool DataCenter::saveLaysetStatus(const std::string& sname, const WordSet& hl, const WordSet& ll, const WordSet& fl, unsigned al)
-{
-   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-   bool stat = _properties.saveLaysetStatus(sname, hl, ll, fl, al);
-   _PROPLock.Unlock();
-   return stat;
-}
-
-bool DataCenter::loadLaysetStatus(const std::string& sname)
-{
-   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-   bool stat = _properties.loadLaysetStatus(sname);
-   _PROPLock.Unlock();
-   return stat;
-}
-
-bool DataCenter::deleteLaysetStatus(const std::string& sname)
-{
-   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-   bool stat = _properties.deleteLaysetStatus(sname);
-   _PROPLock.Unlock();
-   return stat;
-}
-
-bool DataCenter::getLaysetStatus(const std::string& sname, WordSet& hl, WordSet& ll, WordSet& fl, unsigned al)
-{
-   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-   bool stat = _properties.getLaysetStatus(sname, hl, ll, fl, al);
-   _PROPLock.Unlock();
-   return stat;
-}
-
-void DataCenter::setcellmarks_hidden(bool hide)
-{
-   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-   _properties.setcellmarks_hidden(hide);
-   _PROPLock.Unlock();
-}
-
-void DataCenter::settextmarks_hidden(bool hide)
-{
-   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-   _properties.settextmarks_hidden(hide);
-   _PROPLock.Unlock();
-}
-
-void DataCenter::setcellbox_hidden(bool hide)
-{
-   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-   _properties.setcellbox_hidden(hide);
-   _PROPLock.Unlock();
-}
-
-void DataCenter::settextbox_hidden(bool hide)
-{
-   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-   _properties.settextbox_hidden(hide);
-   _PROPLock.Unlock();
-}
-
-void DataCenter::setGrid(byte No, real step, std::string colname)
-{
-   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-   _properties.setGrid(No, step, colname);
-   _PROPLock.Unlock();
-}
-
-bool DataCenter::viewGrid(byte No, bool status)
-{
-   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-   status = _properties.viewGrid(No, status);
-   _PROPLock.Unlock();
-   return status;
-}
-
-void DataCenter::addRuler(TP& p1, TP& p2)
-{
-   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-   _properties.addRuler(p1, p2);
-   _PROPLock.Unlock();
-}
-
-void DataCenter::clearRulers()
-{
-   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-   _properties.clearRulers();
-   _PROPLock.Unlock();
-}
 
 bool DataCenter::getCellNamePair(std::string name, laydata::CellDefin& strdefn)
 {
@@ -1139,7 +929,7 @@ bool DataCenter::getCellNamePair(std::string name, laydata::CellDefin& strdefn)
 
 LayerMapCif* DataCenter::secureCifLayMap(bool import)
 {
-   const USMap* savedMap = _properties.getCifLayMap();
+   const USMap* savedMap = PROPC->getCifLayMap();
    if (NULL != savedMap) return DEBUG_NEW LayerMapCif(*savedMap);
    USMap* theMap = DEBUG_NEW USMap();
    if (import)
@@ -1154,11 +944,11 @@ LayerMapCif* DataCenter::secureCifLayMap(bool import)
    {// Generate the default CIF layer map for export
       lockDB(false);
       nameList tdtLayers;
-      all_layers(tdtLayers);
+      PROPC->all_layers(tdtLayers);
       for ( nameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
       {
          std::ostringstream ciflayname;
-         unsigned layno = getLayerNo( *CDL );
+         unsigned layno = PROPC->getLayerNo( *CDL );
          ciflayname << "L" << layno;
          (*theMap)[layno] = ciflayname.str();
       }
@@ -1169,7 +959,7 @@ LayerMapCif* DataCenter::secureCifLayMap(bool import)
 
 LayerMapExt* DataCenter::secureGdsLayMap(bool import)
 {
-   const USMap* savedMap = _properties.getGdsLayMap();
+   const USMap* savedMap = PROPC->getGdsLayMap();
    LayerMapExt* theGdsMap;
    if (NULL == savedMap)
    {
@@ -1195,12 +985,12 @@ LayerMapExt* DataCenter::secureGdsLayMap(bool import)
       { // generate default export GDS layer map
          lockDB(false);
          nameList tdtLayers;
-         all_layers(tdtLayers);
+         PROPC->all_layers(tdtLayers);
          for ( nameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
          {
             std::ostringstream dtypestr;
-            dtypestr << DATC->getLayerNo( *CDL )<< "; 0";
-            theMap[DATC->getLayerNo( *CDL )] = dtypestr.str();
+            dtypestr << PROPC->getLayerNo( *CDL )<< "; 0";
+            theMap[PROPC->getLayerNo( *CDL )] = dtypestr.str();
          }
          DATC->unlockDB();
          theGdsMap = DEBUG_NEW LayerMapExt(theMap, NULL);
@@ -1241,14 +1031,222 @@ laydata::LibCellLists* DataCenter::getCells(int libID)
 
 void DataCenter::updateVisibleOverlap()
 {
-   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
    lockDB();
-   _TEDLIB()->updateVisibleOverlap(_properties.drawprop());
+   _TEDLIB()->updateVisibleOverlap(PROPC->drawprop());
    unlockDB();
-   VERIFY(wxMUTEX_NO_ERROR == _PROPLock.Unlock());
 }
 
-void initDBLib(const std::string &localDir, const std::string &globalDir)
-{
-   DATC = DEBUG_NEW DataCenter(localDir, globalDir);
-}
+//void initDBLib(const std::string &localDir, const std::string &globalDir)
+//{
+//   DATC  = DEBUG_NEW DataCenter(localDir, globalDir);
+//   PROPC = DEBUG_NEW layprop::PropertyCenter();
+//}
+
+
+
+//bool DataCenter::addlayer(std::string name, unsigned layno, std::string col,
+//                                       std::string fill, std::string sline)
+//{
+//   bool status;
+//   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
+//   status = _properties.addlayer(name, layno, col, fill, sline);
+//   _PROPLock.Unlock();
+//   return status;
+//}
+//
+//bool DataCenter::addlayer(std::string name, unsigned layno)
+//{
+//   bool status;
+//   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
+//   status = _properties.addlayer(name, layno);
+//   _PROPLock.Unlock();
+//   return status;
+//}
+//
+//bool DataCenter::addlayer(unsigned layno)
+//{
+//   bool status;
+//   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
+//   status = _properties.addlayer(layno);
+//   _PROPLock.Unlock();
+//   return status;
+//}
+//
+//unsigned DataCenter::addlayer(std::string name)
+//{
+//   unsigned layno;
+//   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
+//   layno = _properties.addlayer(name);
+//   _PROPLock.Unlock();
+//   return layno;
+//}
+//bool  DataCenter::isLayerExist(word layno)
+//{
+//   return _properties.isLayerExist(layno);
+//}
+
+//bool  DataCenter::isLayerExist(std::string layname)
+//{
+//   return _properties.isLayerExist(layname);
+//}
+//void DataCenter::addline(std::string name, std::string col, word pattern,
+//                                      byte patscale, byte width)
+//{
+//   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
+//   _properties.addline(name, col, pattern, patscale, width);
+//   _PROPLock.Unlock();
+//}
+//
+//void DataCenter::addcolor(std::string name, byte R, byte G, byte B, byte A)
+//{
+//   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
+//   _properties.addcolor(name, R, G, B, A);
+//   _PROPLock.Unlock();
+//}
+//
+//void DataCenter::addfill(std::string name, byte *ptrn)
+//{
+//   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
+//   _properties.addfill(name, ptrn);
+//   _PROPLock.Unlock();
+//}
+
+//void DataCenter::hideLayer(word layno, bool hide)
+//{
+//   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
+//   _properties.hideLayer(layno, hide);
+//   _PROPLock.Unlock();
+//}
+//
+//void DataCenter::lockLayer(word layno, bool lock)
+//{
+//   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
+//   _properties.lockLayer(layno, lock);
+//   _PROPLock.Unlock();
+//}
+//
+//void DataCenter::fillLayer(word layno, bool fill)
+//{
+//   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
+//   _properties.fillLayer(layno, fill);
+//   _PROPLock.Unlock();
+//}
+
+//void DataCenter::pushLayerStatus()
+//{
+//   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
+//   _properties.pushLayerStatus();
+//   _PROPLock.Unlock();
+//}
+//
+//void DataCenter::popLayerStatus()
+//{
+//   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
+//   _properties.popLayerStatus();
+//   _PROPLock.Unlock();
+//}
+//
+//void DataCenter::popBackLayerStatus()
+//{
+//   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
+//   _properties.popBackLayerStatus();
+//   _PROPLock.Unlock();
+//}
+//
+//bool DataCenter::saveLaysetStatus(const std::string& sname)
+//{
+//   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
+//   bool stat = _properties.saveLaysetStatus(sname);
+//   _PROPLock.Unlock();
+//   return stat;
+//}
+//
+//bool DataCenter::saveLaysetStatus(const std::string& sname, const WordSet& hl, const WordSet& ll, const WordSet& fl, unsigned al)
+//{
+//   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
+//   bool stat = _properties.saveLaysetStatus(sname, hl, ll, fl, al);
+//   _PROPLock.Unlock();
+//   return stat;
+//}
+//
+//bool DataCenter::loadLaysetStatus(const std::string& sname)
+//{
+//   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
+//   bool stat = _properties.loadLaysetStatus(sname);
+//   _PROPLock.Unlock();
+//   return stat;
+//}
+//
+//bool DataCenter::deleteLaysetStatus(const std::string& sname)
+//{
+//   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
+//   bool stat = _properties.deleteLaysetStatus(sname);
+//   _PROPLock.Unlock();
+//   return stat;
+//}
+//
+//bool DataCenter::getLaysetStatus(const std::string& sname, WordSet& hl, WordSet& ll, WordSet& fl, unsigned al)
+//{
+//   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
+//   bool stat = _properties.getLaysetStatus(sname, hl, ll, fl, al);
+//   _PROPLock.Unlock();
+//   return stat;
+//}
+
+//void DataCenter::setcellmarks_hidden(bool hide)
+//{
+//   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
+//   _properties.setcellmarks_hidden(hide);
+//   _PROPLock.Unlock();
+//}
+//
+//void DataCenter::settextmarks_hidden(bool hide)
+//{
+//   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
+//   _properties.settextmarks_hidden(hide);
+//   _PROPLock.Unlock();
+//}
+//
+//void DataCenter::setcellbox_hidden(bool hide)
+//{
+//   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
+//   _properties.setcellbox_hidden(hide);
+//   _PROPLock.Unlock();
+//}
+//
+//void DataCenter::settextbox_hidden(bool hide)
+//{
+//   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
+//   _properties.settextbox_hidden(hide);
+//   _PROPLock.Unlock();
+//}
+//
+//void DataCenter::setGrid(byte No, real step, std::string colname)
+//{
+//   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
+//   _properties.setGrid(No, step, colname);
+//   _PROPLock.Unlock();
+//}
+//
+//bool DataCenter::viewGrid(byte No, bool status)
+//{
+//   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
+//   status = _properties.viewGrid(No, status);
+//   _PROPLock.Unlock();
+//   return status;
+//}
+//
+//void DataCenter::addRuler(TP& p1, TP& p2)
+//{
+//   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
+//   _properties.addRuler(p1, p2);
+//   _PROPLock.Unlock();
+//}
+//
+//void DataCenter::clearRulers()
+//{
+//   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
+//   _properties.clearRulers();
+//   _PROPLock.Unlock();
+//}
+//

@@ -13,16 +13,16 @@
 //                                                                          =
 //   This file is a part of Toped project (C) 2001-2007 Toped developers    =
 // ------------------------------------------------------------------------ =
-//           $URL: https://toped.googlecode.com/svn/trunk/tpd_ifaces/drc_tenderer.cpp $
+//           $URL$
 //        Created: Mon Mar 02 2009
 //     Originator: Sergey Gaitukevich - gaitukevich.s@toped.org.uk
 //    Description: Interlayer between CalbrFile and Toped database
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------
-//      $Revision: 1204 $
-//          $Date: 2009-08-26 23:20:02 +0800 (��, 26 ��� 2009) $
-//        $Author: gaitukevich.s $
+//      $Revision$
+//          $Date$
+//        $Author$
 //===========================================================================
 //      Comments :
 //===========================================================================
@@ -34,8 +34,9 @@
 #include "tpdf_common.h"
 
 // Global variables
-Calbr::CalbrFile *DRCData = NULL;
+Calbr::CalbrFile                *DRCData = NULL;
 extern DataCenter*               DATC;
+extern layprop::PropertyCenter*  PROPC;
 extern wxWindow*                 TopedCanvasW;
 
 
@@ -59,7 +60,7 @@ void Calbr::drcTenderer::startWriting()
 {
    _startDrawing = true;
 	_DRCCell = DEBUG_NEW laydata::TdtCell("drc");
-	DATC->setState(layprop::DB);	
+	PROPC->setState(layprop::DB);
 }
 
 void Calbr::drcTenderer::addPoly(const CoordsVector   &coords)
@@ -87,10 +88,10 @@ void Calbr::drcTenderer::addPoly(const CoordsVector   &coords)
          _miny = std::min(it->y, _miny);
          plDB->push_back(TP(it->x, it->y, DBscale));
       }
-		laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(_DRCCell->securelayer(_numError));
-		DATC->addUnpublishedLay(_numError);
-		dwl->addpoly(*plDB, false);
-		delete plDB;
+         laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(_DRCCell->securelayer(_numError));
+         PROPC->addUnpublishedLay(_numError);
+         dwl->addpoly(*plDB, false);
+         delete plDB;
    }
 }
 
@@ -121,48 +122,48 @@ void Calbr::drcTenderer::addLine(const edge &edge)
 
    real      w = 0.01;   //width of line
 
-	laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(_DRCCell->securelayer(_numError));
-	DATC->addUnpublishedLay(_numError);
-	dwl->addwire(*plDB, static_cast<word>(rint(w * DBscale)), false);
+   laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(_DRCCell->securelayer(_numError));
+   PROPC->addUnpublishedLay(_numError);
+   dwl->addwire(*plDB, static_cast<word>(rint(w * DBscale)), false);
    delete plDB;
 }
 
 void Calbr::drcTenderer::showAll(void)
 {
-	DATC->setState(layprop::DRC);
-		WordList lays = DATC->getAllLayers();
-		for(WordList::const_iterator it = lays.begin(); it != lays.end(); ++it)
-		{
-			DATC->hideLayer((*it), false);
-		}
-	DATC->setState(layprop::DB);	
-	tellstdfunc::RefreshGL();
+   PROPC->setState(layprop::DRC);
+   WordList lays = PROPC->getAllLayers();
+   for(WordList::const_iterator it = lays.begin(); it != lays.end(); ++it)
+   {
+      PROPC->hideLayer((*it), false);
+   }
+   PROPC->setState(layprop::DB);
+   tellstdfunc::RefreshGL();
 }
 
 void Calbr::drcTenderer::hideAll(void)
 {
-	DATC->setState(layprop::DRC);
-		WordList lays = DATC->getAllLayers();
-		for(WordList::const_iterator it = lays.begin(); it != lays.end(); ++it)
-		{
-			DATC->hideLayer((*it), true);
-		}
-	DATC->setState(layprop::DB);	
-	tellstdfunc::RefreshGL();
+   PROPC->setState(layprop::DRC);
+   WordList lays = PROPC->getAllLayers();
+   for(WordList::const_iterator it = lays.begin(); it != lays.end(); ++it)
+   {
+      PROPC->hideLayer((*it), true);
+   }
+   PROPC->setState(layprop::DB);
+   tellstdfunc::RefreshGL();
 }
 
 void Calbr::drcTenderer::showError(unsigned int numError)
 {
-	DATC->setState(layprop::DRC);
-		DATC->hideLayer(numError, false);
-	DATC->setState(layprop::DB);
-	tellstdfunc::RefreshGL();
+   PROPC->setState(layprop::DRC);
+   PROPC->hideLayer(numError, false);
+   PROPC->setState(layprop::DB);
+   tellstdfunc::RefreshGL();
 }
 
 void Calbr::drcTenderer::zoom(const edge &edge)
 {
-   real DBscale = DATC->DBscale();
-   DBbox* box = DEBUG_NEW DBbox(TP(edge.x1, edge.y1, DBscale), 
+   real DBscale = PROPC->DBscale();
+   DBbox* box = DEBUG_NEW DBbox(TP(edge.x1, edge.y1, DBscale),
                           TP(edge.x2, edge.y2, DBscale));
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(tui::ZOOM_WINDOW);
@@ -173,15 +174,15 @@ void Calbr::drcTenderer::zoom(const edge &edge)
 
 void Calbr::drcTenderer::endWriting()
 {
-	DATC->setState(layprop::DRC);
-		if (!DATC->upLayers().empty())
-	   {
-			const WordList freshlays = DATC->upLayers();
-			for(WordList::const_iterator CUL = freshlays.begin(); CUL != freshlays.end(); CUL++)
-				DATC->addlayer((*CUL));
-			DATC->clearUnpublishedLayers();
-		}
+   PROPC->setState(layprop::DRC);
+   if (!PROPC->upLayers().empty())
+   {
+      const WordList freshlays = PROPC->upLayers();
+      for(WordList::const_iterator CUL = freshlays.begin(); CUL != freshlays.end(); CUL++)
+         PROPC->addlayer((*CUL));
+      PROPC->clearUnpublishedLayers();
+   }
 
-		_ATDB->registercellread("drc", _DRCCell);
-	DATC->setState(layprop::DB);
+   _ATDB->registercellread("drc", _DRCCell);
+   PROPC->setState(layprop::DB);
 }

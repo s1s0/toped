@@ -37,8 +37,8 @@ wxFrame*                         TopedMainW;
 wxWindow*                        TopedCanvasW;
 
 extern DataCenter*               DATC;
+extern layprop::PropertyCenter*  PROPC;
 extern console::ted_cmd*         Console;
-
 extern const wxEventType         wxEVT_MOUSE_INPUT;
 extern const wxEventType         wxEVT_CANVAS_STATUS;
 extern const wxEventType         wxEVT_SETINGSMENU;
@@ -46,7 +46,7 @@ extern const wxEventType         wxEVT_SETINGSMENU;
 
 //=============================================================================
 telldata::ttint* tellstdfunc::CurrentLayer() {
-   unsigned cl = DATC->curlay();
+   unsigned cl = PROPC->curLay();
    return (DEBUG_NEW telldata::ttint(cl));
 }
 
@@ -95,17 +95,17 @@ telldata::ttlist* tellstdfunc::make_ttlaylist(laydata::SelectList* shapesel) {
    telldata::ttlist* llist = DEBUG_NEW telldata::ttlist(telldata::tn_layout);
    laydata::DataList* lslct;
    SGBitSet pntl;
-   for (laydata::SelectList::const_iterator CL = shapesel->begin(); 
+   for (laydata::SelectList::const_iterator CL = shapesel->begin();
                                             CL != shapesel->end(); CL++) {
       lslct = CL->second;
       // push each data reference into the TELL list
-      for (laydata::DataList::const_iterator CI = lslct->begin(); 
+      for (laydata::DataList::const_iterator CI = lslct->begin();
                                              CI != lslct->end(); CI++) {
          // copy the pointlist, because it will be deleted with the shapesel
          if (0 != CI->second.size()) pntl = SGBitSet(CI->second);
          else                        pntl = SGBitSet();
          llist->add(DEBUG_NEW telldata::ttlayout(CI->first, CL->first, DEBUG_NEW SGBitSet(pntl)));
-      }   
+      }
    }
    return llist;
 }
@@ -117,7 +117,7 @@ void tellstdfunc::clean_ttlaylist(telldata::ttlist* llist) {
    // const, yet compiler doesn't complain that it is DELETED here
    //  - Second - the best place to clean-up the lists is of course inside
    // telldata::ttlayout class, however they don't know anything about laydata::TdtData
-   // though with a strange error message compiler claims that destructors will 
+   // though with a strange error message compiler claims that destructors will
    // not be called - and I have no other choice but to belive it.
    // This of course is because of the separation of the project on modules
    // The other possibility is to convert the list to (say) AtticList and then
@@ -134,11 +134,11 @@ void tellstdfunc::clean_ttlaylist(telldata::ttlist* llist) {
 //==============================================================================
 void tellstdfunc::clean_atticlist(laydata::AtticList* nlst, bool destroy)
 {
-   for (laydata::AtticList::const_iterator CL = nlst->begin(); CL != nlst->end(); CL++) 
+   for (laydata::AtticList::const_iterator CL = nlst->begin(); CL != nlst->end(); CL++)
    {
       if (destroy)
       {
-         for (laydata::ShapeList::const_iterator DI = CL->second->begin(); DI != CL->second->end(); DI++) 
+         for (laydata::ShapeList::const_iterator DI = CL->second->begin(); DI != CL->second->end(); DI++)
             delete (*DI);
       }
       CL->second->clear();
@@ -150,11 +150,11 @@ void tellstdfunc::clean_atticlist(laydata::AtticList* nlst, bool destroy)
 telldata::ttlist* tellstdfunc::make_ttlaylist(laydata::AtticList* shapesel) {
    telldata::ttlist* llist = DEBUG_NEW telldata::ttlist(telldata::tn_layout);
    laydata::ShapeList* lslct;
-   for (laydata::AtticList::const_iterator CL = shapesel->begin(); 
+   for (laydata::AtticList::const_iterator CL = shapesel->begin();
                                             CL != shapesel->end(); CL++) {
       lslct = CL->second;
       // push each data reference into the TELL list
-      for (laydata::ShapeList::const_iterator CI = lslct->begin(); 
+      for (laydata::ShapeList::const_iterator CI = lslct->begin();
                                              CI != lslct->end(); CI++)
       //   if (sh_deleted == (*CI)->status()) - doesn't seems to need it!
             llist->add(DEBUG_NEW telldata::ttlayout(*CI, CL->first));
@@ -262,12 +262,12 @@ void tellstdfunc::UpdateLV()
 //=============================================================================
 void tellstdfunc::RefreshGL()
 {
-   if (!DATC->upLayers().empty())
+   if (!PROPC->upLayers().empty())
    {
-      const WordList freshlays = DATC->upLayers();
+      const WordList freshlays = PROPC->upLayers();
       for(WordList::const_iterator CUL = freshlays.begin(); CUL != freshlays.end(); CUL++)
-         TpdPost::layer_add(DATC->getLayerName(*CUL), *CUL);
-      DATC->clearUnpublishedLayers();
+         TpdPost::layer_add(PROPC->getLayerName(*CUL), *CUL);
+      PROPC->clearUnpublishedLayers();
    }
    Console->set_canvas_invalid(true);
 }
@@ -275,7 +275,7 @@ void tellstdfunc::RefreshGL()
 //=============================================================================
 void tellstdfunc::gridON(byte No, bool status) {
    wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
-   status = DATC->viewGrid(No, status);
+   status = PROPC->viewGrid(No, status);
    switch (No) {
       case 0: eventGRIDUPD.SetInt((status ? tui::STS_GRID0_ON : tui::STS_GRID0_OFF)); break;
       case 1: eventGRIDUPD.SetInt((status ? tui::STS_GRID1_ON : tui::STS_GRID1_OFF)); break;
@@ -297,8 +297,8 @@ void tellstdfunc::updateLayerDefinitions(laydata::TdtLibDir* LIBDIR, nameList& t
    for(WordList::const_iterator CUL = ull.begin(); CUL != ull.end(); CUL++)
    {
       if (0 == *CUL) continue;
-      if (DATC->addlayer(*CUL))
-         TpdPost::layer_add(DATC->getLayerName(*CUL), *CUL);
+      if (PROPC->addlayer(*CUL))
+         TpdPost::layer_add(PROPC->getLayerName(*CUL), *CUL);
    }
 }
 

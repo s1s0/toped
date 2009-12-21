@@ -38,6 +38,7 @@
 #include "tuidefs.h"
 
 extern layprop::FontLibrary* fontLib;
+layprop::PropertyCenter*              PROPC = NULL;
 
 layprop::SDLine::SDLine(const TP& p1,const TP& p2, const real UU) : _ln(p1,p2)
 {
@@ -227,7 +228,7 @@ void layprop::LayoutGrid::Draw(const DrawProperties& drawprop, const real DBscal
 }
 
 //=============================================================================
-layprop::ViewProperties::ViewProperties()
+layprop::PropertyCenter::PropertyCenter()
 {
    _step = 1;
    setUU(1);
@@ -240,11 +241,11 @@ layprop::ViewProperties::ViewProperties()
    _zeroCross = false;
 }
 
-bool layprop::ViewProperties::selectable(unsigned layno) const {
+bool layprop::PropertyCenter::selectable(unsigned layno) const {
    return (!_drawprop.layerHidden(layno) && !_drawprop.layerLocked(layno));
 }
 
-bool layprop::ViewProperties::addlayer( unsigned layno )
+bool layprop::PropertyCenter::addlayer( unsigned layno )
 {
    std::ostringstream lname;
    switch (_drawprop._state)
@@ -262,7 +263,7 @@ bool layprop::ViewProperties::addlayer( unsigned layno )
    return true; // dummy statement to prevent compilation warnings
 }
 
-bool layprop::ViewProperties::addlayer(std::string name, unsigned layno, std::string col,
+bool layprop::PropertyCenter::addlayer(std::string name, unsigned layno, std::string col,
                                        std::string fill, std::string sline)
 {
    if ((col != "") && (_drawprop._laycolors.end() == _drawprop._laycolors.find(col)))
@@ -302,7 +303,7 @@ bool layprop::ViewProperties::addlayer(std::string name, unsigned layno, std::st
    }
 }
 
-bool layprop::ViewProperties::addlayer(std::string name, unsigned layno)
+bool layprop::PropertyCenter::addlayer(std::string name, unsigned layno)
 {
    switch(_drawprop._state)
    {
@@ -319,7 +320,7 @@ bool layprop::ViewProperties::addlayer(std::string name, unsigned layno)
    return false; // dummy statement to prevent compilation warnings
 }
 
-unsigned layprop::ViewProperties::addlayer(std::string name)
+unsigned layprop::PropertyCenter::addlayer(std::string name)
 {
    unsigned layno = 1;
    laySetList::const_reverse_iterator lastLayNo = _drawprop.getCurSetList().rbegin();
@@ -329,12 +330,12 @@ unsigned layprop::ViewProperties::addlayer(std::string name)
    return layno;
 }
 
-bool layprop::ViewProperties::isLayerExist(word layno)
+bool layprop::PropertyCenter::isLayerExist(word layno)
 {
    return (NULL != _drawprop.findLayerSettings(layno));
 }
 
-bool layprop::ViewProperties::isLayerExist(std::string layname)
+bool layprop::PropertyCenter::isLayerExist(std::string layname)
 {
    for(laySetList::const_iterator it = _drawprop.getCurSetList().begin(); it != _drawprop.getCurSetList().end(); ++it)
    {
@@ -343,13 +344,13 @@ bool layprop::ViewProperties::isLayerExist(std::string layname)
    return false;
 }
 
-void layprop::ViewProperties::addUnpublishedLay(word layno)
+void layprop::PropertyCenter::addUnpublishedLay(word layno)
 {
    _uplaylist.push_back(layno);
 }
 
 
-void layprop::ViewProperties::addline(std::string name, std::string col, word pattern,
+void layprop::PropertyCenter::addline(std::string name, std::string col, word pattern,
                                        byte patscale, byte width) {
    if ((col != "") && (_drawprop._laycolors.end() == _drawprop._laycolors.find(col))) {
       std::ostringstream ost;
@@ -365,7 +366,7 @@ void layprop::ViewProperties::addline(std::string name, std::string col, word pa
    _drawprop._lineset[name] = DEBUG_NEW LineSettings(col,pattern,patscale,width);
 }
 
-void layprop::ViewProperties::addcolor(std::string name, byte R, byte G, byte B, byte A) {
+void layprop::PropertyCenter::addcolor(std::string name, byte R, byte G, byte B, byte A) {
    if (_drawprop._laycolors.end() != _drawprop._laycolors.find(name)) {
       delete _drawprop._laycolors[name];
       std::ostringstream ost;
@@ -376,7 +377,7 @@ void layprop::ViewProperties::addcolor(std::string name, byte R, byte G, byte B,
    _drawprop._laycolors[name] = col;
 }
 
-void layprop::ViewProperties::addfill(std::string name, byte* ptrn) {
+void layprop::PropertyCenter::addfill(std::string name, byte* ptrn) {
    if (_drawprop._layfill.end() != _drawprop._layfill.find(name)) {
       delete [] _drawprop._layfill[name];
       std::ostringstream ost;
@@ -386,20 +387,20 @@ void layprop::ViewProperties::addfill(std::string name, byte* ptrn) {
    _drawprop._layfill[name] = ptrn;
 }
 
-void  layprop::ViewProperties::hideLayer(unsigned layno, bool hide) {
+void  layprop::PropertyCenter::hideLayer(unsigned layno, bool hide) {
    // No error messages here, because of possible range use
    LayerSettings* ilayset = const_cast<LayerSettings*>(_drawprop.findLayerSettings(layno));
    if (NULL != ilayset)
       ilayset->_hidden = hide;
 }
 
-void  layprop::ViewProperties::lockLayer(unsigned layno, bool lock) {
+void  layprop::PropertyCenter::lockLayer(unsigned layno, bool lock) {
    // No error messages here, because of possible range use
    LayerSettings* ilayset = const_cast<LayerSettings*>(_drawprop.findLayerSettings(layno));
    if (NULL != ilayset)
       ilayset->_locked = lock;
 }
-const WordList layprop::ViewProperties::getLockedLayers(void)
+const WordList layprop::PropertyCenter::getLockedLayers(void)
 {
    //drawprop._layset
    WordList lockedLayers;
@@ -411,14 +412,14 @@ const WordList layprop::ViewProperties::getLockedLayers(void)
    return lockedLayers;
 }
 
-void  layprop::ViewProperties::fillLayer(unsigned layno, bool fill) {
+void  layprop::PropertyCenter::fillLayer(unsigned layno, bool fill) {
    // No error messages here, because of possible range use
    LayerSettings* ilayset = const_cast<LayerSettings*>(_drawprop.findLayerSettings(layno));
    if (NULL != ilayset)
       ilayset->fillLayer(fill);
 }
 
-const WordList layprop::ViewProperties::getAllLayers(void)
+const WordList layprop::PropertyCenter::getAllLayers(void)
 {
    //drawprop._layset
    WordList listLayers;
@@ -430,7 +431,7 @@ const WordList layprop::ViewProperties::getAllLayers(void)
    return listLayers;
 }
 
-const layprop::LayoutGrid* layprop::ViewProperties::grid(byte No) const {
+const layprop::LayoutGrid* layprop::PropertyCenter::grid(byte No) const {
    if (_grid.end() != _grid.find(No)) {
       gridlist::const_iterator cg = _grid.find(No);
       return cg->second;
@@ -438,28 +439,28 @@ const layprop::LayoutGrid* layprop::ViewProperties::grid(byte No) const {
    else return NULL;
 }
 
-void layprop::ViewProperties::setGrid(byte No, real step, std::string colname) {
+void layprop::PropertyCenter::setGrid(byte No, real step, std::string colname) {
    if (_grid.end() != _grid.find(No)) // if this grid No is already defined
       _grid[No]->Init(step,colname);
    else // define a new grid
       _grid[No] = DEBUG_NEW layprop::LayoutGrid(step, colname);
 }
 
-bool layprop::ViewProperties::viewGrid(byte No, bool status) {
+bool layprop::PropertyCenter::viewGrid(byte No, bool status) {
    if (_grid.end() != _grid.find(No))
       _grid[No]->turnover(status);
    else status = false;
    return status;
 }
 
-void layprop::ViewProperties::drawGrid() const
+void layprop::PropertyCenter::drawGrid() const
 {
    typedef gridlist::const_iterator CI;
    for(CI p = _grid.begin(); p != _grid.end(); p++)
       p->second->Draw(_drawprop, _UU);
 }
 
-// void layprop::ViewProperties::drawGrid(TopRend& rend) const
+// void layprop::PropertyCenter::drawGrid(TopRend& rend) const
 // {
 //    typedef gridlist::const_iterator CI;
 //    for(CI p = _grid.begin(); p != _grid.end(); p++)
@@ -467,7 +468,7 @@ void layprop::ViewProperties::drawGrid() const
 //          rend.Grid(p->second->step(), p->second->color());
 // }
 
-void layprop::ViewProperties::drawZeroCross() const
+void layprop::PropertyCenter::drawZeroCross() const
 {
    if (!_zeroCross) return;
    glLineStipple(1,0xcccc);
@@ -483,30 +484,30 @@ void layprop::ViewProperties::drawZeroCross() const
 }
 
 
-void layprop::ViewProperties::all_colors(nameList& colist) const
+void layprop::PropertyCenter::all_colors(nameList& colist) const
 {
    for( colorMAP::const_iterator CI = _drawprop._laycolors.begin(); CI != _drawprop._laycolors.end(); CI++)
       colist.push_back(CI->first);
 }
 
-void layprop::ViewProperties::all_fills(nameList& filist) const
+void layprop::PropertyCenter::all_fills(nameList& filist) const
 {
    for( fillMAP::const_iterator CI = _drawprop._layfill.begin(); CI != _drawprop._layfill.end(); CI++)
       filist.push_back(CI->first);
 }
 
-void layprop::ViewProperties::all_lines(nameList& linelist) const
+void layprop::PropertyCenter::all_lines(nameList& linelist) const
 {
    for( lineMAP::const_iterator CI = _drawprop._lineset.begin(); CI != _drawprop._lineset.end(); CI++)
       linelist.push_back(CI->first);
 }
 
-void layprop::ViewProperties::setUU(real UU) {
+void layprop::PropertyCenter::setUU(real UU) {
    _UU = UU;
    _DBscale = 1/UU;
 };
 
-void layprop::ViewProperties::saveLayerMaps(FILE* prop_file) const
+void layprop::PropertyCenter::saveLayerMaps(FILE* prop_file) const
 {
    fprintf(prop_file, "void  layerMaps() {\n");
    if (NULL != _gdsLayMap)
@@ -524,7 +525,7 @@ void layprop::ViewProperties::saveLayerMaps(FILE* prop_file) const
    fprintf(prop_file, "}\n\n");
 }
 
-void layprop::ViewProperties::saveScreenProps(FILE* prop_file) const
+void layprop::PropertyCenter::saveScreenProps(FILE* prop_file) const
 {
    fprintf(prop_file, "void  screenSetup() {\n");
    gridlist::const_iterator GLS;
@@ -551,7 +552,7 @@ void layprop::ViewProperties::saveScreenProps(FILE* prop_file) const
 }
 
 
-void layprop::ViewProperties::saveProperties(std::string filename) const
+void layprop::PropertyCenter::saveProperties(std::string filename) const
 {
    FILE * prop_file;
    std::string fname = convertString(filename);
@@ -571,13 +572,13 @@ void layprop::ViewProperties::saveProperties(std::string filename) const
    fclose(prop_file);
 }
 
-void layprop::ViewProperties::setGdsLayMap(USMap* map)
+void layprop::PropertyCenter::setGdsLayMap(USMap* map)
 {
    if (NULL != _gdsLayMap) delete _gdsLayMap;
    _gdsLayMap = map;
 }
 
-void layprop::ViewProperties::setCifLayMap(USMap* map)
+void layprop::PropertyCenter::setCifLayMap(USMap* map)
 {
    if (NULL != _cifLayMap) delete _cifLayMap;
    _cifLayMap = map;
@@ -588,7 +589,7 @@ void layprop::ViewProperties::setCifLayMap(USMap* map)
  * WARNING! This function is only for undo purposes. Should not be used
  * to store/change/delete the layer state
  */
-void layprop::ViewProperties::pushLayerStatus()
+void layprop::PropertyCenter::pushLayerStatus()
 {
    _layStateHistory.push_front(LayStateList());
    LayStateList& clist = _layStateHistory.front();
@@ -604,7 +605,7 @@ void layprop::ViewProperties::pushLayerStatus()
  * WARNING! This function is only for undo purposes. Should not be used
  * to store/change/delete the layer state
  */
-void layprop::ViewProperties::popLayerStatus()
+void layprop::PropertyCenter::popLayerStatus()
 {
    LayStateList& clist = _layStateHistory.front();
    for (std::list<LayerState>::const_iterator CL = clist.second.begin(); CL != clist.second.end(); CL++)
@@ -631,12 +632,12 @@ void layprop::ViewProperties::popLayerStatus()
  * WARNING! This function is only for undo purposes. Should not be used
  * to store/change/delete the layer state
  */
-void layprop::ViewProperties::popBackLayerStatus()
+void layprop::PropertyCenter::popBackLayerStatus()
 {
    _layStateHistory.pop_back();
 }
 
-bool layprop::ViewProperties::saveLaysetStatus(const std::string& sname)
+bool layprop::PropertyCenter::saveLaysetStatus(const std::string& sname)
 {
    LayStateList clist;
    bool status = true;
@@ -650,7 +651,7 @@ bool layprop::ViewProperties::saveLaysetStatus(const std::string& sname)
    return status;
 }
 
-bool layprop::ViewProperties::saveLaysetStatus(const std::string& sname, const WordSet& hidel,
+bool layprop::PropertyCenter::saveLaysetStatus(const std::string& sname, const WordSet& hidel,
       const WordSet& lockl, const WordSet& filll, unsigned alay)
 {
    LayStateList clist;
@@ -668,7 +669,7 @@ bool layprop::ViewProperties::saveLaysetStatus(const std::string& sname, const W
    return status;
 }
 
-bool layprop::ViewProperties::loadLaysetStatus(const std::string& sname)
+bool layprop::PropertyCenter::loadLaysetStatus(const std::string& sname)
 {
    if (_layStateMap.end() == _layStateMap.find(sname)) return false;
    LayStateList clist = _layStateMap[sname];
@@ -690,14 +691,14 @@ bool layprop::ViewProperties::loadLaysetStatus(const std::string& sname)
    return true;
 }
 
-bool layprop::ViewProperties::deleteLaysetStatus(const std::string& sname)
+bool layprop::PropertyCenter::deleteLaysetStatus(const std::string& sname)
 {
    if (_layStateMap.end() == _layStateMap.find(sname)) return false;
    _layStateMap.erase(sname);
    return true;
 }
 
-bool layprop::ViewProperties::getLaysetStatus(const std::string& sname, WordSet& hidel,
+bool layprop::PropertyCenter::getLaysetStatus(const std::string& sname, WordSet& hidel,
       WordSet& lockl, WordSet& filll, unsigned activel)
 {
    if (_layStateMap.end() == _layStateMap.find(sname)) return false;
@@ -712,7 +713,7 @@ bool layprop::ViewProperties::getLaysetStatus(const std::string& sname, WordSet&
    return true;
 }
 
-layprop::ViewProperties::~ViewProperties()
+layprop::PropertyCenter::~PropertyCenter()
 {
    for(gridlist::iterator GI = _grid.begin(); GI != _grid.end(); GI++)
       delete GI->second;

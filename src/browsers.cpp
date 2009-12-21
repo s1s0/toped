@@ -50,6 +50,7 @@
 #include "tpdf_common.h"
 
 extern DataCenter*               DATC;
+extern layprop::PropertyCenter*  PROPC;
 extern Calbr::CalbrFile*         DRCData;
 extern const wxEventType         wxEVT_CMD_BROWSER;
 extern const wxEventType         wxEVT_CONSOLE_PARSE;
@@ -197,7 +198,7 @@ void  browsers::CellBrowser::onLMouseDblClk(wxMouseEvent& event)
       event.Skip();
 }
 /*! Search for a tree item &name starting form the &parent. Returns true if the &item is found*/
-bool browsers::CellBrowser::findItem(const wxString name, wxTreeItemId& item, const wxTreeItemId parent) 
+bool browsers::CellBrowser::findItem(const wxString name, wxTreeItemId& item, const wxTreeItemId parent)
 {
    if (!parent.IsOk()) return false;
    wxTreeItemIdValue cookie;
@@ -220,7 +221,7 @@ bool browsers::CellBrowser::findItem(const wxString name, wxTreeItemId& item, co
 
 /*! Search for a tree item &name which is a child (not grand child!) of the &parent. Returns true
 if such item is found*/
-bool browsers::CellBrowser::findChildItem(const wxString name, wxTreeItemId& item, const wxTreeItemId parent) 
+bool browsers::CellBrowser::findChildItem(const wxString name, wxTreeItemId& item, const wxTreeItemId parent)
 {
    if (!parent.IsOk()) return false;
    wxTreeItemIdValue cookie;
@@ -240,7 +241,7 @@ bool browsers::CellBrowser::findChildItem(const wxString name, wxTreeItemId& ite
    return false;
 }
 
-void browsers::CellBrowser::copyItem(const wxTreeItemId item, const wxTreeItemId newparent, bool targetLib) 
+void browsers::CellBrowser::copyItem(const wxTreeItemId item, const wxTreeItemId newparent, bool targetLib)
 {
    wxTreeItemId newitem = AppendItem(newparent, GetItemText(item));
    int normalImage   = GetItemImage(item,wxTreeItemIcon_Normal);
@@ -267,7 +268,7 @@ void browsers::CellBrowser::copyItem(const wxTreeItemId item, const wxTreeItemId
    }
 }
 
-void browsers::CellBrowser::highlightChildren(wxTreeItemId parent, wxColour clr) 
+void browsers::CellBrowser::highlightChildren(wxTreeItemId parent, wxColour clr)
 {
    wxTreeItemIdValue cookie;
    if (!parent.IsOk()) return;
@@ -675,7 +676,7 @@ void browsers::CellBrowser::onTellAddCell(wxString cellname, wxString parentname
                   break;
                }
             }
-            // ... and if it's not there - the undefined cells            
+            // ... and if it's not there - the undefined cells
             if ( (!linkFound) && findItem(cellname, item, _undefRoot) )
             {
                linkFound = true;
@@ -1278,7 +1279,7 @@ void browsers::XdbBrowser::onFlatView(wxCommandEvent& event)
    _cellBrowser->collectInfo(_hierarchy_view);
    _cellBrowser->statusHighlight(wxT(""), wxT(""), cell_sel_str);
 
-   //Set normal font for  _hierButton 
+   //Set normal font for  _hierButton
    wxFont font = _flatButton->GetFont();
    _hierButton->SetFont(font);
    //Set bold font for _flatButton;
@@ -1308,9 +1309,9 @@ BEGIN_EVENT_TABLE(browsers::browserTAB, wxAuiNotebook)
    EVT_TECUSTOM_COMMAND(wxEVT_CMD_BROWSER, wxID_ANY, browsers::browserTAB::onCommand)
 END_EVENT_TABLE()
 //==============================================================================
-browsers::browserTAB::browserTAB(wxWindow *parent, wxWindowID id,const 
-   wxPoint& pos, const wxSize& size, long style) : 
-                                 wxAuiNotebook(parent, id, pos, size, style) 
+browsers::browserTAB::browserTAB(wxWindow *parent, wxWindowID id,const
+   wxPoint& pos, const wxSize& size, long style) :
+                                 wxAuiNotebook(parent, id, pos, size, style)
 {
    _tdtStruct = DEBUG_NEW TDTbrowser(this, tui::ID_TPD_CELLTREE);
    AddPage(_tdtStruct, wxT("Cells"));
@@ -1323,7 +1324,7 @@ browsers::browserTAB::browserTAB(wxWindow *parent, wxWindowID id,const
    _oasStruct = NULL;
 }
 
-browsers::browserTAB::~browserTAB() 
+browsers::browserTAB::~browserTAB()
 {
 //   It appears that wx is calling automatically the destructors of the
 //   child windows, so no need to call them here
@@ -1342,7 +1343,7 @@ wxString browsers::browserTAB::tdtSelectedCifName() const
 {
    if (NULL != _cifStruct)
       return _cifStruct->selectedCellName();
-   else 
+   else
       return wxT("");
 }
 
@@ -1356,7 +1357,7 @@ wxString browsers::browserTAB::tdtSelectedOasName() const
 void browsers::browserTAB::onCommand(wxCommandEvent& event)
 {
    int command = event.GetInt();
-   switch (command) 
+   switch (command)
    {
       case tui::BT_ADDTDT_LIB: onTellAddTdtLib(1 == event.GetExtraLong());break;
       case tui::BT_ADDGDS_TAB:onTellAddGdsTab();break;
@@ -1387,7 +1388,7 @@ void browsers::browserTAB::onTellAddGdsTab()
    _gdsStruct->collectInfo();
 }
 
-void browsers::browserTAB::onTellClearGdsTab() 
+void browsers::browserTAB::onTellClearGdsTab()
 {
    if (_gdsStruct)
    {
@@ -1501,10 +1502,10 @@ browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoi
    _layer   = DEBUG_NEW LayerInfo(*layer);
    _selected= false;
    _hidden  = false;
-   _filled  = DATC->isFilled(_layer->layno());
+   _filled  = PROPC->isFilled(_layer->layno());
    _picture = NULL;
    makeBrush();
-   const layprop::tellRGB col   = DATC->getColor(_layer->layno());
+   const layprop::tellRGB col   = PROPC->getColor(_layer->layno());
    wxColour color(col.red(), col.green(), col.blue());
 
    _pen = DEBUG_NEW wxPen();
@@ -1524,7 +1525,7 @@ browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoi
 
 void browsers::LayerButton::makeBrush()
 {
-   const byte* ifill = DATC->getFill(_layer->layno());
+   const byte* ifill = PROPC->getFill(_layer->layno());
    wxBitmap *stipplebrush = DEBUG_NEW wxBitmap((char  *)ifill, 32, 32, 1);
    wxImage image;
    image = stipplebrush->ConvertToImage();
@@ -1645,12 +1646,12 @@ void browsers::LayerButton::onPaint(wxPaintEvent&)
    {
       dc.DrawIcon(wxIcon(activelay),_buttonWidth-16,15);
    }
-   else if (DATC->layerLocked(_layer->layno()))
+   else if (PROPC->layerLocked(_layer->layno()))
    {
       dc.DrawIcon(wxIcon(lock),_buttonWidth-16,15);
    }
 
-   if (DATC->layerHidden(_layer->layno()))
+   if (PROPC->layerHidden(_layer->layno()))
    {
       dc.DrawIcon(wxIcon(nolay_xpm),_buttonWidth-16,0);
    }
@@ -1674,7 +1675,7 @@ void browsers::LayerButton::onLeftClick(wxMouseEvent &event)
       //_locked = !_locked;
       wxString cmd;
       cmd << wxT("locklayer(") <<_layer->layno() << wxT(", ");
-      if (DATC->layerLocked(_layer->layno())) cmd << wxT("false") << wxT(");");
+      if (PROPC->layerLocked(_layer->layno())) cmd << wxT("false") << wxT(");");
       else cmd << wxT("true") << wxT(");");
       TpdPost::parseCommand(cmd);
    }
@@ -1758,7 +1759,7 @@ END_EVENT_TABLE()
 //====================================================================
 //
 //
-browsers::LayerPanel::LayerPanel(wxWindow* parent, wxWindowID id, 
+browsers::LayerPanel::LayerPanel(wxWindow* parent, wxWindowID id,
                               const wxPoint& pos,
                               const wxSize& size,
                               long style , const wxString& name)
@@ -1768,7 +1769,7 @@ browsers::LayerPanel::LayerPanel(wxWindow* parent, wxWindowID id,
    _buttonCount = 0;
 }
 
-browsers::LayerPanel::~LayerPanel() 
+browsers::LayerPanel::~LayerPanel()
 {
 }
 
@@ -1782,7 +1783,7 @@ void browsers::LayerPanel::onCommand(wxCommandEvent& event)
 {
    int command = event.GetInt();
    LayerButton* wbutton;
-   switch (command) 
+   switch (command)
    {
 
       case tui::BT_LAYER_DEFAULT:
@@ -1885,7 +1886,7 @@ void  browsers::LayerPanel::addButton(LayerInfo *layer)
          }
       }
       //Restore selection
-      if ((wbutton = checkDefined( DATC->curlay())))
+      if ((wbutton = checkDefined( PROPC->curLay())))
       {
          _selectedButton = wbutton;
          _selectedButton->select();
@@ -1925,7 +1926,7 @@ END_EVENT_TABLE()
 //====================================================================
 
 
-browsers::LayerBrowser::LayerBrowser(wxWindow* parent, wxWindowID id) 
+browsers::LayerBrowser::LayerBrowser(wxWindow* parent, wxWindowID id)
    :wxPanel(parent, id, wxDefaultPosition, wxDefaultSize),
    _layerPanel(NULL),
    _thesizer(NULL)
@@ -1948,7 +1949,7 @@ browsers::LayerBrowser::LayerBrowser(wxWindow* parent, wxWindowID id)
    _thesizer->SetSizeHints( this );
 }
 
-browsers::LayerBrowser::~LayerBrowser() 
+browsers::LayerBrowser::~LayerBrowser()
 {
 }
 
@@ -1956,7 +1957,7 @@ browsers::LayerBrowser::~LayerBrowser()
 void browsers::LayerBrowser::onShowAll(wxCommandEvent& WXUNUSED(event))
 {
    wxString cmd;
-   wxString layers=getAllSelected(); 
+   wxString layers=getAllSelected();
    if (layers != wxEmptyString)
    {
       cmd << wxT("hidelayer(") << getAllSelected() << wxT(", false);");
@@ -1967,7 +1968,7 @@ void browsers::LayerBrowser::onShowAll(wxCommandEvent& WXUNUSED(event))
 void browsers::LayerBrowser::onHideAll(wxCommandEvent& WXUNUSED(event))
 {
    wxString cmd;
-   wxString layers=getAllSelected(); 
+   wxString layers=getAllSelected();
    if (layers != wxEmptyString)
    {
       cmd << wxT("hidelayer(") << getAllSelected() << wxT(", true);");
@@ -1978,7 +1979,7 @@ void browsers::LayerBrowser::onHideAll(wxCommandEvent& WXUNUSED(event))
 void browsers::LayerBrowser::onLockAll(wxCommandEvent& WXUNUSED(event))
 {
    wxString cmd;
-   wxString layers=getAllSelected(); 
+   wxString layers=getAllSelected();
    if (layers != wxEmptyString)
    {
       cmd << wxT("locklayer(") << getAllSelected() << wxT(", true);");
@@ -1991,7 +1992,7 @@ void browsers::LayerBrowser::onLockAll(wxCommandEvent& WXUNUSED(event))
 void browsers::LayerBrowser::onUnlockAll(wxCommandEvent& WXUNUSED(event))
 {
    wxString cmd;
-   wxString layers=getAllSelected(); 
+   wxString layers=getAllSelected();
    if (layers != wxEmptyString)
    {
       cmd << wxT("locklayer(") << getAllSelected() << wxT(", false);");
@@ -2010,8 +2011,8 @@ BEGIN_EVENT_TABLE(browsers::ErrorBrowser, wxTreeCtrl)
    EVT_LEFT_DCLICK(browsers::ErrorBrowser::onLMouseDblClk)
 END_EVENT_TABLE()
 //====================================================================
-browsers::ErrorBrowser::ErrorBrowser(wxWindow* parent, wxWindowID id, 
-                              const wxPoint& pos, 
+browsers::ErrorBrowser::ErrorBrowser(wxWindow* parent, wxWindowID id,
+                              const wxPoint& pos,
                               const wxSize& size,
                               long style):
                      wxTreeCtrl(parent, id, pos, size, style |wxTR_HIDE_ROOT| wxTR_FULL_ROW_HIGHLIGHT )
@@ -2101,7 +2102,7 @@ browsers::DRCBrowser::DRCBrowser(wxWindow* parent, wxWindowID id)
          }
 
       }
-   
+
 }
 
 browsers::DRCBrowser::~DRCBrowser()

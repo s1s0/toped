@@ -33,6 +33,7 @@
 
 
 extern DataCenter*               DATC;
+extern layprop::PropertyCenter*  PROPC;
 extern console::toped_logfile    LogFile;
 
 //=============================================================================
@@ -65,7 +66,7 @@ int tellstdfunc::stdADDBOX::execute() {
    word la = getWordValue();
    UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
-   real DBscale = DATC->DBscale();
+   real DBscale = PROPC->DBscale();
    TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
    TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
    laydata::TdtDesign* ATDB = DATC->lockDB();
@@ -126,7 +127,7 @@ int tellstdfunc::stdDRAWBOX::execute() {
    UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
    // get the data from the stack
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
-   real DBscale = DATC->DBscale();
+   real DBscale = PROPC->DBscale();
    TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
    TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
    laydata::TdtDesign* ATDB = DATC->lockDB();
@@ -184,7 +185,7 @@ int tellstdfunc::stdADDBOXr::execute() {
    real width  = getOpValue();
    telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    telldata::ttpnt  p2 = telldata::ttpnt(p1->x()+width,p1->y()+heigth);
-   real DBscale = DATC->DBscale();
+   real DBscale = PROPC->DBscale();
    TP* p1DB = DEBUG_NEW TP(p1->x(), p1->y(), DBscale);
    TP* p2DB = DEBUG_NEW TP(p2.x() , p2.y() , DBscale);
    laydata::TdtDesign* ATDB = DATC->lockDB();
@@ -246,7 +247,7 @@ int tellstdfunc::stdADDBOXp::execute() {
    UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
    telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    telldata::ttpnt *p2 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-   real DBscale = DATC->DBscale();
+   real DBscale = PROPC->DBscale();
    TP* p1DB = DEBUG_NEW TP(p1->x(), p1->y(), DBscale);
    TP* p2DB = DEBUG_NEW TP(p2->x(), p2->y(), DBscale);
    laydata::TdtDesign* ATDB = DATC->lockDB();
@@ -255,7 +256,7 @@ int tellstdfunc::stdADDBOXp::execute() {
    delete (p1DB);
    delete (p2DB);
    OPstack.push(bx); UNDOPstack.push_front(bx->selfcopy());
-   LogFile << LogFile.getFN() << "("<< *p1 << "," << *p2 << "," << la << ");"; 
+   LogFile << LogFile.getFN() << "("<< *p1 << "," << *p2 << "," << la << ");";
    LogFile.flush();
    delete p1; delete p2;
    RefreshGL();
@@ -306,14 +307,14 @@ int tellstdfunc::stdADDPOLY::execute() {
    if (pl->size() >= 3) {
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
-      real DBscale = DATC->DBscale();
+      real DBscale = PROPC->DBscale();
       laydata::TdtDesign* ATDB = DATC->lockDB();
          pointlist* plst = t2tpoints(pl,DBscale);
          telldata::ttlayout* ply = DEBUG_NEW telldata::ttlayout(ATDB->addpoly(la,plst), la);
          delete plst;
       DATC->unlockDB();
       OPstack.push(ply); UNDOPstack.push_front(ply->selfcopy());
-      LogFile << LogFile.getFN() << "("<< *pl << "," << la << ");"; 
+      LogFile << LogFile.getFN() << "("<< *pl << "," << la << ");";
       LogFile.flush();
    }
    else {
@@ -372,7 +373,7 @@ int tellstdfunc::stdDRAWPOLY::execute() {
    if (pl->size() >= 3) {
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
-      real DBscale = DATC->DBscale();
+      real DBscale = PROPC->DBscale();
       laydata::TdtDesign* ATDB = DATC->lockDB();
          pointlist* plst = t2tpoints(pl,DBscale);
          telldata::ttlayout* ply = DEBUG_NEW telldata::ttlayout(ATDB->addpoly(la,plst), la);
@@ -433,7 +434,7 @@ int tellstdfunc::stdADDWIRE::execute() {
    if (pl->size() > 1) {
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
-      real DBscale = DATC->DBscale();
+      real DBscale = PROPC->DBscale();
       laydata::TdtDesign* ATDB = DATC->lockDB();
          pointlist* plst = t2tpoints(pl,DBscale);
          telldata::ttlayout* wr = DEBUG_NEW telldata::ttlayout(ATDB->addwire(la,plst,
@@ -441,7 +442,7 @@ int tellstdfunc::stdADDWIRE::execute() {
          delete plst;
       DATC->unlockDB();
       OPstack.push(wr);UNDOPstack.push_front(wr->selfcopy());
-      LogFile << LogFile.getFN() << "("<< *pl << "," << w << "," << la << ");"; 
+      LogFile << LogFile.getFN() << "("<< *pl << "," << w << "," << la << ");";
       LogFile.flush();
    }
    else {
@@ -495,7 +496,7 @@ int tellstdfunc::stdDRAWWIRE::execute() {
    word     la = getWordValue();
    real      w = getOpValue();
    DATC->setcmdlayer(la);
-   real DBscale = DATC->DBscale();
+   real DBscale = PROPC->DBscale();
    if (!tellstdfunc::waitGUInput(static_cast<int>(rint(w * DBscale)), &OPstack)) return EXEC_ABORT;
    // get the data from the stack
    la = DATC->curcmdlay();
@@ -510,7 +511,7 @@ int tellstdfunc::stdDRAWWIRE::execute() {
          delete plst;
       DATC->unlockDB();
       OPstack.push(wr);UNDOPstack.push_front(wr->selfcopy());
-      LogFile << "addwire(" << *pl << "," << w << "," << la << ");"; 
+      LogFile << "addwire(" << *pl << "," << w << "," << la << ");";
       LogFile.flush();
    }
    else {
@@ -583,7 +584,7 @@ int tellstdfunc::stdADDTEXT::execute() {
    }
    UNDOcmdQ.push_front(this);
    UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
-   real DBscale = DATC->DBscale();
+   real DBscale = PROPC->DBscale();
    CTM ori(TP(rpnt->x(), rpnt->y(), DBscale),
                                      magn*DBscale/OPENGL_FONT_UNIT,angle,flip);
    laydata::TdtDesign* ATDB = DATC->lockDB();
@@ -652,7 +653,7 @@ void tellstdfunc::stdCELLREF::undo() {
    telldata::ttlayout* cl = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    laydata::TdtDesign* ATDB = DATC->lockDB();
       ATDB->destroy_this(cl->data(),REF_LAY, DATC->TEDLIB());
-   DATC->unlockDB();   
+   DATC->unlockDB();
    delete (cl);
    RefreshGL();
 }
@@ -664,11 +665,11 @@ int tellstdfunc::stdCELLREF::execute() {
    real   angle  = getOpValue();
    telldata::ttpnt  *rpnt  = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    std::string name = getStringValue();
-   real DBscale = DATC->DBscale();
+   real DBscale = PROPC->DBscale();
    CTM ori(TP(rpnt->x(), rpnt->y(), DBscale), magn,angle,flip);
    // check that target cell exists - otherwise tmp_draw can't obviously work.
    // there is another more extensive check when the cell is added, there the circular
-   // references are checked as well 
+   // references are checked as well
    laydata::CellDefin strdefn;
    if (DATC->getCellNamePair(name, strdefn))
    {
@@ -677,7 +678,7 @@ int tellstdfunc::stdCELLREF::execute() {
          telldata::ttlayout* cl = DEBUG_NEW telldata::ttlayout(ATDB->addcellref(strdefn,ori), REF_LAY);
       DATC->unlockDB();
       OPstack.push(cl); UNDOPstack.push_front(cl->selfcopy());
-      LogFile << LogFile.getFN() << "(\""<< name << "\"," << *rpnt << "," << 
+      LogFile << LogFile.getFN() << "(\""<< name << "\"," << *rpnt << "," <<
                         angle << "," << LogFile._2bool(flip) << "," << magn <<");";
       LogFile.flush();
       delete rpnt;
@@ -705,7 +706,7 @@ int tellstdfunc::stdCELLREF_D::execute() {
    std::string name = getStringValue();
    // check that target cell exists - otherwise tmp_draw can't obviously work.
    // there is another more extensive check when the cell is added, there the circular
-   // references are checked as well 
+   // references are checked as well
    laydata::CellDefin strdefn;
    if (!DATC->getCellNamePair(name, strdefn))
    {
@@ -761,7 +762,7 @@ void tellstdfunc::stdCELLAREF::undo() {
 int tellstdfunc::stdCELLAREF::execute() {
    UNDOcmdQ.push_front(this);
    // get the parameters from the operand stack
-   //cellaref("boza",getpoint(),0,false,1,3,2,30,70);   
+   //cellaref("boza",getpoint(),0,false,1,3,2,30,70);
    real   stepY  = getOpValue();
    real   stepX  = getOpValue();
    word   row    = getWordValue();
@@ -769,10 +770,10 @@ int tellstdfunc::stdCELLAREF::execute() {
    real   magn   = getOpValue();
    bool   flip   = getBoolValue();
    real   angle  = getOpValue();
-   telldata::ttpnt  *rpnt  = 
+   telldata::ttpnt  *rpnt  =
                      static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    std::string name = getStringValue();
-   real DBscale = DATC->DBscale();
+   real DBscale = PROPC->DBscale();
    int4b istepX = (int4b)rint(stepX * DBscale);
    int4b istepY = (int4b)rint(stepY * DBscale);
    CTM ori(TP(rpnt->x(), rpnt->y(), DBscale), magn,angle,flip);
@@ -782,8 +783,8 @@ int tellstdfunc::stdCELLAREF::execute() {
             ATDB->addcellaref(name,ori,arrprops),REF_LAY);
    DATC->unlockDB();
    OPstack.push(cl); UNDOPstack.push_front(cl->selfcopy());
-   LogFile << LogFile.getFN() << "(\""<< name << "\"," << *rpnt << "," << 
-            angle << "," << LogFile._2bool(flip) << "," << magn << "," << 
+   LogFile << LogFile.getFN() << "(\""<< name << "\"," << *rpnt << "," <<
+            angle << "," << LogFile._2bool(flip) << "," << magn << "," <<
                       col << "," << row << "," << stepX << "," << stepY << ");";
    LogFile.flush();
    delete rpnt;
@@ -808,10 +809,10 @@ int tellstdfunc::stdCELLAREF_D::execute() {
    word        row   = getWordValue();
    word        col   = getWordValue();
    std::string name  = getStringValue();
-   
+
    // check that target cell exists - otherwise tmp_draw can't obviously work.
    // there is another more extensive check when the cell is added, there the circular
-   // references are checked as well 
+   // references are checked as well
    laydata::TdtDesign* ATDB = DATC->lockDB(false);
    laydata::TdtCell *excell = static_cast<laydata::TdtCell*>(ATDB->checkcell(name));
    DATC->unlockDB();
@@ -822,11 +823,11 @@ int tellstdfunc::stdCELLAREF_D::execute() {
       tell_log(console::MT_ERROR,news);
       return EXEC_ABORT;
    }
-   
-   real DBscale = DATC->DBscale();
+
+   real DBscale = PROPC->DBscale();
    int4b istepX = (int4b)rint(stepX * DBscale);
    int4b istepY = (int4b)rint(stepY * DBscale);
-   
+
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(console::op_abind, &OPstack, name, CTM(), istepX, istepY,col,row))
       return EXEC_ABORT;
@@ -860,25 +861,25 @@ void tellstdfunc::stdUSINGLAYER::undo_cleanup() {
 void tellstdfunc::stdUSINGLAYER::undo() {
    TEUNDO_DEBUG("usinglayer( int ) UNDO");
    word layno = getWordValue(UNDOPstack, true);
-   TpdPost::layer_default(layno, DATC->curlay());
-   DATC->defaultlayer(layno);
+   TpdPost::layer_default(layno, PROPC->curLay());
+   PROPC->defaultLayer(layno);
 }
 
 int tellstdfunc::stdUSINGLAYER::execute() {
    word layno = getWordValue();
    // Unlock and Unhide the layer(if needed)
-   if (DATC->layerHidden(layno)) {
-      DATC->hideLayer(layno, false);
+   if (PROPC->layerHidden(layno)) {
+      PROPC->hideLayer(layno, false);
       TpdPost::layer_status(tui::BT_LAYER_HIDE, layno, false);
-   }   
-   if (DATC->layerLocked(layno)) {
-      DATC->lockLayer(layno, false);
+   }
+   if (PROPC->layerLocked(layno)) {
+      PROPC->lockLayer(layno, false);
       TpdPost::layer_status(tui::BT_LAYER_LOCK, layno, false);
-   }   
-   TpdPost::layer_default(layno, DATC->curlay());
+   }
+   TpdPost::layer_default(layno, PROPC->curLay());
    UNDOcmdQ.push_front(this);
-   UNDOPstack.push_front(DEBUG_NEW telldata::ttint(DATC->curlay()));
-   DATC->defaultlayer(layno);
+   UNDOPstack.push_front(DEBUG_NEW telldata::ttint(PROPC->curLay()));
+   PROPC->defaultLayer(layno);
    LogFile << LogFile.getFN() << "("<< layno << ");";LogFile.flush();
    return EXEC_NEXT;
 }
@@ -893,7 +894,7 @@ tellstdfunc::stdUSINGLAYER_S::stdUSINGLAYER_S(telldata::typeID retype, bool eor)
 int tellstdfunc::stdUSINGLAYER_S::execute()
 {
   std::string layname = getStringValue();
-  unsigned layno = DATC->getLayerNo(layname);
+  unsigned layno = PROPC->getLayerNo(layname);
   if (ERR_LAY != layno)
   {
     OPstack.push(DEBUG_NEW telldata::ttint(layno));

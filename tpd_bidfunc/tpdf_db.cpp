@@ -35,6 +35,7 @@
 
 
 extern DataCenter*               DATC;
+extern layprop::PropertyCenter*  PROPC;
 extern console::toped_logfile    LogFile;
 extern Calbr::CalbrFile*         DRCData;
 
@@ -227,7 +228,7 @@ tellstdfunc::TDTunloadlib::TDTunloadlib(telldata::typeID retype, bool eor) :
 int tellstdfunc::TDTunloadlib::execute()
 {
    std::string libname = getStringValue();
-   
+
    if (DATC->TDTunloadlib(libname))
    {
       TpdPost::addTDTtab(false, true);
@@ -254,7 +255,7 @@ int tellstdfunc::TDTsave::execute()
       TpdTime timec(ATDB->created());
       TpdTime timeu(ATDB->lastUpdated());
    DATC->unlockDB();
-   LogFile << LogFile.getFN() << "(\"" <<  timec() << "\" , \"" << 
+   LogFile << LogFile.getFN() << "(\"" <<  timec() << "\" , \"" <<
          timeu() << "\");"; LogFile.flush();
    return EXEC_NEXT;
 }
@@ -347,7 +348,7 @@ int tellstdfunc::GDSread::execute() {
             GDSin::GDSHierTree* root = AGDSDB->hierTree()->GetFirstRoot(TARGETDB_LIB);
             if (root)
             {
-               do 
+               do
                {
                   top_cell_list.push_back(std::string(root->GetItem()->strctName()));
                } while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
@@ -367,7 +368,7 @@ int tellstdfunc::GDSread::execute() {
       }
 //      else
 //      {
-//         Error should've been already reported by the parser. 
+//         Error should've been already reported by the parser.
 //      }
    }
    else
@@ -464,7 +465,7 @@ int tellstdfunc::GDSimport::execute()
 
 //=============================================================================
 tellstdfunc::GDSimportList::GDSimportList(telldata::typeID retype, bool eor) :
-                              cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor) 
+                              cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_string)));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
@@ -504,7 +505,7 @@ int tellstdfunc::GDSimportList::execute()
    if (LayerExpression.status())
    {
       try {DATC->lockDB(false);}
-      catch (EXPTN) 
+      catch (EXPTN)
       {
          // create a default target data base if one is not already existing
          TpdTime timeCreated(time(NULL));
@@ -613,12 +614,12 @@ int tellstdfunc::GDSexportTOP::execute()
             LayerMapExt default_map(gdsLays, NULL);
 
             DATC->GDSexport(excell, default_map, recur, filename, x2048);
-            LogFile  << LogFile.getFN() 
-                     << "(\""<< cellname << "\"," 
+            LogFile  << LogFile.getFN()
+                     << "(\""<< cellname << "\","
                      << LogFile._2bool(recur) << ", "
                      << *lll << ", "
                      << "\"" << filename << "\","
-                     << LogFile._2bool(x2048) <<");"; 
+                     << LogFile._2bool(x2048) <<");";
             LogFile.flush();
          }
          else
@@ -707,7 +708,7 @@ int tellstdfunc::PSexportTOP::execute()
       DATC->unlockDB();
       if (NULL != excell)
       {
-         LogFile << LogFile.getFN() << "(\""<< cellname << "\"," 
+         LogFile << LogFile.getFN() << "(\""<< cellname << "\","
                                     << ",\"" << filename << "\");";
          LogFile.flush();
       }
@@ -803,12 +804,12 @@ int tellstdfunc::GDSreportlay::execute()
    if(DATC->lockGds(AGDSDB))
    {
       GDSin::GdsStructure *src_structure = AGDSDB->getStructure(name.c_str());
-      std::ostringstream ost; 
+      std::ostringstream ost;
       if (!src_structure) {
          ost << "GDS structure named \"" << name << "\" does not exists";
          tell_log(console::MT_ERROR,ost.str());
       }
-      else 
+      else
       {
          ExtLayers gdsLayers;
          src_structure->collectLayers(gdsLayers,true);
@@ -840,7 +841,7 @@ int tellstdfunc::GDSgetlaymap::execute()
 {
    bool import = getBoolValue();
    telldata::ttlist* theMap = DEBUG_NEW telldata::ttlist(telldata::tn_hsh);
-   const USMap* laymap = DATC->getGdsLayMap();
+   const USMap* laymap = PROPC->getGdsLayMap();
    if (NULL != laymap)
    {
       for (USMap::const_iterator CI = laymap->begin(); CI != laymap->end(); CI++)
@@ -870,12 +871,12 @@ int tellstdfunc::GDSgetlaymap::execute()
    { // generate default export GDS layer map
       DATC->lockDB(false);
       nameList tdtLayers;
-      DATC->all_layers(tdtLayers);
+      PROPC->all_layers(tdtLayers);
       for ( nameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
       {
          std::ostringstream dtypestr;
-         dtypestr << DATC->getLayerNo( *CDL )<< "; 0";
-         telldata::tthsh* clay = DEBUG_NEW telldata::tthsh(DATC->getLayerNo( *CDL ), dtypestr.str());
+         dtypestr << PROPC->getLayerNo( *CDL )<< "; 0";
+         telldata::tthsh* clay = DEBUG_NEW telldata::tthsh(PROPC->getLayerNo( *CDL ), dtypestr.str());
          theMap->add(clay);
       }
       DATC->unlockDB();
@@ -904,7 +905,7 @@ int tellstdfunc::GDSsetlaymap::execute()
       nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
       (*gdsLays)[nameh->key().value()] = nameh->value().value();
    }
-   DATC->setGdsLayMap(gdsLays);
+   PROPC->setGdsLayMap(gdsLays);
 
    LogFile << LogFile.getFN() << "("<< *lll  << ");"; LogFile.flush();
    delete lll;
@@ -1054,7 +1055,7 @@ int tellstdfunc::CIFimportList::execute()
       createDefaultTDT("CIF_default", timeCreated, UNDOcmdQ, UNDOPstack);
       DATC->lockDB(false);
    }
-   DATC->CIFimport(top_cells, cifLays, recur, over, techno * DATC->DBscale());
+   DATC->CIFimport(top_cells, cifLays, recur, over, techno * PROPC->DBscale());
    updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
    DATC->unlockDB();
    // Don't refresh the tree browser here. See the comment in GDSimportAll::execute()
@@ -1109,7 +1110,7 @@ int tellstdfunc::CIFimport::execute()
       createDefaultTDT("CIF_default", timeCreated, UNDOcmdQ, UNDOPstack);
       DATC->lockDB(false);
    }
-   DATC->CIFimport(top_cells, cifLays, recur, over, techno * DATC->DBscale());
+   DATC->CIFimport(top_cells, cifLays, recur, over, techno * PROPC->DBscale());
    updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
    DATC->unlockDB();
    // Don't refresh the tree browser here. See the comment in GDSimportAll::execute()
@@ -1206,7 +1207,7 @@ int tellstdfunc::CIFexportTOP::execute()
          {
             DATC->CIFexport(excell, cifLays, recur, verbose, filename);
             LogFile << LogFile.getFN() << "( \""
-                    << cellname << "\", " 
+                    << cellname << "\", "
                     << LogFile._2bool(recur) << ", "
                     << (*lll) << ", \""
                     << filename << "\", "
@@ -1255,7 +1256,7 @@ int tellstdfunc::CIFgetlaymap::execute()
 {
    bool import = getBoolValue();
    telldata::ttlist* theMap = DEBUG_NEW telldata::ttlist(telldata::tn_hsh);
-   const USMap* laymap = DATC->getCifLayMap();
+   const USMap* laymap = PROPC->getCifLayMap();
    if (NULL != laymap)
    {
       for (USMap::const_iterator CI = laymap->begin(); CI != laymap->end(); CI++)
@@ -1279,12 +1280,12 @@ int tellstdfunc::CIFgetlaymap::execute()
    { // generate default export CIF layer map
       DATC->lockDB(false);
       nameList tdtLayers;
-      DATC->all_layers(tdtLayers);
+      PROPC->all_layers(tdtLayers);
       for ( nameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
       {
          std::ostringstream dtypestr;
-         dtypestr << "L" << DATC->getLayerNo( *CDL );
-         telldata::tthsh* clay = DEBUG_NEW telldata::tthsh(DATC->getLayerNo( *CDL ), dtypestr.str());
+         dtypestr << "L" << PROPC->getLayerNo( *CDL );
+         telldata::tthsh* clay = DEBUG_NEW telldata::tthsh(PROPC->getLayerNo( *CDL ), dtypestr.str());
          theMap->add(clay);
       }
       DATC->unlockDB();
@@ -1313,7 +1314,7 @@ int tellstdfunc::CIFsetlaymap::execute()
       nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
       (*cifLays)[nameh->key().value()] = nameh->value().value();
    }
-   DATC->setCifLayMap(cifLays);
+   PROPC->setCifLayMap(cifLays);
 
    LogFile << LogFile.getFN() << "("<< *lll  << ");"; LogFile.flush();
    delete lll;
@@ -1481,28 +1482,26 @@ tellstdfunc::DRCCalibreimport::DRCCalibreimport(telldata::typeID retype, bool eo
 
 int tellstdfunc::DRCCalibreimport::execute()
 {
-	DATC->setState(layprop::DRC);
-		DATC->addlayer(DRC_LAY);
-	DATC->setState(layprop::DB);
-	std::string filename = getStringValue();
+   PROPC->setState(layprop::DRC);
+   PROPC->addlayer(DRC_LAY);
+   PROPC->setState(layprop::DB);
+   std::string filename = getStringValue();
    if(DRCData)
    {
    }
    else
    {
-		laydata::DrcLibrary* drcDesign = DATC->lockDRC();
-		DRCData = DEBUG_NEW Calbr::CalbrFile(filename, 
-			new Calbr::drcTenderer(drcDesign));
-
+      laydata::DrcLibrary* drcDesign = DATC->lockDRC();
+      DRCData = DEBUG_NEW Calbr::CalbrFile(filename, new Calbr::drcTenderer(drcDesign));
       if(DRCData->isOk())
       {
-			TpdPost::addDRCtab();
+         TpdPost::addDRCtab();
       }
       else
       {
          delete DRCData;
       }
-		DATC->unlockDRC();
+      DATC->unlockDRC();
    }
    return EXEC_NEXT;
 }
@@ -1541,7 +1540,7 @@ int tellstdfunc::DRCshowallerrors::execute()
       std::ostringstream ost;
       ost << "DRC database is not loaded";
       tell_log(console::MT_ERROR,ost.str());
- 
+
    }
    return EXEC_NEXT;
 }
@@ -1563,7 +1562,7 @@ int tellstdfunc::DRChideallerrors::execute()
       std::ostringstream ost;
       ost << "DRC database is not loaded";
       tell_log(console::MT_ERROR,ost.str());
- 
+
    }
    return EXEC_NEXT;
 }

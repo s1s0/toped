@@ -53,6 +53,7 @@
 
 tui::TopedFrame*                 Toped = NULL;
 extern DataCenter*               DATC;
+extern layprop::PropertyCenter*  PROPC;
 extern parsercmd::cmdBLOCK*      CMDBlock;
 extern console::toped_logfile    LogFile;
 extern console::ted_cmd*         Console;
@@ -531,7 +532,8 @@ bool TopedApp::OnInit() {
    wxImage::AddHandler(DEBUG_NEW wxPNGHandler);
    GetLocalDirs();
    GetGlobalDirs();
-   initDBLib(std::string(localDir.mb_str(wxConvFile)), std::string(globalDir.mb_str(wxConvFile)));
+   PROPC = DEBUG_NEW layprop::PropertyCenter();
+   DATC  = DEBUG_NEW DataCenter(std::string(localDir.mb_str(wxConvFile)), std::string(globalDir.mb_str(wxConvFile)));
    Toped = DEBUG_NEW tui::TopedFrame( wxT( "Toped" ), wxPoint(50,50), wxSize(1200,900) );
 
    if (1 < argc)
@@ -568,7 +570,7 @@ bool TopedApp::OnInit() {
    }
    if (!force_basic_rendering)
       render_type = Toped->view()->initializeGL();
-   DATC->loadLayoutFonts(CheckFontFile("arial1"), render_type);
+   PROPC->loadLayoutFonts(CheckFontFile("arial1"), render_type);
 //   if (!LoadFontFile("arial1")) return FALSE;
 
    Toped->setIconDir(std::string(tpdUIDir.mb_str(wxConvFile)));
@@ -645,6 +647,7 @@ int TopedApp::OnExit() {
       delete DRCData;
    }
    delete CMDBlock;
+   delete PROPC;
    delete DATC;
 
    FinishSessionLog();
