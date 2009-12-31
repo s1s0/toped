@@ -917,7 +917,7 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
    _sample   = DEBUG_NEW layset_sample( this, -1, wxDefaultPosition, wxDefaultSize, init);
    nameList all_names;
    wxArrayString all_strings;
-   PROPC->all_colors(all_names);
+   PROPC->allColors(all_names);
    if (!all_names.empty())
    {
       for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
@@ -934,7 +934,7 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
 
    all_names.clear();
    all_strings.Clear();
-   PROPC->all_fills(all_names);
+   PROPC->allFills(all_names);
    if (!all_names.empty())
    {
       for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
@@ -951,7 +951,7 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
 
    all_names.clear();
    all_strings.Clear();
-   PROPC->all_lines(all_names);
+   PROPC->allLines(all_names);
    if (!all_names.empty())
    {
       for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
@@ -1185,7 +1185,7 @@ tui::defineColor::defineColor(wxFrame *parent, wxWindowID id, const wxString &ti
 {
    std::string init_color;
    nameList all_names;
-   PROPC->all_colors(all_names);
+   PROPC->allColors(all_names);
    _colorList = DEBUG_NEW wxListBox(this, ID_ITEMLIST, wxDefaultPosition, wxSize(150,200), 0, NULL, wxLB_SORT);
    if (!all_names.empty())
    {
@@ -1280,7 +1280,7 @@ void tui::defineColor::OnDefineColor(wxCommandEvent& cmdevent)
 {
    nameList all_names;
    wxColourData data;
-   PROPC->all_colors(all_names);
+   PROPC->allColors(all_names);
    word colnum = 0;
    const layprop::tellRGB* tell_color;
    for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
@@ -1682,7 +1682,7 @@ tui::defineFill::defineFill(wxFrame *parent, wxWindowID id, const wxString &titl
       wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)
 {
    nameList all_names;
-   PROPC->all_fills(all_names);
+   PROPC->allFills(all_names);
    _fillList = DEBUG_NEW wxListBox(this, ID_ITEMLIST, wxDefaultPosition, wxSize(150,200), 0, NULL, wxLB_SORT);
    std::string init_color;
    if (!all_names.empty())
@@ -1874,7 +1874,7 @@ SIMap* tui::nameCboxRecords::getTheMap()
       unsigned layno = PROPC->getLayerNo(layname);
       if (ERR_LAY == layno)
       {
-         layno = PROPC->addlayer(layname);
+         layno = PROPC->addLayer(layname);
          TpdPost::layer_add(layname, layno);
       }
       (*cif_lay_map)[std::string(CNM->_ciflay->GetLabel().mb_str(wxConvUTF8))] = layno;
@@ -1967,7 +1967,7 @@ tui::nameCboxList::nameCboxList(wxWindow* parent, wxWindowID id, wxPoint pnt, wx
 {
    // collect all defined layers
    nameList all_names;
-   PROPC->all_layers(all_names);
+   PROPC->allLayers(all_names);
    wxArrayString all_strings;
    int line_height = (int)(GetFont().GetPointSize() * 2.5);
    for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
@@ -2010,7 +2010,7 @@ tui::nameCbox3List::nameCbox3List(wxWindow* parent, wxWindowID id, wxPoint pnt, 
 {
    // collect all defined layers
    nameList all_names;
-   PROPC->all_layers(all_names);
+   PROPC->allLayers(all_names);
    wxArrayString all_strings;
    int line_height = (int)(GetFont().GetPointSize() * 2.5);
    for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
@@ -2104,7 +2104,7 @@ tui::nameEboxList::nameEboxList(wxWindow* parent, wxWindowID id, wxPoint pnt, wx
 {
    // collect all defined layers
    nameList all_names;
-   PROPC->all_layers(all_names);
+   PROPC->allLayers(all_names);
    wxArrayString all_strings;
    int line_height = (int)(GetFont().GetPointSize() * 2.5);
    for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
@@ -2205,7 +2205,7 @@ tui::nameEbox3List::nameEbox3List(wxWindow* parent, wxWindowID id, wxPoint pnt, 
 {
    // collect all defined layers
    nameList all_names;
-   PROPC->all_layers(all_names);
+   PROPC->allLayers(all_names);
    wxArrayString all_strings;
    int line_height = (int)(GetFont().GetPointSize() * 2.5);
    for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)

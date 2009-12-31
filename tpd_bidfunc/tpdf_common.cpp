@@ -297,7 +297,7 @@ void tellstdfunc::updateLayerDefinitions(laydata::TdtLibDir* LIBDIR, nameList& t
    for(WordList::const_iterator CUL = ull.begin(); CUL != ull.end(); CUL++)
    {
       if (0 == *CUL) continue;
-      if (PROPC->addlayer(*CUL))
+      if (PROPC->addLayer(*CUL))
          TpdPost::layer_add(PROPC->getLayerName(*CUL), *CUL);
    }
 }
@@ -313,7 +313,7 @@ void tellstdfunc::initFuncLib(wxFrame* tpd, wxWindow* cnvs)
 // void tellstdfunc::makeGdsLays(ExtLayers& gdsLays)
 // {
 //    nameList allls;
-//    DATC->all_layers(allls);
+//    DATC->allLayers(allls);
 //    for (nameList::const_iterator CL = allls.begin(); CL != allls.end(); CL++)
 //    {
 //       WordSet data_types;

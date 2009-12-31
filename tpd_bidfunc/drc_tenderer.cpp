@@ -179,7 +179,7 @@ void Calbr::drcTenderer::endWriting()
    {
       const WordList freshlays = PROPC->upLayers();
       for(WordList::const_iterator CUL = freshlays.begin(); CUL != freshlays.end(); CUL++)
-         PROPC->addlayer((*CUL));
+         PROPC->addLayer((*CUL));
       PROPC->clearUnpublishedLayers();
    }
 

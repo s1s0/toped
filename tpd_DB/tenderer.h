@@ -873,18 +873,18 @@ namespace tenderer {
          bool              collect();
          void              draw();
 
-         //return layno if _state == DB or predefined layer in other case
+         //return layno if _propertyState == DB or predefined layer in other case
          unsigned          getTenderLay(unsigned layno);
          //set state of DrawProperties
-         void              setState(layprop::drawprop_state state) {_drawprop->setState(state);};
+         void              setState(layprop::PropertyState state) {_drawprop->setState(state);};
          // temporary!
          bool              layerHidden(unsigned layno) const {return  _drawprop->layerHidden(layno)    ;}
-         const CTM&        ScrCTM() const                {return  _drawprop->ScrCTM()              ;}
+         const CTM&        ScrCTM() const                {return  _drawprop->scrCtm()              ;}
          const DBbox&      clipRegion() const            {return  _drawprop->clipRegion()          ;}
          void              pushref(const laydata::TdtCellRef* ref)
-                                                         {        _drawprop->pushref(ref)          ;}
+                                                         {        _drawprop->pushRef(ref)          ;}
          byte              popref(const laydata::TdtCellRef* ref)
-                                                         {return  _drawprop->popref(ref)           ;}
+                                                         {return  _drawprop->popRef(ref)           ;}
          bool              adjustTextOrientation() const {return  _drawprop->adjustTextOrientation();}
       private:
          layprop::DrawProperties*   _drawprop;

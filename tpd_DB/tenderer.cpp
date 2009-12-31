@@ -1662,7 +1662,7 @@ void tenderer::TopRend::text (const std::string* txt, const CTM& ftmtrx, const D
 void tenderer::TopRend::Grid(const real step, const std::string color)
 {
    int gridstep = (int)rint(step / _UU);
-   if ( abs((int)(_drawprop->ScrCTM().a() * gridstep)) > GRID_LIMIT)
+   if ( abs((int)(_drawprop->scrCtm().a() * gridstep)) > GRID_LIMIT)
    {
       _drawprop->setGridColor(color);
       // set first grid step to be multiply on the step
@@ -1838,11 +1838,11 @@ tenderer::TopRend::~TopRend()
 {
 //   char debug_message[256];
 //   unsigned long all_points_drawn = 0;
-//   unsigned      all_layers = 0;
+//   unsigned      allLayers = 0;
    for (DataLay::const_iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {
 //      all_points_drawn += CLAY->second->total_points();
-//      all_layers++;
+//      allLayers++;
 //      sprintf (debug_message, "Layer %i:  %i points", CLAY->first, CLAY->second->total_points());
 //      tell_log(console::MT_INFO,debug_message);
       delete (CLAY->second);
@@ -1854,7 +1854,7 @@ tenderer::TopRend::~TopRend()
       delete (*CSH);
 
    //
-//   sprintf (debug_message, "Rendering summary: %lu vertexes in %i buffers", all_points_drawn, all_layers);
+//   sprintf (debug_message, "Rendering summary: %lu vertexes in %i buffers", all_points_drawn, allLayers);
 //   tell_log(console::MT_WARNING,debug_message);
    //
    if (NULL != _ogl_buffers)

@@ -977,9 +977,9 @@ void laydata::TdtDesign::openGL_draw(layprop::DrawProperties& drawprop)
    if (_target.checkedit())
    {
 //      ctmstack transtack;
-      drawprop.initCTMstack();
+      drawprop.initCtmStack();
       _target.view()->openGL_draw(drawprop, _target.iscell());
-      drawprop.clearCTMstack();
+      drawprop.clearCtmStack();
    }
 }
 
@@ -1018,26 +1018,26 @@ void laydata::TdtDesign::tmp_draw(const layprop::DrawProperties& drawprop,
       tmp_stack.push_front(CTM(newp - base,1,0,false));
       _tmpdata->draw(drawprop, tmp_stack);
    }
-   else if ((drawprop.currentop() != console::op_none) && _target.checkedit())
+   else if ((drawprop.currentOp() != console::op_none) && _target.checkedit())
    {
-      if ((console::op_copy == drawprop.currentop()) || (console::op_move == drawprop.currentop()))
+      if ((console::op_copy == drawprop.currentOp()) || (console::op_move == drawprop.currentOp()))
       {
          base *= _target.rARTM();
          newp *= _target.rARTM();
          tmp_stack.push_front(CTM(_target.ARTM()));
          tmp_stack.push_front(CTM(newp - base,1,0,false)*_target.ARTM());
       }
-      else if ((console::op_flipX == drawprop.currentop()) || (console::op_flipY == drawprop.currentop()))
+      else if ((console::op_flipX == drawprop.currentOp()) || (console::op_flipY == drawprop.currentOp()))
       {
          CTM newpos = _target.ARTM();
          tmp_stack.push_front(newpos);
-         if (console::op_flipX == drawprop.currentop())
+         if (console::op_flipX == drawprop.currentOp())
             newpos.FlipX(newp.y());
          else
             newpos.FlipY(newp.x());
          tmp_stack.push_front(newpos);
       }
-      else if (console::op_rotate == drawprop.currentop())
+      else if (console::op_rotate == drawprop.currentOp())
       {
          CTM newpos = _target.ARTM();
          tmp_stack.push_front(_target.ARTM());

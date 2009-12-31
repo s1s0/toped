@@ -31,10 +31,6 @@
 #include <string>
 #include "quadtree.h"
 
-namespace layprop {
-   class PropertyCenter;
-}
-
 namespace laydata {
 
 //==============================================================================

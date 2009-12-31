@@ -464,16 +464,16 @@ layprop::FontLibrary::~FontLibrary()
 //=============================================================================
 layprop::DrawProperties::DrawProperties() : _clipRegion(0,0)
 {
-   _blockfill = false;
-   _currentop = console::op_none;
-   _drawinglayer = 0;
-   _cellmarks_hidden = true;
-   _textmarks_hidden = true;
-   _cellbox_hidden = true;
-   _textbox_hidden = true;
-   _refstack = NULL;
+   _blockFill = false;
+   _currentOp = console::op_none;
+   _drawingLayer = 0;
+   _cellMarksHidden = true;
+   _textMarksHidden = true;
+   _cellBoxHidden = true;
+   _textBoxHidden = true;
+   _refStack = NULL;
    _renderType = false;
-   _state = DB;
+   _propertyState = DB;
    _adjustTextOrientation = false;
 }
 
@@ -485,12 +485,12 @@ void layprop::DrawProperties::loadLayoutFonts(std::string fontfile, bool vbo)
 
 void layprop::DrawProperties::setGridColor(std::string colname) const
 {
-   if (_laycolors.end() == _laycolors.find(colname))
+   if (_layColors.end() == _layColors.find(colname))
    // put a default gray color if color is not found
       glColor4ub(_defaultColor.red(), _defaultColor.green(), _defaultColor.blue(), _defaultColor.alpha());
    else
    {
-      tellRGB* gcol = _laycolors.find(colname)->second;
+      tellRGB* gcol = _layColors.find(colname)->second;
       assert(NULL != gcol);
       glColor4ub(gcol->red(), gcol->green(), gcol->blue(), gcol->alpha());
    }
@@ -498,8 +498,8 @@ void layprop::DrawProperties::setGridColor(std::string colname) const
 
 void layprop::DrawProperties::setCurrentColor(unsigned layno)
 {
-   _drawinglayer = layno;
-   const layprop::tellRGB& theColor = getColor(_drawinglayer);
+   _drawingLayer = layno;
+   const layprop::tellRGB& theColor = getColor(_drawingLayer);
    glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
 }
 
@@ -509,11 +509,11 @@ void layprop::DrawProperties::adjustAlpha(word factor)
    //@TODO! - A tell option(function or variable) to adjust the constant (30 below)
    // user must know what's going on, otherwise - the rendering result might be confusing
    // Having done that, the method can be enabled
-/*   if (_layset.end() != _layset.find(_drawinglayer))
+/*   if (_layset.end() != _layset.find(_drawingLayer))
    {
-      if (_laycolors.end() != _laycolors.find(_layset[_drawinglayer]->color()))
+      if (_layColors.end() != _layColors.find(_layset[_drawingLayer]->color()))
       {
-         tellRGB* gcol = _laycolors[_layset[_drawinglayer]->color()];
+         tellRGB* gcol = _layColors[_layset[_drawingLayer]->color()];
          if (gcol)
          {
             byte alpha = gcol->alpha();
@@ -543,17 +543,17 @@ bool  layprop::DrawProperties::layerLocked(unsigned layno) const
 
 bool layprop::DrawProperties::setCurrentFill(bool force_fill) const
 {
-   if (REF_LAY == _drawinglayer) return true;
+   if (REF_LAY == _drawingLayer) return true;
    // The lines below are doing effectively
-   // byte* ifill = _layfill[_layset[_drawinglayer]->getfill]
-   const LayerSettings* ilayset = findLayerSettings(_drawinglayer);
-   if ( (NULL != ilayset) && (!_blockfill || force_fill ) )
+   // byte* ifill = _layFill[_layset[_drawingLayer]->getfill]
+   const LayerSettings* ilayset = findLayerSettings(_drawingLayer);
+   if ( (NULL != ilayset) && (!_blockFill || force_fill ) )
    {
       if(ilayset->filled())
       { // layer is filled
          glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-         fillMAP::const_iterator ifillset = _layfill.find(ilayset->fill());
-         if (_layfill.end() == ifillset)
+         FillMap::const_iterator ifillset = _layFill.find(ilayset->fill());
+         if (_layFill.end() == ifillset)
          { // no stipple defined - will use solid fill
 //            glDisable(GL_POLYGON_STIPPLE);
             glEnable(GL_POLYGON_STIPPLE);
@@ -579,7 +579,7 @@ bool layprop::DrawProperties::isFilled(unsigned layno) const
 {
    assert(REF_LAY != layno);
    const LayerSettings* ilayset = findLayerSettings(layno);
-   if ((NULL != ilayset) && !_blockfill)
+   if ((NULL != ilayset) && !_blockFill)
    {
       if(ilayset->filled()) return true;
       else return false;
@@ -587,9 +587,9 @@ bool layprop::DrawProperties::isFilled(unsigned layno) const
    else return false;
 }
 
-void layprop::DrawProperties::draw_text_boundary(const pointlist& ptlist)
+void layprop::DrawProperties::drawTextBoundary(const pointlist& ptlist)
 {
-   if (_textbox_hidden) return;
+   if (_textBoxHidden) return;
    else
    {
 //      glColor4f(1.0, 1.0, 1.0, 0.5);
@@ -603,9 +603,9 @@ void layprop::DrawProperties::draw_text_boundary(const pointlist& ptlist)
    }
 }
 
-void layprop::DrawProperties::draw_cell_boundary(const pointlist& ptlist)
+void layprop::DrawProperties::drawCellBoundary(const pointlist& ptlist)
 {
-   if (_cellbox_hidden) return;
+   if (_cellBoxHidden) return;
    else
    {
       glColor4f(1.0, 1.0, 1.0, 0.5);
@@ -621,7 +621,7 @@ void layprop::DrawProperties::draw_cell_boundary(const pointlist& ptlist)
 
 void layprop::DrawProperties::setLineProps(bool selected) const
 {
-   if (REF_LAY == _drawinglayer)
+   if (REF_LAY == _drawingLayer)
    {
       glEnable(GL_LINE_STIPPLE);
       glLineStipple(1,0xf18f);
@@ -632,7 +632,7 @@ void layprop::DrawProperties::setLineProps(bool selected) const
    }
    else
    {
-      const layprop::LineSettings* theLine = getLine(_drawinglayer);
+      const layprop::LineSettings* theLine = getLine(_drawingLayer);
       if (selected)
       {
          glLineWidth(theLine->width());
@@ -649,39 +649,39 @@ void layprop::DrawProperties::setLineProps(bool selected) const
    }
 }
 
-void  layprop::DrawProperties::blockfill(laydata::CellRefStack* refstack)
+void  layprop::DrawProperties::blockFill(laydata::CellRefStack* refstack)
 {
-   _blockfill = true;
-   _refstack = refstack;
+   _blockFill = true;
+   _refStack = refstack;
 }
 
-void  layprop::DrawProperties::unblockfill()
+void  layprop::DrawProperties::unblockFill()
 {
-   _blockfill = false;
-   _refstack = NULL;
+   _blockFill = false;
+   _refStack = NULL;
 }
 
-void  layprop::DrawProperties::pushref(const laydata::TdtCellRef* cref)
+void  layprop::DrawProperties::pushRef(const laydata::TdtCellRef* cref)
 {
    assert(cref);
-   if (_refstack)
+   if (_refStack)
    {
-      if (_refstack->empty()) _blockfill = true;
-      _refstack->push_front(cref);
+      if (_refStack->empty()) _blockFill = true;
+      _refStack->push_front(cref);
    }
 }
 
-byte layprop::DrawProperties::popref(const laydata::TdtCellRef* cref)
+byte layprop::DrawProperties::popRef(const laydata::TdtCellRef* cref)
 {
    assert(cref);
-   if (_refstack && !_refstack->empty())
+   if (_refStack && !_refStack->empty())
    {
-      if (_refstack->front() == cref)
+      if (_refStack->front() == cref)
       {
-         _refstack->pop_front();
-         if (_refstack->empty())
+         _refStack->pop_front();
+         if (_refStack->empty())
          {
-            _blockfill = false;
+            _blockFill = false;
             return 2;
          }
          else return 1;
@@ -690,26 +690,26 @@ byte layprop::DrawProperties::popref(const laydata::TdtCellRef* cref)
    return 0;
 }
 
-void layprop::DrawProperties::draw_reference_marks(const TP& p0, const binding_marks mark_type) const
+void layprop::DrawProperties::drawReferenceMarks(const TP& p0, const binding_marks mark_type) const
 {
    GLubyte* the_mark;
    switch (mark_type)
    {
-      case  cell_mark:if (_cellmarks_hidden) return;
+      case  cell_mark:if (_cellMarksHidden) return;
       else
       {
          glColor4f((GLfloat)1.0, (GLfloat)1.0, (GLfloat)1.0, (GLfloat)0.8);
          the_mark = cell_mark_bmp;
          break;
       }
-      case array_mark:if (_cellmarks_hidden) return;
+      case array_mark:if (_cellMarksHidden) return;
       else
       {
          glColor4f((GLfloat)1.0, (GLfloat)1.0, (GLfloat)1.0, (GLfloat)0.8);
          the_mark = array_mark_bmp;
          break;
       }
-      case  text_mark:if (_textmarks_hidden) return;
+      case  text_mark:if (_textMarksHidden) return;
       else the_mark = text_mark_bmp;break;
       default: assert(false);
    }
@@ -720,7 +720,7 @@ void layprop::DrawProperties::draw_reference_marks(const TP& p0, const binding_m
 
 unsigned layprop::DrawProperties::getLayerNo(std::string name) const
 {
-   for (laySetList::const_iterator CL = getCurSetList().begin(); CL != getCurSetList().end(); CL++)
+   for (LaySetList::const_iterator CL = getCurSetList().begin(); CL != getCurSetList().end(); CL++)
    {
       if (name == CL->second->name()) return CL->first;
    }
@@ -766,7 +766,7 @@ std::string layprop::DrawProperties::getLineName(unsigned layno) const
 
 unsigned layprop::DrawProperties::getTenderLay(unsigned layno) const
 {
-   switch (_state)
+   switch (_propertyState)
    {
       case DB: return layno;
       case DRC: return DRC_LAY;
@@ -774,9 +774,9 @@ unsigned layprop::DrawProperties::getTenderLay(unsigned layno) const
 	}
 }
 
-void layprop::DrawProperties::all_layers(nameList& alllays) const
+void layprop::DrawProperties::allLayers(nameList& alllays) const
 {
-   for (laySetList::const_iterator CL = getCurSetList().begin(); CL != getCurSetList().end(); CL++)
+   for (LaySetList::const_iterator CL = getCurSetList().begin(); CL != getCurSetList().end(); CL++)
       if (REF_LAY != CL->first) alllays.push_back(CL->second->name());
 }
 
@@ -784,21 +784,21 @@ const layprop::LineSettings* layprop::DrawProperties::getLine(unsigned layno) co
 {
    const LayerSettings* ilayset = findLayerSettings(layno);
    if (NULL == ilayset) return &_defaultSeline;
-   lineMAP::const_iterator line = _lineset.find(ilayset->sline());
-   if (_lineset.end() == line) return &_defaultSeline;
+   LineMap::const_iterator line = _lineSet.find(ilayset->sline());
+   if (_lineSet.end() == line) return &_defaultSeline;
    return line->second;
 // All the stuff above is equivalent to
-//   return _layfill[_layset[layno]->sline()];
+//   return _layFill[_layset[layno]->sline()];
 // but is safer and preserves constness
 }
 
 const layprop::LineSettings* layprop::DrawProperties::getLine(std::string line_name) const
 {
-   lineMAP::const_iterator line = _lineset.find(line_name);
-   if (_lineset.end() == line) return &_defaultSeline;
+   LineMap::const_iterator line = _lineSet.find(line_name);
+   if (_lineSet.end() == line) return &_defaultSeline;
    return line->second;
 // All the stuff above is equivalent to
-//   return _layfill[_layset[layno]->sline()];
+//   return _layFill[_layset[layno]->sline()];
 // but is safer and preserves constness
 }
 
@@ -806,21 +806,21 @@ const byte* layprop::DrawProperties::getFill(unsigned layno) const
 {
    const LayerSettings* ilayset = findLayerSettings(layno);
    if (NULL == ilayset) return &_defaultFill[0];
-   fillMAP::const_iterator fill_set = _layfill.find(ilayset->fill());
-   if (_layfill.end() == fill_set) return &_defaultFill[0];
+   FillMap::const_iterator fill_set = _layFill.find(ilayset->fill());
+   if (_layFill.end() == fill_set) return &_defaultFill[0];
    return fill_set->second;
 // All the stuff above is equivalent to
-//   return _layfill[_layset[layno]->fill()];
+//   return _layFill[_layset[layno]->fill()];
 // but is safer and preserves constness
 }
 
 const byte* layprop::DrawProperties::getFill(std::string fill_name) const
 {
-   fillMAP::const_iterator fill_set = _layfill.find(fill_name);
-   if (_layfill.end() == fill_set) return &_defaultFill[0];
+   FillMap::const_iterator fill_set = _layFill.find(fill_name);
+   if (_layFill.end() == fill_set) return &_defaultFill[0];
    return fill_set->second;
 // All the stuff above is equivalent to
-//   return _layfill[fill_name];
+//   return _layFill[fill_name];
 // but is safer and preserves constness
 }
 
@@ -828,29 +828,29 @@ const layprop::tellRGB& layprop::DrawProperties::getColor(unsigned layno) const
 {
    const LayerSettings* ilayset = findLayerSettings(layno);
    if (NULL == ilayset) return _defaultColor;
-   colorMAP::const_iterator col_set = _laycolors.find(ilayset->color());
-   if (_laycolors.end() == col_set) return _defaultColor;
+   ColorMap::const_iterator col_set = _layColors.find(ilayset->color());
+   if (_layColors.end() == col_set) return _defaultColor;
    return *(col_set->second);
 // All the stuff above is equivalent to
-//   return _laycolors[_layset[layno]->color()];
+//   return _layColors[_layset[layno]->color()];
 // but is safer and preserves constness
 }
 
 const layprop::tellRGB& layprop::DrawProperties::getColor(std::string color_name) const
 {
-   colorMAP::const_iterator col_set = _laycolors.find(color_name);
-   if (_laycolors.end() == col_set) return _defaultColor;
+   ColorMap::const_iterator col_set = _layColors.find(color_name);
+   if (_layColors.end() == col_set) return _defaultColor;
    return *(col_set->second);
 // All the stuff above is equivalent to
-//   return _laycolors[color_name];
+//   return _layColors[color_name];
 // but is safer and preserves constness
 }
 
 void layprop::DrawProperties::savePatterns(FILE* prop_file) const
 {
-   fillMAP::const_iterator CI;
+   FillMap::const_iterator CI;
    fprintf(prop_file, "void  fillSetup() {\n");
-   for( CI = _layfill.begin(); CI != _layfill.end(); CI++)
+   for( CI = _layFill.begin(); CI != _layFill.end(); CI++)
    {
       fprintf(prop_file, "   int list _%s = {\n", CI->first.c_str());
       byte* patdef = CI->second;
@@ -868,7 +868,7 @@ void layprop::DrawProperties::savePatterns(FILE* prop_file) const
       }
       fprintf(prop_file, "   };\n\n");
    }
-   for( CI = _layfill.begin(); CI != _layfill.end(); CI++)
+   for( CI = _layFill.begin(); CI != _layFill.end(); CI++)
    {
       fprintf(prop_file, "   definefill(\"%s\", _%s );\n", CI->first.c_str(), CI->first.c_str());
    }
@@ -877,9 +877,9 @@ void layprop::DrawProperties::savePatterns(FILE* prop_file) const
 
 void layprop::DrawProperties::saveColors(FILE* prop_file) const
 {
-   colorMAP::const_iterator CI;
+   ColorMap::const_iterator CI;
    fprintf(prop_file, "void  colorSetup() {\n");
-   for( CI = _laycolors.begin(); CI != _laycolors.end(); CI++)
+   for( CI = _layColors.begin(); CI != _layColors.end(); CI++)
    {
       tellRGB* the_color = CI->second;
       fprintf(prop_file, "   definecolor(\"%s\", %3d, %3d, %3d, %3d);\n",
@@ -895,7 +895,7 @@ void layprop::DrawProperties::saveColors(FILE* prop_file) const
 
 void layprop::DrawProperties::saveLayers(FILE* prop_file) const
 {
-   laySetList::const_iterator CI;
+   LaySetList::const_iterator CI;
    fprintf(prop_file, "void  layerSetup() {\n");
    fprintf(prop_file, "   colorSetup(); fillSetup(); lineSetup();\n");
    for( CI = getCurSetList().begin(); CI != getCurSetList().end(); CI++)
@@ -914,9 +914,9 @@ void layprop::DrawProperties::saveLayers(FILE* prop_file) const
 
 void layprop::DrawProperties::saveLines(FILE* prop_file) const
 {
-   lineMAP::const_iterator CI;
+   LineMap::const_iterator CI;
    fprintf(prop_file, "void  lineSetup() {\n");
-   for( CI = _lineset.begin(); CI != _lineset.end(); CI++)
+   for( CI = _lineSet.begin(); CI != _lineSet.end(); CI++)
    {
       LineSettings* the_line = CI->second;
       fprintf(prop_file, "   defineline(\"%s\", \"%s\", 0x%04x , %d, %d);\n",
@@ -931,55 +931,55 @@ void layprop::DrawProperties::saveLines(FILE* prop_file) const
 
 const layprop::LayerSettings*  layprop::DrawProperties::findLayerSettings(unsigned layno) const
 {
-   laySetList::const_iterator ilayset;
-   switch (_state)
+   LaySetList::const_iterator ilayset;
+   switch (_propertyState)
    {
-      case DB : ilayset = _laysetDB.find(layno) ; if (_laysetDB.end()  == ilayset) return NULL; break;
-      case DRC: ilayset = _laysetDRC.find(layno); if (_laysetDRC.end() == ilayset) return NULL; break;
+      case DB : ilayset = _laySetDb.find(layno) ; if (_laySetDb.end()  == ilayset) return NULL; break;
+      case DRC: ilayset = _laySetDrc.find(layno); if (_laySetDrc.end() == ilayset) return NULL; break;
       default: assert(false);
    }
    return ilayset->second;
 }
 
-const layprop::laySetList& layprop::DrawProperties::getCurSetList() const
+const layprop::LaySetList& layprop::DrawProperties::getCurSetList() const
 {
-   switch (_state)
+   switch (_propertyState)
    {
-      case DB : return _laysetDB;
-      case DRC: return _laysetDRC;
+      case DB : return _laySetDb;
+      case DRC: return _laySetDrc;
       default: assert(false);
    }
 }
 
-void layprop::DrawProperties::PSwrite(PSFile& psf) const
+void layprop::DrawProperties::psWrite(PSFile& psf) const
 {
-   for(colorMAP::const_iterator CI = _laycolors.begin(); CI != _laycolors.end(); CI++)
+   for(ColorMap::const_iterator CI = _layColors.begin(); CI != _layColors.end(); CI++)
    {
       tellRGB* the_color = CI->second;
       psf.defineColor( CI->first.c_str() , the_color->red(),
                        the_color->green(), the_color->blue() );
    }
 
-   for(fillMAP::const_iterator CI = _layfill.begin(); CI != _layfill.end(); CI++)
+   for(FillMap::const_iterator CI = _layFill.begin(); CI != _layFill.end(); CI++)
       psf.defineFill( CI->first.c_str() , CI->second);
 }
 
 layprop::DrawProperties::~DrawProperties() {
 	//clear all databases
 	setState(layprop::DRC);
-   for (laySetList::const_iterator LSI = getCurSetList().begin(); LSI != getCurSetList().end(); LSI++)
+   for (LaySetList::const_iterator LSI = getCurSetList().begin(); LSI != getCurSetList().end(); LSI++)
       delete LSI->second;
 	setState(layprop::DB);
-	for (laySetList::const_iterator LSI = getCurSetList().begin(); LSI != getCurSetList().end(); LSI++)
+	for (LaySetList::const_iterator LSI = getCurSetList().begin(); LSI != getCurSetList().end(); LSI++)
       delete LSI->second;
 
-   for (colorMAP::iterator CMI = _laycolors.begin(); CMI != _laycolors.end(); CMI++)
+   for (ColorMap::iterator CMI = _layColors.begin(); CMI != _layColors.end(); CMI++)
       delete CMI->second;
-   for (fillMAP::iterator FMI = _layfill.begin(); FMI != _layfill.end(); FMI++)
+   for (FillMap::iterator FMI = _layFill.begin(); FMI != _layFill.end(); FMI++)
       delete [] FMI->second;
-   for (lineMAP::iterator LMI = _lineset.begin(); LMI != _lineset.end(); LMI++)
+   for (LineMap::iterator LMI = _lineSet.begin(); LMI != _lineSet.end(); LMI++)
       delete LMI->second;
-//   if (NULL != _refstack) d elete _refstack; -> deleted in EditObject
+//   if (NULL != _refStack) d elete _refStack; -> deleted in EditObject
    delete fontLib;
 }
 
