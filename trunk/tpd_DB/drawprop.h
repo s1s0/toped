@@ -36,7 +36,7 @@
 namespace layprop {
 
    typedef enum {cell_mark, array_mark, text_mark} binding_marks;
-	typedef enum {DB, DRC} drawprop_state;
+   typedef enum {DB, DRC} PropertyState;
 
    //=============================================================================
    //
@@ -232,10 +232,10 @@ namespace layprop {
    };
 
    //=============================================================================
-   typedef  std::map<std::string, tellRGB*      >        colorMAP;
-   typedef  std::map<std::string, byte*         >        fillMAP;
-   typedef  std::map<std::string, LineSettings* >        lineMAP;
-   typedef  std::map<unsigned   , LayerSettings*>        laySetList;
+   typedef  std::map<std::string, tellRGB*      >        ColorMap;
+   typedef  std::map<std::string, byte*         >        FillMap;
+   typedef  std::map<std::string, LineSettings* >        LineMap;
+   typedef  std::map<unsigned   , LayerSettings*>        LaySetList;
    typedef  std::pair <unsigned, std::list<LayerState> > LayStateList;
 
    //==============================================================================
@@ -262,76 +262,75 @@ namespace layprop {
          void                       setLineProps(bool selected = false) const;
          bool                       layerHidden(unsigned layno) const;
          bool                       layerLocked(unsigned layno) const;
-         const CTM&                 ScrCTM() const       {return  _ScrCTM;}
-         const DBbox&               clipRegion() const   {return _clipRegion;}
-         console::ACTIVE_OP         currentop() const    {return _currentop;}
-         void                       blockfill(laydata::CellRefStack*);
-         void                       unblockfill();
-         void                       pushref(const laydata::TdtCellRef*);
-         byte                       popref(const laydata::TdtCellRef*);
-         void                       initCTMstack()       {_transtack.push(CTM());}
-         void                       clearCTMstack()      {while (!_transtack.empty()) _transtack.pop();}
-         void                       pushCTM(CTM& last)   {_transtack.push(last);}
-         void                       popCTM()             {_transtack.pop();}
-         const CTM&                 topCTM() const       {assert(_transtack.size());return _transtack.top();}
-         void                       draw_reference_marks(const TP&, const binding_marks) const;
-         void                       draw_text_boundary(const pointlist& ptlist);
-         void                       draw_cell_boundary(const pointlist& ptlist);
+         void                       blockFill(laydata::CellRefStack*);
+         void                       unblockFill();
+         void                       pushRef(const laydata::TdtCellRef*);
+         byte                       popRef(const laydata::TdtCellRef*);
+         void                       drawReferenceMarks(const TP&, const binding_marks) const;
+         void                       drawTextBoundary(const pointlist& ptlist);
+         void                       drawCellBoundary(const pointlist& ptlist);
          unsigned                   getLayerNo(std::string name) const;
          std::string                getLayerName(unsigned layno) const;
          std::string                getColorName(unsigned layno) const;
          std::string                getFillName(unsigned layno) const;
          std::string                getLineName(unsigned layno) const;
-
-         //return layno if _state == DB or predefined layer in other case
-         unsigned                   getTenderLay(unsigned layno) const;
-         void                       setState (drawprop_state state) {_state = state;};
-         void                       all_layers(nameList&) const;
-         unsigned                   drawinglayer() const {return _drawinglayer;}
+         unsigned                   getTenderLay(unsigned layno) const;//!return layno if _propertyState == DB or predefined layer otherwise
+         void                       allLayers(nameList&) const;
          const byte*                getFill(unsigned layno) const;
          const byte*                getFill(std::string) const;
          const tellRGB&             getColor(unsigned layno) const;
          const tellRGB&             getColor(std::string) const;
          const LineSettings*        getLine(unsigned layno) const;
          const LineSettings*        getLine(std::string) const;
-         void                       PSwrite(PSFile&) const;
+         void                       psWrite(PSFile&) const;
          void                       loadLayoutFonts(std::string, bool);
+
+         const CTM&                 scrCtm() const       {return  _scrCtm;}
+         const DBbox&               clipRegion() const   {return _clipRegion;}
+         console::ACTIVE_OP         currentOp() const    {return _currentOp;}
+         void                       initCtmStack()       {_tranStack.push(CTM());}
+         void                       clearCtmStack()      {while (!_tranStack.empty()) _tranStack.pop();}
+         void                       pushCtm(CTM& last)   {_tranStack.push(last);}
+         void                       popCtm()             {_tranStack.pop();}
+         const CTM&                 topCtm() const       {assert(_tranStack.size());return _tranStack.top();}
+         void                       setState (PropertyState state) {_propertyState = state;};
+         unsigned                   drawingLayer() const {return _drawingLayer;}
          bool                       renderType()         {return _renderType;}
-         bool                       isTextBoxHidden()    {return _textbox_hidden;}
-         bool                       isCellBoxHidden()    {return _cellbox_hidden;}
+         bool                       isTextBoxHidden()    {return _textBoxHidden;}
+         bool                       isCellBoxHidden()    {return _cellBoxHidden;}
          bool                       adjustTextOrientation() const
                                                          {return _adjustTextOrientation;}
          friend class PropertyCenter;
       protected:
-         laySetList                 _laysetDB;
-         laySetList                 _laysetDRC;
-         colorMAP                   _laycolors;
-         fillMAP                    _layfill;
-         lineMAP                    _lineset;
+         LaySetList                 _laySetDb;
+         LaySetList                 _laySetDrc;
+         ColorMap                   _layColors;
+         FillMap                    _layFill;
+         LineMap                    _lineSet;
          DBbox                      _clipRegion;
-         CTM                        _ScrCTM;
-         bool                       _cellmarks_hidden;
-         bool                       _cellbox_hidden;
-         bool                       _textmarks_hidden;
-         bool                       _textbox_hidden;
+         CTM                        _scrCtm;
+         bool                       _cellMarksHidden;
+         bool                       _cellBoxHidden;
+         bool                       _textMarksHidden;
+         bool                       _textBoxHidden;
          bool                       _adjustTextOrientation;
          void                       savePatterns(FILE*) const;
          void                       saveColors(FILE*) const;
          void                       saveLayers(FILE*) const;
          void                       saveLines(FILE*) const;
-         const laySetList&          getCurSetList() const;
+         const LaySetList&          getCurSetList() const;
          const LayerSettings*       findLayerSettings(unsigned) const;
       private:
-         bool                       _blockfill;
-         laydata::CellRefStack*     _refstack;
-         ctmstack                   _transtack;
-         unsigned                   _drawinglayer;
-         console::ACTIVE_OP         _currentop;
+         bool                       _blockFill;
+         laydata::CellRefStack*     _refStack;
+         ctmstack                   _tranStack;
+         unsigned                   _drawingLayer;
+         console::ACTIVE_OP         _currentOp;
          static const tellRGB       _defaultColor;
          static const byte          _defaultFill[128];
          static const LineSettings  _defaultSeline;
          bool                       _renderType;
-         drawprop_state             _state; //type of drawing
+         PropertyState              _propertyState; //type of drawing
    };
 
 }

@@ -503,7 +503,7 @@ void tui::LayoutCanvas::CursorControl(bool shift, bool ctl) {
    // The sign actually is the sign of the tangens. To avoud troubles with the division by zero,
    // it is easier and faster to obtain the sign like this
    int sign = ((sdX * sdY) >= 0) ? 1 : -1;
-   bool _45deg = (PROPC->marker_angle() == 45);
+   bool _45deg = (PROPC->markerAngle() == 45);
    if (dX > dY) {
       if (_45deg && (dX < 2*dY)) n_ScrMARK.setY( sign*sdX + releasepoint.y() );
       else                       n_ScrMARK.setY( releasepoint.y() );
@@ -910,7 +910,7 @@ void tui::LayoutCanvas::OnMouseIN(wxCommandEvent& evt)
       else                  actop = (console::ACTIVE_OP)evt.GetInt();
       PROPC->setCurrentOp(actop);
       //restricted_move will be true for wire and polygon
-      restricted_move = (PROPC->marker_angle() != 0) &&
+      restricted_move = (PROPC->markerAngle() != 0) &&
             ((actop > 0) || (actop == console::op_dpoly));
       reperX = (console::op_flipX == actop) || (long_cursor && (console::op_flipY != actop));
       reperY = (console::op_flipY == actop) || (long_cursor && (console::op_flipX != actop));

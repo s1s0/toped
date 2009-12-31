@@ -106,30 +106,28 @@ namespace layprop {
       typedef  std::map<byte       , LayoutGrid*   >  gridlist;
                         PropertyCenter();
                        ~PropertyCenter();
-      bool              addlayer(std::string, unsigned, std::string, std::string, std::string);
-      bool              addlayer(std::string, unsigned);
-      bool              addlayer(unsigned);
-      unsigned          addlayer(std::string);
+      bool              addLayer(std::string, unsigned, std::string, std::string, std::string);
+      bool              addLayer(std::string, unsigned);
+      bool              addLayer(unsigned);
+      unsigned          addLayer(std::string);
       bool              isLayerExist(word);
       bool              isLayerExist(std::string);
       void              addUnpublishedLay(word);
-      void              addcolor(std::string name, byte R, byte G, byte B, byte A);
-      void              addfill(std::string name, byte *ptrn);
-      void              addline(std::string, std::string, word, byte, byte);
+      void              addColor(std::string name, byte R, byte G, byte B, byte A);
+      void              addFill(std::string name, byte *ptrn);
+      void              addLine(std::string, std::string, word, byte, byte);
       void              hideLayer(unsigned layno, bool hide);
       void              lockLayer(unsigned layno, bool lock);
       void              fillLayer(unsigned layno, bool fill);
       bool              selectable(unsigned layno) const;
       const WordList    getLockedLayers(void);
       const WordList    getAllLayers(void);
-      bool              selectable(word layno) const;
       void              saveProperties(std::string) const;
       //
       const LayoutGrid* grid(byte) const;
       void              setGrid(byte, real, std::string);
       bool              viewGrid(byte, bool);
       void              drawGrid() const;
-//      void              drawGrid(TopRend&) const;
       void              drawZeroCross() const;
       void              setUU(real);
       void              pushLayerStatus();
@@ -142,14 +140,14 @@ namespace layprop {
       bool              getLaysetStatus(const std::string&, WordSet&, WordSet&, WordSet&, unsigned);
       void              setGdsLayMap(USMap* map);
       void              setCifLayMap(USMap* map);
-      void              all_colors(nameList&) const;
-      void              all_fills(nameList&) const;
-      void              all_lines(nameList&) const;
-      void              setstep(real st)                 {_step = st;}
-      void              setautopan(bool status)          {_autopan = status;}
+      void              allColors(nameList&) const;
+      void              allFills(nameList&) const;
+      void              allLines(nameList&) const;
+      void              setStep(real st)                 {_step = st;}
+      void              setAutoPan(bool status)          {_autopan = status;}
       void              setZeroCross(bool status)        {_zeroCross = status;}
-      void              setmarker_angle(byte angle)      {_marker_angle = angle;}
-      void              setlayselmask(word lsm)          {_layselmask = lsm;}
+      void              setMarkerAngle(byte angle)       {_markerAngle = angle;}
+      void              setLaySelMask(word lsm)          {_layselmask = lsm;}
       void              addRuler(TP& p1, TP& p2)         {_supp_data.addRuler(p1,p2,_UU);}
       void              clearRulers()                    {_supp_data.clearRulers();}
       void              drawRulers(const CTM& layCTM)    {_supp_data.drawRulers(layCTM, stepDB());}
@@ -166,34 +164,34 @@ namespace layprop {
       real              DBscale() const                  {return _DBscale;}
       bool              autopan() const                  {return _autopan;}
       bool              zeroCross() const                {return _zeroCross;}
-      byte              marker_angle() const             {return _marker_angle;}
+      byte              markerAngle() const              {return _markerAngle;}
       word              layselmask() const               {return _layselmask;}
       const USMap*      getGdsLayMap() const             {return _gdsLayMap;}
       const USMap*      getCifLayMap() const             {return _cifLayMap;}
       word              curLay() const                   {return _curlay;}
-      bool              gridVisual(word no)             {return grid(no)->visual();}
+      bool              gridVisual(word no)              {return grid(no)->visual();}
 
       unsigned          getLayerNo(std::string name) const {return _drawprop.getLayerNo(name);}
       std::string       getLayerName(unsigned layno) const {return _drawprop.getLayerName(layno);}
       DrawProperties&   drawprop()                       {return _drawprop;}
       DrawProperties*   drawprop_ptr()                   {return &_drawprop;}
-      void              setcellmarks_hidden(bool hide)   {_drawprop._cellmarks_hidden = hide;}
-      void              settextmarks_hidden(bool hide)   {_drawprop._textmarks_hidden = hide;}
-      void              setcellbox_hidden(bool hide)     {_drawprop._cellbox_hidden = hide;}
-      void              settextbox_hidden(bool hide)     {_drawprop._textbox_hidden = hide;}
-      void              setScrCTM(CTM ScrCTM)            {_drawprop._ScrCTM = ScrCTM;}
+      void              setCellMarksHidden(bool hide)    {_drawprop._cellMarksHidden = hide;}
+      void              setTextMarksHidden(bool hide)    {_drawprop._textMarksHidden = hide;}
+      void              setCellboxHidden(bool hide)      {_drawprop._cellBoxHidden = hide;}
+      void              setTextboxHidden(bool hide)      {_drawprop._textBoxHidden = hide;}
+      void              setScrCTM(CTM ScrCTM)            {_drawprop._scrCtm = ScrCTM;}
       void              setClipRegion(DBbox clipR)       {_drawprop._clipRegion = clipR;}
       void              setCurrentOp(console::ACTIVE_OP actop)
-                                                         {_drawprop._currentop = actop;}
+                                                         {_drawprop._currentOp = actop;}
       void              setAdjustTextOrientation(bool ori)
                                                          {_drawprop._adjustTextOrientation = ori;}
-      console::ACTIVE_OP currentop() const               {return _drawprop.currentop();}
-      void              all_layers(nameList& laylist) const {_drawprop.all_layers(laylist);}
+      console::ACTIVE_OP currentop() const               {return _drawprop.currentOp();}
+      void              allLayers(nameList& laylist) const {_drawprop.allLayers(laylist);}
       void              loadLayoutFonts(std::string fft, bool vbo)
                                                          {_drawprop.loadLayoutFonts(fft, vbo);}
       bool              renderType()                     {return _drawprop.renderType();}
 
-      void              setState(layprop::drawprop_state state)
+      void              setState(layprop::PropertyState state)
                                                          {_drawprop.setState(state);}
       const byte*       getFill(word layno)              {return _drawprop.getFill(layno);}
       const byte*       getFill(std::string fill_name)   {return _drawprop.getFill(fill_name);}
@@ -203,7 +201,7 @@ namespace layprop {
       bool              isFilled(unsigned layno)         {return _drawprop.isFilled(layno);}
       bool              layerHidden(word layno)          {return _drawprop.layerHidden(layno);}
       bool              layerLocked(word layno)          {return _drawprop.layerLocked(layno);}
-      const LineSettings* getLine(word layno)   {return _drawprop.getLine(layno);}
+      const LineSettings* getLine(word layno)            {return _drawprop.getLine(layno);}
       const LineSettings* getLine(std::string line_name) {return _drawprop.getLine(line_name);}
       const std::string getColorName(word layno)         {return _drawprop.getColorName(layno);}
       const std::string getFillName(word layno)          {return _drawprop.getFillName(layno);}
@@ -223,7 +221,7 @@ namespace layprop {
       real                 _step;         // current marker step
       bool                 _autopan;      // view window moves automatically during shape drawing
       bool                 _zeroCross;    //
-      byte                 _marker_angle; // angle of restriction during shape drawing (0,45,90)
+      byte                 _markerAngle; // angle of restriction during shape drawing (0,45,90)
       SupplementaryData    _supp_data;    // supplementary data
       WordList             _uplaylist;    // unpublished layer list
       word                 _layselmask;   // layout shape type selection mask

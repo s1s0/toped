@@ -41,12 +41,12 @@ extern layprop::FontLibrary* fontLib;
 
 void laydata::EditObject::unblockfill()
 {
-   _viewprop->drawprop().unblockfill();
+   _viewprop->drawprop().unblockFill();
 }
 
 void laydata::EditObject::blockfill()
 {
-   _viewprop->drawprop().blockfill(_peditchain);
+   _viewprop->drawprop().blockFill(_peditchain);
 }
 
 laydata::EditObject::EditObject()
@@ -189,7 +189,7 @@ bool laydata::EditObject::securelaydef(unsigned layno)
 {
    if (layno != REF_LAY)
    {
-      bool newlay = _viewprop->addlayer( layno);
+      bool newlay = _viewprop->addLayer( layno);
       if (newlay)
          _viewprop->addUnpublishedLay(layno);
       return newlay;
@@ -497,7 +497,7 @@ void laydata::TdtCell::motion_draw(const layprop::DrawProperties& drawprop,
       // If this is the active cell, then we will have to visualize the
       // selected shapes in move. Patially selected fellas are processed
       // only if the current operation is move
-      console::ACTIVE_OP actop = drawprop.currentop();
+      console::ACTIVE_OP actop = drawprop.currentOp();
       //temporary draw of the active cell - moving selected shapes
       SelectList::const_iterator llst;
       DataList::iterator dlst;

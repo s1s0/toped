@@ -1902,8 +1902,8 @@ void tui::TopedFrame::OnDefineColor(wxCommandEvent& WXUNUSED(event))
    tui::defineColor dlg(this, -1, wxT("Color Definitions"), pos);
    if ( dlg.ShowModal() == wxID_OK )
    {
-      const layprop::colorMAP colors = dlg.allColors();
-      for(layprop::colorMAP::const_iterator CC = colors.begin() ; CC != colors.end(); CC++)
+      const layprop::ColorMap colors = dlg.allColors();
+      for(layprop::ColorMap::const_iterator CC = colors.begin() ; CC != colors.end(); CC++)
       {
          wxString ost;
          layprop::tellRGB* coldef = CC->second;
@@ -1925,8 +1925,8 @@ void tui::TopedFrame::OnDefineFill(wxCommandEvent& WXUNUSED(event))
    tui::defineFill dlg(this, -1, wxT("Fill Definition"), pos);
    if ( dlg.ShowModal() == wxID_OK )
    {
-      layprop::fillMAP patterns = dlg.allPatterns();
-      for(layprop::fillMAP::const_iterator CC = patterns.begin() ; CC != patterns.end(); CC++)
+      layprop::FillMap patterns = dlg.allPatterns();
+      for(layprop::FillMap::const_iterator CC = patterns.begin() ; CC != patterns.end(); CC++)
       {
          wxString ost;
          byte* patdef = CC->second;

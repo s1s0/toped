@@ -470,7 +470,7 @@ void DataCenter::PSexport(laydata::TdtCell* cell, std::string& filename)
 {
    //Get actual time
    PSFile psex(filename);
-   PROPC->drawprop().PSwrite(psex);
+   PROPC->drawprop().psWrite(psex);
    _TEDLIB()->PSwrite(psex, cell, PROPC->drawprop());
 //   gdsex.closeFile();
 }
@@ -944,7 +944,7 @@ LayerMapCif* DataCenter::secureCifLayMap(bool import)
    {// Generate the default CIF layer map for export
       lockDB(false);
       nameList tdtLayers;
-      PROPC->all_layers(tdtLayers);
+      PROPC->allLayers(tdtLayers);
       for ( nameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
       {
          std::ostringstream ciflayname;
@@ -985,7 +985,7 @@ LayerMapExt* DataCenter::secureGdsLayMap(bool import)
       { // generate default export GDS layer map
          lockDB(false);
          nameList tdtLayers;
-         PROPC->all_layers(tdtLayers);
+         PROPC->allLayers(tdtLayers);
          for ( nameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
          {
             std::ostringstream dtypestr;
@@ -1044,39 +1044,39 @@ void DataCenter::updateVisibleOverlap()
 
 
 
-//bool DataCenter::addlayer(std::string name, unsigned layno, std::string col,
+//bool DataCenter::addLayer(std::string name, unsigned layno, std::string col,
 //                                       std::string fill, std::string sline)
 //{
 //   bool status;
 //   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-//   status = _properties.addlayer(name, layno, col, fill, sline);
+//   status = _properties.addLayer(name, layno, col, fill, sline);
 //   _PROPLock.Unlock();
 //   return status;
 //}
 //
-//bool DataCenter::addlayer(std::string name, unsigned layno)
+//bool DataCenter::addLayer(std::string name, unsigned layno)
 //{
 //   bool status;
 //   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-//   status = _properties.addlayer(name, layno);
+//   status = _properties.addLayer(name, layno);
 //   _PROPLock.Unlock();
 //   return status;
 //}
 //
-//bool DataCenter::addlayer(unsigned layno)
+//bool DataCenter::addLayer(unsigned layno)
 //{
 //   bool status;
 //   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-//   status = _properties.addlayer(layno);
+//   status = _properties.addLayer(layno);
 //   _PROPLock.Unlock();
 //   return status;
 //}
 //
-//unsigned DataCenter::addlayer(std::string name)
+//unsigned DataCenter::addLayer(std::string name)
 //{
 //   unsigned layno;
 //   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-//   layno = _properties.addlayer(name);
+//   layno = _properties.addLayer(name);
 //   _PROPLock.Unlock();
 //   return layno;
 //}
@@ -1089,25 +1089,25 @@ void DataCenter::updateVisibleOverlap()
 //{
 //   return _properties.isLayerExist(layname);
 //}
-//void DataCenter::addline(std::string name, std::string col, word pattern,
+//void DataCenter::addLine(std::string name, std::string col, word pattern,
 //                                      byte patscale, byte width)
 //{
 //   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-//   _properties.addline(name, col, pattern, patscale, width);
+//   _properties.addLine(name, col, pattern, patscale, width);
 //   _PROPLock.Unlock();
 //}
 //
-//void DataCenter::addcolor(std::string name, byte R, byte G, byte B, byte A)
+//void DataCenter::addColor(std::string name, byte R, byte G, byte B, byte A)
 //{
 //   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-//   _properties.addcolor(name, R, G, B, A);
+//   _properties.addColor(name, R, G, B, A);
 //   _PROPLock.Unlock();
 //}
 //
-//void DataCenter::addfill(std::string name, byte *ptrn)
+//void DataCenter::addFill(std::string name, byte *ptrn)
 //{
 //   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-//   _properties.addfill(name, ptrn);
+//   _properties.addFill(name, ptrn);
 //   _PROPLock.Unlock();
 //}
 
@@ -1193,31 +1193,31 @@ void DataCenter::updateVisibleOverlap()
 //   return stat;
 //}
 
-//void DataCenter::setcellmarks_hidden(bool hide)
+//void DataCenter::setCellMarksHidden(bool hide)
 //{
 //   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-//   _properties.setcellmarks_hidden(hide);
+//   _properties.setCellMarksHidden(hide);
 //   _PROPLock.Unlock();
 //}
 //
-//void DataCenter::settextmarks_hidden(bool hide)
+//void DataCenter::setTextMarksHidden(bool hide)
 //{
 //   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-//   _properties.settextmarks_hidden(hide);
+//   _properties.setTextMarksHidden(hide);
 //   _PROPLock.Unlock();
 //}
 //
-//void DataCenter::setcellbox_hidden(bool hide)
+//void DataCenter::setCellboxHidden(bool hide)
 //{
 //   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-//   _properties.setcellbox_hidden(hide);
+//   _properties.setCellboxHidden(hide);
 //   _PROPLock.Unlock();
 //}
 //
-//void DataCenter::settextbox_hidden(bool hide)
+//void DataCenter::setTextboxHidden(bool hide)
 //{
 //   while (wxMUTEX_NO_ERROR != _PROPLock.TryLock());
-//   _properties.settextbox_hidden(hide);
+//   _properties.setTextboxHidden(hide);
 //   _PROPLock.Unlock();
 //}
 //

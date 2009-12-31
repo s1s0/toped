@@ -492,7 +492,7 @@ void tellstdfunc::stdSETSELECTMASK::undo()
 {
    TEUNDO_DEBUG("setselectmask() UNDO");
    word mask = getWordValue(UNDOPstack,true);
-   PROPC->setlayselmask(mask);
+   PROPC->setLaySelMask(mask);
 //   UpdateLV();
 }
 
@@ -502,7 +502,7 @@ int tellstdfunc::stdSETSELECTMASK::execute()
    word mask = getWordValue();
    word oldmask = PROPC->layselmask();
    UNDOPstack.push_front(DEBUG_NEW telldata::ttint(oldmask));
-   PROPC->setlayselmask(mask);
+   PROPC->setLaySelMask(mask);
    OPstack.push(DEBUG_NEW telldata::ttint(oldmask));
    LogFile << LogFile.getFN() << "("<< mask <<");"; LogFile.flush();
    return EXEC_NEXT;

@@ -871,7 +871,7 @@ int tellstdfunc::GDSgetlaymap::execute()
    { // generate default export GDS layer map
       DATC->lockDB(false);
       nameList tdtLayers;
-      PROPC->all_layers(tdtLayers);
+      PROPC->allLayers(tdtLayers);
       for ( nameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
       {
          std::ostringstream dtypestr;
@@ -1280,7 +1280,7 @@ int tellstdfunc::CIFgetlaymap::execute()
    { // generate default export CIF layer map
       DATC->lockDB(false);
       nameList tdtLayers;
-      PROPC->all_layers(tdtLayers);
+      PROPC->allLayers(tdtLayers);
       for ( nameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
       {
          std::ostringstream dtypestr;
@@ -1483,7 +1483,7 @@ tellstdfunc::DRCCalibreimport::DRCCalibreimport(telldata::typeID retype, bool eo
 int tellstdfunc::DRCCalibreimport::execute()
 {
    PROPC->setState(layprop::DRC);
-   PROPC->addlayer(DRC_LAY);
+   PROPC->addLayer(DRC_LAY);
    PROPC->setState(layprop::DB);
    std::string filename = getStringValue();
    if(DRCData)
