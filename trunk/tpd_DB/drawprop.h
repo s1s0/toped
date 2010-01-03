@@ -267,21 +267,10 @@ namespace layprop {
          void                       pushRef(const laydata::TdtCellRef*);
          byte                       popRef(const laydata::TdtCellRef*);
          void                       drawReferenceMarks(const TP&, const binding_marks) const;
-         void                       drawTextBoundary(const pointlist& ptlist);
-         void                       drawCellBoundary(const pointlist& ptlist);
+         void                       drawTextBoundary(const pointlist& ptlist) const;
+         void                       drawCellBoundary(const pointlist& ptlist) const;
          unsigned                   getLayerNo(std::string name) const;
-         std::string                getLayerName(unsigned layno) const;
-         std::string                getColorName(unsigned layno) const;
-         std::string                getFillName(unsigned layno) const;
-         std::string                getLineName(unsigned layno) const;
          unsigned                   getTenderLay(unsigned layno) const;//!return layno if _propertyState == DB or predefined layer otherwise
-         void                       allLayers(nameList&) const;
-         const byte*                getFill(unsigned layno) const;
-         const byte*                getFill(std::string) const;
-         const tellRGB&             getColor(unsigned layno) const;
-         const tellRGB&             getColor(std::string) const;
-         const LineSettings*        getLine(unsigned layno) const;
-         const LineSettings*        getLine(std::string) const;
          void                       psWrite(PSFile&) const;
          void                       loadLayoutFonts(std::string, bool);
 
@@ -293,13 +282,33 @@ namespace layprop {
          void                       pushCtm(CTM& last)   {_tranStack.push(last);}
          void                       popCtm()             {_tranStack.pop();}
          const CTM&                 topCtm() const       {assert(_tranStack.size());return _tranStack.top();}
-         void                       setState (PropertyState state) {_propertyState = state;};
+         void                       setState (PropertyState state)
+                                                         {_propertyState = state;};
          unsigned                   drawingLayer() const {return _drawingLayer;}
-         bool                       renderType()         {return _renderType;}
-         bool                       isTextBoxHidden()    {return _textBoxHidden;}
-         bool                       isCellBoxHidden()    {return _cellBoxHidden;}
+         bool                       renderType() const   {return _renderType;}
+         bool                       isTextBoxHidden() const
+                                                         {return _textBoxHidden;}
+         bool                       isCellBoxHidden() const
+                                                         {return _cellBoxHidden;}
          bool                       adjustTextOrientation() const
                                                          {return _adjustTextOrientation;}
+
+         // Used in dialogue boxes an protected during construction of the dialogue boxes
+         std::string                getLayerName(unsigned layno) const;
+         std::string                getColorName(unsigned layno) const;
+         std::string                getFillName(unsigned layno) const;
+         std::string                getLineName(unsigned layno) const;
+         const byte*                getFill(unsigned layno) const;
+         const byte*                getFill(std::string) const;
+         const tellRGB&             getColor(unsigned layno) const;
+         const tellRGB&             getColor(std::string) const;
+         const LineSettings*        getLine(unsigned layno) const;
+         const LineSettings*        getLine(std::string) const;
+         void                       allLayers(nameList&) const;
+         void                       allColors(nameList&) const;
+         void                       allFills(nameList&) const;
+         void                       allLines(nameList&) const;
+
          friend class PropertyCenter;
       protected:
          LaySetList                 _laySetDb;

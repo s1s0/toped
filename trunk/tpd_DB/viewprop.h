@@ -140,9 +140,6 @@ namespace layprop {
       bool              getLaysetStatus(const std::string&, WordSet&, WordSet&, WordSet&, unsigned);
       void              setGdsLayMap(USMap* map);
       void              setCifLayMap(USMap* map);
-      void              allColors(nameList&) const;
-      void              allFills(nameList&) const;
-      void              allLines(nameList&) const;
       void              setStep(real st)                 {_step = st;}
       void              setAutoPan(bool status)          {_autopan = status;}
       void              setZeroCross(bool status)        {_zeroCross = status;}
@@ -172,7 +169,6 @@ namespace layprop {
       bool              gridVisual(word no)              {return grid(no)->visual();}
 
       unsigned          getLayerNo(std::string name) const {return _drawprop.getLayerNo(name);}
-      std::string       getLayerName(unsigned layno) const {return _drawprop.getLayerName(layno);}
       DrawProperties&   drawprop()                       {return _drawprop;}
       DrawProperties*   drawprop_ptr()                   {return &_drawprop;}
       void              setCellMarksHidden(bool hide)    {_drawprop._cellMarksHidden = hide;}
@@ -186,27 +182,17 @@ namespace layprop {
       void              setAdjustTextOrientation(bool ori)
                                                          {_drawprop._adjustTextOrientation = ori;}
       console::ACTIVE_OP currentop() const               {return _drawprop.currentOp();}
-      void              allLayers(nameList& laylist) const {_drawprop.allLayers(laylist);}
       void              loadLayoutFonts(std::string fft, bool vbo)
                                                          {_drawprop.loadLayoutFonts(fft, vbo);}
       bool              renderType()                     {return _drawprop.renderType();}
 
       void              setState(layprop::PropertyState state)
                                                          {_drawprop.setState(state);}
-      const byte*       getFill(word layno)              {return _drawprop.getFill(layno);}
-      const byte*       getFill(std::string fill_name)   {return _drawprop.getFill(fill_name);}
-      const tellRGB&    getColor(word layno)       {return _drawprop.getColor(layno);}
-      const tellRGB&    getColor(std::string color_name)
-                                                         {return _drawprop.getColor(color_name);}
-      bool              isFilled(unsigned layno)         {return _drawprop.isFilled(layno);}
       bool              layerHidden(word layno)          {return _drawprop.layerHidden(layno);}
       bool              layerLocked(word layno)          {return _drawprop.layerLocked(layno);}
-      const LineSettings* getLine(word layno)            {return _drawprop.getLine(layno);}
-      const LineSettings* getLine(std::string line_name) {return _drawprop.getLine(line_name);}
-      const std::string getColorName(word layno)         {return _drawprop.getColorName(layno);}
-      const std::string getFillName(word layno)          {return _drawprop.getFillName(layno);}
-      const std::string getLineName(word layno)          {return _drawprop.getLineName(layno);}
 
+      bool              lockDrawProp(DrawProperties*&);
+      void              unlockDrawProp(DrawProperties*&);
    private:
       typedef std::deque<LayStateList>            LayStateHistory;
       typedef std::map<std::string, LayStateList> LayStateMap;
@@ -229,6 +215,7 @@ namespace layprop {
       USMap*               _cifLayMap;    //
       LayStateMap          _layStateMap;  //
       LayStateHistory      _layStateHistory; //! for undo purposes of layer status related TELL function
+      wxMutex              _drawPLock;    // DrawPropwerties lock
    };
 
    void USMap2String(USMap*, std::string&);

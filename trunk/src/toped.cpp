@@ -1170,42 +1170,48 @@ void tui::TopedFrame::OnCellRemove(wxCommandEvent&)
 }
 
 void tui::TopedFrame::OnGDStranslate(wxCommandEvent& WXUNUSED(event)) {
+   bool success;
+   wxString ost;
    wxRect wnd = GetRect();
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
-   tui::getGDSimport* dlg = NULL;
-   USMap* laymap;
-   try {
-      dlg = DEBUG_NEW tui::getGDSimport(this, -1, wxT("Import GDS structure"), pos,
-                                          _browsers->tdtSelectedGdsName());
-   }
-   catch (EXPTN) {delete dlg;return;}
-   if ( dlg->ShowModal() == wxID_OK )
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
    {
-      laymap = dlg->getGdsLayerMap();
-      USMap* laymap2save = NULL;
-      if (dlg->getSaveMap()) laymap2save = dlg->getFullGdsLayerMap();
+      tui::getGDSimport* dlg = NULL;
+      USMap* laymap;
+      try {
+         dlg = DEBUG_NEW tui::getGDSimport(this, -1, wxT("Import GDS structure"), pos,
+                                             _browsers->tdtSelectedGdsName(), drawProp);
+      }
+      catch (EXPTN) {delete dlg;return;}
+      if ( dlg->ShowModal() == wxID_OK )
+      {
+         laymap = dlg->getGdsLayerMap();
+         USMap* laymap2save = NULL;
+         if (dlg->getSaveMap()) laymap2save = dlg->getFullGdsLayerMap();
 
-      wxString wxlaymap, wxlaymap2save;
-      USMap2wxString(laymap      , wxlaymap     );
-      if (NULL != laymap2save)
-         USMap2wxString(laymap2save , wxlaymap2save);
-
-
-      wxString ost;
-      ost << wxT("gdsimport(\"") << dlg->get_selectedcell() << wxT("\" , ")
-          << wxlaymap << wxT(", ")
-          << (dlg->get_recursive() ? wxT("true") : wxT("false"))   << wxT(" , ")
-          << (dlg->get_overwrite() ? wxT("true") : wxT("false"))   <<wxT(");");
-      if (NULL != laymap2save)
-         ost << wxT("setgdslaymap(")
-             << wxlaymap2save << wxT(");");
-
+         wxString wxlaymap, wxlaymap2save;
+         USMap2wxString(laymap      , wxlaymap     );
+         if (NULL != laymap2save)
+            USMap2wxString(laymap2save , wxlaymap2save);
+         ost << wxT("gdsimport(\"") << dlg->get_selectedcell() << wxT("\" , ")
+             << wxlaymap << wxT(", ")
+             << (dlg->get_recursive() ? wxT("true") : wxT("false"))   << wxT(" , ")
+             << (dlg->get_overwrite() ? wxT("true") : wxT("false"))   <<wxT(");");
+         if (NULL != laymap2save)
+            ost << wxT("setgdslaymap(")
+                << wxlaymap2save << wxT(");");
+         success = true;
+         delete laymap;
+         if (NULL != laymap2save) delete laymap2save;
+      }
+      delete dlg;
+   }
+   PROPC->unlockDrawProp(drawProp);
+   if (success)
       _cmdline->parseCommand(ost);
 
-      delete laymap;
-      if (NULL != laymap2save) delete laymap2save;
-   }
-   delete dlg;
+
 }
 
 void tui::TopedFrame::OnGDSimport(wxCommandEvent& WXUNUSED(event))
@@ -1295,64 +1301,71 @@ void tui::TopedFrame::OnCIFexportLIB(wxCommandEvent& WXUNUSED(event))
    else SetStatusText(wxT("CIF export aborted"));
 }
 
-void tui::TopedFrame::OnGDSexportCELL(wxCommandEvent& WXUNUSED(event)) {
+void tui::TopedFrame::OnGDSexportCELL(wxCommandEvent& WXUNUSED(event))
+{
+   bool success = false;
+   wxString ost;
    SetStatusText(wxT("Exporting a cell to GDS file..."));
    wxRect wnd = GetRect();
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
-   tui::getGDSexport* dlg = NULL;
-   try {
-      dlg = DEBUG_NEW tui::getGDSexport(this, -1, wxT("GDS export cell"), pos,
-                                        _browsers->tdtSelectedCellName());
-   }
-   catch (EXPTN) {delete dlg;return;}
-   wxString cellname;
-   bool recur;
-   USMap* laymap;
-   USMap* laymap2save = NULL;
-   if ( dlg->ShowModal() == wxID_OK ) {
-      cellname = dlg->get_selectedcell();
-      recur = dlg->get_recursive();
-      laymap = dlg->getGdsLayerMap();
-      if (dlg->getSaveMap()) laymap2save = dlg->getFullGdsLayerMap();
-      delete dlg;
-   }
-   else {delete dlg;return;}
-   wxString oststr;
-   oststr <<wxT("Exporting ") << cellname << wxT(" to GDS file");
-   wxString fullCellName;
-   fullCellName << cellname << wxT(".gds");
-   wxFileDialog dlg2(this, oststr , wxT(""), fullCellName,
-      wxT("GDS files |*.gds;*.sf"),
-      tpdfSAVE);
-   if (wxID_OK == dlg2.ShowModal()) {
-      wxString filename = dlg2.GetPath();
-      if(!checkFileOverwriting(filename))
-         SetStatusText(wxT("GDS export aborted"));
-      else
-      {
-         wxString wxlaymap, wxlaymap2save;
-         USMap2wxString(laymap      , wxlaymap     );
-         if (NULL != laymap2save)
-            USMap2wxString(laymap2save , wxlaymap2save);
-
-         wxString ost;
-         ost << wxT("gdsexport(\"")
-            << cellname.c_str() << wxT("\" , ")
-            << (recur ? wxT("true") : wxT("false")) << wxT(",")
-            << wxlaymap << wxT(", \"")
-            << (dlg2.GetDirectory()).c_str() << wxT("/") <<(dlg2.GetFilename()).c_str()
-            << wxT("\", false);");
-         if (NULL != laymap2save)
-            ost << wxT("setgdslaymap(")
-                  << wxlaymap2save << wxT(");");
-
-         _cmdline->parseCommand(ost);
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      tui::getGDSexport* dlg = NULL;
+      try {
+         dlg = DEBUG_NEW tui::getGDSexport(this, -1, wxT("GDS export cell"), pos,
+                                           _browsers->tdtSelectedCellName(), drawProp);
       }
-//      SetStatusText(wxT("Design exported to: ")+dlg2.GetFilename());
+      catch (EXPTN) {delete dlg;return;}
+      wxString cellname;
+      bool recur;
+      USMap* laymap;
+      USMap* laymap2save = NULL;
+      if ( dlg->ShowModal() == wxID_OK ) {
+         cellname = dlg->get_selectedcell();
+         recur = dlg->get_recursive();
+         laymap = dlg->getGdsLayerMap();
+         if (dlg->getSaveMap()) laymap2save = dlg->getFullGdsLayerMap();
+         delete dlg;
+      }
+      else {delete dlg;return;}
+      wxString oststr;
+      oststr <<wxT("Exporting ") << cellname << wxT(" to GDS file");
+      wxString fullCellName;
+      fullCellName << cellname << wxT(".gds");
+      wxFileDialog dlg2(this, oststr , wxT(""), fullCellName,
+         wxT("GDS files |*.gds;*.sf"),
+         tpdfSAVE);
+      if (wxID_OK == dlg2.ShowModal()) {
+         wxString filename = dlg2.GetPath();
+         if(!checkFileOverwriting(filename))
+            SetStatusText(wxT("GDS export aborted"));
+         else
+         {
+            wxString wxlaymap, wxlaymap2save;
+            USMap2wxString(laymap      , wxlaymap     );
+            if (NULL != laymap2save)
+               USMap2wxString(laymap2save , wxlaymap2save);
+            ost << wxT("gdsexport(\"")
+               << cellname.c_str() << wxT("\" , ")
+               << (recur ? wxT("true") : wxT("false")) << wxT(",")
+               << wxlaymap << wxT(", \"")
+               << (dlg2.GetDirectory()).c_str() << wxT("/") <<(dlg2.GetFilename()).c_str()
+               << wxT("\", false);");
+            if (NULL != laymap2save)
+               ost << wxT("setgdslaymap(")
+                     << wxlaymap2save << wxT(");");
+            success = true;
+         }
+   //      SetStatusText(wxT("Design exported to: ")+dlg2.GetFilename());
+      }
+      else SetStatusText(wxT("GDS export aborted"));
+      delete laymap;
+      if (NULL != laymap2save) delete laymap2save;
    }
-   else SetStatusText(wxT("GDS export aborted"));
-   delete laymap;
-   if (NULL != laymap2save) delete laymap2save;
+   PROPC->unlockDrawProp(drawProp);
+   if (success)
+      _cmdline->parseCommand(ost);
 }
 
 
@@ -1373,107 +1386,120 @@ void tui::TopedFrame::OnCIFRead(wxCommandEvent& WXUNUSED(event))
 
 void tui::TopedFrame::OnCIFtranslate(wxCommandEvent& WXUNUSED(event))
 {
+   bool success = false;
+   wxString ost;
    wxRect wnd = GetRect();
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
-   tui::getCIFimport* dlg = NULL;
-   try {
-      dlg = DEBUG_NEW tui::getCIFimport(this, -1, wxT("Import CIF structure"), pos,
-                                        _browsers->tdtSelectedCifName());
-   }
-   catch (EXPTN) {delete dlg;return;}
-   if ( dlg->ShowModal() == wxID_OK )
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
    {
-      // get the layer map first
-      SIMap* laymap = dlg->getCifLayerMap();
-      USMap* laymap2save = NULL;
-      if (dlg->getSaveMap()) laymap2save = dlg->getFullCifLayerMap();
-      wxString wxlaymap, wxlaymap2save;
-      SIMap2wxString(laymap      , wxlaymap     );
-      if (NULL != laymap2save)
-         USMap2wxString(laymap2save , wxlaymap2save);
-      wxString ost;
-      double techno;
-      if (!dlg->getTechno().ToDouble(&techno))
-         techno = 0.0;
-      ost << wxT("cifimport(\"") << dlg->getSelectedCell() << wxT("\" , ") << wxlaymap << wxT(",")
-          << (dlg->getRecursive() ? wxT("true") : wxT("false")) << wxT(",")
-          << (dlg->getOverwrite() ? wxT("true") : wxT("false")) << wxT(",")
-          << techno << wxT(");");
-      if (NULL != laymap2save)
-         ost << wxT("setciflaymap(")
-             << wxlaymap2save << wxT(");");
-
-      _cmdline->parseCommand(ost);
-
-      delete laymap;
-      if (NULL != laymap2save) delete laymap2save;
+      tui::getCIFimport* dlg = NULL;
+      try {
+         dlg = DEBUG_NEW tui::getCIFimport(this, -1, wxT("Import CIF structure"), pos,
+                                           _browsers->tdtSelectedCifName(), drawProp);
+      }
+      catch (EXPTN) {delete dlg;return;}
+      if ( dlg->ShowModal() == wxID_OK )
+      {
+         // get the layer map first
+         SIMap* laymap = dlg->getCifLayerMap();
+         USMap* laymap2save = NULL;
+         if (dlg->getSaveMap()) laymap2save = dlg->getFullCifLayerMap();
+         wxString wxlaymap, wxlaymap2save;
+         SIMap2wxString(laymap      , wxlaymap     );
+         if (NULL != laymap2save)
+            USMap2wxString(laymap2save , wxlaymap2save);
+         double techno;
+         if (!dlg->getTechno().ToDouble(&techno))
+            techno = 0.0;
+         ost << wxT("cifimport(\"") << dlg->getSelectedCell() << wxT("\" , ") << wxlaymap << wxT(",")
+             << (dlg->getRecursive() ? wxT("true") : wxT("false")) << wxT(",")
+             << (dlg->getOverwrite() ? wxT("true") : wxT("false")) << wxT(",")
+             << techno << wxT(");");
+         if (NULL != laymap2save)
+            ost << wxT("setciflaymap(")
+                << wxlaymap2save << wxT(");");
+         success = true;
+         delete laymap;
+         if (NULL != laymap2save) delete laymap2save;
+      }
+      delete dlg;
    }
-   delete dlg;
+   PROPC->unlockDrawProp(drawProp);
+   if (success) _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnCIFexportCELL(wxCommandEvent& WXUNUSED(event))
 {
+   bool success = false;
+   wxString ost;
    SetStatusText(wxT("Exporting a cell to CIF file..."));
    wxRect wnd = GetRect();
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
-   tui::getCIFexport* dlg = NULL;
-   try {
-      dlg = DEBUG_NEW tui::getCIFexport(this, -1, wxT("CIF export cell"), pos,
-                                        _browsers->tdtSelectedCellName());
-   }
-   catch (EXPTN) {delete dlg;return;}
-   wxString cellname;
-   bool recur;
-   bool sverbose;
-   USMap* laymap;
-   USMap* laymap2save = NULL;
-   if ( dlg->ShowModal() == wxID_OK ) {
-      cellname = dlg->get_selectedcell();
-      recur    = dlg->get_recursive();
-      sverbose = dlg->get_slang();
-      laymap   = dlg->getCifLayerMap();
-      if (dlg->getSaveMap()) laymap2save = dlg->getFullCifLayerMap();
-      delete dlg;
-   }
-   else {delete dlg;return;}
-   wxString oststr;
-   oststr <<wxT("Exporting ") << cellname << wxT(" to CIF file");
-   wxString fullCellName;
-   fullCellName << cellname << wxT(".cif");
-   wxFileDialog dlg2(this, oststr , wxT(""), fullCellName,
-      wxT("CIF files |*.cif;*.CIF"),
-      tpdfSAVE);
-   if (wxID_OK == dlg2.ShowModal())
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
    {
-      wxString filename = dlg2.GetPath();
-      if(!checkFileOverwriting(filename))
-         SetStatusText(wxT("CIF export aborted"));
-      else
-      {
-         wxString wxlaymap, wxlaymap2save;
-         USMap2wxString(laymap      , wxlaymap     );
-         if (NULL != laymap2save)
-            USMap2wxString(laymap2save , wxlaymap2save);
-
-         wxString ost;
-
-         ost << wxT("cifexport(\"")
-            << cellname << wxT("\", ")
-            << (recur ? wxT("true") : wxT("false")) << wxT(", ")
-            << wxlaymap << wxT(", \"")
-            <<  dlg2.GetDirectory().c_str() << wxT("/") << dlg2.GetFilename().c_str() << wxT("\", ")
-            << (sverbose ? wxT("true") : wxT("false")) << wxT(" );");
-         if (NULL != laymap2save)
-            ost << wxT("setciflaymap(")
-                << wxlaymap2save << wxT(");");
-
-         _cmdline->parseCommand(ost);
-         SetStatusText(wxT("Design exported to: ")+dlg2.GetFilename());
+      tui::getCIFexport* dlg = NULL;
+      try {
+         dlg = DEBUG_NEW tui::getCIFexport(this, -1, wxT("CIF export cell"), pos,
+                                           _browsers->tdtSelectedCellName(), drawProp);
       }
+      catch (EXPTN) {delete dlg;return;}
+      wxString cellname;
+      bool recur;
+      bool sverbose;
+      USMap* laymap;
+      USMap* laymap2save = NULL;
+      if ( dlg->ShowModal() == wxID_OK ) {
+         cellname = dlg->get_selectedcell();
+         recur    = dlg->get_recursive();
+         sverbose = dlg->get_slang();
+         laymap   = dlg->getCifLayerMap();
+         if (dlg->getSaveMap()) laymap2save = dlg->getFullCifLayerMap();
+         delete dlg;
+      }
+      else {delete dlg;return;}
+      wxString oststr;
+      oststr <<wxT("Exporting ") << cellname << wxT(" to CIF file");
+      wxString fullCellName;
+      fullCellName << cellname << wxT(".cif");
+      wxFileDialog dlg2(this, oststr , wxT(""), fullCellName,
+         wxT("CIF files |*.cif;*.CIF"),
+         tpdfSAVE);
+      if (wxID_OK == dlg2.ShowModal())
+      {
+         wxString filename = dlg2.GetPath();
+         if(!checkFileOverwriting(filename))
+            SetStatusText(wxT("CIF export aborted"));
+         else
+         {
+            wxString wxlaymap, wxlaymap2save;
+            USMap2wxString(laymap      , wxlaymap     );
+            if (NULL != laymap2save)
+               USMap2wxString(laymap2save , wxlaymap2save);
+            ost << wxT("cifexport(\"")
+               << cellname << wxT("\", ")
+               << (recur ? wxT("true") : wxT("false")) << wxT(", ")
+               << wxlaymap << wxT(", \"")
+               <<  dlg2.GetDirectory().c_str() << wxT("/") << dlg2.GetFilename().c_str() << wxT("\", ")
+               << (sverbose ? wxT("true") : wxT("false")) << wxT(" );");
+            if (NULL != laymap2save)
+               ost << wxT("setciflaymap(")
+                   << wxlaymap2save << wxT(");");
+            success = true;
+         }
+      }
+      else SetStatusText(wxT("CIF export aborted"));
+      delete laymap;
+      if (NULL != laymap2save) delete laymap2save;
    }
-   else SetStatusText(wxT("CIF export aborted"));
-   delete laymap;
-   if (NULL != laymap2save) delete laymap2save;
+   PROPC->unlockDrawProp(drawProp);
+   if (success)
+   {
+      _cmdline->parseCommand(ost);
+//      SetStatusText(wxT("Design exported to: ")+dlg2.GetFilename());
+   }
+
 }
 
 void tui::TopedFrame::OnOASRead(wxCommandEvent& WXUNUSED(event))
@@ -1499,42 +1525,46 @@ void tui::TopedFrame::OnOASimport(wxCommandEvent& WXUNUSED(event))
 
 void tui::TopedFrame::OnOAStranslate(wxCommandEvent& WXUNUSED(event))
 {
+   bool success = false;
+   wxString ost;
    wxRect wnd = GetRect();
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
-   tui::getOASimport* dlg = NULL;
-   USMap* laymap;
-   try {
-      dlg = DEBUG_NEW tui::getOASimport(this, -1, wxT("Import OASIS structure"), pos,
-                                          _browsers->tdtSelectedOasName());
-   }
-   catch (EXPTN) {delete dlg;return;}
-   if ( dlg->ShowModal() == wxID_OK )
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
    {
-      laymap = dlg->getOasLayerMap();
-      USMap* laymap2save = NULL;
-      if (dlg->getSaveMap()) laymap2save = dlg->getFullOasLayerMap();
+      tui::getOASimport* dlg = NULL;
+      USMap* laymap;
+      try {
+         dlg = DEBUG_NEW tui::getOASimport(this, -1, wxT("Import OASIS structure"), pos,
+                                             _browsers->tdtSelectedOasName(), drawProp);
+      }
+      catch (EXPTN) {delete dlg;return;}
+      if ( dlg->ShowModal() == wxID_OK )
+      {
+         laymap = dlg->getOasLayerMap();
+         USMap* laymap2save = NULL;
+         if (dlg->getSaveMap()) laymap2save = dlg->getFullOasLayerMap();
 
-      wxString wxlaymap, wxlaymap2save;
-      USMap2wxString(laymap      , wxlaymap     );
-      if (NULL != laymap2save)
-         USMap2wxString(laymap2save , wxlaymap2save);
-
-
-      wxString ost;
-      ost << wxT("oasisimport(\"") << dlg->get_selectedcell() << wxT("\" , ")
-          << wxlaymap << wxT(", ")
-          << (dlg->get_recursive() ? wxT("true") : wxT("false"))   << wxT(" , ")
-          << (dlg->get_overwrite() ? wxT("true") : wxT("false"))   <<wxT(");");
-      if (NULL != laymap2save)
-         ost << wxT("setoasislaymap(")
-             << wxlaymap2save << wxT(");");
-
-      _cmdline->parseCommand(ost);
-
-      delete laymap;
-      if (NULL != laymap2save) delete laymap2save;
+         wxString wxlaymap, wxlaymap2save;
+         USMap2wxString(laymap      , wxlaymap     );
+         if (NULL != laymap2save)
+            USMap2wxString(laymap2save , wxlaymap2save);
+         ost << wxT("oasisimport(\"") << dlg->get_selectedcell() << wxT("\" , ")
+             << wxlaymap << wxT(", ")
+             << (dlg->get_recursive() ? wxT("true") : wxT("false"))   << wxT(" , ")
+             << (dlg->get_overwrite() ? wxT("true") : wxT("false"))   <<wxT(");");
+         if (NULL != laymap2save)
+            ost << wxT("setoasislaymap(")
+                << wxlaymap2save << wxT(");");
+         success = true;
+         delete laymap;
+         if (NULL != laymap2save) delete laymap2save;
+      }
+      delete dlg;
    }
-   delete dlg;
+   PROPC->unlockDrawProp(drawProp);
+   if (success)
+      _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnOASexportLIB(wxCommandEvent& WXUNUSED(event))
@@ -1877,68 +1907,88 @@ void tui::TopedFrame::OnEditLayer(wxCommandEvent& evt)
 	editLayerDlg(layno);
 }
 
-void	tui::TopedFrame::editLayerDlg(word layno)
+void tui::TopedFrame::editLayerDlg(word layno)
 {
-	wxRect wnd = GetRect();
+   bool success = false;
+   wxString ost;
+   wxRect wnd = GetRect();
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
-   tui::defineLayer dlg(this, -1, wxT("Define Layer"), pos, layno);
-   if ( dlg.ShowModal() == wxID_OK )
+   layprop::DrawProperties* drawprop;
+   if (PROPC->lockDrawProp(drawprop))
    {
-      wxString ost;
-      ost      << wxT("layprop(\"") << dlg.layname()
-               << wxT("\" , ")      << dlg.layno()
-               << wxT(" , \"")      << dlg.color()
-               << wxT("\" , \"")    << dlg.fill()
-               << wxT("\" , \"")    << dlg.line()
-               << wxT("\");");
-      _cmdline->parseCommand(ost);
+      tui::defineLayer dlg(this, -1, wxT("Define Layer"), pos, layno, drawprop);
+      if ( dlg.ShowModal() == wxID_OK )
+      {
+         ost      << wxT("layprop(\"") << dlg.layname()
+                  << wxT("\" , ")      << dlg.layno()
+                  << wxT(" , \"")      << dlg.color()
+                  << wxT("\" , \"")    << dlg.fill()
+                  << wxT("\" , \"")    << dlg.line()
+                  << wxT("\");");
+         success = true;
+      }
    }
+   PROPC->unlockDrawProp(drawprop);
+   if (success) _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnDefineColor(wxCommandEvent& WXUNUSED(event))
 {
+   bool success = false;
+   wxString ost;
    wxRect wnd = GetRect();
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
-   tui::defineColor dlg(this, -1, wxT("Color Definitions"), pos);
-   if ( dlg.ShowModal() == wxID_OK )
+   layprop::DrawProperties* drawprop;
+   if (PROPC->lockDrawProp(drawprop))
    {
-      const layprop::ColorMap colors = dlg.allColors();
-      for(layprop::ColorMap::const_iterator CC = colors.begin() ; CC != colors.end(); CC++)
+      tui::defineColor dlg(this, -1, wxT("Color Definitions"), pos, drawprop);
+      if ( dlg.ShowModal() == wxID_OK )
       {
-         wxString ost;
-         layprop::tellRGB* coldef = CC->second;
-         ost   << wxT("definecolor(\"") << wxString(CC->first.c_str(), wxConvUTF8)
-               << wxT("\" , ")      << coldef->red()
-               << wxT(" , ")        << coldef->green()
-               << wxT(" , ")        << coldef->blue()
-               << wxT(" , ")        << coldef->alpha()
-               << wxT(");");
-         _cmdline->parseCommand(ost);
+         const layprop::ColorMap colors = dlg.allColors();
+         for(layprop::ColorMap::const_iterator CC = colors.begin() ; CC != colors.end(); CC++)
+         {
+            layprop::tellRGB* coldef = CC->second;
+            ost   << wxT("definecolor(\"") << wxString(CC->first.c_str(), wxConvUTF8)
+                  << wxT("\" , ")      << coldef->red()
+                  << wxT(" , ")        << coldef->green()
+                  << wxT(" , ")        << coldef->blue()
+                  << wxT(" , ")        << coldef->alpha()
+                  << wxT(");");
+         }
       }
    }
+   PROPC->unlockDrawProp(drawprop);
+   if (success) _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnDefineFill(wxCommandEvent& WXUNUSED(event))
 {
+   bool success = false;
+   wxString ost;
    wxRect wnd = GetRect();
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
-   tui::defineFill dlg(this, -1, wxT("Fill Definition"), pos);
-   if ( dlg.ShowModal() == wxID_OK )
+   layprop::DrawProperties* drawprop;
+   if (PROPC->lockDrawProp(drawprop))
    {
-      layprop::FillMap patterns = dlg.allPatterns();
-      for(layprop::FillMap::const_iterator CC = patterns.begin() ; CC != patterns.end(); CC++)
+      tui::defineFill dlg(this, -1, wxT("Fill Definition"), pos, drawprop);
+      if ( dlg.ShowModal() == wxID_OK )
       {
-         wxString ost;
-         byte* patdef = CC->second;
-         ost   << wxT("definefill(\"") << wxString(CC->first.c_str(), wxConvUTF8)
-               << wxT("\" , {");
-         ost << patdef[0];
-         for (byte i = 1; i < 128; i++)
-            ost  << wxT(",") << patdef[i];
-         ost   << wxT("});");
-         _cmdline->parseCommand(ost);
+         layprop::FillMap patterns = dlg.allPatterns();
+         for(layprop::FillMap::const_iterator CC = patterns.begin() ; CC != patterns.end(); CC++)
+         {
+            byte* patdef = CC->second;
+            ost   << wxT("definefill(\"") << wxString(CC->first.c_str(), wxConvUTF8)
+                  << wxT("\" , {");
+            ost << patdef[0];
+            for (byte i = 1; i < 128; i++)
+               ost  << wxT(",") << patdef[i];
+            ost   << wxT("});");
+            success = true;
+         }
       }
    }
+   PROPC->unlockDrawProp(drawprop);
+   if (success) _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnChangeRef( wxCommandEvent& WXUNUSED( event ))

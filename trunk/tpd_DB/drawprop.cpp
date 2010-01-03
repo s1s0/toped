@@ -483,6 +483,13 @@ void layprop::DrawProperties::loadLayoutFonts(std::string fontfile, bool vbo)
    fontLib = DEBUG_NEW FontLibrary(fontfile, vbo);
 }
 
+void layprop::DrawProperties::setCurrentColor(unsigned layno)
+{
+   _drawingLayer = layno;
+   const layprop::tellRGB& theColor = getColor(_drawingLayer);
+   glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
+}
+
 void layprop::DrawProperties::setGridColor(std::string colname) const
 {
    if (_layColors.end() == _layColors.find(colname))
@@ -494,51 +501,6 @@ void layprop::DrawProperties::setGridColor(std::string colname) const
       assert(NULL != gcol);
       glColor4ub(gcol->red(), gcol->green(), gcol->blue(), gcol->alpha());
    }
-}
-
-void layprop::DrawProperties::setCurrentColor(unsigned layno)
-{
-   _drawingLayer = layno;
-   const layprop::tellRGB& theColor = getColor(_drawingLayer);
-   glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
-}
-
-void layprop::DrawProperties::adjustAlpha(word factor)
-{
-   return;
-   //@TODO! - A tell option(function or variable) to adjust the constant (30 below)
-   // user must know what's going on, otherwise - the rendering result might be confusing
-   // Having done that, the method can be enabled
-/*   if (_layset.end() != _layset.find(_drawingLayer))
-   {
-      if (_layColors.end() != _layColors.find(_layset[_drawingLayer]->color()))
-      {
-         tellRGB* gcol = _layColors[_layset[_drawingLayer]->color()];
-         if (gcol)
-         {
-            byte alpha = gcol->alpha();
-            if (0 < factor)
-               alpha = ((factor * 50) > gcol->alpha()) ? 0 : gcol->alpha() - (factor * 50);
-            glColor4ub(gcol->red(), gcol->green(), gcol->blue(), alpha);
-         }
-      }
-   }*/
-}
-
-bool  layprop::DrawProperties::layerHidden(unsigned layno) const
-{
-   if (REF_LAY == layno) return false;
-   const LayerSettings* ilayset = findLayerSettings(layno);
-   if (NULL != ilayset) return ilayset->hidden();
-   else return true;
-}
-
-bool  layprop::DrawProperties::layerLocked(unsigned layno) const
-{
-   if (REF_LAY == layno) return false;
-   const LayerSettings* ilayset = findLayerSettings(layno);
-   if (NULL != ilayset) return ilayset->locked();
-   else return true;
 }
 
 bool layprop::DrawProperties::setCurrentFill(bool force_fill) const
@@ -587,7 +549,45 @@ bool layprop::DrawProperties::isFilled(unsigned layno) const
    else return false;
 }
 
-void layprop::DrawProperties::drawTextBoundary(const pointlist& ptlist)
+void layprop::DrawProperties::adjustAlpha(word factor)
+{
+   return;
+   //@TODO! - A tell option(function or variable) to adjust the constant (30 below)
+   // user must know what's going on, otherwise - the rendering result might be confusing
+   // Having done that, the method can be enabled
+/*   if (_layset.end() != _layset.find(_drawingLayer))
+   {
+      if (_layColors.end() != _layColors.find(_layset[_drawingLayer]->color()))
+      {
+         tellRGB* gcol = _layColors[_layset[_drawingLayer]->color()];
+         if (gcol)
+         {
+            byte alpha = gcol->alpha();
+            if (0 < factor)
+               alpha = ((factor * 50) > gcol->alpha()) ? 0 : gcol->alpha() - (factor * 50);
+            glColor4ub(gcol->red(), gcol->green(), gcol->blue(), alpha);
+         }
+      }
+   }*/
+}
+
+bool  layprop::DrawProperties::layerHidden(unsigned layno) const
+{
+   if (REF_LAY == layno) return false;
+   const LayerSettings* ilayset = findLayerSettings(layno);
+   if (NULL != ilayset) return ilayset->hidden();
+   else return true;
+}
+
+bool  layprop::DrawProperties::layerLocked(unsigned layno) const
+{
+   if (REF_LAY == layno) return false;
+   const LayerSettings* ilayset = findLayerSettings(layno);
+   if (NULL != ilayset) return ilayset->locked();
+   else return true;
+}
+
+void layprop::DrawProperties::drawTextBoundary(const pointlist& ptlist) const
 {
    if (_textBoxHidden) return;
    else
@@ -603,7 +603,7 @@ void layprop::DrawProperties::drawTextBoundary(const pointlist& ptlist)
    }
 }
 
-void layprop::DrawProperties::drawCellBoundary(const pointlist& ptlist)
+void layprop::DrawProperties::drawCellBoundary(const pointlist& ptlist) const
 {
    if (_cellBoxHidden) return;
    else
@@ -778,6 +778,24 @@ void layprop::DrawProperties::allLayers(nameList& alllays) const
 {
    for (LaySetList::const_iterator CL = getCurSetList().begin(); CL != getCurSetList().end(); CL++)
       if (REF_LAY != CL->first) alllays.push_back(CL->second->name());
+}
+
+void layprop::DrawProperties::allColors(nameList& colist) const
+{
+   for( ColorMap::const_iterator CI = _layColors.begin(); CI != _layColors.end(); CI++)
+      colist.push_back(CI->first);
+}
+
+void layprop::DrawProperties::allFills(nameList& filist) const
+{
+   for( FillMap::const_iterator CI = _layFill.begin(); CI != _layFill.end(); CI++)
+      filist.push_back(CI->first);
+}
+
+void layprop::DrawProperties::allLines(nameList& linelist) const
+{
+   for( LineMap::const_iterator CI = _lineSet.begin(); CI != _lineSet.end(); CI++)
+      linelist.push_back(CI->first);
 }
 
 const layprop::LineSettings* layprop::DrawProperties::getLine(unsigned layno) const

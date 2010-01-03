@@ -54,7 +54,7 @@ namespace CIFin {
    typedef SGHierTree<CifStructure>       CIFHierTree;
 }
 
-namespace browsers 
+namespace browsers
 {
    const int buttonHeight = 30;
 
@@ -88,7 +88,7 @@ namespace browsers
    class CellBrowser: public wxTreeCtrl {
       public:
                            CellBrowser(wxWindow* parent, wxWindowID id = -1,
-                              const wxPoint& pos = wxDefaultPosition, 
+                              const wxPoint& pos = wxDefaultPosition,
                               const wxSize& size = wxDefaultSize,
                               long style = wxTR_DEFAULT_STYLE);
          virtual          ~CellBrowser()  {};
@@ -137,8 +137,8 @@ namespace browsers
    //===========================================================================
    class GDSCellBrowser:public CellBrowser {
       public:
-                           GDSCellBrowser(wxWindow* parent, wxWindowID id = -1, 
-                              const wxPoint& pos = wxDefaultPosition, 
+                           GDSCellBrowser(wxWindow* parent, wxWindowID id = -1,
+                              const wxPoint& pos = wxDefaultPosition,
                               const wxSize& size = wxDefaultSize,
                               long style = wxTR_DEFAULT_STYLE);
          void              showMenu(wxTreeItemId id, const wxPoint& pt);
@@ -184,7 +184,7 @@ namespace browsers
          void              onReportlay(wxCommandEvent& WXUNUSED(event));
          DECLARE_EVENT_TABLE();
    };
-   
+
    //===========================================================================
    class TDTbrowser : public wxPanel {
       public:
@@ -267,7 +267,7 @@ namespace browsers
          word                 getLayNo()          {return _layer->layno();}
 
       private:
-         void                 makeBrush();
+         void                 makeBrush(const layprop::DrawProperties*);
          int                  _buttonWidth;
          int                  _buttonHeight;
          LayerInfo*           _layer;
@@ -322,7 +322,7 @@ namespace browsers
          DECLARE_EVENT_TABLE();
    };
  //===========================================================================
-   class ErrorBrowser: public wxTreeCtrl 
+   class ErrorBrowser: public wxTreeCtrl
    {
    public:
                              ErrorBrowser(wxWindow* parent, wxWindowID id = -1,

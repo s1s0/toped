@@ -1502,10 +1502,16 @@ browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoi
    _layer   = DEBUG_NEW LayerInfo(*layer);
    _selected= false;
    _hidden  = false;
-   _filled  = PROPC->isFilled(_layer->layno());
    _picture = NULL;
-   makeBrush();
-   const layprop::tellRGB col   = PROPC->getColor(_layer->layno());
+   layprop::tellRGB col(0,0,0,0);
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      _filled  = drawProp->isFilled(_layer->layno());
+      makeBrush(drawProp);
+      col = drawProp->getColor(_layer->layno());
+   }
+   PROPC->unlockDrawProp(drawProp);
    wxColour color(col.red(), col.green(), col.blue());
 
    _pen = DEBUG_NEW wxPen();
@@ -1523,9 +1529,9 @@ browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoi
 
 }
 
-void browsers::LayerButton::makeBrush()
+void browsers::LayerButton::makeBrush(const layprop::DrawProperties* drawProp)
 {
-   const byte* ifill = PROPC->getFill(_layer->layno());
+   const byte* ifill = drawProp->getFill(_layer->layno());
    wxBitmap *stipplebrush = DEBUG_NEW wxBitmap((char  *)ifill, 32, 32, 1);
    wxImage image;
    image = stipplebrush->ConvertToImage();

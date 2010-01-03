@@ -87,29 +87,29 @@ namespace tui {
    public:
       getSize(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, real step, byte precision, const float );
       wxString value() const {return _wxText->GetValue();};
-   private:   
+   private:
       wxTextCtrl* _wxText;
    };
 
    //--------------------------------------------------------------------------
    class getStep : public wxDialog {
    public:
-      getStep(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, 
+      getStep(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
                                                                      real init );
       wxString value() const {return _wxText->GetValue();};
-   private:   
+   private:
       wxTextCtrl* _wxText;
    };
 
    //--------------------------------------------------------------------------
    class getGrid : public wxDialog {
    public:
-      getGrid(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, 
+      getGrid(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
                                                    real ig0, real ig1, real ig2);
       wxString grid0() const {return _wxGrid0->GetValue();};
       wxString grid1() const {return _wxGrid1->GetValue();};
       wxString grid2() const {return _wxGrid2->GetValue();};
-   private:   
+   private:
       wxTextCtrl* _wxGrid0;
       wxTextCtrl* _wxGrid1;
       wxTextCtrl* _wxGrid2;
@@ -160,7 +160,7 @@ namespace tui {
       wxString    get_size()  const {return _size->GetValue();};
       wxString    get_angle() const {return _rotation->GetValue();};
       bool        get_flip() const  {return _flip->GetValue();};
-   protected:   
+   protected:
       wxTextCtrl* _text;
       wxTextCtrl* _size;
       wxTextCtrl* _rotation;
@@ -170,7 +170,7 @@ namespace tui {
    //--------------------------------------------------------------------------
    class sgSpinButton : public wxSpinButton {
    public:
-      sgSpinButton(wxWindow *parent, wxTextCtrl* textW, const float step, 
+      sgSpinButton(wxWindow *parent, wxTextCtrl* textW, const float step,
       const float min, const float max, const float value, const int prec) ;
    private:
       wxTextCtrl* _wxText;
@@ -191,7 +191,7 @@ namespace tui {
    //==========================================================================
    class nameCboxRecords : public wxPanel {
       public:
-                               nameCboxRecords(wxWindow*, wxPoint, wxSize, const SIMap&, wxArrayString&, int);
+                               nameCboxRecords(wxWindow*, wxPoint, wxSize, const SIMap&, wxArrayString&, int, const layprop::DrawProperties*);
                               ~nameCboxRecords() {delete _cifMap;}
          SIMap*                getTheMap();
          USMap*                getTheFullMap();
@@ -210,7 +210,7 @@ namespace tui {
    //==========================================================================
    class nameCbox3Records : public wxPanel {
       public:
-                              nameCbox3Records(wxWindow*, wxPoint, wxSize, const ExtLayers&, wxArrayString&, int);
+                              nameCbox3Records(wxWindow*, wxPoint, wxSize, const ExtLayers&, wxArrayString&, int, const layprop::DrawProperties*);
                              ~nameCbox3Records() {delete _gdsLayMap;}
          USMap*               getTheMap();
          USMap*               getTheFullMap();
@@ -232,7 +232,7 @@ namespace tui {
    //==========================================================================
    class nameEboxRecords : public wxPanel {
       public:
-                              nameEboxRecords(wxWindow*, wxPoint, wxSize, const WordList&, wxArrayString&, int);
+                              nameEboxRecords(wxWindow*, wxPoint, wxSize, const WordList&, wxArrayString&, int, const layprop::DrawProperties*);
                              ~nameEboxRecords() {delete _cifMap;}
          USMap*               getTheMap();
          USMap*               getTheFullMap();
@@ -252,7 +252,7 @@ namespace tui {
    //==========================================================================
    class nameEbox3Records : public wxPanel {
       public:
-                              nameEbox3Records(wxWindow*, wxPoint, wxSize, const WordList&, wxArrayString&, int);
+                              nameEbox3Records(wxWindow*, wxPoint, wxSize, const WordList&, wxArrayString&, int, const layprop::DrawProperties*);
                              ~nameEbox3Records() {delete _gdsLayMap;}
          USMap*               getTheMap();
          USMap*               getTheFullMap();
@@ -273,7 +273,7 @@ namespace tui {
    //--------------------------------------------------------------------------
    class nameCboxList : public wxScrolledWindow {
       public:
-                              nameCboxList(wxWindow*, wxWindowID, wxPoint, wxSize, const SIMap&);
+                              nameCboxList(wxWindow*, wxWindowID, wxPoint, wxSize, const SIMap&, const layprop::DrawProperties*);
          SIMap*               getTheMap()     {return _laypanel->getTheMap();}
          USMap*               getTheFullMap() {return _laypanel->getTheFullMap();}
          void                 OnSize( wxSizeEvent& WXUNUSED(event));
@@ -285,7 +285,7 @@ namespace tui {
    //--------------------------------------------------------------------------
    class nameCbox3List : public wxScrolledWindow {
       public:
-                              nameCbox3List(wxWindow*, wxWindowID, wxPoint, wxSize, const ExtLayers&);
+                              nameCbox3List(wxWindow*, wxWindowID, wxPoint, wxSize, const ExtLayers&, const layprop::DrawProperties*);
          USMap*               getTheMap()     {return _laypanel->getTheMap();}
          USMap*               getTheFullMap() {return _laypanel->getTheFullMap();}
          void                 OnSize( wxSizeEvent& WXUNUSED(event));
@@ -297,7 +297,7 @@ namespace tui {
    //--------------------------------------------------------------------------
    class nameEboxList : public wxScrolledWindow {
       public:
-                              nameEboxList(wxWindow*, wxWindowID, wxPoint, wxSize, const WordList&);
+                              nameEboxList(wxWindow*, wxWindowID, wxPoint, wxSize, const WordList&, const layprop::DrawProperties*);
          USMap*               getTheMap()     {return _laypanel->getTheMap();}
          USMap*               getTheFullMap() {return _laypanel->getTheFullMap();}
          void                 OnSize( wxSizeEvent& WXUNUSED(event));
@@ -309,7 +309,7 @@ namespace tui {
    //--------------------------------------------------------------------------
    class nameEbox3List : public wxScrolledWindow {
       public:
-                              nameEbox3List(wxWindow*, wxWindowID, wxPoint, wxSize, const WordList&);
+                              nameEbox3List(wxWindow*, wxWindowID, wxPoint, wxSize, const WordList&, const layprop::DrawProperties*);
          USMap*               getTheMap()     {return _laypanel->getTheMap();}
          USMap*               getTheFullMap() {return _laypanel->getTheFullMap();}
          void                 OnSize( wxSizeEvent& WXUNUSED(event));
@@ -322,7 +322,7 @@ namespace tui {
    class getCIFimport : public wxDialog {
    public:
                         getCIFimport(wxFrame *parent, wxWindowID id, const wxString &title,
-                                                                  wxPoint pos, wxString init);
+                                 wxPoint pos, wxString init, const layprop::DrawProperties*);
       wxString          getSelectedCell() const {return _nameList->GetStringSelection();}
       wxString          getTechno()       const {return _techno;}
       bool              getOverwrite()    const {return _overwrite->GetValue();}
@@ -343,7 +343,7 @@ namespace tui {
    class getCIFexport : public wxDialog {
    public:
                         getCIFexport(wxFrame *parent, wxWindowID id, const wxString &title,
-                                                                  wxPoint pos, wxString init);
+                                   wxPoint pos, wxString init, const layprop::DrawProperties*);
       wxString          get_selectedcell() const {return _nameList->GetStringSelection();}
       bool              get_recursive()    const {return _recursive->GetValue();}
       bool              get_slang()        const {return _slang->GetValue();}
@@ -362,7 +362,7 @@ namespace tui {
    class getGDSimport : public wxDialog {
    public:
                         getGDSimport(wxFrame *parent, wxWindowID id, const wxString &title,
-                                                                  wxPoint pos, wxString init);
+                                    wxPoint pos, wxString init, const layprop::DrawProperties*);
       wxString          get_selectedcell() const {return _nameList->GetStringSelection();};
       bool              get_overwrite()    const {return _overwrite->GetValue();};
       bool              get_recursive()    const {return _recursive->GetValue();};
@@ -381,7 +381,7 @@ namespace tui {
    class getOASimport : public wxDialog {
    public:
                         getOASimport(wxFrame *parent, wxWindowID id, const wxString &title,
-                                                                  wxPoint pos, wxString init);
+                                  wxPoint pos, wxString init, const layprop::DrawProperties*);
       wxString          get_selectedcell() const {return _nameList->GetStringSelection();};
       bool              get_overwrite()    const {return _overwrite->GetValue();};
       bool              get_recursive()    const {return _recursive->GetValue();};
@@ -395,12 +395,12 @@ namespace tui {
       wxListBox*        _nameList;
       nameCbox3List*    _layList;
    };
-   
+
    //--------------------------------------------------------------------------
    class getGDSexport : public wxDialog {
    public:
                         getGDSexport(wxFrame *parent, wxWindowID id, const wxString &title,
-                                                                  wxPoint pos, wxString init);
+                                  wxPoint pos, wxString init, const layprop::DrawProperties*);
       wxString          get_selectedcell() const {return _nameList->GetStringSelection();};
       bool              get_recursive()    const {return _recursive->GetValue();};
       bool              getSaveMap()       const {return _saveMap->GetValue();}
@@ -416,12 +416,9 @@ namespace tui {
    //--------------------------------------------------------------------------
    class layset_sample : public wxWindow {
    public:
-                     layset_sample(wxWindow*, wxWindowID, wxPoint, wxSize, word);
-      void           setColor(word);
+                     layset_sample(wxWindow*, wxWindowID, wxPoint, wxSize, word, const layprop::DrawProperties*);
       void           setColor(const layprop::tellRGB&);
-      void           setFill(word);
       void           setFill(const byte*);
-      void           setLine(word);
       void           setLine(const layprop::LineSettings*);
       void           setSelected(bool selected) {_selected = selected;}
       void           OnPaint(wxPaintEvent&);
@@ -439,36 +436,37 @@ namespace tui {
    //--------------------------------------------------------------------------
    class defineLayer : public wxDialog {
    public:
-                     defineLayer(wxFrame*, wxWindowID, const wxString&, wxPoint, word);
-      virtual       ~defineLayer();
-      void           OnColorChanged(wxCommandEvent&);
-      void           OnFillChanged(wxCommandEvent&);
-      void           OnLineChanged(wxCommandEvent&);
-      void           OnSelectedChanged(wxCommandEvent&);
-      void           OnDefaultColor(wxCommandEvent&);
-      void           OnDefaultPattern(wxCommandEvent&);
-      void           OnDefaultLine(wxCommandEvent&);
-      wxString       layno()       {return _layno;}
-      wxString       layname()     {return _layname;}
-      wxString       color();//       {return _colors->GetValue();}
-      wxString       fill();//        {return _fills->GetValue();}
-      wxString       line();//        {return _lines->GetValue();}
+                                defineLayer(wxFrame*, wxWindowID, const wxString&, wxPoint, word, const layprop::DrawProperties*);
+      virtual                  ~defineLayer();
+      void                      OnColorChanged(wxCommandEvent&);
+      void                      OnFillChanged(wxCommandEvent&);
+      void                      OnLineChanged(wxCommandEvent&);
+      void                      OnSelectedChanged(wxCommandEvent&);
+      void                      OnDefaultColor(wxCommandEvent&);
+      void                      OnDefaultPattern(wxCommandEvent&);
+      void                      OnDefaultLine(wxCommandEvent&);
+      wxString                  layno()       {return _layno;}
+      wxString                  layname()     {return _layname;}
+      wxString                  color();//       {return _colors->GetValue();}
+      wxString                  fill();//        {return _fills->GetValue();}
+      wxString                  line();//        {return _lines->GetValue();}
    private:
-      wxString       _layno;
-      wxString       _layname;
-      wxString       _fillname;
-      wxComboBox*    _colors;
-      wxComboBox*    _fills;
-      wxComboBox*    _lines;
-      layset_sample* _sample;
-      wxCheckBox*    _selected;
+      wxString                  _layno;
+      wxString                  _layname;
+      wxString                  _fillname;
+      wxComboBox*               _colors;
+      wxComboBox*               _fills;
+      wxComboBox*               _lines;
+      layset_sample*            _sample;
+      wxCheckBox*               _selected;
+      const layprop::DrawProperties*  _drawProp;
       DECLARE_EVENT_TABLE();
    };
 
    //--------------------------------------------------------------------------
    class color_sample : public wxWindow {
    public:
-                     color_sample(wxWindow*, wxWindowID, wxPoint, wxSize, std::string);
+                     color_sample(wxWindow*, wxWindowID, wxPoint, wxSize, std::string, const layprop::DrawProperties*);
       void           setColor(const layprop::tellRGB&);
       void           OnPaint(wxPaintEvent&);
    protected:
@@ -481,8 +479,8 @@ namespace tui {
    {
    public:
       typedef  std::map<std::string, layprop::tellRGB*>  colorMAP;
-                     defineColor(wxFrame *parent, wxWindowID id, const wxString &title,
-                                                                  wxPoint pos);
+                        defineColor(wxFrame *parent, wxWindowID id, const wxString &title,
+                                             wxPoint pos, const layprop::DrawProperties*);
       virtual          ~defineColor();
       void              OnDefineColor(wxCommandEvent&);
       void              OnColorSelected(wxCommandEvent&);
@@ -506,6 +504,7 @@ namespace tui {
       wxTextCtrl*             _c_green;
       wxTextCtrl*             _c_blue;
       wxTextCtrl*             _c_alpha;
+      const layprop::DrawProperties*  _drawProp;
 
       DECLARE_EVENT_TABLE();
    };
@@ -546,7 +545,7 @@ namespace tui {
 
    class fill_sample : public wxWindow {
    public:
-                     fill_sample(wxWindow*, wxWindowID, wxPoint, wxSize, std::string);
+                     fill_sample(wxWindow*, wxWindowID, wxPoint, wxSize, std::string, const layprop::DrawProperties*);
       void           setFill(const byte*);
       void           OnPaint(wxPaintEvent&);
    protected:
@@ -560,7 +559,7 @@ namespace tui {
    public:
       typedef  std::map<std::string, byte*         >  fillMAP;
                      defineFill(wxFrame *parent, wxWindowID id, const wxString &title,
-                                                                  wxPoint pos);
+                                             wxPoint pos, const layprop::DrawProperties*);
       virtual       ~defineFill();
       void           OnDefineFill(wxCommandEvent&);
       void           OnFillSelected(wxCommandEvent&);
@@ -581,11 +580,11 @@ namespace tui {
    };
 
       //--------------------------------------------------------------------------
-   class cadenceConvert : public wxDialog 
+   class cadenceConvert : public wxDialog
    {
    public:
       cadenceConvert(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos);
-   protected:   
+   protected:
       wxTextCtrl* _displayList;
       wxTextCtrl* _techList;
       wxTextCtrl* _outputFile;
