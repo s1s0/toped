@@ -1482,10 +1482,9 @@ browsers::LayerInfo::LayerInfo(const std::string &name, const word layno)
 
 //====================================================================
 BEGIN_EVENT_TABLE(browsers::LayerButton, wxPanel)
-   //EVT_COMMAND_RANGE(12000,  12100, wxEVT_COMMAND_BUTTON_CLICKED, LayerButton::OnClick)
    EVT_LEFT_DOWN  (LayerButton::onLeftClick  )
    EVT_MIDDLE_DOWN(LayerButton::onMiddleClick)
-   EVT_RIGHT_DOWN(LayerButton::onRightClick)
+   EVT_RIGHT_DOWN (LayerButton::onRightClick )
    EVT_PAINT      (LayerButton::onPaint      )
    EVT_MENU( LAYERCURRENTEDIT,LayerButton::OnEditLayer )
 
@@ -1493,21 +1492,20 @@ END_EVENT_TABLE()
 //====================================================================
 //
 //
-
 browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoint& pos ,
                                    const wxSize& size, long style , const wxValidator& validator ,
                                    const wxString& name, LayerInfo *layer):wxPanel()
 {
-
    _layer   = DEBUG_NEW LayerInfo(*layer);
    _selected= false;
    _hidden  = false;
+   _locked  = false;
    _picture = NULL;
    layprop::tellRGB col(0,0,0,0);
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-      _filled  = drawProp->isFilled(_layer->layno());
+      _filled  = drawProp->layerFilled(_layer->layno());
       makeBrush(drawProp);
       col = drawProp->getColor(_layer->layno());
    }
@@ -1634,16 +1632,6 @@ void browsers::LayerButton::preparePicture()
    Refresh();
 }
 
-
-browsers::LayerButton::~LayerButton()
-{
-   delete _picture;
-   delete _brush;
-   delete _pen;
-   delete _layer;
-}
-
-
 void browsers::LayerButton::onPaint(wxPaintEvent&)
 {
    wxPaintDC dc(this);
@@ -1652,51 +1640,33 @@ void browsers::LayerButton::onPaint(wxPaintEvent&)
    {
       dc.DrawIcon(wxIcon(activelay),_buttonWidth-16,15);
    }
-   else if (PROPC->layerLocked(_layer->layno()))
+   else
    {
-      dc.DrawIcon(wxIcon(lock),_buttonWidth-16,15);
-   }
-
-   if (PROPC->layerHidden(_layer->layno()))
-   {
-      dc.DrawIcon(wxIcon(nolay_xpm),_buttonWidth-16,0);
+      if (_locked) dc.DrawIcon(wxIcon(lock)     ,_buttonWidth-16,15);
+      if (_hidden) dc.DrawIcon(wxIcon(nolay_xpm),_buttonWidth-16,0 );
    }
 }
 
 void browsers::LayerButton::onLeftClick(wxMouseEvent &event)
 {
-//   LayerPanel *parent =  static_cast<browsers::LayerPanel*> (GetParent());
+   wxString cmd;
    if (event.ShiftDown())
    {//Hide layer
-      //_hidden = !_hidden;
-      hideLayer(!_hidden);
-      wxString cmd;
       cmd << wxT("hidelayer(") <<_layer->layno() << wxT(", ");
-      if (_hidden) cmd << wxT("true") << wxT(");");
-      else cmd << wxT("false") << wxT(");");
-      TpdPost::parseCommand(cmd);
+      if (_hidden) cmd << wxT("false") << wxT(");");
+      else cmd << wxT("true") << wxT(");");
    }
    else if (event.ControlDown())
    {// Lock Layer
-      //_locked = !_locked;
-      wxString cmd;
       cmd << wxT("locklayer(") <<_layer->layno() << wxT(", ");
-      if (PROPC->layerLocked(_layer->layno())) cmd << wxT("false") << wxT(");");
+      if (_locked) cmd << wxT("false") << wxT(");");
       else cmd << wxT("true") << wxT(");");
-      TpdPost::parseCommand(cmd);
    }
    else
    {//Select layer
-      wxString cmd;
       cmd << wxT("usinglayer(") << _layer->layno()<< wxT(");");
-      TpdPost::parseCommand(cmd);
-
-      if (!_selected)
-      {
-         select();
-         TpdPost::layer_select(_layer->layno());
-      }
    }
+   TpdPost::parseCommand(cmd);
 }
 
 void browsers::LayerButton::onMiddleClick(wxMouseEvent &event)
@@ -1708,7 +1678,7 @@ void browsers::LayerButton::onMiddleClick(wxMouseEvent &event)
    TpdPost::parseCommand(cmd);
 }
 
-void    browsers::LayerButton::onRightClick(wxMouseEvent& evt)
+void browsers::LayerButton::onRightClick(wxMouseEvent& evt)
 {
    wxMenu menu;
    menu.Append(LAYERCURRENTEDIT, wxT("Edit layer...")); //if selected call LayerButton::OnEditLayer tui::TMLAY_EDIT
@@ -1735,7 +1705,7 @@ void browsers::LayerButton::hideLayer(bool hide)
 
 void browsers::LayerButton::lockLayer(bool lock)
 {
-   //_locked = lock;
+   _locked = lock;
    preparePicture();
 }
 
@@ -1745,16 +1715,18 @@ void browsers::LayerButton::fillLayer(bool fill)
    preparePicture();
 }
 
-void browsers::LayerButton::select(void)
+void browsers::LayerButton::selectLayer(bool slct)
 {
-   _selected = true;
+   _selected = slct;
    preparePicture();
 }
 
-void browsers::LayerButton::unselect(void)
+browsers::LayerButton::~LayerButton()
 {
-   _selected = false;
-   preparePicture();
+   delete _picture;
+   delete _brush;
+   delete _pen;
+   delete _layer;
 }
 
 //====================================================================
@@ -1769,8 +1741,7 @@ browsers::LayerPanel::LayerPanel(wxWindow* parent, wxWindowID id,
                               const wxPoint& pos,
                               const wxSize& size,
                               long style , const wxString& name)
-                              :wxScrolledWindow(parent, id, pos, size, style, name),
-                               _selectedButton(NULL)
+                              :wxScrolledWindow(parent, id, pos, size, style, name)
 {
    _buttonCount = 0;
 }
@@ -1791,112 +1762,91 @@ void browsers::LayerPanel::onCommand(wxCommandEvent& event)
    LayerButton* wbutton;
    switch (command)
    {
-
       case tui::BT_LAYER_DEFAULT:
-         {
-            word *oldlay = static_cast<word*>(event.GetClientData());
-            word layno = event.GetExtraLong();
-            if ((wbutton = checkDefined(*oldlay))) wbutton->unselect();
-            if ((wbutton = checkDefined( layno ))) wbutton->select();
-            //_layerlist->defaultLayer((word)event.GetExtraLong(), (word)event.GetInt());
-            delete (oldlay);
-            break;
-         }
+      {
+         word *oldlay = static_cast<word*>(event.GetClientData());
+         word layno = event.GetExtraLong();
+         if ((wbutton = checkDefined(*oldlay))) wbutton->selectLayer(false);
+         if ((wbutton = checkDefined( layno ))) wbutton->selectLayer(true);
+         delete (oldlay);
+         break;
+      }
       case    tui::BT_LAYER_HIDE:
-         {
-            word *layno = static_cast<word*>(event.GetClientData());
-            bool status = (1 == event.GetExtraLong());
-            if ((wbutton = checkDefined(*layno))) wbutton->hideLayer(status);
-            delete (layno);
-            break;
-         }
-         //_layerlist->hideLayer((word)event.GetExtraLong(),event.IsChecked());break;
+      {
+         word *layno = static_cast<word*>(event.GetClientData());
+         bool status = (1 == event.GetExtraLong());
+         if ((wbutton = checkDefined(*layno))) wbutton->hideLayer(status);
+         delete (layno);
+         break;
+      }
       case    tui::BT_LAYER_LOCK:
-         {
-            //_layerlist->lockLayer((word)event.GetExtraLong(),event.IsChecked());
-            word *layno = static_cast<word*>(event.GetClientData());
-            bool status = (1 == event.GetExtraLong());
-            if ((wbutton = checkDefined(*layno))) wbutton->lockLayer(status);
-            delete (layno);
-            break;
-         }
+      {
+         //_layerlist->lockLayer((word)event.GetExtraLong(),event.IsChecked());
+         word *layno = static_cast<word*>(event.GetClientData());
+         bool status = (1 == event.GetExtraLong());
+         if ((wbutton = checkDefined(*layno))) wbutton->lockLayer(status);
+         delete (layno);
+         break;
+      }
       case    tui::BT_LAYER_FILL:
-         {
-            word *layno = static_cast<word*>(event.GetClientData());
-            bool status = (1 == event.GetExtraLong());
-            if ((wbutton = checkDefined(*layno))) wbutton->fillLayer(status);
-            delete (layno);
-            break;
-         }
-
-      case     tui::BT_LAYER_SELECT:
-         {
-            word layno = event.GetExtraLong();
-            if (NULL != _selectedButton) _selectedButton->unselect();
-            if ((wbutton = checkDefined( layno))) _selectedButton = _buttonMap[layno];
-            break;
-         }
-
+      {
+         word *layno = static_cast<word*>(event.GetClientData());
+         bool status = (1 == event.GetExtraLong());
+         if ((wbutton = checkDefined(*layno))) wbutton->fillLayer(status);
+         delete (layno);
+         break;
+      }
       case     tui::BT_LAYER_ADD:
-         {
-            word *layno = static_cast<word*>(event.GetClientData());
-            std::string name = std::string(event.GetString().mb_str(wxConvFile ));
-            LayerInfo *layer = DEBUG_NEW LayerInfo(name, *layno);
-            addButton(layer);
-            delete (layno);
-            break;
-         }
+      {
+         word *layno = static_cast<word*>(event.GetClientData());
+         std::string name = std::string(event.GetString().mb_str(wxConvFile ));
+         LayerInfo *layer = DEBUG_NEW LayerInfo(name, *layno);
+         addButton(layer);
+         delete (layno);
+         break;
+      }
       default: assert(false);
    }
 }
 
 void  browsers::LayerPanel::addButton(LayerInfo *layer)
 {
-      LayerButton* wbutton;
-      int szx, szy;
-
-      //Remove selection from current button
-      if (NULL != _selectedButton) _selectedButton->unselect();
-      if ((wbutton = checkDefined( layer->layno() )))
+   LayerButton* wbutton;
+   int szx, szy;
+   if ((wbutton = checkDefined( layer->layno() )))
+   {
+      //Button already exists, replace it
+      //layerButton = DEBUG_NEW LayerButton(this, tui::TMDUMMY_LAYER+_buttonCount, wxPoint (0, _buttonCount*30), wxSize(200, 30),
+      //wxBU_AUTODRAW, wxDefaultValidator, _T("TTT"), layer);
+      int x, y;
+      int ID;
+      wbutton->GetPosition(&x, &y);
+      wbutton->GetSize(&szx, &szy);
+      ID = wbutton->GetId();
+      LayerButton* layerButton = DEBUG_NEW LayerButton(this, ID, wxPoint (x, y), wxSize(szx, szy),
+         wxBU_AUTODRAW|wxNO_BORDER, wxDefaultValidator, _T("button"), layer);
+      _buttonMap[layer->layno()] = layerButton;
+      delete wbutton;
+   }
+   else
+   {
+      //Button doesn't exist, create new button
+      GetClientSize(&szx, &szy);
+      LayerButton* layerButton = DEBUG_NEW LayerButton(this, tui::TMDUMMY_LAYER+_buttonCount,
+                                          wxPoint (0, _buttonCount*buttonHeight), wxSize(szx, buttonHeight),
+                                          wxBU_AUTODRAW, wxDefaultValidator, _T("button"), layer);
+      _buttonMap[layer->layno()] = layerButton;
+      _buttonCount++;
+      this->SetScrollbars(0, buttonHeight, 0, _buttonCount);
+      //Reorder buttons
+      int number = 0;
+      for(LayerButtonMap::iterator it=_buttonMap.begin() ;it!=_buttonMap.end(); ++it, ++number)
       {
-         //Button already exists, replace it
-         //layerButton = DEBUG_NEW LayerButton(this, tui::TMDUMMY_LAYER+_buttonCount, wxPoint (0, _buttonCount*30), wxSize(200, 30),
-         //wxBU_AUTODRAW, wxDefaultValidator, _T("TTT"), layer);
-         int x, y;
-         int ID;
-         wbutton->GetPosition(&x, &y);
-         wbutton->GetSize(&szx, &szy);
-         ID = wbutton->GetId();
-         LayerButton* layerButton = DEBUG_NEW LayerButton(this, ID, wxPoint (x, y), wxSize(szx, szy),
-            wxBU_AUTODRAW|wxNO_BORDER, wxDefaultValidator, _T("button"), layer);
-         _buttonMap[layer->layno()] = layerButton;
-         delete wbutton;
+         LayerButton* tempButton = (*it).second;
+         wxPoint point = wxPoint(0, number*buttonHeight);
+         tempButton->Move(point);
       }
-      else
-      {
-         //Button doesn't exist, create new button
-         GetClientSize(&szx, &szy);
-         LayerButton* layerButton = DEBUG_NEW LayerButton(this, tui::TMDUMMY_LAYER+_buttonCount,
-                                             wxPoint (0, _buttonCount*buttonHeight), wxSize(szx, buttonHeight),
-                                             wxBU_AUTODRAW, wxDefaultValidator, _T("button"), layer);
-         _buttonMap[layer->layno()] = layerButton;
-         _buttonCount++;
-         this->SetScrollbars(0, buttonHeight, 0, _buttonCount);
-         //Reorder buttons
-         int number = 0;
-         for(LayerButtonMap::iterator it=_buttonMap.begin() ;it!=_buttonMap.end(); ++it, ++number)
-         {
-            LayerButton* tempButton = (*it).second;
-            wxPoint point = wxPoint(0, number*buttonHeight);
-            tempButton->Move(point);
-         }
-      }
-      //Restore selection
-      if ((wbutton = checkDefined( PROPC->curLay())))
-      {
-         _selectedButton = wbutton;
-         _selectedButton->select();
-      }
+   }
 }
 
 void  browsers::LayerPanel::onPaint(wxPaintEvent& evt)
@@ -1908,7 +1858,6 @@ void  browsers::LayerPanel::onPaint(wxPaintEvent& evt)
 
 wxString browsers::LayerPanel::getAllSelected()
 {
-      //bool multi_selection = _layerlist->GetSelectedItemCount() > 1;
    if (_buttonMap.empty()) return wxEmptyString;
    wxString layers = wxT("{");
    for(LayerButtonMap::iterator it = _buttonMap.begin(); it != _buttonMap.end(); it++)
@@ -2039,16 +1988,16 @@ void browsers::ErrorBrowser::onLMouseDblClk(wxMouseEvent& event)
       }
       else
       {
-            wxString numstr = GetItemText(id);
-            long number;
-            numstr.ToLong(&number);
+         wxString numstr = GetItemText(id);
+         long number;
+         numstr.ToLong(&number);
 
-            wxTreeItemId parent = GetItemParent(id);
-            std::string error(GetItemText(parent).mb_str(wxConvUTF8));
-            wxString s = GetItemText(parent);
-            wxString cmd;
-            cmd << wxT("drcshowerror(\"") <<  wxString(error.c_str(), wxConvUTF8) << wxT("\", ") << numstr << wxT("  );");
-            TpdPost::parseCommand(cmd);
+         wxTreeItemId parent = GetItemParent(id);
+         std::string error(GetItemText(parent).mb_str(wxConvUTF8));
+         wxString s = GetItemText(parent);
+         wxString cmd;
+         cmd << wxT("drcshowerror(\"") <<  wxString(error.c_str(), wxConvUTF8) << wxT("\", ") << numstr << wxT("  );");
+         TpdPost::parseCommand(cmd);
       }
    }
    else

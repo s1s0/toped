@@ -1576,14 +1576,14 @@ bool tenderer::TopRend::chunkExists(unsigned layno, bool has_selected)
    if (_data.end() != _data.find(layno))
    {
       _clayer = _data[layno];
-      if (_clayer->chunkExists(_cellStack.top(), _drawprop->isFilled(layno) ) ) return true;
+      if (_clayer->chunkExists(_cellStack.top(), _drawprop->layerFilled(layno) ) ) return true;
    }
    else
    {
       _clayer = DEBUG_NEW TenderLay();
       _data[layno] = _clayer;
    }
-   _clayer->newSlice(_cellStack.top(), _drawprop->isFilled(layno), true, has_selected, _cslctd_array_offset);
+   _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(layno), true, has_selected, _cslctd_array_offset);
    return false;
 }
 
@@ -1606,7 +1606,7 @@ void tenderer::TopRend::setLayer(unsigned layno, bool has_selected)
       _clayer = DEBUG_NEW TenderLay();
       _data[layno] = _clayer;
    }
-   _clayer->newSlice(_cellStack.top(), _drawprop->isFilled(layno), false, has_selected, _cslctd_array_offset);
+   _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(layno), false, has_selected, _cslctd_array_offset);
 }
 
 void tenderer::TopRend::pushCell(std::string cname, const CTM& trans, const DBbox& overlap, bool active, bool selected)
@@ -1758,7 +1758,7 @@ bool tenderer::TopRend::collect()
       }
       GLuint pbuf = _ogl_buffers[current_buffer++];
       GLuint ibuf = (0 == CLAY->second->total_indexs()) ? 0u : _ogl_buffers[current_buffer++];
-      CLAY->second->collect(_drawprop->isFilled(CLAY->first), pbuf, ibuf);
+      CLAY->second->collect(_drawprop->layerFilled(CLAY->first), pbuf, ibuf);
    }
    //
    // collect the indexes of the selected objects

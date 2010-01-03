@@ -537,7 +537,7 @@ bool layprop::DrawProperties::setCurrentFill(bool force_fill) const
    else return false;
 }
 
-bool layprop::DrawProperties::isFilled(unsigned layno) const
+bool layprop::DrawProperties::layerFilled(unsigned layno) const
 {
    assert(REF_LAY != layno);
    const LayerSettings* ilayset = findLayerSettings(layno);

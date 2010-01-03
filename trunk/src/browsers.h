@@ -257,8 +257,7 @@ namespace browsers
          void                 onPaint(wxPaintEvent&);
          void                 OnEditLayer(wxCommandEvent&);
          //Call when other button is selected
-         void                 unselect();
-         void                 select();
+         void                 selectLayer(bool);
          void                 hideLayer(bool);
          void                 lockLayer(bool);
          void                 fillLayer(bool);
@@ -301,7 +300,6 @@ namespace browsers
          LayerButton*         checkDefined(word);
          LayerButtonMap       _buttonMap;
          int                  _buttonCount;
-         LayerButton*         _selectedButton;
          DECLARE_EVENT_TABLE();
    };
 

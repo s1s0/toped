@@ -387,19 +387,30 @@ void layprop::PropertyCenter::addFill(std::string name, byte* ptrn) {
    _drawprop._layFill[name] = ptrn;
 }
 
-void  layprop::PropertyCenter::hideLayer(unsigned layno, bool hide) {
+void  layprop::PropertyCenter::hideLayer(unsigned layno, bool hide)
+{
    // No error messages here, because of possible range use
    LayerSettings* ilayset = const_cast<LayerSettings*>(_drawprop.findLayerSettings(layno));
    if (NULL != ilayset)
       ilayset->_hidden = hide;
 }
 
-void  layprop::PropertyCenter::lockLayer(unsigned layno, bool lock) {
+void  layprop::PropertyCenter::lockLayer(unsigned layno, bool lock)
+{
    // No error messages here, because of possible range use
    LayerSettings* ilayset = const_cast<LayerSettings*>(_drawprop.findLayerSettings(layno));
    if (NULL != ilayset)
       ilayset->_locked = lock;
 }
+
+void  layprop::PropertyCenter::fillLayer(unsigned layno, bool fill)
+{
+   // No error messages here, because of possible range use
+   LayerSettings* ilayset = const_cast<LayerSettings*>(_drawprop.findLayerSettings(layno));
+   if (NULL != ilayset)
+      ilayset->fillLayer(fill);
+}
+
 const WordList layprop::PropertyCenter::getLockedLayers(void)
 {
    //drawprop._layset
@@ -410,13 +421,6 @@ const WordList layprop::PropertyCenter::getLockedLayers(void)
       if(it->second->locked()) lockedLayers.push_back((*it).first);
    }
    return lockedLayers;
-}
-
-void  layprop::PropertyCenter::fillLayer(unsigned layno, bool fill) {
-   // No error messages here, because of possible range use
-   LayerSettings* ilayset = const_cast<LayerSettings*>(_drawprop.findLayerSettings(layno));
-   if (NULL != ilayset)
-      ilayset->fillLayer(fill);
 }
 
 const WordList layprop::PropertyCenter::getAllLayers(void)

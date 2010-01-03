@@ -443,15 +443,6 @@ void TpdPost::layer_default(const word newlay, const word oldlay)
    wxPostEvent(_layBrowser, eventLAYER_DEF);
 }
 
-void TpdPost::layer_select(const unsigned lay)
-{
-   assert(_layBrowser);
-   wxCommandEvent eventLAYER_SELECT(wxEVT_CMD_BROWSER);
-   eventLAYER_SELECT.SetExtraLong(lay);
-   eventLAYER_SELECT.SetInt(tui::BT_LAYER_SELECT);
-   wxPostEvent(_layBrowser, eventLAYER_SELECT);
-}
-
 void TpdPost::celltree_open(const std::string cname)
 {
    assert(_cllBrowser);

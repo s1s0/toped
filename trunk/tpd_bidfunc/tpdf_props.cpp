@@ -325,50 +325,54 @@ int tellstdfunc::stdHIDELAYERS::execute()
 {
    bool        hide  = getBoolValue();
    telldata::ttlist *sl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
-   UNDOcmdQ.push_front(this);
-   telldata::ttlist* undolaylist = DEBUG_NEW telldata::ttlist(telldata::tn_int);
-   telldata::ttint *laynumber;
-   laydata::TdtDesign* ATDB = DATC->lockDB();
-   laydata::SelectList *listselected = ATDB->shapesel();
-   laydata::SelectList *todslct = DEBUG_NEW laydata::SelectList();
-   // "preliminary" pass - to collect the selected shapes in the layers, targeted
-   // for locking and to issue some warning messages if appropriate
-   for (unsigned i = 0; i < sl->size() ; i++)
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
    {
-      laynumber = static_cast<telldata::ttint*>((sl->mlist())[i]);
-      if (LAST_EDITABLE_LAYNUM < (unsigned)laynumber->value())
+      telldata::ttlist* undolaylist = DEBUG_NEW telldata::ttlist(telldata::tn_int);
+      laydata::TdtDesign* ATDB = DATC->lockDB();
+      laydata::SelectList *listselected = ATDB->shapesel();
+      laydata::SelectList *todslct = DEBUG_NEW laydata::SelectList();
+      // "preliminary" pass - to collect the selected shapes in the layers, targeted
+      // for locking and to issue some warning messages if appropriate
+      for (unsigned i = 0; i < sl->size() ; i++)
       {
-         std::ostringstream info;
-         info << "Layer number "<< i <<" out of range ... ignored";
-         tell_log(console::MT_WARNING,info.str());
+         telldata::ttint *laynumber = static_cast<telldata::ttint*>((sl->mlist())[i]);
+         if (LAST_EDITABLE_LAYNUM < (unsigned)laynumber->value())
+         {
+            std::ostringstream info;
+            info << "Layer number "<< i <<" out of range ... ignored";
+            tell_log(console::MT_WARNING,info.str());
+         }
+         else if (laynumber->value() == PROPC->curLay())
+         {
+            tell_log(console::MT_WARNING,"Current layer ... ignored");
+         }
+         else if (hide ^ drawProp->layerHidden(laynumber->value()))
+         {
+            if (hide && (listselected->end() != listselected->find(laynumber->value())))
+               (*todslct)[laynumber->value()] = DEBUG_NEW laydata::DataList(*((*listselected)[laynumber->value()]));
+            TpdPost::layer_status(tui::BT_LAYER_HIDE, laynumber->value(), hide);
+            undolaylist->add(DEBUG_NEW telldata::ttint(*laynumber));
+         }
       }
-      else if (laynumber->value() == PROPC->curLay())
+      UNDOcmdQ.push_front(this);
+      UNDOPstack.push_front(undolaylist);
+      UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
+      UNDOPstack.push_front(make_ttlaylist(todslct));
+      // Now unselect the shapes in the target layers
+      ATDB->unselect_fromList(todslct);
+      DATC->unlockDB();
+      // ... and at last - lock the layers. Here we're using the list collected for undo
+      // otherwise we have to either maintain another list or to do again all the checks above
+      for (unsigned i = 0; i < undolaylist->size(); i++)
       {
-         tell_log(console::MT_WARNING,"Current layer ... ignored");
+         telldata::ttint *laynumber = static_cast<telldata::ttint*>((undolaylist->mlist())[i]);
+         PROPC->hideLayer(laynumber->value(), hide);
       }
-      else if (hide ^ PROPC->layerHidden(laynumber->value()))
-      {
-         if (hide && (listselected->end() != listselected->find(laynumber->value())))
-            (*todslct)[laynumber->value()] = DEBUG_NEW laydata::DataList(*((*listselected)[laynumber->value()]));
-         TpdPost::layer_status(tui::BT_LAYER_HIDE, laynumber->value(), hide);
-         undolaylist->add(DEBUG_NEW telldata::ttint(*laynumber));
-      }
+      LogFile << LogFile.getFN() << "("<< *sl << "," <<
+                                         LogFile._2bool(hide) << ");"; LogFile.flush();
    }
-   UNDOPstack.push_front(undolaylist);
-   UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
-   UNDOPstack.push_front(make_ttlaylist(todslct));
-   // Now unselect the shapes in the target layers
-   ATDB->unselect_fromList(todslct);
-   // ... and at last - lock the layers. Here we're using the list collected for undo
-   // otherwise we have to either maintain another list or to do agai all the checks above
-   for (unsigned i = 0; i < undolaylist->size(); i++)
-   {
-      telldata::ttint *laynumber = static_cast<telldata::ttint*>((undolaylist->mlist())[i]);
-      PROPC->hideLayer(laynumber->value(), hide);
-   }
-   DATC->unlockDB();
-   LogFile << LogFile.getFN() << "("<< *sl << "," <<
-                                      LogFile._2bool(hide) << ");"; LogFile.flush();
+   PROPC->unlockDrawProp(drawProp);
    delete sl;
    UpdateLV();
    return EXEC_NEXT;
@@ -617,50 +621,54 @@ int tellstdfunc::stdLOCKLAYERS::execute()
 {
    bool        lock  = getBoolValue();
    telldata::ttlist *sl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
-   UNDOcmdQ.push_front(this);
-   telldata::ttlist* undolaylist = DEBUG_NEW telldata::ttlist(telldata::tn_int);
-   telldata::ttint *laynumber;
-   laydata::TdtDesign* ATDB = DATC->lockDB();
-   laydata::SelectList *listselected = ATDB->shapesel();
-   laydata::SelectList *todslct = DEBUG_NEW laydata::SelectList();
-   // "preliminary" pass - to collect the selected shapes in the layers, targeted
-   // for locking and to issue some warning messages if appropriate
-   for (unsigned i = 0; i < sl->size() ; i++)
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
    {
-      laynumber = static_cast<telldata::ttint*>((sl->mlist())[i]);
-      if (LAST_EDITABLE_LAYNUM < (unsigned)laynumber->value())
+      telldata::ttlist* undolaylist = DEBUG_NEW telldata::ttlist(telldata::tn_int);
+      laydata::TdtDesign* ATDB = DATC->lockDB();
+      laydata::SelectList *listselected = ATDB->shapesel();
+      laydata::SelectList *todslct = DEBUG_NEW laydata::SelectList();
+      // "preliminary" pass - to collect the selected shapes in the layers, targeted
+      // for locking and to issue some warning messages if appropriate
+      for (unsigned i = 0; i < sl->size() ; i++)
       {
-         std::ostringstream info;
-         info << "Layer number "<< i <<" out of range ... ignored";
-         tell_log(console::MT_WARNING,info.str());
+         telldata::ttint *laynumber = static_cast<telldata::ttint*>((sl->mlist())[i]);
+         if (LAST_EDITABLE_LAYNUM < (unsigned)laynumber->value())
+         {
+            std::ostringstream info;
+            info << "Layer number "<< i <<" out of range ... ignored";
+            tell_log(console::MT_WARNING,info.str());
+         }
+         else if (laynumber->value() == PROPC->curLay())
+         {
+            tell_log(console::MT_WARNING,"Current layer ... ignored");
+         }
+         else if (lock ^ drawProp->layerLocked(laynumber->value()))
+         {
+            if (lock && (listselected->end() != listselected->find(laynumber->value())))
+               (*todslct)[laynumber->value()] = DEBUG_NEW laydata::DataList(*((*listselected)[laynumber->value()]));
+            TpdPost::layer_status(tui::BT_LAYER_LOCK, laynumber->value(), lock);
+            undolaylist->add(DEBUG_NEW telldata::ttint(*laynumber));
+         }
       }
-      else if (laynumber->value() == PROPC->curLay())
+      UNDOcmdQ.push_front(this);
+      UNDOPstack.push_front(undolaylist);
+      UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!lock));
+      UNDOPstack.push_front(make_ttlaylist(todslct));
+      // Now unselect the shapes in the target layers
+      ATDB->unselect_fromList(todslct);
+      DATC->unlockDB();
+      // ... and at last - lock the layers. Here we're using the list collected for undo
+      // otherwise we have to either maintain another list or to do again all the checks above
+      for (unsigned i = 0; i < undolaylist->size(); i++)
       {
-         tell_log(console::MT_WARNING,"Current layer ... ignored");
+         telldata::ttint *laynumber = static_cast<telldata::ttint*>((undolaylist->mlist())[i]);
+         PROPC->lockLayer(laynumber->value(), lock);
       }
-      else if (lock ^ PROPC->layerLocked(laynumber->value()))
-      {
-         if (lock && (listselected->end() != listselected->find(laynumber->value())))
-            (*todslct)[laynumber->value()] = DEBUG_NEW laydata::DataList(*((*listselected)[laynumber->value()]));
-         TpdPost::layer_status(tui::BT_LAYER_LOCK, laynumber->value(), lock);
-         undolaylist->add(DEBUG_NEW telldata::ttint(*laynumber));
-      }
+      LogFile << LogFile.getFN() << "("<< *sl << "," <<
+                                         LogFile._2bool(lock) << ");"; LogFile.flush();
    }
-   UNDOPstack.push_front(undolaylist);
-   UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!lock));
-   UNDOPstack.push_front(make_ttlaylist(todslct));
-   // Now unselect the shapes in the target layers
-   ATDB->unselect_fromList(todslct);
-   // ... and at last - lock the layers. Here we're using the list collected for undo
-   // otherwise we have to either maintain another list or to do again all the checks above
-   for (unsigned i = 0; i < undolaylist->size(); i++)
-   {
-      telldata::ttint *laynumber = static_cast<telldata::ttint*>((undolaylist->mlist())[i]);
-      PROPC->lockLayer(laynumber->value(), lock);
-   }
-   DATC->unlockDB();
-   LogFile << LogFile.getFN() << "("<< *sl << "," <<
-                                      LogFile._2bool(lock) << ");"; LogFile.flush();
+   PROPC->unlockDrawProp(drawProp);
    delete sl;
    UpdateLV();
    return EXEC_NEXT;
