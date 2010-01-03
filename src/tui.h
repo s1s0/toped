@@ -203,6 +203,7 @@ namespace tui {
                wxComboBox*       _tdtlay;
          };
          typedef std::list<LayerRecord> AllRecords;
+         const layprop::DrawProperties* _drawProp;
          AllRecords              _allRecords;
          LayerMapCif*           _cifMap;
    };
@@ -225,6 +226,7 @@ namespace tui {
                wxComboBox*       _tdtlay;
          };
          typedef std::list<LayerRecord> AllRecords;
+         const layprop::DrawProperties* _drawProp;
          AllRecords              _allRecords;
          LayerMapExt*            _gdsLayMap;
    };
@@ -245,6 +247,7 @@ namespace tui {
                wxTextCtrl*    _ciflay;
          };
          typedef std::list<LayerRecord> AllRecords;
+         const layprop::DrawProperties* _drawProp;
          AllRecords           _allRecords;
          LayerMapCif*         _cifMap;
    };
@@ -266,6 +269,7 @@ namespace tui {
                wxTextCtrl*    _gdstype;
          };
          typedef std::list<LayerRecord> AllRecords;
+         const layprop::DrawProperties* _drawProp;
          AllRecords           _allRecords;
          LayerMapExt*         _gdsLayMap;
    };

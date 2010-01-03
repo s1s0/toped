@@ -116,9 +116,6 @@ namespace layprop {
       void              addColor(std::string name, byte R, byte G, byte B, byte A);
       void              addFill(std::string name, byte *ptrn);
       void              addLine(std::string, std::string, word, byte, byte);
-      void              hideLayer(unsigned layno, bool hide);
-      void              lockLayer(unsigned layno, bool lock);
-      void              fillLayer(unsigned layno, bool fill);
       bool              selectable(unsigned layno) const;
       const WordList    getLockedLayers(void);
       const WordList    getAllLayers(void);
@@ -168,7 +165,6 @@ namespace layprop {
       word              curLay() const                   {return _curlay;}
       bool              gridVisual(word no)              {return grid(no)->visual();}
 
-      unsigned          getLayerNo(std::string name) const {return _drawprop.getLayerNo(name);}
       DrawProperties&   drawprop()                       {return _drawprop;}
       DrawProperties*   drawprop_ptr()                   {return &_drawprop;}
       void              setCellMarksHidden(bool hide)    {_drawprop._cellMarksHidden = hide;}
@@ -188,8 +184,11 @@ namespace layprop {
 
       void              setState(layprop::PropertyState state)
                                                          {_drawprop.setState(state);}
-      bool              layerHidden(word layno)          {return _drawprop.layerHidden(layno);}
-      bool              layerLocked(word layno)          {return _drawprop.layerLocked(layno);}
+
+      // Methods which require DrawProperties locking
+      void              hideLayer(unsigned layno, bool hide);
+      void              lockLayer(unsigned layno, bool lock);
+      void              fillLayer(unsigned layno, bool fill);
 
       bool              lockDrawProp(DrawProperties*&);
       void              unlockDrawProp(DrawProperties*&);

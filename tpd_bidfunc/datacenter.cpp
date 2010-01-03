@@ -948,7 +948,7 @@ LayerMapCif* DataCenter::secureCifLayMap(const layprop::DrawProperties* drawProp
       for ( nameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
       {
          std::ostringstream ciflayname;
-         unsigned layno = PROPC->getLayerNo( *CDL );
+         unsigned layno = drawProp->getLayerNo( *CDL );
          ciflayname << "L" << layno;
          (*theMap)[layno] = ciflayname.str();
       }
@@ -989,8 +989,8 @@ LayerMapExt* DataCenter::secureGdsLayMap(const layprop::DrawProperties* drawProp
          for ( nameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
          {
             std::ostringstream dtypestr;
-            dtypestr << PROPC->getLayerNo( *CDL )<< "; 0";
-            theMap[PROPC->getLayerNo( *CDL )] = dtypestr.str();
+            dtypestr << drawProp->getLayerNo( *CDL )<< "; 0";
+            theMap[drawProp->getLayerNo( *CDL )] = dtypestr.str();
          }
          DATC->unlockDB();
          theGdsMap = DEBUG_NEW LayerMapExt(theMap, NULL);

@@ -258,10 +258,7 @@ namespace layprop {
          void                       setCurrentColor(unsigned layno);
          void                       setGridColor(std::string colname) const;
          bool                       setCurrentFill(bool) const;
-         bool                       isFilled(unsigned layno) const;
          void                       setLineProps(bool selected = false) const;
-         bool                       layerHidden(unsigned layno) const;
-         bool                       layerLocked(unsigned layno) const;
          void                       blockFill(laydata::CellRefStack*);
          void                       unblockFill();
          void                       pushRef(const laydata::TdtCellRef*);
@@ -269,7 +266,6 @@ namespace layprop {
          void                       drawReferenceMarks(const TP&, const binding_marks) const;
          void                       drawTextBoundary(const pointlist& ptlist) const;
          void                       drawCellBoundary(const pointlist& ptlist) const;
-         unsigned                   getLayerNo(std::string name) const;
          unsigned                   getTenderLay(unsigned layno) const;//!return layno if _propertyState == DB or predefined layer otherwise
          void                       psWrite(PSFile&) const;
          void                       loadLayoutFonts(std::string, bool);
@@ -293,6 +289,11 @@ namespace layprop {
          bool                       adjustTextOrientation() const
                                                          {return _adjustTextOrientation;}
 
+         // Used in dialogue boxes and drawing - partially protected for now
+         bool                       layerHidden(unsigned layno) const;
+         bool                       layerLocked(unsigned layno) const;
+         bool                       layerFilled(unsigned layno) const;
+
          // Used in dialogue boxes an protected during construction of the dialogue boxes
          std::string                getLayerName(unsigned layno) const;
          std::string                getColorName(unsigned layno) const;
@@ -308,6 +309,7 @@ namespace layprop {
          void                       allColors(nameList&) const;
          void                       allFills(nameList&) const;
          void                       allLines(nameList&) const;
+         unsigned                   getLayerNo(std::string name) const;
 
          friend class PropertyCenter;
       protected:

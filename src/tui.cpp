@@ -1827,16 +1827,16 @@ tui::defineFill::~defineFill()
 //==========================================================================
 tui::nameCboxRecords::nameCboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
             const SIMap& inlays, wxArrayString& all_strings, int row_height, const layprop::DrawProperties* drawProp)
-            : wxPanel(parent, wxID_ANY, pnt, sz)
+            : wxPanel(parent, wxID_ANY, pnt, sz), _drawProp(drawProp)
 {
-   _cifMap = DATC->secureCifLayMap(drawProp, true);
+   _cifMap = DATC->secureCifLayMap(_drawProp, true);
    word rowno = 0;
    for (SIMap::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
    {
       wxString cifln  = wxString(CNM->first.c_str(), wxConvUTF8);
       word tdtLay;
       if (!_cifMap->getTdtLay(tdtLay, CNM->first)) tdtLay = CNM->second;
-      wxString wxics  = wxString(drawProp->getLayerName(tdtLay).c_str(), wxConvUTF8);
+      wxString wxics  = wxString(_drawProp->getLayerName(tdtLay).c_str(), wxConvUTF8);
 
       wxCheckBox* dwciflay  = DEBUG_NEW wxCheckBox( this, wxID_ANY, cifln,
          wxPoint(  5,(row_height+5)*rowno + 5), wxSize(100,row_height) );
@@ -1858,7 +1858,7 @@ SIMap* tui::nameCboxRecords::getTheMap()
       // the user didn't put a tdt correspondence for this CIF layer - so we'll try to use the CIF name
       if ("" == layname)
          layname = std::string(CNM->_ciflay->GetLabel().mb_str(wxConvUTF8));
-      unsigned layno = PROPC->getLayerNo(layname);
+      unsigned layno = _drawProp->getLayerNo(layname);
       if (ERR_LAY == layno)
       {
          layno = PROPC->addLayer(layname);
@@ -1880,9 +1880,9 @@ USMap* tui::nameCboxRecords::getTheFullMap()
 //==========================================================================
 tui::nameCbox3Records::nameCbox3Records( wxWindow *parent, wxPoint pnt, wxSize sz,
             const ExtLayers& inlays, wxArrayString& all_strings, int row_height, const layprop::DrawProperties* drawProp)
-            : wxPanel(parent, wxID_ANY, pnt, sz)
+            : wxPanel(parent, wxID_ANY, pnt, sz), _drawProp(drawProp)
 {
-   _gdsLayMap = DATC->secureGdsLayMap(drawProp, true);
+   _gdsLayMap = DATC->secureGdsLayMap(_drawProp, true);
    word rowno = 0;
    for (ExtLayers::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
    {
@@ -1894,7 +1894,7 @@ tui::nameCbox3Records::nameCbox3Records( wxWindow *parent, wxPoint pnt, wxSize s
          sGdsDtype << *CTP;
          word wTdtLay;
          if (!_gdsLayMap->getTdtLay( wTdtLay, CNM->first, *CTP)) wTdtLay = CNM->first;
-         wxString sTdtLay(drawProp->getLayerName(CNM->first).c_str(), wxConvUTF8);
+         wxString sTdtLay(_drawProp->getLayerName(CNM->first).c_str(), wxConvUTF8);
 
          wxCheckBox* dwgdslay  = DEBUG_NEW wxCheckBox( this, wxID_ANY, sGdsLay,
             wxPoint(  5,(row_height+5)*rowno + 5), wxSize(55,row_height), wxALIGN_LEFT );
@@ -1923,7 +1923,7 @@ USMap* tui::nameCbox3Records::getTheMap()
          CNM->_gdslay->GetLabel().ToLong(&lint);
          layno = lint;
       }
-      else layno = PROPC->getLayerNo(layname);
+      else layno = _drawProp->getLayerNo(layname);
       std::ostringstream gdslaytype;
       if (gds_lay_map->end() != gds_lay_map->find(layno))
          gdslaytype << (*gds_lay_map)[layno] << ","
@@ -2033,14 +2033,14 @@ void tui::nameCbox3List::OnSize( wxSizeEvent &WXUNUSED(event) )
 //==========================================================================
 tui::nameEboxRecords::nameEboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
             const WordList& inlays, wxArrayString& all_strings, int row_height, const layprop::DrawProperties* drawProp)
-            : wxPanel(parent, wxID_ANY, pnt, sz)
+            : wxPanel(parent, wxID_ANY, pnt, sz), _drawProp(drawProp)
 {
    word rowno = 0;
-   _cifMap = DATC->secureCifLayMap(drawProp, false);
+   _cifMap = DATC->secureCifLayMap(_drawProp, false);
    for (WordList::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
    {
       word layno = *CNM;
-      wxString tpdlay  = wxString(drawProp->getLayerName(*CNM).c_str(), wxConvUTF8);
+      wxString tpdlay  = wxString(_drawProp->getLayerName(*CNM).c_str(), wxConvUTF8);
       wxString ciflay;
       std::string cifName;
       if ( _cifMap->getCifLay(cifName, layno) )
@@ -2066,7 +2066,7 @@ USMap* tui::nameEboxRecords::getTheMap()
       if (!CNM->_tdtlay->GetValue()) continue;
       std::string layname = std::string(CNM->_tdtlay->GetLabel().mb_str(wxConvUTF8));
       assert("" != layname);
-      unsigned layno = PROPC->getLayerNo(layname);
+      unsigned layno = _drawProp->getLayerNo(layname);
       assert(layno);
       (*cif_lay_map)[layno] = std::string(CNM->_ciflay->GetValue().mb_str(wxConvUTF8));
    }
@@ -2127,9 +2127,9 @@ void tui::nameEboxList::OnSize( wxSizeEvent &WXUNUSED(event) )
 //==========================================================================
 tui::nameEbox3Records::nameEbox3Records( wxWindow *parent, wxPoint pnt, wxSize sz,
             const WordList& inlays, wxArrayString& all_strings, int row_height, const layprop::DrawProperties* drawProp)
-            : wxPanel(parent, wxID_ANY, pnt, sz)
+            : wxPanel(parent, wxID_ANY, pnt, sz), _drawProp(drawProp)
 {
-   _gdsLayMap= DATC->secureGdsLayMap(drawProp, false);
+   _gdsLayMap= DATC->secureGdsLayMap(_drawProp, false);
    word rowno = 0;
    for (WordList::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
    {
@@ -2139,7 +2139,7 @@ tui::nameEbox3Records::nameEbox3Records( wxWindow *parent, wxPoint pnt, wxSize s
          wGdsLay  = *CNM;
          wGdsType = 0;
       }
-      wxString tpdlay  = wxString(drawProp->getLayerName(*CNM).c_str(), wxConvUTF8);
+      wxString tpdlay  = wxString(_drawProp->getLayerName(*CNM).c_str(), wxConvUTF8);
       wxString gdslay, gdstype;
       gdslay << wGdsLay;
       gdstype <<wGdsType;
@@ -2164,7 +2164,7 @@ USMap* tui::nameEbox3Records::getTheMap()
       if (!CNM->_tdtlay->GetValue()) continue;
       std::string layname = std::string(CNM->_tdtlay->GetLabel().mb_str(wxConvUTF8));
       assert("" != layname);
-      unsigned layno = PROPC->getLayerNo(layname);
+      unsigned layno = _drawProp->getLayerNo(layname);
       assert(layno);
       std::ostringstream gdslaytype;
       gdslaytype <<  std::string(CNM->_gdslay->GetValue().mb_str(wxConvUTF8)) << ";"

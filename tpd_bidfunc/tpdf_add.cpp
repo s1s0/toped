@@ -865,22 +865,30 @@ void tellstdfunc::stdUSINGLAYER::undo() {
    PROPC->defaultLayer(layno);
 }
 
-int tellstdfunc::stdUSINGLAYER::execute() {
+int tellstdfunc::stdUSINGLAYER::execute()
+{
    word layno = getWordValue();
    // Unlock and Unhide the layer(if needed)
-   if (PROPC->layerHidden(layno)) {
-      PROPC->hideLayer(layno, false);
-      TpdPost::layer_status(tui::BT_LAYER_HIDE, layno, false);
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      if (drawProp->layerHidden(layno))
+      {
+         PROPC->hideLayer(layno, false);
+         TpdPost::layer_status(tui::BT_LAYER_HIDE, layno, false);
+      }
+      if (drawProp->layerLocked(layno))
+      {
+         PROPC->lockLayer(layno, false);
+         TpdPost::layer_status(tui::BT_LAYER_LOCK, layno, false);
+      }
+      TpdPost::layer_default(layno, PROPC->curLay());
+      UNDOcmdQ.push_front(this);
+      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(PROPC->curLay()));
+      PROPC->defaultLayer(layno);
+      LogFile << LogFile.getFN() << "("<< layno << ");";LogFile.flush();
    }
-   if (PROPC->layerLocked(layno)) {
-      PROPC->lockLayer(layno, false);
-      TpdPost::layer_status(tui::BT_LAYER_LOCK, layno, false);
-   }
-   TpdPost::layer_default(layno, PROPC->curLay());
-   UNDOcmdQ.push_front(this);
-   UNDOPstack.push_front(DEBUG_NEW telldata::ttint(PROPC->curLay()));
-   PROPC->defaultLayer(layno);
-   LogFile << LogFile.getFN() << "("<< layno << ");";LogFile.flush();
+   PROPC->unlockDrawProp(drawProp);
    return EXEC_NEXT;
 }
 
@@ -894,16 +902,21 @@ tellstdfunc::stdUSINGLAYER_S::stdUSINGLAYER_S(telldata::typeID retype, bool eor)
 int tellstdfunc::stdUSINGLAYER_S::execute()
 {
   std::string layname = getStringValue();
-  unsigned layno = PROPC->getLayerNo(layname);
-  if (ERR_LAY != layno)
+  layprop::DrawProperties* drawProp;
+  if (PROPC->lockDrawProp(drawProp))
   {
-    OPstack.push(DEBUG_NEW telldata::ttint(layno));
-    return stdUSINGLAYER::execute();
+     unsigned layno = drawProp->getLayerNo(layname);
+     if (ERR_LAY != layno)
+     {
+       OPstack.push(DEBUG_NEW telldata::ttint(layno));
+       return stdUSINGLAYER::execute();
+     }
+     else {// no layer with this name
+       std::string news = "layer \"";
+       news += layname; news += "\" is not defined";
+       tell_log(console::MT_ERROR,news);
+     }
   }
-  else {// no layer with this name
-    std::string news = "layer \"";
-    news += layname; news += "\" is not defined";
-    tell_log(console::MT_ERROR,news);
-    return EXEC_NEXT;
-  }
+  PROPC->unlockDrawProp(drawProp);
+  return EXEC_NEXT;
 }
