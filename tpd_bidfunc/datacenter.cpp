@@ -509,12 +509,12 @@ laydata::TdtDesign*  DataCenter::lockDB(bool checkACTcell)
 
 laydata::DrcLibrary*  DataCenter::lockDRC(void)
 {
-	if (!_TEDLIB()) throw EXPTNactive_DB();
+   if (!_TEDLIB()) throw EXPTNactive_DB();
    if (!_DRCDB)
    {
-		_DRCDB = DEBUG_NEW laydata::DrcLibrary("drc", _TEDLIB()->DBU(), _TEDLIB()->UU());
+         _DRCDB = DEBUG_NEW laydata::DrcLibrary("drc", _TEDLIB()->DBU(), _TEDLIB()->UU());
    }
-	while (wxMUTEX_NO_ERROR != _DRCLock.TryLock());
+   while (wxMUTEX_NO_ERROR != _DRCLock.TryLock());
    return _DRCDB;
 }
 
@@ -927,7 +927,7 @@ bool DataCenter::getCellNamePair(std::string name, laydata::CellDefin& strdefn)
 }
 
 
-LayerMapCif* DataCenter::secureCifLayMap(bool import)
+LayerMapCif* DataCenter::secureCifLayMap(const layprop::DrawProperties* drawProp, bool import)
 {
    const USMap* savedMap = PROPC->getCifLayMap();
    if (NULL != savedMap) return DEBUG_NEW LayerMapCif(*savedMap);
@@ -944,7 +944,7 @@ LayerMapCif* DataCenter::secureCifLayMap(bool import)
    {// Generate the default CIF layer map for export
       lockDB(false);
       nameList tdtLayers;
-      PROPC->allLayers(tdtLayers);
+      drawProp->allLayers(tdtLayers);
       for ( nameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
       {
          std::ostringstream ciflayname;
@@ -957,7 +957,7 @@ LayerMapCif* DataCenter::secureCifLayMap(bool import)
    return DEBUG_NEW LayerMapCif(*theMap);
 }
 
-LayerMapExt* DataCenter::secureGdsLayMap(bool import)
+LayerMapExt* DataCenter::secureGdsLayMap(const layprop::DrawProperties* drawProp, bool import)
 {
    const USMap* savedMap = PROPC->getGdsLayMap();
    LayerMapExt* theGdsMap;
@@ -985,7 +985,7 @@ LayerMapExt* DataCenter::secureGdsLayMap(bool import)
       { // generate default export GDS layer map
          lockDB(false);
          nameList tdtLayers;
-         PROPC->allLayers(tdtLayers);
+         drawProp->allLayers(tdtLayers);
          for ( nameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
          {
             std::ostringstream dtypestr;

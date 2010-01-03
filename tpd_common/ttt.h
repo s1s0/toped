@@ -112,7 +112,7 @@ class SGBitSet {
 public:
             SGBitSet(word);
             SGBitSet(const SGBitSet&);
-            SGBitSet(): _size(0), _packet(NULL) {};  
+            SGBitSet(): _size(0), _packet(NULL) {};
    void     set(word);
    void     reset(word);
    void     setall();
@@ -131,7 +131,7 @@ private:
    byte*    _packet;
 };
 
-//==============================================================================   
+//==============================================================================
 /*** CTM *********************************************************************
   Current Translation Matrix
 >>> Constructor --------------------------------------------------------------
@@ -223,7 +223,7 @@ private:
 
 //==============================================================================
 // The DBbox class is used primarily in the quadtree algo, to keep the overlap
-// variables of the DB objects and to implement the corresponding calculations. 
+// variables of the DB objects and to implement the corresponding calculations.
 // Its methods shall comply with the specific requirements of the algorithm.
 //
 class DBbox {
@@ -254,7 +254,7 @@ private:
    TP    _p1;
    TP    _p2;
 };
-//==============================================================================   
+//==============================================================================
 class DBline {
 public:
    DBline(): _p1(TP()), _p2(TP()) {};
@@ -290,7 +290,7 @@ unsigned GCD(unsigned arg1, unsigned arg2);
 // A template of a cell hierarchy used for all layout databases in Toped (TDT,
 // GDS, CIF). The cell browser panels only miror the hierarchy build in the
 // data bases of this type.
-// Layout hierarchies have their specifics. 
+// Layout hierarchies have their specifics.
 //  - Cell instances don't have instance names. This means that if a certain
 //    cell is instantiated several times in another cell - this will be shown
 //    in the data base as a single cell instance
@@ -301,20 +301,20 @@ unsigned GCD(unsigned arg1, unsigned arg2);
 //  - A pointer to the actual cell structure. The cell structure can be pointed
 //    to from more than one hierarchy component.
 //  - None or more brothers. There can not be "twins" among the brothers though.
-//    Means that it doesn't matter how many times a cell is instantiated in 
+//    Means that it doesn't matter how many times a cell is instantiated in
 //    another cell. It matters only whether or not it is instantiated.
-//  - None or more children. Again - there should not be "twins" among the 
+//  - None or more children. Again - there should not be "twins" among the
 //    children.
-//  - At most one parent. Means that if a cell is instantiated in several other 
-//    cells there will be exactly one member of hierarchy for each of those 
-//    cases. Cells with no parent (orphans) are the cells on the top of the 
+//  - At most one parent. Means that if a cell is instantiated in several other
+//    cells there will be exactly one member of hierarchy for each of those
+//    cases. Cells with no parent (orphans) are the cells on the top of the
 //    hierarchy tree.
 //  - A linear pointer to the last member of the hierarchy structure. It is used
-//    to search and traverse the entire tree. Only one member can have it's 
-//    "last" field poining to NULL. The code shall always keep a pointer to the 
+//    to search and traverse the entire tree. Only one member can have it's
+//    "last" field poining to NULL. The code shall always keep a pointer to the
 //    component added last to the hierarchy.
 // The structure can be used in two ways.
-// - to build a hierarchy of a data base in memory. This is used after an 
+// - to build a hierarchy of a data base in memory. This is used after an
 //   external DB or library was loaded and also when GDS or CIF files are parsed.
 // - dynamically - when the layout is updated interactively. This is used also
 //   when a GDS or CIF databases are converted to TDT.
@@ -352,7 +352,7 @@ private:
 
 // The constructor
 template <class TYPE>
-SGHierTree<TYPE>::SGHierTree(const TYPE* comp, const TYPE* prnt, SGHierTree* lst) 
+SGHierTree<TYPE>::SGHierTree(const TYPE* comp, const TYPE* prnt, SGHierTree* lst)
 {
    component = comp;last = lst;
    SGHierTree* wv = last;
@@ -367,13 +367,13 @@ SGHierTree<TYPE>::SGHierTree(const TYPE* comp, const TYPE* prnt, SGHierTree* lst
       brother = parent->Fchild;
       parent->Fchild = this;
    }
-   else 
+   else
       brother = NULL;
    Fchild = NULL;
 };
 
 template <class TYPE>
-SGHierTree<TYPE>::SGHierTree(const SGHierTree* cousin, SGHierTree* prnt, SGHierTree* lst) 
+SGHierTree<TYPE>::SGHierTree(const SGHierTree* cousin, SGHierTree* prnt, SGHierTree* lst)
 {
    component = cousin->component;
    parent = prnt;
@@ -390,7 +390,7 @@ SGHierTree<TYPE>::SGHierTree(const SGHierTree* cousin, SGHierTree* prnt, SGHierT
    last = lst;
 };
 
-template <class TYPE> 
+template <class TYPE>
    bool SGHierTree<TYPE>::itemRefdIn(int libID) const {
       if (libID == component->libID()) return true;
       else
@@ -407,7 +407,7 @@ template <class TYPE>
       }
    }
 
-template <class TYPE> 
+template <class TYPE>
       bool   SGHierTree<TYPE>::thisLib(int libID) const {
          /*! Any libID < TARGETDB_LIB will make the functions to ignore it.
              Idea is to have a possibility to traverse the entire
@@ -415,11 +415,11 @@ template <class TYPE>
          return (libID < TARGETDB_LIB) ? true : (libID == component->libID());
       }
 
-template <class TYPE> 
+template <class TYPE>
       bool   SGHierTree<TYPE>::thisParent(int libID) {
-         if      ( NULL == parent       ) 
+         if      ( NULL == parent       )
             return false;
-         else if ( libID <  TARGETDB_LIB ) 
+         else if ( libID <  TARGETDB_LIB )
             // Any libID < TARGETDB_LIB will make the functions to ignore it.
             // Idea is to have a possibility to traverse the entire
             // tree no matter where the cell belongs
@@ -435,7 +435,7 @@ template <class TYPE>
             // 2. Library hierarchy should not be influenced by the changes in the
             //    database and particularly by the changes in the hierarchy of the
             //    database.
-            // To acieve this for library cells we have to check whether all instances 
+            // To acieve this for library cells we have to check whether all instances
             // of this type have parent from libID library
             SGHierTree* wv = GetMember(component);
             while (NULL != wv)
@@ -456,14 +456,14 @@ template <class TYPE>
       return wv;
    }
 
-template <class TYPE> 
+template <class TYPE>
    SGHierTree<TYPE>*   SGHierTree<TYPE>::GetNextRoot(int libID)  {
       SGHierTree* wv = this->last;
       while (wv && (wv->thisParent(libID) || !wv->thisLib(libID) ) ) wv = wv->last;
       return wv;
    }
 
-template <class TYPE> 
+template <class TYPE>
    const SGHierTree<TYPE>* SGHierTree<TYPE>::GetChild(int libID) const {
    if ( (NULL == Fchild) || Fchild->thisLib(libID) ) return Fchild;
       SGHierTree* wv = Fchild;
@@ -471,35 +471,35 @@ template <class TYPE>
       return wv;
    }
 
-template <class TYPE> 
+template <class TYPE>
    const SGHierTree<TYPE>* SGHierTree<TYPE>::GetBrother(int libID) const {
       SGHierTree* wv = brother;
       while (wv && !wv->thisLib(libID) ) wv = wv->brother;
       return wv;
    }
 
-template <class TYPE> 
+template <class TYPE>
    SGHierTree<TYPE>*  SGHierTree<TYPE>::GetMember(const TYPE* comp) {
       SGHierTree* wv = this;
       while (wv && (wv->component != comp)) wv = wv->last;
       return wv;
    }
 
-template <class TYPE> 
+template <class TYPE>
    SGHierTree<TYPE>*  SGHierTree<TYPE>::GetNextMember(const TYPE* comp) {
       SGHierTree* wv = this->last;
       while (wv && (wv->component != comp)) wv = wv->last;
       return wv;
    }
 
-template <class TYPE> 
+template <class TYPE>
    bool SGHierTree<TYPE>::checkAncestors(const TYPE* comp, const TYPE* prnt, SGHierTree* lst) const
 {
    // returns true  -> prnt is already an ancestor of the comp
    //         false -> otherwise
    SGHierTree* wv = lst->GetMember(comp);
    SGHierTree* wvP = lst->GetMember(prnt);
-   // protect yourself - if parent or the component are not in the list 
+   // protect yourself - if parent or the component are not in the list
    assert(wvP); assert(wv);
    do {
       SGHierTree* wv2 = wv;
@@ -519,10 +519,10 @@ int SGHierTree<TYPE>::addParent(const TYPE* comp, const TYPE* prnt, SGHierTree*&
    //         3 -> first parrent added for library component
    SGHierTree* wv = lst->GetMember(comp);
    SGHierTree* wvP = lst->GetMember(prnt);
-   // protect yourself - if parent or the component are not in the list 
+   // protect yourself - if parent or the component are not in the list
    assert(wvP); assert(wv);
    if (NULL == wv->parent) {
-      // if the component use to be orphan, don't create a new member, 
+      // if the component use to be orphan, don't create a new member,
       // just link the existing one
       wv->parent = wvP;
       wv->brother = wvP->Fchild;
@@ -531,43 +531,43 @@ int SGHierTree<TYPE>::addParent(const TYPE* comp, const TYPE* prnt, SGHierTree*&
       else                                        return 3;
    }
    else {
-      // component is not an orphan, so first check that this comp 
-      //already has this prnt. 
+      // component is not an orphan, so first check that this comp
+      //already has this prnt.
       SGHierTree* wv2 = wv;
       do {
          if (wv2->parent->GetItem() == prnt) return 0;
-      }   
+      }
       while (NULL != (wv2 = wv2->GetNextMember(comp)));
       // if not, for every appearance of the parent, we need to add a child comp
       do {
          // here -> we need a "deep" copy. Means - all the children of wv
          // and their children too
          lst = DEBUG_NEW SGHierTree(wv, wvP, lst);
-      }   
-      while (NULL != (wvP = wvP->GetNextMember(prnt))); 
+      }
+      while (NULL != (wvP = wvP->GetNextMember(prnt)));
    }
    return 2;
 };
 
 template <class TYPE>
-int  SGHierTree<TYPE>::removeParent(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst) 
+int  SGHierTree<TYPE>::removeParent(const TYPE* comp, const TYPE* prnt, SGHierTree*& lst)
 {
    // returns 0 -> not much changed (the component has another parent)
    //         1 -> A DB component which is now an orphan
    //         2 -> A library component which is no more referenced in the DB
    //         3 -> Component not found in the tree
    SGHierTree* citem;
-   
+
    SGHierTree* cparent = lst->GetMember(prnt);
    while (cparent) {
       // first unlink comp from its brothers, because comp will be deleted
       assert(cparent->Fchild);
-      if (cparent->Fchild->GetItem() == comp) 
+      if (cparent->Fchild->GetItem() == comp)
       {
          citem = cparent->Fchild;
          cparent->Fchild = citem->brother;
-      }   
-      else 
+      }
+      else
       {
          SGHierTree* child = cparent->Fchild;
          while ((child->brother) && (child->brother->GetItem() != comp))
@@ -582,22 +582,22 @@ int  SGHierTree<TYPE>::removeParent(const TYPE* comp, const TYPE* prnt, SGHierTr
       // can be the last in the structure and the latter is not circular.
       SGHierTree* check = lst->GetMember(comp);
       assert(check);
-      if (check->GetNextMember(comp)) 
+      if (check->GetNextMember(comp))
       {
          // Means that is not the last component of this type
          // So it has to be deleted, though unlinked first
          if (lst == citem) lst = citem->last;
          else {
             SGHierTree* witem = lst;
-            while (witem && (witem->last != citem)) 
+            while (witem && (witem->last != citem))
                witem = witem->last;
             assert(witem);
             witem->last = citem->last;
          }
          delete citem;
-      }   
+      }
       else if (citem) {
-         // This is the last component of this type, so it has to 
+         // This is the last component of this type, so it has to
          // be flagged as an orphan and preserved at the top of the
          // hierarchy, but only if it is NOT a library cell.
          // library cells can't be removed from libraries and when removed from
@@ -607,7 +607,7 @@ int  SGHierTree<TYPE>::removeParent(const TYPE* comp, const TYPE* prnt, SGHierTr
          if   (TARGETDB_LIB == citem->component->libID()) return 2;
          else                                             return 1;
       }
-      cparent = cparent->GetNextMember(prnt);   
+      cparent = cparent->GetNextMember(prnt);
    }
    return 0;
 }
@@ -667,7 +667,7 @@ const word MAX_WORD_VALUE = 65535;
 //const DBbox MAX_OVL_BOX        = DBbox(MIN_X,MAX_X,MIN_Y,MIN_Y); // maximum overlapping box
 const unsigned    REF_LAY              = 0xffffffff;
 const unsigned    ERR_LAY              = 0xfffffffe;
-const unsigned		DRC_LAY					= 0xfffffffd;
+const unsigned    DRC_LAY              = 0xfffffffd;
 const unsigned    LAST_EDITABLE_LAYNUM = 0x0000ffff;
 const byte        OPENGL_FONT_UNIT     = 128;
 const byte        MIN_VISUAL_AREA      = 40;   // that would be 40 pixels

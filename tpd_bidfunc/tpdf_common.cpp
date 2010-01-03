@@ -264,10 +264,15 @@ void tellstdfunc::RefreshGL()
 {
    if (!PROPC->upLayers().empty())
    {
-      const WordList freshlays = PROPC->upLayers();
-      for(WordList::const_iterator CUL = freshlays.begin(); CUL != freshlays.end(); CUL++)
-         TpdPost::layer_add(PROPC->getLayerName(*CUL), *CUL);
-      PROPC->clearUnpublishedLayers();
+      layprop::DrawProperties* drawProp;
+      if (PROPC->lockDrawProp(drawProp))
+      {
+         const WordList freshlays = PROPC->upLayers();
+         for(WordList::const_iterator CUL = freshlays.begin(); CUL != freshlays.end(); CUL++)
+            TpdPost::layer_add(drawProp->getLayerName(*CUL), *CUL);
+         PROPC->clearUnpublishedLayers();
+      }
+      PROPC->unlockDrawProp(drawProp);
    }
    Console->set_canvas_invalid(true);
 }
@@ -293,13 +298,17 @@ void tellstdfunc::updateLayerDefinitions(laydata::TdtLibDir* LIBDIR, nameList& t
    for(nameList::const_iterator CTC= top_cells.begin(); CTC != top_cells.end(); CTC++)
       LIBDIR->collect_usedlays(*CTC, true, ull);
    ull.sort(); ull.unique();
-//   std::unique(ull.begin(),ull.end());
-   for(WordList::const_iterator CUL = ull.begin(); CUL != ull.end(); CUL++)
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
    {
-      if (0 == *CUL) continue;
-      if (PROPC->addLayer(*CUL))
-         TpdPost::layer_add(PROPC->getLayerName(*CUL), *CUL);
+      for(WordList::const_iterator CUL = ull.begin(); CUL != ull.end(); CUL++)
+      {
+         if (0 == *CUL) continue;
+         if (PROPC->addLayer(*CUL))
+            TpdPost::layer_add(drawProp->getLayerName(*CUL), *CUL);
+      }
    }
+   PROPC->unlockDrawProp(drawProp);
 }
 
 //=============================================================================

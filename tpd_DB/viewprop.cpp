@@ -460,14 +460,6 @@ void layprop::PropertyCenter::drawGrid() const
       p->second->Draw(_drawprop, _UU);
 }
 
-// void layprop::PropertyCenter::drawGrid(TopRend& rend) const
-// {
-//    typedef gridlist::const_iterator CI;
-//    for(CI p = _grid.begin(); p != _grid.end(); p++)
-//       if (p->second->visual())
-//          rend.Grid(p->second->step(), p->second->color());
-// }
-
 void layprop::PropertyCenter::drawZeroCross() const
 {
    if (!_zeroCross) return;
@@ -481,25 +473,6 @@ void layprop::PropertyCenter::drawZeroCross() const
    glVertex2i(_drawprop.clipRegion().p2().x(), 0);
    glEnd();
    glDisable(GL_LINE_STIPPLE);
-}
-
-
-void layprop::PropertyCenter::allColors(nameList& colist) const
-{
-   for( ColorMap::const_iterator CI = _drawprop._layColors.begin(); CI != _drawprop._layColors.end(); CI++)
-      colist.push_back(CI->first);
-}
-
-void layprop::PropertyCenter::allFills(nameList& filist) const
-{
-   for( FillMap::const_iterator CI = _drawprop._layFill.begin(); CI != _drawprop._layFill.end(); CI++)
-      filist.push_back(CI->first);
-}
-
-void layprop::PropertyCenter::allLines(nameList& linelist) const
-{
-   for( LineMap::const_iterator CI = _drawprop._lineSet.begin(); CI != _drawprop._lineSet.end(); CI++)
-      linelist.push_back(CI->first);
 }
 
 void layprop::PropertyCenter::setUU(real UU) {
@@ -711,6 +684,32 @@ bool layprop::PropertyCenter::getLaysetStatus(const std::string& sname, WordSet&
    }
    activel = clist.first;
    return true;
+}
+
+bool layprop::PropertyCenter::lockDrawProp(DrawProperties*& propDB)
+{
+   if (wxMUTEX_DEAD_LOCK == _drawPLock.Lock())
+   {
+      tell_log(console::MT_ERROR,"DrawProperties Mutex deadlocked!");
+      propDB = &_drawprop;
+      return false;
+   }
+   else
+   {
+      propDB = &_drawprop;
+      return true /*(NULL != _drawprop)*/;
+   }
+}
+
+void layprop::PropertyCenter::unlockDrawProp(DrawProperties*& propDB/*, bool throwexception*/)
+{
+//   _drawprop = propDB;
+   VERIFY(wxMUTEX_NO_ERROR == _drawPLock.Unlock());
+/*   if(NULL != _bpSync)
+      _bpSync->Signal();
+   else if (throwexception && (NULL == gds_db))
+      throw EXPTNactive_GDS();
+   gds_db = NULL;*/
 }
 
 layprop::PropertyCenter::~PropertyCenter()

@@ -869,17 +869,20 @@ int tellstdfunc::GDSgetlaymap::execute()
    }
    else
    { // generate default export GDS layer map
-      DATC->lockDB(false);
       nameList tdtLayers;
-      PROPC->allLayers(tdtLayers);
-      for ( nameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
+      layprop::DrawProperties* drawProp;
+      if (PROPC->lockDrawProp(drawProp))
       {
-         std::ostringstream dtypestr;
-         dtypestr << PROPC->getLayerNo( *CDL )<< "; 0";
-         telldata::tthsh* clay = DEBUG_NEW telldata::tthsh(PROPC->getLayerNo( *CDL ), dtypestr.str());
-         theMap->add(clay);
+         drawProp->allLayers(tdtLayers);
+         for ( nameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
+         {
+            std::ostringstream dtypestr;
+            dtypestr << drawProp->getLayerNo( *CDL )<< "; 0";
+            telldata::tthsh* clay = DEBUG_NEW telldata::tthsh(drawProp->getLayerNo( *CDL ), dtypestr.str());
+            theMap->add(clay);
+         }
       }
-      DATC->unlockDB();
+      PROPC->unlockDrawProp(drawProp);
    }
    OPstack.push(theMap);
    LogFile << LogFile.getFN() << "("<< LogFile._2bool(import)  << ");"; LogFile.flush();
@@ -1278,17 +1281,20 @@ int tellstdfunc::CIFgetlaymap::execute()
    }
    else
    { // generate default export CIF layer map
-      DATC->lockDB(false);
       nameList tdtLayers;
-      PROPC->allLayers(tdtLayers);
-      for ( nameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
+      layprop::DrawProperties* drawProp;
+      if (PROPC->lockDrawProp(drawProp))
       {
-         std::ostringstream dtypestr;
-         dtypestr << "L" << PROPC->getLayerNo( *CDL );
-         telldata::tthsh* clay = DEBUG_NEW telldata::tthsh(PROPC->getLayerNo( *CDL ), dtypestr.str());
-         theMap->add(clay);
+         drawProp->allLayers(tdtLayers);
+         for ( nameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
+         {
+            std::ostringstream dtypestr;
+            dtypestr << "L" << drawProp->getLayerNo( *CDL );
+            telldata::tthsh* clay = DEBUG_NEW telldata::tthsh(drawProp->getLayerNo( *CDL ), dtypestr.str());
+            theMap->add(clay);
+         }
       }
-      DATC->unlockDB();
+      PROPC->unlockDrawProp(drawProp);
    }
    OPstack.push(theMap);
    LogFile << LogFile.getFN() << "("<< LogFile._2bool(import)  << ");"; LogFile.flush();

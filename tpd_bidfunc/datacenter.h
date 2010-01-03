@@ -97,8 +97,8 @@ public:
    //------------------------------------------------------------------------------------------------
    void                       switch_drawruler(bool st) {_drawruler = st;}
    bool                       drawruler() {return _drawruler;}
-   LayerMapExt*               secureGdsLayMap(bool);
-   LayerMapCif*               secureCifLayMap(bool);
+   LayerMapExt*               secureGdsLayMap(const layprop::DrawProperties*, bool);
+   LayerMapCif*               secureCifLayMap(const layprop::DrawProperties*, bool);
    void                       updateVisibleOverlap();
    std::string                globalDir(void) const     {return _globalDir;}
 
