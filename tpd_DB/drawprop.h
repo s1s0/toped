@@ -94,7 +94,8 @@ namespace layprop {
          bool              hidden()   const {return _hidden;}
          bool              locked()   const {return _locked;}
          void              fillLayer(bool filled)  {_filled = filled;};
-         friend class PropertyCenter;
+         friend class DrawProperties;
+         friend class PropertyCenter; // << TODO - this is temporary. Delete it!
       private:
          std::string       _name;
          std::string       _color;
@@ -289,12 +290,17 @@ namespace layprop {
          bool                       adjustTextOrientation() const
                                                          {return _adjustTextOrientation;}
 
+         void                       hideLayer(unsigned layno, bool hide);
+         void                       lockLayer(unsigned layno, bool lock);
+         void                       fillLayer(unsigned layno, bool fill);
+
          // Used in dialogue boxes and drawing - partially protected for now
          bool                       layerHidden(unsigned layno) const;
          bool                       layerLocked(unsigned layno) const;
          bool                       layerFilled(unsigned layno) const;
 
          // Used in dialogue boxes an protected during construction of the dialogue boxes
+         WordList                   getAllLayers() const;
          std::string                getLayerName(unsigned layno) const;
          std::string                getColorName(unsigned layno) const;
          std::string                getFillName(unsigned layno) const;

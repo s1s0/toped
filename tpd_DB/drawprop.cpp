@@ -727,6 +727,22 @@ unsigned layprop::DrawProperties::getLayerNo(std::string name) const
    return ERR_LAY;
 }
 
+WordList layprop::DrawProperties::getAllLayers() const
+{
+   WordList listLayers;
+   for( LaySetList::const_iterator it = getCurSetList().begin(); it != getCurSetList().end(); it++)
+      listLayers.push_back(it->first);
+   return listLayers;
+}
+
+//WordList layprop::PropertyCenter::getLockedLayers() const
+//{
+//   WordList lockedLayers;
+//   for( LaySetList::const_iterator = getCurSetList().begin(); it != getCurSetList().end(); it++)
+//      if(it->second->locked()) lockedLayers.push_back(it->first);
+//   return lockedLayers;
+//}
+
 std::string layprop::DrawProperties::getLayerName(unsigned layno) const
 {
    const LayerSettings* ilayset = findLayerSettings(layno);
@@ -980,6 +996,30 @@ void layprop::DrawProperties::psWrite(PSFile& psf) const
 
    for(FillMap::const_iterator CI = _layFill.begin(); CI != _layFill.end(); CI++)
       psf.defineFill( CI->first.c_str() , CI->second);
+}
+
+void  layprop::DrawProperties::hideLayer(unsigned layno, bool hide)
+{
+   // No error messages here, because of possible range use
+   LayerSettings* ilayset = const_cast<LayerSettings*>(findLayerSettings(layno));
+   if (NULL != ilayset)
+      ilayset->_hidden = hide;
+}
+
+void  layprop::DrawProperties::lockLayer(unsigned layno, bool lock)
+{
+   // No error messages here, because of possible range use
+   LayerSettings* ilayset = const_cast<LayerSettings*>(findLayerSettings(layno));
+   if (NULL != ilayset)
+      ilayset->_locked = lock;
+}
+
+void  layprop::DrawProperties::fillLayer(unsigned layno, bool fill)
+{
+   // No error messages here, because of possible range use
+   LayerSettings* ilayset = const_cast<LayerSettings*>(findLayerSettings(layno));
+   if (NULL != ilayset)
+      ilayset->fillLayer(fill);
 }
 
 layprop::DrawProperties::~DrawProperties() {

@@ -387,54 +387,6 @@ void layprop::PropertyCenter::addFill(std::string name, byte* ptrn) {
    _drawprop._layFill[name] = ptrn;
 }
 
-void  layprop::PropertyCenter::hideLayer(unsigned layno, bool hide)
-{
-   // No error messages here, because of possible range use
-   LayerSettings* ilayset = const_cast<LayerSettings*>(_drawprop.findLayerSettings(layno));
-   if (NULL != ilayset)
-      ilayset->_hidden = hide;
-}
-
-void  layprop::PropertyCenter::lockLayer(unsigned layno, bool lock)
-{
-   // No error messages here, because of possible range use
-   LayerSettings* ilayset = const_cast<LayerSettings*>(_drawprop.findLayerSettings(layno));
-   if (NULL != ilayset)
-      ilayset->_locked = lock;
-}
-
-void  layprop::PropertyCenter::fillLayer(unsigned layno, bool fill)
-{
-   // No error messages here, because of possible range use
-   LayerSettings* ilayset = const_cast<LayerSettings*>(_drawprop.findLayerSettings(layno));
-   if (NULL != ilayset)
-      ilayset->fillLayer(fill);
-}
-
-const WordList layprop::PropertyCenter::getLockedLayers(void)
-{
-   //drawprop._layset
-   WordList lockedLayers;
-   LaySetList::const_iterator it;
-   for(  it = _drawprop.getCurSetList().begin(); it != _drawprop.getCurSetList().end(); ++it)
-   {
-      if(it->second->locked()) lockedLayers.push_back((*it).first);
-   }
-   return lockedLayers;
-}
-
-const WordList layprop::PropertyCenter::getAllLayers(void)
-{
-   //drawprop._layset
-   WordList listLayers;
-   LaySetList::const_iterator it;
-   for(  it = _drawprop.getCurSetList().begin(); it != _drawprop.getCurSetList().end(); ++it)
-   {
-      listLayers.push_back((*it).first);
-   }
-   return listLayers;
-}
-
 const layprop::LayoutGrid* layprop::PropertyCenter::grid(byte No) const {
    if (_grid.end() != _grid.find(No)) {
       gridlist::const_iterator cg = _grid.find(No);

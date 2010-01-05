@@ -874,12 +874,12 @@ int tellstdfunc::stdUSINGLAYER::execute()
    {
       if (drawProp->layerHidden(layno))
       {
-         PROPC->hideLayer(layno, false);
+         drawProp->hideLayer(layno, false);
          TpdPost::layer_status(tui::BT_LAYER_HIDE, layno, false);
       }
       if (drawProp->layerLocked(layno))
       {
-         PROPC->lockLayer(layno, false);
+         drawProp->lockLayer(layno, false);
          TpdPost::layer_status(tui::BT_LAYER_LOCK, layno, false);
       }
       TpdPost::layer_default(layno, PROPC->curLay());
