@@ -131,10 +131,13 @@ void Calbr::drcTenderer::addLine(const edge &edge)
 void Calbr::drcTenderer::showAll(void)
 {
    PROPC->setState(layprop::DRC);
-   WordList lays = PROPC->getAllLayers();
-   for(WordList::const_iterator it = lays.begin(); it != lays.end(); ++it)
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
    {
-      PROPC->hideLayer((*it), false);
+      WordList lays = drawProp->getAllLayers();
+      for(WordList::const_iterator it = lays.begin(); it != lays.end(); ++it)
+         drawProp->hideLayer((*it), false);
+      PROPC->unlockDrawProp(drawProp);
    }
    PROPC->setState(layprop::DB);
    tellstdfunc::RefreshGL();
@@ -143,10 +146,13 @@ void Calbr::drcTenderer::showAll(void)
 void Calbr::drcTenderer::hideAll(void)
 {
    PROPC->setState(layprop::DRC);
-   WordList lays = PROPC->getAllLayers();
-   for(WordList::const_iterator it = lays.begin(); it != lays.end(); ++it)
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
    {
-      PROPC->hideLayer((*it), true);
+      WordList lays = drawProp->getAllLayers();
+      for(WordList::const_iterator it = lays.begin(); it != lays.end(); ++it)
+         drawProp->hideLayer((*it), true);
+      PROPC->unlockDrawProp(drawProp);
    }
    PROPC->setState(layprop::DB);
    tellstdfunc::RefreshGL();
@@ -155,7 +161,12 @@ void Calbr::drcTenderer::hideAll(void)
 void Calbr::drcTenderer::showError(unsigned int numError)
 {
    PROPC->setState(layprop::DRC);
-   PROPC->hideLayer(numError, false);
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      drawProp->hideLayer(numError, false);
+      PROPC->unlockDrawProp(drawProp);
+   }
    PROPC->setState(layprop::DB);
    tellstdfunc::RefreshGL();
 }

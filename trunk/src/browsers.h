@@ -250,7 +250,7 @@ namespace browsers
                                           const wxValidator& validator = wxDefaultValidator,
                                           const wxString& name = wxT("button"),
                                           LayerInfo *layer = NULL);
-                              ~LayerButton();
+                             ~LayerButton();
          void                 onLeftClick(wxMouseEvent&);
          void                 onMiddleClick(wxMouseEvent&);
          void                 onRightClick(wxMouseEvent&);
@@ -261,7 +261,6 @@ namespace browsers
          void                 hideLayer(bool);
          void                 lockLayer(bool);
          void                 fillLayer(bool);
-         void                 editLayer(wxCommandEvent&);
          void                 preparePicture();
          word                 getLayNo()          {return _layer->layno();}
 

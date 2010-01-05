@@ -117,8 +117,6 @@ namespace layprop {
       void              addFill(std::string name, byte *ptrn);
       void              addLine(std::string, std::string, word, byte, byte);
       bool              selectable(unsigned layno) const;
-      const WordList    getLockedLayers(void);
-      const WordList    getAllLayers(void);
       void              saveProperties(std::string) const;
       //
       const LayoutGrid* grid(byte) const;
@@ -186,9 +184,6 @@ namespace layprop {
                                                          {_drawprop.setState(state);}
 
       // Methods which require DrawProperties locking
-      void              hideLayer(unsigned layno, bool hide);
-      void              lockLayer(unsigned layno, bool lock);
-      void              fillLayer(unsigned layno, bool fill);
 
       bool              lockDrawProp(DrawProperties*&);
       void              unlockDrawProp(DrawProperties*&);
