@@ -1535,7 +1535,7 @@ void browsers::LayerButton::makeBrush(const layprop::DrawProperties* drawProp)
    image = stipplebrush->ConvertToImage();
 #ifdef WIN32
    //Change white color for current one
-   const layprop::tellRGB col   = PROPC->getColor(_layer->layno());
+   const layprop::tellRGB col   = drawProp->getColor(_layer->layno());
 
    int w = image.GetWidth();
    int h = image.GetHeight();
