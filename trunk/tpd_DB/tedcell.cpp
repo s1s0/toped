@@ -189,7 +189,7 @@ bool laydata::EditObject::securelaydef(unsigned layno)
 {
    if (layno != REF_LAY)
    {
-      bool newlay = _viewprop->addLayer( layno);
+      bool newlay = _viewprop->drawprop().addLayer( layno);
       if (newlay)
          _viewprop->addUnpublishedLay(layno);
       return newlay;

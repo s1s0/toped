@@ -73,10 +73,15 @@ int tellstdfunc::stdLAYPROP::execute() {
    word        gdsN  = getWordValue();
    std::string name  = getStringValue();
    // error message - included in the method
-   PROPC->addLayer(name, gdsN, col, fill, sline);
-   TpdPost::layer_add(name,gdsN);
-   LogFile << LogFile.getFN() << "(\""<< name << "\"," << gdsN << ",\"" <<
-         col << "\",\"" << fill <<"\",\"" << sline <<"\");";LogFile.flush();
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      drawProp->addLayer(name, gdsN, col, fill, sline);
+      TpdPost::layer_add(name,gdsN);
+      LogFile << LogFile.getFN() << "(\""<< name << "\"," << gdsN << ",\"" <<
+            col << "\",\"" << fill <<"\",\"" << sline <<"\");";LogFile.flush();
+   }
+   PROPC->unlockDrawProp(drawProp);
    return EXEC_NEXT;
 }
 
@@ -285,8 +290,8 @@ int tellstdfunc::stdHIDELAYER::execute()
       if (PROPC->lockDrawProp(drawProp))
       {
          drawProp->hideLayer(layno, hide);
-         PROPC->unlockDrawProp(drawProp);
       }
+      PROPC->unlockDrawProp(drawProp);
       DATC->updateVisibleOverlap();
       TpdPost::layer_status(tui::BT_LAYER_HIDE, layno, hide);
       LogFile << LogFile.getFN() << "("<< layno << "," <<
@@ -331,8 +336,8 @@ void tellstdfunc::stdHIDELAYERS::undo() {
          drawProp->hideLayer(laynumber->value(), hide);
          TpdPost::layer_status(tui::BT_LAYER_HIDE, laynumber->value(), hide);
       }
-      PROPC->unlockDrawProp(drawProp);
    }
+   PROPC->unlockDrawProp(drawProp);
    laydata::TdtDesign* ATDB = DATC->lockDB();
    ATDB->select_fromList(get_ttlaylist(pl));
    DATC->unlockDB();
@@ -411,23 +416,33 @@ void tellstdfunc::stdHIDECELLMARK::undo_cleanup() {
 void tellstdfunc::stdHIDECELLMARK::undo() {
    TEUNDO_DEBUG("hide_cellmarks( bool ) UNDO");
    bool        hide  = getBoolValue(UNDOPstack,true);
-   PROPC->setCellMarksHidden(hide);
-   wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
-   eventGRIDUPD.SetInt((hide ? tui::STS_CELLMARK_OFF : tui::STS_CELLMARK_ON));
-   wxPostEvent(TopedCanvasW, eventGRIDUPD);
-   RefreshGL();
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      drawProp->setCellMarksHidden(hide);
+      wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
+      eventGRIDUPD.SetInt((hide ? tui::STS_CELLMARK_OFF : tui::STS_CELLMARK_ON));
+      wxPostEvent(TopedCanvasW, eventGRIDUPD);
+      RefreshGL();
+   }
+   PROPC->unlockDrawProp(drawProp);
 }
 
 int tellstdfunc::stdHIDECELLMARK::execute() {
    bool        hide  = getBoolValue();
-   UNDOcmdQ.push_front(this);
-   UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
-   PROPC->setCellMarksHidden(hide);
-   wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
-   eventGRIDUPD.SetInt((hide ? tui::STS_CELLMARK_OFF : tui::STS_CELLMARK_ON));
-   wxPostEvent(TopedCanvasW, eventGRIDUPD);
-   LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
-   RefreshGL();
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      UNDOcmdQ.push_front(this);
+      UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
+      drawProp->setCellMarksHidden(hide);
+      wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
+      eventGRIDUPD.SetInt((hide ? tui::STS_CELLMARK_OFF : tui::STS_CELLMARK_ON));
+      wxPostEvent(TopedCanvasW, eventGRIDUPD);
+      LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
+      RefreshGL();
+   }
+   PROPC->unlockDrawProp(drawProp);
    return EXEC_NEXT;
 }
 
@@ -445,24 +460,34 @@ void tellstdfunc::stdHIDETEXTMARK::undo_cleanup() {
 void tellstdfunc::stdHIDETEXTMARK::undo() {
    TEUNDO_DEBUG("hide_textmarks( bool ) UNDO");
    bool        hide  = getBoolValue(UNDOPstack,true);
-   PROPC->setTextMarksHidden(hide);
-   wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
-   eventGRIDUPD.SetInt((hide ? tui::STS_TEXTMARK_OFF : tui::STS_TEXTMARK_ON));
-   wxPostEvent(TopedCanvasW, eventGRIDUPD);
-   LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
-   RefreshGL();
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      drawProp->setTextMarksHidden(hide);
+      wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
+      eventGRIDUPD.SetInt((hide ? tui::STS_TEXTMARK_OFF : tui::STS_TEXTMARK_ON));
+      wxPostEvent(TopedCanvasW, eventGRIDUPD);
+      LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
+      RefreshGL();
+   }
+   PROPC->unlockDrawProp(drawProp);
 }
 
 int tellstdfunc::stdHIDETEXTMARK::execute() {
    bool        hide  = getBoolValue();
-   UNDOcmdQ.push_front(this);
-   UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
-   PROPC->setTextMarksHidden(hide);
-   wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
-   eventGRIDUPD.SetInt((hide ? tui::STS_TEXTMARK_OFF : tui::STS_TEXTMARK_ON));
-   wxPostEvent(TopedCanvasW, eventGRIDUPD);
-   LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
-   RefreshGL();
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      UNDOcmdQ.push_front(this);
+      UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
+      drawProp->setTextMarksHidden(hide);
+      wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
+      eventGRIDUPD.SetInt((hide ? tui::STS_TEXTMARK_OFF : tui::STS_TEXTMARK_ON));
+      wxPostEvent(TopedCanvasW, eventGRIDUPD);
+      LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
+      RefreshGL();
+   }
+   PROPC->unlockDrawProp(drawProp);
    return EXEC_NEXT;
 }
 
@@ -480,24 +505,33 @@ void tellstdfunc::stdHIDECELLBOND::undo_cleanup() {
 void tellstdfunc::stdHIDECELLBOND::undo() {
    TEUNDO_DEBUG("hide_cellbox( bool ) UNDO");
    bool        hide  = getBoolValue(UNDOPstack,true);
-   PROPC->setCellboxHidden(hide);
-   wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
-   eventGRIDUPD.SetInt((hide ? tui::STS_CELLBOX_OFF : tui::STS_CELLBOX_ON));
-   wxPostEvent(TopedCanvasW, eventGRIDUPD);
-   LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
-   RefreshGL();
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      drawProp->setCellboxHidden(hide);
+      wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
+      eventGRIDUPD.SetInt((hide ? tui::STS_CELLBOX_OFF : tui::STS_CELLBOX_ON));
+      wxPostEvent(TopedCanvasW, eventGRIDUPD);
+      LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
+      RefreshGL();
+   }
+   PROPC->unlockDrawProp(drawProp);
 }
 
 int tellstdfunc::stdHIDECELLBOND::execute() {
    bool        hide  = getBoolValue();
-   UNDOcmdQ.push_front(this);
-   UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
-   PROPC->setCellboxHidden(hide);
-   wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
-   eventGRIDUPD.SetInt((hide ? tui::STS_CELLBOX_OFF : tui::STS_CELLBOX_ON));
-   wxPostEvent(TopedCanvasW, eventGRIDUPD);
-   LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
-   RefreshGL();
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      UNDOcmdQ.push_front(this);
+      UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
+      drawProp->setCellboxHidden(hide);
+      wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
+      eventGRIDUPD.SetInt((hide ? tui::STS_CELLBOX_OFF : tui::STS_CELLBOX_ON));
+      wxPostEvent(TopedCanvasW, eventGRIDUPD);
+      LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
+      RefreshGL();
+   }PROPC->unlockDrawProp(drawProp);
    return EXEC_NEXT;
 }
 
@@ -515,24 +549,34 @@ void tellstdfunc::stdHIDETEXTBOND::undo_cleanup() {
 void tellstdfunc::stdHIDETEXTBOND::undo() {
    TEUNDO_DEBUG("hide_textbox( bool ) UNDO");
    bool        hide  = getBoolValue(UNDOPstack,true);
-   PROPC->setTextboxHidden(hide);
-   wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
-   eventGRIDUPD.SetInt((hide ? tui::STS_TEXTBOX_OFF : tui::STS_TEXTBOX_ON));
-   wxPostEvent(TopedCanvasW, eventGRIDUPD);
-   LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
-   RefreshGL();
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      drawProp->setTextboxHidden(hide);
+      wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
+      eventGRIDUPD.SetInt((hide ? tui::STS_TEXTBOX_OFF : tui::STS_TEXTBOX_ON));
+      wxPostEvent(TopedCanvasW, eventGRIDUPD);
+      LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
+      RefreshGL();
+   }
+   PROPC->unlockDrawProp(drawProp);
 }
 
 int tellstdfunc::stdHIDETEXTBOND::execute() {
    bool        hide  = getBoolValue();
-   UNDOcmdQ.push_front(this);
-   UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
-   PROPC->setTextboxHidden(hide);
-   wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
-   eventGRIDUPD.SetInt((hide ? tui::STS_TEXTBOX_OFF : tui::STS_TEXTBOX_ON));
-   wxPostEvent(TopedCanvasW, eventGRIDUPD);
-   LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
-   RefreshGL();
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      UNDOcmdQ.push_front(this);
+      UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
+      drawProp->setTextboxHidden(hide);
+      wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
+      eventGRIDUPD.SetInt((hide ? tui::STS_TEXTBOX_OFF : tui::STS_TEXTBOX_ON));
+      wxPostEvent(TopedCanvasW, eventGRIDUPD);
+      LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
+      RefreshGL();
+   }
+   PROPC->unlockDrawProp(drawProp);
    return EXEC_NEXT;
 }
 
@@ -560,8 +604,8 @@ void tellstdfunc::stdLOCKLAYER::undo() {
    if (PROPC->lockDrawProp(drawProp))
    {
       drawProp->lockLayer(layno, lock);
-      PROPC->unlockDrawProp(drawProp);
    }
+   PROPC->unlockDrawProp(drawProp);
    laydata::TdtDesign* ATDB = DATC->lockDB();
    ATDB->select_fromList(get_ttlaylist(pl));
    DATC->unlockDB();
@@ -598,9 +642,8 @@ int tellstdfunc::stdLOCKLAYER::execute()
       if (PROPC->lockDrawProp(drawProp))
       {
          drawProp->lockLayer(layno, lock);
-         PROPC->unlockDrawProp(drawProp);
       }
-
+      PROPC->unlockDrawProp(drawProp);
       TpdPost::layer_status(tui::BT_LAYER_LOCK, layno, lock);
       LogFile << LogFile.getFN() << "("<< layno << "," <<
                  LogFile._2bool(lock) << ");"; LogFile.flush();
@@ -644,8 +687,8 @@ void tellstdfunc::stdLOCKLAYERS::undo() {
          drawProp->lockLayer(laynumber->value(), lock);
          TpdPost::layer_status(tui::BT_LAYER_LOCK, laynumber->value(), lock);
       }
-      PROPC->unlockDrawProp(drawProp);
    }
+   PROPC->unlockDrawProp(drawProp);
    laydata::TdtDesign* ATDB = DATC->lockDB();
    ATDB->select_fromList(get_ttlaylist(pl));
    DATC->unlockDB();
@@ -732,8 +775,8 @@ void tellstdfunc::stdFILLLAYER::undo() {
    if (PROPC->lockDrawProp(drawProp))
    {
       drawProp->fillLayer(layno, fill);
-      PROPC->unlockDrawProp(drawProp);
    }
+   PROPC->unlockDrawProp(drawProp);
    TpdPost::layer_status(tui::BT_LAYER_FILL, layno, fill);
    UpdateLV();
 }
@@ -749,11 +792,11 @@ int tellstdfunc::stdFILLLAYER::execute()
       UNDOPstack.push_front(DEBUG_NEW telldata::ttint(layno));
       UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!fill));
       drawProp->fillLayer(layno, fill);
-      PROPC->unlockDrawProp(drawProp);
       TpdPost::layer_status(tui::BT_LAYER_FILL, layno, fill);
       LogFile << LogFile.getFN() << "("<< layno << "," <<
                  LogFile._2bool(fill) << ");"; LogFile.flush();
    }
+   PROPC->unlockDrawProp(drawProp);
    UpdateLV();
    return EXEC_NEXT;
 }
@@ -787,8 +830,8 @@ void tellstdfunc::stdFILLLAYERS::undo() {
          drawProp->fillLayer(lay, fill);
          TpdPost::layer_status(tui::BT_LAYER_FILL, lay, fill);
       }
-      PROPC->unlockDrawProp(drawProp);
    }
+   PROPC->unlockDrawProp(drawProp);
    delete sl;
    UpdateLV();
 }
@@ -807,13 +850,13 @@ int tellstdfunc::stdFILLLAYERS::execute()
          drawProp->fillLayer(lay, fill);
          TpdPost::layer_status(tui::BT_LAYER_FILL, lay, fill);
       }
-      PROPC->unlockDrawProp(drawProp);
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(sl);
       UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!fill));
       LogFile << LogFile.getFN() << "("<< *sl << "," <<
                  LogFile._2bool(fill) << ");"; LogFile.flush();
    }
+   PROPC->unlockDrawProp(drawProp);
    UpdateLV();
    return EXEC_NEXT;
 }

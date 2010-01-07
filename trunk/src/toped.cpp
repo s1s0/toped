@@ -1402,9 +1402,9 @@ void tui::TopedFrame::OnCIFtranslate(wxCommandEvent& WXUNUSED(event))
       if ( dlg->ShowModal() == wxID_OK )
       {
          // get the layer map first
-         SIMap* laymap = dlg->getCifLayerMap();
+         SIMap* laymap = dlg->getCifLayerMap(drawProp);
          USMap* laymap2save = NULL;
-         if (dlg->getSaveMap()) laymap2save = dlg->getFullCifLayerMap();
+         if (dlg->getSaveMap()) laymap2save = dlg->getFullCifLayerMap(drawProp);
          wxString wxlaymap, wxlaymap2save;
          SIMap2wxString(laymap      , wxlaymap     );
          if (NULL != laymap2save)

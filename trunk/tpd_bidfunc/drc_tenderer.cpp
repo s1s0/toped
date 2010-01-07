@@ -59,8 +59,8 @@ void Calbr::drcTenderer::setError(unsigned int numError)
 void Calbr::drcTenderer::startWriting()
 {
    _startDrawing = true;
-	_DRCCell = DEBUG_NEW laydata::TdtCell("drc");
-	PROPC->setState(layprop::DB);
+   _DRCCell = DEBUG_NEW laydata::TdtCell("drc");
+//   PROPC->setState(layprop::DB);
 }
 
 void Calbr::drcTenderer::addPoly(const CoordsVector   &coords)
@@ -88,10 +88,10 @@ void Calbr::drcTenderer::addPoly(const CoordsVector   &coords)
          _miny = std::min(it->y, _miny);
          plDB->push_back(TP(it->x, it->y, DBscale));
       }
-         laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(_DRCCell->securelayer(_numError));
-         PROPC->addUnpublishedLay(_numError);
-         dwl->addpoly(*plDB, false);
-         delete plDB;
+      laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(_DRCCell->securelayer(_numError));
+      PROPC->addUnpublishedLay(_numError);
+      dwl->addpoly(*plDB, false);
+      delete plDB;
    }
 }
 
@@ -130,44 +130,38 @@ void Calbr::drcTenderer::addLine(const edge &edge)
 
 void Calbr::drcTenderer::showAll(void)
 {
-   PROPC->setState(layprop::DRC);
    layprop::DrawProperties* drawProp;
-   if (PROPC->lockDrawProp(drawProp))
+   if (PROPC->lockDrawProp(drawProp, layprop::DRC))
    {
       WordList lays = drawProp->getAllLayers();
       for(WordList::const_iterator it = lays.begin(); it != lays.end(); ++it)
          drawProp->hideLayer((*it), false);
-      PROPC->unlockDrawProp(drawProp);
    }
-   PROPC->setState(layprop::DB);
+   PROPC->unlockDrawProp(drawProp);
    tellstdfunc::RefreshGL();
 }
 
 void Calbr::drcTenderer::hideAll(void)
 {
-   PROPC->setState(layprop::DRC);
    layprop::DrawProperties* drawProp;
-   if (PROPC->lockDrawProp(drawProp))
+   if (PROPC->lockDrawProp(drawProp, layprop::DRC))
    {
       WordList lays = drawProp->getAllLayers();
       for(WordList::const_iterator it = lays.begin(); it != lays.end(); ++it)
          drawProp->hideLayer((*it), true);
-      PROPC->unlockDrawProp(drawProp);
    }
-   PROPC->setState(layprop::DB);
+   PROPC->unlockDrawProp(drawProp);
    tellstdfunc::RefreshGL();
 }
 
 void Calbr::drcTenderer::showError(unsigned int numError)
 {
-   PROPC->setState(layprop::DRC);
    layprop::DrawProperties* drawProp;
-   if (PROPC->lockDrawProp(drawProp))
+   if (PROPC->lockDrawProp(drawProp, layprop::DRC))
    {
       drawProp->hideLayer(numError, false);
-      PROPC->unlockDrawProp(drawProp);
    }
-   PROPC->setState(layprop::DB);
+   PROPC->unlockDrawProp(drawProp);
    tellstdfunc::RefreshGL();
 }
 
@@ -175,7 +169,7 @@ void Calbr::drcTenderer::zoom(const edge &edge)
 {
    real DBscale = PROPC->DBscale();
    DBbox* box = DEBUG_NEW DBbox(TP(edge.x1, edge.y1, DBscale),
-                          TP(edge.x2, edge.y2, DBscale));
+                                TP(edge.x2, edge.y2, DBscale));
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(tui::ZOOM_WINDOW);
    eventZOOM.SetClientData(static_cast<void*>(box));
@@ -185,15 +179,17 @@ void Calbr::drcTenderer::zoom(const edge &edge)
 
 void Calbr::drcTenderer::endWriting()
 {
-   PROPC->setState(layprop::DRC);
-   if (!PROPC->upLayers().empty())
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp, layprop::DRC))
    {
-      const WordList freshlays = PROPC->upLayers();
-      for(WordList::const_iterator CUL = freshlays.begin(); CUL != freshlays.end(); CUL++)
-         PROPC->addLayer((*CUL));
-      PROPC->clearUnpublishedLayers();
+      if (!PROPC->upLayers().empty())
+      {
+         const WordList freshlays = PROPC->upLayers();
+         for(WordList::const_iterator CUL = freshlays.begin(); CUL != freshlays.end(); CUL++)
+            drawProp->addLayer((*CUL));
+         PROPC->clearUnpublishedLayers();
+      }
    }
-
+   PROPC->unlockDrawProp(drawProp);
    _ATDB->registercellread("drc", _DRCCell);
-   PROPC->setState(layprop::DB);
 }

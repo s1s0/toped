@@ -1848,7 +1848,7 @@ tui::nameCboxRecords::nameCboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
    }
 }
 
-SIMap* tui::nameCboxRecords::getTheMap()
+SIMap* tui::nameCboxRecords::getTheMap(layprop::DrawProperties* drawProp)
 {
    SIMap* cif_lay_map = DEBUG_NEW SIMap();
    for (AllRecords::const_iterator CNM = _allRecords.begin(); CNM != _allRecords.end(); CNM++ )
@@ -1861,7 +1861,8 @@ SIMap* tui::nameCboxRecords::getTheMap()
       unsigned layno = _drawProp->getLayerNo(layname);
       if (ERR_LAY == layno)
       {
-         layno = PROPC->addLayer(layname);
+//         layno = drawProp->addLayer(layname);
+         layno = drawProp->addLayer(layname);
          TpdPost::layer_add(layname, layno);
       }
       (*cif_lay_map)[std::string(CNM->_ciflay->GetLabel().mb_str(wxConvUTF8))] = layno;
@@ -1869,9 +1870,9 @@ SIMap* tui::nameCboxRecords::getTheMap()
    return cif_lay_map;
 }
 
-USMap* tui::nameCboxRecords::getTheFullMap()
+USMap* tui::nameCboxRecords::getTheFullMap(layprop::DrawProperties* drawProp)
 {
-   SIMap* umap = getTheMap();
+   SIMap* umap = getTheMap(drawProp);
    USMap* nmap = _cifMap->updateMap(umap);
    delete umap;
    return nmap;
