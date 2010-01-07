@@ -477,6 +477,91 @@ layprop::DrawProperties::DrawProperties() : _clipRegion(0,0)
    _adjustTextOrientation = false;
 }
 
+bool layprop::DrawProperties::addLayer( unsigned layno )
+{
+   std::ostringstream lname;
+   switch (_propertyState)
+   {
+      case DB : if (_laySetDb.end() != _laySetDb.find(layno)) return false;
+                lname << "_UNDEF" << layno;
+                _laySetDb[layno] = DEBUG_NEW LayerSettings(lname.str(),"","","");
+                return true;
+      case DRC: if (_laySetDrc.end() != _laySetDrc.find(layno)) return false;
+                lname << "_DRC" << layno;
+                _laySetDrc[layno] = DEBUG_NEW LayerSettings(lname.str(),"","","");
+                return true;
+      default: assert(false);
+   }
+   return true; // dummy statement to prevent compilation warnings
+}
+
+bool layprop::DrawProperties::addLayer(std::string name, unsigned layno, std::string col,
+                                       std::string fill, std::string sline)
+{
+   if ((col != "") && (_layColors.end() == _layColors.find(col)))
+   {
+      std::ostringstream ost;
+      ost << "Warning! Color \""<<col<<"\" is not defined";
+      tell_log(console::MT_WARNING,ost.str());
+   }
+   if ((fill != "") && (_layFill.end() == _layFill.find(fill)))
+   {
+      std::ostringstream ost;
+      ost << "Warning! Fill \""<<fill<<"\" is not defined";
+      tell_log(console::MT_WARNING, ost.str());
+   }
+   if ((sline != "") && (_lineSet.end() == _lineSet.find(sline)))
+   {
+      std::ostringstream ost;
+      ost << "Warning! Line \""<<sline<<"\" is not defined";
+      tell_log(console::MT_WARNING, ost.str());
+   }
+   bool new_layer = true;
+   switch(_propertyState)
+   {
+      case DB:
+         if (_laySetDb.end() != _laySetDb.find(layno))
+         {
+            new_layer = false;
+            delete _laySetDb[layno];
+            std::ostringstream ost;
+            ost << "Warning! Layer "<<layno<<" redefined";
+            tell_log(console::MT_WARNING, ost.str());
+         }
+         _laySetDb[layno] = DEBUG_NEW LayerSettings(name,col,fill,sline);
+         return new_layer;
+      case DRC: //User can't call DRC database directly
+      default: assert(false);
+   }
+}
+
+bool layprop::DrawProperties::addLayer(std::string name, unsigned layno)
+{
+   switch(_propertyState)
+   {
+      case DB:
+         if (_laySetDb.end() != _laySetDb.find(layno)) return false;
+         _laySetDb[layno] = DEBUG_NEW LayerSettings(name,"","","");
+         return true;
+      case DRC:
+         if (_laySetDrc.end() != _laySetDrc.find(layno)) return false;
+         _laySetDrc[layno] = DEBUG_NEW LayerSettings(name,"","","");
+         return true;
+      default: assert(false);
+   }
+   return false; // dummy statement to prevent compilation warnings
+}
+
+unsigned layprop::DrawProperties::addLayer(std::string name)
+{
+   unsigned layno = 1;
+   LaySetList::const_reverse_iterator lastLayNo = getCurSetList().rbegin();
+   if (getCurSetList().rend() != lastLayNo)
+      layno = lastLayNo->first;
+   while (!addLayer(name, layno)) {layno++;}
+   return layno;
+}
+
 void layprop::DrawProperties::loadLayoutFonts(std::string fontfile, bool vbo)
 {
    _renderType = vbo;

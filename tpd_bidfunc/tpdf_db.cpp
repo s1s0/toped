@@ -1488,9 +1488,12 @@ tellstdfunc::DRCCalibreimport::DRCCalibreimport(telldata::typeID retype, bool eo
 
 int tellstdfunc::DRCCalibreimport::execute()
 {
-   PROPC->setState(layprop::DRC);
-   PROPC->addLayer(DRC_LAY);
-   PROPC->setState(layprop::DB);
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp, layprop::DRC))
+   {
+      drawProp->addLayer(DRC_LAY);
+   }
+   PROPC->unlockDrawProp(drawProp);
    std::string filename = getStringValue();
    if(DRCData)
    {

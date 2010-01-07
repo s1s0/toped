@@ -193,8 +193,8 @@ namespace tui {
       public:
                                nameCboxRecords(wxWindow*, wxPoint, wxSize, const SIMap&, wxArrayString&, int, const layprop::DrawProperties*);
                               ~nameCboxRecords() {delete _cifMap;}
-         SIMap*                getTheMap();
-         USMap*                getTheFullMap();
+         SIMap*                getTheMap(layprop::DrawProperties*);
+         USMap*                getTheFullMap(layprop::DrawProperties*);
       private:
          class LayerRecord {
             public:
@@ -278,8 +278,10 @@ namespace tui {
    class nameCboxList : public wxScrolledWindow {
       public:
                               nameCboxList(wxWindow*, wxWindowID, wxPoint, wxSize, const SIMap&, const layprop::DrawProperties*);
-         SIMap*               getTheMap()     {return _laypanel->getTheMap();}
-         USMap*               getTheFullMap() {return _laypanel->getTheFullMap();}
+         SIMap*               getTheMap(layprop::DrawProperties* drawProp)
+                                              {return _laypanel->getTheMap(drawProp);}
+         USMap*               getTheFullMap(layprop::DrawProperties* drawProp)
+                                              {return _laypanel->getTheFullMap(drawProp);}
          void                 OnSize( wxSizeEvent& WXUNUSED(event));
       private:
          tui::nameCboxRecords*   _laypanel;
@@ -332,8 +334,10 @@ namespace tui {
       bool              getOverwrite()    const {return _overwrite->GetValue();}
       bool              getRecursive()    const {return _recursive->GetValue();}
       bool              getSaveMap()      const {return _saveMap->GetValue();}
-      SIMap*            getCifLayerMap()        {return _layList->getTheMap();}
-      USMap*            getFullCifLayerMap()    {return _layList->getTheFullMap();}
+      SIMap*            getCifLayerMap(layprop::DrawProperties* drawProp)
+                                                {return _layList->getTheMap(drawProp);}
+      USMap*            getFullCifLayerMap(layprop::DrawProperties* drawProp)
+                                                {return _layList->getTheFullMap(drawProp);}
    private:
       wxCheckBox*       _overwrite;
       wxCheckBox*       _recursive;

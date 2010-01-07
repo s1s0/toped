@@ -304,7 +304,7 @@ void tellstdfunc::updateLayerDefinitions(laydata::TdtLibDir* LIBDIR, nameList& t
       for(WordList::const_iterator CUL = ull.begin(); CUL != ull.end(); CUL++)
       {
          if (0 == *CUL) continue;
-         if (PROPC->addLayer(*CUL))
+         if (drawProp->addLayer(*CUL))
             TpdPost::layer_add(drawProp->getLayerName(*CUL), *CUL);
       }
    }

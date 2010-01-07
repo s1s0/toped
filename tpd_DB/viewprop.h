@@ -106,10 +106,6 @@ namespace layprop {
       typedef  std::map<byte       , LayoutGrid*   >  gridlist;
                         PropertyCenter();
                        ~PropertyCenter();
-      bool              addLayer(std::string, unsigned, std::string, std::string, std::string);
-      bool              addLayer(std::string, unsigned);
-      bool              addLayer(unsigned);
-      unsigned          addLayer(std::string);
       bool              isLayerExist(word);
       bool              isLayerExist(std::string);
       void              addUnpublishedLay(word);
@@ -163,34 +159,30 @@ namespace layprop {
       word              curLay() const                   {return _curlay;}
       bool              gridVisual(word no)              {return grid(no)->visual();}
 
-      DrawProperties&   drawprop()                       {return _drawprop;}
-      DrawProperties*   drawprop_ptr()                   {return &_drawprop;}
-      void              setCellMarksHidden(bool hide)    {_drawprop._cellMarksHidden = hide;}
-      void              setTextMarksHidden(bool hide)    {_drawprop._textMarksHidden = hide;}
-      void              setCellboxHidden(bool hide)      {_drawprop._cellBoxHidden = hide;}
-      void              setTextboxHidden(bool hide)      {_drawprop._textBoxHidden = hide;}
-      void              setScrCTM(CTM ScrCTM)            {_drawprop._scrCtm = ScrCTM;}
-      void              setClipRegion(DBbox clipR)       {_drawprop._clipRegion = clipR;}
+      DrawProperties&   drawprop()                       {return *_drawprop;}
+      DrawProperties*   drawprop_ptr()                   {return  _drawprop;}
+      void              setScrCTM(CTM ScrCTM)            {_drawprop->_scrCtm = ScrCTM;}
+      void              setClipRegion(DBbox clipR)       {_drawprop->_clipRegion = clipR;}
       void              setCurrentOp(console::ACTIVE_OP actop)
-                                                         {_drawprop._currentOp = actop;}
+                                                         {_drawprop->_currentOp = actop;}
       void              setAdjustTextOrientation(bool ori)
-                                                         {_drawprop._adjustTextOrientation = ori;}
-      console::ACTIVE_OP currentop() const               {return _drawprop.currentOp();}
+                                                         {_drawprop->_adjustTextOrientation = ori;}
+      console::ACTIVE_OP currentop() const               {return _drawprop->currentOp();}
       void              loadLayoutFonts(std::string fft, bool vbo)
-                                                         {_drawprop.loadLayoutFonts(fft, vbo);}
-      bool              renderType()                     {return _drawprop.renderType();}
+                                                         {_drawprop->loadLayoutFonts(fft, vbo);}
+      bool              renderType()                     {return _drawprop->renderType();}
 
-      void              setState(layprop::PropertyState state)
-                                                         {_drawprop.setState(state);}
+//      void              setState(layprop::PropertyState state)
+//                                                         {_drawprop->setState(state);}
 
       // Methods which require DrawProperties locking
 
-      bool              lockDrawProp(DrawProperties*&);
+      bool              lockDrawProp(DrawProperties*&, PropertyState state = DB);
       void              unlockDrawProp(DrawProperties*&);
    private:
       typedef std::deque<LayStateList>            LayStateHistory;
       typedef std::map<std::string, LayStateList> LayStateMap;
-      DrawProperties       _drawprop;
+      DrawProperties*      _drawprop;
       void                 saveScreenProps(FILE*) const;
       void                 saveLayerMaps(FILE*) const;
       real                 _DBscale;

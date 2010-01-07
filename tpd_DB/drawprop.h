@@ -290,9 +290,18 @@ namespace layprop {
          bool                       adjustTextOrientation() const
                                                          {return _adjustTextOrientation;}
 
+         // Properly protected in tpd_bidfunc
+         bool                       addLayer(std::string, unsigned, std::string, std::string, std::string);
+         bool                       addLayer(std::string, unsigned);
+         bool                       addLayer(unsigned);
+         unsigned                   addLayer(std::string);
          void                       hideLayer(unsigned layno, bool hide);
          void                       lockLayer(unsigned layno, bool lock);
          void                       fillLayer(unsigned layno, bool fill);
+         void                       setCellMarksHidden(bool hide)    {_cellMarksHidden = hide;}
+         void                       setTextMarksHidden(bool hide)    {_textMarksHidden = hide;}
+         void                       setCellboxHidden(bool hide)      {_cellBoxHidden = hide;}
+         void                       setTextboxHidden(bool hide)      {_textBoxHidden = hide;}
 
          // Used in dialogue boxes and drawing - partially protected for now
          bool                       layerHidden(unsigned layno) const;

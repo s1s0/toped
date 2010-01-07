@@ -239,105 +239,21 @@ layprop::PropertyCenter::PropertyCenter()
    _gdsLayMap = NULL;
    _cifLayMap = NULL;
    _zeroCross = false;
+   _drawprop = DEBUG_NEW DrawProperties();
 }
 
 bool layprop::PropertyCenter::selectable(unsigned layno) const {
-   return (!_drawprop.layerHidden(layno) && !_drawprop.layerLocked(layno));
-}
-
-bool layprop::PropertyCenter::addLayer( unsigned layno )
-{
-   std::ostringstream lname;
-   switch (_drawprop._propertyState)
-   {
-      case DB : if (_drawprop._laySetDb.end() != _drawprop._laySetDb.find(layno)) return false;
-                lname << "_UNDEF" << layno;
-                _drawprop._laySetDb[layno] = DEBUG_NEW LayerSettings(lname.str(),"","","");
-                return true;
-      case DRC: if (_drawprop._laySetDrc.end() != _drawprop._laySetDrc.find(layno)) return false;
-                lname << "_DRC" << layno;
-                _drawprop._laySetDrc[layno] = DEBUG_NEW LayerSettings(lname.str(),"","","");
-                return true;
-      default: assert(false);
-   }
-   return true; // dummy statement to prevent compilation warnings
-}
-
-bool layprop::PropertyCenter::addLayer(std::string name, unsigned layno, std::string col,
-                                       std::string fill, std::string sline)
-{
-   if ((col != "") && (_drawprop._layColors.end() == _drawprop._layColors.find(col)))
-   {
-      std::ostringstream ost;
-      ost << "Warning! Color \""<<col<<"\" is not defined";
-      tell_log(console::MT_WARNING,ost.str());
-   }
-   if ((fill != "") && (_drawprop._layFill.end() == _drawprop._layFill.find(fill)))
-   {
-      std::ostringstream ost;
-      ost << "Warning! Fill \""<<fill<<"\" is not defined";
-      tell_log(console::MT_WARNING, ost.str());
-   }
-   if ((sline != "") && (_drawprop._lineSet.end() == _drawprop._lineSet.find(sline)))
-   {
-      std::ostringstream ost;
-      ost << "Warning! Line \""<<sline<<"\" is not defined";
-      tell_log(console::MT_WARNING, ost.str());
-   }
-   bool new_layer = true;
-   switch(_drawprop._propertyState)
-   {
-      case DB:
-         if (_drawprop._laySetDb.end() != _drawprop._laySetDb.find(layno))
-         {
-            new_layer = false;
-            delete _drawprop._laySetDb[layno];
-            std::ostringstream ost;
-            ost << "Warning! Layer "<<layno<<" redefined";
-            tell_log(console::MT_WARNING, ost.str());
-         }
-         _drawprop._laySetDb[layno] = DEBUG_NEW LayerSettings(name,col,fill,sline);
-         return new_layer;
-      case DRC: //User can't call DRC database directly
-      default: assert(false);
-   }
-}
-
-bool layprop::PropertyCenter::addLayer(std::string name, unsigned layno)
-{
-   switch(_drawprop._propertyState)
-   {
-      case DB:
-         if (_drawprop._laySetDb.end() != _drawprop._laySetDb.find(layno)) return false;
-         _drawprop._laySetDb[layno] = DEBUG_NEW LayerSettings(name,"","","");
-         return true;
-      case DRC:
-         if (_drawprop._laySetDrc.end() != _drawprop._laySetDrc.find(layno)) return false;
-         _drawprop._laySetDrc[layno] = DEBUG_NEW LayerSettings(name,"","","");
-         return true;
-      default: assert(false);
-   }
-   return false; // dummy statement to prevent compilation warnings
-}
-
-unsigned layprop::PropertyCenter::addLayer(std::string name)
-{
-   unsigned layno = 1;
-   LaySetList::const_reverse_iterator lastLayNo = _drawprop.getCurSetList().rbegin();
-   if (_drawprop.getCurSetList().rend() != lastLayNo)
-      layno = lastLayNo->first;
-   while (!addLayer(name, layno)) {layno++;}
-   return layno;
+   return (!_drawprop->layerHidden(layno) && !_drawprop->layerLocked(layno));
 }
 
 bool layprop::PropertyCenter::isLayerExist(word layno)
 {
-   return (NULL != _drawprop.findLayerSettings(layno));
+   return (NULL != _drawprop->findLayerSettings(layno));
 }
 
 bool layprop::PropertyCenter::isLayerExist(std::string layname)
 {
-   for(LaySetList::const_iterator it = _drawprop.getCurSetList().begin(); it != _drawprop.getCurSetList().end(); ++it)
+   for(LaySetList::const_iterator it = _drawprop->getCurSetList().begin(); it != _drawprop->getCurSetList().end(); ++it)
    {
       if((*it).second->name() == layname) return true;
    }
@@ -352,39 +268,39 @@ void layprop::PropertyCenter::addUnpublishedLay(word layno)
 
 void layprop::PropertyCenter::addLine(std::string name, std::string col, word pattern,
                                        byte patscale, byte width) {
-   if ((col != "") && (_drawprop._layColors.end() == _drawprop._layColors.find(col))) {
+   if ((col != "") && (_drawprop->_layColors.end() == _drawprop->_layColors.find(col))) {
       std::ostringstream ost;
       ost << "Warning! Color \""<<col<<"\" is not defined";
       tell_log(console::MT_WARNING,ost.str());
    }
-   if (_drawprop._lineSet.end() != _drawprop._lineSet.find(name)) {
-      delete _drawprop._lineSet[name];
+   if (_drawprop->_lineSet.end() != _drawprop->_lineSet.find(name)) {
+      delete _drawprop->_lineSet[name];
       std::ostringstream ost;
       ost << "Warning! Line "<< name <<" redefined";
       tell_log(console::MT_WARNING, ost.str());
    }
-   _drawprop._lineSet[name] = DEBUG_NEW LineSettings(col,pattern,patscale,width);
+   _drawprop->_lineSet[name] = DEBUG_NEW LineSettings(col,pattern,patscale,width);
 }
 
 void layprop::PropertyCenter::addColor(std::string name, byte R, byte G, byte B, byte A) {
-   if (_drawprop._layColors.end() != _drawprop._layColors.find(name)) {
-      delete _drawprop._layColors[name];
+   if (_drawprop->_layColors.end() != _drawprop->_layColors.find(name)) {
+      delete _drawprop->_layColors[name];
       std::ostringstream ost;
       ost << "Warning! Color \""<<name<<"\" redefined";
       tell_log(console::MT_WARNING, ost.str());
    }
    tellRGB* col = DEBUG_NEW tellRGB(R,G,B,A);
-   _drawprop._layColors[name] = col;
+   _drawprop->_layColors[name] = col;
 }
 
 void layprop::PropertyCenter::addFill(std::string name, byte* ptrn) {
-   if (_drawprop._layFill.end() != _drawprop._layFill.find(name)) {
-      delete [] _drawprop._layFill[name];
+   if (_drawprop->_layFill.end() != _drawprop->_layFill.find(name)) {
+      delete [] _drawprop->_layFill[name];
       std::ostringstream ost;
       ost << "Warning! Fill \""<<name<<"\" redefined";
       tell_log(console::MT_WARNING, ost.str());
    }
-   _drawprop._layFill[name] = ptrn;
+   _drawprop->_layFill[name] = ptrn;
 }
 
 const layprop::LayoutGrid* layprop::PropertyCenter::grid(byte No) const {
@@ -413,7 +329,7 @@ void layprop::PropertyCenter::drawGrid() const
 {
    typedef gridlist::const_iterator CI;
    for(CI p = _grid.begin(); p != _grid.end(); p++)
-      p->second->Draw(_drawprop, _UU);
+      p->second->Draw(*_drawprop, _UU);
 }
 
 void layprop::PropertyCenter::drawZeroCross() const
@@ -423,10 +339,10 @@ void layprop::PropertyCenter::drawZeroCross() const
    glEnable(GL_LINE_STIPPLE);
    glBegin(GL_LINES);
    glColor4f((GLfloat)1, (GLfloat)1, (GLfloat)1, (GLfloat)0.7); // gray
-   glVertex2i(0, _drawprop.clipRegion().p1().y());
-   glVertex2i(0, _drawprop.clipRegion().p2().y());
-   glVertex2i(_drawprop.clipRegion().p1().x(), 0);
-   glVertex2i(_drawprop.clipRegion().p2().x(), 0);
+   glVertex2i(0, _drawprop->clipRegion().p1().y());
+   glVertex2i(0, _drawprop->clipRegion().p2().y());
+   glVertex2i(_drawprop->clipRegion().p1().x(), 0);
+   glVertex2i(_drawprop->clipRegion().p2().x(), 0);
    glEnd();
    glDisable(GL_LINE_STIPPLE);
 }
@@ -487,10 +403,10 @@ void layprop::PropertyCenter::saveProperties(std::string filename) const
    std::string fname = convertString(filename);
    prop_file = fopen(fname.c_str(),"wt");
    // file header here
-   _drawprop.savePatterns(prop_file);
-   _drawprop.saveColors(prop_file);
-   _drawprop.saveLines(prop_file);
-   _drawprop.saveLayers(prop_file);
+   _drawprop->savePatterns(prop_file);
+   _drawprop->saveColors(prop_file);
+   _drawprop->saveLines(prop_file);
+   _drawprop->saveLayers(prop_file);
    if ((NULL != _gdsLayMap) || (NULL != _cifLayMap))
       saveLayerMaps(prop_file);
    saveScreenProps(prop_file);
@@ -522,7 +438,7 @@ void layprop::PropertyCenter::pushLayerStatus()
 {
    _layStateHistory.push_front(LayStateList());
    LayStateList& clist = _layStateHistory.front();
-   for (LaySetList::const_iterator CL = _drawprop._laySetDb.begin(); CL != _drawprop._laySetDb.end(); CL++)
+   for (LaySetList::const_iterator CL = _drawprop->_laySetDb.begin(); CL != _drawprop->_laySetDb.end(); CL++)
    {
       clist.second.push_back(LayerState(CL->first, *(CL->second)));
    }
@@ -530,7 +446,7 @@ void layprop::PropertyCenter::pushLayerStatus()
 }
 
 /*! Shall be called by the undo method of loadlaystatus TELL function.
- * Restores the loch/hide/fill state of the defined layers in a _drawprop._laySetDb
+ * Restores the loch/hide/fill state of the defined layers in a _drawprop->_laySetDb
  * WARNING! This function is only for undo purposes. Should not be used
  * to store/change/delete the layer state
  */
@@ -540,7 +456,7 @@ void layprop::PropertyCenter::popLayerStatus()
    for (std::list<LayerState>::const_iterator CL = clist.second.begin(); CL != clist.second.end(); CL++)
    {
       LaySetList::iterator clay;
-      if (_drawprop._laySetDb.end() != (clay = _drawprop._laySetDb.find(CL->number())))
+      if (_drawprop->_laySetDb.end() != (clay = _drawprop->_laySetDb.find(CL->number())))
       {
          clay->second->_filled = CL->filled();
          TpdPost::layer_status(tui::BT_LAYER_FILL, CL->number(), CL->filled());
@@ -570,7 +486,7 @@ bool layprop::PropertyCenter::saveLaysetStatus(const std::string& sname)
 {
    LayStateList clist;
    bool status = true;
-   for (LaySetList::const_iterator CL = _drawprop._laySetDb.begin(); CL != _drawprop._laySetDb.end(); CL++)
+   for (LaySetList::const_iterator CL = _drawprop->_laySetDb.begin(); CL != _drawprop->_laySetDb.end(); CL++)
    {
       clist.second.push_back(LayerState(CL->first, *(CL->second)));
    }
@@ -585,7 +501,7 @@ bool layprop::PropertyCenter::saveLaysetStatus(const std::string& sname, const W
 {
    LayStateList clist;
    bool status = true;
-   for (LaySetList::const_iterator CL = _drawprop._laySetDb.begin(); CL != _drawprop._laySetDb.end(); CL++)
+   for (LaySetList::const_iterator CL = _drawprop->_laySetDb.begin(); CL != _drawprop->_laySetDb.end(); CL++)
    {
       bool hiden  = (hidel.end() != hidel.find(CL->first));
       bool locked = (lockl.end() != lockl.find(CL->first));
@@ -605,7 +521,7 @@ bool layprop::PropertyCenter::loadLaysetStatus(const std::string& sname)
    for (std::list<LayerState>::const_iterator CL = clist.second.begin(); CL != clist.second.end(); CL++)
    {
       LaySetList::iterator clay;
-      if (_drawprop._laySetDb.end() != (clay = _drawprop._laySetDb.find(CL->number())))
+      if (_drawprop->_laySetDb.end() != (clay = _drawprop->_laySetDb.find(CL->number())))
       {
          clay->second->_filled = CL->filled();
          TpdPost::layer_status(tui::BT_LAYER_FILL, CL->number(), CL->filled());
@@ -642,30 +558,32 @@ bool layprop::PropertyCenter::getLaysetStatus(const std::string& sname, WordSet&
    return true;
 }
 
-bool layprop::PropertyCenter::lockDrawProp(DrawProperties*& propDB)
+bool layprop::PropertyCenter::lockDrawProp(DrawProperties*& propDB, PropertyState state)
 {
    if (wxMUTEX_DEAD_LOCK == _drawPLock.Lock())
    {
       tell_log(console::MT_ERROR,"DrawProperties Mutex deadlocked!");
-      propDB = &_drawprop;
+      _drawprop->setState(state);
+      propDB = _drawprop;
       return false;
    }
    else
    {
-      propDB = &_drawprop;
-      return true /*(NULL != _drawprop)*/;
+      _drawprop->setState(state);
+      propDB = _drawprop;
+      return (NULL != _drawprop);
    }
 }
 
 void layprop::PropertyCenter::unlockDrawProp(DrawProperties*& propDB/*, bool throwexception*/)
 {
-//   _drawprop = propDB;
+   _drawprop = propDB;
+   _drawprop->setState(layprop::DB);
    VERIFY(wxMUTEX_NO_ERROR == _drawPLock.Unlock());
-/*   if(NULL != _bpSync)
-      _bpSync->Signal();
-   else if (throwexception && (NULL == gds_db))
-      throw EXPTNactive_GDS();
-   gds_db = NULL;*/
+   assert(NULL != propDB); // TODO <- remove this and replace with the lines below
+//   if (throwexception && (NULL == propDB))
+//      throw EXPTNdrawProperty();
+   propDB = NULL;
 }
 
 layprop::PropertyCenter::~PropertyCenter()
@@ -675,6 +593,8 @@ layprop::PropertyCenter::~PropertyCenter()
    _grid.clear();
    if (NULL != _gdsLayMap) delete _gdsLayMap;
    if (NULL != _cifLayMap) delete _cifLayMap;
+   assert(_drawprop);
+   delete _drawprop;
 }
 
 
