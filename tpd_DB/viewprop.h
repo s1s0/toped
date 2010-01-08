@@ -106,12 +106,9 @@ namespace layprop {
       typedef  std::map<byte       , LayoutGrid*   >  gridlist;
                         PropertyCenter();
                        ~PropertyCenter();
-      bool              isLayerExist(word);
-      bool              isLayerExist(std::string);
+//      bool              isLayerExist(word);
+//      bool              isLayerExist(std::string);
       void              addUnpublishedLay(word);
-      void              addColor(std::string name, byte R, byte G, byte B, byte A);
-      void              addFill(std::string name, byte *ptrn);
-      void              addLine(std::string, std::string, word, byte, byte);
       bool              selectable(unsigned layno) const;
       void              saveProperties(std::string) const;
       //
@@ -131,6 +128,7 @@ namespace layprop {
       bool              getLaysetStatus(const std::string&, WordSet&, WordSet&, WordSet&, unsigned);
       void              setGdsLayMap(USMap* map);
       void              setCifLayMap(USMap* map);
+      void              loadLayoutFonts(std::string fft, bool vbo);
       void              setStep(real st)                 {_step = st;}
       void              setAutoPan(bool status)          {_autopan = status;}
       void              setZeroCross(bool status)        {_zeroCross = status;}
@@ -158,24 +156,17 @@ namespace layprop {
       const USMap*      getCifLayMap() const             {return _cifLayMap;}
       word              curLay() const                   {return _curlay;}
       bool              gridVisual(word no)              {return grid(no)->visual();}
+      bool              renderType() const               {return _renderType;}
 
       DrawProperties&   drawprop()                       {return *_drawprop;}
       DrawProperties*   drawprop_ptr()                   {return  _drawprop;}
       void              setScrCTM(CTM ScrCTM)            {_drawprop->_scrCtm = ScrCTM;}
       void              setClipRegion(DBbox clipR)       {_drawprop->_clipRegion = clipR;}
-      void              setCurrentOp(console::ACTIVE_OP actop)
-                                                         {_drawprop->_currentOp = actop;}
       void              setAdjustTextOrientation(bool ori)
                                                          {_drawprop->_adjustTextOrientation = ori;}
-      console::ACTIVE_OP currentop() const               {return _drawprop->currentOp();}
-      void              loadLayoutFonts(std::string fft, bool vbo)
-                                                         {_drawprop->loadLayoutFonts(fft, vbo);}
-      bool              renderType()                     {return _drawprop->renderType();}
-
-//      void              setState(layprop::PropertyState state)
-//                                                         {_drawprop->setState(state);}
-
-      // Methods which require DrawProperties locking
+      void              setCurrentOp(console::ACTIVE_OP actop)
+                                                         {_drawprop->_currentOp = actop;}
+      console::ACTIVE_OP currentOp() const               {return _drawprop->currentOp();}
 
       bool              lockDrawProp(DrawProperties*&, PropertyState state = DB);
       void              unlockDrawProp(DrawProperties*&);
@@ -193,7 +184,8 @@ namespace layprop {
       real                 _step;         // current marker step
       bool                 _autopan;      // view window moves automatically during shape drawing
       bool                 _zeroCross;    //
-      byte                 _markerAngle; // angle of restriction during shape drawing (0,45,90)
+      bool                 _renderType;   //
+      byte                 _markerAngle;  // angle of restriction during shape drawing (0,45,90)
       SupplementaryData    _supp_data;    // supplementary data
       WordList             _uplaylist;    // unpublished layer list
       word                 _layselmask;   // layout shape type selection mask

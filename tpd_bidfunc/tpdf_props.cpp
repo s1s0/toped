@@ -102,9 +102,14 @@ int tellstdfunc::stdLINEDEF::execute() {
    word pattern     = getWordValue();
    std::string col  = getStringValue();
    std::string name = getStringValue();
-   PROPC->addLine(name, col, pattern, patscale, width);
-   LogFile << LogFile.getFN() << "(\""<< name << "\" , \"" << col << "\","
-         << pattern << " , " << patscale << " , " << width << ");";LogFile.flush();
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      drawProp->addLine(name, col, pattern, patscale, width);
+      LogFile << LogFile.getFN() << "(\""<< name << "\" , \"" << col << "\","
+            << pattern << " , " << patscale << " , " << width << ");";LogFile.flush();
+   }
+   PROPC->unlockDrawProp(drawProp);
    return EXEC_NEXT;
 }
 
@@ -126,9 +131,14 @@ int tellstdfunc::stdCOLORDEF::execute() {
    byte         colR = getByteValue();
    std::string  name = getStringValue();
    // error message - included in the method
-   PROPC->addColor(name, colR, colG, colB, sat);
-   LogFile << LogFile.getFN() << "(\""<< name << "\"," << colR << "," <<
-                       colG << "," << colB << "," << sat << ");";LogFile.flush();
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      drawProp->addColor(name, colR, colG, colB, sat);
+      LogFile << LogFile.getFN() << "(\""<< name << "\"," << colR << "," <<
+                          colG << "," << colB << "," << sat << ");";LogFile.flush();
+   }
+   PROPC->unlockDrawProp(drawProp);
    return EXEC_NEXT;
 }
 
@@ -147,20 +157,25 @@ int tellstdfunc::stdFILLDEF::execute() {
       tell_log(console::MT_ERROR,"Exactly 128 integers expected in a fill pattern. Ignored...");
    }
    else {
-      // declare the array like this because otherwise it'll be wiped
-      byte* ptrn = DEBUG_NEW byte[128];
-      telldata::ttint *cmpnt;
-      for (unsigned i = 0; i < 128; i++) {
-         cmpnt = static_cast<telldata::ttint*>((sl->mlist())[i]);
-         if (cmpnt->value() > MAX_BYTE_VALUE) {
-            tell_log(console::MT_ERROR,"Value out of range in a pattern definition");
+      layprop::DrawProperties* drawProp;
+      if (PROPC->lockDrawProp(drawProp))
+      {
+         // declare the array like this because otherwise it'll be wiped
+         byte* ptrn = DEBUG_NEW byte[128];
+         telldata::ttint *cmpnt;
+         for (unsigned i = 0; i < 128; i++) {
+            cmpnt = static_cast<telldata::ttint*>((sl->mlist())[i]);
+            if (cmpnt->value() > MAX_BYTE_VALUE) {
+               tell_log(console::MT_ERROR,"Value out of range in a pattern definition");
+            }
+            else ptrn[i] = cmpnt->value();
          }
-         else ptrn[i] = cmpnt->value();
+         // error message - included in the method
+         drawProp->addFill(name, ptrn);
+         LogFile << LogFile.getFN() << "(\""<< name << "\"," << *sl << ");";
+         LogFile.flush();
       }
-      // error message - included in the method
-      PROPC->addFill(name, ptrn);
-      LogFile << LogFile.getFN() << "(\""<< name << "\"," << *sl << ");";
-      LogFile.flush();
+      PROPC->unlockDrawProp(drawProp);
    }
    delete sl;
    return EXEC_NEXT;

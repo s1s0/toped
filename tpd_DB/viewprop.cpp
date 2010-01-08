@@ -230,77 +230,40 @@ void layprop::LayoutGrid::Draw(const DrawProperties& drawprop, const real DBscal
 //=============================================================================
 layprop::PropertyCenter::PropertyCenter()
 {
-   _step = 1;
    setUU(1);
-   _curlay = 1;
+   _step        = 1;
+   _curlay      = 1;
    _markerAngle = 0;
-   _autopan = false;
-   _layselmask = laydata::_lmall;
-   _gdsLayMap = NULL;
-   _cifLayMap = NULL;
-   _zeroCross = false;
-   _drawprop = DEBUG_NEW DrawProperties();
+   _autopan     = false;
+   _layselmask  = laydata::_lmall;
+   _gdsLayMap   = NULL;
+   _cifLayMap   = NULL;
+   _zeroCross   = false;
+   _drawprop    = DEBUG_NEW DrawProperties();
+   _renderType  = false;
 }
 
 bool layprop::PropertyCenter::selectable(unsigned layno) const {
    return (!_drawprop->layerHidden(layno) && !_drawprop->layerLocked(layno));
 }
 
-bool layprop::PropertyCenter::isLayerExist(word layno)
-{
-   return (NULL != _drawprop->findLayerSettings(layno));
-}
+//bool layprop::PropertyCenter::isLayerExist(word layno)
+//{
+//   return (NULL != _drawprop->findLayerSettings(layno));
+//}
 
-bool layprop::PropertyCenter::isLayerExist(std::string layname)
-{
-   for(LaySetList::const_iterator it = _drawprop->getCurSetList().begin(); it != _drawprop->getCurSetList().end(); ++it)
-   {
-      if((*it).second->name() == layname) return true;
-   }
-   return false;
-}
+//bool layprop::PropertyCenter::isLayerExist(std::string layname)
+//{
+//   for(LaySetList::const_iterator it = _drawprop->getCurSetList().begin(); it != _drawprop->getCurSetList().end(); ++it)
+//   {
+//      if((*it).second->name() == layname) return true;
+//   }
+//   return false;
+//}
 
 void layprop::PropertyCenter::addUnpublishedLay(word layno)
 {
    _uplaylist.push_back(layno);
-}
-
-
-void layprop::PropertyCenter::addLine(std::string name, std::string col, word pattern,
-                                       byte patscale, byte width) {
-   if ((col != "") && (_drawprop->_layColors.end() == _drawprop->_layColors.find(col))) {
-      std::ostringstream ost;
-      ost << "Warning! Color \""<<col<<"\" is not defined";
-      tell_log(console::MT_WARNING,ost.str());
-   }
-   if (_drawprop->_lineSet.end() != _drawprop->_lineSet.find(name)) {
-      delete _drawprop->_lineSet[name];
-      std::ostringstream ost;
-      ost << "Warning! Line "<< name <<" redefined";
-      tell_log(console::MT_WARNING, ost.str());
-   }
-   _drawprop->_lineSet[name] = DEBUG_NEW LineSettings(col,pattern,patscale,width);
-}
-
-void layprop::PropertyCenter::addColor(std::string name, byte R, byte G, byte B, byte A) {
-   if (_drawprop->_layColors.end() != _drawprop->_layColors.find(name)) {
-      delete _drawprop->_layColors[name];
-      std::ostringstream ost;
-      ost << "Warning! Color \""<<name<<"\" redefined";
-      tell_log(console::MT_WARNING, ost.str());
-   }
-   tellRGB* col = DEBUG_NEW tellRGB(R,G,B,A);
-   _drawprop->_layColors[name] = col;
-}
-
-void layprop::PropertyCenter::addFill(std::string name, byte* ptrn) {
-   if (_drawprop->_layFill.end() != _drawprop->_layFill.find(name)) {
-      delete [] _drawprop->_layFill[name];
-      std::ostringstream ost;
-      ost << "Warning! Fill \""<<name<<"\" redefined";
-      tell_log(console::MT_WARNING, ost.str());
-   }
-   _drawprop->_layFill[name] = ptrn;
 }
 
 const layprop::LayoutGrid* layprop::PropertyCenter::grid(byte No) const {
@@ -534,6 +497,12 @@ bool layprop::PropertyCenter::loadLaysetStatus(const std::string& sname)
    TpdPost::layer_default(clist.first, _curlay);
    _curlay = clist.first;
    return true;
+}
+
+void layprop::PropertyCenter::loadLayoutFonts(std::string fft, bool vbo)
+{
+   _renderType = vbo;
+   _drawprop->loadLayoutFonts(fft, vbo);
 }
 
 bool layprop::PropertyCenter::deleteLaysetStatus(const std::string& sname)
