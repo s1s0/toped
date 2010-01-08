@@ -646,7 +646,7 @@ void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event)) {
    // Context menu here
       wxMenu menu;
       if ( NULL != Console->puc) {
-         switch (PROPC->currentop()) {
+         switch (PROPC->currentOp()) {
             case console::op_dbox:
                if (Console->numpoints() > 0) {
                   menu.Append(CM_CANCEL_LAST, wxT("Cancel first point"));

@@ -495,7 +495,7 @@ void laydata::TdtCell::motion_draw(const layprop::DrawProperties& drawprop,
    if (active)
    {
       // If this is the active cell, then we will have to visualize the
-      // selected shapes in move. Patially selected fellas are processed
+      // selected shapes in move. Partially selected fellas are processed
       // only if the current operation is move
       console::ACTIVE_OP actop = drawprop.currentOp();
       //temporary draw of the active cell - moving selected shapes

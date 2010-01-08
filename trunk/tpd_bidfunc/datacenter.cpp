@@ -724,25 +724,25 @@ void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,
 
 void DataCenter::mousePoint(TP p)
 {
-   if ((console::op_line == PROPC->currentop()) || _drawruler)
+   if ((console::op_line == PROPC->currentOp()) || _drawruler)
       PROPC->mousePoint(p);
-   if ((NULL != _TEDLIB()) && (console::op_cbind != PROPC->currentop())
-                           && (console::op_abind != PROPC->currentop())
-                           && (console::op_tbind != PROPC->currentop())
-                           && (console::op_line  != PROPC->currentop()) )
+   if ((NULL != _TEDLIB()) && (console::op_cbind != PROPC->currentOp())
+                           && (console::op_abind != PROPC->currentOp())
+                           && (console::op_tbind != PROPC->currentOp())
+                           && (console::op_line  != PROPC->currentOp()) )
       _TEDLIB()->mousePoint(p);
 }
 
 void DataCenter::mousePointCancel(TP& lp)
 {
-   if (console::op_line == PROPC->currentop()) return;
+   if (console::op_line == PROPC->currentOp()) return;
    if (_TEDLIB())
       _TEDLIB()->mousePointCancel(lp);
 }
 
 void DataCenter::mouseStop()
 {
-   if (console::op_line == PROPC->currentop())
+   if (console::op_line == PROPC->currentOp())
       PROPC->mouseStop();
    else if (_TEDLIB()) _TEDLIB()->mouseStop();
    else throw EXPTNactive_DB();
@@ -891,12 +891,12 @@ void DataCenter::openGL_render(const CTM& layCTM)
 
 void DataCenter::tmp_draw(const CTM& layCTM, TP base, TP newp)
 {
-   if ((console::op_line == PROPC->currentop()) || _drawruler)
+   if ((console::op_line == PROPC->currentOp()) || _drawruler)
    {
       // ruller
       PROPC->tmp_draw(layCTM, base, newp);
    }
-   if ((console::op_line != PROPC->currentop())  && (NULL !=_TEDLIB()))
+   if ((console::op_line != PROPC->currentOp())  && (NULL !=_TEDLIB()))
    {
 //      _TEDDB->check_active();
       while (wxMUTEX_NO_ERROR != _DBLock.TryLock());

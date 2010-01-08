@@ -464,17 +464,16 @@ layprop::FontLibrary::~FontLibrary()
 //=============================================================================
 layprop::DrawProperties::DrawProperties() : _clipRegion(0,0)
 {
-   _blockFill = false;
-   _currentOp = console::op_none;
-   _drawingLayer = 0;
-   _cellMarksHidden = true;
-   _textMarksHidden = true;
-   _cellBoxHidden = true;
-   _textBoxHidden = true;
-   _refStack = NULL;
-   _renderType = false;
-   _propertyState = DB;
+   _blockFill             = false;
+   _drawingLayer          = 0;
+   _cellMarksHidden       = true;
+   _textMarksHidden       = true;
+   _cellBoxHidden         = true;
+   _textBoxHidden         = true;
+   _refStack              = NULL;
+   _propertyState         = DB;
    _adjustTextOrientation = false;
+   _currentOp             = console::op_none;
 }
 
 bool layprop::DrawProperties::addLayer( unsigned layno )
@@ -562,9 +561,45 @@ unsigned layprop::DrawProperties::addLayer(std::string name)
    return layno;
 }
 
+void layprop::DrawProperties::addLine(std::string name, std::string col, word pattern,
+                                       byte patscale, byte width) {
+   if ((col != "") && (_layColors.end() == _layColors.find(col))) {
+      std::ostringstream ost;
+      ost << "Warning! Color \""<<col<<"\" is not defined";
+      tell_log(console::MT_WARNING,ost.str());
+   }
+   if (_lineSet.end() != _lineSet.find(name)) {
+      delete _lineSet[name];
+      std::ostringstream ost;
+      ost << "Warning! Line "<< name <<" redefined";
+      tell_log(console::MT_WARNING, ost.str());
+   }
+   _lineSet[name] = DEBUG_NEW LineSettings(col,pattern,patscale,width);
+}
+
+void layprop::DrawProperties::addColor(std::string name, byte R, byte G, byte B, byte A) {
+   if (_layColors.end() != _layColors.find(name)) {
+      delete _layColors[name];
+      std::ostringstream ost;
+      ost << "Warning! Color \""<<name<<"\" redefined";
+      tell_log(console::MT_WARNING, ost.str());
+   }
+   tellRGB* col = DEBUG_NEW tellRGB(R,G,B,A);
+   _layColors[name] = col;
+}
+
+void layprop::DrawProperties::addFill(std::string name, byte* ptrn) {
+   if (_layFill.end() != _layFill.find(name)) {
+      delete [] _layFill[name];
+      std::ostringstream ost;
+      ost << "Warning! Fill \""<<name<<"\" redefined";
+      tell_log(console::MT_WARNING, ost.str());
+   }
+   _layFill[name] = ptrn;
+}
+
 void layprop::DrawProperties::loadLayoutFonts(std::string fontfile, bool vbo)
 {
-   _renderType = vbo;
    fontLib = DEBUG_NEW FontLibrary(fontfile, vbo);
 }
 

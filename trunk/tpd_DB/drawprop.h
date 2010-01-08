@@ -273,7 +273,6 @@ namespace layprop {
 
          const CTM&                 scrCtm() const       {return  _scrCtm;}
          const DBbox&               clipRegion() const   {return _clipRegion;}
-         console::ACTIVE_OP         currentOp() const    {return _currentOp;}
          void                       initCtmStack()       {_tranStack.push(CTM());}
          void                       clearCtmStack()      {while (!_tranStack.empty()) _tranStack.pop();}
          void                       pushCtm(CTM& last)   {_tranStack.push(last);}
@@ -282,19 +281,22 @@ namespace layprop {
          void                       setState (PropertyState state)
                                                          {_propertyState = state;};
          unsigned                   drawingLayer() const {return _drawingLayer;}
-         bool                       renderType() const   {return _renderType;}
          bool                       isTextBoxHidden() const
                                                          {return _textBoxHidden;}
          bool                       isCellBoxHidden() const
                                                          {return _cellBoxHidden;}
          bool                       adjustTextOrientation() const
                                                          {return _adjustTextOrientation;}
+         console::ACTIVE_OP         currentOp() const    {return _currentOp;}
 
          // Properly protected in tpd_bidfunc
          bool                       addLayer(std::string, unsigned, std::string, std::string, std::string);
          bool                       addLayer(std::string, unsigned);
          bool                       addLayer(unsigned);
          unsigned                   addLayer(std::string);
+         void                       addColor(std::string name, byte R, byte G, byte B, byte A);
+         void                       addFill(std::string name, byte *ptrn);
+         void                       addLine(std::string, std::string, word, byte, byte);
          void                       hideLayer(unsigned layno, bool hide);
          void                       lockLayer(unsigned layno, bool lock);
          void                       fillLayer(unsigned layno, bool fill);
@@ -340,6 +342,7 @@ namespace layprop {
          bool                       _textMarksHidden;
          bool                       _textBoxHidden;
          bool                       _adjustTextOrientation;
+         console::ACTIVE_OP         _currentOp;    //
          void                       savePatterns(FILE*) const;
          void                       saveColors(FILE*) const;
          void                       saveLayers(FILE*) const;
@@ -351,11 +354,9 @@ namespace layprop {
          laydata::CellRefStack*     _refStack;
          ctmstack                   _tranStack;
          unsigned                   _drawingLayer;
-         console::ACTIVE_OP         _currentOp;
          static const tellRGB       _defaultColor;
          static const byte          _defaultFill[128];
          static const LineSettings  _defaultSeline;
-         bool                       _renderType;
          PropertyState              _propertyState; //type of drawing
    };
 
