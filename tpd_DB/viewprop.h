@@ -160,14 +160,6 @@ namespace layprop {
 
       DrawProperties&   drawprop()                       {return *_drawprop;}
       DrawProperties*   drawprop_ptr()                   {return  _drawprop;}
-      void              setScrCTM(CTM ScrCTM)            {_drawprop->_scrCtm = ScrCTM;}
-      void              setClipRegion(DBbox clipR)       {_drawprop->_clipRegion = clipR;}
-      void              setAdjustTextOrientation(bool ori)
-                                                         {_drawprop->_adjustTextOrientation = ori;}
-      void              setCurrentOp(console::ACTIVE_OP actop)
-                                                         {_drawprop->_currentOp = actop;}
-      console::ACTIVE_OP currentOp() const               {return _drawprop->currentOp();}
-
       bool              lockDrawProp(DrawProperties*&, PropertyState state = DB);
       void              unlockDrawProp(DrawProperties*&);
    private:
