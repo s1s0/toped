@@ -1274,7 +1274,12 @@ void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
       bool val;
       if (from_string<bool>(val, value, std::boolalpha))
       {
-         PROPC->setAdjustTextOrientation(val);
+         layprop::DrawProperties* drawProp;
+         if (PROPC->lockDrawProp(drawProp))
+         {
+            drawProp->setAdjustTextOrientation(val);
+         }
+         PROPC->unlockDrawProp(drawProp);
       }
       else
       {

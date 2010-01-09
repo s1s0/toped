@@ -724,25 +724,46 @@ void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,
 
 void DataCenter::mousePoint(TP p)
 {
-   if ((console::op_line == PROPC->currentOp()) || _drawruler)
+   console::ACTIVE_OP currentOp = console::op_none;
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      currentOp = drawProp->currentOp();
+   }
+   PROPC->unlockDrawProp(drawProp);
+   if ((console::op_line == currentOp) || _drawruler)
       PROPC->mousePoint(p);
-   if ((NULL != _TEDLIB()) && (console::op_cbind != PROPC->currentOp())
-                           && (console::op_abind != PROPC->currentOp())
-                           && (console::op_tbind != PROPC->currentOp())
-                           && (console::op_line  != PROPC->currentOp()) )
+   if ((NULL != _TEDLIB()) && (console::op_cbind != currentOp)
+                           && (console::op_abind != currentOp)
+                           && (console::op_tbind != currentOp)
+                           && (console::op_line  != currentOp) )
       _TEDLIB()->mousePoint(p);
 }
 
 void DataCenter::mousePointCancel(TP& lp)
 {
-   if (console::op_line == PROPC->currentOp()) return;
+   console::ACTIVE_OP currentOp = console::op_none;
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      currentOp = drawProp->currentOp();
+   }
+   PROPC->unlockDrawProp(drawProp);
+   if (console::op_line == currentOp) return;
    if (_TEDLIB())
       _TEDLIB()->mousePointCancel(lp);
 }
 
 void DataCenter::mouseStop()
 {
-   if (console::op_line == PROPC->currentOp())
+   console::ACTIVE_OP currentOp = console::op_none;
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      currentOp = drawProp->currentOp();
+   }
+   PROPC->unlockDrawProp(drawProp);
+   if (console::op_line == currentOp)
       PROPC->mouseStop();
    else if (_TEDLIB()) _TEDLIB()->mouseStop();
    else throw EXPTNactive_DB();
@@ -891,20 +912,24 @@ void DataCenter::openGL_render(const CTM& layCTM)
 
 void DataCenter::tmp_draw(const CTM& layCTM, TP base, TP newp)
 {
-   if ((console::op_line == PROPC->currentOp()) || _drawruler)
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
    {
-      // ruller
-      PROPC->tmp_draw(layCTM, base, newp);
+      console::ACTIVE_OP currentOp = drawProp->currentOp();
+      if ((console::op_line == currentOp) || _drawruler)
+      {
+         // ruller
+         PROPC->tmp_draw(layCTM, base, newp);
+      }
+      if ((console::op_line != currentOp)  && (NULL !=_TEDLIB()))
+      {
+   //      _TEDDB->check_active();
+         while (wxMUTEX_NO_ERROR != _DBLock.TryLock());
+         _TEDLIB()->tmp_draw(PROPC->drawprop(), base, newp);
+         VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
+      }
    }
-   if ((console::op_line != PROPC->currentOp())  && (NULL !=_TEDLIB()))
-   {
-//      _TEDDB->check_active();
-      while (wxMUTEX_NO_ERROR != _DBLock.TryLock());
-      _TEDLIB()->tmp_draw(PROPC->drawprop(), base, newp);
-      VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
-   }
-//
-//   else throw EXPTNactive_DB();
+   PROPC->unlockDrawProp(drawProp);
 }
 
 const laydata::CellList& DataCenter::cells() {

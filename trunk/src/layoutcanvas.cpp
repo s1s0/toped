@@ -632,7 +632,8 @@ void tui::LayoutCanvas::OnMouseRightDown(wxMouseEvent& WXUNUSED(event)) {
    tmp_wnd = true;
 }
 
-void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event)) {
+void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event))
+{
    tmp_wnd = false;
    int4b stepDB = PROPC->stepDB();
    if ((abs(presspoint.x() - ScrMARK.x())  > stepDB) ||
@@ -642,29 +643,35 @@ void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event)) {
       eventZOOM.SetInt(ZOOM_WINDOWM);
       OnZoom(eventZOOM);
    }
-   else {
+   else
+   {
    // Context menu here
       wxMenu menu;
-      if ( NULL != Console->puc) {
-         switch (PROPC->currentOp()) {
+      if ( NULL != Console->puc)
+      {
+         console::ACTIVE_OP currentOp = console::op_none;
+         layprop::DrawProperties* drawProp;
+         if (PROPC->lockDrawProp(drawProp))
+         {
+            currentOp = drawProp->currentOp();
+         }
+         PROPC->unlockDrawProp(drawProp);
+         switch (currentOp)
+         {
             case console::op_dbox:
-               if (Console->numpoints() > 0) {
+               if (Console->numpoints() > 0)
                   menu.Append(CM_CANCEL_LAST, wxT("Cancel first point"));
-               }
                menu.Append(   CM_CHLAY, wxT("Change Layer"));
                menu.Append(CM_CONTINUE, wxT("Continue"));
                menu.Append(   CM_ABORT, wxT("Abort"));
                break;
             case console::op_dpoly:
-               if (Console->numpoints() >= 3) {
+               if (Console->numpoints() >= 3)
                   menu.Append(CM_CLOSE, wxT("Close polygon"));
-               }
-               if (Console->numpoints() > 1) {
+               if (Console->numpoints() > 1)
                   menu.Append(CM_CANCEL_LAST, wxT("Cancel last point"));
-               }
-               else if (Console->numpoints() > 0) {
+               else if (Console->numpoints() > 0)
                   menu.Append(CM_CANCEL_LAST, wxT("Cancel first point"));
-               }
                if (DATC->drawruler())
                   menu.Append(   CM_RULER, wxT("Ruler Off"));
                else
@@ -674,15 +681,12 @@ void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event)) {
                menu.Append(   CM_ABORT, wxT("Abort"));
                break;
             case console::op_dwire:
-               if (Console->numpoints() > 1) {
+               if (Console->numpoints() > 1)
                   menu.Append(CM_CLOSE, wxT("Finish wire"));
-               }
-               if (Console->numpoints() > 1) {
+               if (Console->numpoints() > 1)
                   menu.Append(CM_CANCEL_LAST, wxT("Cancel last point"));
-               }
-               else if (Console->numpoints() > 0) {
+               else if (Console->numpoints() > 0)
                   menu.Append(CM_CANCEL_LAST, wxT("Cancel first point"));
-               }
                if (DATC->drawruler())
                   menu.Append(   CM_RULER, wxT("Ruler Off"));
                else
@@ -705,14 +709,16 @@ void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event)) {
                menu.Append(   CM_ABORT, wxT("Abort"));
          }
       }
-      else { // no user input expected
+      else
+      { // no user input expected
          if (Console->cmdHistoryExists())
          {
             menu.Append(   CM_AGAIN, wxString(Console->lastCommand(), wxConvUTF8));
             menu.Append(TMEDIT_UNDO, wxT("undo"));
             menu.AppendSeparator();
          }
-         if (DATC->numselected() > 0) {
+         if (DATC->numselected() > 0)
+         {
             menu.Append(       TMEDIT_MOVE, wxT("move"  ));
             menu.Append(       TMEDIT_COPY, wxT("copy"  ));
             menu.Append(   TMEDIT_ROTATE90, wxT("rotate"));
@@ -720,7 +726,8 @@ void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event)) {
             menu.Append(      TMEDIT_FLIPY, wxT("flipY" ));
             menu.Append(TMSEL_REPORT_SLCTD, wxT("report selected"));
          }
-         else {
+         else
+         {
             menu.Append(     TMDRAW_BOX, wxT("box"   ));
             menu.Append(    TMDRAW_POLY, wxT("poly"  ));
             menu.Append(    TMDRAW_WIRE, wxT("wire"  ));
@@ -729,7 +736,8 @@ void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event)) {
          menu.AppendSeparator();
          menu.Append( TMSEL_SELECT_IN, wxT("select"     ));
          menu.Append(TMSEL_PSELECT_IN, wxT("part select"));
-         if (DATC->numselected() > 0) {
+         if (DATC->numselected() > 0)
+         {
             menu.Append( TMSEL_UNSELECT_IN, wxT("unselect"     ));
             menu.Append(TMSEL_PUNSELECT_IN, wxT("part unselect"));
          }
@@ -884,60 +892,76 @@ void tui::LayoutCanvas::OnZoom(wxCommandEvent& evt) {
    double ty = ((box->p1().y() + box->p2().y()) - H*sc) / 2;
    _LayCTM.setCTM( sc, 0.0, 0.0, sc, tx, ty);
    _LayCTM.FlipX((box->p1().y() + box->p2().y())/2);  // flip Y coord towards the center
-   PROPC->setScrCTM(_LayCTM.Reversed());
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      drawProp->setScrCTM(_LayCTM.Reversed());
+   }
+   PROPC->unlockDrawProp(drawProp);
    delete box;
    invalid_window = true;
    Refresh();
 }
 
-void tui::LayoutCanvas::update_viewport() {
+void tui::LayoutCanvas::update_viewport()
+{
    int W, H;
    GetClientSize(&W,&H);
    lp_BL = TP(0,0)  * _LayCTM;
    lp_TR = TP(W, H) * _LayCTM;
 //   _status_line.update(W, _LayCTM);
-   PROPC->setClipRegion(DBbox(lp_BL.x(),lp_TR.y(), lp_TR.x(), lp_BL.y()));
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      drawProp->setClipRegion(DBbox(lp_BL.x(),lp_TR.y(), lp_TR.x(), lp_BL.y()));
+   }
+   PROPC->unlockDrawProp(drawProp);
    glClearColor(0,0,0,0);
 }
 
 void tui::LayoutCanvas::OnMouseIN(wxCommandEvent& evt)
 {
-   if (1 == evt.GetExtraLong())
-   { // start mouse input
-      mouse_input = true;
-      console::ACTIVE_OP actop;
-      if (evt.GetInt() > 0) actop = console::op_dwire;
-      else                  actop = (console::ACTIVE_OP)evt.GetInt();
-      PROPC->setCurrentOp(actop);
-      //restricted_move will be true for wire and polygon
-      restricted_move = (PROPC->markerAngle() != 0) &&
-            ((actop > 0) || (actop == console::op_dpoly));
-      reperX = (console::op_flipX == actop) || (long_cursor && (console::op_flipY != actop));
-      reperY = (console::op_flipY == actop) || (long_cursor && (console::op_flipX != actop));
-      if (  (console::op_flipX  == actop)
-          ||(console::op_flipY  == actop)
-          ||(console::op_rotate == actop)
-          ||(console::op_cbind  == actop)
-          ||(console::op_abind  == actop)
-          ||(console::op_tbind  == actop) )
-         rubber_band = true;
-      releasepoint = TP(0,0);
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      if (1 == evt.GetExtraLong())
+      { // start mouse input
+         mouse_input = true;
+         console::ACTIVE_OP actop;
+         if (evt.GetInt() > 0) actop = console::op_dwire;
+         else                  actop = (console::ACTIVE_OP)evt.GetInt();
+         drawProp->setCurrentOp(actop);
+         //restricted_move will be true for wire and polygon
+         restricted_move = (PROPC->markerAngle() != 0) &&
+               ((actop > 0) || (actop == console::op_dpoly));
+         reperX = (console::op_flipX == actop) || (long_cursor && (console::op_flipY != actop));
+         reperY = (console::op_flipY == actop) || (long_cursor && (console::op_flipX != actop));
+         if (  (console::op_flipX  == actop)
+             ||(console::op_flipY  == actop)
+             ||(console::op_rotate == actop)
+             ||(console::op_cbind  == actop)
+             ||(console::op_abind  == actop)
+             ||(console::op_tbind  == actop) )
+            rubber_band = true;
+         releasepoint = TP(0,0);
+      }
+      else
+      { // stop mouse input
+         mouse_input = false;
+         rubber_band = false;
+         restricted_move = false;
+         reperX = long_cursor;
+         reperY = long_cursor;
+         drawProp->setCurrentOp(console::op_none);
+         wxCommandEvent eventPOSITION(wxEVT_CANVAS_STATUS);
+         eventPOSITION.SetString(wxT(""));
+         eventPOSITION.SetInt(CNVS_DEL_Y);
+         wxPostEvent(this, eventPOSITION);
+         eventPOSITION.SetInt(CNVS_DEL_X);
+         wxPostEvent(this, eventPOSITION);
+      }
    }
-   else
-   { // stop mouse input
-      mouse_input = false;
-      rubber_band = false;
-      restricted_move = false;
-      reperX = long_cursor;
-      reperY = long_cursor;
-      PROPC->setCurrentOp(console::op_none);
-      wxCommandEvent eventPOSITION(wxEVT_CANVAS_STATUS);
-      eventPOSITION.SetString(wxT(""));
-      eventPOSITION.SetInt(CNVS_DEL_Y);
-      wxPostEvent(this, eventPOSITION);
-      eventPOSITION.SetInt(CNVS_DEL_X);
-      wxPostEvent(this, eventPOSITION);
-   }
+   PROPC->unlockDrawProp(drawProp);
 }
 
 

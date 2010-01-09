@@ -289,6 +289,13 @@ namespace layprop {
                                                          {return _adjustTextOrientation;}
          console::ACTIVE_OP         currentOp() const    {return _currentOp;}
 
+         // Protected elsewhere
+         void                       setCurrentOp(console::ACTIVE_OP actop)
+                                                         {_currentOp = actop;}
+         void                       setClipRegion(DBbox clipR)
+                                                         {_clipRegion = clipR;}
+         void                       setScrCTM(CTM ScrCTM){_scrCtm = ScrCTM;}
+
          // Properly protected in tpd_bidfunc
          bool                       addLayer(std::string, unsigned, std::string, std::string, std::string);
          bool                       addLayer(std::string, unsigned);
@@ -304,6 +311,8 @@ namespace layprop {
          void                       setTextMarksHidden(bool hide)    {_textMarksHidden = hide;}
          void                       setCellboxHidden(bool hide)      {_cellBoxHidden = hide;}
          void                       setTextboxHidden(bool hide)      {_textBoxHidden = hide;}
+         void                       setAdjustTextOrientation(bool ori)
+                                                                     {_adjustTextOrientation = ori;}
 
          // Used in dialogue boxes and drawing - partially protected for now
          bool                       layerHidden(unsigned layno) const;
