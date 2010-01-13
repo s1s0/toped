@@ -63,26 +63,22 @@ namespace laydata {
       bool                       top();
       DBbox                      overlap() const;
       std::string                name() const;
-      bool                       securelaydef(unsigned layno);
-      TdtCell*                   edit() const      {return _activecell;};
-      TdtCell*                   view() const      {return _viewcell;};
-      bool                       checkedit() const {return _activecell != NULL;};
-      const CTM                  rARTM() const     {return _ARTM.Reversed();};
-      const CTM                  ARTM() const      {return _ARTM;};
-      bool                       iscell() const    {return _activeref == NULL;};
-      layprop::PropertyCenter&   viewprop() const  {return *_viewprop;}
-      void                       init_viewprop(layprop::PropertyCenter* viewprop) {_viewprop = viewprop;}
+      TdtCell*                   edit() const      {return _activecell;}
+      TdtCell*                   view() const      {return _viewcell;}
+      bool                       checkedit() const {return _activecell != NULL;}
+      const CTM                  rARTM() const     {return _ARTM.Reversed();}
+      const CTM                  ARTM() const      {return _ARTM;}
+      bool                       iscell() const    {return _activeref == NULL;}
       void                       reset();
+      CellRefStack*              pEditChain()      {return _peditchain;}
       static EditCellStack       _editstack;    //! the stack of all previously edited (opened) cells
    private:
-      void                       unblockfill();
-      void                       blockfill();
       TdtCell*                   _activecell;   //! the curently active cell
       TdtCell*                   _viewcell;     //! current topview cell - if edit in place is active
       TdtCellRef*                _activeref;    //! current topview reference - if edit in place is active
       CellRefStack*              _peditchain;   //! the path from _viewcell to the _activeref (_activecell)
       CTM                        _ARTM;         //! active reference (cell) translation matrix
-      static layprop::PropertyCenter* _viewprop;
+      static layprop::DrawProperties* _drawProp;
    };
 
 //==============================================================================
@@ -147,17 +143,17 @@ namespace laydata {
       TDTHierTree*         hierout(TDTHierTree*&, TdtCell*, CellList*, const TdtLibDir*);
       DBbox                cellOverlap() const {return _cellOverlap;}
       DBbox                cellVisibleOverlap() const {return _vlOverlap;}
-      void                 select_inBox(DBbox, layprop::PropertyCenter&, bool pntsel = false);
+      void                 selectInBox(DBbox, const DWordSet&, word, bool pntsel = false);
 //      void                 select_inside(const TP);
-      void                 select_fromList(SelectList*, layprop::PropertyCenter&);
-//      void                 select_all(bool select_locked = false);
-      void                 select_all(layprop::PropertyCenter&);
+      void                 selectFromList(SelectList*, const DWordSet&);
+//      void                 selectAll(bool select_locked = false);
+      void                 selectAll(const DWordSet&, word);
       void                 full_select();
       void                 select_this(TdtData*, unsigned);
-      void                 unselect_inBox(DBbox, bool, layprop::PropertyCenter&);
-      void                 unselect_fromList(SelectList*, layprop::PropertyCenter&);
-      void                 unselect_all(bool destroy=false);
-      bool                 addlist(TdtDesign*, AtticList*);
+      void                 unselectInBox(DBbox, bool, const DWordSet&);
+      void                 unselectFromList(SelectList*, const DWordSet&);
+      void                 unselectAll(bool destroy=false);
+      bool                 addlist(TdtDesign*, AtticList*/*, DWordSet&*/);
       bool                 copy_selected(TdtDesign*, const CTM&);
       bool                 move_selected(TdtDesign*, const CTM&, SelectList**);
       bool                 rotate_selected(laydata::TdtDesign*, const CTM&, SelectList**);
@@ -175,8 +171,8 @@ namespace laydata {
       bool                 cutpoly_selected(pointlist&, AtticList**);
       bool                 merge_selected(AtticList**);
       bool                 stretch_selected(int bfactor, AtticList**);
-      AtticList*           changeselect(TP, SH_STATUS status, layprop::PropertyCenter&);
-      TdtCellRef*          getcellover(TP, ctmstack&, CellRefStack*, layprop::PropertyCenter&);
+      AtticList*           changeselect(TP, SH_STATUS status, const DWordSet&);
+      TdtCellRef*          getcellover(TP, ctmstack&, CellRefStack*, const DWordSet&);
       SelectList*          shapesel()        {return &_shapesel;};
       SelectList*          copy_selist() const;
       void                 updateHierarchy(TdtLibDir*);
@@ -187,7 +183,7 @@ namespace laydata {
       bool                 overlapChanged(DBbox&, TdtDesign*);
       DBbox                updateVisibleOverlap(const layprop::DrawProperties&);
    private:
-      bool                 getshapeover(TP, layprop::PropertyCenter&);
+      bool                 getshapeover(TP, const DWordSet&);
       void                 getCellOverlap();
       void                 store_inAttic(AtticList&);
       dword                getFullySelected(DataList*) const;

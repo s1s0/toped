@@ -39,16 +39,6 @@
 
 extern layprop::FontLibrary* fontLib;
 
-void laydata::EditObject::unblockfill()
-{
-   _viewprop->drawprop().unblockFill();
-}
-
-void laydata::EditObject::blockfill()
-{
-   _viewprop->drawprop().blockFill(_peditchain);
-}
-
 laydata::EditObject::EditObject()
 {
    _activecell = NULL;   // the curently active cell
@@ -67,18 +57,20 @@ laydata::EditObject::EditObject(TdtCellRef* cref, TdtCell* vcell, CellRefStack* 
    _ARTM = trans;
 }
 
-DBbox laydata::EditObject::overlap() const{
+DBbox laydata::EditObject::overlap() const
+{
    if (_activecell)
       return _activecell->cellOverlap().overlap(_ARTM);
    else return DEFAULT_OVL_BOX;
 }
 
-void laydata::EditObject::reset() {
-   if (_activecell) {
-      _activecell->unselect_all();
+void laydata::EditObject::reset()
+{
+   if (_activecell)
+   {
+      _activecell->unselectAll();
       _editstack.push_front(DEBUG_NEW EditObject(_activeref, _viewcell, _peditchain, _ARTM));
    }
-   if (_activeref ) unblockfill();
    _peditchain = NULL;
    _activecell = NULL;
    _viewcell = NULL;
@@ -86,12 +78,14 @@ void laydata::EditObject::reset() {
    _ARTM = CTM();
 }
 
-void laydata::EditObject::setcell(TdtCell* cell) {
+void laydata::EditObject::setcell(TdtCell* cell)
+{
    reset();
    _activecell = cell; _viewcell = cell;
 }
 
-void laydata::EditObject::push(TdtCellRef* cref, TdtCell* vref, CellRefStack* crs, CTM trans) {
+void laydata::EditObject::push(TdtCellRef* cref, TdtCell* vref, CellRefStack* crs, CTM trans)
+{
    assert(cref);
    reset(); // Unset previous active reference if it exists
    _activeref = cref;
@@ -99,24 +93,25 @@ void laydata::EditObject::push(TdtCellRef* cref, TdtCell* vref, CellRefStack* cr
    _viewcell = vref;
    _peditchain = crs;
    _ARTM = trans;
-   blockfill();
 }
 
-bool laydata::EditObject::pop() {
+bool laydata::EditObject::pop()
+{
    if ((NULL == _activeref) || (!_peditchain) || (0 == _peditchain->size())) return false;
-   if (_activecell) _activecell->unselect_all();
+   if (_activecell) _activecell->unselectAll();
    //prepare current for pushing in the _editstack
    EditObject* pres = DEBUG_NEW EditObject(_activeref, _viewcell, _peditchain, _ARTM);
-   if (1 == _peditchain->size()) {
+   if (1 == _peditchain->size())
+   {
       // if _activecell is one level only under the _viewcell - edit in place will not
       // be active anymore
       _activecell = _viewcell;
       _peditchain = NULL;
       _activeref = NULL;
       _ARTM = CTM();
-      unblockfill();
    }
-   else {
+   else
+   {
       // copy the _peditchain
       _peditchain = DEBUG_NEW CellRefStack(*_peditchain);
       // pop the last reference (that use to be current) out of the stack
@@ -136,29 +131,27 @@ bool laydata::EditObject::pop() {
       // ... and active cell
       _activecell = _activeref->cstructure();
       //
-      blockfill();
    }
    _editstack.push_front(pres);
    return true;
 }
 
-bool laydata::EditObject::top() {
+bool laydata::EditObject::top()
+{
    if (NULL == _activeref) return false;
-   if (_activecell) _activecell->unselect_all();
-   if (_activeref ) unblockfill();
+   if (_activecell) _activecell->unselectAll();
    _editstack.push_front(DEBUG_NEW EditObject(_activeref, _viewcell, _peditchain, _ARTM));
    _activecell = _viewcell;
    _peditchain = NULL;
    _activeref = NULL;
    _ARTM = CTM();
-   unblockfill();
    return true;
 }
 
-bool laydata::EditObject::previous(const bool undo) {
+bool laydata::EditObject::previous(const bool undo)
+{
    if (0 == _editstack.size()) return false;
-   if (_activecell) _activecell->unselect_all();
-   if (_activeref ) unblockfill();
+   if (_activecell) _activecell->unselectAll();
    EditObject* pres = NULL;
    if (!undo)
       pres = DEBUG_NEW EditObject(_activeref, _viewcell, _peditchain, _ARTM);
@@ -175,27 +168,14 @@ bool laydata::EditObject::previous(const bool undo) {
    //_peditchain = DEBUG_NEW CellRefStack(*(prev->_peditchain));
    _viewcell = prev->_viewcell;
    _ARTM = prev->_ARTM;
-   if (undo) {
+   if (undo)
+   {
       _editstack.pop_front();
       delete prev;
    }
    else
       _editstack.push_front(pres);
-   if (_activeref ) blockfill();
    return true;
-}
-
-bool laydata::EditObject::securelaydef(unsigned layno)
-{
-   if (layno != REF_LAY)
-   {
-      bool newlay = _viewprop->drawprop().addLayer( layno);
-      if (newlay)
-         _viewprop->addUnpublishedLay(layno);
-      return newlay;
-   }
-   else
-      return false;
 }
 
 std::string laydata::EditObject::name() const
@@ -524,25 +504,27 @@ void laydata::TdtCell::motion_draw(const layprop::DrawProperties& drawprop,
    }
 }
 
-bool laydata::TdtCell::getshapeover(TP pnt, layprop::PropertyCenter& viewprop)
+bool laydata::TdtCell::getshapeover(TP pnt, const DWordSet& unselable)
 {
    laydata::TdtData* shape = NULL;
    typedef LayerList::const_iterator LCI;
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
-      if ((REF_LAY != lay->first) && viewprop.selectable(lay->first) &&
-                               lay->second->getobjectover(pnt,shape))
-            return true;
+      if ( (REF_LAY != lay->first)
+          && (unselable.end() == unselable.find(lay->first))
+          && lay->second->getobjectover(pnt,shape)
+          )
+         return true;
    return false;
 }
 
-laydata::AtticList* laydata::TdtCell::changeselect(TP pnt, SH_STATUS status, layprop::PropertyCenter& viewprop)
+laydata::AtticList* laydata::TdtCell::changeselect(TP pnt, SH_STATUS status, const DWordSet& unselable)
 {
    laydata::TdtData* prev = NULL, *shape = NULL;
    unsigned prevlay;
    typedef LayerList::const_iterator LCI;
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
    {
-      if (viewprop.selectable(lay->first))
+      if (unselable.end() != unselable.find(lay->first))
       {
          while (lay->second->getobjectover(pnt,shape))
          {
@@ -585,7 +567,8 @@ laydata::AtticList* laydata::TdtCell::changeselect(TP pnt, SH_STATUS status, lay
    else return NULL;
 }
 
-laydata::TdtCellRef* laydata::TdtCell::getcellover(TP pnt, ctmstack& transtack, CellRefStack* refstack, layprop::PropertyCenter& viewprop)
+laydata::TdtCellRef* laydata::TdtCell::getcellover(TP pnt, ctmstack& transtack,
+                     CellRefStack* refstack, const DWordSet& unselable)
 {
     if (_layers.end() == _layers.find(REF_LAY)) return NULL;
     laydata::TdtData *cellobj = NULL;
@@ -599,7 +582,7 @@ laydata::TdtCellRef* laydata::TdtCell::getcellover(TP pnt, ctmstack& transtack, 
       {// avoid undefined & library cells
          TP pntadj = pnt * cref->translation().Reversed();
          // if in the selected reference there are shapes that overlap pnt...
-         if (cref->cstructure()->getshapeover(pntadj, viewprop))
+         if (cref->cstructure()->getshapeover(pntadj, unselable))
          {
             // ... that is what we need ...
             refstack->push_front(cref);
@@ -610,7 +593,7 @@ laydata::TdtCellRef* laydata::TdtCell::getcellover(TP pnt, ctmstack& transtack, 
          // ... otherwise, dive into the hierarchy
          else
          {
-            laydata::TdtCellRef *rref = cref->cstructure()->getcellover(pntadj,transtack,refstack, viewprop);
+            laydata::TdtCellRef *rref = cref->cstructure()->getcellover(pntadj,transtack,refstack, unselable);
             if (rref) {
                refstack->push_front(cref);
                // save the stack of reference translations
@@ -818,7 +801,7 @@ DBbox laydata::TdtCell::updateVisibleOverlap(const layprop::DrawProperties& prop
    return _vlOverlap;
 }
 
-void laydata::TdtCell::select_inBox(DBbox select_in, layprop::PropertyCenter& viewprop, bool pntsel)
+void laydata::TdtCell::selectInBox(DBbox select_in, const DWordSet& unselable, word layselmask, bool pntsel)
 {
    // check that current cell is within
    if (0ll != select_in.cliparea(_cellOverlap))
@@ -827,14 +810,14 @@ void laydata::TdtCell::select_inBox(DBbox select_in, layprop::PropertyCenter& vi
       typedef LayerList::const_iterator LCI;
       for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
       {
-         if (viewprop.selectable(lay->first))
+         if (unselable.end() == unselable.find(lay->first))
          {
             DataList* ssl;
             if (_shapesel.end() != _shapesel.find(lay->first))
                ssl = _shapesel[lay->first];
             else
                ssl = DEBUG_NEW DataList();
-/***/       lay->second->select_inBox(select_in, ssl, pntsel, viewprop.layselmask());
+/***/       lay->second->selectInBox(select_in, ssl, pntsel, layselmask);
             if (ssl->empty())  delete ssl;
             else               _shapesel[lay->first] = ssl;
          }
@@ -842,7 +825,7 @@ void laydata::TdtCell::select_inBox(DBbox select_in, layprop::PropertyCenter& vi
    }
 }
 
-void laydata::TdtCell::unselect_inBox(DBbox select_in, bool pntsel, layprop::PropertyCenter& viewprop)
+void laydata::TdtCell::unselectInBox(DBbox select_in, bool pntsel, const DWordSet& unselable)
 {
    // check that current cell is within
    if (0ll != select_in.cliparea(_cellOverlap))
@@ -851,13 +834,13 @@ void laydata::TdtCell::unselect_inBox(DBbox select_in, bool pntsel, layprop::Pro
       typedef LayerList::const_iterator LCI;
       for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
       {
-         if (viewprop.selectable(lay->first))
+         if (unselable.end() == unselable.find(lay->first))
          {
             DataList* ssl;
             if (_shapesel.end() != _shapesel.find(lay->first))
             {
                ssl = _shapesel[lay->first];
-/***/          lay->second->unselect_inBox(select_in, ssl, pntsel);
+/***/          lay->second->unselectInBox(select_in, ssl, pntsel);
                if (ssl->empty())
                {
                   delete ssl;
@@ -870,19 +853,20 @@ void laydata::TdtCell::unselect_inBox(DBbox select_in, bool pntsel, layprop::Pro
    }
 }
 
-void laydata::TdtCell::select_fromList(SelectList* slist, layprop::PropertyCenter& viewprop)
+void laydata::TdtCell::selectFromList(SelectList* slist, const DWordSet& unselable)
 {
    DataList* ssl;
    for (SelectList::const_iterator CL = slist->begin(); CL != slist->end(); CL++)
    {
       // if the layer from the list exists in the layout and is not hidden
-      if ((_layers.end() != _layers.find(CL->first)) && viewprop.selectable(CL->first))
+      if ( (_layers.end() != _layers.find(CL->first))
+         &&(unselable.end() == unselable.find(CL->first)) )
       {
          if (_shapesel.end() != _shapesel.find(CL->first))
             ssl = _shapesel[CL->first];
          else
             ssl = DEBUG_NEW DataList();
-         _layers[CL->first]->select_fromList(CL->second, ssl);
+         _layers[CL->first]->selectFromList(CL->second, ssl);
          if (ssl->empty())  delete ssl;
          else              _shapesel[CL->first] = ssl;
       }
@@ -891,44 +875,53 @@ void laydata::TdtCell::select_fromList(SelectList* slist, layprop::PropertyCente
    delete slist;
 }
 
- void laydata::TdtCell::unselect_fromList(SelectList* unslist, layprop::PropertyCenter& viewprop) {
+ void laydata::TdtCell::unselectFromList(SelectList* unslist, const DWordSet& unselable)
+ {
    DataList* lslct = NULL;
    DataList::iterator CI;
    // for every layer in the unselect list
    for (SelectList::const_iterator CUL = unslist->begin();
-                                   CUL != unslist->end(); CUL++) {
+                                   CUL != unslist->end(); CUL++)
+   {
       // if the corresponding layer in the select list exists and is not locked
-      if ((_shapesel.end() != _shapesel.find(CUL->first)) &&
-                                       viewprop.selectable(CUL->first)) {
+      if ( (_shapesel.end() != _shapesel.find(CUL->first))
+         &&(unselable.end() == unselable.find(CUL->first)) )
+      {
          // start looping every shape to be unselected
          for(DataList::iterator CUI = CUL->second->begin();
-                                      CUI != CUL->second->end(); CUI++) {
+                                      CUI != CUL->second->end(); CUI++)
+         {
             bool part_unselect = sh_partsel == CUI->first->status();
             // and check it against the shapes selected
             lslct = _shapesel[CUL->first];
             CI = lslct->begin();
             while (lslct->end() != CI)
-               if (CI->first == CUI->first) {
+               if (CI->first == CUI->first)
+               {
                   // if shapes matched - there are four cases of unselect:
                   // - full select - full unselect
                   // - full select - part unselect
                   // - part select - full unselect
                   // - part select - part unselect
                   if (sh_partsel == CI->first->status())
-                     if (part_unselect)  {// part - part
+                     if (part_unselect)
+                     {// part - part
                         if (unselect_pointlist(*CI,*CUI)) lslct->erase(CI);
                      }
-                     else { // part - full
+                     else
+                     { // part - full
                         //delete CI->second;
                         CI->second.clear();
                         CI->first->set_status(sh_active);
                         lslct->erase(CI);
                      }
                   else
-                     if (part_unselect) {// full - part
+                     if (part_unselect)
+                     {// full - part
                         if (unselect_pointlist(*CI,*CUI)) lslct->erase(CI);
                      }
-                     else { // full - full
+                     else
+                     { // full - full
                         CI->first->set_status(sh_active);
                         lslct->erase(CI);
                      }
@@ -987,15 +980,22 @@ bool laydata::TdtCell::copy_selected(laydata::TdtDesign* ATDB, const CTM& trans)
    return overlapChanged(old_overlap, ATDB);
 };
 
-bool laydata::TdtCell::addlist(laydata::TdtDesign* ATDB, AtticList* nlst) {
+bool laydata::TdtCell::addlist(laydata::TdtDesign* ATDB, AtticList* nlst/*, DWordSet& newLays*/)
+{
    DBbox old_overlap(_cellOverlap);
    for (AtticList::const_iterator CL = nlst->begin();
-                                   CL != nlst->end(); CL++) {
+                                   CL != nlst->end(); CL++)
+   {
       // secure the target layer
       QuadTree* wl = securelayer(CL->first);
-      ATDB->securelaydef(CL->first);
+      // It appears that there is no need here to gather all the layers and eventually
+      // to make sure that there are defined properties for them later. The point is that
+      // the calls to this function are not normally using new layers. This is of course
+      // a wild guess for the future and might bring troubles...
+      /*newLays.insert(CL->first);*/
       for (ShapeList::const_iterator DI = CL->second->begin();
-                                    DI != CL->second->end(); DI++) {
+                                    DI != CL->second->end(); DI++)
+      {
          // add it to the corresponding layer
          (*DI)->set_status(sh_active);
          wl->put(*DI);
@@ -1251,7 +1251,7 @@ bool laydata::TdtCell::delete_selected(laydata::AtticList* fsel,
    }
    // Now move the selected shapes to the attic. Will be used for undo operations
    if (fsel) store_inAttic(*fsel);
-   else      unselect_all(true);
+   else      unselectAll(true);
    updateHierarchy(libdir);
    return overlapChanged(old_overlap, (*libdir)());
 }
@@ -1426,10 +1426,10 @@ bool laydata::TdtCell::destroy_this(laydata::TdtLibDir* libdir, TdtData* ds, uns
    return overlapChanged(old_overlap, (*libdir)());
 }
 
-void laydata::TdtCell::select_all(layprop::PropertyCenter& viewprop)
+void laydata::TdtCell::selectAll(const DWordSet& unselable, word layselmask)
 {
    // This method might be called redundant, because the result of the
-   // call select_inBox(overlap(),...) will produce the same results.
+   // call selectInBox(overlap(),...) will produce the same results.
    // Several reasons though to have this method:
    // speed
    // ungroup operation requires lock/hide layer properties to be ignored
@@ -1438,19 +1438,19 @@ void laydata::TdtCell::select_all(layprop::PropertyCenter& viewprop)
    // partially selected shapes. In order to make the operation faster
    // and to avoid the call of TdtData::select_* methods (that deal with this)
    // for every single shape, it seems better to start from a clean list
-   unselect_all();
+   unselectAll();
    // Select figures within the active layers
    typedef LayerList::const_iterator LCI;
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
    {
-      if (viewprop.selectable(lay->first))
+      if (unselable.end() == unselable.find(lay->first))
       {
          DataList* ssl = DEBUG_NEW DataList();
-/***/    lay->second->select_all(ssl, viewprop.layselmask());
+/***/    lay->second->selectAll(ssl, layselmask);
          if (ssl->empty())
          {
             delete ssl;
-            assert(viewprop.layselmask() != laydata::_lmall);
+            assert(laydata::_lmall != layselmask);
          }
          else
             _shapesel[lay->first] = ssl;
@@ -1460,13 +1460,13 @@ void laydata::TdtCell::select_all(layprop::PropertyCenter& viewprop)
 
 void laydata::TdtCell::full_select()
 {
-   unselect_all();
+   unselectAll();
    // Select figures within the active layers
    typedef LayerList::const_iterator LCI;
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
    {
       DataList* ssl = DEBUG_NEW DataList();
-/***/ lay->second->select_all(ssl);
+/***/ lay->second->selectAll(ssl);
       assert(!ssl->empty());
       _shapesel[lay->first] = ssl;
    }
@@ -1480,7 +1480,7 @@ void laydata::TdtCell::select_this(TdtData* dat, unsigned lay)
    //dat->set_status(sh_selected);
 }
 
-void laydata::TdtCell::unselect_all(bool destroy)
+void laydata::TdtCell::unselectAll(bool destroy)
 {
    DataList* lslct;
    // for every layer with selected shapes
@@ -1881,7 +1881,7 @@ NameSet* laydata::TdtCell::rehash_children()
    {  // if it is not empty...
       // get all cell refs/arefs in a list -
       DataList *refsList = DEBUG_NEW DataList();
-      refsTree->select_all(refsList, laydata::_lmref, false);
+      refsTree->selectAll(refsList, laydata::_lmref, false);
       // for every cell ref in the list
       for (DataList::const_iterator CC = refsList->begin();
                                      CC != refsList->end(); CC++)
@@ -1949,7 +1949,7 @@ bool laydata::TdtCell::relink(laydata::TdtLibDir* libdir)
    QuadTree* refsTree = _layers[REF_LAY];
    DBbox old_overlap(_cellOverlap);
    DataList *refsList = DEBUG_NEW DataList();
-   refsTree->select_all(refsList, laydata::_lmref, false);
+   refsTree->selectAll(refsList, laydata::_lmref, false);
    // relink every single cell ref in the list
    DataList::iterator CC = refsList->begin();
    while (CC != refsList->end())
@@ -1979,7 +1979,7 @@ void laydata::TdtCell::relinkThis(std::string cname, laydata::CellDefin newcelld
    // get all cell references
    DataList *refsList = DEBUG_NEW DataList();
    QuadTree* refsTree = _layers[REF_LAY];
-   refsTree->select_all(refsList, laydata::_lmref, false);
+   refsTree->selectAll(refsList, laydata::_lmref, false);
    //relink only the references to cname
    for (DataList::iterator CC = refsList->begin(); CC != refsList->end(); CC++)
    {
@@ -2082,7 +2082,7 @@ void laydata::TdtCell::collect_usedlays(const TdtLibDir* LTDB, bool recursive, W
 
 laydata::TdtCell::~TdtCell()
 {
-   unselect_all();
+   unselectAll();
    for (LayerList::iterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
       if (REF_LAY == lay->first)

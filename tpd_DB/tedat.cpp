@@ -237,7 +237,7 @@ void laydata::TdtData::select_this(DataList* selist)
    _status = sh_selected;
 }
 
-void laydata::TdtData::select_inBox(DBbox& select_in, DataList* selist, bool pselect)
+void laydata::TdtData::selectInBox(DBbox& select_in, DataList* selist, bool pselect)
 {
    // if shape is already fully selected, nothing to do here
    if (sh_selected == _status) return;
@@ -1851,7 +1851,7 @@ void laydata::TdtCellRef::ungroup(laydata::TdtDesign* ATDB, TdtCell* dst, AtticL
       }
       wl->invalidate();
    }
-   cstr->unselect_all();
+   cstr->unselectAll();
 }
 
 DBbox laydata::TdtCellRef::overlap() const

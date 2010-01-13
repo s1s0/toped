@@ -243,10 +243,6 @@ layprop::PropertyCenter::PropertyCenter()
    _renderType  = false;
 }
 
-bool layprop::PropertyCenter::selectable(unsigned layno) const {
-   return (!_drawprop->layerHidden(layno) && !_drawprop->layerLocked(layno));
-}
-
 //bool layprop::PropertyCenter::isLayerExist(word layno)
 //{
 //   return (NULL != _drawprop->findLayerSettings(layno));
@@ -504,6 +500,19 @@ void layprop::PropertyCenter::loadLayoutFonts(std::string fft, bool vbo)
    _renderType = vbo;
    _drawprop->loadLayoutFonts(fft, vbo);
 }
+
+DWordSet layprop::PropertyCenter::allUnselectable()
+{
+   DWordSet unselectable;
+   layprop::DrawProperties* drawProp;
+   if (lockDrawProp(drawProp))
+   {
+      drawProp->allUnselectable(unselectable);
+   }
+   unlockDrawProp(drawProp);
+   return unselectable;
+}
+
 
 bool layprop::PropertyCenter::deleteLaysetStatus(const std::string& sname)
 {
