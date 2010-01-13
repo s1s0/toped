@@ -129,7 +129,7 @@
 #ifdef TEUNDO_DEBUG_ON
 #define TEUNDO_DEBUG(a)  tell_log(console::MT_INFO,a);
 #else
-#define TEUNDO_DEBUG(a) 
+#define TEUNDO_DEBUG(a)
 #endif
 
 namespace tellstdfunc {
@@ -157,6 +157,7 @@ namespace tellstdfunc {
    void                 initFuncLib(wxFrame*, wxWindow*);
    laydata::SelectList* filter_selist(const laydata::SelectList*, word mask);
    laydata::AtticList*  replace_str(laydata::AtticList*, std::string);
+   bool                 secureLayDef(unsigned);
 //   void                 makeGdsLays(ExtLayers&);
 
 }

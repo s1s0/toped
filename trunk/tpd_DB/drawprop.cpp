@@ -707,6 +707,11 @@ bool  layprop::DrawProperties::layerLocked(unsigned layno) const
    else return true;
 }
 
+bool layprop::DrawProperties::selectable(unsigned layno) const
+{
+   return (!layerHidden(layno) && !layerLocked(layno));
+}
+
 void layprop::DrawProperties::drawTextBoundary(const pointlist& ptlist) const
 {
    if (_textBoxHidden) return;
@@ -769,16 +774,16 @@ void layprop::DrawProperties::setLineProps(bool selected) const
    }
 }
 
-void  layprop::DrawProperties::blockFill(laydata::CellRefStack* refstack)
+void layprop::DrawProperties::initDrawRefStack(laydata::CellRefStack* refStack)
 {
-   _blockFill = true;
-   _refStack = refstack;
+   _refStack = refStack;
+   _blockFill = (NULL != _refStack);
 }
 
-void  layprop::DrawProperties::unblockFill()
+void layprop::DrawProperties::clearDrawRefStack()
 {
-   _blockFill = false;
    _refStack = NULL;
+   _blockFill = false;
 }
 
 void  layprop::DrawProperties::pushRef(const laydata::TdtCellRef* cref)
@@ -853,6 +858,15 @@ WordList layprop::DrawProperties::getAllLayers() const
    for( LaySetList::const_iterator it = getCurSetList().begin(); it != getCurSetList().end(); it++)
       listLayers.push_back(it->first);
    return listLayers;
+}
+
+void layprop::DrawProperties::allUnselectable(DWordSet& layset)
+{
+   for( LaySetList::const_iterator it = getCurSetList().begin(); it != getCurSetList().end(); it++)
+   {
+      if (it->second->hidden() || it->second->locked())
+         layset.insert(it->first);
+   }
 }
 
 //WordList layprop::PropertyCenter::getLockedLayers() const

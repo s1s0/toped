@@ -885,6 +885,9 @@ namespace tenderer {
                                                          {        _drawprop->pushRef(ref)          ;}
          byte              popref(const laydata::TdtCellRef* ref)
                                                          {return  _drawprop->popRef(ref)           ;}
+         void              initDrawRefStack(laydata::CellRefStack* crs)
+                                                         { _drawprop->initDrawRefStack(crs);}
+         void              clearDrawRefStack()           { _drawprop->clearDrawRefStack();}
          bool              adjustTextOrientation() const {return  _drawprop->adjustTextOrientation();}
       private:
          layprop::DrawProperties*   _drawprop;

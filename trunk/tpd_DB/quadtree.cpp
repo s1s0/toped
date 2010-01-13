@@ -335,7 +335,7 @@ bool laydata::QuadTree::delete_marked(SH_STATUS stat, bool partselect) {
 
 /*!Cut with polygon is pretty expensive operation and despite the fact that it
 is executed over selected shapes only, there is no guarantee that the user will
-not do select_all() and then polycut(), and of course nobody can trust the user.
+not do selectAll() and then polycut(), and of course nobody can trust the user.
 So this method is trying to minimize the calculations by executing cutpoly only
 on the shapes that overlap somehow with the cutting polygon */
 void laydata::QuadTree::cutpoly_selected(pointlist& plst, DBbox& cut_overlap,
@@ -745,7 +745,7 @@ void laydata::QuadTree::put(TdtData* shape) {
 /*! Perform the data selection using select_in box. Called by the corresponding
 select methods of the parent structures in the data base - TdtLayer and TdtCell
 */
-void laydata::QuadTree::select_inBox(DBbox& select_in, DataList* selist,
+void laydata::QuadTree::selectInBox(DBbox& select_in, DataList* selist,
                                                   bool pselect, word selmask)
 {
    // check the entire holder for clipping...
@@ -756,18 +756,18 @@ void laydata::QuadTree::select_inBox(DBbox& select_in, DataList* selist,
    {
       if (selmask & wdt->ltype())
       {
-         wdt->select_inBox(select_in, selist, pselect);
+         wdt->selectInBox(select_in, selist, pselect);
       }
       wdt = wdt->next();
    }
    for(byte i = 0; i < 4; i++)
-      if (_quads[i]) _quads[i]->select_inBox(select_in, selist, pselect, selmask);
+      if (_quads[i]) _quads[i]->selectInBox(select_in, selist, pselect, selmask);
 }
 
 /*! Unselects already selected data using unselect_in box. Called by the corresponding
 unselect methods of the parent structures in the data base - TdtLayer and TdtCell
 */
-void laydata::QuadTree::unselect_inBox(DBbox& unselect_in, DataList* unselist,
+void laydata::QuadTree::unselectInBox(DBbox& unselect_in, DataList* unselist,
                                                                  bool pselect) {
    // check the entire holder for clipping...
    if (0ll == unselect_in.cliparea(_overlap)) return;
@@ -783,7 +783,7 @@ void laydata::QuadTree::unselect_inBox(DBbox& unselect_in, DataList* unselist,
       wdt = wdt->next();
    }
    for(byte i = 0; i < 4; i++)
-      if (_quads[i]) _quads[i]->unselect_inBox(unselect_in, unselist, pselect);
+      if (_quads[i]) _quads[i]->unselectInBox(unselect_in, unselist, pselect);
 }
 
 /*! Perform the data selection using list of objects. Called by the
@@ -791,7 +791,7 @@ corresponding select methods of the parent structures in the data base -
 TdtLayer and TdtCell. This select operatoin is the essence of the
 implementatoin of the long discussed (with myself) select lists in TELL
 */
-void laydata::QuadTree::select_fromList(DataList* src, DataList* dst) {
+void laydata::QuadTree::selectFromList(DataList* src, DataList* dst) {
    TdtData* wdt = _first;
    DataList::iterator DI;
    // loop the objects in the qTree first. It will be faster when there
@@ -821,12 +821,12 @@ void laydata::QuadTree::select_fromList(DataList* src, DataList* dst) {
       wdt = wdt->next();
    }
    for(byte i = 0; i < 4; i++)
-      if (_quads[i]) _quads[i]->select_fromList(src, dst);
+      if (_quads[i]) _quads[i]->selectFromList(src, dst);
 }
 
 /*! Mark all shapes in the current QuadTree and its children as sh_selected and
 add a reference in the selist*/
-void laydata::QuadTree::select_all(DataList* selist, word selmask, bool mark) {
+void laydata::QuadTree::selectAll(DataList* selist, word selmask, bool mark) {
    TdtData* wdt = _first;
    if (laydata::_lmnone == selmask) return;
    while(wdt)
@@ -839,7 +839,7 @@ void laydata::QuadTree::select_all(DataList* selist, word selmask, bool mark) {
       wdt = wdt->next();
    }
    for(byte i = 0; i < 4; i++)
-      if (_quads[i]) _quads[i]->select_all(selist, selmask, mark);
+      if (_quads[i]) _quads[i]->selectAll(selist, selmask, mark);
 }
 
 

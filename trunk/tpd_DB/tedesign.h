@@ -95,13 +95,13 @@ namespace laydata {
       TdtData*       addbox(unsigned la, TP* p1, TP* p2, bool sortnow = true);
       TdtData*       addpoly(unsigned, pointlist*, bool sortnow = true);
       TdtData*       addwire(unsigned, pointlist*, word, bool sortnow = true);
-      void           resortlayer(unsigned);
+//      void           resortlayer(unsigned);
       TdtData*       addtext(unsigned la, std::string& text, CTM& ori);
       TdtData*       addcellref(laydata::CellDefin strdefn, CTM& ori);
       TdtData*       addcellaref(std::string&, CTM&, ArrayProperties&);
-      void           addlist(AtticList*);
+      void           addlist(AtticList*/*, DWordSet&*/);
       TdtCell*       opencell(std::string name);
-      bool           editpush(const TP&);
+      bool           editpush(const TP&, const DWordSet&);
       bool           editprev(const bool undo = false);
       bool           editpop();
       bool           edittop();
@@ -115,9 +115,6 @@ namespace laydata {
       void           mouseStop();
       void           mouseFlip();
       void           mouseRotate();
-      void           select_inBox(TP*, TP*, bool pntsel = false);
-      AtticList*     change_select(TP*, bool select = true);
-      void           unselect_inBox(TP*, TP*, bool pntsel = false);
       void           copy_selected( TP p1, TP p2);
       void           move_selected( TP p1, TP p2, SelectList**);
       void           rotate_selected( TP p, real angle, SelectList**);
@@ -141,23 +138,27 @@ namespace laydata {
       void           collectParentCells(std::string&, CellDefList&);
       void           check_active();
       bool           checkValidRef(std::string);
-      void           select_fromList(SelectList* ss) {_target.edit()->select_fromList(ss, _target.viewprop());};
-      void           unselect_fromList(SelectList* ss) {_target.edit()->unselect_fromList(ss, _target.viewprop());};
-      QuadTree*      targetlayer(unsigned layno);
-      bool           securelaydef(unsigned layno) {return _target.securelaydef( layno);}
-      void           unselect_all()    const {_target.edit()->unselect_all(false);};
+
+      void           selectFromList(SelectList* ss, const DWordSet& unselable)
+                                            {_target.edit()->selectFromList(ss, unselable);};
+      void           unselectFromList(SelectList* ss, const DWordSet& unselable)
+                                            {_target.edit()->unselectFromList(ss, unselable);};
+      void           selectInBox(TP*, TP*, const DWordSet&, bool pntsel = false);
+      void           unselectInBox(TP*, TP*, const DWordSet&, bool pntsel = false);
+      AtticList*     changeSelect(TP*, const DWordSet&, bool select = true);
+      void           unselectAll()    const {_target.edit()->unselectAll(false);};
+      void           selectAll(const DWordSet& unselable, word layselmask) const
+                                             {       _target.edit()->selectAll(unselable, layselmask);}
+//      QuadTree*      targetlayer(unsigned layno);
       void           try_unselect_all()const;
       SelectList*    shapesel()        const {return _target.edit()->shapesel();};
       SelectList*    copy_selist()     const {return _target.edit()->copy_selist();};
-      void           select_all()      const {       _target.edit()->select_all(_target.viewprop());};
       void           report_selected(real DBscale) const { _target.edit()->report_selected(DBscale);};
       std::string    activecellname()  const {return _target.name();};
-      void           assign_properties(layprop::PropertyCenter& viewprop) {_target.init_viewprop(&viewprop);}
       //
       time_t         created()         const {return _created;}
       time_t         lastUpdated()     const {return _lastUpdated;}
       //
-//      const ACTIVE_OP tellop()         const {return _tellop;};
       bool           modified;
       friend         class TEDfile;
    private:

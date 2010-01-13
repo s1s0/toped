@@ -260,8 +260,8 @@ namespace layprop {
          void                       setGridColor(std::string colname) const;
          bool                       setCurrentFill(bool) const;
          void                       setLineProps(bool selected = false) const;
-         void                       blockFill(laydata::CellRefStack*);
-         void                       unblockFill();
+         void                       initDrawRefStack(laydata::CellRefStack*);
+         void                       clearDrawRefStack();
          void                       pushRef(const laydata::TdtCellRef*);
          byte                       popRef(const laydata::TdtCellRef*);
          void                       drawReferenceMarks(const TP&, const binding_marks) const;
@@ -295,6 +295,7 @@ namespace layprop {
          void                       setClipRegion(DBbox clipR)
                                                          {_clipRegion = clipR;}
          void                       setScrCTM(CTM ScrCTM){_scrCtm = ScrCTM;}
+         void                       allUnselectable(DWordSet&);
 
          // Properly protected in tpd_bidfunc
          bool                       addLayer(std::string, unsigned, std::string, std::string, std::string);
@@ -318,6 +319,7 @@ namespace layprop {
          bool                       layerHidden(unsigned layno) const;
          bool                       layerLocked(unsigned layno) const;
          bool                       layerFilled(unsigned layno) const;
+         bool                       selectable(unsigned layno) const;
 
          // Used in dialogue boxes an protected during construction of the dialogue boxes
          WordList                   getAllLayers() const;

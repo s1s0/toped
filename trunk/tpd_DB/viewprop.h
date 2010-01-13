@@ -109,7 +109,6 @@ namespace layprop {
 //      bool              isLayerExist(word);
 //      bool              isLayerExist(std::string);
       void              addUnpublishedLay(word);
-      bool              selectable(unsigned layno) const;
       void              saveProperties(std::string) const;
       //
       const LayoutGrid* grid(byte) const;
@@ -129,6 +128,8 @@ namespace layprop {
       void              setGdsLayMap(USMap* map);
       void              setCifLayMap(USMap* map);
       void              loadLayoutFonts(std::string fft, bool vbo);
+      DWordSet          allUnselectable();
+
       void              setStep(real st)                 {_step = st;}
       void              setAutoPan(bool status)          {_autopan = status;}
       void              setZeroCross(bool status)        {_zeroCross = status;}

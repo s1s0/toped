@@ -127,7 +127,6 @@ bool DataCenter::TDTread(std::string filename)
    _tedfilename = filename;
    _neversaved = false;
    _TEDLIB.setDB(static_cast<laydata::TdtDesign*>(tempin.design()));
-   _TEDLIB()->assign_properties(*PROPC);//TODO <-- This shoudn't be needed anymore having a global variable
    // Update Canvas scale
    PROPC->setUU(_TEDLIB()->UU());
    return true;
@@ -490,7 +489,6 @@ void DataCenter::newDesign(std::string name, time_t created)
       _TEDLIB.deleteDB();
    }
    _TEDLIB.setDB(DEBUG_NEW laydata::TdtDesign(name, created, created));
-   _TEDLIB()->assign_properties(*PROPC);//TODO <-- This shoudn't be needed anymore having a global variable
    _tedfilename = _localDir + name + ".tdt";
    _neversaved = true;
    PROPC->setUU(_TEDLIB()->UU());

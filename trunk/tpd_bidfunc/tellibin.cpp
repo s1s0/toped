@@ -418,8 +418,8 @@ UNDO/REDO operation - some preliminary thoughts
 |  "unselect"      |  stdUNSELECT_TL   |   OK   |    -*  |   x    |  see note 3         |
 |  "punselect"     |  stdPNTUNSELECT   |   OK   |    x   |   x    |                     |
 |  "punselect"     |  stdPNTUNSELECT_I |   OK   |    x   |   x    |                     |
-|  "select_all"    |  stdSELECTALL     |   OK   |    x   |   x    |                     |
-|  "unselect_all"  |  stdUNSELECTALL   |   OK   |    x   |   x    |                     |
+|  "selectAll"    |  stdSELECTALL     |   OK   |    x   |   x    |                     |
+|  "unselectAll"  |  stdUNSELECTALL   |   OK   |    x   |   x    |                     |
 -----------------------------------------------------------------------------------------
 |      operation on the toped data     |        |        |        |                     |
 -----------------------------------------------------------------------------------------

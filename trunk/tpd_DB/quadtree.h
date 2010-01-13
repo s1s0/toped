@@ -51,8 +51,8 @@ namespace laydata {
       The methods can be split on several groups:
          - add a single layout object - add(), fitintree()
          - add a group of layout objects - put(), sort(), fitsubtree()
-         - object selection - select_inBox(), unselect_inBox(), select_fromList(),
-           select_all()
+         - object selection - selectInBox(), unselectInBox(), selectFromList(),
+           selectAll()
          - design modification - delete_marked()
          - tree maintanence - validate(), full_validate(), sort(), resort(),
            tmpstore()
@@ -73,10 +73,10 @@ namespace laydata {
       void                 GDSwrite(DbExportFile&) const;
       void                 CIFwrite(DbExportFile&) const;
       void                 PSwrite(PSFile&, const layprop::DrawProperties&) const;
-      void                 select_inBox(DBbox&, DataList*, bool, word /*selmask = laydata::_lmall*/);
-      void                 select_fromList(DataList*, DataList*);
-      void                 select_all(DataList*, word selmask = laydata::_lmall, bool mark = true);
-      void                 unselect_inBox(DBbox&, DataList*, bool);
+      void                 selectInBox(DBbox&, DataList*, bool, word /*selmask = laydata::_lmall*/);
+      void                 selectFromList(DataList*, DataList*);
+      void                 selectAll(DataList*, word selmask = laydata::_lmall, bool mark = true);
+      void                 unselectInBox(DBbox&, DataList*, bool);
       bool                 delete_marked(SH_STATUS stat=sh_selected, bool partselect=false);
       bool                 delete_this(laydata::TdtData*);
       void                 cutpoly_selected(pointlist&, DBbox&, ShapeList**);

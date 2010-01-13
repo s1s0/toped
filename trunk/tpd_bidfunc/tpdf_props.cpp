@@ -262,14 +262,16 @@ void tellstdfunc::stdHIDELAYER::undo() {
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    bool        hide  = getBoolValue(UNDOPstack,true);
    word        layno = getWordValue(UNDOPstack,true);
+   DWordSet unselable;
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
       drawProp->hideLayer(layno, hide);
+      drawProp->allUnselectable(unselable);
    }
    PROPC->unlockDrawProp(drawProp);
    laydata::TdtDesign* ATDB = DATC->lockDB();
-   ATDB->select_fromList(get_ttlaylist(pl));
+      ATDB->selectFromList(get_ttlaylist(pl), unselable);
    DATC->unlockDB();
    delete pl;
    TpdPost::layer_status(tui::BT_LAYER_HIDE, layno, hide);
@@ -282,6 +284,7 @@ int tellstdfunc::stdHIDELAYER::execute()
    word        layno = getWordValue();
    if (layno != PROPC->curLay())
    {
+      DWordSet unselable = PROPC->allUnselectable();
       laydata::TdtDesign* ATDB = DATC->lockDB();
 
       UNDOcmdQ.push_front(this);
@@ -293,7 +296,7 @@ int tellstdfunc::stdHIDELAYER::execute()
       {
          (*todslct)[layno] = DEBUG_NEW laydata::DataList(*((*listselected)[layno]));
          UNDOPstack.push_front(make_ttlaylist(todslct));
-         ATDB->unselect_fromList(todslct);
+         ATDB->unselectFromList(todslct, unselable);
       }
       else
       {
@@ -342,6 +345,7 @@ void tellstdfunc::stdHIDELAYERS::undo() {
    bool        hide  = getBoolValue(UNDOPstack,true);
    telldata::ttlist *sl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    telldata::ttint *laynumber;
+   DWordSet unselable;
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
@@ -351,10 +355,11 @@ void tellstdfunc::stdHIDELAYERS::undo() {
          drawProp->hideLayer(laynumber->value(), hide);
          TpdPost::layer_status(tui::BT_LAYER_HIDE, laynumber->value(), hide);
       }
+      drawProp->allUnselectable(unselable);
    }
    PROPC->unlockDrawProp(drawProp);
    laydata::TdtDesign* ATDB = DATC->lockDB();
-   ATDB->select_fromList(get_ttlaylist(pl));
+   ATDB->selectFromList(get_ttlaylist(pl), unselable);
    DATC->unlockDB();
    delete pl; delete sl;
    UpdateLV();
@@ -364,6 +369,7 @@ int tellstdfunc::stdHIDELAYERS::execute()
 {
    bool        hide  = getBoolValue();
    telldata::ttlist *sl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   DWordSet unselable;
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
@@ -399,7 +405,8 @@ int tellstdfunc::stdHIDELAYERS::execute()
       UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
       UNDOPstack.push_front(make_ttlaylist(todslct));
       // Now unselect the shapes in the target layers
-      ATDB->unselect_fromList(todslct);
+      drawProp->allUnselectable(unselable);
+      ATDB->unselectFromList(todslct, unselable);
       DATC->unlockDB();
       // ... and at last - lock the layers. Here we're using the list collected for undo
       // otherwise we have to either maintain another list or to do again all the checks above
@@ -615,14 +622,16 @@ void tellstdfunc::stdLOCKLAYER::undo() {
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    bool        lock  = getBoolValue(UNDOPstack, true);
    word        layno = getWordValue(UNDOPstack, true);
+   DWordSet unselable;
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
       drawProp->lockLayer(layno, lock);
+      drawProp->allUnselectable(unselable);
    }
    PROPC->unlockDrawProp(drawProp);
    laydata::TdtDesign* ATDB = DATC->lockDB();
-   ATDB->select_fromList(get_ttlaylist(pl));
+   ATDB->selectFromList(get_ttlaylist(pl), unselable);
    DATC->unlockDB();
    delete pl;
    TpdPost::layer_status(tui::BT_LAYER_LOCK, layno, lock);
@@ -635,6 +644,7 @@ int tellstdfunc::stdLOCKLAYER::execute()
    word        layno = getWordValue();
    if (layno != PROPC->curLay())
    {
+      DWordSet unselable = PROPC->allUnselectable();
       laydata::TdtDesign* ATDB = DATC->lockDB();
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::ttint(layno));
@@ -645,7 +655,7 @@ int tellstdfunc::stdLOCKLAYER::execute()
       {
          (*todslct)[layno] = DEBUG_NEW laydata::DataList(*((*listselected)[layno]));
          UNDOPstack.push_front(make_ttlaylist(todslct));
-         ATDB->unselect_fromList(todslct);
+         ATDB->unselectFromList(todslct, unselable);
       }
       else
       {
@@ -693,6 +703,7 @@ void tellstdfunc::stdLOCKLAYERS::undo() {
    bool        lock  = getBoolValue(UNDOPstack,true);
    telldata::ttlist *sl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    telldata::ttint *laynumber;
+   DWordSet unselable;
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
@@ -702,10 +713,11 @@ void tellstdfunc::stdLOCKLAYERS::undo() {
          drawProp->lockLayer(laynumber->value(), lock);
          TpdPost::layer_status(tui::BT_LAYER_LOCK, laynumber->value(), lock);
       }
+      drawProp->allUnselectable(unselable);
    }
    PROPC->unlockDrawProp(drawProp);
    laydata::TdtDesign* ATDB = DATC->lockDB();
-   ATDB->select_fromList(get_ttlaylist(pl));
+   ATDB->selectFromList(get_ttlaylist(pl), unselable);
    DATC->unlockDB();
    delete pl; delete sl;
    UpdateLV();
@@ -718,6 +730,7 @@ int tellstdfunc::stdLOCKLAYERS::execute()
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
+      DWordSet unselable;
       telldata::ttlist* undolaylist = DEBUG_NEW telldata::ttlist(telldata::tn_int);
       laydata::TdtDesign* ATDB = DATC->lockDB();
       laydata::SelectList *listselected = ATDB->shapesel();
@@ -750,7 +763,8 @@ int tellstdfunc::stdLOCKLAYERS::execute()
       UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!lock));
       UNDOPstack.push_front(make_ttlaylist(todslct));
       // Now unselect the shapes in the target layers
-      ATDB->unselect_fromList(todslct);
+      drawProp->allUnselectable(unselable);
+      ATDB->unselectFromList(todslct, unselable);
       DATC->unlockDB();
       // ... and at last - lock the layers. Here we're using the list collected for undo
       // otherwise we have to either maintain another list or to do again all the checks above
@@ -929,8 +943,9 @@ void tellstdfunc::stdLOADLAYSTAT::undo() {
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    std::string sname  = getStringValue(UNDOPstack, true);
    PROPC->popLayerStatus();
+   DWordSet unselable = PROPC->allUnselectable();
    laydata::TdtDesign* ATDB = DATC->lockDB();
-   ATDB->select_fromList(get_ttlaylist(pl));
+   ATDB->selectFromList(get_ttlaylist(pl), unselable);
    DATC->unlockDB();
    delete pl;
    UpdateLV();
@@ -949,7 +964,7 @@ int tellstdfunc::stdLOADLAYSTAT::execute()
       laydata::SelectList *todslct = DEBUG_NEW laydata::SelectList();
       WordSet hll(hidel); // combined locked and hidden layers
       hll.insert(lockl.begin(), lockl.end());
-
+      DWordSet unselable = PROPC->allUnselectable();
       laydata::TdtDesign* ATDB = DATC->lockDB();
          laydata::SelectList *listselected = ATDB->shapesel();
          // first thing is to pick-up the selected shapes of the layers which
@@ -961,7 +976,7 @@ int tellstdfunc::stdLOADLAYSTAT::execute()
          }
          UNDOPstack.push_front(make_ttlaylist(todslct));
          // Now unselect the shapes in the target layers
-         ATDB->unselect_fromList(todslct);
+         ATDB->unselectFromList(todslct, unselable);
       DATC->unlockDB();
       PROPC->pushLayerStatus();
       PROPC->loadLaysetStatus(sname);

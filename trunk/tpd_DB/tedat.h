@@ -96,7 +96,7 @@ namespace laydata {
    //! Changes the pointer to the next tdtddata object
       void                 nextis(TdtData* nxt) {_next = nxt;};
    //! Set the _selected flag in case the object is entirely overlaped by select_in box
-      void                 select_inBox(DBbox&, DataList*, bool);
+      void                 selectInBox(DBbox&, DataList*, bool);
       void                 select_this(DataList*);
       bool                 unselect(DBbox&, SelectDataPair&, bool);
       void                 set_status(SH_STATUS s) {_status = s;};

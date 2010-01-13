@@ -319,6 +319,28 @@ void tellstdfunc::initFuncLib(wxFrame* tpd, wxWindow* cnvs)
 }
 
 //=============================================================================
+bool tellstdfunc::secureLayDef(unsigned layno)
+{
+   bool success = true;
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      if (layno != REF_LAY)
+      {
+         if (drawProp->addLayer(layno))
+            PROPC->addUnpublishedLay(layno);
+      }
+      else
+      {
+         // TODO -add message here
+         success = false;
+      }
+   }
+   PROPC->unlockDrawProp(drawProp);
+   return success;
+}
+
+//=============================================================================
 // void tellstdfunc::makeGdsLays(ExtLayers& gdsLays)
 // {
 //    nameList allls;
