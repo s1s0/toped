@@ -33,6 +33,7 @@
 #include "viewprop.h"
 #include "ps_out.h"
 #include "glf.h"
+#include "tuidefs.h"
 
 
 GLubyte cell_mark_bmp[30] = {
@@ -74,7 +75,6 @@ const byte                    layprop::DrawProperties::_defaultFill [128] = {
    0xAA, 0xAA, 0xAA, 0xAA, 0x00, 0x00, 0x00, 0x00
 };
 
-layprop::FontLibrary* fontLib = NULL;
 //=============================================================================
 //
 //
@@ -474,6 +474,7 @@ layprop::DrawProperties::DrawProperties() : _clipRegion(0,0)
    _propertyState         = DB;
    _adjustTextOrientation = false;
    _currentOp             = console::op_none;
+   _curlay                = 1;
 }
 
 bool layprop::DrawProperties::addLayer( unsigned layno )
@@ -598,10 +599,6 @@ void layprop::DrawProperties::addFill(std::string name, byte* ptrn) {
    _layFill[name] = ptrn;
 }
 
-void layprop::DrawProperties::loadLayoutFonts(std::string fontfile, bool vbo)
-{
-   fontLib = DEBUG_NEW FontLibrary(fontfile, vbo);
-}
 
 void layprop::DrawProperties::setCurrentColor(unsigned layno)
 {
@@ -1171,9 +1168,136 @@ layprop::DrawProperties::~DrawProperties() {
       delete [] FMI->second;
    for (LineMap::iterator LMI = _lineSet.begin(); LMI != _lineSet.end(); LMI++)
       delete LMI->second;
-//   if (NULL != _refStack) d elete _refStack; -> deleted in EditObject
-   delete fontLib;
+//   if (NULL != _refStack) delete _refStack; -> deleted in EditObject
 }
 
+/*! Shall be called by the execute method of loadlaystatus TELL function.
+ * Stores the current state of the defined layers in a _layStateHistory
+ * WARNING! This function is only for undo purposes. Should not be used
+ * to store/change/delete the layer state
+ */
+void layprop::DrawProperties::pushLayerStatus()
+{
+   _layStateHistory.push_front(LayStateList());
+   LayStateList& clist = _layStateHistory.front();
+   for (LaySetList::const_iterator CL = _laySetDb.begin(); CL != _laySetDb.end(); CL++)
+   {
+      clist.second.push_back(LayerState(CL->first, *(CL->second)));
+   }
+   clist.first = _curlay;
+}
+
+/*! Shall be called by the undo method of loadlaystatus TELL function.
+ * Restores the loch/hide/fill state of the defined layers in a _laySetDb
+ * WARNING! This function is only for undo purposes. Should not be used
+ * to store/change/delete the layer state
+ */
+void layprop::DrawProperties::popLayerStatus()
+{
+   LayStateList& clist = _layStateHistory.front();
+   for (std::list<LayerState>::const_iterator CL = clist.second.begin(); CL != clist.second.end(); CL++)
+   {
+      LaySetList::iterator clay;
+      if (_laySetDb.end() != (clay = _laySetDb.find(CL->number())))
+      {
+         clay->second->_filled = CL->filled();
+         TpdPost::layer_status(tui::BT_LAYER_FILL, CL->number(), CL->filled());
+         clay->second->_hidden = CL->hidden();
+         TpdPost::layer_status(tui::BT_LAYER_HIDE, CL->number(), CL->hidden());
+         clay->second->_locked = CL->locked();
+         TpdPost::layer_status(tui::BT_LAYER_LOCK, CL->number(), CL->locked());
+      }
+   }
+   TpdPost::layer_default(clist.first, _curlay);
+   _curlay = clist.first;
+   _layStateHistory.pop_front();
+}
+
+/*!
+ * Removes the oldest saved state in the _layStateHistory. Should be called
+ * by undo_cleanup methods of the related tell functions.
+ * WARNING! This function is only for undo purposes. Should not be used
+ * to store/change/delete the layer state
+ */
+void layprop::DrawProperties::popBackLayerStatus()
+{
+   _layStateHistory.pop_back();
+}
+
+bool layprop::DrawProperties::saveLaysetStatus(const std::string& sname)
+{
+   LayStateList clist;
+   bool status = true;
+   for (LaySetList::const_iterator CL = _laySetDb.begin(); CL != _laySetDb.end(); CL++)
+   {
+      clist.second.push_back(LayerState(CL->first, *(CL->second)));
+   }
+   clist.first = _curlay;
+   if (_layStateMap.end() != _layStateMap.find(sname)) status = false;
+   _layStateMap[sname] = clist;
+   return status;
+}
+
+bool layprop::DrawProperties::saveLaysetStatus(const std::string& sname, const WordSet& hidel,
+      const WordSet& lockl, const WordSet& filll, unsigned alay)
+{
+   LayStateList clist;
+   bool status = true;
+   for (LaySetList::const_iterator CL = _laySetDb.begin(); CL != _laySetDb.end(); CL++)
+   {
+      bool hiden  = (hidel.end() != hidel.find(CL->first));
+      bool locked = (lockl.end() != lockl.find(CL->first));
+      bool filled = (filll.end() != filll.find(CL->first));
+      clist.second.push_back(LayerState(CL->first, hiden, locked, filled));
+   }
+   clist.first = alay;
+   if (_layStateMap.end() == _layStateMap.find(sname)) status = false;
+   _layStateMap[sname] = clist;
+   return status;
+}
+
+bool layprop::DrawProperties::loadLaysetStatus(const std::string& sname)
+{
+   if (_layStateMap.end() == _layStateMap.find(sname)) return false;
+   LayStateList clist = _layStateMap[sname];
+   for (std::list<LayerState>::const_iterator CL = clist.second.begin(); CL != clist.second.end(); CL++)
+   {
+      LaySetList::iterator clay;
+      if (_laySetDb.end() != (clay = _laySetDb.find(CL->number())))
+      {
+         clay->second->_filled = CL->filled();
+         TpdPost::layer_status(tui::BT_LAYER_FILL, CL->number(), CL->filled());
+         clay->second->_hidden = CL->hidden();
+         TpdPost::layer_status(tui::BT_LAYER_HIDE, CL->number(), CL->hidden());
+         clay->second->_locked = CL->locked();
+         TpdPost::layer_status(tui::BT_LAYER_LOCK, CL->number(), CL->locked());
+      }
+   }
+   TpdPost::layer_default(clist.first, _curlay);
+   _curlay = clist.first;
+   return true;
+}
+
+bool layprop::DrawProperties::deleteLaysetStatus(const std::string& sname)
+{
+   if (_layStateMap.end() == _layStateMap.find(sname)) return false;
+   _layStateMap.erase(sname);
+   return true;
+}
+
+bool layprop::DrawProperties::getLaysetStatus(const std::string& sname, WordSet& hidel,
+      WordSet& lockl, WordSet& filll, unsigned activel)
+{
+   if (_layStateMap.end() == _layStateMap.find(sname)) return false;
+   LayStateList clist = _layStateMap[sname];
+   for (std::list<LayerState>::const_iterator CL = clist.second.begin(); CL != clist.second.end(); CL++)
+   {
+      if (CL->hidden()) hidel.insert(hidel.begin(),CL->number());
+      if (CL->locked()) lockl.insert(lockl.begin(),CL->number());
+      if (CL->filled()) filll.insert(filll.begin(),CL->number());
+   }
+   activel = clist.first;
+   return true;
+}
 
 

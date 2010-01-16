@@ -45,8 +45,15 @@ extern const wxEventType         wxEVT_SETINGSMENU;
 
 
 //=============================================================================
-telldata::ttint* tellstdfunc::CurrentLayer() {
-   unsigned cl = PROPC->curLay();
+telldata::ttint* tellstdfunc::CurrentLayer()
+{
+   unsigned cl;
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      cl = drawProp->curLay();
+   }
+   PROPC->unlockDrawProp(drawProp);
    return (DEBUG_NEW telldata::ttint(cl));
 }
 
