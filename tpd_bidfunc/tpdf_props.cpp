@@ -282,44 +282,44 @@ int tellstdfunc::stdHIDELAYER::execute()
 {
    bool        hide  = getBoolValue();
    word        layno = getWordValue();
-   if (layno != PROPC->curLay())
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
    {
-      DWordSet unselable = PROPC->allUnselectable();
-      laydata::TdtDesign* ATDB = DATC->lockDB();
-
-      UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(layno));
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
-      laydata::SelectList *listselected = ATDB->shapesel();
-      laydata::SelectList *todslct = DEBUG_NEW laydata::SelectList();
-      if (hide && (listselected->end() != listselected->find(layno)))
+      if (layno != drawProp->curLay())
       {
-         (*todslct)[layno] = DEBUG_NEW laydata::DataList(*((*listselected)[layno]));
-         UNDOPstack.push_front(make_ttlaylist(todslct));
-         ATDB->unselectFromList(todslct, unselable);
+         DWordSet unselable = PROPC->allUnselectable();
+         laydata::TdtDesign* ATDB = DATC->lockDB();
+
+         UNDOcmdQ.push_front(this);
+         UNDOPstack.push_front(DEBUG_NEW telldata::ttint(layno));
+         UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
+         laydata::SelectList *listselected = ATDB->shapesel();
+         laydata::SelectList *todslct = DEBUG_NEW laydata::SelectList();
+         if (hide && (listselected->end() != listselected->find(layno)))
+         {
+            (*todslct)[layno] = DEBUG_NEW laydata::DataList(*((*listselected)[layno]));
+            UNDOPstack.push_front(make_ttlaylist(todslct));
+            ATDB->unselectFromList(todslct, unselable);
+         }
+         else
+         {
+            UNDOPstack.push_front(make_ttlaylist(todslct));
+            delete todslct;
+         }
+         DATC->unlockDB();
+         drawProp->hideLayer(layno, hide);
+         DATC->updateVisibleOverlap();
+         TpdPost::layer_status(tui::BT_LAYER_HIDE, layno, hide);
+         LogFile << LogFile.getFN() << "("<< layno << "," <<
+                    LogFile._2bool(hide) << ");"; LogFile.flush();
+         UpdateLV();
       }
       else
       {
-         UNDOPstack.push_front(make_ttlaylist(todslct));
-         delete todslct;
+         tell_log(console::MT_ERROR,"Layer above is the current. Can't be hidden");
       }
-      DATC->unlockDB();
-      layprop::DrawProperties* drawProp;
-      if (PROPC->lockDrawProp(drawProp))
-      {
-         drawProp->hideLayer(layno, hide);
-      }
-      PROPC->unlockDrawProp(drawProp);
-      DATC->updateVisibleOverlap();
-      TpdPost::layer_status(tui::BT_LAYER_HIDE, layno, hide);
-      LogFile << LogFile.getFN() << "("<< layno << "," <<
-                 LogFile._2bool(hide) << ");"; LogFile.flush();
-      UpdateLV();
    }
-   else
-   {
-      tell_log(console::MT_ERROR,"Layer above is the current. Can't be hidden");
-   }
+   PROPC->unlockDrawProp(drawProp);
    return EXEC_NEXT;
 }
 
@@ -388,7 +388,7 @@ int tellstdfunc::stdHIDELAYERS::execute()
             info << "Layer number "<< i <<" out of range ... ignored";
             tell_log(console::MT_WARNING,info.str());
          }
-         else if (laynumber->value() == PROPC->curLay())
+         else if (laynumber->value() == drawProp->curLay())
          {
             tell_log(console::MT_WARNING,"Current layer ... ignored");
          }
@@ -642,42 +642,42 @@ int tellstdfunc::stdLOCKLAYER::execute()
 {
    bool        lock  = getBoolValue();
    word        layno = getWordValue();
-   if (layno != PROPC->curLay())
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
    {
-      DWordSet unselable = PROPC->allUnselectable();
-      laydata::TdtDesign* ATDB = DATC->lockDB();
-      UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(layno));
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!lock));
-      laydata::SelectList *listselected = ATDB->shapesel();
-      laydata::SelectList *todslct = DEBUG_NEW laydata::SelectList();
-      if (lock && (listselected->end() != listselected->find(layno)))
+      if (layno != drawProp->curLay())
       {
-         (*todslct)[layno] = DEBUG_NEW laydata::DataList(*((*listselected)[layno]));
-         UNDOPstack.push_front(make_ttlaylist(todslct));
-         ATDB->unselectFromList(todslct, unselable);
+         DWordSet unselable = PROPC->allUnselectable();
+         laydata::TdtDesign* ATDB = DATC->lockDB();
+         UNDOcmdQ.push_front(this);
+         UNDOPstack.push_front(DEBUG_NEW telldata::ttint(layno));
+         UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!lock));
+         laydata::SelectList *listselected = ATDB->shapesel();
+         laydata::SelectList *todslct = DEBUG_NEW laydata::SelectList();
+         if (lock && (listselected->end() != listselected->find(layno)))
+         {
+            (*todslct)[layno] = DEBUG_NEW laydata::DataList(*((*listselected)[layno]));
+            UNDOPstack.push_front(make_ttlaylist(todslct));
+            ATDB->unselectFromList(todslct, unselable);
+         }
+         else
+         {
+            UNDOPstack.push_front(make_ttlaylist(todslct));
+            delete todslct;
+         }
+         DATC->unlockDB();
+         drawProp->lockLayer(layno, lock);
+         TpdPost::layer_status(tui::BT_LAYER_LOCK, layno, lock);
+         LogFile << LogFile.getFN() << "("<< layno << "," <<
+                    LogFile._2bool(lock) << ");"; LogFile.flush();
+         UpdateLV();
       }
       else
       {
-         UNDOPstack.push_front(make_ttlaylist(todslct));
-         delete todslct;
+         tell_log(console::MT_ERROR,"Layer above is the current. Can't be locked.");
       }
-      DATC->unlockDB();
-      layprop::DrawProperties* drawProp;
-      if (PROPC->lockDrawProp(drawProp))
-      {
-         drawProp->lockLayer(layno, lock);
-      }
-      PROPC->unlockDrawProp(drawProp);
-      TpdPost::layer_status(tui::BT_LAYER_LOCK, layno, lock);
-      LogFile << LogFile.getFN() << "("<< layno << "," <<
-                 LogFile._2bool(lock) << ");"; LogFile.flush();
-      UpdateLV();
    }
-   else
-   {
-      tell_log(console::MT_ERROR,"Layer above is the current. Can't be locked.");
-   }
+   PROPC->unlockDrawProp(drawProp);
    return EXEC_NEXT;
 }
 
@@ -746,7 +746,7 @@ int tellstdfunc::stdLOCKLAYERS::execute()
             info << "Layer number "<< i <<" out of range ... ignored";
             tell_log(console::MT_WARNING,info.str());
          }
-         else if (laynumber->value() == PROPC->curLay())
+         else if (laynumber->value() == drawProp->curLay())
          {
             tell_log(console::MT_WARNING,"Current layer ... ignored");
          }
@@ -905,21 +905,31 @@ void tellstdfunc::stdSAVELAYSTAT::undo_cleanup()
 void tellstdfunc::stdSAVELAYSTAT::undo() {
    TEUNDO_DEBUG("savelaystat( string ) UNDO");
    std::string sname  = getStringValue(UNDOPstack, true);
-   VERIFY(PROPC->deleteLaysetStatus(sname));
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      VERIFY(drawProp->deleteLaysetStatus(sname));
+   }
+   PROPC->unlockDrawProp(drawProp);
 }
 
 int tellstdfunc::stdSAVELAYSTAT::execute()
 {
    std::string   sname  = getStringValue();
-   UNDOcmdQ.push_front(this);
-   UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(sname));
-   if (!PROPC->saveLaysetStatus(sname))
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
    {
-      std::stringstream info;
-      info << "Layer set \"" << sname << "\" was redefined";
-      tell_log(console::MT_INFO, info.str());
+      UNDOcmdQ.push_front(this);
+      UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(sname));
+      if (!drawProp->saveLaysetStatus(sname))
+      {
+         std::stringstream info;
+         info << "Layer set \"" << sname << "\" was redefined";
+         tell_log(console::MT_INFO, info.str());
+      }
+      LogFile << LogFile.getFN() << "(\""<< sname << "\");"; LogFile.flush();
    }
-   LogFile << LogFile.getFN() << "(\""<< sname << "\");"; LogFile.flush();
+   PROPC->unlockDrawProp(drawProp);
    return EXEC_NEXT;
 }
 
@@ -934,7 +944,12 @@ void tellstdfunc::stdLOADLAYSTAT::undo_cleanup()
 {
    getStringValue(UNDOPstack, false);
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
-   PROPC->popBackLayerStatus();
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      drawProp->popBackLayerStatus();
+   }
+   PROPC->unlockDrawProp(drawProp);
    delete pl;
 }
 
@@ -942,11 +957,16 @@ void tellstdfunc::stdLOADLAYSTAT::undo() {
    TEUNDO_DEBUG("loadlaystat( string ) UNDO");
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    std::string sname  = getStringValue(UNDOPstack, true);
-   PROPC->popLayerStatus();
-   DWordSet unselable = PROPC->allUnselectable();
-   laydata::TdtDesign* ATDB = DATC->lockDB();
-   ATDB->selectFromList(get_ttlaylist(pl), unselable);
-   DATC->unlockDB();
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      drawProp->popLayerStatus();
+      DWordSet unselable = PROPC->allUnselectable();
+      laydata::TdtDesign* ATDB = DATC->lockDB();
+      ATDB->selectFromList(get_ttlaylist(pl), unselable);
+      DATC->unlockDB();
+   }
+   PROPC->unlockDrawProp(drawProp);
    delete pl;
    UpdateLV();
 }
@@ -956,39 +976,44 @@ int tellstdfunc::stdLOADLAYSTAT::execute()
    std::string   sname  = getStringValue();
    WordSet hidel, lockl, filll;
    unsigned activel = 0;
-   if (PROPC->getLaysetStatus(sname, hidel, lockl, filll, activel))
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
    {
-      UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(sname));
-      // the list containing all deselected shapes
-      laydata::SelectList *todslct = DEBUG_NEW laydata::SelectList();
-      WordSet hll(hidel); // combined locked and hidden layers
-      hll.insert(lockl.begin(), lockl.end());
-      DWordSet unselable = PROPC->allUnselectable();
-      laydata::TdtDesign* ATDB = DATC->lockDB();
-         laydata::SelectList *listselected = ATDB->shapesel();
-         // first thing is to pick-up the selected shapes of the layers which
-         // will be locked or hidden
-         for (WordSet::const_iterator CL = hll.begin(); CL != hll.end(); CL++)
-         {
-            if (listselected->end() != listselected->find(*CL))
-               (*todslct)[*CL] = DEBUG_NEW laydata::DataList(*((*listselected)[*CL]));
-         }
-         UNDOPstack.push_front(make_ttlaylist(todslct));
-         // Now unselect the shapes in the target layers
-         ATDB->unselectFromList(todslct, unselable);
-      DATC->unlockDB();
-      PROPC->pushLayerStatus();
-      PROPC->loadLaysetStatus(sname);
-      LogFile << LogFile.getFN() << "(\""<< sname << "\");"; LogFile.flush();
+      if (drawProp->getLaysetStatus(sname, hidel, lockl, filll, activel))
+      {
+         UNDOcmdQ.push_front(this);
+         UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(sname));
+         // the list containing all deselected shapes
+         laydata::SelectList *todslct = DEBUG_NEW laydata::SelectList();
+         WordSet hll(hidel); // combined locked and hidden layers
+         hll.insert(lockl.begin(), lockl.end());
+         DWordSet unselable = PROPC->allUnselectable();
+         laydata::TdtDesign* ATDB = DATC->lockDB();
+            laydata::SelectList *listselected = ATDB->shapesel();
+            // first thing is to pick-up the selected shapes of the layers which
+            // will be locked or hidden
+            for (WordSet::const_iterator CL = hll.begin(); CL != hll.end(); CL++)
+            {
+               if (listselected->end() != listselected->find(*CL))
+                  (*todslct)[*CL] = DEBUG_NEW laydata::DataList(*((*listselected)[*CL]));
+            }
+            UNDOPstack.push_front(make_ttlaylist(todslct));
+            // Now unselect the shapes in the target layers
+            ATDB->unselectFromList(todslct, unselable);
+         DATC->unlockDB();
+         drawProp->pushLayerStatus();
+         drawProp->loadLaysetStatus(sname);
+         LogFile << LogFile.getFN() << "(\""<< sname << "\");"; LogFile.flush();
+      }
+      else
+      {
+         std::stringstream info;
+         info << "Layer set \"" << sname << "\" is not defined";
+         tell_log(console::MT_ERROR, info.str());
+      }
+      UpdateLV();
    }
-   else
-   {
-      std::stringstream info;
-      info << "Layer set \"" << sname << "\" is not defined";
-      tell_log(console::MT_ERROR, info.str());
-   }
-   UpdateLV();
+   PROPC->unlockDrawProp(drawProp);
    return EXEC_NEXT;
 }
 
@@ -1030,7 +1055,12 @@ void tellstdfunc::stdDELLAYSTAT::undo() {
    for (unsigned i = 0; i < undohidel->size() ; i++)
       hidel.insert(hidel.begin(), (static_cast<telldata::ttint*>((undohidel->mlist())[i]))->value());
    // ... restore the layer set ...
-   PROPC->saveLaysetStatus(sname, hidel, lockl, filll, activel);
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      drawProp->saveLaysetStatus(sname, hidel, lockl, filll, activel);
+   }
+   PROPC->unlockDrawProp(drawProp);
    // ... and finally - clean-up
    delete undofilll;
    delete undolockl;
@@ -1042,33 +1072,38 @@ int tellstdfunc::stdDELLAYSTAT::execute()
    std::string   sname  = getStringValue();
    WordSet hidel, lockl, filll;
    unsigned activel = 0;
-   if (PROPC->getLaysetStatus(sname, hidel, lockl, filll, activel))
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
    {
-      VERIFY(PROPC->deleteLaysetStatus(sname));
-      UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(sname));
-      // Push the layer lists in tell form for undo
-      telldata::ttlist* undohidel = DEBUG_NEW telldata::ttlist(telldata::tn_int);
-      for (WordSet::const_iterator CL = hidel.begin(); CL != hidel.end(); CL++)
-         undohidel->add(DEBUG_NEW telldata::ttint(*CL));
-      UNDOPstack.push_front(undohidel);
-      telldata::ttlist* undolockl = DEBUG_NEW telldata::ttlist(telldata::tn_int);
-      for (WordSet::const_iterator CL = lockl.begin(); CL != lockl.end(); CL++)
-         undolockl->add(DEBUG_NEW telldata::ttint(*CL));
-      UNDOPstack.push_front(undolockl);
-      telldata::ttlist* undofilll = DEBUG_NEW telldata::ttlist(telldata::tn_int);
-      for (WordSet::const_iterator CL = filll.begin(); CL != filll.end(); CL++)
-         undofilll->add(DEBUG_NEW telldata::ttint(*CL));
-      UNDOPstack.push_front(undofilll);
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(activel));
-      LogFile << LogFile.getFN() << "(\""<< sname << "\");"; LogFile.flush();
+      if (drawProp->getLaysetStatus(sname, hidel, lockl, filll, activel))
+      {
+         VERIFY(drawProp->deleteLaysetStatus(sname));
+         UNDOcmdQ.push_front(this);
+         UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(sname));
+         // Push the layer lists in tell form for undo
+         telldata::ttlist* undohidel = DEBUG_NEW telldata::ttlist(telldata::tn_int);
+         for (WordSet::const_iterator CL = hidel.begin(); CL != hidel.end(); CL++)
+            undohidel->add(DEBUG_NEW telldata::ttint(*CL));
+         UNDOPstack.push_front(undohidel);
+         telldata::ttlist* undolockl = DEBUG_NEW telldata::ttlist(telldata::tn_int);
+         for (WordSet::const_iterator CL = lockl.begin(); CL != lockl.end(); CL++)
+            undolockl->add(DEBUG_NEW telldata::ttint(*CL));
+         UNDOPstack.push_front(undolockl);
+         telldata::ttlist* undofilll = DEBUG_NEW telldata::ttlist(telldata::tn_int);
+         for (WordSet::const_iterator CL = filll.begin(); CL != filll.end(); CL++)
+            undofilll->add(DEBUG_NEW telldata::ttint(*CL));
+         UNDOPstack.push_front(undofilll);
+         UNDOPstack.push_front(DEBUG_NEW telldata::ttint(activel));
+         LogFile << LogFile.getFN() << "(\""<< sname << "\");"; LogFile.flush();
+      }
+      else
+      {
+         std::stringstream info;
+         info << "Layer set \"" << sname << "\" is not defined";
+         tell_log(console::MT_ERROR, info.str());
+      }
    }
-   else
-   {
-      std::stringstream info;
-      info << "Layer set \"" << sname << "\" is not defined";
-      tell_log(console::MT_ERROR, info.str());
-   }
+   PROPC->unlockDrawProp(drawProp);
    return EXEC_NEXT;
 }
 //=============================================================================

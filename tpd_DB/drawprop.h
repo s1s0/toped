@@ -95,7 +95,6 @@ namespace layprop {
          bool              locked()   const {return _locked;}
          void              fillLayer(bool filled)  {_filled = filled;};
          friend class DrawProperties;
-         friend class PropertyCenter; // << TODO - this is temporary. Delete it!
       private:
          std::string       _name;
          std::string       _color;
@@ -269,7 +268,6 @@ namespace layprop {
          void                       drawCellBoundary(const pointlist& ptlist) const;
          unsigned                   getTenderLay(unsigned layno) const;//!return layno if _propertyState == DB or predefined layer otherwise
          void                       psWrite(PSFile&) const;
-         void                       loadLayoutFonts(std::string, bool);
 
          const CTM&                 scrCtm() const       {return  _scrCtm;}
          const DBbox&               clipRegion() const   {return _clipRegion;}
@@ -288,6 +286,10 @@ namespace layprop {
          bool                       adjustTextOrientation() const
                                                          {return _adjustTextOrientation;}
          console::ACTIVE_OP         currentOp() const    {return _currentOp;}
+         void                       savePatterns(FILE*) const;
+         void                       saveColors(FILE*) const;
+         void                       saveLayers(FILE*) const;
+         void                       saveLines(FILE*) const;
 
          // Protected elsewhere
          void                       setCurrentOp(console::ACTIVE_OP actop)
@@ -308,12 +310,22 @@ namespace layprop {
          void                       hideLayer(unsigned layno, bool hide);
          void                       lockLayer(unsigned layno, bool lock);
          void                       fillLayer(unsigned layno, bool fill);
+         void                       pushLayerStatus();
+         void                       popLayerStatus();
+         void                       popBackLayerStatus();
+         bool                       saveLaysetStatus(const std::string&);
+         bool                       saveLaysetStatus(const std::string&, const WordSet&, const WordSet&, const WordSet&, unsigned);
+         bool                       loadLaysetStatus(const std::string&);
+         bool                       deleteLaysetStatus(const std::string&);
+         bool                       getLaysetStatus(const std::string&, WordSet&, WordSet&, WordSet&, unsigned);
          void                       setCellMarksHidden(bool hide)    {_cellMarksHidden = hide;}
          void                       setTextMarksHidden(bool hide)    {_textMarksHidden = hide;}
          void                       setCellboxHidden(bool hide)      {_cellBoxHidden = hide;}
          void                       setTextboxHidden(bool hide)      {_textBoxHidden = hide;}
          void                       setAdjustTextOrientation(bool ori)
                                                                      {_adjustTextOrientation = ori;}
+         void                       defaultLayer(word layno)         {_curlay = layno;}
+         word                       curLay() const                   {return _curlay;}
 
          // Used in dialogue boxes and drawing - partially protected for now
          bool                       layerHidden(unsigned layno) const;
@@ -338,14 +350,15 @@ namespace layprop {
          void                       allFills(nameList&) const;
          void                       allLines(nameList&) const;
          unsigned                   getLayerNo(std::string name) const;
-
-         friend class PropertyCenter;
       protected:
+         typedef std::deque<LayStateList>            LayStateHistory;
+         typedef std::map<std::string, LayStateList> LayStateMap;
          LaySetList                 _laySetDb;
          LaySetList                 _laySetDrc;
          ColorMap                   _layColors;
          FillMap                    _layFill;
          LineMap                    _lineSet;
+         word                       _curlay;       // current drawing layer
          DBbox                      _clipRegion;
          CTM                        _scrCtm;
          bool                       _cellMarksHidden;
@@ -354,10 +367,6 @@ namespace layprop {
          bool                       _textBoxHidden;
          bool                       _adjustTextOrientation;
          console::ACTIVE_OP         _currentOp;    //
-         void                       savePatterns(FILE*) const;
-         void                       saveColors(FILE*) const;
-         void                       saveLayers(FILE*) const;
-         void                       saveLines(FILE*) const;
          const LaySetList&          getCurSetList() const;
          const LayerSettings*       findLayerSettings(unsigned) const;
       private:
@@ -365,6 +374,8 @@ namespace layprop {
          laydata::CellRefStack*     _refStack;
          ctmstack                   _tranStack;
          unsigned                   _drawingLayer;
+         LayStateMap                _layStateMap;  //
+         LayStateHistory            _layStateHistory; //! for undo purposes of layer status related TELL function
          static const tellRGB       _defaultColor;
          static const byte          _defaultFill[128];
          static const LineSettings  _defaultSeline;

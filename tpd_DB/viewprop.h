@@ -109,7 +109,7 @@ namespace layprop {
 //      bool              isLayerExist(word);
 //      bool              isLayerExist(std::string);
       void              addUnpublishedLay(word);
-      void              saveProperties(std::string) const;
+      void              saveProperties(std::string);
       //
       const LayoutGrid* grid(byte) const;
       void              setGrid(byte, real, std::string);
@@ -117,14 +117,6 @@ namespace layprop {
       void              drawGrid() const;
       void              drawZeroCross() const;
       void              setUU(real);
-      void              pushLayerStatus();
-      void              popLayerStatus();
-      void              popBackLayerStatus();
-      bool              saveLaysetStatus(const std::string&);
-      bool              saveLaysetStatus(const std::string&, const WordSet&, const WordSet&, const WordSet&, unsigned);
-      bool              loadLaysetStatus(const std::string&);
-      bool              deleteLaysetStatus(const std::string&);
-      bool              getLaysetStatus(const std::string&, WordSet&, WordSet&, WordSet&, unsigned);
       void              setGdsLayMap(USMap* map);
       void              setCifLayMap(USMap* map);
       void              loadLayoutFonts(std::string fft, bool vbo);
@@ -144,7 +136,6 @@ namespace layprop {
       void              mouseStop()                      {_supp_data.mouseStop();}
       const WordList&   upLayers()                       {_uplaylist.sort(); _uplaylist.unique(); return _uplaylist;}
       void              clearUnpublishedLayers()         {_uplaylist.clear();}
-      void              defaultLayer(word layno)         {_curlay = layno;}
       real              step() const                     {return _step;}
       int4b             stepDB() const                   {return (word)rint(_step*_DBscale);}
       real              UU() const                       {return _UU;}
@@ -155,7 +146,6 @@ namespace layprop {
       word              layselmask() const               {return _layselmask;}
       const USMap*      getGdsLayMap() const             {return _gdsLayMap;}
       const USMap*      getCifLayMap() const             {return _cifLayMap;}
-      word              curLay() const                   {return _curlay;}
       bool              gridVisual(word no)              {return grid(no)->visual();}
       bool              renderType() const               {return _renderType;}
 
@@ -164,15 +154,12 @@ namespace layprop {
       bool              lockDrawProp(DrawProperties*&, PropertyState state = DB);
       void              unlockDrawProp(DrawProperties*&);
    private:
-      typedef std::deque<LayStateList>            LayStateHistory;
-      typedef std::map<std::string, LayStateList> LayStateMap;
       DrawProperties*      _drawprop;
       void                 saveScreenProps(FILE*) const;
       void                 saveLayerMaps(FILE*) const;
       real                 _DBscale;
       real                 _UU;           // The scale of the data base. It is mirrored here, on order
                                           // not to read it with every mouse move
-      word                 _curlay;       // current drawing layer
       gridlist             _grid;         // the list of grids as defined by the tell command
       real                 _step;         // current marker step
       bool                 _autopan;      // view window moves automatically during shape drawing
@@ -184,8 +171,6 @@ namespace layprop {
       word                 _layselmask;   // layout shape type selection mask
       USMap*               _gdsLayMap;    //
       USMap*               _cifLayMap;    //
-      LayStateMap          _layStateMap;  //
-      LayStateHistory      _layStateHistory; //! for undo purposes of layer status related TELL function
       wxMutex              _drawPLock;    // DrawPropwerties lock
    };
 

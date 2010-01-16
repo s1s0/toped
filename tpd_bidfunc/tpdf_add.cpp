@@ -861,8 +861,13 @@ void tellstdfunc::stdUSINGLAYER::undo_cleanup() {
 void tellstdfunc::stdUSINGLAYER::undo() {
    TEUNDO_DEBUG("usinglayer( int ) UNDO");
    word layno = getWordValue(UNDOPstack, true);
-   TpdPost::layer_default(layno, PROPC->curLay());
-   PROPC->defaultLayer(layno);
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      TpdPost::layer_default(layno, drawProp->curLay());
+      drawProp->defaultLayer(layno);
+   }
+   PROPC->unlockDrawProp(drawProp);
 }
 
 int tellstdfunc::stdUSINGLAYER::execute()
@@ -882,10 +887,10 @@ int tellstdfunc::stdUSINGLAYER::execute()
          drawProp->lockLayer(layno, false);
          TpdPost::layer_status(tui::BT_LAYER_LOCK, layno, false);
       }
-      TpdPost::layer_default(layno, PROPC->curLay());
+      TpdPost::layer_default(layno, drawProp->curLay());
       UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(PROPC->curLay()));
-      PROPC->defaultLayer(layno);
+      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(drawProp->curLay()));
+      drawProp->defaultLayer(layno);
       LogFile << LogFile.getFN() << "("<< layno << ");";LogFile.flush();
    }
    PROPC->unlockDrawProp(drawProp);

@@ -35,10 +35,9 @@
 #include "viewprop.h"
 #include "outbox.h"
 #include "tenderer.h"
-#include "tuidefs.h"
 
-extern layprop::FontLibrary* fontLib;
-layprop::PropertyCenter*              PROPC = NULL;
+layprop::FontLibrary*                 fontLib = NULL;
+layprop::PropertyCenter*              PROPC   = NULL;
 
 layprop::SDLine::SDLine(const TP& p1,const TP& p2, const real UU) : _ln(p1,p2)
 {
@@ -232,7 +231,6 @@ layprop::PropertyCenter::PropertyCenter()
 {
    setUU(1);
    _step        = 1;
-   _curlay      = 1;
    _markerAngle = 0;
    _autopan     = false;
    _layselmask  = laydata::_lmall;
@@ -256,6 +254,12 @@ layprop::PropertyCenter::PropertyCenter()
 //   }
 //   return false;
 //}
+
+void layprop::PropertyCenter::loadLayoutFonts(std::string fontfile, bool vbo)
+{
+   _renderType = vbo;
+   fontLib = DEBUG_NEW FontLibrary(fontfile, vbo);
+}
 
 void layprop::PropertyCenter::addUnpublishedLay(word layno)
 {
@@ -356,24 +360,29 @@ void layprop::PropertyCenter::saveScreenProps(FILE* prop_file) const
 }
 
 
-void layprop::PropertyCenter::saveProperties(std::string filename) const
+void layprop::PropertyCenter::saveProperties(std::string filename)
 {
-   FILE * prop_file;
-   std::string fname = convertString(filename);
-   prop_file = fopen(fname.c_str(),"wt");
-   // file header here
-   _drawprop->savePatterns(prop_file);
-   _drawprop->saveColors(prop_file);
-   _drawprop->saveLines(prop_file);
-   _drawprop->saveLayers(prop_file);
-   if ((NULL != _gdsLayMap) || (NULL != _cifLayMap))
-      saveLayerMaps(prop_file);
-   saveScreenProps(prop_file);
-   fprintf(prop_file, "layerSetup();");
-   if ((NULL != _gdsLayMap) || (NULL != _cifLayMap))
-      fprintf(prop_file, "layerMaps();");
-   fprintf(prop_file, "screenSetup();\n\n");
-   fclose(prop_file);
+   DrawProperties* drawProp;
+   if (lockDrawProp(drawProp))
+   {
+      FILE * prop_file;
+      std::string fname = convertString(filename);
+      prop_file = fopen(fname.c_str(),"wt");
+      // file header here
+      drawProp->savePatterns(prop_file);
+      drawProp->saveColors(prop_file);
+      drawProp->saveLines(prop_file);
+      drawProp->saveLayers(prop_file);
+      if ((NULL != _gdsLayMap) || (NULL != _cifLayMap))
+         saveLayerMaps(prop_file);
+      saveScreenProps(prop_file);
+      fprintf(prop_file, "layerSetup();");
+      if ((NULL != _gdsLayMap) || (NULL != _cifLayMap))
+         fprintf(prop_file, "layerMaps();");
+      fprintf(prop_file, "screenSetup();\n\n");
+      fclose(prop_file);
+   }
+   unlockDrawProp(drawProp);
 }
 
 void layprop::PropertyCenter::setGdsLayMap(USMap* map)
@@ -388,119 +397,6 @@ void layprop::PropertyCenter::setCifLayMap(USMap* map)
    _cifLayMap = map;
 }
 
-/*! Shall be called by the execute method of loadlaystatus TELL function.
- * Stores the current state of the defined layers in a _layStateHistory
- * WARNING! This function is only for undo purposes. Should not be used
- * to store/change/delete the layer state
- */
-void layprop::PropertyCenter::pushLayerStatus()
-{
-   _layStateHistory.push_front(LayStateList());
-   LayStateList& clist = _layStateHistory.front();
-   for (LaySetList::const_iterator CL = _drawprop->_laySetDb.begin(); CL != _drawprop->_laySetDb.end(); CL++)
-   {
-      clist.second.push_back(LayerState(CL->first, *(CL->second)));
-   }
-   clist.first = _curlay;
-}
-
-/*! Shall be called by the undo method of loadlaystatus TELL function.
- * Restores the loch/hide/fill state of the defined layers in a _drawprop->_laySetDb
- * WARNING! This function is only for undo purposes. Should not be used
- * to store/change/delete the layer state
- */
-void layprop::PropertyCenter::popLayerStatus()
-{
-   LayStateList& clist = _layStateHistory.front();
-   for (std::list<LayerState>::const_iterator CL = clist.second.begin(); CL != clist.second.end(); CL++)
-   {
-      LaySetList::iterator clay;
-      if (_drawprop->_laySetDb.end() != (clay = _drawprop->_laySetDb.find(CL->number())))
-      {
-         clay->second->_filled = CL->filled();
-         TpdPost::layer_status(tui::BT_LAYER_FILL, CL->number(), CL->filled());
-         clay->second->_hidden = CL->hidden();
-         TpdPost::layer_status(tui::BT_LAYER_HIDE, CL->number(), CL->hidden());
-         clay->second->_locked = CL->locked();
-         TpdPost::layer_status(tui::BT_LAYER_LOCK, CL->number(), CL->locked());
-      }
-      TpdPost::layer_default(clist.first, _curlay);
-      _curlay = clist.first;
-   }
-   _layStateHistory.pop_front();
-}
-
-/*!
- * Removes the oldest saved state in the _layStateHistory. Should be called
- * by undo_cleanup methods of the related tell functions.
- * WARNING! This function is only for undo purposes. Should not be used
- * to store/change/delete the layer state
- */
-void layprop::PropertyCenter::popBackLayerStatus()
-{
-   _layStateHistory.pop_back();
-}
-
-bool layprop::PropertyCenter::saveLaysetStatus(const std::string& sname)
-{
-   LayStateList clist;
-   bool status = true;
-   for (LaySetList::const_iterator CL = _drawprop->_laySetDb.begin(); CL != _drawprop->_laySetDb.end(); CL++)
-   {
-      clist.second.push_back(LayerState(CL->first, *(CL->second)));
-   }
-   clist.first = _curlay;
-   if (_layStateMap.end() != _layStateMap.find(sname)) status = false;
-   _layStateMap[sname] = clist;
-   return status;
-}
-
-bool layprop::PropertyCenter::saveLaysetStatus(const std::string& sname, const WordSet& hidel,
-      const WordSet& lockl, const WordSet& filll, unsigned alay)
-{
-   LayStateList clist;
-   bool status = true;
-   for (LaySetList::const_iterator CL = _drawprop->_laySetDb.begin(); CL != _drawprop->_laySetDb.end(); CL++)
-   {
-      bool hiden  = (hidel.end() != hidel.find(CL->first));
-      bool locked = (lockl.end() != lockl.find(CL->first));
-      bool filled = (filll.end() != filll.find(CL->first));
-      clist.second.push_back(LayerState(CL->first, hiden, locked, filled));
-   }
-   clist.first = alay;
-   if (_layStateMap.end() == _layStateMap.find(sname)) status = false;
-   _layStateMap[sname] = clist;
-   return status;
-}
-
-bool layprop::PropertyCenter::loadLaysetStatus(const std::string& sname)
-{
-   if (_layStateMap.end() == _layStateMap.find(sname)) return false;
-   LayStateList clist = _layStateMap[sname];
-   for (std::list<LayerState>::const_iterator CL = clist.second.begin(); CL != clist.second.end(); CL++)
-   {
-      LaySetList::iterator clay;
-      if (_drawprop->_laySetDb.end() != (clay = _drawprop->_laySetDb.find(CL->number())))
-      {
-         clay->second->_filled = CL->filled();
-         TpdPost::layer_status(tui::BT_LAYER_FILL, CL->number(), CL->filled());
-         clay->second->_hidden = CL->hidden();
-         TpdPost::layer_status(tui::BT_LAYER_HIDE, CL->number(), CL->hidden());
-         clay->second->_locked = CL->locked();
-         TpdPost::layer_status(tui::BT_LAYER_LOCK, CL->number(), CL->locked());
-      }
-   }
-   TpdPost::layer_default(clist.first, _curlay);
-   _curlay = clist.first;
-   return true;
-}
-
-void layprop::PropertyCenter::loadLayoutFonts(std::string fft, bool vbo)
-{
-   _renderType = vbo;
-   _drawprop->loadLayoutFonts(fft, vbo);
-}
-
 DWordSet layprop::PropertyCenter::allUnselectable()
 {
    DWordSet unselectable;
@@ -511,29 +407,6 @@ DWordSet layprop::PropertyCenter::allUnselectable()
    }
    unlockDrawProp(drawProp);
    return unselectable;
-}
-
-
-bool layprop::PropertyCenter::deleteLaysetStatus(const std::string& sname)
-{
-   if (_layStateMap.end() == _layStateMap.find(sname)) return false;
-   _layStateMap.erase(sname);
-   return true;
-}
-
-bool layprop::PropertyCenter::getLaysetStatus(const std::string& sname, WordSet& hidel,
-      WordSet& lockl, WordSet& filll, unsigned activel)
-{
-   if (_layStateMap.end() == _layStateMap.find(sname)) return false;
-   LayStateList clist = _layStateMap[sname];
-   for (std::list<LayerState>::const_iterator CL = clist.second.begin(); CL != clist.second.end(); CL++)
-   {
-      if (CL->hidden()) hidel.insert(hidel.begin(),CL->number());
-      if (CL->locked()) lockl.insert(lockl.begin(),CL->number());
-      if (CL->filled()) filll.insert(filll.begin(),CL->number());
-   }
-   activel = clist.first;
-   return true;
 }
 
 bool layprop::PropertyCenter::lockDrawProp(DrawProperties*& propDB, PropertyState state)
@@ -573,6 +446,7 @@ layprop::PropertyCenter::~PropertyCenter()
    if (NULL != _cifLayMap) delete _cifLayMap;
    assert(_drawprop);
    delete _drawprop;
+   delete fontLib;
 }
 
 

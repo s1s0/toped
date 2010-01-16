@@ -1896,9 +1896,13 @@ void tui::TopedFrame::OnMarker90(wxCommandEvent& WXUNUSED(event)) {
 
 void tui::TopedFrame::OnDefineLayer(wxCommandEvent& event)
 {
-   //word layno = _browsers->TDTSelectedLayNo();
-   word layno = PROPC->curLay();
-	editLayerDlg(layno);
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      word layno = drawProp->curLay();
+      editLayerDlg(layno);
+   }
+   PROPC->unlockDrawProp(drawProp);
 }
 
 void tui::TopedFrame::OnEditLayer(wxCommandEvent& evt)
