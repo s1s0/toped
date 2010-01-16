@@ -143,9 +143,9 @@ namespace laydata {
                                             {_target.edit()->selectFromList(ss, unselable);};
       void           unselectFromList(SelectList* ss, const DWordSet& unselable)
                                             {_target.edit()->unselectFromList(ss, unselable);};
-      void           selectInBox(TP*, TP*, const DWordSet&, bool pntsel = false);
-      void           unselectInBox(TP*, TP*, const DWordSet&, bool pntsel = false);
-      AtticList*     changeSelect(TP*, const DWordSet&, bool select = true);
+      void           selectInBox(TP*, TP*, const DWordSet&, word layselmask, bool);
+      void           unselectInBox(TP*, TP*, const DWordSet&, bool);
+      AtticList*     changeSelect(TP*, const DWordSet&, bool);
       void           unselectAll()    const {_target.edit()->unselectAll(false);};
       void           selectAll(const DWordSet& unselable, word layselmask) const
                                              {       _target.edit()->selectAll(unselable, layselmask);}

@@ -78,7 +78,6 @@ namespace laydata {
       TdtCellRef*                _activeref;    //! current topview reference - if edit in place is active
       CellRefStack*              _peditchain;   //! the path from _viewcell to the _activeref (_activecell)
       CTM                        _ARTM;         //! active reference (cell) translation matrix
-      static layprop::DrawProperties* _drawProp;
    };
 
 //==============================================================================

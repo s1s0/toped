@@ -1083,13 +1083,13 @@ void laydata::TdtDesign::mouseRotate()
    if (_tmpdata) _tmpdata->objRotate();
 }
 
-void laydata::TdtDesign::selectInBox(TP* p1, TP* p2, const DWordSet& unselable, bool pntsel)
+void laydata::TdtDesign::selectInBox(TP* p1, TP* p2, const DWordSet& unselable, word layselmask, bool pntsel)
 {
    if (_target.checkedit())
    {
       DBbox select_in((*p1)*_target.rARTM(), (*p2)*_target.rARTM());
       select_in.normalize();
-      _target.edit()->selectInBox(select_in, unselable, pntsel);
+      _target.edit()->selectInBox(select_in, unselable, layselmask, pntsel);
    }
 }
 

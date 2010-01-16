@@ -53,7 +53,7 @@ void tellstdfunc::stdSELECT::undo() {
    TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
    DWordSet unselable = PROPC->allUnselectable();
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      ATDB->unselectInBox(p1DB, p2DB, unselable);
+      ATDB->unselectInBox(p1DB, p2DB, unselable, false);
    DATC->unlockDB();
    delete w;delete p1DB; delete p2DB;
    UpdateLV();
@@ -69,7 +69,7 @@ int tellstdfunc::stdSELECT::execute() {
    TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
    DWordSet unselable = PROPC->allUnselectable();
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      ATDB->selectInBox(p1DB, p2DB, unselable);
+      ATDB->selectInBox(p1DB, p2DB, unselable, PROPC->layselmask(), false);
       OPstack.push(make_ttlaylist(ATDB->shapesel()));
    DATC->unlockDB();
    LogFile << LogFile.getFN() << "("<< *w << ");"; LogFile.flush();
@@ -200,7 +200,7 @@ int tellstdfunc::stdPNTSELECT::execute() {
    TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
    DWordSet unselable = PROPC->allUnselectable();
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      ATDB->selectInBox(p1DB,  p2DB, unselable, true);
+      ATDB->selectInBox(p1DB,  p2DB, unselable, PROPC->layselmask(), true);
       OPstack.push(make_ttlaylist(ATDB->shapesel()));
    DATC->unlockDB();
    LogFile << LogFile.getFN() << "("<< *w << ");"; LogFile.flush();
@@ -241,7 +241,7 @@ void tellstdfunc::stdUNSELECT::undo() {
    TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
    DWordSet unselable = PROPC->allUnselectable();
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      ATDB->selectInBox(p1DB, p2DB, unselable);
+      ATDB->selectInBox(p1DB, p2DB, unselable, PROPC->layselmask(), false);
    DATC->unlockDB();
    delete w; delete p1DB; delete p2DB;
    UpdateLV();
@@ -257,7 +257,7 @@ int tellstdfunc::stdUNSELECT::execute() {
    TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
    DWordSet unselable = PROPC->allUnselectable();
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      ATDB->unselectInBox(p1DB, p2DB, unselable);
+      ATDB->unselectInBox(p1DB, p2DB, unselable, false);
       OPstack.push(make_ttlaylist(ATDB->shapesel()));
    DATC->unlockDB();
    LogFile << LogFile.getFN() << "("<< *w << ");"; LogFile.flush();
@@ -369,7 +369,7 @@ void tellstdfunc::stdPNTUNSELECT::undo() {
    TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
    DWordSet unselable = PROPC->allUnselectable();
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      ATDB->selectInBox(p1DB, p2DB, unselable, true);
+      ATDB->selectInBox(p1DB, p2DB, unselable, PROPC->layselmask(), true);
    DATC->unlockDB();
    delete w; delete p1DB; delete p2DB;
    UpdateLV();
