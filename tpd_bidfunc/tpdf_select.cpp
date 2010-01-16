@@ -70,7 +70,7 @@ int tellstdfunc::stdSELECT::execute() {
    DWordSet unselable = PROPC->allUnselectable();
    laydata::TdtDesign* ATDB = DATC->lockDB();
       ATDB->selectInBox(p1DB, p2DB, unselable, PROPC->layselmask(), false);
-      OPstack.push(make_ttlaylist(ATDB->shapesel()));
+      OPstack.push(make_ttlaylist(ATDB->shapeSel()));
    DATC->unlockDB();
    LogFile << LogFile.getFN() << "("<< *w << ");"; LogFile.flush();
    //DONT delete w; - undo will delete it
@@ -110,7 +110,7 @@ int tellstdfunc::stdSELECT_TL::execute() {
    DWordSet unselable = PROPC->allUnselectable();
    laydata::TdtDesign* ATDB = DATC->lockDB();
       ATDB->selectFromList(get_ttlaylist(pl), unselable);
-      OPstack.push(make_ttlaylist(ATDB->shapesel()));
+      OPstack.push(make_ttlaylist(ATDB->shapeSel()));
    DATC->unlockDB();
    UpdateLV();
    return EXEC_NEXT;
@@ -201,7 +201,7 @@ int tellstdfunc::stdPNTSELECT::execute() {
    DWordSet unselable = PROPC->allUnselectable();
    laydata::TdtDesign* ATDB = DATC->lockDB();
       ATDB->selectInBox(p1DB,  p2DB, unselable, PROPC->layselmask(), true);
-      OPstack.push(make_ttlaylist(ATDB->shapesel()));
+      OPstack.push(make_ttlaylist(ATDB->shapeSel()));
    DATC->unlockDB();
    LogFile << LogFile.getFN() << "("<< *w << ");"; LogFile.flush();
    //DONT delete w; - undo will delete it
@@ -258,7 +258,7 @@ int tellstdfunc::stdUNSELECT::execute() {
    DWordSet unselable = PROPC->allUnselectable();
    laydata::TdtDesign* ATDB = DATC->lockDB();
       ATDB->unselectInBox(p1DB, p2DB, unselable, false);
-      OPstack.push(make_ttlaylist(ATDB->shapesel()));
+      OPstack.push(make_ttlaylist(ATDB->shapeSel()));
    DATC->unlockDB();
    LogFile << LogFile.getFN() << "("<< *w << ");"; LogFile.flush();
    //DONT delete w; - undo will delete it
@@ -298,7 +298,7 @@ int tellstdfunc::stdUNSELECT_TL::execute() {
    DWordSet unselable = PROPC->allUnselectable();
    laydata::TdtDesign* ATDB = DATC->lockDB();
       ATDB->unselectFromList(get_ttlaylist(pl), unselable);
-      OPstack.push(make_ttlaylist(ATDB->shapesel()));
+      OPstack.push(make_ttlaylist(ATDB->shapeSel()));
    DATC->unlockDB();
    UpdateLV();
    return EXEC_NEXT;
@@ -386,7 +386,7 @@ int tellstdfunc::stdPNTUNSELECT::execute() {
    DWordSet unselable = PROPC->allUnselectable();
    laydata::TdtDesign* ATDB = DATC->lockDB();
       ATDB->unselectInBox(p1DB, p2DB, unselable, true);
-      OPstack.push(make_ttlaylist(ATDB->shapesel()));
+      OPstack.push(make_ttlaylist(ATDB->shapeSel()));
    DATC->unlockDB();
    LogFile << LogFile.getFN() << "("<< *w << ");"; LogFile.flush();
    //DONT delete w; - undo will delete it
@@ -432,9 +432,9 @@ int tellstdfunc::stdSELECTALL::execute() {
    UNDOcmdQ.push_front(this);
    DWordSet unselectable = PROPC->allUnselectable();
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      UNDOPstack.push_front(make_ttlaylist(ATDB->shapesel()));
+      UNDOPstack.push_front(make_ttlaylist(ATDB->shapeSel()));
       ATDB->selectAll(unselectable, PROPC->layselmask());
-      OPstack.push(make_ttlaylist(ATDB->shapesel()));
+      OPstack.push(make_ttlaylist(ATDB->shapeSel()));
    DATC->unlockDB();
    LogFile << LogFile.getFN() << "();"; LogFile.flush();
    UpdateLV();
@@ -465,7 +465,7 @@ void tellstdfunc::stdUNSELECTALL::undo() {
 int tellstdfunc::stdUNSELECTALL::execute() {
    UNDOcmdQ.push_front(this);
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      UNDOPstack.push_front(make_ttlaylist(ATDB->shapesel()));
+      UNDOPstack.push_front(make_ttlaylist(ATDB->shapeSel()));
       ATDB->unselectAll();
    DATC->unlockDB();
    LogFile << LogFile.getFN() << "();"; LogFile.flush();
@@ -487,7 +487,7 @@ int tellstdfunc::stdREPORTSLCTD::execute() {
    {
       real DBscale = PROPC->DBscale();
       laydata::TdtDesign* ATDB = DATC->lockDB();
-         ATDB->report_selected(DBscale);
+         ATDB->reportSelected(DBscale);
       DATC->unlockDB();
    }
    return EXEC_NEXT;

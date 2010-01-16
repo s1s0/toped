@@ -132,8 +132,8 @@ are several important points to consider here.
      variable stored somewhere, how the parser will control where the selection
      is from and what is the active cell at the moment?
    - Even if you want to copy or move some group of shapes from one cell to
-     another there is still a way: opencell<source>->select->group<new_cell>
-     ->opencell<destination>->addref<new_cell>
+     another there is still a way: openCell<source>->select->group<new_cell>
+     ->openCell<destination>->addref<new_cell>
    - What happens if the TOPED components listed in the TELL variable or part
      of them are deleted or moved subsequently? That will just confuse the
      TELL user. (Who the fuck is messing with my list?)
@@ -1680,7 +1680,7 @@ void laydata::TdtCellRef::draw_request(tenderer::TopRend& rend) const
 //   rend.drawReferenceMarks(TP(0,0) * newtrans, layprop::cell_mark);
    //
    byte crchain = rend.popref(this);
-   structure()->openGL_render(rend, _translation, false, 2 == crchain);
+   structure()->openGlRender(rend, _translation, false, 2 == crchain);
    if (crchain) rend.pushref(this);
 }
 
@@ -1705,7 +1705,7 @@ void laydata::TdtCellRef::draw_srequest(tenderer::TopRend& rend, const SGBitSet*
 //   rend.drawReferenceMarks(TP(0,0) * newtrans, layprop::cell_mark);
    //
    byte crchain = rend.popref(this);
-   structure()->openGL_render(rend, _translation, true, 2 == crchain);
+   structure()->openGlRender(rend, _translation, true, 2 == crchain);
    if (crchain) rend.pushref(this);
 }
 
@@ -1721,7 +1721,7 @@ void laydata::TdtCellRef::openGL_drawfill(layprop::DrawProperties& drawprop, con
    if ((NULL == structure()) || (0 == ptlist.size())) return;
    // draw the structure itself. Pop/push ref stuff is when edit in place is active
    byte crchain = drawprop.popRef(this);
-   structure()->openGL_draw(drawprop, crchain == 2);
+   structure()->openGlDraw(drawprop, crchain == 2);
    // push is done in the precalc()
 //   drawprop.popCtm();
    if (crchain) drawprop.pushRef(this);
@@ -1753,7 +1753,7 @@ void laydata::TdtCellRef::motion_draw(const layprop::DrawProperties& drawprop,
    if (structure())
    {
       transtack.push_front(_translation * transtack.front());
-      structure()->motion_draw(drawprop, transtack);
+      structure()->motionDraw(drawprop, transtack);
    }
 }
 
@@ -1798,7 +1798,7 @@ void laydata::TdtCellRef::PSwrite(PSFile& psf, const layprop::DrawProperties& dr
    psf.cellref(_structure->name(), _translation);
    if (!psf.hier())
    {
-     _structure->PSwrite(psf, drawprop);
+     _structure->psWrite(psf, drawprop);
    }
 }
 
@@ -1815,12 +1815,12 @@ void laydata::TdtCellRef::ungroup(laydata::TdtDesign* ATDB, TdtCell* dst, AtticL
       tell_log(console::MT_WARNING, ost.str());
       return;
    }
-   cstr->full_select();
-   for (SelectList::const_iterator CL = cstr->shapesel()->begin();
-                                   CL != cstr->shapesel()->end(); CL++)
+   cstr->fullSelect();
+   for (SelectList::const_iterator CL = cstr->shapeSel()->begin();
+                                   CL != cstr->shapeSel()->end(); CL++)
    {
       // secure the target layer
-      QuadTree* wl = dst->securelayer(CL->first);
+      QuadTree* wl = dst->secureLayer(CL->first);
       // There is no point here to ensure that the layer definition exists.
       // We are just transfering shapes from one structure to another.
       // Of course ATDB is undefined (forward defined) here, so if the method has to be
@@ -1844,10 +1844,10 @@ void laydata::TdtCellRef::ungroup(laydata::TdtDesign* ATDB, TdtCell* dst, AtticL
          // ... and to the list of the new shapes (for undo)
          ssl->push_back(data_copy);
          //update the hierarchy tree if this is a cell
-         if (REF_LAY == CL->first) dst->addchild(ATDB,
+         if (REF_LAY == CL->first) dst->addChild(ATDB,
                             static_cast<TdtCellRef*>(data_copy)->cstructure());
          // add it to the selection list of the dst cell
-         dst->select_this(data_copy,CL->first);
+         dst->selectThis(data_copy,CL->first);
       }
       wl->invalidate();
    }
@@ -2013,7 +2013,7 @@ void laydata::TdtCellAref::draw_request(tenderer::TopRend& rend) const
          // ... get the translation matrix ...
          CTM refCTM(TP(_arrprops.stepX() * i , _arrprops.stepY() * j ), 1, 0, false);
          // ...draw the structure itself
-         structure()->openGL_render(rend, refCTM * _translation, false, false);
+         structure()->openGlRender(rend, refCTM * _translation, false, false);
       }
    }
 }
@@ -2044,7 +2044,7 @@ void laydata::TdtCellAref::openGL_drawfill(layprop::DrawProperties& drawprop, co
          refCTM *= drawprop.topCtm();
          // ...draw the structure itself, not forgetting to push/pop the refCTM
          drawprop.pushCtm(refCTM);
-         structure()->openGL_draw(drawprop);
+         structure()->openGlDraw(drawprop);
          drawprop.popCtm();
       }
    }
@@ -2077,7 +2077,7 @@ void laydata::TdtCellAref::motion_draw(const layprop::DrawProperties& drawprop,
          CTM refCTM(TP(_arrprops.stepX() * i , _arrprops.stepY() * j ), 1, 0, false);
          refCTM *= _translation;
          transtack.push_front(refCTM * transtack.front());
-         structure()->motion_draw(drawprop, transtack);
+         structure()->motionDraw(drawprop, transtack);
       }
    }
 }
@@ -2122,7 +2122,7 @@ void laydata::TdtCellAref::PSwrite(PSFile& psf, const layprop::DrawProperties& d
          psf.cellref(_structure->name(), refCTM);
          if (!psf.hier())
          {
-            _structure->PSwrite(psf, drawprop);
+            _structure->psWrite(psf, drawprop);
          }
       }
    }
@@ -2979,7 +2979,7 @@ void laydata::TdtTmpCellRef::draw(const layprop::DrawProperties& drawprop, ctmqu
    if (NULL != _structure)
    {
       transtack.push_front(_translation * transtack.front());
-      _structure->motion_draw(drawprop, transtack);
+      _structure->motionDraw(drawprop, transtack);
    }
 }
 
@@ -2999,7 +2999,7 @@ void laydata::TdtTmpCellAref::draw(const layprop::DrawProperties& drawprop,
             CTM refCTM(TP(_arrprops.stepX() * i , _arrprops.stepY() * j ), 1, 0, false);
             refCTM *= _translation;
             transtack.push_front(refCTM * transtack.front());
-            _structure->motion_draw(drawprop, transtack);
+            _structure->motionDraw(drawprop, transtack);
          }
       }
    }

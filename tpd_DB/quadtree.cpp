@@ -270,7 +270,7 @@ void laydata::QuadTree::sort(ShapeList& inlist)
     processed bottom-up, i.e. the method is recursively called first for child
     QuadTree structures.\n
     On the top level the method is called by two TdtCell methods:
-    delete_selected and move selected. The difference is that for delete,
+    deleteSelected and move selected. The difference is that for delete,
     partially selected shapes are ignored and not processed.\n
     Fully selected shapes are always marked as sh_deleted. When move operation is
     going on they will be re-marked afterwards to sh_selected by the move(copy)
@@ -336,7 +336,7 @@ bool laydata::QuadTree::delete_marked(SH_STATUS stat, bool partselect) {
 /*!Cut with polygon is pretty expensive operation and despite the fact that it
 is executed over selected shapes only, there is no guarantee that the user will
 not do selectAll() and then polycut(), and of course nobody can trust the user.
-So this method is trying to minimize the calculations by executing cutpoly only
+So this method is trying to minimize the calculations by executing cutPoly only
 on the shapes that overlap somehow with the cutting polygon */
 void laydata::QuadTree::cutpoly_selected(pointlist& plst, DBbox& cut_overlap,
                                                            ShapeList** decure) {
@@ -549,7 +549,7 @@ void laydata::QuadTree::CIFwrite(DbExportFile& ciff) const
 }
 
 /*! Write the contents of the QuadTree in a PS file.\n
-Nothing special here - effectively the same as GDSwrite and write method*/
+Nothing special here - effectively the same as gdsWrite and write method*/
 void laydata::QuadTree::PSwrite(PSFile& gdsf, const layprop::DrawProperties& drawprop) const
 {
    TdtData* wdt = _first;
@@ -562,7 +562,7 @@ void laydata::QuadTree::PSwrite(PSFile& gdsf, const layprop::DrawProperties& dra
 }
 
 /*! Draw the contents of the container on the screen using the virtual
-openGL_draw methods of the tdtddata objects. This happens only if
+openGlDraw methods of the tdtddata objects. This happens only if
 the current QuadTree object is visible. Current clip region data is
 obtained from LayoutCanvas. Draws also the select marks in case shape is
 selected. \n This is the cherry of the QuadTree algorithm cake*/
@@ -688,9 +688,9 @@ void laydata::QuadTree::openGL_render(tenderer::TopRend& rend, const DataList* s
 
 
 /*! Temporary draw of the container contents on the screen using the virtual
-tmp_draw methods of the tdtddata objects. This happens only if
+tmpDraw methods of the tdtddata objects. This happens only if
 the current QuadTree object is visible. Current clip region data is
-obtained from LayoutCanvas. In a sence this method is the same as openGL_draw
+obtained from LayoutCanvas. In a sence this method is the same as openGlDraw
 without fill and not handling selected shapes*/
 void laydata::QuadTree::motion_draw(const layprop::DrawProperties& drawprop,
                                                    ctmqueue& transtack) const {
@@ -1008,7 +1008,7 @@ laydata::TdtData* laydata::TdtLayer::addtext(std::string text,
 }
 
 /*! A temporary Draw (during move/copy operations) of the container contents
- on the screen using the virtual QuadTree::tmp_draw() method of the
+ on the screen using the virtual QuadTree::tmpDraw() method of the
  parent object. */
 void laydata::TdtLayer::motion_draw(const layprop::DrawProperties& drawprop,
                                                  ctmqueue& transtack) const {

@@ -1074,7 +1074,7 @@ void GDSin::GdsStructure::importBox(GdsInFile* cf, laydata::TdtCell* dst_cell, c
                          << " }";
                      tell_log(console::MT_ERROR, ost.str());
                   }
-                  laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->securelayer(tdtlaynum));
+                  laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->secureLayer(tdtlaynum));
                   if (check.box())  dwl->addbox(plist[0], plist[2], false);
                   else              dwl->addpoly(plist,false);
                }
@@ -1137,7 +1137,7 @@ void GDSin::GdsStructure::importPoly(GdsInFile* cf, laydata::TdtCell* dst_cell, 
                          << " }";
                      tell_log(console::MT_ERROR, ost.str());
                   }
-                  laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->securelayer(tdtlaynum));
+                  laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->secureLayer(tdtlaynum));
                   if (check.box())  dwl->addbox(plist[0], plist[2], false);
                   else              dwl->addpoly(plist,false);
                }
@@ -1218,7 +1218,7 @@ void GDSin::GdsStructure::importPath(GdsInFile* cf, laydata::TdtCell* dst_cell, 
                               << " }";
                         tell_log(console::MT_ERROR, ost.str());
                      }
-                     laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->securelayer(tdtlaynum));
+                     laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->secureLayer(tdtlaynum));
                      dwl->addwire(plist, width,false);
                   }
                   else
@@ -1309,7 +1309,7 @@ void GDSin::GdsStructure::importText(GdsInFile* cf, laydata::TdtCell* dst_cell, 
             case gds_ENDEL://end of element, exit point
                if ( theLayMap.getTdtLay(tdtlaynum, layer, singleType) )
                {
-                  laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->securelayer(tdtlaynum));
+                  laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->secureLayer(tdtlaynum));
                   // @FIXME absolute magnification, absolute angle should be reflected somehow!!!
                   dwl->addtext(tString,
                               CTM( magnPoint,
@@ -1560,7 +1560,7 @@ void GDSin::Gds2Ted::run(const nameList& top_str_names, bool recursive, bool ove
       catch (EXPTNreadGDS) {tell_log(console::MT_INFO, "Conversion aborted with errors");}
       TpdPost::toped_status(console::TSTS_PRGRSBAROFF);
       _src_lib->closeFile();
-      (*_tdt_db)()->recreate_hierarchy(_tdt_db);
+      (*_tdt_db)()->recreateHierarchy(_tdt_db);
    }
 }
 
@@ -1589,7 +1589,7 @@ void GDSin::Gds2Ted::convert(GDSin::GdsStructure* src_structure, bool overwrite)
 {
    std::string gname = src_structure->strctName();
    // check that destination structure with this name exists
-   laydata::TdtCell* dst_structure = static_cast<laydata::TdtCell*>((*_tdt_db)()->checkcell(gname));
+   laydata::TdtCell* dst_structure = static_cast<laydata::TdtCell*>((*_tdt_db)()->checkCell(gname));
    std::ostringstream ost; ost << "GDS import: ";
    if (NULL != dst_structure)
    {
@@ -1614,7 +1614,7 @@ void GDSin::Gds2Ted::convert(GDSin::GdsStructure* src_structure, bool overwrite)
       // call the cell converter
       src_structure->import(_src_lib, dst_structure, _tdt_db, _theLayMap);
       // and finally - register the cell
-      (*_tdt_db)()->registercellread(gname, dst_structure);
+      (*_tdt_db)()->registerCellRead(gname, dst_structure);
    }
 }
 

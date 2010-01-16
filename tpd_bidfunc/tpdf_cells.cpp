@@ -54,9 +54,9 @@ void tellstdfunc::stdNEWCELL::undo()
    std::string  cname = getStringValue(UNDOPstack, true);
    laydata::TdtDesign* ATDB = DATC->lockDB(false);
        // make sure cname exists ...
-      assert(ATDB->checkcell(cname));
+      assert(ATDB->checkCell(cname));
       // ... and is not active
-      assert(cname != ATDB->activecellname());
+      assert(cname != ATDB->activeCellName());
       // gather the parent cells
       laydata::CellDefList parentCells;
       ATDB->collectParentCells(cname, parentCells);
@@ -64,7 +64,7 @@ void tellstdfunc::stdNEWCELL::undo()
       {
          // if no parent cells - it means that a simple "newcell" was
          // executed - so use the conventional remove cell
-         laydata::TdtCell* rmvdcell = ATDB->removecell(cname,NULL, DATC->TEDLIB());
+         laydata::TdtCell* rmvdcell = ATDB->removeCell(cname,NULL, DATC->TEDLIB());
          delete (rmvdcell);
       }
       else
@@ -79,7 +79,7 @@ int tellstdfunc::stdNEWCELL::execute()
 {
    std::string nm = getStringValue();
    laydata::TdtDesign* ATDB = DATC->lockDB(false);
-   laydata::TdtCell* new_cell = ATDB->addcell(nm, DATC->TEDLIB());
+   laydata::TdtCell* new_cell = ATDB->addCell(nm, DATC->TEDLIB());
    DATC->unlockDB();
    if (NULL != new_cell)
    {
@@ -124,9 +124,9 @@ void tellstdfunc::stdREMOVECELL::undo()
 
    laydata::TdtDesign* ATDB = DATC->lockDB();
    // first add a cell
-   ATDB->addthiscell(rmvdcell, DATC->TEDLIB());
+   ATDB->addThisCell(rmvdcell, DATC->TEDLIB());
    // add the cell contents back
-   rmvdcell->addlist(ATDB, get_shlaylist(pl));
+   rmvdcell->addList(ATDB, get_shlaylist(pl));
    DATC->unlockDB();
    // finally - clean-up behind
    delete pl;
@@ -138,14 +138,14 @@ int tellstdfunc::stdREMOVECELL::execute()
    laydata::AtticList* cell_contents = NULL;
    laydata::TdtCell*   rmvdcell      = NULL;
    laydata::TdtDesign* ATDB = DATC->lockDB(false);
-      if (!ATDB->checkcell(cname))
+      if (!ATDB->checkCell(cname))
       {
          std::string news = "Cell \"";
          news += cname; news += "\" doesn't exists. Nothing to remove";
          tell_log(console::MT_ERROR,news);
 
       }
-      else if (cname == ATDB->activecellname())
+      else if (cname == ATDB->activeCellName())
       {
          tell_log(console::MT_ERROR,"Active cell can't be removed");
       }
@@ -156,7 +156,7 @@ int tellstdfunc::stdREMOVECELL::execute()
          if (parentCells.empty())
          {
             cell_contents = DEBUG_NEW laydata::AtticList();
-            rmvdcell = ATDB->removecell(cname,cell_contents, DATC->TEDLIB());
+            rmvdcell = ATDB->removeCell(cname,cell_contents, DATC->TEDLIB());
          }
          else
          {
@@ -199,14 +199,14 @@ int tellstdfunc::stdREMOVECELL::execute()
 //{
 //   std::string cname = getStringValue();
 //   laydata::TdtDesign* ATDB = DATC->lockDB(false);
-//      if (!ATDB->checkcell(cname))
+//      if (!ATDB->checkCell(cname))
 //      {
 //         std::string news = "Cell \"";
 //         news += cname; news += "\" doesn't exists. Nothing to remove";
 //         tell_log(console::MT_ERROR,news);
 //
 //      }
-//      else if (cname == ATDB->activecellname())
+//      else if (cname == ATDB->activeCellName())
 //      {
 //         tell_log(console::MT_ERROR,"Active cell can't be removed");
 //      }
@@ -255,11 +255,11 @@ void tellstdfunc::stdOPENCELL::undo()
    TEUNDO_DEBUG("opencell( string ) UNDO");
    DWordSet unselable = PROPC->allUnselectable();
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      VERIFY(ATDB->editprev(true));
-      TpdPost::celltree_open(ATDB->activecellname());
+      VERIFY(ATDB->editPrev(true));
+      TpdPost::celltree_open(ATDB->activeCellName());
       telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       ATDB->selectFromList(get_ttlaylist(selected), unselable);
-      DBbox* ovl  = DEBUG_NEW DBbox(ATDB->activeoverlap());
+      DBbox* ovl  = DEBUG_NEW DBbox(ATDB->activeOverlap());
    DATC->unlockDB();
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(tui::ZOOM_WINDOW);
@@ -271,10 +271,10 @@ int tellstdfunc::stdOPENCELL::execute()
 {
    std::string nm = getStringValue();
    laydata::TdtDesign* ATDB = DATC->lockDB(false);
-      std::string oldnm = ATDB->activecellname();
+      std::string oldnm = ATDB->activeCellName();
       telldata::ttlist* selected = NULL;
-      if ("" != oldnm)  selected = make_ttlaylist(ATDB->shapesel());
-      if (ATDB->opencell(nm))
+      if ("" != oldnm)  selected = make_ttlaylist(ATDB->shapeSel());
+      if (ATDB->openCell(nm))
       {
          PROPC->clearRulers();
          if (oldnm != "")
@@ -282,7 +282,7 @@ int tellstdfunc::stdOPENCELL::execute()
             UNDOcmdQ.push_front(this);
             UNDOPstack.push_front(selected);
          }
-         DBbox* ovl  = DEBUG_NEW DBbox(ATDB->activeoverlap());
+         DBbox* ovl  = DEBUG_NEW DBbox(ATDB->activeOverlap());
 /*-!-*/  DATC->unlockDB();
          if (*ovl == DEFAULT_OVL_BOX) *ovl = DEFAULT_ZOOM_BOX;
          TpdPost::celltree_open(nm);
@@ -325,12 +325,12 @@ void tellstdfunc::stdEDITPUSH::undo()
    TEUNDO_DEBUG("editpush( point ) UNDO");
    DWordSet unselable = PROPC->allUnselectable();
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      VERIFY(ATDB->editprev(true));
-      TpdPost::celltree_open(ATDB->activecellname());
+      VERIFY(ATDB->editPrev(true));
+      TpdPost::celltree_open(ATDB->activeCellName());
       telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       ATDB->selectFromList(get_ttlaylist(selected), unselable);
    DATC->unlockDB();
-   std::string news("Cell "); news += ATDB->activecellname(); news += " is opened";
+   std::string news("Cell "); news += ATDB->activeCellName(); news += " is opened";
    tell_log(console::MT_INFO,news);
    delete selected;
    RefreshGL();
@@ -343,12 +343,12 @@ int tellstdfunc::stdEDITPUSH::execute()
    TP p1DB = TP(p1->x(), p1->y(), DBscale);
    DWordSet unselable = PROPC->allUnselectable();
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      telldata::ttlist* selected = make_ttlaylist(ATDB->shapesel());
-      if (ATDB->editpush(p1DB, unselable))
+      telldata::ttlist* selected = make_ttlaylist(ATDB->shapeSel());
+      if (ATDB->editPush(p1DB, unselable))
       {
          UNDOcmdQ.push_front(this);
          UNDOPstack.push_front(selected);
-         std::string name = ATDB->activecellname();
+         std::string name = ATDB->activeCellName();
 /*-!-*/  DATC->unlockDB();
          TpdPost::celltree_highlight(name);
          std::string news("Cell "); news += name; news += " is opened";
@@ -381,12 +381,12 @@ void tellstdfunc::stdEDITPOP::undo()
    TEUNDO_DEBUG("editpop( ) UNDO");
    DWordSet unselable = PROPC->allUnselectable();
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      VERIFY(ATDB->editprev(true));
-      TpdPost::celltree_open(ATDB->activecellname());
+      VERIFY(ATDB->editPrev(true));
+      TpdPost::celltree_open(ATDB->activeCellName());
       telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       ATDB->selectFromList(get_ttlaylist(selected), unselable);
    DATC->unlockDB();
-   std::string news("Cell "); news += ATDB->activecellname(); news += " is opened";
+   std::string news("Cell "); news += ATDB->activeCellName(); news += " is opened";
    tell_log(console::MT_INFO,news);
    delete selected;
    RefreshGL();
@@ -395,12 +395,12 @@ void tellstdfunc::stdEDITPOP::undo()
 int tellstdfunc::stdEDITPOP::execute()
 {
    laydata::TdtDesign* ATDB = DATC->lockDB();
-   telldata::ttlist* selected = make_ttlaylist(ATDB->shapesel());
-      if (ATDB->editpop())
+   telldata::ttlist* selected = make_ttlaylist(ATDB->shapeSel());
+      if (ATDB->editPop())
       {
          UNDOcmdQ.push_front(this);
          UNDOPstack.push_front(selected);
-         std::string name = ATDB->activecellname();
+         std::string name = ATDB->activeCellName();
 /*-!-*/  DATC->unlockDB();
          TpdPost::celltree_highlight(name);
          std::string news("Cell "); news += name; news += " is opened";
@@ -433,12 +433,12 @@ void tellstdfunc::stdEDITPREV::undo()
    TEUNDO_DEBUG("editpop( ) UNDO");
    DWordSet unselable = PROPC->allUnselectable();
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      VERIFY(ATDB->editprev(true));
-      TpdPost::celltree_open(ATDB->activecellname());
+      VERIFY(ATDB->editPrev(true));
+      TpdPost::celltree_open(ATDB->activeCellName());
       telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       ATDB->selectFromList(get_ttlaylist(selected), unselable);
    DATC->unlockDB();
-   std::string news("Cell "); news += ATDB->activecellname(); news += " is opened";
+   std::string news("Cell "); news += ATDB->activeCellName(); news += " is opened";
    tell_log(console::MT_INFO,news);
    delete selected;
    RefreshGL();
@@ -447,12 +447,12 @@ void tellstdfunc::stdEDITPREV::undo()
 int tellstdfunc::stdEDITPREV::execute()
 {
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      telldata::ttlist* selected = make_ttlaylist(ATDB->shapesel());
-      if (ATDB->editprev(false))
+      telldata::ttlist* selected = make_ttlaylist(ATDB->shapeSel());
+      if (ATDB->editPrev(false))
       {
          UNDOcmdQ.push_front(this);
          UNDOPstack.push_front(selected);
-         std::string name = ATDB->activecellname();
+         std::string name = ATDB->activeCellName();
 /*-!-*/  DATC->unlockDB();
          std::string news("Cell "); news += name; news += " is opened";
          tell_log(console::MT_INFO,news);
@@ -485,12 +485,12 @@ void tellstdfunc::stdEDITTOP::undo()
    TEUNDO_DEBUG("editpop( ) UNDO");
    DWordSet unselable = PROPC->allUnselectable();
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      VERIFY(ATDB->editprev(true));
-      TpdPost::celltree_open(ATDB->activecellname());
+      VERIFY(ATDB->editPrev(true));
+      TpdPost::celltree_open(ATDB->activeCellName());
       telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       ATDB->selectFromList(get_ttlaylist(selected), unselable);
    DATC->unlockDB();
-   std::string news("Cell "); news += ATDB->activecellname(); news += " is opened";
+   std::string news("Cell "); news += ATDB->activeCellName(); news += " is opened";
    tell_log(console::MT_INFO,news);
    delete selected;
    RefreshGL();
@@ -499,12 +499,12 @@ void tellstdfunc::stdEDITTOP::undo()
 int tellstdfunc::stdEDITTOP::execute()
 {
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      telldata::ttlist* selected = make_ttlaylist(ATDB->shapesel());
-      if (ATDB->edittop())
+      telldata::ttlist* selected = make_ttlaylist(ATDB->shapeSel());
+      if (ATDB->editTop())
       {
          UNDOcmdQ.push_front(this);
          UNDOPstack.push_front(selected);
-         std::string name = ATDB->activecellname();
+         std::string name = ATDB->activeCellName();
 /*-!-*/  DATC->unlockDB();
          TpdPost::celltree_highlight(name);
          std::string news("Cell "); news += name; news += " is opened";
@@ -544,11 +544,11 @@ void tellstdfunc::stdGROUP::undo()
    std::string  cname = getStringValue(UNDOPstack, true);
    laydata::TdtDesign* ATDB = DATC->lockDB();
       ATDB->selectFromList(get_ttlaylist(pl), unselable);
-      ATDB->ungroup_this(ATDB->ungroup_prep(DATC->TEDLIB()));
+      ATDB->ungroupThis(ATDB->ungroupPrep(DATC->TEDLIB()));
        // make sure cname exists ...
-      assert(ATDB->checkcell(cname));
+      assert(ATDB->checkCell(cname));
       // ... and is not active
-      assert(cname != ATDB->activecellname());
+      assert(cname != ATDB->activeCellName());
       // gather the parent cells
       laydata::CellDefList parentCells;
       ATDB->collectParentCells(cname, parentCells);
@@ -556,7 +556,7 @@ void tellstdfunc::stdGROUP::undo()
       {
          // if no parent cells - it means that a simple "group" was
          // executed - so use the conventional remove cell
-         laydata::TdtCell* rmvdcell = ATDB->removecell(cname,NULL, DATC->TEDLIB());
+         laydata::TdtCell* rmvdcell = ATDB->removeCell(cname,NULL, DATC->TEDLIB());
          delete (rmvdcell);
       }
       else
@@ -573,13 +573,13 @@ int tellstdfunc::stdGROUP::execute()
 {
    std::string name = getStringValue();
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      bool group_sucessful = ATDB->group_selected(name, DATC->TEDLIB());
+      bool group_sucessful = ATDB->groupSelected(name, DATC->TEDLIB());
    DATC->unlockDB();
    if (group_sucessful)
    {
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(name));
-      UNDOPstack.push_front(make_ttlaylist(ATDB->shapesel()));
+      UNDOPstack.push_front(make_ttlaylist(ATDB->shapeSel()));
       LogFile << LogFile.getFN() << "(\""<< name << "\");"; LogFile.flush();
       UpdateLV();
    }
@@ -605,7 +605,7 @@ void tellstdfunc::stdUNGROUP::undo()
    DWordSet unselable = PROPC->allUnselectable();
    laydata::TdtDesign* ATDB = DATC->lockDB();
       // first save the list of all currently selected components
-      laydata::SelectList *savelist = ATDB->copy_selist();
+      laydata::SelectList *savelist = ATDB->copySeList();
       // now unselect all
       ATDB->unselectAll();
       // get the list of shapes produced by the ungroup from the UNDO stack
@@ -613,11 +613,11 @@ void tellstdfunc::stdUNGROUP::undo()
       // select them ...
       ATDB->selectFromList(get_ttlaylist(pl), unselable);
       //... and delete them cleaning up the memory (don't store in the Attic)
-      ATDB->delete_selected(NULL, DATC->TEDLIB());
+      ATDB->deleteSelected(NULL, DATC->TEDLIB());
       // now get the list of the ungroupped cell ref's from the UNDO stack
       telldata::ttlist* pl1 = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       // and add them to the target cell
-      ATDB->addlist(get_shlaylist(pl1));
+      ATDB->addList(get_shlaylist(pl1));
       // select the restored cell refs
       ATDB->selectFromList(get_ttlaylist(pl1), unselable);
       // now restore selection
@@ -634,7 +634,7 @@ void tellstdfunc::stdUNGROUP::undo()
 int tellstdfunc::stdUNGROUP::execute()
 {
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      laydata::ShapeList* cells4u = ATDB->ungroup_prep(DATC->TEDLIB());
+      laydata::ShapeList* cells4u = ATDB->ungroupPrep(DATC->TEDLIB());
    DATC->unlockDB();
    if (cells4u->empty())
    {
@@ -651,7 +651,7 @@ int tellstdfunc::stdUNGROUP::execute()
       ATDB = DATC->lockDB();
          // and then ungroup and push the list of the shapes produced in
          //result of the ungroup
-         laydata::AtticList* undol2 = ATDB->ungroup_this(cells4u);
+         laydata::AtticList* undol2 = ATDB->ungroupThis(cells4u);
       DATC->unlockDB();
       UNDOPstack.push_front(make_ttlaylist(undol2));
       // a bit funny, but effective way of cleaning-up cells4u

@@ -293,7 +293,7 @@ int tellstdfunc::stdHIDELAYER::execute()
          UNDOcmdQ.push_front(this);
          UNDOPstack.push_front(DEBUG_NEW telldata::ttint(layno));
          UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
-         laydata::SelectList *listselected = ATDB->shapesel();
+         laydata::SelectList *listselected = ATDB->shapeSel();
          laydata::SelectList *todslct = DEBUG_NEW laydata::SelectList();
          if (hide && (listselected->end() != listselected->find(layno)))
          {
@@ -375,7 +375,7 @@ int tellstdfunc::stdHIDELAYERS::execute()
    {
       telldata::ttlist* undolaylist = DEBUG_NEW telldata::ttlist(telldata::tn_int);
       laydata::TdtDesign* ATDB = DATC->lockDB();
-      laydata::SelectList *listselected = ATDB->shapesel();
+      laydata::SelectList *listselected = ATDB->shapeSel();
       laydata::SelectList *todslct = DEBUG_NEW laydata::SelectList();
       // "preliminary" pass - to collect the selected shapes in the layers, targeted
       // for locking and to issue some warning messages if appropriate
@@ -652,7 +652,7 @@ int tellstdfunc::stdLOCKLAYER::execute()
          UNDOcmdQ.push_front(this);
          UNDOPstack.push_front(DEBUG_NEW telldata::ttint(layno));
          UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!lock));
-         laydata::SelectList *listselected = ATDB->shapesel();
+         laydata::SelectList *listselected = ATDB->shapeSel();
          laydata::SelectList *todslct = DEBUG_NEW laydata::SelectList();
          if (lock && (listselected->end() != listselected->find(layno)))
          {
@@ -733,7 +733,7 @@ int tellstdfunc::stdLOCKLAYERS::execute()
       DWordSet unselable;
       telldata::ttlist* undolaylist = DEBUG_NEW telldata::ttlist(telldata::tn_int);
       laydata::TdtDesign* ATDB = DATC->lockDB();
-      laydata::SelectList *listselected = ATDB->shapesel();
+      laydata::SelectList *listselected = ATDB->shapeSel();
       laydata::SelectList *todslct = DEBUG_NEW laydata::SelectList();
       // "preliminary" pass - to collect the selected shapes in the layers, targeted
       // for locking and to issue some warning messages if appropriate
@@ -989,7 +989,7 @@ int tellstdfunc::stdLOADLAYSTAT::execute()
          hll.insert(lockl.begin(), lockl.end());
          DWordSet unselable = PROPC->allUnselectable();
          laydata::TdtDesign* ATDB = DATC->lockDB();
-            laydata::SelectList *listselected = ATDB->shapesel();
+            laydata::SelectList *listselected = ATDB->shapeSel();
             // first thing is to pick-up the selected shapes of the layers which
             // will be locked or hidden
             for (WordSet::const_iterator CL = hll.begin(); CL != hll.end(); CL++)

@@ -264,7 +264,7 @@ tellstdfunc::stdZOOMALL::stdZOOMALL(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdZOOMALL::execute() {
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      DBbox* ovl  = DEBUG_NEW DBbox(ATDB->activeoverlap());
+      DBbox* ovl  = DEBUG_NEW DBbox(ATDB->activeOverlap());
    DATC->unlockDB();
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(tui::ZOOM_WINDOW);
@@ -387,25 +387,25 @@ UNDO/REDO operation - some preliminary thoughts
 |  "tdtread"       |  TDTread          |   OK   |    x   |   -*   | issue a warning     |
 |  "tdtsave"       |  TDTsave          |   OK   |    x   |   -    |                     |
 |  "tdtsaveas"     |  TDTsaveas        |   OK   |    x   |   -    |                     |
-|  "opencell"      |  stdOPENCELL      |   OK   |    x   |   x*   | if not initial      |
+|  "openCell"      |  stdOPENCELL      |   OK   |    x   |   x*   | if not initial      |
 |  "usinglayer"    |  stdUSINGLAYER    |   OK   |    x   |   x    |                     |
-|  "addbox"        |  stdADDBOX        |   OK   |    x   |   x    |                     |
-|  "addbox"        |  stdADDBOX_D      |   OK   |    x   |   x    |                     |
-|  "addbox"        |  stdADDBOXr       |   OK   |    x   |   x    |                     |
-|  "addbox"        |  stdADDBOXr_D     |   OK   |    x   |   x    |                     |
-|  "addbox"        |  stdADDBOXp       |   OK   |    x   |   x    |                     |
-|  "addbox"        |  stdADDBOXp_D     |   OK   |    x   |   x    |                     |
-|  "addbox"        |  stdDRAWBOX       |   OK   |    x*  |   x    |   as add<blah-blah> |
-|  "addbox"        |  stdDRAWBOX_D     |   OK   |    x*  |   x    |   as add<blah-blah> |
-|  "addpoly"       |  stdADDPOLY       |   OK   |    x   |   x    |                     |
-|  "addpoly"       |  stdADDPOLY_D     |   OK   |    x   |   x    |                     |
-|  "addpoly"       |  stdDRAWPOLY      |   OK   |    x*  |   x    |   as add<blah-blah> |
-|  "addpoly"       |  stdDRAWPOLY_D    |   OK   |    x*  |   x    |   as add<blah-blah> |
-|  "addwire"       |  stdADDWIRE       |   OK   |    x   |   x    |                     |
-|  "addwire"       |  stdADDWIRE_D     |   OK   |    x   |   x    |                     |
-|  "addwire"       |  stdDRAWWIRE      |   OK   |    x*  |   x    |   as add<blah-blah> |
-|  "addwire"       |  stdDRAWWIRE_D    |   OK   |    x*  |   x    |   as add<blah-blah> |
-|  "addtext"       |  stdADDTEXT       |   OK   |    x   |   x    |                     |
+|  "addBox"        |  stdADDBOX        |   OK   |    x   |   x    |                     |
+|  "addBox"        |  stdADDBOX_D      |   OK   |    x   |   x    |                     |
+|  "addBox"        |  stdADDBOXr       |   OK   |    x   |   x    |                     |
+|  "addBox"        |  stdADDBOXr_D     |   OK   |    x   |   x    |                     |
+|  "addBox"        |  stdADDBOXp       |   OK   |    x   |   x    |                     |
+|  "addBox"        |  stdADDBOXp_D     |   OK   |    x   |   x    |                     |
+|  "addBox"        |  stdDRAWBOX       |   OK   |    x*  |   x    |   as add<blah-blah> |
+|  "addBox"        |  stdDRAWBOX_D     |   OK   |    x*  |   x    |   as add<blah-blah> |
+|  "addPoly"       |  stdADDPOLY       |   OK   |    x   |   x    |                     |
+|  "addPoly"       |  stdADDPOLY_D     |   OK   |    x   |   x    |                     |
+|  "addPoly"       |  stdDRAWPOLY      |   OK   |    x*  |   x    |   as add<blah-blah> |
+|  "addPoly"       |  stdDRAWPOLY_D    |   OK   |    x*  |   x    |   as add<blah-blah> |
+|  "addWire"       |  stdADDWIRE       |   OK   |    x   |   x    |                     |
+|  "addWire"       |  stdADDWIRE_D     |   OK   |    x   |   x    |                     |
+|  "addWire"       |  stdDRAWWIRE      |   OK   |    x*  |   x    |   as add<blah-blah> |
+|  "addWire"       |  stdDRAWWIRE_D    |   OK   |    x*  |   x    |   as add<blah-blah> |
+|  "addText"       |  stdADDTEXT       |   OK   |    x   |   x    |                     |
 |  "cellref"       |  stdCELLREF       |   OK   |    x   |   x    |                     |
 |  "cellaref"      |  stdCELLAREF      |   OK   |    x   |   x    |                     |
 |  "select"        |  stdSELECT        |   OK   |    x   |   x    |                     |

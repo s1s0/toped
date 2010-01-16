@@ -87,7 +87,7 @@ public:
    const laydata::CellList&   cells();
    laydata::TdtLibDir*        TEDLIB() {return &_TEDLIB;}
    laydata::LibCellLists*     getCells(int libID);
-   unsigned int               numselected()           {return (NULL != _TEDLIB()) ? _TEDLIB()->numselected() : 0 ;}
+   unsigned int               numselected()           {return (NULL != _TEDLIB()) ? _TEDLIB()->numSelected() : 0 ;}
    void                       setcmdlayer(word layno) {_curcmdlay = layno;}
    word                       curcmdlay() const       {return _curcmdlay;}
    std::string                tedfilename() const     {return _tedfilename;};
@@ -106,7 +106,7 @@ protected:
    std::string                _tedfilename;
    bool                       _neversaved;
    void                       openGL_draw(const CTM&);
-   void                       openGL_render(const CTM&); // alternative to openGL_draw
+   void                       openGL_render(const CTM&); // alternative to openGlDraw
 private:
    word                       _curcmdlay;    // layer used during current drawing operation
    bool                       _drawruler;    // draw a ruler while composing a shape interactively

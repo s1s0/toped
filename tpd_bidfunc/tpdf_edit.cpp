@@ -56,7 +56,7 @@ void tellstdfunc::stdCOPYSEL::undo()
    DWordSet unselable = PROPC->allUnselectable();
    laydata::TdtDesign* ATDB = DATC->lockDB();
       //clean up the memory (don't store in the Attic)
-      ATDB->delete_selected(NULL, DATC->TEDLIB());
+      ATDB->deleteSelected(NULL, DATC->TEDLIB());
       ATDB->selectFromList(get_ttlaylist(pl), unselable);
    DATC->unlockDB();
    delete (pl);
@@ -70,9 +70,9 @@ int tellstdfunc::stdCOPYSEL::execute()
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    real DBscale = PROPC->DBscale();
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      UNDOPstack.push_front(make_ttlaylist(ATDB->shapesel()));
-      ATDB->copy_selected(TP(p1->x(), p1->y(), DBscale), TP(p2->x(), p2->y(), DBscale));
-      OPstack.push(make_ttlaylist(ATDB->shapesel()));
+      UNDOPstack.push_front(make_ttlaylist(ATDB->shapeSel()));
+      ATDB->copySelected(TP(p1->x(), p1->y(), DBscale), TP(p2->x(), p2->y(), DBscale));
+      OPstack.push(make_ttlaylist(ATDB->shapeSel()));
    DATC->unlockDB();
    LogFile << LogFile.getFN() << "("<< *p1 << "," << *p2 << ");"; LogFile.flush();
    delete p1; delete p2;
@@ -142,18 +142,18 @@ void tellstdfunc::stdMOVESEL::undo()
       laydata::SelectList* fadead[3];
      byte i;
       for (i = 0; i < 3; fadead[i++] = DEBUG_NEW laydata::SelectList());
-      ATDB->move_selected(TP(p1->x(), p1->y(), DBscale), TP(p2->x(), p2->y(), DBscale),fadead);
+      ATDB->moveSelected(TP(p1->x(), p1->y(), DBscale), TP(p2->x(), p2->y(), DBscale),fadead);
       //@TODO Here - an internal check can be done - all 3 of the fadead lists
       // MUST be empty, otherwise - god knows what's wrong!
       for (i = 0; i < 3; delete fadead[i++]);
       ATDB->selectFromList(get_ttlaylist(failed), unselable);
       // put back the replaced (deleted) shapes
-      ATDB->addlist(get_shlaylist(deleted));
+      ATDB->addList(get_shlaylist(deleted));
       // and select them
       ATDB->selectFromList(get_ttlaylist(deleted), unselable);
       // delete the added shapes
       for (word j = 0 ; j < added->mlist().size(); j++) {
-         ATDB->destroy_this(static_cast<telldata::ttlayout*>(added->mlist()[j])->data(),
+         ATDB->destroyThis(static_cast<telldata::ttlayout*>(added->mlist()[j])->data(),
                            static_cast<telldata::ttlayout*>(added->mlist()[j])->layer(),
                            DATC->TEDLIB());
       }
@@ -173,13 +173,13 @@ int tellstdfunc::stdMOVESEL::execute()
    UNDOPstack.push_front(OPstack.top());
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    real DBscale = PROPC->DBscale();
-   // move_selected returns 3 select lists : Failed/Deleted/Added
+   // moveSelected returns 3 select lists : Failed/Deleted/Added
    // This is because of the modify operations
    laydata::SelectList* fadead[3];
    byte i;
    for (i = 0; i < 3; fadead[i++] = DEBUG_NEW laydata::SelectList());
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      ATDB->move_selected(TP(p1->x(), p1->y(), DBscale), TP(p2->x(), p2->y(), DBscale), fadead);
+      ATDB->moveSelected(TP(p1->x(), p1->y(), DBscale), TP(p2->x(), p2->y(), DBscale), fadead);
       // save for undo operations ...
       UNDOPstack.push_front(make_ttlaylist(fadead[0])); // first failed
       UNDOPstack.push_front(make_ttlaylist(fadead[1])); // then deleted
@@ -267,19 +267,19 @@ void tellstdfunc::stdROTATESEL::undo()
       laydata::SelectList* fadead[3];
       byte i;
       for (i = 0; i < 3; fadead[i++] = DEBUG_NEW laydata::SelectList());
-      ATDB->rotate_selected(TP(p1->x(), p1->y(), DBscale), angle, fadead);
+      ATDB->rotateSelected(TP(p1->x(), p1->y(), DBscale), angle, fadead);
       //@TODO Here - an internal check can be done - all 3 of the fadead lists
       // MUST be empty, otherwise - god knows what's wrong!
       for (i = 0; i < 3; delete fadead[i++]);
       ATDB->selectFromList(get_ttlaylist(failed), unselable);
       // put back the replaced (deleted) shapes
-      ATDB->addlist(get_shlaylist(deleted));
+      ATDB->addList(get_shlaylist(deleted));
       // and select them
       ATDB->selectFromList(get_ttlaylist(deleted), unselable);
       // delete the added shapes
       for (word j = 0 ; j < added->mlist().size(); j++)
       {
-         ATDB->destroy_this(static_cast<telldata::ttlayout*>(added->mlist()[j])->data(),
+         ATDB->destroyThis(static_cast<telldata::ttlayout*>(added->mlist()[j])->data(),
                            static_cast<telldata::ttlayout*>(added->mlist()[j])->layer(),
                            DATC->TEDLIB());
       }
@@ -299,14 +299,14 @@ int tellstdfunc::stdROTATESEL::execute()
    real   angle  = getOpValue();
    UNDOPstack.push_front(DEBUG_NEW telldata::ttreal(angle));
    real DBscale = PROPC->DBscale();
-   // rotate_selected returns 3 select lists : Failed/Deleted/Added
+   // rotateSelected returns 3 select lists : Failed/Deleted/Added
    // This is because of the box rotation in which case box has to be converted to polygon
    // Failed shapes here should not exist but no explicit check for this
    laydata::SelectList* fadead[3];
    byte i;
    for (i = 0; i < 3; fadead[i++] = DEBUG_NEW laydata::SelectList());
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      ATDB->rotate_selected(TP(p1->x(), p1->y(), DBscale), angle, fadead);
+      ATDB->rotateSelected(TP(p1->x(), p1->y(), DBscale), angle, fadead);
       telldata::ttlist* added = make_ttlaylist(fadead[2]);
       DWordSet unselable = PROPC->allUnselectable();
       ATDB->selectFromList(get_ttlaylist(added), unselable);
@@ -365,7 +365,7 @@ void tellstdfunc::stdFLIPXSEL::undo()
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(UNDOPstack.front());UNDOPstack.pop_front();
    real DBscale = PROPC->DBscale();
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      ATDB->flip_selected(TP(p1->x(), p1->y(), DBscale), true);
+      ATDB->flipSelected(TP(p1->x(), p1->y(), DBscale), true);
    DATC->unlockDB();
    delete p1;
    RefreshGL();
@@ -378,7 +378,7 @@ int tellstdfunc::stdFLIPXSEL::execute()
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    real DBscale = PROPC->DBscale();
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      ATDB->flip_selected(TP(p1->x(), p1->y(), DBscale), true);
+      ATDB->flipSelected(TP(p1->x(), p1->y(), DBscale), true);
    DATC->unlockDB();
    LogFile << LogFile.getFN() << "("<< *p1 << ");"; LogFile.flush();
    //delete p1; undo will delete them
@@ -422,7 +422,7 @@ void tellstdfunc::stdFLIPYSEL::undo()
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(UNDOPstack.front());UNDOPstack.pop_front();
    real DBscale = PROPC->DBscale();
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      ATDB->flip_selected(TP(p1->x(), p1->y(), DBscale), false);
+      ATDB->flipSelected(TP(p1->x(), p1->y(), DBscale), false);
    DATC->unlockDB();
    delete p1;
    RefreshGL();
@@ -435,7 +435,7 @@ int tellstdfunc::stdFLIPYSEL::execute()
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    real DBscale = PROPC->DBscale();
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      ATDB->flip_selected(TP(p1->x(), p1->y(), DBscale), false);
+      ATDB->flipSelected(TP(p1->x(), p1->y(), DBscale), false);
    DATC->unlockDB();
    LogFile << LogFile.getFN() << "("<< *p1 << ");"; LogFile.flush();
    //delete p1; undo will delete them
@@ -496,7 +496,7 @@ void tellstdfunc::stdDELETESEL::undo()
       udurcells->clear();
       delete(udurcells);
    //
-      ATDB->addlist(get_shlaylist(und));
+      ATDB->addList(get_shlaylist(und));
       ATDB->selectFromList(get_ttlaylist(und), unselable);
    DATC->unlockDB();
    delete (und);
@@ -508,7 +508,7 @@ int tellstdfunc::stdDELETESEL::execute()
    UNDOcmdQ.push_front(this);
    laydata::AtticList* sh_delist = DEBUG_NEW laydata::AtticList();
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      ATDB->delete_selected(sh_delist, DATC->TEDLIB());
+      ATDB->deleteSelected(sh_delist, DATC->TEDLIB());
    DATC->unlockDB();
    UNDOPstack.push_front(make_ttlaylist(sh_delist));
    clean_atticlist(sh_delist); delete sh_delist;
@@ -550,19 +550,19 @@ void tellstdfunc::lgcCUTPOLY::undo()
       // select them ...
       ATDB->selectFromList(get_ttlaylist(pl), unselable);
       //... and delete them cleaning up the memory (don't store in the Attic)
-      ATDB->delete_selected(NULL, DATC->TEDLIB());
+      ATDB->deleteSelected(NULL, DATC->TEDLIB());
       delete pl;
       // now get the list of cuts ...
       pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       // select them ...
       ATDB->selectFromList(get_ttlaylist(pl), unselable);
       //... and delete them cleaning up the memory (don't store in the Attic)
-      ATDB->delete_selected(NULL, DATC->TEDLIB());
+      ATDB->deleteSelected(NULL, DATC->TEDLIB());
       delete pl;
       // now get the list of deleted shapes
       pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       // put them back
-      ATDB->addlist(get_shlaylist(pl));
+      ATDB->addList(get_shlaylist(pl));
       delete pl;
       // and finally, get the list of shapes being selected before the cut
       pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
@@ -588,16 +588,16 @@ int tellstdfunc::lgcCUTPOLY::execute()
          tell_log(console::MT_ERROR, "Invalid cutting polygon encountered");
       }
       else {
-         //cutpoly returns 3 Attic lists -> Delete/AddSelect/AddOnly,
+         //cutPoly returns 3 Attic lists -> Delete/AddSelect/AddOnly,
          // create and initialize them here
          laydata::AtticList* dasao[3];
          for (byte i = 0; i < 3; dasao[i++] = DEBUG_NEW laydata::AtticList());
          DWordSet unselable = PROPC->allUnselectable();
          laydata::TdtDesign* ATDB = DATC->lockDB();
-            if (ATDB->cutpoly(check.get_validated() ,dasao)) {
+            if (ATDB->cutPoly(check.get_validated() ,dasao)) {
                // push the command for undo
                UNDOcmdQ.push_front(this);
-               UNDOPstack.push_front(make_ttlaylist(ATDB->shapesel()));
+               UNDOPstack.push_front(make_ttlaylist(ATDB->shapeSel()));
                // unselect everything
                ATDB->unselectAll();
 
@@ -605,7 +605,7 @@ int tellstdfunc::lgcCUTPOLY::execute()
                // select the shapes to delete & delete them ...
                ATDB->selectFromList(get_ttlaylist(shdeleted), unselable);
                laydata::AtticList* sh_delist = DEBUG_NEW laydata::AtticList();
-               ATDB->delete_selected(sh_delist, DATC->TEDLIB());
+               ATDB->deleteSelected(sh_delist, DATC->TEDLIB());
                // ... not forgetting to save them in the undo data stack for undo
                UNDOPstack.push_front(make_ttlaylist(sh_delist));
                // clean-up the delete attic list
@@ -615,16 +615,16 @@ int tellstdfunc::lgcCUTPOLY::execute()
                // add the result of the cut...
                telldata::ttlist* shaddselect = make_ttlaylist(dasao[1]);
                telldata::ttlist* shaddonly = make_ttlaylist(dasao[2]);
-               ATDB->addlist(dasao[1]);
+               ATDB->addList(dasao[1]);
                UNDOPstack.push_front(shaddselect);
                // ... the cut-offs ....
-               ATDB->addlist(dasao[2]);
+               ATDB->addList(dasao[2]);
                UNDOPstack.push_front(shaddonly);
                // and finally select the_cut
                ATDB->selectFromList(get_ttlaylist(shaddselect), unselable);
                LogFile << "polycut("<< *pl << ");"; LogFile.flush();
                clean_atticlist(dasao[0]); delete (dasao[0]);
-               // delete dasao[1]; delete dasao[2]; - deleted by ATDB->addlist
+               // delete dasao[1]; delete dasao[2]; - deleted by ATDB->addList
             }
          DATC->unlockDB();
       }
@@ -702,12 +702,12 @@ void tellstdfunc::lgcMERGE::undo()
       // select them ...
       ATDB->selectFromList(get_ttlaylist(pl), unselable);
       //... and delete them cleaning up the memory (don't store in the Attic)
-      ATDB->delete_selected(NULL, DATC->TEDLIB());
+      ATDB->deleteSelected(NULL, DATC->TEDLIB());
       delete pl;
       // now get the list of deleted shapes
       pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       // put them back
-      ATDB->addlist(get_shlaylist(pl));
+      ATDB->addList(get_shlaylist(pl));
       delete pl;
       // and finally, get the list of shapes being selected before the cut
       pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
@@ -731,7 +731,7 @@ int tellstdfunc::lgcMERGE::execute()
       for (i = 0; i < 2; dasao[i++] = DEBUG_NEW laydata::AtticList());
       // create a list of currently selected shapes
       laydata::TdtDesign* ATDB = DATC->lockDB();
-         telldata::ttlist* listselected = make_ttlaylist(ATDB->shapesel());
+         telldata::ttlist* listselected = make_ttlaylist(ATDB->shapeSel());
          if (ATDB->merge(dasao)) {
 /*-!-*/     DATC->unlockDB();
             // push the command for undo
@@ -790,12 +790,12 @@ void tellstdfunc::lgcSTRETCH::undo()
       // select them ...
       ATDB->selectFromList(get_ttlaylist(pl), unselable);
       //... and delete them cleaning up the memory (don't store in the Attic)
-      ATDB->delete_selected(NULL, DATC->TEDLIB());
+      ATDB->deleteSelected(NULL, DATC->TEDLIB());
       delete pl;
       // now get the list of deleted shapes
       pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       // put them back
-      ATDB->addlist(get_shlaylist(pl));
+      ATDB->addList(get_shlaylist(pl));
       delete pl;
       // and finally, get the list of shapes being selected before the cut
       pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
@@ -833,7 +833,7 @@ int tellstdfunc::lgcSTRETCH::execute()
                // push the command for undo
                UNDOcmdQ.push_front(this);
                // put the list of selected shapes in undo stack
-               UNDOPstack.push_front(make_ttlaylist(ATDB->shapesel()));
+               UNDOPstack.push_front(make_ttlaylist(ATDB->shapeSel()));
                // unselect everything
                ATDB->unselectAll();
 
@@ -841,7 +841,7 @@ int tellstdfunc::lgcSTRETCH::execute()
                // select the shapes to delete & delete them ...
                ATDB->selectFromList(get_ttlaylist(shdeleted), unselable);
                laydata::AtticList* sh_delist = DEBUG_NEW laydata::AtticList();
-               ATDB->delete_selected(sh_delist, DATC->TEDLIB());
+               ATDB->deleteSelected(sh_delist, DATC->TEDLIB());
                // ... not forgetting to save them in the undo data stack for undo
                UNDOPstack.push_front(make_ttlaylist(sh_delist));
                // clean-up the delete attic list
@@ -850,13 +850,13 @@ int tellstdfunc::lgcSTRETCH::execute()
 
                // add the result of the expand/shrink...
                telldata::ttlist* shaddselect = make_ttlaylist(dasao[1]);
-               ATDB->addlist(dasao[1]);
+               ATDB->addList(dasao[1]);
                UNDOPstack.push_front(shaddselect);
                // and finally select the_cut
                ATDB->selectFromList(get_ttlaylist(shaddselect), unselable);
                LogFile << "resize("<< bfactor << ");"; LogFile.flush();
                clean_atticlist(dasao[0]); delete (dasao[0]);
-               // delete dasao[1]; delete dasao[2]; - deleted by ATDB->addlist
+               // delete dasao[1]; delete dasao[2]; - deleted by ATDB->addList
             }
             else
             {
@@ -899,7 +899,7 @@ void tellstdfunc::stdCHANGELAY::undo()
 int tellstdfunc::stdCHANGELAY::execute()
 {
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      laydata::SelectList *listselected = ATDB->shapesel();
+      laydata::SelectList *listselected = ATDB->shapeSel();
    DATC->unlockDB();
    if (listselected->empty())
    {
@@ -945,7 +945,7 @@ void tellstdfunc::stdCHANGEREF::undo()
    DWordSet unselable = PROPC->allUnselectable();
    laydata::TdtDesign* ATDB = DATC->lockDB();
       // first save the list of all currently selected components
-      laydata::SelectList *savelist = ATDB->copy_selist();
+      laydata::SelectList *savelist = ATDB->copySeList();
       // now unselect all
       ATDB->unselectAll();
       // get the list of new references from the UNDO stack
@@ -953,11 +953,11 @@ void tellstdfunc::stdCHANGEREF::undo()
       // select them ...
       ATDB->selectFromList(get_ttlaylist(pl), unselable);
       //... and delete them cleaning up the memory (don't store in the Attic)
-      ATDB->delete_selected(NULL, DATC->TEDLIB());
+      ATDB->deleteSelected(NULL, DATC->TEDLIB());
       // now get the list of the old cell ref's from the UNDO stack
       telldata::ttlist* pl1 = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       // and add them to the target cell
-      ATDB->addlist(get_shlaylist(pl1));
+      ATDB->addList(get_shlaylist(pl1));
       // select the restored cell refs
       ATDB->selectFromList(get_ttlaylist(pl1), unselable);
       // now restore selection
@@ -976,7 +976,7 @@ int tellstdfunc::stdCHANGEREF::execute()
    laydata::TdtDesign* ATDB = DATC->lockDB();
       bool refok = ATDB->checkValidRef(newref);
       if (refok)
-         cells4u = ATDB->ungroup_prep(DATC->TEDLIB());
+         cells4u = ATDB->ungroupPrep(DATC->TEDLIB());
    DATC->unlockDB();
    if (refok)
    {
@@ -988,7 +988,7 @@ int tellstdfunc::stdCHANGEREF::execute()
       else
       {
          ATDB = DATC->lockDB();
-            laydata::AtticList* undol2 = ATDB->changeref(cells4u, newref);
+            laydata::AtticList* undol2 = ATDB->changeRef(cells4u, newref);
          DATC->unlockDB();
          assert(NULL != undol2);
          UNDOcmdQ.push_front(this);
@@ -1028,7 +1028,7 @@ void tellstdfunc::stdCHANGESTRING::undo()
    DWordSet unselable = PROPC->allUnselectable();
    laydata::TdtDesign* ATDB = DATC->lockDB();
       // first save the list of all currently selected components
-      laydata::SelectList *savelist = ATDB->copy_selist();
+      laydata::SelectList *savelist = ATDB->copySeList();
       // now unselect all
       ATDB->unselectAll();
       // get the list of new texts from the UNDO stack
@@ -1036,11 +1036,11 @@ void tellstdfunc::stdCHANGESTRING::undo()
       // select them ...
       ATDB->selectFromList(get_ttlaylist(pl), unselable);
       //... and delete them cleaning up the memory (don't store in the Attic)
-      ATDB->delete_selected(NULL, DATC->TEDLIB());
+      ATDB->deleteSelected(NULL, DATC->TEDLIB());
       // now get the list of the old text objects from the UNDO stack
       telldata::ttlist* pl1 = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       // and add them to the target cell
-      ATDB->addlist(get_shlaylist(pl1));
+      ATDB->addList(get_shlaylist(pl1));
       // select the restored cell refs
       ATDB->selectFromList(get_ttlaylist(pl1), unselable);
       // now restore selection
@@ -1058,7 +1058,7 @@ int tellstdfunc::stdCHANGESTRING::execute()
    DWordSet unselable = PROPC->allUnselectable();
    laydata::TdtDesign* ATDB = DATC->lockDB();
       // first save the list of all currently selected components ...
-      laydata::SelectList* savelist = ATDB->copy_selist();
+      laydata::SelectList* savelist = ATDB->copySeList();
       // get a list of selected texts only
       laydata::SelectList* texts4u = filter_selist(savelist, laydata::_lmtext);
       if (texts4u->empty())
@@ -1080,7 +1080,7 @@ int tellstdfunc::stdCHANGESTRING::execute()
          ATDB->selectFromList(texts4u, unselable);
          // delete them from the DB - get back the list of deleted shapes.
          laydata::AtticList* fha = DEBUG_NEW laydata::AtticList();
-         ATDB->delete_selected(fha, DATC->TEDLIB());
+         ATDB->deleteSelected(fha, DATC->TEDLIB());
          // save the deleted shapes in the UNDO data stack
          UNDOPstack.push_front(make_ttlaylist(fha));
          // replace the strings
@@ -1089,7 +1089,7 @@ int tellstdfunc::stdCHANGESTRING::execute()
          // save the new texts in the UNDO data stack
          UNDOPstack.push_front(fhb);
          // add the new objects back to the DB
-         ATDB->addlist(get_shlaylist(fhb));
+         ATDB->addList(get_shlaylist(fhb));
          // now restore selection
          ATDB->selectFromList(savelist, unselable);
          ATDB->selectFromList(get_ttlaylist(fhb), unselable);

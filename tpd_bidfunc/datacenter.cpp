@@ -503,7 +503,7 @@ laydata::TdtDesign*  DataCenter::lockDB(bool checkACTcell)
 {
    if (_TEDLIB())
    {
-      if (checkACTcell) _TEDLIB()->check_active();
+      if (checkACTcell) _TEDLIB()->checkActive();
       while (wxMUTEX_NO_ERROR != _DBLock.TryLock());
       return _TEDLIB();
    }
@@ -681,18 +681,18 @@ void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,
    if (console::op_line == input_type) return;
    if (_TEDLIB())
    {
-      _TEDLIB()->check_active();
+      _TEDLIB()->checkActive();
       switch (input_type)
       {
-         case console::op_dbox:   _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::TdtTmpBox()  ); break;
-         case console::op_dpoly:  _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::TdtTmpPoly()) ; break;
+         case console::op_dbox:   _TEDLIB()->setTmpData( DEBUG_NEW laydata::TdtTmpBox()  ); break;
+         case console::op_dpoly:  _TEDLIB()->setTmpData( DEBUG_NEW laydata::TdtTmpPoly()) ; break;
          case console::op_cbind:
          {
             assert ("" != name);
             laydata::CellDefin strdefn;
             CTM eqm;
             VERIFY(DATC->getCellNamePair(name, strdefn));
-            _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::TdtTmpCellRef(strdefn, eqm) );
+            _TEDLIB()->setTmpData( DEBUG_NEW laydata::TdtTmpCellRef(strdefn, eqm) );
             break;
          }
          case console::op_abind:
@@ -703,7 +703,7 @@ void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,
             CTM eqm;
             VERIFY(DATC->getCellNamePair(name, strdefn));
             laydata::ArrayProperties arrprops(stepX, stepY, cols, rows);
-            _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::TdtTmpCellAref(strdefn, eqm, arrprops) );
+            _TEDLIB()->setTmpData( DEBUG_NEW laydata::TdtTmpCellAref(strdefn, eqm, arrprops) );
             break;
          }
          case console::op_tbind:
@@ -711,14 +711,14 @@ void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,
             assert ("" != name);
             CTM eqm(trans);
             eqm.Scale(1/(PROPC->UU()*OPENGL_FONT_UNIT), 1/(PROPC->UU()*OPENGL_FONT_UNIT));
-            _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::TdtTmpText(name, eqm) );
+            _TEDLIB()->setTmpData( DEBUG_NEW laydata::TdtTmpText(name, eqm) );
             break;
          }
-         case console::op_rotate: _TEDLIB()->set_tmpctm( trans );
+         case console::op_rotate: _TEDLIB()->setTmpCtm( trans );
          default:
          {
             if (0  < input_type)
-               _TEDLIB()->set_tmpdata( DEBUG_NEW laydata::TdtTmpWire(input_type) );
+               _TEDLIB()->setTmpData( DEBUG_NEW laydata::TdtTmpWire(input_type) );
          }
       }
    }
@@ -810,13 +810,13 @@ void DataCenter::openGL_draw(const CTM& layCTM)
             #endif
             // There is no need to check for an active cell. If there isn't one
             // the function will return silently.
-            _TEDLIB()->openGL_draw(*drawProp);
+            _TEDLIB()->openGlDraw(*drawProp);
             if(_DRCDB)
             {
                laydata::TdtDefaultCell* dst_structure = _DRCDB->checkcell("drc");
                if (dst_structure)
                {
-                  dst_structure->openGL_draw(*drawProp);
+                  dst_structure->openGlDraw(*drawProp);
                }
             }
             #ifdef RENDER_PROFILING
@@ -870,8 +870,8 @@ void DataCenter::openGL_render(const CTM& layCTM)
             #endif
             // There is no need to check for an active cell. If there isn't one
             // the function will return silently.
-            _TEDLIB()->openGL_render(renderer);
-            //_DRCDB->openGL_draw(_properties.drawprop());
+            _TEDLIB()->openGlRender(renderer);
+            //_DRCDB->openGlDraw(_properties.drawprop());
             #ifdef RENDER_PROFILING
             rendTimer.report("Time elapsed for data traversing: ");
             #endif
@@ -893,7 +893,7 @@ void DataCenter::openGL_render(const CTM& layCTM)
                laydata::TdtDefaultCell* dst_structure = _DRCDB->checkcell("drc");
                if (dst_structure)
                {
-                  dst_structure->openGL_render(renderer, CTM(), false, false);
+                  dst_structure->openGlRender(renderer, CTM(), false, false);
                }
                renderer.setState(layprop::DB);
             }
@@ -933,9 +933,9 @@ void DataCenter::tmp_draw(const CTM& layCTM, TP base, TP newp)
       }
       if ((console::op_line != currentOp)  && (NULL !=_TEDLIB()))
       {
-   //      _TEDDB->check_active();
+   //      _TEDDB->checkActive();
          while (wxMUTEX_NO_ERROR != _DBLock.TryLock());
-         _TEDLIB()->tmp_draw(*drawProp, base, newp);
+         _TEDLIB()->tmpDraw(*drawProp, base, newp);
          VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
       }
    }
@@ -950,9 +950,9 @@ const laydata::CellList& DataCenter::cells() {
 bool DataCenter::getCellNamePair(std::string name, laydata::CellDefin& strdefn)
 {
    laydata::TdtDesign* ATDB = lockDB();
-   if (ATDB->checkcell(name))
+   if (ATDB->checkCell(name))
    {
-      strdefn = ATDB->getcellnamepair(name);
+      strdefn = ATDB->getCellNamePair(name);
       unlockDB();
       return true;
    }

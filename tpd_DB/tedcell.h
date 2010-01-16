@@ -45,10 +45,10 @@ namespace laydata {
    that is currently a target of all toped operations. The complication comes
    from edit in place operations like push/pop/top/previous as well as from the
    undo requirements of all open/edit cell operations.
-   As a rule, if a cell has been opened with opencell() command, _activecell
+   As a rule, if a cell has been opened with openCell() command, _activecell
    and _viewcell point to the same TdtCell object of the target cell, _ARTM is
    assigned to the default CTM() and _activeref and _peditchain are NULL.
-   If a cell has to be open with editpush() or similar, then all of the data
+   If a cell has to be open with editPush() or similar, then all of the data
    fields are coming into play.
    */
    class EditObject {
@@ -65,10 +65,10 @@ namespace laydata {
       std::string                name() const;
       TdtCell*                   edit() const      {return _activecell;}
       TdtCell*                   view() const      {return _viewcell;}
-      bool                       checkedit() const {return _activecell != NULL;}
+      bool                       checkEdit() const {return _activecell != NULL;}
       const CTM                  rARTM() const     {return _ARTM.Reversed();}
       const CTM                  ARTM() const      {return _ARTM;}
-      bool                       iscell() const    {return _activeref == NULL;}
+      bool                       isCell() const    {return _activeref == NULL;}
       void                       reset();
       CellRefStack*              pEditChain()      {return _peditchain;}
       static EditCellStack       _editstack;    //! the stack of all previously edited (opened) cells
@@ -85,23 +85,23 @@ namespace laydata {
       public:
                              TdtDefaultCell(std::string, int , bool );
          virtual            ~TdtDefaultCell() {};
-         virtual void        openGL_draw(layprop::DrawProperties&, bool active=false) const;
-         virtual void        openGL_render(tenderer::TopRend&, const CTM&, bool, bool) const;
-         virtual void        motion_draw(const layprop::DrawProperties&, ctmqueue&, bool active=false) const;
-         virtual void        PSwrite(PSFile&, const layprop::DrawProperties&,
-                                      const CellList* = NULL, const TDTHierTree* = NULL) const;
-         virtual TDTHierTree* hierout(TDTHierTree*& Htree, TdtCell*, CellList*, const TdtLibDir*);
+         virtual void        openGlDraw(layprop::DrawProperties&, bool active=false) const;
+         virtual void        openGlRender(tenderer::TopRend&, const CTM&, bool, bool) const;
+         virtual void        motionDraw(const layprop::DrawProperties&, ctmqueue&, bool active=false) const;
+         virtual TDTHierTree* hierOut(TDTHierTree*& Htree, TdtCell*, CellList*, const TdtLibDir*);
          virtual bool        relink(TdtLibDir*);
          virtual void        relinkThis(std::string, laydata::CellDefin, laydata::TdtLibDir* libdir);
          virtual void        updateHierarchy(TdtLibDir*);
          virtual DBbox       cellOverlap() const;
          virtual DBbox       updateVisibleOverlap(const layprop::DrawProperties&);
          virtual void        write(TEDfile* const, const CellList&, const TDTHierTree*) const;
-         virtual void        GDSwrite(DbExportFile&, const CellList&, const TDTHierTree*) const;
-         virtual void        CIFwrite(DbExportFile&, const CellList&, const TDTHierTree*) const;
-         virtual void        collect_usedlays(const TdtLibDir*, bool, WordList&) const;
+         virtual void        gdsWrite(DbExportFile&, const CellList&, const TDTHierTree*) const;
+         virtual void        cifWrite(DbExportFile&, const CellList&, const TDTHierTree*) const;
+         virtual void        psWrite(PSFile&, const layprop::DrawProperties&,
+                                      const CellList* = NULL, const TDTHierTree* = NULL) const;
+         virtual void        collectUsedLays(const TdtLibDir*, bool, WordList&) const;
 
-         void                 parentfound()     {_orphan = false;};
+         void                 parentFound()     {_orphan = false;};
          bool                 orphan() const    {return _orphan;};
          std::string          name() const      {return _name;};
          int                  libID() const     {return _libID;}
@@ -121,77 +121,77 @@ namespace laydata {
                            TdtCell(std::string);
                            TdtCell(TEDfile* const, std::string, int);
       virtual             ~TdtCell();
-      void                 openGL_draw(layprop::DrawProperties&,
+      virtual void         openGlDraw(layprop::DrawProperties&,
                                                           bool active=false) const;
-      void                 openGL_render(tenderer::TopRend&, const CTM&, bool, bool) const;
-      void                 motion_draw(const layprop::DrawProperties&, ctmqueue&,
+      virtual void         openGlRender(tenderer::TopRend&, const CTM&, bool, bool) const;
+      virtual void         motionDraw(const layprop::DrawProperties&, ctmqueue&,
                                                           bool active=false) const;
-      QuadTree*            securelayer(unsigned layno);
-      TdtCellRef*          addcellref(TdtDesign*, CellDefin str, CTM trans,
+      QuadTree*            secureLayer(unsigned layno);
+      TdtCellRef*          addCellRef(TdtDesign*, CellDefin str, CTM trans,
                                                           bool sortnow = true);
       void                 registerCellRef(CellDefin str, CTM trans);
-      TdtCellAref*         addcellaref(TdtDesign*, CellDefin, CTM,
+      TdtCellAref*         addCellARef(TdtDesign*, CellDefin, CTM,
                                           ArrayProperties&, bool sortnow = true);
       void                 registerCellARef(CellDefin str, CTM trans, ArrayProperties&);
-      bool                 addchild(TdtDesign*, TdtDefaultCell*);
-      void                 write(TEDfile* const, const CellList&, const TDTHierTree*) const;
-      void                 GDSwrite(DbExportFile&, const CellList&, const TDTHierTree*) const;
-      void                 CIFwrite(DbExportFile&, const CellList&, const TDTHierTree*) const;
-      void                 PSwrite(PSFile&, const layprop::DrawProperties&,
+      bool                 addChild(TdtDesign*, TdtDefaultCell*);
+      virtual void         write(TEDfile* const, const CellList&, const TDTHierTree*) const;
+      virtual void         gdsWrite(DbExportFile&, const CellList&, const TDTHierTree*) const;
+      virtual void         cifWrite(DbExportFile&, const CellList&, const TDTHierTree*) const;
+      virtual void         psWrite(PSFile&, const layprop::DrawProperties&,
                                    const CellList* = NULL, const TDTHierTree* = NULL) const;
-      TDTHierTree*         hierout(TDTHierTree*&, TdtCell*, CellList*, const TdtLibDir*);
-      DBbox                cellOverlap() const {return _cellOverlap;}
+      virtual TDTHierTree* hierOut(TDTHierTree*&, TdtCell*, CellList*, const TdtLibDir*);
+      virtual DBbox        cellOverlap() const {return _cellOverlap;}
       DBbox                cellVisibleOverlap() const {return _vlOverlap;}
       void                 selectInBox(DBbox, const DWordSet&, word, bool pntsel = false);
 //      void                 select_inside(const TP);
       void                 selectFromList(SelectList*, const DWordSet&);
 //      void                 selectAll(bool select_locked = false);
       void                 selectAll(const DWordSet&, word);
-      void                 full_select();
-      void                 select_this(TdtData*, unsigned);
+      void                 fullSelect();
+      void                 selectThis(TdtData*, unsigned);
       void                 unselectInBox(DBbox, bool, const DWordSet&);
       void                 unselectFromList(SelectList*, const DWordSet&);
       void                 unselectAll(bool destroy=false);
-      bool                 addlist(TdtDesign*, AtticList*/*, DWordSet&*/);
-      bool                 copy_selected(TdtDesign*, const CTM&);
-      bool                 move_selected(TdtDesign*, const CTM&, SelectList**);
-      bool                 rotate_selected(laydata::TdtDesign*, const CTM&, SelectList**);
-      bool                 transfer_selected(TdtDesign*, const CTM&);
-      bool                 delete_selected(AtticList*, laydata::TdtLibDir* );
-      bool                 destroy_this(TdtLibDir*, TdtData* ds, unsigned la);
+      bool                 addList(TdtDesign*, AtticList*/*, DWordSet&*/);
+      bool                 copySelected(TdtDesign*, const CTM&);
+      bool                 moveSelected(TdtDesign*, const CTM&, SelectList**);
+      bool                 rotateSelected(laydata::TdtDesign*, const CTM&, SelectList**);
+      bool                 transferSelected(TdtDesign*, const CTM&);
+      bool                 deleteSelected(AtticList*, laydata::TdtLibDir* );
+      bool                 destroyThis(TdtLibDir*, TdtData* ds, unsigned la);
       AtticList*           groupPrep(TdtLibDir*);
       ShapeList*           ungroupPrep(TdtLibDir*);
       void                 transferLayer(unsigned);
       void                 transferLayer(SelectList*, unsigned);
       void                 resort();
-      bool                 validate_cells(TdtLibrary*);
-      void                 validate_layers();
-      unsigned int         numselected();
-      bool                 cutpoly_selected(pointlist&, AtticList**);
-      bool                 merge_selected(AtticList**);
-      bool                 stretch_selected(int bfactor, AtticList**);
-      AtticList*           changeselect(TP, SH_STATUS status, const DWordSet&);
-      TdtCellRef*          getcellover(TP, ctmstack&, CellRefStack*, const DWordSet&);
-      SelectList*          shapesel()        {return &_shapesel;};
-      SelectList*          copy_selist() const;
-      void                 updateHierarchy(TdtLibDir*);
-      bool                 relink(TdtLibDir*);
-      void                 relinkThis(std::string, laydata::CellDefin, laydata::TdtLibDir*);
-      void                 report_selected(real) const;
-      void                 collect_usedlays(const TdtLibDir*, bool, WordList&) const;
+      bool                 validateCells(TdtLibrary*);
+      void                 validateLayers();
+      unsigned int         numSelected();
+      bool                 cutPolySelected(pointlist&, AtticList**);
+      bool                 mergeSelected(AtticList**);
+      bool                 stretchSelected(int bfactor, AtticList**);
+      AtticList*           changeSelect(TP, SH_STATUS status, const DWordSet&);
+      TdtCellRef*          getCellOver(TP, ctmstack&, CellRefStack*, const DWordSet&);
+      SelectList*          shapeSel()        {return &_shapesel;};
+      SelectList*          copySeList() const;
+      virtual void         updateHierarchy(TdtLibDir*);
+      virtual bool         relink(TdtLibDir*);
+      virtual void         relinkThis(std::string, laydata::CellDefin, laydata::TdtLibDir*);
+      void                 reportSelected(real) const;
+      virtual void         collectUsedLays(const TdtLibDir*, bool, WordList&) const;
       bool                 overlapChanged(DBbox&, TdtDesign*);
-      DBbox                updateVisibleOverlap(const layprop::DrawProperties&);
+      virtual DBbox        updateVisibleOverlap(const layprop::DrawProperties&);
    private:
-      bool                 getshapeover(TP, const DWordSet&);
+      bool                 getShapeOver(TP, const DWordSet&);
       void                 getCellOverlap();
-      void                 store_inAttic(AtticList&);
+      void                 storeInAttic(AtticList&);
       dword                getFullySelected(DataList*) const;
-      NameSet*             rehash_children();
-      ShapeList*           mergeprep(unsigned);
-      bool                 unselect_pointlist(SelectDataPair&, SelectDataPair&);
+      NameSet*             rehashChildren();
+      ShapeList*           mergePrep(unsigned);
+      bool                 unselectPointList(SelectDataPair&, SelectDataPair&);
       TdtData*             checkNreplacePoly(SelectDataPair&, Validator*, unsigned, SelectList**);
       TdtData*             checkNreplaceBox(SelectDataPair&, Validator*, unsigned, SelectList**);
-      DataList*            secure_dataList(SelectList&, unsigned);
+      DataList*            secureDataList(SelectList&, unsigned);
       NameSet              _children;     //! for hierarchy list purposes
       SelectList           _shapesel;     //! selected shapes
       DBbox                _cellOverlap;  //! Overlap of the entire cell
