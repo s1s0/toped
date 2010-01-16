@@ -524,7 +524,7 @@ laydata::AtticList* laydata::TdtCell::changeselect(TP pnt, SH_STATUS status, con
    typedef LayerList::const_iterator LCI;
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
    {
-      if (unselable.end() != unselable.find(lay->first))
+      if (unselable.end() == unselable.find(lay->first))
       {
          while (lay->second->getobjectover(pnt,shape))
          {

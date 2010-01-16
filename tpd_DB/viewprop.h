@@ -121,6 +121,8 @@ namespace layprop {
       void              setCifLayMap(USMap* map);
       void              loadLayoutFonts(std::string fft, bool vbo);
       DWordSet          allUnselectable();
+      bool              lockDrawProp(DrawProperties*&, PropertyState state = DB);
+      void              unlockDrawProp(DrawProperties*&);
 
       void              setStep(real st)                 {_step = st;}
       void              setAutoPan(bool status)          {_autopan = status;}
@@ -148,11 +150,6 @@ namespace layprop {
       const USMap*      getCifLayMap() const             {return _cifLayMap;}
       bool              gridVisual(word no)              {return grid(no)->visual();}
       bool              renderType() const               {return _renderType;}
-
-      DrawProperties&   drawprop()                       {return *_drawprop;}
-      DrawProperties*   drawprop_ptr()                   {return  _drawprop;}
-      bool              lockDrawProp(DrawProperties*&, PropertyState state = DB);
-      void              unlockDrawProp(DrawProperties*&);
    private:
       DrawProperties*      _drawprop;
       void                 saveScreenProps(FILE*) const;
