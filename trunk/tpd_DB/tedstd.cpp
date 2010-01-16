@@ -354,7 +354,7 @@ laydata::CellDefin laydata::TEDfile::linkcellref(std::string cellname)
    // link the cells instances with their definitions
    if (_design->_cells.end() == striter)
    {
-   //   if (_design->checkcell(name))
+   //   if (_design->checkCell(name))
    //   {
       // search the cell in the libraries because it's not in the DB
       if (!_TEDLIB->getLibCellRNP(cellname, celldef))
@@ -374,13 +374,13 @@ laydata::CellDefin laydata::TEDfile::linkcellref(std::string cellname)
          celldef = _TEDLIB->adddefaultcell(cellname, false);
       }
       else
-         celldef->parentfound();
+         celldef->parentFound();
    }
    else
    {
       celldef = striter->second;
       assert(NULL != celldef);
-      celldef->parentfound();
+      celldef->parentFound();
    }
    return celldef;
 }

@@ -88,7 +88,7 @@ void Calbr::drcTenderer::addPoly(const CoordsVector   &coords)
          _miny = std::min(it->y, _miny);
          plDB->push_back(TP(it->x, it->y, DBscale));
       }
-      laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(_DRCCell->securelayer(_numError));
+      laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(_DRCCell->secureLayer(_numError));
       PROPC->addUnpublishedLay(_numError);
       dwl->addpoly(*plDB, false);
       delete plDB;
@@ -122,7 +122,7 @@ void Calbr::drcTenderer::addLine(const edge &edge)
 
    real      w = 0.01;   //width of line
 
-   laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(_DRCCell->securelayer(_numError));
+   laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(_DRCCell->secureLayer(_numError));
    PROPC->addUnpublishedLay(_numError);
    dwl->addwire(*plDB, static_cast<word>(rint(w * DBscale)), false);
    delete plDB;

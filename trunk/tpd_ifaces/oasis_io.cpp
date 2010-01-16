@@ -835,7 +835,7 @@ void Oasis::Cell::readRectangle(OasisInFile& ofn, laydata::TdtCell* dst_cell, co
 
    if ( theLayMap.getTdtLay(tdtlaynum, _mod_layer(), _mod_datatype() ) )
    {
-      laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->securelayer(tdtlaynum));
+      laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->secureLayer(tdtlaynum));
       if ((0 == _mod_gwidth()) || (0 == _mod_gheight()))
       {
          std::ostringstream winfo;
@@ -892,7 +892,7 @@ void Oasis::Cell::readPolygon(OasisInFile& ofn, laydata::TdtCell* dst_cell, cons
 
    if ( theLayMap.getTdtLay(tdtlaynum, _mod_layer(), _mod_datatype() ) )
    {
-      laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->securelayer(tdtlaynum));
+      laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->secureLayer(tdtlaynum));
       if (info & Rmask)
       {
          int4b* rptpnt = _mod_repete().lcarray();
@@ -967,7 +967,7 @@ void Oasis::Cell::readPath(OasisInFile& ofn, laydata::TdtCell* dst_cell, const L
 
    if ( theLayMap.getTdtLay(tdtlaynum, _mod_layer(), _mod_datatype() ) )
    {
-      laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->securelayer(tdtlaynum));
+      laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->secureLayer(tdtlaynum));
       if (0 == _mod_pathhw())
       {
          std::ostringstream winfo;
@@ -1097,7 +1097,7 @@ void Oasis::Cell::readTrapezoid(OasisInFile& ofn, laydata::TdtCell* dst_cell, co
 
    if ( theLayMap.getTdtLay(tdtlaynum, _mod_layer(), _mod_datatype() ) )
    {
-      laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->securelayer(tdtlaynum));
+      laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->secureLayer(tdtlaynum));
       if (info & Rmask)
       {
          int4b* rptpnt = _mod_repete().lcarray();
@@ -1200,7 +1200,7 @@ void Oasis::Cell::readCTrapezoid(OasisInFile& ofn, laydata::TdtCell* dst_cell, c
 
    if ( theLayMap.getTdtLay(tdtlaynum, _mod_layer(), _mod_datatype() ) )
    {
-      laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->securelayer(tdtlaynum));
+      laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->secureLayer(tdtlaynum));
       if (info & Rmask)
       {
          //read the repetition record from the input stream
@@ -1262,7 +1262,7 @@ void Oasis::Cell::readText(OasisInFile& ofn, laydata::TdtCell* dst_cell, const L
    //
    if ( theLayMap.getTdtLay(tdtlaynum, _mod_tlayer(), _mod_tdatatype() ) )
    {
-      laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->securelayer(tdtlaynum));
+      laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->secureLayer(tdtlaynum));
       if (info & Rmask)
       {
          int4b* rptpnt = _mod_repete().lcarray();
@@ -2467,7 +2467,7 @@ void Oasis::Oas2Ted::run(const nameList& top_str_names, bool recursive, bool ove
       TpdPost::toped_status(console::TSTS_PRGRSBAROFF);
       _src_lib->closeFile();
       TpdPost::toped_status(console::TSTS_PRGRSBAROFF);
-      (*_tdt_db)()->recreate_hierarchy(_tdt_db);
+      (*_tdt_db)()->recreateHierarchy(_tdt_db);
    }
 }
 
@@ -2496,7 +2496,7 @@ void Oasis::Oas2Ted::convert(Oasis::Cell* src_structure, bool overwrite)
 {
    std::string gname = src_structure->name();
    // check that destination structure with this name exists
-   laydata::TdtCell* dst_structure = static_cast<laydata::TdtCell*>((*_tdt_db)()->checkcell(gname));
+   laydata::TdtCell* dst_structure = static_cast<laydata::TdtCell*>((*_tdt_db)()->checkCell(gname));
    std::ostringstream ost; ost << "OASIS import: ";
    if (NULL != dst_structure)
    {
@@ -2521,7 +2521,7 @@ void Oasis::Oas2Ted::convert(Oasis::Cell* src_structure, bool overwrite)
       // call the cell converter
       src_structure->import(*_src_lib, dst_structure, _tdt_db, _theLayMap);
       // and finally - register the cell
-      (*_tdt_db)()->registercellread(gname, dst_structure);
+      (*_tdt_db)()->registerCellRead(gname, dst_structure);
    }
 }
 // oasisimport("AMODUL", true, false);

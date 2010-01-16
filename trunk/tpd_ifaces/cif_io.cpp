@@ -707,7 +707,7 @@ void CIFin::Cif2Ted::convert_prep(const CIFin::CIFHierTree* item, bool overwrite
    CIFin::CifStructure* src_structure = const_cast<CIFin::CifStructure*>(item->GetItem());
    std::string gname = src_structure->name();
    // check that destination structure with this name exists
-   laydata::TdtCell* dst_structure = static_cast<laydata::TdtCell*>((*_tdt_db)()->checkcell(gname));
+   laydata::TdtCell* dst_structure = static_cast<laydata::TdtCell*>((*_tdt_db)()->checkCell(gname));
    std::ostringstream ost; ost << "CIF import: ";
    if (NULL != dst_structure)
    {
@@ -728,7 +728,7 @@ void CIFin::Cif2Ted::convert_prep(const CIFin::CIFHierTree* item, bool overwrite
       ost << "Importing structure " << gname << "...";
       tell_log(console::MT_INFO,ost.str());
       // first create a new cell
-      dst_structure = (*_tdt_db)()->addcell(gname, _tdt_db);
+      dst_structure = (*_tdt_db)()->addCell(gname, _tdt_db);
       // finally call the cell converter
       convert(src_structure, dst_structure);
    }
@@ -745,7 +745,7 @@ void CIFin::Cif2Ted::convert(CIFin::CifStructure* src, laydata::TdtCell* dst)
       if (_cif_layers->end() != _cif_layers->find(swl->name()))
       {
          laydata::TdtLayer* dwl =
-               static_cast<laydata::TdtLayer*>(dst->securelayer((*_cif_layers)[swl->name()]));
+               static_cast<laydata::TdtLayer*>(dst->secureLayer((*_cif_layers)[swl->name()]));
          CIFin::CifData* wd = swl->firstData();
          while ( wd ) // loop trough data
          {
@@ -877,11 +877,11 @@ void CIFin::Cif2Ted::ref ( CIFin::CifRef* wd, laydata::TdtCell* dst)
 {
    CifStructure* refd = _src_lib->getStructure(wd->cell());
    std::string cell_name = refd->name();
-   if (NULL != (*_tdt_db)()->checkcell(cell_name))
+   if (NULL != (*_tdt_db)()->checkCell(cell_name))
    {
-      laydata::CellDefin strdefn = (*_tdt_db)()->getcellnamepair(cell_name);
+      laydata::CellDefin strdefn = (*_tdt_db)()->getCellNamePair(cell_name);
       // Absolute magnification, absolute angle should be reflected somehow!!!
-      dst->addcellref((*_tdt_db)(), strdefn, (*wd->location())*_crosscoeff, false);
+      dst->addCellRef((*_tdt_db)(), strdefn, (*wd->location())*_crosscoeff, false);
    }
    else
    {

@@ -55,7 +55,7 @@ void tellstdfunc::stdADDBOX::undo() {
    telldata::ttlayout* bx = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    word la = getWordValue(UNDOPstack,true);
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      ATDB->destroy_this(bx->data(),la, DATC->TEDLIB());
+      ATDB->destroyThis(bx->data(),la, DATC->TEDLIB());
    DATC->unlockDB();
    delete (bx);
    RefreshGL();
@@ -70,7 +70,7 @@ int tellstdfunc::stdADDBOX::execute() {
    TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
    TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(ATDB->addbox(la, p1DB, p2DB),la);
+      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(ATDB->addBox(la, p1DB, p2DB),la);
    DATC->unlockDB();
    delete (p1DB);
    delete (p2DB);
@@ -111,7 +111,7 @@ void tellstdfunc::stdDRAWBOX::undo() {
    telldata::ttlayout* bx = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    word la = getWordValue(UNDOPstack, true);
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      ATDB->destroy_this(bx->data(),la, DATC->TEDLIB());
+      ATDB->destroyThis(bx->data(),la, DATC->TEDLIB());
    DATC->unlockDB();
    delete (bx);
    RefreshGL();
@@ -131,7 +131,7 @@ int tellstdfunc::stdDRAWBOX::execute() {
    TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
    TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(ATDB->addbox(la, p1DB, p2DB), la);
+      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(ATDB->addBox(la, p1DB, p2DB), la);
    DATC->unlockDB();
    OPstack.push(bx);UNDOPstack.push_front(bx->selfcopy());
    LogFile << "addbox("<< *w << "," << la << ");";LogFile.flush();
@@ -171,7 +171,7 @@ void tellstdfunc::stdADDBOXr::undo() {
    telldata::ttlayout* bx = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    word la = getWordValue(UNDOPstack, true);
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      ATDB->destroy_this(bx->data(),la, DATC->TEDLIB());
+      ATDB->destroyThis(bx->data(),la, DATC->TEDLIB());
    DATC->unlockDB();
    delete (bx);
    RefreshGL();
@@ -189,7 +189,7 @@ int tellstdfunc::stdADDBOXr::execute() {
    TP* p1DB = DEBUG_NEW TP(p1->x(), p1->y(), DBscale);
    TP* p2DB = DEBUG_NEW TP(p2.x() , p2.y() , DBscale);
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(ATDB->addbox(la, p1DB, p2DB), la);
+      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(ATDB->addBox(la, p1DB, p2DB), la);
    DATC->unlockDB();
    delete (p1DB);
    delete (p2DB);
@@ -235,7 +235,7 @@ void tellstdfunc::stdADDBOXp::undo() {
    telldata::ttlayout* bx = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    word la = getWordValue(UNDOPstack, true);
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      ATDB->destroy_this(bx->data(),la, DATC->TEDLIB());
+      ATDB->destroyThis(bx->data(),la, DATC->TEDLIB());
    DATC->unlockDB();
    delete (bx);
    RefreshGL();
@@ -251,7 +251,7 @@ int tellstdfunc::stdADDBOXp::execute() {
    TP* p1DB = DEBUG_NEW TP(p1->x(), p1->y(), DBscale);
    TP* p2DB = DEBUG_NEW TP(p2->x(), p2->y(), DBscale);
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(ATDB->addbox(la, p1DB, p2DB), la);
+      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(ATDB->addBox(la, p1DB, p2DB), la);
    DATC->unlockDB();
    delete (p1DB);
    delete (p2DB);
@@ -295,7 +295,7 @@ void tellstdfunc::stdADDPOLY::undo() {
    telldata::ttlayout* ply = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    word la = getWordValue(UNDOPstack, true);
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      ATDB->destroy_this(ply->data(),la, DATC->TEDLIB());
+      ATDB->destroyThis(ply->data(),la, DATC->TEDLIB());
    DATC->unlockDB();
    delete (ply);
    RefreshGL();
@@ -310,7 +310,7 @@ int tellstdfunc::stdADDPOLY::execute() {
       real DBscale = PROPC->DBscale();
       laydata::TdtDesign* ATDB = DATC->lockDB();
          pointlist* plst = t2tpoints(pl,DBscale);
-         telldata::ttlayout* ply = DEBUG_NEW telldata::ttlayout(ATDB->addpoly(la,plst), la);
+         telldata::ttlayout* ply = DEBUG_NEW telldata::ttlayout(ATDB->addPoly(la,plst), la);
          delete plst;
       DATC->unlockDB();
       OPstack.push(ply); UNDOPstack.push_front(ply->selfcopy());
@@ -356,7 +356,7 @@ void tellstdfunc::stdDRAWPOLY::undo() {
    telldata::ttlayout* ply = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    word la = getWordValue(UNDOPstack, true);
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      ATDB->destroy_this(ply->data(),la, DATC->TEDLIB());
+      ATDB->destroyThis(ply->data(),la, DATC->TEDLIB());
    DATC->unlockDB();
    delete (ply);
    RefreshGL();
@@ -376,7 +376,7 @@ int tellstdfunc::stdDRAWPOLY::execute() {
       real DBscale = PROPC->DBscale();
       laydata::TdtDesign* ATDB = DATC->lockDB();
          pointlist* plst = t2tpoints(pl,DBscale);
-         telldata::ttlayout* ply = DEBUG_NEW telldata::ttlayout(ATDB->addpoly(la,plst), la);
+         telldata::ttlayout* ply = DEBUG_NEW telldata::ttlayout(ATDB->addPoly(la,plst), la);
          delete plst;
       DATC->unlockDB();
       OPstack.push(ply); UNDOPstack.push_front(ply->selfcopy());
@@ -421,7 +421,7 @@ void tellstdfunc::stdADDWIRE::undo() {
    telldata::ttlayout* wr = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    word la = getWordValue(UNDOPstack, true);
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      ATDB->destroy_this(wr->data(),la, DATC->TEDLIB());
+      ATDB->destroyThis(wr->data(),la, DATC->TEDLIB());
    DATC->unlockDB();
    delete (wr);
    RefreshGL();
@@ -437,7 +437,7 @@ int tellstdfunc::stdADDWIRE::execute() {
       real DBscale = PROPC->DBscale();
       laydata::TdtDesign* ATDB = DATC->lockDB();
          pointlist* plst = t2tpoints(pl,DBscale);
-         telldata::ttlayout* wr = DEBUG_NEW telldata::ttlayout(ATDB->addwire(la,plst,
+         telldata::ttlayout* wr = DEBUG_NEW telldata::ttlayout(ATDB->addWire(la,plst,
                                     static_cast<word>(rint(w * DBscale))), la);
          delete plst;
       DATC->unlockDB();
@@ -486,7 +486,7 @@ void tellstdfunc::stdDRAWWIRE::undo() {
    telldata::ttlayout* wr = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    word la = getWordValue(UNDOPstack, true);
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      ATDB->destroy_this(wr->data(),la, DATC->TEDLIB());
+      ATDB->destroyThis(wr->data(),la, DATC->TEDLIB());
    DATC->unlockDB();
    delete (wr);
    RefreshGL();
@@ -506,7 +506,7 @@ int tellstdfunc::stdDRAWWIRE::execute() {
       UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
       laydata::TdtDesign* ATDB = DATC->lockDB();
          pointlist* plst = t2tpoints(pl,DBscale);
-         telldata::ttlayout* wr = DEBUG_NEW telldata::ttlayout(ATDB->addwire(la,plst,
+         telldata::ttlayout* wr = DEBUG_NEW telldata::ttlayout(ATDB->addWire(la,plst,
                                     static_cast<word>(rint(w * DBscale))), la);
          delete plst;
       DATC->unlockDB();
@@ -558,7 +558,7 @@ void tellstdfunc::stdADDTEXT::undo() {
    telldata::ttlayout* tx = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    word la = getWordValue(UNDOPstack, true);
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      ATDB->destroy_this(tx->data(),la, DATC->TEDLIB());
+      ATDB->destroyThis(tx->data(),la, DATC->TEDLIB());
    DATC->unlockDB();
    delete (tx);
    RefreshGL();
@@ -588,7 +588,7 @@ int tellstdfunc::stdADDTEXT::execute() {
    CTM ori(TP(rpnt->x(), rpnt->y(), DBscale),
                                      magn*DBscale/OPENGL_FONT_UNIT,angle,flip);
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      telldata::ttlayout* tx = DEBUG_NEW telldata::ttlayout(ATDB->addtext(la, text, ori), la);
+      telldata::ttlayout* tx = DEBUG_NEW telldata::ttlayout(ATDB->addText(la, text, ori), la);
    DATC->unlockDB();
    OPstack.push(tx);UNDOPstack.push_front(tx->selfcopy());
    LogFile << LogFile.getFN() << "(\"" << text << "\"," << la << "," << *rpnt <<
@@ -652,7 +652,7 @@ void tellstdfunc::stdCELLREF::undo() {
    TEUNDO_DEBUG("cellref(string, point, real, bool, real) UNDO");
    telldata::ttlayout* cl = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      ATDB->destroy_this(cl->data(),REF_LAY, DATC->TEDLIB());
+      ATDB->destroyThis(cl->data(),REF_LAY, DATC->TEDLIB());
    DATC->unlockDB();
    delete (cl);
    RefreshGL();
@@ -667,7 +667,7 @@ int tellstdfunc::stdCELLREF::execute() {
    std::string name = getStringValue();
    real DBscale = PROPC->DBscale();
    CTM ori(TP(rpnt->x(), rpnt->y(), DBscale), magn,angle,flip);
-   // check that target cell exists - otherwise tmp_draw can't obviously work.
+   // check that target cell exists - otherwise tmpDraw can't obviously work.
    // there is another more extensive check when the cell is added, there the circular
    // references are checked as well
    laydata::CellDefin strdefn;
@@ -675,7 +675,7 @@ int tellstdfunc::stdCELLREF::execute() {
    {
       UNDOcmdQ.push_front(this);
       laydata::TdtDesign* ATDB = DATC->lockDB();
-         telldata::ttlayout* cl = DEBUG_NEW telldata::ttlayout(ATDB->addcellref(strdefn,ori), REF_LAY);
+         telldata::ttlayout* cl = DEBUG_NEW telldata::ttlayout(ATDB->addCellRef(strdefn,ori), REF_LAY);
       DATC->unlockDB();
       OPstack.push(cl); UNDOPstack.push_front(cl->selfcopy());
       LogFile << LogFile.getFN() << "(\""<< name << "\"," << *rpnt << "," <<
@@ -704,7 +704,7 @@ tellstdfunc::stdCELLREF_D::stdCELLREF_D(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdCELLREF_D::execute() {
    std::string name = getStringValue();
-   // check that target cell exists - otherwise tmp_draw can't obviously work.
+   // check that target cell exists - otherwise tmpDraw can't obviously work.
    // there is another more extensive check when the cell is added, there the circular
    // references are checked as well
    laydata::CellDefin strdefn;
@@ -753,7 +753,7 @@ void tellstdfunc::stdCELLAREF::undo() {
    TEUNDO_DEBUG("cellaref(string, point, real, bool, real) UNDO");
    telldata::ttlayout* cl = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    laydata::TdtDesign* ATDB = DATC->lockDB();
-      ATDB->destroy_this(cl->data(),REF_LAY, DATC->TEDLIB());
+      ATDB->destroyThis(cl->data(),REF_LAY, DATC->TEDLIB());
    DATC->unlockDB();
    delete (cl);
    RefreshGL();
@@ -780,7 +780,7 @@ int tellstdfunc::stdCELLAREF::execute() {
    laydata::ArrayProperties arrprops(istepX,istepY,col,row);
    laydata::TdtDesign* ATDB = DATC->lockDB();
       telldata::ttlayout* cl = DEBUG_NEW telldata::ttlayout(
-            ATDB->addcellaref(name,ori,arrprops),REF_LAY);
+            ATDB->addCellARef(name,ori,arrprops),REF_LAY);
    DATC->unlockDB();
    OPstack.push(cl); UNDOPstack.push_front(cl->selfcopy());
    LogFile << LogFile.getFN() << "(\""<< name << "\"," << *rpnt << "," <<
@@ -810,11 +810,11 @@ int tellstdfunc::stdCELLAREF_D::execute() {
    word        col   = getWordValue();
    std::string name  = getStringValue();
 
-   // check that target cell exists - otherwise tmp_draw can't obviously work.
+   // check that target cell exists - otherwise tmpDraw can't obviously work.
    // there is another more extensive check when the cell is added, there the circular
    // references are checked as well
    laydata::TdtDesign* ATDB = DATC->lockDB(false);
-   laydata::TdtCell *excell = static_cast<laydata::TdtCell*>(ATDB->checkcell(name));
+   laydata::TdtCell *excell = static_cast<laydata::TdtCell*>(ATDB->checkCell(name));
    DATC->unlockDB();
    if (NULL == excell)
    {

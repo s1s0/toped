@@ -358,14 +358,14 @@ bool tui::LayoutCanvas::initializeGL()
       VBOrendering = false;
       //@TODO - to avoid the "if"
       // setup the renderer - callback function
-      // oGLRender = &DataCenter::openGL_draw;
+      // oGLRender = &DataCenter::openGlDraw;
    }
    else
    {
       VBOrendering = true;
       //@TODO - to avoid the "if"
       // setup the renderer - callback function
-      // oGLRender = (void(__stdcall *)(const CTM&))&DataCenter::openGL_render;
+      // oGLRender = (void(__stdcall *)(const CTM&))&DataCenter::openGlRender;
    }
    return VBOrendering;
    //@NOTE: With the Mesa library updates (first noticed in ver. 6.5) - most of the

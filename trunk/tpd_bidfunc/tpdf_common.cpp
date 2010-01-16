@@ -108,7 +108,7 @@ telldata::ttlist* tellstdfunc::make_ttlaylist(laydata::SelectList* shapesel) {
       // push each data reference into the TELL list
       for (laydata::DataList::const_iterator CI = lslct->begin();
                                              CI != lslct->end(); CI++) {
-         // copy the pointlist, because it will be deleted with the shapesel
+         // copy the pointlist, because it will be deleted with the shapeSel
          if (0 != CI->second.size()) pntl = SGBitSet(CI->second);
          else                        pntl = SGBitSet();
          llist->add(DEBUG_NEW telldata::ttlayout(CI->first, CL->first, DEBUG_NEW SGBitSet(pntl)));
@@ -203,7 +203,7 @@ laydata::AtticList* tellstdfunc::get_shlaylist(telldata::ttlist* llist) {
 }
 
 
-/** Filters shapesel using the mask. Returns new list, containing copy of
+/** Filters shapeSel using the mask. Returns new list, containing copy of
 unfiltered components
 */
 laydata::SelectList* tellstdfunc::filter_selist(const laydata::SelectList* shapesel, word mask)

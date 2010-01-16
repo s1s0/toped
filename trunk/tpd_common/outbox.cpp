@@ -332,7 +332,7 @@ void TpdPost::addTDTtab(bool targetDB, bool newthread)
    // Traversing the entire hierarchy tree can not be done in a
    // separate thread. The main reason - when executing a script
    // that contains for example:
-   //    new("a"); addcell("b");
+   //    new("a"); addCell("b");
    // it's quite possible that cell hierarchy will be traversed
    // after the execution of the second function. The latter will
    // send treeAddMember itself - in result the browser window

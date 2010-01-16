@@ -250,7 +250,7 @@ tellstdfunc::TDTsave::TDTsave(telldata::typeID retype, bool eor) :
 int tellstdfunc::TDTsave::execute()
 {
    laydata::TdtDesign* ATDB = DATC->lockDB(false);
-      ATDB->try_unselect_all();
+      ATDB->tryUnselectAll();
       DATC->TDTwrite();
       TpdTime timec(ATDB->created());
       TpdTime timeu(ATDB->lastUpdated());
@@ -278,7 +278,7 @@ int tellstdfunc::TDTsaveIFF::execute() {
    else
    {
       laydata::TdtDesign* ATDB = DATC->lockDB(false);
-         ATDB->try_unselect_all();
+         ATDB->tryUnselectAll();
          bool stop_ignoring = false;
          if (DATC->TDTcheckwrite(timeCreated, timeSaved, stop_ignoring))
          {
@@ -307,7 +307,7 @@ int tellstdfunc::TDTsaveas::execute()
    if (expandFileName(filename))
    {
       laydata::TdtDesign* ATDB = DATC->lockDB(false);
-         ATDB->try_unselect_all();
+         ATDB->tryUnselectAll();
          DATC->TDTwrite(filename.c_str());
          TpdTime timec(ATDB->created());
          TpdTime timeu(ATDB->lastUpdated());
@@ -607,7 +607,7 @@ int tellstdfunc::GDSexportTOP::execute()
    {
       laydata::TdtCell *excell = NULL;
       laydata::TdtDesign* ATDB = DATC->lockDB(false);
-         excell = static_cast<laydata::TdtCell*>(ATDB->checkcell(cellname));
+         excell = static_cast<laydata::TdtCell*>(ATDB->checkCell(cellname));
 
          if (NULL != excell)
          {
@@ -702,7 +702,7 @@ int tellstdfunc::PSexportTOP::execute()
    {
       laydata::TdtCell *excell = NULL;
       laydata::TdtDesign* ATDB = DATC->lockDB(false);
-         excell = static_cast<laydata::TdtCell*>(ATDB->checkcell(cellname));
+         excell = static_cast<laydata::TdtCell*>(ATDB->checkCell(cellname));
          if (NULL != excell)
             DATC->PSexport(excell, filename);
       DATC->unlockDB();
@@ -1205,7 +1205,7 @@ int tellstdfunc::CIFexportTOP::execute()
    {
       laydata::TdtCell *excell = NULL;
       laydata::TdtDesign* ATDB = DATC->lockDB(false);
-         excell = static_cast<laydata::TdtCell*>(ATDB->checkcell(cellname));
+         excell = static_cast<laydata::TdtCell*>(ATDB->checkCell(cellname));
          if (NULL != excell)
          {
             DATC->CIFexport(excell, cifLays, recur, verbose, filename);
