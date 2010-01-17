@@ -114,8 +114,8 @@ namespace layprop {
       const LayoutGrid* grid(byte) const;
       void              setGrid(byte, real, std::string);
       bool              viewGrid(byte, bool);
-      void              drawGrid() const;
-      void              drawZeroCross() const;
+      void              drawGrid(const DrawProperties*) const;
+      void              drawZeroCross(const DrawProperties*) const;
       void              setUU(real);
       void              setGdsLayMap(USMap* map);
       void              setCifLayMap(USMap* map);

@@ -288,24 +288,24 @@ bool layprop::PropertyCenter::viewGrid(byte No, bool status) {
    return status;
 }
 
-void layprop::PropertyCenter::drawGrid() const
+void layprop::PropertyCenter::drawGrid(const DrawProperties* drawProp) const
 {
    typedef gridlist::const_iterator CI;
    for(CI p = _grid.begin(); p != _grid.end(); p++)
-      p->second->Draw(*_drawprop, _UU);
+      p->second->Draw(*drawProp, _UU);
 }
 
-void layprop::PropertyCenter::drawZeroCross() const
+void layprop::PropertyCenter::drawZeroCross(const DrawProperties* drawProp) const
 {
    if (!_zeroCross) return;
    glLineStipple(1,0xcccc);
    glEnable(GL_LINE_STIPPLE);
    glBegin(GL_LINES);
    glColor4f((GLfloat)1, (GLfloat)1, (GLfloat)1, (GLfloat)0.7); // gray
-   glVertex2i(0, _drawprop->clipRegion().p1().y());
-   glVertex2i(0, _drawprop->clipRegion().p2().y());
-   glVertex2i(_drawprop->clipRegion().p1().x(), 0);
-   glVertex2i(_drawprop->clipRegion().p2().x(), 0);
+   glVertex2i(0, drawProp->clipRegion().p1().y());
+   glVertex2i(0, drawProp->clipRegion().p2().y());
+   glVertex2i(drawProp->clipRegion().p1().x(), 0);
+   glVertex2i(drawProp->clipRegion().p2().x(), 0);
    glEnd();
    glDisable(GL_LINE_STIPPLE);
 }

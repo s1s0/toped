@@ -801,8 +801,8 @@ void DataCenter::openGlDraw(const CTM& layCTM)
       layprop::DrawProperties* drawProp;
       if (PROPC->lockDrawProp(drawProp))
       {
-         PROPC->drawGrid();
-         PROPC->drawZeroCross();
+         PROPC->drawGrid(drawProp);
+         PROPC->drawZeroCross(drawProp);
          if (wxMUTEX_NO_ERROR == _DBLock.TryLock())
          {
             #ifdef RENDER_PROFILING
