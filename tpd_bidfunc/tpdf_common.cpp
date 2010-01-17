@@ -82,7 +82,7 @@ bool tellstdfunc::waitGUInput(int input_type, telldata::operandSTACK *OPstack,
    eventMOUSEIN.SetExtraLong(0);
    wxPostEvent(TopedCanvasW, eventMOUSEIN);
    // and clean-up the state of the temporary ruler
-   DATC->switch_drawruler(false);
+   DATC->switchDrawRuler(false);
    return Console->mouseIN_OK();
 }
 
@@ -259,7 +259,7 @@ laydata::AtticList* tellstdfunc::replace_str(laydata::AtticList* shapesel, std::
 void tellstdfunc::UpdateLV()
 {
    wxString ws;
-   ws.sprintf(wxT("%d"),DATC->numselected());
+   ws.sprintf(wxT("%d"),DATC->numSelected());
    wxCommandEvent eventUPDATESEL(wxEVT_CANVAS_STATUS);
    eventUPDATESEL.SetInt(tui::CNVS_SELECTED);
    eventUPDATESEL.SetString(ws);

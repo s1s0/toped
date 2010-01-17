@@ -254,9 +254,8 @@ namespace layprop {
       public:
                                     DrawProperties();
                                    ~DrawProperties();
-         void                       adjustAlpha(word factor);
+         // Called during the rendering - protected in the render initialization
          void                       setCurrentColor(unsigned layno);
-         void                       setGridColor(std::string colname) const;
          bool                       setCurrentFill(bool) const;
          void                       setLineProps(bool selected = false) const;
          void                       initDrawRefStack(laydata::CellRefStack*);
@@ -266,9 +265,10 @@ namespace layprop {
          void                       drawReferenceMarks(const TP&, const binding_marks) const;
          void                       drawTextBoundary(const pointlist& ptlist) const;
          void                       drawCellBoundary(const pointlist& ptlist) const;
+         void                       setGridColor(std::string colname) const;
          unsigned                   getTenderLay(unsigned layno) const;//!return layno if _propertyState == DB or predefined layer otherwise
          void                       psWrite(PSFile&) const;
-
+         void                       adjustAlpha(word factor);
          const CTM&                 scrCtm() const       {return  _scrCtm;}
          const DBbox&               clipRegion() const   {return _clipRegion;}
          void                       initCtmStack()       {_tranStack.push(CTM());}
@@ -285,21 +285,15 @@ namespace layprop {
                                                          {return _cellBoxHidden;}
          bool                       adjustTextOrientation() const
                                                          {return _adjustTextOrientation;}
-         console::ACTIVE_OP         currentOp() const    {return _currentOp;}
-         void                       savePatterns(FILE*) const;
-         void                       saveColors(FILE*) const;
-         void                       saveLayers(FILE*) const;
-         void                       saveLines(FILE*) const;
-
          // Protected elsewhere
+         console::ACTIVE_OP         currentOp() const    {return _currentOp;}
          void                       setCurrentOp(console::ACTIVE_OP actop)
                                                          {_currentOp = actop;}
          void                       setClipRegion(DBbox clipR)
                                                          {_clipRegion = clipR;}
          void                       setScrCTM(CTM ScrCTM){_scrCtm = ScrCTM;}
          void                       allUnselectable(DWordSet&);
-
-         // Properly protected in tpd_bidfunc
+         // Properly protected in tpd_bidfunc or the functions called from there
          bool                       addLayer(std::string, unsigned, std::string, std::string, std::string);
          bool                       addLayer(std::string, unsigned);
          bool                       addLayer(unsigned);
@@ -318,6 +312,10 @@ namespace layprop {
          bool                       loadLaysetStatus(const std::string&);
          bool                       deleteLaysetStatus(const std::string&);
          bool                       getLaysetStatus(const std::string&, WordSet&, WordSet&, WordSet&, unsigned);
+         void                       savePatterns(FILE*) const;
+         void                       saveColors(FILE*) const;
+         void                       saveLayers(FILE*) const;
+         void                       saveLines(FILE*) const;
          void                       setCellMarksHidden(bool hide)    {_cellMarksHidden = hide;}
          void                       setTextMarksHidden(bool hide)    {_textMarksHidden = hide;}
          void                       setCellboxHidden(bool hide)      {_cellBoxHidden = hide;}

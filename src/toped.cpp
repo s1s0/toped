@@ -1009,10 +1009,10 @@ void tui::TopedFrame::OnTDTSave(wxCommandEvent& WXUNUSED(event)) {
    wxString ost;
    ost << wxT("tdtsave();");
    SetStatusText(wxT("Saving file..."));
-   wxString wxfilename(DATC->tedfilename().c_str(), wxConvFile);
+   wxString wxfilename(DATC->tedFileName().c_str(), wxConvFile);
    wxFileName datafile( wxfilename );
    assert(datafile.IsOk());
-   if (datafile.FileExists() && DATC->neversaved()) {
+   if (datafile.FileExists() && DATC->neverSaved()) {
       wxMessageDialog dlg1(this,
          wxT("File ") + wxfilename + wxT(" already exists. Overwrite ?"),
          wxT("Toped"),
@@ -2056,7 +2056,7 @@ void tui::TopedFrame::OnCurrentLayer( wxCommandEvent& WXUNUSED( event ))
    {
       unsigned long vlu;
       dlg->value().ToULong(&vlu);
-      DATC->setcmdlayer((word)vlu);
+      DATC->setCmdLayer((word)vlu);
    }
    delete dlg;
 }

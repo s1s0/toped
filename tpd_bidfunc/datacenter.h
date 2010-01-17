@@ -82,21 +82,21 @@ public:
    void                       mouseStop();
    void                       mouseFlip();
    void                       mouseRotate();
-   void                       tmp_draw(const CTM&, TP, TP);
+   void                       motionDraw(const CTM&, TP, TP);
    void                       render(const CTM&);
    const laydata::CellList&   cells();
    laydata::TdtLibDir*        TEDLIB() {return &_TEDLIB;}
    laydata::LibCellLists*     getCells(int libID);
-   unsigned int               numselected()           {return (NULL != _TEDLIB()) ? _TEDLIB()->numSelected() : 0 ;}
-   void                       setcmdlayer(word layno) {_curcmdlay = layno;}
-   word                       curcmdlay() const       {return _curcmdlay;}
-   std::string                tedfilename() const     {return _tedfilename;};
-   bool                       neversaved()  const     {return _neversaved;};
+   unsigned int               numSelected()           {return (NULL != _TEDLIB()) ? _TEDLIB()->numSelected() : 0 ;}
+   void                       setCmdLayer(word layno) {_curcmdlay = layno;}
+   word                       curCmdLay() const       {return _curcmdlay;}
+   std::string                tedFileName() const     {return _tedfilename;};
+   bool                       neverSaved()  const     {return _neversaved;};
    bool                       modified() const        {return _TEDLIB.modified();};
 
    //------------------------------------------------------------------------------------------------
-   void                       switch_drawruler(bool st) {_drawruler = st;}
-   bool                       drawruler() {return _drawruler;}
+   void                       switchDrawRuler(bool st) {_drawruler = st;}
+   bool                       drawRuler() {return _drawruler;}
    LayerMapExt*               secureGdsLayMap(const layprop::DrawProperties*, bool);
    LayerMapCif*               secureCifLayMap(const layprop::DrawProperties*, bool);
    void                       updateVisibleOverlap();
@@ -105,8 +105,8 @@ public:
 protected:
    std::string                _tedfilename;
    bool                       _neversaved;
-   void                       openGL_draw(const CTM&);
-   void                       openGL_render(const CTM&); // alternative to openGlDraw
+   void                       openGlDraw(const CTM&);
+   void                       openGlRender(const CTM&); // alternative to openGlDraw
 private:
    word                       _curcmdlay;    // layer used during current drawing operation
    bool                       _drawruler;    // draw a ruler while composing a shape interactively
