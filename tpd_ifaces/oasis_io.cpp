@@ -850,14 +850,14 @@ void Oasis::Cell::readRectangle(OasisInFile& ofn, laydata::TdtCell* dst_cell, co
          {
             TP p1(_mod_gx()+rptpnt[2*rcnt]              ,_mod_gy()+rptpnt[2*rcnt+1]               );
             TP p2(_mod_gx()+rptpnt[2*rcnt]+_mod_gwidth(),_mod_gy()+rptpnt[2*rcnt+1]+_mod_gheight());
-            dwl->addbox(p1, p2, false);
+            dwl->addBox(p1, p2, false);
          }
       }
       else
       {
          TP p1(_mod_gx()              , _mod_gy()               );
          TP p2(_mod_gx()+_mod_gwidth(), _mod_gy()+_mod_gheight());
-         dwl->addbox(p1, p2, false);
+         dwl->addBox(p1, p2, false);
       }
    }
 }
@@ -905,13 +905,13 @@ void Oasis::Cell::readPolygon(OasisInFile& ofn, laydata::TdtCell* dst_cell, cons
             if (!check.valid())
             {
                std::ostringstream ost;
-               ost << "Polygon check fails - {" << check.failtype()
+               ost << "Polygon check fails - {" << check.failType()
                    << " Layer: " << _mod_layer()
                    << " Data type: " << _mod_datatype()
                    << " }";
                tell_log(console::MT_ERROR, ost.str());
             }
-            dwl->addpoly(laypl, false);
+            dwl->addPoly(laypl, false);
          }
       }
       else
@@ -922,13 +922,13 @@ void Oasis::Cell::readPolygon(OasisInFile& ofn, laydata::TdtCell* dst_cell, cons
          if (!check.valid())
          {
             std::ostringstream ost;
-            ost << "Polygon check fails - {" << check.failtype()
+            ost << "Polygon check fails - {" << check.failType()
                 << " Layer: " << _mod_layer()
                 << " Data type: " << _mod_datatype()
                 << " }";
             tell_log(console::MT_ERROR, ost.str());
          }
-         dwl->addpoly(laypl, false);
+         dwl->addPoly(laypl, false);
       }
    }
 }
@@ -998,13 +998,13 @@ void Oasis::Cell::readPath(OasisInFile& ofn, laydata::TdtCell* dst_cell, const L
                   if (!check.valid())
                   {
                      std::ostringstream ost;
-                     ost << "Wire check fails - {" << check.failtype()
+                     ost << "Wire check fails - {" << check.failType()
                            << " Layer: " << _mod_layer()
                            << " Data type: " << _mod_datatype()
                            << " }";
                      tell_log(console::MT_ERROR, ost.str());
                   }
-                  dwl->addwire(laypl, 2*_mod_pathhw(), false);
+                  dwl->addWire(laypl, 2*_mod_pathhw(), false);
                }
                else
                {
@@ -1035,13 +1035,13 @@ void Oasis::Cell::readPath(OasisInFile& ofn, laydata::TdtCell* dst_cell, const L
             if (!check.valid())
             {
                std::ostringstream ost;
-               ost << "Wire check fails - {" << check.failtype()
+               ost << "Wire check fails - {" << check.failType()
                      << " Layer: " << _mod_layer()
                      << " Data type: " << _mod_datatype()
                      << " }";
                tell_log(console::MT_ERROR, ost.str());
             }
-            dwl->addwire(laypl, 2*_mod_pathhw(), false);
+            dwl->addWire(laypl, 2*_mod_pathhw(), false);
          }
          else
          {
@@ -1121,7 +1121,7 @@ void Oasis::Cell::readTrapezoid(OasisInFile& ofn, laydata::TdtCell* dst_cell, co
                laypl.push_back(TP(p1xr + _mod_gwidth() - deltaB, p1yr                 )); // S
                laypl.push_back(TP(p1xr                 - deltaA, p1yr                 )); // R
             }
-            dwl->addpoly(laypl, false);
+            dwl->addPoly(laypl, false);
          }
       }
       else
@@ -1141,7 +1141,7 @@ void Oasis::Cell::readTrapezoid(OasisInFile& ofn, laydata::TdtCell* dst_cell, co
             laypl.push_back(TP(_mod_gx() + _mod_gwidth() - deltaB, _mod_gy()                 )); // S
             laypl.push_back(TP(_mod_gx()                 - deltaA, _mod_gy()                 )); // R
          }
-         dwl->addpoly(laypl, false);
+         dwl->addPoly(laypl, false);
       }
    }
 }
@@ -1215,7 +1215,7 @@ void Oasis::Cell::readCTrapezoid(OasisInFile& ofn, laydata::TdtCell* dst_cell, c
                            (info & Wmask) ? _mod_gwidth()  : 0,
                            (info & Hmask) ? _mod_gheight() : 0,
                            _mod_trpztype()             );
-            dwl->addpoly(laypl, false);
+            dwl->addPoly(laypl, false);
          }
 
       }
@@ -1228,7 +1228,7 @@ void Oasis::Cell::readCTrapezoid(OasisInFile& ofn, laydata::TdtCell* dst_cell, c
                         (info & Wmask) ? _mod_gwidth()  : 0,
                         (info & Hmask) ? _mod_gheight() : 0,
                         _mod_trpztype()  );
-         dwl->addpoly(laypl, false);
+         dwl->addPoly(laypl, false);
       }
    }
 }
@@ -1270,7 +1270,7 @@ void Oasis::Cell::readText(OasisInFile& ofn, laydata::TdtCell* dst_cell, const L
          for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt++)
          {
             TP p1(_mod_tx()+rptpnt[2*rcnt],_mod_ty()+rptpnt[2*rcnt+1]);
-            dwl->addtext( _mod_text(),CTM( p1  ,
+            dwl->addText( _mod_text(),CTM( p1  ,
                                            1.0 / (1e-3 *  OPENGL_FONT_UNIT) , // @FIXME! Font size!
                                            0.0 ,
                                            false
@@ -1281,7 +1281,7 @@ void Oasis::Cell::readText(OasisInFile& ofn, laydata::TdtCell* dst_cell, const L
       else
       {
          TP p1(_mod_tx(),_mod_ty());
-         dwl->addtext( _mod_text(),CTM( p1,
+         dwl->addText( _mod_text(),CTM( p1,
                                         1.0 / (1e-3 *  OPENGL_FONT_UNIT) , // @FIXME! Font size!
                                         0.0 ,
                                         false
@@ -1332,7 +1332,7 @@ void Oasis::Cell::readReference(OasisInFile& ofn, laydata::TdtCell* dst_cell,
 
    if (info & Rmask) readRepetitions(ofn);
    //
-   laydata::CellDefin strdefn = tdt_db->linkcellref(_mod_cellref(), TARGETDB_LIB);
+   laydata::CellDefin strdefn = tdt_db->linkCellRef(_mod_cellref(), TARGETDB_LIB);
    if (info & Rmask)
    {
       int4b* rptpnt = _mod_repete().lcarray();

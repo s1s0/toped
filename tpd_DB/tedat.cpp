@@ -211,13 +211,14 @@ shapes                     TdtCellRef/tdtaref
 
 */
 
-bool laydata::TdtData::point_inside(const TP pnt) {
+bool laydata::TdtData::pointInside(const TP pnt)
+{
    DBbox ovl = overlap();ovl.normalize();
    if (ovl.inside(pnt)) return true;
    else return false;
 }
 
-void laydata::TdtData::select_this(DataList* selist)
+void laydata::TdtData::selectThis(DataList* selist)
 {
    if (sh_partsel == _status)
    {
@@ -244,7 +245,7 @@ void laydata::TdtData::selectInBox(DBbox& select_in, DataList* selist, bool psel
    real clip;
    // get the clip area and if it is 0 - run away
    if (0ll == (clip = select_in.cliparea(overlap()))) return;
-   if (-1.0 == clip) select_this(selist); // entire shape is in
+   if (-1.0 == clip) selectThis(selist); // entire shape is in
    else if ((clip > 0.0) && pselect)
    { // shape partially is in the select box
       if (sh_partsel == _status)
@@ -256,7 +257,7 @@ void laydata::TdtData::selectInBox(DBbox& select_in, DataList* selist, bool psel
             if (SI->first == this) break;
          assert(0 != SI->second.size());
          // select some more points using shape specific procedures
-         select_points(select_in, SI->second);
+         selectPoints(select_in, SI->second);
          // check that after the selection shape doesn't end up fully selected
          if (SI->second.isallset())
          {
@@ -267,9 +268,9 @@ void laydata::TdtData::selectInBox(DBbox& select_in, DataList* selist, bool psel
       else
       {
          // otherwise create a new pointlist
-         SGBitSet pntlst(numpoints());
+         SGBitSet pntlst(numPoints());
          // select some more points using shape specific procedures
-         select_points(select_in, pntlst);
+         selectPoints(select_in, pntlst);
          // and check
          if (!pntlst.isallclear()) {
             _status = sh_partsel;
@@ -302,14 +303,14 @@ bool  laydata::TdtData::unselect(DBbox& select_in, SelectDataPair& SI, bool psel
    {
       // for cell refernces and texts - dont't unselect if they are
       // partially covered
-      if (1 == numpoints()) return false;
+      if (1 == numPoints()) return false;
       // get all points if the shape has not been already partially selected
       if (sh_partsel != _status)
-         SI.second = SGBitSet(numpoints());
+         SI.second = SGBitSet(numPoints());
       // get an alias of the SI.second
       SGBitSet &pntlst = SI.second;
       // finally - go and unselect some points
-      unselect_points(select_in, pntlst);
+      unselectPoints(select_in, pntlst);
       if (pntlst.isallclear())
       {//none selected
          _status = sh_active;
@@ -345,7 +346,7 @@ bool  laydata::TdtData::unselect(DBbox& select_in, SelectDataPair& SI, bool psel
    //    together
    // (The structure of the database in memory is out of discussion here)
    // Achieving the first objective is simple - calculation are performed
-   // once in openGL_precalc() and then reused in the rest of the openGL_*
+   // once in openGlPrecalc() and then reused in the rest of the openGL_*
    // functions. It is quite not clear however where is the balance here,
    // because calculations might be cheaper than the memory access in
    // terms of CPU cycles.
@@ -426,7 +427,7 @@ void laydata::TdtBox::normalize(SGBitSet& psel)
    }
 }
 
-void laydata::TdtBox::openGL_precalc(layprop::DrawProperties& drawprop , pointlist& ptlist) const
+void laydata::TdtBox::openGlPrecalc(layprop::DrawProperties& drawprop , pointlist& ptlist) const
 {
    // translate the points using the current CTM
    ptlist.reserve(4);
@@ -436,17 +437,17 @@ void laydata::TdtBox::openGL_precalc(layprop::DrawProperties& drawprop , pointli
    }
 }
 
-void laydata::TdtBox::draw_request(tenderer::TopRend& rend) const
+void laydata::TdtBox::drawRequest(tenderer::TopRend& rend) const
 {
    rend.box(_pdata);
 }
 
-void laydata::TdtBox::draw_srequest(tenderer::TopRend& rend, const SGBitSet* pslist) const
+void laydata::TdtBox::drawSRequest(tenderer::TopRend& rend, const SGBitSet* pslist) const
 {
    rend.box(_pdata, pslist);
 }
 
-void laydata::TdtBox::openGL_drawline(layprop::DrawProperties&, const pointlist& ptlist) const
+void laydata::TdtBox::openGlDrawLine(layprop::DrawProperties&, const pointlist& ptlist) const
 {
    glBegin(GL_LINE_LOOP);
    for (unsigned i = 0; i < 4; i++)
@@ -454,7 +455,7 @@ void laydata::TdtBox::openGL_drawline(layprop::DrawProperties&, const pointlist&
    glEnd();
 }
 
-void laydata::TdtBox::openGL_drawfill(layprop::DrawProperties&, const pointlist& ptlist) const
+void laydata::TdtBox::openGlDrawFill(layprop::DrawProperties&, const pointlist& ptlist) const
 {
    // We can't draw directly a box here because if the entire cell is rotated
    // on angle <> 90, then it's not a box anymore
@@ -466,7 +467,7 @@ void laydata::TdtBox::openGL_drawfill(layprop::DrawProperties&, const pointlist&
    glEnd();
 }
 
-void laydata::TdtBox::openGL_drawsel(const pointlist& ptlist, const SGBitSet* pslist) const
+void laydata::TdtBox::openGlDrawSel(const pointlist& ptlist, const SGBitSet* pslist) const
 {
    assert(0 != ptlist.size());
    if (sh_selected == status())
@@ -492,7 +493,7 @@ void laydata::TdtBox::openGL_drawsel(const pointlist& ptlist, const SGBitSet* ps
    }
 }
 
-void laydata::TdtBox::motion_draw(const layprop::DrawProperties&, ctmqueue& transtack,
+void laydata::TdtBox::motionDraw(const layprop::DrawProperties&, ctmqueue& transtack,
                                                 SGBitSet* plst) const
 {
    CTM trans = transtack.front();
@@ -522,13 +523,13 @@ void laydata::TdtBox::motion_draw(const layprop::DrawProperties&, ctmqueue& tran
    delete ptlist;
 }
 
-void  laydata::TdtBox::select_points(DBbox& select_in, SGBitSet& pntlst) {
+void  laydata::TdtBox::selectPoints(DBbox& select_in, SGBitSet& pntlst) {
    for (unsigned i = 0; i < 4; i++)
       if ( select_in.inside( TP(_pdata[2*i], _pdata[2*i+1]) ) ) pntlst.set(i);
    pntlst.check_neighbours_set(false);
 }
 
-void  laydata::TdtBox::unselect_points(DBbox& select_in, SGBitSet& pntlst) {
+void  laydata::TdtBox::unselectPoints(DBbox& select_in, SGBitSet& pntlst) {
    if (sh_selected == _status)  // the whole shape use to be selected
       pntlst.setall();
    for (word i = 0; i < 4; i++)
@@ -606,17 +607,17 @@ void laydata::TdtBox::write(TEDfile* const tedfile) const {
    tedfile->put4b(_pdata[p2x]); tedfile->put4b(_pdata[p2y]);
 }
 
-void laydata::TdtBox::GDSwrite(DbExportFile& gdsf) const
+void laydata::TdtBox::gdsWrite(DbExportFile& gdsf) const
 {
    gdsf.box(_pdata);
 }
 
-void laydata::TdtBox::CIFwrite(DbExportFile& ciff) const
+void laydata::TdtBox::cifWrite(DbExportFile& ciff) const
 {
    ciff.box(_pdata);
 }
 
-void laydata::TdtBox::PSwrite(PSFile& gdsf, const layprop::DrawProperties&) const
+void laydata::TdtBox::psWrite(PSFile& gdsf, const layprop::DrawProperties&) const
 {
    gdsf.poly(_pdata, 4, overlap());
 }
@@ -637,7 +638,7 @@ pointlist laydata::TdtBox::shape2poly() const
    return _plist;
 };
 
-void laydata::TdtBox::polycut(pointlist& cutter, ShapeList** decure)
+void laydata::TdtBox::polyCut(pointlist& cutter, ShapeList** decure)
 {
    pointlist _plist = shape2poly();
    // and proceed in the same way as for the polygon
@@ -769,7 +770,7 @@ laydata::TdtPoly::TdtPoly(TEDfile* const tedfile) : TdtData()
    _teseldata = DEBUG_NEW TeselPoly(_pdata, _psize);
 }
 
-void laydata::TdtPoly::openGL_precalc(layprop::DrawProperties& drawprop, pointlist& ptlist) const
+void laydata::TdtPoly::openGlPrecalc(layprop::DrawProperties& drawprop, pointlist& ptlist) const
 {
    // translate the points using the current CTM
    ptlist.reserve(_psize);
@@ -779,17 +780,17 @@ void laydata::TdtPoly::openGL_precalc(layprop::DrawProperties& drawprop, pointli
    }
 }
 
-void laydata::TdtPoly::draw_request(tenderer::TopRend& rend) const
+void laydata::TdtPoly::drawRequest(tenderer::TopRend& rend) const
 {
    rend.poly(_pdata, _psize, _teseldata);
 }
 
-void laydata::TdtPoly::draw_srequest(tenderer::TopRend& rend, const SGBitSet* pslist) const
+void laydata::TdtPoly::drawSRequest(tenderer::TopRend& rend, const SGBitSet* pslist) const
 {
    rend.poly(_pdata, _psize, _teseldata, pslist);
 }
 
-void laydata::TdtPoly::openGL_drawline(layprop::DrawProperties&, const pointlist& ptlist) const
+void laydata::TdtPoly::openGlDrawLine(layprop::DrawProperties&, const pointlist& ptlist) const
 {
    glBegin(GL_LINE_LOOP);
    for (unsigned i = 0; i < ptlist.size(); i++)
@@ -797,7 +798,7 @@ void laydata::TdtPoly::openGL_drawline(layprop::DrawProperties&, const pointlist
    glEnd();
 }
 
-void laydata::TdtPoly::openGL_drawfill(layprop::DrawProperties&, const pointlist& ptlist) const
+void laydata::TdtPoly::openGlDrawFill(layprop::DrawProperties&, const pointlist& ptlist) const
 {
    for ( TeselChain::const_iterator CCH = _teseldata->tdata()->begin(); CCH != _teseldata->tdata()->end(); CCH++ )
    {
@@ -811,7 +812,7 @@ void laydata::TdtPoly::openGL_drawfill(layprop::DrawProperties&, const pointlist
    }
 }
 
-void laydata::TdtPoly::openGL_drawsel(const pointlist& ptlist, const SGBitSet* pslist) const
+void laydata::TdtPoly::openGlDrawSel(const pointlist& ptlist, const SGBitSet* pslist) const
 {
    assert(0 != ptlist.size());
    if (sh_selected == status())
@@ -838,7 +839,7 @@ void laydata::TdtPoly::openGL_drawsel(const pointlist& ptlist, const SGBitSet* p
    }
 }
 
-void laydata::TdtPoly::motion_draw(const layprop::DrawProperties&, ctmqueue& transtack,
+void laydata::TdtPoly::motionDraw(const layprop::DrawProperties&, ctmqueue& transtack,
                                  SGBitSet* plst) const
 {
    CTM trans = transtack.front();
@@ -868,13 +869,13 @@ void laydata::TdtPoly::motion_draw(const layprop::DrawProperties&, ctmqueue& tra
    delete ptlist;
 }
 
-void  laydata::TdtPoly::select_points(DBbox& select_in, SGBitSet& pntlst) {
+void  laydata::TdtPoly::selectPoints(DBbox& select_in, SGBitSet& pntlst) {
    for (unsigned i = 0; i < _psize; i++)
       if ( select_in.inside( TP(_pdata[2*i], _pdata[2*i+1]) ) ) pntlst.set(i);
    pntlst.check_neighbours_set(false);
 }
 
-void laydata::TdtPoly::unselect_points(DBbox& select_in, SGBitSet& pntlst) {
+void laydata::TdtPoly::unselectPoints(DBbox& select_in, SGBitSet& pntlst) {
    if (sh_selected == _status)  // the whole shape use to be selected
       pntlst.setall();
    for (word i = 0; i < _psize; i++)
@@ -1002,7 +1003,7 @@ pointlist laydata::TdtPoly::shape2poly() const
    return plist;
 };
 
-void laydata::TdtPoly::polycut(pointlist& cutter, ShapeList** decure)
+void laydata::TdtPoly::polyCut(pointlist& cutter, ShapeList** decure)
 {
    pointlist plist;
    plist.reserve(_psize);
@@ -1112,17 +1113,17 @@ void laydata::TdtPoly::write(TEDfile* const tedfile) const
    }
 }
 
-void laydata::TdtPoly::GDSwrite(DbExportFile& gdsf) const
+void laydata::TdtPoly::gdsWrite(DbExportFile& gdsf) const
 {
    gdsf.polygon(_pdata, _psize);
 }
 
-void laydata::TdtPoly::CIFwrite(DbExportFile& ciff) const
+void laydata::TdtPoly::cifWrite(DbExportFile& ciff) const
 {
    ciff.polygon(_pdata, _psize);
 }
 
-void laydata::TdtPoly::PSwrite(PSFile& gdsf, const layprop::DrawProperties&) const
+void laydata::TdtPoly::psWrite(PSFile& gdsf, const layprop::DrawProperties&) const
 {
    gdsf.poly(_pdata, _psize, overlap());
 }
@@ -1254,7 +1255,7 @@ DBbox* laydata::TdtWire::mdlPnts(const TP& p1, const TP& p2, const TP& p3) const
                           (int4b) rint(p2.x() + xcorr), (int4b) rint(p2.y() - ycorr));
 }
 
-void laydata::TdtWire::openGL_precalc(layprop::DrawProperties& drawprop, pointlist& ptlist) const
+void laydata::TdtWire::openGlPrecalc(layprop::DrawProperties& drawprop, pointlist& ptlist) const
 {
    // first check whether to draw only the center line
    DBbox wsquare = DBbox(TP(0,0),TP(_width,_width));
@@ -1270,17 +1271,17 @@ void laydata::TdtWire::openGL_precalc(layprop::DrawProperties& drawprop, pointli
       precalc(ptlist, _psize);
 }
 
-void laydata::TdtWire::draw_request(tenderer::TopRend& rend) const
+void laydata::TdtWire::drawRequest(tenderer::TopRend& rend) const
 {
    rend.wire(_pdata, _psize, _width);
 }
 
-void laydata::TdtWire::draw_srequest(tenderer::TopRend& rend, const SGBitSet* pslist) const
+void laydata::TdtWire::drawSRequest(tenderer::TopRend& rend, const SGBitSet* pslist) const
 {
    rend.wire(_pdata, _psize, _width, pslist);
 }
 
-void laydata::TdtWire::openGL_drawline(layprop::DrawProperties&, const pointlist& ptlist) const
+void laydata::TdtWire::openGlDrawLine(layprop::DrawProperties&, const pointlist& ptlist) const
 {
    dword num_points = ptlist.size();
    if (0 == ptlist.size()) return;
@@ -1304,7 +1305,7 @@ void laydata::TdtWire::openGL_drawline(layprop::DrawProperties&, const pointlist
    glEnd();
 }
 
-void laydata::TdtWire::openGL_drawfill(layprop::DrawProperties&, const pointlist& ptlist) const
+void laydata::TdtWire::openGlDrawFill(layprop::DrawProperties&, const pointlist& ptlist) const
 {
    if (_psize == ptlist.size()) return;
    glBegin(GL_QUAD_STRIP);
@@ -1313,7 +1314,7 @@ void laydata::TdtWire::openGL_drawfill(layprop::DrawProperties&, const pointlist
    glEnd();
 }
 
-void laydata::TdtWire::openGL_drawsel(const pointlist& ptlist, const SGBitSet* pslist) const
+void laydata::TdtWire::openGlDrawSel(const pointlist& ptlist, const SGBitSet* pslist) const
 {
    assert(0 != ptlist.size());
    if (sh_selected == status())
@@ -1349,7 +1350,7 @@ void laydata::TdtWire::openGL_drawsel(const pointlist& ptlist, const SGBitSet* p
    }
 }
 
-void laydata::TdtWire::motion_draw(const layprop::DrawProperties& drawprop,
+void laydata::TdtWire::motionDraw(const layprop::DrawProperties& drawprop,
                ctmqueue& transtack, SGBitSet* plst) const
 {
    CTM trans = transtack.front();
@@ -1367,9 +1368,9 @@ void laydata::TdtWire::motion_draw(const layprop::DrawProperties& drawprop,
          ptlist->push_back( TP( _pdata[2*i], _pdata[2*i+1] ) * trans );
    }
    precalc(*ptlist, _psize);
-   openGL_drawline(const_cast<layprop::DrawProperties&>(drawprop), *ptlist);
+   openGlDrawLine(const_cast<layprop::DrawProperties&>(drawprop), *ptlist);
 //      if (drawprop.getCurrentFill())
-//         openGL_drawfill(ptlist);
+//         openGlDrawFill(ptlist);
    ptlist->clear(); delete ptlist;
 }
 
@@ -1446,14 +1447,14 @@ float laydata::TdtWire::get_distance(TP p1, TP p2, TP p0)
    }
 }
 
-void  laydata::TdtWire::select_points(DBbox& select_in, SGBitSet& pntlst)
+void  laydata::TdtWire::selectPoints(DBbox& select_in, SGBitSet& pntlst)
 {
    for (word i = 0; i < _psize; i++)
       if (select_in.inside( TP(_pdata[2*i], _pdata[2*i+1]) ) ) pntlst.set(i);
    pntlst.check_neighbours_set(true);
 }
 
-void laydata::TdtWire::unselect_points(DBbox& select_in, SGBitSet& pntlst)
+void laydata::TdtWire::unselectPoints(DBbox& select_in, SGBitSet& pntlst)
 {
    if (sh_selected == _status) // the whole shape use to be selected
       pntlst.setall();
@@ -1543,17 +1544,17 @@ void laydata::TdtWire::write(TEDfile* const tedfile) const
    }
 }
 
-void laydata::TdtWire::GDSwrite(DbExportFile& gdsf) const
+void laydata::TdtWire::gdsWrite(DbExportFile& gdsf) const
 {
    gdsf.wire(_pdata, _psize, _width);
 }
 
-void laydata::TdtWire::CIFwrite(DbExportFile& ciff) const
+void laydata::TdtWire::cifWrite(DbExportFile& ciff) const
 {
    ciff.wire(_pdata, _psize, _width);
 }
 
-void laydata::TdtWire::PSwrite(PSFile& gdsf, const layprop::DrawProperties&) const
+void laydata::TdtWire::psWrite(PSFile& gdsf, const layprop::DrawProperties&) const
 {
    gdsf.wire(_pdata, _psize, _width, overlap());
 }
@@ -1638,12 +1639,12 @@ laydata::TdtCellRef::TdtCellRef(TEDfile* const tedfile)
    std::string cellrefname = tedfile->getString();
    // get the cell definition pointer and register the cellrefname as a child
    // to the currently parsed cell
-   _structure = tedfile->linkcellref(cellrefname);
+   _structure = tedfile->linkCellRef(cellrefname);
    // get the translation
    _translation = tedfile->getCTM();
 }
 
-void laydata::TdtCellRef::openGL_precalc(layprop::DrawProperties& drawprop, pointlist& ptlist) const
+void laydata::TdtCellRef::openGlPrecalc(layprop::DrawProperties& drawprop, pointlist& ptlist) const
 {
    // calculate the current translation matrix
    CTM newtrans = _translation * drawprop.topCtm();
@@ -1669,7 +1670,7 @@ void laydata::TdtCellRef::openGL_precalc(layprop::DrawProperties& drawprop, poin
    drawprop.drawReferenceMarks(TP(0,0) * newtrans, layprop::cell_mark);
 }
 
-void laydata::TdtCellRef::draw_request(tenderer::TopRend& rend) const
+void laydata::TdtCellRef::drawRequest(tenderer::TopRend& rend) const
 {
    // get overlapping box of the structure ...
    DBbox obox(structure()->cellOverlap());
@@ -1694,7 +1695,7 @@ void laydata::TdtCellRef::vlOverlap(const layprop::DrawProperties& prop, DBbox& 
    vlOvl.overlap(strOverlap);
 }
 
-void laydata::TdtCellRef::draw_srequest(tenderer::TopRend& rend, const SGBitSet*) const
+void laydata::TdtCellRef::drawSRequest(tenderer::TopRend& rend, const SGBitSet*) const
 {
    // get overlapping box of the structure ...
    DBbox obox(structure()->cellOverlap());
@@ -1709,14 +1710,14 @@ void laydata::TdtCellRef::draw_srequest(tenderer::TopRend& rend, const SGBitSet*
    if (crchain) rend.pushref(this);
 }
 
-void laydata::TdtCellRef::openGL_drawline(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
+void laydata::TdtCellRef::openGlDrawLine(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
 {
    if (0 == ptlist.size()) return;
    drawprop.drawCellBoundary(ptlist);
 }
 
 
-void laydata::TdtCellRef::openGL_drawfill(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
+void laydata::TdtCellRef::openGlDrawFill(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
 {
    if ((NULL == structure()) || (0 == ptlist.size())) return;
    // draw the structure itself. Pop/push ref stuff is when edit in place is active
@@ -1727,7 +1728,7 @@ void laydata::TdtCellRef::openGL_drawfill(layprop::DrawProperties& drawprop, con
    if (crchain) drawprop.pushRef(this);
 }
 
-void laydata::TdtCellRef::openGL_drawsel(const pointlist& ptlist, const SGBitSet*) const
+void laydata::TdtCellRef::openGlDrawSel(const pointlist& ptlist, const SGBitSet*) const
 {
    assert(0 != ptlist.size());
    if (sh_selected == status())
@@ -1739,7 +1740,7 @@ void laydata::TdtCellRef::openGL_drawsel(const pointlist& ptlist, const SGBitSet
    }
 }
 
-void laydata::TdtCellRef::openGL_postclean(layprop::DrawProperties& drawprop, pointlist& ptlist) const
+void laydata::TdtCellRef::openGlPostClean(layprop::DrawProperties& drawprop, pointlist& ptlist) const
 {
    if (0 == ptlist.size()) return;
    ptlist.clear();
@@ -1747,7 +1748,7 @@ void laydata::TdtCellRef::openGL_postclean(layprop::DrawProperties& drawprop, po
    drawprop.popCtm();
 }
 
-void laydata::TdtCellRef::motion_draw(const layprop::DrawProperties& drawprop,
+void laydata::TdtCellRef::motionDraw(const layprop::DrawProperties& drawprop,
                  ctmqueue& transtack, SGBitSet*) const
 {
    if (structure())
@@ -1768,7 +1769,7 @@ void laydata::TdtCellRef::write(TEDfile* const tedfile) const {
    tedfile->putCTM(_translation);
 }
 
-laydata::TdtCell* laydata::TdtCellRef::cstructure() const
+laydata::TdtCell* laydata::TdtCellRef::cStructure() const
 {
    laydata::TdtCell* celldef;
    if (_structure->libID())
@@ -1783,17 +1784,17 @@ std::string laydata::TdtCellRef::cellname() const
    return _structure->name();
 }
 
-void laydata::TdtCellRef::GDSwrite(DbExportFile& gdsf) const
+void laydata::TdtCellRef::gdsWrite(DbExportFile& gdsf) const
 {
    gdsf.ref(_structure->name(), _translation);
 }
 
-void laydata::TdtCellRef::CIFwrite(DbExportFile& ciff) const
+void laydata::TdtCellRef::cifWrite(DbExportFile& ciff) const
 {
    ciff.ref(_structure->name(), _translation);
 }
 
-void laydata::TdtCellRef::PSwrite(PSFile& psf, const layprop::DrawProperties& drawprop) const
+void laydata::TdtCellRef::psWrite(PSFile& psf, const layprop::DrawProperties& drawprop) const
 {
    psf.cellref(_structure->name(), _translation);
    if (!psf.hier())
@@ -1806,7 +1807,7 @@ void laydata::TdtCellRef::ungroup(laydata::TdtDesign* ATDB, TdtCell* dst, AtticL
 {
    TdtData *data_copy;
    ShapeList* ssl;
-   TdtCell* cstr = cstructure();
+   TdtCell* cstr = cStructure();
    // select all the shapes of the referenced TdtCell
    if (NULL == cstr)
    {
@@ -1845,7 +1846,7 @@ void laydata::TdtCellRef::ungroup(laydata::TdtDesign* ATDB, TdtCell* dst, AtticL
          ssl->push_back(data_copy);
          //update the hierarchy tree if this is a cell
          if (REF_LAY == CL->first) dst->addChild(ATDB,
-                            static_cast<TdtCellRef*>(data_copy)->cstructure());
+                            static_cast<TdtCellRef*>(data_copy)->cStructure());
          // add it to the selection list of the dst cell
          dst->selectThis(data_copy,CL->first);
       }
@@ -1875,12 +1876,12 @@ laydata::TdtCellAref::TdtCellAref(TEDfile* const tedfile) : TdtCellRef(tedfile)
 }
 
 
-void laydata::TdtCellAref::openGL_precalc(layprop::DrawProperties& drawprop, pointlist& ptlist) const
+void laydata::TdtCellAref::openGlPrecalc(layprop::DrawProperties& drawprop, pointlist& ptlist) const
 {
    // make sure that the referenced structure exists
    assert(structure());
    // Get the areal of entire matrix, but NOT TRANSLATED !
-   DBbox array_overlap = clear_overlap();
+   DBbox array_overlap = clearOverlap();
    // Calculate the CTM for the array
    CTM newtrans = _translation * drawprop.topCtm();
    // ... get the current visual (clipping) window, and make a REVERSE TRANSLATION
@@ -1944,13 +1945,13 @@ void laydata::TdtCellAref::openGL_precalc(layprop::DrawProperties& drawprop, poi
    }
 }
 
-void laydata::TdtCellAref::draw_request(tenderer::TopRend& rend) const
+void laydata::TdtCellAref::drawRequest(tenderer::TopRend& rend) const
 {
 
    // make sure that the referenced structure exists
    assert(structure());
    // Get the areal of entire matrix, but NOT TRANSLATED !
-   DBbox array_overlap = clear_overlap();
+   DBbox array_overlap = clearOverlap();
    // Calculate the CTM for the array
    CTM newtrans = _translation * rend.topCTM();
    // ... get the current visual (clipping) window, and make a REVERSE TRANSLATION
@@ -2018,20 +2019,20 @@ void laydata::TdtCellAref::draw_request(tenderer::TopRend& rend) const
    }
 }
 
-void laydata::TdtCellAref::draw_srequest(tenderer::TopRend& rend, const SGBitSet*) const
+void laydata::TdtCellAref::drawSRequest(tenderer::TopRend& rend, const SGBitSet*) const
 {
    //@FIXME! array of cells selected! It will give confusing results in "edit in place"
-   draw_request(rend);
+   drawRequest(rend);
 }
 
 
-void laydata::TdtCellAref::openGL_drawline(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
+void laydata::TdtCellAref::openGlDrawLine(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
 {
    if (0 == ptlist.size()) return;
    drawprop.drawCellBoundary(ptlist);
 }
 
-void laydata::TdtCellAref::openGL_drawfill(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
+void laydata::TdtCellAref::openGlDrawFill(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
 {
    if (0 == ptlist.size()) return;
    for (int i = ptlist[4].x(); i < ptlist[4].y(); i++)
@@ -2052,7 +2053,7 @@ void laydata::TdtCellAref::openGL_drawfill(layprop::DrawProperties& drawprop, co
 //   drawprop.popCtm();
 }
 
-void laydata::TdtCellAref::openGL_drawsel(const pointlist& ptlist, const SGBitSet*) const
+void laydata::TdtCellAref::openGlDrawSel(const pointlist& ptlist, const SGBitSet*) const
 {
    assert(0 != ptlist.size());
    if (sh_selected == status())
@@ -2064,7 +2065,7 @@ void laydata::TdtCellAref::openGL_drawsel(const pointlist& ptlist, const SGBitSe
    }
 }
 
-void laydata::TdtCellAref::motion_draw(const layprop::DrawProperties& drawprop,
+void laydata::TdtCellAref::motionDraw(const layprop::DrawProperties& drawprop,
                  ctmqueue& transtack, SGBitSet*) const
 {
    assert(structure());
@@ -2099,17 +2100,17 @@ void laydata::TdtCellAref::write(TEDfile* const tedfile) const {
    tedfile->putWord(_arrprops.cols());
 }
 
-void laydata::TdtCellAref::GDSwrite(DbExportFile& gdsf) const
+void laydata::TdtCellAref::gdsWrite(DbExportFile& gdsf) const
 {
    gdsf.aref(_structure->name(), _translation, _arrprops);
 }
 
-void laydata::TdtCellAref::CIFwrite(DbExportFile& ciff) const
+void laydata::TdtCellAref::cifWrite(DbExportFile& ciff) const
 {
    ciff.aref(_structure->name(), _translation, _arrprops);
 }
 
-void laydata::TdtCellAref::PSwrite(PSFile& psf, const layprop::DrawProperties& drawprop) const
+void laydata::TdtCellAref::psWrite(PSFile& psf, const layprop::DrawProperties& drawprop) const
 {
    for (int i = 0; i < _arrprops.cols(); i++)
    {// start/stop rows
@@ -2144,12 +2145,12 @@ void  laydata::TdtCellAref::ungroup(laydata::TdtDesign* ATDB, TdtCell* dst, layd
 DBbox laydata::TdtCellAref::overlap() const
 {
    assert(structure());
-   DBbox ovl(clear_overlap().overlap(_translation));
+   DBbox ovl(clearOverlap().overlap(_translation));
    ovl.normalize();
    return ovl;
 }
 
-DBbox laydata::TdtCellAref::clear_overlap() const
+DBbox laydata::TdtCellAref::clearOverlap() const
 {
    assert(structure());
    DBbox bx(structure()->cellOverlap());
@@ -2187,7 +2188,7 @@ laydata::TdtText::TdtText(TEDfile* const tedfile) : TdtData(),
    _correction = TP(-pure_ovl.p1().x(), -pure_ovl.p1().y());
 }
 
-void laydata::TdtText::replace_str(std::string newstr)
+void laydata::TdtText::replaceStr(std::string newstr)
 {
    _text = newstr;
    assert(NULL != fontLib); // check that font library is initialised
@@ -2198,7 +2199,7 @@ void laydata::TdtText::replace_str(std::string newstr)
    _correction = TP(-pure_ovl.p1().x(), -pure_ovl.p1().y());
 }
 
-void laydata::TdtText::openGL_precalc(layprop::DrawProperties& drawprop, pointlist& ptlist) const
+void laydata::TdtText::openGlPrecalc(layprop::DrawProperties& drawprop, pointlist& ptlist) const
 {
    //  Things to remember...
    // Font has to be translated using its own matrix in which
@@ -2251,7 +2252,7 @@ void laydata::TdtText::openGL_precalc(layprop::DrawProperties& drawprop, pointli
    }
 }
 
-void laydata::TdtText::draw_request(tenderer::TopRend& rend) const
+void laydata::TdtText::drawRequest(tenderer::TopRend& rend) const
 {
    // font translation matrix
    CTM ftmtrx =  _translation * rend.topCTM();
@@ -2267,7 +2268,7 @@ void laydata::TdtText::draw_request(tenderer::TopRend& rend) const
       rend.text(&_text, _translation, _overlap, _correction, false);
 }
 
-void laydata::TdtText::draw_srequest(tenderer::TopRend& rend, const SGBitSet*) const
+void laydata::TdtText::drawSRequest(tenderer::TopRend& rend, const SGBitSet*) const
 {
    // font translation matrix
    CTM ftmtrx =  _translation * rend.topCTM();
@@ -2279,7 +2280,7 @@ void laydata::TdtText::draw_srequest(tenderer::TopRend& rend, const SGBitSet*) c
    rend.text(&_text, _translation, _overlap, _correction, true);
 }
 
-void laydata::TdtText::openGL_drawline(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
+void laydata::TdtText::openGlDrawLine(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
 {
    if (0 == ptlist.size()) return;
    drawprop.drawTextBoundary(ptlist);
@@ -2291,7 +2292,7 @@ void laydata::TdtText::openGL_drawline(layprop::DrawProperties& drawprop, const 
                                              0,                     0,0,0,
                                  ptlist[4].x(),         ptlist[4].y(),0,1};
    glMultMatrixd(ori_mtrx);
-   // correction of the glf shift - as explained in the openGL_precalc above
+   // correction of the glf shift - as explained in the openGlPrecalc above
    glTranslatef(_correction.x(), _correction.y(), 1);
    // The only difference between glut and glf appears to be the size:-
    // glf is not using the font unit, so we need to scale it back up (see below)
@@ -2305,7 +2306,7 @@ void laydata::TdtText::openGL_drawline(layprop::DrawProperties& drawprop, const 
    glPopMatrix();
 }
 
-void laydata::TdtText::openGL_drawfill(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
+void laydata::TdtText::openGlDrawFill(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
 {
    if (0 == ptlist.size()) return;
    glPushMatrix();
@@ -2314,7 +2315,7 @@ void laydata::TdtText::openGL_drawfill(layprop::DrawProperties& drawprop, const 
                                              0,                     0,0,0,
                                  ptlist[4].x(),         ptlist[4].y(),0,1};
    glMultMatrixd(ori_mtrx);
-   // correction of the glf shift - as explained in the openGL_precalc above
+   // correction of the glf shift - as explained in the openGlPrecalc above
    glTranslatef(_correction.x(), _correction.y(), 1);
    // The only difference between glut and glf appears to be the size:-
    // glf is not using the font unit, so we need to scale it back up (see below)
@@ -2326,7 +2327,7 @@ void laydata::TdtText::openGL_drawfill(layprop::DrawProperties& drawprop, const 
    glPopMatrix();
 }
 
-void laydata::TdtText::openGL_drawsel(const pointlist& ptlist, const SGBitSet*) const
+void laydata::TdtText::openGlDrawSel(const pointlist& ptlist, const SGBitSet*) const
 {
    assert(0 != ptlist.size());
    if (sh_selected == status())
@@ -2338,7 +2339,7 @@ void laydata::TdtText::openGL_drawsel(const pointlist& ptlist, const SGBitSet*) 
    }
 }
 
-void laydata::TdtText::openGL_postclean(layprop::DrawProperties& drawprop, pointlist& ptlist) const
+void laydata::TdtText::openGlPostClean(layprop::DrawProperties& drawprop, pointlist& ptlist) const
 {
    if (0 == ptlist.size()) return;
    ptlist.clear();
@@ -2346,7 +2347,7 @@ void laydata::TdtText::openGL_postclean(layprop::DrawProperties& drawprop, point
    drawprop.popCtm();
 }
 
-void laydata::TdtText::motion_draw(const layprop::DrawProperties& drawprop,
+void laydata::TdtText::motionDraw(const layprop::DrawProperties& drawprop,
                ctmqueue& transtack, SGBitSet*) const
 {
    //====================================================================
@@ -2363,7 +2364,7 @@ void laydata::TdtText::motion_draw(const layprop::DrawProperties& drawprop,
                                      0,          0,0,0,
                            ftmtrx.tx(),ftmtrx.ty(),0,1};
       glMultMatrixd(ori_mtrx);
-      // correction of the glf shift - as explained in the openGL_precalc above
+      // correction of the glf shift - as explained in the openGlPrecalc above
       glTranslatef(_correction.x(), _correction.y(), 1);
       glScalef(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT, 1);
       fontLib->drawWiredString(_text);
@@ -2377,17 +2378,17 @@ void laydata::TdtText::write(TEDfile* const tedfile) const {
    tedfile->putCTM(_translation);
 }
 
-void laydata::TdtText::GDSwrite(DbExportFile& gdsf) const
+void laydata::TdtText::gdsWrite(DbExportFile& gdsf) const
 {
    gdsf.text(_text, _translation);
 }
 
-void laydata::TdtText::CIFwrite(DbExportFile& ciff) const
+void laydata::TdtText::cifWrite(DbExportFile& ciff) const
 {
    ciff.text(_text, _translation);
 }
 
-void laydata::TdtText::PSwrite(PSFile& gdsf, const layprop::DrawProperties& drawprop) const
+void laydata::TdtText::psWrite(PSFile& gdsf, const layprop::DrawProperties& drawprop) const
 {
    CTM fmtrx(_translation);
    fmtrx.Scale(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT);
@@ -2483,7 +2484,7 @@ laydata::TdtData* laydata::ValidBox::replacement()
    else return DEBUG_NEW laydata::TdtPoly(_plist);
 }
 
-std::string laydata::ValidBox::failtype()
+std::string laydata::ValidBox::failType()
 {
    if      (!(_status & shp_box))  return "Rotated box";
    else return "OK";
@@ -2613,7 +2614,7 @@ void laydata::ValidPoly::selfcrossing()
       _status |= laydata::shp_cross;*/
 }
 
-std::string laydata::ValidPoly::failtype() {
+std::string laydata::ValidPoly::failType() {
    if      (_status & shp_null) return "NULL area polygon";
    else if (_status & shp_cross) return "Self-crossing";
 //   else if (_status & shp_acute) return "Acute angle";
@@ -2706,7 +2707,7 @@ laydata::TdtData* laydata::ValidWire::replacement() {
    return DEBUG_NEW laydata::TdtWire(_plist, _width);
 }
 
-std::string laydata::ValidWire::failtype() {
+std::string laydata::ValidWire::failType() {
 //   if (_status & shp_null)  return "Zero area";
    if      (_status & shp_cross) return "Self-crossing";
    else if (_status & shp_null ) return "Unsuficcient points";
@@ -2741,12 +2742,12 @@ laydata::TdtData* laydata::createValidShape(pointlist* pl) {
    delete pl;
    if (!check.valid()) {
       std::ostringstream ost;
-      ost << "Resulting shape is invalid - " << check.failtype();
+      ost << "Resulting shape is invalid - " << check.failType();
       tell_log(console::MT_ERROR, ost.str());
       return NULL;
    }
    laydata::TdtData* newshape;
-   pointlist npl = check.get_validated();
+   pointlist npl = check.getValidated();
    if (check.box())
       newshape = DEBUG_NEW laydata::TdtBox(npl[2], npl[0]);
    else
@@ -3028,7 +3029,7 @@ void laydata::TdtTmpText::draw(const layprop::DrawProperties&, ctmqueue& transta
             0,          0,0,0,
             ftmtrx.tx(),ftmtrx.ty(),0,1};
             glMultMatrixd(ori_mtrx);
-            // correction of the glf shift - as explained in the openGL_precalc above
+            // correction of the glf shift - as explained in the openGlPrecalc above
             glTranslatef(-_overlap.p1().x(), -_overlap.p1().y(), 1);
             glScalef(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT, 1);
             fontLib->drawWiredString(_text);

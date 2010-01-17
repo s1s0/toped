@@ -31,6 +31,7 @@
 #include "datacenter.h"
 #include "ted_prompt.h"
 #include "tedat.h"
+#include "viewprop.h"
 
 
 wxFrame*                         TopedMainW;
@@ -218,7 +219,7 @@ laydata::SelectList* tellstdfunc::filter_selist(const laydata::SelectList* shape
       for (laydata::DataList::const_iterator CI = lslct->begin();
                                              CI != lslct->end(); CI++)
       {
-         if (mask & (CI->first->ltype()))
+         if (mask & (CI->first->lType()))
          {
             SGBitSet pntl;
             if (0 != CI->second.size()) pntl = SGBitSet(CI->second);
@@ -243,10 +244,10 @@ laydata::AtticList* tellstdfunc::replace_str(laydata::AtticList* shapesel, std::
       for (laydata::ShapeList::iterator CI = lslct->begin();
                                              CI != lslct->end(); CI++)
       {
-         assert(laydata::_lmtext == (*CI)->ltype());
+         assert(laydata::_lmtext == (*CI)->lType());
          // using build-in copy constructor
          laydata::TdtText* newtxt = DEBUG_NEW laydata::TdtText(*(static_cast<laydata::TdtText*>(*CI)));
-         newtxt->replace_str(newstr);
+         newtxt->replaceStr(newstr);
          newlst->push_back(newtxt);
       }
       (*newtextlist)[CL->first] = newlst;
@@ -303,7 +304,7 @@ void tellstdfunc::updateLayerDefinitions(laydata::TdtLibDir* LIBDIR, nameList& t
    // get all the layers used in the design and define them using the default definition
    WordList ull;
    for(nameList::const_iterator CTC= top_cells.begin(); CTC != top_cells.end(); CTC++)
-      LIBDIR->collect_usedlays(*CTC, true, ull);
+      LIBDIR->collectUsedLays(*CTC, true, ull);
    ull.sort(); ull.unique();
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))

@@ -818,13 +818,13 @@ void CIFin::Cif2Ted::box ( CIFin::CifBox* wd, laydata::TdtLayer* wl, std::string
    if (!check.valid())
    {
       std::ostringstream ost; ost << "Layer " << layname;
-      ost << ": Box check fails - " << check.failtype();
+      ost << ": Box check fails - " << check.failType();
       tell_log(console::MT_ERROR, ost.str());
    }
-   else pl = check.get_validated() ;
+   else pl = check.getValidated() ;
 
-   if (check.box())  wl->addbox(pl[0], pl[2],false);
-   else              wl->addpoly(pl,false);
+   if (check.box())  wl->addBox(pl[0], pl[2],false);
+   else              wl->addPoly(pl,false);
 }
 
 void CIFin::Cif2Ted::poly( CIFin::CifPoly* wd, laydata::TdtLayer* wl, std::string layname)
@@ -842,13 +842,13 @@ void CIFin::Cif2Ted::poly( CIFin::CifPoly* wd, laydata::TdtLayer* wl, std::strin
    if (!check.valid())
    {
       std::ostringstream ost; ost << "Layer " << layname;
-      ost << ": Polygon check fails - " << check.failtype();
+      ost << ": Polygon check fails - " << check.failType();
       tell_log(console::MT_ERROR, ost.str());
    }
-   else pl = check.get_validated() ;
+   else pl = check.getValidated() ;
 
-   if (check.box())  wl->addbox(pl[0], pl[2],false);
-   else              wl->addpoly(pl,false);
+   if (check.box())  wl->addBox(pl[0], pl[2],false);
+   else              wl->addPoly(pl,false);
 }
 
 void CIFin::Cif2Ted::wire( CIFin::CifWire* wd, laydata::TdtLayer* wl, std::string layname)
@@ -866,11 +866,11 @@ void CIFin::Cif2Ted::wire( CIFin::CifWire* wd, laydata::TdtLayer* wl, std::strin
    if (!check.valid())
    {
       std::ostringstream ost; ost << "Layer " << layname;
-      ost << ": Wire check fails - " << check.failtype();
+      ost << ": Wire check fails - " << check.failType();
       tell_log(console::MT_ERROR, ost.str());
    }
-   else pl = check.get_validated() ;
-   wl->addwire(pl, wd->width(),false);
+   else pl = check.getValidated() ;
+   wl->addWire(pl, wd->width(),false);
 }
 
 void CIFin::Cif2Ted::ref ( CIFin::CifRef* wd, laydata::TdtCell* dst)
@@ -898,7 +898,7 @@ void CIFin::Cif2Ted::lbll( CIFin::CifLabelLoc* wd, laydata::TdtLayer* wl, std::s
    if (0.0 == _techno) return;
    TP pnt(*(wd->location()));
    pnt *= _crosscoeff;
-   wl->addtext(wd->text(),
+   wl->addText(wd->text(),
                CTM(pnt,
                    (_techno / (/*(*_tdt_db)()->UU() * */ OPENGL_FONT_UNIT)),
                    0.0,

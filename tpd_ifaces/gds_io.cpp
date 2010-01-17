@@ -1068,15 +1068,15 @@ void GDSin::GdsStructure::importBox(GdsInFile* cf, laydata::TdtCell* dst_cell, c
                   if (!check.valid())
                   {
                      std::ostringstream ost;
-                     ost << "Box check fails - {" << check.failtype()
+                     ost << "Box check fails - {" << check.failType()
                          << " Layer: " << layer
                          << " Data type: " << singleType
                          << " }";
                      tell_log(console::MT_ERROR, ost.str());
                   }
                   laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->secureLayer(tdtlaynum));
-                  if (check.box())  dwl->addbox(plist[0], plist[2], false);
-                  else              dwl->addpoly(plist,false);
+                  if (check.box())  dwl->addBox(plist[0], plist[2], false);
+                  else              dwl->addPoly(plist,false);
                }
                break;
             case gds_ENDEL://end of element, exit point
@@ -1131,15 +1131,15 @@ void GDSin::GdsStructure::importPoly(GdsInFile* cf, laydata::TdtCell* dst_cell, 
                   if (!check.valid())
                   {
                      std::ostringstream ost;
-                     ost << "Polygon check fails - {" << check.failtype()
+                     ost << "Polygon check fails - {" << check.failType()
                          << " Layer: " << layer
                          << " Data type: " << singleType
                          << " }";
                      tell_log(console::MT_ERROR, ost.str());
                   }
                   laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->secureLayer(tdtlaynum));
-                  if (check.box())  dwl->addbox(plist[0], plist[2], false);
-                  else              dwl->addpoly(plist,false);
+                  if (check.box())  dwl->addBox(plist[0], plist[2], false);
+                  else              dwl->addPoly(plist,false);
                }
                break;
             case gds_ENDEL://end of element, exit point
@@ -1212,14 +1212,14 @@ void GDSin::GdsStructure::importPath(GdsInFile* cf, laydata::TdtCell* dst_cell, 
                      if (!check.valid())
                      {
                         std::ostringstream ost;
-                        ost << "Wire check fails - {" << check.failtype()
+                        ost << "Wire check fails - {" << check.failType()
                               << " Layer: " << layer
                               << " Data type: " << singleType
                               << " }";
                         tell_log(console::MT_ERROR, ost.str());
                      }
                      laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->secureLayer(tdtlaynum));
-                     dwl->addwire(plist, width,false);
+                     dwl->addWire(plist, width,false);
                   }
                   else
                   {
@@ -1311,7 +1311,7 @@ void GDSin::GdsStructure::importText(GdsInFile* cf, laydata::TdtCell* dst_cell, 
                {
                   laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->secureLayer(tdtlaynum));
                   // @FIXME absolute magnification, absolute angle should be reflected somehow!!!
-                  dwl->addtext(tString,
+                  dwl->addText(tString,
                               CTM( magnPoint,
                                     magnification / (dbuu *  OPENGL_FONT_UNIT),
                                     angle,
@@ -1380,7 +1380,7 @@ void GDSin::GdsStructure::importSref(GdsInFile* cf, laydata::TdtCell* dst_cell, 
                break;
             case gds_ENDEL:{//end of element, exit point
                // @FIXME absolute magnification, absolute angle should be reflected somehow!!!
-               laydata::CellDefin strdefn = tdt_db->linkcellref(strctName, TARGETDB_LIB);
+               laydata::CellDefin strdefn = tdt_db->linkCellRef(strctName, TARGETDB_LIB);
                dst_cell->registerCellRef( strdefn,
                                           CTM(magnPoint,
                                               magnification,
@@ -1462,7 +1462,7 @@ void GDSin::GdsStructure::importAref(GdsInFile* cf, laydata::TdtCell* dst_cell, 
                break;
             case gds_ENDEL:{//end of element, exit point
                // Absolute magnification, absolute angle should be reflected somehow!!!
-               laydata::CellDefin strdefn = tdt_db->linkcellref(strctName, TARGETDB_LIB);
+               laydata::CellDefin strdefn = tdt_db->linkCellRef(strctName, TARGETDB_LIB);
 
                laydata::ArrayProperties arrprops(arrGetStep(xStep, magnPoint, columns),
                                                  arrGetStep(yStep, magnPoint, rows   ),

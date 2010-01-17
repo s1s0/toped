@@ -29,6 +29,8 @@
 #include "tpdf_cells.h"
 #include "tuidefs.h"
 #include "datacenter.h"
+#include "viewprop.h"
+
 
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;

@@ -30,6 +30,7 @@
 #include "tpdf_edit.h"
 #include "tedat.h"
 #include "datacenter.h"
+#include "viewprop.h"
 
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
@@ -594,7 +595,7 @@ int tellstdfunc::lgcCUTPOLY::execute()
          for (byte i = 0; i < 3; dasao[i++] = DEBUG_NEW laydata::AtticList());
          DWordSet unselable = PROPC->allUnselectable();
          laydata::TdtDesign* ATDB = DATC->lockDB();
-            if (ATDB->cutPoly(check.get_validated() ,dasao)) {
+            if (ATDB->cutPoly(check.getValidated() ,dasao)) {
                // push the command for undo
                UNDOcmdQ.push_front(this);
                UNDOPstack.push_front(make_ttlaylist(ATDB->shapeSel()));

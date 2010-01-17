@@ -32,6 +32,7 @@
 #include "tuidefs.h"
 #include "calbr_reader.h"
 #include "drc_tenderer.h"
+#include "viewprop.h"
 
 
 extern DataCenter*               DATC;
@@ -751,7 +752,7 @@ int tellstdfunc::stdREPORTLAY::execute() {
    std::string cellname = getStringValue();
    WordList ull;
    DATC->lockDB(false);
-      bool success = DATC->TEDLIB()->collect_usedlays(cellname, recursive, ull);
+      bool success = DATC->TEDLIB()->collectUsedLays(cellname, recursive, ull);
    DATC->unlockDB();
    telldata::ttlist* tllull = DEBUG_NEW telldata::ttlist(telldata::tn_int);
    if (success) {

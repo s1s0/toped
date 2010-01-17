@@ -32,6 +32,7 @@
 #include "tpdf_props.h"
 #include "datacenter.h"
 #include "tuidefs.h"
+#include "viewprop.h"
 
 extern parsercmd::cmdBLOCK*      CMDBlock;
 extern DataCenter*               DATC;

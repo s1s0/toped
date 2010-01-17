@@ -49,46 +49,46 @@ namespace laydata {
       for the NW(north-west), NE(north-east), SE(south-east) and SW(south-west)
       subrectangles of the _overlap box.\n
       The methods can be split on several groups:
-         - add a single layout object - add(), fitintree()
-         - add a group of layout objects - put(), sort(), fitsubtree()
+         - add a single layout object - add(), fitInTree()
+         - add a group of layout objects - put(), sort(), fitSubTree()
          - object selection - selectInBox(), unselectInBox(), selectFromList(),
            selectAll()
-         - design modification - delete_marked()
-         - tree maintanence - validate(), full_validate(), sort(), resort(),
-           tmpstore()
+         - design modification - deleteMarked()
+         - tree maintanence - validate(), fullValidate(), sort(), resort(),
+           tmpStore()
             */
    class QuadTree {
    public:
                            QuadTree();
                            QuadTree(TEDfile* const tedfile);
       virtual             ~QuadTree();
-      void                 openGL_draw(layprop::DrawProperties&, const DataList*, bool) const;
-      void                 openGL_render(tenderer::TopRend&, const DataList*) const;
+      void                 openGlDraw(layprop::DrawProperties&, const DataList*, bool) const;
+      void                 openGlRender(tenderer::TopRend&, const DataList*) const;
 //      void                 visible_shapes(laydata::ShapeList*, const DBbox&, const CTM&, const CTM&, unsigned long&);
-      short                clip_type(tenderer::TopRend&) const;
-      virtual void         motion_draw(const layprop::DrawProperties&, ctmqueue&) const;
+      short                clipType(tenderer::TopRend&) const;
+      virtual void         motionDraw(const layprop::DrawProperties&, ctmqueue&) const;
       void                 add(TdtData* shape);
       void                 put(TdtData* shape);
       void                 write(TEDfile* const) const;
-      void                 GDSwrite(DbExportFile&) const;
-      void                 CIFwrite(DbExportFile&) const;
-      void                 PSwrite(PSFile&, const layprop::DrawProperties&) const;
+      void                 gdsWrite(DbExportFile&) const;
+      void                 cifWrite(DbExportFile&) const;
+      void                 psWrite(PSFile&, const layprop::DrawProperties&) const;
       void                 selectInBox(DBbox&, DataList*, bool, word /*selmask = laydata::_lmall*/);
       void                 selectFromList(DataList*, DataList*);
       void                 selectAll(DataList*, word selmask = laydata::_lmall, bool mark = true);
       void                 unselectInBox(DBbox&, DataList*, bool);
-      bool                 delete_marked(SH_STATUS stat=sh_selected, bool partselect=false);
-      bool                 delete_this(laydata::TdtData*);
-      void                 cutpoly_selected(pointlist&, DBbox&, ShapeList**);
-      TdtData*             merge_selected(TdtData*& shapeRef);
+      bool                 deleteMarked(SH_STATUS stat=sh_selected, bool partselect=false);
+      bool                 deleteThis(laydata::TdtData*);
+      void                 cutPolySelected(pointlist&, DBbox&, ShapeList**);
+      TdtData*             mergeSelected(TdtData*& shapeRef);
 /*      TdtData*             getfirstover(const TP);
       TdtData*             getnextover(const TP, laydata::TdtData*, bool& check);*/
-      bool                 getobjectover(const TP pnt, laydata::TdtData*& prev);
+      bool                 getObjectOver(const TP pnt, laydata::TdtData*& prev);
       void                 validate();
-      bool                 full_validate();
+      bool                 fullValidate();
       void                 resort();
       bool                 empty() const;
-      void                 freememory();
+      void                 freeMemory();
       /*! Return the overlapping box*/
       DBbox                overlap() const   {return _overlap;};
       /*! Return the overlapping box*/
@@ -101,11 +101,11 @@ namespace laydata {
       DBbox               _overlap;//! The overlapping box
    private:
       void                 sort(ShapeList&);
-      bool                 fitintree(TdtData* shape);
-      int                  fitsubtree(const DBbox&, DBbox*);
-      void                 tmpstore(ShapeList& store);
+      bool                 fitInTree(TdtData* shape);
+      int                  fitSubTree(const DBbox&, DBbox*);
+      void                 tmpStore(ShapeList& store);
       byte                 biggest(int8b* array) const;
-      void                 update_overlap(const DBbox& hovl);
+      void                 updateOverlap(const DBbox& hovl);
       /*! A pointers to four child QuadTree structures*/
       QuadTree*           _quads[4];
       /*! Pointer to the first TdtData stored in this QuadTree*/
@@ -123,13 +123,13 @@ natural layers which means it doesn't hold cell references
    public:
                            TdtLayer() : QuadTree() {};
                            TdtLayer(TEDfile* const tedfile);
-                          ~TdtLayer() {freememory();};
-      void                 motion_draw(const layprop::DrawProperties&, ctmqueue& ) const;
-      TdtData*             addbox(const TP& p1, const TP& p2, bool sortnow = true);
-      TdtData*             addpoly(pointlist& pl, bool sortnow = true);
-      TdtData*             addpoly(int4b* pl, unsigned psize, bool sortnow = true);
-      TdtData*             addwire(pointlist& pl,word w, bool sortnow = true);
-      TdtData*             addtext(std::string text, CTM trans, bool sortnow = true);
+                          ~TdtLayer() {freeMemory();};
+      virtual void         motionDraw(const layprop::DrawProperties&, ctmqueue& ) const;
+      TdtData*             addBox(const TP& p1, const TP& p2, bool sortnow = true);
+      TdtData*             addPoly(pointlist& pl, bool sortnow = true);
+      TdtData*             addPoly(int4b* pl, unsigned psize, bool sortnow = true);
+      TdtData*             addWire(pointlist& pl,word w, bool sortnow = true);
+      TdtData*             addText(std::string text, CTM trans, bool sortnow = true);
       virtual void         vlOverlap(const layprop::DrawProperties&, DBbox&) const;
    };
 
