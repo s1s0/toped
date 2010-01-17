@@ -64,7 +64,7 @@ logicop::logic::logic(const pointlist& poly1, const pointlist& poly2) :
    _shape1 = NULL;
    _shape2 = NULL;
 }
-   
+
 void logicop::logic::findCrossingPoints()
 {
    // create the event queue
@@ -107,7 +107,7 @@ void logicop::logic::reorderCross()
       else looper = looper->next();
    }
    _shape1 = looper;
-   
+
    centinel = _shape2;
    looper = centinel;
    unsigned shape2Num = 0;
@@ -131,7 +131,7 @@ void logicop::logic::reorderCross()
 }
 /*!If more than one logical operatoin has to be executed over the input shapes
 the raw data #_shape1 and #_shape2 can be reused, but has to be recycled beforehand
-This method is traversing both fields and invokes VPoint::reset_visited() in 
+This method is traversing both fields and invokes VPoint::reset_visited() in
 order to reinitialize the CPoint::_visited fields*/
 void logicop::logic::reset_visited() {
    polycross::VPoint* centinel = _shape1;
@@ -148,7 +148,7 @@ void logicop::logic::reset_visited() {
    }  while (centinel != looper);
 }
 /*!The method uses #_shape1 and #_shape2 structure as an input data and produces
-one or more polygons representing the result of the logical AND between the 
+one or more polygons representing the result of the logical AND between the
 input polygons. Method returns false if no output shapes are generated, and
 true otherwise*/
 bool logicop::logic::AND(pcollection& plycol) {
@@ -198,7 +198,7 @@ bool logicop::logic::AND(pcollection& plycol) {
 }
 
 /*!The method uses #_shape1 and #_shape2 structure as an input data and produces
-one or more polygons representing the result of the logical ANDNOT between the 
+one or more polygons representing the result of the logical ANDNOT between the
 input polygons. Method returns false if no output shapes are generated, and
 true otherwise*/
 bool logicop::logic::ANDNOT(pcollection& plycol) {
@@ -219,7 +219,7 @@ bool logicop::logic::ANDNOT(pcollection& plycol) {
    else
    {
       // No crossing points found, but polygons still might be overlapping...
-      // if poly1 is inside poly2, or both are non overlapping -> 
+      // if poly1 is inside poly2, or both are non overlapping ->
       //      resulting shape is null
       // if poly2 is inside poly1, then we have to generate a polygon
       // combining both shapes
@@ -249,7 +249,7 @@ bool logicop::logic::ANDNOT(pcollection& plycol) {
 }
 
 /*!The method uses #_shape1 and #_shape2 structure as an input data and produces
-one or more polygons representing the result of the logical OR between the 
+one or more polygons representing the result of the logical OR between the
 input polygons. Method returns false if no output shapes are generated, and
 true otherwise*/
 bool logicop::logic::OR(pcollection& plycol) {
@@ -276,7 +276,7 @@ bool logicop::logic::OR(pcollection& plycol) {
       else if (_shape2->inside(_poly1)) centinel = _shape1;
       // ... if not - still insisting - check that the polygons coincides
       else if (NULL == (centinel = checkCoinciding(_poly1, _shape2))) return false;
-      // If we've got here means that one of the polygons is completely 
+      // If we've got here means that one of the polygons is completely
       // overlapped by the other one. So we need to return the outer one
       getShape(plycol, centinel); return true;
    }
@@ -307,7 +307,7 @@ bool logicop::logic::OR(pcollection& plycol) {
       laydata::ValidPoly check(*csh);
       delete csh; lclcol.pop_front();
       if (check.valid())
-         lclvalidated.push_back(DEBUG_NEW pointlist(check.get_validated()));
+         lclvalidated.push_back(DEBUG_NEW pointlist(check.getValidated()));
    }
    if (lclvalidated.empty()) return false;
    // Convert all collected shapes to a single normalized polygon
@@ -369,7 +369,7 @@ pointlist* logicop::logic::hole2simple(const pointlist& outside, const pointlist
    polycross::segmentlist _seg2(inside ,2,true);
    polycross::XQ _eq(_seg1, _seg2); // create the event queue
    polycross::BindCollection BC;
-   
+
    _eq.sweep2bind(BC);
    polycross::BindSegment* sbc = BC.get_highest();
    //insert 2 bind points and link them
@@ -405,12 +405,12 @@ pointlist* logicop::logic::hole2simple(const pointlist& outside, const pointlist
 //   delete shgen;
    if (!check.valid()) {
       std::ostringstream ost;
-      ost << ": Resulting shape is invalid - " << check.failtype();
+      ost << ": Resulting shape is invalid - " << check.failType();
       tell_log(console::MT_ERROR, ost.str());
    }
    else {
       if (laydata::shp_OK != check.status())
-         *shgen = check.get_validated();
+         *shgen = check.getValidated();
    }
    return shgen;
 }
@@ -493,7 +493,7 @@ logicop::stretcher::~stretcher()
 // class CrossFix
 //-----------------------------------------------------------------------------
 /*!*/
-logicop::CrossFix::CrossFix(const pointlist& poly, bool looped) : 
+logicop::CrossFix::CrossFix(const pointlist& poly, bool looped) :
                                                    _poly(poly), _looped(looped)
 {
    _segl = DEBUG_NEW polycross::segmentlist(poly,1, looped);

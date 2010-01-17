@@ -494,7 +494,7 @@ tui::getCIFexport::getCIFexport(wxFrame *parent, wxWindowID id, const wxString &
       }
       //-----------------------------------------------------------------------
       WordList ull;
-      DATC->TEDLIB()->collect_usedlays(TARGETDB_LIB, ull);
+      DATC->TEDLIB()->collectUsedLays(TARGETDB_LIB, ull);
 
    DATC->unlockDB();
    if (init != wxT("")) _nameList->SetStringSelection(init,true);
@@ -661,7 +661,7 @@ tui::getGDSexport::getGDSexport(wxFrame *parent, wxWindowID id, const wxString &
       //-----------------------------------------------------------------------
 
       WordList ull;
-      DATC->TEDLIB()->collect_usedlays(TARGETDB_LIB, ull);
+      DATC->TEDLIB()->collectUsedLays(TARGETDB_LIB, ull);
 
    DATC->unlockDB();
    if (init != wxT("")) _nameList->SetStringSelection(init,true);

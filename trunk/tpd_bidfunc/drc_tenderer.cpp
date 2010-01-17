@@ -32,6 +32,8 @@
 #include "datacenter.h"
 #include "tuidefs.h"
 #include "tpdf_common.h"
+#include "viewprop.h"
+
 
 // Global variables
 Calbr::CalbrFile                *DRCData = NULL;
@@ -90,7 +92,7 @@ void Calbr::drcTenderer::addPoly(const CoordsVector   &coords)
       }
       laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(_DRCCell->secureLayer(_numError));
       PROPC->addUnpublishedLay(_numError);
-      dwl->addpoly(*plDB, false);
+      dwl->addPoly(*plDB, false);
       delete plDB;
    }
 }
@@ -124,7 +126,7 @@ void Calbr::drcTenderer::addLine(const edge &edge)
 
    laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(_DRCCell->secureLayer(_numError));
    PROPC->addUnpublishedLay(_numError);
-   dwl->addwire(*plDB, static_cast<word>(rint(w * DBscale)), false);
+   dwl->addWire(*plDB, static_cast<word>(rint(w * DBscale)), false);
    delete plDB;
 }
 
@@ -191,5 +193,5 @@ void Calbr::drcTenderer::endWriting()
       }
    }
    PROPC->unlockDrawProp(drawProp);
-   _ATDB->registercellread("drc", _DRCCell);
+   _ATDB->registerCellRead("drc", _DRCCell);
 }

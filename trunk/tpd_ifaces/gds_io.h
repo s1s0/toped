@@ -140,8 +140,8 @@ namespace GDSin {
    > rectype   - type of current GdsRecord
    > datatype   - type of data that this record contain
    > record      - the information record
-   > numread   - number of really read bytes in this record
-   > isvalid   - true if numread == reclen, otherwise - false
+   > numRead   - number of really read bytes in this record
+   > isvalid   - true if numRead == reclen, otherwise - false
    >>> Methods ------------------------------------------------------------------
    > Get_rectype()   - inline function - see definition
    > Get_record()      - inline function - see definition

@@ -30,6 +30,8 @@
 #include "tpdf_add.h"
 #include "tuidefs.h"
 #include "datacenter.h"
+#include "viewprop.h"
+
 
 
 extern DataCenter*               DATC;

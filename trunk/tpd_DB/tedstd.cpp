@@ -332,12 +332,12 @@ void laydata::TEDfile::putString(std::string str)
    fputs(str.c_str(), _file);
 }
 
-void laydata::TEDfile::registercellwritten(std::string cellname)
+void laydata::TEDfile::registerCellWritten(std::string cellname)
 {
    _childnames.insert(cellname);
 }
 
-bool laydata::TEDfile::checkcellwritten(std::string cellname)
+bool laydata::TEDfile::checkCellWritten(std::string cellname)
 {
    if (_childnames.end() == _childnames.find(cellname))
       return false;
@@ -345,7 +345,7 @@ bool laydata::TEDfile::checkcellwritten(std::string cellname)
       return true;
 }
 
-laydata::CellDefin laydata::TEDfile::linkcellref(std::string cellname)
+laydata::CellDefin laydata::TEDfile::linkCellRef(std::string cellname)
 {
    // register the name of the referenced cell in the list of children
    _childnames.insert(cellname);
@@ -371,7 +371,7 @@ laydata::CellDefin laydata::TEDfile::linkcellref(std::string cellname)
          // the entire file is parced the cell references without a proper pointer
          // to the structure need to be flaged as warning in case 1 and as error
          // in case 2.
-         celldef = _TEDLIB->adddefaultcell(cellname, false);
+         celldef = _TEDLIB->addDefaultCell(cellname, false);
       }
       else
          celldef->parentFound();
@@ -385,7 +385,7 @@ laydata::CellDefin laydata::TEDfile::linkcellref(std::string cellname)
    return celldef;
 }
 
-void laydata::TEDfile::get_cellchildnames(NameSet& cnames) {
+void laydata::TEDfile::getCellChildNames(NameSet& cnames) {
    // Be very very careful with the copy constructors and assignment of the
    // standard C++ lib containers. Here it seems OK.
    cnames = _childnames;

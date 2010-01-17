@@ -28,6 +28,8 @@
 #include "tpdph.h"
 #include "tpdf_select.h"
 #include "datacenter.h"
+#include "viewprop.h"
+
 
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;

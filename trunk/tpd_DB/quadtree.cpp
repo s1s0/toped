@@ -50,7 +50,7 @@ laydata::QuadTree::QuadTree(TEDfile* const tedfile) : _overlap(DEFAULT_OVL_BOX)
    _quads[0] = _quads[1] = _quads[2] = _quads[3] = NULL;
    _first = NULL;_invalid = false;
    byte recordtype;
-   if       ((0 == tedfile->revision()) && (6 == tedfile->subrevision()))
+   if       ((0 == tedfile->revision()) && (6 == tedfile->subRevision()))
    {
       while (tedf_LAYEREND != (recordtype = tedfile->getByte()))
       {
@@ -85,11 +85,11 @@ It first checks whether or not another layout object is already placed into this
 QuadTree. If not it simply links the shape and exits. If another object is already
 here, then the new overlap area is calculated. \n In case the new area is the same as
 the existing one, then the object might be (possibly) fitted into one of the children
-QuadTree. To check this fitintree() method is called. If this is unsuccessful, just
+QuadTree. To check this fitInTree() method is called. If this is unsuccessful, just
 then the layout object is linked to this QuadTree. \n If the new overlapping area is
 bigger that the existing one, then the layout object is linked to the current QuadTree
 after what the current QuadTree as well as its successors has to be rebuild using
-resort().\n The method might be called recursively via fitintree() method.
+resort().\n The method might be called recursively via fitInTree() method.
 */
 void laydata::QuadTree::add(TdtData* shape)
 {
@@ -97,7 +97,7 @@ void laydata::QuadTree::add(TdtData* shape)
    if (empty()) {
    // first shape in the container
       _overlap = shovl;
-      _first = shape;shape->nextis(NULL);
+      _first = shape;shape->nextIs(NULL);
    }
    else {
       // save the old overlap
@@ -113,14 +113,14 @@ void laydata::QuadTree::add(TdtData* shape)
       {
          // if the overlapping box hasn't changed,
          // try to fit the shape into subtree
-         if ((areanew <= 4ll * shovl.boxarea()) || !fitintree(shape))
+         if ((areanew <= 4ll * shovl.boxarea()) || !fitInTree(shape))
          {
             // shape doesn't fit into the subtree, so place it here
-            shape->nextis(_first); _first = shape;
+            shape->nextIs(_first); _first = shape;
          }
       }
       else { // the overlapping box has had blown-up
-         shape->nextis(_first); _first = shape;
+         shape->nextIs(_first); _first = shape;
          resort(); // re-sort the entire tree
       }
    }
@@ -133,7 +133,7 @@ overlapping area not more than 10%. Returns false if the shape does not fit
 anywhere - means it should be placed higher into the QuadTree structure.\n
 The method might be called recursively via the add() method.
 */
-bool laydata::QuadTree::fitintree(TdtData* shape)
+bool laydata::QuadTree::fitInTree(TdtData* shape)
 {
    DBbox shovl = shape->overlap();
    int8b clipedarea[4];
@@ -169,7 +169,7 @@ bool laydata::QuadTree::fitintree(TdtData* shape)
 children's QuadTree. Returns the index of the child QuadTree which fits
 the shape or -1 otherwise.
 */
-int laydata::QuadTree::fitsubtree(const DBbox& shovl, DBbox* maxsubbox )
+int laydata::QuadTree::fitSubTree(const DBbox& shovl, DBbox* maxsubbox )
 {
    int8b clipedarea[4];
    // check the clipping to see in witch region to place the shape
@@ -209,7 +209,7 @@ void laydata::QuadTree::sort(ShapeList& inlist)
    // if the list contains only one component - link it and run away
    if (1 == inlist.size())
    {
-      (*DI)->nextis(NULL); _first = *DI;
+      (*DI)->nextIs(NULL); _first = *DI;
       return;
    }
    byte i;
@@ -233,10 +233,10 @@ void laydata::QuadTree::sort(ShapeList& inlist)
       sharea = shovl.boxarea();
       // Check it fits in some of the children
       if ((totalarea <= 4ll * sharea) ||
-                        (-1 == (fitinsubbox = fitsubtree(shovl, maxsubbox))))
+                        (-1 == (fitinsubbox = fitSubTree(shovl, maxsubbox))))
       {
          // no fit. The shape is sorted in the current tree
-         (*DI)->nextis(_first); _first = *DI;
+         (*DI)->nextIs(_first); _first = *DI;
       }
       else
       {
@@ -276,7 +276,7 @@ void laydata::QuadTree::sort(ShapeList& inlist)
     going on they will be re-marked afterwards to sh_selected by the move(copy)
     virtual methods of TdtData.
  */
-bool laydata::QuadTree::delete_marked(SH_STATUS stat, bool partselect) {
+bool laydata::QuadTree::deleteMarked(SH_STATUS stat, bool partselect) {
    assert(!((stat != sh_selected) && (partselect == true)));
    // Create and initialize a variable "to be sorted"
    bool _2B_sorted = false;
@@ -286,12 +286,12 @@ bool laydata::QuadTree::delete_marked(SH_STATUS stat, bool partselect) {
    // deleteing sequence is bottom-up, so start from the children
    for (byte i = 0; i < 4; i++)
       if (_quads[i]) {
-         _2B_sorted |= _quads[i]->delete_marked(stat, partselect);
+         _2B_sorted |= _quads[i]->deleteMarked(stat, partselect);
          // check that there is still something left in the child QuadTree
          if (_quads[i]->empty()) {
             delete _quads[i]; _quads[i] = NULL;
          }
-         else update_overlap(_quads[i]->overlap());
+         else updateOverlap(_quads[i]->overlap());
       }
    // prepare a pair of pointers to TdtData
    TdtData* wds = _first;
@@ -302,21 +302,21 @@ bool laydata::QuadTree::delete_marked(SH_STATUS stat, bool partselect) {
       if ((stat == wds->status()) ||
                                 (partselect && (sh_partsel == wds->status()))) {
          // mark the fully selected shapes as deleted
-         if (stat == wds->status()) wds->set_status(sh_deleted);
+         if (stat == wds->status()) wds->setStatus(sh_deleted);
          // Unlink the marked shape from the list
          if (wdsP) { // if this is not the first shape
-            wdsP->nextis(wds->next()); wds->nextis(NULL);
+            wdsP->nextIs(wds->next()); wds->nextIs(NULL);
             wds = wdsP->next();
          }
          else { // Special attention when this is the first shape
-            _first = wds->next(); wds->nextis(NULL);
+            _first = wds->next(); wds->nextIs(NULL);
             wds = _first;
          }
       }
       // If not selected, or partially selected but partselect == false,
       // update the overlapping box, and move further
       else {
-         update_overlap(wds->overlap());
+         updateOverlap(wds->overlap());
          wdsP = wds; wds = wds->next();
       }
    // If _overlap is still NULL here -> means the placeholder is empty. Will
@@ -335,10 +335,10 @@ bool laydata::QuadTree::delete_marked(SH_STATUS stat, bool partselect) {
 
 /*!Cut with polygon is pretty expensive operation and despite the fact that it
 is executed over selected shapes only, there is no guarantee that the user will
-not do selectAll() and then polycut(), and of course nobody can trust the user.
+not do selectAll() and then polyCut(), and of course nobody can trust the user.
 So this method is trying to minimize the calculations by executing cutPoly only
 on the shapes that overlap somehow with the cutting polygon */
-void laydata::QuadTree::cutpoly_selected(pointlist& plst, DBbox& cut_overlap,
+void laydata::QuadTree::cutPolySelected(pointlist& plst, DBbox& cut_overlap,
                                                            ShapeList** decure) {
    // check the entire holder for clipping...
    if (0ll == cut_overlap.cliparea(_overlap)) return;
@@ -349,16 +349,16 @@ void laydata::QuadTree::cutpoly_selected(pointlist& plst, DBbox& cut_overlap,
       if ((sh_selected == wdt->status()) &&
                                     (0ll != cut_overlap.cliparea(wdt->overlap())))
          // go and clip it
-         wdt->polycut(plst, decure);
+         wdt->polyCut(plst, decure);
       wdt = wdt->next();
    }
    for(byte i = 0; i < 4; i++)
-      if (_quads[i]) _quads[i]->cutpoly_selected(plst, cut_overlap, decure);
+      if (_quads[i]) _quads[i]->cutPolySelected(plst, cut_overlap, decure);
 
 }
 
 /*!*/
-laydata::TdtData* laydata::QuadTree::merge_selected(TdtData*& shapeRef) {
+laydata::TdtData* laydata::QuadTree::mergeSelected(TdtData*& shapeRef) {
    laydata::TdtData* mergeres = NULL;
    DBbox overlapRef = shapeRef->overlap();
    // check the entire holder for clipping...
@@ -386,14 +386,14 @@ laydata::TdtData* laydata::QuadTree::merge_selected(TdtData*& shapeRef) {
    // in this area
    for(byte i = 0; i < 4; i++)
       if (_quads[i]) {
-         mergeres = _quads[i]->merge_selected(shapeRef);
+         mergeres = _quads[i]->mergeSelected(shapeRef);
          if (NULL != mergeres) return mergeres;
       }
    //at this point there is nothing more to traverse, so return NULL
    return NULL;
 }
 
-bool laydata::QuadTree::delete_this(laydata::TdtData* object) {
+bool laydata::QuadTree::deleteThis(laydata::TdtData* object) {
    // Create and initialize a variable "to be sorted"
    bool _2B_sorted = false;
    // save the old overlap, and initialize the new one
@@ -402,12 +402,12 @@ bool laydata::QuadTree::delete_this(laydata::TdtData* object) {
    // deleteing sequence is bottom-up, so start from the children
    for (byte i = 0; i < 4; i++)
       if (_quads[i]) {
-         _2B_sorted |= _quads[i]->delete_this(object);
+         _2B_sorted |= _quads[i]->deleteThis(object);
          // check that there is still something left in the child QuadTree
          if (_quads[i]->empty()) {
             delete _quads[i]; _quads[i] = NULL;
          }
-         else update_overlap(_quads[i]->overlap());
+         else updateOverlap(_quads[i]->overlap());
       }
    // prepare a pair of pointers to TdtData
    TdtData* wds = _first;
@@ -418,16 +418,16 @@ bool laydata::QuadTree::delete_this(laydata::TdtData* object) {
       if (wds == object)
          // Unlink the marked shape from the list
          if (wdsP) { // if this is not the first shape
-            wdsP->nextis(wds->next()); wds->nextis(NULL);
+            wdsP->nextIs(wds->next()); wds->nextIs(NULL);
             wds = wdsP->next();
          }
          else { // Special attention when this is the first shape
-            _first = wds->next(); wds->nextis(NULL);
+            _first = wds->next(); wds->nextIs(NULL);
             wds = _first;
          }
       // update the overlapping box, and move further if that's not the object
       else {
-         update_overlap(wds->overlap());
+         updateOverlap(wds->overlap());
          wdsP = wds; wds = wds->next();
       }
    // If _overlap is still NULL here -> means the placeholder is empty. Will
@@ -464,16 +464,16 @@ void laydata::QuadTree::validate() {
 \n This method is executed only if _invalid flag is up. The overlapping box is
 re-evaluated before the sort() method is called.
 */
-bool laydata::QuadTree::full_validate()
+bool laydata::QuadTree::fullValidate()
 {
    if (_invalid)
    {
       ShapeList store;
-      tmpstore(store);
+      tmpStore(store);
       DBbox oldovl = _overlap;
       _overlap = DEFAULT_OVL_BOX;
       for (ShapeList::const_iterator DI = store.begin(); DI != store.end(); DI++)
-         update_overlap((*DI)->overlap());
+         updateOverlap((*DI)->overlap());
       sort(store);
       _invalid = false;
       return (oldovl != _overlap);
@@ -483,13 +483,13 @@ bool laydata::QuadTree::full_validate()
 
 /*! Rebuilds the entire QuadTree object as well as all of its children using the
 sort() method. Beforehand all TdtData is stored in a temporary DataList structure
-by calling tmpstore method\n It is important to note that this method is not
+by calling tmpStore method\n It is important to note that this method is not
 re-evaluating the _overlap variable, but is using it as is
 */
 void laydata::QuadTree::resort() {
    // first save the existing data in a temporary store
    ShapeList store;
-   tmpstore(store);
+   tmpStore(store);
    sort(store);
 }
 
@@ -497,7 +497,7 @@ void laydata::QuadTree::resort() {
 areas of the new object and each of the possible four QuadTree children. Returns
 the serial number of the biggest clipping area which corresponds to one of the
 QuadTree children. \n
-Called by fitintree(), fitsubtree() methods when a decision has to be made which
+Called by fitInTree(), fitSubTree() methods when a decision has to be made which
 of the possible four child areas is most suitable to refuge the current layout
 object (10% decision)
 */
@@ -524,41 +524,41 @@ void laydata::QuadTree::write(TEDfile* const tedfile) const {
 
 /*! Write the contents of the QuadTree in a GDS file.\n
 Nothing special here - effectively the same as write method*/
-void laydata::QuadTree::GDSwrite(DbExportFile& gdsf) const
+void laydata::QuadTree::gdsWrite(DbExportFile& gdsf) const
 {
    TdtData* wdt = _first;
    while(wdt)
    {
-      wdt->GDSwrite(gdsf); wdt = wdt->next();
+      wdt->gdsWrite(gdsf); wdt = wdt->next();
    }
    for(byte i = 0; i < 4; i++)
-      if (_quads[i]) _quads[i]->GDSwrite(gdsf);
+      if (_quads[i]) _quads[i]->gdsWrite(gdsf);
 }
 
 /*! Write the contents of the QuadTree in a CIF file.\n
 Nothing special here - effectively the same as other write method*/
-void laydata::QuadTree::CIFwrite(DbExportFile& ciff) const
+void laydata::QuadTree::cifWrite(DbExportFile& ciff) const
 {
    TdtData* wdt = _first;
    while(wdt)
    {
-      wdt->CIFwrite(ciff); wdt = wdt->next();
+      wdt->cifWrite(ciff); wdt = wdt->next();
    }
    for(byte i = 0; i < 4; i++)
-      if (_quads[i]) _quads[i]->CIFwrite(ciff);
+      if (_quads[i]) _quads[i]->cifWrite(ciff);
 }
 
 /*! Write the contents of the QuadTree in a PS file.\n
 Nothing special here - effectively the same as gdsWrite and write method*/
-void laydata::QuadTree::PSwrite(PSFile& gdsf, const layprop::DrawProperties& drawprop) const
+void laydata::QuadTree::psWrite(PSFile& gdsf, const layprop::DrawProperties& drawprop) const
 {
    TdtData* wdt = _first;
    while(wdt)
    {
-      wdt->PSwrite(gdsf, drawprop); wdt = wdt->next();
+      wdt->psWrite(gdsf, drawprop); wdt = wdt->next();
    }
    for(byte i = 0; i < 4; i++)
-      if (_quads[i]) _quads[i]->PSwrite(gdsf, drawprop);
+      if (_quads[i]) _quads[i]->psWrite(gdsf, drawprop);
 }
 
 /*! Draw the contents of the container on the screen using the virtual
@@ -566,7 +566,7 @@ openGlDraw methods of the tdtddata objects. This happens only if
 the current QuadTree object is visible. Current clip region data is
 obtained from LayoutCanvas. Draws also the select marks in case shape is
 selected. \n This is the cherry of the QuadTree algorithm cake*/
-void laydata::QuadTree::openGL_draw(layprop::DrawProperties& drawprop,
+void laydata::QuadTree::openGlDraw(layprop::DrawProperties& drawprop,
                                                    const DataList* slst, bool fill) const
 {
    if (empty()) return;
@@ -585,29 +585,29 @@ void laydata::QuadTree::openGL_draw(layprop::DrawProperties& drawprop,
       {
          pointlist points;
          // precalculate drawing data
-         wdt->openGL_precalc(drawprop, points);
+         wdt->openGlPrecalc(drawprop, points);
          if (0 != points.size())
          {
             // draw the shape fill (contents of refs, arefs and texts)
-            if (fill)  wdt->openGL_drawfill(drawprop, points);
+            if (fill)  wdt->openGlDrawFill(drawprop, points);
             // draw the outline of the shapes and overlapping boxes
-            wdt->openGL_drawline(drawprop, points);
+            wdt->openGlDrawLine(drawprop, points);
             if ((sh_selected == wdt->status()) || (sh_partsel == wdt->status()))
             {
                drawprop.setLineProps(true);
                if       (sh_selected == wdt->status())
-                  wdt->openGL_drawsel(points, NULL);
+                  wdt->openGlDrawSel(points, NULL);
                else if  (sh_partsel  == wdt->status())
                {
                   DataList::const_iterator SI;
                   for (SI = slst->begin(); SI != slst->end(); SI++)
                      if (SI->first == wdt) break;
                   assert(SI != slst->end());
-                  wdt->openGL_drawsel(points, &(SI->second));
+                  wdt->openGlDrawSel(points, &(SI->second));
                }
                drawprop.setLineProps(false);
             }
-            wdt->openGL_postclean(drawprop, points);
+            wdt->openGlPostClean(drawprop, points);
          }
          wdt = wdt->next();
       }
@@ -619,22 +619,22 @@ void laydata::QuadTree::openGL_draw(layprop::DrawProperties& drawprop,
       {
          pointlist points;
          // precalculate drawing data
-         wdt->openGL_precalc(drawprop, points);
+         wdt->openGlPrecalc(drawprop, points);
          // draw the shape fill (contents of refs, arefs and texts)
-         if (fill)  wdt->openGL_drawfill(drawprop, points);
+         if (fill)  wdt->openGlDrawFill(drawprop, points);
          // draw the outline of the shapes and overlapping boxes
-         wdt->openGL_drawline(drawprop, points);
+         wdt->openGlDrawLine(drawprop, points);
          // clean-up
-         wdt->openGL_postclean(drawprop, points);
+         wdt->openGlPostClean(drawprop, points);
          wdt = wdt->next();
       }
    }
 
    for(byte i = 0; i < 4; i++)
-      if (_quads[i]) _quads[i]->openGL_draw(drawprop, slst, fill);
+      if (_quads[i]) _quads[i]->openGlDraw(drawprop, slst, fill);
 }
 
-short laydata::QuadTree::clip_type(tenderer::TopRend& rend) const
+short laydata::QuadTree::clipType(tenderer::TopRend& rend) const
 {
    if (empty()) return 0;
    // check the entire holder for clipping...
@@ -646,7 +646,7 @@ short laydata::QuadTree::clip_type(tenderer::TopRend& rend) const
    else return -1;
 }
 
-void laydata::QuadTree::openGL_render(tenderer::TopRend& rend, const DataList* slst) const
+void laydata::QuadTree::openGlRender(tenderer::TopRend& rend, const DataList* slst) const
 {
    TdtData* wdt = _first;
    // The drawing will be faster like this for the cells without selected shapes
@@ -658,16 +658,16 @@ void laydata::QuadTree::openGL_render(tenderer::TopRend& rend, const DataList* s
       {
          switch (wdt->status())
          {
-            case sh_selected: wdt->draw_srequest(rend, NULL); break;
+            case sh_selected: wdt->drawSRequest(rend, NULL); break;
             case sh_partsel : {// partially selected - so find the pin list
                DataList::const_iterator SI;
                for (SI = slst->begin(); SI != slst->end(); SI++)
                   if (SI->first == wdt) break;
                assert(SI != slst->end());
-               wdt->draw_srequest(rend, &(SI->second));
+               wdt->drawSRequest(rend, &(SI->second));
                break;
             }
-            default: wdt->draw_request(rend);
+            default: wdt->drawRequest(rend);
          }
          wdt = wdt->next();
       }
@@ -676,14 +676,14 @@ void laydata::QuadTree::openGL_render(tenderer::TopRend& rend, const DataList* s
    {  // if there are no selected shapes
       while(wdt)
       {
-         wdt->draw_request(rend);
+         wdt->drawRequest(rend);
          wdt = wdt->next();
       }
    }
    // continue traversing down given that the objects exists and are visible
    for(byte i = 0; i < 4; i++)
-      if ( (NULL != _quads[i]) && (0 != _quads[i]->clip_type(rend)) )
-         _quads[i]->openGL_render(rend, slst);
+      if ( (NULL != _quads[i]) && (0 != _quads[i]->clipType(rend)) )
+         _quads[i]->openGlRender(rend, slst);
 }
 
 
@@ -692,7 +692,7 @@ tmpDraw methods of the tdtddata objects. This happens only if
 the current QuadTree object is visible. Current clip region data is
 obtained from LayoutCanvas. In a sence this method is the same as openGlDraw
 without fill and not handling selected shapes*/
-void laydata::QuadTree::motion_draw(const layprop::DrawProperties& drawprop,
+void laydata::QuadTree::motionDraw(const layprop::DrawProperties& drawprop,
                                                    ctmqueue& transtack) const {
    if (empty()) return;
    // check the entire holder for clipping...
@@ -702,24 +702,24 @@ void laydata::QuadTree::motion_draw(const layprop::DrawProperties& drawprop,
    else if (!areal.visible(drawprop.scrCtm())) return;
    TdtData* wdt = _first;
    while(wdt) {
-      wdt->motion_draw(drawprop, transtack, NULL);
+      wdt->motionDraw(drawprop, transtack, NULL);
       wdt = wdt->next();
    }
    for(byte i = 0; i < 4; i++)
-      if (_quads[i]) _quads[i]->motion_draw(drawprop, transtack);
+      if (_quads[i]) _quads[i]->motionDraw(drawprop, transtack);
 }
 
 /*! Used to copy TdtData objects from QuadTree to a DataList. This is initiated
-by resort() or full_validate() when current QuadTree needs to be rebuild
+by resort() or fullValidate() when current QuadTree needs to be rebuild
 */
-void laydata::QuadTree::tmpstore(ShapeList &store) {
+void laydata::QuadTree::tmpStore(ShapeList &store) {
    while (_first) {
       store.push_back(_first);
       _first = _first->next();
    }
    for (byte i = 0; i < 4; i++)
       if (_quads[i]) {
-         _quads[i]->tmpstore(store);
+         _quads[i]->tmpStore(store);
          delete _quads[i];
          _quads[i] = NULL;
       }
@@ -729,7 +729,7 @@ void laydata::QuadTree::tmpstore(ShapeList &store) {
 overlapping box hovl. Used when tree is modified, but there is no need
 to sort the data immediately, but only to maintain the valid overlapping
 box of the structure*/
-void laydata::QuadTree::update_overlap(const DBbox& hovl)
+void laydata::QuadTree::updateOverlap(const DBbox& hovl)
 {
    if (empty())  _overlap = hovl;
    else          _overlap.overlap(hovl);
@@ -738,8 +738,8 @@ void laydata::QuadTree::update_overlap(const DBbox& hovl)
 /*! Puts the shape into current QuadTree object without sorting. Updates
 the overlapping box though. */
 void laydata::QuadTree::put(TdtData* shape) {
-   update_overlap(shape->overlap());
-   shape->nextis(_first); _first = shape;
+   updateOverlap(shape->overlap());
+   shape->nextIs(_first); _first = shape;
 }
 
 /*! Perform the data selection using select_in box. Called by the corresponding
@@ -754,7 +754,7 @@ void laydata::QuadTree::selectInBox(DBbox& select_in, DataList* selist,
    TdtData* wdt = _first;
    while(wdt)
    {
-      if (selmask & wdt->ltype())
+      if (selmask & wdt->lType())
       {
          wdt->selectInBox(select_in, selist, pselect);
       }
@@ -803,12 +803,12 @@ void laydata::QuadTree::selectFromList(DataList* src, DataList* dst) {
          // if the objects (pointer) coinsides - that's out object
          if (wdt == DI->first) {
             // select the object
-            if (DI->second.size() == wdt->numpoints()) {
-               wdt->set_status(sh_partsel);
+            if (DI->second.size() == wdt->numPoints()) {
+               wdt->setStatus(sh_partsel);
                dst->push_back(SelectDataPair(wdt,DI->second));
             }
             else {
-               wdt->set_status(sh_selected);
+               wdt->setStatus(sh_selected);
                dst->push_back(SelectDataPair(wdt,SGBitSet()));
             }
             // remove it from the select list - it will speed up the following
@@ -831,10 +831,10 @@ void laydata::QuadTree::selectAll(DataList* selist, word selmask, bool mark) {
    if (laydata::_lmnone == selmask) return;
    while(wdt)
    {
-      if (selmask & wdt->ltype())
+      if (selmask & wdt->lType())
       {
          selist->push_back(SelectDataPair(wdt,SGBitSet()));
-         if (mark) wdt->set_status(sh_selected);
+         if (mark) wdt->setStatus(sh_selected);
       }
       wdt = wdt->next();
    }
@@ -849,9 +849,9 @@ bool laydata::QuadTree::empty() const {
 }
 
 /*! Delete all TdtData objects in the container and free the heap*/
-void laydata::QuadTree::freememory() {
+void laydata::QuadTree::freeMemory() {
    for(byte i = 0; i < 4; i++)
-      if (_quads[i]) _quads[i]->freememory();
+      if (_quads[i]) _quads[i]->freeMemory();
    TdtData* wdt = _first;
    TdtData* dwdt;
    while(wdt) {
@@ -861,14 +861,14 @@ void laydata::QuadTree::freememory() {
    }
 }
 
-bool laydata::QuadTree::getobjectover(const TP pnt, laydata::TdtData*& prev) {
+bool laydata::QuadTree::getObjectOver(const TP pnt, laydata::TdtData*& prev) {
    if (!_overlap.inside(pnt)) return false;
    TdtData* wdt = _first;
    while(wdt) {
       if (prev == NULL) {
 //         DBbox ovl = wdt->overlap();ovl.normalize();
 //         if (ovl.inside(pnt)) {
-         if (wdt->point_inside(pnt)) {
+         if (wdt->pointInside(pnt)) {
             prev = wdt; return true;
          }
       }
@@ -876,7 +876,7 @@ bool laydata::QuadTree::getobjectover(const TP pnt, laydata::TdtData*& prev) {
       wdt = wdt->next();
    }
    for (byte i = 0; i < 4; i++)
-      if (_quads[i] && _quads[i]->getobjectover(pnt,prev)) return true;
+      if (_quads[i] && _quads[i]->getObjectOver(pnt,prev)) return true;
    return false;
 }
 
@@ -963,7 +963,7 @@ laydata::TdtLayer::TdtLayer(TEDfile* const tedfile) : QuadTree()
 /*!Create new TdtBox. Depending on sortnow input variable the new shape is
 just added to the QuadTree (using QuadTree::put()) without sorting or fit on
 the proper place (using add() */
-laydata::TdtData* laydata::TdtLayer::addbox(const TP& p1, const TP& p2, bool sortnow) {
+laydata::TdtData* laydata::TdtLayer::addBox(const TP& p1, const TP& p2, bool sortnow) {
    laydata::TdtBox *shape = DEBUG_NEW TdtBox(p1,p2);
    if (sortnow) add(shape);
    else         put(shape);
@@ -972,14 +972,14 @@ laydata::TdtData* laydata::TdtLayer::addbox(const TP& p1, const TP& p2, bool sor
 /*!Create new TdtPoly. Depending on sortnow input variable the new shape is
 just added to the QuadTree (using QuadTree::put()) without sorting or fit on
 the proper place (using add() */
-laydata::TdtData* laydata::TdtLayer::addpoly(pointlist& pl, bool sortnow) {
+laydata::TdtData* laydata::TdtLayer::addPoly(pointlist& pl, bool sortnow) {
    laydata::TdtPoly *shape = DEBUG_NEW TdtPoly(pl);
    if (sortnow) add(shape);
    else         put(shape);
    return shape;
 }
 
-laydata::TdtData* laydata::TdtLayer::addpoly(int4b* pl, unsigned psize, bool sortnow) {
+laydata::TdtData* laydata::TdtLayer::addPoly(int4b* pl, unsigned psize, bool sortnow) {
    laydata::TdtPoly *shape = DEBUG_NEW TdtPoly(pl, psize);
    if (sortnow) add(shape);
    else         put(shape);
@@ -989,7 +989,7 @@ laydata::TdtData* laydata::TdtLayer::addpoly(int4b* pl, unsigned psize, bool sor
 /*!Create new TdtWire. Depending on sortnow input variable the new shape is
 just added to the QuadTree (using QuadTree::put()) without sorting or fit on
 the proper place (using add() */
-laydata::TdtData* laydata::TdtLayer::addwire(pointlist& pl,word w,
+laydata::TdtData* laydata::TdtLayer::addWire(pointlist& pl,word w,
                                                                  bool sortnow) {
    laydata::TdtWire *shape = DEBUG_NEW TdtWire(pl,w);
    if (sortnow) add(shape);
@@ -999,7 +999,7 @@ laydata::TdtData* laydata::TdtLayer::addwire(pointlist& pl,word w,
 /*!Create new TdtText. Depending on sortnow input variable the new shape is
 just added to the QuadTree (using QuadTree::put()) without sorting or fit on
 the proper place (using add() */
-laydata::TdtData* laydata::TdtLayer::addtext(std::string text,
+laydata::TdtData* laydata::TdtLayer::addText(std::string text,
                                                       CTM trans, bool sortnow) {
    laydata::TdtText *shape = DEBUG_NEW TdtText(text,trans);
    if (sortnow) add(shape);
@@ -1010,7 +1010,7 @@ laydata::TdtData* laydata::TdtLayer::addtext(std::string text,
 /*! A temporary Draw (during move/copy operations) of the container contents
  on the screen using the virtual QuadTree::tmpDraw() method of the
  parent object. */
-void laydata::TdtLayer::motion_draw(const layprop::DrawProperties& drawprop,
+void laydata::TdtLayer::motionDraw(const layprop::DrawProperties& drawprop,
                                                  ctmqueue& transtack) const {
    // check the entire layer for clipping...
    DBbox clip = drawprop.clipRegion();
@@ -1018,7 +1018,7 @@ void laydata::TdtLayer::motion_draw(const layprop::DrawProperties& drawprop,
    DBbox areal = overlap().overlap(transtack.front());
    if      ( 0ll == clip.cliparea(areal)     ) return;
    else if (!areal.visible(drawprop.scrCtm())) return;
-   QuadTree::motion_draw(drawprop, transtack);
+   QuadTree::motionDraw(drawprop, transtack);
 }
 
 void laydata::TdtLayer::vlOverlap(const layprop::DrawProperties&, DBbox& vlBox) const

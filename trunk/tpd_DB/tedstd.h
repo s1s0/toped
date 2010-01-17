@@ -122,15 +122,15 @@ namespace laydata {
    public:
                            Validator(pointlist& plist) : _status(shp_OK),
                                                             _plist(plist) {};
+      virtual             ~Validator() {};
       bool                 valid()           {return _status < shp_cross;}
       bool                 recoverable()     {return _status < shp_null;}
       byte                 status()          {return _status;}
       bool                 box()             {return (0 != (_status & shp_box));}
-      pointlist&           get_validated()   {return _plist;}
+      pointlist&           getValidated()    {return _plist;}
       word                 numpoints()       {return _plist.size();}
-      virtual std::string  failtype() = 0;
+      virtual std::string  failType() = 0;
       virtual TdtData*     replacement() = 0;
-      virtual             ~Validator() {};
    protected:
       byte                 _status;
       pointlist&           _plist;
@@ -158,18 +158,18 @@ namespace laydata {
       void                 putTP(const TP*);
       CTM                  getCTM();
       void                 putCTM(const CTM);
-      void                 registercellwritten(std::string);
-      bool                 checkcellwritten(std::string);
-      CellDefin            linkcellref(std::string cellname);
-      void                 get_cellchildnames(NameSet&);
+      void                 registerCellWritten(std::string);
+      bool                 checkCellWritten(std::string);
+      CellDefin            linkCellRef(std::string cellname);
+      void                 getCellChildNames(NameSet&);
       bool                 status() const  {return _status;};
-      word                 numread() const {return _numread;};
+      word                 numRead() const {return _numread;};
       TdtLibrary*          design() const  {return _design;};
       time_t               created() const {return _created;};
       time_t               lastUpdated() const {return _lastUpdated;};
       const laydata::TdtLibDir* TEDLIB()   {return _TEDLIB;}
       word                 revision()      {return _revision;}
-      word                 subrevision()   {return _subrevision;}
+      word                 subRevision()   {return _subrevision;}
    protected:
       bool                 _status;
       word                 _numread;

@@ -207,20 +207,20 @@ namespace laydata {
                         TdtLibDir();
                        ~TdtLibDir();
       TdtDesign*        operator ()() {return _TEDDB;}
-      void              addlibrary( TdtLibrary* const, word libRef );
-      TdtLibrary*       removelibrary( std::string );
+      void              addLibrary( TdtLibrary* const, word libRef );
+      TdtLibrary*       removeLibrary( std::string );
       TdtLibrary*       getLib(int);
       std::string       getLibName(int);
       void              relink();
-      void              reextract_hierarchy();
+      void              reextractHierarchy();
       int               getLastLibRefNo();
       bool              getLibCellRNP(std::string, CellDefin&, const int libID = TARGETDB_LIB) const;
       TdtDefaultCell*   getLibCellDef(std::string, const int libID = TARGETDB_LIB) const;
-      CellDefin         linkcellref(std::string, int);
-      CellDefin         adddefaultcell( std::string name, bool );
+      CellDefin         linkCellRef(std::string, int);
+      CellDefin         addDefaultCell( std::string name, bool );
       void              addThisUndefCell(TdtDefaultCell*);
-      bool              collect_usedlays(std::string, bool, WordList&) const;
-      void              collect_usedlays(int, WordList&) const;
+      bool              collectUsedLays(std::string, bool, WordList&) const;
+      void              collectUsedLays(int, WordList&) const;
       void              cleanUndefLib();
       TdtDefaultCell*   displaceUndefinedCell(std::string);
       void              holdUndefinedCell(TdtDefaultCell*);
@@ -241,8 +241,8 @@ namespace laydata {
    public:
                      DrcLibrary(std::string name, real DBU, real UU);
       virtual       ~DrcLibrary();
-      TdtDefaultCell* checkcell(std::string name);
-      void           registercellread(std::string, TdtCell*);
+      TdtDefaultCell* checkCell(std::string name);
+      void           registerCellRead(std::string, TdtCell*);
       std::string    name()            const {return _name;}
       real           UU()              const {return _UU;}
       real           DBU()             const {return _DBU;}

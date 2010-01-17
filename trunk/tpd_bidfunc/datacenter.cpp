@@ -148,7 +148,7 @@ int DataCenter::TDTloadlib(std::string filename)
       return -1;
    }
    tempin.closeF();
-   _TEDLIB.addlibrary(tempin.design(), libRef);
+   _TEDLIB.addLibrary(tempin.design(), libRef);
    // Relink everything
    _TEDLIB.relink();
    return libRef;
@@ -157,7 +157,7 @@ int DataCenter::TDTloadlib(std::string filename)
 bool DataCenter::TDTunloadlib(std::string libname)
 {
    // Unhook the library from the list of known DB's, get a pointer to it
-   laydata::TdtLibrary* tberased = _TEDLIB.removelibrary(libname);
+   laydata::TdtLibrary* tberased = _TEDLIB.removeLibrary(libname);
    if ( NULL != tberased )
    {
       // Relink everything
@@ -165,7 +165,7 @@ bool DataCenter::TDTunloadlib(std::string libname)
       // remove tberased cells from hierarchy tree
       tberased->clearHierTree();
       // get the new hierarchy
-      _TEDLIB.reextract_hierarchy();
+      _TEDLIB.reextractHierarchy();
       // after all above - remove the library
       delete tberased;
       return true;
@@ -813,7 +813,7 @@ void DataCenter::openGL_draw(const CTM& layCTM)
             _TEDLIB()->openGlDraw(*drawProp);
             if(_DRCDB)
             {
-               laydata::TdtDefaultCell* dst_structure = _DRCDB->checkcell("drc");
+               laydata::TdtDefaultCell* dst_structure = _DRCDB->checkCell("drc");
                if (dst_structure)
                {
                   dst_structure->openGlDraw(*drawProp);
@@ -890,7 +890,7 @@ void DataCenter::openGL_render(const CTM& layCTM)
             if(_DRCDB)
             {
                renderer.setState(layprop::DRC);
-               laydata::TdtDefaultCell* dst_structure = _DRCDB->checkcell("drc");
+               laydata::TdtDefaultCell* dst_structure = _DRCDB->checkCell("drc");
                if (dst_structure)
                {
                   dst_structure->openGlRender(renderer, CTM(), false, false);
