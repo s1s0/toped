@@ -88,7 +88,7 @@ tellstdfunc::stdCOPYSEL_D::stdCOPYSEL_D(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdCOPYSEL_D::execute()
 {
-   if (DATC->numselected() == 0)
+   if (DATC->numSelected() == 0)
    {
       tell_log(console::MT_ERROR,"No objects selected. Nothing to copy");
       return EXEC_NEXT;
@@ -215,7 +215,7 @@ tellstdfunc::stdMOVESEL_D::stdMOVESEL_D(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdMOVESEL_D::execute()
 {
-   if (DATC->numselected() == 0)
+   if (DATC->numSelected() == 0)
    {
       tell_log(console::MT_ERROR,"No objects selected. Nothing to move");
       return EXEC_NEXT;
@@ -333,7 +333,7 @@ tellstdfunc::stdROTATESEL_D::stdROTATESEL_D(telldata::typeID retype, bool eor) :
 int tellstdfunc::stdROTATESEL_D::execute()
 {
    real   angle  = getOpValue();
-   if (DATC->numselected() == 0)
+   if (DATC->numSelected() == 0)
    {
       tell_log(console::MT_ERROR,"No objects selected. Nothing to rotate");
       return EXEC_NEXT;
@@ -394,7 +394,7 @@ tellstdfunc::stdFLIPXSEL_D::stdFLIPXSEL_D(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdFLIPXSEL_D::execute()
 {
-   if (DATC->numselected() == 0)
+   if (DATC->numSelected() == 0)
    {
       tell_log(console::MT_ERROR,"No objects selected. Nothing to flip");
       return EXEC_NEXT;
@@ -451,7 +451,7 @@ tellstdfunc::stdFLIPYSEL_D::stdFLIPYSEL_D(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdFLIPYSEL_D::execute()
 {
-   if (DATC->numselected() == 0)
+   if (DATC->numSelected() == 0)
    {
       tell_log(console::MT_ERROR,"No objects selected. Nothing to flip");
       return EXEC_NEXT;
@@ -576,7 +576,7 @@ void tellstdfunc::lgcCUTPOLY::undo()
 
 int tellstdfunc::lgcCUTPOLY::execute()
 {
-   if (DATC->numselected() == 0)
+   if (DATC->numSelected() == 0)
       tell_log(console::MT_ERROR,"No selected shapes. Nothing to cut");
    else {
       // get the data from the stack
@@ -642,7 +642,7 @@ tellstdfunc::lgcCUTPOLY_I::lgcCUTPOLY_I(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::lgcCUTPOLY_I::execute()
 {
-   if (DATC->numselected() == 0) {
+   if (DATC->numSelected() == 0) {
       tell_log(console::MT_ERROR,"No selected shapes. Nothing to cut");
       return EXEC_NEXT;
    }
@@ -658,7 +658,7 @@ tellstdfunc::lgcCUTBOX_I::lgcCUTBOX_I(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::lgcCUTBOX_I::execute()
 {
-   if (DATC->numselected() == 0) {
+   if (DATC->numSelected() == 0) {
       tell_log(console::MT_ERROR,"No selected shapes. Nothing to cut");
       return EXEC_NEXT;
    }
@@ -721,7 +721,7 @@ void tellstdfunc::lgcMERGE::undo()
 
 int tellstdfunc::lgcMERGE::execute()
 {
-   if (DATC->numselected() == 0) {
+   if (DATC->numSelected() == 0) {
       tell_log(console::MT_ERROR,"No objects selected. Nothing to cut");
    }
    else {
@@ -809,7 +809,7 @@ void tellstdfunc::lgcSTRETCH::undo()
 
 int tellstdfunc::lgcSTRETCH::execute()
 {
-   if (DATC->numselected() == 0)
+   if (DATC->numSelected() == 0)
    {
       tell_log(console::MT_ERROR,"No object selected. Nothing to modify");
    }

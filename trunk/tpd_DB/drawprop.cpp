@@ -918,7 +918,7 @@ unsigned layprop::DrawProperties::getTenderLay(unsigned layno) const
       case DB: return layno;
       case DRC: return DRC_LAY;
       default: assert(false);
-	}
+   }
 }
 
 void layprop::DrawProperties::allLayers(nameList& alllays) const

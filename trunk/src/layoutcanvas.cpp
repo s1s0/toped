@@ -485,7 +485,7 @@ void tui::LayoutCanvas::wnd_paint() {
 
 void tui::LayoutCanvas::rubber_paint()
 {
-   DATC->tmp_draw(_LayCTM, releasepoint, n_ScrMARK);
+   DATC->motionDraw(_LayCTM, releasepoint, n_ScrMARK);
 }
 
 void tui::LayoutCanvas::CursorControl(bool shift, bool ctl) {
@@ -672,7 +672,7 @@ void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event))
                   menu.Append(CM_CANCEL_LAST, wxT("Cancel last point"));
                else if (Console->numpoints() > 0)
                   menu.Append(CM_CANCEL_LAST, wxT("Cancel first point"));
-               if (DATC->drawruler())
+               if (DATC->drawRuler())
                   menu.Append(   CM_RULER, wxT("Ruler Off"));
                else
                   menu.Append(   CM_RULER, wxT("Ruler On"));
@@ -687,7 +687,7 @@ void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event))
                   menu.Append(CM_CANCEL_LAST, wxT("Cancel last point"));
                else if (Console->numpoints() > 0)
                   menu.Append(CM_CANCEL_LAST, wxT("Cancel first point"));
-               if (DATC->drawruler())
+               if (DATC->drawRuler())
                   menu.Append(   CM_RULER, wxT("Ruler Off"));
                else
                   menu.Append(   CM_RULER, wxT("Ruler On"));
@@ -717,7 +717,7 @@ void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event))
             menu.Append(TMEDIT_UNDO, wxT("undo"));
             menu.AppendSeparator();
          }
-         if (DATC->numselected() > 0)
+         if (DATC->numSelected() > 0)
          {
             menu.Append(       TMEDIT_MOVE, wxT("move"  ));
             menu.Append(       TMEDIT_COPY, wxT("copy"  ));
@@ -736,7 +736,7 @@ void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event))
          menu.AppendSeparator();
          menu.Append( TMSEL_SELECT_IN, wxT("select"     ));
          menu.Append(TMSEL_PSELECT_IN, wxT("part select"));
-         if (DATC->numselected() > 0)
+         if (DATC->numSelected() > 0)
          {
             menu.Append( TMSEL_UNSELECT_IN, wxT("unselect"     ));
             menu.Append(TMSEL_PUNSELECT_IN, wxT("part unselect"));
@@ -1000,7 +1000,7 @@ void tui::LayoutCanvas::OnCMchangeLayer(wxCommandEvent& WXUNUSED(event))
 
 void tui::LayoutCanvas::OnCMrulerState(wxCommandEvent& WXUNUSED(event))
 {
-   DATC->switch_drawruler(!DATC->drawruler());
+   DATC->switchDrawRuler(!DATC->drawRuler());
 }
 
 void tui::LayoutCanvas::OnCMabort(wxCommandEvent& WXUNUSED(event))

@@ -283,7 +283,7 @@ int tellstdfunc::TDTsaveIFF::execute() {
          bool stop_ignoring = false;
          if (DATC->TDTcheckwrite(timeCreated, timeSaved, stop_ignoring))
          {
-            DATC->TDTwrite(DATC->tedfilename().c_str());
+            DATC->TDTwrite(DATC->tedFileName().c_str());
             TpdTime timec(ATDB->created());
             TpdTime timeu(ATDB->lastUpdated());
             LogFile << LogFile.getFN() << "(\"" <<  timec() << "\" , \"" <<

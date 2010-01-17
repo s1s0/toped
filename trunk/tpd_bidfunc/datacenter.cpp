@@ -785,12 +785,12 @@ void DataCenter::mouseRotate()
 void DataCenter::render(const CTM& layCTM)
 {
    if (PROPC->renderType())
-      openGL_render(layCTM);
+      openGlRender(layCTM);
    else
-      openGL_draw(layCTM);
+      openGlDraw(layCTM);
 }
 
-void DataCenter::openGL_draw(const CTM& layCTM)
+void DataCenter::openGlDraw(const CTM& layCTM)
 {
    if (_TEDLIB())
    {
@@ -843,7 +843,7 @@ void DataCenter::openGL_draw(const CTM& layCTM)
    }
 }
 
-void DataCenter::openGL_render(const CTM& layCTM)
+void DataCenter::openGlRender(const CTM& layCTM)
 {
    if (_TEDLIB())
    {
@@ -920,7 +920,7 @@ void DataCenter::openGL_render(const CTM& layCTM)
 }
 
 
-void DataCenter::tmp_draw(const CTM& layCTM, TP base, TP newp)
+void DataCenter::motionDraw(const CTM& layCTM, TP base, TP newp)
 {
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))

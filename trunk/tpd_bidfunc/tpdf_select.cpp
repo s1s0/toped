@@ -481,7 +481,7 @@ tellstdfunc::stdREPORTSLCTD::stdREPORTSLCTD(telldata::typeID retype, bool eor) :
 {}
 
 int tellstdfunc::stdREPORTSLCTD::execute() {
-   if (DATC->numselected() == 0)
+   if (DATC->numSelected() == 0)
    {
       tell_log(console::MT_ERROR,"No objects selected.");
    }
