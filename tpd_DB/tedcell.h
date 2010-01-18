@@ -93,7 +93,7 @@ namespace laydata {
          virtual void        relinkThis(std::string, laydata::CellDefin, laydata::TdtLibDir* libdir);
          virtual void        updateHierarchy(TdtLibDir*);
          virtual DBbox       cellOverlap() const;
-         virtual DBbox       updateVisibleOverlap(const layprop::DrawProperties&);
+         virtual DBbox       getVisibleOverlap(const layprop::DrawProperties&);
          virtual void        write(TEDfile* const, const CellList&, const TDTHierTree*) const;
          virtual void        gdsWrite(DbExportFile&, const CellList&, const TDTHierTree*) const;
          virtual void        cifWrite(DbExportFile&, const CellList&, const TDTHierTree*) const;
@@ -141,7 +141,6 @@ namespace laydata {
                                    const CellList* = NULL, const TDTHierTree* = NULL) const;
       virtual TDTHierTree* hierOut(TDTHierTree*&, TdtCell*, CellList*, const TdtLibDir*);
       virtual DBbox        cellOverlap() const {return _cellOverlap;}
-      DBbox                cellVisibleOverlap() const {return _vlOverlap;}
       void                 selectInBox(DBbox, const DWordSet&, word, bool pntsel = false);
 //      void                 select_inside(const TP);
       void                 selectFromList(SelectList*, const DWordSet&);
@@ -180,7 +179,7 @@ namespace laydata {
       void                 reportSelected(real) const;
       virtual void         collectUsedLays(const TdtLibDir*, bool, WordList&) const;
       bool                 overlapChanged(DBbox&, TdtDesign*);
-      virtual DBbox        updateVisibleOverlap(const layprop::DrawProperties&);
+      virtual DBbox        getVisibleOverlap(const layprop::DrawProperties&);
    private:
       bool                 getShapeOver(TP, const DWordSet&);
       void                 getCellOverlap();
@@ -195,7 +194,6 @@ namespace laydata {
       NameSet              _children;     //! for hierarchy list purposes
       SelectList           _shapesel;     //! selected shapes
       DBbox                _cellOverlap;  //! Overlap of the entire cell
-      DBbox                _vlOverlap;    //! Overlap of the currently visible layers only
    };
 }
 #endif

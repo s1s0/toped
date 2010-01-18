@@ -128,8 +128,7 @@ namespace laydata {
       bool           stretch(int bfactor, AtticList** dasao) {return _target.edit()->stretchSelected(bfactor, dasao);}
       unsigned int   numSelected() const;
       DBbox          activeOverlap();
-      DBbox          visibleOverlap();
-      void           updateVisibleOverlap(layprop::DrawProperties&);
+      DBbox          getVisibleOverlap(layprop::DrawProperties&);
       void           transferLayer(unsigned dst);
       void           transferLayer(laydata::SelectList* slst, unsigned dst);
       AtticList*     changeRef(ShapeList*, std::string);

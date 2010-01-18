@@ -99,7 +99,6 @@ public:
    bool                       drawRuler() {return _drawruler;}
    LayerMapExt*               secureGdsLayMap(const layprop::DrawProperties*, bool);
    LayerMapCif*               secureCifLayMap(const layprop::DrawProperties*, bool);
-   void                       updateVisibleOverlap();
    std::string                globalDir(void) const     {return _globalDir;}
 
 protected:

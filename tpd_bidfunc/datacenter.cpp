@@ -1064,18 +1064,6 @@ laydata::LibCellLists* DataCenter::getCells(int libID)
    return all_cells;
 }
 
-void DataCenter::updateVisibleOverlap()
-{
-   layprop::DrawProperties* drawProp;
-   if (PROPC->lockDrawProp(drawProp))
-   {
-      lockDB();
-      _TEDLIB()->updateVisibleOverlap(*drawProp);
-      unlockDB();
-   }
-   PROPC->unlockDrawProp(drawProp);
-}
-
 //void initDBLib(const std::string &localDir, const std::string &globalDir)
 //{
 //   DATC  = DEBUG_NEW DataCenter(localDir, globalDir);

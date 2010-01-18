@@ -293,6 +293,7 @@ namespace layprop {
                                                          {_clipRegion = clipR;}
          void                       setScrCTM(CTM ScrCTM){_scrCtm = ScrCTM;}
          void                       allUnselectable(DWordSet&);
+         void                       allInvisible(DWordSet&);
          // Properly protected in tpd_bidfunc or the functions called from there
          bool                       addLayer(std::string, unsigned, std::string, std::string, std::string);
          bool                       addLayer(std::string, unsigned);

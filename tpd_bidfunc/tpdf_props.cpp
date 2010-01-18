@@ -288,7 +288,8 @@ int tellstdfunc::stdHIDELAYER::execute()
    {
       if (layno != drawProp->curLay())
       {
-         DWordSet unselable = PROPC->allUnselectable();
+         DWordSet unselable;
+         drawProp->allUnselectable(unselable);
          laydata::TdtDesign* ATDB = DATC->lockDB();
 
          UNDOcmdQ.push_front(this);
@@ -309,7 +310,6 @@ int tellstdfunc::stdHIDELAYER::execute()
          }
          DATC->unlockDB();
          drawProp->hideLayer(layno, hide);
-         DATC->updateVisibleOverlap();
          TpdPost::layer_status(tui::BT_LAYER_HIDE, layno, hide);
          LogFile << LogFile.getFN() << "("<< layno << "," <<
                     LogFile._2bool(hide) << ");"; LogFile.flush();
@@ -648,7 +648,8 @@ int tellstdfunc::stdLOCKLAYER::execute()
    {
       if (layno != drawProp->curLay())
       {
-         DWordSet unselable = PROPC->allUnselectable();
+         DWordSet unselable;
+         drawProp->allUnselectable(unselable);
          laydata::TdtDesign* ATDB = DATC->lockDB();
          UNDOcmdQ.push_front(this);
          UNDOPstack.push_front(DEBUG_NEW telldata::ttint(layno));
@@ -962,7 +963,8 @@ void tellstdfunc::stdLOADLAYSTAT::undo() {
    if (PROPC->lockDrawProp(drawProp))
    {
       drawProp->popLayerStatus();
-      DWordSet unselable = PROPC->allUnselectable();
+      DWordSet unselable;
+      drawProp->allUnselectable(unselable);
       laydata::TdtDesign* ATDB = DATC->lockDB();
       ATDB->selectFromList(get_ttlaylist(pl), unselable);
       DATC->unlockDB();
@@ -988,7 +990,8 @@ int tellstdfunc::stdLOADLAYSTAT::execute()
          laydata::SelectList *todslct = DEBUG_NEW laydata::SelectList();
          WordSet hll(hidel); // combined locked and hidden layers
          hll.insert(lockl.begin(), lockl.end());
-         DWordSet unselable = PROPC->allUnselectable();
+         DWordSet unselable;
+         drawProp->allUnselectable(unselable);
          laydata::TdtDesign* ATDB = DATC->lockDB();
             laydata::SelectList *listselected = ATDB->shapeSel();
             // first thing is to pick-up the selected shapes of the layers which
