@@ -64,7 +64,7 @@ namespace tui {
    //-----------------------------------------------------------------------------
    class TopedFrame : public wxFrame {
    public:
-                              TopedFrame(const wxString& , const wxPoint& , 
+                              TopedFrame(const wxString& , const wxPoint& ,
                                                                const wxSize&);
       void                    OnClose(wxCloseEvent&);
       virtual                ~TopedFrame();
@@ -115,7 +115,7 @@ namespace tui {
 		wxMenu*						toolbarHorSizeMenu;
       wxMenu*                 gdsMenu;
       wxMenu*                 helpMenu;
-		
+
       // Sash layout stuff
       //wxControl*    mS_browsers;
 //      wxWindow*     mS_GLstatus;
@@ -188,6 +188,7 @@ namespace tui {
       void       OnpanUp(wxCommandEvent& WXUNUSED(event));
       void     OnpanDown(wxCommandEvent& WXUNUSED(event));
       void     OnZoomAll(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("zoomall();"));}
+      void OnZoomVisible(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("zoomvisible();"));}
       void     OnDrawBox(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("addbox();"));}
       void    OnDrawPoly(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("addpoly();"));}
       void    OnDrawWire(wxCommandEvent& WXUNUSED(event));

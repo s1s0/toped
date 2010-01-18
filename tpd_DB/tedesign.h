@@ -94,7 +94,6 @@ namespace laydata {
       TdtData*       addBox(unsigned la, TP* p1, TP* p2, bool sortnow = true);
       TdtData*       addPoly(unsigned, pointlist*, bool sortnow = true);
       TdtData*       addWire(unsigned, pointlist*, word, bool sortnow = true);
-//      void           resortlayer(unsigned);
       TdtData*       addText(unsigned la, std::string& text, CTM& ori);
       TdtData*       addCellRef(laydata::CellDefin strdefn, CTM& ori);
       TdtData*       addCellARef(std::string&, CTM&, ArrayProperties&);
@@ -147,7 +146,6 @@ namespace laydata {
       void           unselectAll()    const {_target.edit()->unselectAll(false);};
       void           selectAll(const DWordSet& unselable, word layselmask) const
                                              {       _target.edit()->selectAll(unselable, layselmask);}
-//      QuadTree*      targetlayer(unsigned layno);
       void           tryUnselectAll()const;
       SelectList*    shapeSel()        const {return _target.edit()->shapeSel();};
       SelectList*    copySeList()     const {return _target.edit()->copySeList();};

@@ -197,6 +197,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMVIEW_PANUP        , tui::TopedFrame::OnpanUp       )
    EVT_MENU( TMVIEW_PANDOWN      , tui::TopedFrame::OnpanDown     )
    EVT_MENU( TMVIEW_ZOOMALL      , tui::TopedFrame::OnZoomAll     )
+   EVT_MENU( TMVIEW_ZOOMVISIBLE  , tui::TopedFrame::OnZoomVisible )
 
    EVT_MENU( TMCELL_NEW          , tui::TopedFrame::OnCellNew     )
    EVT_MENU( TMCELL_OPEN         , tui::TopedFrame::OnCellOpen    )
@@ -471,6 +472,7 @@ void tui::TopedFrame::initMenuBar() {
    _resourceCenter->appendMenu("&View/Zoom in", "F2",  &tui::TopedFrame::OnzoomIn, "Zoom in current window" );
    _resourceCenter->appendMenu("&View/Zoom out","F3",  &tui::TopedFrame::OnzoomOut, "Zoom out current window" );
    _resourceCenter->appendMenu("&View/Zoom all","F4",  &tui::TopedFrame::OnZoomAll, "Zoom the current cell" );
+   _resourceCenter->appendMenu("&View/Zoom visible","F5",  &tui::TopedFrame::OnZoomVisible, "Zoom visible objects of the current cell" );
    _resourceCenter->appendMenuSeparator("View");
    _resourceCenter->appendMenu("&View/Pan left",   "SHIFT-LEFT",  &tui::TopedFrame::OnpanLeft, "Move the view window left" );
    _resourceCenter->appendMenu("&View/Pan right",  "SHIFT-RIGHT", &tui::TopedFrame::OnpanRight, "Move the view window right" );

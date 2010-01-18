@@ -102,6 +102,7 @@ namespace tui
       TMVIEW_ZOOMIN       ,
       TMVIEW_ZOOMOUT      ,
       TMVIEW_ZOOMALL      ,
+      TMVIEW_ZOOMVISIBLE  ,
       TMVIEW_PANLEFT      ,
       TMVIEW_PANRIGHT     ,
       TMVIEW_PANUP        ,
