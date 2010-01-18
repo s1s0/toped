@@ -1327,16 +1327,11 @@ DBbox laydata::TdtDesign::activeOverlap()
    return ovl;
 }
 
-DBbox laydata::TdtDesign::visibleOverlap()
+DBbox laydata::TdtDesign::getVisibleOverlap(layprop::DrawProperties& prop)
 {
-   DBbox ovl = _target.view()->cellVisibleOverlap();
+   DBbox ovl = _target.view()->getVisibleOverlap(prop);
    if (ovl == DEFAULT_OVL_BOX) ovl = DEFAULT_ZOOM_BOX;
    return ovl;
-}
-
-void laydata::TdtDesign::updateVisibleOverlap(layprop::DrawProperties& prop)
-{
-   _target.view()->updateVisibleOverlap(prop);
 }
 
 void laydata::TdtDesign::checkActive() {

@@ -1688,7 +1688,7 @@ void laydata::TdtCellRef::drawRequest(tenderer::TopRend& rend) const
 void laydata::TdtCellRef::vlOverlap(const layprop::DrawProperties& prop, DBbox& vlOvl) const
 {
    assert(NULL != structure());
-   DBbox strOverlap(structure()->updateVisibleOverlap(prop));
+   DBbox strOverlap(structure()->getVisibleOverlap(prop));
    if (DEFAULT_OVL_BOX == strOverlap) return;
    strOverlap = strOverlap * _translation;
    strOverlap.normalize();

@@ -278,14 +278,21 @@ tellstdfunc::stdZOOMVISIBLE::stdZOOMVISIBLE(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
 {}
 
-int tellstdfunc::stdZOOMVISIBLE::execute() {
-   laydata::TdtDesign* ATDB = DATC->lockDB();
-      DBbox* ovl  = DEBUG_NEW DBbox(ATDB->visibleOverlap());
-   DATC->unlockDB();
-   wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
-   eventZOOM.SetInt(tui::ZOOM_WINDOW);
-   eventZOOM.SetClientData(static_cast<void*>(ovl));
-   wxPostEvent(TopedCanvasW, eventZOOM);
+int tellstdfunc::stdZOOMVISIBLE::execute()
+{
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      laydata::TdtDesign* ATDB = DATC->lockDB();
+         DBbox* ovl  = DEBUG_NEW DBbox(ATDB->getVisibleOverlap(*drawProp));
+      DATC->unlockDB();
+      wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+      eventZOOM.SetInt(tui::ZOOM_WINDOW);
+      eventZOOM.SetClientData(static_cast<void*>(ovl));
+      wxPostEvent(TopedCanvasW, eventZOOM);
+   }
+   PROPC->unlockDrawProp(drawProp);
+
    return EXEC_NEXT;
 }
 

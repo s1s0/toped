@@ -866,6 +866,14 @@ void layprop::DrawProperties::allUnselectable(DWordSet& layset)
    }
 }
 
+void layprop::DrawProperties::allInvisible(DWordSet& layset)
+{
+   for( LaySetList::const_iterator it = getCurSetList().begin(); it != getCurSetList().end(); it++)
+   {
+      if (it->second->hidden())
+         layset.insert(it->first);
+   }
+}
 //WordList layprop::PropertyCenter::getLockedLayers() const
 //{
 //   WordList lockedLayers;

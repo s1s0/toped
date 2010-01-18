@@ -248,7 +248,7 @@ DBbox laydata::TdtDefaultCell::cellOverlap() const
    return DEFAULT_ZOOM_BOX;
 }
 
-DBbox laydata::TdtDefaultCell::updateVisibleOverlap(const layprop::DrawProperties&)
+DBbox laydata::TdtDefaultCell::getVisibleOverlap(const layprop::DrawProperties&)
 {
    return DEFAULT_ZOOM_BOX;
 }
@@ -290,13 +290,11 @@ void laydata::TdtDefaultCell::invalidateParents(laydata::TdtLibrary* ATDB)
 // class TdtCell
 //-----------------------------------------------------------------------------
 laydata::TdtCell::TdtCell(std::string name) :
-         TdtDefaultCell(name, TARGETDB_LIB, true), _cellOverlap(DEFAULT_OVL_BOX),
-         _vlOverlap(DEFAULT_OVL_BOX){}
+         TdtDefaultCell(name, TARGETDB_LIB, true), _cellOverlap(DEFAULT_OVL_BOX) {}
 
 
 laydata::TdtCell::TdtCell(TEDfile* const tedfile, std::string name, int lib) :
-         TdtDefaultCell(name, lib, true), _cellOverlap(DEFAULT_OVL_BOX),
-         _vlOverlap(DEFAULT_OVL_BOX)
+         TdtDefaultCell(name, lib, true), _cellOverlap(DEFAULT_OVL_BOX)
 {
    byte recordtype;
    word  layno;
@@ -792,13 +790,13 @@ void laydata::TdtCell::getCellOverlap()
    }
 }
 
-DBbox laydata::TdtCell::updateVisibleOverlap(const layprop::DrawProperties& prop)
+DBbox laydata::TdtCell::getVisibleOverlap(const layprop::DrawProperties& prop)
 {
-   _vlOverlap = DEFAULT_OVL_BOX;
+   DBbox vlOverlap(DEFAULT_OVL_BOX);
    for (LayerList::const_iterator LCI = _layers.begin(); LCI != _layers.end(); LCI++)
       if (!prop.layerHidden(LCI->first))
-         LCI->second->vlOverlap(prop, _vlOverlap);
-   return _vlOverlap;
+         LCI->second->vlOverlap(prop, vlOverlap);
+   return vlOverlap;
 }
 
 void laydata::TdtCell::selectInBox(DBbox select_in, const DWordSet& unselable, word layselmask, bool pntsel)
