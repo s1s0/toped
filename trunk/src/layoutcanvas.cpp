@@ -780,8 +780,9 @@ void tui::LayoutCanvas::OnMouseMiddleUp(wxMouseEvent& event)
 {
    TP s_ScrMARK = ScrMARK * _LayCTM.Reversed();
    wxMenu menu;
-   menu.Append(TMVIEW_ZOOMALL  , wxT("Zoom All"));
-   menu.Append(TMVIEW_PANCENTER, wxT("Pan Center"));
+   menu.Append(TMVIEW_ZOOMALL     , wxT("Zoom All"));
+   menu.Append(TMVIEW_ZOOMVISIBLE , wxT("Zoom Visible"));
+   menu.Append(TMVIEW_PANCENTER   , wxT("Pan Center"));
    PopupMenu(&menu, wxPoint(s_ScrMARK.x(), s_ScrMARK.y()));
 }
 

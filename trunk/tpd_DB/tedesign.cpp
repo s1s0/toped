@@ -909,13 +909,6 @@ laydata::TdtData* laydata::TdtDesign::addCellARef(std::string& name, CTM& ori,
    }
 }
 
-//use this procedure after calling addBox, addPoly etc with sortnow == false
-//void laydata::TdtDesign::resortlayer(unsigned la)
-//{
-//   TdtLayer *actlay = static_cast<TdtLayer*>(targetlayer(la));
-//   actlay->resort();
-//}
-
 void laydata::TdtDesign::addList(AtticList* nlst/*, DWordSet& newLays*/)
 {
    if (_target.edit()->addList(this, nlst/*, newLays*/))
@@ -1330,8 +1323,8 @@ DBbox laydata::TdtDesign::activeOverlap()
 DBbox laydata::TdtDesign::getVisibleOverlap(layprop::DrawProperties& prop)
 {
    DBbox ovl = _target.view()->getVisibleOverlap(prop);
-   if (ovl == DEFAULT_OVL_BOX) ovl = DEFAULT_ZOOM_BOX;
-   return ovl;
+   if (ovl == DEFAULT_OVL_BOX) return activeOverlap();
+   else return ovl;
 }
 
 void laydata::TdtDesign::checkActive() {
@@ -1342,11 +1335,6 @@ void laydata::TdtDesign::tryUnselectAll() const {
    if (NULL != _target.edit())
       _target.edit()->unselectAll(false);
 }
-
-//laydata::QuadTree* laydata::TdtDesign::targetlayer(unsigned layno)
-//{
-//   return _target.edit()->secureLayer(layno);
-//}
 
 void laydata::TdtDesign::transferLayer(unsigned dst)
 {
