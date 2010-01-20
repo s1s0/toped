@@ -120,20 +120,20 @@ namespace laydata {
    //==============================================================================
    class Validator {
    public:
-                           Validator(pointlist& plist) : _status(shp_OK),
+                           Validator(const pointlist& plist) : _status(shp_OK),
                                                             _plist(plist) {};
       virtual             ~Validator() {};
       bool                 valid()           {return _status < shp_cross;}
       bool                 recoverable()     {return _status < shp_null;}
       byte                 status()          {return _status;}
       bool                 box()             {return (0 != (_status & shp_box));}
-      pointlist&           getValidated()    {return _plist;}
+      pointlist            getValidated()    {return _plist;}
       word                 numpoints()       {return _plist.size();}
       virtual std::string  failType() = 0;
       virtual TdtData*     replacement() = 0;
    protected:
       byte                 _status;
-      pointlist&           _plist;
+      pointlist            _plist;
    };
 
 //==============================================================================

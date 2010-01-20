@@ -588,14 +588,17 @@ int tellstdfunc::lgcCUTPOLY::execute()
       if (!check.valid()) {
          tell_log(console::MT_ERROR, "Invalid cutting polygon encountered");
       }
-      else {
+      else
+      {
          //cutPoly returns 3 Attic lists -> Delete/AddSelect/AddOnly,
          // create and initialize them here
          laydata::AtticList* dasao[3];
+         pointlist theShape = check.getValidated();
          for (byte i = 0; i < 3; dasao[i++] = DEBUG_NEW laydata::AtticList());
          DWordSet unselable = PROPC->allUnselectable();
          laydata::TdtDesign* ATDB = DATC->lockDB();
-            if (ATDB->cutPoly(check.getValidated() ,dasao)) {
+            if (ATDB->cutPoly( theShape, dasao))
+            {
                // push the command for undo
                UNDOcmdQ.push_front(this);
                UNDOPstack.push_front(make_ttlaylist(ATDB->shapeSel()));
