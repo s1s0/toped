@@ -1343,8 +1343,8 @@ void GDSin::GdsStructure::importSref(GdsInFile* cf, laydata::TdtCell* dst_cell, 
    TP             magnPoint;
    std::string    strctName;
    word           ba;
-   int            tmp; //Dummy variable. Use for gds_PROPATTR
-   std::string    tmp2[128]; //Dummy variable. Use for gds_PROPVALUE
+   int            tmp ; //Dummy variable. Use for gds_PROPATTR
+   std::string    tmp2; //Dummy variable. Use for gds_PROPVALUE
    std::ostringstream ost;
    const GdsRecord* cr = cf->cRecord();
    do
@@ -1416,9 +1416,9 @@ void GDSin::GdsStructure::importAref(GdsInFile* cf, laydata::TdtCell* dst_cell, 
    TP             xStep;
    TP             yStep;
    std::string    strctName;
-   word ba;
-   int tmp; //Dummy variable. Use for gds_PROPATTR
-   std::string tmp2; //Dummy variable. Use for gds_PROPVALUE
+   word           ba;
+   int            tmp;  //Dummy variable. Use for gds_PROPATTR
+   std::string    tmp2; //Dummy variable. Use for gds_PROPVALUE
    std::ostringstream ost;
    //initializing
    const GdsRecord* cr = cf->cRecord();
