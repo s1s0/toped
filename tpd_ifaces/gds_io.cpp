@@ -753,9 +753,9 @@ void GDSin::GdsStructure::linkReferences(GdsInFile* const cf, GdsLibrary* const 
       }
       else
       {
-         char wstr[256];
-         sprintf(wstr," Structure %s is referenced, but not defined!",CRN->c_str() );
-         tell_log(console::MT_WARNING,wstr);
+         std::ostringstream ost;
+         ost << "Structure " << *CRN <<" is referenced, but not defined!";
+         tell_log(console::MT_WARNING,ost.str());
          cf->incGdsiiWarnings();
       }
    }
@@ -1074,6 +1074,7 @@ void GDSin::GdsStructure::importBox(GdsInFile* cf, laydata::TdtCell* dst_cell, c
                          << " }";
                      tell_log(console::MT_ERROR, ost.str());
                   }
+                  else plist = check.getValidated();
                   laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->secureLayer(tdtlaynum));
                   if (check.box())  dwl->addBox(plist[0], plist[2], false);
                   else              dwl->addPoly(plist,false);
@@ -1137,6 +1138,7 @@ void GDSin::GdsStructure::importPoly(GdsInFile* cf, laydata::TdtCell* dst_cell, 
                          << " }";
                      tell_log(console::MT_ERROR, ost.str());
                   }
+                  else plist = check.getValidated();
                   laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->secureLayer(tdtlaynum));
                   if (check.box())  dwl->addBox(plist[0], plist[2], false);
                   else              dwl->addPoly(plist,false);
@@ -1218,6 +1220,7 @@ void GDSin::GdsStructure::importPath(GdsInFile* cf, laydata::TdtCell* dst_cell, 
                               << " }";
                         tell_log(console::MT_ERROR, ost.str());
                      }
+                     else plist = check.getValidated();
                      laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->secureLayer(tdtlaynum));
                      dwl->addWire(plist, width,false);
                   }
@@ -1341,7 +1344,7 @@ void GDSin::GdsStructure::importSref(GdsInFile* cf, laydata::TdtCell* dst_cell, 
    std::string    strctName;
    word           ba;
    int            tmp; //Dummy variable. Use for gds_PROPATTR
-   char           tmp2[128]; //Dummy variable. Use for gds_PROPVALUE
+   std::string    tmp2[128]; //Dummy variable. Use for gds_PROPVALUE
    std::ostringstream ost;
    const GdsRecord* cr = cf->cRecord();
    do
@@ -1415,7 +1418,7 @@ void GDSin::GdsStructure::importAref(GdsInFile* cf, laydata::TdtCell* dst_cell, 
    std::string    strctName;
    word ba;
    int tmp; //Dummy variable. Use for gds_PROPATTR
-   char tmp2[128]; //Dummy variable. Use for gds_PROPVALUE
+   std::string tmp2; //Dummy variable. Use for gds_PROPVALUE
    std::ostringstream ost;
    //initializing
    const GdsRecord* cr = cf->cRecord();
