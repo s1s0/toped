@@ -43,7 +43,12 @@ Dialog stuff
 
 Documentation
 ==============
+   savelayerstatus
+   restorelayerstatus
+   deletelayserstatus 
+   zoomvisible
    toolbarsize
+   filllayer
    (constants)
    horizontal
    vertical

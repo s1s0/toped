@@ -1102,6 +1102,33 @@ void layprop::DrawProperties::saveLines(FILE* prop_file) const
    fprintf(prop_file, "}\n\n");
 }
 
+void layprop::DrawProperties::saveLayState(FILE* prop_file) const
+{
+   LayStateMap::const_iterator CS;
+   fprintf(prop_file, "void  layerState() {\n");
+   for (CS = _layStateMap.begin(); CS != _layStateMap.end(); CS++)
+   {
+      LayStateList the_state = CS->second;
+      //TODO In order to save a layer status we need something like:
+      // locklayers({<all>}, false);
+      // hidelayers({<all>}, false);
+      // filllayers({<all>}, false);
+      // locklayers({<listed>}, true);
+      // hidelayers({<listed>}, true);
+      // filllayers({<listed>}, true);
+      // usinglayer(<layno>);
+      // savelaystatus(<name>);
+      // where <all>     - All defined layers
+      //       <listed>  - The LayStateList members which have the corresponding property
+      //                   set to true
+      // This method is not called at the moment!
+      fprintf(prop_file, "   savelaystatus(\"%s\");\n",
+               CS->first.c_str());
+   }
+   fprintf(prop_file, "}\n\n");
+
+}
+
 const layprop::LayerSettings*  layprop::DrawProperties::findLayerSettings(unsigned layno) const
 {
    LaySetList::const_iterator ilayset;
