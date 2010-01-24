@@ -317,6 +317,7 @@ namespace layprop {
          void                       saveColors(FILE*) const;
          void                       saveLayers(FILE*) const;
          void                       saveLines(FILE*) const;
+         void                       saveLayState(FILE*) const;
          void                       setCellMarksHidden(bool hide)    {_cellMarksHidden = hide;}
          void                       setTextMarksHidden(bool hide)    {_textMarksHidden = hide;}
          void                       setCellboxHidden(bool hide)      {_cellBoxHidden = hide;}
@@ -349,9 +350,11 @@ namespace layprop {
          void                       allFills(nameList&) const;
          void                       allLines(nameList&) const;
          unsigned                   getLayerNo(std::string name) const;
-      protected:
+      private:
          typedef std::deque<LayStateList>            LayStateHistory;
          typedef std::map<std::string, LayStateList> LayStateMap;
+         const LaySetList&          getCurSetList() const;
+         const LayerSettings*       findLayerSettings(unsigned) const;
          LaySetList                 _laySetDb;
          LaySetList                 _laySetDrc;
          ColorMap                   _layColors;
@@ -366,9 +369,6 @@ namespace layprop {
          bool                       _textBoxHidden;
          bool                       _adjustTextOrientation;
          console::ACTIVE_OP         _currentOp;    //
-         const LaySetList&          getCurSetList() const;
-         const LayerSettings*       findLayerSettings(unsigned) const;
-      private:
          bool                       _blockFill;
          laydata::CellRefStack*     _refStack;
          ctmstack                   _tranStack;
