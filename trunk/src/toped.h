@@ -111,8 +111,8 @@ namespace tui {
       wxMenu*                 selectMenu;
       wxMenu*                 settingsMenu;
       wxMenu*                 markerMenu;
-		wxMenu*						toolbarVertSizeMenu;
-		wxMenu*						toolbarHorSizeMenu;
+      wxMenu*                 toolbarVertSizeMenu;
+      wxMenu*                 toolbarHorSizeMenu;
       wxMenu*                 gdsMenu;
       wxMenu*                 helpMenu;
 

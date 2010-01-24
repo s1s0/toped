@@ -210,6 +210,7 @@ class TpdPost {
       static void layer_status(int, const word, const bool);
       static void layer_add(const std::string, const word);
       static void layer_default(const word, const word);
+      static void layers_state(const std::string& name, bool add);
       static void celltree_open(const std::string);
       static void celltree_highlight(const std::string);
       static void treeAddMember(const char*, const char*, int action = 0);

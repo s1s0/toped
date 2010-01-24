@@ -1805,7 +1805,7 @@ void browsers::LayerPanel::onCommand(wxCommandEvent& event)
          delete (layno);
          break;
       }
-      default: assert(false);
+      default: event.Skip();
    }
 }
 
@@ -1872,10 +1872,13 @@ wxString browsers::LayerPanel::getAllSelected()
 
 //====================================================================
 BEGIN_EVENT_TABLE(browsers::LayerBrowser, wxPanel)
-   EVT_BUTTON(tui::BT_LAYER_SHOW_ALL, browsers::LayerBrowser::onShowAll)
-   EVT_BUTTON(tui::BT_LAYER_HIDE_ALL, browsers::LayerBrowser::onHideAll)
-   EVT_BUTTON(tui::BT_LAYER_LOCK_ALL, browsers::LayerBrowser::onLockAll)
+   EVT_BUTTON(tui::BT_LAYER_SHOW_ALL  , browsers::LayerBrowser::onShowAll)
+   EVT_BUTTON(tui::BT_LAYER_HIDE_ALL  , browsers::LayerBrowser::onHideAll)
+   EVT_BUTTON(tui::BT_LAYER_LOCK_ALL  , browsers::LayerBrowser::onLockAll)
    EVT_BUTTON(tui::BT_LAYER_UNLOCK_ALL, browsers::LayerBrowser::onUnlockAll)
+   EVT_BUTTON(tui::BT_LAYER_SAVE_ST   , browsers::LayerBrowser::onSaveState)
+   EVT_BUTTON(tui::BT_LAYER_LOAD_ST   , browsers::LayerBrowser::onLoadState)
+   EVT_TECUSTOM_COMMAND(wxEVT_CMD_BROWSER, wxID_ANY, browsers::LayerBrowser::onCommand)
    EVT_SIZE(browsers::LayerBrowser::OnSize)
 END_EVENT_TABLE()
 //====================================================================
@@ -1888,18 +1891,26 @@ browsers::LayerBrowser::LayerBrowser(wxWindow* parent, wxWindowID id)
 {
    _thesizer = DEBUG_NEW wxBoxSizer(wxVERTICAL);
 
-   wxBoxSizer *sizer1 = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
-   sizer1->Add(DEBUG_NEW wxButton(this, tui::BT_LAYER_SHOW_ALL, wxT("Show All")), 1, wxTOP, 3);
-   sizer1->Add(DEBUG_NEW wxButton(this, tui::BT_LAYER_HIDE_ALL, wxT("Hide All")), 1, wxTOP, 3);
-   _thesizer->Add(sizer1, 0, wxTOP);
+   wxBoxSizer* sizer1 = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
+   sizer1->Add(DEBUG_NEW wxButton(this, tui::BT_LAYER_SHOW_ALL, wxT("Show All")), 1, wxTOP|wxEXPAND, 3);
+   sizer1->Add(DEBUG_NEW wxButton(this, tui::BT_LAYER_HIDE_ALL, wxT("Hide All")), 1, wxTOP|wxEXPAND, 3);
+   _thesizer->Add(sizer1, 0, wxTOP|wxEXPAND);
 
-   wxBoxSizer *sizer2 = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
+   wxBoxSizer* sizer2 = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
    sizer2->Add(DEBUG_NEW wxButton(this, tui::BT_LAYER_LOCK_ALL, wxT("Lock All")), 1, wxTOP, 3);
    sizer2->Add(DEBUG_NEW wxButton(this, tui::BT_LAYER_UNLOCK_ALL, wxT("Unlock All")), 1, wxTOP, 3);
-   _thesizer->Add(sizer2, 0, wxTOP);
+   _thesizer->Add(sizer2, 0, wxTOP|wxEXPAND);
 
    _layerPanel = DEBUG_NEW LayerPanel(this, tui::ID_PNL_LAYERS, wxDefaultPosition, wxDefaultSize, wxVSCROLL);
    _thesizer->Add(_layerPanel, 3, wxEXPAND|wxALL);
+
+   wxBoxSizer* sizer3t = DEBUG_NEW wxBoxSizer(wxVERTICAL);
+   wxBoxSizer* sizer3 = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
+   sizer3->Add(DEBUG_NEW wxButton(this, tui::BT_LAYER_SAVE_ST, wxT("Save State")), 1, wxTOP|wxEXPAND, 3);
+   sizer3->Add(DEBUG_NEW wxButton(this, tui::BT_LAYER_LOAD_ST, wxT("Load State")), 1, wxTOP|wxEXPAND, 3);
+   sizer3t->Add(sizer3, 1, wxTOP|wxEXPAND);
+   sizer3t->Add(DEBUG_NEW wxComboBox(this, tui::BT_LAYER_STATES), 0, wxTOP|wxEXPAND);
+   _thesizer->Add(sizer3t, 0, wxBOTTOM|wxEXPAND);
    SetSizerAndFit(_thesizer);
    _thesizer->SetSizeHints( this );
 }
@@ -1943,7 +1954,6 @@ void browsers::LayerBrowser::onLockAll(wxCommandEvent& WXUNUSED(event))
 
 }
 
-
 void browsers::LayerBrowser::onUnlockAll(wxCommandEvent& WXUNUSED(event))
 {
    wxString cmd;
@@ -1953,7 +1963,55 @@ void browsers::LayerBrowser::onUnlockAll(wxCommandEvent& WXUNUSED(event))
       cmd << wxT("locklayer(") << getAllSelected() << wxT(", false);");
       TpdPost::parseCommand(cmd);
    }
+}
 
+void browsers::LayerBrowser::onSaveState(wxCommandEvent& WXUNUSED(event))
+{
+   wxComboBox* layerState = static_cast<wxComboBox*>(FindWindow(tui::BT_LAYER_STATES));
+   wxString stateName = layerState->GetValue();
+   if (!stateName.IsEmpty())
+   {
+      wxString cmd;
+//      layerState->Append(stateName);
+      cmd << wxT("savelaystatus(\"") << stateName << wxT("\");");
+      TpdPost::parseCommand(cmd);
+   }
+}
+
+void browsers::LayerBrowser::onLoadState(wxCommandEvent& WXUNUSED(event))
+{
+   wxComboBox* layerState = static_cast<wxComboBox*>(FindWindow(tui::BT_LAYER_STATES));
+   wxString stateName = layerState->GetValue();
+   if (!stateName.IsEmpty())
+   {
+      wxString cmd;
+      cmd << wxT("restorelaystatus(\"") << stateName << wxT("\");");
+      TpdPost::parseCommand(cmd);
+   }
+}
+
+void browsers::LayerBrowser::onCommand(wxCommandEvent& event)
+{
+   int command = event.GetInt();
+   switch (command)
+   {
+      case tui::BT_LAYSTATE_SAVE:
+      {
+         wxString stateName = event.GetString();
+         wxComboBox* layerState = static_cast<wxComboBox*>(FindWindow(tui::BT_LAYER_STATES));
+         layerState->Append(stateName);
+         break;
+      }
+      case tui::BT_LAYSTATE_DELETE:
+      {
+         wxString stateName = event.GetString();
+         wxComboBox* layerState = static_cast<wxComboBox*>(FindWindow(tui::BT_LAYER_STATES));
+         layerState->Delete(layerState->FindString(stateName, true));
+         break;
+      }
+//      default: event.Skip();
+      default: assert(false);
+   }
 }
 
 wxString browsers::LayerBrowser::getAllSelected()

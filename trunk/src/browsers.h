@@ -313,6 +313,9 @@ namespace browsers
          void                 onHideAll(wxCommandEvent& WXUNUSED(event));
          void                 onLockAll(wxCommandEvent& WXUNUSED(event));
          void                 onUnlockAll(wxCommandEvent& WXUNUSED(event));
+         void                 onSaveState(wxCommandEvent& WXUNUSED(event));
+         void                 onLoadState(wxCommandEvent& WXUNUSED(event));
+         void                 onCommand(wxCommandEvent&);
          wxString             getAllSelected();
          LayerPanel*          _layerPanel;
          wxBoxSizer*          _thesizer;
