@@ -443,6 +443,18 @@ void TpdPost::layer_default(const word newlay, const word oldlay)
    wxPostEvent(_layBrowser, eventLAYER_DEF);
 }
 
+void TpdPost::layers_state(const std::string& name, bool add)
+{
+   assert(_layBrowser);
+   wxCommandEvent eventLAYERS_STATE(wxEVT_CMD_BROWSER);
+   eventLAYERS_STATE.SetString(wxString(name.c_str(), wxConvUTF8));
+   if (add)
+      eventLAYERS_STATE.SetInt(tui::BT_LAYSTATE_SAVE);
+   else
+      eventLAYERS_STATE.SetInt(tui::BT_LAYSTATE_DELETE);
+   wxPostEvent(_layBrowser, eventLAYERS_STATE);
+}
+
 void TpdPost::celltree_open(const std::string cname)
 {
    assert(_cllBrowser);

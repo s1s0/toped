@@ -911,6 +911,7 @@ void tellstdfunc::stdSAVELAYSTAT::undo() {
    if (PROPC->lockDrawProp(drawProp))
    {
       VERIFY(drawProp->deleteLaysetStatus(sname));
+      TpdPost::layers_state(sname, false);
    }
    PROPC->unlockDrawProp(drawProp);
 }
@@ -928,6 +929,10 @@ int tellstdfunc::stdSAVELAYSTAT::execute()
          std::stringstream info;
          info << "Layer set \"" << sname << "\" was redefined";
          tell_log(console::MT_INFO, info.str());
+      }
+      else
+      {
+         TpdPost::layers_state(sname, true);
       }
       LogFile << LogFile.getFN() << "(\""<< sname << "\");"; LogFile.flush();
    }
@@ -1063,6 +1068,7 @@ void tellstdfunc::stdDELLAYSTAT::undo() {
    if (PROPC->lockDrawProp(drawProp))
    {
       drawProp->saveLaysetStatus(sname, hidel, lockl, filll, activel);
+      TpdPost::layers_state(sname, true);
    }
    PROPC->unlockDrawProp(drawProp);
    // ... and finally - clean-up
@@ -1098,6 +1104,7 @@ int tellstdfunc::stdDELLAYSTAT::execute()
             undofilll->add(DEBUG_NEW telldata::ttint(*CL));
          UNDOPstack.push_front(undofilll);
          UNDOPstack.push_front(DEBUG_NEW telldata::ttint(activel));
+         TpdPost::layers_state(sname, false);
          LogFile << LogFile.getFN() << "(\""<< sname << "\");"; LogFile.flush();
       }
       else
