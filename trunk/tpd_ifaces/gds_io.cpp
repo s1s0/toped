@@ -641,7 +641,7 @@ void GDSin::GdsStructure::import(GdsInFile *cf, laydata::TdtCell* dst_cell,
                assert(strctName == _strctName); // @TODO - throw an exception HERE!
                break;
             case gds_PROPATTR:
-               tell_log(console::MT_WARNING, " GDSII record type 'PROPATTR' skipped");
+//               tell_log(console::MT_WARNING, " GDSII record type 'PROPATTR' skipped");
                cf->incGdsiiWarnings();
                break;
             case gds_STRCLASS:
@@ -705,11 +705,11 @@ GDSin::GdsStructure::GdsStructure(GdsInFile *cf, word bgnRecLength)
                skimNode(cf);
                break;
             case gds_PROPATTR:
-               tell_log(console::MT_WARNING, " GDSII record type 'PROPATTR' skipped");
+//               tell_log(console::MT_WARNING, " GDSII record type 'PROPATTR' skipped");
                cf->incGdsiiWarnings();
                break;
             case gds_STRCLASS:// skipped record !!!
-               tell_log(console::MT_WARNING, " GDSII record type 'STRCLASS' skipped");
+//               tell_log(console::MT_WARNING, " GDSII record type 'STRCLASS' skipped");
                cf->incGdsiiWarnings();// CADANCE internal use only
                break;
             case gds_STRNAME:
@@ -1012,7 +1012,7 @@ void GDSin::GdsStructure::skimNode(GdsInFile* cf)
             case gds_PLEX     :
             case gds_XY       : break;
             case gds_PROPATTR : cf->incGdsiiWarnings(); break;
-            case gds_PROPVALUE: tell_log(console::MT_WARNING, "GDS node - PROPVALUE record ignored");
+            case gds_PROPVALUE: //tell_log(console::MT_WARNING, "GDS node - PROPVALUE record ignored");
                cf->incGdsiiWarnings(); break;
             case gds_ENDEL://end of element, exit point
                updateContents(layer, singleType);
@@ -1050,7 +1050,7 @@ void GDSin::GdsStructure::importBox(GdsInFile* cf, laydata::TdtCell* dst_cell, c
                break;
             case gds_PROPATTR:
                cf->incGdsiiWarnings(); break;
-            case gds_PROPVALUE: tell_log(console::MT_WARNING, "GDS box - PROPVALUE record ignored");
+            case gds_PROPVALUE:// tell_log(console::MT_WARNING, "GDS box - PROPVALUE record ignored");
                cf->incGdsiiWarnings(); break;
             case gds_XY:
                if ( theLayMap.getTdtLay(tdtlaynum, layer, singleType) )
@@ -1098,6 +1098,8 @@ void GDSin::GdsStructure::importPoly(GdsInFile* cf, laydata::TdtCell* dst_cell, 
    int2b       layer;
    int2b       singleType;
    word        tdtlaynum;
+//   int2b       tmp ; //Dummy variable. Use for gds_PROPATTR
+//   std::string tmp2; //Dummy variable. Use for gds_PROPVALUE
    const GdsRecord* cr = cf->cRecord();
    do
    {//start reading
@@ -1113,9 +1115,11 @@ void GDSin::GdsStructure::importPoly(GdsInFile* cf, laydata::TdtCell* dst_cell, 
                break;
             case gds_DATATYPE: cr->retData(&singleType);
                break;
-            case gds_PROPATTR: tell_log(console::MT_WARNING,"GDS boundary - PROPATTR record ignored");
+            case gds_PROPATTR:// tell_log(console::MT_WARNING,"GDS boundary - PROPATTR record ignored");
+//               cr->retData(&tmp);
                cf->incGdsiiWarnings(); break;
-            case gds_PROPVALUE: tell_log(console::MT_WARNING,"GDS boundary - PROPVALUE record ignored");
+            case gds_PROPVALUE:// tell_log(console::MT_WARNING,"GDS boundary - PROPVALUE record ignored");
+//               cr->retData(&tmp2);
                cf->incGdsiiWarnings(); break;
             case gds_XY:
                if ( theLayMap.getTdtLay(tdtlaynum, layer, singleType) )
@@ -1188,9 +1192,9 @@ void GDSin::GdsStructure::importPath(GdsInFile* cf, laydata::TdtCell* dst_cell, 
                break;
             case gds_ENDEXTN:   cr->retData(&endextn);
                break;
-            case gds_PROPATTR: tell_log(console::MT_WARNING,"GDS path - PROPATTR record ignored");
+            case gds_PROPATTR:// tell_log(console::MT_WARNING,"GDS path - PROPATTR record ignored");
                cf->incGdsiiWarnings(); break;
-            case gds_PROPVALUE: tell_log(console::MT_WARNING,"GDS path - PROPVALUE record ignored");
+            case gds_PROPVALUE:// tell_log(console::MT_WARNING,"GDS path - PROPVALUE record ignored");
                cf->incGdsiiWarnings(); break;
             case gds_XY:
                if ( theLayMap.getTdtLay(tdtlaynum, layer, singleType) )
@@ -1285,9 +1289,9 @@ void GDSin::GdsStructure::importText(GdsInFile* cf, laydata::TdtCell* dst_cell, 
                break;
             case gds_WIDTH: cr->retData(&width);// seems not to be used
                break;
-            case gds_PROPATTR: tell_log(console::MT_WARNING,"GDS text - PROPATTR record ignored");
+            case gds_PROPATTR:// tell_log(console::MT_WARNING,"GDS text - PROPATTR record ignored");
                cf->incGdsiiWarnings(); break;
-            case gds_PROPVALUE: tell_log(console::MT_WARNING,"GDS text - PROPVALUE record ignored");
+            case gds_PROPVALUE:// tell_log(console::MT_WARNING,"GDS text - PROPVALUE record ignored");
                cf->incGdsiiWarnings(); break;
             case gds_PRESENTATION:
                cr->retData(&ba,0,16);
