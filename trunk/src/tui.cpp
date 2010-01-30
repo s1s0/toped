@@ -71,6 +71,36 @@ void  tui::sgSpinButton::OnSpin(wxSpinEvent&) {
 }
 
 //==============================================================================
+BEGIN_EVENT_TABLE(tui::sgSliderControl, wxSlider)
+   EVT_SCROLL(tui::sgSliderControl::OnScroll)
+   EVT_TEXT_ENTER(wxID_ANY, sgSliderControl::OnTextEnter)
+END_EVENT_TABLE()
+
+tui::sgSliderControl::sgSliderControl(wxWindow *parent, wxSizer* sizer,
+   const int min, const int max, const int init)
+  : wxSlider(parent, wxID_ANY, init, min, max)
+{
+   wxString ws;
+   ws.sprintf(wxT("%i"), init);
+   _wxText = DEBUG_NEW wxTextCtrl(parent, wxID_ANY, ws, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
+   sizer->Add(   this, 3, wxALL| wxALIGN_CENTER | wxEXPAND);
+   sizer->Add(_wxText, 0, wxALL| wxALIGN_CENTER | wxEXPAND);
+//   _wxText->SetValue(ws);
+}
+
+void  tui::sgSliderControl::OnScroll(wxScrollEvent&)
+{
+   wxString ws;
+   ws.sprintf(wxT("%i"), GetValue());
+   _wxText->SetValue(ws);
+}
+
+void tui::sgSliderControl::OnTextEnter(wxCommandEvent& WXUNUSED(event))
+{
+   wxString ws = _wxText->GetValue();
+}
+
+//==============================================================================
 tui::getSize::getSize(wxFrame *parent, wxWindowID id, const wxString &title,
       wxPoint pos, real step, byte precision, const float init  ) : wxDialog(parent, id, title,
       pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)
@@ -2366,4 +2396,60 @@ void tui::cadenceConvert::onConvert(wxCommandEvent& evt)
          ShowOutput(str, errors, _T("Errors"));
       }
    }
+}
+//=============================================================================
+tui::TopedPropertySheets::TopedPropertySheets(wxWindow* parent)
+{
+   Create(parent, wxID_ANY, wxT("Preferences"), wxDefaultPosition, wxDefaultSize,
+       wxDEFAULT_DIALOG_STYLE| (int)wxPlatform::IfNot(wxOS_WINDOWS_CE, wxRESIZE_BORDER));
+   CreateButtons(wxOK | wxCANCEL);
+   wxBookCtrlBase* notebook = GetBookCtrl();
+   _renderingSheet = DEBUG_NEW RenderingPSheet(notebook);
+   notebook->AddPage(_renderingSheet, wxT("Rendering"), true, -1);
+   LayoutDialog();
+}
+
+tui::TopedPropertySheets::RenderingPSheet::RenderingPSheet(wxWindow* parent) : wxPanel(parent, wxID_ANY)
+{
+   static const wxString rbItemState[] = {wxT("On"), wxT("Off")};
+   wxBoxSizer* topSizer = DEBUG_NEW wxBoxSizer(wxVERTICAL);
+   wxBoxSizer *topCellSizer = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Cells"));
+   wxBoxSizer *topTextSizer = DEBUG_NEW wxStaticBoxSizer(wxHORIZONTAL, this, wxT("Texts"));
+//   wxBoxSizer *cdovSizer = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
+   wxBoxSizer *cdovSizer = DEBUG_NEW wxStaticBoxSizer(wxHORIZONTAL, this, wxT("Depth of view limit"));
+   wxBoxSizer *imgSizer  = DEBUG_NEW wxStaticBoxSizer(wxHORIZONTAL, this, wxT("Image detail (sqare pixels)"));
+   wxBoxSizer *cellSizer = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
+
+   sgSliderControl* depthOfView = DEBUG_NEW sgSliderControl(this, cdovSizer, 0, 16, 16);
+   wxCheckBox* checkDepthOfView = DEBUG_NEW wxCheckBox(this, wxID_ANY , wxT(""));
+   cdovSizer->Add(checkDepthOfView, 0, wxALL| wxALIGN_CENTER | wxEXPAND);
+
+   wxCheckBox* cellOvlBox = DEBUG_NEW wxCheckBox(this, wxID_ANY, wxT("Overlapping box"));
+   wxCheckBox* cellMarks  = DEBUG_NEW wxCheckBox(this, wxID_ANY, wxT("Reference marks"));
+   cellSizer->Add(cellOvlBox, 1, wxALL | wxALIGN_CENTER | wxEXPAND);
+   cellSizer->Add(cellMarks , 1, wxALL | wxALIGN_CENTER | wxEXPAND);
+
+   topCellSizer->Add(cellSizer , 1, wxALL | wxALIGN_CENTER | wxEXPAND);
+   topCellSizer->Add(cdovSizer , 1, wxALL | wxALIGN_CENTER | wxEXPAND);
+
+   wxCheckBox* textOvlBox = DEBUG_NEW wxCheckBox(this, wxID_ANY, wxT("Overlapping box"));
+   wxCheckBox* textMarks  = DEBUG_NEW wxCheckBox(this, wxID_ANY, wxT("Reference marks"));
+   topTextSizer->Add(textOvlBox, 1, wxALL | wxALIGN_CENTER | wxEXPAND);
+   topTextSizer->Add(textMarks , 1, wxALL | wxALIGN_CENTER | wxEXPAND);
+
+   sgSliderControl* imageDetail = DEBUG_NEW sgSliderControl(this, imgSizer, 1, 100, 40);
+
+//   wxBoxSizer *topVisiSizer = DEBUG_NEW wxStaticBoxSizer(wxHORIZONTAL, this, wxT("Show data"));
+//   wxCheckBox* visibility = DEBUG_NEW wxCheckBox(this, wxID_ANY, wxT("Data type visibility"));
+//   wxCheckBox* textMarks  = DEBUG_NEW wxCheckBox(this, wxID_ANY, wxT("Reference marks"));
+//   topTextSizer->Add(textOvlBox, 1, wxALL | wxALIGN_CENTER | wxEXPAND);
+//   topTextSizer->Add(textMarks , 1, wxALL | wxALIGN_CENTER | wxEXPAND);
+
+   topSizer->Add(topCellSizer, 0, wxEXPAND);
+//   topSizer->Add(10,10,0);
+   topSizer->Add(topTextSizer, 0, wxEXPAND);
+   topSizer->Add(imgSizer    , 0, wxEXPAND);
+
+   SetSizer(topSizer);
+   topSizer->Fit(this);
 }

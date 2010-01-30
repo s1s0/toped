@@ -139,6 +139,7 @@ namespace tui
 
       TMSET_STEP          ,
       TMSET_AUTOPAN       ,
+      TMSET_ALLPROP       ,
       TMSET_ZEROCROSS     ,
       TMSET_GRIDDEF       ,
       TMSET_GRID0         ,

@@ -228,6 +228,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
 
    EVT_MENU( TMSET_STEP          , tui::TopedFrame::OnStep        )
    EVT_MENU( TMSET_AUTOPAN       , tui::TopedFrame::OnAutopan     )
+   EVT_MENU( TMSET_ALLPROP       , tui::TopedFrame::OnPropertySheet)
    EVT_MENU( TMSET_GRIDDEF       , tui::TopedFrame::OnGridDefine  )
    EVT_MENU( TMSET_GRID0         , tui::TopedFrame::OnGrid0       )
    EVT_MENU( TMSET_GRID1         , tui::TopedFrame::OnGrid1       )
@@ -574,6 +575,7 @@ void tui::TopedFrame::initMenuBar() {
    settingsMenu=DEBUG_NEW wxMenu();
    settingsMenu->Append         (TMSET_STEP     , wxT("Step")      , wxT("Select objects"));
    settingsMenu->AppendCheckItem(TMSET_AUTOPAN  , wxT("Auto Pan")  , wxT("Automatic window move"));
+   settingsMenu->Append         (TMSET_ALLPROP  , wxT("Properties"), wxT("Tool Properties"));
    settingsMenu->AppendSeparator();
    settingsMenu->Append         (TMSET_GRIDDEF  , wxT("Define grid"), wxT("Define/change the grid step"));
    settingsMenu->AppendCheckItem(TMSET_GRID0    , wxT("Grid 0")    , wxT("Draw/Hide Grid 0"));
@@ -723,7 +725,7 @@ void tui::TopedFrame::initView()
    //----------------------------------------------------------------------------
    _browsers = DEBUG_NEW browsers::browserTAB(this,ID_WIN_BROWSERS,
                                         wxDefaultPosition, wxDefaultSize, wxCLIP_CHILDREN);
-   _browsers->SetSize(wxSize(180, 1000));
+//   _browsers->SetSize(wxSize(180, 1000));
    _browsers->SetArtProvider(DEBUG_NEW wxAuiSimpleTabArt);
    //----------------------------------------------------------------------------
    //the log & lib windows
@@ -731,14 +733,13 @@ void tui::TopedFrame::initView()
    wxAuiNotebook* logpane = DEBUG_NEW wxAuiNotebook(this, ID_WIN_LOG_PANE,
          wxDefaultPosition, wxDefaultSize, wxNB_RIGHT|wxNO_BORDER);
          //wxAUI_NB_DEFAULT_STYLE |wxNB_RIGHT| wxAUI_NB_TAB_EXTERNAL_MOVE | wxNO_BORDER);
-   logpane->SetSize(wxSize(1000, 150));
-   logpane->SetArtProvider(DEBUG_NEW wxAuiSimpleTabArt);
+//   logpane->SetSize(wxSize(1000, 150));
 
    _cmdlog = DEBUG_NEW console::ted_log(logpane, ID_WIN_TXT_LOG);
    logpane->AddPage(_cmdlog, wxT("Log"));
    _cmdbrowser = DEBUG_NEW console::TELLFuncList(logpane);
    logpane->AddPage(_cmdbrowser, wxT("Lib"));
-
+   logpane->SetArtProvider(DEBUG_NEW wxAuiSimpleTabArt);
    //----------------------------------------------------------------------------
    // the openGL window - the canvas
    //----------------------------------------------------------------------------
@@ -1870,6 +1871,12 @@ void tui::TopedFrame::OnAutopan(wxCommandEvent& WXUNUSED(event)){
    wxString ost;
    ost << wxT("autopan(")<< (settingsMenu->IsChecked(TMSET_AUTOPAN) ? wxT("true") : wxT("false")) << wxT(");");
    _cmdline->parseCommand(ost);
+}
+
+void tui::TopedFrame::OnPropertySheet(wxCommandEvent& WXUNUSED(event))
+{
+   tui::TopedPropertySheets* propDialog = DEBUG_NEW tui::TopedPropertySheets(this);
+   propDialog->Show();
 }
 
 void tui::TopedFrame::OnZeroCross(wxCommandEvent& WXUNUSED(event)){
