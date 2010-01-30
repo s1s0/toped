@@ -182,13 +182,15 @@ namespace tui {
    };
 
    //--------------------------------------------------------------------------
-   class sgSliderControl : public wxSlider {
+   class sgSliderControl : public wxPanel {
    public:
-      sgSliderControl(wxWindow*, wxSizer*, const int, const int, const int) ;
+                        sgSliderControl(wxWindow*, const int, const int, const int);
+//      void              Enable(bool);
    private:
-      wxTextCtrl* _wxText;
-      void  OnScroll(wxScrollEvent&);
-      void  OnTextEnter(wxCommandEvent& WXUNUSED(event));
+      wxTextCtrl*       _text;
+      wxSlider*         _slider;
+      void              OnScroll(wxScrollEvent&);
+      void              OnTextEnter(wxCommandEvent& WXUNUSED(event));
       DECLARE_EVENT_TABLE();
    };
 
