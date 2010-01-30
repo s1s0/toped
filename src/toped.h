@@ -203,6 +203,7 @@ namespace tui {
       //
       void        OnStep(wxCommandEvent& WXUNUSED(event));
       void     OnAutopan(wxCommandEvent& WXUNUSED(event));
+      void OnPropertySheet(wxCommandEvent& WXUNUSED(event));
       void   OnZeroCross(wxCommandEvent& WXUNUSED(event));
       void       OnGrid0(wxCommandEvent& WXUNUSED(event));
       void       OnGrid1(wxCommandEvent& WXUNUSED(event));

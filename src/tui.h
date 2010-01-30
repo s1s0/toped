@@ -32,6 +32,7 @@
 
 #include <wx/wx.h>
 #include <wx/spinbutt.h>
+#include <wx/propdlg.h>
 #include "ttt.h"
 #include "viewprop.h"
 
@@ -177,6 +178,17 @@ namespace tui {
       float _step;
       int   _prec;
       void  OnSpin(wxSpinEvent&);
+      DECLARE_EVENT_TABLE();
+   };
+
+   //--------------------------------------------------------------------------
+   class sgSliderControl : public wxSlider {
+   public:
+      sgSliderControl(wxWindow*, wxSizer*, const int, const int, const int) ;
+   private:
+      wxTextCtrl* _wxText;
+      void  OnScroll(wxScrollEvent&);
+      void  OnTextEnter(wxCommandEvent& WXUNUSED(event));
       DECLARE_EVENT_TABLE();
    };
 
@@ -587,7 +599,7 @@ namespace tui {
       DECLARE_EVENT_TABLE();
    };
 
-      //--------------------------------------------------------------------------
+   //--------------------------------------------------------------------------
    class cadenceConvert : public wxDialog
    {
    public:
@@ -604,6 +616,16 @@ namespace tui {
       DECLARE_EVENT_TABLE();
    };
 
+   class TopedPropertySheets : public wxPropertySheetDialog {
+   public:
+      TopedPropertySheets(wxWindow*);
+   private:
+      class RenderingPSheet : public wxPanel {
+      public:
+         RenderingPSheet(wxWindow*);
+      };
+      RenderingPSheet*          _renderingSheet;
+   };
 }
 
 //Print output of external functions
