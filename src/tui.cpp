@@ -71,33 +71,46 @@ void  tui::sgSpinButton::OnSpin(wxSpinEvent&) {
 }
 
 //==============================================================================
-BEGIN_EVENT_TABLE(tui::sgSliderControl, wxSlider)
+BEGIN_EVENT_TABLE(tui::sgSliderControl, wxPanel)
    EVT_SCROLL(tui::sgSliderControl::OnScroll)
    EVT_TEXT_ENTER(wxID_ANY, sgSliderControl::OnTextEnter)
 END_EVENT_TABLE()
 
-tui::sgSliderControl::sgSliderControl(wxWindow *parent, wxSizer* sizer,
+tui::sgSliderControl::sgSliderControl(wxWindow *parent,
    const int min, const int max, const int init)
-  : wxSlider(parent, wxID_ANY, init, min, max)
+  : wxPanel(parent, wxID_ANY)
 {
+   wxBoxSizer *controlSizer = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
+   _slider = DEBUG_NEW wxSlider(this, wxID_ANY, init, min, max);
    wxString ws;
    ws.sprintf(wxT("%i"), init);
-   _wxText = DEBUG_NEW wxTextCtrl(parent, wxID_ANY, ws, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
-   sizer->Add(   this, 3, wxALL| wxALIGN_CENTER | wxEXPAND);
-   sizer->Add(_wxText, 0, wxALL| wxALIGN_CENTER | wxEXPAND);
-//   _wxText->SetValue(ws);
+   _text = DEBUG_NEW wxTextCtrl(this, wxID_ANY, ws, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER, wxTextValidator(wxFILTER_NUMERIC));
+   controlSizer->Add(_slider, 2, wxALL| wxALIGN_CENTER | wxEXPAND);
+   controlSizer->Add(  _text, 1, wxALL| wxALIGN_CENTER | wxEXPAND);
+   SetSizer(controlSizer);
+   controlSizer->Fit(this);
+//  _wxText->SetValue(ws);
 }
+
+//void  tui::sgSliderControl::Enable(bool enable)
+//{
+//   _slider->Enable(enable);
+//   _text->Enable(enable);
+//}
 
 void  tui::sgSliderControl::OnScroll(wxScrollEvent&)
 {
    wxString ws;
-   ws.sprintf(wxT("%i"), GetValue());
-   _wxText->SetValue(ws);
+   ws.sprintf(wxT("%i"), _slider->GetValue());
+   _text->SetValue(ws);
 }
 
 void tui::sgSliderControl::OnTextEnter(wxCommandEvent& WXUNUSED(event))
 {
-   wxString ws = _wxText->GetValue();
+   wxString ws = _text->GetValue();
+   long value;
+   ws.ToLong(&value);
+   _slider->SetValue(value);
 }
 
 //==============================================================================
@@ -2415,29 +2428,33 @@ tui::TopedPropertySheets::RenderingPSheet::RenderingPSheet(wxWindow* parent) : w
    wxBoxSizer* topSizer = DEBUG_NEW wxBoxSizer(wxVERTICAL);
    wxBoxSizer *topCellSizer = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Cells"));
    wxBoxSizer *topTextSizer = DEBUG_NEW wxStaticBoxSizer(wxHORIZONTAL, this, wxT("Texts"));
-//   wxBoxSizer *cdovSizer = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
-   wxBoxSizer *cdovSizer = DEBUG_NEW wxStaticBoxSizer(wxHORIZONTAL, this, wxT("Depth of view limit"));
-   wxBoxSizer *imgSizer  = DEBUG_NEW wxStaticBoxSizer(wxHORIZONTAL, this, wxT("Image detail (sqare pixels)"));
+   wxBoxSizer *cdovSizer = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Depth of view"));
+   wxBoxSizer *imgSizer  = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Image detail (square pixels)"));
    wxBoxSizer *cellSizer = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
 
-   sgSliderControl* depthOfView = DEBUG_NEW sgSliderControl(this, cdovSizer, 0, 16, 16);
-   wxCheckBox* checkDepthOfView = DEBUG_NEW wxCheckBox(this, wxID_ANY , wxT(""));
+   sgSliderControl* depthOfView = DEBUG_NEW sgSliderControl(this, 0, 16, 16);
+   wxCheckBox* checkDepthOfView = DEBUG_NEW wxCheckBox(this, wxID_ANY , wxT("unlimited"));
+   checkDepthOfView->SetValue(true);
+   depthOfView->Enable(false);
    cdovSizer->Add(checkDepthOfView, 0, wxALL| wxALIGN_CENTER | wxEXPAND);
+   cdovSizer->Add(     depthOfView, 0, wxALL| wxALIGN_CENTER | wxEXPAND);
 
    wxCheckBox* cellOvlBox = DEBUG_NEW wxCheckBox(this, wxID_ANY, wxT("Overlapping box"));
    wxCheckBox* cellMarks  = DEBUG_NEW wxCheckBox(this, wxID_ANY, wxT("Reference marks"));
    cellSizer->Add(cellOvlBox, 1, wxALL | wxALIGN_CENTER | wxEXPAND);
    cellSizer->Add(cellMarks , 1, wxALL | wxALIGN_CENTER | wxEXPAND);
 
-   topCellSizer->Add(cellSizer , 1, wxALL | wxALIGN_CENTER | wxEXPAND);
-   topCellSizer->Add(cdovSizer , 1, wxALL | wxALIGN_CENTER | wxEXPAND);
+   topCellSizer->Add(cellSizer , 0, wxALL | wxALIGN_CENTER | wxEXPAND);
+   topCellSizer->Add(10,10,0);
+   topCellSizer->Add(cdovSizer , 0, wxALL | wxALIGN_CENTER | wxEXPAND);
 
    wxCheckBox* textOvlBox = DEBUG_NEW wxCheckBox(this, wxID_ANY, wxT("Overlapping box"));
    wxCheckBox* textMarks  = DEBUG_NEW wxCheckBox(this, wxID_ANY, wxT("Reference marks"));
    topTextSizer->Add(textOvlBox, 1, wxALL | wxALIGN_CENTER | wxEXPAND);
    topTextSizer->Add(textMarks , 1, wxALL | wxALIGN_CENTER | wxEXPAND);
 
-   sgSliderControl* imageDetail = DEBUG_NEW sgSliderControl(this, imgSizer, 1, 100, 40);
+   sgSliderControl* imageDetail = DEBUG_NEW sgSliderControl(this, 1, 100, 40);
+   imgSizer->Add(imageDetail, 0, wxALL | wxALIGN_CENTER | wxEXPAND);
 
 //   wxBoxSizer *topVisiSizer = DEBUG_NEW wxStaticBoxSizer(wxHORIZONTAL, this, wxT("Show data"));
 //   wxCheckBox* visibility = DEBUG_NEW wxCheckBox(this, wxID_ANY, wxT("Data type visibility"));
@@ -2445,10 +2462,11 @@ tui::TopedPropertySheets::RenderingPSheet::RenderingPSheet(wxWindow* parent) : w
 //   topTextSizer->Add(textOvlBox, 1, wxALL | wxALIGN_CENTER | wxEXPAND);
 //   topTextSizer->Add(textMarks , 1, wxALL | wxALIGN_CENTER | wxEXPAND);
 
-   topSizer->Add(topCellSizer, 0, wxEXPAND);
+   topSizer->Add(imgSizer , 0, wxEXPAND | wxALL, 5);
 //   topSizer->Add(10,10,0);
-   topSizer->Add(topTextSizer, 0, wxEXPAND);
-   topSizer->Add(imgSizer    , 0, wxEXPAND);
+   topSizer->Add(topCellSizer, 0, wxEXPAND | wxALL, 5);
+//   topSizer->Add(10,10,0);
+   topSizer->Add(topTextSizer, 0, wxEXPAND | wxALL, 5);
 
    SetSizer(topSizer);
    topSizer->Fit(this);
