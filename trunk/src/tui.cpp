@@ -33,12 +33,16 @@
 #include <wx/colordlg.h>
 #include <wx/regex.h>
 #include <wx/filename.h>
+#include <wx/valgen.h>
 #include "tui.h"
+#include "tuidefs.h"
 #include "datacenter.h"
 #include "browsers.h"
+#include "ted_prompt.h"
 
-extern DataCenter*                DATC;
+extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
+extern console::ted_cmd*         Console;
 
 #if wxCHECK_VERSION(2, 8, 0)
 #define tpdfOPEN wxFD_OPEN
@@ -91,12 +95,6 @@ tui::sgSliderControl::sgSliderControl(wxWindow *parent,
    controlSizer->Fit(this);
 //  _wxText->SetValue(ws);
 }
-
-//void  tui::sgSliderControl::Enable(bool enable)
-//{
-//   _slider->Enable(enable);
-//   _text->Enable(enable);
-//}
 
 void  tui::sgSliderControl::OnScroll(wxScrollEvent&)
 {
@@ -2422,52 +2420,128 @@ tui::TopedPropertySheets::TopedPropertySheets(wxWindow* parent)
    LayoutDialog();
 }
 
+//=============================================================================
+BEGIN_EVENT_TABLE(tui::TopedPropertySheets::RenderingPSheet, wxPanel)
+    EVT_CHECKBOX(PDCELL_DOV       , tui::TopedPropertySheets::RenderingPSheet::OnPropCDOV  )
+    EVT_CHECKBOX(PDSET_CELLBOX    , tui::TopedPropertySheets::RenderingPSheet::OnCellBox   )
+    EVT_CHECKBOX(PDSET_CELLMARK   , tui::TopedPropertySheets::RenderingPSheet::OnCellMark  )
+    EVT_CHECKBOX(PDSET_TEXTBOX    , tui::TopedPropertySheets::RenderingPSheet::OnTextBox   )
+    EVT_CHECKBOX(PDSET_TEXTMARK   , tui::TopedPropertySheets::RenderingPSheet::OnTextMark  )
+END_EVENT_TABLE()
+
 tui::TopedPropertySheets::RenderingPSheet::RenderingPSheet(wxWindow* parent) : wxPanel(parent, wxID_ANY)
 {
-   static const wxString rbItemState[] = {wxT("On"), wxT("Off")};
    wxBoxSizer* topSizer = DEBUG_NEW wxBoxSizer(wxVERTICAL);
-   wxBoxSizer *topCellSizer = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Cells"));
-   wxBoxSizer *topTextSizer = DEBUG_NEW wxStaticBoxSizer(wxHORIZONTAL, this, wxT("Texts"));
-   wxBoxSizer *cdovSizer = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Depth of view"));
-   wxBoxSizer *imgSizer  = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Image detail (square pixels)"));
-   wxBoxSizer *cellSizer = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
-
-   sgSliderControl* depthOfView = DEBUG_NEW sgSliderControl(this, 0, 16, 16);
-   wxCheckBox* checkDepthOfView = DEBUG_NEW wxCheckBox(this, wxID_ANY , wxT("unlimited"));
-   checkDepthOfView->SetValue(true);
-   depthOfView->Enable(false);
-   cdovSizer->Add(checkDepthOfView, 0, wxALL| wxALIGN_CENTER | wxEXPAND);
-   cdovSizer->Add(     depthOfView, 0, wxALL| wxALIGN_CENTER | wxEXPAND);
-
-   wxCheckBox* cellOvlBox = DEBUG_NEW wxCheckBox(this, wxID_ANY, wxT("Overlapping box"));
-   wxCheckBox* cellMarks  = DEBUG_NEW wxCheckBox(this, wxID_ANY, wxT("Reference marks"));
-   cellSizer->Add(cellOvlBox, 1, wxALL | wxALIGN_CENTER | wxEXPAND);
-   cellSizer->Add(cellMarks , 1, wxALL | wxALIGN_CENTER | wxEXPAND);
-
-   topCellSizer->Add(cellSizer , 0, wxALL | wxALIGN_CENTER | wxEXPAND);
-   topCellSizer->Add(10,10,0);
-   topCellSizer->Add(cdovSizer , 0, wxALL | wxALIGN_CENTER | wxEXPAND);
-
-   wxCheckBox* textOvlBox = DEBUG_NEW wxCheckBox(this, wxID_ANY, wxT("Overlapping box"));
-   wxCheckBox* textMarks  = DEBUG_NEW wxCheckBox(this, wxID_ANY, wxT("Reference marks"));
-   topTextSizer->Add(textOvlBox, 1, wxALL | wxALIGN_CENTER | wxEXPAND);
-   topTextSizer->Add(textMarks , 1, wxALL | wxALIGN_CENTER | wxEXPAND);
-
-   sgSliderControl* imageDetail = DEBUG_NEW sgSliderControl(this, 1, 100, 40);
-   imgSizer->Add(imageDetail, 0, wxALL | wxALIGN_CENTER | wxEXPAND);
-
-//   wxBoxSizer *topVisiSizer = DEBUG_NEW wxStaticBoxSizer(wxHORIZONTAL, this, wxT("Show data"));
-//   wxCheckBox* visibility = DEBUG_NEW wxCheckBox(this, wxID_ANY, wxT("Data type visibility"));
-//   wxCheckBox* textMarks  = DEBUG_NEW wxCheckBox(this, wxID_ANY, wxT("Reference marks"));
-//   topTextSizer->Add(textOvlBox, 1, wxALL | wxALIGN_CENTER | wxEXPAND);
-//   topTextSizer->Add(textMarks , 1, wxALL | wxALIGN_CENTER | wxEXPAND);
-
-   topSizer->Add(imgSizer , 0, wxEXPAND | wxALL, 5);
-//   topSizer->Add(10,10,0);
-   topSizer->Add(topCellSizer, 0, wxEXPAND | wxALL, 5);
-//   topSizer->Add(10,10,0);
+      // Image details (Quality)
+      wxBoxSizer *imgSizer  = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Image detail (square pixels)"));
+         sgSliderControl* imageDetail = DEBUG_NEW sgSliderControl(this, 1, 100, 40);
+      imgSizer->Add(imageDetail, 0, wxALL | wxALIGN_CENTER | wxEXPAND);
+      // Cell related rendering properties
+      wxBoxSizer *topCellSizer = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Cells"));
+         // Cell Bounding box and reference marks
+         wxBoxSizer *cellSizer = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
+            wxCheckBox* cellOvlBox = DEBUG_NEW wxCheckBox(this, PDSET_CELLBOX , wxT("Overlapping box"));
+            wxCheckBox* cellMarks  = DEBUG_NEW wxCheckBox(this, PDSET_CELLMARK, wxT("Reference marks"));
+         cellSizer->Add(cellOvlBox, 1, wxALL | wxALIGN_CENTER | wxEXPAND);
+         cellSizer->Add(cellMarks , 1, wxALL | wxALIGN_CENTER | wxEXPAND);
+         // Cell Depth of view
+         wxBoxSizer *cdovSizer = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Depth of view"));
+         _cbDepthOfViewLimit = DEBUG_NEW wxCheckBox(this, PDCELL_DOV , wxT("unlimited"));
+         _cbDepthOfViewLimit->SetValue(true);
+         _cellDepthOfView = DEBUG_NEW sgSliderControl(this, 0, 16, 16);
+         _cellDepthOfView->Enable(false);
+         cdovSizer->Add(_cbDepthOfViewLimit, 0, wxALL| wxALIGN_CENTER | wxEXPAND);
+         cdovSizer->Add(   _cellDepthOfView, 0, wxALL| wxALIGN_CENTER | wxEXPAND);
+      // Pack all cell related properties
+      topCellSizer->Add(cellSizer , 0, wxALL | wxALIGN_CENTER | wxEXPAND);
+      topCellSizer->Add(10,10,0);
+      topCellSizer->Add(cdovSizer , 0, wxALL | wxALIGN_CENTER | wxEXPAND);
+      // Text related rendering properties
+      wxBoxSizer *topTextSizer = DEBUG_NEW wxStaticBoxSizer(wxHORIZONTAL, this, wxT("Texts"));
+         wxCheckBox* textOvlBox = DEBUG_NEW wxCheckBox(this, PDSET_TEXTBOX , wxT("Overlapping box"));
+         wxCheckBox* textMarks  = DEBUG_NEW wxCheckBox(this, PDSET_TEXTMARK, wxT("Reference marks"));
+      topTextSizer->Add(textOvlBox, 1, wxALL | wxALIGN_CENTER | wxEXPAND);
+      topTextSizer->Add(textMarks , 1, wxALL | wxALIGN_CENTER | wxEXPAND);
+   // Pack everything
+   topSizer->Add(   imgSizer , 0, wxEXPAND | wxALL, 5);//   topSizer->Add(10,10,0);
+   topSizer->Add(topCellSizer, 0, wxEXPAND | wxALL, 5);//   topSizer->Add(10,10,0);
    topSizer->Add(topTextSizer, 0, wxEXPAND | wxALL, 5);
 
    SetSizer(topSizer);
    topSizer->Fit(this);
+}
+
+void tui::TopedPropertySheets::RenderingPSheet::OnPropCDOV(wxCommandEvent& cmdevent)
+{
+   _cellDepthOfView->Enable(0 == cmdevent.GetInt());
+   _cellDepthOfView->Refresh();
+}
+
+void tui::TopedPropertySheets::RenderingPSheet::OnCellBox (wxCommandEvent& cmdEvent)
+{
+   wxString ost;
+   ost << wxT("hidecellbox(") << (cmdEvent.GetInt() ? wxT("false") : wxT("true")) << wxT(");");
+   Console->parseCommand(ost);
+}
+
+void tui::TopedPropertySheets::RenderingPSheet::OnCellMark(wxCommandEvent& cmdEvent)
+{
+   wxString ost;
+   ost << wxT("hidecellmarks(") << (cmdEvent.GetInt() ? wxT("false") : wxT("true")) << wxT(");");
+   Console->parseCommand(ost);
+}
+
+void tui::TopedPropertySheets::RenderingPSheet::OnTextBox (wxCommandEvent& cmdEvent)
+{
+   wxString ost;
+   ost << wxT("hidetextbox(") << (cmdEvent.GetInt() ? wxT("false") : wxT("true")) << wxT(");");
+   Console->parseCommand(ost);
+}
+
+void tui::TopedPropertySheets::RenderingPSheet::OnTextMark(wxCommandEvent& cmdEvent)
+{
+   wxString ost;
+   ost << wxT("hidetextmarks(") << (cmdEvent.GetInt() ? wxT("false") : wxT("true")) << wxT(");");
+   Console->parseCommand(ost);
+}
+
+void tui::TopedPropertySheets::RenderingPSheet::update(int cmdId)
+{
+   wxWindow* targetControl;
+   switch (cmdId)
+   {
+      case STS_CELLMARK_ON    :
+         targetControl = FindWindow(PDSET_CELLMARK);
+         static_cast<wxCheckBox*>(targetControl)->SetValue(true );
+         break;
+      case STS_CELLMARK_OFF   :
+         targetControl = FindWindow(PDSET_CELLMARK);
+         static_cast<wxCheckBox*>(targetControl)->SetValue(false);
+         break;
+      case STS_CELLBOX_ON     :
+         targetControl = FindWindow(PDSET_CELLBOX );
+         static_cast<wxCheckBox*>(targetControl)->SetValue(true );
+         break;
+      case STS_CELLBOX_OFF    :
+         targetControl = FindWindow(PDSET_CELLBOX );
+         static_cast<wxCheckBox*>(targetControl)->SetValue(false);
+         break;
+      case STS_TEXTMARK_ON    :
+         targetControl = FindWindow(PDSET_TEXTMARK);
+         static_cast<wxCheckBox*>(targetControl)->SetValue(true );
+         break;
+      case STS_TEXTMARK_OFF   :
+         targetControl = FindWindow(PDSET_TEXTMARK);
+         static_cast<wxCheckBox*>(targetControl)->SetValue(false);
+         break;
+      case STS_TEXTBOX_ON     :
+         targetControl = FindWindow(PDSET_TEXTBOX );
+         static_cast<wxCheckBox*>(targetControl)->SetValue(true );
+         break;
+      case STS_TEXTBOX_OFF    :
+         targetControl = FindWindow(PDSET_TEXTBOX );
+         static_cast<wxCheckBox*>(targetControl)->SetValue(false);
+         break;
+      default: assert(false);
+   }
 }

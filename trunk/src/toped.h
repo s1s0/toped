@@ -100,6 +100,7 @@ namespace tui {
       ResourceCenter*         _resourceCenter;
       LayoutCanvas*           _canvas;
       wxToolBar*              _status;
+      tui::TopedPropertySheets* _propDialog;
       wxAuiManager            _winManager;
       //Menu stuff
       wxMenuBar*              menuBar;
@@ -209,10 +210,6 @@ namespace tui {
       void       OnGrid1(wxCommandEvent& WXUNUSED(event));
       void       OnGrid2(wxCommandEvent& WXUNUSED(event));
       void  OnLongCursor(wxCommandEvent& WXUNUSED(event));
-      void    OnCellMark(wxCommandEvent& WXUNUSED(event));
-      void     OnCellBox(wxCommandEvent& WXUNUSED(event));
-      void    OnTextMark(wxCommandEvent& WXUNUSED(event));
-      void     OnTextBox(wxCommandEvent& WXUNUSED(event));
       void     OnMarker0(wxCommandEvent& WXUNUSED(event));
       void    OnMarker45(wxCommandEvent& WXUNUSED(event));
       void    OnMarker90(wxCommandEvent& WXUNUSED(event));

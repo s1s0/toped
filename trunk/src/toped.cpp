@@ -234,10 +234,6 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMSET_GRID1         , tui::TopedFrame::OnGrid1       )
    EVT_MENU( TMSET_GRID2         , tui::TopedFrame::OnGrid2       )
    EVT_MENU( TMSET_ZEROCROSS     , tui::TopedFrame::OnZeroCross   )
-   EVT_MENU( TMSET_CELLMARK      , tui::TopedFrame::OnCellMark    )
-   EVT_MENU( TMSET_TEXTMARK      , tui::TopedFrame::OnTextMark    )
-   EVT_MENU( TMSET_CELLBOX       , tui::TopedFrame::OnCellBox     )
-   EVT_MENU( TMSET_TEXTBOX       , tui::TopedFrame::OnTextBox     )
 
    EVT_MENU( TMSET_MARKER0       , tui::TopedFrame::OnMarker0     )
    EVT_MENU( TMSET_MARKER45      , tui::TopedFrame::OnMarker45    )
@@ -302,8 +298,7 @@ tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos,
    initMenuBar();
    wxToolTip::Enable(true);
    wxToolTip::SetDelay(3000);
-
-
+   _propDialog = DEBUG_NEW tui::TopedPropertySheets(this);
 }
 
 void tui::TopedFrame::OnClose(wxCloseEvent& event)
@@ -340,6 +335,7 @@ tui::TopedFrame::~TopedFrame() {
 //   delete _GLstatus;
 //   delete _browsers;
     _winManager.UnInit();
+   delete _propDialog;
    delete _canvas;
    delete _resourceCenter;
 //   delete _toped_status;
@@ -583,10 +579,6 @@ void tui::TopedFrame::initMenuBar() {
    settingsMenu->AppendCheckItem(TMSET_GRID2    , wxT("Grid 2")    , wxT("Draw/Hide Grid 2"));
    settingsMenu->AppendSeparator();
    settingsMenu->AppendCheckItem(TMSET_ZEROCROSS, wxT("Zero Cross"), wxT("Draw/Hide Zero Cross mark"));
-   settingsMenu->AppendCheckItem(TMSET_CELLMARK , wxT("Cell marks"), wxT("Draw/Hide Cell marks"));
-   settingsMenu->AppendCheckItem(TMSET_TEXTMARK , wxT("Text marks"), wxT("Draw/Hide Text marks"));
-   settingsMenu->AppendCheckItem(TMSET_CELLBOX  , wxT("Cell box")  , wxT("Draw/Hide Cell overlapping box"));
-   settingsMenu->AppendCheckItem(TMSET_TEXTBOX  , wxT("Text box")  , wxT("Draw/Hide Text overlapping box"));
    settingsMenu->AppendSeparator();
    settingsMenu->Append         (TMSET_MARKER   , wxT("Marker") , markerMenu , wxT("Define marker movement"));
    settingsMenu->AppendCheckItem(TMSET_CURLONG  , wxT("Long cursor")  , wxT("Stretch the cursor cross"));
@@ -1776,13 +1768,6 @@ void tui::TopedFrame::OnGrid2(wxCommandEvent& WXUNUSED(event)){
    _cmdline->parseCommand(ost);
 }
 
-void tui::TopedFrame::OnCellMark(wxCommandEvent& WXUNUSED(event)){
-  wxString ost;
-  ost << wxT("hidecellmarks(") << (settingsMenu->IsChecked(TMSET_CELLMARK) ? wxT("false") : wxT("true")) <<
-  wxT(");");
-  _cmdline->parseCommand(ost);
-}
-
 void tui::TopedFrame::OnLongCursor(wxCommandEvent& WXUNUSED(event)){
   wxString ost;
   ost << wxT("longcursor(") << (settingsMenu->IsChecked(TMSET_CURLONG) ? wxT("true") : wxT("false")) <<
@@ -1846,27 +1831,6 @@ void tui::TopedFrame::OnVToolBarSize48(wxCommandEvent& WXUNUSED(event))
    _cmdline->parseCommand(ost);
 }
 
-void tui::TopedFrame::OnCellBox(wxCommandEvent& WXUNUSED(event)){
-  wxString ost;
-  ost << wxT("hidecellbox(") << (settingsMenu->IsChecked(TMSET_CELLBOX) ? wxT("false") : wxT("true")) <<
-  wxT(");");
-  _cmdline->parseCommand(ost);
-}
-
-void tui::TopedFrame::OnTextMark(wxCommandEvent& WXUNUSED(event)){
-  wxString ost;
-  ost << wxT("hidetextmarks(") << (settingsMenu->IsChecked(TMSET_TEXTMARK) ? wxT("false") : wxT("true")) <<
-  wxT(");");
-  _cmdline->parseCommand(ost);
-}
-
-void tui::TopedFrame::OnTextBox(wxCommandEvent& WXUNUSED(event)){
-  wxString ost;
-  ost << wxT("hidetextbox(") << (settingsMenu->IsChecked(TMSET_TEXTBOX) ? wxT("false") : wxT("true")) <<
-  wxT(");");
-  _cmdline->parseCommand(ost);
-}
-
 void tui::TopedFrame::OnAutopan(wxCommandEvent& WXUNUSED(event)){
    wxString ost;
    ost << wxT("autopan(")<< (settingsMenu->IsChecked(TMSET_AUTOPAN) ? wxT("true") : wxT("false")) << wxT(");");
@@ -1875,8 +1839,7 @@ void tui::TopedFrame::OnAutopan(wxCommandEvent& WXUNUSED(event)){
 
 void tui::TopedFrame::OnPropertySheet(wxCommandEvent& WXUNUSED(event))
 {
-   tui::TopedPropertySheets* propDialog = DEBUG_NEW tui::TopedPropertySheets(this);
-   propDialog->Show();
+   _propDialog->Show();
 }
 
 void tui::TopedFrame::OnZeroCross(wxCommandEvent& WXUNUSED(event)){
@@ -2091,14 +2054,6 @@ void tui::TopedFrame::OnUpdateSettingsMenu(wxCommandEvent& evt)
       case STS_GRID1_OFF      : settingsMenu->Check(TMSET_GRID1       , false);break;
       case STS_GRID2_ON       : settingsMenu->Check(TMSET_GRID2       , true );break;
       case STS_GRID2_OFF      : settingsMenu->Check(TMSET_GRID2       , false);break;
-      case STS_CELLMARK_ON    : settingsMenu->Check(TMSET_CELLMARK    , true );break;
-      case STS_CELLMARK_OFF   : settingsMenu->Check(TMSET_CELLMARK    , false);break;
-      case STS_CELLBOX_ON     : settingsMenu->Check(TMSET_CELLBOX     , true );break;
-      case STS_CELLBOX_OFF    : settingsMenu->Check(TMSET_CELLBOX     , false);break;
-      case STS_TEXTMARK_ON    : settingsMenu->Check(TMSET_TEXTMARK    , true );break;
-      case STS_TEXTMARK_OFF   : settingsMenu->Check(TMSET_TEXTMARK    , false);break;
-      case STS_TEXTBOX_ON     : settingsMenu->Check(TMSET_TEXTBOX     , true );break;
-      case STS_TEXTBOX_OFF    : settingsMenu->Check(TMSET_TEXTBOX     , false);break;
       case STS_AUTOPAN_ON     : settingsMenu->Check(TMSET_AUTOPAN     , true );break;
       case STS_AUTOPAN_OFF    : settingsMenu->Check(TMSET_AUTOPAN     , false);break;
       case STS_ZEROCROSS_ON   : settingsMenu->Check(TMSET_ZEROCROSS   , true );break;
@@ -2116,8 +2071,15 @@ void tui::TopedFrame::OnUpdateSettingsMenu(wxCommandEvent& evt)
       case TMSET_VTOOLSIZE24  : settingsMenu->Check(TMSET_VTOOLSIZE24 , true );break;
       case TMSET_VTOOLSIZE32  : settingsMenu->Check(TMSET_VTOOLSIZE32 , true );break;
       case TMSET_VTOOLSIZE48  : settingsMenu->Check(TMSET_VTOOLSIZE48 , true );break;
-
-                    default: assert(false);
+      case STS_CELLMARK_ON    :
+      case STS_CELLMARK_OFF   :
+      case STS_CELLBOX_ON     :
+      case STS_CELLBOX_OFF    :
+      case STS_TEXTMARK_ON    :
+      case STS_TEXTMARK_OFF   :
+      case STS_TEXTBOX_ON     :
+      case STS_TEXTBOX_OFF    : _propDialog->updateRenderSheet(evt.GetInt());break;
+      default: assert(false);
    }
 };
 

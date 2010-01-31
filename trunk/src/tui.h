@@ -83,6 +83,13 @@ namespace tui {
       ICON_SIZE_48x48_V = 48
    };
 
+   typedef enum {
+      PDSET_CELLMARK      ,
+      PDSET_CELLBOX       ,
+      PDSET_TEXTMARK      ,
+      PDSET_TEXTBOX       ,
+      PDCELL_DOV
+   } RenderPropertyDialogID;
    //--------------------------------------------------------------------------
    class getSize : public wxDialog {
    public:
@@ -185,7 +192,6 @@ namespace tui {
    class sgSliderControl : public wxPanel {
    public:
                         sgSliderControl(wxWindow*, const int, const int, const int);
-//      void              Enable(bool);
    private:
       wxTextCtrl*       _text;
       wxSlider*         _slider;
@@ -620,11 +626,22 @@ namespace tui {
 
    class TopedPropertySheets : public wxPropertySheetDialog {
    public:
-      TopedPropertySheets(wxWindow*);
+                                TopedPropertySheets(wxWindow*);
+      void                      updateRenderSheet(int cmdId) {_renderingSheet->update(cmdId);}
    private:
       class RenderingPSheet : public wxPanel {
       public:
-         RenderingPSheet(wxWindow*);
+                                RenderingPSheet(wxWindow*);
+         void                   update(int);
+      private:
+         void                   OnPropCDOV(wxCommandEvent&);
+         void                   OnCellBox (wxCommandEvent&);
+         void                   OnCellMark(wxCommandEvent&);
+         void                   OnTextBox (wxCommandEvent&);
+         void                   OnTextMark(wxCommandEvent&);
+         wxCheckBox*            _cbDepthOfViewLimit;
+         sgSliderControl*       _cellDepthOfView;
+         DECLARE_EVENT_TABLE();
       };
       RenderingPSheet*          _renderingSheet;
    };
