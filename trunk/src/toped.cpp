@@ -2078,7 +2078,8 @@ void tui::TopedFrame::OnUpdateSettingsMenu(wxCommandEvent& evt)
       case STS_TEXTMARK_ON    :
       case STS_TEXTMARK_OFF   :
       case STS_TEXTBOX_ON     :
-      case STS_TEXTBOX_OFF    : _propDialog->updateRenderSheet(evt.GetInt());break;
+      case STS_TEXTBOX_OFF    :
+      case STS_TEXTORI        : _propDialog->updateRenderSheet(evt.GetInt());break;
       default: assert(false);
    }
 };

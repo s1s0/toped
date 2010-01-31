@@ -229,6 +229,7 @@ namespace tui
       STS_TEXTMARK_OFF    ,
       STS_TEXTBOX_ON      ,
       STS_TEXTBOX_OFF     ,
+      STS_TEXTORI         ,
       STS_AUTOPAN_ON      ,
       STS_AUTOPAN_OFF     ,
       STS_ZEROCROSS_ON    ,

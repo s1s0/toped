@@ -33,10 +33,12 @@
 #include "datacenter.h"
 #include "tuidefs.h"
 #include "viewprop.h"
+#include "ted_prompt.h"
 
 extern parsercmd::cmdBLOCK*      CMDBlock;
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
+extern console::ted_cmd*         Console;
 extern wxWindow*                 TopedCanvasW;
 extern wxFrame*                  TopedMainW;
 extern console::toped_logfile    LogFile;
@@ -1341,6 +1343,13 @@ void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
             drawProp->setAdjustTextOrientation(val);
          }
          PROPC->unlockDrawProp(drawProp);
+         // send an event to update the property dialog
+         wxCommandEvent eventTextOri(wxEVT_SETINGSMENU);
+         eventTextOri.SetInt(tui::STS_TEXTORI);
+         eventTextOri.SetId(val?1:0);
+         wxPostEvent(TopedMainW, eventTextOri);
+         // Request a redraw at the thread exit
+         Console->set_canvas_invalid(true);
       }
       else
       {
