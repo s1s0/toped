@@ -2411,7 +2411,7 @@ void tui::cadenceConvert::onConvert(wxCommandEvent& evt)
 //=============================================================================
 tui::TopedPropertySheets::TopedPropertySheets(wxWindow* parent)
 {
-   Create(parent, wxID_ANY, wxT("Preferences"), wxDefaultPosition, wxDefaultSize,
+   Create(parent, wxID_ANY, wxT("Properties"), wxDefaultPosition, wxDefaultSize,
        wxDEFAULT_DIALOG_STYLE| (int)wxPlatform::IfNot(wxOS_WINDOWS_CE, wxRESIZE_BORDER));
    CreateButtons(wxOK | wxCANCEL);
    wxBookCtrlBase* notebook = GetBookCtrl();
@@ -2427,6 +2427,7 @@ BEGIN_EVENT_TABLE(tui::TopedPropertySheets::RenderingPSheet, wxPanel)
     EVT_CHECKBOX(PDSET_CELLMARK   , tui::TopedPropertySheets::RenderingPSheet::OnCellMark  )
     EVT_CHECKBOX(PDSET_TEXTBOX    , tui::TopedPropertySheets::RenderingPSheet::OnTextBox   )
     EVT_CHECKBOX(PDSET_TEXTMARK   , tui::TopedPropertySheets::RenderingPSheet::OnTextMark  )
+    EVT_CHECKBOX(PDSET_TEXTORI    , tui::TopedPropertySheets::RenderingPSheet::OnTextOri   )
 END_EVENT_TABLE()
 
 tui::TopedPropertySheets::RenderingPSheet::RenderingPSheet(wxWindow* parent) : wxPanel(parent, wxID_ANY)
@@ -2457,11 +2458,17 @@ tui::TopedPropertySheets::RenderingPSheet::RenderingPSheet(wxWindow* parent) : w
       topCellSizer->Add(10,10,0);
       topCellSizer->Add(cdovSizer , 0, wxALL | wxALIGN_CENTER | wxEXPAND);
       // Text related rendering properties
-      wxBoxSizer *topTextSizer = DEBUG_NEW wxStaticBoxSizer(wxHORIZONTAL, this, wxT("Texts"));
-         wxCheckBox* textOvlBox = DEBUG_NEW wxCheckBox(this, PDSET_TEXTBOX , wxT("Overlapping box"));
-         wxCheckBox* textMarks  = DEBUG_NEW wxCheckBox(this, PDSET_TEXTMARK, wxT("Reference marks"));
-      topTextSizer->Add(textOvlBox, 1, wxALL | wxALIGN_CENTER | wxEXPAND);
-      topTextSizer->Add(textMarks , 1, wxALL | wxALIGN_CENTER | wxEXPAND);
+      wxBoxSizer *topTextSizer = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Texts"));
+         wxBoxSizer *textSizer = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
+            wxCheckBox* textOvlBox = DEBUG_NEW wxCheckBox(this, PDSET_TEXTBOX , wxT("Overlapping box"));
+            wxCheckBox* textMarks  = DEBUG_NEW wxCheckBox(this, PDSET_TEXTMARK, wxT("Reference marks"));
+         textSizer->Add(textOvlBox, 1, wxALL | wxALIGN_CENTER | wxEXPAND);
+         textSizer->Add(textMarks , 1, wxALL | wxALIGN_CENTER | wxEXPAND);
+         //
+         wxCheckBox* textOrien  = DEBUG_NEW wxCheckBox(this, PDSET_TEXTORI, wxT("Adjust orientation"));
+      topTextSizer->Add(textSizer, 0, wxALL | wxALIGN_CENTER | wxEXPAND);
+      topTextSizer->Add(textOrien, 1, wxALL | wxALIGN_LEFT             );
+
    // Pack everything
    topSizer->Add(   imgSizer , 0, wxEXPAND | wxALL, 5);//   topSizer->Add(10,10,0);
    topSizer->Add(topCellSizer, 0, wxEXPAND | wxALL, 5);//   topSizer->Add(10,10,0);
@@ -2505,6 +2512,15 @@ void tui::TopedPropertySheets::RenderingPSheet::OnTextMark(wxCommandEvent& cmdEv
    Console->parseCommand(ost);
 }
 
+void tui::TopedPropertySheets::RenderingPSheet::OnTextOri(wxCommandEvent& cmdEvent)
+{
+   wxString ost;
+   ost << wxT("setparams({\"ADJUST_TEXT_ORIENTATION\", \"")
+       << (cmdEvent.GetInt() ? wxT("true") : wxT("false"))
+       << wxT("\"});");
+   Console->parseCommand(ost);
+}
+
 void tui::TopedPropertySheets::RenderingPSheet::update(int cmdId)
 {
    wxWindow* targetControl;
@@ -2541,6 +2557,9 @@ void tui::TopedPropertySheets::RenderingPSheet::update(int cmdId)
       case STS_TEXTBOX_OFF    :
          targetControl = FindWindow(PDSET_TEXTBOX );
          static_cast<wxCheckBox*>(targetControl)->SetValue(false);
+         break;
+      case STS_TEXTORI        :
+            //TODO
          break;
       default: assert(false);
    }

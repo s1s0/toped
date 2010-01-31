@@ -88,6 +88,7 @@ namespace tui {
       PDSET_CELLBOX       ,
       PDSET_TEXTMARK      ,
       PDSET_TEXTBOX       ,
+      PDSET_TEXTORI       ,
       PDCELL_DOV
    } RenderPropertyDialogID;
    //--------------------------------------------------------------------------
@@ -639,6 +640,7 @@ namespace tui {
          void                   OnCellMark(wxCommandEvent&);
          void                   OnTextBox (wxCommandEvent&);
          void                   OnTextMark(wxCommandEvent&);
+         void                   OnTextOri (wxCommandEvent&);
          wxCheckBox*            _cbDepthOfViewLimit;
          sgSliderControl*       _cellDepthOfView;
          DECLARE_EVENT_TABLE();
