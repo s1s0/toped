@@ -286,14 +286,17 @@ void tellstdfunc::RefreshGL()
 }
 
 //=============================================================================
-void tellstdfunc::gridON(byte No, bool status) {
+void tellstdfunc::gridON(byte No, bool status)
+{
    wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
    status = PROPC->viewGrid(No, status);
-   switch (No) {
-      case 0: eventGRIDUPD.SetInt((status ? tui::STS_GRID0_ON : tui::STS_GRID0_OFF)); break;
-      case 1: eventGRIDUPD.SetInt((status ? tui::STS_GRID1_ON : tui::STS_GRID1_OFF)); break;
-      case 2: eventGRIDUPD.SetInt((status ? tui::STS_GRID2_ON : tui::STS_GRID2_OFF)); break;
+   switch (No)
+   {
+      case 0: eventGRIDUPD.SetId(tui::STS_GRID0); break;
+      case 1: eventGRIDUPD.SetId(tui::STS_GRID1); break;
+      case 2: eventGRIDUPD.SetId(tui::STS_GRID2); break;
       default: assert(false);
+      eventGRIDUPD.SetInt(status ? 1 : 0);
    }
    wxPostEvent(TopedCanvasW, eventGRIDUPD);
 }
