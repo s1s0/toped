@@ -177,7 +177,8 @@ int tellstdfunc::stdLONGCURSOR::execute()
    bool        longcur  = getBoolValue();
 
    wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
-   eventGRIDUPD.SetInt((longcur ? tui::STS_LONG_CURSOR : tui::STS_SHORT_CURSOR));
+   eventGRIDUPD.SetId(tui::STS_CURSOR);
+   eventGRIDUPD.SetInt((longcur ? 1 : 0));
    wxPostEvent(TopedMainW, eventGRIDUPD);
 
    wxCommandEvent eventCNVS(wxEVT_CANVAS_CURSOR);

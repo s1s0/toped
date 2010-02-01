@@ -628,12 +628,12 @@ namespace tui {
    class TopedPropertySheets : public wxPropertySheetDialog {
    public:
                                 TopedPropertySheets(wxWindow*);
-      void                      updateRenderSheet(int cmdId) {_renderingSheet->update(cmdId);}
+      void                      updateRenderSheet(wxCommandEvent& evt) {_renderingSheet->update(evt);}
    private:
       class RenderingPSheet : public wxPanel {
       public:
                                 RenderingPSheet(wxWindow*);
-         void                   update(int);
+         void                   update(wxCommandEvent& evt);
       private:
          void                   OnPropCDOV(wxCommandEvent&);
          void                   OnCellBox (wxCommandEvent&);

@@ -2521,45 +2521,30 @@ void tui::TopedPropertySheets::RenderingPSheet::OnTextOri(wxCommandEvent& cmdEve
    Console->parseCommand(ost);
 }
 
-void tui::TopedPropertySheets::RenderingPSheet::update(int cmdId)
+void tui::TopedPropertySheets::RenderingPSheet::update(wxCommandEvent& evt)
 {
    wxWindow* targetControl;
-   switch (cmdId)
+   switch (evt.GetId())
    {
-      case STS_CELLMARK_ON    :
-         targetControl = FindWindow(PDSET_CELLMARK);
-         static_cast<wxCheckBox*>(targetControl)->SetValue(true );
+      case STS_CELLMARK    :
+         targetControl = FindWindow(PDSET_CELLMARK);assert(targetControl);
+         static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt() );
          break;
-      case STS_CELLMARK_OFF   :
-         targetControl = FindWindow(PDSET_CELLMARK);
-         static_cast<wxCheckBox*>(targetControl)->SetValue(false);
+      case STS_CELLBOX     :
+         targetControl = FindWindow(PDSET_CELLBOX );assert(targetControl);
+         static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt() );
          break;
-      case STS_CELLBOX_ON     :
-         targetControl = FindWindow(PDSET_CELLBOX );
-         static_cast<wxCheckBox*>(targetControl)->SetValue(true );
+      case STS_TEXTMARK   :
+         targetControl = FindWindow(PDSET_TEXTMARK);assert(targetControl);
+         static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt());
          break;
-      case STS_CELLBOX_OFF    :
-         targetControl = FindWindow(PDSET_CELLBOX );
-         static_cast<wxCheckBox*>(targetControl)->SetValue(false);
+      case STS_TEXTBOX     :
+         targetControl = FindWindow(PDSET_TEXTBOX );assert(targetControl);
+         static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt());
          break;
-      case STS_TEXTMARK_ON    :
-         targetControl = FindWindow(PDSET_TEXTMARK);
-         static_cast<wxCheckBox*>(targetControl)->SetValue(true );
-         break;
-      case STS_TEXTMARK_OFF   :
-         targetControl = FindWindow(PDSET_TEXTMARK);
-         static_cast<wxCheckBox*>(targetControl)->SetValue(false);
-         break;
-      case STS_TEXTBOX_ON     :
-         targetControl = FindWindow(PDSET_TEXTBOX );
-         static_cast<wxCheckBox*>(targetControl)->SetValue(true );
-         break;
-      case STS_TEXTBOX_OFF    :
-         targetControl = FindWindow(PDSET_TEXTBOX );
-         static_cast<wxCheckBox*>(targetControl)->SetValue(false);
-         break;
-      case STS_TEXTORI        :
-            //TODO
+      case STS_TEXTORI     :
+         targetControl = FindWindow(PDSET_TEXTORI );assert(targetControl);
+         static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt());
          break;
       default: assert(false);
    }

@@ -446,7 +446,8 @@ void tellstdfunc::stdHIDECELLMARK::undo() {
    {
       drawProp->setCellMarksHidden(hide);
       wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
-      eventGRIDUPD.SetInt((hide ? tui::STS_CELLMARK_OFF : tui::STS_CELLMARK_ON));
+      eventGRIDUPD.SetId(tui::STS_CELLMARK);
+      eventGRIDUPD.SetInt(hide ? 0 : 1);
       wxPostEvent(TopedCanvasW, eventGRIDUPD);
       RefreshGL();
    }
@@ -462,7 +463,8 @@ int tellstdfunc::stdHIDECELLMARK::execute() {
       UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
       drawProp->setCellMarksHidden(hide);
       wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
-      eventGRIDUPD.SetInt((hide ? tui::STS_CELLMARK_OFF : tui::STS_CELLMARK_ON));
+      eventGRIDUPD.SetId(tui::STS_CELLMARK);
+      eventGRIDUPD.SetInt(hide ? 0 : 1);
       wxPostEvent(TopedCanvasW, eventGRIDUPD);
       LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
       RefreshGL();
@@ -490,7 +492,8 @@ void tellstdfunc::stdHIDETEXTMARK::undo() {
    {
       drawProp->setTextMarksHidden(hide);
       wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
-      eventGRIDUPD.SetInt((hide ? tui::STS_TEXTMARK_OFF : tui::STS_TEXTMARK_ON));
+      eventGRIDUPD.SetId(tui::STS_TEXTMARK);
+      eventGRIDUPD.SetInt((hide ? 0 : 1));
       wxPostEvent(TopedCanvasW, eventGRIDUPD);
       LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
       RefreshGL();
@@ -507,7 +510,8 @@ int tellstdfunc::stdHIDETEXTMARK::execute() {
       UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
       drawProp->setTextMarksHidden(hide);
       wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
-      eventGRIDUPD.SetInt((hide ? tui::STS_TEXTMARK_OFF : tui::STS_TEXTMARK_ON));
+      eventGRIDUPD.SetId(tui::STS_TEXTMARK);
+      eventGRIDUPD.SetInt((hide ? 0 : 1));
       wxPostEvent(TopedCanvasW, eventGRIDUPD);
       LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
       RefreshGL();
@@ -535,7 +539,8 @@ void tellstdfunc::stdHIDECELLBOND::undo() {
    {
       drawProp->setCellboxHidden(hide);
       wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
-      eventGRIDUPD.SetInt((hide ? tui::STS_CELLBOX_OFF : tui::STS_CELLBOX_ON));
+      eventGRIDUPD.SetId(tui::STS_CELLBOX);
+      eventGRIDUPD.SetInt(hide ? 0 : 1);
       wxPostEvent(TopedCanvasW, eventGRIDUPD);
       LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
       RefreshGL();
@@ -552,7 +557,8 @@ int tellstdfunc::stdHIDECELLBOND::execute() {
       UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
       drawProp->setCellboxHidden(hide);
       wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
-      eventGRIDUPD.SetInt((hide ? tui::STS_CELLBOX_OFF : tui::STS_CELLBOX_ON));
+      eventGRIDUPD.SetId(tui::STS_CELLBOX);
+      eventGRIDUPD.SetInt(hide ? 0 : 1);
       wxPostEvent(TopedCanvasW, eventGRIDUPD);
       LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
       RefreshGL();
@@ -579,7 +585,8 @@ void tellstdfunc::stdHIDETEXTBOND::undo() {
    {
       drawProp->setTextboxHidden(hide);
       wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
-      eventGRIDUPD.SetInt((hide ? tui::STS_TEXTBOX_OFF : tui::STS_TEXTBOX_ON));
+      eventGRIDUPD.SetId(tui::STS_TEXTBOX);
+      eventGRIDUPD.SetInt(hide ? 0 : 1);
       wxPostEvent(TopedCanvasW, eventGRIDUPD);
       LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
       RefreshGL();
@@ -596,7 +603,8 @@ int tellstdfunc::stdHIDETEXTBOND::execute() {
       UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
       drawProp->setTextboxHidden(hide);
       wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
-      eventGRIDUPD.SetInt((hide ? tui::STS_TEXTBOX_OFF : tui::STS_TEXTBOX_ON));
+      eventGRIDUPD.SetId(tui::STS_TEXTBOX);
+      eventGRIDUPD.SetInt(hide ? 0 : 1);
       wxPostEvent(TopedCanvasW, eventGRIDUPD);
       LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
       RefreshGL();
@@ -1201,7 +1209,8 @@ void tellstdfunc::stdAUTOPAN::undo() {
    bool autop = getBoolValue(UNDOPstack, true);
    PROPC->setAutoPan(autop);
    wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
-   eventGRIDUPD.SetInt(autop ? tui::STS_AUTOPAN_ON : tui::STS_AUTOPAN_OFF);
+   eventGRIDUPD.SetId(tui::STS_AUTOPAN);
+   eventGRIDUPD.SetInt(autop ? 1 : 0);
    wxPostEvent(TopedMainW, eventGRIDUPD);
 
 }
@@ -1214,7 +1223,8 @@ int tellstdfunc::stdAUTOPAN::execute() {
    bool autop    = getBoolValue();
    PROPC->setAutoPan(autop);
    wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
-   eventGRIDUPD.SetInt(autop ? tui::STS_AUTOPAN_ON : tui::STS_AUTOPAN_OFF);
+   eventGRIDUPD.SetId(tui::STS_AUTOPAN);
+   eventGRIDUPD.SetInt(autop ? 1 : 0);
    wxPostEvent(TopedMainW, eventGRIDUPD);
    LogFile << LogFile.getFN() << "(" << LogFile._2bool(autop) << ");"; LogFile.flush();
    return EXEC_NEXT;
@@ -1233,10 +1243,11 @@ void tellstdfunc::stdZEROCROSS::undo_cleanup() {
 
 void tellstdfunc::stdZEROCROSS::undo() {
    TEUNDO_DEBUG("zerocross() UNDO");
-   bool autop = getBoolValue(UNDOPstack, true);
-   PROPC->setZeroCross(autop);
+   bool zeroc = getBoolValue(UNDOPstack, true);
+   PROPC->setZeroCross(zeroc);
    wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
-   eventGRIDUPD.SetInt(autop ? tui::STS_ZEROCROSS_ON : tui::STS_ZEROCROSS_OFF);
+   eventGRIDUPD.SetId(tui::STS_ZEROCROSS);
+   eventGRIDUPD.SetInt(zeroc ? 1 : 0);
    wxPostEvent(TopedMainW, eventGRIDUPD);
    RefreshGL();
 }
@@ -1249,7 +1260,8 @@ int tellstdfunc::stdZEROCROSS::execute() {
    bool zeroc    = getBoolValue();
    PROPC->setZeroCross(zeroc);
    wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
-   eventGRIDUPD.SetInt(zeroc ? tui::STS_ZEROCROSS_ON : tui::STS_ZEROCROSS_OFF);
+   eventGRIDUPD.SetId(tui::STS_ZEROCROSS);
+   eventGRIDUPD.SetInt(zeroc ? 1 : 0);
    wxPostEvent(TopedMainW, eventGRIDUPD);
    LogFile << LogFile.getFN() << "(" << LogFile._2bool(zeroc) << ");"; LogFile.flush();
    RefreshGL();
@@ -1271,25 +1283,30 @@ void tellstdfunc::stdSHAPEANGLE::undo() {
    TEUNDO_DEBUG("shapeangle() UNDO");
    byte angle    = getByteValue(UNDOPstack,true);
    PROPC->setMarkerAngle(angle);
+   wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
+   eventGRIDUPD.SetId(tui::STS_ANGLE);
+   eventGRIDUPD.SetInt(angle);
+   wxPostEvent(TopedMainW, eventGRIDUPD);
 }
 
-int tellstdfunc::stdSHAPEANGLE::execute() {
+int tellstdfunc::stdSHAPEANGLE::execute()
+{
    byte angle    = getByteValue();
-   if ((angle == 0) || (angle == 45) || (angle == 90)) {
+   if ((angle == 0) || (angle == 45) || (angle == 90))
+   {
       // prepare undo first
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::ttint(PROPC->markerAngle()));
       //
       PROPC->setMarkerAngle(angle);
       wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
-      if       (angle == 0)  eventGRIDUPD.SetInt(tui::STS_ANGLE_0);
-      else if  (angle == 45) eventGRIDUPD.SetInt(tui::STS_ANGLE_45);
-      else if  (angle == 90) eventGRIDUPD.SetInt(tui::STS_ANGLE_90);
-      else assert(false);
+      eventGRIDUPD.SetId(tui::STS_ANGLE);
+      eventGRIDUPD.SetInt(angle);
       wxPostEvent(TopedMainW, eventGRIDUPD);
       LogFile << LogFile.getFN() << "(" << angle << ");"; LogFile.flush();
    }
-   else {
+   else
+   {
       tell_log(console::MT_ERROR,"0, 45 or 90 degrees allowed only");
    }
    return EXEC_NEXT;
@@ -1345,8 +1362,8 @@ void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
          PROPC->unlockDrawProp(drawProp);
          // send an event to update the property dialog
          wxCommandEvent eventTextOri(wxEVT_SETINGSMENU);
-         eventTextOri.SetInt(tui::STS_TEXTORI);
-         eventTextOri.SetId(val?1:0);
+         eventTextOri.SetId(tui::STS_TEXTORI);
+         eventTextOri.SetInt(val?1:0);
          wxPostEvent(TopedMainW, eventTextOri);
          // Request a redraw at the thread exit
          Console->set_canvas_invalid(true);

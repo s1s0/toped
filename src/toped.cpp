@@ -2047,40 +2047,24 @@ void tui::TopedFrame::OnAbort(wxCommandEvent& WXUNUSED(event)) {
 
 void tui::TopedFrame::OnUpdateSettingsMenu(wxCommandEvent& evt)
 {
-   switch (evt.GetInt()) {
-      case STS_GRID0_ON       : settingsMenu->Check(TMSET_GRID0       , true );break;
-      case STS_GRID0_OFF      : settingsMenu->Check(TMSET_GRID0       , false);break;
-      case STS_GRID1_ON       : settingsMenu->Check(TMSET_GRID1       , true );break;
-      case STS_GRID1_OFF      : settingsMenu->Check(TMSET_GRID1       , false);break;
-      case STS_GRID2_ON       : settingsMenu->Check(TMSET_GRID2       , true );break;
-      case STS_GRID2_OFF      : settingsMenu->Check(TMSET_GRID2       , false);break;
-      case STS_AUTOPAN_ON     : settingsMenu->Check(TMSET_AUTOPAN     , true );break;
-      case STS_AUTOPAN_OFF    : settingsMenu->Check(TMSET_AUTOPAN     , false);break;
-      case STS_ZEROCROSS_ON   : settingsMenu->Check(TMSET_ZEROCROSS   , true );break;
-      case STS_ZEROCROSS_OFF  : settingsMenu->Check(TMSET_ZEROCROSS   , false);break;
-      case STS_LONG_CURSOR    : settingsMenu->Check(TMSET_CURLONG     , true );break;
-      case STS_SHORT_CURSOR   : settingsMenu->Check(TMSET_CURLONG     , false);break;
-      case STS_ANGLE_0        : settingsMenu->Check(TMSET_MARKER0     , true );break;
-      case STS_ANGLE_45       : settingsMenu->Check(TMSET_MARKER45    , true );break;
-      case STS_ANGLE_90       : settingsMenu->Check(TMSET_MARKER90    , true );break;
-      case TMSET_HTOOLSIZE16  : settingsMenu->Check(TMSET_HTOOLSIZE16 , true );break;
-      case TMSET_HTOOLSIZE24  : settingsMenu->Check(TMSET_HTOOLSIZE24 , true );break;
-      case TMSET_HTOOLSIZE32  : settingsMenu->Check(TMSET_HTOOLSIZE32 , true );break;
-      case TMSET_HTOOLSIZE48  : settingsMenu->Check(TMSET_HTOOLSIZE48 , true );break;
-      case TMSET_VTOOLSIZE16  : settingsMenu->Check(TMSET_VTOOLSIZE16 , true );break;
-      case TMSET_VTOOLSIZE24  : settingsMenu->Check(TMSET_VTOOLSIZE24 , true );break;
-      case TMSET_VTOOLSIZE32  : settingsMenu->Check(TMSET_VTOOLSIZE32 , true );break;
-      case TMSET_VTOOLSIZE48  : settingsMenu->Check(TMSET_VTOOLSIZE48 , true );break;
-      case STS_CELLMARK_ON    :
-      case STS_CELLMARK_OFF   :
-      case STS_CELLBOX_ON     :
-      case STS_CELLBOX_OFF    :
-      case STS_TEXTMARK_ON    :
-      case STS_TEXTMARK_OFF   :
-      case STS_TEXTBOX_ON     :
-      case STS_TEXTBOX_OFF    :
-      case STS_TEXTORI        : _propDialog->updateRenderSheet(evt.GetInt());break;
-      default: assert(false);
+   switch (evt.GetId())
+   {
+      case STS_GRID0          : settingsMenu->Check(TMSET_GRID0       , evt.GetInt() );break;
+      case STS_GRID1          : settingsMenu->Check(TMSET_GRID1       , evt.GetInt() );break;
+      case STS_GRID2          : settingsMenu->Check(TMSET_GRID2       , evt.GetInt() );break;
+      case STS_AUTOPAN        : settingsMenu->Check(TMSET_AUTOPAN     , evt.GetInt() );break;
+      case STS_ZEROCROSS      : settingsMenu->Check(TMSET_ZEROCROSS   , evt.GetInt() );break;
+      case STS_CURSOR         : settingsMenu->Check(TMSET_CURLONG     , evt.GetInt() );break;
+      case STS_ANGLE          :
+         switch (evt.GetInt())
+         {
+            case  0: settingsMenu->Check(TMSET_MARKER0     , true );break;
+            case 45: settingsMenu->Check(TMSET_MARKER45    , true );break;
+            case 90: settingsMenu->Check(TMSET_MARKER90    , true );break;
+            default: assert(false);
+         }
+         break;
+      default: _propDialog->updateRenderSheet(evt);break;
    }
 };
 
@@ -2161,23 +2145,29 @@ void tui::TopedFrame::OnUncapturedMouseClick(wxCommandEvent& evt)
 
 void tui::TopedFrame::OnToolBarSize(wxCommandEvent& evt)
 {
-   int size = evt.GetInt();
+   tui::IconSizes sz = static_cast<tui::IconSizes>(evt.GetInt());
    bool direction = static_cast<bool>(evt.GetExtraLong());
-   tui::IconSizes sz = static_cast<tui::IconSizes>(size);
 
    _resourceCenter->setToolBarSize(direction, sz);
-   wxCommandEvent eventTB_MENU_UPD(wxEVT_SETINGSMENU);
+   // update the menu state
    if (tui::_tuihorizontal == direction)
-   {
-      //simplified version of
-      //case ICON_SIZE_16x16: eventTB_MENU_UPD.SetInt(tui::TMSET_HTOOLSIZE16)
-      eventTB_MENU_UPD.SetInt(tui::TMSET_HTOOLSIZE16+size);
-   }
+      switch (sz)
+      {
+         case  ICON_SIZE_16x16: settingsMenu->Check(TMSET_HTOOLSIZE16 , true );break;
+         case  ICON_SIZE_24x24: settingsMenu->Check(TMSET_HTOOLSIZE24 , true );break;
+         case  ICON_SIZE_32x32: settingsMenu->Check(TMSET_HTOOLSIZE32 , true );break;
+         case  ICON_SIZE_48x48: settingsMenu->Check(TMSET_HTOOLSIZE48 , true );break;
+         default: assert(false);
+      }
    else
-   {
-      eventTB_MENU_UPD.SetInt(tui::TMSET_VTOOLSIZE16+size);
-   }
-   wxPostEvent(_canvas, eventTB_MENU_UPD);
+      switch (sz)
+      {
+         case  ICON_SIZE_16x16: settingsMenu->Check(TMSET_VTOOLSIZE16 , true );break;
+         case  ICON_SIZE_24x24: settingsMenu->Check(TMSET_VTOOLSIZE24 , true );break;
+         case  ICON_SIZE_32x32: settingsMenu->Check(TMSET_VTOOLSIZE32 , true );break;
+         case  ICON_SIZE_48x48: settingsMenu->Check(TMSET_VTOOLSIZE48 , true );break;
+         default: assert(false);
+      }
 }
 
 void tui::TopedFrame::OnToolBarDefine(wxCommandEvent& evt)

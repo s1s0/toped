@@ -215,30 +215,18 @@ namespace tui
    } CVSSTATUS_TYPE;
 
    typedef enum {
-      STS_GRID0_ON        ,
-      STS_GRID0_OFF       ,
-      STS_GRID1_ON        ,
-      STS_GRID1_OFF       ,
-      STS_GRID2_ON        ,
-      STS_GRID2_OFF       ,
-      STS_CELLMARK_ON     ,
-      STS_CELLMARK_OFF    ,
-      STS_CELLBOX_ON      ,
-      STS_CELLBOX_OFF     ,
-      STS_TEXTMARK_ON     ,
-      STS_TEXTMARK_OFF    ,
-      STS_TEXTBOX_ON      ,
-      STS_TEXTBOX_OFF     ,
+      STS_GRID0           ,
+      STS_GRID1           ,
+      STS_GRID2           ,
+      STS_CELLMARK        ,
+      STS_CELLBOX         ,
+      STS_TEXTMARK        ,
+      STS_TEXTBOX         ,
       STS_TEXTORI         ,
-      STS_AUTOPAN_ON      ,
-      STS_AUTOPAN_OFF     ,
-      STS_ZEROCROSS_ON    ,
-      STS_ZEROCROSS_OFF   ,
-      STS_ANGLE_0         ,
-      STS_ANGLE_45        ,
-      STS_ANGLE_90        ,
-      STS_LONG_CURSOR     ,
-      STS_SHORT_CURSOR
+      STS_AUTOPAN         ,
+      STS_ZEROCROSS       ,
+      STS_ANGLE           ,
+      STS_CURSOR
    } SETTINGSMENU_TYPE;
 
    typedef enum
