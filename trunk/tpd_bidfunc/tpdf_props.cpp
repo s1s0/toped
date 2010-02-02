@@ -1349,7 +1349,7 @@ void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
          tell_log(console::MT_ERROR,info.str());
       }
    }
-   else if ("ADJUST_TEXT_ORIENTATION == name")
+   else if ("ADJUST_TEXT_ORIENTATION" == name)
    {//setparams({"ADJUST_TEXT_ORIENTATION", "true"});
       bool val;
       if (from_string<bool>(val, value, std::boolalpha))
