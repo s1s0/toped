@@ -270,6 +270,7 @@ namespace layprop {
          void                       psWrite(PSFile&) const;
          void                       adjustAlpha(word factor);
          const CTM&                 scrCtm() const       {return  _scrCtm;}
+         word                       visualLimit() const  {return _visualLimit;}
          const DBbox&               clipRegion() const   {return _clipRegion;}
          void                       initCtmStack()       {_tranStack.push(CTM());}
          void                       clearCtmStack()      {while (!_tranStack.empty()) _tranStack.pop();}
@@ -292,6 +293,8 @@ namespace layprop {
          void                       setClipRegion(DBbox clipR)
                                                          {_clipRegion = clipR;}
          void                       setScrCTM(CTM ScrCTM){_scrCtm = ScrCTM;}
+         void                       setVisualLimit(word mva)
+                                                         {_visualLimit = mva;}
          void                       allUnselectable(DWordSet&);
          void                       allInvisible(DWordSet&);
          // Properly protected in tpd_bidfunc or the functions called from there
@@ -363,6 +366,7 @@ namespace layprop {
          word                       _curlay;       // current drawing layer
          DBbox                      _clipRegion;
          CTM                        _scrCtm;
+         word                       _visualLimit;   // that would be 40 pixels
          bool                       _cellMarksHidden;
          bool                       _cellBoxHidden;
          bool                       _textMarksHidden;

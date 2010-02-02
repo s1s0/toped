@@ -243,7 +243,7 @@ public:
    int   clipbox(DBbox& bx);
    bool  inside(const TP& );
    int8b boxarea() const;
-   bool  visible(const CTM&) const;
+   bool  visible(const CTM&, int8b) const;
    DBbox getcorner(byte corner);
    const TP&    p1()  const {return _p1;};
    const TP&    p2()  const {return _p2;};
@@ -671,7 +671,6 @@ const unsigned    ERR_LAY              = 0xfffffffe;
 const unsigned    DRC_LAY              = 0xfffffffd;
 const unsigned    LAST_EDITABLE_LAYNUM = 0x0000ffff;
 const byte        OPENGL_FONT_UNIT     = 128;
-const byte        MIN_VISUAL_AREA      = 40;   // that would be 40 pixels
 const byte        GRID_LIMIT           = 5;    // if grid step is less than _GRID_LIMIT pixels, grid is hidden
 const DBbox       DEFAULT_OVL_BOX      = DBbox(TP(0,0));
 const DBbox       DEFAULT_ZOOM_BOX     = DBbox(TP(-2000,-2000), TP(20000,20000));

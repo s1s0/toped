@@ -880,6 +880,7 @@ namespace tenderer {
          // temporary!
          bool              layerHidden(unsigned layno) const {return  _drawprop->layerHidden(layno)    ;}
          const CTM&        ScrCTM() const                {return  _drawprop->scrCtm()              ;}
+         word              visualLimit() const           {return  _drawprop->visualLimit()         ;}
          const DBbox&      clipRegion() const            {return  _drawprop->clipRegion()          ;}
          void              pushref(const laydata::TdtCellRef* ref)
                                                          {        _drawprop->pushRef(ref)          ;}

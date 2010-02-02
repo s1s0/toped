@@ -574,7 +574,7 @@ void laydata::QuadTree::openGlDraw(layprop::DrawProperties& drawprop,
    DBbox clip = drawprop.clipRegion();
    DBbox areal = _overlap.overlap(drawprop.topCtm());
    if      ( 0ll == clip.cliparea(areal)     ) return;
-   else if (!areal.visible(drawprop.scrCtm())) return;
+   else if (!areal.visible(drawprop.scrCtm(), drawprop.visualLimit())) return;
    TdtData* wdt = _first;
    // The drawing will be faster like this for the cells without selected shapes
    // that will be the wast majority of the cases. A bit bigger code though.
@@ -641,7 +641,7 @@ short laydata::QuadTree::clipType(tenderer::TopRend& rend) const
    DBbox clip = rend.clipRegion();
    DBbox areal = _overlap.overlap(rend.topCTM());
    int8b clip_area = clip.cliparea(areal);
-   if ( ( 0ll == clip_area ) || (!areal.visible(rend.ScrCTM())) ) return 0;
+   if ( ( 0ll == clip_area ) || (!areal.visible(rend.ScrCTM(), rend.visualLimit())) ) return 0;
    if (0ll < clip_area) return 1;
    else return -1;
 }
@@ -699,7 +699,7 @@ void laydata::QuadTree::motionDraw(const layprop::DrawProperties& drawprop,
    DBbox clip = drawprop.clipRegion();
    DBbox areal = _overlap.overlap(transtack.front());
    if      (0ll == clip.cliparea(areal)      ) return;
-   else if (!areal.visible(drawprop.scrCtm())) return;
+   else if (!areal.visible(drawprop.scrCtm(), drawprop.visualLimit())) return;
    TdtData* wdt = _first;
    while(wdt) {
       wdt->motionDraw(drawprop, transtack, NULL);
@@ -1017,7 +1017,7 @@ void laydata::TdtLayer::motionDraw(const layprop::DrawProperties& drawprop,
    if (empty()) return;
    DBbox areal = overlap().overlap(transtack.front());
    if      ( 0ll == clip.cliparea(areal)     ) return;
-   else if (!areal.visible(drawprop.scrCtm())) return;
+   else if (!areal.visible(drawprop.scrCtm(), drawprop.visualLimit())) return;
    QuadTree::motionDraw(drawprop, transtack);
 }
 

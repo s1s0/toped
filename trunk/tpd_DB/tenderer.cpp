@@ -1639,7 +1639,7 @@ void tenderer::TopRend::wire (int4b* pdata, unsigned psize, word width)
 {
    // first check whether to draw only the center line
    DBbox wsquare = DBbox(TP(0,0),TP(width,width));
-   bool center_line_only = !wsquare.visible(topCTM() * ScrCTM());
+   bool center_line_only = !wsquare.visible(topCTM() * ScrCTM(), visualLimit());
    _clayer->wire(pdata, psize, width, center_line_only, false, NULL);
 }
 
@@ -1647,7 +1647,7 @@ void tenderer::TopRend::wire (int4b* pdata, unsigned psize, word width, const SG
 {
    // first check whether to draw only the center line
    DBbox wsquare = DBbox(TP(0,0),TP(width,width));
-   bool center_line_only = !wsquare.visible(topCTM() * ScrCTM());
+   bool center_line_only = !wsquare.visible(topCTM() * ScrCTM(), visualLimit());
    _clayer->wire(pdata, psize, width, center_line_only, true, psel);
 }
 
