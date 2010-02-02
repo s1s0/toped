@@ -475,6 +475,7 @@ layprop::DrawProperties::DrawProperties() : _clipRegion(0,0)
    _adjustTextOrientation = false;
    _currentOp             = console::op_none;
    _curlay                = 1;
+   _visualLimit           = 40;
 }
 
 bool layprop::DrawProperties::addLayer( unsigned layno )

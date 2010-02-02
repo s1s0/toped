@@ -95,6 +95,14 @@ tui::sgSliderControl::sgSliderControl(wxWindow *parent, int wId, int min, int ma
 //  _wxText->SetValue(ws);
 }
 
+void  tui::sgSliderControl::setValue(int value)
+{
+   _slider->SetValue(value);
+   wxString ws;
+   ws.sprintf(wxT("%i"), value);
+   _text->SetValue(ws);
+}
+
 void  tui::sgSliderControl::OnScroll(wxScrollEvent& event)
 {
    wxString ws;
@@ -2575,6 +2583,9 @@ void tui::TopedPropertySheets::RenderingPSheet::update(wxCommandEvent& evt)
       case STS_TEXTORI     :
          targetControl = FindWindow(PDSET_TEXTORI );assert(targetControl);
          static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt());
+         break;
+      case STS_VISILIMIT   :
+         _imageDetail->setValue(evt.GetInt());
          break;
       default: assert(false);
    }

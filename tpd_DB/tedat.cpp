@@ -1259,7 +1259,7 @@ void laydata::TdtWire::openGlPrecalc(layprop::DrawProperties& drawprop, pointlis
 {
    // first check whether to draw only the center line
    DBbox wsquare = DBbox(TP(0,0),TP(_width,_width));
-   bool center_line_only = !wsquare.visible(drawprop.topCtm() * drawprop.scrCtm());
+   bool center_line_only = !wsquare.visible(drawprop.topCtm() * drawprop.scrCtm(), drawprop.visualLimit());
    if (center_line_only)
       ptlist.reserve(_psize);
    else
@@ -1658,7 +1658,7 @@ void laydata::TdtCellRef::openGlPrecalc(layprop::DrawProperties& drawprop, point
    DBbox clip = drawprop.clipRegion();
    if (0ll == clip.cliparea(areal)) return;
    // check that the cell area is bigger that the MIN_VISUAL_AREA
-   if (!areal.visible(drawprop.scrCtm())) return;
+   if (!areal.visible(drawprop.scrCtm(), drawprop.visualLimit())) return;
    // If we get here - means that the cell (or part of it) is visible
    ptlist.reserve(4);
    ptlist.push_back(obox.p1() * newtrans);
@@ -1676,7 +1676,7 @@ void laydata::TdtCellRef::drawRequest(tenderer::TopRend& rend) const
    DBbox obox(structure()->cellOverlap());
    // ... translate it to the current coordinates ...
    DBbox areal = obox.overlap(_translation * rend.topCTM());
-   if (!areal.visible(rend.ScrCTM())) return;
+   if (!areal.visible(rend.ScrCTM(), rend.visualLimit())) return;
    // draw the cell mark ...
 //   rend.drawReferenceMarks(TP(0,0) * newtrans, layprop::cell_mark);
    //
@@ -1701,7 +1701,7 @@ void laydata::TdtCellRef::drawSRequest(tenderer::TopRend& rend, const SGBitSet*)
    DBbox obox(structure()->cellOverlap());
    // ... translate it to the current coordinates ...
    DBbox areal = obox.overlap(_translation * rend.topCTM());
-   if (!areal.visible(rend.ScrCTM())) return;
+   if (!areal.visible(rend.ScrCTM(), rend.visualLimit())) return;
    // draw the cell mark ...
 //   rend.drawReferenceMarks(TP(0,0) * newtrans, layprop::cell_mark);
    //
@@ -1907,7 +1907,7 @@ void laydata::TdtCellAref::openGlPrecalc(layprop::DrawProperties& drawprop, poin
 
    // We are going to draw "something", so push the new translation matrix in the stack
    drawprop.pushCtm(newtrans);
-   if (structure()->cellOverlap().visible(drawprop.topCtm() * drawprop.scrCtm()))
+   if (structure()->cellOverlap().visible(drawprop.topCtm() * drawprop.scrCtm(), drawprop.visualLimit()))
    {
       // a single structure is big enough to be visible
       // now calculate the start/stop values of the visible references in the matrix
@@ -1971,7 +1971,7 @@ void laydata::TdtCellAref::drawRequest(tenderer::TopRend& rend) const
    //@FIXME! Edit in place array of cells!
    DBbox obox(structure()->cellOverlap());
    int col_beg, col_end, row_beg, row_end;
-   if (obox.visible(rend.topCTM() * rend.ScrCTM()))
+   if (obox.visible(rend.topCTM() * rend.ScrCTM(), rend.visualLimit()))
    {
       // a single structure is big enough to be visible
       // now calculate the start/stop values of the visible references in the matrix
@@ -2231,7 +2231,7 @@ void laydata::TdtText::openGlPrecalc(layprop::DrawProperties& drawprop, pointlis
    // font translation matrix
    CTM ftmtrx =  _translation * drawprop.topCtm();
    DBbox wsquare(TP(0,0), TP(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT));
-   if ( wsquare.visible(ftmtrx * drawprop.scrCtm()) )
+   if ( wsquare.visible(ftmtrx * drawprop.scrCtm(), drawprop.visualLimit()) )
    {
       // If we get here - means that the text is visible
       CTM adjTranslation = (drawprop.adjustTextOrientation()) ?
@@ -2257,7 +2257,7 @@ void laydata::TdtText::drawRequest(tenderer::TopRend& rend) const
    // font translation matrix
    CTM ftmtrx =  _translation * rend.topCTM();
    DBbox wsquare(TP(0,0), TP(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT));
-   if (!wsquare.visible(ftmtrx * rend.ScrCTM()) ) return;
+   if (!wsquare.visible(ftmtrx * rend.ScrCTM(), rend.visualLimit()) ) return;
    // If we get here - means that the text is visible
    // draw the cell mark ...
    //   rend.drawReferenceMarks(TP(0,0) * newtrans, layprop::cell_mark);
@@ -2273,7 +2273,7 @@ void laydata::TdtText::drawSRequest(tenderer::TopRend& rend, const SGBitSet*) co
    // font translation matrix
    CTM ftmtrx =  _translation * rend.topCTM();
    DBbox wsquare(TP(0,0), TP(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT));
-   if (!wsquare.visible(ftmtrx * rend.ScrCTM()) ) return;
+   if (!wsquare.visible(ftmtrx * rend.ScrCTM(), rend.visualLimit()) ) return;
    // If we get here - means that the text is visible
    // draw the cell mark ...
    //   rend.drawReferenceMarks(TP(0,0) * newtrans, layprop::cell_mark);
@@ -2354,7 +2354,7 @@ void laydata::TdtText::motionDraw(const layprop::DrawProperties& drawprop,
    // font translation matrix
    CTM ftmtrx =  _translation * transtack.front();
    DBbox wsquare(TP(0, 0),TP(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT));
-   if (wsquare.visible(ftmtrx * drawprop.scrCtm()))
+   if (wsquare.visible(ftmtrx * drawprop.scrCtm(), drawprop.visualLimit()))
    {
       if (drawprop.adjustTextOrientation())
          ftmtrx = renderingAdjustment(ftmtrx) * transtack.front();

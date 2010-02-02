@@ -1340,7 +1340,19 @@ void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
       word val;
       if ((from_string<word>(val, value, std::dec)) && (val < 256))
       {
-//         MIN_VISUAL_AREA = val;
+         layprop::DrawProperties* drawProp;
+         if (PROPC->lockDrawProp(drawProp))
+         {
+            drawProp->setVisualLimit(val);
+         }
+         PROPC->unlockDrawProp(drawProp);
+         // send an event to update the property dialog
+         wxCommandEvent eventTextOri(wxEVT_SETINGSMENU);
+         eventTextOri.SetId(tui::STS_VISILIMIT);
+         eventTextOri.SetInt(val);
+         wxPostEvent(TopedMainW, eventTextOri);
+         // Request a redraw at the thread exit
+         Console->set_canvas_invalid(true);
       }
       else
       {

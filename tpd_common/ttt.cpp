@@ -260,7 +260,7 @@ int8b DBbox::boxarea() const
                 ((int8b)_p2.y() - (int8b)_p1.y())   );
 }
 
-bool DBbox::visible(const CTM& tmtrx) const
+bool DBbox::visible(const CTM& tmtrx, int8b visualLimit) const
 {
    pointlist ptlist;
    ptlist.reserve(4);
@@ -270,8 +270,8 @@ bool DBbox::visible(const CTM& tmtrx) const
    ptlist.push_back(               (_p2) * tmtrx);
    ptlist.push_back(TP(_p1.x(), _p2.y()) * tmtrx);
 
-   if (llabs(polyarea(ptlist)) >= (int8b)MIN_VISUAL_AREA) return true;
-   else                                                   return false;
+   if (llabs(polyarea(ptlist)) >= visualLimit) return true;
+   else                                        return false;
 }
 
 DBbox DBbox::getcorner(byte corner) {
