@@ -1448,6 +1448,8 @@ void tenderer::TenderRefLay::addCellOBox(TenderRef* cRefBox, word alphaDepth, bo
       _cellRefBoxes.push_back(cRefBox);
       if (1 < alphaDepth)
       {
+         // The meaning of this condition is to prevent rendering of the overlapping box of the
+         // top visible cell. Only the top visible cell has alphaDepth parameter equals to 1
          _alvrtxs += 4;
          _alobjvx++;
       }
@@ -1622,7 +1624,7 @@ void tenderer::TopRend::pushCell(std::string cname, const CTM& trans, const DBbo
       // This list is to keep track of the hidden cRefBox - so we can clean
       // them up. Don't get confused - we need cRefBox during the collecting
       // and drawing phase so we can't really delete them here or after they're
-      // poped-up from _cellStack. The confusion is comming from the "duality"
+      // poped-up from _cellStack. The confusion is coming from the "duality"
       // of the TenderRef - once as a cell reference with CTM, view depth etc.
       // and then as a placeholder of the overlapping reference box
       _hiddenRefBoxes.push_back(cRefBox);
@@ -1799,10 +1801,6 @@ void tenderer::TopRend::draw()
       _drawprop->setCurrentColor(CLAY->first);
       _drawprop->setCurrentFill(true); // force fill (ignore block_fill state)
       _drawprop->setLineProps(false);
-      // draw everything
-      if (0 != CLAY->second->total_points())
-         CLAY->second->draw(_drawprop);
-
       if (0 != CLAY->second->total_slctdx())
       {// redraw selected contours only
          _drawprop->setLineProps(true);
@@ -1814,6 +1812,9 @@ void tenderer::TopRend::draw()
          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
          _drawprop->setLineProps(false);
       }
+      // draw everything
+      if (0 != CLAY->second->total_points())
+         CLAY->second->draw(_drawprop);
       // draw texts
       if (0 != CLAY->second->total_strings())
       {
