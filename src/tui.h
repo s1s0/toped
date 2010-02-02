@@ -89,7 +89,9 @@ namespace tui {
       PDSET_TEXTMARK      ,
       PDSET_TEXTBOX       ,
       PDSET_TEXTORI       ,
-      PDCELL_DOV
+      PDIMG_DETAIL        ,
+      PDCELL_DOV          ,
+      PDCELL_CHECKDOV
    } RenderPropertyDialogID;
    //--------------------------------------------------------------------------
    class getSize : public wxDialog {
@@ -192,7 +194,7 @@ namespace tui {
    //--------------------------------------------------------------------------
    class sgSliderControl : public wxPanel {
    public:
-                        sgSliderControl(wxWindow*, const int, const int, const int);
+                        sgSliderControl(wxWindow*, int, int, int, int);
    private:
       wxTextCtrl*       _text;
       wxSlider*         _slider;
@@ -635,14 +637,17 @@ namespace tui {
                                 RenderingPSheet(wxWindow*);
          void                   update(wxCommandEvent& evt);
       private:
-         void                   OnPropCDOV(wxCommandEvent&);
+         void                   OnCellCheckDov(wxCommandEvent&);
          void                   OnCellBox (wxCommandEvent&);
          void                   OnCellMark(wxCommandEvent&);
          void                   OnTextBox (wxCommandEvent&);
          void                   OnTextMark(wxCommandEvent&);
          void                   OnTextOri (wxCommandEvent&);
+         void                   OnCellDov (wxCommandEvent&);
+         void                   OnImageDetail (wxCommandEvent&);
          wxCheckBox*            _cbDepthOfViewLimit;
          sgSliderControl*       _cellDepthOfView;
+         sgSliderControl*       _imageDetail;
          DECLARE_EVENT_TABLE();
       };
       RenderingPSheet*          _renderingSheet;

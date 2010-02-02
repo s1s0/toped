@@ -80,9 +80,8 @@ BEGIN_EVENT_TABLE(tui::sgSliderControl, wxPanel)
    EVT_TEXT_ENTER(wxID_ANY, sgSliderControl::OnTextEnter)
 END_EVENT_TABLE()
 
-tui::sgSliderControl::sgSliderControl(wxWindow *parent,
-   const int min, const int max, const int init)
-  : wxPanel(parent, wxID_ANY)
+tui::sgSliderControl::sgSliderControl(wxWindow *parent, int wId, int min, int max, int init)
+  : wxPanel(parent, wId)
 {
    wxBoxSizer *controlSizer = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
    _slider = DEBUG_NEW wxSlider(this, wxID_ANY, init, min, max);
@@ -96,11 +95,18 @@ tui::sgSliderControl::sgSliderControl(wxWindow *parent,
 //  _wxText->SetValue(ws);
 }
 
-void  tui::sgSliderControl::OnScroll(wxScrollEvent&)
+void  tui::sgSliderControl::OnScroll(wxScrollEvent& event)
 {
    wxString ws;
    ws.sprintf(wxT("%i"), _slider->GetValue());
    _text->SetValue(ws);
+   int eventID = event.GetEventType();
+   if (wxEVT_SCROLL_THUMBRELEASE == eventID)
+   {
+      wxCommandEvent sliderEvent(wxEVT_COMMAND_ENTER, GetId());
+      sliderEvent.SetInt(_slider->GetValue());
+      wxPostEvent(GetParent(), sliderEvent);
+   }
 }
 
 void tui::sgSliderControl::OnTextEnter(wxCommandEvent& WXUNUSED(event))
@@ -109,6 +115,9 @@ void tui::sgSliderControl::OnTextEnter(wxCommandEvent& WXUNUSED(event))
    long value;
    ws.ToLong(&value);
    _slider->SetValue(value);
+   wxCommandEvent sliderEvent(wxEVT_COMMAND_ENTER, GetId());
+   sliderEvent.SetInt(value);
+   wxPostEvent(GetParent(), sliderEvent);
 }
 
 //==============================================================================
@@ -2422,12 +2431,14 @@ tui::TopedPropertySheets::TopedPropertySheets(wxWindow* parent)
 
 //=============================================================================
 BEGIN_EVENT_TABLE(tui::TopedPropertySheets::RenderingPSheet, wxPanel)
-    EVT_CHECKBOX(PDCELL_DOV       , tui::TopedPropertySheets::RenderingPSheet::OnPropCDOV  )
-    EVT_CHECKBOX(PDSET_CELLBOX    , tui::TopedPropertySheets::RenderingPSheet::OnCellBox   )
-    EVT_CHECKBOX(PDSET_CELLMARK   , tui::TopedPropertySheets::RenderingPSheet::OnCellMark  )
-    EVT_CHECKBOX(PDSET_TEXTBOX    , tui::TopedPropertySheets::RenderingPSheet::OnTextBox   )
-    EVT_CHECKBOX(PDSET_TEXTMARK   , tui::TopedPropertySheets::RenderingPSheet::OnTextMark  )
-    EVT_CHECKBOX(PDSET_TEXTORI    , tui::TopedPropertySheets::RenderingPSheet::OnTextOri   )
+    EVT_CHECKBOX(PDCELL_CHECKDOV  , tui::TopedPropertySheets::RenderingPSheet::OnCellCheckDov   )
+    EVT_CHECKBOX(PDSET_CELLBOX    , tui::TopedPropertySheets::RenderingPSheet::OnCellBox        )
+    EVT_CHECKBOX(PDSET_CELLMARK   , tui::TopedPropertySheets::RenderingPSheet::OnCellMark       )
+    EVT_CHECKBOX(PDSET_TEXTBOX    , tui::TopedPropertySheets::RenderingPSheet::OnTextBox        )
+    EVT_CHECKBOX(PDSET_TEXTMARK   , tui::TopedPropertySheets::RenderingPSheet::OnTextMark       )
+    EVT_CHECKBOX(PDSET_TEXTORI    , tui::TopedPropertySheets::RenderingPSheet::OnTextOri        )
+    EVT_COMMAND_ENTER(PDIMG_DETAIL, tui::TopedPropertySheets::RenderingPSheet::OnImageDetail    )
+    EVT_COMMAND_ENTER(PDCELL_DOV  , tui::TopedPropertySheets::RenderingPSheet::OnCellDov        )
 END_EVENT_TABLE()
 
 tui::TopedPropertySheets::RenderingPSheet::RenderingPSheet(wxWindow* parent) : wxPanel(parent, wxID_ANY)
@@ -2435,8 +2446,8 @@ tui::TopedPropertySheets::RenderingPSheet::RenderingPSheet(wxWindow* parent) : w
    wxBoxSizer* topSizer = DEBUG_NEW wxBoxSizer(wxVERTICAL);
       // Image details (Quality)
       wxBoxSizer *imgSizer  = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Image detail (square pixels)"));
-         sgSliderControl* imageDetail = DEBUG_NEW sgSliderControl(this, 1, 100, 40);
-      imgSizer->Add(imageDetail, 0, wxALL | wxALIGN_CENTER | wxEXPAND);
+         _imageDetail = DEBUG_NEW sgSliderControl(this, PDIMG_DETAIL, 1, 100, 40);
+      imgSizer->Add(_imageDetail, 0, wxALL | wxALIGN_CENTER | wxEXPAND);
       // Cell related rendering properties
       wxBoxSizer *topCellSizer = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Cells"));
          // Cell Bounding box and reference marks
@@ -2447,9 +2458,9 @@ tui::TopedPropertySheets::RenderingPSheet::RenderingPSheet(wxWindow* parent) : w
          cellSizer->Add(cellMarks , 1, wxALL | wxALIGN_CENTER | wxEXPAND);
          // Cell Depth of view
          wxBoxSizer *cdovSizer = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Depth of view"));
-         _cbDepthOfViewLimit = DEBUG_NEW wxCheckBox(this, PDCELL_DOV , wxT("unlimited"));
+         _cbDepthOfViewLimit = DEBUG_NEW wxCheckBox(this, PDCELL_CHECKDOV , wxT("unlimited"));
          _cbDepthOfViewLimit->SetValue(true);
-         _cellDepthOfView = DEBUG_NEW sgSliderControl(this, 0, 16, 16);
+         _cellDepthOfView = DEBUG_NEW sgSliderControl(this, PDCELL_DOV, 0, 16, 16);
          _cellDepthOfView->Enable(false);
          cdovSizer->Add(_cbDepthOfViewLimit, 0, wxALL| wxALIGN_CENTER | wxEXPAND);
          cdovSizer->Add(   _cellDepthOfView, 0, wxALL| wxALIGN_CENTER | wxEXPAND);
@@ -2478,7 +2489,7 @@ tui::TopedPropertySheets::RenderingPSheet::RenderingPSheet(wxWindow* parent) : w
    topSizer->Fit(this);
 }
 
-void tui::TopedPropertySheets::RenderingPSheet::OnPropCDOV(wxCommandEvent& cmdevent)
+void tui::TopedPropertySheets::RenderingPSheet::OnCellCheckDov(wxCommandEvent& cmdevent)
 {
    _cellDepthOfView->Enable(0 == cmdevent.GetInt());
    _cellDepthOfView->Refresh();
@@ -2517,6 +2528,25 @@ void tui::TopedPropertySheets::RenderingPSheet::OnTextOri(wxCommandEvent& cmdEve
    wxString ost;
    ost << wxT("setparams({\"ADJUST_TEXT_ORIENTATION\", \"")
        << (cmdEvent.GetInt() ? wxT("true") : wxT("false"))
+       << wxT("\"});");
+   Console->parseCommand(ost);
+}
+
+void tui::TopedPropertySheets::RenderingPSheet::OnCellDov (wxCommandEvent& cmdEvent)
+{
+   wxString ost;
+   ost << wxT("setparams({\"CELL_VIEW_DEPTH\", \"")
+       << cmdEvent.GetInt()
+       << wxT("\"});");
+   Console->parseCommand(ost);
+
+}
+
+void tui::TopedPropertySheets::RenderingPSheet::OnImageDetail (wxCommandEvent& cmdEvent)
+{
+   wxString ost;
+   ost << wxT("setparams({\"MIN_VISUAL_AREA\", \"")
+       << cmdEvent.GetInt()
        << wxT("\"});");
    Console->parseCommand(ost);
 }
