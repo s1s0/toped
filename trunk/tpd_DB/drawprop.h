@@ -295,6 +295,8 @@ namespace layprop {
          void                       setScrCTM(CTM ScrCTM){_scrCtm = ScrCTM;}
          void                       setVisualLimit(word mva)
                                                          {_visualLimit = mva;}
+         void                       setCellDepthAlphaEbb(byte ebb)
+                                                         {_cellDepthAlphaEbb = ebb;}
          void                       allUnselectable(DWordSet&);
          void                       allInvisible(DWordSet&);
          // Properly protected in tpd_bidfunc or the functions called from there
@@ -367,6 +369,7 @@ namespace layprop {
          DBbox                      _clipRegion;
          CTM                        _scrCtm;
          word                       _visualLimit;   // that would be 40 pixels
+         byte                       _cellDepthAlphaEbb;
          bool                       _cellMarksHidden;
          bool                       _cellBoxHidden;
          bool                       _textMarksHidden;

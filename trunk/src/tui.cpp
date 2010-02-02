@@ -2447,6 +2447,7 @@ BEGIN_EVENT_TABLE(tui::TopedPropertySheets::RenderingPSheet, wxPanel)
     EVT_CHECKBOX(PDSET_TEXTORI    , tui::TopedPropertySheets::RenderingPSheet::OnTextOri        )
     EVT_COMMAND_ENTER(PDIMG_DETAIL, tui::TopedPropertySheets::RenderingPSheet::OnImageDetail    )
     EVT_COMMAND_ENTER(PDCELL_DOV  , tui::TopedPropertySheets::RenderingPSheet::OnCellDov        )
+    EVT_COMMAND_ENTER(PDCELL_DAB  , tui::TopedPropertySheets::RenderingPSheet::OnCellDab        )
 END_EVENT_TABLE()
 
 tui::TopedPropertySheets::RenderingPSheet::RenderingPSheet(wxWindow* parent) : wxPanel(parent, wxID_ANY)
@@ -2472,10 +2473,16 @@ tui::TopedPropertySheets::RenderingPSheet::RenderingPSheet(wxWindow* parent) : w
          _cellDepthOfView->Enable(false);
          cdovSizer->Add(_cbDepthOfViewLimit, 0, wxALL| wxALIGN_CENTER | wxEXPAND);
          cdovSizer->Add(   _cellDepthOfView, 0, wxALL| wxALIGN_CENTER | wxEXPAND);
+         // Cell Depth brightness ebb (shadow)
+         wxBoxSizer *ebbSizer  = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Depth shadow (alpha degradation)"));
+            _cellDepthEbb = DEBUG_NEW sgSliderControl(this, PDCELL_DAB, 0, 80, 0);
+         ebbSizer->Add(_cellDepthEbb, 0, wxALL | wxALIGN_CENTER | wxEXPAND);
       // Pack all cell related properties
       topCellSizer->Add(cellSizer , 0, wxALL | wxALIGN_CENTER | wxEXPAND);
       topCellSizer->Add(10,10,0);
       topCellSizer->Add(cdovSizer , 0, wxALL | wxALIGN_CENTER | wxEXPAND);
+      topCellSizer->Add(10,10,0);
+      topCellSizer->Add(ebbSizer  , 0, wxALL | wxALIGN_CENTER | wxEXPAND);
       // Text related rendering properties
       wxBoxSizer *topTextSizer = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Texts"));
          wxBoxSizer *textSizer = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
@@ -2550,6 +2557,16 @@ void tui::TopedPropertySheets::RenderingPSheet::OnCellDov (wxCommandEvent& cmdEv
 
 }
 
+void tui::TopedPropertySheets::RenderingPSheet::OnCellDab (wxCommandEvent& cmdEvent)
+{
+   wxString ost;
+   ost << wxT("setparams({\"CELL_DEPTH_ALPHA_EBB\", \"")
+       << cmdEvent.GetInt()
+       << wxT("\"});");
+   Console->parseCommand(ost);
+
+}
+
 void tui::TopedPropertySheets::RenderingPSheet::OnImageDetail (wxCommandEvent& cmdEvent)
 {
    wxString ost;
@@ -2586,6 +2603,9 @@ void tui::TopedPropertySheets::RenderingPSheet::update(wxCommandEvent& evt)
          break;
       case STS_VISILIMIT   :
          _imageDetail->setValue(evt.GetInt());
+         break;
+      case STS_CELLDAB     :
+         _cellDepthEbb->setValue(evt.GetInt());
          break;
       default: assert(false);
    }
