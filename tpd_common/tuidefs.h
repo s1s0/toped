@@ -227,7 +227,8 @@ namespace tui
       STS_ZEROCROSS       ,
       STS_ANGLE           ,
       STS_CURSOR          ,
-      STS_VISILIMIT
+      STS_VISILIMIT       ,
+      STS_CELLDAB
    } SETTINGSMENU_TYPE;
 
    typedef enum

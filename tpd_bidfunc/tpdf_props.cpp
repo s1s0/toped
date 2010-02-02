@@ -1387,6 +1387,32 @@ void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
          tell_log(console::MT_ERROR,info.str());
       }
    }
+   else if ("CELL_DEPTH_ALPHA_EBB" == name)
+   {
+      word val;
+      if ((from_string<word>(val, value, std::dec)) && (val <= 80))
+      {
+         layprop::DrawProperties* drawProp;
+         if (PROPC->lockDrawProp(drawProp))
+         {
+            drawProp->setCellDepthAlphaEbb(val);
+         }
+         PROPC->unlockDrawProp(drawProp);
+         // send an event to update the property dialog
+         wxCommandEvent event(wxEVT_SETINGSMENU);
+         event.SetId(tui::STS_CELLDAB);
+         event.SetInt(val);
+         wxPostEvent(TopedMainW, event);
+         // Request a redraw at the thread exit
+         Console->set_canvas_invalid(true);
+      }
+      else
+      {
+         std::ostringstream info;
+         info << "Invalid \""<< name <<"\" value. Expected value is between 0 and 80";
+         tell_log(console::MT_ERROR,info.str());
+      }
+   }
    else
    {
       std::ostringstream info;

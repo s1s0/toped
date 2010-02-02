@@ -476,6 +476,7 @@ layprop::DrawProperties::DrawProperties() : _clipRegion(0,0)
    _currentOp             = console::op_none;
    _curlay                = 1;
    _visualLimit           = 40;
+   _cellDepthAlphaEbb     = 0;
 }
 
 bool layprop::DrawProperties::addLayer( unsigned layno )
@@ -669,24 +670,17 @@ bool layprop::DrawProperties::layerFilled(unsigned layno) const
 
 void layprop::DrawProperties::adjustAlpha(word factor)
 {
-   return;
    //@TODO! - A tell option(function or variable) to adjust the constant (30 below)
    // user must know what's going on, otherwise - the rendering result might be confusing
    // Having done that, the method can be enabled
-/*   if (_layset.end() != _layset.find(_drawingLayer))
+   const layprop::tellRGB& theColor = getColor(_drawingLayer);
+   byte alpha = theColor.alpha();
+   word resultingEbb = factor * _cellDepthAlphaEbb;
+   if (0 < factor)
    {
-      if (_layColors.end() != _layColors.find(_layset[_drawingLayer]->color()))
-      {
-         tellRGB* gcol = _layColors[_layset[_drawingLayer]->color()];
-         if (gcol)
-         {
-            byte alpha = gcol->alpha();
-            if (0 < factor)
-               alpha = ((factor * 50) > gcol->alpha()) ? 0 : gcol->alpha() - (factor * 50);
-            glColor4ub(gcol->red(), gcol->green(), gcol->blue(), alpha);
-         }
-      }
-   }*/
+      alpha = (resultingEbb > (word)alpha) ? 0 : alpha - resultingEbb;
+      glColor4ub(theColor.red(), theColor.green(), theColor.blue(), alpha);
+   }
 }
 
 bool  layprop::DrawProperties::layerHidden(unsigned layno) const
