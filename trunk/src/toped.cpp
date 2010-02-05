@@ -571,7 +571,7 @@ void tui::TopedFrame::initMenuBar() {
    settingsMenu=DEBUG_NEW wxMenu();
    settingsMenu->Append         (TMSET_STEP     , wxT("Step")      , wxT("Select objects"));
    settingsMenu->AppendCheckItem(TMSET_AUTOPAN  , wxT("Auto Pan")  , wxT("Automatic window move"));
-   settingsMenu->Append         (TMSET_ALLPROP  , wxT("Properties"), wxT("Tool Properties"));
+   settingsMenu->Append         (TMSET_ALLPROP  , wxT("Properties..."), wxT("Toped Properties"));
    settingsMenu->AppendSeparator();
    settingsMenu->Append         (TMSET_GRIDDEF  , wxT("Define grid"), wxT("Define/change the grid step"));
    settingsMenu->AppendCheckItem(TMSET_GRID0    , wxT("Grid 0")    , wxT("Draw/Hide Grid 0"));
@@ -729,7 +729,7 @@ void tui::TopedFrame::initView()
 
    _cmdlog = DEBUG_NEW console::ted_log(logpane, ID_WIN_TXT_LOG);
    logpane->AddPage(_cmdlog, wxT("Log"));
-   _cmdbrowser = DEBUG_NEW console::TELLFuncList(logpane);
+   _cmdbrowser = DEBUG_NEW console::TELLFuncList(logpane, ID_TELL_FUNCS);
    logpane->AddPage(_cmdbrowser, wxT("Lib"));
    logpane->SetArtProvider(DEBUG_NEW wxAuiSimpleTabArt);
    //----------------------------------------------------------------------------

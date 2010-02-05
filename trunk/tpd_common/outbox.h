@@ -160,9 +160,6 @@ namespace console {
          typedef std::list<std::string> ArgList;
    };
 
-   void TellFnAdd(const std::string, void*);
-   void TellFnSort();
-
    //===========================================================================
    class TopedStatus : public wxStatusBar {
    public:
@@ -216,12 +213,16 @@ class TpdPost {
       static void treeAddMember(const char*, const char*, int action = 0);
       static void treeRemoveMember(const char*, const char*, int orphan);
       static void parseCommand(const wxString);
+      static void tellFnAdd(const std::string, void*);
+      static void tellFnSort();
+
    private:
       static wxWindow* _statusBar;
       static wxWindow* _topBrowsers;
       static wxWindow* _layBrowser;
       static wxWindow* _cllBrowser;
       static wxWindow* _cmdLine;
+      static wxWindow* _tllFuncList;
 };
 
 //===========================================================================
@@ -322,6 +323,8 @@ bool        expandFileName(std::string&);
 std::string getFileNameOnly(std::string);
 //Convert string from UTF8 to wxConvFile
 std::string convertString(const std::string &str);
+int wxCALLBACK wxListCompareFunction(long, long, long);
+
 
 /** The LayerMapExt is used for GDS/OASIS - TDT layer correspondence in both directions.
       - If the class is constructed with ExtLayers == NULL, then _import will be

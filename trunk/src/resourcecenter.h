@@ -42,7 +42,7 @@
    In future replace "callbackMethod" type to boost::function, winni::closure
    or similar library
 */
-namespace tui 
+namespace tui
 {
    const word _tuihorizontal   = 0x0000;
    const word _tuivertical      = 0x0001;
@@ -78,20 +78,20 @@ namespace tui
       bool           inserted(void) const    { return _inserted; }
       bool           changed(void)  const    { return _changed; }
       int            ID(void)       const    { return _ID;} ;
-      
+
       void           setInserted(bool ins)   {_inserted = ins;};
       void           setChanged(bool  chang) {_changed = chang;};
-   
-      //Create menu item into this wxMenuBar 
+
+      //Create menu item into this wxMenuBar
       virtual void create(wxMenuBar *menuBar);
-      //Change menu item into this wxMenuBar 
+      //Change menu item into this wxMenuBar
       //used for already existed items
       virtual void recreate(wxMenuBar *menuBar);
     protected:
       wxMenu* buildPath(wxMenuBar *menuBar, const std::vector<std::string> &menuNames);
-      
-      int         _ID; 
-      std::string _menuItem; 
+
+      int         _ID;
+      std::string _menuItem;
       std::string _hotKey;
       std::string _function;
       std::string _helpString;
@@ -122,7 +122,7 @@ namespace tui
       MenuItemSeparator(void);
       MenuItemSeparator(std::string menuItem);
       virtual ~MenuItemSeparator() {};
-      
+
       virtual void create(wxMenuBar *menuBar);
    };
 
@@ -162,7 +162,7 @@ namespace tui
       wxBitmap         _bitmaps[ICON_SIZE_END];
       std::string      _bitmapNames[ICON_SIZE_END];
       IconSizes      _currentSize;
-   
+
       //std::string   _hotKey;
       std::string      _function;
       std::string      _helpString;
@@ -211,11 +211,11 @@ namespace tui
 
    bool checkToolSize(IconSizes size);
 
-//=================================
-//      Resourcecenter is resposible
-//      for handle of all ui action
-//      currently only menu and toolbar
-//=================================
+//=============================================================================
+//      Resourcecenter is responsible
+//      for handling all of ui actions.
+//      Currently only menu and tool bars
+//=============================================================================
    class ResourceCenter
    {
    public:
@@ -290,7 +290,7 @@ namespace tellstdfunc {
    using telldata::argumentQ;
    using parsercmd::argumentLIST;
    using parsercmd::argumentTYPE;
-   
+
    TELL_STDCMD_CLASSA(stdADDMENU       );  //
    TELL_STDCMD_CLASSA(stdTOOLBARSIZE       );  //
    TELL_STDCMD_CLASSA(stdDEFINETOOLBAR  );  //

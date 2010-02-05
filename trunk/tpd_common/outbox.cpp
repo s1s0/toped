@@ -88,6 +88,7 @@ wxWindow*               TpdPost::_topBrowsers   = NULL;
 wxWindow*               TpdPost::_layBrowser    = NULL;
 wxWindow*               TpdPost::_cllBrowser    = NULL;
 wxWindow*               TpdPost::_cmdLine       = NULL;
+wxWindow*               TpdPost::_tllFuncList   = NULL;
 
 //==============================================================================
 // The ted_log event table
@@ -283,6 +284,8 @@ TpdPost::TpdPost(wxWindow* mainWindow)
    _layBrowser  = mainWindow->FindWindow(tui::ID_PNL_LAYERS);
    _cllBrowser  = mainWindow->FindWindow(tui::ID_PNL_CELLS);
    _cmdLine     = mainWindow->FindWindow(tui::ID_CMD_LINE);
+   _tllFuncList = mainWindow->FindWindow(tui::ID_TELL_FUNCS);
+   CmdList = static_cast<console::TELLFuncList*>(_tllFuncList);
 }
 
 void TpdPost::toped_status(console::TOPEDSTATUS_TYPE tstatus)
@@ -505,9 +508,38 @@ void TpdPost::parseCommand(const wxString cmd)
    wxPostEvent(_cmdLine, eventPARSE);
 }
 
+void TpdPost::tellFnAdd(const std::string name, void* arguments)
+{
+   wxCommandEvent eventFUNCTION_ADD(wxEVT_FUNC_BROWSER);
+   eventFUNCTION_ADD.SetString(wxString(name.c_str(), wxConvUTF8));
+   eventFUNCTION_ADD.SetClientData(arguments);
+   eventFUNCTION_ADD.SetInt(console::FT_FUNCTION_ADD);
+   wxPostEvent(_tllFuncList, eventFUNCTION_ADD);
+}
+
+void TpdPost::tellFnSort()
+{
+   wxCommandEvent eventFUNCTION_ADD(wxEVT_FUNC_BROWSER);
+   eventFUNCTION_ADD.SetInt(console::FT_FUNCTION_SORT);
+   wxPostEvent(_tllFuncList, eventFUNCTION_ADD);
+}
 
 //==============================================================================
-static int wxCALLBACK wxListCompareFunction(long item1, long item2, long sortData)
+//
+// The existence of this function is ridiculous.
+// It is required to keep the list of defined TELL functions (internal&external)
+// sorted. Required by wxListCtrl::SortItems as a callback function
+// The trouble is that there is no clean way in C++ to make a call back to a
+// method. There are much simpler ways to achieve the same functionality, but
+// wx boys didn't use them in this particular case.
+// So the function MUST be global.
+// Having the function defined as global means that it's loosing the connection
+// with the data in the control (class) which means that it requires a global
+// pointer to to the control itself. It's complete rubbish!
+//
+// Must be reported to wx lads!
+//
+int wxCALLBACK wxListCompareFunction(long item1, long item2, long sortData)
 {
    wxListItem li1, li2;
    li1.SetMask(wxLIST_MASK_TEXT);
@@ -589,22 +621,6 @@ void console::TELLFuncList::OnCommand(wxCommandEvent& event)
    }
 }
 
-//=============================================================================
-void console::TellFnAdd(const std::string name, void* arguments)
-{
-   wxCommandEvent eventFUNCTION_ADD(wxEVT_FUNC_BROWSER);
-   eventFUNCTION_ADD.SetString(wxString(name.c_str(), wxConvUTF8));
-   eventFUNCTION_ADD.SetClientData(arguments);
-   eventFUNCTION_ADD.SetInt(FT_FUNCTION_ADD);
-   wxPostEvent(CmdList, eventFUNCTION_ADD);
-}
-
-void console::TellFnSort()
-{
-   wxCommandEvent eventFUNCTION_ADD(wxEVT_FUNC_BROWSER);
-   eventFUNCTION_ADD.SetInt(FT_FUNCTION_SORT);
-   wxPostEvent(CmdList, eventFUNCTION_ADD);
-}
 //=============================================================================
 std::string TpdTime::operator () ()
 {

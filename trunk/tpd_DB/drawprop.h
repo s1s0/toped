@@ -216,19 +216,21 @@ namespace layprop {
    //
    class FontLibrary {
       public:
-                        FontLibrary(std::string, bool);
-                       ~FontLibrary();
-         void           getStringBounds(const std::string*, DBbox*);
-         void           drawString(const std::string*, bool);
-         void           drawWiredString(std::string);
-         void           drawSolidString(std::string);
-         bool           bindFont();
-         void           unbindFont();
+                                FontLibrary(std::string, bool);
+                               ~FontLibrary();
+         void                   getStringBounds(const std::string*, DBbox*);
+         void                   drawString(const std::string*, bool);
+         void                   drawWiredString(std::string);
+         void                   drawSolidString(std::string);
+         bool                   bindFont();
+         void                   unbindFont();
       private:
-         TGlfFont*      _font;
-         GLuint*        _ogl_buffers; //! Array with the "names" of all openGL buffers
-         byte           _num_ogl_buffers; //! Number of generated openGL VBOs
-         bool           _fti; // font type implementation ()
+         typedef std::map<std::string, TGlfFont*> FontCollectionMap;
+         FontCollectionMap      _font;
+         GLuint*                _ogl_buffers; //! Array with the "names" of all openGL buffers
+         byte                   _num_ogl_buffers; //! Number of generated openGL VBOs
+         bool                   _fti; // font type implementation ()
+         std::string            _activeFontName;
    };
 
    //=============================================================================

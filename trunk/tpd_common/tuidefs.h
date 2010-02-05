@@ -46,6 +46,7 @@ namespace tui
       ID_OAS_CELLTREE     ,
       ID_DRC_CELLTREE     ,
       ID_TPD_STATUS       ,
+      ID_TELL_FUNCS       ,
       ID_PNL_LAYERS       ,
       ID_PNL_CELLS        ,
       ID_CMD_LINE         ,

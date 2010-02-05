@@ -1064,10 +1064,3 @@ laydata::LibCellLists* DataCenter::getCells(int libID)
    return all_cells;
 }
 
-//void initDBLib(const std::string &localDir, const std::string &globalDir)
-//{
-//   DATC  = DEBUG_NEW DataCenter(localDir, globalDir);
-//   PROPC = DEBUG_NEW layprop::PropertyCenter();
-//}
-
-
