@@ -359,12 +359,13 @@ layprop::FontLibrary::FontLibrary(std::string fontfile, bool fti) : _fti(fti)
    {
       //@TODO - list of fonts here!
       // Parse the font library
-      _font = DEBUG_NEW TGlfFont(fontfile);
+      _activeFontName = "arial1";
+      _font[_activeFontName] = DEBUG_NEW TGlfFont(fontfile);
       _num_ogl_buffers += 2;
       // Create the VBO
       _ogl_buffers = DEBUG_NEW GLuint [_num_ogl_buffers];
       glGenBuffers(_num_ogl_buffers, _ogl_buffers);
-      _font->collect(_ogl_buffers[0], _ogl_buffers[1]);
+      _font[_activeFontName]->collect(_ogl_buffers[0], _ogl_buffers[1]);
    }
    else
    {
@@ -382,8 +383,8 @@ void layprop::FontLibrary::getStringBounds(const std::string* text, DBbox* overl
 {
    if (_fti)
    {
-      assert(NULL != _font); // make sure that fonts are initialised
-      _font->getStringBounds(text, overlap);
+      assert(NULL != _font[_activeFontName]); // make sure that fonts are initialized
+      _font[_activeFontName]->getStringBounds(text, overlap);
    }
    else
    {
@@ -397,7 +398,7 @@ void layprop::FontLibrary::drawString(const std::string* text, bool fill)
 {
    if (_fti)
    {
-     _font->drawString(text, fill);
+     _font[_activeFontName]->drawString(text, fill);
    }
    else
    {
@@ -410,7 +411,7 @@ void layprop::FontLibrary::drawWiredString(std::string text)
    if (_fti)
    {
       bindFont();
-      _font->drawString(&text, false);
+      _font[_activeFontName]->drawString(&text, false);
       unbindFont();
    }
    else
@@ -424,7 +425,7 @@ void layprop::FontLibrary::drawSolidString(std::string text)
    if (_fti)
    {
       bindFont();
-      _font->drawString(&text, true);
+      _font[_activeFontName]->drawString(&text, true);
       unbindFont();
    }
    else
@@ -436,8 +437,8 @@ void layprop::FontLibrary::drawSolidString(std::string text)
 bool  layprop::FontLibrary::bindFont()
 {
    assert(_fti);
-   if (NULL != _font)
-      return _font->bindBuffers();
+   if (NULL != _font[_activeFontName])
+      return _font[_activeFontName]->bindBuffers();
    else
       return false;
 }
@@ -452,7 +453,8 @@ layprop::FontLibrary::~FontLibrary()
 {
    if (_fti)
    {
-      delete (_font);
+      for (FontCollectionMap::const_iterator CF = _font.begin(); CF != _font.end(); CF++)
+         delete (CF->second);
       glDeleteBuffers(_num_ogl_buffers, _ogl_buffers);
       delete [] _ogl_buffers;
       _ogl_buffers = NULL;

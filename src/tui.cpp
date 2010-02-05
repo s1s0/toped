@@ -2430,7 +2430,7 @@ tui::TopedPropertySheets::TopedPropertySheets(wxWindow* parent)
 {
    Create(parent, wxID_ANY, wxT("Properties"), wxDefaultPosition, wxDefaultSize,
        wxDEFAULT_DIALOG_STYLE| (int)wxPlatform::IfNot(wxOS_WINDOWS_CE, wxRESIZE_BORDER));
-   CreateButtons(wxOK | wxCANCEL);
+   GetSizer()->Add(DEBUG_NEW wxButton(this, wxID_OK, wxT("Hide")), 0, wxALL | wxALIGN_RIGHT, 5);
    wxBookCtrlBase* notebook = GetBookCtrl();
    _renderingSheet = DEBUG_NEW RenderingPSheet(notebook);
    notebook->AddPage(_renderingSheet, wxT("Rendering"), true, -1);
