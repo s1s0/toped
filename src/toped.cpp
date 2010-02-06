@@ -299,6 +299,8 @@ tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos,
    wxToolTip::Enable(true);
    wxToolTip::SetDelay(3000);
    _propDialog = DEBUG_NEW tui::TopedPropertySheets(this);
+   // Initialize the post system
+   _tPost = DEBUG_NEW TpdPost(this);
 }
 
 void tui::TopedFrame::OnClose(wxCloseEvent& event)
@@ -338,6 +340,7 @@ tui::TopedFrame::~TopedFrame() {
    delete _propDialog;
    delete _canvas;
    delete _resourceCenter;
+   delete _tPost;
 //   delete _toped_status;
 }
 

@@ -333,7 +333,7 @@ void tui::LayoutCanvas::viewshift()
    /*   slide = false;*/
 }
 
-bool tui::LayoutCanvas::initializeGL()
+bool tui::LayoutCanvas::diagnozeGL()
 {
    //@TODO Check somewhere that RGBA mode is available!?
    //@TODO The next call needs to be fitted in some kind of GL descructor
