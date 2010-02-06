@@ -30,6 +30,7 @@
 #include <wx/wx.h>
 #include <wx/filefn.h>
 #include <wx/filename.h>
+#include <wx/dir.h>
 #include <sstream>
 #if WIN32
 #include <crtdbg.h>
@@ -54,11 +55,13 @@
 tui::TopedFrame*                 Toped = NULL;
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
+extern layprop::FontLibrary*     fontLib;
 extern parsercmd::cmdBLOCK*      CMDBlock;
 extern console::toped_logfile    LogFile;
 extern console::ted_cmd*         Console;
 //extern console::TELLFuncList*    CmdList;
 extern Calbr::CalbrFile*         DRCData;
+
 
 //-----------------------------------------------------------------------------
 
@@ -71,17 +74,18 @@ class TopedApp : public wxApp
       virtual bool   OnInit();
       virtual int    OnExit();
       virtual       ~TopedApp(){};
-   protected:
-      bool           GetLogFileName();
-      std::string    CheckFontFile(std::string);
-      bool           CheckCrashLog();
-      void           GetLocalDirs();
-      void           GetGlobalDirs(); //get directories in TPD_GLOBAL
-      void           FinishSessionLog();
-      void           SaveIgnoredCrashLog();
+   private:
+      bool           getLogFileName();
+//      std::string    checkFontFile(std::string);
+      void           loadGlfFonts();
+      bool           checkCrashLog();
+      void           getLocalDirs();
+      void           getGlobalDirs(); //get directories in TPD_GLOBAL
+      void           finishSessionLog();
+      void           saveIgnoredCrashLog();
       void           parseCmdLineArgs();
       void           printLogWHeader();
-      void           InitInternalFunctions(parsercmd::cmdMAIN* mblock);
+      void           initInternalFunctions(parsercmd::cmdMAIN* mblock);
       wxString       _logFileName;
       wxString       _tpdLogDir;
       wxString       _tpdFontDir;
@@ -90,7 +94,7 @@ class TopedApp : public wxApp
       wxString       _localDir;
       wxString       _inputTellFile;
       bool           _forceBasicRendering;
-      bool           _renderType;
+//      bool           _renderType;
 };
 
 //=============================================================================
@@ -98,10 +102,10 @@ bool TopedApp::OnInit()
 {
 //   DATC = DEBUG_NEW DataCenter();
    _forceBasicRendering = false;
-   _renderType = false;
+//   _renderType = false;
    wxImage::AddHandler(DEBUG_NEW wxPNGHandler);
-   GetLocalDirs();
-   GetGlobalDirs();
+   getLocalDirs();
+   getGlobalDirs();
    // Initialize Toped properties
    PROPC = DEBUG_NEW layprop::PropertyCenter();
    // Initialize Toped database
@@ -124,9 +128,9 @@ bool TopedApp::OnInit()
    // Diagnose the graphic system and return the appropriate
    // type of rendering (i.e. basic or tenderer)
    if (!_forceBasicRendering)
-      _renderType = Toped->view()->diagnozeGL();
+      PROPC->setRenderType(Toped->view()->diagnozeGL());
    // First thing after initializing openGL - load available layout fonts
-   PROPC->loadLayoutFonts(CheckFontFile("arial1"), _renderType);
+   loadGlfFonts();
    // Initialize the tool bars
    Toped->setIconDir(std::string(_tpdUIDir.mb_str(wxConvFile)));
    Toped->initToolBars();
@@ -134,12 +138,12 @@ bool TopedApp::OnInit()
    console::ted_log_ctrl *logWindow = DEBUG_NEW console::ted_log_ctrl(Toped->logwin());
    delete wxLog::SetActiveTarget(logWindow);
    // Create the session log file
-   if (!GetLogFileName()) return FALSE;
+   if (!getLogFileName()) return FALSE;
    // It's time to register all internal TELL functions
    // Create the main block parser block - WARNING! blockSTACK structure MUST already exist!
    CMDBlock = DEBUG_NEW parsercmd::cmdMAIN();
    tellstdfunc::initFuncLib(Toped, Toped->view());
-   InitInternalFunctions(static_cast<parsercmd::cmdMAIN*>(CMDBlock));
+   initInternalFunctions(static_cast<parsercmd::cmdMAIN*>(CMDBlock));
    // TODO! Here ->initialization of eventual plug-ins
    // Finally show the Toped frame
    SetTopWindow(Toped);
@@ -150,7 +154,7 @@ bool TopedApp::OnInit()
    //--------------------------------------------------------------------------
    // Check that previous session ended normally
    bool recovery_mode = false;
-   if (CheckCrashLog())
+   if (checkCrashLog())
    {
       wxMessageDialog* dlg1 = DEBUG_NEW  wxMessageDialog(Toped,
             wxT("Last session didn't exit normally. Start recovery?"),
@@ -161,7 +165,7 @@ bool TopedApp::OnInit()
       else
          tell_log(console::MT_WARNING,"Recovery rejected.");
       dlg1->Destroy();
-      if (!recovery_mode) SaveIgnoredCrashLog();
+      if (!recovery_mode) saveIgnoredCrashLog();
    }
    if (recovery_mode)
    {
@@ -201,12 +205,12 @@ int TopedApp::OnExit()
    delete PROPC;
    delete DATC;
 
-   FinishSessionLog();
+   finishSessionLog();
    return wxApp::OnExit();
 }
 
 //=============================================================================
-bool TopedApp::GetLogFileName()
+bool TopedApp::getLogFileName()
 {
    bool status = false;
    wxString fullName;
@@ -224,26 +228,49 @@ bool TopedApp::GetLogFileName()
 }
 
 //=============================================================================
-std::string TopedApp::CheckFontFile(std::string fontname)
+//std::string TopedApp::checkFontFile(std::string fontname)
+//{
+//   wxString fontFile;
+//   fontFile << _tpdFontDir << wxString(fontname.c_str(), wxConvUTF8) << wxT(".glf");
+//   wxFileName fontFN(fontFile);
+//   fontFN.Normalize();
+//   if (fontFN.IsOk() && fontFN.FileExists())
+//      return std::string (std::string(fontFN.GetFullPath().mb_str(wxConvFile)));
+//   else
+//   {
+//      wxString errmsg;
+//      errmsg << wxT("Font not \"") << fontFN.GetFullPath() << wxT("\" not found. \n") <<
+//                wxT("Text objects will not be visualized.\n");
+//      wxMessageDialog* dlg1 = DEBUG_NEW  wxMessageDialog(Toped,
+//            errmsg,
+//            wxT("Toped"),
+//            wxOK | wxICON_ERROR);
+//      dlg1->ShowModal();
+//      dlg1->Destroy();
+//      return "";
+//   }
+//}
+
+void TopedApp::loadGlfFonts()
 {
-   wxString fontFile;
-   fontFile << _tpdFontDir << wxString(fontname.c_str(), wxConvUTF8) << wxT(".glf");
-   wxFileName fontFN(fontFile);
-   fontFN.Normalize();
-   if (fontFN.IsOk() && fontFN.FileExists())
-      return std::string (std::string(fontFN.GetFullPath().mb_str(wxConvFile)));
-   else
+   wxDir fontDirectory(_tpdFontDir);
+   byte numFonts = 0;
+   fontLib = DEBUG_NEW layprop::FontLibrary(PROPC->renderType());
+   if (fontDirectory.IsOpened())
    {
-      wxString errmsg;
-      errmsg << wxT("Font not \"") << fontFN.GetFullPath() << wxT("\" not found. \n") <<
-                wxT("Text objects will not be visualized.\n");
-      wxMessageDialog* dlg1 = DEBUG_NEW  wxMessageDialog(Toped,
-            errmsg,
-            wxT("Toped"),
-            wxOK | wxICON_ERROR);
-      dlg1->ShowModal();
-      dlg1->Destroy();
-      return "";
+      wxString curFN;
+      if (fontDirectory.GetFirst(&curFN, wxT("*.glf"), wxDIR_FILES))
+      {
+         do
+         {
+            wxFileName wxffname(curFN);
+            std::string fname(wxffname.GetName().mb_str(wxConvFile));
+            std::string ffname(curFN.mb_str(wxConvFile));
+            fontLib->LoadLayoutFont(ffname, fname);
+
+            numFonts++;
+         } while (fontDirectory.GetNext(&curFN));
+      }
    }
 }
 
@@ -272,7 +299,7 @@ void TopedApp::parseCmdLineArgs()
 }
 
 //=============================================================================
-bool TopedApp::CheckCrashLog()
+bool TopedApp::checkCrashLog()
 {
    if (wxFileExists(_logFileName))
    {
@@ -283,7 +310,7 @@ bool TopedApp::CheckCrashLog()
 }
 
 //=============================================================================
-void TopedApp::GetLocalDirs()
+void TopedApp::getLocalDirs()
 {
    wxFileName* logDIR = DEBUG_NEW wxFileName(wxT("$TPD_LOCAL/"));
    logDIR->Normalize();
@@ -326,7 +353,7 @@ void TopedApp::GetLocalDirs()
    delete logDIR;
 }
 
-void TopedApp::GetGlobalDirs()
+void TopedApp::getGlobalDirs()
 {
    wxFileName* fontsDIR = DEBUG_NEW wxFileName(wxT("$TPD_GLOBAL/"));
    fontsDIR->Normalize();
@@ -395,7 +422,7 @@ void TopedApp::GetGlobalDirs()
 //=============================================================================
 void TopedApp::printLogWHeader()
 {
-   if (_renderType)
+   if (PROPC->renderType())
    {
       tell_log(console::MT_INFO,"...using VBO rendering");
    }
@@ -413,7 +440,7 @@ void TopedApp::printLogWHeader()
 }
 
 //=============================================================================
-void TopedApp::FinishSessionLog()
+void TopedApp::finishSessionLog()
 {
    LogFile.close();
    wxString fullName;
@@ -426,7 +453,7 @@ void TopedApp::FinishSessionLog()
 }
 
 //=============================================================================
-void TopedApp::SaveIgnoredCrashLog()
+void TopedApp::saveIgnoredCrashLog()
 {
    time_t timeNow = time(NULL);
    tm* broken_time = localtime(&timeNow);
@@ -442,7 +469,7 @@ void TopedApp::SaveIgnoredCrashLog()
    delete lFN;
 }
 
-void TopedApp::InitInternalFunctions(parsercmd::cmdMAIN* mblock)
+void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
 {
    //-----------------------------------------------------------------------------------------------------------
    // First the internal types

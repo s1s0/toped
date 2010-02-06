@@ -189,9 +189,10 @@ namespace layprop {
                         TGlfFont(std::string);
                        ~TGlfFont();
          void           getStringBounds(const std::string*, DBbox*);
-         void           collect(GLuint, GLuint);
+         void           collect();
          bool           bindBuffers();
          void           drawString(const std::string*, bool);
+         byte           status()        {return _status;}
       private:
          typedef std::map<byte, TGlfSymbol*> TFontMap;
          typedef std::map<byte, TGlfRSymbol*> FontMap;
@@ -216,8 +217,9 @@ namespace layprop {
    //
    class FontLibrary {
       public:
-                                FontLibrary(std::string, bool);
+                                FontLibrary(bool);
                                ~FontLibrary();
+         void                   LoadLayoutFont(std::string, std::string);
          void                   getStringBounds(const std::string*, DBbox*);
          void                   drawString(const std::string*, bool);
          void                   drawWiredString(std::string);
@@ -227,8 +229,8 @@ namespace layprop {
       private:
          typedef std::map<std::string, TGlfFont*> FontCollectionMap;
          FontCollectionMap      _font;
-         GLuint*                _ogl_buffers; //! Array with the "names" of all openGL buffers
-         byte                   _num_ogl_buffers; //! Number of generated openGL VBOs
+//         GLuint*                _ogl_buffers; //! Array with the "names" of all openGL buffers
+//         byte                   _num_ogl_buffers; //! Number of generated openGL VBOs
          bool                   _fti; // font type implementation ()
          std::string            _activeFontName;
    };
