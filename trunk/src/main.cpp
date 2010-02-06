@@ -59,8 +59,8 @@ extern layprop::FontLibrary*     fontLib;
 extern parsercmd::cmdBLOCK*      CMDBlock;
 extern console::toped_logfile    LogFile;
 extern console::ted_cmd*         Console;
-//extern console::TELLFuncList*    CmdList;
 extern Calbr::CalbrFile*         DRCData;
+extern const wxEventType         wxEVT_SETINGSMENU;
 
 
 //-----------------------------------------------------------------------------
@@ -129,8 +129,6 @@ bool TopedApp::OnInit()
    // type of rendering (i.e. basic or tenderer)
    if (!_forceBasicRendering)
       PROPC->setRenderType(Toped->view()->diagnozeGL());
-   // First thing after initializing openGL - load available layout fonts
-   loadGlfFonts();
    // Initialize the tool bars
    Toped->setIconDir(std::string(_tpdUIDir.mb_str(wxConvFile)));
    Toped->initToolBars();
@@ -148,6 +146,8 @@ bool TopedApp::OnInit()
    // Finally show the Toped frame
    SetTopWindow(Toped);
    Toped->Show(TRUE);
+   // First thing after initializing openGL - load available layout fonts
+   loadGlfFonts();
    // at this stage - the tool shall be considered fully functional
    //--------------------------------------------------------------------------
 
@@ -264,15 +264,21 @@ void TopedApp::loadGlfFonts()
          {
             std::string ffname(_tpdFontDir.mb_str(wxConvFile));
             ffname += curFN.mb_str(wxConvFile);
-            fontLib->LoadLayoutFont(ffname);
+            if (fontLib->LoadLayoutFont(ffname))
+            {
+               wxCommandEvent eventLoadFont(wxEVT_SETINGSMENU);
+               eventLoadFont.SetId(tui::STS_LDFONT);
+               eventLoadFont.SetString(wxString(fontLib->getActiveFontName().c_str(), wxConvUTF8));
+               wxPostEvent(Toped, eventLoadFont);
+            }
          } while (fontDirectory.GetNext(&curFN));
       }
    }
    if (0 == fontLib->numFonts())
    {
       wxString errmsg;
-      errmsg << wxT("Can't load layout fonts.\n") 
-             << wxT("Check/fix the installation and/or TPD_GLOBAL env. variable\n") 
+      errmsg << wxT("Can't load layout fonts.\n")
+             << wxT("Check/fix the installation and/or TPD_GLOBAL env. variable\n")
              << wxT("Text objects will not be visualized.\n");
       wxMessageDialog* dlg1 = DEBUG_NEW  wxMessageDialog(Toped,
             errmsg,
@@ -280,6 +286,13 @@ void TopedApp::loadGlfFonts()
             wxOK | wxICON_ERROR);
       dlg1->ShowModal();
       dlg1->Destroy();
+   }
+   else
+   {
+      wxCommandEvent eventLoadFont(wxEVT_SETINGSMENU);
+      eventLoadFont.SetId(tui::STS_SLCTFONT);
+      eventLoadFont.SetString(wxT("Arial Normal 1"));
+      wxPostEvent(Toped, eventLoadFont);
    }
 }
 

@@ -172,7 +172,7 @@ layprop::TGlfRSymbol::~TGlfRSymbol()
 //
 //
 //
-layprop::TGlfFont::TGlfFont(std::string filename, std::string& fontname) : 
+layprop::TGlfFont::TGlfFont(std::string filename, std::string& fontname) :
    _status(0), _pitch(0.1f), _spaceWidth(0.5f)
 {
    FILE* ffile = fopen(filename.c_str(), "rb");
@@ -364,7 +364,7 @@ layprop::FontLibrary::FontLibrary(bool fti) :
 {
 }
 
-void layprop::FontLibrary::LoadLayoutFont(std::string fontfile)
+bool layprop::FontLibrary::LoadLayoutFont(std::string fontfile)
 {
    if (_fti)
    {
@@ -375,7 +375,9 @@ void layprop::FontLibrary::LoadLayoutFont(std::string fontfile)
          // fit it in a VBO
          curFont->collect();
          _font[_activeFontName] = curFont;
+         return true;
       }
+      return false;
    }
    else
    {
@@ -457,6 +459,12 @@ void  layprop::FontLibrary::unbindFont()
 {
    glBindBuffer(GL_ARRAY_BUFFER, 0);
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void layprop::FontLibrary::allFontNames(nameList& allFontNames)
+{
+   for(FontCollectionMap::const_iterator CF = _font.begin(); CF != _font.end(); CF++)
+      allFontNames.push_back(CF->first);
 }
 
 layprop::FontLibrary::~FontLibrary()

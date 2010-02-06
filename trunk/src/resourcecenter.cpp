@@ -41,7 +41,6 @@ extern const wxEventType         wxEVT_TOOLBARSIZE;
 extern const wxEventType         wxEVT_TOOLBARDEF;
 extern const wxEventType         wxEVT_TOOLBARADDITEM;
 extern const wxEventType         wxEVT_TOOLBARDELETEITEM;
-extern const wxEventType         wxEVT_SETINGSMENU;
 
 tui::MenuItemHandler::MenuItemHandler(void)
    :_ID(0), _menuItem(""), _hotKey(""), _function(""), _method(NULL)
@@ -49,14 +48,14 @@ tui::MenuItemHandler::MenuItemHandler(void)
 }
 
 tui::MenuItemHandler::MenuItemHandler(int ID, std::string menuItem, std::string hotKey, std::string function)
-   :_ID(ID), _menuItem(menuItem), _hotKey(hotKey), _function(function), _method(NULL) 
+   :_ID(ID), _menuItem(menuItem), _hotKey(hotKey), _function(function), _method(NULL)
 {
    _inserted   =  false;
    _changed    =  false;
 }
 
 tui::MenuItemHandler::MenuItemHandler(int ID, std::string menuItem, std::string hotKey, callbackMethod cbMethod)
-   :_ID(ID), _menuItem(menuItem), _hotKey(hotKey), _function(""), _method(cbMethod) 
+   :_ID(ID), _menuItem(menuItem), _hotKey(hotKey), _function(""), _method(cbMethod)
 {
    _inserted   =  false;
    _changed    =  false;
@@ -72,13 +71,13 @@ tui::MenuItemHandler::MenuItemHandler(int ID, std::string menuItem, std::string 
 //Build intermediate menu item (from top menu)
 //Returns place where we need insert our menu item
 wxMenu* tui::MenuItemHandler::buildPath(wxMenuBar *menuBar, const std::vector<std::string> &menuNames)
-{  
+{
    wxMenu* menu, *menu2;
    wxMenuItem *menuItem;
    int menuID;
 
 
-   //First item - Top Menu 
+   //First item - Top Menu
    std::string menuString =menuNames[0];
    menuID = menuBar->FindMenu(wxString(menuString.c_str(), wxConvUTF8));
    if (wxNOT_FOUND == menuID)
@@ -88,14 +87,14 @@ wxMenu* tui::MenuItemHandler::buildPath(wxMenuBar *menuBar, const std::vector<st
          menuBar->Insert(menuBar->GetMenuCount()-1, menu, wxString(menuString.c_str(), wxConvUTF8));
          menuID = menuBar->FindMenu(wxString(menuString.c_str(), wxConvUTF8));
       }
-      
+
       menu = menuBar->GetMenu(menuID);
       //intermediate menu items - create if does not exists
       for (unsigned int j=1; j<(menuNames.size()-1); j++)
       {
          menuID=menu->FindItem(wxString(menuNames[j].c_str(), wxConvUTF8));
          menuItem = menu->FindItem(menuID, &menu2);
-            
+
          if ((wxNOT_FOUND == menuID) || (menu2 == NULL))
          {
             menu2 = DEBUG_NEW wxMenu();
@@ -121,8 +120,8 @@ void tui::MenuItemHandler::create(wxMenuBar *menuBar)
 
    menuNames = split(_menuItem, '/');
 
-   
-         
+
+
    if (menuNames.size()==0) return;
 
    if (menuNames.size()==1)
@@ -133,17 +132,17 @@ void tui::MenuItemHandler::create(wxMenuBar *menuBar)
       _inserted = true;
       return;
    }
-   
+
    menu = buildPath(menuBar, menuNames);
-         
+
    //last item
    std::string insertedString = *(menuNames.end()-1);
    if (_hotKey !="") insertedString=insertedString+"\t"+_hotKey;
-   
+
    menuItem = DEBUG_NEW wxMenuItem(menu, _ID, wxString(insertedString.c_str(), wxConvUTF8), wxString(_helpString.c_str(), wxConvUTF8));
-        
+
    menu->Append(menuItem);
-            
+
    _inserted = true;
 }
 
@@ -156,8 +155,8 @@ void tui::MenuItemHandler::recreate(wxMenuBar *menuBar)
 
    menuNames = split(_menuItem, '/');
 
-   
-         
+
+
    if (menuNames.size()==0) return;
 
    if (menuNames.size()==1)
@@ -168,15 +167,15 @@ void tui::MenuItemHandler::recreate(wxMenuBar *menuBar)
       _inserted = true;
       return;
    }
-   
+
    menu = buildPath(menuBar, menuNames);
-         
+
    //last item
    std::string insertedString = *(menuNames.end()-1);
    if (_hotKey !="") insertedString=insertedString+"\t"+_hotKey;
-   
+
    int index = menu->FindItem(wxString(insertedString.c_str(), wxConvUTF8));
-   
+
    menuItem = menu->FindItem(index);
    if ((index==wxNOT_FOUND)||(menuItem==NULL))
    {
@@ -188,9 +187,9 @@ void tui::MenuItemHandler::recreate(wxMenuBar *menuBar)
    menuItem->SetText(wxString(insertedString.c_str(), wxConvUTF8));
    menuItem->SetHelp(wxString(_helpString.c_str(), wxConvUTF8));
    //menuItem = DEBUG_NEW wxMenuItem(menu, _ID, insertedString.c_str(), _helpString.c_str());
-    
+
    //menu->Append(menuItem);
-            
+
    _inserted = true;
    _changed = false;
 };
@@ -198,12 +197,12 @@ void tui::MenuItemHandler::recreate(wxMenuBar *menuBar)
 void  tui::MenuItemHandler::changeInterior(std::string hotKey, std::string function, callbackMethod cbMethod, std::string helpString)
 {
    _hotKey = hotKey;
-   if (function!="") 
+   if (function!="")
    {
       _function = function;
       _method = NULL;
    }
-   else 
+   else
       if (cbMethod!= NULL)
          {
             _method = cbMethod;
@@ -237,13 +236,13 @@ void tui::MenuItemSeparator::create(wxMenuBar *menuBar)
 
    menustring = _menuItem;
    menuNames = split(menustring, '/');
-         
+
    if (menuNames.size()==0) return;
 
    menu = buildPath(menuBar, menuNames);
-      
+
    menu->AppendSeparator();
-            
+
    _inserted = true;
 }
 
@@ -384,7 +383,7 @@ tui::ToolBarHandler::ToolBarHandler(int ID, const std::string & name, int direct
       _currentSize(ICON_SIZE_16x16)
 {
    wxAuiPaneInfo paneInfo;
-   
+
    if((_dockDirection==wxAUI_DOCK_LEFT)||(_dockDirection==wxAUI_DOCK_RIGHT))
    {
       _toolBar = DEBUG_NEW TpdToolBar(ID, wxTB_VERTICAL, ICON_SIZE_16x16);
@@ -589,7 +588,7 @@ tui::ResourceCenter::ResourceCenter(void):
 {
 }
 
-tui::ResourceCenter::~ResourceCenter(void) 
+tui::ResourceCenter::~ResourceCenter(void)
 {
    for(itemList::iterator mItem=_menus.begin(); mItem!=_menus.end(); mItem++)
    {
@@ -640,22 +639,22 @@ void tui::ResourceCenter::buildMenu(wxMenuBar *menuBar)
 
 bool tui::ResourceCenter::checkExistence(const tui::MenuItemHandler &item)
 {
-   bool ret=false;  
+   bool ret=false;
    std::ostringstream ost;
 
    std::string curStr, itemStr;
    itemStr = item.menuItem();
-   
+
    //convert menuItem into lowercase and remove char '&'
    itemStr = simplify(itemStr, '&');
-   
+
    std::string itemHotKey = simplify(item.hotKey(), '-');
    itemHotKey = simplify(itemHotKey, '+');
-   
+
    for(itemList::iterator mItem=_menus.begin(); mItem!=_menus.end(); mItem++)
    {
       curStr = (*mItem)->menuItem();
-         
+
       //convert menuItem into lowercase and remove char '&'
       curStr = simplify(curStr, '&');
 
@@ -665,14 +664,14 @@ bool tui::ResourceCenter::checkExistence(const tui::MenuItemHandler &item)
          tell_log(console::MT_WARNING,ost.str());
 
          (*mItem)->changeInterior(item.hotKey(), item.function(), item.method(), item.helpString());
-                  
+
          ret = true;
          continue;
       }
-      
+
       if (item.hotKey()!="")
       {
-         
+
          std::string mItemHotKey = simplify((*mItem)->hotKey(), '-');
          mItemHotKey = simplify(mItemHotKey, '+');
 
@@ -728,7 +727,7 @@ void tui::ResourceCenter::appendMenu(const std::string &menuItem, const std::str
    //it need for simplicity
    std::string str = menuItem;
    str[0] = toupper(str[0]);
-  
+
 
    MenuItemHandler* mItem= DEBUG_NEW MenuItem(ID, str, hotKey, cbMethod);
    if (!checkExistence(*mItem))
@@ -746,14 +745,14 @@ void tui::ResourceCenter::appendMenu(const std::string &menuItem, const std::str
    //it need for simplicity
    std::string str = menuItem;
    str[0] = toupper(str[0]);
-  
+
    MenuItemHandler* mItem= DEBUG_NEW MenuItem(ID, str, hotKey, cbMethod, helpString);
    if (!checkExistence(*mItem))
    {
       _menus.push_back(mItem);
       _menuCount++;
    }
-   
+
 };
 
 void tui::ResourceCenter::appendMenuSeparator(const std::string &menuItem)
@@ -768,7 +767,7 @@ void tui::ResourceCenter::executeMenu(int ID1)
 
    for(itemList::iterator mItem=_menus.begin(); mItem!=_menus.end(); mItem++)
    {
-      if (((*mItem)->ID())==ID1) 
+      if (((*mItem)->ID())==ID1)
       {
          //Priority - user defined function
          if (!((*mItem)->function()).empty())
@@ -796,7 +795,7 @@ void tui::ResourceCenter::executeMenu(int ID1)
    }
 }
 
-/*void tui::ResourceCenter::appendTool(const std::string toolBarName, const std::string &toolBarItem, 
+/*void tui::ResourceCenter::appendTool(const std::string toolBarName, const std::string &toolBarItem,
                                      const std::string &bitmapFileName,
                                      const std::string &hotKey, callbackMethod cbMethod, int direction)
 {
@@ -812,7 +811,7 @@ void tui::ResourceCenter::executeMenu(int ID1)
          break;
       }
    }
-   
+
    if (it==_toolBars.end())
    {
       ID = TDUMMY_TOOL + _toolCount;
@@ -825,7 +824,7 @@ void tui::ResourceCenter::executeMenu(int ID1)
       _toolCount++;
       toolBar->addTool(tool);
    }
- 
+
 }*/
 
 void tui::ResourceCenter::setDirection(int direction)
@@ -1085,10 +1084,10 @@ int tellstdfunc::stdTOOLBARADDITEM::execute()
       iconCmdMap = static_cast<telldata::tthshstr*>((iconCmdMapList->mlist())[i]);
       std::string toolName = iconCmdMap->key().value();
       std::string tellCommand = iconCmdMap->value().value();
-   
+
       //WARNING!!! Object data must destroyed in event reciever
       StringMapClientData *data = DEBUG_NEW StringMapClientData(toolName, tellCommand);
-   
+
       wxString str = wxString(toolbarName.c_str(), wxConvUTF8);
       wxCommandEvent eventToolBarDef(wxEVT_TOOLBARADDITEM);
       eventToolBarDef.SetClientObject(data);
