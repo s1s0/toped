@@ -70,7 +70,7 @@ namespace tui {
       void           snapshot(byte*&, word&, word&);
       void           showInfo();
       void           setOglThread(bool val) {_oglThread = true;} 
-      bool           initializeGL();
+      bool           diagnozeGL();
       bool           initStatus() {
 #ifdef __WXGTK__
          return (NULL != x_visual);

@@ -100,6 +100,7 @@ namespace tui {
       ResourceCenter*         _resourceCenter;
       LayoutCanvas*           _canvas;
       wxToolBar*              _status;
+      TpdPost*                _tPost;
       tui::TopedPropertySheets* _propDialog;
       wxAuiManager            _winManager;
       //Menu stuff
