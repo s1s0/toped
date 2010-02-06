@@ -229,7 +229,9 @@ namespace tui
       STS_ANGLE           ,
       STS_CURSOR          ,
       STS_VISILIMIT       ,
-      STS_CELLDAB
+      STS_CELLDAB         ,
+      STS_LDFONT          ,
+      STS_SLCTFONT
    } SETTINGSMENU_TYPE;
 
    typedef enum

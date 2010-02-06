@@ -218,14 +218,16 @@ namespace layprop {
       public:
                                 FontLibrary(bool);
                                ~FontLibrary();
-         void                   LoadLayoutFont(std::string);
+         bool                   LoadLayoutFont(std::string);
          void                   getStringBounds(const std::string*, DBbox*);
          void                   drawString(const std::string*, bool);
          void                   drawWiredString(std::string);
          void                   drawSolidString(std::string);
          bool                   bindFont();
          void                   unbindFont();
-         word                   numFonts()  {return _font.size();}        
+         void                   allFontNames(nameList&);
+         word                   numFonts()                {return _font.size();}
+         std::string            getActiveFontName() const {return _activeFontName;}
       private:
          typedef std::map<std::string, TGlfFont*> FontCollectionMap;
          FontCollectionMap      _font;

@@ -43,6 +43,7 @@
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
 extern console::ted_cmd*         Console;
+extern layprop::FontLibrary*     fontLib;
 
 #if wxCHECK_VERSION(2, 8, 0)
 #define tpdfOPEN wxFD_OPEN
@@ -2492,8 +2493,13 @@ tui::TopedPropertySheets::RenderingPSheet::RenderingPSheet(wxWindow* parent) : w
          textSizer->Add(textMarks , 1, wxALL | wxALIGN_CENTER | wxEXPAND);
          //
          wxCheckBox* textOrien  = DEBUG_NEW wxCheckBox(this, PDSET_TEXTORI, wxT("Adjust orientation"));
+         wxArrayString allFontNames_wx;
+         nameList allFontNames_std;
+         wxComboBox* allFonts = DEBUG_NEW wxComboBox(this, PDSET_TEXTFONTS,
+               wxT(""), wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_DROPDOWN | wxCB_READONLY | wxCB_SORT);
       topTextSizer->Add(textSizer, 0, wxALL | wxALIGN_CENTER | wxEXPAND);
-      topTextSizer->Add(textOrien, 1, wxALL | wxALIGN_LEFT             );
+      topTextSizer->Add(textOrien, 0, wxALL | wxALIGN_LEFT             );
+      topTextSizer->Add(allFonts , 0, wxALL | wxALIGN_CENTER | wxEXPAND);
 
    // Pack everything
    topSizer->Add(   imgSizer , 0, wxEXPAND | wxALL, 5);//   topSizer->Add(10,10,0);
@@ -2606,6 +2612,14 @@ void tui::TopedPropertySheets::RenderingPSheet::update(wxCommandEvent& evt)
          break;
       case STS_CELLDAB     :
          _cellDepthEbb->setValue(evt.GetInt());
+         break;
+      case STS_LDFONT      :
+         targetControl = FindWindow(PDSET_TEXTFONTS);assert(targetControl);
+         static_cast<wxComboBox*>(targetControl)->Append(evt.GetString() );
+         break;
+      case STS_SLCTFONT    :
+         targetControl = FindWindow(PDSET_TEXTFONTS);assert(targetControl);
+         static_cast<wxComboBox*>(targetControl)->SetStringSelection(evt.GetString() );
          break;
       default: assert(false);
    }

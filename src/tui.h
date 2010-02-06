@@ -89,6 +89,7 @@ namespace tui {
       PDSET_TEXTMARK      ,
       PDSET_TEXTBOX       ,
       PDSET_TEXTORI       ,
+      PDSET_TEXTFONTS     ,
       PDIMG_DETAIL        ,
       PDCELL_DOV          ,
       PDCELL_DAB          ,
