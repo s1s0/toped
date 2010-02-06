@@ -254,7 +254,6 @@ bool TopedApp::getLogFileName()
 void TopedApp::loadGlfFonts()
 {
    wxDir fontDirectory(_tpdFontDir);
-   byte numFonts = 0;
    fontLib = DEBUG_NEW layprop::FontLibrary(PROPC->renderType());
    if (fontDirectory.IsOpened())
    {
@@ -263,14 +262,24 @@ void TopedApp::loadGlfFonts()
       {
          do
          {
-            wxFileName wxffname(curFN);
-            std::string fname(wxffname.GetName().mb_str(wxConvFile));
-            std::string ffname(curFN.mb_str(wxConvFile));
-            fontLib->LoadLayoutFont(ffname, fname);
-
-            numFonts++;
+            std::string ffname(_tpdFontDir.mb_str(wxConvFile));
+            ffname += curFN.mb_str(wxConvFile);
+            fontLib->LoadLayoutFont(ffname);
          } while (fontDirectory.GetNext(&curFN));
       }
+   }
+   if (0 == fontLib->numFonts())
+   {
+      wxString errmsg;
+      errmsg << wxT("Can't load layout fonts.\n") 
+             << wxT("Check/fix the installation and/or TPD_GLOBAL env. variable\n") 
+             << wxT("Text objects will not be visualized.\n");
+      wxMessageDialog* dlg1 = DEBUG_NEW  wxMessageDialog(Toped,
+            errmsg,
+            wxT("Toped"),
+            wxOK | wxICON_ERROR);
+      dlg1->ShowModal();
+      dlg1->Destroy();
    }
 }
 

@@ -186,7 +186,7 @@ namespace layprop {
    //
    class TGlfFont {
       public:
-                        TGlfFont(std::string);
+         TGlfFont(std::string, std::string&);
                        ~TGlfFont();
          void           getStringBounds(const std::string*, DBbox*);
          void           collect();
@@ -200,7 +200,6 @@ namespace layprop {
          TFontMap       _tsymbols;
          word           _all_vertexes;
          word           _all_indexes;
-         char           _fname [97];
          byte           _status;
          byte           _numSymbols;
          float          _pitch;
@@ -219,13 +218,14 @@ namespace layprop {
       public:
                                 FontLibrary(bool);
                                ~FontLibrary();
-         void                   LoadLayoutFont(std::string, std::string);
+         void                   LoadLayoutFont(std::string);
          void                   getStringBounds(const std::string*, DBbox*);
          void                   drawString(const std::string*, bool);
          void                   drawWiredString(std::string);
          void                   drawSolidString(std::string);
          bool                   bindFont();
          void                   unbindFont();
+         word                   numFonts()  {return _font.size();}        
       private:
          typedef std::map<std::string, TGlfFont*> FontCollectionMap;
          FontCollectionMap      _font;

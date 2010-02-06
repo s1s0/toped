@@ -172,7 +172,8 @@ layprop::TGlfRSymbol::~TGlfRSymbol()
 //
 //
 //
-layprop::TGlfFont::TGlfFont(std::string filename) : _status(0), _pitch(0.1f), _spaceWidth(0.5f)
+layprop::TGlfFont::TGlfFont(std::string filename, std::string& fontname) : 
+   _status(0), _pitch(0.1f), _spaceWidth(0.5f)
 {
    FILE* ffile = fopen(filename.c_str(), "rb");
    _pbuffer = 0;
@@ -194,8 +195,10 @@ layprop::TGlfFont::TGlfFont(std::string filename) : _status(0), _pitch(0.1f), _s
    else
    {
       // Get the font name
-      fread(_fname, 96, 1, ffile);
-      _fname[96] = 0x0;
+      char fname [97];
+      fread(fname, 96, 1, ffile);
+      fname[96] = 0x0;
+      fontname = fname;
       // Get the number of symbols
       fread(&_numSymbols, 1, 1, ffile);
       // Read the rest  of bytes to 128 (unused)
@@ -220,7 +223,7 @@ layprop::TGlfFont::TGlfFont(std::string filename) : _status(0), _pitch(0.1f), _s
 void layprop::TGlfFont::collect()
 {
    // Create the VBO
-   GLuint* ogl_buffers = DEBUG_NEW GLuint [2];
+   GLuint ogl_buffers[2];
    glGenBuffers(2, ogl_buffers);
    _pbuffer = ogl_buffers[0];
    _ibuffer = ogl_buffers[1];
@@ -361,17 +364,16 @@ layprop::FontLibrary::FontLibrary(bool fti) :
 {
 }
 
-void layprop::FontLibrary::LoadLayoutFont(std::string fontfile, std::string font)
+void layprop::FontLibrary::LoadLayoutFont(std::string fontfile)
 {
    if (_fti)
    {
       // Parse the font library
-      TGlfFont* curFont = DEBUG_NEW TGlfFont(fontfile);
+      TGlfFont* curFont = DEBUG_NEW TGlfFont(fontfile, _activeFontName);
       if (!curFont->status())
       {
          // fit it in a VBO
          curFont->collect();
-         _activeFontName = font;
          _font[_activeFontName] = curFont;
       }
    }
