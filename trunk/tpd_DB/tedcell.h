@@ -151,7 +151,7 @@ namespace laydata {
       void                 unselectInBox(DBbox, bool, const DWordSet&);
       void                 unselectFromList(SelectList*, const DWordSet&);
       void                 unselectAll(bool destroy=false);
-      bool                 addList(TdtDesign*, AtticList*/*, DWordSet&*/);
+      bool                 addList(TdtDesign*, AtticList* /*, DWordSet&*/);
       bool                 copySelected(TdtDesign*, const CTM&);
       bool                 moveSelected(TdtDesign*, const CTM&, SelectList**);
       bool                 rotateSelected(laydata::TdtDesign*, const CTM&, SelectList**);
