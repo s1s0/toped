@@ -255,11 +255,10 @@ layprop::PropertyCenter::PropertyCenter()
 //   return false;
 //}
 
-void layprop::PropertyCenter::loadLayoutFonts(std::string fontfile, bool vbo)
-{
-   _renderType = vbo;
-   fontLib = DEBUG_NEW FontLibrary(fontfile, vbo);
-}
+//void layprop::PropertyCenter::loadLayoutFonts(std::string ffname, std::string fname, bool vbo)
+//{
+//   fontLib = DEBUG_NEW FontLibrary(ffname, fname, vbo);
+//}
 
 void layprop::PropertyCenter::addUnpublishedLay(word layno)
 {

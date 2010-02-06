@@ -172,7 +172,7 @@ layprop::TGlfRSymbol::~TGlfRSymbol()
 //
 //
 //
-layprop::TGlfFont::TGlfFont(std::string filename) : _pitch(0.1f), _spaceWidth(0.5f)
+layprop::TGlfFont::TGlfFont(std::string filename) : _status(0), _pitch(0.1f), _spaceWidth(0.5f)
 {
    FILE* ffile = fopen(filename.c_str(), "rb");
    _pbuffer = 0;
@@ -217,10 +217,14 @@ layprop::TGlfFont::TGlfFont(std::string filename) : _pitch(0.1f), _spaceWidth(0.
    fclose(ffile);
 }
 
-void layprop::TGlfFont::collect(GLuint pbuf, GLuint ibuf)
+void layprop::TGlfFont::collect()
 {
-   _pbuffer = pbuf;
-   _ibuffer = ibuf;
+   // Create the VBO
+   GLuint* ogl_buffers = DEBUG_NEW GLuint [2];
+   glGenBuffers(2, ogl_buffers);
+   _pbuffer = ogl_buffers[0];
+   _ibuffer = ogl_buffers[1];
+   // Bind the buffers
    glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
    glBufferData(GL_ARRAY_BUFFER                   ,
                 2 * _all_vertexes * sizeof(float) ,
@@ -250,7 +254,6 @@ void layprop::TGlfFont::collect(GLuint pbuf, GLuint ibuf)
    _tsymbols.clear();
    assert(_all_vertexes == vrtx_indx);
    assert(_all_indexes  == indx_indx);
-   _status = 0;
    glUnmapBuffer(GL_ARRAY_BUFFER);
    glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
    glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -345,27 +348,32 @@ layprop::TGlfFont::~TGlfFont()
 {
    for (FontMap::const_iterator CS = _symbols.begin(); CS != _symbols.end(); CS++)
       delete (CS->second);
+   GLuint ogl_buffers[2] = {_pbuffer, _ibuffer};
+   glDeleteBuffers(2, ogl_buffers);
 }
 
 //=============================================================================
 //
 //
 //
-layprop::FontLibrary::FontLibrary(std::string fontfile, bool fti) : _fti(fti)
+layprop::FontLibrary::FontLibrary(bool fti) :
+   _fti(fti), _activeFontName("")
 {
-   _ogl_buffers = NULL;
-   _num_ogl_buffers = 0;
+}
+
+void layprop::FontLibrary::LoadLayoutFont(std::string fontfile, std::string font)
+{
    if (_fti)
    {
-      //@TODO - list of fonts here!
       // Parse the font library
-      _activeFontName = "arial1";
-      _font[_activeFontName] = DEBUG_NEW TGlfFont(fontfile);
-      _num_ogl_buffers += 2;
-      // Create the VBO
-      _ogl_buffers = DEBUG_NEW GLuint [_num_ogl_buffers];
-      glGenBuffers(_num_ogl_buffers, _ogl_buffers);
-      _font[_activeFontName]->collect(_ogl_buffers[0], _ogl_buffers[1]);
+      TGlfFont* curFont = DEBUG_NEW TGlfFont(fontfile);
+      if (!curFont->status())
+      {
+         // fit it in a VBO
+         curFont->collect();
+         _activeFontName = font;
+         _font[_activeFontName] = curFont;
+      }
    }
    else
    {
@@ -455,9 +463,6 @@ layprop::FontLibrary::~FontLibrary()
    {
       for (FontCollectionMap::const_iterator CF = _font.begin(); CF != _font.end(); CF++)
          delete (CF->second);
-      glDeleteBuffers(_num_ogl_buffers, _ogl_buffers);
-      delete [] _ogl_buffers;
-      _ogl_buffers = NULL;
    }
    else
       glfClose();

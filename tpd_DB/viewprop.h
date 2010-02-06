@@ -119,7 +119,6 @@ namespace layprop {
       void              setUU(real);
       void              setGdsLayMap(USMap* map);
       void              setCifLayMap(USMap* map);
-      void              loadLayoutFonts(std::string fft, bool vbo);
       DWordSet          allUnselectable();
       bool              lockDrawProp(DrawProperties*&, PropertyState state = DB);
       void              unlockDrawProp(DrawProperties*&);
@@ -138,6 +137,7 @@ namespace layprop {
       void              mouseStop()                      {_supp_data.mouseStop();}
       const WordList&   upLayers()                       {_uplaylist.sort(); _uplaylist.unique(); return _uplaylist;}
       void              clearUnpublishedLayers()         {_uplaylist.clear();}
+      void              setRenderType(bool rt)           {_renderType = rt;}
       real              step() const                     {return _step;}
       int4b             stepDB() const                   {return (word)rint(_step*_DBscale);}
       real              UU() const                       {return _UU;}
