@@ -31,6 +31,7 @@
 #include <wx/filefn.h>
 #include <wx/filename.h>
 #include <wx/dir.h>
+#include <wx/dynlib.h>
 #include <sstream>
 #if WIN32
 #include <crtdbg.h>
@@ -76,8 +77,8 @@ class TopedApp : public wxApp
       virtual       ~TopedApp(){};
    private:
       bool           getLogFileName();
-//      std::string    checkFontFile(std::string);
       void           loadGlfFonts();
+      void           loadPlugIns();
       bool           checkCrashLog();
       void           getLocalDirs();
       void           getGlobalDirs(); //get directories in TPD_GLOBAL
@@ -89,12 +90,13 @@ class TopedApp : public wxApp
       wxString       _logFileName;
       wxString       _tpdLogDir;
       wxString       _tpdFontDir;
-      wxString       _tpdUIDir;
+      wxString       _tpdResourceDir;
+      wxString       _tpdPlugInDir;
       wxString       _globalDir;
       wxString       _localDir;
       wxString       _inputTellFile;
       bool           _forceBasicRendering;
-//      bool           _renderType;
+      wxDynamicLibrary* _plugin;
 };
 
 //=============================================================================
@@ -130,7 +132,7 @@ bool TopedApp::OnInit()
    if (!_forceBasicRendering)
       PROPC->setRenderType(Toped->view()->diagnozeGL());
    // Initialize the tool bars
-   Toped->setIconDir(std::string(_tpdUIDir.mb_str(wxConvFile)));
+   Toped->setIconDir(std::string(_tpdResourceDir.mb_str(wxConvFile)));
    Toped->initToolBars();
    // Replace the active console in the wx system with Toped console window
    console::ted_log_ctrl *logWindow = DEBUG_NEW console::ted_log_ctrl(Toped->logwin());
@@ -142,7 +144,8 @@ bool TopedApp::OnInit()
    CMDBlock = DEBUG_NEW parsercmd::cmdMAIN();
    tellstdfunc::initFuncLib(Toped, Toped->view());
    initInternalFunctions(static_cast<parsercmd::cmdMAIN*>(CMDBlock));
-   // TODO! Here ->initialization of eventual plug-ins
+   // Loading of eventual plug-ins
+   loadPlugIns();
    // Finally show the Toped frame
    SetTopWindow(Toped);
    Toped->Show(TRUE);
@@ -228,29 +231,6 @@ bool TopedApp::getLogFileName()
 }
 
 //=============================================================================
-//std::string TopedApp::checkFontFile(std::string fontname)
-//{
-//   wxString fontFile;
-//   fontFile << _tpdFontDir << wxString(fontname.c_str(), wxConvUTF8) << wxT(".glf");
-//   wxFileName fontFN(fontFile);
-//   fontFN.Normalize();
-//   if (fontFN.IsOk() && fontFN.FileExists())
-//      return std::string (std::string(fontFN.GetFullPath().mb_str(wxConvFile)));
-//   else
-//   {
-//      wxString errmsg;
-//      errmsg << wxT("Font not \"") << fontFN.GetFullPath() << wxT("\" not found. \n") <<
-//                wxT("Text objects will not be visualized.\n");
-//      wxMessageDialog* dlg1 = DEBUG_NEW  wxMessageDialog(Toped,
-//            errmsg,
-//            wxT("Toped"),
-//            wxOK | wxICON_ERROR);
-//      dlg1->ShowModal();
-//      dlg1->Destroy();
-//      return "";
-//   }
-//}
-
 void TopedApp::loadGlfFonts()
 {
    wxDir fontDirectory(_tpdFontDir);
@@ -294,6 +274,12 @@ void TopedApp::loadGlfFonts()
       eventLoadFont.SetString(wxT("Arial Normal 1"));
       wxPostEvent(Toped, eventLoadFont);
    }
+}
+
+//=============================================================================
+void TopedApp::loadPlugIns()
+{
+   //TODO - dynamically enlist all modules existing in the plugin directory
 }
 
 //=============================================================================
@@ -375,70 +361,53 @@ void TopedApp::getLocalDirs()
    delete logDIR;
 }
 
+//=============================================================================
 void TopedApp::getGlobalDirs()
 {
-   wxFileName* fontsDIR = DEBUG_NEW wxFileName(wxT("$TPD_GLOBAL/"));
-   fontsDIR->Normalize();
-   wxString dirName = fontsDIR->GetPath();
-
-   wxFileName* UIDir = DEBUG_NEW wxFileName(wxT("$TPD_GLOBAL/"));
-   UIDir->Normalize();
-
    wxString info;
-   bool undefined = dirName.Matches(wxT("*$TPD_GLOBAL*"));
-   if (!undefined)
+   if (!wxGetEnv(wxT("TPD_GLOBAL"), &_globalDir))
    {
-      _globalDir = UIDir->GetFullPath();
-      fontsDIR->AppendDir(wxT("fonts"));
-      fontsDIR->Normalize();
-      UIDir->AppendDir(wxT("icons"));
-      UIDir->Normalize();
-   }
-   if (fontsDIR->IsOk())
-   {
-      bool exist = fontsDIR->DirExists();
-      if (!exist)
-      {
-         if (undefined)
-            info = wxT("Environment variable $TPD_GLOBAL is not defined");
-         else
-         {
-            info << wxT("Directory ") << fontsDIR->GetFullPath() << wxT(" doesn't exists");
-         }
-         info << wxT(". Looking for fonts in the current directory \"");
-         info << wxGetCwd() << wxT("\"");
-         tell_log(console::MT_WARNING,info);
-         _tpdFontDir = wxT("./fonts/");
-      }
-      else
-         _tpdFontDir = fontsDIR->GetFullPath();
+      tell_log(console::MT_WARNING,"Environment variable $TPD_GLOBAL is not defined. Trying to use current directory");
+      _globalDir = wxT("./");
+      tell_log(console::MT_WARNING,info);
    }
    else
+      _globalDir << wxT("/");
+   // Check fonts directory
+   wxFileName fontsFolder(_globalDir);
+   fontsFolder.AppendDir(wxT("fonts"));
+   fontsFolder.Normalize();
+   if (fontsFolder.DirExists())
+      _tpdFontDir = fontsFolder.GetFullPath();
+   else
    {
-      info = wxT("Can't evaluate properly \"$TPD_GLOBAL\" env. variable");
-      info << wxT(". Looking for fonts in the current directory \"");
-      tell_log(console::MT_WARNING,info);
-      _tpdFontDir = wxT("./fonts/");
+      info = wxT("Directory \"");
+      info << fontsFolder.GetFullPath() << wxT("\" doesn't exists.");
+      info << wxT(" Looking for fonts in the current directory \"");
+      _tpdFontDir = wxT("./");
    }
-
-   if(UIDir->IsOk())
+   // Check resource directory
+   wxFileName iconsFolder(_globalDir);
+   iconsFolder.AppendDir(wxT("icons"));
+   iconsFolder.Normalize();
+   if (iconsFolder.DirExists())
+      _tpdResourceDir = iconsFolder.GetFullPath();
+   else
    {
-      bool exist = UIDir->DirExists();
-      if (!exist)
-      {
-         info << wxT("Directory ") << UIDir->GetFullPath() << wxT(" doesn't exists");
-         info << wxT(". Looking for icons in the current directory \"");
-         info << wxGetCwd() << wxT("\"");
-         tell_log(console::MT_WARNING,info);
-         _tpdUIDir = wxT("./icons/");
-      }
-      else
-      {
-         _tpdUIDir = UIDir->GetFullPath();
-      }
+      info = wxT("Directory \"");
+      info << iconsFolder.GetFullPath() << wxT("\" doesn't exists.");
+      info << wxT(" Looking for icons in the current directory \"");
+      _tpdResourceDir = wxT("./");
    }
-   delete fontsDIR;
-   delete UIDir;
+   // Check plug-ins directory
+   wxFileName plugFolder(_globalDir);
+   plugFolder.AppendDir(wxT("plugins"));
+   plugFolder.Normalize();
+   if (plugFolder.DirExists())
+      _tpdPlugInDir = plugFolder.GetFullPath();
+   else
+      // Don't generate a noise about plug-in directory.
+      _tpdPlugInDir = wxT("");
 }
 
 //=============================================================================
