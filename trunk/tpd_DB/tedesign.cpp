@@ -35,6 +35,8 @@
 #include "tenderer.h"
 #include "ps_out.h"
 
+extern layprop::PropertyCenter*  PROPC;
+
 //! the stack of all previously edited (opened) cells
 laydata::EditCellStack      laydata::EditObject::_editstack;
 
@@ -1095,6 +1097,7 @@ laydata::AtticList* laydata::TdtDesign::changeSelect(TP* p1, const DWordSet& uns
    else return NULL;
 }
 
+
 void laydata::TdtDesign::unselectInBox(TP* p1, TP* p2, const DWordSet& unselable, bool pntsel) {
    if (_target.checkEdit()) {
       DBbox unselect_in((*p1)*_target.rARTM(), (*p2)*_target.rARTM());
@@ -1397,6 +1400,39 @@ void laydata::DrcLibrary::registerCellRead(std::string cellname, TdtCell* cell) 
       }
    }
    _cells[cellname] = cell;
+}
+
+WordList laydata::DrcLibrary::findSelected(TP* p1)
+{
+   //TdtDefaultCell* cell = checkCell("drc");
+   TdtCell* cell = dynamic_cast<TdtCell*>(checkCell("drc"));
+   TP selp;
+   WordList lays;
+   if (cell) {
+
+      layprop::DrawProperties* drawProp;
+      if (PROPC->lockDrawProp(drawProp, layprop::DRC))
+      {
+         selp = (*p1)*drawProp->scrCtm().Reversed();//(*p1) * cell->rARTM();
+         lays = cell->findSelected(selp);
+         /*drawProp->allLayers(tdtLayers);
+         for ( nameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
+         {
+            std::ostringstream dtypestr;
+            dtypestr << drawProp->getLayerNo( *CDL )<< "; 0";
+            telldata::tthsh* clay = DEBUG_NEW telldata::tthsh(drawProp->getLayerNo( *CDL ), dtypestr.str());
+            theMap->add(clay);
+         }*/
+      }
+      PROPC->unlockDrawProp(drawProp);
+
+
+      //TP 
+      return lays;
+      //return cell.edit()->changeSelect(selp, select ? sh_selected:sh_active, unselable);
+   }
+   else 
+      return lays;
 }
 
 laydata::TdtDefaultCell* laydata::DrcLibrary::checkCell(std::string name)

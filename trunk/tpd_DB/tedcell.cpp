@@ -565,6 +565,24 @@ laydata::AtticList* laydata::TdtCell::changeSelect(TP pnt, SH_STATUS status, con
    else return NULL;
 }
 
+
+WordList laydata::TdtCell::findSelected(TP pnt)
+{
+   WordList errList;
+   laydata::TdtData *shape = NULL;
+   //unsigned prevlay;
+   typedef LayerList::const_iterator LCI;
+   for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
+   {
+      //only one shape in layer is enough
+      if(lay->second->getObjectOver(pnt,shape))
+      {
+         errList.push_back(lay->first);
+      }
+   }
+   return errList;
+}
+
 laydata::TdtCellRef* laydata::TdtCell::getCellOver(TP pnt, ctmstack& transtack,
                      CellRefStack* refstack, const DWordSet& unselable)
 {

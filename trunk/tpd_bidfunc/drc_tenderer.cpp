@@ -195,3 +195,9 @@ void Calbr::drcTenderer::endWriting()
    PROPC->unlockDrawProp(drawProp);
    _ATDB->registerCellRead("drc", _DRCCell);
 }
+
+void Calbr::drcTenderer::explainError(real x, real y)
+{
+   
+   //_DRCCell->selectInBox
+}

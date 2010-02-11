@@ -75,7 +75,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(DRCshowerror     );
    TELL_STDCMD_CLASSA(DRCshowallerrors );
    TELL_STDCMD_CLASSA(DRChideallerrors );
-
+   TELL_STDCMD_CLASSA(DRCexplainerror );
    TELL_STDCMD_CLASSA(PSexportTOP      );
 
    void createDefaultTDT(std::string, TpdTime&, parsercmd::undoQUEUE&, telldata::UNDOPerandQUEUE&);

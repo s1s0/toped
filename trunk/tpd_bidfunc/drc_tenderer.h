@@ -48,6 +48,7 @@ class drcTenderer: public drcRenderer
 	void showError(unsigned int numError);
    void zoom(const edge &edge);
    void endWriting();
+   void explainError(real x, real y);
 private:
    laydata::DrcLibrary* _ATDB;
 	laydata::TdtCell*		_DRCCell;
