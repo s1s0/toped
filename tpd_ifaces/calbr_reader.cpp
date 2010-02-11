@@ -75,7 +75,7 @@ void Calbr::drcPolygon::addCoord(long x, long y)
 {
    wxString xstr = convert(x, _precision);
    wxString ystr = convert(y, _precision);
-      
+
    real xx, yy;
    xstr.ToDouble(&xx);
    ystr.ToDouble(&yy);
@@ -132,7 +132,7 @@ void Calbr::drcRuleCheck::setOrigResCount(int origResCount)
 {
    _origResCount = origResCount;
 }
-   
+
 void Calbr::drcRuleCheck::addDescrString(const std::string & str)
 {
    _descrStrings.push_back(str);
@@ -143,7 +143,7 @@ Calbr::edge Calbr::drcRuleCheck::getZoom(long ordinal)
 	edge ret;
 	for(std::vector <Calbr::drcPolygon>::const_iterator it = _polygons.begin(); it != _polygons.end(); ++it)
 	{
-		if (ordinal == (*it).ordinal()) 
+		if (ordinal == (*it).ordinal())
 		{
 			ret = (*it).getZoom();
 			return ret;
@@ -152,7 +152,7 @@ Calbr::edge Calbr::drcRuleCheck::getZoom(long ordinal)
 
 	for(std::vector <Calbr::drcEdge>::const_iterator it = _edges.begin(); it != _edges.end(); ++it)
 	{
-		if (ordinal == (*it).ordinal()) 
+		if (ordinal == (*it).ordinal())
 		{
 			ret = (*it).getZoom();
 			return ret;
@@ -187,10 +187,10 @@ Calbr::CalbrFile::CalbrFile(const std::string &fileName, drcRenderer *render)
       return;
    }
 
-   
+
    char cellName[512];
-   sscanf( str, "%s %ud", cellName, &_precision);
-   //initialisation of static member drcPolygon class
+   sscanf( str, "%s %ld", cellName, &_precision);
+   //Initialization of static member drcPolygon class
    drcPolygon::_precision = _precision;
    drcEdge::_precision = _precision;
    _cellName = cellName;
@@ -298,7 +298,7 @@ bool Calbr::CalbrFile::parse(unsigned int num)
             }
             ruleCheck->addPolygon(poly);
             break;
-   
+
          case 'e'   :
             for(short j =0; j< numberOfElem; j++)
             {
@@ -339,9 +339,9 @@ void   Calbr::CalbrFile::addResults()
 
    _render->startWriting();
    RuleChecksVector::const_iterator it;
-	for(it= _RuleChecks.begin(); it < _RuleChecks.end(); ++it)
+   for(it= _RuleChecks.begin(); it < _RuleChecks.end(); ++it)
    {
-		_render->setError((*it)->num());
+      _render->setError((*it)->num());
       std::vector <Calbr::drcPolygon>::iterator it2;
       std::vector <Calbr::drcPolygon> *polys = (*it)->polygons();
       for(it2 = polys->begin(); it2 < polys->end(); ++it2)
@@ -370,7 +370,7 @@ void   Calbr::CalbrFile::showError(const std::string & error, long  number)
       {
          _render->hideAll();
          _render->showError((*it)->num());
-         try 
+         try
          {
             zoom = (*it)->getZoom(number);
          }

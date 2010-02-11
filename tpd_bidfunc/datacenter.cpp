@@ -871,7 +871,19 @@ void DataCenter::openGlRender(const CTM& layCTM)
             // There is no need to check for an active cell. If there isn't one
             // the function will return silently.
             _TEDLIB()->openGlRender(renderer);
+            // Draw DRC data (if any)
             //_DRCDB->openGlDraw(_properties.drawprop());
+            //TODO the block below should get into the line above
+            if(_DRCDB)
+            {
+               renderer.setState(layprop::DRC);
+               laydata::TdtDefaultCell* dst_structure = _DRCDB->checkCell("drc");
+               if (dst_structure)
+               {
+                  dst_structure->openGlRender(renderer, CTM(), false, false);
+               }
+               renderer.setState(layprop::DB);
+            }
             #ifdef RENDER_PROFILING
             rendTimer.report("Time elapsed for data traversing: ");
             #endif
@@ -885,17 +897,6 @@ void DataCenter::openGlRender(const CTM& layCTM)
                #ifdef RENDER_PROFILING
                   rendTimer.report("    Total elapsed rendering time: ");
                #endif
-            }
-            // Draw DRC data (if any)
-            if(_DRCDB)
-            {
-               renderer.setState(layprop::DRC);
-               laydata::TdtDefaultCell* dst_structure = _DRCDB->checkCell("drc");
-               if (dst_structure)
-               {
-                  dst_structure->openGlRender(renderer, CTM(), false, false);
-               }
-               renderer.setState(layprop::DB);
             }
             VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
          }
