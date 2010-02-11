@@ -212,7 +212,7 @@ namespace Oasis {
    class PointList {
       public:
                            PointList() : _pltype(dt_unknown), _vcount(0), _delarr(NULL) {}
-                           PointList(PointList&);
+                           PointList(const PointList&);
                            PointList(OasisInFile&, PointListType);
                           ~PointList();
          void              calcPoints(pointlist&, int4b, int4b, bool poly=true);

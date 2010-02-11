@@ -1874,7 +1874,7 @@ Oasis::PointList::PointList(OasisInFile& ofn, PointListType pltype) : _pltype(pl
    }
 }
 
-Oasis::PointList::PointList(PointList& plst)
+Oasis::PointList::PointList(const PointList& plst)
 {
    _pltype = plst._pltype;
    _vcount = plst._vcount;

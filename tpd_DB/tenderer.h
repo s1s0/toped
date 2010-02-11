@@ -211,6 +211,7 @@ namespace tenderer {
    class TextOvlBox {
       public:
                            TextOvlBox(const DBbox&, const CTM&);
+         virtual          ~TextOvlBox() {}
          virtual unsigned  cDataCopy(int*, unsigned&);
       private:
          int4b             _obox[8];
@@ -336,6 +337,7 @@ namespace tenderer {
       public:
                            TenderSelected(const SGBitSet* slist) :
                               _slist(slist), _offset(0) {}
+         virtual          ~TenderSelected() {}
          bool              partSelected() {return (NULL != _slist);}
          virtual SlctTypes type() = 0;
          virtual unsigned  ssize() = 0;
@@ -349,6 +351,7 @@ namespace tenderer {
       public:
                            TextSOvlBox(const DBbox& box, const CTM& mtrx) :
                               TextOvlBox(box, mtrx), TenderSelected(NULL) {}
+         virtual          ~TextSOvlBox() {}
          virtual unsigned  cDataCopy(int*, unsigned&);
          virtual SlctTypes type() { return llps;}
          virtual unsigned  ssize(){ return 4;}
