@@ -295,7 +295,7 @@ namespace browsers
          typedef std::map <word, LayerButton*> LayerButtonMap;
 
          void                 onCommand(wxCommandEvent&);
-         void                 addButton(LayerInfo *layer);
+         void                 addButton(LayerInfo& layer);
          LayerButton*         checkDefined(word);
          LayerButtonMap       _buttonMap;
          int                  _buttonCount;

@@ -1494,7 +1494,7 @@ END_EVENT_TABLE()
 //
 browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoint& pos ,
                                    const wxSize& size, long style , const wxValidator& validator ,
-                                   const wxString& name, LayerInfo *layer):wxPanel()
+                                   const wxString& name, LayerInfo* layer):wxPanel()
 {
    _layer   = DEBUG_NEW LayerInfo(*layer);
    _selected= false;
@@ -1800,7 +1800,7 @@ void browsers::LayerPanel::onCommand(wxCommandEvent& event)
       {
          word *layno = static_cast<word*>(event.GetClientData());
          std::string name = std::string(event.GetString().mb_str(wxConvFile ));
-         LayerInfo *layer = DEBUG_NEW LayerInfo(name, *layno);
+         LayerInfo layer(name, *layno);
          addButton(layer);
          delete (layno);
          break;
@@ -1809,11 +1809,11 @@ void browsers::LayerPanel::onCommand(wxCommandEvent& event)
    }
 }
 
-void  browsers::LayerPanel::addButton(LayerInfo *layer)
+void  browsers::LayerPanel::addButton(LayerInfo& layer)
 {
    LayerButton* wbutton;
    int szx, szy;
-   if ((wbutton = checkDefined( layer->layno() )))
+   if ((wbutton = checkDefined( layer.layno() )))
    {
       //Button already exists, replace it
       //layerButton = DEBUG_NEW LayerButton(this, tui::TMDUMMY_LAYER+_buttonCount, wxPoint (0, _buttonCount*30), wxSize(200, 30),
@@ -1824,8 +1824,8 @@ void  browsers::LayerPanel::addButton(LayerInfo *layer)
       wbutton->GetSize(&szx, &szy);
       ID = wbutton->GetId();
       LayerButton* layerButton = DEBUG_NEW LayerButton(this, ID, wxPoint (x, y), wxSize(szx, szy),
-         wxBU_AUTODRAW|wxNO_BORDER, wxDefaultValidator, _T("button"), layer);
-      _buttonMap[layer->layno()] = layerButton;
+         wxBU_AUTODRAW|wxNO_BORDER, wxDefaultValidator, _T("button"), &layer);
+      _buttonMap[layer.layno()] = layerButton;
       delete wbutton;
    }
    else
@@ -1834,8 +1834,8 @@ void  browsers::LayerPanel::addButton(LayerInfo *layer)
       GetClientSize(&szx, &szy);
       LayerButton* layerButton = DEBUG_NEW LayerButton(this, tui::TMDUMMY_LAYER+_buttonCount,
                                           wxPoint (0, _buttonCount*buttonHeight), wxSize(szx, buttonHeight),
-                                          wxBU_AUTODRAW, wxDefaultValidator, _T("button"), layer);
-      _buttonMap[layer->layno()] = layerButton;
+                                          wxBU_AUTODRAW, wxDefaultValidator, _T("button"), &layer);
+      _buttonMap[layer.layno()] = layerButton;
       _buttonCount++;
       this->SetScrollbars(0, buttonHeight, 0, _buttonCount);
       //Reorder buttons
