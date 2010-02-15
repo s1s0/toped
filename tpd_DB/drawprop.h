@@ -219,6 +219,7 @@ namespace layprop {
                                 FontLibrary(bool);
                                ~FontLibrary();
          bool                   LoadLayoutFont(std::string);
+         bool                   selectFont(std::string);
          void                   getStringBounds(const std::string*, DBbox*);
          void                   drawString(const std::string*, bool);
          void                   drawWiredString(std::string);

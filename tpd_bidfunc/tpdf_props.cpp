@@ -42,6 +42,7 @@ extern console::ted_cmd*         Console;
 extern wxWindow*                 TopedCanvasW;
 extern wxFrame*                  TopedMainW;
 extern console::toped_logfile    LogFile;
+extern layprop::FontLibrary*     fontLib;
 extern const wxEventType         wxEVT_SETINGSMENU;
 
 //=============================================================================
@@ -1411,6 +1412,28 @@ void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
          std::ostringstream info;
          info << "Invalid \""<< name <<"\" value. Expected value is between 0 and 80";
          tell_log(console::MT_ERROR,info.str());
+      }
+   }
+   else if ("SELECT_TEXT_FONT" == name)
+   {
+      if (fontLib->selectFont(value))
+      {
+         wxCommandEvent eventLoadFont(wxEVT_SETINGSMENU);
+         eventLoadFont.SetId(tui::STS_SLCTFONT);
+         eventLoadFont.SetString(wxString(value.c_str(), wxConvUTF8));
+         wxPostEvent(TopedMainW, eventLoadFont);
+         // Request a redraw at the thread exit
+         Console->set_canvas_invalid(true);
+         //TODO The trouble with font changing on the fly is that the 
+         // overlapping boxes of the existing texts shall be reevaluated. 
+         // This means that the database shall be traversed and all text 
+         // objects shall call fontLib->getStringBounds(...)
+      }
+      else
+      {
+         std::ostringstream info;
+         info << "Font \"" << value << "\" not loaded";
+         tell_log(console::MT_ERROR, info.str());
       }
    }
    else

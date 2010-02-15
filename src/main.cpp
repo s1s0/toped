@@ -273,6 +273,7 @@ void TopedApp::loadGlfFonts()
       eventLoadFont.SetId(tui::STS_SLCTFONT);
       eventLoadFont.SetString(wxT("Arial Normal 1"));
       wxPostEvent(Toped, eventLoadFont);
+      fontLib->selectFont("Arial Normal 1");
    }
 }
 

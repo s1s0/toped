@@ -646,6 +646,7 @@ namespace tui {
          void                   OnTextBox (wxCommandEvent&);
          void                   OnTextMark(wxCommandEvent&);
          void                   OnTextOri (wxCommandEvent&);
+         void                   OnTextFont(wxCommandEvent&);
          void                   OnCellDov (wxCommandEvent&);
          void                   OnCellDab (wxCommandEvent&);
          void                   OnImageDetail (wxCommandEvent&);
