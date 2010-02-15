@@ -391,6 +391,16 @@ bool layprop::FontLibrary::LoadLayoutFont(std::string fontfile)
    }
 }
 
+bool layprop::FontLibrary::selectFont(std::string fname)
+{
+   if (_font.end() != _font.find(fname))
+   {
+      _activeFontName = fname;
+      return true;
+   }
+   return false;
+}
+
 void layprop::FontLibrary::getStringBounds(const std::string* text, DBbox* overlap)
 {
    if (_fti)

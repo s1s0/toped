@@ -2446,6 +2446,7 @@ BEGIN_EVENT_TABLE(tui::TopedPropertySheets::RenderingPSheet, wxPanel)
     EVT_CHECKBOX(PDSET_TEXTBOX    , tui::TopedPropertySheets::RenderingPSheet::OnTextBox        )
     EVT_CHECKBOX(PDSET_TEXTMARK   , tui::TopedPropertySheets::RenderingPSheet::OnTextMark       )
     EVT_CHECKBOX(PDSET_TEXTORI    , tui::TopedPropertySheets::RenderingPSheet::OnTextOri        )
+    EVT_COMBOBOX(PDSET_TEXTFONTS , tui::TopedPropertySheets::RenderingPSheet::OnTextFont       )
     EVT_COMMAND_ENTER(PDIMG_DETAIL, tui::TopedPropertySheets::RenderingPSheet::OnImageDetail    )
     EVT_COMMAND_ENTER(PDCELL_DOV  , tui::TopedPropertySheets::RenderingPSheet::OnCellDov        )
     EVT_COMMAND_ENTER(PDCELL_DAB  , tui::TopedPropertySheets::RenderingPSheet::OnCellDab        )
@@ -2549,6 +2550,15 @@ void tui::TopedPropertySheets::RenderingPSheet::OnTextOri(wxCommandEvent& cmdEve
    wxString ost;
    ost << wxT("setparams({\"ADJUST_TEXT_ORIENTATION\", \"")
        << (cmdEvent.GetInt() ? wxT("true") : wxT("false"))
+       << wxT("\"});");
+   Console->parseCommand(ost);
+}
+
+void tui::TopedPropertySheets::RenderingPSheet::OnTextFont(wxCommandEvent& cmdEvent)
+{
+   wxString ost;
+   ost << wxT("setparams({\"SELECT_TEXT_FONT\", \"")
+       << cmdEvent.GetString()
        << wxT("\"});");
    Console->parseCommand(ost);
 }
