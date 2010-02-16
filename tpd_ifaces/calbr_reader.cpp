@@ -114,7 +114,7 @@ Calbr::edge Calbr::drcPolygon::getZoom() const
 }
 
 Calbr::drcRuleCheck::drcRuleCheck(unsigned int num, const std::string &name)
-      :_num(num), _ruleCheckName(name)
+      :_num(num), _ruleCheckName(name),_borderInit(false)
 {
 }
 
@@ -138,6 +138,43 @@ void Calbr::drcRuleCheck::addDescrString(const std::string & str)
    _descrStrings.push_back(str);
 }
 
+void Calbr::drcRuleCheck::addPolygon(const Calbr::drcPolygon &poly)
+{
+   _polygons.push_back(poly);
+   if (_borderInit)
+   {
+      edge polyBorder = poly.getZoom();
+      if(polyBorder.x1 < _border.x1) polyBorder.x1 = _border.x1;
+      if(polyBorder.y1 < _border.y1) polyBorder.y1 = _border.y1;
+      if(polyBorder.x2 > _border.x2) polyBorder.x2 = _border.x2;
+      if(polyBorder.y2 > _border.y2) polyBorder.y2 = _border.y2;
+   }
+   else
+   {
+      _border = poly.getZoom();
+      _borderInit = true;
+   }
+}
+
+void Calbr::drcRuleCheck::addEdge(const Calbr::drcEdge &theEdge)
+{
+   _edges.push_back(theEdge);
+   if (_borderInit)
+   {
+      edge polyBorder = theEdge.getZoom();
+      if(polyBorder.x1 < _border.x1) _border.x1 = polyBorder.x1;
+      if(polyBorder.y1 < _border.y1) _border.y1 = polyBorder.y1;
+      if(polyBorder.x2 > _border.x2) _border.x2 = polyBorder.x2;
+      if(polyBorder.y2 > _border.y2) _border.y2 = polyBorder.y2;
+   }
+   else
+   {
+      _border = theEdge.getZoom();
+      _borderInit = true;
+   }
+}
+
+
 Calbr::edge Calbr::drcRuleCheck::getZoom(long ordinal)
 {
 	edge ret;
@@ -160,6 +197,11 @@ Calbr::edge Calbr::drcRuleCheck::getZoom(long ordinal)
 	}
    throw EXPTNdrc_reader("Can't zoom to chosen element");
 	return ret;
+}
+
+Calbr::edge Calbr::drcRuleCheck::getZoom(void)
+{
+   return _border;
 }
 
 //-----------------------------------------------------------------------------
@@ -200,6 +242,16 @@ Calbr::CalbrFile::CalbrFile(const std::string &fileName, drcRenderer *render)
 		num++;
    }
    addResults();
+
+   _border = (*_RuleChecks.begin())->getZoom();
+   for (RuleChecksVector::const_iterator it = _RuleChecks.begin(); it != _RuleChecks.end(); ++it)
+   {
+      edge tempBorder = (*it)->getZoom();
+      if(tempBorder.x1 < _border.x1) _border.x1 = tempBorder.x1;
+      if(tempBorder.y1 < _border.y1) _border.y1 = tempBorder.y1;
+      if(tempBorder.x2 > _border.x2) _border.x2 = tempBorder.x2;
+      if(tempBorder.y2 > _border.y2) _border.y2 = tempBorder.y2;
+   }
 }
 
 Calbr::CalbrFile::~CalbrFile()
@@ -387,6 +439,7 @@ void   Calbr::CalbrFile::showError(const std::string & error, long  number)
 void   Calbr::CalbrFile::showAllErrors(void)
 {
    _render->showAll();
+   _render->zoom(_border);
 }
 
 void   Calbr::CalbrFile::hideAllErrors(void)
@@ -394,15 +447,6 @@ void   Calbr::CalbrFile::hideAllErrors(void)
    _render->hideAll();
 }
 
-void Calbr::drcRuleCheck::addPolygon(const Calbr::drcPolygon &poly)
-{
-   _polygons.push_back(poly);
-}
-
-void Calbr::drcRuleCheck::addEdge(const Calbr::drcEdge &theEdge)
-{
-   _edges.push_back(theEdge);
-}
 
 wxString Calbr::convert(int number, long precision)
 {
