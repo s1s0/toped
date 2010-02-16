@@ -2042,7 +2042,7 @@ void browsers::ErrorBrowser::onLMouseDblClk(wxMouseEvent& event)
    {
       if (ItemHasChildren(id))
       {
-         if(IsExpanded(id)) Expand(id); else Collapse(id);
+         if(IsExpanded(id)) Collapse(id); else Expand(id);
       }
       else
       {
