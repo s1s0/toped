@@ -125,6 +125,7 @@ public:
    void         addPolygon(const Calbr::drcPolygon &poly);
    void         addEdge(const Calbr::drcEdge &theEdge);
 	edge         getZoom(long ordinal);
+   edge         getZoom(void);
 private:
 	unsigned int _num;
    long         _curResCount; //current result count
@@ -132,6 +133,8 @@ private:
    std::string  _ruleCheckName;
    std::string  _timeStamp;
    std::string  _header;
+   edge         _border;
+   bool         _borderInit;
    std::vector <std::string> _descrStrings;
    std::vector <Calbr::drcPolygon> _polygons;
    std::vector <Calbr::drcEdge> _edges;
@@ -163,6 +166,7 @@ private:
    bool              parse(unsigned int num);
    RuleChecksVector  _RuleChecks;
    bool              _ok;
+   edge              _border;
    drcRenderer*      _render;
 
 
