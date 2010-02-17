@@ -50,6 +50,18 @@ namespace laydata {
    assigned to the default CTM() and _activeref and _peditchain are NULL.
    If a cell has to be open with editPush() or similar, then all of the data
    fields are coming into play.
+   Another feature of this class worth mentioning is the _peditchain stack. This
+   variable holds the path from the _viewcell to _activecell, but NOTE in terms
+   of cell references. This is used during the rendering to figure out how to
+   manipulate the fill of the shapes. The idea is that the renderer takes the
+   current state of this variable and on each step down the hierarchy it checks
+   whether the current cell reference is the same as the reference of the top of the
+   stack. If the checks is successful the fill is blocked and the stack is reduced
+   by 1. This is repeated until the stack is empty which signifies that we've reached
+   current active cell. The stack is restored by the renderer on its way back up
+   the hierarchy.
+   When edit in place mode is not active - then the _peditchain is NULL and the
+   procedure above is skipped.
    */
    class EditObject {
    public:
@@ -73,7 +85,7 @@ namespace laydata {
       CellRefStack*              pEditChain()      {return _peditchain;}
       static EditCellStack       _editstack;    //! the stack of all previously edited (opened) cells
    private:
-      TdtCell*                   _activecell;   //! the curently active cell
+      TdtCell*                   _activecell;   //! the currently active cell
       TdtCell*                   _viewcell;     //! current topview cell - if edit in place is active
       TdtCellRef*                _activeref;    //! current topview reference - if edit in place is active
       CellRefStack*              _peditchain;   //! the path from _viewcell to the _activeref (_activecell)

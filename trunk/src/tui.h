@@ -198,6 +198,7 @@ namespace tui {
    public:
                         sgSliderControl(wxWindow*, int, int, int, int);
       void              setValue(int);
+      int               getValue();
    private:
       wxTextCtrl*       _text;
       wxSlider*         _slider;

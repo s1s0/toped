@@ -1680,9 +1680,10 @@ void laydata::TdtCellRef::drawRequest(tenderer::TopRend& rend) const
    // draw the cell mark ...
 //   rend.drawReferenceMarks(TP(0,0) * newtrans, layprop::cell_mark);
    //
-   byte crchain = rend.popref(this);
-   structure()->openGlRender(rend, _translation, false, 2 == crchain);
-   if (crchain) rend.pushref(this);
+
+   layprop::CellRefChainType crchain = rend.popref(this);
+   structure()->openGlRender(rend, _translation, false, (layprop::crc_ACTIVE == crchain));
+   if (layprop::crc_VIEW != crchain) rend.pushref(this);
 }
 
 void laydata::TdtCellRef::vlOverlap(const layprop::DrawProperties& prop, DBbox& vlOvl) const
@@ -1721,11 +1722,9 @@ void laydata::TdtCellRef::openGlDrawFill(layprop::DrawProperties& drawprop, cons
 {
    if ((NULL == structure()) || (0 == ptlist.size())) return;
    // draw the structure itself. Pop/push ref stuff is when edit in place is active
-   byte crchain = drawprop.popRef(this);
-   structure()->openGlDraw(drawprop, crchain == 2);
-   // push is done in the precalc()
-//   drawprop.popCtm();
-   if (crchain) drawprop.pushRef(this);
+   layprop::CellRefChainType crchain = drawprop.popRef(this);
+   structure()->openGlDraw(drawprop, (layprop::crc_ACTIVE == crchain));
+   if (layprop::crc_VIEW != crchain) drawprop.pushRef(this);
 }
 
 void laydata::TdtCellRef::openGlDrawSel(const pointlist& ptlist, const SGBitSet*) const

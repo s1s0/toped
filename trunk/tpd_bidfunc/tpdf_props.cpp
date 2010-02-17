@@ -29,6 +29,8 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <algorithm>
+#include <cctype>
 #include "tpdf_props.h"
 #include "datacenter.h"
 #include "tuidefs.h"
@@ -1414,6 +1416,52 @@ void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
          tell_log(console::MT_ERROR,info.str());
       }
    }
+   else if ("CELL_VIEW_DEPTH" == name)
+   {
+      word val;
+      std::transform(value.begin(), value.end(), // source
+                     value.begin(),              // destination
+                     ::tolower                 );// operation
+      if ("all" == value)
+      {
+         layprop::DrawProperties* drawProp;
+         if (PROPC->lockDrawProp(drawProp))
+         {
+            drawProp->setCellDepthView(val);
+         }
+         PROPC->unlockDrawProp(drawProp);
+         // send an event to update the property dialog
+         wxCommandEvent event(wxEVT_SETINGSMENU);
+         event.SetId(tui::STS_CELLDOV);
+         event.SetInt(0);
+         wxPostEvent(TopedMainW, event);
+         // Request a redraw at the thread exit
+         Console->set_canvas_invalid(true);
+      }
+      else if ((from_string<word>(val, value, std::dec)) && (val <= 8))
+      {
+         layprop::DrawProperties* drawProp;
+         if (PROPC->lockDrawProp(drawProp))
+         {
+            drawProp->setCellDepthView(val);
+         }
+         PROPC->unlockDrawProp(drawProp);
+         // send an event to update the property dialog
+         wxCommandEvent event(wxEVT_SETINGSMENU);
+         event.SetId(tui::STS_CELLDOV);
+         event.SetInt(val);
+         wxPostEvent(TopedMainW, event);
+
+         // Request a redraw at the thread exit
+         Console->set_canvas_invalid(true);
+      }
+      else
+      {
+         std::ostringstream info;
+         info << "Invalid \""<< name <<"\" value. Expected \"all\" keyword or value between 1 and 8";
+         tell_log(console::MT_ERROR,info.str());
+      }
+   }
    else if ("SELECT_TEXT_FONT" == name)
    {
       if (fontLib->selectFont(value))
@@ -1424,9 +1472,9 @@ void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
          wxPostEvent(TopedMainW, eventLoadFont);
          // Request a redraw at the thread exit
          Console->set_canvas_invalid(true);
-         //TODO The trouble with font changing on the fly is that the 
-         // overlapping boxes of the existing texts shall be reevaluated. 
-         // This means that the database shall be traversed and all text 
+         //TODO The trouble with font changing on the fly is that the
+         // overlapping boxes of the existing texts shall be reevaluated.
+         // This means that the database shall be traversed and all text
          // objects shall call fontLib->getStringBounds(...)
       }
       else

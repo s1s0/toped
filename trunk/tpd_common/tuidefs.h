@@ -230,6 +230,7 @@ namespace tui
       STS_CURSOR          ,
       STS_VISILIMIT       ,
       STS_CELLDAB         ,
+      STS_CELLDOV         ,
       STS_LDFONT          ,
       STS_SLCTFONT
    } SETTINGSMENU_TYPE;

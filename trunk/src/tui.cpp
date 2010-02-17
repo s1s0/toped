@@ -104,6 +104,11 @@ void  tui::sgSliderControl::setValue(int value)
    _text->SetValue(ws);
 }
 
+int  tui::sgSliderControl::getValue()
+{
+   return _slider->GetValue();
+}
+
 void  tui::sgSliderControl::OnScroll(wxScrollEvent& event)
 {
    wxString ws;
@@ -2471,7 +2476,7 @@ tui::TopedPropertySheets::RenderingPSheet::RenderingPSheet(wxWindow* parent) : w
          wxBoxSizer *cdovSizer = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Depth of view"));
          _cbDepthOfViewLimit = DEBUG_NEW wxCheckBox(this, PDCELL_CHECKDOV , wxT("unlimited"));
          _cbDepthOfViewLimit->SetValue(true);
-         _cellDepthOfView = DEBUG_NEW sgSliderControl(this, PDCELL_DOV, 0, 16, 16);
+         _cellDepthOfView = DEBUG_NEW sgSliderControl(this, PDCELL_DOV, 1, 8, 8);
          _cellDepthOfView->Enable(false);
          cdovSizer->Add(_cbDepthOfViewLimit, 0, wxALL| wxALIGN_CENTER | wxEXPAND);
          cdovSizer->Add(   _cellDepthOfView, 0, wxALL| wxALIGN_CENTER | wxEXPAND);
@@ -2509,12 +2514,6 @@ tui::TopedPropertySheets::RenderingPSheet::RenderingPSheet(wxWindow* parent) : w
 
    SetSizer(topSizer);
    topSizer->Fit(this);
-}
-
-void tui::TopedPropertySheets::RenderingPSheet::OnCellCheckDov(wxCommandEvent& cmdevent)
-{
-   _cellDepthOfView->Enable(0 == cmdevent.GetInt());
-   _cellDepthOfView->Refresh();
 }
 
 void tui::TopedPropertySheets::RenderingPSheet::OnCellBox (wxCommandEvent& cmdEvent)
@@ -2563,6 +2562,25 @@ void tui::TopedPropertySheets::RenderingPSheet::OnTextFont(wxCommandEvent& cmdEv
    Console->parseCommand(ost);
 }
 
+void tui::TopedPropertySheets::RenderingPSheet::OnCellCheckDov(wxCommandEvent& cmdevent)
+{
+   wxString ost;
+   bool enable = (0 == cmdevent.GetInt());
+   _cellDepthOfView->Enable(enable);
+   _cellDepthOfView->Refresh();
+   if (enable)
+   {
+      ost << wxT("setparams({\"CELL_VIEW_DEPTH\", \"")
+          << _cellDepthOfView->getValue()
+          << wxT("\"});");
+   }
+   else
+   {
+      ost << wxT("setparams({\"CELL_VIEW_DEPTH\", \"ALL\"});");
+   }
+   Console->parseCommand(ost);
+}
+
 void tui::TopedPropertySheets::RenderingPSheet::OnCellDov (wxCommandEvent& cmdEvent)
 {
    wxString ost;
@@ -2570,7 +2588,6 @@ void tui::TopedPropertySheets::RenderingPSheet::OnCellDov (wxCommandEvent& cmdEv
        << cmdEvent.GetInt()
        << wxT("\"});");
    Console->parseCommand(ost);
-
 }
 
 void tui::TopedPropertySheets::RenderingPSheet::OnCellDab (wxCommandEvent& cmdEvent)
