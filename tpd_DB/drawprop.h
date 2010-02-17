@@ -37,6 +37,10 @@ namespace layprop {
 
    typedef enum {cell_mark, array_mark, text_mark} binding_marks;
    typedef enum {DB, DRC} PropertyState;
+   typedef enum { crc_VIEW   = 0, // not in edit in place mode or not in the active cell chain
+                  crc_EDIT   = 1, // edit in place mode is active and we're in the active cell chain
+                  crc_ACTIVE = 2  // the active cell
+                } CellRefChainType;
 
    //=============================================================================
    //
@@ -268,7 +272,7 @@ namespace layprop {
          void                       initDrawRefStack(laydata::CellRefStack*);
          void                       clearDrawRefStack();
          void                       pushRef(const laydata::TdtCellRef*);
-         byte                       popRef(const laydata::TdtCellRef*);
+         CellRefChainType           popRef(const laydata::TdtCellRef*);
          void                       drawReferenceMarks(const TP&, const binding_marks) const;
          void                       drawTextBoundary(const pointlist& ptlist) const;
          void                       drawCellBoundary(const pointlist& ptlist) const;
@@ -304,6 +308,8 @@ namespace layprop {
                                                          {_visualLimit = mva;}
          void                       setCellDepthAlphaEbb(byte ebb)
                                                          {_cellDepthAlphaEbb = ebb;}
+         void                       setCellDepthView(byte dov)
+                                                         {_cellDepthView = dov;}
          void                       allUnselectable(DWordSet&);
          void                       allInvisible(DWordSet&);
          // Properly protected in tpd_bidfunc or the functions called from there
@@ -377,6 +383,7 @@ namespace layprop {
          CTM                        _scrCtm;
          word                       _visualLimit;   // that would be 40 pixels
          byte                       _cellDepthAlphaEbb;
+         byte                       _cellDepthView; //
          bool                       _cellMarksHidden;
          bool                       _cellBoxHidden;
          bool                       _textMarksHidden;

@@ -504,6 +504,7 @@ layprop::DrawProperties::DrawProperties() : _clipRegion(0,0)
    _curlay                = 1;
    _visualLimit           = 40;
    _cellDepthAlphaEbb     = 0;
+   _cellDepthView         = 0;
 }
 
 bool layprop::DrawProperties::addLayer( unsigned layno )
@@ -815,23 +816,20 @@ void  layprop::DrawProperties::pushRef(const laydata::TdtCellRef* cref)
    }
 }
 
-byte layprop::DrawProperties::popRef(const laydata::TdtCellRef* cref)
+layprop::CellRefChainType layprop::DrawProperties::popRef(const laydata::TdtCellRef* cref)
 {
    assert(cref);
-   if (_refStack && !_refStack->empty())
+   if (_refStack && (!_refStack->empty()) && (_refStack->front() == cref) )
    {
-      if (_refStack->front() == cref)
+      _refStack->pop_front();
+      if (_refStack->empty())
       {
-         _refStack->pop_front();
-         if (_refStack->empty())
-         {
-            _blockFill = false;
-            return 2;
-         }
-         else return 1;
+         _blockFill = false;
+         return crc_ACTIVE;
       }
+      else return crc_EDIT;
    }
-   return 0;
+   return crc_VIEW;
 }
 
 void layprop::DrawProperties::drawReferenceMarks(const TP& p0, const binding_marks mark_type) const

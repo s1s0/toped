@@ -887,7 +887,7 @@ namespace tenderer {
          const DBbox&      clipRegion() const            {return  _drawprop->clipRegion()          ;}
          void              pushref(const laydata::TdtCellRef* ref)
                                                          {        _drawprop->pushRef(ref)          ;}
-         byte              popref(const laydata::TdtCellRef* ref)
+         layprop::CellRefChainType popref(const laydata::TdtCellRef* ref)
                                                          {return  _drawprop->popRef(ref)           ;}
          void              initDrawRefStack(laydata::CellRefStack* crs)
                                                          { _drawprop->initDrawRefStack(crs);}
