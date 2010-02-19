@@ -927,7 +927,7 @@ laydata::TdtCell* laydata::TdtDesign::openCell(std::string name)
       laydata::TdtDefaultCell* tcell = _cells[name];
       if (tcell && (UNDEFCELL_LIB != tcell->libID()))
       {
-         _target.setcell(static_cast<TdtCell*>(_cells[name]));
+         _target.setcell(static_cast<TdtCell*>(tcell));
          return _target.edit();
       }
    }
@@ -1427,11 +1427,11 @@ WordList laydata::DrcLibrary::findSelected(TP* p1)
       PROPC->unlockDrawProp(drawProp);
 
 
-      //TP 
+      //TP
       return lays;
       //return cell.edit()->changeSelect(selp, select ? sh_selected:sh_active, unselable);
    }
-   else 
+   else
       return lays;
 }
 

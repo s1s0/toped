@@ -292,6 +292,7 @@ int tellstdfunc::stdOPENCELL::execute()
          eventZOOM.SetInt(tui::ZOOM_WINDOW);
          eventZOOM.SetClientData(static_cast<void*>(ovl));
          wxPostEvent(TopedCanvasW, eventZOOM);
+         UpdateLV();
          LogFile << LogFile.getFN() << "(\""<< nm << "\");"; LogFile.flush();
       }
       else
@@ -335,7 +336,7 @@ void tellstdfunc::stdEDITPUSH::undo()
    std::string news("Cell "); news += ATDB->activeCellName(); news += " is opened";
    tell_log(console::MT_INFO,news);
    delete selected;
-   RefreshGL();
+   UpdateLV();
 }
 
 int tellstdfunc::stdEDITPUSH::execute()
@@ -355,7 +356,7 @@ int tellstdfunc::stdEDITPUSH::execute()
          TpdPost::celltree_highlight(name);
          std::string news("Cell "); news += name; news += " is opened";
          tell_log(console::MT_INFO,news);
-         RefreshGL();
+         UpdateLV();
          LogFile << LogFile.getFN() << "("<< *p1 << ");"; LogFile.flush();
       }
       else {
@@ -391,7 +392,7 @@ void tellstdfunc::stdEDITPOP::undo()
    std::string news("Cell "); news += ATDB->activeCellName(); news += " is opened";
    tell_log(console::MT_INFO,news);
    delete selected;
-   RefreshGL();
+   UpdateLV();
 }
 
 int tellstdfunc::stdEDITPOP::execute()
@@ -407,7 +408,7 @@ int tellstdfunc::stdEDITPOP::execute()
          TpdPost::celltree_highlight(name);
          std::string news("Cell "); news += name; news += " is opened";
          tell_log(console::MT_INFO,news);
-         RefreshGL();
+         UpdateLV();
          LogFile << LogFile.getFN() << "();"; LogFile.flush();
       }
       else
@@ -443,7 +444,7 @@ void tellstdfunc::stdEDITPREV::undo()
    std::string news("Cell "); news += ATDB->activeCellName(); news += " is opened";
    tell_log(console::MT_INFO,news);
    delete selected;
-   RefreshGL();
+   UpdateLV();
 }
 
 int tellstdfunc::stdEDITPREV::execute()
@@ -459,7 +460,7 @@ int tellstdfunc::stdEDITPREV::execute()
          std::string news("Cell "); news += name; news += " is opened";
          tell_log(console::MT_INFO,news);
          TpdPost::celltree_highlight(name);
-         RefreshGL();
+         UpdateLV();
          LogFile << LogFile.getFN() << "();"; LogFile.flush();
       }
       else
@@ -495,7 +496,7 @@ void tellstdfunc::stdEDITTOP::undo()
    std::string news("Cell "); news += ATDB->activeCellName(); news += " is opened";
    tell_log(console::MT_INFO,news);
    delete selected;
-   RefreshGL();
+   UpdateLV();
 }
 
 int tellstdfunc::stdEDITTOP::execute()
@@ -511,7 +512,7 @@ int tellstdfunc::stdEDITTOP::execute()
          TpdPost::celltree_highlight(name);
          std::string news("Cell "); news += name; news += " is opened";
          tell_log(console::MT_INFO,news);
-         RefreshGL();
+         UpdateLV();
          LogFile << LogFile.getFN() << "();"; LogFile.flush();
       }
       else
