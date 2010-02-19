@@ -1702,7 +1702,7 @@ bool tenderer::TopRend::collect()
    // of required virtual buffers
    //
    DataLay::iterator CCLAY = _data.begin();
-   unsigned num_total_slctdx = 0; // initialise the number of total selected indexes
+   unsigned num_total_slctdx = 0; // Initialize the number of total selected indexes
    unsigned num_total_strings = 0;
    while (CCLAY != _data.end())
    {
@@ -1711,7 +1711,7 @@ bool tenderer::TopRend::collect()
       if ((0 == CCLAY->second->total_points()) && (0 == CCLAY->second->total_strings()))
       {
          delete (CCLAY->second);
-         // Note! Carefull here with the map iteration and erasing! Erase method
+         // Note! Careful here with the map iteration and erasing! Erase method
          // of map<> template doesn't return an iterator (unlike the list<>).
          // Despite the temptation to assume that the iterator will be valid after
          // the erase, it must be clear that erasing will invalidate the iterator.

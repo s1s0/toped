@@ -1713,7 +1713,7 @@ void laydata::TdtCellRef::drawSRequest(tenderer::TopRend& rend, const SGBitSet*)
    layprop::CellRefChainType crchain;
    if (rend.preCheckCRS(this, crchain))
    {
-      structure()->openGlRender(rend, _translation, false, (layprop::crc_ACTIVE == crchain));
+      structure()->openGlRender(rend, _translation, true, (layprop::crc_ACTIVE == crchain));
       if ((layprop::crc_PREACTIVE == crchain) ||
           (layprop::crc_ACTIVE    == crchain)    ) rend.postCheckCRS(this);
    }
