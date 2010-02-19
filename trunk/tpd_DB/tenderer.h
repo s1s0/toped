@@ -881,17 +881,17 @@ namespace tenderer {
          //set state of DrawProperties
          void              setState(layprop::PropertyState state) {_drawprop->setState(state);};
          // temporary!
-         bool              layerHidden(unsigned layno) const {return  _drawprop->layerHidden(layno)    ;}
+         bool              layerHidden(unsigned layno) const
+                                                         {return  _drawprop->layerHidden(layno)    ;}
          const CTM&        ScrCTM() const                {return  _drawprop->scrCtm()              ;}
          word              visualLimit() const           {return  _drawprop->visualLimit()         ;}
          const DBbox&      clipRegion() const            {return  _drawprop->clipRegion()          ;}
-         void              pushref(const laydata::TdtCellRef* ref)
-                                                         {        _drawprop->pushRef(ref)          ;}
-         layprop::CellRefChainType popref(const laydata::TdtCellRef* ref)
-                                                         {return  _drawprop->popRef(ref)           ;}
+         void              postCheckCRS(const laydata::TdtCellRef* ref)
+                                                         {        _drawprop->postCheckCRS(ref)     ;}
+         bool              preCheckCRS(const laydata::TdtCellRef*, layprop::CellRefChainType&);
          void              initDrawRefStack(laydata::CellRefStack* crs)
-                                                         { _drawprop->initDrawRefStack(crs);}
-         void              clearDrawRefStack()           { _drawprop->clearDrawRefStack();}
+                                                         {        _drawprop->initDrawRefStack(crs) ;}
+         void              clearDrawRefStack()           {        _drawprop->clearDrawRefStack()   ;}
          bool              adjustTextOrientation() const {return  _drawprop->adjustTextOrientation();}
       private:
          layprop::DrawProperties*   _drawprop;
@@ -906,6 +906,7 @@ namespace tenderer {
          GLuint*           _ogl_buffers;     //! Array with the "names" of all openGL buffers
          GLuint            _sbuffer;         //! The "name" of the selected index buffer
          TenderRef*        _activeCS;
+         byte              _dovCorrection;   //!Cell ref Depth of view correction (for Edit in Place purposes)
          RefBoxList        _hiddenRefBoxes;  //! Those cRefBox objects which didn't ended in the TenderRefLay structures
    };
 

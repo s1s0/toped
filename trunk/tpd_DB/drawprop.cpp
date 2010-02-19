@@ -806,7 +806,7 @@ void layprop::DrawProperties::clearDrawRefStack()
    _blockFill = false;
 }
 
-void  layprop::DrawProperties::pushRef(const laydata::TdtCellRef* cref)
+void  layprop::DrawProperties::postCheckCRS(const laydata::TdtCellRef* cref)
 {
    assert(cref);
    if (_refStack)
@@ -816,20 +816,24 @@ void  layprop::DrawProperties::pushRef(const laydata::TdtCellRef* cref)
    }
 }
 
-layprop::CellRefChainType layprop::DrawProperties::popRef(const laydata::TdtCellRef* cref)
+layprop::CellRefChainType layprop::DrawProperties::preCheckCRS(const laydata::TdtCellRef* cref)
 {
    assert(cref);
-   if (_refStack && (!_refStack->empty()) && (_refStack->front() == cref) )
-   {
-      _refStack->pop_front();
-      if (_refStack->empty())
-      {
-         _blockFill = false;
-         return crc_ACTIVE;
-      }
-      else return crc_EDIT;
-   }
-   return crc_VIEW;
+   if (_refStack)
+      if (!_refStack->empty())
+         if (_refStack->front() == cref )
+         {
+            _refStack->pop_front();
+            if (_refStack->empty())
+            {
+               _blockFill = false;
+               return crc_ACTIVE;
+            }
+            else return crc_PREACTIVE;
+         }
+         else return crc_VIEW;
+      else return crc_POSTACTIVE;
+   else return crc_VIEW;
 }
 
 void layprop::DrawProperties::drawReferenceMarks(const TP& p0, const binding_marks mark_type) const

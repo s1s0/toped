@@ -1681,9 +1681,13 @@ void laydata::TdtCellRef::drawRequest(tenderer::TopRend& rend) const
 //   rend.drawReferenceMarks(TP(0,0) * newtrans, layprop::cell_mark);
    //
 
-   layprop::CellRefChainType crchain = rend.popref(this);
-   structure()->openGlRender(rend, _translation, false, (layprop::crc_ACTIVE == crchain));
-   if (layprop::crc_VIEW != crchain) rend.pushref(this);
+   layprop::CellRefChainType crchain;
+   if (rend.preCheckCRS(this, crchain))
+   {
+      structure()->openGlRender(rend, _translation, false, (layprop::crc_ACTIVE == crchain));
+      if ((layprop::crc_PREACTIVE == crchain) ||
+          (layprop::crc_ACTIVE    == crchain)    ) rend.postCheckCRS(this);
+   }
 }
 
 void laydata::TdtCellRef::vlOverlap(const layprop::DrawProperties& prop, DBbox& vlOvl) const
@@ -1706,9 +1710,14 @@ void laydata::TdtCellRef::drawSRequest(tenderer::TopRend& rend, const SGBitSet*)
    // draw the cell mark ...
 //   rend.drawReferenceMarks(TP(0,0) * newtrans, layprop::cell_mark);
    //
-   byte crchain = rend.popref(this);
-   structure()->openGlRender(rend, _translation, true, 2 == crchain);
-   if (crchain) rend.pushref(this);
+   layprop::CellRefChainType crchain;
+   if (rend.preCheckCRS(this, crchain))
+   {
+      structure()->openGlRender(rend, _translation, false, (layprop::crc_ACTIVE == crchain));
+      if ((layprop::crc_PREACTIVE == crchain) ||
+          (layprop::crc_ACTIVE    == crchain)    ) rend.postCheckCRS(this);
+   }
+
 }
 
 void laydata::TdtCellRef::openGlDrawLine(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
@@ -1722,9 +1731,9 @@ void laydata::TdtCellRef::openGlDrawFill(layprop::DrawProperties& drawprop, cons
 {
    if ((NULL == structure()) || (0 == ptlist.size())) return;
    // draw the structure itself. Pop/push ref stuff is when edit in place is active
-   layprop::CellRefChainType crchain = drawprop.popRef(this);
+   layprop::CellRefChainType crchain = drawprop.preCheckCRS(this);
    structure()->openGlDraw(drawprop, (layprop::crc_ACTIVE == crchain));
-   if (layprop::crc_VIEW != crchain) drawprop.pushRef(this);
+   if (layprop::crc_VIEW != crchain) drawprop.postCheckCRS(this);
 }
 
 void laydata::TdtCellRef::openGlDrawSel(const pointlist& ptlist, const SGBitSet*) const
