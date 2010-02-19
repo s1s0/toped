@@ -37,9 +37,10 @@ namespace layprop {
 
    typedef enum {cell_mark, array_mark, text_mark} binding_marks;
    typedef enum {DB, DRC} PropertyState;
-   typedef enum { crc_VIEW   = 0, // not in edit in place mode or not in the active cell chain
-                  crc_EDIT   = 1, // edit in place mode is active and we're in the active cell chain
-                  crc_ACTIVE = 2  // the active cell
+   typedef enum { crc_VIEW       = 0, // not in edit in place mode or not in the active cell chain
+                  crc_PREACTIVE  = 1, // edit in place mode, and we're in the active cell chain before the active cell
+                  crc_ACTIVE     = 2, // edit in place mode, the active cell
+                  crc_POSTACTIVE = 3  // edit in place mode, and we're in the active cell chain after the active cell
                 } CellRefChainType;
 
    //=============================================================================
@@ -271,8 +272,8 @@ namespace layprop {
          void                       setLineProps(bool selected = false) const;
          void                       initDrawRefStack(laydata::CellRefStack*);
          void                       clearDrawRefStack();
-         void                       pushRef(const laydata::TdtCellRef*);
-         CellRefChainType           popRef(const laydata::TdtCellRef*);
+         void                       postCheckCRS(const laydata::TdtCellRef*);
+         CellRefChainType           preCheckCRS(const laydata::TdtCellRef*);
          void                       drawReferenceMarks(const TP&, const binding_marks) const;
          void                       drawTextBoundary(const pointlist& ptlist) const;
          void                       drawCellBoundary(const pointlist& ptlist) const;
@@ -297,6 +298,7 @@ namespace layprop {
                                                          {return _cellBoxHidden;}
          bool                       adjustTextOrientation() const
                                                          {return _adjustTextOrientation;}
+         byte                       cellDepthView()      {return _cellDepthView;}
          // Protected elsewhere
          console::ACTIVE_OP         currentOp() const    {return _currentOp;}
          void                       setCurrentOp(console::ACTIVE_OP actop)

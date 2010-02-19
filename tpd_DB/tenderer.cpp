@@ -1559,7 +1559,7 @@ tenderer::TenderRefLay::~TenderRefLay()
 tenderer::TopRend::TopRend( layprop::DrawProperties* drawprop, real UU ) :
       _drawprop(drawprop), _UU(UU), _clayer(NULL),
       _cslctd_array_offset(0u), _num_ogl_buffers(0u), _ogl_buffers(NULL),
-      _activeCS(NULL)
+      _activeCS(NULL), _dovCorrection(0)
 {
    // Initialize the cell (CTM) stack
    _cellStack.push(DEBUG_NEW TenderRef());
@@ -1833,6 +1833,24 @@ void tenderer::TopRend::draw()
 unsigned tenderer::TopRend::getTenderLay(unsigned layno)
 {
    return _drawprop->getTenderLay(layno);
+}
+
+bool tenderer::TopRend::preCheckCRS(const laydata::TdtCellRef* ref, layprop::CellRefChainType& crchain)
+{
+   crchain = _drawprop->preCheckCRS(ref);
+   byte dovLimit = _drawprop->cellDepthView();
+   if (0 == dovLimit) return true;
+   switch (crchain)
+   {
+      case layprop::crc_VIEW:
+         return (_cellStack.size() <= _drawprop->cellDepthView());
+      case layprop::crc_POSTACTIVE:
+         return ((_cellStack.size() - _dovCorrection) < _drawprop->cellDepthView());
+      case layprop::crc_ACTIVE:
+         _dovCorrection = _cellStack.size();
+      default: return true;
+   }
+   return true;// Dummy statement - to prevent compiler warnings
 }
 
 tenderer::TopRend::~TopRend()

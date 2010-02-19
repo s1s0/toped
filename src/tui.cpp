@@ -2640,6 +2640,10 @@ void tui::TopedPropertySheets::RenderingPSheet::update(wxCommandEvent& evt)
       case STS_CELLDAB     :
          _cellDepthEbb->setValue(evt.GetInt());
          break;
+      case STS_CELLDOV     :
+         if (0 != evt.GetInt())
+            _cellDepthOfView->setValue(evt.GetInt());
+         break;
       case STS_LDFONT      :
          targetControl = FindWindow(PDSET_TEXTFONTS);assert(targetControl);
          static_cast<wxComboBox*>(targetControl)->Append(evt.GetString() );
