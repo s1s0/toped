@@ -68,7 +68,6 @@ public:
    virtual void addLine(const edge &edge)=0;
    virtual void endWriting()=0;
 	virtual void zoom(const edge &edge)=0;
-   virtual void explainError(real x, real y)=0;
 };
 
 
@@ -152,7 +151,7 @@ public:
    void              showError(const std::string & error, long  number);
 	void              showAllErrors(void);
    void              hideAllErrors(void);
-   void              explainError(real x, real y) {_render->explainError(x, y);};
+   std::string       explainError(word lay);
    RuleChecksVector* results() {return &_RuleChecks;};
    bool              isOk(void)   {return _ok;}
 	drcRenderer*		render() const {return _render;};

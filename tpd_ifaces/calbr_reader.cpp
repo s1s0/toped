@@ -447,6 +447,14 @@ void   Calbr::CalbrFile::hideAllErrors(void)
    _render->hideAll();
 }
 
+std::string Calbr::CalbrFile::explainError(word lay)
+{
+   for(RuleChecksVector::const_iterator it = _RuleChecks.begin(); it!= _RuleChecks.end(); ++it)
+   {
+      if ((*it)->num() == lay) return (*it)->ruleCheckName();
+   }
+   assert(true);
+}
 
 wxString Calbr::convert(int number, long precision)
 {
