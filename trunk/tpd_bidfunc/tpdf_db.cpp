@@ -1591,20 +1591,17 @@ int tellstdfunc::DRCexplainerror::execute()
    telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    real DBscale = PROPC->DBscale();
    TP* p1DB = DEBUG_NEW TP(p1->x(), p1->y(), DBscale);
-   //DWordSet unselectable = PROPC->allUnselectable();
-   //laydata::TdtDesign* ATDB = DATC->lockDB();
    laydata::DrcLibrary* drcDesign = DATC->lockDRC();
       WordList selectedl = drcDesign->findSelected(p1DB);
+      selectedl.unique();
+      for(WordList::const_iterator it = selectedl.begin(); it!= selectedl.end(); ++it)
+      {
+         std::ostringstream ost;
+         ost << DRCData->explainError((*it));
+         tell_log(console::MT_INFO,ost.str());
+      }
    DATC->unlockDRC();
-   /*if (NULL != selectedl) {
-      UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(make_ttlaylist(selectedl));
-      OPstack.push(make_ttlaylist(selectedl));
-      LogFile << LogFile.getFN() << "("<< *p1 << ");"; LogFile.flush();
-      for(laydata::AtticList::iterator CI = selectedl->begin();CI != selectedl->end(); CI++)
-         delete CI->second;
-      delete selectedl;
-   }*/
+   
    delete p1; delete p1DB;
    UpdateLV();
    return EXEC_NEXT;

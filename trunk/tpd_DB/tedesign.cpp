@@ -1413,23 +1413,11 @@ WordList laydata::DrcLibrary::findSelected(TP* p1)
       layprop::DrawProperties* drawProp;
       if (PROPC->lockDrawProp(drawProp, layprop::DRC))
       {
-         selp = (*p1)*drawProp->scrCtm().Reversed();//(*p1) * cell->rARTM();
+         selp = (*p1)*CTM().Reversed(); //Take identity matrix
          lays = cell->findSelected(selp);
-         /*drawProp->allLayers(tdtLayers);
-         for ( nameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
-         {
-            std::ostringstream dtypestr;
-            dtypestr << drawProp->getLayerNo( *CDL )<< "; 0";
-            telldata::tthsh* clay = DEBUG_NEW telldata::tthsh(drawProp->getLayerNo( *CDL ), dtypestr.str());
-            theMap->add(clay);
-         }*/
       }
       PROPC->unlockDrawProp(drawProp);
-
-
-      //TP
       return lays;
-      //return cell.edit()->changeSelect(selp, select ? sh_selected:sh_active, unselable);
    }
    else
       return lays;
