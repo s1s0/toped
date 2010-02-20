@@ -209,7 +209,7 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos,
    invalid_window = false;
    reperX = reperY = long_cursor = false;
    // Running the openGL drawing in a separate thread
-   // This appears to be a bad idea esspecially on some platforms.
+   // This appears to be a bad idea especially on some platforms.
    // Google it for some opinions.
    // The code is there, but I never got it running reliably if at all
    // The option stays for the sake of experiment.

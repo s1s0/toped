@@ -860,16 +860,6 @@ void tui::TopedFrame::OnCanvasStatus(wxCommandEvent& evt)
    }
 }
 
-// void tui::TopedFrame::OnTopedStatus(wxCommandEvent& evt)
-// {
-//    switch (evt.GetInt()) {
-//       case console::TSTS_THREADON    : _toped_status->OnThreadON(evt.GetString()); break;
-//       case console::TSTS_THREADWAIT  : _toped_status->OnThreadWait(); break;
-//       case console::TSTS_THREADOFF   : _toped_status->OnThreadOFF(); break;
-//       default: assert(false);
-//    }
-// }
-
 void tui::TopedFrame::OnNewDesign(wxCommandEvent& evt) {
    if (DATC->modified()) {
       wxMessageDialog dlg1(this,

@@ -805,6 +805,8 @@ void DataCenter::openGlDraw(const CTM& layCTM)
          PROPC->drawZeroCross(drawProp);
          if (wxMUTEX_NO_ERROR == _DBLock.TryLock())
          {
+//            TpdPost::toped_status(console::TSTS_RENDERON);
+            TpdPost::render_status(true);
             #ifdef RENDER_PROFILING
                HiResTimer rendTimer;
             #endif
@@ -823,6 +825,8 @@ void DataCenter::openGlDraw(const CTM& layCTM)
                rendTimer.report("Total elapsed rendering time");
             #endif
             VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
+//            TpdPost::toped_status(console::TSTS_RENDEROFF);
+            TpdPost::render_status(false);
          }
          else
          {
@@ -865,6 +869,8 @@ void DataCenter::openGlRender(const CTM& layCTM)
          //       _properties.drawZeroCross(renderer);
          if (wxMUTEX_NO_ERROR == _DBLock.TryLock())
          {
+//            TpdPost::toped_status(console::TSTS_RENDERON);
+            TpdPost::render_status(true);
             #ifdef RENDER_PROFILING
             HiResTimer rendTimer;
             #endif
@@ -899,6 +905,8 @@ void DataCenter::openGlRender(const CTM& layCTM)
                #endif
             }
             VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
+//            TpdPost::toped_status(console::TSTS_RENDEROFF);
+            TpdPost::render_status(false);
          }
          else
          {

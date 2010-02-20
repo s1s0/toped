@@ -187,11 +187,12 @@ END_EVENT_TABLE()
 console::TopedStatus::TopedStatus(wxWindow* parent) : wxStatusBar(parent, tui::ID_TPD_STATUS)
 {
    const unsigned Field_Max = 3;
-   static const int widths[Field_Max] = { -1, -1, 32 };
+   static const int widths[Field_Max] = { -1, -1, 64 };
 
     SetFieldsCount(Field_Max);
     SetStatusWidths(Field_Max, widths);
-    _lamp = DEBUG_NEW wxStaticBitmap(this, wxID_ANY, wxIcon(green_lamp));
+    _dbLamp = DEBUG_NEW wxStaticBitmap(this, wxID_ANY, wxIcon(green_lamp));
+    _rndrLamp = DEBUG_NEW wxStaticBitmap(this, wxID_ANY, wxIcon(green_lamp));
     _progress = NULL;
     _progressAdj = 1.0;
 }
@@ -205,6 +206,8 @@ void console::TopedStatus::OnTopedStatus(wxCommandEvent& evt)
       case console::TSTS_THREADON    : OnThreadON(evt.GetString()); break;
       case console::TSTS_THREADWAIT  : OnThreadWait(); break;
       case console::TSTS_THREADOFF   : OnThreadOFF(); break;
+      case console::TSTS_RENDERON    : OnRenderON(); break;
+      case console::TSTS_RENDEROFF   : OnRenderOFF(); break;
       default: assert(false);
    }
 }
@@ -213,19 +216,33 @@ void console::TopedStatus::OnTopedStatus(wxCommandEvent& evt)
 void console::TopedStatus::OnThreadON(wxString cmd)
 {
    SetStatusText(cmd,1);
-   _lamp->SetBitmap(wxIcon(red_lamp));
+   _dbLamp->SetBitmap(wxIcon(red_lamp));
 }
 
 void console::TopedStatus::OnThreadWait()
 {
 //   SetStatusText(wxT("Ready..."),1);
-   _lamp->SetBitmap(wxIcon(blue_lamp));
+   _dbLamp->SetBitmap(wxIcon(blue_lamp));
 }
 
 void console::TopedStatus::OnThreadOFF()
 {
    SetStatusText(wxT("Ready..."),1);
-   _lamp->SetBitmap(wxIcon(green_lamp));
+   _dbLamp->SetBitmap(wxIcon(green_lamp));
+}
+
+void console::TopedStatus::OnRenderON()
+{
+   SetStatusText(wxT("Rendering..."),1);
+   _rndrLamp->SetBitmap(wxIcon(red_lamp));
+   Update();
+}
+
+void console::TopedStatus::OnRenderOFF()
+{
+   SetStatusText(wxT("Ready..."),1);
+   _rndrLamp->SetBitmap(wxIcon(green_lamp));
+   Update();
 }
 
 void console::TopedStatus::OnInitGauge(long int init_val)
@@ -268,9 +285,11 @@ void console::TopedStatus::OnSize(wxSizeEvent& event)
    }
 
    GetFieldRect(2, rect);
-   wxSize size = _lamp->GetSize();
-   _lamp->Move(rect.x + (rect.width - size.x) / 2,
-                rect.y + (rect.height - size.y) / 2);
+   wxSize size = _dbLamp->GetSize();
+   _rndrLamp->Move(rect.x + rect.width / 3 - size.x / 2,
+                   rect.y + (rect.height - size.y) / 2);
+   _dbLamp->Move(rect.x + 2* rect.width / 3  - size.x / 2,
+                 rect.y +   (rect.height - size.y) / 2);
 
     event.Skip();
 }
@@ -321,6 +340,14 @@ void TpdPost::toped_status(console::TOPEDSTATUS_TYPE tstatus, wxString sts_cmd)
    eventSTATUSUPD.SetInt(tstatus);
    eventSTATUSUPD.SetString(sts_cmd);
    wxPostEvent(_statusBar, eventSTATUSUPD);
+}
+
+void TpdPost::render_status(bool on_off)
+{
+   if (on_off)
+      static_cast<console::TopedStatus*>(_statusBar)->OnRenderON();
+   else
+      static_cast<console::TopedStatus*>(_statusBar)->OnRenderOFF();
 }
 
 void TpdPost::addTDTtab(bool targetDB, bool newthread)
