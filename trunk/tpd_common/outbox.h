@@ -68,6 +68,8 @@ namespace console {
       TSTS_THREADON     ,
       TSTS_THREADWAIT   ,
       TSTS_THREADOFF    ,
+      TSTS_RENDERON     ,
+      TSTS_RENDEROFF    ,
       TSTS_PRGRSBARON   ,
       TSTS_PROGRESS     ,
       TSTS_PRGRSBAROFF
@@ -171,12 +173,15 @@ namespace console {
       void                 OnThreadON(wxString);
       void                 OnThreadWait();
       void                 OnThreadOFF();
+      void                 OnRenderON();
+      void                 OnRenderOFF();
       void                 OnSize(wxSizeEvent& event);
       void                 OnInitGauge(long int);
       void                 OnGaugeRun(long int);
       void                 OnCloseGauge();
    private:
-      wxStaticBitmap*      _lamp;
+      wxStaticBitmap*      _dbLamp;
+      wxStaticBitmap*      _rndrLamp;
       wxGauge*             _progress;
       real                 _progressAdj;
       DECLARE_EVENT_TABLE();
@@ -195,6 +200,7 @@ class TpdPost {
       static void toped_status(console::TOPEDSTATUS_TYPE, long int);
       static void toped_status(console::TOPEDSTATUS_TYPE, std::string);
       static void toped_status(console::TOPEDSTATUS_TYPE, wxString);
+      static void render_status(bool);
       static void addTDTtab(bool, bool newthread);
       static void addGDStab();
       static void addCIFtab();

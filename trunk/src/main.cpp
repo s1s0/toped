@@ -291,8 +291,8 @@ void TopedApp::parseCmdLineArgs()
       for (int i=1; i<argc; i++)
       {
          wxString curar(argv[i]);
-//            if (wxT("-ogltrd") == curar) Toped->setOglThread(true);
-         if (wxT("-ogl_safe") == curar) _forceBasicRendering = true;
+         if (wxT("-ogl_thread") == curar) Toped->setOglThread(true);
+         else if (wxT("-ogl_safe") == curar) _forceBasicRendering = true;
          else if (!(0 == curar.Find('-')))
          {
             _inputTellFile.Clear();

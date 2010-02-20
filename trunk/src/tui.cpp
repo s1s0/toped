@@ -115,7 +115,7 @@ void  tui::sgSliderControl::OnScroll(wxScrollEvent& event)
    ws.sprintf(wxT("%i"), _slider->GetValue());
    _text->SetValue(ws);
    int eventID = event.GetEventType();
-   if (wxEVT_SCROLL_THUMBRELEASE == eventID)
+   if (wxEVT_SCROLL_CHANGED == eventID)
    {
       wxCommandEvent sliderEvent(wxEVT_COMMAND_ENTER, GetId());
       sliderEvent.SetInt(_slider->GetValue());
