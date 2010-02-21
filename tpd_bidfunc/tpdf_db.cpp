@@ -1578,14 +1578,45 @@ int tellstdfunc::DRChideallerrors::execute()
 }
 
 //=============================================================================
-tellstdfunc::DRCexplainerror::DRCexplainerror(telldata::typeID retype, bool eor) :
+tellstdfunc::DRCexplainerror_D::DRCexplainerror_D(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
 }
 
+int tellstdfunc::DRCexplainerror_D::execute()
+{
+   // get the data from the stack
+   assert(telldata::tn_pnt == OPstack.top()->get_type());
+   telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
+   real DBscale = PROPC->DBscale();
+   TP* p1DB = DEBUG_NEW TP(p1->x(), p1->y(), DBscale);
+   laydata::DrcLibrary* drcDesign = DATC->lockDRC();
+      WordList selectedl = drcDesign->findSelected(p1DB);
+      selectedl.unique();
+      for(WordList::const_iterator it = selectedl.begin(); it!= selectedl.end(); ++it)
+      {
+         std::ostringstream ost;
+         ost << DRCData->explainError((*it));
+         tell_log(console::MT_INFO,ost.str());
+      }
+   DATC->unlockDRC();
+   
+   delete p1; delete p1DB;
+   UpdateLV();
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::DRCexplainerror::DRCexplainerror(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
+{
+}
+
 int tellstdfunc::DRCexplainerror::execute()
 {
+   // stop the thread and wait for input from the GUI
+   if (!tellstdfunc::waitGUInput(console::op_point, &OPstack)) return EXEC_ABORT;
    // get the data from the stack
    assert(telldata::tn_pnt == OPstack.top()->get_type());
    telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
