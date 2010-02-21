@@ -348,10 +348,12 @@ namespace browsers
       void                    deleteAllItems(void);
       void                    onShowAll(wxCommandEvent&);
       void                    onHideAll(wxCommandEvent&);
+      void                    onExplainError(wxCommandEvent&);
    private:
       ErrorBrowser*           _errorBrowser;
       wxButton*               _showAllButton;
       wxButton*               _hideAllButton;
+      wxButton*               _explainButton;
       DECLARE_EVENT_TABLE();
    };
 

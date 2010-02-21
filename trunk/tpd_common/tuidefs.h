@@ -268,6 +268,7 @@ namespace tui
       BT_CELLS_FLAT2,
       BT_DRC_SHOW_ALL,
       BT_DRC_HIDE_ALL,
+      BT_DRC_EXPLAIN,
       BT_LAYER_SHOW_ALL,
       BT_LAYER_HIDE_ALL,
       BT_LAYER_LOCK_ALL,
