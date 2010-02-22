@@ -34,6 +34,7 @@
 #include "tpdf_common.h"
 #include "viewprop.h"
 
+#include <sstream>
 
 // Global variables
 Calbr::CalbrFile                *DRCData = NULL;
@@ -78,9 +79,9 @@ void Calbr::drcTenderer::addPoly(const CoordsVector   &coords)
 
    if (_ATDB)
    {
-      real DBscale = 1000 /*DATC->DBscale()*/;
-      pointlist *plDB = DEBUG_NEW pointlist();
-      plDB->reserve(coords.size());
+      real DBscale = 1000;
+      pointlist plDB;
+      plDB.reserve(coords.size());
 
       for(CoordsVector::const_iterator it = coords.begin(); it!= coords.end(); ++it)
       {
@@ -88,12 +89,22 @@ void Calbr::drcTenderer::addPoly(const CoordsVector   &coords)
          _maxy = std::max(it->y, _maxy);
          _minx = std::min(it->x, _minx);
          _miny = std::min(it->y, _miny);
-         plDB->push_back(TP(it->x, it->y, DBscale));
+         plDB.push_back(TP(it->x, it->y, DBscale));
       }
       laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(_DRCCell->secureLayer(_numError));
       PROPC->addUnpublishedLay(_numError);
-      dwl->addPoly(*plDB, false);
-      delete plDB;
+      
+      laydata::ValidPoly check(plDB);
+
+      if (!check.valid())
+      {
+         std::ostringstream ost;
+         ost << "Poly check fails - {" << check.failType() << " }";
+         tell_log(console::MT_ERROR, ost.str());
+      }
+      else plDB = check.getValidated();
+      if (check.box())  dwl->addBox(plDB[0], plDB[2], false);
+      else              dwl->addPoly(plDB,false);
    }
 }
 
@@ -116,18 +127,29 @@ void Calbr::drcTenderer::addLine(const edge &edge)
 
    real DBscale = 1000 ;
    //Convert drcEdge to pointlist
-   pointlist *plDB = DEBUG_NEW pointlist();
-   plDB->reserve(2);
+   pointlist plDB; 
+   plDB.reserve(2);
 
-   plDB->push_back(TP(edge.x1, edge.y1, DBscale));
-   plDB->push_back(TP(edge.x2, edge.y2, DBscale));
+   plDB.push_back(TP(edge.x1, edge.y1, DBscale));
+   plDB.push_back(TP(edge.x2, edge.y2, DBscale));
 
    real      w = 0.01;   //width of line
+   word      width = static_cast<word>(rint(w * DBscale));
 
    laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(_DRCCell->secureLayer(_numError));
    PROPC->addUnpublishedLay(_numError);
-   dwl->addWire(*plDB, static_cast<word>(rint(w * DBscale)), false);
-   delete plDB;
+
+
+   laydata::ValidWire check(plDB, width);
+
+   if (!check.valid())
+   {
+      std::ostringstream ost;
+      ost << "Wire check fails - {" << check.failType() << " }";
+      tell_log(console::MT_ERROR, ost.str());
+   }
+   else plDB = check.getValidated();
+   dwl->addWire(plDB, width,false);
 }
 
 void Calbr::drcTenderer::showAll(void)
