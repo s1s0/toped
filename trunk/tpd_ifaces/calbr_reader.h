@@ -80,7 +80,7 @@ public:
    edge*           coords() {return &_coords;};
 	edge            getZoom() const;
    long            ordinal() const {return _ordinal;};
-   void            addError(word la);
+   void            addError();
    static long     _precision;
 private:
    edge            _coords;
@@ -96,7 +96,7 @@ public:
    CoordsVector*   coords() {return &_coords;};
 	edge            getZoom()  const;
    long            ordinal() const {return _ordinal;};
-   void            addError(word la);
+   void            addError();
    static long     _precision;
 private:
    CoordsVector    _coords;
