@@ -71,6 +71,54 @@ int tellstdfunc::stdNEWDESIGNd::execute()
 }
 
 //=============================================================================
+tellstdfunc::stdNEWDESIGNs::stdNEWDESIGNs(telldata::typeID retype, bool eor) :
+      stdNEWDESIGNsd(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+}
+
+int tellstdfunc::stdNEWDESIGNs::execute()
+{
+   TpdTime timeCreated(time(NULL));
+   OPstack.push(DEBUG_NEW telldata::ttstring(timeCreated()));
+   return stdNEWDESIGNsd::execute();
+}
+
+//=============================================================================
+tellstdfunc::stdNEWDESIGNsd::stdNEWDESIGNsd(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+}
+
+int tellstdfunc::stdNEWDESIGNsd::execute()
+{
+   TpdTime timeCreated(getStringValue());
+   real UU = getOpValue();
+   real DBU = getOpValue();
+   std::string nm = getStringValue();
+
+   DATC->newDesign(nm, timeCreated.stdCTime(), DBU, UU);
+   TpdPost::addTDTtab(true, false);
+   // reset UNDO buffers;
+   UNDOcmdQ.clear();
+   while (!UNDOPstack.empty())
+   {
+      delete UNDOPstack.front(); UNDOPstack.pop_front();
+   }
+   LogFile << "newdesign(\""<< nm            << "\" , \""
+                            << DBU           << ", "
+                            << UU            << ", "
+                            << timeCreated() << "\");";
+   LogFile.flush();
+   return EXEC_NEXT;
+}
+//=============================================================================
 tellstdfunc::TDTread::TDTread(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
@@ -1601,7 +1649,7 @@ int tellstdfunc::DRCexplainerror_D::execute()
          tell_log(console::MT_INFO,ost.str());
       }
    DATC->unlockDRC();
-   
+
    delete p1; delete p1DB;
    UpdateLV();
    return EXEC_NEXT;
@@ -1632,7 +1680,7 @@ int tellstdfunc::DRCexplainerror::execute()
          tell_log(console::MT_INFO,ost.str());
       }
    DATC->unlockDRC();
-   
+
    delete p1; delete p1DB;
    UpdateLV();
    return EXEC_NEXT;
@@ -1642,7 +1690,7 @@ int tellstdfunc::DRCexplainerror::execute()
 void tellstdfunc::createDefaultTDT(std::string dbname, TpdTime& timeCreated,
                                    parsercmd::undoQUEUE& undstack, telldata::UNDOPerandQUEUE& undopstack)
 {
-   DATC->newDesign(dbname, timeCreated.stdCTime());
+   DATC->newDesign(dbname, timeCreated.stdCTime(), DEFAULT_DBU, DEFAULT_UU);
    TpdPost::addTDTtab(true, false);
    // reset UNDO buffers;
    undstack.clear();

@@ -1865,39 +1865,39 @@ void tui::TopedFrame::OnDefineLayer(wxCommandEvent& event)
    if (PROPC->lockDrawProp(drawProp))
    {
       word layno = drawProp->curLay();
-      editLayerDlg(layno);
+      editLayerDlg(layno, drawProp);
    }
    PROPC->unlockDrawProp(drawProp);
 }
 
 void tui::TopedFrame::OnEditLayer(wxCommandEvent& evt)
 {
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
 	word layno = evt.GetInt();
-	editLayerDlg(layno);
+	editLayerDlg(layno, drawProp);
+   }
+   PROPC->unlockDrawProp(drawProp);
 }
 
-void tui::TopedFrame::editLayerDlg(word layno)
+void tui::TopedFrame::editLayerDlg(word layno, const layprop::DrawProperties* drawprop)
 {
    bool success = false;
    wxString ost;
    wxRect wnd = GetRect();
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
-   layprop::DrawProperties* drawprop;
-   if (PROPC->lockDrawProp(drawprop))
+   tui::defineLayer dlg(this, -1, wxT("Define Layer"), pos, layno, drawprop);
+   if ( dlg.ShowModal() == wxID_OK )
    {
-      tui::defineLayer dlg(this, -1, wxT("Define Layer"), pos, layno, drawprop);
-      if ( dlg.ShowModal() == wxID_OK )
-      {
-         ost      << wxT("layprop(\"") << dlg.layname()
-                  << wxT("\" , ")      << dlg.layno()
-                  << wxT(" , \"")      << dlg.color()
-                  << wxT("\" , \"")    << dlg.fill()
-                  << wxT("\" , \"")    << dlg.line()
-                  << wxT("\");");
-         success = true;
-      }
+      ost      << wxT("layprop(\"") << dlg.layname()
+               << wxT("\" , ")      << dlg.layno()
+               << wxT(" , \"")      << dlg.color()
+               << wxT("\" , \"")    << dlg.fill()
+               << wxT("\" , \"")    << dlg.line()
+               << wxT("\");");
+      success = true;
    }
-   PROPC->unlockDrawProp(drawprop);
    if (success) _cmdline->parseCommand(ost);
 }
 
