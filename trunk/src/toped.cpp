@@ -1924,6 +1924,7 @@ void tui::TopedFrame::OnDefineColor(wxCommandEvent& WXUNUSED(event))
                   << wxT(" , ")        << coldef->alpha()
                   << wxT(");");
          }
+         success = true;
       }
    }
    PROPC->unlockDrawProp(drawprop);
