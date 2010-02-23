@@ -82,7 +82,7 @@ namespace laydata {
 
    class TdtDesign : public TdtLibrary {
    public:
-                     TdtDesign(std::string, time_t, time_t, real DBU = 1e-9, real UU = 1e-3);
+                     TdtDesign(std::string, time_t, time_t, real DBU, real UU);
       virtual       ~TdtDesign();
       void           read(TEDfile* const);
       void           write(TEDfile* const tedfile);

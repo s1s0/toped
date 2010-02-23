@@ -479,7 +479,7 @@ void DataCenter::PSexport(laydata::TdtCell* cell, std::string& filename)
 //   gdsex.closeFile();
 }
 
-void DataCenter::newDesign(std::string name, time_t created)
+void DataCenter::newDesign(std::string name, time_t created, real DBU, real UU)
 {
    if (_TEDLIB())
    {
@@ -493,7 +493,7 @@ void DataCenter::newDesign(std::string name, time_t created)
       _TEDLIB()->clearHierTree();
       _TEDLIB.deleteDB();
    }
-   _TEDLIB.setDB(DEBUG_NEW laydata::TdtDesign(name, created, created));
+   _TEDLIB.setDB(DEBUG_NEW laydata::TdtDesign(name, created, created, DBU, UU));
    _tedfilename = _localDir + name + ".tdt";
    _neversaved = true;
    PROPC->setUU(_TEDLIB()->UU());

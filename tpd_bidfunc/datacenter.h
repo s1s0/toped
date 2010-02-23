@@ -59,7 +59,7 @@ public:
    bool                       TDTwrite(const char* filename = NULL);
    bool                       TDTcheckwrite(const TpdTime&, const TpdTime&, bool&);
    bool                       TDTcheckread(const std::string, const TpdTime&, const TpdTime&, bool&);
-   void                       newDesign(std::string, time_t);
+   void                       newDesign(std::string, time_t, real, real);
    laydata::TdtDesign*        lockDB(bool checkACTcell = true);
    laydata::DrcLibrary*       lockDRC(void);
    bool                       lockGds(GDSin::GdsInFile*&);

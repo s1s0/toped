@@ -35,7 +35,9 @@ namespace tellstdfunc {
    using parsercmd::argumentLIST;
    using parsercmd::argumentTYPE;
    TELL_STDCMD_CLASSA(stdNEWDESIGNd    );                // reset undo buffers
+   TELL_STDCMD_CLASSA(stdNEWDESIGNsd   );                // reset undo buffers
    TELL_STDCMD_CLASSB(stdNEWDESIGN    , stdNEWDESIGNd ); // reset undo buffers
+   TELL_STDCMD_CLASSB(stdNEWDESIGNs   , stdNEWDESIGNsd); // reset undo buffers
    TELL_STDCMD_CLASSA(TDTread          );                // reset undo buffers
    TELL_STDCMD_CLASSB(TDTreadIFF      , TDTread       );
    TELL_STDCMD_CLASSA(TDTloadlib       );
@@ -70,7 +72,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(OASread          );
    TELL_STDCMD_CLASSA(OASimport        );
    TELL_STDCMD_CLASSA(OASclose         );
-   
+
    TELL_STDCMD_CLASSA(DRCCalibreimport );
    TELL_STDCMD_CLASSA(DRCshowerror     );
    TELL_STDCMD_CLASSA(DRCshowallerrors );
