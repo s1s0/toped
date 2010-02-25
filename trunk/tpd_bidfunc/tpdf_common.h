@@ -134,7 +134,9 @@
 
 namespace tellstdfunc {
 
-   telldata::ttint*     CurrentLayer();
+   telldata::ttint*     getCurrentLayer();
+   unsigned             secureLayer();
+   void                 secureLayer(unsigned);
    bool                 waitGUInput(int, telldata::operandSTACK *,
                                     std::string name = "",
                                     const CTM trans = CTM(),
