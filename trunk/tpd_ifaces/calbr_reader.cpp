@@ -100,10 +100,10 @@ Calbr::edge Calbr::drcPolygon::getZoom() const
 	real maxy = (*it).y;
 	for(CoordsVector::const_iterator it = _coords.begin(); it != _coords.end(); ++it)
 	{
-		if ((*it).x < minx ) minx = (*it).x;
-		if ((*it).y < miny ) miny = (*it).y;
-		if ((*it).x > maxx ) maxx = (*it).x;
-		if ((*it).y > maxy ) maxy = (*it).y;
+      minx = std::min((*it).x, minx);
+      miny = std::min((*it).y, miny);
+      maxx = std::max((*it).x, maxx);
+      maxy = std::max((*it).y, maxy);
 	};
 	edge ret;
 	ret.x1 = minx;
@@ -144,10 +144,10 @@ void Calbr::drcRuleCheck::addPolygon(const Calbr::drcPolygon &poly)
    if (_borderInit)
    {
       edge polyBorder = poly.getZoom();
-      if(polyBorder.x1 < _border.x1) polyBorder.x1 = _border.x1;
-      if(polyBorder.y1 < _border.y1) polyBorder.y1 = _border.y1;
-      if(polyBorder.x2 > _border.x2) polyBorder.x2 = _border.x2;
-      if(polyBorder.y2 > _border.y2) polyBorder.y2 = _border.y2;
+      _border.x1 = std::min(polyBorder.x1, _border.x1);
+      _border.y1 = std::min(polyBorder.y1, _border.y1);
+      _border.x2 = std::max(polyBorder.x2, _border.x2);
+      _border.y2 = std::max(polyBorder.y2, _border.y2);
    }
    else
    {
@@ -162,10 +162,10 @@ void Calbr::drcRuleCheck::addEdge(const Calbr::drcEdge &theEdge)
    if (_borderInit)
    {
       edge polyBorder = theEdge.getZoom();
-      if(polyBorder.x1 < _border.x1) _border.x1 = polyBorder.x1;
-      if(polyBorder.y1 < _border.y1) _border.y1 = polyBorder.y1;
-      if(polyBorder.x2 > _border.x2) _border.x2 = polyBorder.x2;
-      if(polyBorder.y2 > _border.y2) _border.y2 = polyBorder.y2;
+      _border.x1 = std::min(polyBorder.x1, _border.x1);
+      _border.y1 = std::min(polyBorder.y1, _border.y1);
+      _border.x2 = std::max(polyBorder.x2, _border.x2);
+      _border.y2 = std::max(polyBorder.y2, _border.y2);
    }
    else
    {
@@ -478,6 +478,32 @@ void   Calbr::CalbrFile::showError(const std::string & error, long  number)
          try
          {
             zoom = (*it)->getZoom(number);
+         }
+         catch (EXPTNdrc_reader)
+         {
+            return;
+         }
+         _render->zoom(zoom);
+      }
+   }
+   assert(it == _RuleChecks.end());
+}
+
+
+void   Calbr::CalbrFile::showCluster(const std::string & error)
+{
+   edge zoom;
+   RuleChecksVector::const_iterator it;
+   for(it = _RuleChecks.begin(); it!= _RuleChecks.end(); ++it)
+   {
+      std::string x = (*it)->ruleCheckName();
+      if((*it)->ruleCheckName() == error)
+      {
+         _render->hideAll();
+         _render->showError((*it)->num());
+         try
+         {
+            zoom = (*it)->getZoom();
          }
          catch (EXPTNdrc_reader)
          {

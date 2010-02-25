@@ -171,6 +171,8 @@ namespace tui
 
       TMCADENCE_CONVERT   ,
       TMGET_SNAPSHOT      ,
+      TMDRC_SHOW_ERR      ,
+      TMDRC_SHOW_CLUSTER  ,
 
       TMHELP_ABOUTAPP     ,
       TBSTAT_ABORT        ,

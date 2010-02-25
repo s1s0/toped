@@ -2022,6 +2022,10 @@ wxString browsers::LayerBrowser::getAllSelected()
 //====================================================================
 BEGIN_EVENT_TABLE(browsers::ErrorBrowser, wxTreeCtrl)
    EVT_LEFT_DCLICK(browsers::ErrorBrowser::onLMouseDblClk)
+   EVT_TREE_ITEM_RIGHT_CLICK( tui::ID_DRC_CELLTREE, browsers::ErrorBrowser::onItemRightClick)
+   EVT_RIGHT_UP(browsers::ErrorBrowser::onBlankRMouseUp)
+   EVT_MENU(tui::TMDRC_SHOW_ERR, browsers::ErrorBrowser::onShowError)
+   EVT_MENU(tui::TMDRC_SHOW_CLUSTER, browsers::ErrorBrowser::onShowCluster)
 END_EVENT_TABLE()
 //====================================================================
 browsers::ErrorBrowser::ErrorBrowser(wxWindow* parent, wxWindowID id,
@@ -2060,6 +2064,49 @@ void browsers::ErrorBrowser::onLMouseDblClk(wxMouseEvent& event)
    }
    else
       event.Skip();
+}
+
+void browsers::ErrorBrowser::onItemRightClick(wxTreeEvent& event)
+{
+   showMenu(event.GetItem(), event.GetPoint());
+}
+
+void browsers::ErrorBrowser::onBlankRMouseUp(wxMouseEvent& event)
+{
+   wxPoint pt = event.GetPosition();
+   showMenu(HitTest(pt), pt);
+}
+
+void browsers::ErrorBrowser::onShowError(wxCommandEvent& vent)
+{
+   wxString cmd;
+   cmd << wxT("drcshowerror(\"") << _cluster << wxT("\", ") << _error <<wxT(");");
+   TpdPost::parseCommand(cmd);
+}
+
+void browsers::ErrorBrowser::onShowCluster(wxCommandEvent& event)
+{
+   wxString cmd;
+   cmd << wxT("drcshowcluster(\"") << _cluster <<wxT("\");");
+   TpdPost::parseCommand(cmd);
+}
+
+void browsers::ErrorBrowser::showMenu(wxTreeItemId id, const wxPoint& pt)
+{
+   wxMenu menu;
+   if (!id.IsOk()) return;
+   if (ItemHasChildren(id))
+   {
+      menu.Append(tui::TMDRC_SHOW_CLUSTER, wxT("Show cluster")); 
+      _cluster = GetItemText(id);
+   }
+   else
+   {
+      menu.Append(tui::TMDRC_SHOW_ERR, wxT("Show Error")); 
+      _cluster = GetItemText(GetItemParent(id));
+      _error = GetItemText(id);
+   }
+     PopupMenu(&menu, pt);
 }
 
 //====================================================================

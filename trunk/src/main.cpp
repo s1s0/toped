@@ -552,9 +552,10 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    mblock->addFUNC("oasisimport"      ,(DEBUG_NEW                   tellstdfunc::OASimport(telldata::tn_void, true)));
    mblock->addFUNC("drccalibreimport" ,(DEBUG_NEW            tellstdfunc::DRCCalibreimport(telldata::tn_void, true)));
    mblock->addFUNC("drcshowerror"     ,(DEBUG_NEW                tellstdfunc::DRCshowerror(telldata::tn_void, true)));
+   mblock->addFUNC("drcshowcluster"   ,(DEBUG_NEW              tellstdfunc::DRCshowcluster(telldata::tn_void, true)));
    mblock->addFUNC("drcshowallerrors" ,(DEBUG_NEW            tellstdfunc::DRCshowallerrors(telldata::tn_void, true)));
    mblock->addFUNC("drchideallerrors" ,(DEBUG_NEW            tellstdfunc::DRChideallerrors(telldata::tn_void, true)));
-   mblock->addFUNC("drcexplainerror"  ,(DEBUG_NEW             tellstdfunc::DRCexplainerror_D(telldata::tn_void, true)));
+   mblock->addFUNC("drcexplainerror"  ,(DEBUG_NEW           tellstdfunc::DRCexplainerror_D(telldata::tn_void, true)));
    mblock->addFUNC("drcexplainerror"  ,(DEBUG_NEW             tellstdfunc::DRCexplainerror(telldata::tn_void, true)));
    mblock->addFUNC("psexport"         ,(DEBUG_NEW                 tellstdfunc::PSexportTOP(telldata::tn_void,false)));
    mblock->addFUNC("tdtread"          ,(DEBUG_NEW                     tellstdfunc::TDTread(telldata::tn_void, true)));
