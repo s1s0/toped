@@ -46,7 +46,7 @@ extern const wxEventType         wxEVT_SETINGSMENU;
 
 
 //=============================================================================
-telldata::ttint* tellstdfunc::CurrentLayer()
+telldata::ttint* tellstdfunc::getCurrentLayer()
 {
    unsigned cl;
    layprop::DrawProperties* drawProp;
@@ -56,6 +56,30 @@ telldata::ttint* tellstdfunc::CurrentLayer()
    }
    PROPC->unlockDrawProp(drawProp);
    return (DEBUG_NEW telldata::ttint(cl));
+}
+
+//=============================================================================
+//! The whole idea behind this function is to ensure that the target layer is
+//! defined in the property database. Otherwise the user will add a shape
+//! which will be invisible.
+void tellstdfunc::secureLayer(unsigned layno)
+{
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      // check whether it's defined and make a default definition if it isn't
+      if (drawProp->addLayer(layno))
+         TpdPost::layer_add(drawProp->getLayerName(layno), layno);
+   }
+   PROPC->unlockDrawProp(drawProp);
+}
+
+//=============================================================================
+unsigned tellstdfunc::secureLayer()
+{
+   unsigned layno = DATC->curCmdLay();
+   secureLayer(layno);
+   return layno;
 }
 
 //=============================================================================
@@ -314,7 +338,7 @@ void tellstdfunc::updateLayerDefinitions(laydata::TdtLibDir* LIBDIR, nameList& t
    {
       for(WordList::const_iterator CUL = ull.begin(); CUL != ull.end(); CUL++)
       {
-         if (0 == *CUL) continue;
+         if (REF_LAY == *CUL) continue;
          if (drawProp->addLayer(*CUL))
             TpdPost::layer_add(drawProp->getLayerName(*CUL), *CUL);
       }

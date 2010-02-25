@@ -66,6 +66,7 @@ void tellstdfunc::stdADDBOX::undo() {
 int tellstdfunc::stdADDBOX::execute() {
    UNDOcmdQ.push_front(this);
    word la = getWordValue();
+   secureLayer(la);
    UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
    real DBscale = PROPC->DBscale();
@@ -91,7 +92,7 @@ tellstdfunc::stdADDBOX_D::stdADDBOX_D(telldata::typeID retype, bool eor) :
 }
 
 int tellstdfunc::stdADDBOX_D::execute() {
-   OPstack.push(CurrentLayer());
+   OPstack.push(getCurrentLayer());
    return stdADDBOX::execute();
 }
 
@@ -124,11 +125,12 @@ int tellstdfunc::stdDRAWBOX::execute() {
    DATC->setCmdLayer(la);
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(console::op_dbox, &OPstack)) return EXEC_ABORT;
-   la = DATC->curCmdLay();
-   UNDOcmdQ.push_front(this);
-   UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
    // get the data from the stack
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
+   // get the (final) target layer
+   la = secureLayer();
+   UNDOcmdQ.push_front(this);
+   UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
    real DBscale = PROPC->DBscale();
    TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
    TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
@@ -148,7 +150,7 @@ tellstdfunc::stdDRAWBOX_D::stdDRAWBOX_D(telldata::typeID retype, bool eor) :
 {}
 
 int tellstdfunc::stdDRAWBOX_D::execute() {
-   OPstack.push(CurrentLayer());
+   OPstack.push(getCurrentLayer());
    return stdDRAWBOX::execute();
 }
 
@@ -182,6 +184,7 @@ void tellstdfunc::stdADDBOXr::undo() {
 int tellstdfunc::stdADDBOXr::execute() {
    UNDOcmdQ.push_front(this);
    word     la = getWordValue();
+   secureLayer(la);
    UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
    real heigth = getOpValue();
    real width  = getOpValue();
@@ -213,7 +216,7 @@ tellstdfunc::stdADDBOXr_D::stdADDBOXr_D(telldata::typeID retype, bool eor) :
 }
 
 int tellstdfunc::stdADDBOXr_D::execute() {
-   OPstack.push(CurrentLayer());
+   OPstack.push(getCurrentLayer());
    return stdADDBOXr::execute();
 }
 
@@ -246,6 +249,7 @@ void tellstdfunc::stdADDBOXp::undo() {
 int tellstdfunc::stdADDBOXp::execute() {
    UNDOcmdQ.push_front(this);
    word     la = getWordValue();
+   secureLayer(la);
    UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
    telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    telldata::ttpnt *p2 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
@@ -274,7 +278,7 @@ tellstdfunc::stdADDBOXp_D::stdADDBOXp_D(telldata::typeID retype, bool eor) :
 }
 
 int tellstdfunc::stdADDBOXp_D::execute() {
-   OPstack.push(CurrentLayer());
+   OPstack.push(getCurrentLayer());
    return stdADDBOXp::execute();
 }
 
@@ -307,6 +311,7 @@ int tellstdfunc::stdADDPOLY::execute() {
    word     la = getWordValue();
    telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    if (pl->size() >= 3) {
+      secureLayer(la);
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
       real DBscale = PROPC->DBscale();
@@ -336,7 +341,7 @@ tellstdfunc::stdADDPOLY_D::stdADDPOLY_D(telldata::typeID retype, bool eor) :
 }
 
 int tellstdfunc::stdADDPOLY_D::execute() {
-   OPstack.push(CurrentLayer());
+   OPstack.push(getCurrentLayer());
    return stdADDPOLY::execute();
 }
 
@@ -370,8 +375,9 @@ int tellstdfunc::stdDRAWPOLY::execute() {
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(console::op_dpoly, &OPstack)) return EXEC_ABORT;
    // get the data from the stack
-   la = DATC->curCmdLay();
    telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   // get the (final) target layer
+   la = secureLayer();
    if (pl->size() >= 3) {
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
@@ -399,7 +405,7 @@ tellstdfunc::stdDRAWPOLY_D::stdDRAWPOLY_D(telldata::typeID retype, bool eor) :
 {}
 
 int tellstdfunc::stdDRAWPOLY_D::execute() {
-   OPstack.push(CurrentLayer());
+   OPstack.push(getCurrentLayer());
    return stdDRAWPOLY::execute();
 }
 
@@ -434,6 +440,7 @@ int tellstdfunc::stdADDWIRE::execute() {
    real      w = getOpValue();
    telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    if (pl->size() > 1) {
+      secureLayer(la);
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
       real DBscale = PROPC->DBscale();
@@ -465,7 +472,7 @@ tellstdfunc::stdADDWIRE_D::stdADDWIRE_D(telldata::typeID retype, bool eor) :
 }
 
 int tellstdfunc::stdADDWIRE_D::execute() {
-   OPstack.push(CurrentLayer());
+   OPstack.push(getCurrentLayer());
    return stdADDWIRE::execute();
 }
 
@@ -501,8 +508,9 @@ int tellstdfunc::stdDRAWWIRE::execute() {
    real DBscale = PROPC->DBscale();
    if (!tellstdfunc::waitGUInput(static_cast<int>(rint(w * DBscale)), &OPstack)) return EXEC_ABORT;
    // get the data from the stack
-   la = DATC->curCmdLay();
    telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   // get the (final) target layer
+   la = secureLayer();
    if (pl->size() > 1) {
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
@@ -533,7 +541,7 @@ tellstdfunc::stdDRAWWIRE_D::stdDRAWWIRE_D(telldata::typeID retype, bool eor) :
 }
 
 int tellstdfunc::stdDRAWWIRE_D::execute() {
-   OPstack.push(CurrentLayer());
+   OPstack.push(getCurrentLayer());
    return stdDRAWWIRE::execute();
 }
 
@@ -584,6 +592,7 @@ int tellstdfunc::stdADDTEXT::execute() {
       tell_log(console::MT_ERROR,"Text with size 0. Operation ignored");
       return EXEC_ABORT;
    }
+   secureLayer(la);
    UNDOcmdQ.push_front(this);
    UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
    real DBscale = PROPC->DBscale();
@@ -619,13 +628,15 @@ int tellstdfunc::stdADDTEXT_D::execute() {
       tell_log(console::MT_ERROR,"Empty string. Operation ignored");
       return EXEC_ABORT;
    }
+//   unsigned la = PROP
+//   DATC->setCmdLayer(get)
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(console::op_tbind, &OPstack, name, ftrans)) return EXEC_ABORT;
    // get the data from the stack
    telldata::ttbnd *bnd = static_cast<telldata::ttbnd*>(OPstack.top());OPstack.pop();
 
    OPstack.push(DEBUG_NEW telldata::ttstring(name));
-   OPstack.push(CurrentLayer());
+   OPstack.push(getCurrentLayer());
    OPstack.push(DEBUG_NEW telldata::ttpnt(bnd->p()));
    OPstack.push(DEBUG_NEW telldata::ttreal(bnd->rot()));
    OPstack.push(DEBUG_NEW telldata::ttbool(bnd->flx()));
