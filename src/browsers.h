@@ -329,14 +329,15 @@ namespace browsers
                               const wxPoint& pos = wxDefaultPosition,
                               const wxSize& size = wxDefaultSize,
                               long style = wxTR_DEFAULT_STYLE);
-//      void                  saveInfo(const Calbr::drcPolygon &poly);
-//      void                  saveInfo(const Calbr::drcEdge &edge);
-      void                   onLMouseDblClk(wxMouseEvent&);
+      void                    onLMouseDblClk(wxMouseEvent&);
+      virtual void            onItemRightClick(wxTreeEvent&);
+      virtual void            onBlankRMouseUp(wxMouseEvent&);
+      void                    onShowError(wxCommandEvent& WXUNUSED(event));
+      void                    onShowCluster(wxCommandEvent& WXUNUSED(event));
+      void                   showMenu(wxTreeItemId id, const wxPoint& pt);
    private:
-      /*Calbr::drcPolygon      _poly;
-      bool                  _polyError;
-      Calbr::drcEdge       _edge;
-      bool                  _edgeError;*/
+      wxString               _error;
+      wxString               _cluster;
       DECLARE_EVENT_TABLE();
    };
 

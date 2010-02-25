@@ -149,6 +149,7 @@ public:
 
    void              addResults();
    void              showError(const std::string & error, long  number);
+   void              showCluster(const std::string & error);
 	void              showAllErrors(void);
    void              hideAllErrors(void);
    std::string       explainError(word lay);

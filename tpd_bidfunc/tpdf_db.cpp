@@ -1582,6 +1582,21 @@ int tellstdfunc::DRCshowerror::execute()
 
 
 //=============================================================================
+tellstdfunc::DRCshowcluster::DRCshowcluster(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+}
+
+int tellstdfunc::DRCshowcluster::execute()
+{
+   std::string errorName = getStringValue();
+   DRCData->showCluster(errorName);
+   return EXEC_NEXT;
+}
+
+
+//=============================================================================
 tellstdfunc::DRCshowallerrors::DRCshowallerrors(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
 {
