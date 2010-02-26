@@ -5,7 +5,9 @@
 <storageModule moduleId="org.eclipse.cdt.core.settings">
 <cconfiguration id="org.eclipse.linuxtools.cdt.autotools.configuration.build.370519630">
 <storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="org.eclipse.linuxtools.cdt.autotools.configuration.build.370519630" moduleId="org.eclipse.cdt.core.settings" name="Build (GNU)">
-<externalSettings/>
+<externalSettings>
+<externalSetting languages="cdt.managedbuild.tool.gnu.cpp.compiler.input.976935307"/>
+</externalSettings>
 <extensions>
 <extension id="org.eclipse.linuxtools.cdt.autotools.AutotoolsScannerInfoProvider" point="org.eclipse.cdt.core.ScannerInfoProvider"/>
 <extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
@@ -25,19 +27,21 @@
 <builder buildPath="${workspace_loc:/toped/build}" enableAutoBuild="true" enableCleanBuild="true" errorParsers="" id="org.eclipse.linuxtools.cdt.autotools.toolchain.builder.871253904" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Autotools Makefile Generator" superClass="org.eclipse.linuxtools.cdt.autotools.toolchain.builder"/>
 <tool command="configure" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG}${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" errorParsers="" id="org.eclipse.linuxtools.cdt.autotools.gnu.toolchain.tool.configure.1390493216" name="configure" superClass="org.eclipse.linuxtools.cdt.autotools.gnu.toolchain.tool.configure">
 <option id="org.eclipse.linuxtools.cdt.autotools.option.configure.user.1635113776" name="User-specified configuration options" superClass="org.eclipse.linuxtools.cdt.autotools.option.configure.user" value="" valueType="string"/>
+<option id="org.eclipse.linuxtools.cdt.autotools.option.configure.prefix.1028993114" name="Arch-independent install directory (--prefix)" superClass="org.eclipse.linuxtools.cdt.autotools.option.configure.prefix" value="/home/s1s0/opt" valueType="string"/>
 </tool>
 <tool command="autogen.sh" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG}${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" errorParsers="" id="org.eclipse.linuxtools.cdt.autotools.toolchain.tool.autogen.1278387437" name="autogen.sh" superClass="org.eclipse.linuxtools.cdt.autotools.toolchain.tool.autogen"/>
 <tool command="gcc" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG}${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" errorParsers="org.eclipse.cdt.core.GCCErrorParser" id="org.eclipse.linuxtools.cdt.autotools.toolchain.tool.gcc.1793063240" name="GCC C Compiler" superClass="org.eclipse.linuxtools.cdt.autotools.toolchain.tool.gcc">
 <option id="gnu.c.compiler.option.optimization.level.1901443138" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" value="gnu.c.optimization.level.none" valueType="enumerated"/>
 <option id="gnu.c.compiler.option.debugging.level.1692091092" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level"/>
-<option id="gnu.c.compiler.option.include.paths.764596620" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
-<listOptionValue builtIn="false" value="/usr/local/include/wx-2.8/wx"/>
-</option>
+<option id="gnu.c.compiler.option.include.paths.764596620" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath"/>
 <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.385220996" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 </tool>
 <tool command="g++" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG}${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" errorParsers="org.eclipse.cdt.core.GCCErrorParser" id="org.eclipse.linuxtools.cdt.autotools.toolchain.tool.gpp.107594453" name="GCC C++ Compiler" superClass="org.eclipse.linuxtools.cdt.autotools.toolchain.tool.gpp">
 <option id="gnu.cpp.compiler.option.optimization.level.355456740" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level"/>
 <option id="gnu.cpp.compiler.option.debugging.level.772208773" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level"/>
+<option id="gnu.cpp.compiler.option.include.paths.1127968889" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+<listOptionValue builtIn="false" value="/usr/include/wx-2.8"/>
+</option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.976935307" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 </tool>
 </toolChain>

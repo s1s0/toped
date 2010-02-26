@@ -40,6 +40,7 @@ wxWindow*                        TopedCanvasW;
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
 extern console::ted_cmd*         Console;
+extern console::toped_logfile    LogFile;
 extern const wxEventType         wxEVT_MOUSE_INPUT;
 extern const wxEventType         wxEVT_CANVAS_STATUS;
 extern const wxEventType         wxEVT_SETINGSMENU;
@@ -373,6 +374,22 @@ bool tellstdfunc::secureLayDef(unsigned layno)
    }
    PROPC->unlockDrawProp(drawProp);
    return success;
+}
+
+//=============================================================================
+void tellstdfunc::createDefaultTDT(std::string dbname, TpdTime& timeCreated,
+                                   parsercmd::undoQUEUE& undstack, telldata::UNDOPerandQUEUE& undopstack)
+{
+   DATC->newDesign(dbname, timeCreated.stdCTime(), DEFAULT_DBU, DEFAULT_UU);
+   TpdPost::addTDTtab(true, false);
+   // reset UNDO buffers;
+   undstack.clear();
+   while (!undopstack.empty())
+   {
+      delete undopstack.front(); undopstack.pop_front();
+   }
+   LogFile << "newdesign(\""<< dbname << "\" , \"" << timeCreated() <<
+         "\");"; LogFile.flush();
 }
 
 //=============================================================================

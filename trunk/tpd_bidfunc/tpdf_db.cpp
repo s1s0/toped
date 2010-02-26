@@ -1701,18 +1701,3 @@ int tellstdfunc::DRCexplainerror::execute()
    return EXEC_NEXT;
 }
 
-//=============================================================================
-void tellstdfunc::createDefaultTDT(std::string dbname, TpdTime& timeCreated,
-                                   parsercmd::undoQUEUE& undstack, telldata::UNDOPerandQUEUE& undopstack)
-{
-   DATC->newDesign(dbname, timeCreated.stdCTime(), DEFAULT_DBU, DEFAULT_UU);
-   TpdPost::addTDTtab(true, false);
-   // reset UNDO buffers;
-   undstack.clear();
-   while (!undopstack.empty())
-   {
-      delete undopstack.front(); undopstack.pop_front();
-   }
-   LogFile << "newdesign(\""<< dbname << "\" , \"" << timeCreated() <<
-         "\");"; LogFile.flush();
-}
