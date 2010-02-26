@@ -899,6 +899,9 @@ laydata::Validator* laydata::TdtPoly::move(const CTM& trans, SGBitSet& plst)
          {
             _pdata[2*i] = (*nshape)[i].x();_pdata[2*i+1] = (*nshape)[i].y();
          }
+         // resesselate the modified shape
+         delete _teseldata;
+         _teseldata = DEBUG_NEW TeselPoly(_pdata, _psize);
          nshape->clear(); delete nshape;
          delete check;
          return NULL;
@@ -917,7 +920,7 @@ laydata::Validator* laydata::TdtPoly::move(const CTM& trans, SGBitSet& plst)
       }
       else
       {  // The whole gymnastics is because of the Rotate operation (on angles <> 90)
-         // Rotated box is converted to polygon. Means that polygon after rotatoin could
+         // Rotated box is converted to polygon. Means that polygon after rotation could
          // produce a box
          pointlist *mlist = DEBUG_NEW pointlist();
          mlist->reserve(_psize);
