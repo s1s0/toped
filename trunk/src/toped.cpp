@@ -184,8 +184,8 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMEDIT_MOVE         , tui::TopedFrame::OnMove        )
    EVT_MENU( TMEDIT_DELETE       , tui::TopedFrame::OnDelete      )
    EVT_MENU( TMEDIT_ROTATE90     , tui::TopedFrame::OnRotate      )
-   EVT_MENU( TMEDIT_FLIPX        , tui::TopedFrame::OnFlipX       )
-   EVT_MENU( TMEDIT_FLIPY        , tui::TopedFrame::OnFlipY       )
+   EVT_MENU( TMEDIT_FLIPX        , tui::TopedFrame::OnFlipVert    )
+   EVT_MENU( TMEDIT_FLIPY        , tui::TopedFrame::OnFlipHor     )
    EVT_MENU( TMEDIT_POLYCUT      , tui::TopedFrame::OnPolyCut     )
    EVT_MENU( TMEDIT_MERGE        , tui::TopedFrame::OnMerge       )
    EVT_MENU( TMEDIT_RESIZE       , tui::TopedFrame::OnResize      )
@@ -439,8 +439,8 @@ void tui::TopedFrame::initMenuBar() {
    _resourceCenter->appendMenu("&Edit/Delete",     "CTRL-D",  &tui::TopedFrame::OnDelete, "Delete selected shapes" );
    _resourceCenter->appendMenuSeparator("Edit");
    _resourceCenter->appendMenu("&Edit/Rotate 90",  "CTRL-9",  &tui::TopedFrame::OnRotate, "Rotate selected shapes on 90 deg. counter clockwise ");
-   _resourceCenter->appendMenu("&Edit/Flip X",     "CTRL-X",  &tui::TopedFrame::OnFlipX, "Flip selected shapes towards X axis " );
-   _resourceCenter->appendMenu("&Edit/Flip Y",     "CTRL-Y",  &tui::TopedFrame::OnFlipY, "Flip selected shapes towards Y axis " );
+   _resourceCenter->appendMenu("&Edit/Flip Vertical",     "CTRL-X",  &tui::TopedFrame::OnFlipVert, "Flip selected shapes towards X axis " );
+   _resourceCenter->appendMenu("&Edit/Flip Horizontal",     "CTRL-Y",  &tui::TopedFrame::OnFlipHor, "Flip selected shapes towards Y axis " );
    _resourceCenter->appendMenu("&Edit/Cut with poly","CTRL-U",  &tui::TopedFrame::OnPolyCut, "Cut selected shapes with a polygon " );
    _resourceCenter->appendMenu("&Edit/Cut with box","CTRL-ALT-U", &tui::TopedFrame::OnBoxCut, "Cut selected shapes with a box " );
    _resourceCenter->appendMenu("&Edit/Merge",      "CTRL-G",  &tui::TopedFrame::OnMerge, "Merge selected shapes" );
@@ -666,8 +666,8 @@ void tui::TopedFrame::initToolBars()
    _resourceCenter->appendTool("edit", "move", "move", "", "move",&tui::TopedFrame::OnMove);
    _resourceCenter->appendTool("edit", "rotate", "rotate_left", "", "rotate",&tui::TopedFrame::OnRotate);
    //_resourceCenter->appendTool("edit", "rotate_right", "rotate_right.png", "", "rotate",&tui::TopedFrame::OnRotate);
-   _resourceCenter->appendTool("edit", "flipx", "flipx", "", "flip X",&tui::TopedFrame::OnFlipX);
-   _resourceCenter->appendTool("edit", "flipy", "flipy", "", "flip Y",&tui::TopedFrame::OnFlipY);
+   _resourceCenter->appendTool("edit", "flipvert", "flipy", "", "flip vertical",&tui::TopedFrame::OnFlipVert);
+   _resourceCenter->appendTool("edit", "fliphor", "flipx", "", "flip horizontal",&tui::TopedFrame::OnFlipHor);
    _resourceCenter->appendTool("edit", "edit_push", "edit_push", "", "edit push",&tui::TopedFrame::OnCellPush);
    _resourceCenter->appendTool("edit", "edit_pop", "edit_pop", "", "edit pop",&tui::TopedFrame::OnCellPop);
 
