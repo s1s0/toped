@@ -1,8 +1,10 @@
-noinst_HEADERS = tpdf_props.h datacenter.h tellibin.h tllf_list.h tpdf_add.h \
-	tpdf_cells.h tpdf_common.h tpdf_db.h tpdf_edit.h tpdf_get.h tpdf_select.h tpdph.h \
-	drc_tenderer.h
+noinst_HEADERS = tpdf_props.h tellibin.h tllf_list.h tpdf_add.h \
+	tpdf_cells.h tpdf_db.h tpdf_edit.h tpdf_get.h tpdf_select.h \
+	tpdph.h drc_tenderer.h
 lib_LTLIBRARIES = libtpd_bidfunc.la
 libtpd_bidfunc_la_LDFLAGS = -no-undefined
+libtpd_bidfunc_ladir=$(includedir)/tpd
+libtpd_bidfunc_la_HEADERS = tpdf_common.h datacenter.h 
 libtpd_bidfunc_la_SOURCES = tpdf_db.cpp tpdf_select.cpp datacenter.cpp \
 	tellibin.cpp tllf_list.cpp tpdf_add.cpp tpdf_cells.cpp tpdf_common.cpp \
 	tpdf_edit.cpp tpdf_get.cpp tpdf_props.cpp tpdph.cpp drc_tenderer.cpp 

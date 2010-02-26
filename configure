@@ -1628,6 +1628,7 @@ Some influential environment variables:
               This script will default YFLAGS to the empty string to avoid a
               default value of `-d' given by some make applications.
   XMKMF       Path to xmkmf, Makefile generator for X Window System
+  XMKMF       Path to xmkmf, Makefile generator for X Window System
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
