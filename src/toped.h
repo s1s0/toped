@@ -158,8 +158,8 @@ namespace tui {
       void        OnMove(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("move();"));}
       void      OnDelete(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("delete();"));}
       void      OnRotate(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("rotate(90);"));}
-      void       OnFlipX(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("flipX();"));}
-      void       OnFlipY(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("flipY();"));}
+      void    OnFlipVert(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("flip_vert();"));}
+      void     OnFlipHor(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("flip_hor();"));}
       void     OnPolyCut(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("polycut();"));}
       void      OnBoxCut(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("boxcut();"));}
       void       OnMerge(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("merge();"));}
