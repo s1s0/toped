@@ -662,7 +662,7 @@ void browsers::CellBrowser::onTellAddCell(wxString cellname, wxString parentname
             }
          }
          break;
-      case 3://first parrent added for library component
+      case 3://first parent added for library component
          if (_hierarchy_view)
          {//
             wxTreeItemId newparent;
