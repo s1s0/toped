@@ -38,11 +38,9 @@
 #include "tuidefs.h"
 #include "datacenter.h"
 #include "browsers.h"
-#include "ted_prompt.h"
 
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
-extern console::ted_cmd*         Console;
 extern layprop::FontLibrary*     fontLib;
 
 #if wxCHECK_VERSION(2, 8, 0)
@@ -2520,28 +2518,28 @@ void tui::TopedPropertySheets::RenderingPSheet::OnCellBox (wxCommandEvent& cmdEv
 {
    wxString ost;
    ost << wxT("hidecellbox(") << (cmdEvent.GetInt() ? wxT("false") : wxT("true")) << wxT(");");
-   Console->parseCommand(ost);
+   TpdPost::parseCommand(ost);
 }
 
 void tui::TopedPropertySheets::RenderingPSheet::OnCellMark(wxCommandEvent& cmdEvent)
 {
    wxString ost;
    ost << wxT("hidecellmarks(") << (cmdEvent.GetInt() ? wxT("false") : wxT("true")) << wxT(");");
-   Console->parseCommand(ost);
+   TpdPost::parseCommand(ost);
 }
 
 void tui::TopedPropertySheets::RenderingPSheet::OnTextBox (wxCommandEvent& cmdEvent)
 {
    wxString ost;
    ost << wxT("hidetextbox(") << (cmdEvent.GetInt() ? wxT("false") : wxT("true")) << wxT(");");
-   Console->parseCommand(ost);
+   TpdPost::parseCommand(ost);
 }
 
 void tui::TopedPropertySheets::RenderingPSheet::OnTextMark(wxCommandEvent& cmdEvent)
 {
    wxString ost;
    ost << wxT("hidetextmarks(") << (cmdEvent.GetInt() ? wxT("false") : wxT("true")) << wxT(");");
-   Console->parseCommand(ost);
+   TpdPost::parseCommand(ost);
 }
 
 void tui::TopedPropertySheets::RenderingPSheet::OnTextOri(wxCommandEvent& cmdEvent)
@@ -2550,7 +2548,7 @@ void tui::TopedPropertySheets::RenderingPSheet::OnTextOri(wxCommandEvent& cmdEve
    ost << wxT("setparams({\"ADJUST_TEXT_ORIENTATION\", \"")
        << (cmdEvent.GetInt() ? wxT("true") : wxT("false"))
        << wxT("\"});");
-   Console->parseCommand(ost);
+   TpdPost::parseCommand(ost);
 }
 
 void tui::TopedPropertySheets::RenderingPSheet::OnTextFont(wxCommandEvent& cmdEvent)
@@ -2559,7 +2557,7 @@ void tui::TopedPropertySheets::RenderingPSheet::OnTextFont(wxCommandEvent& cmdEv
    ost << wxT("setparams({\"SELECT_TEXT_FONT\", \"")
        << cmdEvent.GetString()
        << wxT("\"});");
-   Console->parseCommand(ost);
+   TpdPost::parseCommand(ost);
 }
 
 void tui::TopedPropertySheets::RenderingPSheet::OnCellCheckDov(wxCommandEvent& cmdevent)
@@ -2578,7 +2576,7 @@ void tui::TopedPropertySheets::RenderingPSheet::OnCellCheckDov(wxCommandEvent& c
    {
       ost << wxT("setparams({\"CELL_VIEW_DEPTH\", \"ALL\"});");
    }
-   Console->parseCommand(ost);
+   TpdPost::parseCommand(ost);
 }
 
 void tui::TopedPropertySheets::RenderingPSheet::OnCellDov (wxCommandEvent& cmdEvent)
@@ -2587,7 +2585,7 @@ void tui::TopedPropertySheets::RenderingPSheet::OnCellDov (wxCommandEvent& cmdEv
    ost << wxT("setparams({\"CELL_VIEW_DEPTH\", \"")
        << cmdEvent.GetInt()
        << wxT("\"});");
-   Console->parseCommand(ost);
+   TpdPost::parseCommand(ost);
 }
 
 void tui::TopedPropertySheets::RenderingPSheet::OnCellDab (wxCommandEvent& cmdEvent)
@@ -2596,7 +2594,7 @@ void tui::TopedPropertySheets::RenderingPSheet::OnCellDab (wxCommandEvent& cmdEv
    ost << wxT("setparams({\"CELL_DEPTH_ALPHA_EBB\", \"")
        << cmdEvent.GetInt()
        << wxT("\"});");
-   Console->parseCommand(ost);
+   TpdPost::parseCommand(ost);
 
 }
 
@@ -2606,7 +2604,7 @@ void tui::TopedPropertySheets::RenderingPSheet::OnImageDetail (wxCommandEvent& c
    ost << wxT("setparams({\"MIN_VISUAL_AREA\", \"")
        << cmdEvent.GetInt()
        << wxT("\"});");
-   Console->parseCommand(ost);
+   TpdPost::parseCommand(ost);
 }
 
 void tui::TopedPropertySheets::RenderingPSheet::update(wxCommandEvent& evt)

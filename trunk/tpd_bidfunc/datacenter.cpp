@@ -510,6 +510,11 @@ laydata::TdtDesign*  DataCenter::lockDB(bool checkACTcell)
    else throw EXPTNactive_DB();
 }
 
+void DataCenter::unlockDB()
+{
+   VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
+}
+
 laydata::DrcLibrary*  DataCenter::lockDRC(void)
 {
    if (!_TEDLIB()) throw EXPTNactive_DB();
@@ -519,11 +524,6 @@ laydata::DrcLibrary*  DataCenter::lockDRC(void)
    }
    while (wxMUTEX_NO_ERROR != _DRCLock.TryLock());
    return _DRCDB;
-}
-
-void DataCenter::unlockDB()
-{
-   VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
 }
 
 void DataCenter::unlockDRC()

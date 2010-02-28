@@ -130,7 +130,7 @@ bool console::miniParser::getPoint() {
    // first one...
    wxString p1s = src_tmpl.GetMatch(exp);
    // The expression is greedy and if you try to get simply the second match,
-   // then, you might get the fractional part of the first coord as second 
+   // then, you might get the fractional part of the first coord as second
    // coordinate, so remove and match again - not quie elegant, but works
    src_tmpl.ReplaceFirst(&exp,wxT(""));
    src_tmpl.Matches(exp);
@@ -248,9 +248,9 @@ bool console::miniParser::getList() {
    if (!src_tmpl.Matches(exp)) return false;
    // remove the outside brackets
    VERIFY(src_tmpl.Compile(wxT("^\\{")));
-   src_tmpl.ReplaceAll(&exp,wxT(""));    
+   src_tmpl.ReplaceAll(&exp,wxT(""));
    VERIFY(src_tmpl.Compile(wxT("\\}$")));
-   src_tmpl.ReplaceAll(&exp,wxT(""));    
+   src_tmpl.ReplaceAll(&exp,wxT(""));
    // now we are going to extract the points
    VERIFY(src_tmpl.Compile(point_tmpl));
    telldata::ttlist *pl = DEBUG_NEW telldata::ttlist(telldata::tn_pnt);
@@ -277,7 +277,7 @@ bool console::miniParser::getList() {
 }
 
 //==============================================================================
-void* console::parse_thread::Entry() 
+void* console::parse_thread::Entry()
 {
 //   wxLogMessage(_T("Mouse is %s (%ld, %ld)"), where.c_str(), x, y);
 //   wxLogMessage(_T("Mutex try to lock..."));
@@ -285,7 +285,7 @@ void* console::parse_thread::Entry()
    wxMutexError result = _mutex.TryLock();
    if (wxMUTEX_BUSY == result)
    {
-      // Don't pile-up commands(threads). If previous command 
+      // Don't pile-up commands(threads). If previous command
       // didn't finish leave the thread immediately.
       // This check can't be done in the main thread. See the comment
       // in ted_cmd::spawnParseThread below
@@ -305,7 +305,7 @@ void* console::parse_thread::Entry()
    {
       // Not sure we can make something here.flex has thrown an exception
       // but it could be the file system or dynamic memory
-      //@TODO check for available dynamic memory 
+      //@TODO check for available dynamic memory
    }
 
    _mutex.Unlock();
@@ -369,7 +369,7 @@ void console::ted_cmd::onGetCommand(wxCommandEvent& WXUNUSED(event))
 void console::ted_cmd::getCommand(bool thread)
 {
    if (puc)  getGUInput(); // run the local GUInput parser
-   else 
+   else
    {
       wxString command = GetValue();
       tell_log(MT_COMMAND, command);
@@ -408,25 +408,25 @@ void console::ted_cmd::spawnParseThread(wxString command)
    //wxTHREAD_JOINABLE, wxTHREAD_DETACHED
    // A Memo on wxMutexes
    // A mutex can be owned by one thread at a time. That's the whole point
-   // of them. The thread that owns the mutex is the one which called 
-   // wxMutex.Lock(). When a mutex is unlocked, it is orphan, i.e. it is 
+   // of them. The thread that owns the mutex is the one which called
+   // wxMutex.Lock(). When a mutex is unlocked, it is orphan, i.e. it is
    // not owned by anybody. Now the exciting part.
    // - What if wxMutex.Lock() is called twice by the same thread?
-   //   This seems to be called "recursive mutexes" and the bottom line 
+   //   This seems to be called "recursive mutexes" and the bottom line
    //   there is - don't try it. (not portable, who knows how it works)
    //   In other words this means that if you lock the mutex in thread X
    //   you should better unlock it in the same thread, otherwise the
    //   hell will break loose.
-   // - About thread synchronisation. wxCondition always have a mutex 
-   //   associated with it. A call to wxCondition::Signal() method will 
-   //   wake-up the thread which currently owns that mutex. Once again - 
-   //   if you are intending to stop the thread X and wait for an event 
-   //   from thread Y then you must lock the mutex from thread X 
+   // - About thread synchronization. wxCondition always have a mutex
+   //   associated with it. A call to wxCondition::Signal() method will
+   //   wake-up the thread which currently owns that mutex. Once again -
+   //   if you are intending to stop the thread X and wait for an event
+   //   from thread Y then you must lock the mutex from thread X
    //   beforehand. Otherwise the thread X is as good as dead.
    //
    // And the most exciting part - wxCondition::Broadcast()
    // It says that it will wake-up all the threads waiting for this
-   // condition. How on earth you can assotiate more than one thread to 
+   // condition. How on earth you can associate more than one thread to
    // a single mutex? This part I don't understand.
    //
 
@@ -471,12 +471,12 @@ void console::ted_cmd::onKeyUP(wxKeyEvent& event) {
       if (_cmd_history.begin() == _history_position)
          _history_position = _cmd_history.end();
       else _history_position--;
-   else 
+   else
       if (_cmd_history.end() == _history_position)
          _history_position = _cmd_history.begin();
       else _history_position++;
       if (_cmd_history.end() == _history_position) SetValue(wxT(""));
-   else 
+   else
    {
       SetValue(wxString(_history_position->c_str(), wxConvUTF8));
    }
@@ -520,7 +520,7 @@ void console::ted_cmd::getGUInput(bool from_keyboard) {
       tell_log(MT_GUIINPUT, command);
       tell_log(MT_EOL);
       Clear();
-   }   
+   }
    else   command = _guinput;
    //parse the data from the prompt
    if (puc->getGUInput(command)) {
@@ -562,7 +562,7 @@ void console::ted_cmd::onGUInput(wxCommandEvent& evt) {
          }
       case  2: {
          telldata::ttpnt* p = static_cast<telldata::ttpnt*>(evt.GetClientData());
-         mouseRB(); 
+         mouseRB();
          delete p;
          break;
          }
@@ -575,7 +575,7 @@ void console::ted_cmd::mouseLB(const telldata::ttpnt& p) {
    // prepare the point string for the input log window
    ost1 << wxT("{ ")<< p.x() << wxT(" , ") << p.y() << wxT(" }");
    // take care about the entry brackets ...
-   if (_numpoints == 0) 
+   if (_numpoints == 0)
       switch (puc->wait4type()) {
          case TLISTOF(telldata::tn_pnt):
          case         telldata::tn_box : ost2 << wxT("{ ") << ost1; break;
@@ -610,7 +610,7 @@ void console::ted_cmd::mouseLB(const telldata::ttpnt& p) {
 }
 
 void console::ted_cmd::mouseRB() {
-   // End of input is not accepted if ... 
+   // End of input is not accepted if ...
    if ( (_numpoints == 0) || ((_numpoints == 1)                      &&
                               (telldata::tn_pnt != puc->wait4type()) &&
                               (telldata::tn_bnd != puc->wait4type())    )

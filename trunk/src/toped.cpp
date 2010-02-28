@@ -66,7 +66,6 @@ extern const wxEventType         wxEVT_EDITLAYER;
 
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
-extern console::ted_cmd*         Console;
 extern parsercmd::cmdBLOCK*      CMDBlock;
 
 tui::CanvasStatus::CanvasStatus(wxWindow* parent, wxWindowID id ,
@@ -264,7 +263,6 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
       // EVT_MENU( TMHELP_ABOUTAPP     , tui::TopedFrame::OnAbout       )
    EVT_MENU_RANGE(TMDUMMY, TMDUMMY+TDUMMY_TOOL-1 , tui::TopedFrame::OnMenu  )
    EVT_TOOL_RANGE(TDUMMY_TOOL, TDUMMY_TOOL+1000 , tui::TopedFrame::OnMenu  )
-   EVT_BUTTON(TBSTAT_ABORT       , tui::TopedFrame::OnAbort       )
    EVT_CLOSE(tui::TopedFrame::OnClose)
 //   EVT_SIZE( TopedFrame::OnSize )
 //   EVT_TECUSTOM_COMMAND(  , wxID_ANY, tui::TopedFrame::OnTopedStatus)
@@ -2030,13 +2028,6 @@ void tui::TopedFrame::OnCurrentLayer( wxCommandEvent& WXUNUSED( event ))
 void tui::TopedFrame::OnMenu(wxCommandEvent& event)
 {
    _resourceCenter->executeMenu(event.GetId());
-}
-
-void tui::TopedFrame::OnAbort(wxCommandEvent& WXUNUSED(event)) {
-   wxCommandEvent eventButtonUP(wxEVT_COMMAND_ENTER);
-   eventButtonUP.SetClientData((void*)NULL);
-   eventButtonUP.SetInt(-1);
-   wxPostEvent(Console, eventButtonUP);
 }
 
 void tui::TopedFrame::OnUpdateSettingsMenu(wxCommandEvent& evt)
