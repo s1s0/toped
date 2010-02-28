@@ -34,7 +34,6 @@
 #include "tuidefs.h"
 #include "toped.h"
 
-extern console::ted_cmd*         Console;
 extern tui::TopedFrame*          Toped;
 
 extern const wxEventType         wxEVT_TOOLBARSIZE;
@@ -567,7 +566,7 @@ void   tui::ToolBarHandler::execute(int ID1)
          //Priority - user defined function
          if (!((*it)->function()).empty())
          {
-            Console->parseCommand(wxString(((*it)->function()).c_str(), wxConvUTF8));
+            TpdPost::parseCommand(wxString(((*it)->function()).c_str(), wxConvUTF8));
             return;
          }
          else
@@ -772,7 +771,7 @@ void tui::ResourceCenter::executeMenu(int ID1)
          //Priority - user defined function
          if (!((*mItem)->function()).empty())
          {
-            Console->parseCommand(wxString(((*mItem)->function()).c_str(), wxConvUTF8));
+            TpdPost::parseCommand(wxString(((*mItem)->function()).c_str(), wxConvUTF8));
             return;
          }
          else

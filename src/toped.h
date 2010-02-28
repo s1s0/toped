@@ -239,7 +239,6 @@ namespace tui {
       void  OnChangeLayer(wxCommandEvent& WXUNUSED(event));
       void  OnCurrentLayer(wxCommandEvent& WXUNUSED(event));
       //
-      void               OnAbort(wxCommandEvent& WXUNUSED(event));
       void  OnUpdateSettingsMenu(wxCommandEvent&);
       void          OnMouseAccel(wxCommandEvent&);
       void        OnCanvasStatus(wxCommandEvent&);

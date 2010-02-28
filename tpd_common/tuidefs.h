@@ -175,7 +175,6 @@ namespace tui
       TMDRC_SHOW_CLUSTER  ,
 
       TMHELP_ABOUTAPP     ,
-      TBSTAT_ABORT        ,
       //Warning!!! Do not use IDs between TMDUMMY and TMDUMMY_END
       TMDUMMY        = 500   ,
       TDUMMY_TOOL    = 2000  ,
