@@ -97,6 +97,7 @@ namespace browsers
          bool              findChildItem(const wxString, wxTreeItemId&, const wxTreeItemId);
          void              copyItem(const wxTreeItemId, const wxTreeItemId, bool targetLib = true);
          void              highlightChildren(wxTreeItemId, wxColour);
+         void              resetData(wxString);
          wxString          selectedCellName();
          wxString          topCellName();
          wxString          activeCellName();
@@ -194,7 +195,7 @@ namespace browsers
                               long style = wxTR_DEFAULT_STYLE);
                           ~TDTbrowser();
          wxString          selectedCellName() const;
-         void              collectInfo(bool keepAct);
+         void              refreshData(bool keepAct);
          CellBrowser*      cellBrowser() const        {return _cellBrowser;}
       private:
          void              onReportUsedLayers(wxCommandEvent& WXUNUSED(event));
@@ -365,14 +366,14 @@ namespace browsers
                                           const wxPoint& pos = wxDefaultPosition,
                                           const wxSize& size = wxDefaultSize,
                                           long style = 0);
-         virtual            ~browserTAB();
+         virtual             ~browserTAB();
          wxString             tdtSelectedGdsName() const;
          wxString             tdtSelectedCifName() const;
          wxString             tdtSelectedOasName() const;
          wxString             tdtSelectedCellName() const   { return _tdtStruct->selectedCellName();}
       private:
          void                 onCommand(wxCommandEvent&);
-         void                 onTellAddTdtLib(bool);
+         void                 onTellRefreshTdtLib(bool);
          void                 onTellAddGdsTab();
          void                 onTellClearGdsTab();
          void                 onTellAddCifTab();
@@ -389,7 +390,6 @@ namespace browsers
          int                 _gdsPageIndex;
          int                 _cifPageIndex;
          LayerBrowser*       _layers;
-//         wxWindow*           _tellParser;
          DECLARE_EVENT_TABLE();
    };
  }

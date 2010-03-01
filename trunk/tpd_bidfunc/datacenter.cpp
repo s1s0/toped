@@ -623,7 +623,14 @@ void DataCenter::bpAddGdsTab()
    TpdPost::addGDStab();
    // Go to sleep and wait until the main thread finished
    // updating the browser panel
+   //
+   // NOTE! The function below will release the lock of the mutex associated with
+   // it - i.e. in this case it will release the _GDSlock and will put the thread in
+   // sleep until Signal or broadcast is called
    _bpSync->Wait();
+   // When the thread is woken-up, the function above will lock the mutex again and
+   // THEN will return here.
+   //
    // Wake-up & unlock the mutex
    VERIFY(wxMUTEX_NO_ERROR == _GDSLock.Unlock());
    // clean-up behind & prepare for the consequent use
@@ -950,11 +957,6 @@ void DataCenter::motionDraw(const CTM& layCTM, TP base, TP newp)
    }
    PROPC->unlockDrawProp(drawProp);
 }
-
-const laydata::CellList& DataCenter::cells() {
-   if (_TEDLIB()) return _TEDLIB()->cells();
-   else throw EXPTNactive_DB();
-};
 
 bool DataCenter::getCellNamePair(std::string name, laydata::CellDefin& strdefn)
 {

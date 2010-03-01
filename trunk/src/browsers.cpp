@@ -281,6 +281,13 @@ void browsers::CellBrowser::highlightChildren(wxTreeItemId parent, wxColour clr)
    }
 }
 
+void browsers::CellBrowser::resetData(wxString dbName)
+{
+   initialize();
+   _dbroot = AppendItem(GetRootItem(), dbName);
+   SetItemImage(_dbroot, BICN_TARGETDB, wxTreeItemIcon_Normal);
+}
+
 wxString browsers::CellBrowser::selectedCellName()
 {
    wxTreeItemId selected = GetSelection();
@@ -558,6 +565,7 @@ void browsers::CellBrowser::onCommand( wxCommandEvent& event )
                             static_cast<int>(event.GetExtraLong()));
          delete (static_cast<wxString*>(event.GetClientData()));
          break;
+      case tui::BT_NEWTDT_DB  : resetData(event.GetString()); break;
       default: assert(false);
    }
 }
@@ -1197,7 +1205,7 @@ wxString browsers::TDTbrowser::selectedCellName() const
    return _cellBrowser->selectedCellName();
 }
 
-void browsers::TDTbrowser::collectInfo(bool keepAct)
+void browsers::TDTbrowser::refreshData(bool keepAct)
 {
    wxString selectedcn(_cellBrowser->selectedCellName());
    wxString topcn(_cellBrowser->topCellName());
@@ -1359,22 +1367,22 @@ void browsers::browserTAB::onCommand(wxCommandEvent& event)
    int command = event.GetInt();
    switch (command)
    {
-      case tui::BT_ADDTDT_LIB: onTellAddTdtLib(1 == event.GetExtraLong());break;
-      case tui::BT_ADDGDS_TAB:onTellAddGdsTab();break;
-      case tui::BT_CLEARGDS_TAB:onTellClearGdsTab(); break;
-      case tui::BT_ADDCIF_TAB:onTellAddCifTab();break;
-      case tui::BT_CLEARCIF_TAB:onTellClearCifTab(); break;
-      case tui::BT_ADDOAS_TAB:onTellAddOasTab();break;
-      case tui::BT_CLEAROAS_TAB:onTellClearOasTab(); break;
-      case tui::BT_ADDDRC_TAB:onTellAddDRCTab();break;
-      case tui::BT_CLEARDRC_TAB:onTellClearDRCTab(); break;
+      case tui::BT_ADDTDT_LIB   : onTellRefreshTdtLib(1 == event.GetExtraLong());break;
+      case tui::BT_ADDGDS_TAB   : onTellAddGdsTab();break;
+      case tui::BT_CLEARGDS_TAB : onTellClearGdsTab(); break;
+      case tui::BT_ADDCIF_TAB   : onTellAddCifTab();break;
+      case tui::BT_CLEARCIF_TAB : onTellClearCifTab(); break;
+      case tui::BT_ADDOAS_TAB   : onTellAddOasTab();break;
+      case tui::BT_CLEAROAS_TAB : onTellClearOasTab(); break;
+      case tui::BT_ADDDRC_TAB   : onTellAddDRCTab();break;
+      case tui::BT_CLEARDRC_TAB : onTellClearDRCTab(); break;
       default: event.Skip();
    }
 }
 
-void browsers::browserTAB::onTellAddTdtLib(bool targetDB)
+void browsers::browserTAB::onTellRefreshTdtLib(bool targetDB)
 {
-   _tdtStruct->collectInfo(!targetDB);
+   _tdtStruct->refreshData(!targetDB);
 }
 
 void browsers::browserTAB::onTellAddGdsTab()
@@ -2097,12 +2105,12 @@ void browsers::ErrorBrowser::showMenu(wxTreeItemId id, const wxPoint& pt)
    if (!id.IsOk()) return;
    if (ItemHasChildren(id))
    {
-      menu.Append(tui::TMDRC_SHOW_CLUSTER, wxT("Show cluster")); 
+      menu.Append(tui::TMDRC_SHOW_CLUSTER, wxT("Show cluster"));
       _cluster = GetItemText(id);
    }
    else
    {
-      menu.Append(tui::TMDRC_SHOW_ERR, wxT("Show Error")); 
+      menu.Append(tui::TMDRC_SHOW_ERR, wxT("Show Error"));
       _cluster = GetItemText(GetItemParent(id));
       _error = GetItemText(id);
    }

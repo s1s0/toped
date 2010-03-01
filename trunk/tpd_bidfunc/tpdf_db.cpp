@@ -104,7 +104,7 @@ int tellstdfunc::stdNEWDESIGNsd::execute()
    std::string nm = getStringValue();
 
    DATC->newDesign(nm, timeCreated.stdCTime(), DBU, UU);
-   TpdPost::addTDTtab(true, false);
+   TpdPost::resetTDTtab(nm);
    // reset UNDO buffers;
    UNDOcmdQ.clear();
    while (!UNDOPstack.empty())
@@ -146,7 +146,7 @@ int tellstdfunc::TDTread::execute()
             updateLayerDefinitions( DATC->TEDLIB(), top_cell_list, TARGETDB_LIB);
          DATC->unlockDB();
          // populate the hierarchy browser
-         TpdPost::addTDTtab(true, true);
+         TpdPost::refreshTDTtab(true);
          //
          LogFile << LogFile.getFN() << "(\""<< filename << "\",\"" <<  timec() <<
                "\",\"" <<  timeu() << "\");"; LogFile.flush();
@@ -203,7 +203,7 @@ int tellstdfunc::TDTreadIFF::execute()
             updateLayerDefinitions(DATC->TEDLIB(), top_cell_list, TARGETDB_LIB);
          DATC->unlockDB();
          // populate the cell hierarchy browser
-         TpdPost::addTDTtab(true, true);
+         TpdPost::refreshTDTtab(true);
          LogFile << LogFile.getFN() << "(\""<< filename << "\",\"" <<  timec() <<
                "\",\"" <<  timeu() << "\");"; LogFile.flush();
          // reset UNDO buffers;
@@ -248,7 +248,7 @@ int tellstdfunc::TDTloadlib::execute()
          updateLayerDefinitions(DATC->TEDLIB(), top_cell_list, libID);
          DATC->TEDLIB()->cleanUndefLib();
          // populating cell hierarchy browser
-         TpdPost::addTDTtab(false, true);
+         TpdPost::refreshTDTtab(false);
          // Clean-up eventual remainings in the themporary storage of the undefined cells
          DATC->TEDLIB()->deleteHeldCells();
          LogFile << LogFile.getFN() << "(\""<< filename << "\");"; LogFile.flush();
@@ -280,7 +280,7 @@ int tellstdfunc::TDTunloadlib::execute()
 
    if (DATC->TDTunloadlib(libname))
    {
-      TpdPost::addTDTtab(false, true);
+      TpdPost::refreshTDTtab(false);
       LogFile << LogFile.getFN() << "(\""<< libname << "\");"; LogFile.flush();
    }
    else
@@ -493,7 +493,7 @@ int tellstdfunc::GDSimport::execute()
             updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
          DATC->unlockDB();
          // populate the hierarchy browser
-         TpdPost::addTDTtab(true, true);
+         TpdPost::refreshTDTtab(true);
          LogFile << LogFile.getFN() << "(\""<< name << "\"," << (*lll) << "," << LogFile._2bool(recur)
                << "," << LogFile._2bool(over) << ");"; LogFile.flush();
       }
@@ -565,7 +565,7 @@ int tellstdfunc::GDSimportList::execute()
       updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
       DATC->unlockDB();
       // populate the hierarchy browser
-      TpdPost::addTDTtab(true, true);
+      TpdPost::refreshTDTtab(true);
       LogFile << LogFile.getFN() << "("<< *pl << "," << *lll << "," << LogFile._2bool(recur)
             << "," << LogFile._2bool(over) << ");"; LogFile.flush();
    }
@@ -1110,8 +1110,8 @@ int tellstdfunc::CIFimportList::execute()
    DATC->CIFimport(top_cells, cifLays, recur, over, techno * PROPC->DBscale());
    updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
    DATC->unlockDB();
-   // Don't refresh the tree browser here. See the comment in GDSimportAll::execute()
-
+   // Don't refresh the tree browser here. It should've been updated by the
+   // CIFimport function during the conversion
    LogFile << LogFile.getFN() << "(" << *pl << ","
            << *ll                   << ","
            << LogFile._2bool(recur) << ","
@@ -1165,7 +1165,8 @@ int tellstdfunc::CIFimport::execute()
    DATC->CIFimport(top_cells, cifLays, recur, over, techno * PROPC->DBscale());
    updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
    DATC->unlockDB();
-   // Don't refresh the tree browser here. See the comment in GDSimportAll::execute()
+   // Don't refresh the tree browser here. It should've been updated by the
+   // CIFimport function during the conversion
 
    LogFile << LogFile.getFN() << "(\"" << name<< "\","
            << *lll                  << ","
@@ -1497,7 +1498,7 @@ int tellstdfunc::OASimport::execute()
             updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
          DATC->unlockDB();
          // populate the hierarchy browser
-         TpdPost::addTDTtab(true, true);
+         TpdPost::refreshTDTtab(true);
          LogFile << LogFile.getFN() << "(\""<< name << "\"," << /*(*lll) << "," <<*/ LogFile._2bool(recur)
                << "," << LogFile._2bool(over) << ");"; LogFile.flush();
       }

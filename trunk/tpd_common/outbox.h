@@ -201,7 +201,7 @@ class TpdPost {
       static void toped_status(console::TOPEDSTATUS_TYPE, std::string);
       static void toped_status(console::TOPEDSTATUS_TYPE, wxString);
       static void render_status(bool);
-      static void addTDTtab(bool, bool newthread);
+      static void refreshTDTtab(bool);
       static void addGDStab();
       static void addCIFtab();
       static void addOAStab();
@@ -214,6 +214,7 @@ class TpdPost {
       static void layer_add(const std::string, const word);
       static void layer_default(const word, const word);
       static void layers_state(const std::string& name, bool add);
+      static void resetTDTtab(const std::string);
       static void celltree_open(const std::string);
       static void celltree_highlight(const std::string);
       static void treeAddMember(const char*, const char*, int action = 0);

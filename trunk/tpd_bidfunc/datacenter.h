@@ -84,7 +84,6 @@ public:
    void                       mouseRotate();
    void                       motionDraw(const CTM&, TP, TP);
    void                       render(const CTM&);
-   const laydata::CellList&   cells();
    laydata::TdtLibDir*        TEDLIB() {return &_TEDLIB;}
    laydata::LibCellLists*     getCells(int libID);
    unsigned int               numSelected()           {return (NULL != _TEDLIB()) ? _TEDLIB()->numSelected() : 0 ;}

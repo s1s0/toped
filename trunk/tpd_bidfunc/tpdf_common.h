@@ -161,7 +161,7 @@ namespace tellstdfunc {
    laydata::AtticList*  replace_str(laydata::AtticList*, std::string);
    bool                 secureLayDef(unsigned);
 //   void                 makeGdsLays(ExtLayers&);
-   void 				createDefaultTDT(std::string, TpdTime&, parsercmd::undoQUEUE&, telldata::UNDOPerandQUEUE&);
+   void                 createDefaultTDT(std::string, TpdTime&, parsercmd::undoQUEUE&, telldata::UNDOPerandQUEUE&);
 
 }
 
