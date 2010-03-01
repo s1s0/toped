@@ -1546,21 +1546,22 @@ int tellstdfunc::DRCCalibreimport::execute()
    std::string filename = getStringValue();
    if(DRCData)
    {
+      DRCData->hideAllErrors();
+      delete DRCData;
+   }
+
+   laydata::DrcLibrary* drcDesign = DATC->lockDRC();
+   DRCData = DEBUG_NEW Calbr::CalbrFile(filename, new Calbr::drcTenderer(drcDesign));
+   if(DRCData->isOk())
+   {
+      TpdPost::addDRCtab();
    }
    else
    {
-      laydata::DrcLibrary* drcDesign = DATC->lockDRC();
-      DRCData = DEBUG_NEW Calbr::CalbrFile(filename, new Calbr::drcTenderer(drcDesign));
-      if(DRCData->isOk())
-      {
-         TpdPost::addDRCtab();
-      }
-      else
-      {
-         delete DRCData;
-      }
-      DATC->unlockDRC();
+      delete DRCData;
    }
+   DATC->unlockDRC();
+
    return EXEC_NEXT;
 }
 
