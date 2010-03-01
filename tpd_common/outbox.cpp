@@ -350,12 +350,21 @@ void TpdPost::render_status(bool on_off)
       static_cast<console::TopedStatus*>(_statusBar)->OnRenderOFF();
 }
 
-void TpdPost::addTDTtab(bool targetDB, bool newthread)
+void TpdPost::refreshTDTtab(bool targetDB)
 {
    assert(_topBrowsers);
    wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
    eventADDTAB.SetInt(tui::BT_ADDTDT_LIB);
    eventADDTAB.SetExtraLong(targetDB ? 1 : 0);
+   wxPostEvent( _topBrowsers, eventADDTAB );
+   // TODO!
+   // The comment below is obsolete and left for info only!
+   // Still there is a potential problem that needs to be addressed
+   // and it is :tdtread("..."); newcell("a")
+   // The risk is as described below.
+   // Search where this function is called. It must be done in a way
+   // similar to the way GDS parser deals with the similar situation.
+   // See
 //   eventADDTAB.SetClientData(static_cast<void*> ( tdtLib));
 //   eventADDTAB.SetExtraLong(traverse_all ? 1 : 0);
    // Note about threads here!
@@ -367,14 +376,11 @@ void TpdPost::addTDTtab(bool targetDB, bool newthread)
    // after the execution of the second function. The latter will
    // send treeAddMember itself - in result the browser window
    // will get cell b twice. Bottom line: don't use PostEvent here!
-   if (newthread)
-      wxPostEvent( _topBrowsers, eventADDTAB );
-   else
-      _topBrowsers->GetEventHandler()->ProcessEvent( eventADDTAB );
+//   else
+//      _topBrowsers->GetEventHandler()->ProcessEvent( eventADDTAB );
    // the alternative is to call the function directly
 //   Browsers->OnTELLaddTDTlib(tdtLib, traverse_all);
 }
-
 
 void TpdPost::addGDStab()
 {
@@ -483,6 +489,15 @@ void TpdPost::layers_state(const std::string& name, bool add)
    else
       eventLAYERS_STATE.SetInt(tui::BT_LAYSTATE_DELETE);
    wxPostEvent(_layBrowser, eventLAYERS_STATE);
+}
+
+void TpdPost::resetTDTtab(const std::string dbName)
+{
+   assert(_topBrowsers);
+   wxCommandEvent resetTDTTab(wxEVT_CMD_BROWSER);
+   resetTDTTab.SetInt(tui::BT_NEWTDT_DB);
+   resetTDTTab.SetString(wxString(dbName.c_str(), wxConvUTF8));
+   wxPostEvent( _cllBrowser, resetTDTTab );
 }
 
 void TpdPost::celltree_open(const std::string cname)
