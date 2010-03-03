@@ -435,6 +435,28 @@ void laydata::TdtLibDir::addLibrary(TdtLibrary* const lib, word libRef)
    _libdirectory.insert( _libdirectory.end(), DEBUG_NEW LibItem(lib->name(), lib) );
 }
 
+int laydata::TdtLibDir::loadlib(std::string filename)
+{
+   laydata::TEDfile tempin(filename.c_str(), this);
+   if (!tempin.status()) return -1;
+   int libRef = getLastLibRefNo();
+   try
+   {
+      tempin.read(libRef);
+   }
+   catch (EXPTNreadTDT)
+   {
+      tempin.closeF();
+      tempin.cleanup();
+      return -1;
+   }
+   tempin.closeF();
+   addLibrary(tempin.design(), libRef);
+   relink();// Re-link everything
+   return libRef;
+}
+
+
 laydata::TdtLibrary* laydata::TdtLibDir::removeLibrary(std::string libname)
 {
    TdtLibrary* tberased = NULL;
@@ -642,6 +664,25 @@ void laydata::TdtLibDir::getHeldCells(CellList* copyList)
       (*copyList)[CUDU->first] = CUDU->second;
    }
    _udurCells.clear();
+}
+
+laydata::LibCellLists* laydata::TdtLibDir::getCells(int libID)
+{
+   laydata::LibCellLists* all_cells = DEBUG_NEW laydata::LibCellLists();
+   if (libID == ALL_LIB)
+   {
+      if (NULL != _TEDDB)
+         all_cells->push_back(&(_TEDDB->cells()));
+      for (int i = 1; i < getLastLibRefNo(); i++)
+         all_cells->push_back(&(getLib(i)->cells()));
+   }
+   else if ( (libID == TARGETDB_LIB) && (NULL != _TEDDB) )
+      all_cells->push_back(&(_TEDDB->cells()));
+   else if (libID == UNDEFCELL_LIB)
+      all_cells->push_back(&(_libdirectory[UNDEFCELL_LIB]->second->cells()));
+   else if (libID < getLastLibRefNo())
+      all_cells->push_back(&(getLib(libID)->cells()));
+   return all_cells;
 }
 
 
@@ -1330,8 +1371,14 @@ DBbox laydata::TdtDesign::getVisibleOverlap(layprop::DrawProperties& prop)
    else return ovl;
 }
 
-void laydata::TdtDesign::checkActive() {
+void laydata::TdtDesign::checkActive()
+{
    if (NULL == _target.edit()) throw EXPTNactive_cell();
+};
+
+bool laydata::TdtDesign::checkActiveCell()
+{
+   return (NULL != _target.edit());
 };
 
 void laydata::TdtDesign::tryUnselectAll() const {

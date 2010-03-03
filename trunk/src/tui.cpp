@@ -261,8 +261,10 @@ tui::getCellRef::getCellRef(wxFrame *parent, wxWindowID id, const wxString &titl
 //   _rotation = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
 //   _flip = DEBUG_NEW wxCheckBox(this, -1, wxT("Flip X"));
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
-   DATC->lockDB();
-      laydata::LibCellLists *cll = DATC->getCells(ALL_LIB);
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
+   {
+      laydata::LibCellLists *cll = dbLibDir->getCells(ALL_LIB);
       for (laydata::LibCellLists::iterator curlib = cll->begin(); curlib != cll->end(); curlib++)
       {
          laydata::CellList::const_iterator CL;
@@ -272,7 +274,8 @@ tui::getCellRef::getCellRef(wxFrame *parent, wxWindowID id, const wxString &titl
          }
       }
       delete cll;
-   DATC->unlockDB();
+   }
+   DATC->unlockTDT(dbLibDir);
    if (init != wxT("")) _nameList->SetStringSelection(init,true);
    // The window layout
    wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
@@ -307,8 +310,10 @@ tui::getCellARef::getCellARef(wxFrame *parent, wxWindowID id, const wxString &ti
 //   _rotation = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
 //   _flip = DEBUG_NEW wxCheckBox(this, -1, wxT("Flip X"));
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
-   DATC->lockDB();
-      laydata::LibCellLists *cll = DATC->getCells(ALL_LIB);
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
+   {
+      laydata::LibCellLists *cll = dbLibDir->getCells(ALL_LIB);
       for (laydata::LibCellLists::iterator curlib = cll->begin(); curlib != cll->end(); curlib++)
       {
          laydata::CellList::const_iterator CL;
@@ -318,7 +323,8 @@ tui::getCellARef::getCellARef(wxFrame *parent, wxWindowID id, const wxString &ti
          }
       }
       delete cll;
-   DATC->unlockDB();
+   }
+   DATC->unlockTDT(dbLibDir);
    if (init != wxT("")) _nameList->SetStringSelection(init,true);
    // The window layout
    wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );

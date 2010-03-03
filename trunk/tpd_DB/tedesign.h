@@ -60,7 +60,7 @@ namespace laydata {
       std::string       name()            const {return _name;}
       real              UU()              const {return _UU;}
       real              DBU()             const {return _DBU;}
-      const CellList&   cells()          const {return _cells;}
+      const CellList&   cells()           const {return _cells;}
       TDTHierTree*      hiertree()        const {return _hiertree;}
       int               libID()           const {return _libID;}
       void              clearHierTree();
@@ -133,7 +133,8 @@ namespace laydata {
       AtticList*     changeRef(ShapeList*, std::string);
       //
       void           collectParentCells(std::string&, CellDefList&);
-      void           checkActive();
+      void           checkActive(); //TODO remove this function
+      bool           checkActiveCell();
       bool           checkValidRef(std::string);
 
       void           selectFromList(SelectList* ss, const DWordSet& unselable)
@@ -181,18 +182,18 @@ namespace laydata {
    cell structure it would be stupid not to allow simple operations whith it. For
    example to define it, or simply to delete the reference to it. Right? (they say
    that the road to hell is covered with roses). When I've started the
-   implementation, then I realised that UNDEFCELL_LIB shall have quite different
-   behaviour from a normal library and from the target DB
+   implementation, then I realized that UNDEFCELL_LIB shall have quite different
+   behavior from a normal library and from the target DB
    - New cells have to be generated on request - normally when a reference to them
      is added. Unlike the target DB where there is a command for this.
    - Unreferenced cells should be cleared (you don't want to see rubbish in the cell
      browser). Unlike the rest of the libraries where they simply come at the top
-     of the hirerarchy if unreferenced.
+     of the hierarchy if unreferenced.
    On top of the above comes the undo. Just a simple example. The last reference to
    an undefined cell had been deleted. One would think - great - we'll clean-up the
    definition. Well if you do that - the undo will crash, because the undefined cell
    reference keeps the pointer to the definition of the undefined cell. It's getting
-   alsomst rediculos, because it appears that to keep the integrity of the undo stack
+   almost ridiculous, because it appears that to keep the integrity of the undo stack
    you have to store also the deleted definitions of the undefined cells. The
    complications involve the hierarchy tree, the cell browser, and basic tell
    functions like addCell, removeCell, group, ungroup, delete etc.
@@ -204,7 +205,7 @@ namespace laydata {
                         TdtLibDir();
                        ~TdtLibDir();
       TdtDesign*        operator ()() {return _TEDDB;}
-      void              addLibrary( TdtLibrary* const, word libRef );
+      int               loadlib(std::string filename);
       TdtLibrary*       removeLibrary( std::string );
       TdtLibrary*       getLib(int);
       std::string       getLibName(int);
@@ -223,14 +224,15 @@ namespace laydata {
       void              holdUndefinedCell(TdtDefaultCell*);
       void              deleteHeldCells();
       void              getHeldCells(CellList*);
+      LibCellLists*     getCells(int libID);
       bool              modified() const {return (NULL == _TEDDB) ? false : _TEDDB->modified;};
       void              deleteDB() {delete _TEDDB;}
       void              setDB(TdtDesign* newdesign) {_TEDDB = newdesign;}
-      const CellList&   getUndefinedCells() {return _libdirectory[UNDEFCELL_LIB]->second->cells();}
    private:
+      void              addLibrary(TdtLibrary* const lib, word libRef);
       Catalog           _libdirectory;
       TdtDesign*        _TEDDB;        // toped data base
-      //! themporary storage for undefined unreferenced cell (see the comment in the class definition)
+      //! Temporary storage for undefined unreferenced cell (see the comment in the class definition)
       CellList          _udurCells;
    };
 

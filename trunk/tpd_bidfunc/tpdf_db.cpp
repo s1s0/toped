@@ -234,30 +234,35 @@ int tellstdfunc::TDTloadlib::execute()
    std::string filename = getStringValue();
    if (expandFileName(filename))
    {
-      nameList top_cell_list;
-      int libID = DATC->TDTloadlib(filename);
-      if (0 <= libID)
+      laydata::TdtLibDir* dbLibDir = NULL;
+      if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
       {
-         laydata::TdtLibrary* LTDB = DATC->getLib(libID);
-         // Gatering the used layers & update the layer definitions
-         laydata::TDTHierTree* root = LTDB->hiertree()->GetFirstRoot(libID);
-         do
+         nameList top_cell_list;
+         int libID = dbLibDir->loadlib(filename);
+         if (0 <= libID)
          {
-            top_cell_list.push_back(std::string(root->GetItem()->name()));
-         } while (NULL != (root = root->GetNextRoot(libID)));
-         updateLayerDefinitions(DATC->TEDLIB(), top_cell_list, libID);
-         DATC->TEDLIB()->cleanUndefLib();
-         // populating cell hierarchy browser
-         TpdPost::refreshTDTtab(false);
-         // Clean-up eventual remainings in the themporary storage of the undefined cells
-         DATC->TEDLIB()->deleteHeldCells();
-         LogFile << LogFile.getFN() << "(\""<< filename << "\");"; LogFile.flush();
+            laydata::TdtLibrary* LTDB = dbLibDir->getLib(libID);
+            // Gathering the used layers & update the layer definitions
+            laydata::TDTHierTree* root = LTDB->hiertree()->GetFirstRoot(libID);
+            do
+            {
+               top_cell_list.push_back(std::string(root->GetItem()->name()));
+            } while (NULL != (root = root->GetNextRoot(libID)));
+            updateLayerDefinitions(dbLibDir, top_cell_list, libID);
+            dbLibDir->cleanUndefLib();
+            // populating cell hierarchy browser
+            TpdPost::refreshTDTtab(false);
+            // Clean-up eventual remainings in the temporary storage of the undefined cells
+            dbLibDir->deleteHeldCells();
+            LogFile << LogFile.getFN() << "(\""<< filename << "\");"; LogFile.flush();
+         }
+         else
+         {
+            std::string info = "Can't load \"" + filename + "\" as a library";
+            tell_log(console::MT_ERROR,info);
+         }
       }
-      else
-      {
-         std::string info = "Can't load \"" + filename + "\" as a library";
-         tell_log(console::MT_ERROR,info);
-      }
+      DATC->unlockTDT(dbLibDir);
    }
    else
    {
