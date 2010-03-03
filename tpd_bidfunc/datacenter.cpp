@@ -54,6 +54,7 @@ DataCenter::DataCenter(const std::string& localDir, const std::string& globalDir
    laydata::TdtLibrary::initHierTreePtr();
    _tedfilename = "unnamed";
    _drawruler = false;
+   _tdtMxState = dbmxs_unlocked;
 }
 
 DataCenter::~DataCenter() {
@@ -130,28 +131,6 @@ bool DataCenter::TDTread(std::string filename)
    // Update Canvas scale
    PROPC->setUU(_TEDLIB()->UU());
    return true;
-}
-
-int DataCenter::TDTloadlib(std::string filename)
-{
-   laydata::TEDfile tempin(filename.c_str(), &_TEDLIB);
-   if (!tempin.status()) return -1;
-   int libRef = _TEDLIB.getLastLibRefNo();
-   try
-   {
-      tempin.read(libRef);
-   }
-   catch (EXPTNreadTDT)
-   {
-      tempin.closeF();
-      tempin.cleanup();
-      return -1;
-   }
-   tempin.closeF();
-   _TEDLIB.addLibrary(tempin.design(), libRef);
-   // Relink everything
-   _TEDLIB.relink();
-   return libRef;
 }
 
 bool DataCenter::TDTunloadlib(std::string libname)
@@ -529,6 +508,47 @@ laydata::DrcLibrary*  DataCenter::lockDRC(void)
 void DataCenter::unlockDRC()
 {
    VERIFY(wxMUTEX_NO_ERROR == _DRCLock.Unlock());
+}
+
+bool DataCenter::lockTDT(laydata::TdtLibDir*& tdt_db, TdtMutexState reqLock)
+{
+   assert(reqLock > dbmxs_deadlock);
+   if (wxMUTEX_DEAD_LOCK == _DBLock.Lock())
+   {
+      tell_log(console::MT_ERROR, "DB Mutex deadlocked!");
+      tdt_db = NULL;
+      _tdtMxState = dbmxs_deadlock;
+   }
+   else
+   {
+      // OK, the mutex is locked!
+      tdt_db = &_TEDLIB;
+      if (_TEDLIB())
+         if (_TEDLIB()->checkActiveCell())
+            _tdtMxState = dbmxs_celllock;
+         else
+            _tdtMxState = dbmxs_dblock;
+      else
+         _tdtMxState = dbmxs_liblock;
+   }
+   return (reqLock <= _tdtMxState);
+}
+
+void DataCenter::unlockTDT(laydata::TdtLibDir* tdt_db, bool throwexception)
+{
+//   _TEDLIB = tdt_db;
+   assert(_tdtMxState > dbmxs_unlocked);
+   VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
+   if (throwexception)
+      switch (_tdtMxState)
+      {
+         case dbmxs_liblock  : throw EXPTNactive_DB();
+         case dbmxs_dblock   : throw EXPTNactive_cell();
+//         case dbmxs_deadlock : ???
+         default             : break;
+      }
+   tdt_db = NULL;
+   _tdtMxState = dbmxs_unlocked;
 }
 
 bool DataCenter::lockGds(GDSin::GdsInFile*& gds_db)
@@ -1055,23 +1075,3 @@ LayerMapExt* DataCenter::secureGdsLayMap(const layprop::DrawProperties* drawProp
    }
    return theGdsMap;
 }
-
-laydata::LibCellLists* DataCenter::getCells(int libID)
-{
-   laydata::LibCellLists* all_cells = DEBUG_NEW laydata::LibCellLists();
-   if (libID == ALL_LIB)
-   {
-      if (NULL != _TEDLIB())
-         all_cells->push_back(&(_TEDLIB()->cells()));
-      for (int i = 1; i < _TEDLIB.getLastLibRefNo(); i++)
-         all_cells->push_back(&(_TEDLIB.getLib(i)->cells()));
-   }
-   else if ( (libID == TARGETDB_LIB) && (NULL != _TEDLIB()) )
-      all_cells->push_back(&(_TEDLIB()->cells()));
-   else if (libID == UNDEFCELL_LIB)
-      all_cells->push_back(&(_TEDLIB.getUndefinedCells()));
-   else if (libID < _TEDLIB.getLastLibRefNo())
-      all_cells->push_back(&(_TEDLIB.getLib(libID)->cells()));
-   return all_cells;
-}
-

@@ -350,145 +350,154 @@ void browsers::CellBrowser::collectInfo( bool hier)
 
 void browsers::CellBrowser::updateFlat()
 {
-   laydata::TdtDesign* design;
-   wxTreeItemId temp, nroot;
-   laydata::LibCellLists *cll;
-   laydata::LibCellLists::iterator curlib;
-   bool rootexists = true;
-   try
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
    {
-      design = DATC->lockDB(false);
-   }
-   catch (EXPTNactive_DB) {rootexists = false;}
-   if (rootexists)
-   {
-      // design name ...
-      _dbroot = AppendItem(GetRootItem(),wxString(design->name().c_str(),  wxConvUTF8));
-      SetItemImage(_dbroot,BICN_TARGETDB,wxTreeItemIcon_Normal);
-      // ... and the cells
-      cll = DATC->getCells(TARGETDB_LIB);
-      for (curlib = cll->begin(); curlib != cll->end(); curlib++)
+      laydata::LibCellLists *cll;
+      laydata::LibCellLists::iterator curlib;
+      bool rootexists = (DATC->tdtMxState() >= dbmxs_dblock);
+      if (rootexists)
       {
-         laydata::CellList::const_iterator CL;
-         for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
-         {
-            wxTreeItemId cellitem = AppendItem(_dbroot, wxString( CL->first.c_str(),  wxConvUTF8));
-            SetItemImage(cellitem,BICN_DBCELL_FLAT,wxTreeItemIcon_Normal);
-         }
-      }
-      delete cll;
-      SortChildren(_dbroot);
-      DATC->unlockDB();
-   }
-
-   // traverse the libraries now
-   _libsRoot.clear();
-   for(int libID = 1; libID < DATC->TEDLIB()->getLastLibRefNo(); libID++)
-   {
-      // library name ...
-      wxTreeItemId libroot = AppendItem(GetRootItem(),wxString(DATC->getLib(libID)->name().c_str(),  wxConvUTF8));
-      _libsRoot.push_back(libroot);
-      SetItemImage(libroot,BICN_LIBRARYDB,wxTreeItemIcon_Normal);
-      // ... and the cells
-      cll = DATC->getCells(libID);
-      for (curlib = cll->begin(); curlib != cll->end(); curlib++)
-      {
-         laydata::CellList::const_iterator CL;
-         for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
-         {
-            wxTreeItemId cellitem = AppendItem(libroot, wxString( CL->first.c_str(),  wxConvUTF8));
-            SetItemImage(cellitem,BICN_LIBCELL_FLAT,wxTreeItemIcon_Normal);
-         }
-      }
-      delete cll;
-      SortChildren(libroot);
-   }
-   // And now - deal with the undefined cells
-   if (rootexists)
-   {
-      const laydata::CellList& cellList= DATC->TEDLIB()->getUndefinedCells();
-      if (cellList.size() != 0)
-      {
-         // the type ...
-         _undefRoot = AppendItem(GetRootItem(), wxString("Undefined Cells", wxConvUTF8));
-         SetItemImage(_undefRoot,BICN_LIBRARYDB,wxTreeItemIcon_Normal); //@FIXME <-- HERE - one more lib icon for undefined cells!
+         // design name ...
+         _dbroot = AppendItem(GetRootItem(),wxString((*dbLibDir)()->name().c_str(),  wxConvUTF8));
+         SetItemImage(_dbroot,BICN_TARGETDB,wxTreeItemIcon_Normal);
          // ... and the cells
-         for(laydata::CellList::const_iterator it=cellList.begin(); it!= cellList.end(); it++)
+         cll = dbLibDir->getCells(TARGETDB_LIB);
+         for (curlib = cll->begin(); curlib != cll->end(); curlib++)
          {
-            wxTreeItemId cellitem = AppendItem(_undefRoot, wxString( (*it).first.c_str(),  wxConvUTF8));
-            SetItemImage(cellitem,BICN_UNDEFCELL,wxTreeItemIcon_Normal);
+            laydata::CellList::const_iterator CL;
+            for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
+            {
+               wxTreeItemId cellitem = AppendItem(_dbroot, wxString( CL->first.c_str(),  wxConvUTF8));
+               SetItemImage(cellitem,BICN_DBCELL_FLAT,wxTreeItemIcon_Normal);
+            }
          }
-         SortChildren(_undefRoot);
+         delete cll;
+         SortChildren(_dbroot);
+      }
+
+      // traverse the libraries now
+      int lastLibRefNo = dbLibDir->getLastLibRefNo();
+      _libsRoot.clear();
+      for(int libID = 1; libID < lastLibRefNo; libID++)
+      {
+         // library name ...
+         wxTreeItemId libroot = AppendItem(GetRootItem(),wxString(dbLibDir->getLib(libID)->name().c_str(),  wxConvUTF8));
+         _libsRoot.push_back(libroot);
+         SetItemImage(libroot,BICN_LIBRARYDB,wxTreeItemIcon_Normal);
+         // ... and the cells
+         cll = dbLibDir->getCells(libID);
+         for (curlib = cll->begin(); curlib != cll->end(); curlib++)
+         {
+            laydata::CellList::const_iterator CL;
+            for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
+            {
+               wxTreeItemId cellitem = AppendItem(libroot, wxString( CL->first.c_str(),  wxConvUTF8));
+               SetItemImage(cellitem,BICN_LIBCELL_FLAT,wxTreeItemIcon_Normal);
+            }
+         }
+         delete cll;
+         SortChildren(libroot);
+      }
+      // And now - deal with the undefined cells
+      if (rootexists)
+      {
+         cll = dbLibDir->getCells(UNDEFCELL_LIB);
+         for (curlib = cll->begin(); curlib != cll->end(); curlib++)
+         {
+            if ((*curlib)->size() != 0)
+            {
+               // the type ...
+               _undefRoot = AppendItem(GetRootItem(), wxString("Undefined Cells", wxConvUTF8));
+               SetItemImage(_undefRoot,BICN_LIBRARYDB,wxTreeItemIcon_Normal); //@FIXME <-- HERE - one more lib icon for undefined cells!
+               // ... and the cells
+               laydata::CellList::const_iterator CL;
+               for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
+               {
+                  wxTreeItemId cellitem = AppendItem(_undefRoot, wxString( (*CL).first.c_str(),  wxConvUTF8));
+                  SetItemImage(cellitem,BICN_UNDEFCELL,wxTreeItemIcon_Normal);
+               }
+               SortChildren(_undefRoot);
+            }
+         }
+         delete cll;
       }
    }
+   DATC->unlockTDT(dbLibDir);
 }
 
 void browsers::CellBrowser::updateHier()
 {
-   laydata::TdtDesign* design;
-   bool rootexists = true;
-   try
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
    {
-      design = DATC->lockDB(false);
-   }
-   catch (EXPTNactive_DB) {rootexists = false;}
-   laydata::TDTHierTree *tdtH = NULL;
-   wxTreeItemId nroot;
-   // traverse the target design - if it exists
-   if (rootexists)
-   {
-      // design name ...
-      _dbroot = AppendItem(GetRootItem(),wxString(design->name().c_str(),  wxConvUTF8));
-      SetItemImage(_dbroot,BICN_TARGETDB,wxTreeItemIcon_Normal);
-      // ... and the cells
-      tdtH = design->hiertree()->GetFirstRoot(TARGETDB_LIB);
-      while (tdtH)
+      bool rootexists = (DATC->tdtMxState() >= dbmxs_dblock);
+      laydata::TDTHierTree *tdtH = NULL;
+      wxTreeItemId nroot;
+
+      // traverse the target design - if it exists
+      if (rootexists)
       {
-         std::string str = tdtH->GetItem()->name();
-         nroot = AppendItem(_dbroot, wxString(tdtH->GetItem()->name().c_str(), wxConvUTF8));
-         collectChildren(tdtH, ALL_LIB, nroot);
-         tdtH = tdtH->GetNextRoot(TARGETDB_LIB);
-      }
-      SortChildren(_dbroot);
-      DATC->unlockDB();
-   }
-   // traverse the libraries now
-   _libsRoot.clear();
-   for(int libID = 1; libID < DATC->TEDLIB()->getLastLibRefNo(); libID++)
-   {
-      // library name ...
-      wxTreeItemId libroot = AppendItem(GetRootItem(),wxString(DATC->getLib(libID)->name().c_str(),  wxConvUTF8));
-      _libsRoot.push_back(libroot);
-      SetItemImage(libroot,BICN_LIBRARYDB,wxTreeItemIcon_Normal);
-      // ... and the cells
-      tdtH = DATC->getLib(libID)->hiertree()->GetFirstRoot(libID);
-      while (tdtH)
-      {
-         std::string str = tdtH->GetItem()->name();
-         nroot = AppendItem(libroot, wxString(tdtH->GetItem()->name().c_str(), wxConvUTF8));
-         collectChildren(tdtH, libID, nroot);
-         tdtH = tdtH->GetNextRoot(libID);
-      }
-      SortChildren(libroot);
-   }
-   // And now - deal with the undefined cells
-   if (rootexists)
-   {
-      const laydata::CellList& cellList= DATC->TEDLIB()->getUndefinedCells();
-      if (cellList.size() != 0)
-      {
-         // the type ...
-         _undefRoot = AppendItem(GetRootItem(), wxString("Undefined Cells", wxConvUTF8));
-         SetItemImage(_undefRoot,BICN_LIBRARYDB,wxTreeItemIcon_Normal); //@FIXME <-- HERE - one more lib icon for undefined cells!
+         laydata::TdtDesign* design = (*dbLibDir)();
+         // design name ...
+         _dbroot = AppendItem(GetRootItem(),wxString(design->name().c_str(),  wxConvUTF8));
+         SetItemImage(_dbroot,BICN_TARGETDB,wxTreeItemIcon_Normal);
          // ... and the cells
-         for(laydata::CellList::const_iterator it=cellList.begin(); it!= cellList.end(); it++)
+         tdtH = design->hiertree()->GetFirstRoot(TARGETDB_LIB);
+         while (tdtH)
          {
-            wxTreeItemId cellitem = AppendItem(_undefRoot, wxString( (*it).first.c_str(),  wxConvUTF8));
-            SetItemImage(cellitem,BICN_UNDEFCELL,wxTreeItemIcon_Normal);
+            std::string str = tdtH->GetItem()->name();
+            nroot = AppendItem(_dbroot, wxString(tdtH->GetItem()->name().c_str(), wxConvUTF8));
+            collectChildren(tdtH, ALL_LIB, nroot);
+            tdtH = tdtH->GetNextRoot(TARGETDB_LIB);
+         }
+         SortChildren(_dbroot);
+      }
+      // traverse the libraries now
+      int lastLibRefNo = dbLibDir->getLastLibRefNo();
+      _libsRoot.clear();
+      for(int libID = 1; libID < lastLibRefNo; libID++)
+      {
+         // library name ...
+         wxTreeItemId libroot = AppendItem(GetRootItem(),wxString(dbLibDir->getLib(libID)->name().c_str(),  wxConvUTF8));
+         _libsRoot.push_back(libroot);
+         SetItemImage(libroot,BICN_LIBRARYDB,wxTreeItemIcon_Normal);
+         // ... and the cells
+         tdtH = dbLibDir->getLib(libID)->hiertree()->GetFirstRoot(libID);
+         while (tdtH)
+         {
+            std::string str = tdtH->GetItem()->name();
+            nroot = AppendItem(libroot, wxString(tdtH->GetItem()->name().c_str(), wxConvUTF8));
+            collectChildren(tdtH, libID, nroot);
+            tdtH = tdtH->GetNextRoot(libID);
+         }
+         SortChildren(libroot);
+      }
+      // And now - deal with the undefined cells
+      if (rootexists)
+      {
+         laydata::LibCellLists *cll = dbLibDir->getCells(UNDEFCELL_LIB);
+         laydata::LibCellLists::iterator curlib;
+         for (curlib = cll->begin(); curlib != cll->end(); curlib++)
+         {
+            if ((*curlib)->size() != 0)
+            {
+               // the type ...
+               _undefRoot = AppendItem(GetRootItem(), wxString("Undefined Cells", wxConvUTF8));
+               SetItemImage(_undefRoot,BICN_LIBRARYDB,wxTreeItemIcon_Normal); //@FIXME <-- HERE - one more lib icon for undefined cells!
+               // ... and the cells
+               laydata::CellList::const_iterator CL;
+               for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
+               {
+                  wxTreeItemId cellitem = AppendItem(_undefRoot, wxString( (*CL).first.c_str(),  wxConvUTF8));
+                  SetItemImage(cellitem,BICN_UNDEFCELL,wxTreeItemIcon_Normal);
+               }
+            }
          }
          SortChildren(_undefRoot);
       }
    }
+   DATC->unlockTDT(dbLibDir);
 }
 
 void browsers::CellBrowser::collectChildren(const laydata::TDTHierTree *root,

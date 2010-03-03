@@ -32,6 +32,15 @@
 #include "gds_io.h"
 #include "oasis_io.h"
 
+typedef enum {
+   //                        mutex     Lib   DB  cell
+   dbmxs_unlocked  = -1,
+   dbmxs_deadlock  =  0, //    0        ?    ?    ?
+   dbmxs_liblock   =  1, //    1        1    0    0
+   dbmxs_dblock    =  2, //    1        1    1    0
+   dbmxs_celllock  =  3  //    1        1    1    1
+} TdtMutexState;
+
 class DataCenter {
 public:
                               DataCenter(const std::string&, const std::string &);
@@ -54,12 +63,12 @@ public:
    void                       importOAScell(const nameList&, const LayerMapExt&, bool recur, bool over);
    void                       PSexport(laydata::TdtCell*, std::string&);
    bool                       TDTread(std::string);
-   int                        TDTloadlib(std::string);
    bool                       TDTunloadlib(std::string);
    bool                       TDTwrite(const char* filename = NULL);
    bool                       TDTcheckwrite(const TpdTime&, const TpdTime&, bool&);
    bool                       TDTcheckread(const std::string, const TpdTime&, const TpdTime&, bool&);
    void                       newDesign(std::string, time_t, real, real);
+   bool                       lockTDT(laydata::TdtLibDir*&, TdtMutexState);
    laydata::TdtDesign*        lockDB(bool checkACTcell = true);
    laydata::DrcLibrary*       lockDRC(void);
    bool                       lockGds(GDSin::GdsInFile*&);
@@ -68,10 +77,9 @@ public:
    void                       bpAddGdsTab();
    void                       bpAddCifTab();
    void                       bpAddOasTab();
-   laydata::TdtLibrary*       getLib(int libID) {return _TEDLIB.getLib(libID);}
-   int                        getLastLibRefNo() {return _TEDLIB.getLastLibRefNo();}
    bool                       getCellNamePair(std::string name, laydata::CellDefin& strdefn);
    void                       unlockDB();
+   void                       unlockTDT(laydata::TdtLibDir*, bool throwexception = false);
    void                       unlockDRC();
    void                       unlockGds(GDSin::GdsInFile*&, bool throwexception = false);
    void                       unlockCif(CIFin::CifFile*&, bool throwexception = false);
@@ -85,7 +93,6 @@ public:
    void                       motionDraw(const CTM&, TP, TP);
    void                       render(const CTM&);
    laydata::TdtLibDir*        TEDLIB() {return &_TEDLIB;}
-   laydata::LibCellLists*     getCells(int libID);
    unsigned int               numSelected()           {return (NULL != _TEDLIB()) ? _TEDLIB()->numSelected() : 0 ;}
    void                       setCmdLayer(word layno) {_curcmdlay = layno;}
    word                       curCmdLay() const       {return _curcmdlay;}
@@ -99,6 +106,7 @@ public:
    LayerMapExt*               secureGdsLayMap(const layprop::DrawProperties*, bool);
    LayerMapCif*               secureCifLayMap(const layprop::DrawProperties*, bool);
    std::string                globalDir(void) const     {return _globalDir;}
+   TdtMutexState              tdtMxState() const {return _tdtMxState;}
 
 protected:
    std::string                _tedfilename;
@@ -120,8 +128,8 @@ private:
    wxMutex                    _GDSLock;      //! GDSII       DB Mutex
    wxMutex                    _CIFLock;      //! CIF         DB Mutex
    wxMutex                    _OASLock;      //! OASIS       DB Mutex
-   wxCondition*               _bpSync;       // Synchronization for cell browser panels
-
+   wxCondition*               _bpSync;       //! Synchronization for cell browser panels
+   TdtMutexState              _tdtMxState;   //! The mutex state of the main DB
 };
 
 //=============================================================================
