@@ -170,7 +170,7 @@ namespace laydata {
    always defined and always located in the 0 slot of the Catalog. Undefined cell
    library is not accessible outside of the scope of this class \n
    Current database is accessible using the class functor.
-   The class is using folowing library ID definitions
+   The class is using following library ID definitions
       ALL_LIB
       TARGETDB_LIB
       UNDEFCELL_LIB
@@ -209,6 +209,8 @@ namespace laydata {
       bool              unloadLib(std::string);
       TdtLibrary*       getLib(int);
       std::string       getLibName(int);
+      void              newDesign(std::string, std::string, time_t, real, real);
+      bool              readDesign(std::string);
       void              relink();
       void              reextractHierarchy();
       int               getLastLibRefNo();
@@ -227,9 +229,9 @@ namespace laydata {
       void              getHeldCells(CellList*);
       LibCellLists*     getCells(int libID);
       bool              modified() const {return (NULL == _TEDDB) ? false : _TEDDB->modified;};
-      void              deleteDB() {delete _TEDDB;}
-      void              setDB(TdtDesign* newdesign) {_TEDDB = newdesign;}
    private:
+      std::string       _tedfilename;
+      bool              _neversaved;
       void              addLibrary(TdtLibrary* const lib, word libRef);
       TdtLibrary*       removeLibrary( std::string );
       Catalog           _libdirectory;

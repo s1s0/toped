@@ -108,31 +108,6 @@ bool DataCenter::TDTcheckread(const std::string filename,
    return retval;
 }
 
-bool DataCenter::TDTread(std::string filename)
-{
-   laydata::TEDfile tempin(filename.c_str(), &_TEDLIB);
-   if (!tempin.status()) return false;
-
-   try
-   {
-      tempin.read(TARGETDB_LIB);
-   }
-   catch (EXPTNreadTDT)
-   {
-      tempin.closeF();
-      tempin.cleanup();
-      return false;
-   }
-   tempin.closeF();
-   _TEDLIB.deleteDB();//Erase existing data
-   _tedfilename = filename;
-   _neversaved = false;
-   _TEDLIB.setDB(static_cast<laydata::TdtDesign*>(tempin.design()));
-   // Update Canvas scale
-   PROPC->setUU(_TEDLIB()->UU());
-   return true;
-}
-
 bool DataCenter::TDTcheckwrite(const TpdTime& timeCreated, const TpdTime& timeSaved, bool& stop_ignoring)
 {
    std::string news;
@@ -436,26 +411,6 @@ void DataCenter::PSexport(laydata::TdtCell* cell, std::string& filename)
    }
    PROPC->unlockDrawProp(drawProp);
 //   gdsex.closeFile();
-}
-
-void DataCenter::newDesign(std::string name, time_t created, real DBU, real UU)
-{
-   if (_TEDLIB())
-   {
-      // Checks before closing(save?) available only when the command is launched
-      // via GUI(void TopedFrame::OnNewDesign(). If the command is typed directly
-      // on the command line, or parsed from file - no checks are executed.
-      // In other words if we are already here we will destroy the current design
-      // without much talking.
-      // UNDO buffers will be reset as well in tellstdfunc::stdNEWDESIGN::execute()
-      // but there is still a chance to restore everything - using the log file.
-      _TEDLIB()->clearHierTree();
-      _TEDLIB.deleteDB();
-   }
-   _TEDLIB.setDB(DEBUG_NEW laydata::TdtDesign(name, created, created, DBU, UU));
-   _tedfilename = _localDir + name + ".tdt";
-   _neversaved = true;
-   PROPC->setUU(_TEDLIB()->UU());
 }
 
 laydata::TdtDesign*  DataCenter::lockDB(bool checkACTcell)

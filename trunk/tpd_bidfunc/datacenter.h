@@ -62,11 +62,9 @@ public:
    bool                       OASParse(std::string);
    void                       importOAScell(const nameList&, const LayerMapExt&, bool recur, bool over);
    void                       PSexport(laydata::TdtCell*, std::string&);
-   bool                       TDTread(std::string);
    bool                       TDTwrite(const char* filename = NULL);
    bool                       TDTcheckwrite(const TpdTime&, const TpdTime&, bool&);
    bool                       TDTcheckread(const std::string, const TpdTime&, const TpdTime&, bool&);
-   void                       newDesign(std::string, time_t, real, real);
    bool                       lockTDT(laydata::TdtLibDir*&, TdtMutexState);
    laydata::TdtDesign*        lockDB(bool checkACTcell = true);
    laydata::DrcLibrary*       lockDRC(void);
@@ -105,6 +103,7 @@ public:
    LayerMapCif*               secureCifLayMap(const layprop::DrawProperties*, bool);
    std::string                globalDir(void) const     {return _globalDir;}
    TdtMutexState              tdtMxState() const {return _tdtMxState;}
+   std::string                localDir() const {return _localDir;}
 
 protected:
    std::string                _tedfilename;

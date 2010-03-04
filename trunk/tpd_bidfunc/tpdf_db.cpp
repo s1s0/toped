@@ -66,7 +66,12 @@ int tellstdfunc::stdNEWDESIGNd::execute()
 {
    TpdTime timeCreated(getStringValue());
    std::string nm = getStringValue();
-   createDefaultTDT(nm, timeCreated, UNDOcmdQ, UNDOPstack);
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
+   {
+      createDefaultTDT(nm, dbLibDir, timeCreated, UNDOcmdQ, UNDOPstack);
+   }
+   DATC->unlockTDT(dbLibDir);
    return EXEC_NEXT;
 }
 
@@ -103,19 +108,24 @@ int tellstdfunc::stdNEWDESIGNsd::execute()
    real DBU = getOpValue();
    std::string nm = getStringValue();
 
-   DATC->newDesign(nm, timeCreated.stdCTime(), DBU, UU);
-   TpdPost::resetTDTtab(nm);
-   // reset UNDO buffers;
-   UNDOcmdQ.clear();
-   while (!UNDOPstack.empty())
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
    {
-      delete UNDOPstack.front(); UNDOPstack.pop_front();
+      dbLibDir->newDesign(nm, DATC->localDir(), timeCreated.stdCTime(), DBU, UU);
+      TpdPost::resetTDTtab(nm);
+      // reset UNDO buffers;
+      UNDOcmdQ.clear();
+      while (!UNDOPstack.empty())
+      {
+         delete UNDOPstack.front(); UNDOPstack.pop_front();
+      }
+      LogFile << "newdesign(\""<< nm            << "\" , \""
+                               << DBU           << ", "
+                               << UU            << ", "
+                               << timeCreated() << "\");";
+      LogFile.flush();
    }
-   LogFile << "newdesign(\""<< nm            << "\" , \""
-                            << DBU           << ", "
-                            << UU            << ", "
-                            << timeCreated() << "\");";
-   LogFile.flush();
+   DATC->unlockTDT(dbLibDir);
    return EXEC_NEXT;
 }
 //=============================================================================
@@ -130,32 +140,41 @@ int tellstdfunc::TDTread::execute()
    std::string filename = getStringValue();
    if (expandFileName(filename))
    {
-      if (DATC->TDTread(filename))
+      laydata::TdtLibDir* dbLibDir = NULL;
+      if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
       {
-         laydata::TdtDesign* ATDB = DATC->lockDB(false);
+         if (dbLibDir->readDesign(filename))
+         {
+            laydata::TdtDesign* tDesign = (*dbLibDir)();
             // time stamps
-            TpdTime timec(ATDB->created());
-            TpdTime timeu(ATDB->lastUpdated());
-            // Gatering the used layers & update the layer definitions
+            TpdTime timec(tDesign->created());
+            TpdTime timeu(tDesign->lastUpdated());
+            // Gathering the used layers & update the layer definitions
             std::list<std::string> top_cell_list;
-            laydata::TDTHierTree* root = ATDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
+            laydata::TDTHierTree* root = tDesign->hiertree()->GetFirstRoot(TARGETDB_LIB);
             do
             {
                top_cell_list.push_back(std::string(root->GetItem()->name()));
             } while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
-            updateLayerDefinitions( DATC->TEDLIB(), top_cell_list, TARGETDB_LIB);
-         DATC->unlockDB();
-         // populate the hierarchy browser
-         TpdPost::refreshTDTtab(true);
-         //
-         LogFile << LogFile.getFN() << "(\""<< filename << "\",\"" <<  timec() <<
-               "\",\"" <<  timeu() << "\");"; LogFile.flush();
-         // reset UNDO buffers;
-         UNDOcmdQ.clear();
-         while (!UNDOPstack.empty()) {
-            delete UNDOPstack.front(); UNDOPstack.pop_front();
+            updateLayerDefinitions( dbLibDir, top_cell_list, TARGETDB_LIB);
+            // populate the hierarchy browser
+            TpdPost::refreshTDTtab(true);
+            //
+            LogFile << LogFile.getFN() << "(\""<< filename << "\",\"" <<  timec() <<
+                  "\",\"" <<  timeu() << "\");"; LogFile.flush();
+            // reset UNDO buffers;
+            UNDOcmdQ.clear();
+            while (!UNDOPstack.empty()) {
+               delete UNDOPstack.front(); UNDOPstack.pop_front();
+            }
+         }
+         else
+         {
+            std::string info = "Error reading file \"" + filename + "\"";
+            tell_log(console::MT_ERROR,info);
          }
       }
+      DATC->unlockTDT(dbLibDir);
    }
    else
    {
@@ -188,29 +207,42 @@ int tellstdfunc::TDTreadIFF::execute()
       bool start_ignoring = false;
       if (DATC->TDTcheckread(filename, timeCreated, timeSaved, start_ignoring))
       {
-         DATC->TDTread(filename);
-         laydata::TdtDesign* ATDB = DATC->lockDB(false);
-            // time stamps
-            TpdTime timec(ATDB->created());
-            TpdTime timeu(ATDB->lastUpdated());
-            // Gatering the used layers & update the layer definitions
-            std::list<std::string> top_cell_list;
-            laydata::TDTHierTree* root = ATDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
-            do
+         laydata::TdtLibDir* dbLibDir = NULL;
+         if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
+         {
+            if (dbLibDir->readDesign(filename))
             {
-               top_cell_list.push_back(std::string(root->GetItem()->name()));
-            } while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
-            updateLayerDefinitions(DATC->TEDLIB(), top_cell_list, TARGETDB_LIB);
-         DATC->unlockDB();
-         // populate the cell hierarchy browser
-         TpdPost::refreshTDTtab(true);
-         LogFile << LogFile.getFN() << "(\""<< filename << "\",\"" <<  timec() <<
-               "\",\"" <<  timeu() << "\");"; LogFile.flush();
-         // reset UNDO buffers;
-         UNDOcmdQ.clear();
-         while (!UNDOPstack.empty()) {
-            delete UNDOPstack.front(); UNDOPstack.pop_front();
+               laydata::TdtDesign* tDesign = (*dbLibDir)();
+               // time stamps
+               TpdTime timec(tDesign->created());
+               TpdTime timeu(tDesign->lastUpdated());
+               // Gathering the used layers & update the layer definitions
+               std::list<std::string> top_cell_list;
+               laydata::TDTHierTree* root = tDesign->hiertree()->GetFirstRoot(TARGETDB_LIB);
+               do
+               {
+                  top_cell_list.push_back(std::string(root->GetItem()->name()));
+               } while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
+               updateLayerDefinitions(dbLibDir, top_cell_list, TARGETDB_LIB);
+               // populate the cell hierarchy browser
+               TpdPost::refreshTDTtab(true);
+               LogFile << LogFile.getFN() << "(\""<< filename << "\",\"" <<  timec() <<
+                     "\",\"" <<  timeu() << "\");"; LogFile.flush();
+               // reset UNDO buffers;
+               UNDOcmdQ.clear();
+               while (!UNDOPstack.empty())
+               {
+                  delete UNDOPstack.front(); UNDOPstack.pop_front();
+               }
+            }
+            else
+            {
+               std::string info = "Error reading file \"" + filename + "\"";
+               tell_log(console::MT_ERROR,info);
+               start_ignoring = false;
+            }
          }
+         DATC->unlockTDT(dbLibDir);
       }
       if (start_ignoring) set_ignoreOnRecovery(true);
    }
@@ -327,7 +359,8 @@ tellstdfunc::TDTsaveIFF::TDTsaveIFF(telldata::typeID retype, bool eor) :
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
-int tellstdfunc::TDTsaveIFF::execute() {
+int tellstdfunc::TDTsaveIFF::execute()
+{
    TpdTime timeSaved(getStringValue());
    TpdTime timeCreated(getStringValue());
    if (!(timeSaved.status() && timeCreated.status()))
@@ -492,20 +525,22 @@ int tellstdfunc::GDSimport::execute()
          nameList top_cells;
          top_cells.push_back(name);
 
-         try {DATC->lockDB(false);}
-         catch (EXPTN)
-         {  // create a default target data base if one is not already existing
-            TpdTime timeCreated(time(NULL));
-            createDefaultTDT(gdsDbName, timeCreated, UNDOcmdQ, UNDOPstack);
-            DATC->lockDB(false);
-         }
-         DATC->importGDScell(top_cells, LayerExpression, recur, over);
+         laydata::TdtLibDir* dbLibDir = NULL;
+         if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
+         {
+            if (dbmxs_dblock > DATC->tdtMxState())
+            {  // create a default target data base if one is not already existing
+               TpdTime timeCreated(time(NULL));
+               createDefaultTDT(gdsDbName, dbLibDir, timeCreated, UNDOcmdQ, UNDOPstack);
+            }
+            DATC->importGDScell(top_cells, LayerExpression, recur, over);
             updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
-         DATC->unlockDB();
-         // populate the hierarchy browser
-         TpdPost::refreshTDTtab(true);
-         LogFile << LogFile.getFN() << "(\""<< name << "\"," << (*lll) << "," << LogFile._2bool(recur)
-               << "," << LogFile._2bool(over) << ");"; LogFile.flush();
+            // populate the hierarchy browser
+            TpdPost::refreshTDTtab(true);
+            LogFile << LogFile.getFN() << "(\""<< name << "\"," << (*lll) << "," << LogFile._2bool(recur)
+                  << "," << LogFile._2bool(over) << ");"; LogFile.flush();
+         }
+         DATC->unlockTDT(dbLibDir);
       }
       else
       {
@@ -563,21 +598,23 @@ int tellstdfunc::GDSimportList::execute()
    LayerMapExt LayerExpression(gdsLaysStrList, gdsLaysAll);
    if (LayerExpression.status())
    {
-      try {DATC->lockDB(false);}
-      catch (EXPTN)
+      laydata::TdtLibDir* dbLibDir = NULL;
+      if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
       {
-         // create a default target data base if one is not already existing
-         TpdTime timeCreated(time(NULL));
-         createDefaultTDT(gdsDbName, timeCreated, UNDOcmdQ, UNDOPstack);
-         DATC->lockDB(false);
+         if (dbmxs_dblock > DATC->tdtMxState())
+         {
+            // create a default target data base if one is not already existing
+            TpdTime timeCreated(time(NULL));
+            createDefaultTDT(gdsDbName, dbLibDir, timeCreated, UNDOcmdQ, UNDOPstack);
+         }
+         DATC->importGDScell(top_cells, LayerExpression, recur, over);
+         updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
+         // populate the hierarchy browser
+         TpdPost::refreshTDTtab(true);
+         LogFile << LogFile.getFN() << "("<< *pl << "," << *lll << "," << LogFile._2bool(recur)
+               << "," << LogFile._2bool(over) << ");"; LogFile.flush();
       }
-      DATC->importGDScell(top_cells, LayerExpression, recur, over);
-      updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
-      DATC->unlockDB();
-      // populate the hierarchy browser
-      TpdPost::refreshTDTtab(true);
-      LogFile << LogFile.getFN() << "("<< *pl << "," << *lll << "," << LogFile._2bool(recur)
-            << "," << LogFile._2bool(over) << ");"; LogFile.flush();
+      DATC->unlockTDT(dbLibDir);
    }
    else
    {
@@ -1109,26 +1146,28 @@ int tellstdfunc::CIFimportList::execute()
    {
       top_cells.push_back((static_cast<telldata::ttstring*>((pl->mlist())[i]))->value());
    }
-   try {DATC->lockDB(false);}
-   catch (EXPTN)
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
    {
-      // create a default target data base if one is not already existing
-      TpdTime timeCreated(time(NULL));
-      createDefaultTDT("CIF_default", timeCreated, UNDOcmdQ, UNDOPstack);
-      DATC->lockDB(false);
-   }
-   DATC->CIFimport(top_cells, cifLays, recur, over, techno * PROPC->DBscale());
-   updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
-   DATC->unlockDB();
-   // Don't refresh the tree browser here. It should've been updated by the
-   // CIFimport function during the conversion
-   LogFile << LogFile.getFN() << "(" << *pl << ","
-           << *ll                   << ","
-           << LogFile._2bool(recur) << ","
-           << LogFile._2bool(over ) << ","
-           << techno                << ");";
+      if (dbmxs_dblock > DATC->tdtMxState())
+      {
+         // create a default target data base if one is not already existing
+         TpdTime timeCreated(time(NULL));
+         createDefaultTDT("CIF_default", dbLibDir, timeCreated, UNDOcmdQ, UNDOPstack);
+      }
+      DATC->CIFimport(top_cells, cifLays, recur, over, techno * PROPC->DBscale());
+      updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
+      // Don't refresh the tree browser here. It should've been updated by the
+      // CIFimport function during the conversion
+      LogFile << LogFile.getFN() << "(" << *pl << ","
+              << *ll                   << ","
+              << LogFile._2bool(recur) << ","
+              << LogFile._2bool(over ) << ","
+              << techno                << ");";
 
-   LogFile.flush();
+      LogFile.flush();
+   }
+   DATC->unlockTDT(dbLibDir);
    delete pl;
    delete ll;
    delete cifLays;
@@ -1164,26 +1203,28 @@ int tellstdfunc::CIFimport::execute()
    // Convert top structure list
    nameList top_cells;
    top_cells.push_back(name.c_str());
-   try {DATC->lockDB(false);}
-   catch (EXPTN)
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
    {
-      // create a default target data base if one is not already existing
-      TpdTime timeCreated(time(NULL));
-      createDefaultTDT("CIF_default", timeCreated, UNDOcmdQ, UNDOPstack);
-      DATC->lockDB(false);
-   }
-   DATC->CIFimport(top_cells, cifLays, recur, over, techno * PROPC->DBscale());
-   updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
-   DATC->unlockDB();
-   // Don't refresh the tree browser here. It should've been updated by the
-   // CIFimport function during the conversion
+      if (dbmxs_dblock > DATC->tdtMxState())
+      {
+         // create a default target data base if one is not already existing
+         TpdTime timeCreated(time(NULL));
+         createDefaultTDT("CIF_default", dbLibDir, timeCreated, UNDOcmdQ, UNDOPstack);
+      }
+      DATC->CIFimport(top_cells, cifLays, recur, over, techno * PROPC->DBscale());
+      updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
+      // Don't refresh the tree browser here. It should've been updated by the
+      // CIFimport function during the conversion
 
-   LogFile << LogFile.getFN() << "(\"" << name<< "\","
-           << *lll                  << ","
-           << LogFile._2bool(recur) << ","
-           << LogFile._2bool(over)  << ","
-           << techno                << ");";
-   LogFile.flush();
+      LogFile << LogFile.getFN() << "(\"" << name<< "\","
+              << *lll                  << ","
+              << LogFile._2bool(recur) << ","
+              << LogFile._2bool(over)  << ","
+              << techno                << ");";
+      LogFile.flush();
+   }
+   DATC->unlockTDT(dbLibDir);
    delete lll;
    cifLays->clear();
    delete cifLays;
@@ -1496,21 +1537,22 @@ int tellstdfunc::OASimport::execute()
       {
          nameList top_cells;
          top_cells.push_back(name);
-
-         try {DATC->lockDB(false);}
-         catch (EXPTN)
-         {  // create a default target data base if one is not already existing
-            TpdTime timeCreated(time(NULL));
-            createDefaultTDT(oasDbName, timeCreated, UNDOcmdQ, UNDOPstack);
-            DATC->lockDB(false);
+         laydata::TdtLibDir* dbLibDir = NULL;
+         if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
+         {
+            if (dbmxs_dblock > DATC->tdtMxState())
+            { // create a default target data base if one is not already existing
+               TpdTime timeCreated(time(NULL));
+               createDefaultTDT(oasDbName, dbLibDir, timeCreated, UNDOcmdQ, UNDOPstack);
+            }
+            DATC->importOAScell(top_cells, LayerExpression, recur, over);
+               updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
+            // populate the hierarchy browser
+            TpdPost::refreshTDTtab(true);
+            LogFile << LogFile.getFN() << "(\""<< name << "\"," << /*(*lll) << "," <<*/ LogFile._2bool(recur)
+                  << "," << LogFile._2bool(over) << ");"; LogFile.flush();
          }
-         DATC->importOAScell(top_cells, LayerExpression, recur, over);
-            updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
-         DATC->unlockDB();
-         // populate the hierarchy browser
-         TpdPost::refreshTDTtab(true);
-         LogFile << LogFile.getFN() << "(\""<< name << "\"," << /*(*lll) << "," <<*/ LogFile._2bool(recur)
-               << "," << LogFile._2bool(over) << ");"; LogFile.flush();
+         DATC->unlockTDT(dbLibDir);
       }
       else
       {

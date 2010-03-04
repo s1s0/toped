@@ -412,6 +412,10 @@ laydata::TdtLibDir::TdtLibDir()
    _libdirectory.insert( _libdirectory.end(), DEBUG_NEW LibItem("__UNDEFINED__", undeflib) );
    // toped data base
    _TEDDB = NULL;
+   // default name of the target DB
+   _tedfilename = "unnamed";
+   // marker whether the target DB has been saved ever
+   _neversaved = true;
 }
 
 laydata::TdtLibDir::~TdtLibDir()
@@ -502,6 +506,51 @@ std::string laydata::TdtLibDir::getLibName(int libID)
    assert(libID); // make sure that nobody asks for the default library
    assert(libID <= (int)_libdirectory.size());
    return _libdirectory[libID]->first;
+}
+
+void laydata::TdtLibDir::newDesign(std::string name, std::string dir, time_t created, real DBU, real UU)
+{
+   if (NULL != _TEDDB)
+   {
+      // Checks before closing(save?) available only when the command is launched
+      // via GUI(void TopedFrame::OnNewDesign(). If the command is typed directly
+      // on the command line, or parsed from file - no checks are executed.
+      // In other words if we are already here we will destroy the current design
+      // without much talking.
+      // UNDO buffers will be reset as well in tellstdfunc::stdNEWDESIGN::execute()
+      // but there is still a chance to restore everything - using the log file.
+      _TEDDB->clearHierTree();
+      delete _TEDDB;
+   }
+   _TEDDB = DEBUG_NEW laydata::TdtDesign(name, created, created, DBU, UU);
+   _tedfilename = dir + name + ".tdt";
+   _neversaved = true;
+   PROPC->setUU(_TEDDB->UU());
+}
+
+bool laydata::TdtLibDir::readDesign(std::string filename)
+{
+   laydata::TEDfile tempin(filename.c_str(), this);
+   if (!tempin.status()) return false;
+
+   try
+   {
+      tempin.read(TARGETDB_LIB);
+   }
+   catch (EXPTNreadTDT)
+   {
+      tempin.closeF();
+      tempin.cleanup();
+      return false;
+   }
+   tempin.closeF();
+   delete _TEDDB;//Erase existing data
+   _tedfilename = filename;
+   _neversaved = false;
+   _TEDDB = static_cast<laydata::TdtDesign*>(tempin.design());
+   // Update Canvas scale
+   PROPC->setUU(_TEDDB->UU());
+   return true;
 }
 
 void laydata::TdtLibDir::relink()
