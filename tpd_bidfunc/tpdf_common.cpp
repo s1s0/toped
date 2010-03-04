@@ -377,10 +377,11 @@ bool tellstdfunc::secureLayDef(unsigned layno)
 }
 
 //=============================================================================
-void tellstdfunc::createDefaultTDT(std::string dbname, TpdTime& timeCreated,
-                                   parsercmd::undoQUEUE& undstack, telldata::UNDOPerandQUEUE& undopstack)
+void tellstdfunc::createDefaultTDT(std::string dbname,
+      laydata::TdtLibDir* dbLibDir, TpdTime& timeCreated,
+      parsercmd::undoQUEUE& undstack, telldata::UNDOPerandQUEUE& undopstack)
 {
-   DATC->newDesign(dbname, timeCreated.stdCTime(), DEFAULT_DBU, DEFAULT_UU);
+   dbLibDir->newDesign(dbname, DATC->localDir(), timeCreated.stdCTime(), DEFAULT_DBU, DEFAULT_UU);
    TpdPost::resetTDTtab(dbname);
    // reset UNDO buffers;
    undstack.clear();

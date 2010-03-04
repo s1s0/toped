@@ -991,14 +991,16 @@ void tui::TopedFrame::OnGDSRead(wxCommandEvent& WXUNUSED(event))
    else SetStatusText(wxT("Parsing aborted"));
 }
 
-void tui::TopedFrame::OnTDTSave(wxCommandEvent& WXUNUSED(event)) {
+void tui::TopedFrame::OnTDTSave(wxCommandEvent& WXUNUSED(event))
+{
    wxString ost;
    ost << wxT("tdtsave();");
    SetStatusText(wxT("Saving file..."));
    wxString wxfilename(DATC->tedFileName().c_str(), wxConvFile);
    wxFileName datafile( wxfilename );
    assert(datafile.IsOk());
-   if (datafile.FileExists() && DATC->neverSaved()) {
+   if (datafile.FileExists() && DATC->neverSaved())
+   {
       wxMessageDialog dlg1(this,
          wxT("File ") + wxfilename + wxT(" already exists. Overwrite ?"),
          wxT("Toped"),
