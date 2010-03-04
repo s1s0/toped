@@ -680,21 +680,31 @@ int tellstdfunc::stdCELLREF::execute() {
    std::string name = getStringValue();
    real DBscale = PROPC->DBscale();
    CTM ori(TP(rpnt->x(), rpnt->y(), DBscale), magn,angle,flip);
-   // check that target cell exists - otherwise tmpDraw can't obviously work.
-   // there is another more extensive check when the cell is added, there the circular
-   // references are checked as well
-   laydata::CellDefin strdefn;
-   if (DATC->getCellNamePair(name, strdefn))
+   //
+   bool cellFound = false;
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
-      UNDOcmdQ.push_front(this);
-      laydata::TdtDesign* ATDB = DATC->lockDB();
-         telldata::ttlayout* cl = DEBUG_NEW telldata::ttlayout(ATDB->addCellRef(strdefn,ori), REF_LAY);
-      DATC->unlockDB();
-      OPstack.push(cl); UNDOPstack.push_front(cl->selfcopy());
-      LogFile << LogFile.getFN() << "(\""<< name << "\"," << *rpnt << "," <<
-                        angle << "," << LogFile._2bool(flip) << "," << magn <<");";
-      LogFile.flush();
-      delete rpnt;
+      // check that target cell exists - otherwise tmpDraw can't obviously work.
+      // there is another more extensive check when the cell is added, there the circular
+      // references are checked as well
+      laydata::CellDefin strdefn;
+      cellFound = dbLibDir->getCellNamePair(name, strdefn);
+      if (cellFound)
+      {
+         laydata::TdtDesign* tDesign = (*dbLibDir)();
+         telldata::ttlayout* cl = DEBUG_NEW telldata::ttlayout(tDesign->addCellRef(strdefn,ori), REF_LAY);
+         UNDOcmdQ.push_front(this);
+         OPstack.push(cl); UNDOPstack.push_front(cl->selfcopy());
+         LogFile << LogFile.getFN() << "(\""<< name << "\"," << *rpnt << "," <<
+                           angle << "," << LogFile._2bool(flip) << "," << magn <<");";
+         LogFile.flush();
+      }
+   }
+   delete rpnt;
+   DATC->unlockTDT(dbLibDir, true);
+   if (cellFound)
+   {
       RefreshGL();
       return EXEC_NEXT;
    }
@@ -703,7 +713,6 @@ int tellstdfunc::stdCELLREF::execute() {
       std::string news = "Cell \"";
       news += name; news += "\" is not defined";
       tell_log(console::MT_ERROR,news);
-      delete rpnt;
       return EXEC_ABORT;
    }
 }
@@ -717,29 +726,40 @@ tellstdfunc::stdCELLREF_D::stdCELLREF_D(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdCELLREF_D::execute() {
    std::string name = getStringValue();
-   // check that target cell exists - otherwise tmpDraw can't obviously work.
-   // there is another more extensive check when the cell is added, there the circular
-   // references are checked as well
-   laydata::CellDefin strdefn;
-   if (!DATC->getCellNamePair(name, strdefn))
+   bool cellFound = false;
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      // check that target cell exists - otherwise tmpDraw can't obviously work.
+      // there is another more extensive check when the cell is added, there the circular
+      // references are checked as well
+      laydata::CellDefin strdefn;
+      cellFound = dbLibDir->getCellNamePair(name, strdefn);
+   }
+   DATC->unlockTDT(dbLibDir, true);
+
+   if (cellFound)
+   {
+      // stop the thread and wait for input from the GUI
+      if (!tellstdfunc::waitGUInput(console::op_cbind, &OPstack, name)) return EXEC_ABORT;
+      // get the data from the stack
+      telldata::ttbnd *bnd = static_cast<telldata::ttbnd*>(OPstack.top());OPstack.pop();
+
+      OPstack.push(DEBUG_NEW telldata::ttstring(name));
+      OPstack.push(DEBUG_NEW telldata::ttpnt(bnd->p()));
+      OPstack.push(DEBUG_NEW telldata::ttreal(bnd->rot()));
+      OPstack.push(DEBUG_NEW telldata::ttbool(bnd->flx()));
+      OPstack.push(DEBUG_NEW telldata::ttreal(bnd->sc()));
+      delete bnd;
+      return stdCELLREF::execute();
+   }
+   else
    {
       std::string news = "Can't find cell \"";
       news += name; news += "\" ";
       tell_log(console::MT_ERROR,news);
       return EXEC_ABORT;
    }
-   // stop the thread and wait for input from the GUI
-   if (!tellstdfunc::waitGUInput(console::op_cbind, &OPstack, name)) return EXEC_ABORT;
-   // get the data from the stack
-   telldata::ttbnd *bnd = static_cast<telldata::ttbnd*>(OPstack.top());OPstack.pop();
-
-   OPstack.push(DEBUG_NEW telldata::ttstring(name));
-   OPstack.push(DEBUG_NEW telldata::ttpnt(bnd->p()));
-   OPstack.push(DEBUG_NEW telldata::ttreal(bnd->rot()));
-   OPstack.push(DEBUG_NEW telldata::ttbool(bnd->flx()));
-   OPstack.push(DEBUG_NEW telldata::ttreal(bnd->sc()));
-   delete bnd;
-   return stdCELLREF::execute();
 }
 
 //=============================================================================

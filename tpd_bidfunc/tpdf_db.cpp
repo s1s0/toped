@@ -238,7 +238,7 @@ int tellstdfunc::TDTloadlib::execute()
       if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
       {
          nameList top_cell_list;
-         int libID = dbLibDir->loadlib(filename);
+         int libID = dbLibDir->loadLib(filename);
          if (0 <= libID)
          {
             laydata::TdtLibrary* LTDB = dbLibDir->getLib(libID);
@@ -283,16 +283,21 @@ int tellstdfunc::TDTunloadlib::execute()
 {
    std::string libname = getStringValue();
 
-   if (DATC->TDTunloadlib(libname))
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
    {
-      TpdPost::refreshTDTtab(false);
-      LogFile << LogFile.getFN() << "(\""<< libname << "\");"; LogFile.flush();
+      if (dbLibDir->unloadLib(libname))
+      {
+         TpdPost::refreshTDTtab(false);
+         LogFile << LogFile.getFN() << "(\""<< libname << "\");"; LogFile.flush();
+      }
+      else
+      {
+         std::string info = "Library \"" + libname + "\" is not loaded";
+         tell_log(console::MT_ERROR,info);
+      }
    }
-   else
-   {
-      std::string info = "Library \"" + libname + "\" is not loaded";
-      tell_log(console::MT_ERROR,info);
-   }
+   DATC->unlockTDT(dbLibDir);
    return EXEC_NEXT;
 }
 
