@@ -63,7 +63,6 @@ public:
    void                       importOAScell(const nameList&, const LayerMapExt&, bool recur, bool over);
    void                       PSexport(laydata::TdtCell*, std::string&);
    bool                       TDTread(std::string);
-   bool                       TDTunloadlib(std::string);
    bool                       TDTwrite(const char* filename = NULL);
    bool                       TDTcheckwrite(const TpdTime&, const TpdTime&, bool&);
    bool                       TDTcheckread(const std::string, const TpdTime&, const TpdTime&, bool&);
@@ -77,7 +76,6 @@ public:
    void                       bpAddGdsTab();
    void                       bpAddCifTab();
    void                       bpAddOasTab();
-   bool                       getCellNamePair(std::string name, laydata::CellDefin& strdefn);
    void                       unlockDB();
    void                       unlockTDT(laydata::TdtLibDir*, bool throwexception = false);
    void                       unlockDRC();

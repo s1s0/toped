@@ -435,7 +435,7 @@ void laydata::TdtLibDir::addLibrary(TdtLibrary* const lib, word libRef)
    _libdirectory.insert( _libdirectory.end(), DEBUG_NEW LibItem(lib->name(), lib) );
 }
 
-int laydata::TdtLibDir::loadlib(std::string filename)
+int laydata::TdtLibDir::loadLib(std::string filename)
 {
    laydata::TEDfile tempin(filename.c_str(), this);
    if (!tempin.status()) return -1;
@@ -456,6 +456,24 @@ int laydata::TdtLibDir::loadlib(std::string filename)
    return libRef;
 }
 
+bool laydata::TdtLibDir::unloadLib(std::string libname)
+{
+   // Unhook the library from the list of known DB's, get a pointer to it
+   laydata::TdtLibrary* tberased = removeLibrary(libname);
+   if ( NULL != tberased )
+   {
+      // Relink everything
+      relink();
+      // remove tberased cells from hierarchy tree
+      tberased->clearHierTree();
+      // get the new hierarchy
+      reextractHierarchy();
+      // after all above - remove the library
+      delete tberased;
+      return true;
+   }
+   else return false;
+}
 
 laydata::TdtLibrary* laydata::TdtLibDir::removeLibrary(std::string libname)
 {
@@ -508,6 +526,17 @@ void laydata::TdtLibDir::reextractHierarchy()
    // finally - relink the active database
    if (NULL !=_TEDDB)
       _TEDDB->recreateHierarchy(this);
+}
+
+bool laydata::TdtLibDir::getCellNamePair(std::string name, laydata::CellDefin& strdefn)
+{
+   if ((NULL != _TEDDB) && (_TEDDB->checkCell(name)))
+   {
+      strdefn = _TEDDB->getCellNamePair(name);
+      return true;
+   }
+   // search the cell in the libraries because it's not in the DB
+   return getLibCellRNP(name, strdefn);
 }
 
 /*! Searches the library directory for a cell \a name. Returns true and updates \a strdefn if

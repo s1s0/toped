@@ -133,26 +133,6 @@ bool DataCenter::TDTread(std::string filename)
    return true;
 }
 
-bool DataCenter::TDTunloadlib(std::string libname)
-{
-   // Unhook the library from the list of known DB's, get a pointer to it
-   laydata::TdtLibrary* tberased = _TEDLIB.removeLibrary(libname);
-   if ( NULL != tberased )
-   {
-      // Relink everything
-      _TEDLIB.relink();
-      // remove tberased cells from hierarchy tree
-      tberased->clearHierTree();
-      // get the new hierarchy
-      _TEDLIB.reextractHierarchy();
-      // after all above - remove the library
-      delete tberased;
-      return true;
-   }
-   else return false;
-}
-
-
 bool DataCenter::TDTcheckwrite(const TpdTime& timeCreated, const TpdTime& timeSaved, bool& stop_ignoring)
 {
    std::string news;
@@ -706,20 +686,23 @@ void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,
                             int4b stepX, int4b stepY, word cols, word rows)
 {
    if (console::op_line == input_type) return;
-   if (_TEDLIB())
+
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (lockTDT(dbLibDir, dbmxs_celllock))
    {
-      _TEDLIB()->checkActive();
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      tDesign->checkActive();
       switch (input_type)
       {
-         case console::op_dbox:   _TEDLIB()->setTmpData( DEBUG_NEW laydata::TdtTmpBox()  ); break;
-         case console::op_dpoly:  _TEDLIB()->setTmpData( DEBUG_NEW laydata::TdtTmpPoly()) ; break;
+         case console::op_dbox:   tDesign->setTmpData( DEBUG_NEW laydata::TdtTmpBox()  ); break;
+         case console::op_dpoly:  tDesign->setTmpData( DEBUG_NEW laydata::TdtTmpPoly()) ; break;
          case console::op_cbind:
          {
             assert ("" != name);
             laydata::CellDefin strdefn;
             CTM eqm;
-            VERIFY(DATC->getCellNamePair(name, strdefn));
-            _TEDLIB()->setTmpData( DEBUG_NEW laydata::TdtTmpCellRef(strdefn, eqm) );
+            VERIFY(dbLibDir->getCellNamePair(name, strdefn));
+            tDesign->setTmpData( DEBUG_NEW laydata::TdtTmpCellRef(strdefn, eqm) );
             break;
          }
          case console::op_abind:
@@ -728,9 +711,9 @@ void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,
             assert(0 != cols);assert(0 != rows);assert(0 != stepX);assert(0 != stepY);
             laydata::CellDefin strdefn;
             CTM eqm;
-            VERIFY(DATC->getCellNamePair(name, strdefn));
+            VERIFY(dbLibDir->getCellNamePair(name, strdefn));
             laydata::ArrayProperties arrprops(stepX, stepY, cols, rows);
-            _TEDLIB()->setTmpData( DEBUG_NEW laydata::TdtTmpCellAref(strdefn, eqm, arrprops) );
+            tDesign->setTmpData( DEBUG_NEW laydata::TdtTmpCellAref(strdefn, eqm, arrprops) );
             break;
          }
          case console::op_tbind:
@@ -738,18 +721,18 @@ void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,
             assert ("" != name);
             CTM eqm(trans);
             eqm.Scale(1/(PROPC->UU()*OPENGL_FONT_UNIT), 1/(PROPC->UU()*OPENGL_FONT_UNIT));
-            _TEDLIB()->setTmpData( DEBUG_NEW laydata::TdtTmpText(name, eqm) );
+            tDesign->setTmpData( DEBUG_NEW laydata::TdtTmpText(name, eqm) );
             break;
          }
-         case console::op_rotate: _TEDLIB()->setTmpCtm( trans );
+         case console::op_rotate: tDesign->setTmpCtm( trans );
          default:
          {
             if (0  < input_type)
-               _TEDLIB()->setTmpData( DEBUG_NEW laydata::TdtTmpWire(input_type) );
+               tDesign->setTmpData( DEBUG_NEW laydata::TdtTmpWire(input_type) );
          }
       }
    }
-   else throw EXPTNactive_DB();
+   unlockTDT(dbLibDir, true);
 }
 
 void DataCenter::mousePoint(TP p)
@@ -763,11 +746,24 @@ void DataCenter::mousePoint(TP p)
    PROPC->unlockDrawProp(drawProp);
    if ((console::op_line == currentOp) || _drawruler)
       PROPC->mousePoint(p);
-   if ((NULL != _TEDLIB()) && (console::op_cbind != currentOp)
-                           && (console::op_abind != currentOp)
-                           && (console::op_tbind != currentOp)
-                           && (console::op_line  != currentOp) )
-      _TEDLIB()->mousePoint(p);
+   if ((console::op_cbind != currentOp) &&
+       (console::op_abind != currentOp) &&
+       (console::op_tbind != currentOp) &&
+       (console::op_line  != currentOp) )
+   {
+      laydata::TdtLibDir* dbLibDir = NULL;
+      if (lockTDT(dbLibDir, dbmxs_celllock))
+      {
+         laydata::TdtDesign* tDesign = (*dbLibDir)();
+         tDesign->mousePoint(p);
+      }
+      else
+      {
+         // How we've got here?!?
+         assert(false);
+      }
+      unlockTDT(dbLibDir);
+   }
 }
 
 void DataCenter::mousePointCancel(TP& lp)
@@ -780,8 +776,18 @@ void DataCenter::mousePointCancel(TP& lp)
    }
    PROPC->unlockDrawProp(drawProp);
    if (console::op_line == currentOp) return;
-   if (_TEDLIB())
-      _TEDLIB()->mousePointCancel(lp);
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      tDesign->mousePointCancel(lp);
+   }
+   else
+   {
+      // How we've got here?!?
+      assert(false);
+   }
+   unlockTDT(dbLibDir);
 }
 
 void DataCenter::mouseStop()
@@ -795,18 +801,53 @@ void DataCenter::mouseStop()
    PROPC->unlockDrawProp(drawProp);
    if (console::op_line == currentOp)
       PROPC->mouseStop();
-   else if (_TEDLIB()) _TEDLIB()->mouseStop();
-   else throw EXPTNactive_DB();
+   else
+   {
+      laydata::TdtLibDir* dbLibDir = NULL;
+      if (lockTDT(dbLibDir, dbmxs_celllock))
+      {
+         laydata::TdtDesign* tDesign = (*dbLibDir)();
+         tDesign->mouseStop();
+      }
+      else
+      {
+         // How we've got here?!?
+         assert(false);
+      }
+      unlockTDT(dbLibDir);
+   }
 }
 
 void DataCenter::mouseFlip()
 {
-   if (_TEDLIB()) _TEDLIB()->mouseFlip();
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      tDesign->mouseFlip();
+   }
+   else
+   {
+      // How we've got here?!?
+      assert(false);
+   }
+   unlockTDT(dbLibDir);
 }
 
 void DataCenter::mouseRotate()
 {
-   if (_TEDLIB()) _TEDLIB()->mouseRotate();
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      tDesign->mouseRotate();
+   }
+   else
+   {
+      // How we've got here?!?
+      assert(false);
+   }
+   unlockTDT(dbLibDir);
 }
 
 void DataCenter::render(const CTM& layCTM)
@@ -978,21 +1019,6 @@ void DataCenter::motionDraw(const CTM& layCTM, TP base, TP newp)
    PROPC->unlockDrawProp(drawProp);
 }
 
-bool DataCenter::getCellNamePair(std::string name, laydata::CellDefin& strdefn)
-{
-   laydata::TdtDesign* ATDB = lockDB();
-   if (ATDB->checkCell(name))
-   {
-      strdefn = ATDB->getCellNamePair(name);
-      unlockDB();
-      return true;
-   }
-   unlockDB();
-   // search the cell in the libraries because it's not in the DB
-   return _TEDLIB.getLibCellRNP(name, strdefn);
-}
-
-
 LayerMapCif* DataCenter::secureCifLayMap(const layprop::DrawProperties* drawProp, bool import)
 {
    const USMap* savedMap = PROPC->getCifLayMap();
@@ -1058,7 +1084,7 @@ LayerMapExt* DataCenter::secureGdsLayMap(const layprop::DrawProperties* drawProp
             dtypestr << drawProp->getLayerNo( *CDL )<< "; 0";
             theMap[drawProp->getLayerNo( *CDL )] = dtypestr.str();
          }
-         DATC->unlockDB();
+         unlockDB();
          theGdsMap = DEBUG_NEW LayerMapExt(theMap, NULL);
       }
    }

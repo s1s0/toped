@@ -205,13 +205,14 @@ namespace laydata {
                         TdtLibDir();
                        ~TdtLibDir();
       TdtDesign*        operator ()() {return _TEDDB;}
-      int               loadlib(std::string filename);
-      TdtLibrary*       removeLibrary( std::string );
+      int               loadLib(std::string);
+      bool              unloadLib(std::string);
       TdtLibrary*       getLib(int);
       std::string       getLibName(int);
       void              relink();
       void              reextractHierarchy();
       int               getLastLibRefNo();
+      bool              getCellNamePair(std::string, laydata::CellDefin&);
       bool              getLibCellRNP(std::string, CellDefin&, const int libID = TARGETDB_LIB) const;
       TdtDefaultCell*   getLibCellDef(std::string, const int libID = TARGETDB_LIB) const;
       CellDefin         linkCellRef(std::string, int);
@@ -230,6 +231,7 @@ namespace laydata {
       void              setDB(TdtDesign* newdesign) {_TEDDB = newdesign;}
    private:
       void              addLibrary(TdtLibrary* const lib, word libRef);
+      TdtLibrary*       removeLibrary( std::string );
       Catalog           _libdirectory;
       TdtDesign*        _TEDDB;        // toped data base
       //! Temporary storage for undefined unreferenced cell (see the comment in the class definition)
