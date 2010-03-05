@@ -413,9 +413,9 @@ laydata::TdtLibDir::TdtLibDir()
    // toped data base
    _TEDDB = NULL;
    // default name of the target DB
-   _tedfilename = "unnamed";
+   _tedFileName = "unnamed";
    // marker whether the target DB has been saved ever
-   _neversaved = true;
+   _neverSaved = true;
 }
 
 laydata::TdtLibDir::~TdtLibDir()
@@ -523,8 +523,8 @@ void laydata::TdtLibDir::newDesign(std::string name, std::string dir, time_t cre
       delete _TEDDB;
    }
    _TEDDB = DEBUG_NEW laydata::TdtDesign(name, created, created, DBU, UU);
-   _tedfilename = dir + name + ".tdt";
-   _neversaved = true;
+   _tedFileName = dir + name + ".tdt";
+   _neverSaved = true;
    PROPC->setUU(_TEDDB->UU());
 }
 
@@ -545,11 +545,52 @@ bool laydata::TdtLibDir::readDesign(std::string filename)
    }
    tempin.closeF();
    delete _TEDDB;//Erase existing data
-   _tedfilename = filename;
-   _neversaved = false;
+   _tedFileName = filename;
+   _neverSaved = false;
    _TEDDB = static_cast<laydata::TdtDesign*>(tempin.design());
    // Update Canvas scale
    PROPC->setUU(_TEDDB->UU());
+   return true;
+}
+
+void laydata::TdtLibDir::writeDesign(const char* filename)
+{
+   if (filename)  _tedFileName = filename;
+   laydata::TEDfile tempin(_tedFileName, this);
+   _neverSaved = false;
+}
+
+bool laydata::TdtLibDir::TDTcheckwrite(const TpdTime& timeCreated, const TpdTime& timeSaved, bool& stop_ignoring)
+{
+   if (NULL == _TEDDB) return false;
+   std::string news;
+   stop_ignoring = false;
+   // File created time stamp must match exactly, otherwise it means
+   // that we're saving not exactly the same file that is requested
+   if (timeCreated.stdCTime() != _TEDDB->created())
+   {
+      news = "time stamp \"Project created \" doesn't match. File save aborted";
+      tell_log(console::MT_ERROR,news);
+      return false;
+   }
+   if (_TEDDB->lastUpdated() < timeSaved.stdCTime())
+   {
+      news = "Database in memory is older than the file. File save operation ignored.";
+      tell_log(console::MT_WARNING,news);
+      _neverSaved = false;
+      return false;
+   }
+   else if (_TEDDB->lastUpdated() > timeSaved.stdCTime())
+      // database in memory is newer than the file - save has to go ahead
+      // ignore on recovery has to stop
+      stop_ignoring = true;
+   else
+   {
+      // database in memory is exactly the same as the file. The save
+      // is going to be spared, ignore on recovery though has to stop
+      stop_ignoring = true;
+      return false;
+   }
    return true;
 }
 

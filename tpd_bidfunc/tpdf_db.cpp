@@ -340,14 +340,18 @@ tellstdfunc::TDTsave::TDTsave(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::TDTsave::execute()
 {
-   laydata::TdtDesign* ATDB = DATC->lockDB(false);
-      ATDB->tryUnselectAll();
-      DATC->TDTwrite();
-      TpdTime timec(ATDB->created());
-      TpdTime timeu(ATDB->lastUpdated());
-   DATC->unlockDB();
-   LogFile << LogFile.getFN() << "(\"" <<  timec() << "\" , \"" <<
-         timeu() << "\");"; LogFile.flush();
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      tDesign->tryUnselectAll();
+      dbLibDir->writeDesign();
+      TpdTime timec(tDesign->created());
+      TpdTime timeu(tDesign->lastUpdated());
+      LogFile << LogFile.getFN() << "(\"" <<  timec() << "\" , \"" <<
+            timeu() << "\");"; LogFile.flush();
+   }
+   DATC->unlockTDT(dbLibDir, true);
    return EXEC_NEXT;
 }
 
@@ -369,19 +373,23 @@ int tellstdfunc::TDTsaveIFF::execute()
    }
    else
    {
-      laydata::TdtDesign* ATDB = DATC->lockDB(false);
-         ATDB->tryUnselectAll();
+      laydata::TdtLibDir* dbLibDir = NULL;
+      if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
+      {
+         laydata::TdtDesign* tDesign = (*dbLibDir)();
          bool stop_ignoring = false;
-         if (DATC->TDTcheckwrite(timeCreated, timeSaved, stop_ignoring))
+         tDesign->tryUnselectAll();
+         if (dbLibDir->TDTcheckwrite(timeCreated, timeSaved, stop_ignoring))
          {
-            DATC->TDTwrite(DATC->tedFileName().c_str());
-            TpdTime timec(ATDB->created());
-            TpdTime timeu(ATDB->lastUpdated());
+            dbLibDir->writeDesign();
+            if (stop_ignoring) set_ignoreOnRecovery(false);
+            TpdTime timec(tDesign->created());
+            TpdTime timeu(tDesign->lastUpdated());
             LogFile << LogFile.getFN() << "(\"" <<  timec() << "\" , \"" <<
                   timeu() << "\");"; LogFile.flush();
          }
-      DATC->unlockDB();
-      if (stop_ignoring) set_ignoreOnRecovery(false);
+      }
+      DATC->unlockTDT(dbLibDir, true);
    }
    return EXEC_NEXT;
 }
@@ -398,14 +406,18 @@ int tellstdfunc::TDTsaveas::execute()
    std::string filename = getStringValue();
    if (expandFileName(filename))
    {
-      laydata::TdtDesign* ATDB = DATC->lockDB(false);
-         ATDB->tryUnselectAll();
-         DATC->TDTwrite(filename.c_str());
-         TpdTime timec(ATDB->created());
-         TpdTime timeu(ATDB->lastUpdated());
-      DATC->unlockDB();
-      LogFile << LogFile.getFN() << "(\""<< filename << "\" , \"" << timec() <<
-            "\" , \"" << timeu() << "\");"; LogFile.flush();
+      laydata::TdtLibDir* dbLibDir = NULL;
+      if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
+      {
+         laydata::TdtDesign* tDesign = (*dbLibDir)();
+         tDesign->tryUnselectAll();
+         dbLibDir->writeDesign(filename.c_str());
+         TpdTime timec(tDesign->created());
+         TpdTime timeu(tDesign->lastUpdated());
+         LogFile << LogFile.getFN() << "(\""<< filename << "\" , \"" << timec() <<
+               "\" , \"" << timeu() << "\");"; LogFile.flush();
+      }
+      DATC->unlockTDT(dbLibDir, true);
    }
    else
    {

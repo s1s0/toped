@@ -52,9 +52,9 @@ DataCenter::DataCenter(const std::string& localDir, const std::string& globalDir
    _bpSync = NULL;
    // initializing the static cell hierarchy tree
    laydata::TdtLibrary::initHierTreePtr();
-   _tedfilename = "unnamed";
    _drawruler = false;
-   _tdtMxState = dbmxs_unlocked;
+   _tdtActMxState = dbmxs_unlocked;
+   _tdtReqMxState = dbmxs_unlocked;
 }
 
 DataCenter::~DataCenter() {
@@ -106,47 +106,6 @@ bool DataCenter::TDTcheckread(const std::string filename,
    }
    tempin.closeF();
    return retval;
-}
-
-bool DataCenter::TDTcheckwrite(const TpdTime& timeCreated, const TpdTime& timeSaved, bool& stop_ignoring)
-{
-   std::string news;
-   stop_ignoring = false;
-   // File created time stamp must match exactly, otherwise it means
-   // that we're saving not exactly the same file that is requested
-   if (timeCreated.stdCTime() != _TEDLIB()->created())
-   {
-      news = "time stamp \"Project created \" doesn't match. File save aborted";
-      tell_log(console::MT_ERROR,news);
-      return false;
-   }
-   if (_TEDLIB()->lastUpdated() < timeSaved.stdCTime())
-   {
-      news = "Database in memory is older than the file. File save operation ignored.";
-      tell_log(console::MT_WARNING,news);
-      _neversaved = false;
-      return false;
-   }
-   else if (_TEDLIB()->lastUpdated() > timeSaved.stdCTime())
-      // database in memory is newer than the file - save has to go ahead
-      // ignore on recovery has to stop
-      stop_ignoring = true;
-   else
-   {
-      // database in memory is exactly the same as the file. The save
-      // is going to be spared, ignore on recovery though has to stop
-      stop_ignoring = true;
-      return false;
-   }
-   return true;
-}
-
-bool DataCenter::TDTwrite(const char* filename)
-{
-   if (filename)  _tedfilename = filename;
-   laydata::TEDfile tempin(_tedfilename, &_TEDLIB);
-   _neversaved = false;
-   return true;
 }
 
 void DataCenter::GDSexport(const LayerMapExt& layerMap, std::string& filename, bool x2048)
@@ -448,11 +407,12 @@ void DataCenter::unlockDRC()
 bool DataCenter::lockTDT(laydata::TdtLibDir*& tdt_db, TdtMutexState reqLock)
 {
    assert(reqLock > dbmxs_deadlock);
+   _tdtReqMxState = reqLock;
    if (wxMUTEX_DEAD_LOCK == _DBLock.Lock())
    {
       tell_log(console::MT_ERROR, "DB Mutex deadlocked!");
       tdt_db = NULL;
-      _tdtMxState = dbmxs_deadlock;
+      _tdtActMxState = dbmxs_deadlock;
    }
    else
    {
@@ -460,30 +420,46 @@ bool DataCenter::lockTDT(laydata::TdtLibDir*& tdt_db, TdtMutexState reqLock)
       tdt_db = &_TEDLIB;
       if (_TEDLIB())
          if (_TEDLIB()->checkActiveCell())
-            _tdtMxState = dbmxs_celllock;
+            _tdtActMxState = dbmxs_celllock;
          else
-            _tdtMxState = dbmxs_dblock;
+            _tdtActMxState = dbmxs_dblock;
       else
-         _tdtMxState = dbmxs_liblock;
+         _tdtActMxState = dbmxs_liblock;
    }
-   return (reqLock <= _tdtMxState);
+   return (_tdtReqMxState <= _tdtActMxState);
 }
 
 void DataCenter::unlockTDT(laydata::TdtLibDir* tdt_db, bool throwexception)
 {
 //   _TEDLIB = tdt_db;
-   assert(_tdtMxState > dbmxs_unlocked);
+   assert(_tdtActMxState > dbmxs_unlocked);
    VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
+   //TODO! In all cases - throw exception if we've got to the deadlocked state
+//   if (dbmxs_deadlock == _tdtActMxState) throw EXPTNmutex_DB();
    if (throwexception)
-      switch (_tdtMxState)
+      switch (_tdtActMxState)
       {
-         case dbmxs_liblock  : throw EXPTNactive_DB();
-         case dbmxs_dblock   : throw EXPTNactive_cell();
-//         case dbmxs_deadlock : ???
+         case dbmxs_liblock  :
+            switch (_tdtReqMxState)
+            {
+               case dbmxs_dblock:
+               case dbmxs_celllock :
+                  _tdtActMxState = _tdtReqMxState = dbmxs_unlocked;
+                  throw EXPTNactive_DB();
+               default: break;
+            }
+         case dbmxs_dblock   :
+            switch (_tdtReqMxState)
+            {
+               case dbmxs_celllock :
+                  _tdtActMxState = _tdtReqMxState = dbmxs_unlocked;
+                  throw EXPTNactive_cell();
+               default: break;
+            }
          default             : break;
       }
    tdt_db = NULL;
-   _tdtMxState = dbmxs_unlocked;
+   _tdtActMxState = _tdtReqMxState = dbmxs_unlocked;
 }
 
 bool DataCenter::lockGds(GDSin::GdsInFile*& gds_db)

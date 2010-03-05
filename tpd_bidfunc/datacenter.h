@@ -62,8 +62,6 @@ public:
    bool                       OASParse(std::string);
    void                       importOAScell(const nameList&, const LayerMapExt&, bool recur, bool over);
    void                       PSexport(laydata::TdtCell*, std::string&);
-   bool                       TDTwrite(const char* filename = NULL);
-   bool                       TDTcheckwrite(const TpdTime&, const TpdTime&, bool&);
    bool                       TDTcheckread(const std::string, const TpdTime&, const TpdTime&, bool&);
    bool                       lockTDT(laydata::TdtLibDir*&, TdtMutexState);
    laydata::TdtDesign*        lockDB(bool checkACTcell = true);
@@ -92,8 +90,6 @@ public:
    unsigned int               numSelected()           {return (NULL != _TEDLIB()) ? _TEDLIB()->numSelected() : 0 ;}
    void                       setCmdLayer(word layno) {_curcmdlay = layno;}
    word                       curCmdLay() const       {return _curcmdlay;}
-   std::string                tedFileName() const     {return _tedfilename;};
-   bool                       neverSaved()  const     {return _neversaved;};
    bool                       modified() const        {return _TEDLIB.modified();};
 
    //------------------------------------------------------------------------------------------------
@@ -102,12 +98,10 @@ public:
    LayerMapExt*               secureGdsLayMap(const layprop::DrawProperties*, bool);
    LayerMapCif*               secureCifLayMap(const layprop::DrawProperties*, bool);
    std::string                globalDir(void) const     {return _globalDir;}
-   TdtMutexState              tdtMxState() const {return _tdtMxState;}
+   TdtMutexState              tdtMxState() const {return _tdtActMxState;}
    std::string                localDir() const {return _localDir;}
 
 protected:
-   std::string                _tedfilename;
-   bool                       _neversaved;
    void                       openGlDraw(const CTM&);
    void                       openGlRender(const CTM&); // alternative to openGlDraw
 private:
@@ -126,7 +120,8 @@ private:
    wxMutex                    _CIFLock;      //! CIF         DB Mutex
    wxMutex                    _OASLock;      //! OASIS       DB Mutex
    wxCondition*               _bpSync;       //! Synchronization for cell browser panels
-   TdtMutexState              _tdtMxState;   //! The mutex state of the main DB
+   TdtMutexState              _tdtActMxState; //! The actual (current) mutex state of the main DB
+   TdtMutexState              _tdtReqMxState; //! The required mutex state of the main DB
 };
 
 //=============================================================================
