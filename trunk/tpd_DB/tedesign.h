@@ -211,6 +211,8 @@ namespace laydata {
       std::string       getLibName(int);
       void              newDesign(std::string, std::string, time_t, real, real);
       bool              readDesign(std::string);
+      void              writeDesign(const char* filename = NULL);
+      bool              TDTcheckwrite(const TpdTime&, const TpdTime&, bool&);
       void              relink();
       void              reextractHierarchy();
       int               getLastLibRefNo();
@@ -229,9 +231,11 @@ namespace laydata {
       void              getHeldCells(CellList*);
       LibCellLists*     getCells(int libID);
       bool              modified() const {return (NULL == _TEDDB) ? false : _TEDDB->modified;};
+      std::string       tedFileName()    {return _tedFileName;}
+      bool              neverSaved()     {return _neverSaved;}
    private:
-      std::string       _tedfilename;
-      bool              _neversaved;
+      std::string       _tedFileName;
+      bool              _neverSaved;
       void              addLibrary(TdtLibrary* const lib, word libRef);
       TdtLibrary*       removeLibrary( std::string );
       Catalog           _libdirectory;

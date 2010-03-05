@@ -993,13 +993,34 @@ void tui::TopedFrame::OnGDSRead(wxCommandEvent& WXUNUSED(event))
 
 void tui::TopedFrame::OnTDTSave(wxCommandEvent& WXUNUSED(event))
 {
-   wxString ost;
-   ost << wxT("tdtsave();");
-   SetStatusText(wxT("Saving file..."));
-   wxString wxfilename(DATC->tedFileName().c_str(), wxConvFile);
+   std::string  tedFileName;
+   bool         tedNeverSaved;
+   bool         tedDBExists = false;
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
+   {
+      tedFileName = dbLibDir->tedFileName();
+      tedNeverSaved = dbLibDir->neverSaved();
+      tedDBExists = true;
+   }
+   DATC->unlockTDT(dbLibDir);
+   if (!tedDBExists)
+   {
+      wxMessageDialog dlg1(this,
+            wxT("No database in memory. Nothing to save"),
+            wxT("Toped"),
+            wxOK | wxICON_WARNING);
+      dlg1.ShowModal();
+      return;
+   }
+   //
+   wxString wxfilename(tedFileName.c_str(), wxConvFile);
    wxFileName datafile( wxfilename );
    assert(datafile.IsOk());
-   if (datafile.FileExists() && DATC->neverSaved())
+   SetStatusText(wxT("Saving file..."));
+   wxString ost;
+   ost << wxT("tdtsave();");
+   if (datafile.FileExists() && tedNeverSaved)
    {
       wxMessageDialog dlg1(this,
          wxT("File ") + wxfilename + wxT(" already exists. Overwrite ?"),
