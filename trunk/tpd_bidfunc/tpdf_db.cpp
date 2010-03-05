@@ -546,7 +546,7 @@ int tellstdfunc::GDSimport::execute()
                createDefaultTDT(gdsDbName, dbLibDir, timeCreated, UNDOcmdQ, UNDOPstack);
             }
             DATC->importGDScell(top_cells, LayerExpression, recur, over);
-            updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
+            updateLayerDefinitions(dbLibDir, top_cells, TARGETDB_LIB);
             // populate the hierarchy browser
             TpdPost::refreshTDTtab(true);
             LogFile << LogFile.getFN() << "(\""<< name << "\"," << (*lll) << "," << LogFile._2bool(recur)
@@ -620,7 +620,7 @@ int tellstdfunc::GDSimportList::execute()
             createDefaultTDT(gdsDbName, dbLibDir, timeCreated, UNDOcmdQ, UNDOPstack);
          }
          DATC->importGDScell(top_cells, LayerExpression, recur, over);
-         updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
+         updateLayerDefinitions(dbLibDir, top_cells, TARGETDB_LIB);
          // populate the hierarchy browser
          TpdPost::refreshTDTtab(true);
          LogFile << LogFile.getFN() << "("<< *pl << "," << *lll << "," << LogFile._2bool(recur)
@@ -1168,7 +1168,7 @@ int tellstdfunc::CIFimportList::execute()
          createDefaultTDT("CIF_default", dbLibDir, timeCreated, UNDOcmdQ, UNDOPstack);
       }
       DATC->CIFimport(top_cells, cifLays, recur, over, techno * PROPC->DBscale());
-      updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
+      updateLayerDefinitions(dbLibDir, top_cells, TARGETDB_LIB);
       // Don't refresh the tree browser here. It should've been updated by the
       // CIFimport function during the conversion
       LogFile << LogFile.getFN() << "(" << *pl << ","
@@ -1225,7 +1225,7 @@ int tellstdfunc::CIFimport::execute()
          createDefaultTDT("CIF_default", dbLibDir, timeCreated, UNDOcmdQ, UNDOPstack);
       }
       DATC->CIFimport(top_cells, cifLays, recur, over, techno * PROPC->DBscale());
-      updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
+      updateLayerDefinitions(dbLibDir, top_cells, TARGETDB_LIB);
       // Don't refresh the tree browser here. It should've been updated by the
       // CIFimport function during the conversion
 
