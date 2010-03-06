@@ -65,48 +65,6 @@ DataCenter::~DataCenter() {
 	if (NULL != _DRCDB) delete _DRCDB;
    // _TEDLIB will be cleared automatically (not a pointer)
 }
-bool DataCenter::TDTcheckread(const std::string filename,
-    const TpdTime& timeCreated, const TpdTime& timeSaved, bool& start_ignoring)
-{
-   bool retval = false;
-   start_ignoring = false;
-   laydata::TEDfile tempin(filename.c_str(), TEDLIB());
-   if (!tempin.status()) return retval;
-
-   std::string news = "Project created: ";
-   TpdTime timec(tempin.created()); news += timec();
-   tell_log(console::MT_INFO,news);
-   news = "Last updated: ";
-   TpdTime timeu(tempin.lastUpdated()); news += timeu();
-   tell_log(console::MT_INFO,news);
-   // File created time stamp must match exactly, otherwise it means
-   // that we're reading not exactly the same file that is requested
-   if (timeCreated != timec)
-   {
-      news = "time stamp \"Project created \" doesn't match";
-      tell_log(console::MT_ERROR,news);
-   }
-   if (timeu.stdCTime() < timeSaved.stdCTime())
-   {
-      news = "time stamp \"Last updated \" is too old.";
-      tell_log(console::MT_ERROR,news);
-   }
-   else if (timeu.stdCTime() > timeSaved.stdCTime())
-   {
-      news = "time stamp \"Last updated \" is is newer than requested.";
-      news +="Some of the following commands will be ignored";
-      tell_log(console::MT_WARNING,news);
-      //Start ignoring
-      start_ignoring = true;
-      retval = true;
-   }
-   else
-   {
-      retval = true;
-   }
-   tempin.closeF();
-   return retval;
-}
 
 void DataCenter::GDSexport(const LayerMapExt& layerMap, std::string& filename, bool x2048)
 {

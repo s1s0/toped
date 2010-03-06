@@ -62,7 +62,6 @@ public:
    bool                       OASParse(std::string);
    void                       importOAScell(const nameList&, const LayerMapExt&, bool recur, bool over);
    void                       PSexport(laydata::TdtCell*, std::string&);
-   bool                       TDTcheckread(const std::string, const TpdTime&, const TpdTime&, bool&);
    bool                       lockTDT(laydata::TdtLibDir*&, TdtMutexState);
    laydata::TdtDesign*        lockDB(bool checkACTcell = true);
    laydata::DrcLibrary*       lockDRC(void);
@@ -86,7 +85,6 @@ public:
    void                       mouseRotate();
    void                       motionDraw(const CTM&, TP, TP);
    void                       render(const CTM&);
-   laydata::TdtLibDir*        TEDLIB() {return &_TEDLIB;}
    unsigned int               numSelected()           {return (NULL != _TEDLIB()) ? _TEDLIB()->numSelected() : 0 ;}
    void                       setCmdLayer(word layno) {_curcmdlay = layno;}
    word                       curCmdLay() const       {return _curcmdlay;}

@@ -213,6 +213,7 @@ namespace laydata {
       bool              readDesign(std::string);
       void              writeDesign(const char* filename = NULL);
       bool              TDTcheckwrite(const TpdTime&, const TpdTime&, bool&);
+      bool              TDTcheckread(const std::string filename, const TpdTime&, const TpdTime&, bool&);
       void              relink();
       void              reextractHierarchy();
       int               getLastLibRefNo();

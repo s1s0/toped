@@ -54,47 +54,55 @@ void tellstdfunc::stdNEWCELL::undo()
 {
    // get the name of the DEBUG_NEW cell
    std::string  cname = getStringValue(UNDOPstack, true);
-   laydata::TdtDesign* ATDB = DATC->lockDB(false);
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
        // make sure cname exists ...
-      assert(ATDB->checkCell(cname));
+      assert(tDesign->checkCell(cname));
       // ... and is not active
-      assert(cname != ATDB->activeCellName());
+      assert(cname != tDesign->activeCellName());
       // gather the parent cells
       laydata::CellDefList parentCells;
-      ATDB->collectParentCells(cname, parentCells);
+      tDesign->collectParentCells(cname, parentCells);
       if (parentCells.empty())
       {
          // if no parent cells - it means that a simple "newcell" was
          // executed - so use the conventional remove cell
-         laydata::TdtCell* rmvdcell = ATDB->removeCell(cname,NULL, DATC->TEDLIB());
+         laydata::TdtCell* rmvdcell = tDesign->removeCell(cname,NULL, dbLibDir);
          delete (rmvdcell);
       }
       else
          // parent cells found - so new cell was created on top of an
          // existing library cell or on top of an undefined, but referenced
          // cell. Use remove referenced cells
-         ATDB->removeRefdCell(cname, parentCells, NULL, DATC->TEDLIB());
-   DATC->unlockDB();
+         tDesign->removeRefdCell(cname, parentCells, NULL, dbLibDir);
+   }
+   DATC->unlockTDT(dbLibDir, true);
 }
 
 int tellstdfunc::stdNEWCELL::execute()
 {
    std::string nm = getStringValue();
-   laydata::TdtDesign* ATDB = DATC->lockDB(false);
-   laydata::TdtCell* new_cell = ATDB->addCell(nm, DATC->TEDLIB());
-   DATC->unlockDB();
-   if (NULL != new_cell)
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
    {
-      UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(nm));
-      LogFile << LogFile.getFN() << "(\""<< nm << "\");"; LogFile.flush();
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      laydata::TdtCell* new_cell = tDesign->addCell(nm, dbLibDir);
+      if (NULL != new_cell)
+      {
+         UNDOcmdQ.push_front(this);
+         UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(nm));
+         LogFile << LogFile.getFN() << "(\""<< nm << "\");"; LogFile.flush();
+      }
+      else
+      {
+         std::string news = "Cell \"";
+         news += nm; news += "\" already exists in the target DB";
+         tell_log(console::MT_ERROR,news);
+      }
    }
-   else
-   {
-      std::string news = "Cell \"";
-      news += nm; news += "\" already exists in the target DB";
-      tell_log(console::MT_ERROR,news);
-   }
+   DATC->unlockTDT(dbLibDir, true);
    return EXEC_NEXT;
 }
 
@@ -124,12 +132,16 @@ void tellstdfunc::stdREMOVECELL::undo()
    // get the removed cell itself (empty)
    laydata::TdtCell* rmvdcell = static_cast<laydata::TdtCell*>(UNDOUstack.front());UNDOUstack.pop_front();
 
-   laydata::TdtDesign* ATDB = DATC->lockDB();
-   // first add a cell
-   ATDB->addThisCell(rmvdcell, DATC->TEDLIB());
-   // add the cell contents back
-   rmvdcell->addList(ATDB, get_shlaylist(pl));
-   DATC->unlockDB();
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      // first add a cell
+      tDesign->addThisCell(rmvdcell, dbLibDir);
+      // add the cell contents back
+      rmvdcell->addList(tDesign, get_shlaylist(pl));
+   }
+   DATC->unlockTDT(dbLibDir, true);
    // finally - clean-up behind
    delete pl;
 }
@@ -139,26 +151,29 @@ int tellstdfunc::stdREMOVECELL::execute()
    std::string cname = getStringValue();
    laydata::AtticList* cell_contents = NULL;
    laydata::TdtCell*   rmvdcell      = NULL;
-   laydata::TdtDesign* ATDB = DATC->lockDB(false);
-      if (!ATDB->checkCell(cname))
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      if (!tDesign->checkCell(cname))
       {
          std::string news = "Cell \"";
          news += cname; news += "\" doesn't exists. Nothing to remove";
          tell_log(console::MT_ERROR,news);
 
       }
-      else if (cname == ATDB->activeCellName())
+      else if (cname == tDesign->activeCellName())
       {
          tell_log(console::MT_ERROR,"Active cell can't be removed");
       }
       else
       {
          laydata::CellDefList parentCells;
-         ATDB->collectParentCells(cname, parentCells);
+         tDesign->collectParentCells(cname, parentCells);
          if (parentCells.empty())
          {
             cell_contents = DEBUG_NEW laydata::AtticList();
-            rmvdcell = ATDB->removeCell(cname,cell_contents, DATC->TEDLIB());
+            rmvdcell = tDesign->removeCell(cname,cell_contents, dbLibDir);
          }
          else
          {
@@ -167,7 +182,8 @@ int tellstdfunc::stdREMOVECELL::execute()
             tell_log(console::MT_ERROR,news);
          }
       }
-   DATC->unlockDB();
+   }
+   DATC->unlockTDT(dbLibDir, true);
    if (NULL != cell_contents)
    {  // removal has been successfull
       assert(NULL != rmvdcell);
@@ -272,11 +288,14 @@ void tellstdfunc::stdOPENCELL::undo()
 int tellstdfunc::stdOPENCELL::execute()
 {
    std::string nm = getStringValue();
-   laydata::TdtDesign* ATDB = DATC->lockDB(false);
-      std::string oldnm = ATDB->activeCellName();
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      std::string oldnm = tDesign->activeCellName();
       telldata::ttlist* selected = NULL;
-      if ("" != oldnm)  selected = make_ttlaylist(ATDB->shapeSel());
-      if (ATDB->openCell(nm))
+      if ("" != oldnm)  selected = make_ttlaylist(tDesign->shapeSel());
+      if (tDesign->openCell(nm))
       {
          PROPC->clearRulers();
          if (oldnm != "")
@@ -284,8 +303,7 @@ int tellstdfunc::stdOPENCELL::execute()
             UNDOcmdQ.push_front(this);
             UNDOPstack.push_front(selected);
          }
-         DBbox* ovl  = DEBUG_NEW DBbox(ATDB->activeOverlap());
-/*-!-*/  DATC->unlockDB();
+         DBbox* ovl  = DEBUG_NEW DBbox(tDesign->activeOverlap());
          if (*ovl == DEFAULT_OVL_BOX) *ovl = DEFAULT_ZOOM_BOX;
          TpdPost::celltree_open(nm);
          wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
@@ -297,16 +315,17 @@ int tellstdfunc::stdOPENCELL::execute()
       }
       else
       {
-/*-!-*/  DATC->unlockDB();
          std::string news = "Cell \"";news += nm;
          laydata::CellDefin strdefn;
-         if (DATC->TEDLIB()->getLibCellRNP(nm, strdefn))
+         if (dbLibDir->getLibCellRNP(nm, strdefn))
             news += "\" is a library cell and can't be edited";
          else
             news += "\" is not defined";
          tell_log(console::MT_ERROR,news);
          if (selected) delete selected;
       }
+   }
+   DATC->unlockTDT(dbLibDir, true);
    return EXEC_NEXT;
 }
 
@@ -545,29 +564,33 @@ void tellstdfunc::stdGROUP::undo()
    DWordSet unselable = PROPC->allUnselectable();
    // get the name of the removed cell
    std::string  cname = getStringValue(UNDOPstack, true);
-   laydata::TdtDesign* ATDB = DATC->lockDB();
-      ATDB->selectFromList(get_ttlaylist(pl), unselable);
-      ATDB->ungroupThis(ATDB->ungroupPrep(DATC->TEDLIB()));
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      tDesign->selectFromList(get_ttlaylist(pl), unselable);
+      tDesign->ungroupThis(tDesign->ungroupPrep(dbLibDir));
        // make sure cname exists ...
-      assert(ATDB->checkCell(cname));
+      assert(tDesign->checkCell(cname));
       // ... and is not active
-      assert(cname != ATDB->activeCellName());
+      assert(cname != tDesign->activeCellName());
       // gather the parent cells
       laydata::CellDefList parentCells;
-      ATDB->collectParentCells(cname, parentCells);
+      tDesign->collectParentCells(cname, parentCells);
       if (parentCells.empty())
       {
          // if no parent cells - it means that a simple "group" was
          // executed - so use the conventional remove cell
-         laydata::TdtCell* rmvdcell = ATDB->removeCell(cname,NULL, DATC->TEDLIB());
+         laydata::TdtCell* rmvdcell = tDesign->removeCell(cname,NULL, dbLibDir);
          delete (rmvdcell);
       }
       else
          // parent cells found - so new cell was created on top of an
          // existing library cell or on top of an undefined, but referenced
          // cell. Use remove referenced cells
-         ATDB->removeRefdCell(cname, parentCells, NULL, DATC->TEDLIB());
-   DATC->unlockDB();
+         tDesign->removeRefdCell(cname, parentCells, NULL, dbLibDir);
+   }
+   DATC->unlockTDT(dbLibDir, true);
    delete pl;
    UpdateLV();
 }
@@ -575,17 +598,20 @@ void tellstdfunc::stdGROUP::undo()
 int tellstdfunc::stdGROUP::execute()
 {
    std::string name = getStringValue();
-   laydata::TdtDesign* ATDB = DATC->lockDB();
-      bool group_sucessful = ATDB->groupSelected(name, DATC->TEDLIB());
-   DATC->unlockDB();
-   if (group_sucessful)
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
-      UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(name));
-      UNDOPstack.push_front(make_ttlaylist(ATDB->shapeSel()));
-      LogFile << LogFile.getFN() << "(\""<< name << "\");"; LogFile.flush();
-      UpdateLV();
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      if (tDesign->groupSelected(name, dbLibDir))
+      {
+         UNDOcmdQ.push_front(this);
+         UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(name));
+         UNDOPstack.push_front(make_ttlaylist(tDesign->shapeSel()));
+         LogFile << LogFile.getFN() << "(\""<< name << "\");"; LogFile.flush();
+         UpdateLV();
+      }
    }
+   DATC->unlockTDT(dbLibDir, true);
    return EXEC_NEXT;
 }
 
@@ -606,67 +632,73 @@ void tellstdfunc::stdUNGROUP::undo()
 {
    TEUNDO_DEBUG("ungroup() UNDO");
    DWordSet unselable = PROPC->allUnselectable();
-   laydata::TdtDesign* ATDB = DATC->lockDB();
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
       // first save the list of all currently selected components
-      laydata::SelectList *savelist = ATDB->copySeList();
+      laydata::SelectList *savelist = tDesign->copySeList();
       // now unselect all
-      ATDB->unselectAll();
+      tDesign->unselectAll();
       // get the list of shapes produced by the ungroup from the UNDO stack
       telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       // select them ...
-      ATDB->selectFromList(get_ttlaylist(pl), unselable);
+      tDesign->selectFromList(get_ttlaylist(pl), unselable);
       //... and delete them cleaning up the memory (don't store in the Attic)
-      ATDB->deleteSelected(NULL, DATC->TEDLIB());
+      tDesign->deleteSelected(NULL, dbLibDir);
       // now get the list of the ungroupped cell ref's from the UNDO stack
       telldata::ttlist* pl1 = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
       // and add them to the target cell
-      ATDB->addList(get_shlaylist(pl1));
+      tDesign->addList(get_shlaylist(pl1));
       // select the restored cell refs
-      ATDB->selectFromList(get_ttlaylist(pl1), unselable);
+      tDesign->selectFromList(get_ttlaylist(pl1), unselable);
       // now restore selection
-      ATDB->selectFromList(savelist, unselable);
+      tDesign->selectFromList(savelist, unselable);
       // and add the list of restored cells to the selection
-      ATDB->selectFromList(get_ttlaylist(pl), unselable);
-   DATC->unlockDB();
-   // finally - clean-up behind
-   delete pl;
-   delete pl1;
+      tDesign->selectFromList(get_ttlaylist(pl), unselable);
+      // finally - clean-up behind
+      delete pl;
+      delete pl1;
+   }
+   DATC->unlockTDT(dbLibDir, true);
    UpdateLV();
 }
 
 int tellstdfunc::stdUNGROUP::execute()
 {
-   laydata::TdtDesign* ATDB = DATC->lockDB();
-      laydata::ShapeList* cells4u = ATDB->ungroupPrep(DATC->TEDLIB());
-   DATC->unlockDB();
-   if (cells4u->empty())
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
-      tell_log(console::MT_ERROR,"Nothing to ungroup");
-      delete cells4u;
-   }
-   else
-   {
-      laydata::AtticList* undol = DEBUG_NEW laydata::AtticList();
-      UNDOcmdQ.push_front(this);
-      // Push the list of the cells to be ungroupped first
-      (*undol)[REF_LAY] = cells4u;
-      UNDOPstack.push_front(make_ttlaylist(undol));
-      ATDB = DATC->lockDB();
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      laydata::ShapeList* cells4u = tDesign->ungroupPrep(dbLibDir);
+      if (cells4u->empty())
+      {
+         tell_log(console::MT_ERROR,"Nothing to ungroup");
+         delete cells4u;
+      }
+      else
+      {
+         laydata::AtticList* undol = DEBUG_NEW laydata::AtticList();
+         UNDOcmdQ.push_front(this);
+         // Push the list of the cells to be ungroupped first
+         (*undol)[REF_LAY] = cells4u;
+         UNDOPstack.push_front(make_ttlaylist(undol));
          // and then ungroup and push the list of the shapes produced in
          //result of the ungroup
-         laydata::AtticList* undol2 = ATDB->ungroupThis(cells4u);
-      DATC->unlockDB();
-      UNDOPstack.push_front(make_ttlaylist(undol2));
-      // a bit funny, but effective way of cleaning-up cells4u
-      // acutually - similar approach was used above to convert cells4u to a
-      // layout list - all this using a AtticList structure undol
-      clean_atticlist(undol, false);
-      delete undol;
-      clean_atticlist(undol2, false);
-      delete undol2;
-      LogFile << LogFile.getFN() << "();"; LogFile.flush();
-      UpdateLV();
+         laydata::AtticList* undol2 = tDesign->ungroupThis(cells4u);
+         UNDOPstack.push_front(make_ttlaylist(undol2));
+         // a bit funny, but effective way of cleaning-up cells4u
+         // acutually - similar approach was used above to convert cells4u to a
+         // layout list - all this using a AtticList structure undol
+         clean_atticlist(undol, false);
+         delete undol;
+         clean_atticlist(undol2, false);
+         delete undol2;
+         LogFile << LogFile.getFN() << "();"; LogFile.flush();
+         UpdateLV();
+      }
    }
+   DATC->unlockTDT(dbLibDir, true);
    return EXEC_NEXT;
 }
 

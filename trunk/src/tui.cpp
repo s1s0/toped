@@ -443,14 +443,16 @@ tui::getLibList::getLibList(wxFrame *parent, wxWindowID id, const wxString &titl
                                     wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
 {
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
-   DATC->lockDB(false);
-   laydata::TdtLibDir* LDR = DATC->TEDLIB();
-
-   for (int curlib = 1; curlib < LDR->getLastLibRefNo(); curlib++)
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
    {
-      _nameList->Append(wxString(LDR->getLibName(curlib).c_str(), wxConvUTF8));
+      for (int curlib = 1; curlib < dbLibDir->getLastLibRefNo(); curlib++)
+      {
+         _nameList->Append(wxString(dbLibDir->getLibName(curlib).c_str(), wxConvUTF8));
+      }
    }
-   DATC->unlockDB();
+   DATC->unlockTDT(dbLibDir);
+
    if (init != wxT("")) _nameList->SetStringSelection(init,true);
    // The window layout
    wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
@@ -554,17 +556,20 @@ tui::getCIFexport::getCIFexport(wxFrame *parent, wxWindowID id, const wxString &
    _saveMap = DEBUG_NEW wxCheckBox(this, -1, wxT("Save Layer Map"));
    _slang = DEBUG_NEW wxCheckBox(this, -1, wxT("Verbose CIF slang"));
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
-   laydata::TdtDesign* ATDB = DATC->lockDB();
-      laydata::CellList const cll = ATDB->cells();
+   WordList ull;
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      laydata::CellList const cll = tDesign->cells();
       laydata::CellList::const_iterator CL;
       for (CL = cll.begin(); CL != cll.end(); CL++) {
          _nameList->Append(wxString(CL->first.c_str(), wxConvUTF8));
       }
       //-----------------------------------------------------------------------
-      WordList ull;
-      DATC->TEDLIB()->collectUsedLays(TARGETDB_LIB, ull);
-
-   DATC->unlockDB();
+      dbLibDir->collectUsedLays(TARGETDB_LIB, ull);
+   }
+   DATC->unlockTDT(dbLibDir);
    if (init != wxT("")) _nameList->SetStringSelection(init,true);
 
    _layList = DEBUG_NEW tui::nameEboxList(this, wxID_ANY, wxDefaultPosition, wxSize(290,300), ull, drawProp);
@@ -720,18 +725,21 @@ tui::getGDSexport::getGDSexport(wxFrame *parent, wxWindowID id, const wxString &
    _recursive->SetValue(true);
    _saveMap = DEBUG_NEW wxCheckBox(this, -1, wxT("Save Layer Map"));
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
-   laydata::TdtDesign* ATDB = DATC->lockDB();
-      laydata::CellList const cll = ATDB->cells();
+   WordList ull;
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      laydata::CellList const cll = tDesign->cells();
       laydata::CellList::const_iterator CL;
       for (CL = cll.begin(); CL != cll.end(); CL++) {
          _nameList->Append(wxString(CL->first.c_str(), wxConvUTF8));
       }
       //-----------------------------------------------------------------------
 
-      WordList ull;
-      DATC->TEDLIB()->collectUsedLays(TARGETDB_LIB, ull);
-
-   DATC->unlockDB();
+      dbLibDir->collectUsedLays(TARGETDB_LIB, ull);
+   }
+   DATC->unlockTDT(dbLibDir);
    if (init != wxT("")) _nameList->SetStringSelection(init,true);
 
    _layList = DEBUG_NEW tui::nameEbox3List(this, wxID_ANY, wxDefaultPosition, wxSize(270,300), ull, drawProp);
