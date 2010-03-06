@@ -204,11 +204,11 @@ int tellstdfunc::TDTreadIFF::execute()
    }
    else if (expandFileName(filename))
    {
-      bool start_ignoring = false;
-      if (DATC->TDTcheckread(filename, timeCreated, timeSaved, start_ignoring))
+      laydata::TdtLibDir* dbLibDir = NULL;
+      if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
       {
-         laydata::TdtLibDir* dbLibDir = NULL;
-         if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
+         bool start_ignoring = false;
+         if (dbLibDir->TDTcheckread(filename, timeCreated, timeSaved, start_ignoring))
          {
             if (dbLibDir->readDesign(filename))
             {
@@ -241,10 +241,10 @@ int tellstdfunc::TDTreadIFF::execute()
                tell_log(console::MT_ERROR,info);
                start_ignoring = false;
             }
+            if (start_ignoring) set_ignoreOnRecovery(true);
          }
-         DATC->unlockTDT(dbLibDir);
       }
-      if (start_ignoring) set_ignoreOnRecovery(true);
+      DATC->unlockTDT(dbLibDir);
    }
    else
    {
@@ -858,9 +858,13 @@ int tellstdfunc::stdREPORTLAY::execute() {
    bool recursive = getBoolValue();
    std::string cellname = getStringValue();
    WordList ull;
-   DATC->lockDB(false);
-      bool success = DATC->TEDLIB()->collectUsedLays(cellname, recursive, ull);
-   DATC->unlockDB();
+   bool success = false;
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
+   {
+      success = dbLibDir->collectUsedLays(cellname, recursive, ull);
+   }
+   DATC->unlockTDT(dbLibDir, true);
    telldata::ttlist* tllull = DEBUG_NEW telldata::ttlist(telldata::tn_int);
    if (success) {
       ull.sort();ull.unique();
@@ -1558,7 +1562,7 @@ int tellstdfunc::OASimport::execute()
                createDefaultTDT(oasDbName, dbLibDir, timeCreated, UNDOcmdQ, UNDOPstack);
             }
             DATC->importOAScell(top_cells, LayerExpression, recur, over);
-               updateLayerDefinitions(DATC->TEDLIB(), top_cells, TARGETDB_LIB);
+               updateLayerDefinitions(dbLibDir, top_cells, TARGETDB_LIB);
             // populate the hierarchy browser
             TpdPost::refreshTDTtab(true);
             LogFile << LogFile.getFN() << "(\""<< name << "\"," << /*(*lll) << "," <<*/ LogFile._2bool(recur)
