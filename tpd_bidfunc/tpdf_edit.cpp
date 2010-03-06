@@ -74,11 +74,15 @@ int tellstdfunc::stdCOPYSEL::execute()
    telldata::ttpnt    *p2 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    real DBscale = PROPC->DBscale();
-   laydata::TdtDesign* ATDB = DATC->lockDB();
-      UNDOPstack.push_front(make_ttlaylist(ATDB->shapeSel()));
-      ATDB->copySelected(TP(p1->x(), p1->y(), DBscale), TP(p2->x(), p2->y(), DBscale));
-      OPstack.push(make_ttlaylist(ATDB->shapeSel()));
-   DATC->unlockDB();
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      UNDOPstack.push_front(make_ttlaylist(tDesign->shapeSel()));
+      tDesign->copySelected(TP(p1->x(), p1->y(), DBscale), TP(p2->x(), p2->y(), DBscale));
+      OPstack.push(make_ttlaylist(tDesign->shapeSel()));
+   }
+   DATC->unlockTDT(dbLibDir, true);
    LogFile << LogFile.getFN() << "("<< *p1 << "," << *p2 << ");"; LogFile.flush();
    delete p1; delete p2;
    RefreshGL();
@@ -187,8 +191,11 @@ int tellstdfunc::stdMOVESEL::execute()
    laydata::SelectList* fadead[3];
    byte i;
    for (i = 0; i < 3; fadead[i++] = DEBUG_NEW laydata::SelectList());
-   laydata::TdtDesign* ATDB = DATC->lockDB();
-      ATDB->moveSelected(TP(p1->x(), p1->y(), DBscale), TP(p2->x(), p2->y(), DBscale), fadead);
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      tDesign->moveSelected(TP(p1->x(), p1->y(), DBscale), TP(p2->x(), p2->y(), DBscale), fadead);
       // save for undo operations ...
       UNDOPstack.push_front(make_ttlaylist(fadead[0])); // first failed
       UNDOPstack.push_front(make_ttlaylist(fadead[1])); // then deleted
@@ -209,7 +216,8 @@ int tellstdfunc::stdMOVESEL::execute()
          }
          delete fadead[i];
       }
-   DATC->unlockDB();
+   }
+   DATC->unlockTDT(dbLibDir, true);
    LogFile << LogFile.getFN() << "("<< *p1 << "," << *p2 << ");"; LogFile.flush();
    //delete p1; delete p2; undo will delete them
    RefreshGL();
@@ -318,17 +326,21 @@ int tellstdfunc::stdROTATESEL::execute()
    laydata::SelectList* fadead[3];
    byte i;
    for (i = 0; i < 3; fadead[i++] = DEBUG_NEW laydata::SelectList());
-   laydata::TdtDesign* ATDB = DATC->lockDB();
-      ATDB->rotateSelected(TP(p1->x(), p1->y(), DBscale), angle, fadead);
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      tDesign->rotateSelected(TP(p1->x(), p1->y(), DBscale), angle, fadead);
       telldata::ttlist* added = make_ttlaylist(fadead[2]);
       DWordSet unselable = PROPC->allUnselectable();
-      ATDB->selectFromList(get_ttlaylist(added), unselable);
+      tDesign->selectFromList(get_ttlaylist(added), unselable);
       // save for undo operations ...
       UNDOPstack.push_front(make_ttlaylist(fadead[0])); // first failed
       UNDOPstack.push_front(make_ttlaylist(fadead[1])); // then deleted
       UNDOPstack.push_front(added); // and added
       for (i = 0; i < 3; delete fadead[i++]);
-   DATC->unlockDB();
+   }
+   DATC->unlockTDT(dbLibDir, true);
    LogFile << LogFile.getFN() << "("<< angle << "," << *p1 << ");"; LogFile.flush();
    //delete p1; undo will delete them
    RefreshGL();
@@ -377,9 +389,13 @@ void tellstdfunc::stdFLIPXSEL::undo()
    TEUNDO_DEBUG("flipX(point) UNDO");
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(UNDOPstack.front());UNDOPstack.pop_front();
    real DBscale = PROPC->DBscale();
-   laydata::TdtDesign* ATDB = DATC->lockDB();
-      ATDB->flipSelected(TP(p1->x(), p1->y(), DBscale), true);
-   DATC->unlockDB();
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      tDesign->flipSelected(TP(p1->x(), p1->y(), DBscale), true);
+   }
+   DATC->unlockTDT(dbLibDir, true);
    delete p1;
    RefreshGL();
 }
@@ -390,9 +406,13 @@ int tellstdfunc::stdFLIPXSEL::execute()
    UNDOPstack.push_front(OPstack.top());
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    real DBscale = PROPC->DBscale();
-   laydata::TdtDesign* ATDB = DATC->lockDB();
-      ATDB->flipSelected(TP(p1->x(), p1->y(), DBscale), true);
-   DATC->unlockDB();
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      tDesign->flipSelected(TP(p1->x(), p1->y(), DBscale), true);
+   }
+   DATC->unlockTDT(dbLibDir, true);
    LogFile << LogFile.getFN() << "("<< *p1 << ");"; LogFile.flush();
    //delete p1; undo will delete them
    RefreshGL();
@@ -434,9 +454,13 @@ void tellstdfunc::stdFLIPYSEL::undo()
    TEUNDO_DEBUG("flipY(point) UNDO");
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(UNDOPstack.front());UNDOPstack.pop_front();
    real DBscale = PROPC->DBscale();
-   laydata::TdtDesign* ATDB = DATC->lockDB();
-      ATDB->flipSelected(TP(p1->x(), p1->y(), DBscale), false);
-   DATC->unlockDB();
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      tDesign->flipSelected(TP(p1->x(), p1->y(), DBscale), false);
+   }
+   DATC->unlockTDT(dbLibDir, true);
    delete p1;
    RefreshGL();
 }
@@ -447,9 +471,13 @@ int tellstdfunc::stdFLIPYSEL::execute()
    UNDOPstack.push_front(OPstack.top());
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    real DBscale = PROPC->DBscale();
-   laydata::TdtDesign* ATDB = DATC->lockDB();
-      ATDB->flipSelected(TP(p1->x(), p1->y(), DBscale), false);
-   DATC->unlockDB();
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      tDesign->flipSelected(TP(p1->x(), p1->y(), DBscale), false);
+   }
+   DATC->unlockTDT(dbLibDir, true);
    LogFile << LogFile.getFN() << "("<< *p1 << ");"; LogFile.flush();
    //delete p1; undo will delete them
    RefreshGL();
@@ -766,10 +794,12 @@ int tellstdfunc::lgcMERGE::execute()
      byte i;
       for (i = 0; i < 2; dasao[i++] = DEBUG_NEW laydata::AtticList());
       // create a list of currently selected shapes
-      laydata::TdtDesign* ATDB = DATC->lockDB();
-         telldata::ttlist* listselected = make_ttlaylist(ATDB->shapeSel());
-         if (ATDB->merge(dasao)) {
-/*-!-*/     DATC->unlockDB();
+      laydata::TdtLibDir* dbLibDir = NULL;
+      if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+      {
+         laydata::TdtDesign* tDesign = (*dbLibDir)();
+         telldata::ttlist* listselected = make_ttlaylist(tDesign->shapeSel());
+         if (tDesign->merge(dasao)) {
             // push the command for undo
             UNDOcmdQ.push_front(this);
             // save the list of originally selected shapes
@@ -781,9 +811,10 @@ int tellstdfunc::lgcMERGE::execute()
             LogFile << "merge( );"; LogFile.flush();
          }
          else {
-/*-!-*/     DATC->unlockDB();
             delete listselected;
          }
+      }
+      DATC->unlockTDT(dbLibDir, true);
       // clean-up the lists
       for (i = 0; i < 2; i++)
       {
@@ -933,38 +964,44 @@ void tellstdfunc::stdCHANGELAY::undo()
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    word src = getWordValue(UNDOPstack, true);
    secureLayDef(src);
-   laydata::TdtDesign* ATDB = DATC->lockDB();
-      ATDB->transferLayer(get_ttlaylist(pl), src);
-   DATC->unlockDB();
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      tDesign->transferLayer(get_ttlaylist(pl), src);
+   }
+   DATC->unlockTDT(dbLibDir, true);
    delete pl;
    RefreshGL();
 }
 
 int tellstdfunc::stdCHANGELAY::execute()
 {
-   laydata::TdtDesign* ATDB = DATC->lockDB();
-      laydata::SelectList *listselected = ATDB->shapeSel();
-   DATC->unlockDB();
-   if (listselected->empty())
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
-      std::ostringstream ost;
-      ost << "No objects selected";
-      tell_log(console::MT_ERROR,ost.str());
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      laydata::SelectList *listselected = tDesign->shapeSel();
+      if (listselected->empty())
+      {
+         std::ostringstream ost;
+         ost << "No objects selected";
+         tell_log(console::MT_ERROR,ost.str());
+      }
+      else
+      {
+         word target = getWordValue();
+         secureLayDef(target);
+         tDesign->transferLayer(target);
+         // prepare undo stacks
+         UNDOcmdQ.push_front(this);
+         UNDOPstack.push_front(DEBUG_NEW telldata::ttint(target));
+         UNDOPstack.push_front(make_ttlaylist(listselected));
+         LogFile << "changelayer("<< target << ");";LogFile.flush();
+         RefreshGL();
+      }
    }
-   else
-   {
-      word target = getWordValue();
-      secureLayDef(target);
-      ATDB = DATC->lockDB();
-         ATDB->transferLayer(target);
-      DATC->unlockDB();
-      // prepare undo stacks
-      UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(target));
-      UNDOPstack.push_front(make_ttlaylist(listselected));
-      LogFile << "changelayer("<< target << ");";LogFile.flush();
-      RefreshGL();
-   }
+   DATC->unlockTDT(dbLibDir, true);
    return EXEC_NEXT;
 }
 
@@ -1159,17 +1196,3 @@ int tellstdfunc::stdCHANGESTRING::execute()
    DATC->unlockTDT(dbLibDir, true);
    return EXEC_NEXT;
 }
-/*   laydata::SelectList* texts4u = filter_selected(laydata::_lmtext);
-   if (texts4u->empty())
-   {
-      tell_log(console::MT_ERROR,"No text objetcs selected");
-   }
-   else
-   {
-      laydata::TdtDesign* ATDB = DATC->lockDB();
-         laydata::AtticList* undol2 = ATDB->changestring(texts4u, newstring);
-      DATC->unlockDB();
-      LogFile << LogFile.getFN() << "();"; LogFile.flush();
-      RefreshGL();
-   }
-  delete texts4u;*/

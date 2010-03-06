@@ -228,15 +228,21 @@ tui::getGrid::getGrid(wxFrame *parent, wxWindowID id, const wxString &title, wxP
 //==============================================================================
 tui::getCellOpen::getCellOpen(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
       wxString init) : wxDialog(parent, id, title, pos, wxDefaultSize,
-                                                   wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  {
+                                                   wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
+{
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
-   laydata::TdtDesign* ATDB = DATC->lockDB(false);
-      laydata::CellList const cll = ATDB->cells();
+
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      laydata::CellList const cll = tDesign->cells();
       laydata::CellList::const_iterator CL;
       for (CL = cll.begin(); CL != cll.end(); CL++) {
          _nameList->Append(wxString(CL->first.c_str(), wxConvUTF8));
       }
-   DATC->unlockDB();
+   }
+   DATC->unlockTDT(dbLibDir);
    if (init != wxT("")) _nameList->SetStringSelection(init,true);
    // The window layout
    wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );

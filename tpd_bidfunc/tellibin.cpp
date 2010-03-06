@@ -132,14 +132,6 @@ tellstdfunc::stdDISTANCE_D::stdDISTANCE_D(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdDISTANCE_D::execute()
 {
-   // generally there is no point having rulers without having
-   // active database and cell, besides rulers appears funny on the
-   // screen because of the default settings of the layout canvas
-   // That's the reason to have the lock/unlock here, i.e. to get an exception
-   // if there is no active database & cell. This is done for the interacive
-   // version only
-   DATC->lockDB();
-   DATC->unlockDB();
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(console::op_line, &OPstack)) return EXEC_ABORT;
    // get the data from the stack
@@ -150,7 +142,6 @@ int tellstdfunc::stdDISTANCE_D::execute()
    OPstack.push(plst);
    delete w;
    return stdDISTANCE::execute();
-
 }
 
 //=============================================================================
@@ -264,13 +255,17 @@ tellstdfunc::stdZOOMALL::stdZOOMALL(telldata::typeID retype, bool eor) :
 {}
 
 int tellstdfunc::stdZOOMALL::execute() {
-   laydata::TdtDesign* ATDB = DATC->lockDB();
-      DBbox* ovl  = DEBUG_NEW DBbox(ATDB->activeOverlap());
-   DATC->unlockDB();
-   wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
-   eventZOOM.SetInt(tui::ZOOM_WINDOW);
-   eventZOOM.SetClientData(static_cast<void*>(ovl));
-   wxPostEvent(TopedCanvasW, eventZOOM);
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      DBbox* ovl  = DEBUG_NEW DBbox(tDesign->activeOverlap());
+      wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+      eventZOOM.SetInt(tui::ZOOM_WINDOW);
+      eventZOOM.SetClientData(static_cast<void*>(ovl));
+      wxPostEvent(TopedCanvasW, eventZOOM);
+   }
+   DATC->unlockTDT(dbLibDir, true);
    return EXEC_NEXT;
 }
 
@@ -281,19 +276,23 @@ tellstdfunc::stdZOOMVISIBLE::stdZOOMVISIBLE(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdZOOMVISIBLE::execute()
 {
-   layprop::DrawProperties* drawProp;
-   if (PROPC->lockDrawProp(drawProp))
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
-      laydata::TdtDesign* ATDB = DATC->lockDB();
-         DBbox* ovl  = DEBUG_NEW DBbox(ATDB->getVisibleOverlap(*drawProp));
-      DATC->unlockDB();
-      wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
-      eventZOOM.SetInt(tui::ZOOM_WINDOW);
-      eventZOOM.SetClientData(static_cast<void*>(ovl));
-      wxPostEvent(TopedCanvasW, eventZOOM);
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      layprop::DrawProperties* drawProp;
+      if (PROPC->lockDrawProp(drawProp))
+      {
+         DBbox* ovl  = DEBUG_NEW DBbox(tDesign->getVisibleOverlap(*drawProp));
+         wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+         eventZOOM.SetInt(tui::ZOOM_WINDOW);
+         eventZOOM.SetClientData(static_cast<void*>(ovl));
+         wxPostEvent(TopedCanvasW, eventZOOM);
+      }
+      // WARNING! Don't throw an exception here. Otherwise the TDT mutex will remain locked!
+      PROPC->unlockDrawProp(drawProp);
    }
-   PROPC->unlockDrawProp(drawProp);
-
+   DATC->unlockTDT(dbLibDir, true);
    return EXEC_NEXT;
 }
 
@@ -303,10 +302,6 @@ tellstdfunc::getPOINT::getPOINT(telldata::typeID retype, bool eor) :
 {}
 
 int tellstdfunc::getPOINT::execute() {
-   // Here - try a hollow lock/unlock the database just to check that it exists
-   // The use of this function should be deprecated
-   DATC->lockDB();
-   DATC->unlockDB();
    // flag the prompt that we expect a single point & handle a pointer to
    // the operand stack
    Console->waitGUInput(&OPstack, console::op_point, CTM());
@@ -323,10 +318,6 @@ tellstdfunc::getPOINTLIST::getPOINTLIST(telldata::typeID retype, bool eor) :
 {}
 
 int tellstdfunc::getPOINTLIST::execute() {
-   // Here - try a hollow lock/unlock the database just to check that it exists
-   // The use of this function should be deprecated
-   DATC->lockDB();
-   DATC->unlockDB();
    // flag the prompt that we expect a list of points & handle a pointer to
    // the operand stack
    Console->waitGUInput(&OPstack, console::op_dpoly, CTM());
