@@ -330,22 +330,6 @@ void DataCenter::PSexport(laydata::TdtCell* cell, std::string& filename)
 //   gdsex.closeFile();
 }
 
-laydata::TdtDesign*  DataCenter::lockDB(bool checkACTcell)
-{
-   if (_TEDLIB())
-   {
-      if (checkACTcell) _TEDLIB()->checkActive();
-      while (wxMUTEX_NO_ERROR != _DBLock.TryLock());
-      return _TEDLIB();
-   }
-   else throw EXPTNactive_DB();
-}
-
-void DataCenter::unlockDB()
-{
-   VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
-}
-
 laydata::DrcLibrary*  DataCenter::lockDRC(void)
 {
    if (!_TEDLIB()) throw EXPTNactive_DB();
@@ -923,7 +907,6 @@ LayerMapCif* DataCenter::secureCifLayMap(const layprop::DrawProperties* drawProp
    }
    else
    {// Generate the default CIF layer map for export
-      lockDB(false);
       nameList tdtLayers;
       drawProp->allLayers(tdtLayers);
       for ( nameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
@@ -933,7 +916,6 @@ LayerMapCif* DataCenter::secureCifLayMap(const layprop::DrawProperties* drawProp
          ciflayname << "L" << layno;
          (*theMap)[layno] = ciflayname.str();
       }
-      unlockDB();
    }
    return DEBUG_NEW LayerMapCif(*theMap);
 }
@@ -964,7 +946,6 @@ LayerMapExt* DataCenter::secureGdsLayMap(const layprop::DrawProperties* drawProp
       }
       else
       { // generate default export GDS layer map
-         lockDB(false);
          nameList tdtLayers;
          drawProp->allLayers(tdtLayers);
          for ( nameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
@@ -973,7 +954,6 @@ LayerMapExt* DataCenter::secureGdsLayMap(const layprop::DrawProperties* drawProp
             dtypestr << drawProp->getLayerNo( *CDL )<< "; 0";
             theMap[drawProp->getLayerNo( *CDL )] = dtypestr.str();
          }
-         unlockDB();
          theGdsMap = DEBUG_NEW LayerMapExt(theMap, NULL);
       }
    }

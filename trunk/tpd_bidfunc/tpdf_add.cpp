@@ -76,14 +76,18 @@ int tellstdfunc::stdADDBOX::execute() {
    real DBscale = PROPC->DBscale();
    TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
    TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
-   laydata::TdtDesign* ATDB = DATC->lockDB();
-      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(ATDB->addBox(la, p1DB, p2DB),la);
-   DATC->unlockDB();
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(tDesign->addBox(la, p1DB, p2DB),la);
+      OPstack.push(bx); UNDOPstack.push_front(bx->selfcopy());
+      LogFile << LogFile.getFN() << "("<< *w << "," << la << ");";LogFile.flush();
+   }
    delete (p1DB);
    delete (p2DB);
-   OPstack.push(bx); UNDOPstack.push_front(bx->selfcopy());
-   LogFile << LogFile.getFN() << "("<< *w << "," << la << ");";LogFile.flush();
    delete w;
+   DATC->unlockTDT(dbLibDir, true);
    RefreshGL();
    return EXEC_NEXT;
 }
@@ -142,12 +146,18 @@ int tellstdfunc::stdDRAWBOX::execute() {
    real DBscale = PROPC->DBscale();
    TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
    TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
-   laydata::TdtDesign* ATDB = DATC->lockDB();
-      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(ATDB->addBox(la, p1DB, p2DB), la);
-   DATC->unlockDB();
-   OPstack.push(bx);UNDOPstack.push_front(bx->selfcopy());
-   LogFile << "addbox("<< *w << "," << la << ");";LogFile.flush();
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(tDesign->addBox(la, p1DB, p2DB), la);
+      OPstack.push(bx);UNDOPstack.push_front(bx->selfcopy());
+      LogFile << "addbox("<< *w << "," << la << ");";LogFile.flush();
+   }
+   delete p1DB;
+   delete p2DB;
    delete w;
+   DATC->unlockTDT(dbLibDir, true);
    RefreshGL();
    return EXEC_NEXT;
 }
@@ -205,15 +215,19 @@ int tellstdfunc::stdADDBOXr::execute() {
    real DBscale = PROPC->DBscale();
    TP* p1DB = DEBUG_NEW TP(p1->x(), p1->y(), DBscale);
    TP* p2DB = DEBUG_NEW TP(p2.x() , p2.y() , DBscale);
-   laydata::TdtDesign* ATDB = DATC->lockDB();
-      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(ATDB->addBox(la, p1DB, p2DB), la);
-   DATC->unlockDB();
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(tDesign->addBox(la, p1DB, p2DB), la);
+      OPstack.push(bx);UNDOPstack.push_front(bx->selfcopy());
+      LogFile << LogFile.getFN() << "("<< *p1 << "," << width << "," << heigth <<
+                                                 "," << la << ");"; LogFile.flush();
+   }
    delete (p1DB);
    delete (p2DB);
-   OPstack.push(bx);UNDOPstack.push_front(bx->selfcopy());
-   LogFile << LogFile.getFN() << "("<< *p1 << "," << width << "," << heigth <<
-                                              "," << la << ");"; LogFile.flush();
    delete p1;
+   DATC->unlockTDT(dbLibDir, true);
    RefreshGL();
    return EXEC_NEXT;
 }
@@ -272,15 +286,19 @@ int tellstdfunc::stdADDBOXp::execute() {
    real DBscale = PROPC->DBscale();
    TP* p1DB = DEBUG_NEW TP(p1->x(), p1->y(), DBscale);
    TP* p2DB = DEBUG_NEW TP(p2->x(), p2->y(), DBscale);
-   laydata::TdtDesign* ATDB = DATC->lockDB();
-      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(ATDB->addBox(la, p1DB, p2DB), la);
-   DATC->unlockDB();
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(tDesign->addBox(la, p1DB, p2DB), la);
+      OPstack.push(bx); UNDOPstack.push_front(bx->selfcopy());
+      LogFile << LogFile.getFN() << "("<< *p1 << "," << *p2 << "," << la << ");";
+      LogFile.flush();
+   }
+   delete p1; delete p2;
    delete (p1DB);
    delete (p2DB);
-   OPstack.push(bx); UNDOPstack.push_front(bx->selfcopy());
-   LogFile << LogFile.getFN() << "("<< *p1 << "," << *p2 << "," << la << ");";
-   LogFile.flush();
-   delete p1; delete p2;
+   DATC->unlockTDT(dbLibDir, true);
    RefreshGL();
    return EXEC_NEXT;
 }
@@ -327,24 +345,31 @@ void tellstdfunc::stdADDPOLY::undo() {
    RefreshGL();
 }
 
-int tellstdfunc::stdADDPOLY::execute() {
+int tellstdfunc::stdADDPOLY::execute()
+{
    word     la = getWordValue();
    telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
-   if (pl->size() >= 3) {
+   if (pl->size() >= 3)
+   {
       secureLayer(la);
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
       real DBscale = PROPC->DBscale();
-      laydata::TdtDesign* ATDB = DATC->lockDB();
+      laydata::TdtLibDir* dbLibDir = NULL;
+      if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+      {
+         laydata::TdtDesign* tDesign = (*dbLibDir)();
          pointlist* plst = t2tpoints(pl,DBscale);
-         telldata::ttlayout* ply = DEBUG_NEW telldata::ttlayout(ATDB->addPoly(la,plst), la);
+         telldata::ttlayout* ply = DEBUG_NEW telldata::ttlayout(tDesign->addPoly(la,plst), la);
          delete plst;
-      DATC->unlockDB();
-      OPstack.push(ply); UNDOPstack.push_front(ply->selfcopy());
-      LogFile << LogFile.getFN() << "("<< *pl << "," << la << ");";
-      LogFile.flush();
+         OPstack.push(ply); UNDOPstack.push_front(ply->selfcopy());
+         LogFile << LogFile.getFN() << "("<< *pl << "," << la << ");";
+         LogFile.flush();
+      }
+      DATC->unlockTDT(dbLibDir, true);
    }
-   else {
+   else
+   {
       tell_log(console::MT_ERROR,"At least 3 points expected to create a polygon");
       OPstack.push(DEBUG_NEW telldata::ttlayout());
    }
@@ -406,13 +431,17 @@ int tellstdfunc::stdDRAWPOLY::execute() {
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
       real DBscale = PROPC->DBscale();
-      laydata::TdtDesign* ATDB = DATC->lockDB();
+      laydata::TdtLibDir* dbLibDir = NULL;
+      if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+      {
+         laydata::TdtDesign* tDesign = (*dbLibDir)();
          pointlist* plst = t2tpoints(pl,DBscale);
-         telldata::ttlayout* ply = DEBUG_NEW telldata::ttlayout(ATDB->addPoly(la,plst), la);
+         telldata::ttlayout* ply = DEBUG_NEW telldata::ttlayout(tDesign->addPoly(la,plst), la);
          delete plst;
-      DATC->unlockDB();
-      OPstack.push(ply); UNDOPstack.push_front(ply->selfcopy());
-      LogFile << "addpoly("<< *pl << "," << la << ");"; LogFile.flush();
+         OPstack.push(ply); UNDOPstack.push_front(ply->selfcopy());
+         LogFile << "addpoly("<< *pl << "," << la << ");"; LogFile.flush();
+      }
+      DATC->unlockTDT(dbLibDir, true);
    }
    else {
       tell_log(console::MT_ERROR,"At least 3 points expected to create a polygon");
@@ -472,15 +501,19 @@ int tellstdfunc::stdADDWIRE::execute() {
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
       real DBscale = PROPC->DBscale();
-      laydata::TdtDesign* ATDB = DATC->lockDB();
+      laydata::TdtLibDir* dbLibDir = NULL;
+      if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+      {
+         laydata::TdtDesign* tDesign = (*dbLibDir)();
          pointlist* plst = t2tpoints(pl,DBscale);
-         telldata::ttlayout* wr = DEBUG_NEW telldata::ttlayout(ATDB->addWire(la,plst,
+         telldata::ttlayout* wr = DEBUG_NEW telldata::ttlayout(tDesign->addWire(la,plst,
                                     static_cast<word>(rint(w * DBscale))), la);
          delete plst;
-      DATC->unlockDB();
-      OPstack.push(wr);UNDOPstack.push_front(wr->selfcopy());
-      LogFile << LogFile.getFN() << "("<< *pl << "," << w << "," << la << ");";
-      LogFile.flush();
+         OPstack.push(wr);UNDOPstack.push_front(wr->selfcopy());
+         LogFile << LogFile.getFN() << "("<< *pl << "," << w << "," << la << ");";
+         LogFile.flush();
+      }
+      DATC->unlockTDT(dbLibDir, true);
    }
    else {
       tell_log(console::MT_ERROR,"At least 2 points expected to create a wire");
@@ -546,15 +579,19 @@ int tellstdfunc::stdDRAWWIRE::execute() {
    if (pl->size() > 1) {
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
-      laydata::TdtDesign* ATDB = DATC->lockDB();
+      laydata::TdtLibDir* dbLibDir = NULL;
+      if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+      {
+         laydata::TdtDesign* tDesign = (*dbLibDir)();
          pointlist* plst = t2tpoints(pl,DBscale);
-         telldata::ttlayout* wr = DEBUG_NEW telldata::ttlayout(ATDB->addWire(la,plst,
+         telldata::ttlayout* wr = DEBUG_NEW telldata::ttlayout(tDesign->addWire(la,plst,
                                     static_cast<word>(rint(w * DBscale))), la);
          delete plst;
-      DATC->unlockDB();
-      OPstack.push(wr);UNDOPstack.push_front(wr->selfcopy());
-      LogFile << "addwire(" << *pl << "," << w << "," << la << ");";
-      LogFile.flush();
+         OPstack.push(wr);UNDOPstack.push_front(wr->selfcopy());
+         LogFile << "addwire(" << *pl << "," << w << "," << la << ");";
+         LogFile.flush();
+      }
+      DATC->unlockTDT(dbLibDir, true);
    }
    else {
       tell_log(console::MT_ERROR,"At least 2 points expected to create a wire");
@@ -634,14 +671,18 @@ int tellstdfunc::stdADDTEXT::execute() {
    real DBscale = PROPC->DBscale();
    CTM ori(TP(rpnt->x(), rpnt->y(), DBscale),
                                      magn*DBscale/OPENGL_FONT_UNIT,angle,flip);
-   laydata::TdtDesign* ATDB = DATC->lockDB();
-      telldata::ttlayout* tx = DEBUG_NEW telldata::ttlayout(ATDB->addText(la, text, ori), la);
-   DATC->unlockDB();
-   OPstack.push(tx);UNDOPstack.push_front(tx->selfcopy());
-   LogFile << LogFile.getFN() << "(\"" << text << "\"," << la << "," << *rpnt <<
-         "," << angle << "," << LogFile._2bool(flip) << "," << magn << ");";
-   LogFile.flush();
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      telldata::ttlayout* tx = DEBUG_NEW telldata::ttlayout(tDesign->addText(la, text, ori), la);
+      OPstack.push(tx);UNDOPstack.push_front(tx->selfcopy());
+      LogFile << LogFile.getFN() << "(\"" << text << "\"," << la << "," << *rpnt <<
+            "," << angle << "," << LogFile._2bool(flip) << "," << magn << ");";
+      LogFile.flush();
+   }
    delete rpnt;
+   DATC->unlockTDT(dbLibDir, true);
    RefreshGL();
    return EXEC_NEXT;
 }
@@ -855,16 +896,20 @@ int tellstdfunc::stdCELLAREF::execute() {
    int4b istepY = (int4b)rint(stepY * DBscale);
    CTM ori(TP(rpnt->x(), rpnt->y(), DBscale), magn,angle,flip);
    laydata::ArrayProperties arrprops(istepX,istepY,col,row);
-   laydata::TdtDesign* ATDB = DATC->lockDB();
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
       telldata::ttlayout* cl = DEBUG_NEW telldata::ttlayout(
-            ATDB->addCellARef(name,ori,arrprops),REF_LAY);
-   DATC->unlockDB();
-   OPstack.push(cl); UNDOPstack.push_front(cl->selfcopy());
-   LogFile << LogFile.getFN() << "(\""<< name << "\"," << *rpnt << "," <<
-            angle << "," << LogFile._2bool(flip) << "," << magn << "," <<
-                      col << "," << row << "," << stepX << "," << stepY << ");";
-   LogFile.flush();
+            tDesign->addCellARef(name,ori,arrprops),REF_LAY);
+      OPstack.push(cl); UNDOPstack.push_front(cl->selfcopy());
+      LogFile << LogFile.getFN() << "(\""<< name << "\"," << *rpnt << "," <<
+               angle << "," << LogFile._2bool(flip) << "," << magn << "," <<
+                         col << "," << row << "," << stepX << "," << stepY << ");";
+      LogFile.flush();
+   }
    delete rpnt;
+   DATC->unlockTDT(dbLibDir, true);
    RefreshGL();
    return EXEC_NEXT;
 }
@@ -890,9 +935,14 @@ int tellstdfunc::stdCELLAREF_D::execute() {
    // check that target cell exists - otherwise tmpDraw can't obviously work.
    // there is another more extensive check when the cell is added, there the circular
    // references are checked as well
-   laydata::TdtDesign* ATDB = DATC->lockDB(false);
-   laydata::TdtCell *excell = static_cast<laydata::TdtCell*>(ATDB->checkCell(name));
-   DATC->unlockDB();
+   laydata::TdtCell *excell = NULL;
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      excell = static_cast<laydata::TdtCell*>(tDesign->checkCell(name));
+   }
+   DATC->unlockTDT(dbLibDir, true);
    if (NULL == excell)
    {
       std::string news = "Can't find cell \"";

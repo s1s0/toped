@@ -271,18 +271,22 @@ void tellstdfunc::stdOPENCELL::undo_cleanup()
 void tellstdfunc::stdOPENCELL::undo()
 {
    TEUNDO_DEBUG("opencell( string ) UNDO");
-   DWordSet unselable = PROPC->allUnselectable();
-   laydata::TdtDesign* ATDB = DATC->lockDB();
-      VERIFY(ATDB->editPrev(true));
-      TpdPost::celltree_open(ATDB->activeCellName());
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      VERIFY(tDesign->editPrev(true));
+      TpdPost::celltree_open(tDesign->activeCellName());
       telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
-      ATDB->selectFromList(get_ttlaylist(selected), unselable);
-      DBbox* ovl  = DEBUG_NEW DBbox(ATDB->activeOverlap());
-   DATC->unlockDB();
-   wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
-   eventZOOM.SetInt(tui::ZOOM_WINDOW);
-   eventZOOM.SetClientData(static_cast<void*>(ovl));
-   wxPostEvent(TopedCanvasW, eventZOOM);
+      DWordSet unselable = PROPC->allUnselectable();
+      tDesign->selectFromList(get_ttlaylist(selected), unselable);
+      DBbox* ovl  = DEBUG_NEW DBbox(tDesign->activeOverlap());
+      wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+      eventZOOM.SetInt(tui::ZOOM_WINDOW);
+      eventZOOM.SetClientData(static_cast<void*>(ovl));
+      wxPostEvent(TopedCanvasW, eventZOOM);
+   }
+   DATC->unlockTDT(dbLibDir, true);
 }
 
 int tellstdfunc::stdOPENCELL::execute()
@@ -345,16 +349,20 @@ void tellstdfunc::stdEDITPUSH::undo_cleanup()
 void tellstdfunc::stdEDITPUSH::undo()
 {
    TEUNDO_DEBUG("editpush( point ) UNDO");
-   DWordSet unselable = PROPC->allUnselectable();
-   laydata::TdtDesign* ATDB = DATC->lockDB();
-      VERIFY(ATDB->editPrev(true));
-      TpdPost::celltree_open(ATDB->activeCellName());
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      VERIFY(tDesign->editPrev(true));
+      TpdPost::celltree_open(tDesign->activeCellName());
       telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
-      ATDB->selectFromList(get_ttlaylist(selected), unselable);
-   DATC->unlockDB();
-   std::string news("Cell "); news += ATDB->activeCellName(); news += " is opened";
-   tell_log(console::MT_INFO,news);
-   delete selected;
+      DWordSet unselable = PROPC->allUnselectable();
+      tDesign->selectFromList(get_ttlaylist(selected), unselable);
+      std::string news("Cell "); news += tDesign->activeCellName(); news += " is opened";
+      tell_log(console::MT_INFO,news);
+      delete selected;
+   }
+   DATC->unlockTDT(dbLibDir, true);
    UpdateLV();
 }
 
@@ -364,26 +372,30 @@ int tellstdfunc::stdEDITPUSH::execute()
    real DBscale = PROPC->DBscale();
    TP p1DB = TP(p1->x(), p1->y(), DBscale);
    DWordSet unselable = PROPC->allUnselectable();
-   laydata::TdtDesign* ATDB = DATC->lockDB();
-      telldata::ttlist* selected = make_ttlaylist(ATDB->shapeSel());
-      if (ATDB->editPush(p1DB, unselable))
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      telldata::ttlist* selected = make_ttlaylist(tDesign->shapeSel());
+      if (tDesign->editPush(p1DB, unselable))
       {
          UNDOcmdQ.push_front(this);
          UNDOPstack.push_front(selected);
-         std::string name = ATDB->activeCellName();
-/*-!-*/  DATC->unlockDB();
+         std::string name = tDesign->activeCellName();
          TpdPost::celltree_highlight(name);
          std::string news("Cell "); news += name; news += " is opened";
          tell_log(console::MT_INFO,news);
          UpdateLV();
          LogFile << LogFile.getFN() << "("<< *p1 << ");"; LogFile.flush();
       }
-      else {
-/*-!-*/  DATC->unlockDB();
+      else
+      {
          tell_log(console::MT_ERROR,"No editable cell reference found on this location");
          delete selected;
       }
+   }
    delete p1;
+   DATC->unlockTDT(dbLibDir, true);
    return EXEC_NEXT;
 }
 
@@ -401,29 +413,35 @@ void tellstdfunc::stdEDITPOP::undo_cleanup()
 void tellstdfunc::stdEDITPOP::undo()
 {
    TEUNDO_DEBUG("editpop( ) UNDO");
-   DWordSet unselable = PROPC->allUnselectable();
-   laydata::TdtDesign* ATDB = DATC->lockDB();
-      VERIFY(ATDB->editPrev(true));
-      TpdPost::celltree_open(ATDB->activeCellName());
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      VERIFY(tDesign->editPrev(true));
+      TpdPost::celltree_open(tDesign->activeCellName());
       telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
-      ATDB->selectFromList(get_ttlaylist(selected), unselable);
-   DATC->unlockDB();
-   std::string news("Cell "); news += ATDB->activeCellName(); news += " is opened";
-   tell_log(console::MT_INFO,news);
-   delete selected;
+      DWordSet unselable = PROPC->allUnselectable();
+      tDesign->selectFromList(get_ttlaylist(selected), unselable);
+      std::string news("Cell "); news += tDesign->activeCellName(); news += " is opened";
+      tell_log(console::MT_INFO,news);
+      delete selected;
+   }
+   DATC->unlockTDT(dbLibDir, true);
    UpdateLV();
 }
 
 int tellstdfunc::stdEDITPOP::execute()
 {
-   laydata::TdtDesign* ATDB = DATC->lockDB();
-   telldata::ttlist* selected = make_ttlaylist(ATDB->shapeSel());
-      if (ATDB->editPop())
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      telldata::ttlist* selected = make_ttlaylist(tDesign->shapeSel());
+      if (tDesign->editPop())
       {
          UNDOcmdQ.push_front(this);
          UNDOPstack.push_front(selected);
-         std::string name = ATDB->activeCellName();
-/*-!-*/  DATC->unlockDB();
+         std::string name = tDesign->activeCellName();
          TpdPost::celltree_highlight(name);
          std::string news("Cell "); news += name; news += " is opened";
          tell_log(console::MT_INFO,news);
@@ -432,10 +450,11 @@ int tellstdfunc::stdEDITPOP::execute()
       }
       else
       {
-/*-!-*/  DATC->unlockDB();
          tell_log(console::MT_ERROR,"Already on the top level of the curent hierarchy");
          delete selected;
       }
+   }
+   DATC->unlockTDT(dbLibDir, true);
    return EXEC_NEXT;
 }
 
@@ -453,29 +472,35 @@ void tellstdfunc::stdEDITPREV::undo_cleanup()
 void tellstdfunc::stdEDITPREV::undo()
 {
    TEUNDO_DEBUG("editpop( ) UNDO");
-   DWordSet unselable = PROPC->allUnselectable();
-   laydata::TdtDesign* ATDB = DATC->lockDB();
-      VERIFY(ATDB->editPrev(true));
-      TpdPost::celltree_open(ATDB->activeCellName());
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      VERIFY(tDesign->editPrev(true));
+      TpdPost::celltree_open(tDesign->activeCellName());
       telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
-      ATDB->selectFromList(get_ttlaylist(selected), unselable);
-   DATC->unlockDB();
-   std::string news("Cell "); news += ATDB->activeCellName(); news += " is opened";
-   tell_log(console::MT_INFO,news);
-   delete selected;
+      DWordSet unselable = PROPC->allUnselectable();
+      tDesign->selectFromList(get_ttlaylist(selected), unselable);
+      std::string news("Cell "); news += tDesign->activeCellName(); news += " is opened";
+      tell_log(console::MT_INFO,news);
+      delete selected;
+   }
+   DATC->unlockTDT(dbLibDir, true);
    UpdateLV();
 }
 
 int tellstdfunc::stdEDITPREV::execute()
 {
-   laydata::TdtDesign* ATDB = DATC->lockDB();
-      telldata::ttlist* selected = make_ttlaylist(ATDB->shapeSel());
-      if (ATDB->editPrev(false))
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      telldata::ttlist* selected = make_ttlaylist(tDesign->shapeSel());
+      if (tDesign->editPrev(false))
       {
          UNDOcmdQ.push_front(this);
          UNDOPstack.push_front(selected);
-         std::string name = ATDB->activeCellName();
-/*-!-*/  DATC->unlockDB();
+         std::string name = tDesign->activeCellName();
          std::string news("Cell "); news += name; news += " is opened";
          tell_log(console::MT_INFO,news);
          TpdPost::celltree_highlight(name);
@@ -484,10 +509,11 @@ int tellstdfunc::stdEDITPREV::execute()
       }
       else
       {
-/*-!-*/  DATC->unlockDB();
          tell_log(console::MT_ERROR,"This is the first cell open during this session");
          delete selected;
       }
+   }
+   DATC->unlockTDT(dbLibDir, true);
    return EXEC_NEXT;
 }
 
@@ -505,29 +531,35 @@ void tellstdfunc::stdEDITTOP::undo_cleanup()
 void tellstdfunc::stdEDITTOP::undo()
 {
    TEUNDO_DEBUG("editpop( ) UNDO");
-   DWordSet unselable = PROPC->allUnselectable();
-   laydata::TdtDesign* ATDB = DATC->lockDB();
-      VERIFY(ATDB->editPrev(true));
-      TpdPost::celltree_open(ATDB->activeCellName());
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      VERIFY(tDesign->editPrev(true));
+      TpdPost::celltree_open(tDesign->activeCellName());
       telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
-      ATDB->selectFromList(get_ttlaylist(selected), unselable);
-   DATC->unlockDB();
-   std::string news("Cell "); news += ATDB->activeCellName(); news += " is opened";
-   tell_log(console::MT_INFO,news);
-   delete selected;
+      DWordSet unselable = PROPC->allUnselectable();
+      tDesign->selectFromList(get_ttlaylist(selected), unselable);
+      std::string news("Cell "); news += tDesign->activeCellName(); news += " is opened";
+      tell_log(console::MT_INFO,news);
+      delete selected;
+   }
+   DATC->unlockTDT(dbLibDir, true);
    UpdateLV();
 }
 
 int tellstdfunc::stdEDITTOP::execute()
 {
-   laydata::TdtDesign* ATDB = DATC->lockDB();
-      telldata::ttlist* selected = make_ttlaylist(ATDB->shapeSel());
-      if (ATDB->editTop())
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      telldata::ttlist* selected = make_ttlaylist(tDesign->shapeSel());
+      if (tDesign->editTop())
       {
          UNDOcmdQ.push_front(this);
          UNDOPstack.push_front(selected);
-         std::string name = ATDB->activeCellName();
-/*-!-*/  DATC->unlockDB();
+         std::string name = tDesign->activeCellName();
          TpdPost::celltree_highlight(name);
          std::string news("Cell "); news += name; news += " is opened";
          tell_log(console::MT_INFO,news);
@@ -536,10 +568,11 @@ int tellstdfunc::stdEDITTOP::execute()
       }
       else
       {
-/*-!-*/  DATC->unlockDB();
-         tell_log(console::MT_ERROR,"Already on the top level of the curent hierarchy");
+         tell_log(console::MT_ERROR,"Already on the top level of the current hierarchy");
          delete selected;
       }
+   }
+   DATC->unlockTDT(dbLibDir, true);
    return EXEC_NEXT;
 }
 

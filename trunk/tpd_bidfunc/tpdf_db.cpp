@@ -665,10 +665,13 @@ int tellstdfunc::GDSexportLIB::execute()
 
    if (expandFileName(filename))
    {
-      DATC->lockDB(false);
+      laydata::TdtLibDir* dbLibDir = NULL;
+      if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
+      {
          LayerMapExt default_map(gdsLays, NULL);
          DATC->GDSexport(default_map, filename, x2048);
-      DATC->unlockDB();
+      }
+      DATC->unlockTDT(dbLibDir, true);
       LogFile << LogFile.getFN() << "( "
               << *lll << ", "
               << "\""<< filename << "\", "
@@ -714,8 +717,11 @@ int tellstdfunc::GDSexportTOP::execute()
    if (expandFileName(filename))
    {
       laydata::TdtCell *excell = NULL;
-      laydata::TdtDesign* ATDB = DATC->lockDB(false);
-         excell = static_cast<laydata::TdtCell*>(ATDB->checkCell(cellname));
+      laydata::TdtLibDir* dbLibDir = NULL;
+      if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
+      {
+         laydata::TdtDesign* tDesign = (*dbLibDir)();
+         excell = static_cast<laydata::TdtCell*>(tDesign->checkCell(cellname));
 
          if (NULL != excell)
          {
@@ -735,7 +741,8 @@ int tellstdfunc::GDSexportTOP::execute()
             std::string message = "Cell " + cellname + " not found in the database";
             tell_log(console::MT_ERROR,message);
          }
-      DATC->unlockDB();
+      }
+      DATC->unlockTDT(dbLibDir, true);
    }
    else
    {
@@ -809,11 +816,15 @@ int tellstdfunc::PSexportTOP::execute()
    if (expandFileName(filename))
    {
       laydata::TdtCell *excell = NULL;
-      laydata::TdtDesign* ATDB = DATC->lockDB(false);
-         excell = static_cast<laydata::TdtCell*>(ATDB->checkCell(cellname));
+      laydata::TdtLibDir* dbLibDir = NULL;
+      if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
+      {
+         laydata::TdtDesign* tDesign = (*dbLibDir)();
+         excell = static_cast<laydata::TdtCell*>(tDesign->checkCell(cellname));
          if (NULL != excell)
             DATC->PSexport(excell, filename);
-      DATC->unlockDB();
+      }
+      DATC->unlockTDT(dbLibDir, true);
       if (NULL != excell)
       {
          LogFile << LogFile.getFN() << "(\""<< cellname << "\","
@@ -1271,9 +1282,12 @@ int tellstdfunc::CIFexportLIB::execute()
    }
    if (expandFileName(filename))
    {
-      DATC->lockDB(false);
-      DATC->CIFexport(cifLays, verbose, filename);
-      DATC->unlockDB();
+      laydata::TdtLibDir* dbLibDir = NULL;
+      if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
+      {
+         DATC->CIFexport(cifLays, verbose, filename);
+      }
+      DATC->unlockTDT(dbLibDir, true);
       LogFile << LogFile.getFN() << "( "
               << (*lll) << ", \""
               << filename << "\", "
@@ -1321,8 +1335,11 @@ int tellstdfunc::CIFexportTOP::execute()
    if (expandFileName(filename))
    {
       laydata::TdtCell *excell = NULL;
-      laydata::TdtDesign* ATDB = DATC->lockDB(false);
-         excell = static_cast<laydata::TdtCell*>(ATDB->checkCell(cellname));
+      laydata::TdtLibDir* dbLibDir = NULL;
+      if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
+      {
+         laydata::TdtDesign* tDesign = (*dbLibDir)();
+         excell = static_cast<laydata::TdtCell*>(tDesign->checkCell(cellname));
          if (NULL != excell)
          {
             DATC->CIFexport(excell, cifLays, recur, verbose, filename);
@@ -1339,7 +1356,8 @@ int tellstdfunc::CIFexportTOP::execute()
             std::string message = "Cell " + cellname + " not found in the database";
             tell_log(console::MT_ERROR,message);
          }
-      DATC->unlockDB();
+      }
+      DATC->unlockTDT(dbLibDir, true);
    }
    else
    {

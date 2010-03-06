@@ -1244,10 +1244,6 @@ void tui::TopedFrame::OnGDSimport(wxCommandEvent& WXUNUSED(event))
 
 void tui::TopedFrame::OnCIFimport(wxCommandEvent& WXUNUSED(event))
 {
-   // Here - try a hollow lock/unlock the database just to check that it exists
-   try {DATC->lockDB(false);}
-   catch (EXPTN) {return;}
-   DATC->unlockDB();
    wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
                      wxT("Caltech files(*.cif)|*.cif;*.CIF|All files(*.*)|*.*"),
                      tpdfOPEN);
@@ -1652,10 +1648,14 @@ void tui::TopedFrame::CellARef(wxString clname) {
 }
 
 void tui::TopedFrame::OnCellGroup(wxCommandEvent& WXUNUSED(event)) {
-   // Here - try a hollow lock/unlock the database just to check that it exists
-   try {DATC->lockDB();}
+   // Here - try a hollow lock/unlock just to check that it exists
+   try
+   {
+      laydata::TdtLibDir* dbLibDir = NULL;
+      DATC->lockTDT(dbLibDir, dbmxs_celllock);
+      DATC->unlockTDT(dbLibDir, true);
+   }
    catch (EXPTN) {return;}
-   DATC->unlockDB();
    //
    wxTextEntryDialog dlg2(this,
       wxT("Cell name:"),

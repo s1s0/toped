@@ -63,7 +63,6 @@ public:
    void                       importOAScell(const nameList&, const LayerMapExt&, bool recur, bool over);
    void                       PSexport(laydata::TdtCell*, std::string&);
    bool                       lockTDT(laydata::TdtLibDir*&, TdtMutexState);
-   laydata::TdtDesign*        lockDB(bool checkACTcell = true);
    laydata::DrcLibrary*       lockDRC(void);
    bool                       lockGds(GDSin::GdsInFile*&);
    bool                       lockCif(CIFin::CifFile*&);
@@ -71,7 +70,6 @@ public:
    void                       bpAddGdsTab();
    void                       bpAddCifTab();
    void                       bpAddOasTab();
-   void                       unlockDB();
    void                       unlockTDT(laydata::TdtLibDir*, bool throwexception = false);
    void                       unlockDRC();
    void                       unlockGds(GDSin::GdsInFile*&, bool throwexception = false);
