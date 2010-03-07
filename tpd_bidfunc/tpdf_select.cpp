@@ -62,10 +62,10 @@ void tellstdfunc::stdSELECT::undo()
       DWordSet unselable = PROPC->allUnselectable();
       tDesign->unselectInBox(p1DB, p2DB, unselable, false);
       delete p1DB; delete p2DB;
+      UpdateLV(tDesign->numSelected());
    }
    delete w;
    DATC->unlockTDT(dbLibDir, true);
-   UpdateLV();
 }
 
 int tellstdfunc::stdSELECT::execute()
@@ -86,10 +86,10 @@ int tellstdfunc::stdSELECT::execute()
       OPstack.push(make_ttlaylist(tDesign->shapeSel()));
       delete p1DB; delete p2DB;
       LogFile << LogFile.getFN() << "("<< *w << ");"; LogFile.flush();
+      UpdateLV(tDesign->numSelected());
    }
    //DONT delete w; - undo will delete it
    DATC->unlockTDT(dbLibDir, true);
-   UpdateLV();
    return EXEC_NEXT;
 }
 
@@ -130,10 +130,10 @@ int tellstdfunc::stdSELECT_TL::execute()
       laydata::TdtDesign* tDesign = (*dbLibDir)();
       tDesign->selectFromList(get_ttlaylist(pl), unselable);
       OPstack.push(make_ttlaylist(tDesign->shapeSel()));
+      UpdateLV(tDesign->numSelected());
    }
    delete pl;
    DATC->unlockTDT(dbLibDir, true);
-   UpdateLV();
    return EXEC_NEXT;
 }
 
@@ -160,10 +160,10 @@ void tellstdfunc::stdSELECTIN::undo()
       laydata::TdtDesign* tDesign = (*dbLibDir)();
       DWordSet unselable = PROPC->allUnselectable();
       tDesign->unselectFromList(get_ttlaylist(selected), unselable);
+      UpdateLV(tDesign->numSelected());
    }
    delete selected;
    DATC->unlockTDT(dbLibDir, true);
-   UpdateLV();
 }
 
 int tellstdfunc::stdSELECTIN::execute()
@@ -187,12 +187,12 @@ int tellstdfunc::stdSELECTIN::execute()
          for(laydata::AtticList::iterator CI = selectedl->begin();CI != selectedl->end(); CI++)
             delete CI->second;
          delete selectedl;
+         UpdateLV(tDesign->numSelected());
       }
       delete p1DB;
    }
    delete p1;
    DATC->unlockTDT(dbLibDir, true);
-   UpdateLV();
    return EXEC_NEXT;
 }
 
@@ -222,10 +222,10 @@ void tellstdfunc::stdPNTSELECT::undo() {
       DWordSet unselable = PROPC->allUnselectable();
       tDesign->unselectInBox(p1DB, p2DB, unselable, true);
       delete p1DB; delete p2DB;
+      UpdateLV(tDesign->numSelected());
    }
    delete w;
    DATC->unlockTDT(dbLibDir, true);
-   UpdateLV();
 }
 
 int tellstdfunc::stdPNTSELECT::execute()
@@ -246,10 +246,10 @@ int tellstdfunc::stdPNTSELECT::execute()
       OPstack.push(make_ttlaylist(tDesign->shapeSel()));
       LogFile << LogFile.getFN() << "("<< *w << ");"; LogFile.flush();
       delete p1DB; delete p2DB;
+      UpdateLV(tDesign->numSelected());
    }
    //DONT delete w; - undo will delete it
    DATC->unlockTDT(dbLibDir, true);
-   UpdateLV();
    return EXEC_NEXT;
 }
 
@@ -291,10 +291,10 @@ void tellstdfunc::stdUNSELECT::undo()
       DWordSet unselable = PROPC->allUnselectable();
       tDesign->selectInBox(p1DB, p2DB, unselable, PROPC->layselmask(), false);
       delete p1DB; delete p2DB;
+      UpdateLV(tDesign->numSelected());
    }
    delete w;
    DATC->unlockTDT(dbLibDir, true);
-   UpdateLV();
 }
 
 int tellstdfunc::stdUNSELECT::execute()
@@ -315,10 +315,10 @@ int tellstdfunc::stdUNSELECT::execute()
       OPstack.push(make_ttlaylist(tDesign->shapeSel()));
       LogFile << LogFile.getFN() << "("<< *w << ");"; LogFile.flush();
       delete p1DB; delete p2DB;
+      UpdateLV(tDesign->numSelected());
    }
    //DONT delete w; - undo will delete it
    DATC->unlockTDT(dbLibDir, true);
-   UpdateLV();
    return EXEC_NEXT;
 }
 
@@ -359,9 +359,9 @@ int tellstdfunc::stdUNSELECT_TL::execute()
       DWordSet unselable = PROPC->allUnselectable();
       tDesign->unselectFromList(get_ttlaylist(pl), unselable);
       OPstack.push(make_ttlaylist(tDesign->shapeSel()));
+      UpdateLV(tDesign->numSelected());
    }
    DATC->unlockTDT(dbLibDir, true);
-   UpdateLV();
    return EXEC_NEXT;
 }
 
@@ -388,10 +388,10 @@ void tellstdfunc::stdUNSELECTIN::undo()
       laydata::TdtDesign* tDesign = (*dbLibDir)();
       DWordSet unselable = PROPC->allUnselectable();
       tDesign->selectFromList(get_ttlaylist(selected), unselable);
+      UpdateLV(tDesign->numSelected());
    }
    delete selected;
    DATC->unlockTDT(dbLibDir, true);
-   UpdateLV();
 }
 
 int tellstdfunc::stdUNSELECTIN::execute()
@@ -414,11 +414,11 @@ int tellstdfunc::stdUNSELECTIN::execute()
          OPstack.push(make_ttlaylist(selectedl));
          LogFile << LogFile.getFN() << "("<< *p1 << ");"; LogFile.flush();
          delete selectedl;
+         UpdateLV(tDesign->numSelected());
       }
    }
    delete p1;
    DATC->unlockTDT(dbLibDir, true);
-   UpdateLV();
    return EXEC_NEXT;
 }
 
@@ -449,10 +449,10 @@ void tellstdfunc::stdPNTUNSELECT::undo()
       DWordSet unselable = PROPC->allUnselectable();
       tDesign->selectInBox(p1DB, p2DB, unselable, PROPC->layselmask(), true);
       delete p1DB; delete p2DB;
+      UpdateLV(tDesign->numSelected());
    }
    delete w;
    DATC->unlockTDT(dbLibDir, true);
-   UpdateLV();
 }
 
 int tellstdfunc::stdPNTUNSELECT::execute()
@@ -473,10 +473,10 @@ int tellstdfunc::stdPNTUNSELECT::execute()
       OPstack.push(make_ttlaylist(tDesign->shapeSel()));
       delete p1DB; delete p2DB;
       LogFile << LogFile.getFN() << "("<< *w << ");"; LogFile.flush();
+      UpdateLV(tDesign->numSelected());
    }
    //DON'T delete w; - undo will delete it
    DATC->unlockTDT(dbLibDir, true);
-   UpdateLV();
    return EXEC_NEXT;
 }
 
@@ -513,10 +513,10 @@ void tellstdfunc::stdSELECTALL::undo()
       DWordSet unselable = PROPC->allUnselectable();
       tDesign->unselectAll();
       tDesign->selectFromList(get_ttlaylist(pl), unselable);
+      UpdateLV(tDesign->numSelected());
    }
    delete pl;
    DATC->unlockTDT(dbLibDir, true);
-   UpdateLV();
 }
 
 int tellstdfunc::stdSELECTALL::execute()
@@ -531,9 +531,9 @@ int tellstdfunc::stdSELECTALL::execute()
       tDesign->selectAll(unselectable, PROPC->layselmask());
       OPstack.push(make_ttlaylist(tDesign->shapeSel()));
       LogFile << LogFile.getFN() << "();"; LogFile.flush();
+      UpdateLV(tDesign->numSelected());
    }
    DATC->unlockTDT(dbLibDir, true);
-   UpdateLV();
    return EXEC_NEXT;
 }
 
@@ -558,10 +558,10 @@ void tellstdfunc::stdUNSELECTALL::undo()
       laydata::TdtDesign* tDesign = (*dbLibDir)();
       DWordSet unselable = PROPC->allUnselectable();
       tDesign->selectFromList(get_ttlaylist(pl), unselable);
+      UpdateLV(tDesign->numSelected());
    }
    delete (pl);
    DATC->unlockTDT(dbLibDir, true);
-   UpdateLV();
 }
 
 int tellstdfunc::stdUNSELECTALL::execute()
@@ -574,7 +574,7 @@ int tellstdfunc::stdUNSELECTALL::execute()
       UNDOPstack.push_front(make_ttlaylist(tDesign->shapeSel()));
       tDesign->unselectAll();
       LogFile << LogFile.getFN() << "();"; LogFile.flush();
-      UpdateLV();
+      UpdateLV(tDesign->numSelected());
    }
    DATC->unlockTDT(dbLibDir, true);
    return EXEC_NEXT;
@@ -587,20 +587,16 @@ tellstdfunc::stdREPORTSLCTD::stdREPORTSLCTD(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdREPORTSLCTD::execute()
 {
-   if (DATC->numSelected() == 0)
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
-      tell_log(console::MT_ERROR,"No objects selected.");
-   }
-   else
-   {
-      laydata::TdtLibDir* dbLibDir = NULL;
-      if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
-      {
-         laydata::TdtDesign* tDesign = (*dbLibDir)();
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      if (0 == tDesign->numSelected())
+         tell_log(console::MT_ERROR,"No objects selected.");
+      else
          tDesign->reportSelected(PROPC->DBscale());
-      }
-      DATC->unlockTDT(dbLibDir, true);
    }
+   DATC->unlockTDT(dbLibDir, true);
    return EXEC_NEXT;
 }
 

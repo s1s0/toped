@@ -281,10 +281,10 @@ laydata::AtticList* tellstdfunc::replace_str(laydata::AtticList* shapesel, std::
 }
 
 //=============================================================================
-void tellstdfunc::UpdateLV()
+void tellstdfunc::UpdateLV(unsigned int numSel)
 {
    wxString ws;
-   ws.sprintf(wxT("%d"),DATC->numSelected());
+   ws.sprintf(wxT("%d"),numSel);
    wxCommandEvent eventUPDATESEL(wxEVT_CANVAS_STATUS);
    eventUPDATESEL.SetInt(tui::CNVS_SELECTED);
    eventUPDATESEL.SetString(ws);

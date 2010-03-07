@@ -281,6 +281,7 @@ void tellstdfunc::stdHIDELAYER::undo() {
          {
             laydata::TdtDesign* tDesign = (*dbLibDir)();
             tDesign->selectFromList(get_ttlaylist(pl), unselable);
+            UpdateLV(tDesign->numSelected());
          }
          else
          {
@@ -293,7 +294,6 @@ void tellstdfunc::stdHIDELAYER::undo() {
    PROPC->unlockDrawProp(drawProp);
    delete pl;
    TpdPost::layer_status(tui::BT_LAYER_HIDE, layno, hide);
-   UpdateLV();
 }
 
 int tellstdfunc::stdHIDELAYER::execute()
@@ -319,6 +319,7 @@ int tellstdfunc::stdHIDELAYER::execute()
                drawProp->allUnselectable(unselable);
                tDesign->unselectFromList(todslct, unselable);
             }
+            UpdateLV(tDesign->numSelected());
          }
          DATC->unlockTDT(dbLibDir);
          UNDOcmdQ.push_front(this);
@@ -330,7 +331,6 @@ int tellstdfunc::stdHIDELAYER::execute()
          TpdPost::layer_status(tui::BT_LAYER_HIDE, layno, hide);
          LogFile << LogFile.getFN() << "("<< layno << "," <<
                     LogFile._2bool(hide) << ");"; LogFile.flush();
-         UpdateLV();
       }
       else
       {
@@ -379,6 +379,7 @@ void tellstdfunc::stdHIDELAYERS::undo() {
       {
          laydata::TdtDesign* tDesign = (*dbLibDir)();
          tDesign->selectFromList(get_ttlaylist(pl), unselable);
+         UpdateLV(tDesign->numSelected());
       }
       else
       {
@@ -387,9 +388,8 @@ void tellstdfunc::stdHIDELAYERS::undo() {
       }
       DATC->unlockTDT(dbLibDir);
    }
-   PROPC->unlockDrawProp(drawProp);
    delete pl; delete sl;
-   UpdateLV();
+   PROPC->unlockDrawProp(drawProp);
 }
 
 int tellstdfunc::stdHIDELAYERS::execute()
@@ -433,6 +433,7 @@ int tellstdfunc::stdHIDELAYERS::execute()
          // Now unselect the shapes in the target layers
          drawProp->allUnselectable(unselable);
          tDesign->unselectFromList(todslct, unselable);
+         UpdateLV(tDesign->numSelected());
       }
       DATC->unlockTDT(dbLibDir);
       UNDOcmdQ.push_front(this);
@@ -452,7 +453,6 @@ int tellstdfunc::stdHIDELAYERS::execute()
    }
    PROPC->unlockDrawProp(drawProp);
    delete sl;
-   UpdateLV();
    return EXEC_NEXT;
 }
 
@@ -673,6 +673,7 @@ void tellstdfunc::stdLOCKLAYER::undo() {
       {
          laydata::TdtDesign* tDesign = (*dbLibDir)();
          tDesign->selectFromList(get_ttlaylist(pl), unselable);
+         UpdateLV(tDesign->numSelected());
       }
       else
       {
@@ -681,10 +682,9 @@ void tellstdfunc::stdLOCKLAYER::undo() {
       }
       DATC->unlockTDT(dbLibDir);
    }
-   PROPC->unlockDrawProp(drawProp);
    delete pl;
+   PROPC->unlockDrawProp(drawProp);
    TpdPost::layer_status(tui::BT_LAYER_LOCK, layno, lock);
-   UpdateLV();
 }
 
 int tellstdfunc::stdLOCKLAYER::execute()
@@ -709,6 +709,7 @@ int tellstdfunc::stdLOCKLAYER::execute()
                drawProp->allUnselectable(unselable);
                tDesign->unselectFromList(todslct, unselable);
             }
+            UpdateLV(tDesign->numSelected());
          }
          DATC->unlockTDT(dbLibDir);
          UNDOcmdQ.push_front(this);
@@ -720,7 +721,6 @@ int tellstdfunc::stdLOCKLAYER::execute()
          TpdPost::layer_status(tui::BT_LAYER_LOCK, layno, lock);
          LogFile << LogFile.getFN() << "("<< layno << "," <<
                     LogFile._2bool(lock) << ");"; LogFile.flush();
-         UpdateLV();
       }
       else
       {
@@ -769,6 +769,7 @@ void tellstdfunc::stdLOCKLAYERS::undo() {
       {
          laydata::TdtDesign* tDesign = (*dbLibDir)();
          tDesign->selectFromList(get_ttlaylist(pl), unselable);
+         UpdateLV(tDesign->numSelected());
       }
       else
       {
@@ -777,9 +778,8 @@ void tellstdfunc::stdLOCKLAYERS::undo() {
       }
       DATC->unlockTDT(dbLibDir);
    }
-   PROPC->unlockDrawProp(drawProp);
    delete pl; delete sl;
-   UpdateLV();
+   PROPC->unlockDrawProp(drawProp);
 }
 
 int tellstdfunc::stdLOCKLAYERS::execute()
@@ -823,6 +823,7 @@ int tellstdfunc::stdLOCKLAYERS::execute()
          DWordSet unselable;
          drawProp->allUnselectable(unselable);
          tDesign->unselectFromList(todslct, unselable);
+         UpdateLV(tDesign->numSelected());
       }
       DATC->unlockTDT(dbLibDir);
       UNDOcmdQ.push_front(this);
@@ -840,9 +841,8 @@ int tellstdfunc::stdLOCKLAYERS::execute()
       LogFile << LogFile.getFN() << "("<< *sl << "," <<
                                          LogFile._2bool(lock) << ");"; LogFile.flush();
    }
-   PROPC->unlockDrawProp(drawProp);
    delete sl;
-   UpdateLV();
+   PROPC->unlockDrawProp(drawProp);
    return EXEC_NEXT;
 }
 
@@ -868,10 +868,10 @@ void tellstdfunc::stdFILLLAYER::undo() {
    if (PROPC->lockDrawProp(drawProp))
    {
       drawProp->fillLayer(layno, fill);
+      TpdPost::layer_status(tui::BT_LAYER_FILL, layno, fill);
+      RefreshGL();
    }
    PROPC->unlockDrawProp(drawProp);
-   TpdPost::layer_status(tui::BT_LAYER_FILL, layno, fill);
-   UpdateLV();
 }
 
 int tellstdfunc::stdFILLLAYER::execute()
@@ -888,9 +888,9 @@ int tellstdfunc::stdFILLLAYER::execute()
       TpdPost::layer_status(tui::BT_LAYER_FILL, layno, fill);
       LogFile << LogFile.getFN() << "("<< layno << "," <<
                  LogFile._2bool(fill) << ");"; LogFile.flush();
+      RefreshGL();
    }
    PROPC->unlockDrawProp(drawProp);
-   UpdateLV();
    return EXEC_NEXT;
 }
 
@@ -923,10 +923,10 @@ void tellstdfunc::stdFILLLAYERS::undo() {
          drawProp->fillLayer(lay, fill);
          TpdPost::layer_status(tui::BT_LAYER_FILL, lay, fill);
       }
+      RefreshGL();
    }
-   PROPC->unlockDrawProp(drawProp);
    delete sl;
-   UpdateLV();
+   PROPC->unlockDrawProp(drawProp);
 }
 
 int tellstdfunc::stdFILLLAYERS::execute()
@@ -948,9 +948,10 @@ int tellstdfunc::stdFILLLAYERS::execute()
       UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!fill));
       LogFile << LogFile.getFN() << "("<< *sl << "," <<
                  LogFile._2bool(fill) << ");"; LogFile.flush();
+      RefreshGL();
    }
+   delete sl;
    PROPC->unlockDrawProp(drawProp);
-   UpdateLV();
    return EXEC_NEXT;
 }
 
@@ -1037,6 +1038,7 @@ void tellstdfunc::stdLOADLAYSTAT::undo() {
       {
          laydata::TdtDesign* tDesign = (*dbLibDir)();
          tDesign->selectFromList(get_ttlaylist(pl), unselable);
+         UpdateLV(tDesign->numSelected());
       }
       else
       {
@@ -1045,9 +1047,8 @@ void tellstdfunc::stdLOADLAYSTAT::undo() {
       }
       DATC->unlockTDT(dbLibDir);
    }
-   PROPC->unlockDrawProp(drawProp);
    delete pl;
-   UpdateLV();
+   PROPC->unlockDrawProp(drawProp);
 }
 
 int tellstdfunc::stdLOADLAYSTAT::execute()
@@ -1081,6 +1082,7 @@ int tellstdfunc::stdLOADLAYSTAT::execute()
             DWordSet unselable;
             drawProp->allUnselectable(unselable);
             tDesign->unselectFromList(todslct, unselable);
+            UpdateLV(tDesign->numSelected());
          }
          DATC->unlockTDT(dbLibDir);
          UNDOcmdQ.push_front(this);
@@ -1097,7 +1099,6 @@ int tellstdfunc::stdLOADLAYSTAT::execute()
          info << "Layer set \"" << sname << "\" is not defined";
          tell_log(console::MT_ERROR, info.str());
       }
-      UpdateLV();
    }
    PROPC->unlockDrawProp(drawProp);
    return EXEC_NEXT;

@@ -1754,7 +1754,8 @@ int tellstdfunc::DRCexplainerror_D::execute()
    DATC->unlockDRC();
 
    delete p1; delete p1DB;
-   UpdateLV();
+//   UpdateLV(); <- It seems this is no necessary here. Refresh should be enough?
+   RefreshGL();
    return EXEC_NEXT;
 }
 
@@ -1785,7 +1786,8 @@ int tellstdfunc::DRCexplainerror::execute()
    DATC->unlockDRC();
 
    delete p1; delete p1DB;
-   UpdateLV();
+   //   UpdateLV(); <- It seems this is no necessary here. Refresh should be enough?
+   RefreshGL();
    return EXEC_NEXT;
 }
 

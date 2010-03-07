@@ -314,8 +314,8 @@ int tellstdfunc::stdOPENCELL::execute()
          eventZOOM.SetInt(tui::ZOOM_WINDOW);
          eventZOOM.SetClientData(static_cast<void*>(ovl));
          wxPostEvent(TopedCanvasW, eventZOOM);
-         UpdateLV();
          LogFile << LogFile.getFN() << "(\""<< nm << "\");"; LogFile.flush();
+         UpdateLV(tDesign->numSelected());
       }
       else
       {
@@ -361,9 +361,9 @@ void tellstdfunc::stdEDITPUSH::undo()
       std::string news("Cell "); news += tDesign->activeCellName(); news += " is opened";
       tell_log(console::MT_INFO,news);
       delete selected;
+      UpdateLV(tDesign->numSelected());
    }
    DATC->unlockTDT(dbLibDir, true);
-   UpdateLV();
 }
 
 int tellstdfunc::stdEDITPUSH::execute()
@@ -385,8 +385,8 @@ int tellstdfunc::stdEDITPUSH::execute()
          TpdPost::celltree_highlight(name);
          std::string news("Cell "); news += name; news += " is opened";
          tell_log(console::MT_INFO,news);
-         UpdateLV();
          LogFile << LogFile.getFN() << "("<< *p1 << ");"; LogFile.flush();
+         UpdateLV(tDesign->numSelected());
       }
       else
       {
@@ -425,9 +425,9 @@ void tellstdfunc::stdEDITPOP::undo()
       std::string news("Cell "); news += tDesign->activeCellName(); news += " is opened";
       tell_log(console::MT_INFO,news);
       delete selected;
+      UpdateLV(tDesign->numSelected());
    }
    DATC->unlockTDT(dbLibDir, true);
-   UpdateLV();
 }
 
 int tellstdfunc::stdEDITPOP::execute()
@@ -445,7 +445,7 @@ int tellstdfunc::stdEDITPOP::execute()
          TpdPost::celltree_highlight(name);
          std::string news("Cell "); news += name; news += " is opened";
          tell_log(console::MT_INFO,news);
-         UpdateLV();
+         UpdateLV(tDesign->numSelected());
          LogFile << LogFile.getFN() << "();"; LogFile.flush();
       }
       else
@@ -484,9 +484,9 @@ void tellstdfunc::stdEDITPREV::undo()
       std::string news("Cell "); news += tDesign->activeCellName(); news += " is opened";
       tell_log(console::MT_INFO,news);
       delete selected;
+      UpdateLV(tDesign->numSelected());
    }
    DATC->unlockTDT(dbLibDir, true);
-   UpdateLV();
 }
 
 int tellstdfunc::stdEDITPREV::execute()
@@ -504,7 +504,7 @@ int tellstdfunc::stdEDITPREV::execute()
          std::string news("Cell "); news += name; news += " is opened";
          tell_log(console::MT_INFO,news);
          TpdPost::celltree_highlight(name);
-         UpdateLV();
+         UpdateLV(tDesign->numSelected());
          LogFile << LogFile.getFN() << "();"; LogFile.flush();
       }
       else
@@ -543,9 +543,9 @@ void tellstdfunc::stdEDITTOP::undo()
       std::string news("Cell "); news += tDesign->activeCellName(); news += " is opened";
       tell_log(console::MT_INFO,news);
       delete selected;
+      UpdateLV(tDesign->numSelected());
    }
    DATC->unlockTDT(dbLibDir, true);
-   UpdateLV();
 }
 
 int tellstdfunc::stdEDITTOP::execute()
@@ -563,7 +563,7 @@ int tellstdfunc::stdEDITTOP::execute()
          TpdPost::celltree_highlight(name);
          std::string news("Cell "); news += name; news += " is opened";
          tell_log(console::MT_INFO,news);
-         UpdateLV();
+         UpdateLV(tDesign->numSelected());
          LogFile << LogFile.getFN() << "();"; LogFile.flush();
       }
       else
@@ -622,10 +622,10 @@ void tellstdfunc::stdGROUP::undo()
          // existing library cell or on top of an undefined, but referenced
          // cell. Use remove referenced cells
          tDesign->removeRefdCell(cname, parentCells, NULL, dbLibDir);
+      UpdateLV(tDesign->numSelected());
    }
    DATC->unlockTDT(dbLibDir, true);
    delete pl;
-   UpdateLV();
 }
 
 int tellstdfunc::stdGROUP::execute()
@@ -641,7 +641,7 @@ int tellstdfunc::stdGROUP::execute()
          UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(name));
          UNDOPstack.push_front(make_ttlaylist(tDesign->shapeSel()));
          LogFile << LogFile.getFN() << "(\""<< name << "\");"; LogFile.flush();
-         UpdateLV();
+         UpdateLV(tDesign->numSelected());
       }
    }
    DATC->unlockTDT(dbLibDir, true);
@@ -692,9 +692,9 @@ void tellstdfunc::stdUNGROUP::undo()
       // finally - clean-up behind
       delete pl;
       delete pl1;
+      UpdateLV(tDesign->numSelected());
    }
    DATC->unlockTDT(dbLibDir, true);
-   UpdateLV();
 }
 
 int tellstdfunc::stdUNGROUP::execute()
@@ -728,7 +728,7 @@ int tellstdfunc::stdUNGROUP::execute()
          clean_atticlist(undol2, false);
          delete undol2;
          LogFile << LogFile.getFN() << "();"; LogFile.flush();
-         UpdateLV();
+         UpdateLV(tDesign->numSelected());
       }
    }
    DATC->unlockTDT(dbLibDir, true);

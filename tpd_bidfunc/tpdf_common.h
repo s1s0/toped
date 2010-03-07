@@ -152,7 +152,7 @@ namespace tellstdfunc {
    laydata::AtticList*  get_shlaylist(telldata::ttlist* llist);
    void                 clean_ttlaylist(telldata::ttlist* llist);
    void                 clean_atticlist(laydata::AtticList*, bool destroy = false);
-   void                 UpdateLV();
+   void                 UpdateLV(unsigned int);
    void                 RefreshGL();
    void                 gridON(byte No, bool status);
    void                 updateLayerDefinitions(laydata::TdtLibDir*, nameList&, int);
