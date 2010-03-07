@@ -96,19 +96,30 @@ tellstdfunc::stdCOPYSEL_D::stdCOPYSEL_D(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdCOPYSEL_D::execute()
 {
-   if (DATC->numSelected() == 0)
+   unsigned numSelected = 0;
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      numSelected = tDesign->numSelected();
+   }
+   DATC->unlockTDT(dbLibDir, true);
+   if (0 == numSelected)
    {
       tell_log(console::MT_ERROR,"No objects selected. Nothing to copy");
       return EXEC_NEXT;
    }
-   // stop the thread and wait for input from the GUI
-   if (!tellstdfunc::waitGUInput(console::op_copy, &OPstack)) return EXEC_ABORT;
-   // get the data from the stack
-   telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
-   OPstack.push(DEBUG_NEW telldata::ttpnt(w->p1().x(), w->p1().y()));
-   OPstack.push(DEBUG_NEW telldata::ttpnt(w->p2().x(), w->p2().y()));
-   delete w;
-   return stdCOPYSEL::execute();
+   else
+   {
+      // stop the thread and wait for input from the GUI
+      if (!tellstdfunc::waitGUInput(console::op_copy, &OPstack)) return EXEC_ABORT;
+      // get the data from the stack
+      telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
+      OPstack.push(DEBUG_NEW telldata::ttpnt(w->p1().x(), w->p1().y()));
+      OPstack.push(DEBUG_NEW telldata::ttpnt(w->p2().x(), w->p2().y()));
+      delete w;
+      return stdCOPYSEL::execute();
+   }
 }
 
 //=============================================================================
@@ -231,19 +242,30 @@ tellstdfunc::stdMOVESEL_D::stdMOVESEL_D(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdMOVESEL_D::execute()
 {
-   if (DATC->numSelected() == 0)
+   unsigned numSelected = 0;
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      numSelected = tDesign->numSelected();
+   }
+   DATC->unlockTDT(dbLibDir, true);
+   if (0 == numSelected)
    {
       tell_log(console::MT_ERROR,"No objects selected. Nothing to move");
       return EXEC_NEXT;
    }
-   // stop the thread and wait for input from the GUI
-   if (!tellstdfunc::waitGUInput(console::op_move, &OPstack)) return EXEC_ABORT;
-   // get the data from the stack
-   telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
-   OPstack.push(DEBUG_NEW telldata::ttpnt(w->p1().x(), w->p1().y()));
-   OPstack.push(DEBUG_NEW telldata::ttpnt(w->p2().x(), w->p2().y()));
-   delete w;
-   return stdMOVESEL::execute();
+   else
+   {
+      // stop the thread and wait for input from the GUI
+      if (!tellstdfunc::waitGUInput(console::op_move, &OPstack)) return EXEC_ABORT;
+      // get the data from the stack
+      telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
+      OPstack.push(DEBUG_NEW telldata::ttpnt(w->p1().x(), w->p1().y()));
+      OPstack.push(DEBUG_NEW telldata::ttpnt(w->p2().x(), w->p2().y()));
+      delete w;
+      return stdMOVESEL::execute();
+   }
 }
 
 //=============================================================================
@@ -357,17 +379,28 @@ tellstdfunc::stdROTATESEL_D::stdROTATESEL_D(telldata::typeID retype, bool eor) :
 int tellstdfunc::stdROTATESEL_D::execute()
 {
    real   angle  = getOpValue();
-   if (DATC->numSelected() == 0)
+   unsigned numSelected = 0;
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      numSelected = tDesign->numSelected();
+   }
+   DATC->unlockTDT(dbLibDir, true);
+   if (0 == numSelected)
    {
       tell_log(console::MT_ERROR,"No objects selected. Nothing to rotate");
       return EXEC_NEXT;
    }
-   CTM rct;
-   rct.Rotate(angle);
-   OPstack.push(DEBUG_NEW telldata::ttreal(angle));
-   // stop the thread and wait for input from the GUI
-   if (!tellstdfunc::waitGUInput(console::op_rotate, &OPstack, "", rct)) return EXEC_ABORT;
-   return stdROTATESEL::execute();
+   else
+   {
+      CTM rct;
+      rct.Rotate(angle);
+      OPstack.push(DEBUG_NEW telldata::ttreal(angle));
+      // stop the thread and wait for input from the GUI
+      if (!tellstdfunc::waitGUInput(console::op_rotate, &OPstack, "", rct)) return EXEC_ABORT;
+      return stdROTATESEL::execute();
+   }
 }
 
 
@@ -426,14 +459,25 @@ tellstdfunc::stdFLIPXSEL_D::stdFLIPXSEL_D(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdFLIPXSEL_D::execute()
 {
-   if (DATC->numSelected() == 0)
+   unsigned numSelected = 0;
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      numSelected = tDesign->numSelected();
+   }
+   DATC->unlockTDT(dbLibDir, true);
+   if (0 == numSelected)
    {
       tell_log(console::MT_ERROR,"No objects selected. Nothing to flip");
       return EXEC_NEXT;
    }
-   // stop the thread and wait for input from the GUI
-   if (!tellstdfunc::waitGUInput(console::op_flipX, &OPstack)) return EXEC_ABORT;
-   return stdFLIPXSEL::execute();
+   else
+   {
+      // stop the thread and wait for input from the GUI
+      if (!tellstdfunc::waitGUInput(console::op_flipX, &OPstack)) return EXEC_ABORT;
+      return stdFLIPXSEL::execute();
+   }
 }
 
 //=============================================================================
@@ -491,14 +535,25 @@ tellstdfunc::stdFLIPYSEL_D::stdFLIPYSEL_D(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdFLIPYSEL_D::execute()
 {
-   if (DATC->numSelected() == 0)
+   unsigned numSelected = 0;
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      numSelected = tDesign->numSelected();
+   }
+   DATC->unlockTDT(dbLibDir, true);
+   if (0 == numSelected)
    {
       tell_log(console::MT_ERROR,"No objects selected. Nothing to flip");
       return EXEC_NEXT;
    }
-   // stop the thread and wait for input from the GUI
-   if (!tellstdfunc::waitGUInput(console::op_flipY, &OPstack)) return EXEC_ABORT;
-   return stdFLIPYSEL::execute();
+   else
+   {
+      // stop the thread and wait for input from the GUI
+      if (!tellstdfunc::waitGUInput(console::op_flipY, &OPstack)) return EXEC_ABORT;
+      return stdFLIPYSEL::execute();
+   }
 }
 
 //=============================================================================
@@ -542,30 +597,31 @@ void tellstdfunc::stdDELETESEL::undo()
    //
       tDesign->addList(get_shlaylist(und));
       tDesign->selectFromList(get_ttlaylist(und), unselable);
+
+      UpdateLV(tDesign->numSelected());
    }
    DATC->unlockTDT(dbLibDir, true);
    delete (und);
-   UpdateLV();
 }
 
 int tellstdfunc::stdDELETESEL::execute()
 {
-   UNDOcmdQ.push_front(this);
-   laydata::AtticList* sh_delist = DEBUG_NEW laydata::AtticList();
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
+      UNDOcmdQ.push_front(this);
+      laydata::AtticList* sh_delist = DEBUG_NEW laydata::AtticList();
       tDesign->deleteSelected(sh_delist, dbLibDir);
       UNDOPstack.push_front(make_ttlaylist(sh_delist));
       clean_atticlist(sh_delist); delete sh_delist;
       laydata::CellList* udurCells = DEBUG_NEW laydata::CellList();
       dbLibDir->getHeldCells(udurCells);
       UNDOUstack.push_front(udurCells);
+      LogFile << LogFile.getFN() << "();"; LogFile.flush();
+      UpdateLV(tDesign->numSelected());
    }
    DATC->unlockTDT(dbLibDir, true);
-   LogFile << LogFile.getFN() << "();"; LogFile.flush();
-   UpdateLV();
    return EXEC_NEXT;
 }
 
@@ -621,76 +677,75 @@ void tellstdfunc::lgcCUTPOLY::undo()
       // ... and restore the selection
       tDesign->selectFromList(get_ttlaylist(pl), unselable);
       delete pl;
+      UpdateLV(tDesign->numSelected());
    }
    DATC->unlockTDT(dbLibDir, true);
-   UpdateLV();
 }
 
 int tellstdfunc::lgcCUTPOLY::execute()
 {
-   if (DATC->numSelected() == 0)
-      tell_log(console::MT_ERROR,"No selected shapes. Nothing to cut");
-   else {
-      // get the data from the stack
-      telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
-      real DBscale = PROPC->DBscale();
-      pointlist *plist = t2tpoints(pl,DBscale);
-      laydata::ValidPoly check(*plist);
-      delete plist;
-      if (!check.valid()) {
-         tell_log(console::MT_ERROR, "Invalid cutting polygon encountered");
-      }
-      else
-      {
-         //cutPoly returns 3 Attic lists -> Delete/AddSelect/AddOnly,
-         // create and initialize them here
-         laydata::AtticList* dasao[3];
-         pointlist theShape = check.getValidated();
-         for (byte i = 0; i < 3; dasao[i++] = DEBUG_NEW laydata::AtticList());
-         DWordSet unselable = PROPC->allUnselectable();
-         laydata::TdtLibDir* dbLibDir = NULL;
-         if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
-         {
-            laydata::TdtDesign* tDesign = (*dbLibDir)();
-            if (tDesign->cutPoly( theShape, dasao))
-            {
-               // push the command for undo
-               UNDOcmdQ.push_front(this);
-               UNDOPstack.push_front(make_ttlaylist(tDesign->shapeSel()));
-               // unselect everything
-               tDesign->unselectAll();
-
-               telldata::ttlist* shdeleted = make_ttlaylist(dasao[0]);
-               // select the shapes to delete & delete them ...
-               tDesign->selectFromList(get_ttlaylist(shdeleted), unselable);
-               laydata::AtticList* sh_delist = DEBUG_NEW laydata::AtticList();
-               tDesign->deleteSelected(sh_delist, dbLibDir);
-               // ... not forgetting to save them in the undo data stack for undo
-               UNDOPstack.push_front(make_ttlaylist(sh_delist));
-               // clean-up the delete attic list
-               clean_atticlist(sh_delist); delete sh_delist;
-               delete shdeleted;
-
-               // add the result of the cut...
-               telldata::ttlist* shaddselect = make_ttlaylist(dasao[1]);
-               telldata::ttlist* shaddonly = make_ttlaylist(dasao[2]);
-               tDesign->addList(dasao[1]);
-               UNDOPstack.push_front(shaddselect);
-               // ... the cut-offs ....
-               tDesign->addList(dasao[2]);
-               UNDOPstack.push_front(shaddonly);
-               // and finally select the_cut
-               tDesign->selectFromList(get_ttlaylist(shaddselect), unselable);
-               LogFile << "polycut("<< *pl << ");"; LogFile.flush();
-               clean_atticlist(dasao[0]); delete (dasao[0]);
-               // delete dasao[1]; delete dasao[2]; - deleted by tDesign->addList
-            }
-         }
-         DATC->unlockTDT(dbLibDir, true);
-      }
-      delete pl;
-      UpdateLV();
+   // get the data from the stack
+   telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   real DBscale = PROPC->DBscale();
+   pointlist *plist = t2tpoints(pl,DBscale);
+   laydata::ValidPoly check(*plist);
+   delete plist;
+   if (!check.valid()) {
+      tell_log(console::MT_ERROR, "Invalid cutting polygon encountered");
    }
+   else
+   {
+      //cutPoly returns 3 Attic lists -> Delete/AddSelect/AddOnly,
+      // create and initialize them here
+      laydata::AtticList* dasao[3];
+      pointlist theShape = check.getValidated();
+      for (byte i = 0; i < 3; dasao[i++] = DEBUG_NEW laydata::AtticList());
+      DWordSet unselable = PROPC->allUnselectable();
+      laydata::TdtLibDir* dbLibDir = NULL;
+      if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+      {
+         laydata::TdtDesign* tDesign = (*dbLibDir)();
+         if (0 == tDesign->numSelected())
+            tell_log(console::MT_ERROR,"No selected shapes. Nothing to cut");
+         else if (tDesign->cutPoly( theShape, dasao))
+         {
+            // push the command for undo
+            UNDOcmdQ.push_front(this);
+            UNDOPstack.push_front(make_ttlaylist(tDesign->shapeSel()));
+            // unselect everything
+            tDesign->unselectAll();
+
+            telldata::ttlist* shdeleted = make_ttlaylist(dasao[0]);
+            // select the shapes to delete & delete them ...
+            tDesign->selectFromList(get_ttlaylist(shdeleted), unselable);
+            laydata::AtticList* sh_delist = DEBUG_NEW laydata::AtticList();
+            tDesign->deleteSelected(sh_delist, dbLibDir);
+            // ... not forgetting to save them in the undo data stack for undo
+            UNDOPstack.push_front(make_ttlaylist(sh_delist));
+            // clean-up the delete attic list
+            clean_atticlist(sh_delist); delete sh_delist;
+            delete shdeleted;
+
+            // add the result of the cut...
+            telldata::ttlist* shaddselect = make_ttlaylist(dasao[1]);
+            telldata::ttlist* shaddonly = make_ttlaylist(dasao[2]);
+            tDesign->addList(dasao[1]);
+            UNDOPstack.push_front(shaddselect);
+            // ... the cut-offs ....
+            tDesign->addList(dasao[2]);
+            UNDOPstack.push_front(shaddonly);
+            // and finally select the_cut
+            tDesign->selectFromList(get_ttlaylist(shaddselect), unselable);
+            LogFile << "polycut("<< *pl << ");"; LogFile.flush();
+            clean_atticlist(dasao[0]); delete (dasao[0]);
+            // delete dasao[1]; delete dasao[2]; - deleted by tDesign->addList
+            UpdateLV(tDesign->numSelected());
+         }
+      }
+      DATC->unlockTDT(dbLibDir, true);
+   }
+   delete pl;
+//   }
    return EXEC_NEXT;
 }
 
@@ -701,13 +756,25 @@ tellstdfunc::lgcCUTPOLY_I::lgcCUTPOLY_I(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::lgcCUTPOLY_I::execute()
 {
-   if (DATC->numSelected() == 0) {
+   unsigned numSelected = 0;
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      numSelected = tDesign->numSelected();
+   }
+   DATC->unlockTDT(dbLibDir, true);
+   if (0 == numSelected)
+   {
       tell_log(console::MT_ERROR,"No selected shapes. Nothing to cut");
       return EXEC_NEXT;
    }
-   // stop the thread and wait for input from the GUI
-   if (!tellstdfunc::waitGUInput(console::op_dpoly, &OPstack)) return EXEC_ABORT;
-   return lgcCUTPOLY::execute();
+   else
+   {
+      // stop the thread and wait for input from the GUI
+      if (!tellstdfunc::waitGUInput(console::op_dpoly, &OPstack)) return EXEC_ABORT;
+      return lgcCUTPOLY::execute();
+   }
 }
 
 //=============================================================================
@@ -717,22 +784,34 @@ tellstdfunc::lgcCUTBOX_I::lgcCUTBOX_I(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::lgcCUTBOX_I::execute()
 {
-   if (DATC->numSelected() == 0) {
+   unsigned numSelected = 0;
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      numSelected = tDesign->numSelected();
+   }
+   DATC->unlockTDT(dbLibDir, true);
+   if (0 == numSelected)
+   {
       tell_log(console::MT_ERROR,"No selected shapes. Nothing to cut");
       return EXEC_NEXT;
    }
-   // stop the thread and wait for input from the GUI
-   if (!tellstdfunc::waitGUInput(console::op_dbox, &OPstack)) return EXEC_ABORT;
-   telldata::ttwnd *bx = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
+   else
+   {
+      // stop the thread and wait for input from the GUI
+      if (!tellstdfunc::waitGUInput(console::op_dbox, &OPstack)) return EXEC_ABORT;
+      telldata::ttwnd *bx = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
 
-   telldata::ttlist *pl = DEBUG_NEW telldata::ttlist(telldata::tn_pnt);
-   pl->add(DEBUG_NEW telldata::ttpnt(bx->p1().x(), bx->p1().y()));
-   pl->add(DEBUG_NEW telldata::ttpnt(bx->p1().x(), bx->p2().y()));
-   pl->add(DEBUG_NEW telldata::ttpnt(bx->p2().x(), bx->p2().y()));
-   pl->add(DEBUG_NEW telldata::ttpnt(bx->p2().x(), bx->p1().y()));
-   OPstack.push(pl);
-   delete bx;
-   return lgcCUTPOLY::execute();
+      telldata::ttlist *pl = DEBUG_NEW telldata::ttlist(telldata::tn_pnt);
+      pl->add(DEBUG_NEW telldata::ttpnt(bx->p1().x(), bx->p1().y()));
+      pl->add(DEBUG_NEW telldata::ttpnt(bx->p1().x(), bx->p2().y()));
+      pl->add(DEBUG_NEW telldata::ttpnt(bx->p2().x(), bx->p2().y()));
+      pl->add(DEBUG_NEW telldata::ttpnt(bx->p2().x(), bx->p1().y()));
+      OPstack.push(pl);
+      delete bx;
+      return lgcCUTPOLY::execute();
+   }
 }
 
 //=============================================================================
@@ -777,52 +856,54 @@ void tellstdfunc::lgcMERGE::undo()
       // ... and restore the selection
       tDesign->selectFromList(get_ttlaylist(pl), unselable);
       delete pl;
+      UpdateLV(tDesign->numSelected());
    }
    DATC->unlockTDT(dbLibDir, true);
-   UpdateLV();
 }
 
 int tellstdfunc::lgcMERGE::execute()
 {
-   if (DATC->numSelected() == 0) {
-      tell_log(console::MT_ERROR,"No objects selected. Nothing to cut");
-   }
-   else {
-      //merge returns 2 Attic lists -> Delete/AddMerged
-      // create and initialize them here
-      laydata::AtticList* dasao[2];
-     byte i;
-      for (i = 0; i < 2; dasao[i++] = DEBUG_NEW laydata::AtticList());
-      // create a list of currently selected shapes
-      laydata::TdtLibDir* dbLibDir = NULL;
-      if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   //merge returns 2 Attic lists -> Delete/AddMerged
+   // create and initialize them here
+   laydata::AtticList* dasao[2];
+   byte i;
+   for (i = 0; i < 2; dasao[i++] = DEBUG_NEW laydata::AtticList());
+   // create a list of currently selected shapes
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      telldata::ttlist* listselected = make_ttlaylist(tDesign->shapeSel());
+      if (0 == listselected->size())
       {
-         laydata::TdtDesign* tDesign = (*dbLibDir)();
-         telldata::ttlist* listselected = make_ttlaylist(tDesign->shapeSel());
-         if (tDesign->merge(dasao)) {
-            // push the command for undo
-            UNDOcmdQ.push_front(this);
-            // save the list of originally selected shapes
-            UNDOPstack.push_front(listselected);
-            // save the list of deleted shapes
-            UNDOPstack.push_front(make_ttlaylist(dasao[0]));
-            // add the result of the merge...
-            UNDOPstack.push_front(make_ttlaylist(dasao[1]));
-            LogFile << "merge( );"; LogFile.flush();
-         }
-         else {
-            delete listselected;
-         }
+         tell_log(console::MT_ERROR,"No objects selected. Nothing to cut");
+         delete listselected;
       }
-      DATC->unlockTDT(dbLibDir, true);
-      // clean-up the lists
-      for (i = 0; i < 2; i++)
+      else if (tDesign->merge(dasao))
       {
-         clean_atticlist(dasao[i]);
-         delete(dasao[i]);
+         // push the command for undo
+         UNDOcmdQ.push_front(this);
+         // save the list of originally selected shapes
+         UNDOPstack.push_front(listselected);
+         // save the list of deleted shapes
+         UNDOPstack.push_front(make_ttlaylist(dasao[0]));
+         // add the result of the merge...
+         UNDOPstack.push_front(make_ttlaylist(dasao[1]));
+         LogFile << "merge( );"; LogFile.flush();
+         UpdateLV(tDesign->numSelected());
+      }
+      else
+      {
+         delete listselected;
       }
    }
-   UpdateLV();
+   // clean-up the lists
+   for (i = 0; i < 2; i++)
+   {
+      clean_atticlist(dasao[i]);
+      delete(dasao[i]);
+   }
+   DATC->unlockTDT(dbLibDir, true);
    return EXEC_NEXT;
 }
 
@@ -872,74 +953,72 @@ void tellstdfunc::lgcSTRETCH::undo()
       // ... and restore the selection
       tDesign->selectFromList(get_ttlaylist(pl), unselable);
       delete pl;
+      UpdateLV(tDesign->numSelected());
    }
    DATC->unlockTDT(dbLibDir, true);
-   UpdateLV();
 }
 
 int tellstdfunc::lgcSTRETCH::execute()
 {
-   if (DATC->numSelected() == 0)
+   real bfactor = getOpValue();
+   if (0.0 == bfactor)
    {
-      tell_log(console::MT_ERROR,"No object selected. Nothing to modify");
+      tell_log(console::MT_WARNING,"Resize argument is 0. Nothing was changed");
    }
    else
    {
-      real bfactor = getOpValue();
-      if (0.0 == bfactor)
+      //expand/shrink returns 2 Attic lists -> Delete/AddSelect,
+      // create and initialize them here
+      laydata::AtticList* dasao[2];
+      DWordSet unselable = PROPC->allUnselectable();
+      for (byte i = 0; i < 2; dasao[i++] = DEBUG_NEW laydata::AtticList());
+      laydata::TdtLibDir* dbLibDir = NULL;
+      if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
       {
-         tell_log(console::MT_WARNING,"Resize argument is 0. Nothing was changed");
-      }
-      else
-      {
-         //expand/shrink returns 2 Attic lists -> Delete/AddSelect,
-         // create and initialize them here
-         laydata::AtticList* dasao[2];
-         DWordSet unselable = PROPC->allUnselectable();
-         for (byte i = 0; i < 2; dasao[i++] = DEBUG_NEW laydata::AtticList());
-         laydata::TdtLibDir* dbLibDir = NULL;
-         if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+         laydata::TdtDesign* tDesign = (*dbLibDir)();
+         real DBscale = PROPC->DBscale();
+         if (0 == tDesign->numSelected())
          {
-            laydata::TdtDesign* tDesign = (*dbLibDir)();
-            real DBscale = PROPC->DBscale();
-            if (tDesign->stretch((int) rint(bfactor * DBscale), dasao))
-            {
-               // push the command for undo
-               UNDOcmdQ.push_front(this);
-               // put the list of selected shapes in undo stack
-               UNDOPstack.push_front(make_ttlaylist(tDesign->shapeSel()));
-               // unselect everything
-               tDesign->unselectAll();
-
-               telldata::ttlist* shdeleted = make_ttlaylist(dasao[0]);
-               // select the shapes to delete & delete them ...
-               tDesign->selectFromList(get_ttlaylist(shdeleted), unselable);
-               laydata::AtticList* sh_delist = DEBUG_NEW laydata::AtticList();
-               tDesign->deleteSelected(sh_delist, dbLibDir);
-               // ... not forgetting to save them in the undo data stack for undo
-               UNDOPstack.push_front(make_ttlaylist(sh_delist));
-               // clean-up the delete attic list
-               clean_atticlist(sh_delist); delete sh_delist;
-               delete shdeleted;
-
-               // add the result of the expand/shrink...
-               telldata::ttlist* shaddselect = make_ttlaylist(dasao[1]);
-               tDesign->addList(dasao[1]);
-               UNDOPstack.push_front(shaddselect);
-               // and finally select the_cut
-               tDesign->selectFromList(get_ttlaylist(shaddselect), unselable);
-               LogFile << "resize("<< bfactor << ");"; LogFile.flush();
-               clean_atticlist(dasao[0]); delete (dasao[0]);
-               // delete dasao[1]; delete dasao[2]; - deleted by tDesign->addList
-            }
-            else
-            {
-               for (byte i = 0; i < 2; delete dasao[i++]);
-            }
+            tell_log(console::MT_ERROR,"No object selected. Nothing to modify");
+            for (byte i = 0; i < 2; delete dasao[i++]);
          }
-         DATC->unlockTDT(dbLibDir, true);
-         UpdateLV();
+         else if (tDesign->stretch((int) rint(bfactor * DBscale), dasao))
+         {
+            // push the command for undo
+            UNDOcmdQ.push_front(this);
+            // put the list of selected shapes in undo stack
+            UNDOPstack.push_front(make_ttlaylist(tDesign->shapeSel()));
+            // unselect everything
+            tDesign->unselectAll();
+
+            telldata::ttlist* shdeleted = make_ttlaylist(dasao[0]);
+            // select the shapes to delete & delete them ...
+            tDesign->selectFromList(get_ttlaylist(shdeleted), unselable);
+            laydata::AtticList* sh_delist = DEBUG_NEW laydata::AtticList();
+            tDesign->deleteSelected(sh_delist, dbLibDir);
+            // ... not forgetting to save them in the undo data stack for undo
+            UNDOPstack.push_front(make_ttlaylist(sh_delist));
+            // clean-up the delete attic list
+            clean_atticlist(sh_delist); delete sh_delist;
+            delete shdeleted;
+
+            // add the result of the expand/shrink...
+            telldata::ttlist* shaddselect = make_ttlaylist(dasao[1]);
+            tDesign->addList(dasao[1]);
+            UNDOPstack.push_front(shaddselect);
+            // and finally select the_cut
+            tDesign->selectFromList(get_ttlaylist(shaddselect), unselable);
+            LogFile << "resize("<< bfactor << ");"; LogFile.flush();
+            clean_atticlist(dasao[0]); delete (dasao[0]);
+            // delete dasao[1]; delete dasao[2]; - deleted by tDesign->addList
+            UpdateLV(tDesign->numSelected());
+         }
+         else
+         {
+            for (byte i = 0; i < 2; delete dasao[i++]);
+         }
       }
+      DATC->unlockTDT(dbLibDir, true);
    }
    return EXEC_NEXT;
 }
@@ -1049,9 +1128,9 @@ void tellstdfunc::stdCHANGEREF::undo()
       // finally - clean-up behind
       delete pl;
       delete pl1;
+      UpdateLV(tDesign->numSelected());
    }
    DATC->unlockTDT(dbLibDir, true);
-   UpdateLV();
 }
 
 int tellstdfunc::stdCHANGEREF::execute()

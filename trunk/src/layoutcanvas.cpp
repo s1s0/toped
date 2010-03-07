@@ -711,13 +711,22 @@ void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event))
       }
       else
       { // no user input expected
+         unsigned numSelected = 0;
+         laydata::TdtLibDir* dbLibDir = NULL;
+         if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+         {
+            laydata::TdtDesign* tDesign = (*dbLibDir)();
+            numSelected = tDesign->numSelected();
+         }
+         DATC->unlockTDT(dbLibDir);
+
          if (Console->cmdHistoryExists())
          {
             menu.Append(   CM_AGAIN, wxString(Console->lastCommand(), wxConvUTF8));
             menu.Append(TMEDIT_UNDO, wxT("undo"));
             menu.AppendSeparator();
          }
-         if (DATC->numSelected() > 0)
+         if (numSelected > 0)
          {
             menu.Append(       TMEDIT_MOVE, wxT("move"  ));
             menu.Append(       TMEDIT_COPY, wxT("copy"  ));
@@ -736,7 +745,7 @@ void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event))
          menu.AppendSeparator();
          menu.Append( TMSEL_SELECT_IN, wxT("select"     ));
          menu.Append(TMSEL_PSELECT_IN, wxT("part select"));
-         if (DATC->numSelected() > 0)
+         if (numSelected > 0)
          {
             menu.Append( TMSEL_UNSELECT_IN, wxT("unselect"     ));
             menu.Append(TMSEL_PUNSELECT_IN, wxT("part unselect"));
