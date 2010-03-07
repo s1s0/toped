@@ -622,7 +622,8 @@ void DataCenter::mousePoint(TP p)
    if ((console::op_cbind != currentOp) &&
        (console::op_abind != currentOp) &&
        (console::op_tbind != currentOp) &&
-       (console::op_line  != currentOp) )
+       (console::op_line  != currentOp) &&
+       (console::op_none  != currentOp)    )
    {
       laydata::TdtLibDir* dbLibDir = NULL;
       if (lockTDT(dbLibDir, dbmxs_celllock))
