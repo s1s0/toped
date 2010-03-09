@@ -267,6 +267,7 @@ Calbr::CalbrFile::CalbrFile(const std::string &fileName, drcRenderer *render)
       if(tempBorder.x2 > _border.x2) _border.x2 = tempBorder.x2;
       if(tempBorder.y2 > _border.y2) _border.y2 = tempBorder.y2;
    }
+	_render->setCellName(_cellName);
 }
 
 Calbr::CalbrFile::~CalbrFile()
@@ -474,16 +475,18 @@ void   Calbr::CalbrFile::showError(const std::string & error, long  number)
       if((*it)->ruleCheckName() == error)
       {
          _render->hideAll();
-         _render->showError((*it)->num());
-         try
-         {
-            zoom = (*it)->getZoom(number);
-         }
-         catch (EXPTNdrc_reader)
-         {
-            return;
-         }
-         _render->zoom(zoom);
+         if(_render->showError((*it)->num()))
+			{
+            try
+            {
+               zoom = (*it)->getZoom(number);
+            }
+            catch (EXPTNdrc_reader)
+            {
+               return;
+            }
+            _render->zoom(zoom);
+			}
       }
    }
    assert(it == _RuleChecks.end());
@@ -500,16 +503,18 @@ void   Calbr::CalbrFile::showCluster(const std::string & error)
       if((*it)->ruleCheckName() == error)
       {
          _render->hideAll();
-         _render->showError((*it)->num());
-         try
-         {
-            zoom = (*it)->getZoom();
-         }
-         catch (EXPTNdrc_reader)
-         {
-            return;
-         }
-         _render->zoom(zoom);
+         if (_render->showError((*it)->num()))
+			{
+				try
+            {
+               zoom = (*it)->getZoom();
+            }
+            catch (EXPTNdrc_reader)
+            {
+               return;
+            }
+            _render->zoom(zoom);
+			}
       }
    }
    assert(it == _RuleChecks.end());

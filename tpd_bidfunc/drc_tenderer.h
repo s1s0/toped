@@ -45,9 +45,10 @@ class drcTenderer: public drcRenderer
    void addLine(const edge &edge);
    void showAll(void);
 	void hideAll(void);
-	void showError(unsigned int numError);
+	bool showError(unsigned int numError);
    void zoom(const edge &edge);
    void endWriting();
+	bool checkCellName();
 private:
    laydata::DrcLibrary* _ATDB;
 	laydata::TdtCell*		_DRCCell;

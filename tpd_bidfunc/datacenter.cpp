@@ -35,10 +35,12 @@
 #include "viewprop.h"
 #include "ps_out.h"
 #include "tenderer.h"
+#include "calbr_reader.h"
 
 // Global variables
 DataCenter*                      DATC  = NULL;
 extern layprop::PropertyCenter*  PROPC;
+extern Calbr::CalbrFile*         DRCData;
 extern const wxEventType         wxEVT_CMD_BROWSER;
 
 //-----------------------------------------------------------------------------
@@ -822,7 +824,7 @@ void DataCenter::openGlRender(const CTM& layCTM)
             // Draw DRC data (if any)
             //_DRCDB->openGlDraw(_properties.drawprop());
             //TODO the block below should get into the line above
-            if(_DRCDB)
+            if(_DRCDB && (_TEDLIB()->activeCellName() == DRCData->cellName()))
             {
                renderer.setState(layprop::DRC);
                laydata::TdtDefaultCell* dst_structure = _DRCDB->checkCell("drc");

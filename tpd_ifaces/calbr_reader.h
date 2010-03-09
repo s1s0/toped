@@ -57,17 +57,20 @@ typedef std::vector <Calbr::coord> CoordsVector;
 class drcRenderer
 {
 public:
-   drcRenderer() {};
+	drcRenderer() {};
    ~drcRenderer() {};
    virtual void startWriting()=0;
 	virtual void setError(unsigned int numError) {};
-	virtual void showError(unsigned int numError) {};
+	virtual bool showError(unsigned int numError) {return false;};
    virtual void showAll() {};
 	virtual void hideAll() {};
    virtual void addPoly(const CoordsVector   &coords)=0;
    virtual void addLine(const edge &edge)=0;
    virtual void endWriting()=0;
 	virtual void zoom(const edge &edge)=0;
+	void setCellName(const std::string & cellName) {_cellName = cellName;};
+protected:
+	std::string _cellName;
 };
 
 
@@ -156,6 +159,7 @@ public:
    RuleChecksVector* results() {return &_RuleChecks;};
    bool              isOk(void)   {return _ok;}
 	drcRenderer*		render() const {return _render;};
+   std::string       cellName() {return _cellName;};
 private:
    FILE*             _calbrFile;
    std::string       _fileName;

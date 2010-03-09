@@ -154,15 +154,24 @@ void Calbr::drcTenderer::addLine(const edge &edge)
 
 void Calbr::drcTenderer::showAll(void)
 {
-   layprop::DrawProperties* drawProp;
-   if (PROPC->lockDrawProp(drawProp, layprop::DRC))
-   {
-      WordList lays = drawProp->getAllLayers();
-      for(WordList::const_iterator it = lays.begin(); it != lays.end(); ++it)
-         drawProp->hideLayer((*it), false);
-   }
-   PROPC->unlockDrawProp(drawProp);
-   tellstdfunc::RefreshGL();
+   if(checkCellName())
+	{
+		layprop::DrawProperties* drawProp;
+      if (PROPC->lockDrawProp(drawProp, layprop::DRC))
+      {
+			WordList lays = drawProp->getAllLayers();
+         for(WordList::const_iterator it = lays.begin(); it != lays.end(); ++it)
+            drawProp->hideLayer((*it), false);
+      }
+      PROPC->unlockDrawProp(drawProp);
+      tellstdfunc::RefreshGL();
+	}
+	else
+	{
+	   std::ostringstream ost;
+      ost << "Wrong cell, expected:" << "\n" << _cellName;
+      tell_log(console::MT_ERROR, ost.str());
+	}
 }
 
 void Calbr::drcTenderer::hideAll(void)
@@ -178,15 +187,26 @@ void Calbr::drcTenderer::hideAll(void)
    tellstdfunc::RefreshGL();
 }
 
-void Calbr::drcTenderer::showError(unsigned int numError)
+bool Calbr::drcTenderer::showError(unsigned int numError)
 {
-   layprop::DrawProperties* drawProp;
-   if (PROPC->lockDrawProp(drawProp, layprop::DRC))
-   {
-      drawProp->hideLayer(numError, false);
-   }
-   PROPC->unlockDrawProp(drawProp);
-   tellstdfunc::RefreshGL();
+	if(checkCellName())
+	{
+		layprop::DrawProperties* drawProp;
+      if (PROPC->lockDrawProp(drawProp, layprop::DRC))
+      {
+			drawProp->hideLayer(numError, false);
+      }
+      PROPC->unlockDrawProp(drawProp);
+      tellstdfunc::RefreshGL();
+		return true;
+	}
+	else
+	{
+		std::ostringstream ost;
+      ost << "Wrong cell, expected:" << "\n" << _cellName;
+      tell_log(console::MT_ERROR, ost.str());
+		return false;
+	}
 }
 
 void Calbr::drcTenderer::zoom(const edge &edge)
@@ -218,3 +238,14 @@ void Calbr::drcTenderer::endWriting()
    _ATDB->registerCellRead("drc", _DRCCell);
 }
 
+bool Calbr::drcTenderer::checkCellName()
+{
+	std::string activeCell;
+	laydata::TdtLibDir *libDir;
+   DATC->lockTDT(libDir, dbmxs_liblock);
+   	laydata::TdtDesign *design = (*libDir)();
+      activeCell = design->activeCellName();
+   DATC->unlockTDT(libDir);
+	 bool ret = _cellName==activeCell;
+	 return ret;
+}
