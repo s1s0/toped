@@ -39,17 +39,17 @@ int ciferror (char *s);
 namespace CIFin {
 
 /*
-A formal CIF 2.0 definition in Wirth notation is given below. Taken from 
+A formal CIF 2.0 definition in Wirth notation is given below. Taken from
 http://ai.eecs.umich.edu/people/conway/VLSI/ImplGuide/ImplGuide.pdf
 "A guide to LSI Implementation", Second Edition, Robert W. Hon Carlo H. Sequin
 
 cifFile              = {{blank} [command] semi} endCommand {blank}.
 
-command              = primCommand | defDeleteCommand | 
+command              = primCommand | defDeleteCommand |
                        defStartCommand semi {{blank}[primCommand]semi} defFinishCommand.
 
 primCommand          = polygonCommand       | boxCommand    | roundFlashCommand |
-                       wireCommand          | layerCommand  | callCommand       | 
+                       wireCommand          | layerCommand  | callCommand       |
                        userExtensionCommand | commentCommand
 
 polygonCommand       = "P" <*{blank}*> path.
@@ -333,7 +333,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
 
    class Cif2Ted {
       public:
-                              Cif2Ted(CifFile*, laydata::TdtLibDir*, SIMap*, real);
+                              Cif2Ted(CifFile*, laydata::TdtLibDir*, const SIMap&, real);
          void                 top_structure(std::string, bool, bool);
       protected:
          void                 child_structure(const CIFHierTree*, bool);
@@ -347,7 +347,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          void                 lbls( CifLabelSig*,laydata::TdtLayer*, std::string );
          CifFile*             _src_lib;
          laydata::TdtLibDir*  _tdt_db;
-         SIMap*               _cif_layers;
+         const SIMap&         _cif_layers;
          real                 _crosscoeff;
          real                 _dbucoeff;
          real                 _techno;
