@@ -658,7 +658,7 @@ CIFin::CifExportFile::~CifExportFile()
 // class Cif2Ted
 //-----------------------------------------------------------------------------
 CIFin::Cif2Ted::Cif2Ted(CIFin::CifFile* src_lib, laydata::TdtLibDir* tdt_db,
-      SIMap* cif_layers, real techno) : _src_lib (src_lib), _tdt_db(tdt_db),
+      const SIMap& cif_layers, real techno) : _src_lib (src_lib), _tdt_db(tdt_db),
                                     _cif_layers(cif_layers), _techno(techno)
 {
    _dbucoeff = 1e-8/(*_tdt_db)()->DBU();
@@ -742,10 +742,11 @@ void CIFin::Cif2Ted::convert(CIFin::CifStructure* src, laydata::TdtCell* dst)
    CIFin::CifLayer* swl = src->firstLayer();
    while( swl ) // loop trough the layers
    {
-      if (_cif_layers->end() != _cif_layers->find(swl->name()))
+      SIMap::const_iterator layno;
+      if ( _cif_layers.end() != (layno = _cif_layers.find(swl->name())) )
       {
          laydata::TdtLayer* dwl =
-               static_cast<laydata::TdtLayer*>(dst->secureLayer((*_cif_layers)[swl->name()]));
+               static_cast<laydata::TdtLayer*>(dst->secureLayer(layno->second));
          CIFin::CifData* wd = swl->firstData();
          while ( wd ) // loop trough data
          {

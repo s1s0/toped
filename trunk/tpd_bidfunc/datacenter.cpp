@@ -50,7 +50,7 @@ DataCenter::DataCenter(const std::string& localDir, const std::string& globalDir
 {
    _localDir = localDir;
    _globalDir = globalDir;
-   _GDSDB = NULL; _CIFDB = NULL;_OASDB = NULL; _DRCDB = NULL;//_TEDDB = NULL;
+   _GDSDB = NULL; _CIFDB = NULL;_OASDB = NULL; _DRCDB = NULL;
    _bpSync = NULL;
    // initializing the static cell hierarchy tree
    laydata::TdtLibrary::initHierTreePtr();
@@ -59,25 +59,14 @@ DataCenter::DataCenter(const std::string& localDir, const std::string& globalDir
    _tdtReqMxState = dbmxs_unlocked;
 }
 
-DataCenter::~DataCenter() {
+DataCenter::~DataCenter()
+{
    laydata::TdtLibrary::clearEntireHierTree();
    if (NULL != _GDSDB) delete _GDSDB;
    if (NULL != _CIFDB) delete _CIFDB;
    if (NULL != _OASDB) delete _OASDB;
 	if (NULL != _DRCDB) delete _DRCDB;
    // _TEDLIB will be cleared automatically (not a pointer)
-}
-
-void DataCenter::GDSexport(const LayerMapExt& layerMap, std::string& filename, bool x2048)
-{
-   GDSin::GdsExportFile gdsex(filename, NULL, layerMap, true);
-   _TEDLIB()->GDSwrite(gdsex);
-}
-
-void DataCenter::GDSexport(laydata::TdtCell* cell, const LayerMapExt& layerMap, bool recur, std::string& filename, bool x2048)
-{
-   GDSin::GdsExportFile gdsex(filename, cell, layerMap, recur);
-   _TEDLIB()->GDSwrite(gdsex);
 }
 
 bool DataCenter::GDSparse(std::string filename)
@@ -115,24 +104,6 @@ bool DataCenter::GDSparse(std::string filename)
    }
    unlockGds(AGDSDB);
    return status;
-}
-
-void DataCenter::importGDScell(const nameList& top_names, const LayerMapExt& laymap, bool recur, bool over)
-{
-   GDSin::GdsInFile* AGDSDB = NULL;
-   if (lockGds(AGDSDB))
-   {
-#ifdef GDSCONVERT_PROFILING
-      HiResTimer profTimer;
-#endif
-      GDSin::Gds2Ted converter(AGDSDB, &_TEDLIB, laymap);
-      converter.run(top_names, recur, over);
-      _TEDLIB()->modified = true;
-#ifdef GDSCONVERT_PROFILING
-      profTimer.report("Time elapsed for GDS conversion: ");
-#endif
-   }
-   unlockGds(AGDSDB, true);
 }
 
 void DataCenter::GDSclose()
@@ -198,19 +169,6 @@ CIFin::CifStatusType DataCenter::CIFparse(std::string filename)
    return status;
 }
 
-void DataCenter::CIFexport(USMap* laymap, bool verbose, std::string& filename)
-{
-   CIFin::CifExportFile cifex(filename, NULL, laymap, true, verbose);
-   _TEDLIB()->CIFwrite(cifex);
-}
-
-void DataCenter::CIFexport(laydata::TdtCell* topcell, USMap* laymap, bool recur, bool verbose, std::string& filename)
-{
-   CIFin::CifExportFile cifex(filename, topcell, laymap, recur, verbose);
-   _TEDLIB()->CIFwrite(cifex);
-}
-
-
 bool DataCenter::cifGetLayers(nameList& cifLayers)
 {
    bool ret_value = false;
@@ -250,21 +208,6 @@ bool DataCenter::oasGetLayers(ExtLayers& oasLayers)
    return ret_value;
 }
 
-void DataCenter::CIFimport( const nameList& top_names, SIMap* cifLayers, bool recur, bool overwrite, real techno )
-{
-   // DB shold have been locked at this point (from the tell functions)
-   CIFin::CifFile* ACIFDB = NULL;
-   if (lockCif(ACIFDB))
-   {
-      CIFin::Cif2Ted converter(ACIFDB, &_TEDLIB, cifLayers, techno);
-      for (nameList::const_iterator CN = top_names.begin(); CN != top_names.end(); CN++)
-         converter.top_structure(*CN, recur, overwrite);
-      _TEDLIB()->modified = true;
-      tell_log(console::MT_INFO,"Done");
-   }
-   unlockCif(ACIFDB, true);
-}
-
 bool DataCenter::OASParse(std::string filename)
 {
    bool status = true;
@@ -297,39 +240,6 @@ bool DataCenter::OASParse(std::string filename)
    }
    unlockOas(AOASDB);
    return status;
-}
-
-void DataCenter::importOAScell(const nameList& top_names, const LayerMapExt& laymap, bool recur, bool over)
-{
-   Oasis::OasisInFile* AOASDB = NULL;
-   if (lockOas(AOASDB))
-   {
-#ifdef OASCONVERT_PROFILING
-      HiResTimer profTimer;
-#endif
-      Oasis::Oas2Ted converter(AOASDB, &_TEDLIB, laymap);
-      converter.run(top_names, recur, over);
-      _TEDLIB()->modified = true;
-#ifdef OASCONVERT_PROFILING
-      profTimer.report("Time elapsed for OASIS conversion: ");
-#endif
-   }
-   unlockOas(AOASDB, true);
-}
-
-
-void DataCenter::PSexport(laydata::TdtCell* cell, std::string& filename)
-{
-   //Get actual time
-   PSFile psex(filename);
-   layprop::DrawProperties* drawProp;
-   if (PROPC->lockDrawProp(drawProp))
-   {
-      drawProp->psWrite(psex);
-      _TEDLIB()->PSwrite(psex, cell, *drawProp);
-   }
-   PROPC->unlockDrawProp(drawProp);
-//   gdsex.closeFile();
 }
 
 laydata::DrcLibrary*  DataCenter::lockDRC(void)
@@ -886,7 +796,6 @@ void DataCenter::motionDraw(const CTM& layCTM, TP base, TP newp)
       }
       if ((console::op_line != currentOp)  && (NULL !=_TEDLIB()))
       {
-   //      _TEDDB->checkActive();
          while (wxMUTEX_NO_ERROR != _DBLock.TryLock());
          _TEDLIB()->tmpDraw(*drawProp, base, newp);
          VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());

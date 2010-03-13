@@ -33,6 +33,7 @@
 #include "calbr_reader.h"
 #include "drc_tenderer.h"
 #include "viewprop.h"
+#include "ps_out.h"
 
 
 extern DataCenter*               DATC;
@@ -514,7 +515,6 @@ int tellstdfunc::GDSimport::execute()
    }
    // Prep: We need all used layers, and the name of the GDS DB
    std::ostringstream ost;
-   std::string gdsDbName = "NonameDB";
    ExtLayers* gdsLaysAll = NULL;
    GDSin::GdsInFile* AGDSDB = NULL;
    if (DATC->lockGds(AGDSDB))
@@ -524,7 +524,6 @@ int tellstdfunc::GDSimport::execute()
       {
          gdsLaysAll = DEBUG_NEW ExtLayers();
          src_structure->collectLayers(*gdsLaysAll,true);
-         gdsDbName = AGDSDB->libname();
       }
    }
    DATC->unlockGds(AGDSDB, true);
@@ -540,12 +539,7 @@ int tellstdfunc::GDSimport::execute()
          laydata::TdtLibDir* dbLibDir = NULL;
          if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
          {
-            if (dbmxs_dblock > DATC->tdtMxState())
-            {  // create a default target data base if one is not already existing
-               TpdTime timeCreated(time(NULL));
-               createDefaultTDT(gdsDbName, dbLibDir, timeCreated, UNDOcmdQ, UNDOPstack);
-            }
-            DATC->importGDScell(top_cells, LayerExpression, recur, over);
+            importGDScell(dbLibDir, top_cells, LayerExpression, UNDOcmdQ, UNDOPstack, recur, over);
             updateLayerDefinitions(dbLibDir, top_cells, TARGETDB_LIB);
             // populate the hierarchy browser
             TpdPost::refreshTDTtab(true);
@@ -613,13 +607,7 @@ int tellstdfunc::GDSimportList::execute()
       laydata::TdtLibDir* dbLibDir = NULL;
       if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
       {
-         if (dbmxs_dblock > DATC->tdtMxState())
-         {
-            // create a default target data base if one is not already existing
-            TpdTime timeCreated(time(NULL));
-            createDefaultTDT(gdsDbName, dbLibDir, timeCreated, UNDOcmdQ, UNDOPstack);
-         }
-         DATC->importGDScell(top_cells, LayerExpression, recur, over);
+         importGDScell(dbLibDir, top_cells, LayerExpression, UNDOcmdQ, UNDOPstack, recur, over);
          updateLayerDefinitions(dbLibDir, top_cells, TARGETDB_LIB);
          // populate the hierarchy browser
          TpdPost::refreshTDTtab(true);
@@ -668,8 +656,10 @@ int tellstdfunc::GDSexportLIB::execute()
       laydata::TdtLibDir* dbLibDir = NULL;
       if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
       {
+         laydata::TdtDesign* tDesign = (*dbLibDir)();
          LayerMapExt default_map(gdsLays, NULL);
-         DATC->GDSexport(default_map, filename, x2048);
+         GDSin::GdsExportFile gdsex(filename, NULL, default_map, true);
+         tDesign->GDSwrite(gdsex);
       }
       DATC->unlockTDT(dbLibDir, true);
       LogFile << LogFile.getFN() << "( "
@@ -726,8 +716,8 @@ int tellstdfunc::GDSexportTOP::execute()
          if (NULL != excell)
          {
             LayerMapExt default_map(gdsLays, NULL);
-
-            DATC->GDSexport(excell, default_map, recur, filename, x2048);
+            GDSin::GdsExportFile gdsex(filename, excell, default_map, recur/*, x2048*/);
+            tDesign->GDSwrite(gdsex);
             LogFile  << LogFile.getFN()
                      << "(\""<< cellname << "\","
                      << LogFile._2bool(recur) << ", "
@@ -822,20 +812,26 @@ int tellstdfunc::PSexportTOP::execute()
          laydata::TdtDesign* tDesign = (*dbLibDir)();
          excell = static_cast<laydata::TdtCell*>(tDesign->checkCell(cellname));
          if (NULL != excell)
-            DATC->PSexport(excell, filename);
+         {
+            layprop::DrawProperties* drawProp;
+            if (PROPC->lockDrawProp(drawProp))
+            {
+               PSFile psex(filename);
+               drawProp->psWrite(psex);
+               tDesign->PSwrite(psex, excell, *drawProp);
+               LogFile << LogFile.getFN() << "(\""<< cellname << "\","
+                                          << ",\"" << filename << "\");";
+               LogFile.flush();
+            }
+            PROPC->unlockDrawProp(drawProp);
+         }
+         else
+         {
+            std::string message = "Cell " + cellname + " not found in the database";
+            tell_log(console::MT_ERROR,message);
+         }
       }
       DATC->unlockTDT(dbLibDir, true);
-      if (NULL != excell)
-      {
-         LogFile << LogFile.getFN() << "(\""<< cellname << "\","
-                                    << ",\"" << filename << "\");";
-         LogFile.flush();
-      }
-      else
-      {
-         std::string message = "Cell " + cellname + " not found in the database";
-         tell_log(console::MT_ERROR,message);
-      }
    }
    else
    {
@@ -1157,7 +1153,7 @@ int tellstdfunc::CIFimportList::execute()
    real techno = getOpValue();
    bool  over  = getBoolValue();
    bool  recur = getBoolValue();
-   SIMap* cifLays = DEBUG_NEW SIMap();
+   SIMap cifLays;
    telldata::ttlist *ll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    // Convert layer map
@@ -1165,7 +1161,7 @@ int tellstdfunc::CIFimportList::execute()
    for (unsigned i = 0; i < ll->size(); i++)
    {
       nameh = static_cast<telldata::tthsh*>((ll->mlist())[i]);
-      (*cifLays)[nameh->value().value()] = nameh->key().value();
+      cifLays[nameh->value().value()] = nameh->key().value();
    }
    // Convert top structure list
    nameList top_cells;
@@ -1176,13 +1172,7 @@ int tellstdfunc::CIFimportList::execute()
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
    {
-      if (dbmxs_dblock > DATC->tdtMxState())
-      {
-         // create a default target data base if one is not already existing
-         TpdTime timeCreated(time(NULL));
-         createDefaultTDT("CIF_default", dbLibDir, timeCreated, UNDOcmdQ, UNDOPstack);
-      }
-      DATC->CIFimport(top_cells, cifLays, recur, over, techno * PROPC->DBscale());
+      importCIFcell(dbLibDir, top_cells, cifLays, UNDOcmdQ, UNDOPstack, recur, over, techno * PROPC->DBscale());
       updateLayerDefinitions(dbLibDir, top_cells, TARGETDB_LIB);
       // Don't refresh the tree browser here. It should've been updated by the
       // CIFimport function during the conversion
@@ -1197,7 +1187,7 @@ int tellstdfunc::CIFimportList::execute()
    DATC->unlockTDT(dbLibDir);
    delete pl;
    delete ll;
-   delete cifLays;
+   cifLays.clear();
    return EXEC_NEXT;
 }
 
@@ -1217,7 +1207,7 @@ int tellstdfunc::CIFimport::execute()
    real techno = getOpValue();
    bool  over  = getBoolValue();
    bool  recur = getBoolValue();
-   SIMap* cifLays = DEBUG_NEW SIMap();
+   SIMap cifLays;
    telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    std::string name = getStringValue();
    // Convert layer map
@@ -1225,7 +1215,7 @@ int tellstdfunc::CIFimport::execute()
    for (unsigned i = 0; i < lll->size(); i++)
    {
       nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
-      (*cifLays)[nameh->value().value()] = nameh->key().value();
+      cifLays[nameh->value().value()] = nameh->key().value();
    }
    // Convert top structure list
    nameList top_cells;
@@ -1233,13 +1223,7 @@ int tellstdfunc::CIFimport::execute()
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
    {
-      if (dbmxs_dblock > DATC->tdtMxState())
-      {
-         // create a default target data base if one is not already existing
-         TpdTime timeCreated(time(NULL));
-         createDefaultTDT("CIF_default", dbLibDir, timeCreated, UNDOcmdQ, UNDOPstack);
-      }
-      DATC->CIFimport(top_cells, cifLays, recur, over, techno * PROPC->DBscale());
+      importCIFcell(dbLibDir, top_cells, cifLays, UNDOcmdQ, UNDOPstack, recur, over, techno * PROPC->DBscale());
       updateLayerDefinitions(dbLibDir, top_cells, TARGETDB_LIB);
       // Don't refresh the tree browser here. It should've been updated by the
       // CIFimport function during the conversion
@@ -1253,8 +1237,7 @@ int tellstdfunc::CIFimport::execute()
    }
    DATC->unlockTDT(dbLibDir);
    delete lll;
-   cifLays->clear();
-   delete cifLays;
+   cifLays.clear();
    return EXEC_NEXT;
 }
 
@@ -1285,14 +1268,16 @@ int tellstdfunc::CIFexportLIB::execute()
       laydata::TdtLibDir* dbLibDir = NULL;
       if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
       {
-         DATC->CIFexport(cifLays, verbose, filename);
+         laydata::TdtDesign* tDesign = (*dbLibDir)();
+         CIFin::CifExportFile cifex(filename, NULL, cifLays, true, verbose);
+         tDesign->CIFwrite(cifex);
+         LogFile << LogFile.getFN() << "( "
+                 << (*lll) << ", \""
+                 << filename << "\", "
+                 << LogFile._2bool(verbose)
+                 << " );"; LogFile.flush();
       }
       DATC->unlockTDT(dbLibDir, true);
-      LogFile << LogFile.getFN() << "( "
-              << (*lll) << ", \""
-              << filename << "\", "
-              << LogFile._2bool(verbose)
-              << " );"; LogFile.flush();
    }
    else
    {
@@ -1342,7 +1327,8 @@ int tellstdfunc::CIFexportTOP::execute()
          excell = static_cast<laydata::TdtCell*>(tDesign->checkCell(cellname));
          if (NULL != excell)
          {
-            DATC->CIFexport(excell, cifLays, recur, verbose, filename);
+            CIFin::CifExportFile cifex(filename, excell, cifLays, recur, verbose);
+            tDesign->CIFwrite(cifex);
             LogFile << LogFile.getFN() << "( \""
                     << cellname << "\", "
                     << LogFile._2bool(recur) << ", "
@@ -1549,7 +1535,6 @@ int tellstdfunc::OASimport::execute()
     }
    //Prep: We need all used layers, and the name of the GDS DB
    std::ostringstream ost;
-   std::string oasDbName = "NonameDB";
    ExtLayers* oasLaysAll = NULL;
    Oasis::OasisInFile* AOASDB = NULL;
    if (DATC->lockOas(AOASDB))
@@ -1559,7 +1544,6 @@ int tellstdfunc::OASimport::execute()
       {
          oasLaysAll = DEBUG_NEW ExtLayers();
          src_structure->collectLayers(*oasLaysAll,true);
-         oasDbName = AOASDB->getLibName();
       }
    }
    DATC->unlockOas(AOASDB, true);
@@ -1574,12 +1558,7 @@ int tellstdfunc::OASimport::execute()
          laydata::TdtLibDir* dbLibDir = NULL;
          if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
          {
-            if (dbmxs_dblock > DATC->tdtMxState())
-            { // create a default target data base if one is not already existing
-               TpdTime timeCreated(time(NULL));
-               createDefaultTDT(oasDbName, dbLibDir, timeCreated, UNDOcmdQ, UNDOPstack);
-            }
-            DATC->importOAScell(top_cells, LayerExpression, recur, over);
+            importOAScell(dbLibDir, top_cells, LayerExpression, UNDOcmdQ, UNDOPstack, recur, over);
                updateLayerDefinitions(dbLibDir, top_cells, TARGETDB_LIB);
             // populate the hierarchy browser
             TpdPost::refreshTDTtab(true);
@@ -1790,4 +1769,82 @@ int tellstdfunc::DRCexplainerror::execute()
    RefreshGL();
    return EXEC_NEXT;
 }
+
+//=============================================================================
+void tellstdfunc::importGDScell(laydata::TdtLibDir* dbLibDir, const nameList& top_names,
+  const LayerMapExt& laymap, parsercmd::undoQUEUE& undstack, telldata::UNDOPerandQUEUE& undopstack,
+  bool recur, bool over)
+{
+   GDSin::GdsInFile* AGDSDB = NULL;
+   if (DATC->lockGds(AGDSDB))
+   {
+      if (dbmxs_dblock > DATC->tdtMxState())
+      {
+         // create a default target data base if one is not already existing
+         TpdTime timeCreated(time(NULL));
+         createDefaultTDT(AGDSDB->libname(), dbLibDir, timeCreated, undstack, undopstack);
+      }
+#ifdef GDSCONVERT_PROFILING
+      HiResTimer profTimer;
+#endif
+      GDSin::Gds2Ted converter(AGDSDB, dbLibDir, laymap);
+      converter.run(top_names, recur, over);
+      (*dbLibDir)()->modified = true;
+#ifdef GDSCONVERT_PROFILING
+      profTimer.report("Time elapsed for GDS conversion: ");
+#endif
+   }
+   DATC->unlockGds(AGDSDB, true);
+}
+
+//=============================================================================
+void tellstdfunc::importCIFcell( laydata::TdtLibDir* dbLibDir, const nameList& top_names,
+  const SIMap& cifLayers, parsercmd::undoQUEUE& undstack, telldata::UNDOPerandQUEUE& undopstack,
+  bool recur, bool overwrite, real techno )
+{
+   if (dbmxs_dblock > DATC->tdtMxState())
+   {
+      // create a default target data base if one is not already existing
+      TpdTime timeCreated(time(NULL));
+      createDefaultTDT("CIF_default", dbLibDir, timeCreated, undstack, undopstack);
+   }
+   // DB should have been locked at this point (from the tell functions)
+   CIFin::CifFile* ACIFDB = NULL;
+   if (DATC->lockCif(ACIFDB))
+   {
+      CIFin::Cif2Ted converter(ACIFDB, dbLibDir, cifLayers, techno);
+      for (nameList::const_iterator CN = top_names.begin(); CN != top_names.end(); CN++)
+         converter.top_structure(*CN, recur, overwrite);
+      (*dbLibDir)()->modified = true;
+      tell_log(console::MT_INFO,"Done");
+   }
+   DATC->unlockCif(ACIFDB, true);
+}
+
+//=============================================================================
+void tellstdfunc::importOAScell(laydata::TdtLibDir* dbLibDir, const nameList& top_names,
+  const LayerMapExt& laymap, parsercmd::undoQUEUE& undstack, telldata::UNDOPerandQUEUE& undopstack,
+  bool recur, bool over)
+{
+   Oasis::OasisInFile* AOASDB = NULL;
+   if (DATC->lockOas(AOASDB))
+   {
+      if (dbmxs_dblock > DATC->tdtMxState())
+      { // create a default target data base if one is not already existing
+         TpdTime timeCreated(time(NULL));
+         createDefaultTDT(AOASDB->getLibName(), dbLibDir, timeCreated, undstack, undopstack);
+      }
+#ifdef OASCONVERT_PROFILING
+      HiResTimer profTimer;
+#endif
+      Oasis::Oas2Ted converter(AOASDB, dbLibDir, laymap);
+      converter.run(top_names, recur, over);
+      (*dbLibDir)()->modified = true;
+#ifdef OASCONVERT_PROFILING
+      profTimer.report("Time elapsed for OASIS conversion: ");
+#endif
+   }
+   DATC->unlockOas(AOASDB, true);
+}
+
 
