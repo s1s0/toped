@@ -59,7 +59,7 @@ public:
    bool                       lockGds(GDSin::GdsInFile*&);
    bool                       lockCif(CIFin::CifFile*&);
    bool                       lockOas(Oasis::OasisInFile*&);
-   void                       bpAddGdsTab();
+   void                       bpAddGdsTab(bool);
    void                       bpAddCifTab();
    void                       bpAddOasTab();
    void                       unlockTDT(laydata::TdtLibDir*, bool throwexception = false);

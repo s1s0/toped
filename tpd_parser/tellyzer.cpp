@@ -70,6 +70,8 @@ parsercmd::undoUQUEUE         parsercmd::cmdVIRTUAL::UNDOUstack;
 parsercmd::undoQUEUE          parsercmd::cmdVIRTUAL::UNDOcmdQ;
 // Recovery status
 bool parsercmd::cmdSTDFUNC::_ignoreOnRecovery = false;
+// Thread execution indicator
+bool parsercmd::cmdSTDFUNC::_threadExecution = false;
 // Depth of the UNDO stack
 word parsercmd::cmdBLOCK::_undoDepth = 100;
 

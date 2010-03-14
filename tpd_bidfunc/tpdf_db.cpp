@@ -445,7 +445,7 @@ int tellstdfunc::GDSread::execute() {
       if (DATC->GDSparse(filename))
       {
          // add GDS tab in the browser
-         DATC->bpAddGdsTab();
+         DATC->bpAddGdsTab(_threadExecution);
          //
          GDSin::GdsInFile* AGDSDB = NULL;
          if (DATC->lockGds(AGDSDB))
