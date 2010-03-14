@@ -31,6 +31,8 @@
 %x incl
 lex_string        \"[^"]*\"
 lex_identifier    [a-zA-Z_][a-zA-Z0-9_]*
+lxt_D			  [0-9]
+lxt_E             [Ee][-+]?{lxt_D}+
 %{ /**************************************************************************/
 #include "tpdph.h"
 #include <stdio.h>
@@ -136,11 +138,12 @@ const                      return tknCONST;
 "*"                        return '*';
 "/"                        return '/';
 "="                        return '=';
-";"   	                  return ';';
+";"   	                   return ';';
 0x[0-9A-Fa-f]+    |
-[0-9]+                   { telllval.integer = parsercmd::getllint(yytext); return tknINT;}
-[0-9]+"."[0-9]*   |
-[0-9]*"."[0-9]+       	 { telllval.real = atof(yytext); return tknREAL;}
+{lxt_D}+                 { telllval.integer = parsercmd::getllint(yytext); return tknINT;}
+{lxt_D}+"."{lxt_D}*({lxt_E})?  |
+{lxt_D}*"."{lxt_D}+({lxt_E})?  |
+{lxt_D}+{lxt_E}          { telllval.real = atof(yytext); return tknREAL;}
 {lex_identifier}         { telllval.parsestr = parsercmd::charcopy(yytext);return tknIDENTIFIER;}
 .     	             	   return tknERROR;
 %% 

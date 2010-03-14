@@ -130,6 +130,7 @@ void telldata::ttreal::assign(tell_var* rt)
 
 void telldata::ttreal::echo(std::string& wstr, real) {
    std::ostringstream ost;
+   std::scientific(ost);
    ost << value();
    wstr += ost.str();
 }
