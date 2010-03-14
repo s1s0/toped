@@ -408,7 +408,7 @@ namespace Oasis {
          wxFileOffset      filePos()         {return _filePos; }
          OASHierTree*      hierTree()        {return _hierTree;}
          real              libUnits()        {return _unit;    }
-         std::string       getLibName()      {return "boza";   }//@FIXME put the file name here without the path!
+         std::string       getLibName()      {return std::string(getFileNameOnly(_fileName));}
          void              setPropContext(PropertyContext context)
                                              {_properties.setContext(context);}
          const Table*      cellNames() const  { return _cellNames;}
