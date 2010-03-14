@@ -160,7 +160,7 @@ namespace tellstdfunc {
    laydata::SelectList* filter_selist(const laydata::SelectList*, word mask);
    laydata::AtticList*  replace_str(laydata::AtticList*, std::string);
    bool                 secureLayDef(unsigned);
-   void                 createDefaultTDT(std::string, laydata::TdtLibDir*, TpdTime&, parsercmd::undoQUEUE&, telldata::UNDOPerandQUEUE&);
+   void                 createDefaultTDT(std::string, laydata::TdtLibDir*, TpdTime&, bool, parsercmd::undoQUEUE&, telldata::UNDOPerandQUEUE&);
 
 }
 

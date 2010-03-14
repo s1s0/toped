@@ -288,6 +288,9 @@ void DataCenter::unlockTDT(laydata::TdtLibDir* tdt_db, bool throwexception)
 //   _TEDLIB = tdt_db;
    assert(_tdtActMxState > dbmxs_unlocked);
    VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
+   tdt_db = NULL;
+   _tdtActMxState = _tdtReqMxState = dbmxs_unlocked;
+   if(NULL != _bpSync) _bpSync->Signal();
    //TODO! In all cases - throw exception if we've got to the deadlocked state
 //   if (dbmxs_deadlock == _tdtActMxState) throw EXPTNmutex_DB();
    if (throwexception)
@@ -312,8 +315,6 @@ void DataCenter::unlockTDT(laydata::TdtLibDir* tdt_db, bool throwexception)
             }
          default             : break;
       }
-   tdt_db = NULL;
-   _tdtActMxState = _tdtReqMxState = dbmxs_unlocked;
 }
 
 bool DataCenter::lockGds(GDSin::GdsInFile*& gds_db)
@@ -394,6 +395,44 @@ void DataCenter::unlockOas(Oasis::OasisInFile*& oasis_db, bool throwexception)
    oasis_db = NULL;
 }
 
+void DataCenter::bpRefreshTdtTab(bool targetDB, bool threadExecution)
+{
+   // This function MUST be called from a locked DB state. It will assert otherwise.
+   assert(_tdtActMxState > dbmxs_deadlock);
+   if (threadExecution)
+   {
+      assert(NULL == _bpSync);
+      TdtMutexState saveMutexState = _tdtActMxState;
+      // Initialize the thread condition with the locked Mutex
+      _bpSync = new wxCondition(_DBLock);
+      // post a message to the main thread
+      TpdPost::refreshTDTtab(targetDB, threadExecution);
+      // Go to sleep and wait until the main thread finished
+      // updating the browser panel
+      //
+      // NOTE! The function below will release the lock of the mutex associated with
+      // it - i.e. in this case it will release the _GDSlock and will put the thread in
+      // sleep until Signal or broadcast is called
+      _bpSync->Wait();
+      // When the thread is woken-up, the function above will lock the mutex again and
+      // THEN will return here.
+      //
+      // Wake-up & unlock the mutex
+      _tdtActMxState = saveMutexState;
+      // clean-up behind & prepare for the consequent use
+      delete _bpSync;
+      _bpSync = NULL;
+   }
+   else
+   {
+      TdtMutexState saveMutexState = _tdtActMxState;
+      _DBLock.Unlock();
+      TpdPost::refreshTDTtab(targetDB, threadExecution);
+      _DBLock.Lock();
+      _tdtActMxState = saveMutexState;
+   }
+}
+
 void DataCenter::bpAddGdsTab(bool threadExecution)
 {
    if (threadExecution)
@@ -430,48 +469,62 @@ void DataCenter::bpAddGdsTab(bool threadExecution)
    }
 }
 
-void DataCenter::bpAddCifTab()
+void DataCenter::bpAddCifTab(bool threadExecution)
 {
-   // Lock the Mutex
-   if (wxMUTEX_DEAD_LOCK == _CIFLock.Lock())
+   if (threadExecution)
    {
-      tell_log(console::MT_ERROR,"CIF Mutex deadlocked!");
-      return;
+      // Lock the Mutex
+      if (wxMUTEX_DEAD_LOCK == _CIFLock.Lock())
+      {
+         tell_log(console::MT_ERROR,"CIF Mutex deadlocked!");
+         return;
+      }
+      // Initialize the thread condition with the locked Mutex
+      _bpSync = new wxCondition(_CIFLock);
+      // post a message to the main thread
+      TpdPost::addCIFtab(threadExecution);
+      // Go to sleep and wait until the main thread finished
+      // updating the browser panel
+      _bpSync->Wait();
+      // Wake-up & unlock the mutex
+      VERIFY(wxMUTEX_NO_ERROR == _CIFLock.Unlock());
+      // clean-up behind & prepare for the consequent use
+      delete _bpSync;
+      _bpSync = NULL;
    }
-   // Initialize the thread condition with the locked Mutex
-   _bpSync = new wxCondition(_CIFLock);
-   // post a message to the main thread
-   TpdPost::addCIFtab();
-   // Go to sleep and wait until the main thread finished
-   // updating the browser panel
-   _bpSync->Wait();
-   // Wake-up & unlock the mutex
-   VERIFY(wxMUTEX_NO_ERROR == _CIFLock.Unlock());
-   // clean-up behind & prepare for the consequent use
-   delete _bpSync;
-   _bpSync = NULL;
+   else
+   {
+      TpdPost::addCIFtab(threadExecution);
+   }
 }
 
-void DataCenter::bpAddOasTab()
+void DataCenter::bpAddOasTab(bool threadExecution )
 {
-   // Lock the Mutex
-   if (wxMUTEX_DEAD_LOCK == _OASLock.Lock())
+   if (threadExecution)
    {
-      tell_log(console::MT_ERROR,"OASIS Mutex deadlocked!");
-      return;
+      // Lock the Mutex
+      if (wxMUTEX_DEAD_LOCK == _OASLock.Lock())
+      {
+         tell_log(console::MT_ERROR,"OASIS Mutex deadlocked!");
+         return;
+      }
+      // initialise the thread condition with the locked Mutex
+      _bpSync = new wxCondition(_OASLock);
+      // post a message to the main thread
+      TpdPost::addOAStab(threadExecution);
+      // Go to sleep and wait until the main thread finished
+      // updating the browser panel
+      _bpSync->Wait();
+      // Wake-up & uplock the mutex
+      VERIFY(wxMUTEX_NO_ERROR == _OASLock.Unlock());
+      // clean-up behind & prepare for the consequent use
+      delete _bpSync;
+      _bpSync = NULL;
    }
-   // initialise the thread condition with the locked Mutex
-   _bpSync = new wxCondition(_OASLock);
-   // post a message to the main thread
-   TpdPost::addOAStab();
-   // Go to sleep and wait until the main thread finished
-   // updating the browser panel
-   _bpSync->Wait();
-   // Wake-up & uplock the mutex
-   VERIFY(wxMUTEX_NO_ERROR == _OASLock.Unlock());
-   // clean-up behind & prepare for the consequent use
-   delete _bpSync;
-   _bpSync = NULL;
+   else
+   {
+      TpdPost::addOAStab(threadExecution);
+   }
 }
 
 void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,

@@ -201,10 +201,10 @@ class TpdPost {
       static void toped_status(console::TOPEDSTATUS_TYPE, std::string);
       static void toped_status(console::TOPEDSTATUS_TYPE, wxString);
       static void render_status(bool);
-      static void refreshTDTtab(bool);
+      static void refreshTDTtab(bool, bool);
       static void addGDStab(bool);
-      static void addCIFtab();
-      static void addOAStab();
+      static void addCIFtab(bool);
+      static void addOAStab(bool);
       static void addDRCtab();
       static void clearGDStab();
       static void clearCIFtab();

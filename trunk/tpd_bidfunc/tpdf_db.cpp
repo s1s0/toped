@@ -70,7 +70,7 @@ int tellstdfunc::stdNEWDESIGNd::execute()
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
    {
-      createDefaultTDT(nm, dbLibDir, timeCreated, UNDOcmdQ, UNDOPstack);
+      createDefaultTDT(nm, dbLibDir, timeCreated, _threadExecution, UNDOcmdQ, UNDOPstack);
    }
    DATC->unlockTDT(dbLibDir);
    return EXEC_NEXT;
@@ -113,7 +113,8 @@ int tellstdfunc::stdNEWDESIGNsd::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
    {
       dbLibDir->newDesign(nm, DATC->localDir(), timeCreated.stdCTime(), DBU, UU);
-      TpdPost::resetTDTtab(nm);
+      DATC->bpRefreshTdtTab(true, _threadExecution);
+//      TpdPost::resetTDTtab(nm);
       // reset UNDO buffers;
       UNDOcmdQ.clear();
       while (!UNDOPstack.empty())
@@ -159,7 +160,7 @@ int tellstdfunc::TDTread::execute()
             } while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
             updateLayerDefinitions( dbLibDir, top_cell_list, TARGETDB_LIB);
             // populate the hierarchy browser
-            TpdPost::refreshTDTtab(true);
+            DATC->bpRefreshTdtTab(true, _threadExecution);
             //
             LogFile << LogFile.getFN() << "(\""<< filename << "\",\"" <<  timec() <<
                   "\",\"" <<  timeu() << "\");"; LogFile.flush();
@@ -226,7 +227,7 @@ int tellstdfunc::TDTreadIFF::execute()
                } while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
                updateLayerDefinitions(dbLibDir, top_cell_list, TARGETDB_LIB);
                // populate the cell hierarchy browser
-               TpdPost::refreshTDTtab(true);
+               DATC->bpRefreshTdtTab(true, _threadExecution);
                LogFile << LogFile.getFN() << "(\""<< filename << "\",\"" <<  timec() <<
                      "\",\"" <<  timeu() << "\");"; LogFile.flush();
                // reset UNDO buffers;
@@ -284,7 +285,7 @@ int tellstdfunc::TDTloadlib::execute()
             updateLayerDefinitions(dbLibDir, top_cell_list, libID);
             dbLibDir->cleanUndefLib();
             // populating cell hierarchy browser
-            TpdPost::refreshTDTtab(false);
+            DATC->bpRefreshTdtTab(false, _threadExecution);
             // Clean-up eventual remainings in the temporary storage of the undefined cells
             dbLibDir->deleteHeldCells();
             LogFile << LogFile.getFN() << "(\""<< filename << "\");"; LogFile.flush();
@@ -321,7 +322,7 @@ int tellstdfunc::TDTunloadlib::execute()
    {
       if (dbLibDir->unloadLib(libname))
       {
-         TpdPost::refreshTDTtab(false);
+         DATC->bpRefreshTdtTab(false, _threadExecution);
          LogFile << LogFile.getFN() << "(\""<< libname << "\");"; LogFile.flush();
       }
       else
@@ -539,10 +540,10 @@ int tellstdfunc::GDSimport::execute()
          laydata::TdtLibDir* dbLibDir = NULL;
          if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
          {
-            importGDScell(dbLibDir, top_cells, LayerExpression, UNDOcmdQ, UNDOPstack, recur, over);
+            importGDScell(dbLibDir, top_cells, LayerExpression, UNDOcmdQ, UNDOPstack, _threadExecution, recur, over);
             updateLayerDefinitions(dbLibDir, top_cells, TARGETDB_LIB);
             // populate the hierarchy browser
-            TpdPost::refreshTDTtab(true);
+            DATC->bpRefreshTdtTab(true, _threadExecution);
             LogFile << LogFile.getFN() << "(\""<< name << "\"," << (*lll) << "," << LogFile._2bool(recur)
                   << "," << LogFile._2bool(over) << ");"; LogFile.flush();
          }
@@ -607,10 +608,10 @@ int tellstdfunc::GDSimportList::execute()
       laydata::TdtLibDir* dbLibDir = NULL;
       if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
       {
-         importGDScell(dbLibDir, top_cells, LayerExpression, UNDOcmdQ, UNDOPstack, recur, over);
+         importGDScell(dbLibDir, top_cells, LayerExpression, UNDOcmdQ, UNDOPstack, _threadExecution, recur, over);
          updateLayerDefinitions(dbLibDir, top_cells, TARGETDB_LIB);
          // populate the hierarchy browser
-         TpdPost::refreshTDTtab(true);
+         DATC->bpRefreshTdtTab(true, _threadExecution);
          LogFile << LogFile.getFN() << "("<< *pl << "," << *lll << "," << LogFile._2bool(recur)
                << "," << LogFile._2bool(over) << ");"; LogFile.flush();
       }
@@ -1052,7 +1053,7 @@ int tellstdfunc::CIFread::execute()
          case CIFin::cfs_POK:
          {
             // add CIF tab in the browser
-            DATC->bpAddCifTab();
+            DATC->bpAddCifTab(_threadExecution);
             // Collect the top structures
             std::list<std::string> top_cell_list;
             CIFin::CifFile* ACIFDB = NULL;
@@ -1172,7 +1173,7 @@ int tellstdfunc::CIFimportList::execute()
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
    {
-      importCIFcell(dbLibDir, top_cells, cifLays, UNDOcmdQ, UNDOPstack, recur, over, techno * PROPC->DBscale());
+      importCIFcell(dbLibDir, top_cells, cifLays, UNDOcmdQ, UNDOPstack, _threadExecution, recur, over, techno * PROPC->DBscale());
       updateLayerDefinitions(dbLibDir, top_cells, TARGETDB_LIB);
       // Don't refresh the tree browser here. It should've been updated by the
       // CIFimport function during the conversion
@@ -1223,7 +1224,7 @@ int tellstdfunc::CIFimport::execute()
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
    {
-      importCIFcell(dbLibDir, top_cells, cifLays, UNDOcmdQ, UNDOPstack, recur, over, techno * PROPC->DBscale());
+      importCIFcell(dbLibDir, top_cells, cifLays, UNDOcmdQ, UNDOPstack, _threadExecution, recur, over, techno * PROPC->DBscale());
       updateLayerDefinitions(dbLibDir, top_cells, TARGETDB_LIB);
       // Don't refresh the tree browser here. It should've been updated by the
       // CIFimport function during the conversion
@@ -1465,7 +1466,7 @@ int tellstdfunc::OASread::execute() {
       if (DATC->OASParse(filename))
       {
          // add OASIS tab in the browser
-         DATC->bpAddOasTab();
+         DATC->bpAddOasTab(_threadExecution);
          //
          Oasis::OasisInFile* AOASDB = NULL;
          if (DATC->lockOas(AOASDB))
@@ -1558,10 +1559,10 @@ int tellstdfunc::OASimport::execute()
          laydata::TdtLibDir* dbLibDir = NULL;
          if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
          {
-            importOAScell(dbLibDir, top_cells, LayerExpression, UNDOcmdQ, UNDOPstack, recur, over);
-               updateLayerDefinitions(dbLibDir, top_cells, TARGETDB_LIB);
+            importOAScell(dbLibDir, top_cells, LayerExpression, UNDOcmdQ, UNDOPstack, _threadExecution, recur, over);
+            updateLayerDefinitions(dbLibDir, top_cells, TARGETDB_LIB);
             // populate the hierarchy browser
-            TpdPost::refreshTDTtab(true);
+            DATC->bpRefreshTdtTab(true, _threadExecution);
             LogFile << LogFile.getFN() << "(\""<< name << "\"," << /*(*lll) << "," <<*/ LogFile._2bool(recur)
                   << "," << LogFile._2bool(over) << ");"; LogFile.flush();
          }
@@ -1773,7 +1774,7 @@ int tellstdfunc::DRCexplainerror::execute()
 //=============================================================================
 void tellstdfunc::importGDScell(laydata::TdtLibDir* dbLibDir, const nameList& top_names,
   const LayerMapExt& laymap, parsercmd::undoQUEUE& undstack, telldata::UNDOPerandQUEUE& undopstack,
-  bool recur, bool over)
+  bool threadExecution, bool recur, bool over)
 {
    GDSin::GdsInFile* AGDSDB = NULL;
    if (DATC->lockGds(AGDSDB))
@@ -1782,7 +1783,7 @@ void tellstdfunc::importGDScell(laydata::TdtLibDir* dbLibDir, const nameList& to
       {
          // create a default target data base if one is not already existing
          TpdTime timeCreated(time(NULL));
-         createDefaultTDT(AGDSDB->libname(), dbLibDir, timeCreated, undstack, undopstack);
+         createDefaultTDT(AGDSDB->libname(), dbLibDir, timeCreated, threadExecution, undstack, undopstack);
       }
 #ifdef GDSCONVERT_PROFILING
       HiResTimer profTimer;
@@ -1800,7 +1801,7 @@ void tellstdfunc::importGDScell(laydata::TdtLibDir* dbLibDir, const nameList& to
 //=============================================================================
 void tellstdfunc::importCIFcell( laydata::TdtLibDir* dbLibDir, const nameList& top_names,
   const SIMap& cifLayers, parsercmd::undoQUEUE& undstack, telldata::UNDOPerandQUEUE& undopstack,
-  bool recur, bool overwrite, real techno )
+  bool threadExecution, bool recur, bool overwrite, real techno )
 {
    // DB should have been locked at this point (from the tell functions)
    CIFin::CifFile* ACIFDB = NULL;
@@ -1810,7 +1811,7 @@ void tellstdfunc::importCIFcell( laydata::TdtLibDir* dbLibDir, const nameList& t
       {
          // create a default target data base if one is not already existing
          TpdTime timeCreated(time(NULL));
-         createDefaultTDT(ACIFDB->getLibName(), dbLibDir, timeCreated, undstack, undopstack);
+         createDefaultTDT(ACIFDB->getLibName(), dbLibDir, timeCreated, threadExecution, undstack, undopstack);
       }
       CIFin::Cif2Ted converter(ACIFDB, dbLibDir, cifLayers, techno);
       for (nameList::const_iterator CN = top_names.begin(); CN != top_names.end(); CN++)
@@ -1824,7 +1825,7 @@ void tellstdfunc::importCIFcell( laydata::TdtLibDir* dbLibDir, const nameList& t
 //=============================================================================
 void tellstdfunc::importOAScell(laydata::TdtLibDir* dbLibDir, const nameList& top_names,
   const LayerMapExt& laymap, parsercmd::undoQUEUE& undstack, telldata::UNDOPerandQUEUE& undopstack,
-  bool recur, bool over)
+  bool threadExecution, bool recur, bool over)
 {
    Oasis::OasisInFile* AOASDB = NULL;
    if (DATC->lockOas(AOASDB))
@@ -1832,7 +1833,7 @@ void tellstdfunc::importOAScell(laydata::TdtLibDir* dbLibDir, const nameList& to
       if (dbmxs_dblock > DATC->tdtMxState())
       { // create a default target data base if one is not already existing
          TpdTime timeCreated(time(NULL));
-         createDefaultTDT(AOASDB->getLibName(), dbLibDir, timeCreated, undstack, undopstack);
+         createDefaultTDT(AOASDB->getLibName(), dbLibDir, timeCreated, threadExecution, undstack, undopstack);
       }
 #ifdef OASCONVERT_PROFILING
       HiResTimer profTimer;

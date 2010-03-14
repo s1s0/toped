@@ -350,36 +350,19 @@ void TpdPost::render_status(bool on_off)
       static_cast<console::TopedStatus*>(_statusBar)->OnRenderOFF();
 }
 
-void TpdPost::refreshTDTtab(bool targetDB)
+void TpdPost::refreshTDTtab(bool targetDB, bool threadExecution)
 {
    assert(_topBrowsers);
    wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
    eventADDTAB.SetInt(tui::BT_ADDTDT_LIB);
    eventADDTAB.SetExtraLong(targetDB ? 1 : 0);
-   wxPostEvent( _topBrowsers, eventADDTAB );
-   // TODO!
-   // The comment below is obsolete and left for info only!
-   // Still there is a potential problem that needs to be addressed
-   // and it is :tdtread("..."); newcell("a")
-   // The risk is as described below.
-   // Search where this function is called. It must be done in a way
-   // similar to the way GDS parser deals with the similar situation.
-   // See
-//   eventADDTAB.SetClientData(static_cast<void*> ( tdtLib));
-//   eventADDTAB.SetExtraLong(traverse_all ? 1 : 0);
-   // Note about threads here!
-   // Traversing the entire hierarchy tree can not be done in a
-   // separate thread. The main reason - when executing a script
-   // that contains for example:
-   //    new("a"); addCell("b");
-   // it's quite possible that cell hierarchy will be traversed
-   // after the execution of the second function. The latter will
-   // send treeAddMember itself - in result the browser window
-   // will get cell b twice. Bottom line: don't use PostEvent here!
-//   else
-//      _topBrowsers->GetEventHandler()->ProcessEvent( eventADDTAB );
-   // the alternative is to call the function directly
-//   Browsers->OnTELLaddTDTlib(tdtLib, traverse_all);
+   if (threadExecution)
+      wxPostEvent( _topBrowsers, eventADDTAB );
+   else
+   {
+      ::wxSafeYield(_topBrowsers);
+      _topBrowsers->GetEventHandler()->ProcessEvent(eventADDTAB);
+   }
 }
 
 void TpdPost::addGDStab(bool threadExecution)
@@ -390,23 +373,38 @@ void TpdPost::addGDStab(bool threadExecution)
    if (threadExecution)
       wxPostEvent(_topBrowsers, eventADDTAB);
    else
+   {
+      ::wxSafeYield(_topBrowsers);
       _topBrowsers->GetEventHandler()->ProcessEvent(eventADDTAB);
+   }
 }
 
-void TpdPost::addCIFtab()
+void TpdPost::addCIFtab(bool threadExecution)
 {
    assert(_topBrowsers);
    wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
    eventADDTAB.SetInt(tui::BT_ADDCIF_TAB);
-   wxPostEvent(_topBrowsers, eventADDTAB);
+   if (threadExecution)
+      wxPostEvent(_topBrowsers, eventADDTAB);
+   else
+   {
+      ::wxSafeYield(_topBrowsers);
+      _topBrowsers->GetEventHandler()->ProcessEvent(eventADDTAB);
+   }
 }
 
-void TpdPost::addOAStab()
+void TpdPost::addOAStab(bool threadExecution)
 {
    assert(_topBrowsers);
    wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
    eventADDTAB.SetInt(tui::BT_ADDOAS_TAB);
-   wxPostEvent(_topBrowsers, eventADDTAB);
+   if (threadExecution)
+      wxPostEvent(_topBrowsers, eventADDTAB);
+   else
+   {
+      ::wxSafeYield(_topBrowsers);
+      _topBrowsers->GetEventHandler()->ProcessEvent(eventADDTAB);
+   }
 }
 
 void TpdPost::addDRCtab()

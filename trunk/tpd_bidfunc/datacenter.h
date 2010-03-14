@@ -59,14 +59,15 @@ public:
    bool                       lockGds(GDSin::GdsInFile*&);
    bool                       lockCif(CIFin::CifFile*&);
    bool                       lockOas(Oasis::OasisInFile*&);
-   void                       bpAddGdsTab(bool);
-   void                       bpAddCifTab();
-   void                       bpAddOasTab();
    void                       unlockTDT(laydata::TdtLibDir*, bool throwexception = false);
    void                       unlockDRC();
    void                       unlockGds(GDSin::GdsInFile*&, bool throwexception = false);
    void                       unlockCif(CIFin::CifFile*&, bool throwexception = false);
    void                       unlockOas(Oasis::OasisInFile*& oasis_db, bool throwexception = false);
+   void                       bpRefreshTdtTab(bool, bool);
+   void                       bpAddGdsTab(bool);
+   void                       bpAddCifTab(bool);
+   void                       bpAddOasTab(bool);
    void                       mouseStart(int input_type, std::string, const CTM, int4b, int4b, word, word);
    void                       mousePointCancel(TP&);
    void                       mousePoint(TP p);
@@ -118,18 +119,20 @@ private:
 //=============================================================================
 //
 // This memo relates to the following fields of the DataCenter class:
-//   GDSin::GdsInFile* _GDSDB
-//   CIFin::CifFile* _CIFDB
-//   wxMutex         _GDSLock
-//   wxMutex         _CIFLock
-//   wxCondition*    _bpSync;
+//   GDSin::GdsInFile*    _GDSDB
+//   CIFin::CifFile*      _CIFDB
+//   Oasis::OasisInFile*  _OASDB
+//   wxMutex              _GDSLock
+//   wxMutex              _CIFLock
+//   wxMutex              _OASLock
+//   wxCondition*         _bpSync
 // and associated methods:
 //   bool lockGds(GDSin::GdsInFile*& gds_db);
 //   bool lockCif(CIFin::CifFile*& cif_db);
+//   bool lockOas(Oasis::OasisInFile*&);
 //   void unlockGds(GDSin::GdsInFile*& gds_db, bool throwexception = false);
 //   void unlockCif(CIFin::CifFile*& cif_db, bool throwexception = false);
-//   void bpAddGdsTab();
-//   void bpAddCifTab();
+//   void unlockOas(Oasis::OasisInFile*& oasis_db, bool throwexception = false);
 //
 //-----------------------------------------------------------------------------
 //   An external database is normally processed in the secondary (parser)
@@ -218,17 +221,107 @@ private:
 //   // which will throw EXPTNactive_GDS exception if AGDSDB == NULL
 //   // AGDSDB is invalid (NULL) from this point on
 //
-// And the last but not least! bpAdd???Tab() must be used from the
-// parser thread to update the browser. The method will put the parser
-// thread in sleep until the main thread finishes with the DB. This will
-// prevent the main thread from eventual long waits to lock the mutex which
-// in turn will keep the main window active and the message queue in sync.
-// See the comments in the bpAdd???Tab() function
-//
 // For more info - see:
 // http://docs.wxwidgets.org/stable/wx_wxmutex.html#wxmutex
 // http://docs.wxwidgets.org/stable/wx_wxcondition.html#wxcondition
 // http://docs.wxwidgets.org/stable/wx_wxthread.html#wxthread
 //=============================================================================
+
+//=============================================================================
+// How to synchronize between the cell browsers and corresponding DB in memory
+//                                  or
+//                 Cell browsers messages/events explained
+//=============================================================================
+//
+// This memo relates to the following fields of the DataCenter class:
+//   wxMutex              _DBLock
+//   wxMutex              _GDSLock
+//   wxMutex              _CIFLock
+//   wxMutex              _OASLock
+//   wxCondition*         _bpSync;
+// and associated methods:
+//   bool lockTDT(laydata::TdtLibDir*&, TdtMutexState);
+//   void unlockTDT(laydata::TdtLibDir*, bool throwexception = false);
+//   void bpRefreshTdtTab(bool, bool);
+//   void bpAddGdsTab(bool);
+//   void bpAddCifTab(bool);
+//   void bpAddOasTab(bool);
+//
+//-----------------------------------------------------------------------------
+//   The cell browser panel is updated due to a message posted from the parser
+//   thread to the main thread which contains the user event wxEVT_CMD_BROWSER.
+//   There are two types of events:
+//   - self contained events - they carry all information needed to update the
+//     cell browser in the event message - for example BT_CELL_ADD
+//   - refresh events (BT_ADDTDT_LIB) - they imply that the the cell browser
+//     must obtain the new DB hierarchy by itself. This can happen only if the
+//     entire DB hierarchy three is parsed from the main thread. This kind of
+//     event occur usually after DB read or DB import.
+//   The processing of the self contained events is trivial and TpdPost class
+//   defines a number of convenience static methods which are widely accessible.
+//   The troubles come with refresh events. Here is why.
+//
+//   - to ensure thread safe message exchange, wxPostMessage must be used for
+//     all messages. This mechanism doesn't define the time when the event will
+//     be processed. In the multithread environment this means that the cell
+//     browser will traverse the DB at any moment after the message was sent
+//     which in turn means that meanwhile the DB could have been changed or
+//     updated. Here is a simple example:
+//       (1)    newdesign("ddd"); // generates refresh event BT_ADDTDT_LIB
+//       (2)    newcell("cell1"); // generates self contained event BT_CELL_ADD
+//       (3)    opencell("cell1");  //
+//     By the time when BT_ADDTDT_LIB event is processed in the main thread,
+//     the parser thread could have had the DB updated with the "cell1". In
+//     result the "cell1" will appear twice in the cell browser due to the
+//     BT_CELL_ADD event generated by the second line in the example code, and
+//     this is in the best case.
+//     The example above is by far not the worst case. Another case could be:
+//       (1)    newdesign("ddd"); // generates refresh event BT_ADDTDT_LIB
+//       (2)    newcell("cell1"); // generates self contained event BT_CELL_ADD
+//       (3)    newdesign("fff"); // generates refresh event BT_ADDTDT_LIB
+//     Here "cell1" might appear as a cell in the new design "fff". Again it's
+//     a matter of time until the cell browser crashes.
+//     Very similar (although less obvious) is the situation with the external
+//     interfaces. Here is the example:
+//       (1) gdsread(...);   // generates refresh event
+//       (2) gdsimport(...); // generates refresh event
+//       (3) gdsclose();     // generates self contained event
+//     The GDS cell browser will easily crash
+//
+//     Obviously we need some kind of thread synchronization for refresh events.
+//     This is implemented in the bp*() methods. They put the parser thread in
+//     sleep until the corresponding _*Lock mutex is not locked/unlocked by the
+//     main thread, and the latter will happen when the cell browser is
+//     processing the BT_ADDTDT_LIB/BT_ADD*_TAB (see the comments inside the
+//     methods for more info)
+//
+//   - This is not the end of it however. Another trouble comes when Toped
+//     executes in a single thread (recovery). In all cases PostEvent puts all
+//     the events in an event queue and they are executed by the wx event queue
+//     "later". PostEvent does not block the execution. It copies the event in
+//     the event queue and returns immediately.
+//     When we have a mix between self contained and refresh events this "later"
+//     generates the same problem as before even though the messages will be
+//     processed in strict succession. In this case, it's not possible to
+//     resolve the issue using threads synchronization as above, because we do
+//     control only a single thread. It appears that PostEvent in this case
+//     can not be used. When a refresh event occurs in this situation, the
+//     event queue must be flushed and then the new event must be processed
+//     immediately using ProcessEvent. Here is the example code
+//         ::wxSafeYield(_topBrowsers);
+//         _topBrowsers->GetEventHandler()->ProcessEvent(eventADDTAB);
+//     Note! - this is safe only in a single thread context.
+//     The code above guarantees that the events will be processed immediately.
+//     It blocks the execution.
+//
+//     To address all the above:
+//     1. For refresh events in the TDT or external DB - always use the
+//        corresponding bp*Tab(...) method. Never use directly TpdPost::refreshTDTtab(...)
+//     2. For self contained events - the corresponding TpdPost methods
+//        shall be used
+//     3. bpRefreshTdtTab(...) must be called with _DBLock mutex locked
+//     4. All other methods - bpAdd*Tab(...) - which serve the external DBs
+//        shall be called with their corresponding mutexes unlocked.
+//
 
 #endif
