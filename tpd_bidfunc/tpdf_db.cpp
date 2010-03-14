@@ -1802,16 +1802,16 @@ void tellstdfunc::importCIFcell( laydata::TdtLibDir* dbLibDir, const nameList& t
   const SIMap& cifLayers, parsercmd::undoQUEUE& undstack, telldata::UNDOPerandQUEUE& undopstack,
   bool recur, bool overwrite, real techno )
 {
-   if (dbmxs_dblock > DATC->tdtMxState())
-   {
-      // create a default target data base if one is not already existing
-      TpdTime timeCreated(time(NULL));
-      createDefaultTDT("CIF_default", dbLibDir, timeCreated, undstack, undopstack);
-   }
    // DB should have been locked at this point (from the tell functions)
    CIFin::CifFile* ACIFDB = NULL;
    if (DATC->lockCif(ACIFDB))
    {
+      if (dbmxs_dblock > DATC->tdtMxState())
+      {
+         // create a default target data base if one is not already existing
+         TpdTime timeCreated(time(NULL));
+         createDefaultTDT(ACIFDB->getLibName(), dbLibDir, timeCreated, undstack, undopstack);
+      }
       CIFin::Cif2Ted converter(ACIFDB, dbLibDir, cifLayers, techno);
       for (nameList::const_iterator CN = top_names.begin(); CN != top_names.end(); CN++)
          converter.top_structure(*CN, recur, overwrite);

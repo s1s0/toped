@@ -290,7 +290,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          CifStructure*  getStructure(std::string);
          void           hierPrep();
          void           hierOut();
-         std::string    Get_libname() const  {return _fileName;}
+         std::string    getLibName() const   {return std::string(getFileNameOnly(_fileName));}
          CIFHierTree*   hiertree()           {return _hierTree;}
          CifStructure*  getFirstStructure()  {return _first;}
          CifStructure*  getTopStructure()    {return _default;}

@@ -682,9 +682,6 @@ void CIFin::Cif2Ted::top_structure(std::string top_str, bool recursive, bool ove
       ost << "Structure \""<< top_str << "\" not found in the CIF DB in memory.";
       tell_log(console::MT_WARNING,ost.str());
    }
-   // Convert the top structure
-   //   hCellBrowser->AddRoot(wxString((_src_lib->Get_libname()).c_str(), wxConvUTF8));
-
 }
 
 void CIFin::Cif2Ted::child_structure(const CIFin::CIFHierTree* root, bool overwrite)
