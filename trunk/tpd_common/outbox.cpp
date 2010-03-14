@@ -382,12 +382,15 @@ void TpdPost::refreshTDTtab(bool targetDB)
 //   Browsers->OnTELLaddTDTlib(tdtLib, traverse_all);
 }
 
-void TpdPost::addGDStab()
+void TpdPost::addGDStab(bool threadExecution)
 {
    assert(_topBrowsers);
    wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
    eventADDTAB.SetInt(tui::BT_ADDGDS_TAB);
-   wxPostEvent(_topBrowsers, eventADDTAB);
+   if (threadExecution)
+      wxPostEvent(_topBrowsers, eventADDTAB);
+   else
+      _topBrowsers->GetEventHandler()->ProcessEvent(eventADDTAB);
 }
 
 void TpdPost::addCIFtab()

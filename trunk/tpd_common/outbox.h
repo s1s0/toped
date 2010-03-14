@@ -202,7 +202,7 @@ class TpdPost {
       static void toped_status(console::TOPEDSTATUS_TYPE, wxString);
       static void render_status(bool);
       static void refreshTDTtab(bool);
-      static void addGDStab();
+      static void addGDStab(bool);
       static void addCIFtab();
       static void addOAStab();
       static void addDRCtab();

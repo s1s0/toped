@@ -295,6 +295,7 @@ void* console::parse_thread::Entry()
    telllloc.first_column = telllloc.first_line = 1;
    telllloc.last_column  = telllloc.last_line  = 1;
    telllloc.filename = NULL;
+   parsercmd::cmdSTDFUNC::setThreadExecution(true);
    TpdPost::toped_status(TSTS_THREADON, command);
    try {
       void* b = tell_scan_string( command.mb_str(wxConvUTF8) );
@@ -317,6 +318,7 @@ void* console::parse_thread::Entry()
       Console->set_canvas_invalid(false);
    }
    TpdPost::toped_status(TSTS_THREADOFF);
+   parsercmd::cmdSTDFUNC::setThreadExecution(false);
 //   wxLogMessage(_T("Mutex unlocked"));
    return NULL;
 };

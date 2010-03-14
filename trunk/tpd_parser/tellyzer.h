@@ -56,7 +56,7 @@ namespace  parsercmd {
    // Used by lexer to include multiply files and for error tracing
    class lexer_files {
    public:
-      lexer_files(void* fh, YYLTYPE* loc) : 
+      lexer_files(void* fh, YYLTYPE* loc) :
                                  lexfilehandler(fh), location(loc) {};
       ~lexer_files()                               {delete location;};
       void*    lexfilehandler;
@@ -64,15 +64,15 @@ namespace  parsercmd {
    };
 
 //-----------------------------------------------------------------------------
-// Define the types of tell scructures
+// Define the types of tell structures
 //-----------------------------------------------------------------------------
 // tell_tn     - list of tell types - used for argument type checking
-// variableMAP - a map (name - variable) structure used to accomodate the
+// variableMAP - a map (name - variable) structure used to accommodate the
 //               tell variables
-// functionMAP - a map (name - function block) structure conaining all defined
+// functionMAP - a map (name - function block) structure containing all defined
 //               tell functions. There is only one defined variable of this
 //               type funcMAP - static member of cmdBLOCK class.
-// blockSTACK  - a stack strucure containing current blocks nesting. Only
+// blockSTACK  - a stack structure containing current blocks nesting. Only
 //               one variable is defined of this class - blocks - static member
 //               of cmdBLOCK.
 // cmdQUEUE    - a queue structure containing the list of tell operators
@@ -323,8 +323,8 @@ namespace  parsercmd {
       cmdLISTADD(cmdLISTADD* indxcmd) :
          _listarg(indxcmd->_listarg),_prefix(indxcmd->_prefix), _index(indxcmd->_index) {};
       dword                 getIndex();
-      // don't delete this and don't get confused. It's only a pointer to a variable, 
-      // that normally should be in the operand stack. List operations are an exception - 
+      // don't delete this and don't get confused. It's only a pointer to a variable,
+      // that normally should be in the operand stack. List operations are an exception -
       // see the comments in the parser (tell_yacc.yy)
       telldata::ttlist*     _listarg;
       bool                  _prefix;
@@ -385,7 +385,7 @@ namespace  parsercmd {
    > -
    >>> Data fields --------------------------------------------------------------
    > cmdQ      - Contains the list of tell commands
-   > VARlocal  - Conatains the map of the local variables
+   > VARlocal  - Contains the map of the local variables
    > blocks    - static - structure of the nested blocks. Used during the parsing
    > funcMAP   - static - map of defined tell functions. No nested functions
                  allowed, so all of them are defined in the main block
@@ -403,10 +403,10 @@ namespace  parsercmd {
    > pushcmd   - add the parsed command to the cmdQ queue
    > pushblock - push current block in the blocks stack structure
    > popblock  - returns (and removes) the top of the blocks structure
-   > run       - override of the QThread::run(). The execution of the block 
+   > run       - override of the QThread::run(). The execution of the block
                  called from the parser needs to start in a separate thread
                  because of the interactive functions.
-   > cleaner   - clean the instruction que downto the previous ';'
+   > cleaner   - clean the instruction queue down to the previous ';'
    ******************************************************************************/
    class cmdBLOCK:public virtual cmdVIRTUAL {
    public:
@@ -478,14 +478,16 @@ namespace  parsercmd {
       bool                       execOnRecovery() {return _execOnRecovery;}
       bool                       ignoreOnRecovery() { return _ignoreOnRecovery;}
       void                       set_ignoreOnRecovery(bool ior) {_ignoreOnRecovery = ior;}
+      static void                setThreadExecution(bool te) {_threadExecution = te;}
       virtual                   ~cmdSTDFUNC();
-      friend void cmdMAIN::recoveryDone();	
+      friend void cmdMAIN::recoveryDone();
    protected:
       argumentLIST*              arguments;
       telldata::typeID           returntype;
-      bool                      _buildin;
-      bool                      _execOnRecovery;
-      static bool               _ignoreOnRecovery;
+      bool                       _buildin;
+      bool                       _execOnRecovery;
+      static bool                _ignoreOnRecovery;
+      static bool                _threadExecution;
    };
 
    class cmdFUNC:public cmdSTDFUNC, public cmdBLOCK {

@@ -394,33 +394,40 @@ void DataCenter::unlockOas(Oasis::OasisInFile*& oasis_db, bool throwexception)
    oasis_db = NULL;
 }
 
-void DataCenter::bpAddGdsTab()
+void DataCenter::bpAddGdsTab(bool threadExecution)
 {
-   // Lock the Mutex
-   if (wxMUTEX_DEAD_LOCK == _GDSLock.Lock())
+   if (threadExecution)
    {
-      tell_log(console::MT_ERROR,"GDS Mutex deadlocked!");
-      return;
+      // Lock the Mutex
+      if (wxMUTEX_DEAD_LOCK == _GDSLock.Lock())
+      {
+         tell_log(console::MT_ERROR,"GDS Mutex deadlocked!");
+         return;
+      }
+      // Initialize the thread condition with the locked Mutex
+      _bpSync = new wxCondition(_GDSLock);
+      // post a message to the main thread
+      TpdPost::addGDStab(threadExecution);
+      // Go to sleep and wait until the main thread finished
+      // updating the browser panel
+      //
+      // NOTE! The function below will release the lock of the mutex associated with
+      // it - i.e. in this case it will release the _GDSlock and will put the thread in
+      // sleep until Signal or broadcast is called
+      _bpSync->Wait();
+      // When the thread is woken-up, the function above will lock the mutex again and
+      // THEN will return here.
+      //
+      // Wake-up & unlock the mutex
+      VERIFY(wxMUTEX_NO_ERROR == _GDSLock.Unlock());
+      // clean-up behind & prepare for the consequent use
+      delete _bpSync;
+      _bpSync = NULL;
    }
-   // Initialize the thread condition with the locked Mutex
-   _bpSync = new wxCondition(_GDSLock);
-   // post a message to the main thread
-   TpdPost::addGDStab();
-   // Go to sleep and wait until the main thread finished
-   // updating the browser panel
-   //
-   // NOTE! The function below will release the lock of the mutex associated with
-   // it - i.e. in this case it will release the _GDSlock and will put the thread in
-   // sleep until Signal or broadcast is called
-   _bpSync->Wait();
-   // When the thread is woken-up, the function above will lock the mutex again and
-   // THEN will return here.
-   //
-   // Wake-up & unlock the mutex
-   VERIFY(wxMUTEX_NO_ERROR == _GDSLock.Unlock());
-   // clean-up behind & prepare for the consequent use
-   delete _bpSync;
-   _bpSync = NULL;
+   else
+   {
+      TpdPost::addGDStab(threadExecution);
+   }
 }
 
 void DataCenter::bpAddCifTab()
