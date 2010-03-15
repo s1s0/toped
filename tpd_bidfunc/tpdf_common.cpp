@@ -167,6 +167,7 @@ void tellstdfunc::clean_ttlaylist(telldata::ttlist* llist) {
 //==============================================================================
 void tellstdfunc::clean_atticlist(laydata::AtticList* nlst, bool destroy)
 {
+   if (NULL == nlst) return;
    for (laydata::AtticList::const_iterator CL = nlst->begin(); CL != nlst->end(); CL++)
    {
       if (destroy)
