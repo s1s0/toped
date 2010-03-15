@@ -322,8 +322,8 @@ void tellstdfunc::gridON(byte No, bool status)
       case 1: eventGRIDUPD.SetId(tui::STS_GRID1); break;
       case 2: eventGRIDUPD.SetId(tui::STS_GRID2); break;
       default: assert(false);
-      eventGRIDUPD.SetInt(status ? 1 : 0);
    }
+   eventGRIDUPD.SetInt(status ? 1 : 0);
    wxPostEvent(TopedCanvasW, eventGRIDUPD);
 }
 
