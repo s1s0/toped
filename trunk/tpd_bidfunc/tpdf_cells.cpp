@@ -191,10 +191,10 @@ int tellstdfunc::stdREMOVECELL::execute()
       UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(cname));
       UNDOPstack.push_front(make_ttlaylist(cell_contents));
       UNDOUstack.push_front(rmvdcell);
+      clean_atticlist(cell_contents, false);
+      delete(cell_contents);
       LogFile << LogFile.getFN() << "(\""<< cname << "\");"; LogFile.flush();
    }
-   clean_atticlist(cell_contents, false);
-   delete(cell_contents);
    return EXEC_NEXT;
 }
 
