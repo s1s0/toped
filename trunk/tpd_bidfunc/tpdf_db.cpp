@@ -1814,8 +1814,7 @@ void tellstdfunc::importCIFcell( laydata::TdtLibDir* dbLibDir, const nameList& t
          createDefaultTDT(ACIFDB->getLibName(), dbLibDir, timeCreated, threadExecution, undstack, undopstack);
       }
       CIFin::Cif2Ted converter(ACIFDB, dbLibDir, cifLayers, techno);
-      for (nameList::const_iterator CN = top_names.begin(); CN != top_names.end(); CN++)
-         converter.top_structure(*CN, recur, overwrite);
+      converter.run(top_names, recur, overwrite);
       (*dbLibDir)()->modified = true;
       tell_log(console::MT_INFO,"Done");
    }

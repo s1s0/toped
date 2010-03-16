@@ -97,8 +97,8 @@ CIFin::CifLayer::CifLayer(std::string name, CifLayer* last):
 
 CIFin::CifLayer::~CifLayer()
 {
-   CifData* wdata = _first;
-   CifData* wdata4d;
+   const CifData* wdata = _first;
+   const CifData* wdata4d;
    while (wdata)
    {
       wdata4d = wdata;
@@ -141,8 +141,8 @@ CIFin::CifStructure::CifStructure(dword ID, CifStructure* last, dword a, dword b
 CIFin::CifStructure::~CifStructure()
 {
    // Remove all layers ...
-   CifLayer* wlay = _first;
-   CifLayer* wlay4d;
+   const CifLayer* wlay = _first;
+   const CifLayer* wlay4d;
    while (NULL != wlay)
    {
       wlay4d = wlay;
@@ -150,8 +150,8 @@ CIFin::CifStructure::~CifStructure()
       delete wlay4d;
    }
    // ... and all references
-   CifRef* wref = _refirst;
-   CifRef* wref4d;
+   const CifRef* wref = _refirst;
+   const CifRef* wref4d;
    while (NULL != wref)
    {
       wref4d = wref;
@@ -162,10 +162,10 @@ CIFin::CifStructure::~CifStructure()
 
 CIFin::CifLayer* CIFin::CifStructure::secureLayer(std::string name)
 {
-   CifLayer* wlay = _first;
+   const CifLayer* wlay = _first;
    while (NULL != wlay)
    {
-      if (name == wlay->name()) return wlay;
+      if (name == wlay->name()) return const_cast<CIFin::CifLayer*>(wlay);
       wlay = wlay->last();
    }
    _first = DEBUG_NEW CifLayer(name, _first);
@@ -174,7 +174,7 @@ CIFin::CifLayer* CIFin::CifStructure::secureLayer(std::string name)
 
 void CIFin::CifStructure::collectLayers(nameList& layList, bool hier)
 {
-   CifLayer* wlay = _first;
+   const CifLayer* wlay = _first;
    while (NULL != wlay)
    {
       layList.push_back(wlay->name());
@@ -195,7 +195,7 @@ void CIFin::CifStructure::addRef(dword cell, CTM* location)
 
 void CIFin::CifStructure::hierPrep(CifFile& cfile)
 {
-   CifRef* _local = _refirst;
+   const CifRef* _local = _refirst;
    while (NULL != _local)
    {
       CifStructure* celldef = cfile.getStructure(_local->cell());
@@ -665,26 +665,45 @@ CIFin::Cif2Ted::Cif2Ted(CIFin::CifFile* src_lib, laydata::TdtLibDir* tdt_db,
 }
 
 
-void CIFin::Cif2Ted::top_structure(std::string top_str, bool recursive, bool overwrite)
+void CIFin::Cif2Ted::run(const nameList& top_str_names, bool recursive, bool overwrite)
 {
    assert(_src_lib->hiertree());
-   CIFin::CifStructure *src_structure = _src_lib->getStructure(top_str);
-   if (NULL != src_structure)
+   for (nameList::const_iterator CN = top_str_names.begin(); CN != top_str_names.end(); CN++)
    {
-      CIFin::CIFHierTree* root = _src_lib->hiertree()->GetMember(src_structure);
-      if (recursive) child_structure(root, overwrite);
-      convert_prep(root, overwrite);
-      root = root->GetNextRoot(TARGETDB_LIB);
+      CIFin::CifStructure *src_structure = _src_lib->getStructure(*CN);
+      if (NULL != src_structure)
+      {
+         CIFin::CIFHierTree* root = _src_lib->hiertree()->GetMember(src_structure);
+         if (recursive) preTraverseChildren(root);
+         if (!src_structure->traversed())
+         {
+            _convertList.push_back(src_structure);
+            src_structure->set_traversed(true);
+         }
+
+      }
+      else
+      {
+         std::ostringstream ost; ost << "CIF import: ";
+         ost << "Structure \""<< *CN << "\" not found in the CIF DB in memory.";
+         tell_log(console::MT_WARNING,ost.str());
+      }
    }
-   else
+   //
+   for (CIFSList::iterator CS = _convertList.begin(); CS != _convertList.end(); CS++)
    {
-      std::ostringstream ost; ost << "CIF import: ";
-      ost << "Structure \""<< top_str << "\" not found in the CIF DB in memory.";
-      tell_log(console::MT_WARNING,ost.str());
+      convert(*CS, overwrite);
+      (*CS)->set_traversed(false); // restore the state for eventual second conversion
    }
+   tell_log(console::MT_INFO, "Done");
+   (*_tdt_db)()->recreateHierarchy(_tdt_db);
+
+   //         if (recursive) preTraverseChildren(root, overwrite);
+   //         convert_prep(root, overwrite);
 }
 
-void CIFin::Cif2Ted::child_structure(const CIFin::CIFHierTree* root, bool overwrite)
+
+void CIFin::Cif2Ted::preTraverseChildren(const CIFin::CIFHierTree* root)
 {
    const CIFin::CIFHierTree* Child= root->GetChild(TARGETDB_LIB);
    while (Child)
@@ -692,16 +711,20 @@ void CIFin::Cif2Ted::child_structure(const CIFin::CIFHierTree* root, bool overwr
       if ( !Child->GetItem()->traversed() )
       {
          // traverse children first
-         child_structure(Child, overwrite);
-         convert_prep(Child, overwrite);
+         preTraverseChildren(Child);
+         CIFin::CifStructure* sstr = const_cast<CIFin::CifStructure*>(Child->GetItem());
+         if (!sstr->traversed())
+         {
+            _convertList.push_back(sstr);
+            sstr->set_traversed(true);
+         }
       }
       Child = Child->GetBrother(TARGETDB_LIB);
    }
 }
 
-void CIFin::Cif2Ted::convert_prep(const CIFin::CIFHierTree* item, bool overwrite)
+void CIFin::Cif2Ted::convert(const CIFin::CifStructure* src_structure, bool overwrite)
 {
-   CIFin::CifStructure* src_structure = const_cast<CIFin::CifStructure*>(item->GetItem());
    std::string gname = src_structure->name();
    // check that destination structure with this name exists
    laydata::TdtCell* dst_structure = static_cast<laydata::TdtCell*>((*_tdt_db)()->checkCell(gname));
@@ -727,16 +750,15 @@ void CIFin::Cif2Ted::convert_prep(const CIFin::CIFHierTree* item, bool overwrite
       // first create a new cell
       dst_structure = (*_tdt_db)()->addCell(gname, _tdt_db);
       // finally call the cell converter
-      convert(src_structure, dst_structure);
+      import(src_structure, dst_structure);
    }
-   src_structure->set_traversed(true);
 }
 
 
-void CIFin::Cif2Ted::convert(CIFin::CifStructure* src, laydata::TdtCell* dst)
+void CIFin::Cif2Ted::import(const CIFin::CifStructure* src, laydata::TdtCell* dst)
 {
    _crosscoeff = _dbucoeff * src->a() / src->b();
-   CIFin::CifLayer* swl = src->firstLayer();
+   const CIFin::CifLayer* swl = src->firstLayer();
    while( swl ) // loop trough the layers
    {
       SIMap::const_iterator layno;
@@ -744,16 +766,16 @@ void CIFin::Cif2Ted::convert(CIFin::CifStructure* src, laydata::TdtCell* dst)
       {
          laydata::TdtLayer* dwl =
                static_cast<laydata::TdtLayer*>(dst->secureLayer(layno->second));
-         CIFin::CifData* wd = swl->firstData();
+         const CIFin::CifData* wd = swl->firstData();
          while ( wd ) // loop trough data
          {
             switch (wd->dataType())
             {
-               case cif_BOX     : box ( static_cast<CIFin::CifBox*     >(wd), dwl, swl->name() );break;
-               case cif_POLY    : poly( static_cast<CIFin::CifPoly*    >(wd), dwl, swl->name() );break;
-               case cif_WIRE    : wire( static_cast<CIFin::CifWire*    >(wd), dwl, swl->name() );break;
-               case cif_LBL_LOC : lbll( static_cast<CIFin::CifLabelLoc*>(wd), dwl, swl->name() );break;
-               case cif_LBL_SIG : lbls( static_cast<CIFin::CifLabelSig*>(wd), dwl, swl->name() );break;
+               case cif_BOX     : box ( static_cast<const CIFin::CifBox*     >(wd), dwl, swl->name() );break;
+               case cif_POLY    : poly( static_cast<const CIFin::CifPoly*    >(wd), dwl, swl->name() );break;
+               case cif_WIRE    : wire( static_cast<const CIFin::CifWire*    >(wd), dwl, swl->name() );break;
+               case cif_LBL_LOC : lbll( static_cast<const CIFin::CifLabelLoc*>(wd), dwl, swl->name() );break;
+               case cif_LBL_SIG : lbls( static_cast<const CIFin::CifLabelSig*>(wd), dwl, swl->name() );break;
                default    : assert(false);
             }
             wd = wd->last();
@@ -768,7 +790,7 @@ void CIFin::Cif2Ted::convert(CIFin::CifStructure* src, laydata::TdtCell* dst)
       swl = swl->last();
    }
 
-   CIFin::CifRef* swr = src->refirst();
+   const CIFin::CifRef* swr = src->refirst();
    while ( swr )
    {
       ref(swr,dst);
@@ -777,7 +799,7 @@ void CIFin::Cif2Ted::convert(CIFin::CifStructure* src, laydata::TdtCell* dst)
    dst->resort();
 }
 
-void CIFin::Cif2Ted::box ( CIFin::CifBox* wd, laydata::TdtLayer* wl, std::string layname)
+void CIFin::Cif2Ted::box ( const CIFin::CifBox* wd, laydata::TdtLayer* wl, std::string layname)
 {
    pointlist pl;   pl.reserve(4);
    real cX, cY;
@@ -825,7 +847,7 @@ void CIFin::Cif2Ted::box ( CIFin::CifBox* wd, laydata::TdtLayer* wl, std::string
    else              wl->addPoly(pl,false);
 }
 
-void CIFin::Cif2Ted::poly( CIFin::CifPoly* wd, laydata::TdtLayer* wl, std::string layname)
+void CIFin::Cif2Ted::poly( const CIFin::CifPoly* wd, laydata::TdtLayer* wl, std::string layname)
 {
    pointlist pl;
    pl.reserve(wd->poly()->size());
@@ -849,7 +871,7 @@ void CIFin::Cif2Ted::poly( CIFin::CifPoly* wd, laydata::TdtLayer* wl, std::strin
    else              wl->addPoly(pl,false);
 }
 
-void CIFin::Cif2Ted::wire( CIFin::CifWire* wd, laydata::TdtLayer* wl, std::string layname)
+void CIFin::Cif2Ted::wire( const CIFin::CifWire* wd, laydata::TdtLayer* wl, std::string layname)
 {
    pointlist pl;
    pl.reserve(wd->poly()->size());
@@ -871,7 +893,7 @@ void CIFin::Cif2Ted::wire( CIFin::CifWire* wd, laydata::TdtLayer* wl, std::strin
    wl->addWire(pl, wd->width(),false);
 }
 
-void CIFin::Cif2Ted::ref ( CIFin::CifRef* wd, laydata::TdtCell* dst)
+void CIFin::Cif2Ted::ref ( const CIFin::CifRef* wd, laydata::TdtCell* dst)
 {
    CifStructure* refd = _src_lib->getStructure(wd->cell());
    std::string cell_name = refd->name();
@@ -889,7 +911,7 @@ void CIFin::Cif2Ted::ref ( CIFin::CifRef* wd, laydata::TdtCell* dst)
    }
 }
 
-void CIFin::Cif2Ted::lbll( CIFin::CifLabelLoc* wd, laydata::TdtLayer* wl, std::string )
+void CIFin::Cif2Ted::lbll( const CIFin::CifLabelLoc* wd, laydata::TdtLayer* wl, std::string )
 {
    // CIF doesn't have a concept of texts (as GDS)
    // text size and placement are just the default
@@ -904,7 +926,7 @@ void CIFin::Cif2Ted::lbll( CIFin::CifLabelLoc* wd, laydata::TdtLayer* wl, std::s
               );
 }
 
-void CIFin::Cif2Ted::lbls( CIFin::CifLabelSig*,laydata::TdtLayer*, std::string )
+void CIFin::Cif2Ted::lbls( const CIFin::CifLabelSig*,laydata::TdtLayer*, std::string )
 {
 }
 

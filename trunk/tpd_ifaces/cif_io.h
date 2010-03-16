@@ -134,8 +134,8 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
       public:
                              CifData(CifData* last) : _last(last) {};
          virtual            ~CifData(){};
-         CifData*            last()         {return _last;}
-         virtual CifDataType dataType() = 0;
+         const CifData*      last() const        {return _last;}
+         virtual CifDataType dataType() const = 0;
       protected:
          CifData*    _last;
    };
@@ -144,11 +144,11 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
       public:
                      CifBox(CifData*, dword, dword, TP*, TP*);
                     ~CifBox();
-         CifDataType dataType()     {return cif_BOX;}
-         dword       length()       {return _length;}
-         dword       width()        {return _width;}
-         TP*         center()       {return _center;}
-         TP*         direction()    {return _direction;}
+         CifDataType dataType() const   {return cif_BOX;}
+         dword       length() const     {return _length;}
+         dword       width() const      {return _width;}
+         const TP*   center() const     {return _center;}
+         const TP*   direction() const  {return _direction;}
       protected:
          dword       _length;
          dword       _width;
@@ -158,21 +158,21 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
 
    class CifPoly : public CifData {
       public:
-                     CifPoly(CifData* last, pointlist*);
-                    ~CifPoly();
-         CifDataType dataType()     {return cif_POLY;}
-         pointlist*  poly()         {return _poly;}
+                           CifPoly(CifData* last, pointlist*);
+                          ~CifPoly();
+         CifDataType       dataType() const    {return cif_POLY;}
+         const pointlist*  poly() const        {return _poly;}
       protected:
          pointlist*  _poly;
    };
 
    class CifWire : public CifData {
       public:
-                     CifWire(CifData* last, pointlist*, dword);
-                    ~CifWire();
-         CifDataType dataType()     {return cif_WIRE;}
-         pointlist*  poly()         {return _poly;}
-         dword       width()        {return _width;}
+                           CifWire(CifData* last, pointlist*, dword);
+                          ~CifWire();
+         CifDataType       dataType() const    {return cif_WIRE;}
+         const pointlist*  poly() const        {return _poly;}
+         dword             width() const       {return _width;}
       protected:
          pointlist*  _poly;
          dword       _width;
@@ -182,10 +182,10 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
       public:
                      CifRef(CifData* last, dword, CTM*);
                     ~CifRef();
-         CifRef*     last()                           {return static_cast<CifRef*>(CifData::last());}
-         dword       cell()                           {return  _cell;}
-         CTM*        location()                       {return  _location;}
-         CifDataType dataType()                       {return  cif_REF;}
+         const CifRef* last() const                   {return static_cast<const CifRef*>(CifData::last());}
+         dword       cell() const                     {return  _cell;}
+         const CTM*  location() const                 {return  _location;}
+         CifDataType dataType() const                 {return  cif_REF;}
       protected:
          dword       _cell;
          CTM*        _location;
@@ -195,7 +195,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
       public:
                      CifLabelLoc(CifData*, std::string, TP*);
          virtual   ~CifLabelLoc();
-         CifDataType dataType()                       {return cif_LBL_LOC;}
+         CifDataType dataType() const                 {return cif_LBL_LOC;}
          std::string text() const                     {return _label;}
          const TP*   location() const                 {return _location;}
 
@@ -208,16 +208,16 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
       public:
                      CifLabelSig(CifData*, std::string, TP*);
                     ~CifLabelSig() {}
-         CifDataType dataType()                       {return cif_LBL_SIG;}
+         CifDataType dataType() const                  {return cif_LBL_SIG;}
    };
 
    class CifLayer {
       public:
                         CifLayer(std::string name, CifLayer* last);
                        ~CifLayer();
-         std::string    name()                        {return _name;}
-         CifLayer*      last()                        {return _last;}
-         CifData*       firstData()                   {return _first;}
+         std::string    name() const                  {return _name;}
+         const CifLayer* last() const                 {return _last;}
+         const CifData* firstData() const             {return _first;}
          void           addBox(dword, dword, TP*, TP* direction = NULL);
          void           addPoly(pointlist* poly);
          void           addWire(pointlist* poly, dword width);
@@ -244,10 +244,10 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          bool           orphan()                      {return _orphan;}
          bool           traversed() const             {return _traversed;}
          void           set_traversed(bool trv)       { _traversed = trv;}
-         CifLayer*      firstLayer()                  {return _first;}
-         CifRef*        refirst()                     {return _refirst;}
-         real           a()                           {return (real)_a;}
-         real           b()                           {return (real)_b;}
+         const CifLayer* firstLayer() const            {return _first;}
+         const CifRef*  refirst() const               {return _refirst;}
+         real           a() const                     {return (real)_a;}
+         real           b() const                     {return (real)_b;}
          CifLayer*      secureLayer(std::string);
          void           addRef(dword cell, CTM* location);
          void           collectLayers(nameList&, bool);
@@ -334,22 +334,23 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
    class Cif2Ted {
       public:
                               Cif2Ted(CifFile*, laydata::TdtLibDir*, const SIMap&, real);
-         void                 top_structure(std::string, bool, bool);
+         void                 run(const nameList&, bool, bool);
       protected:
-         void                 child_structure(const CIFHierTree*, bool);
-         void                 convert_prep(const CIFHierTree* item, bool);
-         void                 convert(CifStructure*, laydata::TdtCell*);
-         void                 box ( CifBox*     ,laydata::TdtLayer*, std::string );
-         void                 poly( CifPoly*    ,laydata::TdtLayer*, std::string );
-         void                 wire( CifWire*    ,laydata::TdtLayer*, std::string );
-         void                 ref ( CifRef*     ,laydata::TdtCell*);
-         void                 lbll( CifLabelLoc*,laydata::TdtLayer*, std::string );
-         void                 lbls( CifLabelSig*,laydata::TdtLayer*, std::string );
+         void                 preTraverseChildren(const CIFHierTree*);
+         void                 convert(const CIFin::CifStructure*, bool);
+         void                 import(const CifStructure*, laydata::TdtCell*);
+         void                 box ( const CifBox*     ,laydata::TdtLayer*, std::string );
+         void                 poly( const CifPoly*    ,laydata::TdtLayer*, std::string );
+         void                 wire( const CifWire*    ,laydata::TdtLayer*, std::string );
+         void                 ref ( const CifRef*     ,laydata::TdtCell*);
+         void                 lbll( const CifLabelLoc*,laydata::TdtLayer*, std::string );
+         void                 lbls( const CifLabelSig*,laydata::TdtLayer*, std::string );
          CifFile*             _src_lib;
          laydata::TdtLibDir*  _tdt_db;
          const SIMap&         _cif_layers;
          real                 _crosscoeff;
          real                 _dbucoeff;
+         CIFSList             _convertList;
          real                 _techno;
    };
 
