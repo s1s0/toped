@@ -1492,7 +1492,7 @@ void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
          layprop::DrawProperties* drawProp;
          if (PROPC->lockDrawProp(drawProp))
          {
-            drawProp->setCellDepthView(val);
+            drawProp->setCellDepthView(0);
          }
          PROPC->unlockDrawProp(drawProp);
          // send an event to update the property dialog
