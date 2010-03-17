@@ -492,9 +492,10 @@ void browsers::CellBrowser::updateHier()
                   wxTreeItemId cellitem = AppendItem(_undefRoot, wxString( (*CL).first.c_str(),  wxConvUTF8));
                   SetItemImage(cellitem,BICN_UNDEFCELL,wxTreeItemIcon_Normal);
                }
+               SortChildren(_undefRoot);
             }
          }
-         SortChildren(_undefRoot);
+         delete cll;
       }
    }
    DATC->unlockTDT(dbLibDir);
