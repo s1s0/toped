@@ -289,7 +289,6 @@ void DataCenter::unlockTDT(laydata::TdtLibDir* tdt_db, bool throwexception)
    assert(_tdtActMxState > dbmxs_unlocked);
    VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
    tdt_db = NULL;
-   _tdtActMxState = _tdtReqMxState = dbmxs_unlocked;
    if(NULL != _bpSync) _bpSync->Signal();
    //TODO! In all cases - throw exception if we've got to the deadlocked state
 //   if (dbmxs_deadlock == _tdtActMxState) throw EXPTNmutex_DB();
@@ -315,6 +314,7 @@ void DataCenter::unlockTDT(laydata::TdtLibDir* tdt_db, bool throwexception)
             }
          default             : break;
       }
+   _tdtActMxState = _tdtReqMxState = dbmxs_unlocked;
 }
 
 bool DataCenter::lockGds(GDSin::GdsInFile*& gds_db)
