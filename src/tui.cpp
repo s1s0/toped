@@ -1977,7 +1977,7 @@ tui::nameCbox3Records::nameCbox3Records( wxWindow *parent, wxPoint pnt, wxSize s
          sGdsDtype << *CTP;
          word wTdtLay;
          if (!_gdsLayMap->getTdtLay( wTdtLay, CNM->first, *CTP)) wTdtLay = CNM->first;
-         wxString sTdtLay(_drawProp->getLayerName(CNM->first).c_str(), wxConvUTF8);
+         wxString sTdtLay(_drawProp->getLayerName(wTdtLay).c_str(), wxConvUTF8);
 
          wxCheckBox* dwgdslay  = DEBUG_NEW wxCheckBox( this, wxID_ANY, sGdsLay,
             wxPoint(  5,(row_height+5)*rowno + 5), wxSize(55,row_height), wxALIGN_LEFT );
@@ -1999,7 +1999,7 @@ USMap* tui::nameCbox3Records::getTheMap()
    {
       if (!CNM->_gdslay->GetValue()) continue;
       unsigned layno;
-      std::string layname = std::string(CNM->_tdtlay->GetLabel().mb_str(wxConvUTF8));
+      std::string layname = std::string(CNM->_tdtlay->GetValue().mb_str(wxConvUTF8));
       if ("" == layname)
       {
          long lint;

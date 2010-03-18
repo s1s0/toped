@@ -814,7 +814,7 @@ void laydata::QuadTree::selectFromList(DataList* src, DataList* dst) {
             // remove it from the select list - it will speed up the following
             // operations
             DI = src->erase(DI);
-            // there is no point looping futher, get the next object
+            // there is no point looping further, get the next object
             break;
          }
          else DI++;
