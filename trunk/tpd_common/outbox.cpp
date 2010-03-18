@@ -1135,7 +1135,7 @@ USMap* LayerMapExt::updateMap(USMap* update, bool import)
    for (USMap::const_iterator CE = update->begin(); CE != update->end(); CE++)
    {
       // the idea behind this parsing is simply to check the syntax and
-      // to protect ourselfs from saving rubbish
+      // to protect ourself from saving rubbish
       wxString exp(CE->second.c_str(), wxConvUTF8);
       patternNormalize(exp);
       wxString lay_exp;
