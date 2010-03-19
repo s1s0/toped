@@ -2,16 +2,16 @@
 ==============================================================================
 |  GLF Library
 |  Version 1.4
-| 
+|
 |  Author: Roman Podobedov
 |  Email: romka@ut.ee
 |  WEB: http://romka.demonews.com
 |  Release Date: 18 May 2001
-|  
+|
 |  Copyright (C) 2000-2001, Romka Graphics
 |  This library is freely distributable without any license or permissions
 |  for non-commercial usage. You can use this library in any non-commercial
-|  program. In each program, where You use this library You should keep 
+|  program. In each program, where You use this library You should keep
 |  this header (author name and coordinates)!
 |  For commercial usage, please contact me: romka@ut.ee
 ==============================================================================
@@ -56,18 +56,18 @@ extern "C" {
 #define GLF_CONSOLE_CURSOR   30
 
 /* Library initialization (must be called before any usage of library) */
-void glfInit(); 
+void glfInit();
 /* Library closing (must be called after usage of library) */
 void glfClose();
 
 /* Font loading/unloading functions */
-int   glfLoadFont(const char *font_name);      /* Load Vector font to memory */
+int   glfLoadFont(const char *font_file_name, char*& font_name);      /* Load Vector font to memory */
 //int   glfLoadBMFFont(char *FName);            /* Load Bitmap font to memory */
 int   glfUnloadFont();                        /* Unload font from memory */
 //int   glfUnloadBMFFont();                     /* Unload current BMF font */
 int   glfUnloadFontD(int font_descriptor);   /* Unload font by font_descriptor */
 //int   glfUnloadBMFFontD(int bmf_descriptor);   /* Unload BMF font by bmf_descriptor */
-
+int  glfSelectFont(int font_descriptor);
 /* Text drawing functions */
 /* --------- Vector Fonts ---------------- */
 void glfDrawWiredSymbol(const char s);    /* Draw wired symbol    */

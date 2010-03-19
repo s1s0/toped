@@ -2,16 +2,16 @@
 ==============================================================================
 |  GLF Library
 |  Version 1.4
-| 
+|
 |  Author: Roman Podobedov
 |  Email: romka@ut.ee
 |  WEB: http://romka.demonews.com
 |  Release Date: 18 May 2001
-|  
+|
 |  Copyright (C) 2000-2001, Romka Graphics
 |  This library is freely distributable without any license or permissions
 |  for non-commercial usage. You can use this library in any non-commercial
-|  program. In each program, where You use this library You should keep 
+|  program. In each program, where You use this library You should keep
 |  this header (author name and coordinates)!
 |  For commercial usage, please contact me: romka@ut.ee
 ==============================================================================
@@ -132,7 +132,7 @@ void glfInit()
       bmf_in_use[i] = 0;
       m_max_height[i] = 0;
    }
-   
+
    curfont = -1;
    bmf_curfont = -1;
    console_msg = GLF_NO;
@@ -155,14 +155,14 @@ void glfInit()
 void glfClose()
 {
    int i;
-   
+
    free(conData);
 
    for (i=0; i<MAX_FONTS; i++) glfUnloadFontD(i);
 //   for (i=0; i<MAX_FONTS; i++) glfUnloadBMFFontD(i);
 }
 
-/* 
+/*
 |   This function check that this machine is little endian
 |   Return value:   1 - little endian
 |               0 - big endian
@@ -179,12 +179,12 @@ static int LittleEndian()
 
 
 /*
-   --------------------------------------------------------------------------------- 
-   ------------------------ Work with vector fonts --------------------------------- 
-   --------------------------------------------------------------------------------- 
+   ---------------------------------------------------------------------------------
+   ------------------------ Work with vector fonts ---------------------------------
+   ---------------------------------------------------------------------------------
 */
 
-/* 
+/*
 |   This function read font file and store information in memory
 |   Return: GLF_OK - if all OK
 |   Return: GLF_ERROR - if any error
@@ -208,7 +208,7 @@ static int ReadFont(const char *font_name, struct glf_font *glff)
    if (strcmp(buffer, "GLF"))
    {
       /* If header is not "GLF" */
-      if (console_msg) 
+      if (console_msg)
          printf("Error reading font file: incorrect file format\n");
       fclose(fontf);
       return GLF_ERROR;
@@ -227,7 +227,7 @@ static int ReadFont(const char *font_name, struct glf_font *glff)
    for (i=0; i<28; i++) fread(&temp, 1, 1, fontf);  /* Read unused data */
 
    /* Now start to read font data */
-  
+
    for (i=0; i<glff->sym_total; i++)
    {
       fread(&code, 1, 1, fontf);  /* Read symbol code   */
@@ -237,7 +237,7 @@ static int ReadFont(const char *font_name, struct glf_font *glff)
 
       if (glff->symbols[code] != NULL)
       {
-         if (console_msg) 
+         if (console_msg)
             printf("Error reading font file: encountered symbols in font\n");
          fclose(fontf);
          return GLF_ERROR;
@@ -262,7 +262,7 @@ static int ReadFont(const char *font_name, struct glf_font *glff)
       {
          fread(&tempfx, 4, 1, fontf);
          fread(&tempfy, 4, 1, fontf);
-          
+
          /* If machine is bigendian -> swap low and high words in
          tempfx and tempfy */
          if (!LEndian)
@@ -292,12 +292,12 @@ static int ReadFont(const char *font_name, struct glf_font *glff)
 }
 
 
-/* 
+/*
 | Function loads font to memory from file
 | Return value: GLF_ERROR  - if error
 |               >=0 - returned font descriptor (load success)
 */
-int glfLoadFont(const char *font_name)
+int glfLoadFont(const char *font_file_name, char*& font_name)
 {
    int i;
    char flag; /* Temporary flag */
@@ -314,12 +314,13 @@ int glfLoadFont(const char *font_name)
       }
 
    if (!flag) return GLF_ERROR; /* Free font not found */
-   if (ReadFont(font_name, fonts[i]) == GLF_OK)
+   if (ReadFont(font_file_name, fonts[i]) == GLF_OK)
    {
       curfont = i; /* Set curfont to just loaded font */
+      font_name = fonts[i]->font_name;
       return i;
    }
-  
+
    if (fonts[i] != NULL)
    {
       free(fonts[i]);
@@ -328,7 +329,7 @@ int glfLoadFont(const char *font_name)
    return GLF_ERROR;
 }
 
-/* 
+/*
 | Unload current font from memory
 | Return value: GLF_OK  - if all OK
 |               GLF_ERROR -  if error
@@ -336,9 +337,9 @@ int glfLoadFont(const char *font_name)
 int glfUnloadFont()
 {
    int i;
-  
+
    if ((curfont<0) || (fonts[curfont] == NULL)) return GLF_ERROR;
-  
+
    for (i=0; i<256; i++)
    {
       if (fonts[curfont]->symbols[i] != NULL)
@@ -368,6 +369,13 @@ int glfUnloadFontD(int font_descriptor)
    glfUnloadFont();
    if (temp != font_descriptor) curfont = temp;
    else curfont = -1;
+   return GLF_OK;
+}
+
+int glfSelectFont(int font_descriptor)
+{
+   if ((font_descriptor < 0) || (fonts[font_descriptor] == NULL)) return GLF_ERROR;
+   curfont = font_descriptor;
    return GLF_OK;
 }
 
@@ -405,10 +413,10 @@ void glfDrawWiredSymbol(char s)
 //    int i, cur_line;
 //    float *tvp; /* temporary vertex pointer */
 //    float x, y;
-//   
+//
 //    if ((curfont < 0) || (fonts[curfont] == NULL)) return;
 //    if (fonts[curfont]->symbols[s] == NULL) return;
-// 
+//
 //    glBegin(GL_LINE_LOOP);
 //    tvp = fonts[curfont]->symbols[s]->vdata;
 //    cur_line = 0;
@@ -476,7 +484,7 @@ static void DrawString(const char *s, void (*funct) (char s))
                {
                   one_symbol* the_next_symbol = fonts[curfont]->symbols[(unsigned char)(s[i+1])];
                   if (the_next_symbol == NULL) continue;
-   
+
                   if (m_direction == GLF_LEFT || m_direction == GLF_RIGHT)
                   {
                      sda = (float)fabs(the_symbol->rightx);
@@ -498,7 +506,7 @@ static void DrawString(const char *s, void (*funct) (char s))
    }
 
    glPushMatrix();
-   
+
    /* Rotate if needed */
    if (RotateAngle != 0.0f) glRotatef(RotateAngle, 0, 0, 1);
 
@@ -612,7 +620,7 @@ void glfDrawTopedString(const char *s, bool fill)
    {
       void(* symbfunc) (char)     = (fill) ? &glfDrawSolidSymbol : &glfDrawWiredSymbol;
       glPushMatrix();
-   
+
       /* Start to draw the string */
       for (i=0; i<(int)strlen(s); i++)
       {
@@ -724,7 +732,7 @@ void glfDraw3DWiredSymbol(char s)
    int i, cur_line;
    float *tvp; /* temp vertex pointer */
    float x, y;
-  
+
    if ((curfont<0) || (fonts[curfont] == NULL)) return;
    if (fonts[curfont]->symbols[(int)s] == NULL) return;
 
@@ -822,7 +830,7 @@ void glfDraw3DSolidSymbol(char s)
    float *tvp;       /* temp vertex pointer */
    float temp_color[4];
    GLboolean light_temp;
-  
+
    if ((curfont<0) || (fonts[curfont] == NULL)) return;
    if (fonts[curfont]->symbols[(int)s] == NULL) return;
    one_symbol* the_symbol = fonts[curfont]->symbols[(unsigned char)s];
@@ -847,7 +855,7 @@ void glfDraw3DSolidSymbol(char s)
 
    b = the_symbol->fdata;
    vp = the_symbol->vdata;
-  
+
    glBegin(GL_TRIANGLES);
    glNormal3f(0, 0, -1);
    for (i=0; i<the_symbol->facets; i++)
@@ -1024,7 +1032,7 @@ float glfGetSymbolDepth()
 int glfSetCurrentFont(int Font_Descriptor)
 {
    if ((Font_Descriptor < 0) || (fonts[Font_Descriptor] == NULL)) return GLF_ERROR;
-  
+
    curfont = Font_Descriptor;
    return GLF_OK;
 }
@@ -1087,7 +1095,7 @@ void glfSetConsoleParam(int width, int height)
 int glfSetConsoleFont(int Font_Descriptor)
 {
    if ((Font_Descriptor < 0) || (fonts[Font_Descriptor] == NULL)) return GLF_ERROR;
-  
+
    conFont = Font_Descriptor;
    return GLF_OK;
 }
@@ -1217,9 +1225,9 @@ void glfSetRotateAngle(float angle)
 
 
 /*
-   --------------------------------------------------------------------------------- 
-   ------------------------ Work with bitmapped fonts ------------------------------ 
-   --------------------------------------------------------------------------------- 
+   ---------------------------------------------------------------------------------
+   ------------------------ Work with bitmapped fonts ------------------------------
+   ---------------------------------------------------------------------------------
 */
 
 /* Set string centering for bitmap fonts */

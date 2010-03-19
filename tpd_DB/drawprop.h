@@ -232,13 +232,13 @@ namespace layprop {
          bool                   bindFont();
          void                   unbindFont();
          void                   allFontNames(nameList&);
-         word                   numFonts()                {return _font.size();}
+         word                   numFonts();
          std::string            getActiveFontName() const {return _activeFontName;}
       private:
-         typedef std::map<std::string, TGlfFont*> FontCollectionMap;
-         FontCollectionMap      _font;
-//         GLuint*                _ogl_buffers; //! Array with the "names" of all openGL buffers
-//         byte                   _num_ogl_buffers; //! Number of generated openGL VBOs
+         typedef std::map<std::string, TGlfFont*> OglFontCollectionMap;
+         typedef std::map<std::string, int>       RamFontCollectionMap;
+         OglFontCollectionMap   _oglFont;
+         RamFontCollectionMap   _ramFont;
          bool                   _fti; // font type implementation ()
          std::string            _activeFontName;
    };
