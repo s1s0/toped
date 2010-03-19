@@ -242,7 +242,7 @@ void layprop::TGlfFont::collect()
                 GL_STATIC_DRAW                   );
    GLuint* cindex_array = (GLuint*)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
 
-   //... and collect them deleting meanwhile the themporary objects
+   //... and collect them deleting meanwhile the temporary objects
    word vrtx_indx = 0;
    word indx_indx = 0;
    for (TFontMap::const_iterator CRS = _tsymbols.begin(); CRS != _tsymbols.end(); CRS++)
@@ -362,6 +362,7 @@ layprop::TGlfFont::~TGlfFont()
 layprop::FontLibrary::FontLibrary(bool fti) :
    _fti(fti), _activeFontName("")
 {
+   if (!_fti) glfInit();
 }
 
 bool layprop::FontLibrary::LoadLayoutFont(std::string fontfile)
@@ -374,39 +375,64 @@ bool layprop::FontLibrary::LoadLayoutFont(std::string fontfile)
       {
          // fit it in a VBO
          curFont->collect();
-         _font[_activeFontName] = curFont;
+         _oglFont[_activeFontName] = curFont;
          return true;
       }
       return false;
    }
    else
    {
-      glfInit();
-      if ( -1 != glfLoadFont(fontfile.c_str()) )
+      char* chFontName = NULL;
+      int fontDescriptor = glfLoadFont(fontfile.c_str(), chFontName);
+      if ( -1 == fontDescriptor )
       {
          std::ostringstream ost1;
          ost1<<"Error loading font file \"" << fontfile << "\". All text objects will not be properly processed";
          tell_log(console::MT_ERROR,ost1.str());
+         return false;
+      }
+      else
+      {
+         assert(chFontName);
+         _activeFontName = std::string(chFontName);
+         _ramFont[_activeFontName] = fontDescriptor;
+         return true;
       }
    }
 }
 
 bool layprop::FontLibrary::selectFont(std::string fname)
 {
-   if (_font.end() != _font.find(fname))
+   if (_fti)
    {
-      _activeFontName = fname;
-      return true;
+      if (_oglFont.end() != _oglFont.find(fname))
+      {
+         _activeFontName = fname;
+         return true;
+      }
+      return false;
    }
-   return false;
+   else
+   {
+      if (_ramFont.end() != _ramFont.find(fname))
+      {
+         if (0 == glfSelectFont(_ramFont[fname]))
+         {
+            _activeFontName = fname;
+            return true;
+         }
+         else return false;
+      }
+      return false;
+   }
 }
 
 void layprop::FontLibrary::getStringBounds(const std::string* text, DBbox* overlap)
 {
    if (_fti)
    {
-      assert(NULL != _font[_activeFontName]); // make sure that fonts are initialized
-      _font[_activeFontName]->getStringBounds(text, overlap);
+      assert(NULL != _oglFont[_activeFontName]); // make sure that fonts are initialized
+      _oglFont[_activeFontName]->getStringBounds(text, overlap);
    }
    else
    {
@@ -420,7 +446,7 @@ void layprop::FontLibrary::drawString(const std::string* text, bool fill)
 {
    if (_fti)
    {
-     _font[_activeFontName]->drawString(text, fill);
+     _oglFont[_activeFontName]->drawString(text, fill);
    }
    else
    {
@@ -433,7 +459,7 @@ void layprop::FontLibrary::drawWiredString(std::string text)
    if (_fti)
    {
       bindFont();
-      _font[_activeFontName]->drawString(&text, false);
+      _oglFont[_activeFontName]->drawString(&text, false);
       unbindFont();
    }
    else
@@ -447,7 +473,7 @@ void layprop::FontLibrary::drawSolidString(std::string text)
    if (_fti)
    {
       bindFont();
-      _font[_activeFontName]->drawString(&text, true);
+      _oglFont[_activeFontName]->drawString(&text, true);
       unbindFont();
    }
    else
@@ -459,29 +485,46 @@ void layprop::FontLibrary::drawSolidString(std::string text)
 bool  layprop::FontLibrary::bindFont()
 {
    assert(_fti);
-   if (NULL != _font[_activeFontName])
-      return _font[_activeFontName]->bindBuffers();
+   if (NULL != _oglFont[_activeFontName])
+      return _oglFont[_activeFontName]->bindBuffers();
    else
       return false;
 }
 
 void  layprop::FontLibrary::unbindFont()
 {
+   assert(_fti);
    glBindBuffer(GL_ARRAY_BUFFER, 0);
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 void layprop::FontLibrary::allFontNames(nameList& allFontNames)
 {
-   for(FontCollectionMap::const_iterator CF = _font.begin(); CF != _font.end(); CF++)
-      allFontNames.push_back(CF->first);
+   if (_fti)
+   {
+      for(OglFontCollectionMap::const_iterator CF = _oglFont.begin(); CF != _oglFont.end(); CF++)
+         allFontNames.push_back(CF->first);
+   }
+   else
+   {
+      for(RamFontCollectionMap::const_iterator CF = _ramFont.begin(); CF != _ramFont.end(); CF++)
+         allFontNames.push_back(CF->first);
+   }
+}
+
+word layprop::FontLibrary::numFonts()
+{
+   if (_fti)
+      return _oglFont.size();
+   else
+      return _ramFont.size();
 }
 
 layprop::FontLibrary::~FontLibrary()
 {
    if (_fti)
    {
-      for (FontCollectionMap::const_iterator CF = _font.begin(); CF != _font.end(); CF++)
+      for (OglFontCollectionMap::const_iterator CF = _oglFont.begin(); CF != _oglFont.end(); CF++)
          delete (CF->second);
    }
    else
