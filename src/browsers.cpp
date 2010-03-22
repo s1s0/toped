@@ -63,7 +63,7 @@ extern const wxEventType         wxEVT_CANVAS_ZOOM;
 //
 //==============================================================================
 BEGIN_EVENT_TABLE(browsers::CellBrowser, wxTreeCtrl)
-   EVT_TREE_ITEM_RIGHT_CLICK( tui::ID_TPD_CELLTREE, browsers::CellBrowser::onItemRightClick)
+   EVT_TREE_ITEM_RIGHT_CLICK( tui::ID_PNL_CELLS, browsers::CellBrowser::onItemRightClick)/*wxID_ANY*/
    EVT_RIGHT_UP(browsers::CellBrowser::onBlankRMouseUp)
    EVT_LEFT_DCLICK(browsers::CellBrowser::onLMouseDblClk)
    EVT_MENU(CELLTREEOPENCELL, browsers::CellBrowser::onWxOpenCell)
