@@ -49,6 +49,7 @@ namespace tui
       ID_TELL_FUNCS       ,
       ID_PNL_LAYERS       ,
       ID_PNL_CELLS        ,
+      ID_PNL_DRC       ,
       ID_CMD_LINE         ,
       //Warning!!! Do not use IDs between ID_DUMMY_WIN and ID_DUMMY_WIN_END
       ID_DUMMY_WIN = 500  ,
