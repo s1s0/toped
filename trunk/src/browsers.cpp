@@ -2040,7 +2040,7 @@ wxString browsers::LayerBrowser::getAllSelected()
 //====================================================================
 BEGIN_EVENT_TABLE(browsers::ErrorBrowser, wxTreeCtrl)
    EVT_LEFT_DCLICK(browsers::ErrorBrowser::onLMouseDblClk)
-   EVT_TREE_ITEM_RIGHT_CLICK( tui::ID_DRC_CELLTREE, browsers::ErrorBrowser::onItemRightClick)
+   EVT_TREE_ITEM_RIGHT_CLICK( tui::ID_PNL_DRC, browsers::ErrorBrowser::onItemRightClick)
    //EVT_RIGHT_UP(browsers::ErrorBrowser::onBlankRMouseUp)
    EVT_MENU(tui::TMDRC_SHOW_ERR, browsers::ErrorBrowser::onShowError)
    EVT_MENU(tui::TMDRC_SHOW_CLUSTER, browsers::ErrorBrowser::onShowCluster)
@@ -2147,7 +2147,7 @@ browsers::DRCBrowser::DRCBrowser(wxWindow* parent, wxWindowID id)
 
    sizer1->Add(_showAllButton, 1, wxEXPAND|wxBOTTOM, 3);
    sizer1->Add(_hideAllButton, 1, wxEXPAND|wxBOTTOM, 3);
-   _errorBrowser = DEBUG_NEW ErrorBrowser(this);
+   _errorBrowser = DEBUG_NEW ErrorBrowser(this, tui::ID_PNL_DRC);
    thesizer->Add(sizer1, 0, wxEXPAND | wxALL);
    thesizer->Add(_errorBrowser, 1, wxEXPAND | wxBOTTOM);
    _explainButton = DEBUG_NEW wxButton( this, tui::BT_DRC_EXPLAIN, wxT("Explain error") );
