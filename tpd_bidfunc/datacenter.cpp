@@ -868,14 +868,14 @@ LayerMapCif* DataCenter::secureCifLayMap(const layprop::DrawProperties* drawProp
 {
    const USMap* savedMap = PROPC->getCifLayMap();
    if (NULL != savedMap) return DEBUG_NEW LayerMapCif(*savedMap);
-   USMap* theMap = DEBUG_NEW USMap();
+   USMap theMap;
    if (import)
    {// Generate the default CIF layer map for import
       nameList cifLayers;
       cifGetLayers(cifLayers);
       word laynum = 1;
       for ( nameList::const_iterator CCL = cifLayers.begin(); CCL != cifLayers.end(); CCL++ )
-         (*theMap)[laynum] = *CCL;
+         theMap[laynum] = *CCL;
    }
    else
    {// Generate the default CIF layer map for export
@@ -886,10 +886,10 @@ LayerMapCif* DataCenter::secureCifLayMap(const layprop::DrawProperties* drawProp
          std::ostringstream ciflayname;
          unsigned layno = drawProp->getLayerNo( *CDL );
          ciflayname << "L" << layno;
-         (*theMap)[layno] = ciflayname.str();
+         theMap[layno] = ciflayname.str();
       }
    }
-   return DEBUG_NEW LayerMapCif(*theMap);
+   return DEBUG_NEW LayerMapCif(theMap);
 }
 
 LayerMapExt* DataCenter::secureGdsLayMap(const layprop::DrawProperties* drawProp, bool import)
