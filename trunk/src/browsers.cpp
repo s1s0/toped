@@ -64,7 +64,7 @@ extern const wxEventType         wxEVT_CANVAS_ZOOM;
 //==============================================================================
 BEGIN_EVENT_TABLE(browsers::CellBrowser, wxTreeCtrl)
    EVT_TREE_ITEM_RIGHT_CLICK( tui::ID_PNL_CELLS, browsers::CellBrowser::onItemRightClick)/*wxID_ANY*/
-   EVT_RIGHT_UP(browsers::CellBrowser::onBlankRMouseUp)
+   //EVT_RIGHT_UP(browsers::CellBrowser::onBlankRMouseUp)
    EVT_LEFT_DCLICK(browsers::CellBrowser::onLMouseDblClk)
    EVT_MENU(CELLTREEOPENCELL, browsers::CellBrowser::onWxOpenCell)
    EVT_TECUSTOM_COMMAND(wxEVT_CMD_BROWSER, wxID_ANY, browsers::CellBrowser::onCommand)
@@ -168,11 +168,11 @@ void browsers::CellBrowser::onItemRightClick(wxTreeEvent& event)
    showMenu(event.GetItem(), event.GetPoint());
 }
 
-void browsers::CellBrowser::onBlankRMouseUp(wxMouseEvent& event)
-{
-   wxPoint pt = event.GetPosition();
-   showMenu(HitTest(pt), pt);
-}
+//void browsers::CellBrowser::onBlankRMouseUp(wxMouseEvent& event)
+//{
+//   wxPoint pt = event.GetPosition();
+//   showMenu(HitTest(pt), pt);
+//}
 
 void  browsers::CellBrowser::onLMouseDblClk(wxMouseEvent& event)
 {
@@ -811,7 +811,7 @@ bool browsers::CellBrowser::checkCorrupted(bool iresult)
 //==============================================================================
 BEGIN_EVENT_TABLE(browsers::GDSCellBrowser, wxTreeCtrl)
    EVT_TREE_ITEM_RIGHT_CLICK( tui::ID_GDS_CELLTREE, browsers::GDSCellBrowser::onItemRightClick)
-   EVT_RIGHT_UP(browsers::GDSCellBrowser::onBlankRMouseUp)
+//   EVT_RIGHT_UP(browsers::GDSCellBrowser::onBlankRMouseUp)
    EVT_MENU(GDSTREEREPORTLAY, browsers::GDSCellBrowser::onReportlay)
 END_EVENT_TABLE()
 
@@ -825,11 +825,11 @@ void browsers::GDSCellBrowser::onItemRightClick(wxTreeEvent& event)
    showMenu(event.GetItem(), event.GetPoint());
 }
 
-void browsers::GDSCellBrowser::onBlankRMouseUp(wxMouseEvent& event)
-{
-   wxPoint pt = event.GetPosition();
-   showMenu(HitTest(pt), pt);
-}
+//void browsers::GDSCellBrowser::onBlankRMouseUp(wxMouseEvent& event)
+//{
+//   wxPoint pt = event.GetPosition();
+//   showMenu(HitTest(pt), pt);
+//}
 
 void browsers::GDSCellBrowser::onReportlay(wxCommandEvent& WXUNUSED(event))
 {
@@ -912,7 +912,7 @@ void browsers::GDSCellBrowser::collectChildren(const GDSin::GDSHierTree* root,
 //==============================================================================
 BEGIN_EVENT_TABLE(browsers::CIFCellBrowser, wxTreeCtrl)
    EVT_TREE_ITEM_RIGHT_CLICK( tui::ID_CIF_CELLTREE, browsers::CIFCellBrowser::onItemRightClick)
-   EVT_RIGHT_UP(browsers::CIFCellBrowser::onBlankRMouseUp)
+//   EVT_RIGHT_UP(browsers::CIFCellBrowser::onBlankRMouseUp)
    EVT_MENU(CIFTREEREPORTLAY, browsers::CIFCellBrowser::onReportlay)
 END_EVENT_TABLE()
 
@@ -926,11 +926,11 @@ void browsers::CIFCellBrowser::onItemRightClick(wxTreeEvent& event)
    showMenu(event.GetItem(), event.GetPoint());
 }
 
-void browsers::CIFCellBrowser::onBlankRMouseUp(wxMouseEvent& event)
-{
-   wxPoint pt = event.GetPosition();
-   showMenu(HitTest(pt), pt);
-}
+//void browsers::CIFCellBrowser::onBlankRMouseUp(wxMouseEvent& event)
+//{
+//   wxPoint pt = event.GetPosition();
+//   showMenu(HitTest(pt), pt);
+//}
 
 void browsers::CIFCellBrowser::onReportlay(wxCommandEvent& WXUNUSED(event))
 {
@@ -1016,7 +1016,7 @@ void browsers::CIFCellBrowser::collectChildren(const CIFin::CIFHierTree* root,
 //==============================================================================
 BEGIN_EVENT_TABLE(browsers::OASCellBrowser, wxTreeCtrl)
    EVT_TREE_ITEM_RIGHT_CLICK( tui::ID_OAS_CELLTREE, browsers::OASCellBrowser::onItemRightClick)
-   EVT_RIGHT_UP(browsers::OASCellBrowser::onBlankRMouseUp)
+//   EVT_RIGHT_UP(browsers::OASCellBrowser::onBlankRMouseUp)
    EVT_MENU(OASTREEREPORTLAY, browsers::OASCellBrowser::onReportlay)
 END_EVENT_TABLE()
 
@@ -1030,11 +1030,11 @@ void browsers::OASCellBrowser::onItemRightClick(wxTreeEvent& event)
    showMenu(event.GetItem(), event.GetPoint());
 }
 
-void browsers::OASCellBrowser::onBlankRMouseUp(wxMouseEvent& event)
-{
-   wxPoint pt = event.GetPosition();
-   showMenu(HitTest(pt), pt);
-}
+//void browsers::OASCellBrowser::onBlankRMouseUp(wxMouseEvent& event)
+//{
+//   wxPoint pt = event.GetPosition();
+//   showMenu(HitTest(pt), pt);
+//}
 
 void browsers::OASCellBrowser::onReportlay(wxCommandEvent& WXUNUSED(event))
 {
@@ -2041,7 +2041,7 @@ wxString browsers::LayerBrowser::getAllSelected()
 BEGIN_EVENT_TABLE(browsers::ErrorBrowser, wxTreeCtrl)
    EVT_LEFT_DCLICK(browsers::ErrorBrowser::onLMouseDblClk)
    EVT_TREE_ITEM_RIGHT_CLICK( tui::ID_DRC_CELLTREE, browsers::ErrorBrowser::onItemRightClick)
-   EVT_RIGHT_UP(browsers::ErrorBrowser::onBlankRMouseUp)
+   //EVT_RIGHT_UP(browsers::ErrorBrowser::onBlankRMouseUp)
    EVT_MENU(tui::TMDRC_SHOW_ERR, browsers::ErrorBrowser::onShowError)
    EVT_MENU(tui::TMDRC_SHOW_CLUSTER, browsers::ErrorBrowser::onShowCluster)
 END_EVENT_TABLE()
@@ -2089,11 +2089,11 @@ void browsers::ErrorBrowser::onItemRightClick(wxTreeEvent& event)
    showMenu(event.GetItem(), event.GetPoint());
 }
 
-void browsers::ErrorBrowser::onBlankRMouseUp(wxMouseEvent& event)
-{
-   wxPoint pt = event.GetPosition();
-   showMenu(HitTest(pt), pt);
-}
+//void browsers::ErrorBrowser::onBlankRMouseUp(wxMouseEvent& event)
+//{
+//   wxPoint pt = event.GetPosition();
+//   showMenu(HitTest(pt), pt);
+//}
 
 void browsers::ErrorBrowser::onShowError(wxCommandEvent& vent)
 {

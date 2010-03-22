@@ -107,7 +107,7 @@ namespace browsers
       protected:
          wxTreeItemId      _rbCellID;
          virtual void      onItemRightClick(wxTreeEvent&);
-         virtual void      onBlankRMouseUp(wxMouseEvent&);
+         //virtual void      onBlankRMouseUp(wxMouseEvent&);
          virtual void      onReportlay(wxCommandEvent& WXUNUSED(event)) {assert(false);}
          bool              checkCorrupted(bool);
          bool              _corrupted;
@@ -147,7 +147,7 @@ namespace browsers
       private:
          void              collectChildren(const GDSin::GDSHierTree*, const wxTreeItemId&, bool);
          void              onItemRightClick(wxTreeEvent&);
-         void              onBlankRMouseUp(wxMouseEvent&);
+         //void              onBlankRMouseUp(wxMouseEvent&);
          void              onReportlay(wxCommandEvent& WXUNUSED(event));
          DECLARE_EVENT_TABLE();
    };
@@ -164,7 +164,7 @@ namespace browsers
       private:
          void              collectChildren(const CIFin::CIFHierTree*, const wxTreeItemId&, bool);
          void              onItemRightClick(wxTreeEvent&);
-         void              onBlankRMouseUp(wxMouseEvent&);
+         //void              onBlankRMouseUp(wxMouseEvent&);
          void              onReportlay(wxCommandEvent& WXUNUSED(event));
          DECLARE_EVENT_TABLE();
    };
@@ -181,7 +181,7 @@ namespace browsers
       private:
          void              collectChildren(const Oasis::OASHierTree*, const wxTreeItemId&, bool);
          void              onItemRightClick(wxTreeEvent&);
-         void              onBlankRMouseUp(wxMouseEvent&);
+         //void              onBlankRMouseUp(wxMouseEvent&);
          void              onReportlay(wxCommandEvent& WXUNUSED(event));
          DECLARE_EVENT_TABLE();
    };
@@ -332,7 +332,7 @@ namespace browsers
                               long style = wxTR_DEFAULT_STYLE);
       void                    onLMouseDblClk(wxMouseEvent&);
       virtual void            onItemRightClick(wxTreeEvent&);
-      virtual void            onBlankRMouseUp(wxMouseEvent&);
+      //virtual void            onBlankRMouseUp(wxMouseEvent&);
       void                    onShowError(wxCommandEvent& WXUNUSED(event));
       void                    onShowCluster(wxCommandEvent& WXUNUSED(event));
       void                   showMenu(wxTreeItemId id, const wxPoint& pt);
