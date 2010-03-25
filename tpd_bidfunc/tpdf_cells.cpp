@@ -91,9 +91,15 @@ int tellstdfunc::stdNEWCELL::execute()
       laydata::TdtCell* new_cell = tDesign->addCell(nm, dbLibDir);
       if (NULL != new_cell)
       {
-         UNDOcmdQ.push_front(this);
-         UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(nm));
-         LogFile << LogFile.getFN() << "(\""<< nm << "\");"; LogFile.flush();
+         if (1 < tDesign->cells().size())
+         {
+            UNDOcmdQ.push_front(this);
+            UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(nm));
+            LogFile << LogFile.getFN() << "(\""<< nm << "\");"; LogFile.flush();
+         }
+         // else
+         // No undo for the first cell in the library. We don't delete the active
+         // cell at the moment
       }
       else
       {
