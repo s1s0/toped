@@ -119,6 +119,7 @@ namespace layprop {
       void              setUU(real);
       void              setGdsLayMap(USMap* map);
       void              setCifLayMap(USMap* map);
+      void              setOasLayMap(USMap* map);
       DWordSet          allUnselectable();
       bool              lockDrawProp(DrawProperties*&, PropertyState state = DB);
       void              unlockDrawProp(DrawProperties*&);
@@ -148,6 +149,7 @@ namespace layprop {
       word              layselmask() const               {return _layselmask;}
       const USMap*      getGdsLayMap() const             {return _gdsLayMap;}
       const USMap*      getCifLayMap() const             {return _cifLayMap;}
+      const USMap*      getOasLayMap() const             {return _oasLayMap;}
       bool              gridVisual(word no)              {return grid(no)->visual();}
       bool              renderType() const               {return _renderType;}
    private:
@@ -168,6 +170,7 @@ namespace layprop {
       word                 _layselmask;   // layout shape type selection mask
       USMap*               _gdsLayMap;    //
       USMap*               _cifLayMap;    //
+      USMap*               _oasLayMap;    //
       wxMutex              _drawPLock;    // DrawPropwerties lock
    };
 

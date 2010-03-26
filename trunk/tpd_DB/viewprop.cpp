@@ -236,6 +236,7 @@ layprop::PropertyCenter::PropertyCenter()
    _layselmask  = laydata::_lmall;
    _gdsLayMap   = NULL;
    _cifLayMap   = NULL;
+   _oasLayMap   = NULL;
    _zeroCross   = false;
    _drawprop    = DEBUG_NEW DrawProperties();
    _renderType  = false;
@@ -317,17 +318,21 @@ void layprop::PropertyCenter::setUU(real UU) {
 void layprop::PropertyCenter::saveLayerMaps(FILE* prop_file) const
 {
    fprintf(prop_file, "void  layerMaps() {\n");
+   std::string sLayMap;
    if (NULL != _gdsLayMap)
    {
-      std::string sGdsLayMap;
-      USMap2String(_gdsLayMap, sGdsLayMap);
-      fprintf(prop_file, "  setgdslaymap( %s );\n", sGdsLayMap.c_str());
+      USMap2String(_gdsLayMap, sLayMap);
+      fprintf(prop_file, "  setgdslaymap( %s );\n", sLayMap.c_str());
    }
    if (NULL != _cifLayMap)
    {
-      std::string sCifLayMap;
-      USMap2String(_cifLayMap, sCifLayMap);
-      fprintf(prop_file, "  setciflaymap( %s );\n", sCifLayMap.c_str());
+      USMap2String(_cifLayMap, sLayMap);
+      fprintf(prop_file, "  setciflaymap( %s );\n", sLayMap.c_str());
+   }
+   if (NULL != _oasLayMap)
+   {
+      USMap2String(_oasLayMap, sLayMap);
+      fprintf(prop_file, "  setoaslaymap( %s );\n", sLayMap.c_str());
    }
    fprintf(prop_file, "}\n\n");
 }
@@ -372,7 +377,7 @@ void layprop::PropertyCenter::saveProperties(std::string filename)
       drawProp->saveColors(prop_file);
       drawProp->saveLines(prop_file);
       drawProp->saveLayers(prop_file);
-      if ((NULL != _gdsLayMap) || (NULL != _cifLayMap))
+      if ((NULL != _gdsLayMap) || (NULL != _cifLayMap) || (NULL != _oasLayMap))
          saveLayerMaps(prop_file);
       saveScreenProps(prop_file);
       fprintf(prop_file, "layerSetup();");
@@ -394,6 +399,12 @@ void layprop::PropertyCenter::setCifLayMap(USMap* map)
 {
    if (NULL != _cifLayMap) delete _cifLayMap;
    _cifLayMap = map;
+}
+
+void layprop::PropertyCenter::setOasLayMap(USMap* map)
+{
+   if (NULL != _oasLayMap) delete _oasLayMap;
+   _oasLayMap = map;
 }
 
 DWordSet layprop::PropertyCenter::allUnselectable()
@@ -443,6 +454,7 @@ layprop::PropertyCenter::~PropertyCenter()
    _grid.clear();
    if (NULL != _gdsLayMap) delete _gdsLayMap;
    if (NULL != _cifLayMap) delete _cifLayMap;
+   if (NULL != _oasLayMap) delete _oasLayMap;
    assert(_drawprop);
    delete _drawprop;
    delete fontLib;

@@ -594,12 +594,10 @@ int tellstdfunc::GDSimportList::execute()
       gdsLaysStrList[nameh->key().value()] = nameh->value().value();
    }
    ExtLayers* gdsLaysAll = DEBUG_NEW ExtLayers();
-   std::string gdsDbName = "NonameDB";
    GDSin::GdsInFile* AGDSDB = NULL;
    if (DATC->lockGds(AGDSDB))
    {
       AGDSDB->collectLayers(*gdsLaysAll);
-      gdsDbName = AGDSDB->libname();
    }
    DATC->unlockGds(AGDSDB, true);
    LayerMapExt LayerExpression(gdsLaysStrList, gdsLaysAll);
@@ -1534,7 +1532,7 @@ int tellstdfunc::OASimport::execute()
        nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
        gdsLaysStrList[nameh->key().value()] = nameh->value().value();
     }
-   //Prep: We need all used layers, and the name of the GDS DB
+   //Prep: We need all used layers, and the name of the OASIS DB
    std::ostringstream ost;
    ExtLayers* oasLaysAll = NULL;
    Oasis::OasisInFile* AOASDB = NULL;
@@ -1582,6 +1580,70 @@ int tellstdfunc::OASimport::execute()
    delete lll;
    return EXEC_NEXT;
 }
+
+//=============================================================================
+tellstdfunc::OASimportList::OASimportList(telldata::typeID retype, bool eor) :
+                              cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_string)));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+}
+
+int tellstdfunc::OASimportList::execute()
+{
+   bool  over  = getBoolValue();
+   bool  recur = getBoolValue();
+   telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   nameList top_cells;
+   for (unsigned i = 0; i < pl->size(); i++)
+   {
+      top_cells.push_back((static_cast<telldata::ttstring*>((pl->mlist())[i]))->value());
+   }
+   // Convert layer map
+   telldata::tthsh* nameh;
+   USMap oasLaysStrList;
+   for (unsigned i = 0; i < lll->size(); i++)
+   {
+      nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
+      oasLaysStrList[nameh->key().value()] = nameh->value().value();
+   }
+   ExtLayers* oasLaysAll = DEBUG_NEW ExtLayers();
+   Oasis::OasisInFile* AOASDB = NULL;
+   if (DATC->lockOas(AOASDB))
+   {
+      AOASDB->collectLayers(*oasLaysAll);
+   }
+   DATC->unlockOas(AOASDB, true);
+
+   LayerMapExt LayerExpression(oasLaysStrList, oasLaysAll);
+   if (LayerExpression.status())
+   {
+      laydata::TdtLibDir* dbLibDir = NULL;
+      if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
+      {
+         importOAScell(dbLibDir, top_cells, LayerExpression, UNDOcmdQ, UNDOPstack, _threadExecution, recur, over);
+         updateLayerDefinitions(dbLibDir, top_cells, TARGETDB_LIB);
+         // populate the hierarchy browser
+         DATC->bpRefreshTdtTab(true, _threadExecution);
+         LogFile << LogFile.getFN() << "("<< *pl << "," << *lll << "," << LogFile._2bool(recur)
+               << "," << LogFile._2bool(over) << ");"; LogFile.flush();
+      }
+      DATC->unlockTDT(dbLibDir);
+   }
+   else
+   {
+      std::ostringstream ost;
+      ost << "Can't execute OAS import - error in the layer map";
+      tell_log(console::MT_ERROR,ost.str());
+   }
+   delete pl;
+   delete lll;
+   return EXEC_NEXT;
+}
+
 //=============================================================================
 tellstdfunc::OASclose::OASclose(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
@@ -1594,6 +1656,90 @@ int tellstdfunc::OASclose::execute() {
    return EXEC_NEXT;
 }
 
+//=============================================================================
+tellstdfunc::OASgetlaymap::OASgetlaymap(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+}
+
+int tellstdfunc::OASgetlaymap::execute()
+{
+   bool import = getBoolValue();
+   telldata::ttlist* theMap = DEBUG_NEW telldata::ttlist(telldata::tn_hsh);
+   const USMap* laymap = PROPC->getOasLayMap();
+   if (NULL != laymap)
+   {
+      for (USMap::const_iterator CI = laymap->begin(); CI != laymap->end(); CI++)
+      {
+         telldata::tthsh* clay = DEBUG_NEW telldata::tthsh(CI->first, CI->second);
+         theMap->add(clay);
+      }
+   }
+   else if (import)
+   { // generate default import OASIS layer map
+      ExtLayers oasLayers;
+      DATC->oasGetLayers(oasLayers);
+      for ( ExtLayers::const_iterator CGL = oasLayers.begin(); CGL != oasLayers.end(); CGL++ )
+      {
+         std::ostringstream dtypestr;
+         dtypestr << CGL->first << ";";
+         for ( WordSet::const_iterator CDT = CGL->second.begin(); CDT != CGL->second.end(); CDT++ )
+         {
+            if ( CDT != CGL->second.begin() ) dtypestr << ", ";
+            dtypestr << *CDT;
+         }
+         telldata::tthsh* clay = DEBUG_NEW telldata::tthsh(CGL->first, dtypestr.str());
+         theMap->add(clay);
+      }
+   }
+   else
+   { // generate default export OASIS layer map
+      nameList tdtLayers;
+      layprop::DrawProperties* drawProp;
+      if (PROPC->lockDrawProp(drawProp))
+      {
+         drawProp->allLayers(tdtLayers);
+         for ( nameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
+         {
+            std::ostringstream dtypestr;
+            dtypestr << drawProp->getLayerNo( *CDL )<< "; 0";
+            telldata::tthsh* clay = DEBUG_NEW telldata::tthsh(drawProp->getLayerNo( *CDL ), dtypestr.str());
+            theMap->add(clay);
+         }
+      }
+      PROPC->unlockDrawProp(drawProp);
+   }
+   OPstack.push(theMap);
+   LogFile << LogFile.getFN() << "("<< LogFile._2bool(import)  << ");"; LogFile.flush();
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::OASsetlaymap::OASsetlaymap(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
+}
+
+int tellstdfunc::OASsetlaymap::execute()
+{
+   telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+
+   // Convert layer map
+   USMap* oasLays = DEBUG_NEW USMap();
+   telldata::tthsh* nameh;
+   for (unsigned i = 0; i < lll->size(); i++)
+   {
+      nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
+      (*oasLays)[nameh->key().value()] = nameh->value().value();
+   }
+   PROPC->setOasLayMap(oasLays);
+
+   LogFile << LogFile.getFN() << "("<< *lll  << ");"; LogFile.flush();
+   delete lll;
+   return EXEC_NEXT;
+}
 
 //=============================================================================
 tellstdfunc::DRCCalibreimport::DRCCalibreimport(telldata::typeID retype, bool eor) :

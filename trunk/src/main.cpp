@@ -548,8 +548,11 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    mblock->addFUNC("getgdslaymap"     ,(DEBUG_NEW        tellstdfunc::GDSgetlaymap(TLISTOF(telldata::tn_hsh), true)));
    mblock->addFUNC("setgdslaymap"     ,(DEBUG_NEW                tellstdfunc::GDSsetlaymap(telldata::tn_void, true)));
    mblock->addFUNC("oasisread"        ,(DEBUG_NEW          tellstdfunc::OASread(TLISTOF(telldata::tn_string), true)));
-   mblock->addFUNC("oasisclose"       ,(DEBUG_NEW                    tellstdfunc::OASclose(telldata::tn_void, true)));
+   mblock->addFUNC("oasisimport"      ,(DEBUG_NEW               tellstdfunc::OASimportList(telldata::tn_void, true)));
    mblock->addFUNC("oasisimport"      ,(DEBUG_NEW                   tellstdfunc::OASimport(telldata::tn_void, true)));
+   mblock->addFUNC("oasisclose"       ,(DEBUG_NEW                    tellstdfunc::OASclose(telldata::tn_void, true)));
+   mblock->addFUNC("getoasislaymap"   ,(DEBUG_NEW        tellstdfunc::OASgetlaymap(TLISTOF(telldata::tn_hsh), true)));
+   mblock->addFUNC("setoasislaymap"   ,(DEBUG_NEW        tellstdfunc::OASsetlaymap(TLISTOF(telldata::tn_hsh), true)));
    mblock->addFUNC("drccalibreimport" ,(DEBUG_NEW            tellstdfunc::DRCCalibreimport(telldata::tn_void, true)));
    mblock->addFUNC("drcshowerror"     ,(DEBUG_NEW                tellstdfunc::DRCshowerror(telldata::tn_void, true)));
    mblock->addFUNC("drcshowcluster"   ,(DEBUG_NEW              tellstdfunc::DRCshowcluster(telldata::tn_void, true)));
