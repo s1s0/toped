@@ -947,7 +947,6 @@ int tellstdfunc::GDSreportlay::execute()
    return EXEC_NEXT;
 }
 
-
 //=============================================================================
 tellstdfunc::GDSgetlaymap::GDSgetlaymap(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
@@ -1653,6 +1652,45 @@ int tellstdfunc::OASclose::execute() {
    TpdPost::clearOAStab();
    DATC->OASclose();
    LogFile << LogFile.getFN() << "();"; LogFile.flush();
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::OASreportlay::OASreportlay(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+}
+
+int tellstdfunc::OASreportlay::execute()
+{
+   std::string name = getStringValue();
+   Oasis::OasisInFile* AOASDB = NULL;
+   if (DATC->lockOas(AOASDB))
+   {
+      Oasis::Cell *src_structure = AOASDB->getCell(name.c_str());
+      std::ostringstream ost;
+      if (!src_structure) {
+         ost << "OASIS structure named \"" << name << "\" does not exists";
+         tell_log(console::MT_ERROR,ost.str());
+      }
+      else
+      {
+         ExtLayers oasLayers;
+         src_structure->collectLayers(oasLayers,true);
+         ost << "OASIS layers found in \"" << name <<"\" { <layer_number> ; <data_type> }" << std::endl;
+         for (ExtLayers::const_iterator NLI = oasLayers.begin(); NLI != oasLayers.end(); NLI++)
+         {
+            ost << "{" << NLI->first << " ; ";
+            for (WordSet::const_iterator NTI = NLI->second.begin(); NTI != NLI->second.end(); NTI++)
+               ost << *NTI << " ";
+            ost << "}"<< std::endl;
+         }
+         tell_log(console::MT_INFO,ost.str());
+         LogFile << LogFile.getFN() << "(\""<< name << "\");"; LogFile.flush();
+      }
+   }
+   DATC->unlockOas(AOASDB, true);
    return EXEC_NEXT;
 }
 
