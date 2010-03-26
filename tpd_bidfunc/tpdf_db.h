@@ -63,6 +63,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(OASimport        );
    TELL_STDCMD_CLASSA(OASimportList    );
    TELL_STDCMD_CLASSA(OASclose         );
+   TELL_STDCMD_CLASSA(OASreportlay     );
    TELL_STDCMD_CLASSA(OASgetlaymap     );
    TELL_STDCMD_CLASSA(OASsetlaymap     );
 

@@ -169,8 +169,8 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMOAS_OPEN          , tui::TopedFrame::OnOASRead     )
    EVT_MENU( TMOAS_IMPORT        , tui::TopedFrame::OnOASimport   )
    EVT_MENU( TMOAS_TRANSLATE     , tui::TopedFrame::OnOAStranslate)
-   EVT_MENU( TMOAS_EXPORTL       , tui::TopedFrame::OnOASexportLIB)
-   EVT_MENU( TMOAS_EXPORTC       , tui::TopedFrame::OnOASexportCELL)
+//   EVT_MENU( TMOAS_EXPORTL       , tui::TopedFrame::OnOASexportLIB)
+//   EVT_MENU( TMOAS_EXPORTC       , tui::TopedFrame::OnOASexportCELL)
    EVT_MENU( TMOAS_CLOSE         , tui::TopedFrame::OnOASclose    )
 
    EVT_MENU( TMFILE_SAVE         , tui::TopedFrame::OnTDTSave     )
@@ -396,12 +396,12 @@ void tui::TopedFrame::initMenuBar() {
 
 
    _resourceCenter->appendMenuSeparator("&File");
-   _resourceCenter->appendMenu("&File/Export to Oasis","",  &tui::TopedFrame::OnOASexportLIB, "Export DB to Oasis using default layer map");
+//   _resourceCenter->appendMenu("&File/Export to Oasis","",  &tui::TopedFrame::OnOASexportLIB, "Export DB to Oasis using default layer map");
    _resourceCenter->appendMenu("&File/Import Oasis","",  &tui::TopedFrame::OnOASimport, "Import Oasis file using default layer map" );
 
    _resourceCenter->appendMenu("&File/More Oasis .../Parse","", &tui::TopedFrame::OnOASRead, "Parse Oasis file" );
    _resourceCenter->appendMenu("&File/More Oasis .../Translate","", &tui::TopedFrame::OnOAStranslate, "Import Oasis structure" );
-   _resourceCenter->appendMenu("&File/More Oasis .../Export Cell", "", &tui::TopedFrame::OnOASexportCELL, "Export cell to Oasis" );
+//   _resourceCenter->appendMenu("&File/More Oasis .../Export Cell", "", &tui::TopedFrame::OnOASexportCELL, "Export cell to Oasis" );
    _resourceCenter->appendMenu("&File/More Oasis .../Close","", &tui::TopedFrame::OnOASclose, "Clear the parsed Oasis file from memory" );
 
 
@@ -1586,15 +1586,15 @@ void tui::TopedFrame::OnOAStranslate(wxCommandEvent& WXUNUSED(event))
       _cmdline->parseCommand(ost);
 }
 
-void tui::TopedFrame::OnOASexportLIB(wxCommandEvent& WXUNUSED(event))
-{
-   //@TODO
-}
+//void tui::TopedFrame::OnOASexportLIB(wxCommandEvent& WXUNUSED(event))
+//{
+//   //@TODO
+//}
 
-void tui::TopedFrame::OnOASexportCELL(wxCommandEvent& WXUNUSED(event))
-{
-   //@TODO
-}
+//void tui::TopedFrame::OnOASexportCELL(wxCommandEvent& WXUNUSED(event))
+//{
+//   //@TODO
+//}
 
 
 void tui::TopedFrame::OnCellRef_B(wxCommandEvent& WXUNUSED(event)) {

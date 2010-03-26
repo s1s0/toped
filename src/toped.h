@@ -146,8 +146,8 @@ namespace tui {
       void     OnOASRead(wxCommandEvent& WXUNUSED(event));
       void   OnOASimport(wxCommandEvent& WXUNUSED(event));
       void   OnOAStranslate(wxCommandEvent& WXUNUSED(event));
-      void   OnOASexportLIB(wxCommandEvent& WXUNUSED(event));
-      void   OnOASexportCELL(wxCommandEvent& WXUNUSED(event));
+//      void   OnOASexportLIB(wxCommandEvent& WXUNUSED(event));
+//      void   OnOASexportCELL(wxCommandEvent& WXUNUSED(event));
       void    OnOASclose(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("oasisclose();"));}
 
       void     OnTDTSave(wxCommandEvent& WXUNUSED(event));
