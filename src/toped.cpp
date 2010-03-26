@@ -1525,7 +1525,21 @@ void tui::TopedFrame::OnOASRead(wxCommandEvent& WXUNUSED(event))
 
 void tui::TopedFrame::OnOASimport(wxCommandEvent& WXUNUSED(event))
 {
-   //@TODO
+   wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
+                     wxT("Oasis files(*.oas)|*.oas;*.OAS|All files(*.*)|*.*"),
+                         tpdfOPEN);
+   if (wxID_OK != dlg2.ShowModal())
+   {
+      SetStatusText(wxT("Parsing aborted")); return;
+   }
+   SetStatusText(wxT("Importing Oasis file..."));
+   wxString filename = dlg2.GetFilename();
+   wxString ost_int;
+   ost_int << wxT("oasisread(\"") << dlg2.GetDirectory() << wxT("/") << dlg2.GetFilename() << wxT("\")");
+   wxString ost;
+   ost << wxT("oasisimport(") << ost_int << wxT(", getoasislaymap(true), true, false );oasisclose();");
+   _cmdline->parseCommand(ost);
+//   SetStatusText(wxT("Stream ")+dlg2.GetFilename()+wxT(" imported"));
 }
 
 void tui::TopedFrame::OnOAStranslate(wxCommandEvent& WXUNUSED(event))
