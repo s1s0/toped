@@ -224,7 +224,25 @@ bool DataCenter::OASParse(std::string filename)
       AOASDB = DEBUG_NEW Oasis::OasisInFile(filename);
       status = AOASDB->status();
       if (status)
+      {
          AOASDB->readLibrary();
+         if (Oasis::vs_crc32 == AOASDB->validation())
+         {
+            Oasis::Iso3309Crc32 crcCheck;
+            if (AOASDB->calculateCRC(crcCheck))
+            {
+               std::ostringstream info;
+               info << "OASIS file: CRC32 calculated signature is 0x"<< std::hex << crcCheck.theCrc();
+               tell_log(console::MT_INFO,info.str());
+            }
+            else
+            {
+               std::ostringstream info;
+               info << "Can't verify the CRC32 signature of file \""<< filename << "\"";
+               tell_log(console::MT_WARNING,info.str());
+            }
+         }
+      }
    }
    catch (EXPTNreadOASIS)
    {
