@@ -29,6 +29,11 @@
 #include "tedesign.h"
 #include <sstream>
 
+const dword Oasis::Iso3309Crc32::_crc32Poly     = 0x04c11db7u;  // The CRC polynomial
+const dword Oasis::Iso3309Crc32::_crc32Constant = 0x38fb2284u;  // constant which matches polynomial above
+const dword Oasis::Iso3309Crc32::_crc32LSBit    = 0x80000000u;
+const dword Oasis::Iso3309Crc32::_crc32MSBit    = 0x00000001u;
+const dword Oasis::Iso3309Crc32::_crc32AllBits  = 0xffffffffu;
 
 //===========================================================================
 Oasis::Table::Table(OasisInFile& ofh)
@@ -208,9 +213,58 @@ Oasis::CBlockInflate::~CBlockInflate()
 }
 
 //===========================================================================
+Oasis::Iso3309Crc32::Iso3309Crc32()
+{
+   _pauseCalculation = false;
+   // initialize auxiliary table
+   tableLoad();
+   // preload shift register, per CRC-32 spec
+   _theCrc = ~_crc32AllBits;
+}
+
+void Oasis::Iso3309Crc32::tableLoad()
+{
+   /* initialize auxiliary table */
+   dword   poly = reflect(_crc32Poly);
+   for (dword i = 0; i < 256; i++)
+   {
+      dword c = i;
+      for (dword j = 0; j < 8 /*Bits in 1 byte*/; j++)
+         c = c & _crc32MSBit ? (c >> 1) ^ poly : (c >> 1);
+      _crc32Table[i] = c;
+   }
+}
+
+dword Oasis::Iso3309Crc32::reflect(dword in)
+{
+   dword   out = 0x0u;
+   for (int i = 0; i < 32; i++)
+   {
+      if (in & 0x01)
+         out |= (0x01 << (31 - i) );
+      in >>= 1;
+   }
+   return(out);
+}
+
+void Oasis::Iso3309Crc32::add(const byte* buf, size_t len)
+{
+   if (_pauseCalculation) return;
+   dword  val = _theCrc;
+   val = ~val & _crc32AllBits;
+   for (size_t i = 0; i < len; i++)
+   {
+      val = (val >> 8) ^ _crc32Table[ ( val ^ (dword) buf[i]) & 0xff ];
+   }
+   val = ~val & _crc32AllBits;
+   _theCrc = val;
+}
+
+//===========================================================================
 Oasis::OasisInFile::OasisInFile(std::string fn) : _cellNames(NULL), _textStrings(NULL),
    _propNames(NULL), _propStrings(NULL), _layerNames(NULL), _xNames(NULL), _offsetFlag(false),
-   _fileName(fn), _fileLength(0), _filePos(0), _progresPos(0), _curCBlock(NULL)
+   _fileName(fn), _fileLength(0), _filePos(0), _progresPos(0), _curCBlock(NULL),
+   _validation(vs_unknown), _signature(0u)
 {
    std::ostringstream info;
    info << "OASIS input file: \"" << _fileName << "\"";
@@ -367,20 +421,22 @@ void Oasis::OasisInFile::readEndRecord()
    byte valid_scheme = getByte();
    if (2 < valid_scheme)
       exception("Unexpected validation scheme type ( not explicitly specified)");
-   else if (0 == valid_scheme)
+   _validation = (Oasis::ValidationScheme)valid_scheme;
+   if (Oasis::vs_noValidation == _validation)
+   {
       info << "OASIS file has no validation signature";
+   }
    else
    {
-      dword signature;
-      byte * sigbyte = (byte*) &signature;
-      sigbyte[3] = getByte();
-      sigbyte[2] = getByte();
-      sigbyte[1] = getByte();
+      byte* sigbyte = (byte*) &_signature;
       sigbyte[0] = getByte();
-      if (1 == valid_scheme)
-         info << "OASIS file: CRC32 validation signature is "<< signature;
+      sigbyte[1] = getByte();
+      sigbyte[2] = getByte();
+      sigbyte[3] = getByte();
+      if (Oasis::vs_crc32 == _validation)
+         info << "OASIS file: CRC32 validation signature is 0x" << std::hex << _signature;
       else
-         info << "OASIS file: CHECKSUM32 validation signature" << signature;
+         info << "OASIS file: CHECKSUM32 validation signature: 0x" << std::hex << _signature;
    }
    tell_log(console::MT_INFO, info.str());
 }
@@ -671,6 +727,22 @@ size_t Oasis::OasisInFile::rawRead(void *pBuf, size_t nCount)
       }
       return nCount;
    }
+}
+
+bool Oasis::OasisInFile::calculateCRC(Oasis::Iso3309Crc32& crc32)
+{
+   if (reopenFile())
+   {
+      byte buf;
+      while (_filePos < _fileLength - 4)
+      {
+         rawRead(&buf, 1);
+         crc32.add(&buf, 1);
+      }
+      closeFile();
+      return true;
+   }
+   return false;
 }
 
 Oasis::OasisInFile::~OasisInFile()

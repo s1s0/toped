@@ -140,7 +140,7 @@ namespace Oasis {
                   tblm_explicit         } TableMode;
 
    /*! OASIS Standard Properties (Appendix 2) depend on the context they appear in.
-       This enum values define all possible contexts for the property records.
+   *   This enum values define all possible contexts for the property records.
    */
    typedef enum { pc_file              ,
                   pc_cell              ,
@@ -149,6 +149,15 @@ namespace Oasis {
 
    typedef enum { md_absolute          ,
                   md_relative           } XYMode;
+
+   /*! OASIS Standard END Record Validation Schemes (Table 12)
+    *  Declares all possible validation schemes and also adding one for
+    *  the cases when the scheme is not yet obtained or wrong
+    */
+   typedef enum { vs_noValidation = 0  ,
+                  vs_crc32        = 1  ,
+                  vs_checkSum32   = 3  ,
+                  vs_unknown      = 4   } ValidationScheme;
 
    class OasisInFile;
    class Cell;
@@ -394,6 +403,32 @@ namespace Oasis {
          wxFileOffset      _startPosInFile;
    };
 
+   /*!
+    * Implementation of the OASIS CRC. The polynomial is as as specified in
+    * ISO 3309 and ITU-T V.42 used in Ethernet, FDDI, cksum, etc.
+    * polynomial is x^32 + x^26 + x^23 + x^22 + x^16 + x^12 + x^11 + x^10
+    *                    + x^8 + x^7 + x^5 + x^4 + x^2 + x^1 + x^0
+    * The implementation is taken from the SEMI standard with some little trims
+    * to fit into the Toped coding style.
+    */
+   class Iso3309Crc32 {
+      public:
+                              Iso3309Crc32();
+         void                 add(const byte*, size_t);
+         dword                theCrc() const              {return _theCrc;}
+      private:
+         void                 tableLoad();
+         dword                reflect(dword);
+         dword                _crc32Table[256];
+         dword                _theCrc;
+         bool                 _pauseCalculation;
+         static const dword   _crc32Poly;
+         static const dword   _crc32Constant;
+         static const dword   _crc32LSBit;
+         static const dword   _crc32MSBit;
+         static const dword   _crc32AllBits;
+   };
+
    class OasisInFile {
       public:
          typedef std::map<std::string, Cell*> DefinitionMap;
@@ -404,6 +439,7 @@ namespace Oasis {
          void              hierOut();
          wxFileOffset      setPosition(wxFileOffset);
          void              inflateCBlock();
+         bool              calculateCRC(Iso3309Crc32&);
          bool              status()          {return _status;  }
          wxFileOffset      filePos()         {return _filePos; }
          OASHierTree*      hierTree()        {return _hierTree;}
@@ -417,7 +453,9 @@ namespace Oasis {
          const Table*      propStrings() const{ return _propStrings;}
          const Table*      layerNames() const { return _layerNames;}
          const Table*      xNames() const     { return _xNames;}
-         const DefinitionMap& definitions() const { return _definedCells; }
+         const DefinitionMap& definitions() const { return _definedCells;}
+         ValidationScheme  validation() const {return _validation;}
+         dword             signature() const  {return _signature;}
          //----------------------------------------------------------------------
          byte              getByte();
          qword             getUnsignedInt(byte);
@@ -463,6 +501,8 @@ namespace Oasis {
          real              _unit;      //! OASIS unit (DBU) retrieved from the file
          OASHierTree*      _hierTree;  //! The tree of reference hierarchy
          CBlockInflate*    _curCBlock; //! Current uncompressed CBLOCK
+         ValidationScheme  _validation;//! Validation Scheme of this OASIS file
+         dword             _signature; //! The signature of the OASIS file (depends on the validation scheme)
          //! Used only in the constructor if the file can't be opened for whatever reason
          bool              _status;
    };
