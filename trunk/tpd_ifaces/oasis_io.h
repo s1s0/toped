@@ -156,8 +156,8 @@ namespace Oasis {
     */
    typedef enum { vs_noValidation = 0  ,
                   vs_crc32        = 1  ,
-                  vs_checkSum32   = 3  ,
-                  vs_unknown      = 4   } ValidationScheme;
+                  vs_checkSum32   = 2  ,
+                  vs_unknown      = 3   } ValidationScheme;
 
    class OasisInFile;
    class Cell;
@@ -440,6 +440,7 @@ namespace Oasis {
          wxFileOffset      setPosition(wxFileOffset);
          void              inflateCBlock();
          bool              calculateCRC(Iso3309Crc32&);
+         bool              calculateChecksum(dword& checksum);
          bool              status()          {return _status;  }
          wxFileOffset      filePos()         {return _filePos; }
          OASHierTree*      hierTree()        {return _hierTree;}

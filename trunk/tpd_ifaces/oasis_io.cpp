@@ -425,6 +425,7 @@ void Oasis::OasisInFile::readEndRecord()
    if (Oasis::vs_noValidation == _validation)
    {
       info << "OASIS file has no validation signature";
+      tell_log(console::MT_INFO, info.str());
    }
    else
    {
@@ -433,12 +434,7 @@ void Oasis::OasisInFile::readEndRecord()
       sigbyte[1] = getByte();
       sigbyte[2] = getByte();
       sigbyte[3] = getByte();
-      if (Oasis::vs_crc32 == _validation)
-         info << "OASIS file: CRC32 validation signature is 0x" << std::hex << _signature;
-      else
-         info << "OASIS file: CHECKSUM32 validation signature: 0x" << std::hex << _signature;
    }
-   tell_log(console::MT_INFO, info.str());
 }
 
 void Oasis::OasisInFile::readLibrary()
@@ -742,6 +738,26 @@ bool Oasis::OasisInFile::calculateCRC(Oasis::Iso3309Crc32& crc32)
       closeFile();
       return true;
    }
+   return false;
+}
+
+bool Oasis::OasisInFile::calculateChecksum(dword& checksum)
+{
+   if (reopenFile())
+   {
+      qword wsum = 0ull; // get a 64 bit number to handle overflows
+      byte buf;
+      while (_filePos < _fileLength - 4)
+      {
+         rawRead(&buf, 1);
+         wsum +=buf;
+         wsum &= 0xffffffff;
+      }
+      closeFile();
+      checksum = (dword) wsum;
+      return true;
+   }
+   checksum = 0u;
    return false;
 }
 
