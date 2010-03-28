@@ -225,20 +225,43 @@ bool DataCenter::OASParse(std::string filename)
       status = AOASDB->status();
       if (status)
       {
+         std::ostringstream info;
          AOASDB->readLibrary();
          if (Oasis::vs_crc32 == AOASDB->validation())
          {
             Oasis::Iso3309Crc32 crcCheck;
             if (AOASDB->calculateCRC(crcCheck))
             {
-               std::ostringstream info;
-               info << "OASIS file: CRC32 calculated signature is 0x"<< std::hex << crcCheck.theCrc();
-               tell_log(console::MT_INFO,info.str());
+               if (AOASDB->signature() == crcCheck.theCrc())
+                  tell_log(console::MT_INFO,"CRC32 - OK");
+               else
+               {
+                  tell_log(console::MT_ERROR,"Bad CRC32!");
+                  status = false;
+               }
             }
             else
             {
-               std::ostringstream info;
                info << "Can't verify the CRC32 signature of file \""<< filename << "\"";
+               tell_log(console::MT_WARNING,info.str());
+            }
+         }
+         else if (Oasis::vs_checkSum32 == AOASDB->validation())
+         {
+            dword checksum;
+            if (AOASDB->calculateChecksum(checksum))
+            {
+               if (AOASDB->signature() == checksum)
+                  tell_log(console::MT_INFO,"CHECKSUM32 - OK");
+               else
+               {
+                  tell_log(console::MT_ERROR,"Bad CHECKSUM32!");
+                  status = false;
+               }
+            }
+            else
+            {
+               info << "Can't verify the CHECKSUM32 signature of file \""<< filename << "\"";
                tell_log(console::MT_WARNING,info.str());
             }
          }
