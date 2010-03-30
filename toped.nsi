@@ -12,7 +12,7 @@
 Name "toped"
 
 ; The file to write
-OutFile "toped_install-0.95RC.exe"
+OutFile "toped_install.exe"
 
 ; The default installation directory
 InstallDir $PROGRAMFILES\toped
@@ -51,8 +51,16 @@ Section "toped"
   File "news.txt"
   File "readme.txt"
   File "glew32.dll"
+  File "zlib1.dll"
   File "virtuoso2tll.exe"
 
+  ;all for PLT scheme
+  SetOutPath $INSTDIR\lib
+  File "lib\iconv.dll"
+  File "lib\libmzsch3m_6ncc9s.dll"
+  File "lib\UnicoWS.dll"
+  
+  ;tll files
   SetOutPath $INSTDIR\tll
   File "tll\arccheck.tll"
   File "tll\checklists.tll"
@@ -250,7 +258,12 @@ Section "Uninstall"
   Delete $INSTDIR\readme.txt
   Delete $INSTDIR\authors
   Delete $INSTDIR\glew32.dll
+  Delete $INSTDIR\zlib1.dll
   Delete $INSTDIR\virtuoso2tll.exe
+
+  Delete $INSTDIR\lib\iconv.dll
+  Delete $INSTDIR\lib\libmzsch3m_6ncc9s.dll
+  Delete $INSTDIR\lib\UnicoWS.dll
 
   Delete $INSTDIR\tll\arccheck.tll
   Delete $INSTDIR\tll\checklists.tll
@@ -387,6 +400,7 @@ Section "Uninstall"
   
   RMDir $INSTDIR\log
   RMDir $INSTDIR\icons
+  RMDir $INSTDIR\lib
   RMDir $INSTDIR\tll
   RMDir $INSTDIR\fonts
   RMDir $INSTDIR\examples
