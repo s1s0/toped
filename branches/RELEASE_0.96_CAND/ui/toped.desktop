@@ -1,0 +1,10 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Toped
+Exec=toped
+Icon=toped
+Type=Application
+Terminal=false
+GenericName=Toped, IC Layout Editor
+Categories=Education;Science;Engineering;
+X-Desktop-File-Install-Version=0.10
