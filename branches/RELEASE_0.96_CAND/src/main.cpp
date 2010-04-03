@@ -106,8 +106,6 @@ bool TopedApp::OnInit()
    _forceBasicRendering = false;
 //   _renderType = false;
    wxImage::AddHandler(DEBUG_NEW wxPNGHandler);
-   getLocalDirs();
-   getGlobalDirs();
    // Initialize Toped properties
    PROPC = DEBUG_NEW layprop::PropertyCenter();
    // Initialize Toped database
@@ -131,12 +129,14 @@ bool TopedApp::OnInit()
    // type of rendering (i.e. basic or tenderer)
    if (!_forceBasicRendering)
       PROPC->setRenderType(Toped->view()->diagnozeGL());
-   // Initialize the tool bars
-   Toped->setIconDir(std::string(_tpdResourceDir.mb_str(wxConvFile)));
-   Toped->initToolBars();
    // Replace the active console in the wx system with Toped console window
    console::ted_log_ctrl *logWindow = DEBUG_NEW console::ted_log_ctrl(Toped->logwin());
    delete wxLog::SetActiveTarget(logWindow);
+   // Initialize the tool bars
+   getLocalDirs();
+   getGlobalDirs();
+   Toped->setIconDir(std::string(_tpdResourceDir.mb_str(wxConvFile)));
+   Toped->initToolBars();
    // Create the session log file
    if (!getLogFileName()) return FALSE;
    // It's time to register all internal TELL functions
@@ -321,45 +321,29 @@ bool TopedApp::checkCrashLog()
 //=============================================================================
 void TopedApp::getLocalDirs()
 {
-   wxFileName* logDIR = DEBUG_NEW wxFileName(wxT("$TPD_LOCAL/"));
-   logDIR->Normalize();
-   wxString dirName = logDIR->GetPath();
    wxString info;
-   bool undefined = dirName.Matches(wxT("*$TPD_LOCAL*"));
-   if (!undefined)
+   if (!wxGetEnv(wxT("TPD_LOCAL"), &_localDir))
    {
-      _localDir = logDIR->GetFullPath();
-      logDIR->AppendDir(wxT("log"));
-      logDIR->Normalize();
-   }
-   if (logDIR->IsOk())
-   {
-      bool exist = logDIR->DirExists();
-      if (!exist)
-      {
-         if (undefined)
-            info = wxT("Environment variable $TPD_LOCAL is not defined");
-         else
-         {
-            info << wxT("Directory ") << logDIR->GetFullPath() << wxT(" doesn't exists");
-         }
-         info << wxT(". Log file will be created in the current directory \"");
-         info << wxGetCwd() << wxT("\"");
-         tell_log(console::MT_WARNING,info);
-         _tpdLogDir = wxT(".");
-      }
-      else
-         _tpdLogDir = logDIR->GetFullPath();
+      tell_log(console::MT_WARNING,"Environment variable $TPD_LOCAL is not defined. Trying to use current directory");
+      _localDir = wxT("./");
    }
    else
+      _localDir << wxT("/");
+
+   // Check fonts directory
+   wxFileName logFolder(_localDir);
+   logFolder.AppendDir(wxT("log"));
+   logFolder.Normalize();
+   if (logFolder.DirExists())
+      _tpdLogDir = logFolder.GetFullPath();
+   else
    {
-      info = wxT("Can't evaluate properly \"$TPD_LOCAL\" env. variable");
-      info << wxT(". Log file will be created in the current directory \"");
+      info = wxT("Directory \"");
+      info << logFolder.GetFullPath() << wxT("\" doesn't exists.");
+      info << wxT(" Log file will be created in the current directory");
+      _tpdLogDir = wxT("./");
       tell_log(console::MT_WARNING,info);
-      _tpdLogDir = wxT(".");
-      _localDir = wxT(".");
    }
-   delete logDIR;
 }
 
 //=============================================================================
@@ -370,7 +354,6 @@ void TopedApp::getGlobalDirs()
    {
       tell_log(console::MT_WARNING,"Environment variable $TPD_GLOBAL is not defined. Trying to use current directory");
       _globalDir = wxT("./");
-      tell_log(console::MT_WARNING,info);
    }
    else
       _globalDir << wxT("/");
@@ -385,6 +368,7 @@ void TopedApp::getGlobalDirs()
       info = wxT("Directory \"");
       info << fontsFolder.GetFullPath() << wxT("\" doesn't exists.");
       info << wxT(" Looking for fonts in the current directory \"");
+      tell_log(console::MT_WARNING,info);
       _tpdFontDir = wxT("./");
    }
    // Check resource directory
@@ -398,6 +382,7 @@ void TopedApp::getGlobalDirs()
       info = wxT("Directory \"");
       info << iconsFolder.GetFullPath() << wxT("\" doesn't exists.");
       info << wxT(" Looking for icons in the current directory \"");
+      tell_log(console::MT_WARNING,info);
       _tpdResourceDir = wxT("./");
    }
    // Check plug-ins directory
