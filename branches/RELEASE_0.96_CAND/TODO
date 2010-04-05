@@ -43,12 +43,36 @@ Dialog stuff
 
 Documentation
 ==============
+   oasisread
+   oasisimport
+   oasisimport
+   oasisclose
+   getoasislaymap
+   setoasislaymap
+   report_oasislayers
+   
+   drccalibreimport
+   drcshowerror
+   drcshowallerrors
+   drcshowallerrors
+   drcshowcluster
+   drchideallerrors
+   drcexplainerror
+   
+   newdesign
+   newdesign
+
+   gdssplit
+   
    savelayerstatus
    restorelayerstatus
    deletelayserstatus 
    zoomvisible
    toolbarsize
+   toolbaradditem
+   toolbardeleteitem
    filllayer
+   
    (constants)
    horizontal
    vertical
@@ -56,6 +80,9 @@ Documentation
    _iconsize24
    _iconsize32
    _iconsize48
+   
+   flipvert (flipX -> deprecated)
+   fliphor  (flipY -> deprecated)
 
 Global options of the editor
 ============================
