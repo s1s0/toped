@@ -637,7 +637,8 @@ tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &
       _nameList->SetFirstItem(init);
    }
 
-   _layList = DEBUG_NEW tui::nameCbox3List(this, wxID_ANY, wxDefaultPosition, wxSize(300,300), gdsLayers, drawProp);
+   _layList = DEBUG_NEW tui::nameCbox3List(this, wxID_ANY, wxDefaultPosition, wxSize(300,300),
+         gdsLayers, drawProp, wxT("GDS layer/type"));
 
    // The window layout
    wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
@@ -695,7 +696,8 @@ tui::getOASimport::getOASimport(wxFrame *parent, wxWindowID id, const wxString &
       _nameList->SetFirstItem(init);
    }
 
-   _layList = DEBUG_NEW tui::nameCbox3List(this, wxID_ANY, wxDefaultPosition, wxSize(300,300), oasLayers, drawProp);
+   _layList = DEBUG_NEW tui::nameCbox3List(this, wxID_ANY, wxDefaultPosition, wxSize(300,300),
+         oasLayers, drawProp, wxT("OAS layer/type"));
 
    // The window layout
    wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
@@ -2075,7 +2077,8 @@ BEGIN_EVENT_TABLE(tui::nameCbox3List, wxScrolledWindow)
       EVT_SIZE( tui::nameCbox3List::OnSize )
 END_EVENT_TABLE()
 
-tui::nameCbox3List::nameCbox3List(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz, const ExtLayers& inlays, const layprop::DrawProperties* drawProp) :
+tui::nameCbox3List::nameCbox3List(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz,
+      const ExtLayers& inlays, const layprop::DrawProperties* drawProp, wxString inName) :
       wxScrolledWindow(parent, id, pnt, sz, wxBORDER_RAISED)
 {
    // collect all defined layers
@@ -2086,7 +2089,7 @@ tui::nameCbox3List::nameCbox3List(wxWindow* parent, wxWindowID id, wxPoint pnt, 
    for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
       all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
 
-   (void) DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("GDS layer/type"),
+   (void) DEBUG_NEW wxStaticText(this, wxID_ANY, inName,
       wxPoint(  5, 5), wxSize(120,line_height), wxALIGN_CENTER | wxBORDER_SUNKEN);
    (void) DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("TDT layer"),
       wxPoint(125, 5), wxSize(150,line_height), wxALIGN_CENTER | wxBORDER_SUNKEN);
@@ -2491,7 +2494,7 @@ tui::TopedPropertySheets::RenderingPSheet::RenderingPSheet(wxWindow* parent) : w
          cellSizer->Add(cellOvlBox, 1, wxALL | wxALIGN_CENTER | wxEXPAND);
          cellSizer->Add(cellMarks , 1, wxALL | wxALIGN_CENTER | wxEXPAND);
          // Cell Depth of view
-         wxBoxSizer *cdovSizer = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Depth of view"));
+         wxBoxSizer *cdovSizer = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Visible hierarchy depth"));
          _cbDepthOfViewLimit = DEBUG_NEW wxCheckBox(this, PDCELL_CHECKDOV , wxT("unlimited"));
          _cbDepthOfViewLimit->SetValue(true);
          _cellDepthOfView = DEBUG_NEW sgSliderControl(this, PDCELL_DOV, 1, 8, 8);
@@ -2499,7 +2502,7 @@ tui::TopedPropertySheets::RenderingPSheet::RenderingPSheet(wxWindow* parent) : w
          cdovSizer->Add(_cbDepthOfViewLimit, 0, wxALL| wxALIGN_CENTER | wxEXPAND);
          cdovSizer->Add(   _cellDepthOfView, 0, wxALL| wxALIGN_CENTER | wxEXPAND);
          // Cell Depth brightness ebb (shadow)
-         wxBoxSizer *ebbSizer  = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Depth shadow (alpha degradation)"));
+         wxBoxSizer *ebbSizer  = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Hierarchy depth opacity"));
             _cellDepthEbb = DEBUG_NEW sgSliderControl(this, PDCELL_DAB, 0, 80, 0);
          ebbSizer->Add(_cellDepthEbb, 0, wxALL | wxALIGN_CENTER | wxEXPAND);
       // Pack all cell related properties
