@@ -70,7 +70,6 @@ void tellstdfunc::stdCOPYSEL::undo()
 
 int tellstdfunc::stdCOPYSEL::execute()
 {
-   UNDOcmdQ.push_front(this);
    telldata::ttpnt    *p2 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    real DBscale = PROPC->DBscale();
@@ -78,6 +77,7 @@ int tellstdfunc::stdCOPYSEL::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
+      UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(make_ttlaylist(tDesign->shapeSel()));
       tDesign->copySelected(TP(p1->x(), p1->y(), DBscale), TP(p2->x(), p2->y(), DBscale));
       OPstack.push(make_ttlaylist(tDesign->shapeSel()));
@@ -191,10 +191,7 @@ void tellstdfunc::stdMOVESEL::undo()
 
 int tellstdfunc::stdMOVESEL::execute()
 {
-   UNDOcmdQ.push_front(this);
-   UNDOPstack.push_front(OPstack.top());
    telldata::ttpnt    *p2 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-   UNDOPstack.push_front(OPstack.top());
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    real DBscale = PROPC->DBscale();
    // moveSelected returns 3 select lists : Failed/Deleted/Added
@@ -206,6 +203,9 @@ int tellstdfunc::stdMOVESEL::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
+      UNDOcmdQ.push_front(this);
+      UNDOPstack.push_front(p2->selfcopy());
+      UNDOPstack.push_front(p1->selfcopy());
       tDesign->moveSelected(TP(p1->x(), p1->y(), DBscale), TP(p2->x(), p2->y(), DBscale), fadead);
       // save for undo operations ...
       UNDOPstack.push_front(make_ttlaylist(fadead[0])); // first failed
@@ -228,9 +228,9 @@ int tellstdfunc::stdMOVESEL::execute()
          delete fadead[i];
       }
    }
+   delete p1; delete p2;
    DATC->unlockTDT(dbLibDir, true);
    LogFile << LogFile.getFN() << "("<< *p1 << "," << *p2 << ");"; LogFile.flush();
-   //delete p1; delete p2; undo will delete them
    RefreshGL();
    return EXEC_NEXT;
 }
@@ -336,11 +336,8 @@ void tellstdfunc::stdROTATESEL::undo()
 
 int tellstdfunc::stdROTATESEL::execute()
 {
-   UNDOcmdQ.push_front(this);
-   UNDOPstack.push_front(OPstack.top());
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    real   angle  = getOpValue();
-   UNDOPstack.push_front(DEBUG_NEW telldata::ttreal(angle));
    real DBscale = PROPC->DBscale();
    // rotateSelected returns 3 select lists : Failed/Deleted/Added
    // This is because of the box rotation in which case box has to be converted to polygon
@@ -357,14 +354,17 @@ int tellstdfunc::stdROTATESEL::execute()
       DWordSet unselable = PROPC->allUnselectable();
       tDesign->selectFromList(get_ttlaylist(added), unselable);
       // save for undo operations ...
+      UNDOcmdQ.push_front(this);
+      UNDOPstack.push_front(p1->selfcopy());
+      UNDOPstack.push_front(DEBUG_NEW telldata::ttreal(angle));
       UNDOPstack.push_front(make_ttlaylist(fadead[0])); // first failed
       UNDOPstack.push_front(make_ttlaylist(fadead[1])); // then deleted
       UNDOPstack.push_front(added); // and added
       for (i = 0; i < 3; delete fadead[i++]);
    }
+   delete p1;
    DATC->unlockTDT(dbLibDir, true);
    LogFile << LogFile.getFN() << "("<< angle << "," << *p1 << ");"; LogFile.flush();
-   //delete p1; undo will delete them
    RefreshGL();
    return EXEC_NEXT;
 }
