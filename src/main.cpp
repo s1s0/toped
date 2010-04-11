@@ -475,8 +475,8 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    mblock->addconstID("_lmpref"  , DEBUG_NEW telldata::ttint( laydata::_lmpref ), true);
    mblock->addconstID("_lmapref" , DEBUG_NEW telldata::ttint( laydata::_lmapref), true);
    // Toolbar properties
-   mblock->addconstID("horizontal", DEBUG_NEW telldata::ttint( tui::_tuihorizontal), true);
-   mblock->addconstID("vertical"  , DEBUG_NEW telldata::ttint( tui::_tuivertical),   true);
+   mblock->addconstID("_horizontal", DEBUG_NEW telldata::ttint( tui::_tuihorizontal), true);
+   mblock->addconstID("_vertical"  , DEBUG_NEW telldata::ttint( tui::_tuivertical),   true);
    mblock->addconstID("_iconsize16", DEBUG_NEW telldata::ttint( tui::ICON_SIZE_16x16),true);
    mblock->addconstID("_iconsize24", DEBUG_NEW telldata::ttint( tui::ICON_SIZE_24x24),true);
    mblock->addconstID("_iconsize32", DEBUG_NEW telldata::ttint( tui::ICON_SIZE_32x32),true);
@@ -605,10 +605,8 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    mblock->addFUNC("flipY"            ,(DEBUG_NEW                 tellstdfunc::stdFLIPYSEL(telldata::tn_void,false)));
    mblock->addFUNC("flipY"            ,(DEBUG_NEW               tellstdfunc::stdFLIPYSEL_D(telldata::tn_void,false)));
    //**********************************************
-   mblock->addFUNC("flip_vert"         ,(DEBUG_NEW                 tellstdfunc::stdFLIPXSEL(telldata::tn_void,false)));
-   mblock->addFUNC("flip_vert"         ,(DEBUG_NEW               tellstdfunc::stdFLIPXSEL_D(telldata::tn_void,false)));
-   mblock->addFUNC("flip_hor"          ,(DEBUG_NEW                 tellstdfunc::stdFLIPYSEL(telldata::tn_void,false)));
-   mblock->addFUNC("flip_hor"          ,(DEBUG_NEW               tellstdfunc::stdFLIPYSEL_D(telldata::tn_void,false)));
+   mblock->addFUNC("flip"            ,(DEBUG_NEW                   tellstdfunc::stdFLIPSEL(telldata::tn_void,false)));
+   mblock->addFUNC("flip"            ,(DEBUG_NEW                 tellstdfunc::stdFLIPSEL_D(telldata::tn_void,false)));
    mblock->addFUNC("delete"           ,(DEBUG_NEW                tellstdfunc::stdDELETESEL(telldata::tn_void,false)));
    mblock->addFUNC("group"            ,(DEBUG_NEW                    tellstdfunc::stdGROUP(telldata::tn_void,false)));
    mblock->addFUNC("ungroup"          ,(DEBUG_NEW                  tellstdfunc::stdUNGROUP(telldata::tn_void,false)));
