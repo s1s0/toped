@@ -35,7 +35,7 @@ General
 
 Dialog stuff
 ============
-   * Grid definitioan dialog is ugly - text windows are not resizing properly. 
+   * Grid definition dialog is ugly - text windows are not resizing properly. 
    * The number of the digits after the decimal point must be intact with the 
      current step. There is some piece of code left in tui.cpp (getSize::getSize)
      to be used as a starting point for this
@@ -43,46 +43,10 @@ Dialog stuff
 
 Documentation
 ==============
-   oasisread
-   oasisimport
-   oasisimport
-   oasisclose
-   getoasislaymap
-   setoasislaymap
-   report_oasislayers
-   
-   drccalibreimport
-   drcshowerror
-   drcshowallerrors
-   drcshowallerrors
-   drcshowcluster
-   drchideallerrors
-   drcexplainerror
-   
-   newdesign
-   newdesign
-
-   gdssplit
-   
    savelayerstatus
    restorelayerstatus
    deletelayserstatus 
-   zoomvisible
-   toolbarsize
-   toolbaradditem
-   toolbardeleteitem
-   filllayer
-   
-   (constants)
-   horizontal
-   vertical
-   _iconsize16
-   _iconsize24
-   _iconsize32
-   _iconsize48
-   
-   flipvert (flipX -> deprecated)
-   fliphor  (flipY -> deprecated)
+
 
 Global options of the editor
 ============================

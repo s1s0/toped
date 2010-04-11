@@ -40,10 +40,8 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSB(stdMOVESEL_D    , stdMOVESEL    );
    TELL_STDCMD_CLASSA_UNDO(stdROTATESEL      );  // undo - implemented
    TELL_STDCMD_CLASSB(stdROTATESEL_D  , stdROTATESEL  );
-   TELL_STDCMD_CLASSA_UNDO(stdFLIPXSEL       );  // undo - implemented
-   TELL_STDCMD_CLASSB(stdFLIPXSEL_D   , stdFLIPXSEL   );
-   TELL_STDCMD_CLASSA_UNDO(stdFLIPYSEL       );  // undo - implemented
-   TELL_STDCMD_CLASSB(stdFLIPYSEL_D   , stdFLIPYSEL   );
+   TELL_STDCMD_CLASSA_UNDO(stdFLIPSEL        );  // undo - implemented
+   TELL_STDCMD_CLASSB(stdFLIPSEL_D   , stdFLIPSEL   );
    TELL_STDCMD_CLASSA_UNDO(stdDELETESEL      );  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(lgcCUTPOLY        );  // undo - implemented
    TELL_STDCMD_CLASSB(lgcCUTPOLY_I    , lgcCUTPOLY    );
@@ -53,6 +51,11 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA_UNDO(stdCHANGELAY      );  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdCHANGEREF      );  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdCHANGESTRING   );  // undo - implemented
+   // Deprecated - to be removed in the next release
+   TELL_STDCMD_CLASSA_UNDO(stdFLIPYSEL       );  // undo - implemented
+   TELL_STDCMD_CLASSB(stdFLIPYSEL_D   , stdFLIPYSEL   );
+   TELL_STDCMD_CLASSA_UNDO(stdFLIPXSEL       );  // undo - implemented
+   TELL_STDCMD_CLASSB(stdFLIPXSEL_D   , stdFLIPXSEL   );
 
 }
 #endif
