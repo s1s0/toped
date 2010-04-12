@@ -70,7 +70,6 @@ void tellstdfunc::stdCOPYSEL::undo()
 
 int tellstdfunc::stdCOPYSEL::execute()
 {
-   UNDOcmdQ.push_front(this);
    telldata::ttpnt    *p2 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    real DBscale = PROPC->DBscale();
@@ -78,13 +77,14 @@ int tellstdfunc::stdCOPYSEL::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
+      UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(make_ttlaylist(tDesign->shapeSel()));
       tDesign->copySelected(TP(p1->x(), p1->y(), DBscale), TP(p2->x(), p2->y(), DBscale));
       OPstack.push(make_ttlaylist(tDesign->shapeSel()));
+      LogFile << LogFile.getFN() << "("<< *p1 << "," << *p2 << ");"; LogFile.flush();
    }
-   DATC->unlockTDT(dbLibDir, true);
-   LogFile << LogFile.getFN() << "("<< *p1 << "," << *p2 << ");"; LogFile.flush();
    delete p1; delete p2;
+   DATC->unlockTDT(dbLibDir, true);
    RefreshGL();
    return EXEC_NEXT;
 }
@@ -191,10 +191,7 @@ void tellstdfunc::stdMOVESEL::undo()
 
 int tellstdfunc::stdMOVESEL::execute()
 {
-   UNDOcmdQ.push_front(this);
-   UNDOPstack.push_front(OPstack.top());
    telldata::ttpnt    *p2 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-   UNDOPstack.push_front(OPstack.top());
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    real DBscale = PROPC->DBscale();
    // moveSelected returns 3 select lists : Failed/Deleted/Added
@@ -206,6 +203,9 @@ int tellstdfunc::stdMOVESEL::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
+      UNDOcmdQ.push_front(this);
+      UNDOPstack.push_front(p2->selfcopy());
+      UNDOPstack.push_front(p1->selfcopy());
       tDesign->moveSelected(TP(p1->x(), p1->y(), DBscale), TP(p2->x(), p2->y(), DBscale), fadead);
       // save for undo operations ...
       UNDOPstack.push_front(make_ttlaylist(fadead[0])); // first failed
@@ -227,10 +227,10 @@ int tellstdfunc::stdMOVESEL::execute()
          }
          delete fadead[i];
       }
+      LogFile << LogFile.getFN() << "("<< *p1 << "," << *p2 << ");"; LogFile.flush();
    }
+   delete p1; delete p2;
    DATC->unlockTDT(dbLibDir, true);
-   LogFile << LogFile.getFN() << "("<< *p1 << "," << *p2 << ");"; LogFile.flush();
-   //delete p1; delete p2; undo will delete them
    RefreshGL();
    return EXEC_NEXT;
 }
@@ -336,11 +336,8 @@ void tellstdfunc::stdROTATESEL::undo()
 
 int tellstdfunc::stdROTATESEL::execute()
 {
-   UNDOcmdQ.push_front(this);
-   UNDOPstack.push_front(OPstack.top());
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    real   angle  = getOpValue();
-   UNDOPstack.push_front(DEBUG_NEW telldata::ttreal(angle));
    real DBscale = PROPC->DBscale();
    // rotateSelected returns 3 select lists : Failed/Deleted/Added
    // This is because of the box rotation in which case box has to be converted to polygon
@@ -357,14 +354,17 @@ int tellstdfunc::stdROTATESEL::execute()
       DWordSet unselable = PROPC->allUnselectable();
       tDesign->selectFromList(get_ttlaylist(added), unselable);
       // save for undo operations ...
+      UNDOcmdQ.push_front(this);
+      UNDOPstack.push_front(p1->selfcopy());
+      UNDOPstack.push_front(DEBUG_NEW telldata::ttreal(angle));
       UNDOPstack.push_front(make_ttlaylist(fadead[0])); // first failed
       UNDOPstack.push_front(make_ttlaylist(fadead[1])); // then deleted
       UNDOPstack.push_front(added); // and added
       for (i = 0; i < 3; delete fadead[i++]);
+      LogFile << LogFile.getFN() << "("<< angle << "," << *p1 << ");"; LogFile.flush();
    }
+   delete p1;
    DATC->unlockTDT(dbLibDir, true);
-   LogFile << LogFile.getFN() << "("<< angle << "," << *p1 << ");"; LogFile.flush();
-   //delete p1; undo will delete them
    RefreshGL();
    return EXEC_NEXT;
 }
@@ -403,63 +403,70 @@ int tellstdfunc::stdROTATESEL_D::execute()
    }
 }
 
-
 //=============================================================================
-tellstdfunc::stdFLIPXSEL::stdFLIPXSEL(telldata::typeID retype, bool eor) :
+tellstdfunc::stdFLIPSEL::stdFLIPSEL(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
 }
 
-void tellstdfunc::stdFLIPXSEL::undo_cleanup()
+void tellstdfunc::stdFLIPSEL::undo_cleanup()
 {
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(UNDOPstack.back());UNDOPstack.pop_back();
+   getWordValue(UNDOPstack, true);
    delete p1;
 }
 
-void tellstdfunc::stdFLIPXSEL::undo()
+void tellstdfunc::stdFLIPSEL::undo()
 {
-   TEUNDO_DEBUG("flipX(point) UNDO");
+   TEUNDO_DEBUG("flip(direction, point) UNDO");
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(UNDOPstack.front());UNDOPstack.pop_front();
-   real DBscale = PROPC->DBscale();
+   word         direction = getWordValue(UNDOPstack, true);
+   real           DBscale = PROPC->DBscale();
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      tDesign->flipSelected(TP(p1->x(), p1->y(), DBscale), true);
+      tDesign->flipSelected(TP(p1->x(), p1->y(), DBscale), (1 == direction));
    }
    DATC->unlockTDT(dbLibDir, true);
    delete p1;
    RefreshGL();
 }
 
-int tellstdfunc::stdFLIPXSEL::execute()
+int tellstdfunc::stdFLIPSEL::execute()
 {
-   UNDOcmdQ.push_front(this);
-   UNDOPstack.push_front(OPstack.top());
-   telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-   real DBscale = PROPC->DBscale();
+   telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
+   word      direction = getWordValue();
+   real        DBscale = PROPC->DBscale();
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      tDesign->flipSelected(TP(p1->x(), p1->y(), DBscale), true);
+      tDesign->flipSelected(TP(p1->x(), p1->y(), DBscale), (1==direction));
+      UNDOcmdQ.push_front(this);
+      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(direction));
+      UNDOPstack.push_front(p1->selfcopy());
+      LogFile << LogFile.getFN() << "("<< *p1 << ");"; LogFile.flush();
    }
+   delete p1;
    DATC->unlockTDT(dbLibDir, true);
-   LogFile << LogFile.getFN() << "("<< *p1 << ");"; LogFile.flush();
-   //delete p1; undo will delete them
    RefreshGL();
    return EXEC_NEXT;
 }
 
 //=============================================================================
-tellstdfunc::stdFLIPXSEL_D::stdFLIPXSEL_D(telldata::typeID retype, bool eor) :
-      stdFLIPXSEL(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
-{}
+tellstdfunc::stdFLIPSEL_D::stdFLIPSEL_D(telldata::typeID retype, bool eor) :
+      stdFLIPSEL(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
+}
 
-int tellstdfunc::stdFLIPXSEL_D::execute()
+int tellstdfunc::stdFLIPSEL_D::execute()
 {
    unsigned numSelected = 0;
+   word      direction = getWordValue();
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -474,87 +481,14 @@ int tellstdfunc::stdFLIPXSEL_D::execute()
    }
    else
    {
+      OPstack.push(DEBUG_NEW telldata::ttint(direction));
+      console::ACTIVE_OP cop = (1 == direction) ? console::op_flipX : console::op_flipY;
       // stop the thread and wait for input from the GUI
-      if (!tellstdfunc::waitGUInput(console::op_flipX, &OPstack)) return EXEC_ABORT;
-      return stdFLIPXSEL::execute();
+      if (!tellstdfunc::waitGUInput(cop, &OPstack)) return EXEC_ABORT;
+      return stdFLIPSEL::execute();
    }
 }
 
-//=============================================================================
-tellstdfunc::stdFLIPYSEL::stdFLIPYSEL(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
-{
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
-}
-
-void tellstdfunc::stdFLIPYSEL::undo_cleanup()
-{
-   telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(UNDOPstack.back());UNDOPstack.pop_back();
-   delete p1;
-}
-
-void tellstdfunc::stdFLIPYSEL::undo()
-{
-   TEUNDO_DEBUG("flipY(point) UNDO");
-   telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(UNDOPstack.front());UNDOPstack.pop_front();
-   real DBscale = PROPC->DBscale();
-   laydata::TdtLibDir* dbLibDir = NULL;
-   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
-   {
-      laydata::TdtDesign* tDesign = (*dbLibDir)();
-      tDesign->flipSelected(TP(p1->x(), p1->y(), DBscale), false);
-   }
-   DATC->unlockTDT(dbLibDir, true);
-   delete p1;
-   RefreshGL();
-}
-
-int tellstdfunc::stdFLIPYSEL::execute()
-{
-   UNDOcmdQ.push_front(this);
-   UNDOPstack.push_front(OPstack.top());
-   telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-   real DBscale = PROPC->DBscale();
-   laydata::TdtLibDir* dbLibDir = NULL;
-   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
-   {
-      laydata::TdtDesign* tDesign = (*dbLibDir)();
-      tDesign->flipSelected(TP(p1->x(), p1->y(), DBscale), false);
-   }
-   DATC->unlockTDT(dbLibDir, true);
-   LogFile << LogFile.getFN() << "("<< *p1 << ");"; LogFile.flush();
-   //delete p1; undo will delete them
-   RefreshGL();
-   return EXEC_NEXT;
-}
-
-//=============================================================================
-tellstdfunc::stdFLIPYSEL_D::stdFLIPYSEL_D(telldata::typeID retype, bool eor) :
-      stdFLIPYSEL(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
-{}
-
-int tellstdfunc::stdFLIPYSEL_D::execute()
-{
-   unsigned numSelected = 0;
-   laydata::TdtLibDir* dbLibDir = NULL;
-   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
-   {
-      laydata::TdtDesign* tDesign = (*dbLibDir)();
-      numSelected = tDesign->numSelected();
-   }
-   DATC->unlockTDT(dbLibDir, true);
-   if (0 == numSelected)
-   {
-      tell_log(console::MT_ERROR,"No objects selected. Nothing to flip");
-      return EXEC_NEXT;
-   }
-   else
-   {
-      // stop the thread and wait for input from the GUI
-      if (!tellstdfunc::waitGUInput(console::op_flipY, &OPstack)) return EXEC_ABORT;
-      return stdFLIPYSEL::execute();
-   }
-}
 
 //=============================================================================
 tellstdfunc::stdDELETESEL::stdDELETESEL(telldata::typeID retype, bool eor) :
@@ -1275,3 +1209,173 @@ int tellstdfunc::stdCHANGESTRING::execute()
    DATC->unlockTDT(dbLibDir, true);
    return EXEC_NEXT;
 }
+
+//=============================================================================
+//
+// Deprecated - to be removed in the next release
+//
+//=============================================================================
+tellstdfunc::stdFLIPXSEL::stdFLIPXSEL(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
+}
+
+void tellstdfunc::stdFLIPXSEL::undo_cleanup()
+{
+   telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(UNDOPstack.back());UNDOPstack.pop_back();
+   delete p1;
+}
+
+void tellstdfunc::stdFLIPXSEL::undo()
+{
+   TEUNDO_DEBUG("flipX(point) UNDO");
+   telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(UNDOPstack.front());UNDOPstack.pop_front();
+   real DBscale = PROPC->DBscale();
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      tDesign->flipSelected(TP(p1->x(), p1->y(), DBscale), true);
+   }
+   DATC->unlockTDT(dbLibDir, true);
+   delete p1;
+   RefreshGL();
+}
+
+int tellstdfunc::stdFLIPXSEL::execute()
+{
+   UNDOcmdQ.push_front(this);
+   UNDOPstack.push_front(OPstack.top());
+   telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
+   real DBscale = PROPC->DBscale();
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      tDesign->flipSelected(TP(p1->x(), p1->y(), DBscale), true);
+   }
+   DATC->unlockTDT(dbLibDir, true);
+   LogFile << LogFile.getFN() << "("<< *p1 << ");"; LogFile.flush();
+   //delete p1; undo will delete them
+   RefreshGL();
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+//
+// Deprecated - to be removed in the next release
+//
+//=============================================================================
+tellstdfunc::stdFLIPXSEL_D::stdFLIPXSEL_D(telldata::typeID retype, bool eor) :
+      stdFLIPXSEL(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{}
+
+int tellstdfunc::stdFLIPXSEL_D::execute()
+{
+   unsigned numSelected = 0;
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      numSelected = tDesign->numSelected();
+   }
+   DATC->unlockTDT(dbLibDir, true);
+   if (0 == numSelected)
+   {
+      tell_log(console::MT_ERROR,"No objects selected. Nothing to flip");
+      return EXEC_NEXT;
+   }
+   else
+   {
+      // stop the thread and wait for input from the GUI
+      if (!tellstdfunc::waitGUInput(console::op_flipX, &OPstack)) return EXEC_ABORT;
+      return stdFLIPXSEL::execute();
+   }
+}
+
+//=============================================================================
+//
+// Deprecated - to be removed in the next release
+//
+//=============================================================================
+tellstdfunc::stdFLIPYSEL::stdFLIPYSEL(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
+}
+
+void tellstdfunc::stdFLIPYSEL::undo_cleanup()
+{
+   telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(UNDOPstack.back());UNDOPstack.pop_back();
+   delete p1;
+}
+
+void tellstdfunc::stdFLIPYSEL::undo()
+{
+   TEUNDO_DEBUG("flipY(point) UNDO");
+   telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(UNDOPstack.front());UNDOPstack.pop_front();
+   real DBscale = PROPC->DBscale();
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      tDesign->flipSelected(TP(p1->x(), p1->y(), DBscale), false);
+   }
+   DATC->unlockTDT(dbLibDir, true);
+   delete p1;
+   RefreshGL();
+}
+
+//=============================================================================
+int tellstdfunc::stdFLIPYSEL::execute()
+{
+   UNDOcmdQ.push_front(this);
+   UNDOPstack.push_front(OPstack.top());
+   telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
+   real DBscale = PROPC->DBscale();
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      tDesign->flipSelected(TP(p1->x(), p1->y(), DBscale), false);
+   }
+   DATC->unlockTDT(dbLibDir, true);
+   LogFile << LogFile.getFN() << "("<< *p1 << ");"; LogFile.flush();
+   //delete p1; undo will delete them
+   RefreshGL();
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+//
+// Deprecated - to be removed in the next release
+//
+//=============================================================================
+tellstdfunc::stdFLIPYSEL_D::stdFLIPYSEL_D(telldata::typeID retype, bool eor) :
+      stdFLIPYSEL(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{}
+
+int tellstdfunc::stdFLIPYSEL_D::execute()
+{
+   unsigned numSelected = 0;
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      numSelected = tDesign->numSelected();
+   }
+   DATC->unlockTDT(dbLibDir, true);
+   if (0 == numSelected)
+   {
+      tell_log(console::MT_ERROR,"No objects selected. Nothing to flip");
+      return EXEC_NEXT;
+   }
+   else
+   {
+      // stop the thread and wait for input from the GUI
+      if (!tellstdfunc::waitGUInput(console::op_flipY, &OPstack)) return EXEC_ABORT;
+      return stdFLIPYSEL::execute();
+   }
+}
+

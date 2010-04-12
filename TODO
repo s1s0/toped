@@ -7,7 +7,6 @@ Short Term
 General
 =========
   * Text resize
-  * interactive rotate might be confusing - needs to be discussed
   * cut/merge doesn't work with wire
   * Parser needs well defined error recovery policy
   * select edge with double click - needs algo for edge proximity. The same algo
@@ -18,8 +17,6 @@ General
   * There is no log possible for select/unselect from list operations. The
     reason is that we don't have a representation of layout list in TELL.
     Think about it. Pointetrs are unapropriate of course.
-  * Think about improving the TEDAT text readability manipulating the orientation
-  * Optional validation - warning/error menu - acute angle case.
   * MEMORY LEAKAGE DEBUG!
 
   TELL related
@@ -35,7 +32,7 @@ General
 
 Dialog stuff
 ============
-   * Grid definitioan dialog is ugly - text windows are not resizing properly. 
+   * Grid definition dialog is ugly - text windows are not resizing properly. 
    * The number of the digits after the decimal point must be intact with the 
      current step. There is some piece of code left in tui.cpp (getSize::getSize)
      to be used as a starting point for this
@@ -43,19 +40,6 @@ Dialog stuff
 
 Documentation
 ==============
-   savelayerstatus
-   restorelayerstatus
-   deletelayserstatus 
-   zoomvisible
-   toolbarsize
-   filllayer
-   (constants)
-   horizontal
-   vertical
-   _iconsize16
-   _iconsize24
-   _iconsize32
-   _iconsize48
 
 Global options of the editor
 ============================

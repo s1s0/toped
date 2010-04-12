@@ -318,7 +318,7 @@ namespace tui {
    //--------------------------------------------------------------------------
    class nameCbox3List : public wxScrolledWindow {
       public:
-                              nameCbox3List(wxWindow*, wxWindowID, wxPoint, wxSize, const ExtLayers&, const layprop::DrawProperties*);
+                              nameCbox3List(wxWindow*, wxWindowID, wxPoint, wxSize, const ExtLayers&, const layprop::DrawProperties*, wxString);
          USMap*               getTheMap()     {return _laypanel->getTheMap();}
          USMap*               getTheFullMap() {return _laypanel->getTheFullMap();}
          void                 OnSize( wxSizeEvent& WXUNUSED(event));
