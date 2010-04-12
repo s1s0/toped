@@ -81,10 +81,10 @@ int tellstdfunc::stdCOPYSEL::execute()
       UNDOPstack.push_front(make_ttlaylist(tDesign->shapeSel()));
       tDesign->copySelected(TP(p1->x(), p1->y(), DBscale), TP(p2->x(), p2->y(), DBscale));
       OPstack.push(make_ttlaylist(tDesign->shapeSel()));
+      LogFile << LogFile.getFN() << "("<< *p1 << "," << *p2 << ");"; LogFile.flush();
    }
-   DATC->unlockTDT(dbLibDir, true);
-   LogFile << LogFile.getFN() << "("<< *p1 << "," << *p2 << ");"; LogFile.flush();
    delete p1; delete p2;
+   DATC->unlockTDT(dbLibDir, true);
    RefreshGL();
    return EXEC_NEXT;
 }
@@ -227,10 +227,10 @@ int tellstdfunc::stdMOVESEL::execute()
          }
          delete fadead[i];
       }
+      LogFile << LogFile.getFN() << "("<< *p1 << "," << *p2 << ");"; LogFile.flush();
    }
    delete p1; delete p2;
    DATC->unlockTDT(dbLibDir, true);
-   LogFile << LogFile.getFN() << "("<< *p1 << "," << *p2 << ");"; LogFile.flush();
    RefreshGL();
    return EXEC_NEXT;
 }
@@ -361,10 +361,10 @@ int tellstdfunc::stdROTATESEL::execute()
       UNDOPstack.push_front(make_ttlaylist(fadead[1])); // then deleted
       UNDOPstack.push_front(added); // and added
       for (i = 0; i < 3; delete fadead[i++]);
+      LogFile << LogFile.getFN() << "("<< angle << "," << *p1 << ");"; LogFile.flush();
    }
    delete p1;
    DATC->unlockTDT(dbLibDir, true);
-   LogFile << LogFile.getFN() << "("<< angle << "," << *p1 << ");"; LogFile.flush();
    RefreshGL();
    return EXEC_NEXT;
 }
