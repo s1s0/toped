@@ -1,0 +1,9 @@
+Toped release 0.96 changes and updates
+----------------------------------------
+* OASIS (Open Artwork Interchange Standard) import. The parser complies with 
+  SEMI P39-308 standard paper.
+* Calibre(c) DRC viewer
+* Rendering properties including the image quality and text fonts can be 
+  manipulated by the user via modeless property dialogue box
+* Save/restore a set of layer properties 
+* Number of stability improvements and bug fixes
