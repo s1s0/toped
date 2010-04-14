@@ -1,3 +1,4 @@
+APP	         ICON                    "../ui/app.ico"
 new	         ICON "../icons/new.ico"
 open	         ICON "../icons/open.ico"
 save           ICON "../icons/save.ico"
