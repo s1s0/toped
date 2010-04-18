@@ -648,7 +648,7 @@ void tui::TopedFrame::initToolBars()
    //_resourceCenter->setToolBarSize("main", ICON_SIZE_24x24);
    _resourceCenter->setDirection(wxAUI_DOCK_TOP);
 
-	_resourceCenter->appendTool("edit", "undo", "undo", "", "undo", &tui::TopedFrame::OnUndo);
+   _resourceCenter->appendTool("edit", "undo", "undo", "", "undo", &tui::TopedFrame::OnUndo);
    //_resourceCenter->appendTool("edit", "redo", "redo", "", "redo",&tui::TopedFrame::OnUndo);
    _resourceCenter->appendTool("edit", "box", "box", "", "add box",&tui::TopedFrame::OnDrawBox);
    _resourceCenter->appendTool("edit", "poly", "poly", "", "add polygon",&tui::TopedFrame::OnDrawPoly);
@@ -1754,7 +1754,13 @@ void tui::TopedFrame::OnUndoDepth(wxCommandEvent& WXUNUSED(event))
    {
       unsigned long newValue;
       if (dlg->value().ToULong(&newValue))
-         CMDBlock->setUndoDepth(static_cast<word>(newValue));
+      {
+         wxString ost;
+         ost << wxT("setparams( {\"UNDO_DEPTH\", \"")
+             << newValue
+             << wxT("\"});");
+         _cmdline->parseCommand(ost);
+      }
    }
    delete dlg;
 }
@@ -1806,56 +1812,56 @@ void tui::TopedFrame::OnLongCursor(wxCommandEvent& WXUNUSED(event)){
 void tui::TopedFrame::OnHToolBarSize16(wxCommandEvent& WXUNUSED(event))
 {
    wxString ost;
-   ost << wxT("toolbarsize(horizontal, _iconsize16);");
+   ost << wxT("toolbarsize(_horizontal, _iconsize16);");
    _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnHToolBarSize24(wxCommandEvent& WXUNUSED(event))
 {
    wxString ost;
-   ost << wxT("toolbarsize(horizontal, _iconsize24);");
+   ost << wxT("toolbarsize(_horizontal, _iconsize24);");
    _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnHToolBarSize32(wxCommandEvent& WXUNUSED(event))
 {
    wxString ost;
-   ost << wxT("toolbarsize(horizontal, _iconsize32);");
+   ost << wxT("toolbarsize(_horizontal, _iconsize32);");
    _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnHToolBarSize48(wxCommandEvent& WXUNUSED(event))
 {
    wxString ost;
-   ost << wxT("toolbarsize(horizontal, _iconsize48);");
+   ost << wxT("toolbarsize(_horizontal, _iconsize48);");
    _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnVToolBarSize16(wxCommandEvent& WXUNUSED(event))
 {
    wxString ost;
-   ost << wxT("toolbarsize(vertical, _iconsize16);");
+   ost << wxT("toolbarsize(_vertical, _iconsize16);");
    _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnVToolBarSize24(wxCommandEvent& WXUNUSED(event))
 {
    wxString ost;
-   ost << wxT("toolbarsize(vertical, _iconsize24);");
+   ost << wxT("toolbarsize(_vertical, _iconsize24);");
    _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnVToolBarSize32(wxCommandEvent& WXUNUSED(event))
 {
    wxString ost;
-   ost << wxT("toolbarsize(vertical, _iconsize32);");
+   ost << wxT("toolbarsize(_vertical, _iconsize32);");
    _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnVToolBarSize48(wxCommandEvent& WXUNUSED(event))
 {
    wxString ost;
-   ost << wxT("toolbarsize(vertical, _iconsize48);");
+   ost << wxT("toolbarsize(_vertical, _iconsize48);");
    _cmdline->parseCommand(ost);
 }
 

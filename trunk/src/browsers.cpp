@@ -1400,7 +1400,7 @@ void browsers::browserTAB::onTellAddGdsTab()
    if (!_gdsStruct)
    {
       _gdsStruct = DEBUG_NEW XdbBrowser(this, tui::ID_GDS_CELLTREE);
-      AddPage(_gdsStruct, wxT("GDS"));
+      AddPage(_gdsStruct, wxT("GDS"), true);
    }
    // don't bother to clean-up existing DB. It's done in the function called
    _gdsStruct->collectInfo();
@@ -1423,7 +1423,7 @@ void browsers::browserTAB::onTellAddCifTab()
    if (NULL == _cifStruct)
    {
       _cifStruct = DEBUG_NEW XdbBrowser(this, tui::ID_CIF_CELLTREE);
-      AddPage(_cifStruct, wxT("CIF"));
+      AddPage(_cifStruct, wxT("CIF"), true);
    }
    // don't bother to clean-up existing DB. It's done in the function called
    _cifStruct->collectInfo();
@@ -1446,7 +1446,7 @@ void browsers::browserTAB::onTellAddOasTab()
    if (NULL == _oasStruct)
    {
       _oasStruct = DEBUG_NEW XdbBrowser(this, tui::ID_OAS_CELLTREE);
-      AddPage(_oasStruct, wxT("Oasis"));
+      AddPage(_oasStruct, wxT("Oasis"), true);
    }
    // don't bother to clean-up existing DB. It's done in the function called
    _oasStruct->collectInfo();
@@ -1469,7 +1469,7 @@ void browsers::browserTAB::onTellAddDRCTab()
    if (NULL == _drcStruct)
    {
       _drcStruct = DEBUG_NEW DRCBrowser(this, tui::ID_DRC_CELLTREE);
-      AddPage(_drcStruct, wxT("DRC results"));
+      AddPage(_drcStruct, wxT("DRC results"), true);
    }
 }
 
