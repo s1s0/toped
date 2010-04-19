@@ -228,6 +228,10 @@ Section "Start Menu Shortcuts"
   
 SectionEnd
 
+; Optional section (can be disabled by the user)
+Section "Desktop Shortcut"
+  CreateShortCut "$DESKTOP\toped.lnk" "$INSTDIR\toped.exe" "" "$INSTDIR\toped.exe" 0
+SectionEnd
 
 ;MessageBox MB_YESNO|MB_ICONQUESTION "Do you wish to reboot the system right now?" IDNO +2
 ;  Reboot
