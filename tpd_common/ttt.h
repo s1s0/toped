@@ -36,7 +36,7 @@
 #include <set>
 #include <assert.h>
 
-#if WIN32
+#ifdef WIN32
    #include <windows.h>
    double round(double x);
    #define rint  round
