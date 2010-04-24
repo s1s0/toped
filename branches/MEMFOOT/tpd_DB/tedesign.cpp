@@ -35,6 +35,10 @@
 #include "tenderer.h"
 #include "ps_out.h"
 
+#ifdef DB_MEMORY_TRACE
+extern long    targetDbCurrentSize;
+#endif
+
 extern layprop::PropertyCenter*  PROPC;
 
 //! the stack of all previously edited (opened) cells
@@ -47,7 +51,12 @@ laydata::TDTHierTree* laydata::TdtLibrary::_hiertree = NULL;
 // class TdtLibrary
 //-----------------------------------------------------------------------------
 laydata::TdtLibrary::TdtLibrary(std::string name, real DBU, real UU, int libID) :
-   _name(name), _libID(libID), _DBU(DBU), _UU(UU) {}
+   _name(name), _libID(libID), _DBU(DBU), _UU(UU)
+{
+#ifdef DB_MEMORY_TRACE
+      targetDbCurrentSize = 0l;
+#endif
+}
 
 //void laydata::TdtLibrary::unloadprep(laydata::TdtLibDir* libdir)
 //{

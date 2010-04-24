@@ -42,6 +42,9 @@
 #include "ps_out.h"
 #include "outbox.h"
 
+#ifdef DB_MEMORY_TRACE
+long    targetDbCurrentSize;
+#endif
 //GLubyte select_mark[30] = {0x00, 0x00, 0x00, 0x00, 0x3F, 0xF8, 0x3F, 0xF8, 0x30, 0x18,
 //                           0x30, 0x18, 0x30, 0x18, 0x30, 0x18, 0x30, 0x18, 0x30, 0x18,
 //                           0x30, 0x18, 0x3F, 0xF8, 0x3F, 0xF8, 0x00, 0x00, 0x00, 0x00};
@@ -3046,3 +3049,16 @@ void laydata::TdtTmpText::draw(const layprop::DrawProperties&, ctmqueue& transta
             fontLib->drawWiredString(_text);
             glPopMatrix();
 }
+
+#ifdef DB_MEMORY_TRACE
+void* laydata::TdtData::operator new(size_t size)
+{
+   targetDbCurrentSize += size;
+   void *p=malloc(size);
+   return p;
+}
+void laydata::TdtData::operator delete(void* p)
+{
+   free(p);
+}
+#endif

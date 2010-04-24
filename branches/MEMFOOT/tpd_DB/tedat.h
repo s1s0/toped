@@ -34,6 +34,8 @@
 #include "tenderer.h"
 #include "drawprop.h"
 
+#define DB_MEMORY_TRACE
+
 namespace laydata {
 //==============================================================================
    /*! Abstract class - the base of all layout objects.\n To optimize the RAM
@@ -104,6 +106,10 @@ namespace laydata {
       virtual word         numPoints() const = 0;
       virtual             ~TdtData(){};
       virtual word         lType() const = 0;
+#ifdef DB_MEMORY_TRACE
+      static void*         operator new (size_t);
+      static void          operator delete (void*);
+#endif
    protected:
       virtual void         selectPoints(DBbox&, SGBitSet&) = 0;
       virtual void         unselectPoints(DBbox&, SGBitSet&) = 0;
