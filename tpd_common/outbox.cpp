@@ -1260,3 +1260,37 @@ void HiResTimer::report(std::string message)
    tell_log(console::MT_INFO,time_message);
 }
 #endif //TIME_PROFILING
+
+
+//OSResourceMeter::OSResourceMeter()
+//{
+//   getrusage(RUSAGE_SELF, &_start_res);
+//}
+//
+//void OSResourceMeter::report(std::string message)
+//{
+//   char resource_message[512];
+//   int fcresult = getrusage(RUSAGE_SELF, &_end_res);
+//   if (0 == fcresult)
+//   {
+//      /* maximum resident set size */
+//      long   ru_maxrss = _end_res.ru_maxrss - _start_res.ru_maxrss;
+//      /* integral shared memory size */
+//      long   ru_ixrss = _end_res.ru_ixrss - _start_res.ru_ixrss;
+//      /* integral unshared data size */
+//      long   ru_idrss = _end_res.ru_idrss - _start_res.ru_idrss;
+//      /* integral unshared stack size */
+//      long   ru_isrss = _end_res.ru_isrss - _start_res.ru_isrss;;
+//      sprintf (resource_message, "%s:\n\
+//      resident set size: %li \n\
+//     shared memory size: %li \n\
+//     unshared data size: %li \n\
+//    unshared stack size: %li ",
+//     message.c_str(), _end_res.ru_maxrss, _end_res.ru_ixrss, _end_res.ru_idrss, _end_res.ru_isrss);
+//      tell_log(console::MT_INFO,resource_message);
+//   }
+//   else
+//   {
+//      tell_log(console::MT_WARNING, "getrusage returned invalid status");
+//   }
+//}
