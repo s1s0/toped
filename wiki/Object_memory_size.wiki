@@ -11,7 +11,7 @@ Any optimisation task requires some kind of criteria. To optimize the memory foo
   * scripts - most of what I found, not surprisingly is actually exploring the features already listed above. It's worth mentioning though smaps.pl script which seem to be relatively simple to create/install and generates descent reports. Still though it suffers the same lack of clarity "what's what" which of course is due to the overall Kernel memory management. Some interesting observations:
       * Heap is allocated on pages. It's virtually impossible to spot a creation of a single small object.
       * I couldn't find a way to distinguish between the heap used by the program itself, and the heap used by the linked libraries. 
-      * Heap is deallocated when required, not when a delete is executed. This often creates the impression that heap is an ever growing resource consumed by your program. When the unused heap it will be claimed back by the OS and granted to another process is entirely due to the Kernel.
+      * Heap is deallocated when required, not when a delete/free is executed. This often creates the impression that heap is an ever growing resource consumed by your program. When the unused heap will be claimed back by the OS and granted to another process is entirely due to the Kernel.
 
 So - the task has to be approached from a different angle.
 
@@ -24,3 +24,6 @@ Add your content here.  Format your content with:
   * Text in *bold* or _italic_
   * Headings, paragraphs, and lists
   * Automatic links to other wiki pages
+
+= smaps.pl =
+This script can be found on the net, but be
