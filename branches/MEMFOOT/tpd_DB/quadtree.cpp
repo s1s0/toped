@@ -32,6 +32,10 @@
 #include "tenderer.h"
 #include "outbox.h"
 
+#ifdef DB_MEMORY_TRACE
+long    targetDbInfraSize;
+#endif
+
 //-----------------------------------------------------------------------------
 // class QuadTree
 //-----------------------------------------------------------------------------
@@ -939,6 +943,19 @@ laydata::QuadTree::~QuadTree() {
      list clean-up when the certain delete hits the bottom of the undo list */
 }
 
+#ifdef DB_MEMORY_TRACE
+void* laydata::QuadTree::operator new(size_t size)
+{
+   targetDbInfraSize += size;
+   void *p=malloc(size);
+   return p;
+}
+void laydata::QuadTree::operator delete(void* p)
+{
+   free(p);
+}
+#endif
+
 //-----------------------------------------------------------------------------
 // class TdtLayer
 //-----------------------------------------------------------------------------
@@ -1032,3 +1049,4 @@ void laydata::TdtLayer::vlOverlap(const layprop::DrawProperties&, DBbox& vlBox) 
 //{
 //
 //}
+
