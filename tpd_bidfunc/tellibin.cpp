@@ -36,7 +36,8 @@
 #include "tuidefs.h"
 
 #ifdef DB_MEMORY_TRACE
-extern long    targetDbCurrentSize;
+extern long    targetDbInfraSize;
+extern long    targetDbDataSize;
 #endif
 
 extern DataCenter*               DATC;
@@ -85,7 +86,10 @@ int tellstdfunc::stdTELLSTATUS::execute()
 {
 #ifdef DB_MEMORY_TRACE
    std::ostringstream message;
-   message << "Target DB size is: " << targetDbCurrentSize;
+   message << "Data DB size: "
+           << " ( internal structures: " << targetDbInfraSize
+           << " ); ( data: " << targetDbDataSize
+           << " ); Total: " << targetDbInfraSize + targetDbDataSize;
    tell_log(console::MT_INFO, message.str());
 #else
    real DBscale = PROPC->DBscale();

@@ -97,6 +97,10 @@ namespace laydata {
       void                 invalidate()      {_invalid = true;};
       /*! Return the status of _invalid flag*/
       bool                 invalid() const   {return _invalid;};
+#ifdef DB_MEMORY_TRACE
+      static void*         operator new (size_t);
+      static void          operator delete (void*);
+#endif
    protected:
       DBbox               _overlap;//! The overlapping box
    private:

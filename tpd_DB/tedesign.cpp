@@ -36,7 +36,8 @@
 #include "ps_out.h"
 
 #ifdef DB_MEMORY_TRACE
-extern long    targetDbCurrentSize;
+extern long    targetDbInfraSize;
+extern long    targetDbDataSize;
 #endif
 
 extern layprop::PropertyCenter*  PROPC;
@@ -54,7 +55,8 @@ laydata::TdtLibrary::TdtLibrary(std::string name, real DBU, real UU, int libID) 
    _name(name), _libID(libID), _DBU(DBU), _UU(UU)
 {
 #ifdef DB_MEMORY_TRACE
-      targetDbCurrentSize = 0l;
+      targetDbInfraSize = 0l;
+      targetDbDataSize  = 0l;
 #endif
 }
 
