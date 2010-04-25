@@ -2,9 +2,16 @@
 
 = Heap size of a Linux process =
 
-Any optimisation task requires some kind of criteria. To optimize the memory footprint of Toped DB we need a simple and reliable measurement of the amount of heap memory allocated by the tool. After some research on the net and multiply tries with C libraries, external tolls, commands, scripts etc. I actually realised (surprise surprise!) that Kernel memory management these days appears to be quite a complex task and extracting the tiny bit of data that I needed out of the OS proves to be a real challenge. Besides it appeared that there are a variety of OS environmental factors that influence those reports - most of them not easily if at all controllable. A small snapshot of my tries below
+Any optimisation task requires some kind of criteria. To optimize the memory footprint of Toped DB we need a simple and reliable measurement of the amount of heap memory allocated by the tool. After some research on the net and multiply tries with C libraries, external tolls, commands, scripts etc. I actually realised (surprise surprise!) that Kernel memory management these days appears to be quite a complex task and extracting the tiny bit of data that I needed out of the OS proves to be a real challenge. Besides it appeared that there are a variety of OS environmental factors that influence those reports - most of them not easily if at all controllable. A small snapshot of my adventures below
 
-  * OS commands - ps, top [http://virtualthreads.blogspot.com/2006/02/understanding-memory-usage-on-linux.html Understanding memory usage on Linux]
+  * OS commands (ps, top) - see [http://virtualthreads.blogspot.com/2006/02/understanding-memory-usage-on-linux.html Understanding memory usage on Linux]
+  * reading proc/<pid>/status - not surprisingly it appears to be not quite different from the above
+  * getrusage() - I manage to squeeze literally nothing about the memory out of this function - then I found [http://www.atarininja.org/index.py/tags/code this]. It appeared that vital parts of *struct rusage* fields are simply not implemented on my platform.
+  * external tools/libraries - [http://valgrind.org valgrind], [http://directory.fsf.org/project/ElectricFence efence], [http://dmalloc.com dmalloc] . They seem to be either too heavy or not quite up to this particular task.
+   * scripts - most of what I found, not surprisingly is actually exploring the features already listed above. It's worth mentioning though smaps.pl script which seem to be relatively simple to create/install and generates descent reports. Still though it suffers the same lack of clarity "what's what" which of course is due to the overall Kernel memory management. Some interesting observations:
+      * Heap is allocated on pages. It's virtually impossible to spot a creation of a single small object.
+      * I couldn't find a way to distinguish between the heap used by the program itself, and the heap used by the linked libraries. 
+      * Heap is deallocated when required, not when a delete is executed. This often creates the impression that heap is an ever growing resource consumed by your program. When the unused heap it will be claimed back by the OS and granted to another process is entirely due to the Kernel.
 
 So - the task has to be approached from a different angle.
 
