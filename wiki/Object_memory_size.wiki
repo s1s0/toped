@@ -13,7 +13,7 @@ Any optimisation task requires some kind of criteria. To optimize the memory foo
   * reading `proc/<pid>/status` - not surprisingly it appears to be not quite different from the above
   * getrusage() - I manage to squeeze literally nothing about the memory out of this function - then I found [http://www.atarininja.org/index.py/tags/code this]. It appeared that vital parts of *struct rusage* fields are simply not implemented on my platform.
   * external tools/libraries - [http://valgrind.org valgrind], [http://directory.fsf.org/project/ElectricFence efence], [http://dmalloc.com dmalloc] . They seem to be either too heavy or not quite up to this particular task.
-  * scripts - most of what I found, not surprisingly is actually exploring the features already listed above. It's worth mentioning though [Object_memory_size#smaps] script which seem to be relatively simple to create/install and generates descent reports. Still though it suffers the same lack of clarity "what's what" which of course is due to the overall Kernel memory management. Some interesting observations:
+  * scripts - most of what I found, not surprisingly is actually exploring the features already listed above. It's worth mentioning the script which seem to be relatively simple to create/install and generates descent reports (See the appendix at the bottom of the page). Still though it suffers the same lack of clarity "what's what" which of course is due to the overall Kernel memory management. Some interesting observations:
       * Heap is allocated on pages. It's virtually impossible to spot a creation of a single small object.
       * I couldn't find a way to distinguish between the heap used by the program itself, and the heap used by the linked libraries. 
       * Heap is deallocated when required, not when a delete/free is executed. This often creates the impression that heap is an ever growing resource consumed by your program. When the unused heap will be claimed back by the OS and granted to another process is entirely due to the Kernel.
@@ -114,12 +114,13 @@ Size of the object in bytes is: 16
    # The granularity follows the pattern 1-2-4-n*8 where n > 0. It makes sense for 64 bit platform. 
 
 Some interesting rules can be drawn from the above:
-   *If the class has no virtual methods
-      * overall size of the data fields is less than 8 bytes - every byte might matter for the memory footprint.
-      * overall size of the data fields is more than 8 bytes - it doesn't matter whether an extra field is of type bool or long - it will take another 8 bytes.
+   * For the classes without virtual methods
+      * every byte might matter for the memory footprint if the overall size of the data fields is less than 8 bytes.
+      * if overall size of the data fields is more than 8 bytes - it doesn't matter whether an extra field is of type bool or long - it will take another 8 bytes.
+   * For the classes with virtual methods the granularity is 8 bytes - so even the first data field will add at least 8 bytes
 
 -------------------------------------------------------------
-= smaps =
+= Appendix: smaps.pl =
 This script can be found on the net, but with some broken links to the required perl modules. Here are they:
    * [http://search.cpan.org/~opi/Class-Member-1.6/ Class-Member]
    * [http://search.cpan.org/~opi/Linux-Smaps-0.06/ Smaps]
