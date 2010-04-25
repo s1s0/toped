@@ -25,12 +25,13 @@ Add your content here.  Format your content with:
   * Headings, paragraphs, and lists
   * Automatic links to other wiki pages
 
+-------------------------------------------------------------
 = smaps =
 This script can be found on the net, but with some broken links to the required perl modules. Here are they:
    * [http://search.cpan.org/~opi/Class-Member-1.6/ Class-Member]
    * [http://search.cpan.org/~opi/Linux-Smaps-0.06/ Smaps]
 
-Here is also the script itself:
+The script itself:
 {{{
 #!/usr/bin/perl
 #smaps.pl
