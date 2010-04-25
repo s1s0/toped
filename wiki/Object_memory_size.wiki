@@ -1,5 +1,10 @@
 #A memo about the amount of memory taken by the objects
 
+<p align=right> *25/04/2010*
+</p>
+
+-------------------------------------------------------------
+
 = Heap size of a Linux process =
 
 Any optimisation task requires some kind of criteria. To optimize the memory footprint of Toped DB we need a simple and reliable measurement of the amount of heap memory allocated by the tool. After some research on the net and multiply tries with C libraries, external tolls, commands, scripts etc. I actually realised (surprise surprise!) that Kernel memory management these days appears to be quite a complex task and extracting the tiny bit of data that I needed out of the OS proves to be a real challenge. Besides it appeared that there are a variety of OS environmental factors that influence those reports - most of them not easily if at all controllable. A small snapshot of my adventures below
@@ -15,15 +20,8 @@ Any optimisation task requires some kind of criteria. To optimize the memory foo
 
 So - the task has to be approached from a different angle.
 
+= Heap size of the Toped DB =
 
-
-
-= Details =
-
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
 
 -------------------------------------------------------------
 = smaps =
