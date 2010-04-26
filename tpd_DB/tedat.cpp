@@ -382,10 +382,6 @@ bool  laydata::TdtData::unselect(DBbox& select_in, SelectDataPair& SI, bool psel
 //-----------------------------------------------------------------------------
 laydata::TdtBox::TdtBox(const TP& p1, const TP& p2) : TdtData()
 {
-#ifdef DB_MEMORY_TRACE
-   targetDbDataSize += 8 * sizeof(int4b);
-#endif
-   _pdata = DEBUG_NEW int4b[8];
    _pdata[p1x ] = p1.x();_pdata[p1y ] = p1.y();
    _pdata[p2x ] = p2.x();_pdata[p2y ] = p2.y();
    _pdata[p1x2] = p1.x();_pdata[p1y2] = p1.y();
@@ -396,10 +392,6 @@ laydata::TdtBox::TdtBox(const TP& p1, const TP& p2) : TdtData()
 
 laydata::TdtBox::TdtBox(TEDfile* const tedfile) : TdtData()
 {
-#ifdef DB_MEMORY_TRACE
-   targetDbDataSize += 8 * sizeof(int4b);
-#endif
-   _pdata = DEBUG_NEW int4b[8];
    TP point;
    point = tedfile->getTP();
    _pdata[p1x ] = point.x();_pdata[p1y ] = point.y();
@@ -448,12 +440,12 @@ void laydata::TdtBox::openGlPrecalc(layprop::DrawProperties& drawprop , pointlis
 
 void laydata::TdtBox::drawRequest(tenderer::TopRend& rend) const
 {
-   rend.box(_pdata);
+   rend.box(const_cast<int4b*>(&_pdata[0]));//TODO Fix the cast!
 }
 
 void laydata::TdtBox::drawSRequest(tenderer::TopRend& rend, const SGBitSet* pslist) const
 {
-   rend.box(_pdata, pslist);
+   rend.box(const_cast<int4b*>(&_pdata[0]), pslist);//TODO Fix the cast!
 }
 
 void laydata::TdtBox::openGlDrawLine(layprop::DrawProperties&, const pointlist& ptlist) const
@@ -739,7 +731,6 @@ pointlist* laydata::TdtBox::movePointsSelected(const SGBitSet& pset,
 
 laydata::TdtBox::~TdtBox()
 {
-   delete [] _pdata;
 }
 
 //-----------------------------------------------------------------------------
