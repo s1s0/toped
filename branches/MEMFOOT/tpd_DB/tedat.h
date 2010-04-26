@@ -163,7 +163,7 @@ namespace laydata {
       };
       void              normalize(SGBitSet& psel);
       pointlist*        movePointsSelected(const SGBitSet&, const CTM&, const CTM& = CTM()) const;
-      int4b*            _pdata;
+      int4b             _pdata[8];
    };
 
 //==============================================================================
