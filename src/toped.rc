@@ -1,4 +1,5 @@
-APP	         ICON                    "../ui/app.ico"
+appIcon        ICON "../ui/toped_app.ico"
+
 new	         ICON "../icons/new.ico"
 open	         ICON "../icons/open.ico"
 save           ICON "../icons/save.ico"
@@ -29,4 +30,5 @@ edit_pop       ICON "../icons/edit_pop.ico"
 toped16x16     ICON "../ui/toped_16x16.ico"
 toped32x32     ICON "../ui/toped_32x32.ico"
 toped48x48     ICON "../ui/toped_48x48.ico"
+toped64x64     ICON "../ui/toped_48x48.ico"
 #include "wx/msw/wx.rc"

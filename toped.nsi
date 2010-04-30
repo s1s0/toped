@@ -11,7 +11,7 @@
 !include MUI2.nsh
 
 ;Request application privileges for Windows Vista
-RequestExecutionLevel user
+;RequestExecutionLevel user
 
 
 ; The name of the installer
@@ -31,8 +31,7 @@ InstallDirRegKey HKLM "Software\toped" "Install_Dir"
 ;Interface Settings
 
   !define MUI_HEADERIMAGE
-  !define MUI_HEADERIMAGE_BITMAP "ui\toped.bmp" 
-
+  !define MUI_HEADERIMAGE_BITMAP "ui\toped_install.bmp" 
   !define MUI_ABORTWARNING
 
 Var LocalDir
@@ -60,20 +59,20 @@ Section "toped" toped
   
   ; Put file there
   File "release\toped.exe"
-  File "glu32.dll"
+  File "winpack\glu32.dll"
   File "toped_example.bat"
-  File "authors"
-  File "news.txt"
-  File "readme.txt"
-  File "glew32.dll"
-  File "zlib1.dll"
-  File "virtuoso2tll.exe"
+  File "winpack\authors"
+  File "winpack\news.txt"
+  File "winpack\readme.txt"
+  File "winpack\glew32.dll"
+  File "winpack\zlib1.dll"
+  File "winpack\virtuoso2tll.exe"
 
   ;all for PLT scheme
   SetOutPath $INSTDIR\lib
-  File "lib\iconv.dll"
-  File "lib\libmzsch3m_6ncc9s.dll"
-  File "lib\UnicoWS.dll"
+  File "winpack\lib\iconv.dll"
+  File "winpack\lib\libmzsch3m_6ncc9s.dll"
+  File "winpack\lib\UnicoWS.dll"
   
   ;tll files
   SetOutPath $INSTDIR\tll
@@ -88,10 +87,6 @@ Section "toped" toped
   File "tll\seed.tll"
   ;File "tll\structures.tll"
   File "tll\tcase.tll"
-
-
-
-
 
   ;icons
   SetOutPath $INSTDIR\icons
@@ -209,7 +204,7 @@ Section "toped" toped
   
   ;Change installation directory to $INSTDIR\examples
   SetOutPath $INSTDIR\examples
-  File "foll.tdt"
+  File "winpack\foll.tdt"
 
 
   ;Return installation directory

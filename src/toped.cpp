@@ -39,6 +39,7 @@
 #include "viewprop.h"
 #include "tenderer.h"
 #include "tui.h"
+#include "../ui/toped16x16.xpm"
 #include "../ui/toped32x32.xpm"
 
 
@@ -285,7 +286,7 @@ END_EVENT_TABLE()
 tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos,
                             const wxSize& size ) : wxFrame((wxFrame *)NULL, ID_WIN_TOPED, title, pos, size)
 {
-   SetIcon(wxICON(toped16x16));
+   SetIcon(wxIcon( toped16x16_xpm ));
    initView();
    wxCommandEvent dummy;
    OnzoomEmpty(dummy);
