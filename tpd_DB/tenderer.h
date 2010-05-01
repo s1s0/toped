@@ -248,6 +248,12 @@ namespace tenderer {
          unsigned          _csize;  //! the number of vertexes in _cdata
    };
 
+   class TenderBox : public TenderCnvx {
+      public:
+                           TenderBox(int4b* pdata) : TenderCnvx(pdata, 4) {}
+         virtual unsigned  cDataCopy(int*, unsigned&);
+   };
+
    /**
       Represents non-convex polygons - most of the poly objects in the DB. Inherits
       TenderCnvx. The only addition is the tesselation data (_tdata) which is
@@ -372,6 +378,16 @@ namespace tenderer {
       public:
                            TenderSCnvx(int4b* pdata, unsigned psize, const SGBitSet* slist) :
                               TenderCnvx(pdata, psize), TenderSelected(slist) {}
+         virtual unsigned  cDataCopy(int*, unsigned&);
+         virtual SlctTypes type() { return ((NULL == _slist) ? llps : lnes);}
+         virtual unsigned  ssize();
+         virtual unsigned  sDataCopy(unsigned*, unsigned&);
+   };
+
+   class TenderSBox : public TenderBox, public TenderSelected {
+      public:
+                           TenderSBox(int4b* pdata, const SGBitSet* slist) :
+                              TenderBox(pdata), TenderSelected(slist) {}
          virtual unsigned  cDataCopy(int*, unsigned&);
          virtual SlctTypes type() { return ((NULL == _slist) ? llps : lnes);}
          virtual unsigned  ssize();
@@ -783,7 +799,7 @@ namespace tenderer {
          unsigned          total_strings(){return _num_total_strings;}
 
       private:
-         void              registerSBox  (TenderSCnvx*);
+         void              registerSBox  (TenderSBox*);
          void              registerSPoly (TenderSNcvx*);
          void              registerSWire (TenderSWire*);
          void              registerSOBox (TextSOvlBox*);

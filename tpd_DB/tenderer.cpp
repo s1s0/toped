@@ -177,6 +177,20 @@ unsigned tenderer::TenderCnvx::cDataCopy(int* array, unsigned& pindex)
 
 //=============================================================================
 //
+// TenderBox
+//
+unsigned  tenderer::TenderBox::cDataCopy(int* array, unsigned& pindex)
+{
+   assert(_csize);
+   array[pindex++] = _cdata[0];array[pindex++] = _cdata[1];
+   array[pindex++] = _cdata[0];array[pindex++] = _cdata[3];
+   array[pindex++] = _cdata[2];array[pindex++] = _cdata[3];
+   array[pindex++] = _cdata[2];array[pindex++] = _cdata[1];
+   return _csize;
+}
+
+//=============================================================================
+//
 // TenderWire
 //
 tenderer::TenderWire::TenderWire(int4b* pdata, unsigned psize, const word width, bool clo)
@@ -349,6 +363,51 @@ unsigned tenderer::TenderSCnvx::cDataCopy(int* array, unsigned& pindex)
 }
 
 unsigned tenderer::TenderSCnvx::sDataCopy(unsigned* array, unsigned& pindex)
+{
+   if (NULL != _slist)
+   { // shape is partially selected
+      // copy the indexes of the selected segment points
+      for (unsigned i = 0; i < _csize; i++)
+      {
+         if (_slist->check(i) && _slist->check((i+1)%_csize))
+         {
+            array[pindex++] = _offset + i;
+            array[pindex++] = _offset + ((i+1)%_csize);
+         }
+      }
+   }
+   else
+   {
+      for (unsigned i = 0; i < _csize; i++)
+         array[pindex++] = _offset + i;
+   }
+   return ssize();
+}
+
+//=============================================================================
+//
+// TenderSBox
+//
+unsigned tenderer::TenderSBox::ssize()
+{
+   if (NULL == _slist) return _csize;
+   // get the number of selected segments first - don't forget that here
+   // we're using GL_LINE_STRIP which means that we're counting selected
+   // line segments and for each segment we're going to store two indexes
+   unsigned ssegs = 0;
+   word  ssize = _slist->size();
+   for (word i = 0; i < _csize; i++)
+      if (_slist->check(i) && _slist->check((i+1)% ssize )) ssegs +=2;
+   return ssegs;
+}
+
+unsigned tenderer::TenderSBox::cDataCopy(int* array, unsigned& pindex)
+{
+   _offset = pindex/2;
+   return TenderBox::cDataCopy(array, pindex);
+}
+
+unsigned tenderer::TenderSBox::sDataCopy(unsigned* array, unsigned& pindex)
 {
    if (NULL != _slist)
    { // shape is partially selected
@@ -1097,13 +1156,13 @@ void tenderer::TenderLay::box  (int4b* pdata, bool sel = false, const SGBitSet* 
    TenderCnvx* cobj = NULL;
    if (sel)
    {
-      TenderSCnvx* sobj = DEBUG_NEW TenderSCnvx(pdata, 4, ss);
+      TenderSBox* sobj = DEBUG_NEW TenderSBox(pdata, ss);
       registerSBox(sobj);
       cobj = sobj;
    }
    else
    {
-      cobj = DEBUG_NEW TenderCnvx(pdata, 4);
+      cobj = DEBUG_NEW TenderBox(pdata);
    }
    _cslice->registerBox(cobj);
 }
@@ -1166,7 +1225,7 @@ void tenderer::TenderLay::text (const std::string* txt, const CTM& ftmtrx, const
 }
 
 
-void tenderer::TenderLay::registerSBox (TenderSCnvx* sobj)
+void tenderer::TenderLay::registerSBox (TenderSBox* sobj)
 {
    _slct_data.push_back(sobj);
    if ( sobj->partSelected() )
