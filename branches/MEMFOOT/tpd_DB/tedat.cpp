@@ -384,8 +384,6 @@ laydata::TdtBox::TdtBox(const TP& p1, const TP& p2) : TdtData()
 {
    _pdata[p1x ] = p1.x();_pdata[p1y ] = p1.y();
    _pdata[p2x ] = p2.x();_pdata[p2y ] = p2.y();
-   _pdata[p1x2] = p1.x();_pdata[p1y2] = p1.y();
-   _pdata[p2x2] = p2.x();_pdata[p2y2] = p2.y();
    SGBitSet dummy;
    normalize(dummy);
 }
@@ -395,10 +393,8 @@ laydata::TdtBox::TdtBox(TEDfile* const tedfile) : TdtData()
    TP point;
    point = tedfile->getTP();
    _pdata[p1x ] = point.x();_pdata[p1y ] = point.y();
-   _pdata[p1x2] = point.x();_pdata[p1y2] = point.y();
    point = tedfile->getTP();
    _pdata[p2x ] = point.x();_pdata[p2y ] = point.y();
-   _pdata[p2x2] = point.x();_pdata[p2y2] = point.y();
    SGBitSet dummy;
    normalize(dummy);
 }
@@ -409,7 +405,6 @@ void laydata::TdtBox::normalize(SGBitSet& psel)
    if (_pdata[p1x] > _pdata[p2x])
    {
       swap = _pdata[p1x]; _pdata[p1x] = _pdata[p2x]; _pdata[p2x] = swap;
-      _pdata[p1x2] = _pdata[p1x]; _pdata[p2x2] = _pdata[p2x];
       if (0 != psel.size())
       {
          psel.swap(0,1);
@@ -419,7 +414,6 @@ void laydata::TdtBox::normalize(SGBitSet& psel)
    if (_pdata[p1y] > _pdata[p2y])
    {
       swap = _pdata[p1y]; _pdata[p1y] = _pdata[p2y]; _pdata[p2y] = swap;
-      _pdata[p1y2] = _pdata[p1y];_pdata[p2y2] = _pdata[p2y];
       if (0 != psel.size())
       {
          psel.swap(0,3);
@@ -544,9 +538,7 @@ laydata::Validator* laydata::TdtBox::move(const CTM& trans, SGBitSet& plst)
    {// used for modify
       pointlist* nshape = movePointsSelected(plst, trans);
       _pdata[p1x ] = (*nshape)[0].x();_pdata[p1y ] = (*nshape)[0].y();
-      _pdata[p1x2] = _pdata[p1x]     ;_pdata[p1y2] = _pdata[p1y];
       _pdata[p2x] = (*nshape)[2].x();_pdata[p2y] = (*nshape)[2].y();;
-      _pdata[p2x2] = _pdata[p2x]     ;_pdata[p2y2] = _pdata[p2y];
       normalize(plst);
       nshape->clear(); delete nshape;
       return NULL;
@@ -578,9 +570,7 @@ void laydata::TdtBox::transfer(const CTM& trans) {
    TP p1 = TP(_pdata[p1x], _pdata[p1y]) * trans;
    TP p2 = TP(_pdata[p2x], _pdata[p2y]) * trans;
    _pdata[p1x ] = p1.x()     ;_pdata[p1y ] = p1.y();
-   _pdata[p1x2] = _pdata[p1x];_pdata[p1y2] = _pdata[p1y];
    _pdata[p2x] = p2.x();_pdata[p2y] = p2.y();
-   _pdata[p2x2] = _pdata[p2x];_pdata[p2y2] = _pdata[p2y];
    SGBitSet dummy;
    normalize(dummy);
 }
