@@ -173,6 +173,7 @@ class TeselChunk {
                         TeselChunk(const TeselVertices&, GLenum, unsigned);
                         TeselChunk(const TeselChunk*, unsigned);
                         TeselChunk(const int*, unsigned, unsigned);
+                        TeselChunk(const TeselChunk&); //copy constructor
                        ~TeselChunk();
       GLenum            type() const      {return _type;}
       word              size() const      {return _size;}
@@ -187,7 +188,7 @@ class TeselChunk {
       GLenum            _type;
 };
 
-typedef std::list<TeselChunk*> TeselChain;
+typedef std::list<TeselChunk> TeselChain;
 
 class TeselTempData {
    public:
@@ -217,7 +218,6 @@ class TeselTempData {
 class TeselPoly {
    public:
                         TeselPoly(const int4b* pdata, unsigned psize);
-                       ~TeselPoly();
       TeselChain*       tdata()                    { return &_tdata;  }
       word              num_ftrs()                 { return _all_ftrs;}
       word              num_ftfs()                 { return _all_ftfs;}
