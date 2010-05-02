@@ -801,10 +801,10 @@ void laydata::TdtPoly::openGlDrawFill(layprop::DrawProperties&, const pointlist&
 {
    for ( TeselChain::const_iterator CCH = _teseldata->tdata()->begin(); CCH != _teseldata->tdata()->end(); CCH++ )
    {
-      glBegin((*CCH)->type());
-      for(unsigned cindx = 0 ; cindx < (*CCH)->size(); cindx++)
+      glBegin(CCH->type());
+      for(unsigned cindx = 0 ; cindx < CCH->size(); cindx++)
       {
-         unsigned vindex = (*CCH)->index_seq()[cindx];
+         unsigned vindex = CCH->index_seq()[cindx];
          glVertex2i(ptlist[vindex].x(), ptlist[vindex].y());
       }
       glEnd();

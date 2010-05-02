@@ -85,6 +85,14 @@ TeselChunk::TeselChunk(const int* data, unsigned size, unsigned offset)
    }
 }
 
+TeselChunk::TeselChunk(const TeselChunk& tcobj)
+{
+   _size = tcobj._size;
+   _type = tcobj._type;
+   _index_seq = DEBUG_NEW unsigned[_size];
+   memcpy(_index_seq, tcobj._index_seq, sizeof(unsigned) * _size);
+}
+
 #ifdef DB_MEMORY_TRACE
 void* TeselChunk::operator new(size_t size)
 {
@@ -115,8 +123,7 @@ TeselTempData::TeselTempData(TeselChain* tc) : _the_chain(tc), _cindexes(),
 
 void TeselTempData::storeChunk()
 {
-   TeselChunk* achunk = DEBUG_NEW TeselChunk(_cindexes, _ctype, _offset);
-   _the_chain->push_back(achunk);
+   _the_chain->push_back(TeselChunk(_cindexes, _ctype, _offset));
    switch (_ctype)
    {
       case GL_TRIANGLE_FAN   : _all_ftfs++; break;
@@ -187,11 +194,11 @@ void TeselPoly::num_indexs(unsigned& iftrs, unsigned& iftfs, unsigned& iftss)
 {
    for (TeselChain::const_iterator CCH = _tdata.begin(); CCH != _tdata.end(); CCH++)
    {
-      switch ((*CCH)->type())
+      switch (CCH->type())
       {
-         case GL_TRIANGLE_FAN   : iftfs += (*CCH)->size(); break;
-         case GL_TRIANGLE_STRIP : iftss += (*CCH)->size(); break;
-         case GL_TRIANGLES      : iftrs += (*CCH)->size(); break;
+         case GL_TRIANGLE_FAN   : iftfs += CCH->size(); break;
+         case GL_TRIANGLE_STRIP : iftss += CCH->size(); break;
+         case GL_TRIANGLES      : iftrs += CCH->size(); break;
          default: assert(0);
       }
    }
@@ -210,12 +217,6 @@ void TeselPoly::operator delete(void* p)
 }
 #endif
 
-
-TeselPoly::~TeselPoly()
-{
-   for (TeselChain::const_iterator CTC = _tdata.begin(); CTC != _tdata.end(); CTC++)
-      delete (*CTC);
-}
 
 //=============================================================================
 //
@@ -361,18 +362,13 @@ DBbox* tenderer::TenderWire::mdlPnts(const word width, word i1, word i2, word i3
 void tenderer::TenderWire::Tesselate()
 {
    _tdata = DEBUG_NEW TeselChain();
-   _tdata->push_back( DEBUG_NEW TeselChunk(_cdata, _csize, 0));
+   _tdata->push_back( TeselChunk(_cdata, _csize, 0));
 }
 
 tenderer::TenderWire::~TenderWire()
 {
    if (NULL != _cdata) delete [] _cdata;
-   if (NULL != _tdata)
-   {
-      for (TeselChain::const_iterator CCH = _tdata->begin(); CCH != _tdata->end(); CCH++)
-         delete (*CCH);
-      delete _tdata;
-   }
+   if (NULL != _tdata) delete _tdata;
 }
 
 //=============================================================================
@@ -800,43 +796,42 @@ void tenderer::TenderTV::collectIndexs(unsigned int* index_array, TeselChain* td
 {
    for (TeselChain::const_iterator TCH = tdata->begin(); TCH != tdata->end(); TCH++)
    {
-      TeselChunk* cchunk = *TCH;
-      switch (cchunk->type())
+      switch (TCH->type())
       {
          case GL_QUAD_STRIP     :
          {
             assert(_sizesix[fqss]);
             _firstix[fqss][size_index[fqss]  ] = sizeof(unsigned) * index_offset[fqss];
-            _sizesix[fqss][size_index[fqss]++] = cchunk->size();
-            for (unsigned i = 0; i < cchunk->size(); i++)
-               index_array[index_offset[fqss]++] = cchunk->index_seq()[i] + cpoint_index;
+            _sizesix[fqss][size_index[fqss]++] = TCH->size();
+            for (unsigned i = 0; i < TCH->size(); i++)
+               index_array[index_offset[fqss]++] = TCH->index_seq()[i] + cpoint_index;
             break;
          }
          case GL_TRIANGLES      :
          {
             assert(_sizesix[ftrs]);
             _firstix[ftrs][size_index[ftrs]  ] = sizeof(unsigned) * index_offset[ftrs];
-            _sizesix[ftrs][size_index[ftrs]++] = cchunk->size();
-            for (unsigned i = 0; i < cchunk->size(); i++)
-               index_array[index_offset[ftrs]++] = cchunk->index_seq()[i] + cpoint_index;
+            _sizesix[ftrs][size_index[ftrs]++] = TCH->size();
+            for (unsigned i = 0; i < TCH->size(); i++)
+               index_array[index_offset[ftrs]++] = TCH->index_seq()[i] + cpoint_index;
             break;
          }
          case GL_TRIANGLE_FAN   :
          {
             assert(_sizesix[ftfs]);
             _firstix[ftfs][size_index[ftfs]  ] = sizeof(unsigned) * index_offset[ftfs];
-            _sizesix[ftfs][size_index[ftfs]++] = cchunk->size();
-            for (unsigned i = 0; i < cchunk->size(); i++)
-               index_array[index_offset[ftfs]++] = cchunk->index_seq()[i] + cpoint_index;
+            _sizesix[ftfs][size_index[ftfs]++] = TCH->size();
+            for (unsigned i = 0; i < TCH->size(); i++)
+               index_array[index_offset[ftfs]++] = TCH->index_seq()[i] + cpoint_index;
             break;
          }
          case GL_TRIANGLE_STRIP :
          {
             assert(_sizesix[ftss]);
             _firstix[ftss][size_index[ftss]  ] = sizeof(unsigned) * index_offset[ftss];
-            _sizesix[ftss][size_index[ftss]++] = cchunk->size();
-            for (unsigned i = 0; i < cchunk->size(); i++)
-               index_array[index_offset[ftss]++] = cchunk->index_seq()[i] + cpoint_index;
+            _sizesix[ftss][size_index[ftss]++] = TCH->size();
+            for (unsigned i = 0; i < TCH->size(); i++)
+               index_array[index_offset[ftss]++] = TCH->index_seq()[i] + cpoint_index;
             break;
          }
          default: assert(0);
