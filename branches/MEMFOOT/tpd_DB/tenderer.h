@@ -127,6 +127,40 @@
 #include <GL/glew.h>
 #include "drawprop.h"
 
+#define DB_MEMORY_TRACE
+
+
+//=============================================================================
+//
+//
+//
+//=============================================================================
+#ifdef DB_MEMORY_TRACE
+class DBMemTracker {
+public:
+                        DBMemTracker() : _targetDbInfraSize(0l),
+                                         _targetDbDataSize(0l) ,
+                                         _targetDbTeselSize(0l)  {}
+   void                 intialize()                     { _targetDbInfraSize = 0l;
+                                                          _targetDbDataSize  = 0l;
+                                                          _targetDbTeselSize = 0l;
+                                                        }
+   void                 incInfraSize(size_t size)       { _targetDbInfraSize += size;}
+   void                 incDataSize(size_t size)        { _targetDbDataSize  += size;}
+   void                 incTeselSize(size_t size)       { _targetDbTeselSize += size;}
+   long                 targetDbInfraSize()             { return _targetDbInfraSize; }
+   long                 targetDbDataSize()              { return _targetDbDataSize;  }
+   long                 targetDbTeselSize()             { return _targetDbTeselSize; }
+   long                 total()                         { return _targetDbInfraSize
+                                                               + _targetDbDataSize
+                                                               + _targetDbTeselSize;
+                                                        }
+private:
+   long                 _targetDbInfraSize;
+   long                 _targetDbDataSize;
+   long                 _targetDbTeselSize;
+};
+#endif
 //=============================================================================
 //
 //
@@ -143,6 +177,10 @@ class TeselChunk {
       GLenum            type() const      {return _type;}
       word              size() const      {return _size;}
       const unsigned*   index_seq() const {return _index_seq;}
+#ifdef DB_MEMORY_TRACE
+      static void*      operator new (size_t);
+      static void       operator delete (void*);
+#endif
    private:
       unsigned*         _index_seq;  // index sequence
       word              _size;       // size of the index sequence
@@ -162,7 +200,10 @@ class TeselTempData {
       word              num_ftrs()                 { return _all_ftrs;}
       word              num_ftfs()                 { return _all_ftfs;}
       word              num_ftss()                 { return _all_ftss;}
-
+#ifdef DB_MEMORY_TRACE
+      static void*      operator new (size_t);
+      static void       operator delete (void*);
+#endif
    private:
       TeselChain*       _the_chain;
       GLenum            _ctype;
@@ -191,6 +232,10 @@ class TeselPoly {
       static GLvoid     teselVertex(GLvoid *, GLvoid *);
       static GLvoid     teselBegin(GLenum, GLvoid *);
       static GLvoid     teselEnd(GLvoid *);
+#endif
+#ifdef DB_MEMORY_TRACE
+      static void*      operator new (size_t);
+      static void       operator delete (void*);
 #endif
    private:
       TeselChain        _tdata;
