@@ -34,8 +34,6 @@
 #include "tenderer.h"
 #include "drawprop.h"
 
-#define DB_MEMORY_TRACE
-
 namespace laydata {
 //==============================================================================
    /*! Abstract class - the base of all layout objects.\n To optimize the RAM

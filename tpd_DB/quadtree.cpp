@@ -33,7 +33,7 @@
 #include "outbox.h"
 
 #ifdef DB_MEMORY_TRACE
-long    targetDbInfraSize;
+   extern DBMemTracker    dbMemTracker;
 #endif
 
 //-----------------------------------------------------------------------------
@@ -451,7 +451,7 @@ bool laydata::QuadTree::deleteThis(laydata::TdtData* object) {
 modification operations (copy, move, delete etc.) to keep the cell parents
 QuadTree structures up to date \n
 Validating of the tree is executed top-down. If the parent is re-sorted,
-childrens will be new, so there is no point to search for invalidated among
+children will be new, so there is no point to search for invalidated among
 them
 */
 void laydata::QuadTree::validate() {
@@ -946,7 +946,7 @@ laydata::QuadTree::~QuadTree() {
 #ifdef DB_MEMORY_TRACE
 void* laydata::QuadTree::operator new(size_t size)
 {
-   targetDbInfraSize += size;
+   dbMemTracker.incInfraSize(size);
    void *p=malloc(size);
    return p;
 }

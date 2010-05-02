@@ -31,6 +31,11 @@
 #include "viewprop.h"
 #include "tedat.h"
 
+
+#ifdef DB_MEMORY_TRACE
+   DBMemTracker    dbMemTracker;
+#endif
+
 GLUtriangulatorObj   *TeselPoly::tenderTesel = NULL;
 extern layprop::FontLibrary* fontLib;
 
@@ -40,6 +45,9 @@ TeselChunk::TeselChunk(const TeselVertices& data, GLenum type, unsigned offset)
 {
    _size = data.size();
    _index_seq = DEBUG_NEW unsigned[_size];
+#ifdef DB_MEMORY_TRACE
+   dbMemTracker.incTeselSize(_size * sizeof(unsigned));
+#endif
    word li = 0;
    for(TeselVertices::const_iterator CVX = data.begin(); CVX != data.end(); CVX++)
       _index_seq[li++] = *CVX + offset;
@@ -51,6 +59,9 @@ TeselChunk::TeselChunk(const TeselChunk* data, unsigned offset)
    _size = data->size();
    _type = data->type();
    _index_seq = DEBUG_NEW unsigned[_size];
+#ifdef DB_MEMORY_TRACE
+   dbMemTracker.incTeselSize(_size * sizeof(unsigned));
+#endif
    const unsigned* copy_seq = data->index_seq();
    for(unsigned i = 0; i < _size; i++)
       _index_seq[i] = copy_seq[i] + offset;
@@ -62,6 +73,9 @@ TeselChunk::TeselChunk(const int* data, unsigned size, unsigned offset)
    _type = GL_QUAD_STRIP;
    assert(0 ==(size % 2));
    _index_seq = DEBUG_NEW unsigned[_size];
+#ifdef DB_MEMORY_TRACE
+   dbMemTracker.incTeselSize(_size * sizeof(unsigned));
+#endif
    word findex = 0;     // forward  index
    word bindex = _size; // backward index
    for (word i = 0; i < _size / 2; i++)
@@ -70,6 +84,19 @@ TeselChunk::TeselChunk(const int* data, unsigned size, unsigned offset)
       _index_seq[2*i+1] = (--bindex) + offset;
    }
 }
+
+#ifdef DB_MEMORY_TRACE
+void* TeselChunk::operator new(size_t size)
+{
+   dbMemTracker.incTeselSize(size);
+   void *p=malloc(size);
+   return p;
+}
+void TeselChunk::operator delete(void* p)
+{
+   free(p);
+}
+#endif
 
 TeselChunk::~TeselChunk()
 {
@@ -98,6 +125,20 @@ void TeselTempData::storeChunk()
       default: assert(0);
    }
 }
+
+#ifdef DB_MEMORY_TRACE
+void* TeselTempData::operator new(size_t size)
+{
+   dbMemTracker.incTeselSize(size);
+   void *p=malloc(size);
+   return p;
+}
+void TeselTempData::operator delete(void* p)
+{
+   free(p);
+}
+#endif
+
 
 //=============================================================================
 // TeselPoly
@@ -155,6 +196,19 @@ void TeselPoly::num_indexs(unsigned& iftrs, unsigned& iftfs, unsigned& iftss)
       }
    }
 }
+
+#ifdef DB_MEMORY_TRACE
+void* TeselPoly::operator new(size_t size)
+{
+   dbMemTracker.incTeselSize(size);
+   void *p=malloc(size);
+   return p;
+}
+void TeselPoly::operator delete(void* p)
+{
+   free(p);
+}
+#endif
 
 
 TeselPoly::~TeselPoly()
