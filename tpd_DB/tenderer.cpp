@@ -36,7 +36,7 @@
    DBMemTracker    dbMemTracker;
 #endif
 
-GLUtriangulatorObj   *TeselPoly::tenderTesel = NULL;
+GLUtriangulatorObj*          TessellPoly::tenderTesel = NULL;
 extern layprop::FontLibrary* fontLib;
 
 //=============================================================================
@@ -133,12 +133,16 @@ void TeselTempData::storeChunk()
    }
 }
 
-
 //=============================================================================
-// TeselPoly
+// TessellPoly
 
-TeselPoly::TeselPoly(const int4b* pdata, unsigned psize)
+TessellPoly::TessellPoly() : _tdata(), _all_ftrs(0), _all_ftfs(0), _all_ftss(0)
 {
+}
+
+void TessellPoly::tessellate(const int4b* pdata, unsigned psize)
+{
+   _tdata.clear();
    TeselTempData ttdata( &_tdata );
    // Start tessellation
    gluTessBeginPolygon(tenderTesel, &ttdata);
@@ -159,25 +163,25 @@ TeselPoly::TeselPoly(const int4b* pdata, unsigned psize)
 }
 
 
-GLvoid TeselPoly::teselBegin(GLenum type, GLvoid* ttmp)
+GLvoid TessellPoly::teselBegin(GLenum type, GLvoid* ttmp)
 {
    TeselTempData* ptmp = static_cast<TeselTempData*>(ttmp);
    ptmp->newChunk(type);
 }
 
-GLvoid TeselPoly::teselVertex(GLvoid *pindex, GLvoid* ttmp)
+GLvoid TessellPoly::teselVertex(GLvoid *pindex, GLvoid* ttmp)
 {
    TeselTempData* ptmp = static_cast<TeselTempData*>(ttmp);
    ptmp->newIndex(*(static_cast<word*>(pindex)));
 }
 
-GLvoid TeselPoly::teselEnd(GLvoid* ttmp)
+GLvoid TessellPoly::teselEnd(GLvoid* ttmp)
 {
    TeselTempData* ptmp = static_cast<TeselTempData*>(ttmp);
    ptmp->storeChunk();
 }
 
-void TeselPoly::num_indexs(unsigned& iftrs, unsigned& iftfs, unsigned& iftss)
+void TessellPoly::num_indexs(unsigned& iftrs, unsigned& iftfs, unsigned& iftss) const
 {
    for (TeselChain::const_iterator CCH = _tdata.begin(); CCH != _tdata.end(); CCH++)
    {
@@ -192,13 +196,13 @@ void TeselPoly::num_indexs(unsigned& iftrs, unsigned& iftfs, unsigned& iftss)
 }
 
 #ifdef DB_MEMORY_TRACE
-void* TeselPoly::operator new(size_t size)
+void* TessellPoly::operator new(size_t size)
 {
    dbMemTracker.incTeselSize(size);
    void *p=malloc(size);
    return p;
 }
-void TeselPoly::operator delete(void* p)
+void TessellPoly::operator delete(void* p)
 {
    free(p);
 }
@@ -700,7 +704,7 @@ void tenderer::TenderTV::registerBox (TenderCnvx* cobj)
    }
 }
 
-void tenderer::TenderTV::registerPoly (TenderNcvx* cobj, TeselPoly* tchain)
+void tenderer::TenderTV::registerPoly (TenderNcvx* cobj, const TessellPoly* tchain)
 {
    unsigned allpoints = cobj->csize();
    if (_filled)
@@ -778,7 +782,7 @@ unsigned tenderer::TenderTV::num_total_indexs()
           );
 }
 
-void tenderer::TenderTV::collectIndexs(unsigned int* index_array, TeselChain* tdata, unsigned* size_index,
+void tenderer::TenderTV::collectIndexs(unsigned int* index_array, const TeselChain* tdata, unsigned* size_index,
                              unsigned* index_offset, unsigned cpoint_index)
 {
    for (TeselChain::const_iterator TCH = tdata->begin(); TCH != tdata->end(); TCH++)
@@ -1203,7 +1207,7 @@ void tenderer::TenderLay::box  (int4b* pdata, bool sel = false, const SGBitSet* 
    _cslice->registerBox(cobj);
 }
 
-void tenderer::TenderLay::poly (int4b* pdata, unsigned psize, TeselPoly* tpoly, bool sel = false, const SGBitSet* ss= NULL)
+void tenderer::TenderLay::poly (int4b* pdata, unsigned psize, const TessellPoly* tpoly, bool sel = false, const SGBitSet* ss= NULL)
 {
    // Make sure that selected shapes don't come unexpected
    assert(_has_selected ? true : !sel);

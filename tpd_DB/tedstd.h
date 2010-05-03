@@ -247,6 +247,6 @@ class DbExportFile {
       real                    _UU;
 };
 
-class TeselPoly;
+class TessellPoly;
 class PSFile;
 #endif

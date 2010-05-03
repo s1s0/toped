@@ -211,14 +211,15 @@ class TeselTempData {
       unsigned          _offset;
 };
 
-class TeselPoly {
+class TessellPoly {
    public:
-                        TeselPoly(const int4b* pdata, unsigned psize);
-      TeselChain*       tdata()                    { return &_tdata;  }
-      word              num_ftrs()                 { return _all_ftrs;}
-      word              num_ftfs()                 { return _all_ftfs;}
-      word              num_ftss()                 { return _all_ftss;}
-      void              num_indexs(unsigned&, unsigned&, unsigned&);
+                        TessellPoly();
+      void              tessellate(const int4b* pdata, unsigned psize);
+      const TeselChain* tdata() const              { return &_tdata;  }
+      word              num_ftrs() const           { return _all_ftrs;}
+      word              num_ftfs() const           { return _all_ftfs;}
+      word              num_ftss() const           { return _all_ftss;}
+      void              num_indexs(unsigned&, unsigned&, unsigned&) const;
       static GLUtriangulatorObj* tenderTesel; //! A pointer to the OpenGL object tesselator
 #ifdef WIN32
       static GLvoid CALLBACK teselVertex(GLvoid *, GLvoid *);
@@ -304,11 +305,11 @@ namespace tenderer {
       public:
                            TenderNcvx(int4b* pdata, unsigned psize) :
                                     TenderCnvx(pdata, psize), _tdata(NULL) {}
-         void              setTeselData(TeselPoly* tdata) {_tdata = tdata;}
+         void              setTeselData(const TessellPoly* tdata) {_tdata = tdata;}
          virtual          ~TenderNcvx(){};
-         virtual TeselChain* tdata()              {return _tdata->tdata();}
+         virtual const TeselChain* tdata()              {return _tdata->tdata();}
       private:
-         TeselPoly*        _tdata; //! polygon tesselation data
+         const TessellPoly*    _tdata; //! polygon tesselation data
    };
 
    /**
@@ -331,7 +332,7 @@ namespace tenderer {
          virtual unsigned  lDataCopy(int*, unsigned&);
          unsigned          lsize()                 {return _lsize;}
          bool              center_line_only()      {return _celno;}
-         virtual TeselChain* tdata()               {return _tdata;}
+         virtual const TeselChain* tdata()               {return _tdata;}
       protected:
          void              precalc(const word);
          DBbox*            endPnts(const word, word, word, bool);
@@ -630,7 +631,7 @@ namespace tenderer {
                            TenderTV(TenderRef* const, bool, bool, unsigned, unsigned);
                         ~TenderTV();
          void              registerBox   (TenderCnvx*);
-         void              registerPoly  (TenderNcvx*, TeselPoly*);
+         void              registerPoly  (TenderNcvx*, const TessellPoly*);
          void              registerWire  (TenderWire*);
          void              registerText  (TenderText*, TextOvlBox*);
 
@@ -646,7 +647,7 @@ namespace tenderer {
          bool              filled() const       {return _filled;}
          std::string       cellName()           {return _refCell->name();}
       protected:
-         void              collectIndexs(unsigned int*, TeselChain*, unsigned*, unsigned*, unsigned);
+         void              collectIndexs(unsigned int*, const TeselChain*, unsigned*, unsigned*, unsigned);
 
          TenderRef*        _refCell;
          // collected data lists
@@ -822,7 +823,7 @@ namespace tenderer {
                            TenderLay();
                         ~TenderLay();
          void              box  (int4b*,                       bool, const SGBitSet*);
-         void              poly (int4b*, unsigned, TeselPoly*, bool, const SGBitSet*);
+         void              poly (int4b*, unsigned, const TessellPoly*, bool, const SGBitSet*);
          void              wire (int4b*, unsigned, word, bool, bool, const SGBitSet*);
          void              text (const std::string*, const CTM&, const DBbox*, const TP&, bool);
 
@@ -923,9 +924,9 @@ namespace tenderer {
          const CTM&        topCTM() const                         {return  _cellStack.top()->ctm();}
          void              box  (int4b* pdata)                    {_clayer->box(pdata, false, NULL);}
          void              box  (int4b* pdata, const SGBitSet* ss){_clayer->box(pdata, true, ss);}
-         void              poly (int4b* pdata, unsigned psize, TeselPoly* tpoly)
+         void              poly (int4b* pdata, unsigned psize, const TessellPoly* tpoly)
                                                                   {_clayer->poly(pdata, psize, tpoly, false, NULL);}
-         void              poly (int4b* pdata, unsigned psize, TeselPoly* tpoly, const SGBitSet* ss)
+         void              poly (int4b* pdata, unsigned psize, const TessellPoly* tpoly, const SGBitSet* ss)
                                                                   {_clayer->poly(pdata, psize, tpoly, true, ss);}
          void              wire (int4b*, unsigned, word);
          void              wire (int4b*, unsigned, word, const SGBitSet*);

@@ -740,7 +740,7 @@ laydata::TdtPoly::TdtPoly(const pointlist& plst) : TdtData()
       _pdata[index++] = plst[i].x();
       _pdata[index++] = plst[i].y();
    }
-   _teseldata = DEBUG_NEW TeselPoly(_pdata, _psize);
+   _teseldata.tessellate(_pdata, _psize);
 }
 
 laydata::TdtPoly::TdtPoly(int4b* pdata, unsigned psize) : _pdata(pdata), _psize(psize)
@@ -748,7 +748,7 @@ laydata::TdtPoly::TdtPoly(int4b* pdata, unsigned psize) : _pdata(pdata), _psize(
 #ifdef DB_MEMORY_TRACE
    dbMemTracker.incDataSize(_psize * 2 * sizeof(int4b));
 #endif
-   _teseldata = DEBUG_NEW TeselPoly(_pdata, _psize);
+   _teseldata.tessellate(_pdata, _psize);
 }
 
 laydata::TdtPoly::TdtPoly(TEDfile* const tedfile) : TdtData()
@@ -766,7 +766,7 @@ laydata::TdtPoly::TdtPoly(TEDfile* const tedfile) : TdtData()
       _pdata[2*i  ] = wpnt.x();
       _pdata[2*i+1] = wpnt.y();
    }
-   _teseldata = DEBUG_NEW TeselPoly(_pdata, _psize);
+   _teseldata.tessellate(_pdata, _psize);
 }
 
 void laydata::TdtPoly::openGlPrecalc(layprop::DrawProperties& drawprop, pointlist& ptlist) const
@@ -781,12 +781,12 @@ void laydata::TdtPoly::openGlPrecalc(layprop::DrawProperties& drawprop, pointlis
 
 void laydata::TdtPoly::drawRequest(tenderer::TopRend& rend) const
 {
-   rend.poly(_pdata, _psize, _teseldata);
+   rend.poly(_pdata, _psize, &_teseldata);
 }
 
 void laydata::TdtPoly::drawSRequest(tenderer::TopRend& rend, const SGBitSet* pslist) const
 {
-   rend.poly(_pdata, _psize, _teseldata, pslist);
+   rend.poly(_pdata, _psize, &_teseldata, pslist);
 }
 
 void laydata::TdtPoly::openGlDrawLine(layprop::DrawProperties&, const pointlist& ptlist) const
@@ -799,7 +799,7 @@ void laydata::TdtPoly::openGlDrawLine(layprop::DrawProperties&, const pointlist&
 
 void laydata::TdtPoly::openGlDrawFill(layprop::DrawProperties&, const pointlist& ptlist) const
 {
-   for ( TeselChain::const_iterator CCH = _teseldata->tdata()->begin(); CCH != _teseldata->tdata()->end(); CCH++ )
+   for ( TeselChain::const_iterator CCH = _teseldata.tdata()->begin(); CCH != _teseldata.tdata()->end(); CCH++ )
    {
       glBegin(CCH->type());
       for(unsigned cindx = 0 ; cindx < CCH->size(); cindx++)
@@ -898,9 +898,8 @@ laydata::Validator* laydata::TdtPoly::move(const CTM& trans, SGBitSet& plst)
          {
             _pdata[2*i] = (*nshape)[i].x();_pdata[2*i+1] = (*nshape)[i].y();
          }
-         // retesselate the modified shape
-         delete _teseldata;
-         _teseldata = DEBUG_NEW TeselPoly(_pdata, _psize);
+         // retessellate the modified shape
+         _teseldata.tessellate(_pdata, _psize);
          nshape->clear(); delete nshape;
          delete check;
          return NULL;
@@ -1173,7 +1172,6 @@ pointlist* laydata::TdtPoly::movePointsSelected(const SGBitSet& pset,
 laydata::TdtPoly::~TdtPoly()
 {
    delete [] _pdata;
-   delete _teseldata;
 }
 
 //-----------------------------------------------------------------------------
