@@ -102,6 +102,7 @@ int tellstdfunc::stdTELLSTATUS::execute()
    }
    news = "Bottom of the operand stack reached";
    tell_log(console::MT_ERROR,news);
+   MemTrack::TrackListMemoryUsage();
 #endif
    return EXEC_NEXT;
 }

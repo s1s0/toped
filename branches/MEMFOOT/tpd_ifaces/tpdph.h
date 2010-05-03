@@ -16,6 +16,8 @@
    #include <map>
    #include <vector>
 #else
-#define DEBUG_NEW new
+#include "MemTrack.h"
+//#define DEBUG_NEW new
+#define DEBUG_NEW MEMTRACK_NEW
 #endif
 //using namespace std;

@@ -127,7 +127,7 @@
 #include <GL/glew.h>
 #include "drawprop.h"
 
-#define DB_MEMORY_TRACE
+//#define DB_MEMORY_TRACE
 
 
 //=============================================================================
