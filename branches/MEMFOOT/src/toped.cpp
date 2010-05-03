@@ -751,21 +751,21 @@ void tui::TopedFrame::initView()
 
    _canvas = DEBUG_NEW LayoutCanvas(this, wxDefaultPosition, wxDefaultSize, gl_attrib);
 
-   TeselPoly::tenderTesel = gluNewTess();
+   TessellPoly::tenderTesel = gluNewTess();
 #ifndef WIN32
-   gluTessCallback(TeselPoly::tenderTesel, GLU_TESS_BEGIN_DATA,
-                   (GLvoid(*)())&TeselPoly::teselBegin);
-   gluTessCallback(TeselPoly::tenderTesel, GLU_TESS_VERTEX_DATA,
-                   (GLvoid(*)())&TeselPoly::teselVertex);
-   gluTessCallback(TeselPoly::tenderTesel, GLU_TESS_END_DATA,
-                   (GLvoid(*)())&TeselPoly::teselEnd);
+   gluTessCallback(TessellPoly::tenderTesel, GLU_TESS_BEGIN_DATA,
+                   (GLvoid(*)())&TessellPoly::teselBegin);
+   gluTessCallback(TessellPoly::tenderTesel, GLU_TESS_VERTEX_DATA,
+                   (GLvoid(*)())&TessellPoly::teselVertex);
+   gluTessCallback(TessellPoly::tenderTesel, GLU_TESS_END_DATA,
+                   (GLvoid(*)())&TessellPoly::teselEnd);
 #else
-   gluTessCallback(TeselPoly::tenderTesel, GLU_TESS_BEGIN_DATA,
-                   (GLvoid(__stdcall *)())&TeselPoly::teselBegin);
-   gluTessCallback(TeselPoly::tenderTesel, GLU_TESS_VERTEX_DATA,
-                   (GLvoid(__stdcall *)())&TeselPoly::teselVertex);
-   gluTessCallback(TeselPoly::tenderTesel, GLU_TESS_END_DATA,
-                   (GLvoid(__stdcall *)())&TeselPoly::teselEnd);
+   gluTessCallback(TessellPoly::tenderTesel, GLU_TESS_BEGIN_DATA,
+                   (GLvoid(__stdcall *)())&TessellPoly::teselBegin);
+   gluTessCallback(TessellPoly::tenderTesel, GLU_TESS_VERTEX_DATA,
+                   (GLvoid(__stdcall *)())&TessellPoly::teselVertex);
+   gluTessCallback(TessellPoly::tenderTesel, GLU_TESS_END_DATA,
+                   (GLvoid(__stdcall *)())&TessellPoly::teselEnd);
 #endif
    //----------------------------------------------------------------------------
    // The command line
