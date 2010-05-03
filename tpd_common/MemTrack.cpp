@@ -439,7 +439,7 @@ namespace MemTrack
             size_t size = pBlockHeader->GetRequestedSize();
             char const *fileName = pBlockHeader->GetFilename();
             int lineNum = pBlockHeader->GetLineNum();
-            printf("*** #%-6d %5d bytes %-50s\n", i, size, typeName);
+            printf("*** #%-6ld %5ld bytes %-50s\n", i, size, typeName);
             printf("... %s:%d\n", fileName, lineNum);
         }
 
@@ -563,8 +563,6 @@ namespace MemTrack
         printf("%-50s%5s  %5s %7s %s \n", "allocated type", "blocks", "", "bytes", "");
         printf("%-50s%5s  %5s %7s %s \n", "--------------", "------", "", "-----", "");
 
-        char* demangledName;
-        int   status;
         for (size_t i = 0; i < numUniqueTypes; i++)
         {
             MemDigest *pMD = pMemDigestArray + i;
@@ -572,12 +570,12 @@ namespace MemTrack
             double blockCountPct = 100.0 * blockCount / grandTotalNumBlocks;
             size_t totalSize = pMD->totalSize;
             double totalSizePct = 100.0 * totalSize / grandTotalSize;
-
+            int   status;
             char* demangledName = abi::__cxa_demangle(pMD->typeName, 0, 0, &status);
             if (0 == status)
             {
                printf(
-                   "%-50s %5d %5.1f%% %7d %5.1f%%\n",
+                   "%-50s %5ld %5.1f%% %7ld %5.1f%%\n",
                    demangledName,
                    blockCount,
                    blockCountPct,
@@ -588,7 +586,7 @@ namespace MemTrack
             else
             {
                printf(
-                   "%-50s %5d %5.1f%% %7d %5.1f%%\n",
+                   "%-50s %5ld %5.1f%% %7ld %5.1f%%\n",
                    pMD->typeName,
                    blockCount,
                    blockCountPct,
@@ -599,7 +597,7 @@ namespace MemTrack
             free(demangledName);
         }
         printf("%-50s %5s %5s  %7s %s \n", "--------", "-----", "", "-------", "");
-        printf("%-50s %5d %5s  %7d %s \n", "[totals]", grandTotalNumBlocks, "", grandTotalSize, "");
+        printf("%-50s %5ld %5s  %7ld %s \n", "[totals]", grandTotalNumBlocks, "", grandTotalSize, "");
 
         // Clean up.
         free(ppBlockHeader);
