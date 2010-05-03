@@ -2045,9 +2045,9 @@ tui::nameCboxList::nameCboxList(wxWindow* parent, wxWindowID id, wxPoint pnt, wx
    for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
       all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
 
-   (void) DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("CIF layer"),
+   /*(void)*/ DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("CIF layer"),
       wxPoint(  5, 5), wxSize(100,line_height), wxALIGN_CENTER | wxBORDER_SUNKEN);
-   (void) DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("TDT layer"),
+   /*(void)*/ DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("TDT layer"),
       wxPoint(110, 5), wxSize(150,line_height), wxALIGN_CENTER | wxBORDER_SUNKEN);
 
    wxSize panelsz = GetClientSize();
@@ -2089,9 +2089,9 @@ tui::nameCbox3List::nameCbox3List(wxWindow* parent, wxWindowID id, wxPoint pnt, 
    for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
       all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
 
-   (void) DEBUG_NEW wxStaticText(this, wxID_ANY, inName,
+   /*(void)*/ DEBUG_NEW wxStaticText(this, wxID_ANY, inName,
       wxPoint(  5, 5), wxSize(120,line_height), wxALIGN_CENTER | wxBORDER_SUNKEN);
-   (void) DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("TDT layer"),
+   /*(void)*/ DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("TDT layer"),
       wxPoint(125, 5), wxSize(150,line_height), wxALIGN_CENTER | wxBORDER_SUNKEN);
 
    wxSize panelsz = GetClientSize();
@@ -2183,9 +2183,9 @@ tui::nameEboxList::nameEboxList(wxWindow* parent, wxWindowID id, wxPoint pnt, wx
    for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
       all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
 
-   (void) DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("TDT layer"),
+   /*(void)*/ DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("TDT layer"),
       wxPoint(  5, 5), wxSize(100,line_height), wxALIGN_CENTER | wxBORDER_SUNKEN);
-   (void) DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("CIF layer"),
+   /*(void)*/ DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("CIF layer"),
       wxPoint(110, 5), wxSize(150,line_height), wxALIGN_CENTER | wxBORDER_SUNKEN);
 
    wxSize panelsz = GetClientSize();
@@ -2284,11 +2284,11 @@ tui::nameEbox3List::nameEbox3List(wxWindow* parent, wxWindowID id, wxPoint pnt, 
    for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
       all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
 
-   (void) DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("TDT layer"),
+   /*(void)*/ DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("TDT layer"),
       wxPoint(  5, 5), wxSize(100,line_height), wxALIGN_CENTER | wxBORDER_SUNKEN);
-   (void) DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("GDS layer"),
+   /*(void)*/ DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("GDS layer"),
       wxPoint(110, 5), wxSize(70,line_height), wxALIGN_CENTER | wxBORDER_SUNKEN);
-   (void) DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("GDS type"),
+   /*(void)*/ DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("GDS type"),
       wxPoint(180, 5), wxSize(70,line_height), wxALIGN_CENTER | wxBORDER_SUNKEN);
 
    wxSize panelsz = GetClientSize();
