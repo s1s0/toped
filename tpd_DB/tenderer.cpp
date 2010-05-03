@@ -133,19 +133,6 @@ void TeselTempData::storeChunk()
    }
 }
 
-#ifdef DB_MEMORY_TRACE
-void* TeselTempData::operator new(size_t size)
-{
-   dbMemTracker.incTeselSize(size);
-   void *p=malloc(size);
-   return p;
-}
-void TeselTempData::operator delete(void* p)
-{
-   free(p);
-}
-#endif
-
 
 //=============================================================================
 // TeselPoly

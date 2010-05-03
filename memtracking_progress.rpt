@@ -1,0 +1,8 @@
+tdtread("/home/skr/toped/library/tdt/chip_zf.tdt");
+1481: Data DB size:  ( internal structures: 2011176 ); ( data: 2546720 ); ( tesselation: 235472 ); Total: 4793368
+1483: Data DB size:  ( internal structures: 2011176 ); ( data: 2546720 ); ( tesselation: 160992 ); Total: 4718888
+
+tdtread("/home/skr/toped/library/tdt/chip_zf.tdt");
+1481: Data DB size:  ( internal structures: 25192512 ); ( data: 50952336 ); ( tesselation: 2040416 ); Total: 78185264
+1483: Data DB size:  ( internal structures: 25192512 ); ( data: 50952336 ); ( tesselation: 1397376 ); Total: 77542224
+
