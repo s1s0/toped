@@ -201,10 +201,6 @@ class TeselTempData {
       word              num_ftrs()                 { return _all_ftrs;}
       word              num_ftfs()                 { return _all_ftfs;}
       word              num_ftss()                 { return _all_ftss;}
-#ifdef DB_MEMORY_TRACE
-      static void*      operator new (size_t);
-      static void       operator delete (void*);
-#endif
    private:
       TeselChain*       _the_chain;
       GLenum            _ctype;
