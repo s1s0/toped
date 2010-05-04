@@ -77,7 +77,11 @@ tellstdfunc::stdTELLSTATUS::stdTELLSTATUS(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
 
-int tellstdfunc::stdTELLSTATUS::execute() {
+int tellstdfunc::stdTELLSTATUS::execute()
+{
+#ifdef DB_MEMORY_TRACE
+   MemTrack::TrackListMemoryUsage();
+#else
    real DBscale = PROPC->DBscale();
    telldata::tell_var *y;
    std::string news;
@@ -88,6 +92,7 @@ int tellstdfunc::stdTELLSTATUS::execute() {
    }
    news = "Bottom of the operand stack reached";
    tell_log(console::MT_ERROR,news);
+#endif
    return EXEC_NEXT;
 }
 

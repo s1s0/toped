@@ -92,15 +92,15 @@ namespace laydata {
    //!
       virtual  pointlist   shape2poly() const = 0;
    //! Returns the next TdtData object ot NULL if it doesn't exists
-      TdtData*             next() const         {return _next;};
+      TdtData*             next() const         {return _next;}
    //! Changes the pointer to the next tdtddata object
       void                 nextIs(TdtData* nxt) {_next = nxt;};
-   //! Set the _selected flag in case the object is entirely overlaped by select_in box
+   //! Set the _selected flag in case the object is entirely overlapped by select_in box
       void                 selectInBox(DBbox&, DataList*, bool);
       void                 selectThis(DataList*);
       bool                 unselect(DBbox&, SelectDataPair&, bool);
-      void                 setStatus(SH_STATUS s) {_status = s;};
-      SH_STATUS            status() const {return _status;};
+      void                 setStatus(SH_STATUS s) {_status = s;}
+      SH_STATUS            status() const {return _status;}
       virtual word         numPoints() const = 0;
       virtual             ~TdtData(){};
       virtual word         lType() const = 0;
@@ -148,16 +148,12 @@ namespace laydata {
       enum {
             p1x  = 0,
             p1y  = 1,
-            p2x2 = 2,// <= p2x
-            p1y2 = 3,// <= p1y
-            p2x  = 4,
-            p2y  = 5,
-            p1x2 = 6,// <= p1x
-            p2y2 = 7 // <= p2y
+            p2x  = 2,
+            p2y  = 3
       };
       void              normalize(SGBitSet& psel);
       pointlist*        movePointsSelected(const SGBitSet&, const CTM&, const CTM& = CTM()) const;
-      int4b*            _pdata;
+      int4b             _pdata[4];
    };
 
 //==============================================================================
@@ -197,7 +193,7 @@ namespace laydata {
          pointlist*        movePointsSelected(const SGBitSet&, const CTM&, const CTM& = CTM()) const;
          int4b*            _pdata;
          unsigned          _psize;
-         TeselPoly*        _teseldata;
+         TessellPoly       _teseldata;
    };
 
 //==============================================================================

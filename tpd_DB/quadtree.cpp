@@ -447,7 +447,7 @@ bool laydata::QuadTree::deleteThis(laydata::TdtData* object) {
 modification operations (copy, move, delete etc.) to keep the cell parents
 QuadTree structures up to date \n
 Validating of the tree is executed top-down. If the parent is re-sorted,
-childrens will be new, so there is no point to search for invalidated among
+children will be new, so there is no point to search for invalidated among
 them
 */
 void laydata::QuadTree::validate() {
@@ -1032,3 +1032,4 @@ void laydata::TdtLayer::vlOverlap(const layprop::DrawProperties&, DBbox& vlBox) 
 //{
 //
 //}
+

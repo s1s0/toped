@@ -31,7 +31,8 @@
 #include "viewprop.h"
 #include "tedat.h"
 
-GLUtriangulatorObj   *TeselPoly::tenderTesel = NULL;
+
+GLUtriangulatorObj*          TessellPoly::tenderTesel = NULL;
 extern layprop::FontLibrary* fontLib;
 
 //=============================================================================
@@ -71,6 +72,14 @@ TeselChunk::TeselChunk(const int* data, unsigned size, unsigned offset)
    }
 }
 
+TeselChunk::TeselChunk(const TeselChunk& tcobj)
+{
+   _size = tcobj._size;
+   _type = tcobj._type;
+   _index_seq = DEBUG_NEW unsigned[_size];
+   memcpy(_index_seq, tcobj._index_seq, sizeof(unsigned) * _size);
+}
+
 TeselChunk::~TeselChunk()
 {
    delete [] _index_seq;
@@ -88,8 +97,7 @@ TeselTempData::TeselTempData(TeselChain* tc) : _the_chain(tc), _cindexes(),
 
 void TeselTempData::storeChunk()
 {
-   TeselChunk* achunk = DEBUG_NEW TeselChunk(_cindexes, _ctype, _offset);
-   _the_chain->push_back(achunk);
+   _the_chain->push_back(TeselChunk(_cindexes, _ctype, _offset));
    switch (_ctype)
    {
       case GL_TRIANGLE_FAN   : _all_ftfs++; break;
@@ -100,10 +108,15 @@ void TeselTempData::storeChunk()
 }
 
 //=============================================================================
-// TeselPoly
+// TessellPoly
 
-TeselPoly::TeselPoly(const int4b* pdata, unsigned psize)
+TessellPoly::TessellPoly() : _tdata(), _all_ftrs(0), _all_ftfs(0), _all_ftss(0)
 {
+}
+
+void TessellPoly::tessellate(const int4b* pdata, unsigned psize)
+{
+   _tdata.clear();
    TeselTempData ttdata( &_tdata );
    // Start tessellation
    gluTessBeginPolygon(tenderTesel, &ttdata);
@@ -124,43 +137,36 @@ TeselPoly::TeselPoly(const int4b* pdata, unsigned psize)
 }
 
 
-GLvoid TeselPoly::teselBegin(GLenum type, GLvoid* ttmp)
+GLvoid TessellPoly::teselBegin(GLenum type, GLvoid* ttmp)
 {
    TeselTempData* ptmp = static_cast<TeselTempData*>(ttmp);
    ptmp->newChunk(type);
 }
 
-GLvoid TeselPoly::teselVertex(GLvoid *pindex, GLvoid* ttmp)
+GLvoid TessellPoly::teselVertex(GLvoid *pindex, GLvoid* ttmp)
 {
    TeselTempData* ptmp = static_cast<TeselTempData*>(ttmp);
    ptmp->newIndex(*(static_cast<word*>(pindex)));
 }
 
-GLvoid TeselPoly::teselEnd(GLvoid* ttmp)
+GLvoid TessellPoly::teselEnd(GLvoid* ttmp)
 {
    TeselTempData* ptmp = static_cast<TeselTempData*>(ttmp);
    ptmp->storeChunk();
 }
 
-void TeselPoly::num_indexs(unsigned& iftrs, unsigned& iftfs, unsigned& iftss)
+void TessellPoly::num_indexs(unsigned& iftrs, unsigned& iftfs, unsigned& iftss) const
 {
    for (TeselChain::const_iterator CCH = _tdata.begin(); CCH != _tdata.end(); CCH++)
    {
-      switch ((*CCH)->type())
+      switch (CCH->type())
       {
-         case GL_TRIANGLE_FAN   : iftfs += (*CCH)->size(); break;
-         case GL_TRIANGLE_STRIP : iftss += (*CCH)->size(); break;
-         case GL_TRIANGLES      : iftrs += (*CCH)->size(); break;
+         case GL_TRIANGLE_FAN   : iftfs += CCH->size(); break;
+         case GL_TRIANGLE_STRIP : iftss += CCH->size(); break;
+         case GL_TRIANGLES      : iftrs += CCH->size(); break;
          default: assert(0);
       }
    }
-}
-
-
-TeselPoly::~TeselPoly()
-{
-   for (TeselChain::const_iterator CTC = _tdata.begin(); CTC != _tdata.end(); CTC++)
-      delete (*CTC);
 }
 
 //=============================================================================
@@ -172,6 +178,20 @@ unsigned tenderer::TenderCnvx::cDataCopy(int* array, unsigned& pindex)
    assert(_csize);
    memcpy(&(array[pindex]), _cdata, 2 * sizeof(int4b) * _csize);
    pindex += 2 * _csize;
+   return _csize;
+}
+
+//=============================================================================
+//
+// TenderBox
+//
+unsigned  tenderer::TenderBox::cDataCopy(int* array, unsigned& pindex)
+{
+   assert(_csize);
+   array[pindex++] = _cdata[0];array[pindex++] = _cdata[1];
+   array[pindex++] = _cdata[0];array[pindex++] = _cdata[3];
+   array[pindex++] = _cdata[2];array[pindex++] = _cdata[3];
+   array[pindex++] = _cdata[2];array[pindex++] = _cdata[1];
    return _csize;
 }
 
@@ -293,18 +313,13 @@ DBbox* tenderer::TenderWire::mdlPnts(const word width, word i1, word i2, word i3
 void tenderer::TenderWire::Tesselate()
 {
    _tdata = DEBUG_NEW TeselChain();
-   _tdata->push_back( DEBUG_NEW TeselChunk(_cdata, _csize, 0));
+   _tdata->push_back( TeselChunk(_cdata, _csize, 0));
 }
 
 tenderer::TenderWire::~TenderWire()
 {
    if (NULL != _cdata) delete [] _cdata;
-   if (NULL != _tdata)
-   {
-      for (TeselChain::const_iterator CCH = _tdata->begin(); CCH != _tdata->end(); CCH++)
-         delete (*CCH);
-      delete _tdata;
-   }
+   if (NULL != _tdata) delete _tdata;
 }
 
 //=============================================================================
@@ -349,6 +364,51 @@ unsigned tenderer::TenderSCnvx::cDataCopy(int* array, unsigned& pindex)
 }
 
 unsigned tenderer::TenderSCnvx::sDataCopy(unsigned* array, unsigned& pindex)
+{
+   if (NULL != _slist)
+   { // shape is partially selected
+      // copy the indexes of the selected segment points
+      for (unsigned i = 0; i < _csize; i++)
+      {
+         if (_slist->check(i) && _slist->check((i+1)%_csize))
+         {
+            array[pindex++] = _offset + i;
+            array[pindex++] = _offset + ((i+1)%_csize);
+         }
+      }
+   }
+   else
+   {
+      for (unsigned i = 0; i < _csize; i++)
+         array[pindex++] = _offset + i;
+   }
+   return ssize();
+}
+
+//=============================================================================
+//
+// TenderSBox
+//
+unsigned tenderer::TenderSBox::ssize()
+{
+   if (NULL == _slist) return _csize;
+   // get the number of selected segments first - don't forget that here
+   // we're using GL_LINE_STRIP which means that we're counting selected
+   // line segments and for each segment we're going to store two indexes
+   unsigned ssegs = 0;
+   word  ssize = _slist->size();
+   for (word i = 0; i < _csize; i++)
+      if (_slist->check(i) && _slist->check((i+1)% ssize )) ssegs +=2;
+   return ssegs;
+}
+
+unsigned tenderer::TenderSBox::cDataCopy(int* array, unsigned& pindex)
+{
+   _offset = pindex/2;
+   return TenderBox::cDataCopy(array, pindex);
+}
+
+unsigned tenderer::TenderSBox::sDataCopy(unsigned* array, unsigned& pindex)
 {
    if (NULL != _slist)
    { // shape is partially selected
@@ -604,7 +664,7 @@ void tenderer::TenderTV::registerBox (TenderCnvx* cobj)
    }
 }
 
-void tenderer::TenderTV::registerPoly (TenderNcvx* cobj, TeselPoly* tchain)
+void tenderer::TenderTV::registerPoly (TenderNcvx* cobj, const TessellPoly* tchain)
 {
    unsigned allpoints = cobj->csize();
    if (_filled)
@@ -682,48 +742,47 @@ unsigned tenderer::TenderTV::num_total_indexs()
           );
 }
 
-void tenderer::TenderTV::collectIndexs(unsigned int* index_array, TeselChain* tdata, unsigned* size_index,
+void tenderer::TenderTV::collectIndexs(unsigned int* index_array, const TeselChain* tdata, unsigned* size_index,
                              unsigned* index_offset, unsigned cpoint_index)
 {
    for (TeselChain::const_iterator TCH = tdata->begin(); TCH != tdata->end(); TCH++)
    {
-      TeselChunk* cchunk = *TCH;
-      switch (cchunk->type())
+      switch (TCH->type())
       {
          case GL_QUAD_STRIP     :
          {
             assert(_sizesix[fqss]);
             _firstix[fqss][size_index[fqss]  ] = sizeof(unsigned) * index_offset[fqss];
-            _sizesix[fqss][size_index[fqss]++] = cchunk->size();
-            for (unsigned i = 0; i < cchunk->size(); i++)
-               index_array[index_offset[fqss]++] = cchunk->index_seq()[i] + cpoint_index;
+            _sizesix[fqss][size_index[fqss]++] = TCH->size();
+            for (unsigned i = 0; i < TCH->size(); i++)
+               index_array[index_offset[fqss]++] = TCH->index_seq()[i] + cpoint_index;
             break;
          }
          case GL_TRIANGLES      :
          {
             assert(_sizesix[ftrs]);
             _firstix[ftrs][size_index[ftrs]  ] = sizeof(unsigned) * index_offset[ftrs];
-            _sizesix[ftrs][size_index[ftrs]++] = cchunk->size();
-            for (unsigned i = 0; i < cchunk->size(); i++)
-               index_array[index_offset[ftrs]++] = cchunk->index_seq()[i] + cpoint_index;
+            _sizesix[ftrs][size_index[ftrs]++] = TCH->size();
+            for (unsigned i = 0; i < TCH->size(); i++)
+               index_array[index_offset[ftrs]++] = TCH->index_seq()[i] + cpoint_index;
             break;
          }
          case GL_TRIANGLE_FAN   :
          {
             assert(_sizesix[ftfs]);
             _firstix[ftfs][size_index[ftfs]  ] = sizeof(unsigned) * index_offset[ftfs];
-            _sizesix[ftfs][size_index[ftfs]++] = cchunk->size();
-            for (unsigned i = 0; i < cchunk->size(); i++)
-               index_array[index_offset[ftfs]++] = cchunk->index_seq()[i] + cpoint_index;
+            _sizesix[ftfs][size_index[ftfs]++] = TCH->size();
+            for (unsigned i = 0; i < TCH->size(); i++)
+               index_array[index_offset[ftfs]++] = TCH->index_seq()[i] + cpoint_index;
             break;
          }
          case GL_TRIANGLE_STRIP :
          {
             assert(_sizesix[ftss]);
             _firstix[ftss][size_index[ftss]  ] = sizeof(unsigned) * index_offset[ftss];
-            _sizesix[ftss][size_index[ftss]++] = cchunk->size();
-            for (unsigned i = 0; i < cchunk->size(); i++)
-               index_array[index_offset[ftss]++] = cchunk->index_seq()[i] + cpoint_index;
+            _sizesix[ftss][size_index[ftss]++] = TCH->size();
+            for (unsigned i = 0; i < TCH->size(); i++)
+               index_array[index_offset[ftss]++] = TCH->index_seq()[i] + cpoint_index;
             break;
          }
          default: assert(0);
@@ -1097,18 +1156,18 @@ void tenderer::TenderLay::box  (int4b* pdata, bool sel = false, const SGBitSet* 
    TenderCnvx* cobj = NULL;
    if (sel)
    {
-      TenderSCnvx* sobj = DEBUG_NEW TenderSCnvx(pdata, 4, ss);
+      TenderSBox* sobj = DEBUG_NEW TenderSBox(pdata, ss);
       registerSBox(sobj);
       cobj = sobj;
    }
    else
    {
-      cobj = DEBUG_NEW TenderCnvx(pdata, 4);
+      cobj = DEBUG_NEW TenderBox(pdata);
    }
    _cslice->registerBox(cobj);
 }
 
-void tenderer::TenderLay::poly (int4b* pdata, unsigned psize, TeselPoly* tpoly, bool sel = false, const SGBitSet* ss= NULL)
+void tenderer::TenderLay::poly (int4b* pdata, unsigned psize, const TessellPoly* tpoly, bool sel = false, const SGBitSet* ss= NULL)
 {
    // Make sure that selected shapes don't come unexpected
    assert(_has_selected ? true : !sel);
@@ -1166,7 +1225,7 @@ void tenderer::TenderLay::text (const std::string* txt, const CTM& ftmtrx, const
 }
 
 
-void tenderer::TenderLay::registerSBox (TenderSCnvx* sobj)
+void tenderer::TenderLay::registerSBox (TenderSBox* sobj)
 {
    _slct_data.push_back(sobj);
    if ( sobj->partSelected() )

@@ -32,6 +32,7 @@
 #include <wx/listctrl.h>
 #include <iostream>
 #include <list>
+//#include <sys/resource.h>
 #include "ttt.h"
 
 #define EVT_TECUSTOM_COMMAND(cmd, id, fn) \
@@ -391,5 +392,12 @@ class HiResTimer {
 };
 #endif //TIME_PROFILING
 
-
+//class OSResourceMeter {
+//public:
+//                        OSResourceMeter();
+//   void                 report(std::string);
+//private:
+//   struct rusage        _start_res;
+//   struct rusage        _end_res;
+//};
 #endif
