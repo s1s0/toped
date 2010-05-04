@@ -127,40 +127,6 @@
 #include <GL/glew.h>
 #include "drawprop.h"
 
-//#define DB_MEMORY_TRACE
-
-
-//=============================================================================
-//
-//
-//
-//=============================================================================
-#ifdef DB_MEMORY_TRACE
-class DBMemTracker {
-public:
-                        DBMemTracker() : _targetDbInfraSize(0l),
-                                         _targetDbDataSize(0l) ,
-                                         _targetDbTeselSize(0l)  {}
-   void                 intialize()                     { _targetDbInfraSize = 0l;
-                                                          _targetDbDataSize  = 0l;
-                                                          _targetDbTeselSize = 0l;
-                                                        }
-   void                 incInfraSize(size_t size)       { _targetDbInfraSize += size;}
-   void                 incDataSize(size_t size)        { _targetDbDataSize  += size;}
-   void                 incTeselSize(size_t size)       { _targetDbTeselSize += size;}
-   long                 targetDbInfraSize()             { return _targetDbInfraSize; }
-   long                 targetDbDataSize()              { return _targetDbDataSize;  }
-   long                 targetDbTeselSize()             { return _targetDbTeselSize; }
-   long                 total()                         { return _targetDbInfraSize
-                                                               + _targetDbDataSize
-                                                               + _targetDbTeselSize;
-                                                        }
-private:
-   long                 _targetDbInfraSize;
-   long                 _targetDbDataSize;
-   long                 _targetDbTeselSize;
-};
-#endif
 //=============================================================================
 //
 //

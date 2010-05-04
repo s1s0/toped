@@ -42,9 +42,6 @@
 #include "ps_out.h"
 #include "outbox.h"
 
-#ifdef DB_MEMORY_TRACE
-   extern DBMemTracker    dbMemTracker;
-#endif
 //GLubyte select_mark[30] = {0x00, 0x00, 0x00, 0x00, 0x3F, 0xF8, 0x3F, 0xF8, 0x30, 0x18,
 //                           0x30, 0x18, 0x30, 0x18, 0x30, 0x18, 0x30, 0x18, 0x30, 0x18,
 //                           0x30, 0x18, 0x3F, 0xF8, 0x3F, 0xF8, 0x00, 0x00, 0x00, 0x00};
@@ -730,9 +727,6 @@ laydata::TdtPoly::TdtPoly(const pointlist& plst) : TdtData()
 {
    _psize = plst.size();
    assert(_psize);
-#ifdef DB_MEMORY_TRACE
-   dbMemTracker.incDataSize(_psize * 2 * sizeof(int4b));
-#endif
    _pdata = DEBUG_NEW int4b[_psize*2];
    unsigned index = 0;
    for (unsigned i = 0; i < _psize; i++)
@@ -745,9 +739,6 @@ laydata::TdtPoly::TdtPoly(const pointlist& plst) : TdtData()
 
 laydata::TdtPoly::TdtPoly(int4b* pdata, unsigned psize) : _pdata(pdata), _psize(psize)
 {
-#ifdef DB_MEMORY_TRACE
-   dbMemTracker.incDataSize(_psize * 2 * sizeof(int4b));
-#endif
    _teseldata.tessellate(_pdata, _psize);
 }
 
@@ -755,9 +746,6 @@ laydata::TdtPoly::TdtPoly(TEDfile* const tedfile) : TdtData()
 {
    _psize = tedfile->getWord();
    assert(_psize);
-#ifdef DB_MEMORY_TRACE
-   dbMemTracker.incDataSize(_psize * 2 * sizeof(int4b));
-#endif
    _pdata = DEBUG_NEW int4b[_psize*2];
    TP wpnt;
    for (unsigned i = 0 ; i < _psize; i++)
@@ -1181,9 +1169,6 @@ laydata::TdtWire::TdtWire(pointlist& plst, word width) : TdtData(), _width(width
 {
    _psize = plst.size();
    assert(_psize);
-#ifdef DB_MEMORY_TRACE
-   dbMemTracker.incDataSize(_psize * 2 * sizeof(int4b));
-#endif
    _pdata = DEBUG_NEW int4b[_psize*2];
    for (unsigned i = 0; i < _psize; i++)
    {
@@ -1196,9 +1181,6 @@ laydata::TdtWire::TdtWire(const int4b* pdata, unsigned psize, word width) :
       TdtData(), _width(width), _psize(psize)
 {
    assert(_psize);
-#ifdef DB_MEMORY_TRACE
-   dbMemTracker.incDataSize(_psize * 2 * sizeof(int4b));
-#endif
    _pdata = DEBUG_NEW int4b[_psize*2];
    memcpy(_pdata, pdata, 2*_psize);
 }
@@ -1207,9 +1189,6 @@ laydata::TdtWire::TdtWire(TEDfile* const tedfile) : TdtData()
 {
    _psize = tedfile->getWord();
    assert(_psize);
-#ifdef DB_MEMORY_TRACE
-   dbMemTracker.incDataSize(_psize * 2 * sizeof(int4b));
-#endif
    _width = tedfile->getWord();
    _pdata = DEBUG_NEW int4b[_psize*2];
    TP wpnt;
@@ -3052,16 +3031,3 @@ void laydata::TdtTmpText::draw(const layprop::DrawProperties&, ctmqueue& transta
             fontLib->drawWiredString(_text);
             glPopMatrix();
 }
-
-#ifdef DB_MEMORY_TRACE
-void* laydata::TdtData::operator new(size_t size)
-{
-   dbMemTracker.incDataSize(size);
-   void *p=malloc(size);
-   return p;
-}
-void laydata::TdtData::operator delete(void* p)
-{
-   free(p);
-}
-#endif

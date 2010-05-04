@@ -35,10 +35,6 @@
 #include "viewprop.h"
 #include "tuidefs.h"
 
-#ifdef DB_MEMORY_TRACE
-   extern DBMemTracker    dbMemTracker;
-#endif
-
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
 extern console::toped_logfile    LogFile;
@@ -84,13 +80,7 @@ tellstdfunc::stdTELLSTATUS::stdTELLSTATUS(telldata::typeID retype, bool eor) :
 int tellstdfunc::stdTELLSTATUS::execute()
 {
 #ifdef DB_MEMORY_TRACE
-   std::ostringstream message;
-   message << "Data DB size: "
-           << " ( internal structures: " << dbMemTracker.targetDbInfraSize()
-           << " ); ( data: " << dbMemTracker.targetDbDataSize()
-           << " ); ( tesselation: " << dbMemTracker.targetDbTeselSize()
-           << " ); Total: " << dbMemTracker.total();
-   tell_log(console::MT_INFO, message.str());
+   MemTrack::TrackListMemoryUsage();
 #else
    real DBscale = PROPC->DBscale();
    telldata::tell_var *y;
@@ -102,7 +92,6 @@ int tellstdfunc::stdTELLSTATUS::execute()
    }
    news = "Bottom of the operand stack reached";
    tell_log(console::MT_ERROR,news);
-   MemTrack::TrackListMemoryUsage();
 #endif
    return EXEC_NEXT;
 }
