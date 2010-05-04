@@ -42,10 +42,6 @@
 #include "../ui/toped16x16.xpm"
 #include "../ui/toped32x32.xpm"
 
-
-#ifndef WIN32
-   #include "../ui/toped16x16.xpm"
-#endif
 #if wxCHECK_VERSION(2, 8, 0)
 #define tpdfOPEN wxFD_OPEN
 #define tpdfSAVE wxFD_SAVE
