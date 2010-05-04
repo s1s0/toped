@@ -47,7 +47,9 @@ laydata::TDTHierTree* laydata::TdtLibrary::_hiertree = NULL;
 // class TdtLibrary
 //-----------------------------------------------------------------------------
 laydata::TdtLibrary::TdtLibrary(std::string name, real DBU, real UU, int libID) :
-   _name(name), _libID(libID), _DBU(DBU), _UU(UU) {}
+   _name(name), _libID(libID), _DBU(DBU), _UU(UU)
+{
+}
 
 //void laydata::TdtLibrary::unloadprep(laydata::TdtLibDir* libdir)
 //{

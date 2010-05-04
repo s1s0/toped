@@ -85,11 +85,15 @@ namespace laydata {
    const word _lmapref  = 0x0080;
    const word _lmall    = 0xffff;
 
+   // The definition below is a "strongly typed enum". Very tempting to use, but too new
+   // and too risky for portability. gcc requires -std=c++0x option to stop the warnings
+   // It's here just as a reminder for the future
+   //   enum class SH_STATUS:byte { sh_active, sh_deleted, sh_selected, sh_partsel, sh_merged } ;
    typedef enum { sh_active, sh_deleted, sh_selected, sh_partsel, sh_merged } SH_STATUS;
    typedef enum {
       shp_OK         = 0x00,
       shp_ident      = 0x01, // identical or one line points removed
-      shp_clock      = 0x02, // poits reordered to get antoclockwise order
+      shp_clock      = 0x02, // points reordered to get anti clockwise order
       shp_box        = 0x04, // shape is a box
       shp_acute      = 0x08, // acute angle
       // critical
@@ -243,6 +247,6 @@ class DbExportFile {
       real                    _UU;
 };
 
-class TeselPoly;
+class TessellPoly;
 class PSFile;
 #endif
