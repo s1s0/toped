@@ -8,6 +8,12 @@
 
 ;--------------------------------
 
+!include MUI2.nsh
+
+;Request application privileges for Windows Vista
+;RequestExecutionLevel user
+
+
 ; The name of the installer
 Name "toped"
 
@@ -21,22 +27,30 @@ InstallDir $PROGRAMFILES\toped
 ; overwrite the old one automatically)
 InstallDirRegKey HKLM "Software\toped" "Install_Dir"
 
+;--------------------------------
+;Interface Settings
+
+  !define MUI_HEADERIMAGE
+  !define MUI_HEADERIMAGE_BITMAP "ui\toped_install.bmp" 
+  !define MUI_ABORTWARNING
+
 Var LocalDir
 ;--------------------------------
 
 ; Pages
+!insertmacro MUI_PAGE_COMPONENTS
+!insertmacro MUI_PAGE_DIRECTORY
+!insertmacro MUI_PAGE_INSTFILES
 
-Page components
-Page directory
-Page instfiles
-
-UninstPage uninstConfirm
-UninstPage instfiles
+!insertmacro MUI_UNPAGE_CONFIRM
+!insertmacro MUI_UNPAGE_INSTFILES
+;UninstPage uninstConfirm
+;UninstPage instfiles
 
 ;--------------------------------
 
 ; The stuff to install
-Section "toped"
+Section "toped" toped
 
   SectionIn RO
   
@@ -45,20 +59,20 @@ Section "toped"
   
   ; Put file there
   File "release\toped.exe"
-  File "glu32.dll"
+  File "winpack\glu32.dll"
   File "toped_example.bat"
-  File "authors"
-  File "news.txt"
-  File "readme.txt"
-  File "glew32.dll"
-  File "zlib1.dll"
-  File "virtuoso2tll.exe"
+  File "winpack\authors"
+  File "winpack\news.txt"
+  File "winpack\readme.txt"
+  File "winpack\glew32.dll"
+  File "winpack\zlib1.dll"
+  File "winpack\virtuoso2tll.exe"
 
   ;all for PLT scheme
   SetOutPath $INSTDIR\lib
-  File "lib\iconv.dll"
-  File "lib\libmzsch3m_6ncc9s.dll"
-  File "lib\UnicoWS.dll"
+  File "winpack\lib\iconv.dll"
+  File "winpack\lib\libmzsch3m_6ncc9s.dll"
+  File "winpack\lib\UnicoWS.dll"
   
   ;tll files
   SetOutPath $INSTDIR\tll
@@ -73,10 +87,6 @@ Section "toped"
   File "tll\seed.tll"
   ;File "tll\structures.tll"
   File "tll\tcase.tll"
-
-
-
-
 
   ;icons
   SetOutPath $INSTDIR\icons
@@ -194,7 +204,7 @@ Section "toped"
   
   ;Change installation directory to $INSTDIR\examples
   SetOutPath $INSTDIR\examples
-  File "foll.tdt"
+  File "winpack\foll.tdt"
 
 
   ;Return installation directory
@@ -218,7 +228,7 @@ Section "toped"
 SectionEnd
 
 ; Optional section (can be disabled by the user)
-Section "Start Menu Shortcuts"
+Section "Start Menu Shortcuts" Start_Menu_Shortcuts
 
   CreateDirectory "$SMPROGRAMS\toped"
   CreateShortCut "$SMPROGRAMS\toped\toped.lnk" "$INSTDIR\toped.exe" "" "$INSTDIR\toped.exe" 0
@@ -228,14 +238,34 @@ Section "Start Menu Shortcuts"
   
 SectionEnd
 
+; Optional section (can be disabled by the user)
+Section "Desktop Shortcut" Desktop_Shortcut
+  CreateShortCut "$DESKTOP\toped.lnk" "$INSTDIR\toped.exe" "" "$INSTDIR\toped.exe" 0
+SectionEnd
 
 ;MessageBox MB_YESNO|MB_ICONQUESTION "Do you wish to reboot the system right now?" IDNO +2
-;  Reboot
+;  Reboot	
 
 Function .onInstSuccess
   MessageBox MB_YESNO|MB_ICONQUESTION "Do you wish to reboot the system right now?" IDNO +2
   Reboot
 FunctionEnd
+
+
+;--------------------------------
+;Descriptions
+!insertmacro MUI_LANGUAGE "English"
+  ;Language strings
+  LangString DESC_Toped ${LANG_ENGLISH} "Main files of Toped Layout Editor"
+  LangString DESC_Start_Menu_Shortcuts ${LANG_ENGLISH} "Adds icons to your start menu"
+  LangString DESC_Desktop_Shortcut ${LANG_ENGLISH} "Adds icon to your desktop for easy access"
+
+  ;Assign language strings to sections
+  !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
+    !insertmacro MUI_DESCRIPTION_TEXT ${toped} $(DESC_Toped)
+    !insertmacro MUI_DESCRIPTION_TEXT ${Start_Menu_Shortcuts} $(DESC_Start_Menu_Shortcuts)
+    !insertmacro MUI_DESCRIPTION_TEXT ${Desktop_Shortcut} $(DESC_Desktop_Shortcut)
+  !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 ;--------------------------------
 
