@@ -84,6 +84,18 @@ AC_CHECK_LIB(z, gzsetparams,
 #Check for wx gl library and for wx threads
 #
 
+dnl----------------------------------------------------------------------------
+dnl
+dnl Toped Compilation options
+dnl
+dnl----------------------------------------------------------------------------
+AC_ARG_WITH(mem-track,
+            [  --with-mem-track        Compile with build-in heap tracker],
+            [ tpd_mem_track="yes"])
+
+if test "$tpd_mem_track" == "yes"; then
+    CPPFLAGS="$CPPFLAGS -DDB_MEMORY_TRACE"
+fi
 
 AC_CONFIG_FILES([
    Makefile
