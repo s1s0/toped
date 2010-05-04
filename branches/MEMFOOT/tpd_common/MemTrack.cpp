@@ -44,7 +44,7 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 //===========================================================================
 
 /* ---------------------------------------- includes */
-
+#ifdef DB_MEMORY_TRACE
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -642,3 +642,4 @@ void operator delete[](void *p)
     MemTrack::TrackFree(p);
 }
 
+#endif //DB_MEMORY_TRACE

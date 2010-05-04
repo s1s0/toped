@@ -32,10 +32,6 @@
 #include "tenderer.h"
 #include "outbox.h"
 
-#ifdef DB_MEMORY_TRACE
-   extern DBMemTracker    dbMemTracker;
-#endif
-
 //-----------------------------------------------------------------------------
 // class QuadTree
 //-----------------------------------------------------------------------------
@@ -942,19 +938,6 @@ laydata::QuadTree::~QuadTree() {
      place where shapes are deleted is in the cell Attic yet ONLY by the undo
      list clean-up when the certain delete hits the bottom of the undo list */
 }
-
-#ifdef DB_MEMORY_TRACE
-void* laydata::QuadTree::operator new(size_t size)
-{
-   dbMemTracker.incInfraSize(size);
-   void *p=malloc(size);
-   return p;
-}
-void laydata::QuadTree::operator delete(void* p)
-{
-   free(p);
-}
-#endif
 
 //-----------------------------------------------------------------------------
 // class TdtLayer

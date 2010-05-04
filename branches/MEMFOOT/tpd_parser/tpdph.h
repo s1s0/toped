@@ -16,8 +16,11 @@
    #include <map>
    #include <vector>
 #else
-#include "MemTrack.h"
-//#define DEBUG_NEW new
-#define DEBUG_NEW MEMTRACK_NEW
+   #ifdef DB_MEMORY_TRACE
+      #include "MemTrack.h"
+      #define DEBUG_NEW MEMTRACK_NEW
+   #else
+      #define DEBUG_NEW new
+   #endif
 #endif
 //using namespace std;
