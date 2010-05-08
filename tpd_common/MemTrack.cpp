@@ -44,6 +44,7 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 //===========================================================================
 
 /* ---------------------------------------- includes */
+#include "tpdph.h"
 #ifdef DB_MEMORY_TRACE
 #include <assert.h>
 #include <stdio.h>
