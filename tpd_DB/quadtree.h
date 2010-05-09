@@ -86,7 +86,7 @@ namespace laydata {
       bool                 getObjectOver(const TP pnt, laydata::TdtData*& prev);
       void                 validate();
       bool                 fullValidate();
-      void                 resort();
+      void                 resort(laydata::TdtData* newdata = NULL);
       bool                 empty() const;
       void                 freeMemory();
       /*! Return the overlapping box*/
@@ -100,6 +100,7 @@ namespace laydata {
    protected:
       DBbox               _overlap;//! The overlapping box
    private:
+      typedef unsigned     ObjectIter;
       void                 sort(ShapeList&);
       bool                 fitInTree(TdtData* shape);
       int                  fitSubTree(const DBbox&, DBbox*);
@@ -109,8 +110,9 @@ namespace laydata {
       /*! A pointers to four child QuadTree structures*/
       QuadTree*           _quads[4];
       /*! Pointer to the first TdtData stored in this QuadTree*/
-      TdtData*            _first;
+      TdtData**           _data;
       /*! Flag indicates that the container needs to be resorted*/
+      ObjectIter          _numObjects;
       bool                _invalid;
    };
 
