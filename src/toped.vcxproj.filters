@@ -1,0 +1,142 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{9961a5a8-16e8-4fcd-833b-9a83a210daa6}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{d246b88f-049e-47e2-b606-930e134446d3}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{e914ba7d-41f4-4228-b7d2-632ffcd8ecd6}</UniqueIdentifier>
+      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="browsers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="layoutcanvas.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="resourcecenter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="toped.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tpdph.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tui.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="browsers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="layoutcanvas.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resourcecenter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="toped.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tpdph.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="wx\msw\blank.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="wx\msw\bullseye.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="wx\msw\cdrom.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="icons\chart.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="wx\msw\computer.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="icons\doc.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="wx\msw\drive.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="wx\msw\file1.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="wx\msw\floppy.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="wx\msw\folder1.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="wx\msw\folder2.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="wx\msw\hand.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="wx\msw\magnif1.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="wx\msw\noentry.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="icons\notepad.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="wx\msw\pbrush.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="wx\msw\pencil.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="wx\msw\pntleft.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="wx\msw\pntright.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="bitmaps\print.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="wx\msw\query.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="wx\msw\removble.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="wx\msw\rightarr.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="wx\msw\roller.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="wx\msw\watch1.cur">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="toped.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>
