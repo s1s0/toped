@@ -258,16 +258,19 @@ Calbr::CalbrFile::CalbrFile(const std::string &fileName, drcRenderer *render)
 
    if (_calbrFile) fclose(_calbrFile);
 
-   _border = (*_RuleChecks.begin())->getZoom();
-   for (RuleChecksVector::const_iterator it = _RuleChecks.begin(); it != _RuleChecks.end(); ++it)
+   if(isOk())
    {
-      edge tempBorder = (*it)->getZoom();
-      if(tempBorder.x1 < _border.x1) _border.x1 = tempBorder.x1;
-      if(tempBorder.y1 < _border.y1) _border.y1 = tempBorder.y1;
-      if(tempBorder.x2 > _border.x2) _border.x2 = tempBorder.x2;
-      if(tempBorder.y2 > _border.y2) _border.y2 = tempBorder.y2;
+	   _border = (*_RuleChecks.begin())->getZoom();
+		for (RuleChecksVector::const_iterator it = _RuleChecks.begin(); it != _RuleChecks.end(); ++it)
+		{
+			edge tempBorder = (*it)->getZoom();
+			if(tempBorder.x1 < _border.x1) _border.x1 = tempBorder.x1;
+			if(tempBorder.y1 < _border.y1) _border.y1 = tempBorder.y1;
+			if(tempBorder.x2 > _border.x2) _border.x2 = tempBorder.x2;
+			if(tempBorder.y2 > _border.y2) _border.y2 = tempBorder.y2;
+		}
+		_render->setCellName(_cellName);
    }
-	_render->setCellName(_cellName);
 }
 
 Calbr::CalbrFile::~CalbrFile()
