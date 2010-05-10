@@ -47,14 +47,14 @@ namespace laydata {
       possible sub-rectangles of the _overlap area. Child QuadTree objects are
       stored into an quads[4] array and each of them is responsible by convention
       for the NW(north-west), NE(north-east), SE(south-east) and SW(south-west)
-      subrectangles of the _overlap box.\n
+      sub-rectangles of the _overlap box.\n
       The methods can be split on several groups:
          - add a single layout object - add(), fitInTree()
          - add a group of layout objects - put(), sort(), fitSubTree()
          - object selection - selectInBox(), unselectInBox(), selectFromList(),
            selectAll()
          - design modification - deleteMarked()
-         - tree maintanence - validate(), fullValidate(), sort(), resort(),
+         - tree maintenance - validate(), fullValidate(), sort(), resort(),
            tmpStore()
             */
    class QuadTree {
