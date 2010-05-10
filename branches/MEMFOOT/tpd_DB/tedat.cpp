@@ -423,10 +423,10 @@ void laydata::TdtBox::openGlPrecalc(layprop::DrawProperties& drawprop , pointlis
 {
    // translate the points using the current CTM
    ptlist.reserve(4);
-   for (unsigned i = 0; i < 4; i++)
-   {
-      ptlist.push_back(TP(_pdata[2*i], _pdata[2*i+1]) * drawprop.topCtm());
-   }
+   ptlist.push_back(TP(_pdata[p1x], _pdata[p1y]) * drawprop.topCtm());
+   ptlist.push_back(TP(_pdata[p2x], _pdata[p1y]) * drawprop.topCtm());
+   ptlist.push_back(TP(_pdata[p2x], _pdata[p2y]) * drawprop.topCtm());
+   ptlist.push_back(TP(_pdata[p1x], _pdata[p2y]) * drawprop.topCtm());
 }
 
 void laydata::TdtBox::drawRequest(tenderer::TopRend& rend) const
@@ -489,44 +489,46 @@ void laydata::TdtBox::motionDraw(const layprop::DrawProperties&, ctmqueue& trans
                                                 SGBitSet* plst) const
 {
    CTM trans = transtack.front();
-   pointlist* ptlist;
    if (sh_partsel == status())
    {
+      TP pt1, pt2;
       CTM strans = transtack.back();
       assert(plst);
-      ptlist = movePointsSelected(*plst, trans, strans);
+      pointlist* nshape = movePointsSelected(*plst, trans, strans);
+      pt1 = (*nshape)[0]; pt2 = (*nshape)[2];
+      glRecti(pt1.x(),pt1.y(),pt2.x(),pt2.y());
+      nshape->clear(); delete nshape;
    }
    else
    {
-      ptlist = DEBUG_NEW pointlist;
-      ptlist->reserve(4);
+      pointlist ptlist;
+      ptlist.reserve(4);
+      ptlist.push_back(TP(_pdata[p1x], _pdata[p1y]) * trans);
+      ptlist.push_back(TP(_pdata[p2x], _pdata[p1y]) * trans);
+      ptlist.push_back(TP(_pdata[p2x], _pdata[p2y]) * trans);
+      ptlist.push_back(TP(_pdata[p1x], _pdata[p2y]) * trans);
+      glBegin(GL_LINE_LOOP);
       for (unsigned i = 0; i < 4; i++)
-      {
-         ptlist->push_back( TP(_pdata[2*i], _pdata[2*i+1]) * trans);
-      }
+         glVertex2i(ptlist[i].x(), ptlist[i].y());
+      glEnd();
+      ptlist.clear();
    }
-   glBegin(GL_LINE_LOOP);
-   for (unsigned i = 0; i < 4; i++)
-   {
-      glVertex2i((*ptlist)[i].x(), (*ptlist)[i].y());
-   }
-   glEnd();
-   ptlist->clear();
-   delete ptlist;
 }
 
 void  laydata::TdtBox::selectPoints(DBbox& select_in, SGBitSet& pntlst) {
-   for (unsigned i = 0; i < 4; i++)
-      if ( select_in.inside( TP(_pdata[2*i], _pdata[2*i+1]) ) ) pntlst.set(i);
+   if (select_in.inside(TP(_pdata[p1x], _pdata[p1y])))  pntlst.set(0);
+   if (select_in.inside(TP(_pdata[p2x], _pdata[p1y])))  pntlst.set(1);
+   if (select_in.inside(TP(_pdata[p2x], _pdata[p2y])))  pntlst.set(2);
+   if (select_in.inside(TP(_pdata[p1x], _pdata[p2y])))  pntlst.set(3);
    pntlst.check_neighbours_set(false);
 }
 
 void  laydata::TdtBox::unselectPoints(DBbox& select_in, SGBitSet& pntlst) {
-   if (sh_selected == _status)  // the whole shape use to be selected
-      pntlst.setall();
-   for (word i = 0; i < 4; i++)
-      if ( select_in.inside( TP(_pdata[2*i], _pdata[2*i+1]) ) ) pntlst.reset(i);
-   pntlst.check_neighbours_set(false);
+   if (sh_selected == _status) pntlst.setall();
+   if (select_in.inside(TP(_pdata[p1x], _pdata[p1y])))  pntlst.reset(0);
+   if (select_in.inside(TP(_pdata[p2x], _pdata[p1y])))  pntlst.reset(1);
+   if (select_in.inside(TP(_pdata[p2x], _pdata[p2y])))  pntlst.reset(2);
+   if (select_in.inside(TP(_pdata[p1x], _pdata[p2y])))  pntlst.reset(3);
 }
 
 laydata::Validator* laydata::TdtBox::move(const CTM& trans, SGBitSet& plst)
@@ -566,7 +568,7 @@ laydata::Validator* laydata::TdtBox::move(const CTM& trans, SGBitSet& plst)
 void laydata::TdtBox::transfer(const CTM& trans) {
    TP p1 = TP(_pdata[p1x], _pdata[p1y]) * trans;
    TP p2 = TP(_pdata[p2x], _pdata[p2y]) * trans;
-   _pdata[p1x ] = p1.x()     ;_pdata[p1y ] = p1.y();
+   _pdata[p1x] = p1.x();_pdata[p1y] = p1.y();
    _pdata[p2x] = p2.x();_pdata[p2y] = p2.y();
    SGBitSet dummy;
    normalize(dummy);

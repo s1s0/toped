@@ -189,9 +189,9 @@ unsigned  tenderer::TenderBox::cDataCopy(int* array, unsigned& pindex)
 {
    assert(_csize);
    array[pindex++] = _cdata[0];array[pindex++] = _cdata[1];
-   array[pindex++] = _cdata[0];array[pindex++] = _cdata[3];
-   array[pindex++] = _cdata[2];array[pindex++] = _cdata[3];
    array[pindex++] = _cdata[2];array[pindex++] = _cdata[1];
+   array[pindex++] = _cdata[2];array[pindex++] = _cdata[3];
+   array[pindex++] = _cdata[0];array[pindex++] = _cdata[3];
    return _csize;
 }
 
