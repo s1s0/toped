@@ -100,7 +100,11 @@ typedef  std::map<word, WordSet>          ExtLayers;
 typedef  std::map<std::string, int>       SIMap;       // name
 typedef  std::map<unsigned, std::string>  USMap;      // Unsigned - String Map
 typedef  std::map<word, unsigned long>    SLMap;
-
+enum QuadIdentificators{ qidNW = 0,
+                         qidNE = 1,
+                         qidSE = 2,
+                         qidSW = 3,
+                         qidNULL = 4};
 //=============================================================================
 // Some common constants (instead of #defines)
 //=============================================================================
@@ -244,7 +248,7 @@ public:
    bool  inside(const TP& );
    int8b boxarea() const;
    bool  visible(const CTM&, int8b) const;
-   DBbox getcorner(byte corner);
+   DBbox getcorner(QuadIdentificators corner);
    const TP&    p1()  const {return _p1;};
    const TP&    p2()  const {return _p2;};
    DBbox operator * (const CTM&) const;
