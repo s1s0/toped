@@ -87,6 +87,7 @@ namespace laydata {
       void                 validate();
       bool                 fullValidate();
       void                 resort(laydata::TdtData* newdata = NULL);
+//      void                 resort(ShapeList&);
       bool                 empty() const;
       void                 freeMemory();
       /*! Return the overlapping box*/
@@ -94,26 +95,45 @@ namespace laydata {
       /*! Return the overlapping box*/
       virtual void         vlOverlap(const layprop::DrawProperties&, DBbox&) const;
       /*! Mark the tree as invalid*/
-      void                 invalidate()      {_invalid = true;};
+      void                 invalidate()      {_props._invalid = true;};
       /*! Return the status of _invalid flag*/
-      bool                 invalid() const   {return _invalid;};
+      bool                 invalid() const   {return _props._invalid;};
    protected:
       DBbox               _overlap;//! The overlapping box
    private:
       typedef unsigned     ObjectIter;
+      struct __attribute__ ((__packed__)) QuadProps
+      {
+                                QuadProps();
+         byte                   numSubQuads() const;
+         char                   getPosition(QuadIdentificators);
+         void                   addQuad(QuadIdentificators);
+         void                   removeQuad(QuadIdentificators);
+         void                   clearQuadMap() {_quadMap = 0;}
+         ObjectIter             _numObjects;
+         /*! Flag indicates that the container needs to be resorted*/
+         bool                   _invalid;
+      private:
+         char                   getNEQuad() const;
+         char                   getNWQuad() const;
+         char                   getSEQuad() const;
+         char                   getSWQuad() const;
+         byte                   _quadMap;
+      };
+
       void                 sort(ShapeList&);
       bool                 fitInTree(TdtData* shape);
-      int                  fitSubTree(const DBbox&, DBbox*);
+      char                 fitSubTree(const DBbox&, DBbox*);
       void                 tmpStore(ShapeList& store);
       byte                 biggest(int8b* array) const;
       void                 updateOverlap(const DBbox& hovl);
+      byte                 sequreQuad(QuadIdentificators);
+      void                 removeQuad(QuadIdentificators);
       /*! A pointers to four child QuadTree structures*/
-      QuadTree*           _quads[4];
+      QuadTree**           _subQuads;
       /*! Pointer to the first TdtData stored in this QuadTree*/
-      TdtData**           _data;
-      /*! Flag indicates that the container needs to be resorted*/
-      ObjectIter          _numObjects;
-      bool                _invalid;
+      TdtData**            _data;
+      QuadProps            _props;
    };
 
 //==============================================================================
