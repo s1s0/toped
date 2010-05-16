@@ -445,7 +445,7 @@ void DataCenter::bpRefreshTdtTab(bool targetDB, bool threadExecution)
       assert(NULL == _bpSync);
       TdtMutexState saveMutexState = _tdtActMxState;
       // Initialize the thread condition with the locked Mutex
-      _bpSync = new wxCondition(_DBLock);
+      _bpSync = DEBUG_NEW wxCondition(_DBLock);
       // post a message to the main thread
       TpdPost::refreshTDTtab(targetDB, threadExecution);
       // Go to sleep and wait until the main thread finished
@@ -485,7 +485,7 @@ void DataCenter::bpAddGdsTab(bool threadExecution)
          return;
       }
       // Initialize the thread condition with the locked Mutex
-      _bpSync = new wxCondition(_GDSLock);
+      _bpSync = DEBUG_NEW wxCondition(_GDSLock);
       // post a message to the main thread
       TpdPost::addGDStab(threadExecution);
       // Go to sleep and wait until the main thread finished
@@ -521,7 +521,7 @@ void DataCenter::bpAddCifTab(bool threadExecution)
          return;
       }
       // Initialize the thread condition with the locked Mutex
-      _bpSync = new wxCondition(_CIFLock);
+      _bpSync = DEBUG_NEW wxCondition(_CIFLock);
       // post a message to the main thread
       TpdPost::addCIFtab(threadExecution);
       // Go to sleep and wait until the main thread finished
@@ -550,7 +550,7 @@ void DataCenter::bpAddOasTab(bool threadExecution )
          return;
       }
       // initialise the thread condition with the locked Mutex
-      _bpSync = new wxCondition(_OASLock);
+      _bpSync = DEBUG_NEW wxCondition(_OASLock);
       // post a message to the main thread
       TpdPost::addOAStab(threadExecution);
       // Go to sleep and wait until the main thread finished

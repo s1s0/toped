@@ -86,13 +86,13 @@ byte laydata::QuadTree::sequreQuad(QuadIdentificators quad)
    {
       QuadProps oldMap = _props;
       _props.addQuad(quad);
-      QuadTree** newSubQuads = new QuadTree*[_props.numSubQuads()];
+      QuadTree** newSubQuads = DEBUG_NEW QuadTree*[_props.numSubQuads()];
       for (byte i = 0; i < 4; i++)
       {
          if (-1 < oldMap.getPosition((QuadIdentificators)i))
             newSubQuads[(byte)_props.getPosition((QuadIdentificators)i)] = _subQuads[(byte)oldMap.getPosition((QuadIdentificators)i)];
          else if (i == quad)
-            newSubQuads[(byte)_props.getPosition((QuadIdentificators)i)] = new QuadTree();
+            newSubQuads[(byte)_props.getPosition((QuadIdentificators)i)] = DEBUG_NEW QuadTree();
       }
       if (_subQuads) delete [] _subQuads;
       _subQuads = newSubQuads;
@@ -106,7 +106,7 @@ void laydata::QuadTree::removeQuad(QuadIdentificators quad)
    assert(-1 != _props.getPosition(quad));
    QuadProps oldMap = _props;
    _props.removeQuad(quad);
-   QuadTree** newSubQuads = new QuadTree*[_props.numSubQuads()];
+   QuadTree** newSubQuads = DEBUG_NEW QuadTree*[_props.numSubQuads()];
    for (byte i = 0; i < 4; i++)
    {
       if ((i != quad) && (-1 < oldMap.getPosition((QuadIdentificators)i)))
@@ -228,7 +228,7 @@ void laydata::QuadTree::add(TdtData* shape)
    {
       // first shape in the container
       _overlap = shovl;
-      _data = new TdtData*[1];
+      _data = DEBUG_NEW TdtData*[1];
       _data[0] = shape;
       _props._numObjects = 1;
    }
@@ -250,7 +250,7 @@ void laydata::QuadTree::add(TdtData* shape)
          if ((areanew <= 4ll * shovl.boxarea()) || !fitInTree(shape))
          {
             // shape doesn't fit into the subtree, so place it here
-            TdtData** newdata = new TdtData*[_props._numObjects+1];
+            TdtData** newdata = DEBUG_NEW TdtData*[_props._numObjects+1];
             memcpy(newdata, _data, sizeof(TdtData*) * _props._numObjects);
             newdata[_props._numObjects++] = shape;
             delete [] _data;
@@ -351,7 +351,7 @@ void laydata::QuadTree::sort(ShapeList& inlist)
    // if the list contains only one component - link it and run away
    if (1 == inlist.size())
    {
-      _data = new TdtData*[1];
+      _data = DEBUG_NEW TdtData*[1];
       _props._numObjects = 1;
       _data[0] = *DI;
       return;
@@ -420,7 +420,7 @@ void laydata::QuadTree::sort(ShapeList& inlist)
    _props._numObjects = inlist.size();
    if (0 < _props._numObjects)
    {
-      _data = new TdtData*[_props._numObjects];
+      _data = DEBUG_NEW TdtData*[_props._numObjects];
       ObjectIter j = 0;
       for (DI = inlist.begin(); DI != inlist.end(); DI++)
          _data[j++] = *DI;
@@ -525,7 +525,7 @@ bool laydata::QuadTree::deleteMarked(SH_STATUS stat, bool partselect)
          if (areaold != areanew) _props._invalid = true;
          // and finally - put the unmarked shapes back
          _props._numObjects = unmarkedObjects.size();
-         _data = new TdtData*[_props._numObjects];
+         _data = DEBUG_NEW TdtData*[_props._numObjects];
          ObjectIter j = 0;
          for (ShapeList::const_iterator DI = unmarkedObjects.begin(); DI != unmarkedObjects.end(); DI++)
             _data[j++] = *DI;
@@ -662,7 +662,7 @@ bool laydata::QuadTree::deleteThis(laydata::TdtData* object)
          if (areaold != areanew) _props._invalid = true;
          // and finally - put the unmarked shapes back
          _props._numObjects = unmarkedObjects.size();
-         _data = new TdtData*[_props._numObjects];
+         _data = DEBUG_NEW TdtData*[_props._numObjects];
          ObjectIter j = 0;
          for (ShapeList::const_iterator DI = unmarkedObjects.begin(); DI != unmarkedObjects.end(); DI++)
             _data[j++] = *DI;
@@ -981,7 +981,7 @@ the overlapping box though. */
 void laydata::QuadTree::put(TdtData* shape)
 {
    updateOverlap(shape->overlap());
-   TdtData** newdata = new TdtData*[_props._numObjects+1];
+   TdtData** newdata = DEBUG_NEW TdtData*[_props._numObjects+1];
    memcpy(newdata, _data, sizeof(TdtData*) * _props._numObjects);
    newdata[_props._numObjects++] = shape;
    delete [] _data;
