@@ -401,19 +401,6 @@ void laydata::QuadTree::sort(ShapeList& inlist)
             _subQuads[quadIndex]->_overlap.overlap(shovl);
             // get rid of the current shape pointer. It is pushed in the sbulists
             DI = inlist.erase(DI);
-   //         // fits in sub-tree fitinsubbox
-   //         sublist[fitinsubbox].push_back(*DI);
-   //         // check this child already exists
-   //         if (_quads[fitinsubbox])  // yes ?
-   //            _quads[fitinsubbox]->_overlap.overlap(shovl);
-   //         else
-   //         {
-   //            // create the child, initialize the overlapping box
-   //            _quads[fitinsubbox] = DEBUG_NEW QuadTree();
-   //            _quads[fitinsubbox]->_overlap = shovl;
-   //         }
-   //         // get rid of the current shape pointer. It is pushed in the sbulists
-   //         DI = inlist.erase(DI);
          }
       }
    }
@@ -479,18 +466,6 @@ bool laydata::QuadTree::deleteMarked(SH_STATUS stat, bool partselect)
       }
       cquad = (QuadIdentificators)(cquad + 1);
    }
-//   for (byte i = 0; i < 4; i++)
-//      if (_quads[i])
-//      {
-//         _2B_sorted |= _quads[i]->deleteMarked(stat, partselect);
-//         // check that there is still something left in the child QuadTree
-//         if (_quads[i]->empty())
-//         {
-//            delete _quads[i]; _quads[i] = NULL;
-//         }
-//         else updateOverlap(_quads[i]->overlap());
-//      }
-
    ShapeList unmarkedObjects;
    bool inventoryChanged = false;
    for (ObjectIter i = 0; i < _props._numObjects; i++)
@@ -620,16 +595,6 @@ bool laydata::QuadTree::deleteThis(laydata::TdtData* object)
       }
       cquad = (QuadIdentificators)(cquad + 1);
    }
-//   for (byte i = 0; i < _props.numSubQuads(); i++)
-//   {
-//      _2B_sorted |= _subQuads[i]->deleteThis(object);
-//      // check that there is still something left in the child QuadTree
-//      if (_subQuads[i]->empty())
-//      {
-//         delete _quads[i]; _quads[i] = NULL;
-//      }
-//      else updateOverlap(_subQuads[i]->overlap());
-//   }
    ShapeList unmarkedObjects;
    bool inventoryChanged = false;
    for (ObjectIter i = 0; i < _props._numObjects; i++)
