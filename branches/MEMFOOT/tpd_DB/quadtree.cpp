@@ -111,6 +111,8 @@ void laydata::QuadTree::removeQuad(QuadIdentificators quad)
    {
       if ((i != quad) && (-1 < oldMap.getPosition((QuadIdentificators)i)))
          newSubQuads[(byte)_props.getPosition((QuadIdentificators)i)] = _subQuads[(byte)oldMap.getPosition((QuadIdentificators)i)];
+      else if (i == quad)
+         delete _subQuads[(byte)oldMap.getPosition((QuadIdentificators)i)];
    }
    delete [] _subQuads;
    _subQuads = newSubQuads;
@@ -471,7 +473,7 @@ bool laydata::QuadTree::deleteMarked(SH_STATUS stat, bool partselect)
          // check that there is still something left in the child QuadTree
          if (_subQuads[(byte)position]->empty())
          {
-            _props.removeQuad(cquad);
+            removeQuad(cquad);
          }
          else updateOverlap(_subQuads[(byte)position]->overlap());
       }
@@ -612,7 +614,7 @@ bool laydata::QuadTree::deleteThis(laydata::TdtData* object)
          // check that there is still something left in the child QuadTree
          if (_subQuads[(byte)position]->empty())
          {
-            _props.removeQuad(cquad);
+            removeQuad(cquad);
          }
          else updateOverlap(_subQuads[(byte)position]->overlap());
       }
