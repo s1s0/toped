@@ -999,7 +999,7 @@ void laydata::TdtDesign::collectParentCells(std::string& cname, CellDefList& par
 laydata::TdtData* laydata::TdtDesign::addBox(unsigned la, TP* p1, TP* p2, bool sortnow )
 {
    DBbox old_overlap(_target.edit()->cellOverlap());
-   TdtLayer *actlay = static_cast<TdtLayer*>(_target.edit()->secureLayer(la));
+   QuadTree *actlay = _target.edit()->secureLayer(la);
    modified = true;
    TP np1((*p1) * _target.rARTM());
    TP np2((*p2) * _target.rARTM());
@@ -1020,7 +1020,7 @@ laydata::TdtData* laydata::TdtDesign::addPoly(unsigned la, pointlist* pl,bool so
    }
    laydata::TdtData* newshape;
    DBbox old_overlap(_target.edit()->cellOverlap());
-   TdtLayer *actlay = static_cast<TdtLayer*>(_target.edit()->secureLayer(la));
+   QuadTree *actlay = _target.edit()->secureLayer(la);
    modified = true;
    pointlist vpl = check.getValidated();
    if (check.box())
@@ -1050,7 +1050,7 @@ laydata::TdtData* laydata::TdtDesign::addWire(unsigned la, pointlist* pl, word w
       return NULL;
    }
    DBbox old_overlap(_target.edit()->cellOverlap());
-   TdtLayer *actlay = static_cast<TdtLayer*>(_target.edit()->secureLayer(la));
+   QuadTree *actlay = _target.edit()->secureLayer(la);
    modified = true;
    pointlist vpl = check.getValidated();
    for(pointlist::iterator PL = vpl.begin(); PL != vpl.end(); PL++)
@@ -1063,7 +1063,7 @@ laydata::TdtData* laydata::TdtDesign::addWire(unsigned la, pointlist* pl, word w
 
 laydata::TdtData* laydata::TdtDesign::addText(unsigned la, std::string& text, CTM& ori) {
    DBbox old_overlap(_target.edit()->cellOverlap());
-   TdtLayer *actlay = static_cast<TdtLayer*>(_target.edit()->secureLayer(la));
+   QuadTree *actlay = _target.edit()->secureLayer(la);
    modified = true;
    ori *= _target.rARTM();
    laydata::TdtData* newshape = actlay->addText(text,ori);

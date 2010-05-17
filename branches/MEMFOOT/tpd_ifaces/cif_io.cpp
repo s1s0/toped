@@ -764,8 +764,7 @@ void CIFin::Cif2Ted::import(const CIFin::CifStructure* src, laydata::TdtCell* ds
       SIMap::const_iterator layno;
       if ( _cif_layers.end() != (layno = _cif_layers.find(swl->name())) )
       {
-         laydata::TdtLayer* dwl =
-               static_cast<laydata::TdtLayer*>(dst->secureLayer(layno->second));
+         laydata::QuadTree* dwl = dst->secureLayer(layno->second);
          const CIFin::CifData* wd = swl->firstData();
          while ( wd ) // loop trough data
          {
@@ -799,7 +798,7 @@ void CIFin::Cif2Ted::import(const CIFin::CifStructure* src, laydata::TdtCell* ds
    dst->resort();
 }
 
-void CIFin::Cif2Ted::box ( const CIFin::CifBox* wd, laydata::TdtLayer* wl, std::string layname)
+void CIFin::Cif2Ted::box ( const CIFin::CifBox* wd, laydata::QuadTree* wl, std::string layname)
 {
    pointlist pl;   pl.reserve(4);
    real cX, cY;
@@ -847,7 +846,7 @@ void CIFin::Cif2Ted::box ( const CIFin::CifBox* wd, laydata::TdtLayer* wl, std::
    else              wl->addPoly(pl,false);
 }
 
-void CIFin::Cif2Ted::poly( const CIFin::CifPoly* wd, laydata::TdtLayer* wl, std::string layname)
+void CIFin::Cif2Ted::poly( const CIFin::CifPoly* wd, laydata::QuadTree* wl, std::string layname)
 {
    pointlist pl;
    pl.reserve(wd->poly()->size());
@@ -871,7 +870,7 @@ void CIFin::Cif2Ted::poly( const CIFin::CifPoly* wd, laydata::TdtLayer* wl, std:
    else              wl->addPoly(pl,false);
 }
 
-void CIFin::Cif2Ted::wire( const CIFin::CifWire* wd, laydata::TdtLayer* wl, std::string layname)
+void CIFin::Cif2Ted::wire( const CIFin::CifWire* wd, laydata::QuadTree* wl, std::string layname)
 {
    pointlist pl;
    pl.reserve(wd->poly()->size());
@@ -911,7 +910,7 @@ void CIFin::Cif2Ted::ref ( const CIFin::CifRef* wd, laydata::TdtCell* dst)
    }
 }
 
-void CIFin::Cif2Ted::lbll( const CIFin::CifLabelLoc* wd, laydata::TdtLayer* wl, std::string )
+void CIFin::Cif2Ted::lbll( const CIFin::CifLabelLoc* wd, laydata::QuadTree* wl, std::string )
 {
    // CIF doesn't have a concept of texts (as GDS)
    // text size and placement are just the default
@@ -926,7 +925,7 @@ void CIFin::Cif2Ted::lbll( const CIFin::CifLabelLoc* wd, laydata::TdtLayer* wl, 
               );
 }
 
-void CIFin::Cif2Ted::lbls( const CIFin::CifLabelSig*,laydata::TdtLayer*, std::string )
+void CIFin::Cif2Ted::lbls( const CIFin::CifLabelSig*,laydata::QuadTree*, std::string )
 {
 }
 

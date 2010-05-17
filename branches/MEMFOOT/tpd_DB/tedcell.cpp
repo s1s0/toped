@@ -307,8 +307,8 @@ laydata::TdtCell::TdtCell(TEDfile* const tedfile, std::string name, int lib) :
          {
             case    tedf_LAYER:
                layno = tedfile->getWord();
-               if (0 != layno) _layers[layno]   = DEBUG_NEW TdtLayer(tedfile);
-               else            _layers[REF_LAY] = DEBUG_NEW QuadTree(tedfile);
+               if (0 != layno) _layers[layno]   = DEBUG_NEW QuadTree(tedfile, false);
+               else            _layers[REF_LAY] = DEBUG_NEW QuadTree(tedfile, true);
                if (0 == layno) tedfile->getCellChildNames(_children);
                break;
             default: throw EXPTNreadTDT("LAYER record type expected");
@@ -323,10 +323,10 @@ laydata::TdtCell::TdtCell(TEDfile* const tedfile, std::string name, int lib) :
          {
             case    tedf_LAYER:
                layno = tedfile->getWord();
-               _layers[layno] = DEBUG_NEW TdtLayer(tedfile);
+               _layers[layno] = DEBUG_NEW QuadTree(tedfile, false);
                break;
             case    tedf_REFS:
-               _layers[REF_LAY] = DEBUG_NEW QuadTree(tedfile);
+               _layers[REF_LAY] = DEBUG_NEW QuadTree(tedfile, true);
                tedfile->getCellChildNames(_children);
                break;
             default: throw EXPTNreadTDT("LAYER record type expected");
@@ -339,10 +339,7 @@ laydata::TdtCell::TdtCell(TEDfile* const tedfile, std::string name, int lib) :
 laydata::QuadTree* laydata::TdtCell::secureLayer(unsigned layno)
 {
    if (_layers.end() == _layers.find(layno))
-   {
-      if (REF_LAY == layno) _layers[layno] = DEBUG_NEW QuadTree();
-      else                  _layers[layno] = DEBUG_NEW TdtLayer();
-   }
+      _layers[layno] = DEBUG_NEW QuadTree();
    return _layers[layno];
 }
 
@@ -813,7 +810,7 @@ DBbox laydata::TdtCell::getVisibleOverlap(const layprop::DrawProperties& prop)
    DBbox vlOverlap(DEFAULT_OVL_BOX);
    for (LayerList::const_iterator LCI = _layers.begin(); LCI != _layers.end(); LCI++)
       if (!prop.layerHidden(LCI->first))
-         LCI->second->vlOverlap(prop, vlOverlap);
+         LCI->second->vlOverlap(prop, vlOverlap, (REF_LAY == LCI->first));
    return vlOverlap;
 }
 
@@ -2101,8 +2098,7 @@ laydata::TdtCell::~TdtCell()
    unselectAll();
    for (LayerList::iterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
-      if (REF_LAY == lay->first)
-         lay->second->freeMemory();
+      lay->second->freeMemory();
       delete lay->second;
    }
    _layers.clear();

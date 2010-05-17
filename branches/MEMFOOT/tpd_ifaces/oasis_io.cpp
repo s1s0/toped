@@ -923,7 +923,7 @@ void Oasis::Cell::readRectangle(OasisInFile& ofn, laydata::TdtCell* dst_cell, co
 
    if ( theLayMap.getTdtLay(tdtlaynum, _mod_layer(), _mod_datatype() ) )
    {
-      laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->secureLayer(tdtlaynum));
+      laydata::QuadTree* dwl = dst_cell->secureLayer(tdtlaynum);
       if ((0 == _mod_gwidth()) || (0 == _mod_gheight()))
       {
          std::ostringstream winfo;
@@ -980,7 +980,7 @@ void Oasis::Cell::readPolygon(OasisInFile& ofn, laydata::TdtCell* dst_cell, cons
 
    if ( theLayMap.getTdtLay(tdtlaynum, _mod_layer(), _mod_datatype() ) )
    {
-      laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->secureLayer(tdtlaynum));
+      laydata::QuadTree* dwl = dst_cell->secureLayer(tdtlaynum);
       if (info & Rmask)
       {
          int4b* rptpnt = _mod_repete().lcarray();
@@ -1055,7 +1055,7 @@ void Oasis::Cell::readPath(OasisInFile& ofn, laydata::TdtCell* dst_cell, const L
 
    if ( theLayMap.getTdtLay(tdtlaynum, _mod_layer(), _mod_datatype() ) )
    {
-      laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->secureLayer(tdtlaynum));
+      laydata::QuadTree* dwl = dst_cell->secureLayer(tdtlaynum);
       if (0 == _mod_pathhw())
       {
          std::ostringstream winfo;
@@ -1185,7 +1185,7 @@ void Oasis::Cell::readTrapezoid(OasisInFile& ofn, laydata::TdtCell* dst_cell, co
 
    if ( theLayMap.getTdtLay(tdtlaynum, _mod_layer(), _mod_datatype() ) )
    {
-      laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->secureLayer(tdtlaynum));
+      laydata::QuadTree* dwl = dst_cell->secureLayer(tdtlaynum);
       if (info & Rmask)
       {
          int4b* rptpnt = _mod_repete().lcarray();
@@ -1288,7 +1288,7 @@ void Oasis::Cell::readCTrapezoid(OasisInFile& ofn, laydata::TdtCell* dst_cell, c
 
    if ( theLayMap.getTdtLay(tdtlaynum, _mod_layer(), _mod_datatype() ) )
    {
-      laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->secureLayer(tdtlaynum));
+      laydata::QuadTree* dwl = dst_cell->secureLayer(tdtlaynum);
       if (info & Rmask)
       {
          //read the repetition record from the input stream
@@ -1350,7 +1350,7 @@ void Oasis::Cell::readText(OasisInFile& ofn, laydata::TdtCell* dst_cell, const L
    //
    if ( theLayMap.getTdtLay(tdtlaynum, _mod_tlayer(), _mod_tdatatype() ) )
    {
-      laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->secureLayer(tdtlaynum));
+      laydata::QuadTree* dwl = dst_cell->secureLayer(tdtlaynum);
       if (info & Rmask)
       {
          int4b* rptpnt = _mod_repete().lcarray();
