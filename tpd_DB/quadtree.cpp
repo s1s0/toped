@@ -179,36 +179,54 @@ laydata::QuadTree::QuadTree() : _overlap(DEFAULT_OVL_BOX), _subQuads(NULL), _dat
 /*! Used for reading the QuadTree from the TDT file. A new shape is added to
 the tree using the put() method. Entire tree is recreated when there is no more
 data to read using resort() method.*/
-laydata::QuadTree::QuadTree(TEDfile* const tedfile) : _overlap(DEFAULT_OVL_BOX), _subQuads(NULL), _data(NULL), _props()
+laydata::QuadTree::QuadTree(TEDfile* const tedfile, bool reflay) :
+   _overlap(DEFAULT_OVL_BOX), _subQuads(NULL), _data(NULL), _props()
 {
    byte recordtype;
-   if       ((0 == tedfile->revision()) && (6 == tedfile->subRevision()))
+   if (reflay)
    {
-      while (tedf_LAYEREND != (recordtype = tedfile->getByte()))
+      if       ((0 == tedfile->revision()) && (6 == tedfile->subRevision()))
       {
-         switch (recordtype)
+         while (tedf_LAYEREND != (recordtype = tedfile->getByte()))
          {
-            case  tedf_CELLREF: put(DEBUG_NEW TdtCellRef(tedfile));break;
-            case tedf_CELLAREF: put(DEBUG_NEW TdtCellAref(tedfile));break;
-            //--------------------------------------------------
-            default: throw EXPTNreadTDT("Unexpected record type");
+            switch (recordtype)
+            {
+               case  tedf_CELLREF: put(DEBUG_NEW TdtCellRef(tedfile));break;
+               case tedf_CELLAREF: put(DEBUG_NEW TdtCellAref(tedfile));break;
+               //--------------------------------------------------
+               default: throw EXPTNreadTDT("Unexpected record type");
+            }
+         }
+      }
+      else
+      {
+         while (tedf_REFSEND != (recordtype = tedfile->getByte()))
+         {
+            switch (recordtype)
+            {
+               case  tedf_CELLREF: put(DEBUG_NEW TdtCellRef(tedfile));break;
+               case tedf_CELLAREF: put(DEBUG_NEW TdtCellAref(tedfile));break;
+               //--------------------------------------------------
+               default: throw EXPTNreadTDT("Unexpected record type");
+            }
          }
       }
    }
    else
    {
-      while (tedf_REFSEND != (recordtype = tedfile->getByte()))
+      while (tedf_LAYEREND != (recordtype = tedfile->getByte()))
       {
          switch (recordtype)
          {
-            case  tedf_CELLREF: put(DEBUG_NEW TdtCellRef(tedfile));break;
-            case tedf_CELLAREF: put(DEBUG_NEW TdtCellAref(tedfile));break;
+            case     tedf_BOX: put(DEBUG_NEW TdtBox(tedfile));break;
+            case     tedf_POLY: put(DEBUG_NEW TdtPoly(tedfile));break;
+            case     tedf_WIRE: put(DEBUG_NEW TdtWire(tedfile));break;
+            case     tedf_TEXT: put(DEBUG_NEW TdtText(tedfile));break;
             //--------------------------------------------------
             default: throw EXPTNreadTDT("Unexpected record type");
          }
       }
    }
-
    resort();
 }
 
@@ -261,10 +279,61 @@ void laydata::QuadTree::add(TdtData* shape)
       }
       else
       { // the overlapping box has had blown-up
-//         shape->nextIs(_first); _first = shape;
          resort(shape); // re-sort the entire tree
       }
    }
+}
+
+/*!Create new TdtBox. Depending on sortnow input variable the new shape is
+just added to the QuadTree (using QuadTree::put()) without sorting or fit on
+the proper place (using add() */
+laydata::TdtData* laydata::QuadTree::addBox(const TP& p1, const TP& p2, bool sortnow)
+{
+   laydata::TdtBox *shape = DEBUG_NEW TdtBox(p1,p2);
+   if (sortnow) add(shape);
+   else         put(shape);
+   return shape;
+}
+/*!Create new TdtPoly. Depending on sortnow input variable the new shape is
+just added to the QuadTree (using QuadTree::put()) without sorting or fit on
+the proper place (using add() */
+laydata::TdtData* laydata::QuadTree::addPoly(pointlist& pl, bool sortnow)
+{
+   laydata::TdtPoly *shape = DEBUG_NEW TdtPoly(pl);
+   if (sortnow) add(shape);
+   else         put(shape);
+   return shape;
+}
+
+laydata::TdtData* laydata::QuadTree::addPoly(int4b* pl, unsigned psize, bool sortnow)
+{
+   laydata::TdtPoly *shape = DEBUG_NEW TdtPoly(pl, psize);
+   if (sortnow) add(shape);
+   else         put(shape);
+   return shape;
+}
+
+/*!Create new TdtWire. Depending on sortnow input variable the new shape is
+just added to the QuadTree (using QuadTree::put()) without sorting or fit on
+the proper place (using add() */
+laydata::TdtData* laydata::QuadTree::addWire(pointlist& pl,word w,
+                                                                 bool sortnow)
+{
+   laydata::TdtWire *shape = DEBUG_NEW TdtWire(pl,w);
+   if (sortnow) add(shape);
+   else         put(shape);
+   return shape;
+}
+/*!Create new TdtText. Depending on sortnow input variable the new shape is
+just added to the QuadTree (using QuadTree::put()) without sorting or fit on
+the proper place (using add() */
+laydata::TdtData* laydata::QuadTree::addText(std::string text,
+                                                      CTM trans, bool sortnow)
+{
+   laydata::TdtText *shape = DEBUG_NEW TdtText(text,trans);
+   if (sortnow) add(shape);
+   else         put(shape);
+   return shape;
 }
 
 /*! Checks whether a single layout object shape will fit into one of the
@@ -377,8 +446,6 @@ void laydata::QuadTree::sort(ShapeList& inlist)
       shovl = (*DI)->overlap();
       sharea = shovl.boxarea();
       // Check it fits in some of the children
-//      if ((totalarea <= 4ll * sharea) ||
-//                        (0 > (fitinsubbox = fitSubTree(shovl, maxsubbox))))
       if (totalarea <= 4ll * sharea)
       {
          // no fit. The shape is sorted in the current tree
@@ -422,9 +489,6 @@ void laydata::QuadTree::sort(ShapeList& inlist)
          assert(-1 < quadPosition);
          _subQuads[(byte)quadPosition]->sort(sublist[i]);
       }
-//   for (byte i = 0; i < _props.numSubQuads(); i++)
-//      _subQuads[i]->sort(sublist[i]);
-
 }
 
 /*! Removes marked shapes from the quadtree without deleting them. The removed
@@ -892,7 +956,8 @@ the current QuadTree object is visible. Current clip region data is
 obtained from LayoutCanvas. In a sence this method is the same as openGlDraw
 without fill and not handling selected shapes*/
 void laydata::QuadTree::motionDraw(const layprop::DrawProperties& drawprop,
-                                                   ctmqueue& transtack) const {
+                                                   ctmqueue& transtack) const
+{
    if (empty()) return;
    // check the entire holder for clipping...
    DBbox clip = drawprop.clipRegion();
@@ -980,7 +1045,8 @@ void laydata::QuadTree::selectInBox(DBbox& select_in, DataList* selist,
 unselect methods of the parent structures in the data base - TdtLayer and TdtCell
 */
 void laydata::QuadTree::unselectInBox(DBbox& unselect_in, DataList* unselist,
-                                                                 bool pselect) {
+                                                                 bool pselect)
+{
    // check the entire holder for clipping...
    if (0ll == unselect_in.cliparea(_overlap)) return;
    for (ObjectIter i = 0; i < _props._numObjects; i++)
@@ -1000,10 +1066,11 @@ void laydata::QuadTree::unselectInBox(DBbox& unselect_in, DataList* unselist,
 
 /*! Perform the data selection using list of objects. Called by the
 corresponding select methods of the parent structures in the data base -
-TdtLayer and TdtCell. This select operatoin is the essence of the
-implementatoin of the long discussed (with myself) select lists in TELL
+TdtLayer and TdtCell. This select operation is the essence of the
+Implementation of the long discussed (with myself) select lists in TELL
 */
-void laydata::QuadTree::selectFromList(DataList* src, DataList* dst) {
+void laydata::QuadTree::selectFromList(DataList* src, DataList* dst)
+{
    DataList::iterator DI;
    // loop the objects in the qTree first. It will be faster when there
    // are no objects in the current QuadTree
@@ -1041,7 +1108,8 @@ void laydata::QuadTree::selectFromList(DataList* src, DataList* dst) {
 
 /*! Mark all shapes in the current QuadTree and its children as sh_selected and
 add a reference in the selist*/
-void laydata::QuadTree::selectAll(DataList* selist, word selmask, bool mark) {
+void laydata::QuadTree::selectAll(DataList* selist, word selmask, bool mark)
+{
    if (laydata::_lmnone == selmask) return;
    for (ObjectIter i = 0; i < _props._numObjects; i++)
    {
@@ -1057,33 +1125,22 @@ void laydata::QuadTree::selectAll(DataList* selist, word selmask, bool mark) {
 }
 
 
-/*! Check whether this is empty i.e. no TdtData objects in the containter */
-bool laydata::QuadTree::empty() const {
+/*! Check whether this is empty i.e. no TdtData objects in the container */
+bool laydata::QuadTree::empty() const
+{
    return (DEFAULT_OVL_BOX == _overlap);
 }
 
-/*! Delete all TdtData objects in the container and free the heap*/
-void laydata::QuadTree::freeMemory()
+bool laydata::QuadTree::getObjectOver(const TP pnt, laydata::TdtData*& prev)
 {
-   for (byte i = 0; i < _props.numSubQuads(); i++)
-      _subQuads[i]->freeMemory();
-   for (ObjectIter i = 0; i < _props._numObjects; i++)
-   {
-      delete _data[i];
-   }
-   delete [] _data;
-   _data = NULL;
-}
-
-bool laydata::QuadTree::getObjectOver(const TP pnt, laydata::TdtData*& prev) {
    if (!_overlap.inside(pnt)) return false;
    for (ObjectIter i = 0; i < _props._numObjects; i++)
    {
       TdtData* wdt = _data[i];
-      if (prev == NULL) {
-//         DBbox ovl = wdt->overlap();ovl.normalize();
-//         if (ovl.inside(pnt)) {
-         if (wdt->pointInside(pnt)) {
+      if (prev == NULL)
+      {
+         if (wdt->pointInside(pnt))
+         {
             prev = wdt; return true;
          }
       }
@@ -1094,14 +1151,19 @@ bool laydata::QuadTree::getObjectOver(const TP pnt, laydata::TdtData*& prev) {
    return false;
 }
 
-void laydata::QuadTree::vlOverlap(const layprop::DrawProperties& prop, DBbox& vlBox) const
+void laydata::QuadTree::vlOverlap(const layprop::DrawProperties& prop, DBbox& vlBox, bool refs) const
 {
-   for (ObjectIter i = 0; i < _props._numObjects; i++)
+   if (refs)
    {
-      _data[i]->vlOverlap(prop, vlBox);
+      for (ObjectIter i = 0; i < _props._numObjects; i++)
+      {
+         _data[i]->vlOverlap(prop, vlBox);
+      }
+      for (byte i = 0; i < _props.numSubQuads(); i++)
+         _subQuads[i]->vlOverlap(prop, vlBox, refs);
    }
-   for (byte i = 0; i < _props.numSubQuads(); i++)
-      _subQuads[i]->vlOverlap(prop, vlBox);
+   else
+      vlBox.overlap(_overlap);
 }
 
 // laydata::TdtData* laydata::QuadTree::getfirstover(const TP pnt) {
@@ -1138,6 +1200,21 @@ void laydata::QuadTree::vlOverlap(const layprop::DrawProperties& prop, DBbox& vl
 //    return NULL;
 // }
 
+/*! Delete all TdtData objects in the container and free the heap. This function
+ * shall be called before the destructor in case the whole layer is to be
+ * destroyed - i.e. on exit for example*/
+void laydata::QuadTree::freeMemory()
+{
+   for (byte i = 0; i < _props.numSubQuads(); i++)
+      _subQuads[i]->freeMemory();
+   for (ObjectIter i = 0; i < _props._numObjects; i++)
+   {
+      delete _data[i];
+   }
+   delete [] _data;
+   _data = NULL;
+}
+
 /*!Object destructor. Cleans up only the underlaying QuadTree objects and the
 _overlap box. TdtData objects are not deleted, instead they are supposed to be
  moved in another placeholder called at the moment Attic (not implemented yet!)*/
@@ -1154,98 +1231,3 @@ laydata::QuadTree::~QuadTree()
      list clean-up when the certain delete hits the bottom of the undo list */
    if (NULL != _data)     delete [] _data;
 }
-
-//-----------------------------------------------------------------------------
-// class TdtLayer
-//-----------------------------------------------------------------------------
-laydata::TdtLayer::TdtLayer(TEDfile* const tedfile) : QuadTree()
-{
-   byte recordtype;
-   while (tedf_LAYEREND != (recordtype = tedfile->getByte()))
-   {
-      switch (recordtype)
-      {
-         case      tedf_BOX: put(DEBUG_NEW TdtBox(tedfile));break;
-         case     tedf_POLY: put(DEBUG_NEW TdtPoly(tedfile));break;
-         case     tedf_WIRE: put(DEBUG_NEW TdtWire(tedfile));break;
-         case     tedf_TEXT: put(DEBUG_NEW TdtText(tedfile));break;
-         //--------------------------------------------------
-         default: throw EXPTNreadTDT("Unexpected record type");
-      }
-   }
-   resort();
-}
-
-/*!Create new TdtBox. Depending on sortnow input variable the new shape is
-just added to the QuadTree (using QuadTree::put()) without sorting or fit on
-the proper place (using add() */
-laydata::TdtData* laydata::TdtLayer::addBox(const TP& p1, const TP& p2, bool sortnow) {
-   laydata::TdtBox *shape = DEBUG_NEW TdtBox(p1,p2);
-   if (sortnow) add(shape);
-   else         put(shape);
-   return shape;
-}
-/*!Create new TdtPoly. Depending on sortnow input variable the new shape is
-just added to the QuadTree (using QuadTree::put()) without sorting or fit on
-the proper place (using add() */
-laydata::TdtData* laydata::TdtLayer::addPoly(pointlist& pl, bool sortnow) {
-   laydata::TdtPoly *shape = DEBUG_NEW TdtPoly(pl);
-   if (sortnow) add(shape);
-   else         put(shape);
-   return shape;
-}
-
-laydata::TdtData* laydata::TdtLayer::addPoly(int4b* pl, unsigned psize, bool sortnow) {
-   laydata::TdtPoly *shape = DEBUG_NEW TdtPoly(pl, psize);
-   if (sortnow) add(shape);
-   else         put(shape);
-   return shape;
-}
-
-/*!Create new TdtWire. Depending on sortnow input variable the new shape is
-just added to the QuadTree (using QuadTree::put()) without sorting or fit on
-the proper place (using add() */
-laydata::TdtData* laydata::TdtLayer::addWire(pointlist& pl,word w,
-                                                                 bool sortnow) {
-   laydata::TdtWire *shape = DEBUG_NEW TdtWire(pl,w);
-   if (sortnow) add(shape);
-   else         put(shape);
-   return shape;
-}
-/*!Create new TdtText. Depending on sortnow input variable the new shape is
-just added to the QuadTree (using QuadTree::put()) without sorting or fit on
-the proper place (using add() */
-laydata::TdtData* laydata::TdtLayer::addText(std::string text,
-                                                      CTM trans, bool sortnow) {
-   laydata::TdtText *shape = DEBUG_NEW TdtText(text,trans);
-   if (sortnow) add(shape);
-   else         put(shape);
-   return shape;
-}
-
-/*! A temporary Draw (during move/copy operations) of the container contents
- on the screen using the virtual QuadTree::tmpDraw() method of the
- parent object. */
-void laydata::TdtLayer::motionDraw(const layprop::DrawProperties& drawprop,
-                                                 ctmqueue& transtack) const {
-   // check the entire layer for clipping...
-   DBbox clip = drawprop.clipRegion();
-   if (empty()) return;
-   DBbox areal = overlap().overlap(transtack.front());
-   if      ( 0ll == clip.cliparea(areal)     ) return;
-   else if (!areal.visible(drawprop.scrCtm(), drawprop.visualLimit())) return;
-   QuadTree::motionDraw(drawprop, transtack);
-}
-
-void laydata::TdtLayer::vlOverlap(const layprop::DrawProperties&, DBbox& vlBox) const
-{
-   vlBox.overlap(_overlap);
-}
-////-----------------------------------------------------------------------------
-//// class TdtRefLayer
-////-----------------------------------------------------------------------------
-//DBbox TdtRefLayer::vlOverlap(const layprop::DrawProperties& drawprop)
-//{
-//
-//}
-

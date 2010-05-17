@@ -91,9 +91,9 @@ void Calbr::drcTenderer::addPoly(const CoordsVector   &coords)
          _miny = std::min(it->y, _miny);
          plDB.push_back(TP(it->x, it->y, DBscale));
       }
-      laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(_DRCCell->secureLayer(_numError));
+      laydata::QuadTree* dwl = _DRCCell->secureLayer(_numError);
       PROPC->addUnpublishedLay(_numError);
-      
+
       laydata::ValidPoly check(plDB);
 
       if (!check.valid())
@@ -127,7 +127,7 @@ void Calbr::drcTenderer::addLine(const edge &edge)
 
    real DBscale = 1000 ;
    //Convert drcEdge to pointlist
-   pointlist plDB; 
+   pointlist plDB;
    plDB.reserve(2);
 
    plDB.push_back(TP(edge.x1, edge.y1, DBscale));
@@ -136,7 +136,7 @@ void Calbr::drcTenderer::addLine(const edge &edge)
    real      w = 0.01;   //width of line
    word      width = static_cast<word>(rint(w * DBscale));
 
-   laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(_DRCCell->secureLayer(_numError));
+   laydata::QuadTree* dwl = _DRCCell->secureLayer(_numError);
    PROPC->addUnpublishedLay(_numError);
 
 

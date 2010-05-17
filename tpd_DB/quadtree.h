@@ -60,14 +60,19 @@ namespace laydata {
    class QuadTree {
    public:
                            QuadTree();
-                           QuadTree(TEDfile* const tedfile);
-      virtual             ~QuadTree();
+                           QuadTree(TEDfile* const, bool);
+                          ~QuadTree();
       void                 openGlDraw(layprop::DrawProperties&, const DataList*, bool) const;
       void                 openGlRender(tenderer::TopRend&, const DataList*) const;
 //      void                 visible_shapes(laydata::ShapeList*, const DBbox&, const CTM&, const CTM&, unsigned long&);
       short                clipType(tenderer::TopRend&) const;
-      virtual void         motionDraw(const layprop::DrawProperties&, ctmqueue&) const;
+      void                 motionDraw(const layprop::DrawProperties&, ctmqueue&) const;
       void                 add(TdtData* shape);
+      TdtData*             addBox(const TP& p1, const TP& p2, bool sortnow = true);
+      TdtData*             addPoly(pointlist& pl, bool sortnow = true);
+      TdtData*             addPoly(int4b* pl, unsigned psize, bool sortnow = true);
+      TdtData*             addWire(pointlist& pl,word w, bool sortnow = true);
+      TdtData*             addText(std::string text, CTM trans, bool sortnow = true);
       void                 put(TdtData* shape);
       void                 write(TEDfile* const) const;
       void                 gdsWrite(DbExportFile&) const;
@@ -91,13 +96,13 @@ namespace laydata {
       bool                 empty() const;
       void                 freeMemory();
       /*! Return the overlapping box*/
-      DBbox                overlap() const   {return _overlap;};
+      DBbox                overlap() const   {return _overlap;}
       /*! Return the overlapping box*/
-      virtual void         vlOverlap(const layprop::DrawProperties&, DBbox&) const;
+      void                 vlOverlap(const layprop::DrawProperties&, DBbox&, bool) const;
       /*! Mark the tree as invalid*/
-      void                 invalidate()      {_props._invalid = true;};
+      void                 invalidate()      {_props._invalid = true;}
       /*! Return the status of _invalid flag*/
-      bool                 invalid() const   {return _props._invalid;};
+      bool                 invalid() const   {return _props._invalid;}
    protected:
       DBbox               _overlap;//! The overlapping box
    private:
@@ -135,34 +140,6 @@ namespace laydata {
       TdtData**            _data;
       QuadProps            _props;
    };
-
-//==============================================================================
-/*! Represent the layer place holder of the tedat database. The expected
-functionality is mostly implemented in the parent class. This class holds all
-natural layers which means it doesn't hold cell references
-*/
-   class TdtLayer : public QuadTree {
-   public:
-                           TdtLayer() : QuadTree() {};
-                           TdtLayer(TEDfile* const tedfile);
-                          ~TdtLayer() {freeMemory();};
-      virtual void         motionDraw(const layprop::DrawProperties&, ctmqueue& ) const;
-      TdtData*             addBox(const TP& p1, const TP& p2, bool sortnow = true);
-      TdtData*             addPoly(pointlist& pl, bool sortnow = true);
-      TdtData*             addPoly(int4b* pl, unsigned psize, bool sortnow = true);
-      TdtData*             addWire(pointlist& pl,word w, bool sortnow = true);
-      TdtData*             addText(std::string text, CTM trans, bool sortnow = true);
-      virtual void         vlOverlap(const layprop::DrawProperties&, DBbox&) const;
-   };
-
-//   class TdtRefLayer : public QuadTree {
-//   public:
-//                           TdtRefLayer() : QuadTree(), _vlOverlap(_overlap) {}
-//      virtual DBbox        vlOverlap(layprop::DrawProperties& prop);
-//   private:
-//      DBbox                _vlOverlap;
-//   };
-//
 }
 
 #endif
