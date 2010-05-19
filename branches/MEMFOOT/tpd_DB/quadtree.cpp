@@ -182,7 +182,9 @@ data to read using resort() method.*/
 laydata::QuadTree::QuadTree(TEDfile* const tedfile, bool reflay) :
    _overlap(DEFAULT_OVL_BOX), _subQuads(NULL), _data(NULL), _props()
 {
-   byte recordtype;
+   byte         recordtype;
+   ShapeList    store;
+   TdtData*     newData;
    if (reflay)
    {
       if       ((0 == tedfile->revision()) && (6 == tedfile->subRevision()))
@@ -191,11 +193,13 @@ laydata::QuadTree::QuadTree(TEDfile* const tedfile, bool reflay) :
          {
             switch (recordtype)
             {
-               case  tedf_CELLREF: put(DEBUG_NEW TdtCellRef(tedfile));break;
-               case tedf_CELLAREF: put(DEBUG_NEW TdtCellAref(tedfile));break;
+               case  tedf_CELLREF: newData = DEBUG_NEW TdtCellRef(tedfile);break;
+               case tedf_CELLAREF: newData = DEBUG_NEW TdtCellAref(tedfile);break;
                //--------------------------------------------------
                default: throw EXPTNreadTDT("Unexpected record type");
             }
+            updateOverlap(newData->overlap());
+            store.push_back(newData);
          }
       }
       else
@@ -204,11 +208,13 @@ laydata::QuadTree::QuadTree(TEDfile* const tedfile, bool reflay) :
          {
             switch (recordtype)
             {
-               case  tedf_CELLREF: put(DEBUG_NEW TdtCellRef(tedfile));break;
-               case tedf_CELLAREF: put(DEBUG_NEW TdtCellAref(tedfile));break;
+               case  tedf_CELLREF: newData = DEBUG_NEW TdtCellRef(tedfile) ;break;
+               case tedf_CELLAREF: newData = DEBUG_NEW TdtCellAref(tedfile);break;
                //--------------------------------------------------
                default: throw EXPTNreadTDT("Unexpected record type");
             }
+            updateOverlap(newData->overlap());
+            store.push_back(newData);
          }
       }
    }
@@ -218,16 +224,18 @@ laydata::QuadTree::QuadTree(TEDfile* const tedfile, bool reflay) :
       {
          switch (recordtype)
          {
-            case     tedf_BOX: put(DEBUG_NEW TdtBox(tedfile));break;
-            case     tedf_POLY: put(DEBUG_NEW TdtPoly(tedfile));break;
-            case     tedf_WIRE: put(DEBUG_NEW TdtWire(tedfile));break;
-            case     tedf_TEXT: put(DEBUG_NEW TdtText(tedfile));break;
+            case     tedf_BOX : newData = DEBUG_NEW TdtBox(tedfile) ;break;
+            case     tedf_POLY: newData = DEBUG_NEW TdtPoly(tedfile);break;
+            case     tedf_WIRE: newData = DEBUG_NEW TdtWire(tedfile);break;
+            case     tedf_TEXT: newData = DEBUG_NEW TdtText(tedfile);break;
             //--------------------------------------------------
             default: throw EXPTNreadTDT("Unexpected record type");
          }
+         updateOverlap(newData->overlap());
+         store.push_back(newData);
       }
    }
-   resort();
+   resort(store);
 }
 
 /*! Add a single layout object shape into the QuadTree.
@@ -756,11 +764,11 @@ void laydata::QuadTree::resort(laydata::TdtData* newdata)
    sort(store);
 }
 
-//void laydata::QuadTree::resort(ShapeList& store)
-//{
-//   tmpStore(store);
-//   sort(store);
-//}
+void laydata::QuadTree::resort(ShapeList& store)
+{
+   tmpStore(store);
+   sort(store);
+}
 
 /*! Takes the array of 4 floating point numbers that correspond to the clipping
 areas of the new object and each of the possible four QuadTree children. Returns
@@ -1230,4 +1238,53 @@ laydata::QuadTree::~QuadTree()
      place where shapes are deleted is in the cell Attic yet ONLY by the undo
      list clean-up when the certain delete hits the bottom of the undo list */
    if (NULL != _data)     delete [] _data;
+}
+
+
+//=============================================================================
+
+void laydata::QTreeTmp::put(laydata::TdtData* shape)
+{
+   _trunk->updateOverlap(shape->overlap());
+   _data.push_back(shape);
+}
+
+/*!Create new TdtBox. Depending on sortnow input variable the new shape is
+just added to the QuadTree (using QuadTree::put()) without sorting or fit on
+the proper place (using add() */
+void laydata::QTreeTmp::addBox(const TP& p1, const TP& p2)
+{
+   laydata::TdtBox *shape = DEBUG_NEW TdtBox(p1,p2);
+   put(shape);
+}
+/*!Create new TdtPoly. Depending on sortnow input variable the new shape is
+just added to the QuadTree (using QuadTree::put()) without sorting or fit on
+the proper place (using add() */
+void laydata::QTreeTmp::addPoly(pointlist& pl)
+{
+   laydata::TdtPoly *shape = DEBUG_NEW TdtPoly(pl);
+   put(shape);
+}
+
+void laydata::QTreeTmp::addPoly(int4b* pl, unsigned psize)
+{
+   laydata::TdtPoly *shape = DEBUG_NEW TdtPoly(pl, psize);
+   put(shape);
+}
+
+/*!Create new TdtWire. Depending on sortnow input variable the new shape is
+just added to the QuadTree (using QuadTree::put()) without sorting or fit on
+the proper place (using add() */
+void laydata::QTreeTmp::addWire(pointlist& pl,word w)
+{
+   laydata::TdtWire *shape = DEBUG_NEW TdtWire(pl,w);
+   put(shape);
+}
+/*!Create new TdtText. Depending on sortnow input variable the new shape is
+just added to the QuadTree (using QuadTree::put()) without sorting or fit on
+the proper place (using add() */
+void laydata::QTreeTmp::addText(std::string text,CTM trans)
+{
+   laydata::TdtText *shape = DEBUG_NEW TdtText(text,trans);
+   put(shape);
 }
