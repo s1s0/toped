@@ -103,8 +103,6 @@ namespace laydata {
       void                 invalidate()      {_props._invalid = true;}
       /*! Return the status of _invalid flag*/
       bool                 invalid() const   {return _props._invalid;}
-   protected:
-      DBbox               _overlap;//! The overlapping box
    private:
       typedef unsigned     ObjectIter;
       struct __attribute__ ((__packed__)) QuadProps
@@ -125,7 +123,6 @@ namespace laydata {
          char                   getSWQuad() const;
          byte                   _quadMap;
       };
-
       void                 sort(ShapeList&);
       bool                 fitInTree(TdtData* shape);
       char                 fitSubTree(const DBbox&, DBbox*);
@@ -134,6 +131,7 @@ namespace laydata {
       void                 updateOverlap(const DBbox& hovl);
       byte                 sequreQuad(QuadIdentificators);
       void                 removeQuad(QuadIdentificators);
+      DBbox                _overlap;//! The overlapping box of the quad
       /*! A pointers to four child QuadTree structures*/
       QuadTree**           _subQuads;
       /*! Pointer to the first TdtData stored in this QuadTree*/

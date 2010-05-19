@@ -996,20 +996,20 @@ void laydata::TdtDesign::collectParentCells(std::string& cname, CellDefList& par
    }
 }
 
-laydata::TdtData* laydata::TdtDesign::addBox(unsigned la, TP* p1, TP* p2, bool sortnow )
+laydata::TdtData* laydata::TdtDesign::addBox(unsigned la, TP* p1, TP* p2 )
 {
    DBbox old_overlap(_target.edit()->cellOverlap());
    QuadTree *actlay = _target.edit()->secureLayer(la);
    modified = true;
    TP np1((*p1) * _target.rARTM());
    TP np2((*p2) * _target.rARTM());
-   laydata::TdtData* newshape = actlay->addBox(np1,np2, sortnow);
+   laydata::TdtData* newshape = actlay->addBox(np1,np2);
    if (_target.edit()->overlapChanged(old_overlap, this))
       do {} while(validateCells());
    return newshape;
 }
 
-laydata::TdtData* laydata::TdtDesign::addPoly(unsigned la, pointlist* pl,bool sortnow)
+laydata::TdtData* laydata::TdtDesign::addPoly(unsigned la, pointlist* pl)
 {
    laydata::ValidPoly check(*pl);
    if (!check.valid()) {
@@ -1027,20 +1027,20 @@ laydata::TdtData* laydata::TdtDesign::addPoly(unsigned la, pointlist* pl,bool so
    {
       TP p1(vpl[0] *_target.rARTM());
       TP p2(vpl[2] *_target.rARTM());
-      newshape = actlay->addBox(p1,p2, sortnow);
+      newshape = actlay->addBox(p1,p2);
    }
    else
    {
       for(pointlist::iterator PL = vpl.begin(); PL != vpl.end(); PL++)
          (*PL) *= _target.rARTM();
-      newshape = actlay->addPoly(vpl, sortnow);
+      newshape = actlay->addPoly(vpl);
    }
    if (_target.edit()->overlapChanged(old_overlap, this))
       do {} while(validateCells());
    return newshape;
 }
 
-laydata::TdtData* laydata::TdtDesign::addWire(unsigned la, pointlist* pl, word w, bool sortnow)
+laydata::TdtData* laydata::TdtDesign::addWire(unsigned la, pointlist* pl, word w)
 {
    laydata::ValidWire check(*pl,w);
    if (!check.valid()) {
@@ -1055,13 +1055,14 @@ laydata::TdtData* laydata::TdtDesign::addWire(unsigned la, pointlist* pl, word w
    pointlist vpl = check.getValidated();
    for(pointlist::iterator PL = vpl.begin(); PL != vpl.end(); PL++)
       (*PL) *= _target.rARTM();
-   laydata::TdtData* newshape = actlay->addWire(vpl,w, sortnow);
+   laydata::TdtData* newshape = actlay->addWire(vpl,w);
    if (_target.edit()->overlapChanged(old_overlap, this))
       do {} while(validateCells());
    return newshape;
 }
 
-laydata::TdtData* laydata::TdtDesign::addText(unsigned la, std::string& text, CTM& ori) {
+laydata::TdtData* laydata::TdtDesign::addText(unsigned la, std::string& text, CTM& ori)
+{
    DBbox old_overlap(_target.edit()->cellOverlap());
    QuadTree *actlay = _target.edit()->secureLayer(la);
    modified = true;
