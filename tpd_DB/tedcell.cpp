@@ -343,6 +343,14 @@ laydata::QuadTree* laydata::TdtCell::secureLayer(unsigned layno)
    return _layers[layno];
 }
 
+laydata::QTreeTmp* laydata::TdtCell::secureUnsortedLayer(unsigned layno)
+{
+   if (_tmpLayers.end() == _tmpLayers.find(layno))
+      _tmpLayers[layno] = DEBUG_NEW QTreeTmp(secureLayer(layno));
+   return _tmpLayers[layno];
+}
+
+
 laydata::TdtCellRef* laydata::TdtCell::addCellRef(laydata::TdtDesign* ATDB,
                                  CellDefin str, CTM trans, bool sortnow)
 {
@@ -354,11 +362,34 @@ laydata::TdtCellRef* laydata::TdtCell::addCellRef(laydata::TdtDesign* ATDB,
    return cellref;
 }
 
-void laydata::TdtCell::registerCellRef(CellDefin str, CTM trans)
+void laydata::TdtCell::registerCellRef(CellDefin str, CTM trans, bool oldTree)
 {
-   QuadTree *cellreflayer = secureLayer(REF_LAY);
-   cellreflayer->put(DEBUG_NEW TdtCellRef(str, trans));
+   if (oldTree)
+   {//TODO remove this part when QuadTree is finally fixed
+      QuadTree *cellreflayer = secureLayer(REF_LAY);
+      cellreflayer->put(DEBUG_NEW TdtCellRef(str, trans));
+   }
+   else
+   {
+      QTreeTmp *cellreflayer = secureUnsortedLayer(REF_LAY);
+      cellreflayer->put(DEBUG_NEW TdtCellRef(str, trans));
+   }
    _children.insert(str->name());
+}
+
+void laydata::TdtCell::registerCellARef(CellDefin str, CTM trans, ArrayProperties& arrprops, bool oldTree)
+{
+   if (oldTree)
+   {//TODO remove this part when QuadTree is finally fixed
+      QuadTree *cellreflayer = secureLayer(REF_LAY);
+      cellreflayer->put(DEBUG_NEW TdtCellAref(str, trans, arrprops));
+   }
+   else
+   {
+      QTreeTmp *cellreflayer = secureUnsortedLayer(REF_LAY);
+      cellreflayer->put(DEBUG_NEW TdtCellAref(str, trans, arrprops));
+   }
+  _children.insert(str->name());
 }
 
 laydata::TdtCellAref* laydata::TdtCell::addCellARef(laydata::TdtDesign* ATDB,
@@ -371,13 +402,6 @@ laydata::TdtCellAref* laydata::TdtCell::addCellARef(laydata::TdtDesign* ATDB,
    if (sortnow) cellreflayer->add(cellaref);
    else         cellreflayer->put(cellaref);
    return cellaref;
-}
-
-void laydata::TdtCell::registerCellARef(CellDefin str, CTM trans, ArrayProperties& arrprops)
-{
-   QuadTree *cellreflayer = secureLayer(REF_LAY);
-   cellreflayer->put(DEBUG_NEW TdtCellAref(str, trans, arrprops));
-  _children.insert(str->name());
 }
 
 bool laydata::TdtCell::addChild(laydata::TdtDesign* ATDB, TdtDefaultCell* child)
@@ -1810,6 +1834,18 @@ void laydata::TdtCell::resort()
    typedef LayerList::const_iterator LCI;
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
       lay->second->resort();
+   getCellOverlap();
+}
+
+void laydata::TdtCell::fixUnsorted()
+{
+   typedef TmpLayerMap::const_iterator LCI;
+   for (LCI lay = _tmpLayers.begin(); lay != _tmpLayers.end(); lay++)
+   {
+      lay->second->sort();
+      delete lay->second;
+   }
+   _tmpLayers.clear();
    getCellOverlap();
 }
 

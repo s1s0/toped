@@ -32,6 +32,7 @@
 
 namespace laydata {
 
+   class QTreeTmp;
 //==============================================================================
    /*! QuadTree class implements the main clipping algorithm of toped. Its main
       purpose is to speed-up the drawing of the database. All objects of type
@@ -92,7 +93,7 @@ namespace laydata {
       void                 validate();
       bool                 fullValidate();
       void                 resort(laydata::TdtData* newdata = NULL);
-//      void                 resort(ShapeList&);
+      void                 resort(ShapeList&);
       bool                 empty() const;
       void                 freeMemory();
       /*! Return the overlapping box*/
@@ -104,6 +105,7 @@ namespace laydata {
       /*! Return the status of _invalid flag*/
       bool                 invalid() const   {return _props._invalid;}
    private:
+      friend class QTreeTmp;
       typedef unsigned     ObjectIter;
       struct __attribute__ ((__packed__)) QuadProps
       {
@@ -137,6 +139,21 @@ namespace laydata {
       /*! Pointer to the first TdtData stored in this QuadTree*/
       TdtData**            _data;
       QuadProps            _props;
+   };
+
+   class QTreeTmp {
+   public:
+                           QTreeTmp(QuadTree* trunk) : _trunk(trunk) {};
+       void                put(TdtData* shape);
+       void                addBox(const TP& p1, const TP& p2);
+       void                addPoly(pointlist& pl);
+       void                addPoly(int4b* pl, unsigned psize);
+       void                addWire(pointlist& pl,word w);
+       void                addText(std::string text, CTM trans);
+       void                sort() {_trunk->resort(_data);}
+   private:
+      ShapeList            _data;
+      QuadTree*            _trunk;
    };
 }
 
