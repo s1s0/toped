@@ -145,11 +145,11 @@ namespace laydata {
    public:
                            QTreeTmp(QuadTree* trunk) : _trunk(trunk) {};
        void                put(TdtData* shape);
-       void                addBox(const TP& p1, const TP& p2);
-       void                addPoly(pointlist& pl);
-       void                addPoly(int4b* pl, unsigned psize);
-       void                addWire(pointlist& pl,word w);
-       void                addText(std::string text, CTM trans);
+       void                putBox(const TP& p1, const TP& p2);
+       void                putPoly(pointlist& pl);
+       void                putPoly(int4b* pl, unsigned psize);
+       void                putWire(pointlist& pl,word w);
+       void                putText(std::string text, CTM trans);
        void                sort() {_trunk->resort(_data);}
    private:
       ShapeList            _data;
