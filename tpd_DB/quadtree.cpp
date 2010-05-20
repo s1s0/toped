@@ -1252,7 +1252,7 @@ void laydata::QTreeTmp::put(laydata::TdtData* shape)
 /*!Create new TdtBox. Depending on sortnow input variable the new shape is
 just added to the QuadTree (using QuadTree::put()) without sorting or fit on
 the proper place (using add() */
-void laydata::QTreeTmp::addBox(const TP& p1, const TP& p2)
+void laydata::QTreeTmp::putBox(const TP& p1, const TP& p2)
 {
    laydata::TdtBox *shape = DEBUG_NEW TdtBox(p1,p2);
    put(shape);
@@ -1260,13 +1260,13 @@ void laydata::QTreeTmp::addBox(const TP& p1, const TP& p2)
 /*!Create new TdtPoly. Depending on sortnow input variable the new shape is
 just added to the QuadTree (using QuadTree::put()) without sorting or fit on
 the proper place (using add() */
-void laydata::QTreeTmp::addPoly(pointlist& pl)
+void laydata::QTreeTmp::putPoly(pointlist& pl)
 {
    laydata::TdtPoly *shape = DEBUG_NEW TdtPoly(pl);
    put(shape);
 }
 
-void laydata::QTreeTmp::addPoly(int4b* pl, unsigned psize)
+void laydata::QTreeTmp::putPoly(int4b* pl, unsigned psize)
 {
    laydata::TdtPoly *shape = DEBUG_NEW TdtPoly(pl, psize);
    put(shape);
@@ -1275,7 +1275,7 @@ void laydata::QTreeTmp::addPoly(int4b* pl, unsigned psize)
 /*!Create new TdtWire. Depending on sortnow input variable the new shape is
 just added to the QuadTree (using QuadTree::put()) without sorting or fit on
 the proper place (using add() */
-void laydata::QTreeTmp::addWire(pointlist& pl,word w)
+void laydata::QTreeTmp::putWire(pointlist& pl,word w)
 {
    laydata::TdtWire *shape = DEBUG_NEW TdtWire(pl,w);
    put(shape);
@@ -1283,7 +1283,7 @@ void laydata::QTreeTmp::addWire(pointlist& pl,word w)
 /*!Create new TdtText. Depending on sortnow input variable the new shape is
 just added to the QuadTree (using QuadTree::put()) without sorting or fit on
 the proper place (using add() */
-void laydata::QTreeTmp::addText(std::string text,CTM trans)
+void laydata::QTreeTmp::putText(std::string text,CTM trans)
 {
    laydata::TdtText *shape = DEBUG_NEW TdtText(text,trans);
    put(shape);

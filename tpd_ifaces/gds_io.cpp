@@ -1076,8 +1076,8 @@ void GDSin::GdsStructure::importBox(GdsInFile* cf, laydata::TdtCell* dst_cell, c
                   }
                   else plist = check.getValidated();
                   laydata::QTreeTmp* dwl = dst_cell->secureUnsortedLayer(tdtlaynum);
-                  if (check.box())  dwl->addBox(plist[0], plist[2]);
-                  else              dwl->addPoly(plist);
+                  if (check.box())  dwl->putBox(plist[0], plist[2]);
+                  else              dwl->putPoly(plist);
                }
                break;
             case gds_ENDEL://end of element, exit point
@@ -1144,8 +1144,8 @@ void GDSin::GdsStructure::importPoly(GdsInFile* cf, laydata::TdtCell* dst_cell, 
                   }
                   else plist = check.getValidated();
                   laydata::QTreeTmp* dwl = dst_cell->secureUnsortedLayer(tdtlaynum);
-                  if (check.box())  dwl->addBox(plist[0], plist[2]);
-                  else              dwl->addPoly(plist);
+                  if (check.box())  dwl->putBox(plist[0], plist[2]);
+                  else              dwl->putPoly(plist);
                }
                break;
             case gds_ENDEL://end of element, exit point
@@ -1226,7 +1226,7 @@ void GDSin::GdsStructure::importPath(GdsInFile* cf, laydata::TdtCell* dst_cell, 
                      }
                      else plist = check.getValidated();
                      laydata::QTreeTmp* dwl = dst_cell->secureUnsortedLayer(tdtlaynum);
-                     dwl->addWire(plist, width);
+                     dwl->putWire(plist, width);
                   }
                   else
                   {
@@ -1318,7 +1318,7 @@ void GDSin::GdsStructure::importText(GdsInFile* cf, laydata::TdtCell* dst_cell, 
                {
                   laydata::QTreeTmp* dwl = dst_cell->secureUnsortedLayer(tdtlaynum);
                   // @FIXME absolute magnification, absolute angle should be reflected somehow!!!
-                  dwl->addText(tString,
+                  dwl->putText(tString,
                               CTM( magnPoint,
                                     magnification / (dbuu *  OPENGL_FONT_UNIT),
                                     angle,
