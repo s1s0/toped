@@ -867,7 +867,7 @@ void Oasis::Cell::import(OasisInFile& ofn, laydata::TdtCell* dst_cell,
          default:
             // check that the cell size is the same as obtained by skim function
             assert(_cellSize == (ofn.filePos() - _filePos - 1));
-            dst_cell->resort();
+            dst_cell->fixUnsorted();
             return;
       }
    } while (true);
@@ -923,7 +923,7 @@ void Oasis::Cell::readRectangle(OasisInFile& ofn, laydata::TdtCell* dst_cell, co
 
    if ( theLayMap.getTdtLay(tdtlaynum, _mod_layer(), _mod_datatype() ) )
    {
-      laydata::QuadTree* dwl = dst_cell->secureLayer(tdtlaynum);
+      laydata::QTreeTmp* dwl = dst_cell->secureUnsortedLayer(tdtlaynum);
       if ((0 == _mod_gwidth()) || (0 == _mod_gheight()))
       {
          std::ostringstream winfo;
@@ -938,14 +938,14 @@ void Oasis::Cell::readRectangle(OasisInFile& ofn, laydata::TdtCell* dst_cell, co
          {
             TP p1(_mod_gx()+rptpnt[2*rcnt]              ,_mod_gy()+rptpnt[2*rcnt+1]               );
             TP p2(_mod_gx()+rptpnt[2*rcnt]+_mod_gwidth(),_mod_gy()+rptpnt[2*rcnt+1]+_mod_gheight());
-            dwl->addBox(p1, p2, false);
+            dwl->putBox(p1, p2);
          }
       }
       else
       {
          TP p1(_mod_gx()              , _mod_gy()               );
          TP p2(_mod_gx()+_mod_gwidth(), _mod_gy()+_mod_gheight());
-         dwl->addBox(p1, p2, false);
+         dwl->putBox(p1, p2);
       }
    }
 }
@@ -980,7 +980,7 @@ void Oasis::Cell::readPolygon(OasisInFile& ofn, laydata::TdtCell* dst_cell, cons
 
    if ( theLayMap.getTdtLay(tdtlaynum, _mod_layer(), _mod_datatype() ) )
    {
-      laydata::QuadTree* dwl = dst_cell->secureLayer(tdtlaynum);
+      laydata::QTreeTmp* dwl = dst_cell->secureUnsortedLayer(tdtlaynum);
       if (info & Rmask)
       {
          int4b* rptpnt = _mod_repete().lcarray();
@@ -999,7 +999,7 @@ void Oasis::Cell::readPolygon(OasisInFile& ofn, laydata::TdtCell* dst_cell, cons
                    << " }";
                tell_log(console::MT_ERROR, ost.str());
             }
-            dwl->addPoly(laypl, false);
+            dwl->putPoly(laypl);
          }
       }
       else
@@ -1016,7 +1016,7 @@ void Oasis::Cell::readPolygon(OasisInFile& ofn, laydata::TdtCell* dst_cell, cons
                 << " }";
             tell_log(console::MT_ERROR, ost.str());
          }
-         dwl->addPoly(laypl, false);
+         dwl->putPoly(laypl);
       }
    }
 }
@@ -1055,7 +1055,7 @@ void Oasis::Cell::readPath(OasisInFile& ofn, laydata::TdtCell* dst_cell, const L
 
    if ( theLayMap.getTdtLay(tdtlaynum, _mod_layer(), _mod_datatype() ) )
    {
-      laydata::QuadTree* dwl = dst_cell->secureLayer(tdtlaynum);
+      laydata::QTreeTmp* dwl = dst_cell->secureUnsortedLayer(tdtlaynum);
       if (0 == _mod_pathhw())
       {
          std::ostringstream winfo;
@@ -1092,7 +1092,7 @@ void Oasis::Cell::readPath(OasisInFile& ofn, laydata::TdtCell* dst_cell, const L
                            << " }";
                      tell_log(console::MT_ERROR, ost.str());
                   }
-                  dwl->addWire(laypl, 2*_mod_pathhw(), false);
+                  dwl->putWire(laypl, 2*_mod_pathhw());
                }
                else
                {
@@ -1129,7 +1129,7 @@ void Oasis::Cell::readPath(OasisInFile& ofn, laydata::TdtCell* dst_cell, const L
                      << " }";
                tell_log(console::MT_ERROR, ost.str());
             }
-            dwl->addWire(laypl, 2*_mod_pathhw(), false);
+            dwl->putWire(laypl, 2*_mod_pathhw());
          }
          else
          {
@@ -1185,7 +1185,7 @@ void Oasis::Cell::readTrapezoid(OasisInFile& ofn, laydata::TdtCell* dst_cell, co
 
    if ( theLayMap.getTdtLay(tdtlaynum, _mod_layer(), _mod_datatype() ) )
    {
-      laydata::QuadTree* dwl = dst_cell->secureLayer(tdtlaynum);
+      laydata::QTreeTmp* dwl = dst_cell->secureUnsortedLayer(tdtlaynum);
       if (info & Rmask)
       {
          int4b* rptpnt = _mod_repete().lcarray();
@@ -1209,7 +1209,7 @@ void Oasis::Cell::readTrapezoid(OasisInFile& ofn, laydata::TdtCell* dst_cell, co
                laypl.push_back(TP(p1xr + _mod_gwidth() - deltaB, p1yr                 )); // S
                laypl.push_back(TP(p1xr                 - deltaA, p1yr                 )); // R
             }
-            dwl->addPoly(laypl, false);
+            dwl->putPoly(laypl);
          }
       }
       else
@@ -1229,7 +1229,7 @@ void Oasis::Cell::readTrapezoid(OasisInFile& ofn, laydata::TdtCell* dst_cell, co
             laypl.push_back(TP(_mod_gx() + _mod_gwidth() - deltaB, _mod_gy()                 )); // S
             laypl.push_back(TP(_mod_gx()                 - deltaA, _mod_gy()                 )); // R
          }
-         dwl->addPoly(laypl, false);
+         dwl->putPoly(laypl);
       }
    }
 }
@@ -1288,7 +1288,7 @@ void Oasis::Cell::readCTrapezoid(OasisInFile& ofn, laydata::TdtCell* dst_cell, c
 
    if ( theLayMap.getTdtLay(tdtlaynum, _mod_layer(), _mod_datatype() ) )
    {
-      laydata::QuadTree* dwl = dst_cell->secureLayer(tdtlaynum);
+      laydata::QTreeTmp* dwl = dst_cell->secureUnsortedLayer(tdtlaynum);
       if (info & Rmask)
       {
          //read the repetition record from the input stream
@@ -1303,7 +1303,7 @@ void Oasis::Cell::readCTrapezoid(OasisInFile& ofn, laydata::TdtCell* dst_cell, c
                            (info & Wmask) ? _mod_gwidth()  : 0,
                            (info & Hmask) ? _mod_gheight() : 0,
                            _mod_trpztype()             );
-            dwl->addPoly(laypl, false);
+            dwl->putPoly(laypl);
          }
 
       }
@@ -1316,7 +1316,7 @@ void Oasis::Cell::readCTrapezoid(OasisInFile& ofn, laydata::TdtCell* dst_cell, c
                         (info & Wmask) ? _mod_gwidth()  : 0,
                         (info & Hmask) ? _mod_gheight() : 0,
                         _mod_trpztype()  );
-         dwl->addPoly(laypl, false);
+         dwl->putPoly(laypl);
       }
    }
 }
@@ -1350,7 +1350,7 @@ void Oasis::Cell::readText(OasisInFile& ofn, laydata::TdtCell* dst_cell, const L
    //
    if ( theLayMap.getTdtLay(tdtlaynum, _mod_tlayer(), _mod_tdatatype() ) )
    {
-      laydata::QuadTree* dwl = dst_cell->secureLayer(tdtlaynum);
+      laydata::QTreeTmp* dwl = dst_cell->secureUnsortedLayer(tdtlaynum);
       if (info & Rmask)
       {
          int4b* rptpnt = _mod_repete().lcarray();
@@ -1358,7 +1358,7 @@ void Oasis::Cell::readText(OasisInFile& ofn, laydata::TdtCell* dst_cell, const L
          for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt++)
          {
             TP p1(_mod_tx()+rptpnt[2*rcnt],_mod_ty()+rptpnt[2*rcnt+1]);
-            dwl->addText( _mod_text(),CTM( p1  ,
+            dwl->putText( _mod_text(),CTM( p1  ,
                                            1.0 / (1e-3 *  OPENGL_FONT_UNIT) , // @FIXME! Font size!
                                            0.0 ,
                                            false
@@ -1369,7 +1369,7 @@ void Oasis::Cell::readText(OasisInFile& ofn, laydata::TdtCell* dst_cell, const L
       else
       {
          TP p1(_mod_tx(),_mod_ty());
-         dwl->addText( _mod_text(),CTM( p1,
+         dwl->putText( _mod_text(),CTM( p1,
                                         1.0 / (1e-3 *  OPENGL_FONT_UNIT) , // @FIXME! Font size!
                                         0.0 ,
                                         false
@@ -1433,7 +1433,8 @@ void Oasis::Cell::readReference(OasisInFile& ofn, laydata::TdtCell* dst_cell,
                                         magnification,
                                         angle,
                                         (info & Fmask)
-                                       )
+                                       ),
+                                       false
                                   );
       }
    }
@@ -1445,7 +1446,8 @@ void Oasis::Cell::readReference(OasisInFile& ofn, laydata::TdtCell* dst_cell,
                                      magnification,
                                      angle,
                                      (info & Fmask)
-                                    )
+                                    ),
+                                    false
                                );
    }
 }
