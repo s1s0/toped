@@ -764,7 +764,7 @@ void CIFin::Cif2Ted::import(const CIFin::CifStructure* src, laydata::TdtCell* ds
       SIMap::const_iterator layno;
       if ( _cif_layers.end() != (layno = _cif_layers.find(swl->name())) )
       {
-         laydata::QuadTree* dwl = dst->secureLayer(layno->second);
+         laydata::QTreeTmp* dwl = dst->secureUnsortedLayer(layno->second);
          const CIFin::CifData* wd = swl->firstData();
          while ( wd ) // loop trough data
          {
@@ -795,10 +795,10 @@ void CIFin::Cif2Ted::import(const CIFin::CifStructure* src, laydata::TdtCell* ds
       ref(swr,dst);
       swr = swr->last();
    }
-   dst->resort();
+   dst->fixUnsorted();
 }
 
-void CIFin::Cif2Ted::box ( const CIFin::CifBox* wd, laydata::QuadTree* wl, std::string layname)
+void CIFin::Cif2Ted::box ( const CIFin::CifBox* wd, laydata::QTreeTmp* wl, std::string layname)
 {
    pointlist pl;   pl.reserve(4);
    real cX, cY;
@@ -842,11 +842,11 @@ void CIFin::Cif2Ted::box ( const CIFin::CifBox* wd, laydata::QuadTree* wl, std::
    }
    else pl = check.getValidated() ;
 
-   if (check.box())  wl->addBox(pl[0], pl[2],false);
-   else              wl->addPoly(pl,false);
+   if (check.box())  wl->putBox(pl[0], pl[2]);
+   else              wl->putPoly(pl);
 }
 
-void CIFin::Cif2Ted::poly( const CIFin::CifPoly* wd, laydata::QuadTree* wl, std::string layname)
+void CIFin::Cif2Ted::poly( const CIFin::CifPoly* wd, laydata::QTreeTmp* wl, std::string layname)
 {
    pointlist pl;
    pl.reserve(wd->poly()->size());
@@ -866,11 +866,11 @@ void CIFin::Cif2Ted::poly( const CIFin::CifPoly* wd, laydata::QuadTree* wl, std:
    }
    else pl = check.getValidated() ;
 
-   if (check.box())  wl->addBox(pl[0], pl[2],false);
-   else              wl->addPoly(pl,false);
+   if (check.box())  wl->putBox(pl[0], pl[2]);
+   else              wl->putPoly(pl);
 }
 
-void CIFin::Cif2Ted::wire( const CIFin::CifWire* wd, laydata::QuadTree* wl, std::string layname)
+void CIFin::Cif2Ted::wire( const CIFin::CifWire* wd, laydata::QTreeTmp* wl, std::string layname)
 {
    pointlist pl;
    pl.reserve(wd->poly()->size());
@@ -889,7 +889,7 @@ void CIFin::Cif2Ted::wire( const CIFin::CifWire* wd, laydata::QuadTree* wl, std:
       tell_log(console::MT_ERROR, ost.str());
    }
    else pl = check.getValidated() ;
-   wl->addWire(pl, wd->width(),false);
+   wl->putWire(pl, wd->width());
 }
 
 void CIFin::Cif2Ted::ref ( const CIFin::CifRef* wd, laydata::TdtCell* dst)
@@ -910,14 +910,14 @@ void CIFin::Cif2Ted::ref ( const CIFin::CifRef* wd, laydata::TdtCell* dst)
    }
 }
 
-void CIFin::Cif2Ted::lbll( const CIFin::CifLabelLoc* wd, laydata::QuadTree* wl, std::string )
+void CIFin::Cif2Ted::lbll( const CIFin::CifLabelLoc* wd, laydata::QTreeTmp* wl, std::string )
 {
    // CIF doesn't have a concept of texts (as GDS)
    // text size and placement are just the default
    if (0.0 == _techno) return;
    TP pnt(*(wd->location()));
    pnt *= _crosscoeff;
-   wl->addText(wd->text(),
+   wl->putText(wd->text(),
                CTM(pnt,
                    (_techno / (/*(*_tdt_db)()->UU() * */ OPENGL_FONT_UNIT)),
                    0.0,
@@ -925,7 +925,7 @@ void CIFin::Cif2Ted::lbll( const CIFin::CifLabelLoc* wd, laydata::QuadTree* wl, 
               );
 }
 
-void CIFin::Cif2Ted::lbls( const CIFin::CifLabelSig*,laydata::QuadTree*, std::string )
+void CIFin::Cif2Ted::lbls( const CIFin::CifLabelSig*,laydata::QTreeTmp*, std::string )
 {
 }
 
