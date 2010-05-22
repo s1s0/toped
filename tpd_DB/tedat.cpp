@@ -1819,9 +1819,9 @@ void laydata::TdtCellRef::ungroup(laydata::TdtDesign* ATDB, TdtCell* dst, AtticL
                                    CL != cstr->shapeSel()->end(); CL++)
    {
       // secure the target layer
-      QuadTree* wl = dst->secureLayer(CL->first);
+      QTreeTmp* wl = dst->secureUnsortedLayer(CL->first);
       // There is no point here to ensure that the layer definition exists.
-      // We are just transfering shapes from one structure to another.
+      // We are just transferring shapes from one structure to another.
       // Of course ATDB is undefined (forward defined) here, so if the method has to be
       // used here - something else should be done
       // ATDB->securelaydef( CL->first );
@@ -1848,7 +1848,6 @@ void laydata::TdtCellRef::ungroup(laydata::TdtDesign* ATDB, TdtCell* dst, AtticL
          // add it to the selection list of the dst cell
          dst->selectThis(data_copy,CL->first);
       }
-      wl->invalidate();
    }
    cstr->unselectAll();
 }

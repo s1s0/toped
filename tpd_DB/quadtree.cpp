@@ -295,52 +295,45 @@ void laydata::QuadTree::add(TdtData* shape)
 /*!Create new TdtBox. Depending on sortnow input variable the new shape is
 just added to the QuadTree (using QuadTree::put()) without sorting or fit on
 the proper place (using add() */
-laydata::TdtData* laydata::QuadTree::addBox(const TP& p1, const TP& p2, bool sortnow)
+laydata::TdtData* laydata::QuadTree::addBox(const TP& p1, const TP& p2)
 {
    laydata::TdtBox *shape = DEBUG_NEW TdtBox(p1,p2);
-   if (sortnow) add(shape);
-   else         put(shape);
+   add(shape);
    return shape;
 }
 /*!Create new TdtPoly. Depending on sortnow input variable the new shape is
 just added to the QuadTree (using QuadTree::put()) without sorting or fit on
 the proper place (using add() */
-laydata::TdtData* laydata::QuadTree::addPoly(pointlist& pl, bool sortnow)
+laydata::TdtData* laydata::QuadTree::addPoly(pointlist& pl)
 {
    laydata::TdtPoly *shape = DEBUG_NEW TdtPoly(pl);
-   if (sortnow) add(shape);
-   else         put(shape);
+   add(shape);
    return shape;
 }
 
-laydata::TdtData* laydata::QuadTree::addPoly(int4b* pl, unsigned psize, bool sortnow)
+laydata::TdtData* laydata::QuadTree::addPoly(int4b* pl, unsigned psize)
 {
    laydata::TdtPoly *shape = DEBUG_NEW TdtPoly(pl, psize);
-   if (sortnow) add(shape);
-   else         put(shape);
+   add(shape);
    return shape;
 }
 
 /*!Create new TdtWire. Depending on sortnow input variable the new shape is
 just added to the QuadTree (using QuadTree::put()) without sorting or fit on
 the proper place (using add() */
-laydata::TdtData* laydata::QuadTree::addWire(pointlist& pl,word w,
-                                                                 bool sortnow)
+laydata::TdtData* laydata::QuadTree::addWire(pointlist& pl,word w)
 {
    laydata::TdtWire *shape = DEBUG_NEW TdtWire(pl,w);
-   if (sortnow) add(shape);
-   else         put(shape);
+   add(shape);
    return shape;
 }
 /*!Create new TdtText. Depending on sortnow input variable the new shape is
 just added to the QuadTree (using QuadTree::put()) without sorting or fit on
 the proper place (using add() */
-laydata::TdtData* laydata::QuadTree::addText(std::string text,
-                                                      CTM trans, bool sortnow)
+laydata::TdtData* laydata::QuadTree::addText(std::string text, CTM trans)
 {
    laydata::TdtText *shape = DEBUG_NEW TdtText(text,trans);
-   if (sortnow) add(shape);
-   else         put(shape);
+   add(shape);
    return shape;
 }
 
@@ -608,7 +601,8 @@ void laydata::QuadTree::cutPolySelected(pointlist& plst, DBbox& cut_overlap,
 }
 
 /*!*/
-laydata::TdtData* laydata::QuadTree::mergeSelected(TdtData*& shapeRef) {
+laydata::TdtData* laydata::QuadTree::mergeSelected(TdtData*& shapeRef)
+{
    laydata::TdtData* mergeres = NULL;
    DBbox overlapRef = shapeRef->overlap();
    // check the entire holder for clipping...

@@ -748,9 +748,11 @@ void CIFin::Cif2Ted::convert(const CIFin::CifStructure* src_structure, bool over
       ost << "Importing structure " << gname << "...";
       tell_log(console::MT_INFO,ost.str());
       // first create a new cell
-      dst_structure = (*_tdt_db)()->addCell(gname, _tdt_db);
-      // finally call the cell converter
+      dst_structure = DEBUG_NEW laydata::TdtCell(gname);
+      // call the cell converter
       import(src_structure, dst_structure);
+      // and finally - register the cell
+      (*_tdt_db)()->registerCellRead(gname, dst_structure);
    }
 }
 
@@ -896,18 +898,9 @@ void CIFin::Cif2Ted::ref ( const CIFin::CifRef* wd, laydata::TdtCell* dst)
 {
    CifStructure* refd = _src_lib->getStructure(wd->cell());
    std::string cell_name = refd->name();
-   if (NULL != (*_tdt_db)()->checkCell(cell_name))
-   {
-      laydata::CellDefin strdefn = (*_tdt_db)()->getCellNamePair(cell_name);
-      // Absolute magnification, absolute angle should be reflected somehow!!!
-      dst->addCellRef((*_tdt_db)(), strdefn, (*wd->location())*_crosscoeff, false);
-   }
-   else
-   {
-      std::string news = "Referenced structure \"";
-      news += cell_name; news += "\" not found. Reference ignored";
-      tell_log(console::MT_ERROR,news);
-   }
+
+   laydata::CellDefin strdefn = _tdt_db->linkCellRef(cell_name, TARGETDB_LIB);
+   dst->registerCellRef( strdefn,(*wd->location())*_crosscoeff);
 }
 
 void CIFin::Cif2Ted::lbll( const CIFin::CifLabelLoc* wd, laydata::QTreeTmp* wl, std::string )

@@ -1393,9 +1393,7 @@ void GDSin::GdsStructure::importSref(GdsInFile* cf, laydata::TdtCell* dst_cell, 
                                               magnification,
                                               angle,
                                               (0 != reflection)
-                                             ),
-                                          false
-                                        );
+                                             )                                        );
                return;
             }
             default://parse error - not expected record type
@@ -1483,8 +1481,7 @@ void GDSin::GdsStructure::importAref(GdsInFile* cf, laydata::TdtCell* dst_cell, 
                                                 angle,
                                                 (0 != reflection)
                                               ),
-                                           arrprops,
-                                           false
+                                           arrprops
                                          );
                return;
             }

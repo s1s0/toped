@@ -69,11 +69,11 @@ namespace laydata {
       short                clipType(tenderer::TopRend&) const;
       void                 motionDraw(const layprop::DrawProperties&, ctmqueue&) const;
       void                 add(TdtData* shape);
-      TdtData*             addBox(const TP& p1, const TP& p2, bool sortnow = true);
-      TdtData*             addPoly(pointlist& pl, bool sortnow = true);
-      TdtData*             addPoly(int4b* pl, unsigned psize, bool sortnow = true);
-      TdtData*             addWire(pointlist& pl,word w, bool sortnow = true);
-      TdtData*             addText(std::string text, CTM trans, bool sortnow = true);
+      TdtData*             addBox(const TP& p1, const TP& p2);
+      TdtData*             addPoly(pointlist& pl);
+      TdtData*             addPoly(int4b* pl, unsigned psize);
+      TdtData*             addWire(pointlist& pl,word w);
+      TdtData*             addText(std::string text, CTM trans);
       void                 put(TdtData* shape);
       void                 write(TEDfile* const) const;
       void                 gdsWrite(DbExportFile&) const;
@@ -150,7 +150,7 @@ namespace laydata {
        void                putPoly(int4b* pl, unsigned psize);
        void                putWire(pointlist& pl,word w);
        void                putText(std::string text, CTM trans);
-       void                sort() {_trunk->resort(_data);}
+       void                commit() {_trunk->resort(_data);}
    private:
       ShapeList            _data;
       QuadTree*            _trunk;
