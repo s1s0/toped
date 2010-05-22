@@ -141,12 +141,10 @@ namespace laydata {
                                                           bool active=false) const;
       QuadTree*            secureLayer(unsigned layno);
       QTreeTmp*            secureUnsortedLayer(unsigned layno);
-      TdtCellRef*          addCellRef(TdtDesign*, CellDefin str, CTM trans,
-                                                          bool sortnow = true);
-      void                 registerCellRef(CellDefin str, CTM trans, bool oldTree = true /*TODO remove this*/);
-      void                 registerCellARef(CellDefin str, CTM trans, ArrayProperties&, bool oldTree = true /*TODO remove this*/);
-      TdtCellAref*         addCellARef(TdtDesign*, CellDefin, CTM,
-                                          ArrayProperties&, bool sortnow = true);
+      void                 registerCellRef(CellDefin str, CTM trans);
+      void                 registerCellARef(CellDefin str, CTM trans, ArrayProperties&);
+      TdtCellRef*          addCellRef(TdtDesign*, CellDefin str, CTM trans);
+      TdtCellAref*         addCellARef(TdtDesign*, CellDefin, CTM, ArrayProperties&);
       bool                 addChild(TdtDesign*, TdtDefaultCell*);
       virtual void         write(TEDfile* const, const CellList&, const TDTHierTree*) const;
       virtual void         gdsWrite(DbExportFile&, const CellList&, const TDTHierTree*) const;

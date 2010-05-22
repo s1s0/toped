@@ -1092,14 +1092,17 @@ laydata::TdtData* laydata::TdtDesign::addCellRef(laydata::CellDefin strdefn, CTM
 }
 
 laydata::TdtData* laydata::TdtDesign::addCellARef(std::string& name, CTM& ori,
-                             ArrayProperties& arrprops) {
-   if (checkCell(name)) {
+                             ArrayProperties& arrprops)
+{
+   if (checkCell(name))
+   {
       laydata::CellDefin strdefn = getCellNamePair(name);
       modified = true;
       ori *= _target.rARTM();
       DBbox old_overlap(_target.edit()->cellOverlap());
       TdtData* ncrf = _target.edit()->addCellARef(this, strdefn, ori, arrprops);
-      if (NULL == ncrf) {
+      if (NULL == ncrf)
+      {
         tell_log(console::MT_ERROR, "Circular reference is forbidden");
       }
       else
@@ -1109,7 +1112,8 @@ laydata::TdtData* laydata::TdtDesign::addCellARef(std::string& name, CTM& ori,
       }
       return ncrf;
    }
-   else {
+   else
+   {
       std::string news = "Cell \"";
       news += name; news += "\" is not defined";
       tell_log(console::MT_ERROR,news);
@@ -1423,7 +1427,7 @@ bool laydata::TdtDesign::groupSelected(std::string name, laydata::TdtLibDir* lib
                                                    CL != TBgroup->end(); CL++)
    {
       ShapeList* lslct = CL->second;
-      QuadTree* wl = newcell->secureLayer(CL->first);
+      QTreeTmp* wl = newcell->secureUnsortedLayer(CL->first);
       // There is no point here to ensure that the layer definition exists.
       // We are just transferring shapes from one structure to another.
       // securelaydef( CL->first );
@@ -1438,7 +1442,7 @@ bool laydata::TdtDesign::groupSelected(std::string name, laydata::TdtLibDir* lib
       delete (lslct);
    }
    TBgroup->clear();delete TBgroup;
-   newcell->resort();
+   newcell->fixUnsorted();
    //reference the new cell into the current one.
    TdtData* ref = _target.edit()->addCellRef(this,
                                     getCellNamePair(name),CTM(TP(0,0),1,0,false));
@@ -1465,7 +1469,7 @@ laydata::AtticList* laydata::TdtDesign::ungroupThis(laydata::ShapeList* cells4u)
    // the initial and final overlap of the cell should not have been
    // changed by this operation. That's not true for the layers though.
    // Bottom line - validate only the layers
-   _target.edit()->validateLayers();
+   _target.edit()->fixUnsorted();
    return shapeUngr;
 }
 

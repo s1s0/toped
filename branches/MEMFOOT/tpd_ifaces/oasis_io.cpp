@@ -1433,8 +1433,7 @@ void Oasis::Cell::readReference(OasisInFile& ofn, laydata::TdtCell* dst_cell,
                                         magnification,
                                         angle,
                                         (info & Fmask)
-                                       ),
-                                       false
+                                       )
                                   );
       }
    }
@@ -1446,8 +1445,7 @@ void Oasis::Cell::readReference(OasisInFile& ofn, laydata::TdtCell* dst_cell,
                                      magnification,
                                      angle,
                                      (info & Fmask)
-                                    ),
-                                    false
+                                    )
                                );
    }
 }
