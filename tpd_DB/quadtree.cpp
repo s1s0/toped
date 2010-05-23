@@ -1010,18 +1010,6 @@ void laydata::QuadTree::updateOverlap(const DBbox& hovl)
    else          _overlap.overlap(hovl);
 }
 
-/*! Puts the shape into current QuadTree object without sorting. Updates
-the overlapping box though. */
-void laydata::QuadTree::put(TdtData* shape)
-{
-   updateOverlap(shape->overlap());
-   TdtData** newdata = DEBUG_NEW TdtData*[_props._numObjects+1];
-   memcpy(newdata, _data, sizeof(TdtData*) * _props._numObjects);
-   newdata[_props._numObjects++] = shape;
-   delete [] _data;
-   _data = newdata;
-}
-
 /*! Perform the data selection using select_in box. Called by the corresponding
 select methods of the parent structures in the data base - TdtLayer and TdtCell
 */
