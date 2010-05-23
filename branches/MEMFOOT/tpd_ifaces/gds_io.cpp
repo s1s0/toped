@@ -1880,9 +1880,9 @@ void GDSin::GdsExportFile::box(const int4b* const pdata)
    wr->add_int2b(_cGdsType);flush(wr);
    wr = setNextRecord(gds_XY,5);
    wr->add_int4b(pdata[0]);wr->add_int4b(pdata[1]);
+   wr->add_int4b(pdata[2]);wr->add_int4b(pdata[1]);
    wr->add_int4b(pdata[2]);wr->add_int4b(pdata[3]);
-   wr->add_int4b(pdata[4]);wr->add_int4b(pdata[5]);
-   wr->add_int4b(pdata[6]);wr->add_int4b(pdata[7]);
+   wr->add_int4b(pdata[0]);wr->add_int4b(pdata[3]);
    wr->add_int4b(pdata[0]);wr->add_int4b(pdata[1]);
    flush(wr);
    wr = setNextRecord(gds_ENDEL);
