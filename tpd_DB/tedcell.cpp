@@ -301,6 +301,8 @@ laydata::TdtCell::TdtCell(TEDfile* const tedfile, std::string name, int lib) :
    // now get the layers
    if       ((0 == tedfile->revision()) && (6 == tedfile->subRevision()))
    {
+      // old version of the TDT file
+      // TODO! shall be removed in the incoming release
       while (tedf_CELLEND != (recordtype = tedfile->getByte()))
       {
          switch (recordtype)
@@ -319,15 +321,28 @@ laydata::TdtCell::TdtCell(TEDfile* const tedfile, std::string name, int lib) :
    {
       while (tedf_CELLEND != (recordtype = tedfile->getByte()))
       {
+         QuadTree* clay = NULL;
          switch (recordtype)
          {
             case    tedf_LAYER:
                layno = tedfile->getWord();
-               _layers[layno] = DEBUG_NEW QuadTree(tedfile, false);
+               clay = DEBUG_NEW QuadTree(tedfile, false);
+               if (!clay->empty())
+                  _layers[layno] = clay;
+               else
+                  delete clay;
+               clay = NULL;
                break;
             case    tedf_REFS:
-               _layers[REF_LAY] = DEBUG_NEW QuadTree(tedfile, true);
-               tedfile->getCellChildNames(_children);
+               clay = DEBUG_NEW QuadTree(tedfile, true);
+               if (!clay->empty())
+               {
+                  _layers[REF_LAY] = clay;
+                  tedfile->getCellChildNames(_children);
+               }
+               else
+                  delete clay;
+               clay = NULL;
                break;
             default: throw EXPTNreadTDT("LAYER record type expected");
          }
@@ -1378,11 +1393,11 @@ bool laydata::TdtCell::mergeSelected(AtticList** dasao)
             // Now add the new shape to the list of selected shapes
             mrgcand->push_back(merged_shape);
             // add the new shape to the layer
-            _layers[CL->first]->put(merged_shape);
+            _layers[CL->first]->add(merged_shape);
             // and mark it as sh_merged
             merged_shape->setStatus(sh_merged);
-            // and finally validate the shapes tree
-            _layers[CL->first]->validate();
+//            // and finally validate the shapes tree
+//            _layers[CL->first]->validate();
          }
          else CS++;
       }
