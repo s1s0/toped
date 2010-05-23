@@ -34,31 +34,31 @@
 
 namespace Calbr
 {
-class drcTenderer: public drcRenderer
-{
-   public:
-   drcTenderer(laydata::DrcLibrary* library);
-   ~drcTenderer();
-	void setError(unsigned int numError);
-   void startWriting();
-   void addPoly(const CoordsVector   &coords);
-   void addLine(const edge &edge);
-   void showAll(void);
-	void hideAll(void);
-	bool showError(unsigned int numError);
-   void zoom(const edge &edge);
-   void endWriting();
-	bool checkCellName();
-private:
-   laydata::DrcLibrary* _ATDB;
-	laydata::TdtCell*		_DRCCell;
-	unsigned int			_numError;
-   double               _maxx;
-   double               _maxy;
-   double               _minx;
-   double               _miny;
-   bool                 _startDrawing; //use for initial setting of _minx, maxy etc
-};
+   class drcTenderer: public drcRenderer
+   {
+      public:
+                           drcTenderer(laydata::DrcLibrary* library);
+                          ~drcTenderer();
+      void                 setError(unsigned int numError);
+      void                 startWriting();
+      void                 addPoly(const CoordsVector   &coords);
+      void                 addLine(const edge &edge);
+      void                 showAll(void);
+      void                 hideAll(void);
+      bool                 showError(unsigned int numError);
+      void                 zoom(const edge &edge);
+      void                 endWriting();
+      bool                 checkCellName();
+   private:
+      laydata::DrcLibrary* _ATDB;
+      laydata::TdtCell*	   _DRCCell;
+      unsigned int         _numError;
+      double               _maxx;
+      double               _maxy;
+      double               _minx;
+      double               _miny;
+      bool                 _startDrawing; //use for initial setting of _minx, maxy etc
+   };
 
 }
 

@@ -91,9 +91,9 @@ void Calbr::drcTenderer::addPoly(const CoordsVector   &coords)
          _miny = std::min(it->y, _miny);
          plDB.push_back(TP(it->x, it->y, DBscale));
       }
-      laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(_DRCCell->secureLayer(_numError));
+      laydata::QTreeTmp* dwl = _DRCCell->secureUnsortedLayer(_numError);
       PROPC->addUnpublishedLay(_numError);
-      
+
       laydata::ValidPoly check(plDB);
 
       if (!check.valid())
@@ -103,8 +103,8 @@ void Calbr::drcTenderer::addPoly(const CoordsVector   &coords)
          tell_log(console::MT_ERROR, ost.str());
       }
       else plDB = check.getValidated();
-      if (check.box())  dwl->addBox(plDB[0], plDB[2], false);
-      else              dwl->addPoly(plDB,false);
+      if (check.box())  dwl->putBox(plDB[0], plDB[2]);
+      else              dwl->putPoly(plDB);
    }
 }
 
@@ -127,7 +127,7 @@ void Calbr::drcTenderer::addLine(const edge &edge)
 
    real DBscale = 1000 ;
    //Convert drcEdge to pointlist
-   pointlist plDB; 
+   pointlist plDB;
    plDB.reserve(2);
 
    plDB.push_back(TP(edge.x1, edge.y1, DBscale));
@@ -136,7 +136,7 @@ void Calbr::drcTenderer::addLine(const edge &edge)
    real      w = 0.01;   //width of line
    word      width = static_cast<word>(rint(w * DBscale));
 
-   laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(_DRCCell->secureLayer(_numError));
+   laydata::QTreeTmp* dwl = _DRCCell->secureUnsortedLayer(_numError);
    PROPC->addUnpublishedLay(_numError);
 
 
@@ -149,7 +149,7 @@ void Calbr::drcTenderer::addLine(const edge &edge)
       tell_log(console::MT_ERROR, ost.str());
    }
    else plDB = check.getValidated();
-   dwl->addWire(plDB, width,false);
+   dwl->putWire(plDB, width);
 }
 
 void Calbr::drcTenderer::showAll(void)
@@ -223,6 +223,7 @@ void Calbr::drcTenderer::zoom(const edge &edge)
 
 void Calbr::drcTenderer::endWriting()
 {
+   _DRCCell->fixUnsorted();
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp, layprop::DRC))
    {

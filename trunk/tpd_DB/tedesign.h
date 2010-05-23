@@ -91,9 +91,9 @@ namespace laydata {
       void           addThisCell(laydata::TdtCell* strdefn, laydata::TdtLibDir*);
       TdtCell*       removeCell(std::string&, laydata::AtticList*, laydata::TdtLibDir*);
       void           removeRefdCell(std::string&, CellDefList&, laydata::AtticList*, laydata::TdtLibDir*);
-      TdtData*       addBox(unsigned la, TP* p1, TP* p2, bool sortnow = true);
-      TdtData*       addPoly(unsigned, pointlist*, bool sortnow = true);
-      TdtData*       addWire(unsigned, pointlist*, word, bool sortnow = true);
+      TdtData*       addBox(unsigned la, TP* p1, TP* p2);
+      TdtData*       addPoly(unsigned, pointlist*);
+      TdtData*       addWire(unsigned, pointlist*, word);
       TdtData*       addText(unsigned la, std::string& text, CTM& ori);
       TdtData*       addCellRef(laydata::CellDefin strdefn, CTM& ori);
       TdtData*       addCellARef(std::string&, CTM&, ArrayProperties&);

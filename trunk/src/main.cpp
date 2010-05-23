@@ -208,6 +208,10 @@ int TopedApp::OnExit()
    delete PROPC;
    delete DATC;
 
+#ifdef DB_MEMORY_TRACE
+   MemTrack::TrackDumpBlocks();
+#endif
+
    finishSessionLog();
    return wxApp::OnExit();
 }

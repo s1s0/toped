@@ -996,20 +996,20 @@ void laydata::TdtDesign::collectParentCells(std::string& cname, CellDefList& par
    }
 }
 
-laydata::TdtData* laydata::TdtDesign::addBox(unsigned la, TP* p1, TP* p2, bool sortnow )
+laydata::TdtData* laydata::TdtDesign::addBox(unsigned la, TP* p1, TP* p2 )
 {
    DBbox old_overlap(_target.edit()->cellOverlap());
-   TdtLayer *actlay = static_cast<TdtLayer*>(_target.edit()->secureLayer(la));
+   QuadTree *actlay = _target.edit()->secureLayer(la);
    modified = true;
    TP np1((*p1) * _target.rARTM());
    TP np2((*p2) * _target.rARTM());
-   laydata::TdtData* newshape = actlay->addBox(np1,np2, sortnow);
+   laydata::TdtData* newshape = actlay->addBox(np1,np2);
    if (_target.edit()->overlapChanged(old_overlap, this))
       do {} while(validateCells());
    return newshape;
 }
 
-laydata::TdtData* laydata::TdtDesign::addPoly(unsigned la, pointlist* pl,bool sortnow)
+laydata::TdtData* laydata::TdtDesign::addPoly(unsigned la, pointlist* pl)
 {
    laydata::ValidPoly check(*pl);
    if (!check.valid()) {
@@ -1020,27 +1020,27 @@ laydata::TdtData* laydata::TdtDesign::addPoly(unsigned la, pointlist* pl,bool so
    }
    laydata::TdtData* newshape;
    DBbox old_overlap(_target.edit()->cellOverlap());
-   TdtLayer *actlay = static_cast<TdtLayer*>(_target.edit()->secureLayer(la));
+   QuadTree *actlay = _target.edit()->secureLayer(la);
    modified = true;
    pointlist vpl = check.getValidated();
    if (check.box())
    {
       TP p1(vpl[0] *_target.rARTM());
       TP p2(vpl[2] *_target.rARTM());
-      newshape = actlay->addBox(p1,p2, sortnow);
+      newshape = actlay->addBox(p1,p2);
    }
    else
    {
       for(pointlist::iterator PL = vpl.begin(); PL != vpl.end(); PL++)
          (*PL) *= _target.rARTM();
-      newshape = actlay->addPoly(vpl, sortnow);
+      newshape = actlay->addPoly(vpl);
    }
    if (_target.edit()->overlapChanged(old_overlap, this))
       do {} while(validateCells());
    return newshape;
 }
 
-laydata::TdtData* laydata::TdtDesign::addWire(unsigned la, pointlist* pl, word w, bool sortnow)
+laydata::TdtData* laydata::TdtDesign::addWire(unsigned la, pointlist* pl, word w)
 {
    laydata::ValidWire check(*pl,w);
    if (!check.valid()) {
@@ -1050,20 +1050,21 @@ laydata::TdtData* laydata::TdtDesign::addWire(unsigned la, pointlist* pl, word w
       return NULL;
    }
    DBbox old_overlap(_target.edit()->cellOverlap());
-   TdtLayer *actlay = static_cast<TdtLayer*>(_target.edit()->secureLayer(la));
+   QuadTree *actlay = _target.edit()->secureLayer(la);
    modified = true;
    pointlist vpl = check.getValidated();
    for(pointlist::iterator PL = vpl.begin(); PL != vpl.end(); PL++)
       (*PL) *= _target.rARTM();
-   laydata::TdtData* newshape = actlay->addWire(vpl,w, sortnow);
+   laydata::TdtData* newshape = actlay->addWire(vpl,w);
    if (_target.edit()->overlapChanged(old_overlap, this))
       do {} while(validateCells());
    return newshape;
 }
 
-laydata::TdtData* laydata::TdtDesign::addText(unsigned la, std::string& text, CTM& ori) {
+laydata::TdtData* laydata::TdtDesign::addText(unsigned la, std::string& text, CTM& ori)
+{
    DBbox old_overlap(_target.edit()->cellOverlap());
-   TdtLayer *actlay = static_cast<TdtLayer*>(_target.edit()->secureLayer(la));
+   QuadTree *actlay = _target.edit()->secureLayer(la);
    modified = true;
    ori *= _target.rARTM();
    laydata::TdtData* newshape = actlay->addText(text,ori);
@@ -1091,14 +1092,17 @@ laydata::TdtData* laydata::TdtDesign::addCellRef(laydata::CellDefin strdefn, CTM
 }
 
 laydata::TdtData* laydata::TdtDesign::addCellARef(std::string& name, CTM& ori,
-                             ArrayProperties& arrprops) {
-   if (checkCell(name)) {
+                             ArrayProperties& arrprops)
+{
+   if (checkCell(name))
+   {
       laydata::CellDefin strdefn = getCellNamePair(name);
       modified = true;
       ori *= _target.rARTM();
       DBbox old_overlap(_target.edit()->cellOverlap());
       TdtData* ncrf = _target.edit()->addCellARef(this, strdefn, ori, arrprops);
-      if (NULL == ncrf) {
+      if (NULL == ncrf)
+      {
         tell_log(console::MT_ERROR, "Circular reference is forbidden");
       }
       else
@@ -1108,7 +1112,8 @@ laydata::TdtData* laydata::TdtDesign::addCellARef(std::string& name, CTM& ori,
       }
       return ncrf;
    }
-   else {
+   else
+   {
       std::string news = "Cell \"";
       news += name; news += "\" is not defined";
       tell_log(console::MT_ERROR,news);
@@ -1422,7 +1427,7 @@ bool laydata::TdtDesign::groupSelected(std::string name, laydata::TdtLibDir* lib
                                                    CL != TBgroup->end(); CL++)
    {
       ShapeList* lslct = CL->second;
-      QuadTree* wl = newcell->secureLayer(CL->first);
+      QTreeTmp* wl = newcell->secureUnsortedLayer(CL->first);
       // There is no point here to ensure that the layer definition exists.
       // We are just transferring shapes from one structure to another.
       // securelaydef( CL->first );
@@ -1437,7 +1442,7 @@ bool laydata::TdtDesign::groupSelected(std::string name, laydata::TdtLibDir* lib
       delete (lslct);
    }
    TBgroup->clear();delete TBgroup;
-   newcell->resort();
+   newcell->fixUnsorted();
    //reference the new cell into the current one.
    TdtData* ref = _target.edit()->addCellRef(this,
                                     getCellNamePair(name),CTM(TP(0,0),1,0,false));
@@ -1464,7 +1469,7 @@ laydata::AtticList* laydata::TdtDesign::ungroupThis(laydata::ShapeList* cells4u)
    // the initial and final overlap of the cell should not have been
    // changed by this operation. That's not true for the layers though.
    // Bottom line - validate only the layers
-   _target.edit()->validateLayers();
+   _target.edit()->fixUnsorted();
    return shapeUngr;
 }
 

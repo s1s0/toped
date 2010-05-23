@@ -339,12 +339,12 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          void                 preTraverseChildren(const CIFHierTree*);
          void                 convert(const CIFin::CifStructure*, bool);
          void                 import(const CifStructure*, laydata::TdtCell*);
-         void                 box ( const CifBox*     ,laydata::TdtLayer*, std::string );
-         void                 poly( const CifPoly*    ,laydata::TdtLayer*, std::string );
-         void                 wire( const CifWire*    ,laydata::TdtLayer*, std::string );
+         void                 box ( const CifBox*     ,laydata::QTreeTmp*, std::string );
+         void                 poly( const CifPoly*    ,laydata::QTreeTmp*, std::string );
+         void                 wire( const CifWire*    ,laydata::QTreeTmp*, std::string );
          void                 ref ( const CifRef*     ,laydata::TdtCell*);
-         void                 lbll( const CifLabelLoc*,laydata::TdtLayer*, std::string );
-         void                 lbls( const CifLabelSig*,laydata::TdtLayer*, std::string );
+         void                 lbll( const CifLabelLoc*,laydata::QTreeTmp*, std::string );
+         void                 lbls( const CifLabelSig*,laydata::QTreeTmp*, std::string );
          CifFile*             _src_lib;
          laydata::TdtLibDir*  _tdt_db;
          const SIMap&         _cif_layers;

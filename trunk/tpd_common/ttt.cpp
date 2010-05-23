@@ -274,7 +274,8 @@ bool DBbox::visible(const CTM& tmtrx, int8b visualLimit) const
    else                                        return false;
 }
 
-DBbox DBbox::getcorner(byte corner) {
+DBbox DBbox::getcorner(QuadIdentificators corner)
+{
    switch(corner) {
       case 0: // NW
    return DBbox(_p1.x(), static_cast<int4b>(rint((_p2.y() + _p1.y()) / 2)),
