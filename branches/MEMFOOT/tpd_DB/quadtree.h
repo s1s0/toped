@@ -74,7 +74,6 @@ namespace laydata {
       TdtData*             addPoly(int4b* pl, unsigned psize);
       TdtData*             addWire(pointlist& pl,word w);
       TdtData*             addText(std::string text, CTM trans);
-      void                 put(TdtData* shape);
       void                 write(TEDfile* const) const;
       void                 gdsWrite(DbExportFile&) const;
       void                 cifWrite(DbExportFile&) const;
