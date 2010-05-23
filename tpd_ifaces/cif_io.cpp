@@ -544,9 +544,9 @@ bool CIFin::CifExportFile::layerSpecification(unsigned layno)
 
 void CIFin::CifExportFile::box(const int4b* const pdata)
 {
-   unsigned int length = abs(pdata[4] - pdata[0]);
-   unsigned int width  = abs(pdata[5] - pdata[1]);
-   TP center((pdata[4] + pdata[0]) / 2, (pdata[5] + pdata[1]) / 2);
+   unsigned int length = abs(pdata[2] - pdata[0]);
+   unsigned int width  = abs(pdata[3] - pdata[1]);
+   TP center((pdata[0] + pdata[2]) / 2, (pdata[1] + pdata[3]) / 2);
 
    if (_verbose)
       _file << "      Box length = "<< length << " width = "<< width <<
