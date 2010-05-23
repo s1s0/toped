@@ -144,10 +144,6 @@ class TeselChunk {
       GLenum            type() const      {return _type;}
       word              size() const      {return _size;}
       const unsigned*   index_seq() const {return _index_seq;}
-#ifdef DB_MEMORY_TRACE
-      static void*      operator new (size_t);
-      static void       operator delete (void*);
-#endif
    private:
       unsigned*         _index_seq;  // index sequence
       word              _size;       // size of the index sequence
@@ -195,10 +191,6 @@ class TessellPoly {
       static GLvoid     teselVertex(GLvoid *, GLvoid *);
       static GLvoid     teselBegin(GLenum, GLvoid *);
       static GLvoid     teselEnd(GLvoid *);
-#endif
-#ifdef DB_MEMORY_TRACE
-      static void*      operator new (size_t);
-      static void       operator delete (void*);
 #endif
    private:
       TeselChain        _tdata;

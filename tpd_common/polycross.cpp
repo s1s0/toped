@@ -50,7 +50,7 @@ SEGM->lP()->x(), SEGM->lP()->y(), SEGM->rP()->x(),SEGM->rP()->y());
 
 //==============================================================================
 /**
- * Determines the lexicographical order of two points comparing X first. 
+ * Determines the lexicographical order of two points comparing X first.
  * @param p1 - first point for comparison
  * @param p2 - second point for comparison
  * @return +1 -> p1  > p2
@@ -208,7 +208,7 @@ polycross::VPoint* polycross::CPoint::follower(bool& direction, bool modify) {
    return flw;
 }
 
-/*! One of the Bentley-Ottman post process functions. This one is dealing 
+/*! One of the Bentley-Ottman post process functions. This one is dealing
 with the cases when a vertex is lying on a segment it doesn't belongs to,
 i.e. two neightboring segments are touching the third segment. The algorithm
 is generating a crossing point exactly at the vertex of each segment. This
@@ -243,7 +243,7 @@ polycross::VPoint* polycross::VPoint::checkNreorder(VPoint*& pairedShape, bool s
    // now check for piercing edge cross points
    VPoint* spV = prevCrossCouple->prev();
    VPoint *snV = nextCrossCouple->next();
-   
+
    VPoint* pV = prevCross;
    int oriP, oriN;
    do pV = pV->prev();
@@ -376,11 +376,11 @@ polycross::CPoint* polycross::polysegment::insertCrossPoint(const TP* pnt) {
    return cp;
 }
 
-unsigned polycross::polysegment::normalize(const TP* p1, const TP* p2) 
+unsigned polycross::polysegment::normalize(const TP* p1, const TP* p2)
 {
    _lP = p1; _rP = p2;
    unsigned numcross = crosspoints.size();
-   if (crosspoints.size() > 1) 
+   if (crosspoints.size() > 1)
    {
       SortLine functor(p1,p2);
       std::sort(crosspoints.begin(), crosspoints.end(), functor);
@@ -388,11 +388,11 @@ unsigned polycross::polysegment::normalize(const TP* p1, const TP* p2)
    return numcross;
 }
 
-/*! Dump the valid segment points and link them. A valid segment points are the 
-segment left point and all crossing points except the coinciding ones. Two 
-segments cross each other in a single point. This is axiohmatic of course, but 
-here it includes the coinciding or partially coinciding segments. It is rather 
-a sanity check here for double crossing points, but BO algo implementation is 
+/*! Dump the valid segment points and link them. A valid segment points are the
+segment left point and all crossing points except the coinciding ones. Two
+segments cross each other in a single point. This is axiohmatic of course, but
+here it includes the coinciding or partially coinciding segments. It is rather
+a sanity check here for double crossing points, but BO algo implementation is
 producing such cases exactly when segments partially coincides.
 */
 void polycross::polysegment::dump_points(polycross::VPoint*& vlist) {
@@ -412,7 +412,7 @@ void polycross::polysegment::dump_points(polycross::VPoint*& vlist) {
          printf("( %i , %i )\n", crosspoints[i]->cp()->x(), crosspoints[i]->cp()->y());
 #endif
       }
-      else 
+      else
       {
 #ifdef BO2_DEBUG
          printf("(<><><><><> Double cross points on segmets %i and %i)\n", _edge, crosspoints[i]->link()->edge() );
@@ -471,7 +471,7 @@ polycross::polysegment::~polysegment()
 polycross::segmentlist::segmentlist(const pointlist& plst, byte plyn, bool looped) {
    _originalPL = &plst;
    unsigned plysize = plst.size();
-   if (!looped) 
+   if (!looped)
    {
       plysize--;
       _segs.reserve(plysize);
@@ -539,9 +539,9 @@ void polycross::TEvent::checkIntersect(polysegment* above, polysegment* below,
 /**
  * The method is using orientation() function to do the job. Segments that belong to
 the same polygon are not checked and method returns NULL. \n
-In case segments intersect, the method calls insertCrossPoint() method. 
- * @param above 
- * @param below 
+In case segments intersect, the method calls insertCrossPoint() method.
+ * @param above
+ * @param below
  * @param eventQ Event queue that will take the new crossing event.
  * @param iff represent the conditional point - if the crossing point found has
 the same coordinates as iff point, then a new event will be added to the event
@@ -563,7 +563,7 @@ TP* polycross::TEvent::getIntersect(polysegment* above, polysegment* below,
       ) return NULL;
    // Now test for intersection point exsistence
    float lsign, rsign, rlmul;
-   
+
    //check that both below endpoints are on the same side of above segment
    lsign = orientation(above->lP(), above->rP(), below->lP());
    rsign = orientation(above->lP(), above->rP(), below->rP());
@@ -616,7 +616,7 @@ TP* polycross::TEvent::getIntersect(polysegment* above, polysegment* below,
       }
       return CrossPoint;
    }
-   
+
    // at this point - the only possibility is that they intersect
    // so - create a cross event
    if (NULL == iff)
@@ -631,11 +631,11 @@ TP* polycross::TEvent::getIntersect(polysegment* above, polysegment* below,
  * Method should be called with one of lps/rps parameters equal to 0. Crossing
 point is returned only if it is not an end point of both segments.
 
- * @param above 
- * @param below 
- * @param lps 
- * @param rps 
- * @return 
+ * @param above
+ * @param below
+ * @param lps
+ * @param rps
+ * @return
  */
 TP* polycross::TEvent::joiningSegments(polysegment* above, polysegment* below, float lps, float rps)
 {
@@ -729,7 +729,7 @@ function assumes that the input two segments definitely cross each other.
 It is called only from TEvent::checkIntersect() in case the check for crossing
 segments is positive.\n
 Crossing point is calculated from general line equations Ax+By+C=0. A care
-is taken for division by 0 case when A or B coefficients are 0. It 
+is taken for division by 0 case when A or B coefficients are 0. It
 is important to note as well that the calculations must be done in floting
 point expressions, otherwise the hell might brake loose.
  * @param above first input segment
@@ -1029,7 +1029,7 @@ void polycross::TmEvent::sweep2bind(YQ& sweepline, BindCollection& bindColl)
    // action is taken only for points in the second polygon
    if ( (1 == _aseg->polyNo()) && (_aseg->polyNo() == _bseg->polyNo())) return;
 
-   // first for _aseg 
+   // first for _aseg
    // if right point is above and the neighbour above is from polygon 1
    if ((_aseg->lP()->y() <= _aseg->rP()->y()) &&
         (1 == thr->threadAbove()->cseg()->polyNo()))
@@ -1038,7 +1038,7 @@ void polycross::TmEvent::sweep2bind(YQ& sweepline, BindCollection& bindColl)
    if ((_aseg->lP()->y() >= _aseg->rP()->y()) &&
         (1 == thr->threadBelow()->cseg()->polyNo()))
       bindColl.update_BL(thr->threadBelow()->cseg(), _aseg->edge(), _aseg->rP());
-   
+
    // then for _bseg
    // if left point is above and the neighbour above is from polygon 1
    if ((_bseg->lP()->y() >= _bseg->rP()->y()) &&
@@ -1314,7 +1314,7 @@ polycross::SegmentThread* polycross::YQ::beginThread(polycross::polysegment* sta
    SegmentThread* above = _bottomSentinel;
    while (sCompare(startseg, above->cseg()) > 0)
       above = above->threadAbove();
-   
+
    SegmentThread* below = above->threadBelow();
    SegmentThread* newthread = DEBUG_NEW SegmentThread(startseg, below, above);
    above->set_threadBelow(newthread);
@@ -1402,7 +1402,7 @@ polycross::SegmentThread* polycross::YQ::swapThreads(unsigned tAID, unsigned tBI
    // ... and below pointers ...
    tAbove->set_threadBelow(tBelow->threadBelow());
    tBelow->set_threadBelow(tAbove); // <===!
-   
+
    return tAbove;
 }
 
@@ -1427,10 +1427,10 @@ int polycross::YQ::sCompare(const polysegment* seg0, const polysegment* seg1)
    ori = orientation(seg1->lP(), seg1->rP(), seg0->rP());
    if (ori != 0) return ori;
    // if it is still the same => we have coinciding segments
-   
+
    // get the original pointlists for the comparing segments
    const pointlist* plist0 = (1 == seg0->polyNo()) ? opl1() : opl2();
-   
+
    // ... and get the location of the inside segment in that sequence
    int numv = plist0->size();
    unsigned indxLP = (*(seg0->lP()) == (*plist0)[seg0->edge()]) ?
@@ -1439,15 +1439,15 @@ int polycross::YQ::sCompare(const polysegment* seg0, const polysegment* seg1)
          seg0->edge() : (seg0->edge() + 1) % numv;
 
    bool indxpos = (indxRP == ((indxLP + 1) % numv));
-   // we are going to get the next point in the sequence and use it to 
+   // we are going to get the next point in the sequence and use it to
    // determine the position that we need
    if (indxpos) indxRP = (indxRP+1) % numv;
    else (0==indxRP) ? indxRP = numv-1 : indxRP--;
-   
+
    ori = orientation(seg1->lP(), seg1->rP(), &((*plist0)[indxRP]));
    assert(ori != 0);
    return ori;
-   
+
 /*   int order;
    // or like that - both ways it should work
    if       (*(seg0->lP()) != *(seg1->lP()))
@@ -1494,7 +1494,7 @@ polycross::XQ::XQ( const segmentlist& seg1, const segmentlist& seg2 ) :
    _sweepline = DEBUG_NEW YQ(_overlap, &seg1, &seg2);
 }
 
-polycross::XQ::XQ( const segmentlist& seg, bool loopsegs ) : 
+polycross::XQ::XQ( const segmentlist& seg, bool loopsegs ) :
                      _overlap(*(seg[0]->lP())), _loopsegs(loopsegs)
 {
    _xqueue = avl_create(E_compare, NULL, NULL);
@@ -1686,6 +1686,8 @@ bool polycross::BindCollection::is_shorter(unsigned segno, real dist)
 
 polycross::BindSegment* polycross::BindCollection::get_highest()
 {
+   if (_blist.empty())
+      return NULL;
    BindList::iterator BI = _blist.begin();
    BindSegment* shseg = *BI;
    while (++BI != _blist.end())

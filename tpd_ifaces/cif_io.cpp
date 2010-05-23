@@ -544,9 +544,9 @@ bool CIFin::CifExportFile::layerSpecification(unsigned layno)
 
 void CIFin::CifExportFile::box(const int4b* const pdata)
 {
-   unsigned int length = abs(pdata[4] - pdata[0]);
-   unsigned int width  = abs(pdata[5] - pdata[1]);
-   TP center((pdata[4] + pdata[0]) / 2, (pdata[5] + pdata[1]) / 2);
+   unsigned int length = abs(pdata[2] - pdata[0]);
+   unsigned int width  = abs(pdata[3] - pdata[1]);
+   TP center((pdata[0] + pdata[2]) / 2, (pdata[1] + pdata[3]) / 2);
 
    if (_verbose)
       _file << "      Box length = "<< length << " width = "<< width <<
@@ -748,9 +748,11 @@ void CIFin::Cif2Ted::convert(const CIFin::CifStructure* src_structure, bool over
       ost << "Importing structure " << gname << "...";
       tell_log(console::MT_INFO,ost.str());
       // first create a new cell
-      dst_structure = (*_tdt_db)()->addCell(gname, _tdt_db);
-      // finally call the cell converter
+      dst_structure = DEBUG_NEW laydata::TdtCell(gname);
+      // call the cell converter
       import(src_structure, dst_structure);
+      // and finally - register the cell
+      (*_tdt_db)()->registerCellRead(gname, dst_structure);
    }
 }
 
@@ -764,8 +766,7 @@ void CIFin::Cif2Ted::import(const CIFin::CifStructure* src, laydata::TdtCell* ds
       SIMap::const_iterator layno;
       if ( _cif_layers.end() != (layno = _cif_layers.find(swl->name())) )
       {
-         laydata::TdtLayer* dwl =
-               static_cast<laydata::TdtLayer*>(dst->secureLayer(layno->second));
+         laydata::QTreeTmp* dwl = dst->secureUnsortedLayer(layno->second);
          const CIFin::CifData* wd = swl->firstData();
          while ( wd ) // loop trough data
          {
@@ -796,10 +797,10 @@ void CIFin::Cif2Ted::import(const CIFin::CifStructure* src, laydata::TdtCell* ds
       ref(swr,dst);
       swr = swr->last();
    }
-   dst->resort();
+   dst->fixUnsorted();
 }
 
-void CIFin::Cif2Ted::box ( const CIFin::CifBox* wd, laydata::TdtLayer* wl, std::string layname)
+void CIFin::Cif2Ted::box ( const CIFin::CifBox* wd, laydata::QTreeTmp* wl, std::string layname)
 {
    pointlist pl;   pl.reserve(4);
    real cX, cY;
@@ -843,11 +844,11 @@ void CIFin::Cif2Ted::box ( const CIFin::CifBox* wd, laydata::TdtLayer* wl, std::
    }
    else pl = check.getValidated() ;
 
-   if (check.box())  wl->addBox(pl[0], pl[2],false);
-   else              wl->addPoly(pl,false);
+   if (check.box())  wl->putBox(pl[0], pl[2]);
+   else              wl->putPoly(pl);
 }
 
-void CIFin::Cif2Ted::poly( const CIFin::CifPoly* wd, laydata::TdtLayer* wl, std::string layname)
+void CIFin::Cif2Ted::poly( const CIFin::CifPoly* wd, laydata::QTreeTmp* wl, std::string layname)
 {
    pointlist pl;
    pl.reserve(wd->poly()->size());
@@ -867,11 +868,11 @@ void CIFin::Cif2Ted::poly( const CIFin::CifPoly* wd, laydata::TdtLayer* wl, std:
    }
    else pl = check.getValidated() ;
 
-   if (check.box())  wl->addBox(pl[0], pl[2],false);
-   else              wl->addPoly(pl,false);
+   if (check.box())  wl->putBox(pl[0], pl[2]);
+   else              wl->putPoly(pl);
 }
 
-void CIFin::Cif2Ted::wire( const CIFin::CifWire* wd, laydata::TdtLayer* wl, std::string layname)
+void CIFin::Cif2Ted::wire( const CIFin::CifWire* wd, laydata::QTreeTmp* wl, std::string layname)
 {
    pointlist pl;
    pl.reserve(wd->poly()->size());
@@ -890,35 +891,26 @@ void CIFin::Cif2Ted::wire( const CIFin::CifWire* wd, laydata::TdtLayer* wl, std:
       tell_log(console::MT_ERROR, ost.str());
    }
    else pl = check.getValidated() ;
-   wl->addWire(pl, wd->width(),false);
+   wl->putWire(pl, wd->width());
 }
 
 void CIFin::Cif2Ted::ref ( const CIFin::CifRef* wd, laydata::TdtCell* dst)
 {
    CifStructure* refd = _src_lib->getStructure(wd->cell());
    std::string cell_name = refd->name();
-   if (NULL != (*_tdt_db)()->checkCell(cell_name))
-   {
-      laydata::CellDefin strdefn = (*_tdt_db)()->getCellNamePair(cell_name);
-      // Absolute magnification, absolute angle should be reflected somehow!!!
-      dst->addCellRef((*_tdt_db)(), strdefn, (*wd->location())*_crosscoeff, false);
-   }
-   else
-   {
-      std::string news = "Referenced structure \"";
-      news += cell_name; news += "\" not found. Reference ignored";
-      tell_log(console::MT_ERROR,news);
-   }
+
+   laydata::CellDefin strdefn = _tdt_db->linkCellRef(cell_name, TARGETDB_LIB);
+   dst->registerCellRef( strdefn,(*wd->location())*_crosscoeff);
 }
 
-void CIFin::Cif2Ted::lbll( const CIFin::CifLabelLoc* wd, laydata::TdtLayer* wl, std::string )
+void CIFin::Cif2Ted::lbll( const CIFin::CifLabelLoc* wd, laydata::QTreeTmp* wl, std::string )
 {
    // CIF doesn't have a concept of texts (as GDS)
    // text size and placement are just the default
    if (0.0 == _techno) return;
    TP pnt(*(wd->location()));
    pnt *= _crosscoeff;
-   wl->addText(wd->text(),
+   wl->putText(wd->text(),
                CTM(pnt,
                    (_techno / (/*(*_tdt_db)()->UU() * */ OPENGL_FONT_UNIT)),
                    0.0,
@@ -926,7 +918,7 @@ void CIFin::Cif2Ted::lbll( const CIFin::CifLabelLoc* wd, laydata::TdtLayer* wl, 
               );
 }
 
-void CIFin::Cif2Ted::lbls( const CIFin::CifLabelSig*,laydata::TdtLayer*, std::string )
+void CIFin::Cif2Ted::lbls( const CIFin::CifLabelSig*,laydata::QTreeTmp*, std::string )
 {
 }
 

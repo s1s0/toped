@@ -57,12 +57,12 @@ void Calbr::drcEdge::addCoord(long x1, long y1, long x2, long y2)
 
 Calbr::edge Calbr::drcEdge::getZoom() const
 {
-	edge ret;
-	ret.x1 = std::min(_coords.x1, _coords.x2);
-	ret.y1 = std::min(_coords.y1, _coords.y2);
-	ret.x2 = std::max(_coords.x1, _coords.x2);
-	ret.y2 = std::max(_coords.y1, _coords.y2);
-	return ret;
+   edge ret;
+   ret.x1 = std::min(_coords.x1, _coords.x2);
+   ret.y1 = std::min(_coords.y1, _coords.y2);
+   ret.x2 = std::max(_coords.x1, _coords.x2);
+   ret.y2 = std::max(_coords.y1, _coords.y2);
+   return ret;
 }
 
 void Calbr::drcEdge::addError()
@@ -93,24 +93,24 @@ void Calbr::drcPolygon::addError()
 
 Calbr::edge Calbr::drcPolygon::getZoom() const
 {
-	CoordsVector::const_iterator it = _coords.begin();
-	real minx = (*it).x;
-	real miny = (*it).y;
-	real maxx = (*it).x;
-	real maxy = (*it).y;
-	for(CoordsVector::const_iterator it = _coords.begin(); it != _coords.end(); ++it)
-	{
+   CoordsVector::const_iterator it = _coords.begin();
+   real minx = (*it).x;
+   real miny = (*it).y;
+   real maxx = (*it).x;
+   real maxy = (*it).y;
+   for (CoordsVector::const_iterator it = _coords.begin(); it != _coords.end(); ++it)
+   {
       minx = std::min((*it).x, minx);
       miny = std::min((*it).y, miny);
       maxx = std::max((*it).x, maxx);
       maxy = std::max((*it).y, maxy);
-	};
-	edge ret;
-	ret.x1 = minx;
-	ret.y1 = miny;
-	ret.x2 = maxx;
-	ret.y2 = maxy;
-	return ret;
+   }
+   edge ret;
+   ret.x1 = minx;
+   ret.y1 = miny;
+   ret.x2 = maxx;
+   ret.y2 = maxy;
+   return ret;
 }
 
 Calbr::drcRuleCheck::drcRuleCheck(unsigned int num, const std::string &name)
@@ -177,26 +177,28 @@ void Calbr::drcRuleCheck::addEdge(const Calbr::drcEdge &theEdge)
 
 Calbr::edge Calbr::drcRuleCheck::getZoom(long ordinal)
 {
-	edge ret;
-	for(std::vector <Calbr::drcPolygon>::const_iterator it = _polygons.begin(); it != _polygons.end(); ++it)
-	{
-		if (ordinal == (*it).ordinal())
-		{
-			ret = (*it).getZoom();
-			return ret;
-		}
-	}
+   edge ret;
+   for (std::vector<Calbr::drcPolygon>::const_iterator it = _polygons.begin(); it
+         != _polygons.end(); ++it)
+   {
+      if (ordinal == (*it).ordinal())
+      {
+         ret = (*it).getZoom();
+         return ret;
+      }
+   }
 
-	for(std::vector <Calbr::drcEdge>::const_iterator it = _edges.begin(); it != _edges.end(); ++it)
-	{
-		if (ordinal == (*it).ordinal())
-		{
-			ret = (*it).getZoom();
-			return ret;
-		}
-	}
+   for (std::vector<Calbr::drcEdge>::const_iterator it = _edges.begin(); it
+         != _edges.end(); ++it)
+   {
+      if (ordinal == (*it).ordinal())
+      {
+         ret = (*it).getZoom();
+         return ret;
+      }
+   }
    throw EXPTNdrc_reader("Can't zoom to chosen element");
-	return ret;
+   return ret;
 }
 
 Calbr::edge Calbr::drcRuleCheck::getZoom(void)
@@ -234,7 +236,7 @@ Calbr::CalbrFile::CalbrFile(const std::string &fileName, drcRenderer *render)
 
 
    char cellName[512];
-   if (sscanf( str, "%s %ld", cellName, &_precision) != 2) 
+   if (sscanf( str, "%s %ld", cellName, &_precision) != 2)
    {
       _ok = false;
       ost << "Problem of reading file " << fname;
@@ -243,7 +245,7 @@ Calbr::CalbrFile::CalbrFile(const std::string &fileName, drcRenderer *render)
       ost<<"Can't read cell name or precision";
       tell_log(console::MT_ERROR,ost.str());
       return;
- 
+
    }
    //Initialization of static member drcPolygon class
    drcPolygon::_precision = _precision;
@@ -364,7 +366,7 @@ bool Calbr::CalbrFile::parse(unsigned int num)
          ost<<"string: " <<tempStr;
          tell_log(console::MT_ERROR,ost.str());
          return false;
- 
+
       };
       drcPolygon poly(ordinal, _render);
       switch(type)
@@ -465,7 +467,7 @@ void   Calbr::CalbrFile::addResults()
       }
    }
    _render->endWriting();
-	_render->hideAll();
+   _render->hideAll();
 }
 
 void   Calbr::CalbrFile::showError(const std::string & error, long  number)
@@ -479,7 +481,7 @@ void   Calbr::CalbrFile::showError(const std::string & error, long  number)
       {
          _render->hideAll();
          if(_render->showError((*it)->num()))
-			{
+         {
             try
             {
                zoom = (*it)->getZoom(number);
@@ -489,7 +491,7 @@ void   Calbr::CalbrFile::showError(const std::string & error, long  number)
                return;
             }
             _render->zoom(zoom);
-			}
+         }
       }
    }
    assert(it == _RuleChecks.end());
@@ -507,8 +509,8 @@ void   Calbr::CalbrFile::showCluster(const std::string & error)
       {
          _render->hideAll();
          if (_render->showError((*it)->num()))
-			{
-				try
+         {
+            try
             {
                zoom = (*it)->getZoom();
             }
@@ -517,7 +519,7 @@ void   Calbr::CalbrFile::showCluster(const std::string & error)
                return;
             }
             _render->zoom(zoom);
-			}
+         }
       }
    }
    assert(it == _RuleChecks.end());
@@ -541,6 +543,8 @@ std::string Calbr::CalbrFile::explainError(word lay)
       if ((*it)->num() == lay) return (*it)->ruleCheckName();
    }
    assert(true);
+   //dummy, to prevent compiler warnings!
+   return "";
 }
 
 wxString Calbr::convert(int number, long precision)

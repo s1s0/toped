@@ -37,6 +37,7 @@ namespace laydata {
    class TdtCellRef;
    class TdtCellAref;
    typedef  std::map<unsigned, QuadTree*>           LayerList;
+   typedef  std::map<unsigned, QTreeTmp*>           TmpLayerMap;
    typedef  SGHierTree<TdtDefaultCell>              TDTHierTree;
 
 
@@ -139,12 +140,11 @@ namespace laydata {
       virtual void         motionDraw(const layprop::DrawProperties&, ctmqueue&,
                                                           bool active=false) const;
       QuadTree*            secureLayer(unsigned layno);
-      TdtCellRef*          addCellRef(TdtDesign*, CellDefin str, CTM trans,
-                                                          bool sortnow = true);
+      QTreeTmp*            secureUnsortedLayer(unsigned layno);
       void                 registerCellRef(CellDefin str, CTM trans);
-      TdtCellAref*         addCellARef(TdtDesign*, CellDefin, CTM,
-                                          ArrayProperties&, bool sortnow = true);
       void                 registerCellARef(CellDefin str, CTM trans, ArrayProperties&);
+      TdtCellRef*          addCellRef(TdtDesign*, CellDefin str, CTM trans);
+      TdtCellAref*         addCellARef(TdtDesign*, CellDefin, CTM, ArrayProperties&);
       bool                 addChild(TdtDesign*, TdtDefaultCell*);
       virtual void         write(TEDfile* const, const CellList&, const TDTHierTree*) const;
       virtual void         gdsWrite(DbExportFile&, const CellList&, const TDTHierTree*) const;
@@ -175,6 +175,7 @@ namespace laydata {
       void                 transferLayer(unsigned);
       void                 transferLayer(SelectList*, unsigned);
       void                 resort();
+      void                 fixUnsorted();
       bool                 validateCells(TdtLibrary*);
       void                 validateLayers();
       unsigned int         numSelected();
@@ -207,6 +208,7 @@ namespace laydata {
       NameSet              _children;     //! for hierarchy list purposes
       SelectList           _shapesel;     //! selected shapes
       DBbox                _cellOverlap;  //! Overlap of the entire cell
+      TmpLayerMap          _tmpLayers;    //! All layers with unsorted data
    };
 }
 #endif

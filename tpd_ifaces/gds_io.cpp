@@ -672,7 +672,7 @@ void GDSin::GdsStructure::import(GdsInFile *cf, laydata::TdtCell* dst_cell,
                skimNode(cf);
                break;
             case gds_ENDSTR:// end of structure, exit point
-               dst_cell->resort();
+               dst_cell->fixUnsorted();
                _traversed = true;
                return;
             default://parse error - not expected record type
@@ -1075,9 +1075,9 @@ void GDSin::GdsStructure::importBox(GdsInFile* cf, laydata::TdtCell* dst_cell, c
                      tell_log(console::MT_ERROR, ost.str());
                   }
                   else plist = check.getValidated();
-                  laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->secureLayer(tdtlaynum));
-                  if (check.box())  dwl->addBox(plist[0], plist[2], false);
-                  else              dwl->addPoly(plist,false);
+                  laydata::QTreeTmp* dwl = dst_cell->secureUnsortedLayer(tdtlaynum);
+                  if (check.box())  dwl->putBox(plist[0], plist[2]);
+                  else              dwl->putPoly(plist);
                }
                break;
             case gds_ENDEL://end of element, exit point
@@ -1143,9 +1143,9 @@ void GDSin::GdsStructure::importPoly(GdsInFile* cf, laydata::TdtCell* dst_cell, 
                      tell_log(console::MT_ERROR, ost.str());
                   }
                   else plist = check.getValidated();
-                  laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->secureLayer(tdtlaynum));
-                  if (check.box())  dwl->addBox(plist[0], plist[2], false);
-                  else              dwl->addPoly(plist,false);
+                  laydata::QTreeTmp* dwl = dst_cell->secureUnsortedLayer(tdtlaynum);
+                  if (check.box())  dwl->putBox(plist[0], plist[2]);
+                  else              dwl->putPoly(plist);
                }
                break;
             case gds_ENDEL://end of element, exit point
@@ -1225,8 +1225,8 @@ void GDSin::GdsStructure::importPath(GdsInFile* cf, laydata::TdtCell* dst_cell, 
                         tell_log(console::MT_ERROR, ost.str());
                      }
                      else plist = check.getValidated();
-                     laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->secureLayer(tdtlaynum));
-                     dwl->addWire(plist, width,false);
+                     laydata::QTreeTmp* dwl = dst_cell->secureUnsortedLayer(tdtlaynum);
+                     dwl->putWire(plist, width);
                   }
                   else
                   {
@@ -1316,9 +1316,9 @@ void GDSin::GdsStructure::importText(GdsInFile* cf, laydata::TdtCell* dst_cell, 
             case gds_ENDEL://end of element, exit point
                if ( theLayMap.getTdtLay(tdtlaynum, layer, singleType) )
                {
-                  laydata::TdtLayer* dwl = static_cast<laydata::TdtLayer*>(dst_cell->secureLayer(tdtlaynum));
+                  laydata::QTreeTmp* dwl = dst_cell->secureUnsortedLayer(tdtlaynum);
                   // @FIXME absolute magnification, absolute angle should be reflected somehow!!!
-                  dwl->addText(tString,
+                  dwl->putText(tString,
                               CTM( magnPoint,
                                     magnification / (dbuu *  OPENGL_FONT_UNIT),
                                     angle,
@@ -1393,8 +1393,7 @@ void GDSin::GdsStructure::importSref(GdsInFile* cf, laydata::TdtCell* dst_cell, 
                                               magnification,
                                               angle,
                                               (0 != reflection)
-                                             )
-                                        );
+                                             )                                        );
                return;
             }
             default://parse error - not expected record type
@@ -1881,9 +1880,9 @@ void GDSin::GdsExportFile::box(const int4b* const pdata)
    wr->add_int2b(_cGdsType);flush(wr);
    wr = setNextRecord(gds_XY,5);
    wr->add_int4b(pdata[0]);wr->add_int4b(pdata[1]);
+   wr->add_int4b(pdata[2]);wr->add_int4b(pdata[1]);
    wr->add_int4b(pdata[2]);wr->add_int4b(pdata[3]);
-   wr->add_int4b(pdata[4]);wr->add_int4b(pdata[5]);
-   wr->add_int4b(pdata[6]);wr->add_int4b(pdata[7]);
+   wr->add_int4b(pdata[0]);wr->add_int4b(pdata[3]);
    wr->add_int4b(pdata[0]);wr->add_int4b(pdata[1]);
    flush(wr);
    wr = setNextRecord(gds_ENDEL);

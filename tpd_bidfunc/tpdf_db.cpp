@@ -1172,8 +1172,8 @@ int tellstdfunc::CIFimportList::execute()
    {
       importCIFcell(dbLibDir, top_cells, cifLays, UNDOcmdQ, UNDOPstack, _threadExecution, recur, over, techno * PROPC->DBscale());
       updateLayerDefinitions(dbLibDir, top_cells, TARGETDB_LIB);
-      // Don't refresh the tree browser here. It should've been updated by the
-      // CIFimport function during the conversion
+      // populate the hierarchy browser
+      DATC->bpRefreshTdtTab(true, _threadExecution);
       LogFile << LogFile.getFN() << "(" << *pl << ","
               << *ll                   << ","
               << LogFile._2bool(recur) << ","
@@ -1223,9 +1223,8 @@ int tellstdfunc::CIFimport::execute()
    {
       importCIFcell(dbLibDir, top_cells, cifLays, UNDOcmdQ, UNDOPstack, _threadExecution, recur, over, techno * PROPC->DBscale());
       updateLayerDefinitions(dbLibDir, top_cells, TARGETDB_LIB);
-      // Don't refresh the tree browser here. It should've been updated by the
-      // CIFimport function during the conversion
-
+      // populate the hierarchy browser
+      DATC->bpRefreshTdtTab(true, _threadExecution);
       LogFile << LogFile.getFN() << "(\"" << name<< "\","
               << *lll                  << ","
               << LogFile._2bool(recur) << ","

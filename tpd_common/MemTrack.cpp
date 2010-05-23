@@ -421,6 +421,7 @@ namespace MemTrack
 
     void TrackDumpBlocks()
     {
+       BlockHeader::memTrackerLock.Lock();
         // Get an array of pointers to all extant blocks.
         size_t numBlocks = BlockHeader::CountBlocks();
         BlockHeader **ppBlockHeader =
@@ -436,16 +437,37 @@ namespace MemTrack
         for (size_t i = 0; i < numBlocks; i++)
         {
             BlockHeader *pBlockHeader = ppBlockHeader[i];
-            char const *typeName = pBlockHeader->GetTypeName();
-            size_t size = pBlockHeader->GetRequestedSize();
-            char const *fileName = pBlockHeader->GetFilename();
-            int lineNum = pBlockHeader->GetLineNum();
-            printf("*** #%-6ld %5ld bytes %-50s\n", i, size, typeName);
-            printf("... %s:%d\n", fileName, lineNum);
+            int   status;
+            char* demangledName = abi::__cxa_demangle(pBlockHeader->GetTypeName(), 0, 0, &status);
+            if (0 == status)
+            {
+               size_t size = pBlockHeader->GetRequestedSize();
+               char const *fileName = pBlockHeader->GetFilename();
+               int lineNum = pBlockHeader->GetLineNum();
+               if (0 < lineNum)
+               {
+                  printf("*** #%-6ld %5ld bytes %-50s\n", i, size, demangledName);
+                  printf("... %s:%d\n", fileName, lineNum);
+               }
+               free(demangledName);
+            }
+            else
+            {
+               char const *typeName = pBlockHeader->GetTypeName();
+               size_t size = pBlockHeader->GetRequestedSize();
+               char const *fileName = pBlockHeader->GetFilename();
+               int lineNum = pBlockHeader->GetLineNum();
+               if (0 < lineNum)
+               {
+                  printf("*** #%-6ld %5ld bytes %-50s\n", i, size, typeName);
+                  printf("... %s:%d\n", fileName, lineNum);
+               }
+            }
         }
 
         // Clean up.
         free(ppBlockHeader);
+        BlockHeader::memTrackerLock.Unlock();
     }
 
     /* ---------------------------------------- struct MemDigest */

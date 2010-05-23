@@ -32,6 +32,7 @@
 
 namespace laydata {
 
+   class QTreeTmp;
 //==============================================================================
    /*! QuadTree class implements the main clipping algorithm of toped. Its main
       purpose is to speed-up the drawing of the database. All objects of type
@@ -47,28 +48,32 @@ namespace laydata {
       possible sub-rectangles of the _overlap area. Child QuadTree objects are
       stored into an quads[4] array and each of them is responsible by convention
       for the NW(north-west), NE(north-east), SE(south-east) and SW(south-west)
-      subrectangles of the _overlap box.\n
+      sub-rectangles of the _overlap box.\n
       The methods can be split on several groups:
          - add a single layout object - add(), fitInTree()
          - add a group of layout objects - put(), sort(), fitSubTree()
          - object selection - selectInBox(), unselectInBox(), selectFromList(),
            selectAll()
          - design modification - deleteMarked()
-         - tree maintanence - validate(), fullValidate(), sort(), resort(),
+         - tree maintenance - validate(), fullValidate(), sort(), resort(),
            tmpStore()
             */
    class QuadTree {
    public:
                            QuadTree();
-                           QuadTree(TEDfile* const tedfile);
-      virtual             ~QuadTree();
+                           QuadTree(TEDfile* const, bool);
+                          ~QuadTree();
       void                 openGlDraw(layprop::DrawProperties&, const DataList*, bool) const;
       void                 openGlRender(tenderer::TopRend&, const DataList*) const;
 //      void                 visible_shapes(laydata::ShapeList*, const DBbox&, const CTM&, const CTM&, unsigned long&);
       short                clipType(tenderer::TopRend&) const;
-      virtual void         motionDraw(const layprop::DrawProperties&, ctmqueue&) const;
+      void                 motionDraw(const layprop::DrawProperties&, ctmqueue&) const;
       void                 add(TdtData* shape);
-      void                 put(TdtData* shape);
+      TdtData*             addBox(const TP& p1, const TP& p2);
+      TdtData*             addPoly(pointlist& pl);
+      TdtData*             addPoly(int4b* pl, unsigned psize);
+      TdtData*             addWire(pointlist& pl,word w);
+      TdtData*             addText(std::string text, CTM trans);
       void                 write(TEDfile* const) const;
       void                 gdsWrite(DbExportFile&) const;
       void                 cifWrite(DbExportFile&) const;
@@ -86,61 +91,69 @@ namespace laydata {
       bool                 getObjectOver(const TP pnt, laydata::TdtData*& prev);
       void                 validate();
       bool                 fullValidate();
-      void                 resort();
+      void                 resort(laydata::TdtData* newdata = NULL);
+      void                 resort(ShapeList&);
       bool                 empty() const;
       void                 freeMemory();
       /*! Return the overlapping box*/
-      DBbox                overlap() const   {return _overlap;};
+      DBbox                overlap() const   {return _overlap;}
       /*! Return the overlapping box*/
-      virtual void         vlOverlap(const layprop::DrawProperties&, DBbox&) const;
+      void                 vlOverlap(const layprop::DrawProperties&, DBbox&, bool) const;
       /*! Mark the tree as invalid*/
-      void                 invalidate()      {_invalid = true;};
+      void                 invalidate()      {_props._invalid = true;}
       /*! Return the status of _invalid flag*/
-      bool                 invalid() const   {return _invalid;};
-   protected:
-      DBbox               _overlap;//! The overlapping box
+      bool                 invalid() const   {return _props._invalid;}
    private:
+      friend class QTreeTmp;
+      typedef unsigned     ObjectIter;
+      struct __attribute__ ((__packed__)) QuadProps
+      {
+                                QuadProps();
+         byte                   numSubQuads() const;
+         char                   getPosition(QuadIdentificators);
+         void                   addQuad(QuadIdentificators);
+         void                   removeQuad(QuadIdentificators);
+         void                   clearQuadMap() {_quadMap = 0;}
+         ObjectIter             _numObjects;
+         /*! Flag indicates that the container needs to be resorted*/
+         bool                   _invalid;
+      private:
+         char                   getNEQuad() const;
+         char                   getNWQuad() const;
+         char                   getSEQuad() const;
+         char                   getSWQuad() const;
+         byte                   _quadMap;
+      };
       void                 sort(ShapeList&);
       bool                 fitInTree(TdtData* shape);
-      int                  fitSubTree(const DBbox&, DBbox*);
+      char                 fitSubTree(const DBbox&, DBbox*);
       void                 tmpStore(ShapeList& store);
       byte                 biggest(int8b* array) const;
       void                 updateOverlap(const DBbox& hovl);
+      byte                 sequreQuad(QuadIdentificators);
+      void                 removeQuad(QuadIdentificators);
+      DBbox                _overlap;//! The overlapping box of the quad
       /*! A pointers to four child QuadTree structures*/
-      QuadTree*           _quads[4];
+      QuadTree**           _subQuads;
       /*! Pointer to the first TdtData stored in this QuadTree*/
-      TdtData*            _first;
-      /*! Flag indicates that the container needs to be resorted*/
-      bool                _invalid;
+      TdtData**            _data;
+      QuadProps            _props;
    };
 
-//==============================================================================
-/*! Represent the layer place holder of the tedat database. The expected
-functionality is mostly implemented in the parent class. This class holds all
-natural layers which means it doesn't hold cell references
-*/
-   class TdtLayer : public QuadTree {
+   class QTreeTmp {
    public:
-                           TdtLayer() : QuadTree() {};
-                           TdtLayer(TEDfile* const tedfile);
-                          ~TdtLayer() {freeMemory();};
-      virtual void         motionDraw(const layprop::DrawProperties&, ctmqueue& ) const;
-      TdtData*             addBox(const TP& p1, const TP& p2, bool sortnow = true);
-      TdtData*             addPoly(pointlist& pl, bool sortnow = true);
-      TdtData*             addPoly(int4b* pl, unsigned psize, bool sortnow = true);
-      TdtData*             addWire(pointlist& pl,word w, bool sortnow = true);
-      TdtData*             addText(std::string text, CTM trans, bool sortnow = true);
-      virtual void         vlOverlap(const layprop::DrawProperties&, DBbox&) const;
+                           QTreeTmp(QuadTree* trunk) : _trunk(trunk) {};
+       void                put(TdtData* shape);
+       void                putBox(const TP& p1, const TP& p2);
+       void                putPoly(pointlist& pl);
+       void                putPoly(int4b* pl, unsigned psize);
+       void                putWire(pointlist& pl,word w);
+       void                putText(std::string text, CTM trans);
+       void                commit() {_trunk->resort(_data);}
+   private:
+      ShapeList            _data;
+      QuadTree*            _trunk;
    };
-
-//   class TdtRefLayer : public QuadTree {
-//   public:
-//                           TdtRefLayer() : QuadTree(), _vlOverlap(_overlap) {}
-//      virtual DBbox        vlOverlap(layprop::DrawProperties& prop);
-//   private:
-//      DBbox                _vlOverlap;
-//   };
-//
 }
 
 #endif

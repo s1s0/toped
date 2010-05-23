@@ -47,7 +47,7 @@ namespace laydata {
    class TdtData  {
    public:
    //! The default constructor.
-      TdtData(SH_STATUS sel = sh_active) : _status(sel), _next(NULL) {};
+      TdtData(SH_STATUS sel = sh_active) : _status(sel)/*, _next(NULL) */{};
       //! Return the overlapping box of the object.
       virtual   DBbox      overlap()  const = 0;
       //! Return the overlapping box of the object.
@@ -92,9 +92,9 @@ namespace laydata {
    //!
       virtual  pointlist   shape2poly() const = 0;
    //! Returns the next TdtData object ot NULL if it doesn't exists
-      TdtData*             next() const         {return _next;}
+//      TdtData*             next() const         {return _next;}
    //! Changes the pointer to the next tdtddata object
-      void                 nextIs(TdtData* nxt) {_next = nxt;};
+//      void                 nextIs(TdtData* nxt) {_next = nxt;};
    //! Set the _selected flag in case the object is entirely overlapped by select_in box
       void                 selectInBox(DBbox&, DataList*, bool);
       void                 selectThis(DataList*);
@@ -109,7 +109,7 @@ namespace laydata {
       virtual void         unselectPoints(DBbox&, SGBitSet&) = 0;
       SH_STATUS            _status;
    //! A pointer to the next TdtData object
-      TdtData*             _next;
+//      TdtData*             _next;
    };
 
 //==============================================================================
