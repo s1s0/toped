@@ -95,11 +95,11 @@ int tellstdfunc::stdNEWCELL::execute()
          {
             UNDOcmdQ.push_front(this);
             UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(nm));
-            LogFile << LogFile.getFN() << "(\""<< nm << "\");"; LogFile.flush();
          }
          // else
          // No undo for the first cell in the library. We don't delete the active
          // cell at the moment
+         LogFile << LogFile.getFN() << "(\""<< nm << "\");"; LogFile.flush();
       }
       else
       {
