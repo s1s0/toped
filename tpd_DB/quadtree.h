@@ -106,7 +106,12 @@ namespace laydata {
    private:
       friend class QTreeTmp;
       typedef unsigned     ObjectIter;
+#ifndef WIN32
       struct __attribute__ ((__packed__)) QuadProps
+#else 
+		#pragma pack()
+		struct  QuadProps
+#endif
       {
                                 QuadProps();
          byte                   numSubQuads() const;
