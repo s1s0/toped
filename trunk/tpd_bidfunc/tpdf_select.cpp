@@ -159,7 +159,9 @@ void tellstdfunc::stdSELECTIN::undo()
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
       DWordSet unselable = PROPC->allUnselectable();
-      tDesign->unselectFromList(get_ttlaylist(selected), unselable);
+      laydata::SelectList* slst = get_ttlaylist(selected);
+      tDesign->unselectFromList(slst, unselable);
+      delete slst;
       UpdateLV(tDesign->numSelected());
    }
    delete selected;
@@ -357,7 +359,9 @@ int tellstdfunc::stdUNSELECT_TL::execute()
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
       DWordSet unselable = PROPC->allUnselectable();
-      tDesign->unselectFromList(get_ttlaylist(pl), unselable);
+      laydata::SelectList* slst = get_ttlaylist(pl);
+      tDesign->unselectFromList(slst, unselable);
+      delete slst;
       OPstack.push(make_ttlaylist(tDesign->shapeSel()));
       UpdateLV(tDesign->numSelected());
    }
