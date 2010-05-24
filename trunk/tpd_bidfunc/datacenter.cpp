@@ -330,7 +330,6 @@ void DataCenter::unlockTDT(laydata::TdtLibDir* tdt_db, bool throwexception)
    assert(_tdtActMxState > dbmxs_unlocked);
    VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
    tdt_db = NULL;
-   if(NULL != _bpSync) _bpSync->Signal();
    //TODO! In all cases - throw exception if we've got to the deadlocked state
 //   if (dbmxs_deadlock == _tdtActMxState) throw EXPTNmutex_DB();
    if (throwexception)
@@ -342,6 +341,7 @@ void DataCenter::unlockTDT(laydata::TdtLibDir* tdt_db, bool throwexception)
                case dbmxs_dblock:
                case dbmxs_celllock :
                   _tdtActMxState = _tdtReqMxState = dbmxs_unlocked;
+                  if(NULL != _bpSync) _bpSync->Signal();
                   throw EXPTNactive_DB();
                default: break;
             }
@@ -350,12 +350,14 @@ void DataCenter::unlockTDT(laydata::TdtLibDir* tdt_db, bool throwexception)
             {
                case dbmxs_celllock :
                   _tdtActMxState = _tdtReqMxState = dbmxs_unlocked;
+                  if(NULL != _bpSync) _bpSync->Signal();
                   throw EXPTNactive_cell();
                default: break;
             }
          default             : break;
       }
    _tdtActMxState = _tdtReqMxState = dbmxs_unlocked;
+   if(NULL != _bpSync) _bpSync->Signal();
 }
 
 bool DataCenter::lockGds(GDSin::GdsInFile*& gds_db)
@@ -444,6 +446,7 @@ void DataCenter::bpRefreshTdtTab(bool targetDB, bool threadExecution)
    {
       assert(NULL == _bpSync);
       TdtMutexState saveMutexState = _tdtActMxState;
+      TdtMutexState saveReqMxState = _tdtReqMxState;
       // Initialize the thread condition with the locked Mutex
       _bpSync = DEBUG_NEW wxCondition(_DBLock);
       // post a message to the main thread
@@ -460,6 +463,7 @@ void DataCenter::bpRefreshTdtTab(bool targetDB, bool threadExecution)
       //
       // Wake-up & unlock the mutex
       _tdtActMxState = saveMutexState;
+      _tdtReqMxState = saveReqMxState;
       // clean-up behind & prepare for the consequent use
       delete _bpSync;
       _bpSync = NULL;
