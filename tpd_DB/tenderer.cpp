@@ -504,8 +504,11 @@ unsigned tenderer::TenderSWire::ssize()
    // Don't forget the edge points. This tiny little special case was dictating
    // the rules when the selected objects were fitted into the whole TopRend
    // class hierarchy.
-   if (_slist->check(0)            ) ssegs +=2;
-   if (_slist->check(_lsize-1)  ) ssegs +=2;
+   if (!_celno)
+   {
+      if (_slist->check(0)         ) ssegs +=2;
+      if (_slist->check(_lsize-1)  ) ssegs +=2;
+   }
    return ssegs;
 }
 
@@ -516,22 +519,25 @@ unsigned tenderer::TenderSWire::sDataCopy(unsigned* array, unsigned& pindex)
       // copy the indexes of the selected segment points
       for (unsigned i = 0; i < _lsize; i++)
       {
-         if (_slist->check(i) && _slist->check((i+1)%_csize))
+         if (_slist->check(i) && _slist->check((i+1)%_lsize))
          {
             array[pindex++] = _loffset + i;
             array[pindex++] = _loffset + ((i+1)%_lsize);
          }
       }
-      // And the edge points!
-      if (_slist->check(0)       ) // if first point is selected
+      if (!_celno)
       {
-         array[pindex++] = _offset;
-         array[pindex++] = _offset + _csize -1;
-      }
-      if (_slist->check(_lsize-1))// if last point is selected
-      {
-         array[pindex++] = _offset + (_csize/2) -1;
-         array[pindex++] = _offset + (_csize/2);
+         // And the edge points!
+         if (_slist->check(0)       ) // if first point is selected
+         {
+            array[pindex++] = _offset;
+            array[pindex++] = _offset + _csize -1;
+         }
+         if (_slist->check(_lsize-1))// if last point is selected
+         {
+            array[pindex++] = _offset + (_csize/2) -1;
+            array[pindex++] = _offset + (_csize/2);
+         }
       }
    }
    else

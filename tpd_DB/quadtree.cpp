@@ -1071,7 +1071,7 @@ void laydata::QuadTree::selectFromList(DataList* src, DataList* dst)
       // loop the objects from the select list
       while ( DI != src->end())
       {
-         // if the objects (pointer) coinsides - that's out object
+         // if the objects (pointer) coincides - that's out object
          if (wdt == DI->first)
          {
             // select the object
