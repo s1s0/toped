@@ -393,7 +393,9 @@ void tui::LayoutCanvas::OnresizeGL(wxSizeEvent& event) {
    lp_BL = TP(0,0)  * _LayCTM;
    lp_TR = TP(w, h) * _LayCTM;
    invalid_window = true;
-	SetCurrent();
+#ifdef WIN32
+   SetCurrent();
+#endif
 }
 
 
@@ -415,6 +417,9 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event)
       else
       {
          wxPaintDC dc(this);
+         #ifdef __WXGTK__
+            SetCurrent();
+         #endif
          glMatrixMode( GL_MODELVIEW );
          glShadeModel( GL_FLAT ); // Single color
          update_viewport();
@@ -436,6 +441,9 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event)
    else
    {
       wxPaintDC dc(this);
+      #ifdef __WXGTK__
+         SetCurrent();
+      #endif
       glAccum(GL_RETURN, 1.0);
       if       (tmp_wnd)         wnd_paint();
       else if  (rubber_band)     rubber_paint();
