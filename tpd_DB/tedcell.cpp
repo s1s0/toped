@@ -1522,16 +1522,19 @@ void laydata::TdtCell::unselectAll(bool destroy)
       // for every single SelectDataPair
       for (DataList::iterator CI = lslct->begin(); CI != lslct->end(); CI++)
       {
-         // unmark the shape
-         CI->first->setStatus(sh_active);
-         // clear the list of selected points if it exists
          if (destroy)
          {
-            if (0 != CI->second.size())
-               CI->second.clear();
-               //delete (CI->second);
-            delete (CI->first);
+            if (sh_selected == CI->first->status())
+               // destroy only fully selected objects
+               delete (CI->first);
+            else
+               // the part selected shall remain
+               CI->first->setStatus(sh_active);
          }
+         else
+         // unmark the shape
+         CI->first->setStatus(sh_active);
+
       }
       // clear the SelectDataPair structures
       lslct->clear();

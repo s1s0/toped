@@ -1552,7 +1552,7 @@ bool laydata::TdtDesign::checkActiveCell()
 
 void laydata::TdtDesign::tryUnselectAll() const {
    if (NULL != _target.edit())
-      _target.edit()->unselectAll(false);
+      _target.edit()->unselectAll();
 }
 
 void laydata::TdtDesign::transferLayer(unsigned dst)
