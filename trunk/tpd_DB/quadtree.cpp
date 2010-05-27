@@ -480,7 +480,10 @@ void laydata::QuadTree::sort(ShapeList& inlist)
       _data = DEBUG_NEW TdtData*[_props._numObjects];
       ObjectIter j = 0;
       for (DI = inlist.begin(); DI != inlist.end(); DI++)
-         _data[j++] = *DI;
+      {
+         _data[j] = *DI;
+         j++;
+      }
    }
    // now go and sort the children - if any
    for (byte i = 0; i < 4; i++)
@@ -545,7 +548,7 @@ bool laydata::QuadTree::deleteMarked(SH_STATUS stat, bool partselect)
       else
       {
          updateOverlap(wds->overlap());
-         unmarkedObjects.push_back(_data[i]);
+         unmarkedObjects.push_back(wds);
       }
    }
    if (inventoryChanged)
@@ -570,7 +573,10 @@ bool laydata::QuadTree::deleteMarked(SH_STATUS stat, bool partselect)
          _data = DEBUG_NEW TdtData*[_props._numObjects];
          ObjectIter j = 0;
          for (ShapeList::const_iterator DI = unmarkedObjects.begin(); DI != unmarkedObjects.end(); DI++)
-            _data[j++] = *DI;
+         {
+            _data[j] = *DI;
+            j++;
+         }
       }
    }
    return _2B_sorted |= _props._invalid;
@@ -673,7 +679,7 @@ bool laydata::QuadTree::deleteThis(laydata::TdtData* object)
       else
       {
          updateOverlap(wds->overlap());
-         unmarkedObjects.push_back(_data[i]);
+         unmarkedObjects.push_back(wds);
       }
    }
    if (inventoryChanged)
@@ -698,7 +704,10 @@ bool laydata::QuadTree::deleteThis(laydata::TdtData* object)
          _data = DEBUG_NEW TdtData*[_props._numObjects];
          ObjectIter j = 0;
          for (ShapeList::const_iterator DI = unmarkedObjects.begin(); DI != unmarkedObjects.end(); DI++)
-            _data[j++] = *DI;
+         {
+            _data[j] = *DI;
+            j++;
+         }
       }
    }
    return _2B_sorted |= _props._invalid;
@@ -986,6 +995,7 @@ void laydata::QuadTree::tmpStore(ShapeList &store)
          store.push_back(_data[i]);
       }
       delete [] _data; _data = NULL;
+      _props._numObjects = 0;
    }
    if (NULL != _subQuads)
    {
