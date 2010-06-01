@@ -208,7 +208,7 @@ Calbr::edge Calbr::drcRuleCheck::getZoom(void)
 
 //-----------------------------------------------------------------------------
 Calbr::CalbrFile::CalbrFile(const std::string &fileName, drcRenderer *render)
-      :_ok(true),_render(render)
+      :_ok(true),_render(render), _cellNameSpace(false)
 {
    std::ostringstream ost;
    _fileName = fileName;
@@ -341,7 +341,6 @@ bool Calbr::CalbrFile::parse(unsigned int num)
       ruleCheck->addDescrString(tempStr);
    }
    //Get Results
-
    for(long i= 0; i < resCount; i++)
    {
       if (fgets(tempStr, 512, _calbrFile)==NULL)
@@ -372,64 +371,17 @@ bool Calbr::CalbrFile::parse(unsigned int num)
       switch(type)
       {
          case 'p'   :
-            for(short j =0; j< numberOfElem; j++)
-            {
-               long x, y;
-               if (fgets(tempStr, 512, _calbrFile)==NULL)
-               {
-                  _ok = false;
-                  ost << "Can't parse  rule " << ruleCheckName;
-                  tell_log(console::MT_ERROR,ost.str());
-                  ost.str("");
-                  ost<<"string: " <<tempStr;
-                  tell_log(console::MT_ERROR,ost.str());
-                  return false;
-               }
-               if (sscanf( tempStr, "%ld %ld", &x, &y)!= 2)
-               {
-                  _ok = false;
-                  ost << "Can't parse  rule " << ruleCheckName;
-                  tell_log(console::MT_ERROR,ost.str());
-                  ost.str("");
-                  ost<<"string: " <<tempStr;
-                  tell_log(console::MT_ERROR,ost.str());
-                  return false;
-
-               };
-               poly.addCoord(x, y);
-            }
+            if (!parsePoly(ruleCheckName ,poly, numberOfElem)) return false; 
             ruleCheck->addPolygon(poly);
             break;
 
          case 'e'   :
-            for(short j =0; j< numberOfElem; j++)
             {
-               long x1, y1, x2, y2;
-               if (fgets(tempStr, 512, _calbrFile)==NULL)
-               {
-                  _ok = false;
-                  ost << "Can't parse  rule " << ruleCheckName;
-                  tell_log(console::MT_ERROR,ost.str());
-                  ost.str("");
-                  ost<<"string: " <<tempStr;
-                  tell_log(console::MT_ERROR,ost.str());
-                  return false;
-               }
-               if(sscanf( tempStr, "%ld %ld %ld %ld", &x1, &y1, &x2, &y2)!=4)
-               {
-                  _ok = false;
-                  ost << "Can't parse  rule " << ruleCheckName;
-                  tell_log(console::MT_ERROR,ost.str());
-                  ost.str("");
-                  ost<<"string: " <<tempStr;
-                  tell_log(console::MT_ERROR,ost.str());
-                  return false;
-               };
                Calbr::drcEdge theEdge(ordinal, _render);
-               theEdge.addCoord(x1, y1, x2, y2);
+               if (!parseEdge(ruleCheckName ,theEdge, numberOfElem)) return false; 
                ruleCheck->addEdge(theEdge);
             }
-            break;
+               break;
          default   :
             _ok = false;
             ost << "Can't parse  rule " << ruleCheckName;
@@ -442,7 +394,81 @@ bool Calbr::CalbrFile::parse(unsigned int num)
    }
    _RuleChecks.push_back(ruleCheck);
    return true;
+}
 
+bool Calbr::CalbrFile::parsePoly(char* ruleCheckName, drcPolygon & poly, int numberOfElem)
+{
+   char tempStr[512];
+   std::ostringstream ost;
+
+   for(short j =0; j< numberOfElem; j++)
+   {
+      long x, y;
+      if (fgets(tempStr, 512, _calbrFile)==NULL)
+      {
+         _ok = false;
+         ost << "Can't parse  rule " << ruleCheckName;
+         tell_log(console::MT_ERROR,ost.str());
+         ost.str("");
+         ost<<"string: " <<tempStr;
+         tell_log(console::MT_ERROR,ost.str());
+         return false;
+      }
+
+      if((tempStr[0]=='C') && (tempStr[1]=='N'))
+      {
+         _cellNameSpace = true;
+         
+      }
+					
+      if (sscanf( tempStr, "%ld %ld", &x, &y)!= 2)
+      {
+			_ok = false;
+         ost << "Can't parse  rule " << ruleCheckName;
+         tell_log(console::MT_ERROR,ost.str());
+         ost.str("");
+         ost<<"string: " <<tempStr;
+         tell_log(console::MT_ERROR,ost.str());
+         return false;
+      };
+      poly.addCoord(x, y);
+}
+
+   return true;
+}
+
+bool Calbr::CalbrFile::parseEdge(char* ruleCheckName, drcEdge & edge, int numberOfElem)
+{
+   char tempStr[512];
+   std::ostringstream ost;
+
+   for(short j =0; j< numberOfElem; j++)
+   {
+      long x1, y1, x2, y2;
+      if (fgets(tempStr, 512, _calbrFile)==NULL)
+      {
+         _ok = false;
+         ost << "Can't parse  rule " << ruleCheckName;
+         tell_log(console::MT_ERROR,ost.str());
+         ost.str("");
+         ost<<"string: " <<tempStr;
+         tell_log(console::MT_ERROR,ost.str());
+         return false;
+      }
+      if(sscanf( tempStr, "%ld %ld %ld %ld", &x1, &y1, &x2, &y2)!=4)
+      {
+         _ok = false;
+         ost << "Can't parse  rule " << ruleCheckName;
+         tell_log(console::MT_ERROR,ost.str());
+         ost.str("");
+         ost<<"string: " <<tempStr;
+         tell_log(console::MT_ERROR,ost.str());
+         return false;
+      };
+      edge.addCoord(x1, y1, x2, y2);
+   }
+
+   return true;
 }
 
 void   Calbr::CalbrFile::addResults()

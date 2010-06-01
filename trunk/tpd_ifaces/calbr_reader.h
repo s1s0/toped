@@ -163,9 +163,12 @@ namespace Calbr
          std::string       _fileName;
          std::string       _cellName;
          long              _precision;
+         bool              _cellNameSpace;
 
          std::ifstream     _inFile;
          bool              parse(unsigned int num);
+         bool              parsePoly(char* ruleCheckName, drcPolygon & poly, int numberOfElem);
+         bool              parseEdge(char* ruleCheckName, drcEdge & edge, int numberOfElem);
          RuleChecksVector  _RuleChecks;
          bool              _ok;
          edge              _border;
