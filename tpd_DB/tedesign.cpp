@@ -929,15 +929,15 @@ laydata::TdtCell* laydata::TdtDesign::removeCell(std::string& name, laydata::Att
    modified = true;
    // get the cell by name
    TdtCell* remcl = static_cast<laydata::TdtCell*>(_cells[name]);
-   // update the _hiertree
-   dbHierRemoveRoot(remcl);
-   // remove the cell from the list of all design cells
-   _cells.erase(_cells.find(name));
    //empty the contents of the removed cell and return it in AtticList
    remcl->fullSelect();
    // validation is not required here, because the cell is not supposed to be
    // referenced if this method is used
    remcl->deleteSelected(fsel, libdir);
+   // update the _hiertree
+   dbHierRemoveRoot(remcl);
+   // remove the cell from the list of all design cells
+   _cells.erase(_cells.find(name));
    // finally - return the empty cell. Don't delete it. Will be used for undo!
    return remcl;
 }

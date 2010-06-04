@@ -131,12 +131,12 @@ void tellstdfunc::stdREMOVECELL::undo_cleanup()
 void tellstdfunc::stdREMOVECELL::undo()
 {
    TEUNDO_DEBUG("removecell( string ) UNDO");
+   // get the removed cell itself (empty)
+   laydata::TdtCell* rmvdcell = static_cast<laydata::TdtCell*>(UNDOUstack.front());UNDOUstack.pop_front();
    // get the contents of the removed cell
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
    // get the name of the removed cell
    std::string  nm = getStringValue(UNDOPstack, true);
-   // get the removed cell itself (empty)
-   laydata::TdtCell* rmvdcell = static_cast<laydata::TdtCell*>(UNDOUstack.front());UNDOUstack.pop_front();
 
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
