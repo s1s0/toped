@@ -659,7 +659,7 @@ void browsers::CellBrowser::onTellAddCell(wxString cellname, wxString parentname
             if (checkCorrupted(findChildItem(cellname, item, _dbroot))) return;
             while (findItem(parentname, newparent, GetRootItem()))
             {
-               // in this case - the parrent should not be a library
+               // in this case - the parent should not be a library
                if (isDbOrLibItem(newparent)) continue;
                copyItem(item,newparent);
                SortChildren(newparent);
@@ -737,6 +737,9 @@ void browsers::CellBrowser::onTellRemoveCell(wxString cellname, wxString parentn
             while (findItem(parentname, newparent, GetRootItem()))
             {
                if (checkCorrupted(findChildItem(cellname, item, newparent))) return;
+               // to make sure that the item will appear only once in the new parent
+               // otherwise if it has been referenced in a number of parents it will
+               // appear several times in the top of the tree
                if (!copied)
                {
                   copyItem(item, _dbroot);
@@ -745,6 +748,16 @@ void browsers::CellBrowser::onTellRemoveCell(wxString cellname, wxString parentn
                DeleteChildren(item);
                Delete(item);
             }
+            assert(_topStructure.IsOk());
+            assert(_activeStructure.IsOk());
+//            statusHighlight(wxString, wxString, wxString);
+//TODO Here is the trouble!
+//            tdtCellSpot(_topStructure, _activeStructure);
+//            wxString cell_top_str = _cellBrowser->topCellName();
+//            wxString cell_act_str = _cellBrowser->activeCellName();
+//            wxString cell_sel_str = _cellBrowser->selectedCellName();
+//            _cellBrowser->collectInfo(_hierarchy_view);
+//            _cellBrowser->statusHighlight(cell_top_str, cell_act_str, cell_sel_str);
          }
          break;
       case 3:// we are removing the cell, not it's reference
@@ -764,6 +777,7 @@ void browsers::CellBrowser::onTellRemoveCell(wxString cellname, wxString parentn
          // finally delete the item and it's children
          DeleteChildren(item);
          Delete(item);
+         tdtCellSpot(_topStructure, _activeStructure);//!TODO the trouble is not here! it is in case 2:
          break;
       }
       case 4:// remove undefined cell
@@ -798,7 +812,7 @@ bool browsers::CellBrowser::checkCorrupted(bool iresult)
 {
    if (!_corrupted && !iresult)
    {
-      tell_log(console::MT_ERROR, "Cell browser lost synchonisation. Press Flat or Hier button to recover. Please report a bug.");
+      tell_log(console::MT_ERROR, "Cell browser lost synchronization. Press Flat or Hier button to recover. Please report a bug.");
    }
    _corrupted |= (!iresult);
    return _corrupted;
