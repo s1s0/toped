@@ -32,15 +32,27 @@
 <tool command="autogen.sh" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG}${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" errorParsers="" id="org.eclipse.linuxtools.cdt.autotools.toolchain.tool.autogen.1278387437" name="autogen.sh" superClass="org.eclipse.linuxtools.cdt.autotools.toolchain.tool.autogen"/>
 <tool command="gcc" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG}${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" errorParsers="org.eclipse.cdt.core.GCCErrorParser" id="org.eclipse.linuxtools.cdt.autotools.toolchain.tool.gcc.1793063240" name="GCC C Compiler" superClass="org.eclipse.linuxtools.cdt.autotools.toolchain.tool.gcc">
 <option id="gnu.c.compiler.option.optimization.level.1901443138" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" value="gnu.c.optimization.level.none" valueType="enumerated"/>
-<option id="gnu.c.compiler.option.debugging.level.1692091092" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level"/>
+<option id="gnu.c.compiler.option.debugging.level.1692091092" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
 <option id="gnu.c.compiler.option.include.paths.764596620" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths"/>
+<option id="gnu.c.compiler.option.preprocessor.def.symbols.944043734" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
+<listOptionValue builtIn="false" value="DB_MEMORY_TRACE"/>
+</option>
 <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.385220996" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 </tool>
 <tool command="g++" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG}${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" errorParsers="org.eclipse.cdt.core.GCCErrorParser" id="org.eclipse.linuxtools.cdt.autotools.toolchain.tool.gpp.107594453" name="GCC C++ Compiler" superClass="org.eclipse.linuxtools.cdt.autotools.toolchain.tool.gpp">
-<option id="gnu.cpp.compiler.option.optimization.level.355456740" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level"/>
-<option id="gnu.cpp.compiler.option.debugging.level.772208773" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level"/>
+<option id="gnu.cpp.compiler.option.optimization.level.355456740" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
+<option id="gnu.cpp.compiler.option.debugging.level.772208773" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 <option id="gnu.cpp.compiler.option.include.paths.1127968889" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 <listOptionValue builtIn="false" value="/usr/include/wx-2.8"/>
+<listOptionValue builtIn="false" value="&quot;${workspace_loc:/toped/tpd_common}&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${workspace_loc:/toped/tpd_bidfunc}&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${workspace_loc:/toped/tpd_DB}&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${workspace_loc:/toped/tpd_ifaces}&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${workspace_loc:/toped/tpd_parser}&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${workspace_loc:/toped/ui}&quot;"/>
+</option>
+<option id="gnu.cpp.compiler.option.preprocessor.def.992275610" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+<listOptionValue builtIn="false" value="DB_MEMORY_TRACE"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.976935307" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 </tool>

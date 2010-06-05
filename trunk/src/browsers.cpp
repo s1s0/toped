@@ -657,6 +657,9 @@ void browsers::CellBrowser::onTellAddCell(wxString cellname, wxString parentname
          {
             wxTreeItemId newparent;
             if (checkCorrupted(findChildItem(cellname, item, _dbroot))) return;
+            wxString cell_top_str = topCellName();
+            wxString cell_act_str = activeCellName();
+            wxString cell_sel_str = selectedCellName();
             while (findItem(parentname, newparent, GetRootItem()))
             {
                // in this case - the parent should not be a library
@@ -666,6 +669,8 @@ void browsers::CellBrowser::onTellAddCell(wxString cellname, wxString parentname
             }
             DeleteChildren(item);
             Delete(item);
+            _topStructure.Unset(); _activeStructure.Unset();
+            statusHighlight(cell_top_str, cell_act_str, cell_sel_str);
          }
          break;
       case 2://new parent added
@@ -733,6 +738,9 @@ void browsers::CellBrowser::onTellRemoveCell(wxString cellname, wxString parentn
          if (_hierarchy_view)
          {
             wxTreeItemId item;
+            wxString cell_top_str = topCellName();
+            wxString cell_act_str = activeCellName();
+            wxString cell_sel_str = selectedCellName();
             bool copied = false;
             while (findItem(parentname, newparent, GetRootItem()))
             {
@@ -748,22 +756,17 @@ void browsers::CellBrowser::onTellRemoveCell(wxString cellname, wxString parentn
                DeleteChildren(item);
                Delete(item);
             }
-            assert(_topStructure.IsOk());
-            assert(_activeStructure.IsOk());
-//            statusHighlight(wxString, wxString, wxString);
-//TODO Here is the trouble!
-//            tdtCellSpot(_topStructure, _activeStructure);
-//            wxString cell_top_str = _cellBrowser->topCellName();
-//            wxString cell_act_str = _cellBrowser->activeCellName();
-//            wxString cell_sel_str = _cellBrowser->selectedCellName();
-//            _cellBrowser->collectInfo(_hierarchy_view);
-//            _cellBrowser->statusHighlight(cell_top_str, cell_act_str, cell_sel_str);
+            _topStructure.Unset(); _activeStructure.Unset();
+            statusHighlight(cell_top_str, cell_act_str, cell_sel_str);
          }
          break;
       case 3:// we are removing the cell, not it's reference
       {
          wxTreeItemId item;
          if (checkCorrupted(findChildItem(cellname, item, _dbroot))) return;
+         wxString cell_top_str = topCellName();
+         wxString cell_act_str = activeCellName();
+         wxString cell_sel_str = selectedCellName();
          // copy all children
          // This part is "in case". The thing is that children should have been
          // removed already, by TdtCell::removePrep
@@ -777,7 +780,8 @@ void browsers::CellBrowser::onTellRemoveCell(wxString cellname, wxString parentn
          // finally delete the item and it's children
          DeleteChildren(item);
          Delete(item);
-         tdtCellSpot(_topStructure, _activeStructure);//!TODO the trouble is not here! it is in case 2:
+         _topStructure.Unset(); _activeStructure.Unset();
+         statusHighlight(cell_top_str, cell_act_str, cell_sel_str);
          break;
       }
       case 4:// remove undefined cell
