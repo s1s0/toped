@@ -56,6 +56,7 @@ namespace parsercmd
 
 /*Current tell variable name*/
 telldata::tell_var *tellvar = NULL;
+telldata::tell_var *tellindxvar = NULL;
 telldata::tell_var *tell_lvalue = NULL;
 /*Current variable is a list*/
 bool indexed = false;
@@ -107,10 +108,10 @@ Well some remarks may save some time in the future...
                   the only predicate of this type
     pargumants  - Structure with function call arguments
 
- There are two telldata::tell_var* variables defined in the parser.
+ There are 3 telldata::tell_var* variables defined in the parser.
    - tellvar - stores a pointer to the last referenced (or defined) tell
                variable. In all cases cmdPUSH is added to the commands with
-               a tellvar argument wich means that during the execution phase,
+               a tellvar argument which means that during the execution phase,
                a copy of tellvar will be pushed in the operand stack. Normally,
                that COPY is used by the subsequent commands and then destroyed.
                Not all the commands use the copy in the operand stack thought.
@@ -123,7 +124,22 @@ Well some remarks may save some time in the future...
                of it which is normally used for most of the operaions. In other
                words lvalues are not handled trough the operand stack, instead
                this variable is used.
-
+   - tellindxvar - this one was introduced with Issue 44 fix. When indexed 
+               variables are parsed, the index itself is defined as an expression 
+               to ensure that all kind of indexing is handled, not only direct
+               one. The trouble comes when the indexing is not direct because the 
+               tellvar is replaced when the expression in the sqare brackets is 
+               parsed. This results in a loss of the original tellvar which was 
+               pointing to the list variable before that variable is pushed into
+               the stack - i.e. the indexing operations would not work with
+               anything but a direct indexing, because only a direct indexing is
+               not replacing the original tellvar. This variable is assigned with
+               the opening square bracket to preserve the original value of tellvar
+               until the expression in brackets is parsed. At the end with the closing
+               bracket the tellvar value is restored. This trick is supposed to work 
+               with double indexing as well.
+               
+                 
 
    Some more questions:
    - Why variables are cloned in the operand stack? If they weren't - we don't
@@ -627,7 +643,6 @@ fielddeclaration:
 telltypeID:
      telltype                              {$$ = $1;}
    | telltype tknLISTdef                   {$$ = $1 | telldata::tn_listmask;}
-/*   | telltype '[' ']'                      {$$ = $1 | telldata::tn_listmask;}*/
 ;
 
 telltype:
@@ -701,8 +716,21 @@ fieldname:
    }
 ;
 
+indxb:
+     '['                            {
+      tellindxvar = tellvar;
+    }
+;
+     
+indxe:
+     ']'                            {
+      tellvar = tellindxvar;
+    }
+;
+
+
 listindex:
-     variable '[' expression ']'    {
+     variable indxb expression indxe    {
       if (parsercmd::ListIndexCheck($1, @1, $3, @3))
       {
          $$ = ($1 & (~telldata::tn_listmask));
@@ -714,7 +742,7 @@ listindex:
 ;
 
 listinsert:
-     variable '[' tknPREADD expression ']'    {
+     variable indxb tknPREADD expression indxe    {
       if (parsercmd::ListIndexCheck($1, @1, $4, @4))
       {
          listadd_command = DEBUG_NEW parsercmd::cmdLISTADD(tellvar,true, true);
@@ -724,7 +752,7 @@ listinsert:
          $$ = telldata::tn_NULL; listadd_command = NULL;
       }
     }
-   | variable '[' tknPREADD ']'               {
+   | variable indxb tknPREADD indxe               {
       if ($1 & telldata::tn_listmask) {
          listadd_command = DEBUG_NEW parsercmd::cmdLISTADD(tellvar,true, false);
          $$ = $1; tell_lvalue = tellvar; lindexed = true;
@@ -734,7 +762,7 @@ listinsert:
          $$ = telldata::tn_NULL; listadd_command = NULL;
       }
     }
-   | variable '[' expression tknPOSTADD ']'   {
+   | variable indxb expression tknPOSTADD indxe   {
       if (parsercmd::ListIndexCheck($1, @1, $3, @3))
       {
          listadd_command = DEBUG_NEW parsercmd::cmdLISTADD(tellvar,false, true);
@@ -744,7 +772,7 @@ listinsert:
          $$ = telldata::tn_NULL; listadd_command = NULL;
       }
     }
-   | variable '[' tknPOSTADD ']'              {
+   | variable indxb tknPOSTADD indxe              {
       if ($1 & telldata::tn_listmask) {
          listadd_command = DEBUG_NEW parsercmd::cmdLISTADD(tellvar,false, false);
          $$ = $1; tell_lvalue = tellvar; lindexed = true;
@@ -757,24 +785,24 @@ listinsert:
 ;
 
 listremove:
-     variable '[' tknPRESUB expression ']'    {
+     variable indxb tknPRESUB expression indxe    {
       if (parsercmd::ListIndexCheck($1, @1, $4, @4))
          CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdLISTSUB(tellvar,true, true));
       $$ = ($1 & (~telldata::tn_listmask));
     }
-   | variable '[' tknPRESUB ']'               {
+   | variable indxb tknPRESUB indxe               {
       if ($1 & telldata::tn_listmask)
          CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdLISTSUB(tellvar,true, false));
       else
          tellerror("list expected",@1);
       $$ = ($1 & (~telldata::tn_listmask));
     }
-   | variable '[' expression tknPOSTSUB ']'   {
+   | variable indxb expression tknPOSTSUB indxe   {
       if (parsercmd::ListIndexCheck($1, @1, $3, @3))
          CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdLISTSUB(tellvar,false, true));
       $$ = ($1 & (~telldata::tn_listmask));
     }
-   | variable '[' tknPOSTSUB ']'              {
+   | variable indxb tknPOSTSUB indxe              {
       if ($1 & telldata::tn_listmask)
          CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdLISTSUB(tellvar,false, false));
       else
@@ -784,7 +812,7 @@ listremove:
 ;
 
 listslice:
-     variable '[' expression tknPRESUB expression ']'    {
+     variable indxb expression tknPRESUB expression indxe    {
       if (parsercmd::ListSliceCheck($1, @1, $5, @5, $3, @3))
       {
          CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdLISTSLICE(tellvar, true, true));
@@ -793,7 +821,7 @@ listslice:
       else
          $$ = telldata::tn_NULL;
     }
-   | variable '[' expression tknPRESUB ']'    {
+   | variable indxb expression tknPRESUB indxe    {
       if (parsercmd::ListSliceCheck($1, @1, $3, @3))
       {
          CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdLISTSLICE(tellvar, false, false));
@@ -802,7 +830,7 @@ listslice:
       else
          $$ = telldata::tn_NULL;
     }
-   | variable '[' expression tknPOSTSUB expression ']'   {
+   | variable indxb expression tknPOSTSUB expression indxe   {
       if (parsercmd::ListSliceCheck($1, @1, $3, @3, $5, @5))
       {
          CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdLISTSLICE(tellvar, false, true));
@@ -811,7 +839,7 @@ listslice:
       else
          $$ = telldata::tn_NULL;
     }
-   | variable '[' tknPOSTSUB  expression ']'   {
+   | variable indxb tknPOSTSUB  expression indxe   {
       if (parsercmd::ListSliceCheck($1, @1, $4, @4))
       {
          CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdLISTSLICE(tellvar, true, false));
@@ -988,6 +1016,7 @@ void cleanonabort()
    if (cfd)             {delete cfd;            cfd               = NULL;}
    tell_lvalue       = NULL;
    tellvar           = NULL;
+   tellindxvar       = NULL;
 }
 
 /*
