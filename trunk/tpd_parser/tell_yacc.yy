@@ -61,7 +61,7 @@ telldata::tell_var *tell_lvalue = NULL;
 bool indexed = false;
 bool lindexed = false;
 /*Current commands - parsed, but not yet in the command stack*/
-parsercmd::cmdFOREACH *foreach_command = NULL;
+std::stack<parsercmd::cmdFOREACH*> foreach_stack;
 parsercmd::cmdLISTADD *listadd_command = NULL;
 /*Current tell struct */
 telldata::tell_type *tellstruct = NULL;
@@ -106,7 +106,7 @@ Well some remarks may save some time in the future...
     pfarguments - Holds the function definition arguments. funcarguments is
                   the only predicate of this type
     pargumants  - Structure with function call arguments
- 
+
  There are two telldata::tell_var* variables defined in the parser.
    - tellvar - stores a pointer to the last referenced (or defined) tell
                variable. In all cases cmdPUSH is added to the commands with
@@ -114,7 +114,7 @@ Well some remarks may save some time in the future...
                a copy of tellvar will be pushed in the operand stack. Normally,
                that COPY is used by the subsequent commands and then destroyed.
                Not all the commands use the copy in the operand stack thought.
-               An important exception is cmdASSIGN (see tell_lvalue below) and 
+               An important exception is cmdASSIGN (see tell_lvalue below) and
                list operations - cmdLISTADD.
                Another example is the loop variable (foreach). Generally this
                variable is hardly used directly.
@@ -202,7 +202,7 @@ Ooops! Second thought!
   layout <variable>
  There will not be a tell const available of this type. This will be the type
  returned from addbox, addpoly, addcell etc. functions.
- Select of course will return: 
+ Select of course will return:
   layout list select(box<variable>)
  Simple!
 
@@ -267,7 +267,7 @@ input:
 entrance:
       statement                            {
       if (!yynerrs)  CMDBlock->execute();
-      else 
+      else
       {
          CMDBlock = CMDBlock->cleaner();
          parsercmd::EOfile();
@@ -302,7 +302,7 @@ funcdeclaration:
 funcdefinition:
      funcdeclaration funcblock             {
       CMDBlock->addUSERFUNC($1, $2, @$);
-      // addUSERFUNC will take care about cleaning the funcdeclaration ($1) and funcblock ($2) 
+      // addUSERFUNC will take care about cleaning the funcdeclaration ($1) and funcblock ($2)
       cfd = NULL;
    }
 ;
@@ -373,7 +373,7 @@ ifstatement:
    | ifcommon tknELSE               {
          CMDBlock = DEBUG_NEW parsercmd::cmdBLOCK();
          CMDBlock->pushblk();
-   }  
+   }
      blockstatement                   {
          parsercmd::cmdBLOCK* else_block = CMDBlock;
          CMDBlock = CMDBlock->popblk();
@@ -420,7 +420,7 @@ foreachstatement:
      lvalue ';' telllist ')'        {
          if  (($4 | telldata::tn_listmask) != $6)
             tellerror("unappropriate variable type",@4);
-         foreach_command = DEBUG_NEW parsercmd::cmdFOREACH(tell_lvalue,tellvar);
+         foreach_stack.push(DEBUG_NEW parsercmd::cmdFOREACH(tell_lvalue));
          CMDBlock = DEBUG_NEW parsercmd::cmdBLOCK();
          CMDBlock->pushblk();
       }
@@ -428,10 +428,10 @@ foreachstatement:
          parsercmd::cmdBLOCK* body_block = CMDBlock;
          CMDBlock = CMDBlock->popblk();
          parsercmd::cmdBLOCK* header_block = CMDBlock;
-         CMDBlock = CMDBlock->popblk();         
-         foreach_command->addBlocks(header_block, body_block);
-         CMDBlock->pushcmd(foreach_command);
-         foreach_command = NULL;
+         CMDBlock = CMDBlock->popblk();
+         parsercmd::cmdFOREACH* cur_foreach = foreach_stack.top(); foreach_stack.pop();
+         cur_foreach->addBlocks(header_block, body_block);
+         CMDBlock->pushcmd(cur_foreach);
       }
 ;
 
@@ -582,7 +582,7 @@ variabledeclaration:
       if (!v) {/* if this variableID doesn't exist already in the local scope*/
          /* add it to the local variable map */
          tellvar = CMDBlock->newTellvar($1, @1);
-         CMDBlock->addID($2,tellvar); 
+         CMDBlock->addID($2,tellvar);
       }
       else
          tellerror("variable already defined in this scope", @2);
@@ -868,7 +868,7 @@ anonymousvar:
 
 /*==EXPRESSION===============================================================*/
 /*orexpression*/
-expression : 
+expression :
      andexpression                         {$$ = $1;}
    | expression tknOR   andexpression      {$$ = parsercmd::BoolEx($1,$3,"||",@1,@2);}
    | expression tknBWOR andexpression      {$$ = parsercmd::BoolEx($1,$3,"|",@1,@2);}
@@ -894,7 +894,7 @@ relexpression :
    | relexpression tknGEQ addexpression    {$$ = parsercmd::BoolEx($1,$3,">=",@1,@2);}
 ;
 
-addexpression: 
+addexpression:
      multiexpression                       {$$ = $1;}
    | addexpression '+' multiexpression     {$$ = parsercmd::Plus($1,$3,@1,@3);}
    | addexpression '-' multiexpression     {$$ = parsercmd::Minus($1,$3,@1,@3);}
@@ -904,20 +904,20 @@ addexpression:
    | addexpression tknSW multiexpression   {$$ = parsercmd::PointMv($1,$3,@1,@3,-1,-1);}
 ;
 
-multiexpression : 
+multiexpression :
      unaryexpression                       {$$ = $1;}
    | multiexpression '*' unaryexpression   {$$ = parsercmd::Multiply($1,$3,@1,@3);}
    | multiexpression '/' unaryexpression   {$$ = parsercmd::Divide($1,$3,@1,@3);}
 ;
 
-unaryexpression : 
+unaryexpression :
      primaryexpression	                   {$$ = $1;}
    | '-' primaryexpression                 {$$ = parsercmd::UMinus($2,@2);}
    | tknNOT   primaryexpression            {$$ = parsercmd::BoolEx($2, "!",@2);}
    | tknBWNOT primaryexpression            {$$ = parsercmd::BoolEx($2, "~",@2);}
 ;
 
-primaryexpression : 
+primaryexpression :
      tknREAL                               {$$ = telldata::tn_real;
       CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPUSH(DEBUG_NEW telldata::ttreal($1), false, true));}
    | tknINT                                {$$ = telldata::tn_int;
@@ -951,7 +951,7 @@ int tellerror (char *s)
    return 0;
 }
 
-void tellerror (std::string s, YYLTYPE loc) 
+void tellerror (std::string s, YYLTYPE loc)
 {
    if (cfd) cfd->incErrors();
    else     yynerrs++;
@@ -978,7 +978,10 @@ void cleanonabort()
 {
    CMDBlock = CMDBlock->cleaner();
    parsercmd::EOfile();
-   if (foreach_command) {delete foreach_command;foreach_command   = NULL;}
+   while (!foreach_stack.empty())
+   {
+	   delete(foreach_stack.top());foreach_stack.pop();
+   }
    if (listadd_command) {delete listadd_command;listadd_command   = NULL;}
    if (tellstruct)      {delete tellstruct;     tellstruct        = NULL;}
    if (argmap)          {delete argmap;         argmap            = NULL;}
