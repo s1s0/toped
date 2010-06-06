@@ -158,6 +158,31 @@ void repeattest() {
 //   repeat {} until(a);
 }
 
+void foreachtest () 
+{
+   foreach (int i; int list {1,2}) 
+   { 
+      int k;
+      foreach (k; int list {2,3}) 
+      {
+         echo (i);
+         echo (k);
+      } 
+      echo(k);
+   }
+}
+
+void indextest(point list a) 
+{
+   int i = 0;
+   while (i < length(a))
+   {
+      echo(a[i]);
+      i = i + 1;
+   }
+}
+
+
 void testcellrefs() {
    newcell("cellrefs");
    opencell("cellrefs");
