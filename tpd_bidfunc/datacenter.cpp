@@ -774,10 +774,17 @@ void DataCenter::openGlDraw(const CTM& layCTM)
             _TEDLIB()->openGlDraw(*drawProp);
             if(_DRCDB)
             {
-               laydata::TdtDefaultCell* dst_structure = _DRCDB->checkCell("drc");
-               if (dst_structure)
+               if (wxMUTEX_NO_ERROR == _DRCLock.TryLock())
                {
-                  dst_structure->openGlDraw(*drawProp);
+                  if (_TEDLIB()->activeCellName() == DRCData->cellName())
+                  {
+
+                     laydata::TdtDefaultCell* dst_structure = _DRCDB->checkCell(DRCData->cellName());
+                     if (dst_structure)
+                     {
+                        dst_structure->openGlDraw(*drawProp);
+                     }
+                    }
                }
             }
             #ifdef RENDER_PROFILING
@@ -839,15 +846,22 @@ void DataCenter::openGlRender(const CTM& layCTM)
             // Draw DRC data (if any)
             //_DRCDB->openGlDraw(_properties.drawprop());
             //TODO the block below should get into the line above
-            if(_DRCDB && (_TEDLIB()->activeCellName() == DRCData->cellName()))
+
+            if(_DRCDB)  
             {
-               renderer.setState(layprop::DRC);
-               laydata::TdtDefaultCell* dst_structure = _DRCDB->checkCell("drc");
-               if (dst_structure)
+               if (wxMUTEX_NO_ERROR == _DRCLock.TryLock())
                {
-                  dst_structure->openGlRender(renderer, CTM(), false, false);
+                  if (_TEDLIB()->activeCellName() == DRCData->cellName())
+                  {
+                     renderer.setState(layprop::DRC);
+                     laydata::TdtDefaultCell* dst_structure = _DRCDB->checkCell("drc");
+                     if (dst_structure)
+                     {
+                        dst_structure->openGlRender(renderer, CTM(), false, false);
+                     }
+                     renderer.setState(layprop::DB);
+                  }
                }
-               renderer.setState(layprop::DB);
             }
             #ifdef RENDER_PROFILING
             rendTimer.report("Time elapsed for data traversing: ");
