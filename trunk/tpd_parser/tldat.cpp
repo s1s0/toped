@@ -149,7 +149,9 @@ void telldata::ttint::assign(tell_var* rt) {
    if (rt->get_type() == tn_real)
    {
       // Note! There is no rint() here deliberately - for compatibility
-      // with normal C. See Issue 47
+      // with normal C. See Issue 47. There is a tell function rint() with
+      // the same functionality as the corresponding C function which
+      // shall be used for rounding
       _value = (int4b) static_cast<ttreal*>(rt)->value();
       update_cstat();
    }
