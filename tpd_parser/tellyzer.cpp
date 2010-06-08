@@ -1793,7 +1793,7 @@ telldata::typeID parsercmd::Assign(telldata::tell_var* lval, bool indexed, telld
    }
    else
    {
-      tellerror("Incompatable operand types in assignment", loc);
+      tellerror("Incompatible operand types in assignment", loc);
       return telldata::tn_void;
    }
 }
@@ -1818,7 +1818,7 @@ telldata::typeID parsercmd::Uninsert(telldata::tell_var* lval, telldata::argumen
    // distributed syntax of the operator
    //
    // To make the things simpler (?!?) for the user we are adding the list
-   // union operation whith the same syntax. It should benefit from the
+   // union operation with the same syntax. It should benefit from the
    // same index syntax - i.e the operator should be quite flexible because
    // list can be added/inserted anywhere in the target list. The beauty is
    // not coming for free though.
@@ -1838,7 +1838,7 @@ telldata::typeID parsercmd::Uninsert(telldata::tell_var* lval, telldata::argumen
    // During the parsing of the listinsertindex clauses cmdLISTADD command
    // is created, but not pushed in the operand stack (it lacks its rvalue!).
    // When the entire '=' statement is parsed, this function has to clarify
-   // whether the operands are compartible and what is the operator -
+   // whether the operands are compatible and what is the operator -
    // add/insert or union. If it is add/insert cmdLISTADD is pushed in the
    // stack (it's rvalue is already in the operand stack). Otherwise it is
    // scrapped. Instead new cmdLISTUNION is created and pushed in the stack
@@ -1854,11 +1854,13 @@ telldata::typeID parsercmd::Uninsert(telldata::tell_var* lval, telldata::argumen
    // tell basic types. This should be checked in the following order:
    // 1. Get the type of the recipient (lval)
    //    It must be a list
-   //    a) strip the list atribute and get the type of the list component
+   //    a) strip the list attribute and get the type of the list component
    //    b) if the type of the lval list component is compound (struct list), check the
    //       input structure for struct list
    //    c) if the type of the list component is basic, check directly that
    //       op2 is a list
+   // 	 d) if after all the above the op2 is still unknown i.e. not a list - try to
+   //       convert it into a structure
    if (TLUNKNOWN_TYPE((*op2)()))
    {
       if (TLISALIST(lvalID))
@@ -1867,6 +1869,8 @@ telldata::typeID parsercmd::Uninsert(telldata::tell_var* lval, telldata::argumen
           vartype = CMDBlock->getTypeByID(lvalID & ~telldata::tn_listmask);
           if (NULL != vartype) op2->userStructListCheck(*vartype, true);
           else op2->toList(true, lvalID & ~telldata::tn_listmask);
+          if (TLUNKNOWN_TYPE((*op2)()))
+             op2->userStructCheck(*vartype, true);
       }
       else
          // lvalue in this function must be a list
@@ -1891,7 +1895,7 @@ telldata::typeID parsercmd::Uninsert(telldata::tell_var* lval, telldata::argumen
       else
       {
          delete unins_cmd;
-         tellerror("Incompatable operand types in list add/insert", loc);
+         tellerror("Incompatible operand types in list add/insert", loc);
          return telldata::tn_void;
       }
    }
