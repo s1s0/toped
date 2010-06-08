@@ -56,7 +56,7 @@ namespace parsercmd
 
 /*Current tell variable name*/
 telldata::tell_var *tellvar = NULL;
-telldata::tell_var *tellindxvar = NULL;
+std::stack<telldata::tell_var*> tellindxvar;
 telldata::tell_var *tell_lvalue = NULL;
 /*Current variable is a list*/
 bool indexed = false;
@@ -718,13 +718,14 @@ fieldname:
 
 indxb:
      '['                            {
-      tellindxvar = tellvar;
+      tellindxvar.push(tellvar);
     }
 ;
      
 indxe:
      ']'                            {
-      tellvar = tellindxvar;
+      tellvar = tellindxvar.top();
+      tellindxvar.pop();
     }
 ;
 
@@ -1016,7 +1017,7 @@ void cleanonabort()
    if (cfd)             {delete cfd;            cfd               = NULL;}
    tell_lvalue       = NULL;
    tellvar           = NULL;
-   tellindxvar       = NULL;
+   while (!tellindxvar.empty()) tellindxvar.pop(); 
 }
 
 /*
