@@ -148,7 +148,9 @@ const telldata::ttreal& telldata::ttreal::operator = (const ttint& a) {
 void telldata::ttint::assign(tell_var* rt) {
    if (rt->get_type() == tn_real)
    {
-      _value = (int4b) rint(static_cast<ttreal*>(rt)->value());
+      // Note! There is no rint() here deliberately - for compatibility
+      // with normal C. See Issue 47
+      _value = (int4b) static_cast<ttreal*>(rt)->value();
       update_cstat();
    }
    else if (rt->get_type() == tn_int)
