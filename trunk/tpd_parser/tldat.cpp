@@ -800,7 +800,6 @@ void telldata::argumentID::toList(bool cmdUpdate, telldata::typeID alistID)
 {
    if (0 < _child.size())
    {// i.e. list is not empty
-      alistID = (*(_child[0]))();
       for(argumentQ::const_iterator CA = _child.begin(); CA != _child.end(); CA ++)
       {
          if (alistID != (**CA)()) return;
