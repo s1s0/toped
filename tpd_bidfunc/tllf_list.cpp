@@ -119,3 +119,26 @@ int tellstdfunc::stdCOS::execute()
    OPstack.push(DEBUG_NEW telldata::ttreal(cos(angle)));
    return EXEC_NEXT;
 }
+
+//============================================================================
+int tellstdfunc::stdRINT::argsOK(argumentQ* amap)
+{
+   return !((amap->size() == 1) && (( (*((*amap)[0]))() == telldata::tn_real  ) ||
+                                    ( (*((*amap)[0]))() == telldata::tn_int   )   ));
+}
+
+nameList* tellstdfunc::stdRINT::callingConv(const telldata::typeMAP*)
+{
+   nameList* argtypes = DEBUG_NEW nameList();
+   argtypes->push_back("int");
+   argtypes->push_back("real");
+   return argtypes;
+}
+
+int tellstdfunc::stdRINT::execute()
+{
+   real value = getOpValue(OPstack);
+   int4b result = (int4b) rint(value);
+   OPstack.push(DEBUG_NEW telldata::ttint(result));
+   return EXEC_NEXT;
+}
