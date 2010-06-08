@@ -371,6 +371,24 @@ void embedif(int a)
    else echo(0);
 }
 
+void roundtest() 
+{
+
+  real r1 = 1;
+  real r2 = 2;
+  real r3 = 3;
+
+  int i1 = r1/r3;
+  echo (i1);
+  echo("The result above should be 0");
+  int i2 = r2/r3;
+  echo (i2);
+  echo("The result above should be 0");
+  i1 = r3/r2;
+  echo (i1);
+  echo("The result above should be 1");
+}
+
 
 newcell("Fcell");
 opencell("Fcell");
