@@ -208,6 +208,22 @@ namespace  parsercmd {
       int execute();
    };
 
+   class cmdSCALEPNT:public cmdVIRTUAL {
+   public:
+      cmdSCALEPNT(bool up) : _up(up) {};
+      int execute();
+   private:
+      bool _up;
+   };
+
+   class cmdSCALEBOX:public cmdVIRTUAL {
+   public:
+      cmdSCALEBOX(bool up) : _up(up) {};
+      int execute();
+   private:
+      bool _up;
+   };
+
    class cmdUMINUS:public cmdVIRTUAL {
    public:
       cmdUMINUS(telldata::typeID type):_type(type) {};

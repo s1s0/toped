@@ -385,6 +385,40 @@ int parsercmd::cmdDIVISION::execute() {
 }
 
 //=============================================================================
+int parsercmd::cmdSCALEPNT::execute()
+{
+   TELL_DEBUG(cmdSCALEPNT);
+   real scaleFactor = getOpValue();
+   telldata::ttpnt *p  = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
+   telldata::ttpnt* r;
+   if (_up)
+      r = DEBUG_NEW telldata::ttpnt(p->x() * scaleFactor,p->y() * scaleFactor);
+   else
+      r = DEBUG_NEW telldata::ttpnt(p->x() / scaleFactor, p->y() / scaleFactor);
+   OPstack.push(r);
+   delete p;
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+int parsercmd::cmdSCALEBOX::execute()
+{
+   TELL_DEBUG(cmdSCALEPNT);
+   real scaleFactor = getOpValue();
+   telldata::ttwnd* w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
+   telldata::ttwnd* r;
+   if (_up)
+      r = DEBUG_NEW telldata::ttwnd(w->p1().x() * scaleFactor , w->p1().y() * scaleFactor ,
+                                    w->p2().x() * scaleFactor , w->p2().y() * scaleFactor  );
+   else
+      r = DEBUG_NEW telldata::ttwnd(w->p1().x() / scaleFactor , w->p1().y() / scaleFactor ,
+                                    w->p2().x() / scaleFactor , w->p2().y() / scaleFactor  );
+   OPstack.push(r);
+   delete w;
+   return EXEC_NEXT;
+}
+
+//=============================================================================
 int parsercmd::cmdLT::execute() {
    TELL_DEBUG(cmdLT);
    real value2 = getOpValue();
@@ -1488,7 +1522,7 @@ telldata::typeID parsercmd::UMinus(telldata::typeID op1, TpdYYLtype loc1) {
       CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdUMINUS(op1));
       return op1;}
    else {
-      tellerror("unexepected operand type",loc1);
+      tellerror("unexpected operand type",loc1);
       return telldata::tn_void;
    }
 }
@@ -1509,7 +1543,7 @@ telldata::typeID parsercmd::Plus(telldata::typeID op1, telldata::typeID op2,
             case  telldata::tn_int:
             case telldata::tn_real:CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPLUS());
                             return telldata::tn_real;
-                  default: tellerror("unexepected operand type",loc2);break;
+                  default: tellerror("unexpected operand type",loc2);break;
          };break;
       case telldata::tn_pnt:
          switch(op2) {
@@ -1517,7 +1551,7 @@ telldata::typeID parsercmd::Plus(telldata::typeID op1, telldata::typeID op2,
                            return telldata::tn_pnt;
             case    telldata::tn_pnt:CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSHIFTPNT2());
                            return telldata::tn_pnt;
-                  default: tellerror("unexepected operand type",loc2);break;
+                  default: tellerror("unexpected operand type",loc2);break;
          };break;
       case telldata::tn_box:
          switch(op2) {
@@ -1526,16 +1560,16 @@ telldata::typeID parsercmd::Plus(telldata::typeID op1, telldata::typeID op2,
                         return telldata::tn_box;
             case telldata::tn_box:    // or
 //            case tn_poly: // or
-                  default: tellerror("unexepected operand type",loc2); break;
+                  default: tellerror("unexpected operand type",loc2); break;
          };break;
       case telldata::tn_string:
          if (telldata::tn_string == op2) {
             CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdCONCATENATE());
             return telldata::tn_string;
          }
-         else tellerror("unexepected operand type",loc2);
+         else tellerror("unexpected operand type",loc2);
          break;
-      default: tellerror("unexepected operand type",loc1);break;
+      default: tellerror("unexpected operand type",loc1);break;
    }
    return telldata::tn_void;
 }
@@ -1549,7 +1583,7 @@ telldata::typeID parsercmd::Minus(telldata::typeID op1, telldata::typeID op2,
             case   telldata::tn_int:
             case  telldata::tn_real:CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdMINUS());
                             return telldata::tn_real;
-                  default: tellerror("unexepected operand type",loc2);break;
+                  default: tellerror("unexpected operand type",loc2);break;
          };break;
       case telldata::tn_pnt:
          switch(op2) {
@@ -1557,7 +1591,7 @@ telldata::typeID parsercmd::Minus(telldata::typeID op1, telldata::typeID op2,
                            return telldata::tn_pnt;
             case    telldata::tn_pnt:CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSHIFTPNT2(-1));
                            return telldata::tn_pnt;
-                  default: tellerror("unexepected operand type",loc2);break;
+                  default: tellerror("unexpected operand type",loc2);break;
          };break;
       case telldata::tn_box:
          switch(op2) {
@@ -1566,9 +1600,9 @@ telldata::typeID parsercmd::Minus(telldata::typeID op1, telldata::typeID op2,
                         return telldata::tn_box;
             case telldata::tn_box:    // or not ???
             //case tn_ttPoly:
-                  default: tellerror("unexepected operand type",loc2);break;
+                  default: tellerror("unexpected operand type",loc2);break;
          };break;
-      default: tellerror("unexepected operand type",loc1);break;
+      default: tellerror("unexpected operand type",loc1);break;
    }
    return telldata::tn_void;
 }
@@ -1583,7 +1617,7 @@ telldata::typeID parsercmd::PointMv(telldata::typeID op1, telldata::typeID op2,
                            return telldata::tn_pnt;
             case    telldata::tn_pnt:CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSHIFTPNT4(xdir,ydir));
                            return telldata::tn_pnt;
-                  default: tellerror("unexepected operand type",loc2);break;
+                  default: tellerror("unexpected operand type",loc2);break;
          };break;
       case telldata::tn_box:
          switch(op2) {
@@ -1592,9 +1626,9 @@ telldata::typeID parsercmd::PointMv(telldata::typeID op1, telldata::typeID op2,
                         return telldata::tn_box;
             case telldata::tn_pnt:CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSHIFTBOX4(xdir,ydir));
                         return telldata::tn_box;
-                  default: tellerror("unexepected operand type",loc2); break;
+                  default: tellerror("unexpected operand type",loc2); break;
          };break;
-      default: tellerror("unexepected operand type",loc1);break;
+      default: tellerror("Unexepected operand type",loc1);break;
    }
    return telldata::tn_void;
 }
@@ -1607,67 +1641,86 @@ telldata::typeID parsercmd::PointMv(telldata::typeID op1, telldata::typeID op2,
 //   box      |scale| rota| and |
 //-------------------------------
 telldata::typeID parsercmd::Multiply(telldata::typeID op1, telldata::typeID op2,
-                                                  TpdYYLtype loc1, TpdYYLtype loc2) {
-   switch (op1)   {
+                                                  TpdYYLtype loc1, TpdYYLtype loc2)
+{
+   switch (op1)
+   {
        case telldata::tn_int:
       case telldata::tn_real:
-         switch(op2) {
-              case telldata::tn_int:
-             case telldata::tn_real:CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdMULTIPLY());
-                         return telldata::tn_real;
-                  default: tellerror("unexepected operand type",loc2);break;
-         };break;
-//      case telldata::tn_pnt:
-//         switch(op2) {
-//            case telldata::tn_real:CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSHIFTPNT(-1));
-//                           return telldata::tn_pnt;
+         switch(op2)
+         {
+             case telldata::tn_int:
+             case telldata::tn_real: CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdMULTIPLY());
+                                     return telldata::tn_real;
+                            default: tellerror("unexpected operand type",loc2);break;
+         };
+         break;
+      case telldata::tn_pnt:
+         switch(op2)
+         {
+            case telldata::tn_int:
+            case telldata::tn_real: CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSCALEPNT(true));
+                                    return telldata::tn_pnt;
 //            case    telldata::tn_pnt:CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSHIFTPNT2(-1));
 //                           return telldata::tn_pnt;
-//                  default: tellerror("unexepected operand type",loc2);break;
-//         };break;
-//      case telldata::tn_box:
-//         switch(op2) {
-//            case telldata::tn_real: // deflate
-//            case telldata::tn_pnt:CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSHIFTBOX(-1));
-//                        return telldata::tn_box;
+                           default: tellerror("unexpected operand type",loc2);break;
+         };break;
+      case telldata::tn_box:
+         switch(op2)
+         {
+            case telldata::tn_int:
+            case telldata::tn_real:CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSCALEBOX(true));
+                                   return telldata::tn_box;
+
+//            case telldata::tn_pnt:    // ???
 //            case telldata::tn_box:    // or not ???
 //            //case tn_ttPoly:
-//                  default: tellerror("unexepected operand type",loc2);break;
-//         };break;
-      default: tellerror("unexepected operand type",loc1);break;
+                  default: tellerror("unexpected operand type",loc2);break;
+         };break;
+      default: tellerror("unexpected operand type",loc1);break;
    }
    return telldata::tn_void;
 }
 
 telldata::typeID parsercmd::Divide(telldata::typeID op1, telldata::typeID op2,
-                                                  TpdYYLtype loc1, TpdYYLtype loc2) {
-   switch (op1)   {
-       case telldata::tn_int:
+                                                  TpdYYLtype loc1, TpdYYLtype loc2)
+{
+   switch (op1)
+   {
+      case telldata::tn_int:
       case telldata::tn_real:
-         switch(op2) {
-            case  telldata::tn_int:
-            case telldata::tn_real:CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdDIVISION());
-                         return telldata::tn_real;
-                  default: tellerror("unexepected operand type",loc2);break;
-         };break;
-//      case telldata::tn_pnt:
-//         switch(op2) {
-//            case telldata::tn_real:CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSHIFTPNT(-1));
-//                           return telldata::tn_pnt;
+         switch(op2)
+         {
+            case telldata::tn_int:
+            case telldata::tn_real: CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdDIVISION());
+                                    return telldata::tn_real;
+                           default: tellerror("unexpected operand type",loc2);break;
+         };
+         break;
+      case telldata::tn_pnt:
+         switch(op2)
+         {
+            case telldata::tn_int:
+            case telldata::tn_real: CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSCALEPNT(false));
+                                    return telldata::tn_pnt;
 //            case    telldata::tn_pnt:CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSHIFTPNT2(-1));
 //                           return telldata::tn_pnt;
-//                  default: tellerror("unexepected operand type",loc2);break;
-//         };break;
-//      case telldata::tn_box:
-//         switch(op2) {
-//            case telldata::tn_real: // deflate
-//            case telldata::tn_pnt:CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSHIFTBOX(-1));
-//                        return telldata::tn_box;
+                  default: tellerror("unexpected operand type",loc2);break;
+         };
+         break;
+      case telldata::tn_box:
+         switch(op2)
+         {
+            case telldata::tn_int:
+            case telldata::tn_real: CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSCALEBOX(false));
+                                    return telldata::tn_box;
+//            case telldata::tn_pnt: // ???
 //            case telldata::tn_box:    // or not ???
 //            //case tn_ttPoly:
-//                  default: tellerror("unexepected operand type",loc2);break;
-//         };break;
-      default: tellerror("unexepected operand type",loc1);break;
+                           default: tellerror("unexpected operand type",loc2);break;
+         };
+         break;
+      default: tellerror("unexpected operand type",loc1);break;
    }
    return telldata::tn_void;
 }
@@ -1949,14 +2002,14 @@ telldata::typeID parsercmd::BoolEx(telldata::typeID op1, telldata::typeID op2,
          else if (ope == "|") CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdBWOR());
          else
          {
-            tellerror("unexepected operand type",loc1);
+            tellerror("unexpected operand type",loc1);
             return telldata::tn_void;
          }
          return telldata::tn_int;
       }
       else
       {
-         tellerror("unexepected operand type",loc1);
+         tellerror("unexpected operand type",loc1);
          return telldata::tn_void;
       }
       return telldata::tn_bool;
@@ -1967,13 +2020,13 @@ telldata::typeID parsercmd::BoolEx(telldata::typeID op1, telldata::typeID op2,
       else if (ope == "||") CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdOR());
       else
       {
-         tellerror("unexepected operand type",loc1);return telldata::tn_void;
+         tellerror("unexpected operand type",loc1);return telldata::tn_void;
       }
       return telldata::tn_bool;
    }
    else
    {
-      tellerror("unexepected operand type",loc2);
+      tellerror("unexpected operand type",loc2);
       return telldata::tn_void;
    }
 }
@@ -1985,7 +2038,7 @@ telldata::typeID parsercmd::BoolEx(telldata::typeID op1, std::string ope, TpdYYL
       if      (ope == "~" ) CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdBWNOT());
       else
       {
-         tellerror("unexepected operand type",loc1);return telldata::tn_void;
+         tellerror("unexpected operand type",loc1);return telldata::tn_void;
       }
       return telldata::tn_int;
    }
@@ -1994,13 +2047,13 @@ telldata::typeID parsercmd::BoolEx(telldata::typeID op1, std::string ope, TpdYYL
       if      (ope == "!") CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdNOT());
       else
       {
-         tellerror("unexepected operand type",loc1);return telldata::tn_void;
+         tellerror("unexpected operand type",loc1);return telldata::tn_void;
       }
       return telldata::tn_bool;
    }
    else
    {
-      tellerror("unexepected operand type",loc1);
+      tellerror("unexpected operand type",loc1);
       return telldata::tn_void;
    }
 }
