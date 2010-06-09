@@ -75,8 +75,7 @@ std::stack<telldata::argumentQ*>  argmapstack;
 parsercmd::FuncDeclaration *cfd;
 /*number of errors in a function defintion*/
 int funcdeferrors = 0;
-/*number of poits of the current polygon*/
-unsigned listlength = 0;
+
 void tellerror(std::string s, TpdYYLtype loc);
 void tellerror (std::string s);
 void cleanonabort();
@@ -121,7 +120,7 @@ Well some remarks may save some time in the future...
                variable is hardly used directly.
    - tell_lvalue - is storing always the tellvar and is used as an argument of
                Assign. Assign obviously needs the original variable - not a copy
-               of it which is normally used for most of the operaions. In other
+               of it which is normally used for most of the operations. In other
                words lvalues are not handled trough the operand stack, instead
                this variable is used.
    - tellindxvar - this one was introduced with Issue 44 fix. When indexed 
