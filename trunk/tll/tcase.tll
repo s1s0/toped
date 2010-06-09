@@ -389,6 +389,21 @@ void roundtest()
   echo("The result above should be 1");
 }
 
+void scaletest() 
+{
+  int  i = 3;
+  real j = 4;
+  point a = { 3,6 }; 
+  echo(a*i);
+  echo(a*3);
+  echo(a*j);
+  echo(a*4.0);
+  
+  echo(a/i);
+  echo(a/3);
+  echo(a/j);
+  echo(a/4.0);
+}
 
 newcell("Fcell");
 opencell("Fcell");
