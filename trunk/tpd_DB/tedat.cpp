@@ -955,6 +955,8 @@ void laydata::TdtPoly::transfer(const CTM& trans)
          _pdata[index++] = plist[i].y();
       }
    assert(index == (2*_psize));
+   // retessellate the modified shape
+   _teseldata.tessellate(_pdata, _psize);
 }
 
 laydata::TdtData* laydata::TdtPoly::copy(const CTM& trans)
