@@ -457,7 +457,9 @@ int tellstdfunc::stdFLIPSEL::execute()
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::ttint(direction));
       UNDOPstack.push_front(p1->selfcopy());
-      LogFile << LogFile.getFN() << "("<< *p1 << ");"; LogFile.flush();
+      std::string dirstr = (direction == 1) ? "_vertical" : "_horizontal";
+      LogFile << LogFile.getFN() << "("<< dirstr
+                                 <<"," << *p1 << ");"; LogFile.flush();
    }
    delete p1;
    DATC->unlockTDT(dbLibDir, true);
