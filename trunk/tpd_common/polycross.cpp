@@ -987,7 +987,7 @@ void polycross::TmEvent::sweep (XQ& eventQ, YQ& sweepline, ThreadList& threadl, 
    BO_printseg(_bseg)
 #endif
    if (0 == _aseg->threadID())
-      EXPTNpolyCross("Sorted segment expected here");
+      throw EXPTNpolyCross("Sorted segment expected here");
    SegmentThread* thr = sweepline.modifyThread(_aseg->threadID(), _bseg);
 
    // check for intersections of the neighbours with the new segment
@@ -1023,7 +1023,7 @@ void polycross::TmEvent::sweep (XQ& eventQ, YQ& sweepline, ThreadList& threadl, 
 void polycross::TmEvent::sweep2bind(YQ& sweepline, BindCollection& bindColl)
 {
    if (0 == _aseg->threadID())
-      EXPTNpolyCross("Sorted segment expected here - bind");
+      throw EXPTNpolyCross("Sorted segment expected here - bind");
    SegmentThread* thr = sweepline.modifyThread(_aseg->threadID(), _bseg);
 
    // action is taken only for points in the second polygon
@@ -1310,7 +1310,7 @@ void polycross:: YQ::initialize(DBbox& overlap)
 polycross::SegmentThread* polycross::YQ::beginThread(polycross::polysegment* startseg)
 {
    if (0 != startseg->threadID())
-      EXPTNpolyCross("Unsorted segment expected here");
+      throw EXPTNpolyCross("Unsorted segment expected here");
    SegmentThread* above = _bottomSentinel;
    while (sCompare(startseg, above->cseg()) > 0)
       above = above->threadAbove();
@@ -1334,16 +1334,16 @@ polycross::SegmentThread* polycross::YQ::endThread(unsigned threadID)
    // get the thread from the _cthreads
    Threads::iterator threadP = _cthreads.find(threadID);
    if (_cthreads.end() == threadP)
-      EXPTNpolyCross("Segment thread not found in YQ - end");
+      throw EXPTNpolyCross("Segment thread not found in YQ - end");
    SegmentThread* thread = threadP->second;
    // relink above/below threads
    SegmentThread* nextT = thread->threadAbove();
    if (NULL == nextT)
-      EXPTNpolyCross("Unable to remove the segment thread properly");
+      throw EXPTNpolyCross("Unable to remove the segment thread properly");
    nextT->set_threadBelow(thread->threadBelow());
    SegmentThread* prevT = thread->threadBelow();
    if (NULL == prevT)
-      EXPTNpolyCross("Unable to remove the segment thread properly");
+      throw EXPTNpolyCross("Unable to remove the segment thread properly");
    prevT->set_threadAbove(thread->threadAbove());
    // erase it
    delete(threadP->second);
@@ -1363,7 +1363,7 @@ polycross::SegmentThread* polycross::YQ::modifyThread(unsigned threadID, polyseg
    // get the thread from the _cthreads
    Threads::iterator threadP = _cthreads.find(threadID);
    if (_cthreads.end() == threadP)
-      EXPTNpolyCross("Segment thread not found in YQ - modify");
+      throw EXPTNpolyCross("Segment thread not found in YQ - modify");
    SegmentThread* thread = threadP->second;
    newsegment->set_threadID(threadID);
    polysegment* oldsegment = thread->set_cseg(newsegment);
@@ -1383,16 +1383,16 @@ polycross::SegmentThread* polycross::YQ::swapThreads(unsigned tAID, unsigned tBI
    Threads::iterator tiAbove = _cthreads.find(tAID);
    Threads::iterator tiBelow = _cthreads.find(tBID);
    if (_cthreads.end() == tiAbove)
-      EXPTNpolyCross("Segment thread not found in YQ - swap");
+      throw EXPTNpolyCross("Segment thread not found in YQ - swap");
    if (_cthreads.end() == tiBelow)
-      EXPTNpolyCross("Segment thread not found in YQ - swap");
+      throw EXPTNpolyCross("Segment thread not found in YQ - swap");
    SegmentThread* tAbove = tiAbove->second;
    SegmentThread* tBelow = tiBelow->second;
    // relink above/below threads
    if (tAbove != tBelow->threadAbove())
-      EXPTNpolyCross("Unable to swap the segment threads properly");
+      throw EXPTNpolyCross("Unable to swap the segment threads properly");
    if (tBelow != tAbove->threadBelow())
-      EXPTNpolyCross("Unable to swap the segment threads properly");
+      throw EXPTNpolyCross("Unable to swap the segment threads properly");
    // first  fix the pointers of the neighboring threads
    tBelow->threadBelow()->set_threadAbove(tAbove);
    tAbove->threadAbove()->set_threadBelow(tBelow);
@@ -1410,7 +1410,7 @@ polycross::SegmentThread* polycross::YQ::getThread(unsigned tID)
 {
    Threads::iterator ti = _cthreads.find(tID);
    if (_cthreads.end() == ti)
-      EXPTNpolyCross("Segment thread not found in YQ - get");
+      throw EXPTNpolyCross("Segment thread not found in YQ - get");
    return ti->second;
 }
 
@@ -1418,7 +1418,7 @@ int polycross::YQ::sCompare(const polysegment* seg0, const polysegment* seg1)
 {
    // Current point is always lp of seg0
    if (seg0 == seg1)
-      EXPTNpolyCross("Different segments expected here");
+      throw EXPTNpolyCross("Different segments expected here");
    //
    int ori;
    ori = orientation(seg1->lP(), seg1->rP(), seg0->lP());
@@ -1457,7 +1457,7 @@ int polycross::YQ::sCompare(const polysegment* seg0, const polysegment* seg1)
    else
       order = (seg0->edge() > seg1->edge()) ? 1 : -1;
    if (0 == order)
-      EXPTNpolyCross("Segments undistinguishable");
+      throw EXPTNpolyCross("Segments undistinguishable");
    return order;*/
 }
 

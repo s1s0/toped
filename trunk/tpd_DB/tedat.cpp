@@ -2640,7 +2640,8 @@ void laydata::ValidWire::angles()
    if (_plist.size() < 2) _status |= shp_null;
    pointlist::iterator cp2 = _plist.begin();
    pointlist::iterator cp1 = cp2; cp2++;
-   real pAngle, cAngle; //
+   real pAngle = 0.0;
+   real cAngle = 0.0;
    bool pAngleValid = false;
    if (_plist.size()>2)
    do
@@ -2766,12 +2767,7 @@ laydata::TdtData* laydata::polymerge(const pointlist& _plist0, const pointlist& 
    catch (EXPTNpolyCross) {return NULL;}
    logicop::pcollection merge_shape;
    laydata::TdtData* resShape = NULL;
-   bool opResult = false;
-   try {
-      opResult = operation.OR(merge_shape);
-   }
-   catch (EXPTNpolyCross) {return resShape;}
-   if (opResult)
+   if (operation.OR(merge_shape))
    {
       assert(1 == merge_shape.size());
       resShape = createValidShape(*merge_shape.begin());
