@@ -263,7 +263,6 @@ input polygons. Method returns false if no output shapes are generated, and
 true otherwise*/
 bool logicop::logic::OR(pcollection& plycol)
 {
-   bool result = false;
    bool direction = true; /*next*/
    pcollection lclcol; // local collection of the resulting shapes
    polycross::VPoint* centinel = NULL;
@@ -293,6 +292,7 @@ bool logicop::logic::OR(pcollection& plycol)
    //
    assert(centinel);
    polycross::VPoint* collector = centinel;
+   bool result = false;
    do {
       if (0 == collector->visited())
       {
@@ -313,7 +313,7 @@ bool logicop::logic::OR(pcollection& plycol)
       }
       collector = collector->next();
    } while (collector != centinel);
-   if (!result) return result;
+   if (!result) return false;
    // Validate all resulting polygons
    pcollection lclvalidated;
    while (!lclcol.empty())
@@ -332,12 +332,17 @@ bool logicop::logic::OR(pcollection& plycol)
    {
       pointlist* curpolyA = respoly;
       pointlist* curpolyB = lclvalidated.front();
-      respoly = hole2simple(*curpolyA, *curpolyB);
+      try
+      {
+         respoly = hole2simple(*curpolyA, *curpolyB);
+      }
+      catch (EXPTNpolyCross) {return false;}
+
       lclvalidated.pop_front();
       delete curpolyA; delete curpolyB;
    }
    plycol.push_back(respoly);
-   return result;
+   return true;
 }
 
 void logicop::logic::getShape(pcollection& plycol, polycross::VPoint* centinel)
@@ -381,7 +386,8 @@ polycross::VPoint* logicop::logic::checkCoinciding(const pointlist& plist, polyc
    return init;
 }
 
-pointlist* logicop::logic::hole2simple(const pointlist& outside, const pointlist& inside) {
+pointlist* logicop::logic::hole2simple(const pointlist& outside, const pointlist& inside)
+{
    polycross::segmentlist _seg1(outside,1,true);
    polycross::segmentlist _seg2(inside ,2,true);
    polycross::XQ _eq(_seg1, _seg2); // create the event queue
