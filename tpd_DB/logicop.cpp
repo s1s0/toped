@@ -47,6 +47,15 @@
 #define REPORT_POLY_DEBUG
 #endif
 
+//#define POLYBIND_DEBUG
+#ifdef POLYBIND_DEBUG
+#define REPORT_POLYBIND_DEBUG(polyObject) \
+   printf("=======================================================\n"); \
+   for (pointlist::const_iterator CP = polyObject->begin(); CP != polyObject->end(); CP++) \
+      printf("( %i , %i )\n", CP->x(), CP->y());
+#else
+#define REPORT_POLYBIND_DEBUG(polyObject)
+#endif
 
 //-----------------------------------------------------------------------------
 // class logic
@@ -252,7 +261,8 @@ bool logicop::logic::ANDNOT(pcollection& plycol) {
 one or more polygons representing the result of the logical OR between the
 input polygons. Method returns false if no output shapes are generated, and
 true otherwise*/
-bool logicop::logic::OR(pcollection& plycol) {
+bool logicop::logic::OR(pcollection& plycol)
+{
    bool result = false;
    bool direction = true; /*next*/
    pcollection lclcol; // local collection of the resulting shapes
@@ -270,7 +280,7 @@ bool logicop::logic::OR(pcollection& plycol) {
    {
       // If there are no crossing points found, this still does not mean
       // that the operation will fail. Polygons might be fully overlapping...
-      // Check that an arbitraty point from poly1 is inside poly2 ...
+      // Check that an arbitrary point from poly1 is inside poly2 ...
       if  (_shape1->inside(_poly2)) centinel = _shape2;
       // ... if not, check that an arbitrary point from poly2 is inside poly1 ...
       else if (_shape2->inside(_poly1)) centinel = _shape1;
@@ -284,15 +294,20 @@ bool logicop::logic::OR(pcollection& plycol) {
    assert(centinel);
    polycross::VPoint* collector = centinel;
    do {
-      if (0 == collector->visited()) {
+      if (0 == collector->visited())
+      {
          pointlist *shgen = DEBUG_NEW pointlist();
          polycross::VPoint* pickup = collector;
+         // The first resulting polygon must be the outer polygon
+         // That's why the direction for the first only is true
+         // The eventual following polygons will be inside the first - so
+         // their direction is always false
          direction = (0 == lclcol.size());
-         do {
+         do
+         {
             pickup = pickup->follower(direction);
             shgen->push_back(TP(pickup->cp()->x(), pickup->cp()->y()));
          } while (pickup != collector);
-         direction = true;
          lclcol.push_back(shgen);
          result = true;
       }
@@ -304,6 +319,7 @@ bool logicop::logic::OR(pcollection& plycol) {
    while (!lclcol.empty())
    {
       pointlist* csh = lclcol.front();
+      REPORT_POLYBIND_DEBUG(csh);
       laydata::ValidPoly check(*csh);
       delete csh; lclcol.pop_front();
       if (check.valid())
@@ -312,7 +328,8 @@ bool logicop::logic::OR(pcollection& plycol) {
    if (lclvalidated.empty()) return false;
    // Convert all collected shapes to a single normalized polygon
    pointlist* respoly = lclvalidated.front();lclvalidated.pop_front();
-   while (0 < lclvalidated.size()) {
+   while (0 < lclvalidated.size())
+   {
       pointlist* curpolyA = respoly;
       pointlist* curpolyB = lclvalidated.front();
       respoly = hole2simple(*curpolyA, *curpolyB);

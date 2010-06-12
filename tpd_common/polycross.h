@@ -40,7 +40,7 @@ namespace polycross
    class TEvent;
    typedef std::list<unsigned> ThreadList;
    typedef enum {_endE, _modifyE, _beginE, _crossE} EventTypes;
-   
+
    int xyorder(const TP*, const TP*);
    int orientation(const TP*, const TP*, const TP*);
    float getLambda( const TP* p1, const TP* p2, const TP* p);
@@ -312,7 +312,7 @@ namespace polycross
          unsigned          _threadBelow;
          TP                _eventvertex;
    };
-   
+
    //===========================================================================
    // Segment Thread
    //===========================================================================
@@ -380,7 +380,7 @@ namespace polycross
          TP*               _brSent;
          TP*               _tlSent;
          TP*               _trSent;
-         
+
    };
 
    //===========================================================================
@@ -430,7 +430,7 @@ namespace polycross
          const TP*         _poly1pnt;
          real              _distance;
    };
-   
+
    //===========================================================================
    // BindCollection
    //===========================================================================

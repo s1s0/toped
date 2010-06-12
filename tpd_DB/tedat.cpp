@@ -2755,7 +2755,8 @@ laydata::TdtData* laydata::createValidShape(pointlist* pl) {
    return newshape;
 }
 
-laydata::TdtData* laydata::polymerge(const pointlist& _plist0, const pointlist& _plist1) {
+laydata::TdtData* laydata::polymerge(const pointlist& _plist0, const pointlist& _plist1)
+{
    if(_plist0.empty() || _plist1.empty()) return NULL;
    logicop::logic operation(_plist0, _plist1);
    try
@@ -2765,10 +2766,15 @@ laydata::TdtData* laydata::polymerge(const pointlist& _plist0, const pointlist& 
    catch (EXPTNpolyCross) {return NULL;}
    logicop::pcollection merge_shape;
    laydata::TdtData* resShape = NULL;
-   if (operation.OR(merge_shape)) {
+   bool opResult = false;
+   try {
+      opResult = operation.OR(merge_shape);
+   }
+   catch (EXPTNpolyCross) {return resShape;}
+   if (opResult)
+   {
       assert(1 == merge_shape.size());
       resShape = createValidShape(*merge_shape.begin());
-//      return new laydata::TdtPoly(**merge_shape.begin());
    }
    return resShape;
 }
