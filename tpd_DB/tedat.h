@@ -225,7 +225,7 @@ namespace laydata {
          virtual bool      point_inside(const TP);
          virtual void      polyCut(pointlist&, ShapeList**){};
          virtual void      stretch(int bfactor, ShapeList**);
-         virtual pointlist shape2poly() const {return pointlist(); /*return empty list*/}
+         virtual pointlist shape2poly() const;
          virtual word      lType() const {return _lmwire;}
       private:
          void              precalc(pointlist&, dword) const;
