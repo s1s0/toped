@@ -208,7 +208,7 @@ Calbr::edge Calbr::drcRuleCheck::getZoom(void)
 
 //-----------------------------------------------------------------------------
 Calbr::CalbrFile::CalbrFile(const std::string &fileName, drcRenderer *render)
-      :_ok(true),_render(render), _cellNameSpace(false)
+      :_cellNameSpace(false), _ok(true), _render(render)
 {
    std::ostringstream ost;
    _fileName = fileName;
@@ -371,14 +371,14 @@ bool Calbr::CalbrFile::parse(unsigned int num)
       switch(type)
       {
          case 'p'   :
-            if (!parsePoly(ruleCheckName ,poly, numberOfElem)) return false; 
+            if (!parsePoly(ruleCheckName ,poly, numberOfElem)) return false;
             ruleCheck->addPolygon(poly);
             break;
 
          case 'e'   :
             {
                Calbr::drcEdge theEdge(ordinal, _render);
-               if (!parseEdge(ruleCheckName ,theEdge, numberOfElem)) return false; 
+               if (!parseEdge(ruleCheckName ,theEdge, numberOfElem)) return false;
                ruleCheck->addEdge(theEdge);
             }
                break;
@@ -418,9 +418,9 @@ bool Calbr::CalbrFile::parsePoly(char* ruleCheckName, drcPolygon & poly, int num
       if((tempStr[0]=='C') && (tempStr[1]=='N'))
       {
          _cellNameSpace = true;
-         
+
       }
-					
+
       if (sscanf( tempStr, "%ld %ld", &x, &y)!= 2)
       {
 			_ok = false;

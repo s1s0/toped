@@ -277,6 +277,7 @@ private:
 typedef  std::vector<TP>         pointlist;
 typedef  std::stack<CTM>         ctmstack;
 typedef  std::deque<CTM>         ctmqueue;
+typedef  std::list<pointlist*>   pcollection; // point list collection
 
 
 struct TpdYYLtype {
