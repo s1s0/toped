@@ -1521,6 +1521,37 @@ void laydata::TdtWire::stretch(int bfactor, ShapeList** decure)
    decure[0]->push_back(this);
 }
 
+pointlist laydata::TdtWire::shape2poly() const
+{
+/**
+ * All the gymnastics here is because of the way precalc() function is
+ * providing its result. The whole thing is that we have this function
+ * (precalc) implemented 3 times. In this class, in TdtTmpWire and in
+ * tenderer::TenderWire. The latter is the proper implementation.
+ * Because of re-usability reasons at the moment we have to use the
+ * implementation in this class.
+ * TODO! Clean-up all the implementations above and create a class
+ * next to ValidWire in here, in tedat which only purpose will be to
+ * convert wire to list of points
+ */
+   pointlist plist;
+   plist.reserve(3*_psize);
+   for (unsigned i = 0; i < _psize; i++)
+      plist.push_back( TP( _pdata[2*i], _pdata[2*i+1] ));
+   precalc(plist,_psize);
+
+   pointlist result;
+   plist.reserve(2 * _psize);
+   for (unsigned i = _psize; i < 3 * _psize; i = i + 2)
+      result.push_back(plist[i]);
+   for (unsigned i = 3 * _psize - 1; i > _psize; i = i - 2)
+      result.push_back(plist[i]);
+
+   ValidPoly check(result);
+   assert(check.valid());
+   return check.getValidated();
+}
+
 void laydata::TdtWire::info(std::ostringstream& ost, real DBU) const
 {
    ost << "wire " << _width/DBU << " - {";
