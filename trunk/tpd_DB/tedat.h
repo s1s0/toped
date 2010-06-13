@@ -199,7 +199,7 @@ namespace laydata {
 //==============================================================================
    class TdtWire : public TdtData   {
       public:
-                           TdtWire(pointlist&, word);
+                           TdtWire(const pointlist&, word);
                            TdtWire(const int4b*, unsigned, word);
                            TdtWire(TEDfile* const tedfile);
                           ~TdtWire();

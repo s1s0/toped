@@ -1395,8 +1395,6 @@ bool laydata::TdtCell::mergeSelected(AtticList** dasao)
             _layers[CL->first]->add(merged_shape);
             // and mark it as sh_merged
             merged_shape->setStatus(sh_merged);
-//            // and finally validate the shapes tree
-//            _layers[CL->first]->validate();
          }
          else CS++;
       }
