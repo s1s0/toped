@@ -44,7 +44,7 @@ namespace polycross
    int xyorder(const TP*, const TP*);
    int orientation(const TP*, const TP*, const TP*);
    float getLambda( const TP* p1, const TP* p2, const TP* p);
-   bool coinsidingSegm(const TP*, const TP*, const TP*);
+   bool coincidingSegm(const TP*, const TP*, const TP*);
    //===========================================================================
    // Vertex Point
    //===========================================================================
@@ -279,7 +279,7 @@ namespace polycross
    };
 
    //===========================================================================
-   // Thread end event singe segment
+   // Thread end event single segment
    //===========================================================================
    class TesEvent : public TEvent
    {
@@ -422,7 +422,7 @@ namespace polycross
          unsigned          poly1seg() { return _poly1seg;};
          const TP*         poly0pnt() const {return _poly0pnt;}
          const TP*         poly1pnt() const {return _poly1pnt;}
-         real              distance() { return _distance;};
+         const real        distance() const {return _distance;};
       private:
          unsigned          _poly0seg;
          unsigned          _poly1seg;
@@ -434,15 +434,18 @@ namespace polycross
    //===========================================================================
    // BindCollection
    //===========================================================================
-class BindCollection
+
+   class BindCollection
    {
       public:
-         ~BindCollection();
+                          ~BindCollection();
          void              update_BL(polysegment*, unsigned, const TP*);
-         BindSegment*      get_highest();
-      private:
+         BindSegment*      getBindSegment(const pcollection&);
+      protected:
          typedef std::list<BindSegment*> BindList;
          bool              is_shorter(unsigned segno, real dist);
+         static bool       compareSegments(BindSegment*, BindSegment*);
+         bool              obstructed(const BindSegment&, const pointlist&);
          BindList          _blist;
    };
 

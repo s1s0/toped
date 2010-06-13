@@ -638,11 +638,11 @@ void laydata::TdtBox::polyCut(pointlist& cutter, ShapeList** decure)
       operation.findCrossingPoints();
    }
    catch (EXPTNpolyCross) {return;}
-   logicop::pcollection cut_shapes;
+   pcollection cut_shapes;
    laydata::TdtData* newshape;
    if (operation.AND(cut_shapes))
    {
-      logicop::pcollection::const_iterator CI;
+      pcollection::const_iterator CI;
       // add the resulting cut_shapes to the_cut ShapeList
       for (CI = cut_shapes.begin(); CI != cut_shapes.end(); CI++)
          if (NULL != (newshape = createValidShape(*CI)))
@@ -650,7 +650,7 @@ void laydata::TdtBox::polyCut(pointlist& cutter, ShapeList** decure)
       cut_shapes.clear();
       // if there is a cut - there will be (most likely) be cut remains as well
       operation.reset_visited();
-      logicop::pcollection rest_shapes;
+      pcollection rest_shapes;
       if (operation.ANDNOT(rest_shapes))
          // add the resulting cut remainings to the_rest ShapeList
          for (CI = rest_shapes.begin(); CI != rest_shapes.end(); CI++)
@@ -1009,11 +1009,11 @@ void laydata::TdtPoly::polyCut(pointlist& cutter, ShapeList** decure)
       operation.findCrossingPoints();
    }
    catch (EXPTNpolyCross) {return;}
-   logicop::pcollection cut_shapes;
+   pcollection cut_shapes;
    laydata::TdtData* newshape;
    if (operation.AND(cut_shapes))
    {
-      logicop::pcollection::const_iterator CI;
+      pcollection::const_iterator CI;
       // add the resulting cut_shapes to the_cut ShapeList
       for (CI = cut_shapes.begin(); CI != cut_shapes.end(); CI++)
          if (NULL != (newshape = createValidShape(*CI)))
@@ -1021,7 +1021,7 @@ void laydata::TdtPoly::polyCut(pointlist& cutter, ShapeList** decure)
       cut_shapes.clear();
       // if there is a cut - there should be cut remains as well
       operation.reset_visited();
-      logicop::pcollection rest_shapes;
+      pcollection rest_shapes;
       if (operation.ANDNOT(rest_shapes))
          // add the resulting cut remainings to the_rest ShapeList
          for (CI = rest_shapes.begin(); CI != rest_shapes.end(); CI++)
@@ -1059,11 +1059,11 @@ void laydata::TdtPoly::stretch(int bfactor, ShapeList** decure)
       if (1 == fixingpoly.crossp())
       throw EXPTNpolyCross("Only one crossing point found. Can't generate polygons");
 
-      logicop::pcollection cut_shapes;
+      pcollection cut_shapes;
       laydata::TdtData* newshape;
       if ( fixingpoly.generate(cut_shapes, bfactor) )
       {
-         logicop::pcollection::const_iterator CI;
+         pcollection::const_iterator CI;
          // add the resulting fixed_shapes to the_cut ShapeList
          for (CI = cut_shapes.begin(); CI != cut_shapes.end(); CI++)
             if (NULL != (newshape = createValidShape(*CI)))
@@ -2765,7 +2765,7 @@ laydata::TdtData* laydata::polymerge(const pointlist& _plist0, const pointlist& 
       operation.findCrossingPoints();
    }
    catch (EXPTNpolyCross) {return NULL;}
-   logicop::pcollection merge_shape;
+   pcollection merge_shape;
    laydata::TdtData* resShape = NULL;
    if (operation.OR(merge_shape))
    {

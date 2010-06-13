@@ -32,26 +32,25 @@
 #include "tedstd.h"
 
 namespace logicop {
-   
-   typedef std::list<pointlist*> pcollection; // point list collection
+
    //===========================================================================
-   /*!This class is the top level wrapper or the interface to all logic 
+   /*!This class is the top level wrapper or the interface to all logic
    operations with shapes. As a general all logic operations are following
    the same procedural path:
    - find all crossing points between the input polygons
    - prepare the data for new shape generation
    - generate the new shape as a result of a certain logic operation
-   
-   So the class constructor is executing the first two steps, manufacturing the 
+
+   So the class constructor is executing the first two steps, manufacturing the
    "raw" product #_shape1 and #_shape2. The user has to call afterwards the actual
-   logic operation method that is producing the final result. Most if not all 
-   logic operations can produce a collection of polygons, that's why a new 
-   container type pcollection is introduced. If more than one operation is 
+   logic operation method that is producing the final result. Most if not all
+   logic operations can produce a collection of polygons, that's why a new
+   container type pcollection is introduced. If more than one operation is
    desired, the user has to call reset_visited(), to prepare the #_shape1/#_shape2
-   structures for another traversing.\n It has to be noted that in general 
-   the input polygons and repectively _poly1 and _poly2 fields are not 
+   structures for another traversing.\n It has to be noted that in general
+   the input polygons and repectively _poly1 and _poly2 fields are not
    interchangable. For example polyA ANDNOT polyB produces different result from
-   polyB ANDNOT polyA. Of course for some operations (AND, OR) that restriction 
+   polyB ANDNOT polyA. Of course for some operations (AND, OR) that restriction
    does not apply. */
    class logic {
    public:
@@ -70,7 +69,7 @@ namespace logicop {
       void              reset_visited();
    private:
       //! Convert a polygon with hole to simple polygon
-      pointlist*        hole2simple(const pointlist&, const pointlist&);
+      pointlist*        hole2simple(const pointlist&, const pointlist&, const pcollection&);
       //
       void              getShape(pcollection&, polycross::VPoint*);
       //
@@ -93,7 +92,7 @@ namespace logicop {
       unsigned                _crossp;
       polycross::segmentlist* _segl1;
       polycross::segmentlist* _segl2;
-      
+
    };
 
    //===========================================================================

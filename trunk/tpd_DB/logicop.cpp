@@ -138,7 +138,7 @@ void logicop::logic::reorderCross()
    }
    _shape2 = looper;
 }
-/*!If more than one logical operatoin has to be executed over the input shapes
+/*!If more than one logical operation has to be executed over the input shapes
 the raw data #_shape1 and #_shape2 can be reused, but has to be recycled beforehand
 This method is traversing both fields and invokes VPoint::reset_visited() in
 order to reinitialize the CPoint::_visited fields*/
@@ -177,11 +177,11 @@ bool logicop::logic::AND(pcollection& plycol) {
    {
       // If there are no crossing points found, this still does not mean
       // that the operation will fail. Polygons might be fully overlapping...
-      // Check that an arbitraty point from poly1 is inside poly2 ...
+      // Check that an arbitrary point from poly1 is inside poly2 ...
       if      (_shape1->inside(_poly2)) centinel = _shape1;
       // ... if not, check that an arbitrary point from poly2 is inside poly1 ...
       else if (_shape2->inside(_poly1)) centinel = _shape2;
-      // ... if not - still insysting - check that the polygons coincides
+      // ... if not - still insisting - check that the polygons coincides
       else if (NULL == (centinel = checkCoinciding(_poly1, _shape2))) return false;
       // If we've got here means that one of the polygons is completely
       // overlapped by the other one. So we need to return the outer one
@@ -232,9 +232,16 @@ bool logicop::logic::ANDNOT(pcollection& plycol) {
       //      resulting shape is null
       // if poly2 is inside poly1, then we have to generate a polygon
       // combining both shapes
-      if (_shape2->inside(_poly1)) {
-         plycol.push_back(hole2simple(_poly1, _poly2));
-         return true;
+      if (_shape2->inside(_poly1))
+      {
+         pcollection dummyCollection;
+         pointlist* respoly = hole2simple(_poly1, _poly2, dummyCollection);
+         if (NULL != respoly)
+         {
+            plycol.push_back(respoly);
+            return true;
+         }
+         else return false;
       }
       else return false;
    }
@@ -332,14 +339,10 @@ bool logicop::logic::OR(pcollection& plycol)
    {
       pointlist* curpolyA = respoly;
       pointlist* curpolyB = lclvalidated.front();
-      try
-      {
-         respoly = hole2simple(*curpolyA, *curpolyB);
-      }
-      catch (EXPTNpolyCross) {return false;}
-
       lclvalidated.pop_front();
+      respoly = hole2simple(*curpolyA, *curpolyB, lclvalidated);
       delete curpolyA; delete curpolyB;
+      if (NULL == respoly) return false;
    }
    plycol.push_back(respoly);
    return true;
@@ -386,15 +389,19 @@ polycross::VPoint* logicop::logic::checkCoinciding(const pointlist& plist, polyc
    return init;
 }
 
-pointlist* logicop::logic::hole2simple(const pointlist& outside, const pointlist& inside)
+pointlist* logicop::logic::hole2simple(const pointlist& outside, const pointlist& inside, const pcollection& obstructions)
 {
    polycross::segmentlist _seg1(outside,1,true);
    polycross::segmentlist _seg2(inside ,2,true);
    polycross::XQ _eq(_seg1, _seg2); // create the event queue
    polycross::BindCollection BC;
-
-   _eq.sweep2bind(BC);
-   polycross::BindSegment* sbc = BC.get_highest();
+   try
+   {
+      _eq.sweep2bind(BC);
+   }
+   catch (EXPTNpolyCross) {return NULL;}
+   polycross::BindSegment* sbc = BC.getBindSegment(obstructions);
+   if (NULL == sbc) return NULL; // i.e. Can't bind those objects together
    //insert 2 bind points and link them
    polycross::BPoint* cpsegA = _seg1.insertBindPoint(sbc->poly0seg(), sbc->poly0pnt());
    polycross::BPoint* cpsegB = _seg2.insertBindPoint(sbc->poly1seg(), sbc->poly1pnt());
@@ -623,23 +630,23 @@ bool logicop::CrossFix::generate(pcollection& plycol, real bfactor)
 {
    // the general idea behind the code below:
    // The list of points resulted from the BO algo shall be traversed to
-   // generate the new polygon(s). The trick is to firler-out properly
+   // generate the new polygon(s). The trick is to filter-out properly
    // redundant points (shapes). The "usual" alternative traversing although
    // almost working, isn't quite appropriate here - the problem is to find a
-   // proper starting point (see the comment in the previsous versions of
+   // proper starting point (see the comment in the previous versions of
    // this file).
    // Another approach has been used here that seem to cover all the
    // shrink/bloat cases and on top of this is quicker and much simpler.
    // The algorithm traverses the points produced by BO-modified and creates
    // ALL shapes. It doesn't filters out anything. ALL possible polygons.
    // Next step is checking every new polygons
-   // - undersizing (shrink) Check the polygoms for orientation. If it's normally
-   // oriented (anticlockwise) - fine. If it isn't - the polygon should be
-   // deleted. Having in mind that all input polygons were normaly oriented
+   // - under-sizing (shrink) Check the polygons for orientation. If it's normally
+   // oriented (anti-clockwise) - fine. If it isn't - the polygon should be
+   // deleted. Having in mind that all input polygons were normally oriented
    //  it means that those parts are inside out and must be removed. When the
-   // input polygon is completely inside out it should dissapear alltogether, but
-   // this case should be catched before this algo is invoked.
-   // - oversized (bloat) All resulting polygons will be normally oriented BUT
+   // input polygon is completely inside out it should disappear altogether, but
+   // this case should be cough before this algo is invoked.
+   // - over-sized (bloat) All resulting polygons will be normally oriented BUT
    // some of the polygons could be overlapped entirely by other polygons. The
    // overlapped fellas should be removed.
    if (0 == _crossp) return false;
@@ -653,7 +660,7 @@ bool logicop::CrossFix::generate(pcollection& plycol, real bfactor)
    if (0 > bfactor)
    {  // undersize case
       // remove the invalid polygons (negative orientation)
-      logicop::pcollection::iterator CI = plycol.begin();
+      pcollection::iterator CI = plycol.begin();
       while (CI != plycol.end())
       {
          if (0ll >= polyarea(**CI))
@@ -668,12 +675,12 @@ bool logicop::CrossFix::generate(pcollection& plycol, real bfactor)
    {  // oversize case
       // Oversizing single polygon shall result in a single polygon.
       // Find the polygon with the biggest area. The rest should be removed
-      // As a samity check (not implemented!)- the biggest polygon should
+      // As a sanity check (not implemented!)- the biggest polygon should
       // overlap entirely all the rest
       word the_one = -1;
       word current = 0;
       int8b biggest_area = 0ll;
-      for (logicop::pcollection::const_iterator CI = plycol.begin(); CI != plycol.end(); CI++)
+      for (pcollection::const_iterator CI = plycol.begin(); CI != plycol.end(); CI++)
       {
          int8b cur_area = polyarea(**CI);
          if (biggest_area < cur_area)
@@ -686,7 +693,7 @@ bool logicop::CrossFix::generate(pcollection& plycol, real bfactor)
       assert(the_one != -1);
       // remove all except the_one
       current = 0;
-      logicop::pcollection::iterator CI = plycol.begin();
+      pcollection::iterator CI = plycol.begin();
       while (CI != plycol.end())
       {
          if (current != the_one)
