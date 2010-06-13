@@ -613,7 +613,7 @@ laydata::TdtData* laydata::QuadTree::mergeSelected(TdtData*& shapeRef)
    DBbox overlapRef = shapeRef->overlap();
    // check the entire holder for clipping...
    if (0ll == overlapRef.cliparea(_overlap)) return NULL;
-   // now start traversing the shapes in the current horlder one by one
+   // now start traversing the shapes in the current holder one by one
    for (ObjectIter i = 0; i < _props._numObjects; i++)
    {
       TdtData* wdt = _data[i];

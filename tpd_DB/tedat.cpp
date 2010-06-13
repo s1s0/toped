@@ -966,7 +966,12 @@ laydata::TdtData* laydata::TdtPoly::copy(const CTM& trans)
    ptlist.reserve(_psize);
    for (unsigned i = 0; i < _psize; i++)
       ptlist.push_back( TP(_pdata[2*i], _pdata[2*i+1]) * trans );
-   return DEBUG_NEW TdtPoly(ptlist);
+   // Don't forget to validate the shape! Because of the CTM - it's
+   // quite possible that (for example) the winding has changed which in turn
+   // will result in bad results in logic operations! (Issue 52)
+   laydata::ValidPoly check(ptlist);
+   assert(check.valid());
+   return DEBUG_NEW TdtPoly(check.getValidated());
 }
 
 bool laydata::TdtPoly::point_inside(TP pnt)
@@ -1169,7 +1174,7 @@ laydata::TdtPoly::~TdtPoly()
 //-----------------------------------------------------------------------------
 // class TdtWire
 //-----------------------------------------------------------------------------
-laydata::TdtWire::TdtWire(pointlist& plst, word width) : TdtData(), _width(width)
+laydata::TdtWire::TdtWire(const pointlist& plst, word width) : TdtData(), _width(width)
 {
    _psize = plst.size();
    assert(_psize);
@@ -1499,7 +1504,10 @@ laydata::TdtData* laydata::TdtWire::copy(const CTM& trans) {
    ptlist.reserve(_psize);
    for (unsigned i = 0; i < _psize; i++)
       ptlist.push_back( TP( _pdata[2*i], _pdata[2*i+1] ) * trans);
-   return DEBUG_NEW TdtWire(ptlist,_width);
+   //
+   ValidWire check(ptlist, _width);
+   assert(check.valid());
+   return DEBUG_NEW TdtWire(check.getValidated(),_width);
 }
 
 void laydata::TdtWire::stretch(int bfactor, ShapeList** decure)
