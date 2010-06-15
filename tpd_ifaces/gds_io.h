@@ -317,6 +317,8 @@ namespace GDSin {
          void                 skimNode(GdsInFile*);
          void                 updateContents(int2b, int2b);
          int                  arrGetStep(TP&, TP&, int2b);
+         bool                 polyAcceptable(pointlist&, bool&, int2b, int2b);
+         bool                 pathAcceptable(pointlist&, int4b, int2b, int2b);
          ExtLayers            _contSummary; // contents summary
          bool                 _haveParent;
          std::string          _strctName;

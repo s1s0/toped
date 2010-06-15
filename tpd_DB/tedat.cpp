@@ -1215,7 +1215,10 @@ DBbox* laydata::TdtWire::endPnts(const TP& p1, const TP& p2, bool first) const
    double denom = first ? (p2.x() - p1.x()) : (p1.x() - p2.x());
    double   nom = first ? (p2.y() - p1.y()) : (p1.y() - p2.y());
    double xcorr, ycorr; // the corrections
-   if ((0 == nom) && (0 == denom)) return NULL;
+   if ((0 == nom) && (0 == denom))
+   { // coinciding points
+      return DEBUG_NEW DBbox(/*p1,p2 */DEFAULT_OVL_BOX);
+   }
    double signX = (  nom > 0) ? (first ? 1.0 : -1.0) : (first ? -1.0 : 1.0);
    double signY = (denom > 0) ? (first ? 1.0 : -1.0) : (first ? -1.0 : 1.0);
    if      (0 == denom)   {xcorr =signX * w ; ycorr = 0;} // vertical
@@ -2551,7 +2554,7 @@ laydata::TdtData* laydata::ValidPoly::replacement() {
 
 /**
  * Checks the polygon angles. Filters out intermediate points if 0 or 180 deg
-   anngle is found as well as coinciding points. Function also flags a box if
+   angle is found as well as coinciding points. Function also flags a box if
    found as well as the acute angles
  */
 void laydata::ValidPoly::angles()
@@ -2677,45 +2680,90 @@ void laydata::ValidWire::angles()
 {
    // check for a single point
    if (_plist.size() < 2) _status |= shp_null;
+   pointlist::iterator cp1 = _plist.end(); cp1--;
    pointlist::iterator cp2 = _plist.begin();
-   pointlist::iterator cp1 = cp2; cp2++;
-   real pAngle = 0.0;
    real cAngle = 0.0;
-   bool pAngleValid = false;
-   if (_plist.size()>2)
-   do
+   std::stack<real> angle_stack;
+   bool prev_cleared = false;
+   while ((angle_stack.size() <= _plist.size()) && (2 < _plist.size()))
    {
       bool eraseP1 = false;
       if (*cp1 == *cp2)
+      {
          eraseP1 = true;
-      else
+         if (!prev_cleared)
+            angle_stack.push(0);
+      }
+      else if (!prev_cleared)
       {
          cAngle = xangle(*cp1, *cp2);
-         if (pAngleValid)
+         if (!angle_stack.empty())
          {
-            real ang = fabs(cAngle - pAngle);
+            real ang = fabs(cAngle - angle_stack.top());
             if ((0 == ang) || (180 == ang))
                eraseP1 = true;
             else if (ang < 90 || ang > 270)
                _status |= laydata::shp_acute;
          }
-         pAngleValid = true;
-         pAngle = cAngle;
+         angle_stack.push(cAngle);
       }
       if (eraseP1)
       {
          cp2 = _plist.erase(cp1);
-         cp1 = cp2; cp2++;
+         cp1 = cp2;
+         if (cp2 == _plist.begin()) cp1 = _plist.end();
+         cp1--;
+         angle_stack.pop();
          _status |= laydata::shp_ident;
+         prev_cleared = true;
       }
       else
       {
          cp1 = cp2; cp2++;
+         prev_cleared = false;
       }
+      if (_plist.end() == cp2) cp2 = _plist.begin();
+      if (_plist.end() == cp1) cp1--;
    }
-   while(cp2 != _plist.end());
-   if (((_plist.size() == 2) && (*(_plist.begin()) == *(_plist.end()-1))) ||
-            (_plist.size() < 2))
+//   pointlist::iterator cp2 = _plist.begin();
+//   pointlist::iterator cp1 = cp2; cp2++;
+//   real pAngle = 0.0;
+//   real cAngle = 0.0;
+//   bool pAngleValid = false;
+//   if (_plist.size()>2)
+//   do
+//   {
+//      bool eraseP1 = false;
+//      if (*cp1 == *cp2)
+//         eraseP1 = true;
+//      else
+//      {
+//         cAngle = xangle(*cp1, *cp2);
+//         if (pAngleValid)
+//         {
+//            real ang = fabs(cAngle - pAngle);
+//            if ((0 == ang) || (180 == ang))
+//               eraseP1 = true;
+//            else if (ang < 90 || ang > 270)
+//               _status |= laydata::shp_acute;
+//         }
+//         pAngleValid = true;
+//         pAngle = cAngle;
+//      }
+//      if (eraseP1)
+//      {
+//         cp2 = _plist.erase(cp1);
+//         cp1 = cp2; cp2++;
+//         _status |= laydata::shp_ident;
+//      }
+//      else
+//      {
+//         cp1 = cp2; cp2++;
+//      }
+//   }
+//   while(cp2 != _plist.end());
+
+   if (((_plist.size() == 2) && (*(_plist.begin()) == *(_plist.end()-1))))
       _status |= shp_null;
 }
 
@@ -2749,7 +2797,7 @@ laydata::TdtData* laydata::ValidWire::replacement() {
 std::string laydata::ValidWire::failType() {
 //   if (_status & shp_null)  return "Zero area";
    if      (_status & shp_cross) return "Self-crossing";
-   else if (_status & shp_null ) return "Unsuficcient points";
+   else if (_status & shp_null ) return "NULL area object";
    else return "OK";
 }
 

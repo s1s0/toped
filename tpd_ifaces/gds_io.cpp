@@ -1130,22 +1130,13 @@ void GDSin::GdsStructure::importPoly(GdsInFile* cf, laydata::TdtCell* dst_cell, 
                   plist.reserve(numpoints);
                   for(word i = 0; i < numpoints; i++)
                      plist.push_back(GDSin::get_TP(cr, i));
-
-                  laydata::ValidPoly check(plist);
-
-                  if (!check.valid())
+                  bool boxObject;
+                  if (polyAcceptable(plist, boxObject, layer, singleType))
                   {
-                     std::ostringstream ost;
-                     ost << "Polygon check fails - {" << check.failType()
-                         << " Layer: " << layer
-                         << " Data type: " << singleType
-                         << " }";
-                     tell_log(console::MT_ERROR, ost.str());
+                     laydata::QTreeTmp* dwl = dst_cell->secureUnsortedLayer(tdtlaynum);
+                     if (boxObject)  dwl->putBox(plist[0], plist[2]);
+                     else            dwl->putPoly(plist);
                   }
-                  else plist = check.getValidated();
-                  laydata::QTreeTmp* dwl = dst_cell->secureUnsortedLayer(tdtlaynum);
-                  if (check.box())  dwl->putBox(plist[0], plist[2]);
-                  else              dwl->putPoly(plist);
                }
                break;
             case gds_ENDEL://end of element, exit point
@@ -1213,20 +1204,11 @@ void GDSin::GdsStructure::importPath(GdsInFile* cf, laydata::TdtCell* dst_cell, 
 
                   if (pathConvertResult)
                   {
-                     laydata::ValidWire check(plist, width);
-
-                     if (!check.valid())
+                     if (pathAcceptable(plist, width, layer, singleType))
                      {
-                        std::ostringstream ost;
-                        ost << "Wire check fails - {" << check.failType()
-                              << " Layer: " << layer
-                              << " Data type: " << singleType
-                              << " }";
-                        tell_log(console::MT_ERROR, ost.str());
+                        laydata::QTreeTmp* dwl = dst_cell->secureUnsortedLayer(tdtlaynum);
+                        dwl->putWire(plist, width);
                      }
-                     else plist = check.getValidated();
-                     laydata::QTreeTmp* dwl = dst_cell->secureUnsortedLayer(tdtlaynum);
-                     dwl->putWire(plist, width);
                   }
                   else
                   {
@@ -1512,6 +1494,49 @@ void GDSin::GdsStructure::split(GdsInFile* src_file, GdsOutFile* dst_file)
       dst_file->putRecord(cr);
    } while (dst_file->filePos() < endPosition);
 }
+
+bool GDSin::GdsStructure::polyAcceptable(pointlist& plist, bool& box, int2b layer, int2b singleType)
+{
+   laydata::ValidPoly check(plist);
+   if (!check.valid())
+   {
+      std::ostringstream ost;
+      ost << "Polygon check fails - {" << check.failType()
+          << " Layer: " << layer
+          << " Data type: " << singleType
+          << " }";
+      tell_log(console::MT_ERROR, ost.str());
+   }
+   if (check.recoverable())
+   {
+      plist = check.getValidated();
+      box = check.box();
+      return true;
+   }
+   else return false;
+}
+
+bool GDSin::GdsStructure::pathAcceptable(pointlist& plist, int4b width, int2b layer, int2b singleType)
+{
+   laydata::ValidWire check(plist, width);
+
+   if (!check.valid())
+   {
+      std::ostringstream ost;
+      ost << "Wire check fails - {" << check.failType()
+            << " Layer: " << layer
+            << " Data type: " << singleType
+            << " }";
+      tell_log(console::MT_ERROR, ost.str());
+   }
+   if (check.recoverable())
+   {
+      plist = check.getValidated();
+      return true;
+   }
+   else return false;
+}
+
 
 GDSin::GdsStructure::~GdsStructure()
 {
