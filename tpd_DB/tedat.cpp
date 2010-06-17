@@ -2943,20 +2943,25 @@ void laydata::TdtTmpPoly::rmpoint(TP& lp)
 //
 void laydata::TdtTmpWire::draw(const layprop::DrawProperties& drawprop, ctmqueue& transtack) const
 {
-   CTM trans = transtack.front();
-   pointlist* ptlist;
    dword num_points = _plist.size();
    if (num_points == 0) return;
-   ptlist = DEBUG_NEW pointlist;
-   ptlist->reserve(3*(num_points + 1));
+   CTM trans = transtack.front();
+   pointlist centerLine;
+   pointlist contourLine;
+   bool ignoreCurrentPoint = (0 == trans.tx()) && (0 == trans.ty());
+   if ( ignoreCurrentPoint )
+      centerLine.reserve(num_points);
+   else
+      centerLine.reserve(num_points+1);
    for (unsigned i = 0; i < num_points; i++)
-      ptlist->push_back(_plist[i]);
-   ptlist->push_back(_plist[num_points-1] * trans);
-   num_points++;
-   precalc((*ptlist), num_points);
+      centerLine.push_back(_plist[i]);
+   if (!ignoreCurrentPoint)
+      centerLine.push_back(_plist[num_points-1] * trans);
 
-   drawline(*ptlist);
-   ptlist->clear(); delete ptlist;
+   precalc(centerLine, contourLine);
+
+   drawline(centerLine, contourLine);
+   centerLine.clear();
 }
 
 void  laydata::TdtTmpWire::rmpoint(TP& lp)
@@ -2966,32 +2971,39 @@ void  laydata::TdtTmpWire::rmpoint(TP& lp)
    if (_plist.size() > 0) lp = _plist.back();
 };
 
-void laydata::TdtTmpWire::precalc(pointlist& ptlist, dword num_points) const
+void laydata::TdtTmpWire::precalc(const pointlist& centerLine, pointlist& contourLine) const
 {
-   DBbox* ln1 = endPnts(ptlist[0],ptlist[1], true);
+   std::list<TP> tmpPlist;
+   int num_points = centerLine.size();
+   DBbox* ln1 = endPnts(centerLine[0],centerLine[1], true);
    if (NULL != ln1)
    {
-      ptlist.push_back(ln1->p1());
-      ptlist.push_back(ln1->p2());
+      tmpPlist.push_back(ln1->p1());
+      tmpPlist.push_back(ln1->p2());
    }
    delete ln1;
-   for (unsigned i = 1; i < num_points - 1; i++)
+   for (int i = 1; i < num_points - 1; i++)
    {
-      ln1 = mdlPnts(ptlist[i-1],ptlist[i],ptlist[i+1]);
+      ln1 = mdlPnts(centerLine[i-1],centerLine[i],centerLine[i+1]);
       if (NULL != ln1)
       {
-         ptlist.push_back(ln1->p1());
-         ptlist.push_back(ln1->p2());
+         tmpPlist.push_back(ln1->p1());
+         tmpPlist.push_back(ln1->p2());
       }
       delete ln1;
    }
-   ln1 = endPnts(ptlist[num_points-2],ptlist[num_points-1],false);
+   ln1 = endPnts(centerLine[num_points-2],centerLine[num_points-1],false);
    if (NULL != ln1)
    {
-      ptlist.push_back(ln1->p1());
-      ptlist.push_back(ln1->p2());
+      tmpPlist.push_back(ln1->p1());
+      tmpPlist.push_back(ln1->p2());
    }
    delete ln1;
+   word contourSize = tmpPlist.size();
+   if (0 == contourSize) return;
+   contourLine.reserve(contourSize);
+   for (std::list<TP>::const_iterator CP = tmpPlist.begin(); CP != tmpPlist.end(); CP++)
+      contourLine.push_back(*CP);
 }
 
 DBbox* laydata::TdtTmpWire::endPnts(const TP& p1, const TP& p2, bool first) const
@@ -3028,8 +3040,8 @@ DBbox* laydata::TdtTmpWire::mdlPnts(const TP& p1, const TP& p2, const TP& p3) co
    double   L2 = sqrt(x32*x32 + y32*y32); //the length of segment 2
    double denom = x32 * y21 - x21 * y32;
 // @FIXME THINK about next two lines!!!    They are wrong !!!
-   if ((0 == denom) || (0 == L1)) return endPnts(p2,p3,false);
-   if (0 == L2) return NULL;
+//   if ((0 == denom) || (0 == L1)) return endPnts(p2,p3,false);
+   if ((0 == denom) || (0 == L1) || (0 == L2)) return NULL;
    // the corrections
    double xcorr = w * ((x32 * L1 - x21 * L2) / denom);
    double ycorr = w * ((y21 * L2 - y32 * L1) / denom);
@@ -3037,27 +3049,25 @@ DBbox* laydata::TdtTmpWire::mdlPnts(const TP& p1, const TP& p2, const TP& p3) co
                            (int4b) rint(p2.x() + xcorr), (int4b) rint(p2.y() - ycorr));
 }
 
-void laydata::TdtTmpWire::drawline(const pointlist& ptlist) const
+void laydata::TdtTmpWire::drawline(const pointlist& centerLine, const pointlist& contourLine) const
 {
-   dword num_points = ptlist.size();
-   if (0 == ptlist.size()) return;
+   int num_lpoints = centerLine.size();
+   if (0 == num_lpoints) return;
    // to keep MS VC++ happy - define the counter outside the loops
-   dword i;
-   dword num_cpoints = (num_points == _plist.size()) ? num_points : num_points / 3;
-   // draw the central line in all cases
-   if (0 == num_cpoints) return;
+   int i;
    glBegin(GL_LINE_STRIP);
-   for (i = 0; i < num_cpoints; i++)
-      glVertex2i(ptlist[i].x(), ptlist[i].y());
+   for (i = 0; i < num_lpoints; i++)
+      glVertex2i(centerLine[i].x(), centerLine[i].y());
    glEnd();
    // now check whether to draw only the center line
-   if (num_cpoints == num_points) return;
+   int num_cpoints = contourLine.size();
+   if (0 == num_cpoints) return;
    // draw the wire contour
    glBegin(GL_LINE_LOOP);
-   for (i = num_cpoints; i < 3 * num_cpoints; i = i + 2)
-      glVertex2i(ptlist[i].x(), ptlist[i].y());
-   for (i = 3 * num_cpoints - 1; i > num_cpoints; i = i - 2)
-      glVertex2i(ptlist[i].x(), ptlist[i].y());
+   for (i = 0; i < num_cpoints; i = i + 2)
+      glVertex2i(contourLine[i].x(), contourLine[i].y());
+   for (i = num_cpoints - 1; i > 0; i = i - 2)
+      glVertex2i(contourLine[i].x(), contourLine[i].y());
    glEnd();
 }
 
