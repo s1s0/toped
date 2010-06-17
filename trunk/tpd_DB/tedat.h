@@ -460,10 +460,10 @@ namespace laydata {
          virtual void      addpoint(TP p) {_plist.push_back(p);}
          virtual void      rmpoint(TP&);
       private:
-         void              precalc(pointlist&, dword) const;
+         void              precalc(const pointlist&, pointlist&) const;
          DBbox*            endPnts(const TP&, const TP&, bool first) const;
          DBbox*            mdlPnts(const TP&, const TP&, const TP&) const;
-         void              drawline(const pointlist& ptlist) const;
+         void              drawline(const pointlist&, const pointlist&) const;
          pointlist         _plist;
          word              _width;
    };

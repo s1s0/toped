@@ -506,7 +506,7 @@ void tui::LayoutCanvas::CursorControl(bool shift, bool ctl) {
    int sdY = ScrMARK.y() - releasepoint.y();
    int dX = abs(sdX);
    int dY = abs(sdY);
-   // The sign actually is the sign of the tangens. To avoud troubles with the division by zero,
+   // The sign actually is the sign of the tangents. To avoid troubles with the division by zero,
    // it is easier and faster to obtain the sign like this
    int sign = ((sdX * sdY) >= 0) ? 1 : -1;
    bool _45deg = (PROPC->markerAngle() == 45);
