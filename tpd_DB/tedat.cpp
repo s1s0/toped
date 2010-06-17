@@ -2979,7 +2979,7 @@ void laydata::TdtTmpWire::precalc(const pointlist& centerLine, pointlist& contou
    if (NULL != ln1)
    {
       tmpPlist.push_back(ln1->p1());
-      tmpPlist.push_back(ln1->p2());
+      tmpPlist.push_front(ln1->p2());
    }
    delete ln1;
    for (int i = 1; i < num_points - 1; i++)
@@ -2988,7 +2988,7 @@ void laydata::TdtTmpWire::precalc(const pointlist& centerLine, pointlist& contou
       if (NULL != ln1)
       {
          tmpPlist.push_back(ln1->p1());
-         tmpPlist.push_back(ln1->p2());
+         tmpPlist.push_front(ln1->p2());
       }
       delete ln1;
    }
@@ -2996,7 +2996,7 @@ void laydata::TdtTmpWire::precalc(const pointlist& centerLine, pointlist& contou
    if (NULL != ln1)
    {
       tmpPlist.push_back(ln1->p1());
-      tmpPlist.push_back(ln1->p2());
+      tmpPlist.push_front(ln1->p2());
    }
    delete ln1;
    word contourSize = tmpPlist.size();
@@ -3039,8 +3039,6 @@ DBbox* laydata::TdtTmpWire::mdlPnts(const TP& p1, const TP& p2, const TP& p3) co
    double   L1 = sqrt(x21*x21 + y21*y21); //the length of segment 1
    double   L2 = sqrt(x32*x32 + y32*y32); //the length of segment 2
    double denom = x32 * y21 - x21 * y32;
-// @FIXME THINK about next two lines!!!    They are wrong !!!
-//   if ((0 == denom) || (0 == L1)) return endPnts(p2,p3,false);
    if ((0 == denom) || (0 == L1) || (0 == L2)) return NULL;
    // the corrections
    double xcorr = w * ((x32 * L1 - x21 * L2) / denom);
@@ -3064,9 +3062,7 @@ void laydata::TdtTmpWire::drawline(const pointlist& centerLine, const pointlist&
    if (0 == num_cpoints) return;
    // draw the wire contour
    glBegin(GL_LINE_LOOP);
-   for (i = 0; i < num_cpoints; i = i + 2)
-      glVertex2i(contourLine[i].x(), contourLine[i].y());
-   for (i = num_cpoints - 1; i > 0; i = i - 2)
+   for (i = 0; i < num_cpoints; i ++)
       glVertex2i(contourLine[i].x(), contourLine[i].y());
    glEnd();
 }
