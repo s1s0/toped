@@ -2984,13 +2984,36 @@ void laydata::TdtTmpWire::precalc(const pointlist& centerLine, pointlist& contou
    delete ln1;
    for (int i = 1; i < num_points - 1; i++)
    {
-      ln1 = mdlPnts(centerLine[i-1],centerLine[i],centerLine[i+1]);
-      if (NULL != ln1)
-      {
-         tmpPlist.push_back(ln1->p1());
-         tmpPlist.push_front(ln1->p2());
+      if ( ( 0 == polycross::orientation(&(centerLine[i-1]), &(centerLine[i]), &(centerLine[i+1]))   ) &&
+           ((0 <  polycross::getLambda  (&(centerLine[i-1]), &(centerLine[i]), &(centerLine[i+1]))) ||
+            (0 <= polycross::getLambda  (&(centerLine[i+1]), &(centerLine[i]), &(centerLine[i-1])))  )  )
+      { // we have collinear wire
+         ln1 = endPnts(centerLine[i-1],centerLine[i],false);
+         if (NULL != ln1)
+         {
+            tmpPlist.push_back(ln1->p1());
+            tmpPlist.push_front(ln1->p2());
+         }
+         delete ln1;
+
+         ln1 = endPnts(centerLine[i],centerLine[i+1],true);
+         if (NULL != ln1)
+         {
+            tmpPlist.push_back(ln1->p1());
+            tmpPlist.push_front(ln1->p2());
+         }
+         delete ln1;
       }
-      delete ln1;
+      else
+      {
+         ln1 = mdlPnts(centerLine[i-1],centerLine[i],centerLine[i+1]);
+         if (NULL != ln1)
+         {
+            tmpPlist.push_back(ln1->p1());
+            tmpPlist.push_front(ln1->p2());
+         }
+         delete ln1;
+      }
    }
    ln1 = endPnts(centerLine[num_points-2],centerLine[num_points-1],false);
    if (NULL != ln1)
