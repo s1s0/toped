@@ -460,9 +460,11 @@ namespace laydata {
          virtual void      addpoint(TP p) {_plist.push_back(p);}
          virtual void      rmpoint(TP&);
       private:
+         typedef std::list<TP>     TmpPlist;
          void              precalc(const pointlist&, pointlist&) const;
-         DBbox*            endPnts(const TP&, const TP&, bool first) const;
-         DBbox*            mdlPnts(const TP&, const TP&, const TP&) const;
+         void              endPnts(const TP&, const TP&, bool first, TmpPlist&) const;
+         void              mdlPnts(const TP&, const TP&, const TP& , TmpPlist&) const;
+         TP                mdlCPnt(const TP&, const TP&) const;
          void              drawline(const pointlist&, const pointlist&) const;
          pointlist         _plist;
          word              _width;

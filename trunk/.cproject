@@ -21,7 +21,7 @@
 <folderInfo id="org.eclipse.linuxtools.cdt.autotools.configuration.build.1619536494." name="/" resourcePath="">
 <toolChain errorParsers="" id="org.eclipse.linuxtools.cdt.autotools.toolChain.1955435601" name="GNU Autotools Toolchain" superClass="org.eclipse.linuxtools.cdt.autotools.toolChain">
 <targetPlatform binaryParser="org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.GNU_ELF" id="org.eclipse.linuxtools.cdt.autotools.toolchain.targetPlatform.559841001" isAbstract="false" name="GNU Autotools Target Platform" superClass="org.eclipse.linuxtools.cdt.autotools.toolchain.targetPlatform"/>
-<builder buildPath="${workspace_loc:/toped/build}" enableAutoBuild="true" enableCleanBuild="true" errorParsers="" id="org.eclipse.linuxtools.cdt.autotools.toolchain.builder.431156089" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Autotools Makefile Generator" superClass="org.eclipse.linuxtools.cdt.autotools.toolchain.builder"/>
+<builder arguments="-k -j2" buildPath="${workspace_loc:/toped/build}" command="make" enableAutoBuild="true" enableCleanBuild="true" errorParsers="" id="org.eclipse.linuxtools.cdt.autotools.toolchain.builder.431156089" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Autotools Makefile Generator" superClass="org.eclipse.linuxtools.cdt.autotools.toolchain.builder"/>
 <tool command="configure" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG}${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" errorParsers="" id="org.eclipse.linuxtools.cdt.autotools.gnu.toolchain.tool.configure.521857338" name="configure" superClass="org.eclipse.linuxtools.cdt.autotools.gnu.toolchain.tool.configure">
 <option id="org.eclipse.linuxtools.cdt.autotools.option.configure.user.974633451" name="User-specified configuration options" superClass="org.eclipse.linuxtools.cdt.autotools.option.configure.user" value="CXXFLAGS=-g3 -O0 -DDB_MEMORY_TRACE" valueType="string"/>
 </tool>
@@ -783,6 +783,8 @@
 </target>
 </buildTargets>
 </storageModule>
+<storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
+<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cconfiguration>
 <cconfiguration id="org.eclipse.linuxtools.cdt.autotools.configuration.build.370519630">
 <storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="org.eclipse.linuxtools.cdt.autotools.configuration.build.370519630" moduleId="org.eclipse.cdt.core.settings" name="Build (GNU)">
@@ -1582,6 +1584,8 @@
 </target>
 </buildTargets>
 </storageModule>
+<storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
+<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cconfiguration>
 </storageModule>
 <storageModule moduleId="cdtBuildSystem" version="4.0.0">
