@@ -2973,55 +2973,25 @@ void  laydata::TdtTmpWire::rmpoint(TP& lp)
 
 void laydata::TdtTmpWire::precalc(const pointlist& centerLine, pointlist& contourLine) const
 {
-   std::list<TP> tmpPlist;
+   TmpPlist tmpPlist;
    int num_points = centerLine.size();
-   DBbox* ln1 = endPnts(centerLine[0],centerLine[1], true);
-   if (NULL != ln1)
-   {
-      tmpPlist.push_back(ln1->p1());
-      tmpPlist.push_front(ln1->p2());
-   }
-   delete ln1;
+   endPnts(centerLine[0],centerLine[1], true, tmpPlist);
    for (int i = 1; i < num_points - 1; i++)
    {
       if ( ( 0 == polycross::orientation(&(centerLine[i-1]), &(centerLine[i]), &(centerLine[i+1]))   ) &&
            ((0 <  polycross::getLambda  (&(centerLine[i-1]), &(centerLine[i]), &(centerLine[i+1]))) ||
             (0 <= polycross::getLambda  (&(centerLine[i+1]), &(centerLine[i]), &(centerLine[i-1])))  )  )
       { // we have collinear wire
-         ln1 = endPnts(centerLine[i-1],centerLine[i],false);
-         if (NULL != ln1)
-         {
-            tmpPlist.push_back(ln1->p1());
-            tmpPlist.push_front(ln1->p2());
-         }
-         delete ln1;
-
-         ln1 = endPnts(centerLine[i],centerLine[i+1],true);
-         if (NULL != ln1)
-         {
-            tmpPlist.push_back(ln1->p1());
-            tmpPlist.push_front(ln1->p2());
-         }
-         delete ln1;
+         TP extPnt = mdlCPnt(centerLine[i-1],centerLine[i]);
+         endPnts(centerLine[i-1],extPnt,false, tmpPlist);
+         endPnts(extPnt,centerLine[i+1],true , tmpPlist);
       }
       else
       {
-         ln1 = mdlPnts(centerLine[i-1],centerLine[i],centerLine[i+1]);
-         if (NULL != ln1)
-         {
-            tmpPlist.push_back(ln1->p1());
-            tmpPlist.push_front(ln1->p2());
-         }
-         delete ln1;
+         mdlPnts(centerLine[i-1],centerLine[i],centerLine[i+1], tmpPlist);
       }
    }
-   ln1 = endPnts(centerLine[num_points-2],centerLine[num_points-1],false);
-   if (NULL != ln1)
-   {
-      tmpPlist.push_back(ln1->p1());
-      tmpPlist.push_front(ln1->p2());
-   }
-   delete ln1;
+   endPnts(centerLine[num_points-2],centerLine[num_points-1],false, tmpPlist);
    word contourSize = tmpPlist.size();
    if (0 == contourSize) return;
    contourLine.reserve(contourSize);
@@ -3029,13 +2999,13 @@ void laydata::TdtTmpWire::precalc(const pointlist& centerLine, pointlist& contou
       contourLine.push_back(*CP);
 }
 
-DBbox* laydata::TdtTmpWire::endPnts(const TP& p1, const TP& p2, bool first) const
+void laydata::TdtTmpWire::endPnts(const TP& p1, const TP& p2, bool first, TmpPlist& tmpPlist) const
 {
    double     w = _width/2;
    double denom = first ? (p2.x() - p1.x()) : (p1.x() - p2.x());
    double   nom = first ? (p2.y() - p1.y()) : (p1.y() - p2.y());
    double xcorr, ycorr; // the corrections
-   if ((0 == nom) && (0 == denom)) return NULL;
+   if ((0 == nom) && (0 == denom)) return;
    double signX = (  nom > 0) ? (first ? 1.0 : -1.0) : (first ? -1.0 : 1.0);
    double signY = (denom > 0) ? (first ? 1.0 : -1.0) : (first ? -1.0 : 1.0);
    if      (0 == denom)   {xcorr =signX * w ; ycorr = 0;} // vertical
@@ -3048,11 +3018,23 @@ DBbox* laydata::TdtTmpWire::endPnts(const TP& p1, const TP& p2, bool first) cons
       ycorr = rint(w * ( 1 / sqsl));
    }
    TP pt = first ? p1 : p2;
-   return DEBUG_NEW DBbox((int4b) rint(pt.x() - xcorr), (int4b) rint(pt.y() + ycorr),
-                           (int4b) rint(pt.x() + xcorr), (int4b) rint(pt.y() - ycorr));
+   tmpPlist.push_back (TP((int4b) rint(pt.x() - xcorr), (int4b) rint(pt.y() + ycorr)));
+   tmpPlist.push_front(TP((int4b) rint(pt.x() + xcorr), (int4b) rint(pt.y() - ycorr)));
 }
 
-DBbox* laydata::TdtTmpWire::mdlPnts(const TP& p1, const TP& p2, const TP& p3) const
+TP laydata::TdtTmpWire::mdlCPnt(const TP& p1, const TP& p2) const
+{
+   double    w = _width / 2;
+   double   x21 = p2.x() - p1.x();
+   double   y21 = p2.y() - p1.y();
+   double    L1 = sqrt(x21*x21 + y21*y21); //the length of segment 1
+   assert(L1 != 0.0);
+   double xcorr = (w * x21)  / L1;
+   double ycorr = (w * y21)  / L1;
+   return TP((int4b) rint(p2.x() + xcorr), (int4b) rint(p2.y() + ycorr));
+}
+
+void laydata::TdtTmpWire::mdlPnts(const TP& p1, const TP& p2, const TP& p3, TmpPlist& tmpPlist) const
 {
    double    w = _width/2;
    double  x32 = p3.x() - p2.x();
@@ -3062,12 +3044,12 @@ DBbox* laydata::TdtTmpWire::mdlPnts(const TP& p1, const TP& p2, const TP& p3) co
    double   L1 = sqrt(x21*x21 + y21*y21); //the length of segment 1
    double   L2 = sqrt(x32*x32 + y32*y32); //the length of segment 2
    double denom = x32 * y21 - x21 * y32;
-   if ((0 == denom) || (0 == L1) || (0 == L2)) return NULL;
+   if ((0 == denom) || (0 == L1) || (0 == L2)) return;
    // the corrections
    double xcorr = w * ((x32 * L1 - x21 * L2) / denom);
    double ycorr = w * ((y21 * L2 - y32 * L1) / denom);
-   return DEBUG_NEW DBbox((int4b) rint(p2.x() - xcorr), (int4b) rint(p2.y() + ycorr),
-                           (int4b) rint(p2.x() + xcorr), (int4b) rint(p2.y() - ycorr));
+   tmpPlist.push_back (TP((int4b) rint(p2.x() - xcorr), (int4b) rint(p2.y() + ycorr)));
+   tmpPlist.push_front(TP((int4b) rint(p2.x() + xcorr), (int4b) rint(p2.y() - ycorr)));
 }
 
 void laydata::TdtTmpWire::drawline(const pointlist& centerLine, const pointlist& contourLine) const
