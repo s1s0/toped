@@ -440,3 +440,141 @@ bool laydata::pathConvert(pointlist& plist, word numpoints, int4b begext, int4b 
 
    return true;
 }
+
+
+//=============================================================================
+
+laydata::WireContour::WireContour(int4b* ldata, unsigned lsize, word width) :
+   _ldata(ldata), _lsize(lsize), _width(width)
+{
+   endPnts(0,1, true);
+   for (unsigned i = 1; i < _lsize - 1; i++)
+   {
+      if (chkCollinear(i-1, i, i+1))
+         colPnts(i-1, i, i+1);
+      else
+         mdlPnts(i-1, i, i+1);
+   }
+   endPnts(_lsize -2, _lsize -1, false);
+}
+
+void laydata::WireContour::getArrayData(int4b* contour)
+{
+   word index = 0;
+   for (PointList::const_iterator CP = _cdata.begin(); CP != _cdata.end(); CP++)
+   {
+      contour[index++] = CP->x();
+      contour[index++] = CP->y();
+   }
+}
+
+void laydata::WireContour::mdlPnts(word i1, word i2, word i3)
+{
+   double    w = _width/2;
+   i1 *= 2; i2 *= 2; i3 *= 2;
+   double  x32 = _ldata[i3  ] - _ldata[i2  ];
+   double  x21 = _ldata[i2  ] - _ldata[i1  ];
+   double  y32 = _ldata[i3+1] - _ldata[i2+1];
+   double  y21 = _ldata[i2+1] - _ldata[i1+1];
+   double   L1 = sqrt(x21*x21 + y21*y21); //the length of segment 1
+   double   L2 = sqrt(x32*x32 + y32*y32); //the length of segment 2
+   double denom = x32 * y21 - x21 * y32;
+   assert (denom);
+   assert (L1);
+   assert (L2);
+   // the corrections
+   double xcorr = w * ((x32 * L1 - x21 * L2) / denom);
+   double ycorr = w * ((y21 * L2 - y32 * L1) / denom);
+   _cdata.push_front(TP((int4b) rint(_ldata[i2  ] - xcorr),(int4b) rint(_ldata[i2+1] + ycorr)));
+   _cdata.push_back (TP((int4b) rint(_ldata[i2  ] + xcorr),(int4b) rint(_ldata[i2+1] - ycorr)));
+}
+
+void laydata::WireContour::endPnts(word i1, word i2, bool first)
+{
+   double     w = _width/2;
+   i1 *= 2; i2 *= 2;
+   double denom = first ? (_ldata[i2  ] - _ldata[i1  ]) : (_ldata[i1  ] - _ldata[i2  ]);
+   double   nom = first ? (_ldata[i2+1] - _ldata[i1+1]) : (_ldata[i1+1] - _ldata[i2+1]);
+   double xcorr, ycorr; // the corrections
+   assert((0 != nom) || (0 != denom));
+   double signX = (  nom > 0) ? (first ? 1.0 : -1.0) : (first ? -1.0 : 1.0);
+   double signY = (denom > 0) ? (first ? 1.0 : -1.0) : (first ? -1.0 : 1.0);
+   if      (0 == denom) // vertical
+   {
+      xcorr =signX * w ; ycorr = 0        ;
+   }
+   else if (0 == nom  )// horizontal |----|
+   {
+      xcorr = 0        ; ycorr = signY * w;
+   }
+   else
+   {
+      double sl   = nom / denom;
+      double sqsl = signY*sqrt( sl*sl + 1);
+      xcorr = rint(w * (sl / sqsl));
+      ycorr = rint(w * ( 1 / sqsl));
+   }
+   word it = first ? i1 : i2;
+   _cdata.push_front(TP((int4b) rint(_ldata[it  ] - xcorr),(int4b) rint(_ldata[it+1] + ycorr)));
+   _cdata.push_back (TP((int4b) rint(_ldata[it  ] + xcorr),(int4b) rint(_ldata[it+1] - ycorr)));
+}
+
+bool laydata::WireContour::chkCollinear(word i1, word i2, word i3)
+{
+   return ( ( 0 == orientation(i1, i2, i3)   ) &&
+            ((0 <  getLambda  (i1, i2, i3)) ||
+             (0 <= getLambda  (i3, i2, i1))  )  );
+}
+
+void laydata::WireContour::colPnts(word i1, word i2, word i3)
+{
+   TP extPnt = mdlCPnt(i1, i2);
+   // Now - this is cheating! We're altering temporary one the central line
+   // points and the reason is - to use the existing methods which deal with
+   // point indexes
+   TP swap(_ldata[2*i2], _ldata[2*i2 + 1]);
+   const_cast<int4b*>(_ldata)[2*i2  ] = extPnt.x();
+   const_cast<int4b*>(_ldata)[2*i2+1] = extPnt.y();
+   endPnts(i1, i2,false);
+   endPnts(i2 ,i3,true );
+   const_cast<int4b*>(_ldata)[2*i2  ] = swap.x();
+   const_cast<int4b*>(_ldata)[2*i2+1] = swap.y();
+}
+
+TP laydata::WireContour::mdlCPnt(word i1, word i2)
+{
+   i1 *= 2; i2 *= 2;
+   double    w = _width / 2;
+   double   x21 = _ldata[i2]   - _ldata[i1]  ;
+   double   y21 = _ldata[i2+1] - _ldata[i1+1];
+   double    L1 = sqrt(x21*x21 + y21*y21); //the length of the segment
+   assert(L1 != 0.0);
+   double xcorr = (w * x21)  / L1;
+   double ycorr = (w * y21)  / L1;
+   return TP((int4b) rint(_ldata[i2] + xcorr), (int4b) rint(_ldata[i2+1] + ycorr));
+}
+
+int laydata::WireContour::orientation(word i1, word i2, word i3)
+{
+   i1 *= 2; i2 *= 2; i3 *=2;
+   // twice the "oriented" area of the enclosed triangle
+   real area = (real(_ldata[i1]) - real(_ldata[i3])) * (real(_ldata[i2+1]) - real(_ldata[i3+1]))
+             - (real(_ldata[i2]) - real(_ldata[i3])) * (real(_ldata[i1+1]) - real(_ldata[i3+1]));
+   if (0 == area) return 0;
+   else
+      return (area > 0) ? 1 : -1;
+}
+
+float laydata::WireContour::getLambda(word i1, word i2, word ii)
+{
+   i1 *= 2; i2 *= 2; ii *=2;
+   float denomX = _ldata[i2  ] - _ldata[ii  ];
+   float denomY = _ldata[i2+1] - _ldata[ii+1];
+   float lambda;
+   if      (0 != denomX) lambda = real(_ldata[ii  ] - _ldata[i1  ]) / denomX;
+   else if (0 != denomY) lambda = real(_ldata[ii+1] - _ldata[i1+1]) / denomY;
+   // point coincides with the lp vertex of the segment
+   else lambda = 0;
+   return lambda;
+}
+

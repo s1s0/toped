@@ -30,7 +30,7 @@
 <option id="gnu.c.compiler.option.optimization.level.41573067" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" value="gnu.c.optimization.level.none" valueType="enumerated"/>
 <option id="gnu.c.compiler.option.debugging.level.2131269825" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level"/>
 <option id="gnu.c.compiler.option.preprocessor.def.symbols.1026236152" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
-<listOptionValue builtIn="false" value="DB_MEMORY_TRACE"/>
+<listOptionValue builtIn="false" value="DB_MEMORY_TRACE=1"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.2120201180" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 </tool>
@@ -38,7 +38,7 @@
 <option id="gnu.cpp.compiler.option.optimization.level.1998678483" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level"/>
 <option id="gnu.cpp.compiler.option.debugging.level.453581047" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level"/>
 <option id="gnu.cpp.compiler.option.preprocessor.def.1304057854" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
-<listOptionValue builtIn="false" value="DB_MEMORY_TRACE"/>
+<listOptionValue builtIn="false" value="DB_MEMORY_TRACE=1"/>
 </option>
 <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.736174368" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 </tool>

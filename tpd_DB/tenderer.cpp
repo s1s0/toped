@@ -203,7 +203,12 @@ tenderer::TenderWire::TenderWire(int4b* pdata, unsigned psize, const word width,
    : TenderNcvx(NULL, 0), _ldata(pdata), _lsize(psize), _celno(clo), _tdata(NULL)
 {
    if (!_celno)
-      precalc(width);
+   {
+      laydata::WireContour wcontour(_ldata, _lsize, width);
+      _csize = wcontour.size();
+      _cdata = DEBUG_NEW int[ 2* _csize];
+      wcontour.getArrayData(_cdata);
+   }
 }
 
 unsigned tenderer::TenderWire::lDataCopy(int* array, unsigned& pindex)
@@ -212,94 +217,6 @@ unsigned tenderer::TenderWire::lDataCopy(int* array, unsigned& pindex)
    memcpy(&(array[pindex]), _ldata, 2 * sizeof(int4b) * _lsize);
    pindex += 2 * _lsize;
    return _lsize;
-}
-
-void tenderer::TenderWire::precalc(word width)
-{
-   _csize = 2 * _lsize;
-   _cdata = DEBUG_NEW int[2 * _csize];
-   DBbox* ln1 = endPnts(width, 0,1, true);
-   word index = 0;
-   word rindex = 2 * _csize - 1;
-   assert (ln1);
-   _cdata[ index++] = ln1->p1().x();
-   _cdata[ index++] = ln1->p1().y();
-   _cdata[rindex--] = ln1->p2().y();
-   _cdata[rindex--] = ln1->p2().x();
-   delete ln1;
-   for (unsigned i = 1; i < _lsize - 1; i++)
-   {
-      ln1 = mdlPnts(width, i-1,i,i+1);
-      assert(ln1);
-      _cdata[ index++] = ln1->p1().x();
-      _cdata[ index++] = ln1->p1().y();
-      _cdata[rindex--] = ln1->p2().y();
-      _cdata[rindex--] = ln1->p2().x();
-      delete ln1;
-   }
-   ln1 = endPnts(width, _lsize -2, _lsize - 1,false);
-   assert(ln1);
-   _cdata[ index++] = ln1->p1().x();
-   _cdata[ index++] = ln1->p1().y();
-   _cdata[rindex--] = ln1->p2().y();
-   _cdata[rindex--] = ln1->p2().x();
-   delete ln1;
-   assert(index == _csize);
-   assert((rindex + 1u) == _csize);
-}
-
-DBbox* tenderer::TenderWire::endPnts(const word width, word i1, word i2, bool first)
-{
-   double     w = width/2;
-   i1 *= 2; i2 *= 2;
-   double denom = first ? (_ldata[i2  ] - _ldata[i1  ]) : (_ldata[i1  ] - _ldata[i2  ]);
-   double   nom = first ? (_ldata[i2+1] - _ldata[i1+1]) : (_ldata[i1+1] - _ldata[i2+1]);
-   double xcorr, ycorr; // the corrections
-   assert((0 != nom) || (0 != denom));
-   double signX = (  nom > 0) ? (first ? 1.0 : -1.0) : (first ? -1.0 : 1.0);
-   double signY = (denom > 0) ? (first ? 1.0 : -1.0) : (first ? -1.0 : 1.0);
-   if      (0 == denom) // vertical
-   {
-      xcorr =signX * w ; ycorr = 0        ;
-   }
-   else if (0 == nom  )// horizontal |----|
-   {
-      xcorr = 0        ; ycorr = signY * w;
-   }
-   else
-   {
-      double sl   = nom / denom;
-      double sqsl = signY*sqrt( sl*sl + 1);
-      xcorr = rint(w * (sl / sqsl));
-      ycorr = rint(w * ( 1 / sqsl));
-   }
-   word it = first ? i1 : i2;
-   return DEBUG_NEW DBbox((int4b) rint(_ldata[it  ] - xcorr),
-                          (int4b) rint(_ldata[it+1] + ycorr),
-                          (int4b) rint(_ldata[it  ] + xcorr),
-                          (int4b) rint(_ldata[it+1] - ycorr) );
-}
-
-DBbox* tenderer::TenderWire::mdlPnts(const word width, word i1, word i2, word i3)
-{
-   double    w = width/2;
-   i1 *= 2; i2 *= 2; i3 *= 2;
-   double  x32 = _ldata[i3  ] - _ldata[i2  ];
-   double  x21 = _ldata[i2  ] - _ldata[i1  ];
-   double  y32 = _ldata[i3+1] - _ldata[i2+1];
-   double  y21 = _ldata[i2+1] - _ldata[i1+1];
-   double   L1 = sqrt(x21*x21 + y21*y21); //the length of segment 1
-   double   L2 = sqrt(x32*x32 + y32*y32); //the length of segment 2
-   double denom = x32 * y21 - x21 * y32;
-   assert (denom);
-   assert (L2);
-   // the corrections
-   double xcorr = w * ((x32 * L1 - x21 * L2) / denom);
-   double ycorr = w * ((y21 * L2 - y32 * L1) / denom);
-   return DEBUG_NEW DBbox((int4b) rint(_ldata[i2  ] - xcorr),
-                          (int4b) rint(_ldata[i2+1] + ycorr),
-                          (int4b) rint(_ldata[i2  ] + xcorr),
-                          (int4b) rint(_ldata[i2+1] - ycorr) );
 }
 
 /** For wire tessellation we can use the common polygon tessellation procedure.
@@ -530,13 +447,13 @@ unsigned tenderer::TenderSWire::sDataCopy(unsigned* array, unsigned& pindex)
          // And the edge points!
          if (_slist->check(0)       ) // if first point is selected
          {
-            array[pindex++] = _offset;
-            array[pindex++] = _offset + _csize -1;
+            array[pindex++] = _offset + (_csize/2) -1;
+            array[pindex++] = _offset + (_csize/2);
          }
          if (_slist->check(_lsize-1))// if last point is selected
          {
-            array[pindex++] = _offset + (_csize/2) -1;
-            array[pindex++] = _offset + (_csize/2);
+            array[pindex++] = _offset;
+            array[pindex++] = _offset + _csize -1;
          }
       }
    }
