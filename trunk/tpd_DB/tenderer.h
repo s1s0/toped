@@ -292,9 +292,6 @@ namespace tenderer {
          bool              center_line_only()      {return _celno;}
          virtual const TeselChain* tdata()               {return _tdata;}
       protected:
-         void              precalc(const word);
-         DBbox*            endPnts(const word, word, word, bool);
-         DBbox*            mdlPnts(const word, word, word, const word);
          int*              _ldata; //! the vertexes of the wires central line
          unsigned          _lsize; //! the number of vertexes in the central line
          bool              _celno; //! indicates whether the center line only shall be drawn

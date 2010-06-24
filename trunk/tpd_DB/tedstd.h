@@ -96,6 +96,7 @@ namespace laydata {
       shp_clock      = 0x02, // points reordered to get anti clockwise order
       shp_box        = 0x04, // shape is a box
       shp_acute      = 0x08, // acute angle
+      shp_collinear  = 0x10, // collinear wire
       // critical
       shp_cross      = 0x40, // self crossing sequence
       shp_null       = 0x80, // 0 area - points are not forming a polygon
@@ -215,6 +216,26 @@ namespace laydata {
 
    bool pathConvert(pointlist&, word, int4b, int4b );
 
+   class WireContour {
+      public:
+                           WireContour(int4b*, unsigned, const word);
+         unsigned          size()         {return _cdata.size();}
+         void              getArrayData(int4b*);
+      private:
+         typedef std::list<TP> PointList;
+         void              endPnts(word, word, bool);
+         void              mdlPnts(word, word, word);
+         bool              chkCollinear(word,word,word);
+         void              colPnts(word,word,word);
+         TP                mdlCPnt(word, word);
+         int               orientation(word, word, word);
+         float             getLambda(word i1, word i2, word ii);
+         const int4b*      _ldata;
+         const unsigned    _lsize;
+         const word        _width;
+         PointList         _cdata;
+   };
+
 }
 
 class DbExportFile {
@@ -247,6 +268,5 @@ class DbExportFile {
       real                    _UU;
 };
 
-class TessellPoly;
 class PSFile;
 #endif
