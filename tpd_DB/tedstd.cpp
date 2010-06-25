@@ -444,20 +444,51 @@ bool laydata::pathConvert(pointlist& plist, word numpoints, int4b begext, int4b 
 
 //=============================================================================
 
-laydata::WireContour::WireContour(int4b* ldata, unsigned lsize, word width) :
+laydata::WireContour::WireContour(const int4b* ldata, unsigned lsize, word width) :
    _ldata(ldata), _lsize(lsize), _width(width)
 {
    endPnts(0,1, true);
    for (unsigned i = 1; i < _lsize - 1; i++)
    {
-      if (chkCollinear(i-1, i, i+1))
-         colPnts(i-1, i, i+1);
-      else
-         mdlPnts(i-1, i, i+1);
+      switch (chkCollinear(i-1, i, i+1))
+      {
+         case 0: // points not in one line
+            mdlPnts(i-1,  i, i+1 ); break;
+         case 1: //i-1 and i coincide
+            endPnts( i, i+1, true); break;
+         case 2: // i and i+1 coincide
+            endPnts(i-1,  i,false); break;
+         case 3: // collinear points
+            colPnts(i-1,  i, i+1 ); break;
+         case 4: // 3 points in one line with i2 in the middle
+            mdlPnts(i-1,  i, i+1 ); break;
+         case 5: // 3 coinciding points
+                                    break;
+         default: assert(false);
+      }
    }
    endPnts(_lsize -2, _lsize -1, false);
 }
 
+/*!
+ * Dumps the generated wire contour in the @plist vector. For optimal performance the
+ * vector object shall be properly allocated using something line reserve(csize())
+ * before calling this method. The method will cope with @plist vectors which already
+ * contain some data. It will just add the contour at the end of the @plist.
+ */
+void laydata::WireContour::getVectorData(pointlist& plist)
+{
+   for (PointList::const_iterator CP = _cdata.begin(); CP != _cdata.end(); CP++)
+   {
+      plist.push_back(*CP);
+   }
+}
+
+/*!
+ * Dumps the generated wire contour in the @contour array. The array must be allocated
+ * before calling this function. The size of the array can be taken from the function
+ * csize()
+ */
 void laydata::WireContour::getArrayData(int4b* contour)
 {
    word index = 0;
@@ -479,9 +510,7 @@ void laydata::WireContour::mdlPnts(word i1, word i2, word i3)
    double   L1 = sqrt(x21*x21 + y21*y21); //the length of segment 1
    double   L2 = sqrt(x32*x32 + y32*y32); //the length of segment 2
    double denom = x32 * y21 - x21 * y32;
-   assert (denom);
-   assert (L1);
-   assert (L2);
+   if ((0 == denom) || (0 == L1) || (0 == L2)) return;
    // the corrections
    double xcorr = w * ((x32 * L1 - x21 * L2) / denom);
    double ycorr = w * ((y21 * L2 - y32 * L1) / denom);
@@ -496,7 +525,7 @@ void laydata::WireContour::endPnts(word i1, word i2, bool first)
    double denom = first ? (_ldata[i2  ] - _ldata[i1  ]) : (_ldata[i1  ] - _ldata[i2  ]);
    double   nom = first ? (_ldata[i2+1] - _ldata[i1+1]) : (_ldata[i1+1] - _ldata[i2+1]);
    double xcorr, ycorr; // the corrections
-   assert((0 != nom) || (0 != denom));
+   if ((0 == nom) && (0 == denom)) return;
    double signX = (  nom > 0) ? (first ? 1.0 : -1.0) : (first ? -1.0 : 1.0);
    double signY = (denom > 0) ? (first ? 1.0 : -1.0) : (first ? -1.0 : 1.0);
    if      (0 == denom) // vertical
@@ -519,11 +548,16 @@ void laydata::WireContour::endPnts(word i1, word i2, bool first)
    _cdata.push_back (TP((int4b) rint(_ldata[it  ] + xcorr),(int4b) rint(_ldata[it+1] - ycorr)));
 }
 
-bool laydata::WireContour::chkCollinear(word i1, word i2, word i3)
+byte laydata::WireContour::chkCollinear(word i1, word i2, word i3)
 {
-   return ( ( 0 == orientation(i1, i2, i3)   ) &&
-            ((0 <  getLambda  (i1, i2, i3)) ||
-             (0 <= getLambda  (i3, i2, i1))  )  );
+   if ( 0 != orientation(i1, i2, i3)) return 0; // points not in one line
+   float lambda1 = getLambda  (i3, i2, i1);
+   float lambda2 = getLambda  (i1, i2, i3);
+   if ((0 == lambda1) && (0 == lambda2)) return 5; // 3 coinciding points
+   if ((0 <  lambda1) || (0 <  lambda2)) return 3; // collinear points
+   if (0 == lambda1) return 1; //i2 and i3 coincide
+   if (0 == lambda2) return 2; //i2 and i1 coincide
+   return 4; // 3 points in one line sequenced with i2 in the middle
 }
 
 void laydata::WireContour::colPnts(word i1, word i2, word i3)
@@ -578,3 +612,65 @@ float laydata::WireContour::getLambda(word i1, word i2, word ii)
    return lambda;
 }
 
+//=============================================================================
+/*!
+ * Takes the original wire central line @parray, makes the appropriate transformations
+ * using the @translation and stores the resulting wire in _ldata. Then it creates the
+ * WireContour object and initializes it with the transformed data.
+ */
+laydata::WireContourAux::WireContourAux(const int4b* parray, unsigned lsize, const word width, const CTM& translation)
+{
+   _ldata = DEBUG_NEW int[2 * lsize];
+   for (unsigned i = 0; i < lsize; i++)
+   {
+      TP cpoint(parray[2*i], parray[2*i+1]);
+      cpoint *= translation;
+      _ldata[2*i  ] = cpoint.x();
+      _ldata[2*i+1] = cpoint.y();
+   }
+   _wcObject = DEBUG_NEW laydata::WireContour(_ldata, lsize, width);
+}
+
+/*!
+ * Accelerates the WireContour usage with poointlist input data. Converts the @plist
+ * into array format and stores the result in _ldata. Then creates the
+ * WireContour object and initializes it with the _ldata array.
+ */
+laydata::WireContourAux::WireContourAux(const pointlist& plist, const word width)
+{
+   word psize = plist.size();
+   _ldata = DEBUG_NEW int[2 * psize];
+   for (unsigned i = 0; i < psize; i++)
+   {
+      _ldata[2*i  ] = plist[i].x();
+      _ldata[2*i+1] = plist[i].y();
+   }
+   _wcObject = DEBUG_NEW laydata::WireContour(_ldata, psize, width);
+}
+
+/*!
+ * Dumps the wire central line and the contour generated by _wxObject in @plist
+ * vector in a format which can be used directly by the methods of the basic
+ * renderer. The @plist must be empty.
+ * The format is: plist[0].x() returns the number of the central line points;
+ * plist[0].y() returns the number of the wire contour points. The central
+ * line points start from plist[1]. The contour points - follow.
+ */
+void laydata::WireContourAux::getRenderingData(pointlist& plist)
+{
+   assert(_wcObject);
+   assert(0 == plist.size());
+   word lsize = _wcObject->lsize();
+   word csize = _wcObject->csize();
+   plist.reserve(lsize + csize + 1);
+   plist.push_back(TP(lsize, csize));
+   for (int i = 0; i < lsize; i++)
+      plist.push_back(TP(_ldata[2*i], _ldata[2*i+1]));
+   _wcObject->getVectorData(plist);
+}
+
+laydata::WireContourAux::~WireContourAux()
+{
+   delete _wcObject;
+   delete [] _ldata;
+}

@@ -216,24 +216,52 @@ namespace laydata {
 
    bool pathConvert(pointlist&, word, int4b, int4b );
 
+
+   /**
+    * The primary subject of this class is to generate the wire contour
+    * from its central line. It is supposed to deal with all of the corner
+    * cases and especially when the wire contains collinear segments. The
+    * class requires the point data in integer array format. It is not
+    * copying the original data - just stores a pointer to it. Thats' why
+    * there is no destructor defined.
+    */
    class WireContour {
       public:
-                           WireContour(int4b*, unsigned, const word);
-         unsigned          size()         {return _cdata.size();}
+                           WireContour(const int4b*, unsigned, const word);
+         unsigned          csize()         {return _cdata.size(); } //! return the number of the contour points
+         unsigned          lsize()         {return _lsize;        } //! return the number of the central line points
          void              getArrayData(int4b*);
+         void              getVectorData(pointlist&);
       private:
          typedef std::list<TP> PointList;
          void              endPnts(word, word, bool);
          void              mdlPnts(word, word, word);
-         bool              chkCollinear(word,word,word);
+         byte              chkCollinear(word,word,word);
          void              colPnts(word,word,word);
          TP                mdlCPnt(word, word);
          int               orientation(word, word, word);
          float             getLambda(word i1, word i2, word ii);
-         const int4b*      _ldata;
-         const unsigned    _lsize;
-         const word        _width;
-         PointList         _cdata;
+         const int4b*      _ldata; //! The original wire central line. Do not delete it. Do not alter it!
+         const unsigned    _lsize; //! The number of points in the wire central line
+         const word        _width; //! The width of the wire
+         PointList         _cdata; //! The generated contour line in a list of points form
+   };
+
+   /**
+    * An auxiliary class to wrap around the WireContour class. It makes WireContour
+    * usable with a point list input data or with data which needs coordinate
+    * transformations. Also it defines a method to dump the wire contour in a pointlist
+    * format which is usable by the basic renderer.
+    */
+   class WireContourAux {
+      public:
+                          WireContourAux(const int4b*, unsigned, const word, const CTM&);
+                          WireContourAux(const pointlist&, const word);
+                         ~WireContourAux();
+         void             getRenderingData(pointlist&);
+      private:
+         WireContour*     _wcObject;
+         int4b*           _ldata;
    };
 
 }
