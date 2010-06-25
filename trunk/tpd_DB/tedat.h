@@ -228,12 +228,9 @@ namespace laydata {
          virtual pointlist shape2poly() const;
          virtual word      lType() const {return _lmwire;}
       private:
-         void              precalc(pointlist&, dword) const;
          void              selectPoints(DBbox&, SGBitSet&);
          void              unselectPoints(DBbox&, SGBitSet&);
          pointlist*        movePointsSelected(const SGBitSet&, const CTM&, const CTM& = CTM()) const;
-         DBbox*            endPnts(const TP&, const TP&, bool) const;
-         DBbox*            mdlPnts(const TP&, const TP&, const TP&) const;
          float             get_distance(TP p1, TP p2, TP p0);
          word              _width;
          int4b*            _pdata;
