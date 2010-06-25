@@ -458,10 +458,6 @@ namespace laydata {
          virtual void      rmpoint(TP&);
       private:
          typedef std::list<TP>     TmpPlist;
-         void              precalc(const pointlist&, pointlist&) const;
-         void              endPnts(const TP&, const TP&, bool first, TmpPlist&) const;
-         void              mdlPnts(const TP&, const TP&, const TP& , TmpPlist&) const;
-         TP                mdlCPnt(const TP&, const TP&) const;
          void              drawline(const pointlist&, const pointlist&) const;
          pointlist         _plist;
          word              _width;
