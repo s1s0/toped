@@ -232,6 +232,7 @@ namespace laydata {
          unsigned          lsize()         {return _lsize;        } //! return the number of the central line points
          void              getArrayData(int4b*);
          void              getVectorData(pointlist&);
+         DBbox             getCOverlap();
       private:
          typedef std::list<TP> PointList;
          void              endPnts(word, word, bool);

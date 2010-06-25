@@ -1209,52 +1209,6 @@ laydata::TdtWire::TdtWire(TEDfile* const tedfile) : TdtData()
    }
 }
 
-DBbox* laydata::TdtWire::endPnts(const TP& p1, const TP& p2, bool first) const
-{
-   double     w = _width/2;
-   double denom = first ? (p2.x() - p1.x()) : (p1.x() - p2.x());
-   double   nom = first ? (p2.y() - p1.y()) : (p1.y() - p2.y());
-   double xcorr, ycorr; // the corrections
-   if ((0 == nom) && (0 == denom))
-   { // coinciding points
-      return DEBUG_NEW DBbox(/*p1,p2 */DEFAULT_OVL_BOX);
-   }
-   double signX = (  nom > 0) ? (first ? 1.0 : -1.0) : (first ? -1.0 : 1.0);
-   double signY = (denom > 0) ? (first ? 1.0 : -1.0) : (first ? -1.0 : 1.0);
-   if      (0 == denom)   {xcorr =signX * w ; ycorr = 0;} // vertical
-   else if (0 == nom  )   {xcorr = 0 ; ycorr = signY * w;} // horizontal |----|
-   else
-   {
-      double sl   = nom / denom;
-      double sqsl = signY*sqrt( sl*sl + 1);
-      xcorr = rint(w * (sl / sqsl));
-      ycorr = rint(w * ( 1 / sqsl));
-   }
-   TP pt = first ? p1 : p2;
-   return DEBUG_NEW DBbox((int4b) rint(pt.x() - xcorr), (int4b) rint(pt.y() + ycorr),
-                          (int4b) rint(pt.x() + xcorr), (int4b) rint(pt.y() - ycorr));
-}
-
-DBbox* laydata::TdtWire::mdlPnts(const TP& p1, const TP& p2, const TP& p3) const
-{
-   double    w = _width/2;
-   double  x32 = p3.x() - p2.x();
-   double  x21 = p2.x() - p1.x();
-   double  y32 = p3.y() - p2.y();
-   double  y21 = p2.y() - p1.y();
-   double   L1 = sqrt(x21*x21 + y21*y21); //the length of segment 1
-   double   L2 = sqrt(x32*x32 + y32*y32); //the length of segment 2
-   double denom = x32 * y21 - x21 * y32;
-// @FIXME THINK about next two lines!!!    They are wrong !!!
-   if ((0 == denom) || (0 == L1)) return endPnts(p2,p3,false);
-   if (0 == L2) return NULL;
-   // the corrections
-   double xcorr = w * ((x32 * L1 - x21 * L2) / denom);
-   double ycorr = w * ((y21 * L2 - y32 * L1) / denom);
-   return DEBUG_NEW DBbox((int4b) rint(p2.x() - xcorr), (int4b) rint(p2.y() + ycorr),
-                          (int4b) rint(p2.x() + xcorr), (int4b) rint(p2.y() - ycorr));
-}
-
 void laydata::TdtWire::openGlPrecalc(layprop::DrawProperties& drawprop, pointlist& ptlist) const
 {
    // first check whether to draw only the center line
@@ -1385,34 +1339,6 @@ void laydata::TdtWire::motionDraw(const layprop::DrawProperties& drawprop,
    openGlDrawLine(const_cast<layprop::DrawProperties&>(drawprop), ptlist);
 }
 
-void laydata::TdtWire::precalc(pointlist& ptlist, dword num_points) const
-{
-   DBbox* ln1 = endPnts(ptlist[0],ptlist[1], true);
-   if (NULL != ln1)
-   {
-      ptlist.push_back(ln1->p1());
-      ptlist.push_back(ln1->p2());
-   }
-   delete ln1;
-   for (unsigned i = 1; i < num_points - 1; i++)
-   {
-      ln1 = mdlPnts(ptlist[i-1],ptlist[i],ptlist[i+1]);
-      if (NULL != ln1)
-      {
-         ptlist.push_back(ln1->p1());
-         ptlist.push_back(ln1->p2());
-      }
-      delete ln1;
-   }
-   ln1 = endPnts(ptlist[num_points-2],ptlist[num_points-1],false);
-   if (NULL != ln1)
-   {
-      ptlist.push_back(ln1->p1());
-      ptlist.push_back(ln1->p2());
-   }
-   delete ln1;
-}
-
 bool laydata::TdtWire::point_inside(TP pnt)
 {
    TP p0, p1;
@@ -1537,33 +1463,13 @@ void laydata::TdtWire::stretch(int bfactor, ShapeList** decure)
 
 pointlist laydata::TdtWire::shape2poly() const
 {
-/**
- * All the gymnastics here is because of the way precalc() function is
- * providing its result. The whole thing is that we have this function
- * (precalc) implemented 3 times. In this class, in TdtTmpWire and in
- * tenderer::TenderWire. The latter is the proper implementation.
- * Because of re-usability reasons at the moment we have to use the
- * implementation in this class.
- * TODO! Clean-up all the implementations above and create a class
- * next to ValidWire in here, in tedat which only purpose will be to
- * convert wire to list of points
- */
-   pointlist plist;
-   plist.reserve(3*_psize);
-   for (unsigned i = 0; i < _psize; i++)
-      plist.push_back( TP( _pdata[2*i], _pdata[2*i+1] ));
-   precalc(plist,_psize);
-
-   pointlist result;
-   plist.reserve(2 * _psize);
-   for (unsigned i = _psize; i < 3 * _psize; i = i + 2)
-      result.push_back(plist[i]);
-   for (unsigned i = 3 * _psize - 1; i > _psize; i = i - 2)
-      result.push_back(plist[i]);
-
-   ValidPoly check(result);
-   assert(check.valid());
-   return check.getValidated();
+   pointlist cdata;
+   laydata::WireContour wcontour(_pdata, _psize, _width);
+   cdata.reserve(wcontour.csize());
+   wcontour.getVectorData(cdata);
+   ValidPoly check(cdata);
+   if (check.valid()) return check.getValidated();
+   else return pointlist();
 }
 
 void laydata::TdtWire::info(std::ostringstream& ost, real DBU) const
@@ -1606,28 +1512,8 @@ void laydata::TdtWire::psWrite(PSFile& gdsf, const layprop::DrawProperties&) con
 
 DBbox laydata::TdtWire::overlap() const
 {
-   DBbox* ln1 = endPnts(TP( _pdata[0], _pdata[1]),
-                        TP( _pdata[2], _pdata[3]),
-                        true
-                        );
-   DBbox ovl = *ln1; delete ln1;
-   DBbox* ln2 = NULL;
-   for (word i = 1; i < _psize - 1; i++)
-   {
-      ln2 = mdlPnts(TP(_pdata[2*(i-1)], _pdata[2*(i-1) + 1]),
-                    TP(_pdata[2* i   ], _pdata[2* i    + 1]),
-                    TP(_pdata[2*(i+1)], _pdata[2*(i+1) + 1])
-                    );
-      ovl.overlap(*ln2);
-      delete ln2;
-   }
-   ln1 = endPnts(TP( _pdata[2*(_psize-2)], _pdata[2*(_psize-2) + 1]),
-                 TP( _pdata[2*(_psize-1)], _pdata[2*(_psize-1) + 1]),
-                 false
-                 );
-   ovl.overlap(*ln1);
-   delete ln1;
-   return ovl;
+   laydata::WireContour wcontour(_pdata, _psize, _width);
+   return wcontour.getCOverlap();
 }
 
 pointlist* laydata::TdtWire::movePointsSelected(const SGBitSet& pset,

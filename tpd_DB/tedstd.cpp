@@ -499,6 +499,17 @@ void laydata::WireContour::getArrayData(int4b* contour)
    }
 }
 
+DBbox laydata::WireContour::getCOverlap()
+{
+   PointList::const_iterator CP = _cdata.begin();
+   DBbox ovl(*CP);
+   while (CP != _cdata.end())
+   {
+      ovl.overlap(*CP); CP++;
+   }
+   return ovl;
+}
+
 void laydata::WireContour::mdlPnts(word i1, word i2, word i3)
 {
    double    w = _width/2;
