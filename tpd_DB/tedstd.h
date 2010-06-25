@@ -258,8 +258,11 @@ namespace laydata {
       public:
                           WireContourAux(const int4b*, unsigned, const word, const CTM&);
                           WireContourAux(const pointlist&, const word);
+                          WireContourAux(const pointlist&, const word, const TP);
                          ~WireContourAux();
          void             getRenderingData(pointlist&);
+         void             getLData(pointlist&);
+         void             getCData(pointlist&);
       private:
          WireContour*     _wcObject;
          int4b*           _ldata;
