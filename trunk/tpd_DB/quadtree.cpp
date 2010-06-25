@@ -861,7 +861,7 @@ void laydata::QuadTree::openGlDraw(layprop::DrawProperties& drawprop,
       {
          TdtData* wdt = _data[i];
          pointlist points;
-         // precalculate drawing data
+         // pre-calculate drawing data
          wdt->openGlPrecalc(drawprop, points);
          if (0 != points.size())
          {

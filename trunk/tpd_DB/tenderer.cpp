@@ -205,7 +205,7 @@ tenderer::TenderWire::TenderWire(int4b* pdata, unsigned psize, const word width,
    if (!_celno)
    {
       laydata::WireContour wcontour(_ldata, _lsize, width);
-      _csize = wcontour.size();
+      _csize = wcontour.csize();
       _cdata = DEBUG_NEW int[ 2* _csize];
       wcontour.getArrayData(_cdata);
    }

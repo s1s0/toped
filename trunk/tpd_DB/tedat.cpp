@@ -1261,14 +1261,17 @@ void laydata::TdtWire::openGlPrecalc(layprop::DrawProperties& drawprop, pointlis
    DBbox wsquare = DBbox(TP(0,0),TP(_width,_width));
    bool center_line_only = !wsquare.visible(drawprop.topCtm() * drawprop.scrCtm(), drawprop.visualLimit());
    if (center_line_only)
-      ptlist.reserve(_psize);
+   {
+      ptlist.reserve(_psize+1);
+      ptlist.push_back(TP(_psize, 0));
+      for (unsigned i = 0; i < _psize; i++)
+         ptlist.push_back(TP( _pdata[2*i], _pdata[2*i+1] ) * drawprop.topCtm());
+   }
    else
-      ptlist.reserve(3 * _psize);
-   // translate the points using the current CTM
-   for (unsigned i = 0; i < _psize; i++)
-      ptlist.push_back( TP( _pdata[2*i], _pdata[2*i+1] ) * drawprop.topCtm());
-   if (!center_line_only)
-      precalc(ptlist, _psize);
+   {
+      laydata::WireContourAux wcontour(_pdata, _psize, _width, drawprop.topCtm());
+      wcontour.getRenderingData(ptlist);
+   }
 }
 
 void laydata::TdtWire::drawRequest(tenderer::TopRend& rend) const
@@ -1283,45 +1286,52 @@ void laydata::TdtWire::drawSRequest(tenderer::TopRend& rend, const SGBitSet* psl
 
 void laydata::TdtWire::openGlDrawLine(layprop::DrawProperties&, const pointlist& ptlist) const
 {
-   dword num_points = ptlist.size();
    if (0 == ptlist.size()) return;
-   // to keep MS VC++ happy - define the counter outside the loops
-   dword i;
-   dword num_cpoints = (num_points == _psize) ? num_points : num_points / 3;
-   // draw the central line in all cases
-   if (0 == num_cpoints) return;
+   word lsize = ptlist[0].x();
+   word csize = ptlist[0].y();
+   // the central line
+   if (0 == lsize) return;
    glBegin(GL_LINE_STRIP);
-   for (i = 0; i < num_cpoints; i++)
-      glVertex2i(ptlist[i].x(), ptlist[i].y());
+   for (word i = 0; i < lsize; i++)
+      glVertex2i(ptlist[i+1].x(), ptlist[i+1].y());
    glEnd();
-   // now check whether to draw only the center line
-   if (num_cpoints == num_points) return;
-   // draw the wire contour
+   // the contour
+   if (0 == csize) return;
    glBegin(GL_LINE_LOOP);
-   for (i = num_cpoints; i < 3 * num_cpoints; i = i + 2)
-      glVertex2i(ptlist[i].x(), ptlist[i].y());
-   for (i = 3 * num_cpoints - 1; i > num_cpoints; i = i - 2)
+   for (word i = lsize; i <= lsize + csize; i++)
       glVertex2i(ptlist[i].x(), ptlist[i].y());
    glEnd();
 }
 
 void laydata::TdtWire::openGlDrawFill(layprop::DrawProperties&, const pointlist& ptlist) const
 {
-   if (_psize == ptlist.size()) return;
+   if (0 == ptlist.size()) return;
+   word lsize = ptlist[0].x();
+   word csize = ptlist[0].y();
+   if ((0 == lsize) || (0 == csize)) return;
+
+   word findex = lsize + 1        ; // forward  index
+   word bindex = lsize + csize    ; // backward index
    glBegin(GL_QUAD_STRIP);
-   for (dword i = _psize; i < 3 *_psize; i++)
-      glVertex2i(ptlist[i].x(), ptlist[i].y());
+   for (word i = 0; i < csize / 2; i++)
+   {
+      glVertex2i(ptlist[findex].x(), ptlist[findex].y());findex++;
+      glVertex2i(ptlist[bindex].x(), ptlist[bindex].y());bindex--;
+   }
    glEnd();
 }
 
 void laydata::TdtWire::openGlDrawSel(const pointlist& ptlist, const SGBitSet* pslist) const
 {
-   assert(0 != ptlist.size());
+   if (0 == ptlist.size()) return;
+   word lsize = ptlist[0].x();
+   word csize = ptlist[0].y();
+   if (0 == lsize) return;
    if (sh_selected == status())
    {
       glBegin(GL_LINE_STRIP);
-      for (unsigned i = 0; i < _psize; i++)
-         glVertex2i(ptlist[i].x(), ptlist[i].y());
+      for (word i = 0; i < lsize; i++)
+         glVertex2i(ptlist[i+1].x(), ptlist[i+1].y());
       glEnd();
    }
    else if (sh_partsel == status())
@@ -1332,19 +1342,22 @@ void laydata::TdtWire::openGlDrawSel(const pointlist& ptlist, const SGBitSet* ps
       {
          if (pslist->check(i) && pslist->check((i+1)%_psize))
          {
-            glVertex2i(ptlist[i].x(), ptlist[i].y());
-            glVertex2i(ptlist[(i+1)%_psize].x(), ptlist[(i+1)%_psize].y());
+            glVertex2i(ptlist[i+1].x(), ptlist[i+1].y());
+            glVertex2i(ptlist[(i+1)%_psize + 1].x(), ptlist[(i+1)%_psize + 1].y());
          }
       }
-      if (pslist->check(0))
-      {// if only the first is selected
-         glVertex2i(ptlist[_psize].x(), ptlist[_psize].y());
-         glVertex2i(ptlist[_psize+1].x(), ptlist[_psize+1].y());
-      }
-      if (pslist->check(_psize-1))
-      {// if only the last is selected
-         glVertex2i(ptlist[3*_psize-1].x(), ptlist[3*_psize-1].y());
-         glVertex2i(ptlist[3*_psize-2].x(), ptlist[3*_psize-2].y());
+      if (csize > 0)
+      {
+         if (pslist->check(0))
+         {// if only the first is selected
+            glVertex2i(ptlist[lsize+csize/2].x(), ptlist[lsize+csize/2].y());
+            glVertex2i(ptlist[lsize+csize/2+1].x(), ptlist[lsize+csize/2 + 1].y());
+         }
+         if (pslist->check(_psize-1))
+         {// if only the last is selected
+            glVertex2i(ptlist[lsize+1].x(), ptlist[lsize+1].y());
+            glVertex2i(ptlist[lsize+csize].x(), ptlist[lsize+csize].y());
+         }
       }
       glEnd();
    }
@@ -1354,24 +1367,22 @@ void laydata::TdtWire::motionDraw(const layprop::DrawProperties& drawprop,
                ctmqueue& transtack, SGBitSet* plst) const
 {
    CTM trans = transtack.front();
-   pointlist* ptlist;
+   pointlist ptlist;
    if (sh_partsel == status())
    {
       CTM strans = transtack.back();
       assert(plst);
-      ptlist = movePointsSelected(*plst, trans, strans);
+      pointlist* modified = movePointsSelected(*plst, trans, strans);
+      laydata::WireContourAux wcontour(*modified, _width);
+      wcontour.getRenderingData(ptlist);
+      modified->clear(); delete modified;
    }
    else
-   {
-      ptlist = DEBUG_NEW pointlist;
-      for (unsigned i = 0; i < _psize; i++)
-         ptlist->push_back( TP( _pdata[2*i], _pdata[2*i+1] ) * trans );
+   { //full select
+      laydata::WireContourAux wcontour(_pdata, _psize, _width, trans);
+      wcontour.getRenderingData(ptlist);
    }
-   precalc(*ptlist, _psize);
-   openGlDrawLine(const_cast<layprop::DrawProperties&>(drawprop), *ptlist);
-//      if (drawprop.getCurrentFill())
-//         openGlDrawFill(ptlist);
-   ptlist->clear(); delete ptlist;
+   openGlDrawLine(const_cast<layprop::DrawProperties&>(drawprop), ptlist);
 }
 
 void laydata::TdtWire::precalc(pointlist& ptlist, dword num_points) const
@@ -2680,88 +2691,45 @@ void laydata::ValidWire::angles()
 {
    // check for a single point
    if (_plist.size() < 2) _status |= shp_null;
-   pointlist::iterator cp1 = _plist.end(); cp1--;
    pointlist::iterator cp2 = _plist.begin();
+   pointlist::iterator cp1 = cp2; cp2++;
+   real pAngle = 0.0;
    real cAngle = 0.0;
-   std::stack<real> angle_stack;
-   bool prev_cleared = false;
-   while ((angle_stack.size() <= _plist.size()) && (2 < _plist.size()))
+   bool pAngleValid = false;
+   if (_plist.size()>2)
+   do
    {
       bool eraseP1 = false;
       if (*cp1 == *cp2)
-      {
          eraseP1 = true;
-         if (!prev_cleared)
-            angle_stack.push(0);
-      }
-      else if (!prev_cleared)
+      else
       {
          cAngle = xangle(*cp1, *cp2);
-         if (!angle_stack.empty())
+         if (pAngleValid)
          {
-            real ang = fabs(cAngle - angle_stack.top());
-            if ((0 == ang) || (180 == ang))
+            real ang = fabs(cAngle - pAngle);
+            if (0 == ang)
                eraseP1 = true;
-            else if (ang < 90 || ang > 270)
+            else if ((ang < 90) || (ang > 270))
                _status |= laydata::shp_acute;
+            else if (180 == ang)
+               _status |= laydata::shp_collinear;
          }
-         angle_stack.push(cAngle);
+         pAngleValid = true;
+         pAngle = cAngle;
       }
       if (eraseP1)
       {
          cp2 = _plist.erase(cp1);
-         cp1 = cp2;
-         if (cp2 == _plist.begin()) cp1 = _plist.end();
-         cp1--;
-         angle_stack.pop();
+         cp1 = cp2; cp2++;
          _status |= laydata::shp_ident;
-         prev_cleared = true;
       }
       else
       {
          cp1 = cp2; cp2++;
-         prev_cleared = false;
       }
-      if (_plist.end() == cp2) cp2 = _plist.begin();
-      if (_plist.end() == cp1) cp1--;
    }
-//   pointlist::iterator cp2 = _plist.begin();
-//   pointlist::iterator cp1 = cp2; cp2++;
-//   real pAngle = 0.0;
-//   real cAngle = 0.0;
-//   bool pAngleValid = false;
-//   if (_plist.size()>2)
-//   do
-//   {
-//      bool eraseP1 = false;
-//      if (*cp1 == *cp2)
-//         eraseP1 = true;
-//      else
-//      {
-//         cAngle = xangle(*cp1, *cp2);
-//         if (pAngleValid)
-//         {
-//            real ang = fabs(cAngle - pAngle);
-//            if ((0 == ang) || (180 == ang))
-//               eraseP1 = true;
-//            else if (ang < 90 || ang > 270)
-//               _status |= laydata::shp_acute;
-//         }
-//         pAngleValid = true;
-//         pAngle = cAngle;
-//      }
-//      if (eraseP1)
-//      {
-//         cp2 = _plist.erase(cp1);
-//         cp1 = cp2; cp2++;
-//         _status |= laydata::shp_ident;
-//      }
-//      else
-//      {
-//         cp1 = cp2; cp2++;
-//      }
-//   }
-//   while(cp2 != _plist.end());
+   while(cp2 != _plist.end());
 
    if (((_plist.size() == 2) && (*(_plist.begin()) == *(_plist.end()-1))))
       _status |= shp_null;
@@ -2779,7 +2747,7 @@ void laydata::ValidWire::selfcrossing() {
    {
       fixingpoly.findCrossingPoints();
    }
-   catch (EXPTNpolyCross) {_status |= laydata::shp_cross; return;}
+   catch (EXPTNpolyCross) {/*FIXME! this is temporary commented-out!*/ _status |= laydata::shp_cross; return;}
    if (0 != fixingpoly.crossp() )
       _status |= laydata::shp_cross;
 
