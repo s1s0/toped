@@ -562,6 +562,7 @@ void laydata::WireContour::endPnts(word i1, word i2, bool first)
 byte laydata::WireContour::chkCollinear(word i1, word i2, word i3)
 {
    if ( 0 != orientation(i1, i2, i3)) return 0; // points not in one line
+   if (_ldata[i1] == _ldata[i3]) return 3;
    float lambda1 = getLambda  (i3, i2, i1);
    float lambda2 = getLambda  (i1, i2, i3);
    if ((0 == lambda1) && (0 == lambda2)) return 5; // 3 coinciding points

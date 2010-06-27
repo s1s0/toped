@@ -2180,7 +2180,7 @@ console::toped_logfile& console::toped_logfile::operator<< (const telldata::ttli
             *this << _2bool(static_cast<telldata::ttbool*>((_tl.mlist())[i])->value());
             break;
          case telldata::tn_string:
-            _file << static_cast<telldata::ttstring*>((_tl.mlist())[i])->value();
+            _file << "\"" << static_cast<telldata::ttstring*>((_tl.mlist())[i])->value() << "\"";
             break;
          case telldata::tn_pnt:
             *this << *(static_cast<telldata::ttpnt*>((_tl.mlist())[i]));
