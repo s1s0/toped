@@ -181,6 +181,7 @@ class TessellPoly {
       word              num_ftrs() const           { return _all_ftrs;}
       word              num_ftfs() const           { return _all_ftfs;}
       word              num_ftss() const           { return _all_ftss;}
+      bool              valid() const              { return (0 < (_all_ftrs + _all_ftfs + _all_ftss));}
       void              num_indexs(unsigned&, unsigned&, unsigned&) const;
       static GLUtriangulatorObj* tenderTesel; //! A pointer to the OpenGL object tesselator
 #ifdef WIN32

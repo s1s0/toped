@@ -590,7 +590,7 @@ void tenderer::TenderTV::registerBox (TenderCnvx* cobj)
 void tenderer::TenderTV::registerPoly (TenderNcvx* cobj, const TessellPoly* tchain)
 {
    unsigned allpoints = cobj->csize();
-   if (_filled)
+   if (_filled && tchain->valid())
    {
       cobj->setTeselData(tchain);
       _ncvx_data.push_back(cobj);
