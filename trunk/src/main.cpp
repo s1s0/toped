@@ -500,6 +500,12 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    mblock->addFUNC("asin"             ,(DEBUG_NEW                    tellstdfunc::stdASIN(telldata::tn_real, true )));
    mblock->addFUNC("acos"             ,(DEBUG_NEW                    tellstdfunc::stdACOS(telldata::tn_real, true )));
    mblock->addFUNC("atan"             ,(DEBUG_NEW                    tellstdfunc::stdATAN(telldata::tn_real, true )));
+   mblock->addFUNC("sinh"             ,(DEBUG_NEW                    tellstdfunc::stdSINH(telldata::tn_real, true )));
+   mblock->addFUNC("cosh"             ,(DEBUG_NEW                    tellstdfunc::stdCOSH(telldata::tn_real, true )));
+   mblock->addFUNC("tanh"             ,(DEBUG_NEW                    tellstdfunc::stdTANH(telldata::tn_real, true )));
+   mblock->addFUNC("asinh"            ,(DEBUG_NEW                   tellstdfunc::stdASINH(telldata::tn_real, true )));
+   mblock->addFUNC("acosh"            ,(DEBUG_NEW                   tellstdfunc::stdACOSH(telldata::tn_real, true )));
+   mblock->addFUNC("atanh"            ,(DEBUG_NEW                   tellstdfunc::stdATANH(telldata::tn_real, true )));
    mblock->addFUNC("round"            ,(DEBUG_NEW                    tellstdfunc::stdROUND(telldata::tn_int, true )));
    mblock->addFUNC("ceil"             ,(DEBUG_NEW                     tellstdfunc::stdCEIL(telldata::tn_int, true )));
    mblock->addFUNC("floor"            ,(DEBUG_NEW                    tellstdfunc::stdFLOOR(telldata::tn_int, true )));
