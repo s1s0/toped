@@ -1186,12 +1186,9 @@ laydata::TdtWire::TdtWire(const pointlist& plst, word width) : TdtData(), _width
    }
 }
 
-laydata::TdtWire::TdtWire(const int4b* pdata, unsigned psize, word width) :
-      TdtData(), _width(width), _psize(psize)
+laydata::TdtWire::TdtWire(int4b* pdata, unsigned psize, word width) :
+      TdtData(), _width(width), _pdata(pdata), _psize(psize)
 {
-   assert(_psize);
-   _pdata = DEBUG_NEW int4b[_psize*2];
-   memcpy(_pdata, pdata, 2*_psize);
 }
 
 laydata::TdtWire::TdtWire(TEDfile* const tedfile) : TdtData()
@@ -1455,7 +1452,9 @@ void laydata::TdtWire::stretch(int bfactor, ShapeList** decure)
    //@TODO cut bfactor from both sides
    if ((2*bfactor + _width) > 0)
    {
-      TdtWire* modified = DEBUG_NEW TdtWire(_pdata, _psize, 2*bfactor + _width);
+      int4b* pdata = DEBUG_NEW int4b[_psize*2];
+      memcpy(pdata, _pdata, 2 * _psize * sizeof(int4b));
+      TdtWire* modified = DEBUG_NEW TdtWire(pdata, _psize, 2*bfactor + _width);
       decure[1]->push_back(modified);
    }
    decure[0]->push_back(this);

@@ -200,7 +200,7 @@ namespace laydata {
    class TdtWire : public TdtData   {
       public:
                            TdtWire(const pointlist&, word);
-                           TdtWire(const int4b*, unsigned, word);
+                           TdtWire(int4b*, unsigned, word);
                            TdtWire(TEDfile* const tedfile);
                           ~TdtWire();
          virtual DBbox     overlap() const;
