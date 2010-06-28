@@ -55,6 +55,13 @@ Documentation
    acos
    atan
    
+   sinh
+   cosh
+   tanh
+   asinh
+   acosh
+   atanh
+
    exp
    log
    log10

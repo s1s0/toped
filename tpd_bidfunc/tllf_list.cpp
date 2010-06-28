@@ -303,3 +303,86 @@ int tellstdfunc::stdLOG10::execute()
    return EXEC_NEXT;
 }
 
+//============================================================================
+tellstdfunc::stdSINH::stdSINH(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+}
+
+int tellstdfunc::stdSINH::execute()
+{
+   real value = getOpValue(OPstack);
+   OPstack.push(DEBUG_NEW telldata::ttreal(sinh(value)));
+   return EXEC_NEXT;
+}
+
+//============================================================================
+tellstdfunc::stdASINH::stdASINH(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+}
+
+int tellstdfunc::stdASINH::execute()
+{
+   real value = getOpValue(OPstack);
+   OPstack.push(DEBUG_NEW telldata::ttreal(asinh(value)));
+   return EXEC_NEXT;
+}
+
+//============================================================================
+tellstdfunc::stdCOSH::stdCOSH(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+}
+
+int tellstdfunc::stdCOSH::execute()
+{
+   real value = getOpValue(OPstack);
+   OPstack.push(DEBUG_NEW telldata::ttreal(cosh(value)));
+   return EXEC_NEXT;
+}
+
+//============================================================================
+tellstdfunc::stdACOSH::stdACOSH(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+}
+
+int tellstdfunc::stdACOSH::execute()
+{
+   real value = getOpValue(OPstack);
+   OPstack.push(DEBUG_NEW telldata::ttreal(acosh(value)));
+   return EXEC_NEXT;
+}
+
+//============================================================================
+tellstdfunc::stdTANH::stdTANH(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+}
+
+int tellstdfunc::stdTANH::execute()
+{
+   real value = getOpValue(OPstack);
+   OPstack.push(DEBUG_NEW telldata::ttreal(tanh(value)));
+   return EXEC_NEXT;
+}
+
+//============================================================================
+tellstdfunc::stdATANH::stdATANH(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+}
+
+int tellstdfunc::stdATANH::execute()
+{
+   real value = getOpValue(OPstack);
+   OPstack.push(DEBUG_NEW telldata::ttreal(atanh(value)));
+   return EXEC_NEXT;
+}
