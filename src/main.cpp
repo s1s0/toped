@@ -496,6 +496,10 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    mblock->addFUNC("abs"              ,(DEBUG_NEW                     tellstdfunc::stdABS(telldata::tn_real, true )));
    mblock->addFUNC("sin"              ,(DEBUG_NEW                     tellstdfunc::stdSIN(telldata::tn_real, true )));
    mblock->addFUNC("cos"              ,(DEBUG_NEW                     tellstdfunc::stdCOS(telldata::tn_real, true )));
+   mblock->addFUNC("tan"              ,(DEBUG_NEW                     tellstdfunc::stdTAN(telldata::tn_real, true )));
+   mblock->addFUNC("asin"             ,(DEBUG_NEW                    tellstdfunc::stdASIN(telldata::tn_real, true )));
+   mblock->addFUNC("acos"             ,(DEBUG_NEW                    tellstdfunc::stdACOS(telldata::tn_real, true )));
+   mblock->addFUNC("atan"             ,(DEBUG_NEW                    tellstdfunc::stdATAN(telldata::tn_real, true )));
    mblock->addFUNC("round"            ,(DEBUG_NEW                    tellstdfunc::stdROUND(telldata::tn_int, true )));
    mblock->addFUNC("ceil"             ,(DEBUG_NEW                     tellstdfunc::stdCEIL(telldata::tn_int, true )));
    mblock->addFUNC("floor"            ,(DEBUG_NEW                    tellstdfunc::stdFLOOR(telldata::tn_int, true )));

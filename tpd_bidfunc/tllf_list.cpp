@@ -75,48 +75,92 @@ int tellstdfunc::stdABS::execute()
 }
 
 //============================================================================
-int tellstdfunc::stdSIN::argsOK(argumentQ* amap)
+tellstdfunc::stdSIN::stdSIN(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   return !((amap->size() == 1) && (( (*((*amap)[0]))() == telldata::tn_real  ) ||
-                                    ( (*((*amap)[0]))() == telldata::tn_int   )   ));
-}
-
-nameList* tellstdfunc::stdSIN::callingConv(const telldata::typeMAP*)
-{
-   nameList* argtypes = DEBUG_NEW nameList();
-   argtypes->push_back("real");
-   argtypes->push_back("real");
-   return argtypes;
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
 }
 
 int tellstdfunc::stdSIN::execute()
 {
    real value = getOpValue(OPstack);
-   double angle = (value / 180.0 * M_PI);// translate in radians
+   real angle = (value / 180.0 * M_PI);// translate in radians
    OPstack.push(DEBUG_NEW telldata::ttreal(sin(angle)));
    return EXEC_NEXT;
 }
 
 //============================================================================
-int tellstdfunc::stdCOS::argsOK(argumentQ* amap)
+tellstdfunc::stdASIN::stdASIN(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   return !((amap->size() == 1) && (( (*((*amap)[0]))() == telldata::tn_real  ) ||
-                                    ( (*((*amap)[0]))() == telldata::tn_int   )   ));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
 }
 
-nameList* tellstdfunc::stdCOS::callingConv(const telldata::typeMAP*)
+int tellstdfunc::stdASIN::execute()
 {
-   nameList* argtypes = DEBUG_NEW nameList();
-   argtypes->push_back("real");
-   argtypes->push_back("real");
-   return argtypes;
+   real value = getOpValue(OPstack);
+   real angle = (asin(value) * 180.0) / M_PI;// translate in degrees
+   OPstack.push(DEBUG_NEW telldata::ttreal(angle));
+   return EXEC_NEXT;
+}
+
+//============================================================================
+tellstdfunc::stdCOS::stdCOS(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
 }
 
 int tellstdfunc::stdCOS::execute()
 {
    real value = getOpValue(OPstack);
-   double angle = (value / 180.0 * M_PI);// translate in radians
+   real angle = (value / 180.0 * M_PI);// translate in radians
    OPstack.push(DEBUG_NEW telldata::ttreal(cos(angle)));
+   return EXEC_NEXT;
+}
+
+//============================================================================
+tellstdfunc::stdACOS::stdACOS(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+}
+
+int tellstdfunc::stdACOS::execute()
+{
+   real value = getOpValue(OPstack);
+   real angle = (acos(value) * 180.0) / M_PI;// translate in degrees
+   OPstack.push(DEBUG_NEW telldata::ttreal(angle));
+   return EXEC_NEXT;
+}
+
+//============================================================================
+tellstdfunc::stdTAN::stdTAN(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+}
+
+int tellstdfunc::stdTAN::execute()
+{
+   real value = getOpValue(OPstack);
+   real angle = (value / 180.0 * M_PI);// translate in radians
+   OPstack.push(DEBUG_NEW telldata::ttreal(tan(angle)));
+   return EXEC_NEXT;
+}
+
+//============================================================================
+tellstdfunc::stdATAN::stdATAN(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+}
+
+int tellstdfunc::stdATAN::execute()
+{
+   real value = getOpValue(OPstack);
+   real angle = (atan(value) * 180.0) / M_PI;// translate in degrees
+   OPstack.push(DEBUG_NEW telldata::ttreal(angle));
    return EXEC_NEXT;
 }
 

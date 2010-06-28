@@ -49,6 +49,11 @@ Documentation
    fmod
    sqrt
    pow
+   
+   tan
+   asin
+   acos
+   atan
 
 
 Global options of the editor

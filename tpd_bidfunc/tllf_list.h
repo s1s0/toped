@@ -37,8 +37,12 @@ namespace tellstdfunc {
 
    TELL_STDCMD_CLASSC(lstLENGTH     );
    TELL_STDCMD_CLASSC(stdABS        );
-   TELL_STDCMD_CLASSC(stdSIN        );
-   TELL_STDCMD_CLASSC(stdCOS        );
+   TELL_STDCMD_CLASSA(stdSIN        );
+   TELL_STDCMD_CLASSA(stdCOS        );
+   TELL_STDCMD_CLASSA(stdTAN        );
+   TELL_STDCMD_CLASSA(stdASIN       );
+   TELL_STDCMD_CLASSA(stdACOS       );
+   TELL_STDCMD_CLASSA(stdATAN       );
 
    TELL_STDCMD_CLASSA(stdROUND      );
    TELL_STDCMD_CLASSA(stdCEIL       );
