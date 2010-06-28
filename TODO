@@ -43,19 +43,13 @@ Dialog stuff
 
 Documentation
 ==============
-   savelayerstatus
-   restorelayerstatus
-   deletelayserstatus 
-   zoomvisible
-   toolbarsize
-   filllayer
-   (constants)
-   horizontal
-   vertical
-   _iconsize16
-   _iconsize24
-   _iconsize32
-   _iconsize48
+   round
+   ceil
+   floor
+   fmod
+   sqrt
+   pow
+
 
 Global options of the editor
 ============================
