@@ -121,24 +121,96 @@ int tellstdfunc::stdCOS::execute()
 }
 
 //============================================================================
-int tellstdfunc::stdRINT::argsOK(argumentQ* amap)
+tellstdfunc::stdROUND::stdROUND(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
-   return !((amap->size() == 1) && (( (*((*amap)[0]))() == telldata::tn_real  ) ||
-                                    ( (*((*amap)[0]))() == telldata::tn_int   )   ));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
 }
 
-nameList* tellstdfunc::stdRINT::callingConv(const telldata::typeMAP*)
-{
-   nameList* argtypes = DEBUG_NEW nameList();
-   argtypes->push_back("int");
-   argtypes->push_back("real");
-   return argtypes;
-}
-
-int tellstdfunc::stdRINT::execute()
+int tellstdfunc::stdROUND::execute()
 {
    real value = getOpValue(OPstack);
    int4b result = (int4b) rint(value);
    OPstack.push(DEBUG_NEW telldata::ttint(result));
    return EXEC_NEXT;
 }
+
+//============================================================================
+tellstdfunc::stdCEIL::stdCEIL(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+}
+
+int tellstdfunc::stdCEIL::execute()
+{
+   real value = getOpValue(OPstack);
+   int4b result = (int4b) ceil(value);
+   OPstack.push(DEBUG_NEW telldata::ttint(result));
+   return EXEC_NEXT;
+}
+
+//============================================================================
+tellstdfunc::stdFLOOR::stdFLOOR(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+}
+
+int tellstdfunc::stdFLOOR::execute()
+{
+   real value = getOpValue(OPstack);
+   int4b result = (int4b) floor(value);
+   OPstack.push(DEBUG_NEW telldata::ttint(result));
+   return EXEC_NEXT;
+}
+
+//============================================================================
+tellstdfunc::stdFMODULO::stdFMODULO(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+}
+
+int tellstdfunc::stdFMODULO::execute()
+{
+   real valueY = getOpValue(OPstack);
+   real valueX = getOpValue(OPstack);
+   real result = fmod(valueX,valueY);
+   OPstack.push(DEBUG_NEW telldata::ttreal(result));
+   return EXEC_NEXT;
+}
+
+//============================================================================
+tellstdfunc::stdSQRT::stdSQRT(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+}
+
+int tellstdfunc::stdSQRT::execute()
+{
+   real value = getOpValue(OPstack);
+   real result = sqrt(value);
+   OPstack.push(DEBUG_NEW telldata::ttreal(result));
+   return EXEC_NEXT;
+}
+
+//============================================================================
+tellstdfunc::stdPOW::stdPOW(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+}
+
+int tellstdfunc::stdPOW::execute()
+{
+   real valueY = getOpValue(OPstack);
+   real valueX = getOpValue(OPstack);
+   real result = pow(valueX,valueY);
+   OPstack.push(DEBUG_NEW telldata::ttreal(result));
+   return EXEC_NEXT;
+}
+

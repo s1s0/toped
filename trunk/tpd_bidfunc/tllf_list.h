@@ -39,7 +39,13 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSC(stdABS        );
    TELL_STDCMD_CLASSC(stdSIN        );
    TELL_STDCMD_CLASSC(stdCOS        );
-   TELL_STDCMD_CLASSC(stdRINT       );
+
+   TELL_STDCMD_CLASSA(stdROUND      );
+   TELL_STDCMD_CLASSA(stdCEIL       );
+   TELL_STDCMD_CLASSA(stdFLOOR      );
+   TELL_STDCMD_CLASSA(stdFMODULO    );
+   TELL_STDCMD_CLASSA(stdSQRT       );
+   TELL_STDCMD_CLASSA(stdPOW        );
 }
 
 #endif  //TLLF_LIST_H

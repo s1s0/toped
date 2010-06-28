@@ -496,7 +496,12 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    mblock->addFUNC("abs"              ,(DEBUG_NEW                     tellstdfunc::stdABS(telldata::tn_real, true )));
    mblock->addFUNC("sin"              ,(DEBUG_NEW                     tellstdfunc::stdSIN(telldata::tn_real, true )));
    mblock->addFUNC("cos"              ,(DEBUG_NEW                     tellstdfunc::stdCOS(telldata::tn_real, true )));
-   mblock->addFUNC("rint"             ,(DEBUG_NEW                     tellstdfunc::stdRINT(telldata::tn_int, true )));
+   mblock->addFUNC("round"            ,(DEBUG_NEW                    tellstdfunc::stdROUND(telldata::tn_int, true )));
+   mblock->addFUNC("ceil"             ,(DEBUG_NEW                     tellstdfunc::stdCEIL(telldata::tn_int, true )));
+   mblock->addFUNC("floor"            ,(DEBUG_NEW                    tellstdfunc::stdFLOOR(telldata::tn_int, true )));
+   mblock->addFUNC("fmod"             ,(DEBUG_NEW                 tellstdfunc::stdFMODULO(telldata::tn_real, true )));
+   mblock->addFUNC("sqrt"             ,(DEBUG_NEW                    tellstdfunc::stdSQRT(telldata::tn_real, true )));
+   mblock->addFUNC("pow"              ,(DEBUG_NEW                     tellstdfunc::stdPOW(telldata::tn_real, true )));
    mblock->addFUNC("getlaytype"       ,(DEBUG_NEW               tellstdfunc::stdGETLAYTYPE(telldata::tn_int, true )));
    mblock->addFUNC("getlaytext"       ,(DEBUG_NEW         tellstdfunc::stdGETLAYTEXTSTR(telldata::tn_string, true )));
    mblock->addFUNC("getlayref"        ,(DEBUG_NEW          tellstdfunc::stdGETLAYREFSTR(telldata::tn_string, true )));
