@@ -506,6 +506,9 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    mblock->addFUNC("fmod"             ,(DEBUG_NEW                 tellstdfunc::stdFMODULO(telldata::tn_real, true )));
    mblock->addFUNC("sqrt"             ,(DEBUG_NEW                    tellstdfunc::stdSQRT(telldata::tn_real, true )));
    mblock->addFUNC("pow"              ,(DEBUG_NEW                     tellstdfunc::stdPOW(telldata::tn_real, true )));
+   mblock->addFUNC("exp"              ,(DEBUG_NEW                     tellstdfunc::stdEXP(telldata::tn_real, true )));
+   mblock->addFUNC("log"              ,(DEBUG_NEW                     tellstdfunc::stdLOG(telldata::tn_real, true )));
+   mblock->addFUNC("log10"            ,(DEBUG_NEW                   tellstdfunc::stdLOG10(telldata::tn_real, true )));
    mblock->addFUNC("getlaytype"       ,(DEBUG_NEW               tellstdfunc::stdGETLAYTYPE(telldata::tn_int, true )));
    mblock->addFUNC("getlaytext"       ,(DEBUG_NEW         tellstdfunc::stdGETLAYTEXTSTR(telldata::tn_string, true )));
    mblock->addFUNC("getlayref"        ,(DEBUG_NEW          tellstdfunc::stdGETLAYREFSTR(telldata::tn_string, true )));

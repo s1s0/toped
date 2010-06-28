@@ -54,6 +54,10 @@ Documentation
    asin
    acos
    atan
+   
+   exp
+   log
+   log10
 
 
 Global options of the editor

@@ -50,6 +50,10 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(stdFMODULO    );
    TELL_STDCMD_CLASSA(stdSQRT       );
    TELL_STDCMD_CLASSA(stdPOW        );
+
+   TELL_STDCMD_CLASSA(stdEXP        );
+   TELL_STDCMD_CLASSA(stdLOG        );
+   TELL_STDCMD_CLASSA(stdLOG10      );
 }
 
 #endif  //TLLF_LIST_H

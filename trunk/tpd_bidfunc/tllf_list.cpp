@@ -258,3 +258,48 @@ int tellstdfunc::stdPOW::execute()
    return EXEC_NEXT;
 }
 
+//============================================================================
+tellstdfunc::stdEXP::stdEXP(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+}
+
+int tellstdfunc::stdEXP::execute()
+{
+   real value = getOpValue(OPstack);
+   real result = exp(value);
+   OPstack.push(DEBUG_NEW telldata::ttreal(result));
+   return EXEC_NEXT;
+}
+
+//============================================================================
+tellstdfunc::stdLOG::stdLOG(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+}
+
+int tellstdfunc::stdLOG::execute()
+{
+   real value = getOpValue(OPstack);
+   real result = log(value);
+   OPstack.push(DEBUG_NEW telldata::ttreal(result));
+   return EXEC_NEXT;
+}
+
+//============================================================================
+tellstdfunc::stdLOG10::stdLOG10(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+}
+
+int tellstdfunc::stdLOG10::execute()
+{
+   real value = getOpValue(OPstack);
+   real result = log10(value);
+   OPstack.push(DEBUG_NEW telldata::ttreal(result));
+   return EXEC_NEXT;
+}
+
