@@ -223,6 +223,7 @@ class TpdPost {
       static void parseCommand(const wxString);
       static void tellFnAdd(const std::string, void*);
       static void tellFnSort();
+      static void quitApp(bool);
 
    private:
       static wxWindow* _statusBar;
@@ -231,6 +232,7 @@ class TpdPost {
       static wxWindow* _cllBrowser;
       static wxWindow* _cmdLine;
       static wxWindow* _tllFuncList;
+      static wxWindow* _mainWindow;
 };
 
 //===========================================================================

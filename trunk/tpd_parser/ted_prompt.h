@@ -61,7 +61,7 @@ namespace console {
       telldata::typeID         _wait4type;
       wxString                  exp;
    };
-   
+
    class ted_cmd : public wxTextCtrl {
    public:
                               ted_cmd(wxWindow*, wxWindow*);
@@ -71,13 +71,15 @@ namespace console {
       void                    getGUInput(bool from_keyboard = true);
       wxCondition*            threadWaits4;
       miniParser*             puc; // parse user coordinates
-      
+
       void                    getCommand(bool);
       bool                    mouseIN_OK() const            {return _mouseIN_OK;};
       word                    numpoints() const             {return _numpoints;}
       const char*             lastCommand() const           {return _cmd_history.rbegin()->c_str();}
       void                    set_canvas_invalid(bool val)  { _canvas_invalid = val;}
       bool                    canvas_invalid()              {return _canvas_invalid;}
+      void                    setExitRequest(bool val)      { _exitRequested = val;}
+      bool                    exitRequested() const         { return _exitRequested;}
       bool                    cmdHistoryExists() const      {return !_cmd_history.empty();}
       void                    spawnParseThread(wxString);
    private:
@@ -97,6 +99,7 @@ namespace console {
       stringList::const_iterator _history_position;
       wxWindow*               _canvas;
       bool                    _canvas_invalid;
+      bool                    _exitRequested;
       DECLARE_EVENT_TABLE();
    };
 

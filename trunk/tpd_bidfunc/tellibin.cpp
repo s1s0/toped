@@ -340,6 +340,28 @@ int tellstdfunc::getPOINTLIST::execute() {
    else return EXEC_RETURN;
 }
 
+//=============================================================================
+tellstdfunc::stdEXIT::stdEXIT(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{}
+
+int tellstdfunc::stdEXIT::execute()
+{
+   if (_threadExecution)
+   {
+      Console->setExitRequest(true);
+      // Don't log the command. It's getting very messy if it gets
+      // in recovery mode!
+      //LogFile << LogFile.getFN() << "();"; LogFile.flush();
+      return EXEC_ABORT;
+   }
+   else
+   {
+      tell_log(console::MT_WARNING,"exit command in recovery mode ignored");
+      return EXEC_NEXT;
+   }
+}
+
 /*
 UNDO/REDO operation - some preliminary thoughts
    Where to fit it. Two major possibilities here:

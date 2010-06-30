@@ -43,24 +43,24 @@
 #include <sys/time.h>
 #endif
 BEGIN_DECLARE_EVENT_TYPES()
-    DECLARE_EVENT_TYPE(wxEVT_CANVAS_STATUS , 10000)
-    DECLARE_EVENT_TYPE(wxEVT_SETINGSMENU   , 10001)
-    DECLARE_EVENT_TYPE(wxEVT_CMD_BROWSER   , 10002)
-    DECLARE_EVENT_TYPE(wxEVT_LOG_ERRMESSAGE, 10003)
-    DECLARE_EVENT_TYPE(wxEVT_MOUSE_ACCEL   , 10004)
-    DECLARE_EVENT_TYPE(wxEVT_MOUSE_INPUT   , 10005)
-    DECLARE_EVENT_TYPE(wxEVT_CANVAS_ZOOM   , 10006)
-    DECLARE_EVENT_TYPE(wxEVT_FUNC_BROWSER  , 10007)
-    DECLARE_EVENT_TYPE(wxEVT_TPDSTATUS     , 10008)
-    DECLARE_EVENT_TYPE(wxEVT_CANVAS_CURSOR , 10009)
-    DECLARE_EVENT_TYPE(wxEVT_CONSOLE_PARSE , 10010)
-    DECLARE_EVENT_TYPE(wxEVT_CURRENT_LAYER , 10011)
-    DECLARE_EVENT_TYPE(wxEVT_TOOLBARSIZE   , 10012)
-    DECLARE_EVENT_TYPE(wxEVT_TOOLBARDEF    , 10013)
-    DECLARE_EVENT_TYPE(wxEVT_TOOLBARADDITEM, 10014)
-    DECLARE_EVENT_TYPE(wxEVT_TOOLBARDELETEITEM, 10015)
-    DECLARE_EVENT_TYPE(wxEVT_EDITLAYER     , 10016)
-
+    DECLARE_EVENT_TYPE(wxEVT_CANVAS_STATUS      , 10000)
+    DECLARE_EVENT_TYPE(wxEVT_SETINGSMENU        , 10001)
+    DECLARE_EVENT_TYPE(wxEVT_CMD_BROWSER        , 10002)
+    DECLARE_EVENT_TYPE(wxEVT_LOG_ERRMESSAGE     , 10003)
+    DECLARE_EVENT_TYPE(wxEVT_MOUSE_ACCEL        , 10004)
+    DECLARE_EVENT_TYPE(wxEVT_MOUSE_INPUT        , 10005)
+    DECLARE_EVENT_TYPE(wxEVT_CANVAS_ZOOM        , 10006)
+    DECLARE_EVENT_TYPE(wxEVT_FUNC_BROWSER       , 10007)
+    DECLARE_EVENT_TYPE(wxEVT_TPDSTATUS          , 10008)
+    DECLARE_EVENT_TYPE(wxEVT_CANVAS_CURSOR      , 10009)
+    DECLARE_EVENT_TYPE(wxEVT_CONSOLE_PARSE      , 10010)
+    DECLARE_EVENT_TYPE(wxEVT_CURRENT_LAYER      , 10011)
+    DECLARE_EVENT_TYPE(wxEVT_TOOLBARSIZE        , 10012)
+    DECLARE_EVENT_TYPE(wxEVT_TOOLBARDEF         , 10013)
+    DECLARE_EVENT_TYPE(wxEVT_TOOLBARADDITEM     , 10014)
+    DECLARE_EVENT_TYPE(wxEVT_TOOLBARDELETEITEM  , 10015)
+    DECLARE_EVENT_TYPE(wxEVT_EDITLAYER          , 10016)
+    DECLARE_EVENT_TYPE(wxEVT_QUITAPP            , 10017)
 END_DECLARE_EVENT_TYPES()
 
 DEFINE_EVENT_TYPE(wxEVT_CANVAS_STATUS)
@@ -80,6 +80,7 @@ DEFINE_EVENT_TYPE(wxEVT_TOOLBARDEF)
 DEFINE_EVENT_TYPE(wxEVT_TOOLBARADDITEM)
 DEFINE_EVENT_TYPE(wxEVT_TOOLBARDELETEITEM)
 DEFINE_EVENT_TYPE(wxEVT_EDITLAYER)
+DEFINE_EVENT_TYPE(wxEVT_QUITAPP)
 
 console::TELLFuncList*  CmdList = NULL;
 
@@ -89,6 +90,7 @@ wxWindow*               TpdPost::_layBrowser    = NULL;
 wxWindow*               TpdPost::_cllBrowser    = NULL;
 wxWindow*               TpdPost::_cmdLine       = NULL;
 wxWindow*               TpdPost::_tllFuncList   = NULL;
+wxWindow*               TpdPost::_mainWindow    = NULL;
 
 //==============================================================================
 // The ted_log event table
@@ -298,12 +300,13 @@ void console::TopedStatus::OnSize(wxSizeEvent& event)
 
 TpdPost::TpdPost(wxWindow* mainWindow)
 {
-   _statusBar   = mainWindow->FindWindow(tui::ID_TPD_STATUS);
-   _topBrowsers = mainWindow->FindWindow(tui::ID_WIN_BROWSERS);
-   _layBrowser  = mainWindow->FindWindow(tui::ID_PNL_LAYERS);
-   _cllBrowser  = mainWindow->FindWindow(tui::ID_PNL_CELLS);
-   _cmdLine     = mainWindow->FindWindow(tui::ID_CMD_LINE);
-   _tllFuncList = mainWindow->FindWindow(tui::ID_TELL_FUNCS);
+   _mainWindow  = mainWindow;
+   _statusBar   = _mainWindow->FindWindow(tui::ID_TPD_STATUS);
+   _topBrowsers = _mainWindow->FindWindow(tui::ID_WIN_BROWSERS);
+   _layBrowser  = _mainWindow->FindWindow(tui::ID_PNL_LAYERS);
+   _cllBrowser  = _mainWindow->FindWindow(tui::ID_PNL_CELLS);
+   _cmdLine     = _mainWindow->FindWindow(tui::ID_CMD_LINE);
+   _tllFuncList = _mainWindow->FindWindow(tui::ID_TELL_FUNCS);
    CmdList = static_cast<console::TELLFuncList*>(_tllFuncList);
 }
 
@@ -566,6 +569,22 @@ void TpdPost::tellFnSort()
    eventFUNCTION_ADD.SetInt(console::FT_FUNCTION_SORT);
    wxPostEvent(_tllFuncList, eventFUNCTION_ADD);
 }
+
+void TpdPost::quitApp(bool threadExecution)
+{
+   wxCommandEvent eventQUITAPP(wxEVT_QUITAPP);
+   //   eventQUITAPP.SetInt(???);
+   if (threadExecution)
+   {
+      wxPostEvent(_mainWindow, eventQUITAPP);
+   }
+   else
+   {
+      ::wxSafeYield(_mainWindow);
+      _mainWindow->GetEventHandler()->ProcessEvent(eventQUITAPP);
+   }
+}
+
 
 //==============================================================================
 //
