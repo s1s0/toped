@@ -60,6 +60,8 @@ extern const wxEventType         wxEVT_TOOLBARDEF;
 extern const wxEventType         wxEVT_TOOLBARADDITEM;
 extern const wxEventType         wxEVT_TOOLBARDELETEITEM;
 extern const wxEventType         wxEVT_EDITLAYER;
+extern const wxEventType         wxEVT_QUITAPP;
+
 
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
@@ -274,6 +276,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARDELETEITEM, wxID_ANY, tui::TopedFrame::OnToolBarDeleteItem)
    EVT_TECUSTOM_COMMAND(wxEVT_EDITLAYER, wxID_ANY, tui::TopedFrame::OnEditLayer )
    EVT_TEXT_MAXLEN(ID_WIN_TXT_LOG, tui::TopedFrame::OnTextLogOverflow)
+   EVT_TECUSTOM_COMMAND(wxEVT_QUITAPP, wxID_ANY, tui::TopedFrame::OnQuit)
 END_EVENT_TABLE()
 
 // See the FIXME note in the bootom of browsers.cpp
@@ -309,10 +312,10 @@ void tui::TopedFrame::OnClose(wxCloseEvent& event)
                               wxYES_NO | wxCANCEL | wxICON_QUESTION);
          switch (dlg1.ShowModal()) {
             case wxID_YES:{
-               wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, m_windowId);
-               event.SetEventObject(this);
+               wxCommandEvent sevent(wxEVT_CLOSE_WINDOW, m_windowId);
+               sevent.SetEventObject(this);
                //GetEventHandler()->ProcessEvent(event);
-               OnTDTSave(event);
+               OnTDTSave(sevent);
             }
             case wxID_NO: break;
             case wxID_CANCEL: {
@@ -988,7 +991,7 @@ void tui::TopedFrame::OnGDSRead(wxCommandEvent& WXUNUSED(event))
    else SetStatusText(wxT("Parsing aborted"));
 }
 
-void tui::TopedFrame::OnTDTSave(wxCommandEvent& WXUNUSED(event))
+void tui::TopedFrame::OnTDTSave(wxCommandEvent&  callingEvent)
 {
    std::string  tedFileName;
    bool         tedNeverSaved;
@@ -1017,6 +1020,7 @@ void tui::TopedFrame::OnTDTSave(wxCommandEvent& WXUNUSED(event))
    SetStatusText(wxT("Saving file..."));
    wxString ost;
    ost << wxT("tdtsave();");
+   bool threadExecution = (wxEVT_CLOSE_WINDOW != callingEvent.GetEventType());
    if (datafile.FileExists() && tedNeverSaved)
    {
       wxMessageDialog dlg1(this,
@@ -1024,11 +1028,11 @@ void tui::TopedFrame::OnTDTSave(wxCommandEvent& WXUNUSED(event))
          wxT("Toped"),
          wxYES_NO | wxICON_QUESTION);
       switch (dlg1.ShowModal()) {
-         case wxID_YES:_cmdline->parseCommand(ost); //Overwrite;
+         case wxID_YES:_cmdline->parseCommand(ost, threadExecution); //Overwrite;
          case wxID_NO: return;
       }
    }
-   else _cmdline->parseCommand(ost);;
+   else _cmdline->parseCommand(ost, threadExecution);
 //   SetStatusText(wxT("Design saved"));
 }
 

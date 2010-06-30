@@ -310,16 +310,24 @@ void* console::parse_thread::Entry()
    }
 
    _mutex.Unlock();
-   if (Console->canvas_invalid())
+   if (Console->exitRequested())
    {
-      wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
-      eventZOOM.SetInt(tui::ZOOM_REFRESH);
-      wxPostEvent(_canvas_wnd, eventZOOM);
-      Console->set_canvas_invalid(false);
+      Console->setExitRequest(false);
+      TpdPost::quitApp(true);
    }
-   TpdPost::toped_status(TSTS_THREADOFF);
+   else
+   {
+      if (Console->canvas_invalid())
+      {
+         wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+         eventZOOM.SetInt(tui::ZOOM_REFRESH);
+         wxPostEvent(_canvas_wnd, eventZOOM);
+         Console->set_canvas_invalid(false);
+      }
+      TpdPost::toped_status(TSTS_THREADOFF);
+   //   wxLogMessage(_T("Mutex unlocked"));
+   }
    parsercmd::cmdSTDFUNC::setThreadExecution(false);
-//   wxLogMessage(_T("Mutex unlocked"));
    return NULL;
 };
 
@@ -338,6 +346,7 @@ console::ted_cmd::ted_cmd(wxWindow *parent, wxWindow *canvas) :
                   wxTE_PROCESS_ENTER | wxNO_BORDER), puc(NULL), _numpoints(0)
 {
    _canvas = canvas;
+   _exitRequested = false;
    threadWaits4 = DEBUG_NEW wxCondition(parse_thread::_mutex);
    VERIFY(threadWaits4->IsOk());
    _mouseIN_OK = true;
@@ -397,6 +406,8 @@ void console::ted_cmd::getCommand(bool thread)
             //@TODO check for available dynamic memory
             // see the same comment @line 307
          }
+         // Make sure that exit command didn't get trough
+         assert(!exitRequested());
       }
       else
          spawnParseThread(command);
