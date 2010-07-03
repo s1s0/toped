@@ -28,6 +28,9 @@
 #include "tpdph.h"
 #include <wx/wx.h>
 #include <wx/regex.h>
+#include <wx/wfstream.h>
+#include <wx/zipstrm.h>
+#include <wx/zstream.h>
 #include <sstream>
 #include "datacenter.h"
 #include "outbox.h"
@@ -72,6 +75,9 @@ DataCenter::~DataCenter()
 bool DataCenter::GDSparse(std::string filename)
 {
    bool status = true;
+   std::string unzippedfn;
+//   if (unZip2Temp(unzippedfn, filename))
+//      filename = unzippedfn;
 
    GDSin::GdsInFile* AGDSDB = NULL;
    if (lockGds(AGDSDB))
@@ -847,7 +853,7 @@ void DataCenter::openGlRender(const CTM& layCTM)
             //_DRCDB->openGlDraw(_properties.drawprop());
             //TODO the block below should get into the line above
 
-            if(_DRCDB)  
+            if(_DRCDB)
             {
                if (wxMUTEX_NO_ERROR == _DRCLock.TryLock())
                {
@@ -1000,4 +1006,58 @@ LayerMapExt* DataCenter::secureGdsLayMap(const layprop::DrawProperties* drawProp
          theGdsMap = DEBUG_NEW LayerMapExt(*savedMap, NULL);
    }
    return theGdsMap;
+}
+
+bool DataCenter::unZip2Temp(std::string& inflatedFN, const std::string deflatedFN)
+{
+   // Initialize an input stream - i.e. open the input file
+   wxFFileInputStream inStream(wxString(deflatedFN.c_str(), wxConvUTF8));
+   if (!inStream.Ok())
+   {
+      // input file does not exist
+      return false;
+   }
+   // Create an input zip stream handling over the input file stream created above
+   wxZipInputStream inZipStream(inStream);
+   if (1 < inZipStream.GetTotalEntries()) return false;
+   wxZipEntry* curZipEntry = inZipStream.GetNextEntry();
+   if (NULL != curZipEntry)
+   {
+      wxFile* outFileHandler = NULL;
+      wxString wxInflatedFN = wxFileName::CreateTempFileName(curZipEntry->GetName(), outFileHandler);
+      wxFileOutputStream outStream(wxInflatedFN);
+      if (outStream.IsOk())
+      {
+         inZipStream.Read(outStream);
+         inflatedFN = std::string(wxInflatedFN.mb_str(wxConvUTF8));
+         return true;
+      }
+      else return false;
+   }
+   else
+      return false;
+}
+
+bool DataCenter::unZlib2Temp(std::string& inflatedFN, const std::string deflatedFN)
+{
+   // Initialize an input stream - i.e. open the input file
+   wxFFileInputStream inStream(wxString(deflatedFN.c_str(), wxConvUTF8));
+   if (!inStream.Ok())
+   {
+      // input file does not exist
+      return false;
+   }
+   // Create an input zlib stream handling over the input file stream created above
+   wxZlibInputStream inZlibStream(inStream);
+   wxFile* outFileHandler = NULL;
+   wxString wxInflatedFN = wxFileName::CreateTempFileName(wxString(), outFileHandler);
+   wxFileOutputStream outStream(wxInflatedFN);
+   if (outStream.IsOk())
+   {
+      inZlibStream.Read(outStream);
+      if (!inZlibStream.IsOk()) return false;
+      inflatedFN = std::string(wxInflatedFN.mb_str(wxConvUTF8));
+      return true;
+   }
+   else return false;
 }
