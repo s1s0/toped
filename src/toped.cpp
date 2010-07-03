@@ -974,8 +974,11 @@ void tui::TopedFrame::OnTELLRead(wxCommandEvent& evt)
 
 void tui::TopedFrame::OnGDSRead(wxCommandEvent& WXUNUSED(event))
 {
-   wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
-                     wxT("Stream files(*.gds;*.sf)|*.gds;*.sf;*.GDS;*.SF|All files(*.*)|*.*"),
+   wxString dbfext;
+   dbfext << wxT("Stream files(*.gds;*.sf)|*.gds;*.sf;*.GDS;*.SF")
+          << wxT("|Ziped files(*.gz; *.zip)|*.gz;*.zip;*.GZ;*.ZIP")
+          << wxT("|All files(*.*)|*.*");
+   wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""), dbfext,
       tpdfOPEN);
    if (wxID_OK == dlg2.ShowModal())
    {
@@ -1226,8 +1229,12 @@ void tui::TopedFrame::OnGDStranslate(wxCommandEvent& WXUNUSED(event)) {
 
 void tui::TopedFrame::OnGDSimport(wxCommandEvent& WXUNUSED(event))
 {
-   wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
-                     wxT("Stream files(*.gds;*.sf)|*.gds;*.sf;*.GDS;*.SF|All files(*.*)|*.*"),
+   wxString dbfext;
+   dbfext << wxT("Stream files(*.gds;*.sf)|*.gds;*.sf;*.GDS;*.SF")
+          << wxT("|Ziped files(*.gz; *.zip)|*.gz;*.zip;*.GZ;*.ZIP")
+          << wxT("|All files(*.*)|*.*");
+   wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""), dbfext,
+//                     wxT("Stream files(*.gds;*.sf)|*.gds;*.sf;*.GDS;*.SF|All files(*.*)|*.*"),
                          tpdfOPEN);
    if (wxID_OK != dlg2.ShowModal())
    {

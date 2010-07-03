@@ -75,10 +75,39 @@ DataCenter::~DataCenter()
 bool DataCenter::GDSparse(std::string filename)
 {
    bool status = true;
-   std::string unzippedfn;
-//   if (unZip2Temp(unzippedfn, filename))
-//      filename = unzippedfn;
-
+   wxFileName wxGdsFN(wxString(filename.c_str(), wxConvUTF8));
+   wxGdsFN.Normalize();
+   if (!wxGdsFN.IsOk())
+   {
+      std::ostringstream info;
+      info << "Invalid filename \"" << filename << "\"";
+      tell_log(console::MT_ERROR,info.str());
+      return false;
+   }
+   wxString theExtention = wxGdsFN.GetExt();
+   bool gzipped = (wxT("gz") == wxGdsFN.GetExt());
+   bool zipped  = (wxT("zip") == wxGdsFN.GetExt());
+   if (zipped)
+   {
+      std::ostringstream info;
+      info << "Inflating the archive \"" << filename << "\" ...";
+      tell_log(console::MT_INFO,info.str());
+      wxString unzippedfn;
+      if (unZip2Temp(unzippedfn, wxGdsFN.GetFullPath()))
+      {
+         info.str("");
+         info << "Done";
+         tell_log(console::MT_INFO,info.str());
+         wxGdsFN = unzippedfn;
+      }
+      else
+      {
+         info.str("");
+         info << "Failed!";
+         tell_log(console::MT_ERROR,info.str());
+         return false;
+      }
+   }
    GDSin::GdsInFile* AGDSDB = NULL;
    if (lockGds(AGDSDB))
    {
@@ -91,7 +120,7 @@ bool DataCenter::GDSparse(std::string filename)
 #ifdef GDSCONVERT_PROFILING
       HiResTimer profTimer;
 #endif
-      AGDSDB = DEBUG_NEW GDSin::GdsInFile(filename);
+      AGDSDB = DEBUG_NEW GDSin::GdsInFile(wxGdsFN.GetFullPath(), gzipped);
 #ifdef GDSCONVERT_PROFILING
       profTimer.report("Time elapsed for GDS parse: ");
 #endif
@@ -1008,10 +1037,10 @@ LayerMapExt* DataCenter::secureGdsLayMap(const layprop::DrawProperties* drawProp
    return theGdsMap;
 }
 
-bool DataCenter::unZip2Temp(std::string& inflatedFN, const std::string deflatedFN)
+bool DataCenter::unZip2Temp(wxString& inflatedFN, const wxString deflatedFN)
 {
    // Initialize an input stream - i.e. open the input file
-   wxFFileInputStream inStream(wxString(deflatedFN.c_str(), wxConvUTF8));
+   wxFFileInputStream inStream(deflatedFN);
    if (!inStream.Ok())
    {
       // input file does not exist
@@ -1024,12 +1053,11 @@ bool DataCenter::unZip2Temp(std::string& inflatedFN, const std::string deflatedF
    if (NULL != curZipEntry)
    {
       wxFile* outFileHandler = NULL;
-      wxString wxInflatedFN = wxFileName::CreateTempFileName(curZipEntry->GetName(), outFileHandler);
-      wxFileOutputStream outStream(wxInflatedFN);
+      inflatedFN = wxFileName::CreateTempFileName(curZipEntry->GetName(), outFileHandler);
+      wxFileOutputStream outStream(inflatedFN);
       if (outStream.IsOk())
       {
          inZipStream.Read(outStream);
-         inflatedFN = std::string(wxInflatedFN.mb_str(wxConvUTF8));
          return true;
       }
       else return false;

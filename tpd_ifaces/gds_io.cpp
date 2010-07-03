@@ -310,18 +310,17 @@ GDSin::GdsRecord::~GdsRecord()
 //==============================================================================
 // class GdsInFile
 //==============================================================================
-GDSin::GdsInFile::GdsInFile(std::string fn, bool gziped)
+GDSin::GdsInFile::GdsInFile(wxString wxfname, bool gziped)
 {
    _hierTree      = NULL;
    _gdsiiWarnings = 0;
-   _fileName      = fn;
+   _fileName      = std::string(wxfname.mb_str(wxConvUTF8));
    _filePos       = 0;
    _prgrs_pos     = 0;
    _library       = NULL;
    _gziped        = gziped;
    _cRecord = DEBUG_NEW GdsRecord();
-   tell_log(console::MT_INFO, std::string("GDSII input file: \"") + fn + std::string("\""));
-   wxString wxfname(_fileName.c_str(), wxConvUTF8 );
+   tell_log(console::MT_INFO, std::string("GDSII input file: \"") + _fileName + std::string("\""));
    if (_gziped)
    {
       wxInputStream* fstream = DEBUG_NEW wxFFileInputStream(wxfname,wxT("rb"));
@@ -337,8 +336,8 @@ GDSin::GdsInFile::GdsInFile(std::string fn, bool gziped)
       return;
    }
    wxFileOffset _fileLength = _gdsFh->GetLength();
-   // The size of GDSII files is originaly multiple by 2048. This is
-   // coming from the acient years when this format was supposed to be written
+   // The size of GDSII files is originally multiple by 2048. This is
+   // coming from the ancient years when this format was supposed to be written
    // on the magnetic tapes. In order to keep the tradition it's a good idea
    // to check the file size and to issue a warning if it is not multiple on 2048.
 //   div_t divi = div(file_length,2048);
@@ -502,7 +501,7 @@ void GDSin::GdsInFile::hierOut()
 void GDSin::GdsInFile::setPosition(wxFileOffset filePos)
 {
    wxFileOffset result = _gdsFh->SeekI(filePos, wxFromStart);
-   assert(wxInvalidOffset == result);
+   assert(wxInvalidOffset != result);
 }
 
 void GDSin::GdsInFile::getTimes(GdsRecord *wr)
@@ -568,7 +567,8 @@ bool GDSin::GdsInFile::getNextRecord()
    word reclen = *(word*)rl - 4; // record length
 //   GdsRecord* retrec = DEBUG_NEW GdsRecord(_gdsFh, reclen, recheader[2],recheader[3]);
    _cRecord->getNextRecord(_gdsFh, reclen, recheader[2],recheader[3]);
-   _filePos += reclen + 4;    // update file position
+   _filePos = _gdsFh->TellI();
+//   _filePos += reclen + 4;    // update file position
    if (2048 < (_filePos - _prgrs_pos))
    {
       _prgrs_pos = _filePos;

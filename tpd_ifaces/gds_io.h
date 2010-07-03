@@ -216,7 +216,7 @@ namespace GDSin {
    ******************************************************************************/
    class   GdsInFile   {
       public:
-                              GdsInFile(std::string, bool gziped = false);
+                              GdsInFile(wxString, bool gziped = false);
          bool                 reopenFile();
          bool                 getNextRecord();
          double               libUnits();
