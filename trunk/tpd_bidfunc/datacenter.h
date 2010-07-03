@@ -93,7 +93,7 @@ protected:
    void                       openGlDraw(const CTM&);
    void                       openGlRender(const CTM&); // alternative to openGlDraw
 private:
-   bool                       unZip2Temp(std::string&, const std::string); //! unzip the input file in a temporary file
+   bool                       unZip2Temp(wxString&, const wxString); //! unzip the input file in a temporary file
    word                       _curcmdlay;    //! layer used during current drawing operation
    bool                       _drawruler;    //! draw a ruler while composing a shape interactively
    std::string                _localDir;
