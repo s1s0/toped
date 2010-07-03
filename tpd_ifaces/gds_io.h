@@ -29,6 +29,7 @@
 
 #include <stdio.h>
 #include <wx/ffile.h>
+#include <wx/wfstream.h>
 #include "ttt.h"
 #include "tedstd.h"
 
@@ -155,7 +156,7 @@ namespace GDSin {
       public:
                            GdsRecord();
                            GdsRecord(byte rt, byte dt, word rl);
-         void              getNextRecord(wxFFile& Gf, word rl, byte rt, byte dt);
+         void              getNextRecord(wxInputStream* Gf, word rl, byte rt, byte dt);
          bool              retData(void* var, word curnum = 0, byte len = 0) const;
          size_t            flush(wxFFile& Gf);
          void              add_int2b(const word);
@@ -215,7 +216,7 @@ namespace GDSin {
    ******************************************************************************/
    class   GdsInFile   {
       public:
-                              GdsInFile(std::string);
+                              GdsInFile(std::string, bool gziped = false);
          bool                 reopenFile();
          bool                 getNextRecord();
          double               libUnits();
@@ -235,7 +236,8 @@ namespace GDSin {
                               ~GdsInFile();
       protected:
          void                 getTimes(GdsRecord* wr);
-         wxFFile              _gdsFh;
+         bool                 unZlib2Temp(wxString&, const wxString);
+         wxInputStream*       _gdsFh;
          std::string          _fileName;
          int2b                _streamVersion;
          int2b                _libDirSize;
@@ -248,6 +250,7 @@ namespace GDSin {
          TpdTime              _tAccess;
          wxFileOffset         _prgrs_pos;
          GdsRecord*           _cRecord;
+         bool                 _gziped;
    };
 
 

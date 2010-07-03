@@ -30,6 +30,9 @@
 #include <sstream>
 #include <string>
 #include <time.h>
+#include <wx/filename.h>
+#include <wx/zstream.h>
+#include <wx/stream.h>
 #include "gds_io.h"
 #include "outbox.h"
 #include "tedat.h"
@@ -59,12 +62,13 @@ GDSin::GdsRecord::GdsRecord(byte rt, byte dt, word rl)
    _record[_index++] = _dataType;
 }
 
-void GDSin::GdsRecord::getNextRecord(wxFFile& Gf, word rl, byte rt, byte dt)
+void GDSin::GdsRecord::getNextRecord(wxInputStream* Gf, word rl, byte rt, byte dt)
 {
    _recLen = rl; _recType = rt; _dataType = dt;
    if (rl)
    {
-      _numread = Gf.Read(_record, _recLen);
+      Gf->Read(_record, _recLen);
+      _numread = Gf->LastRead();
       _valid = (_numread == _recLen) ? true : false;
    }
    else
@@ -306,26 +310,33 @@ GDSin::GdsRecord::~GdsRecord()
 //==============================================================================
 // class GdsInFile
 //==============================================================================
-GDSin::GdsInFile::GdsInFile(std::string fn)
+GDSin::GdsInFile::GdsInFile(std::string fn, bool gziped)
 {
-   _hierTree = NULL;
+   _hierTree      = NULL;
    _gdsiiWarnings = 0;
-   _fileName = fn;
-   _filePos = 0;
-   _prgrs_pos = 0;
-   _library = NULL;
+   _fileName      = fn;
+   _filePos       = 0;
+   _prgrs_pos     = 0;
+   _library       = NULL;
+   _gziped        = gziped;
    _cRecord = DEBUG_NEW GdsRecord();
    tell_log(console::MT_INFO, std::string("GDSII input file: \"") + fn + std::string("\""));
    wxString wxfname(_fileName.c_str(), wxConvUTF8 );
-   _gdsFh.Open(wxfname.c_str(),wxT("rb"));
+   if (_gziped)
+   {
+      wxInputStream* fstream = DEBUG_NEW wxFFileInputStream(wxfname,wxT("rb"));
+      _gdsFh = DEBUG_NEW wxZlibInputStream(fstream);
+   }
+   else
+      _gdsFh = DEBUG_NEW wxFFileInputStream(wxfname,wxT("rb"));
    std::ostringstream info;
-   if (!(_gdsFh.IsOpened()))
+   if (!(_gdsFh->IsOk()))
    {// open the input file
       info << "File "<< _fileName <<" can NOT be opened";
       tell_log(console::MT_ERROR,info.str());
       return;
    }
-   wxFileOffset _fileLength = _gdsFh.Length();
+   wxFileOffset _fileLength = _gdsFh->GetLength();
    // The size of GDSII files is originaly multiple by 2048. This is
    // coming from the acient years when this format was supposed to be written
    // on the magnetic tapes. In order to keep the tradition it's a good idea
@@ -382,21 +393,88 @@ bool GDSin::GdsInFile::reopenFile()
    _prgrs_pos = 0;
    _cRecord = DEBUG_NEW GdsRecord();
    wxString wxfname(_fileName.c_str(), wxConvUTF8 );
-   _gdsFh.Open(wxfname.c_str(),wxT("rb"));
-   if (!(_gdsFh.IsOpened()))
+
+   if (_gziped)
+   {
+      wxString inflatedfn;
+      if (unZlib2Temp(inflatedfn, wxfname))
+      {
+         _gdsFh = DEBUG_NEW wxFFileInputStream(inflatedfn,wxT("rb"));
+//      wxInputStream* fstream = DEBUG_NEW wxFFileInputStream(wxfname,wxT("rb"));
+//      _gdsFh = DEBUG_NEW wxZlibInputStream(fstream);
+      }
+      else return false;
+   }
+   else
+      _gdsFh = DEBUG_NEW wxFFileInputStream(wxfname,wxT("rb"));
+   if (!(_gdsFh->IsOk()))
    {// open the input file
       std::ostringstream info;
       info << "File "<< _fileName <<" can NOT be reopened";
       tell_log(console::MT_ERROR,info.str());
       return false;
    }
+   if (!(_gdsFh->IsSeekable()))
+   {
+      std::ostringstream info;
+      info << "The input stream in not seekable. Can't continue";
+      tell_log(console::MT_ERROR,info.str());
+      return false;
+   }
    return true;
+}
+
+bool GDSin::GdsInFile::unZlib2Temp(wxString& inflatedFN, const wxString deflatedFN)
+{
+   std::ostringstream info;
+   // Initialize an input stream - i.e. open the input file
+   wxFFileInputStream inStream(deflatedFN);
+   if (!inStream.Ok())
+   {
+      info << "Can't open the file " << deflatedFN;
+      tell_log(console::MT_ERROR,info.str());
+      return false;
+   }
+   // Create an input zlib stream handling over the input file stream created above
+   wxZlibInputStream inZlibStream(inStream);
+   wxFile* outFileHandler = NULL;
+   inflatedFN = wxFileName::CreateTempFileName(wxString(), outFileHandler);
+   wxFileOutputStream outStream(inflatedFN);
+   if (outStream.IsOk())
+   {
+      info << " Inflating ... ";
+      tell_log(console::MT_INFO,info.str());
+      inZlibStream.Read(outStream);
+      wxStreamError izlsStatus = inZlibStream.GetLastError();
+      if (wxSTREAM_EOF == izlsStatus)
+      {
+         info.str("");
+         info << " Done ";
+         tell_log(console::MT_INFO,info.str());
+         return true;
+      }
+      else
+      {
+         info << " Inflating finished with status " << izlsStatus << ". Can't continue";
+         tell_log(console::MT_ERROR,info.str());
+         return false;
+      }
+   }
+   else
+   {
+      info << "Can't create a temporary file for deflating. Bailing out. ";
+      tell_log(console::MT_ERROR,info.str());
+      return false;
+   }
 }
 
 void GDSin::GdsInFile::closeFile()
 {
-   if (_gdsFh.IsOpened())
-      _gdsFh.Close();
+   if ( NULL != _gdsFh )
+   {
+      delete _gdsFh;
+      _gdsFh = NULL;
+   }
    if (NULL != _cRecord)
       delete _cRecord;
 }
@@ -423,7 +501,8 @@ void GDSin::GdsInFile::hierOut()
 
 void GDSin::GdsInFile::setPosition(wxFileOffset filePos)
 {
-   _gdsFh.Seek(filePos, wxFromStart);
+   wxFileOffset result = _gdsFh->SeekI(filePos, wxFromStart);
+   assert(wxInvalidOffset == result);
 }
 
 void GDSin::GdsInFile::getTimes(GdsRecord *wr)
@@ -479,13 +558,14 @@ void GDSin::GdsInFile::getTimes(GdsRecord *wr)
 bool GDSin::GdsInFile::getNextRecord()
 {
    char recheader[4]; // record header
-   size_t numread = _gdsFh.Read(&recheader,4);// read record header
+   _gdsFh->Read(&recheader,4);// read record header
+   size_t numread = _gdsFh->LastRead();
    if (numread != 4)
       return false;// error during read in
    char rl[2];
    rl[0] = recheader[1];
    rl[1] = recheader[0];
-   word reclen = *(word*)rl - 4; // record lenght
+   word reclen = *(word*)rl - 4; // record length
 //   GdsRecord* retrec = DEBUG_NEW GdsRecord(_gdsFh, reclen, recheader[2],recheader[3]);
    _cRecord->getNextRecord(_gdsFh, reclen, recheader[2],recheader[3]);
    _filePos += reclen + 4;    // update file position
