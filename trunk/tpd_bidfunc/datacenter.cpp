@@ -1038,26 +1038,3 @@ bool DataCenter::unZip2Temp(std::string& inflatedFN, const std::string deflatedF
       return false;
 }
 
-bool DataCenter::unZlib2Temp(std::string& inflatedFN, const std::string deflatedFN)
-{
-   // Initialize an input stream - i.e. open the input file
-   wxFFileInputStream inStream(wxString(deflatedFN.c_str(), wxConvUTF8));
-   if (!inStream.Ok())
-   {
-      // input file does not exist
-      return false;
-   }
-   // Create an input zlib stream handling over the input file stream created above
-   wxZlibInputStream inZlibStream(inStream);
-   wxFile* outFileHandler = NULL;
-   wxString wxInflatedFN = wxFileName::CreateTempFileName(wxString(), outFileHandler);
-   wxFileOutputStream outStream(wxInflatedFN);
-   if (outStream.IsOk())
-   {
-      inZlibStream.Read(outStream);
-      if (!inZlibStream.IsOk()) return false;
-      inflatedFN = std::string(wxInflatedFN.mb_str(wxConvUTF8));
-      return true;
-   }
-   else return false;
-}
