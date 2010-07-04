@@ -324,9 +324,9 @@ void tui::TopedFrame::OnClose(wxCloseEvent& event)
             }
          }
       }
-      delete this;
+      Destroy();
    }
-   else delete this;
+   Destroy();
 }
 
 tui::TopedFrame::~TopedFrame() {
