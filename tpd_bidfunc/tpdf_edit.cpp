@@ -160,12 +160,8 @@ void tellstdfunc::stdMOVESEL::undo()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      laydata::SelectList* slst = get_ttlaylist(failed);
-      tDesign->unselectFromList(slst, unselable);
-      delete slst;
-      slst = get_ttlaylist(added);
-      tDesign->unselectFromList(slst, unselable);
-      delete slst;
+      tDesign->unselectFromList(get_ttlaylist(failed), unselable);
+      tDesign->unselectFromList(get_ttlaylist(added), unselable);
       laydata::SelectList* fadead[3];
       byte i;
       for (i = 0; i < 3; fadead[i++] = DEBUG_NEW laydata::SelectList());
@@ -308,13 +304,8 @@ void tellstdfunc::stdROTATESEL::undo()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-
-      laydata::SelectList* slst = get_ttlaylist(failed);
-      tDesign->unselectFromList(slst, unselable);
-      delete slst;
-      slst = get_ttlaylist(added);
-      tDesign->unselectFromList(slst, unselable);
-      delete slst;
+      tDesign->unselectFromList(get_ttlaylist(failed), unselable);
+      tDesign->unselectFromList(get_ttlaylist(added), unselable);
       laydata::SelectList* fadead[3];
       byte i;
       for (i = 0; i < 3; fadead[i++] = DEBUG_NEW laydata::SelectList());

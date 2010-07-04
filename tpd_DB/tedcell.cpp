@@ -972,6 +972,7 @@ void laydata::TdtCell::selectFromList(SelectList* slist, const DWordSet& unselab
       // take care to clean up the memory from the unselect list
       delete CUL->second;
    }
+   delete unslist;
 }
 
 bool laydata::TdtCell::copySelected(laydata::TdtDesign* ATDB, const CTM& trans)
