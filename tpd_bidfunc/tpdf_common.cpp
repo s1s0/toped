@@ -229,6 +229,27 @@ laydata::AtticList* tellstdfunc::get_shlaylist(telldata::ttlist* llist) {
    return shapesel;
 }
 
+//=============================================================================
+laydata::DataList* tellstdfunc::copyDataList(const laydata::DataList* dlist)
+{
+   laydata::DataList* clist = DEBUG_NEW laydata::DataList();
+   for (laydata::DataList::const_iterator CDI = dlist->begin(); CDI != dlist->end(); CDI++)
+   {
+      clist->push_back(laydata::SelectDataPair(CDI->first, CDI->second));
+   }
+   return clist;
+}
+
+//=============================================================================
+laydata::SelectList* tellstdfunc::copySelectList(const laydata::SelectList* dlist)
+{
+   laydata::SelectList* clist = DEBUG_NEW laydata::SelectList();
+   for (laydata::SelectList::const_iterator CDI = dlist->begin(); CDI != dlist->end(); CDI++)
+   {
+      (*clist)[CDI->first] = copyDataList(CDI->second);
+   }
+   return clist;
+}
 
 /** Filters shapeSel using the mask. Returns new list, containing copy of
 unfiltered components

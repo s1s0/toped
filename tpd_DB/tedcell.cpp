@@ -964,7 +964,8 @@ void laydata::TdtCell::selectFromList(SelectList* slist, const DWordSet& unselab
          }
          // at the end, if the container of the selected shapes is empty -
          // delete it
-         if (lslct->empty()) {
+         if ((NULL != lslct) && lslct->empty()) 
+         {
             delete lslct; _shapesel.erase(_shapesel.find(CUL->first));
          }
       }
