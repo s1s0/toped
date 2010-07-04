@@ -1,4 +1,4 @@
-#A memo about the amount of memory taken by the objects
+#summary A memo about the amount of memory taken by the objects
 
 <p align=right> *25/04/2010*
 </p>
