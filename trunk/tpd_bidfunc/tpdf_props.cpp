@@ -425,14 +425,25 @@ int tellstdfunc::stdHIDELAYERS::execute()
             else if (hide ^ drawProp->layerHidden(laynumber->value()))
             {
                if (hide && (listselected->end() != listselected->find(laynumber->value())))
+               {
+//                  (*todslct)[laynumber->value()] = copyDataList((*listselected)[laynumber->value()]);
                   (*todslct)[laynumber->value()] = DEBUG_NEW laydata::DataList(*((*listselected)[laynumber->value()]));
+               }
                TpdPost::layer_status(tui::BT_LAYER_HIDE, laynumber->value(), hide);
                undolaylist->add(DEBUG_NEW telldata::ttint(*laynumber));
             }
          }
          // Now unselect the shapes in the target layers
          drawProp->allUnselectable(unselable);
-         tDesign->unselectFromList(todslct, unselable);
+         // An ugly patch here (Issue 62) unselectFromList cleans the contents of 
+         // its first parameter (not a good idea) and if we simply supply the original
+         // todslct - it will be corrupted after unselectFromList and can't be used further
+         // down to create the undo objects.
+         // TODO! Try to clean-up the root of the problem following a simple policy - 
+         // delete where the object is created (if possible)
+         laydata::SelectList* dummy = copySelectList(todslct);
+         tDesign->unselectFromList(dummy, unselable);
+         delete dummy;
          UpdateLV(tDesign->numSelected());
       }
       DATC->unlockTDT(dbLibDir);

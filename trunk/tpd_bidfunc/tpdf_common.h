@@ -150,6 +150,8 @@ namespace tellstdfunc {
    telldata::ttlist*    make_ttlaylist(laydata::AtticList*);
    laydata::SelectList* get_ttlaylist(telldata::ttlist* llist);
    laydata::AtticList*  get_shlaylist(telldata::ttlist* llist);
+   laydata::DataList*   copyDataList(const laydata::DataList* dlist);
+   laydata::SelectList* copySelectList(const laydata::SelectList* dlist);
    void                 clean_ttlaylist(telldata::ttlist* llist);
    void                 clean_atticlist(laydata::AtticList*, bool destroy = false);
    void                 UpdateLV(unsigned int);
