@@ -252,18 +252,8 @@ laydata::SelectList* tellstdfunc::copySelectList(const laydata::SelectList* dlis
 }
 
 //=============================================================================
-/*!
- * Use with caution! introduced with the patch for Issue 62 to clean-up the
- * leakages after the fix (Search the project for "Issue 62" for more info).
- * Because of the way unselectFromList() is implemented - it effectively includes
- * the deep cleaning which this function implements.
- * The function shall be considered as a patch until the unselectFromList() is not
- * changed.
- */
-
 void tellstdfunc::cleanSelectList(laydata::SelectList* dlist)
 {
-   laydata::SelectList* clist = DEBUG_NEW laydata::SelectList();
    for (laydata::SelectList::const_iterator CDI = dlist->begin(); CDI != dlist->end(); CDI++)
    {
       delete CDI->second;
