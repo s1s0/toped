@@ -327,7 +327,12 @@ tellstdfunc::stdASINH::stdASINH(telldata::typeID retype, bool eor) :
 int tellstdfunc::stdASINH::execute()
 {
    real value = getOpValue(OPstack);
+#ifdef WIN32
+   real result = log(value + sqrt(value*value + 1.0));
+   OPstack.push(DEBUG_NEW telldata::ttreal(result));
+#elif
    OPstack.push(DEBUG_NEW telldata::ttreal(asinh(value)));
+#endif
    return EXEC_NEXT;
 }
 
@@ -355,7 +360,12 @@ tellstdfunc::stdACOSH::stdACOSH(telldata::typeID retype, bool eor) :
 int tellstdfunc::stdACOSH::execute()
 {
    real value = getOpValue(OPstack);
+#ifdef WIN32
+   real result = log( value + sqrt( value*value - 1.0));
+   OPstack.push(DEBUG_NEW telldata::ttreal(result));
+#elif
    OPstack.push(DEBUG_NEW telldata::ttreal(acosh(value)));
+#endif
    return EXEC_NEXT;
 }
 
@@ -383,6 +393,11 @@ tellstdfunc::stdATANH::stdATANH(telldata::typeID retype, bool eor) :
 int tellstdfunc::stdATANH::execute()
 {
    real value = getOpValue(OPstack);
+#ifdef WIN32
+   real result = log((1.0 + value) / (1.0 - value)) / 2.0;
+   OPstack.push(DEBUG_NEW telldata::ttreal(result));
+#elif
    OPstack.push(DEBUG_NEW telldata::ttreal(atanh(value)));
+#endif
    return EXEC_NEXT;
 }
