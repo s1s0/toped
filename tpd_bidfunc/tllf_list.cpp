@@ -330,7 +330,7 @@ int tellstdfunc::stdASINH::execute()
 #ifdef WIN32
    real result = log(value + sqrt(value*value + 1.0));
    OPstack.push(DEBUG_NEW telldata::ttreal(result));
-#elif
+#else
    OPstack.push(DEBUG_NEW telldata::ttreal(asinh(value)));
 #endif
    return EXEC_NEXT;
@@ -363,7 +363,7 @@ int tellstdfunc::stdACOSH::execute()
 #ifdef WIN32
    real result = log( value + sqrt( value*value - 1.0));
    OPstack.push(DEBUG_NEW telldata::ttreal(result));
-#elif
+#else
    OPstack.push(DEBUG_NEW telldata::ttreal(acosh(value)));
 #endif
    return EXEC_NEXT;
@@ -396,7 +396,7 @@ int tellstdfunc::stdATANH::execute()
 #ifdef WIN32
    real result = log((1.0 + value) / (1.0 - value)) / 2.0;
    OPstack.push(DEBUG_NEW telldata::ttreal(result));
-#elif
+#else
    OPstack.push(DEBUG_NEW telldata::ttreal(atanh(value)));
 #endif
    return EXEC_NEXT;
