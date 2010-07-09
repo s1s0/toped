@@ -18,7 +18,7 @@
 Name "toped"
 
 ; The file to write
-OutFile "toped_install.exe"
+OutFile "toped_install-0.9.65r1580.exe"
 
 ; The default installation directory
 InstallDir $PROGRAMFILES\toped
@@ -61,7 +61,7 @@ Section "toped" toped
   File "release\toped.exe"
   File "winpack\glu32.dll"
   File "toped_example.bat"
-  File "winpack\authors"
+  File "winpack\authors.txt"
   File "winpack\news.txt"
   File "winpack\readme.txt"
   File "winpack\glew32.dll"
@@ -257,8 +257,8 @@ FunctionEnd
 !insertmacro MUI_LANGUAGE "English"
   ;Language strings
   LangString DESC_Toped ${LANG_ENGLISH} "Main files of Toped Layout Editor"
-  LangString DESC_Start_Menu_Shortcuts ${LANG_ENGLISH} "Adds icons to your start menu"
-  LangString DESC_Desktop_Shortcut ${LANG_ENGLISH} "Adds icon to your desktop for easy access"
+  LangString DESC_Start_Menu_Shortcuts ${LANG_ENGLISH} "Update the start menu"
+  LangString DESC_Desktop_Shortcut ${LANG_ENGLISH} "Add an icon to the desktop"
 
   ;Assign language strings to sections
   !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
