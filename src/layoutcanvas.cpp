@@ -194,10 +194,14 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos,
 #ifdef __WXGTK__
    //  Here we'll have to check that we've got what we've asked for. It is
    // quite possible that we can't get the requested GL visual. If that is the case
-   // we'll have to aboandon the init sequence right here, otherwise Toped will
+   // we'll have to abandon the init sequence right here, otherwise Toped will
    // crash.
    x_visual = (XVisualInfo*) m_vi;
-   if (NULL == x_visual) return;
+   if (NULL == x_visual)
+   {
+      crossCur = NULL;
+      return;
+   }
 #endif
    crossCur = MakeCursor(crosscursor,16, 16);
 //   crossCur = DEBUG_NEW wxCursor((const char*)crosscursor,16, 16);
@@ -1070,7 +1074,7 @@ void tui::LayoutCanvas::OnCMRotate(wxCommandEvent&)
 }
 
 tui::LayoutCanvas::~LayoutCanvas(){
-   delete crossCur;
+   if (NULL != crossCur) delete crossCur;
 //   delete (laydata::TdtData::tessellObj);
 }
 
