@@ -332,8 +332,7 @@ GDSin::GdsInFile::GdsInFile(wxString wxfname, bool gziped)
    if (!(_gdsFh->IsOk()))
    {// open the input file
       info << "File "<< _fileName <<" can NOT be opened";
-      tell_log(console::MT_ERROR,info.str());
-      return;
+      throw EXPTNreadGDS(info.str());
    }
    wxFileOffset _fileLength = _gdsFh->GetLength();
    // The size of GDSII files is originally multiple by 2048. This is
@@ -567,8 +566,8 @@ bool GDSin::GdsInFile::getNextRecord()
    word reclen = *(word*)rl - 4; // record length
 //   GdsRecord* retrec = DEBUG_NEW GdsRecord(_gdsFh, reclen, recheader[2],recheader[3]);
    _cRecord->getNextRecord(_gdsFh, reclen, recheader[2],recheader[3]);
-   _filePos = _gdsFh->TellI();
-//   _filePos += reclen + 4;    // update file position
+//   _filePos = _gdsFh->TellI();
+   _filePos += reclen + 4;    // update file position
    if (2048 < (_filePos - _prgrs_pos))
    {
       _prgrs_pos = _filePos;
