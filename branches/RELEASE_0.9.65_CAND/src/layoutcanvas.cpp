@@ -1058,10 +1058,10 @@ DBbox* tui::LayoutCanvas::zoomIn()
 {
    // The idea here is not to produce a zero box - i.e. to
    // keep the viewing area > 0;
-   long blX = lround( (3.0*(double)lp_BL.x() + (double)lp_TR.x())/4.0 );
-   long blY = lround( (3.0*(double)lp_BL.y() + (double)lp_TR.y())/4.0 );
-   long trX = lround( (3.0*(double)lp_TR.x() + (double)lp_BL.x())/4.0 );
-   long trY = lround( (3.0*(double)lp_TR.y() + (double)lp_BL.y())/4.0 );
+   int8b blX = lround( (3.0*(double)lp_BL.x() + (double)lp_TR.x())/4.0 );
+   int8b blY = lround( (3.0*(double)lp_BL.y() + (double)lp_TR.y())/4.0 );
+   int8b trX = lround( (3.0*(double)lp_TR.x() + (double)lp_BL.x())/4.0 );
+   int8b trY = lround( (3.0*(double)lp_TR.y() + (double)lp_BL.y())/4.0 );
    if ((blX != trX) && (blY != trY))
       return DEBUG_NEW DBbox( blX, blY, trX, trY);
    else // i.e. the resulting box is too small - so return the existing one
@@ -1075,10 +1075,10 @@ DBbox* tui::LayoutCanvas::zoomOut()
 {
    // In this operation we should avoid loss of precision and
    // producing a box which is bigger than the canvas size
-   long blX = lround( (5.0*(double)lp_BL.x() - (double)lp_TR.x())/4.0 );
-   long blY = lround( (5.0*(double)lp_BL.y() - (double)lp_TR.y())/4.0 );
-   long trX = lround( (5.0*(double)lp_TR.x() - (double)lp_BL.x())/4.0 );
-   long trY = lround( (5.0*(double)lp_TR.y() - (double)lp_BL.y())/4.0 );
+   int8b blX = lround( (5.0*(double)lp_BL.x() - (double)lp_TR.x())/4.0 );
+   int8b blY = lround( (5.0*(double)lp_BL.y() - (double)lp_TR.y())/4.0 );
+   int8b trX = lround( (5.0*(double)lp_TR.x() - (double)lp_BL.x())/4.0 );
+   int8b trY = lround( (5.0*(double)lp_TR.y() - (double)lp_BL.y())/4.0 );
    blX = (blX > MAX_INT4B) ? MAX_INT4B :
          (blX < MIN_INT4B) ? MIN_INT4B : blX;
    blY = (blY > MAX_INT4B) ? MAX_INT4B :
@@ -1094,8 +1094,8 @@ DBbox* tui::LayoutCanvas::zoomOut()
 DBbox* tui::LayoutCanvas::zoomLeft()
 {
    // keep the left boundary within the canvas
-   long trX = lround( (     (double)lp_BL.x() + (double)lp_TR.x())/2.0 );
-   long blX = lround( ( 3.0*(double)lp_BL.x() - (double)lp_TR.x())/2.0 );
+   int8b trX = lround( (     (double)lp_BL.x() + (double)lp_TR.x())/2.0 );
+   int8b blX = lround( ( 3.0*(double)lp_BL.x() - (double)lp_TR.x())/2.0 );
    if (blX < MIN_INT4B)
    {
       trX -= blX - MIN_INT4B;
@@ -1108,8 +1108,8 @@ DBbox* tui::LayoutCanvas::zoomLeft()
 DBbox* tui::LayoutCanvas::zoomRight()
 {
    // keep the right boundary within the canvas
-   long trX = lround( ( 3.0*(double)lp_TR.x() - (double)lp_BL.x())/2.0 );
-   long blX = lround( (     (double)lp_TR.x() + (double)lp_BL.x())/2.0 );
+   int8b trX = lround( ( 3.0*(double)lp_TR.x() - (double)lp_BL.x())/2.0 );
+   int8b blX = lround( (     (double)lp_TR.x() + (double)lp_BL.x())/2.0 );
    if (trX > MAX_INT4B)
    {
       blX -= trX - MAX_INT4B;
@@ -1122,8 +1122,8 @@ DBbox* tui::LayoutCanvas::zoomRight()
 DBbox* tui::LayoutCanvas::zoomUp()
 {
    // keep the bottom boundary within the canvas
-   long trY = lround( ( 3.0*(double)lp_BL.y() - (double)lp_TR.y())/2.0 );
-   long blY = lround( (     (double)lp_BL.y() + (double)lp_TR.y())/2.0 );
+   int8b trY = lround( ( 3.0*(double)lp_BL.y() - (double)lp_TR.y())/2.0 );
+   int8b blY = lround( (     (double)lp_BL.y() + (double)lp_TR.y())/2.0 );
    if (trY > MAX_INT4B)
    {
       blY -= trY - MAX_INT4B;
@@ -1136,8 +1136,8 @@ DBbox* tui::LayoutCanvas::zoomUp()
 DBbox* tui::LayoutCanvas::zoomDown()
 {
    // keep the top boundary within the canvas
-   long trY = lround( (     (double)lp_TR.y() + (double)lp_BL.y())/2.0 );
-   long blY = lround( ( 3.0*(double)lp_TR.y() - (double)lp_BL.y())/2.0 );
+   int8b trY = lround( (     (double)lp_TR.y() + (double)lp_BL.y())/2.0 );
+   int8b blY = lround( ( 3.0*(double)lp_TR.y() - (double)lp_BL.y())/2.0 );
    if (blY < MIN_INT4B)
    {
       trY -= blY - MIN_INT4B;
