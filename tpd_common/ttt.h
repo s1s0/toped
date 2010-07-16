@@ -36,9 +36,44 @@
 #include <set>
 #include <assert.h>
 
+//=============================================================================
+// General type declations (compatability)
+//=============================================================================
+typedef unsigned char            byte     ; // 1 byte
+typedef unsigned short           word     ; // 2 bytes
+typedef unsigned int             dword    ; // 4 bytes
+typedef unsigned long long int   qword    ; // 8 bytes
+typedef short    int             int2b    ; // 2 bytes
+typedef          int             int4b    ; // 4 bytes
+typedef long long int            int8b    ; // 8 bytes
+typedef          double          real     ; // 8 bytes
+
+typedef  std::list<std::string>           nameList;
+typedef  std::set<std::string>            NameSet;
+typedef  std::list<word>                  WordList;
+typedef  std::set<word>                   WordSet;
+typedef  std::set<dword>                  DWordSet;
+typedef  std::map<word, WordSet>          ExtLayers;
+typedef  std::map<std::string, int>       SIMap;       // name
+typedef  std::map<unsigned, std::string>  USMap;      // Unsigned - String Map
+typedef  std::map<word, unsigned long>    SLMap;
+enum QuadIdentificators{ qidNW = 0,
+                         qidNE = 1,
+                         qidSE = 2,
+                         qidSW = 3,
+                         qidNULL = 4};
+//=============================================================================
+// Some common constants (instead of #defines)
+//=============================================================================
+const int         ALL_LIB           = -2;
+const int         TARGETDB_LIB      = -1;
+const int         UNDEFCELL_LIB     =  0;
+
+
 #ifdef WIN32
    #include <windows.h>
    double round(double x);
+   int8b lround (double x);
    #define rint  round
    #define llabs _abs64
    //#define round floor
@@ -78,39 +113,6 @@
       }                                                         \
    while (0)
 
-
-//=============================================================================
-// General type declations (compatability)
-//=============================================================================
-typedef unsigned char            byte     ; // 1 byte
-typedef unsigned short           word     ; // 2 bytes
-typedef unsigned int             dword    ; // 4 bytes
-typedef unsigned long long int   qword    ; // 8 bytes
-typedef short    int             int2b    ; // 2 bytes
-typedef          int             int4b    ; // 4 bytes
-typedef long long int            int8b    ; // 8 bytes
-typedef          double          real     ; // 8 bytes
-
-typedef  std::list<std::string>           nameList;
-typedef  std::set<std::string>            NameSet;
-typedef  std::list<word>                  WordList;
-typedef  std::set<word>                   WordSet;
-typedef  std::set<dword>                  DWordSet;
-typedef  std::map<word, WordSet>          ExtLayers;
-typedef  std::map<std::string, int>       SIMap;       // name
-typedef  std::map<unsigned, std::string>  USMap;      // Unsigned - String Map
-typedef  std::map<word, unsigned long>    SLMap;
-enum QuadIdentificators{ qidNW = 0,
-                         qidNE = 1,
-                         qidSE = 2,
-                         qidSW = 3,
-                         qidNULL = 4};
-//=============================================================================
-// Some common constants (instead of #defines)
-//=============================================================================
-const int         ALL_LIB           = -2;
-const int         TARGETDB_LIB      = -1;
-const int         UNDEFCELL_LIB     =  0;
 
 //==============================================================================
 class SGBitSet {
