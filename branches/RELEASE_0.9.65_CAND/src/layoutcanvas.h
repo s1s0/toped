@@ -62,14 +62,14 @@ namespace tui {
 
    //=============================================================================
    class LayoutCanvas : public wxGLCanvas  {
-   public: 
-                     LayoutCanvas(wxWindow *parent, const wxPoint&, 
+   public:
+                     LayoutCanvas(wxWindow *parent, const wxPoint&,
                                                 const wxSize& , int* attribList);
       friend class DrawThread;
       virtual       ~LayoutCanvas();
       void           snapshot(byte*&, word&, word&);
       void           showInfo();
-      void           setOglThread(bool val) {_oglThread = true;} 
+      void           setOglThread(bool val) {_oglThread = true;}
       bool           diagnozeGL();
       bool           initStatus() {
 #ifdef __WXGTK__
@@ -134,6 +134,12 @@ namespace tui {
       void           drawZeroMark();
       void           UpdateCoordWin(int coord, CVSSTATUS_TYPE postype, int dcoord, CVSSTATUS_TYPE dpostype);
       void           EventMouseClick(int button);
+      DBbox*         zoomIn();
+      DBbox*         zoomOut();
+      DBbox*         zoomLeft();
+      DBbox*         zoomRight();
+      DBbox*         zoomUp();
+      DBbox*         zoomDown();
       bool           reperX;         // Draw a cursor line across the window parallel to the X axis
       bool           reperY;         // Draw a cursor line across the window parallel to the Y axis
       bool           long_cursor;    //

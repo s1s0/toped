@@ -50,15 +50,29 @@ void TP::roundTO(int4b step)
 
 TP TP::operator * (const CTM& op2) const
 {
-   return TP((int4b) rint(op2.a() * (real)x() + op2.c() * (real)y() + op2.tx()),
-             (int4b) rint(op2.b() * (real)x() + op2.d() * (real)y() + op2.ty()));
+   long Xlongtmp = lround(op2.a() * (real)x() + op2.c() * (real)y() + op2.tx());
+   long Ylongtmp = lround(op2.b() * (real)x() + op2.d() * (real)y() + op2.ty());
+   // The lines below shall not be needed because assigning long int to
+   // int shall do the same job (seems)
+//   int4b Xtmp = (Xlongtmp > MAX_INT4B) ? MAX_INT4B :
+//                (Xlongtmp < MIN_INT4B) ? MIN_INT4B : Xlongtmp;
+//   int4b Ytmp = (Ylongtmp > MAX_INT4B) ? MAX_INT4B :
+//                (Ylongtmp < MIN_INT4B) ? MIN_INT4B : Ylongtmp;
+   return TP(Xlongtmp, Ylongtmp);
 }
 
 TP TP::operator *= (const CTM& op2)
 {
-   int4b x_new = (int4b) rint(op2.a() * (real)x() + op2.c() * (real)y() + op2.tx());
-   int4b y_new = (int4b) rint(op2.b() * (real)x() + op2.d() * (real)y() + op2.ty());
-   _x = x_new; _y = y_new;
+   long Xlongtmp = lround(op2.a() * (real)x() + op2.c() * (real)y() + op2.tx());
+   long Ylongtmp = lround(op2.b() * (real)x() + op2.d() * (real)y() + op2.ty());
+   _x = Xlongtmp;
+   _y = Ylongtmp;
+   // The lines below shall not be needed because assigning long int to
+   // int shall do the same job (seems)
+//   _x = (Xlongtmp > MAX_INT4B) ? MAX_INT4B :
+//        (Xlongtmp < MIN_INT4B) ? MIN_INT4B : Xlongtmp;
+//   _y = (Ylongtmp > MAX_INT4B) ? MAX_INT4B :
+//        (Ylongtmp < MIN_INT4B) ? MIN_INT4B : Ylongtmp;
   return *this;
 }
 
@@ -295,11 +309,10 @@ DBbox DBbox::getcorner(QuadIdentificators corner)
    }
 }
 
-DBbox DBbox::operator * (const CTM& op2) const {
-   TP np1(int4b(op2.a() * _p1.x() + op2.c() * _p1.y() + op2.tx()),
-          int4b(op2.b() * _p1.x() + op2.d() * _p1.y() + op2.ty()));
-   TP np2(int4b(op2.a() * _p2.x() + op2.c() * _p2.y() + op2.tx()),
-          int4b(op2.b() * _p2.x() + op2.d() * _p2.y() + op2.ty()));
+DBbox DBbox::operator * (const CTM& op2) const
+{
+   TP np1 = _p1 * op2;
+   TP np2 = _p2 * op2;
    return DBbox(np1, np2);
 }
 

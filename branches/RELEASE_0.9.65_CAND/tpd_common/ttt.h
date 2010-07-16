@@ -664,12 +664,10 @@ bool  SGHierTree<TYPE>::removeRootItem(const TYPE* comp, SGHierTree*& lst)
 //=============================================================================
 // More common constants (instead of #defines)
 //=============================================================================
-const byte MAX_BYTE_VALUE = 255;
-const word MAX_WORD_VALUE = 65535;
-//#define MIN_X        (int4b)0x80000001      //  -2 147 483 647
-//#define MAX_X        (int4b)0x7FFFFFFF      //   2 147 483 643
-//#define MIN_Y        (int4b)0x80000001      //  -2 147 483 647
-//#define MAX_Y        (int4b)0x7FFFFFFF      //   2 147 483 647
+const byte        MAX_BYTE_VALUE       = 255;
+const word        MAX_WORD_VALUE       = 65535;
+const int4b       MIN_INT4B            = (int4b)0x80000001; //  -2 147 483 647
+const int4b       MAX_INT4B            = (int4b)0x7FFFFFFF; //   2 147 483 643
 //const DBbox MAX_OVL_BOX        = DBbox(MIN_X,MAX_X,MIN_Y,MIN_Y); // maximum overlapping box
 const unsigned    REF_LAY              = 0xffffffff;
 const unsigned    ERR_LAY              = 0xfffffffe;

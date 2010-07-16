@@ -427,7 +427,7 @@ void laydata::TdtCell::openGlDraw(layprop::DrawProperties& drawprop, bool active
       // fancy like this (dlist iterator) , besause a simple
       // _shapesel[curlayno] complains about loosing qualifiers (const)
       SelectList::const_iterator dlst;
-      bool fill = drawprop.setCurrentFill(false);// honour block_fill state)
+      bool fill = drawprop.setCurrentFill(false);// honor block_fill state)
       if ((active) && (_shapesel.end() != (dlst = _shapesel.find(curlayno))))
          lay->second->openGlDraw(drawprop,dlst->second, fill);
       else
@@ -964,7 +964,7 @@ void laydata::TdtCell::selectFromList(SelectList* slist, const DWordSet& unselab
          }
          // at the end, if the container of the selected shapes is empty -
          // delete it
-         if ((NULL != lslct) && lslct->empty()) 
+         if ((NULL != lslct) && lslct->empty())
          {
             delete lslct; _shapesel.erase(_shapesel.find(CUL->first));
          }
