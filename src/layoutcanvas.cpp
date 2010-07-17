@@ -357,19 +357,15 @@ bool tui::LayoutCanvas::diagnozeGL()
       dlg1->Destroy();
       VBOrendering = false;
    }
-   else if (!glewIsSupported("GL_VERSION_1_5" /* GL_EXT_multi_draw_arrays GL_ARB_vertex_buffer_object"*/))
-   {
-      VBOrendering = false;
-      //@TODO - to avoid the "if"
-      // setup the renderer - callback function
-      // oGLRender = &DataCenter::openGlDraw;
-   }
    else
    {
-      VBOrendering = true;
-      //@TODO - to avoid the "if"
-      // setup the renderer - callback function
-      // oGLRender = (void(__stdcall *)(const CTM&))&DataCenter::openGlRender;
+      _oglVersion14             = glewIsSupported("GL_VERSION_1_4");
+      _oglExtMultiDrawArrays    = glewIsSupported("GL_EXT_multi_draw_arrays");
+      _oglArbVertexBufferObject = glewIsSupported("GL_ARB_vertex_buffer_object");
+      VBOrendering = _oglVersion14 && _oglExtMultiDrawArrays && _oglArbVertexBufferObject;
+		//@TODO - to avoid the "if" in the subsequent renderer calls
+		// setup the renderer - callback function
+		// oGLRender = (void(__stdcall *)(const CTM&))&DataCenter::openGlRender;
    }
    return VBOrendering;
    //@NOTE: With the Mesa library updates (first noticed in ver. 6.5) - most of the

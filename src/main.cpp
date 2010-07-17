@@ -457,7 +457,12 @@ void TopedApp::printLogWHeader()
    }
    else
    {
-      tell_log(console::MT_WARNING,"OpenGL version 1.5 is not supported");
+   	if      (!Toped->view()->oglVersion14())
+   		tell_log(console::MT_WARNING,"OpenGL version 1.4 is not supported");
+   	else if (!Toped->view()->oglArbVertexBufferObject())
+   		tell_log(console::MT_WARNING,"OpenGL implementation doesn't support Vertex Buffer Objects");
+   	else if (!Toped->view()->oglExtMultiDrawArrays())
+   		tell_log(console::MT_WARNING,"OpenGL implementation doesn't support Multi Draw Arrays");
       tell_log(console::MT_INFO,"...Using basic rendering");
    }
    tell_log(console::MT_INFO,"Toped loaded.");
