@@ -52,28 +52,21 @@ TP TP::operator * (const CTM& op2) const
 {
    int8b Xlongtmp = lround(op2.a() * (real)x() + op2.c() * (real)y() + op2.tx());
    int8b Ylongtmp = lround(op2.b() * (real)x() + op2.d() * (real)y() + op2.ty());
-   // The lines below shall not be needed because assigning long int to
-   // int shall do the same job (seems)
-   //int4b Xtmp = (Xlongtmp > MAX_INT4B) ? MAX_INT4B :
-   //             (Xlongtmp < MIN_INT4B) ? MIN_INT4B : Xlongtmp;
-   //int4b Ytmp = (Ylongtmp > MAX_INT4B) ? MAX_INT4B :
-   //             (Ylongtmp < MIN_INT4B) ? MIN_INT4B : Ylongtmp;
-   //return TP(Xtmp, Ytmp);
-   return TP(Xlongtmp, Ylongtmp);
+   int4b Xtmp = (Xlongtmp > MAX_INT4B) ? MAX_INT4B :
+                (Xlongtmp < MIN_INT4B) ? MIN_INT4B : Xlongtmp;
+   int4b Ytmp = (Ylongtmp > MAX_INT4B) ? MAX_INT4B :
+                (Ylongtmp < MIN_INT4B) ? MIN_INT4B : Ylongtmp;
+   return TP(Xtmp, Ytmp);
 }
 
 TP TP::operator *= (const CTM& op2)
 {
    int8b Xlongtmp = lround(op2.a() * (real)x() + op2.c() * (real)y() + op2.tx());
    int8b Ylongtmp = lround(op2.b() * (real)x() + op2.d() * (real)y() + op2.ty());
-   _x = Xlongtmp;
-   _y = Ylongtmp;
-   // The lines below shall not be needed because assigning long int to
-   // int shall do the same job (seems)
-   //_x = (Xlongtmp > MAX_INT4B) ? MAX_INT4B :
-   //     (Xlongtmp < MIN_INT4B) ? MIN_INT4B : Xlongtmp;
-   //_y = (Ylongtmp > MAX_INT4B) ? MAX_INT4B :
-   //     (Ylongtmp < MIN_INT4B) ? MIN_INT4B : Ylongtmp;
+   _x = (Xlongtmp > MAX_INT4B) ? MAX_INT4B :
+        (Xlongtmp < MIN_INT4B) ? MIN_INT4B : Xlongtmp;
+   _y = (Ylongtmp > MAX_INT4B) ? MAX_INT4B :
+        (Ylongtmp < MIN_INT4B) ? MIN_INT4B : Ylongtmp;
   return *this;
 }
 
@@ -617,7 +610,7 @@ double round(double x)
 }
 
 //WARNING! This replacement is far from precise. Needs improvement.
-// There will be (most likely) differencies between Linux and 
+// There will be (most likely) differencies between Linux and
 // Windows
 int8b lround(double x)
 {
