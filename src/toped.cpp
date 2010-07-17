@@ -825,11 +825,11 @@ void tui::TopedFrame::OnQuit( wxCommandEvent& WXUNUSED( event ) ) {
 void tui::TopedFrame::OnAbout( wxCommandEvent& WXUNUSED( event ) ) {
     wxAboutDialogInfo info;
     info.SetName(wxT("Toped"));
-    info.SetVersion(wxT("0.9.x"));
+    info.SetVersion(wxT("0.9.65"));
     info.SetIcon(wxIcon( toped32x32_xpm ));
     info.SetWebSite(wxT("www.toped.org.uk"));
     info.SetDescription(wxT("Open source IC layout editor"));
-    info.SetCopyright(wxT("(C) 2001-2009 Toped developers"));
+    info.SetCopyright(wxT("(C) 2001-2010 Toped developers"));
 
     wxAboutBox(info);
 }
@@ -975,8 +975,7 @@ void tui::TopedFrame::OnTELLRead(wxCommandEvent& evt)
 void tui::TopedFrame::OnGDSRead(wxCommandEvent& WXUNUSED(event))
 {
    wxString dbfext;
-   dbfext << wxT("Stream files(*.gds;*.sf)|*.gds;*.sf;*.GDS;*.SF")
-          << wxT("|Ziped files(*.gz; *.zip)|*.gz;*.zip;*.GZ;*.ZIP")
+   dbfext << wxT("Stream files(*.gds;*.sf;*.gz;*.zip)|*.gds;*.sf;*.GDS;*.SF;*.gz;*.zip;*.GZ;*.ZIP")
           << wxT("|All files(*.*)|*.*");
    wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""), dbfext,
       tpdfOPEN);
@@ -1230,11 +1229,9 @@ void tui::TopedFrame::OnGDStranslate(wxCommandEvent& WXUNUSED(event)) {
 void tui::TopedFrame::OnGDSimport(wxCommandEvent& WXUNUSED(event))
 {
    wxString dbfext;
-   dbfext << wxT("Stream files(*.gds;*.sf)|*.gds;*.sf;*.GDS;*.SF")
-          << wxT("|Ziped files(*.gz; *.zip)|*.gz;*.zip;*.GZ;*.ZIP")
+   dbfext << wxT("Stream files(*.gds;*.sf;*.gz;*.zip)|*.gds;*.sf;*.GDS;*.SF;*.gz;*.zip;*.GZ;*.ZIP")
           << wxT("|All files(*.*)|*.*");
    wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""), dbfext,
-//                     wxT("Stream files(*.gds;*.sf)|*.gds;*.sf;*.GDS;*.SF|All files(*.*)|*.*"),
                          tpdfOPEN);
    if (wxID_OK != dlg2.ShowModal())
    {

@@ -357,19 +357,15 @@ bool tui::LayoutCanvas::diagnozeGL()
       dlg1->Destroy();
       VBOrendering = false;
    }
-   else if (!glewIsSupported("GL_VERSION_1_5" /* GL_EXT_multi_draw_arrays GL_ARB_vertex_buffer_object"*/))
-   {
-      VBOrendering = false;
-      //@TODO - to avoid the "if"
-      // setup the renderer - callback function
-      // oGLRender = &DataCenter::openGlDraw;
-   }
    else
    {
-      VBOrendering = true;
-      //@TODO - to avoid the "if"
-      // setup the renderer - callback function
-      // oGLRender = (void(__stdcall *)(const CTM&))&DataCenter::openGlRender;
+      _oglVersion14             = glewIsSupported("GL_VERSION_1_4");
+      _oglExtMultiDrawArrays    = glewIsSupported("GL_EXT_multi_draw_arrays");
+      _oglArbVertexBufferObject = glewIsSupported("GL_ARB_vertex_buffer_object");
+      VBOrendering = _oglVersion14 && _oglExtMultiDrawArrays && _oglArbVertexBufferObject;
+		//@TODO - to avoid the "if" in the subsequent renderer calls
+		// setup the renderer - callback function
+		// oGLRender = (void(__stdcall *)(const CTM&))&DataCenter::openGlRender;
    }
    return VBOrendering;
    //@NOTE: With the Mesa library updates (first noticed in ver. 6.5) - most of the
@@ -388,12 +384,7 @@ void tui::LayoutCanvas::OnresizeGL(wxSizeEvent& event) {
    if (!GetContext()) return;
    int w, h;
    GetClientSize(&w, &h);
-//   #ifndef __WXMOTIF__
-//      if (GetContext())
-//   #endif
-//    {
    glViewport( 0, 0, (GLint)w, (GLint)h );
-//    }
    lp_BL = TP(0,0)  * _LayCTM;
    lp_TR = TP(w, h) * _LayCTM;
    invalid_window = true;
@@ -864,36 +855,12 @@ void tui::LayoutCanvas::OnZoom(wxCommandEvent& evt) {
       case ZOOM_WINDOW : box = static_cast<DBbox*>(evt.GetClientData());break;
       case ZOOM_WINDOWM: box = DEBUG_NEW DBbox(presspoint.x(),presspoint.y(),
                                              ScrMARK.x(),ScrMARK.y());break;
-      case ZOOM_IN     : box = DEBUG_NEW DBbox( (3*lp_BL.x() + lp_TR.x())/4, //in
-                                                (3*lp_BL.y() + lp_TR.y())/4,
-                                                (3*lp_TR.x() + lp_BL.x())/4,
-                                                (3*lp_TR.y() + lp_BL.y())/4);
-                        break;
-      case ZOOM_OUT    : box = DEBUG_NEW DBbox( (5*lp_BL.x() - lp_TR.x())/4, //out
-                                                (5*lp_BL.y() - lp_TR.y())/4,
-                                                (5*lp_TR.x() - lp_BL.x())/4,
-                                                (5*lp_TR.y() - lp_BL.y())/4);
-                        break;
-      case ZOOM_LEFT   : box = DEBUG_NEW DBbox( (  lp_TR.x() + lp_BL.x())/2, //left
-                                                   lp_BL.y()               ,
-                                                (3*lp_BL.x() - lp_TR.x())/2,
-                                                   lp_TR.y()               );
-                        break;
-      case ZOOM_RIGHT  : box = DEBUG_NEW DBbox( (3*lp_TR.x() - lp_BL.x())/2, // right
-                                                   lp_BL.y()               ,
-                                                (  lp_TR.x() + lp_BL.x())/2,
-                                                   lp_TR.y()               );
-                        break;
-      case ZOOM_UP     : box = DEBUG_NEW DBbox(    lp_BL.x()               , // up
-                                                (3*lp_BL.y() - lp_TR.y())/2,
-                                                   lp_TR.x()               ,
-                                                (  lp_TR.y() + lp_BL.y())/2);
-                        break;
-      case ZOOM_DOWN   : box = DEBUG_NEW DBbox(    lp_BL.x()               , // down
-                                                (  lp_TR.y() + lp_BL.y())/2,
-                                                   lp_TR.x()               ,
-                                                (3*lp_TR.y() - lp_BL.y())/2);
-                        break;
+      case ZOOM_IN     : box = zoomIn()   ; break;
+      case ZOOM_OUT    : box = zoomOut()  ; break;
+      case ZOOM_LEFT   : box = zoomLeft() ; break;
+      case ZOOM_RIGHT  : box = zoomRight(); break;
+      case ZOOM_UP     : box = zoomUp()   ; break;
+      case ZOOM_DOWN   : box = zoomDown() ; break;
       case ZOOM_EMPTY  : box = DEBUG_NEW DBbox(-10,-10,90,90);
                         break;
       case ZOOM_REFRESH: invalid_window = true; Refresh(); return;
@@ -905,13 +872,23 @@ void tui::LayoutCanvas::OnZoom(wxCommandEvent& evt) {
    // integer variables (Wcl & Hcl) directly
    double W = Wcl;
    double H = Hcl;
-   double w = abs(box->p1().x() - box->p2().x());
-   double h = abs(box->p1().y() - box->p2().y());
+   double w = fabs((double)box->p1().x() - (double)box->p2().x());
+   double h = fabs((double)box->p1().y() - (double)box->p2().y());
+   if (w > (double) MAX_INT4B)
+   {
+      tell_log(console::MT_WARNING, "Can't zoom any further");
+      w = MAX_INT4B;
+   }
+   if (h > (double) MAX_INT4B)
+   {
+      tell_log(console::MT_WARNING, "Can't zoom any further");
+      h = MAX_INT4B;
+   }
    double sc =  ((W/H < w/h) ? w/W : h/H);
-   double tx = ((box->p1().x() + box->p2().x()) - W*sc) / 2;
-   double ty = ((box->p1().y() + box->p2().y()) - H*sc) / 2;
+   double tx = (((double)box->p1().x() + (double)box->p2().x()) - W*sc) / 2;
+   double ty = (((double)box->p1().y() + (double)box->p2().y()) - H*sc) / 2;
    _LayCTM.setCTM( sc, 0.0, 0.0, sc, tx, ty);
-   _LayCTM.FlipX((box->p1().y() + box->p2().y())/2);  // flip Y coord towards the center
+   _LayCTM.FlipX(((double)box->p1().y() + (double)box->p2().y())/2);  // flip Y coord towards the center
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
@@ -1071,6 +1048,99 @@ void tui::LayoutCanvas::OnCMRotate(wxCommandEvent&)
    eventCancelLast.SetInt(-3);
    wxPostEvent(Console, eventCancelLast);
    DATC->mouseRotate();
+}
+
+DBbox* tui::LayoutCanvas::zoomIn()
+{
+   // The idea here is not to produce a zero box - i.e. to
+   // keep the viewing area > 0;
+   int8b blX = lround( (3.0*(double)lp_BL.x() + (double)lp_TR.x())/4.0 );
+   int8b blY = lround( (3.0*(double)lp_BL.y() + (double)lp_TR.y())/4.0 );
+   int8b trX = lround( (3.0*(double)lp_TR.x() + (double)lp_BL.x())/4.0 );
+   int8b trY = lround( (3.0*(double)lp_TR.y() + (double)lp_BL.y())/4.0 );
+   if ((blX != trX) && (blY != trY))
+      return DEBUG_NEW DBbox( blX, blY, trX, trY);
+   else // i.e. the resulting box is too small - so return the existing one
+   {
+      tell_log(console::MT_WARNING, "Can't zoom any further");
+      return DEBUG_NEW DBbox( lp_BL, lp_TR);
+   }
+}
+
+DBbox* tui::LayoutCanvas::zoomOut()
+{
+   // In this operation we should avoid loss of precision and
+   // producing a box which is bigger than the canvas size
+   int8b blX = lround( (5.0*(double)lp_BL.x() - (double)lp_TR.x())/4.0 );
+   int8b blY = lround( (5.0*(double)lp_BL.y() - (double)lp_TR.y())/4.0 );
+   int8b trX = lround( (5.0*(double)lp_TR.x() - (double)lp_BL.x())/4.0 );
+   int8b trY = lround( (5.0*(double)lp_TR.y() - (double)lp_BL.y())/4.0 );
+   blX = (blX > MAX_INT4B) ? MAX_INT4B :
+         (blX < MIN_INT4B) ? MIN_INT4B : blX;
+   blY = (blY > MAX_INT4B) ? MAX_INT4B :
+         (blY < MIN_INT4B) ? MIN_INT4B : blY;
+   trX = (trX > MAX_INT4B) ? MAX_INT4B :
+         (trX < MIN_INT4B) ? MIN_INT4B : trX;
+   trY = (trY > MAX_INT4B) ? MAX_INT4B :
+         (trY < MIN_INT4B) ? MIN_INT4B : trY;
+
+   return DEBUG_NEW DBbox( blX, blY, trX, trY);
+}
+
+DBbox* tui::LayoutCanvas::zoomLeft()
+{
+   // keep the left boundary within the canvas
+   int8b trX = lround( (     (double)lp_BL.x() + (double)lp_TR.x())/2.0 );
+   int8b blX = lround( ( 3.0*(double)lp_BL.x() - (double)lp_TR.x())/2.0 );
+   if (blX < MIN_INT4B)
+   {
+      trX -= blX - MIN_INT4B;
+      blX = MIN_INT4B;
+      tell_log(console::MT_WARNING, "Canvas boundary reached");
+   }
+   return DEBUG_NEW DBbox( trX ,lp_BL.y(), blX, lp_TR.y());
+}
+
+DBbox* tui::LayoutCanvas::zoomRight()
+{
+   // keep the right boundary within the canvas
+   int8b trX = lround( ( 3.0*(double)lp_TR.x() - (double)lp_BL.x())/2.0 );
+   int8b blX = lround( (     (double)lp_TR.x() + (double)lp_BL.x())/2.0 );
+   if (trX > MAX_INT4B)
+   {
+      blX -= trX - MAX_INT4B;
+      trX  = MAX_INT4B;
+      tell_log(console::MT_WARNING, "Canvas boundary reached");
+   }
+   return DEBUG_NEW DBbox( trX ,lp_BL.y(), blX, lp_TR.y());
+}
+
+DBbox* tui::LayoutCanvas::zoomUp()
+{
+   // keep the bottom boundary within the canvas
+   int8b trY = lround( ( 3.0*(double)lp_BL.y() - (double)lp_TR.y())/2.0 );
+   int8b blY = lround( (     (double)lp_BL.y() + (double)lp_TR.y())/2.0 );
+   if (trY > MAX_INT4B)
+   {
+      blY -= trY - MAX_INT4B;
+      trY  = MAX_INT4B;
+      tell_log(console::MT_WARNING, "Canvas boundary reached");
+   }
+   return DEBUG_NEW DBbox(lp_BL.x(), trY, lp_TR.x(), blY);
+}
+
+DBbox* tui::LayoutCanvas::zoomDown()
+{
+   // keep the top boundary within the canvas
+   int8b trY = lround( (     (double)lp_TR.y() + (double)lp_BL.y())/2.0 );
+   int8b blY = lround( ( 3.0*(double)lp_TR.y() - (double)lp_BL.y())/2.0 );
+   if (blY < MIN_INT4B)
+   {
+      trY -= blY - MIN_INT4B;
+      blY  = MIN_INT4B;
+      tell_log(console::MT_WARNING, "Canvas boundary reached");
+   }
+   return DEBUG_NEW DBbox(lp_BL.x(), trY, lp_TR.x(), blY);
 }
 
 tui::LayoutCanvas::~LayoutCanvas(){

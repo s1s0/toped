@@ -400,7 +400,7 @@ bool laydata::pathConvert(pointlist& plist, word numpoints, int4b begext, int4b 
    TP P1 = plist[0];
    // find the first neighboring point which is not equivalent to P1
    int fnbr = 1;
-   while ((P1 == plist[fnbr]) && (fnbr < numpoints))
+   while ((fnbr < numpoints) && (P1 == plist[fnbr]))
       fnbr++;
    // get out with error, because the wire has effectively a single point and there is
    // no way on earth to find out in which direction it should be expanded

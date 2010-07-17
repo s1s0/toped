@@ -3,11 +3,9 @@
 BUILT_SOURCES = tell_yacc.h
 AM_YFLAGS = -p tell -d -y -v
 AM_LFLAGS = -Ptell
-noinst_HEADERS = ted_prompt.h  tpdph.h
+noinst_HEADERS = ted_prompt.h  tpdph.h tellyzer.h tldat.h
 lib_LTLIBRARIES = libtpd_parser.la
 #libtpd_parser_la_LDFLAGS = -no-undefined
-libtpd_parser_ladir=$(includedir)/tpd
-libtpd_parser_la_HEADERS = tellyzer.h tldat.h
 libtpd_parser_la_SOURCES = ted_prompt.cpp tell_lex.ll tell_yacc.yy tellyzer.cpp \
 	tldat.cpp tpdph.cpp
 #########################################################################
