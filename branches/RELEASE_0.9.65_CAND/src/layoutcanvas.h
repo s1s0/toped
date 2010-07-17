@@ -70,6 +70,10 @@ namespace tui {
       void           snapshot(byte*&, word&, word&);
       void           showInfo();
       void           setOglThread(bool val) {_oglThread = true;}
+      bool				oglVersion14()             { return _oglVersion14;  				}
+      bool           oglExtMultiDrawArrays()    { return _oglExtMultiDrawArrays;    }
+      bool				oglArbVertexBufferObject() { return _oglArbVertexBufferObject; }
+
       bool           diagnozeGL();
       bool           initStatus() {
 #ifdef __WXGTK__
@@ -144,6 +148,9 @@ namespace tui {
       bool           reperY;         // Draw a cursor line across the window parallel to the Y axis
       bool           long_cursor;    //
       bool           _oglThread;     // Run the openGL drawing in a separate thread
+      bool				_oglVersion14;  //
+      bool           _oglExtMultiDrawArrays;
+      bool				_oglArbVertexBufferObject;
 #ifdef __WXGTK__
       XVisualInfo*   x_visual;       //
 #endif
