@@ -1,0 +1,10 @@
+Toped release 0.9.65 changes and updates
+------------------------------------------
+Bugfix release
+* Memory footprint improved.
+* Ziped and GZipped GDS files are now accepted directly for conversion
+* A set of mathematical functions introduced in TELL.
+* Dozens of bug fixes
+* Some multi-thread related locks resolved and fixed.
+
+
