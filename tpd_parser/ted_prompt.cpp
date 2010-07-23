@@ -27,6 +27,7 @@
 
 #include "tpdph.h"
 #include <string>
+#include <wx/string.h>
 #include <wx/regex.h>
 #include "tuidefs.h"
 #include "ted_prompt.h"

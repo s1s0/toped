@@ -30,6 +30,7 @@
 #include <time.h>
 #include <string>
 #include <sstream>
+#include <wx/string.h>
 #include <wx/regex.h>
 #include <wx/filename.h>
 #include "outbox.h"
