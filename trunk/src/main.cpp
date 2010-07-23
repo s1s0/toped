@@ -77,6 +77,7 @@ class TopedApp : public wxApp
       virtual int    OnRun();
       virtual       ~TopedApp(){};
    private:
+      typedef std::list<wxDynamicLibrary*> PluginList;
       bool           getLogFileName();
       void           loadGlfFonts();
       void           loadPlugIns();
@@ -97,7 +98,7 @@ class TopedApp : public wxApp
       wxString       _localDir;
       wxString       _inputTellFile;
       bool           _forceBasicRendering;
-      wxDynamicLibrary* _plugin;
+      PluginList     _plugins;
 };
 
 //=============================================================================
@@ -105,7 +106,6 @@ bool TopedApp::OnInit()
 {
 //   DATC = DEBUG_NEW DataCenter();
    _forceBasicRendering = false;
-//   _renderType = false;
    wxImage::AddHandler(DEBUG_NEW wxPNGHandler);
    // Initialize Toped properties
    PROPC = DEBUG_NEW layprop::PropertyCenter();
@@ -251,6 +251,9 @@ int TopedApp::OnExit()
    delete CMDBlock;
    delete PROPC;
    delete DATC;
+   // unload the eventual plug-ins
+   for (PluginList::const_iterator CP = _plugins.begin(); CP != _plugins.end(); CP++)
+      delete (*CP);
 
 #ifdef DB_MEMORY_TRACE
    MemTrack::TrackDumpBlocks();
@@ -328,7 +331,48 @@ void TopedApp::loadGlfFonts()
 //=============================================================================
 void TopedApp::loadPlugIns()
 {
-   //TODO - dynamically enlist all modules existing in the plugin directory
+   if (! _tpdPlugInDir.IsEmpty())
+   {
+      wxDir plugDir(_tpdPlugInDir);
+      if (plugDir.IsOpened())
+      {
+         wxString curFN;
+         if (plugDir.GetFirst(&curFN, wxT("*.so"), wxDIR_FILES))
+         {
+            typedef void (*ModuleFunction)(parsercmd::cmdMAIN*);
+            do
+            {
+               wxDynamicLibrary* plugin = DEBUG_NEW wxDynamicLibrary();
+               if (plugin->Load(curFN))
+               {
+                  ModuleFunction piInitFunc = (ModuleFunction)plugin->GetSymbol(wxT("initPluginFunctions"));
+                  if (piInitFunc)
+                  {
+                     piInitFunc(static_cast<parsercmd::cmdMAIN*>(CMDBlock));
+                     _plugins.push_back(plugin);
+                  }
+                  else
+                  {
+                     wxString errMessage(wxT("File \""));
+                     errMessage += curFN;
+                     errMessage += wxT("\" doesn't look like a Toped plug-in");
+                     wxMessageBox(errMessage);
+                     delete plugin;
+                  }
+               }
+               else
+               {
+                  wxString errMessage(wxT("Troubles when trying to load \""));
+                  errMessage += curFN;
+                  errMessage += wxT("\" dynamically");
+                  wxMessageBox(errMessage);
+                  delete plugin;
+               }
+
+            } while (plugDir.GetNext(&curFN));
+         }
+      }
+   }
 }
 
 //=============================================================================
