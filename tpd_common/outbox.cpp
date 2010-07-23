@@ -690,7 +690,7 @@ std::string TpdTime::operator () ()
    tm* broken_time = localtime(&_stdCTime);
    VERIFY(broken_time != NULL);
    char* btm = DEBUG_NEW char[256];
-   strftime(btm, 256, "%d-%m-%Y %X", broken_time);
+   strftime(btm, 256, "%d-%m-%Y %I:%M:%S %p", broken_time);
    std::string info = btm;
    delete [] btm;
    return info;
