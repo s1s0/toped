@@ -271,7 +271,28 @@ const telldata::ttlist& telldata::ttlist::operator =(const telldata::ttlist& cob
    count = cobj._mlist.size();
    _mlist.reserve(count);
    for (i = 0; i < count; i++)
-      _mlist.push_back(cobj._mlist[i]->selfcopy());
+   {
+      typeID compID = cobj._mlist[i]->get_type();
+      typeID localID = _ID & (~telldata::tn_listmask);
+      if (compID == localID)
+         _mlist.push_back(cobj._mlist[i]->selfcopy());
+      else if (NUMBER_TYPE(compID) && NUMBER_TYPE(localID))
+      {
+         // The whole idea here is to keep the list component type homogeneous
+         // The initial trouble comes from the internal conversion between int and real
+         // and this introduces the risk to contaminate int lists with a real value
+         // and vice versa
+         if (telldata::tn_int == localID)
+            _mlist.push_back(DEBUG_NEW ttint(static_cast<ttreal*>(cobj._mlist[i])->value()));
+         else
+            _mlist.push_back(DEBUG_NEW ttreal(static_cast<ttint*>(cobj._mlist[i])->value()));
+      }
+      else
+      {
+         // Unexpected type in the rvalue list. Component i
+         assert(false);
+      }
+   }
    return *this;
 }
 
@@ -806,7 +827,9 @@ void telldata::argumentID::toList(bool cmdUpdate, telldata::typeID alistID)
    {// i.e. list is not empty
       for(argumentQ::const_iterator CA = _child.begin(); CA != _child.end(); CA ++)
       {
-         if (alistID != (**CA)()) return;
+         if (!(   (alistID == (**CA)())
+               || (NUMBER_TYPE( alistID ) && NUMBER_TYPE( (**CA)() ))
+               )) return;
       }
    }
    else // empty list
