@@ -459,6 +459,8 @@ int parsercmd::cmdEQ::execute() {
    TELL_DEBUG(cmdEQ);
    if (NUMBER_TYPE(OPstack.top()->get_type()))
       OPstack.push(DEBUG_NEW telldata::ttbool(getOpValue() == getOpValue()));
+   else if (telldata::tn_bool == OPstack.top()->get_type())
+      OPstack.push(DEBUG_NEW telldata::ttbool(getBoolValue() == getBoolValue()));
 //   else if (tn_
 // box & poly equal
    return EXEC_NEXT;
@@ -469,6 +471,8 @@ int parsercmd::cmdNE::execute() {
    TELL_DEBUG(cmdNE);
    if (NUMBER_TYPE(OPstack.top()->get_type()))
       OPstack.push(DEBUG_NEW telldata::ttbool(getOpValue() != getOpValue()));
+   else if (telldata::tn_bool == OPstack.top()->get_type())
+      OPstack.push(DEBUG_NEW telldata::ttbool(getBoolValue() != getBoolValue()));
 //   else if (tn_
 // box & poly equal
    return EXEC_NEXT;
@@ -2018,6 +2022,8 @@ telldata::typeID parsercmd::BoolEx(telldata::typeID op1, telldata::typeID op2,
    {
       if      (ope == "&&") CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdAND());
       else if (ope == "||") CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdOR());
+      else if (ope == "==") CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdEQ());
+      else if (ope == "!=") CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdNE());
       else
       {
          tellerror("unexpected operand type",loc1);return telldata::tn_void;
