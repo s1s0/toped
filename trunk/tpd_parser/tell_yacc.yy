@@ -860,7 +860,7 @@ structure:
           a tell list or some kind of tell struct or even tell list of tell struct.
           There is no way at this moment to determine the type of the input structure
           for (seems) obvious reasons. So - the type check and the eventual pushcmd
-          are postponed untill we get the recepient - i.e. the lvalue or the
+          are postponed until we get the recepient - i.e. the lvalue or the
           function call. $$ is assigned to argumentID, that caries the whole argument
           queue listed in structure*/
         parsercmd::cmdSTRUCT* struct_command = DEBUG_NEW parsercmd::cmdSTRUCT();
