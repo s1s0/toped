@@ -333,7 +333,6 @@ int parsercmd::cmdSHIFTBOX::execute() {
 int parsercmd::cmdSHIFTBOX3::execute() {
    TELL_DEBUG(cmdSHIFTBOX3);
    real shift = getOpValue();
-//   telldata::ttpnt *p = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
    bool swapx, swapy;
    w->normalize(swapx, swapy);
@@ -341,17 +340,17 @@ int parsercmd::cmdSHIFTBOX3::execute() {
    if  (1 == _signX)
       if (1 == _signY)
          r = DEBUG_NEW telldata::ttwnd(w->p1().x()          , w->p1().y()         ,
-                                 w->p2().x() + shift  , w->p2().y() + shift  );
+                                       w->p2().x() + shift  , w->p2().y() + shift  );
       else
          r = DEBUG_NEW telldata::ttwnd(w->p1().x()          , w->p1().y() - shift ,
-                                 w->p2().x() + shift  , w->p2().y()          );
+                                       w->p2().x() + shift  , w->p2().y()          );
    else
       if (1 == _signY)
          r = DEBUG_NEW telldata::ttwnd(w->p1().x() - shift  , w->p1().y()          ,
-                                 w->p2().x()          , w->p2().y() + shift   );
+                                       w->p2().x()          , w->p2().y() + shift   );
       else
          r = DEBUG_NEW telldata::ttwnd(w->p1().x() - shift  , w->p1().y() - shift  ,
-                                 w->p2().x()          , w->p2().y()           );
+                                       w->p2().x()          , w->p2().y()           );
    r->denormalize(swapx, swapy);
    OPstack.push(r);
    delete w;
@@ -369,20 +368,50 @@ int parsercmd::cmdSHIFTBOX4::execute() {
    if  (1 == _signX)
       if (1 == _signY)
          r = DEBUG_NEW telldata::ttwnd(w->p1().x()          , w->p1().y()         ,
-                                 w->p2().x() + p->x() , w->p2().y() + p->y() );
+                                       w->p2().x() + p->x() , w->p2().y() + p->y() );
       else
          r = DEBUG_NEW telldata::ttwnd(w->p1().x()          , w->p1().y() - p->y(),
-                                 w->p2().x() + p->x() , w->p2().y()          );
+                                       w->p2().x() + p->x() , w->p2().y()          );
    else
       if (1 == _signY)
          r = DEBUG_NEW telldata::ttwnd(w->p1().x() - p->x() , w->p1().y()          ,
-                                 w->p2().x()          , w->p2().y() + p->y()  );
+                                       w->p2().x()          , w->p2().y() + p->y()  );
       else
          r = DEBUG_NEW telldata::ttwnd(w->p1().x() - p->x() , w->p1().y() - p->y() ,
-                                 w->p2().x()          , w->p2().y()           );
+                                       w->p2().x()          , w->p2().y()           );
    r->denormalize(swapx, swapy);
    OPstack.push(r);
    delete p; delete w;
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+int parsercmd::cmdBLOWBOX::execute() {
+   TELL_DEBUG(cmdBLOWBOX);
+   real shift;
+   telldata::ttwnd *w;
+   if (_swapOperands)
+   {
+      w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
+      shift = getOpValue();
+   }
+   else
+   {
+      shift = getOpValue();
+      w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
+   }
+   bool swapx, swapy;
+   w->normalize(swapx, swapy);
+   telldata::ttwnd* r;
+   if  (1 == _sign)
+      r = DEBUG_NEW telldata::ttwnd(w->p1().x() - shift  , w->p1().y() - shift ,
+                                    w->p2().x() + shift  , w->p2().y() + shift  );
+   else
+      r = DEBUG_NEW telldata::ttwnd(w->p1().x() + shift  , w->p1().y() + shift  ,
+                                    w->p2().x() - shift  , w->p2().y() - shift   );
+   r->denormalize(swapx, swapy);
+   OPstack.push(r);
+   delete w;
    return EXEC_NEXT;
 }
 
@@ -1575,9 +1604,9 @@ telldata::typeID parsercmd::UMinus(telldata::typeID op1, TpdYYLtype loc1) {
 //=============================================================================
 //     +      |real |point| box |
 //------------+-----+-----+-----+
-//   real     |  +  |shift| blow|
+//   real     |  +  |shift| blow| *TODO
 //   point    |shift|shift|shift| also:
-//   box      |blow |shift| or  | string + string => concatenation
+//   box      |blow |shift| or* | string + string => concatenation
 //-----------------------------------------------------------------------------
 telldata::typeID parsercmd::Plus(telldata::typeID op1, telldata::typeID op2,
                                                   TpdYYLtype loc1, TpdYYLtype loc2) {
@@ -1590,7 +1619,8 @@ telldata::typeID parsercmd::Plus(telldata::typeID op1, telldata::typeID op2,
                             return telldata::tn_real;
             case telldata::tn_pnt:CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSHIFTPNT(1, true));
                             return telldata::tn_pnt;
-//            case telldata::tn_box: // inflate - TODO
+            case telldata::tn_box: CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdBLOWBOX(1, true));
+                            return telldata::tn_box;
                           default: tellerror("unexpected operand type",loc2);break;
          };break;
       case telldata::tn_pnt:
@@ -1605,12 +1635,13 @@ telldata::typeID parsercmd::Plus(telldata::typeID op1, telldata::typeID op2,
          };break;
       case telldata::tn_box:
          switch(op2) {
-//            case  telldata::tn_int:
-//            case telldata::tn_real: // inflate - TODO
-            case telldata::tn_pnt:CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSHIFTBOX(1, false));
+            case  telldata::tn_int:
+            case telldata::tn_real:CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdBLOWBOX(1, false));
+                        return telldata::tn_box;
+            case telldata::tn_pnt :CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSHIFTBOX(1, false));
                         return telldata::tn_box;
 //            case telldata::tn_box:    // logical OR?
-                  default: tellerror("unexpected operand type",loc2); break;
+                           default: tellerror("unexpected operand type",loc2); break;
          };break;
       case telldata::tn_string:
          if (telldata::tn_string == op2) {
@@ -1625,11 +1656,11 @@ telldata::typeID parsercmd::Plus(telldata::typeID op1, telldata::typeID op2,
 }
 
 //=============================================================================
-//     -      |real |point| box |
-//------------+-----+-----+-----+
-//   real     |  x  |  -  |  -  |
-//   point    |shift|shift|  -  | also:
-//   box      |blow |shift| or  | string + string => concatenation
+//     -      | real |point| box |
+//------------+------+-----+-----+
+//   real     |  x   |  -  |  -  |
+//   point    | shift|shift|  -  | 
+//   box      |shrink|shift| or* | * TODO
 //-----------------------------------------------------------------------------
 telldata::typeID parsercmd::Minus(telldata::typeID op1, telldata::typeID op2,
                                                   TpdYYLtype loc1, TpdYYLtype loc2) {
@@ -1652,8 +1683,9 @@ telldata::typeID parsercmd::Minus(telldata::typeID op1, telldata::typeID op2,
          };break;
       case telldata::tn_box:
          switch(op2) {
-//            case   telldata::tn_int:
-//            case telldata::tn_real: // deflate TODO
+            case   telldata::tn_int:
+            case telldata::tn_real: CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdBLOWBOX(-1, false));
+                        return telldata::tn_box;
             case telldata::tn_pnt:CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSHIFTBOX(-1, false));
                         return telldata::tn_box;
             case telldata::tn_box:    // or not ???
