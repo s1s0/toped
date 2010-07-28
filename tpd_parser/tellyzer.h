@@ -142,10 +142,11 @@ namespace  parsercmd {
 
    class cmdSHIFTPNT:public cmdVIRTUAL {
    public:
-      cmdSHIFTPNT(int sign = 1):_sign(sign) {};
+      cmdSHIFTPNT(int sign, bool swap):_sign(sign), _swapOperands(swap) {};
       int execute();
    private:
       int _sign;
+      bool _swapOperands;
    };
 
    class cmdSHIFTPNT2:public cmdVIRTUAL {
@@ -176,10 +177,11 @@ namespace  parsercmd {
 
    class cmdSHIFTBOX:public cmdVIRTUAL {
    public:
-      cmdSHIFTBOX(int sign = 1):_sign(sign) {};
+      cmdSHIFTBOX(int sign, bool swap):_sign(sign), _swapOperands(swap) {};
       int execute();
    private:
       int _sign;
+      bool _swapOperands;
    };
 
    class cmdSHIFTBOX3:public cmdVIRTUAL {
@@ -210,18 +212,20 @@ namespace  parsercmd {
 
    class cmdSCALEPNT:public cmdVIRTUAL {
    public:
-      cmdSCALEPNT(bool up) : _up(up) {};
+      cmdSCALEPNT(bool up, bool swap) : _up(up), _swapOperands(swap) {};
       int execute();
    private:
       bool _up;
+      bool _swapOperands;
    };
 
    class cmdSCALEBOX:public cmdVIRTUAL {
    public:
-      cmdSCALEBOX(bool up) : _up(up) {};
+      cmdSCALEBOX(bool up, bool swap) : _up(up), _swapOperands(swap) {};
       int execute();
    private:
       bool _up;
+      bool _swapOperands;
    };
 
    class cmdUMINUS:public cmdVIRTUAL {
