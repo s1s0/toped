@@ -202,6 +202,15 @@ namespace  parsercmd {
       int _signY;
    };
 
+   class cmdBLOWBOX:public cmdVIRTUAL {
+   public:
+      cmdBLOWBOX(int sign, bool swap): _sign(sign), _swapOperands(swap) {};
+      int execute();
+   private:
+      int _sign;
+      bool _swapOperands;
+   };
+
    class cmdMULTIPLY:public cmdVIRTUAL {
       int execute();
    };
