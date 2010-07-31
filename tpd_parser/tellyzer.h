@@ -530,7 +530,10 @@ namespace  parsercmd {
       void                    set_defined() {_declaration = false;}
    private:
       typedef std::stack<telldata::variableMAP*> LocalVarStack;
+      typedef std::list<telldata::tell_var*> BackupList;
       bool                    _declaration;
+      BackupList*             backupOperandStack();
+      void                    restoreOperandStack(BackupList*);
       word                    _recursyLevel;
       LocalVarStack           _VARLocalStack;
    };

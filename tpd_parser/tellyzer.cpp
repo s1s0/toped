@@ -1405,7 +1405,14 @@ int parsercmd::cmdFUNC::execute()
    std::string funcname = LogFile.getFN();
    LogFile << "// >> Entering UDF \"" << funcname << "\" .Recurse level:" << _recursyLevel;
    LogFile.flush();
+   // The backup/restore operation is because of the issue with cmdSTACKRST/cmdFUNC
+   // coexistence. In short - cmdSTACKRST is clearing the stack after (almost) each
+   // operation, but this would crash a simple add operator which uses more than one
+   // function calls as operands.
+   // See http://code.google.com/p/toped/issues/detail?id=68 (Issue 68) for further info.
+   BackupList* los = backupOperandStack();
    int retexec = cmdBLOCK::execute();
+   restoreOperandStack(los);
    LogFile << "// << Exiting  UDF \"" << funcname << "\" .Recurse level:" << _recursyLevel;
    LogFile.flush();
    _recursyLevel--;
@@ -1423,6 +1430,28 @@ int parsercmd::cmdFUNC::execute()
    }
    if (EXEC_ABORT == retexec) return retexec;
    else return EXEC_NEXT;
+}
+
+parsercmd::cmdFUNC::BackupList* parsercmd::cmdFUNC::backupOperandStack()
+{
+   BackupList* los = DEBUG_NEW BackupList();
+   while (!OPstack.empty())
+   {
+      los->push_front(OPstack.top());OPstack.pop();
+   }
+   return los;
+}
+
+void parsercmd::cmdFUNC::restoreOperandStack(parsercmd::cmdFUNC::BackupList* los)
+{
+   if (!OPstack.empty()) los->push_back(OPstack.top());
+   while (!OPstack.empty()) OPstack.pop();
+   for(BackupList::const_iterator CV = los->begin(); CV != los->end(); CV++)
+   {
+      OPstack.push(*CV);
+   }
+   los->clear();
+   delete los;
 }
 
 //=============================================================================
