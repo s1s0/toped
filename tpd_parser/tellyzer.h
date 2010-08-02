@@ -332,6 +332,20 @@ namespace  parsercmd {
       bool                 _constant;
    };
 
+   /*! Anonymous variable. This class exists purely to clean-up the anonymous
+    * variable created during the parsing. All the functionality is done in
+    * the assign object which is supposed to get into the stack before this
+    * object.
+    */
+   class cmdANOVAR:public cmdVIRTUAL {
+   public:
+      cmdANOVAR(telldata::tell_var *v) : _var(v) {};
+      int execute() {return EXEC_NEXT;}
+      ~cmdANOVAR() { delete _var;}
+   private:
+      telldata::tell_var*  _var;
+   };
+
    class cmdSTRUCT: public cmdVIRTUAL {
    public:
                cmdSTRUCT() : _arg(NULL) {}
