@@ -960,7 +960,7 @@ primaryexpression :
    | variable                              {$$ = $1;
       CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPUSH(tellvar, indexed));}
    | anonymousvar                          {$$ = $1;
-      CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPUSH(tellvar, false, true));}
+      CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdANOVAR(tellvar));}
    | listremove                            {$$ = $1; indexed = false;}
    | listslice                             {$$ = $1; indexed = false;}
    | '(' expression ')'                    {$$ = $2;}

@@ -44,12 +44,6 @@
 
 extern void tellerror(std::string s, TpdYYLtype loc);
 extern void tellerror(std::string s);
-// Declared here to avoid "undefined symbol" errors reported by
-// ldd -r for tpd_parser.so
-// According to wxWidgets (app.h)
-// this macro can be used multiple times and just allows you to use wxGetApp()
-// function
-//DECLARE_APP(TopedApp)
 
 parsercmd::cmdBLOCK*       CMDBlock = NULL;
 console::toped_logfile     LogFile;
@@ -618,7 +612,7 @@ int parsercmd::cmdSTACKRST::execute() {
 //=============================================================================
 int parsercmd::cmdASSIGN::execute()
 {
-   TELL_DEBUG(cmdREALASSIGN);
+   TELL_DEBUG(cmdASSIGN);
    telldata::tell_var *op = OPstack.top();OPstack.pop();
    telldata::typeID typeis = _var->get_type();
    if (TLISALIST(typeis))
