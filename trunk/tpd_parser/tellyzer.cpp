@@ -1243,10 +1243,10 @@ bool  parsercmd::cmdBLOCK::declValidate(const std::string& fn, const argumentLIS
 int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap)
 {
 // This function is rather twisted, but this seems the only way to deal with
-// anonimous user defined structures handled over as input function arguments.
+// anonymous user defined structures handled over as input function arguments.
 // Otherwise we have to restrict significantly the input arguments rules for
 // functions. Here is the problem.
-// Functoins in tell can be overloaded. In the same time we can have user defined
+// Functions in tell can be overloaded. In the same time we can have user defined
 // structures, that have coincidental fields - for example the fields of the point
 // structure coincides with the fields of an user structure defined as
 // struct sameAsPoint{real a, real z}
