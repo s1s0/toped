@@ -160,10 +160,10 @@ void repeattest() {
 
 void foreachtest () 
 {
-   foreach (int i; int list {1,2}) 
+   foreach (int i; (int list) {1,2}) 
    { 
       int k;
-      foreach (k; int list {2,3}) 
+      foreach (k; (int list) {2,3}) 
       {
          echo (i);
          echo (k);
