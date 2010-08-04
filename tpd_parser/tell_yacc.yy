@@ -248,14 +248,14 @@ Ooops! Second thought!
 %start input
 /*---------------------------------------------------------------------------*/
 %token                 tknERROR
-%token	               tknIF tknELSE tknWHILE tknREPEAT tknUNTIL tknFOREACH
+%token                 tknIF tknELSE tknWHILE tknREPEAT tknUNTIL tknFOREACH
 %token                 tknSTRUCTdef tknVOIDdef tknREALdef tknBOOLdef tknINTdef
 %token                 tknSTRINGdef tknLAYOUTdef tknLISTdef tknRETURN
 %token                 tknTRUE tknFALSE tknLEQ tknGEQ tknEQ tknNEQ
 %token                 tknAND tknOR tknNOT tknBWAND tknBWOR tknBWNOT
 %token                 tknSW tknSE tknNE tknNW tknPREADD tknPRESUB
 %token                 tknPOSTADD tknPOSTSUB tknCONST
-%token <parsestr>      tknIDENTIFIER tknFIELD tknSTRING
+%token <parsestr>      tknIDENTIFIER tknTYPEdef tknFIELD tknSTRING
 %token <real>          tknREAL
 %token <integer>       tknINT
 /* parser types*/
@@ -651,16 +651,10 @@ telltype:
    | tknBOOLdef                            {$$ = telldata::tn_bool;}
    | tknSTRINGdef                          {$$ = telldata::tn_string;}
    | tknLAYOUTdef                          {$$ = telldata::tn_layout;}
-   | tknIDENTIFIER                         {
+   | tknTYPEdef                            {
         const telldata::tell_type* ttype = CMDBlock->getTypeByName($1);
-        if (NULL == ttype)  {
-           tellerror("Bad type specifier", @1);
-           $$ = telldata::tn_NULL;
-           delete [] $1;
-           cleanonabort();
-           YYABORT;
-        }
-        else $$ = ttype->ID();
+        assert (NULL != ttype);
+        $$ = ttype->ID();
         delete [] $1;
       }
 ;
@@ -875,19 +869,19 @@ structure:
 ;
 
 anonymousvar:
-     telltypeID   structure               {
-      telldata::argumentID* op2 = $2;
+     '(' telltypeID ')'  structure        {
+      telldata::argumentID* op2 = $4;
       // the structure is without a type at this moment, so here we do the type checking
-      if (parsercmd::StructTypeCheck($1, op2, @2)) {
-         tellvar = CMDBlock->newTellvar($1, @1);
-         parsercmd::Assign(tellvar, false, $2, @2);
-         delete $2;
-         $$ = $1;
+      if (parsercmd::StructTypeCheck($2, op2, @4)) {
+         tellvar = CMDBlock->newTellvar($2, @1);
+         parsercmd::Assign(tellvar, false, $4, @4);
+         delete $4;
+         $$ = $2;
       }
       else {
-         tellerror("Type mismatch", @2);
+         tellerror("Type mismatch", @4);
          $$ = telldata::tn_NULL;
-         delete $2;
+         delete $4;
          cleanonabort();
          YYABORT;
       }
@@ -939,7 +933,7 @@ multiexpression :
 ;
 
 unaryexpression :
-     primaryexpression	                   {$$ = $1;}
+     primaryexpression                     {$$ = $1;}
    | '-' primaryexpression                 {$$ = parsercmd::UMinus($2,@2);}
    | tknNOT   primaryexpression            {$$ = parsercmd::BoolEx($2, "!",@2);}
    | tknBWNOT primaryexpression            {$$ = parsercmd::BoolEx($2, "~",@2);}

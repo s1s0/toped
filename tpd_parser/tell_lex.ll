@@ -48,6 +48,8 @@ parsercmd::lexer_files* include_stack[MAX_INCLUDE_DEPTH];
 int include_stack_ptr = 0;
 /*Global console object*/
 extern console::ted_cmd*           Console;
+extern parsercmd::cmdBLOCK*        CMDBlock;
+
 /*****************************************************************************
 Function declarations
 *****************************************************************************/
@@ -144,7 +146,12 @@ const                      return tknCONST;
 {lxt_D}+"."{lxt_D}*({lxt_E})?  |
 {lxt_D}*"."{lxt_D}+({lxt_E})?  |
 {lxt_D}+{lxt_E}          { telllval.real = atof(yytext); return tknREAL;}
-{lex_identifier}         { telllval.parsestr = parsercmd::charcopy(yytext);return tknIDENTIFIER;}
+{lex_identifier}         { telllval.parsestr = parsercmd::charcopy(yytext);
+                           const telldata::tell_type* ttype = CMDBlock->getTypeByName(yytext);
+                           if (NULL == ttype)
+                              return tknIDENTIFIER;
+                           else
+                              return tknTYPEdef;}
 .     	             	   return tknERROR;
 %% 
 /**************************************************************************/
