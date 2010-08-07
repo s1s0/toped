@@ -190,7 +190,7 @@ namespace Oasis {
    /*! Represents all OASIS modal variables. Each class used as a TYPE argument of
        this template has to define a proper copy constructor and '=' operator. The
        template takes care about handling the state of the modal variables derived
-       form it. ModalVar::_status field contains this state. Defines equal '='
+       from it. ModalVar::_status field contains this state. Defines equal '='
        operator which should be used to assign (set) a value to the modal variable
        and a functor '()' which should be used to read the value of the modal variable.
        An exception will be thrown if the value of the modal variable is

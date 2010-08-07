@@ -300,5 +300,66 @@ class DbExportFile {
       real                    _UU;
 };
 
+/*!
+ * File compression explained: A plenty of compression algorithms out there -
+ * Toped deals with two of them and the reason is that those are suitable for
+ * layout file purposes and covered by wx library at the time of writing.
+ *  - zip (http://en.wikipedia.org/wiki/ZIP_%28file_format%29) - compression
+ *    algorithm and archiver
+ *  - gzip stream compression algorithm using Lempel-Ziv coding (LZ77).
+ *    (http://en.wikipedia.org/wiki/Gzip). Several implementations of this
+ *    algo, but wx is using Zlib (http://www.zlib.net/)
+ *
+ *  From our prospective the big difference between the two is that the
+ *  first one is also an archiver which means that a zip file can contain
+ *  more than one file. gzip on the other hand is a stream compression which
+ *  means that it contains a single file. In Linux traditionally tar is
+ *  used as archiver and then the entire archive is compressed using gzip
+ *
+ *  Another quite important feature of both formats is that (as it appears
+ *  at least in the wx implementation) both of them are not seekable. In
+ *  other words they are not randomly accessible.
+ *
+ *  Having in mind all the above and the general pattern Toped is following
+ *  for all imports (i.e. two stage conversion as described on the web site
+ *  http://toped.org.uk/trm_ifaces.html) here is the general idea how the
+ *  compressed input files are handled:
+ *  - zip files - opened before the conversion. If they contain a single file
+ *    it is inflated (decompressed) in a temporary location and then the new
+ *    file is used in all conversion stages. If the original file contains more
+ *    than one file - the processing is aborted and conversion is rejected.
+ *  - gzip files - used "as is" in the first import stage where the access is
+ *    sequential. Before the second stage, which requires random access the
+ *    file is inflated in a temporary location and the product is used for the
+ *    conversion.
+ */
+class DbImportFile {
+   public:
+                           DbImportFile(wxString);
+      virtual             ~DbImportFile();
+      bool                 reopenFile();
+      void                 setPosition(wxFileOffset);
+      void                 closeFile();
+      virtual void         hierOut() = 0 ;
+      virtual void         collectLayers(ExtLayers&) const = 0;
+      virtual std::string  libname() const = 0;
+      wxFileOffset         filePos() const                  { return _filePos;                     }
+   protected:
+      bool                 unZlib2Temp(wxString&, const wxString);//! inflate the input zlib file in a temporary one
+      bool                 unZip2Temp();//! inflate the input zip file in a temporary one
+      wxString             _fileName   ;//! A fully validated name of the file. Path,extension, everything
+      wxString             _tmpFileName;//! The name of the eventually deflated file (if the input is compressed)
+      wxInputStream*       _inStream   ;//! The input stream of the opened file
+      wxFileOffset         _fileLength ;//! The length of the file in bytes
+      wxFileOffset         _filePos    ;//! Current position in the file
+      wxFileOffset         _progresPos ;//! Current position of the progress bar (Toped status line)
+      bool                 _gziped     ;//! Indicates that the file is in compressed with gzip
+      bool                 _ziped      ;//! Indicates that the file is in compressed with zip
+      bool                 _status     ;//! Used only in the constructor if the file can't be
+                                        //! opened for whatever reason
+
+      //      typedef SGHierTree<ExternCellType>        GDSHierTree;
+};
+
 class PSFile;
 #endif

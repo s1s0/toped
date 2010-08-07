@@ -239,18 +239,19 @@ namespace GDSin {
          bool                 unZlib2Temp(wxString&, const wxString);
          wxInputStream*       _gdsFh;
          std::string          _fileName;
+         wxFileOffset         _prgrs_pos;
+         wxFileOffset         _filePos;
+         bool                 _gziped;
+         GDSHierTree*         _hierTree; // Tree of instance hierarchy
+
          int2b                _streamVersion;
          int2b                _libDirSize;
          std::string          _srfName;
          GdsLibrary*          _library;
-         wxFileOffset         _filePos;
-         GDSHierTree*         _hierTree; // Tree of instance hierarchy
          int                  _gdsiiWarnings;
          TpdTime              _tModif;
          TpdTime              _tAccess;
-         wxFileOffset         _prgrs_pos;
          GdsRecord*           _cRecord;
-         bool                 _gziped;
    };
 
 
