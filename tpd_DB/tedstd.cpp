@@ -28,6 +28,10 @@
 #include "tpdph.h"
 #include <math.h>
 #include <sstream>
+#include <wx/filename.h>
+#include <wx/wfstream.h>
+#include <wx/zipstrm.h>
+#include <wx/zstream.h>
 #include "tedstd.h"
 #include "ttt.h"
 #include "outbox.h"
@@ -719,4 +723,138 @@ laydata::WireContourAux::~WireContourAux()
 {
    delete _wcObject;
    delete [] _ldata;
+}
+
+//=============================================================================
+//class DbImportFile {
+//   public:
+//                           DbImportFile(wxString, bool gziped = false);
+//      virtual             ~DbImportFile();
+//      bool                 reopenFile();
+//      void                 setPosition(wxFileOffset);
+//      void                 closeFile();
+//      virtual void         hierOut() = 0 ;
+//      virtual void         collectLayers(ExtLayers&) const = 0;
+//      virtual std::string  libname() const = 0;
+//      wxFileOffset         filePos() const                  { return _filePos;                     }
+//   protected:
+//      bool                 unZlib2Temp(wxString&, const wxString);
+//      std::string          _fileName   ;//! A fully validated name of the file. Path,extension, everything
+//      wxFileOffset         _fileLength ;//! The length of the file in bytes
+//      wxFileOffset         _filePos    ;//! Current position in the file
+//      wxFileOffset         _progresPos ;//! Current position of the progress bar (Toped status line)
+//      wxInputStream*       _inStream   ;//! The input stream of the opened file
+//      bool                 _gziped     ;//! Indicates that the file is in compressed with gzip
+//      bool                 _status     ;//! Used only in the constructor if the file can't be
+//                                        //! opened for whatever reason
+//
+//      //      typedef SGHierTree<ExternCellType>        GDSHierTree;
+//};
+
+/*!
+ * The main purpose of the constructor is to create an input stream (_inStream)
+ * from the fileName. It handles zip and gz files recognizing them by the
+ * extension. The outcome of this operation is indicated it in the _status field
+ * of the class.
+ * @param fileName - the fully qualified filename - OS dependent
+ */
+DbImportFile::DbImportFile(wxString fileName) : _inStream(NULL), _fileLength(0),
+      _filePos(0), _progresPos(0), _gziped(false), _ziped(false), _status(false)
+{
+   std::ostringstream info;
+   wxFileName wxGdsFN(fileName);
+   wxGdsFN.Normalize();
+   _fileName = wxGdsFN.GetFullPath();
+   if (wxGdsFN.IsOk())
+   {
+      wxString theExtention = wxGdsFN.GetExt();
+      _gziped = (wxT("gz") == wxGdsFN.GetExt());
+      _ziped  = (wxT("zip") == wxGdsFN.GetExt());
+      if (_ziped)
+      {
+         info << "Inflating the archive \"" << _fileName << "\" ...";
+         tell_log(console::MT_INFO,info.str());
+         if (unZip2Temp())
+         {
+            // zip files are inflated in a temporary location immediately
+            info.str("");
+            info << "Done";
+            tell_log(console::MT_INFO,info.str());
+            _inStream = DEBUG_NEW wxFFileInputStream(_tmpFileName,wxT("rb"));
+            _status = true;
+         }
+         else
+         {
+            info.str("");
+            info << "Failed!";
+            tell_log(console::MT_ERROR,info.str());
+         }
+      }
+      else if (_gziped)
+      {
+         // gz files are handled "as is" in the first import stage.
+         wxInputStream* fstream = DEBUG_NEW wxFFileInputStream(_fileName,wxT("rb"));
+         _inStream = DEBUG_NEW wxZlibInputStream(fstream);
+         _status = true;
+      }
+      else
+      {
+         // File is not comressed
+         _inStream = DEBUG_NEW wxFFileInputStream(_fileName,wxT("rb"));
+         _status = true;
+      }
+   }
+   else
+   {
+      std::ostringstream info;
+      info << "Invalid filename \"" << _fileName << "\"";
+      tell_log(console::MT_ERROR,info.str());
+   }
+   if (!_status) return;
+   assert(NULL != _inStream);
+   //--------------------------------------------------------------------------
+   // OK, we have an input stream now - check it is valid and accessible
+   if (!(_inStream->IsOk()))
+   {
+      info << "File "<< _fileName <<" can NOT be opened";
+      _status = false;
+      delete _inStream;
+      return;
+   }
+   _fileLength = _inStream->GetLength();
+   TpdPost::toped_status(console::TSTS_PRGRSBARON, _fileLength);
+}
+
+bool DbImportFile::unZip2Temp()
+{
+   // Initialize an input stream - i.e. open the input file
+   wxFFileInputStream inStream(_fileName);
+   if (!inStream.Ok())
+   {
+      // input file does not exist
+      return false;
+   }
+   // Create an input zip stream handling over the input file stream created above
+   wxZipInputStream inZipStream(inStream);
+   if (1 < inZipStream.GetTotalEntries()) return false;
+   wxZipEntry* curZipEntry = inZipStream.GetNextEntry();
+   if (NULL != curZipEntry)
+   {
+      wxFile* outFileHandler = NULL;
+      _tmpFileName = wxFileName::CreateTempFileName(curZipEntry->GetName(), outFileHandler);
+      wxFileOutputStream outStream(_tmpFileName);
+      if (outStream.IsOk())
+      {
+         inZipStream.Read(outStream);
+         return true;
+      }
+      else return false;
+   }
+   else
+      return false;
+}
+
+DbImportFile::~DbImportFile()
+{
+   if (NULL != _inStream) delete _inStream;
 }
