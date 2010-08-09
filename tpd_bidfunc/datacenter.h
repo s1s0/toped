@@ -29,7 +29,6 @@
 #define DATA_HANDLER_INCLUDED
 #include "tedesign.h"
 #include "cif_io.h"
-#include "gds_io.h"
 #include "oasis_io.h"
 
 typedef enum {
@@ -56,12 +55,12 @@ public:
    bool                       OASParse(std::string);
    bool                       lockTDT(laydata::TdtLibDir*&, TdtMutexState);
    laydata::DrcLibrary*       lockDRC(void);
-   bool                       lockGds(GDSin::GdsInFile*&);
+   bool                       lockGds(DbImportFile*&);
    bool                       lockCif(CIFin::CifFile*&);
    bool                       lockOas(Oasis::OasisInFile*&);
    void                       unlockTDT(laydata::TdtLibDir*, bool throwexception = false);
    void                       unlockDRC();
-   void                       unlockGds(GDSin::GdsInFile*&, bool throwexception = false);
+   void                       unlockGds(DbImportFile*&, bool throwexception = false);
    void                       unlockCif(CIFin::CifFile*&, bool throwexception = false);
    void                       unlockOas(Oasis::OasisInFile*& oasis_db, bool throwexception = false);
    void                       bpRefreshTdtTab(bool, bool);
@@ -93,14 +92,13 @@ protected:
    void                       openGlDraw(const CTM&);
    void                       openGlRender(const CTM&); // alternative to openGlDraw
 private:
-   bool                       unZip2Temp(wxString&, const wxString); //! unzip the input file in a temporary file
    word                       _curcmdlay;    //! layer used during current drawing operation
    bool                       _drawruler;    //! draw a ruler while composing a shape interactively
    std::string                _localDir;
    std::string                _globalDir;
    laydata::TdtLibDir         _TEDLIB;       //! catalog of available TDT libraries
    laydata::DrcLibrary*       _DRCDB;        //! DRC data
-   GDSin::GdsInFile*          _GDSDB;        //! GDS parsed data
+   DbImportFile*              _GDSDB;        //! GDS parsed data
    CIFin::CifFile*            _CIFDB;        //! CIF parsed data
    Oasis::OasisInFile*        _OASDB;        //! OASIS parsed data
    wxMutex                    _DBLock;       //! Main stream DB Mutex

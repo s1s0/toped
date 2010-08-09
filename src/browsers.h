@@ -39,7 +39,6 @@
 #include <string>
 #include "tedesign.h"
 #include "calbr_reader.h"
-#include "gds_io.h"
 #include "cif_io.h"
 #include "oasis_io.h"
 

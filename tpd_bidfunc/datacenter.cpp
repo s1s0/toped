@@ -32,6 +32,7 @@
 #include <wx/zipstrm.h>
 #include <wx/zstream.h>
 #include <sstream>
+#include "gds_io.h"
 #include "datacenter.h"
 #include "outbox.h"
 #include "tedat.h"
@@ -75,40 +76,7 @@ DataCenter::~DataCenter()
 bool DataCenter::GDSparse(std::string filename)
 {
    bool status = true;
-   wxFileName wxGdsFN(wxString(filename.c_str(), wxConvUTF8));
-   wxGdsFN.Normalize();
-   if (!wxGdsFN.IsOk())
-   {
-      std::ostringstream info;
-      info << "Invalid filename \"" << filename << "\"";
-      tell_log(console::MT_ERROR,info.str());
-      return false;
-   }
-   wxString theExtention = wxGdsFN.GetExt();
-   bool gzipped = (wxT("gz") == wxGdsFN.GetExt());
-   bool zipped  = (wxT("zip") == wxGdsFN.GetExt());
-   if (zipped)
-   {
-      std::ostringstream info;
-      info << "Inflating the archive \"" << filename << "\" ...";
-      tell_log(console::MT_INFO,info.str());
-      wxString unzippedfn;
-      if (unZip2Temp(unzippedfn, wxGdsFN.GetFullPath()))
-      {
-         info.str("");
-         info << "Done";
-         tell_log(console::MT_INFO,info.str());
-         wxGdsFN = unzippedfn;
-      }
-      else
-      {
-         info.str("");
-         info << "Failed!";
-         tell_log(console::MT_ERROR,info.str());
-         return false;
-      }
-   }
-   GDSin::GdsInFile* AGDSDB = NULL;
+   DbImportFile* AGDSDB = NULL;
    if (lockGds(AGDSDB))
    {
       std::string news = "Removing existing GDS data from memory...";
@@ -120,7 +88,7 @@ bool DataCenter::GDSparse(std::string filename)
 #ifdef GDSCONVERT_PROFILING
       HiResTimer profTimer;
 #endif
-      AGDSDB = DEBUG_NEW GDSin::GdsInFile(wxGdsFN.GetFullPath(), gzipped);
+      AGDSDB = DEBUG_NEW GDSin::GdsInFile(wxString(filename.c_str(), wxConvUTF8));
 #ifdef GDSCONVERT_PROFILING
       profTimer.report("Time elapsed for GDS parse: ");
 #endif
@@ -143,7 +111,7 @@ bool DataCenter::GDSparse(std::string filename)
 
 void DataCenter::GDSclose()
 {
-   GDSin::GdsInFile* AGDSDB = NULL;
+   DbImportFile* AGDSDB = NULL;
    if (lockGds(AGDSDB))
    {
       delete AGDSDB;
@@ -220,7 +188,7 @@ bool DataCenter::cifGetLayers(nameList& cifLayers)
 bool DataCenter::gdsGetLayers(ExtLayers& gdsLayers)
 {
    bool ret_value = false;
-   GDSin::GdsInFile* AGDSDB = NULL;
+   DbImportFile* AGDSDB = NULL;
    if (lockGds(AGDSDB))
    {
       AGDSDB->collectLayers(gdsLayers);
@@ -395,7 +363,7 @@ void DataCenter::unlockTDT(laydata::TdtLibDir* tdt_db, bool throwexception)
    if(NULL != _bpSync) _bpSync->Signal();
 }
 
-bool DataCenter::lockGds(GDSin::GdsInFile*& gds_db)
+bool DataCenter::lockGds(DbImportFile*& gds_db)
 {
    if (wxMUTEX_DEAD_LOCK == _GDSLock.Lock())
    {
@@ -410,7 +378,7 @@ bool DataCenter::lockGds(GDSin::GdsInFile*& gds_db)
    }
 }
 
-void DataCenter::unlockGds(GDSin::GdsInFile*& gds_db, bool throwexception)
+void DataCenter::unlockGds(DbImportFile*& gds_db, bool throwexception)
 {
    _GDSDB = gds_db;
    VERIFY(wxMUTEX_NO_ERROR == _GDSLock.Unlock());
@@ -1035,34 +1003,5 @@ LayerMapExt* DataCenter::secureGdsLayMap(const layprop::DrawProperties* drawProp
          theGdsMap = DEBUG_NEW LayerMapExt(*savedMap, NULL);
    }
    return theGdsMap;
-}
-
-bool DataCenter::unZip2Temp(wxString& inflatedFN, const wxString deflatedFN)
-{
-   // Initialize an input stream - i.e. open the input file
-   wxFFileInputStream inStream(deflatedFN);
-   if (!inStream.Ok())
-   {
-      // input file does not exist
-      return false;
-   }
-   // Create an input zip stream handling over the input file stream created above
-   wxZipInputStream inZipStream(inStream);
-   if (1 < inZipStream.GetTotalEntries()) return false;
-   wxZipEntry* curZipEntry = inZipStream.GetNextEntry();
-   if (NULL != curZipEntry)
-   {
-      wxFile* outFileHandler = NULL;
-      inflatedFN = wxFileName::CreateTempFileName(curZipEntry->GetName(), outFileHandler);
-      wxFileOutputStream outStream(inflatedFN);
-      if (outStream.IsOk())
-      {
-         inZipStream.Read(outStream);
-         return true;
-      }
-      else return false;
-   }
-   else
-      return false;
 }
 
