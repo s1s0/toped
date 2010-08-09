@@ -156,7 +156,7 @@ namespace GDSin {
       public:
                            GdsRecord();
                            GdsRecord(byte rt, byte dt, word rl);
-         void              getNextRecord(wxInputStream* Gf, word rl, byte rt, byte dt);
+         void              getNextRecord(DbImportFile* Gf, word rl, byte rt, byte dt);
          bool              retData(void* var, word curnum = 0, byte len = 0) const;
          size_t            flush(wxFFile& Gf);
          void              add_int2b(const word);
@@ -214,34 +214,28 @@ namespace GDSin {
    > GetReadErrors()      - Returns the number of errors during GDSII file reading
    > GetTimes()         - Reads values of t_access and t_modiff (see above)
    ******************************************************************************/
-   class   GdsInFile   {
+   class   GdsInFile : public DbImportFile {
       public:
-                              GdsInFile(wxString, bool gziped = false);
-         bool                 reopenFile();
+                              GdsInFile(wxString);
+         virtual             ~GdsInFile();
          bool                 getNextRecord();
-         double               libUnits();
-         double               userUnits();
-         void                 setPosition(wxFileOffset);
-         void                 closeFile();
          GdsStructure*        getStructure(const std::string);
-         void                 collectLayers(ExtLayers&);
-         std::string          libname() const;
-         void                 hierOut();
-         const GdsRecord*     cRecord() const                  { return _cRecord;                     }
+         virtual double       libUnits() const;
+         virtual void         hierOut();
+         virtual void         collectLayers(ExtLayers&) const;
+         virtual bool         collectLayers(const std::string&, ExtLayers&) const;
+         virtual std::string  libname() const;
+         virtual void         getTopCells(nameList&) const;
+         virtual void         getAllCells(wxListBox&) const;
+         virtual void         convertPrep(const nameList&, bool);
+         const GdsRecord*     cRecord() const                  { return &_cRecord;                    }
          GDSHierTree*         hierTree()                       { return _hierTree;                    }
          int                  gdsiiWarnings()                  { return _gdsiiWarnings;               }
          int                  incGdsiiWarnings()               { return ++_gdsiiWarnings;             }
          const GdsLibrary*    library() const                  { return _library;                     }
-         wxFileOffset         filePos() const                  { return _filePos;                     }
-                              ~GdsInFile();
-      protected:
-         void                 getTimes(GdsRecord* wr);
-         bool                 unZlib2Temp(wxString&, const wxString);
-         wxInputStream*       _gdsFh;
-         std::string          _fileName;
-         wxFileOffset         _prgrs_pos;
-         wxFileOffset         _filePos;
-         bool                 _gziped;
+      private:
+         void                 getTimes();
+         void                 preTraverseChildren(const GDSin::GDSHierTree*);
          GDSHierTree*         _hierTree; // Tree of instance hierarchy
 
          int2b                _streamVersion;
@@ -251,9 +245,8 @@ namespace GDSin {
          int                  _gdsiiWarnings;
          TpdTime              _tModif;
          TpdTime              _tAccess;
-         GdsRecord*           _cRecord;
+         GdsRecord            _cRecord;
    };
-
 
    /*** GdsStructure ************************************************************
    >>> Constructor --------------------------------------------------------------
@@ -290,21 +283,17 @@ namespace GDSin {
    > Get_Allay(byte i)   - ...
    ******************************************************************************/
 
-   class   GdsStructure {
+   class   GdsStructure : public ForeignCell {
       public:
                               GdsStructure(GdsInFile*, word);
-         void                 import(GdsInFile*, laydata::TdtCell*, laydata::TdtLibDir*, const LayerMapExt&);
+         virtual void         import(DbImportFile*, laydata::TdtCell*, laydata::TdtLibDir*, const LayerMapExt&);
          GDSHierTree*         hierOut(GDSHierTree* Htree, GdsStructure* parent);
          void                 collectLayers(ExtLayers&, bool);
          void                 linkReferences(GdsInFile* const, GdsLibrary* const);
          void                 split(GdsInFile*, GdsOutFile*);
-         std::string          strctName() const                { return _strctName;    }
-         bool                 traversed() const                { return _traversed;    }
-         void                 set_traversed(bool tf)           { _traversed = tf;      }
          int                  libID() const                    { return TARGETDB_LIB;  } // to cover the requirements of the hierarchy template
          bool                 haveParent() const               { return _haveParent;   }
          wxFileOffset         strSize() const                  { return _strSize;      }
-                             ~GdsStructure();
       protected:
          void                 importBox(GdsInFile*, laydata::TdtCell*, const LayerMapExt&);
          void                 importPoly(GdsInFile*, laydata::TdtCell*, const LayerMapExt&);
@@ -325,8 +314,6 @@ namespace GDSin {
          bool                 pathAcceptable(pointlist&, int4b, int2b, int2b);
          ExtLayers            _contSummary; // contents summary
          bool                 _haveParent;
-         std::string          _strctName;
-         bool                 _traversed;       //! For hierarchy traversing purposes
          NameSet              _referenceNames;
          GDSStructureList     _children;
          wxFileOffset         _filePos;
@@ -366,6 +353,7 @@ namespace GDSin {
       GDSHierTree*            hierOut();
       GdsStructure*           getStructure(const std::string);
       void                    collectLayers(ExtLayers&);
+      void                    getAllCells(wxListBox&) const;
       double                  dbu() const                      { return _dbu;        }
       double                  uu()  const                      { return _uu;         }
       std::string             libName() const                  { return _libName;    }
@@ -378,21 +366,6 @@ namespace GDSin {
       double                  _uu;
       int2b                   _maxver;
       StructureMap            _structures;
-   };
-
-   class Gds2Ted {
-   public:
-                              Gds2Ted(GDSin::GdsInFile*, laydata::TdtLibDir*, const LayerMapExt&);
-      void                    run(const nameList&, bool, bool);
-   protected:
-      void                    preTraverseChildren(const GDSin::GDSHierTree*);
-      void                    convert(GDSin::GdsStructure*, bool);
-      GDSin::GdsInFile*       _src_lib;
-      laydata::TdtLibDir*     _tdt_db;
-      const LayerMapExt&      _theLayMap;
-      real                    _coeff; // DBU difference
-      GDSStructureList        _convertList;
-      wxFileOffset            _conversionLength;
    };
 
    // Function definition

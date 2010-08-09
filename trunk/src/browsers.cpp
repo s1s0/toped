@@ -874,24 +874,24 @@ void browsers::GDSCellBrowser::showMenu(wxTreeItemId id, const wxPoint& pt)
 void browsers::GDSCellBrowser::collectInfo(bool hier)
 {
    DeleteAllItems();
-
-   GDSin::GdsInFile* AGDSDB = NULL;
+   DbImportFile* AGDSDB = NULL;
    if (DATC->lockGds(AGDSDB))
    {
-      AddRoot(wxString((AGDSDB->libname()).c_str(), wxConvUTF8));
-
-      if (NULL != AGDSDB->hierTree())
-      {
-         GDSin::GDSHierTree* root = AGDSDB->hierTree()->GetFirstRoot(TARGETDB_LIB);
-         wxTreeItemId nroot;
-         while (root)
-         {
-            nroot = AppendItem(GetRootItem(), wxString(root->GetItem()->strctName().c_str(),wxConvUTF8));
-            collectChildren(root, nroot, hier);
-            root = root->GetNextRoot(TARGETDB_LIB);
-         }
-      }
-      SortChildren(GetRootItem());
+      //TODO!
+//      AddRoot(wxString((AGDSDB->libname()).c_str(), wxConvUTF8));
+//
+//      if (NULL != AGDSDB->hierTree())
+//      {
+//         GDSin::GDSHierTree* root = AGDSDB->hierTree()->GetFirstRoot(TARGETDB_LIB);
+//         wxTreeItemId nroot;
+//         while (root)
+//         {
+//            nroot = AppendItem(GetRootItem(), wxString(root->GetItem()->strctName().c_str(),wxConvUTF8));
+//            collectChildren(root, nroot, hier);
+//            root = root->GetNextRoot(TARGETDB_LIB);
+//         }
+//      }
+//      SortChildren(GetRootItem());
    }
    DATC->unlockGds(AGDSDB);
 }

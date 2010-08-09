@@ -300,6 +300,8 @@ class DbExportFile {
       real                    _UU;
 };
 
+class ForeignCell;
+typedef std::list<ForeignCell*> ForeignCellList;
 /*!
  * File compression explained: A plenty of compression algorithms out there -
  * Toped deals with two of them and the reason is that those are suitable for
@@ -338,14 +340,25 @@ class DbImportFile {
                            DbImportFile(wxString);
       virtual             ~DbImportFile();
       bool                 reopenFile();
+      bool                 readStream(void*, size_t, bool updateProgress = false);
       void                 setPosition(wxFileOffset);
-      void                 closeFile();
+      void                 closeStream();
+      virtual double       libUnits() const = 0;
       virtual void         hierOut() = 0 ;
       virtual void         collectLayers(ExtLayers&) const = 0;
+      virtual bool         collectLayers(const std::string&, ExtLayers&) const = 0;
       virtual std::string  libname() const = 0;
-      wxFileOffset         filePos() const                  { return _filePos;                     }
+      virtual void         getTopCells(nameList&) const = 0;
+      virtual void         getAllCells(wxListBox&) const = 0;
+      virtual void         convertPrep(const nameList&, bool) = 0;
+      wxFileOffset         filePos() const                  { return _filePos; }
+      bool                 status() const                   { return _status;  }
+      ForeignCellList&     convList()                       { return _convList;}
    protected:
-      bool                 unZlib2Temp(wxString&, const wxString);//! inflate the input zlib file in a temporary one
+      wxFileOffset         _convLength ;//! the amount of data (in bytes) subjected to conversion
+      ForeignCellList      _convList;
+   private:
+      bool                 unZlib2Temp();//! inflate the input zlib file in a temporary one
       bool                 unZip2Temp();//! inflate the input zip file in a temporary one
       wxString             _fileName   ;//! A fully validated name of the file. Path,extension, everything
       wxString             _tmpFileName;//! The name of the eventually deflated file (if the input is compressed)
@@ -357,9 +370,34 @@ class DbImportFile {
       bool                 _ziped      ;//! Indicates that the file is in compressed with zip
       bool                 _status     ;//! Used only in the constructor if the file can't be
                                         //! opened for whatever reason
-
-      //      typedef SGHierTree<ExternCellType>        GDSHierTree;
 };
+
+//==========================================================================
+class ForeignCell {
+   public:
+                           ForeignCell() : _traversed(false) {};
+      virtual void         import(DbImportFile*, laydata::TdtCell*, laydata::TdtLibDir*, const LayerMapExt&) = 0;
+      bool                 traversed() const                { return _traversed;    }
+      void                 set_traversed(bool tf)           { _traversed = tf;      }
+      std::string          strctName() const                { return _strctName;    }
+   protected:
+      bool                 _traversed;
+      std::string          _strctName;
+};
+
+//==========================================================================
+class ImportDB {
+   public:
+                              ImportDB(DbImportFile*, laydata::TdtLibDir*, const LayerMapExt&);
+      void                    run(const nameList&, bool);
+   protected:
+      void                    convert(ForeignCell*, bool);
+      DbImportFile*           _src_lib;
+      laydata::TdtLibDir*     _tdt_db;
+      const LayerMapExt&      _theLayMap;
+      real                    _coeff; // DBU difference
+};
+
 
 class PSFile;
 #endif

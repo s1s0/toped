@@ -758,8 +758,9 @@ laydata::WireContourAux::~WireContourAux()
  * of the class.
  * @param fileName - the fully qualified filename - OS dependent
  */
-DbImportFile::DbImportFile(wxString fileName) : _inStream(NULL), _fileLength(0),
-      _filePos(0), _progresPos(0), _gziped(false), _ziped(false), _status(false)
+DbImportFile::DbImportFile(wxString fileName) : _convLength(0), _inStream(NULL),
+      _fileLength(0), _filePos(0), _progresPos(0), _gziped(false), _ziped(false),
+      _status(false)
 {
    std::ostringstream info;
    wxFileName wxGdsFN(fileName);
@@ -825,6 +826,77 @@ DbImportFile::DbImportFile(wxString fileName) : _inStream(NULL), _fileLength(0),
    TpdPost::toped_status(console::TSTS_PRGRSBARON, _fileLength);
 }
 
+bool DbImportFile::reopenFile()
+{
+   _filePos    = 0;
+   _progresPos = 0;
+
+   if (_gziped)
+   {
+      if (unZlib2Temp())
+      {
+         _inStream = DEBUG_NEW wxFFileInputStream(_tmpFileName,wxT("rb"));
+      }
+      else return false;
+   }
+   else if (_ziped)
+      _inStream = DEBUG_NEW wxFFileInputStream(_tmpFileName,wxT("rb"));
+   else
+      _inStream = DEBUG_NEW wxFFileInputStream(_fileName,wxT("rb"));
+
+   if (!(_inStream->IsOk()))
+   {// open the input file
+      std::ostringstream info;
+      info << "File "<< _fileName <<" can NOT be reopened";
+      tell_log(console::MT_ERROR,info.str());
+      return false;
+   }
+   if (!(_inStream->IsSeekable()))
+   {
+      std::ostringstream info;
+      info << "The input stream in not seekable. Can't continue";
+      tell_log(console::MT_ERROR,info.str());
+      return false;
+   }
+   TpdPost::toped_status(console::TSTS_PRGRSBARON, _convLength);
+   return true;
+}
+
+bool DbImportFile::readStream(void* buffer, size_t len, bool updateProgress)
+{
+   _inStream->Read(buffer,len);// read record header
+   size_t numread = _inStream->LastRead();
+   if (numread != len)
+      return false;// error during read in
+   // update file position
+   _filePos += numread;
+   // update progress indicator
+   if (updateProgress && (2048 < (_filePos - _progresPos)))
+   {
+      _progresPos = _filePos;
+      TpdPost::toped_status(console::TSTS_PROGRESS, _progresPos);
+   }
+   return true;
+}
+
+void DbImportFile::setPosition(wxFileOffset filePos)
+{
+   wxFileOffset result = _inStream->SeekI(filePos, wxFromStart);
+   assert(wxInvalidOffset != result);
+}
+
+void DbImportFile::closeStream()
+{
+   if ( NULL != _inStream )
+   {
+      delete _inStream;
+      _inStream = NULL;
+   }
+   TpdPost::toped_status(console::TSTS_PRGRSBAROFF);
+   tell_log(console::MT_INFO, "Done");
+   _convLength = 0;
+}
+
 bool DbImportFile::unZip2Temp()
 {
    // Initialize an input stream - i.e. open the input file
@@ -854,7 +926,111 @@ bool DbImportFile::unZip2Temp()
       return false;
 }
 
+bool DbImportFile::unZlib2Temp()
+{
+   std::ostringstream info;
+   // Initialize an input stream - i.e. open the input file
+   wxFFileInputStream inStream(_fileName);
+   if (!inStream.Ok())
+   {
+      info << "Can't open the file " << _fileName;
+      tell_log(console::MT_ERROR,info.str());
+      return false;
+   }
+   // Create an input zlib stream handling over the input file stream created above
+   wxZlibInputStream inZlibStream(inStream);
+   wxFile* outFileHandler = NULL;
+   _tmpFileName = wxFileName::CreateTempFileName(wxString(), outFileHandler);
+   wxFileOutputStream outStream(_tmpFileName);
+   if (outStream.IsOk())
+   {
+      info << " Inflating ... ";
+      tell_log(console::MT_INFO,info.str());
+      inZlibStream.Read(outStream);
+      wxStreamError izlsStatus = inZlibStream.GetLastError();
+      if (wxSTREAM_EOF == izlsStatus)
+      {
+         info.str("");
+         info << " Done ";
+         tell_log(console::MT_INFO,info.str());
+         return true;
+      }
+      else
+      {
+         info << " Inflating finished with status " << izlsStatus << ". Can't continue";
+         tell_log(console::MT_ERROR,info.str());
+         return false;
+      }
+   }
+   else
+   {
+      info << "Can't create a temporary file for deflating. Bailing out. ";
+      tell_log(console::MT_ERROR,info.str());
+      return false;
+   }
+}
+
+
 DbImportFile::~DbImportFile()
 {
    if (NULL != _inStream) delete _inStream;
+}
+
+ImportDB::ImportDB(DbImportFile* src_lib, laydata::TdtLibDir* tdt_db, const LayerMapExt& theLayMap) :
+      _src_lib(src_lib), _tdt_db(tdt_db), _theLayMap(theLayMap),
+               _coeff((*_tdt_db)()->UU() / src_lib->libUnits())
+{}
+
+void ImportDB::run(const nameList& top_str_names, bool overwrite)
+{
+   if (_src_lib->reopenFile())
+   {
+      try
+      {
+         ForeignCellList wList = _src_lib->convList();
+         for (ForeignCellList::iterator CS = wList.begin(); CS != wList.end(); CS++)
+         {
+            convert(*CS, overwrite);
+            (*CS)->set_traversed(false); // restore the state for eventual second conversion
+         }
+         tell_log(console::MT_INFO, "Done");
+      }
+      catch (EXPTNreadGDS) {tell_log(console::MT_INFO, "Conversion aborted with errors");}
+      TpdPost::toped_status(console::TSTS_PRGRSBAROFF);
+      _src_lib->closeStream();
+      (*_tdt_db)()->recreateHierarchy(_tdt_db);
+   }
+}
+
+void ImportDB::convert(ForeignCell* src_structure, bool overwrite)
+{
+   std::string gname = src_structure->strctName();
+   // check that destination structure with this name exists
+   laydata::TdtCell* dst_structure = static_cast<laydata::TdtCell*>((*_tdt_db)()->checkCell(gname));
+   std::ostringstream ost; //ost << "GDS import: ";
+   if (NULL != dst_structure)
+   {
+      if (overwrite)
+      {
+         /*@TODO Erase the existing structure and convert*/
+         ost << "Structure "<< gname << " should be overwritten, but cell erase is not implemented yet ...";
+         tell_log(console::MT_WARNING,ost.str());
+      }
+      else
+      {
+         ost << "Structure "<< gname << " already exists. Skipped";
+         tell_log(console::MT_INFO,ost.str());
+      }
+   }
+   else
+   {
+      ost << "Structure " << gname << "...";
+      tell_log(console::MT_INFO,ost.str());
+      // first create a new cell
+      dst_structure = DEBUG_NEW laydata::TdtCell(gname);
+      // call the cell converter
+      src_structure->import(_src_lib, dst_structure, _tdt_db, _theLayMap);
+      // and finally - register the cell
+      (*_tdt_db)()->registerCellRead(gname, dst_structure);
+   }
 }

@@ -29,6 +29,7 @@
 #include "tpdf_db.h"
 #include <sstream>
 #include "datacenter.h"
+#include "gds_io.h"
 #include "tuidefs.h"
 #include "calbr_reader.h"
 #include "drc_tenderer.h"
@@ -442,30 +443,18 @@ int tellstdfunc::GDSread::execute() {
 
    if (expandFileName(filename))
    {
-      std::list<std::string> top_cell_list;
+      nameList top_cell_list;
       if (DATC->GDSparse(filename))
       {
          // add GDS tab in the browser
          DATC->bpAddGdsTab(_threadExecution);
          //
-         GDSin::GdsInFile* AGDSDB = NULL;
+         DbImportFile* AGDSDB = NULL;
          if (DATC->lockGds(AGDSDB))
-         {
-            GDSin::GDSHierTree* root = AGDSDB->hierTree()->GetFirstRoot(TARGETDB_LIB);
-            if (root)
-            {
-               do
-               {
-                  top_cell_list.push_back(std::string(root->GetItem()->strctName()));
-               } while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
-            }
-            //else ->it's possible to have an empty GDS file
-         }
+            AGDSDB->getTopCells(top_cell_list);
          else
-         {
             // The AGDSDB mist exists here, because GDSparse returned true
             assert(false);
-         }
          DATC->unlockGds(AGDSDB);
          for (std::list<std::string>::const_iterator CN = top_cell_list.begin();
                                                    CN != top_cell_list.end(); CN ++)
@@ -516,20 +505,23 @@ int tellstdfunc::GDSimport::execute()
    }
    // Prep: We need all used layers, and the name of the GDS DB
    std::ostringstream ost;
-   ExtLayers* gdsLaysAll = NULL;
-   GDSin::GdsInFile* AGDSDB = NULL;
+   ExtLayers* gdsLaysAll;
+   bool checkOK = false;
+   DbImportFile* AGDSDB = NULL;
    if (DATC->lockGds(AGDSDB))
    {
-      GDSin::GdsStructure *src_structure = AGDSDB->getStructure(name.c_str());
-      if (src_structure)
-      {
-         gdsLaysAll = DEBUG_NEW ExtLayers();
-         src_structure->collectLayers(*gdsLaysAll,true);
-      }
+      gdsLaysAll = DEBUG_NEW ExtLayers();
+      checkOK = AGDSDB->collectLayers(name, *gdsLaysAll);
+//      GDSin::GdsStructure *src_structure = AGDSDB->getStructure(name.c_str());
+//      if (src_structure)
+//      {
+//         gdsLaysAll = DEBUG_NEW ExtLayers();
+//         src_structure->collectLayers(*gdsLaysAll,true);
+//      }
    }
    DATC->unlockGds(AGDSDB, true);
    //OK, here we go....
-   if (NULL != gdsLaysAll)
+   if (checkOK)
    { // i.e. top structure is found and layers extracted
       LayerMapExt LayerExpression(gdsLaysStrList, gdsLaysAll);
       if (LayerExpression.status())
@@ -594,7 +586,7 @@ int tellstdfunc::GDSimportList::execute()
       gdsLaysStrList[nameh->key().value()] = nameh->value().value();
    }
    ExtLayers* gdsLaysAll = DEBUG_NEW ExtLayers();
-   GDSin::GdsInFile* AGDSDB = NULL;
+   DbImportFile* AGDSDB = NULL;
    if (DATC->lockGds(AGDSDB))
    {
       AGDSDB->collectLayers(*gdsLaysAll);
@@ -760,10 +752,13 @@ int tellstdfunc::GDSsplit::execute()
    if (expandFileName(filename))
    {
 
-      GDSin::GdsInFile* AGDSDB = NULL;
+      DbImportFile* AGDSDB = NULL;
       if (DATC->lockGds(AGDSDB))
       {
-         GDSin::GdsStructure *src_structure = AGDSDB->getStructure(cellname.c_str());
+         // TODO - can we avoid this cast? Split is an unique operation for
+         // GDS only. Even if we can - does it worth it?
+         GDSin::GdsInFile* castedGdsDB = static_cast<GDSin::GdsInFile*>(AGDSDB);
+         GDSin::GdsStructure *src_structure = castedGdsDB->getStructure(cellname.c_str());
          std::ostringstream ost;
          if (!src_structure)
          {
@@ -772,7 +767,7 @@ int tellstdfunc::GDSsplit::execute()
          }
          else
          {
-            GDSin::GdsSplit gdssplit(AGDSDB, filename);
+            GDSin::GdsSplit gdssplit(castedGdsDB, filename);
             gdssplit.run(src_structure, recur);
             LogFile  << LogFile.getFN()
                      << "(\""<< cellname << "\","
@@ -918,19 +913,13 @@ tellstdfunc::GDSreportlay::GDSreportlay(telldata::typeID retype, bool eor) :
 int tellstdfunc::GDSreportlay::execute()
 {
    std::string name = getStringValue();
-   GDSin::GdsInFile* AGDSDB = NULL;
+   DbImportFile* AGDSDB = NULL;
    if(DATC->lockGds(AGDSDB))
    {
-      GDSin::GdsStructure *src_structure = AGDSDB->getStructure(name.c_str());
       std::ostringstream ost;
-      if (!src_structure) {
-         ost << "GDS structure named \"" << name << "\" does not exists";
-         tell_log(console::MT_ERROR,ost.str());
-      }
-      else
+      ExtLayers gdsLayers;
+      if (AGDSDB->collectLayers(name, gdsLayers))
       {
-         ExtLayers gdsLayers;
-         src_structure->collectLayers(gdsLayers,true);
          ost << "GDS layers found in \"" << name <<"\" { <layer_number> ; <data_type> }" << std::endl;
          for (ExtLayers::const_iterator NLI = gdsLayers.begin(); NLI != gdsLayers.end(); NLI++)
          {
@@ -942,6 +931,32 @@ int tellstdfunc::GDSreportlay::execute()
          tell_log(console::MT_INFO,ost.str());
          LogFile << LogFile.getFN() << "(\""<< name << "\");"; LogFile.flush();
       }
+      else
+      {
+         ost << "GDS structure named \"" << name << "\" does not exists";
+         tell_log(console::MT_ERROR,ost.str());
+      }
+//      GDSin::GdsStructure *src_structure = AGDSDB->getStructure(name.c_str());
+//      std::ostringstream ost;
+//      if (!src_structure) {
+//         ost << "GDS structure named \"" << name << "\" does not exists";
+//         tell_log(console::MT_ERROR,ost.str());
+//      }
+//      else
+//      {
+//         ExtLayers gdsLayers;
+//         src_structure->collectLayers(gdsLayers,true);
+//         ost << "GDS layers found in \"" << name <<"\" { <layer_number> ; <data_type> }" << std::endl;
+//         for (ExtLayers::const_iterator NLI = gdsLayers.begin(); NLI != gdsLayers.end(); NLI++)
+//         {
+//            ost << "{" << NLI->first << " ; ";
+//            for (WordSet::const_iterator NTI = NLI->second.begin(); NTI != NLI->second.end(); NTI++)
+//               ost << *NTI << " ";
+//            ost << "}"<< std::endl;
+//         }
+//         tell_log(console::MT_INFO,ost.str());
+//         LogFile << LogFile.getFN() << "(\""<< name << "\");"; LogFile.flush();
+//      }
    }
    DATC->unlockGds(AGDSDB, true);
    return EXEC_NEXT;
@@ -1959,7 +1974,7 @@ void tellstdfunc::importGDScell(laydata::TdtLibDir* dbLibDir, const nameList& to
   const LayerMapExt& laymap, parsercmd::undoQUEUE& undstack, telldata::UNDOPerandQUEUE& undopstack,
   bool threadExecution, bool recur, bool over)
 {
-   GDSin::GdsInFile* AGDSDB = NULL;
+   DbImportFile* AGDSDB = NULL;
    if (DATC->lockGds(AGDSDB))
    {
       if (dbmxs_dblock > DATC->tdtMxState())
@@ -1971,8 +1986,9 @@ void tellstdfunc::importGDScell(laydata::TdtLibDir* dbLibDir, const nameList& to
 #ifdef GDSCONVERT_PROFILING
       HiResTimer profTimer;
 #endif
-      GDSin::Gds2Ted converter(AGDSDB, dbLibDir, laymap);
-      converter.run(top_names, recur, over);
+      AGDSDB->convertPrep(top_names, recur);
+      ImportDB converter(AGDSDB, dbLibDir, laymap);
+      converter.run(top_names, over);
       (*dbLibDir)()->modified = true;
 #ifdef GDSCONVERT_PROFILING
       profTimer.report("Time elapsed for GDS conversion: ");

@@ -62,14 +62,12 @@ GDSin::GdsRecord::GdsRecord(byte rt, byte dt, word rl)
    _record[_index++] = _dataType;
 }
 
-void GDSin::GdsRecord::getNextRecord(wxInputStream* Gf, word rl, byte rt, byte dt)
+void GDSin::GdsRecord::getNextRecord(DbImportFile* Gf, word rl, byte rt, byte dt)
 {
    _recLen = rl; _recType = rt; _dataType = dt;
    if (rl)
    {
-      Gf->Read(_record, _recLen);
-      _numread = Gf->LastRead();
-      _valid = (_numread == _recLen) ? true : false;
+      _valid = Gf->readStream(_record, _recLen, true);
    }
    else
    {
@@ -310,68 +308,41 @@ GDSin::GdsRecord::~GdsRecord()
 //==============================================================================
 // class GdsInFile
 //==============================================================================
-GDSin::GdsInFile::GdsInFile(wxString wxfname, bool gziped)
+GDSin::GdsInFile::GdsInFile(wxString wxfname) : DbImportFile(wxfname)
 {
    _hierTree      = NULL;
    _gdsiiWarnings = 0;
-   _fileName      = std::string(wxfname.mb_str(wxConvUTF8));
-   _filePos       = 0;
-   _prgrs_pos     = 0;
    _library       = NULL;
-   _gziped        = gziped;
-   _cRecord = DEBUG_NEW GdsRecord();
-   tell_log(console::MT_INFO, std::string("GDSII input file: \"") + _fileName + std::string("\""));
-   if (_gziped)
-   {
-      wxInputStream* fstream = DEBUG_NEW wxFFileInputStream(wxfname,wxT("rb"));
-      _gdsFh = DEBUG_NEW wxZlibInputStream(fstream);
-   }
-   else
-      _gdsFh = DEBUG_NEW wxFFileInputStream(wxfname,wxT("rb"));
    std::ostringstream info;
-   if (!(_gdsFh->IsOk()))
-   {// open the input file
-      info << "File "<< _fileName <<" can NOT be opened";
+   if (!status())
       throw EXPTNreadGDS(info.str());
-   }
-   wxFileOffset _fileLength = _gdsFh->GetLength();
-   // The size of GDSII files is originally multiple by 2048. This is
-   // coming from the ancient years when this format was supposed to be written
-   // on the magnetic tapes. In order to keep the tradition it's a good idea
-   // to check the file size and to issue a warning if it is not multiple on 2048.
-//   div_t divi = div(file_length,2048);
-//   if (divi.rem != 0) AddLog('W',"File size is not multiple of 2048");
-   TpdPost::toped_status(console::TSTS_PRGRSBARON, _fileLength);
-
    do
    {// start reading
       if (getNextRecord())
       {
-         switch (_cRecord->recType())
+         switch (_cRecord.recType())
          {
-            case gds_HEADER:      _cRecord->retData(&_streamVersion);
+            case gds_HEADER:      _cRecord.retData(&_streamVersion);
                info.clear();
                info << "Stream version: " << _streamVersion;
                tell_log(console::MT_INFO, info.str());
                break;
-            case gds_BGNLIB:      getTimes(_cRecord);
+            case gds_BGNLIB:      getTimes();
                break;
-            case gds_LIBDIRSIZE:   _cRecord->retData(&_libDirSize);
+            case gds_LIBDIRSIZE:   _cRecord.retData(&_libDirSize);
                break;
-            case gds_SRFNAME:      _cRecord->retData(&_srfName);
+            case gds_SRFNAME:      _cRecord.retData(&_srfName);
                break;
             case gds_LIBSECUR:// I don't need this info. Does anybody need it?
                break;
             case gds_LIBNAME: {  // down in the hierarchy.
                std::string libname;
-               _cRecord->retData(&libname);
+               _cRecord.retData(&libname);
                //Start reading the library structure
               _library = DEBUG_NEW GdsLibrary(this, libname);
                //build the hierarchy tree
                _library->linkReferences(this);
-               closeFile();// close the input stream
-               TpdPost::toped_status(console::TSTS_PRGRSBAROFF);
-               tell_log(console::MT_INFO, "Done");
+               closeStream();// close the input stream
                return; // go out
             }
             default:   //parse error - not expected record type
@@ -384,107 +355,22 @@ GDSin::GdsInFile::GdsInFile(wxString wxfname, bool gziped)
    while (true);
 }
 
-bool GDSin::GdsInFile::reopenFile()
-{
-   _gdsiiWarnings = 0;
-   _filePos = 0;
-   _prgrs_pos = 0;
-   _cRecord = DEBUG_NEW GdsRecord();
-   wxString wxfname(_fileName.c_str(), wxConvUTF8 );
-
-   if (_gziped)
-   {
-      wxString inflatedfn;
-      if (unZlib2Temp(inflatedfn, wxfname))
-      {
-         _gdsFh = DEBUG_NEW wxFFileInputStream(inflatedfn,wxT("rb"));
-//      wxInputStream* fstream = DEBUG_NEW wxFFileInputStream(wxfname,wxT("rb"));
-//      _gdsFh = DEBUG_NEW wxZlibInputStream(fstream);
-      }
-      else return false;
-   }
-   else
-      _gdsFh = DEBUG_NEW wxFFileInputStream(wxfname,wxT("rb"));
-   if (!(_gdsFh->IsOk()))
-   {// open the input file
-      std::ostringstream info;
-      info << "File "<< _fileName <<" can NOT be reopened";
-      tell_log(console::MT_ERROR,info.str());
-      return false;
-   }
-   if (!(_gdsFh->IsSeekable()))
-   {
-      std::ostringstream info;
-      info << "The input stream in not seekable. Can't continue";
-      tell_log(console::MT_ERROR,info.str());
-      return false;
-   }
-   return true;
-}
-
-bool GDSin::GdsInFile::unZlib2Temp(wxString& inflatedFN, const wxString deflatedFN)
-{
-   std::ostringstream info;
-   // Initialize an input stream - i.e. open the input file
-   wxFFileInputStream inStream(deflatedFN);
-   if (!inStream.Ok())
-   {
-      info << "Can't open the file " << deflatedFN;
-      tell_log(console::MT_ERROR,info.str());
-      return false;
-   }
-   // Create an input zlib stream handling over the input file stream created above
-   wxZlibInputStream inZlibStream(inStream);
-   wxFile* outFileHandler = NULL;
-   inflatedFN = wxFileName::CreateTempFileName(wxString(), outFileHandler);
-   wxFileOutputStream outStream(inflatedFN);
-   if (outStream.IsOk())
-   {
-      info << " Inflating ... ";
-      tell_log(console::MT_INFO,info.str());
-      inZlibStream.Read(outStream);
-      wxStreamError izlsStatus = inZlibStream.GetLastError();
-      if (wxSTREAM_EOF == izlsStatus)
-      {
-         info.str("");
-         info << " Done ";
-         tell_log(console::MT_INFO,info.str());
-         return true;
-      }
-      else
-      {
-         info << " Inflating finished with status " << izlsStatus << ". Can't continue";
-         tell_log(console::MT_ERROR,info.str());
-         return false;
-      }
-   }
-   else
-   {
-      info << "Can't create a temporary file for deflating. Bailing out. ";
-      tell_log(console::MT_ERROR,info.str());
-      return false;
-   }
-}
-
-void GDSin::GdsInFile::closeFile()
-{
-   if ( NULL != _gdsFh )
-   {
-      delete _gdsFh;
-      _gdsFh = NULL;
-   }
-   if (NULL != _cRecord)
-      delete _cRecord;
-}
-
 GDSin::GdsStructure* GDSin::GdsInFile::getStructure(const std::string nm)
 {
    return _library->getStructure(nm);
 }
 
-void GDSin::GdsInFile::collectLayers(ExtLayers& lays)
+void GDSin::GdsInFile::collectLayers(ExtLayers& lays) const
 {
    _library->collectLayers(lays);
+}
+
+bool GDSin::GdsInFile::collectLayers(const std::string& cellName, ExtLayers& gdsLayers) const
+{
+   GDSin::GdsStructure* cell = _library->getStructure(cellName);
+   if (NULL == cell) return false;
+   cell->collectLayers(gdsLayers,true);
+   return true;
 }
 
 std::string GDSin::GdsInFile::libname() const
@@ -492,25 +378,38 @@ std::string GDSin::GdsInFile::libname() const
    return _library->libName();
 }
 
+void GDSin::GdsInFile::getTopCells(nameList& topCells) const
+{
+   assert(NULL != _hierTree);
+   GDSin::GDSHierTree* root = _hierTree->GetFirstRoot(TARGETDB_LIB);
+   if (root)
+   {
+      do
+      {
+         topCells.push_back(std::string(root->GetItem()->strctName()));
+      } while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
+   }
+   //else ->it's possible to have an empty GDS file
+}
+
+void GDSin::GdsInFile::getAllCells(wxListBox& cellsBox) const
+{
+   _library->getAllCells(cellsBox);
+}
+
 void GDSin::GdsInFile::hierOut()
 {
    _hierTree = _library->hierOut();
 }
 
-void GDSin::GdsInFile::setPosition(wxFileOffset filePos)
-{
-   wxFileOffset result = _gdsFh->SeekI(filePos, wxFromStart);
-   assert(wxInvalidOffset != result);
-}
-
-void GDSin::GdsInFile::getTimes(GdsRecord *wr)
+void GDSin::GdsInFile::getTimes()
 {
    tm tmodif_bt;
    tm taccess_bt;
    word cw;
-   for (int i = 0; i<wr->recLen()/2; i++)
+   for (int i = 0; i < _cRecord.recLen()/2; i++)
    {
-      wr->retData(&cw,2*i);
+      _cRecord.retData(&cw,2*i);
       switch (i)
       {
          case 0 :tmodif_bt.tm_year   = cw - 1900;break;
@@ -556,35 +455,82 @@ void GDSin::GdsInFile::getTimes(GdsRecord *wr)
 bool GDSin::GdsInFile::getNextRecord()
 {
    char recheader[4]; // record header
-   _gdsFh->Read(&recheader,4);// read record header
-   size_t numread = _gdsFh->LastRead();
-   if (numread != 4)
+   if (!readStream(&recheader,4))
       return false;// error during read in
    char rl[2];
    rl[0] = recheader[1];
    rl[1] = recheader[0];
    word reclen = *(word*)rl - 4; // record length
-//   GdsRecord* retrec = DEBUG_NEW GdsRecord(_gdsFh, reclen, recheader[2],recheader[3]);
-   _cRecord->getNextRecord(_gdsFh, reclen, recheader[2],recheader[3]);
-//   _filePos = _gdsFh->TellI();
-   _filePos += reclen + 4;    // update file position
-   if (2048 < (_filePos - _prgrs_pos))
-   {
-      _prgrs_pos = _filePos;
-      TpdPost::toped_status(console::TSTS_PROGRESS, _prgrs_pos);
-   }
-   if (_cRecord->valid()) return true;
+   _cRecord.getNextRecord(this, reclen, recheader[2],recheader[3]);
+   if (_cRecord.valid()) return true;
    else return false;// error during read in
 }
 
-double GDSin::GdsInFile::libUnits()
+double GDSin::GdsInFile::libUnits() const
 {
    return _library->dbu()/_library->uu();
 }
 
-double GDSin::GdsInFile::userUnits()
+/*! Gathers the cells subject to conversion in a linear list with a bottom-up
+ * order - i.e. top cells last. Also calculates the length of conversion - i.e.
+ * the total amount of data which will be processed during the conversion
+ * itself
+ * @param topCells - The top of the conversion hierarchy. Can be more than one
+ * cell
+ * @param recursive - The type of traversing. If false only the cells listed
+ * in the topCells will be gathered.
+ */
+void GDSin::GdsInFile::convertPrep(const nameList& topCells, bool recursive)
 {
-   return _library->uu();
+   assert(NULL != _hierTree);
+   _convList.clear();
+   for (nameList::const_iterator CN = topCells.begin(); CN != topCells.end(); CN++)
+   {
+      GDSin::GdsStructure *srcStructure = _library->getStructure(*CN);
+      if (NULL != srcStructure)
+      {
+         GDSin::GDSHierTree* root = _hierTree->GetMember(srcStructure);
+         if (recursive) preTraverseChildren(root);
+         if (!srcStructure->traversed())
+         {
+            _convList.push_back(srcStructure);
+            srcStructure->set_traversed(true);
+            _convLength += srcStructure->strSize();
+         }
+      }
+      else
+      {
+         std::ostringstream ost; ost << "GDS import: ";
+         ost << "Structure \""<< *CN << "\" not found in the GDS DB.";
+         tell_log(console::MT_WARNING,ost.str());
+      }
+   }
+
+}
+
+/*! An auxiliary method to GDSin::GdsInFile::convertPrep implementing
+ * recursive traversing of the cell hierarchy tree.
+ * @param root - The root of the hierarchy to be traversed
+ */
+void GDSin::GdsInFile::preTraverseChildren(const GDSin::GDSHierTree* root)
+{
+   const GDSin::GDSHierTree* Child = root->GetChild(TARGETDB_LIB);
+   while (NULL != Child)
+   {
+      if ( !Child->GetItem()->traversed() )
+      {
+         // traverse children first
+         preTraverseChildren(Child);
+         GDSin::GdsStructure* sstr = const_cast<GDSin::GdsStructure*>(Child->GetItem());
+         if (!sstr->traversed())
+         {
+            _convList.push_back(sstr);
+            sstr->set_traversed(true);
+            _convLength += sstr->strSize();
+         }
+      }
+      Child = Child->GetBrother(TARGETDB_LIB);
+   }
 }
 
 GDSin::GdsInFile::~GdsInFile()
@@ -683,6 +629,12 @@ void GDSin::GdsLibrary::collectLayers(ExtLayers& layers)
       CSTR->second->collectLayers(layers, false);
 }
 
+void GDSin::GdsLibrary::getAllCells(wxListBox& nameListBox) const
+{
+   for (StructureMap::const_iterator CSTR = _structures.begin(); CSTR != _structures.end(); CSTR++)
+      nameListBox.Append(wxString(CSTR->first.c_str(), wxConvUTF8));
+}
+
 GDSin::GDSHierTree* GDSin::GdsLibrary::hierOut()
 {
    GDSHierTree* Htree = NULL;
@@ -702,11 +654,12 @@ GDSin::GdsLibrary::~GdsLibrary()
 //==============================================================================
 // class GdsStructure
 //==============================================================================
-void GDSin::GdsStructure::import(GdsInFile *cf, laydata::TdtCell* dst_cell,
+void GDSin::GdsStructure::import(DbImportFile *ccf, laydata::TdtCell* dst_cell,
                                  laydata::TdtLibDir* tdt_db, const LayerMapExt& _theLayMap)
 {
    std::string strctName;
    //initializing
+   GdsInFile* cf = static_cast<GdsInFile*>(ccf);
    const GdsRecord* cr = cf->cRecord();
    cf->setPosition(_filePos);
    do
@@ -752,7 +705,6 @@ void GDSin::GdsStructure::import(GdsInFile *cf, laydata::TdtCell* dst_cell,
                break;
             case gds_ENDSTR:// end of structure, exit point
                dst_cell->fixUnsorted();
-               _traversed = true;
                return;
             default://parse error - not expected record type
                throw EXPTNreadGDS("GDS structure - wrong record type in the current context");
@@ -766,7 +718,6 @@ void GDSin::GdsStructure::import(GdsInFile *cf, laydata::TdtCell* dst_cell,
 
 GDSin::GdsStructure::GdsStructure(GdsInFile *cf, word bgnRecLength)
 {
-   _traversed = false;
    _filePos = cf->filePos();
    _beginRecLength = bgnRecLength + 4;
    //initializing
@@ -1616,118 +1567,6 @@ bool GDSin::GdsStructure::pathAcceptable(pointlist& plist, int4b width, int2b la
    else return false;
 }
 
-
-GDSin::GdsStructure::~GdsStructure()
-{
-
-}
-
-//-----------------------------------------------------------------------------
-// class Gds2Ted
-//-----------------------------------------------------------------------------
-GDSin::Gds2Ted::Gds2Ted(GDSin::GdsInFile* src_lib, laydata::TdtLibDir* tdt_db, const LayerMapExt& theLayMap) :
-      _src_lib(src_lib), _tdt_db(tdt_db), _theLayMap(theLayMap),
-               _coeff((*_tdt_db)()->UU() / src_lib->libUnits()), _conversionLength(0)
-{}
-
-void GDSin::Gds2Ted::run(const nameList& top_str_names, bool recursive, bool overwrite)
-{
-   assert(_src_lib->hierTree());
-
-   for (nameList::const_iterator CN = top_str_names.begin(); CN != top_str_names.end(); CN++)
-   {
-      GDSin::GdsStructure *src_structure = _src_lib->getStructure(*CN);
-      if (NULL != src_structure)
-      {
-         GDSin::GDSHierTree* root = _src_lib->hierTree()->GetMember(src_structure);
-         if (recursive) preTraverseChildren(root);
-         if (!src_structure->traversed())
-         {
-            _convertList.push_back(src_structure);
-            src_structure->set_traversed(true);
-            _conversionLength += src_structure->strSize();
-         }
-      }
-      else
-      {
-         std::ostringstream ost; ost << "GDS import: ";
-         ost << "Structure \""<< *CN << "\" not found in the GDS DB.";
-         tell_log(console::MT_WARNING,ost.str());
-      }
-   }
-   if (_src_lib->reopenFile())
-   {
-      TpdPost::toped_status(console::TSTS_PRGRSBARON, _conversionLength);
-      try
-      {
-         for (GDSStructureList::iterator CS = _convertList.begin(); CS != _convertList.end(); CS++)
-         {
-            convert(*CS, overwrite);
-            (*CS)->set_traversed(false); // restore the state for eventual second conversion
-         }
-         tell_log(console::MT_INFO, "Done");
-      }
-      catch (EXPTNreadGDS) {tell_log(console::MT_INFO, "Conversion aborted with errors");}
-      TpdPost::toped_status(console::TSTS_PRGRSBAROFF);
-      _src_lib->closeFile();
-      (*_tdt_db)()->recreateHierarchy(_tdt_db);
-   }
-}
-
-void GDSin::Gds2Ted::preTraverseChildren(const GDSin::GDSHierTree* root)
-{
-   const GDSin::GDSHierTree* Child = root->GetChild(TARGETDB_LIB);
-   while (Child)
-   {
-      if ( !Child->GetItem()->traversed() )
-      {
-         // traverse children first
-         preTraverseChildren(Child);
-         GDSin::GdsStructure* sstr = const_cast<GDSin::GdsStructure*>(Child->GetItem());
-         if (!sstr->traversed())
-         {
-            _convertList.push_back(sstr);
-            sstr->set_traversed(true);
-            _conversionLength += sstr->strSize();
-         }
-      }
-      Child = Child->GetBrother(TARGETDB_LIB);
-   }
-}
-
-void GDSin::Gds2Ted::convert(GDSin::GdsStructure* src_structure, bool overwrite)
-{
-   std::string gname = src_structure->strctName();
-   // check that destination structure with this name exists
-   laydata::TdtCell* dst_structure = static_cast<laydata::TdtCell*>((*_tdt_db)()->checkCell(gname));
-   std::ostringstream ost; ost << "GDS import: ";
-   if (NULL != dst_structure)
-   {
-      if (overwrite)
-      {
-         /*@TODO Erase the existing structure and convert*/
-         ost << "Structure "<< gname << " should be overwritten, but cell erase is not implemened yet ...";
-         tell_log(console::MT_WARNING,ost.str());
-      }
-      else
-      {
-         ost << "Structure "<< gname << " already exists. Skipped";
-         tell_log(console::MT_INFO,ost.str());
-      }
-   }
-   else
-   {
-      ost << "Structure " << gname << "...";
-      tell_log(console::MT_INFO,ost.str());
-      // first create a new cell
-      dst_structure = DEBUG_NEW laydata::TdtCell(gname);
-      // call the cell converter
-      src_structure->import(_src_lib, dst_structure, _tdt_db, _theLayMap);
-      // and finally - register the cell
-      (*_tdt_db)()->registerCellRead(gname, dst_structure);
-   }
-}
-
 //-----------------------------------------------------------------------------
 // class GdsOutFile
 //-----------------------------------------------------------------------------
@@ -2183,7 +2022,7 @@ void GDSin::GdsSplit::run(GDSin::GdsStructure* src_structure, bool recursive)
       wr = _dst_lib->setNextRecord(gds_ENDLIB);_dst_lib->flush(wr);
 
       tell_log(console::MT_INFO, "Done");
-      _src_lib->closeFile();
+      _src_lib->closeStream();
    }
 }
 
