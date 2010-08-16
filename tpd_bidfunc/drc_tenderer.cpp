@@ -33,6 +33,7 @@
 #include "tuidefs.h"
 #include "tpdf_common.h"
 #include "viewprop.h"
+#include "tedat_ext.h"
 
 #include <sstream>
 
@@ -95,7 +96,6 @@ void Calbr::drcTenderer::addPoly(const CoordsVector   &coords)
       PROPC->addUnpublishedLay(_numError);
 
       laydata::ValidPoly check(plDB);
-
       if (!check.valid())
       {
          std::ostringstream ost;
@@ -103,8 +103,18 @@ void Calbr::drcTenderer::addPoly(const CoordsVector   &coords)
          tell_log(console::MT_ERROR, ost.str());
       }
       else plDB = check.getValidated();
-      if (check.box())  dwl->putBox(plDB[0], plDB[2]);
-      else              dwl->putPoly(plDB);
+		if (check.box())  
+		{
+			laydata::TdtBoxEXT *shape = DEBUG_NEW laydata::TdtBoxEXT(plDB[0], plDB[1]);
+			shape->setLong(_numError);
+			dwl->put(shape);
+		}
+      else
+		{
+			laydata::TdtPolyEXT *shape = DEBUG_NEW laydata::TdtPolyEXT(plDB);
+			shape->setLong(_numError);
+			dwl->put(shape);
+		}
    }
 }
 
@@ -149,7 +159,10 @@ void Calbr::drcTenderer::addLine(const edge &edge)
       tell_log(console::MT_ERROR, ost.str());
    }
    else plDB = check.getValidated();
-   dwl->putWire(plDB, width);
+
+	laydata::TdtWireEXT *shape = DEBUG_NEW laydata::TdtWireEXT(plDB, width);
+	shape->setLong(_numError);
+	dwl->put(shape);
 }
 
 void Calbr::drcTenderer::showAll(void)
