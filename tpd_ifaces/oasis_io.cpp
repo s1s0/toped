@@ -1078,7 +1078,7 @@ void Oasis::Cell::readPath(OasisInFile& ofn, laydata::TdtCell* dst_cell, const L
                   int4b exts = _mod_exs().getExtension(_mod_pathhw());
                   int4b exte = _mod_exe().getExtension(_mod_pathhw());
                   if ( (0 != exts) || (0 != exte) )
-                     pathConvertResult = laydata::pathConvert(laypl, laypl.size(), exts, exte);
+                     pathConvertResult = laydata::pathConvert(laypl, exts, exte);
                }
                if (pathConvertResult)
                {
@@ -1115,7 +1115,7 @@ void Oasis::Cell::readPath(OasisInFile& ofn, laydata::TdtCell* dst_cell, const L
             int4b exts = _mod_exs().getExtension(_mod_pathhw());
             int4b exte = _mod_exe().getExtension(_mod_pathhw());
             if ( (0 != exts) || (0 != exte) )
-               pathConvertResult = laydata::pathConvert(laypl, laypl.size(), exts, exte);
+               pathConvertResult = laydata::pathConvert(laypl, exts, exte);
          }
          if (pathConvertResult)
          {

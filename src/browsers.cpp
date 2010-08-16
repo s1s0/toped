@@ -877,8 +877,8 @@ void browsers::GDSCellBrowser::collectInfo(bool hier)
    DbImportFile* AGDSDB = NULL;
    if (DATC->lockGds(AGDSDB))
    {
+      AddRoot(wxString((AGDSDB->libname()).c_str(), wxConvUTF8));
       //TODO!
-//      AddRoot(wxString((AGDSDB->libname()).c_str(), wxConvUTF8));
 //
 //      if (NULL != AGDSDB->hierTree())
 //      {

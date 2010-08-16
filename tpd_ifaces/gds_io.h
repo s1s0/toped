@@ -286,21 +286,18 @@ namespace GDSin {
    class   GdsStructure : public ForeignCell {
       public:
                               GdsStructure(GdsInFile*, word);
-         virtual void         import(DbImportFile*, laydata::TdtCell*, laydata::TdtLibDir*, const LayerMapExt&);
+         virtual void         import(ImportDB&);
          GDSHierTree*         hierOut(GDSHierTree* Htree, GdsStructure* parent);
          void                 collectLayers(ExtLayers&, bool);
          void                 linkReferences(GdsInFile* const, GdsLibrary* const);
          void                 split(GdsInFile*, GdsOutFile*);
-         int                  libID() const                    { return TARGETDB_LIB;  } // to cover the requirements of the hierarchy template
-         bool                 haveParent() const               { return _haveParent;   }
-         wxFileOffset         strSize() const                  { return _strSize;      }
       protected:
-         void                 importBox(GdsInFile*, laydata::TdtCell*, const LayerMapExt&);
-         void                 importPoly(GdsInFile*, laydata::TdtCell*, const LayerMapExt&);
-         void                 importPath(GdsInFile*, laydata::TdtCell*, const LayerMapExt&);
-         void                 importText(GdsInFile*, laydata::TdtCell*, real, const LayerMapExt&);
-         void                 importSref(GdsInFile*, laydata::TdtCell*, laydata::TdtLibDir*, const LayerMapExt&);
-         void                 importAref(GdsInFile*, laydata::TdtCell*, laydata::TdtLibDir*, const LayerMapExt&);
+         void                 importBox (GdsInFile*, ImportDB&);
+         void                 importPoly(GdsInFile*, ImportDB&);
+         void                 importPath(GdsInFile*, ImportDB&);
+         void                 importText(GdsInFile*, ImportDB&);
+         void                 importSref(GdsInFile*, ImportDB&);
+         void                 importAref(GdsInFile*, ImportDB&);
          void                 skimBox(GdsInFile*);
          void                 skimBoundary(GdsInFile*);
          void                 skimPath(GdsInFile*);
@@ -310,14 +307,9 @@ namespace GDSin {
          void                 skimNode(GdsInFile*);
          void                 updateContents(int2b, int2b);
          int                  arrGetStep(TP&, TP&, int2b);
-         bool                 polyAcceptable(pointlist&, bool&, int2b, int2b);
-         bool                 pathAcceptable(pointlist&, int4b, int2b, int2b);
          ExtLayers            _contSummary; // contents summary
-         bool                 _haveParent;
          NameSet              _referenceNames;
          GDSStructureList     _children;
-         wxFileOffset         _filePos;
-         wxFileOffset         _strSize;
          word                 _beginRecLength; //! used in split function only
    };
 
