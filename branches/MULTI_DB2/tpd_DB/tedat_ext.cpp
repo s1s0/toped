@@ -13,16 +13,16 @@
 //                                                                          =
 //   This file is a part of Toped project (C) 2001-2007 Toped developers    =
 // ------------------------------------------------------------------------ =
-//           $URL: https://toped.googlecode.com/svn/branches/MULTI_DB2/tpd_DB/tedat_ext.cpp $
+//           $URL$
 //        Created: Mon Aug 09 2010
 //     Originator: Svilen Krustev - skr@toped.org.uk
 //    Description: Layout primitives
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------
-//      $Revision: 1559 $
-//          $Date: 2010-06-29 00:03:32 +0300 (Âò, 29 èþí 2010) $
-//        $Author: krustev.svilen $
+//      $Revision$
+//          $Date$
+//        $Author$
 //===========================================================================
 
 #include "tpdph.h"
@@ -94,3 +94,38 @@ void*	laydata::TdtPolyEXT::getClientData(void)
 {
 	return _clientData;
 }
+
+
+void laydata::TdtWireEXT::setInt(int extInt)
+{
+	_extInt = extInt;
+}
+int laydata::TdtWireEXT::getInt(void)
+{
+	return _extInt;
+}
+void laydata::TdtWireEXT::setLong(long extLong)
+{
+	_extLong = extLong;
+}
+long laydata::TdtWireEXT::getLong(void)
+{
+	return _extLong;
+}
+void laydata::TdtWireEXT::setString(const std::string &extString)
+{
+	_extString = extString;
+}
+std::string laydata::TdtWireEXT::getString(void)
+{
+	return _extString;
+}
+void	laydata::TdtWireEXT::setClientData(void* clientData)
+{
+	_clientData = clientData;
+}
+void*	laydata::TdtWireEXT::getClientData(void)
+{
+	return _clientData;
+}
+

@@ -13,16 +13,16 @@
 //                                                                          =
 //   This file is a part of Toped project (C) 2001-2007 Toped developers    =
 // ------------------------------------------------------------------------ =
-//           $URL: https://toped.googlecode.com/svn/branches/MULTI_DB2/tpd_DB/tedat_ext.h $
+//           $URL$
 //        Created: Sun Aug 9 2010
 //     Originator: Svilen Krustev - skr@toped.org.uk
 //    Description: Layout primitives with extentions
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------
-//      $Revision: 1559 $
-//          $Date: 2010-06-29 00:03:32 +0300 (Âò, 29 èþí 2010) $
-//        $Author: krustev.svilen $
+//      $Revision$
+//          $Date$
+//        $Author$
 //===========================================================================
 
 #ifndef TEDAT_EXT_H
@@ -59,6 +59,28 @@ namespace laydata
 						TdtPolyEXT(int4b* plist, unsigned psize):TdtPoly(plist, psize) {};
 						TdtPolyEXT(TEDfile* const tedfile):TdtPoly(tedfile) {};
 						~TdtPolyEXT() {};
+		void			setInt(int extInt);
+		int			getInt(void);
+		void			setLong(long extLong);
+		long			getLong(void);
+		void			setString(const std::string &extString);
+		std::string getString(void);
+		void			setClientData(void* clientData);
+		void*			getClientData(void);
+	private:
+		int			_extInt;
+		long			_extLong;
+		std::string _extString;
+		void*			_clientData;
+	};
+
+	class TdtWireEXT : public TdtWire   
+	{
+    public:
+						TdtWireEXT(const pointlist& plist, word layno):TdtWire(plist, layno) {};
+						TdtWireEXT(int4b* plist, unsigned psize, word layno):TdtWire(plist, psize, layno) {};
+						TdtWireEXT(TEDfile* const tedfile): TdtWire(tedfile) {};
+						~TdtWireEXT() {};
 		void			setInt(int extInt);
 		int			getInt(void);
 		void			setLong(long extLong);
