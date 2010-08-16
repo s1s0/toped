@@ -399,8 +399,9 @@ void laydata::TEDfile::getCellChildNames(NameSet& cnames) {
    _childnames.clear();
 }
 
-bool laydata::pathConvert(pointlist& plist, word numpoints, int4b begext, int4b endext )
+bool laydata::pathConvert(pointlist& plist, int4b begext, int4b endext )
 {
+   word numpoints = plist.size();
    TP P1 = plist[0];
    // find the first neighboring point which is not equivalent to P1
    int fnbr = 1;
@@ -1006,9 +1007,9 @@ void ImportDB::convert(ForeignCell* src_structure, bool overwrite)
 {
    std::string gname = src_structure->strctName();
    // check that destination structure with this name exists
-   laydata::TdtCell* dst_structure = static_cast<laydata::TdtCell*>((*_tdt_db)()->checkCell(gname));
+   _dst_structure = static_cast<laydata::TdtCell*>((*_tdt_db)()->checkCell(gname));
    std::ostringstream ost; //ost << "GDS import: ";
-   if (NULL != dst_structure)
+   if (NULL != _dst_structure)
    {
       if (overwrite)
       {
@@ -1027,10 +1028,147 @@ void ImportDB::convert(ForeignCell* src_structure, bool overwrite)
       ost << "Structure " << gname << "...";
       tell_log(console::MT_INFO,ost.str());
       // first create a new cell
-      dst_structure = DEBUG_NEW laydata::TdtCell(gname);
+      _dst_structure = DEBUG_NEW laydata::TdtCell(gname);
       // call the cell converter
-      src_structure->import(_src_lib, dst_structure, _tdt_db, _theLayMap);
+      src_structure->import(*this);
+      // Sort the qtrees of the new cell
+      _dst_structure->fixUnsorted();
       // and finally - register the cell
-      (*_tdt_db)()->registerCellRead(gname, dst_structure);
+      (*_tdt_db)()->registerCellRead(gname, _dst_structure);
    }
+}
+
+void ImportDB::addPoly(pointlist& plist, word srcLayer, word srcDataType)
+{
+   word tdtLayer;
+   if ( _theLayMap.getTdtLay(tdtLayer, srcLayer, srcDataType) )
+   {
+      bool boxObject;
+      if (polyAcceptable(plist, boxObject, srcLayer, srcDataType))
+      {
+         laydata::QTreeTmp* dwl = _dst_structure->secureUnsortedLayer(tdtLayer);
+         if (boxObject)  dwl->putBox(plist[0], plist[2]);
+         else            dwl->putPoly(plist);
+      }
+   }
+}
+
+void ImportDB::addPath(pointlist& plist, word srcLayer, word srcDataType,
+                       int4b width, short pathType, int4b bgnExtn, int4b endExtn)
+{
+   word tdtLayer;
+   if ( _theLayMap.getTdtLay(tdtLayer, srcLayer, srcDataType) )
+   {
+      bool pathConvertResult = true;
+      if      (2 == pathType)
+         pathConvertResult = laydata::pathConvert(plist, width/2, width/2);
+      else if (4 == pathType)
+         pathConvertResult = laydata::pathConvert(plist, bgnExtn, endExtn);
+
+      if (pathConvertResult)
+      {
+         if (pathAcceptable(plist, width, srcLayer, srcDataType))
+         {
+            laydata::QTreeTmp* dwl = _dst_structure->secureUnsortedLayer(tdtLayer);
+            dwl->putWire(plist, width);
+         }
+      }
+      else
+      {
+         std::ostringstream ost;
+         ost << "Invalid single point path - { Layer: " << srcLayer
+             << " Data type: "                          << srcDataType
+             << " }";
+         tell_log(console::MT_ERROR, ost.str());
+      }
+   }
+}
+
+void ImportDB::addText(std::string tString, word srcLayer, word srcDataType, TP bPoint,
+                       double magnification, double angle, bool reflection)
+{
+   word tdtLayer;
+   if ( _theLayMap.getTdtLay(tdtLayer, srcLayer, srcDataType) )
+   {
+      laydata::QTreeTmp* dwl = _dst_structure->secureUnsortedLayer(tdtLayer);
+      // @FIXME absolute magnification, absolute angle should be reflected somehow!!!
+      dwl->putText(tString,
+                   CTM( bPoint,
+                        magnification / ((*_tdt_db)()->UU() *  OPENGL_FONT_UNIT),
+                        angle,
+                        reflection
+                      )
+                  );
+   }
+}
+
+void ImportDB::addRef(std::string strctName, TP bPoint, double magnification,
+                      double angle, bool reflection)
+{
+   // @FIXME absolute magnification, absolute angle should be reflected somehow!!!
+   laydata::CellDefin strdefn = _tdt_db->linkCellRef(strctName, TARGETDB_LIB);
+   _dst_structure->registerCellRef( strdefn,
+                                    CTM(bPoint,
+                                        magnification,
+                                        angle,
+                                        reflection
+                                       )
+                                  );
+}
+
+void ImportDB::addARef(std::string strctName, TP bPoint, double magnification,
+                      double angle, bool reflection, laydata::ArrayProperties& aprop)
+{
+   // @FIXME absolute magnification, absolute angle should be reflected somehow!!!
+   laydata::CellDefin strdefn = _tdt_db->linkCellRef(strctName, TARGETDB_LIB);
+   _dst_structure->registerCellARef( strdefn,
+                                     CTM(bPoint,
+                                         magnification,
+                                         angle,
+                                         reflection
+                                        ),
+                                     aprop
+                                  );
+}
+
+bool ImportDB::polyAcceptable(pointlist& plist, bool& box, word layer, word singleType)
+{
+   laydata::ValidPoly check(plist);
+   if (!check.valid())
+   {
+      std::ostringstream ost;
+      ost << "Polygon check fails - {" << check.failType()
+          << " Layer: "                << layer
+          << " Data type: "            << singleType
+          << " }";
+      tell_log(console::MT_ERROR, ost.str());
+   }
+   if (check.recoverable())
+   {
+      plist = check.getValidated();
+      box = check.box();
+      return true;
+   }
+   else return false;
+}
+
+bool ImportDB::pathAcceptable(pointlist& plist, int4b width, int2b layer, int2b singleType)
+{
+   laydata::ValidWire check(plist, width);
+
+   if (!check.valid())
+   {
+      std::ostringstream ost;
+      ost << "Wire check fails - {" << check.failType()
+          << " Layer: "             << layer
+          << " Data type: "         << singleType
+          << " }";
+      tell_log(console::MT_ERROR, ost.str());
+   }
+   if (check.recoverable())
+   {
+      plist = check.getValidated();
+      return true;
+   }
+   else return false;
 }

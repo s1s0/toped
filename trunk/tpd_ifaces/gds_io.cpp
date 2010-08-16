@@ -654,12 +654,11 @@ GDSin::GdsLibrary::~GdsLibrary()
 //==============================================================================
 // class GdsStructure
 //==============================================================================
-void GDSin::GdsStructure::import(DbImportFile *ccf, laydata::TdtCell* dst_cell,
-                                 laydata::TdtLibDir* tdt_db, const LayerMapExt& _theLayMap)
+void GDSin::GdsStructure::import(ImportDB& iDB)
 {
    std::string strctName;
    //initializing
-   GdsInFile* cf = static_cast<GdsInFile*>(ccf);
+   GdsInFile* cf = static_cast<GdsInFile*>(iDB.srcFile());
    const GdsRecord* cr = cf->cRecord();
    cf->setPosition(_filePos);
    do
@@ -681,22 +680,22 @@ void GDSin::GdsStructure::import(DbImportFile *ccf, laydata::TdtCell* dst_cell,
                cf->incGdsiiWarnings();// CADANCE internal use only
                break;
             case gds_BOX:
-               importBox(cf, dst_cell, _theLayMap);
+               importBox(cf, iDB);
                break;
             case gds_BOUNDARY:
-               importPoly(cf, dst_cell, _theLayMap);
+               importPoly(cf, iDB);
                break;
             case gds_PATH:
-               importPath(cf, dst_cell, _theLayMap);
+               importPath(cf, iDB);
                break;
             case gds_TEXT:
-               importText(cf, dst_cell, (*tdt_db)()->UU(), _theLayMap);
+               importText(cf, iDB);
                break;
             case gds_SREF:
-               importSref(cf, dst_cell, tdt_db, _theLayMap);
+               importSref(cf, iDB);
                break;
             case gds_AREF:
-               importAref(cf, dst_cell, tdt_db, _theLayMap);
+               importAref(cf, iDB);
                break;
             case gds_NODE:// skipped record !!!
                tell_log(console::MT_WARNING, " GDSII record type 'NODE' skipped");
@@ -704,7 +703,6 @@ void GDSin::GdsStructure::import(DbImportFile *ccf, laydata::TdtCell* dst_cell,
                skimNode(cf);
                break;
             case gds_ENDSTR:// end of structure, exit point
-               dst_cell->fixUnsorted();
                return;
             default://parse error - not expected record type
                throw EXPTNreadGDS("GDS structure - wrong record type in the current context");
@@ -716,12 +714,11 @@ void GDSin::GdsStructure::import(DbImportFile *ccf, laydata::TdtCell* dst_cell,
    while (true);
 }
 
-GDSin::GdsStructure::GdsStructure(GdsInFile *cf, word bgnRecLength)
+GDSin::GdsStructure::GdsStructure(GdsInFile *cf, word bgnRecLength) : ForeignCell()
 {
    _filePos = cf->filePos();
    _beginRecLength = bgnRecLength + 4;
    //initializing
-   _haveParent = false;
    const GdsRecord* cr = cf->cRecord();
    do
    { //start reading
@@ -753,7 +750,7 @@ GDSin::GdsStructure::GdsStructure(GdsInFile *cf, word bgnRecLength)
             case gds_SREF     : skimSRef(cf)    ;  break;
             case gds_AREF     : skimARef(cf)    ;  break;
             case gds_ENDSTR   :// end of structure, exit point
-               _strSize = cf->filePos() - _filePos;
+               _cellSize = cf->filePos() - _filePos;
                return;
             default://parse error - not expected record type
                throw EXPTNreadGDS("GDS structure - wrong record type in the current context");
@@ -1057,12 +1054,10 @@ void GDSin::GdsStructure::skimNode(GdsInFile* cf)
    while (true);
 }
 
-void GDSin::GdsStructure::importBox(GdsInFile* cf, laydata::TdtCell* dst_cell, const LayerMapExt& theLayMap)
+void GDSin::GdsStructure::importBox(GdsInFile* cf, ImportDB& iDB)
 {
    int2b       layer;
    int2b       singleType;
-   word        tdtlaynum;
-
    const GdsRecord* cr = cf->cRecord();
    do
    {//start reading
@@ -1083,33 +1078,17 @@ void GDSin::GdsStructure::importBox(GdsInFile* cf, laydata::TdtCell* dst_cell, c
             case gds_PROPVALUE:// tell_log(console::MT_WARNING, "GDS box - PROPVALUE record ignored");
                cf->incGdsiiWarnings(); break;
             case gds_XY:
-               if ( theLayMap.getTdtLay(tdtlaynum, layer, singleType) )
-               {
-                  //one point less because fist and last point coincide
-                  word numpoints = (cr->recLen())/8 - 1;
-                  assert(numpoints == 4);
-                  pointlist   plist;
-                  plist.reserve(numpoints);
-                  for(word i = 0; i < numpoints; i++)
-                     plist.push_back(GDSin::get_TP(cr, i));
-
-                  laydata::ValidPoly check(plist);
-
-                  if (!check.valid())
-                  {
-                     std::ostringstream ost;
-                     ost << "Box check fails - {" << check.failType()
-                         << " Layer: " << layer
-                         << " Data type: " << singleType
-                         << " }";
-                     tell_log(console::MT_ERROR, ost.str());
-                  }
-                  else plist = check.getValidated();
-                  laydata::QTreeTmp* dwl = dst_cell->secureUnsortedLayer(tdtlaynum);
-                  if (check.box())  dwl->putBox(plist[0], plist[2]);
-                  else              dwl->putPoly(plist);
-               }
+            {
+               //one point less because fist and last point coincide
+               word numpoints = (cr->recLen())/8 - 1;
+               assert(numpoints == 4);
+               pointlist   plist;
+               plist.reserve(numpoints);
+               for(word i = 0; i < numpoints; i++)
+                  plist.push_back(GDSin::get_TP(cr, i));
+               iDB.addPoly(plist, layer, singleType);
                break;
+            }
             case gds_ENDEL://end of element, exit point
                return;
             default: //parse error - not expected record type
@@ -1123,13 +1102,10 @@ void GDSin::GdsStructure::importBox(GdsInFile* cf, laydata::TdtCell* dst_cell, c
 
 }
 
-void GDSin::GdsStructure::importPoly(GdsInFile* cf, laydata::TdtCell* dst_cell, const LayerMapExt& theLayMap)
+void GDSin::GdsStructure::importPoly(GdsInFile* cf, ImportDB& iDB)
 {
    int2b       layer;
    int2b       singleType;
-   word        tdtlaynum;
-//   int2b       tmp ; //Dummy variable. Use for gds_PROPATTR
-//   std::string tmp2; //Dummy variable. Use for gds_PROPVALUE
    const GdsRecord* cr = cf->cRecord();
    do
    {//start reading
@@ -1146,13 +1122,10 @@ void GDSin::GdsStructure::importPoly(GdsInFile* cf, laydata::TdtCell* dst_cell, 
             case gds_DATATYPE: cr->retData(&singleType);
                break;
             case gds_PROPATTR:// tell_log(console::MT_WARNING,"GDS boundary - PROPATTR record ignored");
-//               cr->retData(&tmp);
                cf->incGdsiiWarnings(); break;
             case gds_PROPVALUE:// tell_log(console::MT_WARNING,"GDS boundary - PROPVALUE record ignored");
-//               cr->retData(&tmp2);
                cf->incGdsiiWarnings(); break;
             case gds_XY:
-               if ( theLayMap.getTdtLay(tdtlaynum, layer, singleType) )
                {
                   //one point less because fist and last point coincide
                   word numpoints = (cr->recLen())/8 - 1;
@@ -1160,13 +1133,7 @@ void GDSin::GdsStructure::importPoly(GdsInFile* cf, laydata::TdtCell* dst_cell, 
                   plist.reserve(numpoints);
                   for(word i = 0; i < numpoints; i++)
                      plist.push_back(GDSin::get_TP(cr, i));
-                  bool boxObject;
-                  if (polyAcceptable(plist, boxObject, layer, singleType))
-                  {
-                     laydata::QTreeTmp* dwl = dst_cell->secureUnsortedLayer(tdtlaynum);
-                     if (boxObject)  dwl->putBox(plist[0], plist[2]);
-                     else            dwl->putPoly(plist);
-                  }
+                  iDB.addPoly(plist, layer, singleType);
                }
                break;
             case gds_ENDEL://end of element, exit point
@@ -1181,7 +1148,7 @@ void GDSin::GdsStructure::importPoly(GdsInFile* cf, laydata::TdtCell* dst_cell, 
    while (true);
 }
 
-void GDSin::GdsStructure::importPath(GdsInFile* cf, laydata::TdtCell* dst_cell, const LayerMapExt& theLayMap)
+void GDSin::GdsStructure::importPath(GdsInFile* cf, ImportDB& iDB)
 {
    int2b layer;
    int2b singleType;
@@ -1189,7 +1156,6 @@ void GDSin::GdsStructure::importPath(GdsInFile* cf, laydata::TdtCell* dst_cell, 
    int4b width     = 0;
    int4b bgnextn   = 0;
    int4b endextn   = 0;
-   word  tdtlaynum;
    const GdsRecord* cr = cf->cRecord();
    do
    {//start reading
@@ -1218,36 +1184,15 @@ void GDSin::GdsStructure::importPath(GdsInFile* cf, laydata::TdtCell* dst_cell, 
             case gds_PROPVALUE:// tell_log(console::MT_WARNING,"GDS path - PROPVALUE record ignored");
                cf->incGdsiiWarnings(); break;
             case gds_XY:
-               if ( theLayMap.getTdtLay(tdtlaynum, layer, singleType) )
                {
                   word numpoints = (cr->recLen())/8;
                   pointlist plist;
-                  bool pathConvertResult = true;
                   plist.reserve(numpoints);
                   for(word i = 0; i < numpoints; i++)
                      plist.push_back(GDSin::get_TP(cr, i));
 
-                  if (2 == pathtype)
-                     pathConvertResult = laydata::pathConvert(plist, numpoints, width/2, width/2);
-                  else if (4 == pathtype)
-                     pathConvertResult = laydata::pathConvert(plist, numpoints, bgnextn, endextn);
+                  iDB.addPath(plist, layer, singleType, width, pathtype, bgnextn, endextn);
 
-                  if (pathConvertResult)
-                  {
-                     if (pathAcceptable(plist, width, layer, singleType))
-                     {
-                        laydata::QTreeTmp* dwl = dst_cell->secureUnsortedLayer(tdtlaynum);
-                        dwl->putWire(plist, width);
-                     }
-                  }
-                  else
-                  {
-                     std::ostringstream ost;
-                     ost << "Invalid single point path - { Layer: " << layer
-                           << " Data type: " << singleType
-                           << " }";
-                     tell_log(console::MT_ERROR, ost.str());
-                  }
                }
                break;
             case gds_ENDEL://end of element, exit point
@@ -1262,7 +1207,7 @@ void GDSin::GdsStructure::importPath(GdsInFile* cf, laydata::TdtCell* dst_cell, 
    while (cr->recType() != gds_ENDEL);
 }
 
-void GDSin::GdsStructure::importText(GdsInFile* cf, laydata::TdtCell* dst_cell, real dbuu, const LayerMapExt& theLayMap)
+void GDSin::GdsStructure::importText(GdsInFile* cf, ImportDB& iDB)
 {
    int2b       layer;
    int2b       singleType;
@@ -1326,18 +1271,7 @@ void GDSin::GdsStructure::importText(GdsInFile* cf, laydata::TdtCell* dst_cell, 
             case gds_STRING: cr->retData(&tString);
                break;
             case gds_ENDEL://end of element, exit point
-               if ( theLayMap.getTdtLay(tdtlaynum, layer, singleType) )
-               {
-                  laydata::QTreeTmp* dwl = dst_cell->secureUnsortedLayer(tdtlaynum);
-                  // @FIXME absolute magnification, absolute angle should be reflected somehow!!!
-                  dwl->putText(tString,
-                              CTM( magnPoint,
-                                    magnification / (dbuu *  OPENGL_FONT_UNIT),
-                                    angle,
-                                 (0 != reflection)
-                                 )
-                              );
-               }
+               iDB.addText(tString, layer, singleType, magnPoint, magnification, angle, (0 != reflection));
                return;
             default://parse error - not expected record type
                throw EXPTNreadGDS("GDS text - wrong record type in the current context");
@@ -1349,7 +1283,8 @@ void GDSin::GdsStructure::importText(GdsInFile* cf, laydata::TdtCell* dst_cell, 
    while (true);
 }
 
-void GDSin::GdsStructure::importSref(GdsInFile* cf, laydata::TdtCell* dst_cell, laydata::TdtLibDir* tdt_db, const LayerMapExt&)
+
+void GDSin::GdsStructure::importSref(GdsInFile* cf, ImportDB& iDB)
 {
    word           reflection     = 0;
    word           absMagn        = 0;
@@ -1398,14 +1333,7 @@ void GDSin::GdsStructure::importSref(GdsInFile* cf, laydata::TdtCell* dst_cell, 
                cf->incGdsiiWarnings();
                break;
             case gds_ENDEL:{//end of element, exit point
-               // @FIXME absolute magnification, absolute angle should be reflected somehow!!!
-               laydata::CellDefin strdefn = tdt_db->linkCellRef(strctName, TARGETDB_LIB);
-               dst_cell->registerCellRef( strdefn,
-                                          CTM(magnPoint,
-                                              magnification,
-                                              angle,
-                                              (0 != reflection)
-                                             )                                        );
+               iDB.addRef(strctName, magnPoint, magnification, angle, (0 != reflection));
                return;
             }
             default://parse error - not expected record type
@@ -1418,7 +1346,7 @@ void GDSin::GdsStructure::importSref(GdsInFile* cf, laydata::TdtCell* dst_cell, 
    while (true);
 }
 
-void GDSin::GdsStructure::importAref(GdsInFile* cf, laydata::TdtCell* dst_cell, laydata::TdtLibDir* tdt_db, const LayerMapExt&)
+void GDSin::GdsStructure::importAref(GdsInFile* cf, ImportDB& iDB)
 {
    word           reflection     = 0;
    word           absMagn        = 0;
@@ -1479,22 +1407,12 @@ void GDSin::GdsStructure::importAref(GdsInFile* cf, laydata::TdtCell* dst_cell, 
                cf->incGdsiiWarnings();
                break;
             case gds_ENDEL:{//end of element, exit point
-               // Absolute magnification, absolute angle should be reflected somehow!!!
-               laydata::CellDefin strdefn = tdt_db->linkCellRef(strctName, TARGETDB_LIB);
-
                laydata::ArrayProperties arrprops(arrGetStep(xStep, magnPoint, columns),
                                                  arrGetStep(yStep, magnPoint, rows   ),
                                                  static_cast<word>(columns),
                                                  static_cast<word>(rows)
                                                 );
-               dst_cell->registerCellARef( strdefn,
-                                           CTM( magnPoint,
-                                                magnification,
-                                                angle,
-                                                (0 != reflection)
-                                              ),
-                                           arrprops
-                                         );
+               iDB.addARef(strctName, magnPoint, magnification, angle, (0 != reflection), arrprops);
                return;
             }
             default://parse error - not expected record type
@@ -1517,54 +1435,12 @@ void GDSin::GdsStructure::split(GdsInFile* src_file, GdsOutFile* dst_file)
 {
    const GdsRecord* cr = src_file->cRecord();
    src_file->setPosition(_filePos - _beginRecLength);
-   wxFileOffset endPosition = dst_file->filePos() + _strSize + _beginRecLength;
+   wxFileOffset endPosition = dst_file->filePos() + _cellSize + _beginRecLength;
    do
    { //start reading
       src_file->getNextRecord();
       dst_file->putRecord(cr);
    } while (dst_file->filePos() < endPosition);
-}
-
-bool GDSin::GdsStructure::polyAcceptable(pointlist& plist, bool& box, int2b layer, int2b singleType)
-{
-   laydata::ValidPoly check(plist);
-   if (!check.valid())
-   {
-      std::ostringstream ost;
-      ost << "Polygon check fails - {" << check.failType()
-          << " Layer: " << layer
-          << " Data type: " << singleType
-          << " }";
-      tell_log(console::MT_ERROR, ost.str());
-   }
-   if (check.recoverable())
-   {
-      plist = check.getValidated();
-      box = check.box();
-      return true;
-   }
-   else return false;
-}
-
-bool GDSin::GdsStructure::pathAcceptable(pointlist& plist, int4b width, int2b layer, int2b singleType)
-{
-   laydata::ValidWire check(plist, width);
-
-   if (!check.valid())
-   {
-      std::ostringstream ost;
-      ost << "Wire check fails - {" << check.failType()
-            << " Layer: " << layer
-            << " Data type: " << singleType
-            << " }";
-      tell_log(console::MT_ERROR, ost.str());
-   }
-   if (check.recoverable())
-   {
-      plist = check.getValidated();
-      return true;
-   }
-   else return false;
 }
 
 //-----------------------------------------------------------------------------

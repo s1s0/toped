@@ -214,7 +214,7 @@ namespace laydata {
          word                _rows;
    };
 
-   bool pathConvert(pointlist&, word, int4b, int4b );
+   bool pathConvert(pointlist&, int4b, int4b );
 
 
    /**
@@ -301,6 +301,7 @@ class DbExportFile {
 };
 
 class ForeignCell;
+class ImportDB;
 typedef std::list<ForeignCell*> ForeignCellList;
 /*!
  * File compression explained: A plenty of compression algorithms out there -
@@ -355,8 +356,8 @@ class DbImportFile {
       bool                 status() const                   { return _status;  }
       ForeignCellList&     convList()                       { return _convList;}
    protected:
-      wxFileOffset         _convLength ;//! the amount of data (in bytes) subjected to conversion
-      ForeignCellList      _convList;
+      wxFileOffset         _convLength ;//! The amount of data (in bytes) subjected to conversion
+      ForeignCellList      _convList;   //! The list of cells for conversion in bottom-up order
    private:
       bool                 unZlib2Temp();//! inflate the input zlib file in a temporary one
       bool                 unZip2Temp();//! inflate the input zip file in a temporary one
@@ -375,14 +376,22 @@ class DbImportFile {
 //==========================================================================
 class ForeignCell {
    public:
-                           ForeignCell() : _traversed(false) {};
-      virtual void         import(DbImportFile*, laydata::TdtCell*, laydata::TdtLibDir*, const LayerMapExt&) = 0;
+                           ForeignCell() : _traversed(false), _haveParent(false), _filePos(0), _cellSize(0) {};
+//      virtual void         import(DbImportFile*, laydata::TdtCell*, laydata::TdtLibDir*, const LayerMapExt&) = 0;
+      virtual void         import(ImportDB&) = 0;
       bool                 traversed() const                { return _traversed;    }
       void                 set_traversed(bool tf)           { _traversed = tf;      }
       std::string          strctName() const                { return _strctName;    }
+      int                  libID() const                    { return TARGETDB_LIB;  } // to cover the requirements of the hierarchy template
+      bool                 haveParent() const               { return _haveParent;   }
+      wxFileOffset         strSize() const                  { return _cellSize;     }
    protected:
-      bool                 _traversed;
-      std::string          _strctName;
+      std::string          _strctName  ;//! Name of the Cell
+      bool                 _traversed  ;//! Indicates the cell was already traversed during the conversion
+      bool                 _haveParent ;//! Indicates that the cell is referenced
+      wxFileOffset         _filePos    ;//! The starting position of the cell description in the input stream
+      wxFileOffset         _cellSize   ;//! The size (in byte) if the cell description in the input file
+
 };
 
 //==========================================================================
@@ -390,11 +399,22 @@ class ImportDB {
    public:
                               ImportDB(DbImportFile*, laydata::TdtLibDir*, const LayerMapExt&);
       void                    run(const nameList&, bool);
+      void                    addPoly(pointlist&, word, word);
+      void                    addPath(pointlist&, word, word, int4b, short, int4b, int4b);
+      void                    addText(std::string, word, word, TP, double, double, bool);
+      void                    addRef(std::string, TP, double, double, bool);
+      void                    addARef(std::string, TP, double, double, bool, laydata::ArrayProperties&);
+      DbImportFile*           srcFile()               {return _src_lib;}
+//      bool                    getTdtLayer(word& dstLN, word srcLN, word srcDT)
+//                                                      {return _theLayMap.getTdtLay(dstLN, srcLN, srcDT);}
    protected:
       void                    convert(ForeignCell*, bool);
-      DbImportFile*           _src_lib;
-      laydata::TdtLibDir*     _tdt_db;
-      const LayerMapExt&      _theLayMap;
+      bool                    polyAcceptable(pointlist&, bool&, word , word);
+      bool                    pathAcceptable(pointlist&, int4b, int2b, int2b);
+      DbImportFile*           _src_lib       ;
+      laydata::TdtLibDir*     _tdt_db        ;
+      const LayerMapExt&      _theLayMap     ;
+      laydata::TdtCell*       _dst_structure ; // Current target structure
       real                    _coeff; // DBU difference
 };
 
