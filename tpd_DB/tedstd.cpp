@@ -801,7 +801,7 @@ DbImportFile::DbImportFile(wxString fileName) : _convLength(0), _inStream(NULL),
       }
       else
       {
-         // File is not comressed
+         // File is not compressed
          _inStream = DEBUG_NEW wxFFileInputStream(_fileName,wxT("rb"));
          _status = true;
       }

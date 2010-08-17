@@ -377,7 +377,6 @@ class DbImportFile {
 class ForeignCell {
    public:
                            ForeignCell() : _traversed(false), _haveParent(false), _filePos(0), _cellSize(0) {};
-//      virtual void         import(DbImportFile*, laydata::TdtCell*, laydata::TdtLibDir*, const LayerMapExt&) = 0;
       virtual void         import(ImportDB&) = 0;
       bool                 traversed() const                { return _traversed;    }
       void                 set_traversed(bool tf)           { _traversed = tf;      }
@@ -405,8 +404,6 @@ class ImportDB {
       void                    addRef(std::string, TP, double, double, bool);
       void                    addARef(std::string, TP, double, double, bool, laydata::ArrayProperties&);
       DbImportFile*           srcFile()               {return _src_lib;}
-//      bool                    getTdtLayer(word& dstLN, word srcLN, word srcDT)
-//                                                      {return _theLayMap.getTdtLay(dstLN, srcLN, srcDT);}
    protected:
       void                    convert(ForeignCell*, bool);
       bool                    polyAcceptable(pointlist&, bool&, word , word);
