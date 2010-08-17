@@ -237,7 +237,6 @@ namespace GDSin {
          void                 getTimes();
          void                 preTraverseChildren(const GDSin::GDSHierTree*);
          GDSHierTree*         _hierTree; // Tree of instance hierarchy
-
          int2b                _streamVersion;
          int2b                _libDirSize;
          std::string          _srfName;
