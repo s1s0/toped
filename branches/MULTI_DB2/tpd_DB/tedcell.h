@@ -183,7 +183,7 @@ namespace laydata {
       bool                 mergeSelected(AtticList**);
       bool                 stretchSelected(int bfactor, AtticList**);
       AtticList*           changeSelect(TP, SH_STATUS status, const DWordSet&);
-      WordList             findSelected(TP);
+      laydata::AtticList*  findSelected(TP);
       TdtCellRef*          getCellOver(TP, ctmstack&, CellRefStack*, const DWordSet&);
       SelectList*          shapeSel()        {return &_shapesel;};
       SelectList*          copySeList() const;
