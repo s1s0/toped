@@ -583,18 +583,20 @@ laydata::AtticList* laydata::TdtCell::changeSelect(TP pnt, SH_STATUS status, con
 }
 
 
-WordList laydata::TdtCell::findSelected(TP pnt)
+laydata::AtticList* laydata::TdtCell::findSelected(TP pnt)
 {
-   WordList errList;
+   laydata::AtticList *errList = DEBUG_NEW AtticList();
+
    laydata::TdtData *shape = NULL;
    //unsigned prevlay;
    typedef LayerList::const_iterator LCI;
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
    {
-      //only one shape in layer is enough
-      if(lay->second->getObjectOver(pnt,shape))
+		laydata::ShapeList* atl = DEBUG_NEW ShapeList();
+		(*errList)[lay->first] = atl;
+      while(lay->second->getObjectOver(pnt,shape))
       {
-         errList.push_back(lay->first);
+         atl->push_back(shape);
       }
    }
    return errList;

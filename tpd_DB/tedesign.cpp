@@ -1624,13 +1624,15 @@ WordList laydata::DrcLibrary::findSelected(TP* p1)
    TdtCell* cell = dynamic_cast<TdtCell*>(checkCell("drc"));
    TP selp;
    WordList lays;
+	laydata::AtticList* shapes;
    if (cell) {
 
       layprop::DrawProperties* drawProp;
       if (PROPC->lockDrawProp(drawProp, layprop::DRC))
       {
          selp = (*p1)*CTM().Reversed(); //Take identity matrix
-         lays = cell->findSelected(selp);
+			//??? Add here Error List construction
+         shapes = cell->findSelected(selp);
       }
       PROPC->unlockDrawProp(drawProp);
       return lays;
