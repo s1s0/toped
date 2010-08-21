@@ -1060,48 +1060,44 @@ int tellstdfunc::CIFread::execute()
    telldata::ttlist* topcells = DEBUG_NEW telldata::ttlist(telldata::tn_string);
    if (expandFileName(filename))
    {
-      switch (DATC->CIFparse(filename))
+      if (DATC->CIFparse(filename))
       {
-         case CIFin::cfs_POK:
+         // add CIF tab in the browser
+         DATC->bpAddCifTab(_threadExecution);
+         // Collect the top structures
+         std::list<std::string> top_cell_list;
+         CIFin::CifFile* ACIFDB = NULL;
+         if (DATC->lockCif(ACIFDB))
          {
-            // add CIF tab in the browser
-            DATC->bpAddCifTab(_threadExecution);
-            // Collect the top structures
-            std::list<std::string> top_cell_list;
-            CIFin::CifFile* ACIFDB = NULL;
-            if (DATC->lockCif(ACIFDB))
-            {
-               CIFin::CIFHierTree* root = ACIFDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
-               assert(root);
-               do
-                  top_cell_list.push_back(std::string(root->GetItem()->name()));
-               while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
-            }
-            else
-            {
-               // The ACIFDB mist exists here, because CIFparse returned cfs_POK
-               assert(false);
-            }
-            DATC->unlockCif(ACIFDB);
-            // Convert the string list to TLISTOF(telldata::tn_string)
-            std::list<std::string>::const_iterator CN;
-            for (CN = top_cell_list.begin(); CN != top_cell_list.end(); CN ++)
-               topcells->add(DEBUG_NEW telldata::ttstring(*CN));
-            // Push the top structures in the data stack
-            LogFile << LogFile.getFN() << "(\""<< filename << "\");"; LogFile.flush();
-            break;
+            CIFin::CIFHierTree* root = ACIFDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
+            assert(root);
+            do
+               top_cell_list.push_back(std::string(root->GetItem()->name()));
+            while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
          }
-         case CIFin::cfs_FNF:
+         else
          {
-            std::string info = "File \"" + filename + "\" not found or not readable";
-            tell_log(console::MT_ERROR,info);
-            break;
+            // The ACIFDB mist exists here, because CIFparse returned cfs_POK
+            assert(false);
          }
-         default:
-         {
-            std::string info = "File \"" + filename + "\" doesn't seem to appear a valid CIF file";
-            tell_log(console::MT_ERROR,info);
-         }
+         DATC->unlockCif(ACIFDB);
+         // Convert the string list to TLISTOF(telldata::tn_string)
+         std::list<std::string>::const_iterator CN;
+         for (CN = top_cell_list.begin(); CN != top_cell_list.end(); CN ++)
+            topcells->add(DEBUG_NEW telldata::ttstring(*CN));
+         // Push the top structures in the data stack
+         LogFile << LogFile.getFN() << "(\""<< filename << "\");"; LogFile.flush();
+      }
+//         case CIFin::cfs_FNF:
+//         {
+//            std::string info = "File \"" + filename + "\" not found or not readable";
+//            tell_log(console::MT_ERROR,info);
+//            break;
+//         }
+      else
+      {
+         std::string info = "File \"" + filename + "\" doesn't seem to appear a valid CIF file";
+         tell_log(console::MT_ERROR,info);
       }
    }
    else
@@ -2010,7 +2006,7 @@ void tellstdfunc::importCIFcell( laydata::TdtLibDir* dbLibDir, const nameList& t
       {
          // create a default target data base if one is not already existing
          TpdTime timeCreated(time(NULL));
-         createDefaultTDT(ACIFDB->getLibName(), dbLibDir, timeCreated, threadExecution, undstack, undopstack);
+         createDefaultTDT(ACIFDB->libname(), dbLibDir, timeCreated, threadExecution, undstack, undopstack);
       }
       CIFin::Cif2Ted converter(ACIFDB, dbLibDir, cifLayers, techno);
       converter.run(top_names, recur, overwrite);

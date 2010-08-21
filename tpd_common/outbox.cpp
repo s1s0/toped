@@ -816,16 +816,16 @@ bool expandFileName( std::string& filename)
    return false;
 }
 
-std::string getFileNameOnly( std::string filename )
-{
-   wxFileName fName(wxString(filename.c_str(), wxConvUTF8));
-   fName.Normalize();
-   assert (fName.IsOk());
-   {
-      wxString name = fName.GetName();
-      return std::string(name.mb_str(wxConvFile ));
-   }
-}
+//std::string getFileNameOnly( std::string filename )
+//{
+//   wxFileName fName(wxString(filename.c_str(), wxConvUTF8));
+//   fName.Normalize();
+//   assert (fName.IsOk());
+//   {
+//      wxString name = fName.GetName();
+//      return std::string(name.mb_str(wxConvFile ));
+//   }
+//}
 
 //Convert string from UTF8 to wxConvFile
 std::string convertString(const std::string &str)

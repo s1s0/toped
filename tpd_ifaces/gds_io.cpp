@@ -315,7 +315,9 @@ GDSin::GdsInFile::GdsInFile(wxString wxfname) : DbImportFile(wxfname)
    _library       = NULL;
    std::ostringstream info;
    if (!status())
-      throw EXPTNreadGDS(info.str());
+   {
+      throw EXPTNreadGDS("Failed to open input file");
+   }
    do
    {// start reading
       if (getNextRecord())
@@ -1225,7 +1227,6 @@ void GDSin::GdsStructure::importText(GdsInFile* cf, ImportDB& iDB)
    double      angle          = 0.0;
    TP          magnPoint;
    std::string tString;
-   word        tdtlaynum;
 
    const GdsRecord* cr = cf->cRecord();
    do

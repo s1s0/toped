@@ -142,8 +142,9 @@ void DataCenter::OASclose()
    unlockOas(AOASDB);
 }
 
-CIFin::CifStatusType DataCenter::CIFparse(std::string filename)
+bool DataCenter::CIFparse(std::string filename)
 {
+   bool status = true;
    CIFin::CifFile* ACIFDB = NULL;
    if (lockCif(ACIFDB))
    {
@@ -151,22 +152,25 @@ CIFin::CifStatusType DataCenter::CIFparse(std::string filename)
       tell_log(console::MT_WARNING,news);
       delete ACIFDB;
    }
-   ACIFDB = DEBUG_NEW CIFin::CifFile(filename);
-
-   CIFin::CifStatusType status = ACIFDB->status();
-   if (CIFin::cfs_POK == status)
+   try
+   {
+      ACIFDB = DEBUG_NEW CIFin::CifFile(wxString(filename.c_str(), wxConvUTF8));
+   }
+   catch (EXPTNcif_parser)
+   {
+      TpdPost::toped_status(console::TSTS_PRGRSBAROFF);
+      status = false;
+   }
+   if (status)
    {
       // generate the hierarchy tree of cells
       ACIFDB->hierPrep();
       ACIFDB->hierOut();
    }
-   else
+   else if (NULL != ACIFDB)
    {
-      if (NULL != ACIFDB)
-      {
-         delete ACIFDB;
-         ACIFDB = NULL;
-      }
+      delete ACIFDB;
+      ACIFDB = NULL;
    }
    unlockCif(ACIFDB);
    return status;
@@ -178,7 +182,7 @@ bool DataCenter::cifGetLayers(nameList& cifLayers)
    CIFin::CifFile* ACIFDB = NULL;
    if (lockCif(ACIFDB))
    {
-      ACIFDB->collectLayers(cifLayers);
+//TODO      ACIFDB->collectLayers(cifLayers);
       ret_value = true;
    }
    unlockCif(ACIFDB);

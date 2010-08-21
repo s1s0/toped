@@ -39,8 +39,6 @@ extern void*   new_cif_lex_buffer( FILE* cifin );
 extern void    delete_cif_lex_buffer( void* b ) ;
 extern int     cifparse(); // Calls the bison generated parser
 extern FILE*   cifin;
-extern int     cifdebug;
-extern int     cifnerrs;
 
 
 //=============================================================================
@@ -232,48 +230,28 @@ CIFin::CIFHierTree* CIFin::CifStructure::hierOut(CIFHierTree* theTree, CifStruct
 }
 
 //=============================================================================
-CIFin::CifFile::CifFile(std::string filename)
+CIFin::CifFile::CifFile(wxString wxfname) : DbImportFile(wxfname)
 {
    _first = _current = _default = NULL;
    _curLay = NULL;
    _hierTree = NULL;
-   _fileName = filename;
    std::ostringstream info;
-   // Open the input file
-	std::string fname(convertString(_fileName));
-   if (!(_cifFh = fopen(fname.c_str(),"rt"))) // open the input file
+   if (!status())
    {
-      _status = cfs_FNF; return;
+      throw EXPTNcif_parser("Failed to open input file");
    }
-   // feed the flex with the buffer of the input file
-   void* b = new_cif_lex_buffer( _cifFh );
-   info << "Parsing \"" << _fileName << "\" using CIF grammar";
+   info << "Parsing \"" << fileName() << "\" using CIF grammar";
    tell_log(console::MT_INFO,info.str());
    CIFInFile = this;
    _default = DEBUG_NEW CifStructure(0,NULL);
-   _default->cellNameIs(std::string(getFileNameOnly(filename) + "_cif"));
+   _default->cellNameIs(std::string(getFileNameOnly() + "_cif"));
 
    // run the bison generated parser
    ciflloc.first_column = ciflloc.first_line = 1;
    ciflloc.last_column  = ciflloc.last_line  = 1;
-/*   cifdebug = 1;*/
-   try {
-      // Note! the EXPTNcif_parser exception can be thrown from the
-      // lexer, but only after a call from the parser
-      cifparse();
-      delete_cif_lex_buffer( b );
-   }
-   catch (EXPTNcif_parser)
-   {
-      // Not sure we can make something here.flex has thrown an exception
-      // but it could be the file system or dynamic memory
-      //@TODO check for available dynamic memory
-      // see the same comment ted_prompt:307
-      cifnerrs++;
-   }
-   if (cifnerrs > 0) _status = cfs_ERR;
-   else              _status = cfs_POK;
-   closeFile();
+   cifparse();
+   // Close the input stream when done
+   closeStream();
 }
 
 CIFin::CifFile::~CifFile()
@@ -298,7 +276,7 @@ CIFin::CifFile::~CifFile()
    }
 
    delete _default;
-   closeFile();
+   closeStream();
 }
 
 void CIFin::CifFile::addStructure(dword ID, dword a, dword b)
@@ -374,7 +352,7 @@ void CIFin::CifFile::addLabelSig(char* label, TP* location)
    _curLay->addLabelSig(std::string(label), location);
 }
 
-void CIFin::CifFile::collectLayers(nameList& cifLayers)
+void CIFin::CifFile::collectLayers(nameList& cifLayers) const
 {
    CifStructure* local = _first;
    while (NULL != local)
@@ -436,13 +414,20 @@ void CIFin::CifFile::hierOut()
    }
 }
 
-void CIFin::CifFile::closeFile()
+void CIFin::CifFile::convertPrep(const nameList&, bool)
 {
-   if (NULL != _cifFh)
-   {
-      fclose(_cifFh); _cifFh = NULL;
-   }
-   CIFInFile = NULL;
+   //TODO
+}
+
+void CIFin::CifFile::getTopCells(nameList&) const
+{
+   //TODO
+}
+
+void CIFin::CifFile::getAllCells(wxListBox&) const
+{
+   //TODO
+
 }
 
 //=============================================================================

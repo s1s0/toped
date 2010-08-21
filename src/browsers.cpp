@@ -981,7 +981,7 @@ void browsers::CIFCellBrowser::collectInfo(bool hier)
    CIFin::CifFile* ACIFDB = NULL;
    if (DATC->lockCif(ACIFDB))
    {
-      AddRoot(wxString((ACIFDB->getLibName()).c_str(), wxConvUTF8));
+      AddRoot(wxString((ACIFDB->libname()).c_str(), wxConvUTF8));
 
       if (NULL != ACIFDB->hiertree())
       {

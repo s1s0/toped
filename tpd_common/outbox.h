@@ -330,7 +330,7 @@ class EXPTNdrc_reader : public EXPTN
 };
 
 bool        expandFileName(std::string&);
-std::string getFileNameOnly(std::string);
+//std::string getFileNameOnly(std::string);
 //Convert string from UTF8 to wxConvFile
 std::string convertString(const std::string &str);
 int wxCALLBACK wxListCompareFunction(long, long, long);
