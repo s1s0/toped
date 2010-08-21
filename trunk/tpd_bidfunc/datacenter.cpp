@@ -33,6 +33,7 @@
 #include <wx/zstream.h>
 #include <sstream>
 #include "gds_io.h"
+#include "cif_io.h"
 #include "datacenter.h"
 #include "outbox.h"
 #include "tedat.h"
@@ -122,7 +123,7 @@ void DataCenter::GDSclose()
 
 void DataCenter::CIFclose()
 {
-   CIFin::CifFile* ACIFDB = NULL;
+   DbImportFile* ACIFDB = NULL;
    if (lockCif(ACIFDB))
    {
       delete ACIFDB;
@@ -145,7 +146,7 @@ void DataCenter::OASclose()
 bool DataCenter::CIFparse(std::string filename)
 {
    bool status = true;
-   CIFin::CifFile* ACIFDB = NULL;
+   DbImportFile* ACIFDB = NULL;
    if (lockCif(ACIFDB))
    {
       std::string news = "Removing existing CIF data from memory...";
@@ -162,11 +163,8 @@ bool DataCenter::CIFparse(std::string filename)
       status = false;
    }
    if (status)
-   {
       // generate the hierarchy tree of cells
-      ACIFDB->hierPrep();
       ACIFDB->hierOut();
-   }
    else if (NULL != ACIFDB)
    {
       delete ACIFDB;
@@ -179,10 +177,10 @@ bool DataCenter::CIFparse(std::string filename)
 bool DataCenter::cifGetLayers(nameList& cifLayers)
 {
    bool ret_value = false;
-   CIFin::CifFile* ACIFDB = NULL;
+   DbImportFile* ACIFDB = NULL;
    if (lockCif(ACIFDB))
    {
-//TODO      ACIFDB->collectLayers(cifLayers);
+      ACIFDB->collectLayers(cifLayers);
       ret_value = true;
    }
    unlockCif(ACIFDB);
@@ -393,7 +391,7 @@ void DataCenter::unlockGds(DbImportFile*& gds_db, bool throwexception)
    gds_db = NULL;
 }
 
-bool DataCenter::lockCif(CIFin::CifFile*& cif_db)
+bool DataCenter::lockCif(DbImportFile*& cif_db)
 {
    if (wxMUTEX_DEAD_LOCK == _CIFLock.Lock())
    {
@@ -408,7 +406,7 @@ bool DataCenter::lockCif(CIFin::CifFile*& cif_db)
    }
 }
 
-void DataCenter::unlockCif(CIFin::CifFile*& cif_db, bool throwexception)
+void DataCenter::unlockCif(DbImportFile*& cif_db, bool throwexception)
 {
    _CIFDB = cif_db;
    VERIFY(wxMUTEX_NO_ERROR == _CIFLock.Unlock());

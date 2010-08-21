@@ -28,7 +28,6 @@
 #ifndef DATA_HANDLER_INCLUDED
 #define DATA_HANDLER_INCLUDED
 #include "tedesign.h"
-#include "cif_io.h"
 #include "oasis_io.h"
 
 typedef enum {
@@ -56,12 +55,12 @@ public:
    bool                       lockTDT(laydata::TdtLibDir*&, TdtMutexState);
    laydata::DrcLibrary*       lockDRC(void);
    bool                       lockGds(DbImportFile*&);
-   bool                       lockCif(CIFin::CifFile*&);
+   bool                       lockCif(DbImportFile*&);
    bool                       lockOas(Oasis::OasisInFile*&);
    void                       unlockTDT(laydata::TdtLibDir*, bool throwexception = false);
    void                       unlockDRC();
    void                       unlockGds(DbImportFile*&, bool throwexception = false);
-   void                       unlockCif(CIFin::CifFile*&, bool throwexception = false);
+   void                       unlockCif(DbImportFile*&, bool throwexception = false);
    void                       unlockOas(Oasis::OasisInFile*& oasis_db, bool throwexception = false);
    void                       bpRefreshTdtTab(bool, bool);
    void                       bpAddGdsTab(bool);
@@ -99,7 +98,7 @@ private:
    laydata::TdtLibDir         _TEDLIB;       //! catalog of available TDT libraries
    laydata::DrcLibrary*       _DRCDB;        //! DRC data
    DbImportFile*              _GDSDB;        //! GDS parsed data
-   CIFin::CifFile*            _CIFDB;        //! CIF parsed data
+   DbImportFile*              _CIFDB;        //! CIF parsed data
    Oasis::OasisInFile*        _OASDB;        //! OASIS parsed data
    wxMutex                    _DBLock;       //! Main stream DB Mutex
    wxMutex                    _DRCLock;      //! DRC         DB Mutex

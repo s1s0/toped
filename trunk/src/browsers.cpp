@@ -978,23 +978,23 @@ void browsers::CIFCellBrowser::collectInfo(bool hier)
 {
    DeleteAllItems();
 
-   CIFin::CifFile* ACIFDB = NULL;
+   DbImportFile* ACIFDB = NULL;
    if (DATC->lockCif(ACIFDB))
    {
       AddRoot(wxString((ACIFDB->libname()).c_str(), wxConvUTF8));
-
-      if (NULL != ACIFDB->hiertree())
-      {
-         CIFin::CIFHierTree* root = ACIFDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
-         wxTreeItemId nroot;
-         while (root)
-         {
-            nroot = AppendItem(GetRootItem(), wxString(root->GetItem()->name().c_str(),wxConvUTF8));
-            collectChildren(root, nroot, hier);
-            root = root->GetNextRoot(TARGETDB_LIB);
-         }
-      }
-      SortChildren(GetRootItem());
+//    TODO
+//      if (NULL != ACIFDB->hiertree())
+//      {
+//         CIFin::CIFHierTree* root = ACIFDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
+//         wxTreeItemId nroot;
+//         while (root)
+//         {
+//            nroot = AppendItem(GetRootItem(), wxString(root->GetItem()->name().c_str(),wxConvUTF8));
+//            collectChildren(root, nroot, hier);
+//            root = root->GetNextRoot(TARGETDB_LIB);
+//         }
+//      }
+//      SortChildren(GetRootItem());
    }
    DATC->unlockCif(ACIFDB);
 }
