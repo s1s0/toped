@@ -269,41 +269,42 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          CIFSList       _children;
    };
 
-   class   CifFile {
+   class   CifFile : public DbImportFile {
       public:
-                        CifFile(std::string);
-                        ~CifFile();
-         CifStatusType  status() {return _status;}
-         void           addStructure(dword, dword = 1, dword = 1);
-         void           doneStructure();
-         void           addBox(dword, dword, TP*, TP* direction = NULL);
-         void           addPoly(pointlist*);
-         void           addWire(pointlist*, dword);
-         void           addRef(dword, CTM*);
-         void           addLabelLoc(char*, TP*, char* layname = NULL);
-         void           addLabelSig(char*, TP*);
-         void           secureLayer(char*);
-         void           curCellName(char*);
-         void           curCellOverlap(TP*, TP*);
-         void           collectLayers(nameList&);
-         CifStructure*  getStructure(dword);
-         CifStructure*  getStructure(std::string);
-         void           hierPrep();
-         void           hierOut();
-         std::string    getLibName() const   {return std::string(getFileNameOnly(_fileName));}
-         CIFHierTree*   hiertree()           {return _hierTree;}
-         CifStructure*  getFirstStructure()  {return _first;}
-         CifStructure*  getTopStructure()    {return _default;}
-         void           closeFile();
+                              CifFile(wxString);
+                              ~CifFile();
+         void                 addStructure(dword, dword = 1, dword = 1);
+         void                 doneStructure();
+         void                 addBox(dword, dword, TP*, TP* direction = NULL);
+         void                 addPoly(pointlist*);
+         void                 addWire(pointlist*, dword);
+         void                 addRef(dword, CTM*);
+         void                 addLabelLoc(char*, TP*, char* layname = NULL);
+         void                 addLabelSig(char*, TP*);
+         void                 secureLayer(char*);
+         void                 curCellName(char*);
+         void                 curCellOverlap(TP*, TP*);
+         CifStructure*        getStructure(dword);
+         CifStructure*        getStructure(std::string);
+         void                 hierPrep();
+
+         virtual double       libUnits() const {/*TODO*/ return 1e3;}
+         virtual void         hierOut();
+         virtual std::string  libname() const {return getFileNameOnly();}
+         virtual void         getTopCells(nameList&) const;
+         virtual void         getAllCells(wxListBox&) const;
+         virtual void         convertPrep(const nameList&, bool);
+         virtual void         collectLayers(nameList&) const;
+
+         CIFHierTree*         hiertree()           {return _hierTree;}
+         CifStructure*        getFirstStructure()  {return _first;}
+         CifStructure*        getTopStructure()    {return _default;}
       protected:
-         FILE*          _cifFh;
-         CifStatusType  _status;          //!
-         CifStructure*  _first;           //! poiter to the first defined cell
-         CifStructure*  _current;         //! the working (current) cell
-         CifStructure*  _default;         //! pointer to the default cell - i.e. the scratch pad
-         CifLayer*      _curLay;          //!
-         CIFHierTree*   _hierTree;        //! Tree of instance hierarchy
-         std::string    _fileName;        //! Input CIF file - including the path
+         CifStructure*        _first;           //! poiter to the first defined cell
+         CifStructure*        _current;         //! the working (current) cell
+         CifStructure*        _default;         //! pointer to the default cell - i.e. the scratch pad
+         CifLayer*            _curLay;          //!
+         CIFHierTree*         _hierTree;        //! Tree of instance hierarchy
    };
 
    class CifExportFile : public DbExportFile {

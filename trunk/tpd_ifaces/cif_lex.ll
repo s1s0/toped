@@ -66,7 +66,11 @@ namespace CIFin {
    int      cifsRemDepth = 0; // depth of comments
 }
 using namespace CIFin;
+extern CIFin::CifFile* CIFInFile;
 extern YYLTYPE ciflloc;
+#define YY_INPUT(buf,result,max_size)                    \
+   result = CIFInFile->readTextStream(buf,max_size);
+
 #define YY_USER_ACTION  ciflloc.last_column += yyleng;
 #define YY_FATAL_ERROR(msg)  ciflex_fatal(msg)
 

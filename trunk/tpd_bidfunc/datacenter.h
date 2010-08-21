@@ -48,7 +48,7 @@ public:
    void                       GDSclose();
    void                       CIFclose();
    void                       OASclose();
-   CIFin::CifStatusType       CIFparse(std::string filename);
+   bool                       CIFparse(std::string filename);
    bool                       cifGetLayers(nameList&);
    bool                       gdsGetLayers(ExtLayers&);
    bool                       oasGetLayers(ExtLayers&);

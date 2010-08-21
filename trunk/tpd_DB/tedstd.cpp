@@ -727,31 +727,6 @@ laydata::WireContourAux::~WireContourAux()
 }
 
 //=============================================================================
-//class DbImportFile {
-//   public:
-//                           DbImportFile(wxString, bool gziped = false);
-//      virtual             ~DbImportFile();
-//      bool                 reopenFile();
-//      void                 setPosition(wxFileOffset);
-//      void                 closeFile();
-//      virtual void         hierOut() = 0 ;
-//      virtual void         collectLayers(ExtLayers&) const = 0;
-//      virtual std::string  libname() const = 0;
-//      wxFileOffset         filePos() const                  { return _filePos;                     }
-//   protected:
-//      bool                 unZlib2Temp(wxString&, const wxString);
-//      std::string          _fileName   ;//! A fully validated name of the file. Path,extension, everything
-//      wxFileOffset         _fileLength ;//! The length of the file in bytes
-//      wxFileOffset         _filePos    ;//! Current position in the file
-//      wxFileOffset         _progresPos ;//! Current position of the progress bar (Toped status line)
-//      wxInputStream*       _inStream   ;//! The input stream of the opened file
-//      bool                 _gziped     ;//! Indicates that the file is in compressed with gzip
-//      bool                 _status     ;//! Used only in the constructor if the file can't be
-//                                        //! opened for whatever reason
-//
-//      //      typedef SGHierTree<ExternCellType>        GDSHierTree;
-//};
-
 /*!
  * The main purpose of the constructor is to create an input stream (_inStream)
  * from the fileName. It handles zip and gz files recognizing them by the
@@ -880,6 +855,33 @@ bool DbImportFile::readStream(void* buffer, size_t len, bool updateProgress)
    return true;
 }
 
+size_t DbImportFile::readTextStream(char* buffer, size_t len )
+{
+//   size_t result = 0;
+//   do
+//   {
+//      char cc = _inStream->GetC();
+//      if (1 == _inStream->LastRead())
+//      {
+//         buffer[result++] = cc;
+//      }
+//      else
+//         break;
+//   } while (result < len);
+//   return result;
+   _inStream->Read(buffer,len);// read record header
+   size_t numread = _inStream->LastRead();
+   // update file position
+   _filePos += numread;
+   // update progress indicator
+   if (2048 < (_filePos - _progresPos))
+   {
+      _progresPos = _filePos;
+      TpdPost::toped_status(console::TSTS_PROGRESS, _progresPos);
+   }
+   return numread;
+}
+
 void DbImportFile::setPosition(wxFileOffset filePos)
 {
    wxFileOffset result = _inStream->SeekI(filePos, wxFromStart);
@@ -896,6 +898,15 @@ void DbImportFile::closeStream()
    TpdPost::toped_status(console::TSTS_PRGRSBAROFF);
    tell_log(console::MT_INFO, "Done");
    _convLength = 0;
+}
+
+std::string DbImportFile::getFileNameOnly() const
+{
+   wxFileName fName(_fileName);
+   fName.Normalize();
+   assert (fName.IsOk());
+   wxString name = fName.GetName();
+   return std::string(name.mb_str(wxConvFile ));
 }
 
 bool DbImportFile::unZip2Temp()

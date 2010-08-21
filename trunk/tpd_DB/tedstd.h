@@ -342,19 +342,26 @@ class DbImportFile {
       virtual             ~DbImportFile();
       bool                 reopenFile();
       bool                 readStream(void*, size_t, bool updateProgress = false);
+      size_t               readTextStream(char*, size_t);
       void                 setPosition(wxFileOffset);
       void                 closeStream();
+      std::string          getFileNameOnly() const;
       virtual double       libUnits() const = 0;
       virtual void         hierOut() = 0 ;
-      virtual void         collectLayers(ExtLayers&) const = 0;
-      virtual bool         collectLayers(const std::string&, ExtLayers&) const = 0;
       virtual std::string  libname() const = 0;
       virtual void         getTopCells(nameList&) const = 0;
       virtual void         getAllCells(wxListBox&) const = 0;
       virtual void         convertPrep(const nameList&, bool) = 0;
+      // If you hit any of the asserts below - it most likely means that you're using wrong
+      // combination of DbImportFile extend class type and parameters for this function call
+      // ExtLayers is used for GDS/OASIS, nameList is used for CIF
+      virtual void         collectLayers(ExtLayers&) const {assert(false);}
+      virtual void         collectLayers(nameList& ) const {assert(false);}
+      virtual bool         collectLayers(const std::string&, ExtLayers&) const {assert(false);}
       wxFileOffset         filePos() const                  { return _filePos; }
       bool                 status() const                   { return _status;  }
       ForeignCellList&     convList()                       { return _convList;}
+      std::string          fileName()                       { return std::string(_fileName.mb_str(wxConvFile));}
    protected:
       wxFileOffset         _convLength ;//! The amount of data (in bytes) subjected to conversion
       ForeignCellList      _convList;   //! The list of cells for conversion in bottom-up order
