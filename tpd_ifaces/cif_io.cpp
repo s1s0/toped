@@ -170,7 +170,7 @@ CIFin::CifLayer* CIFin::CifStructure::secureLayer(std::string name)
    return _first;
 }
 
-void CIFin::CifStructure::collectLayers(nameList& layList, bool hier)
+void CIFin::CifStructure::collectLayers(nameList& layList, bool hier) const
 {
    const CifLayer* wlay = _first;
    while (NULL != wlay)
@@ -191,7 +191,7 @@ void CIFin::CifStructure::addRef(dword cell, CTM* location)
    _refirst = DEBUG_NEW CifRef(_refirst, cell, location);
 }
 
-void CIFin::CifStructure::hierPrep(CifFile& cfile)
+void CIFin::CifStructure::linkReferences(CifFile& cfile)
 {
    const CifRef* _local = _refirst;
    while (NULL != _local)
@@ -250,6 +250,7 @@ CIFin::CifFile::CifFile(wxString wxfname) : DbImportFile(wxfname)
    ciflloc.first_column = ciflloc.first_line = 1;
    ciflloc.last_column  = ciflloc.last_line  = 1;
    cifparse();
+   linkReferences();
    // Close the input stream when done
    closeStream();
 }
@@ -364,6 +365,14 @@ void CIFin::CifFile::collectLayers(nameList& cifLayers) const
    cifLayers.unique();
 }
 
+bool CIFin::CifFile::collectLayers(const std::string& name, nameList& cifLayers ) const
+{
+   const CIFin::CifStructure *src_structure = getStructure(name.c_str());
+   if (NULL == src_structure) return false;
+   src_structure->collectLayers(cifLayers, true);
+   return true;
+}
+
 CIFin::CifStructure* CIFin::CifFile::getStructure(dword cellno)
 {
    CifStructure* local = _first;
@@ -377,7 +386,7 @@ CIFin::CifStructure* CIFin::CifFile::getStructure(dword cellno)
    return NULL;
 }
 
-CIFin::CifStructure* CIFin::CifFile::getStructure(std::string cellname)
+const CIFin::CifStructure* CIFin::CifFile::getStructure(const std::string& cellname) const
 {
    if (cellname == _default->name()) return _default;
    CifStructure* local = _first;
@@ -390,13 +399,13 @@ CIFin::CifStructure* CIFin::CifFile::getStructure(std::string cellname)
    return NULL; // Cell with this name not found ?!
 }
 
-void CIFin::CifFile::hierPrep()
+void CIFin::CifFile::linkReferences()
 {
-   _default->hierPrep(*this);
+   _default->linkReferences(*this);
    CifStructure* local = _first;
    while (NULL != local)
    {
-      local->hierPrep(*this);
+      local->linkReferences(*this);
       local = local->last();
    }
 }
@@ -655,7 +664,8 @@ void CIFin::Cif2Ted::run(const nameList& top_str_names, bool recursive, bool ove
    assert(_src_lib->hiertree());
    for (nameList::const_iterator CN = top_str_names.begin(); CN != top_str_names.end(); CN++)
    {
-      CIFin::CifStructure *src_structure = _src_lib->getStructure(*CN);
+      // TODO this cast here is temporary. The entire class will disappear
+      CIFin::CifStructure *src_structure = const_cast<CIFin::CifStructure *>(_src_lib->getStructure(*CN));
       if (NULL != src_structure)
       {
          CIFin::CIFHierTree* root = _src_lib->hiertree()->GetMember(src_structure);

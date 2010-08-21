@@ -30,6 +30,7 @@
 #include <sstream>
 #include "datacenter.h"
 #include "gds_io.h"
+#include "cif_io.h"
 #include "tuidefs.h"
 #include "calbr_reader.h"
 #include "drc_tenderer.h"
@@ -936,27 +937,6 @@ int tellstdfunc::GDSreportlay::execute()
          ost << "GDS structure named \"" << name << "\" does not exists";
          tell_log(console::MT_ERROR,ost.str());
       }
-//      GDSin::GdsStructure *src_structure = AGDSDB->getStructure(name.c_str());
-//      std::ostringstream ost;
-//      if (!src_structure) {
-//         ost << "GDS structure named \"" << name << "\" does not exists";
-//         tell_log(console::MT_ERROR,ost.str());
-//      }
-//      else
-//      {
-//         ExtLayers gdsLayers;
-//         src_structure->collectLayers(gdsLayers,true);
-//         ost << "GDS layers found in \"" << name <<"\" { <layer_number> ; <data_type> }" << std::endl;
-//         for (ExtLayers::const_iterator NLI = gdsLayers.begin(); NLI != gdsLayers.end(); NLI++)
-//         {
-//            ost << "{" << NLI->first << " ; ";
-//            for (WordSet::const_iterator NTI = NLI->second.begin(); NTI != NLI->second.end(); NTI++)
-//               ost << *NTI << " ";
-//            ost << "}"<< std::endl;
-//         }
-//         tell_log(console::MT_INFO,ost.str());
-//         LogFile << LogFile.getFN() << "(\""<< name << "\");"; LogFile.flush();
-//      }
    }
    DATC->unlockGds(AGDSDB, true);
    return EXEC_NEXT;
@@ -1066,14 +1046,10 @@ int tellstdfunc::CIFread::execute()
          DATC->bpAddCifTab(_threadExecution);
          // Collect the top structures
          std::list<std::string> top_cell_list;
-         CIFin::CifFile* ACIFDB = NULL;
+         DbImportFile* ACIFDB = NULL;
          if (DATC->lockCif(ACIFDB))
          {
-            CIFin::CIFHierTree* root = ACIFDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
-            assert(root);
-            do
-               top_cell_list.push_back(std::string(root->GetItem()->name()));
-            while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
+            ACIFDB->getTopCells(top_cell_list);
          }
          else
          {
@@ -1121,25 +1097,24 @@ int tellstdfunc::CIFreportlay::execute()
 {
 
    std::string name = getStringValue();
-   CIFin::CifFile* ACIFDB = NULL;
+   DbImportFile* ACIFDB = NULL;
    if (DATC->lockCif(ACIFDB))
    {
-      CIFin::CifStructure *src_structure = ACIFDB->getStructure(name.c_str());
       std::ostringstream ost;
-      if (!src_structure)
+      nameList cifLayers;
+      if (ACIFDB->collectLayers(name, cifLayers))
       {
-         ost << "CIF structure named \"" << name << "\" does not exists";
-         tell_log(console::MT_ERROR,ost.str());
-      }
-      else
-      {
-         nameList cifLayers;
-         src_structure->collectLayers(cifLayers,true);
+//         src_structure->collectLayers(cifLayers,true); // TODO delete this line
          ost << "CIF layers found in \"" << name <<"\"" << std::endl;
          for (nameList::iterator NLI = cifLayers.begin(); NLI != cifLayers.end(); NLI++)
             ost << *NLI << std::endl;
          tell_log(console::MT_INFO,ost.str());
          LogFile << LogFile.getFN() << "(\""<< name << "\");"; LogFile.flush();
+      }
+      else
+      {
+         ost << "CIF structure named \"" << name << "\" does not exists";
+         tell_log(console::MT_ERROR,ost.str());
       }
    }
    DATC->unlockCif(ACIFDB, true);
@@ -1999,7 +1974,7 @@ void tellstdfunc::importCIFcell( laydata::TdtLibDir* dbLibDir, const nameList& t
   bool threadExecution, bool recur, bool overwrite, real techno )
 {
    // DB should have been locked at this point (from the tell functions)
-   CIFin::CifFile* ACIFDB = NULL;
+   DbImportFile* ACIFDB = NULL;
    if (DATC->lockCif(ACIFDB))
    {
       if (dbmxs_dblock > DATC->tdtMxState())
@@ -2008,7 +1983,8 @@ void tellstdfunc::importCIFcell( laydata::TdtLibDir* dbLibDir, const nameList& t
          TpdTime timeCreated(time(NULL));
          createDefaultTDT(ACIFDB->libname(), dbLibDir, timeCreated, threadExecution, undstack, undopstack);
       }
-      CIFin::Cif2Ted converter(ACIFDB, dbLibDir, cifLayers, techno);
+      //TODO - remove the cast!
+      CIFin::Cif2Ted converter(static_cast<CIFin::CifFile*>(ACIFDB), dbLibDir, cifLayers, techno);
       converter.run(top_names, recur, overwrite);
       (*dbLibDir)()->modified = true;
       tell_log(console::MT_INFO,"Done");

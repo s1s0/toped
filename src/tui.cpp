@@ -491,21 +491,16 @@ tui::getCIFimport::getCIFimport(wxFrame *parent, wxWindowID id, const wxString &
          wxTextValidator(wxFILTER_NUMERIC, &_techno));
 
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300), 0, NULL, wxLB_SORT);
-   CIFin::CifFile* ACIFDB = NULL;
+   nameList cifLayers;
+   DbImportFile* ACIFDB = NULL;
    if (DATC->lockCif(ACIFDB))
    {
-      CIFin::CifStructure* cifs = ACIFDB->getFirstStructure();
-      while (cifs)
-      {
-         _nameList->Append(wxString(cifs->name().c_str(), wxConvUTF8));
-         cifs = cifs->last();
-      }
-      _nameList->Append(wxString(ACIFDB->getTopStructure()->name().c_str(), wxConvUTF8));
+      ACIFDB->getAllCells(*_nameList);
    }
    DATC->unlockCif(ACIFDB, true);
+   if (init != wxT("")) _nameList->SetStringSelection(init,true);
    //-----------------------------------------------------------------------
    SIMap inlays;
-   nameList cifLayers;
    if (DATC->cifGetLayers(cifLayers))
    {
       word laynum = 1;
@@ -514,8 +509,6 @@ tui::getCIFimport::getCIFimport(wxFrame *parent, wxWindowID id, const wxString &
          inlays[*NLI] = laynum++;
       }
    }
-
-   if (init != wxT("")) _nameList->SetStringSelection(init,true);
 
    _layList = DEBUG_NEW tui::nameCboxList(this, wxID_ANY, wxDefaultPosition, wxSize(290,300), inlays, drawProp);
 

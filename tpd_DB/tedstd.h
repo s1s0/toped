@@ -358,6 +358,7 @@ class DbImportFile {
       virtual void         collectLayers(ExtLayers&) const {assert(false);}
       virtual void         collectLayers(nameList& ) const {assert(false);}
       virtual bool         collectLayers(const std::string&, ExtLayers&) const {assert(false);}
+      virtual bool         collectLayers(const std::string&, nameList& ) const {assert(false);}
       wxFileOffset         filePos() const                  { return _filePos; }
       bool                 status() const                   { return _status;  }
       ForeignCellList&     convList()                       { return _convList;}

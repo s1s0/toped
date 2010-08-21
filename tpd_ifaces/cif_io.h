@@ -250,8 +250,8 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          real           b() const                     {return (real)_b;}
          CifLayer*      secureLayer(std::string);
          void           addRef(dword cell, CTM* location);
-         void           collectLayers(nameList&, bool);
-         void           hierPrep(CifFile&);
+         void           collectLayers(nameList&, bool) const;
+         void           linkReferences(CifFile&);
          CIFHierTree*   hierOut(CIFHierTree*, CifStructure*);
       // to cover the requirements of the hierarchy template
          int            libID() const                 {return TARGETDB_LIB;}
@@ -285,8 +285,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          void                 curCellName(char*);
          void                 curCellOverlap(TP*, TP*);
          CifStructure*        getStructure(dword);
-         CifStructure*        getStructure(std::string);
-         void                 hierPrep();
+         const CifStructure*  getStructure(const std::string&) const;
 
          virtual double       libUnits() const {/*TODO*/ return 1e3;}
          virtual void         hierOut();
@@ -295,11 +294,13 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          virtual void         getAllCells(wxListBox&) const;
          virtual void         convertPrep(const nameList&, bool);
          virtual void         collectLayers(nameList&) const;
+         virtual bool         collectLayers(const std::string&, nameList& ) const;
 
          CIFHierTree*         hiertree()           {return _hierTree;}
          CifStructure*        getFirstStructure()  {return _first;}
          CifStructure*        getTopStructure()    {return _default;}
       protected:
+         void                 linkReferences();
          CifStructure*        _first;           //! poiter to the first defined cell
          CifStructure*        _current;         //! the working (current) cell
          CifStructure*        _default;         //! pointer to the default cell - i.e. the scratch pad
