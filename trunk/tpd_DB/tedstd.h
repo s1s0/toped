@@ -384,11 +384,13 @@ class DbImportFile {
 //==========================================================================
 class ForeignCell {
    public:
-                           ForeignCell() : _traversed(false), _haveParent(false), _filePos(0), _cellSize(0) {};
+                           ForeignCell() : _strctName(""), _traversed(false),
+                                    _haveParent(false), _filePos(0), _cellSize(0) {};
       virtual void         import(ImportDB&) = 0;
       bool                 traversed() const                { return _traversed;    }
       void                 set_traversed(bool tf)           { _traversed = tf;      }
       std::string          strctName() const                { return _strctName;    }
+      void                 setStrctName(std::string  nm)    { _strctName = nm;      }
       int                  libID() const                    { return TARGETDB_LIB;  } // to cover the requirements of the hierarchy template
       bool                 haveParent() const               { return _haveParent;   }
       wxFileOffset         strSize() const                  { return _cellSize;     }
@@ -397,7 +399,7 @@ class ForeignCell {
       bool                 _traversed  ;//! Indicates the cell was already traversed during the conversion
       bool                 _haveParent ;//! Indicates that the cell is referenced
       wxFileOffset         _filePos    ;//! The starting position of the cell description in the input stream
-      wxFileOffset         _cellSize   ;//! The size (in byte) if the cell description in the input file
+      wxFileOffset         _cellSize   ;//! The size (in byte) of the cell description in the input file
 
 };
 

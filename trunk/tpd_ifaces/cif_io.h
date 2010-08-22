@@ -231,19 +231,13 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
 
    typedef std::list<CifLayer*>     CifLayerList;
 
-   class CifStructure  {
+   class CifStructure : public ForeignCell  {
       public:
                         CifStructure(dword, CifStructure*, dword=1, dword=1);
                        ~CifStructure();
-         void           cellNameIs(std::string name)  {_name = name;}
          void           cellOverlapIs(TP* bl, TP* tr) {_overlap = DBbox(*bl, *tr);}
          CifStructure*  last() const                  {return _last;}
          dword          ID() const                    {return _ID;}
-         std::string    name() const                  {return _name;}
-         void           parentFound()                 {_orphan = false;}
-         bool           orphan()                      {return _orphan;}
-         bool           traversed() const             {return _traversed;}
-         void           set_traversed(bool trv)       { _traversed = trv;}
          const CifLayer* firstLayer() const            {return _first;}
          const CifRef*  refirst() const               {return _refirst;}
          real           a() const                     {return (real)_a;}
@@ -253,19 +247,15 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          void           collectLayers(nameList&, bool) const;
          void           linkReferences(CifFile&);
          CIFHierTree*   hierOut(CIFHierTree*, CifStructure*);
-      // to cover the requirements of the hierarchy template
-         int            libID() const                 {return TARGETDB_LIB;}
+         virtual void   import(ImportDB&);
       private:
          dword          _ID;
          CifStructure*  _last;
          dword          _a;
          dword          _b;
-         std::string    _name;
          CifLayer*      _first;
          CifRef*        _refirst;
          DBbox          _overlap;
-         bool           _orphan;
-         bool           _traversed;       //! For hierarchy traversing purposes
          CIFSList       _children;
    };
 
@@ -299,6 +289,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          CIFHierTree*         hiertree()                {return _hierTree;}
       protected:
          void                 linkReferences();
+         void                 preTraverseChildren(const CIFin::CIFHierTree*);
          CifStructure*        _first;           //! poiter to the first defined cell
          CifStructure*        _current;         //! the working (current) cell
          CifStructure*        _default;         //! pointer to the default cell - i.e. the scratch pad

@@ -133,8 +133,8 @@ void CIFin::CifLayer::addLabelSig(std::string label, TP* loc)
 
 //=============================================================================
 CIFin::CifStructure::CifStructure(dword ID, CifStructure* last, dword a, dword b) :
-      _ID(ID), _last(last), _a(a), _b(b), _name(""), _first(NULL),
-          _refirst(NULL), _overlap(TP()), _orphan(true), _traversed(false) {}
+      ForeignCell(), _ID(ID), _last(last), _a(a), _b(b), _first(NULL),
+      _refirst(NULL), _overlap(TP()) {}
 
 CIFin::CifStructure::~CifStructure()
 {
@@ -199,7 +199,7 @@ void CIFin::CifStructure::linkReferences(CifFile& cfile)
       CifStructure* celldef = cfile.getStructure(_local->cell());
       if (NULL != celldef)
       {
-         celldef->parentFound();
+         celldef->_haveParent = true;
          _children.push_back(celldef);
       }
       _local = _local->last();
@@ -207,13 +207,13 @@ void CIFin::CifStructure::linkReferences(CifFile& cfile)
    _children.sort();
    _children.unique();
 
-   if ("" == _name)
+   if ("" == _strctName)
    {
       std::ostringstream tmp_name;
       tmp_name << "_cifCellNo_" << _ID;
-      _name = tmp_name.str();
+      _strctName = tmp_name.str();
       std::ostringstream news;
-      news << "Name \"" << _name << "\" assigned automatically to CIF cell "<< _ID ;
+      news << "Name \"" << strctName() << "\" assigned automatically to CIF cell "<< _ID ;
       tell_log(console::MT_INFO,news.str());
    }
 }
@@ -227,6 +227,12 @@ CIFin::CIFHierTree* CIFin::CifStructure::hierOut(CIFHierTree* theTree, CifStruct
       theTree = (*CI)->hierOut(theTree, this);
    }
    return theTree;
+}
+
+void CIFin::CifStructure::import(ImportDB& iDB)
+{
+   // TODO
+   assert(false);
 }
 
 //=============================================================================
@@ -244,7 +250,7 @@ CIFin::CifFile::CifFile(wxString wxfname) : DbImportFile(wxfname)
    tell_log(console::MT_INFO,info.str());
    CIFInFile = this;
    _default = DEBUG_NEW CifStructure(0,NULL);
-   _default->cellNameIs(std::string(getFileNameOnly() + "_cif"));
+   _default->setStrctName(std::string(getFileNameOnly() + "_cif"));
 
    // run the bison generated parser
    ciflloc.first_column = ciflloc.first_line = 1;
@@ -304,7 +310,7 @@ void CIFin::CifFile::curCellName(char* cellname)
 {
    if (NULL !=_current)
    {
-      _current->cellNameIs(std::string(cellname));
+      _current->setStrctName(std::string(cellname));
    }
    else assert(false); // Implement a scratch cell - CIF definition allows data definition ourside the cell boundary
 }
@@ -388,11 +394,11 @@ CIFin::CifStructure* CIFin::CifFile::getStructure(dword cellno)
 
 const CIFin::CifStructure* CIFin::CifFile::getStructure(const std::string& cellname) const
 {
-   if (cellname == _default->name()) return _default;
+   if (cellname == _default->strctName()) return _default;
    CifStructure* local = _first;
    while (NULL != local)
    {
-      if (cellname == local->name())
+      if (cellname == local->strctName())
          return local;
       local = local->last();
    }
@@ -417,15 +423,37 @@ void CIFin::CifFile::hierOut()
    CifStructure* local = _first;
    while (NULL != local)
    {
-      if (local->orphan())
+      if (!local->haveParent())
          _hierTree = local->hierOut(_hierTree,NULL);
       local = local->last();
    }
 }
 
-void CIFin::CifFile::convertPrep(const nameList&, bool)
+void CIFin::CifFile::convertPrep(const nameList& topCells, bool recursive)
 {
-   //TODO
+   assert(NULL != _hierTree);
+   _convList.clear();
+   for (nameList::const_iterator CN = topCells.begin(); CN != topCells.end(); CN++)
+   {
+      CIFin::CifStructure *src_structure = const_cast<CIFin::CifStructure*>(getStructure(*CN));
+      if (NULL != src_structure)
+      {
+         CIFin::CIFHierTree* root = _hierTree->GetMember(src_structure);
+         if (recursive) preTraverseChildren(root);
+         if (!src_structure->traversed())
+         {
+            _convList.push_back(src_structure);
+            src_structure->set_traversed(true);
+            // TODO conversion length?
+         }
+      }
+      else
+      {
+         std::ostringstream ost; ost << "CIF import: ";
+         ost << "Structure \""<< *CN << "\" not found in the CIF DB in memory.";
+         tell_log(console::MT_WARNING,ost.str());
+      }
+   }
 }
 
 void CIFin::CifFile::getTopCells(nameList& top_cell_list) const
@@ -435,7 +463,7 @@ void CIFin::CifFile::getTopCells(nameList& top_cell_list) const
    if (root)
    {
       do
-         top_cell_list.push_back(std::string(root->GetItem()->name()));
+         top_cell_list.push_back(std::string(root->GetItem()->strctName()));
       while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
    }
    //else
@@ -449,11 +477,31 @@ void CIFin::CifFile::getAllCells(wxListBox& cellsBox) const
    CIFin::CifStructure* cifs = _first;
    while (cifs)
    {
-      cellsBox.Append(wxString(cifs->name().c_str(), wxConvUTF8));
+      cellsBox.Append(wxString(cifs->strctName().c_str(), wxConvUTF8));
       cifs = cifs->last();
    }
-   cellsBox.Append(wxString(_default->name().c_str(), wxConvUTF8));
+   cellsBox.Append(wxString(_default->strctName().c_str(), wxConvUTF8));
 
+}
+
+void CIFin::CifFile::preTraverseChildren(const CIFin::CIFHierTree* root)
+{
+   const CIFin::CIFHierTree* Child= root->GetChild(TARGETDB_LIB);
+   while (Child)
+   {
+      if ( !Child->GetItem()->traversed() )
+      {
+         // traverse children first
+         preTraverseChildren(Child);
+         CIFin::CifStructure* sstr = const_cast<CIFin::CifStructure*>(Child->GetItem());
+         if (!sstr->traversed())
+         {
+            _convList.push_back(sstr);
+            sstr->set_traversed(true);
+         }
+      }
+      Child = Child->GetBrother(TARGETDB_LIB);
+   }
 }
 
 //=============================================================================
@@ -737,7 +785,7 @@ void CIFin::Cif2Ted::preTraverseChildren(const CIFin::CIFHierTree* root)
 
 void CIFin::Cif2Ted::convert(const CIFin::CifStructure* src_structure, bool overwrite)
 {
-   std::string gname = src_structure->name();
+   std::string gname = src_structure->strctName();
    // check that destination structure with this name exists
    laydata::TdtCell* dst_structure = static_cast<laydata::TdtCell*>((*_tdt_db)()->checkCell(gname));
    std::ostringstream ost; ost << "CIF import: ";
@@ -909,7 +957,7 @@ void CIFin::Cif2Ted::wire( const CIFin::CifWire* wd, laydata::QTreeTmp* wl, std:
 void CIFin::Cif2Ted::ref ( const CIFin::CifRef* wd, laydata::TdtCell* dst)
 {
    CifStructure* refd = _src_lib->getStructure(wd->cell());
-   std::string cell_name = refd->name();
+   std::string cell_name = refd->strctName();
 
    laydata::CellDefin strdefn = _tdt_db->linkCellRef(cell_name, TARGETDB_LIB);
    dst->registerCellRef( strdefn,(*wd->location())*_crosscoeff);
