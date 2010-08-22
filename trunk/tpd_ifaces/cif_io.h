@@ -296,9 +296,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          virtual void         collectLayers(nameList&) const;
          virtual bool         collectLayers(const std::string&, nameList& ) const;
 
-         CIFHierTree*         hiertree()           {return _hierTree;}
-         CifStructure*        getFirstStructure()  {return _first;}
-         CifStructure*        getTopStructure()    {return _default;}
+         CIFHierTree*         hiertree()                {return _hierTree;}
       protected:
          void                 linkReferences();
          CifStructure*        _first;           //! poiter to the first defined cell

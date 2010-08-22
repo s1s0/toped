@@ -428,14 +428,31 @@ void CIFin::CifFile::convertPrep(const nameList&, bool)
    //TODO
 }
 
-void CIFin::CifFile::getTopCells(nameList&) const
+void CIFin::CifFile::getTopCells(nameList& top_cell_list) const
 {
-   //TODO
+   assert(NULL != _hierTree);
+   CIFin::CIFHierTree* root = _hierTree->GetFirstRoot(TARGETDB_LIB);
+   if (root)
+   {
+      do
+         top_cell_list.push_back(std::string(root->GetItem()->name()));
+      while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
+   }
+   //else
+   //{
+   //   // Considering possible to have an empty CIF file
+   //}
 }
 
-void CIFin::CifFile::getAllCells(wxListBox&) const
+void CIFin::CifFile::getAllCells(wxListBox& cellsBox) const
 {
-   //TODO
+   CIFin::CifStructure* cifs = _first;
+   while (cifs)
+   {
+      cellsBox.Append(wxString(cifs->name().c_str(), wxConvUTF8));
+      cifs = cifs->last();
+   }
+   cellsBox.Append(wxString(_default->name().c_str(), wxConvUTF8));
 
 }
 
