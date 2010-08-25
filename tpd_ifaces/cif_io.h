@@ -108,14 +108,6 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
 95 label length width x y;    Place label in specified area
 
 */
-   typedef enum {
-      cif_BOX        ,
-      cif_POLY       ,
-      cif_WIRE       ,
-      cif_REF        ,
-      cif_LBL_LOC    ,
-      cif_LBL_SIG
-   } CifDataType;
 
    typedef enum {
       cfs_POK        , // parsed OK
@@ -135,80 +127,70 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
                              CifData(CifData* last) : _last(last) {};
          virtual            ~CifData(){};
          const CifData*      last() const        {return _last;}
-         virtual CifDataType dataType() const = 0;
+         virtual void        import ( ImportDB& iDB ) const = 0;
       protected:
-         CifData*    _last;
+         CifData*            _last;
    };
 
    class CifBox : public CifData {
       public:
-                     CifBox(CifData*, dword, dword, TP*, TP*);
-                    ~CifBox();
-         CifDataType dataType() const   {return cif_BOX;}
-         dword       length() const     {return _length;}
-         dword       width() const      {return _width;}
-         const TP*   center() const     {return _center;}
-         const TP*   direction() const  {return _direction;}
+                             CifBox(CifData*, dword, dword, TP*, TP*);
+                            ~CifBox();
+         virtual void        import ( ImportDB& iDB ) const;
       protected:
-         dword       _length;
-         dword       _width;
-         TP*         _center;
-         TP*         _direction;
+         dword               _length;
+         dword               _width;
+         TP*                 _center;
+         TP*                 _direction;
    };
 
    class CifPoly : public CifData {
       public:
-                           CifPoly(CifData* last, pointlist*);
-                          ~CifPoly();
-         CifDataType       dataType() const    {return cif_POLY;}
-         const pointlist*  poly() const        {return _poly;}
+                             CifPoly(CifData* last, pointlist*);
+                            ~CifPoly();
+         virtual void        import( ImportDB& iDB ) const;
       protected:
-         pointlist*  _poly;
+         pointlist*          _poly;
    };
 
    class CifWire : public CifData {
       public:
-                           CifWire(CifData* last, pointlist*, dword);
-                          ~CifWire();
-         CifDataType       dataType() const    {return cif_WIRE;}
-         const pointlist*  poly() const        {return _poly;}
-         dword             width() const       {return _width;}
+                             CifWire(CifData* last, pointlist*, dword);
+                            ~CifWire();
+         virtual void        import( ImportDB& iDB ) const;
       protected:
-         pointlist*  _poly;
-         dword       _width;
+         pointlist*          _poly;
+         dword               _width;
    };
 
    class CifRef : public CifData {
       public:
-                     CifRef(CifData* last, dword, CTM*);
-                    ~CifRef();
-         const CifRef* last() const                   {return static_cast<const CifRef*>(CifData::last());}
-         dword       cell() const                     {return  _cell;}
-         const CTM*  location() const                 {return  _location;}
-         CifDataType dataType() const                 {return  cif_REF;}
+                             CifRef(CifData* last, dword, CTM*);
+                            ~CifRef();
+         const CifRef*       last() const        {return static_cast<const CifRef*>(CifData::last());}
+         dword               cell() const        {return  _cell;}
+         const CTM*          location() const    {return  _location;}
+         virtual void        import ( ImportDB& iDB ) const;
       protected:
-         dword       _cell;
-         CTM*        _location;
+         dword               _cell;
+         CTM*                _location;
    };
 
    class CifLabelLoc : public CifData {
       public:
-                     CifLabelLoc(CifData*, std::string, TP*);
-         virtual   ~CifLabelLoc();
-         CifDataType dataType() const                 {return cif_LBL_LOC;}
-         std::string text() const                     {return _label;}
-         const TP*   location() const                 {return _location;}
-
+                             CifLabelLoc(CifData*, std::string, TP*);
+         virtual            ~CifLabelLoc();
+         virtual void        import( ImportDB& iDB ) const;
       protected:
-         std::string _label;
-         TP*         _location;
+         std::string         _label;
+         TP*                 _location;
    };
 
    class CifLabelSig : public CifLabelLoc {
       public:
-                     CifLabelSig(CifData*, std::string, TP*);
-                    ~CifLabelSig() {}
-         CifDataType dataType() const                  {return cif_LBL_SIG;}
+                             CifLabelSig(CifData*, std::string, TP*);
+                            ~CifLabelSig() {}
+         virtual void        import( ImportDB& iDB ) const;
    };
 
    class CifLayer {
@@ -277,7 +259,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          CifStructure*        getStructure(dword);
          const CifStructure*  getStructure(const std::string&) const;
 
-         virtual double       libUnits() const {/*TODO*/ return 1e3;}
+         virtual double       libUnits() const {return 1e-8;}
          virtual void         hierOut();
          virtual std::string  libname() const {return getFileNameOnly();}
          virtual void         getTopCells(nameList&) const;
@@ -320,29 +302,6 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          std::fstream   _file;            //! Output file handler
          bool           _verbose;         //! CIF output type
          unsigned       _lastcellnum;     //! The number of the last written cell
-   };
-
-   class Cif2Ted {
-      public:
-                              Cif2Ted(CifFile*, laydata::TdtLibDir*, const SIMap&, real);
-         void                 run(const nameList&, bool, bool);
-      protected:
-         void                 preTraverseChildren(const CIFHierTree*);
-         void                 convert(const CIFin::CifStructure*, bool);
-         void                 import(const CifStructure*, laydata::TdtCell*);
-         void                 box ( const CifBox*     ,laydata::QTreeTmp*, std::string );
-         void                 poly( const CifPoly*    ,laydata::QTreeTmp*, std::string );
-         void                 wire( const CifWire*    ,laydata::QTreeTmp*, std::string );
-         void                 ref ( const CifRef*     ,laydata::TdtCell*);
-         void                 lbll( const CifLabelLoc*,laydata::QTreeTmp*, std::string );
-         void                 lbls( const CifLabelSig*,laydata::QTreeTmp*, std::string );
-         CifFile*             _src_lib;
-         laydata::TdtLibDir*  _tdt_db;
-         const SIMap&         _cif_layers;
-         real                 _crosscoeff;
-         real                 _dbucoeff;
-         CIFSList             _convertList;
-         real                 _techno;
    };
 
 }

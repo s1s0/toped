@@ -1971,7 +1971,7 @@ void tellstdfunc::importGDScell(laydata::TdtLibDir* dbLibDir, const nameList& to
 //=============================================================================
 void tellstdfunc::importCIFcell( laydata::TdtLibDir* dbLibDir, const nameList& top_names,
   const SIMap& cifLayers, parsercmd::undoQUEUE& undstack, telldata::UNDOPerandQUEUE& undopstack,
-  bool threadExecution, bool recur, bool overwrite, real techno )
+  bool threadExecution, bool recur, bool over, real techno )
 {
    // DB should have been locked at this point (from the tell functions)
    DbImportFile* ACIFDB = NULL;
@@ -1983,11 +1983,9 @@ void tellstdfunc::importCIFcell( laydata::TdtLibDir* dbLibDir, const nameList& t
          TpdTime timeCreated(time(NULL));
          createDefaultTDT(ACIFDB->libname(), dbLibDir, timeCreated, threadExecution, undstack, undopstack);
       }
-      //TODO - remove the cast!
-      CIFin::Cif2Ted converter(static_cast<CIFin::CifFile*>(ACIFDB), dbLibDir, cifLayers, techno);
-      converter.run(top_names, recur, overwrite);
-      (*dbLibDir)()->modified = true;
-      tell_log(console::MT_INFO,"Done");
+      ACIFDB->convertPrep(top_names, recur);
+      ImportDB converter(ACIFDB, dbLibDir, cifLayers, techno);
+      converter.run(top_names, over);
    }
    DATC->unlockCif(ACIFDB, true);
 }
