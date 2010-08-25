@@ -110,6 +110,7 @@ namespace laydata {
    class TdtDesign;
    class TdtLibrary;
    class TdtLibDir;
+   class QTreeTmp;
    typedef  std::pair<TdtData*, SGBitSet>           SelectDataPair;
    typedef  std::list<SelectDataPair>               DataList;
    typedef  std::map<unsigned, DataList*>           SelectList;
@@ -404,25 +405,78 @@ class ForeignCell {
 };
 
 //==========================================================================
+// If you hit any of the asserts below - it most likely means that you're using wrong
+// combination of DbImportFile extend class type and parameters for this function call
+// ExtLayers is used for GDS/OASIS, nameList is used for CIF
+class LayerCrossMap {
+   public:
+                              LayerCrossMap() : _tdtLayNumber(0), _tmpLayer(NULL) {}
+      laydata::QTreeTmp*      getTmpLayer()     {return _tmpLayer;}
+      virtual bool            mapTdtLay(laydata::TdtCell*, word, word)
+                                                         {assert(false); return false;}
+      virtual bool            mapTdtLay(laydata::TdtCell*,const std::string&)
+                                                         {assert(false); return false;}
+      virtual std::string     printSrcLayer()            {assert(false);}
+   protected:
+      word                    _tdtLayNumber  ; //! Current layer number
+      laydata::QTreeTmp*      _tmpLayer      ; //! Current target layer
+};
+
+class ENumberLayerCM : public LayerCrossMap {
+   public:
+                              ENumberLayerCM(const LayerMapExt& lmap) :
+                                 _layMap(lmap), _extLayNumber(0),
+                                 _extDataType(0) {}
+      virtual bool            mapTdtLay(laydata::TdtCell*,word, word);
+      virtual std::string     printSrcLayer() const;
+   private:
+      const LayerMapExt&      _layMap;
+      word                    _extLayNumber;
+      word                    _extDataType;
+};
+
+class ENameLayerCM : public LayerCrossMap {
+   public:
+                              ENameLayerCM(const SIMap& lmap) :
+                                 _layMap(lmap), _extLayName("") {}
+      virtual bool            mapTdtLay(laydata::TdtCell*, const std::string&);
+      virtual std::string     printSrcLayer() const;
+   private:
+      const SIMap&            _layMap;
+      std::string             _extLayName;
+};
+
+//==========================================================================
 class ImportDB {
    public:
                               ImportDB(DbImportFile*, laydata::TdtLibDir*, const LayerMapExt&);
+                              ImportDB(DbImportFile*, laydata::TdtLibDir*, const SIMap&, real);
       void                    run(const nameList&, bool);
+      bool                    mapTdtLayer(std::string);
       void                    addPoly(pointlist&, word, word);
+      void                    addPoly(pointlist&);
       void                    addPath(pointlist&, word, word, int4b, short, int4b, int4b);
+      void                    addPath(pointlist&, int4b, short pathType = 0, int4b bgnExtn = 0, int4b endExtn = 0);
       void                    addText(std::string, word, word, TP, double, double, bool);
+      void                    addText(std::string, TP, double magnification, double angle = 0, bool reflection = false);
       void                    addRef(std::string, TP, double, double, bool);
+      void                    addRef(std::string, CTM);
       void                    addARef(std::string, TP, double, double, bool, laydata::ArrayProperties&);
-      DbImportFile*           srcFile()               {return _src_lib;}
+      void                    calcCrossCoeff(real cc) { _crossCoeff = _dbuCoeff * cc;}
+      DbImportFile*           srcFile()               { return _src_lib;   }
+      real                    technoSize()            { return _technoSize;}
+      real                    crossCoeff()            { return _crossCoeff;}
    protected:
       void                    convert(ForeignCell*, bool);
-      bool                    polyAcceptable(pointlist&, bool&, word , word);
-      bool                    pathAcceptable(pointlist&, int4b, int2b, int2b);
+      bool                    polyAcceptable(pointlist&, bool&);
+      bool                    pathAcceptable(pointlist&, int4b);
+      LayerCrossMap           _layCrossMap   ;
       DbImportFile*           _src_lib       ;
       laydata::TdtLibDir*     _tdt_db        ;
-      const LayerMapExt&      _theLayMap     ;
       laydata::TdtCell*       _dst_structure ; // Current target structure
-      real                    _coeff; // DBU difference
+      real                    _dbuCoeff      ; // The DBU ratio between the foreign and local DB
+      real                    _crossCoeff    ; // Current cross coefficient
+      real                    _technoSize    ; //! technology size (used for conversion of some texts)
 };
 
 

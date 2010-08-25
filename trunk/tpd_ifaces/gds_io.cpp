@@ -470,7 +470,7 @@ bool GDSin::GdsInFile::getNextRecord()
 
 double GDSin::GdsInFile::libUnits() const
 {
-   return _library->dbu()/_library->uu();
+   return _library->dbu();// /_library->uu();
 }
 
 /*! Gathers the cells subject to conversion in a linear list with a bottom-up

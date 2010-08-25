@@ -46,6 +46,42 @@ CIFin::CifBox::CifBox(CifData* last, dword length, dword width, TP* center, TP* 
                            CifData(last), _length(length), _width(width), _center(center),
                                    _direction(direction) {}
 
+void CIFin::CifBox::import ( ImportDB& iDB ) const
+{
+   pointlist plist;   plist.reserve(4);
+   real cX, cY;
+
+   cX = rint(((real)_center->x() - (real)_length/ 2.0f) * iDB.crossCoeff() );
+   cY = rint(((real)_center->y() - (real)_width / 2.0f) * iDB.crossCoeff() );
+   TP cpnt1( (int4b)cX, (int4b)cY );   plist.push_back(cpnt1);
+
+   cX = rint(((real)_center->x() + (real)_length/ 2.0f) * iDB.crossCoeff() );
+   cY = rint(((real)_center->y() - (real)_width / 2.0f) * iDB.crossCoeff() );
+   TP cpnt2( (int4b)cX, (int4b)cY );   plist.push_back(cpnt2);
+
+   cX = rint(((real)_center->x() + (real)_length/ 2.0f) * iDB.crossCoeff() );
+   cY = rint(((real)_center->y() + (real)_width / 2.0f) * iDB.crossCoeff() );
+   TP cpnt3( (int4b)cX, (int4b)cY );   plist.push_back(cpnt3);
+
+   cX = rint(((real)_center->x() - (real)_length/ 2.0f) * iDB.crossCoeff() );
+   cY = rint(((real)_center->y() + (real)_width / 2.0f) * iDB.crossCoeff() );
+   TP cpnt4( (int4b)cX, (int4b)cY );   plist.push_back(cpnt4);
+   if ( NULL != _direction )
+   {
+      CTM tmx;
+      cX = (real)_center->x() * iDB.crossCoeff();
+      cY = (real)_center->y() * iDB.crossCoeff();
+      tmx.Translate(-cX,-cY);
+      tmx.Rotate(*(_direction));
+      tmx.Translate(cX,cY);
+      plist[0] *=  tmx;
+      plist[1] *=  tmx;
+      plist[2] *=  tmx;
+      plist[3] *=  tmx;
+   }
+   iDB.addPoly(plist);
+}
+
 CIFin::CifBox::~CifBox()
 {
    delete _center;
@@ -55,38 +91,94 @@ CIFin::CifBox::~CifBox()
 CIFin::CifPoly::CifPoly(CifData* last, pointlist* poly) :
       CifData(last), _poly(poly) {}
 
+
+void CIFin::CifPoly::import( ImportDB& iDB ) const
+{
+   pointlist plist;
+   plist.reserve(_poly->size());
+   for(pointlist::const_iterator CP = _poly->begin(); CP != _poly->end(); CP++)
+   {
+      TP pnt(*CP);
+      pnt *= iDB.crossCoeff();
+      plist.push_back(pnt);
+   }
+   iDB.addPoly(plist);
+}
+
 CIFin::CifPoly::~CifPoly()
 {
    delete _poly;
 }
+
 //=============================================================================
 CIFin::CifWire::CifWire(CifData* last, pointlist* poly, dword width) :
       CifData(last), _poly(poly), _width(width) {}
+
+void CIFin::CifWire::import( ImportDB& iDB ) const
+{
+   pointlist plist;
+   plist.reserve(_poly->size());
+   for(pointlist::const_iterator CP = _poly->begin(); CP != _poly->end(); CP++)
+   {
+      TP pnt(*CP);
+      pnt *= iDB.crossCoeff();
+      plist.push_back(pnt);
+   }
+   iDB.addPath(plist, _width);
+}
 
 CIFin::CifWire::~CifWire()
 {
    delete _poly;
 }
+
 //=============================================================================
 CIFin::CifRef::CifRef(CifData* last, dword cell, CTM* location) :
       CifData(last), _cell(cell), _location(location) {}
+
+void CIFin::CifRef::import ( ImportDB& iDB ) const
+{
+   CifFile* cf = static_cast<CifFile*>(iDB.srcFile());
+   ForeignCell* refd = cf->getStructure(_cell);
+   std::string cell_name = refd->strctName();
+
+   iDB.addRef(cell_name, (*_location) * iDB.crossCoeff());
+}
 
 CIFin::CifRef::~CifRef()
 {
    delete _location;
 }
+
 //=============================================================================
 CIFin::CifLabelLoc::CifLabelLoc(CifData* last, std::string label, TP* location) :
       CifData(last), _label(label), _location(location) {}
+
+void CIFin::CifLabelLoc::import( ImportDB& iDB ) const
+{
+   // CIF doesn't have a concept of texts (as GDS)
+   // text size and placement are just the default
+   if (0.0 == iDB.technoSize()) return;
+   TP pnt(*(_location));
+   pnt *= iDB.crossCoeff();
+
+   iDB.addText(_label, pnt, iDB.technoSize());
+}
 
 CIFin::CifLabelLoc::~CifLabelLoc()
 {
    delete _location;
 }
+
 //=============================================================================
 CIFin::CifLabelSig::CifLabelSig(CifData* last, std::string label, TP* location) :
       CifLabelLoc(last, label, location)
 {}
+
+void CIFin::CifLabelSig::import(  ImportDB& iDB ) const
+{
+   //TODO > what to do with those objects?
+}
 
 //=============================================================================
 CIFin::CifLayer::CifLayer(std::string name, CifLayer* last):
@@ -104,7 +196,6 @@ CIFin::CifLayer::~CifLayer()
       delete wdata4d;
    }
 }
-
 
 void CIFin::CifLayer::addBox(dword length,dword width ,TP* center, TP* direction)
 {
@@ -231,8 +322,34 @@ CIFin::CIFHierTree* CIFin::CifStructure::hierOut(CIFHierTree* theTree, CifStruct
 
 void CIFin::CifStructure::import(ImportDB& iDB)
 {
-   // TODO
-   assert(false);
+   iDB.calcCrossCoeff(a() / b());
+   const CIFin::CifLayer* swl = _first;
+   while( swl ) // loop trough the layers
+   {
+      if (iDB.mapTdtLayer( swl->name() ))
+      {
+         const CIFin::CifData* wd = swl->firstData();
+         while ( wd ) // loop trough data
+         {
+            wd->import(iDB);
+            wd = wd->last();
+         }
+      }
+      //else
+      //{
+      //   std::ostringstream ost;
+      //   ost << "CIF Layer name \"" << swl->name() << "\" is not defined in the function input parameter. Will be omitted";
+      //   tell_log(console::MT_INFO,ost.str());
+      //}
+      swl = swl->last();
+   }
+   // Now translate the references
+   const CIFin::CifRef* swr = _refirst;
+   while ( swr )
+   {
+      swr->import(iDB);
+      swr = swr->last();
+   }
 }
 
 //=============================================================================
@@ -645,8 +762,6 @@ void CIFin::CifExportFile::text(const std::string& label, const CTM& trans)
       labelr.replace(loc, 1, "_"); //@FIXME - this should be an option or ...?
 
    _file << "      94 "<< labelr << " "<< (int)trans.tx() << " " << (int)trans.ty() << ";" << std::endl;
-
-
 }
 
 void CIFin::CifExportFile::ref(const std::string& cellname, const CTM& tmatrix)
@@ -712,273 +827,3 @@ CIFin::CifExportFile::~CifExportFile()
    _file.close();
    // don't delete _laymap - it's should be deleted where it had been created
 }
-
-//-----------------------------------------------------------------------------
-// class Cif2Ted
-//-----------------------------------------------------------------------------
-CIFin::Cif2Ted::Cif2Ted(CIFin::CifFile* src_lib, laydata::TdtLibDir* tdt_db,
-      const SIMap& cif_layers, real techno) : _src_lib (src_lib), _tdt_db(tdt_db),
-                                    _cif_layers(cif_layers), _techno(techno)
-{
-   _dbucoeff = 1e-8/(*_tdt_db)()->DBU();
-}
-
-
-void CIFin::Cif2Ted::run(const nameList& top_str_names, bool recursive, bool overwrite)
-{
-   assert(_src_lib->hiertree());
-   for (nameList::const_iterator CN = top_str_names.begin(); CN != top_str_names.end(); CN++)
-   {
-      // TODO this cast here is temporary. The entire class will disappear
-      CIFin::CifStructure *src_structure = const_cast<CIFin::CifStructure *>(_src_lib->getStructure(*CN));
-      if (NULL != src_structure)
-      {
-         CIFin::CIFHierTree* root = _src_lib->hiertree()->GetMember(src_structure);
-         if (recursive) preTraverseChildren(root);
-         if (!src_structure->traversed())
-         {
-            _convertList.push_back(src_structure);
-            src_structure->set_traversed(true);
-         }
-
-      }
-      else
-      {
-         std::ostringstream ost; ost << "CIF import: ";
-         ost << "Structure \""<< *CN << "\" not found in the CIF DB in memory.";
-         tell_log(console::MT_WARNING,ost.str());
-      }
-   }
-   //
-   for (CIFSList::iterator CS = _convertList.begin(); CS != _convertList.end(); CS++)
-   {
-      convert(*CS, overwrite);
-      (*CS)->set_traversed(false); // restore the state for eventual second conversion
-   }
-   tell_log(console::MT_INFO, "Done");
-   (*_tdt_db)()->recreateHierarchy(_tdt_db);
-
-   //         if (recursive) preTraverseChildren(root, overwrite);
-   //         convert_prep(root, overwrite);
-}
-
-
-void CIFin::Cif2Ted::preTraverseChildren(const CIFin::CIFHierTree* root)
-{
-   const CIFin::CIFHierTree* Child= root->GetChild(TARGETDB_LIB);
-   while (Child)
-   {
-      if ( !Child->GetItem()->traversed() )
-      {
-         // traverse children first
-         preTraverseChildren(Child);
-         CIFin::CifStructure* sstr = const_cast<CIFin::CifStructure*>(Child->GetItem());
-         if (!sstr->traversed())
-         {
-            _convertList.push_back(sstr);
-            sstr->set_traversed(true);
-         }
-      }
-      Child = Child->GetBrother(TARGETDB_LIB);
-   }
-}
-
-void CIFin::Cif2Ted::convert(const CIFin::CifStructure* src_structure, bool overwrite)
-{
-   std::string gname = src_structure->strctName();
-   // check that destination structure with this name exists
-   laydata::TdtCell* dst_structure = static_cast<laydata::TdtCell*>((*_tdt_db)()->checkCell(gname));
-   std::ostringstream ost; ost << "CIF import: ";
-   if (NULL != dst_structure)
-   {
-      if (overwrite)
-      {
-         /*@TODO Erase the existing structure and convert*/
-         ost << "Structure "<< gname << " should be overwritten, but cell erase is not implemened yet ...";
-         tell_log(console::MT_WARNING,ost.str());
-      }
-      else
-      {
-         ost << "Structure "<< gname << " already exists. Omitted";
-         tell_log(console::MT_INFO,ost.str());
-      }
-   }
-   else
-   {
-      ost << "Importing structure " << gname << "...";
-      tell_log(console::MT_INFO,ost.str());
-      // first create a new cell
-      dst_structure = DEBUG_NEW laydata::TdtCell(gname);
-      // call the cell converter
-      import(src_structure, dst_structure);
-      // and finally - register the cell
-      (*_tdt_db)()->registerCellRead(gname, dst_structure);
-   }
-}
-
-
-void CIFin::Cif2Ted::import(const CIFin::CifStructure* src, laydata::TdtCell* dst)
-{
-   _crosscoeff = _dbucoeff * src->a() / src->b();
-   const CIFin::CifLayer* swl = src->firstLayer();
-   while( swl ) // loop trough the layers
-   {
-      SIMap::const_iterator layno;
-      if ( _cif_layers.end() != (layno = _cif_layers.find(swl->name())) )
-      {
-         laydata::QTreeTmp* dwl = dst->secureUnsortedLayer(layno->second);
-         const CIFin::CifData* wd = swl->firstData();
-         while ( wd ) // loop trough data
-         {
-            switch (wd->dataType())
-            {
-               case cif_BOX     : box ( static_cast<const CIFin::CifBox*     >(wd), dwl, swl->name() );break;
-               case cif_POLY    : poly( static_cast<const CIFin::CifPoly*    >(wd), dwl, swl->name() );break;
-               case cif_WIRE    : wire( static_cast<const CIFin::CifWire*    >(wd), dwl, swl->name() );break;
-               case cif_LBL_LOC : lbll( static_cast<const CIFin::CifLabelLoc*>(wd), dwl, swl->name() );break;
-               case cif_LBL_SIG : lbls( static_cast<const CIFin::CifLabelSig*>(wd), dwl, swl->name() );break;
-               default    : assert(false);
-            }
-            wd = wd->last();
-         }
-      }
-      //else
-      //{
-      //   std::ostringstream ost;
-      //   ost << "CIF Layer name \"" << swl->name() << "\" is not defined in the function input parameter. Will be omitted";
-      //   tell_log(console::MT_INFO,ost.str());
-      //}
-      swl = swl->last();
-   }
-
-   const CIFin::CifRef* swr = src->refirst();
-   while ( swr )
-   {
-      ref(swr,dst);
-      swr = swr->last();
-   }
-   dst->fixUnsorted();
-}
-
-void CIFin::Cif2Ted::box ( const CIFin::CifBox* wd, laydata::QTreeTmp* wl, std::string layname)
-{
-   pointlist pl;   pl.reserve(4);
-   real cX, cY;
-
-   cX = rint(((real)wd->center()->x() - (real)wd->length()/ 2.0f) * _crosscoeff );
-   cY = rint(((real)wd->center()->y() - (real)wd->width() / 2.0f) * _crosscoeff );
-   TP cpnt1( (int4b)cX, (int4b)cY );   pl.push_back(cpnt1);
-
-   cX = rint(((real)wd->center()->x() + (real)wd->length()/ 2.0f) * _crosscoeff );
-   cY = rint(((real)wd->center()->y() - (real)wd->width() / 2.0f) * _crosscoeff );
-   TP cpnt2( (int4b)cX, (int4b)cY );   pl.push_back(cpnt2);
-
-   cX = rint(((real)wd->center()->x() + (real)wd->length()/ 2.0f) * _crosscoeff );
-   cY = rint(((real)wd->center()->y() + (real)wd->width() / 2.0f) * _crosscoeff );
-   TP cpnt3( (int4b)cX, (int4b)cY );   pl.push_back(cpnt3);
-
-   cX = rint(((real)wd->center()->x() - (real)wd->length()/ 2.0f) * _crosscoeff );
-   cY = rint(((real)wd->center()->y() + (real)wd->width() / 2.0f) * _crosscoeff );
-   TP cpnt4( (int4b)cX, (int4b)cY );   pl.push_back(cpnt4);
-   if (NULL != wd->direction())
-   {
-      CTM tmx;
-      cX = (real)wd->center()->x() * _crosscoeff;
-      cY = (real)wd->center()->y() * _crosscoeff;
-      tmx.Translate(-cX,-cY);
-      tmx.Rotate(*(wd->direction()));
-      tmx.Translate(cX,cY);
-      pl[0] *=  tmx;
-      pl[1] *=  tmx;
-      pl[2] *=  tmx;
-      pl[3] *=  tmx;
-   }
-
-   laydata::ValidPoly check(pl);
-
-   if (!check.valid())
-   {
-      std::ostringstream ost; ost << "Layer " << layname;
-      ost << ": Box check fails - " << check.failType();
-      tell_log(console::MT_ERROR, ost.str());
-   }
-   else pl = check.getValidated() ;
-
-   if (check.box())  wl->putBox(pl[0], pl[2]);
-   else              wl->putPoly(pl);
-}
-
-void CIFin::Cif2Ted::poly( const CIFin::CifPoly* wd, laydata::QTreeTmp* wl, std::string layname)
-{
-   pointlist pl;
-   pl.reserve(wd->poly()->size());
-   for(pointlist::const_iterator CP = wd->poly()->begin(); CP != wd->poly()->end(); CP++)
-   {
-      TP pnt(*CP);
-      pnt *= _crosscoeff;
-      pl.push_back(pnt);
-   }
-   laydata::ValidPoly check(pl);
-
-   if (!check.valid())
-   {
-      std::ostringstream ost; ost << "Layer " << layname;
-      ost << ": Polygon check fails - " << check.failType();
-      tell_log(console::MT_ERROR, ost.str());
-   }
-   else pl = check.getValidated() ;
-
-   if (check.box())  wl->putBox(pl[0], pl[2]);
-   else              wl->putPoly(pl);
-}
-
-void CIFin::Cif2Ted::wire( const CIFin::CifWire* wd, laydata::QTreeTmp* wl, std::string layname)
-{
-   pointlist pl;
-   pl.reserve(wd->poly()->size());
-   for(pointlist::const_iterator CP = wd->poly()->begin(); CP != wd->poly()->end(); CP++)
-   {
-      TP pnt(*CP);
-      pnt *= _crosscoeff;
-      pl.push_back(pnt);
-   }
-   laydata::ValidWire check(pl, wd->width());
-
-   if (!check.valid())
-   {
-      std::ostringstream ost; ost << "Layer " << layname;
-      ost << ": Wire check fails - " << check.failType();
-      tell_log(console::MT_ERROR, ost.str());
-   }
-   else pl = check.getValidated() ;
-   wl->putWire(pl, wd->width());
-}
-
-void CIFin::Cif2Ted::ref ( const CIFin::CifRef* wd, laydata::TdtCell* dst)
-{
-   CifStructure* refd = _src_lib->getStructure(wd->cell());
-   std::string cell_name = refd->strctName();
-
-   laydata::CellDefin strdefn = _tdt_db->linkCellRef(cell_name, TARGETDB_LIB);
-   dst->registerCellRef( strdefn,(*wd->location())*_crosscoeff);
-}
-
-void CIFin::Cif2Ted::lbll( const CIFin::CifLabelLoc* wd, laydata::QTreeTmp* wl, std::string )
-{
-   // CIF doesn't have a concept of texts (as GDS)
-   // text size and placement are just the default
-   if (0.0 == _techno) return;
-   TP pnt(*(wd->location()));
-   pnt *= _crosscoeff;
-   wl->putText(wd->text(),
-               CTM(pnt,
-                   (_techno / (/*(*_tdt_db)()->UU() * */ OPENGL_FONT_UNIT)),
-                   0.0,
-                   false )
-              );
-}
-
-void CIFin::Cif2Ted::lbls( const CIFin::CifLabelSig*,laydata::QTreeTmp*, std::string )
-{
-}
-
