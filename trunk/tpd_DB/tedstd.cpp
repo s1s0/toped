@@ -1079,7 +1079,7 @@ void ImportDB::convert(ForeignCell* src_structure, bool overwrite)
    std::string gname = src_structure->strctName();
    // check that destination structure with this name exists
    _dst_structure = static_cast<laydata::TdtCell*>((*_tdt_db)()->checkCell(gname));
-   std::ostringstream ost; //ost << "GDS import: ";
+   std::ostringstream ost;
    if (NULL != _dst_structure)
    {
       if (overwrite)
@@ -1096,7 +1096,7 @@ void ImportDB::convert(ForeignCell* src_structure, bool overwrite)
    }
    else
    {
-      ost << "Structure " << gname << "...";
+      ost << "Importing " << gname << "...";
       tell_log(console::MT_INFO,ost.str());
       // first create a new cell
       _dst_structure = DEBUG_NEW laydata::TdtCell(gname);
