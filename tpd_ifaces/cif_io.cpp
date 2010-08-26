@@ -124,7 +124,11 @@ void CIFin::CifWire::import( ImportDB& iDB ) const
       pnt *= iDB.crossCoeff();
       plist.push_back(pnt);
    }
-   iDB.addPath(plist, _width);
+   dword width = (dword) rint(_width * iDB.crossCoeff());
+   // actually all CIF wires correspond to GDS type 1 (rounded ends),
+   // but they are silently converted here to type 2, because Toped
+   // doesn't support wire type 1 at all
+   iDB.addPath(plist, width, 2);
 }
 
 CIFin::CifWire::~CifWire()
