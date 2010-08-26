@@ -416,7 +416,7 @@ class LayerCrossMap {
                                                          {assert(false); return false;}
       virtual bool            mapTdtLay(laydata::TdtCell*,const std::string&)
                                                          {assert(false); return false;}
-      virtual std::string     printSrcLayer()            {assert(false);}
+      virtual std::string     printSrcLayer() const      {assert(false);}
    protected:
       word                    _tdtLayNumber  ; //! Current layer number
       laydata::QTreeTmp*      _tmpLayer      ; //! Current target layer
@@ -454,11 +454,9 @@ class ImportDB {
                              ~ImportDB();
       void                    run(const nameList&, bool, bool reopenFile = true);
       bool                    mapTdtLayer(std::string);
-      void                    addPoly(pointlist&, word, word);
+      bool                    mapTdtLayer(word, word);
       void                    addPoly(pointlist&);
-      void                    addPath(pointlist&, word, word, int4b, short, int4b, int4b);
       void                    addPath(pointlist&, int4b, short pathType = 0, int4b bgnExtn = 0, int4b endExtn = 0);
-      void                    addText(std::string, word, word, TP, double, double, bool);
       void                    addText(std::string, TP, double magnification, double angle = 0, bool reflection = false);
       void                    addRef(std::string, TP, double, double, bool);
       void                    addRef(std::string, CTM);

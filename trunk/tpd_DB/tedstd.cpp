@@ -1114,18 +1114,9 @@ bool ImportDB::mapTdtLayer(std::string layName)
    return _layCrossMap->mapTdtLay(_dst_structure, layName);
 }
 
-void ImportDB::addPoly(pointlist& plist, word srcLayer, word srcDataType)
+bool ImportDB::mapTdtLayer(word srcLayer, word srcDataType)
 {
-   if ( _layCrossMap->mapTdtLay(_dst_structure, srcLayer, srcDataType) )
-   {
-      bool boxObject;
-      if (polyAcceptable(plist, boxObject))
-      {
-         laydata::QTreeTmp* tmpLayer = _layCrossMap->getTmpLayer();
-         if (boxObject)  tmpLayer->putBox(plist[0], plist[2]);
-         else            tmpLayer->putPoly(plist);
-      }
-   }
+   return _layCrossMap->mapTdtLay(_dst_structure, srcLayer, srcDataType);
 }
 
 void ImportDB::addPoly(pointlist& plist)
@@ -1138,36 +1129,6 @@ void ImportDB::addPoly(pointlist& plist)
       {
          if (boxObject)  tmpLayer->putBox(plist[0], plist[2]);
          else            tmpLayer->putPoly(plist);
-      }
-   }
-}
-
-void ImportDB::addPath(pointlist& plist, word srcLayer, word srcDataType,
-                       int4b width, short pathType, int4b bgnExtn, int4b endExtn)
-{
-   if ( _layCrossMap->mapTdtLay(_dst_structure, srcLayer, srcDataType) )
-   {
-      bool pathConvertResult = true;
-      if      (2 == pathType)
-         pathConvertResult = laydata::pathConvert(plist, width/2, width/2);
-      else if (4 == pathType)
-         pathConvertResult = laydata::pathConvert(plist, bgnExtn, endExtn);
-
-      if (pathConvertResult)
-      {
-         if (pathAcceptable(plist, width))
-         {
-            laydata::QTreeTmp* tmpLayer = _layCrossMap->getTmpLayer();
-            tmpLayer->putWire(plist, width);
-         }
-      }
-      else
-      {
-         std::ostringstream ost;
-         ost << "Invalid single point path - { "
-             <<  _layCrossMap->printSrcLayer()
-             << " }";
-         tell_log(console::MT_ERROR, ost.str());
       }
    }
 }
@@ -1196,23 +1157,6 @@ void ImportDB::addPath(pointlist& plist, int4b width, short pathType, int4b bgnE
              << " }";
          tell_log(console::MT_ERROR, ost.str());
       }
-   }
-}
-
-void ImportDB::addText(std::string tString, word srcLayer, word srcDataType, TP bPoint,
-                       double magnification, double angle, bool reflection)
-{
-   if ( _layCrossMap->mapTdtLay(_dst_structure, srcLayer, srcDataType) )
-   {
-      laydata::QTreeTmp* tmpLayer = _layCrossMap->getTmpLayer();
-      // @FIXME absolute magnification, absolute angle should be reflected somehow!!!
-      tmpLayer->putText(tString,
-                        CTM( bPoint,
-                             magnification / ((*_tdt_db)()->UU() *  OPENGL_FONT_UNIT),
-                             angle,
-                             reflection
-                           )
-                       );
    }
 }
 

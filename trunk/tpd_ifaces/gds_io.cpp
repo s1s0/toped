@@ -1088,7 +1088,8 @@ void GDSin::GdsStructure::importBox(GdsInFile* cf, ImportDB& iDB)
                plist.reserve(numpoints);
                for(word i = 0; i < numpoints; i++)
                   plist.push_back(GDSin::get_TP(cr, i));
-               iDB.addPoly(plist, layer, singleType);
+               if (iDB.mapTdtLayer(layer, singleType))
+                  iDB.addPoly(plist);
                break;
             }
             case gds_ENDEL://end of element, exit point
@@ -1135,7 +1136,8 @@ void GDSin::GdsStructure::importPoly(GdsInFile* cf, ImportDB& iDB)
                   plist.reserve(numpoints);
                   for(word i = 0; i < numpoints; i++)
                      plist.push_back(GDSin::get_TP(cr, i));
-                  iDB.addPoly(plist, layer, singleType);
+                  if (iDB.mapTdtLayer(layer, singleType))
+                     iDB.addPoly(plist);
                }
                break;
             case gds_ENDEL://end of element, exit point
@@ -1192,9 +1194,8 @@ void GDSin::GdsStructure::importPath(GdsInFile* cf, ImportDB& iDB)
                   plist.reserve(numpoints);
                   for(word i = 0; i < numpoints; i++)
                      plist.push_back(GDSin::get_TP(cr, i));
-
-                  iDB.addPath(plist, layer, singleType, width, pathtype, bgnextn, endextn);
-
+                  if (iDB.mapTdtLayer(layer, singleType))
+                     iDB.addPath(plist, width, pathtype, bgnextn, endextn);
                }
                break;
             case gds_ENDEL://end of element, exit point
@@ -1272,7 +1273,8 @@ void GDSin::GdsStructure::importText(GdsInFile* cf, ImportDB& iDB)
             case gds_STRING: cr->retData(&tString);
                break;
             case gds_ENDEL://end of element, exit point
-               iDB.addText(tString, layer, singleType, magnPoint, magnification, angle, (0 != reflection));
+               if (iDB.mapTdtLayer(layer, singleType))
+                  iDB.addText(tString, magnPoint, magnification, angle, (0 != reflection));
                return;
             default://parse error - not expected record type
                throw EXPTNreadGDS("GDS text - wrong record type in the current context");
