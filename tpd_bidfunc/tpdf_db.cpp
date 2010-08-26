@@ -1985,7 +1985,7 @@ void tellstdfunc::importCIFcell( laydata::TdtLibDir* dbLibDir, const nameList& t
       }
       ACIFDB->convertPrep(top_names, recur);
       ImportDB converter(ACIFDB, dbLibDir, cifLayers, techno);
-      converter.run(top_names, over);
+      converter.run(top_names, over, false);
    }
    DATC->unlockCif(ACIFDB, true);
 }

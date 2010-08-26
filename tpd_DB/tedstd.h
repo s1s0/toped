@@ -451,7 +451,8 @@ class ImportDB {
    public:
                               ImportDB(DbImportFile*, laydata::TdtLibDir*, const LayerMapExt&);
                               ImportDB(DbImportFile*, laydata::TdtLibDir*, const SIMap&, real);
-      void                    run(const nameList&, bool);
+                             ~ImportDB();
+      void                    run(const nameList&, bool, bool reopenFile = true);
       bool                    mapTdtLayer(std::string);
       void                    addPoly(pointlist&, word, word);
       void                    addPoly(pointlist&);
@@ -470,7 +471,7 @@ class ImportDB {
       void                    convert(ForeignCell*, bool);
       bool                    polyAcceptable(pointlist&, bool&);
       bool                    pathAcceptable(pointlist&, int4b);
-      LayerCrossMap           _layCrossMap   ;
+      LayerCrossMap*          _layCrossMap   ;
       DbImportFile*           _src_lib       ;
       laydata::TdtLibDir*     _tdt_db        ;
       laydata::TdtCell*       _dst_structure ; // Current target structure
