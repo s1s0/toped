@@ -1034,28 +1034,28 @@ std::string ENameLayerCM::printSrcLayer() const
 }
 //=============================================================================
 ImportDB::ImportDB(DbImportFile* src_lib, laydata::TdtLibDir* tdt_db, const LayerMapExt& theLayMap) :
-      _layCrossMap( ENumberLayerCM(theLayMap)                  ),
       _src_lib    ( src_lib                                    ),
       _tdt_db     ( tdt_db                                     ),
       _dbuCoeff   ( src_lib->libUnits() / (*_tdt_db)()->DBU()  ),
       _crossCoeff ( _dbuCoeff                                  ),
       _technoSize ( 0.0                                        )
-{}
+{
+   _layCrossMap = DEBUG_NEW ENumberLayerCM(theLayMap);
+}
 
 ImportDB::ImportDB(DbImportFile* src_lib, laydata::TdtLibDir* tdt_db, const SIMap& theLayMap, real techno) :
-      _layCrossMap( ENameLayerCM(theLayMap)                    ),
       _src_lib    ( src_lib                                    ),
       _tdt_db     ( tdt_db                                     ),
       _dbuCoeff   ( src_lib->libUnits() / (*_tdt_db)()->DBU()  ),
       _crossCoeff ( _dbuCoeff                                  ),
       _technoSize ( techno                                     )
 {
-
+   _layCrossMap = DEBUG_NEW ENameLayerCM(theLayMap);
 }
 
-void ImportDB::run(const nameList& top_str_names, bool overwrite)
+void ImportDB::run(const nameList& top_str_names, bool overwrite, bool reopenFile)
 {
-   if (_src_lib->reopenFile())
+   if (!reopenFile || (reopenFile && _src_lib->reopenFile()))
    {
       try
       {
@@ -1111,17 +1111,17 @@ void ImportDB::convert(ForeignCell* src_structure, bool overwrite)
 
 bool ImportDB::mapTdtLayer(std::string layName)
 {
-   return _layCrossMap.mapTdtLay(_dst_structure, layName);
+   return _layCrossMap->mapTdtLay(_dst_structure, layName);
 }
 
 void ImportDB::addPoly(pointlist& plist, word srcLayer, word srcDataType)
 {
-   if ( _layCrossMap.mapTdtLay(_dst_structure, srcLayer, srcDataType) )
+   if ( _layCrossMap->mapTdtLay(_dst_structure, srcLayer, srcDataType) )
    {
       bool boxObject;
       if (polyAcceptable(plist, boxObject))
       {
-         laydata::QTreeTmp* tmpLayer = _layCrossMap.getTmpLayer();
+         laydata::QTreeTmp* tmpLayer = _layCrossMap->getTmpLayer();
          if (boxObject)  tmpLayer->putBox(plist[0], plist[2]);
          else            tmpLayer->putPoly(plist);
       }
@@ -1130,7 +1130,7 @@ void ImportDB::addPoly(pointlist& plist, word srcLayer, word srcDataType)
 
 void ImportDB::addPoly(pointlist& plist)
 {
-   laydata::QTreeTmp* tmpLayer = _layCrossMap.getTmpLayer();
+   laydata::QTreeTmp* tmpLayer = _layCrossMap->getTmpLayer();
    if ( NULL != tmpLayer )
    {
       bool boxObject;
@@ -1145,7 +1145,7 @@ void ImportDB::addPoly(pointlist& plist)
 void ImportDB::addPath(pointlist& plist, word srcLayer, word srcDataType,
                        int4b width, short pathType, int4b bgnExtn, int4b endExtn)
 {
-   if ( _layCrossMap.mapTdtLay(_dst_structure, srcLayer, srcDataType) )
+   if ( _layCrossMap->mapTdtLay(_dst_structure, srcLayer, srcDataType) )
    {
       bool pathConvertResult = true;
       if      (2 == pathType)
@@ -1157,7 +1157,7 @@ void ImportDB::addPath(pointlist& plist, word srcLayer, word srcDataType,
       {
          if (pathAcceptable(plist, width))
          {
-            laydata::QTreeTmp* tmpLayer = _layCrossMap.getTmpLayer();
+            laydata::QTreeTmp* tmpLayer = _layCrossMap->getTmpLayer();
             tmpLayer->putWire(plist, width);
          }
       }
@@ -1165,7 +1165,7 @@ void ImportDB::addPath(pointlist& plist, word srcLayer, word srcDataType,
       {
          std::ostringstream ost;
          ost << "Invalid single point path - { "
-             <<  _layCrossMap.printSrcLayer()
+             <<  _layCrossMap->printSrcLayer()
              << " }";
          tell_log(console::MT_ERROR, ost.str());
       }
@@ -1174,7 +1174,7 @@ void ImportDB::addPath(pointlist& plist, word srcLayer, word srcDataType,
 
 void ImportDB::addPath(pointlist& plist, int4b width, short pathType, int4b bgnExtn, int4b endExtn)
 {
-   laydata::QTreeTmp* tmpLayer = _layCrossMap.getTmpLayer();
+   laydata::QTreeTmp* tmpLayer = _layCrossMap->getTmpLayer();
    if ( NULL != tmpLayer )
    {
       bool pathConvertResult = true;
@@ -1192,7 +1192,7 @@ void ImportDB::addPath(pointlist& plist, int4b width, short pathType, int4b bgnE
       {
          std::ostringstream ost;
          ost << "Invalid single point path - { "
-             <<  _layCrossMap.printSrcLayer()
+             <<  _layCrossMap->printSrcLayer()
              << " }";
          tell_log(console::MT_ERROR, ost.str());
       }
@@ -1202,9 +1202,9 @@ void ImportDB::addPath(pointlist& plist, int4b width, short pathType, int4b bgnE
 void ImportDB::addText(std::string tString, word srcLayer, word srcDataType, TP bPoint,
                        double magnification, double angle, bool reflection)
 {
-   if ( _layCrossMap.mapTdtLay(_dst_structure, srcLayer, srcDataType) )
+   if ( _layCrossMap->mapTdtLay(_dst_structure, srcLayer, srcDataType) )
    {
-      laydata::QTreeTmp* tmpLayer = _layCrossMap.getTmpLayer();
+      laydata::QTreeTmp* tmpLayer = _layCrossMap->getTmpLayer();
       // @FIXME absolute magnification, absolute angle should be reflected somehow!!!
       tmpLayer->putText(tString,
                         CTM( bPoint,
@@ -1218,7 +1218,7 @@ void ImportDB::addText(std::string tString, word srcLayer, word srcDataType, TP 
 
 void ImportDB::addText(std::string tString, TP bPoint, double magnification, double angle, bool reflection)
 {
-   laydata::QTreeTmp* tmpLayer = _layCrossMap.getTmpLayer();
+   laydata::QTreeTmp* tmpLayer = _layCrossMap->getTmpLayer();
    if ( NULL != tmpLayer )
    {
       // @FIXME absolute magnification, absolute angle should be reflected somehow!!!
@@ -1275,7 +1275,7 @@ bool ImportDB::polyAcceptable(pointlist& plist, bool& box)
    {
       std::ostringstream ost;
       ost << "Polygon check fails - {" << check.failType()
-          << _layCrossMap.printSrcLayer()
+          << _layCrossMap->printSrcLayer()
           << " }";
       tell_log(console::MT_ERROR, ost.str());
    }
@@ -1296,7 +1296,7 @@ bool ImportDB::pathAcceptable(pointlist& plist, int4b width )
    {
       std::ostringstream ost;
       ost << "Wire check fails - {" << check.failType()
-          << _layCrossMap.printSrcLayer()
+          << _layCrossMap->printSrcLayer()
           << " }";
       tell_log(console::MT_ERROR, ost.str());
    }
@@ -1306,4 +1306,9 @@ bool ImportDB::pathAcceptable(pointlist& plist, int4b width )
       return true;
    }
    else return false;
+}
+
+ImportDB::~ImportDB()
+{
+   delete _layCrossMap;
 }
