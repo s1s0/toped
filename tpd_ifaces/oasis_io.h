@@ -358,7 +358,7 @@ namespace Oasis {
          ModalVar< word>   _mod_pathhw      ; //! OASIS modal variable path-halfwidth
          ModalVar<int4b>   _mod_gx          ; //! OASIS modal variable geometry-x
          ModalVar<int4b>   _mod_gy          ; //! OASIS modal variable geometry-y
-         ModalVar<std::string> _mod_cellref ;//! OASIS modal variable placement-cell
+         ModalVar<std::string> _mod_cellref ; //! OASIS modal variable placement-cell
          ModalVar<int4b>   _mod_px          ; //! OASIS modal variable placement-x
          ModalVar<int4b>   _mod_py          ; //! OASIS modal variable placement-y
          ModalVar<std::string>   _mod_text  ; //! OASIS modal variable text-string
@@ -390,13 +390,14 @@ namespace Oasis {
 
    class CBlockInflate : public z_stream {
       public:
-                           CBlockInflate(wxFFile*, wxFileOffset, dword, dword);
+                           CBlockInflate(DbImportFile&, wxFileOffset, dword, dword);
          void              readUncompressedBuffer(void *pBuf, size_t nCount);
          bool              endOfBuffer() const  {return _bufOffset == _bufSize;}
          wxFileOffset      startPosInFile() const {return _startPosInFile;}
          virtual          ~CBlockInflate();
       private:
          byte*             _output_buffer;
+         byte*             _input_buffer;
          int               _state;
          wxFileOffset      _bufOffset;
          wxFileOffset      _bufSize;
@@ -429,83 +430,76 @@ namespace Oasis {
          static const dword   _crc32AllBits;
    };
 
-   class OasisInFile {
+   class OasisInFile : public DbImportFile {
       public:
          typedef std::map<std::string, Cell*> DefinitionMap;
-                           OasisInFile(std::string);
-                          ~OasisInFile();
-         bool              reopenFile();
-         void              readLibrary();
-         void              hierOut();
-         wxFileOffset      setPosition(wxFileOffset);
-         void              inflateCBlock();
-         bool              calculateCRC(Iso3309Crc32&);
-         bool              calculateChecksum(dword& checksum);
-         bool              status()          {return _status;  }
-         wxFileOffset      filePos()         {return _filePos; }
-         OASHierTree*      hierTree()        {return _hierTree;}
-         real              libUnits()        {return _unit;    }
-         std::string       getLibName()      {return std::string("FIXME");/*std::string(getFileNameOnly(_fileName))*/}
-         void              setPropContext(PropertyContext context)
+                              OasisInFile(wxString);
+         virtual             ~OasisInFile();
+         virtual void         hierOut();
+         wxFileOffset         oasSetPosition(wxFileOffset);
+         void                 inflateCBlock();
+         bool                 calculateCRC(Iso3309Crc32&);
+         bool                 calculateChecksum(dword& checksum);
+         OASHierTree*         hierTree()        {return _hierTree;}
+         virtual double       libUnits() const  {return _unit;    }
+         virtual std::string  libname() const{return getFileNameOnly();}
+         void                 setPropContext(PropertyContext context)
                                              {_properties.setContext(context);}
-         const Table*      cellNames() const  { return _cellNames;}
-         const Table*      textStrings() const{ return _textStrings;}
-         const Table*      propNames() const  { return _propNames;}
-         const Table*      propStrings() const{ return _propStrings;}
-         const Table*      layerNames() const { return _layerNames;}
-         const Table*      xNames() const     { return _xNames;}
-         const DefinitionMap& definitions() const { return _definedCells;}
-         ValidationScheme  validation() const {return _validation;}
-         dword             signature() const  {return _signature;}
+         const Table*         cellNames() const  { return _cellNames;}
+         const Table*         textStrings() const{ return _textStrings;}
+         const Table*         propNames() const  { return _propNames;}
+         const Table*         propStrings() const{ return _propStrings;}
+         const Table*         layerNames() const { return _layerNames;}
+         const Table*         xNames() const     { return _xNames;}
+         ValidationScheme     validation() const {return _validation;}
+         dword                signature() const  {return _signature;}
+
+         virtual void         getTopCells(nameList&) const;
+         virtual void         getAllCells(wxListBox&) const;
+         virtual void         convertPrep(const nameList&, bool);
          //----------------------------------------------------------------------
-         byte              getByte();
-         qword             getUnsignedInt(byte);
-         int8b             getInt(byte);
-         real              getReal(char type = -1);
-         std::string       getString();
-         std::string       getTextRefName(bool);
-         std::string       getCellRefName(bool);
-         void              exception(std::string);
-         Cell*             getCell(const std::string);
-         void              collectLayers(ExtLayers&);
-         void              getProperty1()     { _properties.getProperty1(*this);}
-         void              getProperty2()     { _properties.getProperty2(*this);}
-         void              closeFile();
+         byte                 getByte();
+         qword                getUnsignedInt(byte);
+         int8b                getInt(byte);
+         real                 getReal(char type = -1);
+         std::string          getString();
+         std::string          getTextRefName(bool);
+         std::string          getCellRefName(bool);
+         void                 exception(std::string);
+         Cell*                getCell(const std::string) const;
+         virtual void         collectLayers(ExtLayers&) const;
+         virtual bool         collectLayers(const std::string&, ExtLayers&) const;
+         void                 getProperty1()     { _properties.getProperty1(*this);}
+         void                 getProperty2()     { _properties.getProperty2(*this);}
       private:
-         float             getFloat();
-         double            getDouble();
-         void              readStartRecord();
-         void              readEndRecord();
-         size_t            rawRead(void *pBuf, size_t nCount);
+         void                 readLibrary();
+         float                getFloat();
+         double               getDouble();
+         void                 readStartRecord();
+         void                 readEndRecord();
+         size_t               rawRead(void *pBuf, size_t nCount);
          //
-         void              linkReferences();
+         void                 linkReferences();
          // Oasis tables
-         Table*            _cellNames;
-         Table*            _textStrings;
-         Table*            _propNames;
-         Table*            _propStrings;
-         Table*            _layerNames;
-         Table*            _xNames;
+         Table*               _cellNames;
+         Table*               _textStrings;
+         Table*               _propNames;
+         Table*               _propStrings;
+         Table*               _layerNames;
+         Table*               _xNames;
          //
-         StdProperties     _properties;
+         StdProperties        _properties;
          //! All Cells defined in the file with a pointer to the respective Cell object
-         DefinitionMap     _definedCells;
+         DefinitionMap        _definedCells;
          //
          //! Position of the table offset fields. (false) - in the START record; (true) in the END record
-         bool              _offsetFlag;
-         std::string       _fileName;  //! A fully validated name of the OASIS file. Path,extension, everything
-         wxFileOffset      _fileLength;//! The length of the OASIS file in bytes
-         wxFileOffset      _filePos;   //! Current position in the OASIS file
-         wxFileOffset      _progresPos;//! Current position on the progress bar (Toped status line)
-         wxFFile           _oasisFh;   //! The file handle of the opened OASIS file
-         std::string       _version;   //! OASIS version record retrieved from the file
-         real              _unit;      //! OASIS unit (DBU) retrieved from the file
-         OASHierTree*      _hierTree;  //! The tree of reference hierarchy
-         CBlockInflate*    _curCBlock; //! Current uncompressed CBLOCK
-         ValidationScheme  _validation;//! Validation Scheme of this OASIS file
-         dword             _signature; //! The signature of the OASIS file (depends on the validation scheme)
-         //! Used only in the constructor if the file can't be opened for whatever reason
-         bool              _status;
+         bool                 _offsetFlag;
+         std::string          _version;   //! OASIS version record retrieved from the file
+         real                 _unit;      //! OASIS unit (DBU) retrieved from the file
+         OASHierTree*         _hierTree;  //! The tree of reference hierarchy
+         CBlockInflate*       _curCBlock; //! Current uncompressed CBLOCK
+         ValidationScheme     _validation;//! Validation Scheme of this OASIS file
+         dword                _signature; //! The signature of the OASIS file (depends on the validation scheme)
    };
 
 

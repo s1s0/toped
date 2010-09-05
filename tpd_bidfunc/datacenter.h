@@ -28,7 +28,6 @@
 #ifndef DATA_HANDLER_INCLUDED
 #define DATA_HANDLER_INCLUDED
 #include "tedesign.h"
-#include "oasis_io.h"
 
 typedef enum {
    //                        mutex     Lib   DB  cell
@@ -56,12 +55,12 @@ public:
    laydata::DrcLibrary*       lockDRC(void);
    bool                       lockGds(DbImportFile*&);
    bool                       lockCif(DbImportFile*&);
-   bool                       lockOas(Oasis::OasisInFile*&);
+   bool                       lockOas(DbImportFile*&);
    void                       unlockTDT(laydata::TdtLibDir*, bool throwexception = false);
    void                       unlockDRC();
    void                       unlockGds(DbImportFile*&, bool throwexception = false);
    void                       unlockCif(DbImportFile*&, bool throwexception = false);
-   void                       unlockOas(Oasis::OasisInFile*& oasis_db, bool throwexception = false);
+   void                       unlockOas(DbImportFile*& oasis_db, bool throwexception = false);
    void                       bpRefreshTdtTab(bool, bool);
    void                       bpAddGdsTab(bool);
    void                       bpAddCifTab(bool);
@@ -99,7 +98,7 @@ private:
    laydata::DrcLibrary*       _DRCDB;        //! DRC data
    DbImportFile*              _GDSDB;        //! GDS parsed data
    DbImportFile*              _CIFDB;        //! CIF parsed data
-   Oasis::OasisInFile*        _OASDB;        //! OASIS parsed data
+   DbImportFile*              _OASDB;        //! OASIS parsed data
    wxMutex                    _DBLock;       //! Main stream DB Mutex
    wxMutex                    _DRCLock;      //! DRC         DB Mutex
    wxMutex                    _GDSLock;      //! GDSII       DB Mutex

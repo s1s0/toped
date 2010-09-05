@@ -31,6 +31,7 @@
 #include "datacenter.h"
 #include "gds_io.h"
 #include "cif_io.h"
+#include "oasis_io.h"
 #include "tuidefs.h"
 #include "calbr_reader.h"
 #include "drc_tenderer.h"
@@ -506,19 +507,13 @@ int tellstdfunc::GDSimport::execute()
    }
    // Prep: We need all used layers, and the name of the GDS DB
    std::ostringstream ost;
-   ExtLayers* gdsLaysAll;
+   ExtLayers* gdsLaysAll = NULL;
    bool checkOK = false;
    DbImportFile* AGDSDB = NULL;
    if (DATC->lockGds(AGDSDB))
    {
       gdsLaysAll = DEBUG_NEW ExtLayers();
       checkOK = AGDSDB->collectLayers(name, *gdsLaysAll);
-//      GDSin::GdsStructure *src_structure = AGDSDB->getStructure(name.c_str());
-//      if (src_structure)
-//      {
-//         gdsLaysAll = DEBUG_NEW ExtLayers();
-//         src_structure->collectLayers(*gdsLaysAll,true);
-//      }
    }
    DATC->unlockGds(AGDSDB, true);
    //OK, here we go....
@@ -1450,24 +1445,12 @@ int tellstdfunc::OASread::execute() {
          // add OASIS tab in the browser
          DATC->bpAddOasTab(_threadExecution);
          //
-         Oasis::OasisInFile* AOASDB = NULL;
+         DbImportFile* AOASDB = NULL;
          if (DATC->lockOas(AOASDB))
-         {
-            Oasis::OASHierTree* root = AOASDB->hierTree()->GetFirstRoot(TARGETDB_LIB);
-            if (root)
-            {
-               do
-               {
-                  top_cell_list.push_back(std::string(root->GetItem()->name()));
-               } while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
-            }
-            //else ->it's possible to have an empty OASIS file
-         }
+            AOASDB->getTopCells(top_cell_list);
          else
-         {
             // The AOASDB mist exists here, because OASISparse returned true
             assert(false);
-         }
          DATC->unlockOas(AOASDB);
          for (std::list<std::string>::const_iterator CN = top_cell_list.begin();
                                                    CN != top_cell_list.end(); CN ++)
@@ -1519,19 +1502,16 @@ int tellstdfunc::OASimport::execute()
    //Prep: We need all used layers, and the name of the OASIS DB
    std::ostringstream ost;
    ExtLayers* oasLaysAll = NULL;
-   Oasis::OasisInFile* AOASDB = NULL;
+   bool checkOK = false;
+   DbImportFile* AOASDB = NULL;
    if (DATC->lockOas(AOASDB))
    {
-      Oasis::Cell *src_structure = AOASDB->getCell(name.c_str());
-      if (src_structure)
-      {
-         oasLaysAll = DEBUG_NEW ExtLayers();
-         src_structure->collectLayers(*oasLaysAll,true);
-      }
+      oasLaysAll = DEBUG_NEW ExtLayers();
+      checkOK = AOASDB->collectLayers(name, *oasLaysAll);
    }
    DATC->unlockOas(AOASDB, true);
    //OK, here we go....
-   if (NULL != oasLaysAll)
+   if (checkOK)
    { // i.e. top structure is found and layers extracted
       LayerMapExt LayerExpression(gdsLaysStrList, oasLaysAll);
       if (LayerExpression.status())
@@ -1595,7 +1575,7 @@ int tellstdfunc::OASimportList::execute()
       oasLaysStrList[nameh->key().value()] = nameh->value().value();
    }
    ExtLayers* oasLaysAll = DEBUG_NEW ExtLayers();
-   Oasis::OasisInFile* AOASDB = NULL;
+   DbImportFile* AOASDB = NULL;
    if (DATC->lockOas(AOASDB))
    {
       AOASDB->collectLayers(*oasLaysAll);
@@ -1650,19 +1630,13 @@ tellstdfunc::OASreportlay::OASreportlay(telldata::typeID retype, bool eor) :
 int tellstdfunc::OASreportlay::execute()
 {
    std::string name = getStringValue();
-   Oasis::OasisInFile* AOASDB = NULL;
+   DbImportFile* AOASDB = NULL;
    if (DATC->lockOas(AOASDB))
    {
-      Oasis::Cell *src_structure = AOASDB->getCell(name.c_str());
+      ExtLayers oasLayers;
       std::ostringstream ost;
-      if (!src_structure) {
-         ost << "OASIS structure named \"" << name << "\" does not exists";
-         tell_log(console::MT_ERROR,ost.str());
-      }
-      else
+      if (AOASDB->collectLayers(name, oasLayers))
       {
-         ExtLayers oasLayers;
-         src_structure->collectLayers(oasLayers,true);
          ost << "OASIS layers found in \"" << name <<"\" { <layer_number> ; <data_type> }" << std::endl;
          for (ExtLayers::const_iterator NLI = oasLayers.begin(); NLI != oasLayers.end(); NLI++)
          {
@@ -1673,6 +1647,11 @@ int tellstdfunc::OASreportlay::execute()
          }
          tell_log(console::MT_INFO,ost.str());
          LogFile << LogFile.getFN() << "(\""<< name << "\");"; LogFile.flush();
+      }
+      else
+      {
+         ost << "OASIS structure named \"" << name << "\" does not exists";
+         tell_log(console::MT_ERROR,ost.str());
       }
    }
    DATC->unlockOas(AOASDB, true);
@@ -1995,18 +1974,18 @@ void tellstdfunc::importOAScell(laydata::TdtLibDir* dbLibDir, const nameList& to
   const LayerMapExt& laymap, parsercmd::undoQUEUE& undstack, telldata::UNDOPerandQUEUE& undopstack,
   bool threadExecution, bool recur, bool over)
 {
-   Oasis::OasisInFile* AOASDB = NULL;
+   DbImportFile* AOASDB = NULL;
    if (DATC->lockOas(AOASDB))
    {
       if (dbmxs_dblock > DATC->tdtMxState())
       { // create a default target data base if one is not already existing
          TpdTime timeCreated(time(NULL));
-         createDefaultTDT(AOASDB->getLibName(), dbLibDir, timeCreated, threadExecution, undstack, undopstack);
+         createDefaultTDT(AOASDB->libname(), dbLibDir, timeCreated, threadExecution, undstack, undopstack);
       }
 #ifdef OASCONVERT_PROFILING
       HiResTimer profTimer;
 #endif
-      Oasis::Oas2Ted converter(AOASDB, dbLibDir, laymap);
+      Oasis::Oas2Ted converter(static_cast<Oasis::OasisInFile*>(AOASDB), dbLibDir, laymap);
       converter.run(top_names, recur, over);
       (*dbLibDir)()->modified = true;
 #ifdef OASCONVERT_PROFILING

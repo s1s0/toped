@@ -886,6 +886,7 @@ void DbImportFile::setPosition(wxFileOffset filePos)
 {
    wxFileOffset result = _inStream->SeekI(filePos, wxFromStart);
    assert(wxInvalidOffset != result);
+   _filePos = filePos;
 }
 
 void DbImportFile::closeStream()

@@ -360,9 +360,10 @@ class DbImportFile {
       virtual void         collectLayers(nameList& ) const {assert(false);}
       virtual bool         collectLayers(const std::string&, ExtLayers&) const {assert(false);}
       virtual bool         collectLayers(const std::string&, nameList& ) const {assert(false);}
-      wxFileOffset         filePos() const                  { return _filePos; }
-      bool                 status() const                   { return _status;  }
-      ForeignCellList&     convList()                       { return _convList;}
+      wxFileOffset         filePos() const                  { return _filePos;   }
+      wxFileOffset         fileLength() const               { return _fileLength;}
+      bool                 status() const                   { return _status;    }
+      ForeignCellList&     convList()                       { return _convList;  }
       std::string          fileName()                       { return std::string(_fileName.mb_str(wxConvFile));}
    protected:
       wxFileOffset         _convLength ;//! The amount of data (in bytes) subjected to conversion
