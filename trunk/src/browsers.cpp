@@ -47,6 +47,7 @@
 #include "../ui/cellundef.xpm"
 #include "gds_io.h"
 #include "cif_io.h"
+#include "oasis_io.h"
 #include "tpdf_common.h"
 
 extern DataCenter*               DATC;
@@ -1082,23 +1083,23 @@ void browsers::OASCellBrowser::collectInfo(bool hier)
 {
    DeleteAllItems();
 
-   Oasis::OasisInFile* AOASDB = NULL;
+   DbImportFile* AOASDB = NULL;
    if (DATC->lockOas(AOASDB))
    {
-      AddRoot(wxString((AOASDB->getLibName()).c_str(), wxConvUTF8));
-
-      if (NULL != AOASDB->hierTree())
-      {
-         Oasis::OASHierTree* root = AOASDB->hierTree()->GetFirstRoot(TARGETDB_LIB);
-         wxTreeItemId nroot;
-         while (root)
-         {
-            nroot = AppendItem(GetRootItem(), wxString(root->GetItem()->name().c_str(),wxConvUTF8));
-            collectChildren(root, nroot, hier);
-            root = root->GetNextRoot(TARGETDB_LIB);
-         }
-      }
-      SortChildren(GetRootItem());
+      AddRoot(wxString((AOASDB->libname()).c_str(), wxConvUTF8));
+      //TODO
+//      if (NULL != AOASDB->hierTree())
+//      {
+//         Oasis::OASHierTree* root = AOASDB->hierTree()->GetFirstRoot(TARGETDB_LIB);
+//         wxTreeItemId nroot;
+//         while (root)
+//         {
+//            nroot = AppendItem(GetRootItem(), wxString(root->GetItem()->name().c_str(),wxConvUTF8));
+//            collectChildren(root, nroot, hier);
+//            root = root->GetNextRoot(TARGETDB_LIB);
+//         }
+//      }
+//      SortChildren(GetRootItem());
    }
    DATC->unlockOas(AOASDB);
 }

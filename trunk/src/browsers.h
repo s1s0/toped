@@ -39,7 +39,6 @@
 #include <string>
 #include "tedesign.h"
 #include "calbr_reader.h"
-#include "oasis_io.h"
 
 // Forward declarations
 
@@ -50,6 +49,11 @@ namespace GDSin {
 namespace CIFin {
    class CifStructure;
    typedef SGHierTree<CifStructure>       CIFHierTree;
+}
+
+namespace Oasis {
+   class Cell;
+   typedef SGHierTree<Cell>        OASHierTree;
 }
 
 namespace browsers

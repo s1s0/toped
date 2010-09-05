@@ -34,6 +34,7 @@
 #include <sstream>
 #include "gds_io.h"
 #include "cif_io.h"
+#include "oasis_io.h"
 #include "datacenter.h"
 #include "outbox.h"
 #include "tedat.h"
@@ -134,7 +135,7 @@ void DataCenter::CIFclose()
 
 void DataCenter::OASclose()
 {
-   Oasis::OasisInFile* AOASDB = NULL;
+   DbImportFile* AOASDB = NULL;
    if (lockOas(AOASDB))
    {
       delete AOASDB;
@@ -203,7 +204,7 @@ bool DataCenter::gdsGetLayers(ExtLayers& gdsLayers)
 bool DataCenter::oasGetLayers(ExtLayers& oasLayers)
 {
    bool ret_value = false;
-   Oasis::OasisInFile* AOASDB = NULL;
+   DbImportFile* AOASDB = NULL;
    if (lockOas(AOASDB))
    {
       AOASDB->collectLayers(oasLayers);
@@ -217,7 +218,7 @@ bool DataCenter::OASParse(std::string filename)
 {
    bool status = true;
 
-   Oasis::OasisInFile* AOASDB = NULL;
+   DbImportFile* AOASDB = NULL;
    if (lockOas(AOASDB))
    {
       std::string news = "Removing existing OASIS data from memory...";
@@ -226,51 +227,7 @@ bool DataCenter::OASParse(std::string filename)
    }
    try
    {
-      AOASDB = DEBUG_NEW Oasis::OasisInFile(filename);
-      status = AOASDB->status();
-      if (status)
-      {
-         std::ostringstream info;
-         AOASDB->readLibrary();
-         if (Oasis::vs_crc32 == AOASDB->validation())
-         {
-            Oasis::Iso3309Crc32 crcCheck;
-            if (AOASDB->calculateCRC(crcCheck))
-            {
-               if (AOASDB->signature() == crcCheck.theCrc())
-                  tell_log(console::MT_INFO,"CRC32 - OK");
-               else
-               {
-                  tell_log(console::MT_ERROR,"Bad CRC32!");
-                  status = false;
-               }
-            }
-            else
-            {
-               info << "Can't verify the CRC32 signature of file \""<< filename << "\"";
-               tell_log(console::MT_WARNING,info.str());
-            }
-         }
-         else if (Oasis::vs_checkSum32 == AOASDB->validation())
-         {
-            dword checksum;
-            if (AOASDB->calculateChecksum(checksum))
-            {
-               if (AOASDB->signature() == checksum)
-                  tell_log(console::MT_INFO,"CHECKSUM32 - OK");
-               else
-               {
-                  tell_log(console::MT_ERROR,"Bad CHECKSUM32!");
-                  status = false;
-               }
-            }
-            else
-            {
-               info << "Can't verify the CHECKSUM32 signature of file \""<< filename << "\"";
-               tell_log(console::MT_WARNING,info.str());
-            }
-         }
-      }
+      AOASDB = DEBUG_NEW Oasis::OasisInFile(wxString(filename.c_str(), wxConvUTF8));
    }
    catch (EXPTNreadOASIS)
    {
@@ -417,7 +374,7 @@ void DataCenter::unlockCif(DbImportFile*& cif_db, bool throwexception)
    cif_db = NULL;
 }
 
-bool DataCenter::lockOas(Oasis::OasisInFile*& oasis_db)
+bool DataCenter::lockOas(DbImportFile*& oasis_db)
 {
    if (wxMUTEX_DEAD_LOCK == _OASLock.Lock())
    {
@@ -432,7 +389,7 @@ bool DataCenter::lockOas(Oasis::OasisInFile*& oasis_db)
    }
 }
 
-void DataCenter::unlockOas(Oasis::OasisInFile*& oasis_db, bool throwexception)
+void DataCenter::unlockOas(DbImportFile*& oasis_db, bool throwexception)
 {
    _OASDB = oasis_db;
    VERIFY(wxMUTEX_NO_ERROR == _OASLock.Unlock());

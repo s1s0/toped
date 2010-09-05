@@ -664,16 +664,10 @@ tui::getOASimport::getOASimport(wxFrame *parent, wxWindowID id, const wxString &
    _recursive->SetValue(true);
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300), 0, NULL, wxLB_SORT);
    ExtLayers oasLayers;
-   Oasis::OasisInFile* AOASDB = NULL;
+   DbImportFile* AOASDB = NULL;
    if (DATC->lockOas(AOASDB))
    {
-      //-----------------------------------------------------------------------
-      // So ugly - even scary, but it's the price to pay for not including wx
-      // in the tpd_interfaces
-      for (Oasis::OasisInFile::DefinitionMap::const_iterator CSTR  = AOASDB->definitions().begin();
-                                                             CSTR != AOASDB->definitions().end(); CSTR++)
-         _nameList->Append(wxString(CSTR->first.c_str(), wxConvUTF8));
-       //-----------------------------------------------------------------------
+      AOASDB->getAllCells(*_nameList);
    }
    DATC->unlockOas(AOASDB, true);
    DATC->oasGetLayers(oasLayers);
