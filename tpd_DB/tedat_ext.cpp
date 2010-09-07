@@ -28,14 +28,6 @@
 #include "tpdph.h"
 #include "tedat_ext.h"
 
-void laydata::TdtBoxEXT::setInt(int extInt)
-{
-	_extInt = extInt;
-}
-int laydata::TdtBoxEXT::getInt(void)
-{
-	return _extInt;
-}
 void laydata::TdtBoxEXT::setLong(long extLong)
 {
 	_extLong = extLong;
@@ -62,14 +54,7 @@ void*	laydata::TdtBoxEXT::getClientData(void)
 }
 
 
-void laydata::TdtPolyEXT::setInt(int extInt)
-{
-	_extInt = extInt;
-}
-int laydata::TdtPolyEXT::getInt(void)
-{
-	return _extInt;
-}
+
 void laydata::TdtPolyEXT::setLong(long extLong)
 {
 	_extLong = extLong;
@@ -96,14 +81,6 @@ void*	laydata::TdtPolyEXT::getClientData(void)
 }
 
 
-void laydata::TdtWireEXT::setInt(int extInt)
-{
-	_extInt = extInt;
-}
-int laydata::TdtWireEXT::getInt(void)
-{
-	return _extInt;
-}
 void laydata::TdtWireEXT::setLong(long extLong)
 {
 	_extLong = extLong;
