@@ -37,8 +37,6 @@ namespace laydata
 						TdtBoxEXT(const TP& p1, const TP& p2):TdtBox(p1, p2) {};
 						TdtBoxEXT(TEDfile* const tedfile):TdtBox(tedfile) {};
 						~TdtBoxEXT() {};
-		void			setInt(int extInt);
-		int			getInt(void);
 		void			setLong(long extLong);
 		long			getLong(void);
 		void			setString(const std::string &extString);
@@ -46,7 +44,6 @@ namespace laydata
 		void			setClientData(void* clientData);
 		void*			getClientData(void);
 	private:
-		int			_extInt;
 		long			_extLong;
 		std::string _extString;
 		void*			_clientData;
@@ -59,8 +56,6 @@ namespace laydata
 						TdtPolyEXT(int4b* plist, unsigned psize):TdtPoly(plist, psize) {};
 						TdtPolyEXT(TEDfile* const tedfile):TdtPoly(tedfile) {};
 						~TdtPolyEXT() {};
-		void			setInt(int extInt);
-		int			getInt(void);
 		void			setLong(long extLong);
 		long			getLong(void);
 		void			setString(const std::string &extString);
@@ -81,8 +76,6 @@ namespace laydata
 						TdtWireEXT(int4b* plist, unsigned psize, word layno):TdtWire(plist, psize, layno) {};
 						TdtWireEXT(TEDfile* const tedfile): TdtWire(tedfile) {};
 						~TdtWireEXT() {};
-		void			setInt(int extInt);
-		int			getInt(void);
 		void			setLong(long extLong);
 		long			getLong(void);
 		void			setString(const std::string &extString);
