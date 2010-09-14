@@ -820,6 +820,7 @@ void DataCenter::openGlDraw(const CTM& layCTM)
                         dst_structure->openGlDraw(*drawProp);
                      }
                     }
+						VERIFY(wxMUTEX_NO_ERROR == _DRCLock.Unlock());
                }
             }
             #ifdef RENDER_PROFILING
@@ -896,6 +897,7 @@ void DataCenter::openGlRender(const CTM& layCTM)
                      }
                      renderer.setState(layprop::DB);
                   }
+						VERIFY(wxMUTEX_NO_ERROR == _DRCLock.Unlock());
                }
             }
             #ifdef RENDER_PROFILING
