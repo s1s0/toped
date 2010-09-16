@@ -1965,6 +1965,7 @@ void tellstdfunc::importCIFcell( laydata::TdtLibDir* dbLibDir, const nameList& t
       ACIFDB->convertPrep(top_names, recur);
       ImportDB converter(ACIFDB, dbLibDir, cifLayers, techno);
       converter.run(top_names, over, false);
+      (*dbLibDir)()->modified = true;
    }
    DATC->unlockCif(ACIFDB, true);
 }
@@ -1985,8 +1986,9 @@ void tellstdfunc::importOAScell(laydata::TdtLibDir* dbLibDir, const nameList& to
 #ifdef OASCONVERT_PROFILING
       HiResTimer profTimer;
 #endif
-      Oasis::Oas2Ted converter(static_cast<Oasis::OasisInFile*>(AOASDB), dbLibDir, laymap);
-      converter.run(top_names, recur, over);
+      AOASDB->convertPrep(top_names, recur);
+      ImportDB converter(AOASDB, dbLibDir, laymap);
+      converter.run(top_names, over);
       (*dbLibDir)()->modified = true;
 #ifdef OASCONVERT_PROFILING
       profTimer.report("Time elapsed for OASIS conversion: ");

@@ -314,21 +314,14 @@ namespace Oasis {
          int4b             _exEx;   //! Explicit extension
    };
 
-   class Cell {
+   class Cell : public ForeignCell {
       public:
                            Cell();
          byte              skimCell(OasisInFile&, bool);
+         virtual void      import(ImportDB&);
          void              linkReferences(OasisInFile&);
          OASHierTree*      hierOut(OASHierTree*, Cell*);
-         void              import(OasisInFile&, laydata::TdtCell*, laydata::TdtLibDir*, const LayerMapExt&);
          void              collectLayers(ExtLayers&, bool);
-
-         std::string       name() const            { return _name;         }
-         bool              haveParent() const      { return _haveParent;   }
-         bool              traversed() const       { return _traversed;    }
-         void              set_traversed(bool tf)  { _traversed = tf;      }
-         wxFileOffset      cellSize()              { return _cellSize;     }
-         int               libID() const           { return TARGETDB_LIB;  } // to cover the requirements of the hierarchy template
       private:
          void              skimRectangle(OasisInFile&);
          void              skimPolygon(OasisInFile&);
@@ -337,13 +330,13 @@ namespace Oasis {
          void              skimCTrapezoid(OasisInFile&);
          void              skimText(OasisInFile&);
          void              skimReference(OasisInFile&, bool);
-         void              readRectangle(OasisInFile&, laydata::TdtCell*, const LayerMapExt&);
-         void              readPolygon(OasisInFile&, laydata::TdtCell*, const LayerMapExt&);
-         void              readPath(OasisInFile&, laydata::TdtCell*, const LayerMapExt&);
-         void              readTrapezoid(OasisInFile&, laydata::TdtCell*, const LayerMapExt&, byte);
-         void              readCTrapezoid(OasisInFile&, laydata::TdtCell*, const LayerMapExt&);
-         void              readText(OasisInFile&, laydata::TdtCell*, const LayerMapExt&);
-         void              readReference(OasisInFile&, laydata::TdtCell*, laydata::TdtLibDir*, bool);
+         void              readRectangle(OasisInFile&, ImportDB&);
+         void              readPolygon(OasisInFile&, ImportDB&);
+         void              readPath(OasisInFile&, ImportDB&);
+         void              readTrapezoid(OasisInFile&, ImportDB&, byte);
+         void              readCTrapezoid(OasisInFile&, ImportDB&);
+         void              readText(OasisInFile&, ImportDB&);
+         void              readReference(OasisInFile&, ImportDB&, bool);
          PointList         readPointList(OasisInFile&);
          void              readRepetitions(OasisInFile&);
          void              readExtensions(OasisInFile&);
@@ -378,13 +371,8 @@ namespace Oasis {
          //TODO - OASIS modal variable circle-radius
          //TODO - OASIS modal variable last-property-name
          //TODO - OASIS modal variable last-value-list
-         std::string       _name            ; //! The Cell name
          NameSet           _referenceNames  ; //! All names of the structures referenced in this cell
          OasisCellList     _children        ; //! Pointers to all Cell structures referenced in this cell
-         wxFileOffset      _filePos         ; //! The position of the corresponding CELL record in the file
-         wxFileOffset      _cellSize        ; //! The size (in bytes) of this cell definition in the OASIS file
-         bool              _haveParent      ; //! Flags that the cell is referenced
-         bool              _traversed       ; //! For hierarchy traversing purposes
          ExtLayers         _contSummary     ; //! Layer contents summary
    };
 
@@ -472,6 +460,7 @@ namespace Oasis {
          void                 getProperty1()     { _properties.getProperty1(*this);}
          void                 getProperty2()     { _properties.getProperty2(*this);}
       private:
+         void                 preTraverseChildren(const OASHierTree*);
          void                 readLibrary();
          float                getFloat();
          double               getDouble();
@@ -501,23 +490,6 @@ namespace Oasis {
          ValidationScheme     _validation;//! Validation Scheme of this OASIS file
          dword                _signature; //! The signature of the OASIS file (depends on the validation scheme)
    };
-
-
-   class Oas2Ted {
-   public:
-                              Oas2Ted(OasisInFile*, laydata::TdtLibDir* , const LayerMapExt&);
-      void                    run(const nameList&, bool, bool);
-   protected:
-      void                    preTraverseChildren(const OASHierTree*);
-      void                    convert(Cell*, bool);
-      OasisInFile*            _src_lib;
-      laydata::TdtLibDir*     _tdt_db;
-      const LayerMapExt&      _theLayMap;
-      real                    _coeff; // DBU difference
-      OasisCellList           _convertList;
-      wxFileOffset            _conversionLength;
-   };
-
 
    void readDelta(OasisInFile&, int4b&, int4b&);
 }

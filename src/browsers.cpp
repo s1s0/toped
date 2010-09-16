@@ -1115,14 +1115,14 @@ void browsers::OASCellBrowser::collectChildren(const Oasis::OASHierTree* root,
    {
       if (_hierarchy_view)
       {
-         nroot = AppendItem(lroot, wxString(Child->GetItem()->name().c_str(), wxConvUTF8));
+         nroot = AppendItem(lroot, wxString(Child->GetItem()->strctName().c_str(), wxConvUTF8));
          collectChildren(Child, nroot, _hierarchy_view);
       }
       else
       {
-         if (!findItem(wxString(Child->GetItem()->name().c_str(), wxConvUTF8), temp, GetRootItem()))
+         if (!findItem(wxString(Child->GetItem()->strctName().c_str(), wxConvUTF8), temp, GetRootItem()))
          {
-            nroot = AppendItem(GetRootItem(), wxString(Child->GetItem()->name().c_str(), wxConvUTF8));
+            nroot = AppendItem(GetRootItem(), wxString(Child->GetItem()->strctName().c_str(), wxConvUTF8));
             collectChildren(Child, nroot, _hierarchy_view);
          }
       }

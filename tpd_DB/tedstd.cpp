@@ -1120,6 +1120,15 @@ bool ImportDB::mapTdtLayer(word srcLayer, word srcDataType)
    return _layCrossMap->mapTdtLay(_dst_structure, srcLayer, srcDataType);
 }
 
+void ImportDB::addBox(const TP& p1, const TP& p2)
+{
+   laydata::QTreeTmp* tmpLayer = _layCrossMap->getTmpLayer();
+   if ( NULL != tmpLayer )
+   {
+      tmpLayer->putBox(p1, p2);
+   }
+}
+
 void ImportDB::addPoly(pointlist& plist)
 {
    laydata::QTreeTmp* tmpLayer = _layCrossMap->getTmpLayer();
