@@ -402,7 +402,6 @@ class ForeignCell {
       bool                 _haveParent ;//! Indicates that the cell is referenced
       wxFileOffset         _filePos    ;//! The starting position of the cell description in the input stream
       wxFileOffset         _cellSize   ;//! The size (in byte) of the cell description in the input file
-
 };
 
 //==========================================================================
@@ -456,6 +455,7 @@ class ImportDB {
       void                    run(const nameList&, bool, bool reopenFile = true);
       bool                    mapTdtLayer(std::string);
       bool                    mapTdtLayer(word, word);
+      void                    addBox(const TP&, const TP&);
       void                    addPoly(pointlist&);
       void                    addPath(pointlist&, int4b, short pathType = 0, int4b bgnExtn = 0, int4b endExtn = 0);
       void                    addText(std::string, TP, double magnification, double angle = 0, bool reflection = false);
