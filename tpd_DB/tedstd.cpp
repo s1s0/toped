@@ -734,9 +734,18 @@ laydata::WireContourAux::~WireContourAux()
  * of the class.
  * @param fileName - the fully qualified filename - OS dependent
  */
-DbImportFile::DbImportFile(wxString fileName) : _convLength(0), _inStream(NULL),
-      _fileLength(0), _filePos(0), _progresPos(0), _gziped(false), _ziped(false),
-      _status(false)
+DbImportFile::DbImportFile(wxString fileName) :
+      _convLength    (     0 ),
+      _inStream      (  NULL ),
+      _fileLength    (     0 ),
+      _filePos       (     0 ),
+      _progresPos    (     0 ),
+      _progresMark   (     0 ),
+      _progresStep   (     0 ),
+      _gziped        ( false ),
+      _ziped         ( false ),
+      _status        ( false ),
+      _progresDivs   (   200 )
 {
    std::ostringstream info;
    wxFileName wxGdsFN(fileName);
@@ -799,13 +808,16 @@ DbImportFile::DbImportFile(wxString fileName) : _convLength(0), _inStream(NULL),
       return;
    }
    _fileLength = _inStream->GetLength();
-   TpdPost::toped_status(console::TSTS_PRGRSBARON, _fileLength);
+   _progresStep = _fileLength / _progresDivs;
+   if (_progresStep > 0)
+      TpdPost::toped_status(console::TSTS_PRGRSBARON, _fileLength);
 }
 
 bool DbImportFile::reopenFile()
 {
-   _filePos    = 0;
-   _progresPos = 0;
+   _filePos     = 0;
+   _progresPos  = 0;
+   _progresMark = 0;
 
    if (_gziped)
    {
@@ -834,7 +846,9 @@ bool DbImportFile::reopenFile()
       tell_log(console::MT_ERROR,info.str());
       return false;
    }
-   TpdPost::toped_status(console::TSTS_PRGRSBARON, _convLength);
+   _progresStep = _convLength / _progresDivs;
+   if (_progresStep > 0)
+      TpdPost::toped_status(console::TSTS_PRGRSBARON, _convLength);
    return true;
 }
 
@@ -847,10 +861,13 @@ bool DbImportFile::readStream(void* buffer, size_t len, bool updateProgress)
    // update file position
    _filePos += numread;
    // update progress indicator
-   if (updateProgress && (2048 < (_filePos - _progresPos)))
+   _progresPos += numread;
+   if (    updateProgress
+       && (_progresStep > 0)
+       && (_progresStep < (_progresPos - _progresMark)))
    {
-      _progresPos = _filePos;
-      TpdPost::toped_status(console::TSTS_PROGRESS, _progresPos);
+      _progresMark = _progresPos;
+      TpdPost::toped_status(console::TSTS_PROGRESS, _progresMark);
    }
    return true;
 }
@@ -874,10 +891,12 @@ size_t DbImportFile::readTextStream(char* buffer, size_t len )
    // update file position
    _filePos += numread;
    // update progress indicator
-   if (2048 < (_filePos - _progresPos))
+   _progresPos += numread;
+   if(   (_progresStep > 0)
+      && (_progresStep < (_progresPos - _progresMark)))
    {
-      _progresPos = _filePos;
-      TpdPost::toped_status(console::TSTS_PROGRESS, _progresPos);
+      _progresMark = _progresPos;
+      TpdPost::toped_status(console::TSTS_PROGRESS, _progresMark);
    }
    return numread;
 }
