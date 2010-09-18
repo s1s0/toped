@@ -361,7 +361,6 @@ CIFin::CifFile::CifFile(wxString wxfname) : DbImportFile(wxfname)
 {
    _first = _current = _default = NULL;
    _curLay = NULL;
-   _hierTree = NULL;
    std::ostringstream info;
    if (!status())
    {
@@ -393,16 +392,6 @@ CIFin::CifFile::~CifFile()
       local = local->last();
       delete local4d;
    }
-   // get rid of the hierarchy tree
-   const ForeignCellTree* hlocal = _hierTree;
-   const ForeignCellTree* hlocal4d;
-   while (hlocal)
-   {
-      hlocal4d = hlocal;
-      hlocal = hlocal->GetLast();
-      delete hlocal4d;
-   }
-
    delete _default;
    closeStream();
 }

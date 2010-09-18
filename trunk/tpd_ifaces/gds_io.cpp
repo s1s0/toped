@@ -310,7 +310,6 @@ GDSin::GdsRecord::~GdsRecord()
 //==============================================================================
 GDSin::GdsInFile::GdsInFile(wxString wxfname) : DbImportFile(wxfname)
 {
-   _hierTree      = NULL;
    _gdsiiWarnings = 0;
    _library       = NULL;
    std::ostringstream info;
@@ -513,13 +512,6 @@ void GDSin::GdsInFile::convertPrep(const nameList& topCells, bool recursive)
 GDSin::GdsInFile::~GdsInFile()
 {
    delete _library;
-   // get rid of the hierarchy tree
-   const ForeignCellTree* var1 = _hierTree;
-   while (var1)
-   {
-      const ForeignCellTree* var2 = var1->GetLast();
-      delete var1; var1 = var2;
-   }
 }
 
 //==============================================================================

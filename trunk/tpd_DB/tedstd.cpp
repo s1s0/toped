@@ -736,6 +736,7 @@ laydata::WireContourAux::~WireContourAux()
  */
 DbImportFile::DbImportFile(wxString fileName) :
       _convLength    (     0 ),
+      _hierTree      (  NULL ),
       _inStream      (  NULL ),
       _fileLength    (     0 ),
       _filePos       (     0 ),
@@ -1031,6 +1032,13 @@ bool DbImportFile::unZlib2Temp()
 DbImportFile::~DbImportFile()
 {
    if (NULL != _inStream) delete _inStream;
+   // get rid of the hierarchy tree
+   const ForeignCellTree* var1 = _hierTree;
+   while (var1)
+   {
+      const ForeignCellTree* var2 = var1->GetLast();
+      delete var1; var1 = var2;
+   }
 }
 
 //=============================================================================

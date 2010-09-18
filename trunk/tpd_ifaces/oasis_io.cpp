@@ -277,10 +277,6 @@ Oasis::OasisInFile::OasisInFile(wxString fn) : DbImportFile(fn),
       _layerNames       ( NULL         ),
       _xNames           ( NULL         ),
       _offsetFlag       ( false        ),
-//      _fileName         ( fn           ),
-//      _fileLength       ( 0            ),
-//      _filePos          ( 0            ),
-//      _progresPos       ( 0            ),
       _curCBlock        ( NULL         ),
       _validation       ( vs_unknown   ),
       _signature        ( 0u           )
@@ -335,23 +331,6 @@ Oasis::OasisInFile::OasisInFile(wxString fn) : DbImportFile(fn),
    }
 }
 
-//bool Oasis::OasisInFile::reopenFile()
-//{
-//   _filePos = 0;
-//   _progresPos = 0;
-//   _curCBlock = NULL;
-//   wxString wxfname(_fileName.c_str(), wxConvUTF8 );
-//   _oasisFh.Open(wxfname.c_str(),wxT("rb"));
-//   if (!(_oasisFh.IsOpened()))
-//   {// open the input file
-//      std::ostringstream info;
-//      info << "File "<< _fileName <<" can NOT be reopened";
-//      tell_log(console::MT_ERROR,info.str());
-//      return false;
-//   }
-//   return true;
-//}
-
 wxFileOffset Oasis::OasisInFile::oasSetPosition(wxFileOffset fPos)
 {
    wxFileOffset coffset;
@@ -367,12 +346,6 @@ wxFileOffset Oasis::OasisInFile::oasSetPosition(wxFileOffset fPos)
    setPosition(fPos);
    return coffset;
 }
-
-//void Oasis::OasisInFile::closeFile()
-//{
-//   if (_status)
-//      _oasisFh.Close();
-//}
 
 void Oasis::OasisInFile::inflateCBlock()
 {
@@ -841,13 +814,6 @@ Oasis::OasisInFile::~OasisInFile()
    if ( _xNames     ) delete _xNames;
    for (DefinitionMap::const_iterator CC = _definedCells.begin(); CC != _definedCells.end(); CC++)
       delete CC->second;
-   // get rid of the hierarchy tree
-   const ForeignCellTree* var1 = _hierTree;
-   while (var1)
-   {
-      const ForeignCellTree* var2 = var1->GetLast();
-      delete var1; var1 = var2;
-   }
 }
 
 //==============================================================================
@@ -1136,7 +1102,6 @@ void Oasis::Cell::readPath(OasisInFile& ofn, ImportDB& iDB)
       {
          pointlist laypl;
          _mod_wplist().calcPoints(laypl, _mod_gx(), _mod_gy(), false);
-         bool pathConvertResult = true;
          if (info & Emask)
          {
             int4b exts = _mod_exs().getExtension(_mod_pathhw());
