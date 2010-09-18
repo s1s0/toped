@@ -40,22 +40,6 @@
 #include "tedesign.h"
 #include "calbr_reader.h"
 
-// Forward declarations
-
-namespace GDSin {
-   class GdsStructure;
-   typedef SGHierTree<GdsStructure>       GDSHierTree;
-}
-namespace CIFin {
-   class CifStructure;
-   typedef SGHierTree<CifStructure>       CIFHierTree;
-}
-
-namespace Oasis {
-   class Cell;
-   typedef SGHierTree<Cell>        OASHierTree;
-}
-
 namespace browsers
 {
    const int buttonHeight = 30;
@@ -147,7 +131,7 @@ namespace browsers
          void              showMenu(wxTreeItemId id, const wxPoint& pt);
          void              collectInfo(bool);
       private:
-         void              collectChildren(const GDSin::GDSHierTree*, const wxTreeItemId&, bool);
+         void              collectChildren(const ForeignCellTree*, const wxTreeItemId&, bool);
          void              onItemRightClick(wxTreeEvent&);
          //void              onBlankRMouseUp(wxMouseEvent&);
          void              onReportlay(wxCommandEvent& WXUNUSED(event));
@@ -164,7 +148,7 @@ namespace browsers
          void              showMenu(wxTreeItemId id, const wxPoint& pt);
          void              collectInfo(bool);
       private:
-         void              collectChildren(const CIFin::CIFHierTree*, const wxTreeItemId&, bool);
+         void              collectChildren(const ForeignCellTree*, const wxTreeItemId&, bool);
          void              onItemRightClick(wxTreeEvent&);
          //void              onBlankRMouseUp(wxMouseEvent&);
          void              onReportlay(wxCommandEvent& WXUNUSED(event));
@@ -181,7 +165,7 @@ namespace browsers
          void              showMenu(wxTreeItemId id, const wxPoint& pt);
          void              collectInfo(bool);
       private:
-         void              collectChildren(const Oasis::OASHierTree*, const wxTreeItemId&, bool);
+         void              collectChildren(const ForeignCellTree*, const wxTreeItemId&, bool);
          void              onItemRightClick(wxTreeEvent&);
          //void              onBlankRMouseUp(wxMouseEvent&);
          void              onReportlay(wxCommandEvent& WXUNUSED(event));

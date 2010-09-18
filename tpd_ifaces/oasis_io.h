@@ -162,7 +162,6 @@ namespace Oasis {
    class OasisInFile;
    class Cell;
 
-   typedef SGHierTree<Cell>        OASHierTree;
    typedef std::list<Cell*>        OasisCellList;
 
    /*! Declares the OASIS name tables.
@@ -320,7 +319,7 @@ namespace Oasis {
          byte              skimCell(OasisInFile&, bool);
          virtual void      import(ImportDB&);
          void              linkReferences(OasisInFile&);
-         OASHierTree*      hierOut(OASHierTree*, Cell*);
+         ForeignCellTree*  hierOut(ForeignCellTree*, Cell*);
          void              collectLayers(ExtLayers&, bool);
       private:
          void              skimRectangle(OasisInFile&);
@@ -428,7 +427,6 @@ namespace Oasis {
          void                 inflateCBlock();
          bool                 calculateCRC(Iso3309Crc32&);
          bool                 calculateChecksum(dword& checksum);
-         OASHierTree*         hierTree()        {return _hierTree;}
          virtual double       libUnits() const  {return _unit;    }
          virtual std::string  libname() const{return getFileNameOnly();}
          void                 setPropContext(PropertyContext context)
@@ -460,7 +458,7 @@ namespace Oasis {
          void                 getProperty1()     { _properties.getProperty1(*this);}
          void                 getProperty2()     { _properties.getProperty2(*this);}
       private:
-         void                 preTraverseChildren(const OASHierTree*);
+         void                 preTraverseChildren(const ForeignCellTree*);
          void                 readLibrary();
          float                getFloat();
          double               getDouble();
@@ -485,7 +483,6 @@ namespace Oasis {
          bool                 _offsetFlag;
          std::string          _version;   //! OASIS version record retrieved from the file
          real                 _unit;      //! OASIS unit (DBU) retrieved from the file
-         OASHierTree*         _hierTree;  //! The tree of reference hierarchy
          CBlockInflate*       _curCBlock; //! Current uncompressed CBLOCK
          ValidationScheme     _validation;//! Validation Scheme of this OASIS file
          dword                _signature; //! The signature of the OASIS file (depends on the validation scheme)

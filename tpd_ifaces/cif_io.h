@@ -118,7 +118,6 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
    class CifStructure;
    class CifFile;
 
-   typedef SGHierTree<CifStructure>       CIFHierTree;
    typedef std::list<CifStructure*>       CIFSList;
 
 
@@ -228,7 +227,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          void           addRef(dword cell, CTM* location);
          void           collectLayers(nameList&, bool) const;
          void           linkReferences(CifFile&);
-         CIFHierTree*   hierOut(CIFHierTree*, CifStructure*);
+         ForeignCellTree* hierOut(ForeignCellTree*, CifStructure*);
          virtual void   import(ImportDB&);
       private:
          dword          _ID;
@@ -268,15 +267,13 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          virtual void         collectLayers(nameList&) const;
          virtual bool         collectLayers(const std::string&, nameList& ) const;
 
-         CIFHierTree*         hiertree()                {return _hierTree;}
       protected:
          void                 linkReferences();
-         void                 preTraverseChildren(const CIFin::CIFHierTree*);
+         void                 preTraverseChildren(const ForeignCellTree*);
          CifStructure*        _first;           //! poiter to the first defined cell
          CifStructure*        _current;         //! the working (current) cell
          CifStructure*        _default;         //! pointer to the default cell - i.e. the scratch pad
          CifLayer*            _curLay;          //!
-         CIFHierTree*         _hierTree;        //! Tree of instance hierarchy
    };
 
    class CifExportFile : public DbExportFile {

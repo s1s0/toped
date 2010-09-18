@@ -383,7 +383,7 @@ std::string GDSin::GdsInFile::libname() const
 void GDSin::GdsInFile::getTopCells(nameList& topCells) const
 {
    assert(NULL != _hierTree);
-   GDSin::GDSHierTree* root = _hierTree->GetFirstRoot(TARGETDB_LIB);
+   ForeignCellTree* root = _hierTree->GetFirstRoot(TARGETDB_LIB);
    if (root)
    {
       do
@@ -491,7 +491,7 @@ void GDSin::GdsInFile::convertPrep(const nameList& topCells, bool recursive)
       GDSin::GdsStructure *srcStructure = _library->getStructure(*CN);
       if (NULL != srcStructure)
       {
-         GDSin::GDSHierTree* root = _hierTree->GetMember(srcStructure);
+         ForeignCellTree* root = _hierTree->GetMember(srcStructure);
          if (recursive) preTraverseChildren(root);
          if (!srcStructure->traversed())
          {
@@ -514,16 +514,16 @@ void GDSin::GdsInFile::convertPrep(const nameList& topCells, bool recursive)
  * recursive traversing of the cell hierarchy tree.
  * @param root - The root of the hierarchy to be traversed
  */
-void GDSin::GdsInFile::preTraverseChildren(const GDSin::GDSHierTree* root)
+void GDSin::GdsInFile::preTraverseChildren(const ForeignCellTree* root)
 {
-   const GDSin::GDSHierTree* Child = root->GetChild(TARGETDB_LIB);
+   const ForeignCellTree* Child = root->GetChild(TARGETDB_LIB);
    while (NULL != Child)
    {
       if ( !Child->GetItem()->traversed() )
       {
          // traverse children first
          preTraverseChildren(Child);
-         GDSin::GdsStructure* sstr = const_cast<GDSin::GdsStructure*>(Child->GetItem());
+         ForeignCell* sstr = const_cast<ForeignCell*>(Child->GetItem());
          if (!sstr->traversed())
          {
             _convList.push_back(sstr);
@@ -539,10 +539,10 @@ GDSin::GdsInFile::~GdsInFile()
 {
    delete _library;
    // get rid of the hierarchy tree
-   const GDSHierTree* var1 = _hierTree;
+   const ForeignCellTree* var1 = _hierTree;
    while (var1)
    {
-      const GDSHierTree* var2 = var1->GetLast();
+      const ForeignCellTree* var2 = var1->GetLast();
       delete var1; var1 = var2;
    }
 }
@@ -637,9 +637,9 @@ void GDSin::GdsLibrary::getAllCells(wxListBox& nameListBox) const
       nameListBox.Append(wxString(CSTR->first.c_str(), wxConvUTF8));
 }
 
-GDSin::GDSHierTree* GDSin::GdsLibrary::hierOut()
+ForeignCellTree* GDSin::GdsLibrary::hierOut()
 {
-   GDSHierTree* Htree = NULL;
+   ForeignCellTree* Htree = NULL;
    for (StructureMap::const_iterator CSTR = _structures.begin(); CSTR != _structures.end(); CSTR++)
       if (!CSTR->second->haveParent())
          Htree = CSTR->second->hierOut(Htree, NULL);
@@ -804,10 +804,10 @@ void GDSin::GdsStructure::collectLayers(ExtLayers& layers_map, bool hier)
       (*CSTR)->collectLayers(layers_map, hier);
 }
 
-GDSin::GDSHierTree* GDSin::GdsStructure::hierOut(GDSHierTree* Htree, GdsStructure* parent)
+ForeignCellTree* GDSin::GdsStructure::hierOut(ForeignCellTree* Htree, GdsStructure* parent)
 {
    // collecting hierarchical information
-   Htree = DEBUG_NEW GDSHierTree(this, parent, Htree);
+   Htree = DEBUG_NEW ForeignCellTree(this, parent, Htree);
    for (GDSStructureList::const_iterator CSTR = _children.begin(); CSTR != _children.end(); CSTR++)
    {
       if (NULL == (*CSTR)) continue;
@@ -1871,7 +1871,7 @@ void GDSin::GdsSplit::run(GDSin::GdsStructure* src_structure, bool recursive)
    assert(_src_lib->hierTree());
    assert(src_structure);
 
-   GDSin::GDSHierTree* root = _src_lib->hierTree()->GetMember(src_structure);
+   ForeignCellTree* root = _src_lib->hierTree()->GetMember(src_structure);
    if (recursive) preTraverseChildren(root);
    if (!src_structure->traversed())
    {
@@ -1905,19 +1905,19 @@ void GDSin::GdsSplit::run(GDSin::GdsStructure* src_structure, bool recursive)
    }
 }
 
-void GDSin::GdsSplit::preTraverseChildren(const GDSin::GDSHierTree* root)
+void GDSin::GdsSplit::preTraverseChildren(const ForeignCellTree* root)
 {
-   const GDSin::GDSHierTree* Child = root->GetChild(TARGETDB_LIB);
+   const ForeignCellTree* Child = root->GetChild(TARGETDB_LIB);
    while (Child)
    {
       if ( !Child->GetItem()->traversed() )
       {
          // traverse children first
          preTraverseChildren(Child);
-         GDSin::GdsStructure* sstr = const_cast<GDSin::GdsStructure*>(Child->GetItem());
+         ForeignCell* sstr = const_cast<ForeignCell*>(Child->GetItem());
          if (!sstr->traversed())
          {
-            _convertList.push_back(sstr);
+            _convertList.push_back(static_cast<GDSin::GdsStructure*>(sstr));
             sstr->set_traversed(true);
          }
       }
