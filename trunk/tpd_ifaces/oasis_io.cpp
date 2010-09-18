@@ -786,7 +786,7 @@ bool Oasis::OasisInFile::calculateChecksum(dword& checksum)
 
 void Oasis::OasisInFile::getTopCells(nameList& top_cell_list) const
 {
-   OASHierTree* root = _hierTree->GetFirstRoot(TARGETDB_LIB);
+   ForeignCellTree* root = _hierTree->GetFirstRoot(TARGETDB_LIB);
    if (root)
    {
       do
@@ -812,7 +812,7 @@ void Oasis::OasisInFile::convertPrep(const nameList& topCells, bool recursive)
       Cell* src_structure = getCell(*CN);
       if (NULL != src_structure)
       {
-         Oasis::OASHierTree* root = _hierTree->GetMember(src_structure);
+         ForeignCellTree* root = _hierTree->GetMember(src_structure);
          if (recursive) preTraverseChildren(root);
          if (!src_structure->traversed())
          {
@@ -830,16 +830,16 @@ void Oasis::OasisInFile::convertPrep(const nameList& topCells, bool recursive)
    }
 }
 
-void Oasis::OasisInFile::preTraverseChildren(const Oasis::OASHierTree* root)
+void Oasis::OasisInFile::preTraverseChildren(const ForeignCellTree* root)
 {
-   const Oasis::OASHierTree* Child = root->GetChild(TARGETDB_LIB);
+   const ForeignCellTree* Child = root->GetChild(TARGETDB_LIB);
    while (Child)
    {
       if ( !Child->GetItem()->traversed() )
       {
          // traverse children first
          preTraverseChildren(Child);
-         Oasis::Cell* sstr = const_cast<Oasis::Cell*>(Child->GetItem());
+         ForeignCell* sstr = const_cast<ForeignCell*>(Child->GetItem());
          if (!sstr->traversed())
          {
             _convList.push_back(sstr);
@@ -863,10 +863,10 @@ Oasis::OasisInFile::~OasisInFile()
    for (DefinitionMap::const_iterator CC = _definedCells.begin(); CC != _definedCells.end(); CC++)
       delete CC->second;
    // get rid of the hierarchy tree
-   const OASHierTree* var1 = _hierTree;
+   const ForeignCellTree* var1 = _hierTree;
    while (var1)
    {
-      const OASHierTree* var2 = var1->GetLast();
+      const ForeignCellTree* var2 = var1->GetLast();
       delete var1; var1 = var2;
    }
 }
@@ -1920,10 +1920,10 @@ void Oasis::Cell::linkReferences(OasisInFile& ofn)
    }
 }
 
-Oasis::OASHierTree* Oasis::Cell::hierOut(OASHierTree* Htree, Cell* parent)
+ForeignCellTree* Oasis::Cell::hierOut(ForeignCellTree* Htree, Cell* parent)
 {
    // collecting hierarchical information
-   Htree = DEBUG_NEW OASHierTree(this, parent, Htree);
+   Htree = DEBUG_NEW ForeignCellTree(this, parent, Htree);
    for (OasisCellList::const_iterator CSTR = _children.begin(); CSTR != _children.end(); CSTR++)
    {
       if (NULL == (*CSTR)) continue;

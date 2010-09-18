@@ -313,10 +313,10 @@ void CIFin::CifStructure::linkReferences(CifFile& cfile)
    }
 }
 
-CIFin::CIFHierTree* CIFin::CifStructure::hierOut(CIFHierTree* theTree, CifStructure* parent)
+ForeignCellTree* CIFin::CifStructure::hierOut(ForeignCellTree* theTree, CifStructure* parent)
 {
    // collecting hierarchical information
-   theTree = DEBUG_NEW CIFHierTree(this, parent, theTree);
+   theTree = DEBUG_NEW ForeignCellTree(this, parent, theTree);
    for (CIFSList::iterator CI = _children.begin(); CI != _children.end(); CI++)
    {
       theTree = (*CI)->hierOut(theTree, this);
@@ -394,8 +394,8 @@ CIFin::CifFile::~CifFile()
       delete local4d;
    }
    // get rid of the hierarchy tree
-   const CIFHierTree* hlocal = _hierTree;
-   const CIFHierTree* hlocal4d;
+   const ForeignCellTree* hlocal = _hierTree;
+   const ForeignCellTree* hlocal4d;
    while (hlocal)
    {
       hlocal4d = hlocal;
@@ -559,7 +559,7 @@ void CIFin::CifFile::convertPrep(const nameList& topCells, bool recursive)
       CIFin::CifStructure *src_structure = const_cast<CIFin::CifStructure*>(getStructure(*CN));
       if (NULL != src_structure)
       {
-         CIFin::CIFHierTree* root = _hierTree->GetMember(src_structure);
+         ForeignCellTree* root = _hierTree->GetMember(src_structure);
          if (recursive) preTraverseChildren(root);
          if (!src_structure->traversed())
          {
@@ -580,7 +580,7 @@ void CIFin::CifFile::convertPrep(const nameList& topCells, bool recursive)
 void CIFin::CifFile::getTopCells(nameList& top_cell_list) const
 {
    assert(NULL != _hierTree);
-   CIFin::CIFHierTree* root = _hierTree->GetFirstRoot(TARGETDB_LIB);
+   ForeignCellTree* root = _hierTree->GetFirstRoot(TARGETDB_LIB);
    if (root)
    {
       do
@@ -605,16 +605,16 @@ void CIFin::CifFile::getAllCells(wxListBox& cellsBox) const
 
 }
 
-void CIFin::CifFile::preTraverseChildren(const CIFin::CIFHierTree* root)
+void CIFin::CifFile::preTraverseChildren(const ForeignCellTree* root)
 {
-   const CIFin::CIFHierTree* Child= root->GetChild(TARGETDB_LIB);
+   const ForeignCellTree* Child= root->GetChild(TARGETDB_LIB);
    while (Child)
    {
       if ( !Child->GetItem()->traversed() )
       {
          // traverse children first
          preTraverseChildren(Child);
-         CIFin::CifStructure* sstr = const_cast<CIFin::CifStructure*>(Child->GetItem());
+         ForeignCell* sstr = const_cast<ForeignCell*>(Child->GetItem());
          if (!sstr->traversed())
          {
             _convList.push_back(sstr);

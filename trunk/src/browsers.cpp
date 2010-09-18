@@ -45,9 +45,6 @@
 #include "../ui/librarydb.xpm"
 #include "../ui/targetdb.xpm"
 #include "../ui/cellundef.xpm"
-#include "gds_io.h"
-#include "cif_io.h"
-#include "oasis_io.h"
 #include "tpdf_common.h"
 
 extern DataCenter*               DATC;
@@ -883,7 +880,7 @@ void browsers::GDSCellBrowser::collectInfo(bool hier)
 //
 //      if (NULL != AGDSDB->hierTree())
 //      {
-//         GDSin::GDSHierTree* root = AGDSDB->hierTree()->GetFirstRoot(TARGETDB_LIB);
+//         ForeignCellTree* root = AGDSDB->hierTree()->GetFirstRoot(TARGETDB_LIB);
 //         wxTreeItemId nroot;
 //         while (root)
 //         {
@@ -897,10 +894,10 @@ void browsers::GDSCellBrowser::collectInfo(bool hier)
    DATC->unlockGds(AGDSDB);
 }
 
-void browsers::GDSCellBrowser::collectChildren(const GDSin::GDSHierTree* root,
+void browsers::GDSCellBrowser::collectChildren(const ForeignCellTree* root,
                                                const wxTreeItemId& lroot, bool _hierarchy_view)
 {
-   const GDSin::GDSHierTree* Child= root->GetChild(TARGETDB_LIB);
+   const ForeignCellTree* Child= root->GetChild(TARGETDB_LIB);
    wxTreeItemId nroot;
    wxTreeItemId temp;
 
@@ -986,7 +983,7 @@ void browsers::CIFCellBrowser::collectInfo(bool hier)
 //    TODO
 //      if (NULL != ACIFDB->hiertree())
 //      {
-//         CIFin::CIFHierTree* root = ACIFDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
+//         ForeignCellTree* root = ACIFDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
 //         wxTreeItemId nroot;
 //         while (root)
 //         {
@@ -1000,10 +997,10 @@ void browsers::CIFCellBrowser::collectInfo(bool hier)
    DATC->unlockCif(ACIFDB);
 }
 
-void browsers::CIFCellBrowser::collectChildren(const CIFin::CIFHierTree* root,
+void browsers::CIFCellBrowser::collectChildren(const ForeignCellTree* root,
                                                const wxTreeItemId& lroot, bool _hierarchy_view)
 {
-   const CIFin::CIFHierTree* Child= root->GetChild(TARGETDB_LIB);
+   const ForeignCellTree* Child= root->GetChild(TARGETDB_LIB);
    wxTreeItemId nroot;
    wxTreeItemId temp;
 
@@ -1104,10 +1101,10 @@ void browsers::OASCellBrowser::collectInfo(bool hier)
    DATC->unlockOas(AOASDB);
 }
 
-void browsers::OASCellBrowser::collectChildren(const Oasis::OASHierTree* root,
+void browsers::OASCellBrowser::collectChildren(const ForeignCellTree* root,
                                                const wxTreeItemId& lroot, bool _hierarchy_view)
 {
-   const Oasis::OASHierTree* Child= root->GetChild(TARGETDB_LIB);
+   const ForeignCellTree* Child= root->GetChild(TARGETDB_LIB);
    wxTreeItemId nroot;
    wxTreeItemId temp;
 

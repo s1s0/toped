@@ -124,7 +124,6 @@ namespace GDSin {
    class GdsLibrary;
    class GdsOutFile;
 
-   typedef SGHierTree<GdsStructure>        GDSHierTree;
    typedef std::list<GDSin::GdsStructure*> GDSStructureList;
 
    /*** GdsRecord ***************************************************************
@@ -229,14 +228,12 @@ namespace GDSin {
          virtual void         getAllCells(wxListBox&) const;
          virtual void         convertPrep(const nameList&, bool);
          const GdsRecord*     cRecord() const                  { return &_cRecord;                    }
-         GDSHierTree*         hierTree()                       { return _hierTree;                    }
          int                  gdsiiWarnings()                  { return _gdsiiWarnings;               }
          int                  incGdsiiWarnings()               { return ++_gdsiiWarnings;             }
          const GdsLibrary*    library() const                  { return _library;                     }
       private:
          void                 getTimes();
-         void                 preTraverseChildren(const GDSin::GDSHierTree*);
-         GDSHierTree*         _hierTree; // Tree of instance hierarchy
+         void                 preTraverseChildren(const ForeignCellTree*);
          int2b                _streamVersion;
          int2b                _libDirSize;
          std::string          _srfName;
@@ -286,7 +283,7 @@ namespace GDSin {
       public:
                               GdsStructure(GdsInFile*, word);
          virtual void         import(ImportDB&);
-         GDSHierTree*         hierOut(GDSHierTree* Htree, GdsStructure* parent);
+         ForeignCellTree*         hierOut(ForeignCellTree* Htree, GdsStructure* parent);
          void                 collectLayers(ExtLayers&, bool);
          void                 linkReferences(GdsInFile* const, GdsLibrary* const);
          void                 split(GdsInFile*, GdsOutFile*);
@@ -341,7 +338,7 @@ namespace GDSin {
       typedef std::map<std::string, GdsStructure*> StructureMap;
                               GdsLibrary(GdsInFile* , std::string);
       void                    linkReferences(GdsInFile* const);
-      GDSHierTree*            hierOut();
+      ForeignCellTree*            hierOut();
       GdsStructure*           getStructure(const std::string);
       void                    collectLayers(ExtLayers&);
       void                    getAllCells(wxListBox&) const;
@@ -414,7 +411,7 @@ namespace GDSin {
                              ~GdsSplit();
       void                    run(GDSin::GdsStructure*, bool);
    protected:
-      void                    preTraverseChildren(const GDSin::GDSHierTree*);
+      void                    preTraverseChildren(const ForeignCellTree*);
       void                    split(GDSin::GdsStructure*);
       GdsInFile*              _src_lib;
       GdsOutFile*             _dst_lib;
