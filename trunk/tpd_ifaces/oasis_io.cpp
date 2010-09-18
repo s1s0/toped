@@ -290,7 +290,7 @@ Oasis::OasisInFile::OasisInFile(wxString fn) : DbImportFile(fn),
       throw EXPTNreadOASIS("Failed to open input file");
    }
    byte magicBytes[13];
-   if ( readStream(magicBytes, 13) )
+   if ( readStream(magicBytes, 13, true) )
    {
       for(byte strindex = 0; strindex < 13; strindex++)
          if (magicBytes[strindex] != Oasis::oas_MagicBytes[strindex])
@@ -732,7 +732,7 @@ size_t Oasis::OasisInFile::rawRead(void *pBuf, size_t nCount)
 {
    if (NULL == _curCBlock)
    {
-      if (!readStream(pBuf,nCount))
+      if (!readStream(pBuf,nCount, true))
          exception("I/O error during read-in");
       return nCount;
    }
