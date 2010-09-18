@@ -269,7 +269,6 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
 
       protected:
          void                 linkReferences();
-         void                 preTraverseChildren(const ForeignCellTree*);
          CifStructure*        _first;           //! poiter to the first defined cell
          CifStructure*        _current;         //! the working (current) cell
          CifStructure*        _default;         //! pointer to the default cell - i.e. the scratch pad

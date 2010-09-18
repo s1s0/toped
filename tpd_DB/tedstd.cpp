@@ -920,6 +920,31 @@ void DbImportFile::closeStream()
    _convLength = 0;
 }
 
+/*! An auxiliary method to DbImportFile::convertPrep implementing
+ * recursive traversing of the cell hierarchy tree.
+ * @param root - The root of the hierarchy to be traversed
+ */
+void DbImportFile::preTraverseChildren(const ForeignCellTree* root)
+{
+   const ForeignCellTree* Child = root->GetChild(TARGETDB_LIB);
+   while (NULL != Child)
+   {
+      if ( !Child->GetItem()->traversed() )
+      {
+         // traverse children first
+         preTraverseChildren(Child);
+         ForeignCell* sstr = const_cast<ForeignCell*>(Child->GetItem());
+         if (!sstr->traversed())
+         {
+            _convList.push_back(sstr);
+            sstr->set_traversed(true);
+            _convLength += sstr->strSize();
+         }
+      }
+      Child = Child->GetBrother(TARGETDB_LIB);
+   }
+}
+
 std::string DbImportFile::getFileNameOnly() const
 {
    wxFileName fName(_fileName);

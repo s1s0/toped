@@ -368,9 +368,10 @@ class DbImportFile {
       std::string          fileName()                       { return std::string(_fileName.mb_str(wxConvFile));}
       ForeignCellTree*     hierTree()                       { return _hierTree;}
    protected:
+      void                 preTraverseChildren(const ForeignCellTree*);
       wxFileOffset         _convLength ;//! The amount of data (in bytes) subjected to conversion
-      ForeignCellList      _convList;   //! The list of cells for conversion in bottom-up order
-      ForeignCellTree*     _hierTree;        //! Tree of instance hierarchy
+      ForeignCellList      _convList   ;//! The list of cells for conversion in bottom-up order
+      ForeignCellTree*     _hierTree   ;//! Tree of instance hierarchy
    private:
       bool                 unZlib2Temp();//! inflate the input zlib file in a temporary one
       bool                 unZip2Temp();//! inflate the input zip file in a temporary one

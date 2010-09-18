@@ -876,20 +876,18 @@ void browsers::GDSCellBrowser::collectInfo(bool hier)
    if (DATC->lockGds(AGDSDB))
    {
       AddRoot(wxString((AGDSDB->libname()).c_str(), wxConvUTF8));
-      //TODO!
-//
-//      if (NULL != AGDSDB->hierTree())
-//      {
-//         ForeignCellTree* root = AGDSDB->hierTree()->GetFirstRoot(TARGETDB_LIB);
-//         wxTreeItemId nroot;
-//         while (root)
-//         {
-//            nroot = AppendItem(GetRootItem(), wxString(root->GetItem()->strctName().c_str(),wxConvUTF8));
-//            collectChildren(root, nroot, hier);
-//            root = root->GetNextRoot(TARGETDB_LIB);
-//         }
-//      }
-//      SortChildren(GetRootItem());
+      if (NULL != AGDSDB->hierTree())
+      {
+         ForeignCellTree* root = AGDSDB->hierTree()->GetFirstRoot(TARGETDB_LIB);
+         wxTreeItemId nroot;
+         while (root)
+         {
+            nroot = AppendItem(GetRootItem(), wxString(root->GetItem()->strctName().c_str(),wxConvUTF8));
+            collectChildren(root, nroot, hier);
+            root = root->GetNextRoot(TARGETDB_LIB);
+         }
+      }
+      SortChildren(GetRootItem());
    }
    DATC->unlockGds(AGDSDB);
 }
@@ -980,19 +978,18 @@ void browsers::CIFCellBrowser::collectInfo(bool hier)
    if (DATC->lockCif(ACIFDB))
    {
       AddRoot(wxString((ACIFDB->libname()).c_str(), wxConvUTF8));
-//    TODO
-//      if (NULL != ACIFDB->hiertree())
-//      {
-//         ForeignCellTree* root = ACIFDB->hiertree()->GetFirstRoot(TARGETDB_LIB);
-//         wxTreeItemId nroot;
-//         while (root)
-//         {
-//            nroot = AppendItem(GetRootItem(), wxString(root->GetItem()->name().c_str(),wxConvUTF8));
-//            collectChildren(root, nroot, hier);
-//            root = root->GetNextRoot(TARGETDB_LIB);
-//         }
-//      }
-//      SortChildren(GetRootItem());
+      if (NULL != ACIFDB->hierTree())
+      {
+         ForeignCellTree* root = ACIFDB->hierTree()->GetFirstRoot(TARGETDB_LIB);
+         wxTreeItemId nroot;
+         while (root)
+         {
+            nroot = AppendItem(GetRootItem(), wxString(root->GetItem()->strctName().c_str(),wxConvUTF8));
+            collectChildren(root, nroot, hier);
+            root = root->GetNextRoot(TARGETDB_LIB);
+         }
+      }
+      SortChildren(GetRootItem());
    }
    DATC->unlockCif(ACIFDB);
 }
@@ -1084,19 +1081,18 @@ void browsers::OASCellBrowser::collectInfo(bool hier)
    if (DATC->lockOas(AOASDB))
    {
       AddRoot(wxString((AOASDB->libname()).c_str(), wxConvUTF8));
-      //TODO
-//      if (NULL != AOASDB->hierTree())
-//      {
-//         Oasis::OASHierTree* root = AOASDB->hierTree()->GetFirstRoot(TARGETDB_LIB);
-//         wxTreeItemId nroot;
-//         while (root)
-//         {
-//            nroot = AppendItem(GetRootItem(), wxString(root->GetItem()->name().c_str(),wxConvUTF8));
-//            collectChildren(root, nroot, hier);
-//            root = root->GetNextRoot(TARGETDB_LIB);
-//         }
-//      }
-//      SortChildren(GetRootItem());
+      if (NULL != AOASDB->hierTree())
+      {
+         ForeignCellTree* root = AOASDB->hierTree()->GetFirstRoot(TARGETDB_LIB);
+         wxTreeItemId nroot;
+         while (root)
+         {
+            nroot = AppendItem(GetRootItem(), wxString(root->GetItem()->strctName().c_str(),wxConvUTF8));
+            collectChildren(root, nroot, hier);
+            root = root->GetNextRoot(TARGETDB_LIB);
+         }
+      }
+      SortChildren(GetRootItem());
    }
    DATC->unlockOas(AOASDB);
 }
