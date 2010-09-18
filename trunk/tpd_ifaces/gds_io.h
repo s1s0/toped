@@ -233,7 +233,6 @@ namespace GDSin {
          const GdsLibrary*    library() const                  { return _library;                     }
       private:
          void                 getTimes();
-         void                 preTraverseChildren(const ForeignCellTree*);
          int2b                _streamVersion;
          int2b                _libDirSize;
          std::string          _srfName;
@@ -283,7 +282,7 @@ namespace GDSin {
       public:
                               GdsStructure(GdsInFile*, word);
          virtual void         import(ImportDB&);
-         ForeignCellTree*         hierOut(ForeignCellTree* Htree, GdsStructure* parent);
+         ForeignCellTree*     hierOut(ForeignCellTree* Htree, GdsStructure* parent);
          void                 collectLayers(ExtLayers&, bool);
          void                 linkReferences(GdsInFile* const, GdsLibrary* const);
          void                 split(GdsInFile*, GdsOutFile*);

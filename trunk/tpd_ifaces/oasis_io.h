@@ -458,7 +458,6 @@ namespace Oasis {
          void                 getProperty1()     { _properties.getProperty1(*this);}
          void                 getProperty2()     { _properties.getProperty2(*this);}
       private:
-         void                 preTraverseChildren(const ForeignCellTree*);
          void                 readLibrary();
          float                getFloat();
          double               getDouble();

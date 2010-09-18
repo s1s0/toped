@@ -830,27 +830,6 @@ void Oasis::OasisInFile::convertPrep(const nameList& topCells, bool recursive)
    }
 }
 
-void Oasis::OasisInFile::preTraverseChildren(const ForeignCellTree* root)
-{
-   const ForeignCellTree* Child = root->GetChild(TARGETDB_LIB);
-   while (Child)
-   {
-      if ( !Child->GetItem()->traversed() )
-      {
-         // traverse children first
-         preTraverseChildren(Child);
-         ForeignCell* sstr = const_cast<ForeignCell*>(Child->GetItem());
-         if (!sstr->traversed())
-         {
-            _convList.push_back(sstr);
-            sstr->set_traversed(true);
-            _convLength += sstr->strSize();
-         }
-      }
-      Child = Child->GetBrother(TARGETDB_LIB);
-   }
-}
-
 Oasis::OasisInFile::~OasisInFile()
 {
    closeStream();

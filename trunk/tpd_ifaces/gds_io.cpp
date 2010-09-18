@@ -510,31 +510,6 @@ void GDSin::GdsInFile::convertPrep(const nameList& topCells, bool recursive)
 
 }
 
-/*! An auxiliary method to GDSin::GdsInFile::convertPrep implementing
- * recursive traversing of the cell hierarchy tree.
- * @param root - The root of the hierarchy to be traversed
- */
-void GDSin::GdsInFile::preTraverseChildren(const ForeignCellTree* root)
-{
-   const ForeignCellTree* Child = root->GetChild(TARGETDB_LIB);
-   while (NULL != Child)
-   {
-      if ( !Child->GetItem()->traversed() )
-      {
-         // traverse children first
-         preTraverseChildren(Child);
-         ForeignCell* sstr = const_cast<ForeignCell*>(Child->GetItem());
-         if (!sstr->traversed())
-         {
-            _convList.push_back(sstr);
-            sstr->set_traversed(true);
-            _convLength += sstr->strSize();
-         }
-      }
-      Child = Child->GetBrother(TARGETDB_LIB);
-   }
-}
-
 GDSin::GdsInFile::~GdsInFile()
 {
    delete _library;

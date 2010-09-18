@@ -605,25 +605,6 @@ void CIFin::CifFile::getAllCells(wxListBox& cellsBox) const
 
 }
 
-void CIFin::CifFile::preTraverseChildren(const ForeignCellTree* root)
-{
-   const ForeignCellTree* Child= root->GetChild(TARGETDB_LIB);
-   while (Child)
-   {
-      if ( !Child->GetItem()->traversed() )
-      {
-         // traverse children first
-         preTraverseChildren(Child);
-         ForeignCell* sstr = const_cast<ForeignCell*>(Child->GetItem());
-         if (!sstr->traversed())
-         {
-            _convList.push_back(sstr);
-            sstr->set_traversed(true);
-         }
-      }
-      Child = Child->GetBrother(TARGETDB_LIB);
-   }
-}
 
 //=============================================================================
 CIFin::CifExportFile::CifExportFile(std::string fn, laydata::TdtCell* topcell,
