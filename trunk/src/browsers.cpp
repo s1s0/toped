@@ -545,6 +545,33 @@ void browsers::CellBrowser::collectChildren(const laydata::TDTHierTree *root,
    }
 }
 
+void browsers::CellBrowser::collectChildren(const ForeignCellTree* root,
+                                            const wxTreeItemId& lroot, bool _hierarchy_view)
+{
+   const ForeignCellTree* Child= root->GetChild(TARGETDB_LIB);
+   wxTreeItemId nroot;
+   wxTreeItemId temp;
+
+   while (Child)
+   {
+      if (_hierarchy_view)
+      {
+         nroot = AppendItem(lroot, wxString(Child->GetItem()->strctName().c_str(), wxConvUTF8));
+         collectChildren(Child, nroot, _hierarchy_view);
+      }
+      else
+      {
+         if (!findItem(wxString(Child->GetItem()->strctName().c_str(), wxConvUTF8), temp, GetRootItem()))
+         {
+            nroot = AppendItem(GetRootItem(), wxString(Child->GetItem()->strctName().c_str(), wxConvUTF8));
+            collectChildren(Child, nroot, _hierarchy_view);
+         }
+      }
+      SortChildren(lroot);
+      Child = Child->GetBrother(TARGETDB_LIB);
+   }
+}
+
 void browsers::CellBrowser::onCommand( wxCommandEvent& event )
 {
    switch ( event.GetInt() )
@@ -827,7 +854,6 @@ bool browsers::CellBrowser::checkCorrupted(bool iresult)
 //==============================================================================
 BEGIN_EVENT_TABLE(browsers::GDSCellBrowser, wxTreeCtrl)
    EVT_TREE_ITEM_RIGHT_CLICK( tui::ID_GDS_CELLTREE, browsers::GDSCellBrowser::onItemRightClick)
-//   EVT_RIGHT_UP(browsers::GDSCellBrowser::onBlankRMouseUp)
    EVT_MENU(GDSTREEREPORTLAY, browsers::GDSCellBrowser::onReportlay)
 END_EVENT_TABLE()
 
@@ -835,17 +861,6 @@ browsers::GDSCellBrowser::GDSCellBrowser(wxWindow *parent, wxWindowID id,
    const wxPoint& pos, const wxSize& size, long style) :
                                        CellBrowser(parent, id, pos, size, style )
 {}
-
-void browsers::GDSCellBrowser::onItemRightClick(wxTreeEvent& event)
-{
-   showMenu(event.GetItem(), event.GetPoint());
-}
-
-//void browsers::GDSCellBrowser::onBlankRMouseUp(wxMouseEvent& event)
-//{
-//   wxPoint pt = event.GetPosition();
-//   showMenu(HitTest(pt), pt);
-//}
 
 void browsers::GDSCellBrowser::onReportlay(wxCommandEvent& WXUNUSED(event))
 {
@@ -864,7 +879,7 @@ void browsers::GDSCellBrowser::showMenu(wxTreeItemId id, const wxPoint& pt)
       menu.Append(GDSTREEREPORTLAY, wxT("Report layers used in " + RBcellname));
    }
    else {
-      menu.Append(tui::TMGDS_CLOSE, wxT("Close GDS")); // will be catched up in toped.cpp
+      menu.Append(tui::TMGDS_CLOSE, wxT("Close GDS")); // will be caught up in toped.cpp
    }
    PopupMenu(&menu, pt);
 }
@@ -892,33 +907,6 @@ void browsers::GDSCellBrowser::collectInfo(bool hier)
    DATC->unlockGds(AGDSDB);
 }
 
-void browsers::GDSCellBrowser::collectChildren(const ForeignCellTree* root,
-                                               const wxTreeItemId& lroot, bool _hierarchy_view)
-{
-   const ForeignCellTree* Child= root->GetChild(TARGETDB_LIB);
-   wxTreeItemId nroot;
-   wxTreeItemId temp;
-
-   while (Child)
-   {
-      if (_hierarchy_view)
-      {
-         nroot = AppendItem(lroot, wxString(Child->GetItem()->strctName().c_str(), wxConvUTF8));
-         collectChildren(Child, nroot, _hierarchy_view);
-      }
-      else
-      {
-         if (!findItem(wxString(Child->GetItem()->strctName().c_str(), wxConvUTF8), temp, GetRootItem()))
-         {
-            nroot = AppendItem(GetRootItem(), wxString(Child->GetItem()->strctName().c_str(), wxConvUTF8));
-            collectChildren(Child, nroot, _hierarchy_view);
-         }
-      }
-      SortChildren(lroot);
-      Child = Child->GetBrother(TARGETDB_LIB);
-   }
-}
-
 //==============================================================================
 //
 // CIFCellBrowser
@@ -926,25 +914,13 @@ void browsers::GDSCellBrowser::collectChildren(const ForeignCellTree* root,
 //==============================================================================
 BEGIN_EVENT_TABLE(browsers::CIFCellBrowser, wxTreeCtrl)
    EVT_TREE_ITEM_RIGHT_CLICK( tui::ID_CIF_CELLTREE, browsers::CIFCellBrowser::onItemRightClick)
-//   EVT_RIGHT_UP(browsers::CIFCellBrowser::onBlankRMouseUp)
    EVT_MENU(CIFTREEREPORTLAY, browsers::CIFCellBrowser::onReportlay)
 END_EVENT_TABLE()
 
-      browsers::CIFCellBrowser::CIFCellBrowser(wxWindow *parent, wxWindowID id,
+browsers::CIFCellBrowser::CIFCellBrowser(wxWindow *parent, wxWindowID id,
    const wxPoint& pos, const wxSize& size, long style) :
       CellBrowser(parent, id, pos, size, style )
 { }
-
-void browsers::CIFCellBrowser::onItemRightClick(wxTreeEvent& event)
-{
-   showMenu(event.GetItem(), event.GetPoint());
-}
-
-//void browsers::CIFCellBrowser::onBlankRMouseUp(wxMouseEvent& event)
-//{
-//   wxPoint pt = event.GetPosition();
-//   showMenu(HitTest(pt), pt);
-//}
 
 void browsers::CIFCellBrowser::onReportlay(wxCommandEvent& WXUNUSED(event))
 {
@@ -965,7 +941,7 @@ void browsers::CIFCellBrowser::showMenu(wxTreeItemId id, const wxPoint& pt)
    }
    else
    {
-      menu.Append(tui::TMCIF_CLOSE, wxT("Close CIF")); // will be catched up in toped.cpp
+      menu.Append(tui::TMCIF_CLOSE, wxT("Close CIF")); // will be caught up in toped.cpp
    }
    PopupMenu(&menu, pt);
 }
@@ -994,34 +970,6 @@ void browsers::CIFCellBrowser::collectInfo(bool hier)
    DATC->unlockCif(ACIFDB);
 }
 
-void browsers::CIFCellBrowser::collectChildren(const ForeignCellTree* root,
-                                               const wxTreeItemId& lroot, bool _hierarchy_view)
-{
-   const ForeignCellTree* Child= root->GetChild(TARGETDB_LIB);
-   wxTreeItemId nroot;
-   wxTreeItemId temp;
-
-   while (Child)
-   {
-      if (_hierarchy_view)
-      {
-         nroot = AppendItem(lroot, wxString(Child->GetItem()->strctName().c_str(), wxConvUTF8));
-         collectChildren(Child, nroot, _hierarchy_view);
-      }
-      else
-      {
-         if (!findItem(wxString(Child->GetItem()->strctName().c_str(), wxConvUTF8), temp, GetRootItem()))
-         {
-            nroot = AppendItem(GetRootItem(), wxString(Child->GetItem()->strctName().c_str(), wxConvUTF8));
-            collectChildren(Child, nroot, _hierarchy_view);
-         }
-      }
-      SortChildren(lroot);
-      Child = Child->GetBrother(TARGETDB_LIB);
-   }
-}
-
-
 //==============================================================================
 //
 // OASCellBrowser
@@ -1029,7 +977,6 @@ void browsers::CIFCellBrowser::collectChildren(const ForeignCellTree* root,
 //==============================================================================
 BEGIN_EVENT_TABLE(browsers::OASCellBrowser, wxTreeCtrl)
    EVT_TREE_ITEM_RIGHT_CLICK( tui::ID_OAS_CELLTREE, browsers::OASCellBrowser::onItemRightClick)
-//   EVT_RIGHT_UP(browsers::OASCellBrowser::onBlankRMouseUp)
    EVT_MENU(OASTREEREPORTLAY, browsers::OASCellBrowser::onReportlay)
 END_EVENT_TABLE()
 
@@ -1037,17 +984,6 @@ browsers::OASCellBrowser::OASCellBrowser(wxWindow *parent, wxWindowID id,
    const wxPoint& pos, const wxSize& size, long style) :
       CellBrowser(parent, id, pos, size, style )
 { }
-
-void browsers::OASCellBrowser::onItemRightClick(wxTreeEvent& event)
-{
-   showMenu(event.GetItem(), event.GetPoint());
-}
-
-//void browsers::OASCellBrowser::onBlankRMouseUp(wxMouseEvent& event)
-//{
-//   wxPoint pt = event.GetPosition();
-//   showMenu(HitTest(pt), pt);
-//}
 
 void browsers::OASCellBrowser::onReportlay(wxCommandEvent& WXUNUSED(event))
 {
@@ -1068,7 +1004,7 @@ void browsers::OASCellBrowser::showMenu(wxTreeItemId id, const wxPoint& pt)
    }
    else
    {
-      menu.Append(tui::TMOAS_CLOSE, wxT("Close Oasis")); // will be catched up in toped.cpp
+      menu.Append(tui::TMOAS_CLOSE, wxT("Close Oasis")); // will be caught up in toped.cpp
    }
    PopupMenu(&menu, pt);
 }
@@ -1097,32 +1033,6 @@ void browsers::OASCellBrowser::collectInfo(bool hier)
    DATC->unlockOas(AOASDB);
 }
 
-void browsers::OASCellBrowser::collectChildren(const ForeignCellTree* root,
-                                               const wxTreeItemId& lroot, bool _hierarchy_view)
-{
-   const ForeignCellTree* Child= root->GetChild(TARGETDB_LIB);
-   wxTreeItemId nroot;
-   wxTreeItemId temp;
-
-   while (Child)
-   {
-      if (_hierarchy_view)
-      {
-         nroot = AppendItem(lroot, wxString(Child->GetItem()->strctName().c_str(), wxConvUTF8));
-         collectChildren(Child, nroot, _hierarchy_view);
-      }
-      else
-      {
-         if (!findItem(wxString(Child->GetItem()->strctName().c_str(), wxConvUTF8), temp, GetRootItem()))
-         {
-            nroot = AppendItem(GetRootItem(), wxString(Child->GetItem()->strctName().c_str(), wxConvUTF8));
-            collectChildren(Child, nroot, _hierarchy_view);
-         }
-      }
-      SortChildren(lroot);
-      Child = Child->GetBrother(TARGETDB_LIB);
-   }
-}
 //==============================================================================
 //
 // TDTbrowser

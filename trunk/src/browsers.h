@@ -96,6 +96,7 @@ namespace browsers
          //virtual void      onBlankRMouseUp(wxMouseEvent&);
          virtual void      onReportlay(wxCommandEvent& WXUNUSED(event)) {assert(false);}
          bool              checkCorrupted(bool);
+         void              collectChildren(const ForeignCellTree*, const wxTreeItemId&, bool);
          bool              _corrupted;
       private:
          typedef std::list<wxTreeItemId> LibsRoot;
@@ -128,13 +129,10 @@ namespace browsers
                               const wxPoint& pos = wxDefaultPosition,
                               const wxSize& size = wxDefaultSize,
                               long style = wxTR_DEFAULT_STYLE);
-         void              showMenu(wxTreeItemId id, const wxPoint& pt);
-         void              collectInfo(bool);
+         virtual void      showMenu(wxTreeItemId id, const wxPoint& pt);
+         virtual void      collectInfo(bool);
       private:
-         void              collectChildren(const ForeignCellTree*, const wxTreeItemId&, bool);
-         void              onItemRightClick(wxTreeEvent&);
-         //void              onBlankRMouseUp(wxMouseEvent&);
-         void              onReportlay(wxCommandEvent& WXUNUSED(event));
+         virtual void      onReportlay(wxCommandEvent& WXUNUSED(event));
          DECLARE_EVENT_TABLE();
    };
 
@@ -145,13 +143,10 @@ namespace browsers
                               const wxPoint& pos = wxDefaultPosition,
                               const wxSize& size = wxDefaultSize,
                               long style = wxTR_DEFAULT_STYLE);
-         void              showMenu(wxTreeItemId id, const wxPoint& pt);
-         void              collectInfo(bool);
+         virtual void      showMenu(wxTreeItemId id, const wxPoint& pt);
+         virtual void      collectInfo(bool);
       private:
-         void              collectChildren(const ForeignCellTree*, const wxTreeItemId&, bool);
-         void              onItemRightClick(wxTreeEvent&);
-         //void              onBlankRMouseUp(wxMouseEvent&);
-         void              onReportlay(wxCommandEvent& WXUNUSED(event));
+         virtual void      onReportlay(wxCommandEvent& WXUNUSED(event));
          DECLARE_EVENT_TABLE();
    };
 
@@ -162,13 +157,10 @@ namespace browsers
                               const wxPoint& pos = wxDefaultPosition,
                               const wxSize& size = wxDefaultSize,
                               long style = wxTR_DEFAULT_STYLE);
-         void              showMenu(wxTreeItemId id, const wxPoint& pt);
-         void              collectInfo(bool);
+         virtual void      showMenu(wxTreeItemId id, const wxPoint& pt);
+         virtual void      collectInfo(bool);
       private:
-         void              collectChildren(const ForeignCellTree*, const wxTreeItemId&, bool);
-         void              onItemRightClick(wxTreeEvent&);
-         //void              onBlankRMouseUp(wxMouseEvent&);
-         void              onReportlay(wxCommandEvent& WXUNUSED(event));
+         virtual void      onReportlay(wxCommandEvent& WXUNUSED(event));
          DECLARE_EVENT_TABLE();
    };
 
