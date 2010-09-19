@@ -43,14 +43,14 @@ public:
                               DataCenter(const std::string&, const std::string &);
                              ~DataCenter();
    bool                       GDSparse(std::string);
+   bool                       CIFparse(std::string filename);
+   bool                       OASParse(std::string);
    void                       GDSclose();
    void                       CIFclose();
    void                       OASclose();
-   bool                       CIFparse(std::string filename);
    bool                       cifGetLayers(nameList&);
    bool                       gdsGetLayers(ExtLayers&);
    bool                       oasGetLayers(ExtLayers&);
-   bool                       OASParse(std::string);
    bool                       lockTDT(laydata::TdtLibDir*&, TdtMutexState);
    laydata::DrcLibrary*       lockDRC(void);
    bool                       lockGds(DbImportFile*&);
