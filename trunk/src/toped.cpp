@@ -1249,9 +1249,10 @@ void tui::TopedFrame::OnGDSimport(wxCommandEvent& WXUNUSED(event))
 
 void tui::TopedFrame::OnCIFimport(wxCommandEvent& WXUNUSED(event))
 {
-   wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
-                     wxT("Caltech files(*.cif)|*.cif;*.CIF|All files(*.*)|*.*"),
-                     tpdfOPEN);
+   wxString dbfext;
+   dbfext << wxT("Caltech files(*.cif;*.gz;*.zip)|*.cif;*.CIF;*.gz;*.zip;*.GZ;*.ZIP")
+          << wxT("|All files(*.*)|*.*");
+   wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""), dbfext, tpdfOPEN);
    if (wxID_OK != dlg2.ShowModal())
    {
       SetStatusText(wxT("Parsing aborted")); return;
@@ -1381,9 +1382,10 @@ void tui::TopedFrame::OnGDSexportCELL(wxCommandEvent& WXUNUSED(event))
 
 void tui::TopedFrame::OnCIFRead(wxCommandEvent& WXUNUSED(event))
 {
-   wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
-                     wxT("Caltech files(*.cif)|*.cif;*.CIF|All files(*.*)|*.*"),
-                         tpdfOPEN);
+   wxString dbfext;
+   dbfext << wxT("Caltech files(*.cif;*.gz;*.zip)|*.cif;*.CIF;*.gz;*.zip;*.GZ;*.ZIP")
+          << wxT("|All files(*.*)|*.*");
+   wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""), dbfext, tpdfOPEN);
    if (wxID_OK == dlg2.ShowModal()) {
       SetStatusText(wxT("Parsing CIF file..."));
       wxString filename = dlg2.GetFilename();
@@ -1514,9 +1516,10 @@ void tui::TopedFrame::OnCIFexportCELL(wxCommandEvent& WXUNUSED(event))
 
 void tui::TopedFrame::OnOASRead(wxCommandEvent& WXUNUSED(event))
 {
-   wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
-                     wxT("Oasis files(*.oas)|*.oas;*.OAS|All files(*.*)|*.*"),
-                     tpdfOPEN);
+   wxString dbfext;
+   dbfext << wxT("Oasis files(*.oas;*.gz;*.zip)|*.oas;*.gz;*.zip;*.GZ;*.ZIP")
+          << wxT("|All files(*.*)|*.*");
+   wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""), dbfext, tpdfOPEN);
    if (wxID_OK == dlg2.ShowModal())
    {
       SetStatusText(wxT("Parsing Oasis file..."));
@@ -1530,9 +1533,10 @@ void tui::TopedFrame::OnOASRead(wxCommandEvent& WXUNUSED(event))
 
 void tui::TopedFrame::OnOASimport(wxCommandEvent& WXUNUSED(event))
 {
-   wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""),
-                     wxT("Oasis files(*.oas)|*.oas;*.OAS|All files(*.*)|*.*"),
-                         tpdfOPEN);
+   wxString dbfext;
+   dbfext << wxT("Oasis files(*.oas;*.gz;*.zip)|*.oas;*.gz;*.zip;*.GZ;*.ZIP")
+          << wxT("|All files(*.*)|*.*");
+   wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""), dbfext, tpdfOPEN);
    if (wxID_OK != dlg2.ShowModal())
    {
       SetStatusText(wxT("Parsing aborted")); return;
