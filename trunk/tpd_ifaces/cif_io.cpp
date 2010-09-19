@@ -393,7 +393,6 @@ CIFin::CifFile::~CifFile()
       delete local4d;
    }
    delete _default;
-   closeStream();
 }
 
 void CIFin::CifFile::addStructure(dword ID, dword a, dword b)

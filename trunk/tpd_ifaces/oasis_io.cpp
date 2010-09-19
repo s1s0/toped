@@ -805,7 +805,6 @@ void Oasis::OasisInFile::convertPrep(const nameList& topCells, bool recursive)
 
 Oasis::OasisInFile::~OasisInFile()
 {
-   closeStream();
    if ( _cellNames  ) delete _cellNames;
    if ( _textStrings) delete _textStrings;
    if ( _propNames  ) delete _propNames;
