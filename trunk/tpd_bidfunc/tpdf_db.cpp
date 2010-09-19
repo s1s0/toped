@@ -1099,7 +1099,6 @@ int tellstdfunc::CIFreportlay::execute()
       nameList cifLayers;
       if (ACIFDB->collectLayers(name, cifLayers))
       {
-//         src_structure->collectLayers(cifLayers,true); // TODO delete this line
          ost << "CIF layers found in \"" << name <<"\"" << std::endl;
          for (nameList::iterator NLI = cifLayers.begin(); NLI != cifLayers.end(); NLI++)
             ost << *NLI << std::endl;

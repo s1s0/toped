@@ -287,22 +287,28 @@ class EXPTNactive_OASIS : public EXPTN
       EXPTNactive_OASIS();
 };
 
-class EXPTNreadTDT : public EXPTN
-{
-   public:
-      EXPTNreadTDT(std::string);
-};
-
 class EXPTNreadGDS : public EXPTN
 {
    public:
       EXPTNreadGDS(std::string);
 };
 
+class EXPTNcif_parser : public EXPTN
+{
+   public:
+      EXPTNcif_parser(std::string);
+};
+
 class EXPTNreadOASIS : public EXPTN
 {
    public:
       EXPTNreadOASIS(std::string);
+};
+
+class EXPTNreadTDT : public EXPTN
+{
+   public:
+      EXPTNreadTDT(std::string);
 };
 
 class EXPTNpolyCross : public EXPTN
@@ -315,12 +321,6 @@ class EXPTNtell_parser : public EXPTN
 {
    public:
       EXPTNtell_parser(std::string);
-};
-
-class EXPTNcif_parser : public EXPTN
-{
-   public:
-      EXPTNcif_parser(std::string);
 };
 
 class EXPTNdrc_reader : public EXPTN

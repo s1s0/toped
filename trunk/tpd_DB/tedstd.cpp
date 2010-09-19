@@ -917,7 +917,6 @@ void DbImportFile::closeStream()
       _inStream = NULL;
    }
    TpdPost::toped_status(console::TSTS_PRGRSBAROFF);
-   tell_log(console::MT_INFO, "Done");
    _convLength = 0;
 }
 
@@ -1120,7 +1119,7 @@ void ImportDB::run(const nameList& top_str_names, bool overwrite, bool reopenFil
          }
          tell_log(console::MT_INFO, "Done");
       }
-      catch (EXPTNreadGDS) {tell_log(console::MT_INFO, "Conversion aborted with errors");}
+      catch (EXPTN) {tell_log(console::MT_INFO, "Conversion aborted with errors");}
       TpdPost::toped_status(console::TSTS_PRGRSBAROFF);
       _src_lib->closeStream();
       (*_tdt_db)()->recreateHierarchy(_tdt_db);
