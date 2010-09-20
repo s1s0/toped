@@ -745,8 +745,8 @@ DbImportFile::DbImportFile(wxString fileName, bool forceSeek) :
       _progresStep   (         0 ),
       _gziped        (     false ),
       _ziped         (     false ),
-      _status        (     false ),
       _forceSeek     ( forceSeek ),
+      _status        (     false ),
       _progresDivs   (       200 )
 {
    std::ostringstream info;
