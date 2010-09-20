@@ -269,7 +269,7 @@ void Oasis::Iso3309Crc32::add(const byte* buf, size_t len)
 }
 
 //===========================================================================
-Oasis::OasisInFile::OasisInFile(wxString fn) : DbImportFile(fn),
+Oasis::OasisInFile::OasisInFile(wxString fn) : DbImportFile(fn, true),
       _cellNames        ( NULL         ),
       _textStrings      ( NULL         ),
       _propNames        ( NULL         ),

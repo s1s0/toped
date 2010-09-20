@@ -340,7 +340,7 @@ typedef std::list<ForeignCell*> ForeignCellList;
  */
 class DbImportFile {
    public:
-                           DbImportFile(wxString);
+                           DbImportFile(wxString, bool);
       virtual             ~DbImportFile();
       bool                 reopenFile();
       bool                 readStream(void*, size_t, bool updateProgress = false);
@@ -374,20 +374,21 @@ class DbImportFile {
       ForeignCellTree*     _hierTree   ;//! Tree of instance hierarchy
    private:
       bool                 unZlib2Temp();//! inflate the input zlib file in a temporary one
-      bool                 unZip2Temp();//! inflate the input zip file in a temporary one
-      wxString             _fileName   ;//! A fully validated name of the file. Path,extension, everything
-      wxString             _tmpFileName;//! The name of the eventually deflated file (if the input is compressed)
-      wxInputStream*       _inStream   ;//! The input stream of the opened file
-      wxFileOffset         _fileLength ;//! The length of the file in bytes
-      wxFileOffset         _filePos    ;//! Current position in the file
-      wxFileOffset         _progresPos ;//! Current position of the progress bar (Toped status line)
-      wxFileOffset         _progresMark;//! Marked  position of the progress bar (Toped status line)
-      wxFileOffset         _progresStep;//! Update step of the progress bar (Toped status line)
-      bool                 _gziped     ;//! Indicates that the file is in compressed with gzip
-      bool                 _ziped      ;//! Indicates that the file is in compressed with zip
-      bool                 _status     ;//! Used only in the constructor if the file can't be
-                                        //! opened for whatever reason
-      unsigned const       _progresDivs;//! Number of updates to the progress bar during the current operation
+      bool                 unZip2Temp() ;//! inflate the input zip file in a temporary one
+      wxString             _fileName    ;//! A fully validated name of the file. Path,extension, everything
+      wxString             _tmpFileName ;//! The name of the eventually deflated file (if the input is compressed)
+      wxInputStream*       _inStream    ;//! The input stream of the opened file
+      wxFileOffset         _fileLength  ;//! The length of the file in bytes
+      wxFileOffset         _filePos     ;//! Current position in the file
+      wxFileOffset         _progresPos  ;//! Current position of the progress bar (Toped status line)
+      wxFileOffset         _progresMark ;//! Marked  position of the progress bar (Toped status line)
+      wxFileOffset         _progresStep ;//! Update step of the progress bar (Toped status line)
+      bool                 _gziped      ;//! Indicates that the file is in compressed with gzip
+      bool                 _ziped       ;//! Indicates that the file is in compressed with zip
+      bool                 _forceSeek   ;//! Seekable stream requested
+      bool                 _status      ;//! Used only in the constructor if the file can't be
+                                         //! opened for whatever reason
+      unsigned const       _progresDivs ;//! Number of updates to the progress bar during the current operation
 };
 
 //==========================================================================
