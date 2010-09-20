@@ -60,6 +60,7 @@ namespace CIFin {
    void     location_comment(YYLTYPE *loc, char* source);
    char*    charcopy(std::string source, bool quotes = false);
    long     getllint(char* source);
+   void     flushParserBuffer();
    static void ciflex_fatal(std::string message);
 //   int      includefile(char* name, FILE* &handler);
 //   int      EOfile();
@@ -216,6 +217,11 @@ char* CIFin::charcopy(std::string source, bool quotes)
 static void CIFin::ciflex_fatal(std::string message)
 {
    throw EXPTNcif_parser(message);
+}
+
+void CIFin::flushParserBuffer()
+{
+   cif_flush_buffer(YY_CURRENT_BUFFER);
 }
 
 /*

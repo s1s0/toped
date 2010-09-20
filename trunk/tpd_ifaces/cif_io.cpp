@@ -38,6 +38,9 @@ CIFin::CifFile* CIFInFile = NULL;
 extern void*   new_cif_lex_buffer( FILE* cifin );
 extern void    delete_cif_lex_buffer( void* b ) ;
 extern int     cifparse(); // Calls the bison generated parser
+namespace CIFin {
+   extern void    flushParserBuffer();
+};
 extern FILE*   cifin;
 
 
@@ -375,6 +378,11 @@ CIFin::CifFile::CifFile(wxString wxfname) : DbImportFile(wxfname, false)
    // run the bison generated parser
    ciflloc.first_column = ciflloc.first_line = 1;
    ciflloc.last_column  = ciflloc.last_line  = 1;
+   // This is to make sure that the parser will start from a clean buffer
+   // It is preventing the case when after a syntax error in the CIF file,
+   // another file can not be parsed, because the buffer is still full with
+   // data
+   flushParserBuffer();
    cifparse();
    linkReferences();
    // Close the input stream when done
