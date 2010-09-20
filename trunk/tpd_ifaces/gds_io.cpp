@@ -308,7 +308,7 @@ GDSin::GdsRecord::~GdsRecord()
 //==============================================================================
 // class GdsInFile
 //==============================================================================
-GDSin::GdsInFile::GdsInFile(wxString wxfname) : DbImportFile(wxfname)
+GDSin::GdsInFile::GdsInFile(wxString wxfname) : DbImportFile(wxfname, false)
 {
    _gdsiiWarnings = 0;
    _library       = NULL;

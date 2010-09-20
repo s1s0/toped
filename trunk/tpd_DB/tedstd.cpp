@@ -734,19 +734,20 @@ laydata::WireContourAux::~WireContourAux()
  * of the class.
  * @param fileName - the fully qualified filename - OS dependent
  */
-DbImportFile::DbImportFile(wxString fileName) :
-      _convLength    (     0 ),
-      _hierTree      (  NULL ),
-      _inStream      (  NULL ),
-      _fileLength    (     0 ),
-      _filePos       (     0 ),
-      _progresPos    (     0 ),
-      _progresMark   (     0 ),
-      _progresStep   (     0 ),
-      _gziped        ( false ),
-      _ziped         ( false ),
-      _status        ( false ),
-      _progresDivs   (   200 )
+DbImportFile::DbImportFile(wxString fileName, bool forceSeek) :
+      _convLength    (         0 ),
+      _hierTree      (      NULL ),
+      _inStream      (      NULL ),
+      _fileLength    (         0 ),
+      _filePos       (         0 ),
+      _progresPos    (         0 ),
+      _progresMark   (         0 ),
+      _progresStep   (         0 ),
+      _gziped        (     false ),
+      _ziped         (     false ),
+      _status        (     false ),
+      _forceSeek     ( forceSeek ),
+      _progresDivs   (       200 )
 {
    std::ostringstream info;
    wxFileName wxGdsFN(fileName);
@@ -779,10 +780,22 @@ DbImportFile::DbImportFile(wxString fileName) :
       }
       else if (_gziped)
       {
-         // gz files are handled "as is" in the first import stage.
-         wxInputStream* fstream = DEBUG_NEW wxFFileInputStream(_fileName,wxT("rb"));
-         _inStream = DEBUG_NEW wxZlibInputStream(fstream);
-         _status = true;
+         // gz files are handled "as is" in the first import stage unless forceSeek
+         // is requested
+         if (_forceSeek)
+         {
+            if (unZlib2Temp())
+            {
+               _inStream = DEBUG_NEW wxFFileInputStream(_tmpFileName,wxT("rb"));
+               _status = true;
+            }
+         }
+         else
+         {
+            wxInputStream* fstream = DEBUG_NEW wxFFileInputStream(_fileName,wxT("rb"));
+            _inStream = DEBUG_NEW wxZlibInputStream(fstream);
+            _status = true;
+         }
       }
       else
       {
@@ -822,10 +835,11 @@ bool DbImportFile::reopenFile()
 
    if (_gziped)
    {
-      if (unZlib2Temp())
-      {
+      if (_forceSeek)
+         // It should've been already inflated by the constructor
          _inStream = DEBUG_NEW wxFFileInputStream(_tmpFileName,wxT("rb"));
-      }
+      else if (unZlib2Temp())
+         _inStream = DEBUG_NEW wxFFileInputStream(_tmpFileName,wxT("rb"));
       else return false;
    }
    else if (_ziped)
