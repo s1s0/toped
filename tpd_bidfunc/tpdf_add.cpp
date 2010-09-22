@@ -1084,21 +1084,22 @@ int tellstdfunc::stdUSINGLAYER_S::execute()
 {
   std::string layname = getStringValue();
   layprop::DrawProperties* drawProp;
+  unsigned layno = ERR_LAY;
   if (PROPC->lockDrawProp(drawProp))
   {
-     unsigned layno = drawProp->getLayerNo(layname);
-     if (ERR_LAY != layno)
-     {
-       OPstack.push(DEBUG_NEW telldata::ttint(layno));
-       return stdUSINGLAYER::execute();
-     }
-     else
-     {// no layer with this name
-       std::string news = "layer \"";
-       news += layname; news += "\" is not defined";
-       tell_log(console::MT_ERROR,news);
-     }
+     layno = drawProp->getLayerNo(layname);
   }
   PROPC->unlockDrawProp(drawProp);
-  return EXEC_NEXT;
+  if (ERR_LAY != layno)
+  {
+    OPstack.push(DEBUG_NEW telldata::ttint(layno));
+    return stdUSINGLAYER::execute();
+  }
+  else
+  {// no layer with this name
+    std::string news = "layer \"";
+    news += layname; news += "\" is not defined";
+    tell_log(console::MT_ERROR,news);
+    return EXEC_ABORT;
+  }
 }
