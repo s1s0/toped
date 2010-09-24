@@ -80,7 +80,7 @@ int polycross::orientation(const TP* p1, const TP* p2, const TP* p3)
 }
 
 /**
- * Cheeck whether point p lies inside the segment defined by p1 and p2. The
+ * Check whether point p lies inside the segment defined by p1 and p2. The
 function assumes that p lies on the line defined by p1 and p2
  * @param p1 first point defining the input segment
  * @param p2 second point defining the input segment

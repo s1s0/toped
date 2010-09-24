@@ -424,7 +424,7 @@ void laydata::TdtCell::openGlDraw(layprop::DrawProperties& drawprop, bool active
       unsigned curlayno = drawprop.getTenderLay(lay->first);
       if (!drawprop.layerHidden(curlayno)) drawprop.setCurrentColor(curlayno);
       else continue;
-      // fancy like this (dlist iterator) , besause a simple
+      // fancy like this (dlist iterator) , because a simple
       // _shapesel[curlayno] complains about loosing qualifiers (const)
       SelectList::const_iterator dlst;
       bool fill = drawprop.setCurrentFill(false);// honor block_fill state)

@@ -477,7 +477,7 @@ laydata::WireContour::WireContour(const int4b* ldata, unsigned lsize, word width
 
 /*!
  * Dumps the generated wire contour in the @plist vector. For optimal performance the
- * vector object shall be properly allocated using something line reserve(csize())
+ * vector object shall be properly allocated using something like reserve(csize())
  * before calling this method. The method will cope with @plist vectors which already
  * contain some data. It will just add the contour at the end of the @plist.
  */
@@ -567,9 +567,9 @@ void laydata::WireContour::endPnts(word i1, word i2, bool first)
 byte laydata::WireContour::chkCollinear(word i1, word i2, word i3)
 {
    if ( 0 != orientation(i1, i2, i3)) return 0; // points not in one line
-   if (_ldata[i1] == _ldata[i3]) return 3;
    float lambda1 = getLambda  (i3, i2, i1);
    float lambda2 = getLambda  (i1, i2, i3);
+   if ((_ldata[2*i1] == _ldata[2*i3]) || (_ldata[2*i1+1] == _ldata[2*i3+1])) return 3;
    if ((0 == lambda1) && (0 == lambda2)) return 5; // 3 coinciding points
    if ((0 <  lambda1) || (0 <  lambda2)) return 3; // collinear points
    if (0 == lambda1) return 1; //i2 and i3 coincide
@@ -645,11 +645,14 @@ laydata::WireContourAux::WireContourAux(const int4b* parray, unsigned lsize, con
       _ldata[2*i  ] = cpoint.x();
       _ldata[2*i+1] = cpoint.y();
    }
-   _wcObject = DEBUG_NEW laydata::WireContour(_ldata, lsize, width);
+   DBbox wadjust(TP(), TP(width,width));
+   wadjust = wadjust * translation;
+   word adjwidth = abs(wadjust.p1().x() - wadjust.p2().x());
+   _wcObject = DEBUG_NEW laydata::WireContour(_ldata, lsize, adjwidth);
 }
 
 /*!
- * Accelerates the WireContour usage with poointlist input data. Converts the @plist
+ * Accelerates the WireContour usage with pointlist input data. Converts the @plist
  * into array format and stores the result in _ldata. Then creates the
  * WireContour object and initializes it with the _ldata array.
  */
