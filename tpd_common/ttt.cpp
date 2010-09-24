@@ -568,9 +568,9 @@ CTM CTM::operator = (const CTM& op2)
 void CTM::Decompose(TP& trans, real& rot, real& scale, bool& flipX) const
 {
    // Assuming that every CTM can be represented as a result
-   // of 4 consequitive operations - flipX, rotate, scale and translate,
-   // this function is extracting the scale, translation, roatatoin and
-   // flip values of these oprations.
+   // of 4 consecutive operations - flipX, rotate, scale and translate,
+   // this function is extracting the scale, translation, rotation and
+   // flip values of these operations.
    // Second presumption here is for the scale value returned. It is that
    // scX and scY are always the same
    real scX = sqrt(_a * _a + _c * _c);
