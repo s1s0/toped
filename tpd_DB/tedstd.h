@@ -238,11 +238,13 @@ namespace laydata {
          typedef std::list<TP> PointList;
          void              endPnts(word, word, bool);
          void              mdlPnts(word, word, word);
+         void              mdlAcutePnts(word, word, word, int, int);
          byte              chkCollinear(word,word,word);
          void              colPnts(word,word,word);
          TP                mdlCPnt(word, word);
          int               orientation(word, word, word);
          float             getLambda(word i1, word i2, word ii);
+         int               xangle(word i1, word i2);
          const int4b*      _ldata; //! The original wire central line. Do not delete it. Do not alter it!
          const unsigned    _lsize; //! The number of points in the wire central line
          const word        _width; //! The width of the wire
