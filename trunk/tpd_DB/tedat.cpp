@@ -2671,7 +2671,8 @@ int laydata::xangle(const TP& p1, const TP& p2) {
       else                 return 180;
    }
    else
-      return (int)rint(180*atan2(double(p2.y() - p1.y()), p2.x() - p1.x())/Pi);
+      return (int)rint(180 * atan2(double(p2.y() - p1.y()),
+                                   double(p2.x() - p1.x()) ) /Pi);
 }
 
 //-----------------------------------------------------------------------------

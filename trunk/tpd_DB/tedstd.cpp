@@ -457,8 +457,18 @@ laydata::WireContour::WireContour(const int4b* ldata, unsigned lsize, word width
    {
       switch (chkCollinear(i-1, i, i+1))
       {
-         case 0: // points not in one line
-            mdlPnts(i-1,  i, i+1 ); break;
+         case 0: {// points not in one line
+            int angle1 = xangle(i  , i-1);
+            int angle2 = xangle(i  , i+1);
+            int ang = abs(angle1 - angle2);
+            assert(ang != 0);
+            assert(ang != 180);
+            if ((ang < 90) || (ang > 270))
+               mdlAcutePnts(i-1,  i, i+1, angle1, angle2); // acute angle
+            else
+               mdlPnts(i-1,  i, i+1 );
+            break;
+         }
          case 1: //i-1 and i coincide
             endPnts( i, i+1, true); break;
          case 2: // i and i+1 coincide
@@ -605,6 +615,43 @@ TP laydata::WireContour::mdlCPnt(word i1, word i2)
    return TP((int4b) rint(_ldata[i2] + xcorr), (int4b) rint(_ldata[i2+1] + ycorr));
 }
 
+
+void laydata::WireContour::mdlAcutePnts(word i1, word i2, word i3, int angle1, int angle2)
+{
+   mdlPnts(i1,  i2, i3 );
+   //
+   i1 *= 2; i2 *= 2; i3 *= 2;
+   int ysign = ((angle1 - angle2) >  0) && ((angle1 -angle2) < 90 )?  1 : - 1;
+   CTM mtrx1;//
+   mtrx1.Rotate(angle1);
+   mtrx1.Translate(_ldata[i2], _ldata[i2+1]);
+   TP p1( -_width/2, ysign * _width/2);
+   p1 *= mtrx1;
+
+   CTM mtrx2;
+   mtrx2.Rotate(angle2);
+   mtrx2.Translate(_ldata[i2], _ldata[i2+1]);
+   TP p2( - _width/2, -ysign * _width/2);
+   p2 *= mtrx2;
+
+   TP pi = _cdata.front(); _cdata.pop_front();
+   TP pe = _cdata.back();  _cdata.pop_back();
+   if (-1 == ysign)
+   {
+      _cdata.push_front(p1);
+      _cdata.push_front(p2);
+      _cdata.push_back (pe);
+      _cdata.push_back (pe);
+   }
+   else
+   {
+      _cdata.push_front(pi);
+      _cdata.push_front(pi);
+      _cdata.push_back (p1);
+      _cdata.push_back (p2);
+   }
+}
+
 int laydata::WireContour::orientation(word i1, word i2, word i3)
 {
    i1 *= 2; i2 *= 2; i3 *=2;
@@ -627,6 +674,30 @@ float laydata::WireContour::getLambda(word i1, word i2, word ii)
    // point coincides with the lp vertex of the segment
    else lambda = 0;
    return lambda;
+}
+
+//-----------------------------------------------------------------------------
+/*! Returns the angle between the line and the X axis
+*/
+//int laydata::WireContour::xangle(const TP& p1, const TP& p2)
+int laydata::WireContour::xangle(word i1, word i2)
+{
+   i1 *= 2; i2 *= 2;
+   const long double Pi = 3.1415926535897932384626433832795;
+   if (_ldata[i1] == _ldata[i2])
+   { //vertical line
+      assert(_ldata[i1+1] != _ldata[i2+1]); // make sure both points do not coinside
+      if   (_ldata[i2+1] > _ldata[i1+1]) return  90;
+      else                               return -90;
+   }
+   else if (_ldata[i1+1] == _ldata[i2+1])
+   { // horizontal line
+      if (_ldata[i2]    > _ldata[i1]   ) return 0;
+      else                               return 180;
+   }
+   else
+      return (int)rint(180*atan2(double(_ldata[i2+1] - _ldata[i1+1]),
+                                 double(_ldata[i2]   - _ldata[i1]  ) ) /Pi);
 }
 
 //=============================================================================
