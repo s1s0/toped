@@ -30,6 +30,7 @@
 
 #include "tpdph.h"
 #include <sstream>
+#include <wx/regex.h>
 #include "calbr_reader.h"
 
 long Calbr::drcPolygon::_precision = 0;
@@ -118,6 +119,11 @@ Calbr::drcRuleCheck::drcRuleCheck(unsigned int num, const std::string &name)
 {
 }
 
+Calbr::drcRuleCheck::~drcRuleCheck()
+{
+	if (_CNStruct) delete _CNStruct;
+}
+
 void Calbr::drcRuleCheck::setTimeStamp(const std::string &timeStamp)
 {
    _timeStamp = timeStamp;
@@ -174,6 +180,10 @@ void Calbr::drcRuleCheck::addEdge(const Calbr::drcEdge &theEdge)
    }
 }
 
+void Calbr::drcRuleCheck::addCellNameStruct(Calbr::cellNameStruct *cnStruct)
+{
+	_CNStruct = cnStruct;
+}
 
 Calbr::edge Calbr::drcRuleCheck::getZoom(long ordinal)
 {
@@ -208,7 +218,7 @@ Calbr::edge Calbr::drcRuleCheck::getZoom(void)
 
 //-----------------------------------------------------------------------------
 Calbr::CalbrFile::CalbrFile(const std::string &fileName, drcRenderer *render)
-      :_cellNameSpace(false), _ok(true), _render(render)
+      :_ok(true), _render(render)
 {
    std::ostringstream ost;
    _fileName = fileName;
@@ -299,7 +309,7 @@ bool Calbr::CalbrFile::parse(unsigned int num)
    if (fgets(ruleCheckName, 512, _calbrFile)==NULL) return false;
 
    //Remove LF from  ruleCheckName before creating ruleCheck
-   Calbr::drcRuleCheck *ruleCheck = DEBUG_NEW Calbr::drcRuleCheck(num, std::string(ruleCheckName, strlen(ruleCheckName)-1));
+   _curRuleCheck = DEBUG_NEW Calbr::drcRuleCheck(num, std::string(ruleCheckName, strlen(ruleCheckName)-1));
    char tempStr[512];
    char timeStamp[512];
    long resCount, origResCount, descrStrCount;
@@ -321,9 +331,9 @@ bool Calbr::CalbrFile::parse(unsigned int num)
       ost<<"string: " <<tempStr;
       return false;
    };
-   ruleCheck->setCurResCount(resCount);
-   ruleCheck->setOrigResCount(origResCount);
-   ruleCheck->setTimeStamp(timeStamp);
+   _curRuleCheck->setCurResCount(resCount);
+   _curRuleCheck->setOrigResCount(origResCount);
+   _curRuleCheck->setTimeStamp(timeStamp);
 
    //Get Description Strings
    for(long i= 0; i < descrStrCount; i++)
@@ -338,7 +348,7 @@ bool Calbr::CalbrFile::parse(unsigned int num)
          tell_log(console::MT_ERROR,ost.str());
          return false;
       }
-      ruleCheck->addDescrString(tempStr);
+      _curRuleCheck->addDescrString(tempStr);
    }
    //Get Results
    for(long i= 0; i < resCount; i++)
@@ -367,19 +377,32 @@ bool Calbr::CalbrFile::parse(unsigned int num)
          return false;
 
       };
+					
+		
+		/*if (fgets(tempStr, 512, _calbrFile)==NULL)
+      {
+         _ok = false;
+         ost << "Can't parse  rule " << ruleCheckName;
+         tell_log(console::MT_ERROR,ost.str());
+         ost.str("");
+         ost<<"string: " <<tempStr;
+         tell_log(console::MT_ERROR,ost.str());
+         return false;
+      }*/
+
       drcPolygon poly(ordinal, _render);
       switch(type)
       {
          case 'p'   :
             if (!parsePoly(ruleCheckName ,poly, numberOfElem)) return false;
-            ruleCheck->addPolygon(poly);
+            _curRuleCheck->addPolygon(poly);
             break;
 
          case 'e'   :
             {
                Calbr::drcEdge theEdge(ordinal, _render);
                if (!parseEdge(ruleCheckName ,theEdge, numberOfElem)) return false;
-               ruleCheck->addEdge(theEdge);
+               _curRuleCheck->addEdge(theEdge);
             }
                break;
          default   :
@@ -392,7 +415,7 @@ bool Calbr::CalbrFile::parse(unsigned int num)
             return false;
       }
    }
-   _RuleChecks.push_back(ruleCheck);
+   _RuleChecks.push_back(_curRuleCheck);
    return true;
 }
 
@@ -415,10 +438,22 @@ bool Calbr::CalbrFile::parsePoly(char* ruleCheckName, drcPolygon & poly, int num
          return false;
       }
 
+		//Check Cell Name Mode
       if((tempStr[0]=='C') && (tempStr[1]=='N'))
       {
-         _cellNameSpace = true;
-
+			cellNameStruct CNStruct;
+			parseCellNameMode(&CNStruct, tempStr);
+			//After parsing Cell Name Mode read next string 
+			if (fgets(tempStr, 512, _calbrFile)==NULL)
+			{
+				_ok = false;
+				ost << "Can't parse  rule " << ruleCheckName;
+				tell_log(console::MT_ERROR,ost.str());
+				ost.str("");
+				ost<<"string: " <<tempStr;
+				tell_log(console::MT_ERROR,ost.str());
+				return false;
+			}
       }
 
       if (sscanf( tempStr, "%ld %ld", &x, &y)!= 2)
@@ -455,6 +490,25 @@ bool Calbr::CalbrFile::parseEdge(char* ruleCheckName, drcEdge & edge, int number
          tell_log(console::MT_ERROR,ost.str());
          return false;
       }
+
+		//Check Cell Name Mode
+      if((tempStr[0]=='C') && (tempStr[1]=='N'))
+      {
+			cellNameStruct CNStruct;
+			parseCellNameMode(&CNStruct, tempStr);
+			//After parsing Cell Name Mode read next string 
+			if (fgets(tempStr, 512, _calbrFile)==NULL)
+			{
+				_ok = false;
+				ost << "Can't parse  rule " << ruleCheckName;
+				tell_log(console::MT_ERROR,ost.str());
+				ost.str("");
+				ost<<"string: " <<tempStr;
+				tell_log(console::MT_ERROR,ost.str());
+				return false;
+			}
+      }
+
       if(sscanf( tempStr, "%ld %ld %ld %ld", &x1, &y1, &x2, &y2)!=4)
       {
          _ok = false;
@@ -470,6 +524,26 @@ bool Calbr::CalbrFile::parseEdge(char* ruleCheckName, drcEdge & edge, int number
 
    return true;
 }
+
+void  Calbr::CalbrFile::parseCellNameMode(cellNameStruct *CNStruct, const std::string &parseString)
+{
+	//Check for Cell Name results
+	wxRegEx regex;
+	//Regexp: CN cellname (with 'c' or withoout 'c') number1, number2 ... number6
+	VERIFY(regex.Compile(wxT("(CN) ([[:alnum:]_]+) (c{0,1}) ([[:digit:]]+) ([[:digit:]]+) ([[:digit:]]+) ([[:digit:]]+) ([[:digit:]]+) ([[:digit:]]+)")));
+	//VERIFY(regex.Compile(wxT("(CN) ([[:alnum:]_]+) (c{0,1}) ([[:digit:]]+) "))); //
+	//wxString st=wxString(parseString.c_str(), wxConvUTF8);
+	wxString st = wxT("CN xxx c 1 2 3 4 5 6");
+	if (regex.Matches(st))
+	{
+		wxString str0 = regex.GetMatch(st, 0);
+		wxString str1 = regex.GetMatch(st, 1);
+		wxString str2 = regex.GetMatch(st, 2);
+		wxString str3 = regex.GetMatch(st, 3);
+		wxString str4 = regex.GetMatch(st, 4);
+	}
+}
+
 
 void   Calbr::CalbrFile::addResults()
 {
