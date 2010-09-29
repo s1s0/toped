@@ -178,7 +178,7 @@ namespace Calbr
          bool              parse(unsigned int num);
          bool              parsePoly(char* ruleCheckName, drcPolygon & poly, int numberOfElem);
          bool              parseEdge(char* ruleCheckName, drcEdge & edge, int numberOfElem);
-			void              parseCellNameMode(cellNameStruct *CNStruct, const std::string &parseString);
+			bool              parseCellNameMode(cellNameStruct *CNStruct, const std::string &parseString);
 			drcRuleCheck*		_curRuleCheck;
          RuleChecksVector  _RuleChecks;
          bool              _ok;

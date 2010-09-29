@@ -441,8 +441,21 @@ bool Calbr::CalbrFile::parsePoly(char* ruleCheckName, drcPolygon & poly, int num
 		//Check Cell Name Mode
       if((tempStr[0]=='C') && (tempStr[1]=='N'))
       {
-			cellNameStruct CNStruct;
-			parseCellNameMode(&CNStruct, tempStr);
+			cellNameStruct *CNStruct = DEBUG_NEW cellNameStruct;
+			if(parseCellNameMode(CNStruct, tempStr))
+			{
+				_curRuleCheck->addCellNameStruct(CNStruct);
+			}
+			else
+			{
+				_ok = false;
+				ost << "Can't parse  rule " << ruleCheckName;
+				tell_log(console::MT_ERROR,ost.str());
+				ost.str("");
+				ost<<"string: " <<tempStr;
+				tell_log(console::MT_ERROR,ost.str());
+				return false;
+			}
 			//After parsing Cell Name Mode read next string 
 			if (fgets(tempStr, 512, _calbrFile)==NULL)
 			{
@@ -494,8 +507,21 @@ bool Calbr::CalbrFile::parseEdge(char* ruleCheckName, drcEdge & edge, int number
 		//Check Cell Name Mode
       if((tempStr[0]=='C') && (tempStr[1]=='N'))
       {
-			cellNameStruct CNStruct;
-			parseCellNameMode(&CNStruct, tempStr);
+			cellNameStruct *CNStruct = DEBUG_NEW cellNameStruct;
+			if(parseCellNameMode(CNStruct, tempStr))
+			{
+				_curRuleCheck->addCellNameStruct(CNStruct);
+			}
+			else
+			{
+				_ok = false;
+				ost << "Can't parse  rule " << ruleCheckName;
+				tell_log(console::MT_ERROR,ost.str());
+				ost.str("");
+				ost<<"string: " <<tempStr;
+				tell_log(console::MT_ERROR,ost.str());
+				return false;
+			}
 			//After parsing Cell Name Mode read next string 
 			if (fgets(tempStr, 512, _calbrFile)==NULL)
 			{
@@ -525,23 +551,48 @@ bool Calbr::CalbrFile::parseEdge(char* ruleCheckName, drcEdge & edge, int number
    return true;
 }
 
-void  Calbr::CalbrFile::parseCellNameMode(cellNameStruct *CNStruct, const std::string &parseString)
+bool  Calbr::CalbrFile::parseCellNameMode(cellNameStruct *CNStruct, const std::string &parseString)
 {
 	//Check for Cell Name results
 	wxRegEx regex;
 	//Regexp: CN cellname (with 'c' or withoout 'c') number1, number2 ... number6
 	VERIFY(regex.Compile(wxT("(CN) ([[:alnum:]_]+) (c{0,1}) ([[:digit:]]+) ([[:digit:]]+) ([[:digit:]]+) ([[:digit:]]+) ([[:digit:]]+) ([[:digit:]]+)")));
-	//VERIFY(regex.Compile(wxT("(CN) ([[:alnum:]_]+) (c{0,1}) ([[:digit:]]+) "))); //
-	//wxString st=wxString(parseString.c_str(), wxConvUTF8);
-	wxString st = wxT("CN xxx c 1 2 3 4 5 6");
-	if (regex.Matches(st))
+	wxString str=wxString(parseString.c_str(), wxConvUTF8);
+	//wxString str = wxT("CN xxx c 1 2 3 4 5 6");
+
+	if (regex.Matches(str))
 	{
-		wxString str0 = regex.GetMatch(st, 0);
-		wxString str1 = regex.GetMatch(st, 1);
-		wxString str2 = regex.GetMatch(st, 2);
-		wxString str3 = regex.GetMatch(st, 3);
-		wxString str4 = regex.GetMatch(st, 4);
+		CNStruct->cellName = regex.GetMatch(str, 2).char_str();
+		std::string str2 = regex.GetMatch(str, 3).char_str();
+		if (!stricmp(str2.c_str(), "")) 
+		{
+			CNStruct->spaceCoords = false;
+		}
+		else
+			if (!stricmp(str2.c_str(), "c")) 
+			{
+				CNStruct->spaceCoords = true;
+			}
+			else
+			{
+				return false;
+			}
+		//Save tranformation matrix 
+		long number;
+		regex.GetMatch(str, 4).ToLong(&number);
+		CNStruct->a[0][0] = number;
+		regex.GetMatch(str, 5).ToLong(&number);
+		CNStruct->a[0][1] = number;
+		regex.GetMatch(str, 6).ToLong(&number);
+		CNStruct->a[0][2] = number;
+		regex.GetMatch(str, 7).ToLong(&number);
+		CNStruct->a[1][0] = number;
+		regex.GetMatch(str, 8).ToLong(&number);
+		CNStruct->a[1][1] = number;
+		regex.GetMatch(str, 9).ToLong(&number);
+		CNStruct->a[1][2] = number;
 	}
+	return true;
 }
 
 
