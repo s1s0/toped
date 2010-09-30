@@ -1802,6 +1802,7 @@ int tellstdfunc::DRCCalibreimport::execute()
 
    laydata::DrcLibrary* drcDesign = DATC->lockDRC();
    DRCData = DEBUG_NEW Calbr::CalbrFile(filename, new Calbr::drcTenderer(drcDesign));
+	DRCData->readFile();
    if(DRCData->isOk())
    {
       TpdPost::addDRCtab();
