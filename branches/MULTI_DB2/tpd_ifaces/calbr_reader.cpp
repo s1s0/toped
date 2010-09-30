@@ -470,8 +470,8 @@ bool  Calbr::CalbrFile::parseCellNameMode(cellNameStruct *CNStruct, const std::s
 	wxRegEx regex;
 	//Regexp: CN cellname (with 'c' or withoout 'c') number1, number2 ... number6
 	VERIFY(regex.Compile(wxT("(CN) ([[:alnum:]_]+) (c{0,1}) ([[:digit:]]+) ([[:digit:]]+) ([[:digit:]]+) ([[:digit:]]+) ([[:digit:]]+) ([[:digit:]]+)")));
-	//wxString str=wxString(parseString.c_str(), wxConvUTF8);
-	wxString str = wxT("CN xxx c 1 -2 3 4 5 6");
+	wxString str=wxString(parseString.c_str(), wxConvUTF8);
+	//wxString str = wxT("CN xxx c 1 -2 3 4 5 6");
 
 	if (regex.Matches(str))
 	{
