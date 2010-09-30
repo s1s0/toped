@@ -904,6 +904,36 @@ EXPTNdrc_reader::EXPTNdrc_reader(std::string info)
    tell_log(console::MT_ERROR,news);
 };
 
+
+
+EXPTNdrc_parser::EXPTNdrc_parser(std::string info)
+{
+   std::string news = "Error in drc parser =>";
+   news += info;
+   tell_log(console::MT_ERROR,news);
+};
+
+EXPTNdrc_parser::EXPTNdrc_parser(err_message type, std::string info, std::string wrongStr)
+{
+	if (type == drc_std)
+	{
+		std::string news = "Error in drc parser =>";
+		news += info;
+		news += "\n";
+		news += wrongStr;
+		tell_log(console::MT_ERROR,news);
+	}
+	else
+	{
+		std::string news = "Can't parse  rule\n";
+		news += info;
+		news += "\n";
+		news += "string:\n";
+		news += wrongStr;
+		tell_log(console::MT_ERROR,news);
+	}
+};
+
 //=============================================================================
 LayerMapExt::LayerMapExt(const USMap& inlist, ExtLayers* alist)
    : _theMap(), _status(true), _alist(alist)

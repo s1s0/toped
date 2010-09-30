@@ -158,6 +158,7 @@ namespace Calbr
       public:
                            CalbrFile(const std::string &fileName, drcRenderer *render);
                           ~CalbrFile();
+			void					readFile();
          void              addResults();
          void              showError(const std::string & error, long  number);
          void              showCluster(const std::string & error);
