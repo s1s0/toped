@@ -489,10 +489,12 @@ void tui::LayoutCanvas::rubber_paint()
    DATC->motionDraw(_LayCTM, releasepoint, n_ScrMARK);
 }
 
-void tui::LayoutCanvas::CursorControl(bool shift, bool ctl) {
+void tui::LayoutCanvas::CursorControl(bool shift, bool ctl)
+{
    // alt key forces free move
    // shift forces restricted move
-   if (ctl || !(rubber_band && (restricted_move || shift))) {
+   if (ctl || !(rubber_band && (restricted_move || shift)))
+   {
       n_ScrMARK = ScrMARK; n_ScrMARKold = ScrMARKold;
       return;
    }
@@ -503,16 +505,19 @@ void tui::LayoutCanvas::CursorControl(bool shift, bool ctl) {
    int dY = abs(sdY);
    // The sign actually is the sign of the tangents. To avoid troubles with the division by zero,
    // it is easier and faster to obtain the sign like this
-   int sign = ((sdX * sdY) >= 0) ? 1 : -1;
+//   int sign = ((sdX * sdY) >= 0) ? 1 : -1;
+   int sign = (((double)sdX * (double)sdY) >= 0.0) ? 1 : -1;
    bool _45deg = (PROPC->markerAngle() == 45);
-   if (dX > dY) {
+   if (dX > dY)
+   {
       if (_45deg && (dX < 2*dY)) n_ScrMARK.setY( sign*sdX + releasepoint.y() );
       else                       n_ScrMARK.setY( releasepoint.y() );
       n_ScrMARK.setX(ScrMARK.x() );
    }
-   else {
+   else
+   {
       if (_45deg && (dY < 2*dX)) n_ScrMARK.setX( sign*sdY + releasepoint.x() );
-      else                      n_ScrMARK.setX( releasepoint.x() );
+      else                       n_ScrMARK.setX( releasepoint.x() );
       n_ScrMARK.setY(ScrMARK.y() );
    }
 }
