@@ -1083,7 +1083,7 @@ void laydata::TdtPoly::stretch(int bfactor, ShapeList** decure)
    {
       // resulting polygon is exactly with 0 area (non-recoverable) OR
       // resulting polygon is turned completely inside out shp_clock & vsh.status()
-      // in both cases - it shall dissapear
+      // in both cases - it shall disappear
       decure[0]->push_back(this);
    }
    delete res;
@@ -1174,7 +1174,8 @@ laydata::TdtPoly::~TdtPoly()
 //-----------------------------------------------------------------------------
 // class TdtWire
 //-----------------------------------------------------------------------------
-laydata::TdtWire::TdtWire(const pointlist& plst, word width) : TdtData(), _width(width)
+laydata::TdtWire::TdtWire(const pointlist& plst, WireWidth width) :
+      TdtData(), _width(width)
 {
    _psize = plst.size();
    assert(_psize);
@@ -1186,7 +1187,7 @@ laydata::TdtWire::TdtWire(const pointlist& plst, word width) : TdtData(), _width
    }
 }
 
-laydata::TdtWire::TdtWire(int4b* pdata, unsigned psize, word width) :
+laydata::TdtWire::TdtWire(int4b* pdata, unsigned psize, WireWidth width) :
       TdtData(), _width(width), _pdata(pdata), _psize(psize)
 {
 }
@@ -1209,7 +1210,7 @@ laydata::TdtWire::TdtWire(TEDfile* const tedfile) : TdtData()
 void laydata::TdtWire::openGlPrecalc(layprop::DrawProperties& drawprop, pointlist& ptlist) const
 {
    // first check whether to draw only the center line
-   DBbox wsquare = DBbox(TP(0,0),TP(_width,_width));
+   DBbox wsquare = DBbox(TP(0,0),TP((int4b)_width, (int4b)_width));
    bool center_line_only = !wsquare.visible(drawprop.topCtm() * drawprop.scrCtm(), drawprop.visualLimit());
    if (center_line_only)
    {
@@ -2432,10 +2433,10 @@ std::string laydata::ValidBox::failType()
 //-----------------------------------------------------------------------------
 laydata::ValidPoly::ValidPoly(pointlist& plist) : Validator(plist) {
    angles();
-   if (_status > 0x10) return;
+   if (!valid()) return;
    //reorder the chain (if needed) to get the points in anticlockwise order
    normalize();
-   if (_status > 0x10) return;
+   if (!valid()) return;
    //check self crossing
    selfcrossing();
 }
@@ -2540,15 +2541,6 @@ void laydata::ValidPoly::selfcrossing()
    catch (EXPTNpolyCross) {_status |= laydata::shp_cross; return;}
    if (0 != fixingpoly.crossp() )
       _status |= laydata::shp_cross;
-
-/* @TODO Clean-up the old self-cross check algo as soon as the resize
-   works properly
-   Old algo
-   tedop::segmentlist segs(_plist, false);
-   tedop::EventQueue Eq(segs); // initialize the event queue
-   tedop::SweepLine  SL(_plist); // initialize the sweep line
-   if (!Eq.check_valid(SL))
-      _status |= laydata::shp_cross;*/
 }
 
 std::string laydata::ValidPoly::failType() {
@@ -2561,12 +2553,16 @@ std::string laydata::ValidPoly::failType() {
 //-----------------------------------------------------------------------------
 // class ValidWire
 //-----------------------------------------------------------------------------
-laydata::ValidWire::ValidWire(pointlist& plist, word width) :
+laydata::ValidWire::ValidWire(pointlist& plist, WireWidth width) :
                                      Validator(plist), _width(width) {
-   angles();
-   if (_status > 0x10) return;
-   if (numpoints() > 3)
-      selfcrossing();
+   if (width > MAX_WIRE_WIDTH)
+      _status |= shp_width;
+   else
+   {
+      angles();
+      if (valid() && numpoints() > 3)
+         selfcrossing();
+   }
 }
 
 /*! Checks the wire angles. Filters out intermediate and coinciding points.
@@ -2622,7 +2618,7 @@ void laydata::ValidWire::angles()
 
 
 /*! Implements  algorithm to check that the wire is not simple crossing.
-Alters the laydata::shp_cross bit of _status if the wire is selfcrossing
+Alters the laydata::shp_cross bit of _status if the wire is self-crossing
 */
 void laydata::ValidWire::selfcrossing() {
 
@@ -2651,6 +2647,7 @@ std::string laydata::ValidWire::failType() {
 //   if (_status & shp_null)  return "Zero area";
    if      (_status & shp_cross) return "Self-crossing";
    else if (_status & shp_null ) return "NULL area object";
+   else if (_status & shp_width) return "Wire width too big.";
    else return "OK";
 }
 

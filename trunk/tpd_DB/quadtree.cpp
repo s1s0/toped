@@ -321,7 +321,7 @@ laydata::TdtData* laydata::QuadTree::addPoly(int4b* pl, unsigned psize)
 /*!Create new TdtWire. Depending on sortnow input variable the new shape is
 just added to the QuadTree (using QuadTree::put()) without sorting or fit on
 the proper place (using add() */
-laydata::TdtData* laydata::QuadTree::addWire(pointlist& pl,word w)
+laydata::TdtData* laydata::QuadTree::addWire(pointlist& pl, WireWidth w)
 {
    laydata::TdtWire *shape = DEBUG_NEW TdtWire(pl,w);
    add(shape);

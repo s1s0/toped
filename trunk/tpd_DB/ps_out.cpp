@@ -161,7 +161,7 @@ void PSFile::poly(const int4b* pdata, unsigned psize, const DBbox bbox)
    fprintf(_psfh,"}<00 01 %X 03 0A>}dpl\n",31 + psize);
 }
 
-void PSFile::wire(const int4b* const pdata, unsigned psize, word width, DBbox bbox)
+void PSFile::wire(const int4b* const pdata, unsigned psize, laydata::WireWidth width, DBbox bbox)
 {
    fprintf(_psfh,"      {{%i %i %i %i ", bbox.p1().x(), bbox.p1().y(),
                                             bbox.p2().x(), bbox.p2().y() );

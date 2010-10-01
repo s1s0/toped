@@ -1040,7 +1040,7 @@ laydata::TdtData* laydata::TdtDesign::addPoly(unsigned la, pointlist* pl)
    return newshape;
 }
 
-laydata::TdtData* laydata::TdtDesign::addWire(unsigned la, pointlist* pl, word w)
+laydata::TdtData* laydata::TdtDesign::addWire(unsigned la, pointlist* pl, WireWidth w)
 {
    laydata::ValidWire check(*pl,w);
    if (!check.valid()) {

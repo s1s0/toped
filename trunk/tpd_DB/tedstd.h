@@ -91,16 +91,20 @@ namespace laydata {
    //   enum class SH_STATUS:byte { sh_active, sh_deleted, sh_selected, sh_partsel, sh_merged } ;
    typedef enum { sh_active, sh_deleted, sh_selected, sh_partsel, sh_merged } SH_STATUS;
    typedef enum {
-      shp_OK         = 0x00,
-      shp_ident      = 0x01, // identical or one line points removed
-      shp_clock      = 0x02, // points reordered to get anti clockwise order
-      shp_box        = 0x04, // shape is a box
-      shp_acute      = 0x08, // acute angle
-      shp_collinear  = 0x10, // collinear wire
+      shp_OK         = 0x0000,
+      shp_ident      = 0x0001, // identical or one line points removed
+      shp_clock      = 0x0002, // points reordered to get anti clockwise order
+      shp_box        = 0x0004, // shape is a box
+      shp_acute      = 0x0008, // acute angle
+      shp_collinear  = 0x0010, // collinear wire
+      shp_shortends  = 0x0020, // wire with end segments shorter than the width
       // critical
-      shp_cross      = 0x40, // self crossing sequence
-      shp_null       = 0x80, // 0 area - points are not forming a polygon
+      shp_cross      = 0x1000, // self crossing sequence
+      shp_width      = 0x2000, // wire with width bigger than 65536
+      shp_null       = 0x8000, // 0 area - points are not forming a polygon
    } shape_status;
+
+   const unsigned shp_valid      = shp_cross; //
 
    class TdtData;
    class EditObject;
@@ -122,6 +126,9 @@ namespace laydata {
    typedef  std::deque<EditObject*>                 EditCellStack;
    typedef  std::list<const CellList*>              LibCellLists;
    typedef  std::list<TdtDefaultCell*>              CellDefList;
+   typedef  dword                                   WireWidth;
+
+   const WireWidth        MAX_WIRE_WIDTH          = 0x0FFFFFFF;
 
    //==============================================================================
    class Validator {
@@ -129,7 +136,7 @@ namespace laydata {
                            Validator(const pointlist& plist) : _status(shp_OK),
                                                             _plist(plist) {};
       virtual             ~Validator() {};
-      bool                 valid()           {return _status < shp_cross;}
+      bool                 valid()           {return _status < shp_valid;}
       bool                 recoverable()     {return _status < shp_null;}
       byte                 status()          {return _status;}
       bool                 box()             {return (0 != (_status & shp_box));}
@@ -138,7 +145,7 @@ namespace laydata {
       virtual std::string  failType() = 0;
       virtual TdtData*     replacement() = 0;
    protected:
-      byte                 _status;
+      unsigned             _status;
       pointlist            _plist;
    };
 
@@ -228,7 +235,7 @@ namespace laydata {
     */
    class WireContour {
       public:
-                           WireContour(const int4b*, unsigned, const word);
+                           WireContour(const int4b*, unsigned, const WireWidth);
          unsigned          csize()         {return _cdata.size(); } //! return the number of the contour points
          unsigned          lsize()         {return _lsize;        } //! return the number of the central line points
          void              getArrayData(int4b*);
@@ -243,11 +250,11 @@ namespace laydata {
          void              colPnts(word,word,word);
          TP                mdlCPnt(word, word);
          int               orientation(word, word, word);
-         float             getLambda(word i1, word i2, word ii);
+         double            getLambda(word i1, word i2, word ii);
          int               xangle(word i1, word i2);
          const int4b*      _ldata; //! The original wire central line. Do not delete it. Do not alter it!
          const unsigned    _lsize; //! The number of points in the wire central line
-         const word        _width; //! The width of the wire
+         const WireWidth   _width; //! The width of the wire
          PointList         _cdata; //! The generated contour line in a list of points form
    };
 
@@ -259,9 +266,9 @@ namespace laydata {
     */
    class WireContourAux {
       public:
-                          WireContourAux(const int4b*, unsigned, const word, const CTM&);
-                          WireContourAux(const pointlist&, const word);
-                          WireContourAux(const pointlist&, const word, const TP);
+                          WireContourAux(const int4b*, unsigned, const WireWidth, const CTM&);
+                          WireContourAux(const pointlist&, const WireWidth);
+                          WireContourAux(const pointlist&, const WireWidth, const TP);
                          ~WireContourAux();
          void             getRenderingData(pointlist&);
          void             getLData(pointlist&);

@@ -448,8 +448,18 @@ bool laydata::pathConvert(pointlist& plist, int4b begext, int4b endext )
 
 
 //=============================================================================
-
-laydata::WireContour::WireContour(const int4b* ldata, unsigned lsize, word width) :
+/*!
+ * The main troubles here are with the precision of the calculations. They are
+ * getting more obvious when the points are on a long distances from each other.
+ * All of the functions used make their calculations in real arithmetics, but
+ * some return the result in integer. For angles close to 0 it became apparent
+ * that the results doesn't quite match.
+ * @param ldata
+ * @param lsize
+ * @param width
+ * @return
+ */
+laydata::WireContour::WireContour(const int4b* ldata, unsigned lsize, WireWidth width) :
    _ldata(ldata), _lsize(lsize), _width(width)
 {
    endPnts(0,1, true);
@@ -461,8 +471,10 @@ laydata::WireContour::WireContour(const int4b* ldata, unsigned lsize, word width
             int angle1 = xangle(i  , i-1);
             int angle2 = xangle(i  , i+1);
             int ang = abs(angle1 - angle2);
-            assert(ang != 0);
-            assert(ang != 180);
+            if (0 == ang)
+               colPnts(i-1,  i, i+1 );
+            else if (180 == ang)
+               mdlPnts(i-1,  i, i+1 );
             if ((ang < 90) || (ang > 270))
                mdlAcutePnts(i-1,  i, i+1, angle1, angle2); // acute angle
             else
@@ -580,10 +592,10 @@ byte laydata::WireContour::chkCollinear(word i1, word i2, word i3)
    float lambda1 = getLambda  (i3, i2, i1);
    float lambda2 = getLambda  (i1, i2, i3);
    if ((_ldata[2*i1] == _ldata[2*i3]) || (_ldata[2*i1+1] == _ldata[2*i3+1])) return 3;
-   if ((0 == lambda1) && (0 == lambda2)) return 5; // 3 coinciding points
-   if ((0 <  lambda1) || (0 <  lambda2)) return 3; // collinear points
-   if (0 == lambda1) return 1; //i2 and i3 coincide
-   if (0 == lambda2) return 2; //i2 and i1 coincide
+   if ((0.0 == lambda1) && (0.0 == lambda2)) return 5; // 3 coinciding points
+   if ((0.0 <  lambda1) || (0.0 <  lambda2)) return 3; // collinear points
+   if (0.0 == lambda1) return 1; //i2 and i3 coincide
+   if (0.0 == lambda2) return 2; //i2 and i1 coincide
    return 4; // 3 points in one line sequenced with i2 in the middle
 }
 
@@ -625,19 +637,23 @@ void laydata::WireContour::mdlAcutePnts(word i1, word i2, word i3, int angle1, i
    CTM mtrx1;//
    mtrx1.Rotate(angle1);
    mtrx1.Translate(_ldata[i2], _ldata[i2+1]);
-   TP p1( -_width/2, ysign * _width/2);
+   TP p1( -((int4b)_width/2),  ysign * ((int4b)_width/2));
    p1 *= mtrx1;
 
    CTM mtrx2;
    mtrx2.Rotate(angle2);
    mtrx2.Translate(_ldata[i2], _ldata[i2+1]);
-   TP p2( - _width/2, -ysign * _width/2);
+   TP p2( -((int4b)_width/2), -ysign * ((int4b)_width/2));
    p2 *= mtrx2;
 
    TP pi = _cdata.front(); _cdata.pop_front();
    TP pe = _cdata.back();  _cdata.pop_back();
    if (-1 == ysign)
    {
+//         _cdata.push_front(p1);
+//         _cdata.push_back(p2);
+//         _cdata.push_front(p2);
+//         _cdata.push_back(p1);
       _cdata.push_front(p1);
       _cdata.push_front(p2);
       _cdata.push_back (pe);
@@ -645,6 +661,10 @@ void laydata::WireContour::mdlAcutePnts(word i1, word i2, word i3, int angle1, i
    }
    else
    {
+//      _cdata.push_front(p2);
+//      _cdata.push_back(p1);
+//      _cdata.push_front(p1);
+//      _cdata.push_back(p2);
       _cdata.push_front(pi);
       _cdata.push_front(pi);
       _cdata.push_back (p1);
@@ -663,14 +683,14 @@ int laydata::WireContour::orientation(word i1, word i2, word i3)
       return (area > 0) ? 1 : -1;
 }
 
-float laydata::WireContour::getLambda(word i1, word i2, word ii)
+double laydata::WireContour::getLambda(word i1, word i2, word ii)
 {
    i1 *= 2; i2 *= 2; ii *=2;
-   float denomX = _ldata[i2  ] - _ldata[ii  ];
-   float denomY = _ldata[i2+1] - _ldata[ii+1];
-   float lambda;
-   if      (0 != denomX) lambda = real(_ldata[ii  ] - _ldata[i1  ]) / denomX;
-   else if (0 != denomY) lambda = real(_ldata[ii+1] - _ldata[i1+1]) / denomY;
+   double denomX = _ldata[i2  ] - _ldata[ii  ];
+   double denomY = _ldata[i2+1] - _ldata[ii+1];
+   double lambda;
+   if      (0.0 != denomX) lambda = double(_ldata[ii  ] - _ldata[i1  ]) / denomX;
+   else if (0.0 != denomY) lambda = double(_ldata[ii+1] - _ldata[i1+1]) / denomY;
    // point coincides with the lp vertex of the segment
    else lambda = 0;
    return lambda;
@@ -679,7 +699,6 @@ float laydata::WireContour::getLambda(word i1, word i2, word ii)
 //-----------------------------------------------------------------------------
 /*! Returns the angle between the line and the X axis
 */
-//int laydata::WireContour::xangle(const TP& p1, const TP& p2)
 int laydata::WireContour::xangle(word i1, word i2)
 {
    i1 *= 2; i2 *= 2;
@@ -706,7 +725,7 @@ int laydata::WireContour::xangle(word i1, word i2)
  * using the @translation and stores the resulting wire in _ldata. Then it creates the
  * WireContour object and initializes it with the transformed data.
  */
-laydata::WireContourAux::WireContourAux(const int4b* parray, unsigned lsize, const word width, const CTM& translation)
+laydata::WireContourAux::WireContourAux(const int4b* parray, unsigned lsize, const WireWidth width, const CTM& translation)
 {
    _ldata = DEBUG_NEW int[2 * lsize];
    for (unsigned i = 0; i < lsize; i++)
@@ -718,7 +737,7 @@ laydata::WireContourAux::WireContourAux(const int4b* parray, unsigned lsize, con
    }
    DBbox wadjust(TP(), TP(width,width));
    wadjust = wadjust * translation;
-   word adjwidth = abs(wadjust.p1().x() - wadjust.p2().x());
+   WireWidth adjwidth = abs(wadjust.p1().x() - wadjust.p2().x());
    _wcObject = DEBUG_NEW laydata::WireContour(_ldata, lsize, adjwidth);
 }
 
@@ -727,7 +746,7 @@ laydata::WireContourAux::WireContourAux(const int4b* parray, unsigned lsize, con
  * into array format and stores the result in _ldata. Then creates the
  * WireContour object and initializes it with the _ldata array.
  */
-laydata::WireContourAux::WireContourAux(const pointlist& plist, const word width)
+laydata::WireContourAux::WireContourAux(const pointlist& plist, const WireWidth width)
 {
    word psize = plist.size();
    _ldata = DEBUG_NEW int[2 * psize];
@@ -739,7 +758,7 @@ laydata::WireContourAux::WireContourAux(const pointlist& plist, const word width
    _wcObject = DEBUG_NEW laydata::WireContour(_ldata, psize, width);
 }
 
-laydata::WireContourAux::WireContourAux(const pointlist& plist, const word width, const TP extraP)
+laydata::WireContourAux::WireContourAux(const pointlist& plist, const WireWidth width, const TP extraP)
 {
    word psize = plist.size() + 1;
    _ldata = DEBUG_NEW int[2 * psize];
