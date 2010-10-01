@@ -199,8 +199,8 @@ namespace laydata {
 //==============================================================================
    class TdtWire : public TdtData   {
       public:
-                           TdtWire(const pointlist&, word);
-                           TdtWire(int4b*, unsigned, word);
+                           TdtWire(const pointlist&, WireWidth);
+                           TdtWire(int4b*, unsigned, WireWidth);
                            TdtWire(TEDfile* const tedfile);
                           ~TdtWire();
          virtual DBbox     overlap() const;
@@ -232,7 +232,7 @@ namespace laydata {
          void              unselectPoints(DBbox&, SGBitSet&);
          pointlist*        movePointsSelected(const SGBitSet&, const CTM&, const CTM& = CTM()) const;
          float             get_distance(TP p1, TP p2, TP p0);
-         word              _width;
+         WireWidth         _width;
          int4b*            _pdata;
          unsigned          _psize;
    };
@@ -389,13 +389,13 @@ namespace laydata {
    //===========================================================================
    class ValidWire : public Validator {
    public:
-                                ValidWire(pointlist&, word);
+                                ValidWire(pointlist&, WireWidth);
       virtual laydata::TdtData* replacement();
       virtual std::string       failType();
    private:
       void                      angles();
       void                      selfcrossing();
-      word                      _width;
+      WireWidth                 _width;
    };
    //===========================================================================
    int            xangle(const TP&, const TP&);
@@ -451,7 +451,7 @@ namespace laydata {
 //==============================================================================
    class TdtTmpWire : public TdtTmpData {
       public:
-                           TdtTmpWire(word width) : _width(width)  {};
+                           TdtTmpWire(WireWidth width) : _width(width)  {};
                           ~TdtTmpWire(){};
          virtual void      draw(const layprop::DrawProperties&, ctmqueue& ) const;
          virtual void      addpoint(TP p) {_plist.push_back(p);}
@@ -460,7 +460,7 @@ namespace laydata {
          typedef std::list<TP>     TmpPlist;
          void              drawline(const pointlist&, const pointlist&) const;
          pointlist         _plist;
-         word              _width;
+         WireWidth         _width;
    };
 
 //==============================================================================

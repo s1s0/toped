@@ -285,7 +285,7 @@ namespace tenderer {
    */
    class TenderWire : public TenderNcvx {
       public:
-                           TenderWire(int4b*, unsigned, const word, bool);
+                           TenderWire(int4b*, unsigned, const laydata::WireWidth, bool);
          virtual          ~TenderWire();
          void              Tesselate();
          virtual unsigned  lDataCopy(int*, unsigned&);
@@ -424,7 +424,7 @@ namespace tenderer {
    */
    class TenderSWire : public TenderWire, public TenderSelected {
       public:
-                           TenderSWire(int4b* pdata, unsigned psize, const word width, bool clo, const SGBitSet* slist) :
+                           TenderSWire(int4b* pdata, unsigned psize, const laydata::WireWidth width, bool clo, const SGBitSet* slist) :
                               TenderWire(pdata, psize, width, clo), TenderSelected(slist), _loffset(0u) {}
          virtual unsigned  cDataCopy(int*, unsigned&);
          virtual unsigned  lDataCopy(int*, unsigned&);
@@ -780,7 +780,7 @@ namespace tenderer {
                         ~TenderLay();
          void              box  (int4b*,                       bool, const SGBitSet*);
          void              poly (int4b*, unsigned, const TessellPoly*, bool, const SGBitSet*);
-         void              wire (int4b*, unsigned, word, bool, bool, const SGBitSet*);
+         void              wire (int4b*, unsigned, laydata::WireWidth, bool, bool, const SGBitSet*);
          void              text (const std::string*, const CTM&, const DBbox*, const TP&, bool);
 
          void              newSlice(TenderRef* const, bool, bool, bool, unsigned);
@@ -884,8 +884,8 @@ namespace tenderer {
                                                                   {_clayer->poly(pdata, psize, tpoly, false, NULL);}
          void              poly (int4b* pdata, unsigned psize, const TessellPoly* tpoly, const SGBitSet* ss)
                                                                   {_clayer->poly(pdata, psize, tpoly, true, ss);}
-         void              wire (int4b*, unsigned, word);
-         void              wire (int4b*, unsigned, word, const SGBitSet*);
+         void              wire (int4b*, unsigned, laydata::WireWidth);
+         void              wire (int4b*, unsigned, laydata::WireWidth, const SGBitSet*);
          void              text (const std::string*, const CTM&, const DBbox&, const TP&, bool);
          bool              collect();
          void              draw();

@@ -93,7 +93,7 @@ namespace laydata {
       void           removeRefdCell(std::string&, CellDefList&, laydata::AtticList*, laydata::TdtLibDir*);
       TdtData*       addBox(unsigned la, TP* p1, TP* p2);
       TdtData*       addPoly(unsigned, pointlist*);
-      TdtData*       addWire(unsigned, pointlist*, word);
+      TdtData*       addWire(unsigned, pointlist*, WireWidth);
       TdtData*       addText(unsigned la, std::string& text, CTM& ori);
       TdtData*       addCellRef(laydata::CellDefin strdefn, CTM& ori);
       TdtData*       addCellARef(std::string&, CTM&, ArrayProperties&);
