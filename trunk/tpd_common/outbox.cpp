@@ -547,6 +547,17 @@ void TpdPost::treeRemoveMember(const char* cell, const char* parent, int action)
    wxPostEvent(_cllBrowser, eventCELLTREE);
 }
 
+void TpdPost::treeRenameMember(const char* oldName, const char* newName)
+{
+   assert(_cllBrowser);
+   wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
+   eventCELLTREE.SetInt(tui::BT_CELL_RENAME);
+   eventCELLTREE.SetString(wxString(oldName, wxConvUTF8));
+   wxString* prnt = DEBUG_NEW wxString(newName, wxConvUTF8);
+   eventCELLTREE.SetClientData(static_cast<void*> (prnt));
+   wxPostEvent(_cllBrowser, eventCELLTREE);
+}
+
 void TpdPost::parseCommand(const wxString cmd)
 {
    assert(_cmdLine);

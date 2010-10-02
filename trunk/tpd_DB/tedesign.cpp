@@ -942,6 +942,24 @@ laydata::TdtCell* laydata::TdtDesign::removeCell(std::string& name, laydata::Att
    return remcl;
 }
 
+void laydata::TdtDesign::renameCell(TdtDefaultCell* targetCell, std::string newName)
+{
+   assert(NULL != targetCell);
+   std::string oldName = targetCell->name();
+   if (!targetCell->orphan())
+   {
+      for (CellList::iterator CS = _cells.begin(); CS != _cells.end(); CS++)
+      {
+         if (CS->first != oldName)
+            CS->second->renameChild(oldName,newName);
+      }
+   }
+   _cells.erase(oldName);
+   _cells[newName] = targetCell;
+   targetCell->setName(newName);
+   TpdPost::treeRenameMember(oldName.c_str(), newName.c_str());
+}
+
 void laydata::TdtDesign::removeRefdCell(std::string& name, CellDefList& pcells, laydata::AtticList* fsel, laydata::TdtLibDir* libdir)
 {
    modified = true;

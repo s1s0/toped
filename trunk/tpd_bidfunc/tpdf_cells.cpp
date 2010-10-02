@@ -26,6 +26,7 @@
 //===========================================================================
 
 #include "tpdph.h"
+#include <sstream>
 #include "tpdf_cells.h"
 #include "tuidefs.h"
 #include "datacenter.h"
@@ -741,3 +742,51 @@ int tellstdfunc::stdUNGROUP::execute()
    return EXEC_NEXT;
 }
 
+//=============================================================================
+tellstdfunc::stdRENAMECELL::stdRENAMECELL(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+}
+
+void tellstdfunc::stdRENAMECELL::undo_cleanup()
+{
+   //TODO
+}
+
+void tellstdfunc::stdRENAMECELL::undo()
+{
+   //TODO
+}
+
+int tellstdfunc::stdRENAMECELL::execute()
+{
+   std::string newName = getStringValue();
+   std::string oldName = getStringValue();
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      laydata::TdtDefaultCell* targetCell = tDesign->checkCell(oldName);
+      laydata::TdtDefaultCell* existCell  = tDesign->checkCell(newName);
+      std::stringstream errMsg;
+      if (NULL == targetCell)
+      {
+         errMsg << "Cell \"" << oldName << "\" not found in the database.";
+         tell_log(console::MT_ERROR,errMsg.str());
+      }
+      else if (NULL != existCell)
+      {
+         errMsg << "Cell \"" << newName << "\" already exists in the database.";
+         tell_log(console::MT_ERROR,errMsg.str());
+      }
+      else
+      {
+         tDesign->renameCell(targetCell, newName);
+         LogFile << LogFile.getFN() << "("<< newName << "," << oldName << ");"; LogFile.flush();
+      }
+   }
+   DATC->unlockTDT(dbLibDir, true);
+   return EXEC_NEXT;
+}

@@ -110,6 +110,7 @@ namespace browsers
          void              tdtCellSpot(const wxTreeItemId&, const wxTreeItemId&);
          void              onTellAddCell(wxString, wxString, int);
          void              onTellRemoveCell(wxString, wxString, int);
+         void              onTellRenameCell(wxString, wxString);
          bool              isDbOrLibItem(const wxTreeItemId);
          wxTreeItemId      _topStructure;
          wxTreeItemId      _activeStructure;

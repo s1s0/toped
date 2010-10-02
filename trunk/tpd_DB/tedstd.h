@@ -100,7 +100,7 @@ namespace laydata {
       shp_shortends  = 0x0020, // wire with end segments shorter than the width
       // critical
       shp_cross      = 0x1000, // self crossing sequence
-      shp_width      = 0x2000, // wire with width bigger than 65536
+      shp_width      = 0x2000, // wire with width bigger than MAX_WIRE_WIDTH
       shp_null       = 0x8000, // 0 area - points are not forming a polygon
    } shape_status;
 

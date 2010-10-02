@@ -113,19 +113,20 @@ namespace laydata {
          virtual void        psWrite(PSFile&, const layprop::DrawProperties&,
                                       const CellList* = NULL, const TDTHierTree* = NULL) const;
          virtual void        collectUsedLays(const TdtLibDir*, bool, WordList&) const;
-
-         void                 parentFound()     {_orphan = false;};
-         bool                 orphan() const    {return _orphan;};
-         std::string          name() const      {return _name;};
-         int                  libID() const     {return _libID;}
+         virtual void        renameChild(std::string, std::string) {assert(false); /* TdTDefaultCell can not be renamed */}
+         void                parentFound()              {_orphan = false;};
+         void                setName(std::string nname) {_name = nname;}
+         bool                orphan() const             {return _orphan;};
+         std::string         name() const               {return _name;};
+         int                 libID() const              {return _libID;}
          //@FIXME! the _orphan must be protected!
-         bool                 _orphan;       //! cell doesn't have a parent
+         bool                _orphan;       //! cell doesn't have a parent
       protected:
-         void                 invalidateParents(TdtLibrary*);
-         LayerList            _layers;       //! all layers the cell (including the reference layer)
-         std::string          _name;         //! cell name
+         void                invalidateParents(TdtLibrary*);
+         LayerList           _layers;       //! all layers the cell (including the reference layer)
+         std::string         _name;         //! cell name
       private:
-         int                  _libID;        //! cell belongs to ... library
+         int                 _libID;        //! cell belongs to ... library
    };
 
 //==============================================================================
@@ -194,6 +195,7 @@ namespace laydata {
       virtual void         collectUsedLays(const TdtLibDir*, bool, WordList&) const;
       bool                 overlapChanged(DBbox&, TdtDesign*);
       virtual DBbox        getVisibleOverlap(const layprop::DrawProperties&);
+      virtual void         renameChild(std::string, std::string);
    private:
       bool                 getShapeOver(TP, const DWordSet&);
       void                 getCellOverlap();
