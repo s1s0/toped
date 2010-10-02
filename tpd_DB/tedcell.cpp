@@ -834,6 +834,16 @@ DBbox laydata::TdtCell::getVisibleOverlap(const layprop::DrawProperties& prop)
    return vlOverlap;
 }
 
+void laydata::TdtCell::renameChild(std::string oldName, std::string newName)
+{
+   NameSet::iterator targetName = _children.find(oldName);
+   if (_children.end() != targetName)
+   {
+      _children.erase(targetName);
+      _children.insert(newName);
+   }
+}
+
 void laydata::TdtCell::selectInBox(DBbox select_in, const DWordSet& unselable, word layselmask, bool pntsel)
 {
    // check that current cell is within

@@ -600,6 +600,11 @@ void browsers::CellBrowser::onCommand( wxCommandEvent& event )
                             static_cast<int>(event.GetExtraLong()));
          delete (static_cast<wxString*>(event.GetClientData()));
          break;
+      case tui::BT_CELL_RENAME:
+         onTellRenameCell(event.GetString(),
+                          *(static_cast<wxString*>(event.GetClientData())));
+         delete (static_cast<wxString*>(event.GetClientData()));
+         break;
       case tui::BT_NEWTDT_DB  : resetData(event.GetString()); break;
       default: assert(false);
    }
@@ -824,6 +829,15 @@ void browsers::CellBrowser::onTellRemoveCell(wxString cellname, wxString parentn
          break;
       }
       default: assert(false);
+   }
+}
+
+void browsers::CellBrowser::onTellRenameCell(wxString oldName, wxString newName)
+{
+   wxTreeItemId targetItem;
+   while (findItem(oldName, targetItem, _dbroot))
+   {
+      SetItemText(targetItem, newName);
    }
 }
 

@@ -90,6 +90,7 @@ namespace laydata {
       TdtCell*       addCell(std::string name, laydata::TdtLibDir*);
       void           addThisCell(laydata::TdtCell* strdefn, laydata::TdtLibDir*);
       TdtCell*       removeCell(std::string&, laydata::AtticList*, laydata::TdtLibDir*);
+      void           renameCell(TdtDefaultCell*, std::string);
       void           removeRefdCell(std::string&, CellDefList&, laydata::AtticList*, laydata::TdtLibDir*);
       TdtData*       addBox(unsigned la, TP* p1, TP* p2);
       TdtData*       addPoly(unsigned, pointlist*);

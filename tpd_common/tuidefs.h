@@ -254,6 +254,7 @@ namespace tui
       BT_CELL_AREF,
       BT_CELL_ADD,
       BT_CELL_REMOVE,
+      BT_CELL_RENAME,
       BT_ADDTDT_LIB,
       BT_NEWTDT_DB,
       BT_ADDGDS_TAB,

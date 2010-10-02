@@ -219,7 +219,8 @@ class TpdPost {
       static void celltree_open(const std::string);
       static void celltree_highlight(const std::string);
       static void treeAddMember(const char*, const char*, int action = 0);
-      static void treeRemoveMember(const char*, const char*, int orphan);
+      static void treeRemoveMember(const char*, const char*, int );
+      static void treeRenameMember(const char*, const char*);
       static void parseCommand(const wxString);
       static void tellFnAdd(const std::string, void*);
       static void tellFnSort();
