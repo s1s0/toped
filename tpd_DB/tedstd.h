@@ -54,7 +54,7 @@
 #define tedf_REFS             0x8C
 #define tedf_REFSEND          0x8D
 #define TED_CUR_REVISION      0
-#define TED_CUR_SUBREVISION   7
+#define TED_CUR_SUBREVISION   8
 
 //==============================================================================
 class PSegment {
@@ -166,7 +166,9 @@ namespace laydata {
       word                 getWord();
       void                 putWord(const word);
       int4b                get4b();
+      WireWidth            get4ub();
       void                 put4b(const int4b);
+      void                 put4ub(const WireWidth);
       TP                   getTP();
       void                 putTP(const TP*);
       CTM                  getCTM();

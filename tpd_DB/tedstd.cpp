@@ -190,6 +190,16 @@ int4b laydata::TEDfile::get4b()
    return result;
 }
 
+laydata::WireWidth laydata::TEDfile::get4ub()
+{
+   WireWidth result;
+   byte length = sizeof(WireWidth);
+   if (1 != (_numread = fread(&result, length, 1, _file)))
+      throw EXPTNreadTDT("Wrong number of bytes read");
+   _position += length;
+   return result;
+}
+
 real laydata::TEDfile::getReal() {
    real result;
    byte length = sizeof(real);
@@ -266,7 +276,7 @@ void laydata::TEDfile::getRevision()
    ost << "TDT format revision: " << _revision << "." << _subrevision;
    tell_log(console::MT_INFO,ost.str());
    if ((_revision != TED_CUR_REVISION) || (_subrevision > TED_CUR_SUBREVISION))
-      throw EXPTNreadTDT("The TDT revision is not maintained by this version of Toped");
+      throw EXPTNreadTDT("The TDT revision is not supported by this version of Toped");
 }
 
 void laydata::TEDfile::putWord(const word data) {
@@ -274,6 +284,10 @@ void laydata::TEDfile::putWord(const word data) {
 }
 
 void laydata::TEDfile::put4b(const int4b data) {
+   fwrite(&data,4,1,_file);
+}
+
+void laydata::TEDfile::put4ub(const WireWidth data) {
    fwrite(&data,4,1,_file);
 }
 
