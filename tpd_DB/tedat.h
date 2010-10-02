@@ -394,6 +394,7 @@ namespace laydata {
       virtual std::string       failType();
    private:
       void                      angles();
+      void                      endSegments();
       void                      selfcrossing();
       WireWidth                 _width;
    };
