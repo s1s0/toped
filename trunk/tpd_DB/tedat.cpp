@@ -1196,7 +1196,10 @@ laydata::TdtWire::TdtWire(TEDfile* const tedfile) : TdtData()
 {
    _psize = tedfile->getWord();
    assert(_psize);
-   _width = tedfile->getWord();
+   if ((0 == tedfile->revision()) && (8 > tedfile->subRevision()))
+      _width = tedfile->getWord();
+   else
+      _width = tedfile->get4ub();
    _pdata = DEBUG_NEW int4b[_psize*2];
    TP wpnt;
    for (unsigned i = 0 ; i < _psize; i++)
@@ -1488,7 +1491,7 @@ void laydata::TdtWire::write(TEDfile* const tedfile) const
 {
    tedfile->putByte(tedf_WIRE);
    tedfile->putWord(_psize);
-   tedfile->putWord(_width);
+   tedfile->put4ub(_width);
    for (word i = 0; i < _psize; i++)
    {
       tedfile->put4b(_pdata[2*i]); tedfile->put4b(_pdata[2*i+1]);

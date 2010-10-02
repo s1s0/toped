@@ -187,7 +187,7 @@ laydata::QuadTree::QuadTree(TEDfile* const tedfile, bool reflay) :
    TdtData*     newData;
    if (reflay)
    {
-      if       ((0 == tedfile->revision()) && (6 == tedfile->subRevision()))
+      if       ((0 == tedfile->revision()) && (7 < tedfile->subRevision()))
       {
          while (tedf_LAYEREND != (recordtype = tedfile->getByte()))
          {
