@@ -651,36 +651,36 @@ void laydata::WireContour::mdlAcutePnts(word i1, word i2, word i3, int angle1, i
    CTM mtrx1;//
    mtrx1.Rotate(angle1);
    mtrx1.Translate(_ldata[i2], _ldata[i2+1]);
-   TP p1( -((int4b)_width/2),  ysign * ((int4b)_width/2));
+   TP p1 ( -((int4b)_width/2),  ysign * ((int4b)_width/2));
+//   TP p1a(  ((int4b)_width/2), -ysign * ((int4b)_width/2));
    p1 *= mtrx1;
+//   p1a*= mtrx1;
 
    CTM mtrx2;
    mtrx2.Rotate(angle2);
    mtrx2.Translate(_ldata[i2], _ldata[i2+1]);
-   TP p2( -((int4b)_width/2), -ysign * ((int4b)_width/2));
+   TP p2 ( -((int4b)_width/2), -ysign * ((int4b)_width/2));
+//   TP p2a(  ((int4b)_width/2),  ysign * ((int4b)_width/2));
    p2 *= mtrx2;
+//   p2a*= mtrx2;
 
    TP pi = _cdata.front(); _cdata.pop_front();
    TP pe = _cdata.back();  _cdata.pop_back();
    if (-1 == ysign)
    {
-//         _cdata.push_front(p1);
-//         _cdata.push_back(p2);
-//         _cdata.push_front(p2);
-//         _cdata.push_back(p1);
       _cdata.push_front(p1);
       _cdata.push_front(p2);
+//      _cdata.push_back (p1a);
+//      _cdata.push_back (p2a);
       _cdata.push_back (pe);
       _cdata.push_back (pe);
    }
    else
    {
-//      _cdata.push_front(p2);
-//      _cdata.push_back(p1);
-//      _cdata.push_front(p1);
-//      _cdata.push_back(p2);
       _cdata.push_front(pi);
       _cdata.push_front(pi);
+//      _cdata.push_front(p1a);
+//      _cdata.push_front(p2a);
       _cdata.push_back (p1);
       _cdata.push_back (p2);
    }
