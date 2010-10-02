@@ -2563,6 +2563,7 @@ laydata::ValidWire::ValidWire(pointlist& plist, WireWidth width) :
    else
    {
       angles();
+      endSegments();
       if (valid() && numpoints() > 3)
          selfcrossing();
    }
@@ -2619,6 +2620,10 @@ void laydata::ValidWire::angles()
       _status |= shp_null;
 }
 
+void laydata::ValidWire::endSegments()
+{
+   //shp_shortends
+}
 
 /*! Implements  algorithm to check that the wire is not simple crossing.
 Alters the laydata::shp_cross bit of _status if the wire is self-crossing
