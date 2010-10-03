@@ -628,6 +628,14 @@ pointlist laydata::TdtBox::shape2poly() const
    return _plist;
 };
 
+pointlist laydata::TdtBox::dumpPoints() const
+{
+   pointlist _plist;
+   _plist.push_back(TP(_pdata[p1x], _pdata[p1y]));
+   _plist.push_back(TP(_pdata[p2x], _pdata[p2y]));
+   return _plist;
+};
+
 void laydata::TdtBox::polyCut(pointlist& cutter, ShapeList** decure)
 {
    pointlist _plist = shape2poly();
@@ -994,6 +1002,16 @@ bool laydata::TdtPoly::point_inside(TP pnt)
 
 pointlist laydata::TdtPoly::shape2poly() const
 {
+   pointlist plist;
+   plist.reserve(_psize);
+   for (unsigned i = 0; i < _psize; i++)
+      plist.push_back(TP(_pdata[2*i], _pdata[2*i+1]));
+   return plist;
+};
+
+pointlist laydata::TdtPoly::dumpPoints() const
+{
+   // Same as shape2poly
    pointlist plist;
    plist.reserve(_psize);
    for (unsigned i = 0; i < _psize; i++)
@@ -1474,6 +1492,15 @@ pointlist laydata::TdtWire::shape2poly() const
    if (check.valid()) return check.getValidated();
    else return pointlist();
 }
+
+pointlist laydata::TdtWire::dumpPoints() const
+{
+   pointlist plist;
+   plist.reserve(_psize);
+   for (unsigned i = 0; i < _psize; i++)
+      plist.push_back(TP(_pdata[2*i], _pdata[2*i+1]));
+   return plist;
+};
 
 void laydata::TdtWire::info(std::ostringstream& ost, real DBU) const
 {

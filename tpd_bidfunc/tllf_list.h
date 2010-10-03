@@ -36,6 +36,9 @@ namespace tellstdfunc {
    using parsercmd::argumentTYPE;
 
    TELL_STDCMD_CLASSC(lstLENGTH     );
+   TELL_STDCMD_CLASSA(lytPOINTDUMP  );
+   TELL_STDCMD_CLASSA(lytTYPEOF     );
+
    TELL_STDCMD_CLASSC(stdABS        );
 
    TELL_STDCMD_CLASSA(stdSIN        );

@@ -586,6 +586,8 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    //                                                                                                      is active see cmdFUNCCALL::execute()
    //-----------------------------------------------------------------------------------------------------------
    mblock->addFUNC("length"           ,(DEBUG_NEW                   tellstdfunc::lstLENGTH(telldata::tn_int, true )));
+   mblock->addFUNC("pointdump"        ,(DEBUG_NEW       tellstdfunc::lytPOINTDUMP(TLISTOF(telldata::tn_pnt), true )));
+   mblock->addFUNC("typeof"           ,(DEBUG_NEW                   tellstdfunc::lytTYPEOF(telldata::tn_int, true )));
    mblock->addFUNC("abs"              ,(DEBUG_NEW                     tellstdfunc::stdABS(telldata::tn_real, true )));
    mblock->addFUNC("sin"              ,(DEBUG_NEW                     tellstdfunc::stdSIN(telldata::tn_real, true )));
    mblock->addFUNC("cos"              ,(DEBUG_NEW                     tellstdfunc::stdCOS(telldata::tn_real, true )));

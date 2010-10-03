@@ -91,6 +91,8 @@ namespace laydata {
       virtual   void       stretch(int bfactor, ShapeList**) = 0;
    //!
       virtual  pointlist   shape2poly() const = 0;
+      //!
+      virtual  pointlist   dumpPoints() const = 0;
    //! Returns the next TdtData object ot NULL if it doesn't exists
 //      TdtData*             next() const         {return _next;}
    //! Changes the pointer to the next tdtddata object
@@ -140,6 +142,7 @@ namespace laydata {
       virtual void         polyCut(pointlist&, ShapeList**);
       virtual void         stretch(int bfactor, ShapeList**);
       virtual pointlist    shape2poly() const;
+      virtual pointlist    dumpPoints() const;
       virtual word         lType() const {return _lmbox;}
    protected:
       void                 selectPoints(DBbox&, SGBitSet&);
@@ -186,6 +189,7 @@ namespace laydata {
          virtual void      polyCut(pointlist&, ShapeList**);
          virtual void      stretch(int bfactor, ShapeList**);
          virtual pointlist shape2poly() const;
+         virtual pointlist dumpPoints() const;
          virtual word      lType() const {return _lmpoly;}
       private:
          void              selectPoints(DBbox&, SGBitSet&);
@@ -226,6 +230,7 @@ namespace laydata {
          virtual void      polyCut(pointlist&, ShapeList**){};
          virtual void      stretch(int bfactor, ShapeList**);
          virtual pointlist shape2poly() const;
+         virtual pointlist dumpPoints() const;
          virtual word      lType() const {return _lmwire;}
       private:
          void              selectPoints(DBbox&, SGBitSet&);
@@ -271,6 +276,7 @@ namespace laydata {
       virtual void         polyCut(pointlist&, ShapeList**) {};
       virtual void         stretch(int bfactor, ShapeList**) {};
       virtual pointlist    shape2poly() const {return pointlist();/*return empty list*/}
+      virtual pointlist    dumpPoints() const {return pointlist();/*return empty list*/}
       virtual ArrayProperties arrayProps() const {return ArrayProperties();}
       virtual word         lType() const {return _lmref;}
       std::string          cellname() const;
@@ -348,6 +354,7 @@ namespace laydata {
       virtual void         polyCut(pointlist&, ShapeList**) {};
       virtual void         stretch(int bfactor, ShapeList**) {};
       virtual pointlist    shape2poly() const {return pointlist();/*return empty list*/}
+      virtual pointlist    dumpPoints() const {return pointlist();/*return empty list*/}
       virtual word         lType() const {return _lmtext;}
       const std::string    text() const {return _text;}
       void                 replaceStr(std::string newstr);
