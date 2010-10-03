@@ -752,12 +752,26 @@ tellstdfunc::stdRENAMECELL::stdRENAMECELL(telldata::typeID retype, bool eor) :
 
 void tellstdfunc::stdRENAMECELL::undo_cleanup()
 {
-   //TODO
+   getStringValue(UNDOPstack, false);
+   getStringValue(UNDOPstack, false);
 }
 
 void tellstdfunc::stdRENAMECELL::undo()
 {
-   //TODO
+   std::string curName  = getStringValue(UNDOPstack, true);
+   std::string origName = getStringValue(UNDOPstack, true);
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      laydata::TdtDefaultCell* targetCell = tDesign->checkCell(curName);
+      laydata::TdtDefaultCell* existCell  = tDesign->checkCell(origName);
+      assert(NULL != targetCell); // Can't find the cell in the DB
+      assert(NULL == existCell);  // Cell with the new name already exists
+
+      tDesign->renameCell(targetCell, origName);
+   }
+   DATC->unlockTDT(dbLibDir, true);
 }
 
 int tellstdfunc::stdRENAMECELL::execute()
@@ -785,6 +799,9 @@ int tellstdfunc::stdRENAMECELL::execute()
       {
          tDesign->renameCell(targetCell, newName);
          LogFile << LogFile.getFN() << "("<< newName << "," << oldName << ");"; LogFile.flush();
+         UNDOcmdQ.push_front(this);
+         UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(oldName));
+         UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(newName));
       }
    }
    DATC->unlockTDT(dbLibDir, true);
