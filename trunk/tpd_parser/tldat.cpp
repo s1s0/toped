@@ -242,7 +242,7 @@ void telldata::ttlayout::echo(std::string& wstr, real DBU)
          ost << "layer " << _layer << " :";
       _data->info(ost, DBU);
    }
-   if (_selp) ost << " - partially selected";
+   if (_selp && (_selp->size() > 0)) ost << " - partially selected";
    wstr += ost.str();
 }
 

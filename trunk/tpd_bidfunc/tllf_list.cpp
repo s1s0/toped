@@ -29,6 +29,10 @@
 #include <sstream>
 #include <math.h>
 #include "tllf_list.h"
+#include "tedat.h"
+#include "viewprop.h"
+
+extern layprop::PropertyCenter*  PROPC;
 
 //============================================================================
 int tellstdfunc::lstLENGTH::argsOK(argumentQ* amap)
@@ -49,6 +53,55 @@ int tellstdfunc::lstLENGTH::execute()
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    OPstack.push(DEBUG_NEW telldata::ttint(pl->size()));
    delete pl;
+   return EXEC_NEXT;
+}
+
+//============================================================================
+tellstdfunc::lytPOINTDUMP::lytPOINTDUMP(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlayout()));
+}
+
+int tellstdfunc::lytPOINTDUMP::execute()
+{
+   telldata::ttlayout* layobject = static_cast<telldata::ttlayout*>(OPstack.top());OPstack.pop();
+   real DBscale = PROPC->DBscale();
+   // The line below will crash spectacularly if the the target DB was changed after the
+   // layout objects were selected. This is a general problem with all the functions of
+   // this type
+   pointlist plst = layobject->data()->dumpPoints();
+
+   telldata::ttlist *pl = DEBUG_NEW telldata::ttlist(telldata::tn_pnt);
+   for (unsigned i = 0; i < plst.size(); i++)
+   {
+      telldata::ttpnt* pp = DEBUG_NEW telldata::ttpnt(((real)plst[i].x()) / DBscale,
+                                                      ((real)plst[i].y()) / DBscale );
+      pl->add(pp);
+   }
+   OPstack.push(pl);
+   delete layobject;
+   return EXEC_NEXT;
+}
+
+//============================================================================
+tellstdfunc::lytTYPEOF::lytTYPEOF(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlayout()));
+}
+
+int tellstdfunc::lytTYPEOF::execute()
+{
+   telldata::ttlayout* layobject = static_cast<telldata::ttlayout*>(OPstack.top());OPstack.pop();
+   // The line below will crash spectacularly if the the target DB was changed after the
+   // layout objects were selected. This is a general problem with all the functions of
+   // this type
+   word ltype = layobject->data()->lType();
+
+   telldata::ttint *lt = DEBUG_NEW telldata::ttint(ltype);
+   OPstack.push(lt);
+   delete layobject;
    return EXEC_NEXT;
 }
 
