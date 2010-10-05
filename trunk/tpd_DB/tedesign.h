@@ -137,6 +137,8 @@ namespace laydata {
       void           checkActive(); //TODO remove this function
       bool           checkActiveCell();
       bool           checkValidRef(std::string);
+      void           storeViewPort(const DBbox& vp)  {_target.storeViewPort(vp);}
+      DBbox*         getLastViewPort() const  { return _target.getLastViewPort();}
 
       void           selectFromList(SelectList* ss, const DWordSet& unselable)
                                             {_target.edit()->selectFromList(ss, unselable);};

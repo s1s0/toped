@@ -85,12 +85,16 @@ namespace laydata {
       void                       reset();
       CellRefStack*              pEditChain()      {return _peditchain;}
       static EditCellStack       _editstack;    //! the stack of all previously edited (opened) cells
+      void                       storeViewPort(const DBbox&);
+      DBbox*                     getLastViewPort() const;
    private:
+      typedef std::map<std::string,DBbox*> ViewPortMap;
       TdtCell*                   _activecell;   //! the currently active cell
       TdtCell*                   _viewcell;     //! current topview cell - if edit in place is active
       TdtCellRef*                _activeref;    //! current topview reference - if edit in place is active
       CellRefStack*              _peditchain;   //! the path from _viewcell to the _activeref (_activecell)
       CTM                        _ARTM;         //! active reference (cell) translation matrix
+      ViewPortMap                _viewPortMap;  //!
    };
 
 //==============================================================================

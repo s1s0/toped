@@ -305,7 +305,20 @@ int tellstdfunc::stdOPENCELL::execute()
       laydata::TdtDesign* tDesign = (*dbLibDir)();
       std::string oldnm = tDesign->activeCellName();
       telldata::ttlist* selected = NULL;
-      if ("" != oldnm)  selected = make_ttlaylist(tDesign->shapeSel());
+      if ("" != oldnm)
+      {
+         selected = make_ttlaylist(tDesign->shapeSel());
+         // Store the current view port
+         DBbox cellViewPort(DEFAULT_ZOOM_BOX);
+         layprop::DrawProperties* drawProp;
+         if (PROPC->lockDrawProp(drawProp))
+         {
+            cellViewPort = drawProp->clipRegion();
+         }
+         PROPC->unlockDrawProp(drawProp);
+         if (cellViewPort != DEFAULT_OVL_BOX)
+            tDesign->storeViewPort(cellViewPort);
+      }
       if (tDesign->openCell(nm))
       {
          PROPC->clearRulers();
@@ -314,7 +327,9 @@ int tellstdfunc::stdOPENCELL::execute()
             UNDOcmdQ.push_front(this);
             UNDOPstack.push_front(selected);
          }
-         DBbox* ovl  = DEBUG_NEW DBbox(tDesign->activeOverlap());
+         DBbox* ovl  = tDesign->getLastViewPort();
+         if (NULL == ovl)
+            ovl = DEBUG_NEW DBbox(tDesign->activeOverlap());
          if (*ovl == DEFAULT_OVL_BOX) *ovl = DEFAULT_ZOOM_BOX;
          TpdPost::celltree_open(nm);
          wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
