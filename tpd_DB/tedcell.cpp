@@ -184,9 +184,34 @@ std::string laydata::EditObject::name() const
    else return std::string("");
 }
 
+void laydata::EditObject::storeViewPort(const DBbox& viewPort)
+{
+   DBbox* vp = DEBUG_NEW DBbox(viewPort);
+
+   ViewPortMap::iterator vpi = _viewPortMap.find(_viewcell->name());
+   if (_viewPortMap.end() != vpi)
+   {
+      delete vpi->second;
+      vpi->second = vp;
+   }
+   else
+      _viewPortMap[_viewcell->name()] = vp;
+}
+
+DBbox* laydata::EditObject::getLastViewPort() const
+{
+   ViewPortMap::const_iterator vpi = _viewPortMap.find(_viewcell->name());
+   if (_viewPortMap.end() != vpi)
+      return vpi->second;
+   else
+      return NULL;
+}
+
 laydata::EditObject::~EditObject()
 {
    if (_peditchain) delete _peditchain;
+   for(ViewPortMap::const_iterator CPM = _viewPortMap.begin(); CPM != _viewPortMap.end(); CPM++)
+      delete CPM->second;
 }
 
 //-----------------------------------------------------------------------------
