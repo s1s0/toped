@@ -65,7 +65,7 @@ namespace Calbr
    {
       public:
                               drcRenderer() {};
-                             ~drcRenderer() {};
+         virtual              ~drcRenderer() {};
          virtual void         startWriting()=0;
          virtual void         setError(unsigned int numError) {};
          virtual bool         showError(unsigned int numError) {return false;};

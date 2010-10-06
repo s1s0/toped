@@ -56,6 +56,7 @@ public:
    bool                       OASParse(std::string);
    bool                       lockTDT(laydata::TdtLibDir*&, TdtMutexState);
    laydata::DrcLibrary*       lockDRC(void);
+	void								deleteDRC(void);
    bool                       lockGds(GDSin::GdsInFile*&);
    bool                       lockCif(CIFin::CifFile*&);
    bool                       lockOas(Oasis::OasisInFile*&);

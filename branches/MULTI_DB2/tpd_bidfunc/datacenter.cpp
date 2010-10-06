@@ -334,6 +334,15 @@ void DataCenter::unlockDRC()
    VERIFY(wxMUTEX_NO_ERROR == _DRCLock.Unlock());
 }
 
+void DataCenter::deleteDRC(void)
+{
+   if (_DRCDB)
+   {
+         delete _DRCDB;
+			_DRCDB = NULL;
+   }
+}
+
 bool DataCenter::lockTDT(laydata::TdtLibDir*& tdt_db, TdtMutexState reqLock)
 {
    assert(reqLock > dbmxs_deadlock);
