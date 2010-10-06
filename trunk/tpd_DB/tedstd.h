@@ -370,8 +370,8 @@ class DbImportFile {
       // ExtLayers is used for GDS/OASIS, nameList is used for CIF
       virtual void         collectLayers(ExtLayers&) const {assert(false);}
       virtual void         collectLayers(nameList& ) const {assert(false);}
-      virtual bool         collectLayers(const std::string&, ExtLayers&) const {assert(false);}
-      virtual bool         collectLayers(const std::string&, nameList& ) const {assert(false);}
+      virtual bool         collectLayers(const std::string&, ExtLayers&) const {assert(false); return false;}
+      virtual bool         collectLayers(const std::string&, nameList& ) const {assert(false); return false;}
       wxFileOffset         filePos() const                  { return _filePos;   }
       wxFileOffset         fileLength() const               { return _fileLength;}
       bool                 status() const                   { return _status;    }
@@ -435,7 +435,7 @@ class LayerCrossMap {
                                                          {assert(false); return false;}
       virtual bool            mapTdtLay(laydata::TdtCell*,const std::string&)
                                                          {assert(false); return false;}
-      virtual std::string     printSrcLayer() const      {assert(false);}
+      virtual std::string     printSrcLayer() const      {assert(false); return false;}
    protected:
       word                    _tdtLayNumber  ; //! Current layer number
       laydata::QTreeTmp*      _tmpLayer      ; //! Current target layer
