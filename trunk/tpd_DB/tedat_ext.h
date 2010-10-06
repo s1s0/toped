@@ -34,59 +34,59 @@ namespace laydata
    class TdtBoxEXT : public TdtBox
    {
    public:
-                  TdtBoxEXT(const TP& p1, const TP& p2):TdtBox(p1, p2) {};
-                  TdtBoxEXT(TEDfile* const tedfile):TdtBox(tedfile) {};
-                 ~TdtBoxEXT() {};
-      void        setLong(long extLong);
-      long        getLong(void);
-      void        setString(const std::string &extString);
-      std::string getString(void);
-      void        setClientData(void* clientData);
-      void*       getClientData(void);
+                          TdtBoxEXT(const TP& p1, const TP& p2):TdtBox(p1, p2) {};
+                          TdtBoxEXT(TEDfile* const tedfile):TdtBox(tedfile) {};
+                         ~TdtBoxEXT() {};
+      virtual void        setLong(long extLong);
+      virtual long        getLong(void);
+      virtual void        setString(const std::string &extString);
+      virtual std::string getString(void);
+      virtual void        setClientData(void* clientData);
+      virtual void*       getClientData(void);
    private:
-      long        _extLong;
-      std::string _extString;
-      void*       _clientData;
+      long                _extLong;
+      std::string         _extString;
+      void*               _clientData;
    };
 
    class TdtPolyEXT : public TdtPoly   
    {
     public:
-                  TdtPolyEXT(const pointlist& plist):TdtPoly(plist) {};
-                  TdtPolyEXT(int4b* plist, unsigned psize):TdtPoly(plist, psize) {};
-                  TdtPolyEXT(TEDfile* const tedfile):TdtPoly(tedfile) {};
-                 ~TdtPolyEXT() {};
-      void        setLong(long extLong);
-      long        getLong(void);
-      void        setString(const std::string &extString);
-      std::string getString(void);
-      void        setClientData(void* clientData);
-      void*       getClientData(void);
+                          TdtPolyEXT(const pointlist& plist):TdtPoly(plist) {};
+                          TdtPolyEXT(int4b* plist, unsigned psize):TdtPoly(plist, psize) {};
+                          TdtPolyEXT(TEDfile* const tedfile):TdtPoly(tedfile) {};
+                         ~TdtPolyEXT() {};
+      virtual void        setLong(long extLong);
+      virtual long        getLong(void);
+      virtual void        setString(const std::string &extString);
+      virtual std::string getString(void);
+      virtual void        setClientData(void* clientData);
+      virtual void*       getClientData(void);
    private:
-      int         _extInt;
-      long        _extLong;
-      std::string _extString;
-      void*       _clientData;
+      int                 _extInt;
+      long                _extLong;
+      std::string         _extString;
+      void*               _clientData;
    };
 
    class TdtWireEXT : public TdtWire
    {
     public:
-                  TdtWireEXT(const pointlist& plist, word layno):TdtWire(plist, layno) {};
-                  TdtWireEXT(int4b* plist, unsigned psize, word layno):TdtWire(plist, psize, layno) {};
-                  TdtWireEXT(TEDfile* const tedfile): TdtWire(tedfile) {};
-                 ~TdtWireEXT() {};
-      void        setLong(long extLong);
-      long        getLong(void);
-      void        setString(const std::string &extString);
-      std::string getString(void);
-      void        setClientData(void* clientData);
-      void*       getClientData(void);
+                          TdtWireEXT(const pointlist& plist, word layno):TdtWire(plist, layno) {};
+                          TdtWireEXT(int4b* plist, unsigned psize, word layno):TdtWire(plist, psize, layno) {};
+                          TdtWireEXT(TEDfile* const tedfile): TdtWire(tedfile) {};
+                         ~TdtWireEXT() {};
+      virtual void        setLong(long extLong);
+      virtual long        getLong(void);
+      virtual void        setString(const std::string &extString);
+      virtual std::string getString(void);
+      virtual void        setClientData(void* clientData);
+      virtual void*       getClientData(void);
    private:
-      int         _extInt;
-      long        _extLong;
-      std::string _extString;
-      void*       _clientData;
+      int                 _extInt;
+      long                _extLong;
+      std::string         _extString;
+      void*               _clientData;
    };
 }
 #endif //TEDAT_EXT_H

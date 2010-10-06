@@ -1609,7 +1609,7 @@ laydata::DrcLibrary::~DrcLibrary()
 void laydata::DrcLibrary::registerCellRead(std::string cellname, TdtCell* cell) {
    if (_cells.end() != _cells.find(cellname))
    {
-   // There are several possiblirities here:
+   // There are several possibilities here:
    // 1. Cell has been referenced before the definition takes place
    // 2. The same case 1, but the reason is circular reference.
    // 3. Cell is defined more than once
