@@ -51,12 +51,12 @@ namespace Calbr
       real x1, y1, x2, y2;
    };
 
-	struct cellNameStruct
-	{
-		bool spaceCoords;
-		int a[2][3];
-		std::string cellName;
-	};
+   struct cellNameStruct
+   {
+      bool spaceCoords;
+      int a[2][3];
+      std::string cellName;
+   };
 
    typedef std::vector <Calbr::coord> CoordsVector;
 
@@ -118,7 +118,7 @@ namespace Calbr
    {
       public:
                               drcRuleCheck(unsigned int num, const std::string &name);
-										~drcRuleCheck();
+                              ~drcRuleCheck();
 
          unsigned int         num(void) const {return _num;};
          std::string          ruleCheckName()   const {return _ruleCheckName;}
@@ -133,7 +133,7 @@ namespace Calbr
          void                 addDescrString(const std::string & str);
          void                 addPolygon(const Calbr::drcPolygon &poly);
          void                 addEdge(const Calbr::drcEdge &theEdge);
-			void						addCellNameStruct(Calbr::cellNameStruct *cnStruct);
+         void                  addCellNameStruct(Calbr::cellNameStruct *cnStruct);
          edge                 getZoom(long ordinal);
          edge                 getZoom(void);
       private:
@@ -148,7 +148,7 @@ namespace Calbr
          std::vector <std::string> _descrStrings;
          std::vector <Calbr::drcPolygon> _polygons;
          std::vector <Calbr::drcEdge> _edges;
-			cellNameStruct			*_CNStruct;
+         cellNameStruct         *_CNStruct;
    };
 
    typedef std::vector <Calbr::drcRuleCheck*> RuleChecksVector;
@@ -158,7 +158,7 @@ namespace Calbr
       public:
                            CalbrFile(const std::string &fileName, drcRenderer *render);
                           ~CalbrFile();
-			void					readFile();
+         void               readFile();
          void              addResults();
          void              showError(const std::string & error, long  number);
          void              showCluster(const std::string & error);
@@ -167,7 +167,7 @@ namespace Calbr
          std::string       explainError(word lay);
          RuleChecksVector* results() {return &_RuleChecks;};
          bool              isOk(void)   {return _ok;}
-         drcRenderer*	   render() const {return _render;};
+         drcRenderer*      render() const {return _render;};
          std::string       cellName() {return _cellName;};
       private:
          FILE*             _calbrFile;
@@ -179,8 +179,8 @@ namespace Calbr
          bool              parse(unsigned int num);
          bool              parsePoly(char* ruleCheckName, drcPolygon & poly, int numberOfElem);
          bool              parseEdge(char* ruleCheckName, drcEdge & edge, int numberOfElem);
-			bool              parseCellNameMode(cellNameStruct *CNStruct, const std::string &parseString);
-			drcRuleCheck*		_curRuleCheck;
+         bool              parseCellNameMode(cellNameStruct *CNStruct, const std::string &parseString);
+         drcRuleCheck*      _curRuleCheck;
          RuleChecksVector  _RuleChecks;
          bool              _ok;
          edge              _border;

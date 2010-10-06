@@ -930,7 +930,7 @@ std::string telldata::echoType( const telldata::typeID tID,
       case telldata::tn_pnt   : atype = "point" ; break;
       case telldata::tn_box   : atype = "box"   ; break;
       case telldata::tn_hsh   : atype = "lmap"  ; break;
-		case telldata::tn_hshstr: atype = "strmap"; break;
+      case telldata::tn_hshstr: atype = "strmap"; break;
       default                 :
       {
          atype = "?UNKNOWN TYPE?";

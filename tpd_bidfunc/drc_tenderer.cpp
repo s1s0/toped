@@ -48,7 +48,7 @@ extern const wxEventType         wxEVT_CANVAS_ZOOM;
 
 Calbr::drcTenderer::drcTenderer(laydata::DrcLibrary* library)
 {
-	_ATDB = library;
+   _ATDB = library;
 }
 
 Calbr::drcTenderer::~drcTenderer()
@@ -57,7 +57,7 @@ Calbr::drcTenderer::~drcTenderer()
 
 void Calbr::drcTenderer::setError(unsigned int numError)
 {
-	_numError = numError;
+   _numError = numError;
 }
 
 void Calbr::drcTenderer::startWriting()
@@ -103,18 +103,18 @@ void Calbr::drcTenderer::addPoly(const CoordsVector   &coords)
          tell_log(console::MT_ERROR, ost.str());
       }
       else plDB = check.getValidated();
-		if (check.box())  
-		{
-			laydata::TdtBoxEXT *shape = DEBUG_NEW laydata::TdtBoxEXT(plDB[0], plDB[1]);
-			shape->setLong(_numError);
-			dwl->put(shape);
-		}
+      if (check.box())  
+      {
+         laydata::TdtBoxEXT *shape = DEBUG_NEW laydata::TdtBoxEXT(plDB[0], plDB[1]);
+         shape->setLong(_numError);
+         dwl->put(shape);
+      }
       else
-		{
-			laydata::TdtPolyEXT *shape = DEBUG_NEW laydata::TdtPolyEXT(plDB);
-			shape->setLong(_numError);
-			dwl->put(shape);
-		}
+      {
+         laydata::TdtPolyEXT *shape = DEBUG_NEW laydata::TdtPolyEXT(plDB);
+         shape->setLong(_numError);
+         dwl->put(shape);
+      }
    }
 }
 
@@ -160,31 +160,31 @@ void Calbr::drcTenderer::addLine(const edge &edge)
    }
    else plDB = check.getValidated();
 
-	laydata::TdtWireEXT *shape = DEBUG_NEW laydata::TdtWireEXT(plDB, width);
-	shape->setLong(_numError);
-	dwl->put(shape);
+   laydata::TdtWireEXT *shape = DEBUG_NEW laydata::TdtWireEXT(plDB, width);
+   shape->setLong(_numError);
+   dwl->put(shape);
 }
 
 void Calbr::drcTenderer::showAll(void)
 {
    if(checkCellName())
-	{
-		layprop::DrawProperties* drawProp;
+   {
+      layprop::DrawProperties* drawProp;
       if (PROPC->lockDrawProp(drawProp, layprop::DRC))
       {
-			WordList lays = drawProp->getAllLayers();
+         WordList lays = drawProp->getAllLayers();
          for(WordList::const_iterator it = lays.begin(); it != lays.end(); ++it)
             drawProp->hideLayer((*it), false);
       }
       PROPC->unlockDrawProp(drawProp);
       tellstdfunc::RefreshGL();
-	}
-	else
-	{
-	   std::ostringstream ost;
+   }
+   else
+   {
+      std::ostringstream ost;
       ost << "Wrong cell, expected:" << "\n" << _cellName;
       tell_log(console::MT_ERROR, ost.str());
-	}
+   }
 }
 
 void Calbr::drcTenderer::hideAll(void)
@@ -202,24 +202,24 @@ void Calbr::drcTenderer::hideAll(void)
 
 bool Calbr::drcTenderer::showError(unsigned int numError)
 {
-	if(checkCellName())
-	{
-		layprop::DrawProperties* drawProp;
+   if(checkCellName())
+   {
+      layprop::DrawProperties* drawProp;
       if (PROPC->lockDrawProp(drawProp, layprop::DRC))
       {
-			drawProp->hideLayer(numError, false);
+         drawProp->hideLayer(numError, false);
       }
       PROPC->unlockDrawProp(drawProp);
       tellstdfunc::RefreshGL();
-		return true;
-	}
-	else
-	{
-		std::ostringstream ost;
+      return true;
+   }
+   else
+   {
+      std::ostringstream ost;
       ost << "Wrong cell, expected:" << "\n" << _cellName;
       tell_log(console::MT_ERROR, ost.str());
-		return false;
-	}
+      return false;
+   }
 }
 
 void Calbr::drcTenderer::zoom(const edge &edge)
@@ -254,12 +254,12 @@ void Calbr::drcTenderer::endWriting()
 
 bool Calbr::drcTenderer::checkCellName()
 {
-	std::string activeCell;
-	laydata::TdtLibDir *libDir;
+   std::string activeCell;
+   laydata::TdtLibDir *libDir;
    DATC->lockTDT(libDir, dbmxs_liblock);
-   	laydata::TdtDesign *design = (*libDir)();
+      laydata::TdtDesign *design = (*libDir)();
       activeCell = design->activeCellName();
    DATC->unlockTDT(libDir);
-	 bool ret = _cellName==activeCell;
-	 return ret;
+    bool ret = _cellName==activeCell;
+    return ret;
 }

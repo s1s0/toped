@@ -1256,12 +1256,12 @@ void  layprop::DrawProperties::fillLayer(unsigned layno, bool fill)
 }
 
 layprop::DrawProperties::~DrawProperties() {
-	//clear all databases
-	setState(layprop::DRC);
+   //clear all databases
+   setState(layprop::DRC);
    for (LaySetList::const_iterator LSI = getCurSetList().begin(); LSI != getCurSetList().end(); LSI++)
       delete LSI->second;
-	setState(layprop::DB);
-	for (LaySetList::const_iterator LSI = getCurSetList().begin(); LSI != getCurSetList().end(); LSI++)
+   setState(layprop::DB);
+   for (LaySetList::const_iterator LSI = getCurSetList().begin(); LSI != getCurSetList().end(); LSI++)
       delete LSI->second;
 
    for (ColorMap::iterator CMI = _layColors.begin(); CMI != _layColors.end(); CMI++)

@@ -51,7 +51,7 @@ namespace Calbr
       bool                 checkCellName();
    private:
       laydata::DrcLibrary* _ATDB;
-      laydata::TdtCell*	   _DRCCell;
+      laydata::TdtCell*    _DRCCell;
       unsigned int         _numError;
       double               _maxx;
       double               _maxy;

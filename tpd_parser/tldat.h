@@ -59,7 +59,7 @@ namespace telldata {
    const typeID tn_box        = 12;
    const typeID tn_bnd        = 13;
    const typeID tn_hsh        = 14;
-	const typeID tn_hshstr     = 15;
+   const typeID tn_hshstr     = 15;
    const typeID tn_usertypes  = 16;
    // the most significant bit is a mask flag
    const typeID tn_listmask = typeID(1) << (8 * sizeof(typeID) - 1);
@@ -128,7 +128,7 @@ namespace telldata {
                            hsh_type();
    };
 
-	 //==============================================================================
+    //==============================================================================
    class hshstr_type : public tell_type {
       public:
                            hshstr_type();
@@ -390,7 +390,7 @@ namespace telldata {
          ttstring*            _value;
    };
 
-	   //==============================================================================
+      //==============================================================================
    // Don't destruct _number and _name here. They are just pointing to the structures in
    // the parent _fieldList and obviously should be destroyed there
    class tthshstr : public user_struct {

@@ -30,79 +30,79 @@
 
 void laydata::TdtBoxEXT::setLong(long extLong)
 {
-	_extLong = extLong;
+   _extLong = extLong;
 }
 long laydata::TdtBoxEXT::getLong(void)
 {
-	return _extLong;
+   return _extLong;
 }
 void laydata::TdtBoxEXT::setString(const std::string &extString)
 {
-	_extString = extString;
+   _extString = extString;
 }
 std::string laydata::TdtBoxEXT::getString(void)
 {
-	return _extString;
+   return _extString;
 }
-void	laydata::TdtBoxEXT::setClientData(void* clientData)
+void   laydata::TdtBoxEXT::setClientData(void* clientData)
 {
-	_clientData = clientData;
+   _clientData = clientData;
 }
-void*	laydata::TdtBoxEXT::getClientData(void)
+void*   laydata::TdtBoxEXT::getClientData(void)
 {
-	return _clientData;
+   return _clientData;
 }
 
 
 
 void laydata::TdtPolyEXT::setLong(long extLong)
 {
-	_extLong = extLong;
+   _extLong = extLong;
 }
 long laydata::TdtPolyEXT::getLong(void)
 {
-	return _extLong;
+   return _extLong;
 }
 void laydata::TdtPolyEXT::setString(const std::string &extString)
 {
-	_extString = extString;
+   _extString = extString;
 }
 std::string laydata::TdtPolyEXT::getString(void)
 {
-	return _extString;
+   return _extString;
 }
-void	laydata::TdtPolyEXT::setClientData(void* clientData)
+void   laydata::TdtPolyEXT::setClientData(void* clientData)
 {
-	_clientData = clientData;
+   _clientData = clientData;
 }
-void*	laydata::TdtPolyEXT::getClientData(void)
+void*   laydata::TdtPolyEXT::getClientData(void)
 {
-	return _clientData;
+   return _clientData;
 }
 
 
 void laydata::TdtWireEXT::setLong(long extLong)
 {
-	_extLong = extLong;
+   _extLong = extLong;
 }
 long laydata::TdtWireEXT::getLong(void)
 {
-	return _extLong;
+   return _extLong;
 }
 void laydata::TdtWireEXT::setString(const std::string &extString)
 {
-	_extString = extString;
+   _extString = extString;
 }
 std::string laydata::TdtWireEXT::getString(void)
 {
-	return _extString;
+   return _extString;
 }
-void	laydata::TdtWireEXT::setClientData(void* clientData)
+void   laydata::TdtWireEXT::setClientData(void* clientData)
 {
-	_clientData = clientData;
+   _clientData = clientData;
 }
-void*	laydata::TdtWireEXT::getClientData(void)
+void*   laydata::TdtWireEXT::getClientData(void)
 {
-	return _clientData;
+   return _clientData;
 }
 
