@@ -109,8 +109,8 @@ namespace laydata {
 #ifndef WIN32
       struct __attribute__ ((__packed__)) QuadProps
 #else 
-		#pragma pack()
-		struct  QuadProps
+      #pragma pack()
+      struct  QuadProps
 #endif
       {
                                 QuadProps();

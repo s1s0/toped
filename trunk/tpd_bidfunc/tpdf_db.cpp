@@ -1766,7 +1766,7 @@ int tellstdfunc::DRCCalibreimport::execute()
 
    laydata::DrcLibrary* drcDesign = DATC->lockDRC();
    DRCData = DEBUG_NEW Calbr::CalbrFile(filename, new Calbr::drcTenderer(drcDesign));
-	DRCData->readFile();
+   DRCData->readFile();
    if(DRCData->isOk())
    {
       TpdPost::addDRCtab();
@@ -1774,8 +1774,8 @@ int tellstdfunc::DRCCalibreimport::execute()
    else
    {
       delete DRCData;
-		DRCData = NULL;
-		DATC->deleteDRC();
+      DRCData = NULL;
+      DATC->deleteDRC();
    }
    DATC->unlockDRC();
 
@@ -1822,10 +1822,10 @@ tellstdfunc::DRCshowallerrors::DRCshowallerrors(telldata::typeID retype, bool eo
 
 int tellstdfunc::DRCshowallerrors::execute()
 {
-	if(DRCData)
-	{
-	   DRCData->showAllErrors();
-	}
+   if(DRCData)
+   {
+      DRCData->showAllErrors();
+   }
    else
    {
       std::ostringstream ost;
@@ -1844,10 +1844,10 @@ tellstdfunc::DRChideallerrors::DRChideallerrors(telldata::typeID retype, bool eo
 
 int tellstdfunc::DRChideallerrors::execute()
 {
-	if(DRCData)
-	{
-	   DRCData->hideAllErrors();
-	}
+   if(DRCData)
+   {
+      DRCData->hideAllErrors();
+   }
    else
    {
       std::ostringstream ost;

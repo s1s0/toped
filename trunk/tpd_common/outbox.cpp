@@ -926,23 +926,23 @@ EXPTNdrc_parser::EXPTNdrc_parser(std::string info)
 
 EXPTNdrc_parser::EXPTNdrc_parser(err_message type, std::string info, std::string wrongStr)
 {
-	if (type == drc_std)
-	{
-		std::string news = "Error in drc parser =>";
-		news += info;
-		news += "\n";
-		news += wrongStr;
-		tell_log(console::MT_ERROR,news);
-	}
-	else
-	{
-		std::string news = "Can't parse  rule\n";
-		news += info;
-		news += "\n";
-		news += "string:\n";
-		news += wrongStr;
-		tell_log(console::MT_ERROR,news);
-	}
+   if (type == drc_std)
+   {
+      std::string news = "Error in drc parser =>";
+      news += info;
+      news += "\n";
+      news += wrongStr;
+      tell_log(console::MT_ERROR,news);
+   }
+   else
+   {
+      std::string news = "Can't parse  rule\n";
+      news += info;
+      news += "\n";
+      news += "string:\n";
+      news += wrongStr;
+      tell_log(console::MT_ERROR,news);
+   }
 };
 
 //=============================================================================

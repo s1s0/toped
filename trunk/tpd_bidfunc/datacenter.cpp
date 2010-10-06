@@ -71,7 +71,7 @@ DataCenter::~DataCenter()
    if (NULL != _GDSDB) delete _GDSDB;
    if (NULL != _CIFDB) delete _CIFDB;
    if (NULL != _OASDB) delete _OASDB;
-	if (NULL != _DRCDB) delete _DRCDB;
+   if (NULL != _DRCDB) delete _DRCDB;
    // _TEDLIB will be cleared automatically (not a pointer)
 }
 
@@ -266,7 +266,7 @@ void DataCenter::deleteDRC(void)
    if (_DRCDB)
    {
          delete _DRCDB;
-			_DRCDB = NULL;
+         _DRCDB = NULL;
    }
 }
 
@@ -755,8 +755,8 @@ void DataCenter::openGlDraw(const CTM& layCTM)
                      {
                         dst_structure->openGlDraw(*drawProp);
                      }
-                    }
-						VERIFY(wxMUTEX_NO_ERROR == _DRCLock.Unlock());
+                  }
+                  VERIFY(wxMUTEX_NO_ERROR == _DRCLock.Unlock());
                }
             }
             #ifdef RENDER_PROFILING
@@ -833,7 +833,7 @@ void DataCenter::openGlRender(const CTM& layCTM)
                      }
                      renderer.setState(layprop::DB);
                   }
-						VERIFY(wxMUTEX_NO_ERROR == _DRCLock.Unlock());
+                  VERIFY(wxMUTEX_NO_ERROR == _DRCLock.Unlock());
                }
             }
             #ifdef RENDER_PROFILING

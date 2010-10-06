@@ -908,7 +908,7 @@ tellstdfunc::stdFILLLAYERS::stdFILLLAYERS(telldata::typeID retype, bool eor) :
 void tellstdfunc::stdFILLLAYERS::undo_cleanup() {
    telldata::ttlist *sl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
    getBoolValue(UNDOPstack, false);
-	delete sl;
+   delete sl;
 }
 
 void tellstdfunc::stdFILLLAYERS::undo() {

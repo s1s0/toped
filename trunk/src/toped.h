@@ -214,15 +214,15 @@ namespace tui {
       void     OnMarker0(wxCommandEvent& WXUNUSED(event));
       void    OnMarker45(wxCommandEvent& WXUNUSED(event));
       void    OnMarker90(wxCommandEvent& WXUNUSED(event));
-      void		OnHToolBarSize16(wxCommandEvent& WXUNUSED(event));
-      void		OnHToolBarSize24(wxCommandEvent& WXUNUSED(event));
-      void		OnHToolBarSize32(wxCommandEvent& WXUNUSED(event));
-      void		OnHToolBarSize48(wxCommandEvent& WXUNUSED(event));
+      void OnHToolBarSize16(wxCommandEvent& WXUNUSED(event));
+      void OnHToolBarSize24(wxCommandEvent& WXUNUSED(event));
+      void OnHToolBarSize32(wxCommandEvent& WXUNUSED(event));
+      void OnHToolBarSize48(wxCommandEvent& WXUNUSED(event));
       void   OnUndoDepth(wxCommandEvent& WXUNUSED(event));
-      void		OnVToolBarSize16(wxCommandEvent& WXUNUSED(event));
-      void		OnVToolBarSize24(wxCommandEvent& WXUNUSED(event));
-      void		OnVToolBarSize32(wxCommandEvent& WXUNUSED(event));
-      void		OnVToolBarSize48(wxCommandEvent& WXUNUSED(event));
+      void OnVToolBarSize16(wxCommandEvent& WXUNUSED(event));
+      void OnVToolBarSize24(wxCommandEvent& WXUNUSED(event));
+      void OnVToolBarSize32(wxCommandEvent& WXUNUSED(event));
+      void OnVToolBarSize48(wxCommandEvent& WXUNUSED(event));
 
 
       void OnEditLayer(wxCommandEvent&);
@@ -234,7 +234,7 @@ namespace tui {
       void  OnGridDefine(wxCommandEvent& WXUNUSED(event));
       void  OnAddRuler(wxCommandEvent& WXUNUSED(event))    {_cmdline->parseCommand(wxT("addruler();") );}
       void  OnClearRulers(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("clearrulers();") );}
-		void  OnCadenceConvert(wxCommandEvent& WXUNUSED(event));
+      void  OnCadenceConvert(wxCommandEvent& WXUNUSED(event));
       void  OnTextLogOverflow(wxCommandEvent& WXUNUSED(event));
       void  OnChangeLayer(wxCommandEvent& WXUNUSED(event));
       void  OnCurrentLayer(wxCommandEvent& WXUNUSED(event));
@@ -248,8 +248,8 @@ namespace tui {
       // The declaration of the associated event table
       void OnUncapturedMouseClick(wxCommandEvent&);
       void          OnToolBarSize(wxCommandEvent&);
-      void     OnToolBarDefine	(wxCommandEvent& evt);
-      void     OnToolBarAddItem	(wxCommandEvent& evt);
+      void        OnToolBarDefine (wxCommandEvent& evt);
+      void       OnToolBarAddItem (wxCommandEvent& evt);
       void     OnToolBarDeleteItem(wxCommandEvent& evt);
       void     editLayerDlg(word layno, const layprop::DrawProperties*);
       void     OnDRCResults(wxCommandEvent& evt);

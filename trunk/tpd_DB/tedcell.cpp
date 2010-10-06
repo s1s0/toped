@@ -617,8 +617,8 @@ laydata::AtticList* laydata::TdtCell::findSelected(TP pnt)
    typedef LayerList::const_iterator LCI;
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
    {
-		laydata::ShapeList* atl = DEBUG_NEW ShapeList();
-		(*errList)[lay->first] = atl;
+      laydata::ShapeList* atl = DEBUG_NEW ShapeList();
+      (*errList)[lay->first] = atl;
       while(lay->second->getObjectOver(pnt,shape))
       {
          atl->push_back(shape);

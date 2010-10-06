@@ -121,7 +121,7 @@ Calbr::drcRuleCheck::drcRuleCheck(unsigned int num, const std::string &name)
 
 Calbr::drcRuleCheck::~drcRuleCheck()
 {
-	if (_CNStruct) delete _CNStruct;
+   if (_CNStruct) delete _CNStruct;
 }
 
 void Calbr::drcRuleCheck::setTimeStamp(const std::string &timeStamp)
@@ -182,7 +182,7 @@ void Calbr::drcRuleCheck::addEdge(const Calbr::drcEdge &theEdge)
 
 void Calbr::drcRuleCheck::addCellNameStruct(Calbr::cellNameStruct *cnStruct)
 {
-	_CNStruct = cnStruct;
+   _CNStruct = cnStruct;
 }
 
 Calbr::edge Calbr::drcRuleCheck::getZoom(long ordinal)
@@ -240,66 +240,66 @@ Calbr::CalbrFile::~CalbrFile()
 
 void Calbr::CalbrFile::readFile()
 {
-	try
-	{
-		std::ostringstream ost;
-		std::string fname(convertString(_fileName));
-		if (!(_calbrFile = fopen(fname.c_str(),"rt"))) // open the input file
-		{
-			throw(EXPTNdrc_reader("Can't open file"));
-		}
+   try
+   {
+      std::ostringstream ost;
+      std::string fname(convertString(_fileName));
+      if (!(_calbrFile = fopen(fname.c_str(),"rt"))) // open the input file
+      {
+         throw(EXPTNdrc_reader("Can't open file"));
+      }
 
-		//read header
-		char str[512];
-		if (fgets(str, 512, _calbrFile)==NULL)
-		{
-			std::string err;
-			err += "Problem of reading file " + fname + "\n";
-			err += "Can't read header";
-			throw(EXPTNdrc_reader(err));
-		}
+      //read header
+      char str[512];
+      if (fgets(str, 512, _calbrFile)==NULL)
+      {
+         std::string err;
+         err += "Problem of reading file " + fname + "\n";
+         err += "Can't read header";
+         throw(EXPTNdrc_reader(err));
+      }
 
 
-		char cellName[512];
-		if (sscanf( str, "%s %ld", cellName, &_precision) != 2)
-		{
-			std::string err;
-			err += "Problem of reading file " + fname + "\n";
-			err += "Can't read cell name or precision";
-			throw(EXPTNdrc_reader(err));
-		}
-		//Initialization of static member drcPolygon class
-		drcPolygon::_precision = _precision;
-		drcEdge::_precision = _precision;
-		_cellName = cellName;
-		unsigned int num = 1;
-		while(parse(num))
-		{
-			num++;
-		}
-		addResults();
+      char cellName[512];
+      if (sscanf( str, "%s %ld", cellName, &_precision) != 2)
+      {
+         std::string err;
+         err += "Problem of reading file " + fname + "\n";
+         err += "Can't read cell name or precision";
+         throw(EXPTNdrc_reader(err));
+      }
+      //Initialization of static member drcPolygon class
+      drcPolygon::_precision = _precision;
+      drcEdge::_precision = _precision;
+      _cellName = cellName;
+      unsigned int num = 1;
+      while(parse(num))
+      {
+         num++;
+      }
+      addResults();
 
-		if (_calbrFile) fclose(_calbrFile);
+      if (_calbrFile) fclose(_calbrFile);
 
-		if(isOk())
-		{
-			_border = (*_RuleChecks.begin())->getZoom();
-			for (RuleChecksVector::const_iterator it = _RuleChecks.begin(); it != _RuleChecks.end(); ++it)
-			{
-				edge tempBorder = (*it)->getZoom();
-				if(tempBorder.x1 < _border.x1) _border.x1 = tempBorder.x1;
-				if(tempBorder.y1 < _border.y1) _border.y1 = tempBorder.y1;
-				if(tempBorder.x2 > _border.x2) _border.x2 = tempBorder.x2;
-				if(tempBorder.y2 > _border.y2) _border.y2 = tempBorder.y2;
-			}
-			_render->setCellName(_cellName);
-		}
-	}
-	catch (EXPTNdrc_parser)
-	{
-		_ok = false;
-		return;
-	}
+      if(isOk())
+      {
+         _border = (*_RuleChecks.begin())->getZoom();
+         for (RuleChecksVector::const_iterator it = _RuleChecks.begin(); it != _RuleChecks.end(); ++it)
+         {
+            edge tempBorder = (*it)->getZoom();
+            if(tempBorder.x1 < _border.x1) _border.x1 = tempBorder.x1;
+            if(tempBorder.y1 < _border.y1) _border.y1 = tempBorder.y1;
+            if(tempBorder.x2 > _border.x2) _border.x2 = tempBorder.x2;
+            if(tempBorder.y2 > _border.y2) _border.y2 = tempBorder.y2;
+         }
+         _render->setCellName(_cellName);
+      }
+   }
+   catch (EXPTNdrc_parser)
+   {
+      _ok = false;
+      return;
+   }
 }
 
 bool Calbr::CalbrFile::parse(unsigned int num)
@@ -319,14 +319,14 @@ bool Calbr::CalbrFile::parse(unsigned int num)
    //Get Current Results Count, Orginal Results Count and description strings count
    if (fgets(tempStr, 512, _calbrFile)==NULL)
    {
-		std::string err;
-		err += "Can't read  rule ";
-		err += ruleCheckName;
-		throw(EXPTNdrc_reader(err));
+      std::string err;
+      err += "Can't read  rule ";
+      err += ruleCheckName;
+      throw(EXPTNdrc_reader(err));
    }
    if( sscanf(tempStr, "%ld %ld %ld %[^\n]\n",  &resCount, &origResCount, &descrStrCount, timeStamp) != 4)
    {
-		throw(EXPTNdrc_parser(drc_parse, ruleCheckName, tempStr));
+      throw(EXPTNdrc_parser(drc_parse, ruleCheckName, tempStr));
    };
    _curRuleCheck->setCurResCount(resCount);
    _curRuleCheck->setOrigResCount(origResCount);
@@ -355,8 +355,8 @@ bool Calbr::CalbrFile::parse(unsigned int num)
       {
          throw(EXPTNdrc_parser(drc_parse, ruleCheckName, tempStr));
       };
-					
-		
+               
+      
       drcPolygon poly(ordinal, _render);
       switch(type)
       {
@@ -393,28 +393,28 @@ bool Calbr::CalbrFile::parsePoly(char* ruleCheckName, drcPolygon & poly, int num
          throw(EXPTNdrc_parser(drc_parse, ruleCheckName, tempStr));
       }
 
-		//Check Cell Name Mode
+      //Check Cell Name Mode
       if((tempStr[0]=='C') && (tempStr[1]=='N'))
       {
-			cellNameStruct *CNStruct = DEBUG_NEW cellNameStruct;
-			if(parseCellNameMode(CNStruct, tempStr))
-			{
-				_curRuleCheck->addCellNameStruct(CNStruct);
-			}
-			else
-			{
-				throw(EXPTNdrc_parser(drc_parse, ruleCheckName, tempStr));
-			}
-			//After parsing Cell Name Mode read next string 
-			if (fgets(tempStr, 512, _calbrFile)==NULL)
-			{
-				throw(EXPTNdrc_parser(drc_parse, ruleCheckName, tempStr));
-			}
+         cellNameStruct *CNStruct = DEBUG_NEW cellNameStruct;
+         if(parseCellNameMode(CNStruct, tempStr))
+         {
+            _curRuleCheck->addCellNameStruct(CNStruct);
+         }
+         else
+         {
+            throw(EXPTNdrc_parser(drc_parse, ruleCheckName, tempStr));
+         }
+         //After parsing Cell Name Mode read next string 
+         if (fgets(tempStr, 512, _calbrFile)==NULL)
+         {
+            throw(EXPTNdrc_parser(drc_parse, ruleCheckName, tempStr));
+         }
       }
 
       if (sscanf( tempStr, "%ld %ld", &x, &y)!= 2)
       {
-			throw(EXPTNdrc_parser(drc_parse, ruleCheckName, tempStr));
+         throw(EXPTNdrc_parser(drc_parse, ruleCheckName, tempStr));
       };
       poly.addCoord(x, y);
 }
@@ -435,23 +435,23 @@ bool Calbr::CalbrFile::parseEdge(char* ruleCheckName, drcEdge & edge, int number
         throw(EXPTNdrc_parser(drc_parse, ruleCheckName, tempStr));
       }
 
-		//Check Cell Name Mode
+      //Check Cell Name Mode
       if((tempStr[0]=='C') && (tempStr[1]=='N'))
       {
-			cellNameStruct *CNStruct = DEBUG_NEW cellNameStruct;
-			if(parseCellNameMode(CNStruct, tempStr))
-			{
-				_curRuleCheck->addCellNameStruct(CNStruct);
-			}
-			else
-			{
-				throw(EXPTNdrc_parser(drc_parse, ruleCheckName, tempStr));
-			}
-			//After parsing Cell Name Mode read next string 
-			if (fgets(tempStr, 512, _calbrFile)==NULL)
-			{
-				throw(EXPTNdrc_parser(drc_parse, ruleCheckName, tempStr));
-			}
+         cellNameStruct *CNStruct = DEBUG_NEW cellNameStruct;
+         if(parseCellNameMode(CNStruct, tempStr))
+         {
+            _curRuleCheck->addCellNameStruct(CNStruct);
+         }
+         else
+         {
+            throw(EXPTNdrc_parser(drc_parse, ruleCheckName, tempStr));
+         }
+         //After parsing Cell Name Mode read next string 
+         if (fgets(tempStr, 512, _calbrFile)==NULL)
+         {
+            throw(EXPTNdrc_parser(drc_parse, ruleCheckName, tempStr));
+         }
       }
 
       if(sscanf( tempStr, "%ld %ld %ld %ld", &x1, &y1, &x2, &y2)!=4)
@@ -466,47 +466,47 @@ bool Calbr::CalbrFile::parseEdge(char* ruleCheckName, drcEdge & edge, int number
 
 bool  Calbr::CalbrFile::parseCellNameMode(cellNameStruct *CNStruct, const std::string &parseString)
 {
-	//Check for Cell Name results
-	wxRegEx regex;
-	//Regexp: CN cellname (with 'c' or withoout 'c') number1, number2 ... number6
-	VERIFY(regex.Compile(wxT("(CN) ([$[:alnum:]_]+) (c{0,1}) (-{0,1}[[:digit:]]+) (-{0,1}[[:digit:]]+) (-{0,1}[[:digit:]]+) (-{0,1}[[:digit:]]+) (-{0,1}[[:digit:]]+) (-{0,1}[[:digit:]]+)")));
-	wxString str=wxString(parseString.c_str(), wxConvUTF8);
-	//wxString str = wxT("CN xxx c -1 2 3 4 5 6");
+   //Check for Cell Name results
+   wxRegEx regex;
+   //Regexp: CN cellname (with 'c' or withoout 'c') number1, number2 ... number6
+   VERIFY(regex.Compile(wxT("(CN) ([$[:alnum:]_]+) (c{0,1}) (-{0,1}[[:digit:]]+) (-{0,1}[[:digit:]]+) (-{0,1}[[:digit:]]+) (-{0,1}[[:digit:]]+) (-{0,1}[[:digit:]]+) (-{0,1}[[:digit:]]+)")));
+   wxString str=wxString(parseString.c_str(), wxConvUTF8);
+   //wxString str = wxT("CN xxx c -1 2 3 4 5 6");
 
-	if (regex.Matches(str))
-	{
-		CNStruct->cellName = regex.GetMatch(str, 2).char_str();
-		std::string str2(regex.GetMatch(str, 3).char_str());
-		if (!strcasecmp(str2.c_str(), ""))
-		{
-			CNStruct->spaceCoords = false;
-		}
-		else
-			if (!strcasecmp(str2.c_str(), "c"))
-			{
-				CNStruct->spaceCoords = true;
-			}
-			else
-			{
-				return false;
-			}
-		//Save tranformation matrix 
-		long number;
-		regex.GetMatch(str, 4).ToLong(&number);
-		CNStruct->a[0][0] = number;
-		regex.GetMatch(str, 5).ToLong(&number);
-		CNStruct->a[0][1] = number;
-		regex.GetMatch(str, 6).ToLong(&number);
-		CNStruct->a[0][2] = number;
-		regex.GetMatch(str, 7).ToLong(&number);
-		CNStruct->a[1][0] = number;
-		regex.GetMatch(str, 8).ToLong(&number);
-		CNStruct->a[1][1] = number;
-		regex.GetMatch(str, 9).ToLong(&number);
-		CNStruct->a[1][2] = number;
-		return true;
-	}
-	else return false;
+   if (regex.Matches(str))
+   {
+      CNStruct->cellName = regex.GetMatch(str, 2).char_str();
+      std::string str2(regex.GetMatch(str, 3).char_str());
+      if (!strcasecmp(str2.c_str(), ""))
+      {
+         CNStruct->spaceCoords = false;
+      }
+      else
+         if (!strcasecmp(str2.c_str(), "c"))
+         {
+            CNStruct->spaceCoords = true;
+         }
+         else
+         {
+            return false;
+         }
+      //Save tranformation matrix 
+      long number;
+      regex.GetMatch(str, 4).ToLong(&number);
+      CNStruct->a[0][0] = number;
+      regex.GetMatch(str, 5).ToLong(&number);
+      CNStruct->a[0][1] = number;
+      regex.GetMatch(str, 6).ToLong(&number);
+      CNStruct->a[0][2] = number;
+      regex.GetMatch(str, 7).ToLong(&number);
+      CNStruct->a[1][0] = number;
+      regex.GetMatch(str, 8).ToLong(&number);
+      CNStruct->a[1][1] = number;
+      regex.GetMatch(str, 9).ToLong(&number);
+      CNStruct->a[1][2] = number;
+      return true;
+   }
+   else return false;
 }
 
 

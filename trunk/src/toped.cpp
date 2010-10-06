@@ -271,7 +271,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_TECUSTOM_COMMAND(wxEVT_CURRENT_LAYER, wxID_ANY, tui::TopedFrame::OnCurrentLayer)
    EVT_COMMAND(wxID_ANY, wxEVT_COMMAND_ENTER, tui::TopedFrame::OnUncapturedMouseClick)
    EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARSIZE, wxID_ANY, tui::TopedFrame::OnToolBarSize)
-   EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARDEF,	 wxID_ANY, tui::TopedFrame::OnToolBarDefine)
+   EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARDEF,  wxID_ANY, tui::TopedFrame::OnToolBarDefine)
    EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARADDITEM, wxID_ANY, tui::TopedFrame::OnToolBarAddItem)
    EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARDELETEITEM, wxID_ANY, tui::TopedFrame::OnToolBarDeleteItem)
    EVT_TECUSTOM_COMMAND(wxEVT_EDITLAYER, wxID_ANY, tui::TopedFrame::OnEditLayer )
@@ -600,15 +600,15 @@ void tui::TopedFrame::initMenuBar() {
    _resourceCenter->appendMenu("&Other/Add Ruler"   , "", &tui::TopedFrame::OnAddRuler, "Add new ruler" );
    _resourceCenter->appendMenu("&Other/Clear Rulers", "", &tui::TopedFrame::OnClearRulers, "Clear all rulers" );
 
-	_resourceCenter->appendMenuSeparator("&Other");
-	_resourceCenter->appendMenu("&Other/Cadence converter ...", "", &tui::TopedFrame::OnCadenceConvert, "Convert Cadence techfiles" );
+   _resourceCenter->appendMenuSeparator("&Other");
+   _resourceCenter->appendMenu("&Other/Cadence converter ...", "", &tui::TopedFrame::OnCadenceConvert, "Convert Cadence techfiles" );
 
 //   _resourceCenter->appendMenuSeparator("Other");
 
    _resourceCenter->appendMenu("&Other/Get Snapshot", "", &tui::TopedFrame::OnTDTSnapshot, "Get a snapshot of the canvas on TGA file");
    _resourceCenter->appendMenu("&Other/Load DRC results ...", "", &tui::TopedFrame::OnDRCResults, "Load DRC results");
 
-	//   _resourceCenter->appendMenuSeparator("Other");
+   //   _resourceCenter->appendMenuSeparator("Other");
 
    _resourceCenter->appendMenu("&Help/Report Video", "", &tui::TopedFrame::OnCheckHW, "Display OpenGL & video driver information" );
    _resourceCenter->appendMenuSeparator("Help");
@@ -1126,7 +1126,7 @@ void tui::TopedFrame::OnTDTSnapshot(wxCommandEvent& WXUNUSED(event))
       fwrite(&tHdr, sizeof(TargaHeader), 1, tFile);
       fwrite(theImage, imgSize, 1, tFile);
    }
-	fclose(tFile);
+   fclose(tFile);
    delete[] theImage;
 }
 
@@ -1925,8 +1925,8 @@ void tui::TopedFrame::OnEditLayer(wxCommandEvent& evt)
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-	word layno = evt.GetInt();
-	editLayerDlg(layno, drawProp);
+      word layno = evt.GetInt();
+      editLayerDlg(layno, drawProp);
    }
    PROPC->unlockDrawProp(drawProp);
 }
@@ -2209,48 +2209,48 @@ void tui::TopedFrame::OnToolBarSize(wxCommandEvent& evt)
 
 void tui::TopedFrame::OnToolBarDefine(wxCommandEvent& evt)
 {
-	std::string toolBarBame(evt.GetString().mb_str(wxConvUTF8));
-	_resourceCenter->defineToolBar(toolBarBame);
+   std::string toolBarBame(evt.GetString().mb_str(wxConvUTF8));
+   _resourceCenter->defineToolBar(toolBarBame);
 }
 
 void tui::TopedFrame::OnToolBarAddItem(wxCommandEvent& evt)
 {
-	std::string toolBarName(evt.GetString().mb_str(wxConvUTF8));
-	tellstdfunc::StringMapClientData* map = static_cast<tellstdfunc::StringMapClientData*>(evt.GetClientObject());
-	std::string toolName = map->GetKey();
-	std::string toolFunc = map->GetValue();
+   std::string toolBarName(evt.GetString().mb_str(wxConvUTF8));
+   tellstdfunc::StringMapClientData* map = static_cast<tellstdfunc::StringMapClientData*>(evt.GetClientObject());
+   std::string toolName = map->GetKey();
+   std::string toolFunc = map->GetValue();
 
-	_resourceCenter->appendTool(toolBarName, toolName, toolName,  "", "", toolFunc);
-	delete map;
+   _resourceCenter->appendTool(toolBarName, toolName, toolName,  "", "", toolFunc);
+   delete map;
 }
 
 void tui::TopedFrame::OnToolBarDeleteItem(wxCommandEvent& evt)
 {
-	std::string toolBarName(evt.GetString().mb_str(wxConvUTF8));
-	wxStringClientData *data= static_cast<wxStringClientData*>(evt.GetClientObject());
-	wxString str = data->GetData();
-	std::string toolName(str.mb_str(wxConvUTF8));
+   std::string toolBarName(evt.GetString().mb_str(wxConvUTF8));
+   wxStringClientData *data= static_cast<wxStringClientData*>(evt.GetClientObject());
+   wxString str = data->GetData();
+   std::string toolName(str.mb_str(wxConvUTF8));
 
-	_resourceCenter->deleteTool(toolBarName, toolName);
+   _resourceCenter->deleteTool(toolBarName, toolName);
 }
 
-void	tui::TopedFrame::OnDRCResults(wxCommandEvent& evt)
+void   tui::TopedFrame::OnDRCResults(wxCommandEvent& evt)
 {
-	wxRect wnd = GetRect();
+   wxRect wnd = GetRect();
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
-	wxFileDialog dlg(this, wxT("Select Calibre DRC Results to open"), wxT(""), wxT(""),
+   wxFileDialog dlg(this, wxT("Select Calibre DRC Results to open"), wxT(""), wxT(""),
       wxT("DRC file (*.results)|*.results|All files(*.*)|*.*"),
       tpdfOPEN);
     if ( dlg.ShowModal() == wxID_OK )
    {
-		wxString ost;
-		ost << wxT("drccalibreimport(\"") << dlg.GetPath()<< wxT("\");");//\"D:/toped/drc3/drc3.drc.results\");");
-		_cmdline->parseCommand(ost);
+      wxString ost;
+      ost << wxT("drccalibreimport(\"") << dlg.GetPath()<< wxT("\");");//\"D:/toped/drc3/drc3.drc.results\");");
+      _cmdline->parseCommand(ost);
    }
 
-	//wxString ost;
+   //wxString ost;
    //ost << wxT("drccalibreimport(\"D:/toped/drc3/drc3.drc.results\");");
-	//_cmdline->parseCommand(ost);
+   //_cmdline->parseCommand(ost);
 }
 
 void  tui::TopedFrame::OnCadenceConvert(wxCommandEvent& WXUNUSED(event))

@@ -1642,31 +1642,31 @@ WordList laydata::DrcLibrary::findSelected(TP* p1)
    TdtCell* cell = dynamic_cast<TdtCell*>(checkCell("drc"));
    TP selp;
    WordList errorList;
-	laydata::AtticList* shapes;
-	laydata::ShapeList *shapeList;
-	TdtData *shape;
+   laydata::AtticList* shapes;
+   laydata::ShapeList *shapeList;
+   TdtData *shape;
    if (cell) {
 
       layprop::DrawProperties* drawProp;
       if (PROPC->lockDrawProp(drawProp, layprop::DRC))
       {
          selp = (*p1)*CTM().Reversed(); //Take identity matrix
-			//??? Add here Error List construction
+         //??? Add here Error List construction
          shapes = cell->findSelected(selp);
-			for(laydata::AtticList::const_iterator it = shapes->begin(); it != shapes->end(); ++it)
-			{
-				word error;
-				shapeList = (*it).second;
-				for (laydata::ShapeList::const_iterator it2 = shapeList->begin(); it2 != shapeList->end(); ++it2)
-				{
-					shape = dynamic_cast<TdtData*> (*it2);
-					error = shape->getLong();
-					errorList.push_back(error);
-				}
-			}
+         for(laydata::AtticList::const_iterator it = shapes->begin(); it != shapes->end(); ++it)
+         {
+            word error;
+            shapeList = (*it).second;
+            for (laydata::ShapeList::const_iterator it2 = shapeList->begin(); it2 != shapeList->end(); ++it2)
+            {
+               shape = dynamic_cast<TdtData*> (*it2);
+               error = shape->getLong();
+               errorList.push_back(error);
+            }
+         }
       }
       PROPC->unlockDrawProp(drawProp);
-		errorList.unique();
+      errorList.unique();
       return errorList;
    }
    else

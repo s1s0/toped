@@ -96,10 +96,10 @@ namespace  parsercmd {
    >>> Constructor --------------------------------------------------------------
    > -
    >>> Data fields --------------------------------------------------------------
-   > OPstack				- Operand stack used to store operans and the results of
+   > OPstack            - Operand stack used to store operans and the results of
    >                      every executed operation
    >>> Methods ------------------------------------------------------------------
-   > execute() 			- Execute the operator (or command)
+   > execute()          - Execute the operator (or command)
    ******************************************************************************/
    class cmdVIRTUAL {
    public:

@@ -222,7 +222,7 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos,
    ap_trigger = 10;
 }
 
-void	tui::LayoutCanvas::showInfo()
+void   tui::LayoutCanvas::showInfo()
 {
    std::ostringstream ost1, ost2, ost3;
 
@@ -363,9 +363,9 @@ bool tui::LayoutCanvas::diagnozeGL()
       _oglExtMultiDrawArrays    = glewIsSupported("GL_EXT_multi_draw_arrays");
       _oglArbVertexBufferObject = glewIsSupported("GL_ARB_vertex_buffer_object");
       VBOrendering = _oglVersion14 && _oglExtMultiDrawArrays && _oglArbVertexBufferObject;
-		//@TODO - to avoid the "if" in the subsequent renderer calls
-		// setup the renderer - callback function
-		// oGLRender = (void(__stdcall *)(const CTM&))&DataCenter::openGlRender;
+      //@TODO - to avoid the "if" in the subsequent renderer calls
+      // setup the renderer - callback function
+      // oGLRender = (void(__stdcall *)(const CTM&))&DataCenter::openGlRender;
    }
    return VBOrendering;
    //@NOTE: With the Mesa library updates (first noticed in ver. 6.5) - most of the
