@@ -56,6 +56,7 @@ public:
    bool                       lockGds(DbImportFile*&);
    bool                       lockCif(DbImportFile*&);
    bool                       lockOas(DbImportFile*&);
+	void                       deleteDRC(void);
    void                       unlockTDT(laydata::TdtLibDir*, bool throwexception = false);
    void                       unlockDRC();
    void                       unlockGds(DbImportFile*&, bool throwexception = false);

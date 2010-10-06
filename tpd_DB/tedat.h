@@ -106,6 +106,17 @@ namespace laydata {
       virtual word         numPoints() const = 0;
       virtual             ~TdtData(){};
       virtual word         lType() const = 0;
+		
+		//********************
+		//Next set of methods is intended for extension of regular layout data object (i.e. for TdtBoxExt  etc)
+		//That is TdtBox etc must assert mistake in overrided methods.
+		virtual	void			setLong(long extLong) = 0;
+		virtual	long			getLong(void) = 0;
+		virtual	void			setString(const std::string &extString) = 0;
+		virtual	std::string getString(void) = 0;
+		virtual	void			setClientData(void* clientData) = 0;
+		virtual	void*			getClientData(void) = 0;
+	//********************
    protected:
       virtual void         selectPoints(DBbox&, SGBitSet&) = 0;
       virtual void         unselectPoints(DBbox&, SGBitSet&) = 0;
@@ -144,6 +155,18 @@ namespace laydata {
       virtual pointlist    shape2poly() const;
       virtual pointlist    dumpPoints() const;
       virtual word         lType() const {return _lmbox;}
+		
+		//********************
+		//Next set of methods is intended for extension of regular layout data object (i.e. for TdtBoxExt  etc)
+		//That is TdtBox etc must assert mistake in overrided methods.
+		virtual	void			setLong(long extLong) {assert(true);};
+		virtual	long			getLong(void) {assert(true); return 0;};
+		virtual	void			setString(const std::string &extString) {assert(true);};
+		virtual	std::string getString(void) {assert(true); return "";};
+		virtual	void			setClientData(void* clientData) {assert(true);};
+		virtual	void*			getClientData(void) {assert(true); return NULL;};
+		//********************
+
    protected:
       void                 selectPoints(DBbox&, SGBitSet&);
       void                 unselectPoints(DBbox&, SGBitSet&);
@@ -191,6 +214,17 @@ namespace laydata {
          virtual pointlist shape2poly() const;
          virtual pointlist dumpPoints() const;
          virtual word      lType() const {return _lmpoly;}
+
+			//********************
+			//Next set of methods is intended for extension of regular layout data object (i.e. for TdtBoxExt  etc)
+			//That is TdtBox etc must assert mistake in overrided methods.
+			virtual	void			setLong(long extLong) {assert(true);};
+			virtual	long			getLong(void) {assert(true); return 0;};
+			virtual	void			setString(const std::string &extString) {assert(true);};
+			virtual	std::string getString(void) {assert(true); return "";};
+			virtual	void			setClientData(void* clientData) {assert(true);};
+			virtual	void*			getClientData(void) {assert(true); return NULL;};
+		//********************
       private:
          void              selectPoints(DBbox&, SGBitSet&);
          void              unselectPoints(DBbox&, SGBitSet&);
@@ -232,6 +266,17 @@ namespace laydata {
          virtual pointlist shape2poly() const;
          virtual pointlist dumpPoints() const;
          virtual word      lType() const {return _lmwire;}
+
+			//********************
+			//Next set of methods is intended for extension of regular layout data object (i.e. for TdtBoxExt  etc)
+			//That is TdtBox etc must assert mistake in overrided methods.
+			virtual	void			setLong(long extLong) {assert(true);};
+			virtual	long			getLong(void) {assert(true); return 0;};
+			virtual	void			setString(const std::string &extString) {assert(true);};
+			virtual	std::string getString(void) {assert(true); return "";};
+			virtual	void			setClientData(void* clientData) {assert(true);};
+			virtual	void*			getClientData(void) {assert(true); return NULL;};
+		//********************
       private:
          void              selectPoints(DBbox&, SGBitSet&);
          void              unselectPoints(DBbox&, SGBitSet&);
@@ -283,6 +328,17 @@ namespace laydata {
       TdtCell*             cStructure() const;
       TdtDefaultCell*      structure() const {return _structure;}
       CTM                  translation() const {return _translation;};
+
+		//********************
+		//Next set of methods is intended for extension of regular layout data object (i.e. for TdtBoxExt  etc)
+		//That is TdtBox etc must assert mistake in overrided methods.
+		virtual	void			setLong(long extLong) {assert(true);};
+		virtual	long			getLong(void) {assert(true); return 0;};
+		virtual	void			setString(const std::string &extString) {assert(true);};
+		virtual	std::string getString(void) {assert(true); return "";};
+		virtual	void			setClientData(void* clientData) {assert(true);};
+		virtual	void*			getClientData(void) {assert(true); return NULL;};
+	//********************
    protected:
       void                 selectPoints(DBbox&, SGBitSet&) {return;}
       void                 unselectPoints(DBbox&, SGBitSet&) {return;}
@@ -319,6 +375,17 @@ namespace laydata {
       virtual word         lType() const {return _lmaref;}
       void                 ungroup(TdtDesign*, TdtCell*, AtticList*);
       ArrayProperties      arrayProps() const {return _arrprops;}
+
+		//********************
+		//Next set of methods is intended for extension of regular layout data object (i.e. for TdtBoxExt  etc)
+		//That is TdtBox etc must assert mistake in overrided methods.
+		virtual	void			setLong(long extLong) {assert(true);};
+		virtual	long			getLong(void) {assert(true); return 0;};
+		virtual	void			setString(const std::string &extString) {assert(true);};
+		virtual	std::string getString(void) {assert(true); return "";};
+		virtual	void			setClientData(void* clientData) {assert(true);};
+		virtual	void*			getClientData(void) {assert(true); return NULL;};
+	//********************
    private:
       DBbox                clearOverlap() const;
       ArrayProperties      _arrprops;
@@ -358,6 +425,17 @@ namespace laydata {
       virtual word         lType() const {return _lmtext;}
       const std::string    text() const {return _text;}
       void                 replaceStr(std::string newstr);
+
+		//********************
+		//Next set of methods is intended for extension of regular layout data object (i.e. for TdtBoxExt  etc)
+		//That is TdtBox etc must assert mistake in overrided methods.
+		virtual	void			setLong(long extLong) {assert(true);};
+		virtual	long			getLong(void) {assert(true); return 0;};
+		virtual	void			setString(const std::string &extString) {assert(true);};
+		virtual	std::string getString(void) {assert(true); return "";};
+		virtual	void			setClientData(void* clientData) {assert(true);};
+		virtual	void*			getClientData(void) {assert(true); return NULL;};
+	//********************
    protected:
       void                 selectPoints(DBbox&, SGBitSet&) {return;};
       void                 unselectPoints(DBbox&, SGBitSet&) {return;};
