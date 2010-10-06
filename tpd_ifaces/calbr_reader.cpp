@@ -476,13 +476,13 @@ bool  Calbr::CalbrFile::parseCellNameMode(cellNameStruct *CNStruct, const std::s
 	if (regex.Matches(str))
 	{
 		CNStruct->cellName = regex.GetMatch(str, 2).char_str();
-		std::string str2 = regex.GetMatch(str, 3).char_str();
-		if (!stricmp(str2.c_str(), "")) 
+		std::string str2(regex.GetMatch(str, 3).char_str());
+		if (!strcasecmp(str2.c_str(), ""))
 		{
 			CNStruct->spaceCoords = false;
 		}
 		else
-			if (!stricmp(str2.c_str(), "c")) 
+			if (!strcasecmp(str2.c_str(), "c"))
 			{
 				CNStruct->spaceCoords = true;
 			}

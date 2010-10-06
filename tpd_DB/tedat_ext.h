@@ -15,7 +15,7 @@
 // ------------------------------------------------------------------------ =
 //           $URL$
 //        Created: Sun Aug 9 2010
-//     Originator: Svilen Krustev - skr@toped.org.uk
+//     Originator: Sergey Gaitukevich - gaitukevich.s@toped.org.uk
 //    Description: Layout primitives with extentions
 //---------------------------------------------------------------------------
 //  Revision info
