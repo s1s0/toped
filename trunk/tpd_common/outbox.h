@@ -330,6 +330,14 @@ class EXPTNdrc_reader : public EXPTN
       EXPTNdrc_reader(std::string);
 };
 
+typedef enum {drc_std, drc_parse} err_message;
+class EXPTNdrc_parser : public EXPTN
+{
+   public:
+      EXPTNdrc_parser(std::string);
+		EXPTNdrc_parser(err_message, std::string, std::string);
+};
+
 bool        expandFileName(std::string&);
 //std::string getFileNameOnly(std::string);
 //Convert string from UTF8 to wxConvFile

@@ -1766,6 +1766,7 @@ int tellstdfunc::DRCCalibreimport::execute()
 
    laydata::DrcLibrary* drcDesign = DATC->lockDRC();
    DRCData = DEBUG_NEW Calbr::CalbrFile(filename, new Calbr::drcTenderer(drcDesign));
+	DRCData->readFile();
    if(DRCData->isOk())
    {
       TpdPost::addDRCtab();
@@ -1773,6 +1774,8 @@ int tellstdfunc::DRCCalibreimport::execute()
    else
    {
       delete DRCData;
+		DRCData = NULL;
+		DATC->deleteDRC();
    }
    DATC->unlockDRC();
 

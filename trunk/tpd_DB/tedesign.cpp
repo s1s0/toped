@@ -1641,20 +1641,36 @@ WordList laydata::DrcLibrary::findSelected(TP* p1)
    //TdtDefaultCell* cell = checkCell("drc");
    TdtCell* cell = dynamic_cast<TdtCell*>(checkCell("drc"));
    TP selp;
-   WordList lays;
+   WordList errorList;
+	laydata::AtticList* shapes;
+	laydata::ShapeList *shapeList;
+	TdtData *shape;
    if (cell) {
 
       layprop::DrawProperties* drawProp;
       if (PROPC->lockDrawProp(drawProp, layprop::DRC))
       {
          selp = (*p1)*CTM().Reversed(); //Take identity matrix
-         lays = cell->findSelected(selp);
+			//??? Add here Error List construction
+         shapes = cell->findSelected(selp);
+			for(laydata::AtticList::const_iterator it = shapes->begin(); it != shapes->end(); ++it)
+			{
+				word error;
+				shapeList = (*it).second;
+				for (laydata::ShapeList::const_iterator it2 = shapeList->begin(); it2 != shapeList->end(); ++it2)
+				{
+					shape = dynamic_cast<TdtData*> (*it2);
+					error = shape->getLong();
+					errorList.push_back(error);
+				}
+			}
       }
       PROPC->unlockDrawProp(drawProp);
-      return lays;
+		errorList.unique();
+      return errorList;
    }
    else
-      return lays;
+      return errorList;
 }
 
 laydata::TdtDefaultCell* laydata::DrcLibrary::checkCell(std::string name)

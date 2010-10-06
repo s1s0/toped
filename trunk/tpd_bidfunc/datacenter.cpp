@@ -261,6 +261,15 @@ void DataCenter::unlockDRC()
    VERIFY(wxMUTEX_NO_ERROR == _DRCLock.Unlock());
 }
 
+void DataCenter::deleteDRC(void)
+{
+   if (_DRCDB)
+   {
+         delete _DRCDB;
+			_DRCDB = NULL;
+   }
+}
+
 bool DataCenter::lockTDT(laydata::TdtLibDir*& tdt_db, TdtMutexState reqLock)
 {
    assert(reqLock > dbmxs_deadlock);
@@ -747,6 +756,7 @@ void DataCenter::openGlDraw(const CTM& layCTM)
                         dst_structure->openGlDraw(*drawProp);
                      }
                     }
+						VERIFY(wxMUTEX_NO_ERROR == _DRCLock.Unlock());
                }
             }
             #ifdef RENDER_PROFILING
@@ -823,6 +833,7 @@ void DataCenter::openGlRender(const CTM& layCTM)
                      }
                      renderer.setState(layprop::DB);
                   }
+						VERIFY(wxMUTEX_NO_ERROR == _DRCLock.Unlock());
                }
             }
             #ifdef RENDER_PROFILING
