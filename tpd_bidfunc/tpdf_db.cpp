@@ -1810,6 +1810,8 @@ int tellstdfunc::DRCCalibreimport::execute()
    else
    {
       delete DRCData;
+		DRCData = NULL;
+		DATC->deleteDRC();
    }
    DATC->unlockDRC();
 
