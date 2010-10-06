@@ -866,7 +866,7 @@ void tui::LayoutCanvas::OnZoom(wxCommandEvent& evt) {
       case ZOOM_RIGHT  : box = zoomRight(); break;
       case ZOOM_UP     : box = zoomUp()   ; break;
       case ZOOM_DOWN   : box = zoomDown() ; break;
-      case ZOOM_EMPTY  : box = DEBUG_NEW DBbox(-10,-10,90,90);
+      case ZOOM_EMPTY  : box = DEBUG_NEW DBbox(DEFAULT_OVL_BOX);
                         break;
       case ZOOM_REFRESH: invalid_window = true; Refresh(); return;
       default: assert(false);
