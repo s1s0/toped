@@ -112,8 +112,8 @@ bool tellstdfunc::waitGUInput(int input_type, telldata::operandSTACK *OPstack,
 }
 
 //=============================================================================
-pointlist* tellstdfunc::t2tpoints(telldata::ttlist *pl, real DBscale) {
-   pointlist *plDB = DEBUG_NEW pointlist();
+PointVector* tellstdfunc::t2tpoints(telldata::ttlist *pl, real DBscale) {
+   PointVector *plDB = DEBUG_NEW PointVector();
    plDB->reserve(pl->size());
    telldata::ttpnt* pt;
    for (unsigned i = 0; i < pl->size(); i++) {

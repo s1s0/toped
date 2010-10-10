@@ -223,7 +223,7 @@ namespace Oasis {
                            PointList(const PointList&);
                            PointList(OasisInFile&, PointListType);
                           ~PointList();
-         void              calcPoints(pointlist&, int4b, int4b, bool poly=true);
+         void              calcPoints(PointVector&, int4b, int4b, bool poly=true);
          dword             vcount()          {return _vcount;}
          int4b*            delarr()          {return _delarr;}
          PointList&        operator = (const PointList&);
@@ -234,12 +234,12 @@ namespace Oasis {
          void              readOctangular(OasisInFile&);
          void              readAllAngle(OasisInFile&);
          void              readDoubleDelta(OasisInFile&);
-         void              calcManhattanH(pointlist&, int4b, int4b, bool);
-         void              calcManhattanV(pointlist&, int4b, int4b, bool);
-         void              calcManhattanE(pointlist&, int4b, int4b);
-         void              calcOctangular(pointlist&, int4b, int4b);
-         void              calcAllAngle(pointlist&, int4b, int4b);
-         void              calcDoubleDelta(pointlist&, int4b, int4b);
+         void              calcManhattanH(PointVector&, int4b, int4b, bool);
+         void              calcManhattanV(PointVector&, int4b, int4b, bool);
+         void              calcManhattanE(PointVector&, int4b, int4b);
+         void              calcOctangular(PointVector&, int4b, int4b);
+         void              calcAllAngle(PointVector&, int4b, int4b);
+         void              calcDoubleDelta(PointVector&, int4b, int4b);
          PointListType     _pltype; //! Oasis point list type
          dword             _vcount; //! Number of vertexes in the list
          int4b*            _delarr; //! Delta sequence in XYXY... array
@@ -340,7 +340,7 @@ namespace Oasis {
          void              readRepetitions(OasisInFile&);
          void              readExtensions(OasisInFile&);
          void              updateContents(int2b, int2b);
-         void              genCTrapezoids(OasisInFile&, pointlist&, int4b, int4b, int4b, int4b, word);
+         void              genCTrapezoids(OasisInFile&, PointVector&, int4b, int4b, int4b, int4b, word);
          void              initModals();
          //
          ModalVar<dword>   _mod_layer       ; //! OASIS modal variable layer

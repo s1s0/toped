@@ -1020,14 +1020,14 @@ void Oasis::Cell::readPolygon(OasisInFile& ofn, ImportDB& iDB)
          assert(rptpnt);
          for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt++)
          {
-            pointlist laypl;
+            PointVector laypl;
             _mod_pplist().calcPoints(laypl, _mod_gx()+rptpnt[2*rcnt],_mod_gy()+rptpnt[2*rcnt+1]);
             iDB.addPoly(laypl);
          }
       }
       else
       {
-         pointlist laypl;
+         PointVector laypl;
          _mod_pplist().calcPoints(laypl, _mod_gx(),_mod_gy());
          iDB.addPoly(laypl);
       }
@@ -1081,7 +1081,7 @@ void Oasis::Cell::readPath(OasisInFile& ofn, ImportDB& iDB)
             assert(rptpnt);
             for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt++)
             {
-               pointlist laypl;
+               PointVector laypl;
                _mod_wplist().calcPoints(laypl, _mod_gx()+rptpnt[2*rcnt], _mod_gy()+rptpnt[2*rcnt+1], false);
                if (info & Emask)
                {
@@ -1099,7 +1099,7 @@ void Oasis::Cell::readPath(OasisInFile& ofn, ImportDB& iDB)
       }
       else
       {
-         pointlist laypl;
+         PointVector laypl;
          _mod_wplist().calcPoints(laypl, _mod_gx(), _mod_gy(), false);
          if (info & Emask)
          {
@@ -1163,7 +1163,7 @@ void Oasis::Cell::readTrapezoid(OasisInFile& ofn, ImportDB& iDB, byte type)
          assert(rptpnt);
          for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt++)
          {
-            pointlist laypl;
+            PointVector laypl;
             int8b p1xr = _mod_gx() + rptpnt[2*rcnt];
             int8b p1yr = _mod_gy() + rptpnt[2*rcnt+1];
             if (info & Omask)
@@ -1185,7 +1185,7 @@ void Oasis::Cell::readTrapezoid(OasisInFile& ofn, ImportDB& iDB, byte type)
       }
       else
       {
-         pointlist laypl;
+         PointVector laypl;
          if (info & Omask)
          {// vertically oriented
             laypl.push_back(TP(_mod_gx()                , _mod_gy()                          )); // P
@@ -1265,7 +1265,7 @@ void Oasis::Cell::readCTrapezoid(OasisInFile& ofn, ImportDB& iDB)
          assert(rptpnt);
          for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt++)
          {
-            pointlist laypl;
+            PointVector laypl;
             genCTrapezoids(ofn, laypl,
                            _mod_gx()+ rptpnt[2*rcnt]  ,
                            _mod_gy()+ rptpnt[2*rcnt+1],
@@ -1277,7 +1277,7 @@ void Oasis::Cell::readCTrapezoid(OasisInFile& ofn, ImportDB& iDB)
       }
       else
       {
-         pointlist laypl;
+         PointVector laypl;
          genCTrapezoids(ofn, laypl      ,
                         _mod_gx()       ,
                         _mod_gy()       ,
@@ -1590,7 +1590,7 @@ void Oasis::Cell::skimReference(OasisInFile& ofn, bool exma)
 }
 
 //------------------------------------------------------------------------------
-void Oasis::Cell::genCTrapezoids(OasisInFile& ofn, pointlist& laypl,
+void Oasis::Cell::genCTrapezoids(OasisInFile& ofn, PointVector& laypl,
       int4b gx, int4b gy, int4b width, int4b height, word ctype)
 {
    dword      delta  = 0;
@@ -2028,7 +2028,7 @@ void Oasis::PointList::readDoubleDelta(OasisInFile& ofb)
    /*@TODO readDoubleDelta*/assert(false);
 }
 
-void Oasis::PointList::calcPoints(pointlist& plst, int4b p1x, int4b p1y, bool polyp)
+void Oasis::PointList::calcPoints(PointVector& plst, int4b p1x, int4b p1y, bool polyp)
 {
    switch (_pltype)
    {
@@ -2042,7 +2042,7 @@ void Oasis::PointList::calcPoints(pointlist& plst, int4b p1x, int4b p1y, bool po
    }
 }
 
-void Oasis::PointList::calcManhattanH(pointlist& plst, int4b p1x, int4b p1y, bool polyp)
+void Oasis::PointList::calcManhattanH(PointVector& plst, int4b p1x, int4b p1y, bool polyp)
 {
    dword numpoints = (polyp ? _vcount + 2 : _vcount + 1);
    plst.reserve(numpoints);
@@ -2063,7 +2063,7 @@ void Oasis::PointList::calcManhattanH(pointlist& plst, int4b p1x, int4b p1y, boo
    }
 }
 
-void Oasis::PointList::calcManhattanV(pointlist& plst, int4b p1x, int4b p1y, bool polyp)
+void Oasis::PointList::calcManhattanV(PointVector& plst, int4b p1x, int4b p1y, bool polyp)
 {
    dword numpoints = (polyp ? _vcount + 2 : _vcount + 1);
    plst.reserve(numpoints);
@@ -2084,7 +2084,7 @@ void Oasis::PointList::calcManhattanV(pointlist& plst, int4b p1x, int4b p1y, boo
    }
 }
 
-void Oasis::PointList::calcManhattanE(pointlist& plst, int4b p1x, int4b p1y)
+void Oasis::PointList::calcManhattanE(PointVector& plst, int4b p1x, int4b p1y)
 {
    plst.reserve(_vcount + 1);
    TP cpnt(p1x,p1y);
@@ -2098,7 +2098,7 @@ void Oasis::PointList::calcManhattanE(pointlist& plst, int4b p1x, int4b p1y)
    }
 }
 
-void Oasis::PointList::calcOctangular(pointlist& plst, int4b p1x, int4b p1y)
+void Oasis::PointList::calcOctangular(PointVector& plst, int4b p1x, int4b p1y)
 {
    plst.reserve(_vcount + 1);
    TP cpnt(p1x,p1y);
@@ -2112,7 +2112,7 @@ void Oasis::PointList::calcOctangular(pointlist& plst, int4b p1x, int4b p1y)
    }
 }
 
-void Oasis::PointList::calcAllAngle(pointlist& plst, int4b p1x, int4b p1y)
+void Oasis::PointList::calcAllAngle(PointVector& plst, int4b p1x, int4b p1y)
 {
    plst.reserve(_vcount + 1);
    TP cpnt(p1x,p1y);
@@ -2126,7 +2126,7 @@ void Oasis::PointList::calcAllAngle(pointlist& plst, int4b p1x, int4b p1y)
    }
 }
 
-void Oasis::PointList::calcDoubleDelta(pointlist& plst, int4b p1x, int4b p1y)
+void Oasis::PointList::calcDoubleDelta(PointVector& plst, int4b p1x, int4b p1y)
 {
    /*@TODO calcDoubleDelta*/assert(false);
 }

@@ -1326,7 +1326,7 @@ bool laydata::TdtCell::deleteSelected(laydata::AtticList* fsel,
    return overlapChanged(old_overlap, (*libdir)());
 }
 
-bool laydata::TdtCell::cutPolySelected(pointlist& plst, AtticList** dasao)
+bool laydata::TdtCell::cutPolySelected(PointVector& plst, AtticList** dasao)
 {
    // calculate the overlap area of the cutting polygon
    DBbox cut_ovl = DBbox(plst[0]);

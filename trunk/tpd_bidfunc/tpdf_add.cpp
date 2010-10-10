@@ -375,7 +375,7 @@ int tellstdfunc::stdADDPOLY::execute()
       if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
       {
          laydata::TdtDesign* tDesign = (*dbLibDir)();
-         pointlist* plst = t2tpoints(pl,DBscale);
+         PointVector* plst = t2tpoints(pl,DBscale);
          telldata::ttlayout* ply = DEBUG_NEW telldata::ttlayout(tDesign->addPoly(la,plst), la);
          delete plst;
          UNDOcmdQ.push_front(this);
@@ -456,7 +456,7 @@ int tellstdfunc::stdDRAWPOLY::execute()
       if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
       {
          laydata::TdtDesign* tDesign = (*dbLibDir)();
-         pointlist* plst = t2tpoints(pl,DBscale);
+         PointVector* plst = t2tpoints(pl,DBscale);
          telldata::ttlayout* ply = DEBUG_NEW telldata::ttlayout(tDesign->addPoly(la,plst), la);
          delete plst;
          UNDOcmdQ.push_front(this);
@@ -531,7 +531,7 @@ int tellstdfunc::stdADDWIRE::execute()
       if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
       {
          laydata::TdtDesign* tDesign = (*dbLibDir)();
-         pointlist* plst = t2tpoints(pl,DBscale);
+         PointVector* plst = t2tpoints(pl,DBscale);
          telldata::ttlayout* wr = DEBUG_NEW telldata::ttlayout(tDesign->addWire(la,plst,
                                     static_cast<laydata::WireWidth>(rint(w * DBscale))), la);
          delete plst;
@@ -615,7 +615,7 @@ int tellstdfunc::stdDRAWWIRE::execute()
       if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
       {
          laydata::TdtDesign* tDesign = (*dbLibDir)();
-         pointlist* plst = t2tpoints(pl,DBscale);
+         PointVector* plst = t2tpoints(pl,DBscale);
          telldata::ttlayout* wr = DEBUG_NEW telldata::ttlayout(tDesign->addWire(la,plst,
                                     static_cast<laydata::WireWidth>(rint(w * DBscale))), la);
          delete plst;

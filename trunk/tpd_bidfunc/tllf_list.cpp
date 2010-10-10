@@ -70,7 +70,7 @@ int tellstdfunc::lytPOINTDUMP::execute()
    // The line below will crash spectacularly if the the target DB was changed after the
    // layout objects were selected. This is a general problem with all the functions of
    // this type
-   pointlist plst = layobject->data()->dumpPoints();
+   PointVector plst = layobject->data()->dumpPoints();
 
    telldata::ttlist *pl = DEBUG_NEW telldata::ttlist(telldata::tn_pnt);
    for (unsigned i = 0; i < plst.size(); i++)

@@ -184,7 +184,7 @@ namespace laydata {
       bool                 validateCells(TdtLibrary*);
       void                 validateLayers();
       unsigned int         numSelected();
-      bool                 cutPolySelected(pointlist&, AtticList**);
+      bool                 cutPolySelected(PointVector&, AtticList**);
       bool                 mergeSelected(AtticList**);
       bool                 stretchSelected(int bfactor, AtticList**);
       AtticList*           changeSelect(TP, SH_STATUS status, const DWordSet&);

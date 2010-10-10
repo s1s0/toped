@@ -51,7 +51,7 @@ CIFin::CifBox::CifBox(CifData* last, dword length, dword width, TP* center, TP* 
 
 void CIFin::CifBox::import ( ImportDB& iDB ) const
 {
-   pointlist plist;   plist.reserve(4);
+   PointVector plist;   plist.reserve(4);
    real cX, cY;
 
    cX = rint(((real)_center->x() - (real)_length/ 2.0f) * iDB.crossCoeff() );
@@ -91,15 +91,15 @@ CIFin::CifBox::~CifBox()
    delete _direction;
 }
 //=============================================================================
-CIFin::CifPoly::CifPoly(CifData* last, pointlist* poly) :
+CIFin::CifPoly::CifPoly(CifData* last, PointVector* poly) :
       CifData(last), _poly(poly) {}
 
 
 void CIFin::CifPoly::import( ImportDB& iDB ) const
 {
-   pointlist plist;
+   PointVector plist;
    plist.reserve(_poly->size());
-   for(pointlist::const_iterator CP = _poly->begin(); CP != _poly->end(); CP++)
+   for(PointVector::const_iterator CP = _poly->begin(); CP != _poly->end(); CP++)
    {
       TP pnt(*CP);
       pnt *= iDB.crossCoeff();
@@ -114,14 +114,14 @@ CIFin::CifPoly::~CifPoly()
 }
 
 //=============================================================================
-CIFin::CifWire::CifWire(CifData* last, pointlist* poly, dword width) :
+CIFin::CifWire::CifWire(CifData* last, PointVector* poly, dword width) :
       CifData(last), _poly(poly), _width(width) {}
 
 void CIFin::CifWire::import( ImportDB& iDB ) const
 {
-   pointlist plist;
+   PointVector plist;
    plist.reserve(_poly->size());
-   for(pointlist::const_iterator CP = _poly->begin(); CP != _poly->end(); CP++)
+   for(PointVector::const_iterator CP = _poly->begin(); CP != _poly->end(); CP++)
    {
       TP pnt(*CP);
       pnt *= iDB.crossCoeff();
@@ -209,12 +209,12 @@ void CIFin::CifLayer::addBox(dword length,dword width ,TP* center, TP* direction
    _first = DEBUG_NEW CifBox(_first, length, width, center, direction);
 }
 
-void CIFin::CifLayer::addPoly(pointlist* poly)
+void CIFin::CifLayer::addPoly(PointVector* poly)
 {
    _first = DEBUG_NEW CifPoly(_first, poly);
 }
 
-void CIFin::CifLayer::addWire(pointlist* poly, dword width)
+void CIFin::CifLayer::addWire(PointVector* poly, dword width)
 {
    _first = DEBUG_NEW CifWire(_first, poly, width);
 }
@@ -446,12 +446,12 @@ void CIFin::CifFile::addBox(dword length, dword width ,TP* center, TP* direction
    _curLay->addBox(length, width, center, direction);
 }
 
-void CIFin::CifFile::addPoly(pointlist* poly)
+void CIFin::CifFile::addPoly(PointVector* poly)
 {
    _curLay->addPoly(poly);
 }
 
-void CIFin::CifFile::addWire(pointlist* poly, dword width)
+void CIFin::CifFile::addWire(PointVector* poly, dword width)
 {
    _curLay->addWire(poly, width);
 }

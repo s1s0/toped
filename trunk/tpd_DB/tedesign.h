@@ -93,8 +93,8 @@ namespace laydata {
       void           renameCell(TdtDefaultCell*, std::string);
       void           removeRefdCell(std::string&, CellDefList&, laydata::AtticList*, laydata::TdtLibDir*);
       TdtData*       addBox(unsigned la, TP* p1, TP* p2);
-      TdtData*       addPoly(unsigned, pointlist*);
-      TdtData*       addWire(unsigned, pointlist*, WireWidth);
+      TdtData*       addPoly(unsigned, PointVector*);
+      TdtData*       addWire(unsigned, PointVector*, WireWidth);
       TdtData*       addText(unsigned la, std::string& text, CTM& ori);
       TdtData*       addCellRef(laydata::CellDefin strdefn, CTM& ori);
       TdtData*       addCellARef(std::string&, CTM&, ArrayProperties&);
@@ -123,7 +123,7 @@ namespace laydata {
       bool           groupSelected(std::string name, laydata::TdtLibDir*);
       ShapeList*     ungroupPrep(laydata::TdtLibDir*);
       AtticList*     ungroupThis(ShapeList*);
-      bool           cutPoly(pointlist& pl, AtticList** dasao);
+      bool           cutPoly(PointVector& pl, AtticList** dasao);
       bool           merge(AtticList** dasao) {return _target.edit()->mergeSelected(dasao);}
       bool           stretch(int bfactor, AtticList** dasao) {return _target.edit()->stretchSelected(bfactor, dasao);}
       unsigned int   numSelected() const;
