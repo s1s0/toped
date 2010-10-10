@@ -379,7 +379,7 @@ std::string GDSin::GdsInFile::libname() const
    return _library->libName();
 }
 
-void GDSin::GdsInFile::getTopCells(nameList& topCells) const
+void GDSin::GdsInFile::getTopCells(NameList& topCells) const
 {
    assert(NULL != _hierTree);
    ForeignCellTree* root = _hierTree->GetFirstRoot(TARGETDB_LIB);
@@ -481,11 +481,11 @@ double GDSin::GdsInFile::libUnits() const
  * @param recursive - The type of traversing. If false only the cells listed
  * in the topCells will be gathered.
  */
-void GDSin::GdsInFile::convertPrep(const nameList& topCells, bool recursive)
+void GDSin::GdsInFile::convertPrep(const NameList& topCells, bool recursive)
 {
    assert(NULL != _hierTree);
    _convList.clear();
-   for (nameList::const_iterator CN = topCells.begin(); CN != topCells.end(); CN++)
+   for (NameList::const_iterator CN = topCells.begin(); CN != topCells.end(); CN++)
    {
       GDSin::GdsStructure *srcStructure = _library->getStructure(*CN);
       if (NULL != srcStructure)
@@ -1804,7 +1804,7 @@ void GDSin::GdsExportFile::aref(const std::string& name, const CTM& translation,
 
 bool GDSin::GdsExportFile::checkCellWritten(std::string cellname) const
 {
-   for (nameList::const_iterator i = _childnames.begin();
+   for (NameList::const_iterator i = _childnames.begin();
                                  i != _childnames.end(); i++)
       if (cellname == *i) return true;
    return false;

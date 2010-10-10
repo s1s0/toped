@@ -225,7 +225,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          real           b() const                     {return (real)_b;}
          CifLayer*      secureLayer(std::string);
          void           addRef(dword cell, CTM* location);
-         void           collectLayers(nameList&, bool) const;
+         void           collectLayers(NameList&, bool) const;
          void           linkReferences(CifFile&);
          ForeignCellTree* hierOut(ForeignCellTree*, CifStructure*);
          virtual void   import(ImportDB&);
@@ -261,11 +261,11 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          virtual double       libUnits() const {return 1e-8;}
          virtual void         hierOut();
          virtual std::string  libname() const {return getFileNameOnly();}
-         virtual void         getTopCells(nameList&) const;
+         virtual void         getTopCells(NameList&) const;
          virtual void         getAllCells(wxListBox&) const;
-         virtual void         convertPrep(const nameList&, bool);
-         virtual void         collectLayers(nameList&) const;
-         virtual bool         collectLayers(const std::string&, nameList& ) const;
+         virtual void         convertPrep(const NameList&, bool);
+         virtual void         collectLayers(NameList&) const;
+         virtual bool         collectLayers(const std::string&, NameList& ) const;
 
       protected:
          void                 linkReferences();

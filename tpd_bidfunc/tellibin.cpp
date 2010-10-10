@@ -55,8 +55,8 @@ int tellstdfunc::stdECHO::argsOK(argumentQ* amap) {
    return (!(amap->size() == 1));
 }
 
-nameList* tellstdfunc::stdECHO::callingConv(const telldata::typeMAP*) {
-   nameList* argtypes = DEBUG_NEW nameList();
+NameList* tellstdfunc::stdECHO::callingConv(const telldata::typeMAP*) {
+   NameList* argtypes = DEBUG_NEW NameList();
    argtypes->push_back("void");
    argtypes->push_back("<...anything...>");
    return argtypes;

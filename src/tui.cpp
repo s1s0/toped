@@ -491,7 +491,7 @@ tui::getCIFimport::getCIFimport(wxFrame *parent, wxWindowID id, const wxString &
          wxTextValidator(wxFILTER_NUMERIC, &_techno));
 
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300), 0, NULL, wxLB_SORT);
-   nameList cifLayers;
+   NameList cifLayers;
    DbImportFile* ACIFDB = NULL;
    if (DATC->lockCif(ACIFDB))
    {
@@ -504,7 +504,7 @@ tui::getCIFimport::getCIFimport(wxFrame *parent, wxWindowID id, const wxString &
    if (DATC->cifGetLayers(cifLayers))
    {
       word laynum = 1;
-      for (nameList::iterator NLI = cifLayers.begin(); NLI != cifLayers.end(); NLI++)
+      for (NameList::iterator NLI = cifLayers.begin(); NLI != cifLayers.end(); NLI++)
       {
          inlays[*NLI] = laynum++;
       }
@@ -966,12 +966,12 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
       dwlayno->SetEditable(false);
    }*/
    _sample   = DEBUG_NEW layset_sample( this, -1, wxDefaultPosition, wxDefaultSize, init, _drawProp);
-   nameList all_names;
+   NameList all_names;
    wxArrayString all_strings;
    _drawProp->allColors(all_names);
    if (!all_names.empty())
    {
-      for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
+      for( NameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
          all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
       if (no_color)
          init_color = wxString(all_names.begin()->c_str(), wxConvUTF8);
@@ -988,7 +988,7 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
    _drawProp->allFills(all_names);
    if (!all_names.empty())
    {
-      for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
+      for( NameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
          all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
       if (no_fill)
          init_fill = wxString(all_names.begin()->c_str(), wxConvUTF8);
@@ -1005,7 +1005,7 @@ tui::defineLayer::defineLayer(wxFrame *parent, wxWindowID id, const wxString &ti
    _drawProp->allLines(all_names);
    if (!all_names.empty())
    {
-      for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
+      for( NameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
       {
          all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
       }
@@ -1236,7 +1236,7 @@ tui::defineColor::defineColor(wxFrame *parent, wxWindowID id, const wxString &ti
       wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE), _drawProp(drawProp)
 {
    std::string init_color;
-   nameList all_names;
+   NameList all_names;
    _colorList = DEBUG_NEW wxListBox(this, ID_ITEMLIST, wxDefaultPosition, wxSize(150,200), 0, NULL, wxLB_SORT);
    _drawProp->allColors(all_names);
    if (!all_names.empty())
@@ -1244,7 +1244,7 @@ tui::defineColor::defineColor(wxFrame *parent, wxWindowID id, const wxString &ti
       init_color = *(all_names.begin());
    }
 
-   for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
+   for( NameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
    {
       _colorList->Append(wxString(CI->c_str(), wxConvUTF8));
       _allColors[*CI] = DEBUG_NEW layprop::tellRGB(_drawProp->getColor(*CI));
@@ -1330,12 +1330,12 @@ tui::defineColor::defineColor(wxFrame *parent, wxWindowID id, const wxString &ti
 
 void tui::defineColor::OnDefineColor(wxCommandEvent& cmdevent)
 {
-   nameList all_names;
+   NameList all_names;
    wxColourData data;
    _drawProp->allColors(all_names);
    word colnum = 0;
    const layprop::tellRGB* tell_color;
-   for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
+   for( NameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
    {
       tell_color= getColor(*CI);
       wxColour colour(tell_color->red(), tell_color->green(), tell_color->blue());
@@ -1733,7 +1733,7 @@ END_EVENT_TABLE()
 tui::defineFill::defineFill(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, const layprop::DrawProperties* drawProp) :
       wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)
 {
-   nameList all_names;
+   NameList all_names;
    drawProp->allFills(all_names);
    _fillList = DEBUG_NEW wxListBox(this, ID_ITEMLIST, wxDefaultPosition, wxSize(150,200), 0, NULL, wxLB_SORT);
    std::string init_color;
@@ -1741,7 +1741,7 @@ tui::defineFill::defineFill(wxFrame *parent, wxWindowID id, const wxString &titl
    {
       init_color = *(all_names.begin());
    }
-   for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
+   for( NameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
    {
       _fillList->Append(wxString(CI->c_str(), wxConvUTF8));
       byte* pat = DEBUG_NEW byte[128];
@@ -2019,11 +2019,11 @@ tui::nameCboxList::nameCboxList(wxWindow* parent, wxWindowID id, wxPoint pnt, wx
       wxScrolledWindow(parent, id, pnt, sz, wxBORDER_RAISED)
 {
    // collect all defined layers
-   nameList all_names;
+   NameList all_names;
    drawProp->allLayers(all_names);
    wxArrayString all_strings;
    int line_height = (int)(GetFont().GetPointSize() * 2.5);
-   for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
+   for( NameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
       all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
 
    /*(void)*/ DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("CIF layer"),
@@ -2063,11 +2063,11 @@ tui::nameCbox3List::nameCbox3List(wxWindow* parent, wxWindowID id, wxPoint pnt, 
       wxScrolledWindow(parent, id, pnt, sz, wxBORDER_RAISED)
 {
    // collect all defined layers
-   nameList all_names;
+   NameList all_names;
    drawProp->allLayers(all_names);
    wxArrayString all_strings;
    int line_height = (int)(GetFont().GetPointSize() * 2.5);
-   for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
+   for( NameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
       all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
 
    /*(void)*/ DEBUG_NEW wxStaticText(this, wxID_ANY, inName,
@@ -2157,11 +2157,11 @@ tui::nameEboxList::nameEboxList(wxWindow* parent, wxWindowID id, wxPoint pnt, wx
       wxScrolledWindow(parent, id, pnt, sz, wxBORDER_RAISED)
 {
    // collect all defined layers
-   nameList all_names;
+   NameList all_names;
    drawProp->allLayers(all_names);
    wxArrayString all_strings;
    int line_height = (int)(GetFont().GetPointSize() * 2.5);
-   for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
+   for( NameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
       all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
 
    /*(void)*/ DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("TDT layer"),
@@ -2258,11 +2258,11 @@ tui::nameEbox3List::nameEbox3List(wxWindow* parent, wxWindowID id, wxPoint pnt, 
       wxScrolledWindow(parent, id, pnt, sz, wxBORDER_RAISED)
 {
    // collect all defined layers
-   nameList all_names;
+   NameList all_names;
    drawProp->allLayers(all_names);
    wxArrayString all_strings;
    int line_height = (int)(GetFont().GetPointSize() * 2.5);
-   for( nameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
+   for( NameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
       all_strings.Add(wxString(CI->c_str(), wxConvUTF8));
 
    /*(void)*/ DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("TDT layer"),
@@ -2502,7 +2502,7 @@ tui::TopedPropertySheets::RenderingPSheet::RenderingPSheet(wxWindow* parent) : w
          //
          wxCheckBox* textOrien  = DEBUG_NEW wxCheckBox(this, PDSET_TEXTORI, wxT("Adjust orientation"));
          wxArrayString allFontNames_wx;
-         nameList allFontNames_std;
+         NameList allFontNames_std;
          wxComboBox* allFonts = DEBUG_NEW wxComboBox(this, PDSET_TEXTFONTS,
                wxT(""), wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_DROPDOWN | wxCB_READONLY | wxCB_SORT);
       topTextSizer->Add(textSizer, 0, wxALL | wxALIGN_CENTER | wxEXPAND);

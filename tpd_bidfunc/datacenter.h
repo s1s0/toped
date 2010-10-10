@@ -48,7 +48,7 @@ public:
    void                       GDSclose();
    void                       CIFclose();
    void                       OASclose();
-   bool                       cifGetLayers(nameList&);
+   bool                       cifGetLayers(NameList&);
    bool                       gdsGetLayers(ExtLayers&);
    bool                       oasGetLayers(ExtLayers&);
    bool                       lockTDT(laydata::TdtLibDir*&, TdtMutexState);

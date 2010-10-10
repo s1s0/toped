@@ -121,7 +121,7 @@
       void        undo() {};                                      \
       void        undo_cleanup() {};                              \
       int         argsOK(argumentQ* amap);                        \
-      nameList*   callingConv(const telldata::typeMAP*);          \
+      NameList*   callingConv(const telldata::typeMAP*);          \
    }
 #endif
 
@@ -158,7 +158,7 @@ namespace tellstdfunc {
    void                 UpdateLV(unsigned int);
    void                 RefreshGL();
    void                 gridON(byte No, bool status);
-   void                 updateLayerDefinitions(laydata::TdtLibDir*, nameList&, int);
+   void                 updateLayerDefinitions(laydata::TdtLibDir*, NameList&, int);
    void                 initFuncLib(wxFrame*, wxWindow*);
    laydata::SelectList* filter_selist(const laydata::SelectList*, word mask);
    laydata::AtticList*  replace_str(laydata::AtticList*, std::string);

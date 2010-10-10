@@ -1346,9 +1346,9 @@ void parsercmd::cmdSTDFUNC::reduce_undo_stack()
    }
 }
 
-nameList* parsercmd::cmdSTDFUNC::callingConv(const telldata::typeMAP* lclTypeDef)
+NameList* parsercmd::cmdSTDFUNC::callingConv(const telldata::typeMAP* lclTypeDef)
 {
-   nameList* argtypes = DEBUG_NEW nameList();
+   NameList* argtypes = DEBUG_NEW NameList();
    argtypes->push_back(telldata::echoType(gettype(), lclTypeDef));
    int argnum = arguments->size();
    for (int i = 0; i != argnum; i++)

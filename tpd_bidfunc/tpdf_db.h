@@ -86,9 +86,9 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(DRCexplainerror  );
    TELL_STDCMD_CLASSA(PSexportTOP      );
 
-   void  importGDScell(laydata::TdtLibDir*, const nameList&, const LayerMapExt&, parsercmd::undoQUEUE&, telldata::UNDOPerandQUEUE&, bool, bool, bool);
-   void  importCIFcell(laydata::TdtLibDir*, const nameList&, const SIMap&      , parsercmd::undoQUEUE&, telldata::UNDOPerandQUEUE&, bool, bool, bool, real);
-   void  importOAScell(laydata::TdtLibDir*, const nameList&, const LayerMapExt&, parsercmd::undoQUEUE&, telldata::UNDOPerandQUEUE&, bool, bool, bool);
+   void  importGDScell(laydata::TdtLibDir*, const NameList&, const LayerMapExt&, parsercmd::undoQUEUE&, telldata::UNDOPerandQUEUE&, bool, bool, bool);
+   void  importCIFcell(laydata::TdtLibDir*, const NameList&, const SIMap&      , parsercmd::undoQUEUE&, telldata::UNDOPerandQUEUE&, bool, bool, bool, real);
+   void  importOAScell(laydata::TdtLibDir*, const NameList&, const LayerMapExt&, parsercmd::undoQUEUE&, telldata::UNDOPerandQUEUE&, bool, bool, bool);
 
 }
 #endif

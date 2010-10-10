@@ -967,7 +967,7 @@ the current QuadTree object is visible. Current clip region data is
 obtained from LayoutCanvas. In a sence this method is the same as openGlDraw
 without fill and not handling selected shapes*/
 void laydata::QuadTree::motionDraw(const layprop::DrawProperties& drawprop,
-                                                   ctmqueue& transtack) const
+                                                   CtmQueue& transtack) const
 {
    if (empty()) return;
    // check the entire holder for clipping...

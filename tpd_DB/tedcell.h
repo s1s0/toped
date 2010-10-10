@@ -104,7 +104,7 @@ namespace laydata {
          virtual            ~TdtDefaultCell() {};
          virtual void        openGlDraw(layprop::DrawProperties&, bool active=false) const;
          virtual void        openGlRender(tenderer::TopRend&, const CTM&, bool, bool) const;
-         virtual void        motionDraw(const layprop::DrawProperties&, ctmqueue&, bool active=false) const;
+         virtual void        motionDraw(const layprop::DrawProperties&, CtmQueue&, bool active=false) const;
          virtual TDTHierTree* hierOut(TDTHierTree*& Htree, TdtCell*, CellList*, const TdtLibDir*);
          virtual bool        relink(TdtLibDir*);
          virtual void        relinkThis(std::string, laydata::CellDefin, laydata::TdtLibDir* libdir);
@@ -142,7 +142,7 @@ namespace laydata {
       virtual void         openGlDraw(layprop::DrawProperties&,
                                                           bool active=false) const;
       virtual void         openGlRender(tenderer::TopRend&, const CTM&, bool, bool) const;
-      virtual void         motionDraw(const layprop::DrawProperties&, ctmqueue&,
+      virtual void         motionDraw(const layprop::DrawProperties&, CtmQueue&,
                                                           bool active=false) const;
       QuadTree*            secureLayer(unsigned layno);
       QTreeTmp*            secureUnsortedLayer(unsigned layno);
@@ -189,7 +189,7 @@ namespace laydata {
       bool                 stretchSelected(int bfactor, AtticList**);
       AtticList*           changeSelect(TP, SH_STATUS status, const DWordSet&);
       laydata::AtticList*  findSelected(TP);
-      TdtCellRef*          getCellOver(TP, ctmstack&, CellRefStack*, const DWordSet&);
+      TdtCellRef*          getCellOver(TP, CtmStack&, CellRefStack*, const DWordSet&);
       SelectList*          shapeSel()        {return &_shapesel;};
       SelectList*          copySeList() const;
       virtual void         updateHierarchy(TdtLibDir*);

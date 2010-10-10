@@ -268,7 +268,7 @@ CIFin::CifLayer* CIFin::CifStructure::secureLayer(std::string name)
    return _first;
 }
 
-void CIFin::CifStructure::collectLayers(nameList& layList, bool hier) const
+void CIFin::CifStructure::collectLayers(NameList& layList, bool hier) const
 {
    const CifLayer* wlay = _first;
    while (NULL != wlay)
@@ -476,7 +476,7 @@ void CIFin::CifFile::addLabelSig(char* label, TP* location)
    _curLay->addLabelSig(std::string(label), location);
 }
 
-void CIFin::CifFile::collectLayers(nameList& cifLayers) const
+void CIFin::CifFile::collectLayers(NameList& cifLayers) const
 {
    CifStructure* local = _first;
    while (NULL != local)
@@ -488,7 +488,7 @@ void CIFin::CifFile::collectLayers(nameList& cifLayers) const
    cifLayers.unique();
 }
 
-bool CIFin::CifFile::collectLayers(const std::string& name, nameList& cifLayers ) const
+bool CIFin::CifFile::collectLayers(const std::string& name, NameList& cifLayers ) const
 {
    const CIFin::CifStructure *src_structure = getStructure(name.c_str());
    if (NULL == src_structure) return false;
@@ -546,11 +546,11 @@ void CIFin::CifFile::hierOut()
    }
 }
 
-void CIFin::CifFile::convertPrep(const nameList& topCells, bool recursive)
+void CIFin::CifFile::convertPrep(const NameList& topCells, bool recursive)
 {
    assert(NULL != _hierTree);
    _convList.clear();
-   for (nameList::const_iterator CN = topCells.begin(); CN != topCells.end(); CN++)
+   for (NameList::const_iterator CN = topCells.begin(); CN != topCells.end(); CN++)
    {
       CIFin::CifStructure *src_structure = const_cast<CIFin::CifStructure*>(getStructure(*CN));
       if (NULL != src_structure)
@@ -573,7 +573,7 @@ void CIFin::CifFile::convertPrep(const nameList& topCells, bool recursive)
    }
 }
 
-void CIFin::CifFile::getTopCells(nameList& top_cell_list) const
+void CIFin::CifFile::getTopCells(NameList& top_cell_list) const
 {
    assert(NULL != _hierTree);
    ForeignCellTree* root = _hierTree->GetFirstRoot(TARGETDB_LIB);

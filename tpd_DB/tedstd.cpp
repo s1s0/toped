@@ -758,7 +758,7 @@ laydata::WireContourAux::WireContourAux(const int4b* parray, unsigned lsize, con
 }
 
 /*!
- * Accelerates the WireContour usage with pointlist input data. Converts the @plist
+ * Accelerates the WireContour usage with PointVector input data. Converts the @plist
  * into array format and stores the result in _ldata. Then creates the
  * WireContour object and initializes it with the _ldata array.
  */
@@ -1228,7 +1228,7 @@ ImportDB::ImportDB(DbImportFile* src_lib, laydata::TdtLibDir* tdt_db, const SIMa
    _layCrossMap = DEBUG_NEW ENameLayerCM(theLayMap);
 }
 
-void ImportDB::run(const nameList& top_str_names, bool overwrite, bool reopenFile)
+void ImportDB::run(const NameList& top_str_names, bool overwrite, bool reopenFile)
 {
    if (!reopenFile || (reopenFile && _src_lib->reopenFile()))
    {

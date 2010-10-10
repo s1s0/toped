@@ -263,7 +263,7 @@ namespace laydata {
    /**
     * An auxiliary class to wrap around the WireContour class. It makes WireContour
     * usable with a point list input data or with data which needs coordinate
-    * transformations. Also it defines a method to dump the wire contour in a pointlist
+    * transformations. Also it defines a method to dump the wire contour in a PointVector
     * format which is usable by the basic renderer.
     */
    class WireContourAux {
@@ -362,16 +362,16 @@ class DbImportFile {
       virtual double       libUnits() const = 0;
       virtual void         hierOut() = 0 ;
       virtual std::string  libname() const = 0;
-      virtual void         getTopCells(nameList&) const = 0;
+      virtual void         getTopCells(NameList&) const = 0;
       virtual void         getAllCells(wxListBox&) const = 0;
-      virtual void         convertPrep(const nameList&, bool) = 0;
+      virtual void         convertPrep(const NameList&, bool) = 0;
       // If you hit any of the asserts below - it most likely means that you're using wrong
       // combination of DbImportFile extend class type and parameters for this function call
-      // ExtLayers is used for GDS/OASIS, nameList is used for CIF
+      // ExtLayers is used for GDS/OASIS, NameList is used for CIF
       virtual void         collectLayers(ExtLayers&) const {assert(false);}
-      virtual void         collectLayers(nameList& ) const {assert(false);}
+      virtual void         collectLayers(NameList& ) const {assert(false);}
       virtual bool         collectLayers(const std::string&, ExtLayers&) const {assert(false); return false;}
-      virtual bool         collectLayers(const std::string&, nameList& ) const {assert(false); return false;}
+      virtual bool         collectLayers(const std::string&, NameList& ) const {assert(false); return false;}
       wxFileOffset         filePos() const                  { return _filePos;   }
       wxFileOffset         fileLength() const               { return _fileLength;}
       bool                 status() const                   { return _status;    }
@@ -426,7 +426,7 @@ class ForeignCell {
 //==========================================================================
 // If you hit any of the asserts below - it most likely means that you're using wrong
 // combination of DbImportFile extend class type and parameters for this function call
-// ExtLayers is used for GDS/OASIS, nameList is used for CIF
+// ExtLayers is used for GDS/OASIS, NameList is used for CIF
 class LayerCrossMap {
    public:
                               LayerCrossMap() : _tdtLayNumber(0), _tmpLayer(NULL) {}
@@ -471,7 +471,7 @@ class ImportDB {
                               ImportDB(DbImportFile*, laydata::TdtLibDir*, const LayerMapExt&);
                               ImportDB(DbImportFile*, laydata::TdtLibDir*, const SIMap&, real);
                              ~ImportDB();
-      void                    run(const nameList&, bool, bool reopenFile = true);
+      void                    run(const NameList&, bool, bool reopenFile = true);
       bool                    mapTdtLayer(std::string);
       bool                    mapTdtLayer(word, word);
       void                    addBox(const TP&, const TP&);
