@@ -1,0 +1,77 @@
+Short Term
+------------
+ - Browser window needs search facilities. For big designs
+ - bitwise logical operations. Require unsigned.
+ - avoid using #defines where possible. Use const instead
+
+General
+=========
+  * Text resize
+  * interactive rotate might be confusing - needs to be discussed
+  * cut/merge doesn't work with wire
+  * Parser needs well defined error recovery policy
+  * select edge with double click - needs algo for edge proximity. The same algo
+    can be used for editpush selecting (optional?)
+  * getpointlist(PARAMETERS) - general management of temporary images from TELL
+    The end of the line here is to include online DRC checks as TELL callback
+    functions
+  * There is no log possible for select/unselect from list operations. The
+    reason is that we don't have a representation of layout list in TELL.
+    Think about it. Pointetrs are unapropriate of course.
+  * Think about improving the TEDAT text readability manipulating the orientation
+  * Optional validation - warning/error menu - acute angle case.
+  * MEMORY LEAKAGE DEBUG!
+
+  TELL related
+  ------------
+  * break, continue, jump/goto statements and label (for the f.... jump)
+  * return statements when there are multiply paths
+  * logical operations between figures in TELL! (maybe Toped engine should be used here)
+  * Introduce default parameter values. Think about callback functions
+
+
+  Graphics
+  ---------
+
+Dialog stuff
+============
+   * Grid definitioan dialog is ugly - text windows are not resizing properly. 
+   * The number of the digits after the decimal point must be intact with the 
+     current step. There is some piece of code left in tui.cpp (getSize::getSize)
+     to be used as a starting point for this
+   * Resources should go to XML and resource compiler should be used
+
+Documentation
+==============
+   round
+   ceil
+   floor
+   fmod
+   sqrt
+   pow
+   
+   tan
+   asin
+   acos
+   atan
+   
+   sinh
+   cosh
+   tanh
+   asinh
+   acosh
+   atanh
+
+   exp
+   log
+   log10
+
+
+Global options of the editor
+============================
+  * lock/hide layer unselects the shapes on the layer. If not all modify 
+    operations must check for the layer status
+  * Ungroup over tdtaref results in a list of tdtref's
+  * Reference point when groupping -> current (0,0), or bottom left point 
+    of the selected shapes
+  * ref/aref select - overlapping the reference point only or the entire area  
