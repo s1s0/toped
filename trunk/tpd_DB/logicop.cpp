@@ -51,7 +51,7 @@
 #ifdef POLYBIND_DEBUG
 #define REPORT_POLYBIND_DEBUG(polyObject) \
    printf("=======================================================\n"); \
-   for (pointlist::const_iterator CP = polyObject->begin(); CP != polyObject->end(); CP++) \
+   for (PointVector::const_iterator CP = polyObject->begin(); CP != polyObject->end(); CP++) \
       printf("( %i , %i )\n", CP->x(), CP->y());
 #else
 #define REPORT_POLYBIND_DEBUG(polyObject)

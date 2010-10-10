@@ -513,7 +513,7 @@ namespace  parsercmd {
       virtual void               undo() = 0;
       virtual void               undo_cleanup() = 0;
       void                       reduce_undo_stack();
-      virtual nameList*          callingConv(const telldata::typeMAP*);
+      virtual NameList*          callingConv(const telldata::typeMAP*);
       virtual int                argsOK(telldata::argumentQ* amap);
       telldata::typeID           gettype() const {return returntype;};
       virtual bool               internal() {return true;}

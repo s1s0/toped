@@ -175,7 +175,7 @@ bool DataCenter::CIFparse(std::string filename)
    return status;
 }
 
-bool DataCenter::cifGetLayers(nameList& cifLayers)
+bool DataCenter::cifGetLayers(NameList& cifLayers)
 {
    bool ret_value = false;
    DbImportFile* ACIFDB = NULL;
@@ -903,17 +903,17 @@ LayerMapCif* DataCenter::secureCifLayMap(const layprop::DrawProperties* drawProp
    USMap theMap;
    if (import)
    {// Generate the default CIF layer map for import
-      nameList cifLayers;
+      NameList cifLayers;
       cifGetLayers(cifLayers);
       word laynum = 1;
-      for ( nameList::const_iterator CCL = cifLayers.begin(); CCL != cifLayers.end(); CCL++ )
+      for ( NameList::const_iterator CCL = cifLayers.begin(); CCL != cifLayers.end(); CCL++ )
          theMap[laynum] = *CCL;
    }
    else
    {// Generate the default CIF layer map for export
-      nameList tdtLayers;
+      NameList tdtLayers;
       drawProp->allLayers(tdtLayers);
-      for ( nameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
+      for ( NameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
       {
          std::ostringstream ciflayname;
          unsigned layno = drawProp->getLayerNo( *CDL );
@@ -950,9 +950,9 @@ LayerMapExt* DataCenter::secureGdsLayMap(const layprop::DrawProperties* drawProp
       }
       else
       { // generate default export GDS layer map
-         nameList tdtLayers;
+         NameList tdtLayers;
          drawProp->allLayers(tdtLayers);
-         for ( nameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
+         for ( NameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
          {
             std::ostringstream dtypestr;
             dtypestr << drawProp->getLayerNo( *CDL )<< "; 0";

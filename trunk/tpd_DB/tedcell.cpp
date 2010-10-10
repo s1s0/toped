@@ -240,7 +240,7 @@ void laydata::TdtDefaultCell::openGlRender(tenderer::TopRend& rend, const CTM& t
 }
 
 
-void laydata::TdtDefaultCell::motionDraw(const layprop::DrawProperties&, ctmqueue&, bool active) const
+void laydata::TdtDefaultCell::motionDraw(const layprop::DrawProperties&, CtmQueue&, bool active) const
 {
 }
 
@@ -510,7 +510,7 @@ void laydata::TdtCell::openGlRender(tenderer::TopRend& rend, const CTM& trans,
 }
 
 void laydata::TdtCell::motionDraw(const layprop::DrawProperties& drawprop,
-                                          ctmqueue& transtack, bool active) const
+                                          CtmQueue& transtack, bool active) const
 {
    if (active)
    {
@@ -627,7 +627,7 @@ laydata::AtticList* laydata::TdtCell::findSelected(TP pnt)
    return errList;
 }
 
-laydata::TdtCellRef* laydata::TdtCell::getCellOver(TP pnt, ctmstack& transtack,
+laydata::TdtCellRef* laydata::TdtCell::getCellOver(TP pnt, CtmStack& transtack,
                      CellRefStack* refstack, const DWordSet& unselable)
 {
     if (_layers.end() == _layers.find(REF_LAY)) return NULL;

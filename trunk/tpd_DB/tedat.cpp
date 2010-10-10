@@ -485,7 +485,7 @@ void laydata::TdtBox::openGlDrawSel(const PointVector& ptlist, const SGBitSet* p
    }
 }
 
-void laydata::TdtBox::motionDraw(const layprop::DrawProperties&, ctmqueue& transtack,
+void laydata::TdtBox::motionDraw(const layprop::DrawProperties&, CtmQueue& transtack,
                                                 SGBitSet* plst) const
 {
    CTM trans = transtack.front();
@@ -836,7 +836,7 @@ void laydata::TdtPoly::openGlDrawSel(const PointVector& ptlist, const SGBitSet* 
    }
 }
 
-void laydata::TdtPoly::motionDraw(const layprop::DrawProperties&, ctmqueue& transtack,
+void laydata::TdtPoly::motionDraw(const layprop::DrawProperties&, CtmQueue& transtack,
                                  SGBitSet* plst) const
 {
    CTM trans = transtack.front();
@@ -888,7 +888,7 @@ laydata::Validator* laydata::TdtPoly::move(const CTM& trans, SGBitSet& plst)
       PointVector* nshape = movePointsSelected(plst, trans);
       laydata::ValidPoly* check = DEBUG_NEW laydata::ValidPoly(*nshape);
       if (laydata::shp_OK == check->status()) {
-         // assign the modified pointlist ONLY if the resulting shape is perfect
+         // assign the modified PointVector ONLY if the resulting shape is perfect
          delete [] _pdata;
          _psize = nshape->size();
          _pdata = DEBUG_NEW int4b[2 * _psize];
@@ -902,7 +902,7 @@ laydata::Validator* laydata::TdtPoly::move(const CTM& trans, SGBitSet& plst)
          delete check;
          return NULL;
       }
-      // in all other cases keep the original pointlist, depending on the check->status()
+      // in all other cases keep the original PointVector, depending on the check->status()
       // the shape will be replaced, or marked as failed to modify
       nshape->clear(); delete nshape;
       return check;
@@ -925,7 +925,7 @@ laydata::Validator* laydata::TdtPoly::move(const CTM& trans, SGBitSet& plst)
          laydata::ValidPoly* check = DEBUG_NEW laydata::ValidPoly(*mlist);
          if (!(laydata::shp_box & check->status()))
          {
-            // leave the modified pointlist ONLY if the resulting shape is not a box
+            // leave the modified PointVector ONLY if the resulting shape is not a box
             for (unsigned i = 0; i < _psize; i++)
             {
                _pdata[2*i] = (*mlist)[i].x();_pdata[2*i+1] = (*mlist)[i].y();
@@ -1337,7 +1337,7 @@ void laydata::TdtWire::openGlDrawSel(const PointVector& ptlist, const SGBitSet* 
 }
 
 void laydata::TdtWire::motionDraw(const layprop::DrawProperties& drawprop,
-               ctmqueue& transtack, SGBitSet* plst) const
+               CtmQueue& transtack, SGBitSet* plst) const
 {
    CTM trans = transtack.front();
    PointVector ptlist;
@@ -1426,7 +1426,7 @@ laydata::Validator* laydata::TdtWire::move(const CTM& trans, SGBitSet& plst)
       PointVector* nshape = movePointsSelected(plst, trans);
       laydata::ValidWire* check = DEBUG_NEW laydata::ValidWire(*nshape, _width);
       if (laydata::shp_OK == check->status()) {
-         // assign the modified pointlist ONLY if the resulting shape is perfect
+         // assign the modified PointVector ONLY if the resulting shape is perfect
          delete [] _pdata;
          _psize = nshape->size();
          _pdata = DEBUG_NEW int4b[2 * _psize];
@@ -1438,7 +1438,7 @@ laydata::Validator* laydata::TdtWire::move(const CTM& trans, SGBitSet& plst)
          delete check;
          return NULL;
       }
-      // in all other cases keep the original pointlist, depending on the check->status()
+      // in all other cases keep the original PointVector, depending on the check->status()
       // the shape will be replaced, or marked as failed to modify
       return check;
    }
@@ -1718,7 +1718,7 @@ void laydata::TdtCellRef::openGlPostClean(layprop::DrawProperties& drawprop, Poi
 }
 
 void laydata::TdtCellRef::motionDraw(const layprop::DrawProperties& drawprop,
-                 ctmqueue& transtack, SGBitSet*) const
+                 CtmQueue& transtack, SGBitSet*) const
 {
    if (structure())
    {
@@ -2034,7 +2034,7 @@ void laydata::TdtCellAref::openGlDrawSel(const PointVector& ptlist, const SGBitS
 }
 
 void laydata::TdtCellAref::motionDraw(const layprop::DrawProperties& drawprop,
-                 ctmqueue& transtack, SGBitSet*) const
+                 CtmQueue& transtack, SGBitSet*) const
 {
    assert(structure());
    for (int i = 0; i < _arrprops.cols(); i++)
@@ -2316,7 +2316,7 @@ void laydata::TdtText::openGlPostClean(layprop::DrawProperties& drawprop, PointV
 }
 
 void laydata::TdtText::motionDraw(const layprop::DrawProperties& drawprop,
-               ctmqueue& transtack, SGBitSet*) const
+               CtmQueue& transtack, SGBitSet*) const
 {
    //====================================================================
    // font translation matrix
@@ -2770,7 +2770,7 @@ laydata::TdtData* laydata::polymerge(const PointVector& _plist0, const PointVect
 
 //==============================================================================
 //
-void laydata::TdtTmpBox::draw(const layprop::DrawProperties&, ctmqueue& transtack) const
+void laydata::TdtTmpBox::draw(const layprop::DrawProperties&, CtmQueue& transtack) const
 {
    CTM trans = transtack.front();
    if (!(_p1)) return;
@@ -2802,7 +2802,7 @@ laydata::TdtTmpBox::~TdtTmpBox()
 
 //==============================================================================
 //
-void laydata::TdtTmpPoly::draw(const layprop::DrawProperties&, ctmqueue& transtack) const
+void laydata::TdtTmpPoly::draw(const layprop::DrawProperties&, CtmQueue& transtack) const
 {
    CTM trans = transtack.front();
    dword numpnts;
@@ -2827,7 +2827,7 @@ void laydata::TdtTmpPoly::rmpoint(TP& lp)
 
 //==============================================================================
 //
-void laydata::TdtTmpWire::draw(const layprop::DrawProperties& drawprop, ctmqueue& transtack) const
+void laydata::TdtTmpWire::draw(const layprop::DrawProperties& drawprop, CtmQueue& transtack) const
 {
    dword num_points = _plist.size();
    if (num_points == 0) return;
@@ -2875,7 +2875,7 @@ void laydata::TdtTmpWire::drawline(const PointVector& centerLine, const PointVec
 
 //==============================================================================
 //
-void laydata::TdtTmpCellRef::draw(const layprop::DrawProperties& drawprop, ctmqueue& transtack) const
+void laydata::TdtTmpCellRef::draw(const layprop::DrawProperties& drawprop, CtmQueue& transtack) const
 {
    if (NULL != _structure)
    {
@@ -2887,7 +2887,7 @@ void laydata::TdtTmpCellRef::draw(const layprop::DrawProperties& drawprop, ctmqu
 //==============================================================================
 //
 void laydata::TdtTmpCellAref::draw(const layprop::DrawProperties& drawprop,
-                                       ctmqueue& transtack) const
+                                       CtmQueue& transtack) const
 {
    if (NULL != _structure)
    {
@@ -2918,7 +2918,7 @@ laydata::TdtTmpText::TdtTmpText(std::string text, CTM trans) : _text(text),
 }
 
 
-void laydata::TdtTmpText::draw(const layprop::DrawProperties&, ctmqueue& transtack) const
+void laydata::TdtTmpText::draw(const layprop::DrawProperties&, CtmQueue& transtack) const
 {
    //====================================================================
    // font translation matrix

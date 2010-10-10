@@ -1428,7 +1428,7 @@ int polycross::YQ::sCompare(const polysegment* seg0, const polysegment* seg1)
    if (ori != 0) return ori;
    // if it is still the same => we have coinciding segments
 
-   // get the original pointlists for the comparing segments
+   // get the original PointVector for the comparing segments
    const PointVector* plist0 = (1 == seg0->polyNo()) ? opl1() : opl2();
 
    // ... and get the location of the inside segment in that sequence

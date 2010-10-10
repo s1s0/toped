@@ -1165,7 +1165,7 @@ laydata::TdtCell* laydata::TdtDesign::openCell(std::string name)
 bool laydata::TdtDesign::editPush(const TP& pnt, const DWordSet& unselable)
 {
    if (_target.checkEdit()) {//
-      ctmstack transtack;
+      CtmStack transtack;
       transtack.push(CTM());
       laydata::CellRefStack* crstack = DEBUG_NEW laydata::CellRefStack();
       TdtCell* oldtvcell = _target.view();
@@ -1238,7 +1238,7 @@ void laydata::TdtDesign::write(TEDfile* const tedfile) {
 
 void laydata::TdtDesign::tmpDraw(const layprop::DrawProperties& drawprop,
                                           TP base, TP newp) {
-   ctmqueue tmp_stack;
+   CtmQueue tmp_stack;
    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
    if (_tmpdata)
    {

@@ -67,7 +67,7 @@ namespace laydata {
       void                 openGlRender(tenderer::TopRend&, const DataList*) const;
 //      void                 visible_shapes(laydata::ShapeList*, const DBbox&, const CTM&, const CTM&, unsigned long&);
       short                clipType(tenderer::TopRend&) const;
-      void                 motionDraw(const layprop::DrawProperties&, ctmqueue&) const;
+      void                 motionDraw(const layprop::DrawProperties&, CtmQueue&) const;
       void                 add(TdtData* shape);
       TdtData*             addBox(const TP& p1, const TP& p2);
       TdtData*             addPoly(PointVector& pl);

@@ -40,9 +40,9 @@ int tellstdfunc::lstLENGTH::argsOK(argumentQ* amap)
    return (!((amap->size() == 1) && ( (*((*amap)[0]))() &  telldata::tn_listmask  )));
 }
 
-nameList* tellstdfunc::lstLENGTH::callingConv(const telldata::typeMAP*)
+NameList* tellstdfunc::lstLENGTH::callingConv(const telldata::typeMAP*)
 {
-   nameList* argtypes = DEBUG_NEW nameList();
+   NameList* argtypes = DEBUG_NEW NameList();
    argtypes->push_back("int");
    argtypes->push_back("<...anything...> list");
    return argtypes;
@@ -112,9 +112,9 @@ int tellstdfunc::stdABS::argsOK(argumentQ* amap)
                                     ( (*((*amap)[0]))() == telldata::tn_int   )   ));
 }
 
-nameList* tellstdfunc::stdABS::callingConv(const telldata::typeMAP*)
+NameList* tellstdfunc::stdABS::callingConv(const telldata::typeMAP*)
 {
-   nameList* argtypes = DEBUG_NEW nameList();
+   NameList* argtypes = DEBUG_NEW NameList();
    argtypes->push_back("real");
    argtypes->push_back("real");
    return argtypes;

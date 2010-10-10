@@ -757,7 +757,7 @@ bool Oasis::OasisInFile::calculateChecksum(dword& checksum)
    return false;
 }
 
-void Oasis::OasisInFile::getTopCells(nameList& top_cell_list) const
+void Oasis::OasisInFile::getTopCells(NameList& top_cell_list) const
 {
    ForeignCellTree* root = _hierTree->GetFirstRoot(TARGETDB_LIB);
    if (root)
@@ -777,10 +777,10 @@ void Oasis::OasisInFile::getAllCells(wxListBox& _nameList) const
       _nameList.Append(wxString(CSTR->first.c_str(), wxConvUTF8));
 }
 
-void Oasis::OasisInFile::convertPrep(const nameList& topCells, bool recursive)
+void Oasis::OasisInFile::convertPrep(const NameList& topCells, bool recursive)
 {
    assert(NULL != _hierTree);
-   for (nameList::const_iterator CN = topCells.begin(); CN != topCells.end(); CN++)
+   for (NameList::const_iterator CN = topCells.begin(); CN != topCells.end(); CN++)
    {
       Cell* src_structure = getCell(*CN);
       if (NULL != src_structure)

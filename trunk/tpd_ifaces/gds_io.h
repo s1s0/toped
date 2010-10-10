@@ -224,9 +224,9 @@ namespace GDSin {
          virtual void         collectLayers(ExtLayers&) const;
          virtual bool         collectLayers(const std::string&, ExtLayers&) const;
          virtual std::string  libname() const;
-         virtual void         getTopCells(nameList&) const;
+         virtual void         getTopCells(NameList&) const;
          virtual void         getAllCells(wxListBox&) const;
-         virtual void         convertPrep(const nameList&, bool);
+         virtual void         convertPrep(const NameList&, bool);
          const GdsRecord*     cRecord() const                  { return &_cRecord;                    }
          int                  gdsiiWarnings()                  { return _gdsiiWarnings;               }
          int                  incGdsiiWarnings()               { return ++_gdsiiWarnings;             }
@@ -399,7 +399,7 @@ namespace GDSin {
          bool                 getMappedLayType(word&, word&, word);
          const LayerMapExt&   _laymap;
          std::string          _ccname;
-         nameList             _childnames;
+         NameList             _childnames;
          word                 _cGdsLayer;
          word                 _cGdsType;
    };

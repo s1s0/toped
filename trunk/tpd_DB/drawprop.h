@@ -231,7 +231,7 @@ namespace layprop {
          void                   drawSolidString(std::string);
          bool                   bindFont();
          void                   unbindFont();
-         void                   allFontNames(nameList&);
+         void                   allFontNames(NameList&);
          word                   numFonts();
          std::string            getActiveFontName() const {return _activeFontName;}
       private:
@@ -365,10 +365,10 @@ namespace layprop {
          const tellRGB&             getColor(std::string) const;
          const LineSettings*        getLine(unsigned layno) const;
          const LineSettings*        getLine(std::string) const;
-         void                       allLayers(nameList&) const;
-         void                       allColors(nameList&) const;
-         void                       allFills(nameList&) const;
-         void                       allLines(nameList&) const;
+         void                       allLayers(NameList&) const;
+         void                       allColors(NameList&) const;
+         void                       allFills(NameList&) const;
+         void                       allLines(NameList&) const;
          unsigned                   getLayerNo(std::string name) const;
       private:
          typedef std::deque<LayStateList>            LayStateHistory;
@@ -394,7 +394,7 @@ namespace layprop {
          console::ACTIVE_OP         _currentOp;    //
          bool                       _blockFill;
          laydata::CellRefStack*     _refStack;
-         ctmstack                   _tranStack;
+         CtmStack                   _tranStack;
          unsigned                   _drawingLayer;
          LayStateMap                _layStateMap;  //
          LayStateHistory            _layStateHistory; //! for undo purposes of layer status related TELL function

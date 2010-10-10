@@ -75,7 +75,7 @@ void PSFile::writeStdDefs()
 
 bool PSFile::checkCellWritten(std::string cellname)
 {
-   for (nameList::const_iterator i = _childnames.begin();
+   for (NameList::const_iterator i = _childnames.begin();
                                  i != _childnames.end(); i++)
       if (cellname == *i) return true;
    return false;

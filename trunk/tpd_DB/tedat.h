@@ -72,7 +72,7 @@ namespace laydata {
    //! Draw the outlines of the selected objects
       virtual   void       drawSRequest(tenderer::TopRend&, const SGBitSet*) const = 0;
    //! Draw the objects in motion during copy/move and similar operations
-      virtual   void       motionDraw(const layprop::DrawProperties&, ctmqueue&, SGBitSet*) const = 0;
+      virtual   void       motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const = 0;
    //! Print an object description on the toped console.
       virtual   void       info(std::ostringstream&, real) const = 0;
    //! Write the TdtData object in TDT file.
@@ -142,7 +142,7 @@ namespace laydata {
       virtual void         openGlDrawSel(const PointVector&, const SGBitSet*) const;
       virtual void         drawRequest(tenderer::TopRend&) const;
       virtual void         drawSRequest(tenderer::TopRend&, const SGBitSet*) const;
-      virtual void         motionDraw(const layprop::DrawProperties&, ctmqueue&, SGBitSet*) const;
+      virtual void         motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
 
       virtual void         info(std::ostringstream&, real) const;
       virtual void         write(TEDfile* const tedfile) const;
@@ -188,7 +188,7 @@ namespace laydata {
          virtual void      openGlDrawSel(const PointVector&, const SGBitSet*) const;
          virtual void      drawRequest(tenderer::TopRend&) const;
          virtual void      drawSRequest(tenderer::TopRend&, const SGBitSet*) const;
-         virtual void      motionDraw(const layprop::DrawProperties&, ctmqueue&, SGBitSet*) const;
+         virtual void      motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
 
          virtual void      info(std::ostringstream&, real) const;
          virtual void      write(TEDfile* const tedfile) const;
@@ -229,7 +229,7 @@ namespace laydata {
          virtual void      openGlDrawSel(const PointVector&, const SGBitSet*) const;
          virtual void      drawRequest(tenderer::TopRend&) const;
          virtual void      drawSRequest(tenderer::TopRend&, const SGBitSet*) const;
-         virtual void      motionDraw(const layprop::DrawProperties&, ctmqueue&, SGBitSet*) const;
+         virtual void      motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
 
          virtual void      info(std::ostringstream&, real) const;
          virtual void      write(TEDfile* const tedfile) const;
@@ -275,7 +275,7 @@ namespace laydata {
       virtual void         openGlPostClean(layprop::DrawProperties&, PointVector& ptlist) const;
       virtual void         drawRequest(tenderer::TopRend&) const;
       virtual void         drawSRequest(tenderer::TopRend&, const SGBitSet*) const;
-      virtual void         motionDraw(const layprop::DrawProperties&, ctmqueue&, SGBitSet*) const;
+      virtual void         motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
 
       virtual void         info(std::ostringstream&, real) const;
       virtual void         write(TEDfile* const tedfile) const;
@@ -300,7 +300,7 @@ namespace laydata {
       CellDefin            _structure; // pointer to the cell definition
       CTM                  _translation;
 //   private:
-//      bool                 ref_visible(ctmstack&, const layprop::DrawProperties&) const;
+//      bool                 ref_visible(CtmStack&, const layprop::DrawProperties&) const;
    };
 
 //==============================================================================
@@ -320,7 +320,7 @@ namespace laydata {
       virtual void         openGlDrawSel(const PointVector&, const SGBitSet*) const;
       virtual void         drawRequest(tenderer::TopRend&) const;
       virtual void         drawSRequest(tenderer::TopRend&, const SGBitSet*) const;
-      virtual void         motionDraw(const layprop::DrawProperties&, ctmqueue&, SGBitSet*) const;
+      virtual void         motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
 
       virtual void         info(std::ostringstream&, real) const;
       virtual void         write(TEDfile* const tedfile) const;
@@ -354,7 +354,7 @@ namespace laydata {
       virtual void         openGlPostClean(layprop::DrawProperties&, PointVector& ptlist) const;
       virtual void         drawRequest(tenderer::TopRend&) const;
       virtual void         drawSRequest(tenderer::TopRend&, const SGBitSet*) const;
-      virtual void         motionDraw(const layprop::DrawProperties&, ctmqueue&, SGBitSet*) const;
+      virtual void         motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
 
       virtual void         info(std::ostringstream&, real) const;
       virtual void         write(TEDfile* const tedfile) const;
@@ -430,7 +430,7 @@ namespace laydata {
 //==============================================================================
    class TdtTmpData {
       public:
-         virtual void      draw(const layprop::DrawProperties&, ctmqueue&) const = 0;
+         virtual void      draw(const layprop::DrawProperties&, CtmQueue&) const = 0;
          //! Add a point to the TdtData object. Used to handle the objects under construction on the screen.
          virtual void      addpoint(TP){assert(false);}
          //! Removes a point from the TdtData object. Used to handle the objects under construction on the screen.
@@ -447,7 +447,7 @@ namespace laydata {
       public:
                            TdtTmpBox() : _p1(NULL), _p2(NULL) {};
                           ~TdtTmpBox();
-         virtual void      draw(const layprop::DrawProperties&, ctmqueue& ) const;
+         virtual void      draw(const layprop::DrawProperties&, CtmQueue& ) const;
          virtual void      addpoint(TP);
          virtual void      rmpoint(TP&);
       private:
@@ -460,7 +460,7 @@ namespace laydata {
       public:
                            TdtTmpPoly() {};
                           ~TdtTmpPoly() {};
-         virtual void      draw(const layprop::DrawProperties&, ctmqueue& ) const;
+         virtual void      draw(const layprop::DrawProperties&, CtmQueue& ) const;
          virtual void      addpoint(TP p)  {_plist.push_back(p);}
          virtual void      rmpoint(TP&);
       private:
@@ -472,7 +472,7 @@ namespace laydata {
       public:
                            TdtTmpWire(WireWidth width) : _width(width)  {};
                           ~TdtTmpWire(){};
-         virtual void      draw(const layprop::DrawProperties&, ctmqueue& ) const;
+         virtual void      draw(const layprop::DrawProperties&, CtmQueue& ) const;
          virtual void      addpoint(TP);
          virtual void      rmpoint(TP&);
       private:
@@ -488,7 +488,7 @@ namespace laydata {
                            TdtTmpCellRef(CellDefin str, CTM trans) :
                                        _structure(str), _translation(trans) {};
                           ~TdtTmpCellRef(){};
-         virtual void      draw(const layprop::DrawProperties&, ctmqueue&) const;
+         virtual void      draw(const layprop::DrawProperties&, CtmQueue&) const;
          void              objFlip()   {_translation.FlipY(0.0)   ;}
          void              objRotate() {_translation.Rotate( 90.0);}
       protected:
@@ -502,7 +502,7 @@ namespace laydata {
                            TdtTmpCellAref(CellDefin str, CTM trans, ArrayProperties& arrprops) :
                               TdtTmpCellRef(str, trans), _arrprops(arrprops) {};
                           ~TdtTmpCellAref(){};
-         virtual void      draw(const layprop::DrawProperties&, ctmqueue&) const;
+         virtual void      draw(const layprop::DrawProperties&, CtmQueue&) const;
       private:
          ArrayProperties   _arrprops;
    };
@@ -512,7 +512,7 @@ namespace laydata {
       public:
                            TdtTmpText(std::string text, CTM trans);
                           ~TdtTmpText(){};
-         virtual void      draw(const layprop::DrawProperties&, ctmqueue&) const;
+         virtual void      draw(const layprop::DrawProperties&, CtmQueue&) const;
          void              objFlip()   {_translation.FlipY(0.0)   ;}
          void              objRotate() {_translation.Rotate( 90.0);}
       protected:

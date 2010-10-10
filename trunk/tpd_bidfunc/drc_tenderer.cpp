@@ -136,7 +136,7 @@ void Calbr::drcTenderer::addLine(const edge &edge)
    }
 
    real DBscale = 1000 ;
-   //Convert drcEdge to pointlist
+   //Convert drcEdge to PointVector
    PointVector plDB;
    plDB.reserve(2);
 

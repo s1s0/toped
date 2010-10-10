@@ -440,9 +440,9 @@ namespace Oasis {
          ValidationScheme     validation() const {return _validation;}
          dword                signature() const  {return _signature;}
 
-         virtual void         getTopCells(nameList&) const;
+         virtual void         getTopCells(NameList&) const;
          virtual void         getAllCells(wxListBox&) const;
-         virtual void         convertPrep(const nameList&, bool);
+         virtual void         convertPrep(const NameList&, bool);
          //----------------------------------------------------------------------
          byte                 getByte();
          qword                getUnsignedInt(byte);

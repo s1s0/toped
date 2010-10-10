@@ -48,7 +48,7 @@ typedef          int             int4b    ; // 4 bytes
 typedef long long int            int8b    ; // 8 bytes
 typedef          double          real     ; // 8 bytes
 
-typedef  std::list<std::string>           nameList;
+typedef  std::list<std::string>           NameList;
 typedef  std::set<std::string>            NameSet;
 typedef  std::list<word>                  WordList;
 typedef  std::set<word>                   WordSet;
@@ -277,8 +277,8 @@ private:
 };
 
 typedef  std::vector<TP>         PointVector;
-typedef  std::stack<CTM>         ctmstack;
-typedef  std::deque<CTM>         ctmqueue;
+typedef  std::stack<CTM>         CtmStack;
+typedef  std::deque<CTM>         CtmQueue;
 typedef  std::list<PointVector*> pcollection; // point list collection
 
 
