@@ -145,7 +145,7 @@ namespace tellstdfunc {
                                     word cols = 0,
                                     word rows = 0
                                    );
-   pointlist*           t2tpoints(telldata::ttlist *, real);
+   PointVector*         t2tpoints(telldata::ttlist *, real);
    telldata::ttlist*    make_ttlaylist(laydata::SelectList*);
    telldata::ttlist*    make_ttlaylist(laydata::AtticList*);
    laydata::SelectList* get_ttlaylist(telldata::ttlist* llist);

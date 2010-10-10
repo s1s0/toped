@@ -136,7 +136,7 @@ Finally, divide the score by two and if the result is odd - the point is inside.
 parameter, procedure reports the point inside (if true) or outside the polygon
  * @return true if the point is inside the polygon
  */
-bool polycross::VPoint::inside(const pointlist& plist, bool touching)
+bool polycross::VPoint::inside(const PointVector& plist, bool touching)
 {
    TP p0, p1;
    byte cc = 0;
@@ -468,7 +468,7 @@ polycross::polysegment::~polysegment()
 //==============================================================================
 // class segmentlist
 
-polycross::segmentlist::segmentlist(const pointlist& plst, byte plyn, bool looped) {
+polycross::segmentlist::segmentlist(const PointVector& plst, byte plyn, bool looped) {
    _originalPL = &plst;
    unsigned plysize = plst.size();
    if (!looped)
@@ -496,7 +496,7 @@ polycross::segmentlist::~segmentlist() {
    _segs.clear();
 }
 
-unsigned polycross::segmentlist::normalize(const pointlist& plst, bool looped) {
+unsigned polycross::segmentlist::normalize(const PointVector& plst, bool looped) {
    unsigned numcross = 0;
    unsigned plysize = plst.size();
    if (looped)
@@ -681,7 +681,7 @@ TP* polycross::TEvent::oneLineSegments(polysegment* above, polysegment* below, Y
    polysegment* outside = swaped ? below : above;
    polysegment* inside  = swaped ? above : below;
    // get the original polygon to which enclosed segment belongs to
-   const pointlist* insideP = (1 == (swaped ?  above->polyNo() : below->polyNo())) ?
+   const PointVector* insideP = (1 == (swaped ?  above->polyNo() : below->polyNo())) ?
          sweepL->opl1() : sweepL->opl2();
    // ... and get the location of the inside segment in that sequence
    int numv = insideP->size();
@@ -1429,7 +1429,7 @@ int polycross::YQ::sCompare(const polysegment* seg0, const polysegment* seg1)
    // if it is still the same => we have coinciding segments
 
    // get the original pointlists for the comparing segments
-   const pointlist* plist0 = (1 == seg0->polyNo()) ? opl1() : opl2();
+   const PointVector* plist0 = (1 == seg0->polyNo()) ? opl1() : opl2();
 
    // ... and get the location of the inside segment in that sequence
    int numv = plist0->size();
@@ -1711,7 +1711,7 @@ bool polycross::BindCollection::compareSegments(polycross::BindSegment* seg1, po
  * This function actually checks whether a segment is crossing a polygon. The swipe line
  * can't be used because it requires effectively closed polygons (one or two)
  */
-bool polycross::BindCollection::obstructed(const BindSegment& segment, const pointlist& obs)
+bool polycross::BindCollection::obstructed(const BindSegment& segment, const PointVector& obs)
 {
    unsigned plysize = obs.size();
    int ori1, ori2;

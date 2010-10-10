@@ -81,7 +81,7 @@ void Calbr::drcTenderer::addPoly(const CoordsVector   &coords)
    if (_ATDB)
    {
       real DBscale = 1000;
-      pointlist plDB;
+      PointVector plDB;
       plDB.reserve(coords.size());
 
       for(CoordsVector::const_iterator it = coords.begin(); it!= coords.end(); ++it)
@@ -137,7 +137,7 @@ void Calbr::drcTenderer::addLine(const edge &edge)
 
    real DBscale = 1000 ;
    //Convert drcEdge to pointlist
-   pointlist plDB;
+   PointVector plDB;
    plDB.reserve(2);
 
    plDB.push_back(TP(edge.x1, edge.y1, DBscale));

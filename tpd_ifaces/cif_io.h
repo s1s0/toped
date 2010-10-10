@@ -145,20 +145,20 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
 
    class CifPoly : public CifData {
       public:
-                             CifPoly(CifData* last, pointlist*);
+                             CifPoly(CifData* last, PointVector*);
                             ~CifPoly();
          virtual void        import( ImportDB& iDB ) const;
       protected:
-         pointlist*          _poly;
+         PointVector*        _poly;
    };
 
    class CifWire : public CifData {
       public:
-                             CifWire(CifData* last, pointlist*, dword);
+                             CifWire(CifData* last, PointVector*, dword);
                             ~CifWire();
          virtual void        import( ImportDB& iDB ) const;
       protected:
-         pointlist*          _poly;
+         PointVector*        _poly;
          dword               _width;
    };
 
@@ -200,8 +200,8 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          const CifLayer* last() const                 {return _last;}
          const CifData* firstData() const             {return _first;}
          void           addBox(dword, dword, TP*, TP* direction = NULL);
-         void           addPoly(pointlist* poly);
-         void           addWire(pointlist* poly, dword width);
+         void           addPoly(PointVector* poly);
+         void           addWire(PointVector* poly, dword width);
          void           addLabelLoc(std::string, TP*);
          void           addLabelSig(std::string, TP*);
       private:
@@ -247,8 +247,8 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          void                 addStructure(dword, dword = 1, dword = 1);
          void                 doneStructure();
          void                 addBox(dword, dword, TP*, TP* direction = NULL);
-         void                 addPoly(pointlist*);
-         void                 addWire(pointlist*, dword);
+         void                 addPoly(PointVector*);
+         void                 addWire(PointVector*, dword);
          void                 addRef(dword, CTM*);
          void                 addLabelLoc(char*, TP*, char* layname = NULL);
          void                 addLabelSig(char*, TP*);

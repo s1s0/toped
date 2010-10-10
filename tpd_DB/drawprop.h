@@ -275,8 +275,8 @@ namespace layprop {
          void                       postCheckCRS(const laydata::TdtCellRef*);
          CellRefChainType           preCheckCRS(const laydata::TdtCellRef*);
          void                       drawReferenceMarks(const TP&, const binding_marks) const;
-         void                       drawTextBoundary(const pointlist& ptlist) const;
-         void                       drawCellBoundary(const pointlist& ptlist) const;
+         void                       drawTextBoundary(const PointVector& ptlist) const;
+         void                       drawCellBoundary(const PointVector& ptlist) const;
          void                       setGridColor(std::string colname) const;
          unsigned                   getTenderLay(unsigned layno) const;//!return layno if _propertyState == DB or predefined layer otherwise
          void                       psWrite(PSFile&) const;

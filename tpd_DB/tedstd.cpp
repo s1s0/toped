@@ -413,7 +413,7 @@ void laydata::TEDfile::getCellChildNames(NameSet& cnames) {
    _childnames.clear();
 }
 
-bool laydata::pathConvert(pointlist& plist, int4b begext, int4b endext )
+bool laydata::pathConvert(PointVector& plist, int4b begext, int4b endext )
 {
    word numpoints = plist.size();
    TP P1 = plist[0];
@@ -517,7 +517,7 @@ laydata::WireContour::WireContour(const int4b* ldata, unsigned lsize, WireWidth 
  * before calling this method. The method will cope with @plist vectors which already
  * contain some data. It will just add the contour at the end of the @plist.
  */
-void laydata::WireContour::getVectorData(pointlist& plist)
+void laydata::WireContour::getVectorData(PointVector& plist)
 {
    for (PointList::const_iterator CP = _cdata.begin(); CP != _cdata.end(); CP++)
    {
@@ -762,7 +762,7 @@ laydata::WireContourAux::WireContourAux(const int4b* parray, unsigned lsize, con
  * into array format and stores the result in _ldata. Then creates the
  * WireContour object and initializes it with the _ldata array.
  */
-laydata::WireContourAux::WireContourAux(const pointlist& plist, const WireWidth width)
+laydata::WireContourAux::WireContourAux(const PointVector& plist, const WireWidth width)
 {
    word psize = plist.size();
    _ldata = DEBUG_NEW int[2 * psize];
@@ -774,7 +774,7 @@ laydata::WireContourAux::WireContourAux(const pointlist& plist, const WireWidth 
    _wcObject = DEBUG_NEW laydata::WireContour(_ldata, psize, width);
 }
 
-laydata::WireContourAux::WireContourAux(const pointlist& plist, const WireWidth width, const TP extraP)
+laydata::WireContourAux::WireContourAux(const PointVector& plist, const WireWidth width, const TP extraP)
 {
    word psize = plist.size() + 1;
    _ldata = DEBUG_NEW int[2 * psize];
@@ -797,7 +797,7 @@ laydata::WireContourAux::WireContourAux(const pointlist& plist, const WireWidth 
  * plist[0].y() returns the number of the wire contour points. The central
  * line points start from plist[1]. The contour points - follow.
  */
-void laydata::WireContourAux::getRenderingData(pointlist& plist)
+void laydata::WireContourAux::getRenderingData(PointVector& plist)
 {
    assert(_wcObject);
    assert(0 == plist.size());
@@ -810,7 +810,7 @@ void laydata::WireContourAux::getRenderingData(pointlist& plist)
    _wcObject->getVectorData(plist);
 }
 
-void laydata::WireContourAux::getLData(pointlist& plist)
+void laydata::WireContourAux::getLData(PointVector& plist)
 {
    assert(_wcObject);
    assert(0 == plist.size());
@@ -820,7 +820,7 @@ void laydata::WireContourAux::getLData(pointlist& plist)
       plist.push_back(TP(_ldata[2*i], _ldata[2*i+1]));
 }
 
-void laydata::WireContourAux::getCData(pointlist& plist)
+void laydata::WireContourAux::getCData(PointVector& plist)
 {
    assert(_wcObject);
    assert(0 == plist.size());
@@ -1303,7 +1303,7 @@ void ImportDB::addBox(const TP& p1, const TP& p2)
    }
 }
 
-void ImportDB::addPoly(pointlist& plist)
+void ImportDB::addPoly(PointVector& plist)
 {
    laydata::QTreeTmp* tmpLayer = _layCrossMap->getTmpLayer();
    if ( NULL != tmpLayer )
@@ -1317,7 +1317,7 @@ void ImportDB::addPoly(pointlist& plist)
    }
 }
 
-void ImportDB::addPath(pointlist& plist, int4b width, short pathType, int4b bgnExtn, int4b endExtn)
+void ImportDB::addPath(PointVector& plist, int4b width, short pathType, int4b bgnExtn, int4b endExtn)
 {
    laydata::QTreeTmp* tmpLayer = _layCrossMap->getTmpLayer();
    if ( NULL != tmpLayer )
@@ -1396,7 +1396,7 @@ void ImportDB::addARef(std::string strctName, TP bPoint, double magnification,
                                   );
 }
 
-bool ImportDB::polyAcceptable(pointlist& plist, bool& box)
+bool ImportDB::polyAcceptable(PointVector& plist, bool& box)
 {
    laydata::ValidPoly check(plist);
    if (!check.valid())
@@ -1416,7 +1416,7 @@ bool ImportDB::polyAcceptable(pointlist& plist, bool& box)
    else return false;
 }
 
-bool ImportDB::pathAcceptable(pointlist& plist, int4b width )
+bool ImportDB::pathAcceptable(PointVector& plist, int4b width )
 {
    laydata::ValidWire check(plist, width);
 

@@ -1051,7 +1051,7 @@ void GDSin::GdsStructure::importBox(GdsInFile* cf, ImportDB& iDB)
                //one point less because fist and last point coincide
                word numpoints = (cr->recLen())/8 - 1;
                assert(numpoints == 4);
-               pointlist   plist;
+               PointVector   plist;
                plist.reserve(numpoints);
                for(word i = 0; i < numpoints; i++)
                   plist.push_back(GDSin::get_TP(cr, i));
@@ -1099,7 +1099,7 @@ void GDSin::GdsStructure::importPoly(GdsInFile* cf, ImportDB& iDB)
                {
                   //one point less because fist and last point coincide
                   word numpoints = (cr->recLen())/8 - 1;
-                  pointlist plist;
+                  PointVector plist;
                   plist.reserve(numpoints);
                   for(word i = 0; i < numpoints; i++)
                      plist.push_back(GDSin::get_TP(cr, i));
@@ -1157,7 +1157,7 @@ void GDSin::GdsStructure::importPath(GdsInFile* cf, ImportDB& iDB)
             case gds_XY:
                {
                   word numpoints = (cr->recLen())/8;
-                  pointlist plist;
+                  PointVector plist;
                   plist.reserve(numpoints);
                   for(word i = 0; i < numpoints; i++)
                      plist.push_back(GDSin::get_TP(cr, i));

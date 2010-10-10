@@ -304,7 +304,7 @@ laydata::TdtData* laydata::QuadTree::addBox(const TP& p1, const TP& p2)
 /*!Create new TdtPoly. Depending on sortnow input variable the new shape is
 just added to the QuadTree (using QuadTree::put()) without sorting or fit on
 the proper place (using add() */
-laydata::TdtData* laydata::QuadTree::addPoly(pointlist& pl)
+laydata::TdtData* laydata::QuadTree::addPoly(PointVector& pl)
 {
    laydata::TdtPoly *shape = DEBUG_NEW TdtPoly(pl);
    add(shape);
@@ -321,7 +321,7 @@ laydata::TdtData* laydata::QuadTree::addPoly(int4b* pl, unsigned psize)
 /*!Create new TdtWire. Depending on sortnow input variable the new shape is
 just added to the QuadTree (using QuadTree::put()) without sorting or fit on
 the proper place (using add() */
-laydata::TdtData* laydata::QuadTree::addWire(pointlist& pl, WireWidth w)
+laydata::TdtData* laydata::QuadTree::addWire(PointVector& pl, WireWidth w)
 {
    laydata::TdtWire *shape = DEBUG_NEW TdtWire(pl,w);
    add(shape);
@@ -587,7 +587,7 @@ is executed over selected shapes only, there is no guarantee that the user will
 not do selectAll() and then polyCut(), and of course nobody can trust the user.
 So this method is trying to minimize the calculations by executing cutPoly only
 on the shapes that overlap somehow with the cutting polygon */
-void laydata::QuadTree::cutPolySelected(pointlist& plst, DBbox& cut_overlap,
+void laydata::QuadTree::cutPolySelected(PointVector& plst, DBbox& cut_overlap,
                                                            ShapeList** decure) {
    // check the entire holder for clipping...
    if (0ll == cut_overlap.cliparea(_overlap)) return;
@@ -860,7 +860,7 @@ void laydata::QuadTree::openGlDraw(layprop::DrawProperties& drawprop,
       for (ObjectIter i = 0; i < _props._numObjects; i++)
       {
          TdtData* wdt = _data[i];
-         pointlist points;
+         PointVector points;
          // pre-calculate drawing data
          wdt->openGlPrecalc(drawprop, points);
          if (0 != points.size())
@@ -894,7 +894,7 @@ void laydata::QuadTree::openGlDraw(layprop::DrawProperties& drawprop,
       for (ObjectIter i = 0; i < _props._numObjects; i++)
       {
          TdtData* wdt = _data[i];
-         pointlist points;
+         PointVector points;
          // precalculate drawing data
          wdt->openGlPrecalc(drawprop, points);
          // draw the shape fill (contents of refs, arefs and texts)
@@ -1252,7 +1252,7 @@ void laydata::QTreeTmp::putBox(const TP& p1, const TP& p2)
 /*!Create new TdtPoly. Depending on sortnow input variable the new shape is
 just added to the QuadTree (using QuadTree::put()) without sorting or fit on
 the proper place (using add() */
-void laydata::QTreeTmp::putPoly(pointlist& pl)
+void laydata::QTreeTmp::putPoly(PointVector& pl)
 {
    laydata::TdtPoly *shape = DEBUG_NEW TdtPoly(pl);
    put(shape);
@@ -1267,7 +1267,7 @@ void laydata::QTreeTmp::putPoly(int4b* pl, unsigned psize)
 /*!Create new TdtWire. Depending on sortnow input variable the new shape is
 just added to the QuadTree (using QuadTree::put()) without sorting or fit on
 the proper place (using add() */
-void laydata::QTreeTmp::putWire(pointlist& pl,word w)
+void laydata::QTreeTmp::putWire(PointVector& pl,word w)
 {
    laydata::TdtWire *shape = DEBUG_NEW TdtWire(pl,w);
    put(shape);

@@ -775,7 +775,7 @@ bool layprop::DrawProperties::selectable(unsigned layno) const
    return (!layerHidden(layno) && !layerLocked(layno));
 }
 
-void layprop::DrawProperties::drawTextBoundary(const pointlist& ptlist) const
+void layprop::DrawProperties::drawTextBoundary(const PointVector& ptlist) const
 {
    if (_textBoxHidden) return;
    else
@@ -791,7 +791,7 @@ void layprop::DrawProperties::drawTextBoundary(const pointlist& ptlist) const
    }
 }
 
-void layprop::DrawProperties::drawCellBoundary(const pointlist& ptlist) const
+void layprop::DrawProperties::drawCellBoundary(const PointVector& ptlist) const
 {
    if (_cellBoxHidden) return;
    else

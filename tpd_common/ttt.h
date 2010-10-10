@@ -276,10 +276,10 @@ private:
    TP    _p2;
 };
 
-typedef  std::vector<TP>         pointlist;
+typedef  std::vector<TP>         PointVector;
 typedef  std::stack<CTM>         ctmstack;
 typedef  std::deque<CTM>         ctmqueue;
-typedef  std::list<pointlist*>   pcollection; // point list collection
+typedef  std::list<PointVector*> pcollection; // point list collection
 
 
 struct TpdYYLtype {
@@ -291,7 +291,7 @@ struct TpdYYLtype {
 };
 
 std::vector<std::string> split (const std::string& str, char delim);
-int8b polyarea(const pointlist& shape);
+int8b polyarea(const PointVector& shape);
 unsigned GCD(unsigned arg1, unsigned arg2);
 
 //=============================================================================

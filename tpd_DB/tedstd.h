@@ -133,20 +133,20 @@ namespace laydata {
    //==============================================================================
    class Validator {
    public:
-                           Validator(const pointlist& plist) : _status(shp_OK),
+                           Validator(const PointVector& plist) : _status(shp_OK),
                                                             _plist(plist) {};
       virtual             ~Validator() {};
       bool                 valid()           {return _status < shp_valid;}
       bool                 recoverable()     {return _status < shp_null;}
       byte                 status()          {return _status;}
       bool                 box()             {return (0 != (_status & shp_box));}
-      pointlist            getValidated()    {return _plist;}
+      PointVector          getValidated()    {return _plist;}
       word                 numpoints()       {return _plist.size();}
       virtual std::string  failType() = 0;
       virtual TdtData*     replacement() = 0;
    protected:
       unsigned             _status;
-      pointlist            _plist;
+      PointVector          _plist;
    };
 
 //==============================================================================
@@ -224,7 +224,7 @@ namespace laydata {
          word                _rows;
    };
 
-   bool pathConvert(pointlist&, int4b, int4b );
+   bool pathConvert(PointVector&, int4b, int4b );
 
 
    /**
@@ -241,7 +241,7 @@ namespace laydata {
          unsigned          csize()         {return _cdata.size(); } //! return the number of the contour points
          unsigned          lsize()         {return _lsize;        } //! return the number of the central line points
          void              getArrayData(int4b*);
-         void              getVectorData(pointlist&);
+         void              getVectorData(PointVector&);
          DBbox             getCOverlap();
       private:
          typedef std::list<TP> PointList;
@@ -269,12 +269,12 @@ namespace laydata {
    class WireContourAux {
       public:
                           WireContourAux(const int4b*, unsigned, const WireWidth, const CTM&);
-                          WireContourAux(const pointlist&, const WireWidth);
-                          WireContourAux(const pointlist&, const WireWidth, const TP);
+                          WireContourAux(const PointVector&, const WireWidth);
+                          WireContourAux(const PointVector&, const WireWidth, const TP);
                          ~WireContourAux();
-         void             getRenderingData(pointlist&);
-         void             getLData(pointlist&);
-         void             getCData(pointlist&);
+         void             getRenderingData(PointVector&);
+         void             getLData(PointVector&);
+         void             getCData(PointVector&);
       private:
          WireContour*     _wcObject;
          int4b*           _ldata;
@@ -475,8 +475,8 @@ class ImportDB {
       bool                    mapTdtLayer(std::string);
       bool                    mapTdtLayer(word, word);
       void                    addBox(const TP&, const TP&);
-      void                    addPoly(pointlist&);
-      void                    addPath(pointlist&, int4b, short pathType = 0, int4b bgnExtn = 0, int4b endExtn = 0);
+      void                    addPoly(PointVector&);
+      void                    addPath(PointVector&, int4b, short pathType = 0, int4b bgnExtn = 0, int4b endExtn = 0);
       void                    addText(std::string, TP, double magnification, double angle = 0, bool reflection = false);
       void                    addRef(std::string, TP, double, double, bool);
       void                    addRef(std::string, CTM);
@@ -487,8 +487,8 @@ class ImportDB {
       real                    crossCoeff()            { return _crossCoeff;}
    protected:
       void                    convert(ForeignCell*, bool);
-      bool                    polyAcceptable(pointlist&, bool&);
-      bool                    pathAcceptable(pointlist&, int4b);
+      bool                    polyAcceptable(PointVector&, bool&);
+      bool                    pathAcceptable(PointVector&, int4b);
       LayerCrossMap*          _layCrossMap   ;
       DbImportFile*           _src_lib       ;
       laydata::TdtLibDir*     _tdt_db        ;
