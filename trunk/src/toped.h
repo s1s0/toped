@@ -189,7 +189,7 @@ namespace tui {
       void    OnpanRight(wxCommandEvent& WXUNUSED(event));
       void       OnpanUp(wxCommandEvent& WXUNUSED(event));
       void     OnpanDown(wxCommandEvent& WXUNUSED(event));
-      void     OnZoomAll(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("zoomall();"));}
+      void     OnZoomAll(wxCommandEvent& WXUNUSED(event));
       void OnZoomVisible(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("zoomvisible();"));}
       void     OnDrawBox(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("addbox();"));}
       void    OnDrawPoly(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("addpoly();"));}
