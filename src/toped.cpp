@@ -2116,6 +2116,20 @@ void  tui::TopedFrame::OnMouseAccel(wxCommandEvent& evt) {
    _cmdline->parseCommand(ost);
 }
 
+void tui::TopedFrame::OnZoomAll(wxCommandEvent& WXUNUSED(event)) {
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      DBbox* ovl  = DEBUG_NEW DBbox(tDesign->activeOverlap());
+      wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+      eventZOOM.SetInt(tui::ZOOM_WINDOW);
+      eventZOOM.SetClientData(static_cast<void*>(ovl));
+      wxPostEvent(_canvas, eventZOOM);
+   }
+   DATC->unlockTDT(dbLibDir, true);
+}
+
 void tui::TopedFrame::OnzoomIn(wxCommandEvent& WXUNUSED(event)) {
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_IN);
