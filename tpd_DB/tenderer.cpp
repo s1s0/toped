@@ -1806,6 +1806,10 @@ void tenderer::TopRend::draw()
    }
    // draw reference boxes
    if (0 < _refLayer.total_points())   _refLayer.draw(_drawprop);
+}
+
+void tenderer::TopRend::cleanUp()
+{
    // Clean-up the buffers
    glBindBuffer(GL_ARRAY_BUFFER, 0);
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

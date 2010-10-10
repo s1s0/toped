@@ -411,26 +411,64 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event)
       }
       else
       {
-         wxPaintDC dc(this);
-         #ifdef __WXGTK__
-            SetCurrent();
-         #endif
-         glMatrixMode( GL_MODELVIEW );
-         glShadeModel( GL_FLAT ); // Single color
-         update_viewport();
-         // CTM matrix stuff
-         glLoadIdentity();
-         glOrtho(lp_BL.x(),lp_TR.x(),lp_TR.y(),lp_BL.y(),-1.0,1.0);
-         glClear(GL_COLOR_BUFFER_BIT);
-         glEnable(GL_BLEND);
-         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-         glClear(GL_ACCUM_BUFFER_BIT);
-         DATC->render(_LayCTM);
-         glAccum(GL_LOAD, 1.0);
-         invalid_window = false;
-         if (rubber_band) rubber_paint();
-         if (reperX || reperY) longCursor();
-         SwapBuffers();
+//         wxPaintDC dc(this);
+//         #ifdef __WXGTK__
+//            SetCurrent();
+//         #endif
+//         glMatrixMode( GL_MODELVIEW );
+//         glShadeModel( GL_FLAT ); // Single color
+//         update_viewport();
+//         // CTM matrix stuff
+//         glLoadIdentity();
+//         glOrtho(lp_BL.x(),lp_TR.x(),lp_TR.y(),lp_BL.y(),-1.0,1.0);
+//         glClear(GL_COLOR_BUFFER_BIT);
+//         glEnable(GL_BLEND);
+//         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//         glClear(GL_ACCUM_BUFFER_BIT);
+//         DATC->render(_LayCTM);
+//         glAccum(GL_LOAD, 1.0);
+//         invalid_window = false;
+//         if (rubber_band) rubber_paint();
+//         if (reperX || reperY) longCursor();
+//         SwapBuffers();
+
+            wxPaintDC dc(this);
+            #ifdef __WXGTK__
+               SetCurrent();
+            #endif
+            glMatrixMode( GL_MODELVIEW );
+            glShadeModel( GL_FLAT ); // Single color
+            update_viewport();
+            // CTM matrix stuff
+            glLoadIdentity();
+            glOrtho(lp_BL.x(),lp_TR.x(),lp_TR.y(),lp_BL.y(),-1.0,1.0);
+            glClear(GL_COLOR_BUFFER_BIT);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            tenderer::TopRend* rend = DATC->openGlRenderIt(_LayCTM);
+            if (NULL != rend)
+            {
+               for (byte i = 1; i < 20; i++)
+               {
+                  glPushMatrix();
+                  float scale = (float) i / 20.0;
+                  glScalef(scale, scale, 1);
+                  rend->draw();
+                  glPopMatrix();
+                  SwapBuffers();
+                  glClear(GL_COLOR_BUFFER_BIT);
+                  glEnable(GL_BLEND);
+                  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+               }
+               glClear(GL_ACCUM_BUFFER_BIT);
+               rend->draw();
+               rend->cleanUp();
+               glAccum(GL_LOAD, 1.0);
+               if (rubber_band) rubber_paint();
+               if (reperX || reperY) longCursor();
+               delete rend;
+            }
+            SwapBuffers();
       }
    }
    else

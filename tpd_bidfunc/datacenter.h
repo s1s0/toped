@@ -86,6 +86,7 @@ public:
    std::string                globalDir(void) const     {return _globalDir;}
    TdtMutexState              tdtMxState() const {return _tdtActMxState;}
    std::string                localDir() const {return _localDir;}
+   tenderer::TopRend*         openGlRenderIt(const CTM&); // alternative to openGlDraw
 
 protected:
    void                       openGlDraw(const CTM&);
