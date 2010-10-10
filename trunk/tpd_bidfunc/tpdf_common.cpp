@@ -159,7 +159,7 @@ void tellstdfunc::clean_ttlaylist(telldata::ttlist* llist) {
    // - Don't try to delete here selp (selected ponts). It is deleted naturally
    // by the destructor of the telldata::ttlayout class it doesn't have the visibility
    // problem of laydata::TdtData
-   for (word i = 0 ; i < llist->mlist().size(); i++) {
+   for (word i = 0 ; i < llist->size(); i++) {
       delete (static_cast<telldata::ttlayout*>(llist->mlist()[i])->data());
    }
 }
