@@ -473,7 +473,7 @@ namespace laydata {
                            TdtTmpWire(WireWidth width) : _width(width)  {};
                           ~TdtTmpWire(){};
          virtual void      draw(const layprop::DrawProperties&, ctmqueue& ) const;
-         virtual void      addpoint(TP p) {_plist.push_back(p);}
+         virtual void      addpoint(TP);
          virtual void      rmpoint(TP&);
       private:
          typedef std::list<TP>     TmpPlist;
