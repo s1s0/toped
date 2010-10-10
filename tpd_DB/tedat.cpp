@@ -2840,6 +2840,12 @@ void laydata::TdtTmpWire::draw(const layprop::DrawProperties& drawprop, ctmqueue
    drawline(centerLine, contourLine);
 }
 
+void  laydata::TdtTmpWire::addpoint(TP lp)
+{
+   if ((0 == _plist.size()) || (!(_plist.back() == lp)))
+      _plist.push_back(lp);
+}
+
 void  laydata::TdtTmpWire::rmpoint(TP& lp)
 {
    assert(_plist.size() > 0);

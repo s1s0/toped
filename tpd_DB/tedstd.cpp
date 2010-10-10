@@ -605,9 +605,11 @@ byte laydata::WireContour::chkCollinear(word i1, word i2, word i3)
    if ( 0 != orientation(i1, i2, i3)) return 0; // points not in one line
    float lambda1 = getLambda  (i3, i2, i1);
    float lambda2 = getLambda  (i1, i2, i3);
-   if ((_ldata[2*i1] == _ldata[2*i3]) || (_ldata[2*i1+1] == _ldata[2*i3+1])) return 3;
+   if ((_ldata[2*i1] == _ldata[2*i3]) && (_ldata[2*i1+1] == _ldata[2*i3+1]))
+      return 3;
    if ((0.0 == lambda1) && (0.0 == lambda2)) return 5; // 3 coinciding points
-   if ((0.0 <  lambda1) || (0.0 <  lambda2)) return 3; // collinear points
+   if ((0.0 <  lambda1) || (0.0 <  lambda2))
+      return 3; // colinear points
    if (0.0 == lambda1) return 1; //i2 and i3 coincide
    if (0.0 == lambda2) return 2; //i2 and i1 coincide
    return 4; // 3 points in one line sequenced with i2 in the middle
