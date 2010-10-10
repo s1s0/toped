@@ -413,8 +413,8 @@ tellstdfunc::stdFLIPSEL::stdFLIPSEL(telldata::typeID retype, bool eor) :
 
 void tellstdfunc::stdFLIPSEL::undo_cleanup()
 {
+   getWordValue(UNDOPstack, false);
    telldata::ttpnt    *p1 = static_cast<telldata::ttpnt*>(UNDOPstack.back());UNDOPstack.pop_back();
-   getWordValue(UNDOPstack, true);
    delete p1;
 }
 
@@ -812,7 +812,7 @@ int tellstdfunc::lgcMERGE::execute()
       telldata::ttlist* listselected = make_ttlaylist(tDesign->shapeSel());
       if (0 == listselected->size())
       {
-         tell_log(console::MT_ERROR,"No objects selected. Nothing to cut");
+         tell_log(console::MT_ERROR,"No objects selected. Nothing to merge");
          delete listselected;
       }
       else if (tDesign->merge(dasao))
