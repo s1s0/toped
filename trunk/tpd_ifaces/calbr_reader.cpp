@@ -36,6 +36,12 @@
 long Calbr::drcPolygon::_precision = 0;
 long Calbr::drcEdge::_precision = 0;
 
+#ifdef WIN32
+   #define tpdSTRxxxCMP stricmp
+#else
+   #define tpdSTRxxxCMP strcasecmp
+#endif
+
 void Calbr::drcEdge::addCoord(long x1, long y1, long x2, long y2)
 {
    real xx, yy;
@@ -477,12 +483,12 @@ bool  Calbr::CalbrFile::parseCellNameMode(cellNameStruct *CNStruct, const std::s
    {
       CNStruct->cellName = regex.GetMatch(str, 2).char_str();
       std::string str2(regex.GetMatch(str, 3).char_str());
-      if (!_stricmp(str2.c_str(), ""))
+      if (!tpdSTRxxxCMP(str2.c_str(), ""))
       {
          CNStruct->spaceCoords = false;
       }
       else
-         if (!_stricmp(str2.c_str(), "c"))
+         if (!tpdSTRxxxCMP(str2.c_str(), "c"))
          {
             CNStruct->spaceCoords = true;
          }
