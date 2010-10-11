@@ -50,7 +50,7 @@ bool checkPositive(long, TpdYYLtype);
    long           integer;
    char*          identifier;
    TP*            point;
-   pointlist*     path;
+   PointVector*     path;
    CTM*           ctmp;
 }
 
@@ -291,7 +291,7 @@ cifLtrans:
 
 cifPath:
      cifPoint                             {
-      $$ = DEBUG_NEW pointlist();
+      $$ = DEBUG_NEW PointVector();
       $$->push_back(*($1));
       delete ($1);
    }

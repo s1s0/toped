@@ -741,9 +741,6 @@ bool layprop::DrawProperties::layerFilled(unsigned layno) const
 
 void layprop::DrawProperties::adjustAlpha(word factor)
 {
-   //@TODO! - A tell option(function or variable) to adjust the constant (30 below)
-   // user must know what's going on, otherwise - the rendering result might be confusing
-   // Having done that, the method can be enabled
    const layprop::tellRGB& theColor = getColor(_drawingLayer);
    byte alpha = theColor.alpha();
    word resultingEbb = factor * _cellDepthAlphaEbb;

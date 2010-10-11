@@ -1192,7 +1192,7 @@ bool laydata::TdtCell::moveSelected(laydata::TdtDesign* ATDB, const CTM& trans, 
       {
          // at the end, if the container of the selected shapes is empty -
          // Note! _shapesel.erase(CL) will invalidate the iterator which means that
-         // it can't be incremened afterwards
+         // it can't be incremented afterwards
          // This on some platforms/compilers/STL implementations or some combinations
          // of the above might work fine sometimes which makes the bug hunt a real fun!
          // (thanks to Sergey)
@@ -1214,7 +1214,7 @@ bool laydata::TdtCell::rotateSelected(laydata::TdtDesign* ATDB, const CTM& trans
    while (_shapesel.end() != CL)
    {
       assert((_layers.end() != _layers.find(CL->first)));
-      // before all remove the selected and partially shapes
+      // before all remove the selected and partially shapes
       // from the data holders ...
       if (_layers[CL->first]->deleteMarked())
          // ... and validate quadTrees if needed
