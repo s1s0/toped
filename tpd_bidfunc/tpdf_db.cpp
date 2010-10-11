@@ -751,8 +751,6 @@ int tellstdfunc::GDSsplit::execute()
       DbImportFile* AGDSDB = NULL;
       if (DATC->lockGds(AGDSDB))
       {
-         // TODO - can we avoid this cast? Split is an unique operation for
-         // GDS only. Even if we can - does it worth it?
          GDSin::GdsInFile* castedGdsDB = static_cast<GDSin::GdsInFile*>(AGDSDB);
          GDSin::GdsStructure *src_structure = castedGdsDB->getStructure(cellname.c_str());
          std::ostringstream ost;
