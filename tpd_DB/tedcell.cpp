@@ -202,7 +202,8 @@ DBbox* laydata::EditObject::getLastViewPort() const
 {
    ViewPortMap::const_iterator vpi = _viewPortMap.find(_viewcell->name());
    if (_viewPortMap.end() != vpi)
-      return vpi->second;
+      // return a copy of the object, it should be deleted by the caller
+      return DEBUG_NEW DBbox(*(vpi->second));
    else
       return NULL;
 }
