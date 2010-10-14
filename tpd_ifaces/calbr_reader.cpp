@@ -127,7 +127,6 @@ Calbr::drcRuleCheck::drcRuleCheck(unsigned int num, const std::string &name)
 
 Calbr::drcRuleCheck::~drcRuleCheck()
 {
-   if (_CNStruct) delete _CNStruct;
 }
 
 void Calbr::drcRuleCheck::setTimeStamp(const std::string &timeStamp)
@@ -186,11 +185,6 @@ void Calbr::drcRuleCheck::addEdge(const Calbr::drcEdge &theEdge)
    }
 }
 
-void Calbr::drcRuleCheck::addCellNameStruct(Calbr::cellNameStruct *cnStruct)
-{
-   _CNStruct = cnStruct;
-}
-
 Calbr::edge Calbr::drcRuleCheck::getZoom(long ordinal)
 {
    edge ret;
@@ -224,7 +218,7 @@ Calbr::edge Calbr::drcRuleCheck::getZoom(void)
 
 //-----------------------------------------------------------------------------
 Calbr::CalbrFile::CalbrFile(const std::string &fileName, drcRenderer *render)
-      :_ok(true), _render(render)
+      :_ok(true), _render(render),_isCellNameMode(false)
 {
    _fileName = fileName;
 }
@@ -281,6 +275,11 @@ void Calbr::CalbrFile::readFile()
       unsigned int num = 1;
       while(parse(num))
       {
+         //Reset CellNameMode
+         //Theoretically there is impossible to change mode from first appearance
+         //But format contains mode flag for each rule check
+         _isCellNameMode = false;
+         _curCellName = "";
          num++;
       }
       addResults();
@@ -362,7 +361,6 @@ bool Calbr::CalbrFile::parse(unsigned int num)
          throw(EXPTNdrc_parser(drc_parse, ruleCheckName, tempStr));
       };
                
-      
       drcPolygon poly(ordinal, _render);
       switch(type)
       {
@@ -382,7 +380,23 @@ bool Calbr::CalbrFile::parse(unsigned int num)
             throw(EXPTNdrc_parser(drc_parse, ruleCheckName, tempStr));
       }
    }
-   _RuleChecks.push_back(_curRuleCheck);
+
+   if(_isCellNameMode)
+   {
+      CellDRCMap::iterator it = _cellDRCMap.find(_curCellName);
+      if(it!= _cellDRCMap.end())
+      {
+         it->second._RuleChecks.push_back(_curRuleCheck);
+      }
+      else
+      {
+         assert(true); // Something wrong. CellNameMode is set but no such cell
+      }
+   }
+   else
+   {
+      _RuleChecks.push_back(_curRuleCheck);
+   }
    return true;
 }
 
@@ -402,10 +416,9 @@ bool Calbr::CalbrFile::parsePoly(char* ruleCheckName, drcPolygon & poly, int num
       //Check Cell Name Mode
       if((tempStr[0]=='C') && (tempStr[1]=='N'))
       {
-         cellNameStruct *CNStruct = DEBUG_NEW cellNameStruct;
-         if(parseCellNameMode(CNStruct, tempStr))
+         if(parseCellNameMode(tempStr))
          {
-            _curRuleCheck->addCellNameStruct(CNStruct);
+            //_curRuleCheck->addCellNameStruct(CNStruct);
          }
          else
          {
@@ -444,10 +457,9 @@ bool Calbr::CalbrFile::parseEdge(char* ruleCheckName, drcEdge & edge, int number
       //Check Cell Name Mode
       if((tempStr[0]=='C') && (tempStr[1]=='N'))
       {
-         cellNameStruct *CNStruct = DEBUG_NEW cellNameStruct;
-         if(parseCellNameMode(CNStruct, tempStr))
+         if(parseCellNameMode( tempStr))
          {
-            _curRuleCheck->addCellNameStruct(CNStruct);
+            //_curRuleCheck->addCellNameStruct(CNStruct);
          }
          else
          {
@@ -470,27 +482,27 @@ bool Calbr::CalbrFile::parseEdge(char* ruleCheckName, drcEdge & edge, int number
    return true;
 }
 
-bool  Calbr::CalbrFile::parseCellNameMode(cellNameStruct *CNStruct, const std::string &parseString)
+bool  Calbr::CalbrFile::parseCellNameMode(const std::string &parseString)
 {
+   cellNameStruct CNStruct;
    //Check for Cell Name results
    wxRegEx regex;
    //Regexp: CN cellname (with 'c' or withoout 'c') number1, number2 ... number6
    VERIFY(regex.Compile(wxT("(CN) ([$[:alnum:]_]+) (c{0,1}) (-{0,1}[[:digit:]]+) (-{0,1}[[:digit:]]+) (-{0,1}[[:digit:]]+) (-{0,1}[[:digit:]]+) (-{0,1}[[:digit:]]+) (-{0,1}[[:digit:]]+)")));
    wxString str=wxString(parseString.c_str(), wxConvUTF8);
    //wxString str = wxT("CN xxx c -1 2 3 4 5 6");
-
    if (regex.Matches(str))
    {
-      CNStruct->cellName = regex.GetMatch(str, 2).char_str();
+      std::string cellName = regex.GetMatch(str, 2).char_str();
       std::string str2(regex.GetMatch(str, 3).char_str());
       if (!tpdSTRxxxCMP(str2.c_str(), ""))
       {
-         CNStruct->spaceCoords = false;
+         CNStruct.spaceCoords = false;
       }
       else
          if (!tpdSTRxxxCMP(str2.c_str(), "c"))
          {
-            CNStruct->spaceCoords = true;
+            CNStruct.spaceCoords = true;
          }
          else
          {
@@ -499,17 +511,30 @@ bool  Calbr::CalbrFile::parseCellNameMode(cellNameStruct *CNStruct, const std::s
       //Save tranformation matrix 
       long number;
       regex.GetMatch(str, 4).ToLong(&number);
-      CNStruct->a[0][0] = number;
+      CNStruct.a[0][0] = number;
       regex.GetMatch(str, 5).ToLong(&number);
-      CNStruct->a[0][1] = number;
+      CNStruct.a[0][1] = number;
       regex.GetMatch(str, 6).ToLong(&number);
-      CNStruct->a[0][2] = number;
+      CNStruct.a[0][2] = number;
       regex.GetMatch(str, 7).ToLong(&number);
-      CNStruct->a[1][0] = number;
+      CNStruct.a[1][0] = number;
       regex.GetMatch(str, 8).ToLong(&number);
-      CNStruct->a[1][1] = number;
+      CNStruct.a[1][1] = number;
       regex.GetMatch(str, 9).ToLong(&number);
-      CNStruct->a[1][2] = number;
+      CNStruct.a[1][2] = number;
+
+
+      _isCellNameMode = true;
+      _curCellName = cellName;
+      CellDRCMap::iterator it = _cellDRCMap.find(cellName);
+      if(it!= _cellDRCMap.end())
+      {
+         it->second = CNStruct;
+      }
+      else
+      {
+         _cellDRCMap[cellName] = CNStruct;
+      }
       return true;
    }
    else return false;
