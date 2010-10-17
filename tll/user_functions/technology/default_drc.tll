@@ -1,0 +1,21 @@
+
+/*
+ * this file serves as a template for technology dependent rules
+ * If user-functions wants to do a design-rule-check (DRC) it
+ * should use the appropriate technology file (at least this 
+ * default parameters)
+ 
+ * Copyright (C) 2010 by Armin Taschwer
+ */
+
+//grid definitions
+const real GRID = 0.025;
+
+//this is essential for the function floor
+//otherwise small rounding errors would give inaccurate results
+//floor() with EPS is still far away to be a round()
+const real EPS = GRID/1000.0; 
+
+//DRC definitions for a Via
+const real VIA = 0.4;
+const real VIA_SPC = 0.5; 

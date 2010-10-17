@@ -1,0 +1,31 @@
+(C) Copyright 2010 by Armin Taschwer
+
+
+Following steps will describe how you will get your own arbitrary logo
+into Toped
+
+following tools will be needed
+* potrace .. a bitmap to vector-format converter (V1.8 used)
+* fig2dev .. converts xfig-files into many other vector formats (V3.2-5c)
+* sed, grep .. standard unix tools
+* octave .. a matlab-like tool (V 3.2)
+* toped .. of course
+
+Workflow:
+--------
+
+1.) you need a bitmap file in PNM format
+2.) convert the PNM-bitmap into a vector-format --> here *.fig
+3.) *.fig is again converted to a TCL/TK script
+4.) the polygons are extracted and stored into a *.dat file
+5.) octave can manipulate the date and constructs a TELL-script
+
+
+Fortunately a shell-script can do the job for you:
+
+follow the steps
+> edit config.m
+> create_logo.sh <path/file.pnm>
+> edit test_logo.tll
+> toped test_logo.tll
+
