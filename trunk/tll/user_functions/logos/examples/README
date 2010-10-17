@@ -1,0 +1,20 @@
+
+
+test1: a simple rectangle with a rectangular hole
+
+my_logo_v0: presents an AT logo
+
+tiger: a complex picture of an tiger which can't be resolved properly
+       --> algorithm too weak for nested holes
+       --> inner polygons has to be determined within an extra routine
+       -------------------------------------------
+       ATTENTION: this is a copy from the internet 
+       --> it is most probably NOT open-source
+       -------------------------------------------
+       
+wnf_logo: WWF Logo is properly recognized
+       -------------------------------------------
+       ATTENTION: this is a copy from the internet 
+       --> it is most probably NOT open-source
+       -------------------------------------------
+
