@@ -288,7 +288,16 @@ void Calbr::CalbrFile::readFile()
 
       if(isOk())
       {
-         _border = (*_RuleChecks.begin())->getZoom();
+         if(!_RuleChecks.empty())
+         {
+            _border = (*_RuleChecks.begin())->getZoom();
+         }
+         else
+         {
+            cellNameStruct *st = &(_cellDRCMap.begin()->second);
+            Calbr::drcRuleCheck* rule = *(st->_RuleChecks.begin());
+            _border = rule->getZoom();
+         }
          for (RuleChecksVector::const_iterator it = _RuleChecks.begin(); it != _RuleChecks.end(); ++it)
          {
             edge tempBorder = (*it)->getZoom();
@@ -297,6 +306,21 @@ void Calbr::CalbrFile::readFile()
             if(tempBorder.x2 > _border.x2) _border.x2 = tempBorder.x2;
             if(tempBorder.y2 > _border.y2) _border.y2 = tempBorder.y2;
          }
+
+         for (CellDRCMap::const_iterator it = _cellDRCMap.begin(); it != _cellDRCMap.end(); ++it)
+         {
+            RuleChecksVector checks = (*it).second._RuleChecks;
+            for (RuleChecksVector::const_iterator it2 = checks.begin(); it2 != checks.end(); ++it2)
+            {  
+               edge tempBorder = (*it2)->getZoom();
+               if(tempBorder.x1 < _border.x1) _border.x1 = tempBorder.x1;
+               if(tempBorder.y1 < _border.y1) _border.y1 = tempBorder.y1;
+               if(tempBorder.x2 > _border.x2) _border.x2 = tempBorder.x2;
+               if(tempBorder.y2 > _border.y2) _border.y2 = tempBorder.y2;
+            }
+            
+         }
+
          _render->setCellName(_cellName);
       }
    }
