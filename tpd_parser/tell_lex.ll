@@ -228,7 +228,6 @@ unsigned parsercmd::getllint(char* source) {
 //=============================================================================
 int parsercmd::includefile(char* name, FILE* &handler)
 {
-   int retvalue = 0;
    if ( include_stack_ptr >= MAX_INCLUDE_DEPTH )
       tell_log(console::MT_ERROR,"Too many nested includes");
    else
@@ -262,11 +261,10 @@ int parsercmd::includefile(char* name, FILE* &handler)
          telllloc.first_column = telllloc.last_column = 1;
          telllloc.first_line = telllloc.last_line = 1;
          telllloc.filename = name;
-         retvalue = 1;
       }
       delete inclFN;
    }
-   return retvalue;
+   return include_stack_ptr;
 }
 
 int parsercmd::EOfile()
