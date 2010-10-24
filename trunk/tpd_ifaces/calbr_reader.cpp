@@ -517,7 +517,7 @@ bool  Calbr::CalbrFile::parseCellNameMode(const std::string &parseString)
    //wxString str = wxT("CN xxx c -1 2 3 4 5 6");
    if (regex.Matches(str))
    {
-      std::string cellName = regex.GetMatch(str, 2).char_str();
+      std::string cellName(regex.GetMatch(str, 2).char_str());
       std::string str2(regex.GetMatch(str, 3).char_str());
       if (!tpdSTRxxxCMP(str2.c_str(), ""))
       {
