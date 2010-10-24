@@ -156,7 +156,7 @@ namespace Calbr
 
 
 
-	typedef std::map <std::string, cellNameStruct> CellDRCMap;
+	typedef std::map <std::string, cellNameStruct*> CellDRCMap;
 
    class CalbrFile
    {
@@ -165,6 +165,7 @@ namespace Calbr
                           ~CalbrFile();
          void               readFile();
          void              addResults();
+         void              addRuleCheck(drcRuleCheck* check);
          void              showError(const std::string & error, long  number);
          void              showCluster(const std::string & error);
          void              showAllErrors(void);
