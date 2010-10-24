@@ -225,16 +225,32 @@ Calbr::CalbrFile::CalbrFile(const std::string &fileName, drcRenderer *render)
 
 Calbr::CalbrFile::~CalbrFile()
 {
-   RuleChecksVector::const_iterator it;
    if (!_RuleChecks.empty())
    {
-      for(it= _RuleChecks.begin(); it < _RuleChecks.end(); ++it)
+      for(RuleChecksVector::const_iterator it= _RuleChecks.begin(); it != _RuleChecks.end(); ++it)
       {
          if ((*it)!= NULL) delete (*it);
       }
       _RuleChecks.clear();
    }
 
+   if(!_cellDRCMap.empty())
+   {
+      for(CellDRCMap::const_iterator  it= _cellDRCMap.begin(); it != _cellDRCMap.end(); ++it)
+      {
+         if ((*it).second!= NULL)
+         {
+            cellNameStruct *CNstruct = (*it).second;
+            for(RuleChecksVector::const_iterator it2= CNstruct->_RuleChecks.begin(); 
+               it2 != CNstruct->_RuleChecks.end(); ++it2)
+            {
+               if ((*it2)!= NULL) delete (*it2);
+            }
+            delete (*it).second;
+         }
+      }
+      _cellDRCMap.clear();
+   }
    if (_render) delete _render;
 }
 
@@ -294,7 +310,7 @@ void Calbr::CalbrFile::readFile()
          }
          else
          {
-            cellNameStruct *st = &(_cellDRCMap.begin()->second);
+            cellNameStruct *st = _cellDRCMap.begin()->second;
             Calbr::drcRuleCheck* rule = *(st->_RuleChecks.begin());
             _border = rule->getZoom();
          }
@@ -309,7 +325,7 @@ void Calbr::CalbrFile::readFile()
 
          for (CellDRCMap::const_iterator it = _cellDRCMap.begin(); it != _cellDRCMap.end(); ++it)
          {
-            RuleChecksVector checks = (*it).second._RuleChecks;
+            RuleChecksVector checks = (*it).second->_RuleChecks;
             for (RuleChecksVector::const_iterator it2 = checks.begin(); it2 != checks.end(); ++it2)
             {  
                edge tempBorder = (*it2)->getZoom();
@@ -318,7 +334,6 @@ void Calbr::CalbrFile::readFile()
                if(tempBorder.x2 > _border.x2) _border.x2 = tempBorder.x2;
                if(tempBorder.y2 > _border.y2) _border.y2 = tempBorder.y2;
             }
-            
          }
 
          _render->setCellName(_cellName);
@@ -405,12 +420,12 @@ bool Calbr::CalbrFile::parse(unsigned int num)
       }
    }
 
-   if(_isCellNameMode)
+   if(_isCellNameMode && !(_RuleChecks.empty()))
    {
       CellDRCMap::iterator it = _cellDRCMap.find(_curCellName);
       if(it!= _cellDRCMap.end())
       {
-         it->second._RuleChecks.push_back(_curRuleCheck);
+         it->second->_RuleChecks.push_back(_curRuleCheck);
       }
       else
       {
@@ -508,7 +523,7 @@ bool Calbr::CalbrFile::parseEdge(char* ruleCheckName, drcEdge & edge, int number
 
 bool  Calbr::CalbrFile::parseCellNameMode(const std::string &parseString)
 {
-   cellNameStruct CNStruct;
+   cellNameStruct *CNStruct = DEBUG_NEW cellNameStruct;
    //Check for Cell Name results
    wxRegEx regex;
    //Regexp: CN cellname (with 'c' or withoout 'c') number1, number2 ... number6
@@ -521,12 +536,12 @@ bool  Calbr::CalbrFile::parseCellNameMode(const std::string &parseString)
       std::string str2(regex.GetMatch(str, 3).char_str());
       if (!tpdSTRxxxCMP(str2.c_str(), ""))
       {
-         CNStruct.spaceCoords = false;
+         CNStruct->spaceCoords = false;
       }
       else
          if (!tpdSTRxxxCMP(str2.c_str(), "c"))
          {
-            CNStruct.spaceCoords = true;
+            CNStruct->spaceCoords = true;
          }
          else
          {
@@ -535,17 +550,17 @@ bool  Calbr::CalbrFile::parseCellNameMode(const std::string &parseString)
       //Save tranformation matrix 
       long number;
       regex.GetMatch(str, 4).ToLong(&number);
-      CNStruct.a[0][0] = number;
+      CNStruct->a[0][0] = number;
       regex.GetMatch(str, 5).ToLong(&number);
-      CNStruct.a[0][1] = number;
+      CNStruct->a[0][1] = number;
       regex.GetMatch(str, 6).ToLong(&number);
-      CNStruct.a[0][2] = number;
+      CNStruct->a[0][2] = number;
       regex.GetMatch(str, 7).ToLong(&number);
-      CNStruct.a[1][0] = number;
+      CNStruct->a[1][0] = number;
       regex.GetMatch(str, 8).ToLong(&number);
-      CNStruct.a[1][1] = number;
+      CNStruct->a[1][1] = number;
       regex.GetMatch(str, 9).ToLong(&number);
-      CNStruct.a[1][2] = number;
+      CNStruct->a[1][2] = number;
 
 
       _isCellNameMode = true;
@@ -553,7 +568,10 @@ bool  Calbr::CalbrFile::parseCellNameMode(const std::string &parseString)
       CellDRCMap::iterator it = _cellDRCMap.find(cellName);
       if(it!= _cellDRCMap.end())
       {
-         it->second = CNStruct;
+         //???Redifinition of CNStruct 
+         //May be we have to add cheking here
+         //it->second = CNStruct;
+         delete CNStruct;
       }
       else
       {
@@ -569,25 +587,47 @@ void   Calbr::CalbrFile::addResults()
 {
 
    _render->startWriting();
-   RuleChecksVector::const_iterator it;
-   for(it= _RuleChecks.begin(); it < _RuleChecks.end(); ++it)
+   if (!_RuleChecks.empty())
    {
-      _render->setError((*it)->num());
-      std::vector <Calbr::drcPolygon>::iterator it2;
-      std::vector <Calbr::drcPolygon> *polys = (*it)->polygons();
-      for(it2 = polys->begin(); it2 < polys->end(); ++it2)
+      RuleChecksVector::const_iterator it;
+      for(it= _RuleChecks.begin(); it < _RuleChecks.end(); ++it)
       {
-         (*it2).addError();
-      }
-      std::vector <Calbr::drcEdge>::iterator it2edge;
-      std::vector <Calbr::drcEdge> *edges = (*it)->edges();
-      for(it2edge = edges->begin(); it2edge < edges->end(); ++it2edge)
-      {
-         (*it2edge).addError();
+         addRuleCheck((*it));
       }
    }
+   else
+   {
+      for (CellDRCMap::const_iterator it = _cellDRCMap.begin(); it != _cellDRCMap.end(); ++it)
+      {
+         _render->setCellName((*it).first);
+
+         RuleChecksVector checks = (*it).second->_RuleChecks;
+         for (RuleChecksVector::const_iterator it2 = checks.begin(); it2 != checks.end(); ++it2)
+         {  
+            addRuleCheck((*it2));
+         }
+      }
+   }
+
    _render->endWriting();
    _render->hideAll();
+}
+
+void   Calbr::CalbrFile::addRuleCheck(drcRuleCheck* check)
+{
+   _render->setError(check->num());
+   std::vector <Calbr::drcPolygon>::iterator it2;
+   std::vector <Calbr::drcPolygon> *polys = check->polygons();
+   for(it2 = polys->begin(); it2 < polys->end(); ++it2)
+   {
+      (*it2).addError();
+   }
+   std::vector <Calbr::drcEdge>::iterator it2edge;
+   std::vector <Calbr::drcEdge> *edges = check->edges();
+   for(it2edge = edges->begin(); it2edge < edges->end(); ++it2edge)
+   {
+      (*it2edge).addError();
+   }
 }
 
 void   Calbr::CalbrFile::showError(const std::string & error, long  number)
