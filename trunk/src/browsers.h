@@ -33,6 +33,7 @@
 #include <wx/notebook.h>
 #include <wx/wx.h>
 #include <wx/listctrl.h>
+#include <wx/treebase.h>
 #include <wx/treectrl.h>
 #include <wx/imaglist.h>
 #include <wx/aui/aui.h>
@@ -331,6 +332,7 @@ namespace browsers
       void                    onHideAll(wxCommandEvent&);
       void                    onExplainError(wxCommandEvent&);
    private:
+      void                    addRuleCheck( const wxTreeItemId &rootId,  Calbr::drcRuleCheck *check);
       ErrorBrowser*           _errorBrowser;
       wxButton*               _showAllButton;
       wxButton*               _hideAllButton;
