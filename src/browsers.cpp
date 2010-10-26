@@ -2091,36 +2091,26 @@ browsers::DRCBrowser::DRCBrowser(wxWindow* parent, wxWindowID id)
    thesizer->Add(sizer2, 0, wxEXPAND | wxALL);
 
       SetSizerAndFit(thesizer);
-      Calbr::RuleChecksVector* errors = DRCData->results();
+      Calbr::RuleChecksVector* errors = DRCData->resultsFlat();
       _errorBrowser->AddRoot(wxT("hidden_wxroot"));
-      for(Calbr::RuleChecksVector::const_iterator it = errors->begin();it < errors->end(); ++it)
+      for(Calbr::RuleChecksVector::const_iterator it = errors->begin();it != errors->end(); ++it)
       {
-         std::string name = (*it)->ruleCheckName();
-         wxTreeItemId  id = _errorBrowser->AppendItem(_errorBrowser->GetRootItem(), wxString(name.c_str(), wxConvUTF8));
-         std::vector <Calbr::drcPolygon>::iterator it2;
-         std::vector <Calbr::drcPolygon> *polys = (*it)->polygons();
-
-         //Save polygons
-         long sz = polys->size();
-         for(long i = 1; i <= sz; i++)
-         {
-            wxString str;
-            str.Printf(wxT("%d"), i);
-            _errorBrowser->AppendItem(id, str);
-         }
-
-         //Save Edges
-         std::vector <Calbr::drcEdge> *edges = (*it)->edges();
-         sz = edges->size();
-         for(long i = 1; i <= sz; i++)
-         {
-            wxString str;
-            str.Printf(wxT("%d"), i);
-            _errorBrowser->AppendItem(id, str);
-         }
-
+         addRuleCheck(_errorBrowser->GetRootItem(), (*it));
       }
 
+      Calbr::CellDRCMap *drcMap = DRCData->resultsCellNameMode();
+
+      for(Calbr::CellDRCMap::const_iterator it = drcMap->begin();it != drcMap->end(); ++it)
+      {
+         std::string cellName = (*it).first;
+         wxTreeItemId  id = _errorBrowser->AppendItem(_errorBrowser->GetRootItem(), wxString(cellName.c_str(), wxConvUTF8));
+
+         Calbr::RuleChecksVector* errors = &((*it).second->_RuleChecks);
+         for(Calbr::RuleChecksVector::const_iterator it2 = errors->begin();it2 != errors->end(); ++it2)
+         {
+            addRuleCheck(id, (*it2));
+         }
+      }
 }
 
 browsers::DRCBrowser::~DRCBrowser()
@@ -2152,3 +2142,30 @@ void   browsers::DRCBrowser::onExplainError(wxCommandEvent& evt)
    cmd << wxT("drcexplainerror();");
    TpdPost::parseCommand(cmd);
  }
+
+void  browsers::DRCBrowser::addRuleCheck( const wxTreeItemId &rootId,  Calbr::drcRuleCheck *check)
+{
+   std::string name = check->ruleCheckName();
+   wxTreeItemId  id = _errorBrowser->AppendItem(rootId, wxString(name.c_str(), wxConvUTF8));
+   std::vector <Calbr::drcPolygon>::iterator it2;
+   std::vector <Calbr::drcPolygon> *polys = check->polygons(); 
+   
+   //Save polygons
+   long sz = polys->size();
+   for(long i = 1; i <= sz; i++)
+   {
+      wxString str;
+      str.Printf(wxT("%d"), i);
+      _errorBrowser->AppendItem(id, str);
+   }
+
+   //Save Edges
+   std::vector <Calbr::drcEdge> *edges = check->edges();
+   sz = edges->size();
+   for(long i = 1; i <= sz; i++)
+   {
+      wxString str;
+      str.Printf(wxT("%d"), i);
+      _errorBrowser->AppendItem(id, str);
+   }
+}

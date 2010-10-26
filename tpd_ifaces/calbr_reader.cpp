@@ -707,6 +707,11 @@ std::string Calbr::CalbrFile::explainError(word lay)
    return "";
 }
 
+bool Calbr::CalbrFile::isCellNameMode(void)
+{
+   return !_cellDRCMap.empty();
+}
+
 wxString Calbr::convert(int number, long precision)
 {
    float x   = float(number) / precision;

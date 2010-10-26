@@ -163,7 +163,7 @@ namespace Calbr
       public:
                            CalbrFile(const std::string &fileName, drcRenderer *render);
                           ~CalbrFile();
-         void               readFile();
+         void              readFile();
          void              addResults();
          void              addRuleCheck(drcRuleCheck* check);
          void              showError(const std::string & error, long  number);
@@ -171,7 +171,9 @@ namespace Calbr
          void              showAllErrors(void);
          void              hideAllErrors(void);
          std::string       explainError(word lay);
-         RuleChecksVector* results() {return &_RuleChecks;};
+         bool              isCellNameMode(void);
+         RuleChecksVector* resultsFlat(void) {return &_RuleChecks;};
+         CellDRCMap*       resultsCellNameMode(void) {return &_cellDRCMap;};
          bool              isOk(void)   {return _ok;}
          drcRenderer*      render() const {return _render;};
          std::string       cellName() {return _cellName;};
