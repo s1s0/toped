@@ -122,6 +122,7 @@ namespace Calbr
    {
       public:
                               drcRuleCheck(unsigned int num, const std::string &name);
+                              drcRuleCheck(const drcRuleCheck& ruleCheck);
                               ~drcRuleCheck();
 
          unsigned int         num(void) const {return _num;};
@@ -188,7 +189,9 @@ namespace Calbr
          bool              parsePoly(char* ruleCheckName, drcPolygon & poly, int numberOfElem);
          bool              parseEdge(char* ruleCheckName, drcEdge & edge, int numberOfElem);
          bool              parseCellNameMode(const std::string &parseString);
-         drcRuleCheck*      _curRuleCheck;
+         void              appendRuleCheckToCellName(void);
+         drcRuleCheck*     _curRuleCheck;
+         std::string       _curRuleCheckName;
          RuleChecksVector  _RuleChecks;
 			CellDRCMap			_cellDRCMap;
          bool              _ok;

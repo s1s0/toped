@@ -125,6 +125,13 @@ Calbr::drcRuleCheck::drcRuleCheck(unsigned int num, const std::string &name)
 {
 }
 
+Calbr::drcRuleCheck::drcRuleCheck(const drcRuleCheck& ruleCheck)
+{
+   _num = ruleCheck._num;
+   _ruleCheckName = ruleCheck._ruleCheckName;
+   _borderInit = ruleCheck._borderInit;
+}
+
 Calbr::drcRuleCheck::~drcRuleCheck()
 {
 }
@@ -355,7 +362,8 @@ bool Calbr::CalbrFile::parse(unsigned int num)
    if (fgets(ruleCheckName, 512, _calbrFile)==NULL) return false;
 
    //Remove LF from  ruleCheckName before creating ruleCheck
-   _curRuleCheck = DEBUG_NEW Calbr::drcRuleCheck(num, std::string(ruleCheckName, strlen(ruleCheckName)-1));
+   _curRuleCheckName = std::string(ruleCheckName, strlen(ruleCheckName)-1);
+   _curRuleCheck = DEBUG_NEW Calbr::drcRuleCheck(num, _curRuleCheckName);
    char tempStr[512];
    char timeStamp[512];
    long resCount, origResCount, descrStrCount;
@@ -400,12 +408,16 @@ bool Calbr::CalbrFile::parse(unsigned int num)
          throw(EXPTNdrc_parser(drc_parse, ruleCheckName, tempStr));
       };
                
-      drcPolygon poly(ordinal, _render);
+      
       switch(type)
       {
+
          case 'p'   :
-            if (!parsePoly(ruleCheckName ,poly, numberOfElem)) return false;
-            _curRuleCheck->addPolygon(poly);
+            {
+               drcPolygon poly(ordinal, _render);
+               if (!parsePoly(ruleCheckName ,poly, numberOfElem)) return false;
+               _curRuleCheck->addPolygon(poly);
+            }
             break;
 
          case 'e'   :
@@ -422,15 +434,7 @@ bool Calbr::CalbrFile::parse(unsigned int num)
 
    if(_isCellNameMode && !(_RuleChecks.empty()))
    {
-      CellDRCMap::iterator it = _cellDRCMap.find(_curCellName);
-      if(it!= _cellDRCMap.end())
-      {
-         it->second->_RuleChecks.push_back(_curRuleCheck);
-      }
-      else
-      {
-         assert(true); // Something wrong. CellNameMode is set but no such cell
-      }
+      appendRuleCheckToCellName();
    }
    else
    {
@@ -455,9 +459,15 @@ bool Calbr::CalbrFile::parsePoly(char* ruleCheckName, drcPolygon & poly, int num
       //Check Cell Name Mode
       if((tempStr[0]=='C') && (tempStr[1]=='N'))
       {
+         if (_isCellNameMode) //Save _curRuleCheck in previous cellName and create copy of current _curRuleCheck
+         {
+            appendRuleCheckToCellName();
+            _curRuleCheck = DEBUG_NEW drcRuleCheck(*_curRuleCheck);
+         }
+
          if(parseCellNameMode(tempStr))
          {
-            //_curRuleCheck->addCellNameStruct(CNStruct);
+            
          }
          else
          {
@@ -496,6 +506,12 @@ bool Calbr::CalbrFile::parseEdge(char* ruleCheckName, drcEdge & edge, int number
       //Check Cell Name Mode
       if((tempStr[0]=='C') && (tempStr[1]=='N'))
       {
+         if (_isCellNameMode) //Save _curRuleCheck in previous cellName and create copy of current _curRuleCheck
+         {
+            appendRuleCheckToCellName();
+            _curRuleCheck = DEBUG_NEW drcRuleCheck(*_curRuleCheck);
+         }
+
          if(parseCellNameMode( tempStr))
          {
             //_curRuleCheck->addCellNameStruct(CNStruct);
@@ -710,6 +726,19 @@ std::string Calbr::CalbrFile::explainError(word lay)
 bool Calbr::CalbrFile::isCellNameMode(void)
 {
    return !_cellDRCMap.empty();
+}
+
+void Calbr::CalbrFile::appendRuleCheckToCellName(void)
+{
+   CellDRCMap::iterator it = _cellDRCMap.find(_curCellName);
+   if(it!= _cellDRCMap.end())
+   {
+      it->second->_RuleChecks.push_back(_curRuleCheck);
+   }
+   else
+   {
+      assert(true); // Something wrong. CellNameMode is set but no such cell
+   }
 }
 
 wxString Calbr::convert(int number, long precision)
