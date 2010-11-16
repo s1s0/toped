@@ -569,15 +569,17 @@ bool  Calbr::CalbrFile::parseCellNameMode(const std::string &parseString)
       CNStruct->a[0][0] = number;
       regex.GetMatch(str, 5).ToLong(&number);
       CNStruct->a[0][1] = number;
+      CNStruct->a[0][2] = 0;
       regex.GetMatch(str, 6).ToLong(&number);
-      CNStruct->a[0][2] = number;
-      regex.GetMatch(str, 7).ToLong(&number);
       CNStruct->a[1][0] = number;
-      regex.GetMatch(str, 8).ToLong(&number);
+      regex.GetMatch(str, 7).ToLong(&number);
       CNStruct->a[1][1] = number;
+      CNStruct->a[1][2] = 0;
+      regex.GetMatch(str, 8).ToLong(&number);
+      CNStruct->a[2][0] = number;
       regex.GetMatch(str, 9).ToLong(&number);
-      CNStruct->a[1][2] = number;
-
+      CNStruct->a[2][1] = number;
+      CNStruct->a[2][2] = 1;
 
       _isCellNameMode = true;
       _curCellName = cellName;

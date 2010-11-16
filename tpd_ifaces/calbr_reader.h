@@ -114,7 +114,7 @@ namespace Calbr
    struct cellNameStruct
    {
       bool              spaceCoords;
-      int               a[2][3];
+      int               a[3][3];
       RuleChecksVector  _RuleChecks;
    };
 
