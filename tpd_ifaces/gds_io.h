@@ -155,7 +155,7 @@ namespace GDSin {
       public:
                            GdsRecord();
                            GdsRecord(byte rt, byte dt, word rl);
-         void              getNextRecord(DbImportFile* Gf, word rl, byte rt, byte dt);
+         void              getNextRecord(ForeignDbFile* Gf, word rl, byte rt, byte dt);
          bool              retData(void* var, word curnum = 0, byte len = 0) const;
          size_t            flush(wxFFile& Gf);
          void              add_int2b(const word);
@@ -213,7 +213,7 @@ namespace GDSin {
    > GetReadErrors()      - Returns the number of errors during GDSII file reading
    > GetTimes()         - Reads values of t_access and t_modiff (see above)
    ******************************************************************************/
-   class   GdsInFile : public DbImportFile {
+   class   GdsInFile : public ForeignDbFile {
       public:
                               GdsInFile(wxString);
          virtual             ~GdsInFile();

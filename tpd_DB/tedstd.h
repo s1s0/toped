@@ -149,6 +149,73 @@ namespace laydata {
       PointVector          _plist;
    };
 
+   //==============================================================================
+   /*!
+    * File compression explained: A plenty of compression algorithms out there -
+    * Toped deals with two of them and the reason is that those are suitable for
+    * layout file purposes and covered by wx library at the time of writing.
+    *  - zip (http://en.wikipedia.org/wiki/ZIP_%28file_format%29) - compression
+    *    algorithm and archiver
+    *  - gzip stream compression algorithm using Lempel-Ziv coding (LZ77).
+    *    (http://en.wikipedia.org/wiki/Gzip). Several implementations of this
+    *    algo, but wx is using Zlib (http://www.zlib.net/)
+    *
+    *  From our prospective the big difference between the two is that the
+    *  first one is also an archiver which means that a zip file can contain
+    *  more than one file. gzip on the other hand is a stream compression which
+    *  means that it contains a single file. In Linux traditionally tar is
+    *  used as archiver and then the entire archive is compressed using gzip
+    *
+    *  Another quite important feature of both formats is that (as it appears
+    *  at least in the wx implementation) both of them are not seekable. In
+    *  other words they are not randomly accessible.
+    *
+    *  Having in mind all the above and the general pattern Toped is following
+    *  for all imports (i.e. two stage conversion as described on the web site
+    *  http://toped.org.uk/trm_ifaces.html) here is the general idea how the
+    *  compressed input files are handled:
+    *  - zip files - opened before the conversion. If they contain a single file
+    *    it is inflated (decompressed) in a temporary location and then the new
+    *    file is used in all conversion stages. If the original file contains more
+    *    than one file - the processing is aborted and conversion is rejected.
+    *  - gzip files - used "as is" in the first import stage where the access is
+    *    sequential. Before the second stage, which requires random access the
+    *    file is inflated in a temporary location and the product is used for the
+    *    conversion.
+    */
+   class TedInputFile {
+      public:
+                              TedInputFile( wxString fileName, bool _forceSeek);
+         virtual             ~TedInputFile();
+         bool                 readStream(void*, size_t, bool updateProgress = false);
+         size_t               readTextStream(char*, size_t);
+         void                 closeStream();
+         std::string          fileName()                       { return std::string(_fileName.mb_str(wxConvFile));}
+         wxFileOffset         fileLength() const               { return _fileLength;}
+         wxFileOffset         filePos() const                  { return _filePos;   }
+         bool                 status() const                   { return _status;    }
+      protected:
+         void                 initFileMetrics(wxFileOffset);
+         void                 setFilePos(wxFileOffset fp)      { _filePos = fp;     }
+         bool                 unZlib2Temp();//! inflate the input zlib file in a temporary one
+         bool                 unZip2Temp() ;//! inflate the input zip file in a temporary one
+         wxInputStream*       _inStream    ;//! The input stream of the opened file
+         bool                 _gziped      ;//! Indicates that the file is in compressed with gzip
+         bool                 _ziped       ;//! Indicates that the file is in compressed with zip
+         bool                 _forceSeek   ;//! Seekable stream requested
+         wxString             _fileName    ;//! A fully validated name of the file. Path,extension, everything
+         wxString             _tmpFileName ;//! The name of the eventually deflated file (if the input is compressed)
+      private:
+         wxFileOffset         _fileLength  ;//! The length of the file in bytes
+         wxFileOffset         _filePos     ;//! Current position in the file
+         wxFileOffset         _progresPos  ;//! Current position of the progress bar (Toped status line)
+         wxFileOffset         _progresMark ;//! Marked  position of the progress bar (Toped status line)
+         wxFileOffset         _progresStep ;//! Update step of the progress bar (Toped status line)
+         unsigned const       _progresDivs ;//! Number of updates to the progress bar during the current operation
+         bool                 _status      ;//! Used only in the constructor if the file can't be
+
+   };
+
 //==============================================================================
    class   TEDfile {
    public:
@@ -203,7 +270,6 @@ namespace laydata {
       TdtLibrary*          _design;
       NameSet              _childnames;
       laydata::TdtLibDir*  _TEDLIB;       // catalog of available TDT libraries
-
    };
 
    class ArrayProperties
@@ -316,48 +382,15 @@ class ForeignCell;
 class ImportDB;
 typedef SGHierTree<ForeignCell> ForeignCellTree;
 typedef std::list<ForeignCell*> ForeignCellList;
-/*!
- * File compression explained: A plenty of compression algorithms out there -
- * Toped deals with two of them and the reason is that those are suitable for
- * layout file purposes and covered by wx library at the time of writing.
- *  - zip (http://en.wikipedia.org/wiki/ZIP_%28file_format%29) - compression
- *    algorithm and archiver
- *  - gzip stream compression algorithm using Lempel-Ziv coding (LZ77).
- *    (http://en.wikipedia.org/wiki/Gzip). Several implementations of this
- *    algo, but wx is using Zlib (http://www.zlib.net/)
- *
- *  From our prospective the big difference between the two is that the
- *  first one is also an archiver which means that a zip file can contain
- *  more than one file. gzip on the other hand is a stream compression which
- *  means that it contains a single file. In Linux traditionally tar is
- *  used as archiver and then the entire archive is compressed using gzip
- *
- *  Another quite important feature of both formats is that (as it appears
- *  at least in the wx implementation) both of them are not seekable. In
- *  other words they are not randomly accessible.
- *
- *  Having in mind all the above and the general pattern Toped is following
- *  for all imports (i.e. two stage conversion as described on the web site
- *  http://toped.org.uk/trm_ifaces.html) here is the general idea how the
- *  compressed input files are handled:
- *  - zip files - opened before the conversion. If they contain a single file
- *    it is inflated (decompressed) in a temporary location and then the new
- *    file is used in all conversion stages. If the original file contains more
- *    than one file - the processing is aborted and conversion is rejected.
- *  - gzip files - used "as is" in the first import stage where the access is
- *    sequential. Before the second stage, which requires random access the
- *    file is inflated in a temporary location and the product is used for the
- *    conversion.
- */
-class DbImportFile {
+class ForeignDbFile : public laydata::TedInputFile {
    public:
-                           DbImportFile(wxString, bool);
-      virtual             ~DbImportFile();
+                           ForeignDbFile(wxString, bool);
+      virtual             ~ForeignDbFile();
       bool                 reopenFile();
-      bool                 readStream(void*, size_t, bool updateProgress = false);
-      size_t               readTextStream(char*, size_t);
+//      bool                 readStream(void*, size_t, bool updateProgress = false);
+//      size_t               readTextStream(char*, size_t);
       void                 setPosition(wxFileOffset);
-      void                 closeStream();
+//      void                 closeStream();
       std::string          getFileNameOnly() const;
       virtual double       libUnits() const = 0;
       virtual void         hierOut() = 0 ;
@@ -366,40 +399,19 @@ class DbImportFile {
       virtual void         getAllCells(wxListBox&) const = 0;
       virtual void         convertPrep(const NameList&, bool) = 0;
       // If you hit any of the asserts below - it most likely means that you're using wrong
-      // combination of DbImportFile extend class type and parameters for this function call
+      // combination of ForeignDbFile extend class type and parameters for this function call
       // ExtLayers is used for GDS/OASIS, NameList is used for CIF
       virtual void         collectLayers(ExtLayers&) const {assert(false);}
       virtual void         collectLayers(NameList& ) const {assert(false);}
       virtual bool         collectLayers(const std::string&, ExtLayers&) const {assert(false); return false;}
       virtual bool         collectLayers(const std::string&, NameList& ) const {assert(false); return false;}
-      wxFileOffset         filePos() const                  { return _filePos;   }
-      wxFileOffset         fileLength() const               { return _fileLength;}
-      bool                 status() const                   { return _status;    }
       ForeignCellList&     convList()                       { return _convList;  }
-      std::string          fileName()                       { return std::string(_fileName.mb_str(wxConvFile));}
       ForeignCellTree*     hierTree()                       { return _hierTree;}
    protected:
       void                 preTraverseChildren(const ForeignCellTree*);
-      wxFileOffset         _convLength ;//! The amount of data (in bytes) subjected to conversion
       ForeignCellList      _convList   ;//! The list of cells for conversion in bottom-up order
       ForeignCellTree*     _hierTree   ;//! Tree of instance hierarchy
-   private:
-      bool                 unZlib2Temp();//! inflate the input zlib file in a temporary one
-      bool                 unZip2Temp() ;//! inflate the input zip file in a temporary one
-      wxString             _fileName    ;//! A fully validated name of the file. Path,extension, everything
-      wxString             _tmpFileName ;//! The name of the eventually deflated file (if the input is compressed)
-      wxInputStream*       _inStream    ;//! The input stream of the opened file
-      wxFileOffset         _fileLength  ;//! The length of the file in bytes
-      wxFileOffset         _filePos     ;//! Current position in the file
-      wxFileOffset         _progresPos  ;//! Current position of the progress bar (Toped status line)
-      wxFileOffset         _progresMark ;//! Marked  position of the progress bar (Toped status line)
-      wxFileOffset         _progresStep ;//! Update step of the progress bar (Toped status line)
-      bool                 _gziped      ;//! Indicates that the file is in compressed with gzip
-      bool                 _ziped       ;//! Indicates that the file is in compressed with zip
-      bool                 _forceSeek   ;//! Seekable stream requested
-      bool                 _status      ;//! Used only in the constructor if the file can't be
-                                         //! opened for whatever reason
-      unsigned const       _progresDivs ;//! Number of updates to the progress bar during the current operation
+      wxFileOffset         _convLength ;//! The amount of data (in bytes) subjected to conversion
 };
 
 //==========================================================================
@@ -425,7 +437,7 @@ class ForeignCell {
 
 //==========================================================================
 // If you hit any of the asserts below - it most likely means that you're using wrong
-// combination of DbImportFile extend class type and parameters for this function call
+// combination of ForeignDbFile extend class type and parameters for this function call
 // ExtLayers is used for GDS/OASIS, NameList is used for CIF
 class LayerCrossMap {
    public:
@@ -468,8 +480,8 @@ class ENameLayerCM : public LayerCrossMap {
 //==========================================================================
 class ImportDB {
    public:
-                              ImportDB(DbImportFile*, laydata::TdtLibDir*, const LayerMapExt&);
-                              ImportDB(DbImportFile*, laydata::TdtLibDir*, const SIMap&, real);
+                              ImportDB(ForeignDbFile*, laydata::TdtLibDir*, const LayerMapExt&);
+                              ImportDB(ForeignDbFile*, laydata::TdtLibDir*, const SIMap&, real);
                              ~ImportDB();
       void                    run(const NameList&, bool, bool reopenFile = true);
       bool                    mapTdtLayer(std::string);
@@ -482,7 +494,7 @@ class ImportDB {
       void                    addRef(std::string, CTM);
       void                    addARef(std::string, TP, double, double, bool, laydata::ArrayProperties&);
       void                    calcCrossCoeff(real cc) { _crossCoeff = _dbuCoeff * cc;}
-      DbImportFile*           srcFile()               { return _src_lib;   }
+      ForeignDbFile*           srcFile()               { return _src_lib;   }
       real                    technoSize()            { return _technoSize;}
       real                    crossCoeff()            { return _crossCoeff;}
    protected:
@@ -490,7 +502,7 @@ class ImportDB {
       bool                    polyAcceptable(PointVector&, bool&);
       bool                    pathAcceptable(PointVector&, int4b);
       LayerCrossMap*          _layCrossMap   ;
-      DbImportFile*           _src_lib       ;
+      ForeignDbFile*           _src_lib       ;
       laydata::TdtLibDir*     _tdt_db        ;
       laydata::TdtCell*       _dst_structure ; // Current target structure
       real                    _dbuCoeff      ; // The DBU ratio between the foreign and local DB

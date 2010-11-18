@@ -377,7 +377,7 @@ namespace Oasis {
 
    class CBlockInflate : public z_stream {
       public:
-                           CBlockInflate(DbImportFile&, wxFileOffset, dword, dword);
+                           CBlockInflate(ForeignDbFile&, wxFileOffset, dword, dword);
          void              readUncompressedBuffer(void *pBuf, size_t nCount);
          bool              endOfBuffer() const  {return _bufOffset == _bufSize;}
          wxFileOffset      startPosInFile() const {return _startPosInFile;}
@@ -417,7 +417,7 @@ namespace Oasis {
          static const dword   _crc32AllBits;
    };
 
-   class OasisInFile : public DbImportFile {
+   class OasisInFile : public ForeignDbFile {
       public:
          typedef std::map<std::string, Cell*> DefinitionMap;
                               OasisInFile(wxString);

@@ -901,7 +901,7 @@ void browsers::GDSCellBrowser::showMenu(wxTreeItemId id, const wxPoint& pt)
 void browsers::GDSCellBrowser::collectInfo(bool hier)
 {
    DeleteAllItems();
-   DbImportFile* AGDSDB = NULL;
+   ForeignDbFile* AGDSDB = NULL;
    if (DATC->lockGds(AGDSDB))
    {
       AddRoot(wxString((AGDSDB->libname()).c_str(), wxConvUTF8));
@@ -964,7 +964,7 @@ void browsers::CIFCellBrowser::collectInfo(bool hier)
 {
    DeleteAllItems();
 
-   DbImportFile* ACIFDB = NULL;
+   ForeignDbFile* ACIFDB = NULL;
    if (DATC->lockCif(ACIFDB))
    {
       AddRoot(wxString((ACIFDB->libname()).c_str(), wxConvUTF8));
@@ -1027,7 +1027,7 @@ void browsers::OASCellBrowser::collectInfo(bool hier)
 {
    DeleteAllItems();
 
-   DbImportFile* AOASDB = NULL;
+   ForeignDbFile* AOASDB = NULL;
    if (DATC->lockOas(AOASDB))
    {
       AddRoot(wxString((AOASDB->libname()).c_str(), wxConvUTF8));

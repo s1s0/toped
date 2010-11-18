@@ -53,15 +53,15 @@ public:
    bool                       oasGetLayers(ExtLayers&);
    bool                       lockTDT(laydata::TdtLibDir*&, TdtMutexState);
    laydata::DrcLibrary*       lockDRC(void);
-   bool                       lockGds(DbImportFile*&);
-   bool                       lockCif(DbImportFile*&);
-   bool                       lockOas(DbImportFile*&);
+   bool                       lockGds(ForeignDbFile*&);
+   bool                       lockCif(ForeignDbFile*&);
+   bool                       lockOas(ForeignDbFile*&);
    void                       deleteDRC(void);
    void                       unlockTDT(laydata::TdtLibDir*, bool throwexception = false);
    void                       unlockDRC();
-   void                       unlockGds(DbImportFile*&, bool throwexception = false);
-   void                       unlockCif(DbImportFile*&, bool throwexception = false);
-   void                       unlockOas(DbImportFile*& oasis_db, bool throwexception = false);
+   void                       unlockGds(ForeignDbFile*&, bool throwexception = false);
+   void                       unlockCif(ForeignDbFile*&, bool throwexception = false);
+   void                       unlockOas(ForeignDbFile*& oasis_db, bool throwexception = false);
    void                       bpRefreshTdtTab(bool, bool);
    void                       bpAddGdsTab(bool);
    void                       bpAddCifTab(bool);
@@ -97,9 +97,9 @@ private:
    std::string                _globalDir;
    laydata::TdtLibDir         _TEDLIB;       //! catalog of available TDT libraries
    laydata::DrcLibrary*       _DRCDB;        //! DRC data
-   DbImportFile*              _GDSDB;        //! GDS parsed data
-   DbImportFile*              _CIFDB;        //! CIF parsed data
-   DbImportFile*              _OASDB;        //! OASIS parsed data
+   ForeignDbFile*              _GDSDB;        //! GDS parsed data
+   ForeignDbFile*              _CIFDB;        //! CIF parsed data
+   ForeignDbFile*              _OASDB;        //! OASIS parsed data
    wxMutex                    _DBLock;       //! Main stream DB Mutex
    wxMutex                    _DRCLock;      //! DRC         DB Mutex
    wxMutex                    _GDSLock;      //! GDSII       DB Mutex
