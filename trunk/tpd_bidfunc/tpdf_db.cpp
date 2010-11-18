@@ -451,7 +451,7 @@ int tellstdfunc::GDSread::execute() {
          // add GDS tab in the browser
          DATC->bpAddGdsTab(_threadExecution);
          //
-         DbImportFile* AGDSDB = NULL;
+         ForeignDbFile* AGDSDB = NULL;
          if (DATC->lockGds(AGDSDB))
             AGDSDB->getTopCells(top_cell_list);
          else
@@ -509,7 +509,7 @@ int tellstdfunc::GDSimport::execute()
    std::ostringstream ost;
    ExtLayers* gdsLaysAll = NULL;
    bool checkOK = false;
-   DbImportFile* AGDSDB = NULL;
+   ForeignDbFile* AGDSDB = NULL;
    if (DATC->lockGds(AGDSDB))
    {
       gdsLaysAll = DEBUG_NEW ExtLayers();
@@ -582,7 +582,7 @@ int tellstdfunc::GDSimportList::execute()
       gdsLaysStrList[nameh->key().value()] = nameh->value().value();
    }
    ExtLayers* gdsLaysAll = DEBUG_NEW ExtLayers();
-   DbImportFile* AGDSDB = NULL;
+   ForeignDbFile* AGDSDB = NULL;
    if (DATC->lockGds(AGDSDB))
    {
       AGDSDB->collectLayers(*gdsLaysAll);
@@ -748,7 +748,7 @@ int tellstdfunc::GDSsplit::execute()
    if (expandFileName(filename))
    {
 
-      DbImportFile* AGDSDB = NULL;
+      ForeignDbFile* AGDSDB = NULL;
       if (DATC->lockGds(AGDSDB))
       {
          GDSin::GdsInFile* castedGdsDB = static_cast<GDSin::GdsInFile*>(AGDSDB);
@@ -907,7 +907,7 @@ tellstdfunc::GDSreportlay::GDSreportlay(telldata::typeID retype, bool eor) :
 int tellstdfunc::GDSreportlay::execute()
 {
    std::string name = getStringValue();
-   DbImportFile* AGDSDB = NULL;
+   ForeignDbFile* AGDSDB = NULL;
    if(DATC->lockGds(AGDSDB))
    {
       std::ostringstream ost;
@@ -1039,7 +1039,7 @@ int tellstdfunc::CIFread::execute()
          DATC->bpAddCifTab(_threadExecution);
          // Collect the top structures
          std::list<std::string> top_cell_list;
-         DbImportFile* ACIFDB = NULL;
+         ForeignDbFile* ACIFDB = NULL;
          if (DATC->lockCif(ACIFDB))
          {
             ACIFDB->getTopCells(top_cell_list);
@@ -1090,7 +1090,7 @@ int tellstdfunc::CIFreportlay::execute()
 {
 
    std::string name = getStringValue();
-   DbImportFile* ACIFDB = NULL;
+   ForeignDbFile* ACIFDB = NULL;
    if (DATC->lockCif(ACIFDB))
    {
       std::ostringstream ost;
@@ -1442,7 +1442,7 @@ int tellstdfunc::OASread::execute() {
          // add OASIS tab in the browser
          DATC->bpAddOasTab(_threadExecution);
          //
-         DbImportFile* AOASDB = NULL;
+         ForeignDbFile* AOASDB = NULL;
          if (DATC->lockOas(AOASDB))
             AOASDB->getTopCells(top_cell_list);
          else
@@ -1500,7 +1500,7 @@ int tellstdfunc::OASimport::execute()
    std::ostringstream ost;
    ExtLayers* oasLaysAll = NULL;
    bool checkOK = false;
-   DbImportFile* AOASDB = NULL;
+   ForeignDbFile* AOASDB = NULL;
    if (DATC->lockOas(AOASDB))
    {
       oasLaysAll = DEBUG_NEW ExtLayers();
@@ -1572,7 +1572,7 @@ int tellstdfunc::OASimportList::execute()
       oasLaysStrList[nameh->key().value()] = nameh->value().value();
    }
    ExtLayers* oasLaysAll = DEBUG_NEW ExtLayers();
-   DbImportFile* AOASDB = NULL;
+   ForeignDbFile* AOASDB = NULL;
    if (DATC->lockOas(AOASDB))
    {
       AOASDB->collectLayers(*oasLaysAll);
@@ -1627,7 +1627,7 @@ tellstdfunc::OASreportlay::OASreportlay(telldata::typeID retype, bool eor) :
 int tellstdfunc::OASreportlay::execute()
 {
    std::string name = getStringValue();
-   DbImportFile* AOASDB = NULL;
+   ForeignDbFile* AOASDB = NULL;
    if (DATC->lockOas(AOASDB))
    {
       ExtLayers oasLayers;
@@ -1924,7 +1924,7 @@ void tellstdfunc::importGDScell(laydata::TdtLibDir* dbLibDir, const NameList& to
   const LayerMapExt& laymap, parsercmd::undoQUEUE& undstack, telldata::UNDOPerandQUEUE& undopstack,
   bool threadExecution, bool recur, bool over)
 {
-   DbImportFile* AGDSDB = NULL;
+   ForeignDbFile* AGDSDB = NULL;
    if (DATC->lockGds(AGDSDB))
    {
       if (dbmxs_dblock > DATC->tdtMxState())
@@ -1953,7 +1953,7 @@ void tellstdfunc::importCIFcell( laydata::TdtLibDir* dbLibDir, const NameList& t
   bool threadExecution, bool recur, bool over, real techno )
 {
    // DB should have been locked at this point (from the tell functions)
-   DbImportFile* ACIFDB = NULL;
+   ForeignDbFile* ACIFDB = NULL;
    if (DATC->lockCif(ACIFDB))
    {
       if (dbmxs_dblock > DATC->tdtMxState())
@@ -1975,7 +1975,7 @@ void tellstdfunc::importOAScell(laydata::TdtLibDir* dbLibDir, const NameList& to
   const LayerMapExt& laymap, parsercmd::undoQUEUE& undstack, telldata::UNDOPerandQUEUE& undopstack,
   bool threadExecution, bool recur, bool over)
 {
-   DbImportFile* AOASDB = NULL;
+   ForeignDbFile* AOASDB = NULL;
    if (DATC->lockOas(AOASDB))
    {
       if (dbmxs_dblock > DATC->tdtMxState())

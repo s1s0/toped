@@ -62,7 +62,7 @@ GDSin::GdsRecord::GdsRecord(byte rt, byte dt, word rl)
    _record[_index++] = _dataType;
 }
 
-void GDSin::GdsRecord::getNextRecord(DbImportFile* Gf, word rl, byte rt, byte dt)
+void GDSin::GdsRecord::getNextRecord(ForeignDbFile* Gf, word rl, byte rt, byte dt)
 {
    _recLen = rl; _recType = rt; _dataType = dt;
    if (rl)
@@ -308,7 +308,7 @@ GDSin::GdsRecord::~GdsRecord()
 //==============================================================================
 // class GdsInFile
 //==============================================================================
-GDSin::GdsInFile::GdsInFile(wxString wxfname) : DbImportFile(wxfname, false)
+GDSin::GdsInFile::GdsInFile(wxString wxfname) : ForeignDbFile(wxfname, false)
 {
    _gdsiiWarnings = 0;
    _library       = NULL;

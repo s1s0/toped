@@ -360,7 +360,7 @@ void CIFin::CifStructure::import(ImportDB& iDB)
 }
 
 //=============================================================================
-CIFin::CifFile::CifFile(wxString wxfname) : DbImportFile(wxfname, false)
+CIFin::CifFile::CifFile(wxString wxfname) : ForeignDbFile(wxfname, false)
 {
    _first = _current = _default = NULL;
    _curLay = NULL;

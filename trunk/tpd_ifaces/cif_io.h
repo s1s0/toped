@@ -240,7 +240,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          CIFSList       _children;
    };
 
-   class   CifFile : public DbImportFile {
+   class   CifFile : public ForeignDbFile {
       public:
                               CifFile(wxString);
                               ~CifFile();

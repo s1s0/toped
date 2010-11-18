@@ -81,6 +81,256 @@ PSegment* PSegment::parallel(TP p)
 }
 
 
+//=============================================================================
+// class TedInputFile
+//=============================================================================
+/*!
+ * The main purpose of the constructor is to create an input stream (_inStream)
+ * from the fileName. It handles zip and gz files recognizing them by the
+ * extension. The outcome of this operation is indicated in the _status field
+ * of the class.
+ * @param fileName - the fully qualified filename - OS dependent
+ */
+laydata::TedInputFile::TedInputFile( wxString fileName, bool forceSeek) :
+      _inStream      (      NULL ),
+      _gziped        (     false ),
+      _ziped         (     false ),
+      _forceSeek     ( forceSeek ),
+      _fileLength    (         0 ),
+      _filePos       (         0 ),
+      _progresPos    (         0 ),
+      _progresMark   (         0 ),
+      _progresStep   (         0 ),
+      _progresDivs   (       200 ),
+      _status        (     false )
+{
+   std::ostringstream info;
+   wxFileName wxImportFN(fileName);
+   wxImportFN.Normalize();
+   _fileName = wxImportFN.GetFullPath();
+   if (wxImportFN.IsOk())
+   {
+      wxString theExtention = wxImportFN.GetExt();
+      _gziped = (wxT("gz") == wxImportFN.GetExt());
+      _ziped  = (wxT("zip") == wxImportFN.GetExt());
+      if (_ziped)
+      {
+         info << "Inflating the archive \"" << _fileName << "\" ...";
+         tell_log(console::MT_INFO,info.str());
+         if (unZip2Temp())
+         {
+            // zip files are inflated in a temporary location immediately
+            info.str("");
+            info << "Done";
+            tell_log(console::MT_INFO,info.str());
+            _inStream = DEBUG_NEW wxFFileInputStream(_tmpFileName,wxT("rb"));
+            _status = true;
+         }
+         else
+         {
+            info.str("");
+            info << "Failed!";
+            tell_log(console::MT_ERROR,info.str());
+         }
+      }
+      else if (_gziped)
+      {
+         // gz files are handled "as is" in the first import stage unless _forceSeek
+         // is requested
+         if (_forceSeek)
+         {
+            if (unZlib2Temp())
+            {
+               _inStream = DEBUG_NEW wxFFileInputStream(_tmpFileName,wxT("rb"));
+               _status = true;
+            }
+         }
+         else
+         {
+            wxInputStream* fstream = DEBUG_NEW wxFFileInputStream(_fileName,wxT("rb"));
+            _inStream = DEBUG_NEW wxZlibInputStream(fstream);
+            _status = true;
+         }
+      }
+      else
+      {
+         // File is not compressed
+         _inStream = DEBUG_NEW wxFFileInputStream(_fileName,wxT("rb"));
+         _status = true;
+      }
+   }
+   else
+   {
+      std::ostringstream info;
+      info << "Invalid filename \"" << _fileName << "\"";
+      tell_log(console::MT_ERROR,info.str());
+   }
+   if (!_status) return;
+   assert(NULL != _inStream);
+   //--------------------------------------------------------------------------
+   // OK, we have an input stream now - check it is valid and accessible
+   if (!(_inStream->IsOk()))
+   {
+      info << "File "<< _fileName <<" can NOT be opened";
+      _status = false;
+      delete _inStream;
+      return;
+   }
+   _fileLength = _inStream->GetLength();
+   _progresStep = _fileLength / _progresDivs;
+   if (_progresStep > 0)
+      TpdPost::toped_status(console::TSTS_PRGRSBARON, _fileLength);
+}
+
+bool laydata::TedInputFile::readStream(void* buffer, size_t len, bool updateProgress)
+{
+   _inStream->Read(buffer,len);// read record header
+   size_t numread = _inStream->LastRead();
+   if (numread != len)
+      return false;// error during read in
+   // update file position
+   _filePos += numread;
+   // update progress indicator
+   _progresPos += numread;
+   if (    updateProgress
+       && (_progresStep > 0)
+       && (_progresStep < (_progresPos - _progresMark)))
+   {
+      _progresMark = _progresPos;
+      TpdPost::toped_status(console::TSTS_PROGRESS, _progresMark);
+   }
+   return true;
+}
+
+size_t laydata::TedInputFile::readTextStream(char* buffer, size_t len )
+{
+//   size_t result = 0;
+//   do
+//   {
+//      char cc = _inStream->GetC();
+//      if (1 == _inStream->LastRead())
+//      {
+//         buffer[result++] = cc;
+//      }
+//      else
+//         break;
+//   } while (result < len);
+//   return result;
+   _inStream->Read(buffer,len);// read record header
+   size_t numread = _inStream->LastRead();
+   // update file position
+   _filePos += numread;
+   // update progress indicator
+   _progresPos += numread;
+   if(   (_progresStep > 0)
+      && (_progresStep < (_progresPos - _progresMark)))
+   {
+      _progresMark = _progresPos;
+      TpdPost::toped_status(console::TSTS_PROGRESS, _progresMark);
+   }
+   return numread;
+}
+
+void laydata::TedInputFile::closeStream()
+{
+   if ( NULL != _inStream )
+   {
+      delete _inStream;
+      _inStream = NULL;
+   }
+   TpdPost::toped_status(console::TSTS_PRGRSBAROFF);
+//   _convLength = 0;
+}
+
+void laydata::TedInputFile::initFileMetrics(wxFileOffset size)
+{
+   _filePos     = 0;
+   _progresPos  = 0;
+   _progresMark = 0;
+   _progresStep = size / _progresDivs;
+   if (_progresStep > 0)
+      TpdPost::toped_status(console::TSTS_PRGRSBARON, size);
+}
+
+bool laydata::TedInputFile::unZip2Temp()
+{
+   // Initialize an input stream - i.e. open the input file
+   wxFFileInputStream inStream(_fileName);
+   if (!inStream.Ok())
+   {
+      // input file does not exist
+      return false;
+   }
+   // Create an input zip stream handling over the input file stream created above
+   wxZipInputStream inZipStream(inStream);
+   if (1 < inZipStream.GetTotalEntries()) return false;
+   wxZipEntry* curZipEntry = inZipStream.GetNextEntry();
+   if (NULL != curZipEntry)
+   {
+      wxFile* outFileHandler = NULL;
+      _tmpFileName = wxFileName::CreateTempFileName(curZipEntry->GetName(), outFileHandler);
+      wxFileOutputStream outStream(_tmpFileName);
+      if (outStream.IsOk())
+      {
+         inZipStream.Read(outStream);
+         return true;
+      }
+      else return false;
+   }
+   else
+      return false;
+}
+
+bool laydata::TedInputFile::unZlib2Temp()
+{
+   std::ostringstream info;
+   // Initialize an input stream - i.e. open the input file
+   wxFFileInputStream inStream(_fileName);
+   if (!inStream.Ok())
+   {
+      info << "Can't open the file " << _fileName;
+      tell_log(console::MT_ERROR,info.str());
+      return false;
+   }
+   // Create an input zlib stream handling over the input file stream created above
+   wxZlibInputStream inZlibStream(inStream);
+   wxFile* outFileHandler = NULL;
+   _tmpFileName = wxFileName::CreateTempFileName(wxString(), outFileHandler);
+   wxFileOutputStream outStream(_tmpFileName);
+   if (outStream.IsOk())
+   {
+      info << " Inflating ... ";
+      tell_log(console::MT_INFO,info.str());
+      inZlibStream.Read(outStream);
+      wxStreamError izlsStatus = inZlibStream.GetLastError();
+      if (wxSTREAM_EOF == izlsStatus)
+      {
+         info.str("");
+         info << " Done ";
+         tell_log(console::MT_INFO,info.str());
+         return true;
+      }
+      else
+      {
+         info << " Inflating finished with status " << izlsStatus << ". Can't continue";
+         tell_log(console::MT_ERROR,info.str());
+         return false;
+      }
+   }
+   else
+   {
+      info << "Can't create a temporary file for deflating. Bailing out. ";
+      tell_log(console::MT_ERROR,info.str());
+      return false;
+   }
+}
+
+laydata::TedInputFile::~TedInputFile()
+{
+   if (NULL != _inStream) delete _inStream;
+}
+
+
 //-----------------------------------------------------------------------------
 // class TEDfile
 //-----------------------------------------------------------------------------
@@ -839,109 +1089,18 @@ laydata::WireContourAux::~WireContourAux()
 /*!
  * The main purpose of the constructor is to create an input stream (_inStream)
  * from the fileName. It handles zip and gz files recognizing them by the
- * extension. The outcome of this operation is indicated it in the _status field
+ * extension. The outcome of this operation is indicated in the _status field
  * of the class.
  * @param fileName - the fully qualified filename - OS dependent
  */
-DbImportFile::DbImportFile(wxString fileName, bool forceSeek) :
-      _convLength    (         0 ),
+ForeignDbFile::ForeignDbFile(wxString fileName, bool forceSeek) : laydata::TedInputFile(fileName, forceSeek),
       _hierTree      (      NULL ),
-      _inStream      (      NULL ),
-      _fileLength    (         0 ),
-      _filePos       (         0 ),
-      _progresPos    (         0 ),
-      _progresMark   (         0 ),
-      _progresStep   (         0 ),
-      _gziped        (     false ),
-      _ziped         (     false ),
-      _forceSeek     ( forceSeek ),
-      _status        (     false ),
-      _progresDivs   (       200 )
+      _convLength    (         0 )
 {
-   std::ostringstream info;
-   wxFileName wxGdsFN(fileName);
-   wxGdsFN.Normalize();
-   _fileName = wxGdsFN.GetFullPath();
-   if (wxGdsFN.IsOk())
-   {
-      wxString theExtention = wxGdsFN.GetExt();
-      _gziped = (wxT("gz") == wxGdsFN.GetExt());
-      _ziped  = (wxT("zip") == wxGdsFN.GetExt());
-      if (_ziped)
-      {
-         info << "Inflating the archive \"" << _fileName << "\" ...";
-         tell_log(console::MT_INFO,info.str());
-         if (unZip2Temp())
-         {
-            // zip files are inflated in a temporary location immediately
-            info.str("");
-            info << "Done";
-            tell_log(console::MT_INFO,info.str());
-            _inStream = DEBUG_NEW wxFFileInputStream(_tmpFileName,wxT("rb"));
-            _status = true;
-         }
-         else
-         {
-            info.str("");
-            info << "Failed!";
-            tell_log(console::MT_ERROR,info.str());
-         }
-      }
-      else if (_gziped)
-      {
-         // gz files are handled "as is" in the first import stage unless forceSeek
-         // is requested
-         if (_forceSeek)
-         {
-            if (unZlib2Temp())
-            {
-               _inStream = DEBUG_NEW wxFFileInputStream(_tmpFileName,wxT("rb"));
-               _status = true;
-            }
-         }
-         else
-         {
-            wxInputStream* fstream = DEBUG_NEW wxFFileInputStream(_fileName,wxT("rb"));
-            _inStream = DEBUG_NEW wxZlibInputStream(fstream);
-            _status = true;
-         }
-      }
-      else
-      {
-         // File is not compressed
-         _inStream = DEBUG_NEW wxFFileInputStream(_fileName,wxT("rb"));
-         _status = true;
-      }
-   }
-   else
-   {
-      std::ostringstream info;
-      info << "Invalid filename \"" << _fileName << "\"";
-      tell_log(console::MT_ERROR,info.str());
-   }
-   if (!_status) return;
-   assert(NULL != _inStream);
-   //--------------------------------------------------------------------------
-   // OK, we have an input stream now - check it is valid and accessible
-   if (!(_inStream->IsOk()))
-   {
-      info << "File "<< _fileName <<" can NOT be opened";
-      _status = false;
-      delete _inStream;
-      return;
-   }
-   _fileLength = _inStream->GetLength();
-   _progresStep = _fileLength / _progresDivs;
-   if (_progresStep > 0)
-      TpdPost::toped_status(console::TSTS_PRGRSBARON, _fileLength);
 }
 
-bool DbImportFile::reopenFile()
+bool ForeignDbFile::reopenFile()
 {
-   _filePos     = 0;
-   _progresPos  = 0;
-   _progresMark = 0;
-
    if (_gziped)
    {
       if (_forceSeek)
@@ -970,84 +1129,22 @@ bool DbImportFile::reopenFile()
       tell_log(console::MT_ERROR,info.str());
       return false;
    }
-   _progresStep = _convLength / _progresDivs;
-   if (_progresStep > 0)
-      TpdPost::toped_status(console::TSTS_PRGRSBARON, _convLength);
+   initFileMetrics(_convLength);
    return true;
 }
 
-bool DbImportFile::readStream(void* buffer, size_t len, bool updateProgress)
-{
-   _inStream->Read(buffer,len);// read record header
-   size_t numread = _inStream->LastRead();
-   if (numread != len)
-      return false;// error during read in
-   // update file position
-   _filePos += numread;
-   // update progress indicator
-   _progresPos += numread;
-   if (    updateProgress
-       && (_progresStep > 0)
-       && (_progresStep < (_progresPos - _progresMark)))
-   {
-      _progresMark = _progresPos;
-      TpdPost::toped_status(console::TSTS_PROGRESS, _progresMark);
-   }
-   return true;
-}
-
-size_t DbImportFile::readTextStream(char* buffer, size_t len )
-{
-//   size_t result = 0;
-//   do
-//   {
-//      char cc = _inStream->GetC();
-//      if (1 == _inStream->LastRead())
-//      {
-//         buffer[result++] = cc;
-//      }
-//      else
-//         break;
-//   } while (result < len);
-//   return result;
-   _inStream->Read(buffer,len);// read record header
-   size_t numread = _inStream->LastRead();
-   // update file position
-   _filePos += numread;
-   // update progress indicator
-   _progresPos += numread;
-   if(   (_progresStep > 0)
-      && (_progresStep < (_progresPos - _progresMark)))
-   {
-      _progresMark = _progresPos;
-      TpdPost::toped_status(console::TSTS_PROGRESS, _progresMark);
-   }
-   return numread;
-}
-
-void DbImportFile::setPosition(wxFileOffset filePos)
+void ForeignDbFile::setPosition(wxFileOffset filePos)
 {
    wxFileOffset result = _inStream->SeekI(filePos, wxFromStart);
    assert(wxInvalidOffset != result);
-   _filePos = filePos;
+   setFilePos(filePos);
 }
 
-void DbImportFile::closeStream()
-{
-   if ( NULL != _inStream )
-   {
-      delete _inStream;
-      _inStream = NULL;
-   }
-   TpdPost::toped_status(console::TSTS_PRGRSBAROFF);
-   _convLength = 0;
-}
-
-/*! An auxiliary method to DbImportFile::convertPrep implementing
+/*! An auxiliary method to ForeignDbFile::convertPrep implementing
  * recursive traversing of the cell hierarchy tree.
  * @param root - The root of the hierarchy to be traversed
  */
-void DbImportFile::preTraverseChildren(const ForeignCellTree* root)
+void ForeignDbFile::preTraverseChildren(const ForeignCellTree* root)
 {
    const ForeignCellTree* Child = root->GetChild(TARGETDB_LIB);
    while (NULL != Child)
@@ -1068,7 +1165,7 @@ void DbImportFile::preTraverseChildren(const ForeignCellTree* root)
    }
 }
 
-std::string DbImportFile::getFileNameOnly() const
+std::string ForeignDbFile::getFileNameOnly() const
 {
    wxFileName fName(_fileName);
    fName.Normalize();
@@ -1077,83 +1174,8 @@ std::string DbImportFile::getFileNameOnly() const
    return std::string(name.mb_str(wxConvFile ));
 }
 
-bool DbImportFile::unZip2Temp()
+ForeignDbFile::~ForeignDbFile()
 {
-   // Initialize an input stream - i.e. open the input file
-   wxFFileInputStream inStream(_fileName);
-   if (!inStream.Ok())
-   {
-      // input file does not exist
-      return false;
-   }
-   // Create an input zip stream handling over the input file stream created above
-   wxZipInputStream inZipStream(inStream);
-   if (1 < inZipStream.GetTotalEntries()) return false;
-   wxZipEntry* curZipEntry = inZipStream.GetNextEntry();
-   if (NULL != curZipEntry)
-   {
-      wxFile* outFileHandler = NULL;
-      _tmpFileName = wxFileName::CreateTempFileName(curZipEntry->GetName(), outFileHandler);
-      wxFileOutputStream outStream(_tmpFileName);
-      if (outStream.IsOk())
-      {
-         inZipStream.Read(outStream);
-         return true;
-      }
-      else return false;
-   }
-   else
-      return false;
-}
-
-bool DbImportFile::unZlib2Temp()
-{
-   std::ostringstream info;
-   // Initialize an input stream - i.e. open the input file
-   wxFFileInputStream inStream(_fileName);
-   if (!inStream.Ok())
-   {
-      info << "Can't open the file " << _fileName;
-      tell_log(console::MT_ERROR,info.str());
-      return false;
-   }
-   // Create an input zlib stream handling over the input file stream created above
-   wxZlibInputStream inZlibStream(inStream);
-   wxFile* outFileHandler = NULL;
-   _tmpFileName = wxFileName::CreateTempFileName(wxString(), outFileHandler);
-   wxFileOutputStream outStream(_tmpFileName);
-   if (outStream.IsOk())
-   {
-      info << " Inflating ... ";
-      tell_log(console::MT_INFO,info.str());
-      inZlibStream.Read(outStream);
-      wxStreamError izlsStatus = inZlibStream.GetLastError();
-      if (wxSTREAM_EOF == izlsStatus)
-      {
-         info.str("");
-         info << " Done ";
-         tell_log(console::MT_INFO,info.str());
-         return true;
-      }
-      else
-      {
-         info << " Inflating finished with status " << izlsStatus << ". Can't continue";
-         tell_log(console::MT_ERROR,info.str());
-         return false;
-      }
-   }
-   else
-   {
-      info << "Can't create a temporary file for deflating. Bailing out. ";
-      tell_log(console::MT_ERROR,info.str());
-      return false;
-   }
-}
-
-
-DbImportFile::~DbImportFile()
-{
-   if (NULL != _inStream) delete _inStream;
    // get rid of the hierarchy tree
    const ForeignCellTree* var1 = _hierTree;
    while (var1)
@@ -1208,7 +1230,7 @@ std::string ENameLayerCM::printSrcLayer() const
    return ostr.str();
 }
 //=============================================================================
-ImportDB::ImportDB(DbImportFile* src_lib, laydata::TdtLibDir* tdt_db, const LayerMapExt& theLayMap) :
+ImportDB::ImportDB(ForeignDbFile* src_lib, laydata::TdtLibDir* tdt_db, const LayerMapExt& theLayMap) :
       _src_lib    ( src_lib                                    ),
       _tdt_db     ( tdt_db                                     ),
       _dbuCoeff   ( src_lib->libUnits() / (*_tdt_db)()->DBU()  ),
@@ -1218,7 +1240,7 @@ ImportDB::ImportDB(DbImportFile* src_lib, laydata::TdtLibDir* tdt_db, const Laye
    _layCrossMap = DEBUG_NEW ENumberLayerCM(theLayMap);
 }
 
-ImportDB::ImportDB(DbImportFile* src_lib, laydata::TdtLibDir* tdt_db, const SIMap& theLayMap, real techno) :
+ImportDB::ImportDB(ForeignDbFile* src_lib, laydata::TdtLibDir* tdt_db, const SIMap& theLayMap, real techno) :
       _src_lib    ( src_lib                                    ),
       _tdt_db     ( tdt_db                                     ),
       _dbuCoeff   ( src_lib->libUnits() / (*_tdt_db)()->DBU()  ),

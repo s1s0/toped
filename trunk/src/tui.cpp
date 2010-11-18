@@ -492,7 +492,7 @@ tui::getCIFimport::getCIFimport(wxFrame *parent, wxWindowID id, const wxString &
 
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300), 0, NULL, wxLB_SORT);
    NameList cifLayers;
-   DbImportFile* ACIFDB = NULL;
+   ForeignDbFile* ACIFDB = NULL;
    if (DATC->lockCif(ACIFDB))
    {
       ACIFDB->getAllCells(*_nameList);
@@ -611,7 +611,7 @@ tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &
    _recursive->SetValue(true);
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300), 0, NULL, wxLB_SORT);
    ExtLayers gdsLayers;
-   DbImportFile* AGDSDB = NULL;
+   ForeignDbFile* AGDSDB = NULL;
    if (DATC->lockGds(AGDSDB))
    {
       AGDSDB->getAllCells(*_nameList);
@@ -664,7 +664,7 @@ tui::getOASimport::getOASimport(wxFrame *parent, wxWindowID id, const wxString &
    _recursive->SetValue(true);
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300), 0, NULL, wxLB_SORT);
    ExtLayers oasLayers;
-   DbImportFile* AOASDB = NULL;
+   ForeignDbFile* AOASDB = NULL;
    if (DATC->lockOas(AOASDB))
    {
       AOASDB->getAllCells(*_nameList);
@@ -2379,9 +2379,9 @@ void  tui::cadenceConvert::onOutputFile(wxCommandEvent& evt)
    }
 }
 
-void ShowOutput(const wxString& cmd,
-                         const wxArrayString& output,
-                         const wxString& title)
+void ShowOutput(const wxString& cmd          ,
+                const wxArrayString& output  ,
+                const wxString& title         )
 {
     size_t count = output.GetCount();
     if ( !count )
@@ -2404,7 +2404,7 @@ void tui::cadenceConvert::onConvert(wxCommandEvent& evt)
       //Looking for $TPD_GLOBAL/virtuoso2tll
       str.Append(wxString(DATC->globalDir().c_str(),wxConvFile));
 #ifdef WIN32
-      //For windows full path need to be replace to short one(Program Files->Progra~1)
+      //For windows full path shall be replaced with short one(Program Files->Progra~1)
       wxFileName filename=wxFileName(str);
       str=filename.GetShortPath();
       str.Append(wxT("virtuoso2tll.exe "));

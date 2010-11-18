@@ -172,7 +172,7 @@ std::string Oasis::Table::getName(dword index) const
       return record->second;
 }
 //===========================================================================
-Oasis::CBlockInflate::CBlockInflate(DbImportFile& ifn, wxFileOffset fofset, dword size_deflated, dword size_inflated)
+Oasis::CBlockInflate::CBlockInflate(ForeignDbFile& ifn, wxFileOffset fofset, dword size_deflated, dword size_inflated)
 {
    // initialize z_stream members
    zalloc       = 0;
@@ -269,7 +269,7 @@ void Oasis::Iso3309Crc32::add(const byte* buf, size_t len)
 }
 
 //===========================================================================
-Oasis::OasisInFile::OasisInFile(wxString fn) : DbImportFile(fn, true),
+Oasis::OasisInFile::OasisInFile(wxString fn) : ForeignDbFile(fn, true),
       _cellNames        ( NULL         ),
       _textStrings      ( NULL         ),
       _propNames        ( NULL         ),
