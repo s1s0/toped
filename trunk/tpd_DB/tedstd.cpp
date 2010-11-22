@@ -82,7 +82,7 @@ PSegment* PSegment::parallel(TP p)
 
 
 //=============================================================================
-// class TedInputFile
+// class InputDBFile
 //=============================================================================
 /*!
  * The main purpose of the constructor is to create an input stream (_inStream)
@@ -91,7 +91,7 @@ PSegment* PSegment::parallel(TP p)
  * of the class.
  * @param fileName - the fully qualified filename - OS dependent
  */
-laydata::TedInputFile::TedInputFile( wxString fileName, bool forceSeek) :
+laydata::InputDBFile::InputDBFile( wxString fileName, bool forceSeek) :
       _inStream      (      NULL ),
       _gziped        (     false ),
       _ziped         (     false ),
@@ -182,7 +182,7 @@ laydata::TedInputFile::TedInputFile( wxString fileName, bool forceSeek) :
       TpdPost::toped_status(console::TSTS_PRGRSBARON, _fileLength);
 }
 
-bool laydata::TedInputFile::readStream(void* buffer, size_t len, bool updateProgress)
+bool laydata::InputDBFile::readStream(void* buffer, size_t len, bool updateProgress)
 {
    _inStream->Read(buffer,len);// read record header
    size_t numread = _inStream->LastRead();
@@ -202,7 +202,7 @@ bool laydata::TedInputFile::readStream(void* buffer, size_t len, bool updateProg
    return true;
 }
 
-size_t laydata::TedInputFile::readTextStream(char* buffer, size_t len )
+size_t laydata::InputDBFile::readTextStream(char* buffer, size_t len )
 {
 //   size_t result = 0;
 //   do
@@ -231,7 +231,7 @@ size_t laydata::TedInputFile::readTextStream(char* buffer, size_t len )
    return numread;
 }
 
-void laydata::TedInputFile::closeStream()
+void laydata::InputDBFile::closeStream()
 {
    if ( NULL != _inStream )
    {
@@ -242,7 +242,7 @@ void laydata::TedInputFile::closeStream()
 //   _convLength = 0;
 }
 
-void laydata::TedInputFile::initFileMetrics(wxFileOffset size)
+void laydata::InputDBFile::initFileMetrics(wxFileOffset size)
 {
    _filePos     = 0;
    _progresPos  = 0;
@@ -252,7 +252,7 @@ void laydata::TedInputFile::initFileMetrics(wxFileOffset size)
       TpdPost::toped_status(console::TSTS_PRGRSBARON, size);
 }
 
-bool laydata::TedInputFile::unZip2Temp()
+bool laydata::InputDBFile::unZip2Temp()
 {
    // Initialize an input stream - i.e. open the input file
    wxFFileInputStream inStream(_fileName);
@@ -281,7 +281,7 @@ bool laydata::TedInputFile::unZip2Temp()
       return false;
 }
 
-bool laydata::TedInputFile::unZlib2Temp()
+bool laydata::InputDBFile::unZlib2Temp()
 {
    std::ostringstream info;
    // Initialize an input stream - i.e. open the input file
@@ -325,52 +325,33 @@ bool laydata::TedInputFile::unZlib2Temp()
    }
 }
 
-laydata::TedInputFile::~TedInputFile()
+laydata::InputDBFile::~InputDBFile()
 {
    if (NULL != _inStream) delete _inStream;
 }
 
-
 //-----------------------------------------------------------------------------
-// class TEDfile
+// class InputTdtFile
 //-----------------------------------------------------------------------------
-laydata::TEDfile::TEDfile(const char* filename, laydata::TdtLibDir* tedlib)  // reading
+laydata::InputTdtFile::InputTdtFile( wxString fileName, laydata::TdtLibDir* tedlib ) :
+      // !Note forcing seekable (true) here is just to get the progress bar working
+      // with compressed TDT files. The trouble is that we can't get the size of the gz
+      // files without inflating them.
+      laydata::InputDBFile(fileName, true),
+      _TEDLIB     (tedlib)
 {
-   _numread = 0;_position = 0;_design = NULL;
-   _TEDLIB = tedlib;
-   std::string fname(convertString(filename));
-   if (NULL == (_file = fopen(fname.c_str(), "rb"))) {
-      std::string news = "File \"";
-      news += filename; news += "\" not found or unaccessable";
-      tell_log(console::MT_ERROR,news);
-      _status = false; return;
-   }
    try
    {
       getFHeader();
    }
    catch (EXPTNreadTDT)
    {
-      fclose(_file);
-      _status = false;
-      return;
+      closeStream();
+      setStatus(false);
    }
-   _status = true;
 }
 
-void laydata::TEDfile::getFHeader()
-{
-   // Get the leading string
-   std::string _leadstr = getString();
-   if (TED_LEADSTRING != _leadstr) throw EXPTNreadTDT("Bad leading record");
-   // Get format revision
-   getRevision();
-   // Get file time stamps
-   getTime(/*timeCreated, timeSaved*/);
-//   checkIntegrity();
-}
-
-void laydata::TEDfile::read(int libRef)
+void laydata::InputTdtFile::read(int libRef)
 {
    if (tedf_DESIGN != getByte()) throw EXPTNreadTDT("Expecting DESIGN record");
    std::string name = getString();
@@ -383,107 +364,83 @@ void laydata::TEDfile::read(int libRef)
       _design = DEBUG_NEW TdtDesign(name,_created, _lastUpdated, DBU,UU);
    _design->read(this);
    //Design end marker is read already in TdtDesign so don't search it here
-   //byte designend = getByte();
+   //byte design_end = getByte();
 }
 
-laydata::TEDfile::TEDfile(std::string& filename, laydata::TdtLibDir* tedlib)
-{ //writing
-   _design = (*tedlib)();
-   _revision=TED_CUR_REVISION;_subrevision=TED_CUR_SUBREVISION;
-   _TEDLIB = tedlib;
-   std::string fname(convertString(filename));
-   if (NULL == (_file = fopen(fname.c_str(), "wb"))) {
-      std::string news = "File \"";
-      news += filename.c_str(); news += "\" can not be created";
-      tell_log(console::MT_ERROR,news);
-      return;
-   }
-   putString(TED_LEADSTRING);
-   putRevision();
-   putTime();
-   static_cast<laydata::TdtDesign*>(_design)->write(this);
-   fclose(_file);
-}
-
-void laydata::TEDfile::cleanup()
+void laydata::InputTdtFile::getFHeader()
 {
-   if (NULL != _design) delete _design;
+   // Get the leading string
+   std::string _leadstr = getString();
+   if (TED_LEADSTRING != _leadstr) throw EXPTNreadTDT("Bad leading record");
+   getRevision();// Get format revision
+   getTime();// Get file time stamps
+//   checkIntegrity();
 }
 
-byte laydata::TEDfile::getByte()
+byte laydata::InputTdtFile::getByte()
 {
    byte result;
-   byte length = sizeof(byte);
-   if (1 != (_numread = fread(&result, length, 1, _file)))
+   if (!readStream(&result,sizeof(byte), true))
       throw EXPTNreadTDT("Wrong number of bytes read");
-   _position += length;
    return result;
 }
 
-word laydata::TEDfile::getWord()
+word laydata::InputTdtFile::getWord()
 {
    word result;
-   byte length = sizeof(word);
-   if (1 != (_numread = fread(&result, length, 1, _file)))
+   if (!readStream(&result,sizeof(word), true))
       throw EXPTNreadTDT("Wrong number of bytes read");
-   _position += length;
    return result;
 }
 
-int4b laydata::TEDfile::get4b()
+int4b laydata::InputTdtFile::get4b()
 {
    int4b result;
-   byte length = sizeof(int4b);
-   if (1 != (_numread = fread(&result, length, 1, _file)))
+   if (!readStream(&result,sizeof(int4b), true))
       throw EXPTNreadTDT("Wrong number of bytes read");
-   _position += length;
    return result;
 }
 
-laydata::WireWidth laydata::TEDfile::get4ub()
+laydata::WireWidth laydata::InputTdtFile::get4ub()
 {
    WireWidth result;
-   byte length = sizeof(WireWidth);
-   if (1 != (_numread = fread(&result, length, 1, _file)))
+   if (!readStream(&result,sizeof(WireWidth), true))
       throw EXPTNreadTDT("Wrong number of bytes read");
-   _position += length;
    return result;
 }
 
-real laydata::TEDfile::getReal() {
+real laydata::InputTdtFile::getReal()
+{
    real result;
    byte length = sizeof(real);
-   if (1 != (_numread = fread(&result, length, 1, _file)))
+   if (!readStream(&result,sizeof(real), true))
       throw EXPTNreadTDT("Wrong number of bytes read");
-   _position += length;
    return result;
 }
 
-std::string laydata::TEDfile::getString()
+std::string laydata::InputTdtFile::getString()
 {
-   std::string str;
    byte length = getByte();
    char* strc = DEBUG_NEW char[length+1];
-   _numread = fread(strc, length, 1, _file);
-   strc[length] = 0x00;
-   if (_numread != 1)
+   if (!readStream(strc,length, true))
    {
       delete[] strc;
       throw EXPTNreadTDT("Wrong number of bytes read");
    }
-   _position += length; str = strc;
+   strc[length] = 0x00;
+   std::string str = strc;
    delete[] strc;
    return str;
 }
 
-TP laydata::TEDfile::getTP()
+TP laydata::InputTdtFile::getTP()
 {
    int4b x = get4b();
    int4b y = get4b();
    return TP(x,y);
 }
 
-CTM laydata::TEDfile::getCTM()
+CTM laydata::InputTdtFile::getCTM()
 {
    real _a  = getReal();
    real _b  = getReal();
@@ -494,7 +451,19 @@ CTM laydata::TEDfile::getCTM()
    return CTM(_a, _b, _c, _d, _tx, _ty);
 }
 
-void laydata::TEDfile::getTime()
+void laydata::InputTdtFile::getRevision()
+{
+   if (tedf_REVISION  != getByte()) throw EXPTNreadTDT("Expecting REVISION record");
+   _revision = getWord();
+   _subrevision = getWord();
+   std::ostringstream ost;
+   ost << "TDT format revision: " << _revision << "." << _subrevision;
+   tell_log(console::MT_INFO,ost.str());
+   if ((_revision != TED_CUR_REVISION) || (_subrevision > TED_CUR_SUBREVISION))
+      throw EXPTNreadTDT("The TDT revision is not supported by this version of Toped");
+}
+
+void laydata::InputTdtFile::getTime()
 {
    tm broken_time;
    if (tedf_TIMECREATED  != getByte()) throw EXPTNreadTDT("Expecting TIMECREATED record");
@@ -517,16 +486,82 @@ void laydata::TEDfile::getTime()
    _lastUpdated = mktime(&broken_time);
 }
 
-void laydata::TEDfile::getRevision()
+void laydata::InputTdtFile::getCellChildNames(NameSet& cnames)
 {
-   if (tedf_REVISION  != getByte()) throw EXPTNreadTDT("Expecting REVISION record");
-   _revision = getWord();
-   _subrevision = getWord();
-   std::ostringstream ost;
-   ost << "TDT format revision: " << _revision << "." << _subrevision;
-   tell_log(console::MT_INFO,ost.str());
-   if ((_revision != TED_CUR_REVISION) || (_subrevision > TED_CUR_SUBREVISION))
-      throw EXPTNreadTDT("The TDT revision is not supported by this version of Toped");
+   // Be very very careful with the copy constructors and assignment of the
+   // standard C++ lib containers. Here it seems OK.
+   cnames = _childnames;
+   //for (NameSet::const_iterator CN = _childnames.begin();
+   //                              CN != _childnames.end() ; CN++)
+   //   cnames->instert(*CN);
+   _childnames.clear();
+}
+
+laydata::CellDefin laydata::InputTdtFile::linkCellRef(std::string cellname)
+{
+   // register the name of the referenced cell in the list of children
+   _childnames.insert(cellname);
+   CellList::const_iterator striter = _design->_cells.find(cellname);
+   laydata::CellDefin celldef = NULL;
+   // link the cells instances with their definitions
+   if (_design->_cells.end() == striter)
+   {
+   //   if (_design->checkCell(name))
+   //   {
+      // search the cell in the libraries because it's not in the DB
+      if (!_TEDLIB->getLibCellRNP(cellname, celldef))
+      {
+         // Attention! In this case we've parsed a cell reference, before
+         // the cell is defined. This might means:
+         //   1. Cell is referenced, but not defined - i.e. library cell, but
+         //      library is not loaded
+         //   2. Circular reference ! Cell1 contains a reference of Cell2,
+         //      that in turn contains a reference of Cell1. This is not allowed
+         // We can not make a decision yet, because the entire file has not been
+         // parsed yet. That is why we are assigning a default cell to the
+         // referenced structure here in order to continue the parsing, and when
+         // the entire file is parced the cell references without a proper pointer
+         // to the structure need to be flaged as warning in case 1 and as error
+         // in case 2.
+         celldef = _TEDLIB->addDefaultCell(cellname, false);
+      }
+      else
+         celldef->parentFound();
+   }
+   else
+   {
+      celldef = striter->second;
+      assert(NULL != celldef);
+      celldef->parentFound();
+   }
+   return celldef;
+}
+
+void laydata::InputTdtFile::cleanup()
+{
+   if (NULL != _design) delete _design;
+}
+
+//-----------------------------------------------------------------------------
+// class TEDfile
+//-----------------------------------------------------------------------------
+laydata::TEDfile::TEDfile(std::string& filename, laydata::TdtLibDir* tedlib)
+{ //writing
+   _design = (*tedlib)();
+   _revision=TED_CUR_REVISION;_subrevision=TED_CUR_SUBREVISION;
+//   _TEDLIB = tedlib;
+   std::string fname(convertString(filename));
+   if (NULL == (_file = fopen(fname.c_str(), "wb"))) {
+      std::string news = "File \"";
+      news += filename.c_str(); news += "\" can not be created";
+      tell_log(console::MT_ERROR,news);
+      return;
+   }
+   putString(TED_LEADSTRING);
+   putRevision();
+   putTime();
+   static_cast<laydata::TdtDesign*>(_design)->write(this);
+   fclose(_file);
 }
 
 void laydata::TEDfile::putWord(const word data) {
@@ -544,7 +579,6 @@ void laydata::TEDfile::put4ub(const WireWidth data) {
 void laydata::TEDfile::putReal(const real data) {
    fwrite(&data, sizeof(real), 1, _file);
 }
-
 
 void laydata::TEDfile::putTime()
 {
@@ -611,56 +645,6 @@ bool laydata::TEDfile::checkCellWritten(std::string cellname)
       return false;
    else
       return true;
-}
-
-laydata::CellDefin laydata::TEDfile::linkCellRef(std::string cellname)
-{
-   // register the name of the referenced cell in the list of children
-   _childnames.insert(cellname);
-   CellList::const_iterator striter = _design->_cells.find(cellname);
-   laydata::CellDefin celldef = NULL;
-   // link the cells instances with their definitions
-   if (_design->_cells.end() == striter)
-   {
-   //   if (_design->checkCell(name))
-   //   {
-      // search the cell in the libraries because it's not in the DB
-      if (!_TEDLIB->getLibCellRNP(cellname, celldef))
-      {
-         // Attention! In this case we've parsed a cell reference, before
-         // the cell is defined. This might means:
-         //   1. Cell is referenced, but not defined - i.e. library cell, but
-         //      library is not loaded
-         //   2. Circular reference ! Cell1 contains a reference of Cell2,
-         //      that in turn contains a reference of Cell1. This is not allowed
-         // We can not make a decision yet, because the entire file has not been
-         // parsed yet. That is why we are assigning a default cell to the
-         // referenced structure here in order to continue the parsing, and when
-         // the entire file is parced the cell references without a proper pointer
-         // to the structure need to be flaged as warning in case 1 and as error
-         // in case 2.
-         celldef = _TEDLIB->addDefaultCell(cellname, false);
-      }
-      else
-         celldef->parentFound();
-   }
-   else
-   {
-      celldef = striter->second;
-      assert(NULL != celldef);
-      celldef->parentFound();
-   }
-   return celldef;
-}
-
-void laydata::TEDfile::getCellChildNames(NameSet& cnames) {
-   // Be very very careful with the copy constructors and assignment of the
-   // standard C++ lib containers. Here it seems OK.
-   cnames = _childnames;
-   //for (NameSet::const_iterator CN = _childnames.begin();
-   //                              CN != _childnames.end() ; CN++)
-   //   cnames->instert(*CN);
-   _childnames.clear();
 }
 
 bool laydata::pathConvert(PointVector& plist, int4b begext, int4b endext )
@@ -1093,7 +1077,7 @@ laydata::WireContourAux::~WireContourAux()
  * of the class.
  * @param fileName - the fully qualified filename - OS dependent
  */
-ForeignDbFile::ForeignDbFile(wxString fileName, bool forceSeek) : laydata::TedInputFile(fileName, forceSeek),
+ForeignDbFile::ForeignDbFile(wxString fileName, bool forceSeek) : laydata::InputDBFile(fileName, forceSeek),
       _hierTree      (      NULL ),
       _convLength    (         0 )
 {

@@ -179,7 +179,7 @@ laydata::QuadTree::QuadTree() : _overlap(DEFAULT_OVL_BOX), _subQuads(NULL), _dat
 /*! Used for reading the QuadTree from the TDT file. A new shape is added to
 the tree using the put() method. Entire tree is recreated when there is no more
 data to read using resort() method.*/
-laydata::QuadTree::QuadTree(TEDfile* const tedfile, bool reflay) :
+laydata::QuadTree::QuadTree(InputTdtFile* const tedfile, bool reflay) :
    _overlap(DEFAULT_OVL_BOX), _subQuads(NULL), _data(NULL), _props()
 {
    byte         recordtype;
@@ -187,7 +187,7 @@ laydata::QuadTree::QuadTree(TEDfile* const tedfile, bool reflay) :
    TdtData*     newData;
    if (reflay)
    {
-      if       ((0 == tedfile->revision()) && (7 < tedfile->subRevision()))
+      if       ((0 == tedfile->revision()) && (7 > tedfile->subRevision()))
       {
          while (tedf_LAYEREND != (recordtype = tedfile->getByte()))
          {

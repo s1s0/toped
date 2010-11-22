@@ -137,7 +137,7 @@ namespace laydata {
    class TdtCell : public TdtDefaultCell  {
    public:
                            TdtCell(std::string);
-                           TdtCell(TEDfile* const, std::string, int);
+                           TdtCell(InputTdtFile* const, std::string, int);
       virtual             ~TdtCell();
       virtual void         openGlDraw(layprop::DrawProperties&,
                                                           bool active=false) const;

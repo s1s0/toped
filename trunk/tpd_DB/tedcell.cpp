@@ -319,7 +319,7 @@ laydata::TdtCell::TdtCell(std::string name) :
          TdtDefaultCell(name, TARGETDB_LIB, true), _cellOverlap(DEFAULT_OVL_BOX) {}
 
 
-laydata::TdtCell::TdtCell(TEDfile* const tedfile, std::string name, int lib) :
+laydata::TdtCell::TdtCell(InputTdtFile* const tedfile, std::string name, int lib) :
          TdtDefaultCell(name, lib, true), _cellOverlap(DEFAULT_OVL_BOX)
 {
    byte recordtype;

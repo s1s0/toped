@@ -118,7 +118,7 @@ void laydata::TdtLibrary::clearEntireHierTree()
    _hiertree = NULL;
 }
 
-void laydata::TdtLibrary::read(TEDfile* const tedfile)
+void laydata::TdtLibrary::read(InputTdtFile* const tedfile)
 {
    std::string cellname;
    while (tedf_CELL == tedfile->getByte())
@@ -443,7 +443,7 @@ void laydata::TdtLibDir::addLibrary(TdtLibrary* const lib, word libRef)
 
 int laydata::TdtLibDir::loadLib(std::string filename)
 {
-   laydata::TEDfile tempin(filename.c_str(), this);
+   laydata::InputTdtFile tempin(wxString(filename.c_str(), wxConvUTF8), this);
    if (!tempin.status()) return -1;
    int libRef = getLastLibRefNo();
    try
@@ -452,11 +452,11 @@ int laydata::TdtLibDir::loadLib(std::string filename)
    }
    catch (EXPTNreadTDT)
    {
-      tempin.closeF();
+      tempin.closeStream();
       tempin.cleanup();
       return -1;
    }
-   tempin.closeF();
+   tempin.closeStream();
    addLibrary(tempin.design(), libRef);
    relink();// Re-link everything
    return libRef;
@@ -532,7 +532,7 @@ void laydata::TdtLibDir::newDesign(std::string name, std::string dir, time_t cre
 
 bool laydata::TdtLibDir::readDesign(std::string filename)
 {
-   laydata::TEDfile tempin(filename.c_str(), this);
+   laydata::InputTdtFile tempin(wxString(filename.c_str(), wxConvUTF8), this);
    if (!tempin.status()) return false;
 
    try
@@ -541,11 +541,11 @@ bool laydata::TdtLibDir::readDesign(std::string filename)
    }
    catch (EXPTNreadTDT)
    {
-      tempin.closeF();
+      tempin.closeStream();
       tempin.cleanup();
       return false;
    }
-   tempin.closeF();
+   tempin.closeStream();
    delete _TEDDB;//Erase existing data
    _tedFileName = filename;
    _neverSaved = false;
@@ -601,7 +601,7 @@ bool laydata::TdtLibDir::TDTcheckread(const std::string filename,
 {
    bool retval = false;
    start_ignoring = false;
-   laydata::TEDfile tempin(filename.c_str(), this);
+   laydata::InputTdtFile tempin(wxString(filename.c_str(), wxConvUTF8), this);
    if (!tempin.status()) return retval;
 
    std::string news = "Project created: ";
@@ -635,7 +635,7 @@ bool laydata::TdtLibDir::TDTcheckread(const std::string filename,
    {
       retval = true;
    }
-   tempin.closeF();
+   tempin.closeStream();
    return retval;
 }
 
@@ -862,7 +862,7 @@ laydata::TdtDesign::TdtDesign(std::string name, time_t created, time_t lastUpdat
    _lastUpdated   = lastUpdated;
 }
 
-void laydata::TdtDesign::read(TEDfile* const tedfile)
+void laydata::TdtDesign::read(InputTdtFile* const tedfile)
 {
    TdtLibrary::read(tedfile);
    _tmpdata = NULL;

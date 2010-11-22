@@ -61,7 +61,7 @@ namespace laydata {
    class QuadTree {
    public:
                            QuadTree();
-                           QuadTree(TEDfile* const, bool);
+                           QuadTree(InputTdtFile* const, bool);
                           ~QuadTree();
       void                 openGlDraw(layprop::DrawProperties&, const DataList*, bool) const;
       void                 openGlRender(tenderer::TopRend&, const DataList*) const;

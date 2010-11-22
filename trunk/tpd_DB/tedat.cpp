@@ -385,7 +385,7 @@ laydata::TdtBox::TdtBox(const TP& p1, const TP& p2) : TdtData()
    normalize(dummy);
 }
 
-laydata::TdtBox::TdtBox(TEDfile* const tedfile) : TdtData()
+laydata::TdtBox::TdtBox(InputTdtFile* const tedfile) : TdtData()
 {
    TP point;
    point = tedfile->getTP();
@@ -752,7 +752,7 @@ laydata::TdtPoly::TdtPoly(int4b* pdata, unsigned psize) : _pdata(pdata), _psize(
    _teseldata.tessellate(_pdata, _psize);
 }
 
-laydata::TdtPoly::TdtPoly(TEDfile* const tedfile) : TdtData()
+laydata::TdtPoly::TdtPoly(InputTdtFile* const tedfile) : TdtData()
 {
    _psize = tedfile->getWord();
    assert(_psize);
@@ -1210,7 +1210,7 @@ laydata::TdtWire::TdtWire(int4b* pdata, unsigned psize, WireWidth width) :
 {
 }
 
-laydata::TdtWire::TdtWire(TEDfile* const tedfile) : TdtData()
+laydata::TdtWire::TdtWire(InputTdtFile* const tedfile) : TdtData()
 {
    _psize = tedfile->getWord();
    assert(_psize);
@@ -1594,7 +1594,7 @@ laydata::TdtWire::~TdtWire()
 //-----------------------------------------------------------------------------
 // class TdtCellRef
 //-----------------------------------------------------------------------------
-laydata::TdtCellRef::TdtCellRef(TEDfile* const tedfile)
+laydata::TdtCellRef::TdtCellRef(InputTdtFile* const tedfile)
 {
    // read the name of the referenced cell
    std::string cellrefname = tedfile->getString();
@@ -1834,7 +1834,7 @@ DBbox laydata::TdtCellRef::overlap() const
 //-----------------------------------------------------------------------------
 // class TdtCellAref
 //-----------------------------------------------------------------------------
-laydata::TdtCellAref::TdtCellAref(TEDfile* const tedfile) : TdtCellRef(tedfile)
+laydata::TdtCellAref::TdtCellAref(InputTdtFile* const tedfile) : TdtCellRef(tedfile)
 {
    int4b _stepX = tedfile->get4b();
    int4b _stepY = tedfile->get4b();
@@ -2145,7 +2145,7 @@ laydata::TdtText::TdtText(std::string text, CTM trans) : TdtData(),
    _correction = TP(-pure_ovl.p1().x(), -pure_ovl.p1().y());
 }
 
-laydata::TdtText::TdtText(TEDfile* const tedfile) : TdtData(),
+laydata::TdtText::TdtText(InputTdtFile* const tedfile) : TdtData(),
    _text(tedfile->getString()), _translation(tedfile->getCTM()), _overlap(TP())
 {
    assert(NULL != fontLib); // check that font library is initialised
