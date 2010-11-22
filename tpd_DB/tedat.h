@@ -129,7 +129,7 @@ namespace laydata {
    class TdtBox : public TdtData   {
    public:
                            TdtBox(const TP& p1, const TP& p2);
-                           TdtBox(TEDfile* const tedfile);
+                           TdtBox(InputTdtFile* const tedfile);
                           ~TdtBox();
       virtual DBbox        overlap() const;
       virtual Validator*   move(const CTM&, SGBitSet& plst);
@@ -175,7 +175,7 @@ namespace laydata {
       public:
                            TdtPoly(const PointVector& plist);
                            TdtPoly(int4b* plist, unsigned psize);
-                           TdtPoly(TEDfile* const tedfile);
+                           TdtPoly(InputTdtFile* const tedfile);
                           ~TdtPoly();
          virtual DBbox     overlap() const;
          virtual Validator* move(const CTM&, SGBitSet& plst);
@@ -216,7 +216,7 @@ namespace laydata {
       public:
                            TdtWire(const PointVector&, WireWidth);
                            TdtWire(int4b*, unsigned, WireWidth);
-                           TdtWire(TEDfile* const tedfile);
+                           TdtWire(InputTdtFile* const tedfile);
                           ~TdtWire();
          virtual DBbox     overlap() const;
          virtual Validator* move(const CTM&, SGBitSet& plst);
@@ -258,7 +258,7 @@ namespace laydata {
    public:
                            TdtCellRef(CellDefin str, CTM trans) : TdtData(),
                                           _structure(str), _translation(trans) {};
-                           TdtCellRef(TEDfile* const tedfile);
+                           TdtCellRef(InputTdtFile* const tedfile);
 //                          ~TdtCellRef() {};
       virtual DBbox        overlap() const;
       virtual   void       vlOverlap(const layprop::DrawProperties&, DBbox&) const;
@@ -308,7 +308,7 @@ namespace laydata {
    public:
                            TdtCellAref(CellDefin str, CTM trans, ArrayProperties& arrprops) :
                               TdtCellRef(str, trans), _arrprops(arrprops) {};
-                           TdtCellAref(TEDfile* const tedfile);
+                           TdtCellAref(InputTdtFile* const tedfile);
 //                          ~TdtCellAref() {};
       virtual DBbox        overlap() const;
       virtual TdtData*     copy(const CTM& trans) {return DEBUG_NEW TdtCellAref(
@@ -339,7 +339,7 @@ namespace laydata {
    class TdtText : public TdtData  {
    public:
                            TdtText(std::string text, CTM trans);
-                           TdtText(TEDfile* const tedfile);
+                           TdtText(InputTdtFile* const tedfile);
 //                          ~TdtText() {};
       virtual DBbox        overlap() const;
       virtual Validator*   move(const CTM& trans, SGBitSet&) {

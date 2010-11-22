@@ -34,10 +34,10 @@ namespace laydata {
    class TdtLibrary {
    public:
       friend class TdtLibDir;
-      friend class TEDfile;
+      friend class InputTdtFile;
                         TdtLibrary(std::string, real, real, int);
       virtual          ~TdtLibrary();
-      virtual void      read(TEDfile* const);
+      virtual void      read(InputTdtFile* const);
       void              GDSwrite(DbExportFile&);
       void              CIFwrite(DbExportFile&);
       void              PSwrite(PSFile&, const TdtCell*, const layprop::DrawProperties&);
@@ -84,7 +84,7 @@ namespace laydata {
    public:
                      TdtDesign(std::string, time_t, time_t, real DBU, real UU);
       virtual       ~TdtDesign();
-      void           read(TEDfile* const);
+      void           read(InputTdtFile* const);
       void           write(TEDfile* const tedfile);
       int            readLibrary(TEDfile* const);
       TdtCell*       addCell(std::string name, laydata::TdtLibDir*);

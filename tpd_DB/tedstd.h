@@ -183,17 +183,18 @@ namespace laydata {
     *    file is inflated in a temporary location and the product is used for the
     *    conversion.
     */
-   class TedInputFile {
+   class InputDBFile {
       public:
-                              TedInputFile( wxString fileName, bool _forceSeek);
-         virtual             ~TedInputFile();
+                              InputDBFile( wxString fileName, bool _forceSeek);
+         virtual             ~InputDBFile();
          bool                 readStream(void*, size_t, bool updateProgress = false);
          size_t               readTextStream(char*, size_t);
          void                 closeStream();
          std::string          fileName()                       { return std::string(_fileName.mb_str(wxConvFile));}
-         wxFileOffset         fileLength() const               { return _fileLength;}
-         wxFileOffset         filePos() const                  { return _filePos;   }
-         bool                 status() const                   { return _status;    }
+         wxFileOffset         fileLength() const               { return _fileLength;   }
+         wxFileOffset         filePos() const                  { return _filePos;      }
+         bool                 status() const                   { return _status;       }
+         void                 setStatus(bool stat)             {        _status = stat;}
       protected:
          void                 initFileMetrics(wxFileOffset);
          void                 setFilePos(wxFileOffset fp)      { _filePos = fp;     }
@@ -217,59 +218,65 @@ namespace laydata {
    };
 
 //==============================================================================
+   class InputTdtFile : public InputDBFile {
+      public:
+                              InputTdtFile( wxString fileName, laydata::TdtLibDir* tedlib );
+         virtual             ~InputTdtFile() {};
+         void                 read(int libRef);
+         void                 getCellChildNames(NameSet&);
+         CellDefin            linkCellRef(std::string cellname);
+         void                 cleanup();
+         byte                 getByte();
+         word                 getWord();
+         int4b                get4b();
+         WireWidth            get4ub();
+         real                 getReal();
+         std::string          getString();
+         TP                   getTP();
+         CTM                  getCTM();
+         TdtLibrary*          design() const       {return _design;};
+         const TdtLibDir*     TEDLIB()             {return _TEDLIB;}
+         word                 revision() const     {return _revision;}
+         word                 subRevision() const  {return _subrevision;}
+         time_t               created() const      {return _created;};
+         time_t               lastUpdated() const  {return _lastUpdated;};
+      private:
+         void                 getFHeader();
+         void                 getRevision();
+         void                 getTime();
+         laydata::TdtLibDir*  _TEDLIB      ;//! Catalog of available TDT libraries (reference to DATC->_TEDLIB)
+         TdtLibrary*          _design      ;//! A design created in memory from the contents of the input file
+         word                 _revision    ;//! Revision (major) of the TDT format which this file carries
+         word                 _subrevision ;//! Revision (minor) of the TDT format which this file carries
+         time_t               _created     ;//! Time stamp indicating when the DB (not the file!) was created
+         time_t               _lastUpdated ;//! Time stamp indicating when the DB (not the file!) was updated for the last time
+         NameSet              _childnames  ;
+   };
+
    class   TEDfile {
    public:
-                           TEDfile(const char*, laydata::TdtLibDir*); // for reading
                            TEDfile(std::string&, laydata::TdtLibDir*); // for writing
       void                 closeF() {fclose(_file);};
-      void                 read(int libRef);
-      void                 cleanup();
-      std::string          getString();
       void                 putString(std::string str);
-      real                 getReal();
       void                 putReal(const real);
-      byte                 getByte();
       void                 putByte(const byte ch) {fputc(ch, _file);};
-      word                 getWord();
       void                 putWord(const word);
-      int4b                get4b();
-      WireWidth            get4ub();
       void                 put4b(const int4b);
       void                 put4ub(const WireWidth);
-      TP                   getTP();
       void                 putTP(const TP*);
-      CTM                  getCTM();
       void                 putCTM(const CTM);
       void                 registerCellWritten(std::string);
       bool                 checkCellWritten(std::string);
-      CellDefin            linkCellRef(std::string cellname);
-      void                 getCellChildNames(NameSet&);
-      bool                 status() const  {return _status;};
-      word                 numRead() const {return _numread;};
-      TdtLibrary*          design() const  {return _design;};
-      time_t               created() const {return _created;};
-      time_t               lastUpdated() const {return _lastUpdated;};
-      const laydata::TdtLibDir* TEDLIB()   {return _TEDLIB;}
-      word                 revision()      {return _revision;}
-      word                 subRevision()   {return _subrevision;}
    protected:
-      bool                 _status;
-      word                 _numread;
    private:
-      void                 getFHeader();
-      void                 getTime();
       void                 putTime();
-      void                 getRevision();
       void                 putRevision();
-      long int             _position;
       FILE*                _file;
       word                 _revision;
       word                 _subrevision;
-      time_t               _created;
       time_t               _lastUpdated;
       TdtLibrary*          _design;
       NameSet              _childnames;
-      laydata::TdtLibDir*  _TEDLIB;       // catalog of available TDT libraries
    };
 
    class ArrayProperties
@@ -382,15 +389,12 @@ class ForeignCell;
 class ImportDB;
 typedef SGHierTree<ForeignCell> ForeignCellTree;
 typedef std::list<ForeignCell*> ForeignCellList;
-class ForeignDbFile : public laydata::TedInputFile {
+class ForeignDbFile : public laydata::InputDBFile {
    public:
                            ForeignDbFile(wxString, bool);
       virtual             ~ForeignDbFile();
       bool                 reopenFile();
-//      bool                 readStream(void*, size_t, bool updateProgress = false);
-//      size_t               readTextStream(char*, size_t);
       void                 setPosition(wxFileOffset);
-//      void                 closeStream();
       std::string          getFileNameOnly() const;
       virtual double       libUnits() const = 0;
       virtual void         hierOut() = 0 ;
