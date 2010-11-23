@@ -899,9 +899,11 @@ void tui::TopedFrame::OnTDTRead(wxCommandEvent& evt)
       }
    }
    SetStatusText(wxT("Opening file..."));
+   wxString dbfext;
+   dbfext << wxT("Toped files(*.tdt;*.gz;*.zip)|*.tdt;*.gz;*.zip;*.GZ;*.ZIP")
+          << wxT("|All files(*.*)|*.*");
    wxFileDialog dlg2(this, wxT("Select a design to open"), wxT(""), wxT(""),
-      wxT("Toped files (*.tdt)|*.tdt|All files(*.*)|*.*"),
-      tpdfOPEN);
+                     dbfext, tpdfOPEN);
    if (wxID_OK == dlg2.ShowModal())
    {
       wxString filename = dlg2.GetFilename();
