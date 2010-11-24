@@ -2129,7 +2129,7 @@ void tui::TopedFrame::OnZoomAll(wxCommandEvent& WXUNUSED(event)) {
       eventZOOM.SetClientData(static_cast<void*>(ovl));
       wxPostEvent(_canvas, eventZOOM);
    }
-   DATC->unlockTDT(dbLibDir, true);
+   DATC->unlockTDT(dbLibDir, false);
 }
 
 void tui::TopedFrame::OnzoomIn(wxCommandEvent& WXUNUSED(event)) {
