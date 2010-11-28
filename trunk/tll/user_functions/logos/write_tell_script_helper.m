@@ -158,29 +158,46 @@ endfunction
 
 ## merge two polygons
 ## precondition is that the polygon A is within B
-## @param ax x members of polyon A which should be the inner polygon
-## @param ay y members of polyon A which should be the inner polygon
-## @param bx x members of polygon B
-## @param by y members of polygon B
+## @param axx x members of polyon A which should be the inner polygon
+## @param ayy y members of polyon A which should be the inner polygon
+## @param bxx x members of polygon B
+## @param byy y members of polygon B
+## @param check if != 0 the a check is performed if A is in B
 ## @return [ x , y ] the new polygon
-function [x,y] = merge_polygon (ax, ay, bx, by)
+function [x,y] = merge_polygons (axx, ayy, bxx, byy, check)
 
-  if (rows(ax) < columns(ax))
-    error("ERROR: merge_polygon: vertical vectors needed");
+  if (length (axx) <= 0)
+    x = bxx;
+    y = byy;
+    return;
   endif
+
+  if (rows(axx) < columns(axx))
+    ##error("ERROR: merge_polygon: vertical vectors needed");
+    ax = axx';
+    ay = ayy';
+  else
+    ax = axx;
+    ay = ayy;
+  endif
+  if (rows(bxx) < columns(bxx))
+    bx = bxx';
+    by = byy';
+  else
+    bx = bxx;
+    by = byy;
+  endif
+
 
   lip = max(size(ax));
   lep = max(size(bx));
   mindist = [inf,1,1]; ## minimal distance, idx ext. polyg., idx inner polyg
 
-  l = inpolygon (ax,ay, bx, by); ##returns boolean vector (each position 1 or 0)
-
-  # debug
-  # ax
-  # ay
-  # bx 
-  # by
-  # l
+  if (check != 0) ## the check is not always necessary
+    l = inpolygon (ax,ay, bx, by); ##returns boolean vector (each position 1 or 0)
+  else
+    l = lip;
+  endif
 
   if ( sum(l) == lip & sum(l) >= 3 & max(size((bx))) >= 3)  ## polygon A is inside B)
 
@@ -236,14 +253,168 @@ function [x,y] = merge_polygon (ax, ay, bx, by)
   
 endfunction
 
+## merge several polygons (no intersection [of sets] )
+## @param ps list of polygons, each polygon is described by 
+##     struct (polyX, polyY, inner, len)
+## @return one polygon in the form struct {polyX, polyY} 
+function merged = merge_nth_polygons (ps)
+
+  lps = length (ps);
+  merged = struct ("polyX",[], "polyY", []);
+
+  if (lps > 0)
+    px = ps(1).polyX;
+    py = ps(1).polyY;
+
+    for i = 2:lps
+      ## printf("merge_polygons AA\n");
+      [px,py] = merge_polygons (px', py', ps(i).polyX', ps(i).polyY', 0);
+    endfor
+
+    merged.polyX = px;
+    merged.polyY = py;
+  endif
+  
+endfunction
+
+
+
+## sort the list of external polygons
+## polygons which are within other polygons sustain higher indices
+## @param p list of polygons in the form of struct (polyX, polyY, inner, len)
+## @return list of sorted indices
+function ilist = sort_polygons (p)
+
+  len_p = length (p);
+  il = 1:len_p;
+
+  if (len_p > 1)
+    c_s = 1; ## counter which marks the start
+    c_e = 2; ## counter which marks the end of the list
+
+    while (c_s < len_p)
+      ix = p( il(c_e) ).polyX;
+      iy = p( il(c_e) ).polyY;
+      ex = p( il(c_s) ).polyX;
+      ey = p( il(c_s) ).polyY;
+
+      l = inpolygon (ix,iy, ex, ey); ##returns boolean vector (each position 1 or 0)
+      ## debug
+      #printf ("cs: %d, ce: %d\n",c_s,c_e);
+      #il
+
+      ## very slow algorithm
+      if ( sum(l) != length(ix) ) ## polygon ix,iy is not in ex,ey
+	## [ 1    2    3    4    5    6    7    8    9   10 ]
+	##   ------   c_s   ------   c_e   ----------------
+	##    il_s           il_b               il_e
+	il_s = il(1:c_s-1);
+	il_e = il(c_e+1:end);
+	il_b = il(c_s+1:c_e-1);
+	ilnew = [ il_s il(c_e) il(c_s) il_b il_e ]; ## exchange c_s c_e
+	il = ilnew;
+	c_s = c_s + 1;
+	c_e = c_s + 1; ## the same comparisons are done again -- but necessary
+      else
+	c_e = c_e + 1;	
+      endif
+
+      if (c_e > len_p)
+	c_s = c_s + 1;
+	c_e = c_s + 1;
+      endif
+
+    endwhile
+    ilist = il;
+  else
+    if (len_p == 1)
+      ilist = [ 1 ];
+    else
+      ilist = [];
+    endif
+  endif
+  
+endfunction
+
+
+## compare inner with extern polygon and merge them if possible
+## @param ip list of inner polygons in the form of struct (polyX, polyY, inner, len)
+## @param ep list of extern polygons in the form of struct (polyX, polyY, inner, len)
+## @return list of merged polygons in the form of a struct (polyX, polyY)
+function newp = build_merged_poly_list (ip, ep)
+  len_ep = length(ep);
+
+  pi = struct ("int",[]); ## contains a internal list of inner polygon indices
+
+  #printf("starting sorting ..\n");
+  sorted_list_ep = sort_polygons (ep);
+  sorted_list_ip = sort_polygons (ip);
+  #printf("end_sorting ..\n");
+
+  ## test each external polygon with an inner one
+  for e = fliplr(sorted_list_ep) ## start with innermost external polygon
+    count = 1;
+    pi(e).int = [];
+    new_slist_ip = [];
+    for i = sorted_list_ip ## start with the outermost internal polygon
+      
+      l = inpolygon (ip(i).polyX, ip(i).polyY, ep(e).polyX, ep(e).polyY); ##returns boolean vector (each position 1 or 0)
+
+      if (sum(l) == length(ip(i).polyX))
+	pi(e).int(count) = i;
+	count = count + 1;
+      else
+	new_slist_ip = [ new_slist_ip i ];
+      endif
+      
+    endfor
+    sorted_list_ip = new_slist_ip; ## indices which are already used are let out
+
+    ## now we should have a list of indices (e.g. [3 5 9]) of inner polygons 
+    ## which are within an extern polygon with index e
+    
+    ##debug
+    #pi(e).int
+  endfor
+
+
+  ## debug
+  # len_ep
+  # pi(1)
+  # length(pi(1).int)
+  newp = [];
+
+  for e = 1:len_ep
+    temp_ip = struct ("polyX",[],"polyY",[],"inner",0,"len",0);
+    temp = struct ("polyX",[], "polyY", []);
+
+    for c = 1:length(pi(e).int)
+      temp_ip(c) = ip(pi(e).int(c));
+    endfor
+
+    if (length(temp_ip) > 0 & length(temp_ip(1).len) > 0 )
+      temp =  merge_nth_polygons(temp_ip);
+    endif
+
+    ## printf("merge_polygons XX\n");
+    [ax,ay] = merge_polygons (temp.polyX, temp.polyY, ep(e).polyX, ep(e).polyY, 0);
+
+    newp(e).polyX = ax;
+    newp(e).polyY = ay;
+  endfor
+endfunction
+
+
 ## check polygons and merge them if they are mergeable
 ## @param pin list of polygons in the form of struct (polyX, polyY, inner, len)
-## @param pin list of merged polygons in the form of a struct (polyX, polyY)
+## @return list of merged polygons in the form of a struct (polyX, polyY)
 function newp = merge_all_polygons (pin)
 
   len_p = length (pin);
   ci = 1; ## counter
   ce = 1; ## counter
+  cn = 1; ## counter
+  
   for i = 1:len_p
     if (pin(i).inner == 1)
       innerpoly(ci) = pin(i);
@@ -254,31 +425,31 @@ function newp = merge_all_polygons (pin)
     endif
   endfor
 
-  len_pe = length (extpoly);
-  len_pi = length (innerpoly);
-  cn = 1; ## counter
-
-  ## test each external polygon with an inner one
-  for e = 1:len_pe
-    merged = 0;
-    for i = 1:len_pi
-      [x,y] = merge_polygon (innerpoly(i).polyX', innerpoly(i).polyY',
-			    extpoly(e).polyX', extpoly(e).polyY');
-      if (length(x) >= 3)
-	newp(cn).polyX = x;
-	newp(cn).polyY = y;
-	merged = 1;
-	cn = cn + 1;
-      endif
-
-      if (i == len_pi & merged == 0)
-	newp(cn).polyX = extpoly(e).polyX;
-	newp(cn).polyY = extpoly(e).polyY;
-	cn = cn + 1;
-      endif
-
+  ## black (external) polygons have to exist
+  if (ce > 1)
+    len_pe = length (extpoly);
+  else
+    return;
+  endif
+ 
+  ## inner polygon may not be available
+  if (ci > 1)
+    len_pi = length (innerpoly);
+  else
+    ## just fill the output structure - nothing else to do
+    for e = 1:len_pe
+	newp(e).polyX = pin(e).polyX;
+	newp(e).polyY = pin(e).polyY;
     endfor
-  endfor
+    return;
+  endif
+
+  ## debug
+  ##innerpoly
+  ##extpoly
+
+  newp = build_merged_poly_list (innerpoly, extpoly);
+
 
 endfunction
 
@@ -302,7 +473,10 @@ function ret = create_tell_code (p, file)
     return;
   endif
 
-  fprintf(fid, "/* this file is generated automatically by an octave-scripts */\n");
+  fprintf(fid, "/* this file is generated automatically by an octave-scripts */\n\n");
+##  fprintf(fid, "#include \"default_drc.tll\"\n");
+##  fprintf(fid, "#include \"geometry.tll\"\n\n");
+
   fprintf(fid, "void paint_logo () {\n");
   
   
