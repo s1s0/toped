@@ -726,13 +726,55 @@ void CIFin::CifExportFile::polygon(const int4b* const pdata, unsigned psize)
 
 void CIFin::CifExportFile::wire(const int4b* const pdata, unsigned psize, unsigned width)
 {
-   if (_verbose)
-      _file <<"      Wire width = " << width << "and points";
-   else
-      _file <<"      W" << width;
+   // Convert data to point list
+   PointVector plist;
+   plist.reserve(psize);
    for (unsigned i = 0; i < psize; i++)
-      _file << " " << pdata[2*i] << " " << pdata[2*i+1];
-   _file << ";"<< std::endl;
+      plist.push_back(TP(pdata[2*i], pdata[2*i+1]));
+
+   // Convert from wire type 0 (Toped natural) to type 2 (the closest to CIF natural type 1)
+   if (pathConvert(plist, psize, width/2))
+   {
+      // Convert data back to array
+      int4b* cPdata = DEBUG_NEW int4b[psize*2];
+      unsigned index = 0;
+      for (unsigned i = 0; i < psize; i++)
+      {
+         cPdata[index++] = plist[i].x();
+         cPdata[index++] = plist[i].y();
+      }
+
+      // write ...
+      if (_verbose)
+         _file <<"      Wire width = " << width << "and points";
+      else
+         _file <<"      W" << width;
+      for (unsigned i = 0; i < psize; i++)
+         _file << " " << cPdata[2*i] << " " << cPdata[2*i+1];
+      _file << ";"<< std::endl;
+
+      delete [] cPdata;
+   }
+   else
+   {
+      // generate a polygon, the piece of wire we have in the DB can't be described as
+      // a CIF wire (2 points with distance <= 2 * w)
+      // Not much point generating a box here - the complications come if the wire
+      // is not parallel to one of the axises.
+      laydata::WireContour cwParr(pdata, psize, width);
+      int4b* cPdata = DEBUG_NEW int4b[2 * cwParr.csize()];
+      cwParr.getArrayData(cPdata);
+
+      if (_verbose)
+         _file <<"      Polygon with vertices";
+      else
+         _file <<"      P";
+      for (unsigned i = 0; i < cwParr.csize(); i++)
+         _file << " " << cPdata[2*i] << " " << cPdata[2*i+1];
+      _file << ";"<< std::endl;
+
+      delete [] cPdata;
+   }
 }
 
 void CIFin::CifExportFile::text(const std::string& label, const CTM& trans)
@@ -800,6 +842,51 @@ void CIFin::CifExportFile::aref(const std::string& name,
          ref(name, refCTM);
       }
    }
+}
+
+bool CIFin::CifExportFile::pathConvert(PointVector& plist, unsigned numpoints, int4b adj )
+{
+   TP P1 = plist[0];
+   // find the first neighboring point which is not equivalent to P1
+   unsigned fnbr = 1;
+   while ((fnbr < numpoints) && (P1 == plist[fnbr]))
+      fnbr++;
+   // The wire has effectively a single point and this is not a valid wire. This
+   // condition should've been caught by the object validation checks.
+   assert(fnbr != numpoints);
+   TP P2 = plist[fnbr];
+
+   double sdX = P2.x() - P1.x();
+   double sdY = P2.y() - P1.y();
+   // The sign - a bit funny way - described in layout canvas
+   int sign = ((sdX * sdY) >= 0) ? -1 : 1;
+   double length = sqrt(sdY*sdY + sdX*sdX);
+   if ( (2 == numpoints) && ((int4b) rint(length) <= 2*adj) ) return false;
+   assert(length);
+   int4b y0 = (int4b) rint(P1.y() - sign*((adj*sdY)/length));
+   int4b x0 = (int4b) rint(P1.x() - sign*((adj*sdX)/length));
+//
+   P2 = plist[numpoints-1];
+   // find the first neighboring point which is not equivalent to P1
+   fnbr = numpoints - 2;
+   while ((P2 == plist[fnbr]) && (fnbr > 0))
+      fnbr--;
+   P1 = plist[fnbr];
+
+   P1 = plist[numpoints-2];
+   sdX = P2.x() - P1.x();
+   sdY = P2.y() - P1.y();
+   sign = ((sdX * sdY) >= 0) ? -1 : 1;
+   length = sqrt(sdY*sdY + sdX*sdX);
+   int4b yn = (int4b) rint(P2.y() + sign*((adj*sdY)/length));
+   int4b xn = (int4b) rint(P2.x() + sign*((adj*sdX)/length));
+
+   plist[0].setX(x0);
+   plist[0].setY(y0);
+   plist[numpoints-1].setX(xn);
+   plist[numpoints-1].setY(yn);
+
+   return true;
 }
 
 CIFin::CifExportFile::~CifExportFile()
