@@ -1362,13 +1362,13 @@ void Oasis::Cell::readReference(OasisInFile& ofn, ImportDB& iDB, bool exma)
    if (info & Cmask) _mod_cellref  = ofn.getCellRefName(info & Nmask);
    if (exma)
    {
-      angle         = (info & Amask) ? ofn.getReal() : 0.0;
       magnification = (info & Mmask) ? ofn.getReal() : 1.0;
+      angle         = (info & Amask) ? ofn.getReal() : 0.0;
    }
    else
    {
-      angle         = 90.0 * (real)((info & (Mmask | Amask)) >> 1);
       magnification = 1.0;
+      angle         = 90.0 * (real)((info & (Mmask | Amask)) >> 1);
    }
    if (magnification <= 0)
          ofn.exception("Bad magnification value (22.10)");
