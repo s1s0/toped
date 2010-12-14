@@ -53,10 +53,8 @@ namespace Calbr
       laydata::DrcLibrary* _ATDB;
       laydata::TdtCell*    _DRCCell;
       unsigned int         _numError;
-      double               _maxx;
-      double               _maxy;
-      double               _minx;
-      double               _miny;
+      TP                   _max;
+      TP                   _min;
       bool                 _startDrawing; //use for initial setting of _minx, maxy etc
    };
 

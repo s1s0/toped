@@ -45,7 +45,8 @@ long Calbr::drcEdge::_precision = 0;
 void Calbr::drcEdge::addCoord(long x1, long y1, long x2, long y2)
 {
    real xx, yy;
-   wxString xstr = convert(x1, _precision);
+   //???****Not using now*******
+   /*wxString xstr = convert(x1, _precision);
    wxString ystr = convert(y1, _precision);
    xstr.ToDouble(&xx);
    ystr.ToDouble(&yy);
@@ -59,7 +60,12 @@ void Calbr::drcEdge::addCoord(long x1, long y1, long x2, long y2)
    ystr.ToDouble(&yy);
 
    _coords.x2 = xx;
-   _coords.y2 = yy;
+   _coords.y2 = yy;*/
+   //*************
+   _coords.x1 = x1;
+   _coords.y1 = y1;
+   _coords.x2 = x2;
+   _coords.y2 = y2;
 }
 
 Calbr::edge Calbr::drcEdge::getZoom() const
@@ -80,16 +86,15 @@ void Calbr::drcEdge::addError()
 
 void Calbr::drcPolygon::addCoord(long x, long y)
 {
-   wxString xstr = convert(x, _precision);
+   //???****Not using now*******
+   /*wxString xstr = convert(x, _precision);
    wxString ystr = convert(y, _precision);
 
-   real xx, yy;
-   xstr.ToDouble(&xx);
-   ystr.ToDouble(&yy);
-
-   Calbr::coord pt;
-   pt.x = xx;
-   pt.y = yy;
+   long xx, yy;
+   xstr.ToLong(&xx);
+   ystr.ToLong(&yy);
+*/
+   TP pt(x, y);
    _coords.push_back(pt);
 }
 
@@ -101,16 +106,16 @@ void Calbr::drcPolygon::addError()
 Calbr::edge Calbr::drcPolygon::getZoom() const
 {
    CoordsVector::const_iterator it = _coords.begin();
-   real minx = (*it).x;
-   real miny = (*it).y;
-   real maxx = (*it).x;
-   real maxy = (*it).y;
+   long minx = (*it).x();
+   long miny = (*it).y();
+   long maxx = (*it).x();
+   long maxy = (*it).y();
    for (CoordsVector::const_iterator it = _coords.begin(); it != _coords.end(); ++it)
    {
-      minx = std::min((*it).x, minx);
-      miny = std::min((*it).y, miny);
-      maxx = std::max((*it).x, maxx);
-      maxy = std::max((*it).y, maxy);
+      minx = std::min(long((*it).x()), minx);
+      miny = std::min(long((*it).y()), miny);
+      maxx = std::max(long((*it).x()), maxx);
+      maxy = std::max(long((*it).y()), maxy);
    }
    edge ret;
    ret.x1 = minx;
@@ -305,6 +310,8 @@ void Calbr::CalbrFile::readFile()
          _curCellName = "";
          num++;
       }
+
+
       addResults();
 
       if (_calbrFile) fclose(_calbrFile);
@@ -565,21 +572,20 @@ bool  Calbr::CalbrFile::parseCellNameMode(const std::string &parseString)
          }
       //Save tranformation matrix 
       long number;
+      long a, b, c, d, tx, ty;
       regex.GetMatch(str, 4).ToLong(&number);
-      CNStruct->a[0][0] = number;
+      a = number;
       regex.GetMatch(str, 5).ToLong(&number);
-      CNStruct->a[0][1] = number;
-      CNStruct->a[0][2] = 0;
+      b = number;
       regex.GetMatch(str, 6).ToLong(&number);
-      CNStruct->a[1][0] = number;
+      c = number;
       regex.GetMatch(str, 7).ToLong(&number);
-      CNStruct->a[1][1] = number;
-      CNStruct->a[1][2] = 0;
+      d = number;
       regex.GetMatch(str, 8).ToLong(&number);
-      CNStruct->a[2][0] = number;
+      tx = number;
       regex.GetMatch(str, 9).ToLong(&number);
-      CNStruct->a[2][1] = number;
-      CNStruct->a[2][2] = 1;
+      ty = number;
+      CNStruct->transfMatrix.setCTM(a, b, c, d, tx, ty);
 
       _isCellNameMode = true;
       _curCellName = cellName;
@@ -618,6 +624,7 @@ void   Calbr::CalbrFile::addResults()
       for (CellDRCMap::const_iterator it = _cellDRCMap.begin(); it != _cellDRCMap.end(); ++it)
       {
          _render->setCellName((*it).first);
+         _render->setTranformation((*it).second->transfMatrix);
 
          RuleChecksVector checks = (*it).second->_RuleChecks;
          for (RuleChecksVector::const_iterator it2 = checks.begin(); it2 != checks.end(); ++it2)

@@ -41,17 +41,17 @@
 namespace Calbr
 {
 
-   struct coord
+ /*  struct coord
    {
       real x, y;
-   };
+   };*/
 
    struct edge
    {
-      real x1, y1, x2, y2;
+      long x1, y1, x2, y2;
    };
 
-   typedef std::vector <Calbr::coord> CoordsVector;
+   typedef std::vector <TP> CoordsVector;
 
 
    class drcRenderer
@@ -64,6 +64,7 @@ namespace Calbr
          virtual bool         showError(unsigned int numError) {return false;};
          virtual void         showAll() {};
          virtual void         hideAll() {};
+         void                 setTranformation(CTM &ctm) {_ctm = ctm;};
          virtual void         addPoly(const CoordsVector   &coords)=0;
          virtual void         addLine(const edge &edge)=0;
          virtual void         endWriting()=0;
@@ -71,6 +72,7 @@ namespace Calbr
          void                 setCellName(const std::string & cellName) {_cellName = cellName;};
       protected:
          std::string          _cellName;
+         CTM                  _ctm;
    };
 
 
@@ -114,7 +116,7 @@ namespace Calbr
    struct cellNameStruct
    {
       bool              spaceCoords;
-      int               a[3][3];
+      CTM               transfMatrix;
       RuleChecksVector  _RuleChecks;
    };
 
