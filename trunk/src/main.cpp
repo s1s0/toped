@@ -791,6 +791,7 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    mblock->addFUNC("toolbardeleteitem",(DEBUG_NEW        tellstdfunc::stdTOOLBARDELETEITEM(telldata::tn_void, true)));
    mblock->addFUNC("setparams"        ,(DEBUG_NEW            tellstdfunc::stdSETPARAMETERS(telldata::tn_void, true)));
    mblock->addFUNC("setparams"        ,(DEBUG_NEW             tellstdfunc::stdSETPARAMETER(telldata::tn_void, true)));
+   mblock->addFUNC("exec"             ,(DEBUG_NEW                     tellstdfunc::stdEXEC(telldata::tn_void, true)));
    mblock->addFUNC("exit"             ,(DEBUG_NEW                     tellstdfunc::stdEXIT(telldata::tn_void,false)));
 
    TpdPost::tellFnSort();

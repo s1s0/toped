@@ -68,6 +68,7 @@ namespace console {
       virtual                ~ted_cmd();
       void                    parseCommand(wxString, bool thread=true);
       void                    waitGUInput(telldata::operandSTACK*,console::ACTIVE_OP, const CTM&);
+      void                    waitExternal(wxString);
       void                    getGUInput(bool from_keyboard = true);
       wxCondition*            threadWaits4;
       miniParser*             puc; // parse user coordinates
@@ -87,6 +88,7 @@ namespace console {
       void                    onGetCommand(wxCommandEvent& WXUNUSED(event));
       void                    onKeyUP(wxKeyEvent&);
       void                    onGUInput(wxCommandEvent&);
+      void                    onExternalDone(wxCommandEvent&);
       void                    cancelLastPoint();
       void                    mouseLB(const telldata::ttpnt& p);
       void                    mouseRB();

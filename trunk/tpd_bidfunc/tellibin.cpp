@@ -341,6 +341,28 @@ int tellstdfunc::getPOINTLIST::execute() {
 }
 
 //=============================================================================
+tellstdfunc::stdEXEC::stdEXEC(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+}
+
+int tellstdfunc::stdEXEC::execute()
+{
+   std::string extCmd = getStringValue();
+   if (_threadExecution)
+   {
+      Console->waitExternal(wxString(extCmd.c_str(), wxConvUTF8));
+      Console->threadWaits4->Wait();
+   }
+   else
+   {
+//      tell_log(console::MT_WARNING,"exit command in recovery mode ignored");
+   }
+   return EXEC_NEXT;
+}
+
+//=============================================================================
 tellstdfunc::stdEXIT::stdEXIT(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
