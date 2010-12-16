@@ -224,6 +224,7 @@ class TpdPost {
       static void parseCommand(const wxString);
       static void tellFnAdd(const std::string, void*);
       static void tellFnSort();
+      static void execExt(const wxString);
       static void quitApp(bool);
 
    private:

@@ -71,6 +71,8 @@ extern YYLTYPE telllloc; // parser current location - global variable, defined i
 console::ted_cmd*           Console = NULL;
 extern const wxEventType    wxEVT_CONSOLE_PARSE;
 extern const wxEventType    wxEVT_CANVAS_ZOOM;
+extern const wxEventType    wxEVT_EXECEXTDONE;
+
 
 //==============================================================================
 bool console::patternFound(const wxString templ,  wxString str) {
@@ -527,6 +529,16 @@ void console::ted_cmd::waitGUInput(telldata::operandSTACK *clst, console::ACTIVE
    TpdPost::toped_status(TSTS_THREADWAIT);
 }
 
+void console::ted_cmd::waitExternal(wxString cmdExt)
+{
+   Connect(-1, wxEVT_EXECEXTDONE,
+           (wxObjectEventFunction) (wxEventFunction)
+           (wxCommandEventFunction)&ted_cmd::onExternalDone);
+
+   TpdPost::toped_status(TSTS_THREADWAIT);
+   TpdPost::execExt(cmdExt);
+}
+
 void console::ted_cmd::getGUInput(bool from_keyboard) {
    wxString command;
    if (from_keyboard) { // input is from keyboard
@@ -554,7 +566,8 @@ void console::ted_cmd::getGUInput(bool from_keyboard) {
    _translation = _initrans;
 }
 
-void console::ted_cmd::onGUInput(wxCommandEvent& evt) {
+void console::ted_cmd::onGUInput(wxCommandEvent& evt)
+{
    switch (evt.GetInt()) {
       case -4: _translation.FlipY();break;
       case -3: _translation.Rotate(90.0);break;
@@ -582,6 +595,12 @@ void console::ted_cmd::onGUInput(wxCommandEvent& evt) {
          }
       default: assert(false);
    }
+}
+
+void console::ted_cmd::onExternalDone(wxCommandEvent& evt)
+{
+   Disconnect(-1, wxEVT_EXECEXTDONE);
+   threadWaits4->Signal();
 }
 
 void console::ted_cmd::mouseLB(const telldata::ttpnt& p) {

@@ -61,6 +61,8 @@ extern const wxEventType         wxEVT_TOOLBARADDITEM;
 extern const wxEventType         wxEVT_TOOLBARDELETEITEM;
 extern const wxEventType         wxEVT_EDITLAYER;
 extern const wxEventType         wxEVT_QUITAPP;
+extern const wxEventType         wxEVT_EXECEXT;
+extern const wxEventType         wxEVT_EXECEXTDONE;
 
 
 extern DataCenter*               DATC;
@@ -277,6 +279,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_TECUSTOM_COMMAND(wxEVT_EDITLAYER, wxID_ANY, tui::TopedFrame::OnEditLayer )
    EVT_TEXT_MAXLEN(ID_WIN_TXT_LOG, tui::TopedFrame::OnTextLogOverflow)
    EVT_TECUSTOM_COMMAND(wxEVT_QUITAPP, wxID_ANY, tui::TopedFrame::OnQuit)
+   EVT_TECUSTOM_COMMAND(wxEVT_EXECEXT, wxID_ANY, tui::TopedFrame::OnExecExt)
 END_EVENT_TABLE()
 
 // See the FIXME note in the bootom of browsers.cpp
@@ -817,6 +820,28 @@ void tui::TopedFrame::initView()
    _winManager.Update();
 }
 
+
+void tui::TopedFrame::OnExecExt( wxCommandEvent& event )
+{
+   wxString extCmd = event.GetString();
+   wxArrayString output, errors;
+
+   int returnCode = wxExecute(extCmd, output, errors);
+   if ( returnCode != -1 )
+   {
+      ShowOutput(extCmd, output, _T("Output"));
+      ShowOutput(extCmd, errors, _T("Errors"));
+   }
+
+   //Post an event to notify the console, that the external command has exited
+   wxCommandEvent eventExecExDone(wxEVT_EXECEXTDONE);
+
+//   eventButtonUP.SetClientData((void*)ttp);
+//   eventButtonUP.SetInt(button);
+   wxPostEvent(_cmdline, eventExecExDone);
+
+
+}
 
 void tui::TopedFrame::OnQuit( wxCommandEvent& WXUNUSED( event ) ) {
    Close(FALSE);
