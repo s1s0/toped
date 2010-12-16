@@ -49,6 +49,7 @@ extern const wxEventType         wxEVT_CANVAS_ZOOM;
 Calbr::drcTenderer::drcTenderer(laydata::DrcLibrary* library)
 {
    _ATDB = library;
+   _ctm.Initialize();
 }
 
 Calbr::drcTenderer::~drcTenderer()
@@ -89,8 +90,8 @@ void Calbr::drcTenderer::addPoly(const CoordsVector   &coords)
          _max.setY(std::max(tempPoint.y(), _max.y()));
          _min.setX(std::min(tempPoint.x(), _min.x()));
          _min.setY(std::min(tempPoint.y(), _min.y()));
-
-         plDB.push_back(TP(tempPoint.x(), tempPoint.y(), DBscale));
+         plDB.push_back(tempPoint);
+         //plDB.push_back(TP(tempPoint.x(), tempPoint.y(), DBscale));
       }
       laydata::QTreeTmp* dwl = _DRCCell->secureUnsortedLayer(_numError);
       PROPC->addUnpublishedLay(_numError);
@@ -137,7 +138,7 @@ void Calbr::drcTenderer::addLine(const edge &edge)
       maxx = std::max(_max.x(), std::max(tempPoint1.x(), tempPoint2.x()));
       maxy = std::max(_max.y(), std::max(tempPoint1.y(), tempPoint2.y()));
       minx = std::min(_min.x(), std::min(tempPoint1.x(), tempPoint2.x()));
-      minx = std::min(_min.y(), std::min(tempPoint1.y(), tempPoint2.y()));
+      miny = std::min(_min.y(), std::min(tempPoint1.y(), tempPoint2.y()));
       _max = TP(maxx, maxy);
       _min = TP(minx, miny);
    }
@@ -147,8 +148,10 @@ void Calbr::drcTenderer::addLine(const edge &edge)
    PointVector plDB;
    plDB.reserve(2);
 
-   plDB.push_back(TP( tempPoint1.x(), tempPoint1.y(), DBscale));
-   plDB.push_back(TP( tempPoint2.x(), tempPoint2.y(), DBscale));
+   plDB.push_back(tempPoint1);
+   plDB.push_back(tempPoint2);
+   //plDB.push_back(TP( tempPoint1.x(), tempPoint1.y(), DBscale));
+   //plDB.push_back(TP( tempPoint2.x(), tempPoint2.y(), DBscale));
 
    real      w = 0.01;   //width of line
    word      width = static_cast<word>(rint(w * DBscale));
@@ -232,8 +235,10 @@ bool Calbr::drcTenderer::showError(unsigned int numError)
 void Calbr::drcTenderer::zoom(const edge &edge)
 {
    real DBscale = PROPC->DBscale();
-   DBbox* box = DEBUG_NEW DBbox(TP(edge.x1, edge.y1, DBscale),
-                                TP(edge.x2, edge.y2, DBscale));
+   TP zoomPoint1 = TP(edge.x1, edge.y1);
+   TP zoomPoint2 = TP(edge.x2, edge.y2);
+   DBbox* box = DEBUG_NEW DBbox(zoomPoint1,
+                                zoomPoint2);
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(tui::ZOOM_WINDOW);
    eventZOOM.SetClientData(static_cast<void*>(box));
