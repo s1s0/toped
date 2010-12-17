@@ -101,6 +101,7 @@ namespace console {
       stringList::const_iterator _history_position;
       wxWindow*               _canvas;
       bool                    _canvas_invalid;
+      bool                    _execExternal;
       bool                    _exitRequested;
       DECLARE_EVENT_TABLE();
    };
