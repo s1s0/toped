@@ -33,6 +33,7 @@
 #include <wx/image.h>
 #include <wx/aboutdlg.h>
 #include <wx/tooltip.h>
+#include <wx/txtstrm.h>
 #include <math.h>
 #include "toped.h"
 #include "datacenter.h"
@@ -62,12 +63,14 @@ extern const wxEventType         wxEVT_TOOLBARDELETEITEM;
 extern const wxEventType         wxEVT_EDITLAYER;
 extern const wxEventType         wxEVT_QUITAPP;
 extern const wxEventType         wxEVT_EXECEXT;
+extern const wxEventType         wxEVT_EXECEXTPIPE;
 extern const wxEventType         wxEVT_EXECEXTDONE;
 
 
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
 extern parsercmd::cmdBLOCK*      CMDBlock;
+extern console::ted_cmd*         Console;
 
 tui::CanvasStatus::CanvasStatus(wxWindow* parent, wxWindowID id ,
    const wxPoint& pos , const wxSize& size , long style)
@@ -144,6 +147,65 @@ void tui::CanvasStatus::setdYpos(wxString coordY){
 void tui::CanvasStatus::setSelected(wxString numsel) {
    _selected->SetLabel(numsel);
 }
+
+//-----------------------------------------------------------------------------
+BEGIN_EVENT_TABLE(tui::ExternalProcess, wxProcess)
+   EVT_TIMER(wxID_ANY, tui::ExternalProcess::OnTimer)
+END_EVENT_TABLE()
+
+tui::ExternalProcess::ExternalProcess(wxEvtHandler* parent) : wxProcess(parent), _idleTimer(this)
+{
+   Redirect();
+   _idleTimer.Start(100);
+}
+
+void tui::ExternalProcess::OnTerminate(int pid, int status)
+{
+   wxTextInputStream tes(*GetErrorStream());
+   if (IsErrorAvailable())
+   {
+      wxString msg;
+      msg << tes.ReadLine();
+      if (!msg.IsEmpty())
+         tell_log(console::MT_ERROR,msg);
+   }
+   wxTextInputStream tis(*GetInputStream());
+   while (IsInputAvailable())
+   {
+      wxString msg;
+      msg << tis.ReadLine();
+      if (!msg.IsEmpty())
+         tell_log(console::MT_INFO,msg);
+   }
+   _idleTimer.Stop();
+   //Post an event to notify the console, that the external command has exited
+   wxCommandEvent eventExecExDone(wxEVT_EXECEXTDONE);
+   wxPostEvent(Console, eventExecExDone);
+
+   delete this;
+}
+
+void tui::ExternalProcess::OnTimer(wxTimerEvent& WXUNUSED(event))
+{
+   wxTextInputStream tes(*GetErrorStream());
+   if (IsErrorAvailable())
+   {
+      wxString msg;
+      msg << tes.ReadLine();
+      if (!msg.IsEmpty())
+         tell_log(console::MT_ERROR,msg);
+   }
+   wxTextInputStream tis(*GetInputStream());
+   while (IsInputAvailable())
+   {
+      wxString msg;
+      msg << tis.ReadLine();
+      if (!msg.IsEmpty())
+         tell_log(console::MT_INFO,msg);
+   }
+//   wxTextOutputStream tos(*GetOutputStream());
+}
+
 //-----------------------------------------------------------------------------
 // The TopedFrame event table (TOPED main event table)
 BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
@@ -280,6 +342,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_TEXT_MAXLEN(ID_WIN_TXT_LOG, tui::TopedFrame::OnTextLogOverflow)
    EVT_TECUSTOM_COMMAND(wxEVT_QUITAPP, wxID_ANY, tui::TopedFrame::OnQuit)
    EVT_TECUSTOM_COMMAND(wxEVT_EXECEXT, wxID_ANY, tui::TopedFrame::OnExecExt)
+   EVT_TECUSTOM_COMMAND(wxEVT_EXECEXTPIPE, wxID_ANY, tui::TopedFrame::OnExecExtTextEnter)
 END_EVENT_TABLE()
 
 // See the FIXME note in the bootom of browsers.cpp
@@ -824,23 +887,29 @@ void tui::TopedFrame::initView()
 void tui::TopedFrame::OnExecExt( wxCommandEvent& event )
 {
    wxString extCmd = event.GetString();
-   wxArrayString output, errors;
+//   wxShell(extCmd);
+//   ExternalProcess* extProc = DEBUG_NEW ExternalProcess(this);
+   _extProc = DEBUG_NEW ExternalProcess(this);
 
-   int returnCode = wxExecute(extCmd, output, errors);
-   if ( returnCode != -1 )
+//   Connect(-1, wxEVT_EXECEXTPIPE,
+//           (wxObjectEventFunction) (wxEventFunction)
+//           (wxCommandEventFunction)&ExternalProcess::OnTextEnter);
+//
+
+   int returnCode = wxExecute(extCmd, wxEXEC_ASYNC, _extProc);
+   if ( 0 == returnCode )
    {
-      ShowOutput(extCmd, output, _T("Output"));
-      ShowOutput(extCmd, errors, _T("Errors"));
+      //Post an event to notify the console, that the external command has exited
+      wxCommandEvent eventExecExDone(wxEVT_EXECEXTDONE);
+      wxPostEvent(_cmdline, eventExecExDone);
    }
+}
 
-   //Post an event to notify the console, that the external command has exited
-   wxCommandEvent eventExecExDone(wxEVT_EXECEXTDONE);
-
-//   eventButtonUP.SetClientData((void*)ttp);
-//   eventButtonUP.SetInt(button);
-   wxPostEvent(_cmdline, eventExecExDone);
-
-
+void tui::TopedFrame::OnExecExtTextEnter(wxCommandEvent& event)
+{
+   wxTextOutputStream tos(*(_extProc->GetOutputStream()));
+   tos << event.GetString();
+   _extProc->CloseOutput();
 }
 
 void tui::TopedFrame::OnQuit( wxCommandEvent& WXUNUSED( event ) ) {

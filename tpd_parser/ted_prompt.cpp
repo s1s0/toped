@@ -350,6 +350,7 @@ console::ted_cmd::ted_cmd(wxWindow *parent, wxWindow *canvas) :
 {
    _canvas = canvas;
    _exitRequested = false;
+   _execExternal  = false;
    threadWaits4 = DEBUG_NEW wxCondition(parse_thread::_mutex);
    VERIFY(threadWaits4->IsOk());
    _mouseIN_OK = true;
@@ -369,6 +370,11 @@ console::ted_cmd::ted_cmd(wxWindow *parent, wxWindow *canvas) :
 void console::ted_cmd::onGetCommand(wxCommandEvent& WXUNUSED(event))
 {
    if (puc)  getGUInput(); // run the local GUInput parser
+   else if (_execExternal)
+   {
+      TpdPost::execPipe(GetValue());
+      Clear();
+   }
    else {
       wxString command = GetValue();
       tell_log(MT_COMMAND, command);
@@ -534,7 +540,7 @@ void console::ted_cmd::waitExternal(wxString cmdExt)
    Connect(-1, wxEVT_EXECEXTDONE,
            (wxObjectEventFunction) (wxEventFunction)
            (wxCommandEventFunction)&ted_cmd::onExternalDone);
-
+   _execExternal = true;
    TpdPost::toped_status(TSTS_THREADWAIT);
    TpdPost::execExt(cmdExt);
 }
@@ -600,6 +606,7 @@ void console::ted_cmd::onGUInput(wxCommandEvent& evt)
 void console::ted_cmd::onExternalDone(wxCommandEvent& evt)
 {
    Disconnect(-1, wxEVT_EXECEXTDONE);
+   _execExternal = false;
    threadWaits4->Signal();
 }
 

@@ -225,6 +225,7 @@ class TpdPost {
       static void tellFnAdd(const std::string, void*);
       static void tellFnSort();
       static void execExt(const wxString);
+      static void execPipe(const wxString);
       static void quitApp(bool);
 
    private:
