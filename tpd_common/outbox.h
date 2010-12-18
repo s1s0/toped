@@ -58,6 +58,8 @@ namespace console {
       MT_ERROR,
       MT_COMMAND,
       MT_GUIPROMPT,
+      MT_SHELLINFO,
+      MT_SHELLERROR,
       MT_GUIINPUT,
       MT_WARNING,
       MT_CELLNAME,
@@ -134,6 +136,7 @@ namespace console {
       wxString          cmd_mark;
       wxString          gui_mark;
       wxString          rply_mark;
+      wxString          shell_mark;
       DECLARE_EVENT_TABLE();
    };
 

@@ -111,6 +111,7 @@ console::ted_log::ted_log(wxWindow *parent, wxWindowID id): wxTextCtrl( parent, 
    cmd_mark = wxT("=> ");
    gui_mark = wxT(">> ");
    rply_mark = wxT("<= ");
+   shell_mark = wxT("# ");
 }
 
 void console::ted_log::OnLOGMessage(wxCommandEvent& evt) {
@@ -131,6 +132,14 @@ void console::ted_log::OnLOGMessage(wxCommandEvent& evt) {
          break;
       case MT_GUIPROMPT:
          *this << gui_mark;
+         break;
+      case MT_SHELLINFO:
+         *this << shell_mark << evt.GetString() << wxT("\n");
+         logColour = *wxBLACK;
+         break;
+      case MT_SHELLERROR:
+         *this << shell_mark << evt.GetString() << wxT("\n");
+         logColour = *wxRED;
          break;
       case MT_GUIINPUT:
          *this << evt.GetString();

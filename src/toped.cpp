@@ -167,7 +167,7 @@ void tui::ExternalProcess::OnTerminate(int pid, int status)
       wxString msg;
       msg << tes.ReadLine();
       if (!msg.IsEmpty())
-         tell_log(console::MT_ERROR,msg);
+         tell_log(console::MT_SHELLERROR,msg);
    }
    wxTextInputStream tis(*GetInputStream());
    while (IsInputAvailable())
@@ -175,7 +175,7 @@ void tui::ExternalProcess::OnTerminate(int pid, int status)
       wxString msg;
       msg << tis.ReadLine();
       if (!msg.IsEmpty())
-         tell_log(console::MT_INFO,msg);
+         tell_log(console::MT_SHELLINFO,msg);
    }
    _idleTimer.Stop();
    //Post an event to notify the console, that the external command has exited
@@ -193,7 +193,7 @@ void tui::ExternalProcess::OnTimer(wxTimerEvent& WXUNUSED(event))
       wxString msg;
       msg << tes.ReadLine();
       if (!msg.IsEmpty())
-         tell_log(console::MT_ERROR,msg);
+         tell_log(console::MT_SHELLERROR,msg);
    }
    wxTextInputStream tis(*GetInputStream());
    while (IsInputAvailable())
@@ -201,7 +201,7 @@ void tui::ExternalProcess::OnTimer(wxTimerEvent& WXUNUSED(event))
       wxString msg;
       msg << tis.ReadLine();
       if (!msg.IsEmpty())
-         tell_log(console::MT_INFO,msg);
+         tell_log(console::MT_SHELLINFO,msg);
    }
 //   wxTextOutputStream tos(*GetOutputStream());
 }
