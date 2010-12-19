@@ -701,26 +701,6 @@ bool console::ted_cmd::findTellFile(const char* fname, std::string& validName)
    }
    validName = fname;
    return false;
-
-   //      wxString absFileName = Console->findTellFile(wxString(name,wxConvUTF8));
-   //      FILE* newfilehandle;
-   //      wxFileName* inclFN = DEBUG_NEW wxFileName(absFileName);
-   //      std::string nfname = inclFN->IsOk() ? std::string(inclFN->GetFullPath().mb_str(wxConvFile )) : name;
-   //      std::string infomsg;
-   //      if (!inclFN->IsOk() || !inclFN->FileExists())
-   //      {
-   //         infomsg = "File \"" + nfname + "\" not found";
-   //         tell_log(console::MT_ERROR,infomsg);
-   //      }
-   //      else if (NULL == (newfilehandle = fopen(nfname.c_str(), "r")))
-   //      {
-   //         infomsg = "File \"" + nfname + "\" can't be open";
-   //         tell_log(console::MT_ERROR,infomsg);
-   //      }
-   //      else
-   //      {
-
-//   return _tllIncludePath.FindAbsoluteValidPath(fname);
 }
 
 console::ted_cmd::~ted_cmd() {
