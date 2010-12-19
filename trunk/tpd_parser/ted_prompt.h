@@ -83,6 +83,9 @@ namespace console {
       bool                    exitRequested() const         { return _exitRequested;}
       bool                    cmdHistoryExists() const      {return !_cmd_history.empty();}
       void                    spawnParseThread(wxString);
+      void                    addTllIncludePath(wxString path){ _tllIncludePath.Add(path);}
+      void                    addTllEnvList(wxString pvar)  { _tllIncludePath.AddEnvList(pvar);}
+      wxString                findTellFile(wxString fname)  { return _tllIncludePath.FindAbsoluteValidPath(fname);}
    private:
       void                    onParseCommand(wxCommandEvent&);
       void                    onGetCommand(wxCommandEvent& WXUNUSED(event));
@@ -103,6 +106,7 @@ namespace console {
       bool                    _canvas_invalid;
       bool                    _execExternal;
       bool                    _exitRequested;
+      wxPathList              _tllIncludePath;
       DECLARE_EVENT_TABLE();
    };
 
