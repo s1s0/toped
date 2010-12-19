@@ -82,8 +82,9 @@ class TopedApp : public wxApp
       void           loadGlfFonts();
       void           loadPlugIns();
       bool           checkCrashLog();
-      void           getLocalDirs();
-      void           getGlobalDirs(); //get directories in TPD_GLOBAL
+      void           getLocalDirs();    //! Get directories in TPD_LOCAL
+      void           getGlobalDirs();   //! Get directories in TPD_GLOBAL
+      void           getTellPathDirs(); //! Check directories in TLL_INCLUDE_PATH
       void           finishSessionLog();
       void           saveIgnoredCrashLog();
       void           parseCmdLineArgs();
@@ -136,6 +137,7 @@ bool TopedApp::OnInit()
    // Initialize the tool bars
    getLocalDirs();
    getGlobalDirs();
+   getTellPathDirs();
    Toped->setIconDir(std::string(_tpdResourceDir.mb_str(wxConvFile)));
    Toped->initToolBars();
    // Create the session log file
@@ -385,6 +387,10 @@ void TopedApp::parseCmdLineArgs()
          wxString curar(argv[i]);
          if (wxT("-ogl_thread") == curar) Toped->setOglThread(true);
          else if (wxT("-ogl_safe") == curar) _forceBasicRendering = true;
+         else if (0 == curar.Find(wxT("-I")))
+         {
+            Console->addTllIncludePath(curar.Remove(0,2));
+         }
          else if (!(0 == curar.Find('-')))
          {
             _inputTellFile.Clear();
@@ -422,7 +428,7 @@ void TopedApp::getLocalDirs()
    else
       _localDir << wxT("/");
 
-   // Check fonts directory
+   // Check log directory
    wxFileName logFolder(_localDir);
    logFolder.AppendDir(wxT("log"));
    logFolder.Normalize();
@@ -486,6 +492,14 @@ void TopedApp::getGlobalDirs()
    else
       // Don't generate a noise about plug-in directory.
       _tpdPlugInDir = wxT("");
+}
+
+void TopedApp::getTellPathDirs()
+{
+   Console->addTllEnvList(wxT("TLL_INCLUDE_PATH"));
+   wxString tllDefaultIncPath;
+   tllDefaultIncPath << _globalDir << wxT("/tll/");
+   Console->addTllIncludePath(tllDefaultIncPath);
 }
 
 //=============================================================================
@@ -798,4 +812,3 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
 }
 // Starting macro
 IMPLEMENT_APP(TopedApp)
-//DECLARE_APP(TopedApp)

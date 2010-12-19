@@ -232,9 +232,9 @@ int parsercmd::includefile(char* name, FILE* &handler)
       tell_log(console::MT_ERROR,"Too many nested includes");
    else
    {
+      wxString absFileName = Console->findTellFile(wxString(name,wxConvUTF8));
       FILE* newfilehandle;
-      wxFileName* inclFN = DEBUG_NEW wxFileName(wxString(name,wxConvUTF8));
-      inclFN->Normalize();
+      wxFileName* inclFN = DEBUG_NEW wxFileName(absFileName);
       std::string nfname = inclFN->IsOk() ? std::string(inclFN->GetFullPath().mb_str(wxConvFile )) : name;
       std::string infomsg;
       if (!inclFN->IsOk() || !inclFN->FileExists())
