@@ -43,29 +43,7 @@ Dialog stuff
 
 Documentation
 ==============
-   round
-   ceil
-   floor
-   fmod
-   sqrt
-   pow
-   
-   tan
-   asin
-   acos
-   atan
-   
-   sinh
-   cosh
-   tanh
-   asinh
-   acosh
-   atanh
-
-   exp
-   log
-   log10
-
+   -I<path> command line and $TLL_INCLUDE_PATH env variable
 
 Global options of the editor
 ============================
