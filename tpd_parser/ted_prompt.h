@@ -85,7 +85,7 @@ namespace console {
       void                    spawnParseThread(wxString);
       void                    addTllIncludePath(wxString path){ _tllIncludePath.Add(path);}
       void                    addTllEnvList(wxString pvar)  { _tllIncludePath.AddEnvList(pvar);}
-      wxString                findTellFile(wxString fname)  { return _tllIncludePath.FindAbsoluteValidPath(fname);}
+      bool                    findTellFile(const char*, std::string&);
    private:
       void                    onParseCommand(wxCommandEvent&);
       void                    onGetCommand(wxCommandEvent& WXUNUSED(event));

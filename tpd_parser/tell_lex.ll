@@ -37,7 +37,6 @@ lxt_E             [Ee][-+]?{lxt_D}+
 #include "tpdph.h"
 #include <stdio.h>
 #include <string.h>
-#include <wx/filename.h>
 #include "tellyzer.h"
 #include "tell_yacc.h"
 #include "ted_prompt.h"
@@ -232,37 +231,37 @@ int parsercmd::includefile(char* name, FILE* &handler)
       tell_log(console::MT_ERROR,"Too many nested includes");
    else
    {
-      wxString absFileName = Console->findTellFile(wxString(name,wxConvUTF8));
-      FILE* newfilehandle;
-      wxFileName* inclFN = DEBUG_NEW wxFileName(absFileName);
-      std::string nfname = inclFN->IsOk() ? std::string(inclFN->GetFullPath().mb_str(wxConvFile )) : name;
+      std::string nfname;
       std::string infomsg;
-      if (!inclFN->IsOk() || !inclFN->FileExists())
+      if (Console->findTellFile(name, nfname))
+      {
+         FILE* newfilehandle = fopen(nfname.c_str(), "r");
+         if (NULL != newfilehandle)
+         {
+            infomsg = "Parsing \"" + nfname + "\" ...";
+            tell_log(console::MT_INFO,infomsg);
+            handler = newfilehandle;
+            /* create a new record with file handler and location objects*/
+            include_stack[include_stack_ptr++] = DEBUG_NEW parsercmd::lexer_files(
+                       static_cast<void*>(YY_CURRENT_BUFFER), DEBUG_NEW YYLTYPE(telllloc));
+            /* switch the buffer to the new file */
+            yy_switch_to_buffer(yy_create_buffer( newfilehandle, YY_BUF_SIZE ) );
+            /* initialize the current error location object */
+            telllloc.first_column = telllloc.last_column = 1;
+            telllloc.first_line = telllloc.last_line = 1;
+            telllloc.filename = name;
+         }
+         else
+         {
+            infomsg = "File \"" + nfname + "\" can't be open";
+            tell_log(console::MT_ERROR,infomsg);
+         }
+      }
+      else
       {
          infomsg = "File \"" + nfname + "\" not found";
          tell_log(console::MT_ERROR,infomsg);
       }
-      else if (NULL == (newfilehandle = fopen(nfname.c_str(), "r")))
-      {
-         infomsg = "File \"" + nfname + "\" can't be open";
-         tell_log(console::MT_ERROR,infomsg);
-      }
-      else
-      {
-         infomsg = "Parsing \"" + nfname + "\" ...";
-         tell_log(console::MT_INFO,infomsg);
-         handler = newfilehandle;
-         /* create a new record with file handler and location objects*/
-         include_stack[include_stack_ptr++] = DEBUG_NEW parsercmd::lexer_files(
-                    static_cast<void*>(YY_CURRENT_BUFFER), DEBUG_NEW YYLTYPE(telllloc));
-         /* switch the buffer to the new file */
-         yy_switch_to_buffer(yy_create_buffer( newfilehandle, YY_BUF_SIZE ) );
-         /* initialize the current error location object */
-         telllloc.first_column = telllloc.last_column = 1;
-         telllloc.first_line = telllloc.last_line = 1;
-         telllloc.filename = name;
-      }
-      delete inclFN;
    }
    return include_stack_ptr;
 }

@@ -29,6 +29,7 @@
 #include <string>
 #include <wx/string.h>
 #include <wx/regex.h>
+#include <wx/filename.h>
 #include "tuidefs.h"
 #include "ted_prompt.h"
 #include "tell_yacc.h"
@@ -679,6 +680,47 @@ void console::ted_cmd::cancelLastPoint() {
    if (_numpoints > 0) _numpoints--;
    tell_log(MT_GUIPROMPT);
    tell_log(MT_GUIINPUT, _guinput);
+}
+
+bool console::ted_cmd::findTellFile(const char* fname, std::string& validName)
+{
+   // Check the original string first
+   wxFileName inclFN(wxString(fname,wxConvUTF8));
+   inclFN.Normalize();
+   if (inclFN.IsOk() && inclFN.FileExists())
+   {
+      validName = std::string(inclFN.GetFullPath().mb_str(wxConvFile ));
+      return true;
+   }
+   // See whether we can find the file name among the search paths
+   wxString absFileName = _tllIncludePath.FindAbsoluteValidPath((wxString(fname,wxConvUTF8)));
+   if (!absFileName.IsEmpty())
+   {
+      validName = std::string(absFileName.mb_str(wxConvFile ));
+      return true;
+   }
+   validName = fname;
+   return false;
+
+   //      wxString absFileName = Console->findTellFile(wxString(name,wxConvUTF8));
+   //      FILE* newfilehandle;
+   //      wxFileName* inclFN = DEBUG_NEW wxFileName(absFileName);
+   //      std::string nfname = inclFN->IsOk() ? std::string(inclFN->GetFullPath().mb_str(wxConvFile )) : name;
+   //      std::string infomsg;
+   //      if (!inclFN->IsOk() || !inclFN->FileExists())
+   //      {
+   //         infomsg = "File \"" + nfname + "\" not found";
+   //         tell_log(console::MT_ERROR,infomsg);
+   //      }
+   //      else if (NULL == (newfilehandle = fopen(nfname.c_str(), "r")))
+   //      {
+   //         infomsg = "File \"" + nfname + "\" can't be open";
+   //         tell_log(console::MT_ERROR,infomsg);
+   //      }
+   //      else
+   //      {
+
+//   return _tllIncludePath.FindAbsoluteValidPath(fname);
 }
 
 console::ted_cmd::~ted_cmd() {
