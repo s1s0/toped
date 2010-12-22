@@ -38,7 +38,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSB(stdADDBOX_D     , stdADDBOX     );
    TELL_STDCMD_CLASSA_UNDO(stdDRAWBOX     );  // undo - implemented
    TELL_STDCMD_CLASSB(stdDRAWBOX_D    , stdDRAWBOX    );
-   TELL_STDCMD_CLASSA_UNDO(stdADDBOXr     );  // undo - implemented8
+   TELL_STDCMD_CLASSA_UNDO(stdADDBOXr     );  // undo - implemented
    TELL_STDCMD_CLASSB(stdADDBOXr_D    , stdADDBOXr    );
    TELL_STDCMD_CLASSA_UNDO(stdADDBOXp     );  // undo - implemented
    TELL_STDCMD_CLASSB(stdADDBOXp_D    , stdADDBOXp    );
