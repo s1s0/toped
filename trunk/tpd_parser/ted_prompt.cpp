@@ -301,6 +301,10 @@ void* console::parse_thread::Entry()
    telllloc.filename = NULL;
    parsercmd::cmdSTDFUNC::setThreadExecution(true);
    TpdPost::toped_status(TSTS_THREADON, command);
+
+#ifdef PARSER_PROFILING
+      HiResTimer profTimer;
+#endif
    try {
       void* b = tell_scan_string( command.mb_str(wxConvUTF8) );
       tellparse();
@@ -312,7 +316,9 @@ void* console::parse_thread::Entry()
       // but it could be the file system or dynamic memory
       //@TODO check for available dynamic memory
    }
-
+#ifdef PARSER_PROFILING
+      profTimer.report("Time elapsed by the last parser run: ");
+#endif
    _mutex.Unlock();
    if (Console->exitRequested())
    {

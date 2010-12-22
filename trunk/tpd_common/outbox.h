@@ -44,6 +44,7 @@
 
 //#define RENDER_PROFILING
 //#define GDSCONVERT_PROFILING
+//#define PARSER_PROFILING
 
 #ifdef RENDER_PROFILING
 #define TIME_PROFILING
@@ -51,7 +52,9 @@
 #ifdef GDSCONVERT_PROFILING
 #define TIME_PROFILING
 #endif
-
+#ifdef PARSER_PROFILING
+#define TIME_PROFILING
+#endif
 namespace console {
    typedef enum {
       MT_INFO = wxLOG_User + 1,
