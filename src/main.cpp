@@ -594,6 +594,8 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    mblock->addconstID("_iconsize48", DEBUG_NEW telldata::ttint( tui::ICON_SIZE_48x48),true);
    // Renderer properties
 
+   // Internal functions, not user accesible (parser is using them at its discretion)
+   mblock->addIntFUNC("$sort_db"      ,(DEBUG_NEW             tellstdfunc::intrnlSORT_DB(telldata::tn_void, false )));
    //-----------------------------------------------------------------------------------------------------------
    // tell build-in functions                                                                              execute on recovery
    //             TELL function name                      Implementation class               return type  (when ignoreOnRecovery

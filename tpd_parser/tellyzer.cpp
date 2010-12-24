@@ -52,8 +52,12 @@ console::toped_logfile     LogFile;
 //-----------------------------------------------------------------------------
 // Table of defined functions
 parsercmd::functionMAP        parsercmd::cmdBLOCK::_funcMAP;
+// Table of internal functions (used by the parser internally)
+parsercmd::functionMAP        parsercmd::cmdBLOCK::_internalFuncMap;
 // Table of current nested blocks
 parsercmd::blockSTACK         parsercmd::cmdBLOCK::_blocks;
+//The state (to be) of the DB after the last function call
+bool                          parsercmd::cmdBLOCK::_dbUnsorted = false;
 // Operand stack
 telldata::operandSTACK        parsercmd::cmdVIRTUAL::OPstack;
 // UNDO Operand stack
@@ -1138,6 +1142,20 @@ void parsercmd::cmdBLOCK::initializeVarLocal()
       VMI->second->initialize();
    }
 }
+
+void parsercmd::cmdBLOCK::checkDbState()
+{
+   if (_dbUnsorted)
+   {
+      // insert an extra $sort_db call
+      std::string funcName = "$sort_db";
+      functionMAP::const_iterator MM = _internalFuncMap.find(funcName);
+      assert(MM != _internalFuncMap.end());
+      cmdSTDFUNC *fbody = MM->second;
+      cmdQ.push_back(DEBUG_NEW parsercmd::cmdFUNCCALL(fbody,funcName));
+      _dbUnsorted = false;
+   }
+}
 //=============================================================================
 parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
                                         (char*& fn, telldata::argumentQ* amap) const {
@@ -1152,6 +1170,23 @@ parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
    }
    if (NULL == amap) delete arguMap;
    return fbody;
+}
+
+void parsercmd::cmdBLOCK::pushcmd(cmdVIRTUAL* cmd, bool needsDbResort)
+{
+   if      ( needsDbResort && (!_dbUnsorted))
+      _dbUnsorted = true;
+   else if (!needsDbResort &&   _dbUnsorted)
+   {
+      // insert an extra $sort_db call
+      std::string funcName = "$sort_db";
+      functionMAP::const_iterator MM = _internalFuncMap.find(funcName);
+      assert(MM != _internalFuncMap.end());
+      cmdSTDFUNC *fbody = MM->second;
+      cmdQ.push_back(DEBUG_NEW parsercmd::cmdFUNCCALL(fbody,funcName));
+      _dbUnsorted = false;
+   }
+   cmdQ.push_back(cmd);
 }
 
 bool  parsercmd::cmdBLOCK::defValidate(const std::string& fn, const argumentLIST* alst, cmdFUNC*& funcdef)
@@ -1543,6 +1578,11 @@ void parsercmd::cmdMAIN::addFUNC(std::string fname , cmdSTDFUNC* cQ)
    TpdPost::tellFnAdd(fname, cQ->callingConv(NULL));
 }
 
+void parsercmd::cmdMAIN::addIntFUNC(std::string fname , cmdSTDFUNC* cQ)
+{
+   _internalFuncMap.insert(std::make_pair(fname,cQ));
+}
+
 /*!
 */
 void parsercmd::cmdMAIN::addUSERFUNC(FuncDeclaration* decl, cmdFUNC* cQ, TpdYYLtype loc)
@@ -1611,6 +1651,10 @@ parsercmd::cmdMAIN::~cmdMAIN(){
    for (functionMAP::iterator FMI = _funcMAP.begin(); FMI != _funcMAP.end(); FMI ++)
       delete FMI->second;
    _funcMAP.clear();
+   for (functionMAP::iterator FMI = _internalFuncMap.begin(); FMI != _internalFuncMap.end(); FMI ++)
+      delete FMI->second;
+   _internalFuncMap.clear();
+
 };
 
 //=============================================================================

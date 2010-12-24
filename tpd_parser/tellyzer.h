@@ -473,12 +473,14 @@ namespace  parsercmd {
       bool                       declValidate(const std::string&, const argumentLIST*, TpdYYLtype);
       cmdSTDFUNC*  const         getFuncBody(char*&, telldata::argumentQ*) const;
       void                       pushcmd(cmdVIRTUAL* cmd) {cmdQ.push_back(cmd);};
+      void                       pushcmd(cmdVIRTUAL*, bool);
       void                       pushblk()                {_blocks.push_front(this);};
       cmdBLOCK*                  popblk();
       void                       copyContents(cmdFUNC*);
       telldata::variableMAP*     copyVarLocal();
       void                       restoreVarLocal(telldata::variableMAP&);
       void                       initializeVarLocal();
+      void                       checkDbState();
       functionMAP const          funcMAP() const {return _funcMAP;}
       word                       undoDepth() {return _undoDepth;}
       void                       setUndoDepth(word ud) {_undoDepth = ud;}
@@ -489,7 +491,9 @@ namespace  parsercmd {
       cmdQUEUE                   cmdQ;      // list of commands
       static blockSTACK         _blocks;
       static functionMAP        _funcMAP;
+      static functionMAP        _internalFuncMap;
       static word               _undoDepth;
+      static bool               _dbUnsorted;
       telldata::typeID          _next_lcl_typeID;
    };
 
@@ -498,6 +502,7 @@ namespace  parsercmd {
                      cmdMAIN();
       int            execute();
       void           addFUNC(std::string, cmdSTDFUNC*);
+      void           addIntFUNC(std::string, cmdSTDFUNC*);
       void           addUSERFUNC(FuncDeclaration*, cmdFUNC*, TpdYYLtype);
       void           addUSERFUNCDECL(FuncDeclaration*, TpdYYLtype);
       void           addGlobalType(std::string, telldata::tell_type*);
@@ -508,7 +513,7 @@ namespace  parsercmd {
    class cmdSTDFUNC:public virtual cmdVIRTUAL {
    public:
                                  cmdSTDFUNC(argumentLIST* vm, telldata::typeID tt, bool eor/* = true*/):
-                                    arguments(vm), returntype(tt), _execOnRecovery(eor) {};
+                                    arguments(vm), returntype(tt), _execOnRecovery(eor), _needsDbResort(false) {};
       virtual int                execute() = 0;
       virtual void               undo() = 0;
       virtual void               undo_cleanup() = 0;
@@ -522,6 +527,7 @@ namespace  parsercmd {
       bool                       ignoreOnRecovery() { return _ignoreOnRecovery;}
       void                       set_ignoreOnRecovery(bool ior) {_ignoreOnRecovery = ior;}
       static void                setThreadExecution(bool te) {_threadExecution = te;}
+      bool                       needsDbResort() {return _needsDbResort;}
       virtual                   ~cmdSTDFUNC();
       friend void cmdMAIN::recoveryDone();
    protected:
@@ -531,6 +537,7 @@ namespace  parsercmd {
       bool                       _execOnRecovery;
       static bool                _ignoreOnRecovery;
       static bool                _threadExecution;
+      bool                       _needsDbResort;
    };
 
    class cmdFUNC:public cmdSTDFUNC, public cmdBLOCK {

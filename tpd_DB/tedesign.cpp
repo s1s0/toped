@@ -1027,6 +1027,27 @@ laydata::TdtData* laydata::TdtDesign::addBox(unsigned la, TP* p1, TP* p2 )
    return newshape;
 }
 
+laydata::TdtData* laydata::TdtDesign::putBox(unsigned la, TP* p1, TP* p2 )
+{
+   DBbox old_overlap(_target.edit()->cellOverlap());
+   QTreeTmp *actlay = _target.edit()->secureUnsortedLayer(la);
+   modified = true;
+   TP np1((*p1) * _target.rARTM());
+   TP np2((*p2) * _target.rARTM());
+   laydata::TdtData* newshape = DEBUG_NEW TdtBox(np1,np2);
+   actlay->put(newshape);
+   return newshape;
+}
+
+void laydata::TdtDesign::fixUnsorted()
+{
+   TdtCell* editTarget = _target.edit();
+   DBbox old_overlap(editTarget->cellOverlap());
+   editTarget->fixUnsorted();
+   if (editTarget->overlapChanged(old_overlap, this))
+      do {} while(validateCells());
+}
+
 laydata::TdtData* laydata::TdtDesign::addPoly(unsigned la, PointVector* pl)
 {
    laydata::ValidPoly check(*pl);
