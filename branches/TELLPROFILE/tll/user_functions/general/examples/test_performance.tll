@@ -1,0 +1,35 @@
+
+//demonstrates the easy of antenna design
+
+#include "config.tll"
+#include "../../technology/default_drc.tll"
+#include "../helper.tll"
+#include "../geometry.tll"
+#include "../wires.tll"
+
+newdesign("via_test");
+newcell("via");
+opencell("via");
+
+//start of the  design
+
+
+//placeVIAarray ( {10,10} , {13,13} , 1 , 2);
+//placeVIAarray ( {10,10} , {13.2,13.2} , 1 , 2);
+//placeVIAarray ( getpoint(), getpoint(), 1 , 2);
+placeVIAarray ( {200,30}, {15,15} ,  1 , 4);
+
+//needs roughly around  15 sec
+//placeVIAarray ({0,0}, {200,200}, 1, 2);
+
+// takes more than xx minutes on my 2.5 GHz system
+// placeVIAarray ({0,0}, {1000,1000}, 1, 2);
+
+//end of design
+
+//tdtsave();
+
+//convert to gds
+//gdsexport ("via",true, getgdslaymap(false),"via.gds", false);
+
+zoomall();

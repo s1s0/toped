@@ -1,0 +1,8 @@
+
+AT 17oct2010
+-----------
+- better detection of polygon holes for more complex designs
+  -> done 27nov2010
+* improve algorithm to detect minimal distance between two polygons (to 
+achive better speed)
+* replace the octave part with a TELL implementation
