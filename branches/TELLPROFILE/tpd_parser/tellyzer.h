@@ -472,15 +472,15 @@ namespace  parsercmd {
       bool                       defValidate(const std::string& ,const argumentLIST*, cmdFUNC*&);
       bool                       declValidate(const std::string&, const argumentLIST*, TpdYYLtype);
       cmdSTDFUNC*  const         getFuncBody(char*&, telldata::argumentQ*) const;
+      cmdSTDFUNC*  const         getIntFuncBody(std::string) const;
       void                       pushcmd(cmdVIRTUAL* cmd) {cmdQ.push_back(cmd);};
-      void                       pushcmd(cmdVIRTUAL*, bool);
       void                       pushblk()                {_blocks.push_front(this);};
       cmdBLOCK*                  popblk();
       void                       copyContents(cmdFUNC*);
       telldata::variableMAP*     copyVarLocal();
       void                       restoreVarLocal(telldata::variableMAP&);
       void                       initializeVarLocal();
-      void                       checkDbState();
+      bool                       checkDbState(bool);
       functionMAP const          funcMAP() const {return _funcMAP;}
       word                       undoDepth() {return _undoDepth;}
       void                       setUndoDepth(word ud) {_undoDepth = ud;}

@@ -283,7 +283,6 @@ entrance:
       statement                            {
       if (!yynerrs) 
       {
-         CMDBlock->checkDbState();
          CMDBlock->execute();
       }
       else
@@ -510,7 +509,7 @@ funccall:
       arguments ')'                        {
       parsercmd::cmdSTDFUNC *fc = CMDBlock->getFuncBody($1,$4);
       if (fc) {
-         CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdFUNCCALL(fc,$1), fc->needsDbResort());
+         CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdFUNCCALL(fc,$1));
          $$ = fc->gettype();
       }
       else {

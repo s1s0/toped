@@ -397,10 +397,10 @@ int tellstdfunc::intrnlSORT_DB::execute()
       laydata::TdtDesign* tDesign = (*dbLibDir)();
       tDesign->fixUnsorted();
    }
-//   else
-//   {
-//      assert(false);
-//   }
+   else
+   {
+      assert(false);
+   }
    DATC->unlockTDT(dbLibDir, false);
 }
 
