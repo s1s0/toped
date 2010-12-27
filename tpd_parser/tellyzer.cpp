@@ -1,4 +1,4 @@
-// //===========================================================================
+//===========================================================================
 //                                                                          =
 //   This program is free software; you can redistribute it and/or modify   =
 //   it under the terms of the GNU General Public License as published by   =
@@ -910,7 +910,15 @@ int parsercmd::cmdFUNCCALL::execute()
       return EXEC_ABORT;
    }
    LogFile.setFN(funcname);
-   try {fresult = funcbody->execute();}
+   try
+   {
+      if (!CMDBlock->checkDbState(funcbody->needsDbResort()))
+      {
+         cmdSTDFUNC* sortFunc = CMDBlock->getIntFuncBody("$sort_db");
+         sortFunc->execute();
+      }
+      fresult = funcbody->execute();
+   }
    catch (EXPTN) {return EXEC_ABORT;}
    funcbody->reduce_undo_stack();
    return fresult;
@@ -1143,18 +1151,15 @@ void parsercmd::cmdBLOCK::initializeVarLocal()
    }
 }
 
-void parsercmd::cmdBLOCK::checkDbState()
+bool parsercmd::cmdBLOCK::checkDbState(bool needsDbResort)
 {
-   if (_dbUnsorted)
+   if      ( needsDbResort && (!_dbUnsorted))
+      return (_dbUnsorted = true);
+   else if (!needsDbResort &&   _dbUnsorted )
    {
-      // insert an extra $sort_db call
-      std::string funcName = "$sort_db";
-      functionMAP::const_iterator MM = _internalFuncMap.find(funcName);
-      assert(MM != _internalFuncMap.end());
-      cmdSTDFUNC *fbody = MM->second;
-      cmdQ.push_back(DEBUG_NEW parsercmd::cmdFUNCCALL(fbody,funcName));
-      _dbUnsorted = false;
+      return (_dbUnsorted = false);
    }
+   else return true;
 }
 //=============================================================================
 parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
@@ -1172,21 +1177,13 @@ parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
    return fbody;
 }
 
-void parsercmd::cmdBLOCK::pushcmd(cmdVIRTUAL* cmd, bool needsDbResort)
+parsercmd::cmdSTDFUNC*  const parsercmd::cmdBLOCK::getIntFuncBody(std::string funcName) const
 {
-   if      ( needsDbResort && (!_dbUnsorted))
-      _dbUnsorted = true;
-   else if (!needsDbResort &&   _dbUnsorted)
-   {
-      // insert an extra $sort_db call
-      std::string funcName = "$sort_db";
-      functionMAP::const_iterator MM = _internalFuncMap.find(funcName);
-      assert(MM != _internalFuncMap.end());
-      cmdSTDFUNC *fbody = MM->second;
-      cmdQ.push_back(DEBUG_NEW parsercmd::cmdFUNCCALL(fbody,funcName));
-      _dbUnsorted = false;
-   }
-   cmdQ.push_back(cmd);
+   // retrieve the body of funcName
+   functionMAP::const_iterator MM = _internalFuncMap.find(funcName);
+   assert(MM != _internalFuncMap.end());
+   cmdSTDFUNC *fbody = MM->second;
+   return fbody;
 }
 
 bool  parsercmd::cmdBLOCK::defValidate(const std::string& fn, const argumentLIST* alst, cmdFUNC*& funcdef)
