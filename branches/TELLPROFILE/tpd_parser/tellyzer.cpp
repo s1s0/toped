@@ -1151,11 +1151,11 @@ void parsercmd::cmdBLOCK::initializeVarLocal()
    }
 }
 
-bool parsercmd::cmdBLOCK::checkDbState(bool needsDbResort)
+bool parsercmd::cmdBLOCK::checkDbState(SortDbRequirement needsDbResort)
 {
-   if      ( needsDbResort && (!_dbUnsorted))
+   if      ( (sdbrUNSORTED == needsDbResort) && (!_dbUnsorted))
       return (_dbUnsorted = true);
-   else if (!needsDbResort &&   _dbUnsorted )
+   else if ( (sdbrSORTED   == needsDbResort) &&   _dbUnsorted )
    {
       return (_dbUnsorted = false);
    }
@@ -1397,6 +1397,7 @@ parsercmd::cmdSTDFUNC::~cmdSTDFUNC() {
 parsercmd::cmdFUNC::cmdFUNC(argumentLIST* vm, telldata::typeID tt, bool declaration):
                         cmdSTDFUNC(vm,tt,true), cmdBLOCK(), _declaration(declaration)
 {
+   _needsDbResort = sdbrDONTCARE;
    _recursyLevel = 0;
    if (!_declaration)
    {
@@ -1668,7 +1669,7 @@ telldata::typeID parsercmd::UMinus(telldata::typeID op1, TpdYYLtype loc1) {
 //=============================================================================
 //     +      |real |point| box |
 //------------+-----+-----+-----+
-//   real     |  +  |shift| blow| *TODO
+//   real     |  +  |shift| blow| *TBD
 //   point    |shift|shift|shift| also:
 //   box      |blow |shift| or* | string + string => concatenation
 //-----------------------------------------------------------------------------
@@ -1724,7 +1725,7 @@ telldata::typeID parsercmd::Plus(telldata::typeID op1, telldata::typeID op2,
 //------------+------+-----+-----+
 //   real     |  x   |  -  |  -  |
 //   point    | shift|shift|  -  | 
-//   box      |shrink|shift| or* | * TODO
+//   box      |shrink|shift| or* | * TBD
 //-----------------------------------------------------------------------------
 telldata::typeID parsercmd::Minus(telldata::typeID op1, telldata::typeID op2,
                                                   TpdYYLtype loc1, TpdYYLtype loc2) {
