@@ -396,6 +396,7 @@ int tellstdfunc::intrnlSORT_DB::execute()
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
       tDesign->fixUnsorted();
+      LogFile << "// $sort_db( );"; LogFile.flush();
    }
    else
    {
