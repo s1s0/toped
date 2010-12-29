@@ -40,11 +40,10 @@ extern console::toped_logfile    LogFile;
 
 //=============================================================================
 tellstdfunc::stdADDBOX::stdADDBOX(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor, parsercmd::sdbrUNSORTED)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttwnd()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
-   _needsDbResort = parsercmd::sdbrUNSORTED;
 }
 
 void tellstdfunc::stdADDBOX::undo_cleanup()
@@ -98,10 +97,9 @@ int tellstdfunc::stdADDBOX::execute()
 
 //=============================================================================
 tellstdfunc::stdADDBOX_D::stdADDBOX_D(telldata::typeID retype, bool eor) :
-      stdADDBOX(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      stdADDBOX(DEBUG_NEW parsercmd::argumentLIST,retype,eor,parsercmd::sdbrUNSORTED)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttwnd()));
-   _needsDbResort = parsercmd::sdbrUNSORTED;
 }
 
 int tellstdfunc::stdADDBOX_D::execute()
@@ -184,13 +182,12 @@ int tellstdfunc::stdDRAWBOX_D::execute()
 
 //=============================================================================
 tellstdfunc::stdADDBOXr::stdADDBOXr(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor, parsercmd::sdbrUNSORTED)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
-   _needsDbResort = parsercmd::sdbrUNSORTED;
 }
 
 void tellstdfunc::stdADDBOXr::undo_cleanup()
@@ -248,12 +245,11 @@ int tellstdfunc::stdADDBOXr::execute()
 
 //=============================================================================
 tellstdfunc::stdADDBOXr_D::stdADDBOXr_D(telldata::typeID retype, bool eor) :
-      stdADDBOXr(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      stdADDBOXr(DEBUG_NEW parsercmd::argumentLIST,retype,eor, parsercmd::sdbrUNSORTED)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
-   _needsDbResort = parsercmd::sdbrUNSORTED;
 }
 
 int tellstdfunc::stdADDBOXr_D::execute()
@@ -264,12 +260,11 @@ int tellstdfunc::stdADDBOXr_D::execute()
 
 //=============================================================================
 tellstdfunc::stdADDBOXp::stdADDBOXp(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor, parsercmd::sdbrUNSORTED)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
-   _needsDbResort = parsercmd::sdbrUNSORTED;
 }
 
 void tellstdfunc::stdADDBOXp::undo_cleanup()
@@ -325,11 +320,10 @@ int tellstdfunc::stdADDBOXp::execute()
 
 //=============================================================================
 tellstdfunc::stdADDBOXp_D::stdADDBOXp_D(telldata::typeID retype, bool eor) :
-      stdADDBOXp(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      stdADDBOXp(DEBUG_NEW parsercmd::argumentLIST,retype,eor,parsercmd::sdbrUNSORTED)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
-   _needsDbResort = parsercmd::sdbrUNSORTED;
 }
 
 int tellstdfunc::stdADDBOXp_D::execute()
@@ -340,11 +334,10 @@ int tellstdfunc::stdADDBOXp_D::execute()
 
 //=============================================================================
 tellstdfunc::stdADDPOLY::stdADDPOLY(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor,parsercmd::sdbrUNSORTED)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_pnt)));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
-   _needsDbResort = parsercmd::sdbrUNSORTED;
 }
 
 void tellstdfunc::stdADDPOLY::undo_cleanup()
@@ -496,12 +489,11 @@ int tellstdfunc::stdDRAWPOLY_D::execute()
 
 //=============================================================================
 tellstdfunc::stdADDWIRE::stdADDWIRE(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor,parsercmd::sdbrUNSORTED)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_pnt)));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
-   _needsDbResort = parsercmd::sdbrUNSORTED;
 }
 
 void tellstdfunc::stdADDWIRE::undo_cleanup()
@@ -659,7 +651,7 @@ int tellstdfunc::stdDRAWWIRE_D::execute()
 
 //=============================================================================
 tellstdfunc::stdADDTEXT::stdADDTEXT(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor,parsercmd::sdbrUNSORTED)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
@@ -667,7 +659,6 @@ tellstdfunc::stdADDTEXT::stdADDTEXT(telldata::typeID retype, bool eor) :
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
-   _needsDbResort = parsercmd::sdbrUNSORTED;
 }
 
 void tellstdfunc::stdADDTEXT::undo_cleanup()
@@ -772,14 +763,13 @@ int tellstdfunc::stdADDTEXT_D::execute()
 
 //=============================================================================
 tellstdfunc::stdCELLREF::stdCELLREF(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor,parsercmd::sdbrUNSORTED)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
-   _needsDbResort = parsercmd::sdbrUNSORTED;
 }
 
 void tellstdfunc::stdCELLREF::undo_cleanup()

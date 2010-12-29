@@ -91,8 +91,8 @@
       void        undo();                                         \
       void        undo_cleanup();                                 \
    protected:                                                     \
-      name(parsercmd::argumentLIST* al,telldata::typeID retype, bool eor) : \
-                                         cmdSTDFUNC(al,retype, eor) {};\
+      name(parsercmd::argumentLIST* al,telldata::typeID retype, bool eor, DbSortState rDBt= sdbrSORTED) : \
+                                         cmdSTDFUNC(al,retype, eor, rDBt) {};\
    }
 #endif
 
