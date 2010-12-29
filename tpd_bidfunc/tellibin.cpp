@@ -384,6 +384,27 @@ int tellstdfunc::stdEXIT::execute()
    }
 }
 
+//============================================================================
+tellstdfunc::intrnlSORT_DB::intrnlSORT_DB(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{}
+
+int tellstdfunc::intrnlSORT_DB::execute()
+{
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      tDesign->fixUnsorted();
+      LogFile << "// $sort_db( );"; LogFile.flush();
+   }
+   else
+   {
+      assert(false);
+   }
+   DATC->unlockTDT(dbLibDir, false);
+}
+
 /*
 UNDO/REDO operation - some preliminary thoughts
    Where to fit it. Two major possibilities here:

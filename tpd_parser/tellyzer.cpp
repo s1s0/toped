@@ -1,4 +1,4 @@
-// //===========================================================================
+//===========================================================================
 //                                                                          =
 //   This program is free software; you can redistribute it and/or modify   =
 //   it under the terms of the GNU General Public License as published by   =
@@ -52,8 +52,12 @@ console::toped_logfile     LogFile;
 //-----------------------------------------------------------------------------
 // Table of defined functions
 parsercmd::functionMAP        parsercmd::cmdBLOCK::_funcMAP;
+// Table of internal functions (used by the parser internally)
+parsercmd::functionMAP        parsercmd::cmdBLOCK::_internalFuncMap;
 // Table of current nested blocks
 parsercmd::blockSTACK         parsercmd::cmdBLOCK::_blocks;
+//The state (to be) of the DB after the last function call
+bool                          parsercmd::cmdBLOCK::_dbUnsorted = false;
 // Operand stack
 telldata::operandSTACK        parsercmd::cmdVIRTUAL::OPstack;
 // UNDO Operand stack
@@ -906,7 +910,15 @@ int parsercmd::cmdFUNCCALL::execute()
       return EXEC_ABORT;
    }
    LogFile.setFN(funcname);
-   try {fresult = funcbody->execute();}
+   try
+   {
+      if (!CMDBlock->checkDbSortState(funcbody->dbSortStatus()))
+      {
+         cmdSTDFUNC* sortFunc = CMDBlock->getIntFuncBody("$sort_db");
+         sortFunc->execute();
+      }
+      fresult = funcbody->execute();
+   }
    catch (EXPTN) {return EXEC_ABORT;}
    funcbody->reduce_undo_stack();
    return fresult;
@@ -1138,6 +1150,17 @@ void parsercmd::cmdBLOCK::initializeVarLocal()
       VMI->second->initialize();
    }
 }
+
+bool parsercmd::cmdBLOCK::checkDbSortState(DbSortState needsDbResort)
+{
+   if      ( (sdbrUNSORTED == needsDbResort) && (!_dbUnsorted))
+      return (_dbUnsorted = true);
+   else if ( (sdbrSORTED   == needsDbResort) &&   _dbUnsorted )
+   {
+      return (_dbUnsorted = false);
+   }
+   else return true;
+}
 //=============================================================================
 parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
                                         (char*& fn, telldata::argumentQ* amap) const {
@@ -1151,6 +1174,15 @@ parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
       else fbody = NULL;
    }
    if (NULL == amap) delete arguMap;
+   return fbody;
+}
+
+parsercmd::cmdSTDFUNC*  const parsercmd::cmdBLOCK::getIntFuncBody(std::string funcName) const
+{
+   // retrieve the body of funcName
+   functionMAP::const_iterator MM = _internalFuncMap.find(funcName);
+   assert(MM != _internalFuncMap.end());
+   cmdSTDFUNC *fbody = MM->second;
    return fbody;
 }
 
@@ -1363,7 +1395,7 @@ parsercmd::cmdSTDFUNC::~cmdSTDFUNC() {
 
 //=============================================================================
 parsercmd::cmdFUNC::cmdFUNC(argumentLIST* vm, telldata::typeID tt, bool declaration):
-                        cmdSTDFUNC(vm,tt,true), cmdBLOCK(), _declaration(declaration)
+         cmdSTDFUNC(vm,tt,true, sdbrDONTCARE), cmdBLOCK(), _declaration(declaration)
 {
    _recursyLevel = 0;
    if (!_declaration)
@@ -1534,6 +1566,12 @@ int parsercmd::cmdMAIN::execute()
       if (EXEC_NEXT == retexec) retexec = a->execute();
       delete a;
    }
+   if (_dbUnsorted)
+   {
+      cmdSTDFUNC* sortFunc = getIntFuncBody("$sort_db");
+      sortFunc->execute();
+      _dbUnsorted = false;
+   }
    return retexec;
 }
 
@@ -1541,6 +1579,11 @@ void parsercmd::cmdMAIN::addFUNC(std::string fname , cmdSTDFUNC* cQ)
 {
    _funcMAP.insert(std::make_pair(fname,cQ));
    TpdPost::tellFnAdd(fname, cQ->callingConv(NULL));
+}
+
+void parsercmd::cmdMAIN::addIntFUNC(std::string fname , cmdSTDFUNC* cQ)
+{
+   _internalFuncMap.insert(std::make_pair(fname,cQ));
 }
 
 /*!
@@ -1611,6 +1654,10 @@ parsercmd::cmdMAIN::~cmdMAIN(){
    for (functionMAP::iterator FMI = _funcMAP.begin(); FMI != _funcMAP.end(); FMI ++)
       delete FMI->second;
    _funcMAP.clear();
+   for (functionMAP::iterator FMI = _internalFuncMap.begin(); FMI != _internalFuncMap.end(); FMI ++)
+      delete FMI->second;
+   _internalFuncMap.clear();
+
 };
 
 //=============================================================================
@@ -1627,7 +1674,7 @@ telldata::typeID parsercmd::UMinus(telldata::typeID op1, TpdYYLtype loc1) {
 //=============================================================================
 //     +      |real |point| box |
 //------------+-----+-----+-----+
-//   real     |  +  |shift| blow| *TODO
+//   real     |  +  |shift| blow| *TBD
 //   point    |shift|shift|shift| also:
 //   box      |blow |shift| or* | string + string => concatenation
 //-----------------------------------------------------------------------------
@@ -1683,7 +1730,7 @@ telldata::typeID parsercmd::Plus(telldata::typeID op1, telldata::typeID op2,
 //------------+------+-----+-----+
 //   real     |  x   |  -  |  -  |
 //   point    | shift|shift|  -  | 
-//   box      |shrink|shift| or* | * TODO
+//   box      |shrink|shift| or* | * TBD
 //-----------------------------------------------------------------------------
 telldata::typeID parsercmd::Minus(telldata::typeID op1, telldata::typeID op2,
                                                   TpdYYLtype loc1, TpdYYLtype loc2) {

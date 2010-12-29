@@ -53,6 +53,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(stdEXEC          );  //
    TELL_STDCMD_CLASSA(stdEXIT          );  //
    //
+   TELL_STDCMD_CLASSA(intrnlSORT_DB    );
 }
 
 #endif

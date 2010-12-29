@@ -93,6 +93,7 @@ namespace laydata {
       void           renameCell(TdtDefaultCell*, std::string);
       void           removeRefdCell(std::string&, CellDefList&, laydata::AtticList*, laydata::TdtLibDir*);
       TdtData*       addBox(unsigned la, TP* p1, TP* p2);
+      TdtData*       putBox(unsigned la, TP* p1, TP* p2);
       TdtData*       addPoly(unsigned, PointVector*);
       TdtData*       addWire(unsigned, PointVector*, WireWidth);
       TdtData*       addText(unsigned la, std::string& text, CTM& ori);
@@ -137,6 +138,7 @@ namespace laydata {
       void           checkActive(); //TODO remove this function
       bool           checkActiveCell();
       bool           checkValidRef(std::string);
+      void           fixUnsorted();
       void           storeViewPort(const DBbox& vp)  {_target.storeViewPort(vp);}
       DBbox*         getLastViewPort() const  { return _target.getLastViewPort();}
 

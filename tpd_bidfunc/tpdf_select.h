@@ -29,10 +29,8 @@
 
 #include "tpdf_common.h"
 namespace tellstdfunc {
-   using parsercmd::cmdSTDFUNC;
+   using namespace parsercmd;
    using telldata::argumentQ;
-   using parsercmd::argumentLIST;
-   using parsercmd::argumentTYPE;
 
    TELL_STDCMD_CLASSA_UNDO(stdSELECT      );  // undo - implemented
    TELL_STDCMD_CLASSB(stdSELECT_I     , stdSELECT     );
