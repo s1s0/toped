@@ -90,6 +90,7 @@ namespace  parsercmd {
    typedef  std::deque<void*>                            undoUQUEUE;
    typedef  std::pair<std::string,telldata::tell_var*>   argumentTYPE;
    typedef  std::deque<argumentTYPE*>                    argumentLIST;
+   typedef enum {sdbrSORTED, sdbrUNSORTED, sdbrDONTCARE} DbSortState;
 
    /*** cmdVIRTUAL **************************************************************
    > virtual class inherited by all tell classes
@@ -472,6 +473,7 @@ namespace  parsercmd {
       bool                       defValidate(const std::string& ,const argumentLIST*, cmdFUNC*&);
       bool                       declValidate(const std::string&, const argumentLIST*, TpdYYLtype);
       cmdSTDFUNC*  const         getFuncBody(char*&, telldata::argumentQ*) const;
+      cmdSTDFUNC*  const         getIntFuncBody(std::string) const;
       void                       pushcmd(cmdVIRTUAL* cmd) {cmdQ.push_back(cmd);};
       void                       pushblk()                {_blocks.push_front(this);};
       cmdBLOCK*                  popblk();
@@ -479,6 +481,7 @@ namespace  parsercmd {
       telldata::variableMAP*     copyVarLocal();
       void                       restoreVarLocal(telldata::variableMAP&);
       void                       initializeVarLocal();
+      bool                       checkDbSortState(DbSortState);
       functionMAP const          funcMAP() const {return _funcMAP;}
       word                       undoDepth() {return _undoDepth;}
       void                       setUndoDepth(word ud) {_undoDepth = ud;}
@@ -489,7 +492,9 @@ namespace  parsercmd {
       cmdQUEUE                   cmdQ;      // list of commands
       static blockSTACK         _blocks;
       static functionMAP        _funcMAP;
+      static functionMAP        _internalFuncMap;
       static word               _undoDepth;
+      static bool               _dbUnsorted;
       telldata::typeID          _next_lcl_typeID;
    };
 
@@ -498,6 +503,7 @@ namespace  parsercmd {
                      cmdMAIN();
       int            execute();
       void           addFUNC(std::string, cmdSTDFUNC*);
+      void           addIntFUNC(std::string, cmdSTDFUNC*);
       void           addUSERFUNC(FuncDeclaration*, cmdFUNC*, TpdYYLtype);
       void           addUSERFUNCDECL(FuncDeclaration*, TpdYYLtype);
       void           addGlobalType(std::string, telldata::tell_type*);
@@ -507,8 +513,8 @@ namespace  parsercmd {
 
    class cmdSTDFUNC:public virtual cmdVIRTUAL {
    public:
-                                 cmdSTDFUNC(argumentLIST* vm, telldata::typeID tt, bool eor/* = true*/):
-                                    arguments(vm), returntype(tt), _execOnRecovery(eor) {};
+                                 cmdSTDFUNC(argumentLIST* vm, telldata::typeID tt, bool eor, DbSortState rDBt = sdbrSORTED):
+                                    arguments(vm), returntype(tt), _execOnRecovery(eor), _dbSortStatus(rDBt) {};
       virtual int                execute() = 0;
       virtual void               undo() = 0;
       virtual void               undo_cleanup() = 0;
@@ -522,6 +528,7 @@ namespace  parsercmd {
       bool                       ignoreOnRecovery() { return _ignoreOnRecovery;}
       void                       set_ignoreOnRecovery(bool ior) {_ignoreOnRecovery = ior;}
       static void                setThreadExecution(bool te) {_threadExecution = te;}
+      DbSortState                dbSortStatus() {return _dbSortStatus;}
       virtual                   ~cmdSTDFUNC();
       friend void cmdMAIN::recoveryDone();
    protected:
@@ -531,6 +538,7 @@ namespace  parsercmd {
       bool                       _execOnRecovery;
       static bool                _ignoreOnRecovery;
       static bool                _threadExecution;
+      const DbSortState          _dbSortStatus;
    };
 
    class cmdFUNC:public cmdSTDFUNC, public cmdBLOCK {

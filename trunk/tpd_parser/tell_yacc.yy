@@ -281,7 +281,10 @@ input:
 
 entrance:
       statement                            {
-      if (!yynerrs)  CMDBlock->execute();
+      if (!yynerrs) 
+      {
+         CMDBlock->execute();
+      }
       else
       {
          CMDBlock = CMDBlock->cleaner();

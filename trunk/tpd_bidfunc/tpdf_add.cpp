@@ -40,7 +40,7 @@ extern console::toped_logfile    LogFile;
 
 //=============================================================================
 tellstdfunc::stdADDBOX::stdADDBOX(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor, parsercmd::sdbrUNSORTED)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttwnd()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
@@ -81,7 +81,7 @@ int tellstdfunc::stdADDBOX::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(tDesign->addBox(la, p1DB, p2DB),la);
+      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(tDesign->putBox(la, p1DB, p2DB),la);
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
       OPstack.push(bx); UNDOPstack.push_front(bx->selfcopy());
@@ -97,7 +97,7 @@ int tellstdfunc::stdADDBOX::execute()
 
 //=============================================================================
 tellstdfunc::stdADDBOX_D::stdADDBOX_D(telldata::typeID retype, bool eor) :
-      stdADDBOX(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      stdADDBOX(DEBUG_NEW parsercmd::argumentLIST,retype,eor,parsercmd::sdbrUNSORTED)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttwnd()));
 }
@@ -182,7 +182,7 @@ int tellstdfunc::stdDRAWBOX_D::execute()
 
 //=============================================================================
 tellstdfunc::stdADDBOXr::stdADDBOXr(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor, parsercmd::sdbrUNSORTED)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
@@ -228,7 +228,7 @@ int tellstdfunc::stdADDBOXr::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(tDesign->addBox(la, p1DB, p2DB), la);
+      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(tDesign->putBox(la, p1DB, p2DB), la);
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
       OPstack.push(bx);UNDOPstack.push_front(bx->selfcopy());
@@ -245,7 +245,7 @@ int tellstdfunc::stdADDBOXr::execute()
 
 //=============================================================================
 tellstdfunc::stdADDBOXr_D::stdADDBOXr_D(telldata::typeID retype, bool eor) :
-      stdADDBOXr(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      stdADDBOXr(DEBUG_NEW parsercmd::argumentLIST,retype,eor, parsercmd::sdbrUNSORTED)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
@@ -260,7 +260,7 @@ int tellstdfunc::stdADDBOXr_D::execute()
 
 //=============================================================================
 tellstdfunc::stdADDBOXp::stdADDBOXp(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor, parsercmd::sdbrUNSORTED)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
@@ -303,7 +303,7 @@ int tellstdfunc::stdADDBOXp::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(tDesign->addBox(la, p1DB, p2DB), la);
+      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(tDesign->putBox(la, p1DB, p2DB), la);
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
       OPstack.push(bx); UNDOPstack.push_front(bx->selfcopy());
@@ -320,7 +320,7 @@ int tellstdfunc::stdADDBOXp::execute()
 
 //=============================================================================
 tellstdfunc::stdADDBOXp_D::stdADDBOXp_D(telldata::typeID retype, bool eor) :
-      stdADDBOXp(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      stdADDBOXp(DEBUG_NEW parsercmd::argumentLIST,retype,eor,parsercmd::sdbrUNSORTED)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
@@ -334,7 +334,7 @@ int tellstdfunc::stdADDBOXp_D::execute()
 
 //=============================================================================
 tellstdfunc::stdADDPOLY::stdADDPOLY(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor,parsercmd::sdbrUNSORTED)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_pnt)));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
@@ -489,7 +489,7 @@ int tellstdfunc::stdDRAWPOLY_D::execute()
 
 //=============================================================================
 tellstdfunc::stdADDWIRE::stdADDWIRE(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor,parsercmd::sdbrUNSORTED)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_pnt)));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
@@ -651,7 +651,7 @@ int tellstdfunc::stdDRAWWIRE_D::execute()
 
 //=============================================================================
 tellstdfunc::stdADDTEXT::stdADDTEXT(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor,parsercmd::sdbrUNSORTED)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
@@ -763,7 +763,7 @@ int tellstdfunc::stdADDTEXT_D::execute()
 
 //=============================================================================
 tellstdfunc::stdCELLREF::stdCELLREF(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor,parsercmd::sdbrUNSORTED)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
