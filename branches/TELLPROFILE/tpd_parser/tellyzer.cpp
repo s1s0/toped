@@ -912,7 +912,7 @@ int parsercmd::cmdFUNCCALL::execute()
    LogFile.setFN(funcname);
    try
    {
-      if (!CMDBlock->checkDbState(funcbody->needsDbResort()))
+      if (!CMDBlock->checkDbSortState(funcbody->dbSortStatus()))
       {
          cmdSTDFUNC* sortFunc = CMDBlock->getIntFuncBody("$sort_db");
          sortFunc->execute();
@@ -1151,7 +1151,7 @@ void parsercmd::cmdBLOCK::initializeVarLocal()
    }
 }
 
-bool parsercmd::cmdBLOCK::checkDbState(SortDbRequirement needsDbResort)
+bool parsercmd::cmdBLOCK::checkDbSortState(DbSortState needsDbResort)
 {
    if      ( (sdbrUNSORTED == needsDbResort) && (!_dbUnsorted))
       return (_dbUnsorted = true);
@@ -1395,9 +1395,8 @@ parsercmd::cmdSTDFUNC::~cmdSTDFUNC() {
 
 //=============================================================================
 parsercmd::cmdFUNC::cmdFUNC(argumentLIST* vm, telldata::typeID tt, bool declaration):
-                        cmdSTDFUNC(vm,tt,true), cmdBLOCK(), _declaration(declaration)
+         cmdSTDFUNC(vm,tt,true, sdbrDONTCARE), cmdBLOCK(), _declaration(declaration)
 {
-   _needsDbResort = sdbrDONTCARE;
    _recursyLevel = 0;
    if (!_declaration)
    {
@@ -1566,6 +1565,12 @@ int parsercmd::cmdMAIN::execute()
       cmdVIRTUAL *a = cmdQ.front();cmdQ.pop_front();
       if (EXEC_NEXT == retexec) retexec = a->execute();
       delete a;
+   }
+   if (_dbUnsorted)
+   {
+      cmdSTDFUNC* sortFunc = getIntFuncBody("$sort_db");
+      sortFunc->execute();
+      _dbUnsorted = false;
    }
    return retexec;
 }

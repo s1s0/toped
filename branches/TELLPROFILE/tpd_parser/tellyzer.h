@@ -90,7 +90,7 @@ namespace  parsercmd {
    typedef  std::deque<void*>                            undoUQUEUE;
    typedef  std::pair<std::string,telldata::tell_var*>   argumentTYPE;
    typedef  std::deque<argumentTYPE*>                    argumentLIST;
-   typedef enum {sdbrSORTED, sdbrUNSORTED, sdbrDONTCARE} SortDbRequirement;
+   typedef enum {sdbrSORTED, sdbrUNSORTED, sdbrDONTCARE} DbSortState;
 
    /*** cmdVIRTUAL **************************************************************
    > virtual class inherited by all tell classes
@@ -481,7 +481,7 @@ namespace  parsercmd {
       telldata::variableMAP*     copyVarLocal();
       void                       restoreVarLocal(telldata::variableMAP&);
       void                       initializeVarLocal();
-      bool                       checkDbState(SortDbRequirement);
+      bool                       checkDbSortState(DbSortState);
       functionMAP const          funcMAP() const {return _funcMAP;}
       word                       undoDepth() {return _undoDepth;}
       void                       setUndoDepth(word ud) {_undoDepth = ud;}
@@ -513,8 +513,8 @@ namespace  parsercmd {
 
    class cmdSTDFUNC:public virtual cmdVIRTUAL {
    public:
-                                 cmdSTDFUNC(argumentLIST* vm, telldata::typeID tt, bool eor/* = true*/):
-                                    arguments(vm), returntype(tt), _execOnRecovery(eor), _needsDbResort(sdbrSORTED) {};
+                                 cmdSTDFUNC(argumentLIST* vm, telldata::typeID tt, bool eor, DbSortState rDBt = sdbrSORTED):
+                                    arguments(vm), returntype(tt), _execOnRecovery(eor), _dbSortStatus(rDBt) {};
       virtual int                execute() = 0;
       virtual void               undo() = 0;
       virtual void               undo_cleanup() = 0;
@@ -528,7 +528,7 @@ namespace  parsercmd {
       bool                       ignoreOnRecovery() { return _ignoreOnRecovery;}
       void                       set_ignoreOnRecovery(bool ior) {_ignoreOnRecovery = ior;}
       static void                setThreadExecution(bool te) {_threadExecution = te;}
-      SortDbRequirement          needsDbResort() {return _needsDbResort;}
+      DbSortState                dbSortStatus() {return _dbSortStatus;}
       virtual                   ~cmdSTDFUNC();
       friend void cmdMAIN::recoveryDone();
    protected:
@@ -538,7 +538,7 @@ namespace  parsercmd {
       bool                       _execOnRecovery;
       static bool                _ignoreOnRecovery;
       static bool                _threadExecution;
-      SortDbRequirement          _needsDbResort;
+      const DbSortState          _dbSortStatus;
    };
 
    class cmdFUNC:public cmdSTDFUNC, public cmdBLOCK {
