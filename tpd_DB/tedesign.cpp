@@ -1029,7 +1029,6 @@ laydata::TdtData* laydata::TdtDesign::addBox(unsigned la, TP* p1, TP* p2 )
 
 laydata::TdtData* laydata::TdtDesign::putBox(unsigned la, TP* p1, TP* p2 )
 {
-   DBbox old_overlap(_target.edit()->cellOverlap());
    QTreeTmp *actlay = _target.edit()->secureUnsortedLayer(la);
    modified = true;
    TP np1((*p1) * _target.rARTM());
@@ -1079,6 +1078,35 @@ laydata::TdtData* laydata::TdtDesign::addPoly(unsigned la, PointVector* pl)
    return newshape;
 }
 
+laydata::TdtData* laydata::TdtDesign::putPoly(unsigned la, PointVector* pl)
+{
+   laydata::ValidPoly check(*pl);
+   if (!check.valid()) {
+      std::ostringstream ost;
+      ost << "Polygon check fails - " << check.failType();
+      tell_log(console::MT_ERROR, ost.str());
+      return NULL;
+   }
+   laydata::TdtData* newshape = NULL;
+   QTreeTmp *actlay = _target.edit()->secureUnsortedLayer(la);
+   modified = true;
+   PointVector vpl = check.getValidated();
+   if (check.box())
+   {
+      TP p1(vpl[0] *_target.rARTM());
+      TP p2(vpl[2] *_target.rARTM());
+      newshape = DEBUG_NEW TdtBox(p1,p2);
+   }
+   else
+   {
+      for(PointVector::iterator PL = vpl.begin(); PL != vpl.end(); PL++)
+         (*PL) *= _target.rARTM();
+      newshape = DEBUG_NEW TdtPoly(vpl);
+   }
+   actlay->put(newshape);
+   return newshape;
+}
+
 laydata::TdtData* laydata::TdtDesign::addWire(unsigned la, PointVector* pl, WireWidth w)
 {
    laydata::ValidWire check(*pl,w);
@@ -1100,6 +1128,25 @@ laydata::TdtData* laydata::TdtDesign::addWire(unsigned la, PointVector* pl, Wire
    return newshape;
 }
 
+laydata::TdtData* laydata::TdtDesign::putWire(unsigned la, PointVector* pl, WireWidth w)
+{
+   laydata::ValidWire check(*pl,w);
+   if (!check.valid()) {
+      std::ostringstream ost;
+      ost << "Wire check fails - " << check.failType();
+      tell_log(console::MT_ERROR, ost.str());
+      return NULL;
+   }
+   QTreeTmp *actlay = _target.edit()->secureUnsortedLayer(la);
+   modified = true;
+   PointVector vpl = check.getValidated();
+   for(PointVector::iterator PL = vpl.begin(); PL != vpl.end(); PL++)
+      (*PL) *= _target.rARTM();
+   laydata::TdtData* newshape =  DEBUG_NEW TdtWire(vpl,w);;
+   actlay->put(newshape);
+   return newshape;
+}
+
 laydata::TdtData* laydata::TdtDesign::addText(unsigned la, std::string& text, CTM& ori)
 {
    DBbox old_overlap(_target.edit()->cellOverlap());
@@ -1109,6 +1156,16 @@ laydata::TdtData* laydata::TdtDesign::addText(unsigned la, std::string& text, CT
    laydata::TdtData* newshape = actlay->addText(text,ori);
    if (_target.edit()->overlapChanged(old_overlap, this))
       do {} while(validateCells());
+   return newshape;
+}
+
+laydata::TdtData* laydata::TdtDesign::putText(unsigned la, std::string& text, CTM& ori)
+{
+   QTreeTmp *actlay = _target.edit()->secureUnsortedLayer(la);
+   modified = true;
+   ori *= _target.rARTM();
+   laydata::TdtData* newshape = DEBUG_NEW TdtText(text,ori);
+   actlay->put(newshape);
    return newshape;
 }
 

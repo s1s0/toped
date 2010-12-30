@@ -707,7 +707,7 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    mblock->addFUNC("addwire"          ,(DEBUG_NEW                tellstdfunc::stdADDWIRE(telldata::tn_layout,false)));
    mblock->addFUNC("addwire"          ,(DEBUG_NEW              tellstdfunc::stdADDWIRE_D(telldata::tn_layout,false)));
    mblock->addFUNC("addtext"          ,(DEBUG_NEW                tellstdfunc::stdADDTEXT(telldata::tn_layout,false)));
-   mblock->addFUNC("addtext"          ,(DEBUG_NEW              tellstdfunc::stdADDTEXT_D(telldata::tn_layout,false)));
+   mblock->addFUNC("addtext"          ,(DEBUG_NEW               tellstdfunc::stdDRAWTEXT(telldata::tn_layout,false)));
    mblock->addFUNC("cellref"          ,(DEBUG_NEW                tellstdfunc::stdCELLREF(telldata::tn_layout,false)));
    mblock->addFUNC("cellref"          ,(DEBUG_NEW              tellstdfunc::stdCELLREF_D(telldata::tn_layout,false)));
    mblock->addFUNC("cellaref"         ,(DEBUG_NEW               tellstdfunc::stdCELLAREF(telldata::tn_layout,false)));

@@ -49,7 +49,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA_UNDO(stdDRAWWIRE    );  // undo - implemented
    TELL_STDCMD_CLASSB(stdDRAWWIRE_D   , stdDRAWWIRE   );
    TELL_STDCMD_CLASSA_UNDO(stdADDTEXT     );  // undo - implemented
-   TELL_STDCMD_CLASSB(stdADDTEXT_D    , stdADDTEXT    );
+   TELL_STDCMD_CLASSA_UNDO(stdDRAWTEXT    );  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdCELLREF     );  // undo - implemented
    TELL_STDCMD_CLASSB(stdCELLREF_D    , stdCELLREF    );
    TELL_STDCMD_CLASSA_UNDO(stdCELLAREF    );  // undo - implemented
