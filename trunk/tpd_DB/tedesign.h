@@ -95,8 +95,11 @@ namespace laydata {
       TdtData*       addBox(unsigned la, TP* p1, TP* p2);
       TdtData*       putBox(unsigned la, TP* p1, TP* p2);
       TdtData*       addPoly(unsigned, PointVector*);
+      TdtData*       putPoly(unsigned, PointVector*);
       TdtData*       addWire(unsigned, PointVector*, WireWidth);
+      TdtData*       putWire(unsigned, PointVector*, WireWidth);
       TdtData*       addText(unsigned la, std::string& text, CTM& ori);
+      TdtData*       putText(unsigned la, std::string& text, CTM& ori);
       TdtData*       addCellRef(laydata::CellDefin strdefn, CTM& ori);
       TdtData*       addCellARef(std::string&, CTM&, ArrayProperties&);
       void           addList(AtticList* /*, DWordSet&*/);
