@@ -955,7 +955,7 @@ int laydata::WireContour::xangle(word i1, word i2)
    const long double Pi = 3.1415926535897932384626433832795;
    if (_ldata[i1] == _ldata[i2])
    { //vertical line
-      assert(_ldata[i1+1] != _ldata[i2+1]); // make sure both points do not coinside
+      assert(_ldata[i1+1] != _ldata[i2+1]); // make sure both points do not coincide
       if   (_ldata[i2+1] > _ldata[i1+1]) return  90;
       else                               return -90;
    }

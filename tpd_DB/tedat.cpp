@@ -2649,7 +2649,7 @@ void laydata::ValidWire::angles()
 
 void laydata::ValidWire::endSegments()
 {
-   //shp_shortends
+   //TODO shp_shortends
 }
 
 /*! Implements  algorithm to check that the wire is not simple crossing.
@@ -2663,7 +2663,7 @@ void laydata::ValidWire::selfcrossing() {
    {
       fixingpoly.findCrossingPoints();
    }
-   catch (EXPTNpolyCross) {/*FIXME! this is temporary commented-out!*/ _status |= laydata::shp_cross; return;}
+   catch (EXPTNpolyCross) { _status |= laydata::shp_cross; return; }
    if (0 != fixingpoly.crossp() )
       _status |= laydata::shp_cross;
 
