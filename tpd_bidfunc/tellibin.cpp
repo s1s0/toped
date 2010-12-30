@@ -403,6 +403,7 @@ int tellstdfunc::intrnlSORT_DB::execute()
       assert(false);
    }
    DATC->unlockTDT(dbLibDir, false);
+   return true;
 }
 
 /*
