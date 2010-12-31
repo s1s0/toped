@@ -34,10 +34,10 @@ namespace laydata {
    class TdtLibrary {
    public:
       friend class TdtLibDir;
-      friend class TEDfile;
+      friend class InputTdtFile;
                         TdtLibrary(std::string, real, real, int);
       virtual          ~TdtLibrary();
-      virtual void      read(TEDfile* const);
+      virtual void      read(InputTdtFile* const);
       void              GDSwrite(DbExportFile&);
       void              CIFwrite(DbExportFile&);
       void              PSwrite(PSFile&, const TdtCell*, const layprop::DrawProperties&);
@@ -84,7 +84,7 @@ namespace laydata {
    public:
                      TdtDesign(std::string, time_t, time_t, real DBU, real UU);
       virtual       ~TdtDesign();
-      void           read(TEDfile* const);
+      void           read(InputTdtFile* const);
       void           write(TEDfile* const tedfile);
       int            readLibrary(TEDfile* const);
       TdtCell*       addCell(std::string name, laydata::TdtLibDir*);
@@ -93,9 +93,13 @@ namespace laydata {
       void           renameCell(TdtDefaultCell*, std::string);
       void           removeRefdCell(std::string&, CellDefList&, laydata::AtticList*, laydata::TdtLibDir*);
       TdtData*       addBox(unsigned la, TP* p1, TP* p2);
-      TdtData*       addPoly(unsigned, pointlist*);
-      TdtData*       addWire(unsigned, pointlist*, WireWidth);
+      TdtData*       putBox(unsigned la, TP* p1, TP* p2);
+      TdtData*       addPoly(unsigned, PointVector*);
+      TdtData*       putPoly(unsigned, PointVector*);
+      TdtData*       addWire(unsigned, PointVector*, WireWidth);
+      TdtData*       putWire(unsigned, PointVector*, WireWidth);
       TdtData*       addText(unsigned la, std::string& text, CTM& ori);
+      TdtData*       putText(unsigned la, std::string& text, CTM& ori);
       TdtData*       addCellRef(laydata::CellDefin strdefn, CTM& ori);
       TdtData*       addCellARef(std::string&, CTM&, ArrayProperties&);
       void           addList(AtticList* /*, DWordSet&*/);
@@ -123,7 +127,7 @@ namespace laydata {
       bool           groupSelected(std::string name, laydata::TdtLibDir*);
       ShapeList*     ungroupPrep(laydata::TdtLibDir*);
       AtticList*     ungroupThis(ShapeList*);
-      bool           cutPoly(pointlist& pl, AtticList** dasao);
+      bool           cutPoly(PointVector& pl, AtticList** dasao);
       bool           merge(AtticList** dasao) {return _target.edit()->mergeSelected(dasao);}
       bool           stretch(int bfactor, AtticList** dasao) {return _target.edit()->stretchSelected(bfactor, dasao);}
       unsigned int   numSelected() const;
@@ -137,6 +141,7 @@ namespace laydata {
       void           checkActive(); //TODO remove this function
       bool           checkActiveCell();
       bool           checkValidRef(std::string);
+      void           fixUnsorted();
       void           storeViewPort(const DBbox& vp)  {_target.storeViewPort(vp);}
       DBbox*         getLastViewPort() const  { return _target.getLastViewPort();}
 

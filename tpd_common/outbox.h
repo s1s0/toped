@@ -44,6 +44,7 @@
 
 //#define RENDER_PROFILING
 //#define GDSCONVERT_PROFILING
+//#define PARSER_PROFILING
 
 #ifdef RENDER_PROFILING
 #define TIME_PROFILING
@@ -51,13 +52,17 @@
 #ifdef GDSCONVERT_PROFILING
 #define TIME_PROFILING
 #endif
-
+#ifdef PARSER_PROFILING
+#define TIME_PROFILING
+#endif
 namespace console {
    typedef enum {
       MT_INFO = wxLOG_User + 1,
       MT_ERROR,
       MT_COMMAND,
       MT_GUIPROMPT,
+      MT_SHELLINFO,
+      MT_SHELLERROR,
       MT_GUIINPUT,
       MT_WARNING,
       MT_CELLNAME,
@@ -134,6 +139,7 @@ namespace console {
       wxString          cmd_mark;
       wxString          gui_mark;
       wxString          rply_mark;
+      wxString          shell_mark;
       DECLARE_EVENT_TABLE();
    };
 
@@ -224,6 +230,8 @@ class TpdPost {
       static void parseCommand(const wxString);
       static void tellFnAdd(const std::string, void*);
       static void tellFnSort();
+      static void execExt(const wxString);
+      static void execPipe(const wxString);
       static void quitApp(bool);
 
    private:

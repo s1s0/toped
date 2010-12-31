@@ -50,8 +50,10 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSB(stdDISTANCE_D   , stdDISTANCE   );
    TELL_STDCMD_CLASSA(stdCLEARRULERS   );
    TELL_STDCMD_CLASSA(stdLONGCURSOR    );  //
+   TELL_STDCMD_CLASSA(stdEXEC          );  //
    TELL_STDCMD_CLASSA(stdEXIT          );  //
    //
+   TELL_STDCMD_CLASSA(intrnlSORT_DB    );
 }
 
 #endif

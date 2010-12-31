@@ -91,8 +91,8 @@
       void        undo();                                         \
       void        undo_cleanup();                                 \
    protected:                                                     \
-      name(parsercmd::argumentLIST* al,telldata::typeID retype, bool eor) : \
-                                         cmdSTDFUNC(al,retype, eor) {};\
+      name(parsercmd::argumentLIST* al,telldata::typeID retype, bool eor, DbSortState rDBt= sdbrSORTED) : \
+                                         cmdSTDFUNC(al,retype, eor, rDBt) {};\
    }
 #endif
 
@@ -121,7 +121,7 @@
       void        undo() {};                                      \
       void        undo_cleanup() {};                              \
       int         argsOK(argumentQ* amap);                        \
-      nameList*   callingConv(const telldata::typeMAP*);          \
+      NameList*   callingConv(const telldata::typeMAP*);          \
    }
 #endif
 
@@ -145,7 +145,7 @@ namespace tellstdfunc {
                                     word cols = 0,
                                     word rows = 0
                                    );
-   pointlist*           t2tpoints(telldata::ttlist *, real);
+   PointVector*         t2tpoints(telldata::ttlist *, real);
    telldata::ttlist*    make_ttlaylist(laydata::SelectList*);
    telldata::ttlist*    make_ttlaylist(laydata::AtticList*);
    laydata::SelectList* get_ttlaylist(telldata::ttlist* llist);
@@ -158,7 +158,7 @@ namespace tellstdfunc {
    void                 UpdateLV(unsigned int);
    void                 RefreshGL();
    void                 gridON(byte No, bool status);
-   void                 updateLayerDefinitions(laydata::TdtLibDir*, nameList&, int);
+   void                 updateLayerDefinitions(laydata::TdtLibDir*, NameList&, int);
    void                 initFuncLib(wxFrame*, wxWindow*);
    laydata::SelectList* filter_selist(const laydata::SelectList*, word mask);
    laydata::AtticList*  replace_str(laydata::AtticList*, std::string);

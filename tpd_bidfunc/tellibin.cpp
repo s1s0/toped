@@ -55,8 +55,8 @@ int tellstdfunc::stdECHO::argsOK(argumentQ* amap) {
    return (!(amap->size() == 1));
 }
 
-nameList* tellstdfunc::stdECHO::callingConv(const telldata::typeMAP*) {
-   nameList* argtypes = DEBUG_NEW nameList();
+NameList* tellstdfunc::stdECHO::callingConv(const telldata::typeMAP*) {
+   NameList* argtypes = DEBUG_NEW NameList();
    argtypes->push_back("void");
    argtypes->push_back("<...anything...>");
    return argtypes;
@@ -341,6 +341,28 @@ int tellstdfunc::getPOINTLIST::execute() {
 }
 
 //=============================================================================
+tellstdfunc::stdEXEC::stdEXEC(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+}
+
+int tellstdfunc::stdEXEC::execute()
+{
+   std::string extCmd = getStringValue();
+   if (_threadExecution)
+   {
+      Console->waitExternal(wxString(extCmd.c_str(), wxConvUTF8));
+      Console->threadWaits4->Wait();
+   }
+   else
+   {
+//      tell_log(console::MT_WARNING,"exit command in recovery mode ignored");
+   }
+   return EXEC_NEXT;
+}
+
+//=============================================================================
 tellstdfunc::stdEXIT::stdEXIT(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {}
@@ -360,6 +382,28 @@ int tellstdfunc::stdEXIT::execute()
       tell_log(console::MT_WARNING,"exit command in recovery mode ignored");
       return EXEC_NEXT;
    }
+}
+
+//============================================================================
+tellstdfunc::intrnlSORT_DB::intrnlSORT_DB(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{}
+
+int tellstdfunc::intrnlSORT_DB::execute()
+{
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      tDesign->fixUnsorted();
+      LogFile << "// $sort_db( );"; LogFile.flush();
+   }
+   else
+   {
+      assert(false);
+   }
+   DATC->unlockTDT(dbLibDir, false);
+   return EXEC_NEXT;
 }
 
 /*

@@ -270,7 +270,7 @@ int8b DBbox::boxarea() const
 
 bool DBbox::visible(const CTM& tmtrx, int8b visualLimit) const
 {
-   pointlist ptlist;
+   PointVector ptlist;
    ptlist.reserve(4);
 
    ptlist.push_back(               (_p1) * tmtrx);
@@ -672,7 +672,7 @@ std::vector<std::string> split (const std::string& str, char delim)
    return ret;
 }
 
-int8b polyarea(const pointlist& shape)
+int8b polyarea(const PointVector& shape)
 {
    int8b area = 0ll;
    word size = shape.size();

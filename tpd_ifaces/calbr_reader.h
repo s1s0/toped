@@ -41,24 +41,17 @@
 namespace Calbr
 {
 
-   struct coord
+ /*  struct coord
    {
       real x, y;
-   };
+   };*/
 
    struct edge
    {
-      real x1, y1, x2, y2;
+      long x1, y1, x2, y2;
    };
 
-   struct cellNameStruct
-   {
-      bool spaceCoords;
-      int a[2][3];
-      std::string cellName;
-   };
-
-   typedef std::vector <Calbr::coord> CoordsVector;
+   typedef std::vector <TP> CoordsVector;
 
 
    class drcRenderer
@@ -71,6 +64,7 @@ namespace Calbr
          virtual bool         showError(unsigned int numError) {return false;};
          virtual void         showAll() {};
          virtual void         hideAll() {};
+         void                 setTranformation(CTM &ctm) {_ctm = ctm;};
          virtual void         addPoly(const CoordsVector   &coords)=0;
          virtual void         addLine(const edge &edge)=0;
          virtual void         endWriting()=0;
@@ -78,6 +72,7 @@ namespace Calbr
          void                 setCellName(const std::string & cellName) {_cellName = cellName;};
       protected:
          std::string          _cellName;
+         CTM                  _ctm;
    };
 
 
@@ -114,10 +109,22 @@ namespace Calbr
          drcRenderer*    _render;
    };
 
+   class drcRuleCheck; //forward declaration
+   typedef std::vector <Calbr::drcRuleCheck*> RuleChecksVector;
+
+	
+   struct cellNameStruct
+   {
+      bool              spaceCoords;
+      CTM               transfMatrix;
+      RuleChecksVector  _RuleChecks;
+   };
+
    class drcRuleCheck
    {
       public:
                               drcRuleCheck(unsigned int num, const std::string &name);
+                              drcRuleCheck(const drcRuleCheck& ruleCheck);
                               ~drcRuleCheck();
 
          unsigned int         num(void) const {return _num;};
@@ -133,7 +140,6 @@ namespace Calbr
          void                 addDescrString(const std::string & str);
          void                 addPolygon(const Calbr::drcPolygon &poly);
          void                 addEdge(const Calbr::drcEdge &theEdge);
-         void                  addCellNameStruct(Calbr::cellNameStruct *cnStruct);
          edge                 getZoom(long ordinal);
          edge                 getZoom(void);
       private:
@@ -148,24 +154,29 @@ namespace Calbr
          std::vector <std::string> _descrStrings;
          std::vector <Calbr::drcPolygon> _polygons;
          std::vector <Calbr::drcEdge> _edges;
-         cellNameStruct         *_CNStruct;
    };
 
-   typedef std::vector <Calbr::drcRuleCheck*> RuleChecksVector;
+
+
+
+	typedef std::map <std::string, cellNameStruct*> CellDRCMap;
 
    class CalbrFile
    {
       public:
                            CalbrFile(const std::string &fileName, drcRenderer *render);
                           ~CalbrFile();
-         void               readFile();
+         void              readFile();
          void              addResults();
+         void              addRuleCheck(drcRuleCheck* check);
          void              showError(const std::string & error, long  number);
          void              showCluster(const std::string & error);
          void              showAllErrors(void);
          void              hideAllErrors(void);
          std::string       explainError(word lay);
-         RuleChecksVector* results() {return &_RuleChecks;};
+         bool              isCellNameMode(void);
+         RuleChecksVector* resultsFlat(void) {return &_RuleChecks;};
+         CellDRCMap*       resultsCellNameMode(void) {return &_cellDRCMap;};
          bool              isOk(void)   {return _ok;}
          drcRenderer*      render() const {return _render;};
          std::string       cellName() {return _cellName;};
@@ -179,10 +190,15 @@ namespace Calbr
          bool              parse(unsigned int num);
          bool              parsePoly(char* ruleCheckName, drcPolygon & poly, int numberOfElem);
          bool              parseEdge(char* ruleCheckName, drcEdge & edge, int numberOfElem);
-         bool              parseCellNameMode(cellNameStruct *CNStruct, const std::string &parseString);
-         drcRuleCheck*      _curRuleCheck;
+         bool              parseCellNameMode(const std::string &parseString);
+         void              appendRuleCheckToCellName(void);
+         drcRuleCheck*     _curRuleCheck;
+         std::string       _curRuleCheckName;
          RuleChecksVector  _RuleChecks;
+			CellDRCMap			_cellDRCMap;
          bool              _ok;
+         bool              _isCellNameMode;
+         std::string       _curCellName; //use for CellNameMode;
          edge              _border;
          drcRenderer*      _render;
    };

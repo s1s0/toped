@@ -40,7 +40,7 @@ extern console::toped_logfile    LogFile;
 
 //=============================================================================
 tellstdfunc::stdADDBOX::stdADDBOX(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor, parsercmd::sdbrUNSORTED)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttwnd()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
@@ -81,7 +81,7 @@ int tellstdfunc::stdADDBOX::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(tDesign->addBox(la, p1DB, p2DB),la);
+      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(tDesign->putBox(la, p1DB, p2DB),la);
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
       OPstack.push(bx); UNDOPstack.push_front(bx->selfcopy());
@@ -97,7 +97,7 @@ int tellstdfunc::stdADDBOX::execute()
 
 //=============================================================================
 tellstdfunc::stdADDBOX_D::stdADDBOX_D(telldata::typeID retype, bool eor) :
-      stdADDBOX(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      stdADDBOX(DEBUG_NEW parsercmd::argumentLIST,retype,eor,parsercmd::sdbrUNSORTED)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttwnd()));
 }
@@ -182,7 +182,7 @@ int tellstdfunc::stdDRAWBOX_D::execute()
 
 //=============================================================================
 tellstdfunc::stdADDBOXr::stdADDBOXr(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor, parsercmd::sdbrUNSORTED)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
@@ -228,7 +228,7 @@ int tellstdfunc::stdADDBOXr::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(tDesign->addBox(la, p1DB, p2DB), la);
+      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(tDesign->putBox(la, p1DB, p2DB), la);
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
       OPstack.push(bx);UNDOPstack.push_front(bx->selfcopy());
@@ -245,7 +245,7 @@ int tellstdfunc::stdADDBOXr::execute()
 
 //=============================================================================
 tellstdfunc::stdADDBOXr_D::stdADDBOXr_D(telldata::typeID retype, bool eor) :
-      stdADDBOXr(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      stdADDBOXr(DEBUG_NEW parsercmd::argumentLIST,retype,eor, parsercmd::sdbrUNSORTED)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
@@ -260,7 +260,7 @@ int tellstdfunc::stdADDBOXr_D::execute()
 
 //=============================================================================
 tellstdfunc::stdADDBOXp::stdADDBOXp(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor, parsercmd::sdbrUNSORTED)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
@@ -303,7 +303,7 @@ int tellstdfunc::stdADDBOXp::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(tDesign->addBox(la, p1DB, p2DB), la);
+      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(tDesign->putBox(la, p1DB, p2DB), la);
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
       OPstack.push(bx); UNDOPstack.push_front(bx->selfcopy());
@@ -320,7 +320,7 @@ int tellstdfunc::stdADDBOXp::execute()
 
 //=============================================================================
 tellstdfunc::stdADDBOXp_D::stdADDBOXp_D(telldata::typeID retype, bool eor) :
-      stdADDBOXp(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      stdADDBOXp(DEBUG_NEW parsercmd::argumentLIST,retype,eor,parsercmd::sdbrUNSORTED)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
@@ -334,7 +334,7 @@ int tellstdfunc::stdADDBOXp_D::execute()
 
 //=============================================================================
 tellstdfunc::stdADDPOLY::stdADDPOLY(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor,parsercmd::sdbrUNSORTED)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_pnt)));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
@@ -375,8 +375,8 @@ int tellstdfunc::stdADDPOLY::execute()
       if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
       {
          laydata::TdtDesign* tDesign = (*dbLibDir)();
-         pointlist* plst = t2tpoints(pl,DBscale);
-         telldata::ttlayout* ply = DEBUG_NEW telldata::ttlayout(tDesign->addPoly(la,plst), la);
+         PointVector* plst = t2tpoints(pl,DBscale);
+         telldata::ttlayout* ply = DEBUG_NEW telldata::ttlayout(tDesign->putPoly(la,plst), la);
          delete plst;
          UNDOcmdQ.push_front(this);
          UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
@@ -398,7 +398,7 @@ int tellstdfunc::stdADDPOLY::execute()
 
 //=============================================================================
 tellstdfunc::stdADDPOLY_D::stdADDPOLY_D(telldata::typeID retype, bool eor) :
-      stdADDPOLY(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      stdADDPOLY(DEBUG_NEW parsercmd::argumentLIST,retype,eor,parsercmd::sdbrUNSORTED)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_pnt)));
 }
@@ -456,7 +456,7 @@ int tellstdfunc::stdDRAWPOLY::execute()
       if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
       {
          laydata::TdtDesign* tDesign = (*dbLibDir)();
-         pointlist* plst = t2tpoints(pl,DBscale);
+         PointVector* plst = t2tpoints(pl,DBscale);
          telldata::ttlayout* ply = DEBUG_NEW telldata::ttlayout(tDesign->addPoly(la,plst), la);
          delete plst;
          UNDOcmdQ.push_front(this);
@@ -489,7 +489,7 @@ int tellstdfunc::stdDRAWPOLY_D::execute()
 
 //=============================================================================
 tellstdfunc::stdADDWIRE::stdADDWIRE(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor,parsercmd::sdbrUNSORTED)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_pnt)));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
@@ -531,8 +531,8 @@ int tellstdfunc::stdADDWIRE::execute()
       if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
       {
          laydata::TdtDesign* tDesign = (*dbLibDir)();
-         pointlist* plst = t2tpoints(pl,DBscale);
-         telldata::ttlayout* wr = DEBUG_NEW telldata::ttlayout(tDesign->addWire(la,plst,
+         PointVector* plst = t2tpoints(pl,DBscale);
+         telldata::ttlayout* wr = DEBUG_NEW telldata::ttlayout(tDesign->putWire(la,plst,
                                     static_cast<laydata::WireWidth>(rint(w * DBscale))), la);
          delete plst;
          UNDOcmdQ.push_front(this);
@@ -555,7 +555,7 @@ int tellstdfunc::stdADDWIRE::execute()
 
 //=============================================================================
 tellstdfunc::stdADDWIRE_D::stdADDWIRE_D(telldata::typeID retype, bool eor) :
-      stdADDWIRE(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      stdADDWIRE(DEBUG_NEW parsercmd::argumentLIST,retype,eor,parsercmd::sdbrUNSORTED)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_pnt)));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
@@ -615,7 +615,7 @@ int tellstdfunc::stdDRAWWIRE::execute()
       if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
       {
          laydata::TdtDesign* tDesign = (*dbLibDir)();
-         pointlist* plst = t2tpoints(pl,DBscale);
+         PointVector* plst = t2tpoints(pl,DBscale);
          telldata::ttlayout* wr = DEBUG_NEW telldata::ttlayout(tDesign->addWire(la,plst,
                                     static_cast<laydata::WireWidth>(rint(w * DBscale))), la);
          delete plst;
@@ -651,7 +651,7 @@ int tellstdfunc::stdDRAWWIRE_D::execute()
 
 //=============================================================================
 tellstdfunc::stdADDTEXT::stdADDTEXT(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor,parsercmd::sdbrUNSORTED)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
@@ -711,7 +711,7 @@ int tellstdfunc::stdADDTEXT::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      telldata::ttlayout* tx = DEBUG_NEW telldata::ttlayout(tDesign->addText(la, text, ori), la);
+      telldata::ttlayout* tx = DEBUG_NEW telldata::ttlayout(tDesign->putText(la, text, ori), la);
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
       OPstack.push(tx);UNDOPstack.push_front(tx->selfcopy());
@@ -726,44 +726,89 @@ int tellstdfunc::stdADDTEXT::execute()
 }
 
 //=============================================================================
-tellstdfunc::stdADDTEXT_D::stdADDTEXT_D(telldata::typeID retype, bool eor) :
-      stdADDTEXT(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+tellstdfunc::stdDRAWTEXT::stdDRAWTEXT(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
 }
 
-int tellstdfunc::stdADDTEXT_D::execute()
+void tellstdfunc::stdDRAWTEXT::undo_cleanup()
 {
-   real   magn   = getOpValue();
-   std::string name = getStringValue();
+   getWordValue(UNDOPstack, false);
+   telldata::ttlayout* tx = static_cast<telldata::ttlayout*>(UNDOPstack.back());UNDOPstack.pop_back();
+   delete tx;
+}
+
+void tellstdfunc::stdDRAWTEXT::undo()
+{
+   TEUNDO_DEBUG("addtext(string, int, point, real, bool, real) UNDO");
+   telldata::ttlayout* tx = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
+   word la = getWordValue(UNDOPstack, true);
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      tDesign->destroyThis(tx->data(),la, dbLibDir);
+   }
+   DATC->unlockTDT(dbLibDir, true);
+   delete (tx);
+   RefreshGL();
+}
+
+int tellstdfunc::stdDRAWTEXT::execute()
+{
+   real   omagn     = getOpValue();
+   std::string text = getStringValue();
    CTM ftrans;
-   ftrans.Scale(magn,magn);
-   if ("" == name)
+   ftrans.Scale(omagn,omagn);
+   if ("" == text)
    {
       tell_log(console::MT_ERROR,"Empty string. Operation ignored");
       return EXEC_ABORT;
    }
-//   unsigned la = PROP
-//   DATC->setCmdLayer(get)
    // stop the thread and wait for input from the GUI
-   if (!tellstdfunc::waitGUInput(console::op_tbind, &OPstack, name, ftrans)) return EXEC_ABORT;
+   if (!tellstdfunc::waitGUInput(console::op_tbind, &OPstack, text, ftrans)) return EXEC_ABORT;
    // get the data from the stack
    telldata::ttbnd *bnd = static_cast<telldata::ttbnd*>(OPstack.top());OPstack.pop();
-
-   OPstack.push(DEBUG_NEW telldata::ttstring(name));
-   OPstack.push(getCurrentLayer());
-   OPstack.push(DEBUG_NEW telldata::ttpnt(bnd->p()));
-   OPstack.push(DEBUG_NEW telldata::ttreal(bnd->rot()));
-   OPstack.push(DEBUG_NEW telldata::ttbool(bnd->flx()));
-   OPstack.push(DEBUG_NEW telldata::ttreal(bnd->sc()));
+   //--------------------------------------------------------------------------
+   real              magn   = bnd->sc().value();
+   bool              flip   = bnd->flx().value();
+   real              angle  = bnd->rot().value();
+   telldata::ttpnt   rpnt   = bnd->p();
+   word              la     = getCurrentLayer()->value();
    delete bnd;
-   return stdADDTEXT::execute();
+
+   if (0.0 == magn)
+   {
+      tell_log(console::MT_ERROR,"Text with size 0. Operation ignored");
+      return EXEC_ABORT;
+   }
+   secureLayer(la);
+   real DBscale = PROPC->DBscale();
+   CTM ori(TP(rpnt.x(), rpnt.y(), DBscale), magn*DBscale/OPENGL_FONT_UNIT,angle,flip);
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      telldata::ttlayout* tx = DEBUG_NEW telldata::ttlayout(tDesign->addText(la, text, ori), la);
+      UNDOcmdQ.push_front(this);
+      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
+      OPstack.push(tx);UNDOPstack.push_front(tx->selfcopy());
+      LogFile << LogFile.getFN() << "(\"" << text << "\"," << la << "," << rpnt <<
+            "," << angle << "," << LogFile._2bool(flip) << "," << magn << ");";
+      LogFile.flush();
+   }
+   DATC->unlockTDT(dbLibDir, true);
+   RefreshGL();
+   return EXEC_NEXT;
+
+   //   return stdADDTEXT::execute();
 }
 
 //=============================================================================
 tellstdfunc::stdCELLREF::stdCELLREF(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor,parsercmd::sdbrUNSORTED)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));

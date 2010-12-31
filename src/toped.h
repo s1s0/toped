@@ -32,6 +32,8 @@
 #include <wx/glcanvas.h>
 #include <wx/laywin.h>
 #include <wx/aui/aui.h>
+#include <wx/process.h>
+#include <wx/timer.h>
 #include "ted_prompt.h"
 #include "layoutcanvas.h"
 #include "tui.h"
@@ -61,6 +63,18 @@ namespace tui {
       wxStaticText*        _selected;
    };
 
+   class ExternalProcess : public wxProcess {
+      public:
+                              ExternalProcess(wxEvtHandler* parent);
+         virtual void         OnTerminate(int pid, int status);
+         void                 OnTimer(wxTimerEvent& WXUNUSED(event));
+//         void                 OnTextEnter(wxCommandEvent& event);
+      private:
+         wxTimer              _idleTimer;
+         wxTextInputStream*   _tes;
+         wxTextInputStream*   _tis;
+         DECLARE_EVENT_TABLE();
+   };
    //-----------------------------------------------------------------------------
    class TopedFrame : public wxFrame {
    public:
@@ -70,9 +84,12 @@ namespace tui {
       virtual                ~TopedFrame();
 //      void                    OnSize(wxSizeEvent& event);
       void                    OnSashDrag(wxSashEvent& event);
+      void                    OnExecExt (wxCommandEvent&);
       void                    OnQuit (wxCommandEvent& WXUNUSED( event ));
       void                    OnCheckHW(wxCommandEvent&);
       void                    OnAbout(wxCommandEvent& WXUNUSED( event ));
+      void                    OnExecExtTextEnter(wxCommandEvent& event);
+
 //      wxMenuBar*              getMenuBar(void) {return GetMenuBar();}
       ResourceCenter*         resourceCenter(void) {return _resourceCenter;}
       console::ted_log*       logwin()   const {return _cmdlog;}
@@ -117,6 +134,7 @@ namespace tui {
       wxMenu*                 toolbarHorSizeMenu;
       wxMenu*                 gdsMenu;
       wxMenu*                 helpMenu;
+      ExternalProcess*        _extProc;
 
       // Sash layout stuff
       //wxControl*    mS_browsers;

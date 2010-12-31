@@ -145,20 +145,20 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
 
    class CifPoly : public CifData {
       public:
-                             CifPoly(CifData* last, pointlist*);
+                             CifPoly(CifData* last, PointVector*);
                             ~CifPoly();
          virtual void        import( ImportDB& iDB ) const;
       protected:
-         pointlist*          _poly;
+         PointVector*        _poly;
    };
 
    class CifWire : public CifData {
       public:
-                             CifWire(CifData* last, pointlist*, dword);
+                             CifWire(CifData* last, PointVector*, dword);
                             ~CifWire();
          virtual void        import( ImportDB& iDB ) const;
       protected:
-         pointlist*          _poly;
+         PointVector*        _poly;
          dword               _width;
    };
 
@@ -200,8 +200,8 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          const CifLayer* last() const                 {return _last;}
          const CifData* firstData() const             {return _first;}
          void           addBox(dword, dword, TP*, TP* direction = NULL);
-         void           addPoly(pointlist* poly);
-         void           addWire(pointlist* poly, dword width);
+         void           addPoly(PointVector* poly);
+         void           addWire(PointVector* poly, dword width);
          void           addLabelLoc(std::string, TP*);
          void           addLabelSig(std::string, TP*);
       private:
@@ -225,7 +225,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          real           b() const                     {return (real)_b;}
          CifLayer*      secureLayer(std::string);
          void           addRef(dword cell, CTM* location);
-         void           collectLayers(nameList&, bool) const;
+         void           collectLayers(NameList&, bool) const;
          void           linkReferences(CifFile&);
          ForeignCellTree* hierOut(ForeignCellTree*, CifStructure*);
          virtual void   import(ImportDB&);
@@ -240,15 +240,15 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          CIFSList       _children;
    };
 
-   class   CifFile : public DbImportFile {
+   class   CifFile : public ForeignDbFile {
       public:
                               CifFile(wxString);
                               ~CifFile();
          void                 addStructure(dword, dword = 1, dword = 1);
          void                 doneStructure();
          void                 addBox(dword, dword, TP*, TP* direction = NULL);
-         void                 addPoly(pointlist*);
-         void                 addWire(pointlist*, dword);
+         void                 addPoly(PointVector*);
+         void                 addWire(PointVector*, dword);
          void                 addRef(dword, CTM*);
          void                 addLabelLoc(char*, TP*, char* layname = NULL);
          void                 addLabelSig(char*, TP*);
@@ -261,15 +261,15 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          virtual double       libUnits() const {return 1e-8;}
          virtual void         hierOut();
          virtual std::string  libname() const {return getFileNameOnly();}
-         virtual void         getTopCells(nameList&) const;
+         virtual void         getTopCells(NameList&) const;
          virtual void         getAllCells(wxListBox&) const;
-         virtual void         convertPrep(const nameList&, bool);
-         virtual void         collectLayers(nameList&) const;
-         virtual bool         collectLayers(const std::string&, nameList& ) const;
+         virtual void         convertPrep(const NameList&, bool);
+         virtual void         collectLayers(NameList&) const;
+         virtual bool         collectLayers(const std::string&, NameList& ) const;
 
       protected:
          void                 linkReferences();
-         CifStructure*        _first;           //! poiter to the first defined cell
+         CifStructure*        _first;           //! pointer to the first defined cell
          CifStructure*        _current;         //! the working (current) cell
          CifStructure*        _default;         //! pointer to the default cell - i.e. the scratch pad
          CifLayer*            _curLay;          //!
@@ -293,6 +293,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          virtual bool   checkCellWritten(std::string) const;
          virtual void   registerCellWritten(std::string);
       private:
+         bool           pathConvert(PointVector&, unsigned, int4b );
          USMap*         _laymap;          //! Toped-CIF layer map
          SIMap          _cellmap;         //! tdt-cif map of all exported cells
          std::fstream   _file;            //! Output file handler

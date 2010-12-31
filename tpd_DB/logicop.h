@@ -55,7 +55,7 @@ namespace logicop {
    class logic {
    public:
       //! The class constructor preparing all data fields
-                        logic(const pointlist&, const pointlist&);
+                        logic(const PointVector&, const PointVector&);
                         ~logic();
       //! Do Benttley-Ottman modified
       void              findCrossingPoints();
@@ -69,21 +69,21 @@ namespace logicop {
       void              reset_visited();
    private:
       //! Convert a polygon with hole to simple polygon
-      pointlist*        hole2simple(const pointlist&, const pointlist&, const pcollection&);
+      PointVector*      hole2simple(const PointVector&, const PointVector&, const pcollection&);
       //
       void              getShape(pcollection&, polycross::VPoint*);
       //
       void              reorderCross();
       //
-      polycross::VPoint* checkCoinciding(const pointlist&, polycross::VPoint*);
+      polycross::VPoint* checkCoinciding(const PointVector&, polycross::VPoint*);
       //
-      polycross::VPoint* getFirstOutside(const pointlist&, polycross::VPoint*);
+      polycross::VPoint* getFirstOutside(const PointVector&, polycross::VPoint*);
       //
       void              cleanupDumped(polycross::VPoint*);
       //! The first input polygon
-      const pointlist&        _poly1;
+      const PointVector&      _poly1;
       //! The second input polygon
-      const pointlist&        _poly2;
+      const PointVector&      _poly2;
       //! The raw data, corresponding to _poly1, used by all logic methods
       polycross::VPoint*      _shape1;
       //! The raw data, corresponding to _poly2, used by all logic methods
@@ -110,11 +110,11 @@ namespace logicop {
    class stretcher {
    public:
       typedef std::vector<SSegment*> SSegments;
-                              stretcher(const pointlist&, int);
+                              stretcher(const PointVector&, int);
                              ~stretcher();
-      pointlist*              execute();
+      PointVector*            execute();
    private:
-      const pointlist&        _poly; //! The input polygon
+      const PointVector&      _poly; //! The input polygon
       SSegments               _segl;
    };
 
@@ -122,7 +122,7 @@ namespace logicop {
    class CrossFix   {
    public:
       //! The class constructor preparing all data fields
-                              CrossFix(const pointlist&, bool looped);
+                              CrossFix(const PointVector&, bool looped);
                              ~CrossFix();
       //! Do Benttley-Ottman modified
       void                    findCrossingPoints();
@@ -138,7 +138,7 @@ namespace logicop {
       //! The raw data, corresponding to _poly, used by all logic methods
       polycross::VPoint*      _shape;
       //! The input polygon
-      const pointlist&        _poly;
+      const PointVector&      _poly;
       polycross::segmentlist* _segl;
       word                    _crossp;
       bool                    _looped; // true - polygon; false wire

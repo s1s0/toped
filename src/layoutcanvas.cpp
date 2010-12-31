@@ -297,7 +297,6 @@ void tui::LayoutCanvas::snapshot(byte*& theImage, word& szW, word& szH)
    unsigned long imageSize = szW * 3 * szH;
    // Get the memory chunk
    theImage = DEBUG_NEW byte[imageSize];
-   //@TODO! A fairly big piece of memory will be required. Make sure that we have proper protections @new
 
    // Now the interesting part
    glPixelStorei(GL_PACK_ALIGNMENT  , 1);
@@ -339,10 +338,6 @@ void tui::LayoutCanvas::viewshift()
 
 bool tui::LayoutCanvas::diagnozeGL()
 {
-   //@TODO Check somewhere that RGBA mode is available!?
-   //@TODO The next call needs to be fitted in some kind of GL descructor
-   // gluDeleteTess(tessellObj);
-
    // Try to find-out which renderer to use on start-up
    bool VBOrendering;
    GLenum err = glewInit();
@@ -1188,7 +1183,6 @@ DBbox* tui::LayoutCanvas::zoomDown()
 
 tui::LayoutCanvas::~LayoutCanvas(){
    if (NULL != crossCur) delete crossCur;
-//   delete (laydata::TdtData::tessellObj);
 }
 
 void* tui::DrawThread::Entry()

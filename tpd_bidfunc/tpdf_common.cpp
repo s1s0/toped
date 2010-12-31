@@ -112,8 +112,8 @@ bool tellstdfunc::waitGUInput(int input_type, telldata::operandSTACK *OPstack,
 }
 
 //=============================================================================
-pointlist* tellstdfunc::t2tpoints(telldata::ttlist *pl, real DBscale) {
-   pointlist *plDB = DEBUG_NEW pointlist();
+PointVector* tellstdfunc::t2tpoints(telldata::ttlist *pl, real DBscale) {
+   PointVector *plDB = DEBUG_NEW PointVector();
    plDB->reserve(pl->size());
    telldata::ttpnt* pt;
    for (unsigned i = 0; i < pl->size(); i++) {
@@ -359,11 +359,11 @@ void tellstdfunc::gridON(byte No, bool status)
 }
 
 //=============================================================================
-void tellstdfunc::updateLayerDefinitions(laydata::TdtLibDir* LIBDIR, nameList& top_cells, int libID)
+void tellstdfunc::updateLayerDefinitions(laydata::TdtLibDir* LIBDIR, NameList& top_cells, int libID)
 {
    // get all the layers used in the design and define them using the default definition
    WordList ull;
-   for(nameList::const_iterator CTC= top_cells.begin(); CTC != top_cells.end(); CTC++)
+   for(NameList::const_iterator CTC= top_cells.begin(); CTC != top_cells.end(); CTC++)
       LIBDIR->collectUsedLays(*CTC, true, ull);
    ull.sort(); ull.unique();
    layprop::DrawProperties* drawProp;
@@ -429,9 +429,9 @@ void tellstdfunc::createDefaultTDT(std::string dbname,
 //=============================================================================
 // void tellstdfunc::makeGdsLays(ExtLayers& gdsLays)
 // {
-//    nameList allls;
+//    NameList allls;
 //    DATC->allLayers(allls);
-//    for (nameList::const_iterator CL = allls.begin(); CL != allls.end(); CL++)
+//    for (NameList::const_iterator CL = allls.begin(); CL != allls.end(); CL++)
 //    {
 //       WordSet data_types;
 //       data_types.insert(0);

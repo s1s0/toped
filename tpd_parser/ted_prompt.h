@@ -68,6 +68,7 @@ namespace console {
       virtual                ~ted_cmd();
       void                    parseCommand(wxString, bool thread=true);
       void                    waitGUInput(telldata::operandSTACK*,console::ACTIVE_OP, const CTM&);
+      void                    waitExternal(wxString);
       void                    getGUInput(bool from_keyboard = true);
       wxCondition*            threadWaits4;
       miniParser*             puc; // parse user coordinates
@@ -82,11 +83,15 @@ namespace console {
       bool                    exitRequested() const         { return _exitRequested;}
       bool                    cmdHistoryExists() const      {return !_cmd_history.empty();}
       void                    spawnParseThread(wxString);
+      void                    addTllIncludePath(wxString path){ _tllIncludePath.Add(path);}
+      void                    addTllEnvList(wxString pvar)  { _tllIncludePath.AddEnvList(pvar);}
+      bool                    findTellFile(const char*, std::string&);
    private:
       void                    onParseCommand(wxCommandEvent&);
       void                    onGetCommand(wxCommandEvent& WXUNUSED(event));
       void                    onKeyUP(wxKeyEvent&);
       void                    onGUInput(wxCommandEvent&);
+      void                    onExternalDone(wxCommandEvent&);
       void                    cancelLastPoint();
       void                    mouseLB(const telldata::ttpnt& p);
       void                    mouseRB();
@@ -99,7 +104,9 @@ namespace console {
       stringList::const_iterator _history_position;
       wxWindow*               _canvas;
       bool                    _canvas_invalid;
+      bool                    _execExternal;
       bool                    _exitRequested;
+      wxPathList              _tllIncludePath;
       DECLARE_EVENT_TABLE();
    };
 

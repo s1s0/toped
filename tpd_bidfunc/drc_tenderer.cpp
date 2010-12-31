@@ -49,6 +49,7 @@ extern const wxEventType         wxEVT_CANVAS_ZOOM;
 Calbr::drcTenderer::drcTenderer(laydata::DrcLibrary* library)
 {
    _ATDB = library;
+   _ctm.Initialize();
 }
 
 Calbr::drcTenderer::~drcTenderer()
@@ -72,25 +73,25 @@ void Calbr::drcTenderer::addPoly(const CoordsVector   &coords)
    if (_startDrawing)
    {
       _startDrawing = false;
-      _maxx = coords.begin()->x;
-      _minx = coords.begin()->x;
-      _maxy = coords.begin()->y;
-      _miny = coords.begin()->y;
+      _max = TP(coords.begin()->x(), coords.begin()->y())*_ctm;
+      _min = TP(coords.begin()->x(), coords.begin()->y())*_ctm;
    }
 
    if (_ATDB)
    {
       real DBscale = 1000;
-      pointlist plDB;
+      PointVector plDB;
       plDB.reserve(coords.size());
 
       for(CoordsVector::const_iterator it = coords.begin(); it!= coords.end(); ++it)
       {
-         _maxx = std::max(it->x, _maxx);
-         _maxy = std::max(it->y, _maxy);
-         _minx = std::min(it->x, _minx);
-         _miny = std::min(it->y, _miny);
-         plDB.push_back(TP(it->x, it->y, DBscale));
+         TP tempPoint = (*it)*_ctm;
+         _max.setX(std::max(tempPoint.x(), _max.x()));
+         _max.setY(std::max(tempPoint.y(), _max.y()));
+         _min.setX(std::min(tempPoint.x(), _min.x()));
+         _min.setY(std::min(tempPoint.y(), _min.y()));
+         plDB.push_back(tempPoint);
+         //plDB.push_back(TP(tempPoint.x(), tempPoint.y(), DBscale));
       }
       laydata::QTreeTmp* dwl = _DRCCell->secureUnsortedLayer(_numError);
       PROPC->addUnpublishedLay(_numError);
@@ -106,6 +107,7 @@ void Calbr::drcTenderer::addPoly(const CoordsVector   &coords)
       if (check.box())  
       {
          laydata::TdtBoxEXT *shape = DEBUG_NEW laydata::TdtBoxEXT(plDB[0], plDB[1]);
+         shape->transfer(_ctm);
          shape->setLong(_numError);
          dwl->put(shape);
       }
@@ -113,6 +115,7 @@ void Calbr::drcTenderer::addPoly(const CoordsVector   &coords)
       {
          laydata::TdtPolyEXT *shape = DEBUG_NEW laydata::TdtPolyEXT(plDB);
          shape->setLong(_numError);
+         shape->transfer(_ctm);
          dwl->put(shape);
       }
    }
@@ -120,28 +123,35 @@ void Calbr::drcTenderer::addPoly(const CoordsVector   &coords)
 
 void Calbr::drcTenderer::addLine(const edge &edge)
 {
+   TP tempPoint1 = TP(edge.x1, edge.y1)*_ctm;
+   TP tempPoint2 = TP(edge.x2, edge.y2)*_ctm;
    if (_startDrawing)
    {
-      _maxx = std::max(edge.x1, edge.x2);
-      _maxy = std::max(edge.y1, edge.y2);
-      _minx = std::min(edge.x1, edge.x2);
-      _miny = std::min(edge.y1, edge.y2);
+      _max = TP(edge.x1, edge.y1)*_ctm;
+      _min = TP(edge.x1, edge.y1)*_ctm;
    }
    else
    {
-      _maxx = std::max(_maxx, std::max(edge.x1, edge.x2));
-      _maxy = std::max(_maxy, std::max(edge.y1, edge.y2));
-      _minx = std::min(_minx, std::min(edge.x1, edge.x2));
-      _miny = std::min(_miny, std::min(edge.y1, edge.y2));
+
+
+      long maxx, maxy, minx, miny;
+      maxx = std::max(_max.x(), std::max(tempPoint1.x(), tempPoint2.x()));
+      maxy = std::max(_max.y(), std::max(tempPoint1.y(), tempPoint2.y()));
+      minx = std::min(_min.x(), std::min(tempPoint1.x(), tempPoint2.x()));
+      miny = std::min(_min.y(), std::min(tempPoint1.y(), tempPoint2.y()));
+      _max = TP(maxx, maxy);
+      _min = TP(minx, miny);
    }
 
    real DBscale = 1000 ;
-   //Convert drcEdge to pointlist
-   pointlist plDB;
+   //Convert drcEdge to PointVector
+   PointVector plDB;
    plDB.reserve(2);
 
-   plDB.push_back(TP(edge.x1, edge.y1, DBscale));
-   plDB.push_back(TP(edge.x2, edge.y2, DBscale));
+   plDB.push_back(tempPoint1);
+   plDB.push_back(tempPoint2);
+   //plDB.push_back(TP( tempPoint1.x(), tempPoint1.y(), DBscale));
+   //plDB.push_back(TP( tempPoint2.x(), tempPoint2.y(), DBscale));
 
    real      w = 0.01;   //width of line
    word      width = static_cast<word>(rint(w * DBscale));
@@ -225,8 +235,10 @@ bool Calbr::drcTenderer::showError(unsigned int numError)
 void Calbr::drcTenderer::zoom(const edge &edge)
 {
    real DBscale = PROPC->DBscale();
-   DBbox* box = DEBUG_NEW DBbox(TP(edge.x1, edge.y1, DBscale),
-                                TP(edge.x2, edge.y2, DBscale));
+   TP zoomPoint1 = TP(edge.x1, edge.y1);
+   TP zoomPoint2 = TP(edge.x2, edge.y2);
+   DBbox* box = DEBUG_NEW DBbox(zoomPoint1,
+                                zoomPoint2);
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(tui::ZOOM_WINDOW);
    eventZOOM.SetClientData(static_cast<void*>(box));

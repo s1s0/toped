@@ -61,18 +61,18 @@ namespace laydata {
    class QuadTree {
    public:
                            QuadTree();
-                           QuadTree(TEDfile* const, bool);
+                           QuadTree(InputTdtFile* const, bool);
                           ~QuadTree();
       void                 openGlDraw(layprop::DrawProperties&, const DataList*, bool) const;
       void                 openGlRender(tenderer::TopRend&, const DataList*) const;
 //      void                 visible_shapes(laydata::ShapeList*, const DBbox&, const CTM&, const CTM&, unsigned long&);
       short                clipType(tenderer::TopRend&) const;
-      void                 motionDraw(const layprop::DrawProperties&, ctmqueue&) const;
+      void                 motionDraw(const layprop::DrawProperties&, CtmQueue&) const;
       void                 add(TdtData* shape);
       TdtData*             addBox(const TP& p1, const TP& p2);
-      TdtData*             addPoly(pointlist& pl);
+      TdtData*             addPoly(PointVector& pl);
       TdtData*             addPoly(int4b* pl, unsigned psize);
-      TdtData*             addWire(pointlist& pl, WireWidth w);
+      TdtData*             addWire(PointVector& pl, WireWidth w);
       TdtData*             addText(std::string text, CTM trans);
       void                 write(TEDfile* const) const;
       void                 gdsWrite(DbExportFile&) const;
@@ -84,7 +84,7 @@ namespace laydata {
       void                 unselectInBox(DBbox&, DataList*, bool);
       bool                 deleteMarked(SH_STATUS stat=sh_selected, bool partselect=false);
       bool                 deleteThis(laydata::TdtData*);
-      void                 cutPolySelected(pointlist&, DBbox&, ShapeList**);
+      void                 cutPolySelected(PointVector&, DBbox&, ShapeList**);
       TdtData*             mergeSelected(TdtData*& shapeRef);
 /*      TdtData*             getfirstover(const TP);
       TdtData*             getnextover(const TP, laydata::TdtData*, bool& check);*/
@@ -150,9 +150,9 @@ namespace laydata {
                            QTreeTmp(QuadTree* trunk) : _trunk(trunk) {};
        void                put(TdtData* shape);
        void                putBox(const TP& p1, const TP& p2);
-       void                putPoly(pointlist& pl);
+       void                putPoly(PointVector& pl);
        void                putPoly(int4b* pl, unsigned psize);
-       void                putWire(pointlist& pl,word w);
+       void                putWire(PointVector& pl,word w);
        void                putText(std::string text, CTM trans);
        void                commit() {_trunk->resort(_data);}
    private:

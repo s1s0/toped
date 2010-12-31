@@ -35,7 +35,7 @@ namespace laydata
    {
    public:
                           TdtBoxEXT(const TP& p1, const TP& p2):TdtBox(p1, p2) {};
-                          TdtBoxEXT(TEDfile* const tedfile):TdtBox(tedfile) {};
+                          TdtBoxEXT(InputTdtFile* const tedfile):TdtBox(tedfile) {};
                          ~TdtBoxEXT() {};
       virtual void        setLong(long extLong);
       virtual long        getLong(void);
@@ -52,9 +52,9 @@ namespace laydata
    class TdtPolyEXT : public TdtPoly   
    {
     public:
-                          TdtPolyEXT(const pointlist& plist):TdtPoly(plist) {};
+                          TdtPolyEXT(const PointVector& plist):TdtPoly(plist) {};
                           TdtPolyEXT(int4b* plist, unsigned psize):TdtPoly(plist, psize) {};
-                          TdtPolyEXT(TEDfile* const tedfile):TdtPoly(tedfile) {};
+                          TdtPolyEXT(InputTdtFile* const tedfile):TdtPoly(tedfile) {};
                          ~TdtPolyEXT() {};
       virtual void        setLong(long extLong);
       virtual long        getLong(void);
@@ -72,9 +72,9 @@ namespace laydata
    class TdtWireEXT : public TdtWire
    {
     public:
-                          TdtWireEXT(const pointlist& plist, word layno):TdtWire(plist, layno) {};
+                          TdtWireEXT(const PointVector& plist, word layno):TdtWire(plist, layno) {};
                           TdtWireEXT(int4b* plist, unsigned psize, word layno):TdtWire(plist, psize, layno) {};
-                          TdtWireEXT(TEDfile* const tedfile): TdtWire(tedfile) {};
+                          TdtWireEXT(InputTdtFile* const tedfile): TdtWire(tedfile) {};
                          ~TdtWireEXT() {};
       virtual void        setLong(long extLong);
       virtual long        getLong(void);
