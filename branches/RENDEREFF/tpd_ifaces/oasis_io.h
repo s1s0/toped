@@ -223,7 +223,7 @@ namespace Oasis {
                            PointList(const PointList&);
                            PointList(OasisInFile&, PointListType);
                           ~PointList();
-         void              calcPoints(pointlist&, int4b, int4b, bool poly=true);
+         void              calcPoints(PointVector&, int4b, int4b, bool poly=true);
          dword             vcount()          {return _vcount;}
          int4b*            delarr()          {return _delarr;}
          PointList&        operator = (const PointList&);
@@ -234,12 +234,12 @@ namespace Oasis {
          void              readOctangular(OasisInFile&);
          void              readAllAngle(OasisInFile&);
          void              readDoubleDelta(OasisInFile&);
-         void              calcManhattanH(pointlist&, int4b, int4b, bool);
-         void              calcManhattanV(pointlist&, int4b, int4b, bool);
-         void              calcManhattanE(pointlist&, int4b, int4b);
-         void              calcOctangular(pointlist&, int4b, int4b);
-         void              calcAllAngle(pointlist&, int4b, int4b);
-         void              calcDoubleDelta(pointlist&, int4b, int4b);
+         void              calcManhattanH(PointVector&, int4b, int4b, bool);
+         void              calcManhattanV(PointVector&, int4b, int4b, bool);
+         void              calcManhattanE(PointVector&, int4b, int4b);
+         void              calcOctangular(PointVector&, int4b, int4b);
+         void              calcAllAngle(PointVector&, int4b, int4b);
+         void              calcDoubleDelta(PointVector&, int4b, int4b);
          PointListType     _pltype; //! Oasis point list type
          dword             _vcount; //! Number of vertexes in the list
          int4b*            _delarr; //! Delta sequence in XYXY... array
@@ -340,7 +340,7 @@ namespace Oasis {
          void              readRepetitions(OasisInFile&);
          void              readExtensions(OasisInFile&);
          void              updateContents(int2b, int2b);
-         void              genCTrapezoids(OasisInFile&, pointlist&, int4b, int4b, int4b, int4b, word);
+         void              genCTrapezoids(OasisInFile&, PointVector&, int4b, int4b, int4b, int4b, word);
          void              initModals();
          //
          ModalVar<dword>   _mod_layer       ; //! OASIS modal variable layer
@@ -377,7 +377,7 @@ namespace Oasis {
 
    class CBlockInflate : public z_stream {
       public:
-                           CBlockInflate(DbImportFile&, wxFileOffset, dword, dword);
+                           CBlockInflate(ForeignDbFile&, wxFileOffset, dword, dword);
          void              readUncompressedBuffer(void *pBuf, size_t nCount);
          bool              endOfBuffer() const  {return _bufOffset == _bufSize;}
          wxFileOffset      startPosInFile() const {return _startPosInFile;}
@@ -417,7 +417,7 @@ namespace Oasis {
          static const dword   _crc32AllBits;
    };
 
-   class OasisInFile : public DbImportFile {
+   class OasisInFile : public ForeignDbFile {
       public:
          typedef std::map<std::string, Cell*> DefinitionMap;
                               OasisInFile(wxString);
@@ -440,9 +440,9 @@ namespace Oasis {
          ValidationScheme     validation() const {return _validation;}
          dword                signature() const  {return _signature;}
 
-         virtual void         getTopCells(nameList&) const;
+         virtual void         getTopCells(NameList&) const;
          virtual void         getAllCells(wxListBox&) const;
-         virtual void         convertPrep(const nameList&, bool);
+         virtual void         convertPrep(const NameList&, bool);
          //----------------------------------------------------------------------
          byte                 getByte();
          qword                getUnsignedInt(byte);

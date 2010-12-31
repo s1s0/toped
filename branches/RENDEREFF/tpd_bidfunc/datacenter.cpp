@@ -78,7 +78,7 @@ DataCenter::~DataCenter()
 bool DataCenter::GDSparse(std::string filename)
 {
    bool status = true;
-   DbImportFile* AGDSDB = NULL;
+   ForeignDbFile* AGDSDB = NULL;
    if (lockGds(AGDSDB))
    {
       std::string news = "Removing existing GDS data from memory...";
@@ -113,7 +113,7 @@ bool DataCenter::GDSparse(std::string filename)
 
 void DataCenter::GDSclose()
 {
-   DbImportFile* AGDSDB = NULL;
+   ForeignDbFile* AGDSDB = NULL;
    if (lockGds(AGDSDB))
    {
       delete AGDSDB;
@@ -124,7 +124,7 @@ void DataCenter::GDSclose()
 
 void DataCenter::CIFclose()
 {
-   DbImportFile* ACIFDB = NULL;
+   ForeignDbFile* ACIFDB = NULL;
    if (lockCif(ACIFDB))
    {
       delete ACIFDB;
@@ -135,7 +135,7 @@ void DataCenter::CIFclose()
 
 void DataCenter::OASclose()
 {
-   DbImportFile* AOASDB = NULL;
+   ForeignDbFile* AOASDB = NULL;
    if (lockOas(AOASDB))
    {
       delete AOASDB;
@@ -147,7 +147,7 @@ void DataCenter::OASclose()
 bool DataCenter::CIFparse(std::string filename)
 {
    bool status = true;
-   DbImportFile* ACIFDB = NULL;
+   ForeignDbFile* ACIFDB = NULL;
    if (lockCif(ACIFDB))
    {
       std::string news = "Removing existing CIF data from memory...";
@@ -175,10 +175,10 @@ bool DataCenter::CIFparse(std::string filename)
    return status;
 }
 
-bool DataCenter::cifGetLayers(nameList& cifLayers)
+bool DataCenter::cifGetLayers(NameList& cifLayers)
 {
    bool ret_value = false;
-   DbImportFile* ACIFDB = NULL;
+   ForeignDbFile* ACIFDB = NULL;
    if (lockCif(ACIFDB))
    {
       ACIFDB->collectLayers(cifLayers);
@@ -191,7 +191,7 @@ bool DataCenter::cifGetLayers(nameList& cifLayers)
 bool DataCenter::gdsGetLayers(ExtLayers& gdsLayers)
 {
    bool ret_value = false;
-   DbImportFile* AGDSDB = NULL;
+   ForeignDbFile* AGDSDB = NULL;
    if (lockGds(AGDSDB))
    {
       AGDSDB->collectLayers(gdsLayers);
@@ -204,7 +204,7 @@ bool DataCenter::gdsGetLayers(ExtLayers& gdsLayers)
 bool DataCenter::oasGetLayers(ExtLayers& oasLayers)
 {
    bool ret_value = false;
-   DbImportFile* AOASDB = NULL;
+   ForeignDbFile* AOASDB = NULL;
    if (lockOas(AOASDB))
    {
       AOASDB->collectLayers(oasLayers);
@@ -218,7 +218,7 @@ bool DataCenter::OASParse(std::string filename)
 {
    bool status = true;
 
-   DbImportFile* AOASDB = NULL;
+   ForeignDbFile* AOASDB = NULL;
    if (lockOas(AOASDB))
    {
       std::string news = "Removing existing OASIS data from memory...";
@@ -331,7 +331,7 @@ void DataCenter::unlockTDT(laydata::TdtLibDir* tdt_db, bool throwexception)
    if(NULL != _bpSync) _bpSync->Signal();
 }
 
-bool DataCenter::lockGds(DbImportFile*& gds_db)
+bool DataCenter::lockGds(ForeignDbFile*& gds_db)
 {
    if (wxMUTEX_DEAD_LOCK == _GDSLock.Lock())
    {
@@ -346,7 +346,7 @@ bool DataCenter::lockGds(DbImportFile*& gds_db)
    }
 }
 
-void DataCenter::unlockGds(DbImportFile*& gds_db, bool throwexception)
+void DataCenter::unlockGds(ForeignDbFile*& gds_db, bool throwexception)
 {
    _GDSDB = gds_db;
    VERIFY(wxMUTEX_NO_ERROR == _GDSLock.Unlock());
@@ -357,7 +357,7 @@ void DataCenter::unlockGds(DbImportFile*& gds_db, bool throwexception)
    gds_db = NULL;
 }
 
-bool DataCenter::lockCif(DbImportFile*& cif_db)
+bool DataCenter::lockCif(ForeignDbFile*& cif_db)
 {
    if (wxMUTEX_DEAD_LOCK == _CIFLock.Lock())
    {
@@ -372,7 +372,7 @@ bool DataCenter::lockCif(DbImportFile*& cif_db)
    }
 }
 
-void DataCenter::unlockCif(DbImportFile*& cif_db, bool throwexception)
+void DataCenter::unlockCif(ForeignDbFile*& cif_db, bool throwexception)
 {
    _CIFDB = cif_db;
    VERIFY(wxMUTEX_NO_ERROR == _CIFLock.Unlock());
@@ -383,7 +383,7 @@ void DataCenter::unlockCif(DbImportFile*& cif_db, bool throwexception)
    cif_db = NULL;
 }
 
-bool DataCenter::lockOas(DbImportFile*& oasis_db)
+bool DataCenter::lockOas(ForeignDbFile*& oasis_db)
 {
    if (wxMUTEX_DEAD_LOCK == _OASLock.Lock())
    {
@@ -398,7 +398,7 @@ bool DataCenter::lockOas(DbImportFile*& oasis_db)
    }
 }
 
-void DataCenter::unlockOas(DbImportFile*& oasis_db, bool throwexception)
+void DataCenter::unlockOas(ForeignDbFile*& oasis_db, bool throwexception)
 {
    _OASDB = oasis_db;
    VERIFY(wxMUTEX_NO_ERROR == _OASLock.Unlock());
@@ -957,17 +957,17 @@ LayerMapCif* DataCenter::secureCifLayMap(const layprop::DrawProperties* drawProp
    USMap theMap;
    if (import)
    {// Generate the default CIF layer map for import
-      nameList cifLayers;
+      NameList cifLayers;
       cifGetLayers(cifLayers);
       word laynum = 1;
-      for ( nameList::const_iterator CCL = cifLayers.begin(); CCL != cifLayers.end(); CCL++ )
+      for ( NameList::const_iterator CCL = cifLayers.begin(); CCL != cifLayers.end(); CCL++ )
          theMap[laynum] = *CCL;
    }
    else
    {// Generate the default CIF layer map for export
-      nameList tdtLayers;
+      NameList tdtLayers;
       drawProp->allLayers(tdtLayers);
-      for ( nameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
+      for ( NameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
       {
          std::ostringstream ciflayname;
          unsigned layno = drawProp->getLayerNo( *CDL );
@@ -1004,9 +1004,9 @@ LayerMapExt* DataCenter::secureGdsLayMap(const layprop::DrawProperties* drawProp
       }
       else
       { // generate default export GDS layer map
-         nameList tdtLayers;
+         NameList tdtLayers;
          drawProp->allLayers(tdtLayers);
-         for ( nameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
+         for ( NameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
          {
             std::ostringstream dtypestr;
             dtypestr << drawProp->getLayerNo( *CDL )<< "; 0";

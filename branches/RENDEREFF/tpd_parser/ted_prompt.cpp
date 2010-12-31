@@ -29,6 +29,7 @@
 #include <string>
 #include <wx/string.h>
 #include <wx/regex.h>
+#include <wx/filename.h>
 #include "tuidefs.h"
 #include "ted_prompt.h"
 #include "tell_yacc.h"
@@ -71,6 +72,8 @@ extern YYLTYPE telllloc; // parser current location - global variable, defined i
 console::ted_cmd*           Console = NULL;
 extern const wxEventType    wxEVT_CONSOLE_PARSE;
 extern const wxEventType    wxEVT_CANVAS_ZOOM;
+extern const wxEventType    wxEVT_EXECEXTDONE;
+
 
 //==============================================================================
 bool console::patternFound(const wxString templ,  wxString str) {
@@ -298,6 +301,10 @@ void* console::parse_thread::Entry()
    telllloc.filename = NULL;
    parsercmd::cmdSTDFUNC::setThreadExecution(true);
    TpdPost::toped_status(TSTS_THREADON, command);
+
+#ifdef PARSER_PROFILING
+      HiResTimer profTimer;
+#endif
    try {
       void* b = tell_scan_string( command.mb_str(wxConvUTF8) );
       tellparse();
@@ -309,7 +316,9 @@ void* console::parse_thread::Entry()
       // but it could be the file system or dynamic memory
       //@TODO check for available dynamic memory
    }
-
+#ifdef PARSER_PROFILING
+      profTimer.report("Time elapsed by the last parser run: ");
+#endif
    _mutex.Unlock();
    if (Console->exitRequested())
    {
@@ -348,6 +357,7 @@ console::ted_cmd::ted_cmd(wxWindow *parent, wxWindow *canvas) :
 {
    _canvas = canvas;
    _exitRequested = false;
+   _execExternal  = false;
    threadWaits4 = DEBUG_NEW wxCondition(parse_thread::_mutex);
    VERIFY(threadWaits4->IsOk());
    _mouseIN_OK = true;
@@ -367,6 +377,11 @@ console::ted_cmd::ted_cmd(wxWindow *parent, wxWindow *canvas) :
 void console::ted_cmd::onGetCommand(wxCommandEvent& WXUNUSED(event))
 {
    if (puc)  getGUInput(); // run the local GUInput parser
+   else if (_execExternal)
+   {
+      TpdPost::execPipe(GetValue());
+      Clear();
+   }
    else {
       wxString command = GetValue();
       tell_log(MT_COMMAND, command);
@@ -527,6 +542,16 @@ void console::ted_cmd::waitGUInput(telldata::operandSTACK *clst, console::ACTIVE
    TpdPost::toped_status(TSTS_THREADWAIT);
 }
 
+void console::ted_cmd::waitExternal(wxString cmdExt)
+{
+   Connect(-1, wxEVT_EXECEXTDONE,
+           (wxObjectEventFunction) (wxEventFunction)
+           (wxCommandEventFunction)&ted_cmd::onExternalDone);
+   _execExternal = true;
+   TpdPost::toped_status(TSTS_THREADWAIT);
+   TpdPost::execExt(cmdExt);
+}
+
 void console::ted_cmd::getGUInput(bool from_keyboard) {
    wxString command;
    if (from_keyboard) { // input is from keyboard
@@ -554,7 +579,8 @@ void console::ted_cmd::getGUInput(bool from_keyboard) {
    _translation = _initrans;
 }
 
-void console::ted_cmd::onGUInput(wxCommandEvent& evt) {
+void console::ted_cmd::onGUInput(wxCommandEvent& evt)
+{
    switch (evt.GetInt()) {
       case -4: _translation.FlipY();break;
       case -3: _translation.Rotate(90.0);break;
@@ -582,6 +608,13 @@ void console::ted_cmd::onGUInput(wxCommandEvent& evt) {
          }
       default: assert(false);
    }
+}
+
+void console::ted_cmd::onExternalDone(wxCommandEvent& evt)
+{
+   Disconnect(-1, wxEVT_EXECEXTDONE);
+   _execExternal = false;
+   threadWaits4->Signal();
 }
 
 void console::ted_cmd::mouseLB(const telldata::ttpnt& p) {
@@ -653,6 +686,27 @@ void console::ted_cmd::cancelLastPoint() {
    if (_numpoints > 0) _numpoints--;
    tell_log(MT_GUIPROMPT);
    tell_log(MT_GUIINPUT, _guinput);
+}
+
+bool console::ted_cmd::findTellFile(const char* fname, std::string& validName)
+{
+   // Check the original string first
+   wxFileName inclFN(wxString(fname,wxConvUTF8));
+   inclFN.Normalize();
+   if (inclFN.IsOk() && inclFN.FileExists())
+   {
+      validName = std::string(inclFN.GetFullPath().mb_str(wxConvFile ));
+      return true;
+   }
+   // See whether we can find the file name among the search paths
+   wxString absFileName = _tllIncludePath.FindAbsoluteValidPath((wxString(fname,wxConvUTF8)));
+   if (!absFileName.IsEmpty())
+   {
+      validName = std::string(absFileName.mb_str(wxConvFile ));
+      return true;
+   }
+   validName = fname;
+   return false;
 }
 
 console::ted_cmd::~ted_cmd() {

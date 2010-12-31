@@ -274,7 +274,7 @@ int tellstdfunc::TDTloadlib::execute()
       laydata::TdtLibDir* dbLibDir = NULL;
       if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
       {
-         nameList top_cell_list;
+         NameList top_cell_list;
          int libID = dbLibDir->loadLib(filename);
          if (0 <= libID)
          {
@@ -445,13 +445,13 @@ int tellstdfunc::GDSread::execute() {
 
    if (expandFileName(filename))
    {
-      nameList top_cell_list;
+      NameList top_cell_list;
       if (DATC->GDSparse(filename))
       {
          // add GDS tab in the browser
          DATC->bpAddGdsTab(_threadExecution);
          //
-         DbImportFile* AGDSDB = NULL;
+         ForeignDbFile* AGDSDB = NULL;
          if (DATC->lockGds(AGDSDB))
             AGDSDB->getTopCells(top_cell_list);
          else
@@ -509,7 +509,7 @@ int tellstdfunc::GDSimport::execute()
    std::ostringstream ost;
    ExtLayers* gdsLaysAll = NULL;
    bool checkOK = false;
-   DbImportFile* AGDSDB = NULL;
+   ForeignDbFile* AGDSDB = NULL;
    if (DATC->lockGds(AGDSDB))
    {
       gdsLaysAll = DEBUG_NEW ExtLayers();
@@ -522,7 +522,7 @@ int tellstdfunc::GDSimport::execute()
       LayerMapExt LayerExpression(gdsLaysStrList, gdsLaysAll);
       if (LayerExpression.status())
       {
-         nameList top_cells;
+         NameList top_cells;
          top_cells.push_back(name);
 
          laydata::TdtLibDir* dbLibDir = NULL;
@@ -568,7 +568,7 @@ int tellstdfunc::GDSimportList::execute()
    bool  recur = getBoolValue();
    telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
-   nameList top_cells;
+   NameList top_cells;
    for (unsigned i = 0; i < pl->size(); i++)
    {
       top_cells.push_back((static_cast<telldata::ttstring*>((pl->mlist())[i]))->value());
@@ -582,7 +582,7 @@ int tellstdfunc::GDSimportList::execute()
       gdsLaysStrList[nameh->key().value()] = nameh->value().value();
    }
    ExtLayers* gdsLaysAll = DEBUG_NEW ExtLayers();
-   DbImportFile* AGDSDB = NULL;
+   ForeignDbFile* AGDSDB = NULL;
    if (DATC->lockGds(AGDSDB))
    {
       AGDSDB->collectLayers(*gdsLaysAll);
@@ -748,11 +748,9 @@ int tellstdfunc::GDSsplit::execute()
    if (expandFileName(filename))
    {
 
-      DbImportFile* AGDSDB = NULL;
+      ForeignDbFile* AGDSDB = NULL;
       if (DATC->lockGds(AGDSDB))
       {
-         // TODO - can we avoid this cast? Split is an unique operation for
-         // GDS only. Even if we can - does it worth it?
          GDSin::GdsInFile* castedGdsDB = static_cast<GDSin::GdsInFile*>(AGDSDB);
          GDSin::GdsStructure *src_structure = castedGdsDB->getStructure(cellname.c_str());
          std::ostringstream ost;
@@ -909,7 +907,7 @@ tellstdfunc::GDSreportlay::GDSreportlay(telldata::typeID retype, bool eor) :
 int tellstdfunc::GDSreportlay::execute()
 {
    std::string name = getStringValue();
-   DbImportFile* AGDSDB = NULL;
+   ForeignDbFile* AGDSDB = NULL;
    if(DATC->lockGds(AGDSDB))
    {
       std::ostringstream ost;
@@ -976,12 +974,12 @@ int tellstdfunc::GDSgetlaymap::execute()
    }
    else
    { // generate default export GDS layer map
-      nameList tdtLayers;
+      NameList tdtLayers;
       layprop::DrawProperties* drawProp;
       if (PROPC->lockDrawProp(drawProp))
       {
          drawProp->allLayers(tdtLayers);
-         for ( nameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
+         for ( NameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
          {
             std::ostringstream dtypestr;
             dtypestr << drawProp->getLayerNo( *CDL )<< "; 0";
@@ -1041,7 +1039,7 @@ int tellstdfunc::CIFread::execute()
          DATC->bpAddCifTab(_threadExecution);
          // Collect the top structures
          std::list<std::string> top_cell_list;
-         DbImportFile* ACIFDB = NULL;
+         ForeignDbFile* ACIFDB = NULL;
          if (DATC->lockCif(ACIFDB))
          {
             ACIFDB->getTopCells(top_cell_list);
@@ -1092,15 +1090,15 @@ int tellstdfunc::CIFreportlay::execute()
 {
 
    std::string name = getStringValue();
-   DbImportFile* ACIFDB = NULL;
+   ForeignDbFile* ACIFDB = NULL;
    if (DATC->lockCif(ACIFDB))
    {
       std::ostringstream ost;
-      nameList cifLayers;
+      NameList cifLayers;
       if (ACIFDB->collectLayers(name, cifLayers))
       {
          ost << "CIF layers found in \"" << name <<"\"" << std::endl;
-         for (nameList::iterator NLI = cifLayers.begin(); NLI != cifLayers.end(); NLI++)
+         for (NameList::iterator NLI = cifLayers.begin(); NLI != cifLayers.end(); NLI++)
             ost << *NLI << std::endl;
          tell_log(console::MT_INFO,ost.str());
          LogFile << LogFile.getFN() << "(\""<< name << "\");"; LogFile.flush();
@@ -1142,7 +1140,7 @@ int tellstdfunc::CIFimportList::execute()
       cifLays[nameh->value().value()] = nameh->key().value();
    }
    // Convert top structure list
-   nameList top_cells;
+   NameList top_cells;
    for (unsigned i = 0; i < pl->size(); i++)
    {
       top_cells.push_back((static_cast<telldata::ttstring*>((pl->mlist())[i]))->value());
@@ -1196,7 +1194,7 @@ int tellstdfunc::CIFimport::execute()
       cifLays[nameh->value().value()] = nameh->key().value();
    }
    // Convert top structure list
-   nameList top_cells;
+   NameList top_cells;
    top_cells.push_back(name.c_str());
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
@@ -1368,10 +1366,10 @@ int tellstdfunc::CIFgetlaymap::execute()
    }
    else if (import)
    { // generate default import CIF layer map
-      nameList cifLayers;
+      NameList cifLayers;
       DATC->cifGetLayers(cifLayers);
       word laynum = 1;
-      for ( nameList::const_iterator CCL = cifLayers.begin(); CCL != cifLayers.end(); CCL++ )
+      for ( NameList::const_iterator CCL = cifLayers.begin(); CCL != cifLayers.end(); CCL++ )
       {
          telldata::tthsh* clay = DEBUG_NEW telldata::tthsh(laynum++, *CCL);
          theMap->add(clay);
@@ -1379,12 +1377,12 @@ int tellstdfunc::CIFgetlaymap::execute()
    }
    else
    { // generate default export CIF layer map
-      nameList tdtLayers;
+      NameList tdtLayers;
       layprop::DrawProperties* drawProp;
       if (PROPC->lockDrawProp(drawProp))
       {
          drawProp->allLayers(tdtLayers);
-         for ( nameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
+         for ( NameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
          {
             std::ostringstream dtypestr;
             dtypestr << "L" << drawProp->getLayerNo( *CDL );
@@ -1444,7 +1442,7 @@ int tellstdfunc::OASread::execute() {
          // add OASIS tab in the browser
          DATC->bpAddOasTab(_threadExecution);
          //
-         DbImportFile* AOASDB = NULL;
+         ForeignDbFile* AOASDB = NULL;
          if (DATC->lockOas(AOASDB))
             AOASDB->getTopCells(top_cell_list);
          else
@@ -1502,7 +1500,7 @@ int tellstdfunc::OASimport::execute()
    std::ostringstream ost;
    ExtLayers* oasLaysAll = NULL;
    bool checkOK = false;
-   DbImportFile* AOASDB = NULL;
+   ForeignDbFile* AOASDB = NULL;
    if (DATC->lockOas(AOASDB))
    {
       oasLaysAll = DEBUG_NEW ExtLayers();
@@ -1515,7 +1513,7 @@ int tellstdfunc::OASimport::execute()
       LayerMapExt LayerExpression(gdsLaysStrList, oasLaysAll);
       if (LayerExpression.status())
       {
-         nameList top_cells;
+         NameList top_cells;
          top_cells.push_back(name);
          laydata::TdtLibDir* dbLibDir = NULL;
          if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
@@ -1560,7 +1558,7 @@ int tellstdfunc::OASimportList::execute()
    bool  recur = getBoolValue();
    telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
-   nameList top_cells;
+   NameList top_cells;
    for (unsigned i = 0; i < pl->size(); i++)
    {
       top_cells.push_back((static_cast<telldata::ttstring*>((pl->mlist())[i]))->value());
@@ -1574,7 +1572,7 @@ int tellstdfunc::OASimportList::execute()
       oasLaysStrList[nameh->key().value()] = nameh->value().value();
    }
    ExtLayers* oasLaysAll = DEBUG_NEW ExtLayers();
-   DbImportFile* AOASDB = NULL;
+   ForeignDbFile* AOASDB = NULL;
    if (DATC->lockOas(AOASDB))
    {
       AOASDB->collectLayers(*oasLaysAll);
@@ -1629,7 +1627,7 @@ tellstdfunc::OASreportlay::OASreportlay(telldata::typeID retype, bool eor) :
 int tellstdfunc::OASreportlay::execute()
 {
    std::string name = getStringValue();
-   DbImportFile* AOASDB = NULL;
+   ForeignDbFile* AOASDB = NULL;
    if (DATC->lockOas(AOASDB))
    {
       ExtLayers oasLayers;
@@ -1696,12 +1694,12 @@ int tellstdfunc::OASgetlaymap::execute()
    }
    else
    { // generate default export OASIS layer map
-      nameList tdtLayers;
+      NameList tdtLayers;
       layprop::DrawProperties* drawProp;
       if (PROPC->lockDrawProp(drawProp))
       {
          drawProp->allLayers(tdtLayers);
-         for ( nameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
+         for ( NameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
          {
             std::ostringstream dtypestr;
             dtypestr << drawProp->getLayerNo( *CDL )<< "; 0";
@@ -1922,11 +1920,11 @@ int tellstdfunc::DRCexplainerror::execute()
 }
 
 //=============================================================================
-void tellstdfunc::importGDScell(laydata::TdtLibDir* dbLibDir, const nameList& top_names,
+void tellstdfunc::importGDScell(laydata::TdtLibDir* dbLibDir, const NameList& top_names,
   const LayerMapExt& laymap, parsercmd::undoQUEUE& undstack, telldata::UNDOPerandQUEUE& undopstack,
   bool threadExecution, bool recur, bool over)
 {
-   DbImportFile* AGDSDB = NULL;
+   ForeignDbFile* AGDSDB = NULL;
    if (DATC->lockGds(AGDSDB))
    {
       if (dbmxs_dblock > DATC->tdtMxState())
@@ -1950,12 +1948,12 @@ void tellstdfunc::importGDScell(laydata::TdtLibDir* dbLibDir, const nameList& to
 }
 
 //=============================================================================
-void tellstdfunc::importCIFcell( laydata::TdtLibDir* dbLibDir, const nameList& top_names,
+void tellstdfunc::importCIFcell( laydata::TdtLibDir* dbLibDir, const NameList& top_names,
   const SIMap& cifLayers, parsercmd::undoQUEUE& undstack, telldata::UNDOPerandQUEUE& undopstack,
   bool threadExecution, bool recur, bool over, real techno )
 {
    // DB should have been locked at this point (from the tell functions)
-   DbImportFile* ACIFDB = NULL;
+   ForeignDbFile* ACIFDB = NULL;
    if (DATC->lockCif(ACIFDB))
    {
       if (dbmxs_dblock > DATC->tdtMxState())
@@ -1973,11 +1971,11 @@ void tellstdfunc::importCIFcell( laydata::TdtLibDir* dbLibDir, const nameList& t
 }
 
 //=============================================================================
-void tellstdfunc::importOAScell(laydata::TdtLibDir* dbLibDir, const nameList& top_names,
+void tellstdfunc::importOAScell(laydata::TdtLibDir* dbLibDir, const NameList& top_names,
   const LayerMapExt& laymap, parsercmd::undoQUEUE& undstack, telldata::UNDOPerandQUEUE& undopstack,
   bool threadExecution, bool recur, bool over)
 {
-   DbImportFile* AOASDB = NULL;
+   ForeignDbFile* AOASDB = NULL;
    if (DATC->lockOas(AOASDB))
    {
       if (dbmxs_dblock > DATC->tdtMxState())

@@ -62,7 +62,7 @@ GDSin::GdsRecord::GdsRecord(byte rt, byte dt, word rl)
    _record[_index++] = _dataType;
 }
 
-void GDSin::GdsRecord::getNextRecord(DbImportFile* Gf, word rl, byte rt, byte dt)
+void GDSin::GdsRecord::getNextRecord(ForeignDbFile* Gf, word rl, byte rt, byte dt)
 {
    _recLen = rl; _recType = rt; _dataType = dt;
    if (rl)
@@ -308,7 +308,7 @@ GDSin::GdsRecord::~GdsRecord()
 //==============================================================================
 // class GdsInFile
 //==============================================================================
-GDSin::GdsInFile::GdsInFile(wxString wxfname) : DbImportFile(wxfname, false)
+GDSin::GdsInFile::GdsInFile(wxString wxfname) : ForeignDbFile(wxfname, false)
 {
    _gdsiiWarnings = 0;
    _library       = NULL;
@@ -379,7 +379,7 @@ std::string GDSin::GdsInFile::libname() const
    return _library->libName();
 }
 
-void GDSin::GdsInFile::getTopCells(nameList& topCells) const
+void GDSin::GdsInFile::getTopCells(NameList& topCells) const
 {
    assert(NULL != _hierTree);
    ForeignCellTree* root = _hierTree->GetFirstRoot(TARGETDB_LIB);
@@ -481,11 +481,11 @@ double GDSin::GdsInFile::libUnits() const
  * @param recursive - The type of traversing. If false only the cells listed
  * in the topCells will be gathered.
  */
-void GDSin::GdsInFile::convertPrep(const nameList& topCells, bool recursive)
+void GDSin::GdsInFile::convertPrep(const NameList& topCells, bool recursive)
 {
    assert(NULL != _hierTree);
    _convList.clear();
-   for (nameList::const_iterator CN = topCells.begin(); CN != topCells.end(); CN++)
+   for (NameList::const_iterator CN = topCells.begin(); CN != topCells.end(); CN++)
    {
       GDSin::GdsStructure *srcStructure = _library->getStructure(*CN);
       if (NULL != srcStructure)
@@ -1051,7 +1051,7 @@ void GDSin::GdsStructure::importBox(GdsInFile* cf, ImportDB& iDB)
                //one point less because fist and last point coincide
                word numpoints = (cr->recLen())/8 - 1;
                assert(numpoints == 4);
-               pointlist   plist;
+               PointVector   plist;
                plist.reserve(numpoints);
                for(word i = 0; i < numpoints; i++)
                   plist.push_back(GDSin::get_TP(cr, i));
@@ -1099,7 +1099,7 @@ void GDSin::GdsStructure::importPoly(GdsInFile* cf, ImportDB& iDB)
                {
                   //one point less because fist and last point coincide
                   word numpoints = (cr->recLen())/8 - 1;
-                  pointlist plist;
+                  PointVector plist;
                   plist.reserve(numpoints);
                   for(word i = 0; i < numpoints; i++)
                      plist.push_back(GDSin::get_TP(cr, i));
@@ -1157,7 +1157,7 @@ void GDSin::GdsStructure::importPath(GdsInFile* cf, ImportDB& iDB)
             case gds_XY:
                {
                   word numpoints = (cr->recLen())/8;
-                  pointlist plist;
+                  PointVector plist;
                   plist.reserve(numpoints);
                   for(word i = 0; i < numpoints; i++)
                      plist.push_back(GDSin::get_TP(cr, i));
@@ -1804,7 +1804,7 @@ void GDSin::GdsExportFile::aref(const std::string& name, const CTM& translation,
 
 bool GDSin::GdsExportFile::checkCellWritten(std::string cellname) const
 {
-   for (nameList::const_iterator i = _childnames.begin();
+   for (NameList::const_iterator i = _childnames.begin();
                                  i != _childnames.end(); i++)
       if (cellname == *i) return true;
    return false;

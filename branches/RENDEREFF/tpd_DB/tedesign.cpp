@@ -118,7 +118,7 @@ void laydata::TdtLibrary::clearEntireHierTree()
    _hiertree = NULL;
 }
 
-void laydata::TdtLibrary::read(TEDfile* const tedfile)
+void laydata::TdtLibrary::read(InputTdtFile* const tedfile)
 {
    std::string cellname;
    while (tedf_CELL == tedfile->getByte())
@@ -443,7 +443,7 @@ void laydata::TdtLibDir::addLibrary(TdtLibrary* const lib, word libRef)
 
 int laydata::TdtLibDir::loadLib(std::string filename)
 {
-   laydata::TEDfile tempin(filename.c_str(), this);
+   laydata::InputTdtFile tempin(wxString(filename.c_str(), wxConvUTF8), this);
    if (!tempin.status()) return -1;
    int libRef = getLastLibRefNo();
    try
@@ -452,11 +452,11 @@ int laydata::TdtLibDir::loadLib(std::string filename)
    }
    catch (EXPTNreadTDT)
    {
-      tempin.closeF();
+      tempin.closeStream();
       tempin.cleanup();
       return -1;
    }
-   tempin.closeF();
+   tempin.closeStream();
    addLibrary(tempin.design(), libRef);
    relink();// Re-link everything
    return libRef;
@@ -532,7 +532,7 @@ void laydata::TdtLibDir::newDesign(std::string name, std::string dir, time_t cre
 
 bool laydata::TdtLibDir::readDesign(std::string filename)
 {
-   laydata::TEDfile tempin(filename.c_str(), this);
+   laydata::InputTdtFile tempin(wxString(filename.c_str(), wxConvUTF8), this);
    if (!tempin.status()) return false;
 
    try
@@ -541,11 +541,11 @@ bool laydata::TdtLibDir::readDesign(std::string filename)
    }
    catch (EXPTNreadTDT)
    {
-      tempin.closeF();
+      tempin.closeStream();
       tempin.cleanup();
       return false;
    }
-   tempin.closeF();
+   tempin.closeStream();
    delete _TEDDB;//Erase existing data
    _tedFileName = filename;
    _neverSaved = false;
@@ -601,7 +601,7 @@ bool laydata::TdtLibDir::TDTcheckread(const std::string filename,
 {
    bool retval = false;
    start_ignoring = false;
-   laydata::TEDfile tempin(filename.c_str(), this);
+   laydata::InputTdtFile tempin(wxString(filename.c_str(), wxConvUTF8), this);
    if (!tempin.status()) return retval;
 
    std::string news = "Project created: ";
@@ -635,7 +635,7 @@ bool laydata::TdtLibDir::TDTcheckread(const std::string filename,
    {
       retval = true;
    }
-   tempin.closeF();
+   tempin.closeStream();
    return retval;
 }
 
@@ -862,7 +862,7 @@ laydata::TdtDesign::TdtDesign(std::string name, time_t created, time_t lastUpdat
    _lastUpdated   = lastUpdated;
 }
 
-void laydata::TdtDesign::read(TEDfile* const tedfile)
+void laydata::TdtDesign::read(InputTdtFile* const tedfile)
 {
    TdtLibrary::read(tedfile);
    _tmpdata = NULL;
@@ -1027,7 +1027,27 @@ laydata::TdtData* laydata::TdtDesign::addBox(unsigned la, TP* p1, TP* p2 )
    return newshape;
 }
 
-laydata::TdtData* laydata::TdtDesign::addPoly(unsigned la, pointlist* pl)
+laydata::TdtData* laydata::TdtDesign::putBox(unsigned la, TP* p1, TP* p2 )
+{
+   QTreeTmp *actlay = _target.edit()->secureUnsortedLayer(la);
+   modified = true;
+   TP np1((*p1) * _target.rARTM());
+   TP np2((*p2) * _target.rARTM());
+   laydata::TdtData* newshape = DEBUG_NEW TdtBox(np1,np2);
+   actlay->put(newshape);
+   return newshape;
+}
+
+void laydata::TdtDesign::fixUnsorted()
+{
+   TdtCell* editTarget = _target.edit();
+   DBbox old_overlap(editTarget->cellOverlap());
+   editTarget->fixUnsorted();
+   if (editTarget->overlapChanged(old_overlap, this))
+      do {} while(validateCells());
+}
+
+laydata::TdtData* laydata::TdtDesign::addPoly(unsigned la, PointVector* pl)
 {
    laydata::ValidPoly check(*pl);
    if (!check.valid()) {
@@ -1040,7 +1060,7 @@ laydata::TdtData* laydata::TdtDesign::addPoly(unsigned la, pointlist* pl)
    DBbox old_overlap(_target.edit()->cellOverlap());
    QuadTree *actlay = _target.edit()->secureLayer(la);
    modified = true;
-   pointlist vpl = check.getValidated();
+   PointVector vpl = check.getValidated();
    if (check.box())
    {
       TP p1(vpl[0] *_target.rARTM());
@@ -1049,7 +1069,7 @@ laydata::TdtData* laydata::TdtDesign::addPoly(unsigned la, pointlist* pl)
    }
    else
    {
-      for(pointlist::iterator PL = vpl.begin(); PL != vpl.end(); PL++)
+      for(PointVector::iterator PL = vpl.begin(); PL != vpl.end(); PL++)
          (*PL) *= _target.rARTM();
       newshape = actlay->addPoly(vpl);
    }
@@ -1058,7 +1078,36 @@ laydata::TdtData* laydata::TdtDesign::addPoly(unsigned la, pointlist* pl)
    return newshape;
 }
 
-laydata::TdtData* laydata::TdtDesign::addWire(unsigned la, pointlist* pl, WireWidth w)
+laydata::TdtData* laydata::TdtDesign::putPoly(unsigned la, PointVector* pl)
+{
+   laydata::ValidPoly check(*pl);
+   if (!check.valid()) {
+      std::ostringstream ost;
+      ost << "Polygon check fails - " << check.failType();
+      tell_log(console::MT_ERROR, ost.str());
+      return NULL;
+   }
+   laydata::TdtData* newshape = NULL;
+   QTreeTmp *actlay = _target.edit()->secureUnsortedLayer(la);
+   modified = true;
+   PointVector vpl = check.getValidated();
+   if (check.box())
+   {
+      TP p1(vpl[0] *_target.rARTM());
+      TP p2(vpl[2] *_target.rARTM());
+      newshape = DEBUG_NEW TdtBox(p1,p2);
+   }
+   else
+   {
+      for(PointVector::iterator PL = vpl.begin(); PL != vpl.end(); PL++)
+         (*PL) *= _target.rARTM();
+      newshape = DEBUG_NEW TdtPoly(vpl);
+   }
+   actlay->put(newshape);
+   return newshape;
+}
+
+laydata::TdtData* laydata::TdtDesign::addWire(unsigned la, PointVector* pl, WireWidth w)
 {
    laydata::ValidWire check(*pl,w);
    if (!check.valid()) {
@@ -1070,12 +1119,31 @@ laydata::TdtData* laydata::TdtDesign::addWire(unsigned la, pointlist* pl, WireWi
    DBbox old_overlap(_target.edit()->cellOverlap());
    QuadTree *actlay = _target.edit()->secureLayer(la);
    modified = true;
-   pointlist vpl = check.getValidated();
-   for(pointlist::iterator PL = vpl.begin(); PL != vpl.end(); PL++)
+   PointVector vpl = check.getValidated();
+   for(PointVector::iterator PL = vpl.begin(); PL != vpl.end(); PL++)
       (*PL) *= _target.rARTM();
    laydata::TdtData* newshape = actlay->addWire(vpl,w);
    if (_target.edit()->overlapChanged(old_overlap, this))
       do {} while(validateCells());
+   return newshape;
+}
+
+laydata::TdtData* laydata::TdtDesign::putWire(unsigned la, PointVector* pl, WireWidth w)
+{
+   laydata::ValidWire check(*pl,w);
+   if (!check.valid()) {
+      std::ostringstream ost;
+      ost << "Wire check fails - " << check.failType();
+      tell_log(console::MT_ERROR, ost.str());
+      return NULL;
+   }
+   QTreeTmp *actlay = _target.edit()->secureUnsortedLayer(la);
+   modified = true;
+   PointVector vpl = check.getValidated();
+   for(PointVector::iterator PL = vpl.begin(); PL != vpl.end(); PL++)
+      (*PL) *= _target.rARTM();
+   laydata::TdtData* newshape =  DEBUG_NEW TdtWire(vpl,w);;
+   actlay->put(newshape);
    return newshape;
 }
 
@@ -1088,6 +1156,16 @@ laydata::TdtData* laydata::TdtDesign::addText(unsigned la, std::string& text, CT
    laydata::TdtData* newshape = actlay->addText(text,ori);
    if (_target.edit()->overlapChanged(old_overlap, this))
       do {} while(validateCells());
+   return newshape;
+}
+
+laydata::TdtData* laydata::TdtDesign::putText(unsigned la, std::string& text, CTM& ori)
+{
+   QTreeTmp *actlay = _target.edit()->secureUnsortedLayer(la);
+   modified = true;
+   ori *= _target.rARTM();
+   laydata::TdtData* newshape = DEBUG_NEW TdtText(text,ori);
+   actlay->put(newshape);
    return newshape;
 }
 
@@ -1165,7 +1243,7 @@ laydata::TdtCell* laydata::TdtDesign::openCell(std::string name)
 bool laydata::TdtDesign::editPush(const TP& pnt, const DWordSet& unselable)
 {
    if (_target.checkEdit()) {//
-      ctmstack transtack;
+      CtmStack transtack;
       transtack.push(CTM());
       laydata::CellRefStack* crstack = DEBUG_NEW laydata::CellRefStack();
       TdtCell* oldtvcell = _target.view();
@@ -1238,7 +1316,7 @@ void laydata::TdtDesign::write(TEDfile* const tedfile) {
 
 void laydata::TdtDesign::tmpDraw(const layprop::DrawProperties& drawprop,
                                           TP base, TP newp) {
-   ctmqueue tmp_stack;
+   CtmQueue tmp_stack;
    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
    if (_tmpdata)
    {
@@ -1360,9 +1438,9 @@ void laydata::TdtDesign::moveSelected( TP p1, TP p2, SelectList** fadead)
       do {} while(validateCells());
 }
 
-bool laydata::TdtDesign::cutPoly(pointlist& pl, AtticList** dasao)
+bool laydata::TdtDesign::cutPoly(PointVector& pl, AtticList** dasao)
 {
-   for (pointlist::iterator CP = pl.begin(); CP != pl.end(); CP ++)
+   for (PointVector::iterator CP = pl.begin(); CP != pl.end(); CP ++)
       (*CP) *= _target.rARTM();
    return _target.edit()->cutPolySelected(pl,dasao);
 }

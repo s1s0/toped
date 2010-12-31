@@ -51,7 +51,7 @@
 #ifdef POLYBIND_DEBUG
 #define REPORT_POLYBIND_DEBUG(polyObject) \
    printf("=======================================================\n"); \
-   for (pointlist::const_iterator CP = polyObject->begin(); CP != polyObject->end(); CP++) \
+   for (PointVector::const_iterator CP = polyObject->begin(); CP != polyObject->end(); CP++) \
       printf("( %i , %i )\n", CP->x(), CP->y());
 #else
 #define REPORT_POLYBIND_DEBUG(polyObject)
@@ -66,7 +66,7 @@ produced. As a second step, two raw data structures are produced, that replicate
 the input polygons, but contain also the crossing points with the required links
 between them. These data structures will be used in all subsequently called
 methods, implementing the actual logic operations*/
-logicop::logic::logic(const pointlist& poly1, const pointlist& poly2) :
+logicop::logic::logic(const PointVector& poly1, const PointVector& poly2) :
                                                 _poly1(poly1), _poly2(poly2) {
    _segl1 = DEBUG_NEW polycross::segmentlist(poly1,1,true);
    _segl2 = DEBUG_NEW polycross::segmentlist(poly2,2,true);
@@ -192,7 +192,7 @@ bool logicop::logic::AND(pcollection& plycol) {
    polycross::VPoint* collector = centinel;
    do {
       if (0 == collector->visited()) {
-         pointlist *shgen = DEBUG_NEW pointlist();
+         PointVector *shgen = DEBUG_NEW PointVector();
          polycross::VPoint* pickup = collector;
          do {
             pickup = pickup->follower(direction);
@@ -235,7 +235,7 @@ bool logicop::logic::ANDNOT(pcollection& plycol) {
       if (_shape2->inside(_poly1))
       {
          pcollection dummyCollection;
-         pointlist* respoly = hole2simple(_poly1, _poly2, dummyCollection);
+         PointVector* respoly = hole2simple(_poly1, _poly2, dummyCollection);
          if (NULL != respoly)
          {
             plycol.push_back(respoly);
@@ -250,7 +250,7 @@ bool logicop::logic::ANDNOT(pcollection& plycol) {
    polycross::VPoint* collector = centinel;
    do {
       if (0 == collector->visited()) {
-         pointlist *shgen = DEBUG_NEW pointlist();
+         PointVector *shgen = DEBUG_NEW PointVector();
          polycross::VPoint* pickup = collector;
          do {
             pickup = pickup->follower(direction, true);
@@ -303,7 +303,7 @@ bool logicop::logic::OR(pcollection& plycol)
    do {
       if (0 == collector->visited())
       {
-         pointlist *shgen = DEBUG_NEW pointlist();
+         PointVector *shgen = DEBUG_NEW PointVector();
          polycross::VPoint* pickup = collector;
          // The first resulting polygon must be the outer polygon
          // That's why the direction for the first only is true
@@ -325,20 +325,20 @@ bool logicop::logic::OR(pcollection& plycol)
    pcollection lclvalidated;
    while (!lclcol.empty())
    {
-      pointlist* csh = lclcol.front();
+      PointVector* csh = lclcol.front();
       REPORT_POLYBIND_DEBUG(csh);
       laydata::ValidPoly check(*csh);
       delete csh; lclcol.pop_front();
       if (check.valid())
-         lclvalidated.push_back(DEBUG_NEW pointlist(check.getValidated()));
+         lclvalidated.push_back(DEBUG_NEW PointVector(check.getValidated()));
    }
    if (lclvalidated.empty()) return false;
    // Convert all collected shapes to a single normalized polygon
-   pointlist* respoly = lclvalidated.front();lclvalidated.pop_front();
+   PointVector* respoly = lclvalidated.front();lclvalidated.pop_front();
    while (0 < lclvalidated.size())
    {
-      pointlist* curpolyA = respoly;
-      pointlist* curpolyB = lclvalidated.front();
+      PointVector* curpolyA = respoly;
+      PointVector* curpolyB = lclvalidated.front();
       lclvalidated.pop_front();
       respoly = hole2simple(*curpolyA, *curpolyB, lclvalidated);
       delete curpolyA; delete curpolyB;
@@ -350,7 +350,7 @@ bool logicop::logic::OR(pcollection& plycol)
 
 void logicop::logic::getShape(pcollection& plycol, polycross::VPoint* centinel)
 {
-   pointlist *shgen = DEBUG_NEW pointlist();
+   PointVector *shgen = DEBUG_NEW PointVector();
    polycross::VPoint* vpnt = centinel;
    do {
       shgen->push_back(TP(vpnt->cp()->x(), vpnt->cp()->y()));
@@ -367,7 +367,7 @@ void logicop::logic::getShape(pcollection& plycol, polycross::VPoint* centinel)
  * @return a point from init that lies entirely outside the polygon described
 by plist. If plist overlaps entirely init - return NULL.
  */
-polycross::VPoint* logicop::logic::getFirstOutside(const pointlist& plist, polycross::VPoint* init)
+polycross::VPoint* logicop::logic::getFirstOutside(const PointVector& plist, polycross::VPoint* init)
 {
    polycross::VPoint *cpoint = init;
    do
@@ -378,7 +378,7 @@ polycross::VPoint* logicop::logic::getFirstOutside(const pointlist& plist, polyc
    return NULL;
 }
 
-polycross::VPoint* logicop::logic::checkCoinciding(const pointlist& plist, polycross::VPoint* init)
+polycross::VPoint* logicop::logic::checkCoinciding(const PointVector& plist, polycross::VPoint* init)
 {
    polycross::VPoint *cpoint = init;
    do
@@ -389,7 +389,7 @@ polycross::VPoint* logicop::logic::checkCoinciding(const pointlist& plist, polyc
    return init;
 }
 
-pointlist* logicop::logic::hole2simple(const pointlist& outside, const pointlist& inside, const pcollection& obstructions)
+PointVector* logicop::logic::hole2simple(const PointVector& outside, const PointVector& inside, const pcollection& obstructions)
 {
    polycross::segmentlist _seg1(outside,1,true);
    polycross::segmentlist _seg2(inside ,2,true);
@@ -416,7 +416,7 @@ pointlist* logicop::logic::hole2simple(const pointlist& outside, const pointlist
    polycross::VPoint*  inshape = _seg2.dump_points();
    // traverse and form the resulting shape
    polycross::VPoint* centinel = outshape;
-   pointlist *shgen = DEBUG_NEW pointlist();
+   PointVector *shgen = DEBUG_NEW PointVector();
    bool direction = true; /*next*/
    polycross::VPoint* pickup = centinel;
    polycross::VPoint* prev = centinel->prev();
@@ -490,7 +490,7 @@ logicop::SSegment::~SSegment()
 // class stretcher
 //-----------------------------------------------------------------------------
 /*!*/
-logicop::stretcher::stretcher(const pointlist& poly, int bfactor) : _poly(poly)
+logicop::stretcher::stretcher(const PointVector& poly, int bfactor) : _poly(poly)
 {
    unsigned plysize = _poly.size();
    _segl.reserve(plysize);
@@ -499,10 +499,10 @@ logicop::stretcher::stretcher(const pointlist& poly, int bfactor) : _poly(poly)
 //   _shape1 = NULL;
 }
 
-pointlist* logicop::stretcher::execute()
+PointVector* logicop::stretcher::execute()
 {
    unsigned plysize = _poly.size();
-   pointlist* streched = DEBUG_NEW pointlist();
+   PointVector* streched = DEBUG_NEW PointVector();
    for (unsigned i = 0; i < plysize; i++)
    {
       TP npnt;
@@ -523,7 +523,7 @@ logicop::stretcher::~stretcher()
 // class CrossFix
 //-----------------------------------------------------------------------------
 /*!*/
-logicop::CrossFix::CrossFix(const pointlist& poly, bool looped) :
+logicop::CrossFix::CrossFix(const PointVector& poly, bool looped) :
                                                    _poly(poly), _looped(looped)
 {
    _segl = DEBUG_NEW polycross::segmentlist(poly,1, looped);
@@ -712,7 +712,7 @@ bool logicop::CrossFix::generate(pcollection& plycol, real bfactor)
 void logicop::CrossFix::traverseOne(polycross::VPoint* const centinel, pcollection& plycol)
 {
    bool direction = true; /*next*/
-   pointlist *shgen = DEBUG_NEW pointlist();
+   PointVector *shgen = DEBUG_NEW PointVector();
    // always push the entry point
    shgen->push_back(TP(centinel->cp()->x(), centinel->cp()->y()));
    polycross::VPoint* collector = centinel->next();

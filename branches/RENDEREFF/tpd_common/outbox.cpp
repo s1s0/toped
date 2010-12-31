@@ -62,6 +62,9 @@ BEGIN_DECLARE_EVENT_TYPES()
     DECLARE_EVENT_TYPE(wxEVT_TOOLBARDELETEITEM  , 10015)
     DECLARE_EVENT_TYPE(wxEVT_EDITLAYER          , 10016)
     DECLARE_EVENT_TYPE(wxEVT_QUITAPP            , 10017)
+    DECLARE_EVENT_TYPE(wxEVT_EXECEXT            , 10018)
+    DECLARE_EVENT_TYPE(wxEVT_EXECEXTPIPE        , 10019)
+    DECLARE_EVENT_TYPE(wxEVT_EXECEXTDONE        , 10020)
 END_DECLARE_EVENT_TYPES()
 
 DEFINE_EVENT_TYPE(wxEVT_CANVAS_STATUS)
@@ -82,6 +85,9 @@ DEFINE_EVENT_TYPE(wxEVT_TOOLBARADDITEM)
 DEFINE_EVENT_TYPE(wxEVT_TOOLBARDELETEITEM)
 DEFINE_EVENT_TYPE(wxEVT_EDITLAYER)
 DEFINE_EVENT_TYPE(wxEVT_QUITAPP)
+DEFINE_EVENT_TYPE(wxEVT_EXECEXT)
+DEFINE_EVENT_TYPE(wxEVT_EXECEXTPIPE)
+DEFINE_EVENT_TYPE(wxEVT_EXECEXTDONE)
 
 console::TELLFuncList*  CmdList = NULL;
 
@@ -105,6 +111,7 @@ console::ted_log::ted_log(wxWindow *parent, wxWindowID id): wxTextCtrl( parent, 
    cmd_mark = wxT("=> ");
    gui_mark = wxT(">> ");
    rply_mark = wxT("<= ");
+   shell_mark = wxT("# ");
 }
 
 void console::ted_log::OnLOGMessage(wxCommandEvent& evt) {
@@ -125,6 +132,14 @@ void console::ted_log::OnLOGMessage(wxCommandEvent& evt) {
          break;
       case MT_GUIPROMPT:
          *this << gui_mark;
+         break;
+      case MT_SHELLINFO:
+         *this << shell_mark << evt.GetString() << wxT("\n");
+         logColour = *wxBLACK;
+         break;
+      case MT_SHELLERROR:
+         *this << shell_mark << evt.GetString() << wxT("\n");
+         logColour = *wxRED;
          break;
       case MT_GUIINPUT:
          *this << evt.GetString();
@@ -580,6 +595,20 @@ void TpdPost::tellFnSort()
    wxCommandEvent eventFUNCTION_ADD(wxEVT_FUNC_BROWSER);
    eventFUNCTION_ADD.SetInt(console::FT_FUNCTION_SORT);
    wxPostEvent(_tllFuncList, eventFUNCTION_ADD);
+}
+
+void TpdPost::execExt(const wxString extCmd)
+{
+   wxCommandEvent eventEXEXEXT(wxEVT_EXECEXT);
+   eventEXEXEXT.SetString(extCmd);
+   wxPostEvent(_mainWindow, eventEXEXEXT);
+}
+
+void TpdPost::execPipe(const wxString extCmd)
+{
+   wxCommandEvent eventExecExPipe(wxEVT_EXECEXTPIPE);
+   eventExecExPipe.SetString(extCmd);
+   wxPostEvent(_mainWindow, eventExecExPipe);
 }
 
 void TpdPost::quitApp(bool threadExecution)

@@ -54,7 +54,7 @@ namespace polycross
          VPoint(const TP* cp) : _cp(cp),_next(NULL),_prev(NULL) {};
          VPoint(const TP* cp, VPoint* prev);
          virtual VPoint*  follower(bool& direction, bool modify = false);
-         virtual bool     inside(const pointlist&, bool touching = false);
+         virtual bool     inside(const PointVector&, bool touching = false);
          virtual char     visited() const      {return 1;}
          virtual void     reset_visited()      {};
          virtual VPoint*  checkNreorder(VPoint*&, bool);
@@ -81,7 +81,7 @@ namespace polycross
          _edge(edge), _crossingP(cp->x(), cp->y()) {};
 //         virtual ~CPoint() {delete _cp;}
          virtual VPoint*  follower(bool& direction, bool modify = false);
-         bool              inside(const pointlist&, bool touching = false) {return true;}
+         bool              inside(const PointVector&, bool touching = false) {return true;}
          char              visited() const {return _visited;}
          void              linkto(CPoint* link) {_link = link;}
          CPoint*           link() const {return _link;}
@@ -159,17 +159,17 @@ namespace polycross
    {
       public:
          typedef std::vector<polysegment*> Segments;
-         segmentlist(const pointlist&, byte, bool);
+         segmentlist(const PointVector&, byte, bool);
          ~segmentlist();
          polysegment*      operator [](unsigned i) const {return _segs[i];};
          unsigned          size() const {return _segs.size();};
-         unsigned          normalize(const pointlist&, bool);
+         unsigned          normalize(const PointVector&, bool);
          VPoint*           dump_points(bool looped = true);
          BPoint*           insertBindPoint(unsigned segno, const TP* point);
-         const pointlist*  originalPL() const {return _originalPL;}
+         const PointVector* originalPL() const {return _originalPL;}
       private:
          Segments          _segs;
-         const pointlist*  _originalPL;
+         const PointVector* _originalPL;
    };
 
    //===========================================================================
@@ -351,8 +351,8 @@ namespace polycross
          SegmentThread*    swapThreads(unsigned, unsigned);
          SegmentThread*    getThread(unsigned);
          void              report();
-         const pointlist*  opl1() const {return _osl1->originalPL();}
-         const pointlist*  opl2() const {return _osl2->originalPL();}
+         const PointVector* opl1() const {return _osl1->originalPL();}
+         const PointVector* opl2() const {return _osl2->originalPL();}
       private:
          class TopSentinel : public SegmentThread
          {
@@ -445,7 +445,7 @@ namespace polycross
          typedef std::list<BindSegment*> BindList;
          bool              is_shorter(unsigned segno, real dist);
          static bool       compareSegments(BindSegment*, BindSegment*);
-         bool              obstructed(const BindSegment&, const pointlist&);
+         bool              obstructed(const BindSegment&, const PointVector&);
          BindList          _blist;
    };
 

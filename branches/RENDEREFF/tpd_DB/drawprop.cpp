@@ -498,7 +498,7 @@ void  layprop::FontLibrary::unbindFont()
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void layprop::FontLibrary::allFontNames(nameList& allFontNames)
+void layprop::FontLibrary::allFontNames(NameList& allFontNames)
 {
    if (_fti)
    {
@@ -741,9 +741,6 @@ bool layprop::DrawProperties::layerFilled(unsigned layno) const
 
 void layprop::DrawProperties::adjustAlpha(word factor)
 {
-   //@TODO! - A tell option(function or variable) to adjust the constant (30 below)
-   // user must know what's going on, otherwise - the rendering result might be confusing
-   // Having done that, the method can be enabled
    const layprop::tellRGB& theColor = getColor(_drawingLayer);
    byte alpha = theColor.alpha();
    word resultingEbb = factor * _cellDepthAlphaEbb;
@@ -775,7 +772,7 @@ bool layprop::DrawProperties::selectable(unsigned layno) const
    return (!layerHidden(layno) && !layerLocked(layno));
 }
 
-void layprop::DrawProperties::drawTextBoundary(const pointlist& ptlist) const
+void layprop::DrawProperties::drawTextBoundary(const PointVector& ptlist) const
 {
    if (_textBoxHidden) return;
    else
@@ -791,7 +788,7 @@ void layprop::DrawProperties::drawTextBoundary(const pointlist& ptlist) const
    }
 }
 
-void layprop::DrawProperties::drawCellBoundary(const pointlist& ptlist) const
+void layprop::DrawProperties::drawCellBoundary(const PointVector& ptlist) const
 {
    if (_cellBoxHidden) return;
    else
@@ -996,25 +993,25 @@ unsigned layprop::DrawProperties::getTenderLay(unsigned layno) const
    }
 }
 
-void layprop::DrawProperties::allLayers(nameList& alllays) const
+void layprop::DrawProperties::allLayers(NameList& alllays) const
 {
    for (LaySetList::const_iterator CL = getCurSetList().begin(); CL != getCurSetList().end(); CL++)
       if (REF_LAY != CL->first) alllays.push_back(CL->second->name());
 }
 
-void layprop::DrawProperties::allColors(nameList& colist) const
+void layprop::DrawProperties::allColors(NameList& colist) const
 {
    for( ColorMap::const_iterator CI = _layColors.begin(); CI != _layColors.end(); CI++)
       colist.push_back(CI->first);
 }
 
-void layprop::DrawProperties::allFills(nameList& filist) const
+void layprop::DrawProperties::allFills(NameList& filist) const
 {
    for( FillMap::const_iterator CI = _layFill.begin(); CI != _layFill.end(); CI++)
       filist.push_back(CI->first);
 }
 
-void layprop::DrawProperties::allLines(nameList& linelist) const
+void layprop::DrawProperties::allLines(NameList& linelist) const
 {
    for( LineMap::const_iterator CI = _lineSet.begin(); CI != _lineSet.end(); CI++)
       linelist.push_back(CI->first);

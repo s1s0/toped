@@ -202,7 +202,8 @@ DBbox* laydata::EditObject::getLastViewPort() const
 {
    ViewPortMap::const_iterator vpi = _viewPortMap.find(_viewcell->name());
    if (_viewPortMap.end() != vpi)
-      return vpi->second;
+      // return a copy of the object, it should be deleted by the caller
+      return DEBUG_NEW DBbox(*(vpi->second));
    else
       return NULL;
 }
@@ -240,7 +241,7 @@ void laydata::TdtDefaultCell::openGlRender(tenderer::TopRend& rend, const CTM& t
 }
 
 
-void laydata::TdtDefaultCell::motionDraw(const layprop::DrawProperties&, ctmqueue&, bool active) const
+void laydata::TdtDefaultCell::motionDraw(const layprop::DrawProperties&, CtmQueue&, bool active) const
 {
 }
 
@@ -318,7 +319,7 @@ laydata::TdtCell::TdtCell(std::string name) :
          TdtDefaultCell(name, TARGETDB_LIB, true), _cellOverlap(DEFAULT_OVL_BOX) {}
 
 
-laydata::TdtCell::TdtCell(TEDfile* const tedfile, std::string name, int lib) :
+laydata::TdtCell::TdtCell(InputTdtFile* const tedfile, std::string name, int lib) :
          TdtDefaultCell(name, lib, true), _cellOverlap(DEFAULT_OVL_BOX)
 {
    byte recordtype;
@@ -510,7 +511,7 @@ void laydata::TdtCell::openGlRender(tenderer::TopRend& rend, const CTM& trans,
 }
 
 void laydata::TdtCell::motionDraw(const layprop::DrawProperties& drawprop,
-                                          ctmqueue& transtack, bool active) const
+                                          CtmQueue& transtack, bool active) const
 {
    if (active)
    {
@@ -627,7 +628,7 @@ laydata::AtticList* laydata::TdtCell::findSelected(TP pnt)
    return errList;
 }
 
-laydata::TdtCellRef* laydata::TdtCell::getCellOver(TP pnt, ctmstack& transtack,
+laydata::TdtCellRef* laydata::TdtCell::getCellOver(TP pnt, CtmStack& transtack,
                      CellRefStack* refstack, const DWordSet& unselable)
 {
     if (_layers.end() == _layers.find(REF_LAY)) return NULL;
@@ -1192,7 +1193,7 @@ bool laydata::TdtCell::moveSelected(laydata::TdtDesign* ATDB, const CTM& trans, 
       {
          // at the end, if the container of the selected shapes is empty -
          // Note! _shapesel.erase(CL) will invalidate the iterator which means that
-         // it can't be incremened afterwards
+         // it can't be incremented afterwards
          // This on some platforms/compilers/STL implementations or some combinations
          // of the above might work fine sometimes which makes the bug hunt a real fun!
          // (thanks to Sergey)
@@ -1214,7 +1215,7 @@ bool laydata::TdtCell::rotateSelected(laydata::TdtDesign* ATDB, const CTM& trans
    while (_shapesel.end() != CL)
    {
       assert((_layers.end() != _layers.find(CL->first)));
-      // before all remove the selected and partially shapes
+      // before all remove the selected and partially shapes
       // from the data holders ...
       if (_layers[CL->first]->deleteMarked())
          // ... and validate quadTrees if needed
@@ -1326,7 +1327,7 @@ bool laydata::TdtCell::deleteSelected(laydata::AtticList* fsel,
    return overlapChanged(old_overlap, (*libdir)());
 }
 
-bool laydata::TdtCell::cutPolySelected(pointlist& plst, AtticList** dasao)
+bool laydata::TdtCell::cutPolySelected(PointVector& plst, AtticList** dasao)
 {
    // calculate the overlap area of the cutting polygon
    DBbox cut_ovl = DBbox(plst[0]);

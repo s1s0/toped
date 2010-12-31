@@ -623,7 +623,7 @@ int tellstdfunc::lgcCUTPOLY::execute()
    // get the data from the stack
    telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
    real DBscale = PROPC->DBscale();
-   pointlist *plist = t2tpoints(pl,DBscale);
+   PointVector *plist = t2tpoints(pl,DBscale);
    laydata::ValidPoly check(*plist);
    delete plist;
    if (!check.valid()) {
@@ -634,7 +634,7 @@ int tellstdfunc::lgcCUTPOLY::execute()
       //cutPoly returns 3 Attic lists -> Delete/AddSelect/AddOnly,
       // create and initialize them here
       laydata::AtticList* dasao[3];
-      pointlist theShape = check.getValidated();
+      PointVector theShape = check.getValidated();
       for (byte i = 0; i < 3; dasao[i++] = DEBUG_NEW laydata::AtticList());
       DWordSet unselable = PROPC->allUnselectable();
       laydata::TdtLibDir* dbLibDir = NULL;

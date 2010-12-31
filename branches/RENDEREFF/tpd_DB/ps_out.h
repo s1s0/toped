@@ -54,7 +54,7 @@ protected:
    void           writeStdDefs();
    FILE*          _psfh;
    std::string    _fname;
-   nameList       _childnames;
+   NameList       _childnames;
    bool           _hierarchical;
 };
 

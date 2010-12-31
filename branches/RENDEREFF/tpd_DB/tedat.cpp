@@ -385,7 +385,7 @@ laydata::TdtBox::TdtBox(const TP& p1, const TP& p2) : TdtData()
    normalize(dummy);
 }
 
-laydata::TdtBox::TdtBox(TEDfile* const tedfile) : TdtData()
+laydata::TdtBox::TdtBox(InputTdtFile* const tedfile) : TdtData()
 {
    TP point;
    point = tedfile->getTP();
@@ -419,7 +419,7 @@ void laydata::TdtBox::normalize(SGBitSet& psel)
    }
 }
 
-void laydata::TdtBox::openGlPrecalc(layprop::DrawProperties& drawprop , pointlist& ptlist) const
+void laydata::TdtBox::openGlPrecalc(layprop::DrawProperties& drawprop , PointVector& ptlist) const
 {
    // translate the points using the current CTM
    ptlist.reserve(4);
@@ -439,7 +439,7 @@ void laydata::TdtBox::drawSRequest(tenderer::TopRend& rend, const SGBitSet* psli
    rend.box(const_cast<int4b*>(&_pdata[0]), pslist);//TODO Fix the cast!
 }
 
-void laydata::TdtBox::openGlDrawLine(layprop::DrawProperties&, const pointlist& ptlist) const
+void laydata::TdtBox::openGlDrawLine(layprop::DrawProperties&, const PointVector& ptlist) const
 {
    glBegin(GL_LINE_LOOP);
    for (unsigned i = 0; i < 4; i++)
@@ -447,7 +447,7 @@ void laydata::TdtBox::openGlDrawLine(layprop::DrawProperties&, const pointlist& 
    glEnd();
 }
 
-void laydata::TdtBox::openGlDrawFill(layprop::DrawProperties&, const pointlist& ptlist) const
+void laydata::TdtBox::openGlDrawFill(layprop::DrawProperties&, const PointVector& ptlist) const
 {
    // We can't draw directly a box here because if the entire cell is rotated
    // on angle <> 90, then it's not a box anymore
@@ -459,7 +459,7 @@ void laydata::TdtBox::openGlDrawFill(layprop::DrawProperties&, const pointlist& 
    glEnd();
 }
 
-void laydata::TdtBox::openGlDrawSel(const pointlist& ptlist, const SGBitSet* pslist) const
+void laydata::TdtBox::openGlDrawSel(const PointVector& ptlist, const SGBitSet* pslist) const
 {
    assert(0 != ptlist.size());
    if (sh_selected == status())
@@ -485,7 +485,7 @@ void laydata::TdtBox::openGlDrawSel(const pointlist& ptlist, const SGBitSet* psl
    }
 }
 
-void laydata::TdtBox::motionDraw(const layprop::DrawProperties&, ctmqueue& transtack,
+void laydata::TdtBox::motionDraw(const layprop::DrawProperties&, CtmQueue& transtack,
                                                 SGBitSet* plst) const
 {
    CTM trans = transtack.front();
@@ -494,14 +494,14 @@ void laydata::TdtBox::motionDraw(const layprop::DrawProperties&, ctmqueue& trans
       TP pt1, pt2;
       CTM strans = transtack.back();
       assert(plst);
-      pointlist* nshape = movePointsSelected(*plst, trans, strans);
+      PointVector* nshape = movePointsSelected(*plst, trans, strans);
       pt1 = (*nshape)[0]; pt2 = (*nshape)[2];
       glRecti(pt1.x(),pt1.y(),pt2.x(),pt2.y());
       nshape->clear(); delete nshape;
    }
    else
    {
-      pointlist ptlist;
+      PointVector ptlist;
       ptlist.reserve(4);
       ptlist.push_back(TP(_pdata[p1x], _pdata[p1y]) * trans);
       ptlist.push_back(TP(_pdata[p2x], _pdata[p1y]) * trans);
@@ -535,7 +535,7 @@ laydata::Validator* laydata::TdtBox::move(const CTM& trans, SGBitSet& plst)
 {
    if (0 != plst.size())
    {// used for modify
-      pointlist* nshape = movePointsSelected(plst, trans);
+      PointVector* nshape = movePointsSelected(plst, trans);
       _pdata[p1x ] = (*nshape)[0].x();_pdata[p1y ] = (*nshape)[0].y();
       _pdata[p2x] = (*nshape)[2].x();_pdata[p2y] = (*nshape)[2].y();;
       normalize(plst);
@@ -544,7 +544,7 @@ laydata::Validator* laydata::TdtBox::move(const CTM& trans, SGBitSet& plst)
    }
    else
    {// used for rotate
-      pointlist plist;
+      PointVector plist;
       plist.reserve(4);
       plist.push_back(TP(_pdata[p1x], _pdata[p1y])*trans);
       plist.push_back(TP(_pdata[p2x], _pdata[p1y])*trans);
@@ -617,10 +617,10 @@ DBbox laydata::TdtBox::overlap() const
    return DBbox(_pdata[p1x], _pdata[p1y], _pdata[p2x], _pdata[p2y]);
 }
 
-pointlist laydata::TdtBox::shape2poly() const
+PointVector laydata::TdtBox::shape2poly() const
 {
   // convert box to polygon
-   pointlist _plist;
+   PointVector _plist;
    _plist.push_back(TP(_pdata[p1x], _pdata[p1y]));
    _plist.push_back(TP(_pdata[p2x], _pdata[p1y]));
    _plist.push_back(TP(_pdata[p2x], _pdata[p2y]));
@@ -628,17 +628,17 @@ pointlist laydata::TdtBox::shape2poly() const
    return _plist;
 };
 
-pointlist laydata::TdtBox::dumpPoints() const
+PointVector laydata::TdtBox::dumpPoints() const
 {
-   pointlist _plist;
+   PointVector _plist;
    _plist.push_back(TP(_pdata[p1x], _pdata[p1y]));
    _plist.push_back(TP(_pdata[p2x], _pdata[p2y]));
    return _plist;
 };
 
-void laydata::TdtBox::polyCut(pointlist& cutter, ShapeList** decure)
+void laydata::TdtBox::polyCut(PointVector& cutter, ShapeList** decure)
 {
-   pointlist _plist = shape2poly();
+   PointVector _plist = shape2poly();
    // and proceed in the same way as for the polygon
    logicop::logic operation(_plist, cutter);
    try
@@ -683,10 +683,10 @@ void laydata::TdtBox::stretch(int bfactor, ShapeList** decure)
    decure[0]->push_back(this);
 }
 
-pointlist* laydata::TdtBox::movePointsSelected(const SGBitSet& pset,
+PointVector* laydata::TdtBox::movePointsSelected(const SGBitSet& pset,
                                     const CTM&  movedM, const CTM& stableM) const {
   // convert box to polygon
-   pointlist* mlist = DEBUG_NEW pointlist();
+   PointVector* mlist = DEBUG_NEW PointVector();
    mlist->push_back(TP(_pdata[p1x], _pdata[p1y]));
    mlist->push_back(TP(_pdata[p2x], _pdata[p1y]));
    mlist->push_back(TP(_pdata[p2x], _pdata[p2y]));
@@ -733,7 +733,7 @@ laydata::TdtBox::~TdtBox()
 //-----------------------------------------------------------------------------
 // class TdtPoly
 //-----------------------------------------------------------------------------
-laydata::TdtPoly::TdtPoly(const pointlist& plst) : TdtData()
+laydata::TdtPoly::TdtPoly(const PointVector& plst) : TdtData()
 {
    _psize = plst.size();
    assert(_psize);
@@ -752,7 +752,7 @@ laydata::TdtPoly::TdtPoly(int4b* pdata, unsigned psize) : _pdata(pdata), _psize(
    _teseldata.tessellate(_pdata, _psize);
 }
 
-laydata::TdtPoly::TdtPoly(TEDfile* const tedfile) : TdtData()
+laydata::TdtPoly::TdtPoly(InputTdtFile* const tedfile) : TdtData()
 {
    _psize = tedfile->getWord();
    assert(_psize);
@@ -767,7 +767,7 @@ laydata::TdtPoly::TdtPoly(TEDfile* const tedfile) : TdtData()
    _teseldata.tessellate(_pdata, _psize);
 }
 
-void laydata::TdtPoly::openGlPrecalc(layprop::DrawProperties& drawprop, pointlist& ptlist) const
+void laydata::TdtPoly::openGlPrecalc(layprop::DrawProperties& drawprop, PointVector& ptlist) const
 {
    // translate the points using the current CTM
    ptlist.reserve(_psize);
@@ -787,7 +787,7 @@ void laydata::TdtPoly::drawSRequest(tenderer::TopRend& rend, const SGBitSet* psl
    rend.poly(_pdata, _psize, &_teseldata, pslist);
 }
 
-void laydata::TdtPoly::openGlDrawLine(layprop::DrawProperties&, const pointlist& ptlist) const
+void laydata::TdtPoly::openGlDrawLine(layprop::DrawProperties&, const PointVector& ptlist) const
 {
    glBegin(GL_LINE_LOOP);
    for (unsigned i = 0; i < ptlist.size(); i++)
@@ -795,7 +795,7 @@ void laydata::TdtPoly::openGlDrawLine(layprop::DrawProperties&, const pointlist&
    glEnd();
 }
 
-void laydata::TdtPoly::openGlDrawFill(layprop::DrawProperties&, const pointlist& ptlist) const
+void laydata::TdtPoly::openGlDrawFill(layprop::DrawProperties&, const PointVector& ptlist) const
 {
    for ( TeselChain::const_iterator CCH = _teseldata.tdata()->begin(); CCH != _teseldata.tdata()->end(); CCH++ )
    {
@@ -809,7 +809,7 @@ void laydata::TdtPoly::openGlDrawFill(layprop::DrawProperties&, const pointlist&
    }
 }
 
-void laydata::TdtPoly::openGlDrawSel(const pointlist& ptlist, const SGBitSet* pslist) const
+void laydata::TdtPoly::openGlDrawSel(const PointVector& ptlist, const SGBitSet* pslist) const
 {
    assert(0 != ptlist.size());
    if (sh_selected == status())
@@ -836,11 +836,11 @@ void laydata::TdtPoly::openGlDrawSel(const pointlist& ptlist, const SGBitSet* ps
    }
 }
 
-void laydata::TdtPoly::motionDraw(const layprop::DrawProperties&, ctmqueue& transtack,
+void laydata::TdtPoly::motionDraw(const layprop::DrawProperties&, CtmQueue& transtack,
                                  SGBitSet* plst) const
 {
    CTM trans = transtack.front();
-   pointlist* ptlist;
+   PointVector* ptlist;
    if (sh_partsel == status())
    {
       CTM strans = transtack.back();
@@ -849,7 +849,7 @@ void laydata::TdtPoly::motionDraw(const layprop::DrawProperties&, ctmqueue& tran
    }
    else
    {
-      ptlist = DEBUG_NEW pointlist;
+      ptlist = DEBUG_NEW PointVector;
       ptlist->reserve(_psize);
       for (unsigned i = 0; i < _psize; i++)
       {
@@ -885,10 +885,10 @@ laydata::Validator* laydata::TdtPoly::move(const CTM& trans, SGBitSet& plst)
    if (0 != plst.size())
    {// modify i.e. move when only part of the polygon is selected
     // should get here only
-      pointlist* nshape = movePointsSelected(plst, trans);
+      PointVector* nshape = movePointsSelected(plst, trans);
       laydata::ValidPoly* check = DEBUG_NEW laydata::ValidPoly(*nshape);
       if (laydata::shp_OK == check->status()) {
-         // assign the modified pointlist ONLY if the resulting shape is perfect
+         // assign the modified PointVector ONLY if the resulting shape is perfect
          delete [] _pdata;
          _psize = nshape->size();
          _pdata = DEBUG_NEW int4b[2 * _psize];
@@ -902,7 +902,7 @@ laydata::Validator* laydata::TdtPoly::move(const CTM& trans, SGBitSet& plst)
          delete check;
          return NULL;
       }
-      // in all other cases keep the original pointlist, depending on the check->status()
+      // in all other cases keep the original PointVector, depending on the check->status()
       // the shape will be replaced, or marked as failed to modify
       nshape->clear(); delete nshape;
       return check;
@@ -918,14 +918,14 @@ laydata::Validator* laydata::TdtPoly::move(const CTM& trans, SGBitSet& plst)
       {  // The whole gymnastics is because of the Rotate operation (on angles <> 90)
          // Rotated box is converted to polygon. Means that polygon after rotation could
          // produce a box
-         pointlist *mlist = DEBUG_NEW pointlist();
+         PointVector *mlist = DEBUG_NEW PointVector();
          mlist->reserve(_psize);
          for (unsigned i = 0; i < _psize; i++)
             mlist->push_back( TP(_pdata[2*i], _pdata[2*i+1] ) * trans );
          laydata::ValidPoly* check = DEBUG_NEW laydata::ValidPoly(*mlist);
          if (!(laydata::shp_box & check->status()))
          {
-            // leave the modified pointlist ONLY if the resulting shape is not a box
+            // leave the modified PointVector ONLY if the resulting shape is not a box
             for (unsigned i = 0; i < _psize; i++)
             {
                _pdata[2*i] = (*mlist)[i].x();_pdata[2*i+1] = (*mlist)[i].y();
@@ -944,7 +944,7 @@ laydata::Validator* laydata::TdtPoly::move(const CTM& trans, SGBitSet& plst)
 
 void laydata::TdtPoly::transfer(const CTM& trans)
 {
-   pointlist plist;
+   PointVector plist;
    plist.reserve(_psize);
    for (unsigned i = 0; i < _psize; i++)
       plist.push_back( TP( _pdata[2*i], _pdata[2*i+1] ) * trans );
@@ -970,7 +970,7 @@ void laydata::TdtPoly::transfer(const CTM& trans)
 laydata::TdtData* laydata::TdtPoly::copy(const CTM& trans)
 {
    // copy the points of the polygon
-   pointlist ptlist;
+   PointVector ptlist;
    ptlist.reserve(_psize);
    for (unsigned i = 0; i < _psize; i++)
       ptlist.push_back( TP(_pdata[2*i], _pdata[2*i+1]) * trans );
@@ -1000,28 +1000,28 @@ bool laydata::TdtPoly::point_inside(TP pnt)
    return (cc & 0x01) ? true : false;
 }
 
-pointlist laydata::TdtPoly::shape2poly() const
+PointVector laydata::TdtPoly::shape2poly() const
 {
-   pointlist plist;
+   PointVector plist;
    plist.reserve(_psize);
    for (unsigned i = 0; i < _psize; i++)
       plist.push_back(TP(_pdata[2*i], _pdata[2*i+1]));
    return plist;
 };
 
-pointlist laydata::TdtPoly::dumpPoints() const
+PointVector laydata::TdtPoly::dumpPoints() const
 {
    // Same as shape2poly
-   pointlist plist;
+   PointVector plist;
    plist.reserve(_psize);
    for (unsigned i = 0; i < _psize; i++)
       plist.push_back(TP(_pdata[2*i], _pdata[2*i+1]));
    return plist;
 };
 
-void laydata::TdtPoly::polyCut(pointlist& cutter, ShapeList** decure)
+void laydata::TdtPoly::polyCut(PointVector& cutter, ShapeList** decure)
 {
-   pointlist plist;
+   PointVector plist;
    plist.reserve(_psize);
    for (unsigned i = 0; i < _psize; i++)
       plist.push_back( TP( _pdata[2*i], _pdata[2*i+1] ) );
@@ -1058,13 +1058,13 @@ void laydata::TdtPoly::polyCut(pointlist& cutter, ShapeList** decure)
 
 void laydata::TdtPoly::stretch(int bfactor, ShapeList** decure)
 {
-   pointlist plist;
+   PointVector plist;
    plist.reserve(_psize);
    for (unsigned i = 0; i < _psize; i++)
       plist.push_back( TP( _pdata[2*i], _pdata[2*i+1] ) );
 
    logicop::stretcher sh_resize(plist, bfactor);
-   pointlist* res = sh_resize.execute();
+   PointVector* res = sh_resize.execute();
    ValidPoly vsh(*res);
    if (vsh.valid() && !(laydata::shp_clock & vsh.status()))
    {
@@ -1152,9 +1152,9 @@ DBbox laydata::TdtPoly::overlap() const
    return ovl;
 }
 
-pointlist* laydata::TdtPoly::movePointsSelected(const SGBitSet& pset,
+PointVector* laydata::TdtPoly::movePointsSelected(const SGBitSet& pset,
                                     const CTM&  movedM, const CTM& stableM) const {
-   pointlist* mlist = DEBUG_NEW pointlist();
+   PointVector* mlist = DEBUG_NEW PointVector();
    mlist->reserve(_psize);
    for (unsigned i = 0 ; i < _psize; i++ )
       mlist->push_back(TP(_pdata[2*i], _pdata[2*i+1]));
@@ -1192,7 +1192,7 @@ laydata::TdtPoly::~TdtPoly()
 //-----------------------------------------------------------------------------
 // class TdtWire
 //-----------------------------------------------------------------------------
-laydata::TdtWire::TdtWire(const pointlist& plst, WireWidth width) :
+laydata::TdtWire::TdtWire(const PointVector& plst, WireWidth width) :
       TdtData(), _width(width)
 {
    _psize = plst.size();
@@ -1210,7 +1210,7 @@ laydata::TdtWire::TdtWire(int4b* pdata, unsigned psize, WireWidth width) :
 {
 }
 
-laydata::TdtWire::TdtWire(TEDfile* const tedfile) : TdtData()
+laydata::TdtWire::TdtWire(InputTdtFile* const tedfile) : TdtData()
 {
    _psize = tedfile->getWord();
    assert(_psize);
@@ -1228,7 +1228,7 @@ laydata::TdtWire::TdtWire(TEDfile* const tedfile) : TdtData()
    }
 }
 
-void laydata::TdtWire::openGlPrecalc(layprop::DrawProperties& drawprop, pointlist& ptlist) const
+void laydata::TdtWire::openGlPrecalc(layprop::DrawProperties& drawprop, PointVector& ptlist) const
 {
    // first check whether to draw only the center line
    DBbox wsquare = DBbox(TP(0,0),TP((int4b)_width, (int4b)_width));
@@ -1257,7 +1257,7 @@ void laydata::TdtWire::drawSRequest(tenderer::TopRend& rend, const SGBitSet* psl
    rend.wire(_pdata, _psize, _width, pslist);
 }
 
-void laydata::TdtWire::openGlDrawLine(layprop::DrawProperties&, const pointlist& ptlist) const
+void laydata::TdtWire::openGlDrawLine(layprop::DrawProperties&, const PointVector& ptlist) const
 {
    if (0 == ptlist.size()) return;
    word lsize = ptlist[0].x();
@@ -1276,7 +1276,7 @@ void laydata::TdtWire::openGlDrawLine(layprop::DrawProperties&, const pointlist&
    glEnd();
 }
 
-void laydata::TdtWire::openGlDrawFill(layprop::DrawProperties&, const pointlist& ptlist) const
+void laydata::TdtWire::openGlDrawFill(layprop::DrawProperties&, const PointVector& ptlist) const
 {
    if (0 == ptlist.size()) return;
    word lsize = ptlist[0].x();
@@ -1294,7 +1294,7 @@ void laydata::TdtWire::openGlDrawFill(layprop::DrawProperties&, const pointlist&
    glEnd();
 }
 
-void laydata::TdtWire::openGlDrawSel(const pointlist& ptlist, const SGBitSet* pslist) const
+void laydata::TdtWire::openGlDrawSel(const PointVector& ptlist, const SGBitSet* pslist) const
 {
    if (0 == ptlist.size()) return;
    word lsize = ptlist[0].x();
@@ -1337,15 +1337,15 @@ void laydata::TdtWire::openGlDrawSel(const pointlist& ptlist, const SGBitSet* ps
 }
 
 void laydata::TdtWire::motionDraw(const layprop::DrawProperties& drawprop,
-               ctmqueue& transtack, SGBitSet* plst) const
+               CtmQueue& transtack, SGBitSet* plst) const
 {
    CTM trans = transtack.front();
-   pointlist ptlist;
+   PointVector ptlist;
    if (sh_partsel == status())
    {
       CTM strans = transtack.back();
       assert(plst);
-      pointlist* modified = movePointsSelected(*plst, trans, strans);
+      PointVector* modified = movePointsSelected(*plst, trans, strans);
       laydata::WireContourAux wcontour(*modified, _width);
       wcontour.getRenderingData(ptlist);
       modified->clear(); delete modified;
@@ -1423,10 +1423,10 @@ laydata::Validator* laydata::TdtWire::move(const CTM& trans, SGBitSet& plst)
 {
    if (0 != plst.size())
    {
-      pointlist* nshape = movePointsSelected(plst, trans);
+      PointVector* nshape = movePointsSelected(plst, trans);
       laydata::ValidWire* check = DEBUG_NEW laydata::ValidWire(*nshape, _width);
       if (laydata::shp_OK == check->status()) {
-         // assign the modified pointlist ONLY if the resulting shape is perfect
+         // assign the modified PointVector ONLY if the resulting shape is perfect
          delete [] _pdata;
          _psize = nshape->size();
          _pdata = DEBUG_NEW int4b[2 * _psize];
@@ -1438,7 +1438,7 @@ laydata::Validator* laydata::TdtWire::move(const CTM& trans, SGBitSet& plst)
          delete check;
          return NULL;
       }
-      // in all other cases keep the original pointlist, depending on the check->status()
+      // in all other cases keep the original PointVector, depending on the check->status()
       // the shape will be replaced, or marked as failed to modify
       return check;
    }
@@ -1459,7 +1459,7 @@ void laydata::TdtWire::transfer(const CTM& trans)
 
 laydata::TdtData* laydata::TdtWire::copy(const CTM& trans) {
    // copy the points of the wire
-   pointlist ptlist;
+   PointVector ptlist;
    ptlist.reserve(_psize);
    for (unsigned i = 0; i < _psize; i++)
       ptlist.push_back( TP( _pdata[2*i], _pdata[2*i+1] ) * trans);
@@ -1482,20 +1482,20 @@ void laydata::TdtWire::stretch(int bfactor, ShapeList** decure)
    decure[0]->push_back(this);
 }
 
-pointlist laydata::TdtWire::shape2poly() const
+PointVector laydata::TdtWire::shape2poly() const
 {
-   pointlist cdata;
+   PointVector cdata;
    laydata::WireContour wcontour(_pdata, _psize, _width);
    cdata.reserve(wcontour.csize());
    wcontour.getVectorData(cdata);
    ValidPoly check(cdata);
    if (check.valid()) return check.getValidated();
-   else return pointlist();
+   else return PointVector();
 }
 
-pointlist laydata::TdtWire::dumpPoints() const
+PointVector laydata::TdtWire::dumpPoints() const
 {
-   pointlist plist;
+   PointVector plist;
    plist.reserve(_psize);
    for (unsigned i = 0; i < _psize; i++)
       plist.push_back(TP(_pdata[2*i], _pdata[2*i+1]));
@@ -1546,10 +1546,10 @@ DBbox laydata::TdtWire::overlap() const
    return wcontour.getCOverlap();
 }
 
-pointlist* laydata::TdtWire::movePointsSelected(const SGBitSet& pset,
+PointVector* laydata::TdtWire::movePointsSelected(const SGBitSet& pset,
                                     const CTM& movedM, const CTM& stableM) const
 {
-   pointlist* mlist = DEBUG_NEW pointlist();
+   PointVector* mlist = DEBUG_NEW PointVector();
    mlist->reserve(_psize);
    for (unsigned i = 0 ; i < _psize; i++ )
       mlist->push_back(TP(_pdata[2*i], _pdata[2*i+1]));
@@ -1594,7 +1594,7 @@ laydata::TdtWire::~TdtWire()
 //-----------------------------------------------------------------------------
 // class TdtCellRef
 //-----------------------------------------------------------------------------
-laydata::TdtCellRef::TdtCellRef(TEDfile* const tedfile)
+laydata::TdtCellRef::TdtCellRef(InputTdtFile* const tedfile)
 {
    // read the name of the referenced cell
    std::string cellrefname = tedfile->getString();
@@ -1605,7 +1605,7 @@ laydata::TdtCellRef::TdtCellRef(TEDfile* const tedfile)
    _translation = tedfile->getCTM();
 }
 
-void laydata::TdtCellRef::openGlPrecalc(layprop::DrawProperties& drawprop, pointlist& ptlist) const
+void laydata::TdtCellRef::openGlPrecalc(layprop::DrawProperties& drawprop, PointVector& ptlist) const
 {
    // calculate the current translation matrix
    CTM newtrans = _translation * drawprop.topCtm();
@@ -1681,14 +1681,14 @@ void laydata::TdtCellRef::drawSRequest(tenderer::TopRend& rend, const SGBitSet*)
 
 }
 
-void laydata::TdtCellRef::openGlDrawLine(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
+void laydata::TdtCellRef::openGlDrawLine(layprop::DrawProperties& drawprop, const PointVector& ptlist) const
 {
    if (0 == ptlist.size()) return;
    drawprop.drawCellBoundary(ptlist);
 }
 
 
-void laydata::TdtCellRef::openGlDrawFill(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
+void laydata::TdtCellRef::openGlDrawFill(layprop::DrawProperties& drawprop, const PointVector& ptlist) const
 {
    if ((NULL == structure()) || (0 == ptlist.size())) return;
    // draw the structure itself. Pop/push ref stuff is when edit in place is active
@@ -1697,7 +1697,7 @@ void laydata::TdtCellRef::openGlDrawFill(layprop::DrawProperties& drawprop, cons
    if (layprop::crc_VIEW != crchain) drawprop.postCheckCRS(this);
 }
 
-void laydata::TdtCellRef::openGlDrawSel(const pointlist& ptlist, const SGBitSet*) const
+void laydata::TdtCellRef::openGlDrawSel(const PointVector& ptlist, const SGBitSet*) const
 {
    assert(0 != ptlist.size());
    if (sh_selected == status())
@@ -1709,7 +1709,7 @@ void laydata::TdtCellRef::openGlDrawSel(const pointlist& ptlist, const SGBitSet*
    }
 }
 
-void laydata::TdtCellRef::openGlPostClean(layprop::DrawProperties& drawprop, pointlist& ptlist) const
+void laydata::TdtCellRef::openGlPostClean(layprop::DrawProperties& drawprop, PointVector& ptlist) const
 {
    if (0 == ptlist.size()) return;
    ptlist.clear();
@@ -1718,7 +1718,7 @@ void laydata::TdtCellRef::openGlPostClean(layprop::DrawProperties& drawprop, poi
 }
 
 void laydata::TdtCellRef::motionDraw(const layprop::DrawProperties& drawprop,
-                 ctmqueue& transtack, SGBitSet*) const
+                 CtmQueue& transtack, SGBitSet*) const
 {
    if (structure())
    {
@@ -1834,7 +1834,7 @@ DBbox laydata::TdtCellRef::overlap() const
 //-----------------------------------------------------------------------------
 // class TdtCellAref
 //-----------------------------------------------------------------------------
-laydata::TdtCellAref::TdtCellAref(TEDfile* const tedfile) : TdtCellRef(tedfile)
+laydata::TdtCellAref::TdtCellAref(InputTdtFile* const tedfile) : TdtCellRef(tedfile)
 {
    int4b _stepX = tedfile->get4b();
    int4b _stepY = tedfile->get4b();
@@ -1844,7 +1844,7 @@ laydata::TdtCellAref::TdtCellAref(TEDfile* const tedfile) : TdtCellRef(tedfile)
 }
 
 
-void laydata::TdtCellAref::openGlPrecalc(layprop::DrawProperties& drawprop, pointlist& ptlist) const
+void laydata::TdtCellAref::openGlPrecalc(layprop::DrawProperties& drawprop, PointVector& ptlist) const
 {
    // make sure that the referenced structure exists
    assert(structure());
@@ -1994,13 +1994,13 @@ void laydata::TdtCellAref::drawSRequest(tenderer::TopRend& rend, const SGBitSet*
 }
 
 
-void laydata::TdtCellAref::openGlDrawLine(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
+void laydata::TdtCellAref::openGlDrawLine(layprop::DrawProperties& drawprop, const PointVector& ptlist) const
 {
    if (0 == ptlist.size()) return;
    drawprop.drawCellBoundary(ptlist);
 }
 
-void laydata::TdtCellAref::openGlDrawFill(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
+void laydata::TdtCellAref::openGlDrawFill(layprop::DrawProperties& drawprop, const PointVector& ptlist) const
 {
    if (0 == ptlist.size()) return;
    for (int i = ptlist[4].x(); i < ptlist[4].y(); i++)
@@ -2021,7 +2021,7 @@ void laydata::TdtCellAref::openGlDrawFill(layprop::DrawProperties& drawprop, con
 //   drawprop.popCtm();
 }
 
-void laydata::TdtCellAref::openGlDrawSel(const pointlist& ptlist, const SGBitSet*) const
+void laydata::TdtCellAref::openGlDrawSel(const PointVector& ptlist, const SGBitSet*) const
 {
    assert(0 != ptlist.size());
    if (sh_selected == status())
@@ -2034,7 +2034,7 @@ void laydata::TdtCellAref::openGlDrawSel(const pointlist& ptlist, const SGBitSet
 }
 
 void laydata::TdtCellAref::motionDraw(const layprop::DrawProperties& drawprop,
-                 ctmqueue& transtack, SGBitSet*) const
+                 CtmQueue& transtack, SGBitSet*) const
 {
    assert(structure());
    for (int i = 0; i < _arrprops.cols(); i++)
@@ -2145,7 +2145,7 @@ laydata::TdtText::TdtText(std::string text, CTM trans) : TdtData(),
    _correction = TP(-pure_ovl.p1().x(), -pure_ovl.p1().y());
 }
 
-laydata::TdtText::TdtText(TEDfile* const tedfile) : TdtData(),
+laydata::TdtText::TdtText(InputTdtFile* const tedfile) : TdtData(),
    _text(tedfile->getString()), _translation(tedfile->getCTM()), _overlap(TP())
 {
    assert(NULL != fontLib); // check that font library is initialised
@@ -2167,7 +2167,7 @@ void laydata::TdtText::replaceStr(std::string newstr)
    _correction = TP(-pure_ovl.p1().x(), -pure_ovl.p1().y());
 }
 
-void laydata::TdtText::openGlPrecalc(layprop::DrawProperties& drawprop, pointlist& ptlist) const
+void laydata::TdtText::openGlPrecalc(layprop::DrawProperties& drawprop, PointVector& ptlist) const
 {
    //  Things to remember...
    // Font has to be translated using its own matrix in which
@@ -2248,7 +2248,7 @@ void laydata::TdtText::drawSRequest(tenderer::TopRend& rend, const SGBitSet*) co
    rend.text(&_text, _translation, _overlap, _correction, true);
 }
 
-void laydata::TdtText::openGlDrawLine(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
+void laydata::TdtText::openGlDrawLine(layprop::DrawProperties& drawprop, const PointVector& ptlist) const
 {
    if (0 == ptlist.size()) return;
    drawprop.drawTextBoundary(ptlist);
@@ -2274,7 +2274,7 @@ void laydata::TdtText::openGlDrawLine(layprop::DrawProperties& drawprop, const p
    glPopMatrix();
 }
 
-void laydata::TdtText::openGlDrawFill(layprop::DrawProperties& drawprop, const pointlist& ptlist) const
+void laydata::TdtText::openGlDrawFill(layprop::DrawProperties& drawprop, const PointVector& ptlist) const
 {
    if (0 == ptlist.size()) return;
    glPushMatrix();
@@ -2295,7 +2295,7 @@ void laydata::TdtText::openGlDrawFill(layprop::DrawProperties& drawprop, const p
    glPopMatrix();
 }
 
-void laydata::TdtText::openGlDrawSel(const pointlist& ptlist, const SGBitSet*) const
+void laydata::TdtText::openGlDrawSel(const PointVector& ptlist, const SGBitSet*) const
 {
    assert(0 != ptlist.size());
    if (sh_selected == status())
@@ -2307,7 +2307,7 @@ void laydata::TdtText::openGlDrawSel(const pointlist& ptlist, const SGBitSet*) c
    }
 }
 
-void laydata::TdtText::openGlPostClean(layprop::DrawProperties& drawprop, pointlist& ptlist) const
+void laydata::TdtText::openGlPostClean(layprop::DrawProperties& drawprop, PointVector& ptlist) const
 {
    if (0 == ptlist.size()) return;
    ptlist.clear();
@@ -2316,7 +2316,7 @@ void laydata::TdtText::openGlPostClean(layprop::DrawProperties& drawprop, pointl
 }
 
 void laydata::TdtText::motionDraw(const layprop::DrawProperties& drawprop,
-               ctmqueue& transtack, SGBitSet*) const
+               CtmQueue& transtack, SGBitSet*) const
 {
    //====================================================================
    // font translation matrix
@@ -2427,7 +2427,7 @@ CTM laydata::TdtText::renderingAdjustment(const CTM& mtrx) const
 //-----------------------------------------------------------------------------
 // class ValidBox
 //-----------------------------------------------------------------------------
-laydata::ValidBox::ValidBox(pointlist& plist) : Validator(plist)
+laydata::ValidBox::ValidBox(PointVector& plist) : Validator(plist)
 {
    word i,j;
    _area = 0;
@@ -2461,7 +2461,7 @@ std::string laydata::ValidBox::failType()
 //-----------------------------------------------------------------------------
 // class ValidPoly
 //-----------------------------------------------------------------------------
-laydata::ValidPoly::ValidPoly(pointlist& plist) : Validator(plist) {
+laydata::ValidPoly::ValidPoly(PointVector& plist) : Validator(plist) {
    angles();
    if (!valid()) return;
    //reorder the chain (if needed) to get the points in anticlockwise order
@@ -2486,8 +2486,8 @@ laydata::TdtData* laydata::ValidPoly::replacement() {
  */
 void laydata::ValidPoly::angles()
 {
-   pointlist::iterator cp1 = _plist.end(); cp1--;
-   pointlist::iterator cp2 = _plist.begin();
+   PointVector::iterator cp1 = _plist.end(); cp1--;
+   PointVector::iterator cp2 = _plist.begin();
    real cAngle = 0.0;
    std::stack<real> angle_stack;
    bool prev_cleared = false;
@@ -2583,7 +2583,7 @@ std::string laydata::ValidPoly::failType() {
 //-----------------------------------------------------------------------------
 // class ValidWire
 //-----------------------------------------------------------------------------
-laydata::ValidWire::ValidWire(pointlist& plist, WireWidth width) :
+laydata::ValidWire::ValidWire(PointVector& plist, WireWidth width) :
                                      Validator(plist), _width(width) {
    if (width > MAX_WIRE_WIDTH)
       _status |= shp_width;
@@ -2603,8 +2603,8 @@ void laydata::ValidWire::angles()
 {
    // check for a single point
    if (_plist.size() < 2) _status |= shp_null;
-   pointlist::iterator cp2 = _plist.begin();
-   pointlist::iterator cp1 = cp2; cp2++;
+   PointVector::iterator cp2 = _plist.begin();
+   PointVector::iterator cp1 = cp2; cp2++;
    real pAngle = 0.0;
    real cAngle = 0.0;
    bool pAngleValid = false;
@@ -2649,7 +2649,7 @@ void laydata::ValidWire::angles()
 
 void laydata::ValidWire::endSegments()
 {
-   //shp_shortends
+   //TODO shp_shortends
 }
 
 /*! Implements  algorithm to check that the wire is not simple crossing.
@@ -2663,7 +2663,7 @@ void laydata::ValidWire::selfcrossing() {
    {
       fixingpoly.findCrossingPoints();
    }
-   catch (EXPTNpolyCross) {/*FIXME! this is temporary commented-out!*/ _status |= laydata::shp_cross; return;}
+   catch (EXPTNpolyCross) { _status |= laydata::shp_cross; return; }
    if (0 != fixingpoly.crossp() )
       _status |= laydata::shp_cross;
 
@@ -2710,7 +2710,7 @@ int laydata::xangle(const TP& p1, const TP& p2) {
 //-----------------------------------------------------------------------------
 // other...
 //-----------------------------------------------------------------------------
-laydata::TdtData* laydata::createValidShape(pointlist* pl) {
+laydata::TdtData* laydata::createValidShape(PointVector* pl) {
    laydata::ValidPoly check(*pl);
    delete pl;
    if (!check.valid()) {
@@ -2720,7 +2720,7 @@ laydata::TdtData* laydata::createValidShape(pointlist* pl) {
       return NULL;
    }
    laydata::TdtData* newshape;
-   pointlist npl = check.getValidated();
+   PointVector npl = check.getValidated();
    if (check.box())
       newshape = DEBUG_NEW laydata::TdtBox(npl[2], npl[0]);
    else
@@ -2729,7 +2729,7 @@ laydata::TdtData* laydata::createValidShape(pointlist* pl) {
    return newshape;
 }
 
-laydata::TdtData* laydata::polymerge(const pointlist& _plist0, const pointlist& _plist1)
+laydata::TdtData* laydata::polymerge(const PointVector& _plist0, const PointVector& _plist1)
 {
    if(_plist0.empty() || _plist1.empty()) return NULL;
    logicop::logic operation(_plist0, _plist1);
@@ -2770,7 +2770,7 @@ laydata::TdtData* laydata::polymerge(const pointlist& _plist0, const pointlist& 
 
 //==============================================================================
 //
-void laydata::TdtTmpBox::draw(const layprop::DrawProperties&, ctmqueue& transtack) const
+void laydata::TdtTmpBox::draw(const layprop::DrawProperties&, CtmQueue& transtack) const
 {
    CTM trans = transtack.front();
    if (!(_p1)) return;
@@ -2802,7 +2802,7 @@ laydata::TdtTmpBox::~TdtTmpBox()
 
 //==============================================================================
 //
-void laydata::TdtTmpPoly::draw(const layprop::DrawProperties&, ctmqueue& transtack) const
+void laydata::TdtTmpPoly::draw(const layprop::DrawProperties&, CtmQueue& transtack) const
 {
    CTM trans = transtack.front();
    dword numpnts;
@@ -2827,13 +2827,13 @@ void laydata::TdtTmpPoly::rmpoint(TP& lp)
 
 //==============================================================================
 //
-void laydata::TdtTmpWire::draw(const layprop::DrawProperties& drawprop, ctmqueue& transtack) const
+void laydata::TdtTmpWire::draw(const layprop::DrawProperties& drawprop, CtmQueue& transtack) const
 {
    dword num_points = _plist.size();
    if (num_points == 0) return;
    laydata::WireContourAux wcontour(_plist, _width, TP(_plist[num_points-1] * transtack.front()));
-   pointlist centerLine;
-   pointlist contourLine;
+   PointVector centerLine;
+   PointVector contourLine;
    wcontour.getLData(centerLine);
    wcontour.getCData(contourLine);
 
@@ -2853,7 +2853,7 @@ void  laydata::TdtTmpWire::rmpoint(TP& lp)
    if (_plist.size() > 0) lp = _plist.back();
 };
 
-void laydata::TdtTmpWire::drawline(const pointlist& centerLine, const pointlist& contourLine) const
+void laydata::TdtTmpWire::drawline(const PointVector& centerLine, const PointVector& contourLine) const
 {
    int num_lpoints = centerLine.size();
    if (0 == num_lpoints) return;
@@ -2875,7 +2875,7 @@ void laydata::TdtTmpWire::drawline(const pointlist& centerLine, const pointlist&
 
 //==============================================================================
 //
-void laydata::TdtTmpCellRef::draw(const layprop::DrawProperties& drawprop, ctmqueue& transtack) const
+void laydata::TdtTmpCellRef::draw(const layprop::DrawProperties& drawprop, CtmQueue& transtack) const
 {
    if (NULL != _structure)
    {
@@ -2887,7 +2887,7 @@ void laydata::TdtTmpCellRef::draw(const layprop::DrawProperties& drawprop, ctmqu
 //==============================================================================
 //
 void laydata::TdtTmpCellAref::draw(const layprop::DrawProperties& drawprop,
-                                       ctmqueue& transtack) const
+                                       CtmQueue& transtack) const
 {
    if (NULL != _structure)
    {
@@ -2918,7 +2918,7 @@ laydata::TdtTmpText::TdtTmpText(std::string text, CTM trans) : _text(text),
 }
 
 
-void laydata::TdtTmpText::draw(const layprop::DrawProperties&, ctmqueue& transtack) const
+void laydata::TdtTmpText::draw(const layprop::DrawProperties&, CtmQueue& transtack) const
 {
    //====================================================================
    // font translation matrix

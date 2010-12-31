@@ -48,7 +48,7 @@ typedef          int             int4b    ; // 4 bytes
 typedef long long int            int8b    ; // 8 bytes
 typedef          double          real     ; // 8 bytes
 
-typedef  std::list<std::string>           nameList;
+typedef  std::list<std::string>           NameList;
 typedef  std::set<std::string>            NameSet;
 typedef  std::list<word>                  WordList;
 typedef  std::set<word>                   WordSet;
@@ -276,10 +276,10 @@ private:
    TP    _p2;
 };
 
-typedef  std::vector<TP>         pointlist;
-typedef  std::stack<CTM>         ctmstack;
-typedef  std::deque<CTM>         ctmqueue;
-typedef  std::list<pointlist*>   pcollection; // point list collection
+typedef  std::vector<TP>         PointVector;
+typedef  std::stack<CTM>         CtmStack;
+typedef  std::deque<CTM>         CtmQueue;
+typedef  std::list<PointVector*> pcollection; // point list collection
 
 
 struct TpdYYLtype {
@@ -291,7 +291,7 @@ struct TpdYYLtype {
 };
 
 std::vector<std::string> split (const std::string& str, char delim);
-int8b polyarea(const pointlist& shape);
+int8b polyarea(const PointVector& shape);
 unsigned GCD(unsigned arg1, unsigned arg2);
 
 //=============================================================================

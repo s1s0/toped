@@ -33,6 +33,7 @@
 #include <wx/image.h>
 #include <wx/aboutdlg.h>
 #include <wx/tooltip.h>
+#include <wx/txtstrm.h>
 #include <math.h>
 #include "toped.h"
 #include "datacenter.h"
@@ -61,11 +62,15 @@ extern const wxEventType         wxEVT_TOOLBARADDITEM;
 extern const wxEventType         wxEVT_TOOLBARDELETEITEM;
 extern const wxEventType         wxEVT_EDITLAYER;
 extern const wxEventType         wxEVT_QUITAPP;
+extern const wxEventType         wxEVT_EXECEXT;
+extern const wxEventType         wxEVT_EXECEXTPIPE;
+extern const wxEventType         wxEVT_EXECEXTDONE;
 
 
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
 extern parsercmd::cmdBLOCK*      CMDBlock;
+extern console::ted_cmd*         Console;
 
 tui::CanvasStatus::CanvasStatus(wxWindow* parent, wxWindowID id ,
    const wxPoint& pos , const wxSize& size , long style)
@@ -142,6 +147,65 @@ void tui::CanvasStatus::setdYpos(wxString coordY){
 void tui::CanvasStatus::setSelected(wxString numsel) {
    _selected->SetLabel(numsel);
 }
+
+//-----------------------------------------------------------------------------
+BEGIN_EVENT_TABLE(tui::ExternalProcess, wxProcess)
+   EVT_TIMER(wxID_ANY, tui::ExternalProcess::OnTimer)
+END_EVENT_TABLE()
+
+tui::ExternalProcess::ExternalProcess(wxEvtHandler* parent) : wxProcess(parent), _idleTimer(this)
+{
+   Redirect();
+   _idleTimer.Start(100);
+}
+
+void tui::ExternalProcess::OnTerminate(int pid, int status)
+{
+   wxTextInputStream tes(*GetErrorStream());
+   if (IsErrorAvailable())
+   {
+      wxString msg;
+      msg << tes.ReadLine();
+      if (!msg.IsEmpty())
+         tell_log(console::MT_SHELLERROR,msg);
+   }
+   wxTextInputStream tis(*GetInputStream());
+   while (IsInputAvailable())
+   {
+      wxString msg;
+      msg << tis.ReadLine();
+      if (!msg.IsEmpty())
+         tell_log(console::MT_SHELLINFO,msg);
+   }
+   _idleTimer.Stop();
+   //Post an event to notify the console, that the external command has exited
+   wxCommandEvent eventExecExDone(wxEVT_EXECEXTDONE);
+   wxPostEvent(Console, eventExecExDone);
+
+   delete this;
+}
+
+void tui::ExternalProcess::OnTimer(wxTimerEvent& WXUNUSED(event))
+{
+   wxTextInputStream tes(*GetErrorStream());
+   if (IsErrorAvailable())
+   {
+      wxString msg;
+      msg << tes.ReadLine();
+      if (!msg.IsEmpty())
+         tell_log(console::MT_SHELLERROR,msg);
+   }
+   wxTextInputStream tis(*GetInputStream());
+   while (IsInputAvailable())
+   {
+      wxString msg;
+      msg << tis.ReadLine();
+      if (!msg.IsEmpty())
+         tell_log(console::MT_SHELLINFO,msg);
+   }
+//   wxTextOutputStream tos(*GetOutputStream());
+}
+
 //-----------------------------------------------------------------------------
 // The TopedFrame event table (TOPED main event table)
 BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
@@ -277,6 +341,8 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_TECUSTOM_COMMAND(wxEVT_EDITLAYER, wxID_ANY, tui::TopedFrame::OnEditLayer )
    EVT_TEXT_MAXLEN(ID_WIN_TXT_LOG, tui::TopedFrame::OnTextLogOverflow)
    EVT_TECUSTOM_COMMAND(wxEVT_QUITAPP, wxID_ANY, tui::TopedFrame::OnQuit)
+   EVT_TECUSTOM_COMMAND(wxEVT_EXECEXT, wxID_ANY, tui::TopedFrame::OnExecExt)
+   EVT_TECUSTOM_COMMAND(wxEVT_EXECEXTPIPE, wxID_ANY, tui::TopedFrame::OnExecExtTextEnter)
 END_EVENT_TABLE()
 
 // See the FIXME note in the bootom of browsers.cpp
@@ -818,6 +884,34 @@ void tui::TopedFrame::initView()
 }
 
 
+void tui::TopedFrame::OnExecExt( wxCommandEvent& event )
+{
+   wxString extCmd = event.GetString();
+//   wxShell(extCmd);
+//   ExternalProcess* extProc = DEBUG_NEW ExternalProcess(this);
+   _extProc = DEBUG_NEW ExternalProcess(this);
+
+//   Connect(-1, wxEVT_EXECEXTPIPE,
+//           (wxObjectEventFunction) (wxEventFunction)
+//           (wxCommandEventFunction)&ExternalProcess::OnTextEnter);
+//
+
+   int returnCode = wxExecute(extCmd, wxEXEC_ASYNC, _extProc);
+   if ( 0 == returnCode )
+   {
+      //Post an event to notify the console, that the external command has exited
+      wxCommandEvent eventExecExDone(wxEVT_EXECEXTDONE);
+      wxPostEvent(_cmdline, eventExecExDone);
+   }
+}
+
+void tui::TopedFrame::OnExecExtTextEnter(wxCommandEvent& event)
+{
+   wxTextOutputStream tos(*(_extProc->GetOutputStream()));
+   tos << event.GetString();
+   _extProc->CloseOutput();
+}
+
 void tui::TopedFrame::OnQuit( wxCommandEvent& WXUNUSED( event ) ) {
    Close(FALSE);
 }
@@ -899,9 +993,11 @@ void tui::TopedFrame::OnTDTRead(wxCommandEvent& evt)
       }
    }
    SetStatusText(wxT("Opening file..."));
+   wxString dbfext;
+   dbfext << wxT("Toped files(*.tdt;*.gz;*.zip)|*.tdt;*.gz;*.zip;*.GZ;*.ZIP")
+          << wxT("|All files(*.*)|*.*");
    wxFileDialog dlg2(this, wxT("Select a design to open"), wxT(""), wxT(""),
-      wxT("Toped files (*.tdt)|*.tdt|All files(*.*)|*.*"),
-      tpdfOPEN);
+                     dbfext, tpdfOPEN);
    if (wxID_OK == dlg2.ShowModal())
    {
       wxString filename = dlg2.GetFilename();
@@ -2127,7 +2223,7 @@ void tui::TopedFrame::OnZoomAll(wxCommandEvent& WXUNUSED(event)) {
       eventZOOM.SetClientData(static_cast<void*>(ovl));
       wxPostEvent(_canvas, eventZOOM);
    }
-   DATC->unlockTDT(dbLibDir, true);
+   DATC->unlockTDT(dbLibDir, false);
 }
 
 void tui::TopedFrame::OnzoomIn(wxCommandEvent& WXUNUSED(event)) {

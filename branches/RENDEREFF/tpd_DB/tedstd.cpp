@@ -81,46 +81,277 @@ PSegment* PSegment::parallel(TP p)
 }
 
 
-//-----------------------------------------------------------------------------
-// class TEDfile
-//-----------------------------------------------------------------------------
-laydata::TEDfile::TEDfile(const char* filename, laydata::TdtLibDir* tedlib)  // reading
+//=============================================================================
+// class InputDBFile
+//=============================================================================
+/*!
+ * The main purpose of the constructor is to create an input stream (_inStream)
+ * from the fileName. It handles zip and gz files recognizing them by the
+ * extension. The outcome of this operation is indicated in the _status field
+ * of the class.
+ * @param fileName - the fully qualified filename - OS dependent
+ */
+laydata::InputDBFile::InputDBFile( wxString fileName, bool forceSeek) :
+      _inStream      (      NULL ),
+      _gziped        (     false ),
+      _ziped         (     false ),
+      _forceSeek     ( forceSeek ),
+      _fileLength    (         0 ),
+      _filePos       (         0 ),
+      _progresPos    (         0 ),
+      _progresMark   (         0 ),
+      _progresStep   (         0 ),
+      _progresDivs   (       200 ),
+      _status        (     false )
 {
-   _numread = 0;_position = 0;_design = NULL;
-   _TEDLIB = tedlib;
-   std::string fname(convertString(filename));
-   if (NULL == (_file = fopen(fname.c_str(), "rb"))) {
-      std::string news = "File \"";
-      news += filename; news += "\" not found or unaccessable";
-      tell_log(console::MT_ERROR,news);
-      _status = false; return;
+   std::ostringstream info;
+   wxFileName wxImportFN(fileName);
+   wxImportFN.Normalize();
+   _fileName = wxImportFN.GetFullPath();
+   if (wxImportFN.IsOk())
+   {
+      wxString theExtention = wxImportFN.GetExt();
+      _gziped = (wxT("gz") == wxImportFN.GetExt());
+      _ziped  = (wxT("zip") == wxImportFN.GetExt());
+      if (_ziped)
+      {
+         info << "Inflating the archive \"" << _fileName << "\" ...";
+         tell_log(console::MT_INFO,info.str());
+         if (unZip2Temp())
+         {
+            // zip files are inflated in a temporary location immediately
+            info.str("");
+            info << "Done";
+            tell_log(console::MT_INFO,info.str());
+            _inStream = DEBUG_NEW wxFFileInputStream(_tmpFileName,wxT("rb"));
+            _status = true;
+         }
+         else
+         {
+            info.str("");
+            info << "Failed!";
+            tell_log(console::MT_ERROR,info.str());
+         }
+      }
+      else if (_gziped)
+      {
+         // gz files are handled "as is" in the first import stage unless _forceSeek
+         // is requested
+         if (_forceSeek)
+         {
+            if (unZlib2Temp())
+            {
+               _inStream = DEBUG_NEW wxFFileInputStream(_tmpFileName,wxT("rb"));
+               _status = true;
+            }
+         }
+         else
+         {
+            wxInputStream* fstream = DEBUG_NEW wxFFileInputStream(_fileName,wxT("rb"));
+            _inStream = DEBUG_NEW wxZlibInputStream(fstream);
+            _status = true;
+         }
+      }
+      else
+      {
+         // File is not compressed
+         _inStream = DEBUG_NEW wxFFileInputStream(_fileName,wxT("rb"));
+         _status = true;
+      }
    }
+   else
+   {
+      std::ostringstream info;
+      info << "Invalid filename \"" << _fileName << "\"";
+      tell_log(console::MT_ERROR,info.str());
+   }
+   if (!_status) return;
+   assert(NULL != _inStream);
+   //--------------------------------------------------------------------------
+   // OK, we have an input stream now - check it is valid and accessible
+   if (!(_inStream->IsOk()))
+   {
+      info << "File "<< _fileName <<" can NOT be opened";
+      _status = false;
+      delete _inStream;
+      return;
+   }
+   _fileLength = _inStream->GetLength();
+   _progresStep = _fileLength / _progresDivs;
+   if (_progresStep > 0)
+      TpdPost::toped_status(console::TSTS_PRGRSBARON, _fileLength);
+}
+
+bool laydata::InputDBFile::readStream(void* buffer, size_t len, bool updateProgress)
+{
+   _inStream->Read(buffer,len);// read record header
+   size_t numread = _inStream->LastRead();
+   if (numread != len)
+      return false;// error during read in
+   // update file position
+   _filePos += numread;
+   // update progress indicator
+   _progresPos += numread;
+   if (    updateProgress
+       && (_progresStep > 0)
+       && (_progresStep < (_progresPos - _progresMark)))
+   {
+      _progresMark = _progresPos;
+      TpdPost::toped_status(console::TSTS_PROGRESS, _progresMark);
+   }
+   return true;
+}
+
+size_t laydata::InputDBFile::readTextStream(char* buffer, size_t len )
+{
+//   size_t result = 0;
+//   do
+//   {
+//      char cc = _inStream->GetC();
+//      if (1 == _inStream->LastRead())
+//      {
+//         buffer[result++] = cc;
+//      }
+//      else
+//         break;
+//   } while (result < len);
+//   return result;
+   _inStream->Read(buffer,len);// read record header
+   size_t numread = _inStream->LastRead();
+   // update file position
+   _filePos += numread;
+   // update progress indicator
+   _progresPos += numread;
+   if(   (_progresStep > 0)
+      && (_progresStep < (_progresPos - _progresMark)))
+   {
+      _progresMark = _progresPos;
+      TpdPost::toped_status(console::TSTS_PROGRESS, _progresMark);
+   }
+   return numread;
+}
+
+void laydata::InputDBFile::closeStream()
+{
+   if ( NULL != _inStream )
+   {
+      delete _inStream;
+      _inStream = NULL;
+   }
+   TpdPost::toped_status(console::TSTS_PRGRSBAROFF);
+//   _convLength = 0;
+}
+
+void laydata::InputDBFile::initFileMetrics(wxFileOffset size)
+{
+   _filePos     = 0;
+   _progresPos  = 0;
+   _progresMark = 0;
+   _progresStep = size / _progresDivs;
+   if (_progresStep > 0)
+      TpdPost::toped_status(console::TSTS_PRGRSBARON, size);
+}
+
+bool laydata::InputDBFile::unZip2Temp()
+{
+   // Initialize an input stream - i.e. open the input file
+   wxFFileInputStream inStream(_fileName);
+   if (!inStream.Ok())
+   {
+      // input file does not exist
+      return false;
+   }
+   // Create an input zip stream handling over the input file stream created above
+   wxZipInputStream inZipStream(inStream);
+   if (1 < inZipStream.GetTotalEntries()) return false;
+   wxZipEntry* curZipEntry = inZipStream.GetNextEntry();
+   if (NULL != curZipEntry)
+   {
+      wxFile* outFileHandler = NULL;
+      _tmpFileName = wxFileName::CreateTempFileName(curZipEntry->GetName(), outFileHandler);
+      wxFileOutputStream outStream(_tmpFileName);
+      if (outStream.IsOk())
+      {
+         inZipStream.Read(outStream);
+         return true;
+      }
+      else return false;
+   }
+   else
+      return false;
+}
+
+bool laydata::InputDBFile::unZlib2Temp()
+{
+   std::ostringstream info;
+   // Initialize an input stream - i.e. open the input file
+   wxFFileInputStream inStream(_fileName);
+   if (!inStream.Ok())
+   {
+      info << "Can't open the file " << _fileName;
+      tell_log(console::MT_ERROR,info.str());
+      return false;
+   }
+   // Create an input zlib stream handling over the input file stream created above
+   wxZlibInputStream inZlibStream(inStream);
+   wxFile* outFileHandler = NULL;
+   _tmpFileName = wxFileName::CreateTempFileName(wxString(), outFileHandler);
+   wxFileOutputStream outStream(_tmpFileName);
+   if (outStream.IsOk())
+   {
+      info << " Inflating ... ";
+      tell_log(console::MT_INFO,info.str());
+      inZlibStream.Read(outStream);
+      wxStreamError izlsStatus = inZlibStream.GetLastError();
+      if (wxSTREAM_EOF == izlsStatus)
+      {
+         info.str("");
+         info << " Done ";
+         tell_log(console::MT_INFO,info.str());
+         return true;
+      }
+      else
+      {
+         info << " Inflating finished with status " << izlsStatus << ". Can't continue";
+         tell_log(console::MT_ERROR,info.str());
+         return false;
+      }
+   }
+   else
+   {
+      info << "Can't create a temporary file for deflating. Bailing out. ";
+      tell_log(console::MT_ERROR,info.str());
+      return false;
+   }
+}
+
+laydata::InputDBFile::~InputDBFile()
+{
+   if (NULL != _inStream) delete _inStream;
+}
+
+//-----------------------------------------------------------------------------
+// class InputTdtFile
+//-----------------------------------------------------------------------------
+laydata::InputTdtFile::InputTdtFile( wxString fileName, laydata::TdtLibDir* tedlib ) :
+      // !Note forcing seekable (true) here is just to get the progress bar working
+      // with compressed TDT files. The trouble is that we can't get the size of the gz
+      // files without inflating them.
+      laydata::InputDBFile(fileName, true),
+      _TEDLIB     (tedlib)
+{
    try
    {
       getFHeader();
    }
    catch (EXPTNreadTDT)
    {
-      fclose(_file);
-      _status = false;
-      return;
+      closeStream();
+      setStatus(false);
    }
-   _status = true;
 }
 
-void laydata::TEDfile::getFHeader()
-{
-   // Get the leading string
-   std::string _leadstr = getString();
-   if (TED_LEADSTRING != _leadstr) throw EXPTNreadTDT("Bad leading record");
-   // Get format revision
-   getRevision();
-   // Get file time stamps
-   getTime(/*timeCreated, timeSaved*/);
-//   checkIntegrity();
-}
-
-void laydata::TEDfile::read(int libRef)
+void laydata::InputTdtFile::read(int libRef)
 {
    if (tedf_DESIGN != getByte()) throw EXPTNreadTDT("Expecting DESIGN record");
    std::string name = getString();
@@ -133,107 +364,83 @@ void laydata::TEDfile::read(int libRef)
       _design = DEBUG_NEW TdtDesign(name,_created, _lastUpdated, DBU,UU);
    _design->read(this);
    //Design end marker is read already in TdtDesign so don't search it here
-   //byte designend = getByte();
+   //byte design_end = getByte();
 }
 
-laydata::TEDfile::TEDfile(std::string& filename, laydata::TdtLibDir* tedlib)
-{ //writing
-   _design = (*tedlib)();
-   _revision=TED_CUR_REVISION;_subrevision=TED_CUR_SUBREVISION;
-   _TEDLIB = tedlib;
-   std::string fname(convertString(filename));
-   if (NULL == (_file = fopen(fname.c_str(), "wb"))) {
-      std::string news = "File \"";
-      news += filename.c_str(); news += "\" can not be created";
-      tell_log(console::MT_ERROR,news);
-      return;
-   }
-   putString(TED_LEADSTRING);
-   putRevision();
-   putTime();
-   static_cast<laydata::TdtDesign*>(_design)->write(this);
-   fclose(_file);
-}
-
-void laydata::TEDfile::cleanup()
+void laydata::InputTdtFile::getFHeader()
 {
-   if (NULL != _design) delete _design;
+   // Get the leading string
+   std::string _leadstr = getString();
+   if (TED_LEADSTRING != _leadstr) throw EXPTNreadTDT("Bad leading record");
+   getRevision();// Get format revision
+   getTime();// Get file time stamps
+//   checkIntegrity();
 }
 
-byte laydata::TEDfile::getByte()
+byte laydata::InputTdtFile::getByte()
 {
    byte result;
-   byte length = sizeof(byte);
-   if (1 != (_numread = fread(&result, length, 1, _file)))
+   if (!readStream(&result,sizeof(byte), true))
       throw EXPTNreadTDT("Wrong number of bytes read");
-   _position += length;
    return result;
 }
 
-word laydata::TEDfile::getWord()
+word laydata::InputTdtFile::getWord()
 {
    word result;
-   byte length = sizeof(word);
-   if (1 != (_numread = fread(&result, length, 1, _file)))
+   if (!readStream(&result,sizeof(word), true))
       throw EXPTNreadTDT("Wrong number of bytes read");
-   _position += length;
    return result;
 }
 
-int4b laydata::TEDfile::get4b()
+int4b laydata::InputTdtFile::get4b()
 {
    int4b result;
-   byte length = sizeof(int4b);
-   if (1 != (_numread = fread(&result, length, 1, _file)))
+   if (!readStream(&result,sizeof(int4b), true))
       throw EXPTNreadTDT("Wrong number of bytes read");
-   _position += length;
    return result;
 }
 
-laydata::WireWidth laydata::TEDfile::get4ub()
+laydata::WireWidth laydata::InputTdtFile::get4ub()
 {
    WireWidth result;
-   byte length = sizeof(WireWidth);
-   if (1 != (_numread = fread(&result, length, 1, _file)))
+   if (!readStream(&result,sizeof(WireWidth), true))
       throw EXPTNreadTDT("Wrong number of bytes read");
-   _position += length;
    return result;
 }
 
-real laydata::TEDfile::getReal() {
+real laydata::InputTdtFile::getReal()
+{
    real result;
    byte length = sizeof(real);
-   if (1 != (_numread = fread(&result, length, 1, _file)))
+   if (!readStream(&result,sizeof(real), true))
       throw EXPTNreadTDT("Wrong number of bytes read");
-   _position += length;
    return result;
 }
 
-std::string laydata::TEDfile::getString()
+std::string laydata::InputTdtFile::getString()
 {
-   std::string str;
    byte length = getByte();
    char* strc = DEBUG_NEW char[length+1];
-   _numread = fread(strc, length, 1, _file);
-   strc[length] = 0x00;
-   if (_numread != 1)
+   if (!readStream(strc,length, true))
    {
       delete[] strc;
       throw EXPTNreadTDT("Wrong number of bytes read");
    }
-   _position += length; str = strc;
+   strc[length] = 0x00;
+   std::string str = strc;
    delete[] strc;
    return str;
 }
 
-TP laydata::TEDfile::getTP()
+TP laydata::InputTdtFile::getTP()
 {
    int4b x = get4b();
    int4b y = get4b();
    return TP(x,y);
 }
 
-CTM laydata::TEDfile::getCTM()
+CTM laydata::InputTdtFile::getCTM()
 {
    real _a  = getReal();
    real _b  = getReal();
@@ -244,7 +451,19 @@ CTM laydata::TEDfile::getCTM()
    return CTM(_a, _b, _c, _d, _tx, _ty);
 }
 
-void laydata::TEDfile::getTime()
+void laydata::InputTdtFile::getRevision()
+{
+   if (tedf_REVISION  != getByte()) throw EXPTNreadTDT("Expecting REVISION record");
+   _revision = getWord();
+   _subrevision = getWord();
+   std::ostringstream ost;
+   ost << "TDT format revision: " << _revision << "." << _subrevision;
+   tell_log(console::MT_INFO,ost.str());
+   if ((_revision != TED_CUR_REVISION) || (_subrevision > TED_CUR_SUBREVISION))
+      throw EXPTNreadTDT("The TDT revision is not supported by this version of Toped");
+}
+
+void laydata::InputTdtFile::getTime()
 {
    tm broken_time;
    if (tedf_TIMECREATED  != getByte()) throw EXPTNreadTDT("Expecting TIMECREATED record");
@@ -267,16 +486,82 @@ void laydata::TEDfile::getTime()
    _lastUpdated = mktime(&broken_time);
 }
 
-void laydata::TEDfile::getRevision()
+void laydata::InputTdtFile::getCellChildNames(NameSet& cnames)
 {
-   if (tedf_REVISION  != getByte()) throw EXPTNreadTDT("Expecting REVISION record");
-   _revision = getWord();
-   _subrevision = getWord();
-   std::ostringstream ost;
-   ost << "TDT format revision: " << _revision << "." << _subrevision;
-   tell_log(console::MT_INFO,ost.str());
-   if ((_revision != TED_CUR_REVISION) || (_subrevision > TED_CUR_SUBREVISION))
-      throw EXPTNreadTDT("The TDT revision is not supported by this version of Toped");
+   // Be very very careful with the copy constructors and assignment of the
+   // standard C++ lib containers. Here it seems OK.
+   cnames = _childnames;
+   //for (NameSet::const_iterator CN = _childnames.begin();
+   //                              CN != _childnames.end() ; CN++)
+   //   cnames->instert(*CN);
+   _childnames.clear();
+}
+
+laydata::CellDefin laydata::InputTdtFile::linkCellRef(std::string cellname)
+{
+   // register the name of the referenced cell in the list of children
+   _childnames.insert(cellname);
+   CellList::const_iterator striter = _design->_cells.find(cellname);
+   laydata::CellDefin celldef = NULL;
+   // link the cells instances with their definitions
+   if (_design->_cells.end() == striter)
+   {
+   //   if (_design->checkCell(name))
+   //   {
+      // search the cell in the libraries because it's not in the DB
+      if (!_TEDLIB->getLibCellRNP(cellname, celldef))
+      {
+         // Attention! In this case we've parsed a cell reference, before
+         // the cell is defined. This might means:
+         //   1. Cell is referenced, but not defined - i.e. library cell, but
+         //      library is not loaded
+         //   2. Circular reference ! Cell1 contains a reference of Cell2,
+         //      that in turn contains a reference of Cell1. This is not allowed
+         // We can not make a decision yet, because the entire file has not been
+         // parsed yet. That is why we are assigning a default cell to the
+         // referenced structure here in order to continue the parsing, and when
+         // the entire file is parced the cell references without a proper pointer
+         // to the structure need to be flaged as warning in case 1 and as error
+         // in case 2.
+         celldef = _TEDLIB->addDefaultCell(cellname, false);
+      }
+      else
+         celldef->parentFound();
+   }
+   else
+   {
+      celldef = striter->second;
+      assert(NULL != celldef);
+      celldef->parentFound();
+   }
+   return celldef;
+}
+
+void laydata::InputTdtFile::cleanup()
+{
+   if (NULL != _design) delete _design;
+}
+
+//-----------------------------------------------------------------------------
+// class TEDfile
+//-----------------------------------------------------------------------------
+laydata::TEDfile::TEDfile(std::string& filename, laydata::TdtLibDir* tedlib)
+{ //writing
+   _design = (*tedlib)();
+   _revision=TED_CUR_REVISION;_subrevision=TED_CUR_SUBREVISION;
+//   _TEDLIB = tedlib;
+   std::string fname(convertString(filename));
+   if (NULL == (_file = fopen(fname.c_str(), "wb"))) {
+      std::string news = "File \"";
+      news += filename.c_str(); news += "\" can not be created";
+      tell_log(console::MT_ERROR,news);
+      return;
+   }
+   putString(TED_LEADSTRING);
+   putRevision();
+   putTime();
+   static_cast<laydata::TdtDesign*>(_design)->write(this);
+   fclose(_file);
 }
 
 void laydata::TEDfile::putWord(const word data) {
@@ -294,7 +579,6 @@ void laydata::TEDfile::put4ub(const WireWidth data) {
 void laydata::TEDfile::putReal(const real data) {
    fwrite(&data, sizeof(real), 1, _file);
 }
-
 
 void laydata::TEDfile::putTime()
 {
@@ -363,57 +647,7 @@ bool laydata::TEDfile::checkCellWritten(std::string cellname)
       return true;
 }
 
-laydata::CellDefin laydata::TEDfile::linkCellRef(std::string cellname)
-{
-   // register the name of the referenced cell in the list of children
-   _childnames.insert(cellname);
-   CellList::const_iterator striter = _design->_cells.find(cellname);
-   laydata::CellDefin celldef = NULL;
-   // link the cells instances with their definitions
-   if (_design->_cells.end() == striter)
-   {
-   //   if (_design->checkCell(name))
-   //   {
-      // search the cell in the libraries because it's not in the DB
-      if (!_TEDLIB->getLibCellRNP(cellname, celldef))
-      {
-         // Attention! In this case we've parsed a cell reference, before
-         // the cell is defined. This might means:
-         //   1. Cell is referenced, but not defined - i.e. library cell, but
-         //      library is not loaded
-         //   2. Circular reference ! Cell1 contains a reference of Cell2,
-         //      that in turn contains a reference of Cell1. This is not allowed
-         // We can not make a decision yet, because the entire file has not been
-         // parsed yet. That is why we are assigning a default cell to the
-         // referenced structure here in order to continue the parsing, and when
-         // the entire file is parced the cell references without a proper pointer
-         // to the structure need to be flaged as warning in case 1 and as error
-         // in case 2.
-         celldef = _TEDLIB->addDefaultCell(cellname, false);
-      }
-      else
-         celldef->parentFound();
-   }
-   else
-   {
-      celldef = striter->second;
-      assert(NULL != celldef);
-      celldef->parentFound();
-   }
-   return celldef;
-}
-
-void laydata::TEDfile::getCellChildNames(NameSet& cnames) {
-   // Be very very careful with the copy constructors and assignment of the
-   // standard C++ lib containers. Here it seems OK.
-   cnames = _childnames;
-   //for (NameSet::const_iterator CN = _childnames.begin();
-   //                              CN != _childnames.end() ; CN++)
-   //   cnames->instert(*CN);
-   _childnames.clear();
-}
-
-bool laydata::pathConvert(pointlist& plist, int4b begext, int4b endext )
+bool laydata::pathConvert(PointVector& plist, int4b begext, int4b endext )
 {
    word numpoints = plist.size();
    TP P1 = plist[0];
@@ -517,7 +751,7 @@ laydata::WireContour::WireContour(const int4b* ldata, unsigned lsize, WireWidth 
  * before calling this method. The method will cope with @plist vectors which already
  * contain some data. It will just add the contour at the end of the @plist.
  */
-void laydata::WireContour::getVectorData(pointlist& plist)
+void laydata::WireContour::getVectorData(PointVector& plist)
 {
    for (PointList::const_iterator CP = _cdata.begin(); CP != _cdata.end(); CP++)
    {
@@ -721,7 +955,7 @@ int laydata::WireContour::xangle(word i1, word i2)
    const long double Pi = 3.1415926535897932384626433832795;
    if (_ldata[i1] == _ldata[i2])
    { //vertical line
-      assert(_ldata[i1+1] != _ldata[i2+1]); // make sure both points do not coinside
+      assert(_ldata[i1+1] != _ldata[i2+1]); // make sure both points do not coincide
       if   (_ldata[i2+1] > _ldata[i1+1]) return  90;
       else                               return -90;
    }
@@ -758,11 +992,11 @@ laydata::WireContourAux::WireContourAux(const int4b* parray, unsigned lsize, con
 }
 
 /*!
- * Accelerates the WireContour usage with pointlist input data. Converts the @plist
+ * Accelerates the WireContour usage with PointVector input data. Converts the @plist
  * into array format and stores the result in _ldata. Then creates the
  * WireContour object and initializes it with the _ldata array.
  */
-laydata::WireContourAux::WireContourAux(const pointlist& plist, const WireWidth width)
+laydata::WireContourAux::WireContourAux(const PointVector& plist, const WireWidth width)
 {
    word psize = plist.size();
    _ldata = DEBUG_NEW int[2 * psize];
@@ -774,7 +1008,7 @@ laydata::WireContourAux::WireContourAux(const pointlist& plist, const WireWidth 
    _wcObject = DEBUG_NEW laydata::WireContour(_ldata, psize, width);
 }
 
-laydata::WireContourAux::WireContourAux(const pointlist& plist, const WireWidth width, const TP extraP)
+laydata::WireContourAux::WireContourAux(const PointVector& plist, const WireWidth width, const TP extraP)
 {
    word psize = plist.size() + 1;
    _ldata = DEBUG_NEW int[2 * psize];
@@ -797,7 +1031,7 @@ laydata::WireContourAux::WireContourAux(const pointlist& plist, const WireWidth 
  * plist[0].y() returns the number of the wire contour points. The central
  * line points start from plist[1]. The contour points - follow.
  */
-void laydata::WireContourAux::getRenderingData(pointlist& plist)
+void laydata::WireContourAux::getRenderingData(PointVector& plist)
 {
    assert(_wcObject);
    assert(0 == plist.size());
@@ -810,7 +1044,7 @@ void laydata::WireContourAux::getRenderingData(pointlist& plist)
    _wcObject->getVectorData(plist);
 }
 
-void laydata::WireContourAux::getLData(pointlist& plist)
+void laydata::WireContourAux::getLData(PointVector& plist)
 {
    assert(_wcObject);
    assert(0 == plist.size());
@@ -820,7 +1054,7 @@ void laydata::WireContourAux::getLData(pointlist& plist)
       plist.push_back(TP(_ldata[2*i], _ldata[2*i+1]));
 }
 
-void laydata::WireContourAux::getCData(pointlist& plist)
+void laydata::WireContourAux::getCData(PointVector& plist)
 {
    assert(_wcObject);
    assert(0 == plist.size());
@@ -839,109 +1073,18 @@ laydata::WireContourAux::~WireContourAux()
 /*!
  * The main purpose of the constructor is to create an input stream (_inStream)
  * from the fileName. It handles zip and gz files recognizing them by the
- * extension. The outcome of this operation is indicated it in the _status field
+ * extension. The outcome of this operation is indicated in the _status field
  * of the class.
  * @param fileName - the fully qualified filename - OS dependent
  */
-DbImportFile::DbImportFile(wxString fileName, bool forceSeek) :
-      _convLength    (         0 ),
+ForeignDbFile::ForeignDbFile(wxString fileName, bool forceSeek) : laydata::InputDBFile(fileName, forceSeek),
       _hierTree      (      NULL ),
-      _inStream      (      NULL ),
-      _fileLength    (         0 ),
-      _filePos       (         0 ),
-      _progresPos    (         0 ),
-      _progresMark   (         0 ),
-      _progresStep   (         0 ),
-      _gziped        (     false ),
-      _ziped         (     false ),
-      _forceSeek     ( forceSeek ),
-      _status        (     false ),
-      _progresDivs   (       200 )
+      _convLength    (         0 )
 {
-   std::ostringstream info;
-   wxFileName wxGdsFN(fileName);
-   wxGdsFN.Normalize();
-   _fileName = wxGdsFN.GetFullPath();
-   if (wxGdsFN.IsOk())
-   {
-      wxString theExtention = wxGdsFN.GetExt();
-      _gziped = (wxT("gz") == wxGdsFN.GetExt());
-      _ziped  = (wxT("zip") == wxGdsFN.GetExt());
-      if (_ziped)
-      {
-         info << "Inflating the archive \"" << _fileName << "\" ...";
-         tell_log(console::MT_INFO,info.str());
-         if (unZip2Temp())
-         {
-            // zip files are inflated in a temporary location immediately
-            info.str("");
-            info << "Done";
-            tell_log(console::MT_INFO,info.str());
-            _inStream = DEBUG_NEW wxFFileInputStream(_tmpFileName,wxT("rb"));
-            _status = true;
-         }
-         else
-         {
-            info.str("");
-            info << "Failed!";
-            tell_log(console::MT_ERROR,info.str());
-         }
-      }
-      else if (_gziped)
-      {
-         // gz files are handled "as is" in the first import stage unless forceSeek
-         // is requested
-         if (_forceSeek)
-         {
-            if (unZlib2Temp())
-            {
-               _inStream = DEBUG_NEW wxFFileInputStream(_tmpFileName,wxT("rb"));
-               _status = true;
-            }
-         }
-         else
-         {
-            wxInputStream* fstream = DEBUG_NEW wxFFileInputStream(_fileName,wxT("rb"));
-            _inStream = DEBUG_NEW wxZlibInputStream(fstream);
-            _status = true;
-         }
-      }
-      else
-      {
-         // File is not compressed
-         _inStream = DEBUG_NEW wxFFileInputStream(_fileName,wxT("rb"));
-         _status = true;
-      }
-   }
-   else
-   {
-      std::ostringstream info;
-      info << "Invalid filename \"" << _fileName << "\"";
-      tell_log(console::MT_ERROR,info.str());
-   }
-   if (!_status) return;
-   assert(NULL != _inStream);
-   //--------------------------------------------------------------------------
-   // OK, we have an input stream now - check it is valid and accessible
-   if (!(_inStream->IsOk()))
-   {
-      info << "File "<< _fileName <<" can NOT be opened";
-      _status = false;
-      delete _inStream;
-      return;
-   }
-   _fileLength = _inStream->GetLength();
-   _progresStep = _fileLength / _progresDivs;
-   if (_progresStep > 0)
-      TpdPost::toped_status(console::TSTS_PRGRSBARON, _fileLength);
 }
 
-bool DbImportFile::reopenFile()
+bool ForeignDbFile::reopenFile()
 {
-   _filePos     = 0;
-   _progresPos  = 0;
-   _progresMark = 0;
-
    if (_gziped)
    {
       if (_forceSeek)
@@ -970,84 +1113,22 @@ bool DbImportFile::reopenFile()
       tell_log(console::MT_ERROR,info.str());
       return false;
    }
-   _progresStep = _convLength / _progresDivs;
-   if (_progresStep > 0)
-      TpdPost::toped_status(console::TSTS_PRGRSBARON, _convLength);
+   initFileMetrics(_convLength);
    return true;
 }
 
-bool DbImportFile::readStream(void* buffer, size_t len, bool updateProgress)
-{
-   _inStream->Read(buffer,len);// read record header
-   size_t numread = _inStream->LastRead();
-   if (numread != len)
-      return false;// error during read in
-   // update file position
-   _filePos += numread;
-   // update progress indicator
-   _progresPos += numread;
-   if (    updateProgress
-       && (_progresStep > 0)
-       && (_progresStep < (_progresPos - _progresMark)))
-   {
-      _progresMark = _progresPos;
-      TpdPost::toped_status(console::TSTS_PROGRESS, _progresMark);
-   }
-   return true;
-}
-
-size_t DbImportFile::readTextStream(char* buffer, size_t len )
-{
-//   size_t result = 0;
-//   do
-//   {
-//      char cc = _inStream->GetC();
-//      if (1 == _inStream->LastRead())
-//      {
-//         buffer[result++] = cc;
-//      }
-//      else
-//         break;
-//   } while (result < len);
-//   return result;
-   _inStream->Read(buffer,len);// read record header
-   size_t numread = _inStream->LastRead();
-   // update file position
-   _filePos += numread;
-   // update progress indicator
-   _progresPos += numread;
-   if(   (_progresStep > 0)
-      && (_progresStep < (_progresPos - _progresMark)))
-   {
-      _progresMark = _progresPos;
-      TpdPost::toped_status(console::TSTS_PROGRESS, _progresMark);
-   }
-   return numread;
-}
-
-void DbImportFile::setPosition(wxFileOffset filePos)
+void ForeignDbFile::setPosition(wxFileOffset filePos)
 {
    wxFileOffset result = _inStream->SeekI(filePos, wxFromStart);
    assert(wxInvalidOffset != result);
-   _filePos = filePos;
+   setFilePos(filePos);
 }
 
-void DbImportFile::closeStream()
-{
-   if ( NULL != _inStream )
-   {
-      delete _inStream;
-      _inStream = NULL;
-   }
-   TpdPost::toped_status(console::TSTS_PRGRSBAROFF);
-   _convLength = 0;
-}
-
-/*! An auxiliary method to DbImportFile::convertPrep implementing
+/*! An auxiliary method to ForeignDbFile::convertPrep implementing
  * recursive traversing of the cell hierarchy tree.
  * @param root - The root of the hierarchy to be traversed
  */
-void DbImportFile::preTraverseChildren(const ForeignCellTree* root)
+void ForeignDbFile::preTraverseChildren(const ForeignCellTree* root)
 {
    const ForeignCellTree* Child = root->GetChild(TARGETDB_LIB);
    while (NULL != Child)
@@ -1068,7 +1149,7 @@ void DbImportFile::preTraverseChildren(const ForeignCellTree* root)
    }
 }
 
-std::string DbImportFile::getFileNameOnly() const
+std::string ForeignDbFile::getFileNameOnly() const
 {
    wxFileName fName(_fileName);
    fName.Normalize();
@@ -1077,83 +1158,8 @@ std::string DbImportFile::getFileNameOnly() const
    return std::string(name.mb_str(wxConvFile ));
 }
 
-bool DbImportFile::unZip2Temp()
+ForeignDbFile::~ForeignDbFile()
 {
-   // Initialize an input stream - i.e. open the input file
-   wxFFileInputStream inStream(_fileName);
-   if (!inStream.Ok())
-   {
-      // input file does not exist
-      return false;
-   }
-   // Create an input zip stream handling over the input file stream created above
-   wxZipInputStream inZipStream(inStream);
-   if (1 < inZipStream.GetTotalEntries()) return false;
-   wxZipEntry* curZipEntry = inZipStream.GetNextEntry();
-   if (NULL != curZipEntry)
-   {
-      wxFile* outFileHandler = NULL;
-      _tmpFileName = wxFileName::CreateTempFileName(curZipEntry->GetName(), outFileHandler);
-      wxFileOutputStream outStream(_tmpFileName);
-      if (outStream.IsOk())
-      {
-         inZipStream.Read(outStream);
-         return true;
-      }
-      else return false;
-   }
-   else
-      return false;
-}
-
-bool DbImportFile::unZlib2Temp()
-{
-   std::ostringstream info;
-   // Initialize an input stream - i.e. open the input file
-   wxFFileInputStream inStream(_fileName);
-   if (!inStream.Ok())
-   {
-      info << "Can't open the file " << _fileName;
-      tell_log(console::MT_ERROR,info.str());
-      return false;
-   }
-   // Create an input zlib stream handling over the input file stream created above
-   wxZlibInputStream inZlibStream(inStream);
-   wxFile* outFileHandler = NULL;
-   _tmpFileName = wxFileName::CreateTempFileName(wxString(), outFileHandler);
-   wxFileOutputStream outStream(_tmpFileName);
-   if (outStream.IsOk())
-   {
-      info << " Inflating ... ";
-      tell_log(console::MT_INFO,info.str());
-      inZlibStream.Read(outStream);
-      wxStreamError izlsStatus = inZlibStream.GetLastError();
-      if (wxSTREAM_EOF == izlsStatus)
-      {
-         info.str("");
-         info << " Done ";
-         tell_log(console::MT_INFO,info.str());
-         return true;
-      }
-      else
-      {
-         info << " Inflating finished with status " << izlsStatus << ". Can't continue";
-         tell_log(console::MT_ERROR,info.str());
-         return false;
-      }
-   }
-   else
-   {
-      info << "Can't create a temporary file for deflating. Bailing out. ";
-      tell_log(console::MT_ERROR,info.str());
-      return false;
-   }
-}
-
-
-DbImportFile::~DbImportFile()
-{
-   if (NULL != _inStream) delete _inStream;
    // get rid of the hierarchy tree
    const ForeignCellTree* var1 = _hierTree;
    while (var1)
@@ -1208,7 +1214,7 @@ std::string ENameLayerCM::printSrcLayer() const
    return ostr.str();
 }
 //=============================================================================
-ImportDB::ImportDB(DbImportFile* src_lib, laydata::TdtLibDir* tdt_db, const LayerMapExt& theLayMap) :
+ImportDB::ImportDB(ForeignDbFile* src_lib, laydata::TdtLibDir* tdt_db, const LayerMapExt& theLayMap) :
       _src_lib    ( src_lib                                    ),
       _tdt_db     ( tdt_db                                     ),
       _dbuCoeff   ( src_lib->libUnits() / (*_tdt_db)()->DBU()  ),
@@ -1218,7 +1224,7 @@ ImportDB::ImportDB(DbImportFile* src_lib, laydata::TdtLibDir* tdt_db, const Laye
    _layCrossMap = DEBUG_NEW ENumberLayerCM(theLayMap);
 }
 
-ImportDB::ImportDB(DbImportFile* src_lib, laydata::TdtLibDir* tdt_db, const SIMap& theLayMap, real techno) :
+ImportDB::ImportDB(ForeignDbFile* src_lib, laydata::TdtLibDir* tdt_db, const SIMap& theLayMap, real techno) :
       _src_lib    ( src_lib                                    ),
       _tdt_db     ( tdt_db                                     ),
       _dbuCoeff   ( src_lib->libUnits() / (*_tdt_db)()->DBU()  ),
@@ -1228,7 +1234,7 @@ ImportDB::ImportDB(DbImportFile* src_lib, laydata::TdtLibDir* tdt_db, const SIMa
    _layCrossMap = DEBUG_NEW ENameLayerCM(theLayMap);
 }
 
-void ImportDB::run(const nameList& top_str_names, bool overwrite, bool reopenFile)
+void ImportDB::run(const NameList& top_str_names, bool overwrite, bool reopenFile)
 {
    if (!reopenFile || (reopenFile && _src_lib->reopenFile()))
    {
@@ -1303,7 +1309,7 @@ void ImportDB::addBox(const TP& p1, const TP& p2)
    }
 }
 
-void ImportDB::addPoly(pointlist& plist)
+void ImportDB::addPoly(PointVector& plist)
 {
    laydata::QTreeTmp* tmpLayer = _layCrossMap->getTmpLayer();
    if ( NULL != tmpLayer )
@@ -1317,7 +1323,7 @@ void ImportDB::addPoly(pointlist& plist)
    }
 }
 
-void ImportDB::addPath(pointlist& plist, int4b width, short pathType, int4b bgnExtn, int4b endExtn)
+void ImportDB::addPath(PointVector& plist, int4b width, short pathType, int4b bgnExtn, int4b endExtn)
 {
    laydata::QTreeTmp* tmpLayer = _layCrossMap->getTmpLayer();
    if ( NULL != tmpLayer )
@@ -1396,7 +1402,7 @@ void ImportDB::addARef(std::string strctName, TP bPoint, double magnification,
                                   );
 }
 
-bool ImportDB::polyAcceptable(pointlist& plist, bool& box)
+bool ImportDB::polyAcceptable(PointVector& plist, bool& box)
 {
    laydata::ValidPoly check(plist);
    if (!check.valid())
@@ -1416,7 +1422,7 @@ bool ImportDB::polyAcceptable(pointlist& plist, bool& box)
    else return false;
 }
 
-bool ImportDB::pathAcceptable(pointlist& plist, int4b width )
+bool ImportDB::pathAcceptable(PointVector& plist, int4b width )
 {
    laydata::ValidWire check(plist, width);
 
