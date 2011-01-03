@@ -585,7 +585,7 @@ namespace tenderer {
          typedef std::list<TenderText*> TenderStrings;
          typedef std::list<TextOvlBox*> RefTxtList;
                            TenderTV(TenderRef* const, bool, bool, unsigned, unsigned);
-                        ~TenderTV();
+                          ~TenderTV();
          void              registerBox   (TenderCnvx*);
          void              registerPoly  (TenderNcvx*, const TessellPoly*);
          void              registerWire  (TenderWire*);
