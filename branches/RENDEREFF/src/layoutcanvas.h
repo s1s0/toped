@@ -35,6 +35,7 @@
 #include <wx/image.h>
 #include "ttt.h"
 #include "tuidefs.h"
+#include "tenderer.h"
 
 namespace tui {
    //=============================================================================
@@ -110,10 +111,12 @@ namespace tui {
       void           OnPanCenter(wxCommandEvent&);
       void           viewshift();
    private:
+      void           transitionEffect(tenderer::TopRend*);
       void           CursorControl(bool, bool);
       void           PointUpdate(int nX, int nY);
 //      void           drawInterim(const TP&);
       CTM            _LayCTM;      // Layout translation matrix
+      CTM            _prevLayCTM;  // Used for display effects (new renderer only)
       TP             ScrMARK;      // Current marker position in DB units
       TP             ScrMARKold;   // Old marker position  in DB units
       TP             n_ScrMARK;    // Normalized marker position in DB units

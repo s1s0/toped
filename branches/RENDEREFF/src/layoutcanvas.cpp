@@ -40,7 +40,6 @@
 #include "datacenter.h"
 #include "ted_prompt.h"
 #include "tedat.h"
-#include "tenderer.h"
 
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
@@ -406,65 +405,33 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event)
       }
       else
       {
-//         wxPaintDC dc(this);
-//         #ifdef __WXGTK__
-//            SetCurrent();
-//         #endif
-//         glMatrixMode( GL_MODELVIEW );
-//         glShadeModel( GL_FLAT ); // Single color
-//         update_viewport();
-//         // CTM matrix stuff
-//         glLoadIdentity();
-//         glOrtho(lp_BL.x(),lp_TR.x(),lp_TR.y(),lp_BL.y(),-1.0,1.0);
-//         glClear(GL_COLOR_BUFFER_BIT);
-//         glEnable(GL_BLEND);
-//         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-//         glClear(GL_ACCUM_BUFFER_BIT);
-//         DATC->render(_LayCTM);
-//         glAccum(GL_LOAD, 1.0);
-//         invalid_window = false;
-//         if (rubber_band) rubber_paint();
-//         if (reperX || reperY) longCursor();
-//         SwapBuffers();
-
-            wxPaintDC dc(this);
-            #ifdef __WXGTK__
-               SetCurrent();
-            #endif
-            glMatrixMode( GL_MODELVIEW );
-            glShadeModel( GL_FLAT ); // Single color
-            update_viewport();
-            // CTM matrix stuff
-            glLoadIdentity();
-            glOrtho(lp_BL.x(),lp_TR.x(),lp_TR.y(),lp_BL.y(),-1.0,1.0);
-            glClear(GL_COLOR_BUFFER_BIT);
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            tenderer::TopRend* rend = DATC->openGlRenderIt(_LayCTM);
-            if (NULL != rend)
-            {
-//               for (byte i = 1; i < 20; i++)
-//               {
-//                  glPushMatrix();
-//                  float scale = (float) i / 20.0;
-//                  glScalef(scale, scale, 1);
-//                  rend->draw();
-//                  glPopMatrix();
-//                  SwapBuffers();
-//                  glClear(GL_COLOR_BUFFER_BIT);
-//                  glEnable(GL_BLEND);
-//                  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-//               }
-               glClear(GL_ACCUM_BUFFER_BIT);
-               rend->draw();
-               rend->cleanUp();
-               glAccum(GL_LOAD, 1.0);
-               invalid_window = false;
-               if (rubber_band) rubber_paint();
-               if (reperX || reperY) longCursor();
-               delete rend;
-            }
-            SwapBuffers();
+         wxPaintDC dc(this);
+         #ifdef __WXGTK__
+            SetCurrent();
+         #endif
+         glMatrixMode( GL_MODELVIEW );
+         glShadeModel( GL_FLAT ); // Single color
+         update_viewport();
+         // CTM matrix stuff
+         glLoadIdentity();
+         glOrtho(lp_BL.x(),lp_TR.x(),lp_TR.y(),lp_BL.y(),-1.0,1.0);
+         glClear(GL_COLOR_BUFFER_BIT);
+         glEnable(GL_BLEND);
+         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+         tenderer::TopRend* rend = DATC->openGlRenderIt(_LayCTM);
+         if (NULL != rend)
+         {
+            transitionEffect(rend);
+            glClear(GL_ACCUM_BUFFER_BIT);
+            rend->draw();
+            rend->cleanUp();
+            glAccum(GL_LOAD, 1.0);
+            invalid_window = false;
+            if (rubber_band) rubber_paint();
+            if (reperX || reperY) longCursor();
+            delete rend;
+         }
+         SwapBuffers();
       }
    }
    else
@@ -478,6 +445,28 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event)
       else if  (rubber_band)     rubber_paint();
       if (reperX || reperY)      longCursor();
       SwapBuffers();
+   }
+}
+
+void tui::LayoutCanvas::transitionEffect(tenderer::TopRend* rend)
+{
+   TP   cPos  , pPos  ;
+   real cRot  , pRot  ;
+   real cScale, pScale;
+   bool cFlip , pFlip ;
+   _LayCTM.Reversed().Decompose(cPos,cRot,cScale,cFlip);
+   _prevLayCTM.Reversed().Decompose(pPos, pRot,pScale,pFlip);
+   for (byte i = 1; i < 20; i++)
+   {
+      glPushMatrix();
+      float scale = (pScale + ((float)i / (float) 20.0) * (cScale - pScale)) / cScale;
+      glScalef(scale, scale, 1);
+      rend->draw();
+      glPopMatrix();
+      SwapBuffers();
+      glClear(GL_COLOR_BUFFER_BIT);
+      glEnable(GL_BLEND);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
    }
 }
 
@@ -926,6 +915,7 @@ void tui::LayoutCanvas::OnZoom(wxCommandEvent& evt) {
    double sc =  ((W/H < w/h) ? w/W : h/H);
    double tx = (((double)box->p1().x() + (double)box->p2().x()) - W*sc) / 2;
    double ty = (((double)box->p1().y() + (double)box->p2().y()) - H*sc) / 2;
+   _prevLayCTM = _LayCTM;
    _LayCTM.setCTM( sc, 0.0, 0.0, sc, tx, ty);
    _LayCTM.FlipX(((double)box->p1().y() + (double)box->p2().y())/2);  // flip Y coord towards the center
    layprop::DrawProperties* drawProp;
