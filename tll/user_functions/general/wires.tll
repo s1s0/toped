@@ -10,9 +10,8 @@
 
 
 /* instead of default_drc you may also use a customized drc file */
-#include "default_drc.tll"
-
-#include "helper.tll"
+//#include "default_drc.tll"
+//#include "helper.tll"
 
 
 /* creates a wire which is an polygon but all corners are on-grid
