@@ -955,7 +955,7 @@ telldata::tell_var* parsercmd::cmdBLOCK::getID(char*& name, bool local){
    // Roll back the blockSTACK until name is found. return NULL otherwise
    typedef blockSTACK::const_iterator BS;
    BS blkstart = _blocks.begin();
-   BS blkend   = local ? _blocks.begin() : _blocks.end();
+   BS blkend   = local ? ++(_blocks.begin()) : _blocks.end();
    for (BS cmd = blkstart; cmd != blkend; cmd++) {
         if ((*cmd)->VARlocal.find(name) != (*cmd)->VARlocal.end())
             return (*cmd)->VARlocal[name];
