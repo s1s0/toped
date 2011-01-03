@@ -459,6 +459,9 @@ void tui::LayoutCanvas::transitionEffect(tenderer::TopRend* rend)
    for (byte i = 1; i < 20; i++)
    {
       glPushMatrix();
+//      float trX = (((float)20 - (float)i)/(float)20) * ((float)cPos.x() - (float)pPos.x());
+//      float trY = (((float)20 - (float)i)/(float)20) * ((float)cPos.y() - (float)pPos.y());
+//      glTranslatef(trX*1000,-trY*1000,1);
       float scale = (pScale + ((float)i / (float) 20.0) * (cScale - pScale)) / cScale;
       glScalef(scale, scale, 1);
       rend->draw();
