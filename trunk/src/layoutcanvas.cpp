@@ -196,22 +196,22 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos,
    // quite possible that we can't get the requested GL visual. If that is the case
    // we'll have to abandon the init sequence right here, otherwise Toped will
    // crash.
-   x_visual = (XVisualInfo*) m_vi;
-   if (NULL == x_visual)
+   _xVisual = (XVisualInfo*) m_vi;
+   if (NULL == _xVisual)
    {
-      crossCur = NULL;
+      _crossCur = NULL;
       return;
    }
 #endif
-   crossCur = MakeCursor(crosscursor,16, 16);
-//   crossCur = DEBUG_NEW wxCursor((const char*)crosscursor,16, 16);
-   SetCursor(*crossCur);
-   tmp_wnd = false;
-   mouse_input = false;
-   rubber_band = false;
-   restricted_move = false;
-   invalid_window = false;
-   reperX = reperY = long_cursor = false;
+   _crossCur = MakeCursor(crosscursor,16, 16);
+//   _crossCur = DEBUG_NEW wxCursor((const char*)crosscursor,16, 16);
+   SetCursor(*_crossCur);
+   _tmpWnd = false;
+   _mouseInput = false;
+   _rubberBand = false;
+   _restrictedMove = false;
+   _invalidWindow = false;
+   _reperX = _reperY = _longCursor = false;
    // Running the openGL drawing in a separate thread
    // This appears to be a bad idea especially on some platforms.
    // Google it for some opinions.
@@ -219,7 +219,7 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos,
    // The option stays for the sake of experiment.
    // DON'T enable it if you're not sure what you're doing!
    _oglThread = false;
-   ap_trigger = 10;
+   _apTrigger = 10;
 }
 
 void   tui::LayoutCanvas::showInfo()
@@ -327,8 +327,8 @@ void tui::LayoutCanvas::viewshift()
    glAccum(GL_RETURN, 1.0);
 //   glReadBuffer(GL_FRONT);
 //   glDrawBuffer(GL_BACK);
-/*   glRasterPos2i (lp_BL.x(), lp_BL.y());
-   glCopyPixels (lp_BL.x() + slide_step, lp_BL.y(), lp_TR.x() - lp_BL.x() -slide_step, lp_TR.y() - lp_BL.y(), GL_COLOR);*/
+/*   glRasterPos2i (_lpBL.x(), _lpBL.y());
+   glCopyPixels (_lpBL.x() + slide_step, _lpBL.y(), _lpTR.x() - _lpBL.x() -slide_step, _lpTR.y() - _lpBL.y(), GL_COLOR);*/
    glRasterPos2i (1, 1);
    glCopyPixels (slide_step, 0, Wcl - slide_step, Hcl, GL_COLOR);
    glAccum(GL_LOAD, 1.0);
@@ -380,9 +380,9 @@ void tui::LayoutCanvas::OnresizeGL(wxSizeEvent& event) {
    int w, h;
    GetClientSize(&w, &h);
    glViewport( 0, 0, (GLint)w, (GLint)h );
-   lp_BL = TP(0,0)  * _LayCTM;
-   lp_TR = TP(w, h) * _LayCTM;
-   invalid_window = true;
+   _lpBL = TP(0,0)  * _LayCTM;
+   _lpTR = TP(w, h) * _LayCTM;
+   _invalidWindow = true;
 #ifdef WIN32
    SetCurrent();
 #endif
@@ -392,8 +392,8 @@ void tui::LayoutCanvas::OnresizeGL(wxSizeEvent& event) {
 void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event)
 {
    if (!GetContext()) return;
-   // invalid_window indicates zooming or refreshing after a tell operation.
-   if (invalid_window)
+   // _invalidWindow indicates zooming or refreshing after a tell operation.
+   if (_invalidWindow)
    {
       if (_oglThread)
       {
@@ -415,16 +415,16 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event)
          update_viewport();
          // CTM matrix stuff
          glLoadIdentity();
-         glOrtho(lp_BL.x(),lp_TR.x(),lp_TR.y(),lp_BL.y(),-1.0,1.0);
+         glOrtho(_lpBL.x(),_lpTR.x(),_lpTR.y(),_lpBL.y(),-1.0,1.0);
          glClear(GL_COLOR_BUFFER_BIT);
          glEnable(GL_BLEND);
          glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
          glClear(GL_ACCUM_BUFFER_BIT);
          DATC->render(_LayCTM);
          glAccum(GL_LOAD, 1.0);
-         invalid_window = false;
-         if (rubber_band) rubber_paint();
-         if (reperX || reperY) longCursor();
+         _invalidWindow = false;
+         if (_rubberBand) rubber_paint();
+         if (_reperX || _reperY) longCursor();
          SwapBuffers();
       }
    }
@@ -435,9 +435,9 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event)
          SetCurrent();
       #endif
       glAccum(GL_RETURN, 1.0);
-      if       (tmp_wnd)         wnd_paint();
-      else if  (rubber_band)     rubber_paint();
-      if (reperX || reperY)      longCursor();
+      if       (_tmpWnd)         wnd_paint();
+      else if  (_rubberBand)     rubber_paint();
+      if (_reperX || _reperY)      longCursor();
       SwapBuffers();
    }
 }
@@ -446,15 +446,15 @@ void tui::LayoutCanvas::longCursor()
 {
    glColor4f(1, 1, 1, .5);
    glBegin(GL_LINES);
-   if (reperX)
+   if (_reperX)
    {
-      glVertex2i(lp_BL.x(), ScrMARK.y()) ;
-      glVertex2i(lp_TR.x(), ScrMARK.y());
+      glVertex2i(_lpBL.x(), _ScrMark.y()) ;
+      glVertex2i(_lpTR.x(), _ScrMark.y());
    }
-   if (reperY)
+   if (_reperY)
    {
-      glVertex2i(ScrMARK.x() , lp_BL.y()) ;
-      glVertex2i(ScrMARK.x() , lp_TR.y());
+      glVertex2i(_ScrMark.x() , _lpBL.y()) ;
+      glVertex2i(_ScrMark.x() , _lpTR.y());
    }
    glEnd();
 }
@@ -474,46 +474,45 @@ void tui::LayoutCanvas::wnd_paint() {
    glColor4f((GLfloat)0.7, (GLfloat)0.7, (GLfloat)0.7, (GLfloat)0.4); // gray
    glDisable(GL_POLYGON_STIPPLE);
    glEnable(GL_POLYGON_SMOOTH);   //- for solid fill
-   glRecti(presspoint.x(),presspoint.y(), n_ScrMARK.x(), n_ScrMARK.y());
+   glRecti(_pressPoint.x(),_pressPoint.y(), _nScrMark.x(), _nScrMark.y());
    glDisable(GL_POLYGON_SMOOTH); //- for solid fill
    glEnable(GL_POLYGON_STIPPLE);
 }
 
 void tui::LayoutCanvas::rubber_paint()
 {
-   DATC->motionDraw(_LayCTM, releasepoint, n_ScrMARK);
+   DATC->motionDraw(_LayCTM, _releasePoint, _nScrMark);
 }
 
 void tui::LayoutCanvas::CursorControl(bool shift, bool ctl)
 {
    // alt key forces free move
    // shift forces restricted move
-   if (ctl || !(rubber_band && (restricted_move || shift)))
+   if (ctl || !(_rubberBand && (_restrictedMove || shift)))
    {
-      n_ScrMARK = ScrMARK; n_ScrMARKold = ScrMARKold;
+      _nScrMark = _ScrMark; _nScrMarkOld = _scrMarkOld;
       return;
    }
-   n_ScrMARKold = n_ScrMARK;
-   int sdX = ScrMARK.x() - releasepoint.x();
-   int sdY = ScrMARK.y() - releasepoint.y();
+   _nScrMarkOld = _nScrMark;
+   int sdX = _ScrMark.x() - _releasePoint.x();
+   int sdY = _ScrMark.y() - _releasePoint.y();
    int dX = abs(sdX);
    int dY = abs(sdY);
    // The sign actually is the sign of the tangents. To avoid troubles with the division by zero,
    // it is easier and faster to obtain the sign like this
-//   int sign = ((sdX * sdY) >= 0) ? 1 : -1;
    int sign = (((double)sdX * (double)sdY) >= 0.0) ? 1 : -1;
    bool _45deg = (PROPC->markerAngle() == 45);
    if (dX > dY)
    {
-      if (_45deg && (dX < 2*dY)) n_ScrMARK.setY( sign*sdX + releasepoint.y() );
-      else                       n_ScrMARK.setY( releasepoint.y() );
-      n_ScrMARK.setX(ScrMARK.x() );
+      if (_45deg && (dX < 2*dY)) _nScrMark.setY( sign*sdX + _releasePoint.y() );
+      else                       _nScrMark.setY( _releasePoint.y() );
+      _nScrMark.setX(_ScrMark.x() );
    }
    else
    {
-      if (_45deg && (dY < 2*dX)) n_ScrMARK.setX( sign*sdY + releasepoint.x() );
-      else                       n_ScrMARK.setX( releasepoint.x() );
-      n_ScrMARK.setY(ScrMARK.y() );
+      if (_45deg && (dY < 2*dX)) _nScrMark.setX( sign*sdY + _releasePoint.x() );
+      else                       _nScrMark.setX( _releasePoint.x() );
+      _nScrMark.setY(_ScrMark.y() );
    }
 }
 
@@ -524,7 +523,7 @@ void tui::LayoutCanvas::UpdateCoordWin(int coord, CVSSTATUS_TYPE postype, int dc
    eventPOSITION.SetString(ws);
    eventPOSITION.SetInt(postype);
    wxPostEvent(this, eventPOSITION);
-   if (rubber_band) {
+   if (_rubberBand) {
       ws.sprintf(wxT("%3.2f"),dcoord*PROPC->UU());
       eventPOSITION.SetString(ws);
       eventPOSITION.SetInt(dpostype);
@@ -535,110 +534,110 @@ void tui::LayoutCanvas::UpdateCoordWin(int coord, CVSSTATUS_TYPE postype, int dc
 void tui::LayoutCanvas::EventMouseClick(int button) {
    wxCommandEvent eventButtonUP(wxEVT_COMMAND_ENTER);
 
-   telldata::ttpnt* ttp = DEBUG_NEW telldata::ttpnt(releasepoint.x()*PROPC->UU(),
-                                              releasepoint.y()*PROPC->UU());
+   telldata::ttpnt* ttp = DEBUG_NEW telldata::ttpnt(_releasePoint.x()*PROPC->UU(),
+                                              _releasePoint.y()*PROPC->UU());
    //Post an event to notify the console
    eventButtonUP.SetClientData((void*)ttp);
    eventButtonUP.SetInt(button);
    wxPostEvent(Console, eventButtonUP);
    // send the point to the current temporary object in the data base
    if (0 == button) {
-      DATC->mousePoint(releasepoint);
+      DATC->mousePoint(_releasePoint);
    }
 }
 
 void tui::LayoutCanvas::PointUpdate(int nX, int nY)
 {
-   ScrMARKold = ScrMARK;
-   ScrMARK = TP(nX,nY) * _LayCTM;
+   _scrMarkOld = _ScrMark;
+   _ScrMark = TP(nX,nY) * _LayCTM;
    int4b stepDB = PROPC->stepDB();
-   ScrMARK.roundTO(stepDB);
+   _ScrMark.roundTO(stepDB);
 
    // update movement indicators
-   int deltaX = abs(ScrMARKold.x() - ScrMARK.x());
-   int deltaY = abs(ScrMARKold.y() - ScrMARK.y());
+   int deltaX = abs(_scrMarkOld.x() - _ScrMark.x());
+   int deltaY = abs(_scrMarkOld.y() - _ScrMark.y());
    if (!(deltaX || deltaY)) return;
    //
    CursorControl(false, false);
    if (deltaX > 0)
-      UpdateCoordWin(ScrMARK.x(), CNVS_POS_X, (n_ScrMARK.x() - releasepoint.x()), CNVS_DEL_X);
+      UpdateCoordWin(_ScrMark.x(), CNVS_POS_X, (_nScrMark.x() - _releasePoint.x()), CNVS_DEL_X);
    if (deltaY > 0)
-      UpdateCoordWin(ScrMARK.y(), CNVS_POS_Y, (n_ScrMARK.y() - releasepoint.y()), CNVS_DEL_Y);
+      UpdateCoordWin(_ScrMark.y(), CNVS_POS_Y, (_nScrMark.y() - _releasePoint.y()), CNVS_DEL_Y);
 }
 
 void tui::LayoutCanvas::OnMouseMotion(wxMouseEvent& event)
 {
-   ScrMARKold = ScrMARK;
+   _scrMarkOld = _ScrMark;
    // get a current position
-   ScrMARK = TP(event.GetX(),event.GetY()) * _LayCTM ;
+   _ScrMark = TP(event.GetX(),event.GetY()) * _LayCTM ;
    int4b stepDB = PROPC->stepDB();
-   ScrMARK.roundTO(stepDB);
-   if (PROPC->autopan() && mouse_input && !invalid_window)
+   _ScrMark.roundTO(stepDB);
+   if (PROPC->autopan() && _mouseInput && !_invalidWindow)
    {
       CTM LayCTMR(_LayCTM.Reversed());
-      TP sp_BL     =     lp_BL * LayCTMR;
-      TP sp_TR     =     lp_TR * LayCTMR;
-      TP s_ScrMARK = n_ScrMARK * LayCTMR;
+      TP sp_BL     =     _lpBL * LayCTMR;
+      TP sp_TR     =     _lpTR * LayCTMR;
+      TP s_ScrMARK = _nScrMark * LayCTMR;
       TP nsp;
-      if      (abs(s_ScrMARK.x() - sp_BL.x()) < ap_trigger)
+      if      (abs(s_ScrMARK.x() - sp_BL.x()) < _apTrigger)
       {
          wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
          eventZOOM.SetInt(ZOOM_LEFT);
          OnZoom(eventZOOM);
-         nsp = ScrMARK * _LayCTM.Reversed();
+         nsp = _ScrMark * _LayCTM.Reversed();
          WarpPointer(nsp.x(),nsp.y());return;
       }
-      else  if(abs(sp_TR.x() - s_ScrMARK.x()) < ap_trigger)
+      else  if(abs(sp_TR.x() - s_ScrMARK.x()) < _apTrigger)
       {
          wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
          eventZOOM.SetInt(ZOOM_RIGHT);
          OnZoom(eventZOOM);
-         nsp = ScrMARK * _LayCTM.Reversed();
+         nsp = _ScrMark * _LayCTM.Reversed();
          WarpPointer(nsp.x(),nsp.y());return;
       }
-      else  if(abs(sp_BL.y() - s_ScrMARK.y()) < ap_trigger)
+      else  if(abs(sp_BL.y() - s_ScrMARK.y()) < _apTrigger)
       {
          wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
          eventZOOM.SetInt(ZOOM_UP);
          OnZoom(eventZOOM);
-         nsp = ScrMARK * _LayCTM.Reversed();
+         nsp = _ScrMark * _LayCTM.Reversed();
          WarpPointer(nsp.x(),nsp.y());return;
       }
-      else  if(abs(s_ScrMARK.y() - sp_TR.y()) < ap_trigger)
+      else  if(abs(s_ScrMARK.y() - sp_TR.y()) < _apTrigger)
       {
          wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
          eventZOOM.SetInt(ZOOM_DOWN);
          OnZoom(eventZOOM);
-         nsp = ScrMARK * _LayCTM.Reversed();
+         nsp = _ScrMark * _LayCTM.Reversed();
          WarpPointer(nsp.x(),nsp.y());return;
       }
    }
    // update movement indicators
-   int deltaX = abs(ScrMARKold.x() - ScrMARK.x());
-   int deltaY = abs(ScrMARKold.y() - ScrMARK.y());
+   int deltaX = abs(_scrMarkOld.x() - _ScrMark.x());
+   int deltaY = abs(_scrMarkOld.y() - _ScrMark.y());
    if (!(deltaX || deltaY)) return;
    //
    CursorControl(event.ShiftDown(), event.ControlDown());
    if (deltaX > 0)
-      UpdateCoordWin(ScrMARK.x(), CNVS_POS_X, (n_ScrMARK.x() - releasepoint.x()), CNVS_DEL_X);
+      UpdateCoordWin(_ScrMark.x(), CNVS_POS_X, (_nScrMark.x() - _releasePoint.x()), CNVS_DEL_X);
    if (deltaY > 0)
-      UpdateCoordWin(ScrMARK.y(), CNVS_POS_Y, (n_ScrMARK.y() - releasepoint.y()), CNVS_DEL_Y);
+      UpdateCoordWin(_ScrMark.y(), CNVS_POS_Y, (_nScrMark.y() - _releasePoint.y()), CNVS_DEL_Y);
 
-//   drawInterim(ScrMARK);
-   if (tmp_wnd || mouse_input || reperX || reperY) Refresh();//updateGL();
+//   drawInterim(_ScrMark);
+   if (_tmpWnd || _mouseInput || _reperX || _reperY) Refresh();//updateGL();
 }
 
 void tui::LayoutCanvas::OnMouseRightDown(wxMouseEvent& WXUNUSED(event)) {
-   presspoint = ScrMARK;
-   tmp_wnd = true;
+   _pressPoint = _ScrMark;
+   _tmpWnd = true;
 }
 
 void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event))
 {
-   tmp_wnd = false;
+   _tmpWnd = false;
    int4b stepDB = PROPC->stepDB();
-   if ((abs(presspoint.x() - ScrMARK.x())  > stepDB) ||
-       (abs(presspoint.y() - ScrMARK.y())  > stepDB))   {
+   if ((abs(_pressPoint.x() - _ScrMark.x())  > stepDB) ||
+       (abs(_pressPoint.y() - _ScrMark.y())  > stepDB))   {
       // if dragging ...
       wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
       eventZOOM.SetInt(ZOOM_WINDOWM);
@@ -752,26 +751,26 @@ void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event))
             menu.Append(TMSEL_PUNSELECT_IN, wxT("part unselect"));
          }
       }
-      TP s_ScrMARK = ScrMARK * _LayCTM.Reversed();
+      TP s_ScrMARK = _ScrMark * _LayCTM.Reversed();
       PopupMenu(&menu, wxPoint(s_ScrMARK.x(), s_ScrMARK.y()));
    }
 }
 
 void tui::LayoutCanvas::OnMouseLeftDown(wxMouseEvent& WXUNUSED(event)) {
-//   presspoint = ScrMARK;
+//   _pressPoint = _ScrMark;
 //   mouseIN(true);
 }
 
 void tui::LayoutCanvas::OnMouseLeftUp(wxMouseEvent& WXUNUSED(event)) {
-//   if ((abs(presspoint.x() - ScrMARK.x())  > step) or
-//       (abs(presspoint.y() - ScrMARK.y())  > step))   {
+//   if ((abs(_pressPoint.x() - _ScrMark.x())  > step) or
+//       (abs(_pressPoint.y() - _ScrMark.y())  > step))   {
 //      // if dragging ...
 //      mouseIN(false);
-////      zoom(presspoint.x(),presspoint.y(),ScrMARK.x(),ScrMARK.y());
+////      zoom(_pressPoint.x(),_pressPoint.y(),_ScrMark.x(),_ScrMark.y());
 //   }
 //   else {
-      releasepoint = n_ScrMARK;
-      if (mouse_input)  rubber_band = true;
+      _releasePoint = _nScrMark;
+      if (_mouseInput)  _rubberBand = true;
       EventMouseClick(0);
 //   }
 }
@@ -780,7 +779,7 @@ void tui::LayoutCanvas::OnMouseLeftDClick(wxMouseEvent& event)
 {
    wxString ws;
    wxCommandEvent eventMOUSEACCEL(wxEVT_MOUSE_ACCEL);
-   ws.sprintf(wxT("{%3.2f,%3.2f}"),ScrMARK.x()*PROPC->UU(), ScrMARK.y()*PROPC->UU());
+   ws.sprintf(wxT("{%3.2f,%3.2f}"),_ScrMark.x()*PROPC->UU(), _ScrMark.y()*PROPC->UU());
    eventMOUSEACCEL.SetString(ws);
    eventMOUSEACCEL.SetInt(event.ShiftDown() ? 0 : 1);
    wxPostEvent(this, eventMOUSEACCEL);
@@ -788,7 +787,7 @@ void tui::LayoutCanvas::OnMouseLeftDClick(wxMouseEvent& event)
 
 void tui::LayoutCanvas::OnMouseMiddleUp(wxMouseEvent& event)
 {
-   TP s_ScrMARK = ScrMARK * _LayCTM.Reversed();
+   TP s_ScrMARK = _ScrMark * _LayCTM.Reversed();
    wxMenu menu;
    menu.Append(TMVIEW_ZOOMALL     , wxT("Zoom All"));
    menu.Append(TMVIEW_ZOOMVISIBLE , wxT("Zoom Visible"));
@@ -822,7 +821,7 @@ void tui::LayoutCanvas::OnMouseWheel(wxMouseEvent& event)
       else if (-1 >= scroll)
          tmpmtrx.Scale(1/scalefactor,1/scalefactor);
       tmpmtrx.Translate(markerpos * _LayCTM - markerpos * _LayCTM * tmpmtrx);
-      DBbox* box = DEBUG_NEW DBbox( lp_BL, lp_TR );
+      DBbox* box = DEBUG_NEW DBbox( _lpBL, _lpTR );
       (*box) = (*box) * tmpmtrx;
       eventZOOM.SetInt(tui::ZOOM_WINDOW);
       eventZOOM.SetClientData(static_cast<void*>(box));
@@ -853,8 +852,8 @@ void tui::LayoutCanvas::OnZoom(wxCommandEvent& evt) {
    switch (evt.GetInt())
    {
       case ZOOM_WINDOW : box = static_cast<DBbox*>(evt.GetClientData());break;
-      case ZOOM_WINDOWM: box = DEBUG_NEW DBbox(presspoint.x(),presspoint.y(),
-                                             ScrMARK.x(),ScrMARK.y());break;
+      case ZOOM_WINDOWM: box = DEBUG_NEW DBbox(_pressPoint.x(),_pressPoint.y(),
+                                             _ScrMark.x(),_ScrMark.y());break;
       case ZOOM_IN     : box = zoomIn()   ; break;
       case ZOOM_OUT    : box = zoomOut()  ; break;
       case ZOOM_LEFT   : box = zoomLeft() ; break;
@@ -863,7 +862,7 @@ void tui::LayoutCanvas::OnZoom(wxCommandEvent& evt) {
       case ZOOM_DOWN   : box = zoomDown() ; break;
       case ZOOM_EMPTY  : box = DEBUG_NEW DBbox(DEFAULT_OVL_BOX);
                         break;
-      case ZOOM_REFRESH: invalid_window = true; Refresh(); return;
+      case ZOOM_REFRESH: _invalidWindow = true; Refresh(); return;
       default: assert(false);
    }
    int Wcl, Hcl;
@@ -896,7 +895,7 @@ void tui::LayoutCanvas::OnZoom(wxCommandEvent& evt) {
    }
    PROPC->unlockDrawProp(drawProp);
    delete box;
-   invalid_window = true;
+   _invalidWindow = true;
    Refresh();
 }
 
@@ -904,13 +903,13 @@ void tui::LayoutCanvas::update_viewport()
 {
    int W, H;
    GetClientSize(&W,&H);
-   lp_BL = TP(0,0)  * _LayCTM;
-   lp_TR = TP(W, H) * _LayCTM;
+   _lpBL = TP(0,0)  * _LayCTM;
+   _lpTR = TP(W, H) * _LayCTM;
 //   _status_line.update(W, _LayCTM);
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-      drawProp->setClipRegion(DBbox(lp_BL.x(),lp_TR.y(), lp_TR.x(), lp_BL.y()));
+      drawProp->setClipRegion(DBbox(_lpBL.x(),_lpTR.y(), _lpTR.x(), _lpBL.y()));
    }
    PROPC->unlockDrawProp(drawProp);
    glClearColor(0,0,0,0);
@@ -923,32 +922,32 @@ void tui::LayoutCanvas::OnMouseIN(wxCommandEvent& evt)
    {
       if (1 == evt.GetExtraLong())
       { // start mouse input
-         mouse_input = true;
+         _mouseInput = true;
          console::ACTIVE_OP actop;
          if (evt.GetInt() > 0) actop = console::op_dwire;
          else                  actop = (console::ACTIVE_OP)evt.GetInt();
          drawProp->setCurrentOp(actop);
-         //restricted_move will be true for wire and polygon
-         restricted_move = (PROPC->markerAngle() != 0) &&
+         //_restrictedMove will be true for wire and polygon
+         _restrictedMove = (PROPC->markerAngle() != 0) &&
                ((actop > 0) || (actop == console::op_dpoly));
-         reperX = (console::op_flipX == actop) || (long_cursor && (console::op_flipY != actop));
-         reperY = (console::op_flipY == actop) || (long_cursor && (console::op_flipX != actop));
+         _reperX = (console::op_flipX == actop) || (_longCursor && (console::op_flipY != actop));
+         _reperY = (console::op_flipY == actop) || (_longCursor && (console::op_flipX != actop));
          if (  (console::op_flipX  == actop)
              ||(console::op_flipY  == actop)
              ||(console::op_rotate == actop)
              ||(console::op_cbind  == actop)
              ||(console::op_abind  == actop)
              ||(console::op_tbind  == actop) )
-            rubber_band = true;
-         releasepoint = TP(0,0);
+            _rubberBand = true;
+         _releasePoint = TP(0,0);
       }
       else
       { // stop mouse input
-         mouse_input = false;
-         rubber_band = false;
-         restricted_move = false;
-         reperX = long_cursor;
-         reperY = long_cursor;
+         _mouseInput = false;
+         _rubberBand = false;
+         _restrictedMove = false;
+         _reperX = _longCursor;
+         _reperY = _longCursor;
          drawProp->setCurrentOp(console::op_none);
          wxCommandEvent eventPOSITION(wxEVT_CANVAS_STATUS);
          eventPOSITION.SetString(wxT(""));
@@ -966,9 +965,9 @@ void tui::LayoutCanvas::OnPanCenter(wxCommandEvent&)
 {
   //viewshift();
    CTM tmpmtrx;
-   TP center((lp_TR.x() + lp_BL.x())/2, (lp_TR.y() + lp_BL.y())/2);
-   tmpmtrx.Translate(ScrMARK - center);
-   DBbox* box = DEBUG_NEW DBbox( lp_BL, lp_TR );
+   TP center((_lpTR.x() + _lpBL.x())/2, (_lpTR.y() + _lpBL.y())/2);
+   tmpmtrx.Translate(_ScrMark - center);
+   DBbox* box = DEBUG_NEW DBbox( _lpBL, _lpTR );
    (*box) = (*box) * tmpmtrx;
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(tui::ZOOM_WINDOW);
@@ -978,8 +977,8 @@ void tui::LayoutCanvas::OnPanCenter(wxCommandEvent&)
 
 void tui::LayoutCanvas::OnCursorType(wxCommandEvent& event)
 {
-   long_cursor = (1 == event.GetInt());
-   reperX = reperY = long_cursor;
+   _longCursor = (1 == event.GetInt());
+   _reperX = _reperY = _longCursor;
 }
 
 void tui::LayoutCanvas::OnCMcontinue(wxCommandEvent& WXUNUSED(event))
@@ -1017,13 +1016,13 @@ void tui::LayoutCanvas::OnCMcancel(wxCommandEvent& WXUNUSED(event))
       eventCancelLast.SetInt(-2);
       wxPostEvent(Console, eventCancelLast);
       // remove the point from the current temporary object in the data base
-      DATC->mousePointCancel(releasepoint);
+      DATC->mousePointCancel(_releasePoint);
    }
 }
 
 void tui::LayoutCanvas::OnCMclose(wxCommandEvent& WXUNUSED(event))
 {
-   releasepoint = ScrMARK;
+   _releasePoint = _ScrMark;
    EventMouseClick(2);
 }
 
@@ -1054,16 +1053,16 @@ DBbox* tui::LayoutCanvas::zoomIn()
 {
    // The idea here is not to produce a zero box - i.e. to
    // keep the viewing area > 0;
-   int8b blX = lround( (3.0*(double)lp_BL.x() + (double)lp_TR.x())/4.0 );
-   int8b blY = lround( (3.0*(double)lp_BL.y() + (double)lp_TR.y())/4.0 );
-   int8b trX = lround( (3.0*(double)lp_TR.x() + (double)lp_BL.x())/4.0 );
-   int8b trY = lround( (3.0*(double)lp_TR.y() + (double)lp_BL.y())/4.0 );
+   int8b blX = lround( (3.0*(double)_lpBL.x() + (double)_lpTR.x())/4.0 );
+   int8b blY = lround( (3.0*(double)_lpBL.y() + (double)_lpTR.y())/4.0 );
+   int8b trX = lround( (3.0*(double)_lpTR.x() + (double)_lpBL.x())/4.0 );
+   int8b trY = lround( (3.0*(double)_lpTR.y() + (double)_lpBL.y())/4.0 );
    if ((blX != trX) && (blY != trY))
       return DEBUG_NEW DBbox( blX, blY, trX, trY);
    else // i.e. the resulting box is too small - so return the existing one
    {
       tell_log(console::MT_WARNING, "Can't zoom any further");
-      return DEBUG_NEW DBbox( lp_BL, lp_TR);
+      return DEBUG_NEW DBbox( _lpBL, _lpTR);
    }
 }
 
@@ -1071,10 +1070,10 @@ DBbox* tui::LayoutCanvas::zoomOut()
 {
    // In this operation we should avoid loss of precision and
    // producing a box which is bigger than the canvas size
-   int8b blX = lround( (5.0*(double)lp_BL.x() - (double)lp_TR.x())/4.0 );
-   int8b blY = lround( (5.0*(double)lp_BL.y() - (double)lp_TR.y())/4.0 );
-   int8b trX = lround( (5.0*(double)lp_TR.x() - (double)lp_BL.x())/4.0 );
-   int8b trY = lround( (5.0*(double)lp_TR.y() - (double)lp_BL.y())/4.0 );
+   int8b blX = lround( (5.0*(double)_lpBL.x() - (double)_lpTR.x())/4.0 );
+   int8b blY = lround( (5.0*(double)_lpBL.y() - (double)_lpTR.y())/4.0 );
+   int8b trX = lround( (5.0*(double)_lpTR.x() - (double)_lpBL.x())/4.0 );
+   int8b trY = lround( (5.0*(double)_lpTR.y() - (double)_lpBL.y())/4.0 );
    blX = (blX > MAX_INT4B) ? MAX_INT4B :
          (blX < MIN_INT4B) ? MIN_INT4B : blX;
    blY = (blY > MAX_INT4B) ? MAX_INT4B :
@@ -1090,61 +1089,61 @@ DBbox* tui::LayoutCanvas::zoomOut()
 DBbox* tui::LayoutCanvas::zoomLeft()
 {
    // keep the left boundary within the canvas
-   int8b trX = lround( (     (double)lp_BL.x() + (double)lp_TR.x())/2.0 );
-   int8b blX = lround( ( 3.0*(double)lp_BL.x() - (double)lp_TR.x())/2.0 );
+   int8b trX = lround( (     (double)_lpBL.x() + (double)_lpTR.x())/2.0 );
+   int8b blX = lround( ( 3.0*(double)_lpBL.x() - (double)_lpTR.x())/2.0 );
    if (blX < MIN_INT4B)
    {
       trX -= blX - MIN_INT4B;
       blX = MIN_INT4B;
       tell_log(console::MT_WARNING, "Canvas boundary reached");
    }
-   return DEBUG_NEW DBbox( trX ,lp_BL.y(), blX, lp_TR.y());
+   return DEBUG_NEW DBbox( trX ,_lpBL.y(), blX, _lpTR.y());
 }
 
 DBbox* tui::LayoutCanvas::zoomRight()
 {
    // keep the right boundary within the canvas
-   int8b trX = lround( ( 3.0*(double)lp_TR.x() - (double)lp_BL.x())/2.0 );
-   int8b blX = lround( (     (double)lp_TR.x() + (double)lp_BL.x())/2.0 );
+   int8b trX = lround( ( 3.0*(double)_lpTR.x() - (double)_lpBL.x())/2.0 );
+   int8b blX = lround( (     (double)_lpTR.x() + (double)_lpBL.x())/2.0 );
    if (trX > MAX_INT4B)
    {
       blX -= trX - MAX_INT4B;
       trX  = MAX_INT4B;
       tell_log(console::MT_WARNING, "Canvas boundary reached");
    }
-   return DEBUG_NEW DBbox( trX ,lp_BL.y(), blX, lp_TR.y());
+   return DEBUG_NEW DBbox( trX ,_lpBL.y(), blX, _lpTR.y());
 }
 
 DBbox* tui::LayoutCanvas::zoomUp()
 {
    // keep the bottom boundary within the canvas
-   int8b trY = lround( ( 3.0*(double)lp_BL.y() - (double)lp_TR.y())/2.0 );
-   int8b blY = lround( (     (double)lp_BL.y() + (double)lp_TR.y())/2.0 );
+   int8b trY = lround( ( 3.0*(double)_lpBL.y() - (double)_lpTR.y())/2.0 );
+   int8b blY = lround( (     (double)_lpBL.y() + (double)_lpTR.y())/2.0 );
    if (trY > MAX_INT4B)
    {
       blY -= trY - MAX_INT4B;
       trY  = MAX_INT4B;
       tell_log(console::MT_WARNING, "Canvas boundary reached");
    }
-   return DEBUG_NEW DBbox(lp_BL.x(), trY, lp_TR.x(), blY);
+   return DEBUG_NEW DBbox(_lpBL.x(), trY, _lpTR.x(), blY);
 }
 
 DBbox* tui::LayoutCanvas::zoomDown()
 {
    // keep the top boundary within the canvas
-   int8b trY = lround( (     (double)lp_TR.y() + (double)lp_BL.y())/2.0 );
-   int8b blY = lround( ( 3.0*(double)lp_TR.y() - (double)lp_BL.y())/2.0 );
+   int8b trY = lround( (     (double)_lpTR.y() + (double)_lpBL.y())/2.0 );
+   int8b blY = lround( ( 3.0*(double)_lpTR.y() - (double)_lpBL.y())/2.0 );
    if (blY < MIN_INT4B)
    {
       trY -= blY - MIN_INT4B;
       blY  = MIN_INT4B;
       tell_log(console::MT_WARNING, "Canvas boundary reached");
    }
-   return DEBUG_NEW DBbox(lp_BL.x(), trY, lp_TR.x(), blY);
+   return DEBUG_NEW DBbox(_lpBL.x(), trY, _lpTR.x(), blY);
 }
 
 tui::LayoutCanvas::~LayoutCanvas(){
-   if (NULL != crossCur) delete crossCur;
+   if (NULL != _crossCur) delete _crossCur;
 }
 
 void* tui::DrawThread::Entry()
@@ -1158,16 +1157,16 @@ void* tui::DrawThread::Entry()
       _canvas->update_viewport();
       // CTM matrix stuff
       glLoadIdentity();
-      glOrtho(_canvas->lp_BL.x(),_canvas->lp_TR.x(),_canvas->lp_TR.y(),_canvas->lp_BL.y(),-1.0,1.0);
+      glOrtho(_canvas->_lpBL.x(),_canvas->_lpTR.x(),_canvas->_lpTR.y(),_canvas->_lpBL.y(),-1.0,1.0);
       glClear(GL_COLOR_BUFFER_BIT);
       glEnable(GL_BLEND);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glClear(GL_ACCUM_BUFFER_BIT);
       DATC->render(_canvas->_LayCTM);    // draw data
       glAccum(GL_LOAD, 1.0);
-      _canvas->invalid_window = false;
-      if (_canvas->rubber_band) _canvas->rubber_paint();
-      if (_canvas->reperX || _canvas->reperY) _canvas->longCursor();
+      _canvas->_invalidWindow = false;
+      if (_canvas->_rubberBand) _canvas->rubber_paint();
+      if (_canvas->_reperX || _canvas->_reperY) _canvas->longCursor();
       _canvas->SwapBuffers();
       _mutex.Unlock();
    }

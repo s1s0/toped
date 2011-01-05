@@ -77,7 +77,7 @@ namespace tui {
       bool           diagnozeGL();
       bool           initStatus() {
 #ifdef __WXGTK__
-         return (NULL != x_visual);
+         return (NULL != _xVisual);
 #else
          return true;
 #endif
@@ -85,7 +85,7 @@ namespace tui {
    protected:
       void           OnpaintGL(wxPaintEvent& event);
       void           OnresizeGL(wxSizeEvent& event);
-      void           OnEraseBackground(wxEraseEvent&) {}; // this prevents flickering !
+      void           OnEraseBackground(wxEraseEvent&) {/* this prevents flickering !*/};
       void           OnMouseMotion(wxMouseEvent&);
       void           OnMouseRightUp(wxMouseEvent& WXUNUSED(event));
       void           OnMouseRightDown(wxMouseEvent& WXUNUSED(event));
@@ -112,26 +112,7 @@ namespace tui {
    private:
       void           CursorControl(bool, bool);
       void           PointUpdate(int nX, int nY);
-//      void           drawInterim(const TP&);
-      CTM            _LayCTM;      // Layout translation matrix
-      TP             ScrMARK;      // Current marker position in DB units
-      TP             ScrMARKold;   // Old marker position  in DB units
-      TP             n_ScrMARK;    // Normalized marker position in DB units
-      TP             n_ScrMARKold; // Normalized Old marker position  in DB units
-      TP             lp_BL;        // bottom left corner of the current visual window
-      TP             lp_TR;        // top right corner of the current visual window
-      double         WH_ratio;     // width/height ratio of the screen as reported by the openGL
-      word           ap_trigger;   // autopan trigger limit
-      TP             presspoint;   // store the location where a mouse button has been pressed
-      TP             releasepoint; // store the location where a mouse button has been released
       void           update_viewport();
-      bool           tmp_wnd;
-      bool           invalid_window; // Indicates canvas needs repainting due to a change of the zoom
-      bool           mouse_input;    // Indicates that a mouse input is expected
-      bool           rubber_band;    // Indicates that moving or changing objects must be drawn
-      bool           restricted_move;// when mouse controlled input
-      wxCursor*      crossCur;
-      //
       void           wnd_paint();
       void           rubber_paint();
       void           longCursor();
@@ -144,15 +125,34 @@ namespace tui {
       DBbox*         zoomRight();
       DBbox*         zoomUp();
       DBbox*         zoomDown();
-      bool           reperX;         // Draw a cursor line across the window parallel to the X axis
-      bool           reperY;         // Draw a cursor line across the window parallel to the Y axis
-      bool           long_cursor;    //
-      bool           _oglThread;     // Run the openGL drawing in a separate thread
-      bool           _oglVersion14;  //
-      bool           _oglExtMultiDrawArrays;
-      bool           _oglArbVertexBufferObject;
+//      void           drawInterim(const TP&);
+      CTM            _LayCTM;        //! Layout translation matrix
+      TP             _ScrMark;        //! Current marker position in DB units
+      TP             _scrMarkOld;     //! Old marker position  in DB units
+      TP             _nScrMark;      //! Normalized marker position in DB units
+      TP             _nScrMarkOld;   //! Normalized Old marker position  in DB units
+      TP             _lpBL;          //! bottom left corner of the current visual window
+      TP             _lpTR;          //! top right corner of the current visual window
+      double         _whRatio;       //! width/height ratio of the screen as reported by the openGL
+      word           _apTrigger;     //! autopan trigger limit
+      TP             _pressPoint;    //! store the location where a mouse button has been pressed
+      TP             _releasePoint;  //! store the location where a mouse button has been released
+      bool           _tmpWnd;
+      bool           _invalidWindow; //! Indicates canvas needs repainting due to a change of the zoom
+      bool           _mouseInput;    //! Indicates that a mouse input is expected
+      bool           _rubberBand;    //! Indicates that moving or changing objects must be drawn
+      bool           _restrictedMove;//! when mouse controlled input
+      wxCursor*      _crossCur;
+      //
+      bool           _reperX;        //! Draw a cursor line across the window parallel to the X axis
+      bool           _reperY;        //! Draw a cursor line across the window parallel to the Y axis
+      bool           _longCursor;    //! Stretch the cursor across the entire canvas
+      bool           _oglThread;     //! Run the openGL drawing in a separate thread
+      bool           _oglVersion14;  //! OpenGL version >= 1.4 detected
+      bool           _oglExtMultiDrawArrays; //! GL_EXT_multi_draw_arrays feature is supported
+      bool           _oglArbVertexBufferObject; //! GL_ARB_vertex_buffer_object feature is supported
 #ifdef __WXGTK__
-      XVisualInfo*   x_visual;       //
+      XVisualInfo*   _xVisual;       //
 #endif
 //      StatusLine     _status_line;
       DECLARE_EVENT_TABLE();
