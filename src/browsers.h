@@ -71,6 +71,7 @@ namespace browsers
       BICN_UNDEFCELL    = 6
    };
 
+
    //===========================================================================
    class CellBrowser: public wxTreeCtrl {
       public:
@@ -306,19 +307,23 @@ namespace browsers
    class ErrorBrowser: public wxTreeCtrl
    {
    public:
-                             ErrorBrowser(wxWindow* parent, wxWindowID id = -1,
+                              ErrorBrowser(wxWindow* parent, wxWindowID id = -1,
                               const wxPoint& pos = wxDefaultPosition,
                               const wxSize& size = wxDefaultSize,
                               long style = wxTR_DEFAULT_STYLE);
       void                    onLMouseDblClk(wxMouseEvent&);
       virtual void            onItemRightClick(wxTreeEvent&);
       //virtual void            onBlankRMouseUp(wxMouseEvent&);
+      void                    onOpenCell(wxCommandEvent&);
       void                    onShowError(wxCommandEvent& WXUNUSED(event));
       void                    onShowCluster(wxCommandEvent& WXUNUSED(event));
-      void                   showMenu(wxTreeItemId id, const wxPoint& pt);
+      void                    showMenu(wxTreeItemId id, const wxPoint& pt);
    private:
-      wxString               _error;
-      wxString               _cluster;
+      bool                    checkCellName(const std::string &str);
+      //wxString               _error;
+      wxString                _cluster;
+      //wxString               _cell;
+      wxTreeItemId            _rbCellID;
       DECLARE_EVENT_TABLE();
    };
 
@@ -373,6 +378,26 @@ namespace browsers
          LayerBrowser*       _layers;
          DECLARE_EVENT_TABLE();
    };
+
+   //type of wxTreeItem for DRC browser
+   enum 
+   {
+      ITEM_ROOT   = 0,
+      ITEM_CELL   = 1,
+      ITEM_ERR    = 2,
+      ITEM_ERR_NUM= 3
+   };
+
+   //Aux class designed for store information about type of data in wxTreeItem for DRC browser 
+   class DRCItemData:public wxTreeItemData
+   {
+   public:
+      DRCItemData(int typ) { type = typ;};
+      int getType() {return type;};
+   private:
+      int type;
+   };
  }
 
+   
 #endif //BROWSERS_H_INCLUDED

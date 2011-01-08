@@ -174,6 +174,7 @@ namespace tui
       TMGET_SNAPSHOT      ,
       TMDRC_SHOW_ERR      ,
       TMDRC_SHOW_CLUSTER  ,
+      TMDRC_OPEN_CELL     ,
 
       TMHELP_ABOUTAPP     ,
       //Warning!!! Do not use IDs between TMDUMMY and TMDUMMY_END
