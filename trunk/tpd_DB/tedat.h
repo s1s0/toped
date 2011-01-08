@@ -284,6 +284,7 @@ namespace laydata {
       virtual void         psWrite(PSFile&, const layprop::DrawProperties&) const;
       virtual void         ungroup(TdtDesign*, TdtCell*, AtticList*);
       virtual word         numPoints() const {return 1;};
+      virtual bool         pointInside(const TP);
       virtual void         polyCut(PointVector&, ShapeList**) {};
       virtual void         stretch(int bfactor, ShapeList**) {};
       virtual PointVector  shape2poly() const {return PointVector();/*return empty list*/}
@@ -362,6 +363,7 @@ namespace laydata {
       virtual void         cifWrite(DbExportFile&) const;
       virtual void         psWrite(PSFile&, const layprop::DrawProperties&) const;
       virtual word         numPoints() const {return 1;};
+      virtual bool         pointInside(const TP);
       virtual void         polyCut(PointVector&, ShapeList**) {};
       virtual void         stretch(int bfactor, ShapeList**) {};
       virtual PointVector  shape2poly() const {return PointVector();/*return empty list*/}

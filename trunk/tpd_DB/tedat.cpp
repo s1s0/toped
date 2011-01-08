@@ -1823,6 +1823,31 @@ void laydata::TdtCellRef::ungroup(laydata::TdtDesign* ATDB, TdtCell* dst, AtticL
    cstr->unselectAll();
 }
 
+bool laydata::TdtCellRef::pointInside(const TP pnt)
+{
+   DBbox ovl(structure()->cellOverlap());
+   PointVector plist;
+   plist.push_back(             ovl.p1()          * _translation);
+   plist.push_back(TP(ovl.p2().x(), ovl.p1().y()) * _translation);
+   plist.push_back(             ovl.p2()          * _translation);
+   plist.push_back(TP(ovl.p1().x(), ovl.p2().y()) * _translation);
+
+   byte cc = 0;
+   for (unsigned i = 0; i < 4 ; i++)
+   {
+      TP& p0 = plist[i];
+      TP& p1 = plist[(i+1)%4];
+      if (((p0.y() <= pnt.y()) && (p1.y() >  pnt.y()))
+        ||((p0.y() >  pnt.y()) && (p1.y() <= pnt.y())) )
+      {
+         float tngns = (float) (pnt.y() - p0.y())/(p1.y() - p0.y());
+         if (pnt.x() < p0.x() + tngns * (p1.x() - p0.x()))
+            cc++;
+      }
+   }
+   return (cc & 0x01) ? true : false;
+}
+
 DBbox laydata::TdtCellRef::overlap() const
 {
    assert(NULL != structure());
@@ -2362,6 +2387,30 @@ void laydata::TdtText::psWrite(PSFile& gdsf, const layprop::DrawProperties& draw
    fmtrx.Scale(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT);
    CTM ffmtrx(fmtrx.a(), fmtrx.b(), fmtrx.c(), fmtrx.d(), _translation.tx(), _translation.ty());
    gdsf.text(_text, ffmtrx);
+}
+
+bool laydata::TdtText::pointInside(const TP pnt)
+{
+   PointVector plist;
+   plist.push_back(             _overlap.p1()               * _translation);
+   plist.push_back(TP(_overlap.p2().x(), _overlap.p1().y()) * _translation);
+   plist.push_back(             _overlap.p2()               * _translation);
+   plist.push_back(TP(_overlap.p1().x(), _overlap.p2().y()) * _translation);
+
+   byte cc = 0;
+   for (unsigned i = 0; i < 4 ; i++)
+   {
+      TP& p0 = plist[i];
+      TP& p1 = plist[(i+1)%4];
+      if (((p0.y() <= pnt.y()) && (p1.y() >  pnt.y()))
+        ||((p0.y() >  pnt.y()) && (p1.y() <= pnt.y())) )
+      {
+         float tngns = (float) (pnt.y() - p0.y())/(p1.y() - p0.y());
+         if (pnt.x() < p0.x() + tngns * (p1.x() - p0.x()))
+            cc++;
+      }
+   }
+   return (cc & 0x01) ? true : false;
 }
 
 DBbox laydata::TdtText::overlap() const
