@@ -188,6 +188,7 @@ namespace laydata {
       bool                 mergeSelected(AtticList**);
       bool                 stretchSelected(int bfactor, AtticList**);
       AtticList*           changeSelect(TP, SH_STATUS status, const DWordSet&);
+      void                 mouseHoover(TP&, layprop::DrawProperties&, const DWordSet&);
       laydata::AtticList*  findSelected(TP);
       TdtCellRef*          getCellOver(TP, CtmStack&, CellRefStack*, const DWordSet&);
       SelectList*          shapeSel()        {return &_shapesel;};
