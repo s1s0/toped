@@ -457,6 +457,8 @@ void tui::LayoutCanvas::longCursor()
       glVertex2i(_ScrMark.x() , _lpTR.y());
    }
    glEnd();
+   if (_reperX && _reperY)
+      DATC->mouseHoover(_ScrMark);
 }
 
 // void tui::LayoutCanvas::drawInterim(const TP& cp)
