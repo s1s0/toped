@@ -226,6 +226,7 @@ namespace tui
       STS_TEXTMARK        ,
       STS_TEXTBOX         ,
       STS_TEXTORI         ,
+      STS_HIGHONHOVER    ,
       STS_AUTOPAN         ,
       STS_ZEROCROSS       ,
       STS_ANGLE           ,

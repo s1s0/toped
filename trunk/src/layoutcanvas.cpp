@@ -435,9 +435,10 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event)
          SetCurrent();
       #endif
       glAccum(GL_RETURN, 1.0);
-      if       (_tmpWnd)         wnd_paint();
-      else if  (_rubberBand)     rubber_paint();
-      if (_reperX || _reperY)      longCursor();
+      if       (_tmpWnd)              wnd_paint();
+      else if  (_rubberBand)          rubber_paint();
+      else if  (PROPC->boldOnHover()) boldOnHover();
+      if (_reperX || _reperY)         longCursor();
       SwapBuffers();
    }
 }
@@ -457,8 +458,6 @@ void tui::LayoutCanvas::longCursor()
       glVertex2i(_ScrMark.x() , _lpTR.y());
    }
    glEnd();
-   if (_reperX && _reperY)
-      DATC->mouseHoover(_ScrMark);
 }
 
 // void tui::LayoutCanvas::drawInterim(const TP& cp)
@@ -484,6 +483,11 @@ void tui::LayoutCanvas::wnd_paint() {
 void tui::LayoutCanvas::rubber_paint()
 {
    DATC->motionDraw(_LayCTM, _releasePoint, _nScrMark);
+}
+
+void tui::LayoutCanvas::boldOnHover()
+{
+   DATC->mouseHoover(_ScrMark);
 }
 
 void tui::LayoutCanvas::CursorControl(bool shift, bool ctl)
@@ -626,7 +630,7 @@ void tui::LayoutCanvas::OnMouseMotion(wxMouseEvent& event)
       UpdateCoordWin(_ScrMark.y(), CNVS_POS_Y, (_nScrMark.y() - _releasePoint.y()), CNVS_DEL_Y);
 
 //   drawInterim(_ScrMark);
-   if (_tmpWnd || _mouseInput || _reperX || _reperY) Refresh();//updateGL();
+   if (_tmpWnd || _mouseInput || _reperX || _reperY || PROPC->boldOnHover()) Refresh();//updateGL();
 }
 
 void tui::LayoutCanvas::OnMouseRightDown(wxMouseEvent& WXUNUSED(event)) {
