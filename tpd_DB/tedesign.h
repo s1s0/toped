@@ -152,6 +152,7 @@ namespace laydata {
       void           selectInBox(TP*, TP*, const DWordSet&, word layselmask, bool);
       void           unselectInBox(TP*, TP*, const DWordSet&, bool);
       AtticList*     changeSelect(TP*, const DWordSet&, bool);
+      void           mouseHoover(TP&, layprop::DrawProperties&, const DWordSet&);
       void           unselectAll()    const {_target.edit()->unselectAll(false);};
       void           selectAll(const DWordSet& unselable, word layselmask) const
                                              {       _target.edit()->selectAll(unselable, layselmask);}

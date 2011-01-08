@@ -74,6 +74,7 @@ public:
    void                       mouseRotate();
    void                       motionDraw(const CTM&, TP, TP);
    void                       render(const CTM&);
+   void                       mouseHoover(TP&);
    void                       setCmdLayer(word layno) {_curcmdlay = layno;}
    word                       curCmdLay() const       {return _curcmdlay;}
    bool                       modified() const        {return _TEDLIB.modified();};

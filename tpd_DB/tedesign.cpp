@@ -1404,6 +1404,15 @@ laydata::AtticList* laydata::TdtDesign::changeSelect(TP* p1, const DWordSet& uns
 }
 
 
+void laydata::TdtDesign::mouseHoover(TP& position, layprop::DrawProperties& drawprop, const DWordSet& unselable)
+{
+   if (_target.checkEdit())
+   {
+      TP selp = position * _target.rARTM();
+      _target.edit()->mouseHoover(selp, drawprop, unselable);
+   }
+}
+
 void laydata::TdtDesign::unselectInBox(TP* p1, TP* p2, const DWordSet& unselable, bool pntsel) {
    if (_target.checkEdit()) {
       DBbox unselect_in((*p1)*_target.rARTM(), (*p2)*_target.rARTM());

@@ -720,6 +720,24 @@ void DataCenter::render(const CTM& layCTM)
       openGlDraw(layCTM);
 }
 
+void DataCenter::mouseHoover(TP& position)
+{
+   if (_TEDLIB())
+   {
+      DWordSet unselectable = PROPC->allUnselectable();
+      layprop::DrawProperties* drawProp;
+      if (PROPC->lockDrawProp(drawProp))
+      {
+         if (wxMUTEX_NO_ERROR == _DBLock.TryLock())
+         {
+            _TEDLIB()->mouseHoover(position, *drawProp, unselectable);
+            VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
+         }
+      }
+      PROPC->unlockDrawProp(drawProp);
+   }
+}
+
 void DataCenter::openGlDraw(const CTM& layCTM)
 {
    if (_TEDLIB())

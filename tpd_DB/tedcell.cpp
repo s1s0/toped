@@ -560,13 +560,14 @@ bool laydata::TdtCell::getShapeOver(TP pnt, const DWordSet& unselable)
 
 laydata::AtticList* laydata::TdtCell::changeSelect(TP pnt, SH_STATUS status, const DWordSet& unselable)
 {
-   laydata::TdtData* prev = NULL, *shape = NULL;
+   laydata::TdtData* prev = NULL;
    unsigned prevlay;
    typedef LayerList::const_iterator LCI;
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
    {
       if (unselable.end() == unselable.find(lay->first))
       {
+         laydata::TdtData* shape = NULL;
          while (lay->second->getObjectOver(pnt,shape))
          {
             if ((status != shape->status()) &&
@@ -606,6 +607,46 @@ laydata::AtticList* laydata::TdtCell::changeSelect(TP pnt, SH_STATUS status, con
       return retlist;
    }
    else return NULL;
+}
+
+void laydata::TdtCell::mouseHoover(TP& position, layprop::DrawProperties& drawprop, const DWordSet& unselable)
+{
+   laydata::TdtData* prev = NULL;
+   unsigned prevlay;
+   typedef LayerList::const_iterator LCI;
+   for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
+   {
+      if (/* (REF_LAY != lay->first) &&*/
+           (unselable.end() == unselable.find(lay->first)) )
+      {
+         laydata::TdtData* shape = NULL;
+         while (lay->second->getObjectOver(position,shape))
+         {
+            if ((sh_active == shape->status()) &&
+                ((NULL == prev) || (prev->overlap().boxarea() > shape->overlap().boxarea())))
+            {
+               prev = shape; prevlay = lay->first;
+            }
+         }
+      }
+   }
+   if (NULL == prev) return;
+   //-------------------------------------------------------------
+   PointVector points;
+
+   unsigned curlayno = drawprop.getTenderLay(prevlay);
+   drawprop.setCurrentColor(curlayno);
+
+   drawprop.setLineProps(true);
+   drawprop.initCtmStack();
+   prev->openGlPrecalc(drawprop, points);
+   prev->setStatus(sh_selected);
+   prev->openGlDrawSel(points, NULL);
+   prev->setStatus(sh_active);
+   prev->openGlPostClean(drawprop, points);
+   drawprop.clearCtmStack();
+   drawprop.setLineProps(false);
+
 }
 
 
