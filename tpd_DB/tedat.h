@@ -196,7 +196,7 @@ namespace laydata {
          virtual void      cifWrite(DbExportFile&) const;
          virtual void      psWrite(PSFile&, const layprop::DrawProperties&) const;
          virtual word      numPoints() const {return _psize;}
-         virtual bool      point_inside(const TP);
+         virtual bool      pointInside(const TP);
          virtual void      polyCut(PointVector&, ShapeList**);
          virtual void      stretch(int bfactor, ShapeList**);
          virtual PointVector shape2poly() const;
@@ -237,7 +237,7 @@ namespace laydata {
          virtual void      cifWrite(DbExportFile&) const;
          virtual void      psWrite(PSFile&, const layprop::DrawProperties&) const;
          virtual word      numPoints() const {return _psize;}
-         virtual bool      point_inside(const TP);
+         virtual bool      pointInside(const TP);
          virtual void      polyCut(PointVector&, ShapeList**){};
          virtual void      stretch(int bfactor, ShapeList**);
          virtual PointVector shape2poly() const;
