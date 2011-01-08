@@ -1409,7 +1409,11 @@ void laydata::TdtDesign::mouseHoover(TP& position, layprop::DrawProperties& draw
    if (_target.checkEdit())
    {
       TP selp = position * _target.rARTM();
+      drawprop.initCtmStack();
+      CTM actm(_target.ARTM());
+      drawprop.pushCtm(actm);
       _target.edit()->mouseHoover(selp, drawprop, unselable);
+      drawprop.clearCtmStack();
    }
 }
 

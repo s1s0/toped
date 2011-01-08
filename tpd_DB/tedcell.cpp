@@ -634,19 +634,18 @@ void laydata::TdtCell::mouseHoover(TP& position, layprop::DrawProperties& drawpr
    //-------------------------------------------------------------
    PointVector points;
 
-   unsigned curlayno = drawprop.getTenderLay(prevlay);
-   drawprop.setCurrentColor(curlayno);
-
-   drawprop.setLineProps(true);
-   drawprop.initCtmStack();
    prev->openGlPrecalc(drawprop, points);
-   prev->setStatus(sh_selected);
-   prev->openGlDrawSel(points, NULL);
-   prev->setStatus(sh_active);
+   if(0 != points.size())
+   {
+      unsigned curlayno = drawprop.getTenderLay(prevlay);
+      drawprop.setCurrentColor(curlayno);
+      glLineWidth(5);
+      prev->setStatus(sh_selected);
+      prev->openGlDrawSel(points, NULL);
+      prev->setStatus(sh_active);
+      glLineWidth(1);
+   }
    prev->openGlPostClean(drawprop, points);
-   drawprop.clearCtmStack();
-   drawprop.setLineProps(false);
-
 }
 
 

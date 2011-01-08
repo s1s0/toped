@@ -895,7 +895,7 @@ void laydata::QuadTree::openGlDraw(layprop::DrawProperties& drawprop,
       {
          TdtData* wdt = _data[i];
          PointVector points;
-         // precalculate drawing data
+         // pre-calculate drawing data
          wdt->openGlPrecalc(drawprop, points);
          // draw the shape fill (contents of refs, arefs and texts)
          if (fill)  wdt->openGlDrawFill(drawprop, points);
