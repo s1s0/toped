@@ -115,6 +115,7 @@ namespace tui {
       void           update_viewport();
       void           wnd_paint();
       void           rubber_paint();
+      void           boldOnHover();
       void           longCursor();
       void           drawZeroMark();
       void           UpdateCoordWin(int coord, CVSSTATUS_TYPE postype, int dcoord, CVSSTATUS_TYPE dpostype);

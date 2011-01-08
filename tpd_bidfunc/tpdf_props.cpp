@@ -1551,6 +1551,33 @@ void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
          tell_log(console::MT_ERROR, info.str());
       }
    }
+   else if ("HIGHLIGHT_ON_HOVER" == name)
+   {//setparams({"HIGHLIGHT_ON_HOVER", "true"});
+      bool val;
+      if (from_string<bool>(val, value, std::boolalpha))
+      {
+         PROPC->setHighlightOnHover(val);
+//         layprop::DrawProperties* drawProp;
+//         if (PROPC->lockDrawProp(drawProp))
+//         {
+//            drawProp->setHighlightOnHover(val);
+//         }
+//         PROPC->unlockDrawProp(drawProp);
+         // send an event to update the property dialog
+         wxCommandEvent eventTextOri(wxEVT_SETINGSMENU);
+         eventTextOri.SetId(tui::STS_HIGHONHOVER);
+         eventTextOri.SetInt(val?1:0);
+         wxPostEvent(TopedMainW, eventTextOri);
+         // Request a redraw at the thread exit
+         Console->set_canvas_invalid(true);
+      }
+      else
+      {
+         std::ostringstream info;
+         info << "Invalid \""<< name <<"\" value. Expected \"true\" or \"false\"";
+         tell_log(console::MT_ERROR,info.str());
+      }
+   }
    else
    {
       std::ostringstream info;

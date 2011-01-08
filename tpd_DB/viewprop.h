@@ -127,6 +127,7 @@ namespace layprop {
       void              setStep(real st)                 {_step = st;}
       void              setAutoPan(bool status)          {_autopan = status;}
       void              setZeroCross(bool status)        {_zeroCross = status;}
+      void              setHighlightOnHover(bool hoh)    {_boldOnHover = hoh;}
       void              setMarkerAngle(byte angle)       {_markerAngle = angle;}
       void              setLaySelMask(word lsm)          {_layselmask = lsm;}
       void              addRuler(TP& p1, TP& p2)         {_supp_data.addRuler(p1,p2,_UU);}
@@ -144,6 +145,7 @@ namespace layprop {
       real              UU() const                       {return _UU;}
       real              DBscale() const                  {return _DBscale;}
       bool              autopan() const                  {return _autopan;}
+      bool              boldOnHover() const              {return _boldOnHover;}
       bool              zeroCross() const                {return _zeroCross;}
       byte              markerAngle() const              {return _markerAngle;}
       word              layselmask() const               {return _layselmask;}
@@ -164,6 +166,7 @@ namespace layprop {
       bool                 _autopan;      // view window moves automatically during shape drawing
       bool                 _zeroCross;    //
       bool                 _renderType;   //
+      bool                 _boldOnHover;  //
       byte                 _markerAngle;  // angle of restriction during shape drawing (0,45,90)
       SupplementaryData    _supp_data;    // supplementary data
       WordList             _uplaylist;    // unpublished layer list

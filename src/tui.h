@@ -91,6 +91,7 @@ namespace tui {
       PDSET_TEXTORI       ,
       PDSET_TEXTFONTS     ,
       PDIMG_DETAIL        ,
+      PDIMG_BOLDHOVER     ,
       PDCELL_DOV          ,
       PDCELL_DAB          ,
       PDCELL_CHECKDOV
@@ -641,6 +642,7 @@ namespace tui {
                                 RenderingPSheet(wxWindow*);
          void                   update(wxCommandEvent& evt);
       private:
+         void                   OnBoldHover(wxCommandEvent&);
          void                   OnCellCheckDov(wxCommandEvent&);
          void                   OnCellBox (wxCommandEvent&);
          void                   OnCellMark(wxCommandEvent&);

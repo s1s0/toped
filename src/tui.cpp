@@ -2447,6 +2447,7 @@ tui::TopedPropertySheets::TopedPropertySheets(wxWindow* parent)
 
 //=============================================================================
 BEGIN_EVENT_TABLE(tui::TopedPropertySheets::RenderingPSheet, wxPanel)
+    EVT_CHECKBOX(PDIMG_BOLDHOVER  , tui::TopedPropertySheets::RenderingPSheet::OnBoldHover      )
     EVT_CHECKBOX(PDCELL_CHECKDOV  , tui::TopedPropertySheets::RenderingPSheet::OnCellCheckDov   )
     EVT_CHECKBOX(PDSET_CELLBOX    , tui::TopedPropertySheets::RenderingPSheet::OnCellBox        )
     EVT_CHECKBOX(PDSET_CELLMARK   , tui::TopedPropertySheets::RenderingPSheet::OnCellMark       )
@@ -2465,7 +2466,10 @@ tui::TopedPropertySheets::RenderingPSheet::RenderingPSheet(wxWindow* parent) : w
       // Image details (Quality)
       wxBoxSizer *imgSizer  = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Image detail (square pixels)"));
          _imageDetail = DEBUG_NEW sgSliderControl(this, PDIMG_DETAIL, 1, 100, 40);
+         wxCheckBox* hoverHigh = DEBUG_NEW wxCheckBox(this, PDIMG_BOLDHOVER , wxT("Highlight on hover"));
       imgSizer->Add(_imageDetail, 0, wxALL | wxALIGN_CENTER | wxEXPAND);
+      imgSizer->Add(hoverHigh, 1, wxALL | wxALIGN_CENTER | wxEXPAND);
+
       // Cell related rendering properties
       wxBoxSizer *topCellSizer = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Cells"));
          // Cell Bounding box and reference marks
@@ -2516,6 +2520,15 @@ tui::TopedPropertySheets::RenderingPSheet::RenderingPSheet(wxWindow* parent) : w
 
    SetSizer(topSizer);
    topSizer->Fit(this);
+}
+
+void tui::TopedPropertySheets::RenderingPSheet::OnBoldHover (wxCommandEvent& cmdEvent)
+{
+   wxString ost;
+   ost << wxT("setparams({\"HIGHLIGHT_ON_HOVER\", \"")
+       << (cmdEvent.GetInt() ? wxT("true") : wxT("false"))
+       << wxT("\"});");
+   TpdPost::parseCommand(ost);
 }
 
 void tui::TopedPropertySheets::RenderingPSheet::OnCellBox (wxCommandEvent& cmdEvent)
@@ -2653,6 +2666,10 @@ void tui::TopedPropertySheets::RenderingPSheet::update(wxCommandEvent& evt)
       case STS_SLCTFONT    :
          targetControl = FindWindow(PDSET_TEXTFONTS);assert(targetControl);
          static_cast<wxComboBox*>(targetControl)->SetStringSelection(evt.GetString() );
+         break;
+      case STS_HIGHONHOVER :
+         targetControl = FindWindow(PDIMG_BOLDHOVER); assert(targetControl);
+         static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt());
          break;
       default: assert(false);
    }
