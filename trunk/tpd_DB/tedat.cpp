@@ -982,7 +982,7 @@ laydata::TdtData* laydata::TdtPoly::copy(const CTM& trans)
    return DEBUG_NEW TdtPoly(check.getValidated());
 }
 
-bool laydata::TdtPoly::point_inside(TP pnt)
+bool laydata::TdtPoly::pointInside(TP pnt)
 {
    TP p0, p1;
    byte cc = 0;
@@ -1358,7 +1358,7 @@ void laydata::TdtWire::motionDraw(const layprop::DrawProperties& drawprop,
    openGlDrawLine(const_cast<layprop::DrawProperties&>(drawprop), ptlist);
 }
 
-bool laydata::TdtWire::point_inside(TP pnt)
+bool laydata::TdtWire::pointInside(TP pnt)
 {
    TP p0, p1;
    for (unsigned i = 0; i < _psize - 1 ; i++)
