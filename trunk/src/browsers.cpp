@@ -1976,6 +1976,7 @@ BEGIN_EVENT_TABLE(browsers::ErrorBrowser, wxTreeCtrl)
    EVT_LEFT_DCLICK(browsers::ErrorBrowser::onLMouseDblClk)
    EVT_TREE_ITEM_RIGHT_CLICK( tui::ID_PNL_DRC, browsers::ErrorBrowser::onItemRightClick)
    //EVT_RIGHT_UP(browsers::ErrorBrowser::onBlankRMouseUp)
+   EVT_MENU(tui::TMDRC_OPEN_CELL, browsers::ErrorBrowser::onOpenCell)
    EVT_MENU(tui::TMDRC_SHOW_ERR, browsers::ErrorBrowser::onShowError)
    EVT_MENU(tui::TMDRC_SHOW_CLUSTER, browsers::ErrorBrowser::onShowCluster)
 END_EVENT_TABLE()
@@ -1991,6 +1992,7 @@ browsers::ErrorBrowser::ErrorBrowser(wxWindow* parent, wxWindowID id,
 
 void browsers::ErrorBrowser::onLMouseDblClk(wxMouseEvent& event)
 {
+   wxString cmd; 
    int flags;
    wxPoint pt = event.GetPosition();
    wxTreeItemId id = HitTest(pt, flags);
@@ -2007,10 +2009,23 @@ void browsers::ErrorBrowser::onLMouseDblClk(wxMouseEvent& event)
          numstr.ToLong(&number);
 
          wxTreeItemId parent = GetItemParent(id);
-         std::string error(GetItemText(parent).mb_str(wxConvUTF8));
-         wxString s = GetItemText(parent);
-         wxString cmd;
-         cmd << wxT("drcshowerror(\"") <<  wxString(error.c_str(), wxConvUTF8) << wxT("\", ") << numstr << wxT("  );");
+         wxString wxError = GetItemText(parent);
+         std::string error(wxError.mb_str(wxConvUTF8));
+         //Check if Cell Name Mode
+         wxTreeItemId parent2 = GetItemParent(parent);
+         //Check if parent2 is cell name
+          DRCItemData *data = static_cast<DRCItemData *>(GetItemData(parent2));
+         if (data->getType() == ITEM_CELL)
+         {
+            wxString wxCell = GetItemText(parent2);
+            std::string cell(wxCell.mb_str(wxConvUTF8));
+            if(!checkCellName(cell))
+            {
+               cmd << wxT("opencell(\"") << wxCell <<wxT("\");");
+            }
+         }
+
+         cmd << wxT("drcshowerror(\"") <<  wxError << wxT("\", ") << numstr << wxT("  );");
          TpdPost::parseCommand(cmd);
       }
    }
@@ -2029,16 +2044,53 @@ void browsers::ErrorBrowser::onItemRightClick(wxTreeEvent& event)
 //   showMenu(HitTest(pt), pt);
 //}
 
+
+void browsers::ErrorBrowser::onOpenCell(wxCommandEvent&  evt)
+{
+   wxString cmd;
+   cmd << wxT("opencell(\"") << GetItemText(_rbCellID) <<wxT("\");");
+   TpdPost::parseCommand(cmd);
+}
+
+
 void browsers::ErrorBrowser::onShowError(wxCommandEvent& vent)
 {
    wxString cmd;
-   cmd << wxT("drcshowerror(\"") << _cluster << wxT("\", ") << _error <<wxT(");");
+   wxTreeItemId parent = GetItemParent(_rbCellID);
+   wxTreeItemId parent2 = GetItemParent(parent);
+   //Check if parent2 is cell name
+   DRCItemData *data = static_cast<DRCItemData *>(GetItemData(parent2));
+   if (data->getType() == ITEM_CELL)
+   {
+     wxString wxCell = GetItemText(parent2);
+      std::string cell(wxCell.mb_str(wxConvUTF8));
+      if(!checkCellName(cell))
+      {
+         cmd << wxT("opencell(\"") << wxCell <<wxT("\");");
+      }
+   }
+
+   cmd << wxT("drcshowerror(\"") << _cluster << wxT("\", ") << GetItemText(_rbCellID) <<wxT(");");
    TpdPost::parseCommand(cmd);
 }
 
 void browsers::ErrorBrowser::onShowCluster(wxCommandEvent& event)
 {
    wxString cmd;
+
+   wxTreeItemId parent = GetItemParent(_rbCellID);
+   //Check if parent is cell name
+   DRCItemData *data = static_cast<DRCItemData *>(GetItemData(parent));
+   if (data->getType() == ITEM_CELL)
+   {
+     wxString wxCell = GetItemText(parent);
+      std::string cell(wxCell.mb_str(wxConvUTF8));
+      if(!checkCellName(cell))
+      {
+         cmd << wxT("opencell(\"") << wxCell <<wxT("\");");
+      }
+   }
+
    cmd << wxT("drcshowcluster(\"") << _cluster <<wxT("\");");
    TpdPost::parseCommand(cmd);
 }
@@ -2046,19 +2098,42 @@ void browsers::ErrorBrowser::onShowCluster(wxCommandEvent& event)
 void browsers::ErrorBrowser::showMenu(wxTreeItemId id, const wxPoint& pt)
 {
    wxMenu menu;
+   _rbCellID = id;
    if (!id.IsOk()) return;
-   if (ItemHasChildren(id))
+   DRCItemData *data = static_cast<DRCItemData *>(GetItemData(id));
+   if (data != NULL)
    {
-      menu.Append(tui::TMDRC_SHOW_CLUSTER, wxT("Show cluster"));
-      _cluster = GetItemText(id);
+      int type=data->getType();
+      switch(type)
+      {
+      case ITEM_CELL:
+         menu.Append(tui::TMDRC_OPEN_CELL, wxT("Open Cell"));
+         break;
+      case ITEM_ERR:
+        menu.Append(tui::TMDRC_SHOW_CLUSTER, wxT("Show cluster"));
+         _cluster = GetItemText(id);
+         break;
+      case ITEM_ERR_NUM:
+         menu.Append(tui::TMDRC_SHOW_ERR, wxT("Show Error"));
+         _cluster = GetItemText(GetItemParent(id));
+         break;
+      default:
+         assert(true);
+      }
    }
-   else
-   {
-      menu.Append(tui::TMDRC_SHOW_ERR, wxT("Show Error"));
-      _cluster = GetItemText(GetItemParent(id));
-      _error = GetItemText(id);
-   }
-     PopupMenu(&menu, pt);
+   PopupMenu(&menu, pt);
+}
+
+bool browsers::ErrorBrowser::checkCellName(const std::string &str)
+{
+   laydata::TdtLibDir *libDir;
+   std::string activeCell;
+   DATC->lockTDT(libDir, dbmxs_liblock);
+      laydata::TdtDesign *design = (*libDir)();
+      activeCell = design->activeCellName();
+   DATC->unlockTDT(libDir);
+   bool ret = activeCell.compare(str);
+   return !ret;
 }
 
 //====================================================================
@@ -2090,7 +2165,7 @@ browsers::DRCBrowser::DRCBrowser(wxWindow* parent, wxWindowID id)
 
       SetSizerAndFit(thesizer);
       Calbr::RuleChecksVector* errors = DRCData->resultsFlat();
-      _errorBrowser->AddRoot(wxT("hidden_wxroot"));
+      _errorBrowser->AddRoot(wxT("hidden_wxroot"), -1, -1, DEBUG_NEW DRCItemData(ITEM_ROOT));
       for(Calbr::RuleChecksVector::const_iterator it = errors->begin();it != errors->end(); ++it)
       {
          addRuleCheck(_errorBrowser->GetRootItem(), (*it));
@@ -2101,7 +2176,7 @@ browsers::DRCBrowser::DRCBrowser(wxWindow* parent, wxWindowID id)
       for(Calbr::CellDRCMap::const_iterator it = drcMap->begin();it != drcMap->end(); ++it)
       {
          std::string cellName = (*it).first;
-         wxTreeItemId  id = _errorBrowser->AppendItem(_errorBrowser->GetRootItem(), wxString(cellName.c_str(), wxConvUTF8));
+         wxTreeItemId  id = _errorBrowser->AppendItem(_errorBrowser->GetRootItem(), wxString(cellName.c_str(), wxConvUTF8), -1, -1, DEBUG_NEW DRCItemData(ITEM_CELL));
 
          Calbr::RuleChecksVector* errors = &((*it).second->_RuleChecks);
          for(Calbr::RuleChecksVector::const_iterator it2 = errors->begin();it2 != errors->end(); ++it2)
@@ -2136,7 +2211,7 @@ void   browsers::DRCBrowser::onHideAll(wxCommandEvent& evt)
 
 void   browsers::DRCBrowser::onExplainError(wxCommandEvent& evt)
 {
-   wxString cmd;
+   wxString cmd; 
    cmd << wxT("drcexplainerror();");
    TpdPost::parseCommand(cmd);
  }
@@ -2144,7 +2219,7 @@ void   browsers::DRCBrowser::onExplainError(wxCommandEvent& evt)
 void  browsers::DRCBrowser::addRuleCheck( const wxTreeItemId &rootId,  Calbr::drcRuleCheck *check)
 {
    std::string name = check->ruleCheckName();
-   wxTreeItemId  id = _errorBrowser->AppendItem(rootId, wxString(name.c_str(), wxConvUTF8));
+   wxTreeItemId  id = _errorBrowser->AppendItem(rootId, wxString(name.c_str(), wxConvUTF8), -1, -1, DEBUG_NEW DRCItemData(ITEM_ERR));
    std::vector <Calbr::drcPolygon>::iterator it2;
    std::vector <Calbr::drcPolygon> *polys = check->polygons(); 
    
@@ -2154,7 +2229,7 @@ void  browsers::DRCBrowser::addRuleCheck( const wxTreeItemId &rootId,  Calbr::dr
    {
       wxString str;
       str.Printf(wxT("%d"), i);
-      _errorBrowser->AppendItem(id, str);
+      _errorBrowser->AppendItem(id, str, -1, -1, DEBUG_NEW DRCItemData(ITEM_ERR_NUM));
    }
 
    //Save Edges
@@ -2164,6 +2239,6 @@ void  browsers::DRCBrowser::addRuleCheck( const wxTreeItemId &rootId,  Calbr::dr
    {
       wxString str;
       str.Printf(wxT("%d"), i);
-      _errorBrowser->AppendItem(id, str);
+      _errorBrowser->AppendItem(id, str, -1, -1, DEBUG_NEW DRCItemData(ITEM_ERR_NUM));
    }
 }
