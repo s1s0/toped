@@ -207,29 +207,32 @@ namespace tui
    } CVSSTATUS_TYPE;
 
    typedef enum {
-      STS_GRID0           ,
-      STS_GRID1           ,
-      STS_GRID2           ,
-      STS_GRIDSTEP0       ,
-      STS_GRIDSTEP1       ,
-      STS_GRIDSTEP2       ,
-      STS_CELLMARK        ,
-      STS_CELLBOX         ,
-      STS_TEXTMARK        ,
-      STS_TEXTBOX         ,
-      STS_TEXTORI         ,
-      STS_HIGHONHOVER     ,
-      STS_AUTOPAN         ,
-      STS_ZEROCROSS       ,
-      STS_ANGLE           ,
-      STS_CURSOR          ,
-      STS_MARKERSTEP      ,
-      STS_VISILIMIT       ,
-      STS_CELLDAB         ,
-      STS_CELLDOV         ,
-      STS_LDFONT          ,
-      STS_SLCTFONT
-   } SETTINGSMENU_TYPE;
+      RPS_CELL_MARK       ,
+      RPS_CELL_BOX        ,
+      RPS_TEXT_MARK       ,
+      RPS_TEXT_BOX        ,
+      RPS_TEXT_ORI        ,
+      RPS_VISI_LIMIT      ,
+      RPS_CELL_DAB        ,
+      RPS_CELL_DOV        ,
+      RPS_LD_FONT         ,
+      RPS_SLCT_FONT
+   } RENDER_PROPERTY_ENUMS;
+
+   typedef enum {
+      CPS_MARKER_MOTION   ,
+      CPS_MARKER_STEP     ,
+      CPS_GRID0_ON        ,
+      CPS_GRID1_ON        ,
+      CPS_GRID2_ON        ,
+      CPS_GRID0_STEP      ,
+      CPS_GRID1_STEP      ,
+      CPS_GRID2_STEP      ,
+      CPS_AUTOPAN         ,
+      CPS_ZERO_CROSS      ,
+      CPS_LONG_CURSOR     ,
+      CPS_BOLD_ON_HOVER
+   } CANVAS_PROPERTY_ENUMS;
 
    typedef enum
    {

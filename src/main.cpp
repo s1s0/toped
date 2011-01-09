@@ -61,7 +61,7 @@ extern parsercmd::cmdBLOCK*      CMDBlock;
 extern console::toped_logfile    LogFile;
 extern console::ted_cmd*         Console;
 extern Calbr::CalbrFile*         DRCData;
-extern const wxEventType         wxEVT_RENDERPARAMS;
+extern const wxEventType         wxEVT_RENDER_PARAMS;
 
 //-----------------------------------------------------------------------------
 
@@ -298,8 +298,8 @@ void TopedApp::loadGlfFonts()
             ffname += curFN.mb_str(wxConvFile);
             if (fontLib->LoadLayoutFont(ffname))
             {
-               wxCommandEvent eventLoadFont(wxEVT_RENDERPARAMS);
-               eventLoadFont.SetId(tui::STS_LDFONT);
+               wxCommandEvent eventLoadFont(wxEVT_RENDER_PARAMS);
+               eventLoadFont.SetId(tui::RPS_LD_FONT);
                eventLoadFont.SetString(wxString(fontLib->getActiveFontName().c_str(), wxConvUTF8));
                wxPostEvent(Toped, eventLoadFont);
             }
@@ -321,8 +321,8 @@ void TopedApp::loadGlfFonts()
    }
    else
    {
-      wxCommandEvent eventLoadFont(wxEVT_RENDERPARAMS);
-      eventLoadFont.SetId(tui::STS_SLCTFONT);
+      wxCommandEvent eventLoadFont(wxEVT_RENDER_PARAMS);
+      eventLoadFont.SetId(tui::RPS_SLCT_FONT);
       eventLoadFont.SetString(wxT("Arial Normal 1"));
       wxPostEvent(Toped, eventLoadFont);
       fontLib->selectFont("Arial Normal 1");

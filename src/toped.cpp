@@ -53,7 +53,7 @@
 
 extern const wxEventType         wxEVT_CANVAS_STATUS;
 extern const wxEventType         wxEVT_CANVAS_ZOOM;
-extern const wxEventType         wxEVT_RENDERPARAMS;
+extern const wxEventType         wxEVT_RENDER_PARAMS;
 extern const wxEventType         wxEVT_CANVAS_PARAMS;
 extern const wxEventType         wxEVT_MOUSE_ACCEL;
 extern const wxEventType         wxEVT_CURRENT_LAYER;
@@ -319,7 +319,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
 //   EVT_SIZE( TopedFrame::OnSize )
 //   EVT_TECUSTOM_COMMAND(  , wxID_ANY, tui::TopedFrame::OnTopedStatus)
    EVT_TECUSTOM_COMMAND(wxEVT_CANVAS_STATUS, wxID_ANY, tui::TopedFrame::OnCanvasStatus)
-   EVT_TECUSTOM_COMMAND(wxEVT_RENDERPARAMS , wxID_ANY, tui::TopedFrame::OnUpdateRenderParams)
+   EVT_TECUSTOM_COMMAND(wxEVT_RENDER_PARAMS, wxID_ANY, tui::TopedFrame::OnUpdateRenderParams)
    EVT_TECUSTOM_COMMAND(wxEVT_CANVAS_PARAMS, wxID_ANY, tui::TopedFrame::OnUpdateCanvasParams)
    EVT_TECUSTOM_COMMAND(wxEVT_MOUSE_ACCEL, wxID_ANY, tui::TopedFrame::OnMouseAccel)
    EVT_TECUSTOM_COMMAND(wxEVT_CURRENT_LAYER, wxID_ANY, tui::TopedFrame::OnCurrentLayer)

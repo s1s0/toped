@@ -2449,7 +2449,6 @@ tui::TopedPropertySheets::TopedPropertySheets(wxWindow* parent)
 
 //=============================================================================
 BEGIN_EVENT_TABLE(tui::TopedPropertySheets::RenderingPSheet, wxPanel)
-    EVT_CHECKBOX(PDIMG_BOLDHOVER  , tui::TopedPropertySheets::RenderingPSheet::OnBoldHover      )
     EVT_CHECKBOX(PDCELL_CHECKDOV  , tui::TopedPropertySheets::RenderingPSheet::OnCellCheckDov   )
     EVT_CHECKBOX(PDSET_CELLBOX    , tui::TopedPropertySheets::RenderingPSheet::OnCellBox        )
     EVT_CHECKBOX(PDSET_CELLMARK   , tui::TopedPropertySheets::RenderingPSheet::OnCellMark       )
@@ -2468,9 +2467,7 @@ tui::TopedPropertySheets::RenderingPSheet::RenderingPSheet(wxWindow* parent) : w
       // Image details (Quality)
       wxBoxSizer *imgSizer  = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Image detail (square pixels)"));
          _imageDetail = DEBUG_NEW sgSliderControl(this, PDIMG_DETAIL, 1, 100, 40);
-         wxCheckBox* hoverHigh = DEBUG_NEW wxCheckBox(this, PDIMG_BOLDHOVER , wxT("Highlight on hover"));
       imgSizer->Add(_imageDetail, 0, wxALL | wxALIGN_CENTER | wxEXPAND);
-      imgSizer->Add(hoverHigh, 1, wxALL | wxALIGN_CENTER | wxEXPAND);
 
       // Cell related rendering properties
       wxBoxSizer *topCellSizer = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Cells"));
@@ -2522,15 +2519,6 @@ tui::TopedPropertySheets::RenderingPSheet::RenderingPSheet(wxWindow* parent) : w
 
    SetSizer(topSizer);
    topSizer->Fit(this);
-}
-
-void tui::TopedPropertySheets::RenderingPSheet::OnBoldHover (wxCommandEvent& cmdEvent)
-{
-   wxString ost;
-   ost << wxT("setparams({\"HIGHLIGHT_ON_HOVER\", \"")
-       << (cmdEvent.GetInt() ? wxT("true") : wxT("false"))
-       << wxT("\"});");
-   TpdPost::parseCommand(ost);
 }
 
 void tui::TopedPropertySheets::RenderingPSheet::OnCellBox (wxCommandEvent& cmdEvent)
@@ -2631,47 +2619,43 @@ void tui::TopedPropertySheets::RenderingPSheet::update(wxCommandEvent& evt)
    wxWindow* targetControl;
    switch (evt.GetId())
    {
-      case STS_CELLMARK    :
+      case RPS_CELL_MARK    :
          targetControl = FindWindow(PDSET_CELLMARK);assert(targetControl);
          static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt() );
          break;
-      case STS_CELLBOX     :
+      case RPS_CELL_BOX     :
          targetControl = FindWindow(PDSET_CELLBOX );assert(targetControl);
          static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt() );
          break;
-      case STS_TEXTMARK   :
+      case RPS_TEXT_MARK   :
          targetControl = FindWindow(PDSET_TEXTMARK);assert(targetControl);
          static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt());
          break;
-      case STS_TEXTBOX     :
+      case RPS_TEXT_BOX     :
          targetControl = FindWindow(PDSET_TEXTBOX );assert(targetControl);
          static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt());
          break;
-      case STS_TEXTORI     :
+      case RPS_TEXT_ORI     :
          targetControl = FindWindow(PDSET_TEXTORI );assert(targetControl);
          static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt());
          break;
-      case STS_VISILIMIT   :
+      case RPS_VISI_LIMIT   :
          _imageDetail->setValue(evt.GetInt());
          break;
-      case STS_CELLDAB     :
+      case RPS_CELL_DAB     :
          _cellDepthEbb->setValue(evt.GetInt());
          break;
-      case STS_CELLDOV     :
+      case RPS_CELL_DOV     :
          if (0 != evt.GetInt())
             _cellDepthOfView->setValue(evt.GetInt());
          break;
-      case STS_LDFONT      :
+      case RPS_LD_FONT      :
          targetControl = FindWindow(PDSET_TEXTFONTS);assert(targetControl);
          static_cast<wxComboBox*>(targetControl)->Append(evt.GetString() );
          break;
-      case STS_SLCTFONT    :
+      case RPS_SLCT_FONT    :
          targetControl = FindWindow(PDSET_TEXTFONTS);assert(targetControl);
          static_cast<wxComboBox*>(targetControl)->SetStringSelection(evt.GetString() );
-         break;
-      case STS_HIGHONHOVER :
-         targetControl = FindWindow(PDIMG_BOLDHOVER); assert(targetControl);
-         static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt());
          break;
       default: assert(false);
    }
@@ -2705,7 +2689,7 @@ tui::TopedPropertySheets::CanvasPSheet::CanvasPSheet(wxWindow* parent) : wxPanel
                                                               wxDefaultPosition,
                                                               wxDefaultSize,
                                                               wxTE_RIGHT | wxTE_PROCESS_ENTER,
-                                                              wxTextValidator(wxFILTER_NUMERIC, &_step));
+                                                              wxTextValidator(wxFILTER_NUMERIC));
          stepSizer->Add(stepStatic, 0, wxTOP | wxBOTTOM | wxLEFT  | wxALIGN_CENTER | wxEXPAND, 5);
          stepSizer->Add(stepValue , 1, wxTOP | wxBOTTOM | wxRIGHT | wxALIGN_CENTER | wxEXPAND, 5);
 
@@ -2728,7 +2712,7 @@ tui::TopedPropertySheets::CanvasPSheet::CanvasPSheet(wxWindow* parent) : wxPanel
                                                        wxDefaultPosition,
                                                        wxDefaultSize,
                                                        wxTE_RIGHT | wxTE_PROCESS_ENTER,
-                                                       wxTextValidator(wxFILTER_NUMERIC, &_grid1));
+                                                       wxTextValidator(wxFILTER_NUMERIC));
 
             gr1Sizer->Add(gr1CBox, 0, wxTOP | wxBOTTOM | wxLEFT  | wxALIGN_CENTER | wxEXPAND, 5);
             gr1Sizer->Add(gr1TBox ,1, wxTOP | wxBOTTOM | wxRIGHT | wxALIGN_CENTER | wxEXPAND, 5);
@@ -2739,7 +2723,7 @@ tui::TopedPropertySheets::CanvasPSheet::CanvasPSheet(wxWindow* parent) : wxPanel
                                                        wxDefaultPosition,
                                                        wxDefaultSize,
                                                        wxTE_RIGHT | wxTE_PROCESS_ENTER,
-                                                       wxTextValidator(wxFILTER_NUMERIC, &_grid2));
+                                                       wxTextValidator(wxFILTER_NUMERIC));
 
             gr2Sizer->Add(gr2CBox, 0, wxTOP | wxBOTTOM | wxLEFT  | wxALIGN_CENTER | wxEXPAND, 5);
             gr2Sizer->Add(gr2TBox ,1, wxTOP | wxBOTTOM | wxRIGHT | wxALIGN_CENTER | wxEXPAND, 5);
@@ -2750,7 +2734,7 @@ tui::TopedPropertySheets::CanvasPSheet::CanvasPSheet(wxWindow* parent) : wxPanel
                                                        wxDefaultPosition,
                                                        wxDefaultSize,
                                                        wxTE_RIGHT | wxTE_PROCESS_ENTER,
-                                                       wxTextValidator(wxFILTER_NUMERIC, &_grid3));
+                                                       wxTextValidator(wxFILTER_NUMERIC));
 
             gr3Sizer->Add(gr3CBox, 0, wxTOP | wxBOTTOM | wxLEFT  | wxALIGN_CENTER | wxEXPAND, 5);
             gr3Sizer->Add(gr3TBox ,1, wxTOP | wxBOTTOM | wxRIGHT | wxALIGN_CENTER | wxEXPAND, 5);
@@ -2896,11 +2880,11 @@ void tui::TopedPropertySheets::CanvasPSheet::update(wxCommandEvent& evt)
    wxWindow* targetControl;
    switch (evt.GetId())
    {
-      case STS_MARKERSTEP:
+      case CPS_MARKER_STEP:
          targetControl = FindWindow(CDMARKER_STEP);assert(targetControl);
          static_cast<wxTextCtrl*>(targetControl)->SetValue(evt.GetString());
          break;
-      case STS_ANGLE     :
+      case CPS_MARKER_MOTION:
          targetControl = FindWindow(CDMARKER_MOTION);assert(targetControl);
          switch (evt.GetInt())
          {
@@ -2910,44 +2894,46 @@ void tui::TopedPropertySheets::CanvasPSheet::update(wxCommandEvent& evt)
             default: assert(false);
          }
          break;
-      case STS_GRID0     :
+      case CPS_GRID0_ON     :
          targetControl = FindWindow(CDGRID_CBOX1);assert(targetControl);
          static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt() );
          break;
-      case STS_GRID1     :
+      case CPS_GRID1_ON     :
          targetControl = FindWindow(CDGRID_CBOX2);assert(targetControl);
          static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt() );
          break;
-      case STS_GRID2     :
+      case CPS_GRID2_ON     :
          targetControl = FindWindow(CDGRID_CBOX3);assert(targetControl);
          static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt() );
          break;
-      case STS_GRIDSTEP0 :
+      case CPS_GRID0_STEP :
          targetControl = FindWindow(CDGRID_SET1);assert(targetControl);
          static_cast<wxTextCtrl*>(targetControl)->SetValue(evt.GetString() );
          break;
-      case STS_GRIDSTEP1 :
+      case CPS_GRID1_STEP :
          targetControl = FindWindow(CDGRID_SET2);assert(targetControl);
          static_cast<wxTextCtrl*>(targetControl)->SetValue(evt.GetString() );
          break;
-      case STS_GRIDSTEP2 :
+      case CPS_GRID2_STEP :
          targetControl = FindWindow(CDGRID_SET3);assert(targetControl);
          static_cast<wxTextCtrl*>(targetControl)->SetValue(evt.GetString() );
          break;
-      case STS_CURSOR    :
+      case CPS_LONG_CURSOR    :
          targetControl = FindWindow(CDMISC_LONGCURSOR);assert(targetControl);
          static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt() );
          break;
-      case STS_AUTOPAN   :
+      case CPS_AUTOPAN   :
          targetControl = FindWindow(CDMISC_AUTOPAN);assert(targetControl);
          static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt() );
          break;
-      case STS_HIGHONHOVER :
+      case CPS_BOLD_ON_HOVER :
          targetControl = FindWindow(CDMISC_BOLDONHOOVER); assert(targetControl);
          static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt());
-      case STS_ZEROCROSS :
+         break;
+      case CPS_ZERO_CROSS :
          targetControl = FindWindow(CDMISC_ZEROCROSS);assert(targetControl);
          static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt() );
          break;
+      default: assert(false);
    }
 }
