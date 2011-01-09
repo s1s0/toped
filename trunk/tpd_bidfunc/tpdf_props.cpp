@@ -45,7 +45,8 @@ extern wxWindow*                 TopedCanvasW;
 extern wxFrame*                  TopedMainW;
 extern console::toped_logfile    LogFile;
 extern layprop::FontLibrary*     fontLib;
-extern const wxEventType         wxEVT_SETINGSMENU;
+extern const wxEventType         wxEVT_RENDERPARAMS;
+extern const wxEventType         wxEVT_CANVAS_PARAMS;
 
 //=============================================================================
 tellstdfunc::stdPROPSAVE::stdPROPSAVE(telldata::typeID retype, bool eor) :
@@ -203,6 +204,20 @@ int tellstdfunc::stdGRIDDEF::execute()
    real    step    = getOpValue();
    byte    no      = getByteValue();
    PROPC->setGrid(no,step,colname);
+
+   wxCommandEvent eventGRIDUPD(wxEVT_CANVAS_PARAMS);
+   switch (no)
+   {
+      case 0: eventGRIDUPD.SetId(tui::STS_GRIDSTEP0); break;
+      case 1: eventGRIDUPD.SetId(tui::STS_GRIDSTEP1); break;
+      case 2: eventGRIDUPD.SetId(tui::STS_GRIDSTEP2); break;
+      default: assert(false);
+   }
+   wxString stepString;
+   stepString << step;
+   eventGRIDUPD.SetString(stepString);
+   wxPostEvent(TopedCanvasW, eventGRIDUPD);
+
    LogFile << LogFile.getFN() << "(" << no << "," << step << ",\"" <<
                                               colname << "\");";LogFile.flush();
    RefreshGL();
@@ -476,7 +491,7 @@ void tellstdfunc::stdHIDECELLMARK::undo() {
    if (PROPC->lockDrawProp(drawProp))
    {
       drawProp->setCellMarksHidden(hide);
-      wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
+      wxCommandEvent eventGRIDUPD(wxEVT_RENDERPARAMS);
       eventGRIDUPD.SetId(tui::STS_CELLMARK);
       eventGRIDUPD.SetInt(hide ? 0 : 1);
       wxPostEvent(TopedCanvasW, eventGRIDUPD);
@@ -493,7 +508,7 @@ int tellstdfunc::stdHIDECELLMARK::execute() {
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
       drawProp->setCellMarksHidden(hide);
-      wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
+      wxCommandEvent eventGRIDUPD(wxEVT_RENDERPARAMS);
       eventGRIDUPD.SetId(tui::STS_CELLMARK);
       eventGRIDUPD.SetInt(hide ? 0 : 1);
       wxPostEvent(TopedCanvasW, eventGRIDUPD);
@@ -522,7 +537,7 @@ void tellstdfunc::stdHIDETEXTMARK::undo() {
    if (PROPC->lockDrawProp(drawProp))
    {
       drawProp->setTextMarksHidden(hide);
-      wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
+      wxCommandEvent eventGRIDUPD(wxEVT_RENDERPARAMS);
       eventGRIDUPD.SetId(tui::STS_TEXTMARK);
       eventGRIDUPD.SetInt((hide ? 0 : 1));
       wxPostEvent(TopedCanvasW, eventGRIDUPD);
@@ -540,7 +555,7 @@ int tellstdfunc::stdHIDETEXTMARK::execute() {
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
       drawProp->setTextMarksHidden(hide);
-      wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
+      wxCommandEvent eventGRIDUPD(wxEVT_RENDERPARAMS);
       eventGRIDUPD.SetId(tui::STS_TEXTMARK);
       eventGRIDUPD.SetInt((hide ? 0 : 1));
       wxPostEvent(TopedCanvasW, eventGRIDUPD);
@@ -569,7 +584,7 @@ void tellstdfunc::stdHIDECELLBOND::undo() {
    if (PROPC->lockDrawProp(drawProp))
    {
       drawProp->setCellboxHidden(hide);
-      wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
+      wxCommandEvent eventGRIDUPD(wxEVT_RENDERPARAMS);
       eventGRIDUPD.SetId(tui::STS_CELLBOX);
       eventGRIDUPD.SetInt(hide ? 0 : 1);
       wxPostEvent(TopedCanvasW, eventGRIDUPD);
@@ -587,7 +602,7 @@ int tellstdfunc::stdHIDECELLBOND::execute() {
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
       drawProp->setCellboxHidden(hide);
-      wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
+      wxCommandEvent eventGRIDUPD(wxEVT_RENDERPARAMS);
       eventGRIDUPD.SetId(tui::STS_CELLBOX);
       eventGRIDUPD.SetInt(hide ? 0 : 1);
       wxPostEvent(TopedCanvasW, eventGRIDUPD);
@@ -615,7 +630,7 @@ void tellstdfunc::stdHIDETEXTBOND::undo() {
    if (PROPC->lockDrawProp(drawProp))
    {
       drawProp->setTextboxHidden(hide);
-      wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
+      wxCommandEvent eventGRIDUPD(wxEVT_RENDERPARAMS);
       eventGRIDUPD.SetId(tui::STS_TEXTBOX);
       eventGRIDUPD.SetInt(hide ? 0 : 1);
       wxPostEvent(TopedCanvasW, eventGRIDUPD);
@@ -633,7 +648,7 @@ int tellstdfunc::stdHIDETEXTBOND::execute() {
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
       drawProp->setTextboxHidden(hide);
-      wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
+      wxCommandEvent eventGRIDUPD(wxEVT_RENDERPARAMS);
       eventGRIDUPD.SetId(tui::STS_TEXTBOX);
       eventGRIDUPD.SetInt(hide ? 0 : 1);
       wxPostEvent(TopedCanvasW, eventGRIDUPD);
@@ -1249,7 +1264,15 @@ void tellstdfunc::stdSTEP::undo_cleanup() {
 
 void tellstdfunc::stdSTEP::undo() {
    TEUNDO_DEBUG("step() UNDO");
-   PROPC->setStep(getOpValue(UNDOPstack,true));
+   real    step    = getOpValue(UNDOPstack,true);
+   PROPC->setStep(step);
+
+   wxString stepStr;
+   stepStr << step;
+   wxCommandEvent eventMARKERSTEP(wxEVT_CANVAS_PARAMS);
+   eventMARKERSTEP.SetId(tui::STS_MARKERSTEP);
+   eventMARKERSTEP.SetString(stepStr);
+   wxPostEvent(TopedMainW, eventMARKERSTEP);
 }
 
 int tellstdfunc::stdSTEP::execute() {
@@ -1259,6 +1282,14 @@ int tellstdfunc::stdSTEP::execute() {
    //
    real    step    = getOpValue();
    PROPC->setStep(step);
+
+   wxString stepStr;
+   stepStr << step;
+   wxCommandEvent eventMARKERSTEP(wxEVT_CANVAS_PARAMS);
+   eventMARKERSTEP.SetId(tui::STS_MARKERSTEP);
+   eventMARKERSTEP.SetString(stepStr);
+   wxPostEvent(TopedMainW, eventMARKERSTEP);
+
    LogFile << LogFile.getFN() << "(" << step << ");"; LogFile.flush();
    return EXEC_NEXT;
 }
@@ -1278,7 +1309,7 @@ void tellstdfunc::stdAUTOPAN::undo() {
    TEUNDO_DEBUG("autopan() UNDO");
    bool autop = getBoolValue(UNDOPstack, true);
    PROPC->setAutoPan(autop);
-   wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
+   wxCommandEvent eventGRIDUPD(wxEVT_CANVAS_PARAMS);
    eventGRIDUPD.SetId(tui::STS_AUTOPAN);
    eventGRIDUPD.SetInt(autop ? 1 : 0);
    wxPostEvent(TopedMainW, eventGRIDUPD);
@@ -1292,7 +1323,7 @@ int tellstdfunc::stdAUTOPAN::execute() {
    //
    bool autop    = getBoolValue();
    PROPC->setAutoPan(autop);
-   wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
+   wxCommandEvent eventGRIDUPD(wxEVT_CANVAS_PARAMS);
    eventGRIDUPD.SetId(tui::STS_AUTOPAN);
    eventGRIDUPD.SetInt(autop ? 1 : 0);
    wxPostEvent(TopedMainW, eventGRIDUPD);
@@ -1315,7 +1346,7 @@ void tellstdfunc::stdZEROCROSS::undo() {
    TEUNDO_DEBUG("zerocross() UNDO");
    bool zeroc = getBoolValue(UNDOPstack, true);
    PROPC->setZeroCross(zeroc);
-   wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
+   wxCommandEvent eventGRIDUPD(wxEVT_CANVAS_PARAMS);
    eventGRIDUPD.SetId(tui::STS_ZEROCROSS);
    eventGRIDUPD.SetInt(zeroc ? 1 : 0);
    wxPostEvent(TopedMainW, eventGRIDUPD);
@@ -1329,7 +1360,7 @@ int tellstdfunc::stdZEROCROSS::execute() {
    //
    bool zeroc    = getBoolValue();
    PROPC->setZeroCross(zeroc);
-   wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
+   wxCommandEvent eventGRIDUPD(wxEVT_CANVAS_PARAMS);
    eventGRIDUPD.SetId(tui::STS_ZEROCROSS);
    eventGRIDUPD.SetInt(zeroc ? 1 : 0);
    wxPostEvent(TopedMainW, eventGRIDUPD);
@@ -1353,7 +1384,7 @@ void tellstdfunc::stdSHAPEANGLE::undo() {
    TEUNDO_DEBUG("shapeangle() UNDO");
    byte angle    = getByteValue(UNDOPstack,true);
    PROPC->setMarkerAngle(angle);
-   wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
+   wxCommandEvent eventGRIDUPD(wxEVT_CANVAS_PARAMS);
    eventGRIDUPD.SetId(tui::STS_ANGLE);
    eventGRIDUPD.SetInt(angle);
    wxPostEvent(TopedMainW, eventGRIDUPD);
@@ -1369,7 +1400,7 @@ int tellstdfunc::stdSHAPEANGLE::execute()
       UNDOPstack.push_front(DEBUG_NEW telldata::ttint(PROPC->markerAngle()));
       //
       PROPC->setMarkerAngle(angle);
-      wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
+      wxCommandEvent eventGRIDUPD(wxEVT_CANVAS_PARAMS);
       eventGRIDUPD.SetId(tui::STS_ANGLE);
       eventGRIDUPD.SetInt(angle);
       wxPostEvent(TopedMainW, eventGRIDUPD);
@@ -1417,7 +1448,7 @@ void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
          }
          PROPC->unlockDrawProp(drawProp);
          // send an event to update the property dialog
-         wxCommandEvent eventTextOri(wxEVT_SETINGSMENU);
+         wxCommandEvent eventTextOri(wxEVT_RENDERPARAMS);
          eventTextOri.SetId(tui::STS_VISILIMIT);
          eventTextOri.SetInt(val);
          wxPostEvent(TopedMainW, eventTextOri);
@@ -1443,7 +1474,7 @@ void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
          }
          PROPC->unlockDrawProp(drawProp);
          // send an event to update the property dialog
-         wxCommandEvent eventTextOri(wxEVT_SETINGSMENU);
+         wxCommandEvent eventTextOri(wxEVT_RENDERPARAMS);
          eventTextOri.SetId(tui::STS_TEXTORI);
          eventTextOri.SetInt(val?1:0);
          wxPostEvent(TopedMainW, eventTextOri);
@@ -1469,7 +1500,7 @@ void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
          }
          PROPC->unlockDrawProp(drawProp);
          // send an event to update the property dialog
-         wxCommandEvent event(wxEVT_SETINGSMENU);
+         wxCommandEvent event(wxEVT_RENDERPARAMS);
          event.SetId(tui::STS_CELLDAB);
          event.SetInt(val);
          wxPostEvent(TopedMainW, event);
@@ -1498,7 +1529,7 @@ void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
          }
          PROPC->unlockDrawProp(drawProp);
          // send an event to update the property dialog
-         wxCommandEvent event(wxEVT_SETINGSMENU);
+         wxCommandEvent event(wxEVT_RENDERPARAMS);
          event.SetId(tui::STS_CELLDOV);
          event.SetInt(0);
          wxPostEvent(TopedMainW, event);
@@ -1514,7 +1545,7 @@ void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
          }
          PROPC->unlockDrawProp(drawProp);
          // send an event to update the property dialog
-         wxCommandEvent event(wxEVT_SETINGSMENU);
+         wxCommandEvent event(wxEVT_RENDERPARAMS);
          event.SetId(tui::STS_CELLDOV);
          event.SetInt(val);
          wxPostEvent(TopedMainW, event);
@@ -1533,7 +1564,7 @@ void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
    {
       if (fontLib->selectFont(value))
       {
-         wxCommandEvent eventLoadFont(wxEVT_SETINGSMENU);
+         wxCommandEvent eventLoadFont(wxEVT_RENDERPARAMS);
          eventLoadFont.SetId(tui::STS_SLCTFONT);
          eventLoadFont.SetString(wxString(value.c_str(), wxConvUTF8));
          wxPostEvent(TopedMainW, eventLoadFont);
@@ -1564,7 +1595,7 @@ void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
 //         }
 //         PROPC->unlockDrawProp(drawProp);
          // send an event to update the property dialog
-         wxCommandEvent eventTextOri(wxEVT_SETINGSMENU);
+         wxCommandEvent eventTextOri(wxEVT_RENDERPARAMS);
          eventTextOri.SetId(tui::STS_HIGHONHOVER);
          eventTextOri.SetInt(val?1:0);
          wxPostEvent(TopedMainW, eventTextOri);

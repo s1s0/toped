@@ -43,7 +43,7 @@ extern console::ted_cmd*         Console;
 extern console::toped_logfile    LogFile;
 extern const wxEventType         wxEVT_MOUSE_INPUT;
 extern const wxEventType         wxEVT_CANVAS_STATUS;
-extern const wxEventType         wxEVT_SETINGSMENU;
+extern const wxEventType         wxEVT_CANVAS_PARAMS;
 
 
 //=============================================================================
@@ -345,7 +345,7 @@ void tellstdfunc::RefreshGL()
 //=============================================================================
 void tellstdfunc::gridON(byte No, bool status)
 {
-   wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
+   wxCommandEvent eventGRIDUPD(wxEVT_CANVAS_PARAMS);
    status = PROPC->viewGrid(No, status);
    switch (No)
    {

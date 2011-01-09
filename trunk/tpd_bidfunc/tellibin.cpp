@@ -44,7 +44,7 @@ extern wxFrame*                  TopedMainW;
 extern wxWindow*                 TopedCanvasW;
 
 
-extern const wxEventType         wxEVT_SETINGSMENU;
+extern const wxEventType         wxEVT_CANVAS_PARAMS;
 extern const wxEventType         wxEVT_CANVAS_ZOOM;
 extern const wxEventType         wxEVT_MOUSE_INPUT;
 extern const wxEventType         wxEVT_CANVAS_CURSOR;
@@ -172,7 +172,7 @@ int tellstdfunc::stdLONGCURSOR::execute()
 {
    bool        longcur  = getBoolValue();
 
-   wxCommandEvent eventGRIDUPD(wxEVT_SETINGSMENU);
+   wxCommandEvent eventGRIDUPD(wxEVT_CANVAS_PARAMS);
    eventGRIDUPD.SetId(tui::STS_CURSOR);
    eventGRIDUPD.SetInt((longcur ? 1 : 0));
    wxPostEvent(TopedMainW, eventGRIDUPD);
