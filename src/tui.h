@@ -96,6 +96,22 @@ namespace tui {
       PDCELL_DAB          ,
       PDCELL_CHECKDOV
    } RenderPropertyDialogID;
+
+   typedef enum {
+      CDMARKER_STEP       ,
+      CDMARKER_MOTION     ,
+      CDGRID_SET1         ,
+      CDGRID_SET2         ,
+      CDGRID_SET3         ,
+      CDGRID_CBOX1        ,
+      CDGRID_CBOX2        ,
+      CDGRID_CBOX3        ,
+      CDMISC_LONGCURSOR   ,
+      CDMISC_AUTOPAN      ,
+      CDMISC_BOLDONHOOVER ,
+      CDMISC_ZEROCROSS
+   } CanvasPropertyDialogID;
+
    //--------------------------------------------------------------------------
    class getSize : public wxDialog {
    public:
@@ -636,11 +652,12 @@ namespace tui {
    public:
                                 TopedPropertySheets(wxWindow*);
       void                      updateRenderSheet(wxCommandEvent& evt) {_renderingSheet->update(evt);}
+      void                      updateCanvasSheet(wxCommandEvent& evt) {   _canvasSheet->update(evt);}
    private:
       class RenderingPSheet : public wxPanel {
       public:
                                 RenderingPSheet(wxWindow*);
-         void                   update(wxCommandEvent& evt);
+         void                   update(wxCommandEvent&);
       private:
          void                   OnBoldHover(wxCommandEvent&);
          void                   OnCellCheckDov(wxCommandEvent&);
@@ -659,7 +676,32 @@ namespace tui {
          sgSliderControl*       _imageDetail;
          DECLARE_EVENT_TABLE();
       };
+      class CanvasPSheet : public wxPanel {
+      public:
+                                CanvasPSheet(wxWindow*);
+         void                   update(wxCommandEvent&);
+      private:
+         void                   OnMarkerStep  (wxCommandEvent&);
+         void                   OnMarkerMotion(wxCommandEvent&);
+         void                   OnGridOn1     (wxCommandEvent&);
+         void                   OnGridOn2     (wxCommandEvent&);
+         void                   OnGridOn3     (wxCommandEvent&);
+         void                   OnGridSet1    (wxCommandEvent&);
+         void                   OnGridSet2    (wxCommandEvent&);
+         void                   OnGridSet3    (wxCommandEvent&);
+         void                   OnLongCorsor  (wxCommandEvent&);
+         void                   OnAutoPan     (wxCommandEvent&);
+         void                   OnBoldOnHoover(wxCommandEvent&);
+         void                   OnZeroCross   (wxCommandEvent&);
+
+         wxString               _step;
+         wxString               _grid1;
+         wxString               _grid2;
+         wxString               _grid3;
+         DECLARE_EVENT_TABLE();
+      };
       RenderingPSheet*          _renderingSheet;
+      CanvasPSheet*             _canvasSheet;
    };
 }
 

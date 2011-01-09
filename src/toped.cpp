@@ -53,7 +53,8 @@
 
 extern const wxEventType         wxEVT_CANVAS_STATUS;
 extern const wxEventType         wxEVT_CANVAS_ZOOM;
-extern const wxEventType         wxEVT_SETINGSMENU;
+extern const wxEventType         wxEVT_RENDERPARAMS;
+extern const wxEventType         wxEVT_CANVAS_PARAMS;
 extern const wxEventType         wxEVT_MOUSE_ACCEL;
 extern const wxEventType         wxEVT_CURRENT_LAYER;
 extern const wxEventType         wxEVT_TOOLBARSIZE;
@@ -330,7 +331,8 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
 //   EVT_SIZE( TopedFrame::OnSize )
 //   EVT_TECUSTOM_COMMAND(  , wxID_ANY, tui::TopedFrame::OnTopedStatus)
    EVT_TECUSTOM_COMMAND(wxEVT_CANVAS_STATUS, wxID_ANY, tui::TopedFrame::OnCanvasStatus)
-   EVT_TECUSTOM_COMMAND(wxEVT_SETINGSMENU, wxID_ANY, tui::TopedFrame::OnUpdateSettingsMenu)
+   EVT_TECUSTOM_COMMAND(wxEVT_RENDERPARAMS , wxID_ANY, tui::TopedFrame::OnUpdateRenderParams)
+   EVT_TECUSTOM_COMMAND(wxEVT_CANVAS_PARAMS, wxID_ANY, tui::TopedFrame::OnUpdateCanvasParams)
    EVT_TECUSTOM_COMMAND(wxEVT_MOUSE_ACCEL, wxID_ANY, tui::TopedFrame::OnMouseAccel)
    EVT_TECUSTOM_COMMAND(wxEVT_CURRENT_LAYER, wxID_ANY, tui::TopedFrame::OnCurrentLayer)
    EVT_COMMAND(wxID_ANY, wxEVT_COMMAND_ENTER, tui::TopedFrame::OnUncapturedMouseClick)
@@ -2178,28 +2180,15 @@ void tui::TopedFrame::OnMenu(wxCommandEvent& event)
    _resourceCenter->executeMenu(event.GetId());
 }
 
-void tui::TopedFrame::OnUpdateSettingsMenu(wxCommandEvent& evt)
+void tui::TopedFrame::OnUpdateRenderParams(wxCommandEvent& evt)
 {
-   switch (evt.GetId())
-   {
-      case STS_GRID0          : settingsMenu->Check(TMSET_GRID0       , evt.GetInt() );break;
-      case STS_GRID1          : settingsMenu->Check(TMSET_GRID1       , evt.GetInt() );break;
-      case STS_GRID2          : settingsMenu->Check(TMSET_GRID2       , evt.GetInt() );break;
-      case STS_AUTOPAN        : settingsMenu->Check(TMSET_AUTOPAN     , evt.GetInt() );break;
-      case STS_ZEROCROSS      : settingsMenu->Check(TMSET_ZEROCROSS   , evt.GetInt() );break;
-      case STS_CURSOR         : settingsMenu->Check(TMSET_CURLONG     , evt.GetInt() );break;
-      case STS_ANGLE          :
-         switch (evt.GetInt())
-         {
-            case  0: settingsMenu->Check(TMSET_MARKER0     , true );break;
-            case 45: settingsMenu->Check(TMSET_MARKER45    , true );break;
-            case 90: settingsMenu->Check(TMSET_MARKER90    , true );break;
-            default: assert(false);
-         }
-         break;
-      default: _propDialog->updateRenderSheet(evt);break;
-   }
+   _propDialog->updateRenderSheet(evt);
 };
+
+void tui::TopedFrame::OnUpdateCanvasParams(wxCommandEvent& evt)
+{
+   _propDialog->updateCanvasSheet(evt);
+}
 
 void  tui::TopedFrame::OnMouseAccel(wxCommandEvent& evt) {
    wxString ost;

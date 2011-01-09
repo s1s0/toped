@@ -2440,7 +2440,9 @@ tui::TopedPropertySheets::TopedPropertySheets(wxWindow* parent)
        wxDEFAULT_DIALOG_STYLE| (int)wxPlatform::IfNot(wxOS_WINDOWS_CE, wxRESIZE_BORDER));
    GetSizer()->Add(DEBUG_NEW wxButton(this, wxID_OK, wxT("Hide")), 0, wxALL | wxALIGN_RIGHT, 5);
    wxBookCtrlBase* notebook = GetBookCtrl();
+   _canvasSheet    = DEBUG_NEW CanvasPSheet(notebook);
    _renderingSheet = DEBUG_NEW RenderingPSheet(notebook);
+   notebook->AddPage(_canvasSheet   , wxT("Canvas")   , true, -1);
    notebook->AddPage(_renderingSheet, wxT("Rendering"), true, -1);
    LayoutDialog();
 }
@@ -2454,7 +2456,7 @@ BEGIN_EVENT_TABLE(tui::TopedPropertySheets::RenderingPSheet, wxPanel)
     EVT_CHECKBOX(PDSET_TEXTBOX    , tui::TopedPropertySheets::RenderingPSheet::OnTextBox        )
     EVT_CHECKBOX(PDSET_TEXTMARK   , tui::TopedPropertySheets::RenderingPSheet::OnTextMark       )
     EVT_CHECKBOX(PDSET_TEXTORI    , tui::TopedPropertySheets::RenderingPSheet::OnTextOri        )
-    EVT_COMBOBOX(PDSET_TEXTFONTS , tui::TopedPropertySheets::RenderingPSheet::OnTextFont       )
+    EVT_COMBOBOX(PDSET_TEXTFONTS  , tui::TopedPropertySheets::RenderingPSheet::OnTextFont       )
     EVT_COMMAND_ENTER(PDIMG_DETAIL, tui::TopedPropertySheets::RenderingPSheet::OnImageDetail    )
     EVT_COMMAND_ENTER(PDCELL_DOV  , tui::TopedPropertySheets::RenderingPSheet::OnCellDov        )
     EVT_COMMAND_ENTER(PDCELL_DAB  , tui::TopedPropertySheets::RenderingPSheet::OnCellDab        )
@@ -2672,5 +2674,280 @@ void tui::TopedPropertySheets::RenderingPSheet::update(wxCommandEvent& evt)
          static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt());
          break;
       default: assert(false);
+   }
+}
+
+//=============================================================================
+BEGIN_EVENT_TABLE(tui::TopedPropertySheets::CanvasPSheet, wxPanel)
+    EVT_TEXT_ENTER(CDMARKER_STEP    ,tui::TopedPropertySheets::CanvasPSheet::OnMarkerStep    )
+    EVT_RADIOBOX(CDMARKER_MOTION    ,tui::TopedPropertySheets::CanvasPSheet::OnMarkerMotion  )
+    EVT_CHECKBOX(CDGRID_CBOX1       ,tui::TopedPropertySheets::CanvasPSheet::OnGridOn1       )
+    EVT_CHECKBOX(CDGRID_CBOX2       ,tui::TopedPropertySheets::CanvasPSheet::OnGridOn2       )
+    EVT_CHECKBOX(CDGRID_CBOX3       ,tui::TopedPropertySheets::CanvasPSheet::OnGridOn3       )
+    EVT_CHECKBOX(CDMISC_LONGCURSOR  ,tui::TopedPropertySheets::CanvasPSheet::OnLongCorsor    )
+    EVT_CHECKBOX(CDMISC_AUTOPAN     ,tui::TopedPropertySheets::CanvasPSheet::OnAutoPan       )
+    EVT_CHECKBOX(CDMISC_BOLDONHOOVER,tui::TopedPropertySheets::CanvasPSheet::OnBoldOnHoover  )
+    EVT_CHECKBOX(CDMISC_ZEROCROSS   ,tui::TopedPropertySheets::CanvasPSheet::OnZeroCross     )
+    EVT_TEXT_ENTER(CDGRID_SET1      ,tui::TopedPropertySheets::CanvasPSheet::OnGridSet1       )
+    EVT_TEXT_ENTER(CDGRID_SET2      ,tui::TopedPropertySheets::CanvasPSheet::OnGridSet2       )
+    EVT_TEXT_ENTER(CDGRID_SET3      ,tui::TopedPropertySheets::CanvasPSheet::OnGridSet3       )
+END_EVENT_TABLE()
+
+tui::TopedPropertySheets::CanvasPSheet::CanvasPSheet(wxWindow* parent) : wxPanel(parent, wxID_ANY)
+{
+   wxBoxSizer* topSizer = DEBUG_NEW wxBoxSizer(wxVERTICAL);
+      // Image details (Quality)
+      wxBoxSizer *markerSizer  = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Marker"));
+
+         wxBoxSizer *stepSizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+            wxStaticText* stepStatic = DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("Step:"));
+            wxTextCtrl*   stepValue  = DEBUG_NEW wxTextCtrl  (this, CDMARKER_STEP, wxT(""),
+                                                              wxDefaultPosition,
+                                                              wxDefaultSize,
+                                                              wxTE_RIGHT | wxTE_PROCESS_ENTER,
+                                                              wxTextValidator(wxFILTER_NUMERIC, &_step));
+         stepSizer->Add(stepStatic, 0, wxTOP | wxBOTTOM | wxLEFT  | wxALIGN_CENTER | wxEXPAND, 5);
+         stepSizer->Add(stepValue , 1, wxTOP | wxBOTTOM | wxRIGHT | wxALIGN_CENTER | wxEXPAND, 5);
+
+         static const wxString motionOptions[] = { wxT("Free"), wxT("45 deg"), wxT("90 deg") };
+         wxRadioBox* motion = DEBUG_NEW wxRadioBox(this, CDMARKER_MOTION, wxT("Motion"),
+                                                   wxDefaultPosition,
+                                                   wxDefaultSize,
+                                                   WXSIZEOF(motionOptions),
+                                                   motionOptions ,
+                                                   1,
+                                                   wxRA_VERTICAL
+                                                   );
+      markerSizer->Add(stepSizer, 0, wxALL | wxALIGN_CENTER | wxEXPAND);
+      markerSizer->Add(motion   , 0, wxALL | wxALIGN_CENTER | wxEXPAND);
+      //
+      wxBoxSizer *gridSizer = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Grid Step"));
+         wxBoxSizer *gr1Sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+            wxCheckBox* gr1CBox = DEBUG_NEW wxCheckBox(this, CDGRID_CBOX1, wxT("Set 1:"));
+            wxTextCtrl* gr1TBox = DEBUG_NEW wxTextCtrl(this, CDGRID_SET1, wxT(""),
+                                                       wxDefaultPosition,
+                                                       wxDefaultSize,
+                                                       wxTE_RIGHT | wxTE_PROCESS_ENTER,
+                                                       wxTextValidator(wxFILTER_NUMERIC, &_grid1));
+
+            gr1Sizer->Add(gr1CBox, 0, wxTOP | wxBOTTOM | wxLEFT  | wxALIGN_CENTER | wxEXPAND, 5);
+            gr1Sizer->Add(gr1TBox ,1, wxTOP | wxBOTTOM | wxRIGHT | wxALIGN_CENTER | wxEXPAND, 5);
+
+         wxBoxSizer *gr2Sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+            wxCheckBox* gr2CBox = DEBUG_NEW wxCheckBox(this, CDGRID_CBOX2, wxT("Set 2:"));
+            wxTextCtrl* gr2TBox = DEBUG_NEW wxTextCtrl(this, CDGRID_SET2, wxT(""),
+                                                       wxDefaultPosition,
+                                                       wxDefaultSize,
+                                                       wxTE_RIGHT | wxTE_PROCESS_ENTER,
+                                                       wxTextValidator(wxFILTER_NUMERIC, &_grid2));
+
+            gr2Sizer->Add(gr2CBox, 0, wxTOP | wxBOTTOM | wxLEFT  | wxALIGN_CENTER | wxEXPAND, 5);
+            gr2Sizer->Add(gr2TBox ,1, wxTOP | wxBOTTOM | wxRIGHT | wxALIGN_CENTER | wxEXPAND, 5);
+
+         wxBoxSizer *gr3Sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+            wxCheckBox* gr3CBox = DEBUG_NEW wxCheckBox(this, CDGRID_CBOX3, wxT("Set 3:"));
+            wxTextCtrl* gr3TBox = DEBUG_NEW wxTextCtrl(this, CDGRID_SET3, wxT(""),
+                                                       wxDefaultPosition,
+                                                       wxDefaultSize,
+                                                       wxTE_RIGHT | wxTE_PROCESS_ENTER,
+                                                       wxTextValidator(wxFILTER_NUMERIC, &_grid3));
+
+            gr3Sizer->Add(gr3CBox, 0, wxTOP | wxBOTTOM | wxLEFT  | wxALIGN_CENTER | wxEXPAND, 5);
+            gr3Sizer->Add(gr3TBox ,1, wxTOP | wxBOTTOM | wxRIGHT | wxALIGN_CENTER | wxEXPAND, 5);
+
+      gridSizer->Add(gr1Sizer, 0, wxALL | wxALIGN_CENTER | wxEXPAND);
+      gridSizer->Add(gr2Sizer, 0, wxALL | wxALIGN_CENTER | wxEXPAND);
+      gridSizer->Add(gr3Sizer, 0, wxALL | wxALIGN_CENTER | wxEXPAND);
+
+      wxCheckBox* longCursor   = DEBUG_NEW wxCheckBox(this, CDMISC_LONGCURSOR  , wxT("Long Cursor"));
+      wxCheckBox* autoPan      = DEBUG_NEW wxCheckBox(this, CDMISC_AUTOPAN     , wxT("Auto Pan"));
+      wxCheckBox* boldOnHover  = DEBUG_NEW wxCheckBox(this, CDMISC_BOLDONHOOVER, wxT("Highlight on hover"));
+      wxCheckBox* zeroCross    = DEBUG_NEW wxCheckBox(this, CDMISC_ZEROCROSS   , wxT("Mark the (0,0) position"));
+
+//   // Pack everything
+   topSizer->Add( markerSizer , 0, wxEXPAND | wxALL, 5);
+   topSizer->Add( gridSizer   , 0, wxEXPAND | wxALL, 5);
+   topSizer->Add( longCursor  , 0, wxEXPAND | wxALL, 5);
+   topSizer->Add( autoPan     , 0, wxEXPAND | wxALL, 5);
+   topSizer->Add( boldOnHover , 0, wxEXPAND | wxALL, 5);
+   topSizer->Add( zeroCross   , 0, wxEXPAND | wxALL, 5);
+//
+   SetSizer(topSizer);
+   topSizer->Fit(this);
+}
+
+void tui::TopedPropertySheets::CanvasPSheet::OnMarkerStep(wxCommandEvent& cmdEvent)
+{
+   wxString ost;
+   ost << wxT("step(")
+       << cmdEvent.GetString()
+       << wxT(");");
+   TpdPost::parseCommand(ost);
+}
+   void tui::TopedPropertySheets::CanvasPSheet::OnMarkerMotion(wxCommandEvent& cmdEvent)
+{
+   byte intVal;
+   switch (cmdEvent.GetInt())
+   {
+      case 0: intVal =  0; break;
+      case 1: intVal = 45; break;
+      case 2: intVal = 90; break;
+      default: assert(false);
+   }
+   wxString ost;
+   ost << wxT("shapeangle(")
+       << intVal
+       << wxT(");");
+   TpdPost::parseCommand(ost);
+}
+
+void tui::TopedPropertySheets::CanvasPSheet::OnGridOn1(wxCommandEvent& cmdEvent)
+{
+   wxString ost;
+   ost << wxT("grid(0, ")
+       << (cmdEvent.GetInt() ? wxT("true") : wxT("false"))
+       << wxT(");");
+   TpdPost::parseCommand(ost);
+}
+
+void tui::TopedPropertySheets::CanvasPSheet::OnGridOn2(wxCommandEvent& cmdEvent)
+{
+   wxString ost;
+   ost << wxT("grid(1, ")
+       << (cmdEvent.GetInt() ? wxT("true") : wxT("false"))
+       << wxT(");");
+   TpdPost::parseCommand(ost);
+}
+
+void tui::TopedPropertySheets::CanvasPSheet::OnGridOn3(wxCommandEvent& cmdEvent)
+{
+   wxString ost;
+   ost << wxT("grid(2, ")
+       << (cmdEvent.GetInt() ? wxT("true") : wxT("false"))
+       << wxT(");");
+   TpdPost::parseCommand(ost);
+}
+
+void tui::TopedPropertySheets::CanvasPSheet::OnGridSet1(wxCommandEvent& cmdEvent)
+{
+   wxString ost;
+   ost << wxT("definegrid(0,")
+       << cmdEvent.GetString()
+       << wxT(",\"white\");");
+   TpdPost::parseCommand(ost);
+}
+
+void tui::TopedPropertySheets::CanvasPSheet::OnGridSet2(wxCommandEvent& cmdEvent)
+{
+   wxString ost;
+   ost << wxT("definegrid(1,")
+       << cmdEvent.GetString()
+       << wxT(",\"white\");");
+   TpdPost::parseCommand(ost);
+}
+
+void tui::TopedPropertySheets::CanvasPSheet::OnGridSet3(wxCommandEvent& cmdEvent)
+{
+   wxString ost;
+   ost << wxT("definegrid(2,")
+       << cmdEvent.GetString()
+       << wxT(",\"white\");");
+   TpdPost::parseCommand(ost);
+}
+
+void tui::TopedPropertySheets::CanvasPSheet::OnLongCorsor(wxCommandEvent& cmdEvent)
+{
+   wxString ost;
+   ost << wxT("longcursor( ")
+       << (cmdEvent.GetInt() ? wxT("true") : wxT("false"))
+       << wxT(" );");
+   TpdPost::parseCommand(ost);
+}
+
+void tui::TopedPropertySheets::CanvasPSheet::OnAutoPan(wxCommandEvent& cmdEvent)
+{
+   wxString ost;
+   ost << wxT("autopan( ")
+       << (cmdEvent.GetInt() ? wxT("true") : wxT("false"))
+       << wxT(" );");
+   TpdPost::parseCommand(ost);
+}
+
+void tui::TopedPropertySheets::CanvasPSheet::OnBoldOnHoover(wxCommandEvent& cmdEvent)
+{
+   wxString ost;
+   ost << wxT("setparams({\"HIGHLIGHT_ON_HOVER\", \"")
+       << (cmdEvent.GetInt() ? wxT("true") : wxT("false"))
+       << wxT("\"});");
+   TpdPost::parseCommand(ost);
+}
+
+void tui::TopedPropertySheets::CanvasPSheet::OnZeroCross(wxCommandEvent& cmdEvent)
+{
+   wxString ost;
+   ost << wxT("zerocross( ")
+       << (cmdEvent.GetInt() ? wxT("true") : wxT("false"))
+       << wxT(" );");
+   TpdPost::parseCommand(ost);
+}
+
+void tui::TopedPropertySheets::CanvasPSheet::update(wxCommandEvent& evt)
+{
+   wxWindow* targetControl;
+   switch (evt.GetId())
+   {
+      case STS_MARKERSTEP:
+         targetControl = FindWindow(CDMARKER_STEP);assert(targetControl);
+         static_cast<wxTextCtrl*>(targetControl)->SetValue(evt.GetString());
+         break;
+      case STS_ANGLE     :
+         targetControl = FindWindow(CDMARKER_MOTION);assert(targetControl);
+         switch (evt.GetInt())
+         {
+            case  0: static_cast<wxRadioBox*>(targetControl)->SetSelection(0); break;
+            case 45: static_cast<wxRadioBox*>(targetControl)->SetSelection(1); break;
+            case 90: static_cast<wxRadioBox*>(targetControl)->SetSelection(2); break;
+            default: assert(false);
+         }
+         break;
+      case STS_GRID0     :
+         targetControl = FindWindow(CDGRID_CBOX1);assert(targetControl);
+         static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt() );
+         break;
+      case STS_GRID1     :
+         targetControl = FindWindow(CDGRID_CBOX2);assert(targetControl);
+         static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt() );
+         break;
+      case STS_GRID2     :
+         targetControl = FindWindow(CDGRID_CBOX3);assert(targetControl);
+         static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt() );
+         break;
+      case STS_GRIDSTEP0 :
+         targetControl = FindWindow(CDGRID_SET1);assert(targetControl);
+         static_cast<wxTextCtrl*>(targetControl)->SetValue(evt.GetString() );
+         break;
+      case STS_GRIDSTEP1 :
+         targetControl = FindWindow(CDGRID_SET2);assert(targetControl);
+         static_cast<wxTextCtrl*>(targetControl)->SetValue(evt.GetString() );
+         break;
+      case STS_GRIDSTEP2 :
+         targetControl = FindWindow(CDGRID_SET3);assert(targetControl);
+         static_cast<wxTextCtrl*>(targetControl)->SetValue(evt.GetString() );
+         break;
+      case STS_CURSOR    :
+         targetControl = FindWindow(CDMISC_LONGCURSOR);assert(targetControl);
+         static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt() );
+         break;
+      case STS_AUTOPAN   :
+         targetControl = FindWindow(CDMISC_AUTOPAN);assert(targetControl);
+         static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt() );
+         break;
+      case STS_HIGHONHOVER :
+         targetControl = FindWindow(CDMISC_BOLDONHOOVER); assert(targetControl);
+         static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt());
+      case STS_ZEROCROSS :
+         targetControl = FindWindow(CDMISC_ZEROCROSS);assert(targetControl);
+         static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt() );
+         break;
    }
 }
