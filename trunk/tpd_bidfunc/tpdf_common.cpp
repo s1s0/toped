@@ -349,9 +349,9 @@ void tellstdfunc::gridON(byte No, bool status)
    status = PROPC->viewGrid(No, status);
    switch (No)
    {
-      case 0: eventGRIDUPD.SetId(tui::STS_GRID0); break;
-      case 1: eventGRIDUPD.SetId(tui::STS_GRID1); break;
-      case 2: eventGRIDUPD.SetId(tui::STS_GRID2); break;
+      case 0: eventGRIDUPD.SetId(tui::CPS_GRID0_ON); break;
+      case 1: eventGRIDUPD.SetId(tui::CPS_GRID1_ON); break;
+      case 2: eventGRIDUPD.SetId(tui::CPS_GRID2_ON); break;
       default: assert(false);
    }
    eventGRIDUPD.SetInt(status ? 1 : 0);
