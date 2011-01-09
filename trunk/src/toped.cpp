@@ -289,19 +289,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMSEL_UNSELECT_ALL  , tui::TopedFrame::OnUnselectAll )
    EVT_MENU( TMSEL_REPORT_SLCTD  , tui::TopedFrame::OnReportSelected )
 
-   EVT_MENU( TMSET_STEP          , tui::TopedFrame::OnStep        )
-   EVT_MENU( TMSET_AUTOPAN       , tui::TopedFrame::OnAutopan     )
    EVT_MENU( TMSET_ALLPROP       , tui::TopedFrame::OnPropertySheet)
-   EVT_MENU( TMSET_GRIDDEF       , tui::TopedFrame::OnGridDefine  )
-   EVT_MENU( TMSET_GRID0         , tui::TopedFrame::OnGrid0       )
-   EVT_MENU( TMSET_GRID1         , tui::TopedFrame::OnGrid1       )
-   EVT_MENU( TMSET_GRID2         , tui::TopedFrame::OnGrid2       )
-   EVT_MENU( TMSET_ZEROCROSS     , tui::TopedFrame::OnZeroCross   )
-
-   EVT_MENU( TMSET_MARKER0       , tui::TopedFrame::OnMarker0     )
-   EVT_MENU( TMSET_MARKER45      , tui::TopedFrame::OnMarker45    )
-   EVT_MENU( TMSET_MARKER90      , tui::TopedFrame::OnMarker90    )
-   EVT_MENU( TMSET_CURLONG       , tui::TopedFrame::OnLongCursor  )
 
    EVT_MENU( TMSET_HTOOLSIZE16   , tui::TopedFrame::OnHToolBarSize16   )
    EVT_MENU( TMSET_HTOOLSIZE24   , tui::TopedFrame::OnHToolBarSize24   )
@@ -619,10 +607,6 @@ void tui::TopedFrame::initMenuBar() {
    //---------------------------------------------------------------------------
    // menuBar entry Settings
    // first the sub menu
-   markerMenu=DEBUG_NEW wxMenu();
-   markerMenu->AppendRadioItem(TMSET_MARKER0    , wxT("Free")      , wxT("Marker is not restricted"));
-   markerMenu->AppendRadioItem(TMSET_MARKER45   , wxT("45 degrees"), wxT("Restrict shape angles to 45 deg"));
-   markerMenu->AppendRadioItem(TMSET_MARKER90   , wxT("Orthogonal"), wxT("Restrict shape angles to 90 deg"));
 
    //Toolbar Size sub menu
    toolbarHorSizeMenu = DEBUG_NEW wxMenu();
@@ -638,19 +622,7 @@ void tui::TopedFrame::initMenuBar() {
    //toolbarVertSizeMenu->AppendRadioItem(TMSET_VTOOLSIZE48   ,   wxT("48x48"), wxT("Vertical toolbars size is 48x48"));
    // now the setting menu itself
    settingsMenu=DEBUG_NEW wxMenu();
-   settingsMenu->Append         (TMSET_STEP     , wxT("Step")      , wxT("Select objects"));
-   settingsMenu->AppendCheckItem(TMSET_AUTOPAN  , wxT("Auto Pan")  , wxT("Automatic window move"));
    settingsMenu->Append         (TMSET_ALLPROP  , wxT("Properties..."), wxT("Toped Properties"));
-   settingsMenu->AppendSeparator();
-   settingsMenu->Append         (TMSET_GRIDDEF  , wxT("Define grid"), wxT("Define/change the grid step"));
-   settingsMenu->AppendCheckItem(TMSET_GRID0    , wxT("Grid 0")    , wxT("Draw/Hide Grid 0"));
-   settingsMenu->AppendCheckItem(TMSET_GRID1    , wxT("Grid 1")    , wxT("Draw/Hide Grid 1"));
-   settingsMenu->AppendCheckItem(TMSET_GRID2    , wxT("Grid 2")    , wxT("Draw/Hide Grid 2"));
-   settingsMenu->AppendSeparator();
-   settingsMenu->AppendCheckItem(TMSET_ZEROCROSS, wxT("Zero Cross"), wxT("Draw/Hide Zero Cross mark"));
-   settingsMenu->AppendSeparator();
-   settingsMenu->Append         (TMSET_MARKER   , wxT("Marker") , markerMenu , wxT("Define marker movement"));
-   settingsMenu->AppendCheckItem(TMSET_CURLONG  , wxT("Long cursor")  , wxT("Stretch the cursor cross"));
    settingsMenu->AppendSeparator();
    settingsMenu->Append         (TMSET_HTOOLSIZE   , wxT("Toolbar size") , toolbarHorSizeMenu , wxT("Define toolbars size"));
    settingsMenu->Append         (TMSET_UNDODEPTH   , wxT("Undo Depth")   , wxT("Change the depth of undo stack"));
@@ -1838,16 +1810,6 @@ void tui::TopedFrame::OnResize(wxCommandEvent& WXUNUSED(event)) {
    delete dlg;
 }
 
-void tui::TopedFrame::OnStep(wxCommandEvent& WXUNUSED(event)) {
-   wxRect wnd = GetRect();
-   wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
-   tui::getStep dlg(this, -1, wxT("Step size"), pos, PROPC->step());
-   if ( dlg.ShowModal() == wxID_OK ) {
-      wxString ost; ost << wxT("step(")<<dlg.value()<<wxT(");");
-      _cmdline->parseCommand(ost);
-   }
-}
-
 void tui::TopedFrame::OnUndoDepth(wxCommandEvent& WXUNUSED(event))
 {
    wxRect wnd = GetRect();
@@ -1889,31 +1851,6 @@ void tui::TopedFrame::OnGridDefine(wxCommandEvent& WXUNUSED(event)) {
       ost << wxT("definegrid(2,")<<dlg.grid2()<<wxT(",\"white\");");
       _cmdline->parseCommand(ost);
    }
-}
-
-void tui::TopedFrame::OnGrid0(wxCommandEvent& WXUNUSED(event)) {
-   wxString ost;
-   ost << wxT("grid(0,") << (settingsMenu->IsChecked(TMSET_GRID0) ? wxT("true") : wxT("false")) << wxT(");");
-   _cmdline->parseCommand(ost);
-}
-
-void tui::TopedFrame::OnGrid1(wxCommandEvent& WXUNUSED(event)){
-   wxString ost;
-   ost << wxT("grid(1,") << (settingsMenu->IsChecked(TMSET_GRID1) ? wxT("true") : wxT("false")) << wxT(");");
-   _cmdline->parseCommand(ost);
-}
-
-void tui::TopedFrame::OnGrid2(wxCommandEvent& WXUNUSED(event)){
-   wxString ost;
-   ost << wxT("grid(2,") << (settingsMenu->IsChecked(TMSET_GRID2) ? wxT("true") : wxT("false")) << wxT(");");
-   _cmdline->parseCommand(ost);
-}
-
-void tui::TopedFrame::OnLongCursor(wxCommandEvent& WXUNUSED(event)){
-  wxString ost;
-  ost << wxT("longcursor(") << (settingsMenu->IsChecked(TMSET_CURLONG) ? wxT("true") : wxT("false")) <<
-  wxT(");");
-  _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnHToolBarSize16(wxCommandEvent& WXUNUSED(event))
@@ -1972,39 +1909,9 @@ void tui::TopedFrame::OnVToolBarSize48(wxCommandEvent& WXUNUSED(event))
    _cmdline->parseCommand(ost);
 }
 
-void tui::TopedFrame::OnAutopan(wxCommandEvent& WXUNUSED(event)){
-   wxString ost;
-   ost << wxT("autopan(")<< (settingsMenu->IsChecked(TMSET_AUTOPAN) ? wxT("true") : wxT("false")) << wxT(");");
-   _cmdline->parseCommand(ost);
-}
-
 void tui::TopedFrame::OnPropertySheet(wxCommandEvent& WXUNUSED(event))
 {
    _propDialog->Show();
-}
-
-void tui::TopedFrame::OnZeroCross(wxCommandEvent& WXUNUSED(event)){
-   wxString ost;
-   ost << wxT("zerocross(")<< (settingsMenu->IsChecked(TMSET_ZEROCROSS) ? wxT("true") : wxT("false")) << wxT(");");
-   _cmdline->parseCommand(ost);
-}
-
-void tui::TopedFrame::OnMarker0(wxCommandEvent& WXUNUSED(event)) {
-   wxString ost;
-   ost << wxT("shapeangle(0);");
-   _cmdline->parseCommand(ost);
-}
-
-void tui::TopedFrame::OnMarker45(wxCommandEvent& WXUNUSED(event)) {
-   wxString ost;
-   ost << wxT("shapeangle(45);");
-   _cmdline->parseCommand(ost);
-}
-
-void tui::TopedFrame::OnMarker90(wxCommandEvent& WXUNUSED(event)) {
-   wxString ost;
-   ost << wxT("shapeangle(90);");
-   _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnDefineLayer(wxCommandEvent& event)

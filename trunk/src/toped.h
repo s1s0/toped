@@ -221,17 +221,7 @@ namespace tui {
       void OnReportSelected(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("report_selected();"));}
       void   OnSelectAll(wxCommandEvent& WXUNUSED(event)) {_cmdline->parseCommand(wxT("select_all();"));}
       //
-      void        OnStep(wxCommandEvent& WXUNUSED(event));
-      void     OnAutopan(wxCommandEvent& WXUNUSED(event));
       void OnPropertySheet(wxCommandEvent& WXUNUSED(event));
-      void   OnZeroCross(wxCommandEvent& WXUNUSED(event));
-      void       OnGrid0(wxCommandEvent& WXUNUSED(event));
-      void       OnGrid1(wxCommandEvent& WXUNUSED(event));
-      void       OnGrid2(wxCommandEvent& WXUNUSED(event));
-      void  OnLongCursor(wxCommandEvent& WXUNUSED(event));
-      void     OnMarker0(wxCommandEvent& WXUNUSED(event));
-      void    OnMarker45(wxCommandEvent& WXUNUSED(event));
-      void    OnMarker90(wxCommandEvent& WXUNUSED(event));
       void OnHToolBarSize16(wxCommandEvent& WXUNUSED(event));
       void OnHToolBarSize24(wxCommandEvent& WXUNUSED(event));
       void OnHToolBarSize32(wxCommandEvent& WXUNUSED(event));
