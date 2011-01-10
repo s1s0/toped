@@ -2225,20 +2225,20 @@ void  browsers::DRCBrowser::addRuleCheck( const wxTreeItemId &rootId,  Calbr::dr
    
    //Save polygons
    long sz = polys->size();
-   for(long i = 1; i <= sz; i++)
+   for(std::vector <Calbr::drcPolygon>::const_iterator it = polys->begin(); it != polys->end(); ++it)
    {
       wxString str;
-      str.Printf(wxT("%d"), i);
+      str.Printf(wxT("%d"), (*it).ordinal());
       _errorBrowser->AppendItem(id, str, -1, -1, DEBUG_NEW DRCItemData(ITEM_ERR_NUM));
    }
 
    //Save Edges
    std::vector <Calbr::drcEdge> *edges = check->edges();
    sz = edges->size();
-   for(long i = 1; i <= sz; i++)
+   for(std::vector <Calbr::drcEdge>::const_iterator it = edges->begin(); it != edges->end(); ++it)
    {
       wxString str;
-      str.Printf(wxT("%d"), i);
+      str.Printf(wxT("%d"), (*it).ordinal());
       _errorBrowser->AppendItem(id, str, -1, -1, DEBUG_NEW DRCItemData(ITEM_ERR_NUM));
    }
 }

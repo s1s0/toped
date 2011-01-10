@@ -655,11 +655,13 @@ void   Calbr::CalbrFile::addRuleCheck(drcRuleCheck* check)
    }
 }
 
-void   Calbr::CalbrFile::showError(const std::string & error, long  number)
+void   Calbr::CalbrFile::showError(const std::string& cell, const std::string& error, long  number)
 {
+   Calbr::cellNameStruct* cellStruct =_cellDRCMap[cell];
+   RuleChecksVector* ruleCheck = &(cellStruct->_RuleChecks);
    edge zoom;
    RuleChecksVector::const_iterator it;
-   for(it = _RuleChecks.begin(); it!= _RuleChecks.end(); ++it)
+   for(it = ruleCheck->begin(); it!= ruleCheck->end(); ++it)
    {
       std::string x = (*it)->ruleCheckName();
       if((*it)->ruleCheckName() == error)
@@ -679,7 +681,7 @@ void   Calbr::CalbrFile::showError(const std::string & error, long  number)
          }
       }
    }
-   assert(it == _RuleChecks.end());
+   assert(it == ruleCheck->end());
 }
 
 

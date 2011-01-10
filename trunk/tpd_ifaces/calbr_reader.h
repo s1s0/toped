@@ -169,7 +169,7 @@ namespace Calbr
          void              readFile();
          void              addResults();
          void              addRuleCheck(drcRuleCheck* check);
-         void              showError(const std::string & error, long  number);
+         void              showError(const std::string & cell, const std::string & error, long  number);
          void              showCluster(const std::string & error);
          void              showAllErrors(void);
          void              hideAllErrors(void);

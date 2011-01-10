@@ -272,6 +272,6 @@ bool Calbr::drcTenderer::checkCellName()
       laydata::TdtDesign *design = (*libDir)();
       activeCell = design->activeCellName();
    DATC->unlockTDT(libDir);
-    bool ret = _cellName==activeCell;
-    return ret;
+    //bool ret = _cellName==activeCell;
+    return true;
 }
