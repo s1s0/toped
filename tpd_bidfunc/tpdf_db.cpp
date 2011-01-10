@@ -1792,7 +1792,15 @@ int tellstdfunc::DRCshowerror::execute()
 {
    long errorNumber = getWordValue();
    std::string errorName = getStringValue();
-   DRCData->showError(errorName, errorNumber);
+
+   laydata::TdtLibDir *libDir;
+   std::string activeCell;
+   DATC->lockTDT(libDir, dbmxs_liblock);
+      laydata::TdtDesign *design = (*libDir)();
+      activeCell = design->activeCellName();
+   DATC->unlockTDT(libDir);
+
+   DRCData->showError(activeCell,errorName, errorNumber);
    return EXEC_NEXT;
 }
 
