@@ -653,7 +653,7 @@ void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event))
    {
    // Context menu here
       wxMenu menu;
-      if ( NULL != Console->puc)
+      if ( NULL != Console->_puc)
       {
          console::ACTIVE_OP currentOp = console::op_none;
          layprop::DrawProperties* drawProp;

@@ -93,9 +93,9 @@ namespace tellstdfunc {
    possible
 2. It is not an operation on the layout type. It should be something
    similar to copy one cell under a new name or to delete a cell. Obviously
-   theese operations (functions) should be called differently.
-3. The idea of "edit" operation is to have a manual oportunity to change the
-   layout objects. It will be extremely usefull for text/ref/aref objects in
+   these operations (functions) should be called differently.
+3. The idea of "edit" operation is to have a manual opportunity to change the
+   layout objects. It will be extremely useful for text/ref/aref objects in
    order to change the text/cell. Changing the layer will be possible
    via this operation.
 

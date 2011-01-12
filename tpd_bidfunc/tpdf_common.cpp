@@ -99,7 +99,7 @@ bool tellstdfunc::waitGUInput(int input_type, telldata::operandSTACK *OPstack,
    eventMOUSEIN.SetExtraLong(1);
    wxPostEvent(TopedCanvasW, eventMOUSEIN);
    // force the thread in wait condition until the ted_prompt has our data
-   Console->threadWaits4->Wait();
+   Console->_threadWaits4->Wait();
    // ... and continue when the thread is woken up
    // Delete the temporary object in the TdtDesign
    DATC->mouseStop();
