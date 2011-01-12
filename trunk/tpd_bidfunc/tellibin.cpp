@@ -311,7 +311,7 @@ int tellstdfunc::getPOINT::execute() {
    // the operand stack
    Console->waitGUInput(&OPstack, console::op_point, CTM());
    // force the thread in wait condition until the ted_prompt has our data
-   Console->threadWaits4->Wait();
+   Console->_threadWaits4->Wait();
    // ... and continue when the thread is woken up
    if (Console->mouseIN_OK())  return EXEC_NEXT;
    else return EXEC_RETURN;
@@ -332,7 +332,7 @@ int tellstdfunc::getPOINTLIST::execute() {
    eventMOUSEIN.SetExtraLong(1);
    wxPostEvent(TopedCanvasW, eventMOUSEIN);
    // force the thread in wait condition until the ted_prompt has our data
-   Console->threadWaits4->Wait();
+   Console->_threadWaits4->Wait();
    // ... and continue when the thread is woken up
    eventMOUSEIN.SetExtraLong(0);
    wxPostEvent(TopedCanvasW, eventMOUSEIN);
@@ -353,7 +353,7 @@ int tellstdfunc::stdEXEC::execute()
    if (_threadExecution)
    {
       Console->waitExternal(wxString(extCmd.c_str(), wxConvUTF8));
-      Console->threadWaits4->Wait();
+      Console->_threadWaits4->Wait();
    }
    else
    {

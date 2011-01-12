@@ -62,6 +62,21 @@ namespace console {
       wxString                  exp;
    };
 
+   class parse_thread : public wxThread
+   {
+   public:
+                              parse_thread(wxWindow* canvas_wnd, wxThreadKind kind=wxTHREAD_DETACHED);
+      void                    setCommand(const wxString& str) {_command = str;}
+      wxCondition*            mutexCondition()                { return _mutexCondition;}
+      wxMutex                 _mutex;
+   protected:
+      void*                   Entry();
+      void                    OnExit();
+      wxString                _command;
+      wxWindow*               _canvas_wnd;
+      wxCondition*            _mutexCondition;
+   };
+
    class ted_cmd : public wxTextCtrl {
    public:
                               ted_cmd(wxWindow*, wxWindow*);
@@ -70,8 +85,8 @@ namespace console {
       void                    waitGUInput(telldata::operandSTACK*,console::ACTIVE_OP, const CTM&);
       void                    waitExternal(wxString);
       void                    getGUInput(bool from_keyboard = true);
-      wxCondition*            threadWaits4;
-      miniParser*             puc; // parse user coordinates
+      wxCondition*            _threadWaits4;
+      miniParser*             _puc; // parse user coordinates
 
       void                    getCommand(bool);
       bool                    mouseIN_OK() const            {return _mouseIN_OK;};
@@ -82,11 +97,12 @@ namespace console {
       void                    setExitRequest(bool val)      { _exitRequested = val;}
       bool                    exitRequested() const         { return _exitRequested;}
       bool                    cmdHistoryExists() const      {return !_cmd_history.empty();}
-      void                    spawnParseThread(wxString);
       void                    addTllIncludePath(wxString path){ _tllIncludePath.Add(path);}
       void                    addTllEnvList(wxString pvar)  { _tllIncludePath.AddEnvList(pvar);}
       bool                    findTellFile(const char*, std::string&);
    private:
+      void                    spawnTellThread(/*wxString*/);
+      void                    runTellCommand(const wxString&);
       void                    onParseCommand(wxCommandEvent&);
       void                    onGetCommand(wxCommandEvent& WXUNUSED(event));
       void                    onKeyUP(wxKeyEvent&);
@@ -107,21 +123,8 @@ namespace console {
       bool                    _execExternal;
       bool                    _exitRequested;
       wxPathList              _tllIncludePath;
+      parse_thread*           _tellThread;
       DECLARE_EVENT_TABLE();
-   };
-
-   class parse_thread : public wxThread
-   {
-   public:
-      parse_thread(wxString& cmd, wxWindow* canvas_wnd, wxThreadKind kind=wxTHREAD_DETACHED):
-                  wxThread(kind),command(cmd), _canvas_wnd(canvas_wnd){};
-      friend ted_cmd::ted_cmd( wxWindow*, wxWindow*);
-      friend void ted_cmd::spawnParseThread(wxString);
-   protected:
-      void*                   Entry();
-      wxString                command;
-      wxWindow*               _canvas_wnd;
-      static wxMutex          _mutex;
    };
 }
 #endif

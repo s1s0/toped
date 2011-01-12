@@ -62,7 +62,7 @@ extern const wxEventType         wxEVT_TOOLBARDEF;
 extern const wxEventType         wxEVT_TOOLBARADDITEM;
 extern const wxEventType         wxEVT_TOOLBARDELETEITEM;
 extern const wxEventType         wxEVT_EDITLAYER;
-extern const wxEventType         wxEVT_QUITAPP;
+extern const wxEventType         wxEVT_EXITAPP;
 extern const wxEventType         wxEVT_EXECEXT;
 extern const wxEventType         wxEVT_EXECEXTPIPE;
 extern const wxEventType         wxEVT_EXECEXTDONE;
@@ -330,12 +330,12 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARDELETEITEM, wxID_ANY, tui::TopedFrame::OnToolBarDeleteItem)
    EVT_TECUSTOM_COMMAND(wxEVT_EDITLAYER, wxID_ANY, tui::TopedFrame::OnEditLayer )
    EVT_TEXT_MAXLEN(ID_WIN_TXT_LOG, tui::TopedFrame::OnTextLogOverflow)
-   EVT_TECUSTOM_COMMAND(wxEVT_QUITAPP, wxID_ANY, tui::TopedFrame::OnQuit)
+   EVT_TECUSTOM_COMMAND(wxEVT_EXITAPP, wxID_ANY, tui::TopedFrame::OnExit)
    EVT_TECUSTOM_COMMAND(wxEVT_EXECEXT, wxID_ANY, tui::TopedFrame::OnExecExt)
    EVT_TECUSTOM_COMMAND(wxEVT_EXECEXTPIPE, wxID_ANY, tui::TopedFrame::OnExecExtTextEnter)
 END_EVENT_TABLE()
 
-// See the FIXME note in the bootom of browsers.cpp
+// See the FIXME note in the botom of browsers.cpp
 //   EVT_COMMAND(wxID_ANY, wxEVT_INIT_DIALOG , tui::TopedFrame::OnDefineLayer )
 
 tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos,
@@ -887,6 +887,12 @@ void tui::TopedFrame::OnExecExtTextEnter(wxCommandEvent& event)
 }
 
 void tui::TopedFrame::OnQuit( wxCommandEvent& WXUNUSED( event ) ) {
+   wxString ost;
+   ost << wxT("exit();");
+   _cmdline->parseCommand(ost);
+}
+
+void tui::TopedFrame::OnExit( wxCommandEvent& WXUNUSED( event ) ) {
    Close(FALSE);
 }
 

@@ -35,10 +35,6 @@
 #include "tell_yacc.h"
 
 //-----------------------------------------------------------------------------
-// Some static members
-//-----------------------------------------------------------------------------
-wxMutex          console::parse_thread::_mutex;
-//-----------------------------------------------------------------------------
 // Some external definitions
 //-----------------------------------------------------------------------------
 //??? I need help in this place
@@ -281,66 +277,73 @@ bool console::miniParser::getList() {
 }
 
 //==============================================================================
+console::parse_thread::parse_thread(wxWindow* canvas_wnd, wxThreadKind kind):
+      wxThread       ( kind                         ),
+      _canvas_wnd    ( canvas_wnd                   ),
+      _mutexCondition( DEBUG_NEW wxCondition(_mutex))
+{}
+
 void* console::parse_thread::Entry()
 {
-//   wxLogMessage(_T("Mouse is %s (%ld, %ld)"), where.c_str(), x, y);
-//   wxLogMessage(_T("Mutex try to lock..."));
-
-   wxMutexError result = _mutex.TryLock();
-   if (wxMUTEX_BUSY == result)
+   if (wxMUTEX_DEAD_LOCK == _mutex.Lock())
    {
-      // Don't pile-up commands(threads). If previous command
-      // didn't finish leave the thread immediately.
-      // This check can't be done in the main thread. See the comment
-      // in ted_cmd::spawnParseThread below
-      tell_log( MT_WARNING, "Busy. Command above skipped");
+      tell_log(console::MT_ERROR, "TELL Mutex found deadlocked on Entry!");
       return NULL;
    }
-   telllloc.first_column = telllloc.first_line = 1;
-   telllloc.last_column  = telllloc.last_line  = 1;
-   telllloc.filename = NULL;
-   parsercmd::cmdSTDFUNC::setThreadExecution(true);
-   TpdPost::toped_status(TSTS_THREADON, command);
+   do {
+      _mutexCondition->Wait();
 
-#ifdef PARSER_PROFILING
-      HiResTimer profTimer;
-#endif
-   try {
-      void* b = tell_scan_string( command.mb_str(wxConvUTF8) );
-      tellparse();
-      delete_tell_lex_buffer( b );
-   }
-   catch (EXPTNtell_parser)
-   {
-      // Not sure we can make something here.flex has thrown an exception
-      // but it could be the file system or dynamic memory
-      //@TODO check for available dynamic memory
-   }
-#ifdef PARSER_PROFILING
-      profTimer.report("Time elapsed by the last parser run: ");
-#endif
-   _mutex.Unlock();
-   if (Console->exitRequested())
-   {
-      Console->setExitRequest(false);
-      TpdPost::quitApp(true);
-   }
-   else
-   {
-      if (Console->canvas_invalid())
-      {
-         wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
-         eventZOOM.SetInt(tui::ZOOM_REFRESH);
-         wxPostEvent(_canvas_wnd, eventZOOM);
-         Console->set_canvas_invalid(false);
+      telllloc.first_column = telllloc.first_line = 1;
+      telllloc.last_column  = telllloc.last_line  = 1;
+      telllloc.filename = NULL;
+      parsercmd::cmdSTDFUNC::setThreadExecution(true);
+      TpdPost::toped_status(TSTS_THREADON, _command);
+
+   #ifdef PARSER_PROFILING
+         HiResTimer profTimer;
+   #endif
+      try {
+         void* b = tell_scan_string(_command.mb_str(wxConvUTF8) );
+         tellparse();
+         delete_tell_lex_buffer( b );
       }
-      TpdPost::toped_status(TSTS_THREADOFF);
-   //   wxLogMessage(_T("Mutex unlocked"));
-   }
-   parsercmd::cmdSTDFUNC::setThreadExecution(false);
+      catch (EXPTNtell_parser)
+      {
+         // Not sure we can make something here.flex has thrown an exception
+         // but it could be the file system or dynamic memory
+         //@TODO check for available dynamic memory
+      }
+   #ifdef PARSER_PROFILING
+         profTimer.report("Time elapsed by the last parser run: ");
+   #endif
+      if (Console->exitRequested())
+      {
+         Console->setExitRequest(false);
+         TpdPost::quitApp(true);
+         break;
+      }
+      else
+      {
+         if (Console->canvas_invalid())
+         {
+            wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+            eventZOOM.SetInt(tui::ZOOM_REFRESH);
+            wxPostEvent(_canvas_wnd, eventZOOM);
+            Console->set_canvas_invalid(false);
+         }
+         TpdPost::toped_status(TSTS_THREADOFF);
+      }
+      parsercmd::cmdSTDFUNC::setThreadExecution(false);
+   } while(true);
+
+   _mutex.Unlock();
    return NULL;
 };
 
+void console::parse_thread::OnExit()
+{
+   delete _mutexCondition;
+}
 
 //==============================================================================
 // The ted_cmd event table
@@ -353,17 +356,16 @@ END_EVENT_TABLE()
 //==============================================================================
 console::ted_cmd::ted_cmd(wxWindow *parent, wxWindow *canvas) :
       wxTextCtrl( parent, tui::ID_CMD_LINE, wxT(""), wxDefaultPosition, wxDefaultSize,
-                  wxTE_PROCESS_ENTER | wxNO_BORDER), puc(NULL), _numpoints(0)
+                  wxTE_PROCESS_ENTER | wxNO_BORDER), _puc(NULL), _numpoints(0)
 {
    _canvas = canvas;
    _exitRequested = false;
    _execExternal  = false;
-   threadWaits4 = DEBUG_NEW wxCondition(parse_thread::_mutex);
-   VERIFY(threadWaits4->IsOk());
    _mouseIN_OK = true;
    Console = this;
    _history_position = _cmd_history.begin();
    _canvas_invalid = false;
+   spawnTellThread();
 };
 
 // Note! getCommand and onGetCommand should be overloaded methods, however
@@ -376,7 +378,7 @@ console::ted_cmd::ted_cmd(wxWindow *parent, wxWindow *canvas) :
    log window and spawns the tell parser in a new thread                   */
 void console::ted_cmd::onGetCommand(wxCommandEvent& WXUNUSED(event))
 {
-   if (puc)  getGUInput(); // run the local GUInput parser
+   if (_puc)  getGUInput(); // run the local GUInput parser
    else if (_execExternal)
    {
       TpdPost::execPipe(GetValue());
@@ -389,13 +391,13 @@ void console::ted_cmd::onGetCommand(wxCommandEvent& WXUNUSED(event))
       _history_position = _cmd_history.end();
       Clear();
 
-      spawnParseThread(command);
+      runTellCommand(command);
    }
 }
 
 void console::ted_cmd::getCommand(bool thread)
 {
-   if (puc)  getGUInput(); // run the local GUInput parser
+   if (_puc)  getGUInput(); // run the local GUInput parser
    else
    {
       wxString command = GetValue();
@@ -426,12 +428,12 @@ void console::ted_cmd::getCommand(bool thread)
          assert(!exitRequested());
       }
       else
-         spawnParseThread(command);
+         runTellCommand(command);
    }
 }
 
 
-void console::ted_cmd::spawnParseThread(wxString command)
+void console::ted_cmd::spawnTellThread(/*wxString command*/)
 {
    // executing the parser in a separate thread
    //wxTHREAD_JOINABLE, wxTHREAD_DETACHED
@@ -459,14 +461,36 @@ void console::ted_cmd::spawnParseThread(wxString command)
    // a single mutex? This part I don't understand.
    //
 
-   parse_thread *pthrd = DEBUG_NEW parse_thread(command, _canvas);
-   wxThreadError result = pthrd->Create();
+   _tellThread = DEBUG_NEW parse_thread(/*command, */_canvas);
+   _threadWaits4 = _tellThread->mutexCondition();
+   VERIFY(_threadWaits4->IsOk());
+
+   wxThreadError result = _tellThread->Create();
    if (wxTHREAD_NO_ERROR == result)
-      pthrd->Run();
+      _tellThread->Run();
    else
    {
       tell_log( MT_ERROR, "Can't execute the command in a separate thread");
       //delete(pthrd);
+   }
+}
+
+void console::ted_cmd::runTellCommand(const wxString& cmd)
+{
+   wxMutexError result = _tellThread->_mutex.TryLock();
+   if (wxMUTEX_BUSY == result)
+   {
+      // Don't pile-up commands(threads). If previous command
+      // didn't finish leave the thread immediately.
+      // This check can't be done in the main thread. See the comment
+      // in ted_cmd::spawnParseThread below
+      tell_log( MT_WARNING, "Busy. Command above skipped");
+   }
+   else
+   {
+      _tellThread->setCommand(cmd);
+      _tellThread->_mutex.Unlock();
+      _threadWaits4->Signal();
    }
 }
 
@@ -479,14 +503,14 @@ void console::ted_cmd::spawnParseThread(wxString command)
 // is called directly
 void console::ted_cmd::onParseCommand(wxCommandEvent& event)
 {
-   if (NULL != puc) return; // don't accept commands during shape input sessions
+   if (NULL != _puc) return; // don't accept commands during shape input sessions
    SetValue(event.GetString());
    getCommand(true);
 }
 
 void console::ted_cmd::parseCommand(wxString cmd, bool thread)
 {
-   if (NULL != puc) return; // don't accept commands during shape input sessions
+   if (NULL != _puc) return; // don't accept commands during shape input sessions
    SetValue(cmd);
    getCommand(thread);
 }
@@ -529,7 +553,7 @@ void console::ted_cmd::waitGUInput(telldata::operandSTACK *clst, console::ACTIVE
       case console::op_tbind  : ttype = telldata::tn_bnd; break;
       default:ttype = TLISTOF(telldata::tn_pnt); break;
    }
-   puc = DEBUG_NEW miniParser(clst, ttype);
+   _puc = DEBUG_NEW miniParser(clst, ttype);
    _numpoints = 0;
    _initrans = _translation = trans;
    _mouseIN_OK = true;
@@ -562,13 +586,13 @@ void console::ted_cmd::getGUInput(bool from_keyboard) {
    }
    else   command = _guinput;
    //parse the data from the prompt
-   if (puc->getGUInput(command)) {
+   if (_puc->getGUInput(command)) {
       //if the proper pattern was found
       Disconnect(-1, wxEVT_COMMAND_ENTER);
-      delete puc; puc = NULL;
+      delete _puc; _puc = NULL;
       _mouseIN_OK = true;
       // wake-up the thread expecting this data
-      threadWaits4->Signal();
+      _threadWaits4->Signal();
    }
    else {
       tell_log(MT_ERROR, "Bad input data, Try again...");
@@ -587,12 +611,12 @@ void console::ted_cmd::onGUInput(wxCommandEvent& evt)
       case -2: cancelLastPoint();break;
       case -1:   // abort current  mouse input
          Disconnect(-1, wxEVT_COMMAND_ENTER);
-         delete puc; puc = NULL;
+         delete _puc; _puc = NULL;
          _mouseIN_OK = false;
          tell_log(MT_WARNING, "input aborted");
          tell_log(MT_EOL);
          // wake-up the thread expecting this data
-         threadWaits4->Signal();
+         _threadWaits4->Signal();
          break;
       case  0:  {// left mouse button
          telldata::ttpnt* p = static_cast<telldata::ttpnt*>(evt.GetClientData());
@@ -614,7 +638,7 @@ void console::ted_cmd::onExternalDone(wxCommandEvent& evt)
 {
    Disconnect(-1, wxEVT_EXECEXTDONE);
    _execExternal = false;
-   threadWaits4->Signal();
+   _threadWaits4->Signal();
 }
 
 void console::ted_cmd::mouseLB(const telldata::ttpnt& p) {
@@ -623,7 +647,7 @@ void console::ted_cmd::mouseLB(const telldata::ttpnt& p) {
    ost1 << wxT("{ ")<< p.x() << wxT(" , ") << p.y() << wxT(" }");
    // take care about the entry brackets ...
    if (_numpoints == 0)
-      switch (puc->wait4type()) {
+      switch (_puc->wait4type()) {
          case TLISTOF(telldata::tn_pnt):
          case         telldata::tn_box : ost2 << wxT("{ ") << ost1; break;
          case         telldata::tn_bnd :
@@ -650,21 +674,21 @@ void console::ted_cmd::mouseLB(const telldata::ttpnt& p) {
    // actualize the number of points entered
    _numpoints++;
    // If there is nothing else to wait ... call end of mouse input
-   if (((_numpoints == 1) && ((telldata::tn_pnt == puc->wait4type()) ||
-                              (telldata::tn_bnd == puc->wait4type())   ))
-   ||  ((_numpoints == 2) &&  (telldata::tn_box == puc->wait4type())   ))
+   if (((_numpoints == 1) && ((telldata::tn_pnt == _puc->wait4type()) ||
+                              (telldata::tn_bnd == _puc->wait4type())   ))
+   ||  ((_numpoints == 2) &&  (telldata::tn_box == _puc->wait4type())   ))
       mouseRB();
 }
 
 void console::ted_cmd::mouseRB() {
    // End of input is not accepted if ...
    if ( (_numpoints == 0) || ((_numpoints == 1)                      &&
-                              (telldata::tn_pnt != puc->wait4type()) &&
-                              (telldata::tn_bnd != puc->wait4type())    )
+                              (telldata::tn_pnt != _puc->wait4type()) &&
+                              (telldata::tn_bnd != _puc->wait4type())    )
       ) return;
    // put the proper closing bracket
    wxString close;
-   switch (puc->wait4type()) {
+   switch (_puc->wait4type()) {
       case TLISTOF(telldata::tn_pnt):
       case         telldata::tn_box : close = wxT(" }"); break;
       default         : close = wxT("")  ;
@@ -709,6 +733,9 @@ bool console::ted_cmd::findTellFile(const char* fname, std::string& validName)
    return false;
 }
 
-console::ted_cmd::~ted_cmd() {
-   delete threadWaits4; _cmd_history.clear();
+console::ted_cmd::~ted_cmd()
+{
+   _cmd_history.clear();
+   // Because we're using detachable threads - the thread is supposed to delet itself
+   // delete _tellThread
 }
