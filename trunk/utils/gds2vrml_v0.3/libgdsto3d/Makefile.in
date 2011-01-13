@@ -74,7 +74,7 @@ am_libgdsto3d_la_OBJECTS = config_cfg.lo gdsobject.lo gdsparse.lo \
 	gdspath.lo gdstext.lo process_cfg.lo
 libgdsto3d_la_OBJECTS = $(am_libgdsto3d_la_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
-depcomp = $(SHELL) $(top_srcdir)/depcomp
+depcomp = $(SHELL) $(top_srcdir)/../../depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
