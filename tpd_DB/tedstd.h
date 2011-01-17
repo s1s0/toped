@@ -451,7 +451,7 @@ class LayerCrossMap {
                                                          {assert(false); return false;}
       virtual bool            mapTdtLay(laydata::TdtCell*,const std::string&)
                                                          {assert(false); return false;}
-      virtual std::string     printSrcLayer() const      {assert(false); return false;}
+      virtual std::string     printSrcLayer() const      {assert(false); return std::string("");}
    protected:
       word                    _tdtLayNumber  ; //! Current layer number
       laydata::QTreeTmp*      _tmpLayer      ; //! Current target layer

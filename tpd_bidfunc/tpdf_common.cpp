@@ -89,7 +89,7 @@ bool tellstdfunc::waitGUInput(int input_type, telldata::operandSTACK *OPstack,
 {
    // Create a temporary object in the TdtDesign (only if a DEBUG_NEW object is created, i.e. box,wire,polygon,cell etc.)
    try {DATC->mouseStart(input_type, name, trans, stepX, stepY, cols, rows);}
-   catch (EXPTN) {return false;}
+   catch (EXPTN&) {return false;}
    // flag the prompt what type of data is expected & handle a pointer to
    // the operand stack
    Console->waitGUInput(OPstack, (console::ACTIVE_OP)input_type, trans);

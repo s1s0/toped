@@ -307,7 +307,7 @@ void* console::parse_thread::Entry()
          tellparse();
          delete_tell_lex_buffer( b );
       }
-      catch (EXPTNtell_parser)
+      catch (EXPTNtell_parser&)
       {
          // Not sure we can make something here.flex has thrown an exception
          // but it could be the file system or dynamic memory
@@ -417,7 +417,7 @@ void console::ted_cmd::getCommand(bool thread)
             tellparse();
             delete_tell_lex_buffer( b );
          }
-         catch (EXPTNtell_parser)
+         catch (EXPTNtell_parser&)
          {
             // Not sure we can make something here.flex has thrown an exception
             // but it could be the file system or dynamic memory
