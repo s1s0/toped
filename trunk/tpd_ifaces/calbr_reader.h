@@ -195,12 +195,12 @@ namespace Calbr
          drcRuleCheck*     _curRuleCheck;
          std::string       _curRuleCheckName;
          RuleChecksVector  _RuleChecks;
-			CellDRCMap			_cellDRCMap;
+         CellDRCMap        _cellDRCMap;
          bool              _ok;
+         drcRenderer*      _render;
          bool              _isCellNameMode;
          std::string       _curCellName; //use for CellNameMode;
          edge              _border;
-         drcRenderer*      _render;
    };
 
    wxString convert(int number, long precision);

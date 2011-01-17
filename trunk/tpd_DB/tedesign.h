@@ -38,9 +38,9 @@ namespace laydata {
                         TdtLibrary(std::string, real, real, int);
       virtual          ~TdtLibrary();
       virtual void      read(InputTdtFile* const);
-      void              GDSwrite(DbExportFile&);
-      void              CIFwrite(DbExportFile&);
-      void              PSwrite(PSFile&, const TdtCell*, const layprop::DrawProperties&);
+      void              gdsWrite(DbExportFile&);
+      void              cifWrite(DbExportFile&);
+      void              psWrite(PSFile&, const TdtCell*, const layprop::DrawProperties&);
       TdtDefaultCell*   checkCell(std::string name, bool undeflib = false);
       void              recreateHierarchy(const laydata::TdtLibDir* );
       void              registerCellRead(std::string, TdtCell*);
@@ -138,7 +138,6 @@ namespace laydata {
       AtticList*     changeRef(ShapeList*, std::string);
       //
       void           collectParentCells(std::string&, CellDefList&);
-      void           checkActive(); //TODO remove this function
       bool           checkActiveCell();
       bool           checkValidRef(std::string);
       void           fixUnsorted();
@@ -188,7 +187,7 @@ namespace laydata {
    The decision to allow undefined structures seemed to be a good idea having in
    mind the it is legal in GDS to have references to undefined structures. The
    next argument was the introduction of the libraries. Having an undefined
-   cell structure it would be stupid not to allow simple operations whith it. For
+   cell structure it would be stupid not to allow simple operations with it. For
    example to define it, or simply to delete the reference to it. Right? (they say
    that the road to hell is covered with roses). When I've started the
    implementation, then I realized that UNDEFCELL_LIB shall have quite different

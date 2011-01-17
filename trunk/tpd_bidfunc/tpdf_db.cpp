@@ -646,7 +646,7 @@ int tellstdfunc::GDSexportLIB::execute()
          laydata::TdtDesign* tDesign = (*dbLibDir)();
          LayerMapExt default_map(gdsLays, NULL);
          GDSin::GdsExportFile gdsex(filename, NULL, default_map, true);
-         tDesign->GDSwrite(gdsex);
+         tDesign->gdsWrite(gdsex);
       }
       DATC->unlockTDT(dbLibDir, true);
       LogFile << LogFile.getFN() << "( "
@@ -704,7 +704,7 @@ int tellstdfunc::GDSexportTOP::execute()
          {
             LayerMapExt default_map(gdsLays, NULL);
             GDSin::GdsExportFile gdsex(filename, excell, default_map, recur/*, x2048*/);
-            tDesign->GDSwrite(gdsex);
+            tDesign->gdsWrite(gdsex);
             LogFile  << LogFile.getFN()
                      << "(\""<< cellname << "\","
                      << LogFile._2bool(recur) << ", "
@@ -806,7 +806,7 @@ int tellstdfunc::PSexportTOP::execute()
             {
                PSFile psex(filename);
                drawProp->psWrite(psex);
-               tDesign->PSwrite(psex, excell, *drawProp);
+               tDesign->psWrite(psex, excell, *drawProp);
                LogFile << LogFile.getFN() << "(\""<< cellname << "\","
                                           << ",\"" << filename << "\");";
                LogFile.flush();
@@ -1245,7 +1245,7 @@ int tellstdfunc::CIFexportLIB::execute()
       {
          laydata::TdtDesign* tDesign = (*dbLibDir)();
          CIFin::CifExportFile cifex(filename, NULL, cifLays, true, verbose);
-         tDesign->CIFwrite(cifex);
+         tDesign->cifWrite(cifex);
          LogFile << LogFile.getFN() << "( "
                  << (*lll) << ", \""
                  << filename << "\", "
@@ -1303,7 +1303,7 @@ int tellstdfunc::CIFexportTOP::execute()
          if (NULL != excell)
          {
             CIFin::CifExportFile cifex(filename, excell, cifLays, recur, verbose);
-            tDesign->CIFwrite(cifex);
+            tDesign->cifWrite(cifex);
             LogFile << LogFile.getFN() << "( \""
                     << cellname << "\", "
                     << LogFile._2bool(recur) << ", "

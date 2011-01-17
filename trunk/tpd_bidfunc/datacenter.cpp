@@ -552,7 +552,6 @@ void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,
    if (lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      tDesign->checkActive();
       switch (input_type)
       {
          case console::op_dbox:   tDesign->setTmpData( DEBUG_NEW laydata::TdtTmpBox()  ); break;

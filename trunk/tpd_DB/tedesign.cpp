@@ -161,7 +161,7 @@ void laydata::TdtLibrary::registerCellRead(std::string cellname, TdtCell* cell) 
    _cells[cellname] = cell;
 }
 
-void laydata::TdtLibrary::GDSwrite(DbExportFile& gdsf)
+void laydata::TdtLibrary::gdsWrite(DbExportFile& gdsf)
 {
    TpdTime timelu(_lastUpdated);
    gdsf.libraryStart(name(), timelu, DBU(), UU());
@@ -183,7 +183,7 @@ void laydata::TdtLibrary::GDSwrite(DbExportFile& gdsf)
    gdsf.libraryFinish();
 }
 
-void laydata::TdtLibrary::CIFwrite(DbExportFile& ciff)
+void laydata::TdtLibrary::cifWrite(DbExportFile& ciff)
 {
    TpdTime timelu(_lastUpdated);
    ciff.libraryStart(name(), timelu, DBU(), UU());
@@ -203,7 +203,7 @@ void laydata::TdtLibrary::CIFwrite(DbExportFile& ciff)
    }
 }
 
-void laydata::TdtLibrary::PSwrite(PSFile& psf, const TdtCell* top, const layprop::DrawProperties& drawprop)
+void laydata::TdtLibrary::psWrite(PSFile& psf, const TdtCell* top, const layprop::DrawProperties& drawprop)
 {
    laydata::TDTHierTree* root_cell = _hiertree->GetMember(top);
    if (psf.hier())
@@ -450,7 +450,7 @@ int laydata::TdtLibDir::loadLib(std::string filename)
    {
       tempin.read(libRef);
    }
-   catch (EXPTNreadTDT)
+   catch (EXPTNreadTDT&)
    {
       tempin.closeStream();
       tempin.cleanup();
@@ -539,7 +539,7 @@ bool laydata::TdtLibDir::readDesign(std::string filename)
    {
       tempin.read(TARGETDB_LIB);
    }
-   catch (EXPTNreadTDT)
+   catch (EXPTNreadTDT&)
    {
       tempin.closeStream();
       tempin.cleanup();
@@ -1648,11 +1648,6 @@ DBbox laydata::TdtDesign::getVisibleOverlap(layprop::DrawProperties& prop)
    if (ovl == DEFAULT_OVL_BOX) return activeOverlap();
    else return ovl;
 }
-
-void laydata::TdtDesign::checkActive()
-{
-   if (NULL == _target.edit()) throw EXPTNactive_cell();
-};
 
 bool laydata::TdtDesign::checkActiveCell()
 {
