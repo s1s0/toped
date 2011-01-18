@@ -1831,7 +1831,6 @@ BEGIN_EVENT_TABLE(browsers::LayerBrowser, wxPanel)
    EVT_BUTTON(tui::BT_LAYER_SAVE_ST   , browsers::LayerBrowser::onSaveState)
    EVT_BUTTON(tui::BT_LAYER_LOAD_ST   , browsers::LayerBrowser::onLoadState)
    EVT_TECUSTOM_COMMAND(wxEVT_CMD_BROWSER, wxID_ANY, browsers::LayerBrowser::onCommand)
-   EVT_SIZE(browsers::LayerBrowser::OnSize)
 END_EVENT_TABLE()
 //====================================================================
 

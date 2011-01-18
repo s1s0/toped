@@ -718,14 +718,19 @@ void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event))
       else
       { // no user input expected
          unsigned numSelected = 0;
+         bool skipContextMenu = false;
          laydata::TdtLibDir* dbLibDir = NULL;
          if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
          {
             laydata::TdtDesign* tDesign = (*dbLibDir)();
             numSelected = tDesign->numSelected();
          }
+         else
+         {
+            skipContextMenu = true;
+         }
          DATC->unlockTDT(dbLibDir);
-
+         if (skipContextMenu) return;
          if (Console->cmdHistoryExists())
          {
             menu.Append(   CM_AGAIN, wxString(Console->lastCommand(), wxConvUTF8));
@@ -793,12 +798,15 @@ void tui::LayoutCanvas::OnMouseLeftDClick(wxMouseEvent& event)
 
 void tui::LayoutCanvas::OnMouseMiddleUp(wxMouseEvent& event)
 {
-   TP s_ScrMARK = _ScrMark * _LayCTM.Reversed();
-   wxMenu menu;
-   menu.Append(TMVIEW_ZOOMALL     , wxT("Zoom All"));
-   menu.Append(TMVIEW_ZOOMVISIBLE , wxT("Zoom Visible"));
-   menu.Append(TMVIEW_PANCENTER   , wxT("Pan Center"));
-   PopupMenu(&menu, wxPoint(s_ScrMARK.x(), s_ScrMARK.y()));
+   if (DATC->checkActiveCell())
+   {
+      TP s_ScrMARK = _ScrMark * _LayCTM.Reversed();
+      wxMenu menu;
+      menu.Append(TMVIEW_ZOOMALL     , wxT("Zoom All"));
+      menu.Append(TMVIEW_ZOOMVISIBLE , wxT("Zoom Visible"));
+      menu.Append(TMVIEW_PANCENTER   , wxT("Pan Center"));
+      PopupMenu(&menu, wxPoint(s_ScrMARK.x(), s_ScrMARK.y()));
+   }
 }
 
 void tui::LayoutCanvas::OnMouseWheel(wxMouseEvent& event)
