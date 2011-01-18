@@ -62,6 +62,7 @@ public:
    void                       unlockGds(ForeignDbFile*&, bool throwexception = false);
    void                       unlockCif(ForeignDbFile*&, bool throwexception = false);
    void                       unlockOas(ForeignDbFile*& oasis_db, bool throwexception = false);
+   bool                       checkActiveCell();
    void                       bpRefreshTdtTab(bool, bool);
    void                       bpAddGdsTab(bool);
    void                       bpAddCifTab(bool);

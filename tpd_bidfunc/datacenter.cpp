@@ -95,7 +95,7 @@ bool DataCenter::GDSparse(std::string filename)
       profTimer.report("Time elapsed for GDS parse: ");
 #endif
    }
-   catch (EXPTNreadGDS)
+   catch (EXPTNreadGDS&)
    {
       TpdPost::toped_status(console::TSTS_PRGRSBAROFF);
       status = false;
@@ -158,7 +158,7 @@ bool DataCenter::CIFparse(std::string filename)
    {
       ACIFDB = DEBUG_NEW CIFin::CifFile(wxString(filename.c_str(), wxConvUTF8));
    }
-   catch (EXPTNcif_parser)
+   catch (EXPTNcif_parser&)
    {
       TpdPost::toped_status(console::TSTS_PRGRSBAROFF);
       status = false;
@@ -229,7 +229,7 @@ bool DataCenter::OASParse(std::string filename)
    {
       AOASDB = DEBUG_NEW Oasis::OasisInFile(wxString(filename.c_str(), wxConvUTF8));
    }
-   catch (EXPTNreadOASIS)
+   catch (EXPTNreadOASIS&)
    {
       TpdPost::toped_status(console::TSTS_PRGRSBAROFF);
       status = false;
@@ -407,6 +407,14 @@ void DataCenter::unlockOas(ForeignDbFile*& oasis_db, bool throwexception)
    else if (throwexception && (NULL == oasis_db))
       throw EXPTNactive_OASIS();
    oasis_db = NULL;
+}
+
+bool DataCenter::checkActiveCell()
+{
+   if (_TEDLIB() && _TEDLIB()->checkActiveCell())
+      return true;
+   else
+      return false;
 }
 
 void DataCenter::bpRefreshTdtTab(bool targetDB, bool threadExecution)
