@@ -570,7 +570,7 @@ int8b Oasis::OasisInFile::getInt(byte length)
    const byte  smask       = 0x01; // highlights the sign
    byte        bytecounter = 0   ; // how many bytes were read
    byte        bytein            ; // last byte read from the file stream
-   byte        sign              ;
+   byte        sign        = 0   ;
    int8b       result      = 0   ; // the result
    // the result in array of bytes representation
    byte       *btres       = (byte*)&result;

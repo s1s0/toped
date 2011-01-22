@@ -1021,7 +1021,7 @@ void tui::TopedFrame::OnTDTUnloadLib(wxCommandEvent& evt)
    {
       dlg = DEBUG_NEW tui::getLibList(this, -1, wxT("Close Library"), pos, libName);
    }
-   catch (EXPTN) {delete dlg;return;}
+   catch (EXPTN&) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK )
    {
       wxString ost;
@@ -1072,7 +1072,7 @@ void tui::TopedFrame::OnGDSRead(wxCommandEvent& WXUNUSED(event))
 void tui::TopedFrame::OnTDTSave(wxCommandEvent&  callingEvent)
 {
    std::string  tedFileName;
-   bool         tedNeverSaved;
+   bool         tedNeverSaved = false;
    bool         tedDBExists = false;
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
@@ -1231,7 +1231,7 @@ void tui::TopedFrame::OnCellOpen(wxCommandEvent& WXUNUSED(event)) {
    try {
       dlg = DEBUG_NEW tui::getCellOpen(this, -1, wxT("Cell Open"), pos, wxT(""));
    }
-   catch (EXPTN) {delete dlg;return;}
+   catch (EXPTN&) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK ) {
       wxString ost;
       ost << wxT("opencell(\"") << dlg->get_selectedcell() << wxT("\");");
@@ -1248,7 +1248,7 @@ void tui::TopedFrame::OnCellRemove(wxCommandEvent&)
    try {
       dlg = DEBUG_NEW tui::getCellOpen(this, -1, wxT("Cell Remove"), pos, wxT(""));
    }
-   catch (EXPTN) {delete dlg;return;}
+   catch (EXPTN&) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK ) {
       wxString ost;
       ost << wxT("removecell(\"") << dlg->get_selectedcell() << wxT("\");");
@@ -1271,7 +1271,7 @@ void tui::TopedFrame::OnGDStranslate(wxCommandEvent& WXUNUSED(event)) {
          dlg = DEBUG_NEW tui::getGDSimport(this, -1, wxT("Import GDS structure"), pos,
                                              _browsers->tdtSelectedGdsName(), drawProp);
       }
-      catch (EXPTN) {delete dlg;return;}
+      catch (EXPTN&) {delete dlg;return;}
       if ( dlg->ShowModal() == wxID_OK )
       {
          laymap = dlg->getGdsLayerMap();
@@ -1403,7 +1403,7 @@ void tui::TopedFrame::OnGDSexportCELL(wxCommandEvent& WXUNUSED(event))
          dlg = DEBUG_NEW tui::getGDSexport(this, -1, wxT("GDS export cell"), pos,
                                            _browsers->tdtSelectedCellName(), drawProp);
       }
-      catch (EXPTN) {delete dlg;return;}
+      catch (EXPTN&) {delete dlg;return;}
       wxString cellname;
       bool recur;
       USMap* laymap;
@@ -1486,7 +1486,7 @@ void tui::TopedFrame::OnCIFtranslate(wxCommandEvent& WXUNUSED(event))
          dlg = DEBUG_NEW tui::getCIFimport(this, -1, wxT("Import CIF structure"), pos,
                                            _browsers->tdtSelectedCifName(), drawProp);
       }
-      catch (EXPTN) {delete dlg;return;}
+      catch (EXPTN&) {delete dlg;return;}
       if ( dlg->ShowModal() == wxID_OK )
       {
          // get the layer map first
@@ -1532,7 +1532,7 @@ void tui::TopedFrame::OnCIFexportCELL(wxCommandEvent& WXUNUSED(event))
          dlg = DEBUG_NEW tui::getCIFexport(this, -1, wxT("CIF export cell"), pos,
                                            _browsers->tdtSelectedCellName(), drawProp);
       }
-      catch (EXPTN) {delete dlg;return;}
+      catch (EXPTN&) {delete dlg;return;}
       wxString cellname;
       bool recur;
       bool sverbose;
@@ -1642,7 +1642,7 @@ void tui::TopedFrame::OnOAStranslate(wxCommandEvent& WXUNUSED(event))
          dlg = DEBUG_NEW tui::getOASimport(this, -1, wxT("Import OASIS structure"), pos,
                                              _browsers->tdtSelectedOasName(), drawProp);
       }
-      catch (EXPTN) {delete dlg;return;}
+      catch (EXPTN&) {delete dlg;return;}
       if ( dlg->ShowModal() == wxID_OK )
       {
          laymap = dlg->getOasLayerMap();
@@ -1705,7 +1705,7 @@ void tui::TopedFrame::CellRef(wxString clname) {
    try {
       dlg = DEBUG_NEW tui::getCellRef(this, -1, wxT("Cell Reference"), pos, clname);
    }
-   catch (EXPTN) {delete dlg;return;}
+   catch (EXPTN&) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK ) {
       wxString ost;
 /*      ost << wxT("cellref(\"") << dlg->get_selectedcell() <<wxT("\",getpoint(),")
@@ -1725,7 +1725,7 @@ void tui::TopedFrame::CellARef(wxString clname) {
    try {
       dlg = DEBUG_NEW tui::getCellARef(this, -1, wxT("Array of References"), pos, clname);
    }
-   catch (EXPTN) {delete dlg; return;}
+   catch (EXPTN&) {delete dlg; return;}
    if ( dlg->ShowModal() == wxID_OK ) {
       wxString ost;
 /*      ost << wxT("cellaref(\"") << dlg->get_selectedcell() <<wxT("\",getpoint(),")
@@ -1754,7 +1754,7 @@ void tui::TopedFrame::OnCellGroup(wxCommandEvent& WXUNUSED(event)) {
       DATC->lockTDT(dbLibDir, dbmxs_celllock);
       DATC->unlockTDT(dbLibDir, true);
    }
-   catch (EXPTN) {return;}
+   catch (EXPTN&) {return;}
    //
    wxTextEntryDialog dlg2(this,
       wxT("Cell name:"),
@@ -1775,7 +1775,7 @@ void tui::TopedFrame::OnDrawWire(wxCommandEvent& WXUNUSED(event)) {
    try {
       dlg = DEBUG_NEW tui::getSize(this, -1, wxT("Wire width"), pos, PROPC->step() ,3, 2);
    }
-   catch (EXPTN) {delete dlg;return;}
+   catch (EXPTN&) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK ) {
       wxString ost; ost << wxT("addwire(")<<dlg->value()<<wxT(");");
       _cmdline->parseCommand(ost);
@@ -1790,7 +1790,7 @@ void tui::TopedFrame::OnDrawText(wxCommandEvent& WXUNUSED(event)) {
    try {
       dlg = DEBUG_NEW tui::getTextdlg(this, -1, wxT("Add text"), pos);
    }
-   catch (EXPTN) {delete dlg;return;}
+   catch (EXPTN&) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK )
    {
       wxString ost; ost << wxT("addtext(\"")
@@ -1808,7 +1808,7 @@ void tui::TopedFrame::OnResize(wxCommandEvent& WXUNUSED(event)) {
    try {
       dlg = DEBUG_NEW tui::getSize(this, -1, wxT("Resize by"), pos, PROPC->step() ,3, 1);
    }
-   catch (EXPTN) {delete dlg;return;}
+   catch (EXPTN&) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK ) {
       wxString ost; ost << wxT("resize(")<<dlg->value()<<wxT(");");
       _cmdline->parseCommand(ost);
@@ -1824,7 +1824,7 @@ void tui::TopedFrame::OnUndoDepth(wxCommandEvent& WXUNUSED(event))
    try {
       dlg = DEBUG_NEW tui::getSize(this, -1, wxT("Undo depth"), pos, 1, 0, CMDBlock->undoDepth());
    }
-   catch (EXPTN) {delete dlg;return;}
+   catch (EXPTN&) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK )
    {
       unsigned long newValue;
@@ -2030,7 +2030,7 @@ void tui::TopedFrame::OnChangeRef( wxCommandEvent& WXUNUSED( event ))
    try {
       dlg = DEBUG_NEW tui::getCellRef(this, -1, wxT("Change Cell Reference"), pos, wxT(""));
    }
-   catch (EXPTN) {delete dlg;return;}
+   catch (EXPTN&) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK )
    {
       wxString ost;
@@ -2061,7 +2061,7 @@ void tui::TopedFrame::OnChangeLayer( wxCommandEvent& WXUNUSED( event ))
    try {
       dlg = DEBUG_NEW tui::getSize(this, -1, wxT("Transfer to layer"), pos, 1, 0, 2);
    }
-   catch (EXPTN) {delete dlg;return;}
+   catch (EXPTN&) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK )
    {
       wxString ost; ost << wxT("changelayer(")<<dlg->value()<<wxT(");");
@@ -2078,7 +2078,7 @@ void tui::TopedFrame::OnCurrentLayer( wxCommandEvent& WXUNUSED( event ))
    try {
       dlg = DEBUG_NEW tui::getSize(this, -1, wxT("Change current layer"), pos, 1, 0, 2);
    }
-   catch (EXPTN) {delete dlg;return;}
+   catch (EXPTN&) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK )
    {
       unsigned long vlu;

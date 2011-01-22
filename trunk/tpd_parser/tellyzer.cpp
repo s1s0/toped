@@ -919,7 +919,7 @@ int parsercmd::cmdFUNCCALL::execute()
       }
       fresult = funcbody->execute();
    }
-   catch (EXPTN) {return EXEC_ABORT;}
+   catch (EXPTN&) {return EXEC_ABORT;}
    funcbody->reduce_undo_stack();
    return fresult;
 }
@@ -1526,7 +1526,7 @@ int parsercmd::cmdREPEAT::execute() {
 //=============================================================================
 int parsercmd::cmdFOREACH::execute() {
    TELL_DEBUG(cmdFOREACH);
-   int retexec;
+   int retexec = EXEC_NEXT;
 
    _header->execute();
    telldata::ttlist* clist = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();

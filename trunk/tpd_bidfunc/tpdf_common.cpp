@@ -49,7 +49,7 @@ extern const wxEventType         wxEVT_CANVAS_PARAMS;
 //=============================================================================
 telldata::ttint* tellstdfunc::getCurrentLayer()
 {
-   unsigned cl;
+   unsigned cl = 0;
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {

@@ -44,7 +44,7 @@ long Calbr::drcEdge::_precision = 0;
 
 void Calbr::drcEdge::addCoord(long x1, long y1, long x2, long y2)
 {
-   real xx, yy;
+//   real xx, yy;
    //???****Not using now*******
    /*wxString xstr = convert(x1, _precision);
    wxString ystr = convert(y1, _precision);
@@ -353,7 +353,7 @@ void Calbr::CalbrFile::readFile()
          _render->setCellName(_cellName);
       }
    }
-   catch (EXPTNdrc_parser)
+   catch (EXPTNdrc_parser&)
    {
       _ok = false;
       return;
@@ -673,7 +673,7 @@ void   Calbr::CalbrFile::showError(const std::string& cell, const std::string& e
             {
                zoom = (*it)->getZoom(number);
             }
-            catch (EXPTNdrc_reader)
+            catch (EXPTNdrc_reader&)
             {
                return;
             }
@@ -701,7 +701,7 @@ void   Calbr::CalbrFile::showCluster(const std::string & error)
             {
                zoom = (*it)->getZoom();
             }
-            catch (EXPTNdrc_reader)
+            catch (EXPTNdrc_reader&)
             {
                return;
             }

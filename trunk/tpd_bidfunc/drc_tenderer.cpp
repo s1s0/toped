@@ -79,7 +79,7 @@ void Calbr::drcTenderer::addPoly(const CoordsVector   &coords)
 
    if (_ATDB)
    {
-      real DBscale = 1000;
+//      real DBscale = 1000;
       PointVector plDB;
       plDB.reserve(coords.size());
 
@@ -234,7 +234,7 @@ bool Calbr::drcTenderer::showError(unsigned int numError)
 
 void Calbr::drcTenderer::zoom(const edge &edge)
 {
-   real DBscale = PROPC->DBscale();
+//   real DBscale = PROPC->DBscale();
    TP zoomPoint1 = TP(edge.x1, edge.y1);
    TP zoomPoint2 = TP(edge.x2, edge.y2);
    DBbox* box = DEBUG_NEW DBbox(zoomPoint1,
