@@ -612,12 +612,11 @@ laydata::AtticList* laydata::TdtCell::changeSelect(TP pnt, SH_STATUS status, con
 void laydata::TdtCell::mouseHoover(TP& position, layprop::DrawProperties& drawprop, const DWordSet& unselable)
 {
    laydata::TdtData* prev = NULL;
-   unsigned prevlay;
+   unsigned prevlay = 0;
    typedef LayerList::const_iterator LCI;
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
    {
-      if (/* (REF_LAY != lay->first) &&*/
-           (unselable.end() == unselable.find(lay->first)) )
+      if ( (unselable.end() == unselable.find(lay->first)) )
       {
          laydata::TdtData* shape = NULL;
          while (lay->second->getObjectOver(position,shape))

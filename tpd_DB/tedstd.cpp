@@ -344,7 +344,7 @@ laydata::InputTdtFile::InputTdtFile( wxString fileName, laydata::TdtLibDir* tedl
    {
       getFHeader();
    }
-   catch (EXPTNreadTDT)
+   catch (EXPTNreadTDT&)
    {
       closeStream();
       setStatus(false);
@@ -412,7 +412,6 @@ laydata::WireWidth laydata::InputTdtFile::get4ub()
 real laydata::InputTdtFile::getReal()
 {
    real result;
-   byte length = sizeof(real);
    if (!readStream(&result,sizeof(real), true))
       throw EXPTNreadTDT("Wrong number of bytes read");
    return result;
@@ -1248,7 +1247,7 @@ void ImportDB::run(const NameList& top_str_names, bool overwrite, bool reopenFil
          }
          tell_log(console::MT_INFO, "Done");
       }
-      catch (EXPTN) {tell_log(console::MT_INFO, "Conversion aborted with errors");}
+      catch (EXPTN&) {tell_log(console::MT_INFO, "Conversion aborted with errors");}
       TpdPost::toped_status(console::TSTS_PRGRSBAROFF);
       _src_lib->closeStream();
       (*_tdt_db)()->recreateHierarchy(_tdt_db);
