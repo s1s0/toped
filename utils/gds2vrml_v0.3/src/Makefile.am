@@ -13,6 +13,6 @@ gds2vrml_SOURCES = gds2vrml.cpp  gdsobject_vrml.cpp gdsparse_vrml.cpp
 # EXTRAS
 #########################################################################
 ## AM_CPPFLAGS is the replacement for INCLUDES
-AM_CPPFLAGS = -I$(top_srcdir)/libgdsto3d
+AM_CPPFLAGS = -I@TOP_GDS2VRML_SRCDIR@/libgdsto3d
 
-gds2vrml_LDADD = $(top_builddir)/libgdsto3d/libgdsto3d.la
+gds2vrml_LDADD = @TOP_GDS2VRML_BUILDDIR@/libgdsto3d/libgdsto3d.la

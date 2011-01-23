@@ -18,8 +18,8 @@ AC_PROG_YACC
 if test "$YACC" == "yacc"; then
    AC_MSG_ERROR([Bison not found])
 fi
-CPPFLAGS="$CPPFLAGS -Wall -g -fexceptions"
-CFLAGS="$CFLAGS -Wall -g -fexceptions"
+#CPPFLAGS="$CPPFLAGS -Wall -g -fexceptions"
+#CFLAGS="$CFLAGS -Wall -g -fexceptions"
 LDFLAGS="$LDFLAGS -Wl,--as-needed"
 
 # Checks for header files.
@@ -89,13 +89,30 @@ dnl
 dnl Toped Compilation options
 dnl
 dnl----------------------------------------------------------------------------
+
+#Check debug conditions
+AC_ARG_ENABLE([debug],
+              [  --enable-debug          Turn on debugging],
+              [tpd_debug="yes"])
+if test "$tpd_debug" == "yes"; then
+   CXXFLAGS="-Wall -g3 -O0 -fexceptions"
+else
+   CXXFLAGS="-Wall -O2 -fexceptions"
+fi
+
+#Check memory tracking
 AC_ARG_WITH(mem-track,
             [  --with-mem-track        Compile with build-in heap tracker],
             [ tpd_mem_track="yes"])
-
 if test "$tpd_mem_track" == "yes"; then
     CPPFLAGS="$CPPFLAGS -DDB_MEMORY_TRACE"
 fi
+
+#Conditional compilation (utilities)
+AC_ARG_ENABLE([utils],
+              [  --enable-utils          Compile Toped utilities],
+              [tpd_utils=true])
+AM_CONDITIONAL([UTILS], [test x$tpd_utils = xtrue])
 
 AC_CONFIG_FILES([
    Makefile
@@ -111,4 +128,15 @@ AC_CONFIG_FILES([
    tll/Makefile
    utils/cadence/Makefile
 ])
+
+AM_COND_IF([UTILS],
+           [AC_SUBST(TOP_GDS2VRML_SRCDIR,   ['$(top_srcdir)/'"utils/gds2vrml_v0.3"]  )
+            AC_SUBST(TOP_GDS2VRML_BUILDDIR, ['$(top_builddir)/'"utils/gds2vrml_v0.3"])
+            AC_CONFIG_FILES([
+              utils/gds2vrml_v0.3/libgdsto3d/Makefile
+              utils/gds2vrml_v0.3/src/Makefile
+            ])
+           ]
+)
+
 AC_OUTPUT

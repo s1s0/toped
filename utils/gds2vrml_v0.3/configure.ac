@@ -14,14 +14,6 @@ AC_LIBTOOL_DLOPEN
 AC_PROG_LIBTOOL
 AC_PROG_CXX
 AC_PROG_CC
-AM_PROG_LEX
-AC_PROG_YACC
-if test "$YACC" == "yacc"; then
-   AC_MSG_ERROR([Bison not found])
-fi
-#CPPFLAGS="$CPPFLAGS -Wall -g -fexceptions"
-#CFLAGS="$CFLAGS -Wall -g -fexceptions"
-#LDFLAGS="$LDFLAGS -Wl,--as-needed"
 
 # Checks for header files.
 AC_HEADER_STDC
@@ -33,6 +25,8 @@ AC_C_CONST
 AC_C_INLINE
 AC_TYPE_SIZE_T
 
+AC_SUBST(TOP_GDS2VRML_SRCDIR, ['$(top_srcdir)'])
+AC_SUBST(TOP_GDS2VRML_BUILDDIR, ['$(top_builddir)'])
 
 AC_CONFIG_FILES([
    Makefile 
