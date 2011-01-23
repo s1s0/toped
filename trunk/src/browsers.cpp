@@ -2170,7 +2170,7 @@ browsers::DRCBrowser::DRCBrowser(wxWindow* parent, wxWindowID id)
          addRuleCheck(_errorBrowser->GetRootItem(), (*it));
       }
 
-      Calbr::CellDRCMap *drcMap = DRCData->resultsCellNameMode();
+      Calbr::CellDRCMap *drcMap = DRCData->cellDRCMap();
 
       for(Calbr::CellDRCMap::const_iterator it = drcMap->begin();it != drcMap->end(); ++it)
       {

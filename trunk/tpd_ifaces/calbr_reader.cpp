@@ -610,7 +610,7 @@ bool  Calbr::CalbrFile::parseCellNameMode(const std::string &parseString)
 void   Calbr::CalbrFile::addResults()
 {
 
-   _render->startWriting();
+   /*_render->startWriting();
    if (!_RuleChecks.empty())
    {
       RuleChecksVector::const_iterator it;
@@ -619,10 +619,11 @@ void   Calbr::CalbrFile::addResults()
          addRuleCheck((*it));
       }
    }
-   else
+   else*/
    {
       for (CellDRCMap::const_iterator it = _cellDRCMap.begin(); it != _cellDRCMap.end(); ++it)
       {
+         _render->startWriting((*it).first);
          _render->setCellName((*it).first);
          _render->setTranformation((*it).second->transfMatrix);
 
@@ -631,10 +632,11 @@ void   Calbr::CalbrFile::addResults()
          {  
             addRuleCheck((*it2));
          }
+         _render->endWriting();
       }
    }
 
-   _render->endWriting();
+   //_render->endWriting();
    _render->hideAll();
 }
 
@@ -666,6 +668,7 @@ void   Calbr::CalbrFile::showError(const std::string& cell, const std::string& e
       std::string x = (*it)->ruleCheckName();
       if((*it)->ruleCheckName() == error)
       {
+         _cellName = cell;
          _render->hideAll();
          if(_render->showError((*it)->num()))
          {
@@ -737,6 +740,16 @@ std::string Calbr::CalbrFile::explainError(word lay)
 bool Calbr::CalbrFile::isCellNameMode(void)
 {
    return !_cellDRCMap.empty();
+}
+
+CTM Calbr::CalbrFile::getCTM(const std::string & cell)
+{
+   CellDRCMap::iterator it = _cellDRCMap.find(cell);
+   if (it == _cellDRCMap.end())
+   {
+      assert(true);
+   }
+   return it->second->transfMatrix;
 }
 
 void Calbr::CalbrFile::appendRuleCheckToCellName(void)

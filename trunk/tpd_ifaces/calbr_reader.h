@@ -59,7 +59,7 @@ namespace Calbr
       public:
                               drcRenderer() {};
          virtual              ~drcRenderer() {};
-         virtual void         startWriting()=0;
+         virtual void         startWriting(const std::string &cell)=0;
          virtual void         setError(unsigned int numError) {};
          virtual bool         showError(unsigned int numError) {return false;};
          virtual void         showAll() {};
@@ -176,7 +176,8 @@ namespace Calbr
          std::string       explainError(word lay);
          bool              isCellNameMode(void);
          RuleChecksVector* resultsFlat(void) {return &_RuleChecks;};
-         CellDRCMap*       resultsCellNameMode(void) {return &_cellDRCMap;};
+         CellDRCMap*       cellDRCMap(void) {return &_cellDRCMap;};
+         CTM               getCTM(const std::string & cell);
          bool              isOk(void)   {return _ok;}
          drcRenderer*      render() const {return _render;};
          std::string       cellName() {return _cellName;};
