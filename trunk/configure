@@ -604,6 +604,10 @@ ac_includes_default="\
 ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
+TOP_GDS2VRML_BUILDDIR
+TOP_GDS2VRML_SRCDIR
+UTILS_FALSE
+UTILS_TRUE
 WX_RESCOMP
 WX_VERSION
 WX_LIBS_STATIC
@@ -755,7 +759,9 @@ with_wxdir
 with_wx_config
 with_wx_prefix
 with_wx_exec_prefix
+enable_debug
 with_mem_track
+enable_utils
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1403,6 +1409,8 @@ Optional Features:
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
   --disable-libtool-lock  avoid locking (might break parallel builds)
+  --enable-debug          Turn on debugging
+  --enable-utils          Compile Toped utilities
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -15049,8 +15057,8 @@ test -n "$YACC" || YACC="yacc"
 if test "$YACC" == "yacc"; then
    as_fn_error $? "Bison not found" "$LINENO" 5
 fi
-CPPFLAGS="$CPPFLAGS -Wall -g -fexceptions"
-CFLAGS="$CFLAGS -Wall -g -fexceptions"
+#CPPFLAGS="$CPPFLAGS -Wall -g -fexceptions"
+#CFLAGS="$CFLAGS -Wall -g -fexceptions"
 LDFLAGS="$LDFLAGS -Wl,--as-needed"
 
 # Checks for header files.
@@ -17021,17 +17029,57 @@ $as_echo "no (version $WX_VERSION is not new enough)" >&6; }
 #
 
 
+#Check debug conditions
+# Check whether --enable-debug was given.
+if test "${enable_debug+set}" = set; then :
+  enableval=$enable_debug; tpd_debug="yes"
+fi
+
+if test "$tpd_debug" == "yes"; then
+   CXXFLAGS="-Wall -g3 -O0 -fexceptions"
+else
+   CXXFLAGS="-Wall -O2 -fexceptions"
+fi
+
+#Check memory tracking
+
 # Check whether --with-mem-track was given.
 if test "${with_mem_track+set}" = set; then :
   withval=$with_mem_track;  tpd_mem_track="yes"
 fi
 
-
 if test "$tpd_mem_track" == "yes"; then
     CPPFLAGS="$CPPFLAGS -DDB_MEMORY_TRACE"
 fi
 
+#Conditional compilation (utilities)
+# Check whether --enable-utils was given.
+if test "${enable_utils+set}" = set; then :
+  enableval=$enable_utils; tpd_utils=true
+fi
+
+ if test x$tpd_utils = xtrue; then
+  UTILS_TRUE=
+  UTILS_FALSE='#'
+else
+  UTILS_TRUE='#'
+  UTILS_FALSE=
+fi
+
+
 ac_config_files="$ac_config_files Makefile ui/Makefile tpd_common/Makefile tpd_DB/Makefile tpd_ifaces/Makefile tpd_parser/Makefile tpd_bidfunc/Makefile src/Makefile fonts/Makefile icons/Makefile tll/Makefile utils/cadence/Makefile"
+
+
+if test x$tpd_utils = xtrue; then
+  TOP_GDS2VRML_SRCDIR='$(top_srcdir)/'"utils/gds2vrml_v0.3"
+
+            TOP_GDS2VRML_BUILDDIR='$(top_builddir)/'"utils/gds2vrml_v0.3"
+
+            ac_config_files="$ac_config_files utils/gds2vrml_v0.3/libgdsto3d/Makefile utils/gds2vrml_v0.3/src/Makefile"
+
+
+
+fi
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -17153,6 +17201,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${am__fastdepCC_TRUE}" && test -z "${am__fastdepCC_FALSE}"; then
   as_fn_error $? "conditional \"am__fastdepCC\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${UTILS_TRUE}" && test -z "${UTILS_FALSE}"; then
+  as_fn_error $? "conditional \"UTILS\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 
@@ -18127,6 +18179,8 @@ do
     "icons/Makefile") CONFIG_FILES="$CONFIG_FILES icons/Makefile" ;;
     "tll/Makefile") CONFIG_FILES="$CONFIG_FILES tll/Makefile" ;;
     "utils/cadence/Makefile") CONFIG_FILES="$CONFIG_FILES utils/cadence/Makefile" ;;
+    "utils/gds2vrml_v0.3/libgdsto3d/Makefile") CONFIG_FILES="$CONFIG_FILES utils/gds2vrml_v0.3/libgdsto3d/Makefile" ;;
+    "utils/gds2vrml_v0.3/src/Makefile") CONFIG_FILES="$CONFIG_FILES utils/gds2vrml_v0.3/src/Makefile" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
