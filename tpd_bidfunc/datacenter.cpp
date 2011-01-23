@@ -848,16 +848,15 @@ void DataCenter::openGlRender(const CTM& layCTM)
             {
                if (wxMUTEX_NO_ERROR == _DRCLock.TryLock())
                {
-                  if (_TEDLIB()->activeCellName() == DRCData->cellName())
+                  std::string cell = DRCData->cellName();
+                  renderer.setState(layprop::DRC);
+                  laydata::TdtDefaultCell* dst_structure = _DRCDB->checkCell(cell);
+                  if (dst_structure)
                   {
-                     renderer.setState(layprop::DRC);
-                     laydata::TdtDefaultCell* dst_structure = _DRCDB->checkCell("drc");
-                     if (dst_structure)
-                     {
-                        dst_structure->openGlRender(renderer, CTM(), false, false);
-                     }
-                     renderer.setState(layprop::DB);
+                     dst_structure->openGlRender(renderer, DRCData->getCTM(cell), false, false);
                   }
+                  renderer.setState(layprop::DB);
+                  
                   VERIFY(wxMUTEX_NO_ERROR == _DRCLock.Unlock());
                }
             }

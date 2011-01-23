@@ -40,7 +40,7 @@ namespace Calbr
                            drcTenderer(laydata::DrcLibrary* library);
                           ~drcTenderer();
       void                 setError(unsigned int numError);
-      void                 startWriting();
+      void                 startWriting(const std::string &cell);
       void                 addPoly(const CoordsVector   &coords);
       void                 addLine(const edge &edge);
       void                 showAll(void);
@@ -52,6 +52,7 @@ namespace Calbr
    private:
       laydata::DrcLibrary* _ATDB;
       laydata::TdtCell*    _DRCCell;
+      std::string          _cell;
       unsigned int         _numError;
       TP                   _max;
       TP                   _min;

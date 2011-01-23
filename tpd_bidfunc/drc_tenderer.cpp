@@ -61,10 +61,11 @@ void Calbr::drcTenderer::setError(unsigned int numError)
    _numError = numError;
 }
 
-void Calbr::drcTenderer::startWriting()
+void Calbr::drcTenderer::startWriting(const std::string &cell)
 {
    _startDrawing = true;
-   _DRCCell = DEBUG_NEW laydata::TdtCell("drc");
+   _cell = cell;
+   _DRCCell = DEBUG_NEW laydata::TdtCell(_cell);
 //   PROPC->setState(layprop::DB);
 }
 
@@ -96,7 +97,7 @@ void Calbr::drcTenderer::addPoly(const CoordsVector   &coords)
       laydata::QTreeTmp* dwl = _DRCCell->secureUnsortedLayer(_numError);
       PROPC->addUnpublishedLay(_numError);
 
-      laydata::ValidPoly check(plDB);
+      /*laydata::ValidPoly check(plDB);
       if (!check.valid())
       {
          std::ostringstream ost;
@@ -112,12 +113,12 @@ void Calbr::drcTenderer::addPoly(const CoordsVector   &coords)
          dwl->put(shape);
       }
       else
-      {
+      {*/
          laydata::TdtPolyEXT *shape = DEBUG_NEW laydata::TdtPolyEXT(plDB);
          shape->setLong(_numError);
          shape->transfer(_ctm);
          dwl->put(shape);
-      }
+     // }
    }
 }
 
@@ -160,7 +161,7 @@ void Calbr::drcTenderer::addLine(const edge &edge)
    PROPC->addUnpublishedLay(_numError);
 
 
-   laydata::ValidWire check(plDB, width);
+   /*laydata::ValidWire check(plDB, width);
 
    if (!check.valid())
    {
@@ -169,7 +170,7 @@ void Calbr::drcTenderer::addLine(const edge &edge)
       tell_log(console::MT_ERROR, ost.str());
    }
    else plDB = check.getValidated();
-
+*/
    laydata::TdtWireEXT *shape = DEBUG_NEW laydata::TdtWireEXT(plDB, width);
    shape->setLong(_numError);
    dwl->put(shape);
@@ -261,7 +262,7 @@ void Calbr::drcTenderer::endWriting()
       }
    }
    PROPC->unlockDrawProp(drawProp);
-   _ATDB->registerCellRead("drc", _DRCCell);
+   _ATDB->registerCellRead(_cell, _DRCCell);
 }
 
 bool Calbr::drcTenderer::checkCellName()
