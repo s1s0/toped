@@ -1,0 +1,1 @@
+gds2vrml_v0.3.exe -i %1 -o %2 -p %3 -t %4
