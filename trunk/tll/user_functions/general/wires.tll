@@ -4,10 +4,29 @@
  *
  * Copyright (C) 2010 by Armin Taschwer
  *
+ * Functions
+ * ---------
  * void addwire_on_grid (point list pl, real width, bool fullypoly);
  * void placeVIAarray  (point leftbot, point righttop, int startlay, int stoplay);
+
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+
  */
 
+// following files need to be included BEFORE including this file !!
 
 /* instead of default_drc you may also use a customized drc file */
 //#include "default_drc.tll"
@@ -86,6 +105,10 @@ void addwire_on_grid (point list pl, real width, bool fullypoly) {
 }
 
 
+/* ATTENTION placeVIAarray:
+ * needs a technology file (at least default_drc.tll) to be included!
+ */
+
 /*
  * draws an array on vias into a rectangle defined by leftbot and
  * righttop
@@ -116,8 +139,10 @@ void placeVIAarray (point leftbot, point righttop, int startlay, int stoplay) {
 	rt.y = leftbot.y;
   }
 
-  point dist = (rt - via_spc*2.0 - lb - via ); // diagonal without
-											   // last VIAs+space  
+
+  point t_dist = vec_abs (rt - lb);
+  point dist = t_dist - (via_spc*2.0 + via); // diagonal without
+                                             // last VIAs+space  
 
   /*   x...x...x...x   --> x == vias, . == spaces */
   int xx = floor(EPS + dist.x / (VIA+VIA_SPC)); //number of vias & spaces - 1 via
@@ -137,15 +162,15 @@ void placeVIAarray (point leftbot, point righttop, int startlay, int stoplay) {
   }
 
   //debug
-  /* echo(lb); echo(rt); */
-  /* echo(rt-lb); */
-  /* echo(dist); */
-  /* echo(spcx);echo(spcy); */
-  /* echo(spcgrid); */
-  /* echo( "xx: " );echo(xx); */
-  /* echo( "yy: " );echo(yy); */
-  /* echo( "alay ");echo(alay); */
-  /* echo( "zlay ");echo(zlay); */
+  // echo(lb); echo(rt);
+  // echo(vec_abs(rt-lb));
+  // echo(dist);
+  // echo(spcx);echo(spcy);
+  // echo(spcgrid);
+  // echo( "xx: " );echo( xx );
+  // echo( "yy: " );echo( yy );
+  // echo( "alay ");echo(alay);
+  // echo( "zlay ");echo(zlay);
   
   if (spcgrid.x < VIA_SPC) {
 	echo ("WARNING: found DRC violation for X-spacing -- abort function");
@@ -159,7 +184,8 @@ void placeVIAarray (point leftbot, point righttop, int startlay, int stoplay) {
 	} 
   }
 
-  int break = 0; 
+  int break = 0; //if break == 1 : do not draw any vias
+
   foreach (int lay; seq(alay,zlay) ) {
 	//debug
 	//echo (lay);
@@ -206,14 +232,16 @@ void placeVIAarray (point leftbot, point righttop, int startlay, int stoplay) {
 		  px = (VIA+spcgrid.x)*(x-1);
 		  py = (VIA+spcgrid.y)*(y-1);
 		  newp = { px, py};
-		  residue = rt - newp;
+		  residue = t_dist - newp + via_spc;
 		  if (residue.x < VIA_SPC) {
 			echo ("WARNING: found DRC violation in X-direction -- VIA will not drawn");
+			//echo (rt); echo (newp); echo (rt - newp);
 			echo ("  residue: "); echo (residue);
 			echo ("  spcgrid: "); echo (spcgrid);
 		  } else {
 			if (residue.y < VIA_SPC) {
 			  echo ("WARNING: found DRC violation in Y-direction -- VIA will not drawn");
+			  //echo (rt); echo (newp); echo (rt - newp);
 			  echo ("  residue: "); echo (residue);
 			  echo ("  spcgrid: "); echo (spcgrid);
 			} else {
