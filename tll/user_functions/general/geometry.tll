@@ -23,6 +23,7 @@
  * point vec_normal (point) .. returns a orthogonal and normalized vector (90° ccw)
  * point vec_mirror (point) .. returns a mirrored (180°) vector
  * real vec_cross (point a, point b) .. returns the cross product of two vector
+ * point vec_abs (point) .. returns the absolute values of the vector
 
  * POINTs related
  * --------------
@@ -191,6 +192,17 @@ point vec_mirror (point in) {
  * @return */
 real vec_cross (point a, point b) {
   return a.x*b.y - b.x*a.y;
+}
+
+/**
+ * returns the absolute values of the input vector
+ * @param a input vector
+ * @return absolute vector */
+point vec_abs (point a) {
+  point b;
+  b.x = abs(a.x);
+  b.y = abs(a.y);
+  return b;
 }
 
 /**
