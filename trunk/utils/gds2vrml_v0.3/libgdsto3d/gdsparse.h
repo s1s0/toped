@@ -39,10 +39,11 @@ typedef uint16_t u_int16_t;
 #include "gdsobjects.h"
 #include "gds_types.h"
 
-
-#define int16_t __int16 
-#define int32_t __int32 
-#define u_int16_t unsigned __int16 
+#if defined(WIN32)
+   #define int16_t   __int16 
+   #define int32_t   __int32 
+   #define u_int16_t unsigned __int16 
+#endif
 
 typedef enum{
 	cpCentre,
