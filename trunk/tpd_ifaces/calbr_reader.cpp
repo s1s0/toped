@@ -585,7 +585,9 @@ bool  Calbr::CalbrFile::parseCellNameMode(const std::string &parseString)
       tx = number;
       regex.GetMatch(str, 9).ToLong(&number);
       ty = number;
-      CNStruct->transfMatrix.setCTM(a, b, c, d, tx, ty);
+      CTM dummy;
+//      CNStruct->transfMatrix.setCTM(a, b, c, d, tx, ty);
+      CNStruct->transfMatrix.setCTM(dummy.a(), dummy.b(), dummy.c(), dummy.d(), dummy.tx(), dummy.ty());
 
       _isCellNameMode = true;
       _curCellName = cellName;
