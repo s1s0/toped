@@ -299,15 +299,17 @@ void Calbr::CalbrFile::readFile()
       //Initialization of static member drcPolygon class
       drcPolygon::_precision = _precision;
       drcEdge::_precision = _precision;
-      _cellName = cellName;
+      _curCellName = cellName;
       unsigned int num = 1;
+
+      cellNameStruct *CNStruct = DEBUG_NEW cellNameStruct;
+      _cellDRCMap[_curCellName] = CNStruct;
       while(parse(num))
       {
          //Reset CellNameMode
          //Theoretically there is impossible to change mode from first appearance
          //But format contains mode flag for each rule check
          _isCellNameMode = false;
-         _curCellName = "";
          num++;
       }
 
@@ -350,7 +352,7 @@ void Calbr::CalbrFile::readFile()
             }
          }
 
-         _render->setCellName(_cellName);
+         _render->setCellName(_curCellName);
       }
    }
    catch (EXPTNdrc_parser&)
@@ -387,6 +389,7 @@ bool Calbr::CalbrFile::parse(unsigned int num)
    {
       throw(EXPTNdrc_parser(drc_parse, ruleCheckName, tempStr));
    };
+
    _curRuleCheck->setCurResCount(resCount);
    _curRuleCheck->setOrigResCount(origResCount);
    _curRuleCheck->setTimeStamp(timeStamp);
@@ -439,14 +442,7 @@ bool Calbr::CalbrFile::parse(unsigned int num)
       }
    }
 
-   if(_isCellNameMode && !(_RuleChecks.empty()))
-   {
-      appendRuleCheckToCellName();
-   }
-   else
-   {
-      _RuleChecks.push_back(_curRuleCheck);
-   }
+   appendRuleCheckToCellName();
    return true;
 }
 
@@ -670,7 +666,7 @@ void   Calbr::CalbrFile::showError(const std::string& cell, const std::string& e
       std::string x = (*it)->ruleCheckName();
       if((*it)->ruleCheckName() == error)
       {
-         _cellName = cell;
+         _curCellName = cell;
          _render->hideAll();
          if(_render->showError((*it)->num()))
          {
