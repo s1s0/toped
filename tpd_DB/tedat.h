@@ -130,7 +130,7 @@ namespace laydata {
    public:
                            TdtBox(const TP& p1, const TP& p2);
                            TdtBox(InputTdtFile* const tedfile);
-                          ~TdtBox();
+      virtual             ~TdtBox();
       virtual DBbox        overlap() const;
       virtual Validator*   move(const CTM&, SGBitSet& plst);
       virtual void         transfer(const CTM&);
@@ -176,7 +176,7 @@ namespace laydata {
                            TdtPoly(const PointVector& plist);
                            TdtPoly(int4b* plist, unsigned psize);
                            TdtPoly(InputTdtFile* const tedfile);
-                          ~TdtPoly();
+         virtual          ~TdtPoly();
          virtual DBbox     overlap() const;
          virtual Validator* move(const CTM&, SGBitSet& plst);
          virtual void      transfer(const CTM&);
@@ -217,7 +217,7 @@ namespace laydata {
                            TdtWire(const PointVector&, WireWidth);
                            TdtWire(int4b*, unsigned, WireWidth);
                            TdtWire(InputTdtFile* const tedfile);
-                          ~TdtWire();
+         virtual          ~TdtWire();
          virtual DBbox     overlap() const;
          virtual Validator* move(const CTM&, SGBitSet& plst);
          virtual void      transfer(const CTM&);
@@ -259,7 +259,7 @@ namespace laydata {
                            TdtCellRef(CellDefin str, CTM trans) : TdtData(),
                                           _structure(str), _translation(trans) {};
                            TdtCellRef(InputTdtFile* const tedfile);
-//                          ~TdtCellRef() {};
+      virtual             ~TdtCellRef() {};
       virtual DBbox        overlap() const;
       virtual   void       vlOverlap(const layprop::DrawProperties&, DBbox&) const;
       virtual Validator*   move(const CTM& trans, SGBitSet&) {
@@ -310,7 +310,7 @@ namespace laydata {
                            TdtCellAref(CellDefin str, CTM trans, ArrayProperties& arrprops) :
                               TdtCellRef(str, trans), _arrprops(arrprops) {};
                            TdtCellAref(InputTdtFile* const tedfile);
-//                          ~TdtCellAref() {};
+      virtual             ~TdtCellAref() {};
       virtual DBbox        overlap() const;
       virtual TdtData*     copy(const CTM& trans) {return DEBUG_NEW TdtCellAref(
                               _structure,_translation * trans, _arrprops);};
@@ -341,7 +341,7 @@ namespace laydata {
    public:
                            TdtText(std::string text, CTM trans);
                            TdtText(InputTdtFile* const tedfile);
-//                          ~TdtText() {};
+      virtual             ~TdtText() {};
       virtual DBbox        overlap() const;
       virtual Validator*   move(const CTM& trans, SGBitSet&) {
                                             _translation *= trans; return NULL;};
@@ -448,7 +448,7 @@ namespace laydata {
    class TdtTmpBox : public TdtTmpData {
       public:
                            TdtTmpBox() : _p1(NULL), _p2(NULL) {};
-                          ~TdtTmpBox();
+         virtual          ~TdtTmpBox();
          virtual void      draw(const layprop::DrawProperties&, CtmQueue& ) const;
          virtual void      addpoint(TP);
          virtual void      rmpoint(TP&);
@@ -461,7 +461,7 @@ namespace laydata {
    class TdtTmpPoly : public TdtTmpData {
       public:
                            TdtTmpPoly() {};
-                          ~TdtTmpPoly() {};
+         virtual          ~TdtTmpPoly() {};
          virtual void      draw(const layprop::DrawProperties&, CtmQueue& ) const;
          virtual void      addpoint(TP p)  {_plist.push_back(p);}
          virtual void      rmpoint(TP&);
@@ -473,7 +473,7 @@ namespace laydata {
    class TdtTmpWire : public TdtTmpData {
       public:
                            TdtTmpWire(WireWidth width) : _width(width)  {};
-                          ~TdtTmpWire(){};
+         virtual          ~TdtTmpWire(){};
          virtual void      draw(const layprop::DrawProperties&, CtmQueue& ) const;
          virtual void      addpoint(TP);
          virtual void      rmpoint(TP&);
@@ -489,7 +489,7 @@ namespace laydata {
       public:
                            TdtTmpCellRef(CellDefin str, CTM trans) :
                                        _structure(str), _translation(trans) {};
-                          ~TdtTmpCellRef(){};
+         virtual          ~TdtTmpCellRef(){};
          virtual void      draw(const layprop::DrawProperties&, CtmQueue&) const;
          void              objFlip()   {_translation.FlipY(0.0)   ;}
          void              objRotate() {_translation.Rotate( 90.0);}
@@ -503,7 +503,7 @@ namespace laydata {
       public:
                            TdtTmpCellAref(CellDefin str, CTM trans, ArrayProperties& arrprops) :
                               TdtTmpCellRef(str, trans), _arrprops(arrprops) {};
-                          ~TdtTmpCellAref(){};
+         virtual          ~TdtTmpCellAref(){};
          virtual void      draw(const layprop::DrawProperties&, CtmQueue&) const;
       private:
          ArrayProperties   _arrprops;
@@ -513,7 +513,7 @@ namespace laydata {
    class TdtTmpText : public TdtTmpData {
       public:
                            TdtTmpText(std::string text, CTM trans);
-                          ~TdtTmpText(){};
+         virtual          ~TdtTmpText(){};
          virtual void      draw(const layprop::DrawProperties&, CtmQueue&) const;
          void              objFlip()   {_translation.FlipY(0.0)   ;}
          void              objRotate() {_translation.Rotate( 90.0);}
