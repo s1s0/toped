@@ -180,11 +180,10 @@ namespace Calbr
          CTM               getCTM(const std::string & cell);
          bool              isOk(void)   {return _ok;}
          drcRenderer*      render() const {return _render;};
-         std::string       cellName() {return _cellName;};
+         std::string       cellName() {return _curCellName;};
       private:
          FILE*             _calbrFile;
          std::string       _fileName;
-         std::string       _cellName;
          long              _precision;
 
          std::ifstream     _inFile;
