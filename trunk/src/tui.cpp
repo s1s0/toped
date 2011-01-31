@@ -2664,6 +2664,7 @@ void tui::TopedPropertySheets::RenderingPSheet::update(wxCommandEvent& evt)
 //=============================================================================
 BEGIN_EVENT_TABLE(tui::TopedPropertySheets::CanvasPSheet, wxPanel)
     EVT_TEXT_ENTER(CDMARKER_STEP    ,tui::TopedPropertySheets::CanvasPSheet::OnMarkerStep    )
+    EVT_BUTTON    (CDMARKER_STEP_SET,tui::TopedPropertySheets::CanvasPSheet::OnMarkerStep    )
     EVT_RADIOBOX(CDMARKER_MOTION    ,tui::TopedPropertySheets::CanvasPSheet::OnMarkerMotion  )
     EVT_CHECKBOX(CDGRID_CBOX1       ,tui::TopedPropertySheets::CanvasPSheet::OnGridOn1       )
     EVT_CHECKBOX(CDGRID_CBOX2       ,tui::TopedPropertySheets::CanvasPSheet::OnGridOn2       )
@@ -2672,9 +2673,12 @@ BEGIN_EVENT_TABLE(tui::TopedPropertySheets::CanvasPSheet, wxPanel)
     EVT_CHECKBOX(CDMISC_AUTOPAN     ,tui::TopedPropertySheets::CanvasPSheet::OnAutoPan       )
     EVT_CHECKBOX(CDMISC_BOLDONHOOVER,tui::TopedPropertySheets::CanvasPSheet::OnBoldOnHoover  )
     EVT_CHECKBOX(CDMISC_ZEROCROSS   ,tui::TopedPropertySheets::CanvasPSheet::OnZeroCross     )
-    EVT_TEXT_ENTER(CDGRID_SET1      ,tui::TopedPropertySheets::CanvasPSheet::OnGridSet1       )
-    EVT_TEXT_ENTER(CDGRID_SET2      ,tui::TopedPropertySheets::CanvasPSheet::OnGridSet2       )
-    EVT_TEXT_ENTER(CDGRID_SET3      ,tui::TopedPropertySheets::CanvasPSheet::OnGridSet3       )
+    EVT_TEXT_ENTER(CDGRID_SET1      ,tui::TopedPropertySheets::CanvasPSheet::OnGridSet1      )
+    EVT_TEXT_ENTER(CDGRID_SET2      ,tui::TopedPropertySheets::CanvasPSheet::OnGridSet2      )
+    EVT_TEXT_ENTER(CDGRID_SET3      ,tui::TopedPropertySheets::CanvasPSheet::OnGridSet3      )
+    EVT_BUTTON    (CDGRID_ENTER1    ,tui::TopedPropertySheets::CanvasPSheet::OnGridSet1      )
+    EVT_BUTTON    (CDGRID_ENTER2    ,tui::TopedPropertySheets::CanvasPSheet::OnGridSet2      )
+    EVT_BUTTON    (CDGRID_ENTER3    ,tui::TopedPropertySheets::CanvasPSheet::OnGridSet3      )
 END_EVENT_TABLE()
 
 tui::TopedPropertySheets::CanvasPSheet::CanvasPSheet(wxWindow* parent) : wxPanel(parent, wxID_ANY)
@@ -2690,8 +2694,10 @@ tui::TopedPropertySheets::CanvasPSheet::CanvasPSheet(wxWindow* parent) : wxPanel
                                                               wxDefaultSize,
                                                               wxTE_RIGHT | wxTE_PROCESS_ENTER,
                                                               wxTextValidator(wxFILTER_NUMERIC));
+            wxButton*     stepEnter = DEBUG_NEW wxButton(this, CDMARKER_STEP_SET, wxT("Set"));
          stepSizer->Add(stepStatic, 0, wxTOP | wxBOTTOM | wxLEFT  | wxALIGN_CENTER | wxEXPAND, 5);
          stepSizer->Add(stepValue , 1, wxTOP | wxBOTTOM | wxRIGHT | wxALIGN_CENTER | wxEXPAND, 5);
+         stepSizer->Add(stepEnter , 0, wxTOP | wxBOTTOM | wxRIGHT | wxALIGN_CENTER | wxEXPAND, 5);
 
          static const wxString motionOptions[] = { wxT("Free"), wxT("45 deg"), wxT("90 deg") };
          wxRadioBox* motion = DEBUG_NEW wxRadioBox(this, CDMARKER_MOTION, wxT("Motion"),
@@ -2713,9 +2719,11 @@ tui::TopedPropertySheets::CanvasPSheet::CanvasPSheet(wxWindow* parent) : wxPanel
                                                        wxDefaultSize,
                                                        wxTE_RIGHT | wxTE_PROCESS_ENTER,
                                                        wxTextValidator(wxFILTER_NUMERIC));
+            wxButton*  gr1Enter = DEBUG_NEW wxButton(this, CDGRID_ENTER1, wxT("Set"));
 
             gr1Sizer->Add(gr1CBox, 0, wxTOP | wxBOTTOM | wxLEFT  | wxALIGN_CENTER | wxEXPAND, 5);
             gr1Sizer->Add(gr1TBox ,1, wxTOP | wxBOTTOM | wxRIGHT | wxALIGN_CENTER | wxEXPAND, 5);
+            gr1Sizer->Add(gr1Enter,0, wxTOP | wxBOTTOM | wxRIGHT | wxALIGN_CENTER | wxEXPAND, 5);
 
          wxBoxSizer *gr2Sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
             wxCheckBox* gr2CBox = DEBUG_NEW wxCheckBox(this, CDGRID_CBOX2, wxT("Set 2:"));
@@ -2724,9 +2732,11 @@ tui::TopedPropertySheets::CanvasPSheet::CanvasPSheet(wxWindow* parent) : wxPanel
                                                        wxDefaultSize,
                                                        wxTE_RIGHT | wxTE_PROCESS_ENTER,
                                                        wxTextValidator(wxFILTER_NUMERIC));
+            wxButton*  gr2Enter = DEBUG_NEW wxButton(this, CDGRID_ENTER2, wxT("Set"));
 
             gr2Sizer->Add(gr2CBox, 0, wxTOP | wxBOTTOM | wxLEFT  | wxALIGN_CENTER | wxEXPAND, 5);
             gr2Sizer->Add(gr2TBox ,1, wxTOP | wxBOTTOM | wxRIGHT | wxALIGN_CENTER | wxEXPAND, 5);
+            gr2Sizer->Add(gr2Enter,0, wxTOP | wxBOTTOM | wxRIGHT | wxALIGN_CENTER | wxEXPAND, 5);
 
          wxBoxSizer *gr3Sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
             wxCheckBox* gr3CBox = DEBUG_NEW wxCheckBox(this, CDGRID_CBOX3, wxT("Set 3:"));
@@ -2735,9 +2745,11 @@ tui::TopedPropertySheets::CanvasPSheet::CanvasPSheet(wxWindow* parent) : wxPanel
                                                        wxDefaultSize,
                                                        wxTE_RIGHT | wxTE_PROCESS_ENTER,
                                                        wxTextValidator(wxFILTER_NUMERIC));
+            wxButton*  gr3Enter = DEBUG_NEW wxButton(this, CDGRID_ENTER3, wxT("Set"));
 
             gr3Sizer->Add(gr3CBox, 0, wxTOP | wxBOTTOM | wxLEFT  | wxALIGN_CENTER | wxEXPAND, 5);
             gr3Sizer->Add(gr3TBox ,1, wxTOP | wxBOTTOM | wxRIGHT | wxALIGN_CENTER | wxEXPAND, 5);
+            gr3Sizer->Add(gr3Enter,0, wxTOP | wxBOTTOM | wxRIGHT | wxALIGN_CENTER | wxEXPAND, 5);
 
       gridSizer->Add(gr1Sizer, 0, wxALL | wxALIGN_CENTER | wxEXPAND);
       gridSizer->Add(gr2Sizer, 0, wxALL | wxALIGN_CENTER | wxEXPAND);
@@ -2760,11 +2772,15 @@ tui::TopedPropertySheets::CanvasPSheet::CanvasPSheet(wxWindow* parent) : wxPanel
    topSizer->Fit(this);
 }
 
-void tui::TopedPropertySheets::CanvasPSheet::OnMarkerStep(wxCommandEvent& cmdEvent)
+void tui::TopedPropertySheets::CanvasPSheet::OnMarkerStep(wxCommandEvent& WXUNUSED(event))
 {
+   wxWindow* targetControl;
+   targetControl = FindWindow(CDMARKER_STEP);assert(targetControl);
+   wxString contents = static_cast<wxTextCtrl*>(targetControl)->GetValue( );
+
    wxString ost;
    ost << wxT("step(")
-       << cmdEvent.GetString()
+       << contents
        << wxT(");");
    TpdPost::parseCommand(ost);
 }
@@ -2812,29 +2828,41 @@ void tui::TopedPropertySheets::CanvasPSheet::OnGridOn3(wxCommandEvent& cmdEvent)
    TpdPost::parseCommand(ost);
 }
 
-void tui::TopedPropertySheets::CanvasPSheet::OnGridSet1(wxCommandEvent& cmdEvent)
+void tui::TopedPropertySheets::CanvasPSheet::OnGridSet1(wxCommandEvent& WXUNUSED(event))
 {
+   wxWindow* targetControl;
+   targetControl = FindWindow(CDGRID_SET1);assert(targetControl);
+   wxString contents = static_cast<wxTextCtrl*>(targetControl)->GetValue( );
+
    wxString ost;
    ost << wxT("definegrid(0,")
-       << cmdEvent.GetString()
+       << contents
        << wxT(",\"white\");");
    TpdPost::parseCommand(ost);
 }
 
-void tui::TopedPropertySheets::CanvasPSheet::OnGridSet2(wxCommandEvent& cmdEvent)
+void tui::TopedPropertySheets::CanvasPSheet::OnGridSet2(wxCommandEvent& WXUNUSED(event))
 {
+   wxWindow* targetControl;
+   targetControl = FindWindow(CDGRID_SET2);assert(targetControl);
+   wxString contents = static_cast<wxTextCtrl*>(targetControl)->GetValue( );
+
    wxString ost;
    ost << wxT("definegrid(1,")
-       << cmdEvent.GetString()
+       << contents
        << wxT(",\"white\");");
    TpdPost::parseCommand(ost);
 }
 
-void tui::TopedPropertySheets::CanvasPSheet::OnGridSet3(wxCommandEvent& cmdEvent)
+void tui::TopedPropertySheets::CanvasPSheet::OnGridSet3(wxCommandEvent& WXUNUSED(event))
 {
+   wxWindow* targetControl;
+   targetControl = FindWindow(CDGRID_SET3);assert(targetControl);
+   wxString contents = static_cast<wxTextCtrl*>(targetControl)->GetValue( );
+
    wxString ost;
    ost << wxT("definegrid(2,")
-       << cmdEvent.GetString()
+       << contents
        << wxT(",\"white\");");
    TpdPost::parseCommand(ost);
 }

@@ -98,10 +98,14 @@ namespace tui {
 
    typedef enum {
       CDMARKER_STEP       ,
+      CDMARKER_STEP_SET   ,
       CDMARKER_MOTION     ,
       CDGRID_SET1         ,
+      CDGRID_ENTER1       ,
       CDGRID_SET2         ,
+      CDGRID_ENTER2       ,
       CDGRID_SET3         ,
+      CDGRID_ENTER3       ,
       CDGRID_CBOX1        ,
       CDGRID_CBOX2        ,
       CDGRID_CBOX3        ,
@@ -679,14 +683,14 @@ namespace tui {
                                 CanvasPSheet(wxWindow*);
          void                   update(wxCommandEvent&);
       private:
-         void                   OnMarkerStep  (wxCommandEvent&);
+         void                   OnMarkerStep  (wxCommandEvent& WXUNUSED(event));
          void                   OnMarkerMotion(wxCommandEvent&);
          void                   OnGridOn1     (wxCommandEvent&);
          void                   OnGridOn2     (wxCommandEvent&);
          void                   OnGridOn3     (wxCommandEvent&);
-         void                   OnGridSet1    (wxCommandEvent&);
-         void                   OnGridSet2    (wxCommandEvent&);
-         void                   OnGridSet3    (wxCommandEvent&);
+         void                   OnGridSet1    (wxCommandEvent& WXUNUSED(event));
+         void                   OnGridSet2    (wxCommandEvent& WXUNUSED(event));
+         void                   OnGridSet3    (wxCommandEvent& WXUNUSED(event));
          void                   OnLongCorsor  (wxCommandEvent&);
          void                   OnAutoPan     (wxCommandEvent&);
          void                   OnBoldOnHoover(wxCommandEvent&);
