@@ -74,8 +74,8 @@ void Calbr::drcTenderer::addPoly(const CoordsVector   &coords)
    if (_startDrawing)
    {
       _startDrawing = false;
-      _max = TP(coords.begin()->x(), coords.begin()->y())*_ctm;
-      _min = TP(coords.begin()->x(), coords.begin()->y())*_ctm;
+     _max = TP(coords.begin()->x(), coords.begin()->y());
+     _min = TP(coords.begin()->x(), coords.begin()->y());
    }
 
    if (_ATDB)
@@ -86,7 +86,7 @@ void Calbr::drcTenderer::addPoly(const CoordsVector   &coords)
 
       for(CoordsVector::const_iterator it = coords.begin(); it!= coords.end(); ++it)
       {
-         TP tempPoint = (*it)*_ctm;
+         TP tempPoint = (*it);
          _max.setX(std::max(tempPoint.x(), _max.x()));
          _max.setY(std::max(tempPoint.y(), _max.y()));
          _min.setX(std::min(tempPoint.x(), _min.x()));
@@ -97,39 +97,21 @@ void Calbr::drcTenderer::addPoly(const CoordsVector   &coords)
       laydata::QTreeTmp* dwl = _DRCCell->secureUnsortedLayer(_numError);
       PROPC->addUnpublishedLay(_numError);
 
-      /*laydata::ValidPoly check(plDB);
-      if (!check.valid())
-      {
-         std::ostringstream ost;
-         ost << "Poly check fails - {" << check.failType() << " }";
-         tell_log(console::MT_ERROR, ost.str());
-      }
-      else plDB = check.getValidated();
-      if (check.box())  
-      {
-         laydata::TdtBoxEXT *shape = DEBUG_NEW laydata::TdtBoxEXT(plDB[0], plDB[1]);
-         shape->transfer(_ctm);
-         shape->setLong(_numError);
-         dwl->put(shape);
-      }
-      else
-      {*/
-         laydata::TdtPolyEXT *shape = DEBUG_NEW laydata::TdtPolyEXT(plDB);
-         shape->setLong(_numError);
-         shape->transfer(_ctm);
-         dwl->put(shape);
-     // }
+      laydata::TdtPolyEXT *shape = DEBUG_NEW laydata::TdtPolyEXT(plDB);
+      shape->setLong(_numError);
+      //shape->transfer(_ctm);
+      dwl->put(shape);
    }
 }
 
 void Calbr::drcTenderer::addLine(const edge &edge)
 {
-   TP tempPoint1 = TP(edge.x1, edge.y1)*_ctm;
-   TP tempPoint2 = TP(edge.x2, edge.y2)*_ctm;
+   TP tempPoint1 = TP(edge.x1, edge.y1);
+   TP tempPoint2 = TP(edge.x2, edge.y2);
    if (_startDrawing)
    {
-      _max = TP(edge.x1, edge.y1)*_ctm;
-      _min = TP(edge.x1, edge.y1)*_ctm;
+      _max = TP(edge.x1, edge.y1);
+      _min = TP(edge.x1, edge.y1);
    }
    else
    {
