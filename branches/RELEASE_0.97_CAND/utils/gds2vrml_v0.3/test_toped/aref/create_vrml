@@ -1,0 +1,40 @@
+#!/bin/bash
+
+LD_LIBRARY_PATH=~/src/gdsto3d-20080229/build/libgdsto3d:$LD_LIBRARY_PATH
+
+GDS2VRML=../../src/gds2vrml
+
+## extract cell-name
+if [ -f $1 ] ; then
+    CELL=`basename $1 .gds`
+    echo "--> converting cell $CELL " 
+else
+    echo "usage: create_vrml <file.gds> [<top-cell-name>]"
+    echo "ERROR: parameter $1 is not a valid filename"
+    exit
+fi
+
+## check for top-cell name
+if [ "x$2" == "x" ] ; then
+    ## attention Cadence converts top-cell names if it contains unsupported signs 
+    ## like dots 
+    TOP=`echo ${CELL} | sed -e "s/\./\_/"`
+else
+    TOP=$2
+fi
+
+## removes existing WRL files
+if [ -f ${CELL}.wrl ] ; then
+    rm -f ${CELL}.wrl
+fi
+
+if [ -f ${CELL}.wrl.gz ] ; then
+    rm -f ${CELL}.wrl.gz
+fi
+
+
+${GDS2VRML} -i ${CELL}.gds -o ${CELL}.wrl -p simple.txt -t ${TOP}
+
+# view3dscene can read gzipped files?!
+gzip ${CELL}.wrl
+

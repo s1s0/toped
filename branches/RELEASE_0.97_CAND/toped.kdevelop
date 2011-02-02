@@ -1,0 +1,274 @@
+<?xml version = '1.0'?>
+<kdevelop>
+  <general>
+    <author>Svilen Krustev</author>
+    <email>s_krustev@toped.org.uk</email>
+    <version>$VERSION$</version>
+    <projectmanagement>KDevAutoProject</projectmanagement>
+    <primarylanguage>C++</primarylanguage>
+    <ignoreparts/>
+    <projectdirectory>.</projectdirectory>
+    <absoluteprojectpath>false</absoluteprojectpath>
+    <description/>
+    <versioncontrol>kdevsubversion</versioncontrol>
+    <secondaryLanguages/>
+    <projectname>toped</projectname>
+    <defaultencoding/>
+  </general>
+  <kdevautoproject>
+    <general>
+      <activetarget>src/toped</activetarget>
+      <useconfiguration>debug</useconfiguration>
+    </general>
+    <run>
+      <mainprogram>/local_home/skr/toped/debug</mainprogram>
+      <directoryradio>executable</directoryradio>
+      <customdirectory>/</customdirectory>
+      <programargs/>
+      <terminal>true</terminal>
+      <autocompile>true</autocompile>
+      <envvars>
+        <envvar value="/home/skr/toped_public" name="TPD_GLOBAL" />
+        <envvar value="/home/skr/toped_public" name="TPD_LOCAL" />
+      </envvars>
+      <globaldebugarguments/>
+      <globalcwd>/local_home/skr/toped/debug</globalcwd>
+      <useglobalprogram>false</useglobalprogram>
+      <autoinstall>false</autoinstall>
+      <autokdesu>false</autokdesu>
+    </run>
+    <configurations>
+      <optimized>
+        <builddir>optimized</builddir>
+        <ccompiler>kdevgccoptions</ccompiler>
+        <cxxcompiler>kdevgppoptions</cxxcompiler>
+        <f77compiler>kdevpgf77options</f77compiler>
+        <cxxflags>-O2 -g0</cxxflags>
+        <envvars/>
+        <configargs>--prefix /opt/toped</configargs>
+        <topsourcedir/>
+        <cppflags/>
+        <ldflags/>
+        <ccompilerbinary/>
+        <cxxcompilerbinary/>
+        <f77compilerbinary/>
+        <cflags>-O2 -g0</cflags>
+        <f77flags/>
+      </optimized>
+      <debug>
+        <configargs>--prefix=/local_home/skr/opt/toped</configargs>
+        <builddir>/local_home/skr/toped/debug</builddir>
+        <ccompiler>kdevgccoptions</ccompiler>
+        <cxxcompiler>kdevgppoptions</cxxcompiler>
+        <f77compiler>kdevpgf77options</f77compiler>
+        <cxxflags>-O0 -Wall -ggdb -pg</cxxflags>
+        <envvars/>
+        <topsourcedir/>
+        <cppflags/>
+        <ldflags>-pg</ldflags>
+        <ccompilerbinary/>
+        <cxxcompilerbinary/>
+        <f77compilerbinary/>
+        <cflags>-O0 -Wall -ggdb -pg</cflags>
+        <f77flags/>
+      </debug>
+    </configurations>
+    <make>
+      <envvars>
+        <envvar value="1" name="WANT_AUTOCONF_2_5" />
+        <envvar value="1" name="WANT_AUTOMAKE_1_6" />
+      </envvars>
+      <abortonerror>false</abortonerror>
+      <numberofjobs>1</numberofjobs>
+      <dontact>false</dontact>
+      <makebin/>
+      <prio>0</prio>
+      <runmultiplejobs>false</runmultiplejobs>
+    </make>
+  </kdevautoproject>
+  <kdevdebugger>
+    <general>
+      <dbgshell>libtool execute</dbgshell>
+      <programargs/>
+      <gdbpath/>
+      <configGdbScript/>
+      <runShellScript/>
+      <runGdbScript/>
+      <breakonloadinglibs>true</breakonloadinglibs>
+      <separatetty>false</separatetty>
+      <floatingtoolbar>false</floatingtoolbar>
+      <raiseGDBOnStart>false</raiseGDBOnStart>
+    </general>
+    <display>
+      <staticmembers>false</staticmembers>
+      <demanglenames>true</demanglenames>
+      <outputradix>10</outputradix>
+    </display>
+  </kdevdebugger>
+  <kdevdoctreeview>
+    <ignoretocs>
+      <toc>ada</toc>
+      <toc>ada_bugs_gcc</toc>
+      <toc>bash</toc>
+      <toc>bash_bugs</toc>
+      <toc>clanlib</toc>
+      <toc>fortran_bugs_gcc</toc>
+      <toc>gnome1</toc>
+      <toc>gnustep</toc>
+      <toc>gtk</toc>
+      <toc>gtk_bugs</toc>
+      <toc>haskell</toc>
+      <toc>haskell_bugs_ghc</toc>
+      <toc>java_bugs_gcc</toc>
+      <toc>java_bugs_sun</toc>
+      <toc>kde2book</toc>
+      <toc>opengl</toc>
+      <toc>pascal_bugs_fp</toc>
+      <toc>php</toc>
+      <toc>php_bugs</toc>
+      <toc>perl</toc>
+      <toc>perl_bugs</toc>
+      <toc>python</toc>
+      <toc>python_bugs</toc>
+      <toc>qt-kdev3</toc>
+      <toc>ruby</toc>
+      <toc>ruby_bugs</toc>
+      <toc>sdl</toc>
+      <toc>sw</toc>
+      <toc>w3c-dom-level2-html</toc>
+      <toc>w3c-svg</toc>
+      <toc>w3c-uaag10</toc>
+      <toc>wxwidgets_bugs</toc>
+    </ignoretocs>
+    <ignoreqt_xml>
+      <toc>Guide to the Qt Translation Tools</toc>
+      <toc>Qt Assistant Manual</toc>
+      <toc>Qt Designer Manual</toc>
+      <toc>Qt Reference Documentation</toc>
+      <toc>qmake User Guide</toc>
+    </ignoreqt_xml>
+    <ignoredoxygen>
+      <toc>KDE Libraries (Doxygen)</toc>
+    </ignoredoxygen>
+  </kdevdoctreeview>
+  <kdevfilecreate>
+    <filetypes/>
+    <useglobaltypes>
+      <type ext="ui" />
+      <type ext="cpp" />
+      <type ext="h" />
+      <type ext="ll" />
+      <type ext="yy" />
+    </useglobaltypes>
+  </kdevfilecreate>
+  <kdevcppsupport>
+    <references/>
+    <codecompletion>
+      <includeGlobalFunctions>true</includeGlobalFunctions>
+      <includeTypes>true</includeTypes>
+      <includeEnums>true</includeEnums>
+      <includeTypedefs>false</includeTypedefs>
+      <automaticCodeCompletion>true</automaticCodeCompletion>
+      <automaticArgumentsHint>true</automaticArgumentsHint>
+      <automaticHeaderCompletion>true</automaticHeaderCompletion>
+      <codeCompletionDelay>250</codeCompletionDelay>
+      <argumentsHintDelay>400</argumentsHintDelay>
+      <headerCompletionDelay>250</headerCompletionDelay>
+      <showOnlyAccessibleItems>false</showOnlyAccessibleItems>
+      <completionBoxItemOrder>0</completionBoxItemOrder>
+      <howEvaluationContextMenu>true</howEvaluationContextMenu>
+      <showCommentWithArgumentHint>true</showCommentWithArgumentHint>
+      <statusBarTypeEvaluation>false</statusBarTypeEvaluation>
+      <namespaceAliases>std=_GLIBCXX_STD;__gnu_cxx=std</namespaceAliases>
+      <processPrimaryTypes>true</processPrimaryTypes>
+      <processFunctionArguments>false</processFunctionArguments>
+      <preProcessAllHeaders>false</preProcessAllHeaders>
+      <parseMissingHeadersExperimental>false</parseMissingHeadersExperimental>
+      <resolveIncludePathsUsingMakeExperimental>false</resolveIncludePathsUsingMakeExperimental>
+      <alwaysParseInBackground>true</alwaysParseInBackground>
+      <usePermanentCaching>true</usePermanentCaching>
+      <alwaysIncludeNamespaces>false</alwaysIncludeNamespaces>
+      <includePaths>.;</includePaths>
+    </codecompletion>
+    <creategettersetter>
+      <prefixGet/>
+      <prefixSet>set</prefixSet>
+      <prefixVariable>m_,_</prefixVariable>
+      <parameterName>theValue</parameterName>
+      <inlineGet>true</inlineGet>
+      <inlineSet>true</inlineSet>
+    </creategettersetter>
+    <qt>
+      <used>false</used>
+      <version>3</version>
+      <root>/usr/lib64/qt-3.3</root>
+      <includestyle>3</includestyle>
+      <designerintegration>EmbeddedKDevDesigner</designerintegration>
+      <qmake>/usr/lib64/qt-3.3/bin/qmake</qmake>
+      <designer>/usr/lib64/qt-3.3/bin/designer</designer>
+      <designerpluginpaths/>
+    </qt>
+    <splitheadersource>
+      <enabled>false</enabled>
+      <synchronize>true</synchronize>
+      <orientation>Vertical</orientation>
+    </splitheadersource>
+  </kdevcppsupport>
+  <kdevfileview>
+    <groups>
+      <group pattern="*.cpp; *.c" name="Sources" />
+      <group pattern="*.h" name="Headers" />
+      <group pattern="*.yy" name="Parsers" />
+      <group pattern="*.ll" name="Lexers" />
+      <hidenonprojectfiles>false</hidenonprojectfiles>
+      <hidenonlocation>false</hidenonlocation>
+    </groups>
+    <tree>
+      <hidepatterns>*.o,*.lo,CVS</hidepatterns>
+      <hidenonprojectfiles>false</hidenonprojectfiles>
+      <showvcsfields>true</showvcsfields>
+    </tree>
+  </kdevfileview>
+  <cppsupportpart>
+    <filetemplates>
+      <interfacesuffix>.h</interfacesuffix>
+      <implementationsuffix>.cpp</implementationsuffix>
+    </filetemplates>
+  </cppsupportpart>
+  <ctagspart>
+    <customArguments/>
+    <customTagfilePath/>
+  </ctagspart>
+  <kdevdocumentation>
+    <projectdoc>
+      <docsystem>Doxygen Documentation Collection</docsystem>
+      <docurl>toped.tag</docurl>
+      <usermanualurl>/home/skr/toped_public/doc/API/html</usermanualurl>
+    </projectdoc>
+  </kdevdocumentation>
+  <dist>
+    <custom>false</custom>
+    <bzip>true</bzip>
+    <archname>%n_%v_%d</archname>
+    <appname>toped.kdevelop</appname>
+    <version>0.8</version>
+    <release>3</release>
+    <vendor>Svilen Krastev</vendor>
+    <licence>GPL</licence>
+    <summary>IC Layout Editor</summary>
+    <group>Applications/Engineering</group>
+    <packager>Svilen Krastev</packager>
+    <description>VLSI layout editor</description>
+    <changelog>*
+- first RPM</changelog>
+    <devpackage>false</devpackage>
+    <docspackage>false</docspackage>
+    <appicon>false</appicon>
+    <arch>8</arch>
+    <genHTML>false</genHTML>
+    <useRPM>false</useRPM>
+    <ftpkde>false</ftpkde>
+    <appskde>false</appskde>
+    <url/>
+  </dist>
+</kdevelop>
