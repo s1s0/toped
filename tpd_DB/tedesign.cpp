@@ -1722,23 +1722,23 @@ void laydata::DrcLibrary::registerCellRead(std::string cellname, TdtCell* cell) 
    _cells[cellname] = cell;
 }
 
-WordList laydata::DrcLibrary::findSelected(TP* p1)
+WordList laydata::DrcLibrary::findSelected(const std::string &cell, TP* p1)
 {
    //TdtDefaultCell* cell = checkCell("drc");
-   TdtCell* cell = dynamic_cast<TdtCell*>(checkCell("drc"));
+   TdtCell* theCell = dynamic_cast<TdtCell*>(checkCell(cell));
    TP selp;
    WordList errorList;
    laydata::AtticList* shapes;
    laydata::ShapeList *shapeList;
    TdtData *shape;
-   if (cell) {
+   if (theCell) {
 
       layprop::DrawProperties* drawProp;
       if (PROPC->lockDrawProp(drawProp, layprop::DRC))
       {
          selp = (*p1)*CTM().Reversed(); //Take identity matrix
          //??? Add here Error List construction
-         shapes = cell->findSelected(selp);
+         shapes = theCell->findSelected(selp);
          for(laydata::AtticList::const_iterator it = shapes->begin(); it != shapes->end(); ++it)
          {
             word error;
@@ -1753,6 +1753,16 @@ WordList laydata::DrcLibrary::findSelected(TP* p1)
       }
       PROPC->unlockDrawProp(drawProp);
       errorList.unique();
+      if(shapes != NULL)
+      {
+         for(laydata::AtticList::iterator it = shapes->begin(); it != shapes->end(); ++it)
+         {
+            shapeList = (*it).second;
+            delete shapeList;
+         }
+
+         delete shapes;
+      }
       return errorList;
    }
    else

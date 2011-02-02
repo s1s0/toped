@@ -726,9 +726,13 @@ void   Calbr::CalbrFile::hideAllErrors(void)
 
 std::string Calbr::CalbrFile::explainError(word lay)
 {
-   for(RuleChecksVector::const_iterator it = _RuleChecks.begin(); it!= _RuleChecks.end(); ++it)
+   for(CellDRCMap::const_iterator m_it = _cellDRCMap.begin(); m_it!=_cellDRCMap.end(); ++m_it)
    {
-      if ((*it)->num() == lay) return (*it)->ruleCheckName();
+      RuleChecksVector *ruleChecks = &((*m_it).second->_RuleChecks);
+      for(RuleChecksVector::const_iterator it = ruleChecks->begin(); it!= ruleChecks->end(); ++it)
+      {
+         if ((*it)->num() == lay) return (*it)->ruleCheckName();
+      }
    }
    assert(true);
    //dummy, to prevent compiler warnings!
