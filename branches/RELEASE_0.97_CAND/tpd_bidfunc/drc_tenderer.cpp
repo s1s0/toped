@@ -74,8 +74,8 @@ void Calbr::drcTenderer::addPoly(const CoordsVector   &coords)
    if (_startDrawing)
    {
       _startDrawing = false;
-     _max = TP(coords.begin()->x(), coords.begin()->y());
-     _min = TP(coords.begin()->x(), coords.begin()->y());
+      _max = TP(coords.begin()->x(), coords.begin()->y())*_ctm;
+      _min = TP(coords.begin()->x(), coords.begin()->y())*_ctm;
    }
 
    if (_ATDB)
@@ -86,7 +86,7 @@ void Calbr::drcTenderer::addPoly(const CoordsVector   &coords)
 
       for(CoordsVector::const_iterator it = coords.begin(); it!= coords.end(); ++it)
       {
-         TP tempPoint = (*it);
+         TP tempPoint = (*it)*_ctm;
          _max.setX(std::max(tempPoint.x(), _max.x()));
          _max.setY(std::max(tempPoint.y(), _max.y()));
          _min.setX(std::min(tempPoint.x(), _min.x()));
@@ -99,15 +99,15 @@ void Calbr::drcTenderer::addPoly(const CoordsVector   &coords)
 
       laydata::TdtPolyEXT *shape = DEBUG_NEW laydata::TdtPolyEXT(plDB);
       shape->setLong(_numError);
-      //shape->transfer(_ctm);
+      shape->transfer(_ctm);
       dwl->put(shape);
    }
 }
 
 void Calbr::drcTenderer::addLine(const edge &edge)
-{
-   TP tempPoint1 = TP(edge.x1, edge.y1);
-   TP tempPoint2 = TP(edge.x2, edge.y2);
+{  
+   TP tempPoint1 = TP(edge.x1, edge.y1)*_ctm;
+   TP tempPoint2 = TP(edge.x2, edge.y2)*_ctm;
    if (_startDrawing)
    {
       _max = TP(edge.x1, edge.y1);
@@ -115,8 +115,6 @@ void Calbr::drcTenderer::addLine(const edge &edge)
    }
    else
    {
-
-
       long maxx, maxy, minx, miny;
       maxx = std::max(_max.x(), std::max(tempPoint1.x(), tempPoint2.x()));
       maxy = std::max(_max.y(), std::max(tempPoint1.y(), tempPoint2.y()));
@@ -155,6 +153,7 @@ void Calbr::drcTenderer::addLine(const edge &edge)
 */
    laydata::TdtWireEXT *shape = DEBUG_NEW laydata::TdtWireEXT(plDB, width);
    shape->setLong(_numError);
+   shape->transfer(_ctm);
    dwl->put(shape);
 }
 
@@ -170,6 +169,12 @@ void Calbr::drcTenderer::showAll(void)
             drawProp->hideLayer((*it), false);
       }
       PROPC->unlockDrawProp(drawProp);
+      edge zoomEdge;
+      zoomEdge.x1 = _min.x();
+      zoomEdge.y1 = _min.y();
+      zoomEdge.x2 = _max.x();
+      zoomEdge.y2 = _max.y();
+      zoom(zoomEdge);
       tellstdfunc::RefreshGL();
    }
    else
