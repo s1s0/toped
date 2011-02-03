@@ -300,6 +300,7 @@ void Calbr::CalbrFile::readFile()
       drcPolygon::_precision = _precision;
       drcEdge::_precision = _precision;
       _curCellName = cellName;
+      _topCellName = cellName;
       unsigned int num = 1;
 
       cellNameStruct *CNStruct = DEBUG_NEW cellNameStruct;
@@ -716,7 +717,7 @@ void   Calbr::CalbrFile::showCluster(const std::string & error)
 void   Calbr::CalbrFile::showAllErrors(void)
 {
    _render->showAll();
-   _render->zoom(_border);
+   //_render->zoom(_border);
 }
 
 void   Calbr::CalbrFile::hideAllErrors(void)

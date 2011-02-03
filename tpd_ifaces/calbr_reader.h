@@ -181,9 +181,11 @@ namespace Calbr
          bool              isOk(void)   {return _ok;}
          drcRenderer*      render() const {return _render;};
          std::string       cellName() {return _curCellName;};
+         std::string       topCellName() {return _topCellName;};
       private:
          FILE*             _calbrFile;
          std::string       _fileName;
+         std::string       _topCellName;
          long              _precision;
 
          std::ifstream     _inFile;
