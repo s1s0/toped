@@ -67,7 +67,7 @@
 // (if the class is inherited) because of the argument checks
 #ifndef TELL_STDCMD_CLASSA
 #define TELL_STDCMD_CLASSA(name)                                  \
-   class name : public cmdSTDFUNC {                               \
+   class name : public parsercmd::cmdSTDFUNC {                    \
    public:                                                        \
       name(telldata::typeID retype, bool eor);                    \
       int         execute();                                      \
@@ -75,7 +75,7 @@
       void        undo_cleanup() {};                              \
    protected:                                                     \
       name(parsercmd::argumentLIST* al,telldata::typeID retype, bool eor) : \
-                                         cmdSTDFUNC(al,retype,eor) {};\
+                                    parsercmd::cmdSTDFUNC(al,retype,eor) {};\
    }
 #endif
 
@@ -84,7 +84,7 @@
 // (if the class is inherited) because of the argument checks
 #ifndef TELL_STDCMD_CLASSA_UNDO
 #define TELL_STDCMD_CLASSA_UNDO(name)                             \
-   class name : public cmdSTDFUNC {                               \
+   class name : public parsercmd::cmdSTDFUNC {                    \
    public:                                                        \
       name(telldata::typeID retype, bool eor);                    \
       int         execute();                                      \
@@ -92,7 +92,7 @@
       void        undo_cleanup();                                 \
    protected:                                                     \
       name(parsercmd::argumentLIST* al,telldata::typeID retype, bool eor, DbSortState rDBt= sdbrSORTED) : \
-                                         cmdSTDFUNC(al,retype, eor, rDBt) {};\
+                   parsercmd::cmdSTDFUNC(al,retype, eor, rDBt) {};\
    }
 #endif
 
@@ -114,13 +114,13 @@
 // of this class - see the comments on top of the file
 #ifndef TELL_STDCMD_CLASSC
 #define TELL_STDCMD_CLASSC(name)                                  \
-   class name : public cmdSTDFUNC {                               \
+   class name : public parsercmd::cmdSTDFUNC {                    \
    public:                                                        \
-      name(telldata::typeID retype, bool eor):cmdSTDFUNC(NULL,retype,eor) {};   \
+      name(telldata::typeID retype, bool eor):parsercmd::cmdSTDFUNC(NULL,retype,eor) {};   \
       int         execute();                                      \
       void        undo() {};                                      \
       void        undo_cleanup() {};                              \
-      int         argsOK(argumentQ* amap);                        \
+      int         argsOK(telldata::argumentQ* amap);              \
       NameList*   callingConv(const telldata::typeMAP*);          \
    }
 #endif
