@@ -296,8 +296,8 @@ unsigned GCD(unsigned arg1, unsigned arg2);
 
 //=============================================================================
 // A template of a cell hierarchy used for all layout databases in Toped (TDT,
-// GDS, CIF). The cell browser panels only miror the hierarchy build in the
-// data bases of this type.
+// GDS, CIF, Oasis). The cell browser panels only mirror the hierarchy build in
+// the data bases of this type.
 // Layout hierarchies have their specifics.
 //  - Cell instances don't have instance names. This means that if a certain
 //    cell is instantiated several times in another cell - this will be shown
@@ -319,14 +319,13 @@ unsigned GCD(unsigned arg1, unsigned arg2);
 //    hierarchy tree.
 //  - A linear pointer to the last member of the hierarchy structure. It is used
 //    to search and traverse the entire tree. Only one member can have it's
-//    "last" field poining to NULL. The code shall always keep a pointer to the
+//    "last" field pointing to NULL. The code shall always keep a pointer to the
 //    component added last to the hierarchy.
 // The structure can be used in two ways.
 // - to build a hierarchy of a data base in memory. This is used after an
-//   external DB or library was loaded and also when GDS or CIF files are parsed.
-// - dynamically - when the layout is updated interactively. This is used also
-//   when a GDS or CIF databases are converted to TDT.
-//
+//   external DB or library was loaded and also when external DBs are parsed.
+// - dynamically - when the layout is updated interactively. Beware that this
+//   method can be painfully slow when used intensively for big DBs
 
 template <class TYPE> class SGHierTree {
 public:
