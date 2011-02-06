@@ -687,11 +687,14 @@ void   Calbr::CalbrFile::showError(const std::string& cell, const std::string& e
 }
 
 
-void   Calbr::CalbrFile::showCluster(const std::string & error)
+void   Calbr::CalbrFile::showCluster(const std::string & cell, const std::string & error)
 {
+   Calbr::cellNameStruct* cellStruct =_cellDRCMap[cell];
+   RuleChecksVector* ruleChecks = &(cellStruct->_RuleChecks);
+
    edge zoom;
    RuleChecksVector::const_iterator it;
-   for(it = _RuleChecks.begin(); it!= _RuleChecks.end(); ++it)
+   for(it = ruleChecks->begin(); it!= ruleChecks->end(); ++it)
    {
       std::string x = (*it)->ruleCheckName();
       if((*it)->ruleCheckName() == error)
@@ -711,7 +714,7 @@ void   Calbr::CalbrFile::showCluster(const std::string & error)
          }
       }
    }
-   assert(it == _RuleChecks.end());
+   assert(it == ruleChecks->end());
 }
 
 void   Calbr::CalbrFile::showAllErrors(void)

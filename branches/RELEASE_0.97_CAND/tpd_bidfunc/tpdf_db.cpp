@@ -1815,7 +1815,14 @@ tellstdfunc::DRCshowcluster::DRCshowcluster(telldata::typeID retype, bool eor) :
 int tellstdfunc::DRCshowcluster::execute()
 {
    std::string errorName = getStringValue();
-   DRCData->showCluster(errorName);
+   laydata::TdtLibDir *libDir;
+   std::string activeCell;
+   DATC->lockTDT(libDir, dbmxs_liblock);
+      laydata::TdtDesign *design = (*libDir)();
+      activeCell = design->activeCellName();
+   DATC->unlockTDT(libDir);
+
+   DRCData->showCluster(activeCell, errorName);
    return EXEC_NEXT;
 }
 
