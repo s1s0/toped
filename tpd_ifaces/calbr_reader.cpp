@@ -131,10 +131,10 @@ Calbr::drcRuleCheck::drcRuleCheck(unsigned int num, const std::string &name)
 }
 
 Calbr::drcRuleCheck::drcRuleCheck(const drcRuleCheck& ruleCheck)
+      :_borderInit(false)
 {
    _num = ruleCheck._num;
    _ruleCheckName = ruleCheck._ruleCheckName;
-   _borderInit = ruleCheck._borderInit;
 }
 
 Calbr::drcRuleCheck::~drcRuleCheck()
