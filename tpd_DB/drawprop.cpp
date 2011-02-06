@@ -985,6 +985,7 @@ std::string layprop::DrawProperties::getLineName(unsigned layno) const
 
 unsigned layprop::DrawProperties::getTenderLay(unsigned layno) const
 {
+//   if (REF_LAY == layno) return layno;//no references yet in the DRC DB
    switch (_propertyState)
    {
       case DB: return layno;

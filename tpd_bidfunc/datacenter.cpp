@@ -778,8 +778,10 @@ void DataCenter::openGlDraw(const CTM& layCTM)
                   if (dst_structure)
                   {
                      drawProp->initCtmStack();
+//                     drawProp->initDrawRefStack(NULL); // no references yet in the DRC DB
                      dst_structure->openGlDraw(*drawProp);
-                     drawProp->clearCtmStack();
+//                     drawProp->clearCtmStack();
+                     drawProp->clearDrawRefStack();
                   }
                   drawProp->setState(layprop::DB);
                   VERIFY(wxMUTEX_NO_ERROR == _DRCLock.Unlock());
