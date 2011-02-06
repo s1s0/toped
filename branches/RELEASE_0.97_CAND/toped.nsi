@@ -18,7 +18,7 @@
 Name "toped"
 
 ; The file to write
-OutFile "toped_install-0.9.65r1580.exe"
+OutFile "toped_install-0.97.r1747.exe"
 
 ; The default installation directory
 InstallDir $PROGRAMFILES\toped
@@ -60,7 +60,7 @@ Section "toped" toped
   ; Put file there
   File "release\toped.exe"
   File "winpack\glu32.dll"
-  File "toped_example.bat"
+  File "winpack\toped_example.bat"
   File "winpack\authors.txt"
   File "winpack\news.txt"
   File "winpack\readme.txt"
@@ -74,6 +74,61 @@ Section "toped" toped
   File "winpack\lib\libmzsch3m_6ncc9s.dll"
   File "winpack\lib\UnicoWS.dll"
   
+  ;gds2vrml files
+  SetOutPath $INSTDIR\utils\gds2vrml
+  File "release\gds2vrml_v0.3.exe"
+  File "gds2vrml\authors"
+  File "gds2vrml\copying"
+  File "gds2vrml\history"
+  File "gds2vrml\news"
+  File "gds2vrml\readme"
+  File "gds2vrml\todo"
+
+  ;gds2vrml samples
+  SetOutPath $INSTDIR\utils\gds2vrml\test_toped\aref
+  File "gds2vrml\test_toped\aref\aref_5x10_norot_noflip_nomag.gds"
+  File "gds2vrml\test_toped\aref\aref_5x10_45_flip_2x.tdt"
+  File "gds2vrml\test_toped\aref\aref_5x10_45_flip_nomag.wrl.gz"
+  File "gds2vrml\test_toped\aref\aref_simple.tdt"
+  File "gds2vrml\test_toped\aref\aref_5x10_norot_flip_nomag.gds"
+  File "gds2vrml\test_toped\aref\aref_5x10_45_noflip_nomag.tdt"
+  File "gds2vrml\test_toped\aref\aref_5x10_norot_noflip_nomag.wrl.gz"
+  File "gds2vrml\test_toped\aref\aref_5x10_45_flip_nomag.tdt"
+  File "gds2vrml\test_toped\aref\aref_5x10_norot_flip_nomag.wrl.gz"
+  File "gds2vrml\test_toped\aref\aref_5x10_norot_noflip_nomag.tdt"
+  File "gds2vrml\test_toped\aref\aref_5x10_45_flip_0.3x.gds"
+  File "gds2vrml\test_toped\aref\aref_5x10_norot_flip_nomag.tdt"
+  File "gds2vrml\test_toped\aref\aref_5x10_45_flip_2x.gds"
+  File "gds2vrml\test_toped\aref\aref_simple.gds"
+  File "gds2vrml\test_toped\aref\aref_5x10_45_flip_0.3x.wrl.gz"
+  File "gds2vrml\test_toped\aref\aref_5x10_45_noflip_nomag.gds"
+  File "gds2vrml\test_toped\aref\aref_5x10_45_flip_2x.wrl.gz"
+  File "gds2vrml\test_toped\aref\simple.txt"
+  File "gds2vrml\test_toped\aref\create_vrml.bat"
+  File "gds2vrml\test_toped\aref\aref_simple.wrl.gz"
+  File "gds2vrml\test_toped\aref\aref_5x10_45_flip_nomag.gds"
+  File "gds2vrml\test_toped\aref\make_all.bat"
+  File "gds2vrml\test_toped\aref\README.txt"
+  File "gds2vrml\test_toped\aref\aref_5x10_45_noflip_nomag.wrl.gz"
+  File "gds2vrml\test_toped\aref\aref_5x10_45_flip_0.3x.tdt"
+
+  SetOutPath $INSTDIR\utils\gds2vrml\test_toped\sref
+  File "gds2vrml\test_toped\sref\sref_hier.tdt"
+  File "gds2vrml\test_toped\sref\sref_3inst_norot_noflip_nomag.tdt"
+  File "gds2vrml\test_toped\sref\sref_hier.gds"
+  File "gds2vrml\test_toped\sref\create_vrml"
+  File "gds2vrml\test_toped\sref\sref_3inst_norot_noflip_nomag.gds"
+  File "gds2vrml\test_toped\sref\make_all"
+  File "gds2vrml\test_toped\sref\sref_3inst_norot_flip_nomag.tdt"
+  File "gds2vrml\test_toped\sref\sref_3inst_norot_flip_nomag.gds"
+  File "gds2vrml\test_toped\sref\simple.txt"
+  File "gds2vrml\test_toped\sref\create_vrml.bat"
+  File "gds2vrml\test_toped\sref\sref_hier.wrl.gz"
+  File "gds2vrml\test_toped\sref\make_all.bat"
+  File "gds2vrml\test_toped\sref\sref_3inst_norot_noflip_nomag.wrl.gz"
+  File "gds2vrml\test_toped\sref\README.txt"
+  File "gds2vrml\test_toped\sref\sref_3inst_norot_flip_nomag.wrl.gz"
+
   ;tll files
   SetOutPath $INSTDIR\tll
   File "tll\arccheck.tll"
@@ -87,6 +142,13 @@ Section "toped" toped
   File "tll\seed.tll"
   ;File "tll\structures.tll"
   File "tll\tcase.tll"
+
+  ;more tll files
+  SetOutPath $INSTDIR\tll\user_functions\general
+  File "tll\user_functions\general\geometry.tll"
+  File "tll\user_functions\general\helper.tll"
+  File "tll\user_functions\general\todo"
+  File "tll\user_functions\general\wires.tll"
 
   ;icons
   SetOutPath $INSTDIR\icons
@@ -224,6 +286,7 @@ Section "toped" toped
   ;Write environment variables
   WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" TPD_GLOBAL "$INSTDIR"
   WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" TPD_LOCAL "$LocalDir"
+  WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" TLL_INCLUDE_PATH "$INSTDIR\tll"
   SetRebootFlag true
 SectionEnd
 
@@ -279,6 +342,7 @@ Section "Uninstall"
 
   DeleteRegValue HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "TPD_GLOBAL"
   DeleteRegValue HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "TPD_LOCAL" 
+  DeleteRegValue HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "TLL_INCLUDE_PATH" 
 
   ; Remove files and uninstaller
   Delete $INSTDIR\toped.exe
@@ -306,6 +370,12 @@ Section "Uninstall"
   Delete $INSTDIR\tll\seed.tll
   ;Delete $INSTDIR\tll\structures.tll
   Delete $INSTDIR\tll\tcase.tll
+
+  ;more tll files
+  Delete $INSTDIR\tll\user_functions\general\geometry.tll
+  Delete $INSTDIR\tll\user_functions\general\helper.tll
+  Delete $INSTDIR\tll\user_functions\general\todo
+  Delete $INSTDIR\tll\user_functions\general\wires.tll
 
 
 
@@ -412,6 +482,59 @@ Section "Uninstall"
   Delete $INSTDIR\icons\zoom_in48x48.png
   Delete $INSTDIR\icons\zoom_out48x48.png
 
+  ;gds2vrml files
+  Delete $INSTDIR\utils\gds2vrml\gds2vrml_v0.3.exe
+  Delete $INSTDIR\utils\gds2vrml\authors
+  Delete $INSTDIR\utils\gds2vrml\copying
+  Delete $INSTDIR\utils\gds2vrml\history
+  Delete $INSTDIR\utils\gds2vrml\news
+  Delete $INSTDIR\utils\gds2vrml\readme
+  Delete $INSTDIR\utils\gds2vrml\todo
+
+  ;gds2vrml samples
+  Delete $INSTDIR\utils\gds2vrml\test_toped\aref\aref_5x10_norot_noflip_nomag.gds
+  Delete $INSTDIR\utils\gds2vrml\test_toped\aref\aref_5x10_45_flip_2x.tdt
+  Delete $INSTDIR\utils\gds2vrml\test_toped\aref\aref_5x10_45_flip_nomag.wrl.gz
+  Delete $INSTDIR\utils\gds2vrml\test_toped\aref\aref_simple.tdt
+  Delete $INSTDIR\utils\gds2vrml\test_toped\aref\aref_5x10_norot_flip_nomag.gds
+  Delete $INSTDIR\utils\gds2vrml\test_toped\aref\aref_5x10_45_noflip_nomag.tdt
+  Delete $INSTDIR\utils\gds2vrml\test_toped\aref\aref_5x10_norot_noflip_nomag.wrl.gz
+  Delete $INSTDIR\utils\gds2vrml\test_toped\aref\aref_5x10_45_flip_nomag.tdt
+  Delete $INSTDIR\utils\gds2vrml\test_toped\aref\aref_5x10_norot_flip_nomag.wrl.gz
+  Delete $INSTDIR\utils\gds2vrml\test_toped\aref\aref_5x10_norot_noflip_nomag.tdt
+  Delete $INSTDIR\utils\gds2vrml\test_toped\aref\aref_5x10_45_flip_0.3x.gds
+  Delete $INSTDIR\utils\gds2vrml\test_toped\aref\aref_5x10_norot_flip_nomag.tdt
+  Delete $INSTDIR\utils\gds2vrml\test_toped\aref\aref_5x10_45_flip_2x.gds
+  Delete $INSTDIR\utils\gds2vrml\test_toped\aref\aref_simple.gds
+  Delete $INSTDIR\utils\gds2vrml\test_toped\aref\aref_5x10_45_flip_0.3x.wrl.gz
+  Delete $INSTDIR\utils\gds2vrml\test_toped\aref\aref_5x10_45_noflip_nomag.gds
+  Delete $INSTDIR\utils\gds2vrml\test_toped\aref\aref_5x10_45_flip_2x.wrl.gz
+  Delete $INSTDIR\utils\gds2vrml\test_toped\aref\simple.txt
+  Delete $INSTDIR\utils\gds2vrml\test_toped\aref\create_vrml.bat
+  Delete $INSTDIR\utils\gds2vrml\test_toped\aref\aref_simple.wrl.gz
+  Delete $INSTDIR\utils\gds2vrml\test_toped\aref\aref_5x10_45_flip_nomag.gds
+  Delete $INSTDIR\utils\gds2vrml\test_toped\aref\make_all.bat
+  Delete $INSTDIR\utils\gds2vrml\test_toped\aref\README.txt
+  Delete $INSTDIR\utils\gds2vrml\test_toped\aref\aref_5x10_45_noflip_nomag.wrl.gz
+  Delete $INSTDIR\utils\gds2vrml\test_toped\aref\aref_5x10_45_flip_0.3x.tdt
+
+  Delete $INSTDIR\utils\gds2vrml\test_toped\sref\sref_hier.tdt
+  Delete $INSTDIR\utils\gds2vrml\test_toped\sref\sref_3inst_norot_noflip_nomag.tdt
+  Delete $INSTDIR\utils\gds2vrml\test_toped\sref\sref_hier.gds
+  Delete $INSTDIR\utils\gds2vrml\test_toped\sref\create_vrml
+  Delete $INSTDIR\utils\gds2vrml\test_toped\sref\sref_3inst_norot_noflip_nomag.gds
+  Delete $INSTDIR\utils\gds2vrml\test_toped\sref\make_all
+  Delete $INSTDIR\utils\gds2vrml\test_toped\sref\sref_3inst_norot_flip_nomag.tdt
+  Delete $INSTDIR\utils\gds2vrml\test_toped\sref\sref_3inst_norot_flip_nomag.gds
+  Delete $INSTDIR\utils\gds2vrml\test_toped\sref\simple.txt
+  Delete $INSTDIR\utils\gds2vrml\test_toped\sref\create_vrml.bat
+  Delete $INSTDIR\utils\gds2vrml\test_toped\sref\sref_hier.wrl.gz
+  Delete $INSTDIR\utils\gds2vrml\test_toped\sref\make_all.bat
+  Delete $INSTDIR\utils\gds2vrml\test_toped\sref\sref_3inst_norot_noflip_nomag.wrl.gz
+  Delete $INSTDIR\utils\gds2vrml\test_toped\sref\README.txt
+  Delete $INSTDIR\utils\gds2vrml\test_toped\sref\sref_3inst_norot_flip_nomag.wrl.gz
+
+
   Delete $INSTDIR\examples\foll.tdt
 
   ReadRegStr $R0 HKCU "Environment" "HOME"
@@ -431,7 +554,14 @@ Section "Uninstall"
   RMDir $INSTDIR\log
   RMDir $INSTDIR\icons
   RMDir $INSTDIR\lib
+  RMDir $INSTDIR\tll\user_functions\general
+  RMDir $INSTDIR\tll\user_functions
   RMDir $INSTDIR\tll
+  RMDir $INSTDIR\utils\gds2vrml\test_toped\aref
+  RMDir $INSTDIR\utils\gds2vrml\test_toped\sref
+  RMDir $INSTDIR\utils\gds2vrml\test_toped
+  RMDir $INSTDIR\utils\gds2vrml
+  RMDir $INSTDIR\utils
   RMDir $INSTDIR\fonts
   RMDir $INSTDIR\examples
 
@@ -440,6 +570,7 @@ Section "Uninstall"
 
   ; Remove shortcuts, if any
   Delete "$SMPROGRAMS\toped\*.*"
+  Delete "$DESKTOP\toped.lnk"
 
   ; Remove directories used
   RMDir "$SMPROGRAMS\toped"
