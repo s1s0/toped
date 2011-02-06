@@ -442,8 +442,8 @@ template <class TYPE>
             // 2. Library hierarchy should not be influenced by the changes in the
             //    database and particularly by the changes in the hierarchy of the
             //    database.
-            // To acieve this for library cells we have to check whether all instances
-            // of this type have parent from libID library
+            // To achieve this for library cells we have to check whether all
+            // instances of this type have parent from libID library
             SGHierTree* wv = GetMember(component);
             while (NULL != wv)
             {
