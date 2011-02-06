@@ -170,7 +170,7 @@ namespace Calbr
          void              addResults();
          void              addRuleCheck(drcRuleCheck* check);
          void              showError(const std::string & cell, const std::string & error, long  number);
-         void              showCluster(const std::string & error);
+         void              showCluster(const std::string & cell, const std::string & error);
          void              showAllErrors(void);
          void              hideAllErrors(void);
          std::string       explainError(word lay);
