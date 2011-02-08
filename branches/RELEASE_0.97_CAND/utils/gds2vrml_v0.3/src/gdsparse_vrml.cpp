@@ -31,8 +31,6 @@
 
 
 #include <cstdio>
-//#include <cstdlib>
-//#include <cmath>
 
 #include <stdlib.h>
 
@@ -41,11 +39,6 @@
 #include "gdsparse.h"
 #include "gdsparse_vrml.h"
 #include "gdsobject_vrml.h"
-//#include "gds_globals.h"
-//#include "gds2pov.h"
-//#include "gdstext.h"
-//#include "gdspolygon.h"
-
 
 extern int verbose_output;
 
@@ -91,130 +84,6 @@ void GDSParse_vrml::OutputHeader()
     fprintf(_optr, "## Copyright (C) 2009 Roger Light, 2010 Armin Taschwer\n");
     fprintf(_optr, "## http://atchoo.org/gds2pov/\n\n");
 
-    /* [-at-]
-       fprintf(_optr, "#include \"colors.inc\"\n");
-       fprintf(_optr, "#include \"metals.inc\"\n");
-       fprintf(_optr, "#include \"transforms.inc\"\n");
-
-       struct _Boundary *Boundary = _Objects->GetBoundary();
-       float half_widthX = (Boundary->XMax - Boundary->XMin)/2;
-       float half_widthY = (Boundary->YMax - Boundary->YMin)/2;
-       float centreX = half_widthX + Boundary->XMin;
-       float centreY = half_widthY + Boundary->YMin;
-
-       float distance;
-       if(half_widthX > half_widthY){
-       distance = half_widthX * 1.8;
-       }else{
-       distance = half_widthY * 1.8;
-       }
-
-       fprintf(_optr, "#declare sizeX = %.2f;\n", Boundary->XMax - Boundary->XMin);
-       fprintf(_optr, "#declare sizeY = %.2f;\n", Boundary->YMax - Boundary->YMin);
-       //		fprintf(_optr, "#declare sizeZ = %.2f\n", Boundary->ZMax - Boundary->ZMin);
-
-       fprintf(_optr, "// TopLeft: %.2f, %.2f\n", Boundary->XMin, Boundary->YMax);
-       fprintf(_optr, "// TopRight: %.2f, %.2f\n", Boundary->XMax, Boundary->YMax);
-       fprintf(_optr, "// BottomLeft: %.2f, %.2f\n", Boundary->XMin, Boundary->YMin);
-       fprintf(_optr, "// BottomRight: %.2f, %.2f\n", Boundary->XMax, Boundary->YMin);
-       fprintf(_optr, "// Centre: %.2f, %.2f\n", centreX, centreY);
-
-       float XMod = _config->GetCameraPos()->XMod;
-       float YMod = _config->GetCameraPos()->YMod;
-       float ZMod = _config->GetCameraPos()->ZMod;
-    */
-
-    /* _camfile is a possible camera include file. Depends on the -e option
-     * If it is null, use the normal camera else use the include */
-    /*[at]
-      if(!_camfile){
-      switch(_config->GetCameraPos()->boundarypos){
-      case bpCentre:
-      // Default camera angle = 67.38
-      // Half of this is 33.69
-      // tan(33.69) = 0.66666 = 1/1.5
-      // Make it slightly larger so that we have a little bit of a border: 1.5+20% = 1.8
-	
-      fprintf(_optr, "camera {\n\tlocation <%.2f,%.2f,%.2f>\n", centreX*XMod, centreY*YMod, -distance*ZMod);
-      break;
-      case bpTopLeft:
-      fprintf(_optr, "camera {\n\tlocation <%.2f, %.2f, %.2f>\n", Boundary->XMin*XMod, Boundary->YMax*YMod, -distance*ZMod);
-      break;
-      case bpTopRight:
-      fprintf(_optr, "camera {\n\tlocation <%.2f, %.2f, %.2f>\n", Boundary->XMax*XMod, Boundary->YMax*YMod, -distance*ZMod);
-      break;
-      case bpBottomLeft:
-      fprintf(_optr, "camera {\n\tlocation <%.2f, %.2f, %.2f>\n", Boundary->XMin*XMod, Boundary->YMin*YMod, -distance*ZMod);
-      break;
-      case bpBottomRight:
-      fprintf(_optr, "camera {\n\tlocation <%.2f, %.2f, %.2f>\n", Boundary->XMax*XMod, Boundary->YMin*YMod, -distance*ZMod);
-      break;
-      }
-
-      fprintf(_optr, "\tsky <0,0,-1>\n"); //This fixes the look at rotation (hopefully)
-
-      XMod = _config->GetLookAtPos()->XMod;
-      YMod = _config->GetLookAtPos()->YMod;
-      ZMod = _config->GetLookAtPos()->ZMod;
-
-      switch(_config->GetLookAtPos()->boundarypos){
-      case bpCentre:
-      fprintf(_optr, "\tlook_at <%.2f,%.2f,%.2f>\n}\n", centreX*XMod, centreY*YMod, -distance*ZMod);
-      break;
-      case bpTopLeft:
-      fprintf(_optr, "\tlook_at <%.2f,%.2f,%.2f>\n}\n", Boundary->XMin*XMod, Boundary->YMax*YMod, -distance*ZMod);
-      break;
-      case bpTopRight:
-      fprintf(_optr, "\tlook_at <%.2f,%.2f,%.2f>\n}\n", Boundary->XMax*XMod, Boundary->YMax*YMod, -distance*ZMod);
-      break;
-      case bpBottomLeft:
-      fprintf(_optr, "\tlook_at <%.2f,%.2f,%.2f>\n}\n", Boundary->XMin*XMod, Boundary->YMin*YMod, -distance*ZMod);
-      break;
-      case bpBottomRight:
-      fprintf(_optr, "\tlook_at <%.2f,%.2f,%.2f>\n}\n", Boundary->XMax*XMod, Boundary->YMin*YMod, -distance*ZMod);
-      break;
-      }
-      }else{
-      fprintf(_optr, "#include %s\n", _camfile);
-      }
-
-      if(_config->GetLightPos()!=NULL){
-      Position dummypos;
-      dummypos.Next = _config->GetLightPos();
-
-      Position *LightPos = &dummypos;
-
-      while(LightPos->Next){
-      LightPos = LightPos->Next;
-      XMod = LightPos->XMod;
-      YMod = LightPos->YMod;
-      ZMod = LightPos->ZMod;
-
-      switch(LightPos->boundarypos){
-      case bpCentre:
-      fprintf(_optr, "light_source {<%.2f,%.2f,%.2f> White }\n", centreX*XMod, centreY*YMod, -distance*ZMod);
-      break;
-      case bpTopLeft:
-      fprintf(_optr, "light_source {<%.2f,%.2f,%.2f> White }\n", Boundary->XMin*XMod, Boundary->YMax*YMod, -distance*ZMod);
-      break;
-      case bpTopRight:
-      fprintf(_optr, "light_source {<%.2f,%.2f,%.2f> White }\n", Boundary->XMax*XMod, Boundary->YMax*YMod, -distance*ZMod);
-      break;
-      case bpBottomLeft:
-      fprintf(_optr, "light_source {<%.2f,%.2f,%.2f> White }\n", Boundary->XMin*XMod, Boundary->YMin*YMod, -distance*ZMod);
-      break;
-      case bpBottomRight:
-      fprintf(_optr, "light_source {<%.2f,%.2f,%.2f> White }\n", Boundary->XMax*XMod, Boundary->YMin*YMod, -distance*ZMod);
-      break;
-      }
-      }
-      }else{
-      fprintf(_optr, "light_source {<%.2f,%.2f,%.2f> White }\n", centreX, centreY, -distance);
-      }
-
-      fprintf(_optr, "background { color Black }\n");
-      fprintf(_optr, "global_settings { ambient_light rgb <%.2f,%.2f,%.2f> }\n", _config->GetAmbient(), _config->GetAmbient(), _config->GetAmbient());
-    */
 
     /* Output layer texture information */
     
@@ -233,16 +102,11 @@ void GDSParse_vrml::OutputHeader()
 	fprintf (_optr, "    material Material {\n");
 	fprintf (_optr, "      diffuseColor %.2f %.2f %.2f\n",
 		 firstlayer->Red, firstlayer->Green, firstlayer->Blue);
-	fprintf (_optr, "      transparency %.2f\n", firstlayer->Filter);
+	fprintf (_optr, "      transparency %.2f\n", 1.0 - firstlayer->Filter);
 		
 	if(!firstlayer->Metal){
-	  //fprintf(_optr, "#declare t%s = pigment{rgbf <%.2f, %.2f, %.2f, %.2f>}\n", 
-	  //		  firstlayer->Name, firstlayer->Red,firstlayer->Green, firstlayer->Blue, firstlayer->Filter);
 	  fprintf (_optr, "      shininess 0.2\n");
 	}
-	//else{
-	//fprintf(_optr, "#declare t%s = texture{pigment{rgbf <%.2f, %.2f, %.2f, %.2f>} finish{F_MetalA}}\n", firstlayer->Name, firstlayer->Red, firstlayer->Green, firstlayer->Blue, firstlayer->Filter);
-	//}
 
 	fprintf (_optr, "    }\n");
 	fprintf (_optr, "  }\n");
@@ -251,20 +115,6 @@ void GDSParse_vrml::OutputHeader()
       firstlayer = firstlayer->Next;
     } while (firstlayer);
 
-    /* [at]
-       if(firstlayer->Show){
-       if(!firstlayer->Metal){
-       fprintf(_optr, "#declare t%s = pigment{rgbf <%.2f, %.2f, %.2f, %.2f>}\n", 
-       firstlayer->Name, firstlayer->Red, firstlayer->Green, firstlayer->Blue, firstlayer->Filter);
-       }else{
-       fprintf(_optr, "#declare t%s = texture{pigment{rgbf <%.2f, %.2f, %.2f, %.2f>} finish{F_MetalA}}\n", firstlayer->Name, firstlayer->Red, firstlayer->Green, firstlayer->Blue, firstlayer->Filter);
-       }
-       }
-	
-       if(_bounding_output){
-       fprintf(_optr, "box {<%.2f,%.2f,%.2f> <%.2f,%.2f,%.2f> texture { pigment { rgb <0.75, 0.75, 0.75> } } }", Boundary->XMin, Boundary->YMin,_units*_process->GetLowest(),Boundary->XMax, Boundary->YMax,_units*_process->GetHighest());
-       }
-    */
 
     GDSObject * obj;
 

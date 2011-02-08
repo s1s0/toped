@@ -8,18 +8,21 @@ manually.
 GDS2VRML is hacked from the orginal code of GDS2POV Version 20080229
 ( --> http://atchoo.org/gds2pov/ ) and is therefor also available under the 
 GPLv2. To get a running version of the gds2vrml code you need at least the headers 
-and the compiled version of libgdsto3d from the gdsto3d project writen by 
+and the compiled version of libgdsto3d from the gdsto3d project written by 
 Roger Light.
+--> from v0.3 on the libgdsto3d is included!
 
 =====================================
 Installation:
 ------------
 
-needs libgdsto3d libraries
+If "Makefile.cvs" exists but no "configure" ..
+$ make -f Makefile.cvs
 
-$ make clean
-$ touch .depend
+$ ./configure
 $ make
+$ make install
+
 
 =====================================
 Using:
@@ -65,7 +68,12 @@ Options
 
 Attention, some of the upper described parameters maybe won't work since 
 they are written to be used in the original gds2pov.
-For now (v0.2) these parameters are -b, -c, -d, -e, -g
+For now (v0.2,v0.3) these parameters are -b, -c, -d, -e, -g
+
+Under the directory macros you will find a script file create_vrml. Just copy 
+this file to your working directories and edit the first two entries 
+properly.
+
 
 =====================================
 Viewing:
@@ -83,7 +91,7 @@ Process-File:
 # Lines starting with a # are comments.
 #
 # This file describes a made up p-sub, single well 4 layer metal CMOS 
-process.
+# process.
 #
 # This file consists of Layer entries in the following format:
 #
