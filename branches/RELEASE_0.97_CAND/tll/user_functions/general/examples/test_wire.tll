@@ -1,5 +1,6 @@
 
-//demonstrates the easy of antenna design
+// demonstrates how the distinct wire-creation could be applied
+// advantage: all of the points are on-grid
 
 #include "config.tll"
 #include "default_drc.tll"
@@ -7,11 +8,11 @@
 #include "geometry.tll"
 #include "wires.tll"
 
-newdesign("via_test");
-newcell("via");
-opencell("via");
+newdesign("wire_test");
+newcell("wire");
+opencell("wire");
 
-//start of the  design
+//start of design
 
 point list a = { {0,0}, {100,100}, {200,100} };
 point list b = { {50,0}, {130,70}, {200,70} };
