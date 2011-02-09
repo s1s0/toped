@@ -1,3 +1,7 @@
+noinst_HEADERS = config_cfg.h gdselements.h gds_globals.h gdsobject.h \
+gdsobjects.h gdsparse.h gdspath.h gdspolygon.h gdstext.h gdsto3d.h \
+gds_types.h process_cfg.h
+ 
 #########################################################################
 # APPLICATION SECTION
 #########################################################################
