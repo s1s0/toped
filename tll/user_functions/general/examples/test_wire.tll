@@ -2,10 +2,10 @@
 //demonstrates the easy of antenna design
 
 #include "config.tll"
-#include "../../technology/default_drc.tll"
-#include "../helper.tll"
-#include "../geometry.tll"
-#include "../wires.tll"
+#include "default_drc.tll"
+#include "helper.tll"
+#include "geometry.tll"
+#include "wires.tll"
 
 newdesign("via_test");
 newcell("via");
