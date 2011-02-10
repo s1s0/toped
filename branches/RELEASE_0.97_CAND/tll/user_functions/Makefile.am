@@ -1,0 +1,1 @@
+SUBDIRS = technology general logos
