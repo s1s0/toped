@@ -4,7 +4,8 @@ Toped release 0.97 changes and updates
 - New utility (gds2vrml) for generation of VRML files
 - Improved memory footprint, improved TELL execution speed
 - Compressed files supported now for all DB formats
-- Plug-in development infrastructure. Plug-in example will be available shortly
+- Plug-in development infrastructure. Header files for a development package are
+  released for the first time. Plug-in example will be available shortly
 - TELL user library initiated and included in the distribution
 - Some new build-in TELL functions including exec renamecell etc.
 - Bug fixes and stability improvements
