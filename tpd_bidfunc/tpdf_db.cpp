@@ -1815,7 +1815,14 @@ tellstdfunc::DRCshowcluster::DRCshowcluster(telldata::typeID retype, bool eor) :
 int tellstdfunc::DRCshowcluster::execute()
 {
    std::string errorName = getStringValue();
-   DRCData->showCluster(errorName);
+   laydata::TdtLibDir *libDir;
+   std::string activeCell;
+   DATC->lockTDT(libDir, dbmxs_liblock);
+      laydata::TdtDesign *design = (*libDir)();
+      activeCell = design->activeCellName();
+   DATC->unlockTDT(libDir);
+
+   DRCData->showCluster(activeCell, errorName);
    return EXEC_NEXT;
 }
 
@@ -1878,8 +1885,17 @@ int tellstdfunc::DRCexplainerror_D::execute()
    telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    real DBscale = PROPC->DBscale();
    TP* p1DB = DEBUG_NEW TP(p1->x(), p1->y(), DBscale);
+
+   //get active call name
+   laydata::TdtLibDir *libDir;
+   std::string activeCell;
+   DATC->lockTDT(libDir, dbmxs_liblock);
+      laydata::TdtDesign *design = (*libDir)();
+      activeCell = design->activeCellName();
+   DATC->unlockTDT(libDir);
+
    laydata::DrcLibrary* drcDesign = DATC->lockDRC();
-      WordList selectedl = drcDesign->findSelected(p1DB);
+      WordList selectedl = drcDesign->findSelected(activeCell, p1DB);
       selectedl.unique();
       for(WordList::const_iterator it = selectedl.begin(); it!= selectedl.end(); ++it)
       {
@@ -1910,8 +1926,17 @@ int tellstdfunc::DRCexplainerror::execute()
    telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    real DBscale = PROPC->DBscale();
    TP* p1DB = DEBUG_NEW TP(p1->x(), p1->y(), DBscale);
+
+   //get active call name
+   laydata::TdtLibDir *libDir;
+   std::string activeCell;
+   DATC->lockTDT(libDir, dbmxs_liblock);
+      laydata::TdtDesign *design = (*libDir)();
+      activeCell = design->activeCellName();
+   DATC->unlockTDT(libDir);
+
    laydata::DrcLibrary* drcDesign = DATC->lockDRC();
-      WordList selectedl = drcDesign->findSelected(p1DB);
+      WordList selectedl = drcDesign->findSelected(activeCell, p1DB);
       selectedl.unique();
       for(WordList::const_iterator it = selectedl.begin(); it!= selectedl.end(); ++it)
       {

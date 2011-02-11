@@ -170,7 +170,7 @@ namespace Calbr
          void              addResults();
          void              addRuleCheck(drcRuleCheck* check);
          void              showError(const std::string & cell, const std::string & error, long  number);
-         void              showCluster(const std::string & error);
+         void              showCluster(const std::string & cell, const std::string & error);
          void              showAllErrors(void);
          void              hideAllErrors(void);
          std::string       explainError(word lay);
@@ -181,9 +181,11 @@ namespace Calbr
          bool              isOk(void)   {return _ok;}
          drcRenderer*      render() const {return _render;};
          std::string       cellName() {return _curCellName;};
+         std::string       topCellName() {return _topCellName;};
       private:
          FILE*             _calbrFile;
          std::string       _fileName;
+         std::string       _topCellName;
          long              _precision;
 
          std::ifstream     _inFile;

@@ -2197,6 +2197,8 @@ void browsers::DRCBrowser::deleteAllItems(void)
 void   browsers::DRCBrowser::onShowAll(wxCommandEvent& evt)
 {
    wxString cmd;
+   wxString cell=wxString(DRCData->topCellName().c_str(),  wxConvUTF8);
+   cmd << wxT("opencell(\"") << cell <<wxT("\");");
    cmd << wxT("drcshowallerrors();");
    TpdPost::parseCommand(cmd);
 }

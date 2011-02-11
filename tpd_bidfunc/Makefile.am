@@ -3,7 +3,7 @@ noinst_HEADERS = tpdf_props.h tellibin.h tllf_list.h tpdf_add.h \
 	tpdph.h drc_tenderer.h
 lib_LTLIBRARIES = libtpd_bidfunc.la
 libtpd_bidfunc_la_LDFLAGS = -no-undefined
-libtpd_bidfunc_ladir=$(includedir)/tpd
+libtpd_bidfunc_ladir=$(includedir)/toped_$(PACKAGE_VERSION)/tpd
 libtpd_bidfunc_la_HEADERS = tpdf_common.h datacenter.h 
 libtpd_bidfunc_la_SOURCES = tpdf_db.cpp tpdf_select.cpp datacenter.cpp \
 	tellibin.cpp tllf_list.cpp tpdf_add.cpp tpdf_cells.cpp tpdf_common.cpp \

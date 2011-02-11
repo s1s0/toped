@@ -54,7 +54,7 @@ void printusage()
   printf(" -b\t\tOutput bounding box instead of layout to allow easier and\n\t\tquicker placing of the camera\n");
   printf(" -c\t\tSpecify config file\n");
   printf(" -d\t\tDecompose polygons into triangles (use mesh2 object instead of prism)\n");
-  printf(" -e\t\tUse external camera include file instead of specifying camera internally\n");
+  //printf(" -e\t\tUse external camera include file instead of specifying camera internally\n");
   printf(" -g\t\tGenerate a process file based on the input gds2 file (suppresses POV-Ray file generation).\n");
   printf(" -h\t\tDisplay this help\n");
   printf(" -i\t\tInput GDS2 file (stdin if not specified)\n");
