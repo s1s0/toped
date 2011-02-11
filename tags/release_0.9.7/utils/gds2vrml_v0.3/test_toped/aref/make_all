@@ -1,0 +1,7 @@
+./create_vrml aref_5x10_norot_flip_nomag.gds bbb
+./create_vrml aref_5x10_norot_noflip_nomag.gds bbb
+./create_vrml aref_5x10_45_flip_nomag.gds bbb
+./create_vrml aref_5x10_45_flip_2x.gds bbb
+./create_vrml aref_5x10_45_flip_0.3x.gds bbb
+./create_vrml aref_simple.gds bbb
+./create_vrml aref_5x10_45_noflip_nomag.gds bbb

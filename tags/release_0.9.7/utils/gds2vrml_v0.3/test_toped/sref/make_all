@@ -1,0 +1,3 @@
+./create_vrml sref_hier.gds bbb
+./create_vrml sref_3inst_norot_noflip_nomag.gds bbb
+./create_vrml sref_3inst_norot_flip_nomag.gds bbb
