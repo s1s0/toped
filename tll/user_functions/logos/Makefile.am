@@ -1,8 +1,8 @@
-tllgenerallogosdir = $(tlldir)/user_functions/logos
-tllgenerallogosSCRIPTS = config.m write_tell_script.m \
+tllgenerallogosdir = $(pkgdatadir)/tll/user_functions/logos
+tllgenerallogos_SCRIPTS = config.m write_tell_script.m \
                          write_tell_script_helper.m create_logo.sh  
-tllgenerallogosDATA = README config_min.tll test_logo.tll
-EXTRA_DIST = $(tllgenerallogosDATA) $(tllgenerallogosSCRIPTS)
-CLEANFILES = $(tllgenerallogosSCRIPTS) $(tllgenerallogosDATA)
+tllgenerallogos_DATA = README config_min.tll test_logo.tll
+EXTRA_DIST = $(tllgenerallogos_DATA) $(tllgenerallogos_SCRIPTS)
+CLEANFILES = $(tllgenerallogos_SCRIPTS) $(tllgenerallogos_DATA)
 SUBDIRS = examples
 
