@@ -2082,11 +2082,11 @@ void laydata::TdtCellAref::info(std::ostringstream& ost, real DBU) const {
    ost << " [" << _arrprops.cols() << " x {" << _arrprops.colStep().x()
                                              << " , "
                                              << _arrprops.colStep().y()
-                                             << "}";
+                                             << "} ; ";
    ost <<         _arrprops.rows() << " x {" << _arrprops.rowStep().x()
                                              << " , "
                                              << _arrprops.rowStep().y()
-                                             << "}";
+                                             << "} ]";
 }
 
 void laydata::TdtCellAref::write(TEDfile* const tedfile) const {
