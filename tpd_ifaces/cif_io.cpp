@@ -837,7 +837,7 @@ void CIFin::CifExportFile::aref(const std::string& name,
       for(int j = 0; j < arrprops.rows(); j++)
       { // start/stop columns
          // ... get the translation matrix ...
-         CTM refCTM(TP(arrprops.stepX() * i , arrprops.stepY() * j ), 1, 0, false);
+         CTM refCTM(arrprops.displ(i,j), 1, 0, false);
          refCTM *= translation;
          ref(name, refCTM);
       }
