@@ -54,7 +54,7 @@
 #define tedf_REFS             0x8C
 #define tedf_REFSEND          0x8D
 #define TED_CUR_REVISION      0
-#define TED_CUR_SUBREVISION   8
+#define TED_CUR_SUBREVISION   9
 
 //==============================================================================
 class PSegment {
