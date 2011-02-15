@@ -1802,8 +1802,6 @@ void GDSin::GdsExportFile::aref(const std::string& name, const CTM& translation,
    TP dRow(arrprops.rowStep().x() * arrprops.rows(), arrprops.rowStep().y() * arrprops.rows());
    wr->add_int4b(dCol.x());wr->add_int4b(dCol.y());
    wr->add_int4b(dRow.x());wr->add_int4b(dRow.y());
-//   wr->add_int4b(trans.x() + arrprops.cols() * arrprops.stepX());wr->add_int4b(trans.y());
-//   wr->add_int4b(trans.x());wr->add_int4b(trans.y() + arrprops.rows() * arrprops.stepY());
    flush(wr);
    wr = setNextRecord(gds_ENDEL);
    flush(wr);

@@ -1861,11 +1861,22 @@ DBbox laydata::TdtCellRef::overlap() const
 //-----------------------------------------------------------------------------
 laydata::TdtCellAref::TdtCellAref(InputTdtFile* const tedfile) : TdtCellRef(tedfile)
 {
-   int4b _stepX = tedfile->get4b();
-   int4b _stepY = tedfile->get4b();
-   word _rows = tedfile->getWord();
-   word _cols = tedfile->getWord();
-   _arrprops = ArrayProperties(_stepX, _stepY, _cols, _rows);
+   if ((0 == tedfile->revision()) && (9 > tedfile->subRevision()))
+   {
+      int4b stepX = tedfile->get4b();
+      int4b stepY = tedfile->get4b();
+      word  rows = tedfile->getWord();
+      word  cols = tedfile->getWord();
+      _arrprops = ArrayProperties( stepX, stepY, cols, rows);
+   }
+   else
+   {
+      TP colStep = tedfile->getTP();
+      TP rowStep = tedfile->getTP();
+      word rows = tedfile->getWord();
+      word cols = tedfile->getWord();
+      _arrprops = ArrayProperties(colStep, rowStep, cols, rows);
+   }
 }
 
 
@@ -2093,8 +2104,10 @@ void laydata::TdtCellAref::write(TEDfile* const tedfile) const {
    tedfile->putByte(tedf_CELLAREF);
    tedfile->putString(_structure->name());
    tedfile->putCTM(_translation);
-   tedfile->put4b(_arrprops.colStep().x()); //FIXME TDT format must be updated!
-   tedfile->put4b(_arrprops.rowStep().y()); //FIXME TDT format must be updated!
+   TP cStep(_arrprops.colStep());
+   tedfile->putTP(&cStep);
+   TP rStep(_arrprops.rowStep());
+   tedfile->putTP(&rStep);
    tedfile->putWord(_arrprops.rows());
    tedfile->putWord(_arrprops.cols());
 }
