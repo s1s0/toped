@@ -645,7 +645,7 @@ void laydata::TdtBox::polyCut(PointVector& cutter, ShapeList** decure)
    {
       operation.findCrossingPoints();
    }
-   catch (EXPTNpolyCross) {return;}
+   catch (EXPTNpolyCross&) {return;}
    pcollection cut_shapes;
    laydata::TdtData* newshape;
    if (operation.AND(cut_shapes))
@@ -1031,7 +1031,7 @@ void laydata::TdtPoly::polyCut(PointVector& cutter, ShapeList** decure)
    {
       operation.findCrossingPoints();
    }
-   catch (EXPTNpolyCross) {return;}
+   catch (EXPTNpolyCross&) {return;}
    pcollection cut_shapes;
    laydata::TdtData* newshape;
    if (operation.AND(cut_shapes))
@@ -1078,7 +1078,7 @@ void laydata::TdtPoly::stretch(int bfactor, ShapeList** decure)
       {
          fixingpoly.findCrossingPoints();
       }
-      catch (EXPTNpolyCross) {return;}
+      catch (EXPTNpolyCross&) {return;}
       if (1 == fixingpoly.crossp())
       throw EXPTNpolyCross("Only one crossing point found. Can't generate polygons");
 
@@ -1861,11 +1861,22 @@ DBbox laydata::TdtCellRef::overlap() const
 //-----------------------------------------------------------------------------
 laydata::TdtCellAref::TdtCellAref(InputTdtFile* const tedfile) : TdtCellRef(tedfile)
 {
-   int4b _stepX = tedfile->get4b();
-   int4b _stepY = tedfile->get4b();
-   word _rows = tedfile->getWord();
-   word _cols = tedfile->getWord();
-   _arrprops = ArrayProperties(_stepX, _stepY, _cols, _rows);
+   if ((0 == tedfile->revision()) && (9 > tedfile->subRevision()))
+   {
+      int4b stepX = tedfile->get4b();
+      int4b stepY = tedfile->get4b();
+      word  rows = tedfile->getWord();
+      word  cols = tedfile->getWord();
+      _arrprops = ArrayProperties( stepX, stepY, cols, rows);
+   }
+   else
+   {
+      TP colStep = tedfile->getTP();
+      TP rowStep = tedfile->getTP();
+      word rows = tedfile->getWord();
+      word cols = tedfile->getWord();
+      _arrprops = ArrayProperties(colStep, rowStep, cols, rows);
+   }
 }
 
 
@@ -2005,7 +2016,7 @@ void laydata::TdtCellAref::drawRequest(tenderer::TopRend& rend) const
       { // start/stop columns
          // for each of the visual array figures...
          // ... get the translation matrix ...
-         CTM refCTM(TP(_arrprops.stepX() * i , _arrprops.stepY() * j ), 1, 0, false);
+         CTM refCTM(_arrprops.displ(i,j), 1, 0, false);
          // ...draw the structure itself
          structure()->openGlRender(rend, refCTM * _translation, false, false);
       }
@@ -2034,7 +2045,7 @@ void laydata::TdtCellAref::openGlDrawFill(layprop::DrawProperties& drawprop, con
       { // start/stop columns
          // for each of the visual array figures...
          // ... get the translation matrix ...
-         CTM refCTM(TP(_arrprops.stepX() * i , _arrprops.stepY() * j ), 1, 0, false);
+         CTM refCTM(_arrprops.displ(i,j), 1, 0, false);
          refCTM *= drawprop.topCtm();
          // ...draw the structure itself, not forgetting to push/pop the refCTM
          drawprop.pushCtm(refCTM);
@@ -2068,7 +2079,7 @@ void laydata::TdtCellAref::motionDraw(const layprop::DrawProperties& drawprop,
       { // start/stop columns
          // for each of the visual array figures...
          // ... get the translation matrix ...
-         CTM refCTM(TP(_arrprops.stepX() * i , _arrprops.stepY() * j ), 1, 0, false);
+         CTM refCTM(_arrprops.displ(i,j), 1, 0, false);
          refCTM *= _translation;
          transtack.push_front(refCTM * transtack.front());
          structure()->motionDraw(drawprop, transtack);
@@ -2079,16 +2090,24 @@ void laydata::TdtCellAref::motionDraw(const layprop::DrawProperties& drawprop,
 void laydata::TdtCellAref::info(std::ostringstream& ost, real DBU) const {
    ost << "cell \"" << _structure->name() << "\" - array reference @ {";
    ost << _translation.tx()/DBU << " , " << _translation.ty()/DBU << "} ->";
-   ost << " [" << _arrprops.cols() << " x " << _arrprops.stepX() << " , " ;
-   ost <<         _arrprops.rows() << " x " << _arrprops.stepY() << "]";
+   ost << " [" << _arrprops.cols() << " x {" << _arrprops.colStep().x()
+                                             << " , "
+                                             << _arrprops.colStep().y()
+                                             << "} ; ";
+   ost <<         _arrprops.rows() << " x {" << _arrprops.rowStep().x()
+                                             << " , "
+                                             << _arrprops.rowStep().y()
+                                             << "} ]";
 }
 
 void laydata::TdtCellAref::write(TEDfile* const tedfile) const {
    tedfile->putByte(tedf_CELLAREF);
    tedfile->putString(_structure->name());
    tedfile->putCTM(_translation);
-   tedfile->put4b(_arrprops.stepX());
-   tedfile->put4b(_arrprops.stepY());
+   TP cStep(_arrprops.colStep());
+   tedfile->putTP(&cStep);
+   TP rStep(_arrprops.rowStep());
+   tedfile->putTP(&rStep);
    tedfile->putWord(_arrprops.rows());
    tedfile->putWord(_arrprops.cols());
 }
@@ -2111,7 +2130,7 @@ void laydata::TdtCellAref::psWrite(PSFile& psf, const layprop::DrawProperties& d
       { // start/stop columns
          // for each of the visual array figures...
          // ... get the translation matrix ...
-         CTM refCTM(TP(_arrprops.stepX() * i , _arrprops.stepY() * j ), 1, 0, false);
+         CTM refCTM(_arrprops.displ(i,j), 1, 0, false);
          refCTM *= _translation;
          psf.cellref(_structure->name(), refCTM);
          if (!psf.hier())
@@ -2127,7 +2146,7 @@ void  laydata::TdtCellAref::ungroup(laydata::TdtDesign* ATDB, TdtCell* dst, layd
       for(word j = 0; j < _arrprops.rows(); j++) {
          // for each of the array figures
          CTM refCTM;
-         refCTM.Translate(_arrprops.stepX() * i , _arrprops.stepY() * j );
+         refCTM.Translate(_arrprops.displ(i, j));
          refCTM *= _translation;
          laydata::TdtCellRef* cellref = DEBUG_NEW TdtCellRef(_structure, refCTM);
          cellref->ungroup(ATDB, dst, nshp);
@@ -2148,7 +2167,8 @@ DBbox laydata::TdtCellAref::clearOverlap() const
    assert(structure());
    DBbox bx(structure()->cellOverlap());
    DBbox ovl(bx);
-   CTM refCTM(1.0,0.0,0.0,1.0,_arrprops.stepX() * (_arrprops.cols()-1), _arrprops.stepY() * (_arrprops.rows() - 1));
+   TP opCor(_arrprops.displ(_arrprops.cols()-1,_arrprops.rows()-1));
+   CTM refCTM(1.0,0.0,0.0,1.0, opCor.x(), opCor.y());
    bx = bx * refCTM; bx.normalize();
    ovl.overlap(bx);
    return ovl;
@@ -2617,7 +2637,7 @@ void laydata::ValidPoly::selfcrossing()
    {
       fixingpoly.findCrossingPoints();
    }
-   catch (EXPTNpolyCross) {_status |= laydata::shp_cross; return;}
+   catch (EXPTNpolyCross&) {_status |= laydata::shp_cross; return;}
    if (0 != fixingpoly.crossp() )
       _status |= laydata::shp_cross;
 }
@@ -2712,7 +2732,7 @@ void laydata::ValidWire::selfcrossing() {
    {
       fixingpoly.findCrossingPoints();
    }
-   catch (EXPTNpolyCross) { _status |= laydata::shp_cross; return; }
+   catch (EXPTNpolyCross&) { _status |= laydata::shp_cross; return; }
    if (0 != fixingpoly.crossp() )
       _status |= laydata::shp_cross;
 
@@ -2786,7 +2806,7 @@ laydata::TdtData* laydata::polymerge(const PointVector& _plist0, const PointVect
    {
       operation.findCrossingPoints();
    }
-   catch (EXPTNpolyCross) {return NULL;}
+   catch (EXPTNpolyCross&) {return NULL;}
    pcollection merge_shape;
    laydata::TdtData* resShape = NULL;
    if (operation.OR(merge_shape))
@@ -2946,7 +2966,7 @@ void laydata::TdtTmpCellAref::draw(const layprop::DrawProperties& drawprop,
          { // start/stop columns
             // for each of the visual array figures...
             // ... get the translation matrix ...
-            CTM refCTM(TP(_arrprops.stepX() * i , _arrprops.stepY() * j ), 1, 0, false);
+            CTM refCTM(_arrprops.displ(i,j), 1, 0, false);
             refCTM *= _translation;
             transtack.push_front(refCTM * transtack.front());
             _structure->motionDraw(drawprop, transtack);
