@@ -414,6 +414,7 @@ void tellstdfunc::createDefaultTDT(std::string dbname,
       parsercmd::undoQUEUE& undstack, telldata::UNDOPerandQUEUE& undopstack)
 {
    dbLibDir->newDesign(dbname, DATC->localDir(), timeCreated.stdCTime(), DEFAULT_DBU, DEFAULT_UU);
+   dbLibDir->cleanUndefLib();
    DATC->bpRefreshTdtTab(true, threadExecution);
 //   TpdPost::resetTDTtab(dbname);
    // reset UNDO buffers;

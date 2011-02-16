@@ -116,6 +116,7 @@ int tellstdfunc::stdNEWDESIGNsd::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
    {
       dbLibDir->newDesign(nm, DATC->localDir(), timeCreated.stdCTime(), DBU, UU);
+      dbLibDir->cleanUndefLib();
       DATC->bpRefreshTdtTab(true, _threadExecution);
 //      TpdPost::resetTDTtab(nm);
       // reset UNDO buffers;
