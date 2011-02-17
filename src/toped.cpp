@@ -899,7 +899,7 @@ void tui::TopedFrame::OnExit( wxCommandEvent& WXUNUSED( event ) ) {
 void tui::TopedFrame::OnAbout( wxCommandEvent& WXUNUSED( event ) ) {
     wxAboutDialogInfo info;
     info.SetName(wxT("Toped"));
-    info.SetVersion(wxT("0.9.7"));
+    info.SetVersion(wxT("0.9.x"));
     info.SetIcon(wxIcon( toped32x32_xpm ));
     info.SetWebSite(wxT("www.toped.org.uk"));
     info.SetDescription(wxT("Open source IC layout editor"));
