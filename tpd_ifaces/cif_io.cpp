@@ -614,7 +614,7 @@ CIFin::CifExportFile::CifExportFile(std::string fn, laydata::TdtCell* topcell,
    TpdTime timec(time(NULL));
 
    _file << "(              CIF   2.0       );"    << std::endl;
-   _file << "(        generator : Toped 0.9.x );"  << std::endl;
+   _file << "(        generator : Toped 0.9.7 );"  << std::endl;
    _file << "(             user : tbd );"          << std::endl;
    _file << "(          machine : tbd );"          << std::endl;
    _file << "(       time stamp : " << timec() << ");" << std::endl;
@@ -837,7 +837,7 @@ void CIFin::CifExportFile::aref(const std::string& name,
       for(int j = 0; j < arrprops.rows(); j++)
       { // start/stop columns
          // ... get the translation matrix ...
-         CTM refCTM(TP(arrprops.stepX() * i , arrprops.stepY() * j ), 1, 0, false);
+         CTM refCTM(arrprops.displ(i,j), 1, 0, false);
          refCTM *= translation;
          ref(name, refCTM);
       }

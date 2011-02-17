@@ -231,15 +231,6 @@ void GDSObject_vrml::OutputPathToFile(FILE *fptr, class GDSObjects *Objects, cha
 	  }
 	}
 	PrintSpaces(fptr); fprintf (fptr, "      ] ## end coordIndex\n");
-	//if(!path->Colour.Metal){
-	//	fprintf(fptr, "pigment{rgbf <%.2f, %.2f, %.2f, %.2f>} ", path->Colour.R, path->Colour.G, path->Colour.B, path->Colour.F);
-	//}else{
-	//	fprintf(fptr, "pigment{rgbf <%.2f, %.2f, %.2f, %.2f>} finish{F_MetalA} ", path->Colour.R, path->Colour.G, path->Colour.B, path->Colour.F);
-	//}
-	/* [at]
-	   fprintf(fptr, "texture{t%s}",path->GetLayer()->Name);
-	   fprintf(fptr, "}\n");
-	*/
 	PrintSpaces(fptr); fprintf (fptr, "    } ## end geometry indexedfaceset\n"); //end plane 2
 	PrintSpaces(fptr); fprintf (fptr, "  } ## end shape path\n"); //end plane 1
       }
@@ -308,6 +299,10 @@ void GDSObject_vrml::OutputPolygonToFile(FILE *fptr, class GDSObjects *Objects, 
 	PrintSpaces(fptr); fprintf (fptr, "      spine [0 %.2f 0, 0 %.2f 0]\n", hs, ht);
 	PrintSpaces(fptr); fprintf (fptr, "      solid TRUE\n");
 	PrintSpaces(fptr); fprintf (fptr, "      ccw FALSE\n");
+	PrintSpaces(fptr); fprintf (fptr, "      beginCap TRUE\n");
+	PrintSpaces(fptr); fprintf (fptr, "      endCap TRUE\n");
+	PrintSpaces(fptr); fprintf (fptr, "      creaseAngle 0\n");
+	PrintSpaces(fptr); fprintf (fptr, "      convex FALSE\n"); //FIXME can be checked (TRUE improves browser speed)
 
 	PrintSpaces(fptr); fprintf(fptr, "    } ## end geometry extrusion\n"); //close plane 3
 	PrintSpaces(fptr); fprintf(fptr, "  } ## end Shape polygon\n"); //close plane 2
@@ -563,76 +558,6 @@ void GDSObject_vrml::OutputARefToFile(FILE *fptr, class GDSObjects *Objects, cha
       aref = aref->Next;
     } while (aref);
 
-
-    /* */
-    /*
-    while(aref->Next){
-      aref = aref->Next;
-      if(aref->Rotate.Y == 90.0 || aref->Rotate.Y == -90.0){
-	if(aref->Columns && aref->Rows && (aref->X3 - aref->X1) && (aref->Y2 - aref->Y1)){
-	  dx = (float)(aref->X3 - aref->X1) / (float)aref->Columns;
-	  dy = (float)(aref->Y2 - aref->Y1) / (float)aref->Rows;
-
-	  fprintf(fptr, "#declare dx = %.2f;\n", dx);
-	  fprintf(fptr, "#declare dy = %.2f;\n", dy);
-
-	  fprintf(fptr, "#declare colcount = 0;\n");
-	  fprintf(fptr, "#declare cols = %d;\n", aref->Columns);
-	  fprintf(fptr, "#declare rows = %d;\n", aref->Rows);
-	  fprintf(fptr, "#while (colcount < cols)\n");
-	  fprintf(fptr, "\t#declare rowcount = 0;");
-	  fprintf(fptr, "\t#while (rowcount < rows)\n");
-	  fprintf(fptr, "\t\tobject{str_%s ", aref->Name);
-	  if(aref->Mag!=1.0){
-	    fprintf(fptr, "scale <%.2f,%.2f,1> ", aref->Mag, aref->Mag);
-	  }
-	  if(aref->Flipped){
-	    fprintf(fptr, "scale <1,-1,1> ");
-	  }
-	  fprintf(fptr, "translate <%.2f+dx*colcount,%.2f+dy*rowcount,0>", aref->X1, aref->Y1);
-	  if(aref->Rotate.Y){
-	    fprintf(fptr, " Rotate_Around_Trans(<0,0,%.2f>,<%.2f+dx*colcount,%.2f+dy*rowcount,0>)", -aref->Rotate.Y, aref->X1, aref->Y1);
-	  }
-	  fprintf(fptr, "}\n");
-
-	  fprintf(fptr, "\t\t#declare rowcount = rowcount + 1;\n");
-	  fprintf(fptr, "\t#end\n");
-	  fprintf(fptr, "\t#declare colcount = colcount + 1;\n");
-	  fprintf(fptr, "#end\n");
-	}
-      }else{
-	if(aref->Columns && aref->Rows && (aref->X2 - aref->X1) && (aref->Y3 - aref->Y1)){
-	  dx = (float)(aref->X2 - aref->X1) / (float)aref->Columns;
-	  dy = (float)(aref->Y3 - aref->Y1) / (float)aref->Rows;
-
-	  fprintf(fptr, "#declare dx = %.2f;\n", dx);
-	  fprintf(fptr, "#declare dy = %.2f;\n", dy);
-
-	  fprintf(fptr, "#declare colcount = 0;\n");
-	  fprintf(fptr, "#declare cols = %d;\n", aref->Columns);
-	  fprintf(fptr, "#declare rows = %d;\n", aref->Rows);
-	  fprintf(fptr, "#while (colcount < cols)\n");
-	  fprintf(fptr, "\t#declare rowcount = 0;");
-	  fprintf(fptr, "\t#while (rowcount < rows)\n");
-	  fprintf(fptr, "\t\tobject{str_%s ", aref->Name);
-	  if(aref->Flipped){
-	    fprintf(fptr, "scale <1,-1,1> ");
-	  }
-	  fprintf(fptr, "translate <%.2f+dx*colcount,%.2f+dy*rowcount,0>", aref->X1, aref->Y1);
-	  if(aref->Rotate.Y){
-	    fprintf(fptr, " Rotate_Around_Trans(<0,0,%.2f>,<%.2f+dx*colcount,%.2f+dy*rowcount,0>)", -aref->Rotate.Y, aref->X1, aref->Y1);
-	  }
-	  fprintf(fptr, "}\n");
-
-	  fprintf(fptr, "\t\t#declare rowcount = rowcount + 1;\n");
-	  fprintf(fptr, "\t#end\n");
-	  fprintf(fptr, "\t#declare colcount = colcount + 1;\n");
-	  fprintf(fptr, "#end\n");
-	}
-      }
-      } */
-
-
   }    
 }
 
@@ -805,26 +730,6 @@ void GDSObject_vrml::DecomposePOVPolygons(FILE *fptr)
 	    fprintf(fptr, ",<%d,%d,%d>", bendindex1+polygon->GetPoints()-1, j+polygon->GetPoints()-1, (j+polygon->GetPoints()>=2*(polygon->GetPoints()-1))?j+1:j+polygon->GetPoints());
 	  }
 	}
-	/*}else if(negatives==2 && positives>2){
-	  bendindex1 = -1;
-	  bendindex2 = -1;
-
-	  fprintf(fptr, "} face_indices{%d", 2*(polygon->GetPoints()-2) + 2*(polygon->GetPoints()-1));
-	  for(unsigned int j=0; j<polygon->GetPoints()-1; j++){
-	  if(polygon->GetAngleCoords(j)<0 && bendindex1 == -1){
-	  bendindex1 = j;
-	  }else if(polygon->GetAngleCoords(j)<0){
-	  bendindex2 = j;
-	  break;
-	  }
-	  }
-	  for(unsigned int j=bendindex1; j<=bendindex2; j++){
-	  fprintf(fptr, "<%d,%d,%d>",);
-	  }
-	  for(unsigned int j=0; j<bendindex1; j++){
-	  fprintf(fptr, ",<%d,%d,%d>",);
-	  }
-	*/
       }else{
 	fprintf(fptr, "} face_indices { %d", 2*(polygon->GetPoints()-1));
       }

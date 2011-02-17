@@ -1,17 +1,18 @@
 
-//demonstrates the easy of antenna design
+// demonstrates the performance of the scripting-core 
+// by creating thousands of VIAs
 
 #include "config.tll"
-#include "../../technology/default_drc.tll"
-#include "../helper.tll"
-#include "../geometry.tll"
-#include "../wires.tll"
+#include "user_functions/technology/default_drc.tll"
+#include "user_functions/general/helper.tll"
+#include "user_functions/general/geometry.tll"
+#include "user_functions/general/wires.tll"
 
 newdesign("via_test");
 newcell("via");
 opencell("via");
 
-//start of the  design
+//start of design
 
 
 //placeVIAarray ( {10,10} , {13,13} , 1 , 2);
@@ -40,5 +41,5 @@ placeVIAarray ({0,0}, {1000,1000}, 1, 2);
 
 zoomall();
 
-tdtsave();
-exit();
+//tdtsave();
+//exit();

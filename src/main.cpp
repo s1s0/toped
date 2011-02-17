@@ -34,9 +34,14 @@
 #include <wx/dynlib.h>
 #include <sstream>
 #if WIN32
-#include <crtdbg.h>
+   #include <crtdbg.h>
 #endif
-
+#ifdef __linux__
+   #include <sys/stat.h>
+   #include <sys/types.h>
+   #include <unistd.h>
+   #include <errno.h>
+#endif
 #include "toped.h"
 #include "viewprop.h"
 #include "datacenter.h"
@@ -343,6 +348,45 @@ void TopedApp::loadPlugIns()
             typedef void (*ModuleFunction)(parsercmd::cmdMAIN*);
             do
             {
+#ifdef __linux__
+               // Handling the eventual symbolic links manually. Mainstream wx
+               // doesn't seem to have a anything about it yet although there are
+               // some reports:
+               // http://trac.wxwidgets.org/ticket/1993
+               // http://trac.wxwidgets.org/ticket/4619
+               // http://groups.google.com/group/wx-users/browse_thread/thread/7a2146856543d06d/713af78928657f66?hl=en&lnk=gst&q=symbolic+link#713af78928657f66
+               wxString pinCandName = _tpdPlugInDir + curFN;
+               std::string fnstr(pinCandName.mb_str(wxConvUTF8));
+               struct stat stbuf;
+               if (-1 == stat(fnstr.c_str(), &stbuf))
+               {
+                  printf( "Can't get a file \"%s\" stat: %s\n", fnstr.c_str(), strerror( errno ) );
+                  printf( "Plug-in load operation is likely to fail\n");
+               }
+               else
+               {
+                  if (stbuf.st_mode & S_IFLNK)
+                  {
+                     //File is a symbolic link - it has to be resolved
+                     char buf[1024];
+                     ssize_t len = readlink(fnstr.c_str(), buf, sizeof(buf)-1);
+                     if (-1 == len)
+                     {
+                        printf( "Can't read a link \"%s\": %s\n", fnstr.c_str(), strerror( errno ) );
+                        printf( "Plug-in load operation is likely to fail\n");
+                     }
+                     else
+                     {
+                        //OK, the link resolved - replace the original curFN
+                        // returned from GetFirst/GetNext
+                        buf[len] = '\0';
+                        curFN = wxString(buf, wxConvUTF8);
+                     }
+                  }
+                  // else - the file is not a symbolic link - so
+                  // there is nothing to do
+               }
+#endif
                wxDynamicLibrary* plugin = DEBUG_NEW wxDynamicLibrary();
                if (plugin->Load(curFN))
                {
@@ -365,7 +409,8 @@ void TopedApp::loadPlugIns()
                {
                   wxString errMessage(wxT("Troubles when trying to load \""));
                   errMessage += curFN;
-                  errMessage += wxT("\" dynamically");
+                  errMessage += wxT("\" dynamically\n");
+                  errMessage += wxT("\" Check the OS & Toped consoles for further details");
                   wxMessageBox(errMessage);
                   delete plugin;
                }

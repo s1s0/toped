@@ -772,15 +772,18 @@ void DataCenter::openGlDraw(const CTM& layCTM)
             {
                if (wxMUTEX_NO_ERROR == _DRCLock.TryLock())
                {
-                  if (_TEDLIB()->activeCellName() == DRCData->cellName())
+                  std::string cell = DRCData->cellName();
+                  drawProp->setState(layprop::DRC);
+                  laydata::TdtDefaultCell* dst_structure = _DRCDB->checkCell(cell);
+                  if (dst_structure)
                   {
-
-                     laydata::TdtDefaultCell* dst_structure = _DRCDB->checkCell(DRCData->cellName());
-                     if (dst_structure)
-                     {
-                        dst_structure->openGlDraw(*drawProp);
-                     }
+                     drawProp->initCtmStack();
+//                     drawProp->initDrawRefStack(NULL); // no references yet in the DRC DB
+                     dst_structure->openGlDraw(*drawProp);
+//                     drawProp->clearCtmStack();
+                     drawProp->clearDrawRefStack();
                   }
+                  drawProp->setState(layprop::DB);
                   VERIFY(wxMUTEX_NO_ERROR == _DRCLock.Unlock());
                }
             }
@@ -856,7 +859,6 @@ void DataCenter::openGlRender(const CTM& layCTM)
                      dst_structure->openGlRender(renderer, DRCData->getCTM(cell), false, false);
                   }
                   renderer.setState(layprop::DB);
-                  
                   VERIFY(wxMUTEX_NO_ERROR == _DRCLock.Unlock());
                }
             }

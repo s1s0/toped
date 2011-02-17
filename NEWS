@@ -1,28 +1,11 @@
-Toped release 0.95 changes and updates
+Toped release 0.97 changes and updates
 ----------------------------------------
-Bugfix release
-* Multigigabyte GDS files are now converted in minutes. 
-* Linux packaging - conversion utility for Virtuoso(C) is now in the Linux package
-* Stability with various graphic drivers is improved.
-* Some multithread related locks resolved and fixed.
-
-
-Toped release 0.94 changes and updates
-----------------------------------------
-* New graphic renderer which speeds-up the drawing up-to 3.5 times. 
-  Requires openGL version 1.4 and Virtual Buffer Objects. Will be used as a 
-  base for future graphical effects.
-* The old renderer remains to cover graphic drivers implementing older openGL 
-  versions and particularly virtual desktops. The speed here is also improved 
-  significantly.
-* Updates and fixes in the external interfaces. GDSII in particular.
-* New utility for conversion of Virtuoso(C) technology files to TELL.
-* TDT format updated with new records. Version updated to 0.7. Old Toped releases 
-  will not be able to read TDT files produced by this release. This release should 
-  handle silently both versions.
-* Significant provisions on improving the GDSII conversion speed. This task together 
-  with the reducing of the memory footprint is not finished though.
-* Further updates on the user interface customization - toolbars
-* Updates in the internal handling of the cell references. In result layer 0 is 
-  handled as a normal layer now.
-* Number of bug fixes
+- Further work on Calibre DRC visualisation. Browser supports cell name mode now.
+- New utility (gds2vrml) for generation of VRML files
+- Improved memory footprint, improved TELL execution speed
+- Compressed files supported now for all DB formats
+- Plug-in development infrastructure. Header files for a development package are
+  released for the first time. Plug-in example will be available shortly
+- TELL user library initiated and included in the distribution
+- Some new build-in TELL functions including exec renamecell etc.
+- Bug fixes and stability improvements
