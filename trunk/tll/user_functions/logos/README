@@ -21,7 +21,9 @@ Workflow:
 5.) octave can manipulate the date and constructs a TELL-script
 
 
-Fortunately a shell-script can do the job for you:
+Fortunately a shell-script "create_logo.sh" can do the job for you:
+(if you want to use the files from the subdirectory "examples", 
+please unzip the pnm-files before you apply the script)
 
 follow the steps
 > edit config.m

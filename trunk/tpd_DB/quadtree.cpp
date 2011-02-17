@@ -417,11 +417,12 @@ the method is called for every of the child structures.
 */
 void laydata::QuadTree::sort(ShapeList& inlist)
 {
+   unsigned int entryListSize = inlist.size();
    // if the input list is empty - nothing to do!
-   if (0 == inlist.size()) return;
+   if (0 == entryListSize) return;
    ShapeList::iterator DI = inlist.begin();
    // if the list contains only one component - link it and run away
-   if (1 == inlist.size())
+   if (1 == entryListSize)
    {
       _data = DEBUG_NEW TdtData*[1];
       _props._numObjects = 1;
@@ -429,7 +430,6 @@ void laydata::QuadTree::sort(ShapeList& inlist)
       return;
    }
    // the overlapping box of the current shape
-//   DBbox shovl(TP(0,0));
    DBbox shovl = DEFAULT_OVL_BOX;
    // the maximum possible overlapping boxes of the 4 children
    DBbox maxsubbox[4] = {DEFAULT_OVL_BOX, DEFAULT_OVL_BOX,
@@ -472,9 +472,16 @@ void laydata::QuadTree::sort(ShapeList& inlist)
          }
       }
    }
-   // at this point inlist MUST contain only the shapes for this QuadTree. The rest was
-   // split over the underlying (maximum 4) QuadTrees. So - first save the local ones
+   // at this point inlist MUST contain only the shapes for this QuadTree.
+   // The rest was split over the underlying (maximum 4) QuadTrees.
    _props._numObjects = inlist.size();
+   assert (entryListSize == (_props._numObjects +
+                             sublist[0].size()  +
+                             sublist[1].size()  +
+                             sublist[2].size()  +
+                             sublist[3].size()    )
+          );
+   // So - first save the local ones
    if (0 < _props._numObjects)
    {
       _data = DEBUG_NEW TdtData*[_props._numObjects];
@@ -490,7 +497,6 @@ void laydata::QuadTree::sort(ShapeList& inlist)
       if (!sublist[i].empty())
       {
          char quadPosition = _props.getPosition((QuadIdentificators) i);
-         assert(-1 < quadPosition);
          _subQuads[(byte)quadPosition]->sort(sublist[i]);
       }
 }

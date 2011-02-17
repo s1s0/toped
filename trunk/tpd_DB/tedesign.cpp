@@ -1700,17 +1700,17 @@ void laydata::DrcLibrary::registerCellRead(std::string cellname, TdtCell* cell) 
    // 2. The same case 1, but the reason is circular reference.
    // 3. Cell is defined more than once
    // Case 3 seems to be just theoretical and we should abort the reading
-   // and retun with error in this case.
+   // and return with error in this case.
    // Case 2 is really dangerous and once again theoretically we need to
    // break the circularity. This might happen however once the whole file
-   // is parced
+   // is parsed
    // Case 1 is quite OK, although, the write sequence should use the
    // cell structure tree and start the writing from the leaf cells. At the
    // moment writing is in kind of alphabetical order and case 1 is more
    // than possible. In the future it might me appropriate to issue a warning
    // for possible circular reference.
       if (NULL == _cells[cellname]) {
-         // case 1 or case 2 -> can't be distiguised in this moment
+         // case 1 or case 2 -> can't be distinguished in this moment
          //_cells[cellname] = cell;
          // cell has been referenced already, so it's not an orphan
          cell->parentFound();
@@ -1722,23 +1722,23 @@ void laydata::DrcLibrary::registerCellRead(std::string cellname, TdtCell* cell) 
    _cells[cellname] = cell;
 }
 
-WordList laydata::DrcLibrary::findSelected(TP* p1)
+WordList laydata::DrcLibrary::findSelected(const std::string &cell, TP* p1)
 {
    //TdtDefaultCell* cell = checkCell("drc");
-   TdtCell* cell = dynamic_cast<TdtCell*>(checkCell("drc"));
+   TdtCell* theCell = dynamic_cast<TdtCell*>(checkCell(cell));
    TP selp;
    WordList errorList;
    laydata::AtticList* shapes;
    laydata::ShapeList *shapeList;
    TdtData *shape;
-   if (cell) {
+   if (theCell) {
 
       layprop::DrawProperties* drawProp;
       if (PROPC->lockDrawProp(drawProp, layprop::DRC))
       {
          selp = (*p1)*CTM().Reversed(); //Take identity matrix
          //??? Add here Error List construction
-         shapes = cell->findSelected(selp);
+         shapes = theCell->findSelected(selp);
          for(laydata::AtticList::const_iterator it = shapes->begin(); it != shapes->end(); ++it)
          {
             word error;
@@ -1753,6 +1753,16 @@ WordList laydata::DrcLibrary::findSelected(TP* p1)
       }
       PROPC->unlockDrawProp(drawProp);
       errorList.unique();
+      if(shapes != NULL)
+      {
+         for(laydata::AtticList::iterator it = shapes->begin(); it != shapes->end(); ++it)
+         {
+            shapeList = (*it).second;
+            delete shapeList;
+         }
+
+         delete shapes;
+      }
       return errorList;
    }
    else

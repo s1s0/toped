@@ -1,8 +1,12 @@
 #!/bin/bash
 
-LD_LIBRARY_PATH=~/src/gdsto3d-20080229/build/libgdsto3d:$LD_LIBRARY_PATH
+## if your ldconf or your LD_LIBRARY_PATH don't include the path to 
+## libgds3d uncomment and edit following line properly
+#LD_LIBRARY_PATH=~/lib:$LD_LIBRARY_PATH
 
-GDS2VRML=../../src/gds2vrml
+## if your PATH environment variable doesn't include the path to the
+## gds2vrm executabel the path has to be added
+GDS2VRML=gds2vrml
 
 ## extract cell-name
 if [ -f $1 ] ; then
@@ -10,6 +14,7 @@ if [ -f $1 ] ; then
     echo "--> converting cell $CELL " 
 else
     echo "usage: create_vrml <file.gds> [<top-cell-name>]"
+    echo "       top-cell-name has to be included if it differs from filename"
     echo "ERROR: parameter $1 is not a valid filename"
     exit
 fi
@@ -35,6 +40,6 @@ fi
 
 ${GDS2VRML} -i ${CELL}.gds -o ${CELL}.wrl -p simple.txt -t ${TOP}
 
-# view3dscene can read gzipped files?!
+# view3dscene can read gzipped files!
 gzip ${CELL}.wrl
 

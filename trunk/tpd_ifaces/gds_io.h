@@ -301,7 +301,8 @@ namespace GDSin {
          void                 skimARef(GdsInFile*);
          void                 skimNode(GdsInFile*);
          void                 updateContents(int2b, int2b);
-         int                  arrGetStep(TP&, TP&, int2b);
+//         int                  arrGetStep(TP&, TP&, int2b);
+         TP                   arrGetStep(const TP&, const TP&, int2b);
          ExtLayers            _contSummary; // contents summary
          NameSet              _referenceNames;
          GDSStructureList     _children;

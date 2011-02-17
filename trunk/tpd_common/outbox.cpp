@@ -833,7 +833,17 @@ bool TpdTime::getStdCTime(wxString& exp) {
       wxString ampm = src_tmpl.GetMatch(exp);
       assert(0 != ampm.Len());
       if ( wxT("PM") == ampm )
-         broken_time.tm_hour += 12;
+      {
+         if (broken_time.tm_hour < 12)
+            broken_time.tm_hour += 12;
+         else
+            broken_time.tm_hour  = 0;
+      }
+      else if ( wxT("AM") == ampm )
+      {
+         if (broken_time.tm_hour == 12)
+            broken_time.tm_hour  = 0;
+      }
       src_tmpl.ReplaceFirst(&exp,wxT(""));
    }
    //

@@ -558,7 +558,7 @@ namespace tenderer {
       gathered during the traversing and sorting step.
 
       \verbatim
-      -------------------------------------------------------------------
+       -------------------------------------------------------------------
       |      |                                           |       VBO      |
       | data |            openGL function                |----------------|
       | type |                                           | vertex | index |
@@ -585,7 +585,7 @@ namespace tenderer {
          typedef std::list<TenderText*> TenderStrings;
          typedef std::list<TextOvlBox*> RefTxtList;
                            TenderTV(TenderRef* const, bool, bool, unsigned, unsigned);
-                        ~TenderTV();
+                          ~TenderTV();
          void              registerBox   (TenderCnvx*);
          void              registerPoly  (TenderNcvx*, const TessellPoly*);
          void              registerWire  (TenderWire*);
@@ -777,7 +777,7 @@ namespace tenderer {
          typedef std::map<std::string, TenderTV*> ReusableTTVMap;
 
                            TenderLay();
-                        ~TenderLay();
+                          ~TenderLay();
          void              box  (int4b*,                       bool, const SGBitSet*);
          void              poly (int4b*, unsigned, const TessellPoly*, bool, const SGBitSet*);
          void              wire (int4b*, unsigned, laydata::WireWidth, bool, bool, const SGBitSet*);
@@ -833,7 +833,7 @@ namespace tenderer {
    class TenderRefLay {
       public:
                            TenderRefLay();
-                        ~TenderRefLay();
+                          ~TenderRefLay();
          void              addCellOBox(TenderRef*, word, bool);
          void              collect(GLuint);
          void              draw(layprop::DrawProperties*);
@@ -863,10 +863,10 @@ namespace tenderer {
    /**
       Toped RENDERER is the front-end class, the interface to the rest of the world.
       All render views are initiated using an object of this class. There should be
-      only one object of this class at a time. The class must be destroyed before
-      the next rendering view is invoked. The data gathered for the previous view
-      must be considered invalid. The object structure created by this class is
-      shown in the documentation of the module.
+      only one object of this class at a time. The object of this class must be
+      destroyed before the next rendering view is invoked. The data gathered for
+      the previous view must be considered invalid. The object structure created
+      by this class is shown in the documentation of the module.
    */
    class TopRend {
       public:

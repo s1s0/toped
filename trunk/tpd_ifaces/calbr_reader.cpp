@@ -131,10 +131,10 @@ Calbr::drcRuleCheck::drcRuleCheck(unsigned int num, const std::string &name)
 }
 
 Calbr::drcRuleCheck::drcRuleCheck(const drcRuleCheck& ruleCheck)
+      :_borderInit(false)
 {
    _num = ruleCheck._num;
    _ruleCheckName = ruleCheck._ruleCheckName;
-   _borderInit = ruleCheck._borderInit;
 }
 
 Calbr::drcRuleCheck::~drcRuleCheck()
@@ -300,6 +300,7 @@ void Calbr::CalbrFile::readFile()
       drcPolygon::_precision = _precision;
       drcEdge::_precision = _precision;
       _curCellName = cellName;
+      _topCellName = cellName;
       unsigned int num = 1;
 
       cellNameStruct *CNStruct = DEBUG_NEW cellNameStruct;
@@ -686,11 +687,14 @@ void   Calbr::CalbrFile::showError(const std::string& cell, const std::string& e
 }
 
 
-void   Calbr::CalbrFile::showCluster(const std::string & error)
+void   Calbr::CalbrFile::showCluster(const std::string & cell, const std::string & error)
 {
+   Calbr::cellNameStruct* cellStruct =_cellDRCMap[cell];
+   RuleChecksVector* ruleChecks = &(cellStruct->_RuleChecks);
+
    edge zoom;
    RuleChecksVector::const_iterator it;
-   for(it = _RuleChecks.begin(); it!= _RuleChecks.end(); ++it)
+   for(it = ruleChecks->begin(); it!= ruleChecks->end(); ++it)
    {
       std::string x = (*it)->ruleCheckName();
       if((*it)->ruleCheckName() == error)
@@ -710,13 +714,13 @@ void   Calbr::CalbrFile::showCluster(const std::string & error)
          }
       }
    }
-   assert(it == _RuleChecks.end());
+   assert(it == ruleChecks->end());
 }
 
 void   Calbr::CalbrFile::showAllErrors(void)
 {
    _render->showAll();
-   _render->zoom(_border);
+   //_render->zoom(_border);
 }
 
 void   Calbr::CalbrFile::hideAllErrors(void)
@@ -726,9 +730,13 @@ void   Calbr::CalbrFile::hideAllErrors(void)
 
 std::string Calbr::CalbrFile::explainError(word lay)
 {
-   for(RuleChecksVector::const_iterator it = _RuleChecks.begin(); it!= _RuleChecks.end(); ++it)
+   for(CellDRCMap::const_iterator m_it = _cellDRCMap.begin(); m_it!=_cellDRCMap.end(); ++m_it)
    {
-      if ((*it)->num() == lay) return (*it)->ruleCheckName();
+      RuleChecksVector *ruleChecks = &((*m_it).second->_RuleChecks);
+      for(RuleChecksVector::const_iterator it = ruleChecks->begin(); it!= ruleChecks->end(); ++it)
+      {
+         if ((*it)->num() == lay) return (*it)->ruleCheckName();
+      }
    }
    assert(true);
    //dummy, to prevent compiler warnings!

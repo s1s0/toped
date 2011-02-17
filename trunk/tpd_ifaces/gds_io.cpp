@@ -1395,10 +1395,12 @@ void GDSin::GdsStructure::importAref(GdsInFile* cf, ImportDB& iDB)
    while (true);
 }
 
-int GDSin::GdsStructure::arrGetStep(TP& Step, TP& magnPoint, int2b colrows)
+TP GDSin::GdsStructure::arrGetStep(const TP& Step, const TP& magnPoint, int2b colrows)
 {
-   return (int) sqrt(pow(float((Step.x() - magnPoint.x())),2) +
-                     pow(float((Step.y() - magnPoint.y())),2)   ) / colrows;
+//   return (int) sqrt(pow(float((Step.x() - magnPoint.x())),2) +
+//                     pow(float((Step.y() - magnPoint.y())),2)   ) / colrows;
+   return TP((float)(Step.x() - magnPoint.x()) / (float)colrows,
+             (float)(Step.y() - magnPoint.y()) / (float)colrows );
 }
 
 void GDSin::GdsStructure::split(GdsInFile* src_file, GdsOutFile* dst_file)
@@ -1795,8 +1797,11 @@ void GDSin::GdsExportFile::aref(const std::string& name, const CTM& translation,
    flush(wr);
    wr = setNextRecord(gds_XY,3);
    wr->add_int4b(trans.x());wr->add_int4b(trans.y());
-   wr->add_int4b(trans.x() + arrprops.cols() * arrprops.stepX());wr->add_int4b(trans.y());
-   wr->add_int4b(trans.x());wr->add_int4b(trans.y() + arrprops.rows() * arrprops.stepY());
+
+   TP dCol(arrprops.colStep().x() * arrprops.cols(), arrprops.colStep().y() * arrprops.cols());
+   TP dRow(arrprops.rowStep().x() * arrprops.rows(), arrprops.rowStep().y() * arrprops.rows());
+   wr->add_int4b(dCol.x());wr->add_int4b(dCol.y());
+   wr->add_int4b(dRow.x());wr->add_int4b(dRow.y());
    flush(wr);
    wr = setNextRecord(gds_ENDEL);
    flush(wr);

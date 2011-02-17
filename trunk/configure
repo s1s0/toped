@@ -17067,7 +17067,7 @@ else
 fi
 
 
-ac_config_files="$ac_config_files Makefile ui/Makefile tpd_common/Makefile tpd_DB/Makefile tpd_ifaces/Makefile tpd_parser/Makefile tpd_bidfunc/Makefile src/Makefile fonts/Makefile icons/Makefile tll/Makefile utils/cadence/Makefile"
+ac_config_files="$ac_config_files Makefile ui/Makefile tpd_common/Makefile tpd_DB/Makefile tpd_ifaces/Makefile tpd_parser/Makefile tpd_bidfunc/Makefile src/Makefile fonts/Makefile icons/Makefile utils/cadence/Makefile tll/Makefile tll/user_functions/Makefile tll/user_functions/technology/Makefile tll/user_functions/general/Makefile tll/user_functions/general/examples/Makefile tll/user_functions/logos/Makefile tll/user_functions/logos/examples/Makefile"
 
 
 if test x$tpd_utils = xtrue; then
@@ -18177,8 +18177,14 @@ do
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
     "fonts/Makefile") CONFIG_FILES="$CONFIG_FILES fonts/Makefile" ;;
     "icons/Makefile") CONFIG_FILES="$CONFIG_FILES icons/Makefile" ;;
-    "tll/Makefile") CONFIG_FILES="$CONFIG_FILES tll/Makefile" ;;
     "utils/cadence/Makefile") CONFIG_FILES="$CONFIG_FILES utils/cadence/Makefile" ;;
+    "tll/Makefile") CONFIG_FILES="$CONFIG_FILES tll/Makefile" ;;
+    "tll/user_functions/Makefile") CONFIG_FILES="$CONFIG_FILES tll/user_functions/Makefile" ;;
+    "tll/user_functions/technology/Makefile") CONFIG_FILES="$CONFIG_FILES tll/user_functions/technology/Makefile" ;;
+    "tll/user_functions/general/Makefile") CONFIG_FILES="$CONFIG_FILES tll/user_functions/general/Makefile" ;;
+    "tll/user_functions/general/examples/Makefile") CONFIG_FILES="$CONFIG_FILES tll/user_functions/general/examples/Makefile" ;;
+    "tll/user_functions/logos/Makefile") CONFIG_FILES="$CONFIG_FILES tll/user_functions/logos/Makefile" ;;
+    "tll/user_functions/logos/examples/Makefile") CONFIG_FILES="$CONFIG_FILES tll/user_functions/logos/examples/Makefile" ;;
     "utils/gds2vrml_v0.3/libgdsto3d/Makefile") CONFIG_FILES="$CONFIG_FILES utils/gds2vrml_v0.3/libgdsto3d/Makefile" ;;
     "utils/gds2vrml_v0.3/src/Makefile") CONFIG_FILES="$CONFIG_FILES utils/gds2vrml_v0.3/src/Makefile" ;;
 

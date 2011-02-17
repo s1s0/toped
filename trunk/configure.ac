@@ -125,8 +125,14 @@ AC_CONFIG_FILES([
    src/Makefile
    fonts/Makefile
    icons/Makefile
-   tll/Makefile
    utils/cadence/Makefile
+   tll/Makefile
+   tll/user_functions/Makefile
+   tll/user_functions/technology/Makefile
+   tll/user_functions/general/Makefile
+   tll/user_functions/general/examples/Makefile
+   tll/user_functions/logos/Makefile
+   tll/user_functions/logos/examples/Makefile
 ])
 
 AM_COND_IF([UTILS],

@@ -54,7 +54,7 @@
 #define tedf_REFS             0x8C
 #define tedf_REFSEND          0x8D
 #define TED_CUR_REVISION      0
-#define TED_CUR_SUBREVISION   8
+#define TED_CUR_SUBREVISION   9
 
 //==============================================================================
 class PSegment {
@@ -282,17 +282,23 @@ namespace laydata {
    class ArrayProperties
    {
       public:
-         ArrayProperties() : _stepX(0), _stepY(0), _cols(0), _rows(0) {}
+         ArrayProperties() : _colStep(0,0), _rowStep(0,0), _cols(0), _rows(0) {}
          ArrayProperties(int4b stepX, int4b stepY, word cols, word rows) :
-            _stepX(stepX), _stepY(stepY), _cols(cols), _rows(rows) {}
+            _colStep(stepX,0), _rowStep(0,stepY), _cols(cols), _rows(rows) {}
+         ArrayProperties(const TP& colStep, const TP& rowStep, word cols, word rows) :
+            _colStep(colStep), _rowStep(rowStep), _cols(cols), _rows(rows) {}
          bool                valid() {return ((_cols != 0) && (_rows != 0));}
-         int4b               stepX() const {return _stepX;}
-         int4b               stepY() const {return _stepY;}
-         word                cols()  const {return _cols;}
-         word                rows()  const {return _rows;}
+//         int4b               stepX() const {return _colStep.x();}
+//         int4b               stepY() const {return _rowStep.y();}
+         const TP&           colStep() const {return _colStep;}
+         const TP&           rowStep() const {return _rowStep;}
+         TP                  displ(int col, int row) const {return TP((_colStep.x() * col) + (_rowStep.x() * row),
+                                                                      (_colStep.y() * col) + (_rowStep.y() * row) );}
+         word                cols()    const {return _cols;}
+         word                rows()    const {return _rows;}
       private:
-         int4b               _stepX;
-         int4b               _stepY;
+         TP                  _colStep;
+         TP                  _rowStep;
          word                _cols;
          word                _rows;
    };

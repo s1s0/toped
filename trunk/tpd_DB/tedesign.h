@@ -259,7 +259,7 @@ namespace laydata {
       virtual                 ~DrcLibrary();
       TdtDefaultCell*         checkCell(std::string name);
       void                    registerCellRead(std::string, TdtCell*);
-      WordList                findSelected(TP*); //use for DRCexplainerror
+      WordList                findSelected(const std::string &cell, TP*); //use for DRCexplainerror
       std::string             name()            const {return _name;}
       real                    UU()              const {return _UU;}
       real                    DBU()             const {return _DBU;}

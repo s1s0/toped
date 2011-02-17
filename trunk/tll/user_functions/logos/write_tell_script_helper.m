@@ -8,6 +8,8 @@
 # A algorthmic search is done to determine and connect inner with outer
 # polygons to make it drawable in Toped
 #
+# difference to v1: sorting algorithm for polygons is not used
+# 
 # here some helper functions
 
 #
@@ -281,6 +283,8 @@ endfunction
 
 ## sort the list of external polygons
 ## polygons which are within other polygons sustain higher indices
+## FIXME: this algorithm still doesn't provide a 100% correct solution - but 
+## seems to be sufficient
 ## @param p list of polygons in the form of struct (polyX, polyY, inner, len)
 ## @return list of sorted indices
 function ilist = sort_polygons (p)
@@ -347,9 +351,13 @@ function newp = build_merged_poly_list (ip, ep)
   pi = struct ("int",[]); ## contains a internal list of inner polygon indices
 
   #printf("starting sorting ..\n");
-  sorted_list_ep = sort_polygons (ep);
-  sorted_list_ip = sort_polygons (ip);
+  ##sorted_list_ep = sort_polygons (ep);
+  ##sorted_list_ip = sort_polygons (ip);
   #printf("end_sorting ..\n");
+  
+  ## sorting is not necessary
+  sorted_list_ep = 1:length(ep);
+  sorted_list_ip = 1:length(ip);
 
   ## test each external polygon with an inner one
   for e = fliplr(sorted_list_ep) ## start with innermost external polygon

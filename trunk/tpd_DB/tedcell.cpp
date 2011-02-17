@@ -469,11 +469,11 @@ void laydata::TdtCell::openGlRender(tenderer::TopRend& rend, const CTM& trans,
    typedef LayerList::const_iterator LCI;
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
    {
-      //first to check visibility for layer
+      //first - to check visibility of the layer
       if (rend.layerHidden(lay->first)) continue;
-      //second to get fake number for layer.
-      //For regular database it is equal of real number of layer
-      //For drc database it is common for all layers
+      //second - get internal layer number:
+      //       - for regular database it is equal to the TDT layer number
+      //       - for DRC database it is common for all layers - DRC_LAY
       unsigned curlayno = rend.getTenderLay(lay->first);
       // retrieve the selected objects (if they exists)
       SelectList::const_iterator dlsti;
@@ -485,27 +485,35 @@ void laydata::TdtCell::openGlRender(tenderer::TopRend& rend, const CTM& trans,
       // traversing depends on the area overlap between the layer chunk and
       // current location of the view port. In other words traverse the
       // cells only if they are not already traversed. For more info -
-      // see the documentation of tenderer.h::TenderReTV class
-      if (REF_LAY != curlayno)
+      // see the documentation of tenderer.h::TenderReTV class.
+      // The exceptions here are:
+      // - the cell references of course
+      // - the DRC DB - because it is using a single layer besides it doesn't
+      //   utilize the reference mechanism at all.
+      switch (curlayno)
       {
-         short cltype = lay->second->clipType(rend);
-         switch (cltype)
+         case REF_LAY: lay->second->openGlRender(rend, dlist); break;
+         case DRC_LAY: rend.setLayer(curlayno, (NULL != dlist));
+                       lay->second->openGlRender(rend, dlist); break;
+         default     :
          {
-            case -1: {// full overlap - conditional rendering
-               if ( !rend.chunkExists(curlayno, (NULL != dlist)) )
+            short cltype = lay->second->clipType(rend);
+            switch (cltype)
+            {
+               case -1: {// full overlap - conditional rendering
+                  if ( !rend.chunkExists(curlayno, (NULL != dlist)) )
+                     lay->second->openGlRender(rend, dlist);
+                  break;
+               }
+               case  1: {//partial clip - render always
+                  rend.setLayer(curlayno, (NULL != dlist));
                   lay->second->openGlRender(rend, dlist);
-               break;
+                  break;
+               }
+               default: assert(0 == cltype);
             }
-            case  1: {//partial clip - render always
-               rend.setLayer(curlayno, (NULL != dlist));
-               lay->second->openGlRender(rend, dlist);
-               break;
-            }
-            default: assert(0 == cltype);
          }
       }
-      else
-         lay->second->openGlRender(rend, dlist);
    }
    rend.popCell();
 }
