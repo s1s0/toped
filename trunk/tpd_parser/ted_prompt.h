@@ -82,13 +82,12 @@ namespace console {
                               ted_cmd(wxWindow*, wxWindow*);
       virtual                ~ted_cmd();
       void                    parseCommand(wxString, bool thread=true);
+      void                    stopParserThread();
       void                    waitGUInput(telldata::operandSTACK*,console::ACTIVE_OP, const CTM&);
       void                    waitExternal(wxString);
       void                    getGUInput(bool from_keyboard = true);
-      wxCondition*            _threadWaits4;
-      miniParser*             _puc; // parse user coordinates
-
       void                    getCommand(bool);
+      bool                    findTellFile(const char*, std::string&);
       bool                    mouseIN_OK() const            {return _mouseIN_OK;};
       word                    numpoints() const             {return _numpoints;}
       const char*             lastCommand() const           {return _cmd_history.rbegin()->c_str();}
@@ -99,7 +98,8 @@ namespace console {
       bool                    cmdHistoryExists() const      {return !_cmd_history.empty();}
       void                    addTllIncludePath(wxString path){ _tllIncludePath.Add(path);}
       void                    addTllEnvList(wxString pvar)  { _tllIncludePath.AddEnvList(pvar);}
-      bool                    findTellFile(const char*, std::string&);
+      wxCondition*            _threadWaits4;
+      miniParser*             _puc; // parse user coordinates
    private:
       void                    spawnTellThread(/*wxString*/);
       void                    runTellCommand(const wxString&);
