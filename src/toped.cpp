@@ -240,7 +240,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMFILE_SAVE         , tui::TopedFrame::OnTDTSave     )
    EVT_MENU( TMFILE_SAVEAS       , tui::TopedFrame::OnTDTSaveAs   )
    EVT_MENU( TMPROP_SAVE         , tui::TopedFrame::OnPropSave    )
-   EVT_MENU( TMFILE_EXIT         , tui::TopedFrame::OnQuit        )
+   EVT_MENU( TMFILE_EXIT         , tui::TopedFrame::OnExit        )
 
    EVT_MENU( TMEDIT_UNDO         , tui::TopedFrame::OnUndo        )
    EVT_MENU( TMEDIT_COPY         , tui::TopedFrame::OnCopy        )
@@ -361,7 +361,8 @@ void tui::TopedFrame::OnClose(wxCloseEvent& event)
 {
    if (event.CanVeto())
    {
-      if (DATC->modified()) {
+      if (DATC->modified())
+      {
          wxMessageDialog dlg1(this,
                               wxT("Save the current design before closing?\n(Cancel to continue the session)"),
                               wxT("Current design contains unsaved data"),
@@ -380,8 +381,8 @@ void tui::TopedFrame::OnClose(wxCloseEvent& event)
             }
          }
       }
-      Destroy();
    }
+   _cmdline->stopParserThread();
    Destroy();
 }
 
@@ -468,7 +469,7 @@ void tui::TopedFrame::initMenuBar() {
    _resourceCenter->appendMenuSeparator("&File");
   // _resourceCenter->appendMenu("&File/Snapshot ...","",  &tui::TopedFrame::OnTDTSnapshot, "Export screen to picture" );
   // _resourceCenter->appendMenuSeparator("&File");
-   _resourceCenter->appendMenu("&File/Exit",        "",  &tui::TopedFrame::OnQuit, "Exit Toped" );
+   _resourceCenter->appendMenu("&File/Exit",        "",  &tui::TopedFrame::OnExit, "Exit Toped" );
 
 
    //---------------------------------------------------------------------------
@@ -884,12 +885,6 @@ void tui::TopedFrame::OnExecExtTextEnter(wxCommandEvent& event)
    wxTextOutputStream tos(*(_extProc->GetOutputStream()));
    tos << event.GetString();
    _extProc->CloseOutput();
-}
-
-void tui::TopedFrame::OnQuit( wxCommandEvent& WXUNUSED( event ) ) {
-   wxString ost;
-   ost << wxT("exit();");
-   _cmdline->parseCommand(ost);
 }
 
 void tui::TopedFrame::OnExit( wxCommandEvent& WXUNUSED( event ) ) {

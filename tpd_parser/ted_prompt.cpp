@@ -292,6 +292,8 @@ void* console::parse_thread::Entry()
    }
    do {
       _mutexCondition->Wait();
+      if (TestDestroy())
+         break; // Thread Exit point
 
       telllloc.first_column = telllloc.first_line = 1;
       telllloc.last_column  = telllloc.last_line  = 1;
@@ -320,22 +322,17 @@ void* console::parse_thread::Entry()
       {
          Console->setExitRequest(false);
          TpdPost::quitApp(true);
-         break;
       }
-      else
+      else if (Console->canvas_invalid())
       {
-         if (Console->canvas_invalid())
-         {
-            wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
-            eventZOOM.SetInt(tui::ZOOM_REFRESH);
-            wxPostEvent(_canvas_wnd, eventZOOM);
-            Console->set_canvas_invalid(false);
-         }
-         TpdPost::toped_status(TSTS_THREADOFF);
+         wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
+         eventZOOM.SetInt(tui::ZOOM_REFRESH);
+         wxPostEvent(_canvas_wnd, eventZOOM);
+         Console->set_canvas_invalid(false);
       }
+      TpdPost::toped_status(TSTS_THREADOFF);
       parsercmd::cmdSTDFUNC::setThreadExecution(false);
    } while(true);
-
    _mutex.Unlock();
    return NULL;
 };
@@ -492,6 +489,19 @@ void console::ted_cmd::runTellCommand(const wxString& cmd)
       _tellThread->_mutex.Unlock();
       _threadWaits4->Signal();
    }
+}
+
+void console::ted_cmd::stopParserThread()
+{
+   wxMutexError result;
+   do
+   {
+      result = _tellThread->_mutex.TryLock();
+   } while (wxMUTEX_BUSY != result);
+   _tellThread->setCommand(wxT(""));
+   _tellThread->_mutex.Unlock();
+   _tellThread->Delete();
+   _threadWaits4->Signal();
 }
 
 // Note! parseCommand and onParseCommand should be overloaded methods, however

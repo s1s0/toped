@@ -813,7 +813,7 @@ int tellstdfunc::stdRENAMECELL::execute()
       else
       {
          tDesign->renameCell(targetCell, newName);
-         LogFile << LogFile.getFN() << "("<< newName << "," << oldName << ");"; LogFile.flush();
+         LogFile << LogFile.getFN() << "(\""<< newName << "\",\"" << oldName << "\");"; LogFile.flush();
          UNDOcmdQ.push_front(this);
          UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(oldName));
          UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(newName));
