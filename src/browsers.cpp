@@ -29,6 +29,7 @@
 //===========================================================================
 
 #include "tpdph.h"
+#include <sstream>
 #include <wx/tooltip.h>
 #include "browsers.h"
 #include "viewprop.h"
@@ -1927,6 +1928,13 @@ void browsers::LayerBrowser::onSaveState(wxCommandEvent& WXUNUSED(event))
       cmd << wxT("savelaystatus(\"") << stateName << wxT("\");");
       TpdPost::parseCommand(cmd);
    }
+   else
+   {
+		std::ostringstream ost;
+      ost<<"Name of Layers State is not specified";
+      tell_log(console::MT_ERROR,ost.str());
+      return;
+   }
 }
 
 void browsers::LayerBrowser::onLoadState(wxCommandEvent& WXUNUSED(event))
@@ -1938,6 +1946,13 @@ void browsers::LayerBrowser::onLoadState(wxCommandEvent& WXUNUSED(event))
       wxString cmd;
       cmd << wxT("restorelaystatus(\"") << stateName << wxT("\");");
       TpdPost::parseCommand(cmd);
+   }
+	else
+   {
+		std::ostringstream ost;
+      ost<<"Name of Layers State is not specified";
+      tell_log(console::MT_ERROR,ost.str());
+      return;
    }
 }
 
