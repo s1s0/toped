@@ -247,9 +247,11 @@ void telldata::ttlayout::echo(std::string& wstr, real DBU)
 }
 
 void telldata::ttlayout::assign(tell_var* data) {
-   _data  = static_cast<ttlayout*>(data)->_data;
-   _selp  = static_cast<ttlayout*>(data)->_selp;
-   _layer = static_cast<ttlayout*>(data)->_layer;
+   ttlayout* variable = static_cast<ttlayout*>(data);
+   _data  = variable->_data;
+   if (NULL != variable->_selp) _selp = DEBUG_NEW SGBitSet(*(variable->_selp));
+   else _selp = NULL;
+   _layer = variable->_layer;
    update_cstat();
 }
 
