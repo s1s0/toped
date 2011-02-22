@@ -326,7 +326,7 @@ namespace  parsercmd {
       cmdPUSH(telldata::tell_var *v, bool indexed, bool constant=false):
                         _var(v),  _indexed(indexed), _constant(constant) {};
       int execute();
-      ~cmdPUSH() {if (_constant) delete _var;};
+      virtual ~cmdPUSH() {if (_constant) delete _var;};
    private:
       telldata::tell_var*  _var;
       bool                 _indexed;
@@ -342,7 +342,7 @@ namespace  parsercmd {
    public:
       cmdANOVAR(telldata::tell_var *v) : _var(v) {};
       int execute() {return EXEC_NEXT;}
-      ~cmdANOVAR() { delete _var;}
+      virtual ~cmdANOVAR() { delete _var;}
    private:
       telldata::tell_var*  _var;
    };
@@ -508,7 +508,7 @@ namespace  parsercmd {
       void           addUSERFUNCDECL(FuncDeclaration*, TpdYYLtype);
       void           addGlobalType(std::string, telldata::tell_type*);
       void           recoveryDone();
-      ~cmdMAIN();
+      virtual       ~cmdMAIN();
    };
 
    class cmdSTDFUNC:public virtual cmdVIRTUAL {
@@ -564,7 +564,7 @@ namespace  parsercmd {
    public:
       cmdIFELSE(cmdBLOCK* tb, cmdBLOCK* fb):trueblock(tb),falseblock(fb) {};
       int                     execute();
-      ~cmdIFELSE() {delete trueblock; delete falseblock;}
+      virtual ~cmdIFELSE() {delete trueblock; delete falseblock;}
    private:
       cmdBLOCK*               trueblock;
       cmdBLOCK*               falseblock;
@@ -574,7 +574,7 @@ namespace  parsercmd {
    public:
       cmdWHILE(cmdBLOCK* cnd, cmdBLOCK* bd):condblock(cnd),body(bd) {};
       int                  execute();
-      ~cmdWHILE() {delete condblock; delete body;}
+      virtual ~cmdWHILE() {delete condblock; delete body;}
    private:
       cmdBLOCK *condblock;
       cmdBLOCK *body;
@@ -584,7 +584,7 @@ namespace  parsercmd {
    public:
       cmdREPEAT(cmdBLOCK* cnd, cmdBLOCK* bd):condblock(cnd),body(bd) {};
       int                  execute();
-      ~cmdREPEAT() {delete condblock; delete body;}
+      virtual ~cmdREPEAT() {delete condblock; delete body;}
    private:
       cmdBLOCK *condblock;
       cmdBLOCK *body;
@@ -597,7 +597,7 @@ namespace  parsercmd {
       void                 addBlocks(cmdBLOCK* hd, cmdBLOCK* bd)
                                                     {_header = hd; _body = bd;}
       int                  execute();
-      ~cmdFOREACH();
+      virtual ~cmdFOREACH();
    private:
       telldata::tell_var*  _var;
       cmdBLOCK*            _header;
