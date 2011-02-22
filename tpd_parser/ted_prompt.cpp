@@ -497,11 +497,12 @@ void console::ted_cmd::stopParserThread()
    do
    {
       result = _tellThread->_mutex.TryLock();
-   } while (wxMUTEX_BUSY != result);
+   } while (wxMUTEX_BUSY == result);
    _tellThread->setCommand(wxT(""));
    _tellThread->_mutex.Unlock();
+	_threadWaits4->Signal();
    _tellThread->Delete();
-   _threadWaits4->Signal();
+
 }
 
 // Note! parseCommand and onParseCommand should be overloaded methods, however
