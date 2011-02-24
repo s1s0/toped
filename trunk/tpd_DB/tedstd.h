@@ -288,8 +288,6 @@ namespace laydata {
          ArrayProperties(const TP& colStep, const TP& rowStep, word cols, word rows) :
             _colStep(colStep), _rowStep(rowStep), _cols(cols), _rows(rows) {}
          bool                valid() {return ((_cols != 0) && (_rows != 0));}
-//         int4b               stepX() const {return _colStep.x();}
-//         int4b               stepY() const {return _rowStep.y();}
          const TP&           colStep() const {return _colStep;}
          const TP&           rowStep() const {return _rowStep;}
          TP                  displ(int col, int row) const {return TP((_colStep.x() * col) + (_rowStep.x() * row),

@@ -931,6 +931,7 @@ int tellstdfunc::stdCELLREF_D::execute()
    }
 }
 
+
 //=============================================================================
 tellstdfunc::stdCELLAREF::stdCELLAREF(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
@@ -942,8 +943,8 @@ tellstdfunc::stdCELLAREF::stdCELLAREF(telldata::typeID retype, bool eor) :
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
 }
 
 void tellstdfunc::stdCELLAREF::undo_cleanup()
@@ -968,6 +969,80 @@ void tellstdfunc::stdCELLAREF::undo()
 }
 
 int tellstdfunc::stdCELLAREF::execute()
+{
+   // get the parameters from the operand stack
+   //cellaref("boza",getpoint(),0,false,1,3,2,{30,0},{0,70});
+   telldata::ttpnt  *stepTPY  = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
+   telldata::ttpnt  *stepTPX  = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
+   word   row    = getWordValue();
+   word   col    = getWordValue();
+   real   magn   = getOpValue();
+   bool   flip   = getBoolValue();
+   real   angle  = getOpValue();
+   telldata::ttpnt  *rpnt  =
+                     static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
+   std::string name = getStringValue();
+   real DBscale = PROPC->DBscale();
+   TP istepTPX(stepTPX->x(), stepTPX->y(), DBscale);
+   TP istepTPY(stepTPY->x(), stepTPY->y(), DBscale);
+   CTM ori(TP(rpnt->x(), rpnt->y(), DBscale), magn,angle,flip);
+   laydata::ArrayProperties arrprops(istepTPX,istepTPY,col,row);
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      telldata::ttlayout* cl = DEBUG_NEW telldata::ttlayout(
+            tDesign->addCellARef(name,ori,arrprops),REF_LAY);
+      UNDOcmdQ.push_front(this);
+      OPstack.push(cl); UNDOPstack.push_front(cl->selfcopy());
+      LogFile << LogFile.getFN() << "(\""<< name << "\"," << *rpnt << "," <<
+               angle << "," << LogFile._2bool(flip) << "," << magn << "," <<
+                         col << "," << row << "," << *stepTPX << "," << *stepTPY << ");";
+      LogFile.flush();
+   }
+   delete rpnt;
+   DATC->unlockTDT(dbLibDir, true);
+   RefreshGL();
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::stdCELLAREFO::stdCELLAREFO(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+}
+
+void tellstdfunc::stdCELLAREFO::undo_cleanup()
+{
+   telldata::ttlayout* cl = static_cast<telldata::ttlayout*>(UNDOPstack.back());UNDOPstack.pop_back();
+   delete cl;
+}
+
+void tellstdfunc::stdCELLAREFO::undo()
+{
+   TEUNDO_DEBUG("cellaref(string, point, real, bool, real) UNDO");
+   telldata::ttlayout* cl = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      tDesign->destroyThis(cl->data(),REF_LAY, dbLibDir);
+   }
+   DATC->unlockTDT(dbLibDir, true);
+   delete (cl);
+   RefreshGL();
+}
+
+int tellstdfunc::stdCELLAREFO::execute()
 {
    // get the parameters from the operand stack
    //cellaref("boza",getpoint(),0,false,1,3,2,30,70);
@@ -1006,8 +1081,8 @@ int tellstdfunc::stdCELLAREF::execute()
 }
 
 //=============================================================================
-tellstdfunc::stdCELLAREF_D::stdCELLAREF_D(telldata::typeID retype, bool eor) :
-      stdCELLAREF(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+tellstdfunc::stdCELLAREFO_D::stdCELLAREFO_D(telldata::typeID retype, bool eor) :
+      stdCELLAREFO(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
@@ -1016,7 +1091,7 @@ tellstdfunc::stdCELLAREF_D::stdCELLAREF_D(telldata::typeID retype, bool eor) :
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
 }
 
-int tellstdfunc::stdCELLAREF_D::execute()
+int tellstdfunc::stdCELLAREFO_D::execute()
 {
    real        stepY = getOpValue();
    real        stepX = getOpValue();
@@ -1063,7 +1138,7 @@ int tellstdfunc::stdCELLAREF_D::execute()
    OPstack.push(DEBUG_NEW telldata::ttreal(stepX));
    OPstack.push(DEBUG_NEW telldata::ttreal(stepY));
    delete bnd;
-   return stdCELLAREF::execute();
+   return stdCELLAREFO::execute();
 }
 
 //=============================================================================

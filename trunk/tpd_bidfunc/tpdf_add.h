@@ -53,7 +53,8 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA_UNDO(stdCELLREF     );  // undo - implemented
    TELL_STDCMD_CLASSB(stdCELLREF_D    , stdCELLREF    );
    TELL_STDCMD_CLASSA_UNDO(stdCELLAREF    );  // undo - implemented
-   TELL_STDCMD_CLASSB(stdCELLAREF_D   , stdCELLAREF   );
+   TELL_STDCMD_CLASSA_UNDO(stdCELLAREFO   );  // undo - implemented
+   TELL_STDCMD_CLASSB(stdCELLAREFO_D  , stdCELLAREFO  );
    TELL_STDCMD_CLASSA_UNDO(stdUSINGLAYER  );  // undo - implemented
    TELL_STDCMD_CLASSB(stdUSINGLAYER_S , stdUSINGLAYER );  //
 }
