@@ -755,7 +755,8 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    mblock->addFUNC("cellref"          ,(DEBUG_NEW                tellstdfunc::stdCELLREF(telldata::tn_layout,false)));
    mblock->addFUNC("cellref"          ,(DEBUG_NEW              tellstdfunc::stdCELLREF_D(telldata::tn_layout,false)));
    mblock->addFUNC("cellaref"         ,(DEBUG_NEW               tellstdfunc::stdCELLAREF(telldata::tn_layout,false)));
-   mblock->addFUNC("cellaref"         ,(DEBUG_NEW             tellstdfunc::stdCELLAREF_D(telldata::tn_layout,false)));
+   mblock->addFUNC("cellaref"         ,(DEBUG_NEW              tellstdfunc::stdCELLAREFO(telldata::tn_layout,false)));
+   mblock->addFUNC("cellaref"         ,(DEBUG_NEW            tellstdfunc::stdCELLAREFO_D(telldata::tn_layout,false)));
    mblock->addFUNC("select"           ,(DEBUG_NEW        tellstdfunc::stdSELECT(TLISTOF(telldata::tn_layout),false)));
    mblock->addFUNC("select"           ,(DEBUG_NEW      tellstdfunc::stdSELECTIN(TLISTOF(telldata::tn_layout),false)));
    mblock->addFUNC("select"           ,(DEBUG_NEW      tellstdfunc::stdSELECT_I(TLISTOF(telldata::tn_layout),false)));
