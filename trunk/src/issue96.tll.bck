@@ -1,0 +1,51 @@
+#include "$TPD_GLOBAL/tll/seed.tll"
+
+void testcellarefs() {
+   newcell("cellarefs");
+   opencell("cellarefs");
+
+   point displ = {0,0};
+   cellaref("Fcell", displ, 180, true, 1, 5, 5, { -12, 0}, { 0, 12});
+
+}
+
+void testcellrefs() {
+   newcell("cellrefs");
+   opencell("cellrefs");
+
+   int xStep = -12;
+   int yStep =  12;
+   int i = 0;
+   repeat
+   {
+      int j = 0;
+      repeat
+      {
+         cellref("Fcell", {i*xStep, j*yStep}, 0, false, 1);
+         j = j + 1;
+      }
+      until (j < 5);
+      i = i + 1;
+   }
+   until (i < 5);
+}
+
+/*
+The idea of this exercise is to mimic the aref created in "cellarefs"
+with the ref's created in "cellrefs"
+The array is with negative step, flipped and rotated.
+The cellrefs mimics effectively the same array and when referenced below
+it is flipped and rotated.
+*/
+newcell("Fcell");
+opencell("Fcell");
+point list pl1 =
+{{0,0},{0,10},{6,10},{6,8},{2,8},{2,6},{4,6},{4,4},{2,4},{2,2},{2,0}};
+addpoly(pl1,2);
+testcellrefs();
+testcellarefs();
+newcell("top_test");
+opencell("top_test");
+cellref("cellarefs", {  0, 0},   0, false, 1);
+cellref("cellrefs" , {100, 0}, 180, true , 1);
+zoomall();

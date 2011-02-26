@@ -1399,8 +1399,8 @@ TP GDSin::GdsStructure::arrGetStep(const TP& Step, const TP& magnPoint, int2b co
 {
 //   return (int) sqrt(pow(float((Step.x() - magnPoint.x())),2) +
 //                     pow(float((Step.y() - magnPoint.y())),2)   ) / colrows;
-   return TP((float)(Step.x() - magnPoint.x()) / (float)colrows,
-             (float)(Step.y() - magnPoint.y()) / (float)colrows );
+   return TP((int) rint((float)(Step.x() - magnPoint.x()) / (float)colrows),
+             (int) rint((float)(Step.y() - magnPoint.y()) / (float)colrows) );
 }
 
 void GDSin::GdsStructure::split(GdsInFile* src_file, GdsOutFile* dst_file)

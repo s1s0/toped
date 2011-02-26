@@ -1990,17 +1990,34 @@ void laydata::TdtCellAref::drawRequest(tenderer::TopRend& rend) const
          real cstepY = (array_overlap.p2().y() - array_overlap.p1().y()) / _arrprops.rows();
          // matrix is partially visible
          col_beg = array_overlap.p1().x() < clip.p1().x() ?
-               (int) rint((clip.p1().x() - array_overlap.p1().x()) / cstepX) : 0;
+               (int) rint (fabs((clip.p1().x() - array_overlap.p1().x()) / cstepX)) : 0;
          row_beg = array_overlap.p1().y() < clip.p1().y() ?
-               (int) rint((clip.p1().y() - array_overlap.p1().y()) / cstepY) : 0;
-         col_end = col_beg + (int) rint((visual_box.p2().x() - visual_box.p1().x()) / cstepX);
-         row_end = row_beg + (int) rint((visual_box.p2().y() - visual_box.p1().y()) / cstepY);
+               (int) rint (fabs((clip.p1().y() - array_overlap.p1().y()) / cstepY)) : 0;
+         col_end = col_beg + (int) rint(fabs((visual_box.p2().x() - visual_box.p1().x()) / cstepX));
+         row_end = row_beg + (int) rint(fabs((visual_box.p2().y() - visual_box.p1().y()) / cstepY));
          // add an extra row/column from both sides to ensure visibility of the`
          // border areas
          col_beg -= (0 == col_beg) ? 0 : 1;
          row_beg -= (0 == row_beg) ? 0 : 1;
          col_end += (_arrprops.cols() == col_end) ? 0 : 1;
          row_end += (_arrprops.rows() == row_end) ? 0 : 1;
+         // Adjust for negative steps
+         if (_arrprops.colStep().x() < 0)
+         {
+            int swap = col_beg;
+            col_beg = _arrprops.cols() - col_end;
+            col_end = _arrprops.cols() - swap;
+         }
+         if (_arrprops.rowStep().y() < 0)
+         {
+            int swap = row_beg;
+            row_beg = _arrprops.rows() - row_end;
+            row_end = _arrprops.rows() - swap;
+         }
+         assert(col_beg >=0);
+         assert(col_end >=0);
+         assert(row_beg >=0);
+         assert(row_end >=0);
       }
    }
    else
