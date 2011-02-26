@@ -206,6 +206,31 @@ void testcellrefs() {
    redraw();
 }
 
+void testcellarefs() {
+   newcell("cellarefs");
+   opencell("cellarefs");
+   point displ = {0,0};
+   int arrsgrid = 150;
+   foreach(bool flip; (bool list) {false, true})
+   {
+      foreach(real angle; (real list) {0,90,180,270})
+      {
+         cellaref("Fcell", displ, angle, flip, 1, 5, 5, { 12, 0}, { 0, 12});
+         cellaref("Fcell", displ, angle, flip, 1, 5, 5, {-12, 0}, { 0, 12});
+         cellaref("Fcell", displ, angle, flip, 1, 5, 5, { 12, 0}, { 0,-12});
+         cellaref("Fcell", displ, angle, flip, 1, 5, 5, {-12, 0}, { 0,-12});
+         displ = displ + (point){arrsgrid,0};
+      }
+      displ = displ + (point){-4*arrsgrid,arrsgrid};
+   }
+
+   addbox({ -48 ,   0 } , { 6  , 58 }, 6);
+   addbox({ 0   ,   0 } , { 54 , 58 }, 6);
+   addbox({ 0   , -48 } , { 54 , 10 }, 6);
+   addbox({ -48 , -48 } , { 6  , 10 }, 6);
+
+}
+
 void testtexts() {
    newcell("textrefs");
    opencell("textrefs");
@@ -411,6 +436,7 @@ point list pl1 =
 {{0,0},{0,10},{6,10},{6,8},{2,8},{2,6},{4,6},{4,4},{2,4},{2,2},{2,0}};
 addpoly(pl1,2);
 testcellrefs();
+testcellarefs();
 testtexts();
 newcell("cell_1");
 opencell("cell_1");
