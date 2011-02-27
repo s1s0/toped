@@ -1377,8 +1377,17 @@ void GDSin::GdsStructure::importAref(GdsInFile* cf, ImportDB& iDB)
                cf->incGdsiiWarnings();
                break;
             case gds_ENDEL:{//end of element, exit point
-               laydata::ArrayProps arrprops(arrGetStep(cDispl, refPoint, columns, angle, (0 != reflection)),
-                                            arrGetStep(rDispl, refPoint, rows   , angle, (0 != reflection)),
+               // It appears that the so called in the GDS description "displacement points"
+               // (?Displ) are already transformed - i.e. if the matrix is rotated - they
+               // are already rotated and same is for the flip and scale. In other words they
+               // are in a sense the corners of the lattice in absolute terms. This ingenious
+               // conclusion took me a weekend to figure-out. Because our ArrayProps class
+               // doesn't care about the transformations we need to unwind the column and row
+               // steps here applying the reverse transformation (in arrGetStep).
+               CTM arrAdj(refPoint, magnification, angle, (0 != reflection));
+               arrAdj = arrAdj.Reversed();
+               laydata::ArrayProps arrprops(arrGetStep(cDispl, columns, arrAdj),
+                                            arrGetStep(rDispl, rows   , arrAdj),
                                             static_cast<word>(columns),
                                             static_cast<word>(rows)
                                            );
@@ -1395,21 +1404,11 @@ void GDSin::GdsStructure::importAref(GdsInFile* cf, ImportDB& iDB)
    while (true);
 }
 
-TP GDSin::GdsStructure::arrGetStep(const TP& displPoint, const TP& refPoint, int2b colrows, real angle, bool flipX)
+TP GDSin::GdsStructure::arrGetStep(const TP& displPoint, int2b colrows, const CTM& dAdj)
 {
-   TP displ ((int) rint((float)(displPoint.x() - refPoint.x()) / (float)colrows),
-             (int) rint((float)(displPoint.y() - refPoint.y()) / (float)colrows) );
-   // It appears that the so called in the GDS description "displacement points"
-   // (displPoint) are already transformed - i.e. if the matrix is rotated - they
-   // are already rotated and same is for the flip. In other words they are in a
-   // sense the corners of the lattice in absolute terms. This ingenious conclusion
-   // took me a weekend to figure-out. Because our ArrayProps class doesn't care
-   // about the transformations we need to unwind the column and row steps here
-   // applying the reverse transformation.
-   CTM dAdj;
-   dAdj.Rotate(360.0-angle);
-   if (flipX) dAdj.FlipX(0.0);
-   return (displ * dAdj);
+   TP displStep = displPoint * dAdj;
+   displStep /= colrows;
+   return displStep;
 }
 
 void GDSin::GdsStructure::split(GdsInFile* src_file, GdsOutFile* dst_file)
@@ -1809,6 +1808,8 @@ void GDSin::GdsExportFile::aref(const std::string& name, const CTM& translation,
 
    TP dCol(arrprops.colStep().x() * arrprops.cols(), arrprops.colStep().y() * arrprops.cols());
    TP dRow(arrprops.rowStep().x() * arrprops.rows(), arrprops.rowStep().y() * arrprops.rows());
+   dCol *= translation;
+   dRow *= translation;
    wr->add_int4b(dCol.x());wr->add_int4b(dCol.y());
    wr->add_int4b(dRow.x());wr->add_int4b(dRow.y());
    flush(wr);

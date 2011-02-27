@@ -216,6 +216,7 @@ public:
    TP   operator *  ( const CTM& ) const;
    TP   operator *= ( const CTM& );
    TP   operator *= ( const real );
+   TP   operator /= ( const real );
    TP   operator =  ( const TP& np)        {_x = np.x(); _y = np.y(); return *this;};
    TP   operator -  ( const TP& pnt) const {return TP(_x - pnt.x(),_y - pnt.y());};
    TP   operator +  ( const TP& pnt) const {return TP(_x + pnt.x(),_y + pnt.y());};
