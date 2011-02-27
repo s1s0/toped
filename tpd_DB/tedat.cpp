@@ -1825,13 +1825,15 @@ void laydata::TdtCellRef::ungroup(laydata::TdtDesign* ATDB, TdtCell* dst, AtticL
 
 bool laydata::TdtCellRef::pointInside(const TP pnt)
 {
+   // The reason of doing this "manually"is simply that the reference can be
+   // rotated on non-orthogonal angle. This will compromise the simple
+   // ovl * translation and in result we're getting a strange select behavior
    DBbox ovl(structure()->cellOverlap());
    PointVector plist;
    plist.push_back(             ovl.p1()          * _translation);
    plist.push_back(TP(ovl.p2().x(), ovl.p1().y()) * _translation);
    plist.push_back(             ovl.p2()          * _translation);
    plist.push_back(TP(ovl.p1().x(), ovl.p2().y()) * _translation);
-
    byte cc = 0;
    for (unsigned i = 0; i < 4 ; i++)
    {
@@ -1928,17 +1930,31 @@ void laydata::TdtCellAref::openGlPrecalc(layprop::DrawProperties& drawprop, Poin
          real cstepY = (array_overlap.p2().y() - array_overlap.p1().y()) / _arrprops.rows();
          // matrix is partially visible
          stst[0] = array_overlap.p1().x() < clip.p1().x() ?
-               (int) rint((clip.p1().x() - array_overlap.p1().x()) / cstepX) : 0;
+               (int) rint(fabs((clip.p1().x() - array_overlap.p1().x()) / cstepX)) : 0;
          stst[2] = array_overlap.p1().y() < clip.p1().y() ?
-               (int) rint((clip.p1().y() - array_overlap.p1().y()) / cstepY) : 0;
-         stst[1] = stst[0] + (int) rint((visual_box.p2().x() - visual_box.p1().x()) / cstepX);
-         stst[3] = stst[2] + (int) rint((visual_box.p2().y() - visual_box.p1().y()) / cstepY);
+               (int) rint(fabs((clip.p1().y() - array_overlap.p1().y()) / cstepY)) : 0;
+         stst[1] = stst[0] + (int) rint(fabs((visual_box.p2().x() - visual_box.p1().x()) / cstepX));
+         stst[3] = stst[2] + (int) rint(fabs((visual_box.p2().y() - visual_box.p1().y()) / cstepY));
          // add an extra row/column from both sides to ensure visibility of the`
          // border areas
          stst[0] -= (0 == stst[0]) ? 0 : 1;
          stst[2] -= (0 == stst[2]) ? 0 : 1;
          stst[1] += (_arrprops.cols() == stst[1]) ? 0 : 1;
          stst[3] += (_arrprops.rows() == stst[3]) ? 0 : 1;
+         // Adjust for negative steps
+         if (_arrprops.colStep().x() < 0)
+         {
+            int swap = stst[0];
+            stst[0] = _arrprops.cols() - stst[1];
+            stst[1] = _arrprops.cols() - swap;
+         }
+         if (_arrprops.rowStep().y() < 0)
+         {
+            int swap = stst[2];
+            stst[2] = _arrprops.rows() - stst[3];
+            stst[3] = _arrprops.rows() - swap;
+         }
+
          ptlist.push_back(TP(stst[0],stst[1]));
          ptlist.push_back(TP(stst[2],stst[3]));
       }
@@ -2191,6 +2207,31 @@ DBbox laydata::TdtCellAref::clearOverlap() const
    bx = bx * refCTM; bx.normalize();
    ovl.overlap(bx);
    return ovl;
+}
+
+bool laydata::TdtCellAref::pointInside(const TP pnt)
+{
+   // See the note in the corresponding method of TdtCellRef
+   DBbox ovl(clearOverlap());
+   PointVector plist;
+   plist.push_back(             ovl.p1()          * _translation);
+   plist.push_back(TP(ovl.p2().x(), ovl.p1().y()) * _translation);
+   plist.push_back(             ovl.p2()          * _translation);
+   plist.push_back(TP(ovl.p1().x(), ovl.p2().y()) * _translation);
+   byte cc = 0;
+   for (unsigned i = 0; i < 4 ; i++)
+   {
+      TP& p0 = plist[i];
+      TP& p1 = plist[(i+1)%4];
+      if (((p0.y() <= pnt.y()) && (p1.y() >  pnt.y()))
+        ||((p0.y() >  pnt.y()) && (p1.y() <= pnt.y())) )
+      {
+         float tngns = (float) (pnt.y() - p0.y())/(p1.y() - p0.y());
+         if (pnt.x() < p0.x() + tngns * (p1.x() - p0.x()))
+            cc++;
+      }
+   }
+   return (cc & 0x01) ? true : false;
 }
 
 //-----------------------------------------------------------------------------

@@ -322,6 +322,7 @@ namespace laydata {
       virtual void         drawRequest(tenderer::TopRend&) const;
       virtual void         drawSRequest(tenderer::TopRend&, const SGBitSet*) const;
       virtual void         motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
+      virtual bool         pointInside(const TP);
 
       virtual void         info(std::ostringstream&, real) const;
       virtual void         write(TEDfile* const tedfile) const;
