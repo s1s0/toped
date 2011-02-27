@@ -289,7 +289,7 @@ namespace laydata {
       virtual void         stretch(int bfactor, ShapeList**) {};
       virtual PointVector  shape2poly() const {return PointVector();/*return empty list*/}
       virtual PointVector  dumpPoints() const {return PointVector();/*return empty list*/}
-      virtual ArrayProperties arrayProps() const {return ArrayProperties();}
+      virtual ArrayProps   arrayProps() const {return ArrayProps();}
       virtual word         lType() const {return _lmref;}
       std::string          cellname() const;
       TdtCell*             cStructure() const;
@@ -307,7 +307,7 @@ namespace laydata {
 //==============================================================================
    class TdtCellAref : public TdtCellRef  {
    public:
-                           TdtCellAref(CellDefin str, CTM trans, ArrayProperties& arrprops) :
+                           TdtCellAref(CellDefin str, CTM trans, const ArrayProps& arrprops) :
                               TdtCellRef(str, trans), _arrprops(arrprops) {};
                            TdtCellAref(InputTdtFile* const tedfile);
       virtual             ~TdtCellAref() {};
@@ -330,10 +330,10 @@ namespace laydata {
       virtual void         psWrite(PSFile&, const layprop::DrawProperties&) const;
       virtual word         lType() const {return _lmaref;}
       void                 ungroup(TdtDesign*, TdtCell*, AtticList*);
-      ArrayProperties      arrayProps() const {return _arrprops;}
+      ArrayProps           arrayProps() const {return _arrprops;}
    private:
       DBbox                clearOverlap() const;
-      ArrayProperties      _arrprops;
+      ArrayProps           _arrprops;
    };
 
 //==============================================================================
@@ -501,12 +501,12 @@ namespace laydata {
 //==============================================================================
    class TdtTmpCellAref : public TdtTmpCellRef {
       public:
-                           TdtTmpCellAref(CellDefin str, CTM trans, ArrayProperties& arrprops) :
+                           TdtTmpCellAref(CellDefin str, CTM trans, ArrayProps& arrprops) :
                               TdtTmpCellRef(str, trans), _arrprops(arrprops) {};
          virtual          ~TdtTmpCellAref(){};
          virtual void      draw(const layprop::DrawProperties&, CtmQueue&) const;
       private:
-         ArrayProperties   _arrprops;
+         ArrayProps        _arrprops;
    };
 
 //==============================================================================

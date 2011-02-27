@@ -1387,7 +1387,7 @@ void ImportDB::addRef(std::string strctName, CTM location)
 }
 
 void ImportDB::addARef(std::string strctName, TP bPoint, double magnification,
-                      double angle, bool reflection, laydata::ArrayProperties& aprop)
+                      double angle, bool reflection, laydata::ArrayProps& aprop)
 {
    // @FIXME absolute magnification, absolute angle should be reflected somehow!!!
    laydata::CellDefin strdefn = _tdt_db->linkCellRef(strctName, TARGETDB_LIB);

@@ -279,13 +279,13 @@ namespace laydata {
       NameSet              _childnames;
    };
 
-   class ArrayProperties
+   class ArrayProps
    {
       public:
-         ArrayProperties() : _colStep(0,0), _rowStep(0,0), _cols(0), _rows(0) {}
-         ArrayProperties(int4b stepX, int4b stepY, word cols, word rows) :
-            _colStep(stepX,0), _rowStep(0,stepY), _cols(cols), _rows(rows) {}
-         ArrayProperties(const TP& colStep, const TP& rowStep, word cols, word rows) :
+         ArrayProps() : _colStep(0,0), _rowStep(0,0), _cols(0), _rows(0) {}
+//         ArrayProperties(int4b stepX, int4b stepY, word cols, word rows) :
+//            _colStep(stepX,0), _rowStep(0,stepY), _cols(cols), _rows(rows) {}
+         ArrayProps(const TP& colStep, const TP& rowStep, word cols, word rows) :
             _colStep(colStep), _rowStep(rowStep), _cols(cols), _rows(rows) {}
          bool                valid() {return ((_cols != 0) && (_rows != 0));}
          const TP&           colStep() const {return _colStep;}
@@ -374,7 +374,7 @@ class DbExportFile {
       virtual void            wire(const int4b* const, unsigned, unsigned) = 0;
       virtual void            text(const std::string&, const CTM&) = 0;
       virtual void            ref(const std::string&, const CTM&) = 0;
-      virtual void            aref(const std::string&, const CTM&, const laydata::ArrayProperties&) = 0;
+      virtual void            aref(const std::string&, const CTM&, const laydata::ArrayProps&) = 0;
       virtual bool            checkCellWritten(std::string) const = 0;
       virtual void            registerCellWritten(std::string) = 0;
       const laydata::TdtCell* topcell() const   {return _topcell; }
@@ -500,7 +500,7 @@ class ImportDB {
       void                    addText(std::string, TP, double magnification, double angle = 0, bool reflection = false);
       void                    addRef(std::string, TP, double, double, bool);
       void                    addRef(std::string, CTM);
-      void                    addARef(std::string, TP, double, double, bool, laydata::ArrayProperties&);
+      void                    addARef(std::string, TP, double, double, bool, laydata::ArrayProps&);
       void                    calcCrossCoeff(real cc) { _crossCoeff = _dbuCoeff * cc;}
       ForeignDbFile*           srcFile()               { return _src_lib;   }
       real                    technoSize()            { return _technoSize;}

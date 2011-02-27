@@ -398,7 +398,7 @@ void laydata::TdtCell::registerCellRef(CellDefin str, CTM trans)
    _children.insert(str->name());
 }
 
-void laydata::TdtCell::registerCellARef(CellDefin str, CTM trans, ArrayProperties& arrprops)
+void laydata::TdtCell::registerCellARef(CellDefin str, CTM trans, ArrayProps& arrprops)
 {
    QTreeTmp *cellreflayer = secureUnsortedLayer(REF_LAY);
    cellreflayer->put(DEBUG_NEW TdtCellAref(str, trans, arrprops));
@@ -416,7 +416,7 @@ laydata::TdtCellRef* laydata::TdtCell::addCellRef(laydata::TdtDesign* ATDB,
 }
 
 laydata::TdtCellAref* laydata::TdtCell::addCellARef(laydata::TdtDesign* ATDB,
-          CellDefin str, CTM trans, ArrayProperties& arrprops)
+          CellDefin str, CTM trans, ArrayProps& arrprops)
 {
    if (!addChild(ATDB, str)) return NULL;
    QuadTree *cellreflayer = secureLayer(REF_LAY);

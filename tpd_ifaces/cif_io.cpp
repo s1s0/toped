@@ -830,7 +830,7 @@ void CIFin::CifExportFile::ref(const std::string& cellname, const CTM& tmatrix)
 }
 
 void CIFin::CifExportFile::aref(const std::string& name,
-                                const CTM& translation, const laydata::ArrayProperties& arrprops)
+                                const CTM& translation, const laydata::ArrayProps& arrprops)
 {
    for (int i = 0; i < arrprops.cols(); i++)
    {// start/stop rows

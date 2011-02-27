@@ -1867,15 +1867,17 @@ laydata::TdtCellAref::TdtCellAref(InputTdtFile* const tedfile) : TdtCellRef(tedf
       int4b stepY = tedfile->get4b();
       word  rows = tedfile->getWord();
       word  cols = tedfile->getWord();
-      _arrprops = ArrayProperties( stepX, stepY, cols, rows);
+      TP cDispl(stepX,     0);
+      TP rDispl(    0, stepY);
+      _arrprops = ArrayProps( cDispl, rDispl, cols, rows);
    }
    else
    {
-      TP colStep = tedfile->getTP();
-      TP rowStep = tedfile->getTP();
+      TP cDispl = tedfile->getTP();
+      TP rDispl = tedfile->getTP();
       word rows = tedfile->getWord();
       word cols = tedfile->getWord();
-      _arrprops = ArrayProperties(colStep, rowStep, cols, rows);
+      _arrprops = ArrayProps(cDispl, rDispl, cols, rows);
    }
 }
 
