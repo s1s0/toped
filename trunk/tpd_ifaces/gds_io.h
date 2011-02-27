@@ -302,7 +302,7 @@ namespace GDSin {
          void                 skimNode(GdsInFile*);
          void                 updateContents(int2b, int2b);
 //         int                  arrGetStep(TP&, TP&, int2b);
-         TP                   arrGetStep(const TP&, const TP&, int2b, real, bool);
+         TP                   arrGetStep(const TP&, int2b, const CTM&);
          ExtLayers            _contSummary; // contents summary
          NameSet              _referenceNames;
          GDSStructureList     _children;

@@ -77,6 +77,13 @@ TP TP::operator *= (const real factor)
    return *this;
 }
 
+TP TP::operator /= (const real factor)
+{
+   _x = (int4b) rint((real)_x / factor);
+   _y = (int4b) rint((real)_y / factor);
+   return *this;
+}
+
 //TP TP::operator = ( const QPoint& qp) {
 //   _x = qp.x(); _y = qp.y();
 //   return *this;
