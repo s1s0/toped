@@ -289,7 +289,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          virtual void   wire(const int4b* const, unsigned, unsigned);
          virtual void   text(const std::string&, const CTM&);
          virtual void   ref(const std::string&, const CTM&);
-         virtual void   aref(const std::string&, const CTM&, const laydata::ArrayProperties&);
+         virtual void   aref(const std::string&, const CTM&, const laydata::ArrayProps&);
          virtual bool   checkCellWritten(std::string) const;
          virtual void   registerCellWritten(std::string);
       private:

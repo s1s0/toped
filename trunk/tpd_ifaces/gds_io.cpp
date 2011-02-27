@@ -1325,9 +1325,9 @@ void GDSin::GdsStructure::importAref(GdsInFile* cf, ImportDB& iDB)
    double         angle          = 0.0;
    int2b          columns        = 0;
    int2b          rows           = 0;
-   TP             magnPoint;
-   TP             xStep;
-   TP             yStep;
+   TP             refPoint;
+   TP             cDispl;
+   TP             rDispl;
    std::string    strctName;
    word           ba;
    int            tmp;  //Dummy variable. Use for gds_PROPATTR
@@ -1359,9 +1359,9 @@ void GDSin::GdsStructure::importAref(GdsInFile* cf, ImportDB& iDB)
             case gds_ANGLE: cr->retData(&angle);
                break;
             case gds_XY:
-               magnPoint = GDSin::get_TP(cr,0);
-               xStep     = GDSin::get_TP(cr,1);
-               yStep     = GDSin::get_TP(cr,2);
+               refPoint  = GDSin::get_TP(cr,0);
+               cDispl    = GDSin::get_TP(cr,1);
+               rDispl    = GDSin::get_TP(cr,2);
                break;
             case gds_COLROW://return number of columns & rows in the array
                cr->retData(&columns  );
@@ -1377,12 +1377,12 @@ void GDSin::GdsStructure::importAref(GdsInFile* cf, ImportDB& iDB)
                cf->incGdsiiWarnings();
                break;
             case gds_ENDEL:{//end of element, exit point
-               laydata::ArrayProperties arrprops(arrGetStep(xStep, magnPoint, columns),
-                                                 arrGetStep(yStep, magnPoint, rows   ),
-                                                 static_cast<word>(columns),
-                                                 static_cast<word>(rows)
-                                                );
-               iDB.addARef(strctName, magnPoint, magnification, angle, (0 != reflection), arrprops);
+               laydata::ArrayProps arrprops(arrGetStep(cDispl, refPoint, columns, angle, (0 != reflection)),
+                                            arrGetStep(rDispl, refPoint, rows   , angle, (0 != reflection)),
+                                            static_cast<word>(columns),
+                                            static_cast<word>(rows)
+                                           );
+               iDB.addARef(strctName, refPoint, magnification, angle, (0 != reflection), arrprops);
                return;
             }
             default://parse error - not expected record type
@@ -1395,12 +1395,21 @@ void GDSin::GdsStructure::importAref(GdsInFile* cf, ImportDB& iDB)
    while (true);
 }
 
-TP GDSin::GdsStructure::arrGetStep(const TP& Step, const TP& magnPoint, int2b colrows)
+TP GDSin::GdsStructure::arrGetStep(const TP& displPoint, const TP& refPoint, int2b colrows, real angle, bool flipX)
 {
-//   return (int) sqrt(pow(float((Step.x() - magnPoint.x())),2) +
-//                     pow(float((Step.y() - magnPoint.y())),2)   ) / colrows;
-   return TP((int) rint((float)(Step.x() - magnPoint.x()) / (float)colrows),
-             (int) rint((float)(Step.y() - magnPoint.y()) / (float)colrows) );
+   TP displ ((int) rint((float)(displPoint.x() - refPoint.x()) / (float)colrows),
+             (int) rint((float)(displPoint.y() - refPoint.y()) / (float)colrows) );
+   // It appears that the so called in the GDS description "displacement points"
+   // (displPoint) are already transformed - i.e. if the matrix is rotated - they
+   // are already rotated and same is for the flip. In other words they are in a
+   // sense the corners of the lattice in absolute terms. This ingenious conclusion
+   // took me a weekend to figure-out. Because our ArrayProps class doesn't care
+   // about the transformations we need to unwind the column and row steps here
+   // applying the reverse transformation.
+   CTM dAdj;
+   dAdj.Rotate(360.0-angle);
+   if (flipX) dAdj.FlipX(0.0);
+   return (displ * dAdj);
 }
 
 void GDSin::GdsStructure::split(GdsInFile* src_file, GdsOutFile* dst_file)
@@ -1774,7 +1783,7 @@ void GDSin::GdsExportFile::ref(const std::string& name, const CTM& translation)
 }
 
 void GDSin::GdsExportFile::aref(const std::string& name, const CTM& translation,
-                                const laydata::ArrayProperties& arrprops)
+                                const laydata::ArrayProps& arrprops)
 {
    GDSin::GdsRecord* wr = setNextRecord(gds_AREF);
    flush(wr);

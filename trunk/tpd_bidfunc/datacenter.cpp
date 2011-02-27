@@ -580,7 +580,9 @@ void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,
             laydata::CellDefin strdefn;
             CTM eqm;
             VERIFY(dbLibDir->getCellNamePair(name, strdefn));
-            laydata::ArrayProperties arrprops(stepX, stepY, cols, rows);
+            TP cDispl(stepX,     0);
+            TP rDispl(    0, stepY);
+            laydata::ArrayProps arrprops(cDispl, rDispl, cols, rows);
             tDesign->setTmpData( DEBUG_NEW laydata::TdtTmpCellAref(strdefn, eqm, arrprops) );
             break;
          }

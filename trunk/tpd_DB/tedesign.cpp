@@ -1188,7 +1188,7 @@ laydata::TdtData* laydata::TdtDesign::addCellRef(laydata::CellDefin strdefn, CTM
 }
 
 laydata::TdtData* laydata::TdtDesign::addCellARef(std::string& name, CTM& ori,
-                             ArrayProperties& arrprops)
+                             ArrayProps& arrprops)
 {
    if (checkCell(name))
    {
@@ -1611,7 +1611,7 @@ laydata::AtticList* laydata::TdtDesign::changeRef(ShapeList* cells4u, std::strin
    for (ShapeList::const_iterator CC = cells4u->begin(); CC != cells4u->end(); CC++)
    {
       CTM ori = static_cast<TdtCellRef*>(*CC)->translation();
-      ArrayProperties arrayprops = static_cast<TdtCellRef*>(*CC)->arrayProps();
+      ArrayProps arrayprops = static_cast<TdtCellRef*>(*CC)->arrayProps();
       TdtData* ncrf;
       if (arrayprops.valid())
          ncrf = _target.edit()->addCellARef(this, strdefn, ori, arrayprops);

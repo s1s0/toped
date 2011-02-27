@@ -983,10 +983,10 @@ int tellstdfunc::stdCELLAREF::execute()
                      static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    std::string name = getStringValue();
    real DBscale = PROPC->DBscale();
-   TP istepTPX(stepTPX->x(), stepTPX->y(), DBscale);
-   TP istepTPY(stepTPY->x(), stepTPY->y(), DBscale);
+   TP cDispl(stepTPX->x(), stepTPX->y(), DBscale);
+   TP rDispl(stepTPY->x(), stepTPY->y(), DBscale);
    CTM ori(TP(rpnt->x(), rpnt->y(), DBscale), magn,angle,flip);
-   laydata::ArrayProperties arrprops(istepTPX,istepTPY,col,row);
+   laydata::ArrayProps arrprops(cDispl, rDispl, col, row);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -1057,10 +1057,10 @@ int tellstdfunc::stdCELLAREFO::execute()
                      static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
    std::string name = getStringValue();
    real DBscale = PROPC->DBscale();
-   int4b istepX = (int4b)rint(stepX * DBscale);
-   int4b istepY = (int4b)rint(stepY * DBscale);
+   TP cDispl(stepX, 0    , DBscale);
+   TP rDispl(    0, stepY, DBscale);
    CTM ori(TP(rpnt->x(), rpnt->y(), DBscale), magn,angle,flip);
-   laydata::ArrayProperties arrprops(istepX,istepY,col,row);
+   laydata::ArrayProps arrprops(cDispl,rDispl,col,row);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {

@@ -302,7 +302,7 @@ namespace GDSin {
          void                 skimNode(GdsInFile*);
          void                 updateContents(int2b, int2b);
 //         int                  arrGetStep(TP&, TP&, int2b);
-         TP                   arrGetStep(const TP&, const TP&, int2b);
+         TP                   arrGetStep(const TP&, const TP&, int2b, real, bool);
          ExtLayers            _contSummary; // contents summary
          NameSet              _referenceNames;
          GDSStructureList     _children;
@@ -393,7 +393,7 @@ namespace GDSin {
          virtual void         wire(const int4b* const, unsigned, unsigned);
          virtual void         text(const std::string&, const CTM&);
          virtual void         ref(const std::string&, const CTM&);
-         virtual void         aref(const std::string&, const CTM&, const laydata::ArrayProperties&);
+         virtual void         aref(const std::string&, const CTM&, const laydata::ArrayProps&);
          virtual bool         checkCellWritten(std::string) const;
          virtual void         registerCellWritten(std::string);
       private:
