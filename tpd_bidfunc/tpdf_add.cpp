@@ -1000,6 +1000,8 @@ int tellstdfunc::stdCELLAREF::execute()
                          col << "," << row << "," << *stepTPX << "," << *stepTPY << ");";
       LogFile.flush();
    }
+   delete stepTPY;
+   delete stepTPX;
    delete rpnt;
    DATC->unlockTDT(dbLibDir, true);
    RefreshGL();
