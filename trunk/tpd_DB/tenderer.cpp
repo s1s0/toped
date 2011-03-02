@@ -1635,6 +1635,19 @@ void tenderer::TopRend::wire (int4b* pdata, unsigned psize, laydata::WireWidth w
    _clayer->wire(pdata, psize, width, center_line_only, true, psel);
 }
 
+void tenderer::TopRend::arefOBox(std::string cname, const CTM& trans, const DBbox& overlap, bool selected)
+{
+   if (selected || (!_drawprop->isCellBoxHidden()))
+   {
+      TenderRef* cRefBox = DEBUG_NEW TenderRef(cname,
+                                               trans * _cellStack.top()->ctm(),
+                                               overlap,
+                                               _cellStack.size()
+                                              );
+      _refLayer.addCellOBox(cRefBox, _cellStack.size(), selected);
+   }
+}
+
 void tenderer::TopRend::text (const std::string* txt, const CTM& ftmtrx, const DBbox& ovl, const TP& cor, bool sel)
 {
    if ((!_drawprop->isTextBoxHidden()) || sel)

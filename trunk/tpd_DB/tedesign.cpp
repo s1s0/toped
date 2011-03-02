@@ -1291,9 +1291,9 @@ void laydata::TdtDesign::openGlRender(tenderer::TopRend& rend)
 {
    if (_target.checkEdit())
    {
-      const CTM boza;
+      const CTM unity;
       rend.initDrawRefStack(_target.pEditChain());
-      _target.view()->openGlRender(rend, boza, false, _target.isCell());
+      _target.view()->openGlRender(rend, unity, false, _target.isCell());
       rend.clearDrawRefStack();
    }
 }

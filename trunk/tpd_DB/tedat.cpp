@@ -2045,6 +2045,7 @@ void laydata::TdtCellAref::drawRequest(tenderer::TopRend& rend) const
    }
 
    // finally - start drawing
+   rend.arefOBox(structure()->name(), _translation, array_overlap, (sh_selected == _status) );
    for (int i = col_beg; i < col_end; i++)
    {// start/stop rows
       for(int j = row_beg; j < row_end; j++)
