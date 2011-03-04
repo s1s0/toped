@@ -617,8 +617,9 @@ void TpdPost::quitApp(int exitType)
 {
    wxCommandEvent eventQUITAPP(wxEVT_EXITAPP);
    eventQUITAPP.SetInt(exitType);
-   ::wxSafeYield(_mainWindow);
-   _mainWindow->GetEventHandler()->ProcessEvent(eventQUITAPP);
+   wxPostEvent(_mainWindow, eventQUITAPP);
+//   ::wxSafeYield(_mainWindow);
+//   _mainWindow->GetEventHandler()->ProcessEvent(eventQUITAPP);
 }
 
 

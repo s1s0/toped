@@ -85,6 +85,7 @@ namespace tui {
       void                    OnSashDrag(wxSashEvent& event);
       void                    OnExecExt (wxCommandEvent&);
       void                    checkExit (wxCommandEvent& WXUNUSED( event ));
+      void                    OnClose(wxCloseEvent& WXUNUSED( event ));
       void                    OnExitRequest (wxCommandEvent& WXUNUSED( event ));
       void                    OnCheckHW(wxCommandEvent&);
       void                    OnAbout(wxCommandEvent& WXUNUSED( event ));
