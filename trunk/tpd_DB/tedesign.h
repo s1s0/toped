@@ -128,8 +128,8 @@ namespace laydata {
       ShapeList*     ungroupPrep(laydata::TdtLibDir*);
       AtticList*     ungroupThis(ShapeList*);
       bool           cutPoly(PointVector& pl, AtticList** dasao);
-      bool           merge(AtticList** dasao) {return _target.edit()->mergeSelected(dasao);}
-      bool           stretch(int bfactor, AtticList** dasao) {return _target.edit()->stretchSelected(bfactor, dasao);}
+      bool           merge(AtticList** dasao);
+      bool           stretch(int bfactor, AtticList** dasao);
       unsigned int   numSelected() const;
       DBbox          activeOverlap();
       DBbox          getVisibleOverlap(layprop::DrawProperties&);
