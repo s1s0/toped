@@ -613,19 +613,12 @@ void TpdPost::execPipe(const wxString extCmd)
    wxPostEvent(_mainWindow, eventExecExPipe);
 }
 
-void TpdPost::quitApp(/*bool threadExecution*/ int exitType)
+void TpdPost::quitApp(int exitType)
 {
    wxCommandEvent eventQUITAPP(wxEVT_EXITAPP);
    eventQUITAPP.SetInt(exitType);
-//   if (threadExecution)
-//   {
-      wxPostEvent(_mainWindow, eventQUITAPP);
-//   }
-//   else
-//   {
-//      ::wxSafeYield(_mainWindow);
-//      _mainWindow->GetEventHandler()->ProcessEvent(eventQUITAPP);
-//   }
+   ::wxSafeYield(_mainWindow);
+   _mainWindow->GetEventHandler()->ProcessEvent(eventQUITAPP);
 }
 
 
