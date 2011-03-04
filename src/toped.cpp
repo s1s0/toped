@@ -315,6 +315,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
       // EVT_MENU( TMHELP_ABOUTAPP     , tui::TopedFrame::OnAbout       )
    EVT_MENU_RANGE(TMDUMMY, TMDUMMY+TDUMMY_TOOL-1 , tui::TopedFrame::OnMenu  )
    EVT_TOOL_RANGE(TDUMMY_TOOL, TDUMMY_TOOL+1000 , tui::TopedFrame::OnMenu  )
+   EVT_CLOSE(tui::TopedFrame::OnClose)
 //   EVT_SIZE( TopedFrame::OnSize )
 //   EVT_TECUSTOM_COMMAND(  , wxID_ANY, tui::TopedFrame::OnTopedStatus)
    EVT_TECUSTOM_COMMAND(wxEVT_CANVAS_STATUS, wxID_ANY, tui::TopedFrame::OnCanvasStatus)
@@ -890,6 +891,12 @@ void tui::TopedFrame::OnExitRequest( wxCommandEvent&  event )
       case 1 : checkExit(event) ; break; // Make pre-exit checks
       default: assert(false);
    }
+}
+
+void tui::TopedFrame::OnClose(wxCloseEvent& WXUNUSED( event ))
+{
+   wxMilliSleep(300);
+   Destroy();
 }
 
 void tui::TopedFrame::OnAbout( wxCommandEvent& WXUNUSED( event ) ) {
