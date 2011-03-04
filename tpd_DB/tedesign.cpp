@@ -1455,7 +1455,20 @@ bool laydata::TdtDesign::cutPoly(PointVector& pl, AtticList** dasao)
 {
    for (PointVector::iterator CP = pl.begin(); CP != pl.end(); CP ++)
       (*CP) *= _target.rARTM();
+   modified = true;
    return _target.edit()->cutPolySelected(pl,dasao);
+}
+
+bool laydata::TdtDesign::merge(AtticList** dasao)
+{
+   modified = true;
+   return _target.edit()->mergeSelected(dasao);
+}
+
+bool laydata::TdtDesign::stretch(int bfactor, AtticList** dasao)
+{
+   modified = true;
+   return _target.edit()->stretchSelected(bfactor, dasao);
 }
 
 void laydata::TdtDesign::rotateSelected( TP p, real angle, SelectList** fadead)
