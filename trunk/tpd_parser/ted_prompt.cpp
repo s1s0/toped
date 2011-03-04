@@ -321,7 +321,7 @@ void* console::parse_thread::Entry()
       if (Console->exitRequested())
       {
          Console->setExitRequest(false);
-         TpdPost::quitApp(true);
+         TpdPost::quitApp(1);
       }
       else if (Console->canvas_invalid())
       {
@@ -339,6 +339,7 @@ void* console::parse_thread::Entry()
 
 void console::parse_thread::OnExit()
 {
+   TpdPost::quitApp(0);
    delete _mutexCondition;
 }
 
@@ -500,8 +501,8 @@ void console::ted_cmd::stopParserThread()
    } while (wxMUTEX_BUSY == result);
    _tellThread->setCommand(wxT(""));
    _tellThread->_mutex.Unlock();
-	_threadWaits4->Signal();
    _tellThread->Delete();
+   _threadWaits4->Signal();
 
 }
 

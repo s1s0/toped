@@ -240,7 +240,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMFILE_SAVE         , tui::TopedFrame::OnTDTSave     )
    EVT_MENU( TMFILE_SAVEAS       , tui::TopedFrame::OnTDTSaveAs   )
    EVT_MENU( TMPROP_SAVE         , tui::TopedFrame::OnPropSave    )
-   EVT_MENU( TMFILE_EXIT         , tui::TopedFrame::OnExit        )
+   EVT_MENU( TMFILE_EXIT         , tui::TopedFrame::checkExit     )
 
    EVT_MENU( TMEDIT_UNDO         , tui::TopedFrame::OnUndo        )
    EVT_MENU( TMEDIT_COPY         , tui::TopedFrame::OnCopy        )
@@ -315,7 +315,6 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
       // EVT_MENU( TMHELP_ABOUTAPP     , tui::TopedFrame::OnAbout       )
    EVT_MENU_RANGE(TMDUMMY, TMDUMMY+TDUMMY_TOOL-1 , tui::TopedFrame::OnMenu  )
    EVT_TOOL_RANGE(TDUMMY_TOOL, TDUMMY_TOOL+1000 , tui::TopedFrame::OnMenu  )
-   EVT_CLOSE(tui::TopedFrame::OnClose)
 //   EVT_SIZE( TopedFrame::OnSize )
 //   EVT_TECUSTOM_COMMAND(  , wxID_ANY, tui::TopedFrame::OnTopedStatus)
    EVT_TECUSTOM_COMMAND(wxEVT_CANVAS_STATUS, wxID_ANY, tui::TopedFrame::OnCanvasStatus)
@@ -330,7 +329,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARDELETEITEM, wxID_ANY, tui::TopedFrame::OnToolBarDeleteItem)
    EVT_TECUSTOM_COMMAND(wxEVT_EDITLAYER, wxID_ANY, tui::TopedFrame::OnEditLayer )
    EVT_TEXT_MAXLEN(ID_WIN_TXT_LOG, tui::TopedFrame::OnTextLogOverflow)
-   EVT_TECUSTOM_COMMAND(wxEVT_EXITAPP, wxID_ANY, tui::TopedFrame::OnExit)
+   EVT_TECUSTOM_COMMAND(wxEVT_EXITAPP, wxID_ANY, tui::TopedFrame::OnExitRequest)
    EVT_TECUSTOM_COMMAND(wxEVT_EXECEXT, wxID_ANY, tui::TopedFrame::OnExecExt)
    EVT_TECUSTOM_COMMAND(wxEVT_EXECEXTPIPE, wxID_ANY, tui::TopedFrame::OnExecExtTextEnter)
 END_EVENT_TABLE()
@@ -357,34 +356,6 @@ tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos,
    _tPost = DEBUG_NEW TpdPost(this);
 }
 
-void tui::TopedFrame::OnClose(wxCloseEvent& event)
-{
-   if (event.CanVeto())
-   {
-      if (DATC->modified())
-      {
-         wxMessageDialog dlg1(this,
-                              wxT("Save the current design before closing?\n(Cancel to continue the session)"),
-                              wxT("Current design contains unsaved data"),
-                              wxYES_NO | wxCANCEL | wxICON_QUESTION);
-         switch (dlg1.ShowModal()) {
-            case wxID_YES:{
-               wxCommandEvent sevent(wxEVT_CLOSE_WINDOW, m_windowId);
-               sevent.SetEventObject(this);
-               //GetEventHandler()->ProcessEvent(event);
-               OnTDTSave(sevent);
-            }
-            case wxID_NO: break;
-            case wxID_CANCEL: {
-               event.Veto(TRUE);
-               return;
-            }
-         }
-      }
-   }
-   _cmdline->stopParserThread();
-   Destroy();
-}
 
 tui::TopedFrame::~TopedFrame() {
 //   delete _laycanvas;
@@ -469,7 +440,7 @@ void tui::TopedFrame::initMenuBar() {
    _resourceCenter->appendMenuSeparator("&File");
   // _resourceCenter->appendMenu("&File/Snapshot ...","",  &tui::TopedFrame::OnTDTSnapshot, "Export screen to picture" );
   // _resourceCenter->appendMenuSeparator("&File");
-   _resourceCenter->appendMenu("&File/Exit",        "",  &tui::TopedFrame::OnExit, "Exit Toped" );
+   _resourceCenter->appendMenu("&File/Exit",        "",  &tui::TopedFrame::checkExit, "Exit Toped" );
 
 
    //---------------------------------------------------------------------------
@@ -887,8 +858,38 @@ void tui::TopedFrame::OnExecExtTextEnter(wxCommandEvent& event)
    _extProc->CloseOutput();
 }
 
-void tui::TopedFrame::OnExit( wxCommandEvent& WXUNUSED( event ) ) {
-   Close(FALSE);
+void tui::TopedFrame::checkExit( wxCommandEvent& WXUNUSED( event ) )
+{
+   if (DATC->modified())
+   {
+      wxMessageDialog dlg1(this,
+                           wxT("Save the current design before closing?\n(Cancel to continue the session)"),
+                           wxT("Current design contains unsaved data"),
+                           wxYES_NO | wxCANCEL | wxICON_QUESTION);
+      switch (dlg1.ShowModal())
+      {
+         case wxID_YES:{
+            wxCommandEvent sevent(wxEVT_CLOSE_WINDOW, m_windowId);
+            sevent.SetEventObject(this);
+            //GetEventHandler()->ProcessEvent(event);
+            OnTDTSave(sevent);
+         }
+         case wxID_NO: _cmdline->stopParserThread();
+         case wxID_CANCEL: return;
+      }
+   }
+   else
+      _cmdline->stopParserThread();
+}
+
+void tui::TopedFrame::OnExitRequest( wxCommandEvent&  event )
+{
+   switch (event.GetInt())
+   {
+      case 0 : Close(FALSE); break; // Exit the application
+      case 1 : checkExit(event) ; break; // Make pre-exit checks
+      default: assert(false);
+   }
 }
 
 void tui::TopedFrame::OnAbout( wxCommandEvent& WXUNUSED( event ) ) {
