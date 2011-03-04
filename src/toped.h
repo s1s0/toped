@@ -80,12 +80,12 @@ namespace tui {
    public:
                               TopedFrame(const wxString& , const wxPoint& ,
                                                                const wxSize&);
-      void                    OnClose(wxCloseEvent&);
       virtual                ~TopedFrame();
 //      void                    OnSize(wxSizeEvent& event);
       void                    OnSashDrag(wxSashEvent& event);
       void                    OnExecExt (wxCommandEvent&);
-      void                    OnExit (wxCommandEvent& WXUNUSED( event ));
+      void                    checkExit (wxCommandEvent& WXUNUSED( event ));
+      void                    OnExitRequest (wxCommandEvent& WXUNUSED( event ));
       void                    OnCheckHW(wxCommandEvent&);
       void                    OnAbout(wxCommandEvent& WXUNUSED( event ));
       void                    OnExecExtTextEnter(wxCommandEvent& event);
@@ -254,7 +254,6 @@ namespace tui {
       // additional
       void    CellRef(wxString);
       void   CellARef(wxString);
-      // The declaration of the associated event table
       void OnUncapturedMouseClick(wxCommandEvent&);
       void          OnToolBarSize(wxCommandEvent&);
       void        OnToolBarDefine (wxCommandEvent& evt);
@@ -262,6 +261,7 @@ namespace tui {
       void     OnToolBarDeleteItem(wxCommandEvent& evt);
       void     editLayerDlg(word layno, const layprop::DrawProperties*);
       void     OnDRCResults(wxCommandEvent& evt);
+      // The declaration of the associated event table
       DECLARE_EVENT_TABLE();
    };
 

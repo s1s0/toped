@@ -232,7 +232,7 @@ class TpdPost {
       static void tellFnSort();
       static void execExt(const wxString);
       static void execPipe(const wxString);
-      static void quitApp(bool);
+      static void quitApp(int);
 
    private:
       static wxWindow* _statusBar;
