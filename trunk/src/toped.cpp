@@ -315,6 +315,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
       // EVT_MENU( TMHELP_ABOUTAPP     , tui::TopedFrame::OnAbout       )
    EVT_MENU_RANGE(TMDUMMY, TMDUMMY+TDUMMY_TOOL-1 , tui::TopedFrame::OnMenu  )
    EVT_TOOL_RANGE(TDUMMY_TOOL, TDUMMY_TOOL+1000 , tui::TopedFrame::OnMenu  )
+   EVT_ICONIZE(tui::TopedFrame::OnIconize)
    EVT_CLOSE(tui::TopedFrame::OnClose)
 //   EVT_SIZE( TopedFrame::OnSize )
 //   EVT_TECUSTOM_COMMAND(  , wxID_ANY, tui::TopedFrame::OnTopedStatus)
@@ -2266,6 +2267,16 @@ void   tui::TopedFrame::OnDRCResults(wxCommandEvent& evt)
    //wxString ost;
    //ost << wxT("drccalibreimport(\"D:/toped/drc3/drc3.drc.results\");");
    //_cmdline->parseCommand(ost);
+}
+
+void tui::TopedFrame::OnIconize(wxIconizeEvent& evt)
+{
+   if (!evt.Iconized())
+   {
+      wxCommandEvent eventREFRESH(wxEVT_CANVAS_ZOOM);
+      eventREFRESH.SetInt(ZOOM_REFRESH);
+      wxPostEvent(_canvas, eventREFRESH);
+   }
 }
 
 void  tui::TopedFrame::OnCadenceConvert(wxCommandEvent& WXUNUSED(event))

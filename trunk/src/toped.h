@@ -262,6 +262,7 @@ namespace tui {
       void     OnToolBarDeleteItem(wxCommandEvent& evt);
       void     editLayerDlg(word layno, const layprop::DrawProperties*);
       void     OnDRCResults(wxCommandEvent& evt);
+      void     OnIconize(wxIconizeEvent& evt);
       // The declaration of the associated event table
       DECLARE_EVENT_TABLE();
    };
