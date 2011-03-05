@@ -1022,6 +1022,19 @@ int tellstdfunc::GDSsetlaymap::execute()
 }
 
 //=============================================================================
+tellstdfunc::GDSclearlaymap::GDSclearlaymap(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+}
+
+int tellstdfunc::GDSclearlaymap::execute()
+{
+   PROPC->setGdsLayMap(NULL);
+   LogFile << LogFile.getFN() << "();"; LogFile.flush();
+   return EXEC_NEXT;
+}
+
+//=============================================================================
 tellstdfunc::CIFread::CIFread(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
 {
@@ -1425,6 +1438,19 @@ int tellstdfunc::CIFsetlaymap::execute()
 }
 
 //=============================================================================
+tellstdfunc::CIFclearlaymap::CIFclearlaymap(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+}
+
+int tellstdfunc::CIFclearlaymap::execute()
+{
+   PROPC->setCifLayMap(NULL);
+   LogFile << LogFile.getFN() << "();"; LogFile.flush();
+   return EXEC_NEXT;
+}
+
+//=============================================================================
 tellstdfunc::OASread::OASread(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
 {
@@ -1738,6 +1764,19 @@ int tellstdfunc::OASsetlaymap::execute()
 
    LogFile << LogFile.getFN() << "("<< *lll  << ");"; LogFile.flush();
    delete lll;
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::OASclearlaymap::OASclearlaymap(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+{
+}
+
+int tellstdfunc::OASclearlaymap::execute()
+{
+   PROPC->setOasLayMap(NULL);
+   LogFile << LogFile.getFN() << "();"; LogFile.flush();
    return EXEC_NEXT;
 }
 
