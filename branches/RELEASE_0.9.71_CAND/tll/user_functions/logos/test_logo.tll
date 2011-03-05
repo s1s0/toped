@@ -1,0 +1,21 @@
+ 
+
+#include "config_min.tll" 
+#include "user_functions/technology/default_drc.tll"
+#include "user_functions/general/geometry.tll"
+ 
+newdesign("aaa");
+newcell("bbb");
+opencell("bbb");
+
+//#include "examples/test1.tll"
+//#include "examples/test2.tll"
+//#include "examples/test3.tll"
+#include "examples/test4.tll"
+//#include "examples/my_logo_v0.tll"
+//#include "examples/tiger.tll"
+//#include "examples/wnf-logo.tll"
+//#include "examples/wnf-logo.tll.gz"
+
+paint_logo();
+zoomall();

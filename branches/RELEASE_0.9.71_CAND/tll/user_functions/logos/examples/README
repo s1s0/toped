@@ -1,0 +1,22 @@
+
+
+test1: a simple rectangle with a rectangular hole
+test2: a simple example of nested rectangles and holes
+test3: another simple example of nested rectangles and holes
+test4: a complex example of nested rectangles and holes
+
+my_logo_v0: presents a logo from an arbitrary font family
+
+tiger: a complex drawing depicting a tiger
+       --> needs more than 30min on my 2.5 GHz system to convert into TLL
+       -------------------------------------------
+       ATTENTION: this is a copy from the internet 
+       --> it is most probably NOT open-source
+       -------------------------------------------
+       
+wnf_logo: WWF Logo: panda bear
+       -------------------------------------------
+       ATTENTION: this is a copy from the internet 
+       --> it is most probably NOT open-source
+       -------------------------------------------
+
