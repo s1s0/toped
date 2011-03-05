@@ -57,6 +57,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(GDSreportlay     );
    TELL_STDCMD_CLASSA(GDSgetlaymap     );
    TELL_STDCMD_CLASSA(GDSsetlaymap     );
+   TELL_STDCMD_CLASSA(GDSclearlaymap   );
    TELL_STDCMD_CLASSA(GDSsplit         );
 
    TELL_STDCMD_CLASSA(OASread          );
@@ -66,6 +67,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(OASreportlay     );
    TELL_STDCMD_CLASSA(OASgetlaymap     );
    TELL_STDCMD_CLASSA(OASsetlaymap     );
+   TELL_STDCMD_CLASSA(OASclearlaymap   );
 
    TELL_STDCMD_CLASSA(CIFread          );
    TELL_STDCMD_CLASSA(CIFimport        );
@@ -75,6 +77,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(CIFclose         );
    TELL_STDCMD_CLASSA(CIFreportlay     );
    TELL_STDCMD_CLASSA(CIFgetlaymap     );
+   TELL_STDCMD_CLASSA(CIFclearlaymap   );
    TELL_STDCMD_CLASSA(CIFsetlaymap     );
 
    TELL_STDCMD_CLASSA(DRCCalibreimport );
