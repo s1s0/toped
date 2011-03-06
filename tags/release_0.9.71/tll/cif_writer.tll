@@ -1,0 +1,27 @@
+#include "$TPD_LOCAL/tll/tcase.tll"
+
+//    	     name    	 GDS  Colour       Fill              Selected
+
+lmap list cif_layer_definition = {  {  1 ,"NWEL" },
+                                    {  2 ,"ACTI" },
+                                    {  3 ,"UNK1" },
+                                    {  4 ,"POLY" },
+                                    {  5 ,"NIMP" },
+                                    {  6 ,"PIMP" },
+                                    {  7 ,"CONT" },
+                                    {  8 ,"MTL1" },
+                                    {  9 ,"PASS" },
+                                    { 10 ,"UNK2" },
+                                    { 11 ,"UNK3" },
+                                    { 12 ,"UNK4" },
+                                    { 13 ,"PFLD" },
+                                    { 14 ,"PLY1" },
+                                    { 15 ,"FUSE" },
+                                    { 17 ,"VIA1" },
+                                    { 18 ,"MTL2" },
+                                    { 60 ,"TXT1" },
+                                    { 62 ,"TXT2" },
+                                    { 63 ,"SCRB" } };
+
+cifexport(cif_layer_definition , true, "test_export_v.cif");
+cifexport(cif_layer_definition , false, "test_export.cif");
