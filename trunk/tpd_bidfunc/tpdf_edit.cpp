@@ -502,8 +502,8 @@ void tellstdfunc::stdDELETESEL::undo_cleanup()
    telldata::ttlist* und = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
    clean_ttlaylist(und);
    delete und;
-   laydata::CellList* udurcells = static_cast<laydata::CellList*>(UNDOUstack.front());UNDOUstack.pop_front();
-   for (laydata::CellList::const_iterator CUDU = udurcells->begin(); CUDU != udurcells->end(); CUDU++)
+   laydata::CellMap* udurcells = static_cast<laydata::CellMap*>(UNDOUstack.front());UNDOUstack.pop_front();
+   for (laydata::CellMap::const_iterator CUDU = udurcells->begin(); CUDU != udurcells->end(); CUDU++)
    {
       delete CUDU->second;
    }
@@ -516,14 +516,14 @@ void tellstdfunc::stdDELETESEL::undo()
    TEUNDO_DEBUG("delete() UNDO");
    // get the removed undefined cells (if any)
    telldata::ttlist* und = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
-   laydata::CellList* udurcells = static_cast<laydata::CellList*>(UNDOUstack.front());UNDOUstack.pop_front();
+   laydata::CellMap* udurcells = static_cast<laydata::CellMap*>(UNDOUstack.front());UNDOUstack.pop_front();
    std::string prnt_name = "";
    DWordSet unselable = PROPC->allUnselectable();
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      for (laydata::CellList::const_iterator CUDU = udurcells->begin(); CUDU != udurcells->end(); CUDU++)
+      for (laydata::CellMap::const_iterator CUDU = udurcells->begin(); CUDU != udurcells->end(); CUDU++)
       {
          dbLibDir->addThisUndefCell(CUDU->second);
          TpdPost::treeAddMember(CUDU->second->name().c_str(), prnt_name.c_str(), 0);
@@ -551,7 +551,7 @@ int tellstdfunc::stdDELETESEL::execute()
       tDesign->deleteSelected(sh_delist, dbLibDir);
       UNDOPstack.push_front(make_ttlaylist(sh_delist));
       clean_atticlist(sh_delist); delete sh_delist;
-      laydata::CellList* udurCells = DEBUG_NEW laydata::CellList();
+      laydata::CellMap* udurCells = DEBUG_NEW laydata::CellMap();
       dbLibDir->getHeldCells(udurCells);
       UNDOUstack.push_front(udurCells);
       LogFile << LogFile.getFN() << "();"; LogFile.flush();

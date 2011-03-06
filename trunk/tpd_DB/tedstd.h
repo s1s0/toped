@@ -120,11 +120,11 @@ namespace laydata {
    typedef  std::map<unsigned, DataList*>           SelectList;
    typedef  std::list<TdtData*>                     ShapeList;
    typedef  std::map<unsigned,ShapeList*>           AtticList;
-   typedef  std::map<std::string, TdtDefaultCell*>  CellList;
+   typedef  std::map<std::string, TdtDefaultCell*>  CellMap;
    typedef  TdtDefaultCell*                         CellDefin;
    typedef  std::deque<const TdtCellRef*>           CellRefStack;
    typedef  std::deque<EditObject*>                 EditCellStack;
-   typedef  std::list<const CellList*>              LibCellLists;
+   typedef  std::list<const CellMap*>               LibCellLists;
    typedef  std::list<TdtDefaultCell*>              CellDefList;
    typedef  dword                                   WireWidth;
 
@@ -502,7 +502,7 @@ class ImportDB {
       void                    addRef(std::string, CTM);
       void                    addARef(std::string, TP, double, double, bool, laydata::ArrayProps&);
       void                    calcCrossCoeff(real cc) { _crossCoeff = _dbuCoeff * cc;}
-      ForeignDbFile*           srcFile()               { return _src_lib;   }
+      ForeignDbFile*          srcFile()               { return _src_lib;   }
       real                    technoSize()            { return _technoSize;}
       real                    crossCoeff()            { return _crossCoeff;}
    protected:

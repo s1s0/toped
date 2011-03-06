@@ -500,7 +500,7 @@ laydata::CellDefin laydata::InputTdtFile::linkCellRef(std::string cellname)
 {
    // register the name of the referenced cell in the list of children
    _childnames.insert(cellname);
-   CellList::const_iterator striter = _design->_cells.find(cellname);
+   CellMap::const_iterator striter = _design->_cells.find(cellname);
    laydata::CellDefin celldef = NULL;
    // link the cells instances with their definitions
    if (_design->_cells.end() == striter)

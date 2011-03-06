@@ -236,8 +236,8 @@ tui::getCellOpen::getCellOpen(wxFrame *parent, wxWindowID id, const wxString &ti
    if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      laydata::CellList const cll = tDesign->cells();
-      laydata::CellList::const_iterator CL;
+      laydata::CellMap const cll = tDesign->cells();
+      laydata::CellMap::const_iterator CL;
       for (CL = cll.begin(); CL != cll.end(); CL++) {
          _nameList->Append(wxString(CL->first.c_str(), wxConvUTF8));
       }
@@ -273,7 +273,7 @@ tui::getCellRef::getCellRef(wxFrame *parent, wxWindowID id, const wxString &titl
       laydata::LibCellLists *cll = dbLibDir->getCells(ALL_LIB);
       for (laydata::LibCellLists::iterator curlib = cll->begin(); curlib != cll->end(); curlib++)
       {
-         laydata::CellList::const_iterator CL;
+         laydata::CellMap::const_iterator CL;
          for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
          {
             _nameList->Append(wxString(CL->first.c_str(), wxConvUTF8));
@@ -322,7 +322,7 @@ tui::getCellARef::getCellARef(wxFrame *parent, wxWindowID id, const wxString &ti
       laydata::LibCellLists *cll = dbLibDir->getCells(ALL_LIB);
       for (laydata::LibCellLists::iterator curlib = cll->begin(); curlib != cll->end(); curlib++)
       {
-         laydata::CellList::const_iterator CL;
+         laydata::CellMap::const_iterator CL;
          for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
          {
             _nameList->Append(wxString(CL->first.c_str(), wxConvUTF8));
@@ -560,8 +560,8 @@ tui::getCIFexport::getCIFexport(wxFrame *parent, wxWindowID id, const wxString &
    if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      laydata::CellList const cll = tDesign->cells();
-      laydata::CellList::const_iterator CL;
+      laydata::CellMap const cll = tDesign->cells();
+      laydata::CellMap::const_iterator CL;
       for (CL = cll.begin(); CL != cll.end(); CL++) {
          _nameList->Append(wxString(CL->first.c_str(), wxConvUTF8));
       }
@@ -719,8 +719,8 @@ tui::getGDSexport::getGDSexport(wxFrame *parent, wxWindowID id, const wxString &
    if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      laydata::CellList const cll = tDesign->cells();
-      laydata::CellList::const_iterator CL;
+      laydata::CellMap const cll = tDesign->cells();
+      laydata::CellMap::const_iterator CL;
       for (CL = cll.begin(); CL != cll.end(); CL++) {
          _nameList->Append(wxString(CL->first.c_str(), wxConvUTF8));
       }

@@ -109,7 +109,7 @@ namespace laydata {
       
       //********************
       //Next set of methods is intended for extension of regular layout data object (i.e. for TdtBoxExt  etc)
-      //That is TdtBox etc must assert mistake in overrided methods.
+      //That is TdtBox etc must assert mistake in overwritten methods.
       virtual   void       setLong(long extLong) {assert(true);};
       virtual   long       getLong(void) {assert(true); return 0;};
       virtual   void       setString(const std::string &extString) {assert(true);};

@@ -60,7 +60,7 @@ namespace laydata {
       std::string       name()            const {return _name;}
       real              UU()              const {return _UU;}
       real              DBU()             const {return _DBU;}
-      const CellList&   cells()           const {return _cells;}
+      const CellMap&    cells()           const {return _cells;}
       TDTHierTree*      hiertree()        const {return _hiertree;}
       int               libID()           const {return _libID;}
       void              clearHierTree();
@@ -73,7 +73,7 @@ namespace laydata {
       int                  _libID;        // library ID
       real                 _DBU;          // Size of database units in meters
       real                 _UU;           // size of user unit in DBU
-      CellList             _cells;        // list of cells in the design
+      CellMap              _cells;        // list of cells in the design
                                           //
       static TDTHierTree*  _hiertree;     //
       time_t               _created;
@@ -237,7 +237,7 @@ namespace laydata {
       TdtDefaultCell*   displaceUndefinedCell(std::string);
       void              holdUndefinedCell(TdtDefaultCell*);
       void              deleteHeldCells();
-      void              getHeldCells(CellList*);
+      void              getHeldCells(CellMap*);
       LibCellLists*     getCells(int libID);
       bool              modified() const {return (NULL == _TEDDB) ? false : _TEDDB->modified;};
       std::string       tedFileName()    {return _tedFileName;}
@@ -250,25 +250,21 @@ namespace laydata {
       Catalog           _libdirectory;
       TdtDesign*        _TEDDB;        // toped data base
       //! Temporary storage for undefined unreferenced cell (see the comment in the class definition)
-      CellList          _udurCells;
+      CellMap           _udurCells;
    };
 
    class DrcLibrary {
    public:
-                              DrcLibrary(std::string name, real DBU, real UU);
-      virtual                 ~DrcLibrary();
-      TdtDefaultCell*         checkCell(std::string name);
-      void                    registerCellRead(std::string, TdtCell*);
-      WordList                findSelected(const std::string &cell, TP*); //use for DRCexplainerror
-      std::string             name()            const {return _name;}
-      real                    UU()              const {return _UU;}
-      real                    DBU()             const {return _DBU;}
+                           DrcLibrary(std::string name);
+      virtual              ~DrcLibrary();
+      TdtDefaultCell*      checkCell(std::string name);
+      void                 registerCellRead(std::string, TdtCell*);
+      WordList             findSelected(const std::string &cell, TP*); //use for DRCexplainerror
+      std::string          name()            const {return _name;}
    protected:
 
       std::string          _name;         // design/library name
-      real                 _DBU;          // Size of database units in meters
-      real                 _UU;           // size of user unit in DBU
-      CellList             _cells;        // list of cells in the design
+      CellMap              _cells;        // list of cells in the design
    };
 
 }

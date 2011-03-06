@@ -250,7 +250,7 @@ laydata::DrcLibrary*  DataCenter::lockDRC(void)
    if (!_TEDLIB()) throw EXPTNactive_DB();
    if (!_DRCDB)
    {
-         _DRCDB = DEBUG_NEW laydata::DrcLibrary("drc", _TEDLIB()->DBU(), _TEDLIB()->UU());
+         _DRCDB = DEBUG_NEW laydata::DrcLibrary("drc");
    }
    while (wxMUTEX_NO_ERROR != _DRCLock.TryLock());
    return _DRCDB;
