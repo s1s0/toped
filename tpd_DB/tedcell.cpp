@@ -246,12 +246,12 @@ void laydata::TdtDefaultCell::motionDraw(const layprop::DrawProperties&, CtmQueu
 }
 
 void laydata::TdtDefaultCell::psWrite(PSFile&, const layprop::DrawProperties&,
-      const CellList*, const TDTHierTree*) const
+      const CellMap*, const TDTHierTree*) const
 {
 }
 
 laydata::TDTHierTree* laydata::TdtDefaultCell::hierOut(laydata::TDTHierTree*& Htree,
-                                    TdtCell* parent, CellList* celldefs, const laydata::TdtLibDir* libdir)
+                                    TdtCell* parent, CellMap* celldefs, const laydata::TdtLibDir* libdir)
 {
    return Htree = DEBUG_NEW TDTHierTree(this, parent, Htree);
 }
@@ -279,17 +279,17 @@ DBbox laydata::TdtDefaultCell::getVisibleOverlap(const layprop::DrawProperties&)
    return DEFAULT_ZOOM_BOX;
 }
 
-void laydata::TdtDefaultCell::write(TEDfile* const, const CellList&, const TDTHierTree*) const
+void laydata::TdtDefaultCell::write(TEDfile* const, const CellMap&, const TDTHierTree*) const
 {
    assert(false);
 }
 
-void laydata::TdtDefaultCell::gdsWrite(DbExportFile&, const CellList&, const TDTHierTree*) const
+void laydata::TdtDefaultCell::gdsWrite(DbExportFile&, const CellMap&, const TDTHierTree*) const
 {
    assert(false);
 }
 
-void laydata::TdtDefaultCell::cifWrite(DbExportFile&, const CellList&, const TDTHierTree*) const
+void laydata::TdtDefaultCell::cifWrite(DbExportFile&, const CellMap&, const TDTHierTree*) const
 {
    assert(false);
 }
@@ -714,7 +714,7 @@ laydata::TdtCellRef* laydata::TdtCell::getCellOver(TP pnt, CtmStack& transtack,
    return NULL;
 }
 
-void laydata::TdtCell::write(TEDfile* const tedfile, const CellList& allcells, const TDTHierTree* root) const
+void laydata::TdtCell::write(TEDfile* const tedfile, const CellMap& allcells, const TDTHierTree* root) const
 {
    // We going to write the cells in hierarchical order. Children - first!
    const laydata::TDTHierTree* Child= root->GetChild(TARGETDB_LIB);
@@ -752,7 +752,7 @@ void laydata::TdtCell::write(TEDfile* const tedfile, const CellList& allcells, c
    tedfile->registerCellWritten(name());
 }
 
-void laydata::TdtCell::gdsWrite(DbExportFile& gdsf, const CellList& allcells,
+void laydata::TdtCell::gdsWrite(DbExportFile& gdsf, const CellMap& allcells,
                                  const TDTHierTree* root) const
 {
    // We are going to write the cells in hierarchical order. Children - first!
@@ -780,7 +780,7 @@ void laydata::TdtCell::gdsWrite(DbExportFile& gdsf, const CellList& allcells,
    gdsf.definitionFinish();
 }
 
-void laydata::TdtCell::cifWrite(DbExportFile& ciff, const CellList& allcells,
+void laydata::TdtCell::cifWrite(DbExportFile& ciff, const CellMap& allcells,
                                 const TDTHierTree* root) const
 {
    // We going to write the cells in hierarchical order. Children - first!
@@ -823,7 +823,7 @@ void laydata::TdtCell::cifWrite(DbExportFile& ciff, const CellList& allcells,
 }
 
 void laydata::TdtCell::psWrite(PSFile& psf, const layprop::DrawProperties& drawprop,
-                               const CellList* allcells, const TDTHierTree* root) const
+                               const CellMap* allcells, const TDTHierTree* root) const
 {
    if (psf.hier())
    {
@@ -861,7 +861,7 @@ void laydata::TdtCell::psWrite(PSFile& psf, const layprop::DrawProperties& drawp
 }
 
 laydata::TDTHierTree* laydata::TdtCell::hierOut(laydata::TDTHierTree*& Htree,
-                   TdtCell* parent, CellList* celldefs, const laydata::TdtLibDir* libdir)
+                   TdtCell* parent, CellMap* celldefs, const laydata::TdtLibDir* libdir)
 {
    // collecting hierarchical information
    // NOTE! This function is supposed just to collect information.

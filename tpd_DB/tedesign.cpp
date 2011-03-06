@@ -64,7 +64,7 @@ laydata::TdtLibrary::TdtLibrary(std::string name, real DBU, real UU, int libID) 
 
 void laydata::TdtLibrary::relink(TdtLibDir* libdir)
 {
-   laydata::CellList::iterator wc;
+   laydata::CellMap::iterator wc;
    bool need_validation = false;
    for (wc = _cells.begin(); wc != _cells.end(); wc++)
    {
@@ -234,7 +234,7 @@ void laydata::TdtLibrary::recreateHierarchy(const laydata::TdtLibDir* libdir)
       clearHierTree();
    }
    // here - run the hierarchy extraction on orphans only
-   for (laydata::CellList::const_iterator wc = _cells.begin();
+   for (laydata::CellMap::const_iterator wc = _cells.begin();
                                           wc != _cells.end(); wc++) {
       if (wc->second && wc->second->orphan())
          _hiertree = wc->second->hierOut(_hiertree, NULL, &_cells, libdir);
@@ -243,7 +243,7 @@ void laydata::TdtLibrary::recreateHierarchy(const laydata::TdtLibDir* libdir)
 
 laydata::CellDefin laydata::TdtLibrary::getCellNamePair(std::string name) const
 {
-   CellList::const_iterator striter = _cells.find(name);
+   CellMap::const_iterator striter = _cells.find(name);
    if (_cells.end() == striter)
       return NULL;
    else
@@ -276,7 +276,7 @@ void laydata::TdtLibrary::addThisUndefCell(laydata::TdtDefaultCell* thecell)
 bool laydata::TdtLibrary::validateCells()
 {
    bool invalidParents = false;
-   laydata::CellList::const_iterator wc;
+   laydata::CellMap::const_iterator wc;
    for (wc = _cells.begin(); wc != _cells.end(); wc++)
    {
       if (NULL != wc->second)
@@ -287,7 +287,7 @@ bool laydata::TdtLibrary::validateCells()
 
 void laydata::TdtLibrary::clearLib()
 {
-   laydata::CellList::const_iterator wc;
+   laydata::CellMap::const_iterator wc;
    for (wc = _cells.begin(); wc != _cells.end(); wc++)
       delete wc->second;
    _cells.clear();
@@ -295,7 +295,7 @@ void laydata::TdtLibrary::clearLib()
 
 void laydata::TdtLibrary::cleanUnreferenced()
 {
-   laydata::CellList::iterator wc = _cells.begin();
+   laydata::CellMap::iterator wc = _cells.begin();
    while (wc != _cells.end())
    {
       const TDTHierTree* hcell = _hiertree->GetMember(wc->second);
@@ -303,7 +303,7 @@ void laydata::TdtLibrary::cleanUnreferenced()
       {
          _hiertree->removeRootItem(wc->second, _hiertree);
          delete wc->second;
-         laydata::CellList::iterator wcd = wc++;
+         laydata::CellMap::iterator wcd = wc++;
          _cells.erase(wcd);
       }
       else wc++;
@@ -321,7 +321,7 @@ libraries other than UNDEFCELL_LIB.
 laydata::TdtDefaultCell* laydata::TdtLibrary::displaceCell(const std::string& cell_name)
 {
    assert(UNDEFCELL_LIB == _libID); // see the function comment above!
-   laydata::CellList::iterator wc = _cells.find(cell_name);
+   laydata::CellMap::iterator wc = _cells.find(cell_name);
    if (_cells.end() == wc) return NULL;
    laydata::TdtDefaultCell* celldef = wc->second;
    _hiertree->removeRootItem(celldef, _hiertree);
@@ -331,7 +331,7 @@ laydata::TdtDefaultCell* laydata::TdtLibrary::displaceCell(const std::string& ce
 
 void laydata::TdtLibrary::collectUsedLays(WordList& laylist) const
 {
-   for (CellList::const_iterator CC = _cells.begin(); CC != _cells.end(); CC++)
+   for (CellMap::const_iterator CC = _cells.begin(); CC != _cells.end(); CC++)
    {
       CC->second->collectUsedLays(NULL, false,laylist);
    }
@@ -766,7 +766,7 @@ laydata::CellDefin laydata::TdtLibDir::linkCellRef(std::string cellname, int lib
 {
    assert(UNDEFCELL_LIB != libID);
    laydata::TdtLibrary* curlib = (TARGETDB_LIB == libID) ? _TEDDB : _libdirectory[libID]->second;
-   CellList::const_iterator striter = curlib->_cells.find(cellname);
+   CellMap::const_iterator striter = curlib->_cells.find(cellname);
    laydata::CellDefin strdefn = NULL;
    // link the cells instances with their definitions
    if (curlib->_cells.end() == striter)
@@ -814,16 +814,16 @@ void laydata::TdtLibDir::holdUndefinedCell(TdtDefaultCell* udefrcell)
 
 void laydata::TdtLibDir::deleteHeldCells()
 {
-   for (CellList::const_iterator CUDU = _udurCells.begin(); CUDU != _udurCells.end(); CUDU++)
+   for (CellMap::const_iterator CUDU = _udurCells.begin(); CUDU != _udurCells.end(); CUDU++)
    {
       delete CUDU->second;
    }
    _udurCells.clear();
 }
 
-void laydata::TdtLibDir::getHeldCells(CellList* copyList)
+void laydata::TdtLibDir::getHeldCells(CellMap* copyList)
 {
-   for (CellList::const_iterator CUDU = _udurCells.begin(); CUDU != _udurCells.end(); CUDU++)
+   for (CellMap::const_iterator CUDU = _udurCells.begin(); CUDU != _udurCells.end(); CUDU++)
    {
       (*copyList)[CUDU->first] = CUDU->second;
    }
@@ -948,7 +948,7 @@ void laydata::TdtDesign::renameCell(TdtDefaultCell* targetCell, std::string newN
    std::string oldName = targetCell->name();
    if (!targetCell->orphan())
    {
-      for (CellList::iterator CS = _cells.begin(); CS != _cells.end(); CS++)
+      for (CellMap::iterator CS = _cells.begin(); CS != _cells.end(); CS++)
       {
          if (CS->first != oldName)
             CS->second->renameChild(oldName,newName);
@@ -998,7 +998,7 @@ from TERGETDB_LIB - i.e. all parent cells of cell "name" belonging to the TARGET
  */
 void laydata::TdtDesign::collectParentCells(std::string& cname, CellDefList& parrentCells)
 {
-   laydata::CellList::const_iterator ccellIter = _cells.find(cname);
+   laydata::CellMap::const_iterator ccellIter = _cells.find(cname);
    if (_cells.end() == ccellIter) return;
    laydata::TdtDefaultCell* tcell = ccellIter->second;
    TDTHierTree* ccl = _hiertree->GetMember(tcell);
@@ -1694,12 +1694,12 @@ laydata::TdtDesign::~TdtDesign()
 //
 //
 
-laydata::DrcLibrary::DrcLibrary(std::string name, real DBU, real UU) :
-   _name(name), _DBU(DBU), _UU(UU) {}
+laydata::DrcLibrary::DrcLibrary(std::string name/*, real DBU, real UU*/) :
+   _name(name){}
 
 laydata::DrcLibrary::~DrcLibrary()
 {
-   laydata::CellList::const_iterator wc;
+   laydata::CellMap::const_iterator wc;
    for (wc = _cells.begin(); wc != _cells.end(); wc++)
       delete wc->second;
    _cells.clear();
@@ -1744,7 +1744,8 @@ WordList laydata::DrcLibrary::findSelected(const std::string &cell, TP* p1)
    laydata::AtticList* shapes;
    laydata::ShapeList *shapeList;
    TdtData *shape;
-   if (theCell) {
+   if (theCell)
+   {
 
       layprop::DrawProperties* drawProp;
       if (PROPC->lockDrawProp(drawProp, layprop::DRC))

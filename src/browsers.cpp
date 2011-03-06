@@ -362,7 +362,7 @@ void browsers::CellBrowser::updateFlat()
          cll = dbLibDir->getCells(TARGETDB_LIB);
          for (curlib = cll->begin(); curlib != cll->end(); curlib++)
          {
-            laydata::CellList::const_iterator CL;
+            laydata::CellMap::const_iterator CL;
             for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
             {
                wxTreeItemId cellitem = AppendItem(_dbroot, wxString( CL->first.c_str(),  wxConvUTF8));
@@ -386,7 +386,7 @@ void browsers::CellBrowser::updateFlat()
          cll = dbLibDir->getCells(libID);
          for (curlib = cll->begin(); curlib != cll->end(); curlib++)
          {
-            laydata::CellList::const_iterator CL;
+            laydata::CellMap::const_iterator CL;
             for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
             {
                wxTreeItemId cellitem = AppendItem(libroot, wxString( CL->first.c_str(),  wxConvUTF8));
@@ -408,7 +408,7 @@ void browsers::CellBrowser::updateFlat()
                _undefRoot = AppendItem(GetRootItem(), wxString("Undefined Cells", wxConvUTF8));
                SetItemImage(_undefRoot,BICN_LIBRARYDB,wxTreeItemIcon_Normal); //@FIXME <-- HERE - one more lib icon for undefined cells!
                // ... and the cells
-               laydata::CellList::const_iterator CL;
+               laydata::CellMap::const_iterator CL;
                for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
                {
                   wxTreeItemId cellitem = AppendItem(_undefRoot, wxString( (*CL).first.c_str(),  wxConvUTF8));
@@ -483,7 +483,7 @@ void browsers::CellBrowser::updateHier()
                _undefRoot = AppendItem(GetRootItem(), wxString("Undefined Cells", wxConvUTF8));
                SetItemImage(_undefRoot,BICN_LIBRARYDB,wxTreeItemIcon_Normal); //@FIXME <-- HERE - one more lib icon for undefined cells!
                // ... and the cells
-               laydata::CellList::const_iterator CL;
+               laydata::CellMap::const_iterator CL;
                for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
                {
                   wxTreeItemId cellitem = AppendItem(_undefRoot, wxString( (*CL).first.c_str(),  wxConvUTF8));

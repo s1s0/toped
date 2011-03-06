@@ -105,17 +105,17 @@ namespace laydata {
          virtual void        openGlDraw(layprop::DrawProperties&, bool active=false) const;
          virtual void        openGlRender(tenderer::TopRend&, const CTM&, bool, bool) const;
          virtual void        motionDraw(const layprop::DrawProperties&, CtmQueue&, bool active=false) const;
-         virtual TDTHierTree* hierOut(TDTHierTree*& Htree, TdtCell*, CellList*, const TdtLibDir*);
+         virtual TDTHierTree* hierOut(TDTHierTree*& Htree, TdtCell*, CellMap*, const TdtLibDir*);
          virtual bool        relink(TdtLibDir*);
          virtual void        relinkThis(std::string, laydata::CellDefin, laydata::TdtLibDir* libdir);
          virtual void        updateHierarchy(TdtLibDir*);
          virtual DBbox       cellOverlap() const;
          virtual DBbox       getVisibleOverlap(const layprop::DrawProperties&);
-         virtual void        write(TEDfile* const, const CellList&, const TDTHierTree*) const;
-         virtual void        gdsWrite(DbExportFile&, const CellList&, const TDTHierTree*) const;
-         virtual void        cifWrite(DbExportFile&, const CellList&, const TDTHierTree*) const;
+         virtual void        write(TEDfile* const, const CellMap&, const TDTHierTree*) const;
+         virtual void        gdsWrite(DbExportFile&, const CellMap&, const TDTHierTree*) const;
+         virtual void        cifWrite(DbExportFile&, const CellMap&, const TDTHierTree*) const;
          virtual void        psWrite(PSFile&, const layprop::DrawProperties&,
-                                      const CellList* = NULL, const TDTHierTree* = NULL) const;
+                                      const CellMap* = NULL, const TDTHierTree* = NULL) const;
          virtual void        collectUsedLays(const TdtLibDir*, bool, WordList&) const;
          virtual void        renameChild(std::string, std::string) {assert(false); /* TdTDefaultCell can not be renamed */}
          void                parentFound()              {_orphan = false;};
@@ -151,12 +151,12 @@ namespace laydata {
       TdtCellRef*          addCellRef(TdtDesign*, CellDefin str, CTM trans);
       TdtCellAref*         addCellARef(TdtDesign*, CellDefin, CTM, ArrayProps&);
       bool                 addChild(TdtDesign*, TdtDefaultCell*);
-      virtual void         write(TEDfile* const, const CellList&, const TDTHierTree*) const;
-      virtual void         gdsWrite(DbExportFile&, const CellList&, const TDTHierTree*) const;
-      virtual void         cifWrite(DbExportFile&, const CellList&, const TDTHierTree*) const;
+      virtual void         write(TEDfile* const, const CellMap&, const TDTHierTree*) const;
+      virtual void         gdsWrite(DbExportFile&, const CellMap&, const TDTHierTree*) const;
+      virtual void         cifWrite(DbExportFile&, const CellMap&, const TDTHierTree*) const;
       virtual void         psWrite(PSFile&, const layprop::DrawProperties&,
-                                   const CellList* = NULL, const TDTHierTree* = NULL) const;
-      virtual TDTHierTree* hierOut(TDTHierTree*&, TdtCell*, CellList*, const TdtLibDir*);
+                                   const CellMap* = NULL, const TDTHierTree* = NULL) const;
+      virtual TDTHierTree* hierOut(TDTHierTree*&, TdtCell*, CellMap*, const TdtLibDir*);
       virtual DBbox        cellOverlap() const {return _cellOverlap;}
       void                 selectInBox(DBbox, const DWordSet&, word, bool pntsel = false);
 //      void                 select_inside(const TP);

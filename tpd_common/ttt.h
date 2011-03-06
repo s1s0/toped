@@ -65,6 +65,7 @@ enum QuadIdentificators{ qidNW = 0,
 //=============================================================================
 // Some common constants (instead of #defines)
 //=============================================================================
+const int         GRC_LIB           = -3; //Geometry rules check violations
 const int         ALL_LIB           = -2;
 const int         TARGETDB_LIB      = -1;
 const int         UNDEFCELL_LIB     =  0;
