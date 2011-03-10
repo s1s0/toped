@@ -77,10 +77,8 @@ namespace laydata {
       virtual   void       info(std::ostringstream&, real) const = 0;
    //! Write the TdtData object in TDT file.
       virtual   void       write(TEDfile* const tedfile) const = 0;
-   //! Write the TdtData object in GDS file.
-      virtual   void       gdsWrite(DbExportFile&) const = 0;
-   //! Write the TdtData object in CIF file.
-      virtual   void       cifWrite(DbExportFile&) const = 0;
+   //! Export the TdtData object in external format.
+      virtual   void       dbExport(DbExportFile&) const = 0;
    //! Write the TdtData object in PS file.
       virtual   void       psWrite(PSFile&, const layprop::DrawProperties&) const = 0;
    //!
@@ -146,8 +144,7 @@ namespace laydata {
 
       virtual void         info(std::ostringstream&, real) const;
       virtual void         write(TEDfile* const tedfile) const;
-      virtual void         gdsWrite(DbExportFile&) const;
-      virtual void         cifWrite(DbExportFile&) const;
+      virtual void         dbExport(DbExportFile&) const;
       virtual void         psWrite(PSFile&, const layprop::DrawProperties&) const;
       virtual word         numPoints() const {return 4;};
       virtual void         polyCut(PointVector&, ShapeList**);
@@ -192,8 +189,7 @@ namespace laydata {
 
          virtual void      info(std::ostringstream&, real) const;
          virtual void      write(TEDfile* const tedfile) const;
-         virtual void      gdsWrite(DbExportFile&) const;
-         virtual void      cifWrite(DbExportFile&) const;
+         virtual void      dbExport(DbExportFile&) const;
          virtual void      psWrite(PSFile&, const layprop::DrawProperties&) const;
          virtual word      numPoints() const {return _psize;}
          virtual bool      pointInside(const TP);
@@ -233,8 +229,7 @@ namespace laydata {
 
          virtual void      info(std::ostringstream&, real) const;
          virtual void      write(TEDfile* const tedfile) const;
-         virtual void      gdsWrite(DbExportFile&) const;
-         virtual void      cifWrite(DbExportFile&) const;
+         virtual void      dbExport(DbExportFile&) const;
          virtual void      psWrite(PSFile&, const layprop::DrawProperties&) const;
          virtual word      numPoints() const {return _psize;}
          virtual bool      pointInside(const TP);
@@ -279,8 +274,7 @@ namespace laydata {
 
       virtual void         info(std::ostringstream&, real) const;
       virtual void         write(TEDfile* const tedfile) const;
-      virtual void         gdsWrite(DbExportFile&) const;
-      virtual void         cifWrite(DbExportFile&) const;
+      virtual void         dbExport(DbExportFile&) const;
       virtual void         psWrite(PSFile&, const layprop::DrawProperties&) const;
       virtual void         ungroup(TdtDesign*, TdtCell*, AtticList*);
       virtual word         numPoints() const {return 1;};
@@ -326,8 +320,7 @@ namespace laydata {
 
       virtual void         info(std::ostringstream&, real) const;
       virtual void         write(TEDfile* const tedfile) const;
-      virtual void         gdsWrite(DbExportFile&) const;
-      virtual void         cifWrite(DbExportFile&) const;
+      virtual void         dbExport(DbExportFile&) const;
       virtual void         psWrite(PSFile&, const layprop::DrawProperties&) const;
       virtual word         lType() const {return _lmaref;}
       void                 ungroup(TdtDesign*, TdtCell*, AtticList*);
@@ -360,8 +353,7 @@ namespace laydata {
 
       virtual void         info(std::ostringstream&, real) const;
       virtual void         write(TEDfile* const tedfile) const;
-      virtual void         gdsWrite(DbExportFile&) const;
-      virtual void         cifWrite(DbExportFile&) const;
+      virtual void         dbExport(DbExportFile&) const;
       virtual void         psWrite(PSFile&, const layprop::DrawProperties&) const;
       virtual word         numPoints() const {return 1;};
       virtual bool         pointInside(const TP);

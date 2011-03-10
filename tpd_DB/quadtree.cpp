@@ -808,28 +808,16 @@ void laydata::QuadTree::write(TEDfile* const tedfile) const {
       _subQuads[i]->write(tedfile);
 }
 
-/*! Write the contents of the QuadTree in a GDS file.\n
+/*! Exports the contents of the QuadTree in a file.\n
 Nothing special here - effectively the same as write method*/
-void laydata::QuadTree::gdsWrite(DbExportFile& gdsf) const
+void laydata::QuadTree::dbExport(DbExportFile& exportF) const
 {
    for (ObjectIter i = 0; i < _props._numObjects; i++)
    {
-      _data[i]->gdsWrite(gdsf);
+      _data[i]->dbExport(exportF);
    }
    for (byte i = 0; i < _props.numSubQuads(); i++)
-      _subQuads[i]->gdsWrite(gdsf);
-}
-
-/*! Write the contents of the QuadTree in a CIF file.\n
-Nothing special here - effectively the same as other write method*/
-void laydata::QuadTree::cifWrite(DbExportFile& ciff) const
-{
-   for (ObjectIter i = 0; i < _props._numObjects; i++)
-   {
-      _data[i]->cifWrite(ciff);
-   }
-   for (byte i = 0; i < _props.numSubQuads(); i++)
-      _subQuads[i]->cifWrite(ciff);
+      _subQuads[i]->dbExport(exportF);
 }
 
 /*! Write the contents of the QuadTree in a PS file.\n
