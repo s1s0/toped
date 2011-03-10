@@ -284,12 +284,7 @@ void laydata::TdtDefaultCell::write(TEDfile* const, const CellMap&, const TDTHie
    assert(false);
 }
 
-void laydata::TdtDefaultCell::gdsWrite(DbExportFile&, const CellMap&, const TDTHierTree*) const
-{
-   assert(false);
-}
-
-void laydata::TdtDefaultCell::cifWrite(DbExportFile&, const CellMap&, const TDTHierTree*) const
+void laydata::TdtDefaultCell::dbExport(DbExportFile&, const CellMap&, const TDTHierTree*) const
 {
    assert(false);
 }
@@ -752,59 +747,31 @@ void laydata::TdtCell::write(TEDfile* const tedfile, const CellMap& allcells, co
    tedfile->registerCellWritten(name());
 }
 
-void laydata::TdtCell::gdsWrite(DbExportFile& gdsf, const CellMap& allcells,
-                                 const TDTHierTree* root) const
-{
-   // We are going to write the cells in hierarchical order. Children - first!
-   if (gdsf.recur())
-   {
-      const laydata::TDTHierTree* Child= root->GetChild(TARGETDB_LIB);
-      while (Child)
-      {
-         allcells.find(Child->GetItem()->name())->second->gdsWrite(gdsf, allcells, Child);
-         Child = Child->GetBrother(TARGETDB_LIB);
-      }
-   }
-   // If no more children and the cell has not been written yet
-   if (gdsf.checkCellWritten(name())) return;
-   //
-   gdsf.definitionStart(name());
-
-   // and now the layers
-   laydata::LayerList::const_iterator wl;
-   for (wl = _layers.begin(); wl != _layers.end(); wl++)
-   {
-      if ((REF_LAY != wl->first) && !gdsf.layerSpecification(wl->first)) continue;
-      wl->second->gdsWrite(gdsf);
-   }
-   gdsf.definitionFinish();
-}
-
-void laydata::TdtCell::cifWrite(DbExportFile& ciff, const CellMap& allcells,
+void laydata::TdtCell::dbExport(DbExportFile& exportf, const CellMap& allcells,
                                 const TDTHierTree* root) const
 {
    // We going to write the cells in hierarchical order. Children - first!
-   if (ciff.recur())
+   if (exportf.recur())
    {
       const laydata::TDTHierTree* Child= root->GetChild(TARGETDB_LIB);
       while (Child)
       {
-         allcells.find(Child->GetItem()->name())->second->cifWrite(ciff, allcells, Child);
+         allcells.find(Child->GetItem()->name())->second->dbExport(exportf, allcells, Child);
          Child = Child->GetBrother(TARGETDB_LIB);
       }
    }
    // If no more children and the cell has not been written yet
-   if (ciff.checkCellWritten(name())) return;
+   if (exportf.checkCellWritten(name())) return;
    //
-   ciff.definitionStart(name());
-   // @TODO! See Bug#15242
+   exportf.definitionStart(name());
+   // @TODO! See Bug#15242 (CIF related)
    // Currently all coordinates are exported in DBU units and in the DS line of CIF
    // we put the ratio between DBU and the CIF precision (constant). This makes the
    // resulting CIF files ineffective, because normally there will be too many
    // pointless zeros. What we need is the smallest step which is used in each of
-   // the cells. This can be calculated here, but also can be a value precalculated
+   // the cells. This can be calculated here, but also can be a value pre-calculated
    // on the fly when each and every points gets stored in the cell structure.
-   // In practice this should be done in the folowing way
+   // In practice this should be done in the following way
    // - calculate the reciprocal value of DBU ( (unsigned) 1/ DBU ). Let's name it
    //   DBUR. Make sure that the conversion error is cleaned-up.
    // - define the step and assign to it initially DBUR
@@ -816,10 +783,10 @@ void laydata::TdtCell::cifWrite(DbExportFile& ciff, const CellMap& allcells,
    laydata::LayerList::const_iterator wl;
    for (wl = _layers.begin(); wl != _layers.end(); wl++)
    {
-      if ((REF_LAY != wl->first) && !ciff.layerSpecification(wl->first)) continue;
-      wl->second->cifWrite(ciff);
+      if ((REF_LAY != wl->first) && !exportf.layerSpecification(wl->first)) continue;
+      wl->second->dbExport(exportf);
    }
-   ciff.definitionFinish();
+   exportf.definitionFinish();
 }
 
 void laydata::TdtCell::psWrite(PSFile& psf, const layprop::DrawProperties& drawprop,

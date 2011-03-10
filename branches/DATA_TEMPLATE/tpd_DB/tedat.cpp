@@ -597,14 +597,9 @@ void laydata::TdtBox::write(TEDfile* const tedfile) const {
    tedfile->put4b(_pdata[p2x]); tedfile->put4b(_pdata[p2y]);
 }
 
-void laydata::TdtBox::gdsWrite(DbExportFile& gdsf) const
+void laydata::TdtBox::dbExport(DbExportFile& exportF) const
 {
-   gdsf.box(_pdata);
-}
-
-void laydata::TdtBox::cifWrite(DbExportFile& ciff) const
-{
-   ciff.box(_pdata);
+   exportF.box(_pdata);
 }
 
 void laydata::TdtBox::psWrite(PSFile& gdsf, const layprop::DrawProperties&) const
@@ -1129,14 +1124,9 @@ void laydata::TdtPoly::write(TEDfile* const tedfile) const
    }
 }
 
-void laydata::TdtPoly::gdsWrite(DbExportFile& gdsf) const
+void laydata::TdtPoly::dbExport(DbExportFile& exportF) const
 {
-   gdsf.polygon(_pdata, _psize);
-}
-
-void laydata::TdtPoly::cifWrite(DbExportFile& ciff) const
-{
-   ciff.polygon(_pdata, _psize);
+   exportF.polygon(_pdata, _psize);
 }
 
 void laydata::TdtPoly::psWrite(PSFile& gdsf, const layprop::DrawProperties&) const
@@ -1525,14 +1515,9 @@ void laydata::TdtWire::write(TEDfile* const tedfile) const
    }
 }
 
-void laydata::TdtWire::gdsWrite(DbExportFile& gdsf) const
+void laydata::TdtWire::dbExport(DbExportFile& exportF) const
 {
-   gdsf.wire(_pdata, _psize, _width);
-}
-
-void laydata::TdtWire::cifWrite(DbExportFile& ciff) const
-{
-   ciff.wire(_pdata, _psize, _width);
+   exportF.wire(_pdata, _psize, _width);
 }
 
 void laydata::TdtWire::psWrite(PSFile& gdsf, const layprop::DrawProperties&) const
@@ -1753,14 +1738,9 @@ std::string laydata::TdtCellRef::cellname() const
    return _structure->name();
 }
 
-void laydata::TdtCellRef::gdsWrite(DbExportFile& gdsf) const
+void laydata::TdtCellRef::dbExport(DbExportFile& exportF) const
 {
-   gdsf.ref(_structure->name(), _translation);
-}
-
-void laydata::TdtCellRef::cifWrite(DbExportFile& ciff) const
-{
-   ciff.ref(_structure->name(), _translation);
+   exportF.ref(_structure->name(), _translation);
 }
 
 void laydata::TdtCellRef::psWrite(PSFile& psf, const layprop::DrawProperties& drawprop) const
@@ -2148,14 +2128,9 @@ void laydata::TdtCellAref::write(TEDfile* const tedfile) const {
    tedfile->putWord(_arrprops.cols());
 }
 
-void laydata::TdtCellAref::gdsWrite(DbExportFile& gdsf) const
+void laydata::TdtCellAref::dbExport(DbExportFile& exportF) const
 {
-   gdsf.aref(_structure->name(), _translation, _arrprops);
-}
-
-void laydata::TdtCellAref::cifWrite(DbExportFile& ciff) const
-{
-   ciff.aref(_structure->name(), _translation, _arrprops);
+   exportF.aref(_structure->name(), _translation, _arrprops);
 }
 
 void laydata::TdtCellAref::psWrite(PSFile& psf, const layprop::DrawProperties& drawprop) const
@@ -2452,14 +2427,9 @@ void laydata::TdtText::write(TEDfile* const tedfile) const {
    tedfile->putCTM(_translation);
 }
 
-void laydata::TdtText::gdsWrite(DbExportFile& gdsf) const
+void laydata::TdtText::dbExport(DbExportFile& exportF) const
 {
-   gdsf.text(_text, _translation);
-}
-
-void laydata::TdtText::cifWrite(DbExportFile& ciff) const
-{
-   ciff.text(_text, _translation);
+   exportF.text(_text, _translation);
 }
 
 void laydata::TdtText::psWrite(PSFile& gdsf, const layprop::DrawProperties& drawprop) const

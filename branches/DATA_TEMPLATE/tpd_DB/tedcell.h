@@ -112,8 +112,7 @@ namespace laydata {
          virtual DBbox       cellOverlap() const;
          virtual DBbox       getVisibleOverlap(const layprop::DrawProperties&);
          virtual void        write(TEDfile* const, const CellMap&, const TDTHierTree*) const;
-         virtual void        gdsWrite(DbExportFile&, const CellMap&, const TDTHierTree*) const;
-         virtual void        cifWrite(DbExportFile&, const CellMap&, const TDTHierTree*) const;
+         virtual void        dbExport(DbExportFile&, const CellMap&, const TDTHierTree*) const;
          virtual void        psWrite(PSFile&, const layprop::DrawProperties&,
                                       const CellMap* = NULL, const TDTHierTree* = NULL) const;
          virtual void        collectUsedLays(const TdtLibDir*, bool, WordList&) const;
@@ -152,8 +151,7 @@ namespace laydata {
       TdtCellAref*         addCellARef(TdtDesign*, CellDefin, CTM, ArrayProps&);
       bool                 addChild(TdtDesign*, TdtDefaultCell*);
       virtual void         write(TEDfile* const, const CellMap&, const TDTHierTree*) const;
-      virtual void         gdsWrite(DbExportFile&, const CellMap&, const TDTHierTree*) const;
-      virtual void         cifWrite(DbExportFile&, const CellMap&, const TDTHierTree*) const;
+      virtual void         dbExport(DbExportFile&, const CellMap&, const TDTHierTree*) const;
       virtual void         psWrite(PSFile&, const layprop::DrawProperties&,
                                    const CellMap* = NULL, const TDTHierTree* = NULL) const;
       virtual TDTHierTree* hierOut(TDTHierTree*&, TdtCell*, CellMap*, const TdtLibDir*);

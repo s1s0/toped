@@ -679,7 +679,6 @@ void CIFin::CifExportFile::libraryStart(std::string libname, TpdTime& libtime, r
 void CIFin::CifExportFile::libraryFinish()
 {
    // nothing to do for CIF export
-   assert(false);
 }
 
 bool CIFin::CifExportFile::layerSpecification(unsigned layno)

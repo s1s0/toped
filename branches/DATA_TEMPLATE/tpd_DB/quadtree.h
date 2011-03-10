@@ -75,8 +75,7 @@ namespace laydata {
       TdtData*             addWire(PointVector& pl, WireWidth w);
       TdtData*             addText(std::string text, CTM trans);
       void                 write(TEDfile* const) const;
-      void                 gdsWrite(DbExportFile&) const;
-      void                 cifWrite(DbExportFile&) const;
+      void                 dbExport(DbExportFile&) const;
       void                 psWrite(PSFile&, const layprop::DrawProperties&) const;
       void                 selectInBox(DBbox&, DataList*, bool, word /*selmask = laydata::_lmall*/);
       void                 selectFromList(DataList*, DataList*);
@@ -106,11 +105,10 @@ namespace laydata {
    private:
       friend class QTreeTmp;
       typedef unsigned     ObjectIter;
-#ifndef WIN32
+#ifdef WIN32
+      #pragma pack() struct  QuadProps
+#else
       struct __attribute__ ((__packed__)) QuadProps
-#else 
-      #pragma pack()
-      struct  QuadProps
 #endif
       {
                                 QuadProps();

@@ -161,46 +161,26 @@ void laydata::TdtLibrary::registerCellRead(std::string cellname, TdtCell* cell) 
    _cells[cellname] = cell;
 }
 
-void laydata::TdtLibrary::gdsWrite(DbExportFile& gdsf)
+void laydata::TdtLibrary::dbExport(DbExportFile& exportF)
 {
    TpdTime timelu(_lastUpdated);
-   gdsf.libraryStart(name(), timelu, DBU(), UU());
+   exportF.libraryStart(name(), timelu, DBU(), UU());
    //
-   if (NULL == gdsf.topcell())
+   if (NULL == exportF.topcell())
    {
       laydata::TDTHierTree* root_cell = _hiertree->GetFirstRoot(TARGETDB_LIB);
       while (root_cell)
       {
-         _cells[root_cell->GetItem()->name()]->gdsWrite(gdsf, _cells, root_cell);
+         _cells[root_cell->GetItem()->name()]->dbExport(exportF, _cells, root_cell);
          root_cell = root_cell->GetNextRoot(TARGETDB_LIB);
       }
    }
    else
    {
-      laydata::TDTHierTree* root_cell = _hiertree->GetMember(gdsf.topcell());
-      gdsf.topcell()->gdsWrite(gdsf, _cells, root_cell);
+      laydata::TDTHierTree* root_cell = _hiertree->GetMember(exportF.topcell());
+      exportF.topcell()->dbExport(exportF, _cells, root_cell);
    }
-   gdsf.libraryFinish();
-}
-
-void laydata::TdtLibrary::cifWrite(DbExportFile& ciff)
-{
-   TpdTime timelu(_lastUpdated);
-   ciff.libraryStart(name(), timelu, DBU(), UU());
-   if (NULL == ciff.topcell())
-   {
-      laydata::TDTHierTree* root = _hiertree->GetFirstRoot(TARGETDB_LIB);
-      while (root)
-      {
-         _cells[root->GetItem()->name()]->cifWrite(ciff, _cells, root);
-         root = root->GetNextRoot(TARGETDB_LIB);
-      }
-   }
-   else
-   {
-      laydata::TDTHierTree* root_cell = _hiertree->GetMember(ciff.topcell());
-      ciff.topcell()->cifWrite(ciff, _cells, root_cell);
-   }
+   exportF.libraryFinish();
 }
 
 void laydata::TdtLibrary::psWrite(PSFile& psf, const TdtCell* top, const layprop::DrawProperties& drawprop)

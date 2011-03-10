@@ -647,7 +647,7 @@ int tellstdfunc::GDSexportLIB::execute()
          laydata::TdtDesign* tDesign = (*dbLibDir)();
          LayerMapExt default_map(gdsLays, NULL);
          GDSin::GdsExportFile gdsex(filename, NULL, default_map, true);
-         tDesign->gdsWrite(gdsex);
+         tDesign->dbExport(gdsex);
       }
       DATC->unlockTDT(dbLibDir, true);
       LogFile << LogFile.getFN() << "( "
@@ -705,7 +705,7 @@ int tellstdfunc::GDSexportTOP::execute()
          {
             LayerMapExt default_map(gdsLays, NULL);
             GDSin::GdsExportFile gdsex(filename, excell, default_map, recur/*, x2048*/);
-            tDesign->gdsWrite(gdsex);
+            tDesign->dbExport(gdsex);
             LogFile  << LogFile.getFN()
                      << "(\""<< cellname << "\","
                      << LogFile._2bool(recur) << ", "
@@ -1259,7 +1259,7 @@ int tellstdfunc::CIFexportLIB::execute()
       {
          laydata::TdtDesign* tDesign = (*dbLibDir)();
          CIFin::CifExportFile cifex(filename, NULL, cifLays, true, verbose);
-         tDesign->cifWrite(cifex);
+         tDesign->dbExport(cifex);
          LogFile << LogFile.getFN() << "( "
                  << (*lll) << ", \""
                  << filename << "\", "
@@ -1317,7 +1317,7 @@ int tellstdfunc::CIFexportTOP::execute()
          if (NULL != excell)
          {
             CIFin::CifExportFile cifex(filename, excell, cifLays, recur, verbose);
-            tDesign->cifWrite(cifex);
+            tDesign->dbExport(cifex);
             LogFile << LogFile.getFN() << "( \""
                     << cellname << "\", "
                     << LogFile._2bool(recur) << ", "
