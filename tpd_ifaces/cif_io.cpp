@@ -872,7 +872,6 @@ bool CIFin::CifExportFile::pathConvert(PointVector& plist, unsigned numpoints, i
       fnbr--;
    P1 = plist[fnbr];
 
-//   P1 = plist[numpoints-2];
    sdX = P2.x() - P1.x();
    sdY = P2.y() - P1.y();
    sign = ((sdX * sdY) >= 0) ? -1 : 1;
