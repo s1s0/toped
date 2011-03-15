@@ -868,11 +868,11 @@ bool CIFin::CifExportFile::pathConvert(PointVector& plist, unsigned numpoints, i
    P2 = plist[numpoints-1];
    // find the first neighboring point which is not equivalent to P1
    fnbr = numpoints - 2;
-   while ((P2 == plist[fnbr]) && (fnbr > 0))
+   while ((P2 == plist[fnbr]) && (fnbr >= 0))
       fnbr--;
    P1 = plist[fnbr];
 
-   P1 = plist[numpoints-2];
+//   P1 = plist[numpoints-2];
    sdX = P2.x() - P1.x();
    sdY = P2.y() - P1.y();
    sign = ((sdX * sdY) >= 0) ? -1 : 1;
