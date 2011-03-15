@@ -671,17 +671,17 @@ bool laydata::pathConvert(PointVector& plist, int4b begext, int4b endext )
    P2 = plist[numpoints-1];
    // find the first neighboring point which is not equivalent to P1
    fnbr = numpoints - 2;
-   while ((P2 == plist[fnbr]) && (fnbr > 0))
+   while ((P2 == plist[fnbr]) && (fnbr >= 0))
       fnbr--;
    // assert, because if it was found above, it should exists!
    assert(fnbr >= 0);
    P1 = plist[fnbr];
 
-   P1 = plist[numpoints-2];
    sdX = P2.x() - P1.x();
    sdY = P2.y() - P1.y();
    sign = ((sdX * sdY) >= 0) ? 1 : -1;
    length = sqrt(sdY*sdY + sdX*sdX);
+   assert(length);
    int4b yn = (int4b) rint(P2.y() + sign*((endext*sdY)/length));
    int4b xn = (int4b) rint(P2.x() + sign*((endext*sdX)/length));
 
