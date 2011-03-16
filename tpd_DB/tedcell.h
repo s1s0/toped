@@ -29,7 +29,7 @@
 #define TEDCELL_H_INCLUDED
 
 #include <string>
-#include "quadtree.h"
+#include "qtree_tmpl.h"
 
 namespace laydata {
 
