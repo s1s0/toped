@@ -207,6 +207,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\qtree_tmpl.cpp"
+				>
+			</File>
+			<File
 				RelativePath="quadtree.cpp"
 				>
 				<FileConfiguration
@@ -369,6 +373,10 @@
 			</File>
 			<File
 				RelativePath=".\ps_out.h"
+				>
+			</File>
+			<File
+				RelativePath=".\qtree_tmpl.h"
 				>
 			</File>
 			<File
