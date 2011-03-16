@@ -37,7 +37,8 @@ namespace laydata {
    typedef QTreeTmpl<TdtData>  QuadTree;
 
 #ifdef WIN32
-   #pragma pack() struct  QuadProps
+   #pragma pack() 
+	struct  QuadProps
 #else
    struct __attribute__ ((__packed__)) QuadProps
 #endif
