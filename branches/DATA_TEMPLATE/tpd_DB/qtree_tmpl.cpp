@@ -69,7 +69,7 @@ const typename laydata::QTreeTmpl<DataT>::Iterator& laydata::QTreeTmpl<DataT>::I
       return *this;
    else if (0 < _cQuad->_props.numSubQuads())
    {// push down the tree
-      _qPosStack->push(QtPosition(_cQuad,0));
+      _qPosStack->push(QtPosition<DataT>(_cQuad,0));
       _cQuad = _cQuad->_subQuads[0];
       secureNonEmptyDown();
       return *this;
@@ -77,7 +77,7 @@ const typename laydata::QTreeTmpl<DataT>::Iterator& laydata::QTreeTmpl<DataT>::I
    else while (0 < _qPosStack->size())
    {
       //pop a quad
-      QtPosition prevQuad = _qPosStack->top(); _qPosStack->pop();
+      QtPosition<DataT> prevQuad = _qPosStack->top(); _qPosStack->pop();
       byte cSubQuad = prevQuad._cSubQuad;
       // Note! - if we're traversing the subquads - it means that we've already
       // traversed the eventual data in the popped quad. So go and find the next
@@ -85,7 +85,7 @@ const typename laydata::QTreeTmpl<DataT>::Iterator& laydata::QTreeTmpl<DataT>::I
       if (++cSubQuad < prevQuad._cQuad->_props.numSubQuads())
       {
          // Ok, valid found, push its parent in the stack
-         _qPosStack->push(QtPosition(prevQuad._cQuad,cSubQuad));
+         _qPosStack->push(QtPosition<DataT>(prevQuad._cQuad,cSubQuad));
          _cQuad = prevQuad._cQuad->_subQuads[cSubQuad];
          secureNonEmptyDown();
          return *this;
@@ -135,7 +135,7 @@ void laydata::QTreeTmpl<DataT>::Iterator::secureNonEmptyDown()
    {
       if (0 < _cQuad->_props.numSubQuads())
       {
-         _qPosStack->push(QtPosition(_cQuad,0));
+         _qPosStack->push(QtPosition<DataT>(_cQuad,0));
          _cQuad = _cQuad->_subQuads[0];
       }
       else assert(false); // i.e. the tree is not in traversable condition
@@ -825,19 +825,6 @@ void laydata::QTreeTmpl<DataT>::write(TEDfile* const tedfile) const {
    for (byte i = 0; i < _props.numSubQuads(); i++)
       _subQuads[i]->write(tedfile);
 }
-
-/*! Exports the contents of the QuadTree in a file.\n
-Nothing special here - effectively the same as write method*/
-//template <typename DataT>
-//void laydata::QTreeTmpl<DataT>::dbExport(DbExportFile& exportF) const
-//{
-//   for (QuadsIter i = 0; i < _props._numObjects; i++)
-//   {
-//      _data[i]->dbExport(exportF);
-//   }
-//   for (byte i = 0; i < _props.numSubQuads(); i++)
-//      _subQuads[i]->dbExport(exportF);
-//}
 
 /*! Write the contents of the QuadTree in a PS file.\n
 Nothing special here - effectively the same as gdsWrite and write method*/

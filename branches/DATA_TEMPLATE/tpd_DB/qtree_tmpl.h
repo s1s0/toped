@@ -64,6 +64,8 @@ namespace laydata {
       typedef  std::list<DataT*>                     TObjList;
       typedef  std::pair<DataT*, SGBitSet>           TObjDataPair;
       typedef  std::list<TObjDataPair>               TObjDataPairList;
+      typedef  std::stack<QtPosition<DataT> >        QPosStack;
+
       friend class Iterator;
       class Iterator {
          public:
@@ -101,7 +103,6 @@ namespace laydata {
       DataT*               addWire(PointVector& pl, WireWidth w);
       DataT*               addText(std::string text, CTM trans);
       void                 write(TEDfile* const) const;
-//      void                 dbExport(DbExportFile&) const;
       void                 psWrite(PSFile&, const layprop::DrawProperties&) const;
       void                 selectInBox(DBbox&, TObjDataPairList*, bool, word /*selmask = laydata::_lmall*/);
       void                 selectFromList(TObjDataPairList*, TObjDataPairList*);
