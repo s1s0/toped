@@ -33,8 +33,6 @@
 #include "quadtree.h"
 
 namespace laydata {
-//   struct  QuadProps;
-//   class   QTreeTmp;
    //==============================================================================
       /*! QuadTree class implements the main clipping algorithm of toped. Its main
          purpose is to speed-up the drawing of the database. All objects of type
@@ -63,11 +61,36 @@ namespace laydata {
    template <typename DataT>
    class QTreeTmpl {
    public:
+      typedef  std::list<DataT*>                     TObjList;
+      typedef  std::pair<DataT*, SGBitSet>           TObjDataPair;
+      typedef  std::list<TObjDataPair>               TObjDataPairList;
+      friend class Iterator;
+      class Iterator {
+         public:
+                            Iterator();
+                            Iterator(const QTreeTmpl<DataT>&);
+                            Iterator(const Iterator&);
+                           ~Iterator();
+            const Iterator& operator++();    //Prefix
+            const Iterator  operator++(int); //Postfix
+            bool            operator==(const Iterator&);
+            bool            operator!=(const Iterator&);
+            DataT*          operator->();
+         private:
+            void                    secureNonEmptyDown();
+            const QTreeTmpl<DataT>* _cQuad;
+            QuadsIter               _cData;
+            QPosStack*              _qPosStack;
+            bool                    _copy;
+      };
+
                            QTreeTmpl();
                            QTreeTmpl(InputTdtFile* const, bool);
                           ~QTreeTmpl();
-      void                 openGlDraw(layprop::DrawProperties&, const DataList*, bool) const;
-      void                 openGlRender(tenderer::TopRend&, const DataList*) const;
+      const Iterator       begin();
+      const Iterator       end();
+      void                 openGlDraw(layprop::DrawProperties&, const TObjDataPairList*, bool) const;
+      void                 openGlRender(tenderer::TopRend&, const TObjDataPairList*) const;
 //      void                 visible_shapes(laydata::ShapeList*, const DBbox&, const CTM&, const CTM&, unsigned long&);
       short                clipType(tenderer::TopRend&) const;
       void                 motionDraw(const layprop::DrawProperties&, CtmQueue&) const;
@@ -78,15 +101,15 @@ namespace laydata {
       DataT*               addWire(PointVector& pl, WireWidth w);
       DataT*               addText(std::string text, CTM trans);
       void                 write(TEDfile* const) const;
-      void                 dbExport(DbExportFile&) const;
+//      void                 dbExport(DbExportFile&) const;
       void                 psWrite(PSFile&, const layprop::DrawProperties&) const;
-      void                 selectInBox(DBbox&, DataList*, bool, word /*selmask = laydata::_lmall*/);
-      void                 selectFromList(DataList*, DataList*);
-      void                 selectAll(DataList*, word selmask = laydata::_lmall, bool mark = true);
-      void                 unselectInBox(DBbox&, DataList*, bool);
+      void                 selectInBox(DBbox&, TObjDataPairList*, bool, word /*selmask = laydata::_lmall*/);
+      void                 selectFromList(TObjDataPairList*, TObjDataPairList*);
+      void                 selectAll(TObjDataPairList*, word selmask = laydata::_lmall, bool mark = true);
+      void                 unselectInBox(DBbox&, TObjDataPairList*, bool);
       bool                 deleteMarked(SH_STATUS stat=sh_selected, bool partselect=false);
       bool                 deleteThis(DataT*);
-      void                 cutPolySelected(PointVector&, DBbox&, ShapeList**);
+      void                 cutPolySelected(PointVector&, DBbox&, TObjList**);
       DataT*               mergeSelected(DataT*& shapeRef);
 /*      DataT*               getfirstover(const TP);
       DataT*               getnextover(const TP, laydata::DataT*, bool& check);*/
@@ -94,7 +117,7 @@ namespace laydata {
       void                 validate();
       bool                 fullValidate();
       void                 resort(DataT* newdata = NULL);
-      void                 resort(ShapeList&);
+      void                 resort(TObjList&);
       bool                 empty() const;
       void                 freeMemory();
       /*! Return the overlapping box*/
@@ -107,23 +130,21 @@ namespace laydata {
       bool                 invalid() const;
    private:
       friend class QTreeTmp;
-      void                 sort(ShapeList&);
+      void                 sort(TObjList&);
       bool                 fitInTree(DataT* shape);
       char                 fitSubTree(const DBbox&, DBbox*);
-      void                 tmpStore(ShapeList& store);
+      void                 tmpStore(TObjList& store);
       byte                 biggest(int8b* array) const;
       void                 updateOverlap(const DBbox& hovl);
       byte                 sequreQuad(QuadIdentificators);
       void                 removeQuad(QuadIdentificators);
       DBbox                _overlap;//! The overlapping box of the quad
       /*! A pointers to four child QuadTree structures*/
-      QTreeTmpl**           _subQuads;
+      QTreeTmpl**          _subQuads;
       /*! Pointer to the first DataT stored in this QuadTree*/
       DataT**              _data;
       QuadProps            _props;
    };
-
-
 }
 
 #endif /* QTREE_TMPL_H_ */
