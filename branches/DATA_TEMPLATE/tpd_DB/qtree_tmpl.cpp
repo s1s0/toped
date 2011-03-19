@@ -290,56 +290,6 @@ void laydata::QTreeTmpl<DataT>::add(DataT* shape)
    }
 }
 
-/*!Create new TdtBox. Depending on sortnow input variable the new shape is
-just added to the QuadTree (using QuadTree<DataT>::put()) without sorting or fit on
-the proper place (using add() */
-template <typename DataT>
-DataT* laydata::QTreeTmpl<DataT>::addBox(const TP& p1, const TP& p2)
-{
-   laydata::TdtBox *shape = DEBUG_NEW TdtBox(p1,p2);
-   add(shape);
-   return shape;
-}
-/*!Create new TdtPoly. Depending on sortnow input variable the new shape is
-just added to the QuadTree (using QuadTree<DataT>::put()) without sorting or fit on
-the proper place (using add() */
-template <typename DataT>
-DataT* laydata::QTreeTmpl<DataT>::addPoly(PointVector& pl)
-{
-   laydata::TdtPoly *shape = DEBUG_NEW TdtPoly(pl);
-   add(shape);
-   return shape;
-}
-
-template <typename DataT>
-DataT* laydata::QTreeTmpl<DataT>::addPoly(int4b* pl, unsigned psize)
-{
-   laydata::TdtPoly *shape = DEBUG_NEW TdtPoly(pl, psize);
-   add(shape);
-   return shape;
-}
-
-/*!Create new TdtWire. Depending on sortnow input variable the new shape is
-just added to the QuadTree (using QuadTree<DataT>::put()) without sorting or fit on
-the proper place (using add() */
-template <typename DataT>
-DataT* laydata::QTreeTmpl<DataT>::addWire(PointVector& pl, WireWidth w)
-{
-   laydata::TdtWire *shape = DEBUG_NEW TdtWire(pl,w);
-   add(shape);
-   return shape;
-}
-/*!Create new TdtText. Depending on sortnow input variable the new shape is
-just added to the QuadTree (using QuadTree<DataT>::put()) without sorting or fit on
-the proper place (using add() */
-template <typename DataT>
-DataT* laydata::QTreeTmpl<DataT>::addText(std::string text, CTM trans)
-{
-   laydata::TdtText *shape = DEBUG_NEW TdtText(text,trans);
-   add(shape);
-   return shape;
-}
-
 /*! Checks whether a single layout object shape will fit into one of the
 children's QuadTree. It calls add() and returns success if the new layout object
 fits entirely into one of the possible subtrees or if it blows up its
@@ -812,32 +762,6 @@ byte laydata::QTreeTmpl<DataT>::biggest(int8b* array) const
    return curmaxindx;
 }
 
-/*! Write the contents of the QuadTree in a TDT file.\n
-The idea about store a sorted data does not seems to be appropriate for TDT
-format. It is TOPED internal affair. Format might be used by somebody else -
- you never know - do you?*/
-template <typename DataT>
-void laydata::QTreeTmpl<DataT>::write(TEDfile* const tedfile) const {
-   for (QuadsIter i = 0; i < _props._numObjects; i++)
-   {
-      _data[i]->write(tedfile);
-   }
-   for (byte i = 0; i < _props.numSubQuads(); i++)
-      _subQuads[i]->write(tedfile);
-}
-
-/*! Write the contents of the QuadTree in a PS file.\n
-Nothing special here - effectively the same as gdsWrite and write method*/
-template <typename DataT>
-void laydata::QTreeTmpl<DataT>::psWrite(PSFile& gdsf, const layprop::DrawProperties& drawprop) const
-{
-   for (QuadsIter i = 0; i < _props._numObjects; i++)
-   {
-      _data[i]->psWrite(gdsf, drawprop);
-   }
-   for (byte i = 0; i < _props.numSubQuads(); i++)
-      _subQuads[i]->psWrite(gdsf, drawprop);
-}
 
 /*! Draw the contents of the container on the screen using the virtual
 openGlDraw methods of the tdtddata objects. This happens only if
