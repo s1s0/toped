@@ -97,13 +97,6 @@ namespace laydata {
       short                clipType(tenderer::TopRend&) const;
       void                 motionDraw(const layprop::DrawProperties&, CtmQueue&) const;
       void                 add(DataT* shape);
-      DataT*               addBox(const TP& p1, const TP& p2);
-      DataT*               addPoly(PointVector& pl);
-      DataT*               addPoly(int4b* pl, unsigned psize);
-      DataT*               addWire(PointVector& pl, WireWidth w);
-      DataT*               addText(std::string text, CTM trans);
-      void                 write(TEDfile* const) const;
-      void                 psWrite(PSFile&, const layprop::DrawProperties&) const;
       void                 selectInBox(DBbox&, TObjDataPairList*, bool, word /*selmask = laydata::_lmall*/);
       void                 selectFromList(TObjDataPairList*, TObjDataPairList*);
       void                 selectAll(TObjDataPairList*, word selmask = laydata::_lmall, bool mark = true);

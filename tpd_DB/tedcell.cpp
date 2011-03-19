@@ -732,14 +732,16 @@ void laydata::TdtCell::write(TEDfile* const tedfile, const CellMap& allcells, co
       if (REF_LAY == wl->first)
       {
          tedfile->putByte(tedf_REFS);
-         wl->second->write(tedfile);
+         for (QuadTree::Iterator DI = wl->second->begin(); DI != wl->second->end(); DI++)
+            DI->write(tedfile);
          tedfile->putByte(tedf_REFSEND);
       }
       else if ( LAST_EDITABLE_LAYNUM >= wl->first )
       {
          tedfile->putByte(tedf_LAYER);
          tedfile->putWord(wl->first);
-         wl->second->write(tedfile);
+         for (QuadTree::Iterator DI = wl->second->begin(); DI != wl->second->end(); DI++)
+            DI->write(tedfile);
          tedfile->putByte(tedf_LAYEREND);
       }
    }
@@ -820,7 +822,8 @@ void laydata::TdtCell::psWrite(PSFile& psf, const layprop::DrawProperties& drawp
       {
          if (REF_LAY != curlayno)
             psf.propSet(drawprop.getColorName(curlayno), drawprop.getFillName(curlayno));
-         wl->second->psWrite(psf, drawprop);
+         for (QuadTree::Iterator DI = wl->second->begin(); DI != wl->second->end(); DI++)
+            DI->psWrite(psf, drawprop);
       }
    }
    psf.cellFooter();

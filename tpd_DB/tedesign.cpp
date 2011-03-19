@@ -1001,7 +1001,8 @@ laydata::TdtData* laydata::TdtDesign::addBox(unsigned la, TP* p1, TP* p2 )
    modified = true;
    TP np1((*p1) * _target.rARTM());
    TP np2((*p2) * _target.rARTM());
-   laydata::TdtData* newshape = actlay->addBox(np1,np2);
+   laydata::TdtBox *newshape = DEBUG_NEW TdtBox(np1,np2);
+   actlay->add(newshape);
    if (_target.edit()->overlapChanged(old_overlap, this))
       do {} while(validateCells());
    return newshape;
@@ -1045,13 +1046,16 @@ laydata::TdtData* laydata::TdtDesign::addPoly(unsigned la, PointVector* pl)
    {
       TP p1(vpl[0] *_target.rARTM());
       TP p2(vpl[2] *_target.rARTM());
-      newshape = actlay->addBox(p1,p2);
+      newshape = DEBUG_NEW TdtBox(p1,p2);
+      actlay->add(newshape);
    }
    else
    {
       for(PointVector::iterator PL = vpl.begin(); PL != vpl.end(); PL++)
          (*PL) *= _target.rARTM();
-      newshape = actlay->addPoly(vpl);
+      newshape = DEBUG_NEW TdtPoly(vpl);
+      actlay->add(newshape);
+
    }
    if (_target.edit()->overlapChanged(old_overlap, this))
       do {} while(validateCells());
@@ -1102,7 +1106,8 @@ laydata::TdtData* laydata::TdtDesign::addWire(unsigned la, PointVector* pl, Wire
    PointVector vpl = check.getValidated();
    for(PointVector::iterator PL = vpl.begin(); PL != vpl.end(); PL++)
       (*PL) *= _target.rARTM();
-   laydata::TdtData* newshape = actlay->addWire(vpl,w);
+   laydata::TdtWire *newshape = DEBUG_NEW TdtWire(vpl,w);
+   actlay->add(newshape);
    if (_target.edit()->overlapChanged(old_overlap, this))
       do {} while(validateCells());
    return newshape;
@@ -1133,7 +1138,9 @@ laydata::TdtData* laydata::TdtDesign::addText(unsigned la, std::string& text, CT
    QuadTree *actlay = _target.edit()->secureLayer(la);
    modified = true;
    ori *= _target.rARTM();
-   laydata::TdtData* newshape = actlay->addText(text,ori);
+   laydata::TdtText *newshape = DEBUG_NEW TdtText(text,ori);
+   actlay->add(newshape);
+
    if (_target.edit()->overlapChanged(old_overlap, this))
       do {} while(validateCells());
    return newshape;
