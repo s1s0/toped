@@ -91,10 +91,6 @@ namespace laydata {
       virtual  PointVector shape2poly() const = 0;
       //!
       virtual  PointVector dumpPoints() const = 0;
-   //! Returns the next TdtData object ot NULL if it doesn't exists
-//      TdtData*             next() const         {return _next;}
-   //! Changes the pointer to the next tdtddata object
-//      void                 nextIs(TdtData* nxt) {_next = nxt;};
    //! Set the _selected flag in case the object is entirely overlapped by select_in box
       void                 selectInBox(DBbox&, DataList*, bool);
       void                 selectThis(DataList*);
@@ -119,8 +115,6 @@ namespace laydata {
       virtual void         selectPoints(DBbox&, SGBitSet&) = 0;
       virtual void         unselectPoints(DBbox&, SGBitSet&) = 0;
       SH_STATUS            _status;
-   //! A pointer to the next TdtData object
-//      TdtData*             _next;
    };
 
 //==============================================================================

@@ -36,6 +36,15 @@ namespace laydata {
    template <typename DataT>   class QTreeTmpl;
    typedef QTreeTmpl<TdtData>  QuadTree;
 
+   class QtPosition {
+   public:
+         QtPosition(const QuadTree* cQuad, byte cSubQuad) : _cQuad(cQuad), _cSubQuad(cSubQuad) {}
+      const QuadTree*     _cQuad;
+      const byte          _cSubQuad;
+   };
+
+   typedef std::stack<QtPosition> QPosStack;
+
 #ifdef WIN32
    #pragma pack() 
 	struct  QuadProps

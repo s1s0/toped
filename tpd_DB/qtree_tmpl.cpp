@@ -32,6 +32,123 @@
 #include "viewprop.h"
 #include "tenderer.h"
 #include "outbox.h"
+#include "tedat_ext.h"
+
+
+template <typename DataT>
+laydata::QTreeTmpl<DataT>::Iterator::Iterator() :
+   _cQuad     ( NULL                 ),
+   _cData     ( 0                    ),
+   _qPosStack ( NULL                 ),
+   _copy      ( false                )
+{
+}
+
+template <typename DataT>
+laydata::QTreeTmpl<DataT>::Iterator::Iterator(const QTreeTmpl<DataT>& cQuad) :
+   _cQuad     (&cQuad                ),
+   _cData     ( 0                    ),
+   _qPosStack ( DEBUG_NEW QPosStack()),
+   _copy      ( false                )
+{
+   secureNonEmptyDown();
+}
+
+template <typename DataT>
+laydata::QTreeTmpl<DataT>::Iterator::Iterator(const Iterator& iter):
+   _cQuad     ( iter._cQuad          ),
+   _cData     ( iter._cData          ),
+   _qPosStack ( iter._qPosStack      ),
+   _copy      ( true                 )
+{}
+
+template <typename DataT>
+const typename laydata::QTreeTmpl<DataT>::Iterator& laydata::QTreeTmpl<DataT>::Iterator::operator++()
+{ //Prefix
+   if (++_cData < _cQuad->_props._numObjects)
+      return *this;
+   else if (0 < _cQuad->_props.numSubQuads())
+   {// push down the tree
+      _qPosStack->push(QtPosition(_cQuad,0));
+      _cQuad = _cQuad->_subQuads[0];
+      secureNonEmptyDown();
+      return *this;
+   }
+   else while (0 < _qPosStack->size())
+   {
+      //pop a quad
+      QtPosition prevQuad = _qPosStack->top(); _qPosStack->pop();
+      byte cSubQuad = prevQuad._cSubQuad;
+      // Note! - if we're traversing the subquads - it means that we've already
+      // traversed the eventual data in the popped quad. So go and find the next
+      // quad sideways
+      if (++cSubQuad < prevQuad._cQuad->_props.numSubQuads())
+      {
+         // Ok, valid found, push its parent in the stack
+         _qPosStack->push(QtPosition(prevQuad._cQuad,cSubQuad));
+         _cQuad = prevQuad._cQuad->_subQuads[cSubQuad];
+         secureNonEmptyDown();
+         return *this;
+      }
+   }
+   // end of the container
+   _cQuad = NULL;
+   return *this;
+}
+
+template <typename DataT>
+const typename laydata::QTreeTmpl<DataT>::Iterator laydata::QTreeTmpl<DataT>::Iterator::operator++(int /*unused*/)
+{ //Postfix
+   Iterator previous(*this);
+   operator++();
+   return previous;
+}
+
+template <typename DataT>
+bool laydata::QTreeTmpl<DataT>::Iterator::operator==(const Iterator& iter)
+{
+   // Presumption here is that there is no point comparing the _qPosStack fields
+   // The parity of the _cQuad pointers is considered enough because they must
+   // be unique anyway
+   if ((NULL ==_cQuad) && (NULL == iter._cQuad)) return true;
+   else if (_cQuad == iter._cQuad)
+      return (_cData == iter._cData);
+   else return false;
+}
+
+template <typename DataT>
+bool laydata::QTreeTmpl<DataT>::Iterator::operator!=(const Iterator& iter)
+{
+   return !operator==(iter);
+}
+
+template <typename DataT>
+DataT* laydata::QTreeTmpl<DataT>::Iterator::operator->()
+{
+   return _cQuad->_data[_cData];
+}
+
+template <typename DataT>
+void laydata::QTreeTmpl<DataT>::Iterator::secureNonEmptyDown()
+{
+   while (0 == _cQuad->_props._numObjects)
+   {
+      if (0 < _cQuad->_props.numSubQuads())
+      {
+         _qPosStack->push(QtPosition(_cQuad,0));
+         _cQuad = _cQuad->_subQuads[0];
+      }
+      else assert(false); // i.e. the tree is not in traversable condition
+   }
+   _cData = 0;
+}
+
+template <typename DataT>
+laydata::QTreeTmpl<DataT>::Iterator::~Iterator()
+{
+   if ((!_copy) && (NULL != _qPosStack))
+      delete _qPosStack;
+}
 
 //-----------------------------------------------------------------------------
 // class QuadTree
@@ -51,7 +168,7 @@ laydata::QTreeTmpl<DataT>::QTreeTmpl(InputTdtFile* const tedfile, bool reflay) :
    _overlap(DEFAULT_OVL_BOX), _subQuads(NULL), _data(NULL), _props()
 {
    byte         recordtype;
-   ShapeList    store;
+   TObjList    store;
    DataT*     newData;
    if (reflay)
    {
@@ -104,6 +221,18 @@ laydata::QTreeTmpl<DataT>::QTreeTmpl(InputTdtFile* const tedfile, bool reflay) :
       }
    }
    resort(store);
+}
+
+template <typename DataT>
+const typename laydata::QTreeTmpl<DataT>::Iterator laydata::QTreeTmpl<DataT>::begin()
+{
+   return Iterator(*this);
+}
+
+template <typename DataT>
+const typename laydata::QTreeTmpl<DataT>::Iterator laydata::QTreeTmpl<DataT>::end()
+{
+   return Iterator();
 }
 
 /*! Add a single layout object shape into the QuadTree.
@@ -292,12 +421,12 @@ method is called in a try to put the data in the child QuadTree. At the end
 the method is called for every of the child structures.
 */
 template <typename DataT>
-void laydata::QTreeTmpl<DataT>::sort(ShapeList& inlist)
+void laydata::QTreeTmpl<DataT>::sort(TObjList& inlist)
 {
    unsigned int entryListSize = inlist.size();
    // if the input list is empty - nothing to do!
    if (0 == entryListSize) return;
-   ShapeList::iterator DI = inlist.begin();
+   typename TObjList::iterator DI = inlist.begin();
    // if the list contains only one component - link it and run away
    if (1 == entryListSize)
    {
@@ -313,7 +442,7 @@ void laydata::QTreeTmpl<DataT>::sort(ShapeList& inlist)
                          DEFAULT_OVL_BOX, DEFAULT_OVL_BOX};
    for (byte i = 0; i < 4; i++) maxsubbox[i] = _overlap.getcorner((QuadIdentificators)i);
    // the sub-lists data will be sorted in
-   ShapeList sublist[4];
+   TObjList sublist[4];
    // which is the child where current shape fits
    char fitinsubbox;
    // initialize the iterator
@@ -418,7 +547,7 @@ bool laydata::QTreeTmpl<DataT>::deleteMarked(SH_STATUS stat, bool partselect)
       }
       cquad = (QuadIdentificators)(cquad + 1);
    }
-   ShapeList unmarkedObjects;
+   TObjList unmarkedObjects;
    bool inventoryChanged = false;
    for (QuadsIter i = 0; i < _props._numObjects; i++)
    {
@@ -456,7 +585,8 @@ bool laydata::QTreeTmpl<DataT>::deleteMarked(SH_STATUS stat, bool partselect)
          _props._numObjects = unmarkedObjects.size();
          _data = DEBUG_NEW DataT*[_props._numObjects];
          QuadsIter j = 0;
-         for (ShapeList::const_iterator DI = unmarkedObjects.begin(); DI != unmarkedObjects.end(); DI++)
+         for (typename TObjList::const_iterator DI = unmarkedObjects.begin();
+                                                  DI != unmarkedObjects.end(); DI++)
          {
             _data[j] = *DI;
             j++;
@@ -473,10 +603,10 @@ So this method is trying to minimize the calculations by executing cutPoly only
 on the shapes that overlap somehow with the cutting polygon */
 template <typename DataT>
 void laydata::QTreeTmpl<DataT>::cutPolySelected(PointVector& plst, DBbox& cut_overlap,
-                                                           ShapeList** decure) {
+                                                           TObjList** decure) {
    // check the entire holder for clipping...
    if (0ll == cut_overlap.cliparea(_overlap)) return;
-   // now start traversing the shapes in the current horlder one by one
+   // now start traversing the shapes in the current holder one by one
    for (QuadsIter i = 0; i < _props._numObjects; i++)
    {
       DataT* wdt = _data[i];
@@ -554,7 +684,7 @@ bool laydata::QTreeTmpl<DataT>::deleteThis(DataT* object)
       }
       cquad = (QuadIdentificators)(cquad + 1);
    }
-   ShapeList unmarkedObjects;
+   TObjList unmarkedObjects;
    bool inventoryChanged = false;
    for (QuadsIter i = 0; i < _props._numObjects; i++)
    {
@@ -590,7 +720,8 @@ bool laydata::QTreeTmpl<DataT>::deleteThis(DataT* object)
          _props._numObjects = unmarkedObjects.size();
          _data = DEBUG_NEW DataT*[_props._numObjects];
          QuadsIter j = 0;
-         for (ShapeList::const_iterator DI = unmarkedObjects.begin(); DI != unmarkedObjects.end(); DI++)
+         for (typename TObjList::const_iterator DI = unmarkedObjects.begin();
+                                                  DI != unmarkedObjects.end(); DI++)
          {
             _data[j] = *DI;
             j++;
@@ -629,11 +760,11 @@ bool laydata::QTreeTmpl<DataT>::fullValidate()
 {
    if (_props._invalid)
    {
-      ShapeList store;
+      TObjList store;
       tmpStore(store);
       DBbox oldovl = _overlap;
       _overlap = DEFAULT_OVL_BOX;
-      for (ShapeList::const_iterator DI = store.begin(); DI != store.end(); DI++)
+      for (typename TObjList::const_iterator DI = store.begin(); DI != store.end(); DI++)
          updateOverlap((*DI)->overlap());
       sort(store);
       _props._invalid = false;
@@ -643,7 +774,7 @@ bool laydata::QTreeTmpl<DataT>::fullValidate()
 }
 
 /*! Rebuilds the entire QuadTree object as well as all of its children using the
-sort() method. Beforehand all DataT is stored in a temporary DataList structure
+sort() method. Beforehand all DataT is stored in a temporary TObjDataPairList structure
 by calling tmpStore method\n It is important to note that this method is not
 re-evaluating the _overlap variable, but is using it as is
 */
@@ -651,14 +782,14 @@ template <typename DataT>
 void laydata::QTreeTmpl<DataT>::resort(DataT* newdata)
 {
    // first save the existing data in a temporary store
-   ShapeList store;
+   TObjList store;
    if (NULL != newdata) store.push_back(newdata);
    tmpStore(store);
    sort(store);
 }
 
 template <typename DataT>
-void laydata::QTreeTmpl<DataT>::resort(ShapeList& store)
+void laydata::QTreeTmpl<DataT>::resort(TObjList& store)
 {
    tmpStore(store);
    sort(store);
@@ -697,16 +828,16 @@ void laydata::QTreeTmpl<DataT>::write(TEDfile* const tedfile) const {
 
 /*! Exports the contents of the QuadTree in a file.\n
 Nothing special here - effectively the same as write method*/
-template <typename DataT>
-void laydata::QTreeTmpl<DataT>::dbExport(DbExportFile& exportF) const
-{
-   for (QuadsIter i = 0; i < _props._numObjects; i++)
-   {
-      _data[i]->dbExport(exportF);
-   }
-   for (byte i = 0; i < _props.numSubQuads(); i++)
-      _subQuads[i]->dbExport(exportF);
-}
+//template <typename DataT>
+//void laydata::QTreeTmpl<DataT>::dbExport(DbExportFile& exportF) const
+//{
+//   for (QuadsIter i = 0; i < _props._numObjects; i++)
+//   {
+//      _data[i]->dbExport(exportF);
+//   }
+//   for (byte i = 0; i < _props.numSubQuads(); i++)
+//      _subQuads[i]->dbExport(exportF);
+//}
 
 /*! Write the contents of the QuadTree in a PS file.\n
 Nothing special here - effectively the same as gdsWrite and write method*/
@@ -728,7 +859,7 @@ obtained from LayoutCanvas. Draws also the select marks in case shape is
 selected. \n This is the cherry of the QuadTree algorithm cake*/
 template <typename DataT>
 void laydata::QTreeTmpl<DataT>::openGlDraw(layprop::DrawProperties& drawprop,
-                                                   const DataList* slst, bool fill) const
+                                                   const TObjDataPairList* slst, bool fill) const
 {
    if (empty()) return;
    // check the entire holder for clipping...
@@ -760,7 +891,7 @@ void laydata::QTreeTmpl<DataT>::openGlDraw(layprop::DrawProperties& drawprop,
                   wdt->openGlDrawSel(points, NULL);
                else if  (sh_partsel  == wdt->status())
                {
-                  DataList::const_iterator SI;
+                  typename TObjDataPairList::const_iterator SI;
                   for (SI = slst->begin(); SI != slst->end(); SI++)
                      if (SI->first == wdt) break;
                   assert(SI != slst->end());
@@ -808,7 +939,7 @@ short laydata::QTreeTmpl<DataT>::clipType(tenderer::TopRend& rend) const
 }
 
 template <typename DataT>
-void laydata::QTreeTmpl<DataT>::openGlRender(tenderer::TopRend& rend, const DataList* slst) const
+void laydata::QTreeTmpl<DataT>::openGlRender(tenderer::TopRend& rend, const TObjDataPairList* slst) const
 {
    // The drawing will be faster like this for the cells without selected shapes
    // that will be the wast majority of the cases. A bit bigger code though.
@@ -822,7 +953,7 @@ void laydata::QTreeTmpl<DataT>::openGlRender(tenderer::TopRend& rend, const Data
          {
             case sh_selected: wdt->drawSRequest(rend, NULL); break;
             case sh_partsel : {// partially selected - so find the pin list
-               DataList::const_iterator SI;
+               typename TObjDataPairList::const_iterator SI;
                for (SI = slst->begin(); SI != slst->end(); SI++)
                   if (SI->first == wdt) break;
                assert(SI != slst->end());
@@ -870,11 +1001,11 @@ void laydata::QTreeTmpl<DataT>::motionDraw(const layprop::DrawProperties& drawpr
       _subQuads[i]->motionDraw(drawprop, transtack);
 }
 
-/*! Used to copy DataT objects from QuadTree to a DataList. This is initiated
+/*! Used to copy DataT objects from QuadTree to a TObjDataPairList. This is initiated
 by resort() or fullValidate() when current QuadTree needs to be rebuild
 */
 template <typename DataT>
-void laydata::QTreeTmpl<DataT>::tmpStore(ShapeList &store)
+void laydata::QTreeTmpl<DataT>::tmpStore(TObjList &store)
 {
    if (NULL != _data)
    {
@@ -954,7 +1085,7 @@ void laydata::QTreeTmpl<DataT>::removeQuad(QuadIdentificators quad)
 select methods of the parent structures in the data base - TdtLayer and TdtCell
 */
 template <typename DataT>
-void laydata::QTreeTmpl<DataT>::selectInBox(DBbox& select_in, DataList* selist,
+void laydata::QTreeTmpl<DataT>::selectInBox(DBbox& select_in, TObjDataPairList* selist,
                                                   bool pselect, word selmask)
 {
    // check the entire holder for clipping...
@@ -976,7 +1107,7 @@ void laydata::QTreeTmpl<DataT>::selectInBox(DBbox& select_in, DataList* selist,
 unselect methods of the parent structures in the data base - TdtLayer and TdtCell
 */
 template <typename DataT>
-void laydata::QTreeTmpl<DataT>::unselectInBox(DBbox& unselect_in, DataList* unselist,
+void laydata::QTreeTmpl<DataT>::unselectInBox(DBbox& unselect_in, TObjDataPairList* unselist,
                                                                  bool pselect)
 {
    // check the entire holder for clipping...
@@ -985,7 +1116,7 @@ void laydata::QTreeTmpl<DataT>::unselectInBox(DBbox& unselect_in, DataList* unse
    {
       DataT* wdt = _data[i];
       // now start unselecting from the list
-      DataList::iterator DI = unselist->begin();
+      typename TObjDataPairList::iterator DI = unselist->begin();
       while ( DI != unselist->end() )
          if ((wdt == DI->first) &&
              (DI->first->unselect(unselect_in, *DI, pselect)))
@@ -1002,9 +1133,9 @@ TdtLayer and TdtCell. This select operation is the essence of the
 Implementation of the long discussed (with myself) select lists in TELL
 */
 template <typename DataT>
-void laydata::QTreeTmpl<DataT>::selectFromList(DataList* src, DataList* dst)
+void laydata::QTreeTmpl<DataT>::selectFromList(TObjDataPairList* src, TObjDataPairList* dst)
 {
-   DataList::iterator DI;
+   typename TObjDataPairList::iterator DI;
    // loop the objects in the qTree first. It will be faster when there
    // are no objects in the current QuadTree
    for (QuadsIter i = 0; i < _props._numObjects; i++)
@@ -1020,11 +1151,11 @@ void laydata::QTreeTmpl<DataT>::selectFromList(DataList* src, DataList* dst)
             // select the object
             if (DI->second.size() == wdt->numPoints()) {
                wdt->setStatus(sh_partsel);
-               dst->push_back(SelectDataPair(wdt,DI->second));
+               dst->push_back(TObjDataPair(wdt,DI->second));
             }
             else {
                wdt->setStatus(sh_selected);
-               dst->push_back(SelectDataPair(wdt,SGBitSet()));
+               dst->push_back(TObjDataPair(wdt,SGBitSet()));
             }
             // remove it from the select list - it will speed up the following
             // operations
@@ -1042,7 +1173,7 @@ void laydata::QTreeTmpl<DataT>::selectFromList(DataList* src, DataList* dst)
 /*! Mark all shapes in the current QuadTree and its children as sh_selected and
 add a reference in the selist*/
 template <typename DataT>
-void laydata::QTreeTmpl<DataT>::selectAll(DataList* selist, word selmask, bool mark)
+void laydata::QTreeTmpl<DataT>::selectAll(TObjDataPairList* selist, word selmask, bool mark)
 {
    if (laydata::_lmnone == selmask) return;
    for (QuadsIter i = 0; i < _props._numObjects; i++)
@@ -1050,7 +1181,7 @@ void laydata::QTreeTmpl<DataT>::selectAll(DataList* selist, word selmask, bool m
       DataT* wdt = _data[i];
       if (selmask & wdt->lType())
       {
-         selist->push_back(SelectDataPair(wdt,SGBitSet()));
+         selist->push_back(TObjDataPair(wdt,SGBitSet()));
          if (mark) wdt->setStatus(sh_selected);
       }
    }
@@ -1189,4 +1320,5 @@ laydata::QTreeTmpl<DataT>::~QTreeTmpl()
 //==============================================================================
 // implicit instantiation of the template with a certain type parameter
 template class laydata::QTreeTmpl<laydata::TdtData>;
+//template class laydata::QTreeTmpl<laydata::TdtErrData>;
 
