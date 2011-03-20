@@ -115,8 +115,6 @@ namespace laydata {
       void                 freeMemory();
       /*! Return the overlapping box*/
       DBbox                overlap() const   {return _overlap;}
-      /*! Return the overlapping box*/
-      void                 vlOverlap(const layprop::DrawProperties&, DBbox&, bool) const;
       /*! Mark the tree as invalid*/
       void                 invalidate();
       /*! Return the status of _invalid flag*/

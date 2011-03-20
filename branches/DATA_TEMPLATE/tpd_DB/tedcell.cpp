@@ -878,8 +878,20 @@ DBbox laydata::TdtCell::getVisibleOverlap(const layprop::DrawProperties& prop)
 {
    DBbox vlOverlap(DEFAULT_OVL_BOX);
    for (LayerList::const_iterator LCI = _layers.begin(); LCI != _layers.end(); LCI++)
-      if (!prop.layerHidden(LCI->first))
-         LCI->second->vlOverlap(prop, vlOverlap, (REF_LAY == LCI->first));
+   {
+      unsigned  layno  = LCI->first;
+      QuadTree* cqTree = LCI->second;
+      if (!prop.layerHidden(layno))
+      {
+         if (REF_LAY == layno)
+         {
+            for(QuadTree::Iterator CS = cqTree->begin(); CS != cqTree->end(); CS++)
+               CS->vlOverlap(prop, vlOverlap);
+         }
+         else
+            vlOverlap.overlap(cqTree->overlap());
+      }
+   }
    return vlOverlap;
 }
 
