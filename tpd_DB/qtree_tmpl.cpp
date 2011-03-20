@@ -497,7 +497,7 @@ void laydata::QTreeTmpl<DataT>::cutPolySelected(PointVector& plst, DBbox& cut_ov
    for (QuadsIter i = 0; i < _props._numObjects; i++)
    {
       DataT* wdt = _data[i];
-      // for fully selected shpes if they overlap with the cutting polygon
+      // for fully selected shapes if they overlap with the cutting polygon
       if ((sh_selected == wdt->status()) &&
                                     (0ll != cut_overlap.cliparea(wdt->overlap())))
          // go and clip it
@@ -1064,22 +1064,6 @@ bool laydata::QTreeTmpl<DataT>::getObjectOver(const TP pnt, DataT*& prev)
    for (byte i = 0; i < _props.numSubQuads(); i++)
       if (_subQuads[i]->getObjectOver(pnt,prev)) return true;
    return false;
-}
-
-template <typename DataT>
-void laydata::QTreeTmpl<DataT>::vlOverlap(const layprop::DrawProperties& prop, DBbox& vlBox, bool refs) const
-{
-   if (refs)
-   {
-      for (QuadsIter i = 0; i < _props._numObjects; i++)
-      {
-         _data[i]->vlOverlap(prop, vlBox);
-      }
-      for (byte i = 0; i < _props.numSubQuads(); i++)
-         _subQuads[i]->vlOverlap(prop, vlBox, refs);
-   }
-   else
-      vlBox.overlap(_overlap);
 }
 
 template <typename DataT>
