@@ -200,6 +200,8 @@ namespace laydata {
       virtual DBbox        getVisibleOverlap(const layprop::DrawProperties&);
       virtual void         renameChild(std::string, std::string);
    private:
+      void                 readTdtLay(InputTdtFile* const);
+      void                 readTdtRef(InputTdtFile* const);
       bool                 getShapeOver(TP, const DWordSet&);
       void                 getCellOverlap();
       void                 storeInAttic(AtticList&);

@@ -160,69 +160,6 @@ laydata::QTreeTmpl<DataT>::QTreeTmpl() : _overlap(DEFAULT_OVL_BOX), _subQuads(NU
 {
 }
 
-/*! Used for reading the QuadTree from the TDT file. A new shape is added to
-the tree using the put() method. Entire tree is recreated when there is no more
-data to read using resort() method.*/
-template <typename DataT>
-laydata::QTreeTmpl<DataT>::QTreeTmpl(InputTdtFile* const tedfile, bool reflay) :
-   _overlap(DEFAULT_OVL_BOX), _subQuads(NULL), _data(NULL), _props()
-{
-   byte         recordtype;
-   TObjList    store;
-   DataT*     newData;
-   if (reflay)
-   {
-      if       ((0 == tedfile->revision()) && (7 > tedfile->subRevision()))
-      {
-         while (tedf_LAYEREND != (recordtype = tedfile->getByte()))
-         {
-            switch (recordtype)
-            {
-               case  tedf_CELLREF: newData = DEBUG_NEW TdtCellRef(tedfile);break;
-               case tedf_CELLAREF: newData = DEBUG_NEW TdtCellAref(tedfile);break;
-               //--------------------------------------------------
-               default: throw EXPTNreadTDT("Unexpected record type");
-            }
-            updateOverlap(newData->overlap());
-            store.push_back(newData);
-         }
-      }
-      else
-      {
-         while (tedf_REFSEND != (recordtype = tedfile->getByte()))
-         {
-            switch (recordtype)
-            {
-               case  tedf_CELLREF: newData = DEBUG_NEW TdtCellRef(tedfile) ;break;
-               case tedf_CELLAREF: newData = DEBUG_NEW TdtCellAref(tedfile);break;
-               //--------------------------------------------------
-               default: throw EXPTNreadTDT("Unexpected record type");
-            }
-            updateOverlap(newData->overlap());
-            store.push_back(newData);
-         }
-      }
-   }
-   else
-   {
-      while (tedf_LAYEREND != (recordtype = tedfile->getByte()))
-      {
-         switch (recordtype)
-         {
-            case     tedf_BOX : newData = DEBUG_NEW TdtBox(tedfile) ;break;
-            case     tedf_POLY: newData = DEBUG_NEW TdtPoly(tedfile);break;
-            case     tedf_WIRE: newData = DEBUG_NEW TdtWire(tedfile);break;
-            case     tedf_TEXT: newData = DEBUG_NEW TdtText(tedfile);break;
-            //--------------------------------------------------
-            default: throw EXPTNreadTDT("Unexpected record type");
-         }
-         updateOverlap(newData->overlap());
-         store.push_back(newData);
-      }
-   }
-   resort(store);
-}
-
 template <typename DataT>
 const typename laydata::QTreeTmpl<DataT>::Iterator laydata::QTreeTmpl<DataT>::begin()
 {

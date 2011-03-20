@@ -318,58 +318,61 @@ laydata::TdtCell::TdtCell(InputTdtFile* const tedfile, std::string name, int lib
          TdtDefaultCell(name, lib, true), _cellOverlap(DEFAULT_OVL_BOX)
 {
    byte recordtype;
-   word  layno;
-   // now get the layers
-   if       ((0 == tedfile->revision()) && (6 == tedfile->subRevision()))
+   while (tedf_CELLEND != (recordtype = tedfile->getByte()))
    {
-      // old version of the TDT file
-      // TODO! shall be removed in the incoming release
-      while (tedf_CELLEND != (recordtype = tedfile->getByte()))
+      switch (recordtype)
       {
-         switch (recordtype)
-         {
-            case    tedf_LAYER:
-               layno = tedfile->getWord();
-               if (0 != layno) _layers[layno]   = DEBUG_NEW QuadTree(tedfile, false);
-               else            _layers[REF_LAY] = DEBUG_NEW QuadTree(tedfile, true);
-               if (0 == layno) tedfile->getCellChildNames(_children);
-               break;
-            default: throw EXPTNreadTDT("LAYER record type expected");
-         }
+         case    tedf_LAYER:
+            readTdtLay(tedfile);
+            break;
+         case    tedf_REFS:
+            readTdtRef(tedfile);
+            tedfile->getCellChildNames(_children);
+            break;
+         default: throw EXPTNreadTDT("LAYER record type expected");
       }
    }
-   else
+   fixUnsorted();
+}
+
+
+void laydata::TdtCell::readTdtLay(InputTdtFile* const tedfile)
+{
+   byte      recordtype;
+   TdtData*  newData;
+   unsigned  layno    = tedfile->getWord();
+   QTreeTmp* tmpLayer = secureUnsortedLayer(layno);
+   while (tedf_LAYEREND != (recordtype = tedfile->getByte()))
    {
-      while (tedf_CELLEND != (recordtype = tedfile->getByte()))
+      switch (recordtype)
       {
-         QuadTree* clay = NULL;
-         switch (recordtype)
-         {
-            case    tedf_LAYER:
-               layno = tedfile->getWord();
-               clay = DEBUG_NEW QuadTree(tedfile, false);
-               if (!clay->empty())
-                  _layers[layno] = clay;
-               else
-                  delete clay;
-               clay = NULL;
-               break;
-            case    tedf_REFS:
-               clay = DEBUG_NEW QuadTree(tedfile, true);
-               if (!clay->empty())
-               {
-                  _layers[REF_LAY] = clay;
-                  tedfile->getCellChildNames(_children);
-               }
-               else
-                  delete clay;
-               clay = NULL;
-               break;
-            default: throw EXPTNreadTDT("LAYER record type expected");
-         }
+         case     tedf_BOX : newData = DEBUG_NEW TdtBox(tedfile) ;break;
+         case     tedf_POLY: newData = DEBUG_NEW TdtPoly(tedfile);break;
+         case     tedf_WIRE: newData = DEBUG_NEW TdtWire(tedfile);break;
+         case     tedf_TEXT: newData = DEBUG_NEW TdtText(tedfile);break;
+         //--------------------------------------------------
+         default: throw EXPTNreadTDT("Unexpected record type");
       }
+      tmpLayer->put(newData);
    }
-   getCellOverlap();
+}
+
+void laydata::TdtCell::readTdtRef(InputTdtFile* const tedfile)
+{
+   byte      recordtype;
+   TdtData*  newData;
+   QTreeTmp* tmpLayer = secureUnsortedLayer(REF_LAY);
+   while (tedf_REFSEND != (recordtype = tedfile->getByte()))
+   {
+      switch (recordtype)
+      {
+         case  tedf_CELLREF: newData = DEBUG_NEW TdtCellRef(tedfile) ;break;
+         case tedf_CELLAREF: newData = DEBUG_NEW TdtCellAref(tedfile);break;
+         //--------------------------------------------------
+         default: throw EXPTNreadTDT("Unexpected record type");
+      }
+      tmpLayer->put(newData);
+   }
 }
 
 laydata::QuadTree* laydata::TdtCell::secureLayer(unsigned layno)

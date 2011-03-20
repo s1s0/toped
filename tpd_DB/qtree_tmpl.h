@@ -87,7 +87,6 @@ namespace laydata {
       };
 
                            QTreeTmpl();
-                           QTreeTmpl(InputTdtFile* const, bool);
                           ~QTreeTmpl();
       const Iterator       begin();
       const Iterator       end();

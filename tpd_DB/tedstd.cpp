@@ -349,6 +349,15 @@ laydata::InputTdtFile::InputTdtFile( wxString fileName, laydata::TdtLibDir* tedl
       closeStream();
       setStatus(false);
    }
+   bool versionOk = (0 ==_revision) &&
+                    (6 < _subrevision) && (10 > _subrevision);
+   if (!versionOk)
+   {
+      std::ostringstream ost;
+      ost << "TDT format revision not supported: 0.7 - 0.9 expected";
+      tell_log(console::MT_ERROR,ost.str());
+      setStatus(versionOk);
+   }
 }
 
 void laydata::InputTdtFile::read(int libRef)
