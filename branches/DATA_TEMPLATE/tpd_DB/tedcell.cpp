@@ -1566,7 +1566,7 @@ void laydata::TdtCell::selectAll(const DWordSet& unselable, word layselmask)
       if (unselable.end() == unselable.find(lay->first))
       {
          DataList* ssl = DEBUG_NEW DataList();
-/***/    lay->second->selectAll(ssl, layselmask);
+/***/    selectAllWrapper(lay->second, ssl, layselmask);
          if (ssl->empty())
          {
             delete ssl;
@@ -1586,7 +1586,7 @@ void laydata::TdtCell::fullSelect()
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
    {
       DataList* ssl = DEBUG_NEW DataList();
-/***/ lay->second->selectAll(ssl);
+/***/ selectAllWrapper(lay->second,ssl);
       assert(!ssl->empty());
       _shapesel[lay->first] = ssl;
    }
@@ -2016,7 +2016,7 @@ NameSet* laydata::TdtCell::rehashChildren()
    {  // if it is not empty...
       // get all cell refs/arefs in a list -
       DataList *refsList = DEBUG_NEW DataList();
-      refsTree->selectAll(refsList, laydata::_lmref, false);
+      selectAllWrapper(refsTree, refsList, laydata::_lmref, false);
       // for every cell ref in the list
       for (DataList::const_iterator CC = refsList->begin();
                                      CC != refsList->end(); CC++)
@@ -2084,7 +2084,7 @@ bool laydata::TdtCell::relink(laydata::TdtLibDir* libdir)
    QuadTree* refsTree = _layers[REF_LAY];
    DBbox old_overlap(_cellOverlap);
    DataList *refsList = DEBUG_NEW DataList();
-   refsTree->selectAll(refsList, laydata::_lmref, false);
+   selectAllWrapper(refsTree, refsList, laydata::_lmref, false);
    // relink every single cell ref in the list
    DataList::iterator CC = refsList->begin();
    while (CC != refsList->end())
@@ -2114,7 +2114,7 @@ void laydata::TdtCell::relinkThis(std::string cname, laydata::CellDefin newcelld
    // get all cell references
    DataList *refsList = DEBUG_NEW DataList();
    QuadTree* refsTree = _layers[REF_LAY];
-   refsTree->selectAll(refsList, laydata::_lmref, false);
+   selectAllWrapper(refsTree, refsList, laydata::_lmref, false);
    //relink only the references to cname
    for (DataList::iterator CC = refsList->begin(); CC != refsList->end(); CC++)
    {
@@ -2212,6 +2212,19 @@ void laydata::TdtCell::collectUsedLays(const TdtLibDir* LTDB, bool recursive, Wo
    for(LayerList::const_iterator CL = _layers.begin(); CL != _layers.end(); CL++)
       if (LAST_EDITABLE_LAYNUM > CL->first)
          laylist.push_back(CL->first);
+}
+
+void laydata::TdtCell::selectAllWrapper(QuadTree* qtree, DataList* selist, word selmask, bool mark)
+{
+   if (laydata::_lmnone == selmask) return;
+   for (QuadTree::Iterator CI = qtree->begin(); CI != qtree->end(); CI++)
+   {
+      if (selmask & CI->lType())
+      {
+         selist->push_back(SelectDataPair(*CI,SGBitSet()));
+         if (mark) CI->setStatus(sh_selected);
+      }
+   }
 }
 
 laydata::TdtCell::~TdtCell()

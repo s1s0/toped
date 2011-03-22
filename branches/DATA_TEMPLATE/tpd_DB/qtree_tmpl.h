@@ -114,7 +114,6 @@ namespace laydata {
       void                 motionDraw(const layprop::DrawProperties&, CtmQueue&) const;
       void                 add(DataT* shape);
       void                 selectFromList(TObjDataPairList*, TObjDataPairList*);
-      void                 selectAll(TObjDataPairList*, word selmask = laydata::_lmall, bool mark = true);
       bool                 deleteMarked(SH_STATUS stat=sh_selected, bool partselect=false);
       bool                 deleteThis(DataT*);
       void                 cutPolySelected(PointVector&, DBbox&, TObjList**);

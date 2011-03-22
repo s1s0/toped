@@ -1047,26 +1047,6 @@ void laydata::QTreeTmpl<DataT>::selectFromList(TObjDataPairList* src, TObjDataPa
       _subQuads[i]->selectFromList(src, dst);
 }
 
-/*! Mark all shapes in the current QuadTree and its children as sh_selected and
-add a reference in the selist*/
-template <typename DataT>
-void laydata::QTreeTmpl<DataT>::selectAll(TObjDataPairList* selist, word selmask, bool mark)
-{
-   if (laydata::_lmnone == selmask) return;
-   for (QuadsIter i = 0; i < _props._numObjects; i++)
-   {
-      DataT* wdt = _data[i];
-      if (selmask & wdt->lType())
-      {
-         selist->push_back(TObjDataPair(wdt,SGBitSet()));
-         if (mark) wdt->setStatus(sh_selected);
-      }
-   }
-   for (byte i = 0; i < _props.numSubQuads(); i++)
-      _subQuads[i]->selectAll(selist, selmask, mark);
-}
-
-
 /*! Check whether this is empty i.e. no DataT objects in the container */
 template <typename DataT>
 bool laydata::QTreeTmpl<DataT>::empty() const
