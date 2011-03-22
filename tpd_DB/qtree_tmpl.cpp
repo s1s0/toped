@@ -35,6 +35,9 @@
 #include "tedat_ext.h"
 
 
+//-----------------------------------------------------------------------------
+// class QTreeTmpl::Iterator
+//-----------------------------------------------------------------------------
 template <typename DataT>
 laydata::QTreeTmpl<DataT>::Iterator::Iterator() :
    _cQuad     ( NULL                 ),
@@ -67,29 +70,18 @@ const typename laydata::QTreeTmpl<DataT>::Iterator& laydata::QTreeTmpl<DataT>::I
 { //Prefix
    if (++_cData < _cQuad->_props._numObjects)
       return *this;
-   else if (0 < _cQuad->_props.numSubQuads())
-   {// push down the tree
-      _qPosStack->push(QtPosition<DataT>(_cQuad,0));
-      _cQuad = _cQuad->_subQuads[0];
-      secureNonEmptyDown();
+   if (nextSubQuad(0, _cQuad->_props.numSubQuads()))
       return *this;
-   }
-   else while (0 < _qPosStack->size())
+   while (0 < _qPosStack->size())
    {
       //pop a quad
       QtPosition<DataT> prevQuad = _qPosStack->top(); _qPosStack->pop();
-      byte cSubQuad = prevQuad._cSubQuad;
+      _cQuad = prevQuad._cQuad;
       // Note! - if we're traversing the subquads - it means that we've already
       // traversed the eventual data in the popped quad. So go and find the next
       // quad sideways
-      if (++cSubQuad < prevQuad._cQuad->_props.numSubQuads())
-      {
-         // Ok, valid found, push its parent in the stack
-         _qPosStack->push(QtPosition<DataT>(prevQuad._cQuad,cSubQuad));
-         _cQuad = prevQuad._cQuad->_subQuads[cSubQuad];
-         secureNonEmptyDown();
+      if (nextSubQuad(prevQuad._cSubQuad+1, _cQuad->_props.numSubQuads()))
          return *this;
-      }
    }
    // end of the container
    _cQuad = NULL;
@@ -129,7 +121,13 @@ DataT* laydata::QTreeTmpl<DataT>::Iterator::operator->()
 }
 
 template <typename DataT>
-void laydata::QTreeTmpl<DataT>::Iterator::secureNonEmptyDown()
+DataT* laydata::QTreeTmpl<DataT>::Iterator::operator*()
+{
+   return _cQuad->_data[_cData];
+}
+
+template <typename DataT>
+bool laydata::QTreeTmpl<DataT>::Iterator::secureNonEmptyDown()
 {
    while (0 == _cQuad->_props._numObjects)
    {
@@ -141,6 +139,25 @@ void laydata::QTreeTmpl<DataT>::Iterator::secureNonEmptyDown()
       else assert(false); // i.e. the tree is not in traversable condition
    }
    _cData = 0;
+   return true;
+}
+
+template <typename DataT>
+bool laydata::QTreeTmpl<DataT>::Iterator::nextSubQuad(byte quadBeg, byte quadEnd)
+{
+   for (byte i = quadBeg; i < quadEnd; i++)
+   {
+      _qPosStack->push(QtPosition<DataT>(_cQuad,i));
+      _cQuad = _cQuad->_subQuads[i];
+      if (secureNonEmptyDown())
+         return true;
+      else
+      {
+         QtPosition<DataT> pQuad = _qPosStack->top(); _qPosStack->pop();
+         _cQuad = pQuad._cQuad;
+      }
+   }
+   return false;
 }
 
 template <typename DataT>
@@ -148,6 +165,58 @@ laydata::QTreeTmpl<DataT>::Iterator::~Iterator()
 {
    if ((!_copy) && (NULL != _qPosStack))
       delete _qPosStack;
+}
+
+//-----------------------------------------------------------------------------
+// class QTreeTmpl::Iterator
+//-----------------------------------------------------------------------------
+template <typename DataT>
+laydata::QTreeTmpl<DataT>::ClipIterator::ClipIterator() :
+   Iterator   (                      ),
+   _clipBox   ( TP(MIN_INT4B, MIN_INT4B),
+                TP(MAX_INT4B, MAX_INT4B))
+{
+}
+
+template <typename DataT>
+laydata::QTreeTmpl<DataT>::ClipIterator::ClipIterator(const QTreeTmpl<DataT>& cQuad, const DBbox& clip) :
+   Iterator   ( cQuad                ),
+   _clipBox   ( clip                 )
+{
+   secureNonEmptyDown();
+}
+
+template <typename DataT>
+laydata::QTreeTmpl<DataT>::ClipIterator::ClipIterator(const ClipIterator& iter):
+   Iterator   ( iter                 ),
+   _clipBox   ( iter._clipBox        )
+{}
+
+template <typename DataT>
+const typename laydata::QTreeTmpl<DataT>::ClipIterator& laydata::QTreeTmpl<DataT>::ClipIterator::operator++()
+{ //Prefix
+   Iterator::operator++();
+   return(*this);
+}
+
+template <typename DataT>
+const typename laydata::QTreeTmpl<DataT>::ClipIterator laydata::QTreeTmpl<DataT>::ClipIterator::operator++(int /*unused*/)
+{ //Postfix
+   ClipIterator previous(*this);
+   Iterator::operator++();
+   return previous;
+}
+
+template <typename DataT>
+bool laydata::QTreeTmpl<DataT>::ClipIterator::secureNonEmptyDown()
+{
+   if (0ll == _clipBox.cliparea(Iterator::_cQuad->_overlap)) return false;
+   while (0 == Iterator::_cQuad->_props._numObjects)
+   {
+      return nextSubQuad(0,Iterator::_cQuad->_props.numSubQuads());
+   }
+   Iterator::_cData = 0;
+   return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -164,6 +233,12 @@ template <typename DataT>
 const typename laydata::QTreeTmpl<DataT>::Iterator laydata::QTreeTmpl<DataT>::begin()
 {
    return Iterator(*this);
+}
+
+template <typename DataT>
+const typename laydata::QTreeTmpl<DataT>::ClipIterator laydata::QTreeTmpl<DataT>::begin(const DBbox& clip)
+{
+   return ClipIterator(*this, clip);
 }
 
 template <typename DataT>
@@ -927,52 +1002,6 @@ void laydata::QTreeTmpl<DataT>::removeQuad(QuadIdentificators quad)
    }
    delete [] _subQuads;
    _subQuads = newSubQuads;
-}
-
-/*! Perform the data selection using select_in box. Called by the corresponding
-select methods of the parent structures in the data base - TdtLayer and TdtCell
-*/
-template <typename DataT>
-void laydata::QTreeTmpl<DataT>::selectInBox(DBbox& select_in, TObjDataPairList* selist,
-                                                  bool pselect, word selmask)
-{
-   // check the entire holder for clipping...
-   if ((laydata::_lmnone == selmask) || (0ll == select_in.cliparea(_overlap))) return;
-   // now start selecting one by one
-   for (QuadsIter i = 0; i < _props._numObjects; i++)
-   {
-      DataT* wdt = _data[i];
-      if (selmask & wdt->lType())
-      {
-         wdt->selectInBox(select_in, selist, pselect);
-      }
-   }
-   for (byte i = 0; i < _props.numSubQuads(); i++)
-      _subQuads[i]->selectInBox(select_in, selist, pselect, selmask);
-}
-
-/*! Unselects already selected data using unselect_in box. Called by the corresponding
-unselect methods of the parent structures in the data base - TdtLayer and TdtCell
-*/
-template <typename DataT>
-void laydata::QTreeTmpl<DataT>::unselectInBox(DBbox& unselect_in, TObjDataPairList* unselist,
-                                                                 bool pselect)
-{
-   // check the entire holder for clipping...
-   if (0ll == unselect_in.cliparea(_overlap)) return;
-   for (QuadsIter i = 0; i < _props._numObjects; i++)
-   {
-      DataT* wdt = _data[i];
-      // now start unselecting from the list
-      typename TObjDataPairList::iterator DI = unselist->begin();
-      while ( DI != unselist->end() )
-         if ((wdt == DI->first) &&
-             (DI->first->unselect(unselect_in, *DI, pselect)))
-               DI = unselist->erase(DI);
-         else DI++;
-   }
-   for (byte i = 0; i < _props.numSubQuads(); i++)
-      _subQuads[i]->unselectInBox(unselect_in, unselist, pselect);
 }
 
 /*! Perform the data selection using list of objects. Called by the

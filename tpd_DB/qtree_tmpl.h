@@ -69,26 +69,43 @@ namespace laydata {
       friend class Iterator;
       class Iterator {
          public:
-                            Iterator();
-                            Iterator(const QTreeTmpl<DataT>&);
-                            Iterator(const Iterator&);
-                           ~Iterator();
-            const Iterator& operator++();    //Prefix
-            const Iterator  operator++(int); //Postfix
-            bool            operator==(const Iterator&);
-            bool            operator!=(const Iterator&);
-            DataT*          operator->();
-         private:
-            void                    secureNonEmptyDown();
+                                    Iterator();
+                                    Iterator(const QTreeTmpl<DataT>&);
+                                    Iterator(const Iterator&);
+            virtual                ~Iterator();
+            const Iterator&         operator++();    //Prefix
+            const Iterator          operator++(int); //Postfix
+            bool                    operator==(const Iterator&);
+            bool                    operator!=(const Iterator&);
+            DataT*                  operator->();
+            DataT*                  operator*();
+         protected:
+            virtual bool            secureNonEmptyDown();
+            bool                    nextSubQuad(byte, byte);
             const QTreeTmpl<DataT>* _cQuad;
             QuadsIter               _cData;
             QPosStack*              _qPosStack;
             bool                    _copy;
       };
 
+      friend class ClipIterator;
+      class ClipIterator : public QTreeTmpl<DataT>::Iterator {
+         public:
+                                    ClipIterator();
+                                    ClipIterator(const QTreeTmpl<DataT>&, const DBbox&);
+                                    ClipIterator(const ClipIterator&);
+            virtual                ~ClipIterator() {}
+            const ClipIterator&     operator++();    //Prefix
+            const ClipIterator      operator++(int); //Postfix
+         protected:
+            virtual bool            secureNonEmptyDown();
+            DBbox                   _clipBox;
+      };
+
                            QTreeTmpl();
                           ~QTreeTmpl();
       const Iterator       begin();
+      const ClipIterator   begin(const DBbox&);
       const Iterator       end();
       void                 openGlDraw(layprop::DrawProperties&, const TObjDataPairList*, bool) const;
       void                 openGlRender(tenderer::TopRend&, const TObjDataPairList*) const;
@@ -96,10 +113,8 @@ namespace laydata {
       short                clipType(tenderer::TopRend&) const;
       void                 motionDraw(const layprop::DrawProperties&, CtmQueue&) const;
       void                 add(DataT* shape);
-      void                 selectInBox(DBbox&, TObjDataPairList*, bool, word /*selmask = laydata::_lmall*/);
       void                 selectFromList(TObjDataPairList*, TObjDataPairList*);
       void                 selectAll(TObjDataPairList*, word selmask = laydata::_lmall, bool mark = true);
-      void                 unselectInBox(DBbox&, TObjDataPairList*, bool);
       bool                 deleteMarked(SH_STATUS stat=sh_selected, bool partselect=false);
       bool                 deleteThis(DataT*);
       void                 cutPolySelected(PointVector&, DBbox&, TObjList**);
