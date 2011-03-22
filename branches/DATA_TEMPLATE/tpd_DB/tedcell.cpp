@@ -907,6 +907,7 @@ void laydata::TdtCell::renameChild(std::string oldName, std::string newName)
 
 void laydata::TdtCell::selectInBox(DBbox select_in, const DWordSet& unselable, word layselmask, bool pntsel)
 {
+   if (laydata::_lmnone == layselmask) return;
    // check that current cell is within
    if (0ll != select_in.cliparea(_cellOverlap))
    {
@@ -921,7 +922,9 @@ void laydata::TdtCell::selectInBox(DBbox select_in, const DWordSet& unselable, w
                ssl = _shapesel[lay->first];
             else
                ssl = DEBUG_NEW DataList();
-/***/       lay->second->selectInBox(select_in, ssl, pntsel, layselmask);
+            for (QuadTree::ClipIterator CI = lay->second->begin(select_in); CI != lay->second->end(); CI++)
+               if (layselmask & CI->lType())
+                  CI->selectInBox(select_in, ssl, pntsel);
             if (ssl->empty())  delete ssl;
             else               _shapesel[lay->first] = ssl;
          }
@@ -944,7 +947,22 @@ void laydata::TdtCell::unselectInBox(DBbox select_in, bool pntsel, const DWordSe
             if (_shapesel.end() != _shapesel.find(lay->first))
             {
                ssl = _shapesel[lay->first];
-/***/          lay->second->unselectInBox(select_in, ssl, pntsel);
+/*          lay->second->unselectInBox(select_in, ssl, pntsel);                */
+//               void laydata::QTreeTmpl<DataT>::unselectInBox(DBbox& unselect_in, TObjDataPairList* unselist,
+//                                                                                bool pselect)
+               // check the entire holder for clipping...
+               for (QuadTree::ClipIterator CI = lay->second->begin(select_in); CI != lay->second->end(); CI++)
+               {
+                  // now start unselecting from the list
+                  DataList::iterator DI = ssl->begin();
+                  while ( DI != ssl->end() )
+                     if ((*CI == DI->first) &&
+                         (DI->first->unselect(select_in, *DI, pntsel)))
+                           DI = ssl->erase(DI);
+                     else DI++;
+               }
+
+/*-----------------------------------------------------------------------------*/
                if (ssl->empty())
                {
                   delete ssl;
