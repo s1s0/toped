@@ -1396,7 +1396,17 @@ bool laydata::TdtCell::cutPolySelected(PointVector& plst, AtticList** dasao)
       byte i;
       for (i = 0; i < 3; decure[i++] = DEBUG_NEW ShapeList());
       // do the clipping
-      _layers[CL->first]->cutPolySelected(plst, cut_ovl, decure);
+      QuadTree* curlay = _layers[CL->first];
+//      _layers[CL->first]->cutPolySelected(plst, cut_ovl, decure);
+      for (QuadTree::ClipIterator CI = curlay->begin(cut_ovl); CI != curlay->end(); CI++)
+      {
+//         DataT* wdt = _data[i];
+         // for fully selected shapes if they overlap with the cutting polygon
+         if ((sh_selected == CI->status()) &&
+                                       (0ll != cut_ovl.cliparea(CI->overlap())))
+            // go and clip it
+            CI->polyCut(plst, decure);
+      }
       // add the shapelists to the collection, but only if they are not empty
       for (i = 0; i < 3; i++)
       {
@@ -1464,7 +1474,8 @@ bool laydata::TdtCell::mergeSelected(AtticList** dasao)
       while (CS != mrgcand->end())
       {
          TdtData* ref_shape = *CS;
-         if ((merged_shape = _layers[CL->first]->mergeSelected(ref_shape)))
+         if ( (merged_shape = mergeWrapper(_layers[CL->first], ref_shape)) )
+//         if ((merged_shape = _layers[CL->first]->mergeSelected(ref_shape)))
          {
             // if the mergeSelected produced non NULL result, it also
             // has changed the value of ref_shape. Now the most disgusting part -
@@ -2225,6 +2236,34 @@ void laydata::TdtCell::selectAllWrapper(QuadTree* qtree, DataList* selist, word 
          if (mark) CI->setStatus(sh_selected);
       }
    }
+}
+
+laydata::TdtData* laydata::TdtCell::mergeWrapper(QuadTree* qtree, TdtData*& ref_shape)
+{
+   TdtData* mergeres = NULL;
+   DBbox overlapRef = ref_shape->overlap();
+   // now start traversing the shapes in the current holder one by one
+   for (QuadTree::ClipIterator CI = qtree->begin(overlapRef); CI != qtree->end(); CI++)
+   {
+//      DataT* wdt = _data[i];
+      // for fully selected shapes if they overlap with the reference
+      // and this is not the same shape as the reference
+      if ((*CI != ref_shape) &&
+          ((sh_selected == CI->status()) || (sh_merged == CI->status())) &&
+          (0ll != overlapRef.cliparea(CI->overlap())))
+      {
+         // go and merge it
+         mergeres = polymerge(CI->shape2poly(), ref_shape->shape2poly());
+         if (NULL != mergeres)
+         {
+            // If the merge produce a result - return the result and
+            // substitute the ref_shape with its merged counterpart
+            ref_shape = *CI;
+            break;
+         }
+      }
+   }
+   return mergeres;
 }
 
 laydata::TdtCell::~TdtCell()

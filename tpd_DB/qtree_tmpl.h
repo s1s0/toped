@@ -116,8 +116,6 @@ namespace laydata {
       void                 selectFromList(TObjDataPairList*, TObjDataPairList*);
       bool                 deleteMarked(SH_STATUS stat=sh_selected, bool partselect=false);
       bool                 deleteThis(DataT*);
-      void                 cutPolySelected(PointVector&, DBbox&, TObjList**);
-      DataT*               mergeSelected(DataT*& shapeRef);
 /*      DataT*               getfirstover(const TP);
       DataT*               getnextover(const TP, laydata::DataT*, bool& check);*/
       bool                 getObjectOver(const TP pnt, DataT*& prev);

@@ -213,6 +213,7 @@ namespace laydata {
       TdtData*             checkNreplaceBox(SelectDataPair&, Validator*, unsigned, SelectList**);
       DataList*            secureDataList(SelectList&, unsigned);
       void                 selectAllWrapper(QuadTree*, DataList*, word selmask = laydata::_lmall, bool mark = true);
+      TdtData*             mergeWrapper(QuadTree*, TdtData*&);
       NameSet              _children;     //! for hierarchy list purposes
       SelectList           _shapesel;     //! selected shapes
       DBbox                _cellOverlap;  //! Overlap of the entire cell
