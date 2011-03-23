@@ -558,69 +558,6 @@ bool laydata::QTreeTmpl<DataT>::deleteMarked(SH_STATUS stat, bool partselect)
    return _2B_sorted |= _props._invalid;
 }
 
-/*!Cut with polygon is pretty expensive operation and despite the fact that it
-is executed over selected shapes only, there is no guarantee that the user will
-not do selectAll() and then polyCut(), and of course nobody can trust the user.
-So this method is trying to minimize the calculations by executing cutPoly only
-on the shapes that overlap somehow with the cutting polygon */
-template <typename DataT>
-void laydata::QTreeTmpl<DataT>::cutPolySelected(PointVector& plst, DBbox& cut_overlap,
-                                                           TObjList** decure) {
-   // check the entire holder for clipping...
-   if (0ll == cut_overlap.cliparea(_overlap)) return;
-   // now start traversing the shapes in the current holder one by one
-   for (QuadsIter i = 0; i < _props._numObjects; i++)
-   {
-      DataT* wdt = _data[i];
-      // for fully selected shapes if they overlap with the cutting polygon
-      if ((sh_selected == wdt->status()) &&
-                                    (0ll != cut_overlap.cliparea(wdt->overlap())))
-         // go and clip it
-         wdt->polyCut(plst, decure);
-   }
-   for (byte i = 0; i < _props.numSubQuads(); i++)
-      _subQuads[i]->cutPolySelected(plst, cut_overlap, decure);
-
-}
-
-/*!*/
-template <typename DataT>
-DataT* laydata::QTreeTmpl<DataT>::mergeSelected(DataT*& shapeRef)
-{
-   DataT* mergeres = NULL;
-   DBbox overlapRef = shapeRef->overlap();
-   // check the entire holder for clipping...
-   if (0ll == overlapRef.cliparea(_overlap)) return NULL;
-   // now start traversing the shapes in the current holder one by one
-   for (QuadsIter i = 0; i < _props._numObjects; i++)
-   {
-      DataT* wdt = _data[i];
-      // for fully selected shapes if they overlap with the reference
-      // and this is not the same shape as the reference
-      if ((wdt != shapeRef) &&
-          ((sh_selected == wdt->status()) || (sh_merged == wdt->status())) &&
-          (0ll != overlapRef.cliparea(wdt->overlap()))) {
-         // go and merge it
-         mergeres = polymerge(wdt->shape2poly(), shapeRef->shape2poly());
-         if (NULL != mergeres) {
-            // If the merge produce a result - return the result and
-            // substitute the shapeRef with its merged counterpart
-            shapeRef = wdt;
-            return mergeres;
-         }
-      }
-   }
-   // if we've got to this point - means that no more shapes to merge
-   // in this area
-   for (byte i = 0; i < _props.numSubQuads(); i++)
-   {
-      mergeres = _subQuads[i]->mergeSelected(shapeRef);
-      if (NULL != mergeres) return mergeres;
-   }
-   //at this point there is nothing more to traverse, so return NULL
-   return NULL;
-}
-
 template <typename DataT>
 bool laydata::QTreeTmpl<DataT>::deleteThis(DataT* object)
 {
