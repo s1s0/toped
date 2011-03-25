@@ -66,7 +66,6 @@ namespace laydata {
       typedef  std::list<TObjDataPair>               TObjDataPairList;
       typedef  std::stack<QtPosition<DataT> >        QPosStack;
 
-      friend class Iterator;
       class Iterator {
          public:
                                     Iterator();
@@ -88,7 +87,6 @@ namespace laydata {
             bool                    _copy;
       };
 
-      friend class ClipIterator;
       class ClipIterator : public QTreeTmpl<DataT>::Iterator {
          public:
                                     ClipIterator();
@@ -102,16 +100,30 @@ namespace laydata {
             DBbox                   _clipBox;
       };
 
+      class DrawIterator : public QTreeTmpl<DataT>::Iterator {
+         public:
+                                    DrawIterator();
+                                    DrawIterator(const QTreeTmpl<DataT>&, const layprop::DrawProperties&, const CtmQueue& );
+                                    DrawIterator(const DrawIterator&);
+            virtual                ~DrawIterator() {}
+            const DrawIterator&     operator++();    //Prefix
+            const DrawIterator      operator++(int); //Postfix
+         protected:
+            virtual bool            secureNonEmptyDown();
+            const layprop::DrawProperties* drawprop;
+            const CtmQueue*         _transtack;
+      };
+
                            QTreeTmpl();
                           ~QTreeTmpl();
       const Iterator       begin();
       const ClipIterator   begin(const DBbox&);
+      const DrawIterator   begin(const layprop::DrawProperties&, const CtmQueue&);
       const Iterator       end();
       void                 openGlDraw(layprop::DrawProperties&, const TObjDataPairList*, bool) const;
       void                 openGlRender(tenderer::TopRend&, const TObjDataPairList*) const;
 //      void                 visible_shapes(laydata::ShapeList*, const DBbox&, const CTM&, const CTM&, unsigned long&);
       short                clipType(tenderer::TopRend&) const;
-      void                 motionDraw(const layprop::DrawProperties&, CtmQueue&) const;
       void                 add(DataT* shape);
       void                 selectFromList(TObjDataPairList*, TObjDataPairList*);
       bool                 deleteMarked(SH_STATUS stat=sh_selected, bool partselect=false);
@@ -132,6 +144,9 @@ namespace laydata {
       /*! Return the status of _invalid flag*/
       bool                 invalid() const;
    private:
+      friend class Iterator;
+      friend class ClipIterator;
+      friend class DrawIterator;
       friend class QTreeTmp;
       void                 sort(TObjList&);
       bool                 fitInTree(DataT* shape);

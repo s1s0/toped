@@ -168,7 +168,7 @@ laydata::QTreeTmpl<DataT>::Iterator::~Iterator()
 }
 
 //-----------------------------------------------------------------------------
-// class QTreeTmpl::Iterator
+// class QTreeTmpl::ClipIterator
 //-----------------------------------------------------------------------------
 template <typename DataT>
 laydata::QTreeTmpl<DataT>::ClipIterator::ClipIterator() :
@@ -220,6 +220,65 @@ bool laydata::QTreeTmpl<DataT>::ClipIterator::secureNonEmptyDown()
 }
 
 //-----------------------------------------------------------------------------
+// class QTreeTmpl::DrawIterator
+//-----------------------------------------------------------------------------
+template <typename DataT>
+laydata::QTreeTmpl<DataT>::DrawIterator::DrawIterator() :
+   Iterator   (                      ),
+   drawprop   ( NULL                 ),
+   _transtack ( NULL                 )
+{
+}
+
+template <typename DataT>
+laydata::QTreeTmpl<DataT>::DrawIterator::DrawIterator(const QTreeTmpl<DataT>& cQuad, const layprop::DrawProperties& props, const CtmQueue& transtack) :
+   Iterator   ( cQuad                ),
+   drawprop   (&props                ),
+   _transtack (&transtack            )
+{
+   secureNonEmptyDown();
+}
+
+template <typename DataT>
+laydata::QTreeTmpl<DataT>::DrawIterator::DrawIterator(const DrawIterator& iter):
+   Iterator   ( iter                 ),
+   drawprop   ( iter.drawprop        ),
+   _transtack ( iter._transtack      )
+{}
+
+template <typename DataT>
+const typename laydata::QTreeTmpl<DataT>::DrawIterator& laydata::QTreeTmpl<DataT>::DrawIterator::operator++()
+{ //Prefix
+   Iterator::operator++();
+   return(*this);
+}
+
+template <typename DataT>
+const typename laydata::QTreeTmpl<DataT>::DrawIterator laydata::QTreeTmpl<DataT>::DrawIterator::operator++(int /*unused*/)
+{ //Postfix
+   DrawIterator previous(*this);
+   Iterator::operator++();
+   return previous;
+}
+
+template <typename DataT>
+bool laydata::QTreeTmpl<DataT>::DrawIterator::secureNonEmptyDown()
+{
+   assert(drawprop);
+   assert(_transtack);
+   DBbox clip = drawprop->clipRegion();
+   DBbox areal = Iterator::_cQuad->_overlap.overlap(_transtack->front());
+   if      (0ll == clip.cliparea(areal)      ) return false;
+   else if (!areal.visible(drawprop->scrCtm(), drawprop->visualLimit())) return false;
+   while (0 == Iterator::_cQuad->_props._numObjects)
+   {
+      return nextSubQuad(0,Iterator::_cQuad->_props.numSubQuads());
+   }
+   Iterator::_cData = 0;
+   return true;
+}
+
+//-----------------------------------------------------------------------------
 // class QuadTree
 //-----------------------------------------------------------------------------
 
@@ -239,6 +298,12 @@ template <typename DataT>
 const typename laydata::QTreeTmpl<DataT>::ClipIterator laydata::QTreeTmpl<DataT>::begin(const DBbox& clip)
 {
    return ClipIterator(*this, clip);
+}
+
+template <typename DataT>
+const typename laydata::QTreeTmpl<DataT>::DrawIterator laydata::QTreeTmpl<DataT>::begin(const layprop::DrawProperties& drawprop, const CtmQueue& transtack)
+{
+   return DrawIterator(*this, drawprop, transtack);
 }
 
 template <typename DataT>
@@ -835,30 +900,6 @@ void laydata::QTreeTmpl<DataT>::openGlRender(tenderer::TopRend& rend, const TObj
    for (byte i = 0; i < _props.numSubQuads(); i++)
       if ( 0 != _subQuads[i]->clipType(rend))
          _subQuads[i]->openGlRender(rend, slst);
-}
-
-
-/*! Temporary draw of the container contents on the screen using the virtual
-tmpDraw methods of the tdtddata objects. This happens only if
-the current QuadTree object is visible. Current clip region data is
-obtained from LayoutCanvas. In a sence this method is the same as openGlDraw
-without fill and not handling selected shapes*/
-template <typename DataT>
-void laydata::QTreeTmpl<DataT>::motionDraw(const layprop::DrawProperties& drawprop,
-                                                   CtmQueue& transtack) const
-{
-   if (empty()) return;
-   // check the entire holder for clipping...
-   DBbox clip = drawprop.clipRegion();
-   DBbox areal = _overlap.overlap(transtack.front());
-   if      (0ll == clip.cliparea(areal)      ) return;
-   else if (!areal.visible(drawprop.scrCtm(), drawprop.visualLimit())) return;
-   for (QuadsIter i = 0; i < _props._numObjects; i++)
-   {
-      _data[i]->motionDraw(drawprop, transtack, NULL);
-   }
-   for (byte i = 0; i < _props.numSubQuads(); i++)
-      _subQuads[i]->motionDraw(drawprop, transtack);
 }
 
 /*! Used to copy DataT objects from QuadTree to a TObjDataPairList. This is initiated

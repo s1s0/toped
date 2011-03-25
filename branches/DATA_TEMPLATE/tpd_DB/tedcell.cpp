@@ -545,7 +545,9 @@ void laydata::TdtCell::motionDraw(const layprop::DrawProperties& drawprop,
          if (!drawprop.layerHidden(lay->first))
          {
             const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(lay->first);
-            lay->second->motionDraw(drawprop, transtack);
+            QuadTree* curlay = lay->second;
+             for (QuadTree::DrawIterator CI = curlay->begin(drawprop, transtack); CI != curlay->end(); CI++)
+               CI->motionDraw(drawprop, transtack, NULL);
          }
       transtack.pop_front();
    }
