@@ -61,58 +61,16 @@ namespace laydata {
    template <typename DataT>
    class QTreeTmpl {
    public:
+      friend class Iterator<DataT>;
+      friend class ClipIterator<DataT>;
+      friend class DrawIterator<DataT>;
+      friend class QTreeTmp;
       typedef  std::list<DataT*>                     TObjList;
       typedef  std::pair<DataT*, SGBitSet>           TObjDataPair;
       typedef  std::list<TObjDataPair>               TObjDataPairList;
-      typedef  std::stack<QtPosition<DataT> >        QPosStack;
-
-      class Iterator {
-         public:
-                                    Iterator();
-                                    Iterator(const QTreeTmpl<DataT>&);
-                                    Iterator(const Iterator&);
-            virtual                ~Iterator();
-            const Iterator&         operator++();    //Prefix
-            const Iterator          operator++(int); //Postfix
-            bool                    operator==(const Iterator&);
-            bool                    operator!=(const Iterator&);
-            DataT*                  operator->();
-            DataT*                  operator*();
-         protected:
-            virtual bool            secureNonEmptyDown();
-            bool                    nextSubQuad(byte, byte);
-            const QTreeTmpl<DataT>* _cQuad;
-            QuadsIter               _cData;
-            QPosStack*              _qPosStack;
-            bool                    _copy;
-      };
-
-      class ClipIterator : public QTreeTmpl<DataT>::Iterator {
-         public:
-                                    ClipIterator();
-                                    ClipIterator(const QTreeTmpl<DataT>&, const DBbox&);
-                                    ClipIterator(const ClipIterator&);
-            virtual                ~ClipIterator() {}
-            const ClipIterator&     operator++();    //Prefix
-            const ClipIterator      operator++(int); //Postfix
-         protected:
-            virtual bool            secureNonEmptyDown();
-            DBbox                   _clipBox;
-      };
-
-      class DrawIterator : public QTreeTmpl<DataT>::Iterator {
-         public:
-                                    DrawIterator();
-                                    DrawIterator(const QTreeTmpl<DataT>&, const layprop::DrawProperties&, const CtmQueue& );
-                                    DrawIterator(const DrawIterator&);
-            virtual                ~DrawIterator() {}
-            const DrawIterator&     operator++();    //Prefix
-            const DrawIterator      operator++(int); //Postfix
-         protected:
-            virtual bool            secureNonEmptyDown();
-            const layprop::DrawProperties* drawprop;
-            const CtmQueue*         _transtack;
-      };
+      typedef laydata::Iterator<DataT>               Iterator;
+      typedef laydata::ClipIterator<DataT>           ClipIterator;
+      typedef laydata::DrawIterator<DataT>           DrawIterator;
 
                            QTreeTmpl();
                           ~QTreeTmpl();
@@ -144,10 +102,6 @@ namespace laydata {
       /*! Return the status of _invalid flag*/
       bool                 invalid() const;
    private:
-      friend class Iterator;
-      friend class ClipIterator;
-      friend class DrawIterator;
-      friend class QTreeTmp;
       void                 sort(TObjList&);
       bool                 fitInTree(DataT* shape);
       char                 fitSubTree(const DBbox&, DBbox*);

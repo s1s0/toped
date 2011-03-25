@@ -176,3 +176,254 @@ void laydata::QTreeTmp::commit()
 {
    _trunk->resort(_data);
 }
+
+
+
+//-----------------------------------------------------------------------------
+// class QTreeTmpl::Iterator
+//-----------------------------------------------------------------------------
+template <typename DataT>
+laydata::Iterator<DataT>::Iterator() :
+   _cQuad     ( NULL                 ),
+   _cData     ( 0                    ),
+   _qPosStack ( NULL                 ),
+   _copy      ( false                )
+{
+}
+
+template <typename DataT>
+laydata::Iterator<DataT>::Iterator(const QTreeTmpl<DataT>& cQuad) :
+   _cQuad     (&cQuad                ),
+   _cData     ( 0                    ),
+   _qPosStack ( DEBUG_NEW QPosStack()),
+   _copy      ( false                )
+{
+   secureNonEmptyDown();
+}
+
+template <typename DataT>
+laydata::Iterator<DataT>::Iterator(const Iterator& iter):
+   _cQuad     ( iter._cQuad          ),
+   _cData     ( iter._cData          ),
+   _qPosStack ( iter._qPosStack      ),
+   _copy      ( true                 )
+{}
+
+template <typename DataT>
+const typename laydata::Iterator<DataT>& laydata::Iterator<DataT>::operator++()
+{ //Prefix
+   if (++_cData < _cQuad->_props._numObjects)
+      return *this;
+   if (nextSubQuad(0, _cQuad->_props.numSubQuads()))
+      return *this;
+   while (0 < _qPosStack->size())
+   {
+      //pop a quad
+      QtPosition<DataT> prevQuad = _qPosStack->top(); _qPosStack->pop();
+      _cQuad = prevQuad._cQuad;
+      // Note! - if we're traversing the subquads - it means that we've already
+      // traversed the eventual data in the popped quad. So go and find the next
+      // quad sideways
+      if (nextSubQuad(prevQuad._cSubQuad+1, _cQuad->_props.numSubQuads()))
+         return *this;
+   }
+   // end of the container
+   _cQuad = NULL;
+   return *this;
+}
+
+template <typename DataT>
+const typename laydata::Iterator<DataT> laydata::Iterator<DataT>::operator++(int /*unused*/)
+{ //Postfix
+   Iterator previous(*this);
+   operator++();
+   return previous;
+}
+
+template <typename DataT>
+bool laydata::Iterator<DataT>::operator==(const Iterator& iter)
+{
+   // Presumption here is that there is no point comparing the _qPosStack fields
+   // The parity of the _cQuad pointers is considered enough because they must
+   // be unique anyway
+   if ((NULL ==_cQuad) && (NULL == iter._cQuad)) return true;
+   else if (_cQuad == iter._cQuad)
+      return (_cData == iter._cData);
+   else return false;
+}
+
+template <typename DataT>
+bool laydata::Iterator<DataT>::operator!=(const Iterator& iter)
+{
+   return !operator==(iter);
+}
+
+template <typename DataT>
+DataT* laydata::Iterator<DataT>::operator->()
+{
+   return _cQuad->_data[_cData];
+}
+
+template <typename DataT>
+DataT* laydata::Iterator<DataT>::operator*()
+{
+   return _cQuad->_data[_cData];
+}
+
+template <typename DataT>
+bool laydata::Iterator<DataT>::secureNonEmptyDown()
+{
+   while (0 == _cQuad->_props._numObjects)
+   {
+      if (0 < _cQuad->_props.numSubQuads())
+      {
+         _qPosStack->push(QtPosition<DataT>(_cQuad,0));
+         _cQuad = _cQuad->_subQuads[0];
+      }
+      else assert(false); // i.e. the tree is not in traversable condition
+   }
+   _cData = 0;
+   return true;
+}
+
+template <typename DataT>
+bool laydata::Iterator<DataT>::nextSubQuad(byte quadBeg, byte quadEnd)
+{
+   for (byte i = quadBeg; i < quadEnd; i++)
+   {
+      _qPosStack->push(QtPosition<DataT>(_cQuad,i));
+      _cQuad = _cQuad->_subQuads[i];
+      if (secureNonEmptyDown())
+         return true;
+      else
+      {
+         QtPosition<DataT> pQuad = _qPosStack->top(); _qPosStack->pop();
+         _cQuad = pQuad._cQuad;
+      }
+   }
+   return false;
+}
+
+template <typename DataT>
+laydata::Iterator<DataT>::~Iterator()
+{
+   if ((!_copy) && (NULL != _qPosStack))
+      delete _qPosStack;
+}
+
+//-----------------------------------------------------------------------------
+// class QTreeTmpl::ClipIterator
+//-----------------------------------------------------------------------------
+template <typename DataT>
+laydata::ClipIterator<DataT>::ClipIterator() :
+   Iterator<DataT> (                      ),
+   _clipBox        ( TP(MIN_INT4B, MIN_INT4B),
+                     TP(MAX_INT4B, MAX_INT4B))
+{
+}
+
+template <typename DataT>
+laydata::ClipIterator<DataT>::ClipIterator(const QTreeTmpl<DataT>& cQuad, const DBbox& clip) :
+   Iterator<DataT> ( cQuad                ),
+   _clipBox        ( clip                 )
+{
+   secureNonEmptyDown();
+}
+
+template <typename DataT>
+laydata::ClipIterator<DataT>::ClipIterator(const ClipIterator& iter):
+   Iterator<DataT> ( iter                 ),
+   _clipBox        ( iter._clipBox        )
+{}
+
+template <typename DataT>
+const typename laydata::ClipIterator<DataT>& laydata::ClipIterator<DataT>::operator++()
+{ //Prefix
+   Iterator<DataT>::operator++();
+   return(*this);
+}
+
+template <typename DataT>
+const typename laydata::ClipIterator<DataT> laydata::ClipIterator<DataT>::operator++(int /*unused*/)
+{ //Postfix
+   ClipIterator previous(*this);
+   Iterator<DataT>::operator++();
+   return previous;
+}
+
+template <typename DataT>
+bool laydata::ClipIterator<DataT>::secureNonEmptyDown()
+{
+   if (0ll == _clipBox.cliparea(Iterator<DataT>::_cQuad->_overlap)) return false;
+   while (0 == Iterator<DataT>::_cQuad->_props._numObjects)
+   {
+      return nextSubQuad(0,Iterator<DataT>::_cQuad->_props.numSubQuads());
+   }
+   Iterator<DataT>::_cData = 0;
+   return true;
+}
+
+//-----------------------------------------------------------------------------
+// class QTreeTmpl::DrawIterator
+//-----------------------------------------------------------------------------
+template <typename DataT>
+laydata::DrawIterator<DataT>::DrawIterator() :
+   Iterator<DataT>   (                      ),
+   drawprop          ( NULL                 ),
+   _transtack        ( NULL                 )
+{
+}
+
+template <typename DataT>
+laydata::DrawIterator<DataT>::DrawIterator(const QTreeTmpl<DataT>& cQuad, const layprop::DrawProperties& props, const CtmQueue& transtack) :
+   Iterator<DataT>   ( cQuad                ),
+   drawprop          (&props                ),
+   _transtack        (&transtack            )
+{
+   secureNonEmptyDown();
+}
+
+template <typename DataT>
+laydata::DrawIterator<DataT>::DrawIterator(const DrawIterator& iter):
+   Iterator<DataT>   ( iter                 ),
+   drawprop          ( iter.drawprop        ),
+   _transtack        ( iter._transtack      )
+{}
+
+template <typename DataT>
+const typename laydata::DrawIterator<DataT>& laydata::DrawIterator<DataT>::operator++()
+{ //Prefix
+   Iterator<DataT>::operator++();
+   return(*this);
+}
+
+template <typename DataT>
+const typename laydata::DrawIterator<DataT> laydata::DrawIterator<DataT>::operator++(int /*unused*/)
+{ //Postfix
+   DrawIterator previous(*this);
+   Iterator<DataT>::operator++();
+   return previous;
+}
+
+template <typename DataT>
+bool laydata::DrawIterator<DataT>::secureNonEmptyDown()
+{
+   assert(drawprop);
+   assert(_transtack);
+   DBbox clip = drawprop->clipRegion();
+   DBbox areal = Iterator<DataT>::_cQuad->_overlap.overlap(_transtack->front());
+   if      (0ll == clip.cliparea(areal)      ) return false;
+   else if (!areal.visible(drawprop->scrCtm(), drawprop->visualLimit())) return false;
+   while (0 == Iterator<DataT>::_cQuad->_props._numObjects)
+   {
+      return nextSubQuad(0,Iterator<DataT>::_cQuad->_props.numSubQuads());
+   }
+   Iterator<DataT>::_cData = 0;
+   return true;
+}
+
+//==============================================================================
+// implicit template instantiation with a certain type parameter
+template class laydata::Iterator<laydata::TdtData>;
+template class laydata::ClipIterator<laydata::TdtData>;
+template class laydata::DrawIterator<laydata::TdtData>;
