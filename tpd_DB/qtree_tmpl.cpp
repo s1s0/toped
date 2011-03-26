@@ -36,50 +36,61 @@
 
 
 //-----------------------------------------------------------------------------
-// class QuadTree
+// class QTreeTmpl
 //-----------------------------------------------------------------------------
 
-/*! The main constructor of the class*/
+/*! The main and only constructor of the class*/
 template <typename DataT>
 laydata::QTreeTmpl<DataT>::QTreeTmpl() : _overlap(DEFAULT_OVL_BOX), _subQuads(NULL), _data(NULL), _props()
 {
 }
 
+/*! A convenience method initializing the QTreeTmpl::Iterator*/
 template <typename DataT>
 const typename laydata::QTreeTmpl<DataT>::Iterator laydata::QTreeTmpl<DataT>::begin()
 {
    return Iterator(*this);
 }
 
+/*! A convenience method initializing the QTreeTmpl::ClipIterator*/
 template <typename DataT>
 const typename laydata::QTreeTmpl<DataT>::ClipIterator laydata::QTreeTmpl<DataT>::begin(const DBbox& clip)
 {
    return ClipIterator(*this, clip);
 }
 
+/*! A convenience method initializing the QTreeTmpl::DrawIterator*/
 template <typename DataT>
 const typename laydata::QTreeTmpl<DataT>::DrawIterator laydata::QTreeTmpl<DataT>::begin(const layprop::DrawProperties& drawprop, const CtmQueue& transtack)
 {
    return DrawIterator(*this, drawprop, transtack);
 }
 
+/*! A convenience method returning an empty iterator*/
 template <typename DataT>
 const typename laydata::QTreeTmpl<DataT>::Iterator laydata::QTreeTmpl<DataT>::end()
 {
    return Iterator();
 }
 
-/*! Add a single layout object shape into the QuadTree.
-It first checks whether or not another layout object is already placed into this
-QuadTree. If not it simply links the shape and exits. If another object is already
-here, then the new overlap area is calculated. \n In case the new area is the same as
-the existing one, then the object might be (possibly) fitted into one of the children
-QuadTree. To check this fitInTree() method is called. If this is unsuccessful, just
-then the layout object is linked to this QuadTree. \n If the new overlapping area is
-bigger that the existing one, then the layout object is linked to the current QuadTree
-after what the current QuadTree as well as its successors has to be rebuild using
-resort().\n The method might be called recursively via fitInTree() method.
-*/
+/*! Add a single layout object shape into the QTreeTmpl.\n
+ * It first checks whether or not another layout object is already placed into
+ * this QTreeTmpl. If not it simply adds the object and exits. If another object
+ * is already here, then the new overlap area is calculated. \n
+ * In case the new area is the same as the existing one, then the object might
+ * be (possibly) fitted into one of the children QTreeTmpl. To check this
+ * fitInTree() method is called. If this is unsuccessful, just then the layout
+ * object is added to this QTreeTmpl. \n
+ * If the new overlapping area is bigger that the existing one, then the layout
+ * object is linked to the current QTreeTmpl after what the current QTreeTmpl as
+ * well as its successors has to be rebuild using resort().\n The method might
+ * be called recursively via fitInTree() method.\n
+ * NOTE! This method is quite expensive (slow!) and its usage shall be
+ * limited only to the operations dealing with a single object and requiring
+ * sorted tree at the end. In all other cases when a group of objects havr to be
+ * added to the tree - an auxiliary object of laydata::QTreeTmp class shall be
+ * used.
+ */
 template <typename DataT>
 void laydata::QTreeTmpl<DataT>::add(DataT* shape)
 {
@@ -125,12 +136,12 @@ void laydata::QTreeTmpl<DataT>::add(DataT* shape)
 }
 
 /*! Checks whether a single layout object shape will fit into one of the
-children's QuadTree. It calls add() and returns success if the new layout object
-fits entirely into one of the possible subtrees or if it blows up its
-overlapping area not more than 10%. Returns false if the shape does not fit
-anywhere - means it should be placed higher into the QuadTree structure.\n
-The method might be called recursively via the add() method.
-*/
+ * children's QTreeTmpl. It calls add() and returns success if the new layout
+ * object fits entirely into one of the possible sub-quads or if it blows up
+ * its overlapping area not more than 10%. Returns false if the shape does not
+ * fit anywhere - means it should be placed higher into the QTreeTmpl structure.\n
+ * The method might be called recursively via the add() method.
+ */
 template <typename DataT>
 bool laydata::QTreeTmpl<DataT>::fitInTree(DataT* shape)
 {
@@ -166,10 +177,10 @@ bool laydata::QTreeTmpl<DataT>::fitInTree(DataT* shape)
    return false; // shape can not be fit into any subtree
 }
 
-/*! Checks whether a single layout object shape will fit into one of the
-children's QuadTree. Returns the index of the child QuadTree which fits
-the shape or -1 otherwise.
-*/
+/*! Checks whether a single layout object will fit into one of the children's
+ * QTreeTmpl. Returns the index of the child QTreeTmpl which fits the shape or
+ * -1 otherwise.
+ */
 template <typename DataT>
 char laydata::QTreeTmpl<DataT>::fitSubTree(const DBbox& shovl, DBbox* maxsubbox )
 {
@@ -199,11 +210,11 @@ char laydata::QTreeTmpl<DataT>::fitSubTree(const DBbox& shovl, DBbox* maxsubbox 
    return -1; // shape can not be fit into any subtree
 }
 
-/*! Build a new QuadTree structure for the DataT in the inlist. The method is
-using the existing _overlap variable. For every layout shape fitinsubtree()
-method is called in a try to put the data in the child QuadTree. At the end
-the method is called for every of the child structures.
-*/
+/*! Build a new QTreeTmpl structure for the DataT in the inlist. The method is
+ * using the existing _overlap variable. For every layout object fitinsubtree()
+ * method is called in a try to put the data in the child QTreeTmpl. At the end
+ * the method is called for every of the child structures.
+ */
 template <typename DataT>
 void laydata::QTreeTmpl<DataT>::sort(TObjList& inlist)
 {
@@ -262,7 +273,7 @@ void laydata::QTreeTmpl<DataT>::sort(TObjList& inlist)
          }
       }
    }
-   // at this point inlist MUST contain only the shapes for this QuadTree.
+   // at this point inlist MUST contain only the shapes for this QTreeTmpl.
    // The rest was split over the underlying (maximum 4) QuadTrees.
    _props._numObjects = inlist.size();
    assert (entryListSize == (_props._numObjects +
@@ -291,19 +302,19 @@ void laydata::QTreeTmpl<DataT>::sort(TObjList& inlist)
       }
 }
 
-/*! Removes marked shapes from the quadtree without deleting them. The removed
-    shapes are still listed in the _shapesel container of the current cell.
-    The new overlapping box is calculated during this process and the method
-    returns true to notify its parent that the overlapping box has changed and
-    resort has to be initiated on the upper levels of the tree. The tree is
-    processed bottom-up, i.e. the method is recursively called first for child
-    QuadTree structures.\n
-    On the top level the method is called by two TdtCell methods:
-    deleteSelected and move selected. The difference is that for delete,
-    partially selected shapes are ignored and not processed.\n
-    Fully selected shapes are always marked as sh_deleted. When move operation is
-    going on they will be re-marked afterwards to sh_selected by the move(copy)
-    virtual methods of DataT.
+/*! Removes marked shapes from the QTreeTmpl without deleting them. The removed
+ *  shapes are still listed in the _shapesel container of the current cell.
+ *  The new overlapping box is calculated during this process and the method
+ *  returns true to notify its parent that the overlapping box has changed and
+ *  resort has to be initiated on the upper levels of the tree. The tree is
+ *  processed bottom-up, i.e. the method is recursively called first for child
+ *  QTreeTmpl structures.\n
+ *  On the top level the method is called by two TdtCell methods:-
+ *  deleteSelected and move selected. The difference is that for delete,
+ *  partially selected shapes are ignored and not processed.\n
+ *  Fully selected shapes are always marked as sh_deleted. When move operation
+ *  is going on they will be re-marked afterwards to sh_selected by the
+ *  move/copy virtual methods of DataT.
  */
 template <typename DataT>
 bool laydata::QTreeTmpl<DataT>::deleteMarked(SH_STATUS stat, bool partselect)
@@ -322,7 +333,7 @@ bool laydata::QTreeTmpl<DataT>::deleteMarked(SH_STATUS stat, bool partselect)
       if (-1 < position)
       {
          _2B_sorted |= _subQuads[(byte)position]->deleteMarked(stat, partselect);
-         // check that there is still something left in the child QuadTree
+         // check that there is still something left in the child QTreeTmpl
          if (_subQuads[(byte)position]->empty())
          {
             removeQuad(cquad);
@@ -361,7 +372,7 @@ bool laydata::QTreeTmpl<DataT>::deleteMarked(SH_STATUS stat, bool partselect)
       else
       {
          //Now if the overlapping rectangles differ, then invalidate
-         //the current QuadTree
+         //the current QTreeTmpl
          int8b areaold = oldovl.boxarea();
          int8b areanew = _overlap.boxarea();
          if (areaold != areanew) _props._invalid = true;
@@ -396,7 +407,7 @@ bool laydata::QTreeTmpl<DataT>::deleteThis(DataT* object)
       if (-1 < position)
       {
          _2B_sorted |= _subQuads[(byte)position]->deleteThis(object);
-         // check that there is still something left in the child QuadTree
+         // check that there is still something left in the child QTreeTmpl
          if (_subQuads[(byte)position]->empty())
          {
             removeQuad(cquad);
@@ -433,7 +444,7 @@ bool laydata::QTreeTmpl<DataT>::deleteThis(DataT* object)
       else
       {
          //Now if the overlapping rectangles differ, then invalidate
-         //the current QuadTree
+         //the current QTreeTmpl
          int8b areaold = oldovl.boxarea();
          int8b areanew = _overlap.boxarea();
          if (areaold != areanew) _props._invalid = true;
@@ -452,13 +463,13 @@ bool laydata::QTreeTmpl<DataT>::deleteThis(DataT* object)
    return _2B_sorted |= _props._invalid;
 }
 
-/*! Call a resort() method if _props._invalid flag is up. Used mainly after database
-modification operations (copy, move, delete etc.) to keep the cell parents
-QuadTree structures up to date \n
-Validating of the tree is executed top-down. If the parent is re-sorted,
-children will be new, so there is no point to search for invalidated among
-them
-*/
+/*! Calls a resort() method if _props._invalid flag is up. Used mainly after
+ * database modification operations (copy, move, delete etc.) to keep the cell
+ * parents QTreeTmpl structures up to date \n
+ * Validating of the tree is executed top-down. If the parent is re-sorted,
+ * children will be new, so there is no point to search for invalidated among
+ * them
+ */
 template <typename DataT>
 void laydata::QTreeTmpl<DataT>::validate()
 {
@@ -472,10 +483,10 @@ void laydata::QTreeTmpl<DataT>::validate()
          _subQuads[i]->resort();
 }
 
-/*! Exactly as resort(), rebuilds the QuadTree object as well as its children.
-\n This method is executed only if _props._invalid flag is up. The overlapping box is
-re-evaluated before the sort() method is called.
-*/
+/*! Exactly as resort(), rebuilds the QTreeTmpl object as well as its children.\n
+ * This method is executed only if _props._invalid flag is up. The overlapping
+ * box is re-evaluated before the sort() method is called.
+ */
 template <typename DataT>
 bool laydata::QTreeTmpl<DataT>::fullValidate()
 {
@@ -494,11 +505,12 @@ bool laydata::QTreeTmpl<DataT>::fullValidate()
    return false;
 }
 
-/*! Rebuilds the entire QuadTree object as well as all of its children using the
-sort() method. Beforehand all DataT is stored in a temporary TObjDataPairList structure
-by calling tmpStore method\n It is important to note that this method is not
-re-evaluating the _overlap variable, but is using it as is
-*/
+/*! Rebuilds the entire QTreeTmpl object as well as all of its children using the
+ * sort() method. Beforehand all DataT is stored in a temporary TObjDataPairList
+ * structure by calling tmpStore method\n
+ * It is important to note that this method is not re-evaluating the _overlap
+ * variable, but is using it as is
+ */
 template <typename DataT>
 void laydata::QTreeTmpl<DataT>::resort(DataT* newdata)
 {
@@ -517,13 +529,13 @@ void laydata::QTreeTmpl<DataT>::resort(TObjList& store)
 }
 
 /*! Takes the array of 4 floating point numbers that correspond to the clipping
-areas of the new object and each of the possible four QuadTree children. Returns
-the serial number of the biggest clipping area which corresponds to one of the
-QuadTree children. \n
-Called by fitInTree(), fitSubTree() methods when a decision has to be made which
-of the possible four child areas is most suitable to refuge the current layout
-object (10% decision)
-*/
+ * areas of the new object and each of the possible four QTreeTmpl children.
+ * Returns the serial number of the biggest clipping area which corresponds to
+ * one of the QTreeTmpl children. \n
+ * Called by fitInTree(), fitSubTree() methods when a decision has to be made
+ * which of the possible four child areas is most suitable to refuge the current
+ * layout object (10% decision)
+ */
 template <typename DataT>
 byte laydata::QTreeTmpl<DataT>::biggest(int8b* array) const
 {
@@ -533,12 +545,12 @@ byte laydata::QTreeTmpl<DataT>::biggest(int8b* array) const
    return curmaxindx;
 }
 
-
-/*! Draw the contents of the container on the screen using the virtual
-openGlDraw methods of the tdtddata objects. This happens only if
-the current QuadTree object is visible. Current clip region data is
-obtained from LayoutCanvas. Draws also the select marks in case shape is
-selected. \n This is the cherry of the QuadTree algorithm cake*/
+/*! Draw the contents of the container on the screen using the virtual openGlDraw
+ *  methods of the tdtddata objects. This happens only if the current QTreeTmpl
+ *  object is visible. Current clip region data is obtained from LayoutCanvas.
+ *  Draws also the select marks in case shape is selected.\n
+ *  This is the cherry of the QTreeTmpl algorithm cake
+ */
 template <typename DataT>
 void laydata::QTreeTmpl<DataT>::openGlDraw(layprop::DrawProperties& drawprop,
                                                    const TObjDataPairList* slst, bool fill) const
@@ -659,9 +671,10 @@ void laydata::QTreeTmpl<DataT>::openGlRender(tenderer::TopRend& rend, const TObj
          _subQuads[i]->openGlRender(rend, slst);
 }
 
-/*! Used to copy DataT objects from QuadTree to a TObjDataPairList. This is initiated
-by resort() or fullValidate() when current QuadTree needs to be rebuild
-*/
+/*! Used to copy DataT objects from QTreeTmpl to a TObjDataPairList. This is
+ * initiated by resort() or fullValidate() when current QTreeTmpl needs to be
+ * rebuild
+ */
 template <typename DataT>
 void laydata::QTreeTmpl<DataT>::tmpStore(TObjList &store)
 {
@@ -687,10 +700,11 @@ void laydata::QTreeTmpl<DataT>::tmpStore(TObjList &store)
    }
 }
 
-/*! Updates the overlapping box of the current QuadTree object with the
-overlapping box hovl. Used when tree is modified, but there is no need
-to sort the data immediately, but only to maintain the valid overlapping
-box of the structure*/
+/*! Updates the overlapping box of the current QTreeTmpl object with the
+ * overlapping box hovl. Used when tree is modified, but there is no need to
+ * sort the data immediately, but only to maintain the valid overlapping box of
+ * the structure
+ */
 template <typename DataT>
 void laydata::QTreeTmpl<DataT>::updateOverlap(const DBbox& hovl)
 {
@@ -739,17 +753,17 @@ void laydata::QTreeTmpl<DataT>::removeQuad(QuadIdentificators quad)
    _subQuads = newSubQuads;
 }
 
-/*! Perform the data selection using list of objects. Called by the
-corresponding select methods of the parent structures in the data base -
-TdtLayer and TdtCell. This select operation is the essence of the
-Implementation of the long discussed (with myself) select lists in TELL
-*/
+/*! Perform the data selection using list of objects. Called by the corresponding
+ * select methods of the parent structures in the data base - TdtLayer and
+ * TdtCell. This select operation is the essence of the Implementation of the
+ * long discussed (with myself) select lists in TELL
+ */
 template <typename DataT>
 void laydata::QTreeTmpl<DataT>::selectFromList(TObjDataPairList* src, TObjDataPairList* dst)
 {
    typename TObjDataPairList::iterator DI;
    // loop the objects in the qTree first. It will be faster when there
-   // are no objects in the current QuadTree
+   // are no objects in the current QTreeTmpl
    for (QuadsIter i = 0; i < _props._numObjects; i++)
    {
       DataT* wdt = _data[i];
@@ -782,7 +796,8 @@ void laydata::QTreeTmpl<DataT>::selectFromList(TObjDataPairList* src, TObjDataPa
       _subQuads[i]->selectFromList(src, dst);
 }
 
-/*! Check whether this is empty i.e. no DataT objects in the container */
+/*! Check whether this is empty i.e. no DataT objects in the container
+ */
 template <typename DataT>
 bool laydata::QTreeTmpl<DataT>::empty() const
 {
@@ -810,21 +825,45 @@ bool laydata::QTreeTmpl<DataT>::getObjectOver(const TP pnt, DataT*& prev)
    return false;
 }
 
+/*! Delete all DataT objects in the container and free the heap. This function
+ *  shall be called before the destructor in case the whole layer is to be
+ *  destroyed - i.e. on exit for example
+ */
 template <typename DataT>
-void laydata::QTreeTmpl<DataT>::invalidate()
+void laydata::QTreeTmpl<DataT>::freeMemory()
 {
-   _props._invalid = true;
+   for (byte i = 0; i < _props.numSubQuads(); i++)
+      _subQuads[i]->freeMemory();
+   for (QuadsIter i = 0; i < _props._numObjects; i++)
+   {
+      delete _data[i];
+   }
+   delete [] _data;
+   _data = NULL;
 }
 
-/*! Return the status of _invalid flag*/
+/*! Object destructor. Cleans up only the underlaying QTreeTmpl objects and the
+ * _overlap box. DataT objects are not deleted, instead they are supposed to be
+ * moved in another placeholder called at the moment Attic (not implemented yet!)
+ */
 template <typename DataT>
-bool laydata::QTreeTmpl<DataT>::invalid() const
+laydata::QTreeTmpl<DataT>::~QTreeTmpl()
 {
-   return _props._invalid;
+   if (NULL != _subQuads)
+   {
+      for (byte i = 0; i < _props.numSubQuads(); i++)
+         delete _subQuads[i];
+      delete [] _subQuads;
+   }
+   /*Do not delete tdt objects by any means here. During the session the only
+     place where shapes are deleted is in the cell Attic yet ONLY by the undo
+     list clean-up when the certain delete hits the bottom of the undo list */
+   if (NULL != _data)     delete [] _data;
 }
+
 
 // template <typename DataT>
-// laydata::DataT* laydata::QuadTree<DataT>::getfirstover(const TP pnt) {
+// laydata::DataT* laydata::QTreeTmpl<DataT>::getfirstover(const TP pnt) {
 //    if (!_overlap.inside(pnt)) return NULL;
 //    DataT* wdt = _first;
 //    while(wdt) {
@@ -838,7 +877,7 @@ bool laydata::QTreeTmpl<DataT>::invalid() const
 // }
 //
 // template <typename DataT>
-// laydata::DataT* laydata::QuadTree<DataT>::getnextover(const TP pnt, laydata::DataT *start,bool& check) {
+// laydata::DataT* laydata::QTreeTmpl<DataT>::getnextover(const TP pnt, laydata::DataT *start,bool& check) {
 //    if (!_overlap.inside(pnt)) return NULL;
 //    DataT* wdt = _first;
 //    while(wdt) {
@@ -858,40 +897,6 @@ bool laydata::QTreeTmpl<DataT>::invalid() const
 //       }
 //    return NULL;
 // }
-
-/*! Delete all DataT objects in the container and free the heap. This function
- * shall be called before the destructor in case the whole layer is to be
- * destroyed - i.e. on exit for example*/
-template <typename DataT>
-void laydata::QTreeTmpl<DataT>::freeMemory()
-{
-   for (byte i = 0; i < _props.numSubQuads(); i++)
-      _subQuads[i]->freeMemory();
-   for (QuadsIter i = 0; i < _props._numObjects; i++)
-   {
-      delete _data[i];
-   }
-   delete [] _data;
-   _data = NULL;
-}
-
-/*!Object destructor. Cleans up only the underlaying QuadTree objects and the
-_overlap box. DataT objects are not deleted, instead they are supposed to be
- moved in another placeholder called at the moment Attic (not implemented yet!)*/
-template <typename DataT>
-laydata::QTreeTmpl<DataT>::~QTreeTmpl()
-{
-   if (NULL != _subQuads)
-   {
-      for (byte i = 0; i < _props.numSubQuads(); i++)
-         delete _subQuads[i];
-      delete [] _subQuads;
-   }
-   /*Do not delete tdt objects by any means here. During the session the only
-     place where shapes are deleted is in the cell Attic yet ONLY by the undo
-     list clean-up when the certain delete hits the bottom of the undo list */
-   if (NULL != _data)     delete [] _data;
-}
 
 //==============================================================================
 // implicit template instantiation with a certain type parameter

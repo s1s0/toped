@@ -28,6 +28,7 @@
 #include "tpdph.h"
 #include "quadtree.h"
 #include "qtree_tmpl.h"
+#include "tedat_ext.h"
 
 laydata::QuadProps::QuadProps(): _numObjects(0), _invalid(false), _quadMap(0)
 {}
@@ -425,5 +426,8 @@ bool laydata::DrawIterator<DataT>::secureNonEmptyDown()
 //==============================================================================
 // implicit template instantiation with a certain type parameter
 template class laydata::Iterator<laydata::TdtData>;
+template class laydata::Iterator<laydata::TdtErrData>;
 template class laydata::ClipIterator<laydata::TdtData>;
+template class laydata::ClipIterator<laydata::TdtErrData>;
 template class laydata::DrawIterator<laydata::TdtData>;
+template class laydata::DrawIterator<laydata::TdtErrData>;

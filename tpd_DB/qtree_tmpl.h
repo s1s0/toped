@@ -34,30 +34,30 @@
 
 namespace laydata {
    //==============================================================================
-      /*! QuadTree class implements the main clipping algorithm of toped. Its main
-         purpose is to speed-up the drawing of the database. All objects of type
-         DataT or its derivatives - means all layout data - are stored into the
-         objects of QuadTree type. Each object of QuadTree class is responsible for a
-         rectangular area defined by the _overlap field. This area is dynamic and
-         updated with every added, moved or deleted layout object.\n Each QuadTree
-         object might be a parent of maximum four child objects of the same QuadTree
-         class, so that each of the children is responsible for one out of the
-         possible four sub-rectangles. Every layout object is fitted during the
-         construction into the smallest possible QuadTree object. The children are
-         created dynamically when a new object is about to fit into one of the four
-         possible sub-rectangles of the _overlap area. Child QuadTree objects are
-         stored into an quads[4] array and each of them is responsible by convention
-         for the NW(north-west), NE(north-east), SE(south-east) and SW(south-west)
-         sub-rectangles of the _overlap box.\n
-         The methods can be split on several groups:
-            - add a single layout object - add(), fitInTree()
-            - add a group of layout objects - put(), sort(), fitSubTree()
-            - object selection - selectInBox(), unselectInBox(), selectFromList(),
-              selectAll()
-            - design modification - deleteMarked()
-            - tree maintenance - validate(), fullValidate(), sort(), resort(),
-              tmpStore()
-               */
+   /*!QTreeTmpl class implements the main clipping algorithm of Toped. Its
+    * main purpose is to speed-up the drawing of the database. All objects of
+    * type DataT or its derivatives - means all layout data - are stored into
+    * objects of QTreeTmpl type.\n
+    * QTreeTmpl is entirely  dynamic entity by nature. The contents of each
+    * particular QTreeTmpl depends on the properties of all objects in the
+    * database in terms of quantity and overlapping area. Each object of
+    * QTreeTmpl class is responsible for a dynamically defined rectangular
+    * area. This area is updated with every added, moved or deleted layout
+    * object.\n
+    * Each QTreeTmpl object might be a parent of maximum four child objects
+    * of the same QTreeTmpl class, so that each of the children is responsible
+    * for one out of the possible four sub-rectangles. Every layout object is
+    * fitted during the construction into the smallest possible QTreeTmpl
+    * object. Special attention is taken for the small objects located along
+    * the central strips of the QTreeTmpl.\n
+    * The children QTreeTmpl objects are created dynamically when a new object
+    * is about to fit into one of the four possible sub-rectangles of the
+    * overlapping area. Child QuadTree objects are stored into a dynamic
+    * array of up to 4 QTreeTmpl objects (_subQuads). \n
+    * From outside a QTreeTmpl object shall behave like a container -
+    * abstracting out as much as possible all of the clipping, sorting etc.
+    * To achieve that appropriate iterators are defined.
+    */
    template <typename DataT>
    class QTreeTmpl {
    public:
@@ -65,12 +65,12 @@ namespace laydata {
       friend class ClipIterator<DataT>;
       friend class DrawIterator<DataT>;
       friend class QTreeTmp;
-      typedef  std::list<DataT*>                     TObjList;
-      typedef  std::pair<DataT*, SGBitSet>           TObjDataPair;
-      typedef  std::list<TObjDataPair>               TObjDataPairList;
-      typedef laydata::Iterator<DataT>               Iterator;
-      typedef laydata::ClipIterator<DataT>           ClipIterator;
-      typedef laydata::DrawIterator<DataT>           DrawIterator;
+      typedef     std::list<DataT*>             TObjList;
+      typedef     std::pair<DataT*, SGBitSet>   TObjDataPair;
+      typedef     std::list<TObjDataPair>       TObjDataPairList;
+      typedef laydata::Iterator<DataT>          Iterator;
+      typedef laydata::ClipIterator<DataT>      ClipIterator;
+      typedef laydata::DrawIterator<DataT>      DrawIterator;
 
                            QTreeTmpl();
                           ~QTreeTmpl();
@@ -80,14 +80,11 @@ namespace laydata {
       const Iterator       end();
       void                 openGlDraw(layprop::DrawProperties&, const TObjDataPairList*, bool) const;
       void                 openGlRender(tenderer::TopRend&, const TObjDataPairList*) const;
-//      void                 visible_shapes(laydata::ShapeList*, const DBbox&, const CTM&, const CTM&, unsigned long&);
       short                clipType(tenderer::TopRend&) const;
       void                 add(DataT* shape);
       void                 selectFromList(TObjDataPairList*, TObjDataPairList*);
       bool                 deleteMarked(SH_STATUS stat=sh_selected, bool partselect=false);
       bool                 deleteThis(DataT*);
-/*      DataT*               getfirstover(const TP);
-      DataT*               getnextover(const TP, laydata::DataT*, bool& check);*/
       bool                 getObjectOver(const TP pnt, DataT*& prev);
       void                 validate();
       bool                 fullValidate();
@@ -95,12 +92,12 @@ namespace laydata {
       void                 resort(TObjList&);
       bool                 empty() const;
       void                 freeMemory();
-      /*! Return the overlapping box*/
+      //! Return the overlapping box
       DBbox                overlap() const   {return _overlap;}
-      /*! Mark the tree as invalid*/
-      void                 invalidate();
-      /*! Return the status of _invalid flag*/
-      bool                 invalid() const;
+      //! Return the status of _invalid flag*/
+      bool                 invalid() const   { return _props._invalid;}
+      //! Mark the tree as invalid*/
+      void                 invalidate()      {_props._invalid = true;}
    private:
       void                 sort(TObjList&);
       bool                 fitInTree(DataT* shape);
@@ -110,13 +107,14 @@ namespace laydata {
       void                 updateOverlap(const DBbox& hovl);
       byte                 sequreQuad(QuadIdentificators);
       void                 removeQuad(QuadIdentificators);
-      DBbox                _overlap;//! The overlapping box of the quad
-      /*! A pointers to four child QuadTree structures*/
-      QTreeTmpl**          _subQuads;
-      /*! Pointer to the first DataT stored in this QuadTree*/
-      DataT**              _data;
-      QuadProps            _props;
+      DBbox                _overlap;   //! The overlapping box of the quad
+      QTreeTmpl**          _subQuads;  //! A pointers to the child QTreeTmpl structures
+      DataT**              _data;      //! Pointer to The array of objects stored in this QTreeTmpl
+      QuadProps            _props;     //! The structure holding the properties of this QTreeTmpl
    };
 }
+//    void                 visible_shapes(laydata::ShapeList*, const DBbox&, const CTM&, const CTM&, unsigned long&);
+//    DataT*               getfirstover(const TP);
+//    DataT*               getnextover(const TP, laydata::DataT*, bool& check);*/
 
 #endif /* QTREE_TMPL_H_ */
