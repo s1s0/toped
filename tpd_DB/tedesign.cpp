@@ -464,7 +464,7 @@ bool laydata::TdtLibDir::unloadLib(std::string libname)
 laydata::TdtLibrary* laydata::TdtLibDir::removeLibrary(std::string libname)
 {
    TdtLibrary* tberased = NULL;
-   for (Catalog::iterator LDI = _libdirectory.begin(); LDI != _libdirectory.end(); LDI++)
+   for (LibCatalog::iterator LDI = _libdirectory.begin(); LDI != _libdirectory.end(); LDI++)
    {
       if (libname == (*LDI)->first)
       {
