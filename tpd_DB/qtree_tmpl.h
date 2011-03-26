@@ -82,14 +82,12 @@ namespace laydata {
       void                 openGlRender(tenderer::TopRend&, const TObjDataPairList*) const;
       short                clipType(tenderer::TopRend&) const;
       void                 add(DataT* shape);
-      void                 selectFromList(TObjDataPairList*, TObjDataPairList*);
       bool                 deleteMarked(SH_STATUS stat=sh_selected, bool partselect=false);
       bool                 deleteThis(DataT*);
       bool                 getObjectOver(const TP pnt, DataT*& prev);
       void                 validate();
       bool                 fullValidate();
       void                 resort(DataT* newdata = NULL);
-      void                 resort(TObjList&);
       bool                 empty() const;
       void                 freeMemory();
       //! Return the overlapping box
@@ -99,6 +97,7 @@ namespace laydata {
       //! Mark the tree as invalid*/
       void                 invalidate()      {_props._invalid = true;}
    private:
+      void                 resort(TObjList&);
       void                 sort(TObjList&);
       bool                 fitInTree(DataT* shape);
       char                 fitSubTree(const DBbox&, DBbox*);
