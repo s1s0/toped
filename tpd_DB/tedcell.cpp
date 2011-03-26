@@ -219,7 +219,7 @@ laydata::EditObject::~EditObject()
 // class TdtDefaultCell
 //-----------------------------------------------------------------------------
 laydata::TdtDefaultCell::TdtDefaultCell(std::string name, int libID, bool orphan) :
-      _orphan(orphan), _name(name), _libID(libID)  {}
+      _name(name), _libID(libID), _orphan(orphan) {}
 
 void laydata::TdtDefaultCell::openGlDraw(layprop::DrawProperties&, bool active) const
 {
@@ -431,7 +431,7 @@ bool laydata::TdtCell::addChild(laydata::TdtDesign* ATDB, TdtDefaultCell* child)
       //Circular reference found. child is already an ancestor of this
       return false;
    //leave a mark that child is not orphan
-   child->parentFound();
+   child->setOrphan(false);
    // update the list of children of the current cell
    _children.insert(child->name());
    // update the hierarchical tree

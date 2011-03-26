@@ -152,7 +152,7 @@ void laydata::TdtLibrary::registerCellRead(std::string cellname, TdtCell* cell) 
          // case 1 or case 2 -> can't be distiguised in this moment
          //_cells[cellname] = cell;
          // cell has been referenced already, so it's not an orphan
-         cell->parentFound();
+         cell->setOrphan(false);
       }
       else {
          //@FIXME case 3 -> parsing should be stopped !
@@ -367,7 +367,7 @@ void laydata::TdtLibrary::dbHierRemoveParent(TdtDefaultCell* comp, const TdtDefa
    else if ( 3 != res)
    {
       TpdPost::treeRemoveMember(comp->name().c_str(), prnt->name().c_str(), res);
-      comp->_orphan = (res > 0);
+      comp->setOrphan(res>0);
    }
 }
 
@@ -765,7 +765,7 @@ laydata::CellDefin laydata::TdtLibDir::linkCellRef(std::string cellname, int lib
    // Mark that the cell definition is referenced, i.e. it is not the top
    // of the tree (orphan flag in the TdtCell)
    assert(strdefn);
-   strdefn->parentFound();
+   strdefn->setOrphan(false);
    return strdefn;
 }
 
@@ -1713,7 +1713,7 @@ void laydata::DrcLibrary::registerCellRead(std::string cellname, TdtCell* cell) 
          // case 1 or case 2 -> can't be distinguished in this moment
          //_cells[cellname] = cell;
          // cell has been referenced already, so it's not an orphan
-         cell->parentFound();
+         cell->setOrphan(false);
       }
       else {
          //@FIXME case 3 -> parsing should be stopped !
