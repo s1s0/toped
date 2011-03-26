@@ -117,17 +117,16 @@ namespace laydata {
                                       const CellMap* = NULL, const TDTHierTree* = NULL) const;
          virtual void        collectUsedLays(const TdtLibDir*, bool, WordList&) const;
          virtual void        renameChild(std::string, std::string) {assert(false); /* TdTDefaultCell can not be renamed */}
-         void                parentFound()              {_orphan = false;};
          void                setName(std::string nname) {_name = nname;}
-         bool                orphan() const             {return _orphan;};
-         std::string         name() const               {return _name;};
+         bool                orphan() const             {return _orphan;}
+         void                setOrphan(bool orph)       {_orphan = orph;}
+         std::string         name() const               {return _name;}
          int                 libID() const              {return _libID;}
-         //@FIXME! the _orphan must be protected!
-         bool                _orphan;       //! cell doesn't have a parent
       protected:
          void                invalidateParents(TdtLibrary*);
          LayerList           _layers;       //! all layers the cell (including the reference layer)
          std::string         _name;         //! cell name
+         bool                _orphan;       //! cell doesn't have a parent
       private:
          int                 _libID;        //! cell belongs to ... library
    };

@@ -534,13 +534,13 @@ laydata::CellDefin laydata::InputTdtFile::linkCellRef(std::string cellname)
          celldef = _TEDLIB->addDefaultCell(cellname, false);
       }
       else
-         celldef->parentFound();
+         celldef->setOrphan(false);
    }
    else
    {
       celldef = striter->second;
       assert(NULL != celldef);
-      celldef->parentFound();
+      celldef->setOrphan(false);
    }
    return celldef;
 }
