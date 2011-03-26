@@ -510,11 +510,11 @@ class ImportDB {
       bool                    polyAcceptable(PointVector&, bool&);
       bool                    pathAcceptable(PointVector&, int4b);
       LayerCrossMap*          _layCrossMap   ;
-      ForeignDbFile*           _src_lib       ;
+      ForeignDbFile*          _src_lib       ;
       laydata::TdtLibDir*     _tdt_db        ;
-      laydata::TdtCell*       _dst_structure ; // Current target structure
-      real                    _dbuCoeff      ; // The DBU ratio between the foreign and local DB
-      real                    _crossCoeff    ; // Current cross coefficient
+      laydata::TdtCell*       _dst_structure ; //! Current target structure
+      real                    _dbuCoeff      ; //! The DBU ratio between the foreign and local DB
+      real                    _crossCoeff    ; //! Current cross coefficient
       real                    _technoSize    ; //! technology size (used for conversion of some texts)
 };
 

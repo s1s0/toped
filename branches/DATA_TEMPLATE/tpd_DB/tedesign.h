@@ -172,43 +172,49 @@ namespace laydata {
    };
 
    /*! Library directory or Directory of libraries.
-   This object contains pointers to all loaded libraries. Current database is a
-   special case. The other special case is the library of undefined cells. It is
-   always defined and always located in the 0 slot of the Catalog. Undefined cell
-   library is not accessible outside of the scope of this class \n
-   Current database is accessible using the class functor.
-   The class is using following library ID definitions
-      ALL_LIB
-      TARGETDB_LIB
-      UNDEFCELL_LIB
-
-   A short memo on UNDEFCELL_LIB which proves to be a pain in the back...
-   The decision to allow undefined structures seemed to be a good idea having in
-   mind the it is legal in GDS to have references to undefined structures. The
-   next argument was the introduction of the libraries. Having an undefined
-   cell structure it would be stupid not to allow simple operations with it. For
-   example to define it, or simply to delete the reference to it. Right? (they say
-   that the road to hell is covered with roses). When I've started the
-   implementation, then I realized that UNDEFCELL_LIB shall have quite different
-   behavior from a normal library and from the target DB
-   - New cells have to be generated on request - normally when a reference to them
-     is added. Unlike the target DB where there is a command for this.
-   - Unreferenced cells should be cleared (you don't want to see rubbish in the cell
-     browser). Unlike the rest of the libraries where they simply come at the top
-     of the hierarchy if unreferenced.
-   On top of the above comes the undo. Just a simple example. The last reference to
-   an undefined cell had been deleted. One would think - great - we'll clean-up the
-   definition. Well if you do that - the undo will crash, because the undefined cell
-   reference keeps the pointer to the definition of the undefined cell. It's getting
-   almost ridiculous, because it appears that to keep the integrity of the undo stack
-   you have to store also the deleted definitions of the undefined cells. The
-   complications involve the hierarchy tree, the cell browser, and basic tell
-   functions like addCell, removeCell, group, ungroup, delete etc.
-   */
+    *  This object contains pointers to all loaded libraries. Current database
+    *  is a special case. The other special case is the library of undefined
+    *  cells. It is always defined and always located in the 0 slot of the
+    *  Catalog. Undefined cell library is not accessible outside of the scope of
+    *  this class
+    *
+    *  Current database is accessible using the class functor. The class is
+    *  using following library ID definitions:
+    *  - ALL_LIB
+    *  - TARGETDB_LIB
+    *  - UNDEFCELL_LIB
+    *
+    *  A short memo on UNDEFCELL_LIB which proves to be a pain in the back...
+    *  The decision to allow undefined structures seemed to be a good idea
+    *  having in mind the it is legal in GDS to have references to undefined
+    *  structures. The next argument was the introduction of the libraries.
+    *  Having an undefined cell structure it would be stupid not to allow simple
+    *  operations with it. For example to define it, or simply to delete the
+    *  reference to it. Right? (they say that the road to hell is covered with
+    *  roses). When I've started the implementation, then I realized that
+    *  UNDEFCELL_LIB shall have quite different behavior from a normal library
+    *  and from the target DB
+    *   - New cells have to be generated on request - normally when a reference
+    *     to them is added. Unlike the target DB where there is a command for
+    *     this.
+    *   - Unreferenced cells should be cleared (you don't want to see rubbish in
+    *     the cell browser). Unlike the rest of the libraries where they simply
+    *     come at the top of the hierarchy if unreferenced.
+    *
+    *  On top of the above comes the undo. Just a simple example. The last
+    *  reference to an undefined cell had been deleted. One would think - great -
+    *  we'll clean-up the definition. Well if you do that - the undo will crash,
+    *  because the undefined cell reference keeps the pointer to the definition
+    *  of the undefined cell. It's getting almost ridiculous, because it appears
+    *  that to keep the integrity of the undo stack you have to store also the
+    *  deleted definitions of the undefined cells. The complications involve the
+    *  hierarchy tree, the cell browser, and basic tell functions like addCell,
+    *  removeCell, group, ungroup, delete etc.
+    */
    class TdtLibDir {
    public:
       typedef std::pair<std::string, TdtLibrary*> LibItem;
-      typedef std::vector<LibItem*>               Catalog;
+      typedef std::vector<LibItem*>               LibCatalog;
                         TdtLibDir();
                        ~TdtLibDir();
       TdtDesign*        operator ()() {return _TEDDB;}
@@ -246,7 +252,7 @@ namespace laydata {
       bool              _neverSaved;
       void              addLibrary(TdtLibrary* const lib, word libRef);
       TdtLibrary*       removeLibrary( std::string );
-      Catalog           _libdirectory;
+      LibCatalog        _libdirectory;
       TdtDesign*        _TEDDB;        // toped data base
       //! Temporary storage for undefined unreferenced cell (see the comment in the class definition)
       CellMap           _udurCells;

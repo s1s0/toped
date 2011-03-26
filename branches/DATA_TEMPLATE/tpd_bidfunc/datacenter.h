@@ -99,9 +99,9 @@ private:
    std::string                _globalDir;
    laydata::TdtLibDir         _TEDLIB;       //! catalog of available TDT libraries
    laydata::DrcLibrary*       _DRCDB;        //! DRC data
-   ForeignDbFile*              _GDSDB;        //! GDS parsed data
-   ForeignDbFile*              _CIFDB;        //! CIF parsed data
-   ForeignDbFile*              _OASDB;        //! OASIS parsed data
+   ForeignDbFile*             _GDSDB;        //! GDS parsed data
+   ForeignDbFile*             _CIFDB;        //! CIF parsed data
+   ForeignDbFile*             _OASDB;        //! OASIS parsed data
    wxMutex                    _DBLock;       //! Main stream DB Mutex
    wxMutex                    _DRCLock;      //! DRC         DB Mutex
    wxMutex                    _GDSLock;      //! GDSII       DB Mutex
