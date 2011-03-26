@@ -990,7 +990,8 @@ void laydata::TdtCell::selectFromList(SelectList* slist, const DWordSet& unselab
             ssl = _shapesel[CL->first];
          else
             ssl = DEBUG_NEW DataList();
-         _layers[CL->first]->selectFromList(CL->second, ssl);
+//         _layers[CL->first]->selectFromList(CL->second, ssl);
+         selectFromListWrapper(_layers[CL->first], CL->second, ssl);
          if (ssl->empty())  delete ssl;
          else              _shapesel[CL->first] = ssl;
       }
@@ -2266,6 +2267,43 @@ laydata::TdtData* laydata::TdtCell::mergeWrapper(QuadTree* qtree, TdtData*& ref_
       }
    }
    return mergeres;
+}
+
+void laydata::TdtCell::selectFromListWrapper(QuadTree* qtree, DataList* src, DataList* dst)
+{
+   typename DataList::iterator DI;
+   // loop the objects in the qTree first. It will be faster when there
+   // are no objects in the current QTreeTmpl
+   for (QuadTree::Iterator CI = qtree->begin(); CI != qtree->end(); CI++)
+   {
+      TdtData* wdt = *CI;
+      DI = src->begin();
+      // loop the objects from the select list
+      while ( DI != src->end())
+      {
+         // if the objects (pointer) coincides - that's out object
+         if (wdt == DI->first)
+         {
+            // select the object
+            if (DI->second.size() == wdt->numPoints()) {
+               wdt->setStatus(sh_partsel);
+               dst->push_back(SelectDataPair(wdt,DI->second));
+            }
+            else {
+               wdt->setStatus(sh_selected);
+               dst->push_back(SelectDataPair(wdt,SGBitSet()));
+            }
+            // remove it from the select list - it will speed up the following
+            // operations
+            DI = src->erase(DI);
+            // there is no point looping further, get the next object
+            break;
+         }
+         else DI++;
+      }
+   }
+//   for (byte i = 0; i < _props.numSubQuads(); i++)
+//      _subQuads[i]->selectFromList(src, dst);
 }
 
 laydata::TdtCell::~TdtCell()

@@ -753,49 +753,6 @@ void laydata::QTreeTmpl<DataT>::removeQuad(QuadIdentificators quad)
    _subQuads = newSubQuads;
 }
 
-/*! Perform the data selection using list of objects. Called by the corresponding
- * select methods of the parent structures in the data base - TdtLayer and
- * TdtCell. This select operation is the essence of the Implementation of the
- * long discussed (with myself) select lists in TELL
- */
-template <typename DataT>
-void laydata::QTreeTmpl<DataT>::selectFromList(TObjDataPairList* src, TObjDataPairList* dst)
-{
-   typename TObjDataPairList::iterator DI;
-   // loop the objects in the qTree first. It will be faster when there
-   // are no objects in the current QTreeTmpl
-   for (QuadsIter i = 0; i < _props._numObjects; i++)
-   {
-      DataT* wdt = _data[i];
-      DI = src->begin();
-      // loop the objects from the select list
-      while ( DI != src->end())
-      {
-         // if the objects (pointer) coincides - that's out object
-         if (wdt == DI->first)
-         {
-            // select the object
-            if (DI->second.size() == wdt->numPoints()) {
-               wdt->setStatus(sh_partsel);
-               dst->push_back(TObjDataPair(wdt,DI->second));
-            }
-            else {
-               wdt->setStatus(sh_selected);
-               dst->push_back(TObjDataPair(wdt,SGBitSet()));
-            }
-            // remove it from the select list - it will speed up the following
-            // operations
-            DI = src->erase(DI);
-            // there is no point looping further, get the next object
-            break;
-         }
-         else DI++;
-      }
-   }
-   for (byte i = 0; i < _props.numSubQuads(); i++)
-      _subQuads[i]->selectFromList(src, dst);
-}
-
 /*! Check whether this is empty i.e. no DataT objects in the container
  */
 template <typename DataT>
