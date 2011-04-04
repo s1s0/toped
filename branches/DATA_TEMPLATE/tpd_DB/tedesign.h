@@ -29,6 +29,7 @@
 #define TEDESIGN_H_INCLUDED
 
 #include "tedcell.h"
+#include "grccell.h"
 namespace laydata {
 
    class TdtLibrary {
@@ -73,6 +74,7 @@ namespace laydata {
       real                 _DBU;          // Size of database units in meters
       real                 _UU;           // size of user unit in DBU
       CellMap              _cells;        // list of cells in the design
+      auxdata::GrcCellMap  _grcCells;     // List of cells with geometry errors
                                           //
       static TDTHierTree*  _hiertree;     //
       time_t               _created;

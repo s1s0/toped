@@ -64,7 +64,7 @@ namespace laydata {
       friend class Iterator<DataT>;
       friend class ClipIterator<DataT>;
       friend class DrawIterator<DataT>;
-      friend class QTreeTmp;
+      friend class QTStoreTmpl<DataT>;
       typedef     std::list<DataT*>             TObjList;
       typedef     std::pair<DataT*, SGBitSet>   TObjDataPair;
       typedef     std::list<TObjDataPair>       TObjDataPairList;

@@ -219,7 +219,20 @@ laydata::EditObject::~EditObject()
 // class TdtDefaultCell
 //-----------------------------------------------------------------------------
 laydata::TdtDefaultCell::TdtDefaultCell(std::string name, int libID, bool orphan) :
-      _name(name), _libID(libID), _orphan(orphan) {}
+   _name          (name    ),
+   _orphan        (orphan  ),
+   _libID         (libID   )
+{}
+
+laydata::TdtDefaultCell::~TdtDefaultCell()
+{
+   for (LayerList::iterator lay = _layers.begin(); lay != _layers.end(); lay++)
+   {
+      lay->second->freeMemory();
+      delete lay->second;
+   }
+   _layers.clear();
+}
 
 void laydata::TdtDefaultCell::openGlDraw(layprop::DrawProperties&, bool active) const
 {
@@ -422,6 +435,13 @@ laydata::TdtCellAref* laydata::TdtCell::addCellARef(laydata::TdtDesign* ATDB,
                        DEBUG_NEW TdtCellAref(str, trans, arrprops);
    cellreflayer->add(cellaref);
    return cellaref;
+}
+
+void laydata::TdtCell::addAuxRef(unsigned layno, auxdata::GrcCell* str)
+{
+   QuadTree *cellreflayer = secureLayer(layno);
+   laydata::TdtAuxRef* cellref = DEBUG_NEW TdtAuxRef(str);
+   cellreflayer->add(cellref);
 }
 
 bool laydata::TdtCell::addChild(laydata::TdtDesign* ATDB, TdtDefaultCell* child)
@@ -1929,13 +1949,13 @@ void laydata::TdtCell::transferLayer(SelectList* slst, unsigned dst)
    // so no need to refresh the overlapping box etc.
 }
 
-void laydata::TdtCell::resort()
-{
-   typedef LayerList::const_iterator LCI;
-   for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
-      lay->second->resort();
-   getCellOverlap();
-}
+//void laydata::TdtCell::resort()
+//{
+//   typedef LayerList::const_iterator LCI;
+//   for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
+//      lay->second->resort();
+//   getCellOverlap();
+//}
 
 void laydata::TdtCell::fixUnsorted()
 {
@@ -2309,10 +2329,4 @@ void laydata::TdtCell::selectFromListWrapper(QuadTree* qtree, DataList* src, Dat
 laydata::TdtCell::~TdtCell()
 {
    unselectAll();
-   for (LayerList::iterator lay = _layers.begin(); lay != _layers.end(); lay++)
-   {
-      lay->second->freeMemory();
-      delete lay->second;
-   }
-   _layers.clear();
 }

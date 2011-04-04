@@ -1289,9 +1289,15 @@ void ImportDB::convert(ForeignCell* src_structure, bool overwrite)
       tell_log(console::MT_INFO,ost.str());
       // first create a new cell
       _dst_structure = DEBUG_NEW laydata::TdtCell(gname);
+      _grc_structure = DEBUG_NEW auxdata::GrcCell(gname);
       // call the cell converter
       src_structure->import(*this);
       // Sort the qtrees of the new cell
+      bool emptyCell = _grc_structure->fixUnsorted();
+      if (emptyCell)
+         delete _grc_structure;
+      else
+         _dst_structure->addAuxRef(GRC_LAY, _grc_structure);
       _dst_structure->fixUnsorted();
       // and finally - register the cell
       (*_tdt_db)()->registerCellRead(gname, _dst_structure);
@@ -1313,7 +1319,7 @@ void ImportDB::addBox(const TP& p1, const TP& p2)
    laydata::QTreeTmp* tmpLayer = _layCrossMap->getTmpLayer();
    if ( NULL != tmpLayer )
    {
-      tmpLayer->putBox(p1, p2);
+      tmpLayer->put(DEBUG_NEW laydata::TdtBox(p1,p2));
    }
 }
 
@@ -1325,8 +1331,13 @@ void ImportDB::addPoly(PointVector& plist)
       bool boxObject;
       if (polyAcceptable(plist, boxObject /*srcLayer, srcDataType*/))
       {
-         if (boxObject)  tmpLayer->putBox(plist[0], plist[2]);
-         else            tmpLayer->putPoly(plist);
+         if (boxObject)  tmpLayer->put(DEBUG_NEW laydata::TdtBox(plist[0], plist[2]));
+         else            tmpLayer->put(DEBUG_NEW laydata::TdtPoly(plist));
+      }
+      else
+      {
+         auxdata::QTreeTmp* errlay = _grc_structure->secureUnsortedLayer(_layCrossMap->tdtLayNumber());
+         errlay->put(DEBUG_NEW auxdata::TdtErrPoly(plist));
       }
    }
 }
@@ -1345,7 +1356,12 @@ void ImportDB::addPath(PointVector& plist, int4b width, short pathType, int4b bg
       if (pathConvertResult)
       {
          if (pathAcceptable(plist, width))
-            tmpLayer->putWire(plist, width);
+            tmpLayer->put(DEBUG_NEW laydata::TdtWire(plist, width));
+         else
+         {
+            auxdata::QTreeTmp* errlay = _grc_structure->secureUnsortedLayer(_layCrossMap->tdtLayNumber());
+            errlay->put(DEBUG_NEW auxdata::TdtErrWire(plist, width));
+         }
       }
       else
       {
@@ -1364,13 +1380,14 @@ void ImportDB::addText(std::string tString, TP bPoint, double magnification, dou
    if ( NULL != tmpLayer )
    {
       // @FIXME absolute magnification, absolute angle should be reflected somehow!!!
-      tmpLayer->putText(tString,
-                        CTM( bPoint,
-                             magnification / ((*_tdt_db)()->UU() *  OPENGL_FONT_UNIT),
-                             angle,
-                             reflection
-                           )
-                       );
+      tmpLayer->put(DEBUG_NEW laydata::TdtText(tString,
+                                               CTM( bPoint,
+                                                    magnification / ((*_tdt_db)()->UU() *  OPENGL_FONT_UNIT),
+                                                    angle,
+                                                    reflection
+                                                  )
+                                              )
+                    );
    }
 }
 
@@ -1421,7 +1438,7 @@ bool ImportDB::polyAcceptable(PointVector& plist, bool& box)
           << " }";
       tell_log(console::MT_ERROR, ost.str());
    }
-   if (check.recoverable())
+   if (check.valid())
    {
       plist = check.getValidated();
       box = check.box();
@@ -1442,7 +1459,7 @@ bool ImportDB::pathAcceptable(PointVector& plist, int4b width )
           << " }";
       tell_log(console::MT_ERROR, ost.str());
    }
-   if (check.recoverable())
+   if (check.valid())
    {
       plist = check.getValidated();
       return true;

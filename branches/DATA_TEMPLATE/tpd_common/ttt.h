@@ -62,10 +62,16 @@ enum QuadIdentificators{ qidNW = 0,
                          qidSE = 2,
                          qidSW = 3,
                          qidNULL = 4};
+
+// The definition below is a "strongly typed enum". Very tempting to use, but too new
+// and too risky for portability. gcc requires -std=c++0x option to stop the warnings
+// It's here just as a reminder for the future
+//   enum class SH_STATUS:byte { sh_active, sh_deleted, sh_selected, sh_partsel, sh_merged } ;
+typedef enum { sh_active, sh_deleted, sh_selected, sh_partsel, sh_merged } SH_STATUS;
+
 //=============================================================================
 // Some common constants (instead of #defines)
 //=============================================================================
-const int         GRC_LIB           = -3; //Geometry rules check violations
 const int         ALL_LIB           = -2;
 const int         TARGETDB_LIB      = -1;
 const int         UNDEFCELL_LIB     =  0;
@@ -675,6 +681,7 @@ const int4b       MAX_INT4B            = (int4b)0x7FFFFFFF; //   2 147 483 643
 const unsigned    REF_LAY              = 0xffffffff;
 const unsigned    ERR_LAY              = 0xfffffffe;
 const unsigned    DRC_LAY              = 0xfffffffd;
+const unsigned    GRC_LAY              = 0xfffffffc;
 const unsigned    LAST_EDITABLE_LAYNUM = 0x0000ffff;
 const byte        OPENGL_FONT_UNIT     = 128;
 const byte        GRID_LIMIT           = 5;    // if grid step is less than _GRID_LIMIT pixels, grid is hidden

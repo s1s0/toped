@@ -101,7 +101,7 @@ namespace laydata {
    class TdtDefaultCell  {
       public:
                              TdtDefaultCell(std::string, int , bool );
-         virtual            ~TdtDefaultCell() {};
+         virtual            ~TdtDefaultCell();
          virtual void        openGlDraw(layprop::DrawProperties&, bool active=false) const;
          virtual void        openGlRender(tenderer::TopRend&, const CTM&, bool, bool) const;
          virtual void        motionDraw(const layprop::DrawProperties&, CtmQueue&, bool active=false) const;
@@ -147,6 +147,7 @@ namespace laydata {
       void                 registerCellRef(CellDefin str, CTM trans);
       void                 registerCellARef(CellDefin str, CTM trans, ArrayProps&);
       TdtCellRef*          addCellRef(TdtDesign*, CellDefin str, CTM trans);
+      void                 addAuxRef(unsigned layno, auxdata::GrcCell*);
       TdtCellAref*         addCellARef(TdtDesign*, CellDefin, CTM, ArrayProps&);
       bool                 addChild(TdtDesign*, TdtDefaultCell*);
       virtual void         write(TEDfile* const, const CellMap&, const TDTHierTree*) const;
@@ -176,7 +177,7 @@ namespace laydata {
       ShapeList*           ungroupPrep(TdtLibDir*);
       void                 transferLayer(unsigned);
       void                 transferLayer(SelectList*, unsigned);
-      void                 resort();
+//      void                 resort();
       void                 fixUnsorted();
       bool                 validateCells(TdtLibrary*);
       void                 validateLayers();
