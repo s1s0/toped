@@ -41,6 +41,7 @@
 #include "tenderer.h"
 #include "ps_out.h"
 #include "outbox.h"
+#include "grccell.h"
 
 //GLubyte select_mark[30] = {0x00, 0x00, 0x00, 0x00, 0x3F, 0xF8, 0x3F, 0xF8, 0x30, 0x18,
 //                           0x30, 0x18, 0x30, 0x18, 0x30, 0x18, 0x30, 0x18, 0x30, 0x18,
@@ -2523,6 +2524,122 @@ CTM laydata::TdtText::renderingAdjustment(const CTM& mtrx) const
    }
    return adjmatrix;
 }
+
+//-----------------------------------------------------------------------------
+
+DBbox laydata::TdtAuxRef::overlap() const
+{
+   assert(NULL != _structure);
+   DBbox ovl(_structure->cellOverlap());
+   ovl.normalize();
+   return ovl;
+}
+
+void  laydata::TdtAuxRef::vlOverlap(const layprop::DrawProperties& prop, DBbox& vlOvl) const
+{
+   assert(NULL != _structure);
+   DBbox strOverlap(_structure->getVisibleOverlap(prop));
+   if (DEFAULT_OVL_BOX == strOverlap) return;
+   strOverlap.normalize();
+   vlOvl.overlap(strOverlap);
+}
+
+void  laydata::TdtAuxRef::openGlPrecalc(layprop::DrawProperties& drawprop, PointVector& ptlist) const
+{
+      // calculate the current translation matrix
+      CTM newtrans = drawprop.topCtm();
+      // get overlapping box of the structure ...
+      DBbox obox(DEFAULT_ZOOM_BOX);
+      if (_structure)
+         obox = _structure->cellOverlap();
+      // ... translate it to the current coordinates ...
+      DBbox areal = obox.overlap(newtrans);
+      // check that the cell (or part of it) is in the visual window
+      DBbox clip = drawprop.clipRegion();
+      if (0ll == clip.cliparea(areal)) return;
+      // check that the cell area is bigger that the MIN_VISUAL_AREA
+      if (!areal.visible(drawprop.scrCtm(), drawprop.visualLimit())) return;
+      // If we get here - means that the cell (or part of it) is visible
+      ptlist.reserve(4);
+      ptlist.push_back(obox.p1() * newtrans);
+      ptlist.push_back(TP(obox.p2().x(), obox.p1().y()) * newtrans);
+      ptlist.push_back(obox.p2() * newtrans);
+      ptlist.push_back(TP(obox.p1().x(), obox.p2().y()) * newtrans);
+}
+
+void  laydata::TdtAuxRef::openGlDrawLine(layprop::DrawProperties& drawprop, const PointVector& ptlist) const
+{
+//   if (0 == ptlist.size()) return;
+//   drawprop.drawCellBoundary(ptlist);
+}
+
+void  laydata::TdtAuxRef::openGlDrawFill(layprop::DrawProperties& drawprop, const PointVector& ptlist) const
+{
+   if ((NULL == _structure) || (0 == ptlist.size())) return;
+   // draw the structure itself
+   _structure->openGlDraw(drawprop, false);
+}
+
+void  laydata::TdtAuxRef::openGlDrawSel(const PointVector&, const SGBitSet*) const
+{
+
+}
+
+void  laydata::TdtAuxRef::openGlPostClean(layprop::DrawProperties& drawprop, PointVector& ptlist) const
+{
+   if (0 == ptlist.size()) return;
+   ptlist.clear();
+}
+
+void  laydata::TdtAuxRef::drawRequest(tenderer::TopRend& rend) const
+{
+   // get overlapping box of the structure ...
+   DBbox obox(_structure->cellOverlap());
+   // ... translate it to the current coordinates ...
+   DBbox areal = obox.overlap(rend.topCTM());
+   if (!areal.visible(rend.ScrCTM(), rend.visualLimit())) return;
+
+   _structure->openGlRender(rend, CTM(), false, false);
+}
+
+void  laydata::TdtAuxRef::drawSRequest(tenderer::TopRend& rend, const SGBitSet*) const
+{
+   assert(false);
+   drawRequest(rend);
+}
+
+void  laydata::TdtAuxRef::motionDraw(const layprop::DrawProperties& drawprop, CtmQueue& transtack, SGBitSet*) const
+{
+   assert(false);
+//   if (_structure)
+//      _structure->motionDraw(drawprop, transtack);
+}
+
+void laydata::TdtAuxRef::info(std::ostringstream&, real) const
+{
+   assert(false);
+}
+
+void laydata::TdtAuxRef::write(TEDfile* const tedfile) const
+{
+   assert(false);
+}
+
+void laydata::TdtAuxRef::dbExport(DbExportFile&) const
+{
+   assert(false);
+}
+
+void laydata::TdtAuxRef::psWrite(PSFile&, const layprop::DrawProperties&) const
+{
+   assert(false);
+}
+
+bool laydata::TdtAuxRef::pointInside(const TP)
+{
+   return false;
+}
+
 
 //-----------------------------------------------------------------------------
 // class ValidBox

@@ -32,8 +32,7 @@
 #include "viewprop.h"
 #include "tenderer.h"
 #include "outbox.h"
-#include "tedat_ext.h"
-
+#include "grccell.h"
 
 //-----------------------------------------------------------------------------
 // class QTreeTmpl
@@ -858,5 +857,5 @@ laydata::QTreeTmpl<DataT>::~QTreeTmpl()
 //==============================================================================
 // implicit template instantiation with a certain type parameter
 template class laydata::QTreeTmpl<laydata::TdtData>;
-//template class laydata::QTreeTmpl<laydata::TdtErrData>;
+template class laydata::QTreeTmpl<auxdata::TdtErrData>;
 

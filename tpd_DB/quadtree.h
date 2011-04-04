@@ -121,21 +121,24 @@ namespace laydata {
       byte                      _quadMap;
    };
 
-   class QTreeTmp {
+   template <typename DataT>
+   class QTStoreTmpl {
    public:
-                                QTreeTmp(QuadTree* trunk) : _trunk(trunk) {};
-       void                     put(TdtData* shape);
-       void                     putBox(const TP& p1, const TP& p2);
-       void                     putPoly(PointVector& pl);
-       void                     putPoly(int4b* pl, unsigned psize);
-       void                     putWire(PointVector& pl,word w);
-       void                     putText(std::string text, CTM trans);
+                                QTStoreTmpl(QTreeTmpl<DataT>* trunk) : _trunk(trunk) {};
+       void                     put(DataT* shape);
+//       void                     putBox(const TP& p1, const TP& p2);
+//       void                     putPoly(PointVector& pl);
+//       void                     putPoly(int4b* pl, unsigned psize);
+//       void                     putWire(PointVector& pl,word w);
+//       void                     putText(std::string text, CTM trans);
        void                     commit();
    private:
+      typedef  std::list<DataT*>    ShapeList;
       ShapeList                 _data;
-      QuadTree*                 _trunk;
+      QTreeTmpl<DataT>*         _trunk;
    };
 
+   typedef QTStoreTmpl<TdtData>  QTreeTmp;
 }
 
 #endif

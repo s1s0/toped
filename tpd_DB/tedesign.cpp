@@ -134,7 +134,7 @@ void laydata::TdtLibrary::read(InputTdtFile* const tedfile)
 void laydata::TdtLibrary::registerCellRead(std::string cellname, TdtCell* cell) {
    if (_cells.end() != _cells.find(cellname))
    {
-   // There are several possiblirities here:
+   // There are several possibilities here:
    // 1. Cell has been referenced before the definition takes place
    // 2. The same case 1, but the reason is circular reference.
    // 3. Cell is defined more than once
@@ -779,7 +779,7 @@ laydata::TdtDefaultCell* laydata::TdtLibDir::displaceUndefinedCell(std::string c
    return _libdirectory[UNDEFCELL_LIB]->second->displaceCell(cell_name);
 }
 
-/*! Ensures a themporary storage of an undefined cell which has been unlinked
+/*! Ensures a temporary storage of an undefined cell which has been unlinked
 (unreferenced).
 */
 void laydata::TdtLibDir::holdUndefinedCell(TdtDefaultCell* udefrcell)

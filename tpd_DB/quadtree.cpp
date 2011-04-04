@@ -28,7 +28,7 @@
 #include "tpdph.h"
 #include "quadtree.h"
 #include "qtree_tmpl.h"
-#include "tedat_ext.h"
+#include "grccell.h"
 
 laydata::QuadProps::QuadProps(): _numObjects(0), _invalid(false), _quadMap(0)
 {}
@@ -127,53 +127,60 @@ char laydata::QuadProps::getNWQuad() const
 
 //=============================================================================
 
-void laydata::QTreeTmp::put(laydata::TdtData* shape)
+template <typename DataT>
+void laydata::QTStoreTmpl<DataT>::put(DataT* shape)
 {
    _trunk->updateOverlap(shape->overlap());
    _data.push_back(shape);
 }
 
-/*!Create new TdtBox. Depending on sortnow input variable the new shape is
-just added to the QuadTree (using QuadTree::put()) without sorting or fit on
-the proper place (using add() */
-void laydata::QTreeTmp::putBox(const TP& p1, const TP& p2)
-{
-   laydata::TdtBox *shape = DEBUG_NEW TdtBox(p1,p2);
-   put(shape);
-}
-/*!Create new TdtPoly. Depending on sortnow input variable the new shape is
-just added to the QuadTree (using QuadTree::put()) without sorting or fit on
-the proper place (using add() */
-void laydata::QTreeTmp::putPoly(PointVector& pl)
-{
-   laydata::TdtPoly *shape = DEBUG_NEW TdtPoly(pl);
-   put(shape);
-}
+///*!Create new TdtBox. Depending on sortnow input variable the new shape is
+//just added to the QuadTree (using QuadTree::put()) without sorting or fit on
+//the proper place (using add() */
+//template <typename DataT>
+//void laydata::QTStoreTmpl<DataT>::putBox(const TP& p1, const TP& p2)
+//{
+//   laydata::TdtBox *shape = DEBUG_NEW TdtBox(p1,p2);
+//   put(shape);
+//}
+///*!Create new TdtPoly. Depending on sortnow input variable the new shape is
+//just added to the QuadTree (using QuadTree::put()) without sorting or fit on
+//the proper place (using add() */
+//template <typename DataT>
+//void laydata::QTStoreTmpl<DataT>::putPoly(PointVector& pl)
+//{
+//   laydata::TdtPoly *shape = DEBUG_NEW TdtPoly(pl);
+//   put(shape);
+//}
+//
+//template <typename DataT>
+//void laydata::QTStoreTmpl<DataT>::putPoly(int4b* pl, unsigned psize)
+//{
+//   laydata::TdtPoly *shape = DEBUG_NEW TdtPoly(pl, psize);
+//   put(shape);
+//}
+//
+///*!Create new TdtWire. Depending on sortnow input variable the new shape is
+//just added to the QuadTree (using QuadTree::put()) without sorting or fit on
+//the proper place (using add() */
+//template <typename DataT>
+//void laydata::QTStoreTmpl<DataT>::putWire(PointVector& pl,word w)
+//{
+//   laydata::TdtWire *shape = DEBUG_NEW TdtWire(pl,w);
+//   put(shape);
+//}
+///*!Create new TdtText. Depending on sortnow input variable the new shape is
+//just added to the QuadTree (using QuadTree::put()) without sorting or fit on
+//the proper place (using add() */
+//template <typename DataT>
+//void laydata::QTStoreTmpl<DataT>::putText(std::string text,CTM trans)
+//{
+//   laydata::TdtText *shape = DEBUG_NEW TdtText(text,trans);
+//   put(shape);
+//}
 
-void laydata::QTreeTmp::putPoly(int4b* pl, unsigned psize)
-{
-   laydata::TdtPoly *shape = DEBUG_NEW TdtPoly(pl, psize);
-   put(shape);
-}
-
-/*!Create new TdtWire. Depending on sortnow input variable the new shape is
-just added to the QuadTree (using QuadTree::put()) without sorting or fit on
-the proper place (using add() */
-void laydata::QTreeTmp::putWire(PointVector& pl,word w)
-{
-   laydata::TdtWire *shape = DEBUG_NEW TdtWire(pl,w);
-   put(shape);
-}
-/*!Create new TdtText. Depending on sortnow input variable the new shape is
-just added to the QuadTree (using QuadTree::put()) without sorting or fit on
-the proper place (using add() */
-void laydata::QTreeTmp::putText(std::string text,CTM trans)
-{
-   laydata::TdtText *shape = DEBUG_NEW TdtText(text,trans);
-   put(shape);
-}
-
-void laydata::QTreeTmp::commit()
+template <typename DataT>
+void laydata::QTStoreTmpl<DataT>::commit()
 {
    _trunk->resort(_data);
 }
@@ -426,8 +433,10 @@ bool laydata::DrawIterator<DataT>::secureNonEmptyDown()
 //==============================================================================
 // implicit template instantiation with a certain type parameter
 template class laydata::Iterator<laydata::TdtData>;
-template class laydata::Iterator<laydata::TdtErrData>;
+template class laydata::Iterator<auxdata::TdtErrData>;
 template class laydata::ClipIterator<laydata::TdtData>;
-template class laydata::ClipIterator<laydata::TdtErrData>;
+template class laydata::ClipIterator<auxdata::TdtErrData>;
 template class laydata::DrawIterator<laydata::TdtData>;
-template class laydata::DrawIterator<laydata::TdtErrData>;
+template class laydata::DrawIterator<auxdata::TdtErrData>;
+template class laydata::QTStoreTmpl<laydata::TdtData>;
+template class laydata::QTStoreTmpl<auxdata::TdtErrData>;

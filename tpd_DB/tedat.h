@@ -46,59 +46,59 @@ namespace laydata {
        is sorted in. */
    class TdtData  {
    public:
-   //! The default constructor.
-      TdtData(SH_STATUS sel = sh_active) : _status(sel)/*, _next(NULL) */{};
+      //! The default constructor.
+                           TdtData(SH_STATUS sel = sh_active) : _status(sel){};
+      virtual             ~TdtData(){};
       //! Return the overlapping box of the object.
       virtual   DBbox      overlap()  const = 0;
       //! Return the overlapping box of the object.
       virtual   void       vlOverlap(const layprop::DrawProperties&, DBbox&) const {assert(false);}
-   //! Move the object relatively using the input CTM
+      //! Move the object relatively using the input CTM
       virtual   Validator* move(const CTM&, SGBitSet& plst) = 0;
-   //! Rotate or flip (transfer the object using input CTM
+      //! Rotate or flip (transfer the object using input CTM
       virtual   void       transfer(const CTM&) = 0;
-   //! Copy the object and move it using the input CTM
+      //! Copy the object and move it using the input CTM
       virtual   TdtData*   copy(const CTM&) = 0;
-   //! A preparation for drawing - calculating all drawing objects using translation matrix stack.
+      //! A preparation for drawing - calculating all drawing objects using translation matrix stack.
       virtual   void       openGlPrecalc(layprop::DrawProperties&, PointVector&) const = 0;
-   //! Draw the outline of the objects
+      //! Draw the outline of the objects
       virtual   void       openGlDrawLine(layprop::DrawProperties&, const PointVector&) const = 0;
-   //! Draw the object texture
+      //! Draw the object texture
       virtual   void       openGlDrawFill(layprop::DrawProperties&, const PointVector&) const = 0;
-   //! Draw the outlines of the selected objects
+      //! Draw the outlines of the selected objects
       virtual   void       openGlDrawSel(const PointVector&, const SGBitSet*) const = 0;
-   //! Clean-up the calculated drawing objects
+      //! Clean-up the calculated drawing objects
       virtual   void       openGlPostClean(layprop::DrawProperties&, PointVector& ptlist) const {ptlist.clear();}
       virtual   void       drawRequest(tenderer::TopRend&) const = 0;
-   //! Draw the outlines of the selected objects
+      //! Draw the outlines of the selected objects
       virtual   void       drawSRequest(tenderer::TopRend&, const SGBitSet*) const = 0;
-   //! Draw the objects in motion during copy/move and similar operations
+      //! Draw the objects in motion during copy/move and similar operations
       virtual   void       motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const = 0;
-   //! Print an object description on the toped console.
+      //! Print an object description on the toped console.
       virtual   void       info(std::ostringstream&, real) const = 0;
-   //! Write the TdtData object in TDT file.
+      //! Write the TdtData object in TDT file.
       virtual   void       write(TEDfile* const tedfile) const = 0;
-   //! Export the TdtData object in external format.
+      //! Export the TdtData object in external format.
       virtual   void       dbExport(DbExportFile&) const = 0;
-   //! Write the TdtData object in PS file.
+      //! Write the TdtData object in PS file.
       virtual   void       psWrite(PSFile&, const layprop::DrawProperties&) const = 0;
-   //!
+      //!
       virtual   bool       pointInside(const TP);
-   //! shape cut with the input polygon
+      //! shape cut with the input polygon
       virtual   void       polyCut(PointVector&, ShapeList**) = 0;
-   //! shrink/stretch
+      //! shrink/stretch
       virtual   void       stretch(int bfactor, ShapeList**) = 0;
-   //!
+      //!
       virtual  PointVector shape2poly() const = 0;
       //!
       virtual  PointVector dumpPoints() const = 0;
-   //! Set the _selected flag in case the object is entirely overlapped by select_in box
+      //! Set the _selected flag in case the object is entirely overlapped by select_in box
       void                 selectInBox(DBbox&, DataList*, bool);
       void                 selectThis(DataList*);
       bool                 unselect(DBbox&, SelectDataPair&, bool);
       void                 setStatus(SH_STATUS s) {_status = s;}
       SH_STATUS            status() const {return _status;}
       virtual word         numPoints() const = 0;
-      virtual             ~TdtData(){};
       virtual word         lType() const = 0;
       
       //********************
@@ -110,7 +110,7 @@ namespace laydata {
       virtual   std::string getString(void) {assert(true); return "";};
       virtual   void       setClientData(void* clientData) {assert(true);};
       virtual   void*      getClientData(void) {assert(true); return NULL;};
-   //********************
+      //********************
    protected:
       virtual void         selectPoints(DBbox&, SGBitSet&) = 0;
       virtual void         unselectPoints(DBbox&, SGBitSet&) = 0;
@@ -246,16 +246,16 @@ namespace laydata {
    class TdtCellRef : public TdtData  {
    public:
                            TdtCellRef(CellDefin str, CTM trans) : TdtData(),
-                                          _structure(str), _translation(trans) {};
+                                          _structure(str), _translation(trans) {}
                            TdtCellRef(InputTdtFile* const tedfile);
-      virtual             ~TdtCellRef() {};
+      virtual             ~TdtCellRef() {}
       virtual DBbox        overlap() const;
       virtual   void       vlOverlap(const layprop::DrawProperties&, DBbox&) const;
       virtual Validator*   move(const CTM& trans, SGBitSet&) {
-                                            _translation *= trans; return NULL;};
-      virtual void         transfer(const CTM& trans) {_translation *= trans;};
+                                            _translation *= trans; return NULL;}
+      virtual void         transfer(const CTM& trans) {_translation *= trans;}
       virtual TdtData*     copy(const CTM& trans) {return DEBUG_NEW TdtCellRef(
-                                               _structure,_translation*trans);};
+                                               _structure,_translation*trans);}
 //       TdtCellRef*          getShapeOver(TP);
       virtual void         openGlPrecalc(layprop::DrawProperties&, PointVector&) const;
       virtual void         openGlDrawLine(layprop::DrawProperties&, const PointVector&) const;
@@ -296,12 +296,12 @@ namespace laydata {
    class TdtCellAref : public TdtCellRef  {
    public:
                            TdtCellAref(CellDefin str, CTM trans, const ArrayProps& arrprops) :
-                              TdtCellRef(str, trans), _arrprops(arrprops) {};
+                              TdtCellRef(str, trans), _arrprops(arrprops) {}
                            TdtCellAref(InputTdtFile* const tedfile);
       virtual             ~TdtCellAref() {};
       virtual DBbox        overlap() const;
       virtual TdtData*     copy(const CTM& trans) {return DEBUG_NEW TdtCellAref(
-                              _structure,_translation * trans, _arrprops);};
+                              _structure,_translation * trans, _arrprops);}
 
       virtual void         openGlPrecalc(layprop::DrawProperties&, PointVector&) const;
       virtual void         openGlDrawLine(layprop::DrawProperties&, const PointVector&) const;
@@ -332,10 +332,10 @@ namespace laydata {
       virtual             ~TdtText() {};
       virtual DBbox        overlap() const;
       virtual Validator*   move(const CTM& trans, SGBitSet&) {
-                                            _translation *= trans; return NULL;};
-      virtual void         transfer(const CTM& trans)  {_translation *= trans;};
+                                            _translation *= trans; return NULL;}
+      virtual void         transfer(const CTM& trans)  {_translation *= trans;}
       virtual TdtData*     copy(const CTM& trans) {return DEBUG_NEW TdtText(
-                                                  _text,_translation * trans);};
+                                                  _text,_translation * trans);}
       virtual void         openGlPrecalc(layprop::DrawProperties&, PointVector&) const;
       virtual void         openGlDrawLine(layprop::DrawProperties&, const PointVector&) const;
       virtual void         openGlDrawFill(layprop::DrawProperties&, const PointVector&) const;
@@ -369,6 +369,49 @@ namespace laydata {
       TP                  _correction;
    };
 
+
+//==============================================================================
+   class TdtAuxRef : public TdtData  {
+   public:
+                           TdtAuxRef(auxdata::GrcCell* str) : TdtData(),
+                                          _structure(str) {};
+      virtual             ~TdtAuxRef() {};
+      virtual DBbox        overlap() const;
+      virtual void         vlOverlap(const layprop::DrawProperties&, DBbox&) const;
+      virtual Validator*   move(const CTM&, SGBitSet&) {assert(false);return NULL;}
+      virtual void         transfer(const CTM&) {assert(false);}
+      virtual TdtData*     copy(const CTM& trans) {assert(false);return NULL;}
+//       TdtCellRef*          getShapeOver(TP);
+      virtual void         openGlPrecalc(layprop::DrawProperties&, PointVector&) const;
+      virtual void         openGlDrawLine(layprop::DrawProperties&, const PointVector&) const;
+      virtual void         openGlDrawFill(layprop::DrawProperties&, const PointVector&) const;
+      virtual void         openGlDrawSel(const PointVector&, const SGBitSet*) const;
+      virtual void         openGlPostClean(layprop::DrawProperties&, PointVector& ptlist) const;
+      virtual void         drawRequest(tenderer::TopRend&) const;
+      virtual void         drawSRequest(tenderer::TopRend&, const SGBitSet*) const;
+      virtual void         motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
+
+      virtual void         info(std::ostringstream&, real) const;
+      virtual void         write(TEDfile* const tedfile) const;
+      virtual void         dbExport(DbExportFile&) const;
+      virtual void         psWrite(PSFile&, const layprop::DrawProperties&) const;
+//      virtual void         ungroup(TdtDesign*, TdtCell*, AtticList*);
+      virtual word         numPoints() const {return 1;};
+      virtual bool         pointInside(const TP);
+      virtual void         polyCut(PointVector&, ShapeList**) {};
+      virtual void         stretch(int bfactor, ShapeList**) {};
+      virtual PointVector  shape2poly() const {return PointVector();/*return empty list*/}
+      virtual PointVector  dumpPoints() const {return PointVector();/*return empty list*/}
+//      virtual ArrayProps   arrayProps() const {return ArrayProps();}
+      virtual word         lType() const {return _lmgrcref;}
+//      std::string          cellname() const;
+//      TdtCell*             cStructure() const;
+//      TdtDefaultCell*      structure() const {return _structure;}
+   protected:
+      void                 selectPoints(DBbox&, SGBitSet&) {}
+      void                 unselectPoints(DBbox&, SGBitSet&) {}
+      auxdata::GrcCell*    _structure; // pointer to the cell definition
+   };
 //==============================================================================
 
    class ValidBox  : public Validator {

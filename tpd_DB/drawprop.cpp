@@ -753,7 +753,7 @@ void layprop::DrawProperties::adjustAlpha(word factor)
 
 bool  layprop::DrawProperties::layerHidden(unsigned layno) const
 {
-   if (REF_LAY == layno) return false;
+   if ((REF_LAY == layno) || (GRC_LAY == layno)) return false;
    const LayerSettings* ilayset = findLayerSettings(layno);
    if (NULL != ilayset) return ilayset->hidden();
    else return true;

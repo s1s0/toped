@@ -83,13 +83,9 @@ namespace laydata {
    const word _lmaref   = 0x0020;
    const word _lmpref   = 0x0040;
    const word _lmapref  = 0x0080;
+   const word _lmgrcref = 0x0100;
    const word _lmall    = 0xffff;
 
-   // The definition below is a "strongly typed enum". Very tempting to use, but too new
-   // and too risky for portability. gcc requires -std=c++0x option to stop the warnings
-   // It's here just as a reminder for the future
-   //   enum class SH_STATUS:byte { sh_active, sh_deleted, sh_selected, sh_partsel, sh_merged } ;
-   typedef enum { sh_active, sh_deleted, sh_selected, sh_partsel, sh_merged } SH_STATUS;
    typedef enum {
       shp_OK         = 0x0000,
       shp_ident      = 0x0001, // identical or one line points removed
@@ -114,7 +110,8 @@ namespace laydata {
    class TdtDesign;
    class TdtLibrary;
    class TdtLibDir;
-   class QTreeTmp;
+   template <typename DataT>   class QTStoreTmpl;
+   typedef QTStoreTmpl<TdtData>                     QTreeTmp;
    typedef  std::pair<TdtData*, SGBitSet>           SelectDataPair;
    typedef  std::list<SelectDataPair>               DataList;
    typedef  std::map<unsigned, DataList*>           SelectList;
@@ -356,7 +353,11 @@ namespace laydata {
          WireContour*     _wcObject;
          int4b*           _ldata;
    };
+}
 
+namespace auxdata {
+   class GrcCell;
+   typedef std::map<std::string, GrcCell*>  GrcCellMap;
 }
 
 class DbExportFile {
@@ -451,13 +452,14 @@ class LayerCrossMap {
    public:
                               LayerCrossMap() : _tdtLayNumber(0), _tmpLayer(NULL) {}
       laydata::QTreeTmp*      getTmpLayer()     {return _tmpLayer;}
+      unsigned                tdtLayNumber()    {return _tdtLayNumber;}
       virtual bool            mapTdtLay(laydata::TdtCell*, word, word)
                                                          {assert(false); return false;}
       virtual bool            mapTdtLay(laydata::TdtCell*,const std::string&)
                                                          {assert(false); return false;}
       virtual std::string     printSrcLayer() const      {assert(false); return std::string("");}
    protected:
-      word                    _tdtLayNumber  ; //! Current layer number
+      unsigned                _tdtLayNumber  ; //! Current layer number
       laydata::QTreeTmp*      _tmpLayer      ; //! Current target layer
 };
 
@@ -513,6 +515,7 @@ class ImportDB {
       ForeignDbFile*          _src_lib       ;
       laydata::TdtLibDir*     _tdt_db        ;
       laydata::TdtCell*       _dst_structure ; //! Current target structure
+      auxdata::GrcCell*       _grc_structure ; //! Current error structure
       real                    _dbuCoeff      ; //! The DBU ratio between the foreign and local DB
       real                    _crossCoeff    ; //! Current cross coefficient
       real                    _technoSize    ; //! technology size (used for conversion of some texts)
