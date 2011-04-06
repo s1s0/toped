@@ -2526,6 +2526,10 @@ CTM laydata::TdtText::renderingAdjustment(const CTM& mtrx) const
 }
 
 //-----------------------------------------------------------------------------
+laydata::TdtAuxRef::~TdtAuxRef()
+{
+   delete _structure;
+}
 
 DBbox laydata::TdtAuxRef::overlap() const
 {

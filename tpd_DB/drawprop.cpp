@@ -695,7 +695,7 @@ void layprop::DrawProperties::setGridColor(std::string colname) const
 
 bool layprop::DrawProperties::setCurrentFill(bool force_fill) const
 {
-   if (REF_LAY == _drawingLayer) return true;
+   if ((REF_LAY == _drawingLayer) || (GRC_LAY == _drawingLayer)) return true;
    // The lines below are doing effectively
    // byte* ifill = _layFill[_layset[_drawingLayer]->getfill]
    const LayerSettings* ilayset = findLayerSettings(_drawingLayer);

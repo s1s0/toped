@@ -375,7 +375,7 @@ namespace laydata {
    public:
                            TdtAuxRef(auxdata::GrcCell* str) : TdtData(),
                                           _structure(str) {};
-      virtual             ~TdtAuxRef() {};
+      virtual             ~TdtAuxRef();
       virtual DBbox        overlap() const;
       virtual void         vlOverlap(const layprop::DrawProperties&, DBbox&) const;
       virtual Validator*   move(const CTM&, SGBitSet&) {assert(false);return NULL;}
