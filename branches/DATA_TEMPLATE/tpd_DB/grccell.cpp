@@ -99,12 +99,12 @@ void auxdata::TdtErrPoly::openGlDrawSel(const PointVector& ptlist, const SGBitSe
 
 void auxdata::TdtErrPoly::drawRequest(tenderer::TopRend& rend) const
 {
-   rend.poly(_pdata, _psize, NULL /*&_teseldata*/); //TODO - do we need another entry method to the renderer?
+   rend.poly(_pdata, _psize, NULL );
 }
 
 void auxdata::TdtErrPoly::drawSRequest(tenderer::TopRend& rend, const SGBitSet*) const
 {
-   rend.poly(_pdata, _psize, NULL /*&_teseldata*/, NULL);
+   rend.poly(_pdata, _psize, NULL, NULL);
 }
 
 void auxdata::TdtErrPoly::info(std::ostringstream& ost, real DBU) const
@@ -469,22 +469,8 @@ void auxdata::GrcCell::openGlRender(tenderer::TopRend& rend, const CTM& trans,
          case DRC_LAY: assert(false); break;
          default     :
          {
+            rend.setLayer(curlayno, (NULL != dlist));
             lay->second->openGlRender(rend, dlist);
-//            short cltype = lay->second->clipType(rend);
-//            switch (cltype)
-//            {
-//               case -1: {// full overlap - conditional rendering
-//                  if ( !rend.chunkExists(curlayno, (NULL != dlist)) )
-//                     lay->second->openGlRender(rend, dlist);
-//                  break;
-//               }
-//               case  1: {//partial clip - render always
-//                  rend.setLayer(curlayno, (NULL != dlist));
-//                  lay->second->openGlRender(rend, dlist);
-//                  break;
-//               }
-//               default: assert(0 == cltype);
-//            }
          }
       }
    }
