@@ -575,6 +575,16 @@ void TpdPost::treeRenameMember(const char* oldName, const char* newName)
    wxPostEvent(_cllBrowser, eventCELLTREE);
 }
 
+void TpdPost::treeMarkGrcMember(const char* cell, bool error)
+{
+   assert(_cllBrowser);
+   wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
+   eventCELLTREE.SetInt(tui::BT_CELL_MARK_GRC);
+   eventCELLTREE.SetString(wxString(cell, wxConvUTF8));
+   eventCELLTREE.SetExtraLong(error);
+   wxPostEvent(_cllBrowser, eventCELLTREE);
+}
+
 void TpdPost::parseCommand(const wxString cmd)
 {
    assert(_cmdLine);

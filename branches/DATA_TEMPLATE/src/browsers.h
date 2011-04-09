@@ -62,13 +62,17 @@ namespace browsers
    // all browser icons
    enum
    {
-      BICN_LIBCELL_HIER = 0,  // library cell with hierarchy  0
-      BICN_DBCELL_HIER  = 1,  // DB      cell with hierarchy  1
-      BICN_LIBCELL_FLAT = 2,  // library cell  w/o hierarchy  2
-      BICN_DBCELL_FLAT  = 3,  // DB      cell  w/o hierarchy  3
-      BICN_LIBRARYDB    = 4,  // library                      4
-      BICN_TARGETDB     = 5,  // DB                           5
-      BICN_UNDEFCELL    = 6
+      BICN_LIBCELL_HIER   ,  // library cell with hierarchy
+      BICN_LIBCELL_HIER_I ,  // library cell with hierarchy and invalid objects
+      BICN_DBCELL_HIER    ,  // DB      cell with hierarchy
+      BICN_DBCELL_HIER_I  ,  // DB      cell with hierarchy and invalid objects
+      BICN_LIBCELL_FLAT   ,  // library cell  w/o hierarchy
+      BICN_LIBCELL_FLAT_I ,  // library cell  w/o hierarchy and invalid objects
+      BICN_DBCELL_FLAT    ,  // DB      cell  w/o hierarchy
+      BICN_DBCELL_FLAT_I  ,  // DB      cell  w/o hierarchy and invalid objects
+      BICN_LIBRARYDB      ,  // library
+      BICN_TARGETDB       ,  // DB
+      BICN_UNDEFCELL
    };
 
 

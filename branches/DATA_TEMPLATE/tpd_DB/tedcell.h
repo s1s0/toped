@@ -117,6 +117,7 @@ namespace laydata {
                                       const CellMap* = NULL, const TDTHierTree* = NULL) const;
          virtual void        collectUsedLays(const TdtLibDir*, bool, WordList&) const;
          virtual void        renameChild(std::string, std::string) {assert(false); /* TdTDefaultCell can not be renamed */}
+         bool                checkLayer(unsigned) const;
          void                setName(std::string nname) {_name = nname;}
          bool                orphan() const             {return _orphan;}
          void                setOrphan(bool orph)       {_orphan = orph;}

@@ -39,9 +39,13 @@
 #include "../ui/activelay.xpm"
 #include "../ui/lock.xpm"
 #include "../ui/cellhg.xpm"
+#include "../ui/cellhg_g.xpm"
 #include "../ui/cellh.xpm"
+#include "../ui/cellh_g.xpm"
 #include "../ui/cellfg.xpm"
+#include "../ui/cellfg_g.xpm"
 #include "../ui/cellf.xpm"
+#include "../ui/cellf_g.xpm"
 #include "../ui/nolay.xpm"
 #include "../ui/librarydb.xpm"
 #include "../ui/targetdb.xpm"
@@ -366,7 +370,10 @@ void browsers::CellBrowser::updateFlat()
             for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
             {
                wxTreeItemId cellitem = AppendItem(_dbroot, wxString( CL->first.c_str(),  wxConvUTF8));
-               SetItemImage(cellitem,BICN_DBCELL_FLAT,wxTreeItemIcon_Normal);
+               if (CL->second->checkLayer(GRC_LAY))
+                  SetItemImage(cellitem,BICN_DBCELL_FLAT_I,wxTreeItemIcon_Normal);
+               else
+                  SetItemImage(cellitem,BICN_DBCELL_FLAT,wxTreeItemIcon_Normal);
             }
          }
          delete cll;
@@ -390,7 +397,10 @@ void browsers::CellBrowser::updateFlat()
             for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
             {
                wxTreeItemId cellitem = AppendItem(libroot, wxString( CL->first.c_str(),  wxConvUTF8));
-               SetItemImage(cellitem,BICN_LIBCELL_FLAT,wxTreeItemIcon_Normal);
+               if (CL->second->checkLayer(GRC_LAY))
+                  SetItemImage(cellitem,BICN_LIBCELL_FLAT_I,wxTreeItemIcon_Normal);
+               else
+                  SetItemImage(cellitem,BICN_LIBCELL_FLAT,wxTreeItemIcon_Normal);
             }
          }
          delete cll;
@@ -463,7 +473,6 @@ void browsers::CellBrowser::updateHier()
          tdtH = dbLibDir->getLib(libID)->hiertree()->GetFirstRoot(libID);
          while (tdtH)
          {
-            std::string str = tdtH->GetItem()->name();
             nroot = AppendItem(libroot, wxString(tdtH->GetItem()->name().c_str(), wxConvUTF8));
             collectChildren(tdtH, libID, nroot);
             tdtH = tdtH->GetNextRoot(libID);
@@ -501,22 +510,40 @@ void browsers::CellBrowser::updateHier()
 void browsers::CellBrowser::collectChildren(const laydata::TDTHierTree *root,
                                            int libID, const wxTreeItemId& lroot)
 {
+   const laydata::TdtDefaultCell* cellItem = root->GetItem();
    const laydata::TDTHierTree* child= root->GetChild(libID);
-   int rootLibID = root->GetItem()->libID();
+   bool withGrc = cellItem->checkLayer(GRC_LAY);
+   int rootLibID = cellItem->libID();
    if (child)
    {
       switch (rootLibID)
       {
          case TARGETDB_LIB:
-            SetItemImage(lroot,BICN_DBCELL_HIER,wxTreeItemIcon_Normal);
-            SetItemImage(lroot,BICN_DBCELL_FLAT,wxTreeItemIcon_Expanded);
+            if (withGrc)
+            {
+               SetItemImage(lroot,BICN_DBCELL_HIER_I,wxTreeItemIcon_Normal);
+               SetItemImage(lroot,BICN_DBCELL_FLAT_I,wxTreeItemIcon_Expanded);
+            }
+            else
+            {
+               SetItemImage(lroot,BICN_DBCELL_HIER,wxTreeItemIcon_Normal);
+               SetItemImage(lroot,BICN_DBCELL_FLAT,wxTreeItemIcon_Expanded);
+            }
             break;
          case UNDEFCELL_LIB:
             SetItemImage(lroot,BICN_UNDEFCELL,wxTreeItemIcon_Normal);
             break;
          default:
-            SetItemImage(lroot,BICN_LIBCELL_HIER,wxTreeItemIcon_Normal);
-            SetItemImage(lroot,BICN_LIBCELL_FLAT,wxTreeItemIcon_Expanded);
+            if (withGrc)
+            {
+               SetItemImage(lroot,BICN_LIBCELL_HIER_I,wxTreeItemIcon_Normal);
+               SetItemImage(lroot,BICN_LIBCELL_FLAT_I,wxTreeItemIcon_Expanded);
+            }
+            else
+            {
+               SetItemImage(lroot,BICN_LIBCELL_HIER,wxTreeItemIcon_Normal);
+               SetItemImage(lroot,BICN_LIBCELL_FLAT,wxTreeItemIcon_Expanded);
+            }
       }
    }
    else
@@ -524,13 +551,19 @@ void browsers::CellBrowser::collectChildren(const laydata::TDTHierTree *root,
       switch (rootLibID)
       {
          case TARGETDB_LIB:
-            SetItemImage(lroot,BICN_DBCELL_FLAT,wxTreeItemIcon_Normal);
+            if (withGrc)
+               SetItemImage(lroot,BICN_DBCELL_FLAT_I,wxTreeItemIcon_Normal);
+            else
+               SetItemImage(lroot,BICN_DBCELL_FLAT,wxTreeItemIcon_Normal);
             break;
          case UNDEFCELL_LIB:
             SetItemImage(lroot,BICN_UNDEFCELL,wxTreeItemIcon_Normal);
             break;
          default:
-            SetItemImage(lroot,BICN_LIBCELL_FLAT,wxTreeItemIcon_Normal);
+            if (withGrc)
+               SetItemImage(lroot,BICN_LIBCELL_FLAT_I,wxTreeItemIcon_Normal);
+            else
+               SetItemImage(lroot,BICN_LIBCELL_FLAT,wxTreeItemIcon_Normal);
       }
    }
    wxTreeItemId nroot;
@@ -1079,9 +1112,13 @@ browsers::TDTbrowser::TDTbrowser(wxWindow *parent, wxWindowID id,
 
    _imageList = DEBUG_NEW wxImageList(16, 16, TRUE);
    _imageList->Add( wxIcon( cellhg    ) ); // BICN_LIBCELL_HIER
+   _imageList->Add( wxIcon( cellhg_g  ) ); // BICN_LIBCELL_HIER_I
    _imageList->Add( wxIcon( cellh     ) ); // BICN_DBCELL_HIER
+   _imageList->Add( wxIcon( cellh_g   ) ); // BICN_DBCELL_HIER_I
    _imageList->Add( wxIcon( cellfg    ) ); // BICN_LIBCELL_FLAT
+   _imageList->Add( wxIcon( cellfg_g  ) ); // BICN_LIBCELL_FLAT_I
    _imageList->Add( wxIcon( cellf     ) ); // BICN_DBCELL_FLAT
+   _imageList->Add( wxIcon( cellf_g   ) ); // BICN_DBCELL_FLAT_I
    _imageList->Add( wxIcon( librarydb ) ); // BICN_LIBRARYDB
    _imageList->Add( wxIcon( targetdb  ) ); // BICN_TARGETDB
    _imageList->Add( wxIcon( cellundef ) ); // BICN_UNDEFCELL

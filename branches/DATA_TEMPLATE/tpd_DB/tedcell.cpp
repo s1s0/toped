@@ -320,6 +320,11 @@ void laydata::TdtDefaultCell::invalidateParents(laydata::TdtLibrary* ATDB)
    }
 }
 
+bool laydata::TdtDefaultCell::checkLayer(unsigned layno) const
+{
+   return (_layers.end() != _layers.find(layno));
+}
+
 //-----------------------------------------------------------------------------
 // class TdtCell
 //-----------------------------------------------------------------------------
@@ -442,6 +447,7 @@ void laydata::TdtCell::addAuxRef(unsigned layno, auxdata::GrcCell* str)
    QuadTree *cellreflayer = secureLayer(layno);
    laydata::TdtAuxRef* cellref = DEBUG_NEW TdtAuxRef(str);
    cellreflayer->add(cellref);
+//   TpdPost::treeMarkGrcMember(_name, true);
 }
 
 bool laydata::TdtCell::addChild(laydata::TdtDesign* ATDB, TdtDefaultCell* child)
