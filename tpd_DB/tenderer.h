@@ -890,6 +890,7 @@ namespace tenderer {
          void              text (const std::string*, const CTM&, const DBbox&, const TP&, bool);
          bool              collect();
          void              draw();
+         void              cleanUp();
 
          //return layno if _propertyState == DB or predefined layer in other case
          unsigned          getTenderLay(unsigned layno);
