@@ -454,14 +454,6 @@ void auxdata::GrcCell::openGlRender(tenderer::TopRend& rend, const CTM& trans,
          dlist = dlsti->second;
       else
          dlist = NULL;
-      // traversing depends on the area overlap between the layer chunk and
-      // current location of the view port. In other words traverse the
-      // cells only if they are not already traversed. For more info -
-      // see the documentation of tenderer.h::TenderReTV class.
-      // The exceptions here are:
-      // - the cell references of course
-      // - the DRC DB - because it is using a single layer besides it doesn't
-      //   utilize the reference mechanism at all.
       switch (curlayno)
       {
          case REF_LAY:
