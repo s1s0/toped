@@ -126,8 +126,10 @@ void browsers::CellBrowser::showMenu(wxTreeItemId id, const wxPoint& pt)
          wxString RBcellname = GetItemText(id);
          switch (GetItemImage(id,wxTreeItemIcon_Normal))
          {
-            case BICN_DBCELL_HIER :
-            case BICN_DBCELL_FLAT :
+            case BICN_DBCELL_HIER  :
+            case BICN_DBCELL_HIER_I:
+            case BICN_DBCELL_FLAT  :
+            case BICN_DBCELL_FLAT_I:
             {
                menu.Append(CELLTREEOPENCELL, wxT("Open " + RBcellname));
                menu.Append(tui::TMCELL_REF_B , wxT("Add reference to " + RBcellname));
@@ -141,8 +143,10 @@ void browsers::CellBrowser::showMenu(wxTreeItemId id, const wxPoint& pt)
                menu.Append(tui::TMCELL_REPORTLAY, wxT("Report layers used in " + RBcellname));
                break;
             }
-            case BICN_LIBCELL_HIER:
-            case BICN_LIBCELL_FLAT:
+            case BICN_LIBCELL_HIER  :
+            case BICN_LIBCELL_HIER_I:
+            case BICN_LIBCELL_FLAT  :
+            case BICN_LIBCELL_FLAT_I:
                menu.Append(tui::TMCELL_REF_B , wxT("Add reference to " + RBcellname));
                menu.Append(tui::TMCELL_AREF_B, wxT("Add array of " + RBcellname));
                menu.Append(tui::TMCELL_REPORTLAY, wxT("Report layers used in " + RBcellname));
