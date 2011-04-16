@@ -770,22 +770,15 @@ void DataCenter::openGlDraw(const CTM& layCTM)
             // There is no need to check for an active cell. If there isn't one
             // the function will return silently.
             _TEDLIB()->openGlDraw(*drawProp);
+            // Draw DRC data (if any)
+            // TODO! clean-up the DRC stuff here - see the comment below in the
+            // openGlRender method
             if(_DRCDB)
             {
                if (wxMUTEX_NO_ERROR == _DRCLock.TryLock())
                {
                   std::string cell = DRCData->cellName();
-                  drawProp->setState(layprop::DRC);
-                  laydata::TdtDefaultCell* dst_structure = _DRCDB->checkCell(cell);
-                  if (dst_structure)
-                  {
-                     drawProp->initCtmStack();
-//                     drawProp->initDrawRefStack(NULL); // no references yet in the DRC DB
-                     dst_structure->openGlDraw(*drawProp);
-//                     drawProp->clearCtmStack();
-                     drawProp->clearDrawRefStack();
-                  }
-                  drawProp->setState(layprop::DB);
+                  _DRCDB->openGlDraw(*drawProp, cell);
                   VERIFY(wxMUTEX_NO_ERROR == _DRCLock.Unlock());
                }
             }
@@ -846,21 +839,16 @@ void DataCenter::openGlRender(const CTM& layCTM)
             // the function will return silently.
             _TEDLIB()->openGlRender(renderer);
             // Draw DRC data (if any)
-            //_DRCDB->openGlDraw(_properties.drawprop());
-            //TODO the block below should get into the line above
-
+            // TODO! clean-up the DRC stuff here - lock/unlock and more importantly
+            // DrcLibrary <-> CalibrFile i.e. _DRCDB <-> DRCData. The end of the line shall be
+            // the removal of the DRCData object
             if(_DRCDB)
             {
                if (wxMUTEX_NO_ERROR == _DRCLock.TryLock())
                {
-                  std::string cell = DRCData->cellName();
-                  renderer.setState(layprop::DRC);
-                  laydata::TdtDefaultCell* dst_structure = _DRCDB->checkCell(cell);
-                  if (dst_structure)
-                  {
-                     dst_structure->openGlRender(renderer, DRCData->getCTM(cell), false, false);
-                  }
-                  renderer.setState(layprop::DB);
+                  std::string cellName = DRCData->cellName();
+                  CTM cellCTM = DRCData->getCTM(cellName);
+                  _DRCDB->openGlRender(renderer, cellName, cellCTM);
                   VERIFY(wxMUTEX_NO_ERROR == _DRCLock.Unlock());
                }
             }

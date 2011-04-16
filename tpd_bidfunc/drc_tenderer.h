@@ -38,7 +38,7 @@ namespace Calbr
    {
       public:
                            drcTenderer(laydata::DrcLibrary* library);
-                          ~drcTenderer();
+      virtual             ~drcTenderer();
       void                 setError(unsigned int numError);
       void                 startWriting(const std::string &cell);
       void                 addPoly(const CoordsVector   &coords);

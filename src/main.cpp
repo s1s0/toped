@@ -250,10 +250,7 @@ int TopedApp::OnRun()
 //=============================================================================
 int TopedApp::OnExit()
 {
-   if (DRCData)
-   {
-      delete DRCData;
-   }
+   if (DRCData) delete DRCData;
    delete CMDBlock;
    delete PROPC;
    delete DATC;

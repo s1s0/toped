@@ -267,6 +267,8 @@ namespace laydata {
       TdtDefaultCell*      checkCell(std::string name);
       void                 registerCellRead(std::string, TdtCell*);
       WordList             findSelected(const std::string &cell, TP*); //use for DRCexplainerror
+      void                 openGlDraw(layprop::DrawProperties&, std::string);
+      void                 openGlRender(tenderer::TopRend&, std::string, CTM&);
       std::string          name()            const {return _name;}
    protected:
 
