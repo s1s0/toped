@@ -1776,3 +1776,30 @@ laydata::TdtDefaultCell* laydata::DrcLibrary::checkCell(std::string name)
       return NULL;
    else return _cells[name];
 }
+
+void laydata::DrcLibrary::openGlDraw(layprop::DrawProperties& drawProp, std::string cell)
+{
+   drawProp.setState(layprop::DRC);
+   laydata::TdtDefaultCell* dst_structure = checkCell(cell);
+   if (dst_structure)
+   {
+      drawProp.initCtmStack();
+//    drawProp->initDrawRefStack(NULL); // no references yet in the DRC DB
+      dst_structure->openGlDraw(drawProp);
+//    drawProp->clearCtmStack();
+      drawProp.clearDrawRefStack();
+   }
+   drawProp.setState(layprop::DB);
+}
+
+void laydata::DrcLibrary::openGlRender(tenderer::TopRend& renderer, std::string cell, CTM& cctm)
+{
+   renderer.setState(layprop::DRC);
+   laydata::TdtDefaultCell* dst_structure = checkCell(cell);
+   if (dst_structure)
+   {
+      dst_structure->openGlRender(renderer, cctm, false, false);
+   }
+   renderer.setState(layprop::DB);
+}
+
