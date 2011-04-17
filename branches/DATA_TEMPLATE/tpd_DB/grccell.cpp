@@ -99,7 +99,7 @@ void auxdata::TdtErrPoly::openGlDrawSel(const PointVector& ptlist, const SGBitSe
 
 void auxdata::TdtErrPoly::drawRequest(tenderer::TopRend& rend) const
 {
-   rend.poly(_pdata, _psize, NULL );
+   rend.fpoly(_pdata, _psize);
 }
 
 void auxdata::TdtErrPoly::drawSRequest(tenderer::TopRend& rend, const SGBitSet*) const
@@ -269,7 +269,7 @@ void auxdata::TdtErrWire::openGlDrawSel(const PointVector& ptlist, const SGBitSe
 
 void auxdata::TdtErrWire::drawRequest(tenderer::TopRend& rend) const
 {
-   rend.wire(_pdata, _psize, _width);
+   rend.fwire(_pdata, _psize, _width);
 
 }
 
@@ -436,7 +436,7 @@ void auxdata::GrcCell::openGlDraw(layprop::DrawProperties& drawprop, bool active
 void auxdata::GrcCell::openGlRender(tenderer::TopRend& rend, const CTM& trans,
                                      bool selected, bool active) const
 {
-//   rend.pushCell(_name, trans, _cellOverlap, active, selected);
+//   rend.setBlinkData(true);
    // Draw figures
    typedef LayerList::const_iterator LCI;
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
@@ -466,7 +466,7 @@ void auxdata::GrcCell::openGlRender(tenderer::TopRend& rend, const CTM& trans,
          }
       }
    }
-//   rend.popCell();
+//   rend.setBlinkData(false);
 }
 
 DBbox auxdata::GrcCell::getVisibleOverlap(const layprop::DrawProperties& prop)

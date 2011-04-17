@@ -465,6 +465,46 @@ unsigned tenderer::TenderSWire::sDataCopy(unsigned* array, unsigned& pindex)
    return ssize();
 }
 
+
+//=============================================================================
+//
+// TenderFNcvx
+//
+unsigned tenderer::TenderFNcvx::cDataCopy(int* array, unsigned& pindex)
+{
+   _offset = pindex/2;
+   return TenderCnvx::cDataCopy(array, pindex);
+}
+
+unsigned tenderer::TenderFNcvx::fDataCopy(unsigned* array, unsigned& pindex)
+{
+   for (unsigned i = 0; i < _csize; i++)
+      array[pindex++] = _offset + i;
+   return _csize;
+}
+
+//=============================================================================
+//
+// TenderFWire
+//
+unsigned tenderer::TenderFWire::cDataCopy(int* array, unsigned& pindex)
+{
+   _offset = pindex/2;
+   return TenderCnvx::cDataCopy(array, pindex);
+}
+
+unsigned tenderer::TenderFWire::lDataCopy(int* array, unsigned& pindex)
+{
+   _loffset = pindex/2;
+   return TenderWire::lDataCopy(array, pindex);
+}
+
+unsigned tenderer::TenderFWire::fDataCopy(unsigned* array, unsigned& pindex)
+{
+   for (unsigned i = 0; i < _lsize; i++)
+      array[pindex++] = _loffset + i;
+   return _lsize;
+}
 //=============================================================================
 //
 // class TextOvlBox
@@ -993,7 +1033,8 @@ void tenderer::TenderReTV::drawTexts(layprop::DrawProperties* drawprop)
 //
 tenderer::TenderLay::TenderLay(): _cslice(NULL),
    _num_total_points(0u), _num_total_indexs(0u), _num_total_strings(0u),
-   _has_selected(false), _stv_array_offset(0u), _slctd_array_offset(0u)
+   _has_selected(false), _stv_array_offset(0u), _slctd_array_offset(0u),
+                                                _flshd_array_offset(0u)
 {
    for (int i = lstr; i <= lnes; i++)
    {
@@ -1002,14 +1043,22 @@ tenderer::TenderLay::TenderLay(): _cslice(NULL),
       _asindxs[i] = 0u;
       _asobjix[i] = 0u;
    }
+
+   for (int i = lstr; i < lnes; i++)
+   {
+      _sizflix[i] = NULL;
+      _fstflix[i] = NULL;
+      _afindxs[i] = 0u;
+      _afobjix[i] = 0u;
+   }
 }
 
 /**
- * Create a new object of TenderTV type which will be reffered to by _cslice
+ * Create a new object of TenderTV type which will be referred to by _cslice
  * @param ctrans Current translation matrix of the new object
  * @param fill Whether to fill the drawing objects
  */
-void tenderer::TenderLay::newSlice(TenderRef* const ctrans, bool fill, bool reusable, bool has_selected, unsigned slctd_array_offset)
+void tenderer::TenderLay::newSlice(TenderRef* const ctrans, bool fill, bool reusable, bool has_selected, unsigned slctd_array_offset, unsigned flshd_array_offset )
 {
    if ((_has_selected = has_selected)) // <-- that's not a mistake!
    {
@@ -1017,6 +1066,8 @@ void tenderer::TenderLay::newSlice(TenderRef* const ctrans, bool fill, bool reus
       _slctd_array_offset = slctd_array_offset;
       _stv_array_offset = 2 * _num_total_points;
    }
+   _flshd_array_offset = flshd_array_offset;
+   _ftv_array_offset = 2 * _num_total_points;
    _cslice = DEBUG_NEW TenderTV(ctrans, fill, reusable, 2 * _num_total_points, _num_total_indexs);
 }
 
@@ -1147,6 +1198,19 @@ void tenderer::TenderLay::text (const std::string* txt, const CTM& ftmtrx, const
    _cslice->registerText(DEBUG_NEW TenderText(txt, ftm), cobj);
 }
 
+void tenderer::TenderLay::fpoly (int4b* pdata, unsigned psize, const TessellPoly* tpoly)
+{
+   TenderFNcvx* fobj = DEBUG_NEW TenderFNcvx(pdata, psize);
+   registerFPoly(fobj);
+   _cslice->registerPoly(fobj, tpoly);
+}
+
+void tenderer::TenderLay::fwire (int4b* pdata, unsigned psize, laydata::WireWidth width, bool center_only)
+{
+   TenderFWire* fobj = DEBUG_NEW TenderFWire(pdata, psize, width, center_only);
+   registerFWire(fobj);
+   _cslice->registerWire(fobj);
+}
 
 void tenderer::TenderLay::registerSBox (TenderSBox* sobj)
 {
@@ -1206,6 +1270,27 @@ unsigned tenderer::TenderLay::total_slctdx()
    return ( _asindxs[lstr] +
             _asindxs[llps] +
             _asindxs[lnes]
+          );
+}
+
+void tenderer::TenderLay::registerFPoly (TenderFNcvx* fobj)
+{
+   _flsh_data.push_back(fobj);
+   _afindxs[llps] += fobj->csize();
+   _afobjix[llps]++;
+}
+
+void tenderer::TenderLay::registerFWire (TenderFWire* fobj)
+{
+   _flsh_data.push_back(fobj);
+   _afindxs[lstr] += fobj->lsize();
+   _afobjix[lstr]++;
+}
+
+unsigned tenderer::TenderLay::total_flshdx()
+{
+   return ( _afindxs[lstr] +
+            _afindxs[llps]
           );
 }
 
@@ -1302,6 +1387,53 @@ void tenderer::TenderLay::collectSelected(unsigned int* slctd_array)
    }
 }
 
+void tenderer::TenderLay::collectFlashing(unsigned int* slctd_array)
+{
+   unsigned      flsh_arr_size = _afindxs[lstr] + _afindxs[llps];
+   if (0 == flsh_arr_size) return;
+
+   // initialise the indexing arrays of flashing objects
+   if (0 < _afobjix[lstr])
+   {
+      _sizflix[lstr] = DEBUG_NEW GLsizei[_afobjix[lstr]];
+      _fstflix[lstr] = DEBUG_NEW GLuint[_afobjix[lstr]];
+   }
+   if (0 < _afobjix[llps])
+   {
+      _sizflix[llps] = DEBUG_NEW GLsizei[_afobjix[llps]];
+      _fstflix[llps] = DEBUG_NEW GLuint[_afobjix[llps]];
+   }
+   unsigned size_findex[2];
+   unsigned index_foffset[2];
+   size_findex[lstr] = size_findex[llps] = 0u;
+   index_foffset[lstr] = _flshd_array_offset;
+   index_foffset[llps] = index_foffset[lstr] + _afindxs[lstr];
+
+
+   for (SliceFlashing::const_iterator SSL = _flsh_data.begin(); SSL != _flsh_data.end(); SSL++)
+   {
+      TenderFlashing* cchunk = *SSL;
+      switch (cchunk->type())
+      {
+         case lstr : // LINES
+         {
+            assert(_sizflix[lstr]);
+            _fstflix[lstr][size_findex[lstr]  ] = sizeof(unsigned) * index_foffset[lstr];
+            _sizflix[lstr][size_findex[lstr]++] = cchunk->fDataCopy(slctd_array, index_foffset[lstr]);
+            break;
+         }
+         case llps      : // LINE_LOOP
+         {
+            assert(_sizflix[llps]);
+            _fstflix[llps][size_findex[llps]  ] = sizeof(unsigned) * index_foffset[llps];
+            _sizflix[llps][size_findex[llps]++] = cchunk->fDataCopy(slctd_array, index_foffset[llps]);
+            break;
+         }
+         default: assert(false);
+      }
+   }
+}
+
 void tenderer::TenderLay::draw(layprop::DrawProperties* drawprop)
 {
    glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
@@ -1372,6 +1504,41 @@ void tenderer::TenderLay::drawSelected()
    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
+void tenderer::TenderLay::drawFlashing()
+{
+   glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
+   // Check the state of the buffer
+   GLint bufferSize;
+   glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
+   assert(bufferSize == (GLint)(2 * _num_total_points * sizeof(int4b)));
+
+   glVertexPointer(2, GL_INT, 0, (GLvoid*)(sizeof(int4b) * _ftv_array_offset));
+   glEnableClientState(GL_VERTEX_ARRAY);
+   glEnableClientState(GL_INDEX_ARRAY);
+
+   if (_afobjix[lstr] > 0)
+   {
+      assert(_sizflix[lstr]);
+      assert(_fstflix[lstr]);
+      //glMultiDrawElements(GL_LINE_STRIP, _sizslix[lstr], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[lstr], _asobjix[lstr]);
+      for (unsigned i= 0; i < _afobjix[lstr]; i++)
+         glDrawElements(GL_LINE_STRIP, _sizflix[lstr][i], GL_UNSIGNED_INT, (const GLvoid*)_fstflix[lstr][i]);
+   }
+   if (_afobjix[llps] > 0)
+   {
+      assert(_sizflix[llps]);
+      assert(_fstflix[llps]);
+         //glMultiDrawElements(GL_LINE_LOOP     , _sizslix[llps], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[llps], _alobjix[llps]);
+      for (unsigned i= 0; i < _afobjix[llps]; i++)
+         glDrawElements(GL_LINE_LOOP, _sizflix[llps][i], GL_UNSIGNED_INT, (const GLvoid*)_fstflix[llps][i]);
+   }
+   glDisableClientState(GL_INDEX_ARRAY);
+   glDisableClientState(GL_VERTEX_ARRAY);
+
+
+   glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
 void tenderer::TenderLay::drawTexts(layprop::DrawProperties* drawprop)
 {
    for (TenderTVList::const_iterator TLAY = _layData.begin(); TLAY != _layData.end(); TLAY++)
@@ -1399,6 +1566,12 @@ tenderer::TenderLay::~TenderLay()
    if (NULL != _fstslix[lstr]) delete [] _fstslix[lstr];
    if (NULL != _fstslix[llps]) delete [] _fstslix[llps];
    if (NULL != _fstslix[lnes]) delete [] _fstslix[lnes];
+
+   if (NULL != _sizflix[lstr]) delete [] _sizflix[lstr];
+   if (NULL != _sizflix[llps]) delete [] _sizflix[llps];
+
+   if (NULL != _fstflix[lstr]) delete [] _fstflix[lstr];
+   if (NULL != _fstflix[llps]) delete [] _fstflix[llps];
 }
 //=============================================================================
 //
@@ -1540,7 +1713,7 @@ tenderer::TenderRefLay::~TenderRefLay()
 //
 tenderer::TopRend::TopRend( layprop::DrawProperties* drawprop, real UU ) :
       _drawprop(drawprop), _UU(UU), _clayer(NULL),
-      _cslctd_array_offset(0u), _num_ogl_buffers(0u), _ogl_buffers(NULL),
+      _cslctd_array_offset(0u), _cflshd_array_offset(0u), _num_ogl_buffers(0u), _ogl_buffers(NULL),
       _activeCS(NULL), _dovCorrection(0)
 {
    // Initialize the cell (CTM) stack
@@ -1556,6 +1729,7 @@ bool tenderer::TopRend::chunkExists(unsigned layno, bool has_selected)
    { // post process the current layer
       _clayer->ppSlice();
       _cslctd_array_offset += _clayer->total_slctdx();
+      _cflshd_array_offset += _clayer->total_flshdx();
    }
    if (_data.end() != _data.find(layno))
    {
@@ -1567,7 +1741,7 @@ bool tenderer::TopRend::chunkExists(unsigned layno, bool has_selected)
       _clayer = DEBUG_NEW TenderLay();
       _data[layno] = _clayer;
    }
-   _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(layno), true, has_selected, _cslctd_array_offset);
+   _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(layno), true, has_selected, _cslctd_array_offset, _cflshd_array_offset);
    return false;
 }
 
@@ -1580,6 +1754,7 @@ void tenderer::TopRend::setLayer(unsigned layno, bool has_selected)
    { // post process the current layer
       _clayer->ppSlice();
       _cslctd_array_offset += _clayer->total_slctdx();
+      _cflshd_array_offset += _clayer->total_flshdx();
    }
    if (_data.end() != _data.find(layno))
    {
@@ -1590,7 +1765,7 @@ void tenderer::TopRend::setLayer(unsigned layno, bool has_selected)
       _clayer = DEBUG_NEW TenderLay();
       _data[layno] = _clayer;
    }
-   _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(layno), false, has_selected, _cslctd_array_offset);
+   _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(layno), false, has_selected, _cslctd_array_offset, _cflshd_array_offset);
 }
 
 void tenderer::TopRend::pushCell(std::string cname, const CTM& trans, const DBbox& overlap, bool active, bool selected)
@@ -1633,6 +1808,14 @@ void tenderer::TopRend::wire (int4b* pdata, unsigned psize, laydata::WireWidth w
    DBbox wsquare = DBbox(TP(0,0),TP(width,width));
    bool center_line_only = !wsquare.visible(topCTM() * ScrCTM(), visualLimit());
    _clayer->wire(pdata, psize, width, center_line_only, true, psel);
+}
+
+void tenderer::TopRend::fwire (int4b* pdata, unsigned psize, laydata::WireWidth width)
+{
+   // first check whether to draw only the center line
+   DBbox wsquare = DBbox(TP(0,0),TP(width,width));
+   bool center_line_only = !wsquare.visible(topCTM() * ScrCTM(), visualLimit());
+   _clayer->fwire(pdata, psize, width, center_line_only);
 }
 
 void tenderer::TopRend::arefOBox(std::string cname, const CTM& trans, const DBbox& overlap, bool selected)
@@ -1697,7 +1880,8 @@ bool tenderer::TopRend::collect()
    // of required virtual buffers
    //
    DataLay::iterator CCLAY = _data.begin();
-   unsigned num_total_slctdx = 0; // Initialize the number of total selected indexes
+   unsigned num_total_slctdx = 0; // Initialize the total number of selected indexes
+   unsigned num_total_flshdx = 0; // Initialize the total number of flashed  indexes
    unsigned num_total_strings = 0;
    while (CCLAY != _data.end())
    {
@@ -1721,6 +1905,7 @@ bool tenderer::TopRend::collect()
       else if (0 != CCLAY->second->total_points())
       {
          num_total_slctdx += CCLAY->second->total_slctdx();
+         num_total_flshdx += CCLAY->second->total_flshdx();
          _num_ogl_buffers++;
          if (0 < CCLAY->second->total_indexs())
             _num_ogl_buffers++;
@@ -1730,7 +1915,8 @@ bool tenderer::TopRend::collect()
          CCLAY++;
    }
    if (0 < _refLayer.total_points())  _num_ogl_buffers ++; // reference boxes
-   if (0 < num_total_slctdx      )  _num_ogl_buffers++;  // selected
+   if (0 < num_total_slctdx      )    _num_ogl_buffers++;  // selected
+   if (0 < num_total_flshdx      )    _num_ogl_buffers++;  // flashing
    // Check whether we have to continue after traversing
    if (0 == _num_ogl_buffers)
    {
@@ -1776,6 +1962,24 @@ bool tenderer::TopRend::collect()
       }
       glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
    }
+   // collect the indexes of the flashing objects
+   if (0 < num_total_flshdx)
+   {// selected objects buffer
+      _fbuffer = _ogl_buffers[current_buffer++];
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _fbuffer);
+      glBufferData(GL_ELEMENT_ARRAY_BUFFER           ,
+                   num_total_flshdx * sizeof(unsigned) ,
+                                              NULL                              ,
+                                              GL_DYNAMIC_DRAW                    );
+      unsigned int* findex_array = (unsigned int*)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
+      for (DataLay::const_iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
+      {
+         if (0 == CLAY->second->total_flshdx())
+            continue;
+         CLAY->second->collectFlashing(findex_array);
+      }
+      glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
+   }
    //
    // collect the reference boxes
    if (0 < _refLayer.total_points())
@@ -1797,7 +2001,7 @@ void tenderer::TopRend::draw()
       _drawprop->setCurrentFill(true); // force fill (ignore block_fill state)
       _drawprop->setLineProps(false);
       if (0 != CLAY->second->total_slctdx())
-      {// redraw selected contours only
+      {// draw selected contours only
          _drawprop->setLineProps(true);
          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _sbuffer);
          glPushMatrix();
@@ -1807,6 +2011,19 @@ void tenderer::TopRend::draw()
          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
          _drawprop->setLineProps(false);
       }
+
+      if (0 != CLAY->second->total_flshdx())
+      {// draw flashing contours only
+         _drawprop->setLineProps(true);
+         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _fbuffer);
+         glPushMatrix();
+         glMultMatrixd(_activeCS->translation());
+         CLAY->second->drawFlashing(  );
+         glPopMatrix();
+         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+         _drawprop->setLineProps(false);
+      }
+
       // draw everything
       if (0 != CLAY->second->total_points())
          CLAY->second->draw(_drawprop);
