@@ -436,6 +436,60 @@ namespace tenderer {
    };
 
    /**
+   *
+   */
+   class TenderFlashing {
+      public:
+                           TenderFlashing() : _offset(0) {}
+         virtual          ~TenderFlashing() {}
+         virtual SlctTypes type() = 0;
+         virtual unsigned  fDataCopy(unsigned*, unsigned&) = 0;
+      protected:
+         unsigned          _offset; //! The offset of the first vertex in the point VBO
+   };
+
+   /**
+      Holds a non-convex polygon which are supposed to flash. Its primary purpose
+      is to generate the indexes for the contour (_cdata) data of its primary parent.
+      Implements the virtual methods of its parents. Doesn't have any own fields or
+      methods.
+      The re-implementation of the cDataCopy() has the same function as described in
+      TenderSCnvx class
+   */
+   class TenderFNcvx : public TenderNcvx, public TenderFlashing  {
+      public:
+                           TenderFNcvx(int4b* pdata, unsigned psize) :
+                              TenderNcvx(pdata, psize), TenderFlashing() {}
+         virtual unsigned  cDataCopy(int*, unsigned&);
+         virtual SlctTypes type() { return llps;}
+         virtual unsigned  fDataCopy(unsigned*, unsigned&);
+   };
+
+   /**
+      Holds a wires which are supposed to flash. Like its primary parent this is
+      not quite trivial class. Because of the specifics of the wire storage it has
+      to store an additional VBO offset parameter for the central line. Note that
+      unlike other selected objects, this one is indexing primary the central line
+      data (_ldata) of its parent and in addition the contour data (_cdata) in
+      some of the selection cases. The class implements all virtual methods of its
+      parents.
+      Here the re-implementation of two methods has to be highlighted. cDataCopy()
+      updates inherited _offset field. lDataCopy in turn updates _loffset field.
+      Both of them vital for proper indexing of the selected vertexes.
+   */
+   class TenderFWire : public TenderWire, public TenderFlashing {
+      public:
+                           TenderFWire(int4b* pdata, unsigned psize, const laydata::WireWidth width, bool clo) :
+                              TenderWire(pdata, psize, width, clo), TenderFlashing(), _loffset(0u) {}
+         virtual unsigned  cDataCopy(int*, unsigned&);
+         virtual unsigned  lDataCopy(int*, unsigned&);
+         virtual SlctTypes type() { return lstr;}
+         virtual unsigned  fDataCopy(unsigned*, unsigned&);
+      private:
+         unsigned          _loffset;
+   };
+
+   /**
    *  Cell reference boxes & reference related data
    */
    class TenderRef {
@@ -459,6 +513,7 @@ namespace tenderer {
    typedef std::list<TenderNcvx*>      SlicePolygons;
    typedef std::list<TenderWire*>      SliceWires;
    typedef std::list<TenderSelected*>  SliceSelected;
+   typedef std::list<TenderFlashing*>  SliceFlashing;
    typedef std::list<TenderRef*>       RefBoxList;
 
    /**
@@ -783,17 +838,22 @@ namespace tenderer {
          void              wire (int4b*, unsigned, laydata::WireWidth, bool, bool, const SGBitSet*);
          void              text (const std::string*, const CTM&, const DBbox*, const TP&, bool);
 
-         void              newSlice(TenderRef* const, bool, bool, bool, unsigned);
+         void              fpoly(int4b*, unsigned, const TessellPoly*);
+         void              fwire(int4b*, unsigned, laydata::WireWidth, bool);
+         void              newSlice(TenderRef* const, bool, bool, bool, unsigned, unsigned);
          bool              chunkExists(TenderRef* const, bool);
          void              ppSlice();
          void              draw(layprop::DrawProperties*);
          void              drawSelected();
+         void              drawFlashing();
          void              drawTexts(layprop::DrawProperties*);
          void              collect(bool, GLuint, GLuint);
          void              collectSelected(unsigned int*);
+         void              collectFlashing(unsigned int*);
          unsigned          total_points() {return _num_total_points;}
          unsigned          total_indexs() {return _num_total_indexs;}
          unsigned          total_slctdx();
+         unsigned          total_flshdx();
          unsigned          total_strings(){return _num_total_strings;}
 
       private:
@@ -801,6 +861,8 @@ namespace tenderer {
          void              registerSPoly (TenderSNcvx*);
          void              registerSWire (TenderSWire*);
          void              registerSOBox (TextSOvlBox*);
+         void              registerFPoly (TenderFNcvx*);
+         void              registerFWire (TenderFWire*);
          ReusableTTVMap    _reusableFData; // reusable filled chunks
          ReusableTTVMap    _reusableCData; // reusable contour chunks
          TenderTVList      _layData;
@@ -820,9 +882,18 @@ namespace tenderer {
          unsigned          _asobjix[3]; //! array with the total number of selected objects
          GLsizei*          _sizslix[3]; //! arrays of sizes for indexes sets of selected objects
          GLuint*           _fstslix[3]; //! arrays of first indexes for selected objects
+         // Data related to flashing objects
+         SliceFlashing     _flsh_data;
+         // index related data for selected objects
+         unsigned          _afindxs[2]; //! array with the total number of indexes of flashing objects
+         unsigned          _afobjix[2]; //! array with the total number of flashing objects
+         GLsizei*          _sizflix[2]; //! arrays of sizes for indexes sets of flashing objects
+         GLuint*           _fstflix[2]; //! arrays of first indexes for flashing objects
          // offsets in the VBO
          unsigned          _stv_array_offset; //! first point in the TenderTV with selected objects in this layer
+         unsigned          _ftv_array_offset; //! first point in the TenderTV with flashing objects in this layer
          unsigned          _slctd_array_offset; //! first point in the VBO with selected indexes
+         unsigned          _flshd_array_offset; //! first point in the VBO with flashing indexes
    };
 
    /**
@@ -884,8 +955,11 @@ namespace tenderer {
                                                                   {_clayer->poly(pdata, psize, tpoly, false, NULL);}
          void              poly (int4b* pdata, unsigned psize, const TessellPoly* tpoly, const SGBitSet* ss)
                                                                   {_clayer->poly(pdata, psize, tpoly, true, ss);}
+         void              fpoly(int4b* pdata, unsigned psize, const TessellPoly* tpoly = NULL)
+                                                                  {_clayer->fpoly(pdata, psize, tpoly);}
          void              wire (int4b*, unsigned, laydata::WireWidth);
          void              wire (int4b*, unsigned, laydata::WireWidth, const SGBitSet*);
+         void              fwire(int4b*, unsigned, laydata::WireWidth);
          void              arefOBox(std::string, const CTM&, const DBbox&, bool);
          void              text (const std::string*, const CTM&, const DBbox&, const TP&, bool);
          bool              collect();
@@ -917,10 +991,12 @@ namespace tenderer {
          TenderRefLay      _refLayer;
          CellStack         _cellStack;       //!Required during data traversing stage
          unsigned          _cslctd_array_offset; //! Current selected array offset
+         unsigned          _cflshd_array_offset; //! Current flashing array offset
          //
          unsigned          _num_ogl_buffers; //! Number of generated openGL VBOs
          GLuint*           _ogl_buffers;     //! Array with the "names" of all openGL buffers
          GLuint            _sbuffer;         //! The "name" of the selected index buffer
+         GLuint            _fbuffer;         //! The "name" of the flashing index buffer
          TenderRef*        _activeCS;
          byte              _dovCorrection;   //!Cell ref Depth of view correction (for Edit in Place purposes)
          RefBoxList        _hiddenRefBoxes;  //! Those cRefBox objects which didn't ended in the TenderRefLay structures
