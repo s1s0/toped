@@ -2297,7 +2297,7 @@ laydata::TdtData* laydata::TdtCell::mergeWrapper(QuadTree* qtree, TdtData*& ref_
 
 void laydata::TdtCell::selectFromListWrapper(QuadTree* qtree, DataList* src, DataList* dst)
 {
-   typename DataList::iterator DI;
+   DataList::iterator DI;
    // loop the objects in the qTree first. It will be faster when there
    // are no objects in the current QTreeTmpl
    for (QuadTree::Iterator CI = qtree->begin(); CI != qtree->end(); CI++)
