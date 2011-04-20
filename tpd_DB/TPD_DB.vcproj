@@ -183,6 +183,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\grccell.cpp"
+				>
+			</File>
+			<File
 				RelativePath="logicop.cpp"
 				>
 				<FileConfiguration
@@ -365,6 +369,10 @@
 			>
 			<File
 				RelativePath=".\drawprop.h"
+				>
+			</File>
+			<File
+				RelativePath=".\grccell.h"
 				>
 			</File>
 			<File
