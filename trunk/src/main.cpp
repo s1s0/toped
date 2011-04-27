@@ -84,6 +84,7 @@ class TopedApp : public wxApp
       typedef std::list<wxDynamicLibrary*> PluginList;
       bool           getLogFileName();
       void           loadGlfFonts();
+		void           loadStartupScript();
       void           loadPlugIns();
       bool           checkCrashLog();
       void           getLocalDirs();    //! Get directories in TPD_LOCAL
@@ -237,6 +238,7 @@ int TopedApp::OnRun()
    }
    else
    {
+		loadStartupScript();
       // Execute the tell file from the command line
       LogFile.init(std::string(_logFileName.mb_str(wxConvFile )));
 //      wxLog::AddTraceMask(wxT("thread"));
@@ -333,6 +335,15 @@ void TopedApp::loadGlfFonts()
       fontLib->selectFont("Arial Normal 1");
    }
 }
+
+//=============================================================================
+void TopedApp::loadStartupScript()
+{
+	wxString inputfile;
+   inputfile << wxT("#include \"$TPD_GLOBAL\\tll\\.topedrc\"");
+   Console->parseCommand(inputfile, false);
+}
+
 
 //=============================================================================
 void TopedApp::loadPlugIns()
