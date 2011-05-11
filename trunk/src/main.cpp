@@ -110,6 +110,8 @@ class TopedApp : public wxApp
 //=============================================================================
 bool TopedApp::OnInit()
 {
+   getLocalDirs();
+   getGlobalDirs();
 //   DATC = DEBUG_NEW DataCenter();
    _forceBasicRendering = false;
    wxImage::AddHandler(DEBUG_NEW wxPNGHandler);
@@ -139,10 +141,9 @@ bool TopedApp::OnInit()
    // Replace the active console in the wx system with Toped console window
    console::ted_log_ctrl *logWindow = DEBUG_NEW console::ted_log_ctrl(Toped->logwin());
    delete wxLog::SetActiveTarget(logWindow);
-   // Initialize the tool bars
-   getLocalDirs();
-   getGlobalDirs();
+   
    getTellPathDirs();
+   // Initialize the tool bars
    Toped->setIconDir(std::string(_tpdResourceDir.mb_str(wxConvFile)));
    Toped->initToolBars();
    // Create the session log file
