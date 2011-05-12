@@ -1543,7 +1543,7 @@ tenderer::TenderRefLay::~TenderRefLay()
 // class TopRend
 //
 tenderer::TopRend::TopRend( layprop::DrawProperties* drawprop, real UU ) :
-      _drawprop(drawprop), _UU(UU), _clayer(NULL),
+      _drawprop(drawprop), _UU(UU), _clayer(NULL), _grcLayer(NULL),
       _cslctd_array_offset(0u), _num_ogl_buffers(0u), _ogl_buffers(NULL),
       _activeCS(NULL), _dovCorrection(0)
 {
@@ -1629,6 +1629,12 @@ void tenderer::TopRend::pushCell(std::string cname, const CTM& trans, const DBbo
    }
 }
 
+void tenderer::TopRend::grcpoly(int4b* pdata, unsigned psize)
+{
+   assert(_grcLayer);
+   _grcLayer->poly(pdata, psize, NULL);
+}
+
 void tenderer::TopRend::wire (int4b* pdata, unsigned psize, laydata::WireWidth width)
 {
    // first check whether to draw only the center line
@@ -1643,6 +1649,14 @@ void tenderer::TopRend::wire (int4b* pdata, unsigned psize, laydata::WireWidth w
    DBbox wsquare = DBbox(TP(0,0),TP(width,width));
    bool center_line_only = !wsquare.visible(topCTM() * ScrCTM(), visualLimit());
    _clayer->wireS(pdata, psize, width, center_line_only,psel);
+}
+
+void tenderer::TopRend::grcwire (int4b* pdata, unsigned psize, laydata::WireWidth width)
+{
+   // first check whether to draw only the center line
+   DBbox wsquare = DBbox(TP(0,0),TP(width,width));
+   bool center_line_only = !wsquare.visible(topCTM() * ScrCTM(), visualLimit());
+   _grcLayer->wire(pdata, psize, width, center_line_only);
 }
 
 void tenderer::TopRend::arefOBox(std::string cname, const CTM& trans, const DBbox& overlap, bool selected)
@@ -1801,6 +1815,60 @@ bool tenderer::TopRend::collect()
    return true;
 }
 
+bool tenderer::TopRend::grcCollect()
+{
+   // First filter-out the layers that doesn't have any objects on them,
+   // post process the last slices in the layers and also gather the number
+   // of required virtual buffers
+   //
+   GrcLay::iterator CCLAY = _grcData.begin();
+   while (CCLAY != _grcData.end())
+   {
+      CCLAY->second->ppSlice();
+      if (0 == CCLAY->second->total_points())
+      {
+         delete (CCLAY->second);
+         _grcData.erase(CCLAY++);
+      }
+      else if (0 != CCLAY->second->total_points())
+      {
+         _num_ogl_grc_buffers++;
+         if (0 < CCLAY->second->total_indexs())
+            _num_ogl_grc_buffers++;
+         CCLAY++;
+      }
+      else
+         CCLAY++;
+   }
+   // Check whether we have to continue after traversing
+   if (0 == _num_ogl_grc_buffers) return false;
+   //--------------------------------------------------------------------------
+   //
+   // generate all VBOs
+   //
+   _ogl_grc_buffers = DEBUG_NEW GLuint [_num_ogl_grc_buffers];
+   glGenBuffers(_num_ogl_grc_buffers, _ogl_grc_buffers);
+   unsigned current_buffer = 0;
+   //
+   // collect the point arrays
+   for (GrcLay::const_iterator CLAY = _grcData.begin(); CLAY != _grcData.end(); CLAY++)
+   {
+      if (0 == CLAY->second->total_points())
+      {
+         assert(0 != CLAY->second->total_strings());
+         continue;
+      }
+      GLuint pbuf = _ogl_grc_buffers[current_buffer++];
+      GLuint ibuf = (0 == CLAY->second->total_indexs()) ? 0u : _ogl_grc_buffers[current_buffer++];
+      CLAY->second->collect(_drawprop->layerFilled(CLAY->first), pbuf, ibuf);
+   }
+   //
+   // collect the indexes of the selected objects
+   // that's about it...
+   checkOGLError("grcCollect");
+   return true;
+}
+
 void tenderer::TopRend::draw()
 {
    for (DataLay::const_iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
@@ -1834,11 +1902,58 @@ void tenderer::TopRend::draw()
    checkOGLError("draw");
 }
 
+void tenderer::TopRend::grcDraw()
+{
+   for (GrcLay::const_iterator CLAY = _grcData.begin(); CLAY != _grcData.end(); CLAY++)
+   {// for every layer
+      _drawprop->setCurrentColor(CLAY->first);
+      _drawprop->setCurrentFill(true); // force fill (ignore block_fill state)
+      _drawprop->setLineProps(false);
+      // draw everything
+      if (0 != CLAY->second->total_points())
+         CLAY->second->draw(_drawprop);
+   }
+   checkOGLError("grcDraw");
+}
+
 void tenderer::TopRend::cleanUp()
 {
    // Clean-up the buffers
    glBindBuffer(GL_ARRAY_BUFFER, 0);
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void tenderer::TopRend::grcCleanUp()
+{
+   // Clean-up the buffers
+   glBindBuffer(GL_ARRAY_BUFFER, 0);
+   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void tenderer::TopRend::setGrcLayer(bool setEData, unsigned layno)
+{
+   if (setEData)
+   {
+      assert(_grcLayer == NULL);
+      if (_grcData.end() != _grcData.find(layno))
+      {
+         _grcLayer = _grcData[layno];
+      }
+      else
+      {
+         _grcLayer = DEBUG_NEW TenderLay();
+         _grcData[layno] = _grcLayer;
+      }
+      _grcLayer->newSlice(_cellStack.top(), false, false);
+   }
+   else
+   {
+      assert(_grcLayer != NULL);
+      // post process the current layer
+      _grcLayer->ppSlice();
+      _grcLayer = NULL;
+//      _cslctd_array_offset += _elayer->total_slctdx();
+   }
 }
 
 unsigned tenderer::TopRend::getTenderLay(unsigned layno)
@@ -1892,6 +2007,15 @@ tenderer::TopRend::~TopRend()
       glDeleteBuffers(_num_ogl_buffers, _ogl_buffers);
       delete [] _ogl_buffers;
       _ogl_buffers = NULL;
+   }
+   // GRC clean-up
+   for (GrcLay::const_iterator CLAY = _grcData.begin(); CLAY != _grcData.end(); CLAY++)
+      delete (CLAY->second);
+   if (NULL != _ogl_grc_buffers)
+   {
+      glDeleteBuffers(_num_ogl_grc_buffers, _ogl_grc_buffers);
+      delete [] _ogl_grc_buffers;
+      _ogl_grc_buffers = NULL;
    }
 }
 

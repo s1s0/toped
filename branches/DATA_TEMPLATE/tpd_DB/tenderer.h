@@ -875,6 +875,7 @@ namespace tenderer {
    //-----------------------------------------------------------------------------
    //
    typedef std::map<unsigned, TenderELay*> DataLay;
+   typedef std::map<unsigned, TenderLay*>  GrcLay;
    typedef std::stack<TenderRef*> CellStack;
 
    /**
@@ -901,14 +902,19 @@ namespace tenderer {
                                                                   {_clayer->poly(pdata, psize, tpoly);}
          void              poly (int4b* pdata, unsigned psize, const TessellPoly* tpoly, const SGBitSet* ss)
                                                                   {_clayer->polyS(pdata, psize, tpoly, ss);}
+         void              grcpoly(int4b* pdata, unsigned psize);
          void              wire (int4b*, unsigned, laydata::WireWidth);
          void              wire (int4b*, unsigned, laydata::WireWidth, const SGBitSet*);
+         void              grcwire (int4b*, unsigned, laydata::WireWidth);
          void              arefOBox(std::string, const CTM&, const DBbox&, bool);
          void              text (const std::string*, const CTM&, const DBbox&, const TP&, bool);
          bool              collect();
+         bool              grcCollect();
          void              draw();
+         void              grcDraw();
          void              cleanUp();
-
+         void              grcCleanUp();
+         void              setGrcLayer(bool, unsigned);
          //return layno if _propertyState == DB or predefined layer in other case
          unsigned          getTenderLay(unsigned layno);
          //set state of DrawProperties
@@ -929,14 +935,18 @@ namespace tenderer {
       private:
          layprop::DrawProperties*   _drawprop;
          real              _UU;
-         DataLay           _data;            //!All data for drawing
-         TenderELay*       _clayer;          //!Working variable pointing to the current slice
+         DataLay           _data;            //!All editable data for drawing
+         GrcLay            _grcData;         //!All GRC      data for drawing
+         TenderELay*       _clayer;          //!Working variable pointing to the current edit slice
+         TenderLay*        _grcLayer;        //!Working variable pointing to the current GRC  slice
          TenderRefLay      _refLayer;
          CellStack         _cellStack;       //!Required during data traversing stage
          unsigned          _cslctd_array_offset; //! Current selected array offset
          //
          unsigned          _num_ogl_buffers; //! Number of generated openGL VBOs
+         unsigned          _num_ogl_grc_buffers; //!
          GLuint*           _ogl_buffers;     //! Array with the "names" of all openGL buffers
+         GLuint*           _ogl_grc_buffers; //! Array with the "names" of the GRC related openGL buffers
          GLuint            _sbuffer;         //! The "name" of the selected index buffer
          TenderRef*        _activeCS;
          byte              _dovCorrection;   //!Cell ref Depth of view correction (for Edit in Place purposes)
