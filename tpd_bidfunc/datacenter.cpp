@@ -867,6 +867,11 @@ void DataCenter::openGlRender(const CTM& layCTM)
                #endif
                renderer.cleanUp();
             }
+            if (renderer.grcCollect())
+            {
+               renderer.grcDraw();
+               renderer.grcCleanUp();
+            }
             VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
 //            TpdPost::toped_status(console::TSTS_RENDEROFF);
             TpdPost::render_status(false);
