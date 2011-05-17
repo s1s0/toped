@@ -185,6 +185,7 @@
 ;****************GLOBAL VARIABLES AND FUNCTIONS*******************
 (define packet-list  '())
 (define layer-list '())
+(define stipple-list '())
 
 ;****************CADENCE API FUNCTIONS********************************
 
@@ -211,7 +212,7 @@
           (list "}"))))  
 
 ;---------------------------------------------
-(define drDefineStipple
+(define drDefineStipple1
   (lambda(stipplelist)
     (let ((stipple-names '()))
       (append (list "void fillSetup() {")
@@ -259,7 +260,57 @@
               (list (list "definefill(\"blank\",blank);"))
               (list "}")))))
 
-
+;---------------------------------------------
+;parse-stipple->list
+;input name - sting
+;      bitmap - list  
+;output - list containing parsed stipple definition
+(define (parse-stipple name bitmap)
+  (list(append (list "int list " name "= {" )
+               (map-exclude-last (lambda (str) (string-append str ","))
+                                 (expand-to-N (foldl (lambda (word result) 
+                                                       (append result  
+                                                               (map bin-str->hex-str 
+                                                                    (split-to-8 (expand-string-to-32
+                                                                                 ;get list of bits from cadence bitmap
+                                                                                 (foldl 
+                                                                                  (lambda (bit bitstr)
+                                                                                    (string-append bitstr (number->string bit))) 
+                                                                                  ""  word))))))
+                                                     '()
+                                                     bitmap) 128) )
+               (list "};\n"))))
+;---------------------------------------------
+(define drDefineStipple
+  (lambda(stipplelist)
+    (let ((stipple-names '()))
+    (set! stipple-list (append stipple-list 
+                               (list (string-append "int list blank= {" 
+                                   "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
+                                   "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
+                                   "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
+                                   "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
+                                   "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
+                                   "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
+                                   "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
+                                   "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
+                                   "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
+                                   "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
+                                   "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
+                                   "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
+                                   "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
+                                   "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
+                                   "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
+                                   "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00" "};"))
+     
+                               (map (lambda(stipple)
+                                      (let ((display (car stipple))
+                                            (name (cadr stipple))
+                                            (bitmap (caddr stipple)))
+                                        (set! stipple-names (append stipple-names (list name)))
+                                        (parse-stipple name bitmap)))
+                   stipplelist))))))
+    
 (define drDefineLineStyle
   (lambda(style)
     (list "/*drLineStyle"
@@ -366,42 +417,42 @@
 
 (define mfgGridResolution
   (lambda (resolutions)
-    (list "/*mfgGridResolution"
+    (list "/*mfgGridResolution "
           "not realized yet*/")))
 
 (define controls
   (lambda (cntrls)
-    (list "/*controls"
+    (list "/*controls "
           "not realized yet*/")))
 
 (define viaLayers
   (lambda (layers)
-    (list "/*viaLayers"
+    (list "/*viaLayers "
           "not realized yet*/")))
 
 (define orderedSpacingRules
   (lambda (rules)
-    (list "/*orderedSpacingRules"
+    (list "/*orderedSpacingRules "
           "not realized yet*/")))
 
 (define spacingRules
   (lambda (rules)
-    (list "/*spacingRules"
+    (list "/*spacingRules "
           "not realized yet*/")))
 
 (define devices
   (lambda (devs)
-    (list "/*devices"
+    (list "/*devices "
           "not realized yet*/")))
 
 (define lxRules
   (lambda (rules)
-    (list "/*lxRules"
+    (list "/*lxRules "
           "not realized yet*/")))
   
   (define compactorRules
   (lambda (rules)
-    (list "/*compactorRules"
+    (list "/*compactorRules "
           "not realized yet*/")))
 
 ;****************TRANSLATOR FUNCTIONS********************************
@@ -432,6 +483,13 @@
                      '())))
                layer-list)
           (list (list "}"))))
+  
+(define (stipple-setup)  
+  (append (list (list "void fillSetup() {"))
+          (map (lambda(stipple)
+                 stipple) 
+               stipple-list)
+          (list (list "}"))))
 ;------------------------
 (define (post-proceed)
   (append (list (list "colorSetup();")
@@ -458,7 +516,8 @@
         (body (cadr lst)))
     (cons (cond ((eq? command 'drDefineColor) (drDefineColor body))
           ((eq? command 'drDefineDisplay) (drDefineDisplay body))
-          ((eq? command 'drDefineStipple) (drDefineStipple body))
+          ((eq? command 'drDefineStipple) (begin (drDefineStipple body)
+                                                 '()))
           ((eq? command 'drDefineLineStyle) (drDefineLineStyle body))
           ((eq? command 'drDefinePacket) (begin
                                            (set! packet-list (append  (drDefinePacket body) packet-list))
@@ -521,7 +580,7 @@
 ;output - non (output write down to tell.tll file
 
 (define (convert input-list)
-  (write-to-file (car input-list) (append (parse (collect-strings (cdr input-list))) (layer-setup) (post-proceed) )))
+  (write-to-file (car input-list) (append (parse (collect-strings (cdr input-list))) (stipple-setup)(layer-setup) (post-proceed) )))
 
 ;debug-print-packets
 (define (debug-print-packets file)
@@ -571,4 +630,5 @@
   ;(debug-print-packets "d:\\toped\\vanguard\\display.drf")
   ;(debug-print-layers "d:\\toped\\vanguard\\vis40cb.tf")
    ;(convert (list "d:\\toped\\vanguard\\tell.tll" "d:\\toped\\vanguard\\display.drf" "d:\\toped\\vanguard\\vis40cb.tf"))
+   (convert (list "d:\\toped\\v2\\tell.tll" "d:\\toped\\v2\\display.drf" "d:\\toped\\v2\\BCD30Lib.tf"))
 )
