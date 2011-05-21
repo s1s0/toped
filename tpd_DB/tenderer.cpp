@@ -1544,7 +1544,8 @@ tenderer::TenderRefLay::~TenderRefLay()
 //
 tenderer::TopRend::TopRend( layprop::DrawProperties* drawprop, real UU ) :
       _drawprop(drawprop), _UU(UU), _clayer(NULL), _grcLayer(NULL),
-      _cslctd_array_offset(0u), _num_ogl_buffers(0u), _ogl_buffers(NULL),
+      _cslctd_array_offset(0u), _num_ogl_buffers(0u), _num_ogl_grc_buffers(0u),
+      _ogl_buffers(NULL), _ogl_grc_buffers(NULL),
       _activeCS(NULL), _dovCorrection(0)
 {
    // Initialize the cell (CTM) stack
