@@ -63,6 +63,7 @@ DataCenter::DataCenter(const std::string& localDir, const std::string& globalDir
    _drawruler = false;
    _tdtActMxState = dbmxs_unlocked;
    _tdtReqMxState = dbmxs_unlocked;
+   _cRenderer = NULL;
 }
 
 DataCenter::~DataCenter()
@@ -729,6 +730,14 @@ void DataCenter::render(const CTM& layCTM)
       openGlDraw(layCTM);
 }
 
+void DataCenter::drawFOnly()
+{
+   if (PROPC->renderType())
+   {
+      if (NULL != _cRenderer) _cRenderer->grcDraw();
+   }
+}
+
 void DataCenter::mouseHoover(TP& position)
 {
    if (_TEDLIB())
@@ -819,13 +828,19 @@ void DataCenter::openGlRender(const CTM& layCTM)
       layprop::DrawProperties* drawProp;
       if (PROPC->lockDrawProp(drawProp))
       {
-         tenderer::TopRend renderer( drawProp, PROPC->UU() );
+         if (NULL != _cRenderer)
+         {
+//            _cRenderer->cleanUp();
+            _cRenderer->grcCleanUp();
+            delete _cRenderer;
+         }
+         _cRenderer = new tenderer::TopRend( drawProp, PROPC->UU() );
          // render the grid
          for (byte gridNo = 0; gridNo < 3; gridNo++)
          {
             const layprop::LayoutGrid* cgrid = PROPC->grid(gridNo);
             if ((NULL !=  cgrid) && cgrid->visual())
-               renderer.Grid(cgrid->step(), cgrid->color());
+               _cRenderer->Grid(cgrid->step(), cgrid->color());
          }
          //       _properties.drawZeroCross(renderer);
          if (wxMUTEX_NO_ERROR == _DBLock.TryLock())
@@ -837,7 +852,7 @@ void DataCenter::openGlRender(const CTM& layCTM)
             #endif
             // There is no need to check for an active cell. If there isn't one
             // the function will return silently.
-            _TEDLIB()->openGlRender(renderer);
+            _TEDLIB()->openGlRender(*_cRenderer);
             // Draw DRC data (if any)
             // TODO! clean-up the DRC stuff here - lock/unlock and more importantly
             // DrcLibrary <-> CalibrFile i.e. _DRCDB <-> DRCData. The end of the line shall be
@@ -848,7 +863,7 @@ void DataCenter::openGlRender(const CTM& layCTM)
                {
                   std::string cellName = DRCData->cellName();
                   CTM cellCTM = DRCData->getCTM(cellName);
-                  _DRCDB->openGlRender(renderer, cellName, cellCTM);
+                  _DRCDB->openGlRender(*_cRenderer, cellName, cellCTM);
                   VERIFY(wxMUTEX_NO_ERROR == _DRCLock.Unlock());
                }
             }
@@ -856,21 +871,21 @@ void DataCenter::openGlRender(const CTM& layCTM)
             rendTimer.report("Time elapsed for data traversing: ");
             #endif
             // The version with the central VBO's
-            if (renderer.collect())
+            if (_cRenderer->collect())
             {
                #ifdef RENDER_PROFILING
                   rendTimer.report("Time elapsed for data copying   : ");
                #endif
-               renderer.draw();
+               _cRenderer->draw();
                #ifdef RENDER_PROFILING
                   rendTimer.report("    Total elapsed rendering time: ");
                #endif
-               renderer.cleanUp();
+               _cRenderer->cleanUp();
             }
-            if (renderer.grcCollect())
+            if (_cRenderer->grcCollect())
             {
-               renderer.grcDraw();
-               renderer.grcCleanUp();
+//               _cRenderer->grcDraw();
+//               _cRenderer->grcCleanUp();
             }
             VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
 //            TpdPost::toped_status(console::TSTS_RENDEROFF);
