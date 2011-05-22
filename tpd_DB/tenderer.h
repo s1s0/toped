@@ -675,27 +675,101 @@ namespace tenderer {
    };
 
    /**
-    * TENDER LAYer represents a DB layer in the rendering view. It
-    * generates, stores and sorts all the TenderTV objects (one per DB cell) and
-    * also initializes the corresponding virtual buffers (the vertex and eventually
-    * the index) for this layer.
-    *
-    * A new TenderLay object is created by the newSlice() method during the DB
-    * traversing. A reference to it is stored in the _layData list as well as
-    * in the _cslice field. All subsequent calls to box(), poly() and wire()
-    * methods create the corresponding object of class Tender* and store them
-    * calling the corresponding methods of _cslice object (of TenderTV class).
-    * If the data is selected then an object of the overloaded class is created
-    * and a reference to it is stored in _slct_data list as well.
-    *
-    * TenderLay keeps track of the total current amount of vertexes
-    * (_num_total_points) and indexes (_num_total_indexs) in order to initialize
-    * properly the offset fields of the generated TenderTV objects. When a new
-    * slice of class TenderTV is created, the current slice is post processed
-    * (method ppSlice()) in order to update the fields mentioned above. The
-    * final values stored in those fields are used later to reserve a proper
-    * amount of memory for the VBO's belonging to this layer.
-    */
+      TENDER LAYer represents a DB layer in the rendering view. It generates,
+      stores and sorts all the TenderTV objects (one per DB cell) and also
+      Initializes the corresponding virtual buffers (the vertex and eventually
+      the index) for this layer. This class is responsible also for gathering of
+      the selected data indexes.
+
+      A new TederTV object is created by the newSlice() method during the DB
+      traversing. A reference to it is stored in the _layData list as well as
+      in the _cslice field. All subsequent calls to box(), poly() and wire()
+      methods create the corresponding object of class Tender* and store them
+      calling the corresponding methods of _cslice object (of TenderTV class).
+      If the data is selected then an object of the overloaded class is created
+      and a reference to it is stored in _slct_data list as well.
+
+      TenderLay keeps track of the total current amount of vertexes
+      (_num_total_points) and indexes (_num_total_indexs) in order to initialize
+      properly the offset fields of the generated TenderTV objects. When a new
+      slice of class TenderTV is created, the current slice is post processed
+      (method ppSlice()) in order to update the fields mentioned above. The
+      final values stored in those fields are used later to reserve a proper
+      amount of memory for the VBO's belonging to this layer.
+
+      The rendering of the selected objects is done in this class. TenderTV does
+      hold the object vertex data, but it is completely unaware of selection
+      related properties. The primary reason for this is that data can be
+      selected only in one of the generated TenderTV objects, because only one
+      of them eventually belongs to the active cell. Having an additional VBO
+      per TenderTV object for selected data would be a waste of course, because
+      all but one of them will be empty anyway. Instead a single VBO is generated
+      for the entire rendering view with the indexes of all selected vertexes in
+      the active cell across all layers.
+
+      Selected objects will be rendered twice. Once - together with all other
+      objects in the TenderTV objects and again here, in this class in order to
+      highlight them. An object can be fully or partially selected and depending
+      on this it shall be rendered using the corresponding data structure:
+
+      \verbatim
+       --------------------------------------------------------------
+      |  TopRend  |  fully selected    | partially selected |        |
+      |    data   |--------------------|--------------------|  enum  |
+      | (indexes) |  box | poly | wire |  box | poly | wire |        |
+      |-----------|------|------|------|------|------|------|--------|
+      |line strips|      |      |      |   x  |   x  |   x  |  lstr  |
+      | contours  |  x   |  x   |      |      |      |      |  llps  |
+      |   lines   |      |      |  x   |      |      |      |  lnes  |
+      --------------------------------------------------------------
+      \endverbatim
+
+      In the manner similar to TenderTV class, TenderLay sorts the selected objects
+      in three "bins" and gathers some statistics about each of them. One position
+      per bin is stored in each of the array fields (_asindxs[3], _asobjix[3],
+      _sizslix[3], _fstslix[3]) representing the overall amount of indexes, the
+      total number of indexed objects, the size of each object in terms of indexes
+      and the offset of each first object index in the buffer. Additionally every
+      selected object will need to store the offset of its vertex data within the
+      slice representing the active cell in the vertex buffer. This is done by the
+      selected objects themselves when vertex VBOs are collected via the
+      re-implementation of cDataCopy virtual methods in the TenderS* classes.
+      TenderLay doesn't take part in this process, TenderTV class is not aware of
+      it either - it happens "naturally" thanks to the class hierarchy.
+
+      The collectSelected() method implements the second step of the processing of
+      selected data. It must be called after the collect() method, because the
+      latter is the one that indirectly gathers the object vertex offsets described
+      previously. collectSelected() puts all index data in the linear vertex buffer
+      structured in the following way:
+
+      \verbatim
+      -------------------------------------------------------------------------
+      ... ||   lstr  |   llps  |  lnes  ||   lstr  |   llps  |  lnes  || ...
+      ... ||----------------------------||----------------------------|| ...
+      ... ||  this TenderLay index data ||  next TenderLay index data || ...
+      -------------------------------------------------------------------------
+      \endverbatim
+
+      The drawing of the corresponding portion of the selected data buffer is done
+      also in this class by the drawSelected() method. For this we need the vertex
+      buffer and a proper offset in it which will point to the beginning of the data
+      slice belonging to the active cell. This offset is captured during the data
+      traversing in the field _stv_array_offset. Having done that, the drawing is
+      now trivial
+
+      ----------------------------------------------------------------
+      |      |                                        |       VBO      |
+      | data |            openGL function             |----------------|
+      | type |                                        | vertex | index |
+      |------|----------------------------------------|--------|-------|
+      | lstr | glMultiDrawElements(GL_LINE_STRIP ...) |    x   |   x   |
+      |------|----------------------------------------|--------|-------|
+      | llps | glMultiDrawElements(GL_LINE_LOOP  ...) |    x   |   x   |
+      |------|----------------------------------------|--------|-------|
+      | lnes | glMultiDrawElements(GL_LINES      ...) |    x   |   x   |
+      ----------------------------------------------------------------
+   */
    class TenderLay {
       public:
          typedef std::list<TenderTV*>     TenderTVList;
@@ -703,131 +777,45 @@ namespace tenderer {
          typedef std::map<std::string, TenderTV*> ReusableTTVMap;
 
                            TenderLay();
-         virtual          ~TenderLay();
+                          ~TenderLay();
          void              box  (int4b*);
+         void              box  (int4b*,                               const SGBitSet*);
          void              poly (int4b*, unsigned, const TessellPoly*);
+         void              poly (int4b*, unsigned, const TessellPoly*, const SGBitSet*);
          void              wire (int4b*, unsigned, laydata::WireWidth, bool);
-         void              text (const std::string*, const CTM&, const DBbox*, const TP&);
-
-         void              newSlice(TenderRef* const, bool, bool);
+         void              wire (int4b*, unsigned, laydata::WireWidth, bool, const SGBitSet*);
+         void              text (const std::string*, const CTM&, const DBbox*, const TP&, bool);
+         void              newSlice(TenderRef* const, bool, bool /*, bool, unsigned*/);
+         void              newSlice(TenderRef* const, bool, bool, unsigned slctd_array_offset);
          bool              chunkExists(TenderRef* const, bool);
          void              ppSlice();
          void              draw(layprop::DrawProperties*);
+         void              drawSelected();
          void              drawTexts(layprop::DrawProperties*);
          void              collect(bool, GLuint, GLuint);
+         void              collectSelected(unsigned int*);
          unsigned          total_points() {return _num_total_points;}
          unsigned          total_indexs() {return _num_total_indexs;}
+         unsigned          total_slctdx();
          unsigned          total_strings(){return _num_total_strings;}
 
-      protected:
-         TenderTV*         _cslice;    //!Working variable pointing to the current slice
-         unsigned          _num_total_points;
-         GLuint            _pbuffer;
-      private:
-         ReusableTTVMap    _reusableFData; // reusable filled chunks
-         ReusableTTVMap    _reusableCData; // reusable contour chunks
-         TenderTVList      _layData;
-         TenderReTVList    _reLayData;
-         unsigned          _num_total_indexs;
-         unsigned          _num_total_slctdx;
-         unsigned          _num_total_strings;
-         GLuint            _ibuffer;
-   };
-
-
-   /**
-    * TENDER Editable LAYer
-   *  The rendering of the selected objects is done in this class. TenderTV does
-   *  hold the object vertex data, but it is completely unaware of selection
-   *  related properties. The primary reason for this is that data can be
-   *  selected only in one of the generated TenderTV objects, because only one
-   *  of them eventually belongs to the active cell. Having an additional VBO
-   *  per TenderTV object for selected data would be a waste of course, because
-   *  all but one of them will be empty anyway. Instead a single VBO is generated
-   *  for the entire rendering view with the indexes of all selected vertexes in
-   *  the active cell across all layers.
-   *
-   *  Selected objects will be rendered twice. Once - together with all other
-   *  objects in the TenderTV objects and again here, in this class in order to
-   *  highlight them. An object can be fully or partially selected and depending
-   *  on this it shall be rendered using the corresponding data structure:
-   *
-   *  \verbatim
-   *   --------------------------------------------------------------
-   *  |  TopRend  |  fully selected    | partially selected |        |
-   *  |    data   |--------------------|--------------------|  enum  |
-   *  | (indexes) |  box | poly | wire |  box | poly | wire |        |
-   *  |-----------|------|------|------|------|------|------|--------|
-   *  |line strips|      |      |      |   x  |   x  |   x  |  lstr  |
-   *  | contours  |  x   |  x   |      |      |      |      |  llps  |
-   *  |   lines   |      |      |  x   |      |      |      |  lnes  |
-   *  --------------------------------------------------------------
-   *  \endverbatim
-   *
-   *  In the manner similar to TenderTV class, TenderLay sorts the selected objects
-   *  in three "bins" and gathers some statistics about each of them. One position
-   *  per bin is stored in each of the array fields (_asindxs[3], _asobjix[3],
-   *  _sizslix[3], _fstslix[3]) representing the overall amount of indexes, the
-   *  total number of indexed objects, the size of each object in terms of indexes
-   *  and the offset of each first object index in the buffer. Additionally every
-   *  selected object will need to store the offset of its vertex data within the
-   *  slice representing the active cell in the vertex buffer. This is done by the
-   *  selected objects themselves when vertex VBOs are collected via the
-   *  re-implementation of cDataCopy virtual methods in the TenderS* classes.
-   *  TenderLay doesn't take part in this process, TenderTV class is not aware of
-   *  it either - it happens "naturally" thanks to the class hierarchy.
-   *
-   *  The collectSelected() method implements the second step of the processing of
-   *  selected data. It must be called after the collect() method, because the
-   *  latter is the one that indirectly gathers the object vertex offsets described
-   *  previously. collectSelected() puts all index data in the linear vertex buffer
-   *  structured in the following way:
-   *
-   *  \verbatim
-   *  -------------------------------------------------------------------------
-   *  ... ||   lstr  |   llps  |  lnes  ||   lstr  |   llps  |  lnes  || ...
-   *  ... ||----------------------------||----------------------------|| ...
-   *  ... ||  this TenderLay index data ||  next TenderLay index data || ...
-   *  -------------------------------------------------------------------------
-   *  \endverbatim
-   *
-   *  The drawing of the corresponding portion of the selected data buffer is done
-   *  also in this class by the drawSelected() method. For this we need the vertex
-   *  buffer and a proper offset in it which will point to the beginning of the data
-   *  slice belonging to the active cell. This offset is captured during the data
-   *  traversing in the field _stv_array_offset. Having done that, the drawing is
-   *  now trivial
-   *
-   *  ----------------------------------------------------------------
-   *  |      |                                        |       VBO      |
-   *  | data |            openGL function             |----------------|
-   *  | type |                                        | vertex | index |
-   *  |------|----------------------------------------|--------|-------|
-   *  | lstr | glMultiDrawElements(GL_LINE_STRIP ...) |    x   |   x   |
-   *  |------|----------------------------------------|--------|-------|
-   *  | llps | glMultiDrawElements(GL_LINE_LOOP  ...) |    x   |   x   |
-   *  |------|----------------------------------------|--------|-------|
-   *  | lnes | glMultiDrawElements(GL_LINES      ...) |    x   |   x   |
-   *  ----------------------------------------------------------------
-   */
-   class TenderELay : public TenderLay {
-      public:
-                           TenderELay();
-         virtual          ~TenderELay();
-         void              boxS (int4b*,                               const SGBitSet*);
-         void              polyS(int4b*, unsigned, const TessellPoly*, const SGBitSet*);
-         void              wireS(int4b*, unsigned, laydata::WireWidth, bool, const SGBitSet*);
-         void              textS(const std::string*, const CTM&, const DBbox*, const TP&);
-
-         void              newSliceS(TenderRef* const, bool, bool, unsigned);
-         void              drawSelected();
-         void              collectSelected(unsigned int*);
-         unsigned          total_slctdx();
       private:
          void              registerSBox  (TenderSBox*);
          void              registerSPoly (TenderSNcvx*);
          void              registerSWire (TenderSWire*);
          void              registerSOBox (TextSOvlBox*);
+         ReusableTTVMap    _reusableFData; // reusable filled chunks
+         ReusableTTVMap    _reusableCData; // reusable contour chunks
+         TenderTVList      _layData;
+         TenderReTVList    _reLayData;
+         TenderTV*         _cslice;    //!Working variable pointing to the current slice
+         unsigned          _num_total_points;
+         unsigned          _num_total_indexs;
+         unsigned          _num_total_slctdx;
+         unsigned          _num_total_strings;
+         GLuint            _pbuffer;
+         GLuint            _ibuffer;
+         bool              _has_selected;
          // Data related to selected objects
          SliceSelected     _slct_data;
          // index related data for selected objects
@@ -872,8 +860,7 @@ namespace tenderer {
 
    //-----------------------------------------------------------------------------
    //
-   typedef std::map<unsigned, TenderELay*> DataLay;
-   typedef std::map<unsigned, TenderLay*>  GrcLay;
+   typedef std::map<unsigned, TenderLay*> DataLay;
    typedef std::stack<TenderRef*> CellStack;
 
    /**
@@ -895,11 +882,11 @@ namespace tenderer {
          void              popCell()                              {_cellStack.pop();}
          const CTM&        topCTM() const                         {return  _cellStack.top()->ctm();}
          void              box  (int4b* pdata)                    {_clayer->box(pdata);}
-         void              box  (int4b* pdata, const SGBitSet* ss){_clayer->boxS(pdata, ss);}
+         void              box  (int4b* pdata, const SGBitSet* ss){_clayer->box(pdata, ss);}
          void              poly (int4b* pdata, unsigned psize, const TessellPoly* tpoly)
                                                                   {_clayer->poly(pdata, psize, tpoly);}
          void              poly (int4b* pdata, unsigned psize, const TessellPoly* tpoly, const SGBitSet* ss)
-                                                                  {_clayer->polyS(pdata, psize, tpoly, ss);}
+                                                                  {_clayer->poly(pdata, psize, tpoly, ss);}
          void              grcpoly(int4b* pdata, unsigned psize);
          void              wire (int4b*, unsigned, laydata::WireWidth);
          void              wire (int4b*, unsigned, laydata::WireWidth, const SGBitSet*);
@@ -934,8 +921,8 @@ namespace tenderer {
          layprop::DrawProperties*   _drawprop;
          real              _UU;
          DataLay           _data;            //!All editable data for drawing
-         GrcLay            _grcData;         //!All GRC      data for drawing
-         TenderELay*       _clayer;          //!Working variable pointing to the current edit slice
+         DataLay           _grcData;         //!All GRC      data for drawing
+         TenderLay*        _clayer;          //!Working variable pointing to the current edit slice
          TenderLay*        _grcLayer;        //!Working variable pointing to the current GRC  slice
          TenderRefLay      _refLayer;
          CellStack         _cellStack;       //!Required during data traversing stage
