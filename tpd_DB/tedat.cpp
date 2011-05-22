@@ -2614,9 +2614,8 @@ void  laydata::TdtAuxRef::drawSRequest(tenderer::TopRend& rend, const SGBitSet*)
 
 void  laydata::TdtAuxRef::motionDraw(const layprop::DrawProperties& drawprop, CtmQueue& transtack, SGBitSet*) const
 {
-   assert(false);
-//   if (_structure)
-//      _structure->motionDraw(drawprop, transtack);
+   assert(NULL != _structure);
+   _structure->motionDraw(drawprop, transtack);
 }
 
 void laydata::TdtAuxRef::info(std::ostringstream&, real) const

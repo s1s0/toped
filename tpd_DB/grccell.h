@@ -53,6 +53,8 @@ namespace auxdata {
       virtual   void       drawRequest(tenderer::TopRend&) const = 0;
       //! Draw the outlines of the selected objects
       virtual   void       drawSRequest(tenderer::TopRend&, const SGBitSet*) const = 0;
+      //! Draw the objects in motion during copy/move and similar operations
+      virtual   void       motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const = 0;
       //! Print an object description on the toped console.
       virtual   void       info(std::ostringstream&, real) const = 0;
       //!
@@ -85,6 +87,7 @@ namespace auxdata {
          virtual void      openGlDrawSel(const PointVector&, const SGBitSet*) const;
          virtual void      drawRequest(tenderer::TopRend&) const;
          virtual void      drawSRequest(tenderer::TopRend&, const SGBitSet*) const;
+         virtual void      motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
          virtual void      info(std::ostringstream&, real) const;
 //         virtual word      numPoints() const {return _psize;}
          virtual bool      pointInside(const TP)const;
@@ -108,6 +111,7 @@ namespace auxdata {
          virtual void      openGlDrawSel(const PointVector&, const SGBitSet*) const;
          virtual void      drawRequest(tenderer::TopRend&) const;
          virtual void      drawSRequest(tenderer::TopRend&, const SGBitSet*) const;
+         virtual void      motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
          virtual void      info(std::ostringstream&, real) const;
 //         virtual word      numPoints() const {return _psize;}
          virtual bool      pointInside(const TP)const;
@@ -136,6 +140,7 @@ namespace auxdata {
          virtual void        openGlRender(tenderer::TopRend&, const CTM&, bool, bool) const;
          virtual DBbox       getVisibleOverlap(const layprop::DrawProperties&);
          virtual void        collectUsedLays(WordList&) const;
+         virtual void        motionDraw(const layprop::DrawProperties&, CtmQueue&, bool active=false) const;
          //
          QuadTree*           secureLayer(unsigned layno);
          QTreeTmp*           secureUnsortedLayer(unsigned layno);

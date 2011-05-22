@@ -119,6 +119,27 @@ void auxdata::TdtErrPoly::info(std::ostringstream& ost, real DBU) const
    ost << "};";
 }
 
+void auxdata::TdtErrPoly::motionDraw(const layprop::DrawProperties&, CtmQueue& transtack,
+                                 SGBitSet* plst) const
+{
+   CTM trans = transtack.front();
+   PointVector* ptlist = DEBUG_NEW PointVector;
+   ptlist->reserve(_psize);
+   for (unsigned i = 0; i < _psize; i++)
+   {
+      ptlist->push_back( TP(_pdata[2*i], _pdata[2*i+1]) * trans);
+   }
+   glBegin(GL_LINE_LOOP);
+   for (unsigned i = 0; i < _psize; i++)
+   {
+      glVertex2i((*ptlist)[i].x(), (*ptlist)[i].y());
+   }
+   glEnd();
+   ptlist->clear();
+   delete ptlist;
+}
+
+
 bool auxdata::TdtErrPoly::pointInside(const TP pnt)const
 {
    TP p0, p1;
@@ -289,6 +310,16 @@ void auxdata::TdtErrWire::info(std::ostringstream& ost, real DBU) const
       if (i != _psize - 1) ost << " , ";
    }
    ost << "};";
+}
+
+void auxdata::TdtErrWire::motionDraw(const layprop::DrawProperties& drawprop,
+               CtmQueue& transtack, SGBitSet* plst) const
+{
+   CTM trans = transtack.front();
+   PointVector ptlist;
+   laydata::WireContourAux wcontour(_pdata, _psize, _width, trans);
+   wcontour.getRenderingData(ptlist);
+   openGlDrawLine(const_cast<layprop::DrawProperties&>(drawprop), ptlist);
 }
 
 bool auxdata::TdtErrWire::pointInside(const TP pnt)const
@@ -481,3 +512,41 @@ DBbox auxdata::GrcCell::getVisibleOverlap(const layprop::DrawProperties& prop)
    }
    return vlOverlap;
 }
+
+void auxdata::GrcCell::motionDraw(const layprop::DrawProperties& drawprop,
+                                          CtmQueue& transtack, bool active) const
+{
+//   if (active)
+//   {
+//      // If this is the active cell, then we will have to visualize the
+//      // selected shapes in move. Partially selected fellas are processed
+//      // only if the current operation is move
+//      console::ACTIVE_OP actop = drawprop.currentOp();
+//      //temporary draw of the active cell - moving selected shapes
+//      SelectList::const_iterator llst;
+//      DataList::iterator dlst;
+//      for (llst = _shapesel.begin(); llst != _shapesel.end(); llst++) {
+//         const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(llst->first);
+//         for (dlst = llst->second->begin(); dlst != llst->second->end(); dlst++)
+//            if (!((actop == console::op_copy) && (sh_partsel == dlst->first->status())))
+//               dlst->first->motionDraw(drawprop, transtack, &(dlst->second));
+//      }
+//   }
+//   else {
+      // Here we draw obviously a cell which reference has been selected
+      // somewhere up the hierarchy. On this level - no selected shapes
+      // whatsoever exists, so just perform a regular draw, but of course
+      // without fill
+      typedef LayerList::const_iterator LCI;
+      for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
+         if (!drawprop.layerHidden(lay->first))
+         {
+            const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(lay->first);
+            QuadTree* curlay = lay->second;
+             for (QuadTree::DrawIterator CI = curlay->begin(drawprop, transtack); CI != curlay->end(); CI++)
+               CI->motionDraw(drawprop, transtack, NULL);
+         }
+//      transtack.pop_front();
+//   }
+}
+
