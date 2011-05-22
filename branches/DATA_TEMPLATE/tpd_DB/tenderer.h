@@ -678,8 +678,7 @@ namespace tenderer {
     * TENDER LAYer represents a DB layer in the rendering view. It
     * generates, stores and sorts all the TenderTV objects (one per DB cell) and
     * also initializes the corresponding virtual buffers (the vertex and eventually
-    * the index) for this layer. This class is responsible also for gathering of
-    * the selected data indexes.
+    * the index) for this layer.
     *
     * A new TenderLay object is created by the newSlice() method during the DB
     * traversing. A reference to it is stored in the _layData list as well as
@@ -733,7 +732,6 @@ namespace tenderer {
          unsigned          _num_total_slctdx;
          unsigned          _num_total_strings;
          GLuint            _ibuffer;
-//         bool              _has_selected;
    };
 
 
@@ -949,7 +947,7 @@ namespace tenderer {
          GLuint*           _ogl_grc_buffers; //! Array with the "names" of the GRC related openGL buffers
          GLuint            _sbuffer;         //! The "name" of the selected index buffer
          TenderRef*        _activeCS;
-         byte              _dovCorrection;   //!Cell ref Depth of view correction (for Edit in Place purposes)
+         byte              _dovCorrection;   //! Cell ref Depth of view correction (for Edit in Place purposes)
          RefBoxList        _hiddenRefBoxes;  //! Those cRefBox objects which didn't ended in the TenderRefLay structures
    };
 
