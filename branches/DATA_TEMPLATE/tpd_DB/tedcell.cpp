@@ -516,6 +516,7 @@ void laydata::TdtCell::openGlRender(tenderer::TopRend& rend, const CTM& trans,
       //   utilize the reference mechanism at all.
       switch (curlayno)
       {
+         case GRC_LAY:
          case REF_LAY: lay->second->openGlRender(rend, dlist); break;
          case DRC_LAY: rend.setLayer(curlayno, (NULL != dlist));
                        lay->second->openGlRender(rend, dlist); break;
