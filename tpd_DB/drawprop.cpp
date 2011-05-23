@@ -928,6 +928,7 @@ void layprop::DrawProperties::allUnselectable(DWordSet& layset)
       if (it->second->hidden() || it->second->locked())
          layset.insert(it->first);
    }
+   layset.insert(GRC_LAY);
 }
 
 void layprop::DrawProperties::allInvisible(DWordSet& layset)

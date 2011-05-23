@@ -2608,8 +2608,8 @@ void  laydata::TdtAuxRef::drawRequest(tenderer::TopRend& rend) const
 
 void  laydata::TdtAuxRef::drawSRequest(tenderer::TopRend& rend, const SGBitSet*) const
 {
+   // This object is not supposed to be selected.
    assert(false);
-   drawRequest(rend);
 }
 
 void  laydata::TdtAuxRef::motionDraw(const layprop::DrawProperties& drawprop, CtmQueue& transtack, SGBitSet*) const
