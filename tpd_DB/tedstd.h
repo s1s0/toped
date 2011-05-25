@@ -123,9 +123,6 @@ namespace laydata {
    typedef  std::deque<EditObject*>                 EditCellStack;
    typedef  std::list<const CellMap*>               LibCellLists;
    typedef  std::list<TdtDefaultCell*>              CellDefList;
-   typedef  dword                                   WireWidth;
-
-   const WireWidth        MAX_WIRE_WIDTH          = 0x0FFFFFFF;
 
    //==============================================================================
    class Validator {

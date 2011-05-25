@@ -199,7 +199,7 @@ unsigned  tenderer::TenderBox::cDataCopy(int* array, unsigned& pindex)
 //
 // TenderWire
 //
-tenderer::TenderWire::TenderWire(int4b* pdata, unsigned psize, const laydata::WireWidth width, bool clo)
+tenderer::TenderWire::TenderWire(int4b* pdata, unsigned psize, const WireWidth width, bool clo)
    : TenderNcvx(NULL, 0), _ldata(pdata), _lsize(psize), _celno(clo), _tdata(NULL)
 {
    if (!_celno)
@@ -1098,12 +1098,12 @@ void tenderer::TenderLay::poly (int4b* pdata, unsigned psize, const TessellPoly*
    _cslice->registerPoly(sobj, tpoly);
 }
 
-void tenderer::TenderLay::wire (int4b* pdata, unsigned psize, laydata::WireWidth width, bool center_only)
+void tenderer::TenderLay::wire (int4b* pdata, unsigned psize, WireWidth width, bool center_only)
 {
    _cslice->registerWire(DEBUG_NEW TenderWire(pdata, psize, width, center_only));
 }
 
-void tenderer::TenderLay::wire (int4b* pdata, unsigned psize, laydata::WireWidth width, bool center_only, const SGBitSet* ss)
+void tenderer::TenderLay::wire (int4b* pdata, unsigned psize, WireWidth width, bool center_only, const SGBitSet* ss)
 {
    TenderSWire* sobj = DEBUG_NEW TenderSWire(pdata, psize, width, center_only, ss);
    registerSWire(sobj);
@@ -1619,7 +1619,7 @@ void tenderer::TopRend::grcpoly(int4b* pdata, unsigned psize)
    _grcLayer->poly(pdata, psize, NULL);
 }
 
-void tenderer::TopRend::wire (int4b* pdata, unsigned psize, laydata::WireWidth width)
+void tenderer::TopRend::wire (int4b* pdata, unsigned psize, WireWidth width)
 {
    // first check whether to draw only the center line
    DBbox wsquare = DBbox(TP(0,0),TP(width,width));
@@ -1627,7 +1627,7 @@ void tenderer::TopRend::wire (int4b* pdata, unsigned psize, laydata::WireWidth w
    _clayer->wire(pdata, psize, width, center_line_only);
 }
 
-void tenderer::TopRend::wire (int4b* pdata, unsigned psize, laydata::WireWidth width, const SGBitSet* psel)
+void tenderer::TopRend::wire (int4b* pdata, unsigned psize, WireWidth width, const SGBitSet* psel)
 {
    // first check whether to draw only the center line
    DBbox wsquare = DBbox(TP(0,0),TP(width,width));
@@ -1635,7 +1635,7 @@ void tenderer::TopRend::wire (int4b* pdata, unsigned psize, laydata::WireWidth w
    _clayer->wire(pdata, psize, width, center_line_only,psel);
 }
 
-void tenderer::TopRend::grcwire (int4b* pdata, unsigned psize, laydata::WireWidth width)
+void tenderer::TopRend::grcwire (int4b* pdata, unsigned psize, WireWidth width)
 {
    // first check whether to draw only the center line
    DBbox wsquare = DBbox(TP(0,0),TP(width,width));

@@ -29,8 +29,8 @@
 #include <sstream>
 #include "grccell.h"
 
-auxdata::TdtErrPoly::TdtErrPoly(const PointVector& plst) :
-   TdtErrData(          )
+auxdata::TdtGrcPoly::TdtGrcPoly(const PointVector& plst) :
+   TdtAuxData(          )
 {
    _psize = plst.size();
    assert(_psize);
@@ -43,18 +43,18 @@ auxdata::TdtErrPoly::TdtErrPoly(const PointVector& plst) :
    }
 }
 
-auxdata::TdtErrPoly::TdtErrPoly(int4b* pdata, unsigned psize) :
-   TdtErrData  (           ),
+auxdata::TdtGrcPoly::TdtGrcPoly(int4b* pdata, unsigned psize) :
+   TdtAuxData  (           ),
    _pdata      ( pdata     ),
    _psize      ( psize     )
 {}
 
-auxdata::TdtErrPoly::~TdtErrPoly()
+auxdata::TdtGrcPoly::~TdtGrcPoly()
 {
    delete [] _pdata;
 }
 
-DBbox auxdata::TdtErrPoly::overlap() const
+DBbox auxdata::TdtGrcPoly::overlap() const
 {
    DBbox ovl(_pdata[0], _pdata[1]) ;
    for (word i = 1; i < _psize; i++)
@@ -62,7 +62,7 @@ DBbox auxdata::TdtErrPoly::overlap() const
    return ovl;
 }
 
-void auxdata::TdtErrPoly::openGlPrecalc(layprop::DrawProperties& drawprop, PointVector& ptlist) const
+void auxdata::TdtGrcPoly::openGlPrecalc(layprop::DrawProperties& drawprop, PointVector& ptlist) const
 {
    // translate the points using the current CTM
    ptlist.reserve(_psize);
@@ -72,7 +72,7 @@ void auxdata::TdtErrPoly::openGlPrecalc(layprop::DrawProperties& drawprop, Point
    }
 }
 
-void auxdata::TdtErrPoly::openGlDrawLine(layprop::DrawProperties&, const PointVector& ptlist) const
+void auxdata::TdtGrcPoly::openGlDrawLine(layprop::DrawProperties&, const PointVector& ptlist) const
 {
    glBegin(GL_LINE_LOOP);
    for (unsigned i = 0; i < ptlist.size(); i++)
@@ -80,12 +80,12 @@ void auxdata::TdtErrPoly::openGlDrawLine(layprop::DrawProperties&, const PointVe
    glEnd();
 }
 
-void auxdata::TdtErrPoly::openGlDrawFill(layprop::DrawProperties&, const PointVector&) const
+void auxdata::TdtGrcPoly::openGlDrawFill(layprop::DrawProperties&, const PointVector&) const
 {
    // Not filled!
 }
 
-void auxdata::TdtErrPoly::openGlDrawSel(const PointVector& ptlist, const SGBitSet*) const
+void auxdata::TdtGrcPoly::openGlDrawSel(const PointVector& ptlist, const SGBitSet*) const
 {
    assert(0 != ptlist.size());
    if (sh_selected == status())
@@ -97,17 +97,17 @@ void auxdata::TdtErrPoly::openGlDrawSel(const PointVector& ptlist, const SGBitSe
    }
 }
 
-void auxdata::TdtErrPoly::drawRequest(tenderer::TopRend& rend) const
+void auxdata::TdtGrcPoly::drawRequest(tenderer::TopRend& rend) const
 {
    rend.grcpoly(_pdata, _psize);
 }
 
-void auxdata::TdtErrPoly::drawSRequest(tenderer::TopRend& rend, const SGBitSet*) const
+void auxdata::TdtGrcPoly::drawSRequest(tenderer::TopRend& rend, const SGBitSet*) const
 {
    rend.poly(_pdata, _psize, NULL, NULL);
 }
 
-void auxdata::TdtErrPoly::info(std::ostringstream& ost, real DBU) const
+void auxdata::TdtGrcPoly::info(std::ostringstream& ost, real DBU) const
 {
    ost << "polygon - {";
    for (unsigned i = 0; i < _psize; i++)
@@ -119,7 +119,7 @@ void auxdata::TdtErrPoly::info(std::ostringstream& ost, real DBU) const
    ost << "};";
 }
 
-void auxdata::TdtErrPoly::motionDraw(const layprop::DrawProperties&, CtmQueue& transtack,
+void auxdata::TdtGrcPoly::motionDraw(const layprop::DrawProperties&, CtmQueue& transtack,
                                  SGBitSet* plst) const
 {
    CTM trans = transtack.front();
@@ -140,7 +140,7 @@ void auxdata::TdtErrPoly::motionDraw(const layprop::DrawProperties&, CtmQueue& t
 }
 
 
-bool auxdata::TdtErrPoly::pointInside(const TP pnt)const
+bool auxdata::TdtGrcPoly::pointInside(const TP pnt)const
 {
    TP p0, p1;
    byte cc = 0;
@@ -158,7 +158,7 @@ bool auxdata::TdtErrPoly::pointInside(const TP pnt)const
    return (cc & 0x01) ? true : false;
 }
 
-PointVector auxdata::TdtErrPoly::dumpPoints() const
+PointVector auxdata::TdtGrcPoly::dumpPoints() const
 {
    PointVector plist;
    plist.reserve(_psize);
@@ -169,8 +169,8 @@ PointVector auxdata::TdtErrPoly::dumpPoints() const
 
 
 //==============================================================================
-auxdata::TdtErrWire::TdtErrWire(const PointVector& plst, WireWidth width) :
-   TdtErrData  (           ),
+auxdata::TdtGrcWire::TdtGrcWire(const PointVector& plst, WireWidth width) :
+   TdtAuxData  (           ),
    _width      (width      )
 {
    _psize = plst.size();
@@ -183,8 +183,8 @@ auxdata::TdtErrWire::TdtErrWire(const PointVector& plst, WireWidth width) :
    }
 }
 
-auxdata::TdtErrWire::TdtErrWire(int4b* pdata, unsigned psize, WireWidth width) :
-   TdtErrData  (           ),
+auxdata::TdtGrcWire::TdtGrcWire(int4b* pdata, unsigned psize, WireWidth width) :
+   TdtAuxData  (           ),
    _pdata      ( pdata     ),
    _psize      ( psize     ),
    _width      ( width     )
@@ -192,18 +192,18 @@ auxdata::TdtErrWire::TdtErrWire(int4b* pdata, unsigned psize, WireWidth width) :
 
 }
 
-auxdata::TdtErrWire::~TdtErrWire()
+auxdata::TdtGrcWire::~TdtGrcWire()
 {
    delete [] _pdata;
 }
 
-DBbox auxdata::TdtErrWire::overlap() const
+DBbox auxdata::TdtGrcWire::overlap() const
 {
    laydata::WireContour wcontour(_pdata, _psize, _width);
    return wcontour.getCOverlap();
 }
 
-void auxdata::TdtErrWire::openGlPrecalc(layprop::DrawProperties& drawprop, PointVector& ptlist) const
+void auxdata::TdtGrcWire::openGlPrecalc(layprop::DrawProperties& drawprop, PointVector& ptlist) const
 {
    // first check whether to draw only the center line
    DBbox wsquare = DBbox(TP(0,0),TP((int4b)_width, (int4b)_width));
@@ -222,7 +222,7 @@ void auxdata::TdtErrWire::openGlPrecalc(layprop::DrawProperties& drawprop, Point
    }
 }
 
-void auxdata::TdtErrWire::openGlDrawLine(layprop::DrawProperties&, const PointVector& ptlist) const
+void auxdata::TdtGrcWire::openGlDrawLine(layprop::DrawProperties&, const PointVector& ptlist) const
 {
    if (0 == ptlist.size()) return;
    word lsize = ptlist[0].x();
@@ -241,12 +241,12 @@ void auxdata::TdtErrWire::openGlDrawLine(layprop::DrawProperties&, const PointVe
    glEnd();
 }
 
-void auxdata::TdtErrWire::openGlDrawFill(layprop::DrawProperties&, const PointVector&) const
+void auxdata::TdtGrcWire::openGlDrawFill(layprop::DrawProperties&, const PointVector&) const
 {
    // Never filled
 }
 
-void auxdata::TdtErrWire::openGlDrawSel(const PointVector& ptlist, const SGBitSet* pslist) const
+void auxdata::TdtGrcWire::openGlDrawSel(const PointVector& ptlist, const SGBitSet* pslist) const
 {
    if (0 == ptlist.size()) return;
    word lsize = ptlist[0].x();
@@ -288,19 +288,19 @@ void auxdata::TdtErrWire::openGlDrawSel(const PointVector& ptlist, const SGBitSe
    }
 }
 
-void auxdata::TdtErrWire::drawRequest(tenderer::TopRend& rend) const
+void auxdata::TdtGrcWire::drawRequest(tenderer::TopRend& rend) const
 {
 //   rend.fwire(_pdata, _psize, _width);
    rend.grcwire(_pdata, _psize, _width);
 
 }
 
-void auxdata::TdtErrWire::drawSRequest(tenderer::TopRend& rend, const SGBitSet*) const
+void auxdata::TdtGrcWire::drawSRequest(tenderer::TopRend& rend, const SGBitSet*) const
 {
    rend.wire(_pdata, _psize, _width, NULL);
 }
 
-void auxdata::TdtErrWire::info(std::ostringstream& ost, real DBU) const
+void auxdata::TdtGrcWire::info(std::ostringstream& ost, real DBU) const
 {
    ost << "wire " << _width/DBU << " - {";
    for (unsigned i = 0; i < _psize; i++)
@@ -312,7 +312,7 @@ void auxdata::TdtErrWire::info(std::ostringstream& ost, real DBU) const
    ost << "};";
 }
 
-void auxdata::TdtErrWire::motionDraw(const layprop::DrawProperties& drawprop,
+void auxdata::TdtGrcWire::motionDraw(const layprop::DrawProperties& drawprop,
                CtmQueue& transtack, SGBitSet* plst) const
 {
    CTM trans = transtack.front();
@@ -322,7 +322,7 @@ void auxdata::TdtErrWire::motionDraw(const layprop::DrawProperties& drawprop,
    openGlDrawLine(const_cast<layprop::DrawProperties&>(drawprop), ptlist);
 }
 
-bool auxdata::TdtErrWire::pointInside(const TP pnt)const
+bool auxdata::TdtGrcWire::pointInside(const TP pnt)const
 {
    TP p0, p1;
    for (unsigned i = 0; i < _psize - 1 ; i++)
@@ -336,7 +336,7 @@ bool auxdata::TdtErrWire::pointInside(const TP pnt)const
    return false;
 }
 
-float auxdata::TdtErrWire::get_distance(const TP& p1, const TP& p2, const TP& p0) const
+float auxdata::TdtGrcWire::get_distance(const TP& p1, const TP& p2, const TP& p0) const
 {
    if (p1.x() == p2.x())
       // if the segment is parallel to Y axis
@@ -367,7 +367,7 @@ float auxdata::TdtErrWire::get_distance(const TP& p1, const TP& p2, const TP& p0
    }
 }
 
-PointVector auxdata::TdtErrWire::dumpPoints() const
+PointVector auxdata::TdtGrcWire::dumpPoints() const
 {
    PointVector plist;
    plist.reserve(_psize);

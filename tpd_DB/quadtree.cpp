@@ -433,10 +433,10 @@ bool laydata::DrawIterator<DataT>::secureNonEmptyDown()
 //==============================================================================
 // implicit template instantiation with a certain type parameter
 template class laydata::Iterator<laydata::TdtData>;
-template class laydata::Iterator<auxdata::TdtErrData>;
+template class laydata::Iterator<auxdata::TdtAuxData>;
 template class laydata::ClipIterator<laydata::TdtData>;
-template class laydata::ClipIterator<auxdata::TdtErrData>;
+template class laydata::ClipIterator<auxdata::TdtAuxData>;
 template class laydata::DrawIterator<laydata::TdtData>;
-template class laydata::DrawIterator<auxdata::TdtErrData>;
+template class laydata::DrawIterator<auxdata::TdtAuxData>;
 template class laydata::QTStoreTmpl<laydata::TdtData>;
-template class laydata::QTStoreTmpl<auxdata::TdtErrData>;
+template class laydata::QTStoreTmpl<auxdata::TdtAuxData>;

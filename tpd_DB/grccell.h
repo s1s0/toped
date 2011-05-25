@@ -31,13 +31,12 @@
 #include "qtree_tmpl.h"
 
 namespace auxdata {
-   typedef  dword                                   WireWidth;
 
    //==============================================================================
-   class TdtErrData  {
+   class TdtAuxData  {
    public:
       //! The default constructor.
-                           TdtErrData(SH_STATUS sel = sh_active) : _status(sel){};
+                           TdtAuxData(SH_STATUS sel = sh_active) : _status(sel){};
       //! Return the overlapping box of the object.
       virtual   DBbox      overlap()  const = 0;
       //! A preparation for drawing - calculating all drawing objects using translation matrix stack.
@@ -68,17 +67,17 @@ namespace auxdata {
       void                 setStatus(SH_STATUS s) {_status = s;}
       SH_STATUS            status() const {return _status;}
 //      virtual word         numPoints() const = 0;
-      virtual             ~TdtErrData(){};
+      virtual             ~TdtAuxData(){};
    protected:
       SH_STATUS            _status;
    };
 
    //==============================================================================
-   class TdtErrPoly : public TdtErrData   {
+   class TdtGrcPoly : public TdtAuxData   {
       public:
-                           TdtErrPoly(const PointVector&);
-                           TdtErrPoly(int4b*, unsigned);
-         virtual          ~TdtErrPoly();
+                           TdtGrcPoly(const PointVector&);
+                           TdtGrcPoly(int4b*, unsigned);
+         virtual          ~TdtGrcPoly();
          virtual DBbox     overlap() const;
 
          virtual void      openGlPrecalc(layprop::DrawProperties&, PointVector&) const;
@@ -98,11 +97,11 @@ namespace auxdata {
    };
 
    //==============================================================================
-   class TdtErrWire : public TdtErrData   {
+   class TdtGrcWire : public TdtAuxData   {
       public:
-                           TdtErrWire(const PointVector&, WireWidth);
-                           TdtErrWire(int4b*, unsigned, WireWidth);
-         virtual          ~TdtErrWire();
+                           TdtGrcWire(const PointVector&, WireWidth);
+                           TdtGrcWire(int4b*, unsigned, WireWidth);
+         virtual          ~TdtGrcWire();
          virtual DBbox     overlap() const;
 
          virtual void      openGlPrecalc(layprop::DrawProperties&, PointVector&) const;
@@ -123,10 +122,10 @@ namespace auxdata {
          WireWidth         _width;
    };
 
-   typedef laydata::QTreeTmpl<TdtErrData>    QuadTree;
-   typedef laydata::QTStoreTmpl<TdtErrData>  QTreeTmp;
+   typedef laydata::QTreeTmpl<TdtAuxData>    QuadTree;
+   typedef laydata::QTStoreTmpl<TdtAuxData>  QTreeTmp;
    typedef std::map<unsigned, QuadTree*>     LayerList;
-   typedef  std::pair<TdtErrData*, SGBitSet> SelectDataPair;
+   typedef  std::pair<TdtAuxData*, SGBitSet> SelectDataPair;
    typedef  std::list<SelectDataPair>        DataList;
    typedef  std::map<unsigned, DataList*>    SelectList;
    typedef  std::map<unsigned, QTreeTmp*>    TmpLayerMap;
