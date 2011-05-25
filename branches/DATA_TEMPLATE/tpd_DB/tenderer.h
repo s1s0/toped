@@ -285,7 +285,7 @@ namespace tenderer {
    */
    class TenderWire : public TenderNcvx {
       public:
-                           TenderWire(int4b*, unsigned, const laydata::WireWidth, bool);
+                           TenderWire(int4b*, unsigned, const WireWidth, bool);
          virtual          ~TenderWire();
          void              Tesselate();
          virtual unsigned  lDataCopy(int*, unsigned&);
@@ -424,7 +424,7 @@ namespace tenderer {
    */
    class TenderSWire : public TenderWire, public TenderSelected {
       public:
-                           TenderSWire(int4b* pdata, unsigned psize, const laydata::WireWidth width, bool clo, const SGBitSet* slist) :
+                           TenderSWire(int4b* pdata, unsigned psize, const WireWidth width, bool clo, const SGBitSet* slist) :
                               TenderWire(pdata, psize, width, clo), TenderSelected(slist), _loffset(0u) {}
          virtual unsigned  cDataCopy(int*, unsigned&);
          virtual unsigned  lDataCopy(int*, unsigned&);
@@ -782,8 +782,8 @@ namespace tenderer {
          void              box  (int4b*,                               const SGBitSet*);
          void              poly (int4b*, unsigned, const TessellPoly*);
          void              poly (int4b*, unsigned, const TessellPoly*, const SGBitSet*);
-         void              wire (int4b*, unsigned, laydata::WireWidth, bool);
-         void              wire (int4b*, unsigned, laydata::WireWidth, bool, const SGBitSet*);
+         void              wire (int4b*, unsigned, WireWidth, bool);
+         void              wire (int4b*, unsigned, WireWidth, bool, const SGBitSet*);
          void              text (const std::string*, const CTM&, const DBbox*, const TP&, bool);
          void              newSlice(TenderRef* const, bool, bool /*, bool, unsigned*/);
          void              newSlice(TenderRef* const, bool, bool, unsigned slctd_array_offset);
@@ -888,9 +888,9 @@ namespace tenderer {
          void              poly (int4b* pdata, unsigned psize, const TessellPoly* tpoly, const SGBitSet* ss)
                                                                   {_clayer->poly(pdata, psize, tpoly, ss);}
          void              grcpoly(int4b* pdata, unsigned psize);
-         void              wire (int4b*, unsigned, laydata::WireWidth);
-         void              wire (int4b*, unsigned, laydata::WireWidth, const SGBitSet*);
-         void              grcwire (int4b*, unsigned, laydata::WireWidth);
+         void              wire (int4b*, unsigned, WireWidth);
+         void              wire (int4b*, unsigned, WireWidth, const SGBitSet*);
+         void              grcwire (int4b*, unsigned, WireWidth);
          void              arefOBox(std::string, const CTM&, const DBbox&, bool);
          void              text (const std::string*, const CTM&, const DBbox&, const TP&, bool);
          bool              collect();

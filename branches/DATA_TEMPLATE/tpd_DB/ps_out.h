@@ -43,7 +43,7 @@ public:
    void           defineColor(std::string, byte, byte, byte);
    void           defineFill(std::string, const byte*);
    void           poly(const int4b* const, unsigned, const DBbox);
-   void           wire(const int4b* const, unsigned, laydata::WireWidth, const DBbox);
+   void           wire(const int4b* const, unsigned, WireWidth, const DBbox);
    void           text(std::string, const CTM);
    void           cellref(std::string, const CTM);
    void           pspage_header(const DBbox);

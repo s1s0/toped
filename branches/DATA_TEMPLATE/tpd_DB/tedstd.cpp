@@ -410,7 +410,7 @@ int4b laydata::InputTdtFile::get4b()
    return result;
 }
 
-laydata::WireWidth laydata::InputTdtFile::get4ub()
+WireWidth laydata::InputTdtFile::get4ub()
 {
    WireWidth result;
    if (!readStream(&result,sizeof(WireWidth), true))
@@ -1337,7 +1337,7 @@ void ImportDB::addPoly(PointVector& plist)
       else
       {
          auxdata::QTreeTmp* errlay = _grc_structure->secureUnsortedLayer(_layCrossMap->tdtLayNumber());
-         errlay->put(DEBUG_NEW auxdata::TdtErrPoly(plist));
+         errlay->put(DEBUG_NEW auxdata::TdtGrcPoly(plist));
       }
    }
 }
@@ -1360,7 +1360,7 @@ void ImportDB::addPath(PointVector& plist, int4b width, short pathType, int4b bg
          else
          {
             auxdata::QTreeTmp* errlay = _grc_structure->secureUnsortedLayer(_layCrossMap->tdtLayNumber());
-            errlay->put(DEBUG_NEW auxdata::TdtErrWire(plist, width));
+            errlay->put(DEBUG_NEW auxdata::TdtGrcWire(plist, width));
          }
       }
       else
