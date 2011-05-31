@@ -126,12 +126,8 @@ namespace laydata {
    public:
                                 QTStoreTmpl(QTreeTmpl<DataT>* trunk) : _trunk(trunk) {};
        void                     put(DataT* shape);
-//       void                     putBox(const TP& p1, const TP& p2);
-//       void                     putPoly(PointVector& pl);
-//       void                     putPoly(int4b* pl, unsigned psize);
-//       void                     putWire(PointVector& pl,word w);
-//       void                     putText(std::string text, CTM trans);
        void                     commit();
+       unsigned                 numObjects()  {return _data.size();}
    private:
       typedef  std::list<DataT*>    ShapeList;
       ShapeList                 _data;

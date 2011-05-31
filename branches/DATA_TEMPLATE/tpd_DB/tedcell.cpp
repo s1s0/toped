@@ -1969,7 +1969,15 @@ void laydata::TdtCell::fixUnsorted()
    typedef TmpLayerMap::const_iterator LCI;
    for (LCI lay = _tmpLayers.begin(); lay != _tmpLayers.end(); lay++)
    {
-      lay->second->commit();
+      if (0 != lay->second->numObjects())
+         lay->second->commit();
+      else
+      {
+         LayerList::iterator tlay = _layers.find(lay->first);
+         assert(tlay != _layers.end());
+         delete tlay->second;
+         _layers.erase(tlay);
+      }
       delete lay->second;
    }
    _tmpLayers.clear();
