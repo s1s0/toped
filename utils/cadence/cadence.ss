@@ -25,8 +25,9 @@
 ;//===========================================================================
 
 (module cadence scheme
-(require scheme/list)
-(provide convert)
+  (require scheme/base)
+  (require scheme/list)
+  (provide convert)
 
 ;****************AUX FUNCTIONS********************************
 
@@ -185,7 +186,7 @@
 ;****************GLOBAL VARIABLES AND FUNCTIONS*******************
 (define packet-list  '())
 (define layer-list '())
-(define stipple-list '())
+(define stipple-list (make-hash))
 
 ;****************CADENCE API FUNCTIONS********************************
 
@@ -280,28 +281,12 @@
                                                      '()
                                                      bitmap) 128) )
                (list "};\n"))))
-;---------------------------------------------
-;insert-in-stipple
-;input new-stipple  - list 
-;      stipple-list - list  
-;output - return (cons stipple-name stipple), corresponding "name"
-;          or #f if no such stipple
-(define (insert-in-stipple  new-stipple stipplelist)
-  (let ((cur-stipple-name (car (car stipplelist)))
-        (cur-stipple (car stipplelist))
-        (new-stipple-name (car new-stipple)))
-         
-        (if (equal? new-stipple-name cur-stipple-name)
-            (cons new-stipple (cdr stipplelist))
-            (if (empty? (cdr stipplelist)) 
-                (cons new-stipple stipplelist) 
-                (cons  cur-stipple (insert-in-stipple new-stipple (cdr stipplelist) ))))))
   
 ;---------------------------------------------
 (define drDefineStipple
   (lambda(stipplelist)
     (let ((stipple-names '())
-          (blank-stipple (list 'blank (list (string-append "int list blank= {" 
+          (blank-stipple  (list (string-append "int list blank= {" 
                                    "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
                                    "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
                                    "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
@@ -317,17 +302,15 @@
                                    "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
                                    "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
                                    "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,"
-                                   "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00" "};")))))
+                                   "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00" "};"))))
       (if (empty? stipple-list) 
-          (set! stipple-list (list blank-stipple))
-          (set! stipple-list (append stipple-list 
-                                     (foldl insert-in-stipple stipple-list (map (lambda(stipple)
-                                                    (let ((display (car stipple))
-                                                          (name (cadr stipple))
-                                                          (bitmap (caddr stipple)))
-                                                      (set! stipple-names (append stipple-names (list name)))
-                                                      (list name (parse-stipple name bitmap))))
-                                                  stipplelist))))))))
+          (hash-set! stipple-list 'blank blank-stipple)
+          (map (lambda(stipple)
+                 (let ((display (car stipple))
+                       (name (cadr stipple))
+                       (bitmap (caddr stipple)))
+                   (hash-set! stipple-list name (parse-stipple name bitmap)))) 
+               stipplelist)))))
     
 (define drDefineLineStyle
   (lambda(style)
@@ -504,9 +487,8 @@
   
 (define (stipple-setup)  
   (append (list (list "void fillSetup() {"))
-          (map (lambda(stipple)
-                 stipple) 
-               stipple-list)
+          (hash-map stipple-list (lambda(stipple-name stipple)
+                 stipple))
           (list (list "}"))))
 ;------------------------
 (define (post-proceed)
