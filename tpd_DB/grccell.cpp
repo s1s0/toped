@@ -144,6 +144,11 @@ void auxdata::TdtGrcPoly::write(laydata::TEDfile* const tedfile) const
    }
 }
 
+void auxdata::TdtGrcPoly::dbExport(DbExportFile& exportF) const
+{
+   exportF.polygon(_pdata, _psize);
+}
+
 void auxdata::TdtGrcPoly::motionDraw(const layprop::DrawProperties&, CtmQueue& transtack,
                                  SGBitSet* plst) const
 {
@@ -366,6 +371,11 @@ void auxdata::TdtGrcWire::write(laydata::TEDfile* const tedfile) const
    }
 }
 
+void auxdata::TdtGrcWire::dbExport(DbExportFile& exportF) const
+{
+   exportF.wire(_pdata, _psize, _width);
+}
+
 void auxdata::TdtGrcWire::motionDraw(const layprop::DrawProperties& drawprop,
                CtmQueue& transtack, SGBitSet* plst) const
 {
@@ -481,6 +491,18 @@ void auxdata::GrcCell::write(laydata::TEDfile* const tedfile) const
       for (QuadTree::Iterator DI = wl->second->begin(); DI != wl->second->end(); DI++)
          DI->write(tedfile);
       tedfile->putByte(tedf_LAYEREND);
+   }
+}
+
+void auxdata::GrcCell::dbExport(DbExportFile& exportf) const
+{
+   LayerList::const_iterator wl;
+   for (wl = _layers.begin(); wl != _layers.end(); wl++)
+   {
+      assert(LAST_EDITABLE_LAYNUM > wl->first);
+      if ( !exportf.layerSpecification(wl->first) ) continue;
+      for (QuadTree::Iterator DI = wl->second->begin(); DI != wl->second->end(); DI++)
+         DI->dbExport(exportf);
    }
 }
 
