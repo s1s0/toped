@@ -49,7 +49,7 @@ auxdata::TdtGrcPoly::TdtGrcPoly(int4b* pdata, unsigned psize) :
    _psize      ( psize     )
 {}
 
-auxdata::TdtGrcPoly::TdtGrcPoly(laydata::InputTdtFile* const tedfile) :
+auxdata::TdtGrcPoly::TdtGrcPoly(InputTdtFile* const tedfile) :
    TdtAuxData  (           )
 {
    _psize = tedfile->getWord();
@@ -221,7 +221,7 @@ auxdata::TdtGrcWire::TdtGrcWire(int4b* pdata, unsigned psize, WireWidth width) :
 {
 }
 
-auxdata::TdtGrcWire::TdtGrcWire(laydata::InputTdtFile* const tedfile) :
+auxdata::TdtGrcWire::TdtGrcWire(InputTdtFile* const tedfile) :
    TdtAuxData  (           )
 {
    _psize = tedfile->getWord();
@@ -448,7 +448,7 @@ auxdata::GrcCell::GrcCell(std::string name) :
    _shapesel      (                 )
 {}
 
-auxdata::GrcCell::GrcCell(laydata::InputTdtFile* const tedfile, std::string name) :
+auxdata::GrcCell::GrcCell(InputTdtFile* const tedfile, std::string name) :
    _name          ( name            ),
    _layers        (                 ),
    _cellOverlap   ( DEFAULT_OVL_BOX ),
@@ -662,7 +662,7 @@ void auxdata::GrcCell::motionDraw(const layprop::DrawProperties& drawprop,
 //   }
 }
 
-void auxdata::GrcCell::readTdtLay(laydata::InputTdtFile* const tedfile)
+void auxdata::GrcCell::readTdtLay(InputTdtFile* const tedfile)
 {
    byte      recordtype;
    TdtAuxData*  newData;

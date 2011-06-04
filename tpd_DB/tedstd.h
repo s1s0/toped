@@ -146,110 +146,6 @@ namespace laydata {
       PointVector          _plist;
    };
 
-   //==============================================================================
-   /*!
-    * File compression explained: A plenty of compression algorithms out there -
-    * Toped deals with two of them and the reason is that those are suitable for
-    * layout file purposes and covered by wx library at the time of writing.
-    *  - zip (http://en.wikipedia.org/wiki/ZIP_%28file_format%29) - compression
-    *    algorithm and archiver
-    *  - gzip stream compression algorithm using Lempel-Ziv coding (LZ77).
-    *    (http://en.wikipedia.org/wiki/Gzip). Several implementations of this
-    *    algo, but wx is using Zlib (http://www.zlib.net/)
-    *
-    *  From our prospective the big difference between the two is that the
-    *  first one is also an archiver which means that a zip file can contain
-    *  more than one file. gzip on the other hand is a stream compression which
-    *  means that it contains a single file. In Linux traditionally tar is
-    *  used as archiver and then the entire archive is compressed using gzip
-    *
-    *  Another quite important feature of both formats is that (as it appears
-    *  at least in the wx implementation) both of them are not seekable. In
-    *  other words they are not randomly accessible.
-    *
-    *  Having in mind all the above and the general pattern Toped is following
-    *  for all imports (i.e. two stage conversion as described on the web site
-    *  http://toped.org.uk/trm_ifaces.html) here is the general idea how the
-    *  compressed input files are handled:
-    *  - zip files - opened before the conversion. If they contain a single file
-    *    it is inflated (decompressed) in a temporary location and then the new
-    *    file is used in all conversion stages. If the original file contains more
-    *    than one file - the processing is aborted and conversion is rejected.
-    *  - gzip files - used "as is" in the first import stage where the access is
-    *    sequential. Before the second stage, which requires random access the
-    *    file is inflated in a temporary location and the product is used for the
-    *    conversion.
-    */
-   class InputDBFile {
-      public:
-                              InputDBFile( wxString fileName, bool _forceSeek);
-         virtual             ~InputDBFile();
-         bool                 readStream(void*, size_t, bool updateProgress = false);
-         size_t               readTextStream(char*, size_t);
-         void                 closeStream();
-         std::string          fileName()                       { return std::string(_fileName.mb_str(wxConvFile));}
-         wxFileOffset         fileLength() const               { return _fileLength;   }
-         wxFileOffset         filePos() const                  { return _filePos;      }
-         bool                 status() const                   { return _status;       }
-         void                 setStatus(bool stat)             {        _status = stat;}
-      protected:
-         void                 initFileMetrics(wxFileOffset);
-         void                 setFilePos(wxFileOffset fp)      { _filePos = fp;     }
-         bool                 unZlib2Temp();//! inflate the input zlib file in a temporary one
-         bool                 unZip2Temp() ;//! inflate the input zip file in a temporary one
-         wxInputStream*       _inStream    ;//! The input stream of the opened file
-         bool                 _gziped      ;//! Indicates that the file is in compressed with gzip
-         bool                 _ziped       ;//! Indicates that the file is in compressed with zip
-         bool                 _forceSeek   ;//! Seekable stream requested
-         wxString             _fileName    ;//! A fully validated name of the file. Path,extension, everything
-         wxString             _tmpFileName ;//! The name of the eventually deflated file (if the input is compressed)
-      private:
-         wxFileOffset         _fileLength  ;//! The length of the file in bytes
-         wxFileOffset         _filePos     ;//! Current position in the file
-         wxFileOffset         _progresPos  ;//! Current position of the progress bar (Toped status line)
-         wxFileOffset         _progresMark ;//! Marked  position of the progress bar (Toped status line)
-         wxFileOffset         _progresStep ;//! Update step of the progress bar (Toped status line)
-         unsigned const       _progresDivs ;//! Number of updates to the progress bar during the current operation
-         bool                 _status      ;//! Used only in the constructor if the file can't be
-
-   };
-
-//==============================================================================
-   class InputTdtFile : public InputDBFile {
-      public:
-                              InputTdtFile( wxString fileName, laydata::TdtLibDir* tedlib );
-         virtual             ~InputTdtFile() {};
-         void                 read(int libRef);
-         void                 getCellChildNames(NameSet&);
-         CellDefin            linkCellRef(std::string cellname);
-         void                 cleanup();
-         byte                 getByte();
-         word                 getWord();
-         int4b                get4b();
-         WireWidth            get4ub();
-         real                 getReal();
-         std::string          getString();
-         TP                   getTP();
-         CTM                  getCTM();
-         TdtLibrary*          design() const       {return _design;};
-         const TdtLibDir*     TEDLIB()             {return _TEDLIB;}
-         word                 revision() const     {return _revision;}
-         word                 subRevision() const  {return _subrevision;}
-         time_t               created() const      {return _created;};
-         time_t               lastUpdated() const  {return _lastUpdated;};
-      private:
-         void                 getFHeader();
-         void                 getRevision();
-         void                 getTime();
-         laydata::TdtLibDir*  _TEDLIB      ;//! Catalog of available TDT libraries (reference to DATC->_TEDLIB)
-         TdtLibrary*          _design      ;//! A design created in memory from the contents of the input file
-         word                 _revision    ;//! Revision (major) of the TDT format which this file carries
-         word                 _subrevision ;//! Revision (minor) of the TDT format which this file carries
-         time_t               _created     ;//! Time stamp indicating when the DB (not the file!) was created
-         time_t               _lastUpdated ;//! Time stamp indicating when the DB (not the file!) was updated for the last time
-         NameSet              _childnames  ;
-   };
-
    class ArrayProps
    {
       public:
@@ -334,6 +230,111 @@ namespace auxdata {
    typedef std::map<std::string, GrcCell*>  GrcCellMap;
 }
 
+//==============================================================================
+/*!
+ * File compression explained: A plenty of compression algorithms out there -
+ * Toped deals with two of them and the reason is that those are suitable for
+ * layout file purposes and covered by wx library at the time of writing.
+ *  - zip (http://en.wikipedia.org/wiki/ZIP_%28file_format%29) - compression
+ *    algorithm and archiver
+ *  - gzip stream compression algorithm using Lempel-Ziv coding (LZ77).
+ *    (http://en.wikipedia.org/wiki/Gzip). Several implementations of this
+ *    algo, but wx is using Zlib (http://www.zlib.net/)
+ *
+ *  From our prospective the big difference between the two is that the
+ *  first one is also an archiver which means that a zip file can contain
+ *  more than one file. gzip on the other hand is a stream compression which
+ *  means that it contains a single file. In Linux traditionally tar is
+ *  used as archiver and then the entire archive is compressed using gzip
+ *
+ *  Another quite important feature of both formats is that (as it appears
+ *  at least in the wx implementation) both of them are not seekable. In
+ *  other words they are not randomly accessible.
+ *
+ *  Having in mind all the above and the general pattern Toped is following
+ *  for all imports (i.e. two stage conversion as described on the web site
+ *  http://toped.org.uk/trm_ifaces.html) here is the general idea how the
+ *  compressed input files are handled:
+ *  - zip files - opened before the conversion. If they contain a single file
+ *    it is inflated (decompressed) in a temporary location and then the new
+ *    file is used in all conversion stages. If the original file contains more
+ *    than one file - the processing is aborted and conversion is rejected.
+ *  - gzip files - used "as is" in the first import stage where the access is
+ *    sequential. Before the second stage, which requires random access the
+ *    file is inflated in a temporary location and the product is used for the
+ *    conversion.
+ */
+class InputDBFile {
+   public:
+                           InputDBFile( wxString fileName, bool _forceSeek);
+      virtual             ~InputDBFile();
+      bool                 readStream(void*, size_t, bool updateProgress = false);
+      size_t               readTextStream(char*, size_t);
+      void                 closeStream();
+      std::string          fileName()                       { return std::string(_fileName.mb_str(wxConvFile));}
+      wxFileOffset         fileLength() const               { return _fileLength;   }
+      wxFileOffset         filePos() const                  { return _filePos;      }
+      bool                 status() const                   { return _status;       }
+      void                 setStatus(bool stat)             {        _status = stat;}
+   protected:
+      void                 initFileMetrics(wxFileOffset);
+      void                 setFilePos(wxFileOffset fp)      { _filePos = fp;     }
+      bool                 unZlib2Temp();//! inflate the input zlib file in a temporary one
+      bool                 unZip2Temp() ;//! inflate the input zip file in a temporary one
+      wxInputStream*       _inStream    ;//! The input stream of the opened file
+      bool                 _gziped      ;//! Indicates that the file is in compressed with gzip
+      bool                 _ziped       ;//! Indicates that the file is in compressed with zip
+      bool                 _forceSeek   ;//! Seekable stream requested
+      wxString             _fileName    ;//! A fully validated name of the file. Path,extension, everything
+      wxString             _tmpFileName ;//! The name of the eventually deflated file (if the input is compressed)
+   private:
+      wxFileOffset         _fileLength  ;//! The length of the file in bytes
+      wxFileOffset         _filePos     ;//! Current position in the file
+      wxFileOffset         _progresPos  ;//! Current position of the progress bar (Toped status line)
+      wxFileOffset         _progresMark ;//! Marked  position of the progress bar (Toped status line)
+      wxFileOffset         _progresStep ;//! Update step of the progress bar (Toped status line)
+      unsigned const       _progresDivs ;//! Number of updates to the progress bar during the current operation
+      bool                 _status      ;//! Used only in the constructor if the file can't be
+
+};
+
+//==============================================================================
+class InputTdtFile : public InputDBFile {
+   public:
+                           InputTdtFile( wxString fileName, laydata::TdtLibDir* tedlib );
+      virtual             ~InputTdtFile() {};
+      void                 read(int libRef);
+      void                 getCellChildNames(NameSet&);
+      laydata::CellDefin   linkCellRef(std::string cellname);
+      void                 cleanup();
+      byte                 getByte();
+      word                 getWord();
+      int4b                get4b();
+      WireWidth            get4ub();
+      real                 getReal();
+      std::string          getString();
+      TP                   getTP();
+      CTM                  getCTM();
+      laydata::TdtLibrary* design() const       {return _design;};
+      const laydata::TdtLibDir*
+                           TEDLIB()             {return _TEDLIB;}
+      word                 revision() const     {return _revision;}
+      word                 subRevision() const  {return _subrevision;}
+      time_t               created() const      {return _created;};
+      time_t               lastUpdated() const  {return _lastUpdated;};
+   private:
+      void                 getFHeader();
+      void                 getRevision();
+      void                 getTime();
+      laydata::TdtLibDir*  _TEDLIB      ;//! Catalog of available TDT libraries (reference to DATC->_TEDLIB)
+      laydata::TdtLibrary* _design      ;//! A design created in memory from the contents of the input file
+      word                 _revision    ;//! Revision (major) of the TDT format which this file carries
+      word                 _subrevision ;//! Revision (minor) of the TDT format which this file carries
+      time_t               _created     ;//! Time stamp indicating when the DB (not the file!) was created
+      time_t               _lastUpdated ;//! Time stamp indicating when the DB (not the file!) was updated for the last time
+      NameSet              _childnames  ;
+};
+
 class   OutputTdtFile {
 public:
                         OutputTdtFile(std::string&, laydata::TdtLibDir*);
@@ -393,7 +394,7 @@ class ForeignCell;
 class ImportDB;
 typedef SGHierTree<ForeignCell> ForeignCellTree;
 typedef std::list<ForeignCell*> ForeignCellList;
-class ForeignDbFile : public laydata::InputDBFile {
+class ForeignDbFile : public InputDBFile {
    public:
                            ForeignDbFile(wxString, bool);
       virtual             ~ForeignDbFile();

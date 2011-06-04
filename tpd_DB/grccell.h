@@ -81,7 +81,7 @@ namespace auxdata {
       public:
                            TdtGrcPoly(const PointVector&);
                            TdtGrcPoly(int4b*, unsigned);
-                           TdtGrcPoly(laydata::InputTdtFile* const);
+                           TdtGrcPoly(InputTdtFile* const);
          virtual          ~TdtGrcPoly();
          virtual DBbox     overlap() const;
 
@@ -108,7 +108,7 @@ namespace auxdata {
       public:
                            TdtGrcWire(const PointVector&, WireWidth);
                            TdtGrcWire(int4b*, unsigned, WireWidth);
-                           TdtGrcWire(laydata::InputTdtFile* const);
+                           TdtGrcWire(InputTdtFile* const);
          virtual          ~TdtGrcWire();
          virtual DBbox     overlap() const;
 
@@ -144,7 +144,7 @@ namespace auxdata {
    class GrcCell {
       public:
                              GrcCell(std::string);
-                             GrcCell(laydata::InputTdtFile* const, std::string);
+                             GrcCell(InputTdtFile* const, std::string);
          virtual            ~GrcCell();
          virtual void        write(OutputTdtFile* const) const;
          void                dbExport(DbExportFile&) const;
@@ -161,7 +161,7 @@ namespace auxdata {
          virtual DBbox       cellOverlap() const        {return _cellOverlap;}
          std::string         name() const               {return _name;}
       protected:
-         void                readTdtLay(laydata::InputTdtFile* const);
+         void                readTdtLay(InputTdtFile* const);
          void                getCellOverlap();
          std::string         _name;         //! cell name
          LayerList           _layers;       //! all layers in the cell
