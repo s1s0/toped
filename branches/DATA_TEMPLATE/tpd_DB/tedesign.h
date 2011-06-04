@@ -57,15 +57,18 @@ namespace laydata {
       void              dbHierRemoveRoot(const TdtDefaultCell*);
       bool              dbHierCheckAncestors(const TdtDefaultCell*, const TdtDefaultCell*);
       //
+      void              clearHierTree();
+      static void       clearEntireHierTree();
+      static void       initHierTreePtr() {_hiertree = NULL;}
       std::string       name()            const {return _name;}
       real              UU()              const {return _UU;}
       real              DBU()             const {return _DBU;}
       const CellMap&    cells()           const {return _cells;}
       TDTHierTree*      hiertree()        const {return _hiertree;}
       int               libID()           const {return _libID;}
-      void              clearHierTree();
-      static void       clearEntireHierTree();
-      static void       initHierTreePtr() {_hiertree = NULL;}
+      time_t            created()         const {return _created;}
+      time_t            lastUpdated()     const {return _lastUpdated;}
+      //
    protected:
       bool                 validateCells();
       TdtDefaultCell*      displaceCell(const std::string&);
@@ -86,8 +89,8 @@ namespace laydata {
                      TdtDesign(std::string, time_t, time_t, real DBU, real UU);
       virtual       ~TdtDesign();
       void           read(InputTdtFile* const);
-      void           write(TEDfile* const tedfile);
-      int            readLibrary(TEDfile* const);
+      void           write(OutputTdtFile* const tedfile);
+      int            readLibrary(OutputTdtFile* const);
       TdtCell*       addCell(std::string name, laydata::TdtLibDir*);
       void           addThisCell(laydata::TdtCell* strdefn, laydata::TdtLibDir*);
       TdtCell*       removeCell(std::string&, laydata::AtticList*, laydata::TdtLibDir*);
@@ -162,11 +165,7 @@ namespace laydata {
       void           reportSelected(real DBscale) const { _target.edit()->reportSelected(DBscale);};
       std::string    activeCellName()  const {return _target.name();};
       //
-      time_t         created()         const {return _created;}
-      time_t         lastUpdated()     const {return _lastUpdated;}
-      //
       bool           modified;
-      friend         class TEDfile;
    private:
       TdtTmpData*    _tmpdata;      // pointer to a data under construction - for view purposes
       EditObject     _target;       // edit/view target <- introduced with pedit operations

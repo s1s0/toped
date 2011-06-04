@@ -111,7 +111,7 @@ namespace laydata {
          virtual void        updateHierarchy(TdtLibDir*);
          virtual DBbox       cellOverlap() const;
          virtual DBbox       getVisibleOverlap(const layprop::DrawProperties&);
-         virtual void        write(TEDfile* const, const CellMap&, const TDTHierTree*) const;
+         virtual void        write(OutputTdtFile* const, const CellMap&, const TDTHierTree*) const;
          virtual void        dbExport(DbExportFile&, const CellMap&, const TDTHierTree*) const;
          virtual void        psWrite(PSFile&, const layprop::DrawProperties&,
                                       const CellMap* = NULL, const TDTHierTree* = NULL) const;
@@ -151,7 +151,7 @@ namespace laydata {
       void                 addAuxRef(unsigned layno, auxdata::GrcCell*);
       TdtCellAref*         addCellARef(TdtDesign*, CellDefin, CTM, ArrayProps&);
       bool                 addChild(TdtDesign*, TdtDefaultCell*);
-      virtual void         write(TEDfile* const, const CellMap&, const TDTHierTree*) const;
+      virtual void         write(OutputTdtFile* const, const CellMap&, const TDTHierTree*) const;
       virtual void         dbExport(DbExportFile&, const CellMap&, const TDTHierTree*) const;
       virtual void         psWrite(PSFile&, const layprop::DrawProperties&,
                                    const CellMap* = NULL, const TDTHierTree* = NULL) const;

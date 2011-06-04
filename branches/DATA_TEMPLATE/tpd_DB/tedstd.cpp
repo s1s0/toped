@@ -553,7 +553,7 @@ void laydata::InputTdtFile::cleanup()
 //-----------------------------------------------------------------------------
 // class TEDfile
 //-----------------------------------------------------------------------------
-laydata::TEDfile::TEDfile(std::string& filename, laydata::TdtLibDir* tedlib)
+OutputTdtFile::OutputTdtFile(std::string& filename, laydata::TdtLibDir* tedlib)
 { //writing
    _design = (*tedlib)();
    _revision=TED_CUR_REVISION;_subrevision=TED_CUR_SUBREVISION;
@@ -572,25 +572,25 @@ laydata::TEDfile::TEDfile(std::string& filename, laydata::TdtLibDir* tedlib)
    fclose(_file);
 }
 
-void laydata::TEDfile::putWord(const word data) {
+void OutputTdtFile::putWord(const word data) {
    fwrite(&data,2,1,_file);
 }
 
-void laydata::TEDfile::put4b(const int4b data) {
+void OutputTdtFile::put4b(const int4b data) {
    fwrite(&data,4,1,_file);
 }
 
-void laydata::TEDfile::put4ub(const WireWidth data) {
+void OutputTdtFile::put4ub(const WireWidth data) {
    fwrite(&data,4,1,_file);
 }
 
-void laydata::TEDfile::putReal(const real data) {
+void OutputTdtFile::putReal(const real data) {
    fwrite(&data, sizeof(real), 1, _file);
 }
 
-void laydata::TEDfile::putTime()
+void OutputTdtFile::putTime()
 {
-   time_t ctime = static_cast<laydata::TdtDesign*>(_design)->created();
+   time_t ctime = _design->created();
    tm* broken_time = localtime(&ctime);
    putByte(tedf_TIMECREATED);
    put4b(broken_time->tm_mday);
@@ -600,9 +600,8 @@ void laydata::TEDfile::putTime()
    put4b(broken_time->tm_min);
    put4b(broken_time->tm_sec);
    //
-   _lastUpdated = time(NULL);
-   static_cast<laydata::TdtDesign*>(_design)->_lastUpdated = _lastUpdated;
-   broken_time = localtime(&_lastUpdated);
+   ctime = _design->lastUpdated();
+   broken_time = localtime(&ctime);
    putByte(tedf_TIMEUPDATED);
    put4b(broken_time->tm_mday);
    put4b(broken_time->tm_mon);
@@ -612,19 +611,19 @@ void laydata::TEDfile::putTime()
    put4b(broken_time->tm_sec);
 }
 
-void laydata::TEDfile::putRevision()
+void OutputTdtFile::putRevision()
 {
    putByte(tedf_REVISION);
    putWord(_revision);
    putWord(_subrevision);
 }
 
-void laydata::TEDfile::putTP(const TP* p)
+void OutputTdtFile::putTP(const TP* p)
 {
    put4b(p->x()); put4b(p->y());
 }
 
-void laydata::TEDfile::putCTM(const CTM matrix)
+void OutputTdtFile::putCTM(const CTM matrix)
 {
    putReal(matrix.a());
    putReal(matrix.b());
@@ -634,7 +633,7 @@ void laydata::TEDfile::putCTM(const CTM matrix)
    putReal(matrix.ty());
 }
 
-void laydata::TEDfile::putString(std::string str)
+void OutputTdtFile::putString(std::string str)
 {
 //   byte len = str.length();
 //   fwrite(&len, 1,1, _file);
@@ -642,12 +641,12 @@ void laydata::TEDfile::putString(std::string str)
    fputs(str.c_str(), _file);
 }
 
-void laydata::TEDfile::registerCellWritten(std::string cellname)
+void OutputTdtFile::registerCellWritten(std::string cellname)
 {
    _childnames.insert(cellname);
 }
 
-bool laydata::TEDfile::checkCellWritten(std::string cellname)
+bool OutputTdtFile::checkCellWritten(std::string cellname)
 {
    if (_childnames.end() == _childnames.find(cellname))
       return false;

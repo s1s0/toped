@@ -57,7 +57,7 @@ namespace auxdata {
       //! Print an object description on the toped console.
       virtual   void       info(std::ostringstream&, real) const = 0;
       //! Write the TdtData object in TDT file.
-      virtual   void       write(laydata::TEDfile* const tedfile) const = 0;
+      virtual   void       write(OutputTdtFile* const tedfile) const = 0;
       //! Export the TdtData object in external format.
       virtual   void       dbExport(DbExportFile&) const = 0;
       //!
@@ -93,7 +93,7 @@ namespace auxdata {
          virtual void      drawSRequest(tenderer::TopRend&, const SGBitSet*) const;
          virtual void      motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
          virtual void      info(std::ostringstream&, real) const;
-         virtual void      write(laydata::TEDfile* const tedfile) const;
+         virtual void      write(OutputTdtFile* const tedfile) const;
          virtual void      dbExport(DbExportFile&) const;
 //         virtual word      numPoints() const {return _psize;}
          virtual bool      pointInside(const TP)const;
@@ -120,7 +120,7 @@ namespace auxdata {
          virtual void      drawSRequest(tenderer::TopRend&, const SGBitSet*) const;
          virtual void      motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
          virtual void      info(std::ostringstream&, real) const;
-         virtual void      write(laydata::TEDfile* const tedfile) const;
+         virtual void      write(OutputTdtFile* const tedfile) const;
          virtual void      dbExport(DbExportFile&) const;
 //         virtual word      numPoints() const {return _psize;}
          virtual bool      pointInside(const TP)const;
@@ -146,7 +146,7 @@ namespace auxdata {
                              GrcCell(std::string);
                              GrcCell(laydata::InputTdtFile* const, std::string);
          virtual            ~GrcCell();
-         virtual void        write(laydata::TEDfile* const) const;
+         virtual void        write(OutputTdtFile* const) const;
          void                dbExport(DbExportFile&) const;
          virtual void        openGlDraw(layprop::DrawProperties&, bool active=false) const;
          virtual void        openGlRender(tenderer::TopRend&, const CTM&, bool, bool) const;

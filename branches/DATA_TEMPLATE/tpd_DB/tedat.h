@@ -77,7 +77,7 @@ namespace laydata {
       //! Print an object description on the toped console.
       virtual   void       info(std::ostringstream&, real) const = 0;
       //! Write the TdtData object in TDT file.
-      virtual   void       write(TEDfile* const tedfile) const = 0;
+      virtual   void       write(OutputTdtFile* const tedfile) const = 0;
       //! Export the TdtData object in external format.
       virtual   void       dbExport(DbExportFile&) const = 0;
       //! Write the TdtData object in PS file.
@@ -137,7 +137,7 @@ namespace laydata {
       virtual void         motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
 
       virtual void         info(std::ostringstream&, real) const;
-      virtual void         write(TEDfile* const tedfile) const;
+      virtual void         write(OutputTdtFile* const tedfile) const;
       virtual void         dbExport(DbExportFile&) const;
       virtual void         psWrite(PSFile&, const layprop::DrawProperties&) const;
       virtual word         numPoints() const {return 4;};
@@ -182,7 +182,7 @@ namespace laydata {
          virtual void      motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
 
          virtual void      info(std::ostringstream&, real) const;
-         virtual void      write(TEDfile* const tedfile) const;
+         virtual void      write(OutputTdtFile* const tedfile) const;
          virtual void      dbExport(DbExportFile&) const;
          virtual void      psWrite(PSFile&, const layprop::DrawProperties&) const;
          virtual word      numPoints() const {return _psize;}
@@ -222,7 +222,7 @@ namespace laydata {
          virtual void      motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
 
          virtual void      info(std::ostringstream&, real) const;
-         virtual void      write(TEDfile* const tedfile) const;
+         virtual void      write(OutputTdtFile* const tedfile) const;
          virtual void      dbExport(DbExportFile&) const;
          virtual void      psWrite(PSFile&, const layprop::DrawProperties&) const;
          virtual word      numPoints() const {return _psize;}
@@ -267,7 +267,7 @@ namespace laydata {
       virtual void         motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
 
       virtual void         info(std::ostringstream&, real) const;
-      virtual void         write(TEDfile* const tedfile) const;
+      virtual void         write(OutputTdtFile* const tedfile) const;
       virtual void         dbExport(DbExportFile&) const;
       virtual void         psWrite(PSFile&, const layprop::DrawProperties&) const;
       virtual void         ungroup(TdtDesign*, TdtCell*, AtticList*);
@@ -313,7 +313,7 @@ namespace laydata {
       virtual bool         pointInside(const TP);
 
       virtual void         info(std::ostringstream&, real) const;
-      virtual void         write(TEDfile* const tedfile) const;
+      virtual void         write(OutputTdtFile* const tedfile) const;
       virtual void         dbExport(DbExportFile&) const;
       virtual void         psWrite(PSFile&, const layprop::DrawProperties&) const;
       virtual word         lType() const {return _lmaref;}
@@ -346,7 +346,7 @@ namespace laydata {
       virtual void         motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
 
       virtual void         info(std::ostringstream&, real) const;
-      virtual void         write(TEDfile* const tedfile) const;
+      virtual void         write(OutputTdtFile* const tedfile) const;
       virtual void         dbExport(DbExportFile&) const;
       virtual void         psWrite(PSFile&, const layprop::DrawProperties&) const;
       virtual word         numPoints() const {return 1;};
@@ -392,7 +392,7 @@ namespace laydata {
       virtual void         motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
 
       virtual void         info(std::ostringstream&, real) const;
-      virtual void         write(TEDfile* const tedfile) const;
+      virtual void         write(OutputTdtFile* const tedfile) const;
       virtual void         dbExport(DbExportFile&) const;
       virtual void         psWrite(PSFile&, const layprop::DrawProperties&) const;
 //      virtual void         ungroup(TdtDesign*, TdtCell*, AtticList*);

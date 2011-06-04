@@ -292,7 +292,7 @@ DBbox laydata::TdtDefaultCell::getVisibleOverlap(const layprop::DrawProperties&)
    return DEFAULT_ZOOM_BOX;
 }
 
-void laydata::TdtDefaultCell::write(TEDfile* const, const CellMap&, const TDTHierTree*) const
+void laydata::TdtDefaultCell::write(OutputTdtFile* const, const CellMap&, const TDTHierTree*) const
 {
    assert(false);
 }
@@ -747,7 +747,7 @@ laydata::TdtCellRef* laydata::TdtCell::getCellOver(TP pnt, CtmStack& transtack,
    return NULL;
 }
 
-void laydata::TdtCell::write(TEDfile* const tedfile, const CellMap& allcells, const TDTHierTree* root) const
+void laydata::TdtCell::write(OutputTdtFile* const tedfile, const CellMap& allcells, const TDTHierTree* root) const
 {
    // We going to write the cells in hierarchical order. Children - first!
    const laydata::TDTHierTree* Child= root->GetChild(TARGETDB_LIB);

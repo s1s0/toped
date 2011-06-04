@@ -592,7 +592,7 @@ void laydata::TdtBox::info(std::ostringstream& ost, real DBU) const {
    ost << "};";
 }
 
-void laydata::TdtBox::write(TEDfile* const tedfile) const {
+void laydata::TdtBox::write(OutputTdtFile* const tedfile) const {
    tedfile->putByte(tedf_BOX);
    tedfile->put4b(_pdata[p1x]); tedfile->put4b(_pdata[p1y]);
    tedfile->put4b(_pdata[p2x]); tedfile->put4b(_pdata[p2y]);
@@ -1115,7 +1115,7 @@ void laydata::TdtPoly::info(std::ostringstream& ost, real DBU) const
    ost << "};";
 }
 
-void laydata::TdtPoly::write(TEDfile* const tedfile) const
+void laydata::TdtPoly::write(OutputTdtFile* const tedfile) const
 {
    tedfile->putByte(tedf_POLY);
    tedfile->putWord(_psize);
@@ -1505,7 +1505,7 @@ void laydata::TdtWire::info(std::ostringstream& ost, real DBU) const
    ost << "};";
 }
 
-void laydata::TdtWire::write(TEDfile* const tedfile) const
+void laydata::TdtWire::write(OutputTdtFile* const tedfile) const
 {
    tedfile->putByte(tedf_WIRE);
    tedfile->putWord(_psize);
@@ -1718,7 +1718,7 @@ void laydata::TdtCellRef::info(std::ostringstream& ost, real DBU) const {
    ost << _translation.tx()/DBU << " , " << _translation.ty()/DBU << "}";
 }
 
-void laydata::TdtCellRef::write(TEDfile* const tedfile) const {
+void laydata::TdtCellRef::write(OutputTdtFile* const tedfile) const {
    tedfile->putByte(tedf_CELLREF);
    tedfile->putString(_structure->name());
    tedfile->putCTM(_translation);
@@ -2117,7 +2117,7 @@ void laydata::TdtCellAref::info(std::ostringstream& ost, real DBU) const {
                                              << "} ]";
 }
 
-void laydata::TdtCellAref::write(TEDfile* const tedfile) const {
+void laydata::TdtCellAref::write(OutputTdtFile* const tedfile) const {
    tedfile->putByte(tedf_CELLAREF);
    tedfile->putString(_structure->name());
    tedfile->putCTM(_translation);
@@ -2422,7 +2422,7 @@ void laydata::TdtText::motionDraw(const layprop::DrawProperties& drawprop,
    }
 }
 
-void laydata::TdtText::write(TEDfile* const tedfile) const {
+void laydata::TdtText::write(OutputTdtFile* const tedfile) const {
    tedfile->putByte(tedf_TEXT);
    tedfile->putString(_text);
    tedfile->putCTM(_translation);
@@ -2623,7 +2623,7 @@ void laydata::TdtAuxRef::info(std::ostringstream&, real) const
    assert(false);//TODO
 }
 
-void laydata::TdtAuxRef::write(TEDfile* const tedfile) const
+void laydata::TdtAuxRef::write(OutputTdtFile* const tedfile) const
 {
    assert(NULL != _structure);
    _structure->write(tedfile);

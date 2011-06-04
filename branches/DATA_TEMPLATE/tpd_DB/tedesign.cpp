@@ -538,7 +538,7 @@ bool laydata::TdtLibDir::readDesign(std::string filename)
 void laydata::TdtLibDir::writeDesign(const char* filename)
 {
    if (filename)  _tedFileName = filename;
-   laydata::TEDfile tempin(_tedFileName, this);
+   OutputTdtFile tempin(_tedFileName, this);
    _neverSaved = false;
 }
 
@@ -1286,7 +1286,7 @@ void laydata::TdtDesign::openGlRender(tenderer::TopRend& rend)
 }
 
 
-void laydata::TdtDesign::write(TEDfile* const tedfile) {
+void laydata::TdtDesign::write(OutputTdtFile* const tedfile) {
    tedfile->putByte(tedf_DESIGN);
    tedfile->putString(_name);
    tedfile->putReal(_DBU);
