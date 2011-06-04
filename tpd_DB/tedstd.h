@@ -35,26 +35,29 @@
 //==============================================================================
 // Toped DaTa (TDT) file markers
 //==============================================================================
-#define TED_LEADSTRING        "TED"
-#define tedf_REVISION         0x02
-#define tedf_TIMECREATED      0x03
-#define tedf_TIMEUPDATED      0x04
-#define tedf_DESIGN           0x80
-#define tedf_DESIGNEND        0x81
-#define tedf_CELL             0x82
-#define tedf_CELLEND          0x83
-#define tedf_LAYER            0x84
-#define tedf_CELLREF          0x85
-#define tedf_CELLAREF         0x86
-#define tedf_BOX              0x87
-#define tedf_POLY             0x88
-#define tedf_WIRE             0x89
-#define tedf_TEXT             0x8A
-#define tedf_LAYEREND         0x8B
-#define tedf_REFS             0x8C
-#define tedf_REFSEND          0x8D
-#define TED_CUR_REVISION      0
-#define TED_CUR_SUBREVISION   9
+const std::string TED_LEADSTRING("TED");
+const byte tedf_REVISION        = 0x02;
+const byte tedf_TIMECREATED     = 0x03;
+const byte tedf_TIMEUPDATED     = 0x04;
+const byte tedf_DESIGN          = 0x80;
+const byte tedf_DESIGNEND       = 0x81;
+const byte tedf_CELL            = 0x82;
+const byte tedf_CELLEND         = 0x83;
+const byte tedf_LAYER           = 0x84;
+const byte tedf_CELLREF         = 0x85;
+const byte tedf_CELLAREF        = 0x86;
+const byte tedf_BOX             = 0x87;
+const byte tedf_POLY            = 0x88;
+const byte tedf_WIRE            = 0x89;
+const byte tedf_TEXT            = 0x8A;
+const byte tedf_LAYEREND        = 0x8B;
+const byte tedf_REFS            = 0x8C;
+const byte tedf_REFSEND         = 0x8D;
+const byte tedf_GRC             = 0x8E;
+const byte tedf_GRCEND          = 0x8F;
+//
+const byte TED_CUR_REVISION     = 0x00;
+const byte TED_CUR_SUBREVISION  = 0x0A;
 
 //==============================================================================
 class PSegment {

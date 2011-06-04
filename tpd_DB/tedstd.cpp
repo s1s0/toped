@@ -350,7 +350,7 @@ laydata::InputTdtFile::InputTdtFile( wxString fileName, laydata::TdtLibDir* tedl
       setStatus(false);
    }
    bool versionOk = (0 ==_revision) &&
-                    (6 < _subrevision) && (10 > _subrevision);
+                    (6 < _subrevision) && (11 > _subrevision);
    if (!versionOk)
    {
       std::ostringstream ost;

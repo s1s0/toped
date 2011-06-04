@@ -56,6 +56,8 @@ namespace auxdata {
       virtual   void       motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const = 0;
       //! Print an object description on the toped console.
       virtual   void       info(std::ostringstream&, real) const = 0;
+      //! Write the TdtData object in TDT file.
+      virtual   void       write(laydata::TEDfile* const tedfile) const = 0;
       //!
       virtual   bool       pointInside(const TP) const = 0;
       //!
@@ -77,6 +79,7 @@ namespace auxdata {
       public:
                            TdtGrcPoly(const PointVector&);
                            TdtGrcPoly(int4b*, unsigned);
+                           TdtGrcPoly(laydata::InputTdtFile* const);
          virtual          ~TdtGrcPoly();
          virtual DBbox     overlap() const;
 
@@ -88,6 +91,7 @@ namespace auxdata {
          virtual void      drawSRequest(tenderer::TopRend&, const SGBitSet*) const;
          virtual void      motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
          virtual void      info(std::ostringstream&, real) const;
+         virtual void      write(laydata::TEDfile* const tedfile) const;
 //         virtual word      numPoints() const {return _psize;}
          virtual bool      pointInside(const TP)const;
          virtual PointVector dumpPoints() const;
@@ -101,6 +105,7 @@ namespace auxdata {
       public:
                            TdtGrcWire(const PointVector&, WireWidth);
                            TdtGrcWire(int4b*, unsigned, WireWidth);
+                           TdtGrcWire(laydata::InputTdtFile* const);
          virtual          ~TdtGrcWire();
          virtual DBbox     overlap() const;
 
@@ -112,6 +117,7 @@ namespace auxdata {
          virtual void      drawSRequest(tenderer::TopRend&, const SGBitSet*) const;
          virtual void      motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
          virtual void      info(std::ostringstream&, real) const;
+         virtual void      write(laydata::TEDfile* const tedfile) const;
 //         virtual word      numPoints() const {return _psize;}
          virtual bool      pointInside(const TP)const;
          virtual PointVector dumpPoints() const;
@@ -134,7 +140,9 @@ namespace auxdata {
    class GrcCell {
       public:
                              GrcCell(std::string);
+                             GrcCell(laydata::InputTdtFile* const, std::string);
          virtual            ~GrcCell();
+         virtual void        write(laydata::TEDfile* const) const;
          virtual void        openGlDraw(layprop::DrawProperties&, bool active=false) const;
          virtual void        openGlRender(tenderer::TopRend&, const CTM&, bool, bool) const;
          virtual DBbox       getVisibleOverlap(const layprop::DrawProperties&);
@@ -148,9 +156,10 @@ namespace auxdata {
          virtual DBbox       cellOverlap() const        {return _cellOverlap;}
          std::string         name() const               {return _name;}
       protected:
+         void                readTdtLay(laydata::InputTdtFile* const);
          void                getCellOverlap();
          std::string         _name;         //! cell name
-         LayerList           _layers;       //! all layers the cell
+         LayerList           _layers;       //! all layers in the cell
          DBbox               _cellOverlap;  //! Overlap of the entire cell
          SelectList          _shapesel;     //! selected shapes
          TmpLayerMap         _tmpLayers;    //! All layers with unsorted data
