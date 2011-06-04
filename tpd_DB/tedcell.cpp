@@ -219,7 +219,20 @@ laydata::EditObject::~EditObject()
 // class TdtDefaultCell
 //-----------------------------------------------------------------------------
 laydata::TdtDefaultCell::TdtDefaultCell(std::string name, int libID, bool orphan) :
-      _orphan(orphan), _name(name), _libID(libID)  {}
+   _name          (name    ),
+   _orphan        (orphan  ),
+   _libID         (libID   )
+{}
+
+laydata::TdtDefaultCell::~TdtDefaultCell()
+{
+   for (LayerList::iterator lay = _layers.begin(); lay != _layers.end(); lay++)
+   {
+      lay->second->freeMemory();
+      delete lay->second;
+   }
+   _layers.clear();
+}
 
 void laydata::TdtDefaultCell::openGlDraw(layprop::DrawProperties&, bool active) const
 {
@@ -279,17 +292,12 @@ DBbox laydata::TdtDefaultCell::getVisibleOverlap(const layprop::DrawProperties&)
    return DEFAULT_ZOOM_BOX;
 }
 
-void laydata::TdtDefaultCell::write(TEDfile* const, const CellMap&, const TDTHierTree*) const
+void laydata::TdtDefaultCell::write(OutputTdtFile* const, const CellMap&, const TDTHierTree*) const
 {
    assert(false);
 }
 
-void laydata::TdtDefaultCell::gdsWrite(DbExportFile&, const CellMap&, const TDTHierTree*) const
-{
-   assert(false);
-}
-
-void laydata::TdtDefaultCell::cifWrite(DbExportFile&, const CellMap&, const TDTHierTree*) const
+void laydata::TdtDefaultCell::dbExport(DbExportFile&, const CellMap&, const TDTHierTree*) const
 {
    assert(false);
 }
@@ -312,6 +320,11 @@ void laydata::TdtDefaultCell::invalidateParents(laydata::TdtLibrary* ATDB)
    }
 }
 
+bool laydata::TdtDefaultCell::checkLayer(unsigned layno) const
+{
+   return (_layers.end() != _layers.find(layno));
+}
+
 //-----------------------------------------------------------------------------
 // class TdtCell
 //-----------------------------------------------------------------------------
@@ -323,58 +336,67 @@ laydata::TdtCell::TdtCell(InputTdtFile* const tedfile, std::string name, int lib
          TdtDefaultCell(name, lib, true), _cellOverlap(DEFAULT_OVL_BOX)
 {
    byte recordtype;
-   word  layno;
-   // now get the layers
-   if       ((0 == tedfile->revision()) && (6 == tedfile->subRevision()))
+   while (tedf_CELLEND != (recordtype = tedfile->getByte()))
    {
-      // old version of the TDT file
-      // TODO! shall be removed in the incoming release
-      while (tedf_CELLEND != (recordtype = tedfile->getByte()))
+      switch (recordtype)
       {
-         switch (recordtype)
+         case    tedf_LAYER:
+            readTdtLay(tedfile);
+            break;
+         case    tedf_REFS:
+            readTdtRef(tedfile);
+            tedfile->getCellChildNames(_children);
+            break;
+         case    tedf_GRC:
          {
-            case    tedf_LAYER:
-               layno = tedfile->getWord();
-               if (0 != layno) _layers[layno]   = DEBUG_NEW QuadTree(tedfile, false);
-               else            _layers[REF_LAY] = DEBUG_NEW QuadTree(tedfile, true);
-               if (0 == layno) tedfile->getCellChildNames(_children);
-               break;
-            default: throw EXPTNreadTDT("LAYER record type expected");
+            auxdata::GrcCell* grc_structure = DEBUG_NEW auxdata::GrcCell(tedfile, _name);
+            addAuxRef(GRC_LAY, grc_structure);
+            break;
          }
+         default: throw EXPTNreadTDT("LAYER record type expected");
       }
    }
-   else
+   fixUnsorted();
+}
+
+
+void laydata::TdtCell::readTdtLay(InputTdtFile* const tedfile)
+{
+   byte      recordtype;
+   TdtData*  newData;
+   unsigned  layno    = tedfile->getWord();
+   QTreeTmp* tmpLayer = secureUnsortedLayer(layno);
+   while (tedf_LAYEREND != (recordtype = tedfile->getByte()))
    {
-      while (tedf_CELLEND != (recordtype = tedfile->getByte()))
+      switch (recordtype)
       {
-         QuadTree* clay = NULL;
-         switch (recordtype)
-         {
-            case    tedf_LAYER:
-               layno = tedfile->getWord();
-               clay = DEBUG_NEW QuadTree(tedfile, false);
-               if (!clay->empty())
-                  _layers[layno] = clay;
-               else
-                  delete clay;
-               clay = NULL;
-               break;
-            case    tedf_REFS:
-               clay = DEBUG_NEW QuadTree(tedfile, true);
-               if (!clay->empty())
-               {
-                  _layers[REF_LAY] = clay;
-                  tedfile->getCellChildNames(_children);
-               }
-               else
-                  delete clay;
-               clay = NULL;
-               break;
-            default: throw EXPTNreadTDT("LAYER record type expected");
-         }
+         case     tedf_BOX : newData = DEBUG_NEW TdtBox(tedfile) ;break;
+         case     tedf_POLY: newData = DEBUG_NEW TdtPoly(tedfile);break;
+         case     tedf_WIRE: newData = DEBUG_NEW TdtWire(tedfile);break;
+         case     tedf_TEXT: newData = DEBUG_NEW TdtText(tedfile);break;
+         //--------------------------------------------------
+         default: throw EXPTNreadTDT("Unexpected record type");
       }
+      tmpLayer->put(newData);
    }
-   getCellOverlap();
+}
+
+void laydata::TdtCell::readTdtRef(InputTdtFile* const tedfile)
+{
+   byte      recordtype;
+   TdtData*  newData;
+   QTreeTmp* tmpLayer = secureUnsortedLayer(REF_LAY);
+   while (tedf_REFSEND != (recordtype = tedfile->getByte()))
+   {
+      switch (recordtype)
+      {
+         case  tedf_CELLREF: newData = DEBUG_NEW TdtCellRef(tedfile) ;break;
+         case tedf_CELLAREF: newData = DEBUG_NEW TdtCellAref(tedfile);break;
+         //--------------------------------------------------
+         default: throw EXPTNreadTDT("Unexpected record type");
+      }
+      tmpLayer->put(newData);
+   }
 }
 
 laydata::QuadTree* laydata::TdtCell::secureLayer(unsigned layno)
@@ -426,6 +448,14 @@ laydata::TdtCellAref* laydata::TdtCell::addCellARef(laydata::TdtDesign* ATDB,
    return cellaref;
 }
 
+void laydata::TdtCell::addAuxRef(unsigned layno, auxdata::GrcCell* str)
+{
+   QuadTree *cellreflayer = secureLayer(layno);
+   laydata::TdtAuxRef* cellref = DEBUG_NEW TdtAuxRef(str);
+   cellreflayer->add(cellref);
+//   TpdPost::treeMarkGrcMember(_name, true);
+}
+
 bool laydata::TdtCell::addChild(laydata::TdtDesign* ATDB, TdtDefaultCell* child)
 {
    // check for circular reference, i.e. the child is a father of some of its ancestors
@@ -433,7 +463,7 @@ bool laydata::TdtCell::addChild(laydata::TdtDesign* ATDB, TdtDefaultCell* child)
       //Circular reference found. child is already an ancestor of this
       return false;
    //leave a mark that child is not orphan
-   child->parentFound();
+   child->setOrphan(false);
    // update the list of children of the current cell
    _children.insert(child->name());
    // update the hierarchical tree
@@ -492,6 +522,7 @@ void laydata::TdtCell::openGlRender(tenderer::TopRend& rend, const CTM& trans,
       //   utilize the reference mechanism at all.
       switch (curlayno)
       {
+         case GRC_LAY:
          case REF_LAY: lay->second->openGlRender(rend, dlist); break;
          case DRC_LAY: rend.setLayer(curlayno, (NULL != dlist));
                        lay->second->openGlRender(rend, dlist); break;
@@ -547,7 +578,9 @@ void laydata::TdtCell::motionDraw(const layprop::DrawProperties& drawprop,
          if (!drawprop.layerHidden(lay->first))
          {
             const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(lay->first);
-            lay->second->motionDraw(drawprop, transtack);
+            QuadTree* curlay = lay->second;
+             for (QuadTree::DrawIterator CI = curlay->begin(drawprop, transtack); CI != curlay->end(); CI++)
+               CI->motionDraw(drawprop, transtack, NULL);
          }
       transtack.pop_front();
    }
@@ -714,7 +747,7 @@ laydata::TdtCellRef* laydata::TdtCell::getCellOver(TP pnt, CtmStack& transtack,
    return NULL;
 }
 
-void laydata::TdtCell::write(TEDfile* const tedfile, const CellMap& allcells, const TDTHierTree* root) const
+void laydata::TdtCell::write(OutputTdtFile* const tedfile, const CellMap& allcells, const TDTHierTree* root) const
 {
    // We going to write the cells in hierarchical order. Children - first!
    const laydata::TDTHierTree* Child= root->GetChild(TARGETDB_LIB);
@@ -737,74 +770,55 @@ void laydata::TdtCell::write(TEDfile* const tedfile, const CellMap& allcells, co
       if (REF_LAY == wl->first)
       {
          tedfile->putByte(tedf_REFS);
-         wl->second->write(tedfile);
+         for (QuadTree::Iterator DI = wl->second->begin(); DI != wl->second->end(); DI++)
+            DI->write(tedfile);
          tedfile->putByte(tedf_REFSEND);
       }
       else if ( LAST_EDITABLE_LAYNUM >= wl->first )
       {
          tedfile->putByte(tedf_LAYER);
          tedfile->putWord(wl->first);
-         wl->second->write(tedfile);
+         for (QuadTree::Iterator DI = wl->second->begin(); DI != wl->second->end(); DI++)
+            DI->write(tedfile);
          tedfile->putByte(tedf_LAYEREND);
+      }
+      else if (GRC_LAY == wl->first)
+      {
+         tedfile->putByte(tedf_GRC);
+         for (QuadTree::Iterator DI = wl->second->begin(); DI != wl->second->end(); DI++)
+            DI->write(tedfile);
+         tedfile->putByte(tedf_GRCEND);
       }
    }
    tedfile->putByte(tedf_CELLEND);
    tedfile->registerCellWritten(name());
 }
 
-void laydata::TdtCell::gdsWrite(DbExportFile& gdsf, const CellMap& allcells,
-                                 const TDTHierTree* root) const
-{
-   // We are going to write the cells in hierarchical order. Children - first!
-   if (gdsf.recur())
-   {
-      const laydata::TDTHierTree* Child= root->GetChild(TARGETDB_LIB);
-      while (Child)
-      {
-         allcells.find(Child->GetItem()->name())->second->gdsWrite(gdsf, allcells, Child);
-         Child = Child->GetBrother(TARGETDB_LIB);
-      }
-   }
-   // If no more children and the cell has not been written yet
-   if (gdsf.checkCellWritten(name())) return;
-   //
-   gdsf.definitionStart(name());
-
-   // and now the layers
-   laydata::LayerList::const_iterator wl;
-   for (wl = _layers.begin(); wl != _layers.end(); wl++)
-   {
-      if ((REF_LAY != wl->first) && !gdsf.layerSpecification(wl->first)) continue;
-      wl->second->gdsWrite(gdsf);
-   }
-   gdsf.definitionFinish();
-}
-
-void laydata::TdtCell::cifWrite(DbExportFile& ciff, const CellMap& allcells,
+void laydata::TdtCell::dbExport(DbExportFile& exportf, const CellMap& allcells,
                                 const TDTHierTree* root) const
 {
    // We going to write the cells in hierarchical order. Children - first!
-   if (ciff.recur())
+   if (exportf.recur())
    {
       const laydata::TDTHierTree* Child= root->GetChild(TARGETDB_LIB);
       while (Child)
       {
-         allcells.find(Child->GetItem()->name())->second->cifWrite(ciff, allcells, Child);
+         allcells.find(Child->GetItem()->name())->second->dbExport(exportf, allcells, Child);
          Child = Child->GetBrother(TARGETDB_LIB);
       }
    }
    // If no more children and the cell has not been written yet
-   if (ciff.checkCellWritten(name())) return;
+   if (exportf.checkCellWritten(name())) return;
    //
-   ciff.definitionStart(name());
-   // @TODO! See Bug#15242
+   exportf.definitionStart(name());
+   // @TODO! See Bug#15242 (CIF related)
    // Currently all coordinates are exported in DBU units and in the DS line of CIF
    // we put the ratio between DBU and the CIF precision (constant). This makes the
    // resulting CIF files ineffective, because normally there will be too many
    // pointless zeros. What we need is the smallest step which is used in each of
-   // the cells. This can be calculated here, but also can be a value precalculated
+   // the cells. This can be calculated here, but also can be a value pre-calculated
    // on the fly when each and every points gets stored in the cell structure.
-   // In practice this should be done in the folowing way
+   // In practice this should be done in the following way
    // - calculate the reciprocal value of DBU ( (unsigned) 1/ DBU ). Let's name it
    //   DBUR. Make sure that the conversion error is cleaned-up.
    // - define the step and assign to it initially DBUR
@@ -813,13 +827,17 @@ void laydata::TdtCell::cifWrite(DbExportFile& ciff, const CellMap& allcells,
    //   with the new value.
 
    // loop the layers
-   laydata::LayerList::const_iterator wl;
+   LayerList::const_iterator wl;
    for (wl = _layers.begin(); wl != _layers.end(); wl++)
    {
-      if ((REF_LAY != wl->first) && !ciff.layerSpecification(wl->first)) continue;
-      wl->second->cifWrite(ciff);
+      if ( (REF_LAY != wl->first) &&
+           (GRC_LAY != wl->first) &&
+           !exportf.layerSpecification(wl->first))
+         continue;
+      for (QuadTree::Iterator DI = wl->second->begin(); DI != wl->second->end(); DI++)
+         DI->dbExport(exportf);
    }
-   ciff.definitionFinish();
+   exportf.definitionFinish();
 }
 
 void laydata::TdtCell::psWrite(PSFile& psf, const layprop::DrawProperties& drawprop,
@@ -852,7 +870,8 @@ void laydata::TdtCell::psWrite(PSFile& psf, const layprop::DrawProperties& drawp
       {
          if (REF_LAY != curlayno)
             psf.propSet(drawprop.getColorName(curlayno), drawprop.getFillName(curlayno));
-         wl->second->psWrite(psf, drawprop);
+         for (QuadTree::Iterator DI = wl->second->begin(); DI != wl->second->end(); DI++)
+            DI->psWrite(psf, drawprop);
       }
    }
    psf.cellFooter();
@@ -904,8 +923,20 @@ DBbox laydata::TdtCell::getVisibleOverlap(const layprop::DrawProperties& prop)
 {
    DBbox vlOverlap(DEFAULT_OVL_BOX);
    for (LayerList::const_iterator LCI = _layers.begin(); LCI != _layers.end(); LCI++)
-      if (!prop.layerHidden(LCI->first))
-         LCI->second->vlOverlap(prop, vlOverlap, (REF_LAY == LCI->first));
+   {
+      unsigned  layno  = LCI->first;
+      QuadTree* cqTree = LCI->second;
+      if (!prop.layerHidden(layno))
+      {
+         if (REF_LAY == layno)
+         {
+            for(QuadTree::Iterator CS = cqTree->begin(); CS != cqTree->end(); CS++)
+               CS->vlOverlap(prop, vlOverlap);
+         }
+         else
+            vlOverlap.overlap(cqTree->overlap());
+      }
+   }
    return vlOverlap;
 }
 
@@ -921,6 +952,7 @@ void laydata::TdtCell::renameChild(std::string oldName, std::string newName)
 
 void laydata::TdtCell::selectInBox(DBbox select_in, const DWordSet& unselable, word layselmask, bool pntsel)
 {
+   if (laydata::_lmnone == layselmask) return;
    // check that current cell is within
    if (0ll != select_in.cliparea(_cellOverlap))
    {
@@ -935,7 +967,9 @@ void laydata::TdtCell::selectInBox(DBbox select_in, const DWordSet& unselable, w
                ssl = _shapesel[lay->first];
             else
                ssl = DEBUG_NEW DataList();
-/***/       lay->second->selectInBox(select_in, ssl, pntsel, layselmask);
+            for (QuadTree::ClipIterator CI = lay->second->begin(select_in); CI != lay->second->end(); CI++)
+               if (layselmask & CI->lType())
+                  CI->selectInBox(select_in, ssl, pntsel);
             if (ssl->empty())  delete ssl;
             else               _shapesel[lay->first] = ssl;
          }
@@ -958,7 +992,22 @@ void laydata::TdtCell::unselectInBox(DBbox select_in, bool pntsel, const DWordSe
             if (_shapesel.end() != _shapesel.find(lay->first))
             {
                ssl = _shapesel[lay->first];
-/***/          lay->second->unselectInBox(select_in, ssl, pntsel);
+/*          lay->second->unselectInBox(select_in, ssl, pntsel);                */
+//               void laydata::QTreeTmpl<DataT>::unselectInBox(DBbox& unselect_in, TObjDataPairList* unselist,
+//                                                                                bool pselect)
+               // check the entire holder for clipping...
+               for (QuadTree::ClipIterator CI = lay->second->begin(select_in); CI != lay->second->end(); CI++)
+               {
+                  // now start unselecting from the list
+                  DataList::iterator DI = ssl->begin();
+                  while ( DI != ssl->end() )
+                     if ((*CI == DI->first) &&
+                         (DI->first->unselect(select_in, *DI, pntsel)))
+                           DI = ssl->erase(DI);
+                     else DI++;
+               }
+
+/*-----------------------------------------------------------------------------*/
                if (ssl->empty())
                {
                   delete ssl;
@@ -984,7 +1033,8 @@ void laydata::TdtCell::selectFromList(SelectList* slist, const DWordSet& unselab
             ssl = _shapesel[CL->first];
          else
             ssl = DEBUG_NEW DataList();
-         _layers[CL->first]->selectFromList(CL->second, ssl);
+//         _layers[CL->first]->selectFromList(CL->second, ssl);
+         selectFromListWrapper(_layers[CL->first], CL->second, ssl);
          if (ssl->empty())  delete ssl;
          else              _shapesel[CL->first] = ssl;
       }
@@ -1392,7 +1442,17 @@ bool laydata::TdtCell::cutPolySelected(PointVector& plst, AtticList** dasao)
       byte i;
       for (i = 0; i < 3; decure[i++] = DEBUG_NEW ShapeList());
       // do the clipping
-      _layers[CL->first]->cutPolySelected(plst, cut_ovl, decure);
+      QuadTree* curlay = _layers[CL->first];
+//      _layers[CL->first]->cutPolySelected(plst, cut_ovl, decure);
+      for (QuadTree::ClipIterator CI = curlay->begin(cut_ovl); CI != curlay->end(); CI++)
+      {
+//         DataT* wdt = _data[i];
+         // for fully selected shapes if they overlap with the cutting polygon
+         if ((sh_selected == CI->status()) &&
+                                       (0ll != cut_ovl.cliparea(CI->overlap())))
+            // go and clip it
+            CI->polyCut(plst, decure);
+      }
       // add the shapelists to the collection, but only if they are not empty
       for (i = 0; i < 3; i++)
       {
@@ -1460,7 +1520,8 @@ bool laydata::TdtCell::mergeSelected(AtticList** dasao)
       while (CS != mrgcand->end())
       {
          TdtData* ref_shape = *CS;
-         if ((merged_shape = _layers[CL->first]->mergeSelected(ref_shape)))
+         if ( (merged_shape = mergeWrapper(_layers[CL->first], ref_shape)) )
+//         if ((merged_shape = _layers[CL->first]->mergeSelected(ref_shape)))
          {
             // if the mergeSelected produced non NULL result, it also
             // has changed the value of ref_shape. Now the most disgusting part -
@@ -1562,7 +1623,7 @@ void laydata::TdtCell::selectAll(const DWordSet& unselable, word layselmask)
       if (unselable.end() == unselable.find(lay->first))
       {
          DataList* ssl = DEBUG_NEW DataList();
-/***/    lay->second->selectAll(ssl, layselmask);
+/***/    selectAllWrapper(lay->second, ssl, layselmask);
          if (ssl->empty())
          {
             delete ssl;
@@ -1582,7 +1643,7 @@ void laydata::TdtCell::fullSelect()
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
    {
       DataList* ssl = DEBUG_NEW DataList();
-/***/ lay->second->selectAll(ssl);
+/***/ selectAllWrapper(lay->second,ssl);
       assert(!ssl->empty());
       _shapesel[lay->first] = ssl;
    }
@@ -1911,20 +1972,28 @@ void laydata::TdtCell::transferLayer(SelectList* slst, unsigned dst)
    // so no need to refresh the overlapping box etc.
 }
 
-void laydata::TdtCell::resort()
-{
-   typedef LayerList::const_iterator LCI;
-   for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
-      lay->second->resort();
-   getCellOverlap();
-}
+//void laydata::TdtCell::resort()
+//{
+//   typedef LayerList::const_iterator LCI;
+//   for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
+//      lay->second->resort();
+//   getCellOverlap();
+//}
 
 void laydata::TdtCell::fixUnsorted()
 {
    typedef TmpLayerMap::const_iterator LCI;
    for (LCI lay = _tmpLayers.begin(); lay != _tmpLayers.end(); lay++)
    {
-      lay->second->commit();
+      if (0 != lay->second->numObjects())
+         lay->second->commit();
+      else
+      {
+         LayerList::iterator tlay = _layers.find(lay->first);
+         assert(tlay != _layers.end());
+         delete tlay->second;
+         _layers.erase(tlay);
+      }
       delete lay->second;
    }
    _tmpLayers.clear();
@@ -2012,7 +2081,7 @@ NameSet* laydata::TdtCell::rehashChildren()
    {  // if it is not empty...
       // get all cell refs/arefs in a list -
       DataList *refsList = DEBUG_NEW DataList();
-      refsTree->selectAll(refsList, laydata::_lmref, false);
+      selectAllWrapper(refsTree, refsList, laydata::_lmref, false);
       // for every cell ref in the list
       for (DataList::const_iterator CC = refsList->begin();
                                      CC != refsList->end(); CC++)
@@ -2080,7 +2149,7 @@ bool laydata::TdtCell::relink(laydata::TdtLibDir* libdir)
    QuadTree* refsTree = _layers[REF_LAY];
    DBbox old_overlap(_cellOverlap);
    DataList *refsList = DEBUG_NEW DataList();
-   refsTree->selectAll(refsList, laydata::_lmref, false);
+   selectAllWrapper(refsTree, refsList, laydata::_lmref, false);
    // relink every single cell ref in the list
    DataList::iterator CC = refsList->begin();
    while (CC != refsList->end())
@@ -2110,7 +2179,7 @@ void laydata::TdtCell::relinkThis(std::string cname, laydata::CellDefin newcelld
    // get all cell references
    DataList *refsList = DEBUG_NEW DataList();
    QuadTree* refsTree = _layers[REF_LAY];
-   refsTree->selectAll(refsList, laydata::_lmref, false);
+   selectAllWrapper(refsTree, refsList, laydata::_lmref, false);
    //relink only the references to cname
    for (DataList::iterator CC = refsList->begin(); CC != refsList->end(); CC++)
    {
@@ -2210,13 +2279,85 @@ void laydata::TdtCell::collectUsedLays(const TdtLibDir* LTDB, bool recursive, Wo
          laylist.push_back(CL->first);
 }
 
+void laydata::TdtCell::selectAllWrapper(QuadTree* qtree, DataList* selist, word selmask, bool mark)
+{
+   if (laydata::_lmnone == selmask) return;
+   for (QuadTree::Iterator CI = qtree->begin(); CI != qtree->end(); CI++)
+   {
+      if (selmask & CI->lType())
+      {
+         selist->push_back(SelectDataPair(*CI,SGBitSet()));
+         if (mark) CI->setStatus(sh_selected);
+      }
+   }
+}
+
+laydata::TdtData* laydata::TdtCell::mergeWrapper(QuadTree* qtree, TdtData*& ref_shape)
+{
+   TdtData* mergeres = NULL;
+   DBbox overlapRef = ref_shape->overlap();
+   // now start traversing the shapes in the current holder one by one
+   for (QuadTree::ClipIterator CI = qtree->begin(overlapRef); CI != qtree->end(); CI++)
+   {
+//      DataT* wdt = _data[i];
+      // for fully selected shapes if they overlap with the reference
+      // and this is not the same shape as the reference
+      if ((*CI != ref_shape) &&
+          ((sh_selected == CI->status()) || (sh_merged == CI->status())) &&
+          (0ll != overlapRef.cliparea(CI->overlap())))
+      {
+         // go and merge it
+         mergeres = polymerge(CI->shape2poly(), ref_shape->shape2poly());
+         if (NULL != mergeres)
+         {
+            // If the merge produce a result - return the result and
+            // substitute the ref_shape with its merged counterpart
+            ref_shape = *CI;
+            break;
+         }
+      }
+   }
+   return mergeres;
+}
+
+void laydata::TdtCell::selectFromListWrapper(QuadTree* qtree, DataList* src, DataList* dst)
+{
+   DataList::iterator DI;
+   // loop the objects in the qTree first. It will be faster when there
+   // are no objects in the current QTreeTmpl
+   for (QuadTree::Iterator CI = qtree->begin(); CI != qtree->end(); CI++)
+   {
+      TdtData* wdt = *CI;
+      DI = src->begin();
+      // loop the objects from the select list
+      while ( DI != src->end())
+      {
+         // if the objects (pointer) coincides - that's out object
+         if (wdt == DI->first)
+         {
+            // select the object
+            if (DI->second.size() == wdt->numPoints()) {
+               wdt->setStatus(sh_partsel);
+               dst->push_back(SelectDataPair(wdt,DI->second));
+            }
+            else {
+               wdt->setStatus(sh_selected);
+               dst->push_back(SelectDataPair(wdt,SGBitSet()));
+            }
+            // remove it from the select list - it will speed up the following
+            // operations
+            DI = src->erase(DI);
+            // there is no point looping further, get the next object
+            break;
+         }
+         else DI++;
+      }
+   }
+//   for (byte i = 0; i < _props.numSubQuads(); i++)
+//      _subQuads[i]->selectFromList(src, dst);
+}
+
 laydata::TdtCell::~TdtCell()
 {
    unselectAll();
-   for (LayerList::iterator lay = _layers.begin(); lay != _layers.end(); lay++)
-   {
-      lay->second->freeMemory();
-      delete lay->second;
-   }
-   _layers.clear();
 }

@@ -170,6 +170,7 @@ BEGIN_EVENT_TABLE(tui::LayoutCanvas, wxGLCanvas)
    EVT_TECUSTOM_COMMAND (wxEVT_CANVAS_ZOOM  , wxID_ANY, tui::LayoutCanvas::OnZoom)
    EVT_TECUSTOM_COMMAND (wxEVT_MOUSE_INPUT  , wxID_ANY, tui::LayoutCanvas::OnMouseIN)
    EVT_TECUSTOM_COMMAND (wxEVT_CANVAS_CURSOR, wxID_ANY, tui::LayoutCanvas::OnCursorType)
+   EVT_TIMER            (                     wxID_ANY, tui::LayoutCanvas::OnTimer)
 
    EVT_MENU(         CM_RULER, LayoutCanvas::OnCMrulerState    )
    EVT_MENU(         CM_CHLAY, LayoutCanvas::OnCMchangeLayer   )
@@ -202,6 +203,7 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos,
       _crossCur = NULL;
       return;
    }
+   _blinkTimer.SetOwner(this);
 #endif
    _crossCur = MakeCursor(crosscursor,16, 16);
 //   _crossCur = DEBUG_NEW wxCursor((const char*)crosscursor,16, 16);
@@ -220,6 +222,7 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos,
    // DON'T enable it if you're not sure what you're doing!
    _oglThread = false;
    _apTrigger = 10;
+   _blinkOn = false;
 }
 
 void   tui::LayoutCanvas::showInfo()
@@ -406,6 +409,7 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event)
       }
       else
       {
+         _blinkTimer.Stop();
          wxPaintDC dc(this);
          #ifdef __WXGTK__
             SetCurrent();
@@ -423,9 +427,11 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event)
          DATC->render(_LayCTM);
          glAccum(GL_LOAD, 1.0);
          _invalidWindow = false;
+         _blinkOn = true;
          if (_rubberBand) rubber_paint();
          if (_reperX || _reperY) longCursor();
          SwapBuffers();
+         _blinkTimer.Start(500,wxTIMER_CONTINUOUS);
       }
    }
    else
@@ -1061,6 +1067,28 @@ void tui::LayoutCanvas::OnCMRotate(wxCommandEvent&)
    eventCancelLast.SetInt(-3);
    wxPostEvent(Console, eventCancelLast);
    DATC->mouseRotate();
+}
+
+void tui::LayoutCanvas::OnTimer(wxTimerEvent& WXUNUSED(event))
+{
+   wxPaintDC dc(this);
+   #ifdef __WXGTK__
+      SetCurrent();
+   #endif
+   if (_blinkOn)
+   {
+      glAccum(GL_RETURN, 1.0);
+      if       (_tmpWnd)              wnd_paint();
+      else if  (_rubberBand)          rubber_paint();
+      else if  (PROPC->boldOnHover()) boldOnHover();
+      if (_reperX || _reperY)         longCursor();
+   }
+   else
+   {
+      DATC->drawFOnly();
+   }
+   SwapBuffers();
+   _blinkOn = !_blinkOn;
 }
 
 DBbox* tui::LayoutCanvas::zoomIn()

@@ -252,6 +252,7 @@ namespace tui
       BT_CELL_ADD,
       BT_CELL_REMOVE,
       BT_CELL_RENAME,
+      BT_CELL_MARK_GRC,
       BT_ADDTDT_LIB,
       BT_NEWTDT_DB,
       BT_ADDGDS_TAB,

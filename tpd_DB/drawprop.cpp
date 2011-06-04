@@ -695,7 +695,7 @@ void layprop::DrawProperties::setGridColor(std::string colname) const
 
 bool layprop::DrawProperties::setCurrentFill(bool force_fill) const
 {
-   if (REF_LAY == _drawingLayer) return true;
+   if ((REF_LAY == _drawingLayer) || (GRC_LAY == _drawingLayer)) return true;
    // The lines below are doing effectively
    // byte* ifill = _layFill[_layset[_drawingLayer]->getfill]
    const LayerSettings* ilayset = findLayerSettings(_drawingLayer);
@@ -753,7 +753,7 @@ void layprop::DrawProperties::adjustAlpha(word factor)
 
 bool  layprop::DrawProperties::layerHidden(unsigned layno) const
 {
-   if (REF_LAY == layno) return false;
+   if ((REF_LAY == layno) || (GRC_LAY == layno)) return false;
    const LayerSettings* ilayset = findLayerSettings(layno);
    if (NULL != ilayset) return ilayset->hidden();
    else return true;
@@ -928,6 +928,7 @@ void layprop::DrawProperties::allUnselectable(DWordSet& layset)
       if (it->second->hidden() || it->second->locked())
          layset.insert(it->first);
    }
+   layset.insert(GRC_LAY);
 }
 
 void layprop::DrawProperties::allInvisible(DWordSet& layset)

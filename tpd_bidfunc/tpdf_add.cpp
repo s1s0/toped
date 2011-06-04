@@ -533,7 +533,7 @@ int tellstdfunc::stdADDWIRE::execute()
          laydata::TdtDesign* tDesign = (*dbLibDir)();
          PointVector* plst = t2tpoints(pl,DBscale);
          telldata::ttlayout* wr = DEBUG_NEW telldata::ttlayout(tDesign->putWire(la,plst,
-                                    static_cast<laydata::WireWidth>(rint(w * DBscale))), la);
+                                    static_cast<WireWidth>(rint(w * DBscale))), la);
          delete plst;
          UNDOcmdQ.push_front(this);
          UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
@@ -617,7 +617,7 @@ int tellstdfunc::stdDRAWWIRE::execute()
          laydata::TdtDesign* tDesign = (*dbLibDir)();
          PointVector* plst = t2tpoints(pl,DBscale);
          telldata::ttlayout* wr = DEBUG_NEW telldata::ttlayout(tDesign->addWire(la,plst,
-                                    static_cast<laydata::WireWidth>(rint(w * DBscale))), la);
+                                    static_cast<WireWidth>(rint(w * DBscale))), la);
          delete plst;
          UNDOcmdQ.push_front(this);
          UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));

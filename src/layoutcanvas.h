@@ -108,6 +108,8 @@ namespace tui {
       void           OnCMRotate(wxCommandEvent&);
       void           OnCursorType(wxCommandEvent&);
       void           OnPanCenter(wxCommandEvent&);
+      void           OnTimer(wxTimerEvent& WXUNUSED(event));
+
       void           viewshift();
    private:
       void           CursorControl(bool, bool);
@@ -152,6 +154,8 @@ namespace tui {
       bool           _oglVersion14;  //! OpenGL version >= 1.4 detected
       bool           _oglExtMultiDrawArrays; //! GL_EXT_multi_draw_arrays feature is supported
       bool           _oglArbVertexBufferObject; //! GL_ARB_vertex_buffer_object feature is supported
+      wxTimer        _blinkTimer;    //! To implement the flashing images
+      bool           _blinkOn;
 #ifdef __WXGTK__
       XVisualInfo*   _xVisual;       //
 #endif

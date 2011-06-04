@@ -88,5 +88,6 @@ namespace laydata
       std::string         _extString;
       void*               _clientData;
    };
+
 }
 #endif //TEDAT_EXT_H

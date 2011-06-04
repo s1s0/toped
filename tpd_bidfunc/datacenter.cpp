@@ -63,15 +63,17 @@ DataCenter::DataCenter(const std::string& localDir, const std::string& globalDir
    _drawruler = false;
    _tdtActMxState = dbmxs_unlocked;
    _tdtReqMxState = dbmxs_unlocked;
+   _cRenderer = NULL;
 }
 
 DataCenter::~DataCenter()
 {
+   if (NULL != _cRenderer) delete _cRenderer;
    laydata::TdtLibrary::clearEntireHierTree();
-   if (NULL != _GDSDB) delete _GDSDB;
-   if (NULL != _CIFDB) delete _CIFDB;
-   if (NULL != _OASDB) delete _OASDB;
-   if (NULL != _DRCDB) delete _DRCDB;
+   if (NULL != _GDSDB    ) delete _GDSDB;
+   if (NULL != _CIFDB    ) delete _CIFDB;
+   if (NULL != _OASDB    ) delete _OASDB;
+   if (NULL != _DRCDB    ) delete _DRCDB;
    // _TEDLIB will be cleared automatically (not a pointer)
 }
 
@@ -729,6 +731,14 @@ void DataCenter::render(const CTM& layCTM)
       openGlDraw(layCTM);
 }
 
+void DataCenter::drawFOnly()
+{
+   if (PROPC->renderType())
+   {
+      if (NULL != _cRenderer) _cRenderer->grcDraw();
+   }
+}
+
 void DataCenter::mouseHoover(TP& position)
 {
    if (_TEDLIB())
@@ -770,22 +780,15 @@ void DataCenter::openGlDraw(const CTM& layCTM)
             // There is no need to check for an active cell. If there isn't one
             // the function will return silently.
             _TEDLIB()->openGlDraw(*drawProp);
+            // Draw DRC data (if any)
+            // TODO! clean-up the DRC stuff here - see the comment below in the
+            // openGlRender method
             if(_DRCDB)
             {
                if (wxMUTEX_NO_ERROR == _DRCLock.TryLock())
                {
                   std::string cell = DRCData->cellName();
-                  drawProp->setState(layprop::DRC);
-                  laydata::TdtDefaultCell* dst_structure = _DRCDB->checkCell(cell);
-                  if (dst_structure)
-                  {
-                     drawProp->initCtmStack();
-//                     drawProp->initDrawRefStack(NULL); // no references yet in the DRC DB
-                     dst_structure->openGlDraw(*drawProp);
-//                     drawProp->clearCtmStack();
-                     drawProp->clearDrawRefStack();
-                  }
-                  drawProp->setState(layprop::DB);
+                  _DRCDB->openGlDraw(*drawProp, cell);
                   VERIFY(wxMUTEX_NO_ERROR == _DRCLock.Unlock());
                }
             }
@@ -826,13 +829,19 @@ void DataCenter::openGlRender(const CTM& layCTM)
       layprop::DrawProperties* drawProp;
       if (PROPC->lockDrawProp(drawProp))
       {
-         tenderer::TopRend renderer( drawProp, PROPC->UU() );
+         if (NULL != _cRenderer)
+         {
+//            _cRenderer->cleanUp();
+            _cRenderer->grcCleanUp();
+            delete _cRenderer;
+         }
+         _cRenderer = new tenderer::TopRend( drawProp, PROPC->UU() );
          // render the grid
          for (byte gridNo = 0; gridNo < 3; gridNo++)
          {
             const layprop::LayoutGrid* cgrid = PROPC->grid(gridNo);
             if ((NULL !=  cgrid) && cgrid->visual())
-               renderer.Grid(cgrid->step(), cgrid->color());
+               _cRenderer->Grid(cgrid->step(), cgrid->color());
          }
          //       _properties.drawZeroCross(renderer);
          if (wxMUTEX_NO_ERROR == _DBLock.TryLock())
@@ -844,23 +853,18 @@ void DataCenter::openGlRender(const CTM& layCTM)
             #endif
             // There is no need to check for an active cell. If there isn't one
             // the function will return silently.
-            _TEDLIB()->openGlRender(renderer);
+            _TEDLIB()->openGlRender(*_cRenderer);
             // Draw DRC data (if any)
-            //_DRCDB->openGlDraw(_properties.drawprop());
-            //TODO the block below should get into the line above
-
+            // TODO! clean-up the DRC stuff here - lock/unlock and more importantly
+            // DrcLibrary <-> CalibrFile i.e. _DRCDB <-> DRCData. The end of the line shall be
+            // the removal of the DRCData object
             if(_DRCDB)
             {
                if (wxMUTEX_NO_ERROR == _DRCLock.TryLock())
                {
-                  std::string cell = DRCData->cellName();
-                  renderer.setState(layprop::DRC);
-                  laydata::TdtDefaultCell* dst_structure = _DRCDB->checkCell(cell);
-                  if (dst_structure)
-                  {
-                     dst_structure->openGlRender(renderer, DRCData->getCTM(cell), false, false);
-                  }
-                  renderer.setState(layprop::DB);
+                  std::string cellName = DRCData->cellName();
+                  CTM cellCTM = DRCData->getCTM(cellName);
+                  _DRCDB->openGlRender(*_cRenderer, cellName, cellCTM);
                   VERIFY(wxMUTEX_NO_ERROR == _DRCLock.Unlock());
                }
             }
@@ -868,15 +872,21 @@ void DataCenter::openGlRender(const CTM& layCTM)
             rendTimer.report("Time elapsed for data traversing: ");
             #endif
             // The version with the central VBO's
-            if (renderer.collect())
+            if (_cRenderer->collect())
             {
                #ifdef RENDER_PROFILING
                   rendTimer.report("Time elapsed for data copying   : ");
                #endif
-               renderer.draw();
+               _cRenderer->draw();
                #ifdef RENDER_PROFILING
                   rendTimer.report("    Total elapsed rendering time: ");
                #endif
+               _cRenderer->cleanUp();
+            }
+            if (_cRenderer->grcCollect())
+            {
+//               _cRenderer->grcDraw();
+//               _cRenderer->grcCleanUp();
             }
             VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
 //            TpdPost::toped_status(console::TSTS_RENDEROFF);
@@ -902,6 +912,60 @@ void DataCenter::openGlRender(const CTM& layCTM)
    }
 }
 
+
+//tenderer::TopRend* DataCenter::openGlRenderIt(const CTM& layCTM)
+//{
+//   tenderer::TopRend* renderer = NULL;
+//   if (_TEDLIB())
+//   {
+//      // Don't block the drawing if the databases are
+//      // locked. This will block all redraw activities including UI
+//      // which have nothing to do with the DB. Drop a message in the log
+//      // and keep going!
+//      layprop::DrawProperties* drawProp;
+//      if (PROPC->lockDrawProp(drawProp))
+//      {
+//         renderer = DEBUG_NEW tenderer::TopRend( drawProp, PROPC->UU() );
+//         // render the grid
+//         for (byte gridNo = 0; gridNo < 3; gridNo++)
+//         {
+//            const layprop::LayoutGrid* cgrid = PROPC->grid(gridNo);
+//            if ((NULL !=  cgrid) && cgrid->visual())
+//               renderer->Grid(cgrid->step(), cgrid->color());
+//         }
+//         //       _properties.drawZeroCross(renderer);
+//         if (wxMUTEX_NO_ERROR == _DBLock.TryLock())
+//         {
+//            TpdPost::render_status(true);
+//            // There is no need to check for an active cell. If there isn't one
+//            // the function will return silently.
+//            _TEDLIB()->openGlRender(*renderer);
+//            // Draw DRC data (if any)
+//            //_DRCDB->openGlDraw(_properties.drawprop());
+//            //TODO the block below should get into the line above
+//
+//            renderer->collect();
+//            VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
+//            TpdPost::render_status(false);
+//         }
+//         else
+//         {
+//            // If DB is locked - skip the DB drawing, but draw all the property DB stuff
+//            tell_log(console::MT_INFO,std::string("DB busy. Viewport redraw skipped"));
+//         }
+//      }
+//      else
+//      {
+//         // If property DB is locked - we can't do much drawing even if the
+//         // DB is not locked. In the same time there should not be an operation
+//         // which holds the property DB lock for a long time. So it should be
+//         // rather an exception
+//         tell_log(console::MT_INFO,std::string("Property DB busy. Viewport redraw skipped"));
+//      }
+//      PROPC->unlockDrawProp(drawProp);
+//   }
+//   return renderer;
+//}
 
 void DataCenter::motionDraw(const CTM& layCTM, TP base, TP newp)
 {

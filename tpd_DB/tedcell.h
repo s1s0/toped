@@ -29,7 +29,7 @@
 #define TEDCELL_H_INCLUDED
 
 #include <string>
-#include "quadtree.h"
+#include "qtree_tmpl.h"
 
 namespace laydata {
 
@@ -101,7 +101,7 @@ namespace laydata {
    class TdtDefaultCell  {
       public:
                              TdtDefaultCell(std::string, int , bool );
-         virtual            ~TdtDefaultCell() {};
+         virtual            ~TdtDefaultCell();
          virtual void        openGlDraw(layprop::DrawProperties&, bool active=false) const;
          virtual void        openGlRender(tenderer::TopRend&, const CTM&, bool, bool) const;
          virtual void        motionDraw(const layprop::DrawProperties&, CtmQueue&, bool active=false) const;
@@ -111,24 +111,23 @@ namespace laydata {
          virtual void        updateHierarchy(TdtLibDir*);
          virtual DBbox       cellOverlap() const;
          virtual DBbox       getVisibleOverlap(const layprop::DrawProperties&);
-         virtual void        write(TEDfile* const, const CellMap&, const TDTHierTree*) const;
-         virtual void        gdsWrite(DbExportFile&, const CellMap&, const TDTHierTree*) const;
-         virtual void        cifWrite(DbExportFile&, const CellMap&, const TDTHierTree*) const;
+         virtual void        write(OutputTdtFile* const, const CellMap&, const TDTHierTree*) const;
+         virtual void        dbExport(DbExportFile&, const CellMap&, const TDTHierTree*) const;
          virtual void        psWrite(PSFile&, const layprop::DrawProperties&,
                                       const CellMap* = NULL, const TDTHierTree* = NULL) const;
          virtual void        collectUsedLays(const TdtLibDir*, bool, WordList&) const;
          virtual void        renameChild(std::string, std::string) {assert(false); /* TdTDefaultCell can not be renamed */}
-         void                parentFound()              {_orphan = false;};
+         bool                checkLayer(unsigned) const;
          void                setName(std::string nname) {_name = nname;}
-         bool                orphan() const             {return _orphan;};
-         std::string         name() const               {return _name;};
+         bool                orphan() const             {return _orphan;}
+         void                setOrphan(bool orph)       {_orphan = orph;}
+         std::string         name() const               {return _name;}
          int                 libID() const              {return _libID;}
-         //@FIXME! the _orphan must be protected!
-         bool                _orphan;       //! cell doesn't have a parent
       protected:
          void                invalidateParents(TdtLibrary*);
          LayerList           _layers;       //! all layers the cell (including the reference layer)
          std::string         _name;         //! cell name
+         bool                _orphan;       //! cell doesn't have a parent
       private:
          int                 _libID;        //! cell belongs to ... library
    };
@@ -149,11 +148,11 @@ namespace laydata {
       void                 registerCellRef(CellDefin str, CTM trans);
       void                 registerCellARef(CellDefin str, CTM trans, ArrayProps&);
       TdtCellRef*          addCellRef(TdtDesign*, CellDefin str, CTM trans);
+      void                 addAuxRef(unsigned layno, auxdata::GrcCell*);
       TdtCellAref*         addCellARef(TdtDesign*, CellDefin, CTM, ArrayProps&);
       bool                 addChild(TdtDesign*, TdtDefaultCell*);
-      virtual void         write(TEDfile* const, const CellMap&, const TDTHierTree*) const;
-      virtual void         gdsWrite(DbExportFile&, const CellMap&, const TDTHierTree*) const;
-      virtual void         cifWrite(DbExportFile&, const CellMap&, const TDTHierTree*) const;
+      virtual void         write(OutputTdtFile* const, const CellMap&, const TDTHierTree*) const;
+      virtual void         dbExport(DbExportFile&, const CellMap&, const TDTHierTree*) const;
       virtual void         psWrite(PSFile&, const layprop::DrawProperties&,
                                    const CellMap* = NULL, const TDTHierTree* = NULL) const;
       virtual TDTHierTree* hierOut(TDTHierTree*&, TdtCell*, CellMap*, const TdtLibDir*);
@@ -179,7 +178,7 @@ namespace laydata {
       ShapeList*           ungroupPrep(TdtLibDir*);
       void                 transferLayer(unsigned);
       void                 transferLayer(SelectList*, unsigned);
-      void                 resort();
+//      void                 resort();
       void                 fixUnsorted();
       bool                 validateCells(TdtLibrary*);
       void                 validateLayers();
@@ -202,6 +201,8 @@ namespace laydata {
       virtual DBbox        getVisibleOverlap(const layprop::DrawProperties&);
       virtual void         renameChild(std::string, std::string);
    private:
+      void                 readTdtLay(InputTdtFile* const);
+      void                 readTdtRef(InputTdtFile* const);
       bool                 getShapeOver(TP, const DWordSet&);
       void                 getCellOverlap();
       void                 storeInAttic(AtticList&);
@@ -212,6 +213,9 @@ namespace laydata {
       TdtData*             checkNreplacePoly(SelectDataPair&, Validator*, unsigned, SelectList**);
       TdtData*             checkNreplaceBox(SelectDataPair&, Validator*, unsigned, SelectList**);
       DataList*            secureDataList(SelectList&, unsigned);
+      void                 selectAllWrapper(QuadTree*, DataList*, word selmask = laydata::_lmall, bool mark = true);
+      void                 selectFromListWrapper(QuadTree*, DataList*, DataList*);
+      TdtData*             mergeWrapper(QuadTree*, TdtData*&);
       NameSet              _children;     //! for hierarchy list purposes
       SelectList           _shapesel;     //! selected shapes
       DBbox                _cellOverlap;  //! Overlap of the entire cell
