@@ -423,7 +423,7 @@ void laydata::TdtLibDir::addLibrary(TdtLibrary* const lib, word libRef)
 
 int laydata::TdtLibDir::loadLib(std::string filename)
 {
-   laydata::InputTdtFile tempin(wxString(filename.c_str(), wxConvUTF8), this);
+   InputTdtFile tempin(wxString(filename.c_str(), wxConvUTF8), this);
    if (!tempin.status()) return -1;
    int libRef = getLastLibRefNo();
    try
@@ -512,7 +512,7 @@ void laydata::TdtLibDir::newDesign(std::string name, std::string dir, time_t cre
 
 bool laydata::TdtLibDir::readDesign(std::string filename)
 {
-   laydata::InputTdtFile tempin(wxString(filename.c_str(), wxConvUTF8), this);
+   InputTdtFile tempin(wxString(filename.c_str(), wxConvUTF8), this);
    if (!tempin.status()) return false;
 
    try
@@ -581,7 +581,7 @@ bool laydata::TdtLibDir::TDTcheckread(const std::string filename,
 {
    bool retval = false;
    start_ignoring = false;
-   laydata::InputTdtFile tempin(wxString(filename.c_str(), wxConvUTF8), this);
+   InputTdtFile tempin(wxString(filename.c_str(), wxConvUTF8), this);
    if (!tempin.status()) return retval;
 
    std::string news = "Project created: ";

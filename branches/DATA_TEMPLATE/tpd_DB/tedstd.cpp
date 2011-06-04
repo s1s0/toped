@@ -91,7 +91,7 @@ PSegment* PSegment::parallel(TP p)
  * of the class.
  * @param fileName - the fully qualified filename - OS dependent
  */
-laydata::InputDBFile::InputDBFile( wxString fileName, bool forceSeek) :
+InputDBFile::InputDBFile( wxString fileName, bool forceSeek) :
       _inStream      (      NULL ),
       _gziped        (     false ),
       _ziped         (     false ),
@@ -182,7 +182,7 @@ laydata::InputDBFile::InputDBFile( wxString fileName, bool forceSeek) :
       TpdPost::toped_status(console::TSTS_PRGRSBARON, _fileLength);
 }
 
-bool laydata::InputDBFile::readStream(void* buffer, size_t len, bool updateProgress)
+bool InputDBFile::readStream(void* buffer, size_t len, bool updateProgress)
 {
    _inStream->Read(buffer,len);// read record header
    size_t numread = _inStream->LastRead();
@@ -202,7 +202,7 @@ bool laydata::InputDBFile::readStream(void* buffer, size_t len, bool updateProgr
    return true;
 }
 
-size_t laydata::InputDBFile::readTextStream(char* buffer, size_t len )
+size_t InputDBFile::readTextStream(char* buffer, size_t len )
 {
 //   size_t result = 0;
 //   do
@@ -231,7 +231,7 @@ size_t laydata::InputDBFile::readTextStream(char* buffer, size_t len )
    return numread;
 }
 
-void laydata::InputDBFile::closeStream()
+void InputDBFile::closeStream()
 {
    if ( NULL != _inStream )
    {
@@ -242,7 +242,7 @@ void laydata::InputDBFile::closeStream()
 //   _convLength = 0;
 }
 
-void laydata::InputDBFile::initFileMetrics(wxFileOffset size)
+void InputDBFile::initFileMetrics(wxFileOffset size)
 {
    _filePos     = 0;
    _progresPos  = 0;
@@ -252,7 +252,7 @@ void laydata::InputDBFile::initFileMetrics(wxFileOffset size)
       TpdPost::toped_status(console::TSTS_PRGRSBARON, size);
 }
 
-bool laydata::InputDBFile::unZip2Temp()
+bool InputDBFile::unZip2Temp()
 {
    // Initialize an input stream - i.e. open the input file
    wxFFileInputStream inStream(_fileName);
@@ -281,7 +281,7 @@ bool laydata::InputDBFile::unZip2Temp()
       return false;
 }
 
-bool laydata::InputDBFile::unZlib2Temp()
+bool InputDBFile::unZlib2Temp()
 {
    std::ostringstream info;
    // Initialize an input stream - i.e. open the input file
@@ -325,7 +325,7 @@ bool laydata::InputDBFile::unZlib2Temp()
    }
 }
 
-laydata::InputDBFile::~InputDBFile()
+InputDBFile::~InputDBFile()
 {
    if (NULL != _inStream) delete _inStream;
 }
@@ -333,11 +333,11 @@ laydata::InputDBFile::~InputDBFile()
 //-----------------------------------------------------------------------------
 // class InputTdtFile
 //-----------------------------------------------------------------------------
-laydata::InputTdtFile::InputTdtFile( wxString fileName, laydata::TdtLibDir* tedlib ) :
+InputTdtFile::InputTdtFile( wxString fileName, laydata::TdtLibDir* tedlib ) :
       // !Note forcing seekable (true) here is just to get the progress bar working
       // with compressed TDT files. The trouble is that we can't get the size of the gz
       // files without inflating them.
-      laydata::InputDBFile(fileName, true),
+      InputDBFile(fileName, true),
       _TEDLIB     (tedlib)
 {
    try
@@ -360,7 +360,7 @@ laydata::InputTdtFile::InputTdtFile( wxString fileName, laydata::TdtLibDir* tedl
    }
 }
 
-void laydata::InputTdtFile::read(int libRef)
+void InputTdtFile::read(int libRef)
 {
    if (tedf_DESIGN != getByte()) throw EXPTNreadTDT("Expecting DESIGN record");
    std::string name = getString();
@@ -368,15 +368,15 @@ void laydata::InputTdtFile::read(int libRef)
    real          UU = getReal();
    tell_log(console::MT_DESIGNNAME, name);
    if (libRef > 0)
-      _design = DEBUG_NEW TdtLibrary(name, DBU, UU, libRef);
+      _design = DEBUG_NEW laydata::TdtLibrary(name, DBU, UU, libRef);
    else
-      _design = DEBUG_NEW TdtDesign(name,_created, _lastUpdated, DBU,UU);
+      _design = DEBUG_NEW laydata::TdtDesign(name,_created, _lastUpdated, DBU,UU);
    _design->read(this);
    //Design end marker is read already in TdtDesign so don't search it here
    //byte design_end = getByte();
 }
 
-void laydata::InputTdtFile::getFHeader()
+void InputTdtFile::getFHeader()
 {
    // Get the leading string
    std::string _leadstr = getString();
@@ -386,7 +386,7 @@ void laydata::InputTdtFile::getFHeader()
 //   checkIntegrity();
 }
 
-byte laydata::InputTdtFile::getByte()
+byte InputTdtFile::getByte()
 {
    byte result;
    if (!readStream(&result,sizeof(byte), true))
@@ -394,7 +394,7 @@ byte laydata::InputTdtFile::getByte()
    return result;
 }
 
-word laydata::InputTdtFile::getWord()
+word InputTdtFile::getWord()
 {
    word result;
    if (!readStream(&result,sizeof(word), true))
@@ -402,7 +402,7 @@ word laydata::InputTdtFile::getWord()
    return result;
 }
 
-int4b laydata::InputTdtFile::get4b()
+int4b InputTdtFile::get4b()
 {
    int4b result;
    if (!readStream(&result,sizeof(int4b), true))
@@ -410,7 +410,7 @@ int4b laydata::InputTdtFile::get4b()
    return result;
 }
 
-WireWidth laydata::InputTdtFile::get4ub()
+WireWidth InputTdtFile::get4ub()
 {
    WireWidth result;
    if (!readStream(&result,sizeof(WireWidth), true))
@@ -418,7 +418,7 @@ WireWidth laydata::InputTdtFile::get4ub()
    return result;
 }
 
-real laydata::InputTdtFile::getReal()
+real InputTdtFile::getReal()
 {
    real result;
    if (!readStream(&result,sizeof(real), true))
@@ -426,7 +426,7 @@ real laydata::InputTdtFile::getReal()
    return result;
 }
 
-std::string laydata::InputTdtFile::getString()
+std::string InputTdtFile::getString()
 {
    byte length = getByte();
    char* strc = DEBUG_NEW char[length+1];
@@ -441,14 +441,14 @@ std::string laydata::InputTdtFile::getString()
    return str;
 }
 
-TP laydata::InputTdtFile::getTP()
+TP InputTdtFile::getTP()
 {
    int4b x = get4b();
    int4b y = get4b();
    return TP(x,y);
 }
 
-CTM laydata::InputTdtFile::getCTM()
+CTM InputTdtFile::getCTM()
 {
    real _a  = getReal();
    real _b  = getReal();
@@ -459,7 +459,7 @@ CTM laydata::InputTdtFile::getCTM()
    return CTM(_a, _b, _c, _d, _tx, _ty);
 }
 
-void laydata::InputTdtFile::getRevision()
+void InputTdtFile::getRevision()
 {
    if (tedf_REVISION  != getByte()) throw EXPTNreadTDT("Expecting REVISION record");
    _revision = getWord();
@@ -471,7 +471,7 @@ void laydata::InputTdtFile::getRevision()
       throw EXPTNreadTDT("The TDT revision is not supported by this version of Toped");
 }
 
-void laydata::InputTdtFile::getTime()
+void InputTdtFile::getTime()
 {
    tm broken_time;
    if (tedf_TIMECREATED  != getByte()) throw EXPTNreadTDT("Expecting TIMECREATED record");
@@ -494,7 +494,7 @@ void laydata::InputTdtFile::getTime()
    _lastUpdated = mktime(&broken_time);
 }
 
-void laydata::InputTdtFile::getCellChildNames(NameSet& cnames)
+void InputTdtFile::getCellChildNames(NameSet& cnames)
 {
    // Be very very careful with the copy constructors and assignment of the
    // standard C++ lib containers. Here it seems OK.
@@ -505,11 +505,11 @@ void laydata::InputTdtFile::getCellChildNames(NameSet& cnames)
    _childnames.clear();
 }
 
-laydata::CellDefin laydata::InputTdtFile::linkCellRef(std::string cellname)
+laydata::CellDefin InputTdtFile::linkCellRef(std::string cellname)
 {
    // register the name of the referenced cell in the list of children
    _childnames.insert(cellname);
-   CellMap::const_iterator striter = _design->_cells.find(cellname);
+   laydata::CellMap::const_iterator striter = _design->_cells.find(cellname);
    laydata::CellDefin celldef = NULL;
    // link the cells instances with their definitions
    if (_design->_cells.end() == striter)
@@ -545,7 +545,7 @@ laydata::CellDefin laydata::InputTdtFile::linkCellRef(std::string cellname)
    return celldef;
 }
 
-void laydata::InputTdtFile::cleanup()
+void InputTdtFile::cleanup()
 {
    if (NULL != _design) delete _design;
 }
@@ -1084,7 +1084,7 @@ laydata::WireContourAux::~WireContourAux()
  * of the class.
  * @param fileName - the fully qualified filename - OS dependent
  */
-ForeignDbFile::ForeignDbFile(wxString fileName, bool forceSeek) : laydata::InputDBFile(fileName, forceSeek),
+ForeignDbFile::ForeignDbFile(wxString fileName, bool forceSeek) : InputDBFile(fileName, forceSeek),
       _hierTree      (      NULL ),
       _convLength    (         0 )
 {

@@ -35,7 +35,7 @@ namespace laydata {
    class TdtLibrary {
    public:
       friend class TdtLibDir;
-      friend class InputTdtFile;
+      friend class ::InputTdtFile;
                         TdtLibrary(std::string, real, real, int);
       virtual          ~TdtLibrary();
       virtual void      read(InputTdtFile* const);
