@@ -347,6 +347,12 @@ laydata::TdtCell::TdtCell(InputTdtFile* const tedfile, std::string name, int lib
             readTdtRef(tedfile);
             tedfile->getCellChildNames(_children);
             break;
+         case    tedf_GRC:
+         {
+            auxdata::GrcCell* grc_structure = DEBUG_NEW auxdata::GrcCell(tedfile, _name);
+            addAuxRef(GRC_LAY, grc_structure);
+            break;
+         }
          default: throw EXPTNreadTDT("LAYER record type expected");
       }
    }
@@ -775,6 +781,13 @@ void laydata::TdtCell::write(TEDfile* const tedfile, const CellMap& allcells, co
          for (QuadTree::Iterator DI = wl->second->begin(); DI != wl->second->end(); DI++)
             DI->write(tedfile);
          tedfile->putByte(tedf_LAYEREND);
+      }
+      else if (GRC_LAY == wl->first)
+      {
+         tedfile->putByte(tedf_GRC);
+         for (QuadTree::Iterator DI = wl->second->begin(); DI != wl->second->end(); DI++)
+            DI->write(tedfile);
+         tedfile->putByte(tedf_GRCEND);
       }
    }
    tedfile->putByte(tedf_CELLEND);

@@ -49,6 +49,21 @@ auxdata::TdtGrcPoly::TdtGrcPoly(int4b* pdata, unsigned psize) :
    _psize      ( psize     )
 {}
 
+auxdata::TdtGrcPoly::TdtGrcPoly(laydata::InputTdtFile* const tedfile) :
+   TdtAuxData  (           )
+{
+   _psize = tedfile->getWord();
+   assert(_psize);
+   _pdata = DEBUG_NEW int4b[_psize*2];
+   TP wpnt;
+   for (unsigned i = 0 ; i < _psize; i++)
+   {
+      wpnt = tedfile->getTP();
+      _pdata[2*i  ] = wpnt.x();
+      _pdata[2*i+1] = wpnt.y();
+   }
+}
+
 auxdata::TdtGrcPoly::~TdtGrcPoly()
 {
    delete [] _pdata;
@@ -117,6 +132,16 @@ void auxdata::TdtGrcPoly::info(std::ostringstream& ost, real DBU) const
       if (i != _psize - 1) ost << " , ";
    }
    ost << "};";
+}
+
+void auxdata::TdtGrcPoly::write(laydata::TEDfile* const tedfile) const
+{
+   tedfile->putByte(tedf_POLY);
+   tedfile->putWord(_psize);
+   for (unsigned i = 0; i < _psize; i++)
+   {
+      tedfile->put4b(_pdata[2*i]); tedfile->put4b(_pdata[2*i+1]);
+   }
 }
 
 void auxdata::TdtGrcPoly::motionDraw(const layprop::DrawProperties&, CtmQueue& transtack,
@@ -189,7 +214,25 @@ auxdata::TdtGrcWire::TdtGrcWire(int4b* pdata, unsigned psize, WireWidth width) :
    _psize      ( psize     ),
    _width      ( width     )
 {
+}
 
+auxdata::TdtGrcWire::TdtGrcWire(laydata::InputTdtFile* const tedfile) :
+   TdtAuxData  (           )
+{
+   _psize = tedfile->getWord();
+   assert(_psize);
+   if ((0 == tedfile->revision()) && (8 > tedfile->subRevision()))
+      _width = tedfile->getWord();
+   else
+      _width = tedfile->get4ub();
+   _pdata = DEBUG_NEW int4b[_psize*2];
+   TP wpnt;
+   for (unsigned i = 0 ; i < _psize; i++)
+   {
+      wpnt = tedfile->getTP();
+      _pdata[2*i  ]  = wpnt.x();
+      _pdata[2*i+1]  = wpnt.y();
+   }
 }
 
 auxdata::TdtGrcWire::~TdtGrcWire()
@@ -312,6 +355,17 @@ void auxdata::TdtGrcWire::info(std::ostringstream& ost, real DBU) const
    ost << "};";
 }
 
+void auxdata::TdtGrcWire::write(laydata::TEDfile* const tedfile) const
+{
+   tedfile->putByte(tedf_WIRE);
+   tedfile->putWord(_psize);
+   tedfile->put4ub(_width);
+   for (word i = 0; i < _psize; i++)
+   {
+      tedfile->put4b(_pdata[2*i]); tedfile->put4b(_pdata[2*i+1]);
+   }
+}
+
 void auxdata::TdtGrcWire::motionDraw(const layprop::DrawProperties& drawprop,
                CtmQueue& transtack, SGBitSet* plst) const
 {
@@ -384,6 +438,28 @@ auxdata::GrcCell::GrcCell(std::string name) :
    _shapesel      (                 )
 {}
 
+auxdata::GrcCell::GrcCell(laydata::InputTdtFile* const tedfile, std::string name) :
+   _name          ( name            ),
+   _layers        (                 ),
+   _cellOverlap   ( DEFAULT_OVL_BOX ),
+   _shapesel      (                 )
+{
+   byte      recordtype;
+   while (tedf_GRCEND != (recordtype = tedfile->getByte()))
+   {
+      switch (recordtype)
+      {
+         case    tedf_LAYER:
+            readTdtLay(tedfile);
+            break;
+         default: throw EXPTNreadTDT("LAYER record type expected");
+      }
+   }
+   // Sort the qtrees of the new cell
+   bool emptyCell = fixUnsorted();
+   assert(!emptyCell);
+}
+
 auxdata::GrcCell::~GrcCell()
 {
    for (LayerList::iterator lay = _layers.begin(); lay != _layers.end(); lay++)
@@ -392,6 +468,20 @@ auxdata::GrcCell::~GrcCell()
       delete lay->second;
    }
    _layers.clear();
+}
+
+void auxdata::GrcCell::write(laydata::TEDfile* const tedfile) const
+{
+   LayerList::const_iterator wl;
+   for (wl = _layers.begin(); wl != _layers.end(); wl++)
+   {
+      assert(LAST_EDITABLE_LAYNUM >= wl->first);
+      tedfile->putByte(tedf_LAYER);
+      tedfile->putWord(wl->first);
+      for (QuadTree::Iterator DI = wl->second->begin(); DI != wl->second->end(); DI++)
+         DI->write(tedfile);
+      tedfile->putByte(tedf_LAYEREND);
+   }
 }
 
 void auxdata::GrcCell::collectUsedLays(WordList& laylist) const
@@ -550,3 +640,21 @@ void auxdata::GrcCell::motionDraw(const layprop::DrawProperties& drawprop,
 //   }
 }
 
+void auxdata::GrcCell::readTdtLay(laydata::InputTdtFile* const tedfile)
+{
+   byte      recordtype;
+   TdtAuxData*  newData;
+   unsigned  layno    = tedfile->getWord();
+   QTreeTmp* tmpLayer = secureUnsortedLayer(layno);
+   while (tedf_LAYEREND != (recordtype = tedfile->getByte()))
+   {
+      switch (recordtype)
+      {
+         case     tedf_POLY: newData = DEBUG_NEW TdtGrcPoly(tedfile);break;
+         case     tedf_WIRE: newData = DEBUG_NEW TdtGrcWire(tedfile);break;
+         //--------------------------------------------------
+         default: throw EXPTNreadTDT("Unexpected record type");
+      }
+      tmpLayer->put(newData);
+   }
+}

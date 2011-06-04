@@ -2625,7 +2625,8 @@ void laydata::TdtAuxRef::info(std::ostringstream&, real) const
 
 void laydata::TdtAuxRef::write(TEDfile* const tedfile) const
 {
-   assert(false);
+   assert(NULL != _structure);
+   _structure->write(tedfile);
 }
 
 void laydata::TdtAuxRef::dbExport(DbExportFile&) const
