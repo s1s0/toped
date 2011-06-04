@@ -35,26 +35,29 @@
 //==============================================================================
 // Toped DaTa (TDT) file markers
 //==============================================================================
-#define TED_LEADSTRING        "TED"
-#define tedf_REVISION         0x02
-#define tedf_TIMECREATED      0x03
-#define tedf_TIMEUPDATED      0x04
-#define tedf_DESIGN           0x80
-#define tedf_DESIGNEND        0x81
-#define tedf_CELL             0x82
-#define tedf_CELLEND          0x83
-#define tedf_LAYER            0x84
-#define tedf_CELLREF          0x85
-#define tedf_CELLAREF         0x86
-#define tedf_BOX              0x87
-#define tedf_POLY             0x88
-#define tedf_WIRE             0x89
-#define tedf_TEXT             0x8A
-#define tedf_LAYEREND         0x8B
-#define tedf_REFS             0x8C
-#define tedf_REFSEND          0x8D
-#define TED_CUR_REVISION      0
-#define TED_CUR_SUBREVISION   9
+const std::string TED_LEADSTRING("TED");
+const byte tedf_REVISION        = 0x02;
+const byte tedf_TIMECREATED     = 0x03;
+const byte tedf_TIMEUPDATED     = 0x04;
+const byte tedf_DESIGN          = 0x80;
+const byte tedf_DESIGNEND       = 0x81;
+const byte tedf_CELL            = 0x82;
+const byte tedf_CELLEND         = 0x83;
+const byte tedf_LAYER           = 0x84;
+const byte tedf_CELLREF         = 0x85;
+const byte tedf_CELLAREF        = 0x86;
+const byte tedf_BOX             = 0x87;
+const byte tedf_POLY            = 0x88;
+const byte tedf_WIRE            = 0x89;
+const byte tedf_TEXT            = 0x8A;
+const byte tedf_LAYEREND        = 0x8B;
+const byte tedf_REFS            = 0x8C;
+const byte tedf_REFSEND         = 0x8D;
+const byte tedf_GRC             = 0x8E;
+const byte tedf_GRCEND          = 0x8F;
+//
+const byte TED_CUR_REVISION     = 0x00;
+const byte TED_CUR_SUBREVISION  = 0x0A;
 
 //==============================================================================
 class PSegment {
@@ -83,13 +86,9 @@ namespace laydata {
    const word _lmaref   = 0x0020;
    const word _lmpref   = 0x0040;
    const word _lmapref  = 0x0080;
+   const word _lmgrcref = 0x0100;
    const word _lmall    = 0xffff;
 
-   // The definition below is a "strongly typed enum". Very tempting to use, but too new
-   // and too risky for portability. gcc requires -std=c++0x option to stop the warnings
-   // It's here just as a reminder for the future
-   //   enum class SH_STATUS:byte { sh_active, sh_deleted, sh_selected, sh_partsel, sh_merged } ;
-   typedef enum { sh_active, sh_deleted, sh_selected, sh_partsel, sh_merged } SH_STATUS;
    typedef enum {
       shp_OK         = 0x0000,
       shp_ident      = 0x0001, // identical or one line points removed
@@ -114,7 +113,8 @@ namespace laydata {
    class TdtDesign;
    class TdtLibrary;
    class TdtLibDir;
-   class QTreeTmp;
+   template <typename DataT>   class QTStoreTmpl;
+   typedef QTStoreTmpl<TdtData>                     QTreeTmp;
    typedef  std::pair<TdtData*, SGBitSet>           SelectDataPair;
    typedef  std::list<SelectDataPair>               DataList;
    typedef  std::map<unsigned, DataList*>           SelectList;
@@ -126,9 +126,6 @@ namespace laydata {
    typedef  std::deque<EditObject*>                 EditCellStack;
    typedef  std::list<const CellMap*>               LibCellLists;
    typedef  std::list<TdtDefaultCell*>              CellDefList;
-   typedef  dword                                   WireWidth;
-
-   const WireWidth        MAX_WIRE_WIDTH          = 0x0FFFFFFF;
 
    //==============================================================================
    class Validator {
@@ -147,136 +144,6 @@ namespace laydata {
    protected:
       unsigned             _status;
       PointVector          _plist;
-   };
-
-   //==============================================================================
-   /*!
-    * File compression explained: A plenty of compression algorithms out there -
-    * Toped deals with two of them and the reason is that those are suitable for
-    * layout file purposes and covered by wx library at the time of writing.
-    *  - zip (http://en.wikipedia.org/wiki/ZIP_%28file_format%29) - compression
-    *    algorithm and archiver
-    *  - gzip stream compression algorithm using Lempel-Ziv coding (LZ77).
-    *    (http://en.wikipedia.org/wiki/Gzip). Several implementations of this
-    *    algo, but wx is using Zlib (http://www.zlib.net/)
-    *
-    *  From our prospective the big difference between the two is that the
-    *  first one is also an archiver which means that a zip file can contain
-    *  more than one file. gzip on the other hand is a stream compression which
-    *  means that it contains a single file. In Linux traditionally tar is
-    *  used as archiver and then the entire archive is compressed using gzip
-    *
-    *  Another quite important feature of both formats is that (as it appears
-    *  at least in the wx implementation) both of them are not seekable. In
-    *  other words they are not randomly accessible.
-    *
-    *  Having in mind all the above and the general pattern Toped is following
-    *  for all imports (i.e. two stage conversion as described on the web site
-    *  http://toped.org.uk/trm_ifaces.html) here is the general idea how the
-    *  compressed input files are handled:
-    *  - zip files - opened before the conversion. If they contain a single file
-    *    it is inflated (decompressed) in a temporary location and then the new
-    *    file is used in all conversion stages. If the original file contains more
-    *    than one file - the processing is aborted and conversion is rejected.
-    *  - gzip files - used "as is" in the first import stage where the access is
-    *    sequential. Before the second stage, which requires random access the
-    *    file is inflated in a temporary location and the product is used for the
-    *    conversion.
-    */
-   class InputDBFile {
-      public:
-                              InputDBFile( wxString fileName, bool _forceSeek);
-         virtual             ~InputDBFile();
-         bool                 readStream(void*, size_t, bool updateProgress = false);
-         size_t               readTextStream(char*, size_t);
-         void                 closeStream();
-         std::string          fileName()                       { return std::string(_fileName.mb_str(wxConvFile));}
-         wxFileOffset         fileLength() const               { return _fileLength;   }
-         wxFileOffset         filePos() const                  { return _filePos;      }
-         bool                 status() const                   { return _status;       }
-         void                 setStatus(bool stat)             {        _status = stat;}
-      protected:
-         void                 initFileMetrics(wxFileOffset);
-         void                 setFilePos(wxFileOffset fp)      { _filePos = fp;     }
-         bool                 unZlib2Temp();//! inflate the input zlib file in a temporary one
-         bool                 unZip2Temp() ;//! inflate the input zip file in a temporary one
-         wxInputStream*       _inStream    ;//! The input stream of the opened file
-         bool                 _gziped      ;//! Indicates that the file is in compressed with gzip
-         bool                 _ziped       ;//! Indicates that the file is in compressed with zip
-         bool                 _forceSeek   ;//! Seekable stream requested
-         wxString             _fileName    ;//! A fully validated name of the file. Path,extension, everything
-         wxString             _tmpFileName ;//! The name of the eventually deflated file (if the input is compressed)
-      private:
-         wxFileOffset         _fileLength  ;//! The length of the file in bytes
-         wxFileOffset         _filePos     ;//! Current position in the file
-         wxFileOffset         _progresPos  ;//! Current position of the progress bar (Toped status line)
-         wxFileOffset         _progresMark ;//! Marked  position of the progress bar (Toped status line)
-         wxFileOffset         _progresStep ;//! Update step of the progress bar (Toped status line)
-         unsigned const       _progresDivs ;//! Number of updates to the progress bar during the current operation
-         bool                 _status      ;//! Used only in the constructor if the file can't be
-
-   };
-
-//==============================================================================
-   class InputTdtFile : public InputDBFile {
-      public:
-                              InputTdtFile( wxString fileName, laydata::TdtLibDir* tedlib );
-         virtual             ~InputTdtFile() {};
-         void                 read(int libRef);
-         void                 getCellChildNames(NameSet&);
-         CellDefin            linkCellRef(std::string cellname);
-         void                 cleanup();
-         byte                 getByte();
-         word                 getWord();
-         int4b                get4b();
-         WireWidth            get4ub();
-         real                 getReal();
-         std::string          getString();
-         TP                   getTP();
-         CTM                  getCTM();
-         TdtLibrary*          design() const       {return _design;};
-         const TdtLibDir*     TEDLIB()             {return _TEDLIB;}
-         word                 revision() const     {return _revision;}
-         word                 subRevision() const  {return _subrevision;}
-         time_t               created() const      {return _created;};
-         time_t               lastUpdated() const  {return _lastUpdated;};
-      private:
-         void                 getFHeader();
-         void                 getRevision();
-         void                 getTime();
-         laydata::TdtLibDir*  _TEDLIB      ;//! Catalog of available TDT libraries (reference to DATC->_TEDLIB)
-         TdtLibrary*          _design      ;//! A design created in memory from the contents of the input file
-         word                 _revision    ;//! Revision (major) of the TDT format which this file carries
-         word                 _subrevision ;//! Revision (minor) of the TDT format which this file carries
-         time_t               _created     ;//! Time stamp indicating when the DB (not the file!) was created
-         time_t               _lastUpdated ;//! Time stamp indicating when the DB (not the file!) was updated for the last time
-         NameSet              _childnames  ;
-   };
-
-   class   TEDfile {
-   public:
-                           TEDfile(std::string&, laydata::TdtLibDir*); // for writing
-      void                 closeF() {fclose(_file);};
-      void                 putString(std::string str);
-      void                 putReal(const real);
-      void                 putByte(const byte ch) {fputc(ch, _file);};
-      void                 putWord(const word);
-      void                 put4b(const int4b);
-      void                 put4ub(const WireWidth);
-      void                 putTP(const TP*);
-      void                 putCTM(const CTM);
-      void                 registerCellWritten(std::string);
-      bool                 checkCellWritten(std::string);
-   protected:
-   private:
-      void                 putTime();
-      void                 putRevision();
-      FILE*                _file;
-      word                 _revision;
-      word                 _subrevision;
-      time_t               _lastUpdated;
-      TdtLibrary*          _design;
-      NameSet              _childnames;
    };
 
    class ArrayProps
@@ -356,8 +223,142 @@ namespace laydata {
          WireContour*     _wcObject;
          int4b*           _ldata;
    };
-
 }
+
+namespace auxdata {
+   class GrcCell;
+   typedef std::map<std::string, GrcCell*>  GrcCellMap;
+}
+
+//==============================================================================
+/*!
+ * File compression explained: A plenty of compression algorithms out there -
+ * Toped deals with two of them and the reason is that those are suitable for
+ * layout file purposes and covered by wx library at the time of writing.
+ *  - zip (http://en.wikipedia.org/wiki/ZIP_%28file_format%29) - compression
+ *    algorithm and archiver
+ *  - gzip stream compression algorithm using Lempel-Ziv coding (LZ77).
+ *    (http://en.wikipedia.org/wiki/Gzip). Several implementations of this
+ *    algo, but wx is using Zlib (http://www.zlib.net/)
+ *
+ *  From our prospective the big difference between the two is that the
+ *  first one is also an archiver which means that a zip file can contain
+ *  more than one file. gzip on the other hand is a stream compression which
+ *  means that it contains a single file. In Linux traditionally tar is
+ *  used as archiver and then the entire archive is compressed using gzip
+ *
+ *  Another quite important feature of both formats is that (as it appears
+ *  at least in the wx implementation) both of them are not seekable. In
+ *  other words they are not randomly accessible.
+ *
+ *  Having in mind all the above and the general pattern Toped is following
+ *  for all imports (i.e. two stage conversion as described on the web site
+ *  http://toped.org.uk/trm_ifaces.html) here is the general idea how the
+ *  compressed input files are handled:
+ *  - zip files - opened before the conversion. If they contain a single file
+ *    it is inflated (decompressed) in a temporary location and then the new
+ *    file is used in all conversion stages. If the original file contains more
+ *    than one file - the processing is aborted and conversion is rejected.
+ *  - gzip files - used "as is" in the first import stage where the access is
+ *    sequential. Before the second stage, which requires random access the
+ *    file is inflated in a temporary location and the product is used for the
+ *    conversion.
+ */
+class InputDBFile {
+   public:
+                           InputDBFile( wxString fileName, bool _forceSeek);
+      virtual             ~InputDBFile();
+      bool                 readStream(void*, size_t, bool updateProgress = false);
+      size_t               readTextStream(char*, size_t);
+      void                 closeStream();
+      std::string          fileName()                       { return std::string(_fileName.mb_str(wxConvFile));}
+      wxFileOffset         fileLength() const               { return _fileLength;   }
+      wxFileOffset         filePos() const                  { return _filePos;      }
+      bool                 status() const                   { return _status;       }
+      void                 setStatus(bool stat)             {        _status = stat;}
+   protected:
+      void                 initFileMetrics(wxFileOffset);
+      void                 setFilePos(wxFileOffset fp)      { _filePos = fp;     }
+      bool                 unZlib2Temp();//! inflate the input zlib file in a temporary one
+      bool                 unZip2Temp() ;//! inflate the input zip file in a temporary one
+      wxInputStream*       _inStream    ;//! The input stream of the opened file
+      bool                 _gziped      ;//! Indicates that the file is in compressed with gzip
+      bool                 _ziped       ;//! Indicates that the file is in compressed with zip
+      bool                 _forceSeek   ;//! Seekable stream requested
+      wxString             _fileName    ;//! A fully validated name of the file. Path,extension, everything
+      wxString             _tmpFileName ;//! The name of the eventually deflated file (if the input is compressed)
+   private:
+      wxFileOffset         _fileLength  ;//! The length of the file in bytes
+      wxFileOffset         _filePos     ;//! Current position in the file
+      wxFileOffset         _progresPos  ;//! Current position of the progress bar (Toped status line)
+      wxFileOffset         _progresMark ;//! Marked  position of the progress bar (Toped status line)
+      wxFileOffset         _progresStep ;//! Update step of the progress bar (Toped status line)
+      unsigned const       _progresDivs ;//! Number of updates to the progress bar during the current operation
+      bool                 _status      ;//! Used only in the constructor if the file can't be
+
+};
+
+//==============================================================================
+class InputTdtFile : public InputDBFile {
+   public:
+                           InputTdtFile( wxString fileName, laydata::TdtLibDir* tedlib );
+      virtual             ~InputTdtFile() {};
+      void                 read(int libRef);
+      void                 getCellChildNames(NameSet&);
+      laydata::CellDefin   linkCellRef(std::string cellname);
+      void                 cleanup();
+      byte                 getByte();
+      word                 getWord();
+      int4b                get4b();
+      WireWidth            get4ub();
+      real                 getReal();
+      std::string          getString();
+      TP                   getTP();
+      CTM                  getCTM();
+      laydata::TdtLibrary* design() const       {return _design;};
+      const laydata::TdtLibDir*
+                           TEDLIB()             {return _TEDLIB;}
+      word                 revision() const     {return _revision;}
+      word                 subRevision() const  {return _subrevision;}
+      time_t               created() const      {return _created;};
+      time_t               lastUpdated() const  {return _lastUpdated;};
+   private:
+      void                 getFHeader();
+      void                 getRevision();
+      void                 getTime();
+      laydata::TdtLibDir*  _TEDLIB      ;//! Catalog of available TDT libraries (reference to DATC->_TEDLIB)
+      laydata::TdtLibrary* _design      ;//! A design created in memory from the contents of the input file
+      word                 _revision    ;//! Revision (major) of the TDT format which this file carries
+      word                 _subrevision ;//! Revision (minor) of the TDT format which this file carries
+      time_t               _created     ;//! Time stamp indicating when the DB (not the file!) was created
+      time_t               _lastUpdated ;//! Time stamp indicating when the DB (not the file!) was updated for the last time
+      NameSet              _childnames  ;
+};
+
+class   OutputTdtFile {
+public:
+                        OutputTdtFile(std::string&, laydata::TdtLibDir*);
+   void                 closeF() {fclose(_file);};
+   void                 putString(std::string str);
+   void                 putReal(const real);
+   void                 putByte(const byte ch) {fputc(ch, _file);};
+   void                 putWord(const word);
+   void                 put4b(const int4b);
+   void                 put4ub(const WireWidth);
+   void                 putTP(const TP*);
+   void                 putCTM(const CTM);
+   void                 registerCellWritten(std::string);
+   bool                 checkCellWritten(std::string);
+protected:
+private:
+   void                 putTime();
+   void                 putRevision();
+   FILE*                _file;
+   word                 _revision;
+   word                 _subrevision;
+   laydata::TdtLibrary* _design;
+   NameSet              _childnames;
+};
 
 class DbExportFile {
    public:
@@ -393,7 +394,7 @@ class ForeignCell;
 class ImportDB;
 typedef SGHierTree<ForeignCell> ForeignCellTree;
 typedef std::list<ForeignCell*> ForeignCellList;
-class ForeignDbFile : public laydata::InputDBFile {
+class ForeignDbFile : public InputDBFile {
    public:
                            ForeignDbFile(wxString, bool);
       virtual             ~ForeignDbFile();
@@ -451,13 +452,14 @@ class LayerCrossMap {
    public:
                               LayerCrossMap() : _tdtLayNumber(0), _tmpLayer(NULL) {}
       laydata::QTreeTmp*      getTmpLayer()     {return _tmpLayer;}
+      unsigned                tdtLayNumber()    {return _tdtLayNumber;}
       virtual bool            mapTdtLay(laydata::TdtCell*, word, word)
                                                          {assert(false); return false;}
       virtual bool            mapTdtLay(laydata::TdtCell*,const std::string&)
                                                          {assert(false); return false;}
       virtual std::string     printSrcLayer() const      {assert(false); return std::string("");}
    protected:
-      word                    _tdtLayNumber  ; //! Current layer number
+      unsigned                _tdtLayNumber  ; //! Current layer number
       laydata::QTreeTmp*      _tmpLayer      ; //! Current target layer
 };
 
@@ -510,11 +512,12 @@ class ImportDB {
       bool                    polyAcceptable(PointVector&, bool&);
       bool                    pathAcceptable(PointVector&, int4b);
       LayerCrossMap*          _layCrossMap   ;
-      ForeignDbFile*           _src_lib       ;
+      ForeignDbFile*          _src_lib       ;
       laydata::TdtLibDir*     _tdt_db        ;
-      laydata::TdtCell*       _dst_structure ; // Current target structure
-      real                    _dbuCoeff      ; // The DBU ratio between the foreign and local DB
-      real                    _crossCoeff    ; // Current cross coefficient
+      laydata::TdtCell*       _dst_structure ; //! Current target structure
+      auxdata::GrcCell*       _grc_structure ; //! Current error structure
+      real                    _dbuCoeff      ; //! The DBU ratio between the foreign and local DB
+      real                    _crossCoeff    ; //! Current cross coefficient
       real                    _technoSize    ; //! technology size (used for conversion of some texts)
 };
 

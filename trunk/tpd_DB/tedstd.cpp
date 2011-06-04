@@ -91,7 +91,7 @@ PSegment* PSegment::parallel(TP p)
  * of the class.
  * @param fileName - the fully qualified filename - OS dependent
  */
-laydata::InputDBFile::InputDBFile( wxString fileName, bool forceSeek) :
+InputDBFile::InputDBFile( wxString fileName, bool forceSeek) :
       _inStream      (      NULL ),
       _gziped        (     false ),
       _ziped         (     false ),
@@ -182,7 +182,7 @@ laydata::InputDBFile::InputDBFile( wxString fileName, bool forceSeek) :
       TpdPost::toped_status(console::TSTS_PRGRSBARON, _fileLength);
 }
 
-bool laydata::InputDBFile::readStream(void* buffer, size_t len, bool updateProgress)
+bool InputDBFile::readStream(void* buffer, size_t len, bool updateProgress)
 {
    _inStream->Read(buffer,len);// read record header
    size_t numread = _inStream->LastRead();
@@ -202,7 +202,7 @@ bool laydata::InputDBFile::readStream(void* buffer, size_t len, bool updateProgr
    return true;
 }
 
-size_t laydata::InputDBFile::readTextStream(char* buffer, size_t len )
+size_t InputDBFile::readTextStream(char* buffer, size_t len )
 {
 //   size_t result = 0;
 //   do
@@ -231,7 +231,7 @@ size_t laydata::InputDBFile::readTextStream(char* buffer, size_t len )
    return numread;
 }
 
-void laydata::InputDBFile::closeStream()
+void InputDBFile::closeStream()
 {
    if ( NULL != _inStream )
    {
@@ -242,7 +242,7 @@ void laydata::InputDBFile::closeStream()
 //   _convLength = 0;
 }
 
-void laydata::InputDBFile::initFileMetrics(wxFileOffset size)
+void InputDBFile::initFileMetrics(wxFileOffset size)
 {
    _filePos     = 0;
    _progresPos  = 0;
@@ -252,7 +252,7 @@ void laydata::InputDBFile::initFileMetrics(wxFileOffset size)
       TpdPost::toped_status(console::TSTS_PRGRSBARON, size);
 }
 
-bool laydata::InputDBFile::unZip2Temp()
+bool InputDBFile::unZip2Temp()
 {
    // Initialize an input stream - i.e. open the input file
    wxFFileInputStream inStream(_fileName);
@@ -281,7 +281,7 @@ bool laydata::InputDBFile::unZip2Temp()
       return false;
 }
 
-bool laydata::InputDBFile::unZlib2Temp()
+bool InputDBFile::unZlib2Temp()
 {
    std::ostringstream info;
    // Initialize an input stream - i.e. open the input file
@@ -325,7 +325,7 @@ bool laydata::InputDBFile::unZlib2Temp()
    }
 }
 
-laydata::InputDBFile::~InputDBFile()
+InputDBFile::~InputDBFile()
 {
    if (NULL != _inStream) delete _inStream;
 }
@@ -333,11 +333,11 @@ laydata::InputDBFile::~InputDBFile()
 //-----------------------------------------------------------------------------
 // class InputTdtFile
 //-----------------------------------------------------------------------------
-laydata::InputTdtFile::InputTdtFile( wxString fileName, laydata::TdtLibDir* tedlib ) :
+InputTdtFile::InputTdtFile( wxString fileName, laydata::TdtLibDir* tedlib ) :
       // !Note forcing seekable (true) here is just to get the progress bar working
       // with compressed TDT files. The trouble is that we can't get the size of the gz
       // files without inflating them.
-      laydata::InputDBFile(fileName, true),
+      InputDBFile(fileName, true),
       _TEDLIB     (tedlib)
 {
    try
@@ -349,9 +349,18 @@ laydata::InputTdtFile::InputTdtFile( wxString fileName, laydata::TdtLibDir* tedl
       closeStream();
       setStatus(false);
    }
+   bool versionOk = (0 ==_revision) &&
+                    (6 < _subrevision) && (11 > _subrevision);
+   if (!versionOk)
+   {
+      std::ostringstream ost;
+      ost << "TDT format revision not supported: 0.7 - 0.9 expected";
+      tell_log(console::MT_ERROR,ost.str());
+      setStatus(versionOk);
+   }
 }
 
-void laydata::InputTdtFile::read(int libRef)
+void InputTdtFile::read(int libRef)
 {
    if (tedf_DESIGN != getByte()) throw EXPTNreadTDT("Expecting DESIGN record");
    std::string name = getString();
@@ -359,15 +368,15 @@ void laydata::InputTdtFile::read(int libRef)
    real          UU = getReal();
    tell_log(console::MT_DESIGNNAME, name);
    if (libRef > 0)
-      _design = DEBUG_NEW TdtLibrary(name, DBU, UU, libRef);
+      _design = DEBUG_NEW laydata::TdtLibrary(name, DBU, UU, libRef);
    else
-      _design = DEBUG_NEW TdtDesign(name,_created, _lastUpdated, DBU,UU);
+      _design = DEBUG_NEW laydata::TdtDesign(name,_created, _lastUpdated, DBU,UU);
    _design->read(this);
    //Design end marker is read already in TdtDesign so don't search it here
    //byte design_end = getByte();
 }
 
-void laydata::InputTdtFile::getFHeader()
+void InputTdtFile::getFHeader()
 {
    // Get the leading string
    std::string _leadstr = getString();
@@ -377,7 +386,7 @@ void laydata::InputTdtFile::getFHeader()
 //   checkIntegrity();
 }
 
-byte laydata::InputTdtFile::getByte()
+byte InputTdtFile::getByte()
 {
    byte result;
    if (!readStream(&result,sizeof(byte), true))
@@ -385,7 +394,7 @@ byte laydata::InputTdtFile::getByte()
    return result;
 }
 
-word laydata::InputTdtFile::getWord()
+word InputTdtFile::getWord()
 {
    word result;
    if (!readStream(&result,sizeof(word), true))
@@ -393,7 +402,7 @@ word laydata::InputTdtFile::getWord()
    return result;
 }
 
-int4b laydata::InputTdtFile::get4b()
+int4b InputTdtFile::get4b()
 {
    int4b result;
    if (!readStream(&result,sizeof(int4b), true))
@@ -401,7 +410,7 @@ int4b laydata::InputTdtFile::get4b()
    return result;
 }
 
-laydata::WireWidth laydata::InputTdtFile::get4ub()
+WireWidth InputTdtFile::get4ub()
 {
    WireWidth result;
    if (!readStream(&result,sizeof(WireWidth), true))
@@ -409,7 +418,7 @@ laydata::WireWidth laydata::InputTdtFile::get4ub()
    return result;
 }
 
-real laydata::InputTdtFile::getReal()
+real InputTdtFile::getReal()
 {
    real result;
    if (!readStream(&result,sizeof(real), true))
@@ -417,7 +426,7 @@ real laydata::InputTdtFile::getReal()
    return result;
 }
 
-std::string laydata::InputTdtFile::getString()
+std::string InputTdtFile::getString()
 {
    byte length = getByte();
    char* strc = DEBUG_NEW char[length+1];
@@ -432,14 +441,14 @@ std::string laydata::InputTdtFile::getString()
    return str;
 }
 
-TP laydata::InputTdtFile::getTP()
+TP InputTdtFile::getTP()
 {
    int4b x = get4b();
    int4b y = get4b();
    return TP(x,y);
 }
 
-CTM laydata::InputTdtFile::getCTM()
+CTM InputTdtFile::getCTM()
 {
    real _a  = getReal();
    real _b  = getReal();
@@ -450,7 +459,7 @@ CTM laydata::InputTdtFile::getCTM()
    return CTM(_a, _b, _c, _d, _tx, _ty);
 }
 
-void laydata::InputTdtFile::getRevision()
+void InputTdtFile::getRevision()
 {
    if (tedf_REVISION  != getByte()) throw EXPTNreadTDT("Expecting REVISION record");
    _revision = getWord();
@@ -462,7 +471,7 @@ void laydata::InputTdtFile::getRevision()
       throw EXPTNreadTDT("The TDT revision is not supported by this version of Toped");
 }
 
-void laydata::InputTdtFile::getTime()
+void InputTdtFile::getTime()
 {
    tm broken_time;
    if (tedf_TIMECREATED  != getByte()) throw EXPTNreadTDT("Expecting TIMECREATED record");
@@ -485,7 +494,7 @@ void laydata::InputTdtFile::getTime()
    _lastUpdated = mktime(&broken_time);
 }
 
-void laydata::InputTdtFile::getCellChildNames(NameSet& cnames)
+void InputTdtFile::getCellChildNames(NameSet& cnames)
 {
    // Be very very careful with the copy constructors and assignment of the
    // standard C++ lib containers. Here it seems OK.
@@ -496,11 +505,11 @@ void laydata::InputTdtFile::getCellChildNames(NameSet& cnames)
    _childnames.clear();
 }
 
-laydata::CellDefin laydata::InputTdtFile::linkCellRef(std::string cellname)
+laydata::CellDefin InputTdtFile::linkCellRef(std::string cellname)
 {
    // register the name of the referenced cell in the list of children
    _childnames.insert(cellname);
-   CellMap::const_iterator striter = _design->_cells.find(cellname);
+   laydata::CellMap::const_iterator striter = _design->_cells.find(cellname);
    laydata::CellDefin celldef = NULL;
    // link the cells instances with their definitions
    if (_design->_cells.end() == striter)
@@ -525,18 +534,18 @@ laydata::CellDefin laydata::InputTdtFile::linkCellRef(std::string cellname)
          celldef = _TEDLIB->addDefaultCell(cellname, false);
       }
       else
-         celldef->parentFound();
+         celldef->setOrphan(false);
    }
    else
    {
       celldef = striter->second;
       assert(NULL != celldef);
-      celldef->parentFound();
+      celldef->setOrphan(false);
    }
    return celldef;
 }
 
-void laydata::InputTdtFile::cleanup()
+void InputTdtFile::cleanup()
 {
    if (NULL != _design) delete _design;
 }
@@ -544,7 +553,7 @@ void laydata::InputTdtFile::cleanup()
 //-----------------------------------------------------------------------------
 // class TEDfile
 //-----------------------------------------------------------------------------
-laydata::TEDfile::TEDfile(std::string& filename, laydata::TdtLibDir* tedlib)
+OutputTdtFile::OutputTdtFile(std::string& filename, laydata::TdtLibDir* tedlib)
 { //writing
    _design = (*tedlib)();
    _revision=TED_CUR_REVISION;_subrevision=TED_CUR_SUBREVISION;
@@ -563,25 +572,25 @@ laydata::TEDfile::TEDfile(std::string& filename, laydata::TdtLibDir* tedlib)
    fclose(_file);
 }
 
-void laydata::TEDfile::putWord(const word data) {
+void OutputTdtFile::putWord(const word data) {
    fwrite(&data,2,1,_file);
 }
 
-void laydata::TEDfile::put4b(const int4b data) {
+void OutputTdtFile::put4b(const int4b data) {
    fwrite(&data,4,1,_file);
 }
 
-void laydata::TEDfile::put4ub(const WireWidth data) {
+void OutputTdtFile::put4ub(const WireWidth data) {
    fwrite(&data,4,1,_file);
 }
 
-void laydata::TEDfile::putReal(const real data) {
+void OutputTdtFile::putReal(const real data) {
    fwrite(&data, sizeof(real), 1, _file);
 }
 
-void laydata::TEDfile::putTime()
+void OutputTdtFile::putTime()
 {
-   time_t ctime = static_cast<laydata::TdtDesign*>(_design)->created();
+   time_t ctime = _design->created();
    tm* broken_time = localtime(&ctime);
    putByte(tedf_TIMECREATED);
    put4b(broken_time->tm_mday);
@@ -591,9 +600,8 @@ void laydata::TEDfile::putTime()
    put4b(broken_time->tm_min);
    put4b(broken_time->tm_sec);
    //
-   _lastUpdated = time(NULL);
-   static_cast<laydata::TdtDesign*>(_design)->_lastUpdated = _lastUpdated;
-   broken_time = localtime(&_lastUpdated);
+   ctime = _design->lastUpdated();
+   broken_time = localtime(&ctime);
    putByte(tedf_TIMEUPDATED);
    put4b(broken_time->tm_mday);
    put4b(broken_time->tm_mon);
@@ -603,19 +611,19 @@ void laydata::TEDfile::putTime()
    put4b(broken_time->tm_sec);
 }
 
-void laydata::TEDfile::putRevision()
+void OutputTdtFile::putRevision()
 {
    putByte(tedf_REVISION);
    putWord(_revision);
    putWord(_subrevision);
 }
 
-void laydata::TEDfile::putTP(const TP* p)
+void OutputTdtFile::putTP(const TP* p)
 {
    put4b(p->x()); put4b(p->y());
 }
 
-void laydata::TEDfile::putCTM(const CTM matrix)
+void OutputTdtFile::putCTM(const CTM matrix)
 {
    putReal(matrix.a());
    putReal(matrix.b());
@@ -625,7 +633,7 @@ void laydata::TEDfile::putCTM(const CTM matrix)
    putReal(matrix.ty());
 }
 
-void laydata::TEDfile::putString(std::string str)
+void OutputTdtFile::putString(std::string str)
 {
 //   byte len = str.length();
 //   fwrite(&len, 1,1, _file);
@@ -633,12 +641,12 @@ void laydata::TEDfile::putString(std::string str)
    fputs(str.c_str(), _file);
 }
 
-void laydata::TEDfile::registerCellWritten(std::string cellname)
+void OutputTdtFile::registerCellWritten(std::string cellname)
 {
    _childnames.insert(cellname);
 }
 
-bool laydata::TEDfile::checkCellWritten(std::string cellname)
+bool OutputTdtFile::checkCellWritten(std::string cellname)
 {
    if (_childnames.end() == _childnames.find(cellname))
       return false;
@@ -671,17 +679,17 @@ bool laydata::pathConvert(PointVector& plist, int4b begext, int4b endext )
    P2 = plist[numpoints-1];
    // find the first neighboring point which is not equivalent to P1
    fnbr = numpoints - 2;
-   while ((P2 == plist[fnbr]) && (fnbr > 0))
+   while ((P2 == plist[fnbr]) && (fnbr >= 0))
       fnbr--;
    // assert, because if it was found above, it should exists!
    assert(fnbr >= 0);
    P1 = plist[fnbr];
 
-   P1 = plist[numpoints-2];
    sdX = P2.x() - P1.x();
    sdY = P2.y() - P1.y();
    sign = ((sdX * sdY) >= 0) ? 1 : -1;
    length = sqrt(sdY*sdY + sdX*sdX);
+   assert(length);
    int4b yn = (int4b) rint(P2.y() + sign*((endext*sdY)/length));
    int4b xn = (int4b) rint(P2.x() + sign*((endext*sdX)/length));
 
@@ -1076,7 +1084,7 @@ laydata::WireContourAux::~WireContourAux()
  * of the class.
  * @param fileName - the fully qualified filename - OS dependent
  */
-ForeignDbFile::ForeignDbFile(wxString fileName, bool forceSeek) : laydata::InputDBFile(fileName, forceSeek),
+ForeignDbFile::ForeignDbFile(wxString fileName, bool forceSeek) : InputDBFile(fileName, forceSeek),
       _hierTree      (      NULL ),
       _convLength    (         0 )
 {
@@ -1280,9 +1288,15 @@ void ImportDB::convert(ForeignCell* src_structure, bool overwrite)
       tell_log(console::MT_INFO,ost.str());
       // first create a new cell
       _dst_structure = DEBUG_NEW laydata::TdtCell(gname);
+      _grc_structure = DEBUG_NEW auxdata::GrcCell(gname);
       // call the cell converter
       src_structure->import(*this);
       // Sort the qtrees of the new cell
+      bool emptyCell = _grc_structure->fixUnsorted();
+      if (emptyCell)
+         delete _grc_structure;
+      else
+         _dst_structure->addAuxRef(GRC_LAY, _grc_structure);
       _dst_structure->fixUnsorted();
       // and finally - register the cell
       (*_tdt_db)()->registerCellRead(gname, _dst_structure);
@@ -1304,7 +1318,7 @@ void ImportDB::addBox(const TP& p1, const TP& p2)
    laydata::QTreeTmp* tmpLayer = _layCrossMap->getTmpLayer();
    if ( NULL != tmpLayer )
    {
-      tmpLayer->putBox(p1, p2);
+      tmpLayer->put(DEBUG_NEW laydata::TdtBox(p1,p2));
    }
 }
 
@@ -1316,8 +1330,13 @@ void ImportDB::addPoly(PointVector& plist)
       bool boxObject;
       if (polyAcceptable(plist, boxObject /*srcLayer, srcDataType*/))
       {
-         if (boxObject)  tmpLayer->putBox(plist[0], plist[2]);
-         else            tmpLayer->putPoly(plist);
+         if (boxObject)  tmpLayer->put(DEBUG_NEW laydata::TdtBox(plist[0], plist[2]));
+         else            tmpLayer->put(DEBUG_NEW laydata::TdtPoly(plist));
+      }
+      else
+      {
+         auxdata::QTreeTmp* errlay = _grc_structure->secureUnsortedLayer(_layCrossMap->tdtLayNumber());
+         errlay->put(DEBUG_NEW auxdata::TdtGrcPoly(plist));
       }
    }
 }
@@ -1336,7 +1355,12 @@ void ImportDB::addPath(PointVector& plist, int4b width, short pathType, int4b bg
       if (pathConvertResult)
       {
          if (pathAcceptable(plist, width))
-            tmpLayer->putWire(plist, width);
+            tmpLayer->put(DEBUG_NEW laydata::TdtWire(plist, width));
+         else
+         {
+            auxdata::QTreeTmp* errlay = _grc_structure->secureUnsortedLayer(_layCrossMap->tdtLayNumber());
+            errlay->put(DEBUG_NEW auxdata::TdtGrcWire(plist, width));
+         }
       }
       else
       {
@@ -1355,13 +1379,14 @@ void ImportDB::addText(std::string tString, TP bPoint, double magnification, dou
    if ( NULL != tmpLayer )
    {
       // @FIXME absolute magnification, absolute angle should be reflected somehow!!!
-      tmpLayer->putText(tString,
-                        CTM( bPoint,
-                             magnification / ((*_tdt_db)()->UU() *  OPENGL_FONT_UNIT),
-                             angle,
-                             reflection
-                           )
-                       );
+      tmpLayer->put(DEBUG_NEW laydata::TdtText(tString,
+                                               CTM( bPoint,
+                                                    magnification / ((*_tdt_db)()->UU() *  OPENGL_FONT_UNIT),
+                                                    angle,
+                                                    reflection
+                                                  )
+                                              )
+                    );
    }
 }
 
@@ -1412,7 +1437,7 @@ bool ImportDB::polyAcceptable(PointVector& plist, bool& box)
           << " }";
       tell_log(console::MT_ERROR, ost.str());
    }
-   if (check.recoverable())
+   if (check.valid())
    {
       plist = check.getValidated();
       box = check.box();
@@ -1433,7 +1458,7 @@ bool ImportDB::pathAcceptable(PointVector& plist, int4b width )
           << " }";
       tell_log(console::MT_ERROR, ost.str());
    }
-   if (check.recoverable())
+   if (check.valid())
    {
       plist = check.getValidated();
       return true;

@@ -199,7 +199,7 @@ unsigned  tenderer::TenderBox::cDataCopy(int* array, unsigned& pindex)
 //
 // TenderWire
 //
-tenderer::TenderWire::TenderWire(int4b* pdata, unsigned psize, const laydata::WireWidth width, bool clo)
+tenderer::TenderWire::TenderWire(int4b* pdata, unsigned psize, const WireWidth width, bool clo)
    : TenderNcvx(NULL, 0), _ldata(pdata), _lsize(psize), _celno(clo), _tdata(NULL)
 {
    if (!_celno)
@@ -590,7 +590,7 @@ void tenderer::TenderTV::registerBox (TenderCnvx* cobj)
 void tenderer::TenderTV::registerPoly (TenderNcvx* cobj, const TessellPoly* tchain)
 {
    unsigned allpoints = cobj->csize();
-   if (_filled && tchain->valid())
+   if (_filled && tchain && tchain->valid())
    {
       cobj->setTeselData(tchain);
       _ncvx_data.push_back(cobj);
@@ -1005,18 +1005,20 @@ tenderer::TenderLay::TenderLay(): _cslice(NULL),
 }
 
 /**
- * Create a new object of TenderTV type which will be reffered to by _cslice
+ * Create a new object of TenderTV type which will be referred to by _cslice
  * @param ctrans Current translation matrix of the new object
  * @param fill Whether to fill the drawing objects
  */
-void tenderer::TenderLay::newSlice(TenderRef* const ctrans, bool fill, bool reusable, bool has_selected, unsigned slctd_array_offset)
+void tenderer::TenderLay::newSlice(TenderRef* const ctrans, bool fill, bool reusable, unsigned slctd_array_offset)
 {
-   if ((_has_selected = has_selected)) // <-- that's not a mistake!
-   {
-      assert( 0 == total_slctdx());
-      _slctd_array_offset = slctd_array_offset;
-      _stv_array_offset = 2 * _num_total_points;
-   }
+   assert( 0 == total_slctdx());
+   _slctd_array_offset = slctd_array_offset;
+   _stv_array_offset = 2 * _num_total_points;
+   newSlice(ctrans, fill, reusable);
+}
+
+void tenderer::TenderLay::newSlice(TenderRef* const ctrans, bool fill, bool reusable)
+{
    _cslice = DEBUG_NEW TenderTV(ctrans, fill, reusable, 2 * _num_total_points, _num_total_indexs);
 }
 
@@ -1072,57 +1074,40 @@ void tenderer::TenderLay::ppSlice()
    }
 }
 
-void tenderer::TenderLay::box  (int4b* pdata, bool sel = false, const SGBitSet* ss= NULL)
+void tenderer::TenderLay::box  (int4b* pdata)
 {
-   // Make sure that selected shapes don't come unexpected
-   assert(_has_selected ? true : !sel);
-   TenderCnvx* cobj = NULL;
-   if (sel)
-   {
-      TenderSBox* sobj = DEBUG_NEW TenderSBox(pdata, ss);
-      registerSBox(sobj);
-      cobj = sobj;
-   }
-   else
-   {
-      cobj = DEBUG_NEW TenderBox(pdata);
-   }
-   _cslice->registerBox(cobj);
+   _cslice->registerBox(DEBUG_NEW TenderBox(pdata));
 }
 
-void tenderer::TenderLay::poly (int4b* pdata, unsigned psize, const TessellPoly* tpoly, bool sel = false, const SGBitSet* ss= NULL)
+void tenderer::TenderLay::box (int4b* pdata, const SGBitSet* ss)
 {
-   // Make sure that selected shapes don't come unexpected
-   assert(_has_selected ? true : !sel);
-   TenderNcvx* cobj = NULL;
-   if (sel)
-   {
-      TenderSNcvx* sobj = DEBUG_NEW TenderSNcvx(pdata, psize, ss);
-      registerSPoly(sobj);
-      cobj = sobj;
-   }
-   else
-   {
-      cobj = DEBUG_NEW TenderNcvx(pdata, psize);
-   }
-   _cslice->registerPoly(cobj, tpoly);
+   TenderSBox* sobj = DEBUG_NEW TenderSBox(pdata, ss);
+   registerSBox(sobj);
+   _cslice->registerBox(sobj);
 }
 
-void tenderer::TenderLay::wire (int4b* pdata, unsigned psize, laydata::WireWidth width, bool center_only, bool sel = false, const SGBitSet* ss= NULL)
+void tenderer::TenderLay::poly (int4b* pdata, unsigned psize, const TessellPoly* tpoly)
 {
-   assert(_has_selected ? true : !sel);
-   TenderWire* cobj;
-   if (sel)
-   {
-      TenderSWire* sobj = DEBUG_NEW TenderSWire(pdata, psize, width, center_only, ss);
-      registerSWire(sobj);
-      cobj = sobj;
-   }
-   else
-   {
-      cobj = DEBUG_NEW TenderWire(pdata, psize, width, center_only);
-   }
-   _cslice->registerWire(cobj);
+   _cslice->registerPoly(DEBUG_NEW TenderNcvx(pdata, psize), tpoly);
+}
+
+void tenderer::TenderLay::poly (int4b* pdata, unsigned psize, const TessellPoly* tpoly, const SGBitSet* ss)
+{
+   TenderSNcvx* sobj = DEBUG_NEW TenderSNcvx(pdata, psize, ss);
+   registerSPoly(sobj);
+   _cslice->registerPoly(sobj, tpoly);
+}
+
+void tenderer::TenderLay::wire (int4b* pdata, unsigned psize, WireWidth width, bool center_only)
+{
+   _cslice->registerWire(DEBUG_NEW TenderWire(pdata, psize, width, center_only));
+}
+
+void tenderer::TenderLay::wire (int4b* pdata, unsigned psize, WireWidth width, bool center_only, const SGBitSet* ss)
+{
+   TenderSWire* sobj = DEBUG_NEW TenderSWire(pdata, psize, width, center_only, ss);
+   registerSWire(sobj);
+   _cslice->registerWire(sobj);
 }
 
 void tenderer::TenderLay::text (const std::string* txt, const CTM& ftmtrx, const DBbox* ovl, const TP& cor, bool sel)
@@ -1400,6 +1385,8 @@ tenderer::TenderLay::~TenderLay()
    if (NULL != _fstslix[llps]) delete [] _fstslix[llps];
    if (NULL != _fstslix[lnes]) delete [] _fstslix[lnes];
 }
+
+
 //=============================================================================
 //
 // class TenderRefLay
@@ -1539,8 +1526,9 @@ tenderer::TenderRefLay::~TenderRefLay()
 // class TopRend
 //
 tenderer::TopRend::TopRend( layprop::DrawProperties* drawprop, real UU ) :
-      _drawprop(drawprop), _UU(UU), _clayer(NULL),
-      _cslctd_array_offset(0u), _num_ogl_buffers(0u), _ogl_buffers(NULL),
+      _drawprop(drawprop), _UU(UU), _clayer(NULL), _grcLayer(NULL),
+      _cslctd_array_offset(0u), _num_ogl_buffers(0u), _num_ogl_grc_buffers(0u),
+      _ogl_buffers(NULL), _ogl_grc_buffers(NULL),
       _activeCS(NULL), _dovCorrection(0)
 {
    // Initialize the cell (CTM) stack
@@ -1567,7 +1555,10 @@ bool tenderer::TopRend::chunkExists(unsigned layno, bool has_selected)
       _clayer = DEBUG_NEW TenderLay();
       _data[layno] = _clayer;
    }
-   _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(layno), true, has_selected, _cslctd_array_offset);
+   if (has_selected)
+      _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(layno), true, _cslctd_array_offset);
+   else
+      _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(layno), true);
    return false;
 }
 
@@ -1590,7 +1581,10 @@ void tenderer::TopRend::setLayer(unsigned layno, bool has_selected)
       _clayer = DEBUG_NEW TenderLay();
       _data[layno] = _clayer;
    }
-   _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(layno), false, has_selected, _cslctd_array_offset);
+   if (has_selected)
+      _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(layno), false, _cslctd_array_offset);
+   else
+      _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(layno), false);
 }
 
 void tenderer::TopRend::pushCell(std::string cname, const CTM& trans, const DBbox& overlap, bool active, bool selected)
@@ -1619,20 +1613,34 @@ void tenderer::TopRend::pushCell(std::string cname, const CTM& trans, const DBbo
    }
 }
 
-void tenderer::TopRend::wire (int4b* pdata, unsigned psize, laydata::WireWidth width)
+void tenderer::TopRend::grcpoly(int4b* pdata, unsigned psize)
 {
-   // first check whether to draw only the center line
-   DBbox wsquare = DBbox(TP(0,0),TP(width,width));
-   bool center_line_only = !wsquare.visible(topCTM() * ScrCTM(), visualLimit());
-   _clayer->wire(pdata, psize, width, center_line_only, false, NULL);
+   assert(_grcLayer);
+   _grcLayer->poly(pdata, psize, NULL);
 }
 
-void tenderer::TopRend::wire (int4b* pdata, unsigned psize, laydata::WireWidth width, const SGBitSet* psel)
+void tenderer::TopRend::wire (int4b* pdata, unsigned psize, WireWidth width)
 {
    // first check whether to draw only the center line
    DBbox wsquare = DBbox(TP(0,0),TP(width,width));
    bool center_line_only = !wsquare.visible(topCTM() * ScrCTM(), visualLimit());
-   _clayer->wire(pdata, psize, width, center_line_only, true, psel);
+   _clayer->wire(pdata, psize, width, center_line_only);
+}
+
+void tenderer::TopRend::wire (int4b* pdata, unsigned psize, WireWidth width, const SGBitSet* psel)
+{
+   // first check whether to draw only the center line
+   DBbox wsquare = DBbox(TP(0,0),TP(width,width));
+   bool center_line_only = !wsquare.visible(topCTM() * ScrCTM(), visualLimit());
+   _clayer->wire(pdata, psize, width, center_line_only,psel);
+}
+
+void tenderer::TopRend::grcwire (int4b* pdata, unsigned psize, WireWidth width)
+{
+   // first check whether to draw only the center line
+   DBbox wsquare = DBbox(TP(0,0),TP(width,width));
+   bool center_line_only = !wsquare.visible(topCTM() * ScrCTM(), visualLimit());
+   _grcLayer->wire(pdata, psize, width, center_line_only);
 }
 
 void tenderer::TopRend::arefOBox(std::string cname, const CTM& trans, const DBbox& overlap, bool selected)
@@ -1650,10 +1658,12 @@ void tenderer::TopRend::arefOBox(std::string cname, const CTM& trans, const DBbo
 
 void tenderer::TopRend::text (const std::string* txt, const CTM& ftmtrx, const DBbox& ovl, const TP& cor, bool sel)
 {
-   if ((!_drawprop->isTextBoxHidden()) || sel)
-      _clayer->text(txt, ftmtrx, &ovl, cor, sel);
-   else
+   if (sel)
+      _clayer->text(txt, ftmtrx, &ovl, cor, true);
+   else if (_drawprop->isTextBoxHidden())
       _clayer->text(txt, ftmtrx, NULL, cor, false);
+   else
+      _clayer->text(txt, ftmtrx, &ovl, cor, false);
 }
 
 void tenderer::TopRend::Grid(const real step, const std::string color)
@@ -1789,6 +1799,60 @@ bool tenderer::TopRend::collect()
    return true;
 }
 
+bool tenderer::TopRend::grcCollect()
+{
+   // First filter-out the layers that doesn't have any objects on them,
+   // post process the last slices in the layers and also gather the number
+   // of required virtual buffers
+   //
+   DataLay::iterator CCLAY = _grcData.begin();
+   while (CCLAY != _grcData.end())
+   {
+      CCLAY->second->ppSlice();
+      if (0 == CCLAY->second->total_points())
+      {
+         delete (CCLAY->second);
+         _grcData.erase(CCLAY++);
+      }
+      else if (0 != CCLAY->second->total_points())
+      {
+         _num_ogl_grc_buffers++;
+         if (0 < CCLAY->second->total_indexs())
+            _num_ogl_grc_buffers++;
+         CCLAY++;
+      }
+      else
+         CCLAY++;
+   }
+   // Check whether we have to continue after traversing
+   if (0 == _num_ogl_grc_buffers) return false;
+   //--------------------------------------------------------------------------
+   //
+   // generate all VBOs
+   //
+   _ogl_grc_buffers = DEBUG_NEW GLuint [_num_ogl_grc_buffers];
+   glGenBuffers(_num_ogl_grc_buffers, _ogl_grc_buffers);
+   unsigned current_buffer = 0;
+   //
+   // collect the point arrays
+   for (DataLay::const_iterator CLAY = _grcData.begin(); CLAY != _grcData.end(); CLAY++)
+   {
+      if (0 == CLAY->second->total_points())
+      {
+         assert(0 != CLAY->second->total_strings());
+         continue;
+      }
+      GLuint pbuf = _ogl_grc_buffers[current_buffer++];
+      GLuint ibuf = (0 == CLAY->second->total_indexs()) ? 0u : _ogl_grc_buffers[current_buffer++];
+      CLAY->second->collect(_drawprop->layerFilled(CLAY->first), pbuf, ibuf);
+   }
+   //
+   // collect the indexes of the selected objects
+   // that's about it...
+   checkOGLError("grcCollect");
+   return true;
+}
+
 void tenderer::TopRend::draw()
 {
    for (DataLay::const_iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
@@ -1819,10 +1883,61 @@ void tenderer::TopRend::draw()
    }
    // draw reference boxes
    if (0 < _refLayer.total_points())   _refLayer.draw(_drawprop);
+   checkOGLError("draw");
+}
+
+void tenderer::TopRend::grcDraw()
+{
+   for (DataLay::const_iterator CLAY = _grcData.begin(); CLAY != _grcData.end(); CLAY++)
+   {// for every layer
+      _drawprop->setCurrentColor(CLAY->first);
+      _drawprop->setCurrentFill(true); // force fill (ignore block_fill state)
+      _drawprop->setLineProps(false);
+      // draw everything
+      if (0 != CLAY->second->total_points())
+         CLAY->second->draw(_drawprop);
+   }
+   checkOGLError("grcDraw");
+}
+
+void tenderer::TopRend::cleanUp()
+{
    // Clean-up the buffers
    glBindBuffer(GL_ARRAY_BUFFER, 0);
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-   checkOGLError("draw");
+}
+
+void tenderer::TopRend::grcCleanUp()
+{
+   // Clean-up the buffers
+   glBindBuffer(GL_ARRAY_BUFFER, 0);
+   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void tenderer::TopRend::setGrcLayer(bool setEData, unsigned layno)
+{
+   if (setEData)
+   {
+      assert(_grcLayer == NULL);
+      if (_grcData.end() != _grcData.find(layno))
+      {
+         _grcLayer = _grcData[layno];
+      }
+      else
+      {
+         _grcLayer = DEBUG_NEW TenderLay();
+         _grcData[layno] = _grcLayer;
+      }
+      _grcLayer->newSlice(_cellStack.top(), false, false);
+   }
+   else
+   {
+      assert(_grcLayer != NULL);
+      // post process the current layer
+      _grcLayer->ppSlice();
+      _grcLayer = NULL;
+//      _cslctd_array_offset += _elayer->total_slctdx();
+   }
 }
 
 unsigned tenderer::TopRend::getTenderLay(unsigned layno)
@@ -1876,6 +1991,15 @@ tenderer::TopRend::~TopRend()
       glDeleteBuffers(_num_ogl_buffers, _ogl_buffers);
       delete [] _ogl_buffers;
       _ogl_buffers = NULL;
+   }
+   // GRC clean-up
+   for (DataLay::const_iterator CLAY = _grcData.begin(); CLAY != _grcData.end(); CLAY++)
+      delete (CLAY->second);
+   if (NULL != _ogl_grc_buffers)
+   {
+      glDeleteBuffers(_num_ogl_grc_buffers, _ogl_grc_buffers);
+      delete [] _ogl_grc_buffers;
+      _ogl_grc_buffers = NULL;
    }
 }
 

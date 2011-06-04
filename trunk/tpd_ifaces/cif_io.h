@@ -134,7 +134,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
    class CifBox : public CifData {
       public:
                              CifBox(CifData*, dword, dword, TP*, TP*);
-                            ~CifBox();
+         virtual            ~CifBox();
          virtual void        import ( ImportDB& iDB ) const;
       protected:
          dword               _length;
@@ -146,7 +146,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
    class CifPoly : public CifData {
       public:
                              CifPoly(CifData* last, PointVector*);
-                            ~CifPoly();
+         virtual            ~CifPoly();
          virtual void        import( ImportDB& iDB ) const;
       protected:
          PointVector*        _poly;
@@ -155,7 +155,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
    class CifWire : public CifData {
       public:
                              CifWire(CifData* last, PointVector*, dword);
-                            ~CifWire();
+         virtual            ~CifWire();
          virtual void        import( ImportDB& iDB ) const;
       protected:
          PointVector*        _poly;
@@ -165,7 +165,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
    class CifRef : public CifData {
       public:
                              CifRef(CifData* last, dword, CTM*);
-                            ~CifRef();
+         virtual            ~CifRef();
          const CifRef*       last() const        {return static_cast<const CifRef*>(CifData::last());}
          dword               cell() const        {return  _cell;}
          const CTM*          location() const    {return  _location;}
@@ -188,7 +188,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
    class CifLabelSig : public CifLabelLoc {
       public:
                              CifLabelSig(CifData*, std::string, TP*);
-                            ~CifLabelSig() {}
+         virtual            ~CifLabelSig() {}
          virtual void        import( ImportDB& iDB ) const;
    };
 
@@ -215,7 +215,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
    class CifStructure : public ForeignCell  {
       public:
                         CifStructure(dword, CifStructure*, dword=1, dword=1);
-                       ~CifStructure();
+         virtual       ~CifStructure();
          void           cellOverlapIs(TP* bl, TP* tr) {_overlap = DBbox(*bl, *tr);}
          CifStructure*  last() const                  {return _last;}
          dword          ID() const                    {return _ID;}
@@ -243,7 +243,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
    class   CifFile : public ForeignDbFile {
       public:
                               CifFile(wxString);
-                              ~CifFile();
+         virtual             ~CifFile();
          void                 addStructure(dword, dword = 1, dword = 1);
          void                 doneStructure();
          void                 addBox(dword, dword, TP*, TP* direction = NULL);

@@ -134,7 +134,7 @@ void laydata::TdtLibrary::read(InputTdtFile* const tedfile)
 void laydata::TdtLibrary::registerCellRead(std::string cellname, TdtCell* cell) {
    if (_cells.end() != _cells.find(cellname))
    {
-   // There are several possiblirities here:
+   // There are several possibilities here:
    // 1. Cell has been referenced before the definition takes place
    // 2. The same case 1, but the reason is circular reference.
    // 3. Cell is defined more than once
@@ -152,7 +152,7 @@ void laydata::TdtLibrary::registerCellRead(std::string cellname, TdtCell* cell) 
          // case 1 or case 2 -> can't be distiguised in this moment
          //_cells[cellname] = cell;
          // cell has been referenced already, so it's not an orphan
-         cell->parentFound();
+         cell->setOrphan(false);
       }
       else {
          //@FIXME case 3 -> parsing should be stopped !
@@ -161,46 +161,26 @@ void laydata::TdtLibrary::registerCellRead(std::string cellname, TdtCell* cell) 
    _cells[cellname] = cell;
 }
 
-void laydata::TdtLibrary::gdsWrite(DbExportFile& gdsf)
+void laydata::TdtLibrary::dbExport(DbExportFile& exportF)
 {
    TpdTime timelu(_lastUpdated);
-   gdsf.libraryStart(name(), timelu, DBU(), UU());
+   exportF.libraryStart(name(), timelu, DBU(), UU());
    //
-   if (NULL == gdsf.topcell())
+   if (NULL == exportF.topcell())
    {
       laydata::TDTHierTree* root_cell = _hiertree->GetFirstRoot(TARGETDB_LIB);
       while (root_cell)
       {
-         _cells[root_cell->GetItem()->name()]->gdsWrite(gdsf, _cells, root_cell);
+         _cells[root_cell->GetItem()->name()]->dbExport(exportF, _cells, root_cell);
          root_cell = root_cell->GetNextRoot(TARGETDB_LIB);
       }
    }
    else
    {
-      laydata::TDTHierTree* root_cell = _hiertree->GetMember(gdsf.topcell());
-      gdsf.topcell()->gdsWrite(gdsf, _cells, root_cell);
+      laydata::TDTHierTree* root_cell = _hiertree->GetMember(exportF.topcell());
+      exportF.topcell()->dbExport(exportF, _cells, root_cell);
    }
-   gdsf.libraryFinish();
-}
-
-void laydata::TdtLibrary::cifWrite(DbExportFile& ciff)
-{
-   TpdTime timelu(_lastUpdated);
-   ciff.libraryStart(name(), timelu, DBU(), UU());
-   if (NULL == ciff.topcell())
-   {
-      laydata::TDTHierTree* root = _hiertree->GetFirstRoot(TARGETDB_LIB);
-      while (root)
-      {
-         _cells[root->GetItem()->name()]->cifWrite(ciff, _cells, root);
-         root = root->GetNextRoot(TARGETDB_LIB);
-      }
-   }
-   else
-   {
-      laydata::TDTHierTree* root_cell = _hiertree->GetMember(ciff.topcell());
-      ciff.topcell()->cifWrite(ciff, _cells, root_cell);
-   }
+   exportF.libraryFinish();
 }
 
 void laydata::TdtLibrary::psWrite(PSFile& psf, const TdtCell* top, const layprop::DrawProperties& drawprop)
@@ -387,7 +367,7 @@ void laydata::TdtLibrary::dbHierRemoveParent(TdtDefaultCell* comp, const TdtDefa
    else if ( 3 != res)
    {
       TpdPost::treeRemoveMember(comp->name().c_str(), prnt->name().c_str(), res);
-      comp->_orphan = (res > 0);
+      comp->setOrphan(res>0);
    }
 }
 
@@ -443,7 +423,7 @@ void laydata::TdtLibDir::addLibrary(TdtLibrary* const lib, word libRef)
 
 int laydata::TdtLibDir::loadLib(std::string filename)
 {
-   laydata::InputTdtFile tempin(wxString(filename.c_str(), wxConvUTF8), this);
+   InputTdtFile tempin(wxString(filename.c_str(), wxConvUTF8), this);
    if (!tempin.status()) return -1;
    int libRef = getLastLibRefNo();
    try
@@ -484,7 +464,7 @@ bool laydata::TdtLibDir::unloadLib(std::string libname)
 laydata::TdtLibrary* laydata::TdtLibDir::removeLibrary(std::string libname)
 {
    TdtLibrary* tberased = NULL;
-   for (Catalog::iterator LDI = _libdirectory.begin(); LDI != _libdirectory.end(); LDI++)
+   for (LibCatalog::iterator LDI = _libdirectory.begin(); LDI != _libdirectory.end(); LDI++)
    {
       if (libname == (*LDI)->first)
       {
@@ -532,7 +512,7 @@ void laydata::TdtLibDir::newDesign(std::string name, std::string dir, time_t cre
 
 bool laydata::TdtLibDir::readDesign(std::string filename)
 {
-   laydata::InputTdtFile tempin(wxString(filename.c_str(), wxConvUTF8), this);
+   InputTdtFile tempin(wxString(filename.c_str(), wxConvUTF8), this);
    if (!tempin.status()) return false;
 
    try
@@ -558,7 +538,7 @@ bool laydata::TdtLibDir::readDesign(std::string filename)
 void laydata::TdtLibDir::writeDesign(const char* filename)
 {
    if (filename)  _tedFileName = filename;
-   laydata::TEDfile tempin(_tedFileName, this);
+   OutputTdtFile tempin(_tedFileName, this);
    _neverSaved = false;
 }
 
@@ -601,7 +581,7 @@ bool laydata::TdtLibDir::TDTcheckread(const std::string filename,
 {
    bool retval = false;
    start_ignoring = false;
-   laydata::InputTdtFile tempin(wxString(filename.c_str(), wxConvUTF8), this);
+   InputTdtFile tempin(wxString(filename.c_str(), wxConvUTF8), this);
    if (!tempin.status()) return retval;
 
    std::string news = "Project created: ";
@@ -785,7 +765,7 @@ laydata::CellDefin laydata::TdtLibDir::linkCellRef(std::string cellname, int lib
    // Mark that the cell definition is referenced, i.e. it is not the top
    // of the tree (orphan flag in the TdtCell)
    assert(strdefn);
-   strdefn->parentFound();
+   strdefn->setOrphan(false);
    return strdefn;
 }
 
@@ -799,7 +779,7 @@ laydata::TdtDefaultCell* laydata::TdtLibDir::displaceUndefinedCell(std::string c
    return _libdirectory[UNDEFCELL_LIB]->second->displaceCell(cell_name);
 }
 
-/*! Ensures a themporary storage of an undefined cell which has been unlinked
+/*! Ensures a temporary storage of an undefined cell which has been unlinked
 (unreferenced).
 */
 void laydata::TdtLibDir::holdUndefinedCell(TdtDefaultCell* udefrcell)
@@ -1021,7 +1001,8 @@ laydata::TdtData* laydata::TdtDesign::addBox(unsigned la, TP* p1, TP* p2 )
    modified = true;
    TP np1((*p1) * _target.rARTM());
    TP np2((*p2) * _target.rARTM());
-   laydata::TdtData* newshape = actlay->addBox(np1,np2);
+   laydata::TdtBox *newshape = DEBUG_NEW TdtBox(np1,np2);
+   actlay->add(newshape);
    if (_target.edit()->overlapChanged(old_overlap, this))
       do {} while(validateCells());
    return newshape;
@@ -1065,13 +1046,16 @@ laydata::TdtData* laydata::TdtDesign::addPoly(unsigned la, PointVector* pl)
    {
       TP p1(vpl[0] *_target.rARTM());
       TP p2(vpl[2] *_target.rARTM());
-      newshape = actlay->addBox(p1,p2);
+      newshape = DEBUG_NEW TdtBox(p1,p2);
+      actlay->add(newshape);
    }
    else
    {
       for(PointVector::iterator PL = vpl.begin(); PL != vpl.end(); PL++)
          (*PL) *= _target.rARTM();
-      newshape = actlay->addPoly(vpl);
+      newshape = DEBUG_NEW TdtPoly(vpl);
+      actlay->add(newshape);
+
    }
    if (_target.edit()->overlapChanged(old_overlap, this))
       do {} while(validateCells());
@@ -1122,7 +1106,8 @@ laydata::TdtData* laydata::TdtDesign::addWire(unsigned la, PointVector* pl, Wire
    PointVector vpl = check.getValidated();
    for(PointVector::iterator PL = vpl.begin(); PL != vpl.end(); PL++)
       (*PL) *= _target.rARTM();
-   laydata::TdtData* newshape = actlay->addWire(vpl,w);
+   laydata::TdtWire *newshape = DEBUG_NEW TdtWire(vpl,w);
+   actlay->add(newshape);
    if (_target.edit()->overlapChanged(old_overlap, this))
       do {} while(validateCells());
    return newshape;
@@ -1153,7 +1138,9 @@ laydata::TdtData* laydata::TdtDesign::addText(unsigned la, std::string& text, CT
    QuadTree *actlay = _target.edit()->secureLayer(la);
    modified = true;
    ori *= _target.rARTM();
-   laydata::TdtData* newshape = actlay->addText(text,ori);
+   laydata::TdtText *newshape = DEBUG_NEW TdtText(text,ori);
+   actlay->add(newshape);
+
    if (_target.edit()->overlapChanged(old_overlap, this))
       do {} while(validateCells());
    return newshape;
@@ -1299,7 +1286,7 @@ void laydata::TdtDesign::openGlRender(tenderer::TopRend& rend)
 }
 
 
-void laydata::TdtDesign::write(TEDfile* const tedfile) {
+void laydata::TdtDesign::write(OutputTdtFile* const tedfile) {
    tedfile->putByte(tedf_DESIGN);
    tedfile->putString(_name);
    tedfile->putReal(_DBU);
@@ -1726,7 +1713,7 @@ void laydata::DrcLibrary::registerCellRead(std::string cellname, TdtCell* cell) 
          // case 1 or case 2 -> can't be distinguished in this moment
          //_cells[cellname] = cell;
          // cell has been referenced already, so it's not an orphan
-         cell->parentFound();
+         cell->setOrphan(false);
       }
       else {
          //@FIXME case 3 -> parsing should be stopped !
@@ -1789,3 +1776,30 @@ laydata::TdtDefaultCell* laydata::DrcLibrary::checkCell(std::string name)
       return NULL;
    else return _cells[name];
 }
+
+void laydata::DrcLibrary::openGlDraw(layprop::DrawProperties& drawProp, std::string cell)
+{
+   drawProp.setState(layprop::DRC);
+   laydata::TdtDefaultCell* dst_structure = checkCell(cell);
+   if (dst_structure)
+   {
+      drawProp.initCtmStack();
+//    drawProp->initDrawRefStack(NULL); // no references yet in the DRC DB
+      dst_structure->openGlDraw(drawProp);
+//    drawProp->clearCtmStack();
+      drawProp.clearDrawRefStack();
+   }
+   drawProp.setState(layprop::DB);
+}
+
+void laydata::DrcLibrary::openGlRender(tenderer::TopRend& renderer, std::string cell, CTM& cctm)
+{
+   renderer.setState(layprop::DRC);
+   laydata::TdtDefaultCell* dst_structure = checkCell(cell);
+   if (dst_structure)
+   {
+      dst_structure->openGlRender(renderer, cctm, false, false);
+   }
+   renderer.setState(layprop::DB);
+}
+

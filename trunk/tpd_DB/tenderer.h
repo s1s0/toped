@@ -285,7 +285,7 @@ namespace tenderer {
    */
    class TenderWire : public TenderNcvx {
       public:
-                           TenderWire(int4b*, unsigned, const laydata::WireWidth, bool);
+                           TenderWire(int4b*, unsigned, const WireWidth, bool);
          virtual          ~TenderWire();
          void              Tesselate();
          virtual unsigned  lDataCopy(int*, unsigned&);
@@ -424,7 +424,7 @@ namespace tenderer {
    */
    class TenderSWire : public TenderWire, public TenderSelected {
       public:
-                           TenderSWire(int4b* pdata, unsigned psize, const laydata::WireWidth width, bool clo, const SGBitSet* slist) :
+                           TenderSWire(int4b* pdata, unsigned psize, const WireWidth width, bool clo, const SGBitSet* slist) :
                               TenderWire(pdata, psize, width, clo), TenderSelected(slist), _loffset(0u) {}
          virtual unsigned  cDataCopy(int*, unsigned&);
          virtual unsigned  lDataCopy(int*, unsigned&);
@@ -778,12 +778,15 @@ namespace tenderer {
 
                            TenderLay();
                           ~TenderLay();
-         void              box  (int4b*,                       bool, const SGBitSet*);
-         void              poly (int4b*, unsigned, const TessellPoly*, bool, const SGBitSet*);
-         void              wire (int4b*, unsigned, laydata::WireWidth, bool, bool, const SGBitSet*);
+         void              box  (int4b*);
+         void              box  (int4b*,                               const SGBitSet*);
+         void              poly (int4b*, unsigned, const TessellPoly*);
+         void              poly (int4b*, unsigned, const TessellPoly*, const SGBitSet*);
+         void              wire (int4b*, unsigned, WireWidth, bool);
+         void              wire (int4b*, unsigned, WireWidth, bool, const SGBitSet*);
          void              text (const std::string*, const CTM&, const DBbox*, const TP&, bool);
-
-         void              newSlice(TenderRef* const, bool, bool, bool, unsigned);
+         void              newSlice(TenderRef* const, bool, bool /*, bool, unsigned*/);
+         void              newSlice(TenderRef* const, bool, bool, unsigned slctd_array_offset);
          bool              chunkExists(TenderRef* const, bool);
          void              ppSlice();
          void              draw(layprop::DrawProperties*);
@@ -878,19 +881,25 @@ namespace tenderer {
          void              pushCell(std::string, const CTM&, const DBbox&, bool, bool);
          void              popCell()                              {_cellStack.pop();}
          const CTM&        topCTM() const                         {return  _cellStack.top()->ctm();}
-         void              box  (int4b* pdata)                    {_clayer->box(pdata, false, NULL);}
-         void              box  (int4b* pdata, const SGBitSet* ss){_clayer->box(pdata, true, ss);}
+         void              box  (int4b* pdata)                    {_clayer->box(pdata);}
+         void              box  (int4b* pdata, const SGBitSet* ss){_clayer->box(pdata, ss);}
          void              poly (int4b* pdata, unsigned psize, const TessellPoly* tpoly)
-                                                                  {_clayer->poly(pdata, psize, tpoly, false, NULL);}
+                                                                  {_clayer->poly(pdata, psize, tpoly);}
          void              poly (int4b* pdata, unsigned psize, const TessellPoly* tpoly, const SGBitSet* ss)
-                                                                  {_clayer->poly(pdata, psize, tpoly, true, ss);}
-         void              wire (int4b*, unsigned, laydata::WireWidth);
-         void              wire (int4b*, unsigned, laydata::WireWidth, const SGBitSet*);
+                                                                  {_clayer->poly(pdata, psize, tpoly, ss);}
+         void              grcpoly(int4b* pdata, unsigned psize);
+         void              wire (int4b*, unsigned, WireWidth);
+         void              wire (int4b*, unsigned, WireWidth, const SGBitSet*);
+         void              grcwire (int4b*, unsigned, WireWidth);
          void              arefOBox(std::string, const CTM&, const DBbox&, bool);
          void              text (const std::string*, const CTM&, const DBbox&, const TP&, bool);
          bool              collect();
+         bool              grcCollect();
          void              draw();
-
+         void              grcDraw();
+         void              cleanUp();
+         void              grcCleanUp();
+         void              setGrcLayer(bool, unsigned);
          //return layno if _propertyState == DB or predefined layer in other case
          unsigned          getTenderLay(unsigned layno);
          //set state of DrawProperties
@@ -911,17 +920,21 @@ namespace tenderer {
       private:
          layprop::DrawProperties*   _drawprop;
          real              _UU;
-         DataLay           _data;            //!All data for drawing
-         TenderLay*        _clayer;          //!Working variable pointing to the current slice
+         DataLay           _data;            //!All editable data for drawing
+         DataLay           _grcData;         //!All GRC      data for drawing
+         TenderLay*        _clayer;          //!Working variable pointing to the current edit slice
+         TenderLay*        _grcLayer;        //!Working variable pointing to the current GRC  slice
          TenderRefLay      _refLayer;
          CellStack         _cellStack;       //!Required during data traversing stage
          unsigned          _cslctd_array_offset; //! Current selected array offset
          //
          unsigned          _num_ogl_buffers; //! Number of generated openGL VBOs
+         unsigned          _num_ogl_grc_buffers; //!
          GLuint*           _ogl_buffers;     //! Array with the "names" of all openGL buffers
+         GLuint*           _ogl_grc_buffers; //! Array with the "names" of the GRC related openGL buffers
          GLuint            _sbuffer;         //! The "name" of the selected index buffer
          TenderRef*        _activeCS;
-         byte              _dovCorrection;   //!Cell ref Depth of view correction (for Edit in Place purposes)
+         byte              _dovCorrection;   //! Cell ref Depth of view correction (for Edit in Place purposes)
          RefBoxList        _hiddenRefBoxes;  //! Those cRefBox objects which didn't ended in the TenderRefLay structures
    };
 

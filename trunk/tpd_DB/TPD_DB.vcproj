@@ -183,6 +183,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\grccell.cpp"
+				>
+			</File>
+			<File
 				RelativePath="logicop.cpp"
 				>
 				<FileConfiguration
@@ -204,6 +208,10 @@
 			</File>
 			<File
 				RelativePath=".\ps_out.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\qtree_tmpl.cpp"
 				>
 			</File>
 			<File
@@ -364,11 +372,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\grccell.h"
+				>
+			</File>
+			<File
 				RelativePath="logicop.h"
 				>
 			</File>
 			<File
 				RelativePath=".\ps_out.h"
+				>
+			</File>
+			<File
+				RelativePath=".\qtree_tmpl.h"
 				>
 			</File>
 			<File

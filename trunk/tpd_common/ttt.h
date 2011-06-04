@@ -48,6 +48,7 @@ typedef          int             int4b    ; // 4 bytes
 typedef long long int            int8b    ; // 8 bytes
 typedef          double          real     ; // 8 bytes
 
+typedef  dword                            WireWidth;
 typedef  std::list<std::string>           NameList;
 typedef  std::set<std::string>            NameSet;
 typedef  std::list<word>                  WordList;
@@ -57,15 +58,22 @@ typedef  std::map<word, WordSet>          ExtLayers;
 typedef  std::map<std::string, int>       SIMap;       // name
 typedef  std::map<unsigned, std::string>  USMap;      // Unsigned - String Map
 typedef  std::map<word, unsigned long>    SLMap;
+
 enum QuadIdentificators{ qidNW = 0,
                          qidNE = 1,
                          qidSE = 2,
                          qidSW = 3,
                          qidNULL = 4};
+
+// The definition below is a "strongly typed enum". Very tempting to use, but too new
+// and too risky for portability. gcc requires -std=c++0x option to stop the warnings
+// It's here just as a reminder for the future
+//   enum class SH_STATUS:byte { sh_active, sh_deleted, sh_selected, sh_partsel, sh_merged } ;
+typedef enum { sh_active, sh_deleted, sh_selected, sh_partsel, sh_merged } SH_STATUS;
+
 //=============================================================================
 // Some common constants (instead of #defines)
 //=============================================================================
-const int         GRC_LIB           = -3; //Geometry rules check violations
 const int         ALL_LIB           = -2;
 const int         TARGETDB_LIB      = -1;
 const int         UNDEFCELL_LIB     =  0;
@@ -671,10 +679,12 @@ const byte        MAX_BYTE_VALUE       = 255;
 const word        MAX_WORD_VALUE       = 65535;
 const int4b       MIN_INT4B            = (int4b)0x80000001; //  -2 147 483 647
 const int4b       MAX_INT4B            = (int4b)0x7FFFFFFF; //   2 147 483 643
+const WireWidth   MAX_WIRE_WIDTH       = 0x0FFFFFFF;
 //const DBbox MAX_OVL_BOX        = DBbox(MIN_X,MAX_X,MIN_Y,MIN_Y); // maximum overlapping box
 const unsigned    REF_LAY              = 0xffffffff;
 const unsigned    ERR_LAY              = 0xfffffffe;
 const unsigned    DRC_LAY              = 0xfffffffd;
+const unsigned    GRC_LAY              = 0xfffffffc;
 const unsigned    LAST_EDITABLE_LAYNUM = 0x0000ffff;
 const byte        OPENGL_FONT_UNIT     = 128;
 const byte        GRID_LIMIT           = 5;    // if grid step is less than _GRID_LIMIT pixels, grid is hidden
@@ -682,4 +692,5 @@ const DBbox       DEFAULT_OVL_BOX      = DBbox(TP(0,0));
 const DBbox       DEFAULT_ZOOM_BOX     = DBbox(TP(-2000,-2000), TP(20000,20000));
 const real        DEFAULT_DBU          = 1e-9;
 const real        DEFAULT_UU           = 1e-3;
+
 #endif
