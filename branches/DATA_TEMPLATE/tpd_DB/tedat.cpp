@@ -2620,7 +2620,7 @@ void  laydata::TdtAuxRef::motionDraw(const layprop::DrawProperties& drawprop, Ct
 
 void laydata::TdtAuxRef::info(std::ostringstream&, real) const
 {
-   assert(false);
+   assert(false);//TODO
 }
 
 void laydata::TdtAuxRef::write(TEDfile* const tedfile) const
@@ -2629,14 +2629,15 @@ void laydata::TdtAuxRef::write(TEDfile* const tedfile) const
    _structure->write(tedfile);
 }
 
-void laydata::TdtAuxRef::dbExport(DbExportFile&) const
+void laydata::TdtAuxRef::dbExport(DbExportFile& exportF) const
 {
-   assert(false);
+   assert(NULL != _structure);
+   _structure->dbExport(exportF);
 }
 
 void laydata::TdtAuxRef::psWrite(PSFile&, const layprop::DrawProperties&) const
 {
-   assert(false);
+   assert(false);//TODO
 }
 
 bool laydata::TdtAuxRef::pointInside(const TP)

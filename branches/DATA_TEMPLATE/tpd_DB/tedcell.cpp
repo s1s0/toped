@@ -827,10 +827,13 @@ void laydata::TdtCell::dbExport(DbExportFile& exportf, const CellMap& allcells,
    //   with the new value.
 
    // loop the layers
-   laydata::LayerList::const_iterator wl;
+   LayerList::const_iterator wl;
    for (wl = _layers.begin(); wl != _layers.end(); wl++)
    {
-      if ((REF_LAY != wl->first) && !exportf.layerSpecification(wl->first)) continue;
+      if ( (REF_LAY != wl->first) &&
+           (GRC_LAY != wl->first) &&
+           !exportf.layerSpecification(wl->first))
+         continue;
       for (QuadTree::Iterator DI = wl->second->begin(); DI != wl->second->end(); DI++)
          DI->dbExport(exportf);
    }
