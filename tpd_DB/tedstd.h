@@ -250,32 +250,6 @@ namespace laydata {
          NameSet              _childnames  ;
    };
 
-   class   TEDfile {
-   public:
-                           TEDfile(std::string&, laydata::TdtLibDir*); // for writing
-      void                 closeF() {fclose(_file);};
-      void                 putString(std::string str);
-      void                 putReal(const real);
-      void                 putByte(const byte ch) {fputc(ch, _file);};
-      void                 putWord(const word);
-      void                 put4b(const int4b);
-      void                 put4ub(const WireWidth);
-      void                 putTP(const TP*);
-      void                 putCTM(const CTM);
-      void                 registerCellWritten(std::string);
-      bool                 checkCellWritten(std::string);
-   protected:
-   private:
-      void                 putTime();
-      void                 putRevision();
-      FILE*                _file;
-      word                 _revision;
-      word                 _subrevision;
-      time_t               _lastUpdated;
-      TdtLibrary*          _design;
-      NameSet              _childnames;
-   };
-
    class ArrayProps
    {
       public:
@@ -359,6 +333,31 @@ namespace auxdata {
    class GrcCell;
    typedef std::map<std::string, GrcCell*>  GrcCellMap;
 }
+
+class   OutputTdtFile {
+public:
+                        OutputTdtFile(std::string&, laydata::TdtLibDir*);
+   void                 closeF() {fclose(_file);};
+   void                 putString(std::string str);
+   void                 putReal(const real);
+   void                 putByte(const byte ch) {fputc(ch, _file);};
+   void                 putWord(const word);
+   void                 put4b(const int4b);
+   void                 put4ub(const WireWidth);
+   void                 putTP(const TP*);
+   void                 putCTM(const CTM);
+   void                 registerCellWritten(std::string);
+   bool                 checkCellWritten(std::string);
+protected:
+private:
+   void                 putTime();
+   void                 putRevision();
+   FILE*                _file;
+   word                 _revision;
+   word                 _subrevision;
+   laydata::TdtLibrary* _design;
+   NameSet              _childnames;
+};
 
 class DbExportFile {
    public:

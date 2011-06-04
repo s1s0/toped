@@ -134,7 +134,7 @@ void auxdata::TdtGrcPoly::info(std::ostringstream& ost, real DBU) const
    ost << "};";
 }
 
-void auxdata::TdtGrcPoly::write(laydata::TEDfile* const tedfile) const
+void auxdata::TdtGrcPoly::write(OutputTdtFile* const tedfile) const
 {
    tedfile->putByte(tedf_POLY);
    tedfile->putWord(_psize);
@@ -360,7 +360,7 @@ void auxdata::TdtGrcWire::info(std::ostringstream& ost, real DBU) const
    ost << "};";
 }
 
-void auxdata::TdtGrcWire::write(laydata::TEDfile* const tedfile) const
+void auxdata::TdtGrcWire::write(OutputTdtFile* const tedfile) const
 {
    tedfile->putByte(tedf_WIRE);
    tedfile->putWord(_psize);
@@ -480,7 +480,7 @@ auxdata::GrcCell::~GrcCell()
    _layers.clear();
 }
 
-void auxdata::GrcCell::write(laydata::TEDfile* const tedfile) const
+void auxdata::GrcCell::write(OutputTdtFile* const tedfile) const
 {
    LayerList::const_iterator wl;
    for (wl = _layers.begin(); wl != _layers.end(); wl++)
