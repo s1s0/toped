@@ -268,7 +268,7 @@ Ooops! Second thought!
 %type <pfarguments>    funcarguments
 %type <parguments>     structure argument
 %type <plarguments>    nearguments arguments
-%type <pfblock>        funcblock
+%type <pfblock>        funcblock emptyfblock fblock
 %type <pblock>         ifcommon
 %type <ptypedef>       fielddeclaration typedefstruct
 %type <pfdeclaration>  funcdeclaration
@@ -325,7 +325,13 @@ funcdefinition:
    }
 ;
 
-funcblock :
+
+funcblock:
+      emptyfblock                          {}
+    | fblock                               {}
+;
+
+fblock :
      '{'                                   {
          CMDBlock = DEBUG_NEW parsercmd::cmdFUNC(cfd->argListCopy(),cfd->type(),false);
          CMDBlock->pushblk();
@@ -335,6 +341,12 @@ funcblock :
          CMDBlock = CMDBlock->popblk();
       }
 ;
+
+emptyfblock :
+     '{' '}'                               {
+         $$ = NULL;
+         tellerror("Empty function definition.", @1);
+      }
 
 returnstatement :
      tknRETURN                             {

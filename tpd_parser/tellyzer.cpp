@@ -1253,15 +1253,17 @@ bool  parsercmd::cmdBLOCK::declValidate(const std::string& fn, const argumentLIS
          }
          else if (!fb->second->declaration())
          {
-            ost << "Function \"" << fn << "\" already defined. Declaration ignored";
-            tell_log(console::MT_WARNING, ost.str());
+//            NOTE! The warnings here and in the following block are quite confusing
+//                  for the user.
+//            ost << "Function \"" << fn << "\" already defined at this point.";
+//            tell_log(console::MT_WARNING, ost.str());
             allow_declaration = false;
             break;
          }
          else
          {
-            ost << "Function \"" << fn << "\" already declared. Declaration ignored";
-            tell_log(console::MT_WARNING, ost.str());
+//            ost << "Function \"" << fn << "\" already declared at this point.";
+//            tell_log(console::MT_WARNING, ost.str());
             allow_declaration = false;
             break;
          }
