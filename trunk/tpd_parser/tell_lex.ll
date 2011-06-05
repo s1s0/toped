@@ -31,7 +31,7 @@
 %x incl
 lex_string        \"[^"]*\"
 lex_identifier    [a-zA-Z_][a-zA-Z0-9_]*
-lxt_D			  [0-9]
+lxt_D             [0-9]
 lxt_E             [Ee][-+]?{lxt_D}+
 %{ /**************************************************************************/
 #include "tpdph.h"
@@ -57,7 +57,7 @@ Function declarations
 namespace parsercmd {
    void     location_step(YYLTYPE *loc);
    void     location_lines(YYLTYPE *loc, int num);
-   void     location_comment(YYLTYPE *loc, char* source);
+   void     ccomment(YYLTYPE *loc);
    char*    charcopy(std::string source, bool quotes = false);
    unsigned getllint(char* source);
    int      includefile(char* name, FILE* &handler);
@@ -76,7 +76,7 @@ location_step(&telllloc);
 %} /*******************************************************************************/
 [ \t]+                     location_step(&telllloc);
 \n+                        location_lines(&telllloc,yyleng);location_step(&telllloc);
-"/*"([^\*]|\*[^/])*"*/"    location_comment(&telllloc,yytext);
+"/*"                       ccomment(&telllloc); /*commant block C style*/
 "//".*\n                   location_lines(&telllloc,1);/* comment line */
 #include                   BEGIN(incl);
 <incl>{lex_string}       { /*first change the scanner state, otherwise there
@@ -182,26 +182,30 @@ void parsercmd::location_lines(YYLTYPE *loc, int num)
    loc->last_line += num;
 }
 
-void parsercmd::location_comment(YYLTYPE *loc, char* source)
+void parsercmd::ccomment(YYLTYPE *loc)
 {
-   unsigned endlnum = 0;
-   unsigned posnum = 0;
-   while (0x00 != *source)
+   char c, c1;
+
+loop:
+   while ((c = yyinput()) != '*' && c != 0)
    {
-      if (0x0A == *source) 
+      if (0x0A == c) 
       {
-         endlnum++;
-         posnum = 1;
+         loc->last_line++;
+         loc->last_column = 1;
       }
-      else posnum++;
-      source++;
+      else loc->last_column++;
    }
-   if (0 != endlnum)
+
+   loc->last_column++;
+   if ((c1 = yyinput()) != '/' && c != 0)
    {
-      loc->last_line += endlnum;
-      loc->last_column = posnum;
-      location_step(loc);
+      unput(c1);
+      goto loop;
    }
+   loc->last_column++;
+
+   location_step(loc);
 }
 
 //=============================================================================
