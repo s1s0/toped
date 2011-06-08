@@ -278,6 +278,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\techeditor.cpp"
+				>
+			</File>
+			<File
 				RelativePath="toped.cpp"
 				>
 				<FileConfiguration
@@ -356,6 +360,10 @@
 			</File>
 			<File
 				RelativePath=".\resourcecenter.h"
+				>
+			</File>
+			<File
+				RelativePath=".\techeditor.h"
 				>
 			</File>
 			<File

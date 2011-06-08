@@ -40,6 +40,7 @@
 #include "viewprop.h"
 #include "tenderer.h"
 #include "tui.h"
+#include "techeditor.h"
 #include "../ui/toped16x16.xpm"
 #include "../ui/toped32x32.xpm"
 
@@ -307,6 +308,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
 
    EVT_MENU( TMSET_DEFCOLOR      , tui::TopedFrame::OnDefineColor )
    EVT_MENU( TMSET_DEFFILL       , tui::TopedFrame::OnDefineFill  )
+   EVT_MENU( TMSET_TECHEDITOR    , tui::TopedFrame::OnTechEditor  )
 
    EVT_MENU( TMADD_RULER         , tui::TopedFrame::OnAddRuler    )
    EVT_MENU( TMCLEAR_RULERS      , tui::TopedFrame::OnClearRulers )
@@ -606,6 +608,7 @@ void tui::TopedFrame::initMenuBar() {
    settingsMenu->Append         (TMSET_DEFLAY   , wxT("Define Layer") , wxT("Define a layer"));
    settingsMenu->Append         (TMSET_DEFCOLOR , wxT("Define Color") , wxT("Define a drawing color"));
    settingsMenu->Append         (TMSET_DEFFILL  , wxT("Define Fill")  , wxT("Define a drawing pattern"));
+   settingsMenu->Append         (TMSET_TECHEDITOR, wxT("Technology Editor")  , wxT("Define a technology"));
    //---------------------------------------------------------------------------
    // menuBar entry helpMenu
    /*helpMenu=DEBUG_NEW wxMenu();
@@ -2024,6 +2027,13 @@ void tui::TopedFrame::OnDefineFill(wxCommandEvent& WXUNUSED(event))
    }
    PROPC->unlockDrawProp(drawprop);
    if (success) _cmdline->parseCommand(ost);
+}
+
+void tui::TopedFrame::OnTechEditor(wxCommandEvent& WXUNUSED(event))
+{
+   TechEditorDialog* techDialog = DEBUG_NEW TechEditorDialog(this,ID_TECH_EDITOR);
+   techDialog->ShowModal();
+   delete techDialog;
 }
 
 void tui::TopedFrame::OnChangeRef( wxCommandEvent& WXUNUSED( event ))
