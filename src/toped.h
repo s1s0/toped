@@ -39,6 +39,7 @@
 #include "tui.h"
 #include "resourcecenter.h"
 #include "browsers.h"
+#include "techeditor.h"
 
 
 namespace tui {
@@ -238,6 +239,7 @@ namespace tui {
       void OnDefineLayer(wxCommandEvent&);
       void OnDefineColor(wxCommandEvent& WXUNUSED(event));
       void  OnDefineFill(wxCommandEvent& WXUNUSED(event));
+      void  OnTechEditor(wxCommandEvent& WXUNUSED(event));
       void    OnMenu(wxCommandEvent&);
 
       void  OnGridDefine(wxCommandEvent& WXUNUSED(event));

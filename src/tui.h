@@ -33,6 +33,7 @@
 #include <wx/wx.h>
 #include <wx/spinbutt.h>
 #include <wx/propdlg.h>
+#include "wx/odcombo.h"
 #include "ttt.h"
 #include "viewprop.h"
 

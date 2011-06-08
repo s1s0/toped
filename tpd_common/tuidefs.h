@@ -49,8 +49,10 @@ namespace tui
       ID_TELL_FUNCS       ,
       ID_PNL_LAYERS       ,
       ID_PNL_CELLS        ,
-      ID_PNL_DRC       ,
+      ID_PNL_DRC          ,
       ID_CMD_LINE         ,
+      ID_TECH_EDITOR      ,
+      ID_TECH_PANEL       ,
       //Warning!!! Do not use IDs between ID_DUMMY_WIN and ID_DUMMY_WIN_END
       ID_DUMMY_WIN = 500  ,
       ID_DUMMY_WIN_END = 600
@@ -154,6 +156,7 @@ namespace tui
       TMSET_DEFLAY        ,
       TMSET_DEFCOLOR      ,
       TMSET_DEFFILL       ,
+      TMSET_TECHEDITOR    ,
 
       TMADD_RULER         ,
       TMCLEAR_RULERS      ,
@@ -169,7 +172,7 @@ namespace tui
       TMDUMMY        = 500   ,
       TDUMMY_TOOL    = 2000  ,
       TMDUMMY_LAYER  = 10000 ,
-      TMDUMMY_END    = 11000
+      TMDUMMY_END    = 11000 ,
    } TOPED_MENUID;
 
 
@@ -278,7 +281,9 @@ namespace tui
       BT_LAYER_LOAD_ST,
       BT_LAYER_STATES,
       BT_LAYSTATE_SAVE,
-      BT_LAYSTATE_DELETE
+      BT_LAYSTATE_DELETE,
+		BT_TECH_APPLY,
+		BT_TECH_CANCEL,
    } BROWSER_EVT_TYPE;
 
 }
