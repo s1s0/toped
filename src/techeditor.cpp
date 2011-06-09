@@ -118,14 +118,26 @@ void tui::ColorListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, 
 {
    if ( item == wxNOT_FOUND )
             return;
+   layprop::tellRGB col(0,0,0,0);
+
    wxRect r(rect);
    r.Deflate(3);
    r.height -= 2;
 
-   int penStyle = wxSOLID;
-   wxPen pen( dc.GetTextForeground(), 3, penStyle );
-   // Get text colour as pen colour
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      std::string coloname =(GetString( item ).mb_str(wxConvUTF8));
+      col   = drawProp->getColor(coloname);
+   }
+   PROPC->unlockDrawProp(drawProp);
+   
+   wxColour color(col.red(), col.green(), col.blue(), col.alpha());
+   wxPen pen( color, 3, wxSOLID );
+
+   wxBrush brush(color, wxSOLID);
    dc.SetPen( pen );
+   dc.SetBrush(brush);
 
    if ( !(flags & wxODCB_PAINTING_CONTROL) )
    {
@@ -134,7 +146,8 @@ void tui::ColorListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, 
                   (r.y + 0) + ( (r.height/2) - dc.GetCharHeight() )/2
                   );
 
-      dc.DrawLine( r.x+r.width/2 + 5, r.y+((r.height/4)*3), r.x+r.width - 5, r.y+((r.height/4)*3) );
+      //dc.DrawLine( r.x+r.width/2 + 5, r.y+((r.height/4)*3), r.x+r.width - 5, r.y+((r.height/4)*3) );
+      dc.DrawRectangle(r.x+r.width/2 + 5, r.y+((r.height/4)*3)-10, r.x+r.width - 5, r.y+((r.height/4)*3)+10 );
    }
    else
    {
@@ -143,7 +156,8 @@ void tui::ColorListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, 
                   (r.y + 0) + ( (r.height/2) - dc.GetCharHeight() )/2
                   );
 
-      dc.DrawLine( r.x+r.width/2 + 5, r.y+((r.height/4)*3), r.x+r.width - 5, r.y+((r.height/4)*3) );
+      //dc.DrawLine( r.x+r.width/2 + 5, r.y+((r.height/4)*3), r.x+r.width - 5, r.y+((r.height/4)*3) );
+      dc.DrawRectangle(r.x+r.width/2 + 5, r.y+((r.height/4)*3)-10, r.x+r.width - 5, r.y+((r.height/4)*3)+10 );
    }
 }
 
