@@ -2965,3 +2965,37 @@ void tui::TopedPropertySheets::CanvasPSheet::update(wxCommandEvent& evt)
       default: assert(false);
    }
 }
+
+//Return brush for corresponding color and filling 
+wxBrush* tui::makeBrush(const byte* ifill, const layprop::tellRGB col)
+{
+   wxBrush *brush;
+   wxBitmap *stipplebrush = DEBUG_NEW wxBitmap((char  *)ifill, 32, 32, 1);
+   wxImage image;
+   image = stipplebrush->ConvertToImage();
+#ifdef WIN32
+   //Change white color for current one
+
+
+   int w = image.GetWidth();
+   int h = image.GetHeight();
+   for (int i=0; i<w; i++)
+      for (int j=0; j<h; j++)
+      {
+         if((image.GetRed(i,j)==0) && (image.GetGreen(i,j)==0) && (image.GetBlue(i,j)==0))
+         {
+            image.SetRGB(i, j, col.red(), col.green(), col.blue());
+         }
+         else
+         {
+            image.SetRGB(i, j, 0, 0, 0);
+         }
+      }
+   delete stipplebrush;
+   //Recreate bitmap with new color
+   stipplebrush = DEBUG_NEW wxBitmap(image, 1);
+#endif
+   brush = DEBUG_NEW wxBrush(   *stipplebrush);
+   delete stipplebrush;
+   return brush;
+}

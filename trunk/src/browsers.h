@@ -251,7 +251,6 @@ namespace browsers
          word                 getLayNo()          {return _layer->layno();}
 
       private:
-         void                 makeBrush(const layprop::DrawProperties*);
          int                  _buttonWidth;
          int                  _buttonHeight;
          LayerInfo*           _layer;

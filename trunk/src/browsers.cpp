@@ -34,6 +34,7 @@
 #include "browsers.h"
 #include "viewprop.h"
 #include "tuidefs.h"
+#include "tui.h"
 #include "outbox.h"
 #include "datacenter.h"
 #include "../ui/activelay.xpm"
@@ -1500,8 +1501,9 @@ browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoi
    if (PROPC->lockDrawProp(drawProp))
    {
       _filled  = drawProp->layerFilled(_layer->layno());
-      makeBrush(drawProp);
-      col = drawProp->getColor(_layer->layno());
+      const byte* ifill = drawProp->getFill(_layer->layno());
+      col   = drawProp->getColor(_layer->layno());
+      _brush = tui::makeBrush(ifill, col);
    }
    PROPC->unlockDrawProp(drawProp);
    wxColour color(col.red(), col.green(), col.blue());
@@ -1519,38 +1521,6 @@ browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoi
    wxString caption(_layer->name().c_str(),wxConvUTF8);
    SetToolTip(caption);
 
-}
-
-void browsers::LayerButton::makeBrush(const layprop::DrawProperties* drawProp)
-{
-   const byte* ifill = drawProp->getFill(_layer->layno());
-   wxBitmap *stipplebrush = DEBUG_NEW wxBitmap((char  *)ifill, 32, 32, 1);
-   wxImage image;
-   image = stipplebrush->ConvertToImage();
-#ifdef WIN32
-   //Change white color for current one
-   const layprop::tellRGB col   = drawProp->getColor(_layer->layno());
-
-   int w = image.GetWidth();
-   int h = image.GetHeight();
-   for (int i=0; i<w; i++)
-      for (int j=0; j<h; j++)
-      {
-         if((image.GetRed(i,j)==0) && (image.GetGreen(i,j)==0) && (image.GetBlue(i,j)==0))
-         {
-            image.SetRGB(i, j, col.red(), col.green(), col.blue());
-         }
-         else
-         {
-            image.SetRGB(i, j, 0, 0, 0);
-         }
-      }
-   delete stipplebrush;
-   //Recreate bitmap with new color
-   stipplebrush = DEBUG_NEW wxBitmap(image, 1);
-#endif
-   _brush = DEBUG_NEW wxBrush(   *stipplebrush);
-   delete stipplebrush;
 }
 
 void browsers::LayerButton::preparePicture()

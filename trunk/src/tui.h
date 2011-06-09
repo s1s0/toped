@@ -702,6 +702,10 @@ namespace tui {
       RenderingPSheet*          _renderingSheet;
       CanvasPSheet*             _canvasSheet;
    };
+
+   //Return brush for corresponding color and filling
+   //This function is used for visualization in GUI (layer buttons, technology editor etc) 
+   wxBrush* makeBrush(const byte* ifill, const layprop::tellRGB col);
 }
 
 //Print output of external functions
