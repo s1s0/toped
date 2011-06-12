@@ -15,14 +15,14 @@
 // ------------------------------------------------------------------------ =
 //           $URL: https://toped.googlecode.com/svn/trunk/src/techeditor.h $
 //        Created: Wed Apr 11 2011
-//     Originator: Svilen Krustev - skr@toped.org.uk
+//     Originator: Sergey Gaitukevich - gaitukevich.s@toped.org.uk
 //    Description: Technology Editor 
 //                 
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------
 //      $Revision: 1714 $
-//          $Date: 2011-01-09 01:21:00 +0800 (Вс, 09 янв 2011) $
+//          $Date: 2011-01-09 01:21:00 +0800 (пїЅпїЅ, 09 пїЅпїЅпїЅ 2011) $
 //        $Author: gaitukevich.s $
 //===========================================================================
 //      Comments :

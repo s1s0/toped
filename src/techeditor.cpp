@@ -15,14 +15,14 @@
 // ------------------------------------------------------------------------ =
 //           $URL: https://toped.googlecode.com/svn/trunk/src/techeditor.cpp $
 //        Created: Wed Apr 11 2011
-//     Originator: Svilen Krustev - skr@toped.org.uk
+//     Originator:  Sergey Gaitukevich - gaitukevich.s@toped.org.uk
 //    Description: Technology Editor 
 //                 
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------
 //      $Revision: 1714 $
-//          $Date: 2011-01-09 01:21:00 +0800 (Вс, 09 янв 2011) $
+//          $Date: 2011-01-09 01:21:00 +0800 (пїЅпїЅ, 09 пїЅпїЅпїЅ 2011) $
 //        $Author: gaitukevich.s $
 //===========================================================================
 //      Comments :
@@ -87,8 +87,6 @@ void tui::TechEditorDialog::prepareData()
    if (PROPC->lockDrawProp(drawProp))
    {
       WordList lays = drawProp->getAllLayers();
-      int i = 0;
-
 
       for(WordList::const_iterator it = lays.begin(); it != lays.end(); ++it)
       {
@@ -127,7 +125,7 @@ void tui::ColorListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, 
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-      std::string coloname =(GetString( item ).mb_str(wxConvUTF8));
+      std::string coloname(GetString( item ).mb_str(wxConvUTF8));
       col   = drawProp->getColor(coloname);
    }
    PROPC->unlockDrawProp(drawProp);
