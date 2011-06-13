@@ -402,6 +402,7 @@ namespace laydata {
       virtual void         stretch(int bfactor, ShapeList**) {};
       virtual PointVector  shape2poly() const {return PointVector();/*return empty list*/}
       virtual PointVector  dumpPoints() const {return PointVector();/*return empty list*/}
+      auxdata::GrcCell*    structure() const {return _structure;}
 //      virtual ArrayProps   arrayProps() const {return ArrayProps();}
       virtual word         lType() const {return _lmgrcref;}
 //      std::string          cellname() const;

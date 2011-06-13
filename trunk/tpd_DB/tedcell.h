@@ -200,6 +200,7 @@ namespace laydata {
       bool                 overlapChanged(DBbox&, TdtDesign*);
       virtual DBbox        getVisibleOverlap(const layprop::DrawProperties&);
       virtual void         renameChild(std::string, std::string);
+      auxdata::GrcCell*    getGrcCell();
    private:
       void                 readTdtLay(InputTdtFile* const);
       void                 readTdtRef(InputTdtFile* const);

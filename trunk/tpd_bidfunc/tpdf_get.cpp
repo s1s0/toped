@@ -29,7 +29,10 @@
 #include <sstream>
 #include "tpdf_get.h"
 #include "tedat.h"
+#include "datacenter.h"
 
+extern DataCenter*               DATC;
+extern console::toped_logfile    LogFile;
 extern void tellerror(std::string s);
 
 //=============================================================================
@@ -93,4 +96,62 @@ int tellstdfunc::stdGETLAYREFSTR::execute()
       delete tx;
       return EXEC_NEXT;
    }
+}
+
+//=============================================================================
+tellstdfunc::stdGETGRCLAYERS::stdGETGRCLAYERS(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
+{
+}
+
+int tellstdfunc::stdGETGRCLAYERS::execute()
+{
+   telldata::ttlist* tllull = DEBUG_NEW telldata::ttlist(telldata::tn_int);
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      DWordSet grcLays;
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      auxdata::GrcCell* grcCell = tDesign->getGrcCell();
+      if (NULL != grcCell)
+      {
+         grcCell->reportLayers(grcLays);
+         for (DWordSet::const_iterator CL = grcLays.begin(); CL != grcLays.end(); CL++)
+            tllull->add(DEBUG_NEW telldata::ttint(*CL));
+      }
+      LogFile << LogFile.getFN() << "();"; LogFile.flush();
+   }
+   OPstack.push(tllull);
+   DATC->unlockTDT(dbLibDir, true);
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::stdGETGRCDATA::stdGETGRCDATA(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
+}
+
+int tellstdfunc::stdGETGRCDATA::execute()
+{
+   word     la = getWordValue();
+   telldata::ttlist* llist = DEBUG_NEW telldata::ttlist(telldata::tn_auxilary);
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      auxdata::AuxDataList dataList;
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      auxdata::GrcCell* grcCell = tDesign->getGrcCell();
+      if (NULL != grcCell)
+      {
+         grcCell->reportLayData(la,dataList);
+         for (auxdata::AuxDataList::const_iterator CD = dataList.begin(); CD != dataList.end(); CD++)
+            llist->add(DEBUG_NEW telldata::ttauxdata(*CD, la));
+      }
+      LogFile << LogFile.getFN() << "();"; LogFile.flush();
+   }
+   OPstack.push(llist);
+   DATC->unlockTDT(dbLibDir, true);
+   return EXEC_NEXT;
 }

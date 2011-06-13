@@ -31,7 +31,8 @@
 #include "tldat.h"
 #include "tellyzer.h"
 
-#include "tedat.h" //<< Must find a way to remove this from here. See line 243 - it's all about it!
+#include "tedat.h"   //<< Must find a way to remove this from here. See line 243 - it's all about it!
+#include "grccell.h" //<< Must find a way to remove this from here. See line 282 - it's all about it!
 //=============================================================================
 telldata::tell_var* telldata::tell_type::initfield(const typeID ID) const {
    telldata::tell_var* nvar;
@@ -255,6 +256,41 @@ void telldata::ttlayout::assign(tell_var* data) {
    update_cstat();
 }
 
+//=============================================================================
+telldata::ttauxdata::ttauxdata(const ttauxdata& cobj) :
+      tell_var ( cobj.get_type() ),
+     _data     ( cobj._data      ), // don't copy the layout data!
+     _layer    ( cobj._layer     )
+{}
+
+const telldata::ttauxdata& telldata::ttauxdata::operator = (const ttauxdata& cobj)
+{
+   _layer = cobj._layer;
+   _data = cobj._data; // don't copy the layout data!
+   return *this;
+}
+
+void telldata::ttauxdata::echo(std::string& wstr, real DBU)
+{
+   std::ostringstream ost;
+   if (NULL == _data)
+      ost << "< !EMPTY! >";
+   else
+   {
+      if ( LAST_EDITABLE_LAYNUM > _layer)
+         ost << "layer " << _layer << " :";
+      _data->info(ost, DBU);
+   }
+   wstr += ost.str();
+}
+
+void telldata::ttauxdata::assign(tell_var* data)
+{
+   ttauxdata* variable = static_cast<ttauxdata*>(data);
+   _data  = variable->_data;
+   _layer = variable->_layer;
+   update_cstat();
+}
 //=============================================================================
 telldata::ttlist::ttlist(const telldata::ttlist& cobj) : tell_var(cobj.get_type()) {
    // copy constructor

@@ -2357,6 +2357,25 @@ void laydata::TdtCell::selectFromListWrapper(QuadTree* qtree, DataList* src, Dat
 //      _subQuads[i]->selectFromList(src, dst);
 }
 
+auxdata::GrcCell* laydata::TdtCell::getGrcCell()
+{
+   auxdata::GrcCell* theCell = NULL;
+   if (checkLayer(GRC_LAY))
+   {
+      // Note! GRC_LAY by convention is supposed to have a SINGLE data object
+      // of type TdtAuxRef
+      unsigned numObjects = 0;
+      QuadTree* wl = _layers[GRC_LAY];
+      for (QuadTree::Iterator DI = wl->begin(); DI != wl->end(); DI++)
+      {
+         theCell = static_cast<laydata::TdtAuxRef*>(*DI)->structure();
+         numObjects++;
+      }
+      assert(1 == numObjects);
+   }
+   return theCell;
+}
+
 laydata::TdtCell::~TdtCell()
 {
    unselectAll();

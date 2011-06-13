@@ -149,21 +149,22 @@ namespace laydata {
       DBbox*         getLastViewPort() const  { return _target.getLastViewPort();}
 
       void           selectFromList(SelectList* ss, const DWordSet& unselable)
-                                            {_target.edit()->selectFromList(ss, unselable);};
+                                            {_target.edit()->selectFromList(ss, unselable);}
       void           unselectFromList(SelectList* ss, const DWordSet& unselable)
-                                            {_target.edit()->unselectFromList(ss, unselable);};
+                                            {_target.edit()->unselectFromList(ss, unselable);}
       void           selectInBox(TP*, TP*, const DWordSet&, word layselmask, bool);
       void           unselectInBox(TP*, TP*, const DWordSet&, bool);
       AtticList*     changeSelect(TP*, const DWordSet&, bool);
       void           mouseHoover(TP&, layprop::DrawProperties&, const DWordSet&);
-      void           unselectAll()    const {_target.edit()->unselectAll(false);};
+      void           unselectAll()    const {_target.edit()->unselectAll(false);}
       void           selectAll(const DWordSet& unselable, word layselmask) const
                                              {       _target.edit()->selectAll(unselable, layselmask);}
       void           tryUnselectAll()const;
-      SelectList*    shapeSel()        const {return _target.edit()->shapeSel();};
-      SelectList*    copySeList()     const {return _target.edit()->copySeList();};
+      SelectList*    shapeSel()        const {return _target.edit()->shapeSel();}
+      SelectList*    copySeList()     const {return _target.edit()->copySeList();}
       void           reportSelected(real DBscale) const { _target.edit()->reportSelected(DBscale);};
-      std::string    activeCellName()  const {return _target.name();};
+      std::string    activeCellName()  const {return _target.name();}
+      auxdata::GrcCell* getGrcCell(){return _target.edit()->getGrcCell();}
       //
       bool           modified;
    private:

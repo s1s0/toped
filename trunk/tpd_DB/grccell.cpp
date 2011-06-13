@@ -444,15 +444,13 @@ PointVector auxdata::TdtGrcWire::dumpPoints() const
 auxdata::GrcCell::GrcCell(std::string name) :
    _name          ( name            ),
    _layers        (                 ),
-   _cellOverlap   ( DEFAULT_OVL_BOX ),
-   _shapesel      (                 )
+   _cellOverlap   ( DEFAULT_OVL_BOX )
 {}
 
 auxdata::GrcCell::GrcCell(InputTdtFile* const tedfile, std::string name) :
    _name          ( name            ),
    _layers        (                 ),
-   _cellOverlap   ( DEFAULT_OVL_BOX ),
-   _shapesel      (                 )
+   _cellOverlap   ( DEFAULT_OVL_BOX )
 {
    byte      recordtype;
    while (tedf_GRCEND != (recordtype = tedfile->getByte()))
@@ -566,14 +564,8 @@ void auxdata::GrcCell::openGlDraw(layprop::DrawProperties& drawprop, bool active
       unsigned curlayno = drawprop.getTenderLay(lay->first);
       if (!drawprop.layerHidden(curlayno)) drawprop.setCurrentColor(curlayno);
       else continue;
-      // fancy like this (dlist iterator) , because a simple
-      // _shapesel[curlayno] complains about loosing qualifiers (const)
-      SelectList::const_iterator dlst;
       bool fill = drawprop.setCurrentFill(false);// honor block_fill state)
-      if ((active) && (_shapesel.end() != (dlst = _shapesel.find(curlayno))))
-         lay->second->openGlDraw(drawprop,dlst->second, fill);
-      else
-         lay->second->openGlDraw(drawprop, NULL, fill);
+      lay->second->openGlDraw(drawprop, NULL, fill);
    }
 }
 
@@ -590,13 +582,6 @@ void auxdata::GrcCell::openGlRender(tenderer::TopRend& rend, const CTM& trans,
       //       - for regular database it is equal to the TDT layer number
       //       - for DRC database it is common for all layers - DRC_LAY
       unsigned curlayno = rend.getTenderLay(lay->first);
-      // retrieve the selected objects (if they exists)
-      SelectList::const_iterator dlsti;
-      const DataList* dlist;
-      if (active && (_shapesel.end() != (dlsti = _shapesel.find(curlayno))))
-         dlist = dlsti->second;
-      else
-         dlist = NULL;
       switch (curlayno)
       {
          case REF_LAY:
@@ -605,7 +590,7 @@ void auxdata::GrcCell::openGlRender(tenderer::TopRend& rend, const CTM& trans,
          default     :
          {
             rend.setGrcLayer(true, curlayno);
-            lay->second->openGlRender(rend, dlist);
+            lay->second->openGlRender(rend, NULL);
             rend.setGrcLayer(false, curlayno);
          }
       }
@@ -678,5 +663,23 @@ void auxdata::GrcCell::readTdtLay(InputTdtFile* const tedfile)
          default: throw EXPTNreadTDT("Unexpected record type");
       }
       tmpLayer->put(newData);
+   }
+}
+
+void auxdata::GrcCell::reportLayers(DWordSet& grcLays)
+{
+   for (LayerList::const_iterator wl = _layers.begin(); wl != _layers.end(); wl++)
+   {
+      grcLays.insert(wl->first);
+   }
+}
+
+void auxdata::GrcCell::reportLayData(unsigned lay, AuxDataList& dataList)
+{
+   LayerList::const_iterator wl = _layers.find(lay);
+   if (_layers.end() != wl)
+   {
+      for (QuadTree::Iterator DI = wl->second->begin(); DI != wl->second->end(); DI++)
+         dataList.push_back(*DI);
    }
 }

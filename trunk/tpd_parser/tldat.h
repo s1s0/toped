@@ -42,6 +42,10 @@
 namespace laydata {
    class TdtData;
 }
+
+namespace auxdata {
+   class TdtAuxData;
+}
 //=============================================================================
 // TELL types
 //=============================================================================
@@ -54,6 +58,7 @@ namespace telldata {
    const typeID tn_bool       = 4 ;
    const typeID tn_string     = 5 ;
    const typeID tn_layout     = 6 ;
+   const typeID tn_auxilary   = 7 ;
    const typeID tn_composite  = 10;
    const typeID tn_pnt        = 11;
    const typeID tn_box        = 12;
@@ -248,9 +253,29 @@ namespace telldata {
       SGBitSet*            selp() const     {return _selp;};
       virtual             ~ttlayout()       {if (_selp) delete _selp;}
    private:
-      laydata::TdtData*   _data;
-      unsigned            _layer;
-      SGBitSet*           _selp; // selected points;
+      laydata::TdtData*    _data;
+      unsigned             _layer;
+      SGBitSet*            _selp; // selected points;
+   };
+
+   //==============================================================================
+   class ttauxdata: public tell_var {
+   public:
+                           ttauxdata(): tell_var(tn_layout), _data(NULL),
+                             _layer(ERR_LAY) {};
+                           ttauxdata(auxdata::TdtAuxData* pdat, unsigned lay):
+                             tell_var(tn_layout), _data(pdat), _layer(lay) {};
+                           ttauxdata(const ttauxdata& cobj);
+      const ttauxdata&     operator = (const ttauxdata&);
+      void                 initialize() {_data = NULL;}
+      void                 echo(std::string&, real);
+      void                 assign(tell_var*);
+      tell_var*            selfcopy() const {return DEBUG_NEW ttauxdata(*this);};
+      auxdata::TdtAuxData* data() const     {return _data;};
+      unsigned             layer() const    {return _layer;};
+   private:
+      auxdata::TdtAuxData* _data;
+      unsigned             _layer;
    };
 
    //==============================================================================
