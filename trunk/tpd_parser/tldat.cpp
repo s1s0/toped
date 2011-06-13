@@ -50,6 +50,7 @@ telldata::tell_var* telldata::tell_type::initfield(const typeID ID) const {
          case tn_hsh   : nvar = DEBUG_NEW telldata::tthsh()    ;break;
          case tn_hshstr: nvar = DEBUG_NEW telldata::tthshstr() ;break;
          case tn_layout: nvar = DEBUG_NEW telldata::ttlayout() ;break;
+         case tn_auxilary: nvar = DEBUG_NEW telldata::ttauxdata() ;break;
                 default: {
                      assert(_tIDMAP.end() != _tIDMAP.find(ID));
                      nvar = DEBUG_NEW telldata::user_struct(_tIDMAP.find(ID)->second);
@@ -965,6 +966,7 @@ std::string telldata::echoType( const telldata::typeID tID,
       case telldata::tn_bool  : atype = "bool"  ; break;
       case telldata::tn_string: atype = "string"; break;
       case telldata::tn_layout: atype = "layout"; break;
+      case telldata::tn_auxilary: atype = "auxdata"; break;
       case telldata::tn_pnt   : atype = "point" ; break;
       case telldata::tn_box   : atype = "box"   ; break;
       case telldata::tn_hsh   : atype = "lmap"  ; break;

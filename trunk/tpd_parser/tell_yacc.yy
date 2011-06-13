@@ -250,7 +250,7 @@ Ooops! Second thought!
 %token                 tknERROR
 %token                 tknIF tknELSE tknWHILE tknREPEAT tknUNTIL tknFOREACH
 %token                 tknSTRUCTdef tknVOIDdef tknREALdef tknBOOLdef tknINTdef
-%token                 tknSTRINGdef tknLAYOUTdef tknLISTdef tknRETURN
+%token                 tknSTRINGdef tknLAYOUTdef tknAUXDATAdef tknLISTdef tknRETURN
 %token                 tknTRUE tknFALSE tknLEQ tknGEQ tknEQ tknNEQ
 %token                 tknAND tknOR tknNOT tknBWAND tknBWOR tknBWNOT
 %token                 tknSW tknSE tknNE tknNW tknPREADD tknPRESUB
@@ -666,6 +666,7 @@ telltype:
    | tknBOOLdef                            {$$ = telldata::tn_bool;}
    | tknSTRINGdef                          {$$ = telldata::tn_string;}
    | tknLAYOUTdef                          {$$ = telldata::tn_layout;}
+   | tknAUXDATAdef                         {$$ = telldata::tn_auxilary;}
    | tknTYPEdef                            {
         const telldata::tell_type* ttype = CMDBlock->getTypeByName($1);
         assert (NULL != ttype);

@@ -1032,6 +1032,7 @@ telldata::tell_var* parsercmd::cmdBLOCK::newTellvar(telldata::typeID ID, TpdYYLt
       case    telldata::tn_hshstr: return(DEBUG_NEW telldata::tthshstr());
       case telldata::tn_string: return(DEBUG_NEW telldata::ttstring());
       case telldata::tn_layout: return(DEBUG_NEW telldata::ttlayout());
+      case telldata::tn_auxilary: return(DEBUG_NEW telldata::ttauxdata());
       default:
       {
          const telldata::tell_type* utype = getTypeByID(ID);
