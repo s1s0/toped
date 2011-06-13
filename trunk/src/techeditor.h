@@ -74,6 +74,7 @@ class TechEditorDialog : public wxDialog
    public:
                   TechEditorDialog( wxWindow* parent,wxWindowID id = wxID_ANY);
                   ~TechEditorDialog();
+            void  onLayerSelected(wxCommandEvent&);
       DECLARE_EVENT_TABLE()
 
 };

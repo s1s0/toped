@@ -40,6 +40,7 @@ extern layprop::PropertyCenter*  PROPC;
 extern const wxEventType         wxEVT_CMD_BROWSER;
 
 BEGIN_EVENT_TABLE(tui::TechEditorDialog, wxDialog)
+   EVT_LISTBOX(ID_TE_LAYER, tui::TechEditorDialog::onLayerSelected) 
 END_EVENT_TABLE()
 
 tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id)//, const wxString& title, const wxPoint& pos, const wxSize& size, long style )  
@@ -48,7 +49,7 @@ tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id)//, con
 	wxBoxSizer *sizer1= DEBUG_NEW wxBoxSizer(wxVERTICAL);
       wxBoxSizer *sizer2 = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
          wxBoxSizer *hsizer0 = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Layers") );
-            _layerList = DEBUG_NEW wxListBox(this, wxID_ANY);
+            _layerList = DEBUG_NEW wxListBox(this, ID_TE_LAYER);
             hsizer0->Add(_layerList, 1, wxEXPAND, 0);
          wxBoxSizer *vsizer0 = DEBUG_NEW wxStaticBoxSizer( wxVERTICAL, this, wxT("Properties") );
             _layerColors = DEBUG_NEW ColorListComboBox();
@@ -79,6 +80,30 @@ tui::TechEditorDialog::~TechEditorDialog()
 {
 }
 
+void  tui::TechEditorDialog::onLayerSelected(wxCommandEvent&)
+{
+   int selNumber = _layerList->GetSelection();
+   wxString layerName = _layerList->GetString(selNumber);
+
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      word lay_no = drawProp->getLayerNo(std::string(layerName.mb_str(wxConvUTF8)));
+       std::string colorName = drawProp->getColorName(lay_no);
+      int colorNumber = _layerColors->FindString(wxString(colorName.c_str(), wxConvUTF8));
+      if (colorNumber != wxNOT_FOUND)
+      {
+         _layerColors->SetSelection(colorNumber);
+      }
+      else
+      {
+         tell_log(console::MT_WARNING, "There is no appropriate color");
+      }
+   }
+   PROPC->unlockDrawProp(drawProp);
+
+   
+}
 
 void tui::TechEditorDialog::prepareData()
 {
