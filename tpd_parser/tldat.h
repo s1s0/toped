@@ -261,10 +261,10 @@ namespace telldata {
    //==============================================================================
    class ttauxdata: public tell_var {
    public:
-                           ttauxdata(): tell_var(tn_layout), _data(NULL),
+                           ttauxdata(): tell_var(tn_auxilary), _data(NULL),
                              _layer(ERR_LAY) {};
                            ttauxdata(auxdata::TdtAuxData* pdat, unsigned lay):
-                             tell_var(tn_layout), _data(pdat), _layer(lay) {};
+                             tell_var(tn_auxilary), _data(pdat), _layer(lay) {};
                            ttauxdata(const ttauxdata& cobj);
       const ttauxdata&     operator = (const ttauxdata&);
       void                 initialize() {_data = NULL;}

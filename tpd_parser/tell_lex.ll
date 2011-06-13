@@ -92,6 +92,7 @@ int                        return tknINTdef;
 bool                       return tknBOOLdef;
 string                     return tknSTRINGdef;
 layout                     return tknLAYOUTdef;
+auxdata                    return tknAUXDATAdef;
 list                       return tknLISTdef;
 return                     return tknRETURN;
 true                       return tknTRUE;
