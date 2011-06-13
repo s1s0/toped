@@ -135,9 +135,7 @@ namespace auxdata {
    typedef laydata::QTreeTmpl<TdtAuxData>    QuadTree;
    typedef laydata::QTStoreTmpl<TdtAuxData>  QTreeTmp;
    typedef std::map<unsigned, QuadTree*>     LayerList;
-   typedef  std::pair<TdtAuxData*, SGBitSet> SelectDataPair;
-   typedef  std::list<SelectDataPair>        DataList;
-   typedef  std::map<unsigned, DataList*>    SelectList;
+   typedef std::list<TdtAuxData*>            AuxDataList;
    typedef  std::map<unsigned, QTreeTmp*>    TmpLayerMap;
 
 
@@ -158,6 +156,9 @@ namespace auxdata {
          QTreeTmp*           secureUnsortedLayer(unsigned layno);
          bool                fixUnsorted();
          //
+         void                reportLayers(DWordSet&);
+         void                reportLayData(unsigned, AuxDataList&);
+         //
          virtual DBbox       cellOverlap() const        {return _cellOverlap;}
          std::string         name() const               {return _name;}
       protected:
@@ -166,7 +167,6 @@ namespace auxdata {
          std::string         _name;         //! cell name
          LayerList           _layers;       //! all layers in the cell
          DBbox               _cellOverlap;  //! Overlap of the entire cell
-         SelectList          _shapesel;     //! selected shapes
          TmpLayerMap         _tmpLayers;    //! All layers with unsorted data
    };
 
