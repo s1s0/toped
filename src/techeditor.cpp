@@ -36,6 +36,8 @@
 
 extern layprop::PropertyCenter*  PROPC;
 
+const wxString emptyFill = wxT("No Filling");
+
 ///////////////////////////////////////////////////////////////////////////
 extern const wxEventType         wxEVT_CMD_BROWSER;
 
@@ -61,7 +63,19 @@ tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id)//, con
                   wxCB_READONLY //wxNO_BORDER | wxCB_READONLY
                   );
             vsizer1->Add(_layerColors);
+            
+            _layerFills = DEBUG_NEW FillListComboBox();
+            prepareFills();
+            wxBoxSizer *vsizer2 = DEBUG_NEW wxStaticBoxSizer( wxVERTICAL, this, wxT("Fill") );
+               _layerFills->Create(this,wxID_ANY,wxEmptyString,
+                   wxDefaultPosition, wxDefaultSize,
+                  _colorItems,
+                  wxCB_READONLY //wxNO_BORDER | wxCB_READONLY
+                  );
+            vsizer2->Add(_layerFills);
+
          vsizer0->Add(vsizer1);
+         vsizer0->Add(vsizer2);
       sizer2->Add(hsizer0, 1, wxEXPAND, 0);
       sizer2->Add(vsizer0, 1, wxEXPAND, 0);
       wxBoxSizer *sizer3 = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
@@ -89,7 +103,8 @@ void  tui::TechEditorDialog::onLayerSelected(wxCommandEvent&)
    if (PROPC->lockDrawProp(drawProp))
    {
       word lay_no = drawProp->getLayerNo(std::string(layerName.mb_str(wxConvUTF8)));
-       std::string colorName = drawProp->getColorName(lay_no);
+      //Set active color
+      std::string colorName = drawProp->getColorName(lay_no);
       int colorNumber = _layerColors->FindString(wxString(colorName.c_str(), wxConvUTF8));
       if (colorNumber != wxNOT_FOUND)
       {
@@ -99,6 +114,21 @@ void  tui::TechEditorDialog::onLayerSelected(wxCommandEvent&)
       {
          tell_log(console::MT_WARNING, "There is no appropriate color");
       }
+      //Set active filling
+      std::string fillName = drawProp->getFillName(lay_no);
+      int fillNumber = _layerFills->FindString(wxString(fillName.c_str(), wxConvUTF8));
+      if (fillNumber != wxNOT_FOUND)
+      {
+         _layerFills->SetSelection(fillNumber);
+      }
+      else
+      {
+         fillNumber = _layerFills->FindString(emptyFill);
+         _layerFills->SetSelection(fillNumber);
+      }
+      //Set active filling
+
+
    }
    PROPC->unlockDrawProp(drawProp);
 
@@ -137,6 +167,22 @@ void tui::TechEditorDialog::prepareColors()
    PROPC->unlockDrawProp(drawProp);
 }
 
+void tui::TechEditorDialog::prepareFills()
+{
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      NameList all_names;
+      drawProp->allFills(all_names);
+      for(NameList::const_iterator it=all_names.begin(); it!=all_names.end(); ++it)
+      {
+         _layerFills->Append(wxString((*it).c_str(), wxConvUTF8));
+      }
+      _layerFills->Append(emptyFill);
+   }
+   PROPC->unlockDrawProp(drawProp);
+}
+
 void tui::ColorListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, int flags ) const
 {
    if ( item == wxNOT_FOUND )
@@ -150,8 +196,8 @@ void tui::ColorListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, 
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-      std::string coloname(GetString( item ).mb_str(wxConvUTF8));
-      col   = drawProp->getColor(coloname);
+      std::string colorName(GetString( item ).mb_str(wxConvUTF8));
+      col   = drawProp->getColor(colorName);
    }
    PROPC->unlockDrawProp(drawProp);
    
@@ -213,3 +259,61 @@ void tui::ColorListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, 
 }*/
 
 
+void tui::FillListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, int flags ) const
+{
+   if ( item == wxNOT_FOUND )
+            return;
+   layprop::tellRGB col(255,255,255,0);
+   wxColour color(col.red(), col.green(), col.blue(), col.alpha());
+   const byte* ifill;
+
+   wxRect r(rect);
+   r.Deflate(3);
+   r.height -= 2;
+   wxBrush *brush;
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      wxString str = GetString( item );
+      std::string fillname(str.mb_str(wxConvUTF8));
+      if(str.Cmp(emptyFill)) 
+      {
+         ifill   = drawProp->getFill(fillname);
+         brush= tui::makeBrush(ifill, col);        
+      }
+      else
+      {
+         brush = DEBUG_NEW wxBrush(color, wxTRANSPARENT);
+      }
+   }
+   PROPC->unlockDrawProp(drawProp);
+   
+
+   wxPen pen( color, 3, wxSOLID );
+
+   brush->SetColour(color);
+   dc.SetPen( pen );
+   dc.SetBrush(*brush);
+
+   if ( !(flags & wxODCB_PAINTING_CONTROL) )
+   {
+      dc.DrawText(GetString( item ),
+                  r.x + 3,
+                  (r.y + 0) + ( (r.height/2) - dc.GetCharHeight() )/2
+                  );
+
+      //dc.DrawLine( r.x+r.width/2 + 5, r.y+((r.height/4)*3), r.x+r.width - 5, r.y+((r.height/4)*3) );
+      dc.DrawRectangle(r.x+r.width/2 + 5, r.y+((r.height/4)*3)-10, r.x+r.width - 5, r.y+((r.height/4)*3)+10 );
+   }
+   else
+   {
+      dc.DrawText(GetString( item ),
+                  r.x + 3,
+                  (r.y + 0) + ( (r.height/2) - dc.GetCharHeight() )/2
+                  );
+
+      //dc.DrawLine( r.x+r.width/2 + 5, r.y+((r.height/4)*3), r.x+r.width - 5, r.y+((r.height/4)*3) );
+      dc.DrawRectangle(r.x+r.width/2 + 5, r.y+((r.height/4)*3)-10, r.x+r.width - 5, r.y+((r.height/4)*3)+10 );
+   }
+   delete brush;
+}

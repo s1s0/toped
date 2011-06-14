@@ -54,6 +54,18 @@ class ColorListComboBox : public wxOwnerDrawnComboBox
       //virtual void OnDrawBackground( wxDC& dc, const wxRect& rect, int item, int flags ) const;
 };
 
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class FillingListComboBox
+///////////////////////////////////////////////////////////////////////////////
+class FillListComboBox : public wxOwnerDrawnComboBox
+{
+   public:
+      virtual void OnDrawItem( wxDC& dc, const wxRect& rect, int item, int flags ) const;
+      //virtual void OnDrawBackground( wxDC& dc, const wxRect& rect, int item, int flags ) const;
+};
+
+
 ///////////////////////////////////////////////////////////////////////////////
 /// Class TechEditorDialog
 ///////////////////////////////////////////////////////////////////////////////
@@ -63,14 +75,15 @@ class TechEditorDialog : public wxDialog
       //wxScrolledWindow*     _layerPanel;
       wxListBox*              _layerList;
       wxOwnerDrawnComboBox*   _layerColors;
+      wxOwnerDrawnComboBox*   _layerFills;
       wxButton*	            _applyButton;
       wxButton*	            _cancelButton;
       wxBoxSizer*	            _sizer;
       wxArrayString           _colorItems; 
 
-      void			prepareColors();
-      void			prepareData();
-	
+      void        prepareColors();
+      void        prepareFills();
+      void        prepareData();
    public:
                   TechEditorDialog( wxWindow* parent,wxWindowID id = wxID_ANY);
                   ~TechEditorDialog();
