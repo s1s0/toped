@@ -13,7 +13,7 @@
 //                                                                          =
 //   This file is a part of Toped project (C) 2001-2007 Toped developers    =
 // ------------------------------------------------------------------------ =
-//           $URL: https://toped.googlecode.com/svn/trunk/src/techeditor.h $
+//           $URL$
 //        Created: Wed Apr 11 2011
 //     Originator: Sergey Gaitukevich - gaitukevich.s@toped.org.uk
 //    Description: Technology Editor 
@@ -21,9 +21,9 @@
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------
-//      $Revision: 1714 $
-//          $Date: 2011-01-09 01:21:00 +0800 (��, 09 ��� 2011) $
-//        $Author: gaitukevich.s $
+//      $Revision$
+//          $Date$
+//        $Author$
 //===========================================================================
 //      Comments :
 //===========================================================================
