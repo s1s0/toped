@@ -165,6 +165,7 @@ namespace laydata {
       void           reportSelected(real DBscale) const { _target.edit()->reportSelected(DBscale);};
       std::string    activeCellName()  const {return _target.name();}
       auxdata::GrcCell* getGrcCell(){return _target.edit()->getGrcCell();}
+      void           clearGrcCell() {       _target.edit()->clearGrcCell();}
       //
       bool           modified;
    private:

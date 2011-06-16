@@ -683,3 +683,16 @@ void auxdata::GrcCell::reportLayData(unsigned lay, AuxDataList& dataList)
          dataList.push_back(*DI);
    }
 }
+
+bool auxdata::GrcCell::cleanLay(unsigned lay)
+{
+   bool emptycell = false;
+   LayerList::const_iterator wl = _layers.find(lay);
+   if (_layers.end() != wl)
+   {
+      delete (wl->second);
+      _layers.erase(lay);
+      emptycell = _layers.empty();
+   }
+   return emptycell;
+}

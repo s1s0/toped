@@ -99,12 +99,12 @@ int tellstdfunc::stdGETLAYREFSTR::execute()
 }
 
 //=============================================================================
-tellstdfunc::stdGETGRCLAYERS::stdGETGRCLAYERS(telldata::typeID retype, bool eor) :
+tellstdfunc::grcGETLAYERS::grcGETLAYERS(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
 {
 }
 
-int tellstdfunc::stdGETGRCLAYERS::execute()
+int tellstdfunc::grcGETLAYERS::execute()
 {
    telldata::ttlist* tllull = DEBUG_NEW telldata::ttlist(telldata::tn_int);
    laydata::TdtLibDir* dbLibDir = NULL;
@@ -127,13 +127,13 @@ int tellstdfunc::stdGETGRCLAYERS::execute()
 }
 
 //=============================================================================
-tellstdfunc::stdGETGRCDATA::stdGETGRCDATA(telldata::typeID retype, bool eor) :
+tellstdfunc::grcGETDATA::grcGETDATA(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
 {
    arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
 }
 
-int tellstdfunc::stdGETGRCDATA::execute()
+int tellstdfunc::grcGETDATA::execute()
 {
    word     la = getWordValue();
    telldata::ttlist* llist = DEBUG_NEW telldata::ttlist(telldata::tn_auxilary);
@@ -153,5 +153,36 @@ int tellstdfunc::stdGETGRCDATA::execute()
    }
    OPstack.push(llist);
    DATC->unlockTDT(dbLibDir, true);
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::grcCLEANALAYER::grcCLEANALAYER(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
+{
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
+}
+
+int tellstdfunc::grcCLEANALAYER::execute()
+{
+   word     la = getWordValue();
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      auxdata::GrcCell* grcCell = tDesign->getGrcCell();
+      if (NULL != grcCell)
+      {
+         bool cleanCell = grcCell->cleanLay(la);
+         if (cleanCell)
+         {
+            tDesign->clearGrcCell();
+            TpdPost::treeMarkGrcMember(tDesign->activeCellName().c_str(), false);
+         }
+      }
+      LogFile << LogFile.getFN() << "();"; LogFile.flush();
+   }
+   DATC->unlockTDT(dbLibDir, true);
+   RefreshGL();
    return EXEC_NEXT;
 }
