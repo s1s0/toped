@@ -117,6 +117,7 @@ namespace browsers
          void              onTellAddCell(wxString, wxString, int);
          void              onTellRemoveCell(wxString, wxString, int);
          void              onTellRenameCell(wxString, wxString);
+         void              onTellChangeGrc(wxString, bool);
          bool              isDbOrLibItem(const wxTreeItemId);
          wxTreeItemId      _topStructure;
          wxTreeItemId      _activeStructure;
@@ -178,7 +179,7 @@ namespace browsers
                               const wxPoint& pos = wxDefaultPosition,
                               const wxSize& size = wxDefaultSize,
                               long style = wxTR_DEFAULT_STYLE);
-                          ~TDTbrowser();
+         virtual          ~TDTbrowser();
          wxString          selectedCellName() const;
          void              refreshData(bool keepAct);
          CellBrowser*      cellBrowser() const        {return _cellBrowser;}

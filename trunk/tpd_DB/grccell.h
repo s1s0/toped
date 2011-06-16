@@ -158,6 +158,7 @@ namespace auxdata {
          //
          void                reportLayers(DWordSet&);
          void                reportLayData(unsigned, AuxDataList&);
+         bool                cleanLay(unsigned);
          //
          virtual DBbox       cellOverlap() const        {return _cellOverlap;}
          std::string         name() const               {return _name;}

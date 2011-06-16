@@ -2376,6 +2376,26 @@ auxdata::GrcCell* laydata::TdtCell::getGrcCell()
    return theCell;
 }
 
+
+void laydata::TdtCell::clearGrcCell()
+{
+   if (checkLayer(GRC_LAY))
+   {
+      // Note! GRC_LAY by convention is supposed to have a SINGLE data object
+      // of type TdtAuxRef
+      unsigned numObjects = 0;
+      QuadTree* wl = _layers[GRC_LAY];
+      for (QuadTree::Iterator DI = wl->begin(); DI != wl->end(); DI++)
+      {
+         delete *DI;
+         numObjects++;
+      }
+      assert(1 == numObjects);
+      delete (wl);
+      _layers.erase(GRC_LAY);
+   }
+}
+
 laydata::TdtCell::~TdtCell()
 {
    unselectAll();
