@@ -690,6 +690,7 @@ bool auxdata::GrcCell::cleanLay(unsigned lay)
    LayerList::const_iterator wl = _layers.find(lay);
    if (_layers.end() != wl)
    {
+      wl->second->freeMemory();
       delete (wl->second);
       _layers.erase(lay);
       emptycell = _layers.empty();
