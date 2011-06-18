@@ -887,9 +887,15 @@ void browsers::CellBrowser::onTellChangeGrc(wxString cellName, bool mark)
    while (findItem(cellName, targetItem, _dbroot))
    {
       if (mark)
-         SetItemImage(targetItem,BICN_DBCELL_FLAT_I,wxTreeItemIcon_Normal);
+      {
+         SetItemImage(targetItem,BICN_DBCELL_HIER_I,wxTreeItemIcon_Normal);
+         SetItemImage(targetItem,BICN_DBCELL_FLAT_I,wxTreeItemIcon_Expanded);
+      }
       else
-         SetItemImage(targetItem,BICN_DBCELL_FLAT,wxTreeItemIcon_Normal);
+      {
+         SetItemImage(targetItem,BICN_DBCELL_HIER,wxTreeItemIcon_Normal);
+         SetItemImage(targetItem,BICN_DBCELL_FLAT,wxTreeItemIcon_Expanded);
+      }
    }
 }
 
