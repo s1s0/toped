@@ -151,12 +151,12 @@ void tellstdfunc::clean_ttlaylist(telldata::ttlist* llist) {
    //  - Second - the best place to clean-up the lists is of course inside
    // telldata::ttlayout class, however they don't know anything about laydata::TdtData
    // though with a strange error message compiler claims that destructors will
-   // not be called - and I have no other choice but to belive it.
+   // not be called - and I have no other choice but to believe it.
    // This of course is because of the separation of the project on modules
    // The other possibility is to convert the list to (say) AtticList and then
    // to use the corresponding destroyer, but that seem to be much more convoluted
    // This looks weird - true, but is doing the job.
-   // - Don't try to delete here selp (selected ponts). It is deleted naturally
+   // - Don't try to delete here selp (selected points). It is deleted naturally
    // by the destructor of the telldata::ttlayout class it doesn't have the visibility
    // problem of laydata::TdtData
    for (word i = 0 ; i < llist->size(); i++) {

@@ -125,6 +125,7 @@ void tellstdfunc::stdREMOVECELL::undo_cleanup()
    getStringValue(UNDOPstack, false);
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
    laydata::TdtCell* rmvdcell = static_cast<laydata::TdtCell*>(UNDOUstack.back());UNDOUstack.pop_back();
+   clean_ttlaylist(pl);
    delete pl;
    delete rmvdcell;
 }

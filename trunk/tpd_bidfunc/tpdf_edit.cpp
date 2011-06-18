@@ -499,10 +499,10 @@ tellstdfunc::stdDELETESEL::stdDELETESEL(telldata::typeID retype, bool eor) :
 
 void tellstdfunc::stdDELETESEL::undo_cleanup()
 {
+   laydata::CellMap* udurcells = static_cast<laydata::CellMap*>(UNDOUstack.back());UNDOUstack.pop_back();
    telldata::ttlist* und = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
    clean_ttlaylist(und);
    delete und;
-   laydata::CellMap* udurcells = static_cast<laydata::CellMap*>(UNDOUstack.front());UNDOUstack.pop_front();
    for (laydata::CellMap::const_iterator CUDU = udurcells->begin(); CUDU != udurcells->end(); CUDU++)
    {
       delete CUDU->second;
