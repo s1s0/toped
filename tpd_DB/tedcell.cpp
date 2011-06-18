@@ -401,6 +401,8 @@ void laydata::TdtCell::readTdtRef(InputTdtFile* const tedfile)
 
 laydata::QuadTree* laydata::TdtCell::secureLayer(unsigned layno)
 {
+   // TODO Would be nice to update the code in such a was so the assert below holds
+   // assert((layno < LAST_EDITABLE_LAYNUM) || (layno == REF_LAY));
    if (_layers.end() == _layers.find(layno))
       _layers[layno] = DEBUG_NEW QuadTree();
    return _layers[layno];
@@ -408,6 +410,8 @@ laydata::QuadTree* laydata::TdtCell::secureLayer(unsigned layno)
 
 laydata::QTreeTmp* laydata::TdtCell::secureUnsortedLayer(unsigned layno)
 {
+   // TODO Would be nice to update the code in such a was so the assert below holds
+   // assert((layno < LAST_EDITABLE_LAYNUM) || (layno == REF_LAY));
    if (_tmpLayers.end() == _tmpLayers.find(layno))
       _tmpLayers[layno] = DEBUG_NEW QTreeTmp(secureLayer(layno));
    return _tmpLayers[layno];
