@@ -147,6 +147,9 @@ namespace laydata {
       void           fixUnsorted();
       void           storeViewPort(const DBbox& vp)  {_target.storeViewPort(vp);}
       DBbox*         getLastViewPort() const  { return _target.getLastViewPort();}
+      TdtCell*       targetECell()            {assert(_target.checkEdit()); return _target.edit();}
+      std::string    activeCellName()  const {return _target.name();}
+
 
       void           selectFromList(SelectList* ss, const DWordSet& unselable)
                                             {_target.edit()->selectFromList(ss, unselable);}
@@ -162,10 +165,6 @@ namespace laydata {
       void           tryUnselectAll()const;
       SelectList*    shapeSel()        const {return _target.edit()->shapeSel();}
       SelectList*    copySeList()     const {return _target.edit()->copySeList();}
-      void           reportSelected(real DBscale) const { _target.edit()->reportSelected(DBscale);};
-      std::string    activeCellName()  const {return _target.name();}
-      auxdata::GrcCell* getGrcCell(){return _target.edit()->getGrcCell();}
-      void           clearGrcCell() {       _target.edit()->clearGrcCell();}
       //
       bool           modified;
    private:

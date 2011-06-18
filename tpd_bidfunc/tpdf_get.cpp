@@ -111,8 +111,8 @@ int tellstdfunc::grcGETLAYERS::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       DWordSet grcLays;
-      laydata::TdtDesign* tDesign = (*dbLibDir)();
-      auxdata::GrcCell* grcCell = tDesign->getGrcCell();
+      laydata::TdtCell*   tCell   = (*dbLibDir)()->targetECell();
+      auxdata::GrcCell* grcCell   = tCell->getGrcCell();
       if (NULL != grcCell)
       {
          grcCell->reportLayers(grcLays);
@@ -141,8 +141,8 @@ int tellstdfunc::grcGETDATA::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       auxdata::AuxDataList dataList;
-      laydata::TdtDesign* tDesign = (*dbLibDir)();
-      auxdata::GrcCell* grcCell = tDesign->getGrcCell();
+      laydata::TdtCell*   tCell   = (*dbLibDir)()->targetECell();
+      auxdata::GrcCell* grcCell   = tCell->getGrcCell();
       if (NULL != grcCell)
       {
          grcCell->reportLayData(la,dataList);
@@ -170,13 +170,14 @@ int tellstdfunc::grcCLEANALAYER::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      auxdata::GrcCell* grcCell = tDesign->getGrcCell();
+      laydata::TdtCell*   tCell   = tDesign->targetECell();
+      auxdata::GrcCell* grcCell   = tCell->getGrcCell();
       if (NULL != grcCell)
       {
          bool cleanCell = grcCell->cleanLay(la);
          if (cleanCell)
          {
-            tDesign->clearGrcCell();
+            tCell->clearGrcCell();
             TpdPost::treeMarkGrcMember(tDesign->activeCellName().c_str(), false);
          }
       }
