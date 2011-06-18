@@ -590,11 +590,11 @@ int tellstdfunc::stdREPORTSLCTD::execute()
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
-      laydata::TdtDesign* tDesign = (*dbLibDir)();
-      if (0 == tDesign->numSelected())
+      laydata::TdtCell*   tCell   = (*dbLibDir)()->targetECell();
+      if (0 == tCell->numSelected())
          tell_log(console::MT_ERROR,"No objects selected.");
       else
-         tDesign->reportSelected(PROPC->DBscale());
+         tCell->reportSelected(PROPC->DBscale());
    }
    DATC->unlockTDT(dbLibDir, true);
    return EXEC_NEXT;
