@@ -815,7 +815,6 @@ namespace tenderer {
          unsigned          _num_total_strings;
          GLuint            _pbuffer;
          GLuint            _ibuffer;
-         bool              _has_selected;
          // Data related to selected objects
          SliceSelected     _slct_data;
          // index related data for selected objects

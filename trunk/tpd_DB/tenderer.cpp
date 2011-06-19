@@ -993,7 +993,7 @@ void tenderer::TenderReTV::drawTexts(layprop::DrawProperties* drawprop)
 //
 tenderer::TenderLay::TenderLay(): _cslice(NULL),
    _num_total_points(0u), _num_total_indexs(0u), _num_total_strings(0u),
-   _has_selected(false), _stv_array_offset(0u), _slctd_array_offset(0u)
+   _stv_array_offset(0u), _slctd_array_offset(0u)
 {
    for (int i = lstr; i <= lnes; i++)
    {
@@ -1113,7 +1113,6 @@ void tenderer::TenderLay::wire (int4b* pdata, unsigned psize, WireWidth width, b
 void tenderer::TenderLay::text (const std::string* txt, const CTM& ftmtrx, const DBbox* ovl, const TP& cor, bool sel)
 {
    // Make sure that selected shapes don't come unexpected
-   assert(_has_selected ? true : !sel);
    TextOvlBox* cobj = NULL;
    if (sel)
    {
