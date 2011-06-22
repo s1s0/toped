@@ -1,4 +1,4 @@
-//===========================================================================
+
 //                                                                          =
 //   This program is free software; you can redistribute it and/or modify   =
 //   it under the terms of the GNU General Public License as published by   =
@@ -59,7 +59,7 @@ tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id)//, con
             wxBoxSizer *vsizer1 = DEBUG_NEW wxStaticBoxSizer( wxVERTICAL, this, wxT("Color") );
                _layerColors->Create(this,wxID_ANY,wxEmptyString,
                    wxDefaultPosition, wxDefaultSize,
-                  _colorItems,
+                  NULL,
                   wxCB_READONLY //wxNO_BORDER | wxCB_READONLY
                   );
             vsizer1->Add(_layerColors);
@@ -69,13 +69,24 @@ tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id)//, con
             wxBoxSizer *vsizer2 = DEBUG_NEW wxStaticBoxSizer( wxVERTICAL, this, wxT("Fill") );
                _layerFills->Create(this,wxID_ANY,wxEmptyString,
                    wxDefaultPosition, wxDefaultSize,
-                  _colorItems,
+                  NULL,
                   wxCB_READONLY //wxNO_BORDER | wxCB_READONLY
                   );
             vsizer2->Add(_layerFills);
 
+            _layerLines = DEBUG_NEW  LineListComboBox();
+            prepareLines();
+            wxBoxSizer *vsizer3 = DEBUG_NEW wxStaticBoxSizer( wxVERTICAL, this, wxT("Line Style") );
+               _layerLines->Create(this,wxID_ANY,wxEmptyString,
+                   wxDefaultPosition, wxDefaultSize,
+                  NULL,
+                  wxCB_READONLY //wxNO_BORDER | wxCB_READONLY
+                  );
+            vsizer3->Add(_layerLines);
+
          vsizer0->Add(vsizer1);
          vsizer0->Add(vsizer2);
+         vsizer0->Add(vsizer3);
       sizer2->Add(hsizer0, 1, wxEXPAND, 0);
       sizer2->Add(vsizer0, 1, wxEXPAND, 0);
       wxBoxSizer *sizer3 = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
@@ -179,6 +190,22 @@ void tui::TechEditorDialog::prepareFills()
          _layerFills->Append(wxString((*it).c_str(), wxConvUTF8));
       }
       _layerFills->Append(emptyFill);
+   }
+   PROPC->unlockDrawProp(drawProp);
+}
+
+void tui::TechEditorDialog::prepareLines()
+{
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      NameList all_lines;
+      drawProp->allLines(all_lines);
+
+      for(NameList::const_iterator it=all_lines.begin(); it!=all_lines.end(); ++it)
+      {
+         _layerLines->Append(wxString((*it).c_str(), wxConvUTF8));
+      }
    }
    PROPC->unlockDrawProp(drawProp);
 }
@@ -314,6 +341,68 @@ void tui::FillListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, i
 
       //dc.DrawLine( r.x+r.width/2 + 5, r.y+((r.height/4)*3), r.x+r.width - 5, r.y+((r.height/4)*3) );
       dc.DrawRectangle(r.x+r.width/2 + 5, r.y+((r.height/4)*3)-10, r.x+r.width - 5, r.y+((r.height/4)*3)+10 );
+   }
+   delete brush;
+}
+
+
+void tui::LineListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, int flags ) const
+{
+   if ( item == wxNOT_FOUND )
+            return;
+   layprop::tellRGB col(255,0,0,0);
+   wxColour color(col.red(), col.green(), col.blue(), col.alpha());
+   const layprop::LineSettings *line;
+
+   byte* ifill = DEBUG_NEW byte[128];
+   std::fill(ifill, ifill + 127, 0);
+   for(int i=0; i<=127; i++)
+      ifill[i]=0;
+   
+
+   wxRect r(rect);
+   //r.Deflate(3);
+   //r.height -= 2;
+   wxBrush *brush;
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      wxString str = GetString( item );
+      std::string lineName(str.mb_str(wxConvUTF8));
+      line = drawProp->getLine(lineName);
+      word pattern = line->pattern();
+      unsigned char *ptrByte=(unsigned char*)&pattern;
+      ifill[36] = *ptrByte;
+      ifill[37] = *(ptrByte+1);
+      ifill[38] = *ptrByte;
+      ifill[39] = *(ptrByte+1);
+      brush= tui::makeBrush(ifill, col);        
+
+   }
+   PROPC->unlockDrawProp(drawProp);
+   
+
+   wxPen pen( color, 1);//, wxSOLID );
+
+   brush->SetColour(color);
+   dc.SetPen( pen );
+   dc.SetBrush(*brush);
+
+   if ( !(flags & wxODCB_PAINTING_CONTROL) )
+   {
+      dc.DrawText(GetString( item ),
+                  r.x + 3,
+                  (r.y + 0) + ( (r.height/2) - dc.GetCharHeight() )/2
+                  );
+      dc.DrawRectangle(r.x+r.width/2 + 5, r.y, r.x+r.width - 5, 31);
+   }
+   else
+   {
+      dc.DrawText(GetString( item ),
+                  r.x + 3,
+                  (r.y + 0) + ( (r.height/2) - dc.GetCharHeight() )/2
+                  );
+      dc.DrawRectangle(r.x+r.width/2 + 5, r.y, r.x+r.width - 5, 16);
    }
    delete brush;
 }
