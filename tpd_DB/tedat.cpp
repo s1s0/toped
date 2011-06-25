@@ -1762,7 +1762,7 @@ void laydata::TdtCellRef::ungroup(laydata::TdtDesign* ATDB, TdtCell* dst, AtticL
    if (NULL == cstr)
    {
       std::ostringstream ost;
-      ost << "Cell \"" << structure()->name() << "\" is undefined. Ignored during ungoup.";
+      ost << "Cell \"" << structure()->name() << "\" is undefined. Ignored during ungroup.";
       tell_log(console::MT_WARNING, ost.str());
       return;
    }

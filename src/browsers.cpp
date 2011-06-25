@@ -250,26 +250,47 @@ bool browsers::CellBrowser::findChildItem(const wxString name, wxTreeItemId& ite
 void browsers::CellBrowser::copyItem(const wxTreeItemId item, const wxTreeItemId newparent, bool targetLib)
 {
    wxTreeItemId newitem = AppendItem(newparent, GetItemText(item));
+   int parentnormalImage = GetItemImage(newparent,wxTreeItemIcon_Normal);
+   int parentGrcMask = (BICN_DBCELL_HIER_I  == parentnormalImage)
+                     | (BICN_LIBCELL_HIER_I == parentnormalImage);
    int normalImage   = GetItemImage(item,wxTreeItemIcon_Normal);
    int expandedImage = GetItemImage(item,wxTreeItemIcon_Expanded);
    SetItemImage(newitem, normalImage, wxTreeItemIcon_Normal);
    SetItemImage(newitem, expandedImage, wxTreeItemIcon_Expanded);
    if (targetLib)
    {
-      SetItemImage(newparent,BICN_DBCELL_HIER,wxTreeItemIcon_Normal);
-      SetItemImage(newparent,BICN_DBCELL_FLAT,wxTreeItemIcon_Expanded);
+      if (parentGrcMask)
+      {
+         SetItemImage(newparent, BICN_DBCELL_HIER_I, wxTreeItemIcon_Normal);
+         SetItemImage(newparent, BICN_DBCELL_FLAT_I, wxTreeItemIcon_Expanded);
+      }
+      else
+      {
+         SetItemImage(newparent, BICN_DBCELL_HIER, wxTreeItemIcon_Normal);
+         SetItemImage(newparent, BICN_DBCELL_FLAT, wxTreeItemIcon_Expanded);
+      }
    }
    else
    {
-      SetItemImage(newparent,BICN_LIBCELL_HIER,wxTreeItemIcon_Normal);
-      SetItemImage(newparent,BICN_LIBCELL_FLAT,wxTreeItemIcon_Expanded);
+      if (parentGrcMask)
+      {
+         SetItemImage(newparent, BICN_LIBCELL_HIER_I, wxTreeItemIcon_Normal);
+         SetItemImage(newparent, BICN_LIBCELL_FLAT_I, wxTreeItemIcon_Expanded);
+      }
+      else
+      {
+         SetItemImage(newparent, BICN_LIBCELL_HIER, wxTreeItemIcon_Normal);
+         SetItemImage(newparent, BICN_LIBCELL_FLAT, wxTreeItemIcon_Expanded);
+      }
    }
    SetItemTextColour(newitem, GetItemTextColour(newparent));
    wxTreeItemIdValue cookie;
    wxTreeItemId child = GetFirstChild(item,cookie);
    while (child.IsOk())
    {
-      copyItem(child, newitem, (BICN_DBCELL_HIER == normalImage));
+      bool childTargetLib =  (BICN_DBCELL_HIER   == normalImage)
+                            |(BICN_DBCELL_HIER_I == normalImage);
+      copyItem(child, newitem, childTargetLib);
       child = GetNextChild(item,cookie);
    }
 }
