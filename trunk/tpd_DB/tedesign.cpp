@@ -1569,7 +1569,8 @@ laydata::ShapeList* laydata::TdtDesign::ungroupPrep(laydata::TdtLibDir* libdir)
    return _target.edit()->ungroupPrep(libdir);
 }
 
-laydata::AtticList* laydata::TdtDesign::ungroupThis(laydata::ShapeList* cells4u) {
+laydata::AtticList* laydata::TdtDesign::ungroupThis(laydata::ShapeList* cells4u)
+{
    laydata::AtticList* shapeUngr = DEBUG_NEW laydata::AtticList();
    for (ShapeList::const_iterator CC = cells4u->begin();
                                                      CC != cells4u->end(); CC++)

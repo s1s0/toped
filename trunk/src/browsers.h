@@ -237,7 +237,7 @@ namespace browsers
                                           const wxValidator& validator = wxDefaultValidator,
                                           const wxString& name = wxT("button"),
                                           LayerInfo *layer = NULL);
-                             ~LayerButton();
+         virtual             ~LayerButton();
          void                 onLeftClick(wxMouseEvent&);
          void                 onMiddleClick(wxMouseEvent&);
          void                 onRightClick(wxMouseEvent&);

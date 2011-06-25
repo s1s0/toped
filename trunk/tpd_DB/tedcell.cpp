@@ -1767,17 +1767,35 @@ laydata::ShapeList* laydata::TdtCell::ungroupPrep(laydata::TdtLibDir* libdir)
    ShapeList* csel = DEBUG_NEW ShapeList();
    if (_shapesel.end() != _shapesel.find(REF_LAY))
    {
-      // unlink the selected cells
-      if (_layers[REF_LAY]->deleteMarked())
+      DataList::iterator CI;
+      // First of all - we have to preserve the references of the cells which
+      // contain invalid (GRC) data. By convention those cells shall not be
+      // ungrouped
+      for (CI = _shapesel[REF_LAY]->begin(); CI != _shapesel[REF_LAY]->end(); CI++)
       {
-         if (_layers[REF_LAY]->empty())
+         TdtCell* structure = static_cast<TdtCellRef*>(CI->first)->cStructure();
+         if (structure->checkLayer(GRC_LAY))
          {
-            delete _layers[REF_LAY]; _layers.erase(_layers.find(REF_LAY));
+            CI->first->setStatus(sh_preserved);
+            std::ostringstream ost;
+            ost << "Cell \"" << structure->name() << "\" contains invalid data. Ignored during ungroup.";
+            tell_log(console::MT_WARNING, ost.str());
          }
-         else _layers[REF_LAY]->validate();
       }
-      // now move every single shape in the corresponding fsel layer ...
-      DataList::iterator CI = _shapesel[REF_LAY]->begin();
+
+      QuadTree* cellrefLayer = _layers[REF_LAY];
+      // now unlink the selected cell references
+      if (cellrefLayer->deleteMarked())
+      {
+         if (cellrefLayer->empty())
+         {
+            delete cellrefLayer; _layers.erase(_layers.find(REF_LAY));
+         }
+         else cellrefLayer->validate();
+      }
+      // now move every single shape in the corresponding csel layer and also
+      // return the status of the cells with invalid data.
+      CI = _shapesel[REF_LAY]->begin();
       while (CI != _shapesel[REF_LAY]->end())
       {
          // ... but only if it is marked as sh_deleted
@@ -1788,7 +1806,12 @@ laydata::ShapeList* laydata::TdtCell::ungroupPrep(laydata::TdtLibDir* libdir)
             assert( 0 == CI->second.size() );
             CI = _shapesel[REF_LAY]->erase(CI);
          }
-         else CI++;
+         else
+         {
+            if (sh_preserved == CI->first->status())
+               CI->first->setStatus(sh_selected);
+            CI++;
+         }
       }
       if (_shapesel[REF_LAY]->empty())
       {
