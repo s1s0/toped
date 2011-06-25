@@ -680,6 +680,8 @@ void tellstdfunc::stdUNGROUP::undo_cleanup()
 {
    telldata::ttlist* pl1 = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
    telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
+   clean_ttlaylist(pl1);
+   clean_ttlaylist(pl);
    delete pl;
    delete pl1;
 }
@@ -713,6 +715,7 @@ void tellstdfunc::stdUNGROUP::undo()
       // and add the list of restored cells to the selection
       tDesign->selectFromList(get_ttlaylist(pl), unselable);
       // finally - clean-up behind
+      clean_ttlaylist(pl);
       delete pl;
       delete pl1;
       UpdateLV(tDesign->numSelected());
