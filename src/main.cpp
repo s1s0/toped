@@ -827,8 +827,8 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    mblock->addFUNC("flipY"            ,(DEBUG_NEW                 tellstdfunc::stdFLIPYSEL(telldata::tn_void,false)));
    mblock->addFUNC("flipY"            ,(DEBUG_NEW               tellstdfunc::stdFLIPYSEL_D(telldata::tn_void,false)));
    //**********************************************
-   mblock->addFUNC("flip"            ,(DEBUG_NEW                   tellstdfunc::stdFLIPSEL(telldata::tn_void,false)));
-   mblock->addFUNC("flip"            ,(DEBUG_NEW                 tellstdfunc::stdFLIPSEL_D(telldata::tn_void,false)));
+   mblock->addFUNC("flip"             ,(DEBUG_NEW                  tellstdfunc::stdFLIPSEL(telldata::tn_void,false)));
+   mblock->addFUNC("flip"             ,(DEBUG_NEW                tellstdfunc::stdFLIPSEL_D(telldata::tn_void,false)));
    mblock->addFUNC("delete"           ,(DEBUG_NEW                tellstdfunc::stdDELETESEL(telldata::tn_void,false)));
    mblock->addFUNC("group"            ,(DEBUG_NEW                    tellstdfunc::stdGROUP(telldata::tn_void,false)));
    mblock->addFUNC("ungroup"          ,(DEBUG_NEW                  tellstdfunc::stdUNGROUP(telldata::tn_void,false)));

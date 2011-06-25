@@ -201,7 +201,7 @@ laydata::SelectList* tellstdfunc::get_ttlaylist(telldata::ttlist* llist) {
    laydata::SelectList* shapesel = DEBUG_NEW laydata::SelectList();
    unsigned clayer;
    SGBitSet* pntl_o;
-   for (word i = 0 ; i < llist->mlist().size(); i++) {
+   for (unsigned i = 0 ; i < llist->mlist().size(); i++) {
       clayer = static_cast<telldata::ttlayout*>(llist->mlist()[i])->layer();
       if (shapesel->end() == shapesel->find(clayer))
          (*shapesel)[clayer] = DEBUG_NEW laydata::DataList();
@@ -219,7 +219,7 @@ laydata::SelectList* tellstdfunc::get_ttlaylist(telldata::ttlist* llist) {
 laydata::AtticList* tellstdfunc::get_shlaylist(telldata::ttlist* llist) {
    laydata::AtticList* shapesel = DEBUG_NEW laydata::AtticList();
    unsigned clayer;
-   for (word i = 0 ; i < llist->mlist().size(); i++) {
+   for (unsigned i = 0 ; i < llist->mlist().size(); i++) {
       clayer = static_cast<telldata::ttlayout*>(llist->mlist()[i])->layer();
       if (shapesel->end() == shapesel->find(clayer))
          (*shapesel)[clayer] = DEBUG_NEW laydata::ShapeList();
