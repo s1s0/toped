@@ -84,7 +84,7 @@ class TopedApp : public wxApp
       typedef std::list<wxDynamicLibrary*> PluginList;
       bool           getLogFileName();
       void           loadGlfFonts();
-		void           loadStartupScript();
+      void           defaultStartupScript();
       void           loadPlugIns();
       bool           checkCrashLog();
       void           getLocalDirs();    //! Get directories in TPD_LOCAL
@@ -239,13 +239,14 @@ int TopedApp::OnRun()
    }
    else
    {
-		loadStartupScript();
       // Execute the tell file from the command line
       LogFile.init(std::string(_logFileName.mb_str(wxConvFile )));
 //      wxLog::AddTraceMask(wxT("thread"));
 //      wxLog::AddTraceMask(wxTRACE_MemAlloc);
       if ( !_inputTellFile.IsEmpty() )
          Console->parseCommand(_inputTellFile);
+      else
+         defaultStartupScript();
 
    }
    return wxApp::OnRun();
@@ -335,11 +336,37 @@ void TopedApp::loadGlfFonts()
 }
 
 //=============================================================================
-void TopedApp::loadStartupScript()
+void TopedApp::defaultStartupScript()
 {
-	wxString inputfile;
-   inputfile << wxT("#include \"$TPD_GLOBAL\\tll\\.topedrc\"");
-   Console->parseCommand(inputfile, false);
+   wxFileName rcFile(_globalDir);
+   rcFile.AppendDir(wxT("tll"));
+   rcFile.SetFullName(wxT(".topedrc"));
+   rcFile.Normalize();
+   assert(rcFile.IsOk());
+   if (rcFile.FileExists())
+   {
+      wxString tellCommand;
+      tellCommand << wxT("#include \"") << rcFile.GetFullPath() << wxT("\"");
+      Console->parseCommand(tellCommand, false);
+   }
+   else
+   {
+      rcFile.AssignDir(_localDir);
+      rcFile.AppendDir(wxT("tll"));
+      rcFile.SetFullName(wxT(".topedrc"));
+      rcFile.Normalize();
+      assert(rcFile.IsOk());
+      if (rcFile.FileExists())
+      {
+         wxString tellCommand;
+         tellCommand << wxT("#include \"") << rcFile.GetFullPath() << wxT("\"");
+         Console->parseCommand(tellCommand, false);
+      }
+      else
+      {
+         tell_log(console::MT_WARNING,"File \".topedrc\" not found. Consider loading a technology file.");
+      }
+   }
 }
 
 
