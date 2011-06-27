@@ -1,0 +1,49 @@
+
+/**
+ * defines some check functions to test the contents of certain types of variables
+
+ * Copyright (C) 2011 by Armin Taschwer
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+
+ */
+
+/** check points
+ * @param sample test item to check
+ * @param template sample should match the template
+ * @return if the two points are identical the functions returns TRUE
+ */
+bool check_point (point sample, point template) {
+  bool ret = false;
+
+  //points can only be equal within an epsilon environment
+  //or the values are for example REAL_pINF -- then no epsilon 
+  //is allowed
+  //--> geometry.tll has to be included
+  if ( ((sample.x == template.x) &&
+	(sample.y == template.y)) ||
+       points_equal (sample, template)) {
+    ret = true;
+  }
+  return (ret);
+}
+
+void check_point_echo (point sample, point template) {
+  if (check_point (sample, template)) {
+    echo ("Test OK");
+  } else {
+    echo ("Test FAILED");
+  }
+}

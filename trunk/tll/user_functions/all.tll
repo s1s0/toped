@@ -1,0 +1,12 @@
+
+/*
+ * if you want to change the technology copy this file
+ * to your working directory and change the appropriate entry
+ */
+
+#include "general/definitions.tll"
+#include "technology/default_drc.tll"
+
+#include "general/helper.tll"
+#include "general/geometry.tll"
+#include "general/wires.tll"
