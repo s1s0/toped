@@ -7,7 +7,7 @@
  *
  * Copyright (C) 2010 by Armin Taschwer
 
- * GRID-related
+ * GRID related
  * ------------
  * point floor_of_pt (point) .. returns the "floored" values of a vector
  * point round_of_pt (point) .. returns the "rounded" values of a vector
@@ -21,15 +21,19 @@
  * -----------------
  * real vec_len (point) .. length of a vector
  * point vec_normal (point) .. returns a orthogonal and normalized vector (90° ccw)
- * point vec_mirror (point) .. returns a mirrored (180°) vector
- * real vec_cross (point a, point b) .. returns the cross product of two vector
- * point vec_abs (point) .. returns the absolute values of the vector
+ * point vec_mirror (point) .. returns a mirrored (180°) version of input vector
+ * real vec_cross (point a, point b) .. returns the cross product of two vectors
+ * point vec_abs (point) .. returns the absolute value of the vector
 
  * POINTs related
  * --------------
  * bool points_equal (point, point) .. 2 point are within an epsilon neighbourhood
- * bool is_point_on_line (point p, point a, point b) .. true if point p is on line (ab)
+ * bool is_point_on_line (point p, point a, point b) .. true if point p is on the line (ab)
 
+ * BOXES related
+ * -------------
+ * real box_width (box) .. width of box
+ * real box_height (box) .. width of box
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -238,3 +242,23 @@ bool is_point_on_line (point p, point a, point b) {
   }
   return on_line;
 }
+
+
+/**
+ * returns the width of a box-type
+ * @param b box
+ * @return width of box
+ */
+real box_width (box b) {
+  return ( abs(b.p1.x - b.p2.x));
+}
+
+/**
+ * returns the width of a box-type
+ * @param b box
+ * @return width of box
+ */
+real box_height (box b) {
+  return ( abs(b.p1.y - b.p2.y));  
+}
+

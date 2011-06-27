@@ -9,6 +9,10 @@
  * Functions
  * ---------
  * int list seq (int a, int b) .. generates a sequence between a and b
+ * real max (real a, real b) .. returns the maximum of two variables
+ * real min (real a, real b) .. returns the minimum of two variables
+ * real list_max (real list l) .. returns the maximum of a list
+ * real list_min (real list l) .. returns the minimum of a list
  
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,3 +58,63 @@ int list seq (int a, int b) {
   return out;
 }
 
+
+/**
+ * returns the maximum between two real variables
+ * @param a first number
+ * @param b second number
+ * @return maximum of a and b
+ */
+real r_max (real a, real b) {
+  real m = a;
+  if (a < b) m = b;
+  return (m);
+}
+
+/**
+ * returns the minimum between two real variables
+ * @param a first number
+ * @param b second number
+ * @return minimum of a and b
+ */
+real r_min (real a, real b) {
+  real m = a;
+  if (a > b) m = b;
+  return (m);
+}
+
+/**
+ * returns the maximum of a list
+ * @param l list of real numbers
+ * @return maximum of l
+ */
+real rlist_max (real list l) {
+  real m;
+  //check if list contains at least one element 
+  if (length(l) > 0) m = l[0];
+  else return (INT_mINF); //better than nothing //other solutions?
+
+  real list ll = l[1-:];
+  foreach(real i; l) {
+    if (i > m) m = i;
+  }
+  return (m);
+}
+
+/**
+ * returns the minimum of a list
+ * @param l list of real numbers
+ * @return maximum of l
+ */
+real rlist_min (real list l) {
+  real m;
+  //check if list contains at least one element 
+  if (length(l) > 0) m = l[0];
+  else return (INT_mINF); //better than nothing //other solutions?
+
+  real list ll = l[1-:];
+  foreach(real i; l) {
+    if (i < m) m = i;
+  }
+  return (m);
+}
