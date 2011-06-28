@@ -8,9 +8,9 @@
 			<storageModule externalCElementFile="org.eclipse.linuxtools.cdt.autotools.core.configuration.build.208823131_cdtBuildSystem" version="4.0.0"/>
 			<storageModule externalCElementFile="org.eclipse.linuxtools.cdt.autotools.core.configuration.build.208823131_org.eclipse.cdt.core.externalSettings"/>
 			<storageModule externalCElementFile="org.eclipse.linuxtools.cdt.autotools.core.configuration.build.208823131_org.eclipse.cdt.core.language.mapping"/>
-			<storageModule externalCElementFile="org.eclipse.linuxtools.cdt.autotools.core.configuration.build.208823131_org.eclipse.cdt.make.core.buildtargets"/>
 			<storageModule externalCElementFile="org.eclipse.linuxtools.cdt.autotools.core.configuration.build.208823131_org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 			<storageModule externalCElementFile="org.eclipse.linuxtools.cdt.autotools.core.configuration.build.208823131_scannerConfiguration"/>
+			<storageModule externalCElementFile="org.eclipse.linuxtools.cdt.autotools.core.configuration.build.208823131_org.eclipse.cdt.make.core.buildtargets"/>
 		</cconfiguration>
 	</storageModule>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">

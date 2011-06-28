@@ -10,10 +10,12 @@ SUBDIRS_MAIN = ui                                         \
                tll                                        \
                tll/user_functions                         \
                tll/user_functions/technology/             \
+               tll/user_functions/test/                   \
                tll/user_functions/general                 \
                tll/user_functions/general/examples        \
-               tll/user_functions/logos                   \
-               tll/user_functions/logos/examples          \
+               tll/user_functions/tools                   \
+               tll/user_functions/tools/logos             \
+               tll/user_functions/tools/logos/examples    \
                utils/cadence
 if UTILS
    SUBDIRS =   $(SUBDIRS_MAIN)                 \
