@@ -1,4 +1,4 @@
-tllgenerallogosdir = $(pkgdatadir)/tll/user_functions/logos
+tllgenerallogosdir = $(pkgdatadir)/tll/user_functions/tools/logos
 tllgenerallogos_SCRIPTS = config.m write_tell_script.m \
                          write_tell_script_helper.m create_logo.sh  
 tllgenerallogos_DATA = README config_min.tll test_logo.tll

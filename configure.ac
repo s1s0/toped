@@ -135,6 +135,7 @@ AC_CONFIG_FILES([
    tll/user_functions/tools/Makefile
    tll/user_functions/tools/logos/Makefile
    tll/user_functions/tools/logos/examples/Makefile
+   tll/user_functions/devices/Makefile   
 ])
 
 AM_COND_IF([UTILS],
