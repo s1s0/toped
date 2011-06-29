@@ -1603,6 +1603,33 @@ void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
          tell_log(console::MT_ERROR,info.str());
       }
    }
+
+   else if ("GRC_BLINK_FREQ" == name)
+   {
+      word val;
+      if ((from_string<word>(val, value, std::dec)) && (val <= 10))
+      {
+//         layprop::DrawProperties* drawProp;
+//         if (PROPC->lockDrawProp(drawProp))
+//         {
+//            drawProp->setCellDepthAlphaEbb(val);
+//         }
+//         PROPC->unlockDrawProp(drawProp);
+         // send an event to update the property dialog
+         wxCommandEvent event(wxEVT_RENDER_PARAMS);
+         event.SetId(tui::RPS_GRC_FREQ);
+         event.SetInt(val);
+         wxPostEvent(TopedMainW, event);
+      }
+      else
+      {
+         std::ostringstream info;
+         info << "Invalid \""<< name <<"\" value. Expected value is between 0 and 10";
+         tell_log(console::MT_ERROR,info.str());
+      }
+   }
+
+
    else
    {
       std::ostringstream info;
