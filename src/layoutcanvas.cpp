@@ -427,10 +427,10 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event)
          DATC->render(_LayCTM);
          glAccum(GL_LOAD, 1.0);
          _invalidWindow = false;
-         _blinkOn = true;
          if (_rubberBand) rubber_paint();
          if (_reperX || _reperY) longCursor();
          SwapBuffers();
+         _blinkOn = false;
          _blinkTimer.Start(500,wxTIMER_CONTINUOUS);
       }
    }

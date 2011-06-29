@@ -219,7 +219,8 @@ namespace tui
       RPS_CELL_DAB        ,
       RPS_CELL_DOV        ,
       RPS_LD_FONT         ,
-      RPS_SLCT_FONT
+      RPS_SLCT_FONT       ,
+      RPS_GRC_FREQ
    } RENDER_PROPERTY_ENUMS;
 
    typedef enum {

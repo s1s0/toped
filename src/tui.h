@@ -95,7 +95,9 @@ namespace tui {
       PDIMG_DETAIL        ,
       PDCELL_DOV          ,
       PDCELL_DAB          ,
-      PDCELL_CHECKDOV
+      PDCELL_CHECKDOV     ,
+      PDGRC_BLINKON       ,
+      PDGRC_BLINKFREQ
    } RenderPropertyDialogID;
 
    typedef enum {
@@ -674,10 +676,14 @@ namespace tui {
          void                   OnCellDov (wxCommandEvent&);
          void                   OnCellDab (wxCommandEvent&);
          void                   OnImageDetail (wxCommandEvent&);
+         void                   OnGrcBlinkOn(wxCommandEvent&);
+         void                   OnGrcBlinkFreq(wxCommandEvent&);
          wxCheckBox*            _cbDepthOfViewLimit;
+         wxCheckBox*            _cbGrcBlinkOn;
          sgSliderControl*       _cellDepthOfView;
          sgSliderControl*       _cellDepthEbb;
          sgSliderControl*       _imageDetail;
+         sgSliderControl*       _cbGrcBlinkFreq;
          DECLARE_EVENT_TABLE();
       };
       class CanvasPSheet : public wxPanel {

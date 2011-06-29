@@ -2449,16 +2449,18 @@ tui::TopedPropertySheets::TopedPropertySheets(wxWindow* parent)
 
 //=============================================================================
 BEGIN_EVENT_TABLE(tui::TopedPropertySheets::RenderingPSheet, wxPanel)
-    EVT_CHECKBOX(PDCELL_CHECKDOV  , tui::TopedPropertySheets::RenderingPSheet::OnCellCheckDov   )
-    EVT_CHECKBOX(PDSET_CELLBOX    , tui::TopedPropertySheets::RenderingPSheet::OnCellBox        )
-    EVT_CHECKBOX(PDSET_CELLMARK   , tui::TopedPropertySheets::RenderingPSheet::OnCellMark       )
-    EVT_CHECKBOX(PDSET_TEXTBOX    , tui::TopedPropertySheets::RenderingPSheet::OnTextBox        )
-    EVT_CHECKBOX(PDSET_TEXTMARK   , tui::TopedPropertySheets::RenderingPSheet::OnTextMark       )
-    EVT_CHECKBOX(PDSET_TEXTORI    , tui::TopedPropertySheets::RenderingPSheet::OnTextOri        )
-    EVT_COMBOBOX(PDSET_TEXTFONTS  , tui::TopedPropertySheets::RenderingPSheet::OnTextFont       )
-    EVT_COMMAND_ENTER(PDIMG_DETAIL, tui::TopedPropertySheets::RenderingPSheet::OnImageDetail    )
-    EVT_COMMAND_ENTER(PDCELL_DOV  , tui::TopedPropertySheets::RenderingPSheet::OnCellDov        )
-    EVT_COMMAND_ENTER(PDCELL_DAB  , tui::TopedPropertySheets::RenderingPSheet::OnCellDab        )
+    EVT_CHECKBOX(PDCELL_CHECKDOV      , tui::TopedPropertySheets::RenderingPSheet::OnCellCheckDov  )
+    EVT_CHECKBOX(PDSET_CELLBOX        , tui::TopedPropertySheets::RenderingPSheet::OnCellBox       )
+    EVT_CHECKBOX(PDSET_CELLMARK       , tui::TopedPropertySheets::RenderingPSheet::OnCellMark      )
+    EVT_CHECKBOX(PDSET_TEXTBOX        , tui::TopedPropertySheets::RenderingPSheet::OnTextBox       )
+    EVT_CHECKBOX(PDSET_TEXTMARK       , tui::TopedPropertySheets::RenderingPSheet::OnTextMark      )
+    EVT_CHECKBOX(PDSET_TEXTORI        , tui::TopedPropertySheets::RenderingPSheet::OnTextOri       )
+    EVT_CHECKBOX(PDGRC_BLINKON        , tui::TopedPropertySheets::RenderingPSheet::OnGrcBlinkOn    )
+    EVT_COMBOBOX(PDSET_TEXTFONTS      , tui::TopedPropertySheets::RenderingPSheet::OnTextFont      )
+    EVT_COMMAND_ENTER(PDIMG_DETAIL    , tui::TopedPropertySheets::RenderingPSheet::OnImageDetail   )
+    EVT_COMMAND_ENTER(PDCELL_DOV      , tui::TopedPropertySheets::RenderingPSheet::OnCellDov       )
+    EVT_COMMAND_ENTER(PDCELL_DAB      , tui::TopedPropertySheets::RenderingPSheet::OnCellDab       )
+    EVT_COMMAND_ENTER(PDGRC_BLINKFREQ , tui::TopedPropertySheets::RenderingPSheet::OnGrcBlinkFreq  )
 END_EVENT_TABLE()
 
 tui::TopedPropertySheets::RenderingPSheet::RenderingPSheet(wxWindow* parent) : wxPanel(parent, wxID_ANY)
@@ -2511,11 +2513,20 @@ tui::TopedPropertySheets::RenderingPSheet::RenderingPSheet(wxWindow* parent) : w
       topTextSizer->Add(textSizer, 0, wxALL | wxALIGN_CENTER | wxEXPAND);
       topTextSizer->Add(textOrien, 0, wxALL | wxALIGN_LEFT             );
       topTextSizer->Add(allFonts , 0, wxALL | wxALIGN_CENTER | wxEXPAND);
+      //GRC related rendering properties
+      wxBoxSizer *grcSizer = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Invalid objects"));
+      _cbGrcBlinkOn = DEBUG_NEW wxCheckBox(this, PDGRC_BLINKON , wxT("blinking"));
+      _cbGrcBlinkOn->SetValue(true);
+      _cbGrcBlinkFreq = DEBUG_NEW sgSliderControl(this, PDGRC_BLINKFREQ, 1, 10, 5);
+      _cbGrcBlinkFreq->Enable(true);
+      grcSizer->Add(_cbGrcBlinkOn  , 0, wxALL| wxALIGN_CENTER | wxEXPAND);
+      grcSizer->Add(_cbGrcBlinkFreq, 0, wxALL| wxALIGN_CENTER | wxEXPAND);
 
    // Pack everything
    topSizer->Add(   imgSizer , 0, wxEXPAND | wxALL, 5);//   topSizer->Add(10,10,0);
    topSizer->Add(topCellSizer, 0, wxEXPAND | wxALL, 5);//   topSizer->Add(10,10,0);
    topSizer->Add(topTextSizer, 0, wxEXPAND | wxALL, 5);
+   topSizer->Add(grcSizer    , 0, wxEXPAND | wxALL, 5);
 
    SetSizer(topSizer);
    topSizer->Fit(this);
@@ -2614,6 +2625,34 @@ void tui::TopedPropertySheets::RenderingPSheet::OnImageDetail (wxCommandEvent& c
    TpdPost::parseCommand(ost);
 }
 
+void tui::TopedPropertySheets::RenderingPSheet::OnGrcBlinkOn(wxCommandEvent& cmdevent)
+{
+   wxString ost;
+   bool enable = (1 == cmdevent.GetInt());
+   _cbGrcBlinkFreq->Enable(enable);
+   _cbGrcBlinkFreq->Refresh();
+   if (enable)
+   {
+      ost << wxT("setparams({\"GRC_BLINK_FREQ\", \"")
+          << _cbGrcBlinkFreq->getValue()
+          << wxT("\"});");
+   }
+   else
+   {
+      ost << wxT("setparams({\"GRC_BLINK_FREQ\", \"0\"});");
+   }
+   TpdPost::parseCommand(ost);
+}
+
+void tui::TopedPropertySheets::RenderingPSheet::OnGrcBlinkFreq (wxCommandEvent& cmdEvent)
+{
+   wxString ost;
+   ost << wxT("setparams({\"GRC_BLINK_FREQ\", \"")
+       << cmdEvent.GetInt()
+       << wxT("\"});");
+   TpdPost::parseCommand(ost);
+}
+
 void tui::TopedPropertySheets::RenderingPSheet::update(wxCommandEvent& evt)
 {
    wxWindow* targetControl;
@@ -2656,6 +2695,18 @@ void tui::TopedPropertySheets::RenderingPSheet::update(wxCommandEvent& evt)
       case RPS_SLCT_FONT    :
          targetControl = FindWindow(PDSET_TEXTFONTS);assert(targetControl);
          static_cast<wxComboBox*>(targetControl)->SetStringSelection(evt.GetString() );
+         break;
+      case RPS_GRC_FREQ     :
+         if (0 == evt.GetInt())
+         {
+            _cbGrcBlinkFreq->Enable(false);
+            _cbGrcBlinkOn->SetValue(false);
+         }
+         else
+         {
+            _cbGrcBlinkFreq->setValue(evt.GetInt());
+            _cbGrcBlinkOn->SetValue(true);
+         }
          break;
       default: assert(false);
    }
