@@ -222,6 +222,7 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos,
    // DON'T enable it if you're not sure what you're doing!
    _oglThread = false;
    _apTrigger = 10;
+   _blinkInterval = 500;
    _blinkOn = false;
 }
 
@@ -425,13 +426,17 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event)
          glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
          glClear(GL_ACCUM_BUFFER_BIT);
          DATC->render(_LayCTM);
+         if (0 == _blinkInterval) DATC->drawFOnly();
          glAccum(GL_LOAD, 1.0);
          _invalidWindow = false;
          if (_rubberBand) rubber_paint();
          if (_reperX || _reperY) longCursor();
          SwapBuffers();
-         _blinkOn = false;
-         _blinkTimer.Start(500,wxTIMER_CONTINUOUS);
+         if (0 < _blinkInterval)
+         {
+            _blinkOn = false;
+            _blinkTimer.Start(_blinkInterval,wxTIMER_CONTINUOUS);
+         }
       }
    }
    else

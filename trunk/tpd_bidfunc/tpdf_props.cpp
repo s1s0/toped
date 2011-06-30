@@ -1604,7 +1604,7 @@ void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
       }
    }
 
-   else if ("GRC_BLINK_FREQ" == name)
+   else if ("GRC_BLINK_PERIOD" == name)
    {
       word val;
       if ((from_string<word>(val, value, std::dec)) && (val <= 10))
@@ -1617,9 +1617,10 @@ void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
 //         PROPC->unlockDrawProp(drawProp);
          // send an event to update the property dialog
          wxCommandEvent event(wxEVT_RENDER_PARAMS);
-         event.SetId(tui::RPS_GRC_FREQ);
+         event.SetId(tui::RPS_GRC_PERIOD);
          event.SetInt(val);
          wxPostEvent(TopedMainW, event);
+         Console->set_canvas_invalid(true);
       }
       else
       {

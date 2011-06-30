@@ -38,10 +38,12 @@
 #include "tuidefs.h"
 #include "datacenter.h"
 #include "browsers.h"
+#include "toped.h"
 
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
 extern layprop::FontLibrary*     fontLib;
+extern tui::TopedFrame*          Toped;
 
 #if wxCHECK_VERSION(2, 8, 0)
 #define tpdfOPEN wxFD_OPEN
@@ -2633,13 +2635,13 @@ void tui::TopedPropertySheets::RenderingPSheet::OnGrcBlinkOn(wxCommandEvent& cmd
    _cbGrcBlinkFreq->Refresh();
    if (enable)
    {
-      ost << wxT("setparams({\"GRC_BLINK_FREQ\", \"")
+      ost << wxT("setparams({\"GRC_BLINK_PERIOD\", \"")
           << _cbGrcBlinkFreq->getValue()
           << wxT("\"});");
    }
    else
    {
-      ost << wxT("setparams({\"GRC_BLINK_FREQ\", \"0\"});");
+      ost << wxT("setparams({\"GRC_BLINK_PERIOD\", \"0\"});");
    }
    TpdPost::parseCommand(ost);
 }
@@ -2647,7 +2649,7 @@ void tui::TopedPropertySheets::RenderingPSheet::OnGrcBlinkOn(wxCommandEvent& cmd
 void tui::TopedPropertySheets::RenderingPSheet::OnGrcBlinkFreq (wxCommandEvent& cmdEvent)
 {
    wxString ost;
-   ost << wxT("setparams({\"GRC_BLINK_FREQ\", \"")
+   ost << wxT("setparams({\"GRC_BLINK_PERIOD\", \"")
        << cmdEvent.GetInt()
        << wxT("\"});");
    TpdPost::parseCommand(ost);
@@ -2696,16 +2698,18 @@ void tui::TopedPropertySheets::RenderingPSheet::update(wxCommandEvent& evt)
          targetControl = FindWindow(PDSET_TEXTFONTS);assert(targetControl);
          static_cast<wxComboBox*>(targetControl)->SetStringSelection(evt.GetString() );
          break;
-      case RPS_GRC_FREQ     :
+      case RPS_GRC_PERIOD   :
          if (0 == evt.GetInt())
          {
             _cbGrcBlinkFreq->Enable(false);
             _cbGrcBlinkOn->SetValue(false);
+            Toped->view()->setBlinkInterval(0);
          }
          else
          {
             _cbGrcBlinkFreq->setValue(evt.GetInt());
             _cbGrcBlinkOn->SetValue(true);
+            Toped->view()->setBlinkInterval(100*evt.GetInt());
          }
          break;
       default: assert(false);
