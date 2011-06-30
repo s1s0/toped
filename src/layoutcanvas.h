@@ -82,6 +82,7 @@ namespace tui {
          return true;
 #endif
       }
+      void           setBlinkInterval(word bi)   {_blinkInterval = bi;}
    protected:
       void           OnpaintGL(wxPaintEvent& event);
       void           OnresizeGL(wxSizeEvent& event);
@@ -154,6 +155,7 @@ namespace tui {
       bool           _oglVersion14;  //! OpenGL version >= 1.4 detected
       bool           _oglExtMultiDrawArrays; //! GL_EXT_multi_draw_arrays feature is supported
       bool           _oglArbVertexBufferObject; //! GL_ARB_vertex_buffer_object feature is supported
+      word           _blinkInterval; //!
       wxTimer        _blinkTimer;    //! To implement the flashing images
       bool           _blinkOn;
 #ifdef __WXGTK__

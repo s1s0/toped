@@ -220,7 +220,7 @@ namespace tui
       RPS_CELL_DOV        ,
       RPS_LD_FONT         ,
       RPS_SLCT_FONT       ,
-      RPS_GRC_FREQ
+      RPS_GRC_PERIOD
    } RENDER_PROPERTY_ENUMS;
 
    typedef enum {
