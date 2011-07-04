@@ -36,6 +36,7 @@
 #include "ttt.h"
 #include "outbox.h"
 #include "tedesign.h"
+#include "auxdat.h"
 
 //-----------------------------------------------------------------------------
 // class PSegment

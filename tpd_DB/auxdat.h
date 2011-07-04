@@ -25,8 +25,8 @@
 //        $Author$
 //===========================================================================
 
-#ifndef GRCCELL_H_
-#define GRCCELL_H_
+#ifndef AUXDAT_H_
+#define AUXDAT_H_
 
 #include "qtree_tmpl.h"
 
@@ -172,4 +172,4 @@ namespace auxdata {
    };
 
 }
-#endif /* GRCCELL_H_ */
+#endif /* AUXDAT_H_ */

@@ -32,7 +32,7 @@
 #include "tellyzer.h"
 
 #include "tedat.h"   //<< Must find a way to remove this from here. See line 243 - it's all about it!
-#include "grccell.h" //<< Must find a way to remove this from here. See line 282 - it's all about it!
+#include "auxdat.h" //<< Must find a way to remove this from here. See line 282 - it's all about it!
 //=============================================================================
 telldata::tell_var* telldata::tell_type::initfield(const typeID ID) const {
    telldata::tell_var* nvar;

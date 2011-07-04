@@ -36,12 +36,12 @@
 #include <math.h>
 #include <algorithm>
 #include "tedat.h"
+#include "auxdat.h"
 #include "tedcell.h"
 #include "logicop.h"
 #include "tenderer.h"
 #include "ps_out.h"
 #include "outbox.h"
-#include "grccell.h"
 
 //GLubyte select_mark[30] = {0x00, 0x00, 0x00, 0x00, 0x3F, 0xF8, 0x3F, 0xF8, 0x30, 0x18,
 //                           0x30, 0x18, 0x30, 0x18, 0x30, 0x18, 0x30, 0x18, 0x30, 0x18,

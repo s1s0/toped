@@ -32,7 +32,7 @@
 #include "viewprop.h"
 #include "tenderer.h"
 #include "outbox.h"
-#include "grccell.h"
+#include "auxdat.h"
 
 //-----------------------------------------------------------------------------
 // class QTreeTmpl

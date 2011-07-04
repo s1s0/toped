@@ -29,7 +29,6 @@
 #define TEDESIGN_H_INCLUDED
 
 #include "tedcell.h"
-#include "grccell.h"
 namespace laydata {
 
    class TdtLibrary {
