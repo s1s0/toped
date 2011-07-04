@@ -29,6 +29,7 @@
 #include <sstream>
 #include "tpdf_get.h"
 #include "tedat.h"
+#include "auxdat.h"
 #include "datacenter.h"
 
 extern DataCenter*               DATC;

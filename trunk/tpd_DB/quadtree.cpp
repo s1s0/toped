@@ -28,7 +28,7 @@
 #include "tpdph.h"
 #include "quadtree.h"
 #include "qtree_tmpl.h"
-#include "grccell.h"
+#include "auxdat.h"
 
 laydata::QuadProps::QuadProps(): _numObjects(0), _invalid(false), _quadMap(0)
 {}

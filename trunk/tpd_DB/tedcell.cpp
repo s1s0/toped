@@ -31,6 +31,7 @@
 #include <iostream>
 #include "tedcell.h"
 #include "tedat.h"
+#include "auxdat.h"
 #include "viewprop.h"
 #include "tedesign.h"
 #include "tenderer.h"

@@ -27,7 +27,7 @@
 
 #include "tpdph.h"
 #include <sstream>
-#include "grccell.h"
+#include "auxdat.h"
 
 auxdata::TdtGrcPoly::TdtGrcPoly(const PointVector& plst) :
    TdtAuxData(          )
