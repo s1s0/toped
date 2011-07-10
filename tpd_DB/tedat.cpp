@@ -2780,7 +2780,7 @@ void laydata::ValidPoly::normalize()
 
 /*! Implements  algorithm to check that the polygon is not
 self crossing. Alters the laydata::shp_cross bit of _status if the polygon
-is selfcrossing
+is self crossing
 */
 void laydata::ValidPoly::selfcrossing()
 {
@@ -2790,7 +2790,11 @@ void laydata::ValidPoly::selfcrossing()
    {
       fixingpoly.findCrossingPoints();
    }
-   catch (EXPTNpolyCross&) {_status |= laydata::shp_cross; return;}
+   catch (EXPTNpolyCross&)
+   {
+      _status |= laydata::shp_cross;
+      return;
+   }
    if (0 != fixingpoly.crossp() )
       _status |= laydata::shp_cross;
 }
