@@ -399,7 +399,7 @@ PointVector* logicop::logic::hole2simple(const PointVector& outside, const Point
    {
       _eq.sweep2bind(BC);
    }
-   catch (EXPTNpolyCross) {return NULL;}
+   catch (EXPTNpolyCross&) {return NULL;}
    polycross::BindSegment* sbc = BC.getBindSegment(obstructions);
    if (NULL == sbc) return NULL; // i.e. Can't bind those objects together
    //insert 2 bind points and link them
