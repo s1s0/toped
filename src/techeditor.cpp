@@ -360,34 +360,94 @@ void tui::LineListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, i
    for(int i=0; i<=127; i++)
       ifill[i]=0;
    
-
+   
    wxRect r(rect);
-   //r.Deflate(3);
-   //r.height -= 2;
+
    wxBrush *brush;
    layprop::DrawProperties* drawProp;
+   byte width;
+   byte patscale;
+   wxDash dashes[32];
+   int index = 0;
+
    if (PROPC->lockDrawProp(drawProp))
    {
       wxString str = GetString( item );
       std::string lineName(str.mb_str(wxConvUTF8));
       line = drawProp->getLine(lineName);
-      word pattern = line->pattern();
-      unsigned char *ptrByte=(unsigned char*)&pattern;
-      ifill[36] = *ptrByte;
-      ifill[37] = *(ptrByte+1);
-      ifill[38] = *ptrByte;
-      ifill[39] = *(ptrByte+1);
+      word pattern = line->pattern(); 
+      width = line->width();
+      patscale = line->patscale();
+ //patscale = 1;
+      enum statetype {zero, one};
+      int state;
+
+
+      int i = 0;
+
+      int mask = 0x8000;
+      int length = 0;
+      if (pattern & mask) 
+      {
+         state = one; 
+      }
+      else 
+      {
+         state = zero;
+      }
+      for (int i= 0; i < 16; ++i)
+      {
+         if(pattern & mask)
+         {
+            if(state == one) 
+            {
+               length++;
+            }
+            else
+            {
+               dashes[index] = patscale*length;
+               state = one;
+               index++;
+               length = 1;
+            }
+         }
+         else
+         {
+            if(state == zero) 
+            {
+               length++;
+            }
+            else
+            {
+               dashes[index] = patscale*length;
+               state = zero;
+               index++;
+               length = 1;
+            }
+         }
+         mask = mask >> 1;
+      }
+      //last step
+      dashes[index] = length;
+
+
+      
       brush= tui::makeBrush(ifill, col);        
 
    }
+     
+
+   wxPen pen(wxT("black"), width, wxUSER_DASH);
+   pen.SetDashes(index, dashes);
+
    PROPC->unlockDrawProp(drawProp);
    
 
-   wxPen pen( color, 1);//, wxSOLID );
+//   wxPen pen( color, 1);//, wxSOLID );
 
    brush->SetColour(color);
    dc.SetPen( pen );
-   dc.SetBrush(*brush);
+  // dc.SetBrush(*brush);
 
    if ( !(flags & wxODCB_PAINTING_CONTROL) )
    {
@@ -395,7 +455,8 @@ void tui::LineListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, i
                   r.x + 3,
                   (r.y + 0) + ( (r.height/2) - dc.GetCharHeight() )/2
                   );
-      dc.DrawRectangle(r.x+r.width/2 + 5, r.y, r.x+r.width - 5, 31);
+      //dc.DrawRectangle(r.x+r.width/2 + 5, r.y, r.x+r.width - 5, 31);
+      dc.DrawLine(r.x+r.width/2 + 5, r.y+10, r.x+r.width - 5, r.y+10);
    }
    else
    {
@@ -403,7 +464,8 @@ void tui::LineListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, i
                   r.x + 3,
                   (r.y + 0) + ( (r.height/2) - dc.GetCharHeight() )/2
                   );
-      dc.DrawRectangle(r.x+r.width/2 + 5, r.y, r.x+r.width - 5, 16);
+      //dc.DrawRectangle(r.x+r.width/2 + 5, r.y, r.x+r.width - 5, 16);
+      dc.DrawLine(r.x+r.width/2 + 5, r.y+10, r.x+r.width - 5, r.y+10);
    }
    delete brush;
 }
