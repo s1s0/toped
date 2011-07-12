@@ -1,0 +1,40 @@
+
+/*
+ * this file serves as a template for technology dependent rules
+ * If user-functions wants to do a design-rule-check (DRC) it
+ * should use the appropriate technology file (at least this 
+ * default parameters)
+ 
+ * Copyright (C) 2010 by Armin Taschwer
+ */
+
+//grid definitions
+const real GRID = 0.025;
+
+//this is essential for the function floor
+//otherwise small rounding errors would give inaccurate results
+//floor() with EPS is still far away to be a round()
+const real EPS = GRID/1000.0; 
+
+//DRC definitions for a Via
+const real VIA = 0.4;
+const real VIA_SPC = 0.5; 
+
+//Wires
+const int MAX_POLY = 1; //max. number of poly-layers
+const int MAX_METAL = 4; //max. number of metal-layers
+
+const real P1_MIN_W = 0.35; //width
+const real P1_MIN_S = 0.45; //space
+
+const real M1_MIN_W = 0.5;
+const real M1_MIN_S = 0.45;
+
+const real M2_MIN_W = 0.6;
+const real M2_MIN_S = 0.5;
+
+const real M3_MIN_W = 0.6;
+const real M3_MIN_S = 0.5;
+
+const real M4_MIN_W = 0.6;
+const real M4_MIN_S = 0.6;
