@@ -46,7 +46,7 @@ BEGIN_EVENT_TABLE(tui::TechEditorDialog, wxDialog)
 END_EVENT_TABLE()
 
 tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id)//, const wxString& title, const wxPoint& pos, const wxSize& size, long style )  
-:wxDialog( parent, id, wxT("Technology Editor"), wxDefaultPosition, wxSize(800, 500))//, title, pos, size, style )
+:wxDialog( parent, id, wxT("Technology Editor"), wxDefaultPosition, wxSize(1200, 500))//, title, pos, size, style )
 {
    wxSize size = GetSize();
 	wxBoxSizer *sizer1= DEBUG_NEW wxBoxSizer(wxVERTICAL);
@@ -239,22 +239,20 @@ void tui::ColorListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, 
    if ( !(flags & wxODCB_PAINTING_CONTROL) )
    {
       dc.DrawText(GetString( item ),
-                  r.x + 3,
-                  (r.y + 0) + ( (r.height/2) - dc.GetCharHeight() )/2
+                  rect.x + 5,
+                  (rect.y - 1) + ( (rect.height/2) - dc.GetCharHeight()/2 )
                   );
-
-      //dc.DrawLine( r.x+r.width/2 + 5, r.y+((r.height/4)*3), r.x+r.width - 5, r.y+((r.height/4)*3) );
-      dc.DrawRectangle(r.x+r.width/2 + 5, r.y+((r.height/4)*3)-10, r.x+r.width - 5, r.y+((r.height/4)*3)+10 );
+      dc.DrawRectangle(r.x+r.width/2 + 5, r.y, 
+                        r.x+r.width - 5, r.y+r.height);
    }
    else
    {
       dc.DrawText(GetString( item ),
-                  r.x + 3,
-                  (r.y + 0) + ( (r.height/2) - dc.GetCharHeight() )/2
+                  rect.x + 5,
+                  (rect.y - 1) + ( (rect.height/2) - dc.GetCharHeight()/2 )
                   );
-
-      //dc.DrawLine( r.x+r.width/2 + 5, r.y+((r.height/4)*3), r.x+r.width - 5, r.y+((r.height/4)*3) );
-      dc.DrawRectangle(r.x+r.width/2 + 5, r.y+((r.height/4)*3)-10, r.x+r.width - 5, r.y+((r.height/4)*3)+10 );
+      dc.DrawRectangle(r.x+r.width/2 + 5, r.y, 
+                        r.x+r.width - 5, r.y+r.height);
    }
 }
 
@@ -322,26 +320,24 @@ void tui::FillListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, i
    brush->SetColour(color);
    dc.SetPen( pen );
    dc.SetBrush(*brush);
+   dc.SetBackground(*wxBLACK);
 
    if ( !(flags & wxODCB_PAINTING_CONTROL) )
    {
       dc.DrawText(GetString( item ),
-                  r.x + 3,
-                  (r.y + 0) + ( (r.height/2) - dc.GetCharHeight() )/2
+                  rect.x + 5,
+                  (rect.y - 1) + ( (rect.height/2) - dc.GetCharHeight()/2 )
                   );
-
-      //dc.DrawLine( r.x+r.width/2 + 5, r.y+((r.height/4)*3), r.x+r.width - 5, r.y+((r.height/4)*3) );
-      dc.DrawRectangle(r.x+r.width/2 + 5, r.y+((r.height/4)*3)-10, r.x+r.width - 5, r.y+((r.height/4)*3)+10 );
-   }
+      dc.DrawRectangle(rect.x+rect.width/2 + 5, rect.y, 
+                        rect.x+rect.width - 5,rect.y + rect.height);   }
    else
    {
       dc.DrawText(GetString( item ),
-                  r.x + 3,
-                  (r.y + 0) + ( (r.height/2) - dc.GetCharHeight() )/2
+                  rect.x + 5,
+                  (rect.y - 1) + ( (rect.height/2) - dc.GetCharHeight()/2 )
                   );
-
-      //dc.DrawLine( r.x+r.width/2 + 5, r.y+((r.height/4)*3), r.x+r.width - 5, r.y+((r.height/4)*3) );
-      dc.DrawRectangle(r.x+r.width/2 + 5, r.y+((r.height/4)*3)-10, r.x+r.width - 5, r.y+((r.height/4)*3)+10 );
+      dc.DrawRectangle(rect.x+rect.width/2 + 5, rect.y, 
+                        rect.x+rect.width - 5, rect.y+rect.height);
    }
    delete brush;
 }
@@ -378,7 +374,6 @@ void tui::LineListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, i
       word pattern = line->pattern(); 
       width = line->width();
       patscale = line->patscale();
- //patscale = 1;
       enum statetype {zero, one};
       int state;
 
@@ -428,44 +423,27 @@ void tui::LineListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, i
          mask = mask >> 1;
       }
       //last step
-      dashes[index] = length;
+      //index++;
+      dashes[index] = patscale*length;
 
 
       
       brush= tui::makeBrush(ifill, col);        
-
    }
      
-
    wxPen pen(wxT("black"), width, wxUSER_DASH);
    pen.SetDashes(index, dashes);
 
    PROPC->unlockDrawProp(drawProp);
-   
-
-//   wxPen pen( color, 1);//, wxSOLID );
-
+ 
    brush->SetColour(color);
    dc.SetPen( pen );
-  // dc.SetBrush(*brush);
+   dc.DrawText(GetString( item ),
+               rect.x + 5,
+               (rect.y - 1) + ( (rect.height/2) - dc.GetCharHeight()/2 )
+               );
 
-   if ( !(flags & wxODCB_PAINTING_CONTROL) )
-   {
-      dc.DrawText(GetString( item ),
-                  r.x + 3,
-                  (r.y + 0) + ( (r.height/2) - dc.GetCharHeight() )/2
-                  );
-      //dc.DrawRectangle(r.x+r.width/2 + 5, r.y, r.x+r.width - 5, 31);
-      dc.DrawLine(r.x+r.width/2 + 5, r.y+10, r.x+r.width - 5, r.y+10);
-   }
-   else
-   {
-      dc.DrawText(GetString( item ),
-                  r.x + 3,
-                  (r.y + 0) + ( (r.height/2) - dc.GetCharHeight() )/2
-                  );
-      //dc.DrawRectangle(r.x+r.width/2 + 5, r.y, r.x+r.width - 5, 16);
-      dc.DrawLine(r.x+r.width/2 + 5, r.y+10, r.x+r.width - 5, r.y+10);
-   }
+      dc.DrawLine(r.x+r.width/2 + 5, r.y+r.height/2, r.x+r.width - 5, r.y+r.height/2);
+
    delete brush;
 }
