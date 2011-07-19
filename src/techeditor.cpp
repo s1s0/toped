@@ -289,14 +289,15 @@ void tui::FillListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, i
 {
    if ( item == wxNOT_FOUND )
             return;
-   layprop::tellRGB col(255, 255, 255, 255);
+//   layprop::tellRGB col(255, 255, 255, 255);
+   layprop::tellRGB col(0, 0, 0, 255);// Black
    wxColour color(col.red(), col.green(), col.blue(), col.alpha());
    const byte* ifill;
 
    wxRect r(rect);
    r.Deflate(3);
    r.height -= 2;
-   wxBrush *brush;
+   wxBrush *brush = NULL;
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
@@ -305,7 +306,7 @@ void tui::FillListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, i
       if(str.Cmp(emptyFill)) 
       {
          ifill   = drawProp->getFill(fillname);
-         brush= tui::makeBrush(ifill, col);        
+         brush= tui::makeBrush(ifill, col);
       }
       else
       {
@@ -314,34 +315,51 @@ void tui::FillListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, i
    }
    PROPC->unlockDrawProp(drawProp);
    
-
-   wxPen pen( color, 3, wxSOLID );
-
-   brush->SetColour(color);
-   dc.SetPen( pen );
-   dc.SetBrush(*brush);
-   dc.SetBackground(*wxBLACK);
-
-   if ( !(flags & wxODCB_PAINTING_CONTROL) )
+   if (NULL != brush)
    {
-      dc.DrawText(GetString( item ),
-                  rect.x + 5,
-                  (rect.y - 1) + ( (rect.height/2) - dc.GetCharHeight()/2 )
-                  );
-      dc.DrawRectangle(rect.x+rect.width/2 + 5, rect.y, 
-                        rect.x+rect.width - 5,rect.y + rect.height);   }
-   else
-   {
-      dc.DrawText(GetString( item ),
-                  rect.x + 5,
-                  (rect.y - 1) + ( (rect.height/2) - dc.GetCharHeight()/2 )
-                  );
-      dc.DrawRectangle(rect.x+rect.width/2 + 5, rect.y, 
-                        rect.x+rect.width - 5, rect.y+rect.height);
+      wxPen pen( color, 2, wxSOLID );
+
+      brush->SetColour(color);
+      dc.SetPen( pen );
+      dc.SetBrush(*brush);
+   //   dc.SetBackground(*wxBLACK);
+   //   dc.Clear();
+
+      if ( !(flags & wxODCB_PAINTING_CONTROL) )
+      {
+         dc.DrawText(GetString( item ),
+                     rect.x + 5,
+                     (rect.y - 1) + ( (rect.height/2) - dc.GetCharHeight()/2 )
+                     );
+         dc.DrawRectangle(rect.x+rect.width/2 + 5, rect.y,
+                           rect.x+rect.width - 5,rect.y + rect.height);
+      }
+      else
+      {
+         dc.DrawText(GetString( item ),
+                     rect.x + 5,
+                     (rect.y - 1) + ( (rect.height/2) - dc.GetCharHeight()/2 )
+                     );
+         dc.DrawRectangle(rect.x+rect.width/2 + 5, rect.y,
+                           rect.x+rect.width - 5, rect.y+rect.height);
+      }
+      delete brush;
    }
-   delete brush;
 }
 
+//void tui::FillListComboBox::OnDrawBackground(wxDC& dc, const wxRect& rect, int /*item*/, int /*flags */) const
+//{
+//   layprop::tellRGB col(0, 0, 0, 255);// Black
+//   wxColour color(col.red(), col.green(), col.blue(), col.alpha());
+//
+//   wxBrush brush(color    , wxSOLID);
+//   wxPen   pen  ( color, 2, wxSOLID );
+//   dc.SetPen  ( pen );
+//   dc.SetBrush(brush);
+//
+//   dc.DrawRectangle( rect.x + rect.width/2 + 5, rect.y             ,
+//                     rect.x + rect.width   - 5, rect.y + rect.height );
+//}
 
 void tui::LineListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, int flags ) const
 {

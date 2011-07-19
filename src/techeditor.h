@@ -62,7 +62,7 @@ class FillListComboBox : public wxOwnerDrawnComboBox
 {
    public:
       virtual void OnDrawItem( wxDC& dc, const wxRect& rect, int item, int flags ) const;
-      //virtual void OnDrawBackground( wxDC& dc, const wxRect& rect, int item, int flags ) const;
+//      virtual void OnDrawBackground( wxDC& dc, const wxRect& rect, int item, int flags ) const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
