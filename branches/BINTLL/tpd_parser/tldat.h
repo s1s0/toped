@@ -25,8 +25,8 @@
 //        $Author$
 //===========================================================================
 
-#ifndef CTM_H
-#define CTM_H
+#ifndef TLDAT_H
+#define TLDAT_H
 
 #include <string>
 #include <vector>
@@ -461,4 +461,4 @@ namespace telldata {
    std::string echoType( const telldata::typeID, const telldata::typeMAP*);
 }
 
-#endif
+#endif //TELLEXE_H

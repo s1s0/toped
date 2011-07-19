@@ -73,7 +73,10 @@ bool parsercmd::cmdSTDFUNC::_threadExecution = false;
 // Depth of the UNDO stack
 word parsercmd::cmdBLOCK::_undoDepth = 100;
 
-
+void parsercmd::cmdVIRTUAL::binDump(TellBinFile& bintell)
+{
+   bintell << binCode();
+}
 
 real parsercmd::cmdVIRTUAL::getOpValue(telldata::operandSTACK& OPs)
 {
@@ -225,7 +228,8 @@ bool parsercmd::cmdVIRTUAL::getBoolValue(telldata::UNDOPerandQUEUE& OPs, bool fr
    return value;
 }
 //=============================================================================
-int parsercmd::cmdPLUS::execute() {
+int parsercmd::cmdPLUS::execute()
+{
    TELL_DEBUG(cmdPLUS);
    real value2 = getOpValue();
    real value1 = getOpValue();
@@ -234,7 +238,8 @@ int parsercmd::cmdPLUS::execute() {
 }
 
 //=============================================================================
-int parsercmd::cmdCONCATENATE::execute() {
+int parsercmd::cmdCONCATENATE::execute()
+{
    TELL_DEBUG(cmdCONCATENATE);
    std::string op2 = getStringValue(OPstack);
    std::string op1 = getStringValue(OPstack);
@@ -243,7 +248,8 @@ int parsercmd::cmdCONCATENATE::execute() {
 }
 
 //=============================================================================
-int parsercmd::cmdMINUS::execute() {
+int parsercmd::cmdMINUS::execute()
+{
    TELL_DEBUG(cmdMINUS);
    real value2 = getOpValue();
    real value1 = getOpValue();
@@ -252,7 +258,8 @@ int parsercmd::cmdMINUS::execute() {
 }
 
 //=============================================================================
-int parsercmd::cmdSHIFTPNT::execute() {
+int parsercmd::cmdSHIFTPNT::execute()
+{
    TELL_DEBUG(cmdSHIFTPNT);
    real shift;
    telldata::ttpnt *p;
@@ -272,6 +279,14 @@ int parsercmd::cmdSHIFTPNT::execute() {
    return EXEC_NEXT;
 }
 
+void parsercmd::cmdSHIFTPNT::binDump(TellBinFile& bintell)
+{
+   byte cmdOptions = 0x00;
+   if (_swapOperands)  cmdOptions |= TLM_SWAP;
+   if (_sign)        { cmdOptions |= TLM_SIGNX; cmdOptions |= TLM_SIGNY;}
+   cmdVIRTUAL::binDump(bintell);
+   bintell << cmdOptions;
+}
 //=============================================================================
 int parsercmd::cmdSHIFTPNT2::execute() {
    TELL_DEBUG(cmdSHIFTPNT2);
@@ -281,6 +296,14 @@ int parsercmd::cmdSHIFTPNT2::execute() {
    delete p; delete p1;
    OPstack.push(r);
    return EXEC_NEXT;
+}
+
+void parsercmd::cmdSHIFTPNT2::binDump(TellBinFile& bintell)
+{
+   byte cmdOptions = 0x00;
+   if (_sign)        { cmdOptions |= TLM_SIGNX; cmdOptions |= TLM_SIGNY;}
+   cmdVIRTUAL::binDump(bintell);
+   bintell << cmdOptions;
 }
 
 //=============================================================================
@@ -294,6 +317,14 @@ int parsercmd::cmdSHIFTPNT3::execute() {
    return EXEC_NEXT;
 }
 
+void parsercmd::cmdSHIFTPNT3::binDump(TellBinFile& bintell)
+{
+   byte cmdOptions = 0x00;
+   if (_signX)         cmdOptions |= TLM_SIGNX;
+   if (_signX)         cmdOptions |= TLM_SIGNY;
+   cmdVIRTUAL::binDump(bintell);
+   bintell << cmdOptions;
+}
 //=============================================================================
 int parsercmd::cmdSHIFTPNT4::execute() {
    TELL_DEBUG(cmdSHIFTPNT4);
@@ -305,6 +336,14 @@ int parsercmd::cmdSHIFTPNT4::execute() {
    return EXEC_NEXT;
 }
 
+void parsercmd::cmdSHIFTPNT4::binDump(TellBinFile& bintell)
+{
+   byte cmdOptions = 0x00;
+   if (_signX)         cmdOptions |= TLM_SIGNX;
+   if (_signX)         cmdOptions |= TLM_SIGNY;
+   cmdVIRTUAL::binDump(bintell);
+   bintell << cmdOptions;
+}
 //=============================================================================
 int parsercmd::cmdSHIFTBOX::execute() {
    TELL_DEBUG(cmdSHIFTBOX);
@@ -327,6 +366,14 @@ int parsercmd::cmdSHIFTBOX::execute() {
    return EXEC_NEXT;
 }
 
+void parsercmd::cmdSHIFTBOX::binDump(TellBinFile& bintell)
+{
+   byte cmdOptions = 0x00;
+   if (_swapOperands)  cmdOptions |= TLM_SWAP;
+   if (_sign)        { cmdOptions |= TLM_SIGNX; cmdOptions |= TLM_SIGNY;}
+   cmdVIRTUAL::binDump(bintell);
+   bintell << cmdOptions;
+}
 //=============================================================================
 int parsercmd::cmdSHIFTBOX3::execute() {
    TELL_DEBUG(cmdSHIFTBOX3);
@@ -355,6 +402,14 @@ int parsercmd::cmdSHIFTBOX3::execute() {
    return EXEC_NEXT;
 }
 
+void parsercmd::cmdSHIFTBOX3::binDump(TellBinFile& bintell)
+{
+   byte cmdOptions = 0x00;
+   if (_signX)         cmdOptions |= TLM_SIGNX;
+   if (_signX)         cmdOptions |= TLM_SIGNY;
+   cmdVIRTUAL::binDump(bintell);
+   bintell << cmdOptions;
+}
 //=============================================================================
 int parsercmd::cmdSHIFTBOX4::execute() {
    TELL_DEBUG(cmdSHIFTBOX4);
@@ -383,6 +438,14 @@ int parsercmd::cmdSHIFTBOX4::execute() {
    return EXEC_NEXT;
 }
 
+void parsercmd::cmdSHIFTBOX4::binDump(TellBinFile& bintell)
+{
+   byte cmdOptions = 0x00;
+   if (_signX)         cmdOptions |= TLM_SIGNX;
+   if (_signX)         cmdOptions |= TLM_SIGNY;
+   cmdVIRTUAL::binDump(bintell);
+   bintell << cmdOptions;
+}
 //=============================================================================
 int parsercmd::cmdBLOWBOX::execute() {
    TELL_DEBUG(cmdBLOWBOX);
@@ -411,6 +474,15 @@ int parsercmd::cmdBLOWBOX::execute() {
    OPstack.push(r);
    delete w;
    return EXEC_NEXT;
+}
+
+void parsercmd::cmdBLOWBOX::binDump(TellBinFile& bintell)
+{
+   byte cmdOptions = 0x00;
+   if (_swapOperands)  cmdOptions |= TLM_SWAP;
+   if (_sign)        { cmdOptions |= TLM_SIGNX; cmdOptions |= TLM_SIGNY;}
+   cmdVIRTUAL::binDump(bintell);
+   bintell << cmdOptions;
 }
 
 //=============================================================================
@@ -457,6 +529,14 @@ int parsercmd::cmdSCALEPNT::execute()
    return EXEC_NEXT;
 }
 
+void parsercmd::cmdSCALEPNT::binDump(TellBinFile& bintell)
+{
+   byte cmdOptions = 0x00;
+   if (_swapOperands)  cmdOptions |= TLM_SWAP;
+   if (!_up)         { cmdOptions |= TLM_SIGNX; cmdOptions |= TLM_SIGNY;}
+   cmdVIRTUAL::binDump(bintell);
+   bintell << cmdOptions;
+}
 //=============================================================================
 int parsercmd::cmdSCALEBOX::execute()
 {
@@ -486,6 +566,14 @@ int parsercmd::cmdSCALEBOX::execute()
    return EXEC_NEXT;
 }
 
+void parsercmd::cmdSCALEBOX::binDump(TellBinFile& bintell)
+{
+   byte cmdOptions = 0x00;
+   if (_swapOperands)  cmdOptions |= TLM_SWAP;
+   if (!_up)         { cmdOptions |= TLM_SIGNX; cmdOptions |= TLM_SIGNY;}
+   cmdVIRTUAL::binDump(bintell);
+   bintell << cmdOptions;
+}
 //=============================================================================
 int parsercmd::cmdLT::execute() {
    TELL_DEBUG(cmdLT);

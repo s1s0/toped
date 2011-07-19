@@ -35,6 +35,7 @@
 #include <stack>
 #include <fstream>
 #include "tldat.h"
+#include "tellexe.h"
 
 #define  EXEC_NEXT      0
 #define  EXEC_RETURN    1
@@ -104,8 +105,9 @@ namespace  parsercmd {
    ******************************************************************************/
    class cmdVIRTUAL {
    public:
-      cmdVIRTUAL(): _opstackerr(false) {};
+                   cmdVIRTUAL(): _opstackerr(false) {};
       virtual int  execute() = 0;
+      virtual void binDump(TellBinFile& );
               real getOpValue(telldata::operandSTACK& OPs = OPstack);
               word getWordValue(telldata::operandSTACK& OPs = OPstack);
               byte getByteValue(telldata::operandSTACK& OPs = OPstack);
@@ -117,8 +119,9 @@ namespace  parsercmd {
               byte getByteValue(telldata::UNDOPerandQUEUE&, bool);
        std::string getStringValue(telldata::UNDOPerandQUEUE&, bool);
               bool getBoolValue(telldata::UNDOPerandQUEUE&, bool);
-      virtual ~cmdVIRTUAL() {};
+      virtual     ~cmdVIRTUAL() {};
    protected:
+      virtual byte binCode() = 0;
       static telldata::operandSTACK       OPstack;      // Operand stack
       static telldata::UNDOPerandQUEUE    UNDOPstack;   // undo operand stack
       static undoQUEUE                    UNDOcmdQ;     // undo command stack
@@ -130,21 +133,33 @@ namespace  parsercmd {
     The definition of the following classes is trivial
    ******************************************************************************/
    class cmdPLUS:public cmdVIRTUAL {
-      int execute();
+   public:
+      virtual int    execute();
+   protected:
+      virtual byte   binCode()            { return TLB_OP_PLUS;}
    };
 
    class cmdCONCATENATE:public cmdVIRTUAL {
-      int execute();
+   public:
+      virtual int    execute();
+   protected:
+      virtual byte   binCode()            { return TLB_OP_CONCATENATE;}
    };
 
    class cmdMINUS:public cmdVIRTUAL {
-      int execute();
+   public:
+      virtual int    execute();
+   protected:
+      virtual byte   binCode()            { return TLB_OP_MINUS;}
    };
 
    class cmdSHIFTPNT:public cmdVIRTUAL {
    public:
       cmdSHIFTPNT(int sign, bool swap):_sign(sign), _swapOperands(swap) {};
-      int execute();
+      virtual int    execute();
+      virtual void   binDump(TellBinFile& );
+   protected:
+      virtual byte   binCode()            { return TLB_OP_SHIFTPNT;}
    private:
       int _sign;
       bool _swapOperands;
@@ -153,7 +168,10 @@ namespace  parsercmd {
    class cmdSHIFTPNT2:public cmdVIRTUAL {
    public:
       cmdSHIFTPNT2(int sign = 1):_sign(sign) {};
-      int execute();
+      virtual int    execute();
+      virtual void   binDump(TellBinFile& );
+   protected:
+      virtual byte   binCode()            { return TLB_OP_SHIFTPNT2;}
    private:
       int _sign;
    };
@@ -161,7 +179,10 @@ namespace  parsercmd {
    class cmdSHIFTPNT3:public cmdVIRTUAL {
    public:
       cmdSHIFTPNT3(int signX, int signY): _signX(signX), _signY(signY) {};
-      int execute();
+      virtual int    execute();
+      virtual void   binDump(TellBinFile& );
+   protected:
+      virtual byte   binCode()            { return TLB_OP_SHIFTPNT3;}
    private:
       int _signX;
       int _signY;
@@ -170,7 +191,10 @@ namespace  parsercmd {
    class cmdSHIFTPNT4:public cmdVIRTUAL {
    public:
       cmdSHIFTPNT4(int signX, int signY): _signX(signX), _signY(signY) {};
-      int execute();
+      virtual int    execute();
+      virtual void   binDump(TellBinFile& );
+   protected:
+      virtual byte   binCode()            { return TLB_OP_SHIFTPNT4;}
    private:
       int _signX;
       int _signY;
@@ -180,8 +204,11 @@ namespace  parsercmd {
    public:
       cmdSHIFTBOX(int sign, bool swap):_sign(sign), _swapOperands(swap) {};
       int execute();
+      virtual void   binDump(TellBinFile& );
+   protected:
+      virtual byte   binCode()            { return TLB_OP_SHIFTBOX;}
    private:
-      int _sign;
+      int  _sign;
       bool _swapOperands;
    };
 
@@ -189,6 +216,9 @@ namespace  parsercmd {
    public:
       cmdSHIFTBOX3(int signX, int signY): _signX(signX), _signY(signY) {};
       int execute();
+      virtual void   binDump(TellBinFile& );
+   protected:
+      virtual byte   binCode()            { return TLB_OP_SHIFTBOX3;}
    private:
       int _signX;
       int _signY;
@@ -198,6 +228,9 @@ namespace  parsercmd {
    public:
       cmdSHIFTBOX4(int signX, int signY): _signX(signX), _signY(signY) {};
       int execute();
+      virtual void   binDump(TellBinFile& );
+   protected:
+      virtual byte   binCode()            { return TLB_OP_SHIFTBOX4;}
    private:
       int _signX;
       int _signY;
@@ -207,23 +240,35 @@ namespace  parsercmd {
    public:
       cmdBLOWBOX(int sign, bool swap): _sign(sign), _swapOperands(swap) {};
       int execute();
+      virtual void   binDump(TellBinFile& );
+   protected:
+      virtual byte   binCode()            { return TLB_OP_BLOWBOX;}
    private:
-      int _sign;
+      int  _sign;
       bool _swapOperands;
    };
 
    class cmdMULTIPLY:public cmdVIRTUAL {
+   public:
       int execute();
+   protected:
+      virtual byte   binCode()            { return TLB_OP_MULTIPLY;}
    };
 
    class cmdDIVISION:public cmdVIRTUAL {
+   public:
       int execute();
+   protected:
+      virtual byte   binCode()            { return TLB_OP_DIVISION;}
    };
 
    class cmdSCALEPNT:public cmdVIRTUAL {
    public:
       cmdSCALEPNT(bool up, bool swap) : _up(up), _swapOperands(swap) {};
       int execute();
+      virtual void   binDump(TellBinFile& );
+   protected:
+      virtual byte   binCode()            { return TLB_OP_SCALEPNT;}
    private:
       bool _up;
       bool _swapOperands;
@@ -233,6 +278,9 @@ namespace  parsercmd {
    public:
       cmdSCALEBOX(bool up, bool swap) : _up(up), _swapOperands(swap) {};
       int execute();
+      virtual void   binDump(TellBinFile& );
+   protected:
+      virtual byte   binCode()            { return TLB_OP_SCALEBOX;}
    private:
       bool _up;
       bool _swapOperands;
@@ -249,61 +297,85 @@ namespace  parsercmd {
    class cmdLT:public cmdVIRTUAL {
    public:
       int execute();
+   protected:
+      virtual byte   binCode()            { return TLB_OP_LT;}
    };
 
    class cmdLET:public cmdVIRTUAL {
    public:
       int execute();
+   protected:
+      virtual byte   binCode()            { return TLB_OP_LET;}
    };
 
    class cmdGT:public cmdVIRTUAL {
    public:
       int execute();
+   protected:
+      virtual byte   binCode()            { return TLB_OP_GT;}
    };
 
    class cmdGET:public cmdVIRTUAL {
    public:
       int execute();
+   protected:
+      virtual byte   binCode()            { return TLB_OP_GET;}
    };
 
    class cmdEQ:public cmdVIRTUAL {
    public:
       int execute();
+   protected:
+      virtual byte   binCode()            { return TLB_OP_EQ;}
    };
 
    class cmdNE:public cmdVIRTUAL {
    public:
       int execute();
+   protected:
+      virtual byte   binCode()            { return TLB_OP_NE;}
    };
 
    class cmdNOT:public cmdVIRTUAL {
    public:
       int execute();
+   protected:
+      virtual byte   binCode()            { return TLB_OP_NOT;}
    };
 
    class cmdBWNOT:public cmdVIRTUAL {
    public:
       int execute();
+   protected:
+      virtual byte   binCode()            { return TLB_OP_BWNOT;}
    };
 
    class cmdAND:public cmdVIRTUAL {
    public:
       int execute();
+   protected:
+      virtual byte   binCode()            { return TLB_OP_AND;}
    };
 
    class cmdBWAND:public cmdVIRTUAL {
    public:
       int execute();
+   protected:
+      virtual byte   binCode()            { return TLB_OP_BWAND;}
    };
 
    class cmdOR:public cmdVIRTUAL {
    public:
       int execute();
+   protected:
+      virtual byte   binCode()            { return TLB_OP_OR;}
    };
 
    class cmdBWOR:public cmdVIRTUAL {
    public:
       int execute();
+   protected:
+      virtual byte   binCode()            { return TLB_OP_BWOR;}
    };
 
    class cmdSTACKRST:public cmdVIRTUAL {
