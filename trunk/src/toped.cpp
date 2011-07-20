@@ -655,6 +655,11 @@ void tui::TopedFrame::setIconDir(const std::string& uiDir)
    if (_resourceCenter) _resourceCenter->setIconDir(uiDir);
 }
 
+void  tui::TopedFrame::setActiveCmd()
+{
+   _cmdline->SetFocus();
+}
+
 void tui::TopedFrame::initToolBars()
 {
    _resourceCenter->setDirection(wxAUI_DOCK_TOP);

@@ -104,6 +104,7 @@ namespace tui {
       void                    initToolBars();
       void                    setIconDir(const std::string& uiDir);
       void                    setOglThread(bool val) {_canvas->setOglThread(val);}
+      void                    setActiveCmd();
    private:
       void                    initMenuBar();
       void                    initView();
