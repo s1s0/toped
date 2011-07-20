@@ -866,6 +866,7 @@ void tui::LayoutCanvas::OnChar(wxKeyEvent& event)
       case WXK_DOWN : eventZOOM.SetInt(ZOOM_DOWN ); break;
       case '+'      : eventZOOM.SetInt(ZOOM_IN   ); break;
       case '-'      : eventZOOM.SetInt(ZOOM_OUT  ); break;
+      case WXK_ESCAPE:((TopedFrame*)this->GetParent())->setActiveCmd();
             default : event.Skip(); return;
    }
    OnZoom(eventZOOM);
