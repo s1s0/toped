@@ -162,45 +162,6 @@ bool TopedApp::OnInit()
    loadGlfFonts();
    // at this stage - the tool shall be considered fully functional
    //--------------------------------------------------------------------------
-
-//   //--------------------------------------------------------------------------
-//   // Check that previous session ended normally
-//   bool recovery_mode = false;
-//   if (checkCrashLog())
-//   {
-//      wxMessageDialog* dlg1 = DEBUG_NEW  wxMessageDialog(Toped,
-//            wxT("Last session didn't exit normally. Start recovery?"),
-//            wxT("Toped"),
-//            wxYES_NO | wxICON_WARNING);
-//      if (wxID_YES == dlg1->ShowModal())
-//         recovery_mode = true;
-//      else
-//         tell_log(console::MT_WARNING,"Recovery rejected.");
-//      dlg1->Destroy();
-//      if (!recovery_mode) saveIgnoredCrashLog();
-//   }
-//   if (recovery_mode)
-//   {
-//      // Try to recover executing the commands logged during previous
-//      // session
-//      tell_log(console::MT_WARNING,"Starting recovery ...");
-//      wxString inputfile;
-//      inputfile << wxT("#include \"") << _logFileName.c_str() << wxT("\"");
-//      Console->parseCommand(inputfile, false);
-//      tell_log(console::MT_WARNING,"Exit recovery mode.");
-//      static_cast<parsercmd::cmdMAIN*>(CMDBlock)->recoveryDone();
-//      LogFile.init(std::string(_logFileName.mb_str(wxConvFile)), true);
-//   }
-//   else
-//   {
-//      // Execute the tell file from the command line
-//      LogFile.init(std::string(_logFileName.mb_str(wxConvFile )));
-////      wxLog::AddTraceMask(wxT("thread"));
-////      wxLog::AddTraceMask(wxTRACE_MemAlloc);
-//      if ( !_inputTellFile.IsEmpty() )
-//         Console->parseCommand(_inputTellFile);
-//
-//   }
    // Put a rendering info in the log
    printLogWHeader();
    return TRUE;

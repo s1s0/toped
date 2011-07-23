@@ -28,9 +28,12 @@
 //===========================================================================*/
 
 /* Define the (exclusive) start condition when the parser includes a file */
-%x incl
+%x pINCL
+%x pDEFNM
+%x pDEFVAL
 lex_string        \"[^"]*\"
-lex_identifier    [a-zA-Z_][a-zA-Z0-9_]*
+lex_ID            [a-zA-Z_][a-zA-Z0-9_]*
+lxt_S             [ \t]+
 lxt_D             [0-9]
 lxt_E             [Ee][-+]?{lxt_D}+
 %{ /**************************************************************************/
@@ -74,17 +77,32 @@ extern YYLTYPE telllloc;
 /* Mark the current position as a start of the next token */
 location_step(&telllloc);
 %} /*******************************************************************************/
-[ \t]+                     location_step(&telllloc);
-\n+                        location_lines(&telllloc,yyleng);location_step(&telllloc);
-"/*"                       ccomment(&telllloc); /*commant block C style*/
+<*>{lxt_S}                 location_step(&telllloc);
+<*>\n+                     location_lines(&telllloc,yyleng);location_step(&telllloc);
+"/*"                       ccomment(&telllloc); /*comment block C style*/
 "//".*\n                   location_lines(&telllloc,1);/* comment line */
-#include                   BEGIN(incl);
-<incl>{lex_string}       { /*first change the scanner state, otherwise there
-                             is a risk to remain in <incl>*/
+#include                   BEGIN(pINCL);
+<pINCL>{lex_string}      { /*first change the scanner state, otherwise there
+                             is a risk to remain in <pINCL>*/
                            BEGIN(INITIAL); 
                            if (! parsercmd::includefile(parsercmd::charcopy(yytext, true), yyin)) 
                               yyterminate(); }
-<incl><<EOF>>            { BEGIN(INITIAL); return tknERROR; }
+#define{lxt_S}           { printf("Entering pDEFNM state \n");
+                           BEGIN(pDEFNM);
+                         }
+<pDEFNM>{lex_ID}{lxt_S}  { printf("preprocessor variable \"%s\" \n", yytext);
+                           BEGIN(pDEFVAL);
+                         }
+<pDEFNM>{lex_ID}         { printf("Empty preprocessor variable \"%s\" \n", yytext);
+                           BEGIN(INITIAL);
+                         }
+<pDEFNM>.                { BEGIN(INITIAL);
+                           return tknERROR;
+                         }
+<pDEFVAL>.*              { printf("preprocessor value     \"%s\" \n", yytext);
+                           BEGIN(INITIAL);
+                         }
+<pINCL><<EOF>>           { BEGIN(INITIAL); return tknERROR; }
 <<EOF>>                  { if (!parsercmd::EOfile()) yyterminate();}
 void                       return tknVOIDdef;
 real                       return tknREALdef;
@@ -107,7 +125,7 @@ until                      return tknUNTIL;
 const                      return tknCONST;
 {lex_string}             { telllval.parsestr = parsercmd::charcopy(yytext, true);
                            return tknSTRING;                               }
-"."{lex_identifier}      { telllval.parsestr = parsercmd::charcopy(yytext);return tknFIELD;}
+"."{lex_ID}              { telllval.parsestr = parsercmd::charcopy(yytext);return tknFIELD;}
 "<="                       return tknLEQ;
 ">="                       return tknGEQ;
 "=="                       return tknEQ;
@@ -140,19 +158,19 @@ const                      return tknCONST;
 "*"                        return '*';
 "/"                        return '/';
 "="                        return '=';
-";"   	                   return ';';
+";"                        return ';';
 0x[0-9A-Fa-f]+    |
 {lxt_D}+                 { telllval.integer = parsercmd::getllint(yytext); return tknINT;}
 {lxt_D}+"."{lxt_D}*({lxt_E})?  |
 {lxt_D}*"."{lxt_D}+({lxt_E})?  |
 {lxt_D}+{lxt_E}          { telllval.real = atof(yytext); return tknREAL;}
-{lex_identifier}         { telllval.parsestr = parsercmd::charcopy(yytext);
+{lex_ID}                 { telllval.parsestr = parsercmd::charcopy(yytext);
                            const telldata::tell_type* ttype = CMDBlock->getTypeByName(yytext);
                            if (NULL == ttype)
                               return tknIDENTIFIER;
                            else
                               return tknTYPEdef;}
-.     	             	   return tknERROR;
+.                          return tknERROR;
 %% 
 /**************************************************************************/
 /*Support functions for the flex parser*/
