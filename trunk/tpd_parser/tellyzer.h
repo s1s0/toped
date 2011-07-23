@@ -53,7 +53,7 @@ namespace  parsercmd {
    class cmdBLOCK;
    class FuncDeclaration;
 
-   // Used by lexer to include multiply files and for error tracing
+   //! Used by lexer to include multiply files and for error tracing
    class lexer_files {
    public:
       lexer_files(void* fh, YYLTYPE* loc) :
@@ -61,6 +61,19 @@ namespace  parsercmd {
       ~lexer_files()                               {delete location;};
       void*    lexfilehandler;
       YYLTYPE* location;
+   };
+
+   class TellPreProc {
+      public:
+                           TellPreProc() : _preDef("") {};
+         void              define(std::string, std::string, const TpdYYLtype&);
+         void              undefine(std::string, const TpdYYLtype&);
+         void              define(std::string);
+         void              preDefine(std::string, const TpdYYLtype&);
+      private:
+         typedef std::map <std::string, std::string> VariableMap;
+         VariableMap       _variables;
+         std::string       _preDef;
    };
 
 //-----------------------------------------------------------------------------

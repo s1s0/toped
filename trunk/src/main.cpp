@@ -63,6 +63,7 @@ extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
 extern layprop::FontLibrary*     fontLib;
 extern parsercmd::cmdBLOCK*      CMDBlock;
+extern parsercmd::TellPreProc*   tellPP;
 extern console::toped_logfile    LogFile;
 extern console::ted_cmd*         Console;
 extern Calbr::CalbrFile*         DRCData;
@@ -164,6 +165,8 @@ bool TopedApp::OnInit()
    //--------------------------------------------------------------------------
    // Put a rendering info in the log
    printLogWHeader();
+   // initialize the TELL pre-processor
+   tellPP = DEBUG_NEW parsercmd::TellPreProc();
    return TRUE;
 }
 
