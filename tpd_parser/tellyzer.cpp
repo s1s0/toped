@@ -119,6 +119,19 @@ void parsercmd::TellPreProc::preDefine(std::string var, const TpdYYLtype& loc)
    _preDef = var;
 }
 
+bool parsercmd::TellPreProc::check(std::string var, std::string& val)
+{
+   VariableMap::iterator CV = _variables.find(var);
+   if (_variables.end() == CV)
+   {
+      val = var; return false;
+   }
+   else
+   {
+      val = CV->second; return true;
+   }
+}
+
 //=============================================================================
 real parsercmd::cmdVIRTUAL::getOpValue(telldata::operandSTACK& OPs)
 {

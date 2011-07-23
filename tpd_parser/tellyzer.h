@@ -70,6 +70,7 @@ namespace  parsercmd {
          void              undefine(std::string, const TpdYYLtype&);
          void              define(std::string);
          void              preDefine(std::string, const TpdYYLtype&);
+         bool              check(std::string, std::string&);
       private:
          typedef std::map <std::string, std::string> VariableMap;
          VariableMap       _variables;
