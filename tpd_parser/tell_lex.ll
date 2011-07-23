@@ -51,6 +51,7 @@ int include_stack_ptr = 0;
 /*Global console object*/
 extern console::ted_cmd*           Console;
 extern parsercmd::cmdBLOCK*        CMDBlock;
+extern parsercmd::TellPreProc*     tellPP;
 
 /*****************************************************************************
 Function declarations
@@ -66,6 +67,8 @@ namespace parsercmd {
    int      includefile(char* name, FILE* &handler);
    int      EOfile();
    static void telllex_fatal(std::string);
+   void     newPrepVar(std::string source, bool empty);
+   void     newPrepVal(std::string source);
 }
 using namespace parsercmd;
 extern YYLTYPE telllloc;
@@ -87,19 +90,15 @@ location_step(&telllloc);
                            BEGIN(INITIAL); 
                            if (! parsercmd::includefile(parsercmd::charcopy(yytext, true), yyin)) 
                               yyterminate(); }
-#define{lxt_S}           { printf("Entering pDEFNM state \n");
-                           BEGIN(pDEFNM);
-                         }
-<pDEFNM>{lex_ID}{lxt_S}  { printf("preprocessor variable \"%s\" \n", yytext);
-                           BEGIN(pDEFVAL);
-                         }
-<pDEFNM>{lex_ID}         { printf("Empty preprocessor variable \"%s\" \n", yytext);
+#define                    BEGIN(pDEFNM);
+<pDEFNM>{lex_ID}[ \t]*\n { parsercmd::newPrepVar(yytext, true);
+                           location_lines(&telllloc,yyleng);location_step(&telllloc);
                            BEGIN(INITIAL);
                          }
-<pDEFNM>.                { BEGIN(INITIAL);
-                           return tknERROR;
+<pDEFNM>{lex_ID}         { parsercmd::newPrepVar(yytext, false);
+                           BEGIN(pDEFVAL);
                          }
-<pDEFVAL>.*              { printf("preprocessor value     \"%s\" \n", yytext);
+<pDEFVAL>.*              { parsercmd::newPrepVal(yytext);
                            BEGIN(INITIAL);
                          }
 <pINCL><<EOF>>           { BEGIN(INITIAL); return tknERROR; }
@@ -170,7 +169,7 @@ const                      return tknCONST;
                               return tknIDENTIFIER;
                            else
                               return tknTYPEdef;}
-.                          return tknERROR;
+<*>.                       BEGIN(INITIAL);return tknERROR;
 %% 
 /**************************************************************************/
 /*Support functions for the flex parser*/
@@ -316,9 +315,19 @@ static void parsercmd::telllex_fatal(std::string message)
    throw EXPTNtell_parser(message);
 }
 
-/*
-"."[Pp]"1"               { telllval.parsestr = parsercmd::charcopy("1");return tknFIELD;}
-"."[Pp]"2"               { telllval.parsestr = parsercmd::charcopy("2");return tknFIELD;}
-"."[Xx]                  { telllval.parsestr = parsercmd::charcopy("x");return tknFIELD;}
-"."[Yy]                  { telllval.parsestr = parsercmd::charcopy("y");return tknFIELD;}
-*/
+void parsercmd::newPrepVar(std::string source, bool empty)
+{
+   if (empty)
+   {
+      source.erase(source.find_first_of(" \n"));
+      tellPP->define(source, std::string(""), telllloc);
+   }
+   else
+      tellPP->preDefine(source, telllloc);
+}
+
+void parsercmd::newPrepVal(std::string source)
+{
+   tellPP->define(source);
+}
+

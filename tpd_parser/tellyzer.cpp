@@ -46,6 +46,7 @@ extern void tellerror(std::string s, TpdYYLtype loc);
 extern void tellerror(std::string s);
 
 parsercmd::cmdBLOCK*       CMDBlock = NULL;
+parsercmd::TellPreProc*    tellPP   = NULL;
 console::toped_logfile     LogFile;
 //-----------------------------------------------------------------------------
 // Initialize some static members
@@ -74,7 +75,51 @@ bool parsercmd::cmdSTDFUNC::_threadExecution = false;
 word parsercmd::cmdBLOCK::_undoDepth = 100;
 
 
+//=============================================================================
+void parsercmd::TellPreProc::define(std::string var, std::string val, const TpdYYLtype& loc)
+{
+   assert("" == _preDef);
+   if (_variables.end() != _variables.find(var))
+   {
+      std::ostringstream ost;
+      ost << "Variable \""<< var <<"\" redefined";
+      tellerror(ost.str(), loc);
+   }
+   _variables[var] = val;
+}
 
+void parsercmd::TellPreProc::undefine(std::string var, const TpdYYLtype& loc)
+{
+   VariableMap::iterator CV = _variables.find(var);
+   if (_variables.end() == CV)
+   {
+      std::ostringstream ost;
+      ost << "Variable \""<< var <<"\" is not defined. #undef is ignored";
+      tellerror(ost.str(), loc);
+   }
+   _variables.erase(CV);
+}
+
+void parsercmd::TellPreProc::define(std::string val)
+{
+   assert("" != _preDef);
+   _variables[_preDef] = val;
+   _preDef = "";
+}
+
+void parsercmd::TellPreProc::preDefine(std::string var, const TpdYYLtype& loc)
+{
+   assert("" == _preDef);
+   if (_variables.end() != _variables.find(var))
+   {
+      std::ostringstream ost;
+      ost << "Variable \""<< var <<"\" redefined";
+      tellerror(ost.str(), loc);
+   }
+   _preDef = var;
+}
+
+//=============================================================================
 real parsercmd::cmdVIRTUAL::getOpValue(telldata::operandSTACK& OPs)
 {
    real value = 0;
