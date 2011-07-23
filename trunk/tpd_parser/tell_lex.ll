@@ -69,6 +69,7 @@ namespace parsercmd {
    static void telllex_fatal(std::string);
    void     newPrepVar(std::string source, bool empty);
    void     newPrepVal(std::string source);
+   bool     checkPrepVar(const std::string source);
 }
 using namespace parsercmd;
 extern YYLTYPE telllloc;
@@ -163,12 +164,15 @@ const                      return tknCONST;
 {lxt_D}+"."{lxt_D}*({lxt_E})?  |
 {lxt_D}*"."{lxt_D}+({lxt_E})?  |
 {lxt_D}+{lxt_E}          { telllval.real = atof(yytext); return tknREAL;}
-{lex_ID}                 { telllval.parsestr = parsercmd::charcopy(yytext);
-                           const telldata::tell_type* ttype = CMDBlock->getTypeByName(yytext);
-                           if (NULL == ttype)
-                              return tknIDENTIFIER;
-                           else
-                              return tknTYPEdef;}
+{lex_ID}                 { if (!parsercmd::checkPrepVar(yytext))
+                           {
+                              const telldata::tell_type* ttype = CMDBlock->getTypeByName(telllval.parsestr);
+                              if (NULL == ttype)
+                                 return tknIDENTIFIER;
+                              else
+                                 return tknTYPEdef;
+                           }
+                         }
 <*>.                       BEGIN(INITIAL);return tknERROR;
 %% 
 /**************************************************************************/
@@ -331,3 +335,19 @@ void parsercmd::newPrepVal(std::string source)
    tellPP->define(source);
 }
 
+bool parsercmd::checkPrepVar(const std::string source)
+{
+   std::string replacement;
+   if (tellPP->check(source,replacement))
+   {
+      const char* rchar = replacement.c_str();
+      for (int i = replacement.length() - 1; i >= 0; --i)
+         unput(rchar[i]);
+      return true;
+   }
+   else
+   {
+      telllval.parsestr = charcopy(source);
+      return false;
+   }
+}
