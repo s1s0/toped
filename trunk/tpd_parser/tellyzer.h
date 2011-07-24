@@ -65,16 +65,24 @@ namespace  parsercmd {
 
    class TellPreProc {
       public:
-                           TellPreProc() : _preDef("") {};
+                           TellPreProc() : _preDef(""), _ppState(ppINACTIVE) {};
          void              define(std::string, std::string, const TpdYYLtype&);
          void              undefine(std::string, const TpdYYLtype&);
          void              define(std::string);
          void              preDefine(std::string, const TpdYYLtype&);
          bool              check(std::string, std::string&);
+
+         bool              ppIfDef(std::string);
+         bool              ppIfNDef(std::string);
+         bool              ppElse(const TpdYYLtype&);
+         bool              ppEndIf(const TpdYYLtype&);
+
       private:
          typedef std::map <std::string, std::string> VariableMap;
+         typedef enum { ppINACTIVE, ppBYPASS, ppACTIVE } PpState;
          VariableMap       _variables;
          std::string       _preDef;
+         PpState           _ppState;
    };
 
 //-----------------------------------------------------------------------------

@@ -132,6 +132,53 @@ bool parsercmd::TellPreProc::check(std::string var, std::string& val)
    }
 }
 
+bool parsercmd::TellPreProc::ppIfDef(std::string var)
+{
+   if (_variables.end() != _variables.find(var))
+   {
+      _ppState = ppACTIVE;
+      return true;
+   }
+   _ppState = ppBYPASS;
+   return false;
+}
+
+bool parsercmd::TellPreProc::ppIfNDef(std::string var)
+{
+   if (_variables.end() == _variables.find(var))
+   {
+      _ppState = ppACTIVE;
+      return true;
+   }
+   _ppState = ppBYPASS;
+   return false;
+}
+
+bool parsercmd::TellPreProc::ppElse(const TpdYYLtype& loc)
+{
+   switch(_ppState)
+   {
+      case ppACTIVE: _ppState = ppBYPASS; return false;
+      case ppBYPASS: _ppState = ppACTIVE; return true;
+      default      : {
+         tellerror("Unexpected #else", loc); return true;
+      }
+   }
+   return true; // dummy statement, to prevent compiler warnings
+}
+
+
+bool parsercmd::TellPreProc::ppEndIf(const TpdYYLtype& loc)
+{
+   if (ppINACTIVE == _ppState)
+   {
+      tellerror("Unexpected #endif", loc);
+      return false;
+   }
+   _ppState = ppINACTIVE;
+   return true;
+}
+
 //=============================================================================
 real parsercmd::cmdVIRTUAL::getOpValue(telldata::operandSTACK& OPs)
 {
