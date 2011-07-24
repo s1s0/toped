@@ -31,6 +31,11 @@
 %x pINCL
 %x pDEFNM
 %x pDEFVAL
+%x pIFD
+%x pIFND
+%x pELSE
+%x pIFED
+%x pPASS
 lex_string        \"[^"]*\"
 lex_ID            [a-zA-Z_][a-zA-Z0-9_]*
 lxt_S             [ \t]+
@@ -85,12 +90,27 @@ location_step(&telllloc);
 <*>\n+                     location_lines(&telllloc,yyleng);location_step(&telllloc);
 "/*"                       ccomment(&telllloc); /*comment block C style*/
 "//".*\n                   location_lines(&telllloc,1);/* comment line */
-#include                   BEGIN(pINCL);
-<pINCL>{lex_string}      { /*first change the scanner state, otherwise there
-                             is a risk to remain in <pINCL>*/
-                           BEGIN(INITIAL); 
-                           if (! parsercmd::includefile(parsercmd::charcopy(yytext, true), yyin)) 
-                              yyterminate(); }
+#ifdef                     BEGIN(pIFD);
+<pIFD>{lex_ID}           { if (!tellPP->ppIfDef(yytext))
+                              BEGIN(pPASS);
+                           else
+                              BEGIN(INITIAL);
+                         }
+#ifndef                    BEGIN(pIFND);
+<pIFND>{lex_ID}          { if (!tellPP->ppIfNDef(yytext))
+                              BEGIN(pPASS);
+                           else
+                              BEGIN(INITIAL);
+                         }
+<*>#else                 { if (!tellPP->ppElse(telllloc))
+                              BEGIN(pPASS);
+                           else
+                              BEGIN(INITIAL);
+                         }
+<*>#endif                { tellPP->ppEndIf(telllloc);
+                           BEGIN(INITIAL);
+                         }
+<pPASS>.*                /*nothing to do here*/
 #define                    BEGIN(pDEFNM);
 <pDEFNM>{lex_ID}[ \t]*\n { parsercmd::newPrepVar(yytext, true);
                            location_lines(&telllloc,yyleng);location_step(&telllloc);
@@ -102,6 +122,12 @@ location_step(&telllloc);
 <pDEFVAL>.*              { parsercmd::newPrepVal(yytext);
                            BEGIN(INITIAL);
                          }
+#include                   BEGIN(pINCL);
+<pINCL>{lex_string}      { /*first change the scanner state, otherwise there
+                             is a risk to remain in <pINCL>*/
+                           BEGIN(INITIAL); 
+                           if (! parsercmd::includefile(parsercmd::charcopy(yytext, true), yyin)) 
+                              yyterminate(); }
 <pINCL><<EOF>>           { BEGIN(INITIAL); return tknERROR; }
 <<EOF>>                  { if (!parsercmd::EOfile()) yyterminate();}
 void                       return tknVOIDdef;
