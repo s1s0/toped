@@ -1,0 +1,22 @@
+#define printf      echo
+#define single
+#define singleNspace  
+
+#ifdef single
+   #define message1      "Single is defined"
+#else
+   bamboozle = 0; // unknown variable shall not be reported!
+   #define message1     "Single is not defined"
+#endif
+
+#ifndef singleNspace
+   bamboozle = 0; // unknown variable shall not be reported!
+   #define message2      "singleNspace is not defined"
+#else
+   #define message2      "singleNspace is defined"
+#endif
+
+printf(message1);
+printf(message2);
+printf("Parser shall report error @col 46"); bamboozle = 0;//Check the error location reported by the parser!
+
