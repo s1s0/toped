@@ -113,7 +113,7 @@ location_step(&telllloc);
 <pPASS>.*                /*nothing to do here*/
 #define                    BEGIN(pDEFNM);
 <pDEFNM>{lex_ID}[ \t]*\n { parsercmd::newPrepVar(yytext, true);
-                           location_lines(&telllloc,yyleng);location_step(&telllloc);
+                           location_lines(&telllloc,1);location_step(&telllloc);
                            BEGIN(INITIAL);
                          }
 <pDEFNM>{lex_ID}         { parsercmd::newPrepVar(yytext, false);
@@ -369,6 +369,7 @@ bool parsercmd::checkPrepVar(const std::string source)
       const char* rchar = replacement.c_str();
       for (int i = replacement.length() - 1; i >= 0; --i)
          unput(rchar[i]);
+      telllloc.last_column -= replacement.length();
       return true;
    }
    else
