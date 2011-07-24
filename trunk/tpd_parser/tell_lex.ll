@@ -369,7 +369,7 @@ bool parsercmd::checkPrepVar(const std::string source)
       const char* rchar = replacement.c_str();
       for (int i = replacement.length() - 1; i >= 0; --i)
          unput(rchar[i]);
-      telllloc.last_column -= replacement.length();
+      telllloc.last_column -= replacement.length() - 1;
       return true;
    }
    else
