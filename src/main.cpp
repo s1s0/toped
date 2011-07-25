@@ -225,6 +225,7 @@ int TopedApp::OnExit()
    // unload the eventual plug-ins
    for (PluginList::const_iterator CP = _plugins.begin(); CP != _plugins.end(); CP++)
       delete (*CP);
+   delete tellPP;
 
 #ifdef DB_MEMORY_TRACE
    MemTrack::TrackDumpBlocks();

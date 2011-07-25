@@ -30,6 +30,7 @@
 /* Define the (exclusive) start condition when the parser includes a file */
 %x pINCL
 %x pDEFNM
+%x pUDEFNM
 %x pDEFVAL
 %x pIFD
 %x pIFND
@@ -74,6 +75,7 @@ namespace parsercmd {
    static void telllex_fatal(std::string);
    void     newPrepVar(std::string source, bool empty);
    void     newPrepVal(std::string source);
+   void     deletePrepVal(std::string source);
    bool     checkPrepVar(const std::string source);
 }
 using namespace parsercmd;
@@ -89,7 +91,7 @@ location_step(&telllloc);
 <*>{lxt_S}                 location_step(&telllloc);
 <*>\n+                     location_lines(&telllloc,yyleng);location_step(&telllloc);
 "/*"                       ccomment(&telllloc); /*comment block C style*/
-"//".*\n                   location_lines(&telllloc,1);/* comment line */
+"//".*\n                   location_lines(&telllloc,1);location_step(&telllloc);/* comment line */
 #ifdef                     BEGIN(pIFD);
 <pIFD>{lex_ID}           { if (!tellPP->ppIfDef(yytext))
                               BEGIN(pPASS);
@@ -105,10 +107,16 @@ location_step(&telllloc);
 <*>#else                 { if (!tellPP->ppElse(telllloc))
                               BEGIN(pPASS);
                            else
+                           {
                               BEGIN(INITIAL);
+                              if (tellPP->lastError())
+                                 return tknERROR;
+                           }
                          }
 <*>#endif                { tellPP->ppEndIf(telllloc);
                            BEGIN(INITIAL);
+                           if (tellPP->lastError())
+                              return tknERROR;
                          }
 <pPASS>.*                /*nothing to do here*/
 #define                    BEGIN(pDEFNM);
@@ -122,6 +130,10 @@ location_step(&telllloc);
 <pDEFVAL>.*              { parsercmd::newPrepVal(yytext);
                            BEGIN(INITIAL);
                          }
+#undef                     BEGIN(pUDEFNM);
+<pUDEFNM>{lex_ID}        { tellPP->undefine(yytext, telllloc);
+                           BEGIN(INITIAL);
+                         }
 #include                   BEGIN(pINCL);
 <pINCL>{lex_string}      { /*first change the scanner state, otherwise there
                              is a risk to remain in <pINCL>*/
@@ -129,7 +141,11 @@ location_step(&telllloc);
                            if (! parsercmd::includefile(parsercmd::charcopy(yytext, true), yyin)) 
                               yyterminate(); }
 <pINCL><<EOF>>           { BEGIN(INITIAL); return tknERROR; }
-<<EOF>>                  { if (!parsercmd::EOfile()) yyterminate();}
+<<EOF>>                  { tellPP->checkEOF();
+                           if (tellPP->lastError())
+                              return tknERROR;
+                           else if (!parsercmd::EOfile()) yyterminate();
+                         }
 void                       return tknVOIDdef;
 real                       return tknREALdef;
 int                        return tknINTdef;
@@ -369,7 +385,7 @@ bool parsercmd::checkPrepVar(const std::string source)
       const char* rchar = replacement.c_str();
       for (int i = replacement.length() - 1; i >= 0; --i)
          unput(rchar[i]);
-      telllloc.last_column -= replacement.length() - 1;
+      telllloc.last_column -= replacement.length();
       return true;
    }
    else

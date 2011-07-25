@@ -63,26 +63,33 @@ namespace  parsercmd {
       YYLTYPE* location;
    };
 
+   /*! Implements a simple preprocessor and more specifically the state of the
+    * preprocessor. Hold all currently defined pre-processor variables as well
+    * as the current pre-processor state in regards to #if(n)def/#else/#endif
+    */
    class TellPreProc {
       public:
-                           TellPreProc() : _preDef(""), _ppState(ppINACTIVE) {};
+                           TellPreProc() : _preDef(""), _ppState(ppINACTIVE), _lastError(false) {};
          void              define(std::string, std::string, const TpdYYLtype&);
          void              undefine(std::string, const TpdYYLtype&);
          void              define(std::string);
          void              preDefine(std::string, const TpdYYLtype&);
          bool              check(std::string, std::string&);
-
          bool              ppIfDef(std::string);
          bool              ppIfNDef(std::string);
          bool              ppElse(const TpdYYLtype&);
-         bool              ppEndIf(const TpdYYLtype&);
-
+         void              ppEndIf(const TpdYYLtype&);
+         void              checkEOF();
+         bool              lastError();
       private:
+         void              ppError(std::string, const TpdYYLtype&);
+         void              ppWarning(std::string, const TpdYYLtype&);
          typedef std::map <std::string, std::string> VariableMap;
          typedef enum { ppINACTIVE, ppBYPASS, ppACTIVE } PpState;
          VariableMap       _variables;
          std::string       _preDef;
          PpState           _ppState;
+         bool              _lastError; //! Keeps the state of the last operation
    };
 
 //-----------------------------------------------------------------------------
