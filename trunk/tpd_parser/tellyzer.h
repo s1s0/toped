@@ -73,6 +73,7 @@ namespace  parsercmd {
          void              define(std::string, std::string, const TpdYYLtype&);
          void              undefine(std::string, const TpdYYLtype&);
          void              define(std::string);
+         void              cmdlDefine(std::string);
          void              preDefine(std::string, const TpdYYLtype&);
          bool              check(std::string, std::string&);
          bool              ppIfDef(std::string);

@@ -122,6 +122,8 @@ bool TopedApp::OnInit()
    DATC  = DEBUG_NEW DataCenter(std::string(_localDir.mb_str(wxConvFile)), std::string(_globalDir.mb_str(wxConvFile)));
    // Get the Graphic User Interface (gui system)
    Toped = DEBUG_NEW tui::TopedFrame( wxT( "Toped" ), wxPoint(50,50), wxSize(1200,900) );
+   // initialize the TELL pre-processor
+   tellPP = DEBUG_NEW parsercmd::TellPreProc();
    // check command line arguments
    parseCmdLineArgs();
    // Check we've got the required graphic capabilities. If not - bail out.
@@ -165,8 +167,6 @@ bool TopedApp::OnInit()
    //--------------------------------------------------------------------------
    // Put a rendering info in the log
    printLogWHeader();
-   // initialize the TELL pre-processor
-   tellPP = DEBUG_NEW parsercmd::TellPreProc();
    return TRUE;
 }
 
@@ -435,6 +435,11 @@ void TopedApp::parseCmdLineArgs()
          else if (0 == curar.Find(wxT("-I")))
          {
             Console->addTllIncludePath(curar.Remove(0,2));
+         }
+         else if (0 == curar.Find(wxT("-D")))
+         {
+            wxString defOnly = curar.Remove(0,2);
+            tellPP->cmdlDefine( std::string(defOnly.mb_str(wxConvUTF8)) );
          }
          else if (!(0 == curar.Find('-')))
          {
