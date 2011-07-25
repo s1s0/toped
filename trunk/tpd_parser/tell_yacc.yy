@@ -989,7 +989,7 @@ int tellerror (char *s)
    return 0;
 }
 
-void tellerror (std::string s, YYLTYPE loc)
+void tellerror (std::string s, TpdYYLtype loc)
 {
    if (cfd) cfd->incErrors();
    else     yynerrs++;

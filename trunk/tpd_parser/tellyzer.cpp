@@ -83,7 +83,7 @@ void parsercmd::TellPreProc::define(std::string var, std::string val, const TpdY
    {
       std::ostringstream ost;
       ost << "Variable \""<< var <<"\" redefined";
-      tellerror(ost.str(), loc);
+      ppWarning(ost.str(), loc);
    }
    _variables[var] = val;
 }
@@ -95,9 +95,10 @@ void parsercmd::TellPreProc::undefine(std::string var, const TpdYYLtype& loc)
    {
       std::ostringstream ost;
       ost << "Variable \""<< var <<"\" is not defined. #undef is ignored";
-      tellerror(ost.str(), loc);
+      ppWarning(ost.str(), loc);
    }
-   _variables.erase(CV);
+   else
+      _variables.erase(CV);
 }
 
 void parsercmd::TellPreProc::define(std::string val)
@@ -114,7 +115,7 @@ void parsercmd::TellPreProc::preDefine(std::string var, const TpdYYLtype& loc)
    {
       std::ostringstream ost;
       ost << "Variable \""<< var <<"\" redefined";
-      tellerror(ost.str(), loc);
+      ppWarning(ost.str(), loc);
    }
    _preDef = var;
 }
@@ -161,22 +162,65 @@ bool parsercmd::TellPreProc::ppElse(const TpdYYLtype& loc)
       case ppACTIVE: _ppState = ppBYPASS; return false;
       case ppBYPASS: _ppState = ppACTIVE; return true;
       default      : {
-         tellerror("Unexpected #else", loc); return true;
+         _lastError = true;
+         ppError("Unexpected #else", loc);
+         return true;
       }
    }
    return true; // dummy statement, to prevent compiler warnings
 }
 
 
-bool parsercmd::TellPreProc::ppEndIf(const TpdYYLtype& loc)
+void parsercmd::TellPreProc::ppEndIf(const TpdYYLtype& loc)
 {
    if (ppINACTIVE == _ppState)
    {
-      tellerror("Unexpected #endif", loc);
-      return false;
+      _lastError = true;
+      ppError("Unexpected #endif", loc);
    }
-   _ppState = ppINACTIVE;
-   return true;
+   else
+      _ppState = ppINACTIVE;
+}
+
+bool parsercmd::TellPreProc::lastError()
+{
+   bool ret = _lastError;
+   _lastError = false;
+   return ret;
+}
+
+void parsercmd::TellPreProc::checkEOF()
+{
+   if (ppINACTIVE != _ppState)
+   {
+      _lastError = true;
+      tell_log(console::MT_ERROR,"Unterminated #if at the end of the file");
+      _ppState = ppINACTIVE;
+   }
+}
+
+void parsercmd::TellPreProc::ppError(std::string msg, const TpdYYLtype& loc)
+{
+   std::ostringstream ost;
+   ost << "line " << loc.first_line << ": col " << loc.first_column << ": ";
+   if (loc.filename) {
+      std::string fn = loc.filename;
+      ost << "in file \"" << fn << "\" : ";
+   }
+   ost << msg;
+   tell_log(console::MT_ERROR,ost.str());
+}
+
+void parsercmd::TellPreProc::ppWarning(std::string msg, const TpdYYLtype& loc)
+{
+   std::ostringstream ost;
+   ost << "line " << loc.first_line << ": col " << loc.first_column << ": ";
+   if (loc.filename) {
+      std::string fn = loc.filename;
+      ost << "in file \"" << fn << "\" : ";
+   }
+   ost << msg;
+   tell_log(console::MT_WARNING,ost.str());
 }
 
 //=============================================================================
