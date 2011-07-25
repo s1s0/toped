@@ -1,15 +1,38 @@
 
-/*
- * helper functions
+//===========================================================================
+//                                                                          =
+// ------------------------------------------------------------------------ =
+//                      TTTTT    EEEE     L       L                         =
+//                      T T T    E        L       L                         =
+//                        T      EEE      L       L                         =
+//                        T      E        L       L                         =
+//                        T      EEEEE    LLLLL   LLLLL                     =
+//                                                                          =
+//   This file is a part of Toped project                                   =
+//   Copyright (C) 2001-2010 Toped developers                               =
+// ------------------------------------------------------------------------ =
+//           $URL:$
+//     Originator: Armin Taschwer - analogcmos@gmx.net
+//---------------------------------------------------------------------------
+//  Revision info
+//---------------------------------------------------------------------------
+//      $Revision:$
+//          $Date:$
+//        $Author:$
+//===========================================================================
+/**   Description:
  *
- * Copyright (C) 2010 by Armin Taschwer
+ * some functions which are useful by scripting wires
+ * 
  *
  * Functions
  * ---------
  * void addwire_on_grid (point list pl, real width, bool fullypoly);
  * void placeVIAarray  (point leftbot, point righttop, int startlay, int stoplay);
+ */
 
-
+/** LICENSE:
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -23,8 +46,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
-
  */
+
 
 // following files need to be included BEFORE including this file !!
 
@@ -122,34 +145,59 @@ void addwire_on_grid (point list pl, real width, bool fullypoly) {
  */
 void placeVIAarray (point leftbot, point righttop, int startlay, int stoplay) {
   
-  point via_spc = {VIA_SPC,VIA_SPC};
+  point via_spc = {VIA_SPC, VIA_SPC};
   point via = { VIA, VIA };
   box via_bx = { {0,0}, via };
+  point via_enc = {VIA_ENC, VIA_ENC};
 
   point lb = leftbot;
   point rt = righttop;
 
   //check input range
   if (leftbot.x > righttop.x) { 
-	lb.x = righttop.x;
-	rt.x = leftbot.x;
+    lb.x = righttop.x;
+    rt.x = leftbot.x;
   }
   if (leftbot.y > righttop.y) {
-	lb.y = righttop.y;
-	rt.y = leftbot.y;
+    lb.y = righttop.y;
+    rt.y = leftbot.y;
   }
 
 
   point t_dist = vec_abs (rt - lb);
-  point dist = t_dist - (via_spc*2.0 + via); // diagonal without
-                                             // last VIAs+space  
+  point dist = t_dist - (via_enc*2.0 + via); // diagonal without
+                                             // last VIAs+enclosure  
+  if (dist.x < 0) dist.x = 0.0;
+  if (dist.y < 0) dist.y = 0.0;
 
   /*   x...x...x...x   --> x == vias, . == spaces */
   int xx = floor(EPS + dist.x / (VIA+VIA_SPC)); //number of vias & spaces - 1 via
-  real spcx = (dist.x - xx*VIA)/xx; //max. space between two vias
-  
   int yy = floor(EPS + dist.y / (VIA+VIA_SPC)); //number of vias & spaces - 1 via
-  real spcy = (dist.y - yy*VIA)/yy; //max. space between two vias
+  real spcx, spcy;
+  real min_w = VIA + 2.0*VIA_ENC;
+
+  if (xx == 0) {
+    
+    if(t_dist.x >= min_w ) {
+      //xx = 1; //just one row
+      spcx = VIA_SPC; //suppresses error messages
+    } else {
+      spcx = 0; //forces exit
+    }
+  } else {
+    spcx = (dist.x - xx*VIA)/xx; //max. space between two vias
+  }
+
+  if (yy == 0) {
+    if (t_dist.y >= min_w ) {
+      //yy = 1; //just one row
+      spcy = VIA_SPC; //suppresses error messages
+    } else {
+      spcy = 0; //forces exit
+    }
+  } else {
+    spcy = (dist.y - yy*VIA)/yy; //max. space between two vias
+  }
 
   point spcgrid = floor_to_grid ( {spcx, spcy} );
 
@@ -157,9 +205,10 @@ void placeVIAarray (point leftbot, point righttop, int startlay, int stoplay) {
   int zlay = stoplay;
 
   if (startlay > stoplay) {
-	alay = stoplay;
-	zlay = startlay;
+    alay = stoplay;
+    zlay = startlay;
   }
+
 
   //debug
   // echo(lb); echo(rt);
@@ -173,85 +222,92 @@ void placeVIAarray (point leftbot, point righttop, int startlay, int stoplay) {
   // echo( "zlay ");echo(zlay);
   
   if (spcgrid.x < VIA_SPC) {
-	echo ("WARNING: found DRC violation for X-spacing -- abort function");
-	echo ("  spcgrid: "); echo (spcgrid);
-	return;
+    echo ("WARNING: found DRC violation for X-spacing -- abort function");
+    echo ("  spcgrid: "); echo (spcgrid);
+    return;
   } else {
-	if (spcgrid.y < VIA_SPC) {
-	  echo ("WARNING: found DRC violation for Y-spacing -- abort function");
-	  echo ("  spcgrid: "); echo (spcgrid);
-	  return;
-	} 
+    if (spcgrid.y < VIA_SPC) {
+      echo ("WARNING: found DRC violation for Y-spacing -- abort function");
+      echo ("  spcgrid: "); echo (spcgrid);
+      return;
+    } 
   }
 
   int break = 0; //if break == 1 : do not draw any vias
 
   foreach (int lay; seq(alay,zlay) ) {
-	//debug
-	//echo (lay);
+    //debug
+    //echo (lay);
 
-	if (lay == 1) {
-	  usinglayer ("MET1");
-	  addbox ( { lb, rt } );
-	  if (lay >= zlay) { break = 1; }
-	  else {
-		usinglayer ("VIA1");
+    if (lay == 1) {
+      usinglayer ("MET1");
+      addbox ( { lb, rt } );
+      if (lay >= zlay) { break = 1; }
+      else {
+	usinglayer ("VIA1");
+      }
+    }
+
+    if (lay == 2) {
+      usinglayer ("MET2");
+      addbox ( { lb, rt } );
+      if (lay >= zlay) { break = 1; }
+      else {
+	usinglayer ("VIA2");
+      }
+    }
+    if (lay == 3) {
+      usinglayer ("MET3");
+      addbox ( { lb, rt } );
+      if (lay >= zlay) { break = 1; }
+      else {
+	usinglayer ("VIA3");
+      }
+    }
+    if (lay == 4) {
+      usinglayer ("MET4");
+      addbox ( { lb, rt } );
+      break = 1; 
+    }
+
+    if ( break == 0 ) {
+      int exx = xx+1;
+      int eyy = yy+1;
+      real px,py;
+      point newp, residue;
+
+      foreach (int x; seq (1,exx) ) {
+	foreach (int y; seq (1,eyy) ) {
+	  px = (VIA+spcgrid.x)*(x-1);
+	  py = (VIA+spcgrid.y)*(y-1);
+	  newp = { px, py};
+	  residue = t_dist - newp + via_spc;
+
+	  if (exx == 1) residue.x = VIA_SPC; //skip warning
+	  if (eyy == 1) residue.y = VIA_SPC; //skip warning
+
+	  if (residue.x < VIA_SPC) {
+	    echo ("WARNING: found DRC violation in X-direction -- VIA will not drawn");
+	    //echo (rt); echo (newp); echo (rt - newp);
+	    echo ("  residue: "); echo (residue);
+	    echo ("  spcgrid: "); echo (spcgrid);
+	  } else {
+	    if (residue.y < VIA_SPC) {
+	      echo ("WARNING: found DRC violation in Y-direction -- VIA will not drawn");
+	      //echo (rt); echo (newp); echo (rt - newp);
+	      echo ("  residue: "); echo (residue);
+	      echo ("  spcgrid: "); echo (spcgrid);
+	    } else {
+	      point sspace = via_enc;
+	      if (exx == 1) sspace.x = floor_of_real_to_grid((t_dist.x - VIA)/2.0);
+	      if (eyy == 1) sspace.y = floor_of_real_to_grid((t_dist.y - VIA)/2.0);
+	      addbox ( via_bx + lb + sspace + newp );
+	    }
 	  }
 	}
-
-	if (lay == 2) {
-	  usinglayer ("MET2");
-	  addbox ( { lb, rt } );
-	  if (lay >= zlay) { break = 1; }
-	  else {
-		usinglayer ("VIA2");
-	  }
-	}
-	if (lay == 3) {
-	  usinglayer ("MET3");
-	  addbox ( { lb, rt } );
-	  if (lay >= zlay) { break = 1; }
-	  else {
-		usinglayer ("VIA3");
-	  }
-	}
-	if (lay == 4) {
-	  usinglayer ("MET4");
-	  addbox ( { lb, rt } );
-	  break = 1; 
-	}
-
-	if ( break == 0 ) {
-	  int exx = xx+1;
-	  int eyy = yy+1;
-	  real px,py;
-	  point newp, residue;
-
-	  foreach (int x; seq (1,exx) ) {
-		foreach (int y; seq (1,eyy) ) {
-		  px = (VIA+spcgrid.x)*(x-1);
-		  py = (VIA+spcgrid.y)*(y-1);
-		  newp = { px, py};
-		  residue = t_dist - newp + via_spc;
-		  if (residue.x < VIA_SPC) {
-			echo ("WARNING: found DRC violation in X-direction -- VIA will not drawn");
-			//echo (rt); echo (newp); echo (rt - newp);
-			echo ("  residue: "); echo (residue);
-			echo ("  spcgrid: "); echo (spcgrid);
-		  } else {
-			if (residue.y < VIA_SPC) {
-			  echo ("WARNING: found DRC violation in Y-direction -- VIA will not drawn");
-			  //echo (rt); echo (newp); echo (rt - newp);
-			  echo ("  residue: "); echo (residue);
-			  echo ("  spcgrid: "); echo (spcgrid);
-			} else {
-			  addbox ( via_bx + lb + via_spc + newp );
-			}
-		  }
-		}
-	  }
-	} else {
-	  lay = zlay + 1;
-	}
+      }
+    } else {
+      lay = zlay + 1;
+    }
   }
 }

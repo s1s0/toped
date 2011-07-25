@@ -6,3 +6,9 @@ AT 17oct2010
 * improve algorithm to detect minimal distance between two polygons (to 
 achive better speed)
 * replace the octave part with a TELL implementation
+* make logos DRC-clean
+  --> 45° only --> function to draw lines/polygons
+      DONE: 25jul2011
+  --> do not allow notches
+  --> minimum width
+  --> maximum width

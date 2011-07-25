@@ -529,7 +529,7 @@ function ret = create_tell_code (p, file)
   for lay = 1:ll
     fprintf (fid, "  usinglayer(\"%s\");\n", LAYER(lay).name);
     for i = 1:l
-      fprintf (fid, "  addpoly ( round_list_to_grid (p%d) );\n", i);
+      fprintf (fid, "  addpoly ( create_poly_ortho_dia( round_list_to_grid (p%d), %f ));\n", i, SIZE/10000);
     endfor
   endfor
 

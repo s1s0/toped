@@ -367,6 +367,9 @@ void layerSetup() {
    layprop("MET2"     ,10  ,"red"       ,"checkerboard"   , "selected3" );cifmap[:+] = {{ 10, "MTL1"}};gdsmap[:+] = {{ 10, " 10; 0"}};
    layprop("MET3"     ,31  ,"yellow"       ,"checkerboard"   , "selected3" );cifmap[:+] = {{ 31, "MTL1"}};gdsmap[:+] = {{ 31, " 31; 0"}};
    layprop("MET4"     ,36  ,"magenta"       ,"checkerboard"   , "selected3" );cifmap[:+] = {{ 36, "MTL1"}};gdsmap[:+] = {{ 36, " 36; 0"}};
+   layprop("VIA1"     ,9  ,"darkgreen"       ,"checkerboard"   , "selected3" );cifmap[:+] = {{ 9, "MTL1"}};gdsmap[:+] = {{ 9, " 9; 0"}};
+   layprop("VIA2"     ,30  ,"darkred"       ,"checkerboard"   , "selected3" );cifmap[:+] = {{ 30, "MTL1"}};gdsmap[:+] = {{ 30, " 30; 0"}};
+   layprop("VIA3"     ,35  ,"darkMagenta"       ,"checkerboard"   , "selected3" );cifmap[:+] = {{ 35, "MTL1"}};gdsmap[:+] = {{ 35, " 35; 0"}};
 
 //   setciflaymap(cifmap);
 //   setgdslaymap(gdsmap);
@@ -388,18 +391,13 @@ void screenSetup() {
    shapeangle(45);
 }
 
-
-void menuSetup() {
-    ;
-}
-
 void parameterSetup() {
     setparams({"GRC_BLINK_PERIOD", "0"});
 }
 
+
 layerSetup();
 screenSetup();
-menuSetup();
 parameterSetup();
-usinglayer(8);
 
+usinglayer("MET1");

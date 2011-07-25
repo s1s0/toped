@@ -1,9 +1,42 @@
+//===========================================================================
+//                                                                          =
+// ------------------------------------------------------------------------ =
+//                      TTTTT    EEEE     L       L                         =
+//                      T T T    E        L       L                         =
+//                        T      EEE      L       L                         =
+//                        T      E        L       L                         =
+//                        T      EEEEE    LLLLL   LLLLL                     =
+//                                                                          =
+//   This file is a part of Toped project                                   =
+//   Copyright (C) 2001-2010 Toped developers                               =
+// ------------------------------------------------------------------------ =
+//           $URL:$
+//     Originator: Armin Taschwer - analogcmos@gmx.net
+//---------------------------------------------------------------------------
+//  Revision info
+//---------------------------------------------------------------------------
+//      $Revision:$
+//          $Date:$
+//        $Author:$
+//===========================================================================
 
-/**
- * defines some check functions to test the contents of certain types of variables
+/**   Description:
+ *
+ * Defines some function for make the writing of
+ * test-functions/scripts easier.
+ *
+ *      Functions:
+ *
+ * bool check_compare_data (<int,real,point>, <int,real,point>);
+ * .. compares two data types
+ *
+ * void check_compare_data_echo (<int,real,point>, <int,real,point>);
+ * .. put a human readable result of a comparison on the command line
+ * 
+ **/
 
- * Copyright (C) 2011 by Armin Taschwer
-
+/** LICENSE:
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -17,15 +50,50 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+ **/
 
- */
 
-/** check points
+/* ATTENTION: for following overloaded functions the order of
+   definition might be of importance ! --> has to be checked */
+
+//overloaded version for BOOL
+bool check_compare_data (bool a, bool b) {
+  bool ret = false;
+  if (a == b) ret = true;
+  return (ret);
+}
+
+//overloaded version for INT
+bool check_compare_data (int a, int b) {
+  bool ret = false;
+  if (a == b) ret = true;
+  return (ret);
+}
+
+//overloaded version for REAL
+// functions allowes to return TRUE if a and b are close
+// withing a certain error range (because of rounding errors)
+// ATTENTION: for now, the error might be 1e-9 !
+bool check_compare_data (real a, real b) {
+  bool ret = false;
+  real error = abs(a/1e9);
+
+  if (a == 0.0) error = 1e-9;
+
+  if ((a+error) > b && (a-error) < b) ret = true;
+  //if (a == b) ret = true;
+  return (ret);
+}
+
+/** check data types
+ * Since points are real values the functions check returns true if
+ * the minimum distance falls below EPS (defined in
+ * "technology/default_drc.tll") 
  * @param sample test item to check
  * @param template sample should match the template
  * @return if the two points are identical the functions returns TRUE
  */
-bool check_point (point sample, point template) {
+bool check_compare_data (point sample, point template) {
   bool ret = false;
 
   //points can only be equal within an epsilon environment
@@ -40,10 +108,44 @@ bool check_point (point sample, point template) {
   return (ret);
 }
 
-void check_point_echo (point sample, point template) {
-  if (check_point (sample, template)) {
+
+
+//echos a human readable version of the upper defined comparison checks
+//overloaded version for BOOL
+void check_compare_data_echo (bool sample, bool template) {
+  if (check_compare_data (sample, template)) {
     echo ("Test OK");
   } else {
     echo ("Test FAILED");
   }
 }
+
+//overloaded version for INT
+void check_compare_data_echo (int sample, int template) {
+  if (check_compare_data (sample, template)) {
+    echo ("Test OK");
+  } else {
+    echo ("Test FAILED");
+  }
+}
+
+//overloaded version for REAL
+void check_compare_data_echo (real sample, real template) {
+  if (check_compare_data (sample, template)) {
+    echo ("Test OK");
+  } else {
+    echo ("Test FAILED");
+  }
+}
+
+//overloaded version for points
+void check_compare_data_echo (point sample, point template) {
+  if (check_compare_data (sample, template)) {
+    echo ("Test OK");
+  } else {
+    echo ("Test FAILED");
+  }
+}
+
+
+
