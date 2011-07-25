@@ -141,10 +141,14 @@ location_step(&telllloc);
                            if (! parsercmd::includefile(parsercmd::charcopy(yytext, true), yyin)) 
                               yyterminate(); }
 <pINCL><<EOF>>           { BEGIN(INITIAL); return tknERROR; }
-<<EOF>>                  { tellPP->checkEOF();
+<<EOF>>                  { int res = parsercmd::EOfile();
+                           tellPP->checkEOF();
                            if (tellPP->lastError())
+                           {
+                              BEGIN(INITIAL); 
                               return tknERROR;
-                           else if (!parsercmd::EOfile()) yyterminate();
+                           }
+                           else if (!res) yyterminate();
                          }
 void                       return tknVOIDdef;
 real                       return tknREALdef;

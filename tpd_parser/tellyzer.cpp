@@ -108,6 +108,15 @@ void parsercmd::TellPreProc::define(std::string val)
    _preDef = "";
 }
 
+void parsercmd::TellPreProc::cmdlDefine(std::string varval)
+{
+   size_t eqMark = varval.find('=');
+   if (-1 == eqMark)
+      _variables[varval] = std::string("");
+   else
+      _variables[varval.substr(0,eqMark)] = varval.substr(eqMark+1);
+}
+
 void parsercmd::TellPreProc::preDefine(std::string var, const TpdYYLtype& loc)
 {
    assert("" == _preDef);
