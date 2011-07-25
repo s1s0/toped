@@ -8,7 +8,7 @@ test4: a complex example of nested rectangles and holes
 my_logo_v0: presents a logo from an arbitrary font family
 
 tiger: a complex drawing depicting a tiger
-       --> needs more than 30min on my 2.5 GHz system to convert into TLL
+       --> needs more than 30min on my 2.5 GHz system to convert it to TLL
        -------------------------------------------
        ATTENTION: this is a copy from the internet 
        --> it is most probably NOT open-source
