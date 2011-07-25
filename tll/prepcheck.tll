@@ -1,6 +1,6 @@
-// Any fo the definitions below can be defined on the command line using the gcc syntax
-// for example: -Dsingle -Dprintf=echo
-//#define printf      echo
+// Any of the definitions below can be defined on the command line using the gcc syntax
+// example: -Dsingle -Dprintf=echo
+#define printf      echo
 #define single
 #define singleNspace  
 
