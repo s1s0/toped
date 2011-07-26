@@ -9,6 +9,8 @@ SUBDIRS_MAIN = ui                                         \
                icons                                      \
                tll                                        \
                tll/user_functions                         \
+               tll/user_functions/config                  \
+               tll/user_functions/devices                 \
                tll/user_functions/technology/             \
                tll/user_functions/test/                   \
                tll/user_functions/general                 \
