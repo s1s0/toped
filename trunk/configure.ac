@@ -128,6 +128,7 @@ AC_CONFIG_FILES([
    utils/cadence/Makefile
    tll/Makefile
    tll/user_functions/Makefile
+   tll/user_functions/config/Makefile
    tll/user_functions/technology/Makefile
    tll/user_functions/test/Makefile
    tll/user_functions/general/Makefile
