@@ -113,21 +113,35 @@ int tellstdfunc::stdPRINTF::execute()
    telldata::ttstring* fttstr = static_cast<telldata::ttstring*>(varstack.top());
    std::string workS(fttstr->value());
    varstack.pop();
-   bool status = true;
+   int status = 1;
    while (!varstack.empty())
-   {
+   { // the idea of this cycle is to loop until varstack is empty and in all
+     // cases to clean-up the heap (varstack contents). Of course it is supposed
+     // to replace the format strings from the original string, but this is just
+     // in case if there is no error in the operation so far.
       telldata::tell_var* op = varstack.top();
       varstack.pop();
-      if (!chopPrintfSpec(workS, op))
-      {
-         // Runtime error here!
-         status = false;
-         break;
-      }
+      if (1 == status)
+         status = replaceNextFstr(workS, op);
+      delete op;
    }
-   if (status)
+   // yet another check here - make sure that there is no more format sequences
+   // remaining in the string.
+   if (checkFstr(workS))
+   {
+      tell_log(console::MT_ERROR, "printf call contains less arguments than the number of %-tags in the format string");
+   }
+   else if ( 1 == status)
    {
       tell_log(console::MT_INFO,workS);
+   }
+   else if ( 0 == status)
+   {  // more parameters than expected
+      tell_log(console::MT_ERROR, "printf call contains more arguments than the number of %-tags in the format string");
+   }
+   else if (-1 == status)
+   {
+      tell_log(console::MT_ERROR, "printf discrepancy between the format string and argument type");
    }
    return EXEC_NEXT;
 }
@@ -494,7 +508,7 @@ int tellstdfunc::intrnlSORT_DB::execute()
 }
 
 
-bool tellstdfunc::chopPrintfSpec(std::string& str, telldata::tell_var* val)
+bool tellstdfunc::replaceNextFstr(std::string& str, telldata::tell_var* val)
 {
    wxString wxStr(str.c_str(), wxConvUTF8);
    wxRegEx src_tmpl(tellstdfunc::fspec_tmpl);
@@ -502,37 +516,45 @@ bool tellstdfunc::chopPrintfSpec(std::string& str, telldata::tell_var* val)
    if (src_tmpl.Matches(wxStr))
    {
       size_t start, length;
-      if (src_tmpl.GetMatch(&start, &length))
+      bool status = src_tmpl.GetMatch(&start, &length);
+      assert(status); // i.e. if Matches() returned true, the same shall be returned by GetMatch()
+      char* formatChars = new char[length+1];
+      char replacement[1024]; // TODO - any chance for a decent length here?
+      str.copy(formatChars, length, start);
+      formatChars[length] = 0x00;
+      int numChars;
+      switch (val->get_type())
       {
-         char* formatChars = new char[length+1];
-         char replacement[1024]; // TODO - any chance for a decent length here?
-         str.copy(formatChars, length, start);
-         formatChars[length] = 0x00;
-
-         switch (val->get_type())
-         {
-            case telldata::tn_int    :
-               sprintf(replacement, formatChars, static_cast<telldata::ttint*>(val)->value());
-               break;
-            case telldata::tn_real   :
-               sprintf(replacement, formatChars, static_cast<telldata::ttreal*>(val)->value());
-               break;
-            case telldata::tn_bool   :
-               sprintf(replacement, formatChars, static_cast<telldata::ttbool*>(val)->value());
-               break;
-            case telldata::tn_string : {
-               std::string boza = static_cast<telldata::ttstring*>(val)->value();
-               sprintf(replacement, formatChars, boza.c_str());
-               break;
-            }
-            default: assert(false);
+         case telldata::tn_int    :
+            numChars = sprintf(replacement, formatChars, static_cast<telldata::ttint*>(val)->value());
+            break;
+         case telldata::tn_real   :
+            numChars = sprintf(replacement, formatChars, static_cast<telldata::ttreal*>(val)->value());
+            break;
+         case telldata::tn_bool   :
+            numChars = sprintf(replacement, formatChars, static_cast<telldata::ttbool*>(val)->value());
+            break;
+         case telldata::tn_string : {
+            std::string interStr = static_cast<telldata::ttstring*>(val)->value();
+            numChars = sprintf(replacement, formatChars, interStr.c_str());
+            break;
          }
-         str.replace(start, length, replacement);
-         return true;
+         default: assert(false);
+         if (0 > numChars)
+            return -1; //format string found, but there is a discrepancy with the corresponding variable
       }
-      else return false;
+      str.replace(start, length, replacement);
+      return 1; // OK
    }
-   else return false;
+   return 0; // format string not found
+}
+
+bool tellstdfunc::checkFstr(const std::string& str)
+{
+   wxString wxStr(str.c_str(), wxConvUTF8);
+   wxRegEx src_tmpl(tellstdfunc::fspec_tmpl);
+   VERIFY(src_tmpl.IsValid());
+   return src_tmpl.Matches(wxStr);
 }
 
 /*
@@ -543,7 +565,7 @@ UNDO/REDO operation - some preliminary thoughts
    1. At this moment seems that the first way has two major drawback - it will
    mess around with the threads. Undo will be a command that will have to
    reinvoke the parser to parse another command. The other thing that seems
-   to be potentially hazardous is the maintanance of the operand stack - it
+   to be potentially hazardous is the maintenance of the operand stack - it
    seems impossible  to execute properly undo/redo if it is included somewhere
    in a function, script, file, preproc.definition or god knows where else in
    the language.

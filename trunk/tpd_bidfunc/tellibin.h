@@ -44,7 +44,8 @@ namespace tellstdfunc {
    const wxString spec_tmpl      = wxT("[cdieEfgGosuxXpn%]");
    const wxString fspec_tmpl     = wxT("%")+flags_tmpl + width_tmpl + prec_tmpl + spec_tmpl;
 
-   bool chopPrintfSpec(std::string&, telldata::tell_var*);
+   bool replaceNextFstr(std::string&, telldata::tell_var*);
+   bool checkFstr(const std::string&);
 
    TELL_STDCMD_CLASSC(stdECHO          );
    TELL_STDCMD_CLASSC(stdPRINTF        );
