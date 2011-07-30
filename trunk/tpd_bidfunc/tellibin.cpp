@@ -51,7 +51,7 @@ extern const wxEventType         wxEVT_CANVAS_CURSOR;
 
 
 //=============================================================================
-int tellstdfunc::stdPRINTF::argsOK(argumentQ* amap)
+int tellstdfunc::stdSPRINTF::argsOK(argumentQ* amap)
 {
    arguments = DEBUG_NEW parsercmd::argumentLIST();
    unsigned numArgs = amap->size();
@@ -85,7 +85,7 @@ int tellstdfunc::stdPRINTF::argsOK(argumentQ* amap)
    return 0; // OK
 }
 
-NameList* tellstdfunc::stdPRINTF::callingConv(const telldata::typeMAP*)
+NameList* tellstdfunc::stdSPRINTF::callingConv(const telldata::typeMAP*)
 {
    NameList* argtypes = DEBUG_NEW NameList();
    argtypes->push_back("void");
@@ -94,7 +94,7 @@ NameList* tellstdfunc::stdPRINTF::callingConv(const telldata::typeMAP*)
    return argtypes;
 }
 
-int tellstdfunc::stdPRINTF::execute()
+int tellstdfunc::stdSPRINTF::execute()
 {
    std::stack<telldata::tell_var*> varstack;
    // get the function arguments from the argument stack using the info in
@@ -106,12 +106,13 @@ int tellstdfunc::stdPRINTF::execute()
 
       assert(curarg->second->get_type() == op->get_type());
       varstack.push(op);
-      delete curarg; arguments->pop_back();
+      delete curarg->second; delete curarg; arguments->pop_back();
    }
    // OK the first one must be the format string - let's get it out
    //
    telldata::ttstring* fttstr = static_cast<telldata::ttstring*>(varstack.top());
    std::string workS(fttstr->value());
+   delete fttstr;
    varstack.pop();
    int status = 1;
    while (!varstack.empty())
@@ -130,23 +131,52 @@ int tellstdfunc::stdPRINTF::execute()
    if (checkFstr(workS))
    {
       tell_log(console::MT_ERROR, "printf call contains less arguments than the number of %-tags in the format string");
+      OPstack.push(DEBUG_NEW telldata::ttstring());
+      return EXEC_ABORT;
    }
    else if ( 1 == status)
    {
-      tell_log(console::MT_INFO,workS);
+      OPstack.push(DEBUG_NEW telldata::ttstring(workS));
+      return EXEC_NEXT;
    }
    else if ( 0 == status)
    {  // more parameters than expected
       tell_log(console::MT_ERROR, "printf call contains more arguments than the number of %-tags in the format string");
+      OPstack.push(DEBUG_NEW telldata::ttstring());
+      return EXEC_ABORT;
    }
    else if (-1 == status)
    {
       tell_log(console::MT_ERROR, "printf discrepancy between the format string and argument type");
+      OPstack.push(DEBUG_NEW telldata::ttstring());
+      return EXEC_ABORT;
    }
-   return EXEC_NEXT;
+   assert(false);
+   return EXEC_ABORT;
 }
 
+//=============================================================================
+int tellstdfunc::stdPRINTF::argsOK(argumentQ* amap)
+{
+   return stdSPRINTF::argsOK(amap);
+}
 
+NameList* tellstdfunc::stdPRINTF::callingConv(const telldata::typeMAP*)
+{
+   NameList* argtypes = DEBUG_NEW NameList();
+   argtypes->push_back("string");
+   argtypes->push_back("string");
+   argtypes->push_back("<...>");
+   return argtypes;
+}
+
+int tellstdfunc::stdPRINTF::execute()
+{
+   int result = stdSPRINTF::execute();
+   if (EXEC_NEXT == result)
+      tell_log(console::MT_INFO,getStringValue());
+   return result;
+}
 
 //=============================================================================
 int tellstdfunc::stdECHO::argsOK(argumentQ* amap)

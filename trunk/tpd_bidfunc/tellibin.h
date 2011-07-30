@@ -48,7 +48,8 @@ namespace tellstdfunc {
    bool checkFstr(const std::string&);
 
    TELL_STDCMD_CLASSC(stdECHO          );
-   TELL_STDCMD_CLASSC(stdPRINTF        );
+   TELL_STDCMD_CLASSC(stdSPRINTF       );
+   TELL_STDCMD_CLASSD(stdPRINTF , stdSPRINTF );
    TELL_STDCMD_CLASSA(stdTELLSTATUS    );
    TELL_STDCMD_CLASSA(stdUNDO          );
    TELL_STDCMD_CLASSA(stdREDRAW        );
