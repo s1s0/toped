@@ -72,19 +72,21 @@ extern const wxEventType    wxEVT_EXECEXTDONE;
 
 
 //==============================================================================
-bool console::patternFound(const wxString templ,  wxString str) {
+bool console::patternFound(const wxString templ,  wxString str)
+{
    patternNormalize(str);
    wxRegEx src_tmpl(templ);
    VERIFY(src_tmpl.IsValid());
    return src_tmpl.Matches(str);
 }
 
-void console::patternNormalize(wxString& str) {
+void console::patternNormalize(wxString& str)
+{
    wxRegEx regex;
    // replace tabs with spaces
    VERIFY(regex.Compile(wxT("\t")));
    regex.ReplaceAll(&str,wxT(" "));
-   // remove continious spaces
+   // remove continuous spaces
    VERIFY(regex.Compile(wxT("[[:space:]]{2,}")));
    regex.ReplaceAll(&str,wxT(""));
    //remove leading spaces

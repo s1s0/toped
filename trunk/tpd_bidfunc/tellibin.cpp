@@ -51,18 +51,105 @@ extern const wxEventType         wxEVT_CANVAS_CURSOR;
 
 
 //=============================================================================
-int tellstdfunc::stdECHO::argsOK(argumentQ* amap) {
+int tellstdfunc::stdPRINTF::argsOK(argumentQ* amap)
+{
+   arguments = DEBUG_NEW parsercmd::argumentLIST();
+   unsigned numArgs = amap->size();
+   if (1 > numArgs) return -1; // i.e. error - at least one argument is expected
+   telldata::argumentID carg((*(*amap)[0]));
+   if (telldata::tn_string != carg()) return -1; //i.e. error - first argument must be a string
+   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   for (unsigned i = 1; i < numArgs; i++)
+   {
+      carg = (*(*amap)[i]);
+      if (!PRINTF_ABLE(carg()))
+         return -1;
+      else
+         switch (carg())
+         {
+            case telldata::tn_int    :
+               arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
+               break;
+            case telldata::tn_real   :
+               arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+               break;
+            case telldata::tn_bool   :
+               arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+               break;
+            case telldata::tn_string :
+               arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+               break;
+            default: assert(false);
+         }
+   }
+   return 0; // OK
+}
+
+NameList* tellstdfunc::stdPRINTF::callingConv(const telldata::typeMAP*)
+{
+   NameList* argtypes = DEBUG_NEW NameList();
+   argtypes->push_back("void");
+   argtypes->push_back("string");
+   argtypes->push_back("<...>");
+   return argtypes;
+}
+
+int tellstdfunc::stdPRINTF::execute()
+{
+   std::stack<telldata::tell_var*> varstack;
+   // get the function arguments from the argument stack using the info in
+   // the arguments structure and push them in a local stack structure.
+   while (0 < arguments->size())
+   {
+      telldata::tell_var *op = OPstack.top();OPstack.pop();
+      argumentTYPE *curarg = arguments->back();
+
+      assert(curarg->second->get_type() == op->get_type());
+      varstack.push(op);
+      delete curarg; arguments->pop_back();
+   }
+   // OK the first one must be the format string - let's get it out
+   //
+   telldata::ttstring* fttstr = static_cast<telldata::ttstring*>(varstack.top());
+   std::string workS(fttstr->value());
+   varstack.pop();
+   bool status = true;
+   while (!varstack.empty())
+   {
+      telldata::tell_var* op = varstack.top();
+      varstack.pop();
+      if (!chopPrintfSpec(workS, op))
+      {
+         // Runtime error here!
+         status = false;
+         break;
+      }
+   }
+   if (status)
+   {
+      tell_log(console::MT_INFO,workS);
+   }
+   return EXEC_NEXT;
+}
+
+
+
+//=============================================================================
+int tellstdfunc::stdECHO::argsOK(argumentQ* amap)
+{
    return (!(amap->size() == 1));
 }
 
-NameList* tellstdfunc::stdECHO::callingConv(const telldata::typeMAP*) {
+NameList* tellstdfunc::stdECHO::callingConv(const telldata::typeMAP*)
+{
    NameList* argtypes = DEBUG_NEW NameList();
    argtypes->push_back("void");
    argtypes->push_back("<...anything...>");
    return argtypes;
 }
 
-int tellstdfunc::stdECHO::execute() {
+int tellstdfunc::stdECHO::execute()
+{
    real DBscale = PROPC->DBscale();
    telldata::tell_var *p = OPstack.top();OPstack.pop();
    std::string news;
@@ -404,6 +491,48 @@ int tellstdfunc::intrnlSORT_DB::execute()
    }
    DATC->unlockTDT(dbLibDir, false);
    return EXEC_NEXT;
+}
+
+
+bool tellstdfunc::chopPrintfSpec(std::string& str, telldata::tell_var* val)
+{
+   wxString wxStr(str.c_str(), wxConvUTF8);
+   wxRegEx src_tmpl(tellstdfunc::fspec_tmpl);
+   VERIFY(src_tmpl.IsValid());
+   if (src_tmpl.Matches(wxStr))
+   {
+      size_t start, length;
+      if (src_tmpl.GetMatch(&start, &length))
+      {
+         char* formatChars = new char[length+1];
+         char replacement[1024]; // TODO - any chance for a decent length here?
+         str.copy(formatChars, length, start);
+         formatChars[length] = 0x00;
+
+         switch (val->get_type())
+         {
+            case telldata::tn_int    :
+               sprintf(replacement, formatChars, static_cast<telldata::ttint*>(val)->value());
+               break;
+            case telldata::tn_real   :
+               sprintf(replacement, formatChars, static_cast<telldata::ttreal*>(val)->value());
+               break;
+            case telldata::tn_bool   :
+               sprintf(replacement, formatChars, static_cast<telldata::ttbool*>(val)->value());
+               break;
+            case telldata::tn_string : {
+               std::string boza = static_cast<telldata::ttstring*>(val)->value();
+               sprintf(replacement, formatChars, boza.c_str());
+               break;
+            }
+            default: assert(false);
+         }
+         str.replace(start, length, replacement);
+         return true;
+      }
+      else return false;
+   }
+   else return false;
 }
 
 /*

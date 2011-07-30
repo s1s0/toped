@@ -50,16 +50,15 @@
 // be defined for every class.
 //
 // Bottom line, we are using the first way and the parent argsOK method for
-// the majority of the functions. The exception here are functions like echo (the
-// only exception ?) that should be flexible enough to get any type of parameters.
+// the majority of the functions. The exception here are functions like echo
+// that should be flexible enough to get any type of parameters.
 // It is defined using the second way.
 //
 // == Declaration of the standard functions using macro definitions ==
 //
 // To avoid boring and trivial class declaration here some preprocessor macros
-// are used. Hope that in this case there is more convinience than harm using
-// macroses
-// with the following types of definitions
+// are used. Hope that in this case there is more convenience than harm using
+// macroses with the following types of definitions
 
 
 // TELL_STDCMD_CLASSA      - inherits directly cmdSTDFUNC - no UNDO
@@ -110,8 +109,7 @@
    }
 #endif
 
-// Using different type of argument checking. Only echo is defined
-// of this class - see the comments on top of the file
+// Using different type of argument checking - see the comments on top of the file
 #ifndef TELL_STDCMD_CLASSC
 #define TELL_STDCMD_CLASSC(name)                                  \
    class name : public parsercmd::cmdSTDFUNC {                    \

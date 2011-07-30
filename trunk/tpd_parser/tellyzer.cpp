@@ -1457,7 +1457,7 @@ int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap)
 //  c) If the argument doesn't match, bail-out, but don't forget to clean-up the
 //     the copies of the previously checked arguments
 // 2. When the entire argument list is checked and it matches the corresponding
-//    function parameter types, use the saved list of adjusted arguments to readjust
+//    function parameter types, use the saved list of adjusted arguments to re-adjust
 //    the original user defined argument types, which will be used to execute
 //    properly the cmdSTRUCT commands already pushed into the command stack during
 //    the bison parsing
@@ -1465,7 +1465,7 @@ int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap)
 // overloaded functions defined with effectively the same parameter list. In this case,
 // when that function is called with anonymous argument(s) the tellyzer will invoke the
 // first function body that matches the entire list of input arguments. This will be most
-// likely undefined. To prevent this we need beter checks during the function definition
+// likely undefined. To prevent this we need better checks during the function definition
 // parsing
    unsigned i = amap->size();
    if (i != arguments->size()) return -1;
