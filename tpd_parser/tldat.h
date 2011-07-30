@@ -33,7 +33,8 @@
 #include <algorithm>
 #include "ttt.h"
 
-#define NUMBER_TYPE(op) ((op > telldata::tn_void) && (op < telldata::tn_bool) && !(op & telldata::tn_listmask))
+#define NUMBER_TYPE(op) ((op > telldata::tn_void) && (op < telldata::tn_bool  ) && !(op & telldata::tn_listmask))
+#define PRINTF_ABLE(op) ((op > telldata::tn_void) && (op < telldata::tn_layout) && !(op & telldata::tn_listmask))
 #define TLISTOF(op) (op | telldata::tn_listmask)
 #define TLISALIST(op) (op & telldata::tn_listmask)
 #define TLCOMPOSIT_TYPE(op) (op > telldata::tn_composite)

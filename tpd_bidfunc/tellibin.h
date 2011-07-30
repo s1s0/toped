@@ -28,6 +28,8 @@
 #ifndef  TELLIBIN_H
 #define  TELLIBIN_H
 #include "tpdf_common.h"
+#include <wx/string.h>
+#include <wx/regex.h>
 
 
 namespace tellstdfunc {
@@ -36,7 +38,16 @@ namespace tellstdfunc {
    using parsercmd::argumentLIST;
    using parsercmd::argumentTYPE;
 
+   const wxString flags_tmpl     = wxT("[-+ #0]?");
+   const wxString width_tmpl     = wxT("([[:digit:]]+|\\*)?");
+   const wxString prec_tmpl      = wxT("(\\.[[:digit:]]+|\\*)?");
+   const wxString spec_tmpl      = wxT("[cdieEfgGosuxXpn%]");
+   const wxString fspec_tmpl     = wxT("%")+flags_tmpl + width_tmpl + prec_tmpl + spec_tmpl;
+
+   bool chopPrintfSpec(std::string&, telldata::tell_var*);
+
    TELL_STDCMD_CLASSC(stdECHO          );
+   TELL_STDCMD_CLASSC(stdPRINTF        );
    TELL_STDCMD_CLASSA(stdTELLSTATUS    );
    TELL_STDCMD_CLASSA(stdUNDO          );
    TELL_STDCMD_CLASSA(stdREDRAW        );
