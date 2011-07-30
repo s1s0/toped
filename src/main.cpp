@@ -684,6 +684,7 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    //-----------------------------------------------------------------------------------------------------------
    mblock->addFUNC("echo"             ,(DEBUG_NEW                     tellstdfunc::stdECHO(telldata::tn_void, true)));
    mblock->addFUNC("printf"           ,(DEBUG_NEW                   tellstdfunc::stdPRINTF(telldata::tn_void, true)));
+   mblock->addFUNC("sprintf"          ,(DEBUG_NEW                tellstdfunc::stdSPRINTF(telldata::tn_string, true)));
    mblock->addFUNC("status"           ,(DEBUG_NEW               tellstdfunc::stdTELLSTATUS(telldata::tn_void, true)));
    mblock->addFUNC("undo"             ,(DEBUG_NEW                     tellstdfunc::stdUNDO(telldata::tn_void,false)));
    //

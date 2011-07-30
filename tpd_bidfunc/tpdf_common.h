@@ -123,6 +123,19 @@
    }
 #endif
 
+// TELL_STDCMD_CLASSD - inherits TELL_STDCMD_CLASSC class type,
+// the idea here is to cover the classes
+#ifndef TELL_STDCMD_CLASSD
+#define TELL_STDCMD_CLASSD(name, father)                          \
+   class name : public father {                                   \
+   public:                                                        \
+      name(telldata::typeID retype, bool eor):father(retype,eor) {}; \
+      int         execute();                                      \
+      int         argsOK(telldata::argumentQ* amap);              \
+      NameList*   callingConv(const telldata::typeMAP*);          \
+   }
+#endif
+
 //#define TEUNDO_DEBUG_ON
 #ifdef TEUNDO_DEBUG_ON
 #define TEUNDO_DEBUG(a)  tell_log(console::MT_INFO,a);
