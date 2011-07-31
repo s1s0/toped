@@ -42,9 +42,12 @@ namespace tellstdfunc {
    const wxString width_tmpl     = wxT("([[:digit:]]+|\\*)?");
    const wxString prec_tmpl      = wxT("(\\.[[:digit:]]+|\\*)?");
    const wxString spec_tmpl      = wxT("[cdieEfgGosuxXpn%]");
+   const wxString esc_tmpl       = wxT("\\\\n");
    const wxString fspec_tmpl     = wxT("%")+flags_tmpl + width_tmpl + prec_tmpl + spec_tmpl;
+//   const wxString dblesc_tmpl    = esc_tmpl + esc_tmpl;
 
    bool replaceNextFstr(std::string&, telldata::tell_var*);
+   void replaceESCs(std::string&);
    bool checkFstr(const std::string&);
 
    TELL_STDCMD_CLASSC(stdECHO          );
