@@ -108,11 +108,14 @@ int tellstdfunc::stdSPRINTF::execute()
       varstack.push(op);
       delete curarg->second; delete curarg; arguments->pop_back();
    }
+   delete arguments;
+   arguments = NULL;
    // OK the first one must be the format string - let's get it out
    //
    telldata::ttstring* fttstr = static_cast<telldata::ttstring*>(varstack.top());
    std::string workS(fttstr->value());
    delete fttstr;
+   replaceESCs(workS);
    varstack.pop();
    int status = 1;
    while (!varstack.empty())
@@ -174,7 +177,7 @@ int tellstdfunc::stdPRINTF::execute()
 {
    int result = stdSPRINTF::execute();
    if (EXEC_NEXT == result)
-      tell_log(console::MT_INFO,getStringValue());
+      tell_log(console::MT_GUIINPUT,getStringValue());
    return result;
 }
 
@@ -577,6 +580,19 @@ bool tellstdfunc::replaceNextFstr(std::string& str, telldata::tell_var* val)
       return 1; // OK
    }
    return 0; // format string not found
+}
+
+void tellstdfunc::replaceESCs(std::string& str)
+{
+//   dblesc_tmpl
+   wxString wxStr(str.c_str(), wxConvUTF8);
+   wxRegEx src_tmpl(tellstdfunc::esc_tmpl);
+   VERIFY(src_tmpl.IsValid());
+   if (src_tmpl.Matches(wxStr))
+   {
+      src_tmpl.ReplaceAll(&wxStr, wxT("\n"));
+      str = std::string(wxStr.mb_str(wxConvUTF8));
+   }
 }
 
 bool tellstdfunc::checkFstr(const std::string& str)
