@@ -99,17 +99,13 @@ int tellstdfunc::stdSPRINTF::execute()
    std::stack<telldata::tell_var*> varstack;
    // get the function arguments from the argument stack using the info in
    // the arguments structure and push them in a local stack structure.
-   while (0 < arguments->size())
+   argumentLIST::const_reverse_iterator CI = arguments->rbegin();
+   while (arguments->rend() != CI)
    {
       telldata::tell_var *op = OPstack.top();OPstack.pop();
-      argumentTYPE *curarg = arguments->back();
-
-      assert(curarg->second->get_type() == op->get_type());
+      assert((*CI)->second->get_type() == op->get_type());CI++;
       varstack.push(op);
-      delete curarg->second; delete curarg; arguments->pop_back();
    }
-   delete arguments;
-   arguments = NULL;
    // OK the first one must be the format string - let's get it out
    //
    telldata::ttstring* fttstr = static_cast<telldata::ttstring*>(varstack.top());
