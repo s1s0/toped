@@ -296,9 +296,10 @@ void telldata::ttauxdata::assign(tell_var* data)
 telldata::ttlist::ttlist(const telldata::ttlist& cobj) : tell_var(cobj.get_type()) {
    // copy constructor
    unsigned count = cobj._mlist.size();
-   _mlist.reserve(count);
+   _mlist.resize(count);
    for (unsigned i = 0; i < count; i++)
-     _mlist.push_back(cobj._mlist[i]->selfcopy());
+      _mlist[i] = cobj._mlist[i]->selfcopy();
+//     _mlist.push_back(cobj._mlist[i]->selfcopy());
 }
 
 const telldata::ttlist& telldata::ttlist::operator =(const telldata::ttlist& cobj) {
@@ -371,6 +372,17 @@ telldata::tell_var* telldata::ttlist::index_var(dword index)
    else return _mlist[index];
 }
 
+void telldata::ttlist::resize(unsigned num, tell_var* initVar)
+{
+   _mlist.resize(num);
+   for (unsigned i = 0; i < num; i++)
+   {
+//      if (NULL == _mlist[i])
+         _mlist[i] = initVar->selfcopy();
+   }
+   delete initVar;
+}
+
 bool telldata::ttlist::validIndex(dword index)
 {
    dword cursize = _mlist.size();
@@ -391,6 +403,7 @@ void telldata::ttlist::insert(telldata::tell_var* newval, dword index)
       // add a position in the list and copy the last component into it
 //      _mlist.push_back(_mlist[_mlist.size()-1]->selfcopy());
       _mlist.push_back(newval->selfcopy());
+//      _mlist[index] = newval->selfcopy();
    }
    else
    {

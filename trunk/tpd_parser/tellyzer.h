@@ -341,6 +341,14 @@ namespace  parsercmd {
       int execute();
    };
 
+   class cmdLISTSIZE:public cmdVIRTUAL {
+   public:
+      cmdLISTSIZE(telldata::tell_var* var): _var(var){};
+      int execute();
+   protected:
+      telldata::tell_var*  _var;
+   };
+
    class cmdASSIGN:public cmdVIRTUAL {
    public:
       cmdASSIGN(telldata::tell_var* var, bool indexed): _var(var), _indexed(indexed) {};
@@ -499,7 +507,7 @@ namespace  parsercmd {
       const telldata::tell_type* getTypeByName(char*&) const;
       const telldata::tell_type* getTypeByID(const telldata::typeID ID) const;
       telldata::tell_var*        getID(char*&, bool local=false);
-      telldata::tell_var*        newTellvar(telldata::typeID, TpdYYLtype);
+      telldata::tell_var*        newTellvar(telldata::typeID, TpdYYLtype, telldata::tell_var* size = NULL);
       bool                       defValidate(const std::string& ,const argumentLIST*, cmdFUNC*&);
       bool                       declValidate(const std::string&, const argumentLIST*, TpdYYLtype);
       cmdSTDFUNC*  const         getFuncBody(char*&, telldata::argumentQ*) const;

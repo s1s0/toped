@@ -772,6 +772,39 @@ int parsercmd::cmdSTACKRST::execute() {
 }
 
 //=============================================================================
+int parsercmd::cmdLISTSIZE::execute() {
+   TELL_DEBUG(cmdLISTSIZE);
+   dword idx = getIndexValue();
+   telldata::tell_var* initVar;
+   telldata::typeID ID = _var->get_type() & ~telldata::tn_listmask;
+   switch (ID)
+   {
+      case telldata::tn_real    : initVar = DEBUG_NEW telldata::ttreal()   ; break;
+      case telldata::tn_int     : initVar = DEBUG_NEW telldata::ttint()    ; break;
+      case telldata::tn_bool    : initVar = DEBUG_NEW telldata::ttbool()   ; break;
+      case telldata::tn_pnt     : initVar = DEBUG_NEW telldata::ttpnt()    ; break;
+      case telldata::tn_box     : initVar = DEBUG_NEW telldata::ttwnd()    ; break;
+      case telldata::tn_bnd     : initVar = DEBUG_NEW telldata::ttbnd()    ; break;
+      case telldata::tn_hsh     : initVar = DEBUG_NEW telldata::tthsh()    ; break;
+      case telldata::tn_hshstr  : initVar = DEBUG_NEW telldata::tthshstr() ; break;
+      case telldata::tn_string  : initVar = DEBUG_NEW telldata::ttstring() ; break;
+      case telldata::tn_layout  : initVar = DEBUG_NEW telldata::ttlayout() ; break;
+      case telldata::tn_auxilary: initVar = DEBUG_NEW telldata::ttauxdata(); break;
+      default:
+      {
+         const telldata::tell_type* utype = CMDBlock->getTypeByID(ID);
+         if (NULL == utype)
+            assert(false);// unknown base array type ?!
+         else
+            initVar = DEBUG_NEW telldata::user_struct(utype);
+      }
+   }
+
+   static_cast<telldata::ttlist*>(_var)->resize(idx, initVar);
+   return EXEC_NEXT;
+}
+
+//=============================================================================
 int parsercmd::cmdASSIGN::execute()
 {
    TELL_DEBUG(cmdASSIGN);
@@ -1173,10 +1206,18 @@ const telldata::tell_type* parsercmd::cmdBLOCK::getTypeByID(const telldata::type
    return NULL;
 }
 
-telldata::tell_var* parsercmd::cmdBLOCK::newTellvar(telldata::typeID ID, TpdYYLtype loc)
+telldata::tell_var* parsercmd::cmdBLOCK::newTellvar(telldata::typeID ID, TpdYYLtype loc, telldata::tell_var* size)
 {
    if (ID & telldata::tn_listmask)
+   {
+      if (NULL != size);
+      {
+         int boza;
+         boza = 1;
+
+      }
       return(DEBUG_NEW telldata::ttlist(ID));
+   }
    else
    switch (ID)
    {
