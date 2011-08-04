@@ -788,10 +788,10 @@ int parsercmd::cmdASSIGN::execute()
       if (_indexed)
       {
          dword idx = getIndexValue();
-         _var = static_cast<telldata::ttlist*>(_var)->index_var(idx);
-         if ((NULL != _var) && (!_opstackerr))
+         telldata::tell_var* indexVar = static_cast<telldata::ttlist*>(_var)->index_var(idx);
+         if ((NULL != indexVar) && (!_opstackerr))
          {
-            _var->assign(op); OPstack.push(_var->selfcopy());
+            indexVar->assign(op); OPstack.push(indexVar->selfcopy());
          }
          else
          {
@@ -1018,7 +1018,7 @@ telldata::tell_var* parsercmd::cmdSTRUCT::getList() {
    telldata::tell_var  *p;
    for (unsigned i = 0; i < llength; i++) {
       p = OPstack.top();OPstack.pop();
-      pl->add(p); //Dont delete p; here! And don't get confused!
+      pl->add(p); //Don't delete p; here! And don't get confused!
    }
    pl->reverse();
    return pl;
