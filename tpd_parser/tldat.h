@@ -288,13 +288,14 @@ namespace telldata {
       void                 initialize();
       void                 echo(std::string&, real);
       void                 assign(tell_var*);
-      tell_var*            selfcopy() const  {return DEBUG_NEW ttlist(*this);};
-      const typeID         get_type() const  {return _ID | tn_listmask;};
-      memlist              mlist() const     {return _mlist;};
-      void                 add(tell_var* p) {_mlist.push_back(p);};
-      void                 reserve(unsigned num) {_mlist.reserve(num);};
-      void                 reverse()         {std::reverse(_mlist.begin(), _mlist.end());};
-      unsigned             size() const      {return _mlist.size();};
+      tell_var*            selfcopy() const  {return DEBUG_NEW ttlist(*this);}
+      const typeID         get_type() const  {return _ID | tn_listmask;}
+      memlist              mlist() const     {return _mlist;}
+      void                 add(tell_var* p) {_mlist.push_back(p);}
+      void                 reserve(unsigned num) {_mlist.reserve(num);}
+      void                 resize(unsigned num, tell_var* initVar);
+      void                 reverse()         {std::reverse(_mlist.begin(), _mlist.end());}
+      unsigned             size() const      {return _mlist.size();}
       tell_var*            index_var(dword);
       bool                 validIndex(dword);
       void                 insert(telldata::tell_var*, dword);

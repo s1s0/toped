@@ -143,7 +143,7 @@ Well some remarks may save some time in the future...
    Some more questions:
    - Why variables are cloned in the operand stack? If they weren't - we don't
      need tell_lvalue and most likely tellvar as well.
-     The main reason are the memory leakeges. It is getting very messy with the
+     The main reason are the memory leakages. It is getting very messy with the
      loops, constants, intermediate results etc. Some of them should be deleted,
      some of them should be kept.
      Operations like recursive list union:
@@ -162,13 +162,13 @@ Well some remarks may save some time in the future...
 Now something about the arrays. Actually there will be lists. Why? The main
  reason is that select functions may (and certainly will) return various
  objects - point, box, polygons, path, text etc together. Arrays by nature
- contain fixed number of homogenous objects and I can't think of a convinient
+ contain fixed number of homogeneous objects and I can't think of a convenient
  language construct for selection that will return such a thing. That's why it
  seems better to introduce a list instead. The list members can be of any tell
  type and they don't need to be the same type.
- The question then becames - do we need a function that will return the type of
+ The question then becomes - do we need a function that will return the type of
  a list member? Seems the answer is - NO!Of course I might be wrong - let's see
- Enough rubish! The constructs are:
+ Enough rubbish! The constructs are:
  list <variable>         -> definition;
  variable[<index>]       -> indexing;
  word length(<variable>) -> standard function will return the number of members
@@ -176,8 +176,8 @@ Now something about the arrays. Actually there will be lists. Why? The main
  Besides polygons and paths will be represented as a list of points
 
 Ooops! Second thought!
- The thing is that we have two different thigns here:
-   One (array or list) is a langage construct
+ The thing is that we have two different things here:
+   One (array or list) is a language construct
    Another (that thing that select will return) is a layout data base object(s).
  What does it mean...
  If the list are implemented as described above this effectively means that we'll
@@ -198,20 +198,20 @@ Ooops! Second thought!
  addbox(a)               -> is creating a rectangular layout object in the
                              current cell.
  These two things have nothing in common from the moment when addbox(a) is
- executed. A lot of addbox fuctions can be executed with this variable.
+ executed. A lot of addbox functions can be executed with this variable.
  Select function will provide a way to get a reference to the existing layout
- objects. This references can be used aftewrards to move, copy, delete etc.
+ objects. This references can be used afterwards to move, copy, delete etc.
  these objects, but these operations will not affect by any means tell variable 'a'.
  Having this cleared-up the concept of lists is now crystal. All lists will be
  homogeneous and their definitions will look like.
   <tell_type> list <variable>
- thus the strict type-cheking is still in place. I still insist on the typename
+ thus the strict type-checking is still in place. I still insist on the typename
  list (not array) because the size of these things will not be fixed. The side
  effect here is that polygons and wires now became a list of points. We will
  have list of words (for definition of the fills for example) - we can have
  list of any tell type and the type-check will still work perfectly!
 
- A new type obviously will be introduced to accomodate the pointers to the
+ A new type obviously will be introduced to accommodate the pointers to the
  layout objects described above.This is still to be thought out but it seems it
  will look like
   layout <variable>
@@ -613,6 +613,21 @@ variabledeclaration:
          /* add it to the local variable map */
          tellvar = CMDBlock->newTellvar($1, @1);
          CMDBlock->addID($2,tellvar);
+      }
+      else
+         tellerror("variable already defined in this scope", @2);
+      $$ = $1; delete [] $2;indexed = false;
+   }
+   |  telltypeID   tknIDENTIFIER  indxb expression indxe  {
+      telldata::tell_var* v = CMDBlock->getID($2, true);
+      if (!v) {/* if this variableID doesn't exist already in the local scope*/
+         /* add it to the local variable map */
+         if (parsercmd::ListIndexCheck($1, @1, $4, @4))
+         {
+            tellvar = CMDBlock->newTellvar($1, @1);
+            CMDBlock->addID($2,tellvar);
+            CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdLISTSIZE(tellvar));
+         }
       }
       else
          tellerror("variable already defined in this scope", @2);
