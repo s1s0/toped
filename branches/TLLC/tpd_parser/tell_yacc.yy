@@ -47,8 +47,6 @@
 #define YYERROR_VERBOSE 1
 /*Current command block - defined in tellyzer.cpp*/
 extern parsercmd::cmdBLOCK*       CMDBlock;
-/*Global console object*/
-extern console::ted_cmd*           Console;
 namespace parsercmd
 {
    extern int EOfile();

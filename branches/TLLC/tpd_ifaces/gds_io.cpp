@@ -189,7 +189,7 @@ double GDSin::GdsRecord::gds2ieee(byte* gds) const
    expc -= 0x10;
    // Now normalize the mantissa - shift left until first 1 drops-out
    // The last byte will get some rubbish in it's LSBits, but it
-   // shouldn't matter because last four buts of the mantissa will be
+   // shouldn't matter because last four bits of the mantissa will be
    // chopped-out
    byte carry;
    do {

@@ -38,7 +38,7 @@
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
 extern console::toped_logfile    LogFile;
-extern console::ted_cmd*         Console;
+extern console::TllCmdLine*      Console;
 
 extern wxFrame*                  TopedMainW;
 extern wxWindow*                 TopedCanvasW;

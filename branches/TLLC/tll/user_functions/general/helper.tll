@@ -52,6 +52,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
 
+#include "definitions.tll"
 
 /* provides a sequence of integers
  * --> the TELL possibility to use "quick-lists" should be prefered
