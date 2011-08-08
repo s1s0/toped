@@ -76,6 +76,14 @@ word parsercmd::cmdBLOCK::_undoDepth = 100;
 
 
 //=============================================================================
+parsercmd::TellPreProc::TellPreProc() :
+   _preDef      (""   ),
+   _lastError   (false)
+{
+   _ppState.push(ppINACTIVE);
+   _ifdefDepth.push(0);
+}
+
 void parsercmd::TellPreProc::define(std::string var, std::string val, const TpdYYLtype& loc)
 {
    assert("" == _preDef);
@@ -146,10 +154,10 @@ bool parsercmd::TellPreProc::ppIfDef(std::string var)
 {
    if (_variables.end() != _variables.find(var))
    {
-      _ppState = ppACTIVE;
+      _ppState.push(ppACTIVE);
       return true;
    }
-   _ppState = ppBYPASS;
+   _ppState.push(ppBYPASS);
    return false;
 }
 
@@ -157,19 +165,19 @@ bool parsercmd::TellPreProc::ppIfNDef(std::string var)
 {
    if (_variables.end() == _variables.find(var))
    {
-      _ppState = ppACTIVE;
+      _ppState.push(ppACTIVE);
       return true;
    }
-   _ppState = ppBYPASS;
+   _ppState.push(ppBYPASS);
    return false;
 }
 
 bool parsercmd::TellPreProc::ppElse(const TpdYYLtype& loc)
 {
-   switch(_ppState)
+   switch(_ppState.top())
    {
-      case ppACTIVE: _ppState = ppBYPASS; return false;
-      case ppBYPASS: _ppState = ppACTIVE; return true;
+      case ppACTIVE: _ppState.pop(); _ppState.push(ppBYPASS); return false;
+      case ppBYPASS: _ppState.pop(); _ppState.push(ppACTIVE); return true;
       default      : {
          _lastError = true;
          ppError("Unexpected #else", loc);
@@ -182,13 +190,14 @@ bool parsercmd::TellPreProc::ppElse(const TpdYYLtype& loc)
 
 void parsercmd::TellPreProc::ppEndIf(const TpdYYLtype& loc)
 {
-   if (ppINACTIVE == _ppState)
+   if (1 == _ppState.size())
    {
+      assert(ppINACTIVE == _ppState.top());
       _lastError = true;
       ppError("Unexpected #endif", loc);
    }
    else
-      _ppState = ppINACTIVE;
+      _ppState.pop();
 }
 
 bool parsercmd::TellPreProc::lastError()
@@ -200,12 +209,24 @@ bool parsercmd::TellPreProc::lastError()
 
 void parsercmd::TellPreProc::checkEOF()
 {
-   if (ppINACTIVE != _ppState)
+   assert(0 < _ifdefDepth.size());
+   if (_ifdefDepth.top() != _ppState.size())
    {
       _lastError = true;
       tell_log(console::MT_ERROR,"Unterminated #if at the end of the file");
-      _ppState = ppINACTIVE;
+      while (1 < _ppState.size())
+         _ppState.pop();
+      assert(ppINACTIVE == _ppState.top());
+      while (1 < _ifdefDepth.size())
+         _ifdefDepth.pop();
    }
+   else
+      _ifdefDepth.pop();
+}
+
+void parsercmd::TellPreProc::markBOF()
+{
+   _ifdefDepth.push(_ppState.size());
 }
 
 void parsercmd::TellPreProc::ppError(std::string msg, const TpdYYLtype& loc)
