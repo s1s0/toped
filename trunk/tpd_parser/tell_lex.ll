@@ -138,17 +138,23 @@ location_step(&telllloc);
 <pINCL>{lex_string}      { /*first change the scanner state, otherwise there
                              is a risk to remain in <pINCL>*/
                            BEGIN(INITIAL); 
+                           tellPP->markBOF(); 
                            if (! parsercmd::includefile(parsercmd::charcopy(yytext, true), yyin)) 
-                              yyterminate(); }
+                              yyterminate();
+                         }
 <pINCL><<EOF>>           { BEGIN(INITIAL); return tknERROR; }
 <<EOF>>                  { int res = parsercmd::EOfile();
-                           tellPP->checkEOF();
-                           if (tellPP->lastError())
+                           if (res)
                            {
-                              BEGIN(INITIAL); 
-                              return tknERROR;
-                           }
-                           else if (!res) yyterminate();
+                              tellPP->checkEOF();
+                              if (tellPP->lastError())
+                              {
+                                 BEGIN(INITIAL); 
+                                 return tknERROR;
+                              }
+                           } 
+                           else 
+                              yyterminate();
                          }
 void                       return tknVOIDdef;
 real                       return tknREALdef;
