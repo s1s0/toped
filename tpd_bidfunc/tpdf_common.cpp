@@ -39,7 +39,7 @@ wxWindow*                        TopedCanvasW;
 
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
-extern console::ted_cmd*         Console;
+extern console::TllCmdLine*      Console;
 extern console::toped_logfile    LogFile;
 extern const wxEventType         wxEVT_MOUSE_INPUT;
 extern const wxEventType         wxEVT_CANVAS_STATUS;

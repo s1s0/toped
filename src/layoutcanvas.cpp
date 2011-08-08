@@ -45,7 +45,7 @@
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
 extern DataCenter*               DRCDATC;
-extern console::ted_cmd*         Console;
+extern console::TllCmdLine*      Console;
 extern const wxEventType         wxEVT_CANVAS_STATUS;
 extern const wxEventType         wxEVT_CANVAS_CURSOR;
 extern const wxEventType         wxEVT_CANVAS_ZOOM;
