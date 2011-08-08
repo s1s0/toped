@@ -1,0 +1,499 @@
+
+//===========================================================================
+//                                                                          =
+// ------------------------------------------------------------------------ =
+//                      TTTTT    EEEE     L       L                         =
+//                      T T T    E        L       L                         =
+//                        T      EEE      L       L                         =
+//                        T      E        L       L                         =
+//                        T      EEEEE    LLLLL   LLLLL                     =
+//                                                                          =
+//   This file is a part of Toped project                                   =
+//   Copyright (C) 2001-2010 Toped developers                               =
+// ------------------------------------------------------------------------ =
+//           $URL$
+//     Originator: Armin Taschwer - analogcmos@gmx.net
+//---------------------------------------------------------------------------
+//  Revision info
+//---------------------------------------------------------------------------
+//      $Revision$
+//          $Date$
+//        $Author$
+//===========================================================================
+/**   Description:
+ *
+ * This functions-file defines some helper functions commonly used for 
+ * geometric tasks in a TELL-application
+ * GRID, EPS: have to be defined before including this file
+ *       --> see comments below
+ *
+ *      Functions:
+ *
+ * GRID related
+ * ------------
+ * point floor_of_pt (point) .. returns the "floored" values of a vector
+ * point round_of_pt (point) .. returns the "rounded" values of a vector
+ * point floor_to_grid (point) .. aligns the point to a GRID
+ * point round_to_grid (point) .. aligns the point to a GRID
+ * point list round_list_to_grid (point list in) .. aligns a list of point to GRID
+ * real floor_of_real_to_grid (real) .. returns an aligned real number
+ * real ceil_of_real_to_grid (real) .. returns an aligned real number
+
+ * VECTOR-arithmetic
+ * -----------------
+ * real vec_len (point) .. length of a vector
+ * point vec_normal (point) .. returns a orthogonal and normalized vector (90° ccw)
+ * point vec_mirror (point) .. returns a mirrored (180°) version of input vector
+ * real vec_cross (point a, point b) .. returns the cross product of two vectors
+ * real vec_dot (point a, point b) .. returns the dot product
+ * real vec_angle (point a, point b) .. returns the angel between two vectors
+ * real vec_angle_sign (point a, point b) .. returns the sign-correct angel of vector ab
+ * point vec_abs (point) .. returns the absolute value of the vector
+ * point vec_intersection (point Aa, point Ab, point Ba, point Bb, bool is_on_vector);
+
+ * POINTs related
+ * --------------
+ * bool points_equal (point, point) .. 2 point are within an epsilon neighbourhood
+ * bool point_is_valid (point) .. checks if the point is in a valid set
+ * bool is_point_on_vec (point p, point a, point b) .. true if point p is between a and b
+ * bool is_point_on_line (point p, point a, point b) .. true if point p is on line ab
+ * real distance_point_to_line (point p, point a, point b) .. returns shortest distance
+
+ * BOXES related
+ * -------------
+ * real box_width (box) .. width of box
+ * real box_height (box) .. width of box
+ */
+
+/** LICENSE:
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+ */
+
+
+
+/* 
+   IMPORTANT: following functions already need some information from the technology
+   dependent configuration files. This file has to be included before you include this
+   file. If no specific technology is used you can use "default_drc.tll" as a 
+   starting point
+*/
+
+
+/* returns the largest integer which is smaller then point "in"
+ * @param in input point
+ * @return "floored" point
+ */
+point floor_of_pt (point in) {
+  point out;
+  //epsilon environment is necessary to prevent for floating point
+  //errors
+  out.x = floor (in.x + EPS);
+  out.y = floor (in.y + EPS);
+  return out;
+}
+
+/* returns a rounded integer 
+ * @param in input point
+ * @return "rounded" point
+ */
+point round_of_pt (point in) {
+  point out;
+  //epsilon environment is necessary to prevent for floating point
+  //errors
+  out.x = round (in.x + EPS);
+  out.y = round (in.y + EPS);
+  return out;
+}
+
+
+/* calculated points might be easily off-grid
+ * this function aligns the point to the grid
+ * @param in input point
+ * @return returns the aligned point
+ */
+point round_to_grid (point in) {
+  point out;
+  point fp = round_of_pt (in/GRID);
+  out = fp*GRID;
+
+  return out;
+}
+
+/* aligns a list of points to the predefined grid
+ * --> refer to your technology file
+ * @param in list of points to align * @return aligned list of points
+ */
+point list round_list_to_grid (point list in) {
+  point list out;
+
+  foreach (point p ; in) {
+    out[:+] = round_to_grid (p);
+  }
+
+  return out;
+}
+
+
+/* returns the closest on-grid point to the input which is smaller (in
+ *  x and y) or equal to input point
+ * @param in input piont
+ * @return "floored" point on grid
+ */
+point floor_to_grid (point in) {
+  point out;
+  point fp = floor_of_pt (in / GRID);
+  out = fp*GRID;
+  return out;
+}
+
+
+/**
+ * @parm in1 first input point
+ * @parm in2 sec input point
+ * @return true if the 2 input point are positioned in the same
+ * epsilon environment
+ */
+bool points_equal (point in1, point  in2) {
+  if (in1.x+EPS > in2.x && in1.x - EPS < in2.x &&
+	  in1.y+EPS > in2.y && in1.y - EPS < in2.y) {
+	return true;
+  } else {
+	return false;
+  }
+}
+
+/**
+ * checks if a point is valid, that means, the point has to be within
+ * the allowed set of real numbers
+ * @param in point to check
+ * @return false if point reaches the limits of the real number set
+ */
+bool point_is_valid (point in) {
+  bool r = true;
+  if (in.x == REAL_pINF || in.x == REAL_mINF ||
+      in.y == REAL_pINF || in.y == REAL_mINF) {
+    r =false;
+  }
+  return (r);
+}
+
+
+/* aligns a real-number to the grid
+ * @param in real number which should be brought to grid
+ * @return aligned real number
+ */
+real floor_of_real_to_grid (real in) {
+  int x = floor ( (in / GRID) + EPS );
+  return x*GRID;
+}
+
+/* aligns a real-number to the grid
+ * @param in real number which should be brought to grid
+ * @return aligned real number
+ */
+real ceil_of_real_to_grid (real in) {
+  int x = ceil ( (in / GRID) + EPS );
+  return x*GRID;
+}
+
+
+/**
+ * @param in input vector
+ * @return length of vector
+ */
+real vec_len (point in) {
+  return sqrt( pow(in.x,2) + pow(in.y,2) );
+}
+
+/**
+ * @param in input vector
+ * @return normalized normal-vector of input vector "in"
+ */
+point vec_normal (point in) {
+  point norm;
+  norm = { -in.y, in.x };
+  return norm/vec_len(norm);
+}
+
+/**
+ * @param in input vector
+ * @return mirrored vector of input vector (180° rotation)
+ */
+point vec_mirror (point in) {
+  point mirr;
+  mirr = { -in.x, -in.y };
+  return mirr;
+}
+
+/**
+ * returns the cross product of two vectors
+ * @param a first vector
+ * @param b second vector
+ * @return cross product: a x b
+ */
+real vec_cross (point a, point b) {
+  return a.x*b.y - b.x*a.y;
+}
+
+/**
+ * dot (inner) product of two vectors
+ * @param a first vector
+ * @param b second vector
+ * @return dot product
+ */
+real vec_dot (point a, point b) {
+  return (a.x*b.x + a.y*b.y);
+}
+
+/**
+ * calculate the angle between two vectors a, b
+ * certainly, the two vectors have the same origin
+ * cos A = a b / (|a||b|)
+ * @param a first vector
+ * @param b second vector
+ * @return angle in degree
+ */
+real vec_angle (point a, point b) {
+  real scalar = vec_dot (a,b);
+  real abs_a = vec_len (a);
+  real abs_b = vec_len (b);
+
+  return ( acos ( scalar / ( abs_a * abs_b )) );
+}
+/**
+ * Will do the same as "vec_angle"  -->  cos A = a b / (|a||b|)
+ * additionally, the angle will get the correct sign by comparing A
+ * with B, where B is the dot product of the normalized vector of a
+ * Thus, the base for this calculation is always a
+ * @param a first vector
+ * @param b second vector
+ * @return angle in degree
+ */
+real vec_angle_sign (point a, point b) {
+  real alpha = vec_angle (a, b);
+  point normb = { -b.y, b.x }; //normalized version of b
+  real beta = vec_angle (a, normb);
+
+  if (beta < 90.0) {
+    alpha = -alpha;
+  }
+  return (alpha);
+}
+
+/**
+ * returns the absolute values of the input vector
+ * @param a input vector
+ * @return absolute vector */
+point vec_abs (point a) {
+  point b;
+  b.x = abs(a.x);
+  b.y = abs(a.y);
+  return b;
+}
+
+
+
+/* 
+ * calculates the cross point of two vectors A and B
+ * @param Aa start point of vector A
+ * @param Ab end point of vector A
+ * @param Ba start point of vector B
+ * @param Bb end point of vector B
+ * @param is_on_vector TRUE if intersections should be recognized only if
+ * the intersection point is on the vector-edge A, FALSE .. all
+ * intersections will be detected (A is considered as an infinite line)
+ * @return crossing point of A and B if it is different to one of the
+ * input points, otherwise INF 
+ * --> compare to definitions.tll: REAL_pINF 
+ */
+point vec_intersection (point Aa, point Ab, 
+			point Ba, point Bb, 
+			bool is_on_vector) {
+  point A = Ab - Aa;
+  point B = Bb - Ba;
+  point ret;
+
+  real ka, kb;
+
+  // A vertical ??
+  if ( abs(A.x) < EPS && A.y >= 0) ka = REAL_pINF;
+  else if ( abs(A.x) < EPS && A.y <= 0) ka = REAL_mINF;
+  else ka = A.y / A.x;
+
+  // B vertical ??
+  if ( abs(B.x) < EPS && B.y >= 0) kb = REAL_pINF;
+  else if ( abs(B.x) < EPS && B.y <= 0) kb = REAL_mINF;
+  else kb = B.y / B.x;
+
+  //echo (Aa); echo (Ab);
+  //echo (Ba); echo (Bb);
+  //echo (ka);
+  //echo (kb);
+
+  if ( abs(ka) == REAL_pINF && abs (kb) == REAL_pINF) {
+    // both are vertical --> no solution
+    ret = { REAL_pINF, REAL_pINF };
+  } else if (abs(ka - kb) < EPS/100) {
+    // both vectors are in parallel tan alpha = EPS/1 =
+    // 0.025/(1000*100) == 1 grid over 100 mm --> should be accurate enough
+    ret = { REAL_pINF, REAL_pINF };
+  } else if ( abs(ka) == REAL_pINF ) {
+    //vector A is vertical
+    real d = Ba.y - Ba.x*kb;
+    real y = kb*Aa.x + d;
+    if (is_on_vector == true) {
+      if ( (y <= Aa.y && y >= Ab.y ) ||
+	   (y >= Aa.y && y <= Ab.y )) {
+	ret = { Aa.x, y };
+      } else {
+	ret = { REAL_pINF, REAL_pINF };
+      }
+    } else {
+	ret = { Aa.x, y };
+    }      
+  } else if ( abs(kb) == REAL_pINF ) {
+    //vector B is vertical
+    real d = Aa.y - Aa.x*ka;
+    real y = ka*Ba.x + d;
+    if (is_on_vector == true) {
+      if ( (y <= Ba.y && y >= Bb.y ) ||
+	   (y >= Ba.y && y <= Bb.y )) {
+	ret = { Ba.x, y };
+      } else {
+	ret = { REAL_pINF, REAL_pINF };
+      }    
+    } else {
+      ret = { Ba.x, y };
+    }
+  } else {
+    // general situation
+    // ka * x + da = kb*x + db
+    real da = Aa.y - Aa.x*ka;
+    real db = Ba.y - Ba.x*kb;
+    real x = (db - da) / (ka  - kb);
+    real y = ka * x + da;
+
+    if (is_on_vector == true) {
+      if ( ((x >= Aa.x && x <= Ab.x) ||
+	    (x <= Aa.x && x >= Ab.x) ) &&
+	   ((y >= Aa.y && y <= Ab.y) ||
+	    (y <= Aa.y && y >= Ab.y)) ) {
+	ret = {x,y};
+      } else {
+	ret = { REAL_pINF, REAL_pINF };
+      }
+    } else {
+	ret = {x,y};
+    }      
+  }
+  return ret;
+}
+
+
+/**
+ * returns shortest distance between point p and line ab
+ * @param p point in distance to line ab
+ * @param a first point of line ab
+ * @param b sec point of line ab
+ * @return shortest distance between p and ab
+ */
+real distance_point_to_line (point p, point a, point b) {
+  point line = b - a;
+  point vec = p - a; //vector to point p
+  real dist; // orthogonal distance from line to point p
+
+  // h = (a x b)/ |a|
+
+  dist = vec_cross (line, vec) / vec_len(line);
+
+  return (dist);
+}
+
+
+/**
+ * check if the on point is on the vector defined by a and b
+ * and between them. Accuracy is defined by the global EPS variable 
+ * which defines the uncertainness area
+ * @param p point/vector to check
+ * @param a starting point of line
+ * @param b end point of line
+ * @return true if point is on line */
+bool is_point_on_vec (point p, point a, point b) {
+  point line = b - a;
+  real dist;
+  dist = distance_point_to_line (p, a,b);
+
+  bool on_vec = false;
+
+  //FIXME: first part should be replaced by "is_point_on_line"
+
+  if (abs(dist) < EPS) {
+    // distance is now zero
+    // now check if point is between points a and b
+    point A = a;
+    point B = b;
+
+    if ( line.x < 0 ) { A.x = b.x; B.x = a.x; } //swap 
+    if ( line.y < 0 ) { A.y = b.y; B.y = a.y; } //swap
+
+    if ( p.x >= A.x && p.x <= B.x &&
+         p.y >= A.y && p.y <= B.y ) {
+      on_vec = true;
+    }
+  }
+  return on_vec;
+}
+
+/**
+ * basically the same as "is_point_on_vec" but with the exception that
+ * point p can be everywhere int real number set
+ * @param p point/vector to check
+ * @param a starting point of line
+ * @param b end point of line
+ * @return true if point is on line
+ */
+bool is_point_on_line (point p, point a, point b) {
+  real dist;
+  dist = distance_point_to_line (p, a,b);
+
+  bool on_line = false;
+
+  if (abs(dist) < EPS) {
+    on_line = true;
+  }
+
+  return on_line;
+}
+
+
+/**
+ * returns the width of a box-type
+ * @param b box
+ * @return width of box
+ */
+real box_width (box b) {
+  return ( abs(b.p1.x - b.p2.x));
+}
+
+/**
+ * returns the width of a box-type
+ * @param b box
+ * @return width of box
+ */
+real box_height (box b) {
+  return ( abs(b.p1.y - b.p2.y));  
+}
+

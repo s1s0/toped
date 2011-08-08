@@ -1,0 +1,142 @@
+
+//===========================================================================
+//                                                                          =
+// ------------------------------------------------------------------------ =
+//                      TTTTT    EEEE     L       L                         =
+//                      T T T    E        L       L                         =
+//                        T      EEE      L       L                         =
+//                        T      E        L       L                         =
+//                        T      EEEEE    LLLLL   LLLLL                     =
+//                                                                          =
+//   This file is a part of Toped project                                   =
+//   Copyright (C) 2001-2010 Toped developers                               =
+// ------------------------------------------------------------------------ =
+//           $URL$
+//     Originator: Armin Taschwer - analogcmos@gmx.net
+//---------------------------------------------------------------------------
+//  Revision info
+//---------------------------------------------------------------------------
+//      $Revision$
+//          $Date$
+//        $Author$
+//===========================================================================
+/**   Description:
+ *
+ * section with helper functions commonly used in TELL-functions
+ * GRID: should be defined before including this file
+ *       --> see comments below
+ *
+ * 
+ * Functions
+ * ---------
+ * int list seq (int a, int b) .. generates a sequence between a and b
+ * real r_max (real a, real b) .. returns the maximum of two variables
+ * real r_min (real a, real b) .. returns the minimum of two variables
+ * real rlist_max (real list l) .. returns the maximum of a list
+ * real rlist_min (real list l) .. returns the minimum of a list
+
+/** LICENSE:
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+ */
+
+
+/* provides a sequence of integers
+ * --> the TELL possibility to use "quick-lists" should be prefered
+ * @param a starting point of the sequentiel list
+ * @param b end point of the seq. list
+ * @return sequence of integer numbers between a and b
+ */
+int list seq (int a, int b) {
+  int list out;
+  int c = a;
+  int end = b;
+  
+  if (a > end) {
+    end = a;
+    c = b;
+  }
+  
+  while (c <= end) {
+	if (a <= b) {
+	  out[:+] = c;
+	} else {
+	  out[+:] = c;
+	}
+	c = c+1;
+  }
+  return out;
+}
+
+
+/**
+ * returns the maximum between two real variables
+ * @param a first number
+ * @param b second number
+ * @return maximum of a and b
+ */
+real r_max (real a, real b) {
+  real m = a;
+  if (a < b) m = b;
+  return (m);
+}
+
+/**
+ * returns the minimum between two real variables
+ * @param a first number
+ * @param b second number
+ * @return minimum of a and b
+ */
+real r_min (real a, real b) {
+  real m = a;
+  if (a > b) m = b;
+  return (m);
+}
+
+/**
+ * returns the maximum of a list
+ * @param l list of real numbers
+ * @return maximum of l
+ */
+real rlist_max (real list l) {
+  real m;
+  //check if list contains at least one element 
+  if (length(l) > 0) m = l[0];
+  else return (INT_mINF); //better than nothing //other solutions?
+
+  real list ll = l[1-:];
+  foreach(real i; l) {
+    if (i > m) m = i;
+  }
+  return (m);
+}
+
+/**
+ * returns the minimum of a list
+ * @param l list of real numbers
+ * @return maximum of l
+ */
+real rlist_min (real list l) {
+  real m;
+  //check if list contains at least one element 
+  if (length(l) > 0) m = l[0];
+  else return (INT_mINF); //better than nothing //other solutions?
+
+  real list ll = l[1-:];
+  foreach(real i; l) {
+    if (i < m) m = i;
+  }
+  return (m);
+}

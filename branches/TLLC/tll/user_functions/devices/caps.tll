@@ -1,0 +1,194 @@
+
+//===========================================================================
+//                                                                          =
+// ------------------------------------------------------------------------ =
+//                      TTTTT    EEEE     L       L                         =
+//                      T T T    E        L       L                         =
+//                        T      EEE      L       L                         =
+//                        T      E        L       L                         =
+//                        T      EEEEE    LLLLL   LLLLL                     =
+//                                                                          =
+//   This file is a part of Toped project                                   =
+//   Copyright (C) 2001-2010 Toped developers                               =
+// ------------------------------------------------------------------------ =
+//           $URL$
+//     Originator: Armin Taschwer - analogcmos@gmx.net
+//---------------------------------------------------------------------------
+//  Revision info
+//---------------------------------------------------------------------------
+//      $Revision$
+//          $Date$
+//        $Author$
+//===========================================================================
+/**   Description:
+ *
+ * functions to generate different kind of caps
+ *
+ */
+
+/** LICENSE:
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+ */
+
+
+/* simple fingercaps
+ * @param area describes the area into which the finger-cap should be places
+ * @param startlayer lowest metal layer (1 = MET1, 2 = MET2, etc.)
+ * @param endlayer highest metal layer
+ */
+void draw_finger_cap ( box b, int startlayer, int endlayer ) {
+
+  real max_min_w = 0; //width of finger
+  real max_min_s = 0; //gap between fingers
+
+  int sl = startlayer;
+  int el = endlayer;
+
+  if (startlayer > endlayer) {
+    el = startlayer;
+    sl = endlayer;
+  }
+  if (sl > MAX_METAL) return;
+  if (el > MAX_METAL) el = MAX_METAL;
+
+  // check for the largest minimal wire width / space
+  foreach (int i; seq(sl,el) ) {
+    if (i == 1) {
+      max_min_w = M1_MIN_W;
+      max_min_s = M1_MIN_S;
+    } else if (i == 2) {
+      if (max_min_w < M2_MIN_W) max_min_w = M2_MIN_W;
+      if (max_min_s < M2_MIN_S) max_min_s = M2_MIN_S;
+    } else if (i == 3) {
+      if (max_min_w < M3_MIN_W) max_min_w = M3_MIN_W;
+      if (max_min_s < M3_MIN_S) max_min_s = M3_MIN_S;
+    } else if (i == 4) {
+      if (max_min_w < M4_MIN_W) max_min_w = M4_MIN_W;
+      if (max_min_s < M4_MIN_S) max_min_s = M4_MIN_S;
+    }
+    //needs to be extended if more metals are wanted
+  }
+
+  int base_y = max_min_w + 2*VIA_ENC; //height of the base segment of the comb
+
+  //fingers are always oriented from north to south
+  int n_finger = floor((box_width (b) - max_min_w) / (2*max_min_w + 2*max_min_s));
+  int n_finger_p_1 = n_finger + 1;
+
+  real len_finger = box_height (b) - base_y*2 - max_min_s;
+
+  // echo (n_finger);
+  // echo (max_min_w);
+  // echo (max_min_s);
+  // echo (box_height(b));
+  // echo (len_finger);
+
+
+  real y_start;       //
+  real x,y;           //changing y values
+  real fac;           // -1 if y_start is minimal, otherwise 1
+  real x_start = r_min (b.p1.x, b.p2.x);
+  point list comb;
+
+  foreach (int i ; seq (sl,el)) {
+    // set layer
+    if (i == 1) usinglayer ("MET1");
+    if (i == 2) usinglayer ("MET2");
+    if (i == 3) usinglayer ("MET3");
+    if (i == 4) usinglayer ("MET4");
+
+    if ( fmod(i,2) == 0 ) { //for upper comb
+      y_start = r_max (b.p1.y, b.p2.y);
+      fac = 1;
+    } else { //for lower comb
+      y_start = r_min (b.p1.y, b.p2.y);
+      fac = -1;
+    }
+
+    //upper comb (lower comb resp. for second layer)
+    x = x_start;
+    y = y_start;
+    foreach (int j; seq(1,n_finger_p_1)) {
+      if (j == 1) { 
+	comb[:+] = { x_start, y_start };
+	y = y_start - fac*(len_finger + base_y);
+      } else {
+	comb[:+] = { x, y };
+	y = y - fac*(len_finger);
+      }
+	
+      comb[:+] = { x, y }; x = x + max_min_w;
+      comb[:+] = { x, y }; y = y + fac*len_finger;
+      comb[:+] = { x, y }; x = x + max_min_w + 2*max_min_s;
+	
+      if (j == n_finger_p_1) {
+	comb[:+] = { x - max_min_w - 2*max_min_s, y_start };
+      }
+    }
+    addpoly (comb); //draws comb
+
+    comb = {}; //delete contents
+
+    //lower comb (upper comb resp.)
+    x = x_start;
+    y_start = y_start - fac*(box_height(b));
+    fac = -1 * fac;
+
+    foreach (int j; seq(1,n_finger_p_1)) {
+      if (j == 1) { 
+	comb[:+] = { x_start, y_start };
+	y = y_start - fac*(base_y);
+	comb[:+] = { x_start, y };
+	x = x_start + max_min_w + max_min_s;
+      } else if ( j == n_finger_p_1) {
+	comb[:+] = { x, y };
+	x = x + max_min_s + max_min_w;
+      } else {
+	comb[:+] = { x, y };
+	x = x + 2*max_min_s + max_min_w;
+      }
+	
+      comb[:+] = { x, y }; y = y - fac*len_finger;
+      comb[:+] = { x, y }; x = x + max_min_w;
+      comb[:+] = { x, y }; y = y + fac*len_finger;
+      
+	
+      if (j == n_finger_p_1) {
+	comb[:-];
+	comb[:-];
+	comb[:+] = { x - max_min_w, y_start };
+      }
+    }
+    //echo(comb);
+    addpoly (comb);
+
+    comb = {}; //delete contents
+
+    //draw vias
+    if (i != el) {
+      real via_x_start = r_min (b.p1.x, b.p2.x);
+      real via_x_end = x - max_min_w;
+      real via_y_up = r_max (b.p1.y, b.p2.y);
+      real via_y_down = r_min (b.p1.y, b.p2.y) + base_y;
+      int via_el = i + 1;
+
+      placeVIAarray ( {via_x_start, via_y_up}, 
+		      {via_x_end,   via_y_up - base_y}, i, via_el);
+      placeVIAarray ( {via_x_start, via_y_down}, 
+		      {via_x_end,   via_y_down - base_y}, i, via_el);
+    }
+  }
+}
