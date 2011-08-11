@@ -67,6 +67,7 @@ extern const wxEventType         wxEVT_EXITAPP;
 extern const wxEventType         wxEVT_EXECEXT;
 extern const wxEventType         wxEVT_EXECEXTPIPE;
 extern const wxEventType         wxEVT_EXECEXTDONE;
+extern const wxEventType         wxEVT_CONSOLE_PARSE;
 
 
 extern DataCenter*               DATC;
@@ -336,6 +337,9 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_TECUSTOM_COMMAND(wxEVT_EXITAPP, wxID_ANY, tui::TopedFrame::OnExitRequest)
    EVT_TECUSTOM_COMMAND(wxEVT_EXECEXT, wxID_ANY, tui::TopedFrame::OnExecExt)
    EVT_TECUSTOM_COMMAND(wxEVT_EXECEXTPIPE, wxID_ANY, tui::TopedFrame::OnExecExtTextEnter)
+   EVT_TECUSTOM_COMMAND(wxEVT_CONSOLE_PARSE, wxID_ANY, tui::TopedFrame::onParseCommand)
+   EVT_TEXT_ENTER(tui::ID_CMD_LINE, tui::TopedFrame::onGetCommand)
+   EVT_KEY_UP(tui::TopedFrame::onKeyUP)
 END_EVENT_TABLE()
 
 // See the FIXME note in the botom of browsers.cpp
@@ -371,6 +375,7 @@ tui::TopedFrame::~TopedFrame() {
    delete _canvas;
    delete _resourceCenter;
    delete _tPost;
+   delete _cmdline;
 //   delete _toped_status;
 }
 
@@ -657,7 +662,7 @@ void tui::TopedFrame::setIconDir(const std::string& uiDir)
 
 void  tui::TopedFrame::setActiveCmd()
 {
-   _cmdline->SetFocus();
+   _cmdline->getWidget()->SetFocus();
 }
 
 void tui::TopedFrame::initToolBars()
@@ -792,13 +797,13 @@ void tui::TopedFrame::initView()
    //----------------------------------------------------------------------------
    // The command line
    //----------------------------------------------------------------------------
-   _cmdline = DEBUG_NEW wxTextCtrl( this, tui::ID_CMD_LINE, wxT(""),
-                                       wxDefaultPosition,
-                                       wxSize(1000, 30),
-                                       wxTE_PROCESS_ENTER | wxNO_BORDER );
-   DEBUG_NEW console::TedCmdLine(_canvas, _cmdline);
+   wxTextCtrl* cmdlineW = DEBUG_NEW wxTextCtrl( this, tui::ID_CMD_LINE, wxT(""),
+                                                wxDefaultPosition,
+                                                wxSize(1000, 30),
+                                                wxTE_PROCESS_ENTER | wxNO_BORDER );
+   _cmdline = DEBUG_NEW console::TedCmdLine(_canvas, cmdlineW);
 
-// _cmdline->SetWindowStyleFlag(wxSW_3D | wxCLIP_CHILDREN);
+// cmdlineW->SetWindowStyleFlag(wxSW_3D | wxCLIP_CHILDREN);
 
    _winManager.AddPane(_browsers,   wxAuiPaneInfo().
                                     Left().
@@ -831,7 +836,7 @@ void tui::TopedFrame::initView()
                                     CaptionVisible(false)
                       );
 
-   _winManager.AddPane(_cmdline,    wxAuiPaneInfo().
+   _winManager.AddPane(cmdlineW,    wxAuiPaneInfo().
                                     Bottom().
                                     Row(0).
                                     BestSize(wxSize(1000,30)).
@@ -2458,10 +2463,26 @@ void tui::TopedFrame::OnTextLogOverflow(wxCommandEvent& WXUNUSED(event))
    //@TODO! I can't get this message. In the same time it seems that
    // wx is getting stuck when bombarded with messages from the
    // tell thread (GDS parse/import case). This is observed on
-   // windows. Trincating the text log contents doesn't really help
+   // windows. Truncating the text log contents doesn't really help
 //   int boza;
 //   boza++;
 //   int lalal = 2* boza;
+}
+
+
+void tui::TopedFrame::onParseCommand(wxCommandEvent& evt)
+{
+   _cmdline->onParseCommand(evt);
+}
+
+void tui::TopedFrame::onGetCommand(wxCommandEvent& evt)
+{
+   _cmdline->onGetCommand(evt);
+}
+
+void tui::TopedFrame::onKeyUP(wxKeyEvent& evt)
+{
+   _cmdline->onKeyUP(evt);
 }
 
 void tui::TopedFrame::USMap2wxString(USMap* inmap, wxString& outmap)
