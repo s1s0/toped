@@ -158,7 +158,7 @@ bool TopedApp::OnInit()
    }
    else
    {
-
+      DEBUG_NEW console::TllCCmdLine();
    }
 
    getTellPathDirs();

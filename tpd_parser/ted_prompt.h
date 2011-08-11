@@ -126,7 +126,7 @@ namespace console {
       parse_thread*           _tellThread;
    };
 
-   class TedCmdLine: public TllCmdLine /*, public wxTextCtrl*/ {
+   class TedCmdLine: public TllCmdLine {
    public:
                               TedCmdLine(wxWindow*, wxTextCtrl*);
       virtual void            waitGUInput(telldata::operandSTACK*,console::ACTIVE_OP, const CTM&);
@@ -144,6 +144,18 @@ namespace console {
       void                    onGUInput(wxCommandEvent&);
       void                    onExternalDone(wxCommandEvent&);
       wxTextCtrl*             _cmdLineWnd;
+   };
+
+   class TllCCmdLine: public TllCmdLine {
+   public:
+                              TllCCmdLine();
+      virtual void            waitGUInput(telldata::operandSTACK*,console::ACTIVE_OP, const CTM&);
+      virtual void            getGUInput(bool from_keyboard);
+      virtual void            waitExternal(wxString);
+   protected:
+      virtual wxString        getString();
+      virtual void            setString(const wxString&);
+      virtual void            clearString();
    };
 
 }
