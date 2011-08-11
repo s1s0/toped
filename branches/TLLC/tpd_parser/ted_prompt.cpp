@@ -771,3 +771,34 @@ void console::TedCmdLine::clearString()
 }
 
 //static_cast<console::TedCmdLine*>()
+
+//==============================================================================
+console::TllCCmdLine::TllCCmdLine() : console::TllCmdLine(NULL)
+{
+
+}
+
+void     console::TllCCmdLine::waitGUInput(telldata::operandSTACK*,console::ACTIVE_OP, const CTM&)
+{
+
+}
+void     console::TllCCmdLine::getGUInput(bool from_keyboard)
+{
+
+}
+void     console::TllCCmdLine::waitExternal(wxString)
+{
+
+}
+wxString console::TllCCmdLine::getString()
+{
+   return (wxT(""));
+}
+void     console::TllCCmdLine::setString(const wxString&)
+{
+
+}
+void     console::TllCCmdLine::clearString()
+{
+
+}
