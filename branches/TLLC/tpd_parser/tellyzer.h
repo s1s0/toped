@@ -69,7 +69,7 @@ namespace  parsercmd {
     */
    class TellPreProc {
       public:
-                           TellPreProc() : _preDef(""), _ppState(ppINACTIVE), _lastError(false) {};
+                           TellPreProc();
          void              define(std::string, std::string, const TpdYYLtype&);
          void              undefine(std::string, const TpdYYLtype&);
          void              define(std::string);
@@ -81,16 +81,25 @@ namespace  parsercmd {
          bool              ppElse(const TpdYYLtype&);
          void              ppEndIf(const TpdYYLtype&);
          void              checkEOF();
+         void              markBOF();
          bool              lastError();
+         void              tllFileName(std::string fn) {_tllFN = fn;}
+         bool              pragOnce();
+         void              reset();
       private:
          void              ppError(std::string, const TpdYYLtype&);
          void              ppWarning(std::string, const TpdYYLtype&);
-         typedef std::map <std::string, std::string> VariableMap;
          typedef enum { ppINACTIVE, ppBYPASS, ppACTIVE } PpState;
+         typedef std::map <std::string, std::string> VariableMap;
+         typedef std::stack <PpState>  StateStack;
+         typedef std::stack <unsigned> DepthStack;
          VariableMap       _variables;
          std::string       _preDef;
-         PpState           _ppState;
          bool              _lastError; //! Keeps the state of the last operation
+         std::string       _tllFN; //! The name of the currently parsed  tell file
+         StateStack        _ppState;
+         DepthStack        _ifdefDepth;
+         NameSet           _parsedFiles; //! parsed files which had #pragma once statement
    };
 
 //-----------------------------------------------------------------------------
