@@ -78,7 +78,8 @@ word parsercmd::cmdBLOCK::_undoDepth = 100;
 //=============================================================================
 parsercmd::TellPreProc::TellPreProc() :
    _preDef      (""   ),
-   _lastError   (false)
+   _lastError   (false),
+   _tllFN       (""   )
 {
    _ppState.push(ppINACTIVE);
    _ifdefDepth.push(0);
@@ -251,6 +252,32 @@ void parsercmd::TellPreProc::ppWarning(std::string msg, const TpdYYLtype& loc)
    }
    ost << msg;
    tell_log(console::MT_WARNING,ost.str());
+}
+
+bool parsercmd::TellPreProc::pragOnce()
+{
+   assert(!_tllFN.empty());
+   if (_parsedFiles.end() == _parsedFiles.find(_tllFN))
+   {
+      _parsedFiles.insert(_tllFN);
+      return false;
+   }
+   else
+      return true;
+}
+
+void parsercmd::TellPreProc::reset()
+{
+   _variables.clear();
+   _parsedFiles.clear();
+   _preDef = "";
+   _lastError = false;
+
+   while (1 < _ppState.size())    _ppState.pop();
+   assert(ppINACTIVE == _ppState.top());
+   while (1 < _ifdefDepth.size()) _ifdefDepth.pop();
+   assert(0 == _ifdefDepth.top());
+   // std::string       _tllFN; <- this one can't be cleared. pragma once might be following
 }
 
 //=============================================================================

@@ -83,6 +83,9 @@ namespace  parsercmd {
          void              checkEOF();
          void              markBOF();
          bool              lastError();
+         void              tllFileName(std::string fn) {_tllFN = fn;}
+         bool              pragOnce();
+         void              reset();
       private:
          void              ppError(std::string, const TpdYYLtype&);
          void              ppWarning(std::string, const TpdYYLtype&);
@@ -93,8 +96,10 @@ namespace  parsercmd {
          VariableMap       _variables;
          std::string       _preDef;
          bool              _lastError; //! Keeps the state of the last operation
+         std::string       _tllFN; //! The name of the currently parsed  tell file
          StateStack        _ppState;
          DepthStack        _ifdefDepth;
+         NameSet           _parsedFiles; //! parsed files which had #pragma once statement
    };
 
 //-----------------------------------------------------------------------------

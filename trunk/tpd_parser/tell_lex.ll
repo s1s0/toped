@@ -24,7 +24,7 @@
 //          $Date$
 //        $Author$
 //---------------------------------------------------------------------------
-// A non-reentrant parser for tell
+// A non-reentrant lexer for tell
 //===========================================================================*/
 
 /* Define the (exclusive) start condition when the parser includes a file */
@@ -37,6 +37,7 @@
 %x pELSE
 %x pIFED
 %x pPASS
+%x pPRAGMA
 lex_string        \"[^"]*\"
 lex_ID            [a-zA-Z_][a-zA-Z0-9_]*
 lxt_S             [ \t]+
@@ -92,6 +93,27 @@ location_step(&telllloc);
 <*>\n+                     location_lines(&telllloc,yyleng);location_step(&telllloc);
 "/*"                       ccomment(&telllloc); /*comment block C style*/
 "//".*\n                   location_lines(&telllloc,1);location_step(&telllloc);/* comment line */
+#pragma                    BEGIN(pPRAGMA);
+<pPRAGMA>once            { BEGIN(INITIAL);
+                           if (tellPP->pragOnce())
+                           {
+                              if (parsercmd::EOfile())
+                              {
+                                 tellPP->checkEOF();
+                                 if (tellPP->lastError())
+                                    return tknERROR;
+                              } 
+                              else 
+                                 yyterminate();
+                           }
+                         }
+<pPRAGMA>prepreset       { BEGIN(INITIAL);
+                           tellPP->reset();
+                         }
+<pPRAGMA>fullreset       { BEGIN(INITIAL);
+                           //CMDBlock->clearUserData();
+                           tellPP->reset();
+                         }
 #ifdef                     BEGIN(pIFD);
 <pIFD>{lex_ID}           { if (!tellPP->ppIfDef(yytext))
                               BEGIN(pPASS);
@@ -328,6 +350,8 @@ int parsercmd::includefile(char* name, FILE* &handler)
             telllloc.first_column = telllloc.last_column = 1;
             telllloc.first_line = telllloc.last_line = 1;
             telllloc.filename = name;
+            /* keep the full file name (in case of #pragma once) */
+            tellPP->tllFileName(nfname);
          }
          else
          {
