@@ -581,14 +581,6 @@ console::TllCmdLine::~TllCmdLine()
 }
 
 //==============================================================================
-// The ted_cmd event table
-BEGIN_EVENT_TABLE( console::TedCmdLine, wxEvtHandler )
-   EVT_TECUSTOM_COMMAND(wxEVT_CONSOLE_PARSE, wxID_ANY, TedCmdLine::onParseCommand)
-   EVT_TEXT_ENTER(wxID_ANY, TedCmdLine::onGetCommand)
-   EVT_KEY_UP(TedCmdLine::onKeyUP)
-END_EVENT_TABLE()
-
-//==============================================================================
 console::TedCmdLine::TedCmdLine(wxWindow* canvas, wxTextCtrl* cmdLineWnd) :
       TllCmdLine  ( canvas      ),
       _cmdLineWnd ( cmdLineWnd  )

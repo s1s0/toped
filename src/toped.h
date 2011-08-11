@@ -96,7 +96,7 @@ namespace tui {
       ResourceCenter*         resourceCenter(void) {return _resourceCenter;}
       console::ted_log*       logwin()   const {return _cmdlog;}
       LayoutCanvas*           view()     const {return _canvas;}
-//      console::TedCmdLine*    cmdline()  const {return _cmdline;}
+      console::TedCmdLine*    cmdline()  const {return _cmdline;}
       browsers::browserTAB*   browsers() const {return _browsers;}
       console::TELLFuncList*  cmdlist()  const {return _cmdbrowser;}
       wxWindow*               getFrame()       {return this;}
@@ -113,7 +113,7 @@ namespace tui {
       void                    SIMap2wxString(SIMap* inmap, wxString& outmap);
       console::ted_log*       _cmdlog;       // log window
       console::TELLFuncList*  _cmdbrowser;
-      wxTextCtrl*             _cmdline;      // tell command input window
+      console::TedCmdLine*    _cmdline;
       //LayoutCanvas*           _laycanvas;
       CanvasStatus*           _GLstatus;
       browsers::browserTAB*   _browsers;  // TDT/GDS/layer browsers
@@ -266,6 +266,9 @@ namespace tui {
       void     editLayerDlg(word layno, const layprop::DrawProperties*);
       void     OnDRCResults(wxCommandEvent& evt);
       void     OnIconize(wxIconizeEvent& evt);
+      void     onParseCommand(wxCommandEvent& evt);
+      void       onGetCommand(wxCommandEvent& evt);
+      void            onKeyUP(wxKeyEvent& evt);
       // The declaration of the associated event table
       DECLARE_EVENT_TABLE();
    };

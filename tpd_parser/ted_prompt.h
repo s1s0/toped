@@ -132,18 +132,18 @@ namespace console {
       virtual void            waitGUInput(telldata::operandSTACK*,console::ACTIVE_OP, const CTM&);
       virtual void            getGUInput(bool from_keyboard);
       virtual void            waitExternal(wxString);
+      void                    onParseCommand(wxCommandEvent&);
+      void                    onGetCommand(wxCommandEvent& WXUNUSED(event));
+      void                    onKeyUP(wxKeyEvent&);
+      wxTextCtrl*             getWidget()                 {return _cmdLineWnd;}
    protected:
       virtual wxString        getString();
       virtual void            setString(const wxString&);
       virtual void            clearString();
    private:
-      void                    onParseCommand(wxCommandEvent&);
-      void                    onGetCommand(wxCommandEvent& WXUNUSED(event));
-      void                    onKeyUP(wxKeyEvent&);
       void                    onGUInput(wxCommandEvent&);
       void                    onExternalDone(wxCommandEvent&);
       wxTextCtrl*             _cmdLineWnd;
-      DECLARE_EVENT_TABLE();
    };
 
 }

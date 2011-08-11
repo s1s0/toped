@@ -97,7 +97,7 @@ wxWindow*               TpdPost::_statusBar     = NULL;
 wxWindow*               TpdPost::_topBrowsers   = NULL;
 wxWindow*               TpdPost::_layBrowser    = NULL;
 wxWindow*               TpdPost::_cllBrowser    = NULL;
-wxWindow*               TpdPost::_cmdLine       = NULL;
+//wxWindow*               TpdPost::_cmdLine       = NULL;
 wxWindow*               TpdPost::_tllFuncList   = NULL;
 wxWindow*               TpdPost::_mainWindow    = NULL;
 
@@ -323,7 +323,7 @@ TpdPost::TpdPost(wxWindow* mainWindow)
    _topBrowsers = _mainWindow->FindWindow(tui::ID_WIN_BROWSERS);
    _layBrowser  = _mainWindow->FindWindow(tui::ID_PNL_LAYERS);
    _cllBrowser  = _mainWindow->FindWindow(tui::ID_PNL_CELLS);
-   _cmdLine     = _mainWindow->FindWindow(tui::ID_CMD_LINE);
+//   _cmdLine     = _mainWindow->FindWindow(tui::ID_CMD_LINE);
    _tllFuncList = _mainWindow->FindWindow(tui::ID_TELL_FUNCS);
    CmdList = static_cast<console::TELLFuncList*>(_tllFuncList);
 }
@@ -587,10 +587,12 @@ void TpdPost::treeMarkGrcMember(const char* cell, bool error)
 
 void TpdPost::parseCommand(const wxString cmd)
 {
-   assert(_cmdLine);
+//   assert(_cmdLine);
+   assert(_mainWindow);
    wxCommandEvent eventPARSE(wxEVT_CONSOLE_PARSE);
    eventPARSE.SetString(cmd);
-   wxPostEvent(_cmdLine, eventPARSE);
+//   wxPostEvent(_cmdLine, eventPARSE);
+   wxPostEvent(_mainWindow, eventPARSE);
 }
 
 void TpdPost::tellFnAdd(const std::string name, void* arguments)
