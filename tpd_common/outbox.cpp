@@ -373,7 +373,7 @@ void TpdPost::render_status(bool on_off)
 
 void TpdPost::refreshTDTtab(bool targetDB, bool threadExecution)
 {
-   assert(_topBrowsers);
+   if (NULL == _topBrowsers) return;
    wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
    eventADDTAB.SetInt(tui::BT_ADDTDT_LIB);
    eventADDTAB.SetExtraLong(targetDB ? 1 : 0);
@@ -470,7 +470,7 @@ void TpdPost::clearDRCtab()
 
 void TpdPost::layer_status(int btype, const word layno, const bool status)
 {
-   assert(_layBrowser);
+   if (NULL == _layBrowser) return;
    wxCommandEvent eventLAYER_STATUS(wxEVT_CMD_BROWSER);
    eventLAYER_STATUS.SetExtraLong(status);
    eventLAYER_STATUS.SetInt(btype);
@@ -481,7 +481,7 @@ void TpdPost::layer_status(int btype, const word layno, const bool status)
 
 void TpdPost::layer_add(const std::string name, const word layno)
 {
-   assert(_layBrowser);
+   if (NULL == _layBrowser) return;
    wxCommandEvent eventLAYER_ADD(wxEVT_CMD_BROWSER);
    word *laynotemp = DEBUG_NEW word(layno);
    eventLAYER_ADD.SetClientData(static_cast<void*> (laynotemp));
@@ -492,7 +492,7 @@ void TpdPost::layer_add(const std::string name, const word layno)
 
 void TpdPost::layer_default(const word newlay, const word oldlay)
 {
-   assert(_layBrowser);
+   if (NULL == _layBrowser) return;
    wxCommandEvent eventLAYER_DEF(wxEVT_CMD_BROWSER);
    eventLAYER_DEF.SetExtraLong(newlay);
    word *laynotemp = DEBUG_NEW word(oldlay);
@@ -503,7 +503,7 @@ void TpdPost::layer_default(const word newlay, const word oldlay)
 
 void TpdPost::layers_state(const std::string& name, bool add)
 {
-   assert(_layBrowser);
+   if (NULL == _layBrowser) return;
    wxCommandEvent eventLAYERS_STATE(wxEVT_CMD_BROWSER);
    eventLAYERS_STATE.SetString(wxString(name.c_str(), wxConvUTF8));
    if (add)
@@ -515,7 +515,7 @@ void TpdPost::layers_state(const std::string& name, bool add)
 
 void TpdPost::resetTDTtab(const std::string dbName)
 {
-   assert(_topBrowsers);
+   if (NULL == _cllBrowser) return;
    wxCommandEvent resetTDTTab(wxEVT_CMD_BROWSER);
    resetTDTTab.SetInt(tui::BT_NEWTDT_DB);
    resetTDTTab.SetString(wxString(dbName.c_str(), wxConvUTF8));
@@ -524,7 +524,7 @@ void TpdPost::resetTDTtab(const std::string dbName)
 
 void TpdPost::celltree_open(const std::string cname)
 {
-   assert(_cllBrowser);
+   if (NULL == _cllBrowser) return;
    wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
    eventCELLTREE.SetInt(tui::BT_CELL_OPEN);
    eventCELLTREE.SetString(wxString(cname.c_str(), wxConvUTF8));
@@ -533,7 +533,7 @@ void TpdPost::celltree_open(const std::string cname)
 
 void TpdPost::celltree_highlight(const std::string cname)
 {
-   assert(_cllBrowser);
+   if (NULL == _cllBrowser) return;
    wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
    eventCELLTREE.SetInt(tui::BT_CELL_HIGHLIGHT);
    eventCELLTREE.SetString(wxString(cname.c_str(), wxConvUTF8));
@@ -542,7 +542,7 @@ void TpdPost::celltree_highlight(const std::string cname)
 
 void TpdPost::treeAddMember(const char* cell, const char* parent, int action)
 {
-   assert(_cllBrowser);
+   if (NULL == _cllBrowser) return;
    wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
    eventCELLTREE.SetInt(tui::BT_CELL_ADD);
    eventCELLTREE.SetString(wxString(cell, wxConvUTF8));
@@ -554,7 +554,7 @@ void TpdPost::treeAddMember(const char* cell, const char* parent, int action)
 
 void TpdPost::treeRemoveMember(const char* cell, const char* parent, int action)
 {
-   assert(_cllBrowser);
+   if (NULL == _cllBrowser) return;
    wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
    eventCELLTREE.SetInt(tui::BT_CELL_REMOVE);
    eventCELLTREE.SetString(wxString(cell, wxConvUTF8));
@@ -566,7 +566,7 @@ void TpdPost::treeRemoveMember(const char* cell, const char* parent, int action)
 
 void TpdPost::treeRenameMember(const char* oldName, const char* newName)
 {
-   assert(_cllBrowser);
+   if (NULL == _cllBrowser) return;
    wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
    eventCELLTREE.SetInt(tui::BT_CELL_RENAME);
    eventCELLTREE.SetString(wxString(oldName, wxConvUTF8));
@@ -577,7 +577,7 @@ void TpdPost::treeRenameMember(const char* oldName, const char* newName)
 
 void TpdPost::treeMarkGrcMember(const char* cell, bool error)
 {
-   assert(_cllBrowser);
+   if (NULL == _cllBrowser) return;
    wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
    eventCELLTREE.SetInt(tui::BT_CELL_MARK_GRC);
    eventCELLTREE.SetString(wxString(cell, wxConvUTF8));

@@ -773,14 +773,14 @@ void console::TedCmdLine::clearString()
 //static_cast<console::TedCmdLine*>()
 
 //==============================================================================
-console::TllCCmdLine::TllCCmdLine() : console::TllCmdLine(NULL)
-{
-
-}
+console::TllCCmdLine::TllCCmdLine() :
+   console::TllCmdLine     ( NULL         ),
+   _currentCommand         ( wxT("")      )
+{}
 
 void     console::TllCCmdLine::waitGUInput(telldata::operandSTACK*,console::ACTIVE_OP, const CTM&)
 {
-
+   assert(false);
 }
 void     console::TllCCmdLine::getGUInput(bool from_keyboard)
 {
@@ -788,17 +788,17 @@ void     console::TllCCmdLine::getGUInput(bool from_keyboard)
 }
 void     console::TllCCmdLine::waitExternal(wxString)
 {
-
+   assert(0);
 }
 wxString console::TllCCmdLine::getString()
 {
-   return (wxT(""));
+   return (_currentCommand);
 }
-void     console::TllCCmdLine::setString(const wxString&)
+void     console::TllCCmdLine::setString(const wxString& str)
 {
-
+   _currentCommand = str;
 }
 void     console::TllCCmdLine::clearString()
 {
-
+   _currentCommand.Clear();
 }
