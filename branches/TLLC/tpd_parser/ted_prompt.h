@@ -156,6 +156,8 @@ namespace console {
       virtual wxString        getString();
       virtual void            setString(const wxString&);
       virtual void            clearString();
+   private:
+      wxString                _currentCommand;
    };
 
 }
