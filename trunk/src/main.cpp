@@ -105,6 +105,7 @@ class TopedApp : public wxApp
       wxString       _localDir;
       wxString       _inputTellFile;
       bool           _forceBasicRendering;
+      bool           _noLog;
       PluginList     _plugins;
 };
 
@@ -115,6 +116,7 @@ bool TopedApp::OnInit()
    getGlobalDirs();
 //   DATC = DEBUG_NEW DataCenter();
    _forceBasicRendering = false;
+   _noLog               = false;
    wxImage::AddHandler(DEBUG_NEW wxPNGHandler);
    // Initialize Toped properties
    PROPC = DEBUG_NEW layprop::PropertyCenter();
@@ -199,12 +201,18 @@ int TopedApp::OnRun()
       Console->parseCommand(inputfile, false);
       tell_log(console::MT_WARNING,"Exit recovery mode.");
       static_cast<parsercmd::cmdMAIN*>(CMDBlock)->recoveryDone();
-      LogFile.init(std::string(_logFileName.mb_str(wxConvFile)), true);
+      if (_noLog)
+         LogFile.setEnabled(_noLog);
+      else
+         LogFile.init(std::string(_logFileName.mb_str(wxConvFile)), true);
    }
    else
    {
       // Execute the tell file from the command line
-      LogFile.init(std::string(_logFileName.mb_str(wxConvFile )));
+      if (_noLog)
+         LogFile.setEnabled(_noLog);
+      else
+         LogFile.init(std::string(_logFileName.mb_str(wxConvFile)), true);
 //      wxLog::AddTraceMask(wxT("thread"));
 //      wxLog::AddTraceMask(wxTRACE_MemAlloc);
       if ( !_inputTellFile.IsEmpty() )
@@ -231,7 +239,7 @@ int TopedApp::OnExit()
    MemTrack::TrackDumpBlocks();
 #endif
 
-   finishSessionLog();
+   if (!_noLog) finishSessionLog();
    return wxApp::OnExit();
 }
 
@@ -432,6 +440,7 @@ void TopedApp::parseCmdLineArgs()
          wxString curar(argv[i]);
          if (wxT("-ogl_thread") == curar) Toped->setOglThread(true);
          else if (wxT("-ogl_safe") == curar) _forceBasicRendering = true;
+         else if (wxT("-nolog")    == curar) _noLog               = true;
          else if (0 == curar.Find(wxT("-I")))
          {
             Console->addTllIncludePath(curar.Remove(0,2));
