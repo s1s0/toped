@@ -65,7 +65,7 @@ extern layprop::FontLibrary*     fontLib;
 extern parsercmd::cmdBLOCK*      CMDBlock;
 extern parsercmd::TellPreProc*   tellPP;
 extern console::toped_logfile    LogFile;
-extern console::ted_cmd*         Console;
+extern console::TllCmdLine*      Console;
 extern Calbr::CalbrFile*         DRCData;
 extern const wxEventType         wxEVT_RENDER_PARAMS;
 
@@ -105,8 +105,11 @@ class TopedApp : public wxApp
       wxString       _localDir;
       wxString       _inputTellFile;
       bool           _forceBasicRendering;
-      bool           _noLog;
+      bool           _noLog;     //! Don't create a log file
+      bool           _gui;       //! Run graphics (as opposed to a command line mode)
       PluginList     _plugins;
+      wxPathList     _tllIncludePath;
+
 };
 
 //=============================================================================
@@ -117,58 +120,92 @@ bool TopedApp::OnInit()
 //   DATC = DEBUG_NEW DataCenter();
    _forceBasicRendering = false;
    _noLog               = false;
+   _gui                 = true;
    wxImage::AddHandler(DEBUG_NEW wxPNGHandler);
    // Initialize Toped properties
    PROPC = DEBUG_NEW layprop::PropertyCenter();
    // Initialize Toped database
    DATC  = DEBUG_NEW DataCenter(std::string(_localDir.mb_str(wxConvFile)), std::string(_globalDir.mb_str(wxConvFile)));
-   // Get the Graphic User Interface (gui system)
-   Toped = DEBUG_NEW tui::TopedFrame( wxT( "Toped" ), wxPoint(50,50), wxSize(1200,900) );
    // initialize the TELL pre-processor
    tellPP = DEBUG_NEW parsercmd::TellPreProc();
    // check command line arguments
    parseCmdLineArgs();
-   // Check we've got the required graphic capabilities. If not - bail out.
-   if (!Toped->view()->initStatus())
+   if (_gui)
    {
-      wxMessageDialog* dlg1 = DEBUG_NEW  wxMessageDialog(Toped,
-            wxT("Toped can't obtain required GLX Visual. Check your video driver/setup please"),
-            wxT("Toped"),
-            wxOK | wxICON_ERROR);
-      dlg1->ShowModal();
-      dlg1->Destroy();
-      return FALSE;
+      // Get the Graphic User Interface (gui system)
+      Toped = DEBUG_NEW tui::TopedFrame( wxT( "Toped" ), wxPoint(50,50), wxSize(1200,900) );
+      // Check we've got the required graphic capabilities. If not - bail out.
+      if (!Toped->view()->initStatus())
+      {
+         wxMessageDialog* dlg1 = DEBUG_NEW  wxMessageDialog(Toped,
+               wxT("Toped can't obtain required GLX Visual. Check your video driver/setup please"),
+               wxT("Toped"),
+               wxOK | wxICON_ERROR);
+         dlg1->ShowModal();
+         dlg1->Destroy();
+         return FALSE;
+      }
+      // Diagnose the graphic system and return the appropriate
+      // type of rendering (i.e. basic or tenderer)
+      if (!_forceBasicRendering)
+         PROPC->setRenderType(Toped->view()->diagnozeGL());
+
+      // Replace the active console in the wx system with Toped console window
+      console::ted_log_ctrl *logWindow = DEBUG_NEW console::ted_log_ctrl(Toped->logwin());
+      delete wxLog::SetActiveTarget(logWindow);
+      // Initialize the tool bars
+      Toped->setIconDir(std::string(_tpdResourceDir.mb_str(wxConvFile)));
+      Toped->initToolBars();
+      tellstdfunc::initFuncLib(Toped, Toped->view());
    }
-   // Diagnose the graphic system and return the appropriate
-   // type of rendering (i.e. basic or tenderer)
-   if (!_forceBasicRendering)
-      PROPC->setRenderType(Toped->view()->diagnozeGL());
-   // Replace the active console in the wx system with Toped console window
-   console::ted_log_ctrl *logWindow = DEBUG_NEW console::ted_log_ctrl(Toped->logwin());
-   delete wxLog::SetActiveTarget(logWindow);
-   
+   else
+   {
+      TessellPoly::tenderTesel = gluNewTess();
+      #ifndef WIN32
+         gluTessCallback(TessellPoly::tenderTesel, GLU_TESS_BEGIN_DATA,
+                         (GLvoid(*)())&TessellPoly::teselBegin);
+         gluTessCallback(TessellPoly::tenderTesel, GLU_TESS_VERTEX_DATA,
+                         (GLvoid(*)())&TessellPoly::teselVertex);
+         gluTessCallback(TessellPoly::tenderTesel, GLU_TESS_END_DATA,
+                         (GLvoid(*)())&TessellPoly::teselEnd);
+      #else
+         gluTessCallback(TessellPoly::tenderTesel, GLU_TESS_BEGIN_DATA,
+                         (GLvoid(__stdcall *)())&TessellPoly::teselBegin);
+         gluTessCallback(TessellPoly::tenderTesel, GLU_TESS_VERTEX_DATA,
+                         (GLvoid(__stdcall *)())&TessellPoly::teselVertex);
+         gluTessCallback(TessellPoly::tenderTesel, GLU_TESS_END_DATA,
+                         (GLvoid(__stdcall *)())&TessellPoly::teselEnd);
+      #endif
+
+      DEBUG_NEW console::TllCCmdLine();
+      loadGlfFonts();
+      console::ted_log_ctrl *logWindow = DEBUG_NEW console::ted_log_ctrl(NULL);
+      delete wxLog::SetActiveTarget(logWindow);
+      wxPrintf(wxT("Tell Compiler\n"));
+   }
+
    getTellPathDirs();
-   // Initialize the tool bars
-   Toped->setIconDir(std::string(_tpdResourceDir.mb_str(wxConvFile)));
-   Toped->initToolBars();
    // Create the session log file
    if (!getLogFileName()) return FALSE;
    // It's time to register all internal TELL functions
    // Create the main block parser block - WARNING! blockSTACK structure MUST already exist!
    CMDBlock = DEBUG_NEW parsercmd::cmdMAIN();
-   tellstdfunc::initFuncLib(Toped, Toped->view());
    initInternalFunctions(static_cast<parsercmd::cmdMAIN*>(CMDBlock));
    // Loading of eventual plug-ins
    loadPlugIns();
-   // Finally show the Toped frame
-   SetTopWindow(Toped);
-   Toped->Show(TRUE);
-   // First thing after initializing openGL - load available layout fonts
-   loadGlfFonts();
-   // at this stage - the tool shall be considered fully functional
-   //--------------------------------------------------------------------------
-   // Put a rendering info in the log
-   printLogWHeader();
+
+   if (_gui)
+   {
+      // Finally show the Toped frame
+      SetTopWindow(Toped);
+      Toped->Show(TRUE);
+      // First thing after initializing openGL - load available layout fonts
+      loadGlfFonts();
+      // at this stage - the tool shall be considered fully functional
+      //--------------------------------------------------------------------------
+      // Put a rendering info in the log
+      printLogWHeader();
+   }
    return TRUE;
 }
 
@@ -441,9 +478,13 @@ void TopedApp::parseCmdLineArgs()
          if (wxT("-ogl_thread") == curar) Toped->setOglThread(true);
          else if (wxT("-ogl_safe") == curar) _forceBasicRendering = true;
          else if (wxT("-nolog")    == curar) _noLog               = true;
+         else if (wxT("-nogui")    == curar) _gui                 = false;
          else if (0 == curar.Find(wxT("-I")))
          {
-            Console->addTllIncludePath(curar.Remove(0,2));
+            // Store the include paths in a temporary location until we have a
+            // valid console
+            _tllIncludePath.Add(curar.Remove(0,2));
+//            Console->addTllIncludePath(curar.Remove(0,2));
          }
          else if (0 == curar.Find(wxT("-D")))
          {
@@ -555,6 +596,8 @@ void TopedApp::getGlobalDirs()
 
 void TopedApp::getTellPathDirs()
 {
+   for (unsigned i = 0; i < _tllIncludePath.size(); i++)
+      Console->addTllIncludePath(_tllIncludePath[i]);
    Console->addTllEnvList(wxT("TLL_INCLUDE_PATH"));
    wxString tllDefaultIncPath;
    tllDefaultIncPath << _globalDir << wxT("/tll/");
