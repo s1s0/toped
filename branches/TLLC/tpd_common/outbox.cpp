@@ -175,14 +175,79 @@ void console::ted_log::OnLOGMessage(wxCommandEvent& evt) {
    evt.Skip();
 }
 
-void console::ted_log_ctrl::DoLog(wxLogLevel level, const wxChar *msg, time_t timestamp) {
-   wxCommandEvent eventLOG(wxEVT_LOG_ERRMESSAGE);
-   eventLOG.SetString(msg);
-   eventLOG.SetInt(level);
-   eventLOG.SetExtraLong(timestamp);
-   wxPostEvent(_tellLOGW, eventLOG);
+
+//=============================================================================
+void console::ted_log_ctrl::DoLog(wxLogLevel level, const wxChar *msg, time_t timestamp)
+{
+   if (NULL != _tellLOGW)
+   { // gui mode
+      wxCommandEvent eventLOG(wxEVT_LOG_ERRMESSAGE);
+      eventLOG.SetString(msg);
+      eventLOG.SetInt(level);
+      eventLOG.SetExtraLong(timestamp);
+      wxPostEvent(_tellLOGW, eventLOG);
+   }
+   else
+   { // text mode
+      wxString wxMsg(msg);
+      std::string stringmsg(wxMsg.mb_str(wxConvUTF8));
+      cmdLineLog(level, stringmsg, timestamp);
+   }
 }
 
+void console::ted_log_ctrl::cmdLineLog(wxLogLevel level, const std::string& msg, time_t timestamp)
+{
+   const std::string       cmd_mark   = "=> ";
+   const std::string       gui_mark   = ">> ";
+   const std::string       rply_mark  = "<= ";
+   const std::string       shell_mark = "# " ;
+
+   std::stringstream ostr;
+   switch (level)
+   {
+      case    MT_INFO:
+         ostr << rply_mark << msg << "\n";
+         break;
+      case   MT_ERROR:
+         ostr << rply_mark << msg << "\n";
+         break;
+      case MT_COMMAND:
+         ostr << cmd_mark << msg << "\n";
+         break;
+      case MT_GUIPROMPT:
+         ostr << gui_mark;
+         break;
+      case MT_SHELLINFO:
+         ostr << shell_mark << msg << "\n";
+         break;
+      case MT_SHELLERROR:
+         ostr << shell_mark << msg << "\n";
+         break;
+      case MT_GUIINPUT:
+         ostr << msg;
+         break;
+      case MT_EOL:
+         ostr << "\n";
+         break;
+      case MT_WARNING:
+         ostr << rply_mark << msg << "\n";
+         break;
+      case MT_CELLNAME:
+         ostr << wxT(" Cell ") << msg << "\n";
+         break;
+      case MT_DESIGNNAME:
+         ostr << rply_mark << wxT(" Design ") << msg << "\n";
+         break;
+      default: //wx Messages
+         ostr << wxT("WX MESSAGE Level:") << level << wxT(" \"") << msg << wxT("\"\n");
+         break;
+   }
+   wxString convertStr(ostr.str().c_str(), wxConvUTF8);
+   wxPrintf(convertStr);
+
+}
+
+//=============================================================================
 void tell_log(console::LOG_TYPE lt, const char* msg)
 {
    wxLog::OnLog(lt, wxString(msg, wxConvUTF8), time(NULL));

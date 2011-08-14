@@ -144,13 +144,13 @@ namespace console {
    };
 
    //===========================================================================
-   class ted_log_ctrl : public wxLogTextCtrl {
+   class ted_log_ctrl : public wxLog {
    public:
-      ted_log_ctrl(wxTextCtrl *pTextCtrl) : wxLogTextCtrl(pTextCtrl),
-                                                         _tellLOGW(pTextCtrl){};
+      ted_log_ctrl(wxEvtHandler *pTextCtrl) : wxLog(), _tellLOGW(pTextCtrl){};
    private:
-      void         DoLog(wxLogLevel level, const wxChar *msg, time_t timestamp);
-      wxTextCtrl*  _tellLOGW;
+      void           DoLog(wxLogLevel level, const wxChar *msg, time_t timestamp);
+      void           cmdLineLog(wxLogLevel level, const std::string& msg, time_t timestamp);
+      wxEvtHandler*  _tellLOGW;
    };
 
    //===========================================================================
