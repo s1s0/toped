@@ -177,6 +177,8 @@ bool TopedApp::OnInit()
 
       DEBUG_NEW console::TllCCmdLine();
       loadGlfFonts();
+      console::ted_log_ctrl *logWindow = DEBUG_NEW console::ted_log_ctrl(NULL);
+      delete wxLog::SetActiveTarget(logWindow);
       wxPrintf(wxT("Tell Compiler\n"));
    }
 
