@@ -700,11 +700,12 @@ namespace  parsercmd {
 namespace console{
    class toped_logfile {
       public:
-         toped_logfile() {};
+                           toped_logfile() :_enabled(true) {};
          void              close();
          void              init(const std::string logFileName, bool append = false);
          void              setFN(std::string fn) {_funcname = fn;};
          std::string       getFN() const {return _funcname;};
+         void              setEnabled(bool enabled) {_enabled = enabled;}
          std::string       _2bool(bool b) {return b ? "true" : "false";};
          toped_logfile&    operator<< (const byte);
          toped_logfile&    operator<< (const word);
@@ -720,6 +721,7 @@ namespace console{
       private:
          std::fstream     _file;
          std::string      _funcname;
+         bool             _enabled;
    };
 }
 #endif

@@ -2501,15 +2501,15 @@ parsercmd::FuncDeclaration::~FuncDeclaration()
 // class toped_logfile
 //-----------------------------------------------------------------------------
 // TOPED log file header
-#define LFH_SEPARATOR "//=============================================================================="
-#define LFH_HEADER    "//                                TOPED log file"
-#define LFH_REVISION  "//    TOPED revision: "
-#define LFH_ENVIRONM  "// Current directory: "
-#define LFH_TIMESTAMP "//   Session started: "
-#define LFH_RECOSTAMP "// Session recovered: "
-
 void console::toped_logfile::init(const std::string logFileName, bool append)
 {
+   const std::string LFH_SEPARATOR = "//==============================================================================";
+   const std::string LFH_HEADER    = "//                                TOPED log file";
+   const std::string LFH_REVISION  = "//    TOPED revision: ";
+   const std::string LFH_ENVIRONM  = "// Current directory: ";
+   const std::string LFH_TIMESTAMP = "//   Session started: ";
+   const std::string LFH_RECOSTAMP = "// Session recovered: ";
+
    char *locale=setlocale(LC_ALL, "");
    if (append)
    {
@@ -2535,90 +2535,111 @@ void console::toped_logfile::init(const std::string logFileName, bool append)
 }
 
 console::toped_logfile& console::toped_logfile::operator<< (const byte _i) {
-   _file << static_cast<unsigned short>(_i) ; return *this;
+   if (_enabled)
+      _file << static_cast<unsigned short>(_i) ;
+   return *this;
 }
 
 console::toped_logfile& console::toped_logfile::operator<< (const word _i) {
-   _file << _i ; return *this;
+   if (_enabled)
+      _file << _i ;
+   return *this;
 }
 
 console::toped_logfile& console::toped_logfile::operator<< (const int4b _i) {
-   _file << _i ; return *this;
+   if (_enabled)
+      _file << _i ;
+   return *this;
 }
 
 console::toped_logfile& console::toped_logfile::operator<< (const real _r) {
-   _file << _r ; return *this;
+   if (_enabled)
+      _file << _r ;
+   return *this;
 }
 
 console::toped_logfile& console::toped_logfile::operator<< (const telldata::ttpnt& _p) {
-   _file << "{" << _p.x() << "," << _p.y() << "}";
+   if (_enabled)
+      _file << "{" << _p.x() << "," << _p.y() << "}";
    return *this;
 }
 
 console::toped_logfile& console::toped_logfile::operator<< (const std::string& _s) {
-   _file << _s ; return *this;
+   if (_enabled)
+      _file << _s ;
+   return *this;
 }
 
 console::toped_logfile& console::toped_logfile::operator<< (const telldata::ttwnd& _w) {
-   _file << "{{" << _w.p1().x() << "," << _w.p1().y() << "}," <<
-         "{" << _w.p2().x() << "," << _w.p2().y() << "}}";
+   if (_enabled)
+      _file << "{{" << _w.p1().x() << "," << _w.p1().y() << "}," <<
+                "{" << _w.p2().x() << "," << _w.p2().y() << "}}";
    return *this;
 }
 
 console::toped_logfile& console::toped_logfile::operator<< (const telldata::ttbnd& _b) {
-   _file << "{{" << _b.p().x() << "," << _b.p().y() << "}," <<
-         _b.rot().value() << "," << (_b.flx().value() ? "true" : "false") << "," <<
-         _b.sc().value() << "}";
+   if (_enabled)
+      _file << "{{" << _b.p().x() << "," << _b.p().y() << "}," <<
+            _b.rot().value() << "," << (_b.flx().value() ? "true" : "false") << "," <<
+            _b.sc().value() << "}";
    return *this;
 }
 
 console::toped_logfile& console::toped_logfile::operator<< (const telldata::tthsh& _h) {
-   _file << "{" << _h.key().value() << ",\"" << _h.value().value() << "\"}";
+   if (_enabled)
+      _file << "{" << _h.key().value() << ",\"" << _h.value().value() << "\"}";
    return *this;
 }
 
 console::toped_logfile& console::toped_logfile::operator<< (const telldata::ttlist& _tl) {
-   _file << "{";
-   for (unsigned i = 0; i < _tl.size(); i++) {
-      if (i != 0) _file << ",";
-      switch (~telldata::tn_listmask & _tl.get_type()) {
-         case telldata::tn_int:
-            _file << static_cast<telldata::ttint*>((_tl.mlist())[i])->value();
-            break;
-         case telldata::tn_real:
-            _file << static_cast<telldata::ttreal*>((_tl.mlist())[i])->value();
-            break;
-         case telldata::tn_bool:
-            *this << _2bool(static_cast<telldata::ttbool*>((_tl.mlist())[i])->value());
-            break;
-         case telldata::tn_string:
-            _file << "\"" << static_cast<telldata::ttstring*>((_tl.mlist())[i])->value() << "\"";
-            break;
-         case telldata::tn_pnt:
-            *this << *(static_cast<telldata::ttpnt*>((_tl.mlist())[i]));
-            break;
-         case telldata::tn_box:
-            *this << *(static_cast<telldata::ttwnd*>((_tl.mlist())[i]));
-            break;
-         case telldata::tn_bnd:
-            *this << *(static_cast<telldata::ttbnd*>((_tl.mlist())[i]));
-            break;
-         case telldata::tn_hsh:
-            *this << *(static_cast<telldata::tthsh*>((_tl.mlist())[i]));
-            break;
-//         case tn_layout:
-            default:{assert(false);}
+   if (_enabled)
+   {
+      _file << "{";
+      for (unsigned i = 0; i < _tl.size(); i++) {
+         if (i != 0) _file << ",";
+         switch (~telldata::tn_listmask & _tl.get_type()) {
+            case telldata::tn_int:
+               _file << static_cast<telldata::ttint*>((_tl.mlist())[i])->value();
+               break;
+            case telldata::tn_real:
+               _file << static_cast<telldata::ttreal*>((_tl.mlist())[i])->value();
+               break;
+            case telldata::tn_bool:
+               *this << _2bool(static_cast<telldata::ttbool*>((_tl.mlist())[i])->value());
+               break;
+            case telldata::tn_string:
+               _file << "\"" << static_cast<telldata::ttstring*>((_tl.mlist())[i])->value() << "\"";
+               break;
+            case telldata::tn_pnt:
+               *this << *(static_cast<telldata::ttpnt*>((_tl.mlist())[i]));
+               break;
+            case telldata::tn_box:
+               *this << *(static_cast<telldata::ttwnd*>((_tl.mlist())[i]));
+               break;
+            case telldata::tn_bnd:
+               *this << *(static_cast<telldata::ttbnd*>((_tl.mlist())[i]));
+               break;
+            case telldata::tn_hsh:
+               *this << *(static_cast<telldata::tthsh*>((_tl.mlist())[i]));
+               break;
+   //         case tn_layout:
+               default:{assert(false);}
+         }
       }
+      _file << "}";
    }
-   _file << "}";
    return *this;
 }
-console::toped_logfile& console::toped_logfile::flush() {
-   _file << std::endl; return *this;
+console::toped_logfile& console::toped_logfile::flush()
+{
+   if (_enabled)
+      _file << std::endl;
+   return *this;
 }
 
 void console::toped_logfile::close()
 {
-   _file.close();
+   if (_enabled)
+      _file.close();
 }
 
