@@ -65,7 +65,7 @@ extern int tellparse(); // Calls the bison generated parser
 extern YYLTYPE telllloc; // parser current location - global variable, defined in bison
 
 //extern const wxEventType    wxEVT_LOG_ERRMESSAGE;
-console::ted_cmd*           Console = NULL;
+console::TllCmdLine*        Console = NULL;
 extern const wxEventType    wxEVT_CONSOLE_PARSE;
 extern const wxEventType    wxEVT_CANVAS_ZOOM;
 extern const wxEventType    wxEVT_EXECEXTDONE;
@@ -346,65 +346,31 @@ void console::parse_thread::OnExit()
 }
 
 //==============================================================================
-// The ted_cmd event table
-BEGIN_EVENT_TABLE( console::ted_cmd, wxTextCtrl )
-   EVT_TECUSTOM_COMMAND(wxEVT_CONSOLE_PARSE, wxID_ANY, ted_cmd::onParseCommand)
-   EVT_TEXT_ENTER(wxID_ANY, ted_cmd::onGetCommand)
-   EVT_KEY_UP(ted_cmd::onKeyUP)
-END_EVENT_TABLE()
-
-//==============================================================================
-console::ted_cmd::ted_cmd(wxWindow *parent, wxWindow *canvas) :
-      wxTextCtrl( parent, tui::ID_CMD_LINE, wxT(""), wxDefaultPosition, wxDefaultSize,
-                  wxTE_PROCESS_ENTER | wxNO_BORDER), _puc(NULL), _numpoints(0)
+console::TllCmdLine::TllCmdLine(wxWindow *canvas) :
+    wxEvtHandler     (                       ),
+   _puc              ( NULL                  ),
+   _numpoints        ( 0                     ),
+   _history_position ( _cmd_history.begin()  ),
+   _execExternal     ( false                 ),
+   _mouseIN_OK       ( true                  ),
+   _canvas           ( canvas                ),
+   _canvas_invalid   ( false                 ),
+   _exitRequested    ( false                 )
 {
-   _canvas = canvas;
-   _exitRequested = false;
-   _execExternal  = false;
-   _mouseIN_OK = true;
    Console = this;
-   _history_position = _cmd_history.begin();
-   _canvas_invalid = false;
    spawnTellThread();
 };
 
-// Note! getCommand and onGetCommand should be overloaded methods, however
-// wxEvent macroses (or maybe the whole system) are not happy if there is
-// an overloaded function of the one listed in the EVT_* macros. This is the
-// only reason for this functions to have different names. They do (almost)
-// the same thing
-
-/*! Called when the command line is entered. Updates the command history,
-   log window and spawns the tell parser in a new thread                   */
-void console::ted_cmd::onGetCommand(wxCommandEvent& WXUNUSED(event))
+void console::TllCmdLine::getCommand(bool thread)
 {
-   if (_puc)  getGUInput(); // run the local GUInput parser
-   else if (_execExternal)
-   {
-      TpdPost::execPipe(GetValue());
-      Clear();
-   }
-   else {
-      wxString command = GetValue();
-      tell_log(MT_COMMAND, command);
-      _cmd_history.push_back(std::string(command.mb_str(wxConvUTF8)));
-      _history_position = _cmd_history.end();
-      Clear();
-
-      runTellCommand(command);
-   }
-}
-
-void console::ted_cmd::getCommand(bool thread)
-{
-   if (_puc)  getGUInput(); // run the local GUInput parser
+   if (_puc)  getGUInput(true); // run the local GUInput parser getting the keyboard input
    else
    {
-      wxString command = GetValue();
+      wxString command = getString();
       tell_log(MT_COMMAND, command);
       _cmd_history.push_back(std::string(command.mb_str(wxConvUTF8)));
       _history_position = _cmd_history.end();
-      Clear();
+      clearString();
       if (!thread)
       { // executing the parser without thread
          // essentially the same code as in parse_thread::Entry, but
@@ -433,7 +399,7 @@ void console::ted_cmd::getCommand(bool thread)
 }
 
 
-void console::ted_cmd::spawnTellThread(/*wxString command*/)
+void console::TllCmdLine::spawnTellThread(/*wxString command*/)
 {
    // executing the parser in a separate thread
    //wxTHREAD_JOINABLE, wxTHREAD_DETACHED
@@ -475,7 +441,7 @@ void console::ted_cmd::spawnTellThread(/*wxString command*/)
    }
 }
 
-void console::ted_cmd::runTellCommand(const wxString& cmd)
+void console::TllCmdLine::runTellCommand(const wxString& cmd)
 {
    wxMutexError result = _tellThread->_mutex.TryLock();
    if (wxMUTEX_BUSY == result)
@@ -494,7 +460,7 @@ void console::ted_cmd::runTellCommand(const wxString& cmd)
    }
 }
 
-void console::ted_cmd::stopParserThread()
+void console::TllCmdLine::stopParserThread()
 {
    wxMutexError result;
    do
@@ -508,154 +474,14 @@ void console::ted_cmd::stopParserThread()
 
 }
 
-// Note! parseCommand and onParseCommand should be overloaded methods, however
-// wxEvent macroses (or maybe the whole system) are not happy if there is
-// an overloaded function of the one listed in the EVT_* macros. This is the
-// only reason for this functions to have different names. They do the same
-// thing
-// onParseCommand is called from wxEVT_CONSOLE_PARSE event while getCommand()
-// is called directly
-void console::ted_cmd::onParseCommand(wxCommandEvent& event)
+void console::TllCmdLine::parseCommand(wxString cmd, bool thread)
 {
    if (NULL != _puc) return; // don't accept commands during shape input sessions
-   SetValue(event.GetString());
-   getCommand(true);
-}
-
-void console::ted_cmd::parseCommand(wxString cmd, bool thread)
-{
-   if (NULL != _puc) return; // don't accept commands during shape input sessions
-   SetValue(cmd);
+   setString(cmd);
    getCommand(thread);
 }
 
-void console::ted_cmd::onKeyUP(wxKeyEvent& event) {
-
-   if ((WXK_UP != event.GetKeyCode()) &&  (WXK_DOWN != event.GetKeyCode())) {
-      event.Skip();return;
-   }
-   if (WXK_DOWN != event.GetKeyCode())
-      if (_cmd_history.begin() == _history_position)
-         _history_position = _cmd_history.end();
-      else _history_position--;
-   else
-      if (_cmd_history.end() == _history_position)
-         _history_position = _cmd_history.begin();
-      else _history_position++;
-      if (_cmd_history.end() == _history_position) SetValue(wxT(""));
-   else
-   {
-      SetValue(wxString(_history_position->c_str(), wxConvUTF8));
-   }
-}
-
-void console::ted_cmd::waitGUInput(telldata::operandSTACK *clst, console::ACTIVE_OP input_type, const CTM& trans)
-{
-   telldata::typeID ttype;
-   switch (input_type)
-   {
-      case console::op_line   :
-      case console::op_dbox   :
-      case console::op_copy   :
-      case console::op_move   : ttype = telldata::tn_box; break;
-      case console::op_rotate :
-      case console::op_flipY  :
-      case console::op_flipX  :
-      case console::op_point  : ttype = telldata::tn_pnt; break;
-      case console::op_cbind  :
-      case console::op_abind  :
-      case console::op_tbind  : ttype = telldata::tn_bnd; break;
-      default:ttype = TLISTOF(telldata::tn_pnt); break;
-   }
-   _puc = DEBUG_NEW miniParser(clst, ttype);
-   _numpoints = 0;
-   _initrans = _translation = trans;
-   _mouseIN_OK = true;
-   _guinput.Clear();
-   tell_log(MT_GUIPROMPT);
-   Connect(-1, wxEVT_COMMAND_ENTER,
-           (wxObjectEventFunction) (wxEventFunction)
-           (wxCommandEventFunction)&ted_cmd::onGUInput);
-
-   TpdPost::toped_status(TSTS_THREADWAIT);
-}
-
-void console::ted_cmd::waitExternal(wxString cmdExt)
-{
-   Connect(-1, wxEVT_EXECEXTDONE,
-           (wxObjectEventFunction) (wxEventFunction)
-           (wxCommandEventFunction)&ted_cmd::onExternalDone);
-   _execExternal = true;
-   TpdPost::toped_status(TSTS_THREADWAIT);
-   TpdPost::execExt(cmdExt);
-}
-
-void console::ted_cmd::getGUInput(bool from_keyboard) {
-   wxString command;
-   if (from_keyboard) { // input is from keyboard
-      command = GetValue();
-      tell_log(MT_GUIINPUT, command);
-      tell_log(MT_EOL);
-      Clear();
-   }
-   else   command = _guinput;
-   //parse the data from the prompt
-   if (_puc->getGUInput(command)) {
-      //if the proper pattern was found
-      Disconnect(-1, wxEVT_COMMAND_ENTER);
-      delete _puc; _puc = NULL;
-      _mouseIN_OK = true;
-      // wake-up the thread expecting this data
-      _threadWaits4->Signal();
-   }
-   else {
-      tell_log(MT_ERROR, "Bad input data, Try again...");
-      tell_log(MT_GUIPROMPT);
-   }
-   _guinput.Clear();
-   _numpoints = 0;
-   _translation = _initrans;
-}
-
-void console::ted_cmd::onGUInput(wxCommandEvent& evt)
-{
-   switch (evt.GetInt()) {
-      case -4: _translation.FlipY();break;
-      case -3: _translation.Rotate(90.0);break;
-      case -2: cancelLastPoint();break;
-      case -1:   // abort current  mouse input
-         Disconnect(-1, wxEVT_COMMAND_ENTER);
-         delete _puc; _puc = NULL;
-         _mouseIN_OK = false;
-         tell_log(MT_WARNING, "input aborted");
-         tell_log(MT_EOL);
-         // wake-up the thread expecting this data
-         _threadWaits4->Signal();
-         break;
-      case  0:  {// left mouse button
-         telldata::ttpnt* p = static_cast<telldata::ttpnt*>(evt.GetClientData());
-         mouseLB(*p);
-         delete p;
-         break;
-         }
-      case  2: {
-         telldata::ttpnt* p = static_cast<telldata::ttpnt*>(evt.GetClientData());
-         mouseRB();
-         delete p;
-         break;
-         }
-      default: assert(false);
-   }
-}
-
-void console::ted_cmd::onExternalDone(wxCommandEvent& evt)
-{
-   Disconnect(-1, wxEVT_EXECEXTDONE);
-   _execExternal = false;
-   _threadWaits4->Signal();
-}
-
-void console::ted_cmd::mouseLB(const telldata::ttpnt& p) {
+void console::TllCmdLine::mouseLB(const telldata::ttpnt& p) {
    wxString ost1, ost2;
    // prepare the point string for the input log window
    ost1 << wxT("{ ")<< p.x() << wxT(" , ") << p.y() << wxT(" }");
@@ -694,7 +520,7 @@ void console::ted_cmd::mouseLB(const telldata::ttpnt& p) {
       mouseRB();
 }
 
-void console::ted_cmd::mouseRB() {
+void console::TllCmdLine::mouseRB() {
    // End of input is not accepted if ...
    if ( (_numpoints == 0) || ((_numpoints == 1)                      &&
                               (telldata::tn_pnt != _puc->wait4type()) &&
@@ -717,7 +543,7 @@ void console::ted_cmd::mouseRB() {
    _guinput.Clear();
 }
 
-void console::ted_cmd::cancelLastPoint() {
+void console::TllCmdLine::cancelLastPoint() {
    tell_log(MT_WARNING, "last point canceled");
    int pos = _guinput.Find('{',true);
    _guinput = _guinput.Left(pos-2);
@@ -726,7 +552,7 @@ void console::ted_cmd::cancelLastPoint() {
    tell_log(MT_GUIINPUT, _guinput);
 }
 
-bool console::ted_cmd::findTellFile(const char* fname, std::string& validName)
+bool console::TllCmdLine::findTellFile(const char* fname, std::string& validName)
 {
    // Check the original string first
    wxFileName inclFN(wxString(fname,wxConvUTF8));
@@ -747,9 +573,232 @@ bool console::ted_cmd::findTellFile(const char* fname, std::string& validName)
    return false;
 }
 
-console::ted_cmd::~ted_cmd()
+console::TllCmdLine::~TllCmdLine()
 {
    _cmd_history.clear();
    // Because we're using detachable threads - the thread is supposed to delet itself
    // delete _tellThread
+}
+
+//==============================================================================
+console::TedCmdLine::TedCmdLine(wxWindow* canvas, wxTextCtrl* cmdLineWnd) :
+      TllCmdLine  ( canvas      ),
+      _cmdLineWnd ( cmdLineWnd  )
+{
+}
+
+// Note! parseCommand and onParseCommand should be overloaded methods, however
+// wxEvent macroses (or maybe the whole system) are not happy if there is
+// an overloaded function of the one listed in the EVT_* macros. This is the
+// only reason for this functions to have different names. They do the same
+// thing
+// onParseCommand is called from wxEVT_CONSOLE_PARSE event while getCommand()
+// is called directly
+void console::TedCmdLine::onParseCommand(wxCommandEvent& event)
+{
+   if (NULL != _puc) return; // don't accept commands during shape input sessions
+   setString(event.GetString());
+   getCommand(true);
+}
+
+// Note! getCommand and onGetCommand should be overloaded methods, however
+// wxEvent macroses (or maybe the whole system) are not happy if there is
+// an overloaded function of the one listed in the EVT_* macros. This is the
+// only reason for this functions to have different names. They do (almost)
+// the same thing
+
+/*! Called when the command line is entered. Updates the command history,
+   log window and spawns the tell parser in a new thread                   */
+void console::TedCmdLine::onGetCommand(wxCommandEvent& WXUNUSED(event))
+{
+   if (_puc)  getGUInput(true); // run the local GUInput parser getting the keyboard input
+   else if (_execExternal)
+   {
+      TpdPost::execPipe(getString());
+      clearString();
+   }
+   else {
+      wxString command = getString();
+      tell_log(MT_COMMAND, command);
+      _cmd_history.push_back(std::string(command.mb_str(wxConvUTF8)));
+      _history_position = _cmd_history.end();
+      clearString();
+
+      runTellCommand(command);
+   }
+}
+
+void console::TedCmdLine::onKeyUP(wxKeyEvent& event) {
+
+   if ((WXK_UP != event.GetKeyCode()) &&  (WXK_DOWN != event.GetKeyCode())) {
+      event.Skip();return;
+   }
+   if (WXK_DOWN != event.GetKeyCode())
+      if (_cmd_history.begin() == _history_position)
+         _history_position = _cmd_history.end();
+      else _history_position--;
+   else
+      if (_cmd_history.end() == _history_position)
+         _history_position = _cmd_history.begin();
+      else _history_position++;
+      if (_cmd_history.end() == _history_position) setString(wxT(""));
+   else
+   {
+      setString(wxString(_history_position->c_str(), wxConvUTF8));
+   }
+}
+
+void console::TedCmdLine::waitGUInput(telldata::operandSTACK *clst, console::ACTIVE_OP input_type, const CTM& trans)
+{
+   telldata::typeID ttype;
+   switch (input_type)
+   {
+      case console::op_line   :
+      case console::op_dbox   :
+      case console::op_copy   :
+      case console::op_move   : ttype = telldata::tn_box; break;
+      case console::op_rotate :
+      case console::op_flipY  :
+      case console::op_flipX  :
+      case console::op_point  : ttype = telldata::tn_pnt; break;
+      case console::op_cbind  :
+      case console::op_abind  :
+      case console::op_tbind  : ttype = telldata::tn_bnd; break;
+      default:ttype = TLISTOF(telldata::tn_pnt); break;
+   }
+   _puc = DEBUG_NEW miniParser(clst, ttype);
+   _numpoints = 0;
+   _initrans = _translation = trans;
+   _mouseIN_OK = true;
+   _guinput.Clear();
+   tell_log(MT_GUIPROMPT);
+   Connect(-1, wxEVT_COMMAND_ENTER,
+           (wxObjectEventFunction) (wxEventFunction)
+           (wxCommandEventFunction)&TedCmdLine::onGUInput);
+
+   TpdPost::toped_status(TSTS_THREADWAIT);
+}
+
+void console::TedCmdLine::getGUInput(bool from_keyboard)
+{
+   wxString command;
+   if (from_keyboard) { // input is from keyboard
+      command = getString();
+      tell_log(MT_GUIINPUT, command);
+      tell_log(MT_EOL);
+      clearString();
+   }
+   else   command = _guinput;
+   //parse the data from the prompt
+   if (_puc->getGUInput(command)) {
+      //if the proper pattern was found
+      Disconnect(-1, wxEVT_COMMAND_ENTER);
+      delete _puc; _puc = NULL;
+      _mouseIN_OK = true;
+      // wake-up the thread expecting this data
+      _threadWaits4->Signal();
+   }
+   else {
+      tell_log(MT_ERROR, "Bad input data, Try again...");
+      tell_log(MT_GUIPROMPT);
+   }
+   _guinput.Clear();
+   _numpoints = 0;
+   _translation = _initrans;
+}
+
+void console::TedCmdLine::onGUInput(wxCommandEvent& evt)
+{
+   switch (evt.GetInt()) {
+      case -4: _translation.FlipY();break;
+      case -3: _translation.Rotate(90.0);break;
+      case -2: cancelLastPoint();break;
+      case -1:   // abort current  mouse input
+         Disconnect(-1, wxEVT_COMMAND_ENTER);
+         delete _puc; _puc = NULL;
+         _mouseIN_OK = false;
+         tell_log(MT_WARNING, "input aborted");
+         tell_log(MT_EOL);
+         // wake-up the thread expecting this data
+         _threadWaits4->Signal();
+         break;
+      case  0:  {// left mouse button
+         telldata::ttpnt* p = static_cast<telldata::ttpnt*>(evt.GetClientData());
+         mouseLB(*p);
+         delete p;
+         break;
+         }
+      case  2: {
+         telldata::ttpnt* p = static_cast<telldata::ttpnt*>(evt.GetClientData());
+         mouseRB();
+         delete p;
+         break;
+         }
+      default: assert(false);
+   }
+}
+
+void console::TedCmdLine::waitExternal(wxString cmdExt)
+{
+   Connect(-1, wxEVT_EXECEXTDONE,
+           (wxObjectEventFunction) (wxEventFunction)
+           (wxCommandEventFunction)&TedCmdLine::onExternalDone);
+   _execExternal = true;
+   TpdPost::toped_status(TSTS_THREADWAIT);
+   TpdPost::execExt(cmdExt);
+}
+
+void console::TedCmdLine::onExternalDone(wxCommandEvent& evt)
+{
+   Disconnect(-1, wxEVT_EXECEXTDONE);
+   _execExternal = false;
+   _threadWaits4->Signal();
+}
+
+wxString console::TedCmdLine::getString()
+{
+   return _cmdLineWnd->GetValue();
+}
+
+void console::TedCmdLine::setString(const wxString& str)
+{
+   _cmdLineWnd->SetValue(str);
+}
+
+void console::TedCmdLine::clearString()
+{
+   _cmdLineWnd->Clear();
+}
+
+//static_cast<console::TedCmdLine*>()
+
+//==============================================================================
+console::TllCCmdLine::TllCCmdLine() :
+   console::TllCmdLine     ( NULL         ),
+   _currentCommand         ( wxT("")      )
+{}
+
+void     console::TllCCmdLine::waitGUInput(telldata::operandSTACK*,console::ACTIVE_OP, const CTM&)
+{
+   assert(false);
+}
+void     console::TllCCmdLine::getGUInput(bool from_keyboard)
+{
+
+}
+void     console::TllCCmdLine::waitExternal(wxString)
+{
+   assert(0);
+}
+wxString console::TllCCmdLine::getString()
+{
+   return (_currentCommand);
+}
+void     console::TllCCmdLine::setString(const wxString& str)
+{
+   _currentCommand = str;
+}
+void     console::TllCCmdLine::clearString()
+{
+   _currentCommand.Clear();
 }

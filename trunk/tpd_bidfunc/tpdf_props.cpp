@@ -40,7 +40,7 @@
 extern parsercmd::cmdBLOCK*      CMDBlock;
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
-extern console::ted_cmd*         Console;
+extern console::TllCmdLine*      Console;
 extern wxWindow*                 TopedCanvasW;
 extern wxFrame*                  TopedMainW;
 extern console::toped_logfile    LogFile;

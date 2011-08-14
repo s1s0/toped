@@ -77,17 +77,17 @@ namespace console {
       wxCondition*            _mutexCondition;
    };
 
-   class ted_cmd : public wxTextCtrl {
+   class TllCmdLine : public wxEvtHandler {
    public:
-                              ted_cmd(wxWindow*, wxWindow*);
-      virtual                ~ted_cmd();
+                              TllCmdLine(wxWindow *canvas);
+      virtual                ~TllCmdLine();
       void                    parseCommand(wxString, bool thread=true);
       void                    stopParserThread();
-      void                    waitGUInput(telldata::operandSTACK*,console::ACTIVE_OP, const CTM&);
-      void                    waitExternal(wxString);
-      void                    getGUInput(bool from_keyboard = true);
       void                    getCommand(bool);
       bool                    findTellFile(const char*, std::string&);
+      virtual void            waitGUInput(telldata::operandSTACK*,console::ACTIVE_OP, const CTM&) = 0;
+      virtual void            getGUInput(bool from_keyboard) = 0;
+      virtual void            waitExternal(wxString) = 0;
       bool                    mouseIN_OK() const            {return _mouseIN_OK;};
       word                    numpoints() const             {return _numpoints;}
       const char*             lastCommand() const           {return _cmd_history.rbegin()->c_str();}
@@ -100,31 +100,65 @@ namespace console {
       void                    addTllEnvList(wxString pvar)  { _tllIncludePath.AddEnvList(pvar);}
       wxCondition*            _threadWaits4;
       miniParser*             _puc; // parse user coordinates
-   private:
-      void                    spawnTellThread(/*wxString*/);
+   protected:
+      virtual wxString        getString() = 0;
+      virtual void            setString(const wxString&) = 0;
+      virtual void            clearString() = 0;
       void                    runTellCommand(const wxString&);
-      void                    onParseCommand(wxCommandEvent&);
-      void                    onGetCommand(wxCommandEvent& WXUNUSED(event));
-      void                    onKeyUP(wxKeyEvent&);
-      void                    onGUInput(wxCommandEvent&);
-      void                    onExternalDone(wxCommandEvent&);
-      void                    cancelLastPoint();
       void                    mouseLB(const telldata::ttpnt& p);
       void                    mouseRB();
+      void                    cancelLastPoint();
       word                    _numpoints;
       CTM                     _translation;
       CTM                     _initrans;
-      bool                    _mouseIN_OK;
       wxString                _guinput;
       stringList              _cmd_history;
       stringList::const_iterator _history_position;
+      bool                    _execExternal;
+      bool                    _mouseIN_OK;
+   private:
+      void                    spawnTellThread(/*wxString*/);
+      void                    onGetCommand(wxCommandEvent& WXUNUSED(event));
       wxWindow*               _canvas;
       bool                    _canvas_invalid;
-      bool                    _execExternal;
       bool                    _exitRequested;
       wxPathList              _tllIncludePath;
       parse_thread*           _tellThread;
-      DECLARE_EVENT_TABLE();
    };
+
+   class TedCmdLine: public TllCmdLine {
+   public:
+                              TedCmdLine(wxWindow*, wxTextCtrl*);
+      virtual void            waitGUInput(telldata::operandSTACK*,console::ACTIVE_OP, const CTM&);
+      virtual void            getGUInput(bool from_keyboard);
+      virtual void            waitExternal(wxString);
+      void                    onParseCommand(wxCommandEvent&);
+      void                    onGetCommand(wxCommandEvent& WXUNUSED(event));
+      void                    onKeyUP(wxKeyEvent&);
+      wxTextCtrl*             getWidget()                 {return _cmdLineWnd;}
+   protected:
+      virtual wxString        getString();
+      virtual void            setString(const wxString&);
+      virtual void            clearString();
+   private:
+      void                    onGUInput(wxCommandEvent&);
+      void                    onExternalDone(wxCommandEvent&);
+      wxTextCtrl*             _cmdLineWnd;
+   };
+
+   class TllCCmdLine: public TllCmdLine {
+   public:
+                              TllCCmdLine();
+      virtual void            waitGUInput(telldata::operandSTACK*,console::ACTIVE_OP, const CTM&);
+      virtual void            getGUInput(bool from_keyboard);
+      virtual void            waitExternal(wxString);
+   protected:
+      virtual wxString        getString();
+      virtual void            setString(const wxString&);
+      virtual void            clearString();
+   private:
+      wxString                _currentCommand;
+   };
+
 }
 #endif

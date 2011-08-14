@@ -56,7 +56,7 @@ lxt_E             [Ee][-+]?{lxt_D}+
 parsercmd::lexer_files* include_stack[MAX_INCLUDE_DEPTH];
 int include_stack_ptr = 0;
 /*Global console object*/
-extern console::ted_cmd*           Console;
+extern console::TllCmdLine*        Console;
 extern parsercmd::cmdBLOCK*        CMDBlock;
 extern parsercmd::TellPreProc*     tellPP;
 

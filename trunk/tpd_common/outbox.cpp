@@ -97,7 +97,7 @@ wxWindow*               TpdPost::_statusBar     = NULL;
 wxWindow*               TpdPost::_topBrowsers   = NULL;
 wxWindow*               TpdPost::_layBrowser    = NULL;
 wxWindow*               TpdPost::_cllBrowser    = NULL;
-wxWindow*               TpdPost::_cmdLine       = NULL;
+//wxWindow*               TpdPost::_cmdLine       = NULL;
 wxWindow*               TpdPost::_tllFuncList   = NULL;
 wxWindow*               TpdPost::_mainWindow    = NULL;
 
@@ -175,14 +175,79 @@ void console::ted_log::OnLOGMessage(wxCommandEvent& evt) {
    evt.Skip();
 }
 
-void console::ted_log_ctrl::DoLog(wxLogLevel level, const wxChar *msg, time_t timestamp) {
-   wxCommandEvent eventLOG(wxEVT_LOG_ERRMESSAGE);
-   eventLOG.SetString(msg);
-   eventLOG.SetInt(level);
-   eventLOG.SetExtraLong(timestamp);
-   wxPostEvent(_tellLOGW, eventLOG);
+
+//=============================================================================
+void console::ted_log_ctrl::DoLog(wxLogLevel level, const wxChar *msg, time_t timestamp)
+{
+   if (NULL != _tellLOGW)
+   { // gui mode
+      wxCommandEvent eventLOG(wxEVT_LOG_ERRMESSAGE);
+      eventLOG.SetString(msg);
+      eventLOG.SetInt(level);
+      eventLOG.SetExtraLong(timestamp);
+      wxPostEvent(_tellLOGW, eventLOG);
+   }
+   else
+   { // text mode
+      wxString wxMsg(msg);
+      std::string stringmsg(wxMsg.mb_str(wxConvUTF8));
+      cmdLineLog(level, stringmsg, timestamp);
+   }
 }
 
+void console::ted_log_ctrl::cmdLineLog(wxLogLevel level, const std::string& msg, time_t timestamp)
+{
+   const std::string       cmd_mark   = "=> ";
+   const std::string       gui_mark   = ">> ";
+   const std::string       rply_mark  = "<= ";
+   const std::string       shell_mark = "# " ;
+
+   std::stringstream ostr;
+   switch (level)
+   {
+      case    MT_INFO:
+         ostr << rply_mark << msg << "\n";
+         break;
+      case   MT_ERROR:
+         ostr << rply_mark << msg << "\n";
+         break;
+      case MT_COMMAND:
+         ostr << cmd_mark << msg << "\n";
+         break;
+      case MT_GUIPROMPT:
+         ostr << gui_mark;
+         break;
+      case MT_SHELLINFO:
+         ostr << shell_mark << msg << "\n";
+         break;
+      case MT_SHELLERROR:
+         ostr << shell_mark << msg << "\n";
+         break;
+      case MT_GUIINPUT:
+         ostr << msg;
+         break;
+      case MT_EOL:
+         ostr << "\n";
+         break;
+      case MT_WARNING:
+         ostr << rply_mark << msg << "\n";
+         break;
+      case MT_CELLNAME:
+         ostr << wxT(" Cell ") << msg << "\n";
+         break;
+      case MT_DESIGNNAME:
+         ostr << rply_mark << wxT(" Design ") << msg << "\n";
+         break;
+      default: //wx Messages
+         ostr << wxT("WX MESSAGE Level:") << level << wxT(" \"") << msg << wxT("\"\n");
+         break;
+   }
+   wxString convertStr(ostr.str().c_str(), wxConvUTF8);
+   wxPrintf(convertStr);
+
+}
+
+//=============================================================================
 void tell_log(console::LOG_TYPE lt, const char* msg)
 {
    wxLog::OnLog(lt, wxString(msg, wxConvUTF8), time(NULL));
@@ -323,7 +388,7 @@ TpdPost::TpdPost(wxWindow* mainWindow)
    _topBrowsers = _mainWindow->FindWindow(tui::ID_WIN_BROWSERS);
    _layBrowser  = _mainWindow->FindWindow(tui::ID_PNL_LAYERS);
    _cllBrowser  = _mainWindow->FindWindow(tui::ID_PNL_CELLS);
-   _cmdLine     = _mainWindow->FindWindow(tui::ID_CMD_LINE);
+//   _cmdLine     = _mainWindow->FindWindow(tui::ID_CMD_LINE);
    _tllFuncList = _mainWindow->FindWindow(tui::ID_TELL_FUNCS);
    CmdList = static_cast<console::TELLFuncList*>(_tllFuncList);
 }
@@ -373,7 +438,7 @@ void TpdPost::render_status(bool on_off)
 
 void TpdPost::refreshTDTtab(bool targetDB, bool threadExecution)
 {
-   assert(_topBrowsers);
+   if (NULL == _topBrowsers) return;
    wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
    eventADDTAB.SetInt(tui::BT_ADDTDT_LIB);
    eventADDTAB.SetExtraLong(targetDB ? 1 : 0);
@@ -470,7 +535,7 @@ void TpdPost::clearDRCtab()
 
 void TpdPost::layer_status(int btype, const word layno, const bool status)
 {
-   assert(_layBrowser);
+   if (NULL == _layBrowser) return;
    wxCommandEvent eventLAYER_STATUS(wxEVT_CMD_BROWSER);
    eventLAYER_STATUS.SetExtraLong(status);
    eventLAYER_STATUS.SetInt(btype);
@@ -481,7 +546,7 @@ void TpdPost::layer_status(int btype, const word layno, const bool status)
 
 void TpdPost::layer_add(const std::string name, const word layno)
 {
-   assert(_layBrowser);
+   if (NULL == _layBrowser) return;
    wxCommandEvent eventLAYER_ADD(wxEVT_CMD_BROWSER);
    word *laynotemp = DEBUG_NEW word(layno);
    eventLAYER_ADD.SetClientData(static_cast<void*> (laynotemp));
@@ -492,7 +557,7 @@ void TpdPost::layer_add(const std::string name, const word layno)
 
 void TpdPost::layer_default(const word newlay, const word oldlay)
 {
-   assert(_layBrowser);
+   if (NULL == _layBrowser) return;
    wxCommandEvent eventLAYER_DEF(wxEVT_CMD_BROWSER);
    eventLAYER_DEF.SetExtraLong(newlay);
    word *laynotemp = DEBUG_NEW word(oldlay);
@@ -503,7 +568,7 @@ void TpdPost::layer_default(const word newlay, const word oldlay)
 
 void TpdPost::layers_state(const std::string& name, bool add)
 {
-   assert(_layBrowser);
+   if (NULL == _layBrowser) return;
    wxCommandEvent eventLAYERS_STATE(wxEVT_CMD_BROWSER);
    eventLAYERS_STATE.SetString(wxString(name.c_str(), wxConvUTF8));
    if (add)
@@ -515,7 +580,7 @@ void TpdPost::layers_state(const std::string& name, bool add)
 
 void TpdPost::resetTDTtab(const std::string dbName)
 {
-   assert(_topBrowsers);
+   if (NULL == _cllBrowser) return;
    wxCommandEvent resetTDTTab(wxEVT_CMD_BROWSER);
    resetTDTTab.SetInt(tui::BT_NEWTDT_DB);
    resetTDTTab.SetString(wxString(dbName.c_str(), wxConvUTF8));
@@ -524,7 +589,7 @@ void TpdPost::resetTDTtab(const std::string dbName)
 
 void TpdPost::celltree_open(const std::string cname)
 {
-   assert(_cllBrowser);
+   if (NULL == _cllBrowser) return;
    wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
    eventCELLTREE.SetInt(tui::BT_CELL_OPEN);
    eventCELLTREE.SetString(wxString(cname.c_str(), wxConvUTF8));
@@ -533,7 +598,7 @@ void TpdPost::celltree_open(const std::string cname)
 
 void TpdPost::celltree_highlight(const std::string cname)
 {
-   assert(_cllBrowser);
+   if (NULL == _cllBrowser) return;
    wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
    eventCELLTREE.SetInt(tui::BT_CELL_HIGHLIGHT);
    eventCELLTREE.SetString(wxString(cname.c_str(), wxConvUTF8));
@@ -542,7 +607,7 @@ void TpdPost::celltree_highlight(const std::string cname)
 
 void TpdPost::treeAddMember(const char* cell, const char* parent, int action)
 {
-   assert(_cllBrowser);
+   if (NULL == _cllBrowser) return;
    wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
    eventCELLTREE.SetInt(tui::BT_CELL_ADD);
    eventCELLTREE.SetString(wxString(cell, wxConvUTF8));
@@ -554,7 +619,7 @@ void TpdPost::treeAddMember(const char* cell, const char* parent, int action)
 
 void TpdPost::treeRemoveMember(const char* cell, const char* parent, int action)
 {
-   assert(_cllBrowser);
+   if (NULL == _cllBrowser) return;
    wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
    eventCELLTREE.SetInt(tui::BT_CELL_REMOVE);
    eventCELLTREE.SetString(wxString(cell, wxConvUTF8));
@@ -566,7 +631,7 @@ void TpdPost::treeRemoveMember(const char* cell, const char* parent, int action)
 
 void TpdPost::treeRenameMember(const char* oldName, const char* newName)
 {
-   assert(_cllBrowser);
+   if (NULL == _cllBrowser) return;
    wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
    eventCELLTREE.SetInt(tui::BT_CELL_RENAME);
    eventCELLTREE.SetString(wxString(oldName, wxConvUTF8));
@@ -577,7 +642,7 @@ void TpdPost::treeRenameMember(const char* oldName, const char* newName)
 
 void TpdPost::treeMarkGrcMember(const char* cell, bool error)
 {
-   assert(_cllBrowser);
+   if (NULL == _cllBrowser) return;
    wxCommandEvent eventCELLTREE(wxEVT_CMD_BROWSER);
    eventCELLTREE.SetInt(tui::BT_CELL_MARK_GRC);
    eventCELLTREE.SetString(wxString(cell, wxConvUTF8));
@@ -587,10 +652,12 @@ void TpdPost::treeMarkGrcMember(const char* cell, bool error)
 
 void TpdPost::parseCommand(const wxString cmd)
 {
-   assert(_cmdLine);
+//   assert(_cmdLine);
+   assert(_mainWindow);
    wxCommandEvent eventPARSE(wxEVT_CONSOLE_PARSE);
    eventPARSE.SetString(cmd);
-   wxPostEvent(_cmdLine, eventPARSE);
+//   wxPostEvent(_cmdLine, eventPARSE);
+   wxPostEvent(_mainWindow, eventPARSE);
 }
 
 void TpdPost::tellFnAdd(const std::string name, void* arguments)
