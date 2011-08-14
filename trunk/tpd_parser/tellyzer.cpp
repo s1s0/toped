@@ -433,9 +433,19 @@ bool parsercmd::cmdVIRTUAL::getBoolValue(telldata::UNDOPerandQUEUE& OPs, bool fr
 //=============================================================================
 int parsercmd::cmdPLUS::execute() {
    TELL_DEBUG(cmdPLUS);
-   real value2 = getOpValue();
-   real value1 = getOpValue();
-   OPstack.push(DEBUG_NEW telldata::ttreal(value1 + value2));
+   if (telldata::tn_real == _retype)
+   {
+      real value2 = getOpValue();
+      real value1 = getOpValue();
+      OPstack.push(DEBUG_NEW telldata::ttreal(value1 + value2));
+   }
+   else if (telldata::tn_int == _retype)
+   {
+      int value2 = getOpValue();
+      int value1 = getOpValue();
+      OPstack.push(DEBUG_NEW telldata::ttint(value1 + value2));
+   }
+   else assert(false);
    return EXEC_NEXT;
 }
 
@@ -451,9 +461,19 @@ int parsercmd::cmdCONCATENATE::execute() {
 //=============================================================================
 int parsercmd::cmdMINUS::execute() {
    TELL_DEBUG(cmdMINUS);
-   real value2 = getOpValue();
-   real value1 = getOpValue();
-   OPstack.push(DEBUG_NEW telldata::ttreal(value1 - value2));
+   if (telldata::tn_real == _retype)
+   {
+      real value2 = getOpValue();
+      real value1 = getOpValue();
+      OPstack.push(DEBUG_NEW telldata::ttreal(value1 - value2));
+   }
+   else if (telldata::tn_int == _retype)
+   {
+      int value2 = getOpValue();
+      int value1 = getOpValue();
+      OPstack.push(DEBUG_NEW telldata::ttint(value1 - value2));
+   }
+   else assert(false);
    return EXEC_NEXT;
 }
 
@@ -1932,10 +1952,21 @@ telldata::typeID parsercmd::Plus(telldata::typeID op1, telldata::typeID op2,
                                                   TpdYYLtype loc1, TpdYYLtype loc2) {
    switch (op1)   {
       case  telldata::tn_int:
+         switch(op2) {
+            case  telldata::tn_int:CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPLUS(telldata::tn_int));
+                            return telldata::tn_int;
+            case telldata::tn_real:CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPLUS(telldata::tn_real));
+                            return telldata::tn_real;
+            case telldata::tn_pnt:CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSHIFTPNT(1, true));
+                            return telldata::tn_pnt;
+            case telldata::tn_box: CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdBLOWBOX(1, true));
+                            return telldata::tn_box;
+                          default: tellerror("unexpected operand type",loc2);break;
+         };break;
       case telldata::tn_real:
          switch(op2) {
             case  telldata::tn_int:
-            case telldata::tn_real:CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPLUS());
+            case telldata::tn_real:CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPLUS(telldata::tn_real));
                             return telldata::tn_real;
             case telldata::tn_pnt:CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSHIFTPNT(1, true));
                             return telldata::tn_pnt;
@@ -1986,10 +2017,17 @@ telldata::typeID parsercmd::Minus(telldata::typeID op1, telldata::typeID op2,
                                                   TpdYYLtype loc1, TpdYYLtype loc2) {
    switch (op1)   {
        case telldata::tn_int:
+          switch(op2) {
+             case   telldata::tn_int:CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdMINUS(telldata::tn_int));
+                             return telldata::tn_real;
+             case  telldata::tn_real:CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdMINUS(telldata::tn_real));
+                             return telldata::tn_real;
+                   default: tellerror("unexpected operand type",loc2);break;
+          };break;
       case telldata::tn_real:
          switch(op2) {
             case   telldata::tn_int:
-            case  telldata::tn_real:CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdMINUS());
+            case  telldata::tn_real:CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdMINUS(telldata::tn_real));
                             return telldata::tn_real;
                   default: tellerror("unexpected operand type",loc2);break;
          };break;

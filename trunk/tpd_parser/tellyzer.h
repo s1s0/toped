@@ -169,7 +169,11 @@ namespace  parsercmd {
     The definition of the following classes is trivial
    ******************************************************************************/
    class cmdPLUS:public cmdVIRTUAL {
+   public:
+      cmdPLUS(telldata::typeID retype): _retype(retype) {};
       int execute();
+   private:
+      telldata::typeID _retype;
    };
 
    class cmdCONCATENATE:public cmdVIRTUAL {
@@ -177,7 +181,11 @@ namespace  parsercmd {
    };
 
    class cmdMINUS:public cmdVIRTUAL {
+   public:
+      cmdMINUS(telldata::typeID retype): _retype(retype) {};
       int execute();
+   private:
+      telldata::typeID _retype;
    };
 
    class cmdSHIFTPNT:public cmdVIRTUAL {
