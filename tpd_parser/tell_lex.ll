@@ -111,8 +111,8 @@ location_step(&telllloc);
                            tellPP->reset();
                          }
 <pPRAGMA>fullreset       { BEGIN(INITIAL);
-                           //CMDBlock->clearUserData();
                            tellPP->reset();
+                           TpdPost::reloadTellFuncs();
                          }
 #ifdef                     BEGIN(pIFD);
 <pIFD>{lex_ID}           { if (!tellPP->ppIfDef(yytext))

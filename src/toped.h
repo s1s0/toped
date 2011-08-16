@@ -34,6 +34,7 @@
 #include <wx/aui/aui.h>
 #include <wx/process.h>
 #include <wx/timer.h>
+#include <wx/dynlib.h>
 #include "ted_prompt.h"
 #include "layoutcanvas.h"
 #include "tui.h"
@@ -266,13 +267,59 @@ namespace tui {
       void     editLayerDlg(word layno, const layprop::DrawProperties*);
       void     OnDRCResults(wxCommandEvent& evt);
       void     OnIconize(wxIconizeEvent& evt);
+      void  onReloadTellFuncs(wxCommandEvent& WXUNUSED(evt));
       void     onParseCommand(wxCommandEvent& evt);
       void       onGetCommand(wxCommandEvent& evt);
       void            onKeyUP(wxKeyEvent& evt);
       // The declaration of the associated event table
       DECLARE_EVENT_TABLE();
    };
-
 }
+
+//=============================================================================
+// The top application class. All initialization and exiting code
+//=============================================================================
+class TopedApp : public wxApp
+{
+   public:
+      virtual bool   OnInit();
+      virtual int    OnExit();
+      virtual int    OnRun();
+              void   reloadInternalFunctions();
+      virtual       ~TopedApp(){};
+   private:
+      typedef std::list<wxDynamicLibrary*> PluginList;
+      typedef void (*ModuleFunction)(parsercmd::cmdMAIN*);
+      bool           getLogFileName();
+      void           loadGlfFonts();
+      void           defaultStartupScript();
+      void           loadPlugIns();
+      bool           checkCrashLog();
+      void           getLocalDirs();    //! Get directories in TPD_LOCAL
+      void           getGlobalDirs();   //! Get directories in TPD_GLOBAL
+      void           getTellPathDirs(); //! Check directories in TLL_INCLUDE_PATH
+      void           finishSessionLog();
+      void           saveIgnoredCrashLog();
+      void           parseCmdLineArgs();
+      void           printLogWHeader();
+      void           initInternalFunctions(parsercmd::cmdMAIN* mblock);
+      wxString       _logFileName;
+      wxString       _tpdLogDir;
+      wxString       _tpdFontDir;
+      wxString       _tpdResourceDir;
+      wxString       _tpdPlugInDir;
+      wxString       _globalDir;
+      wxString       _localDir;
+      wxString       _inputTellFile;
+      bool           _forceBasicRendering;
+      bool           _noLog;     //! Don't create a log file
+      bool           _gui;       //! Run graphics (as opposed to a command line mode)
+      PluginList     _plugins;
+      wxPathList     _tllIncludePath;
+
+};
+
+DECLARE_APP(TopedApp)
+
 #endif
 
