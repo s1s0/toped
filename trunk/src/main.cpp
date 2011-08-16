@@ -31,7 +31,6 @@
 #include <wx/filefn.h>
 #include <wx/filename.h>
 #include <wx/dir.h>
-#include <wx/dynlib.h>
 #include <sstream>
 #if WIN32
    #include <crtdbg.h>
@@ -69,48 +68,6 @@ extern console::TllCmdLine*      Console;
 extern Calbr::CalbrFile*         DRCData;
 extern const wxEventType         wxEVT_RENDER_PARAMS;
 
-//-----------------------------------------------------------------------------
-
-//=============================================================================
-// The top application class. All initialization and exiting code
-//=============================================================================
-class TopedApp : public wxApp
-{
-   public:
-      virtual bool   OnInit();
-      virtual int    OnExit();
-      virtual int    OnRun();
-      virtual       ~TopedApp(){};
-   private:
-      typedef std::list<wxDynamicLibrary*> PluginList;
-      bool           getLogFileName();
-      void           loadGlfFonts();
-      void           defaultStartupScript();
-      void           loadPlugIns();
-      bool           checkCrashLog();
-      void           getLocalDirs();    //! Get directories in TPD_LOCAL
-      void           getGlobalDirs();   //! Get directories in TPD_GLOBAL
-      void           getTellPathDirs(); //! Check directories in TLL_INCLUDE_PATH
-      void           finishSessionLog();
-      void           saveIgnoredCrashLog();
-      void           parseCmdLineArgs();
-      void           printLogWHeader();
-      void           initInternalFunctions(parsercmd::cmdMAIN* mblock);
-      wxString       _logFileName;
-      wxString       _tpdLogDir;
-      wxString       _tpdFontDir;
-      wxString       _tpdResourceDir;
-      wxString       _tpdPlugInDir;
-      wxString       _globalDir;
-      wxString       _localDir;
-      wxString       _inputTellFile;
-      bool           _forceBasicRendering;
-      bool           _noLog;     //! Don't create a log file
-      bool           _gui;       //! Run graphics (as opposed to a command line mode)
-      PluginList     _plugins;
-      wxPathList     _tllIncludePath;
-
-};
 
 //=============================================================================
 bool TopedApp::OnInit()
@@ -260,6 +217,26 @@ int TopedApp::OnRun()
    }
    return wxApp::OnRun();
 }
+
+void TopedApp::reloadInternalFunctions()
+{
+   parsercmd::cmdBLOCK* lclBlock = CMDBlock->popblk();
+   while (NULL != lclBlock)
+   {
+      CMDBlock = lclBlock;
+      lclBlock = CMDBlock->popblk();
+   }
+   delete CMDBlock;
+   CMDBlock = DEBUG_NEW parsercmd::cmdMAIN();
+   initInternalFunctions(static_cast<parsercmd::cmdMAIN*>(CMDBlock));
+   for (PluginList::const_iterator CP = _plugins.begin(); CP != _plugins.end(); CP++)
+   {
+      ModuleFunction piInitFunc = (ModuleFunction)(*CP)->GetSymbol(wxT("initPluginFunctions"));
+      assert(NULL != piInitFunc);
+      piInitFunc(static_cast<parsercmd::cmdMAIN*>(CMDBlock));
+   }
+}
+
 //=============================================================================
 int TopedApp::OnExit()
 {
@@ -391,7 +368,6 @@ void TopedApp::loadPlugIns()
          wxString curFN;
          if (plugDir.GetFirst(&curFN, wxT("*.so"), wxDIR_FILES))
          {
-            typedef void (*ModuleFunction)(parsercmd::cmdMAIN*);
             do
             {
 #ifdef __linux__

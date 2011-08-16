@@ -67,8 +67,8 @@ extern const wxEventType         wxEVT_EXITAPP;
 extern const wxEventType         wxEVT_EXECEXT;
 extern const wxEventType         wxEVT_EXECEXTPIPE;
 extern const wxEventType         wxEVT_EXECEXTDONE;
+extern const wxEventType         wxEVT_RELOADTELLFUNCS;
 extern const wxEventType         wxEVT_CONSOLE_PARSE;
-
 
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
@@ -337,6 +337,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_TECUSTOM_COMMAND(wxEVT_EXITAPP, wxID_ANY, tui::TopedFrame::OnExitRequest)
    EVT_TECUSTOM_COMMAND(wxEVT_EXECEXT, wxID_ANY, tui::TopedFrame::OnExecExt)
    EVT_TECUSTOM_COMMAND(wxEVT_EXECEXTPIPE, wxID_ANY, tui::TopedFrame::OnExecExtTextEnter)
+   EVT_TECUSTOM_COMMAND(wxEVT_RELOADTELLFUNCS, wxID_ANY, tui::TopedFrame::onReloadTellFuncs)
    EVT_TECUSTOM_COMMAND(wxEVT_CONSOLE_PARSE, wxID_ANY, tui::TopedFrame::onParseCommand)
    EVT_TEXT_ENTER(tui::ID_CMD_LINE, tui::TopedFrame::onGetCommand)
    EVT_KEY_UP(tui::TopedFrame::onKeyUP)
@@ -2469,6 +2470,10 @@ void tui::TopedFrame::OnTextLogOverflow(wxCommandEvent& WXUNUSED(event))
 //   int lalal = 2* boza;
 }
 
+void tui::TopedFrame::onReloadTellFuncs(wxCommandEvent& WXUNUSED(evt))
+{
+   wxGetApp().reloadInternalFunctions();
+}
 
 void tui::TopedFrame::onParseCommand(wxCommandEvent& evt)
 {
