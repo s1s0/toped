@@ -519,12 +519,12 @@ namespace  parsercmd {
       virtual void               addUSERFUNCDECL(FuncDeclaration*, TpdYYLtype);
       void                       addID(const char*, telldata::tell_var*);
       void                       addconstID(const char*, telldata::tell_var*, bool initialized);
-      void                       addlocaltype(const char*, telldata::tell_type*);
-      telldata::tell_type*       requesttypeID(char*&);
-      const telldata::tell_type* getTypeByName(char*&) const;
-      const telldata::tell_type* getTypeByID(const telldata::typeID ID) const;
+      void                       addlocaltype(const char*, telldata::TCompType*);
+      telldata::TCompType*       requesttypeID(char*&);
+      const telldata::TCompType* getTypeByName(char*&) const;
+      const telldata::TCompType* getTypeByID(const telldata::typeID ID) const;
       telldata::tell_var*        getID(char*&, bool local=false);
-      telldata::tell_var*        newTellvar(telldata::typeID, TpdYYLtype, telldata::tell_var* size = NULL);
+      telldata::tell_var*        newTellvar(telldata::typeID, TpdYYLtype);
       bool                       defValidate(const std::string& ,const argumentLIST*, cmdFUNC*&);
       bool                       declValidate(const std::string&, const argumentLIST*, TpdYYLtype);
       cmdSTDFUNC*  const         getFuncBody(char*&, telldata::argumentQ*) const;
@@ -561,7 +561,7 @@ namespace  parsercmd {
       void           addIntFUNC(std::string, cmdSTDFUNC*);
       void           addUSERFUNC(FuncDeclaration*, cmdFUNC*, TpdYYLtype);
       void           addUSERFUNCDECL(FuncDeclaration*, TpdYYLtype);
-      void           addGlobalType(std::string, telldata::tell_type*);
+      void           addGlobalType(std::string, telldata::TCompType*);
       void           recoveryDone();
       virtual       ~cmdMAIN();
    };

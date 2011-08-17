@@ -71,7 +71,7 @@ namespace telldata {
    const typeID tn_listmask = typeID(1) << (8 * sizeof(typeID) - 1);
 
    class tell_var;
-   class tell_type;
+   class TCompType;
    class ttint;
    class argumentID;
 
@@ -79,7 +79,7 @@ namespace telldata {
    typedef std::pair<std::string, tell_var*> structRECNAME;
    typedef std::deque<structRECID>           recfieldsID;
    typedef std::deque<structRECNAME>         recfieldsNAME;
-   typedef std::map<std::string, tell_type*> typeMAP;
+   typedef std::map<std::string, TCompType*> typeMAP;
    typedef std::map<std::string, tell_var* > variableMAP;
    typedef std::vector<tell_var*>            memlist;
    typedef std::deque<argumentID*>           argumentQ;
@@ -89,55 +89,61 @@ namespace telldata {
 
    //==============================================================================
    /*Every block (parsercmd::cmdBLOCK) defined maintains a table (map) to the
-     locally defined user types in a form <typename - tell_type>. Every user type
-     (telldata::tell_type), maintains a table (map) to the user defined types
-     (telldata::tell_type) used in this type in a form <ID - tell_type. The latter is
-     updated by addfield method. Thus the tell_type can execute its own copy
+     locally defined user types in a form <typename - TCompType>. Every user type
+     (telldata::TCompType), maintains a table (map) to the user defined types
+     (telldata::TCompType) used in this type in a form <ID - TCompType. The latter is
+     updated by addfield method. Thus the TCompType can execute its own copy
      constructor
    */
-   class tell_type {
+   class TType {
+      public:
+                              TType(typeID ID) : _ID(ID) {}
+         const typeID         ID() const        {return _ID;}
+      protected:
+         typeID               _ID;
+   };
+   //! Tell Composite Type
+   class TCompType : public TType {
    public:
-                           tell_type(typeID ID) : _ID(ID) {assert(TLCOMPOSIT_TYPE(ID));}
-      bool                 addfield(std::string, typeID, const tell_type* utype);
+                           TCompType(typeID ID) : TType(ID) {assert(TLCOMPOSIT_TYPE(ID));}
+      bool                 addfield(std::string, typeID, const TCompType* utype);
       tell_var*            initfield(const typeID) const;
-      const tell_type*     findtype(const typeID) const;
+      const TCompType*     findtype(const typeID) const;
       const recfieldsID&   fields() const    {return _fields;}
-      const typeID         ID() const        {return _ID;}
-      typedef std::map<const typeID, const tell_type*> typeIDMAP;
    protected:
-      typeID               _ID;
+      typedef std::map<const typeID, const TCompType*> typeIDMAP;
       recfieldsID          _fields;
       typeIDMAP            _tIDMAP;
    };
 
    //==============================================================================
-   class point_type : public tell_type {
+   class TPointType : public TCompType {
    public:
-                           point_type();
+                           TPointType();
    };
 
    //==============================================================================
-   class box_type : public tell_type {
+   class TBoxType : public TCompType {
    public:
-                           box_type(point_type*);
+                           TBoxType(TPointType*);
    };
 
    //==============================================================================
-   class bnd_type : public tell_type {
+   class TBindType : public TCompType {
    public:
-                           bnd_type(point_type*);
+                           TBindType(TPointType*);
    };
 
    //==============================================================================
-   class hsh_type : public tell_type {
+   class THshType : public TCompType {
       public:
-                           hsh_type();
+                           THshType();
    };
 
     //==============================================================================
-   class hshstr_type : public tell_type {
+   class THshStrType : public TCompType {
       public:
-                           hshstr_type();
+                           THshStrType();
    };
 
    //==============================================================================
@@ -168,12 +174,12 @@ namespace telldata {
                                           tell_var(tn_real), _value(cobj.value()) {}
       const ttreal&        operator =(const ttreal&);
       const ttreal&        operator =(const ttint&);
-      void                 initialize() {_value = 0.0;}
-      void                 echo(std::string&, real);
-      void                 assign(tell_var*);
+      virtual void         initialize() {_value = 0.0;}
+      virtual void         echo(std::string&, real);
+      virtual void         assign(tell_var*);
       real                 value() const        {return _value;};
       void                 uminus()             {_value  = -_value;   };
-      tell_var*            selfcopy() const     {return DEBUG_NEW ttreal(_value);};
+      virtual tell_var*    selfcopy() const     {return DEBUG_NEW ttreal(_value);};
       friend class ttpnt;
    private:
       real  _value;
@@ -187,12 +193,12 @@ namespace telldata {
                                           tell_var(tn_int), _value(cobj.value()) {}
       const ttint&         operator =(const ttint&);
       const ttint&         operator =(const ttreal&);
-      void                 initialize() {_value = 0;}
-      void                 echo(std::string&, real);
-      void                 assign(tell_var*);
+      virtual void         initialize() {_value = 0;}
+      virtual void         echo(std::string&, real);
+      virtual void         assign(tell_var*);
       int4b                value() const        {return _value;};
       void                 uminus()             {_value  = -_value;   };
-      tell_var*            selfcopy() const     {return DEBUG_NEW ttint(_value);};
+      virtual tell_var*    selfcopy() const     {return DEBUG_NEW ttint(_value);};
       void                 NOT()                {_value = ~_value;}
    protected:
       int4b               _value;
@@ -206,11 +212,11 @@ namespace telldata {
                            ttbool(const ttbool& cobj) :
                                          tell_var(tn_bool), _value(cobj.value()) {};
       const ttbool&        operator = (const ttbool&);
-      void                 initialize() {_value = false;}
-      void                 echo(std::string&, real);
-      void                 assign(tell_var*);
+      virtual void         initialize() {_value = false;}
+      virtual void         echo(std::string&, real);
+      virtual void         assign(tell_var*);
       bool                 value() const        {return _value;};
-      tell_var*            selfcopy() const     {return DEBUG_NEW ttbool(_value);};
+      virtual tell_var*    selfcopy() const     {return DEBUG_NEW ttbool(_value);};
       void                 AND(bool op)         {_value = _value && op;};
       void                 OR(bool op)          {_value = _value || op; };
       void                 NOT()                {_value = !_value;}
@@ -227,10 +233,10 @@ namespace telldata {
                            ttstring(const ttstring& cobj) :
                                         tell_var(tn_string), _value(cobj.value()){};
       const ttstring&      operator = (const ttstring&);
-      void                 initialize() {_value = "";}
-      void                 echo(std::string&, real);// {wstr += _value;};
-      void                 assign(tell_var*);
-      tell_var*            selfcopy() const    {return DEBUG_NEW ttstring(_value);}
+      virtual void         initialize() {_value = "";}
+      virtual void         echo(std::string&, real);// {wstr += _value;};
+      virtual void         assign(tell_var*);
+      virtual tell_var*    selfcopy() const    {return DEBUG_NEW ttstring(_value);}
       const std::string    value() const       {return _value;};
    private:
       std::string         _value;
@@ -245,10 +251,10 @@ namespace telldata {
                              tell_var(tn_layout), _data(pdat), _layer(lay), _selp(selp) {};
                            ttlayout(const ttlayout& cobj);
       const ttlayout&      operator = (const ttlayout&);
-      void                 initialize() {if (_selp) delete _selp;_data = NULL;}
-      void                 echo(std::string&, real);
-      void                 assign(tell_var*);
-      tell_var*            selfcopy() const {return DEBUG_NEW ttlayout(*this);};
+      virtual void         initialize() {if (_selp) delete _selp;_data = NULL;}
+      virtual void         echo(std::string&, real);
+      virtual void         assign(tell_var*);
+      virtual tell_var*    selfcopy() const {return DEBUG_NEW ttlayout(*this);};
       laydata::TdtData*    data() const     {return _data;};
       unsigned             layer() const    {return _layer;};
       SGBitSet*            selp() const     {return _selp;};
@@ -268,10 +274,10 @@ namespace telldata {
                              tell_var(tn_auxilary), _data(pdat), _layer(lay) {};
                            ttauxdata(const ttauxdata& cobj);
       const ttauxdata&     operator = (const ttauxdata&);
-      void                 initialize() {_data = NULL;}
-      void                 echo(std::string&, real);
-      void                 assign(tell_var*);
-      tell_var*            selfcopy() const {return DEBUG_NEW ttauxdata(*this);};
+      virtual void         initialize() {_data = NULL;}
+      virtual void         echo(std::string&, real);
+      virtual void         assign(tell_var*);
+      virtual tell_var*    selfcopy() const {return DEBUG_NEW ttauxdata(*this);};
       auxdata::TdtAuxData* data() const     {return _data;};
       unsigned             layer() const    {return _layer;};
    private:
@@ -280,23 +286,34 @@ namespace telldata {
    };
 
    //==============================================================================
+//   class ttcallback: public tell_var {
+//   public:
+//      virtual void         initialize() {/*TODO*/}
+//      virtual void         echo(std::string&, real);
+//      virtual void         assign(tell_var*);
+//      virtual tell_var*    selfcopy() const {return DEBUG_NEW ttcallback(*this);};
+//   private:
+//      typeID               _retypeID;
+//      //TODO function arguments
+//   };
+   //==============================================================================
    class ttlist:public tell_var {
    public:
                            ttlist(typeID ltype): tell_var(ltype) {};
                            ttlist(const ttlist& cobj);
       const ttlist&        operator = (const ttlist&);
-      void                 initialize();
-      void                 echo(std::string&, real);
-      void                 assign(tell_var*);
-      tell_var*            selfcopy() const  {return DEBUG_NEW ttlist(*this);}
-      const typeID         get_type() const  {return _ID | tn_listmask;}
+      virtual void         initialize();
+      virtual void         echo(std::string&, real);
+      virtual void         assign(tell_var*);
+      virtual tell_var*    selfcopy() const  {return DEBUG_NEW ttlist(*this);}
+      virtual const typeID get_type() const  {return _ID | tn_listmask;}
       memlist              mlist() const     {return _mlist;}
       void                 add(tell_var* p) {_mlist.push_back(p);}
       void                 reserve(unsigned num) {_mlist.reserve(num);}
       void                 resize(unsigned num, tell_var* initVar);
       void                 reverse()         {std::reverse(_mlist.begin(), _mlist.end());}
       unsigned             size() const      {return _mlist.size();}
-      tell_var*            index_var(dword);
+      virtual tell_var*    index_var(dword);
       bool                 validIndex(dword);
       void                 insert(telldata::tell_var*, dword);
       void                 insert(telldata::tell_var*);
@@ -313,15 +330,15 @@ namespace telldata {
    class user_struct : public tell_var {
    public:
                            user_struct(const typeID ID) : tell_var(ID) {};
-                           user_struct(const tell_type*);
-                           user_struct(const tell_type*, operandSTACK&);
+                           user_struct(const TCompType*);
+                           user_struct(const TCompType*, operandSTACK&);
                            user_struct(const user_struct&);
       virtual             ~user_struct();
-      void                 initialize();
-      tell_var*            selfcopy() const  {return DEBUG_NEW user_struct(*this);}
-      void                 echo(std::string&, real);
-      void                 assign(tell_var*);
-      tell_var*            field_var(char*& fname);
+      virtual void         initialize();
+      virtual tell_var*    selfcopy() const  {return DEBUG_NEW user_struct(*this);}
+      virtual void         echo(std::string&, real);
+      virtual void         assign(tell_var*);
+      virtual tell_var*    field_var(char*& fname);
    protected:
       recfieldsNAME        _fieldList;
    };
@@ -334,9 +351,9 @@ namespace telldata {
                            ttpnt (real x=0, real y=0);
                            ttpnt(const ttpnt&);
                            ttpnt(operandSTACK& OPStack);
-                           tell_var*            selfcopy() const    {return DEBUG_NEW ttpnt(*this);}
-      void                 echo(std::string&, real);
-      void                 assign(tell_var*);
+      virtual tell_var*    selfcopy() const    {return DEBUG_NEW ttpnt(*this);}
+      virtual void         echo(std::string&, real);
+      virtual void         assign(tell_var*);
       const real           x() const           {return _x->value();}
       const real           y() const           {return _y->value();}
       void                 scale(real sf)      {_x->_value *= sf;_y->_value *= sf;};
@@ -358,9 +375,9 @@ namespace telldata {
                            ttwnd( ttpnt tl, ttpnt br);
                            ttwnd(operandSTACK& OPStack);
                            ttwnd(const ttwnd& cobj);
-      tell_var*            selfcopy() const    {return DEBUG_NEW ttwnd(*this);};
-      void                 echo(std::string&, real);
-      void                 assign(tell_var*);
+      virtual tell_var*    selfcopy() const    {return DEBUG_NEW ttwnd(*this);};
+      virtual void         echo(std::string&, real);
+      virtual void         assign(tell_var*);
       const ttpnt&         p1() const          {return *_p1;};
       const ttpnt&         p2() const          {return *_p2;};
       void                 scale(real sf)      {_p1->scale(sf); _p1->scale(sf);};
@@ -382,9 +399,9 @@ namespace telldata {
                            ttbnd( ttpnt p, ttreal rot, ttbool flx, ttreal sc);
                            ttbnd(operandSTACK& OPStack);
                            ttbnd(const ttbnd& cobj);
-      tell_var*            selfcopy() const    {return DEBUG_NEW ttbnd(*this);};
-      void                 echo(std::string&, real);
-      void                 assign(tell_var*);
+      virtual tell_var*    selfcopy() const    {return DEBUG_NEW ttbnd(*this);};
+      virtual void         echo(std::string&, real);
+      virtual void         assign(tell_var*);
       const ttpnt&         p() const           {return *_p;}
       const ttreal&        rot() const         {return *_rot;}
       const ttbool&        flx() const         {return *_flx;}
@@ -405,9 +422,9 @@ namespace telldata {
                               tthsh (int4b number=1, std::string name = "");
                               tthsh(const tthsh&);
                               tthsh(operandSTACK& OPStack);
-         tell_var*            selfcopy() const    {return DEBUG_NEW tthsh(*this);}
-         void                 echo(std::string&, real);
-         void                 assign(tell_var*);
+         virtual tell_var*    selfcopy() const    {return DEBUG_NEW tthsh(*this);}
+         virtual void         echo(std::string&, real);
+         virtual void         assign(tell_var*);
          const ttint&         key()   const        {return *_key;}
          const ttstring&      value() const        {return *_value;}
 //         void                 set_number(const int4b number)   {_number->_value = number; }
@@ -425,9 +442,9 @@ namespace telldata {
                               tthshstr (std::string number="", std::string name = "");
                               tthshstr(const tthshstr&);
                               tthshstr(operandSTACK& OPStack);
-         tell_var*            selfcopy() const    {return DEBUG_NEW tthshstr(*this);}
-         void                 echo(std::string&, real);
-         void                 assign(tell_var*);
+         virtual tell_var*    selfcopy() const    {return DEBUG_NEW tthshstr(*this);}
+         virtual void         echo(std::string&, real);
+         virtual void         assign(tell_var*);
          const ttstring&      key()   const        {return *_key;}
          const ttstring&      value() const        {return *_value;}
 //         void                 set_number(const int4b number)   {_number->_value = number; }
@@ -449,8 +466,8 @@ namespace telldata {
                            ~argumentID();//               {_child.clear();}
       void                 toList(bool, typeID alistID = tn_NULL);
       void                 adjustID(const argumentID&);
-      void                 userStructCheck(const telldata::tell_type&, bool);
-      void                 userStructListCheck(const telldata::tell_type&, bool);
+      void                 userStructCheck(const telldata::TCompType&, bool);
+      void                 userStructListCheck(const telldata::TCompType&, bool);
       telldata::typeID     operator () () const        {return _ID;}
       const argumentQ&     child() const               {return _child;}
    private:

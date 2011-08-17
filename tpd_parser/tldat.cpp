@@ -34,7 +34,7 @@
 #include "tedat.h"   //<< Must find a way to remove this from here. See line 243 - it's all about it!
 #include "auxdat.h" //<< Must find a way to remove this from here. See line 282 - it's all about it!
 //=============================================================================
-telldata::tell_var* telldata::tell_type::initfield(const typeID ID) const {
+telldata::tell_var* telldata::TCompType::initfield(const typeID ID) const {
    telldata::tell_var* nvar;
    if (ID & telldata::tn_listmask) nvar = DEBUG_NEW telldata::ttlist(ID & ~telldata::tn_listmask);
    else
@@ -61,7 +61,7 @@ telldata::tell_var* telldata::tell_type::initfield(const typeID ID) const {
    return nvar;
 }
 
-bool telldata::tell_type::addfield(std::string fname, typeID fID, const tell_type* utype) {
+bool telldata::TCompType::addfield(std::string fname, typeID fID, const TCompType* utype) {
    // search for a field with this name
    for (recfieldsID::const_iterator CF = _fields.begin(); CF != _fields.end(); CF++) {
       if (CF->first == fname) return false;
@@ -71,28 +71,28 @@ bool telldata::tell_type::addfield(std::string fname, typeID fID, const tell_typ
     return true;
 }
 
-const telldata::tell_type* telldata::tell_type::findtype(const typeID basetype) const
+const telldata::TCompType* telldata::TCompType::findtype(const typeID basetype) const
 {
    assert(_tIDMAP.end() != _tIDMAP.find(basetype));
    return _tIDMAP.find(basetype)->second;
 }
 
 //=============================================================================
-telldata::point_type::point_type() : tell_type(telldata::tn_pnt)
+telldata::TPointType::TPointType() : TCompType(telldata::tn_pnt)
 {
    addfield("x", telldata::tn_real, NULL);
    addfield("y", telldata::tn_real, NULL);
 };
 
 //=============================================================================
-telldata::box_type::box_type(point_type* pfld) : tell_type(telldata::tn_box)
+telldata::TBoxType::TBoxType(TPointType* pfld) : TCompType(telldata::tn_box)
 {
    addfield("p1", telldata::tn_pnt, pfld);
    addfield("p2", telldata::tn_pnt, pfld);
 };
 
 //=============================================================================
-telldata::bnd_type::bnd_type(point_type* pfld) : tell_type(telldata::tn_bnd)
+telldata::TBindType::TBindType(TPointType* pfld) : TCompType(telldata::tn_bnd)
 {
    addfield("p"   , telldata::tn_pnt , pfld);
    addfield("rot" , telldata::tn_real, NULL);
@@ -101,14 +101,14 @@ telldata::bnd_type::bnd_type(point_type* pfld) : tell_type(telldata::tn_bnd)
 };
 
 //=============================================================================
-telldata::hsh_type::hsh_type() : tell_type(telldata::tn_hsh)
+telldata::THshType::THshType() : TCompType(telldata::tn_hsh)
 {
    addfield("key"   , telldata::tn_int   , NULL);
    addfield("value" , telldata::tn_string, NULL);
 };
 
 //=============================================================================
-telldata::hshstr_type::hshstr_type() : tell_type(telldata::tn_hshstr)
+telldata::THshStrType::THshStrType() : TCompType(telldata::tn_hshstr)
 {
    addfield("key"   , telldata::tn_string, NULL);
    addfield("value" , telldata::tn_string, NULL);
@@ -502,13 +502,13 @@ telldata::ttlist::~ttlist()
 }
 
 //=============================================================================
-telldata::user_struct::user_struct(const tell_type* tltypedef) : tell_var(tltypedef->ID()) {
+telldata::user_struct::user_struct(const TCompType* tltypedef) : tell_var(tltypedef->ID()) {
    const recfieldsID& typefields = tltypedef->fields();
    for (recfieldsID::const_iterator CI = typefields.begin(); CI != typefields.end(); CI++)
       _fieldList.push_back(structRECNAME(CI->first,tltypedef->initfield(CI->second)));
 }
 
-telldata::user_struct::user_struct(const tell_type* tltypedef, operandSTACK& OPstack) :
+telldata::user_struct::user_struct(const TCompType* tltypedef, operandSTACK& OPstack) :
                                                                 tell_var(tltypedef->ID())
 {
    assert(NULL != tltypedef);
@@ -891,7 +891,7 @@ void telldata::argumentID::toList(bool cmdUpdate, telldata::typeID alistID)
       static_cast<parsercmd::cmdSTRUCT*>(_command)->setargID(this);
 }
 
-void telldata::argumentID::userStructCheck(const telldata::tell_type& vartype, bool cmdUpdate)
+void telldata::argumentID::userStructCheck(const telldata::TCompType& vartype, bool cmdUpdate)
 {
    const telldata::recfieldsID& recfields = vartype.fields();
    // first check that both lists have the same size
@@ -930,7 +930,7 @@ void telldata::argumentID::userStructCheck(const telldata::tell_type& vartype, b
       static_cast<parsercmd::cmdSTRUCT*>(_command)->setargID(this);
 }
 
-void telldata::argumentID::userStructListCheck(const telldata::tell_type& vartype, bool cmdUpdate)
+void telldata::argumentID::userStructListCheck(const telldata::TCompType& vartype, bool cmdUpdate)
 {
    for (argumentQ::iterator CA = _child.begin(); CA != _child.end(); CA++)
       if ( TLUNKNOWN_TYPE( (**CA)() ) ) (*CA)->userStructCheck(vartype, cmdUpdate);

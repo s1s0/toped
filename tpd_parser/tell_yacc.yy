@@ -63,7 +63,7 @@ bool lindexed = false;
 std::stack<parsercmd::cmdFOREACH*> foreach_stack;
 parsercmd::cmdLISTADD *listadd_command = NULL;
 /*Current tell struct */
-telldata::tell_type *tellstruct = NULL;
+telldata::TCompType *tellstruct = NULL;
 /* used for argument type checking during function call parse */
 telldata::argumentQ   *argmap  = NULL;
 /*taking care when a function is called from the argument list of another call*/
@@ -96,7 +96,7 @@ Well some remarks may save some time in the future...
     real        - this holds the real numbers during parsing. tknREAL is the
                   only token of this type
     parsestr    - to hold variable/function names during parsing
-    pttname     - that's the tell_type we spoke about above. Once again - this is
+    pttname     - that's the TCompType we spoke about above. Once again - this is
                   NOT a tell variable. Just the ID of the type.
     pfblock     - same as previous, however to avoid generally some casting
                   the {} blocks and function blocks have been separated.
@@ -202,7 +202,7 @@ Ooops! Second thought!
  these objects, but these operations will not affect by any means tell variable 'a'.
  Having this cleared-up the concept of lists is now crystal. All lists will be
  homogeneous and their definitions will look like.
-  <tell_type> list <variable>
+  <TCompType> list <variable>
  thus the strict type-checking is still in place. I still insist on the typename
  list (not array) because the size of these things will not be fixed. The side
  effect here is that polygons and wires now became a list of points. We will
@@ -248,7 +248,8 @@ Ooops! Second thought!
 %token                 tknERROR
 %token                 tknIF tknELSE tknWHILE tknREPEAT tknUNTIL tknFOREACH
 %token                 tknSTRUCTdef tknVOIDdef tknREALdef tknBOOLdef tknINTdef
-%token                 tknSTRINGdef tknLAYOUTdef tknAUXDATAdef tknLISTdef tknRETURN
+%token                 tknSTRINGdef tknLAYOUTdef tknAUXDATAdef tknLISTdef 
+%token                 tknCALLBACKdef tknRETURN
 %token                 tknTRUE tknFALSE tknLEQ tknGEQ tknEQ tknNEQ
 %token                 tknAND tknOR tknNOT tknBWAND tknBWOR tknBWNOT
 %token                 tknSW tknSE tknNE tknNW tknPREADD tknPRESUB
@@ -581,6 +582,12 @@ funcargument:
       cfd->pushArg(DEBUG_NEW parsercmd::argumentTYPE($2,tellvar));
       delete [] $2;
    }
+/*
+   | tknCALLBACKdef tknIDENTIFIER          {
+    //TODO - new callback parameter
+    //TODO - push it to the list of arguments
+   }
+   */
 ;
 
 lvalue:
@@ -656,7 +663,7 @@ variabledeclaration:
 
 fielddeclaration:
      telltypeID  tknIDENTIFIER              {
-      const telldata::tell_type* ftype =
+      const telldata::TCompType* ftype =
             CMDBlock->getTypeByID($1 & ~telldata::tn_listmask);
       if (!tellstruct->addfield($2, $1, ftype)) {
          tellerror("field with this name already defined in this strucutre", @2);
@@ -681,7 +688,7 @@ telltype:
    | tknLAYOUTdef                          {$$ = telldata::tn_layout;}
    | tknAUXDATAdef                         {$$ = telldata::tn_auxilary;}
    | tknTYPEdef                            {
-        const telldata::tell_type* ttype = CMDBlock->getTypeByName($1);
+        const telldata::TCompType* ttype = CMDBlock->getTypeByName($1);
         assert (NULL != ttype);
         $$ = ttype->ID();
         delete [] $1;

@@ -860,7 +860,7 @@ int parsercmd::cmdLISTSIZE::execute() {
       case telldata::tn_auxilary: initVar = DEBUG_NEW telldata::ttauxdata(); break;
       default:
       {
-         const telldata::tell_type* utype = CMDBlock->getTypeByID(ID);
+         const telldata::TCompType* utype = CMDBlock->getTypeByID(ID);
          if (NULL == utype)
             assert(false);// unknown base array type ?!
          else
@@ -1188,7 +1188,7 @@ bool parsercmd::cmdRETURN::checkRetype(telldata::argumentID* arg) {
    if (NULL == arg) return (_retype == telldata::tn_void);
 
    if (TLUNKNOWN_TYPE((*arg)())) {
-      const telldata::tell_type* vartype;
+      const telldata::TCompType* vartype;
       if (TLISALIST(_retype)) { // we have a list lval
           vartype = CMDBlock->getTypeByID(_retype & ~telldata::tn_listmask);
           if (NULL != vartype) arg->userStructListCheck(*vartype, true);
@@ -1234,21 +1234,21 @@ void parsercmd::cmdBLOCK::addconstID(const char* name, telldata::tell_var* var, 
    if (initialized) var->update_cstat();
 }
 
-void parsercmd::cmdBLOCK::addlocaltype(const char* ttypename, telldata::tell_type* ntype) {
+void parsercmd::cmdBLOCK::addlocaltype(const char* ttypename, telldata::TCompType* ntype) {
    assert(TYPElocal.end() == TYPElocal.find(ttypename));
    _next_lcl_typeID = ntype->ID() + 1;
    TYPElocal[ttypename] = ntype;
 }
 
-telldata::tell_type* parsercmd::cmdBLOCK::requesttypeID(char*& ttypename) {
+telldata::TCompType* parsercmd::cmdBLOCK::requesttypeID(char*& ttypename) {
    if (TYPElocal.end() == TYPElocal.find(ttypename)) {
-      telldata::tell_type* ntype = DEBUG_NEW telldata::tell_type(_next_lcl_typeID);
+      telldata::TCompType* ntype = DEBUG_NEW telldata::TCompType(_next_lcl_typeID);
       return ntype;
    }
    else return NULL;
 }
 
-const telldata::tell_type* parsercmd::cmdBLOCK::getTypeByName(char*& ttypename) const {
+const telldata::TCompType* parsercmd::cmdBLOCK::getTypeByName(char*& ttypename) const {
    TELL_DEBUG(***gettypeID***);
    // Roll back the blockSTACK until name is found. return NULL otherwise
    typedef blockSTACK::const_iterator BS;
@@ -1261,7 +1261,7 @@ const telldata::tell_type* parsercmd::cmdBLOCK::getTypeByName(char*& ttypename) 
    return NULL;
 }
 
-const telldata::tell_type* parsercmd::cmdBLOCK::getTypeByID(const telldata::typeID ID) const {
+const telldata::TCompType* parsercmd::cmdBLOCK::getTypeByID(const telldata::typeID ID) const {
    TELL_DEBUG(***getTypeByID***);
    // Roll back the blockSTACK until name is found. return NULL otherwise
    typedef blockSTACK::const_iterator BS;
@@ -1274,35 +1274,29 @@ const telldata::tell_type* parsercmd::cmdBLOCK::getTypeByID(const telldata::type
    return NULL;
 }
 
-telldata::tell_var* parsercmd::cmdBLOCK::newTellvar(telldata::typeID ID, TpdYYLtype loc, telldata::tell_var* size)
+telldata::tell_var* parsercmd::cmdBLOCK::newTellvar(telldata::typeID ID, TpdYYLtype loc)
 {
    if (ID & telldata::tn_listmask)
    {
-      if (NULL != size);
-      {
-         int boza;
-         boza = 1;
-
-      }
       return(DEBUG_NEW telldata::ttlist(ID));
    }
    else
    switch (ID)
    {
-      case   telldata::tn_real: return(DEBUG_NEW telldata::ttreal());
-      case    telldata::tn_int: return(DEBUG_NEW telldata::ttint());
-      case   telldata::tn_bool: return(DEBUG_NEW telldata::ttbool());
-      case    telldata::tn_pnt: return(DEBUG_NEW telldata::ttpnt());
-      case    telldata::tn_box: return(DEBUG_NEW telldata::ttwnd());
-      case    telldata::tn_bnd: return(DEBUG_NEW telldata::ttbnd());
-      case    telldata::tn_hsh: return(DEBUG_NEW telldata::tthsh());
-      case    telldata::tn_hshstr: return(DEBUG_NEW telldata::tthshstr());
-      case telldata::tn_string: return(DEBUG_NEW telldata::ttstring());
-      case telldata::tn_layout: return(DEBUG_NEW telldata::ttlayout());
+      case   telldata::tn_real  : return(DEBUG_NEW telldata::ttreal());
+      case    telldata::tn_int  : return(DEBUG_NEW telldata::ttint());
+      case   telldata::tn_bool  : return(DEBUG_NEW telldata::ttbool());
+      case    telldata::tn_pnt  : return(DEBUG_NEW telldata::ttpnt());
+      case    telldata::tn_box  : return(DEBUG_NEW telldata::ttwnd());
+      case    telldata::tn_bnd  : return(DEBUG_NEW telldata::ttbnd());
+      case    telldata::tn_hsh  : return(DEBUG_NEW telldata::tthsh());
+      case telldata::tn_hshstr  : return(DEBUG_NEW telldata::tthshstr());
+      case telldata::tn_string  : return(DEBUG_NEW telldata::ttstring());
+      case telldata::tn_layout  : return(DEBUG_NEW telldata::ttlayout());
       case telldata::tn_auxilary: return(DEBUG_NEW telldata::ttauxdata());
       default:
       {
-         const telldata::tell_type* utype = getTypeByID(ID);
+         const telldata::TCompType* utype = getTypeByID(ID);
          if (NULL == utype)
             tellerror("Bad type specifier", loc);
          else
@@ -1589,7 +1583,7 @@ int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap)
       telldata::typeID lvalID = (*arguments)[i]->second->get_type();
       if (TLUNKNOWN_TYPE(cargID))
       {
-         const telldata::tell_type* vartype;
+         const telldata::TCompType* vartype;
          if (TLISALIST(lvalID))
          { // we have a list lval
             vartype = CMDBlock->getTypeByID(lvalID & ~telldata::tn_listmask);
@@ -1906,7 +1900,7 @@ parsercmd::cmdMAIN::cmdMAIN():cmdBLOCK(telldata::tn_usertypes) {
    pushblk();
 };
 
-void  parsercmd::cmdMAIN::addGlobalType(std::string ttypename, telldata::tell_type* ntype) {
+void  parsercmd::cmdMAIN::addGlobalType(std::string ttypename, telldata::TCompType* ntype) {
    assert(TYPElocal.end() == TYPElocal.find(ttypename));
    TYPElocal[ttypename] = ntype;
 }
@@ -2177,7 +2171,7 @@ bool parsercmd::StructTypeCheck(telldata::typeID targett,
                                       telldata::argumentID* op2, TpdYYLtype loc)
 {
    VERIFY(TLUNKNOWN_TYPE((*op2)()));
-   const telldata::tell_type* vartype;
+   const telldata::TCompType* vartype;
    if (TLISALIST(targett))
    { // we have a list lval
       vartype = CMDBlock->getTypeByID(targett & ~telldata::tn_listmask);
@@ -2270,7 +2264,7 @@ telldata::typeID parsercmd::Assign(telldata::tell_var* lval, bool indexed, telld
    //       input structure for struct
    if (TLUNKNOWN_TYPE((*op2)()))
    {
-      const telldata::tell_type* vartype;
+      const telldata::TCompType* vartype;
       if (TLISALIST(lvalID))
       { // we have a list lval
           vartype = CMDBlock->getTypeByID(lvalID & ~telldata::tn_listmask);
@@ -2366,7 +2360,7 @@ telldata::typeID parsercmd::Uninsert(telldata::tell_var* lval, telldata::argumen
    {
       if (TLISALIST(lvalID))
       { // we have a list lval
-         const telldata::tell_type* vartype;
+         const telldata::TCompType* vartype;
           vartype = CMDBlock->getTypeByID(lvalID & ~telldata::tn_listmask);
           if (NULL != vartype) op2->userStructListCheck(*vartype, true);
           else op2->toList(true, lvalID & ~telldata::tn_listmask);
