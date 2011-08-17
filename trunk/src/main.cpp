@@ -640,11 +640,11 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    //-----------------------------------------------------------------------------------------------------------
    // First the internal types
    //-----------------------------------------------------------------------------------------------------------
-   telldata::point_type*   pntype      = DEBUG_NEW telldata::point_type();
-   telldata::box_type*     bxtype      = DEBUG_NEW telldata::box_type(pntype);
-   telldata::bnd_type*     bndtype     = DEBUG_NEW telldata::bnd_type(pntype);
-   telldata::hsh_type*     hshtype     = DEBUG_NEW telldata::hsh_type();
-   telldata::hshstr_type*  hshstrtype  = DEBUG_NEW telldata::hshstr_type();
+   telldata::TPointType*   pntype      = DEBUG_NEW telldata::TPointType();
+   telldata::TBoxType*     bxtype      = DEBUG_NEW telldata::TBoxType(pntype);
+   telldata::TBindType*     bndtype     = DEBUG_NEW telldata::TBindType(pntype);
+   telldata::THshType*     hshtype     = DEBUG_NEW telldata::THshType();
+   telldata::THshStrType*  hshstrtype  = DEBUG_NEW telldata::THshStrType();
 
    mblock->addGlobalType("point"     , pntype);
    mblock->addGlobalType("box"       , bxtype);

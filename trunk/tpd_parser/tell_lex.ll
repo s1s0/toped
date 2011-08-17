@@ -184,6 +184,7 @@ int                        return tknINTdef;
 bool                       return tknBOOLdef;
 string                     return tknSTRINGdef;
 layout                     return tknLAYOUTdef;
+callback                   return tknCALLBACKdef;
 auxdata                    return tknAUXDATAdef;
 list                       return tknLISTdef;
 return                     return tknRETURN;
@@ -240,7 +241,7 @@ const                      return tknCONST;
 {lxt_D}+{lxt_E}          { telllval.real = atof(yytext); return tknREAL;}
 {lex_ID}                 { if (!parsercmd::checkPrepVar(yytext))
                            {
-                              const telldata::tell_type* ttype = CMDBlock->getTypeByName(telllval.parsestr);
+                              const telldata::TCompType* ttype = CMDBlock->getTypeByName(telllval.parsestr);
                               if (NULL == ttype)
                                  return tknIDENTIFIER;
                               else
