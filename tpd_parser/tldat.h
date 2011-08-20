@@ -71,7 +71,7 @@ namespace telldata {
    const typeID tn_listmask = typeID(1) << (8 * sizeof(typeID) - 1);
 
    class tell_var;
-   class TCompType;
+   class TType;
    class ttint;
    class argumentID;
 
@@ -79,7 +79,7 @@ namespace telldata {
    typedef std::pair<std::string, tell_var*> structRECNAME;
    typedef std::deque<structRECID>           recfieldsID;
    typedef std::deque<structRECNAME>         recfieldsNAME;
-   typedef std::map<std::string, TCompType*> typeMAP;
+   typedef std::map<std::string, TType*>     typeMAP;
    typedef std::map<std::string, tell_var* > variableMAP;
    typedef std::vector<tell_var*>            memlist;
    typedef std::deque<argumentID*>           argumentQ;
@@ -99,6 +99,7 @@ namespace telldata {
       public:
                               TType(typeID ID) : _ID(ID) {}
          const typeID         ID() const        {return _ID;}
+         virtual bool         isComposite() const = 0;
       protected:
          typeID               _ID;
    };
@@ -106,14 +107,26 @@ namespace telldata {
    class TCompType : public TType {
    public:
                            TCompType(typeID ID) : TType(ID) {assert(TLCOMPOSIT_TYPE(ID));}
-      bool                 addfield(std::string, typeID, const TCompType* utype);
+      bool                 addfield(std::string, typeID, const TType* utype);
       tell_var*            initfield(const typeID) const;
-      const TCompType*     findtype(const typeID) const;
+      const TType*         findtype(const typeID) const;
       const recfieldsID&   fields() const    {return _fields;}
-   protected:
-      typedef std::map<const typeID, const TCompType*> typeIDMAP;
+      virtual bool         isComposite() const    {return true;}
+   private:
+      typedef std::map<const typeID, const TType*> typeIDMAP;
       recfieldsID          _fields;
       typeIDMAP            _tIDMAP;
+   };
+
+   class TCallBackType : public TType {
+   public:
+                           TCallBackType(typeID ID) : TType(ID) {assert(TLCOMPOSIT_TYPE(ID));}
+      void                 addParam(typeID);
+      virtual bool         isComposite() const    {return false;}
+   private:
+      typedef std::list<typeID> TypeIdList;
+      typeID               _fType; //! Function return type
+      TypeIdList           _paramList;
    };
 
    //==============================================================================
@@ -466,8 +479,8 @@ namespace telldata {
                            ~argumentID();//               {_child.clear();}
       void                 toList(bool, typeID alistID = tn_NULL);
       void                 adjustID(const argumentID&);
-      void                 userStructCheck(const telldata::TCompType&, bool);
-      void                 userStructListCheck(const telldata::TCompType&, bool);
+      void                 userStructCheck(const telldata::TType*, bool);
+      void                 userStructListCheck(const telldata::TType*, bool);
       telldata::typeID     operator () () const        {return _ID;}
       const argumentQ&     child() const               {return _child;}
    private:

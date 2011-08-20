@@ -241,7 +241,7 @@ const                      return tknCONST;
 {lxt_D}+{lxt_E}          { telllval.real = atof(yytext); return tknREAL;}
 {lex_ID}                 { if (!parsercmd::checkPrepVar(yytext))
                            {
-                              const telldata::TCompType* ttype = CMDBlock->getTypeByName(telllval.parsestr);
+                              const telldata::TType* ttype = CMDBlock->getTypeByName(telllval.parsestr);
                               if (NULL == ttype)
                                  return tknIDENTIFIER;
                               else

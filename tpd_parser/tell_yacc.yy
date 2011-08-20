@@ -663,7 +663,7 @@ variabledeclaration:
 
 fielddeclaration:
      telltypeID  tknIDENTIFIER              {
-      const telldata::TCompType* ftype =
+      const telldata::TType* ftype =
             CMDBlock->getTypeByID($1 & ~telldata::tn_listmask);
       if (!tellstruct->addfield($2, $1, ftype)) {
          tellerror("field with this name already defined in this strucutre", @2);
@@ -688,7 +688,7 @@ telltype:
    | tknLAYOUTdef                          {$$ = telldata::tn_layout;}
    | tknAUXDATAdef                         {$$ = telldata::tn_auxilary;}
    | tknTYPEdef                            {
-        const telldata::TCompType* ttype = CMDBlock->getTypeByName($1);
+        const telldata::TType* ttype = CMDBlock->getTypeByName($1);
         assert (NULL != ttype);
         $$ = ttype->ID();
         delete [] $1;
@@ -697,7 +697,7 @@ telltype:
 
 recorddefinition:
      tknSTRUCTdef tknIDENTIFIER            {
-        tellstruct = CMDBlock->requesttypeID($2);
+        tellstruct = CMDBlock->secureCompType($2);
         if (NULL == tellstruct) {
            tellerror("type with this name already defined", @1);
            delete [] $2;
