@@ -53,15 +53,19 @@ telldata::tell_var* telldata::TCompType::initfield(const typeID ID) const {
          case tn_auxilary: nvar = DEBUG_NEW telldata::ttauxdata() ;break;
                 default: {
                      assert(_tIDMAP.end() != _tIDMAP.find(ID));
-                     nvar = DEBUG_NEW telldata::user_struct(_tIDMAP.find(ID)->second);
-                     // the default is effectively nvar = DEBUG_NEW telldata::user_struct(_tIDMAP[ID]),
-                     // but it is not keeping constness
+                     const TType* vartype = _tIDMAP.find(ID)->second;
+                     if (vartype->isComposite())
+                        nvar = DEBUG_NEW telldata::user_struct(static_cast<const TCompType*>(vartype));
+                     else
+                     {
+                        assert(false); //TODO callback types
+                     }
                 }
       }
    return nvar;
 }
 
-bool telldata::TCompType::addfield(std::string fname, typeID fID, const TCompType* utype) {
+bool telldata::TCompType::addfield(std::string fname, typeID fID, const TType* utype) {
    // search for a field with this name
    for (recfieldsID::const_iterator CF = _fields.begin(); CF != _fields.end(); CF++) {
       if (CF->first == fname) return false;
@@ -71,10 +75,16 @@ bool telldata::TCompType::addfield(std::string fname, typeID fID, const TCompTyp
     return true;
 }
 
-const telldata::TCompType* telldata::TCompType::findtype(const typeID basetype) const
+const telldata::TType* telldata::TCompType::findtype(const typeID basetype) const
 {
    assert(_tIDMAP.end() != _tIDMAP.find(basetype));
    return _tIDMAP.find(basetype)->second;
+}
+
+//=============================================================================
+void telldata::TCallBackType::addParam(typeID pID)
+{
+   _paramList.push_back(pID);
 }
 
 //=============================================================================
@@ -891,9 +901,14 @@ void telldata::argumentID::toList(bool cmdUpdate, telldata::typeID alistID)
       static_cast<parsercmd::cmdSTRUCT*>(_command)->setargID(this);
 }
 
-void telldata::argumentID::userStructCheck(const telldata::TCompType& vartype, bool cmdUpdate)
+void telldata::argumentID::userStructCheck(const telldata::TType* vtype, bool cmdUpdate)
 {
-   const telldata::recfieldsID& recfields = vartype.fields();
+   if (!vtype->isComposite())
+   {
+      assert(false); //TODO - callback types
+   }
+   const telldata::TCompType* vartype = static_cast<const telldata::TCompType*>(vtype);
+   const telldata::recfieldsID& recfields = vartype->fields();
    // first check that both lists have the same size
    if (_child.size() != recfields.size()) return;
    recfieldsID::const_iterator CF;
@@ -906,13 +921,13 @@ void telldata::argumentID::userStructCheck(const telldata::TCompType& vartype, b
          if (TLISALIST(CF->second))
          {// check the list fields
             if (TLCOMPOSIT_TYPE((CF->second & (~telldata::tn_listmask))))
-               (*CA)->userStructListCheck(*(vartype.findtype(CF->second)), cmdUpdate);
+               (*CA)->userStructListCheck(vartype->findtype(CF->second), cmdUpdate);
             else
                (*CA)->toList(cmdUpdate, CF->second & ~telldata::tn_listmask);
          }
          else
             // call in recursion the userStructCheck method of the child
-            (*CA)->userStructCheck(*(vartype.findtype(CF->second)), cmdUpdate);
+            (*CA)->userStructCheck(vartype->findtype(CF->second), cmdUpdate);
       }
       if (!NUMBER_TYPE( CF->second ))
       {
@@ -920,22 +935,22 @@ void telldata::argumentID::userStructCheck(const telldata::TCompType& vartype, b
          // so check strictly the type
          if ( (**CA)() != CF->second) return; // no match
       }
-      else // for number types - allow compatablity (int to real only)
+      else // for number types - allow compatibility (int to real only)
          if (!NUMBER_TYPE( (**CA)() )) return; // no match
          else if (CF->second < (**CA)() ) return; // no match
    }
    // all fields match => we can assign a known ID to the argumentID
-   _ID = vartype.ID();
+   _ID = vartype->ID();
    if (cmdUpdate)
       static_cast<parsercmd::cmdSTRUCT*>(_command)->setargID(this);
 }
 
-void telldata::argumentID::userStructListCheck(const telldata::TCompType& vartype, bool cmdUpdate)
+void telldata::argumentID::userStructListCheck(const telldata::TType* vartype, bool cmdUpdate)
 {
    for (argumentQ::iterator CA = _child.begin(); CA != _child.end(); CA++)
       if ( TLUNKNOWN_TYPE( (**CA)() ) ) (*CA)->userStructCheck(vartype, cmdUpdate);
 
-   toList(cmdUpdate, vartype.ID());
+   toList(cmdUpdate, vartype->ID());
 }
 
 void telldata::argumentID::adjustID(const argumentID& obj2copy)
