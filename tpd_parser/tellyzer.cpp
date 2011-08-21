@@ -1113,6 +1113,7 @@ int parsercmd::cmdPUSH::execute()
    }
 }
 
+//=============================================================================
 telldata::tell_var* parsercmd::cmdSTRUCT::getList() {
    telldata::typeID comptype = (*_arg)() & ~telldata::tn_listmask;
    telldata::ttlist *pl = DEBUG_NEW telldata::ttlist(comptype);
@@ -1160,6 +1161,20 @@ int parsercmd::cmdSTRUCT::execute()
    return EXEC_NEXT;
 }
 
+//=============================================================================
+int parsercmd::cmdFUNCREF::execute()
+{
+   TELL_DEBUG(cmdFUNCREF);
+   if ((NULL == _funcBody) || (telldata::tn_anyfref == _ID))
+   {
+      tellerror("Callback statement not evaluated properly. Internal parser error");
+      return EXEC_RETURN;
+   }
+
+   telldata::tell_var *ustrct = DEBUG_NEW telldata::call_back( _ID, _funcBody);
+   OPstack.push(ustrct);
+   return EXEC_NEXT;
+}
 //=============================================================================
 int parsercmd::cmdFUNCCALL::execute()
 {
@@ -1222,7 +1237,8 @@ parsercmd::cmdBLOCK::cmdBLOCK() {
    VARlocal.clear();
 }
 
-telldata::tell_var* parsercmd::cmdBLOCK::getID(char*& name, bool local){
+telldata::tell_var* parsercmd::cmdBLOCK::getID(const char* name, bool local) const
+{
    TELL_DEBUG(***getID***);
    // Roll back the blockSTACK until name is found. return NULL otherwise
    typedef blockSTACK::const_iterator BS;
@@ -1253,9 +1269,21 @@ void parsercmd::cmdBLOCK::addlocaltype(const char* ttypename, telldata::TType* n
    TYPElocal[ttypename] = ntype;
 }
 
-telldata::TCompType* parsercmd::cmdBLOCK::secureCompType(char*& ttypename) {
-   if (TYPElocal.end() == TYPElocal.find(ttypename)) {
+telldata::TCompType* parsercmd::cmdBLOCK::secureCompType(char*& ttypename)
+{
+   if (TYPElocal.end() == TYPElocal.find(ttypename))
+   {
       telldata::TCompType* ntype = DEBUG_NEW telldata::TCompType(_next_lcl_typeID);
+      return ntype;
+   }
+   else return NULL;
+}
+
+telldata::TCallBackType* parsercmd::cmdBLOCK::secureCallBackType(char*& ttypename)
+{
+   if (TYPElocal.end() == TYPElocal.find(ttypename))
+   {
+      telldata::TCallBackType* ntype = DEBUG_NEW telldata::TCallBackType(_next_lcl_typeID);
       return ntype;
    }
    else return NULL;
@@ -1315,7 +1343,7 @@ telldata::tell_var* parsercmd::cmdBLOCK::newTellvar(telldata::typeID ID, TpdYYLt
          else if (utype->isComposite())
             return (DEBUG_NEW telldata::user_struct(static_cast<const telldata::TCompType*>(utype)));
          else
-            assert(false); // TODO - callback types
+            return (DEBUG_NEW telldata::call_back(ID));
       }
    }
    return NULL;
@@ -1440,7 +1468,7 @@ bool parsercmd::cmdBLOCK::checkDbSortState(DbSortState needsDbResort)
 }
 //=============================================================================
 parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
-                                        (char*& fn, telldata::argumentQ* amap) const {
+                                        (const char* fn, telldata::argumentQ* amap) const {
    cmdSTDFUNC *fbody = NULL;
    typedef functionMAP::iterator MM;
    std::pair<MM,MM> range = _funcMAP.equal_range(fn);
@@ -1449,6 +1477,25 @@ parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
       fbody = fb->second;
       if (0 == fbody->argsOK(arguMap)) break;
       else fbody = NULL;
+   }
+   if (NULL == fbody)
+   { // not found normally, but there is still a hope - it could be a callback!
+      telldata::tell_var* callbackvar = getID(fn);
+      if (callbackvar)
+      {
+         telldata::typeID vID = callbackvar->get_type();
+         if (TLCOMPOSIT_TYPE(vID))
+         {
+            const telldata::TType* vType = getTypeByID(callbackvar->get_type());
+            if (!vType->isComposite())
+            {
+               telldata::call_back* cbckvar = static_cast<telldata::call_back*>(callbackvar);
+               fbody = static_cast<cmdSTDFUNC*>(cbckvar->funcBody());
+               if (0 != fbody->argsOK(arguMap))
+                  fbody = NULL;
+            }
+         }
+      }
    }
    if (NULL == amap) delete arguMap;
    return fbody;

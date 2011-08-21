@@ -413,6 +413,19 @@ namespace  parsercmd {
       telldata::argumentID*  _arg;
    };
 
+   class cmdFUNCREF: public cmdVIRTUAL {
+   public:
+               cmdFUNCREF(std::string fn) : _funcBody(NULL), _funcName(fn), _ID(telldata::tn_anyfref) {}
+      void     setFuncBody(cmdSTDFUNC* funcBody, telldata::typeID ID) {_funcBody = funcBody; _ID = ID;}
+      std::string funcName() const              {return _funcName;}
+      virtual ~cmdFUNCREF()                     {}
+      int      execute();
+   private:
+      cmdSTDFUNC*       _funcBody;
+      std::string       _funcName;
+      telldata::typeID  _ID;
+   };
+
    class cmdLISTADD : public cmdVIRTUAL {
    public:
                cmdLISTADD(telldata::tell_var* listarg, bool prefix, bool index) :
@@ -521,13 +534,14 @@ namespace  parsercmd {
       void                       addconstID(const char*, telldata::tell_var*, bool initialized);
       void                       addlocaltype(const char*, telldata::TType*);
       telldata::TCompType*       secureCompType(char*&);
+      telldata::TCallBackType*   secureCallBackType(char*&);
       const telldata::TType*     getTypeByName(char*&) const;
       const telldata::TType*     getTypeByID(const telldata::typeID ID) const;
-      telldata::tell_var*        getID(char*&, bool local=false);
+      telldata::tell_var*        getID(const char*, bool local=false) const;
       telldata::tell_var*        newTellvar(telldata::typeID, TpdYYLtype);
       bool                       defValidate(const std::string& ,const argumentLIST*, cmdFUNC*&);
       bool                       declValidate(const std::string&, const argumentLIST*, TpdYYLtype);
-      cmdSTDFUNC*  const         getFuncBody(char*&, telldata::argumentQ*) const;
+      cmdSTDFUNC*  const         getFuncBody(const char*, telldata::argumentQ*) const;
       cmdSTDFUNC*  const         getIntFuncBody(std::string) const;
       void                       pushcmd(cmdVIRTUAL* cmd) {cmdQ.push_back(cmd);};
       void                       pushblk()                {_blocks.push_front(this);};
