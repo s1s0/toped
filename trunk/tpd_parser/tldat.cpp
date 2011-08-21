@@ -33,6 +33,9 @@
 
 #include "tedat.h"   //<< Must find a way to remove this from here. See line 243 - it's all about it!
 #include "auxdat.h" //<< Must find a way to remove this from here. See line 282 - it's all about it!
+
+extern parsercmd::cmdBLOCK*       CMDBlock;
+
 //=============================================================================
 telldata::tell_var* telldata::TCompType::initfield(const typeID ID) const {
    telldata::tell_var* nvar;
@@ -82,7 +85,7 @@ const telldata::TType* telldata::TCompType::findtype(const typeID basetype) cons
 }
 
 //=============================================================================
-void telldata::TCallBackType::addParam(typeID pID)
+void telldata::TCallBackType::pushArg(typeID pID)
 {
    _paramList.push_back(pID);
 }
@@ -584,6 +587,28 @@ telldata::tell_var* telldata::user_struct::field_var(char*& fname) {
 }
 
 //=============================================================================
+telldata::call_back::call_back(typeID ID, void* fBody) :
+   tell_var  ( ID     ),
+   _funcBody ( fBody  )
+{}
+
+telldata::call_back::call_back(const call_back& cobj) :
+   tell_var  ( cobj.get_type()  ),
+   _funcBody ( cobj._funcBody   )
+{}
+
+
+void telldata::call_back::echo(std::string&, real)
+{
+   assert(false); //TODO
+}
+void telldata::call_back::assign(tell_var* value)
+{
+   call_back* n_value = static_cast<telldata::call_back*>(value);
+   _funcBody  = n_value->_funcBody;
+}
+
+//=============================================================================
 telldata::ttpnt::ttpnt (real x, real y) : user_struct(telldata::tn_pnt),
                                          _x(DEBUG_NEW ttreal(x)), _y(DEBUG_NEW ttreal(y))
 {
@@ -903,46 +928,63 @@ void telldata::argumentID::toList(bool cmdUpdate, telldata::typeID alistID)
 
 void telldata::argumentID::userStructCheck(const telldata::TType* vtype, bool cmdUpdate)
 {
-   if (!vtype->isComposite())
+   if (vtype->isComposite())
    {
-      assert(false); //TODO - callback types
-   }
-   const telldata::TCompType* vartype = static_cast<const telldata::TCompType*>(vtype);
-   const telldata::recfieldsID& recfields = vartype->fields();
-   // first check that both lists have the same size
-   if (_child.size() != recfields.size()) return;
-   recfieldsID::const_iterator CF;
-   argumentQ::iterator CA;
-   for (CF = recfields.begin(), CA = _child.begin();
-             (CF != recfields.end() && CA != _child.end()); CF ++, CA++)
-   {
-      if ( TLUNKNOWN_TYPE( (**CA)() ) )
+      const telldata::TCompType* vartype = static_cast<const telldata::TCompType*>(vtype);
+      const telldata::recfieldsID& recfields = vartype->fields();
+      // first check that both lists have the same size
+      if (_child.size() != recfields.size()) return;
+      recfieldsID::const_iterator CF;
+      argumentQ::iterator CA;
+      for (CF = recfields.begin(), CA = _child.begin();
+                (CF != recfields.end() && CA != _child.end()); CF ++, CA++)
       {
-         if (TLISALIST(CF->second))
-         {// check the list fields
-            if (TLCOMPOSIT_TYPE((CF->second & (~telldata::tn_listmask))))
-               (*CA)->userStructListCheck(vartype->findtype(CF->second), cmdUpdate);
+         if ( TLUNKNOWN_TYPE( (**CA)() ) )
+         {
+            if (TLISALIST(CF->second))
+            {// check the list fields
+               if (TLCOMPOSIT_TYPE((CF->second & (~telldata::tn_listmask))))
+                  (*CA)->userStructListCheck(vartype->findtype(CF->second), cmdUpdate);
+               else
+                  (*CA)->toList(cmdUpdate, CF->second & ~telldata::tn_listmask);
+            }
             else
-               (*CA)->toList(cmdUpdate, CF->second & ~telldata::tn_listmask);
+               // call in recursion the userStructCheck method of the child
+               (*CA)->userStructCheck(vartype->findtype(CF->second), cmdUpdate);
          }
-         else
-            // call in recursion the userStructCheck method of the child
-            (*CA)->userStructCheck(vartype->findtype(CF->second), cmdUpdate);
+         if (!NUMBER_TYPE( CF->second ))
+         {
+            // for non-number types there is no internal conversion,
+            // so check strictly the type
+            if ( (**CA)() != CF->second) return; // no match
+         }
+         else // for number types - allow compatibility (int to real only)
+            if (!NUMBER_TYPE( (**CA)() )) return; // no match
+            else if (CF->second < (**CA)() ) return; // no match
       }
-      if (!NUMBER_TYPE( CF->second ))
-      {
-         // for non-number types there is no internal conversion,
-         // so check strictly the type
-         if ( (**CA)() != CF->second) return; // no match
-      }
-      else // for number types - allow compatibility (int to real only)
-         if (!NUMBER_TYPE( (**CA)() )) return; // no match
-         else if (CF->second < (**CA)() ) return; // no match
+      // all fields match => we can assign a known ID to the argumentID
+      _ID = vartype->ID();
+      if (cmdUpdate)
+         static_cast<parsercmd::cmdSTRUCT*>(_command)->setargID(this);
    }
-   // all fields match => we can assign a known ID to the argumentID
-   _ID = vartype->ID();
-   if (cmdUpdate)
-      static_cast<parsercmd::cmdSTRUCT*>(_command)->setargID(this);
+   else
+   {
+      if (telldata::tn_anyfref != _ID) return; // the rval is not a function reference
+      assert(NULL != _command);
+      const telldata::TCallBackType* vartype = static_cast<const telldata::TCallBackType*>(vtype);
+      parsercmd::cmdFUNCREF* frefCmd = static_cast<parsercmd::cmdFUNCREF*>(_command);
+
+      const TypeIdList& fParamList = vartype->paramList();
+      for (TypeIdList::const_iterator CP = fParamList.begin(); CP != fParamList.end(); CP++)
+         _child.push_back(DEBUG_NEW argumentID(*CP));
+
+      std::string fname = frefCmd->funcName();
+      parsercmd::cmdSTDFUNC *fc = CMDBlock->getFuncBody(fname.c_str(),&_child);
+      if (NULL == fc) return; // can't find function with this name and argument list
+      _ID = vtype->ID();
+      if (cmdUpdate)
+         frefCmd->setFuncBody( fc, _ID);
+   }
 }
 
 void telldata::argumentID::userStructListCheck(const telldata::TType* vartype, bool cmdUpdate)

@@ -62,8 +62,10 @@ bool lindexed = false;
 /*Current commands - parsed, but not yet in the command stack*/
 std::stack<parsercmd::cmdFOREACH*> foreach_stack;
 parsercmd::cmdLISTADD *listadd_command = NULL;
-/*Current tell struct */
+/*Current tell struct definition*/
 telldata::TCompType *tellstruct = NULL;
+/*Current tell callback definition*/
+telldata::TCallBackType *tellcallback = NULL;
 /* used for argument type checking during function call parse */
 telldata::argumentQ   *argmap  = NULL;
 /*taking care when a function is called from the argument list of another call*/
@@ -241,6 +243,7 @@ Ooops! Second thought!
    parsercmd::cmdBLOCK*        pblock;
    parsercmd::cmdFUNC*         pfblock;
    parsercmd::FuncDeclaration* pfdeclaration;
+/*    telldata::TCallBackType*   pfcallbackdef;*/
 }
 
 %start input
@@ -265,12 +268,13 @@ Ooops! Second thought!
 %type <pttname>        variabledeclaration andexpression eqexpression relexpression
 %type <pttname>        listindex listinsert listremove listslice
 %type <pfarguments>    funcarguments
-%type <parguments>     structure argument
+%type <parguments>     structure argument funcreference
 %type <plarguments>    nearguments arguments
 %type <pfblock>        funcblock emptyfblock fblock
 %type <pblock>         ifcommon
 %type <ptypedef>       fielddeclaration typedefstruct
 %type <pfdeclaration>  funcdeclaration
+/*%type <pfcallbackdef>  callbacktypedef*/
 /*=============================================================================*/
 %%
 input:
@@ -510,6 +514,7 @@ statement:
    | listremove          ';'               {CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSTACKRST());}
    | listslice           ';'               {CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSTACKRST());}
    | recorddefinition    ';'               { }
+   | callbacktypedef     ';'               { }
 ;
 
 funccall:
@@ -559,6 +564,7 @@ argument :
      expression                            {$$ = DEBUG_NEW telldata::argumentID($1);}
    | assignment                            {$$ = DEBUG_NEW telldata::argumentID($1);}
    | structure                             {$$ = $1;}
+   | funcreference                         {$$ = $1;}
 ;
 
 nearguments :
@@ -689,11 +695,47 @@ telltype:
    | tknAUXDATAdef                         {$$ = telldata::tn_auxilary;}
    | tknTYPEdef                            {
         const telldata::TType* ttype = CMDBlock->getTypeByName($1);
-        assert (NULL != ttype);
+        // the lexer shall generate tknTYPEdef if and only of the identifier is
+        // a known type name. The assert is to double check this.
+        assert (NULL != ttype); 
         $$ = ttype->ID();
         delete [] $1;
       }
 ;
+
+callbacktypedef:
+     tknCALLBACKdef telltypeID tknIDENTIFIER '(' {
+        tellcallback = CMDBlock->secureCallBackType($3);
+        if (NULL == tellcallback) {
+           tellerror("type with this name already defined", @2);
+           delete [] $3;
+           cleanonabort();
+           YYABORT;
+        }
+        tellcallback->setFType($2);
+        delete [] $3;
+     }
+     anoarguments ')'                      {
+        CMDBlock->addlocaltype($3,tellcallback);
+        tellcallback = NULL;
+     }
+;
+
+anoarguments:
+                                           {}
+   | anoneargument                         {}
+;
+
+anoneargument:
+     anoargument                           {}
+   | anoneargument ',' anoargument         {}
+;
+
+anoargument:
+     telltypeID                            {
+        tellcallback->pushArg($1);
+   }
+
 
 recorddefinition:
      tknSTRUCTdef tknIDENTIFIER            {
@@ -904,6 +946,14 @@ structure:
    }
 ;
 
+funcreference:
+     '@' tknIDENTIFIER                    {
+        parsercmd::cmdFUNCREF* funcref = DEBUG_NEW parsercmd::cmdFUNCREF($2);
+        CMDBlock->pushcmd(funcref);
+        $$ = DEBUG_NEW telldata::argumentID(funcref);
+        delete [] $2;
+   }
+;
 anonymousvar:
      '(' telltypeID ')'  structure        {
       telldata::argumentID* op2 = $4;

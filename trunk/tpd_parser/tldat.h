@@ -38,7 +38,7 @@
 #define TLISTOF(op) (op | telldata::tn_listmask)
 #define TLISALIST(op) (op & telldata::tn_listmask)
 #define TLCOMPOSIT_TYPE(op) (op > telldata::tn_composite)
-#define TLUNKNOWN_TYPE(op) (op == telldata::tn_composite)
+#define TLUNKNOWN_TYPE(op) ((op == telldata::tn_composite) || (op == telldata::tn_anyfref))
 
 namespace laydata {
    class TdtData;
@@ -52,14 +52,15 @@ namespace auxdata {
 //=============================================================================
 namespace telldata {
    typedef unsigned int typeID;
-   const typeID tn_NULL       = 0 ;
-   const typeID tn_void       = 1 ;
-   const typeID tn_int        = 2 ;
-   const typeID tn_real       = 3 ;
-   const typeID tn_bool       = 4 ;
-   const typeID tn_string     = 5 ;
-   const typeID tn_layout     = 6 ;
-   const typeID tn_auxilary   = 7 ;
+   const typeID tn_NULL       =  0;
+   const typeID tn_void       =  1;
+   const typeID tn_int        =  2;
+   const typeID tn_real       =  3;
+   const typeID tn_bool       =  4;
+   const typeID tn_string     =  5;
+   const typeID tn_layout     =  6;
+   const typeID tn_auxilary   =  7;
+   const typeID tn_anyfref    =  9;
    const typeID tn_composite  = 10;
    const typeID tn_pnt        = 11;
    const typeID tn_box        = 12;
@@ -85,6 +86,7 @@ namespace telldata {
    typedef std::deque<argumentID*>           argumentQ;
    typedef std::stack<telldata::tell_var*>   operandSTACK;
    typedef std::deque<telldata::tell_var*>   UNDOPerandQUEUE;
+   typedef std::list<typeID>                 TypeIdList;
 
 
    //==============================================================================
@@ -121,10 +123,11 @@ namespace telldata {
    class TCallBackType : public TType {
    public:
                            TCallBackType(typeID ID) : TType(ID) {assert(TLCOMPOSIT_TYPE(ID));}
-      void                 addParam(typeID);
+      void                 pushArg(typeID);
+      void                 setFType(typeID ft)    {_fType = ft; }
+      const TypeIdList&    paramList() const      {return _paramList;}
       virtual bool         isComposite() const    {return false;}
    private:
-      typedef std::list<typeID> TypeIdList;
       typeID               _fType; //! Function return type
       TypeIdList           _paramList;
    };
@@ -357,6 +360,22 @@ namespace telldata {
    };
 
    //==============================================================================
+   class call_back : public tell_var {
+   public:
+                           call_back(const typeID ID) : tell_var(ID), _funcBody(NULL) {}
+                           call_back(const typeID ID, void*);
+                           call_back(const call_back&);
+      virtual             ~call_back() {}
+      virtual void         initialize()      {_funcBody = NULL;}
+      virtual tell_var*    selfcopy() const  {return DEBUG_NEW call_back(*this);}
+      virtual void         echo(std::string&, real);
+      virtual void         assign(tell_var*);
+      void*                funcBody()        {return _funcBody;}
+   protected:
+      void*                _funcBody; /*cmdSTDFUNC* */
+   };
+
+   //==============================================================================
    // Don't destruct _x and _y here. They are just pointing to the structures in
    // the parent _fieldList and obviously should be destroyed there
    class ttpnt : public user_struct {
@@ -476,6 +495,8 @@ namespace telldata {
                                                          _ID(telldata::tn_composite),
                                                     _child(*child), _command(cmd) {};
                            argumentID(const argumentID&);
+                           argumentID(void* cmd) : _ID(telldata::tn_anyfref),
+                                                   _command(cmd) {};
                            ~argumentID();//               {_child.clear();}
       void                 toList(bool, typeID alistID = tn_NULL);
       void                 adjustID(const argumentID&);
@@ -488,6 +509,8 @@ namespace telldata {
       argumentQ            _child;
       void*                _command;
    };
+
+
 
    void argQClear(argumentQ*);
    std::string echoType( const telldata::typeID, const telldata::typeMAP*);
