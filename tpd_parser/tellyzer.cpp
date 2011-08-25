@@ -1314,6 +1314,17 @@ const telldata::TType* parsercmd::cmdBLOCK::getTypeByID(const telldata::typeID I
    return NULL;
 }
 
+/*!
+ * Creates a new TELL variable in the heap. Called from the parser predominantly
+ * for all kinds of variable operations including function parameters
+ * @param ID - the typeID of the new variable
+ * @param varName - variable name. This is not used normally. It is required
+ * only for variables of type call_back, because here in this function an object
+ * of a cmdCALLBACK class is instantiated.
+ * @param loc the location of the variable identifier in the source TELL file -
+ * for error reporting purposes
+ * @return the new TELL variable. It also can return NULL in case of error
+ */
 telldata::tell_var* parsercmd::cmdBLOCK::newTellvar(telldata::typeID ID, const char* varName, TpdYYLtype loc)
 {
    if (ID & telldata::tn_listmask)
@@ -1343,29 +1354,12 @@ telldata::tell_var* parsercmd::cmdBLOCK::newTellvar(telldata::typeID ID, const c
             return (DEBUG_NEW telldata::user_struct(static_cast<const telldata::TCompType*>(utype)));
          else
          {
-            //            // Create a new function declaration
-            //            FuncDeclaration* declaration = DEBUG_NEW FuncDeclaration(varName, vartype->fType());
-            //            // ... and transfer the function arguments from the type definition
-            //            const telldata::TypeIdList& fParamList = vartype->paramList();
-            //            for (telldata::TypeIdList::const_iterator CP = fParamList.begin(); CP != fParamList.end(); CP++)
-            //            {
-            //               telldata::tell_var* lvar = newTellvar(*CP, "", loc);
-            //               declaration->pushArg(DEBUG_NEW parsercmd::argumentTYPE(std::string(""),lvar));
-            //            }
-            //            // now register the above and get back the newly created callback footprint
-            //            parsercmd::cmdFUNC* cbfp = addUSERFUNCDECL(declaration, loc);
-            //            // finally - create a callback variable using the callback declaration created above
-            //            // !and! keep a note - it is effectively a function declaration!
             const telldata::TCallBackType* vartype = static_cast<const telldata::TCallBackType*>(utype);
             parsercmd::cmdCALLBACK* cbfp = DEBUG_NEW cmdCALLBACK(vartype->paramList(),vartype->fType(), loc);
             if (addCALLBACKDECL(varName, cbfp, loc))
                return (DEBUG_NEW telldata::call_back(ID, cbfp));
             else
-            {
                delete cbfp;
-               return NULL;
-            }
-
          }
       }
    }
@@ -1395,11 +1389,11 @@ parsercmd::cmdFUNC* parsercmd::cmdBLOCK::addUSERFUNCDECL(FuncDeclaration*, TpdYY
    return NULL;
 }
 
-bool  parsercmd::cmdBLOCK::addCALLBACKDECL(std::string, cmdCALLBACK*, TpdYYLtype)
+bool parsercmd::cmdBLOCK::addCALLBACKDECL(std::string, cmdCALLBACK*, TpdYYLtype)
 {
    TELL_DEBUG(addFUNCDECL);
    tellerror("Callback definitions (as well as function declarations) can be only global");
-   return NULL;
+   return false;
 }
 
 int parsercmd::cmdBLOCK::execute() {
@@ -1840,30 +1834,15 @@ void parsercmd::cmdFUNC::restoreOperandStack(parsercmd::cmdFUNC::BackupList* los
    delete los;
 }
 //=============================================================================
-
 parsercmd::cmdCALLBACK::cmdCALLBACK(const telldata::TypeIdList&  paramlist, telldata::typeID retype, TpdYYLtype loc) :
    cmdFUNC( DEBUG_NEW parsercmd::argumentLIST, retype, true  )
 {
-
    for (telldata::TypeIdList::const_iterator CP = paramlist.begin(); CP != paramlist.end(); CP++)
    {
       telldata::tell_var* lvar = newTellvar(*CP, "", loc);
       arguments->push_back(DEBUG_NEW parsercmd::argumentTYPE(std::string(""),lvar));
    }
 }
-
-//void parsercmd::cmdCALLBACK::nameArgs(const argumentLIST* a2copy)
-//{
-//   assert(arguments->size() == a2copy->size());
-//   parsercmd::argumentLIST::iterator CA;
-//   parsercmd::argumentLIST::const_iterator CB;
-//   for (CA = arguments->begin(), CB = a2copy->begin(); CA != arguments->end(); CA++, CB++)
-//   {
-//      assert((*CA)->second->get_type() == (*CB)->second->get_type());
-//      (*CA)->first = (*CB)->first;
-//      VARlocal[(*CB)->first] = (*CA)->second->selfcopy();
-//   }
-//}
 
 int parsercmd::cmdCALLBACK::execute()
 {
