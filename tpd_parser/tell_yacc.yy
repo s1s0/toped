@@ -584,16 +584,10 @@ funcneargument:
 
 funcargument:
      telltypeID tknIDENTIFIER              {
-      tellvar = CMDBlock->newTellvar($1, @1);
+      tellvar = CMDBlock->newTellvar($1, $2, @1);
       cfd->pushArg(DEBUG_NEW parsercmd::argumentTYPE($2,tellvar));
       delete [] $2;
    }
-/*
-   | tknCALLBACKdef tknIDENTIFIER          {
-    //TODO - new callback parameter
-    //TODO - push it to the list of arguments
-   }
-   */
 ;
 
 lvalue:
@@ -622,7 +616,7 @@ variabledeclaration:
       telldata::tell_var* v = CMDBlock->getID($2, true);
       if (!v) {/* if this variableID doesn't exist already in the local scope*/
          /* add it to the local variable map */
-         tellvar = CMDBlock->newTellvar($1, @1);
+         tellvar = CMDBlock->newTellvar($1, $2, @1);
          CMDBlock->addID($2,tellvar);
       }
       else
@@ -635,7 +629,7 @@ variabledeclaration:
          /* add it to the local variable map */
          if (parsercmd::ListIndexCheck($1, @1, $4, @4))
          {
-            tellvar = CMDBlock->newTellvar($1, @1);
+            tellvar = CMDBlock->newTellvar($1, $2, @1);
             CMDBlock->addID($2,tellvar);
             CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdLISTSIZE(tellvar));
          }
@@ -648,7 +642,7 @@ variabledeclaration:
       telldata::tell_var* v = CMDBlock->getID($3, true);
       if (!v) {/* if this variableID doesn't exist already in the local scope*/
          /* add it to the local variable map */
-         tellvar = CMDBlock->newTellvar($2, @2);
+         tellvar = CMDBlock->newTellvar($2, $3, @2);
          CMDBlock->addconstID($3,tellvar,false);
       }
       else
@@ -659,7 +653,7 @@ variabledeclaration:
       telldata::tell_var* v = CMDBlock->getID($3, true);
       if (!v) {/* if this variableID doesn't exist already in the local scope*/
          /* add it to the local variable map */
-         tellvar = CMDBlock->newTellvar($1, @1);
+         tellvar = CMDBlock->newTellvar($1, $3, @1);
          CMDBlock->addID($3,tellvar);
       }
       else tellerror("variable already defined in this scope", @3);
@@ -959,7 +953,7 @@ anonymousvar:
       telldata::argumentID* op2 = $4;
       // the structure is without a type at this moment, so here we do the type checking
       if (parsercmd::StructTypeCheck($2, op2, @4)) {
-         tellvar = CMDBlock->newTellvar($2, @1);
+         tellvar = CMDBlock->newTellvar($2, "", @1);
          parsercmd::Assign(tellvar, false, $4, @4);
          delete $4;
          $$ = $2;

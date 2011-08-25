@@ -52,6 +52,7 @@ namespace  parsercmd {
    class cmdFUNC;
    class cmdBLOCK;
    class FuncDeclaration;
+   class cmdCALLBACK;
 
    //! Used by lexer to include multiply files and for error tracing
    class lexer_files {
@@ -415,13 +416,16 @@ namespace  parsercmd {
 
    class cmdFUNCREF: public cmdVIRTUAL {
    public:
-               cmdFUNCREF(std::string fn) : _funcBody(NULL), _funcName(fn), _ID(telldata::tn_anyfref) {}
+               cmdFUNCREF(std::string fn) : _funcBody(NULL), _preCheckfBody(NULL), _funcName(fn), _ID(telldata::tn_anyfref) {}
       void     setFuncBody(cmdSTDFUNC* funcBody, telldata::typeID ID) {_funcBody = funcBody; _ID = ID;}
+      void     setFuncBody(telldata::typeID ID) {assert(_preCheckfBody); _funcBody = _preCheckfBody; _ID = ID;}
+      void     setPreCheckfBody(cmdSTDFUNC* funcBody) {_preCheckfBody = funcBody;}
       std::string funcName() const              {return _funcName;}
       virtual ~cmdFUNCREF()                     {}
       int      execute();
    private:
       cmdSTDFUNC*       _funcBody;
+      cmdSTDFUNC*       _preCheckfBody;
       std::string       _funcName;
       telldata::typeID  _ID;
    };
@@ -529,7 +533,8 @@ namespace  parsercmd {
       cmdBLOCK*                  cleaner();
       virtual void               addFUNC(std::string, cmdSTDFUNC*);
       virtual void               addUSERFUNC(FuncDeclaration*, cmdFUNC*, TpdYYLtype);
-      virtual void               addUSERFUNCDECL(FuncDeclaration*, TpdYYLtype);
+      virtual cmdFUNC*           addUSERFUNCDECL(FuncDeclaration*, TpdYYLtype);
+      virtual bool               addCALLBACKDECL(std::string, cmdCALLBACK*, TpdYYLtype);
       void                       addID(const char*, telldata::tell_var*);
       void                       addconstID(const char*, telldata::tell_var*, bool initialized);
       void                       addlocaltype(const char*, telldata::TType*);
@@ -538,7 +543,7 @@ namespace  parsercmd {
       const telldata::TType*     getTypeByName(char*&) const;
       const telldata::TType*     getTypeByID(const telldata::typeID ID) const;
       telldata::tell_var*        getID(const char*, bool local=false) const;
-      telldata::tell_var*        newTellvar(telldata::typeID, TpdYYLtype);
+      telldata::tell_var*        newTellvar(telldata::typeID, const char*, TpdYYLtype);
       bool                       defValidate(const std::string& ,const argumentLIST*, cmdFUNC*&);
       bool                       declValidate(const std::string&, const argumentLIST*, TpdYYLtype);
       cmdSTDFUNC*  const         getFuncBody(const char*, telldata::argumentQ*) const;
@@ -574,7 +579,8 @@ namespace  parsercmd {
       void           addFUNC(std::string, cmdSTDFUNC*);
       void           addIntFUNC(std::string, cmdSTDFUNC*);
       void           addUSERFUNC(FuncDeclaration*, cmdFUNC*, TpdYYLtype);
-      void           addUSERFUNCDECL(FuncDeclaration*, TpdYYLtype);
+      cmdFUNC*       addUSERFUNCDECL(FuncDeclaration*, TpdYYLtype);
+      bool           addCALLBACKDECL(std::string, cmdCALLBACK*, TpdYYLtype);
       void           addGlobalType(std::string, telldata::TType*);
       void           recoveryDone();
       virtual       ~cmdMAIN();
@@ -598,12 +604,12 @@ namespace  parsercmd {
       void                       set_ignoreOnRecovery(bool ior) {_ignoreOnRecovery = ior;}
       static void                setThreadExecution(bool te) {_threadExecution = te;}
       DbSortState                dbSortStatus() {return _dbSortStatus;}
+      const argumentLIST*        getArguments() {return arguments;}
       virtual                   ~cmdSTDFUNC();
       friend void cmdMAIN::recoveryDone();
    protected:
       argumentLIST*              arguments;
       telldata::typeID           returntype;
-      bool                       _buildin;
       bool                       _execOnRecovery;
       static bool                _ignoreOnRecovery;
       static bool                _threadExecution;
@@ -613,13 +619,13 @@ namespace  parsercmd {
    class cmdFUNC:public cmdSTDFUNC, public cmdBLOCK {
    public:
                               cmdFUNC(argumentLIST*, telldata::typeID, bool);
-      int                     execute();
-      bool                    internal() {return false;}
-      bool                    declaration() {return _declaration;}
-      void                    undo() {};
-      void                    undo_cleanup() {};
+      virtual int             execute();
+      virtual bool            internal() {return false;}
+      virtual bool            declaration() {return _declaration;}
+      virtual void            undo() {};
+      virtual void            undo_cleanup() {};
       void                    set_defined() {_declaration = false;}
-   private:
+   protected:
       typedef std::stack<telldata::variableMAP*> LocalVarStack;
       typedef std::list<telldata::tell_var*> BackupList;
       bool                    _declaration;
@@ -627,6 +633,16 @@ namespace  parsercmd {
       void                    restoreOperandStack(BackupList*);
       word                    _recursyLevel;
       LocalVarStack           _VARLocalStack;
+   };
+
+   class cmdCALLBACK : public cmdFUNC {
+   public:
+                              cmdCALLBACK(const telldata::TypeIdList&, telldata::typeID, TpdYYLtype loc);
+//      void                    nameArgs(const argumentLIST* a2copy);
+      void                    setFBody(parsercmd::cmdSTDFUNC* fbody) {_fbody = fbody; set_defined();}
+      virtual int             execute();
+   private:
+      parsercmd::cmdSTDFUNC*  _fbody;
    };
 
    class cmdIFELSE: public cmdVIRTUAL {

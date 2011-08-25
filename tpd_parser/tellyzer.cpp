@@ -1170,8 +1170,7 @@ int parsercmd::cmdFUNCREF::execute()
       tellerror("Callback statement not evaluated properly. Internal parser error");
       return EXEC_RETURN;
    }
-
-   telldata::tell_var *ustrct = DEBUG_NEW telldata::call_back( _ID, _funcBody);
+   telldata::tell_var *ustrct = DEBUG_NEW telldata::call_back( _ID, _funcBody, true);
    OPstack.push(ustrct);
    return EXEC_NEXT;
 }
@@ -1315,7 +1314,7 @@ const telldata::TType* parsercmd::cmdBLOCK::getTypeByID(const telldata::typeID I
    return NULL;
 }
 
-telldata::tell_var* parsercmd::cmdBLOCK::newTellvar(telldata::typeID ID, TpdYYLtype loc)
+telldata::tell_var* parsercmd::cmdBLOCK::newTellvar(telldata::typeID ID, const char* varName, TpdYYLtype loc)
 {
    if (ID & telldata::tn_listmask)
    {
@@ -1343,7 +1342,31 @@ telldata::tell_var* parsercmd::cmdBLOCK::newTellvar(telldata::typeID ID, TpdYYLt
          else if (utype->isComposite())
             return (DEBUG_NEW telldata::user_struct(static_cast<const telldata::TCompType*>(utype)));
          else
-            return (DEBUG_NEW telldata::call_back(ID));
+         {
+            //            // Create a new function declaration
+            //            FuncDeclaration* declaration = DEBUG_NEW FuncDeclaration(varName, vartype->fType());
+            //            // ... and transfer the function arguments from the type definition
+            //            const telldata::TypeIdList& fParamList = vartype->paramList();
+            //            for (telldata::TypeIdList::const_iterator CP = fParamList.begin(); CP != fParamList.end(); CP++)
+            //            {
+            //               telldata::tell_var* lvar = newTellvar(*CP, "", loc);
+            //               declaration->pushArg(DEBUG_NEW parsercmd::argumentTYPE(std::string(""),lvar));
+            //            }
+            //            // now register the above and get back the newly created callback footprint
+            //            parsercmd::cmdFUNC* cbfp = addUSERFUNCDECL(declaration, loc);
+            //            // finally - create a callback variable using the callback declaration created above
+            //            // !and! keep a note - it is effectively a function declaration!
+            const telldata::TCallBackType* vartype = static_cast<const telldata::TCallBackType*>(utype);
+            parsercmd::cmdCALLBACK* cbfp = DEBUG_NEW cmdCALLBACK(vartype->paramList(),vartype->fType(), loc);
+            if (addCALLBACKDECL(varName, cbfp, loc))
+               return (DEBUG_NEW telldata::call_back(ID, cbfp));
+            else
+            {
+               delete cbfp;
+               return NULL;
+            }
+
+         }
       }
    }
    return NULL;
@@ -1366,9 +1389,17 @@ void parsercmd::cmdBLOCK::addUSERFUNC(FuncDeclaration*, cmdFUNC*, TpdYYLtype) {
    tellerror("Nested function definitions are not allowed");
 }
 
-void parsercmd::cmdBLOCK::addUSERFUNCDECL(FuncDeclaration*, TpdYYLtype) {
+parsercmd::cmdFUNC* parsercmd::cmdBLOCK::addUSERFUNCDECL(FuncDeclaration*, TpdYYLtype) {
    TELL_DEBUG(addFUNCDECL);
    tellerror("Function definitions can be only global");
+   return NULL;
+}
+
+bool  parsercmd::cmdBLOCK::addCALLBACKDECL(std::string, cmdCALLBACK*, TpdYYLtype)
+{
+   TELL_DEBUG(addFUNCDECL);
+   tellerror("Callback definitions (as well as function declarations) can be only global");
+   return NULL;
 }
 
 int parsercmd::cmdBLOCK::execute() {
@@ -1478,25 +1509,28 @@ parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
       if (0 == fbody->argsOK(arguMap)) break;
       else fbody = NULL;
    }
-   if (NULL == fbody)
-   { // not found normally, but there is still a hope - it could be a callback!
-      telldata::tell_var* callbackvar = getID(fn);
-      if (callbackvar)
-      {
-         telldata::typeID vID = callbackvar->get_type();
-         if (TLCOMPOSIT_TYPE(vID))
-         {
-            const telldata::TType* vType = getTypeByID(callbackvar->get_type());
-            if (!vType->isComposite())
-            {
-               telldata::call_back* cbckvar = static_cast<telldata::call_back*>(callbackvar);
-               fbody = static_cast<cmdSTDFUNC*>(cbckvar->funcBody());
-               if (0 != fbody->argsOK(arguMap))
-                  fbody = NULL;
-            }
-         }
-      }
-   }
+//   if (NULL == fbody)
+//   { // not found normally, but there is still a hope - it could be a callback!
+//      telldata::tell_var* callbackvar = getID(fn);
+//      if (callbackvar)
+//      {
+//         telldata::typeID vID = callbackvar->get_type();
+//         if (TLCOMPOSIT_TYPE(vID))
+//         {
+//            const telldata::TType* vType = getTypeByID(callbackvar->get_type());
+//            if (!vType->isComposite())
+//            {
+//               telldata::call_back* cbckvar = static_cast<telldata::call_back*>(callbackvar);
+//               fbody = static_cast<cmdSTDFUNC*>(cbckvar->funcBody());
+//               if (fbody)
+//               {
+//                  if (0 != fbody->argsOK(arguMap))
+//                     fbody = NULL;
+//               }
+//            }
+//         }
+//      }
+//   }
    if (NULL == amap) delete arguMap;
    return fbody;
 }
@@ -1615,7 +1649,7 @@ int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap)
 // Here is the idea
 // 1. If an unknown type appears in the argument list
 //  a) Create a copy of the argument using argumentID copy constructor
-//  b) Check that the DEBUG_NEW argument matches the type of the function parameter and
+//  b) Check that the new argument matches the type of the function parameter and
 //     if so:
 //     - assign (adjust) the type of the argument to the type of the parameter
 //     - push the argument in the temporary structure
@@ -1805,7 +1839,45 @@ void parsercmd::cmdFUNC::restoreOperandStack(parsercmd::cmdFUNC::BackupList* los
    los->clear();
    delete los;
 }
+//=============================================================================
 
+parsercmd::cmdCALLBACK::cmdCALLBACK(const telldata::TypeIdList&  paramlist, telldata::typeID retype, TpdYYLtype loc) :
+   cmdFUNC( DEBUG_NEW parsercmd::argumentLIST, retype, true  )
+{
+
+   for (telldata::TypeIdList::const_iterator CP = paramlist.begin(); CP != paramlist.end(); CP++)
+   {
+      telldata::tell_var* lvar = newTellvar(*CP, "", loc);
+      arguments->push_back(DEBUG_NEW parsercmd::argumentTYPE(std::string(""),lvar));
+   }
+}
+
+//void parsercmd::cmdCALLBACK::nameArgs(const argumentLIST* a2copy)
+//{
+//   assert(arguments->size() == a2copy->size());
+//   parsercmd::argumentLIST::iterator CA;
+//   parsercmd::argumentLIST::const_iterator CB;
+//   for (CA = arguments->begin(), CB = a2copy->begin(); CA != arguments->end(); CA++, CB++)
+//   {
+//      assert((*CA)->second->get_type() == (*CB)->second->get_type());
+//      (*CA)->first = (*CB)->first;
+//      VARlocal[(*CB)->first] = (*CA)->second->selfcopy();
+//   }
+//}
+
+int parsercmd::cmdCALLBACK::execute()
+{
+   if (_declaration)
+   {
+      tell_log(console::MT_ERROR,"Internal parser error. Callback function body missing");
+      return EXEC_ABORT;
+   }
+   else
+   {
+      assert(NULL != _fbody);
+      return _fbody->execute();
+   }
+}
 //=============================================================================
 int parsercmd::cmdIFELSE::execute() {
    TELL_DEBUG(cmdIFELSE);
@@ -1949,13 +2021,25 @@ with such name and calling convention already exists. If it doesn't - a new cmdF
 be created and will be inserted in the _funcMAP. The contents of the new cmdFUNC will be
 empty and cmdFUNC._declarationit will be true.
 */
-void parsercmd::cmdMAIN::addUSERFUNCDECL(FuncDeclaration* decl, TpdYYLtype loc)
+parsercmd::cmdFUNC* parsercmd::cmdMAIN::addUSERFUNCDECL(FuncDeclaration* decl, TpdYYLtype loc)
 {
+   cmdFUNC* cQ = NULL;
    if (CMDBlock->declValidate(decl->name().c_str(),decl->argList(),loc))
    {
-      cmdSTDFUNC* cQ = DEBUG_NEW parsercmd::cmdFUNC(decl->argListCopy(),decl->type(), true);
+      cQ = DEBUG_NEW parsercmd::cmdFUNC(decl->argListCopy(),decl->type(), true);
       _funcMAP.insert(std::make_pair(decl->name(), cQ));
    }
+   return cQ;
+}
+
+bool parsercmd::cmdMAIN::addCALLBACKDECL(std::string name, cmdCALLBACK* decl, TpdYYLtype loc)
+{
+   if (CMDBlock->declValidate(name.c_str(),decl->getArguments(),loc))
+   {
+      _funcMAP.insert(std::make_pair(name, decl));
+      return true;
+   }
+   return false;
 }
 
 parsercmd::cmdMAIN::cmdMAIN():cmdBLOCK(telldata::tn_usertypes) {

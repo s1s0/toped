@@ -125,6 +125,7 @@ namespace telldata {
                            TCallBackType(typeID ID) : TType(ID) {assert(TLCOMPOSIT_TYPE(ID));}
       void                 pushArg(typeID);
       void                 setFType(typeID ft)    {_fType = ft; }
+      typeID               fType() const          {return _fType;}
       const TypeIdList&    paramList() const      {return _paramList;}
       virtual bool         isComposite() const    {return false;}
    private:
@@ -302,17 +303,6 @@ namespace telldata {
    };
 
    //==============================================================================
-//   class ttcallback: public tell_var {
-//   public:
-//      virtual void         initialize() {/*TODO*/}
-//      virtual void         echo(std::string&, real);
-//      virtual void         assign(tell_var*);
-//      virtual tell_var*    selfcopy() const {return DEBUG_NEW ttcallback(*this);};
-//   private:
-//      typeID               _retypeID;
-//      //TODO function arguments
-//   };
-   //==============================================================================
    class ttlist:public tell_var {
    public:
                            ttlist(typeID ltype): tell_var(ltype) {};
@@ -362,17 +352,17 @@ namespace telldata {
    //==============================================================================
    class call_back : public tell_var {
    public:
-                           call_back(const typeID ID) : tell_var(ID), _funcBody(NULL) {}
-                           call_back(const typeID ID, void*);
+                           call_back(const typeID ID, void*, bool defintition = false);
                            call_back(const call_back&);
       virtual             ~call_back() {}
-      virtual void         initialize()      {_funcBody = NULL;}
+      virtual void         initialize();
       virtual tell_var*    selfcopy() const  {return DEBUG_NEW call_back(*this);}
       virtual void         echo(std::string&, real);
       virtual void         assign(tell_var*);
-      void*                funcBody()        {return _funcBody;}
+      void*                funcBody()        {return _fcbBody;}
    protected:
-      void*                _funcBody; /*cmdSTDFUNC* */
+      void*                _fcbBody; /* cmdCALLBACK* */
+      bool                 _definition;
    };
 
    //==============================================================================
