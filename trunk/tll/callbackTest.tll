@@ -1,0 +1,93 @@
+//===========================================================================
+//                                                                          =
+// ------------------------------------------------------------------------ =
+//                      TTTTT    EEEE     L       L                         =
+//                      T T T    E        L       L                         =
+//                        T      EEE      L       L                         =
+//                        T      E        L       L                         =
+//                        T      EEEEE    LLLLL   LLLLL                     =
+//                                                                          =
+//   This file is a part of Toped project (C) 2001-2006 Toped developers    =
+// ------------------------------------------------------------------------ =
+//           $URL$
+//        Created: Thu Aug 25 02:09:23 BST 2011
+//     Originator: Svilen Krustev - skr@toped.org.uk
+//    Description: call back tests
+//---------------------------------------------------------------------------
+//  Revision info
+//---------------------------------------------------------------------------
+//      $Revision$
+//          $Date$
+//        $Author$
+//===========================================================================
+
+
+/*
+void funcArguFunc(int a, int b, callback fparam)
+{
+   int result = fparam(a,b);
+   string buffer = sprintf ("%d fparam %d is %d", a, b, result);
+   printf ("[%s] \n",buffer);
+}
+*/
+int simpleAdd(int a, int b)
+{
+  return (a + b);
+}
+
+int simpleSub(int a, int b)
+{
+  return (a - b);
+}
+
+/*
+funcArguFunc(2,3,&simpleAdd);
+funcArguFunc(2,3,&simpleSub);
+
+callback varfunction;
+varfunction = &simpleAdd;
+int c = varfunction(2,3);
+varfunction = &simpleSub;
+int d = varfunction(2,3);
+*/
+
+/* The callback type definition follows the function definition syntax
+ * with two differencies:
+ * - "callback" keyword marks the start of the definition
+ * - the argument list is anonimous i.e. just a list of argument types
+callback <return_type> <functypename> ([<argument> [, <argument> [...]]])
+*/
+
+// define a callback type unifunctype ...
+callback int unifunctype(int,int);
+// ... and a variable unifunc of that type
+unifunctype unifuncA = @simpleAdd;
+
+echo(unifuncA(2,3));
+unifuncA = @simpleSub;
+echo(unifuncA(2,3));
+/*
+// or define directly a variable unifunc of anonymous callback type
+callback int (int,int) unifuncB;
+unifuncB = @simpleSub
+*/
+//same for the function argument list - using a pre-defined callback type
+
+void funcArguFunc(int a, int b, unifunctype unifunc)
+{
+   int result = unifunc(a,b);
+   string buffer = sprintf ("%d fparam %d is %d", a, b, result);
+   printf ("[%s] \n",buffer);
+}
+
+funcArguFunc(2,3,@simpleAdd);
+funcArguFunc(2,3,@simpleSub);
+/*
+// ... or anonymous callback type
+ void funcArguFunc(int a, int b, callback int (int,int) unifunc)
+{
+   int result = unifunc(a,b);
+   string buffer = sprintf ("%d fparam %d is %d", a, b, result);
+   printf ("[%s] \n",buffer);
+}
+*/
