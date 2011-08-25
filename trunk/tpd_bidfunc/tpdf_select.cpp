@@ -37,9 +37,9 @@ extern console::toped_logfile    LogFile;
 
 //=============================================================================
 tellstdfunc::stdSELECT::stdSELECT(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttwnd()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttwnd()));
 }
 
 void tellstdfunc::stdSELECT::undo_cleanup()
@@ -95,7 +95,7 @@ int tellstdfunc::stdSELECT::execute()
 
 //=============================================================================
 tellstdfunc::stdSELECT_I::stdSELECT_I(telldata::typeID retype, bool eor) :
-      stdSELECT(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      stdSELECT(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {}
 
 int tellstdfunc::stdSELECT_I::execute() {
@@ -106,9 +106,9 @@ int tellstdfunc::stdSELECT_I::execute() {
 
 //=============================================================================
 tellstdfunc::stdSELECT_TL::stdSELECT_TL(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_layout)));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_layout)));
 }
 
 void tellstdfunc::stdSELECT_TL::undo_cleanup()
@@ -139,9 +139,9 @@ int tellstdfunc::stdSELECT_TL::execute()
 
 //=============================================================================
 tellstdfunc::stdSELECTIN::stdSELECTIN(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttpnt()));
 }
 
 void tellstdfunc::stdSELECTIN::undo_cleanup()
@@ -198,9 +198,9 @@ int tellstdfunc::stdSELECTIN::execute()
 
 //=============================================================================
 tellstdfunc::stdPNTSELECT::stdPNTSELECT(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttwnd()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttwnd()));
 }
 
 void tellstdfunc::stdPNTSELECT::undo_cleanup()
@@ -255,7 +255,7 @@ int tellstdfunc::stdPNTSELECT::execute()
 
 //=============================================================================
 tellstdfunc::stdPNTSELECT_I::stdPNTSELECT_I(telldata::typeID retype, bool eor) :
-      stdPNTSELECT(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      stdPNTSELECT(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {}
 
 int tellstdfunc::stdPNTSELECT_I::execute() {
@@ -266,9 +266,9 @@ int tellstdfunc::stdPNTSELECT_I::execute() {
 
 //=============================================================================
 tellstdfunc::stdUNSELECT::stdUNSELECT(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttwnd()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttwnd()));
 }
 
 void tellstdfunc::stdUNSELECT::undo_cleanup()
@@ -324,7 +324,7 @@ int tellstdfunc::stdUNSELECT::execute()
 
 //=============================================================================
 tellstdfunc::stdUNSELECT_I::stdUNSELECT_I(telldata::typeID retype, bool eor) :
-      stdUNSELECT(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      stdUNSELECT(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {}
 
 int tellstdfunc::stdUNSELECT_I::execute() {
@@ -335,9 +335,9 @@ int tellstdfunc::stdUNSELECT_I::execute() {
 
 //=============================================================================
 tellstdfunc::stdUNSELECT_TL::stdUNSELECT_TL(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_layout)));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_layout)));
 }
 
 void tellstdfunc::stdUNSELECT_TL::undo() {
@@ -367,9 +367,9 @@ int tellstdfunc::stdUNSELECT_TL::execute()
 
 //=============================================================================
 tellstdfunc::stdUNSELECTIN::stdUNSELECTIN(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttpnt()));
 }
 
 void tellstdfunc::stdUNSELECTIN::undo_cleanup()
@@ -424,9 +424,9 @@ int tellstdfunc::stdUNSELECTIN::execute()
 
 //=============================================================================
 tellstdfunc::stdPNTUNSELECT::stdPNTUNSELECT(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttwnd()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttwnd()));
 }
 
 void tellstdfunc::stdPNTUNSELECT::undo_cleanup()
@@ -482,7 +482,7 @@ int tellstdfunc::stdPNTUNSELECT::execute()
 
 //=============================================================================
 tellstdfunc::stdPNTUNSELECT_I::stdPNTUNSELECT_I(telldata::typeID retype, bool eor) :
-      stdPNTUNSELECT(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      stdPNTUNSELECT(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {}
 
 int tellstdfunc::stdPNTUNSELECT_I::execute() {
@@ -493,7 +493,7 @@ int tellstdfunc::stdPNTUNSELECT_I::execute() {
 
 //=============================================================================
 tellstdfunc::stdSELECTALL::stdSELECTALL(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {}
 
 void tellstdfunc::stdSELECTALL::undo_cleanup()
@@ -539,7 +539,7 @@ int tellstdfunc::stdSELECTALL::execute()
 
 //=============================================================================
 tellstdfunc::stdUNSELECTALL::stdUNSELECTALL(telldata::typeID retype, bool eor) :
-                               cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+                               cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {}
 
 void tellstdfunc::stdUNSELECTALL::undo_cleanup()
@@ -582,7 +582,7 @@ int tellstdfunc::stdUNSELECTALL::execute()
 
 //=============================================================================
 tellstdfunc::stdREPORTSLCTD::stdREPORTSLCTD(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {}
 
 int tellstdfunc::stdREPORTSLCTD::execute()
@@ -603,9 +603,9 @@ int tellstdfunc::stdREPORTSLCTD::execute()
 
 //=============================================================================
 tellstdfunc::stdSETSELECTMASK::stdSETSELECTMASK(telldata::typeID retype, bool eor) :
-                               cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+                               cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
 }
 
 void tellstdfunc::stdSETSELECTMASK::undo_cleanup()

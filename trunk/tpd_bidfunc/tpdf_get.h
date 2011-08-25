@@ -32,8 +32,8 @@
 namespace tellstdfunc {
    using parsercmd::cmdSTDFUNC;
    using telldata::argumentQ;
-   using parsercmd::argumentLIST;
-   using parsercmd::argumentTYPE;
+   using parsercmd::ArgumentLIST;
+   using parsercmd::ArgumentTYPE;
 
    TELL_STDCMD_CLASSA(stdGETLAYTYPE     );
    TELL_STDCMD_CLASSA(stdGETLAYTEXTSTR  );

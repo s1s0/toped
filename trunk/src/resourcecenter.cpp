@@ -996,11 +996,11 @@ bool tui::checkToolSize(IconSizes size)
 
 //=============================================================================
 tellstdfunc::stdADDMENU::stdADDMENU(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 int tellstdfunc::stdADDMENU::execute()
@@ -1019,10 +1019,10 @@ int tellstdfunc::stdADDMENU::execute()
 
 //=============================================================================
 tellstdfunc::stdTOOLBARSIZE::stdTOOLBARSIZE(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
 }
 
 int tellstdfunc::stdTOOLBARSIZE::execute()
@@ -1048,9 +1048,9 @@ int tellstdfunc::stdTOOLBARSIZE::execute()
 
 //=============================================================================
 tellstdfunc::stdDEFINETOOLBAR::stdDEFINETOOLBAR(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 int tellstdfunc::stdDEFINETOOLBAR::execute()
@@ -1066,10 +1066,10 @@ int tellstdfunc::stdDEFINETOOLBAR::execute()
 
 //=============================================================================
 tellstdfunc::stdTOOLBARADDITEM::stdTOOLBARADDITEM(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hshstr)));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hshstr)));
 }
 
 int tellstdfunc::stdTOOLBARADDITEM::execute()
@@ -1100,10 +1100,10 @@ int tellstdfunc::stdTOOLBARADDITEM::execute()
 
 //=============================================================================
 tellstdfunc::stdTOOLBARADDITEM_S::stdTOOLBARADDITEM_S(telldata::typeID retype, bool eor) :
-      stdTOOLBARADDITEM(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      stdTOOLBARADDITEM(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::tthshstr()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::tthshstr()));
 }
 
 int tellstdfunc::stdTOOLBARADDITEM_S::execute()
@@ -1118,10 +1118,10 @@ int tellstdfunc::stdTOOLBARADDITEM_S::execute()
 
 //=============================================================================
 tellstdfunc::stdTOOLBARDELETEITEM::stdTOOLBARDELETEITEM(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 int tellstdfunc::stdTOOLBARDELETEITEM::execute()

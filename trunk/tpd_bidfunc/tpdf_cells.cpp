@@ -41,9 +41,9 @@ extern wxWindow*                 TopedCanvasW;
 
 //=============================================================================
 tellstdfunc::stdNEWCELL::stdNEWCELL(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 void tellstdfunc::stdNEWCELL::undo_cleanup()
@@ -115,9 +115,9 @@ int tellstdfunc::stdNEWCELL::execute()
 
 //=============================================================================
 tellstdfunc::stdREMOVECELL::stdREMOVECELL(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 void tellstdfunc::stdREMOVECELL::undo_cleanup()
@@ -208,9 +208,9 @@ int tellstdfunc::stdREMOVECELL::execute()
 
 //=============================================================================
 //tellstdfunc::stdREMOVEREFDCELL::stdREMOVEREFDCELL(telldata::typeID retype, bool eor) :
-//      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+//      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 //{
-//   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+//   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
 //}
 //
 //void tellstdfunc::stdREMOVEREFDCELL::undo_cleanup()
@@ -265,9 +265,9 @@ int tellstdfunc::stdREMOVECELL::execute()
 
 //=============================================================================
 tellstdfunc::stdOPENCELL::stdOPENCELL(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 void tellstdfunc::stdOPENCELL::undo_cleanup()
@@ -358,9 +358,9 @@ int tellstdfunc::stdOPENCELL::execute()
 
 //=============================================================================
 tellstdfunc::stdEDITPUSH::stdEDITPUSH(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttpnt()));
 }
 
 void tellstdfunc::stdEDITPUSH::undo_cleanup()
@@ -424,7 +424,7 @@ int tellstdfunc::stdEDITPUSH::execute()
 
 //=============================================================================
 tellstdfunc::stdEDITPOP::stdEDITPOP(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {}
 
 void tellstdfunc::stdEDITPOP::undo_cleanup()
@@ -483,7 +483,7 @@ int tellstdfunc::stdEDITPOP::execute()
 
 //=============================================================================
 tellstdfunc::stdEDITPREV::stdEDITPREV(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {}
 
 void tellstdfunc::stdEDITPREV::undo_cleanup()
@@ -542,7 +542,7 @@ int tellstdfunc::stdEDITPREV::execute()
 
 //=============================================================================
 tellstdfunc::stdEDITTOP::stdEDITTOP(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype, eor)
 {}
 
 void tellstdfunc::stdEDITTOP::undo_cleanup()
@@ -601,9 +601,9 @@ int tellstdfunc::stdEDITTOP::execute()
 
 //=============================================================================
 tellstdfunc::stdGROUP::stdGROUP(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 void tellstdfunc::stdGROUP::undo_cleanup()
@@ -673,7 +673,7 @@ int tellstdfunc::stdGROUP::execute()
 
 //=============================================================================
 tellstdfunc::stdUNGROUP::stdUNGROUP(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {}
 
 void tellstdfunc::stdUNGROUP::undo_cleanup()
@@ -763,10 +763,10 @@ int tellstdfunc::stdUNGROUP::execute()
 
 //=============================================================================
 tellstdfunc::stdRENAMECELL::stdRENAMECELL(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 void tellstdfunc::stdRENAMECELL::undo_cleanup()

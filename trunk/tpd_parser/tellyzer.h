@@ -66,7 +66,7 @@ namespace  parsercmd {
 
    /*! Implements a simple preprocessor and more specifically the state of the
     * preprocessor. Hold all currently defined pre-processor variables as well
-    * as the current pre-processor state in regards to #if(n)def/#else/#endif
+    * as the current pre-processor state with regards to #if(n)def/#else/#endif
     */
    class TellPreProc {
       public:
@@ -112,24 +112,24 @@ namespace  parsercmd {
 // functionMAP - a map (name - function block) structure containing all defined
 //               tell functions. There is only one defined variable of this
 //               type funcMAP - static member of cmdBLOCK class.
-// blockSTACK  - a stack structure containing current blocks nesting. Only
+// BlockSTACK  - a stack structure containing current blocks nesting. Only
 //               one variable is defined of this class - blocks - static member
 //               of cmdBLOCK.
-// cmdQUEUE    - a queue structure containing the list of tell operators
+// CmdQUEUE    - a queue structure containing the list of tell operators
 //operandSTACK - a stack structure used for storing the operans and results.
 //               A single static variable - OPstack - is defined in cmdVIRTUAL
 //               class. Used during execution
-// argumentTYPE- ???
-// argumentLIST- ???
+// ArgumentTYPE- ???
+// ArgumentLIST- ???
 // argumentMAP - ???
 //-----------------------------------------------------------------------------
-   typedef  std::multimap<std::string, cmdSTDFUNC*>      functionMAP;
-   typedef  std::deque<cmdBLOCK*>                        blockSTACK;
-   typedef  std::deque<cmdVIRTUAL*>                      cmdQUEUE;
-   typedef  std::deque<cmdSTDFUNC*>                      undoQUEUE;
-   typedef  std::deque<void*>                            undoUQUEUE;
-   typedef  std::pair<std::string,telldata::tell_var*>   argumentTYPE;
-   typedef  std::deque<argumentTYPE*>                    argumentLIST;
+   typedef  std::multimap<std::string, cmdSTDFUNC*>      FunctionMAP;
+   typedef  std::deque<cmdBLOCK*>                        BlockSTACK;
+   typedef  std::deque<cmdVIRTUAL*>                      CmdQUEUE;
+   typedef  std::deque<cmdSTDFUNC*>                      UndoQUEUE;
+   typedef  std::deque<void*>                            UndoUQUEUE;
+   typedef  std::pair<std::string,telldata::tell_var*>   ArgumentTYPE;
+   typedef  std::deque<ArgumentTYPE*>                    ArgumentLIST;
    typedef enum {sdbrSORTED, sdbrUNSORTED, sdbrDONTCARE} DbSortState;
 
    /*** cmdVIRTUAL **************************************************************
@@ -161,8 +161,8 @@ namespace  parsercmd {
    protected:
       static telldata::operandSTACK       OPstack;      // Operand stack
       static telldata::UNDOPerandQUEUE    UNDOPstack;   // undo operand stack
-      static undoQUEUE                    UNDOcmdQ;     // undo command stack
-      static undoUQUEUE                   UNDOUstack;   // undo utility stack
+      static UndoQUEUE                    UNDOcmdQ;     // undo command stack
+      static UndoUQUEUE                   UNDOUstack;   // undo utility stack
       bool                                _opstackerr;  // error while extracting operands
    };
 
@@ -505,11 +505,11 @@ namespace  parsercmd {
 
    class cmdFUNCCALL: public cmdVIRTUAL {
    public:
-      cmdFUNCCALL(cmdSTDFUNC* bd, std::string fn):funcbody(bd), funcname(fn) {};
+      cmdFUNCCALL(cmdSTDFUNC* bd, std::string fn):_funcbody(bd), _funcname(fn) {};
       int execute();
    protected:
-      cmdSTDFUNC*       funcbody;
-      std::string       funcname;
+      cmdSTDFUNC*       _funcbody;
+      std::string       _funcname;
    };
 
    /*** cmdBLOCK ****************************************************************
@@ -518,8 +518,8 @@ namespace  parsercmd {
    >>> Constructor --------------------------------------------------------------
    > -
    >>> Data fields --------------------------------------------------------------
-   > cmdQ      - Contains the list of tell commands
-   > VARlocal  - Contains the map of the local variables
+   > _cmdQ      - Contains the list of tell commands
+   > _varLocal  - Contains the map of the local variables
    > blocks    - static - structure of the nested blocks. Used during the parsing
    > funcMAP   - static - map of defined tell functions. No nested functions
                  allowed, so all of them are defined in the main block
@@ -527,14 +527,14 @@ namespace  parsercmd {
    > addFUNC   -
    > addID     - add a new variable to the variableMAP structure. The new
                  variable is initialized. Called when an identifier is matched.
-                 If VARlocal exists, the variable is added there, otherwise
+                 If _varLocal exists, the variable is added there, otherwise
                  VARglobal map is used
    > getID     - extracts tell_var* from variableMAP by name. Local variableMAP
                  has a priority(if exists). Returns NULL if such a name is not
-                 found in both (VARlocal, VARglobal) maps.
+                 found in both (_varLocal, VARglobal) maps.
    > getfuncID - extracts the cmdBLOCK* from the funcMAP by name. Returns NULL
                  if function name doesn't exist
-   > pushcmd   - add the parsed command to the cmdQ queue
+   > pushcmd   - add the parsed command to the _cmdQ queue
    > pushblock - push current block in the blocks stack structure
    > popblock  - returns (and removes) the top of the blocks structure
    > run       - override of the QThread::run(). The execution of the block
@@ -546,7 +546,7 @@ namespace  parsercmd {
    public:
                                  cmdBLOCK();
                                  cmdBLOCK(telldata::typeID lltID) :
-                                                            _next_lcl_typeID(lltID){};
+                                                            _nextLclTypeID(lltID){};
       int                        execute();
       cmdBLOCK*                  cleaner();
       virtual void               addFUNC(std::string, cmdSTDFUNC*);
@@ -562,11 +562,11 @@ namespace  parsercmd {
       const telldata::TType*     getTypeByID(const telldata::typeID ID) const;
       telldata::tell_var*        getID(const char*, bool local=false) const;
       telldata::tell_var*        newTellvar(telldata::typeID, const char*, TpdYYLtype);
-      bool                       defValidate(const std::string& ,const argumentLIST*, cmdFUNC*&);
-      bool                       declValidate(const std::string&, const argumentLIST*, TpdYYLtype);
+      bool                       defValidate(const std::string& ,const ArgumentLIST*, cmdFUNC*&);
+      bool                       declValidate(const std::string&, const ArgumentLIST*, TpdYYLtype);
       cmdSTDFUNC*  const         getFuncBody(const char*, telldata::argumentQ*) const;
       cmdSTDFUNC*  const         getIntFuncBody(std::string) const;
-      void                       pushcmd(cmdVIRTUAL* cmd) {cmdQ.push_back(cmd);};
+      void                       pushcmd(cmdVIRTUAL* cmd) {_cmdQ.push_back(cmd);};
       void                       pushblk()                {_blocks.push_front(this);};
       cmdBLOCK*                  popblk();
       void                       copyContents(cmdFUNC*);
@@ -574,20 +574,20 @@ namespace  parsercmd {
       void                       restoreVarLocal(telldata::variableMAP&);
       void                       initializeVarLocal();
       bool                       checkDbSortState(DbSortState);
-      functionMAP const          funcMAP() const {return _funcMAP;}
+      FunctionMAP const          funcMAP() const {return _funcMAP;}
       word                       undoDepth() {return _undoDepth;}
       void                       setUndoDepth(word ud) {_undoDepth = ud;}
       virtual                   ~cmdBLOCK();
    protected:
-      telldata::variableMAP      VARlocal;  // list of local variables
-      telldata::typeMAP          TYPElocal; // list of local types
-      cmdQUEUE                   cmdQ;      // list of commands
-      static blockSTACK         _blocks;
-      static functionMAP        _funcMAP;
-      static functionMAP        _internalFuncMap;
+      telldata::variableMAP     _varLocal;  // list of local variables
+      telldata::typeMAP         _typeLocal; // list of local types
+      CmdQUEUE                  _cmdQ;      // list of commands
+      static BlockSTACK         _blocks;
+      static FunctionMAP        _funcMAP;
+      static FunctionMAP        _internalFuncMap;
       static word               _undoDepth;
       static bool               _dbUnsorted;
-      telldata::typeID          _next_lcl_typeID;
+      telldata::typeID          _nextLclTypeID;
    };
 
    class cmdMAIN:public cmdBLOCK {
@@ -606,15 +606,15 @@ namespace  parsercmd {
 
    class cmdSTDFUNC:public virtual cmdVIRTUAL {
    public:
-                                 cmdSTDFUNC(argumentLIST* vm, telldata::typeID tt, bool eor, DbSortState rDBt = sdbrSORTED):
-                                    arguments(vm), returntype(tt), _execOnRecovery(eor), _dbSortStatus(rDBt) {};
+                                 cmdSTDFUNC(ArgumentLIST* vm, telldata::typeID tt, bool eor, DbSortState rDBt = sdbrSORTED):
+                                    _arguments(vm), _returntype(tt), _execOnRecovery(eor), _dbSortStatus(rDBt) {};
       virtual int                execute() = 0;
       virtual void               undo() = 0;
       virtual void               undo_cleanup() = 0;
       void                       reduce_undo_stack();
       virtual NameList*          callingConv(const telldata::typeMAP*);
       virtual int                argsOK(telldata::argumentQ* amap);
-      telldata::typeID           gettype() const {return returntype;};
+      telldata::typeID           gettype() const {return _returntype;};
       virtual bool               internal() {return true;}
       virtual bool               declaration() {return false;}
       bool                       execOnRecovery() {return _execOnRecovery;}
@@ -622,12 +622,12 @@ namespace  parsercmd {
       void                       set_ignoreOnRecovery(bool ior) {_ignoreOnRecovery = ior;}
       static void                setThreadExecution(bool te) {_threadExecution = te;}
       DbSortState                dbSortStatus() {return _dbSortStatus;}
-      const argumentLIST*        getArguments() {return arguments;}
+      const ArgumentLIST*        getArguments() {return _arguments;}
       virtual                   ~cmdSTDFUNC();
       friend void cmdMAIN::recoveryDone();
    protected:
-      argumentLIST*              arguments;
-      telldata::typeID           returntype;
+      ArgumentLIST*              _arguments;
+      telldata::typeID           _returntype;
       bool                       _execOnRecovery;
       static bool                _ignoreOnRecovery;
       static bool                _threadExecution;
@@ -636,7 +636,7 @@ namespace  parsercmd {
 
    class cmdFUNC:public cmdSTDFUNC, public cmdBLOCK {
    public:
-                              cmdFUNC(argumentLIST*, telldata::typeID, bool);
+                              cmdFUNC(ArgumentLIST*, telldata::typeID, bool);
       virtual int             execute();
       virtual bool            internal() {return false;}
       virtual bool            declaration() {return _declaration;}
@@ -665,7 +665,7 @@ namespace  parsercmd {
     * During the construction we're creating an argument list which is effectively
     * a copy of the typeID list in the corresponding telldata::TCallBackType i.e.
     * the type definition of this callback. That argument list contains anonymous
-    * arguments i.e. their names are empty strings, but this is OK, because they
+    * _arguments i.e. their names are empty strings, but this is OK, because they
     * are to be used in the argument checks and adjustments. Now this is the first
     * difference with the "regular" function declarations in TELL. The second and
     * more important one is that when the regular function which had been declared
@@ -675,7 +675,7 @@ namespace  parsercmd {
     * function references to user defined functions only. Much simpler mechanism
     * is implemented here which is - calling the referenced function directly.
     * The important part here is - don't try to extract the parameter values from
-    * the operand stack in run time, arguments of this object are to be ignored
+    * the operand stack in run time, _arguments of this object are to be ignored
     * in run time, they are here solely for argument checking purposes.
     */
    class cmdCALLBACK : public cmdFUNC {
@@ -689,32 +689,32 @@ namespace  parsercmd {
 
    class cmdIFELSE: public cmdVIRTUAL {
    public:
-      cmdIFELSE(cmdBLOCK* tb, cmdBLOCK* fb):trueblock(tb),falseblock(fb) {};
+      cmdIFELSE(cmdBLOCK* tb, cmdBLOCK* fb):_trueblock(tb),_falseblock(fb) {};
       int                     execute();
-      virtual ~cmdIFELSE() {delete trueblock; delete falseblock;}
+      virtual ~cmdIFELSE() {delete _trueblock; delete _falseblock;}
    private:
-      cmdBLOCK*               trueblock;
-      cmdBLOCK*               falseblock;
+      cmdBLOCK*               _trueblock;
+      cmdBLOCK*               _falseblock;
    };
 
    class cmdWHILE: public cmdVIRTUAL {
    public:
-      cmdWHILE(cmdBLOCK* cnd, cmdBLOCK* bd):condblock(cnd),body(bd) {};
+      cmdWHILE(cmdBLOCK* cnd, cmdBLOCK* bd):_condblock(cnd),_body(bd) {};
       int                  execute();
-      virtual ~cmdWHILE() {delete condblock; delete body;}
+      virtual ~cmdWHILE() {delete _condblock; delete _body;}
    private:
-      cmdBLOCK *condblock;
-      cmdBLOCK *body;
+      cmdBLOCK*                _condblock;
+      cmdBLOCK*                _body;
    };
 
    class cmdREPEAT: public cmdVIRTUAL {
    public:
-      cmdREPEAT(cmdBLOCK* cnd, cmdBLOCK* bd):condblock(cnd),body(bd) {};
+      cmdREPEAT(cmdBLOCK* cnd, cmdBLOCK* bd): _condblock(cnd), _body(bd) {};
       int                  execute();
-      virtual ~cmdREPEAT() {delete condblock; delete body;}
+      virtual ~cmdREPEAT() {delete _condblock; delete _body;}
    private:
-      cmdBLOCK *condblock;
-      cmdBLOCK *body;
+      cmdBLOCK*                _condblock;
+      cmdBLOCK*                _body;
    };
 
    class cmdFOREACH: public cmdVIRTUAL {
@@ -746,7 +746,7 @@ namespace  parsercmd {
    bool              ListIndexCheck(telldata::typeID, TpdYYLtype, telldata::typeID, TpdYYLtype);
    bool              ListSliceCheck(telldata::typeID, TpdYYLtype, telldata::typeID, TpdYYLtype, telldata::typeID, TpdYYLtype);
    bool              ListSliceCheck(telldata::typeID, TpdYYLtype, telldata::typeID, TpdYYLtype);
-   void              ClearArgumentList(argumentLIST*);
+   void              ClearArgumentList(ArgumentLIST*);
 
 
    /**
@@ -756,21 +756,21 @@ namespace  parsercmd {
    public:
                                        FuncDeclaration(std::string name, telldata::typeID type):
                                           _name(name), _type(type), _numReturns(0), _numErrors(0)
-                                          {_argList = DEBUG_NEW parsercmd::argumentLIST;}
+                                          {_argList = DEBUG_NEW parsercmd::ArgumentLIST;}
                                       ~FuncDeclaration();
       const std::string                name() const     {return _name;}
       const telldata::typeID           type() const     {return _type;}
-      const parsercmd::argumentLIST*   argList() const  {return _argList;}
-      void                             pushArg(parsercmd::argumentTYPE* arg) {_argList->push_back(arg);}
+      const parsercmd::ArgumentLIST*   argList() const  {return _argList;}
+      void                             pushArg(parsercmd::ArgumentTYPE* arg) {_argList->push_back(arg);}
       void                             incReturns() {_numReturns++;}
       void                             incErrors() {_numErrors++;}
       word                             numReturns() const {return _numReturns;}
       word                             numErrors() const {return _numErrors;}
-      parsercmd::argumentLIST*         argListCopy() const;
+      parsercmd::ArgumentLIST*         argListCopy() const;
    private:
       std::string                      _name;
       telldata::typeID                 _type;
-      parsercmd::argumentLIST*         _argList;
+      parsercmd::ArgumentLIST*         _argList;
       word                             _numReturns;
       word                             _numErrors;
    };

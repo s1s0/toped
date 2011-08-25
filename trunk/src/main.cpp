@@ -145,7 +145,7 @@ bool TopedApp::OnInit()
    // Create the session log file
    if (!getLogFileName()) return FALSE;
    // It's time to register all internal TELL functions
-   // Create the main block parser block - WARNING! blockSTACK structure MUST already exist!
+   // Create the main block parser block - WARNING! BlockSTACK structure MUST already exist!
    CMDBlock = DEBUG_NEW parsercmd::cmdMAIN();
    initInternalFunctions(static_cast<parsercmd::cmdMAIN*>(CMDBlock));
    // Loading of eventual plug-ins

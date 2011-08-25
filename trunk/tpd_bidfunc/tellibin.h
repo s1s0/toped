@@ -35,8 +35,8 @@
 namespace tellstdfunc {
    using parsercmd::cmdSTDFUNC;
    using telldata::argumentQ;
-   using parsercmd::argumentLIST;
-   using parsercmd::argumentTYPE;
+   using parsercmd::ArgumentLIST;
+   using parsercmd::ArgumentTYPE;
 
    const wxString flags_tmpl     = wxT("[-+ #0]?");
    const wxString width_tmpl     = wxT("([[:digit:]]+|\\*)?");

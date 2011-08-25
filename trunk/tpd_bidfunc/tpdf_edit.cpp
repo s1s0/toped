@@ -38,10 +38,10 @@ extern console::toped_logfile    LogFile;
 
 //=============================================================================
 tellstdfunc::stdCOPYSEL::stdCOPYSEL(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttpnt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttpnt()));
 }
 
 void tellstdfunc::stdCOPYSEL::undo_cleanup()
@@ -91,7 +91,7 @@ int tellstdfunc::stdCOPYSEL::execute()
 
 //=============================================================================
 tellstdfunc::stdCOPYSEL_D::stdCOPYSEL_D(telldata::typeID retype, bool eor) :
-      stdCOPYSEL(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      stdCOPYSEL(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {}
 
 int tellstdfunc::stdCOPYSEL_D::execute()
@@ -124,10 +124,10 @@ int tellstdfunc::stdCOPYSEL_D::execute()
 
 //=============================================================================
 tellstdfunc::stdMOVESEL::stdMOVESEL(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttpnt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttpnt()));
 }
 
 void tellstdfunc::stdMOVESEL::undo_cleanup()
@@ -237,7 +237,7 @@ int tellstdfunc::stdMOVESEL::execute()
 
 //=============================================================================
 tellstdfunc::stdMOVESEL_D::stdMOVESEL_D(telldata::typeID retype, bool eor) :
-      stdMOVESEL(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      stdMOVESEL(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {}
 
 int tellstdfunc::stdMOVESEL_D::execute()
@@ -270,10 +270,10 @@ int tellstdfunc::stdMOVESEL_D::execute()
 
 //=============================================================================
 tellstdfunc::stdROTATESEL::stdROTATESEL(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttpnt()));
 }
 
 void tellstdfunc::stdROTATESEL::undo_cleanup()
@@ -371,9 +371,9 @@ int tellstdfunc::stdROTATESEL::execute()
 
 //=============================================================================
 tellstdfunc::stdROTATESEL_D::stdROTATESEL_D(telldata::typeID retype, bool eor) :
-      stdROTATESEL(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      stdROTATESEL(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
 }
 
 int tellstdfunc::stdROTATESEL_D::execute()
@@ -405,10 +405,10 @@ int tellstdfunc::stdROTATESEL_D::execute()
 
 //=============================================================================
 tellstdfunc::stdFLIPSEL::stdFLIPSEL(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttpnt()));
 }
 
 void tellstdfunc::stdFLIPSEL::undo_cleanup()
@@ -460,9 +460,9 @@ int tellstdfunc::stdFLIPSEL::execute()
 
 //=============================================================================
 tellstdfunc::stdFLIPSEL_D::stdFLIPSEL_D(telldata::typeID retype, bool eor) :
-      stdFLIPSEL(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      stdFLIPSEL(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
 }
 
 int tellstdfunc::stdFLIPSEL_D::execute()
@@ -494,7 +494,7 @@ int tellstdfunc::stdFLIPSEL_D::execute()
 
 //=============================================================================
 tellstdfunc::stdDELETESEL::stdDELETESEL(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {}
 
 void tellstdfunc::stdDELETESEL::undo_cleanup()
@@ -563,9 +563,9 @@ int tellstdfunc::stdDELETESEL::execute()
 
 //=============================================================================
 tellstdfunc::lgcCUTPOLY::lgcCUTPOLY(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_pnt)));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_pnt)));
 }
 
 void tellstdfunc::lgcCUTPOLY::undo_cleanup()
@@ -687,7 +687,7 @@ int tellstdfunc::lgcCUTPOLY::execute()
 
 //=============================================================================
 tellstdfunc::lgcCUTPOLY_I::lgcCUTPOLY_I(telldata::typeID retype, bool eor) :
-      lgcCUTPOLY(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      lgcCUTPOLY(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {}
 
 int tellstdfunc::lgcCUTPOLY_I::execute()
@@ -715,7 +715,7 @@ int tellstdfunc::lgcCUTPOLY_I::execute()
 
 //=============================================================================
 tellstdfunc::lgcCUTBOX_I::lgcCUTBOX_I(telldata::typeID retype, bool eor) :
-      lgcCUTPOLY(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      lgcCUTPOLY(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {}
 
 int tellstdfunc::lgcCUTBOX_I::execute()
@@ -752,7 +752,7 @@ int tellstdfunc::lgcCUTBOX_I::execute()
 
 //=============================================================================
 tellstdfunc::lgcMERGE::lgcMERGE(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {}
 
 void tellstdfunc::lgcMERGE::undo_cleanup()
@@ -847,9 +847,9 @@ int tellstdfunc::lgcMERGE::execute()
 
 //=============================================================================
 tellstdfunc::lgcSTRETCH::lgcSTRETCH(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
 }
 
 void tellstdfunc::lgcSTRETCH::undo_cleanup()
@@ -962,9 +962,9 @@ int tellstdfunc::lgcSTRETCH::execute()
 
 //=============================================================================
 tellstdfunc::stdCHANGELAY::stdCHANGELAY(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
 }
 
 void tellstdfunc::stdCHANGELAY::undo_cleanup()
@@ -1022,9 +1022,9 @@ int tellstdfunc::stdCHANGELAY::execute()
 
 //=============================================================================
 tellstdfunc::stdCHANGEREF::stdCHANGEREF(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 void tellstdfunc::stdCHANGEREF::undo_cleanup()
@@ -1110,9 +1110,9 @@ int tellstdfunc::stdCHANGEREF::execute()
 
 //=============================================================================
 tellstdfunc::stdCHANGESTRING::stdCHANGESTRING(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 void tellstdfunc::stdCHANGESTRING::undo_cleanup()
@@ -1218,9 +1218,9 @@ int tellstdfunc::stdCHANGESTRING::execute()
 //
 //=============================================================================
 tellstdfunc::stdFLIPXSEL::stdFLIPXSEL(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttpnt()));
 }
 
 void tellstdfunc::stdFLIPXSEL::undo_cleanup()
@@ -1270,7 +1270,7 @@ int tellstdfunc::stdFLIPXSEL::execute()
 //
 //=============================================================================
 tellstdfunc::stdFLIPXSEL_D::stdFLIPXSEL_D(telldata::typeID retype, bool eor) :
-      stdFLIPXSEL(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      stdFLIPXSEL(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {}
 
 int tellstdfunc::stdFLIPXSEL_D::execute()
@@ -1302,9 +1302,9 @@ int tellstdfunc::stdFLIPXSEL_D::execute()
 //
 //=============================================================================
 tellstdfunc::stdFLIPYSEL::stdFLIPYSEL(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttpnt()));
 }
 
 void tellstdfunc::stdFLIPYSEL::undo_cleanup()
@@ -1355,7 +1355,7 @@ int tellstdfunc::stdFLIPYSEL::execute()
 //
 //=============================================================================
 tellstdfunc::stdFLIPYSEL_D::stdFLIPYSEL_D(telldata::typeID retype, bool eor) :
-      stdFLIPYSEL(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      stdFLIPYSEL(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {}
 
 int tellstdfunc::stdFLIPYSEL_D::execute()

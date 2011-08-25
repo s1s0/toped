@@ -411,7 +411,7 @@ bool tellstdfunc::secureLayDef(unsigned layno)
 //=============================================================================
 void tellstdfunc::createDefaultTDT(std::string dbname,
       laydata::TdtLibDir* dbLibDir, TpdTime& timeCreated, bool threadExecution,
-      parsercmd::undoQUEUE& undstack, telldata::UNDOPerandQUEUE& undopstack)
+      parsercmd::UndoQUEUE& undstack, telldata::UNDOPerandQUEUE& undopstack)
 {
    dbLibDir->newDesign(dbname, DATC->localDir(), timeCreated.stdCTime(), DEFAULT_DBU, DEFAULT_UU);
    dbLibDir->cleanUndefLib();
