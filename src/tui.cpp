@@ -2415,7 +2415,7 @@ void tui::cadenceConvert::onConvert(wxCommandEvent& evt)
       str.Append(wxT("virtuoso2tll.ss "));
 #endif
 
-      //prepare command line arguments
+      //prepare command line _arguments
       wxString strtemp = _outputFile->GetValue();
       str.Append(strtemp);
       str.Append(wxT(" "));

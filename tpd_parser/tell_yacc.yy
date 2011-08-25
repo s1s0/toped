@@ -237,7 +237,7 @@ Ooops! Second thought!
    int                         integer;
    char*                       parsestr;
     telldata::typeID           pttname;
-   parsercmd::argumentLIST*    pfarguments;
+   parsercmd::ArgumentLIST*    pfarguments;
     telldata::argumentQ*       plarguments;
     telldata::argumentID*      parguments;
    parsercmd::cmdBLOCK*        pblock;
@@ -585,7 +585,7 @@ funcneargument:
 funcargument:
      telltypeID tknIDENTIFIER              {
       tellvar = CMDBlock->newTellvar($1, $2, @1);
-      cfd->pushArg(DEBUG_NEW parsercmd::argumentTYPE($2,tellvar));
+      cfd->pushArg(DEBUG_NEW parsercmd::ArgumentTYPE($2,tellvar));
       delete [] $2;
    }
 ;

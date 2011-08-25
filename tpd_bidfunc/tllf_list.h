@@ -32,8 +32,8 @@
 namespace tellstdfunc {
    using parsercmd::cmdSTDFUNC;
    using telldata::argumentQ;
-   using parsercmd::argumentLIST;
-   using parsercmd::argumentTYPE;
+   using parsercmd::ArgumentLIST;
+   using parsercmd::ArgumentTYPE;
 
    TELL_STDCMD_CLASSC(lstLENGTH     );
    TELL_STDCMD_CLASSA(lytPOINTDUMP  );

@@ -32,8 +32,8 @@
 namespace tellstdfunc {
    using parsercmd::cmdSTDFUNC;
    using telldata::argumentQ;
-   using parsercmd::argumentLIST;
-   using parsercmd::argumentTYPE;
+   using parsercmd::ArgumentLIST;
+   using parsercmd::ArgumentTYPE;
    TELL_STDCMD_CLASSA(stdNEWDESIGNd    );                // reset undo buffers
    TELL_STDCMD_CLASSA(stdNEWDESIGNsd   );                // reset undo buffers
    TELL_STDCMD_CLASSB(stdNEWDESIGN    , stdNEWDESIGNd ); // reset undo buffers
@@ -89,9 +89,9 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(DRCexplainerror  );
    TELL_STDCMD_CLASSA(PSexportTOP      );
 
-   void  importGDScell(laydata::TdtLibDir*, const NameList&, const LayerMapExt&, parsercmd::undoQUEUE&, telldata::UNDOPerandQUEUE&, bool, bool, bool);
-   void  importCIFcell(laydata::TdtLibDir*, const NameList&, const SIMap&      , parsercmd::undoQUEUE&, telldata::UNDOPerandQUEUE&, bool, bool, bool, real);
-   void  importOAScell(laydata::TdtLibDir*, const NameList&, const LayerMapExt&, parsercmd::undoQUEUE&, telldata::UNDOPerandQUEUE&, bool, bool, bool);
+   void  importGDScell(laydata::TdtLibDir*, const NameList&, const LayerMapExt&, parsercmd::UndoQUEUE&, telldata::UNDOPerandQUEUE&, bool, bool, bool);
+   void  importCIFcell(laydata::TdtLibDir*, const NameList&, const SIMap&      , parsercmd::UndoQUEUE&, telldata::UNDOPerandQUEUE&, bool, bool, bool, real);
+   void  importOAScell(laydata::TdtLibDir*, const NameList&, const LayerMapExt&, parsercmd::UndoQUEUE&, telldata::UNDOPerandQUEUE&, bool, bool, bool);
 
 }
 #endif

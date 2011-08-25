@@ -53,12 +53,12 @@ extern const wxEventType         wxEVT_CANVAS_CURSOR;
 //=============================================================================
 int tellstdfunc::stdSPRINTF::argsOK(argumentQ* amap)
 {
-   arguments = DEBUG_NEW parsercmd::argumentLIST();
+   _arguments = DEBUG_NEW parsercmd::ArgumentLIST();
    unsigned numArgs = amap->size();
    if (1 > numArgs) return -1; // i.e. error - at least one argument is expected
    telldata::argumentID carg((*(*amap)[0]));
    if (telldata::tn_string != carg()) return -1; //i.e. error - first argument must be a string
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
    for (unsigned i = 1; i < numArgs; i++)
    {
       carg = (*(*amap)[i]);
@@ -68,16 +68,16 @@ int tellstdfunc::stdSPRINTF::argsOK(argumentQ* amap)
          switch (carg())
          {
             case telldata::tn_int    :
-               arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttint()));
+               _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
                break;
             case telldata::tn_real   :
-               arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttreal()));
+               _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
                break;
             case telldata::tn_bool   :
-               arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+               _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
                break;
             case telldata::tn_string :
-               arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+               _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
                break;
             default: assert(false);
          }
@@ -99,8 +99,8 @@ int tellstdfunc::stdSPRINTF::execute()
    std::stack<telldata::tell_var*> varstack;
    // get the function arguments from the argument stack using the info in
    // the arguments structure and push them in a local stack structure.
-   argumentLIST::const_reverse_iterator CI = arguments->rbegin();
-   while (arguments->rend() != CI)
+   ArgumentLIST::const_reverse_iterator CI = _arguments->rbegin();
+   while (_arguments->rend() != CI)
    {
       telldata::tell_var *op = OPstack.top();OPstack.pop();
       assert((*CI)->second->get_type() == op->get_type());CI++;
@@ -204,7 +204,7 @@ int tellstdfunc::stdECHO::execute()
 
 //=============================================================================
 tellstdfunc::stdTELLSTATUS::stdTELLSTATUS(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {}
 
 int tellstdfunc::stdTELLSTATUS::execute()
@@ -228,9 +228,9 @@ int tellstdfunc::stdTELLSTATUS::execute()
 
 //=============================================================================
 tellstdfunc::stdDISTANCE::stdDISTANCE(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_pnt)));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_pnt)));
 }
 
 int tellstdfunc::stdDISTANCE::execute()
@@ -261,7 +261,7 @@ int tellstdfunc::stdDISTANCE::execute()
 
 //=============================================================================
 tellstdfunc::stdDISTANCE_D::stdDISTANCE_D(telldata::typeID retype, bool eor) :
-      stdDISTANCE(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      stdDISTANCE(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
 }
 
@@ -281,7 +281,7 @@ int tellstdfunc::stdDISTANCE_D::execute()
 
 //=============================================================================
 tellstdfunc::stdCLEARRULERS::stdCLEARRULERS(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {}
 
 int tellstdfunc::stdCLEARRULERS::execute()
@@ -293,9 +293,9 @@ int tellstdfunc::stdCLEARRULERS::execute()
 
 //=============================================================================
 tellstdfunc::stdLONGCURSOR::stdLONGCURSOR(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
 }
 
 int tellstdfunc::stdLONGCURSOR::execute()
@@ -318,7 +318,7 @@ int tellstdfunc::stdLONGCURSOR::execute()
 
 //=============================================================================
 tellstdfunc::stdUNDO::stdUNDO(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {}
 
 int tellstdfunc::stdUNDO::execute() {
@@ -335,7 +335,7 @@ int tellstdfunc::stdUNDO::execute() {
 
 //=============================================================================
 tellstdfunc::stdREDRAW::stdREDRAW(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {}
 
 int tellstdfunc::stdREDRAW::execute()
@@ -346,10 +346,10 @@ int tellstdfunc::stdREDRAW::execute()
 
 //=============================================================================
 tellstdfunc::stdZOOMWIN::stdZOOMWIN(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttpnt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttpnt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttpnt()));
 }
 
 int tellstdfunc::stdZOOMWIN::execute() {
@@ -367,9 +367,9 @@ int tellstdfunc::stdZOOMWIN::execute() {
 
 //=============================================================================
 tellstdfunc::stdZOOMWINb::stdZOOMWINb(telldata::typeID retype, bool eor) :
-      stdZOOMWIN(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
+      stdZOOMWIN(DEBUG_NEW parsercmd::ArgumentLIST,retype, eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttwnd()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttwnd()));
 }
 
 int tellstdfunc::stdZOOMWINb::execute() {
@@ -386,7 +386,7 @@ int tellstdfunc::stdZOOMWINb::execute() {
 
 //=============================================================================
 tellstdfunc::stdZOOMALL::stdZOOMALL(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype, eor)
 {}
 
 int tellstdfunc::stdZOOMALL::execute() {
@@ -406,7 +406,7 @@ int tellstdfunc::stdZOOMALL::execute() {
 
 //=============================================================================
 tellstdfunc::stdZOOMVISIBLE::stdZOOMVISIBLE(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype, eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype, eor)
 {}
 
 int tellstdfunc::stdZOOMVISIBLE::execute()
@@ -433,7 +433,7 @@ int tellstdfunc::stdZOOMVISIBLE::execute()
 
 //=============================================================================
 tellstdfunc::getPOINT::getPOINT(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {}
 
 int tellstdfunc::getPOINT::execute() {
@@ -449,7 +449,7 @@ int tellstdfunc::getPOINT::execute() {
 
 //=============================================================================
 tellstdfunc::getPOINTLIST::getPOINTLIST(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {}
 
 int tellstdfunc::getPOINTLIST::execute() {
@@ -472,9 +472,9 @@ int tellstdfunc::getPOINTLIST::execute() {
 
 //=============================================================================
 tellstdfunc::stdEXEC::stdEXEC(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   arguments->push_back(DEBUG_NEW argumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
 }
 
 int tellstdfunc::stdEXEC::execute()
@@ -494,7 +494,7 @@ int tellstdfunc::stdEXEC::execute()
 
 //=============================================================================
 tellstdfunc::stdEXIT::stdEXIT(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {}
 
 int tellstdfunc::stdEXIT::execute()
@@ -516,7 +516,7 @@ int tellstdfunc::stdEXIT::execute()
 
 //============================================================================
 tellstdfunc::intrnlSORT_DB::intrnlSORT_DB(telldata::typeID retype, bool eor) :
-      cmdSTDFUNC(DEBUG_NEW parsercmd::argumentLIST,retype,eor)
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {}
 
 int tellstdfunc::intrnlSORT_DB::execute()

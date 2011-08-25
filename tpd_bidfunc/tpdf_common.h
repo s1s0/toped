@@ -33,19 +33,19 @@
 
 
 //-----------------------------------------------------------------------------
-//    === Two ways for arguments checking of the standard functions ===
+//    === Two ways for _arguments checking of the standard functions ===
 //
 // First one is to build the argumentmap structure in the constructor and not
 // define argsOK and callingConv methods. The argsOK method of the parent
-// cmdSTDFUNC will check the arguments.
+// cmdSTDFUNC will check the _arguments.
 //
-// Second one is not to build argumentmap map (i.e. to leave arguments=NULL)
+// Second one is not to build argumentmap map (i.e. to leave _arguments=NULL)
 // and to define argsOK. This one seems more flexible and looks like it takes
 // less space - at least a function parameters do not need to be allocated. They
 // are anonymous anyway, so their names can not be used.
 // After implementation of the tell structures however this way looks like more
-// hassle, because of the anonymous arguments. We need to deal "per case" with
-// the pain of determining the type of those arguments, and this is not the error
+// hassle, because of the anonymous _arguments. We need to deal "per case" with
+// the pain of determining the type of those _arguments, and this is not the error
 // proof way. Besides in this case additional virtual method callingConv() has to
 // be defined for every class.
 //
@@ -73,7 +73,7 @@
       void        undo() {};                                      \
       void        undo_cleanup() {};                              \
    protected:                                                     \
-      name(parsercmd::argumentLIST* al,telldata::typeID retype, bool eor) : \
+      name(parsercmd::ArgumentLIST* al,telldata::typeID retype, bool eor) : \
                                     parsercmd::cmdSTDFUNC(al,retype,eor) {};\
    }
 #endif
@@ -90,7 +90,7 @@
       void        undo();                                         \
       void        undo_cleanup();                                 \
    protected:                                                     \
-      name(parsercmd::argumentLIST* al,telldata::typeID retype, bool eor, DbSortState rDBt= sdbrSORTED) : \
+      name(parsercmd::ArgumentLIST* al,telldata::typeID retype, bool eor, DbSortState rDBt= sdbrSORTED) : \
                    parsercmd::cmdSTDFUNC(al,retype, eor, rDBt) {};\
    }
 #endif
@@ -174,7 +174,7 @@ namespace tellstdfunc {
    laydata::SelectList* filter_selist(const laydata::SelectList*, word mask);
    laydata::AtticList*  replace_str(laydata::AtticList*, std::string);
    bool                 secureLayDef(unsigned);
-   void                 createDefaultTDT(std::string, laydata::TdtLibDir*, TpdTime&, bool, parsercmd::undoQUEUE&, telldata::UNDOPerandQUEUE&);
+   void                 createDefaultTDT(std::string, laydata::TdtLibDir*, TpdTime&, bool, parsercmd::UndoQUEUE&, telldata::UNDOPerandQUEUE&);
 
 }
 

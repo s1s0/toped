@@ -52,11 +52,11 @@ console::toped_logfile     LogFile;
 // Initialize some static members
 //-----------------------------------------------------------------------------
 // Table of defined functions
-parsercmd::functionMAP        parsercmd::cmdBLOCK::_funcMAP;
+parsercmd::FunctionMAP        parsercmd::cmdBLOCK::_funcMAP;
 // Table of internal functions (used by the parser internally)
-parsercmd::functionMAP        parsercmd::cmdBLOCK::_internalFuncMap;
+parsercmd::FunctionMAP        parsercmd::cmdBLOCK::_internalFuncMap;
 // Table of current nested blocks
-parsercmd::blockSTACK         parsercmd::cmdBLOCK::_blocks;
+parsercmd::BlockSTACK         parsercmd::cmdBLOCK::_blocks;
 //The state (to be) of the DB after the last function call
 bool                          parsercmd::cmdBLOCK::_dbUnsorted = false;
 // Operand stack
@@ -64,9 +64,9 @@ telldata::operandSTACK        parsercmd::cmdVIRTUAL::OPstack;
 // UNDO Operand stack
 telldata::UNDOPerandQUEUE     parsercmd::cmdVIRTUAL::UNDOPstack;
 // UNDO utility stack (used for deleted cell definitions)
-parsercmd::undoUQUEUE         parsercmd::cmdVIRTUAL::UNDOUstack;
+parsercmd::UndoUQUEUE         parsercmd::cmdVIRTUAL::UNDOUstack;
 // UNDO command queue
-parsercmd::undoQUEUE          parsercmd::cmdVIRTUAL::UNDOcmdQ;
+parsercmd::UndoQUEUE          parsercmd::cmdVIRTUAL::UNDOcmdQ;
 // Recovery status
 bool parsercmd::cmdSTDFUNC::_ignoreOnRecovery = false;
 // Thread execution indicator
@@ -1179,30 +1179,30 @@ int parsercmd::cmdFUNCCALL::execute()
 {
    TELL_DEBUG(cmdFUNC);
    int fresult;
-   if (funcbody->ignoreOnRecovery() && !funcbody->execOnRecovery())
+   if (_funcbody->ignoreOnRecovery() && !_funcbody->execOnRecovery())
    {
-      std::string info = funcname + " ignored";
+      std::string info = _funcname + " ignored";
       tell_log(console::MT_INFO, info);
       return EXEC_NEXT;
    }
-   if (funcbody->declaration())
+   if (_funcbody->declaration())
    {
-      std::string info = "Link error. Function " + funcname + "() not defined";
+      std::string info = "Link error. Function " + _funcname + "() not defined";
       tell_log(console::MT_ERROR, info);
       return EXEC_ABORT;
    }
-   LogFile.setFN(funcname);
+   LogFile.setFN(_funcname);
    try
    {
-      if (!CMDBlock->checkDbSortState(funcbody->dbSortStatus()))
+      if (!CMDBlock->checkDbSortState(_funcbody->dbSortStatus()))
       {
          cmdSTDFUNC* sortFunc = CMDBlock->getIntFuncBody("$sort_db");
          sortFunc->execute();
       }
-      fresult = funcbody->execute();
+      fresult = _funcbody->execute();
    }
    catch (EXPTN&) {return EXEC_ABORT;}
-   funcbody->reduce_undo_stack();
+   _funcbody->reduce_undo_stack();
    return fresult;
 }
 
@@ -1231,48 +1231,48 @@ bool parsercmd::cmdRETURN::checkRetype(telldata::argumentID* arg)
 //=============================================================================
 parsercmd::cmdBLOCK::cmdBLOCK() {
    assert(!_blocks.empty());
-   _next_lcl_typeID = _blocks.front()->_next_lcl_typeID;
-   TYPElocal.clear();
-   VARlocal.clear();
+   _nextLclTypeID = _blocks.front()->_nextLclTypeID;
+   _typeLocal.clear();
+   _varLocal.clear();
 }
 
 telldata::tell_var* parsercmd::cmdBLOCK::getID(const char* name, bool local) const
 {
    TELL_DEBUG(***getID***);
-   // Roll back the blockSTACK until name is found. return NULL otherwise
-   typedef blockSTACK::const_iterator BS;
+   // Roll back the BlockSTACK until name is found. return NULL otherwise
+   typedef BlockSTACK::const_iterator BS;
    BS blkstart = _blocks.begin();
    BS blkend   = local ? ++(_blocks.begin()) : _blocks.end();
    for (BS cmd = blkstart; cmd != blkend; cmd++) {
-        if ((*cmd)->VARlocal.find(name) != (*cmd)->VARlocal.end())
-            return (*cmd)->VARlocal[name];
+        if ((*cmd)->_varLocal.find(name) != (*cmd)->_varLocal.end())
+            return (*cmd)->_varLocal[name];
    }
    return NULL;
 }
 
 void parsercmd::cmdBLOCK::addID(const char* name, telldata::tell_var* var) {
    TELL_DEBUG(addID);
-   VARlocal[name] = var;
+   _varLocal[name] = var;
 }
 
 void parsercmd::cmdBLOCK::addconstID(const char* name, telldata::tell_var* var, bool initialized) {
    TELL_DEBUG(addID);
-   VARlocal[name] = var;
+   _varLocal[name] = var;
    var->const_declaration();
    if (initialized) var->update_cstat();
 }
 
 void parsercmd::cmdBLOCK::addlocaltype(const char* ttypename, telldata::TType* ntype) {
-   assert(TYPElocal.end() == TYPElocal.find(ttypename));
-   _next_lcl_typeID = ntype->ID() + 1;
-   TYPElocal[ttypename] = ntype;
+   assert(_typeLocal.end() == _typeLocal.find(ttypename));
+   _nextLclTypeID = ntype->ID() + 1;
+   _typeLocal[ttypename] = ntype;
 }
 
 telldata::TCompType* parsercmd::cmdBLOCK::secureCompType(char*& ttypename)
 {
-   if (TYPElocal.end() == TYPElocal.find(ttypename))
+   if (_typeLocal.end() == _typeLocal.find(ttypename))
    {
-      telldata::TCompType* ntype = DEBUG_NEW telldata::TCompType(_next_lcl_typeID);
+      telldata::TCompType* ntype = DEBUG_NEW telldata::TCompType(_nextLclTypeID);
       return ntype;
    }
    else return NULL;
@@ -1282,11 +1282,11 @@ telldata::TCallBackType* parsercmd::cmdBLOCK::secureCallBackType(const char* tty
 {
    if (NULL == ttypename)
    { // anonymous type
-      return DEBUG_NEW telldata::TCallBackType(_next_lcl_typeID);
+      return DEBUG_NEW telldata::TCallBackType(_nextLclTypeID);
    }
-   if (TYPElocal.end() == TYPElocal.find(ttypename))
+   if (_typeLocal.end() == _typeLocal.find(ttypename))
    {
-      telldata::TCallBackType* ntype = DEBUG_NEW telldata::TCallBackType(_next_lcl_typeID);
+      telldata::TCallBackType* ntype = DEBUG_NEW telldata::TCallBackType(_nextLclTypeID);
       return ntype;
    }
    else return NULL;
@@ -1294,26 +1294,26 @@ telldata::TCallBackType* parsercmd::cmdBLOCK::secureCallBackType(const char* tty
 
 const telldata::TType* parsercmd::cmdBLOCK::getTypeByName(char*& ttypename) const {
    TELL_DEBUG(***gettypeID***);
-   // Roll back the blockSTACK until name is found. return NULL otherwise
-   typedef blockSTACK::const_iterator BS;
+   // Roll back the BlockSTACK until name is found. return NULL otherwise
+   typedef BlockSTACK::const_iterator BS;
    BS blkstart = _blocks.begin();
    BS blkend   = _blocks.end();
    for (BS cmd = blkstart; cmd != blkend; cmd++) {
-        if ((*cmd)->TYPElocal.end() != (*cmd)->TYPElocal.find(ttypename))
-            return (*cmd)->TYPElocal[ttypename];
+        if ((*cmd)->_typeLocal.end() != (*cmd)->_typeLocal.find(ttypename))
+            return (*cmd)->_typeLocal[ttypename];
    }
    return NULL;
 }
 
 const telldata::TType* parsercmd::cmdBLOCK::getTypeByID(const telldata::typeID ID) const {
    TELL_DEBUG(***getTypeByID***);
-   // Roll back the blockSTACK until name is found. return NULL otherwise
-   typedef blockSTACK::const_iterator BS;
+   // Roll back the BlockSTACK until name is found. return NULL otherwise
+   typedef BlockSTACK::const_iterator BS;
    BS blkstart = _blocks.begin();
    BS blkend   = _blocks.end();
    typedef telldata::typeMAP::const_iterator CT;
    for (BS cmd = blkstart; cmd != blkend; cmd++)
-      for (CT ctp = (*cmd)->TYPElocal.begin(); ctp != (*cmd)->TYPElocal.end(); ctp++)
+      for (CT ctp = (*cmd)->_typeLocal.begin(); ctp != (*cmd)->_typeLocal.end(); ctp++)
          if (ID == ctp->second->ID()) return ctp->second;
    return NULL;
 }
@@ -1403,7 +1403,7 @@ bool parsercmd::cmdBLOCK::addCALLBACKDECL(std::string, cmdCALLBACK*, TpdYYLtype)
 int parsercmd::cmdBLOCK::execute() {
    TELL_DEBUG(cmdBLOCK_execute);
    int retexec = EXEC_NEXT; // to secure an empty block
-   for (cmdQUEUE::const_iterator cmd = cmdQ.begin(); cmd != cmdQ.end(); cmd++) {
+   for (CmdQUEUE::const_iterator cmd = _cmdQ.begin(); cmd != _cmdQ.end(); cmd++) {
       if ((retexec = (*cmd)->execute())) break;
    }
    return retexec;
@@ -1411,8 +1411,8 @@ int parsercmd::cmdBLOCK::execute() {
 
 parsercmd::cmdBLOCK* parsercmd::cmdBLOCK::cleaner() {
    TELL_DEBUG(cmdBLOCK_cleaner);
-   while (!cmdQ.empty()) {
-      cmdVIRTUAL *a = cmdQ.front();cmdQ.pop_front();
+   while (!_cmdQ.empty()) {
+      cmdVIRTUAL *a = _cmdQ.front();_cmdQ.pop_front();
       delete a;
    }
    if (_blocks.size() > 1)
@@ -1425,40 +1425,40 @@ parsercmd::cmdBLOCK* parsercmd::cmdBLOCK::cleaner() {
 }
 
 parsercmd::cmdBLOCK::~cmdBLOCK() {
-   for (cmdQUEUE::iterator CMDI = cmdQ.begin(); CMDI != cmdQ.end(); CMDI++)
+   for (CmdQUEUE::iterator CMDI = _cmdQ.begin(); CMDI != _cmdQ.end(); CMDI++)
       delete *CMDI;
-   cmdQ.clear();
-   for (telldata::variableMAP::iterator VMI = VARlocal.begin(); VMI != VARlocal.end(); VMI++)
+   _cmdQ.clear();
+   for (telldata::variableMAP::iterator VMI = _varLocal.begin(); VMI != _varLocal.end(); VMI++)
       delete VMI->second;
-   VARlocal.clear();
-   for (telldata::typeMAP::iterator TMI = TYPElocal.begin(); TMI != TYPElocal.end(); TMI++)
+   _varLocal.clear();
+   for (telldata::typeMAP::iterator TMI = _typeLocal.begin(); TMI != _typeLocal.end(); TMI++)
       delete TMI->second;
-   TYPElocal.clear();
+   _typeLocal.clear();
 
 }
 
 void parsercmd::cmdBLOCK::copyContents( cmdFUNC* cQ )
 {
-   for (cmdQUEUE::const_iterator cmd = cmdQ.begin(); cmd != cmdQ.end(); cmd++)
+   for (CmdQUEUE::const_iterator cmd = _cmdQ.begin(); cmd != _cmdQ.end(); cmd++)
       cQ->pushcmd(*cmd);
 
-   cmdQ.clear();
+   _cmdQ.clear();
 
-   for (telldata::variableMAP::iterator VMI = VARlocal.begin(); VMI != VARlocal.end(); VMI++)
+   for (telldata::variableMAP::iterator VMI = _varLocal.begin(); VMI != _varLocal.end(); VMI++)
       cQ->addID(VMI->first.c_str(), VMI->second);
 
-   VARlocal.clear();
+   _varLocal.clear();
 
-   for (telldata::typeMAP::iterator TMI = TYPElocal.begin(); TMI != TYPElocal.end(); TMI++)
+   for (telldata::typeMAP::iterator TMI = _typeLocal.begin(); TMI != _typeLocal.end(); TMI++)
       cQ->addlocaltype(TMI->first.c_str(), TMI->second);
 
-   TYPElocal.clear();
+   _typeLocal.clear();
 }
 
 telldata::variableMAP* parsercmd::cmdBLOCK::copyVarLocal()
 {
    telldata::variableMAP* varmap = DEBUG_NEW telldata::variableMAP();
-   for (telldata::variableMAP::iterator VMI = VARlocal.begin(); VMI != VARlocal.end(); VMI++)
+   for (telldata::variableMAP::iterator VMI = _varLocal.begin(); VMI != _varLocal.end(); VMI++)
       (*varmap)[VMI->first.c_str()] = VMI->second->selfcopy();
    return varmap;
 }
@@ -1466,7 +1466,7 @@ telldata::variableMAP* parsercmd::cmdBLOCK::copyVarLocal()
 void parsercmd::cmdBLOCK::restoreVarLocal(telldata::variableMAP& nvars)
 {
    typedef telldata::variableMAP::iterator VMIT;
-   for (VMIT VMI = VARlocal.begin(); VMI != VARlocal.end(); VMI++)
+   for (VMIT VMI = _varLocal.begin(); VMI != _varLocal.end(); VMI++)
    {
       VMIT coresp = nvars.find(VMI->first.c_str());
       assert(coresp != nvars.end());
@@ -1479,7 +1479,7 @@ void parsercmd::cmdBLOCK::restoreVarLocal(telldata::variableMAP& nvars)
 void parsercmd::cmdBLOCK::initializeVarLocal()
 {
    typedef telldata::variableMAP::iterator VMIT;
-   for (VMIT VMI = VARlocal.begin(); VMI != VARlocal.end(); VMI++)
+   for (VMIT VMI = _varLocal.begin(); VMI != _varLocal.end(); VMI++)
    {
       VMI->second->initialize();
    }
@@ -1499,7 +1499,7 @@ bool parsercmd::cmdBLOCK::checkDbSortState(DbSortState needsDbResort)
 parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
                                         (const char* fn, telldata::argumentQ* amap) const {
    cmdSTDFUNC *fbody = NULL;
-   typedef functionMAP::iterator MM;
+   typedef FunctionMAP::iterator MM;
    std::pair<MM,MM> range = _funcMAP.equal_range(fn);
    telldata::argumentQ* arguMap = (NULL == amap) ? DEBUG_NEW telldata::argumentQ : amap;
    for (MM fb = range.first; fb != range.second; fb++) {
@@ -1536,21 +1536,21 @@ parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
 parsercmd::cmdSTDFUNC*  const parsercmd::cmdBLOCK::getIntFuncBody(std::string funcName) const
 {
    // retrieve the body of funcName
-   functionMAP::const_iterator MM = _internalFuncMap.find(funcName);
+   FunctionMAP::const_iterator MM = _internalFuncMap.find(funcName);
    assert(MM != _internalFuncMap.end());
    cmdSTDFUNC *fbody = MM->second;
    return fbody;
 }
 
-bool  parsercmd::cmdBLOCK::defValidate(const std::string& fn, const argumentLIST* alst, cmdFUNC*& funcdef)
+bool  parsercmd::cmdBLOCK::defValidate(const std::string& fn, const ArgumentLIST* alst, cmdFUNC*& funcdef)
 {
-   // convert argumentLIST to argumentMAP
+   // convert ArgumentLIST to argumentMAP
    telldata::argumentQ arguMap;
-   typedef argumentLIST::const_iterator AT;
+   typedef ArgumentLIST::const_iterator AT;
    for (AT arg = alst->begin(); arg != alst->end(); arg++)
       arguMap.push_back(DEBUG_NEW telldata::argumentID((*arg)->second->get_type()));
    // get the function definitions with this name
-   typedef functionMAP::iterator MM;
+   typedef FunctionMAP::iterator MM;
    std::pair<MM,MM> range = _funcMAP.equal_range(fn);
    bool allow_definition = true;
    for (MM fb = range.first; fb != range.second; fb++)
@@ -1583,15 +1583,15 @@ bool  parsercmd::cmdBLOCK::defValidate(const std::string& fn, const argumentLIST
    return allow_definition;
 }
 
-bool  parsercmd::cmdBLOCK::declValidate(const std::string& fn, const argumentLIST* alst, TpdYYLtype loc)
+bool  parsercmd::cmdBLOCK::declValidate(const std::string& fn, const ArgumentLIST* alst, TpdYYLtype loc)
 {
-   // convert argumentLIST to argumentMAP
+   // convert ArgumentLIST to argumentMAP
    telldata::argumentQ arguMap;
-   typedef argumentLIST::const_iterator AT;
+   typedef ArgumentLIST::const_iterator AT;
    for (AT arg = alst->begin(); arg != alst->end(); arg++)
       arguMap.push_back(DEBUG_NEW telldata::argumentID((*arg)->second->get_type()));
    // get the function definitions with this name
-   typedef functionMAP::iterator MM;
+   typedef FunctionMAP::iterator MM;
    std::pair<MM,MM> range = _funcMAP.equal_range(fn);
    bool allow_declaration = true;
    for (MM fb = range.first; fb != range.second; fb++)
@@ -1665,7 +1665,7 @@ int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap)
 // likely undefined. To prevent this we need better checks during the function definition
 // parsing
    unsigned i = amap->size();
-   if (i != arguments->size()) return -1;
+   if (i != _arguments->size()) return -1;
    telldata::argumentQ UnknownArgsCopy;
    // :) - some fun here, but it might be confusing - '--' postfix operation is executed
    // always after the comparison, but before the cycle body. So. if all the arguments
@@ -1674,7 +1674,7 @@ int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap)
    {
       telldata::typeID cargID = (*(*amap)[i])();
       telldata::argumentID carg((*(*amap)[i]));
-      telldata::typeID lvalID = (*arguments)[i]->second->get_type();
+      telldata::typeID lvalID = (*_arguments)[i]->second->get_type();
       if (TLUNKNOWN_TYPE(cargID))
       {
          const telldata::TType* vartype;
@@ -1740,29 +1740,29 @@ NameList* parsercmd::cmdSTDFUNC::callingConv(const telldata::typeMAP* lclTypeDef
 {
    NameList* argtypes = DEBUG_NEW NameList();
    argtypes->push_back(telldata::echoType(gettype(), lclTypeDef));
-   int argnum = arguments->size();
+   int argnum = _arguments->size();
    for (int i = 0; i != argnum; i++)
-      argtypes->push_back(telldata::echoType((*arguments)[i]->second->get_type(), lclTypeDef));
+      argtypes->push_back(telldata::echoType((*_arguments)[i]->second->get_type(), lclTypeDef));
    return argtypes;
 }
 
 parsercmd::cmdSTDFUNC::~cmdSTDFUNC() {
-   ClearArgumentList(arguments);
-   delete arguments;
+   ClearArgumentList(_arguments);
+   delete _arguments;
 }
 
 //=============================================================================
-parsercmd::cmdFUNC::cmdFUNC(argumentLIST* vm, telldata::typeID tt, bool declaration):
+parsercmd::cmdFUNC::cmdFUNC(ArgumentLIST* vm, telldata::typeID tt, bool declaration):
          cmdSTDFUNC(vm,tt,true, sdbrDONTCARE), cmdBLOCK(), _declaration(declaration)
 {
    _recursyLevel = 0;
    if (!_declaration)
    {
       // copy the arguments in the structure of the local variables
-      typedef argumentLIST::const_iterator AT;
-      for (AT arg = arguments->begin(); arg != arguments->end(); arg++)
+      typedef ArgumentLIST::const_iterator AT;
+      for (AT arg = _arguments->begin(); arg != _arguments->end(); arg++)
       {
-         VARlocal[(*arg)->first] = (*arg)->second->selfcopy();
+         _varLocal[(*arg)->first] = (*arg)->second->selfcopy();
       }
    }
 }
@@ -1773,13 +1773,13 @@ int parsercmd::cmdFUNC::execute()
    _recursyLevel++;
    // get the arguments from the operands stack and replace the values
    // of the function arguments
-   int i = arguments->size();
+   int i = _arguments->size();
    while (i-- > 0)
    {
       //get the argument name
-      std::string   argname = (*arguments)[i]->first;
+      std::string   argname = (*_arguments)[i]->first;
       // get the tell variable (by name)
-      telldata::tell_var* argvar = VARlocal[argname];
+      telldata::tell_var* argvar = _varLocal[argname];
       // get a value from the operand stack
       telldata::tell_var* argval = OPstack.top();
       // replace the value of the local variable with the argument value
@@ -1839,12 +1839,12 @@ void parsercmd::cmdFUNC::restoreOperandStack(parsercmd::cmdFUNC::BackupList* los
 }
 //=============================================================================
 parsercmd::cmdCALLBACK::cmdCALLBACK(const telldata::TypeIdList&  paramlist, telldata::typeID retype, TpdYYLtype loc) :
-   cmdFUNC( DEBUG_NEW parsercmd::argumentLIST, retype, true  )
+   cmdFUNC( DEBUG_NEW parsercmd::ArgumentLIST, retype, true  )
 {
    for (telldata::TypeIdList::const_iterator CP = paramlist.begin(); CP != paramlist.end(); CP++)
    {
       telldata::tell_var* lvar = newTellvar(*CP, "", loc);
-      arguments->push_back(DEBUG_NEW parsercmd::argumentTYPE(std::string(""),lvar));
+      _arguments->push_back(DEBUG_NEW parsercmd::ArgumentTYPE(std::string(""),lvar));
    }
 }
 
@@ -1866,8 +1866,8 @@ int parsercmd::cmdIFELSE::execute() {
    TELL_DEBUG(cmdIFELSE);
    int retexec = EXEC_NEXT;
    telldata::ttbool *cond = static_cast<telldata::ttbool*>(OPstack.top());OPstack.pop();
-   if (cond->value())   retexec =  trueblock->execute();
-   else if (falseblock) retexec = falseblock->execute();
+   if (cond->value())   retexec =  _trueblock->execute();
+   else if (_falseblock) retexec = _falseblock->execute();
    delete cond;
    return retexec;
 }
@@ -1879,10 +1879,10 @@ int parsercmd::cmdWHILE::execute() {
    telldata::ttbool *cond;
    bool    condvalue;
    while (true) {
-      condblock->execute();
+      _condblock->execute();
       cond = static_cast<telldata::ttbool*>(OPstack.top());OPstack.pop();
       condvalue = cond->value(); delete cond;
-      if (condvalue)    retexec = body->execute();
+      if (condvalue)    retexec = _body->execute();
       else              return retexec;
       if (EXEC_NEXT != retexec) return retexec;
    }
@@ -1895,9 +1895,9 @@ int parsercmd::cmdREPEAT::execute() {
    telldata::ttbool *cond;
    bool    condvalue;
    while (true) {
-      retexec = body->execute();
+      retexec = _body->execute();
       if (EXEC_NEXT != retexec) return retexec;
-      condblock->execute();
+      _condblock->execute();
       cond = static_cast<telldata::ttbool*>(OPstack.top());OPstack.pop();
       condvalue = cond->value(); delete cond;
       if (!condvalue)           return retexec;
@@ -1941,9 +1941,9 @@ int parsercmd::cmdMAIN::execute()
 {
    TELL_DEBUG(cmdMAIN_execute);
    int retexec = EXEC_NEXT;
-   while (!cmdQ.empty())
+   while (!_cmdQ.empty())
    {
-      cmdVIRTUAL *a = cmdQ.front();cmdQ.pop_front();
+      cmdVIRTUAL *a = _cmdQ.front();_cmdQ.pop_front();
       if (EXEC_NEXT == retexec) retexec = a->execute();
       delete a;
    }
@@ -1985,7 +1985,7 @@ void parsercmd::cmdMAIN::addUSERFUNC(FuncDeclaration* decl, cmdFUNC* cQ, TpdYYLt
       {// pour over the definition contents in the body created by the declaration
          cQ->copyContents(declfunc);
          declfunc->set_defined();
-         TpdPost::tellFnAdd(decl->name(), cQ->callingConv(&TYPElocal));
+         TpdPost::tellFnAdd(decl->name(), cQ->callingConv(&_typeLocal));
          TpdPost::tellFnSort();
       }
       else
@@ -2031,8 +2031,8 @@ parsercmd::cmdMAIN::cmdMAIN():cmdBLOCK(telldata::tn_usertypes) {
 
 void  parsercmd::cmdMAIN::addGlobalType(std::string ttypename, telldata::TType* ntype)
 {
-   assert(TYPElocal.end() == TYPElocal.find(ttypename));
-   TYPElocal[ttypename] = ntype;
+   assert(_typeLocal.end() == _typeLocal.find(ttypename));
+   _typeLocal[ttypename] = ntype;
 }
 
 void parsercmd::cmdMAIN::recoveryDone()
@@ -2045,10 +2045,10 @@ parsercmd::cmdMAIN::~cmdMAIN(){
    {
       UNDOcmdQ.back()->undo_cleanup();UNDOcmdQ.pop_back();
    }
-   for (functionMAP::iterator FMI = _funcMAP.begin(); FMI != _funcMAP.end(); FMI ++)
+   for (FunctionMAP::iterator FMI = _funcMAP.begin(); FMI != _funcMAP.end(); FMI ++)
       delete FMI->second;
    _funcMAP.clear();
-   for (functionMAP::iterator FMI = _internalFuncMap.begin(); FMI != _internalFuncMap.end(); FMI ++)
+   for (FunctionMAP::iterator FMI = _internalFuncMap.begin(); FMI != _internalFuncMap.end(); FMI ++)
       delete FMI->second;
    _internalFuncMap.clear();
 
@@ -2632,9 +2632,9 @@ telldata::typeID parsercmd::BoolEx(telldata::typeID op1, std::string ope, TpdYYL
    }
 }
 
-void parsercmd::ClearArgumentList(argumentLIST* alst) {
+void parsercmd::ClearArgumentList(ArgumentLIST* alst) {
    if (NULL == alst) return;
-   for (argumentLIST::iterator ALI = alst->begin(); ALI != alst->end(); ALI++) {
+   for (ArgumentLIST::iterator ALI = alst->begin(); ALI != alst->end(); ALI++) {
       delete (*ALI)->second;
       delete (*ALI);
    }
@@ -2644,12 +2644,12 @@ void parsercmd::ClearArgumentList(argumentLIST* alst) {
 //-----------------------------------------------------------------------------
 // class FuncDeclaration
 //-----------------------------------------------------------------------------
-parsercmd::argumentLIST* parsercmd::FuncDeclaration::argListCopy() const
+parsercmd::ArgumentLIST* parsercmd::FuncDeclaration::argListCopy() const
 {
-   parsercmd::argumentLIST* arglist = DEBUG_NEW parsercmd::argumentLIST;
-   typedef argumentLIST::const_iterator AT;
+   parsercmd::ArgumentLIST* arglist = DEBUG_NEW parsercmd::ArgumentLIST;
+   typedef ArgumentLIST::const_iterator AT;
    for (AT arg = _argList->begin(); arg != _argList->end(); arg++)
-      arglist->push_back(DEBUG_NEW parsercmd::argumentTYPE((*arg)->first,(*arg)->second->selfcopy()));
+      arglist->push_back(DEBUG_NEW parsercmd::ArgumentTYPE((*arg)->first,(*arg)->second->selfcopy()));
    return arglist;
 }
 
