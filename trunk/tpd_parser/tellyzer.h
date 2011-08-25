@@ -414,6 +414,24 @@ namespace  parsercmd {
       telldata::argumentID*  _arg;
    };
 
+   /*!
+    * Function reference. This class holds a function reference or in C terms a
+    * pointer to an existing TELL function. It is part of the call back mechanism
+    * implemented in TELL. In parse time an object of this class is pushed in the
+    * command queue and initialized with the name of the referenced function and
+    * with the default typeID for a function reference. A pointer to this object
+    * is also stored in the corresponding argumentID object which will do the
+    * type checks later and eventually update the _funcBody and _ID fields.\n
+    * In run time (execute()) those parameters will be transfered to the
+    * corresponding telldata::call_back variable through the operand stack thus
+    * completing the substitution of the original empty function.
+    * There are two possible argument checks that an object of this type might
+    * get involved in. The first one is a simple assignment. The second one is
+    * a function call. The latter implements more complex parameter evaluation
+    * which in turn requires a "late update" of this object. This mechanism is
+    * implemented via _preCheckfBody field and the methods that use it.
+    *
+    */
    class cmdFUNCREF: public cmdVIRTUAL {
    public:
                cmdFUNCREF(std::string fn) : _funcBody(NULL), _preCheckfBody(NULL), _funcName(fn), _ID(telldata::tn_anyfref) {}
@@ -421,7 +439,7 @@ namespace  parsercmd {
       void     setFuncBody(telldata::typeID ID) {assert(_preCheckfBody); _funcBody = _preCheckfBody; _ID = ID;}
       void     setPreCheckfBody(cmdSTDFUNC* funcBody) {_preCheckfBody = funcBody;}
       std::string funcName() const              {return _funcName;}
-      virtual ~cmdFUNCREF()                     {}
+      virtual ~cmdFUNCREF()                     {/*nothing to clean-up here*/}
       int      execute();
    private:
       cmdSTDFUNC*       _funcBody;
@@ -635,10 +653,34 @@ namespace  parsercmd {
       LocalVarStack           _VARLocalStack;
    };
 
+
+   /*!
+    * Every TELL variable of a callback type will invoke an object of this class.
+    * In a sense it creates a function declaration in the parser which will allow
+    * the incoming calls of that call back function to be parsed exactly as a
+    * normal function call. During run time though the function body (_fbody)
+    * shall be replaced (see cmdFUNCREF) before the execution comes to this object.
+    * Then it's easy - we just execute the function body of the referenced function.\n
+    * An important note (couple of nights already lost on this).
+    * During the construction we're creating an argument list which is effectively
+    * a copy of the typeID list in the corresponding telldata::TCallBackType i.e.
+    * the type definition of this callback. That argument list contains anonymous
+    * arguments i.e. their names are empty strings, but this is OK, because they
+    * are to be used in the argument checks and adjustments. Now this is the first
+    * difference with the "regular" function declarations in TELL. The second and
+    * more important one is that when the regular function which had been declared
+    * gets defined, then its function body, local variables, local types etc are
+    * pasted into the original object created by the declaration.\n
+    * With callbacks this mechanism is not quite feasible unless we restrict
+    * function references to user defined functions only. Much simpler mechanism
+    * is implemented here which is - calling the referenced function directly.
+    * The important part here is - don't try to extract the parameter values from
+    * the operand stack in run time, arguments of this object are to be ignored
+    * in run time, they are here solely for argument checking purposes.
+    */
    class cmdCALLBACK : public cmdFUNC {
    public:
                               cmdCALLBACK(const telldata::TypeIdList&, telldata::typeID, TpdYYLtype loc);
-//      void                    nameArgs(const argumentLIST* a2copy);
       void                    setFBody(parsercmd::cmdSTDFUNC* fbody) {_fbody = fbody; set_defined();}
       virtual int             execute();
    private:
