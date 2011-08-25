@@ -1278,8 +1278,12 @@ telldata::TCompType* parsercmd::cmdBLOCK::secureCompType(char*& ttypename)
    else return NULL;
 }
 
-telldata::TCallBackType* parsercmd::cmdBLOCK::secureCallBackType(char*& ttypename)
+telldata::TCallBackType* parsercmd::cmdBLOCK::secureCallBackType(const char* ttypename)
 {
+   if (NULL == ttypename)
+   { // anonymous type
+      return DEBUG_NEW telldata::TCallBackType(_next_lcl_typeID);
+   }
    if (TYPElocal.end() == TYPElocal.find(ttypename))
    {
       telldata::TCallBackType* ntype = DEBUG_NEW telldata::TCallBackType(_next_lcl_typeID);

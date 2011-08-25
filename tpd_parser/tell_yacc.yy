@@ -659,6 +659,28 @@ variabledeclaration:
       else tellerror("variable already defined in this scope", @3);
       $$ = $1; delete [] $3;indexed = false;
    }
+   | tknCALLBACKdef telltypeID '('          {
+        tellcallback = CMDBlock->secureCallBackType(NULL);
+        assert (NULL != tellcallback);
+        tellcallback->setFType($2);
+     }
+     anoarguments ')'  tknIDENTIFIER         {
+         telldata::tell_var* v = CMDBlock->getID($7, true);
+         if (!v) {/* if this variableID doesn't exist already in the local scope*/
+            /* add it to the local variable map */
+            parsercmd::cmdCALLBACK* cbfp = DEBUG_NEW parsercmd::cmdCALLBACK(tellcallback->paramList(),tellcallback->fType(), @1);
+            if (CMDBlock->addCALLBACKDECL($7, cbfp, @1))
+               tellvar = DEBUG_NEW telldata::call_back(tellcallback->ID(), cbfp);
+            else
+               delete cbfp;
+
+            CMDBlock->addID($7,tellvar);
+         }
+         else
+            tellerror("variable already defined in this scope", @7);
+        $$ = tellcallback->ID(); 
+        delete tellcallback; tellcallback = NULL; delete [] $7;indexed = false;
+   }
 ;
 
 fielddeclaration:

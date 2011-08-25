@@ -557,7 +557,7 @@ namespace  parsercmd {
       void                       addconstID(const char*, telldata::tell_var*, bool initialized);
       void                       addlocaltype(const char*, telldata::TType*);
       telldata::TCompType*       secureCompType(char*&);
-      telldata::TCallBackType*   secureCallBackType(char*&);
+      telldata::TCallBackType*   secureCallBackType(const char*);
       const telldata::TType*     getTypeByName(char*&) const;
       const telldata::TType*     getTypeByID(const telldata::typeID ID) const;
       telldata::tell_var*        getID(const char*, bool local=false) const;
