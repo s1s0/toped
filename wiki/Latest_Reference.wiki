@@ -6,6 +6,46 @@ Most actual reference for functions and options in the development branch of Top
 
 = Details =
 
-  * [cmdlineoptions command line options]
-  * [preproc preprocessing commands]
-  * [tellfunc Tell-functions]
+== Command line options ==
+
+Usage: `toped {options}* [tll-file]`
+
+*Command line options:*
+
+{{{
+  -ogl_thread: 
+  -ogl_safe  : 
+  -nolog     : logging will be suppressed //rev1917
+  -nogui     : GUI will not be started. Useful for TLL parsing
+  -I<path>   : includes additional search paths for TLL files
+  -D<macro>  : equivalent to #define <macro>
+  -help      : This help message
+}}}
+
+== Preprocessing commands ==
+
+*Pragmas*
+
+{{{
+  #pragma once   //rev1911: calls the *.tll file only once in actual toped session
+  #pragma prereset //rev1911: 
+  #pragma fullreset //rev1920: deletes any function or variable definitions. TELL stack is "clean" 
+}}}
+
+*Definitions*
+
+{{{
+  #define <var> <value>
+  #define <macro> <code>
+}}}
+
+*Statements*
+
+{{{
+  #ifdef | #ifndef 
+  [#else]
+  #endif
+}}}
+
+
+== Tell-functions ==
