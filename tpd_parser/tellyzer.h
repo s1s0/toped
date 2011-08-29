@@ -556,6 +556,7 @@ namespace  parsercmd {
       void                       addID(const char*, telldata::tell_var*);
       void                       addconstID(const char*, telldata::tell_var*, bool initialized);
       void                       addlocaltype(const char*, telldata::TType*);
+      void                       addAnoLoType(telldata::TType*);
       telldata::TCompType*       secureCompType(char*&);
       telldata::TCallBackType*   secureCallBackType(const char*);
       const telldata::TType*     getTypeByName(char*&) const;
@@ -581,6 +582,7 @@ namespace  parsercmd {
    protected:
       telldata::variableMAP     _varLocal;  // list of local variables
       telldata::typeMAP         _typeLocal; // list of local types
+      telldata::TypeList        _typeAnoLo; // list of anonymous local types
       CmdQUEUE                  _cmdQ;      // list of commands
       static BlockSTACK         _blocks;
       static FunctionMAP        _funcMAP;

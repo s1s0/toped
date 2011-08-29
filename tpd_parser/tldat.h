@@ -87,6 +87,7 @@ namespace telldata {
    typedef std::stack<telldata::tell_var*>   operandSTACK;
    typedef std::deque<telldata::tell_var*>   UNDOPerandQUEUE;
    typedef std::list<typeID>                 TypeIdList;
+   typedef std::list<TType*>                 TypeList;
 
 
    //==============================================================================

@@ -1229,10 +1229,12 @@ bool parsercmd::cmdRETURN::checkRetype(telldata::argumentID* arg)
    return ((_retype == (*arg)()) || (NUMBER_TYPE(_retype) && NUMBER_TYPE((*arg)())));
 }
 //=============================================================================
-parsercmd::cmdBLOCK::cmdBLOCK() {
+parsercmd::cmdBLOCK::cmdBLOCK()
+{
    assert(!_blocks.empty());
    _nextLclTypeID = _blocks.front()->_nextLclTypeID;
    _typeLocal.clear();
+   _typeAnoLo.clear();
    _varLocal.clear();
 }
 
@@ -1266,6 +1268,12 @@ void parsercmd::cmdBLOCK::addlocaltype(const char* ttypename, telldata::TType* n
    assert(_typeLocal.end() == _typeLocal.find(ttypename));
    _nextLclTypeID = ntype->ID() + 1;
    _typeLocal[ttypename] = ntype;
+}
+
+void parsercmd::cmdBLOCK::addAnoLoType(telldata::TType* ntype)
+{
+   _nextLclTypeID = ntype->ID() + 1;
+   _typeAnoLo.push_back(ntype);
 }
 
 telldata::TCompType* parsercmd::cmdBLOCK::secureCompType(char*& ttypename)
@@ -1312,9 +1320,14 @@ const telldata::TType* parsercmd::cmdBLOCK::getTypeByID(const telldata::typeID I
    BS blkstart = _blocks.begin();
    BS blkend   = _blocks.end();
    typedef telldata::typeMAP::const_iterator CT;
+   typedef telldata::TypeList::const_iterator CAT;
    for (BS cmd = blkstart; cmd != blkend; cmd++)
+   {
       for (CT ctp = (*cmd)->_typeLocal.begin(); ctp != (*cmd)->_typeLocal.end(); ctp++)
          if (ID == ctp->second->ID()) return ctp->second;
+      for (CAT ctp = (*cmd)->_typeAnoLo.begin(); ctp != (*cmd)->_typeAnoLo.end(); ctp++)
+         if (ID == (*ctp)->ID()) return (*ctp);
+   }
    return NULL;
 }
 
@@ -1434,7 +1447,9 @@ parsercmd::cmdBLOCK::~cmdBLOCK() {
    for (telldata::typeMAP::iterator TMI = _typeLocal.begin(); TMI != _typeLocal.end(); TMI++)
       delete TMI->second;
    _typeLocal.clear();
-
+   for (telldata::TypeList::iterator TMI = _typeAnoLo.begin(); TMI != _typeAnoLo.end(); TMI++)
+      delete (*TMI);
+   _typeAnoLo.clear();
 }
 
 void parsercmd::cmdBLOCK::copyContents( cmdFUNC* cQ )
@@ -1450,9 +1465,17 @@ void parsercmd::cmdBLOCK::copyContents( cmdFUNC* cQ )
    _varLocal.clear();
 
    for (telldata::typeMAP::iterator TMI = _typeLocal.begin(); TMI != _typeLocal.end(); TMI++)
-      cQ->addlocaltype(TMI->first.c_str(), TMI->second);
+      cQ->_typeLocal[TMI->first] = TMI->second;
 
    _typeLocal.clear();
+
+   for (telldata::TypeList::iterator TMI = _typeAnoLo.begin(); TMI != _typeAnoLo.end(); TMI++)
+      cQ->_typeAnoLo.push_back(*TMI);
+
+   _typeLocal.clear();
+
+   cQ->_nextLclTypeID = _nextLclTypeID;
+
 }
 
 telldata::variableMAP* parsercmd::cmdBLOCK::copyVarLocal()

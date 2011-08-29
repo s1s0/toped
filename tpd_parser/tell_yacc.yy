@@ -266,7 +266,7 @@ Ooops! Second thought!
 %type <pttname>        assignment fieldname funccall telllist
 %type <pttname>        lvalue telltype telltypeID variable anonymousvar
 %type <pttname>        variabledeclaration andexpression eqexpression relexpression
-%type <pttname>        listindex listinsert listremove listslice
+%type <pttname>        listindex listinsert listremove listslice callbackanotypedef
 %type <pfarguments>    funcarguments
 %type <parguments>     structure argument funcreference
 %type <plarguments>    nearguments arguments
@@ -659,28 +659,6 @@ variabledeclaration:
       else tellerror("variable already defined in this scope", @3);
       $$ = $1; delete [] $3;indexed = false;
    }
-   | tknCALLBACKdef telltypeID '('          {
-        tellcallback = CMDBlock->secureCallBackType(NULL);
-        assert (NULL != tellcallback);
-        tellcallback->setFType($2);
-     }
-     anoarguments ')'  tknIDENTIFIER         {
-         telldata::tell_var* v = CMDBlock->getID($7, true);
-         if (!v) {/* if this variableID doesn't exist already in the local scope*/
-            /* add it to the local variable map */
-            parsercmd::cmdCALLBACK* cbfp = DEBUG_NEW parsercmd::cmdCALLBACK(tellcallback->paramList(),tellcallback->fType(), @1);
-            if (CMDBlock->addCALLBACKDECL($7, cbfp, @1))
-               tellvar = DEBUG_NEW telldata::call_back(tellcallback->ID(), cbfp);
-            else
-               delete cbfp;
-
-            CMDBlock->addID($7,tellvar);
-         }
-         else
-            tellerror("variable already defined in this scope", @7);
-        $$ = tellcallback->ID(); 
-        delete tellcallback; tellcallback = NULL; delete [] $7;indexed = false;
-   }
 ;
 
 fielddeclaration:
@@ -699,6 +677,7 @@ fielddeclaration:
 telltypeID:
      telltype                              {$$ = $1;}
    | telltype tknLISTdef                   {$$ = $1 | telldata::tn_listmask;}
+   | callbackanotypedef                    {$$ = $1; /*TODO - check! should be OK to have call back lists*/}
 ;
 
 telltype:
@@ -733,6 +712,19 @@ callbacktypedef:
      }
      anoarguments ')'                      {
         CMDBlock->addlocaltype($3,tellcallback);
+        tellcallback = NULL;
+     }
+;
+
+callbackanotypedef:
+     tknCALLBACKdef telltypeID '('          {
+        tellcallback = CMDBlock->secureCallBackType(NULL);
+        assert (NULL != tellcallback);
+        tellcallback->setFType($2);
+     }
+     anoarguments ')'                       {
+        CMDBlock->addAnoLoType(tellcallback);
+        $$ = tellcallback->ID(); 
         tellcallback = NULL;
      }
 ;
@@ -1160,4 +1152,33 @@ block:
          else CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdIFELSE(if_block,else_block));
       }
 ;
+*/
+/*
+   
+   | tknCALLBACKdef telltypeID '('          {
+        tellcallback = CMDBlock->secureCallBackType(NULL);
+        assert (NULL != tellcallback);
+        tellcallback->setFType($2);
+     }
+     anoarguments ')'  tknIDENTIFIER         {
+         telldata::tell_var* v = CMDBlock->getID($7, true);
+         if (!v) {// if this variableID doesn't exist already in the local scope
+            
+            // add it to the local variable map
+            parsercmd::cmdCALLBACK* cbfp = DEBUG_NEW parsercmd::cmdCALLBACK(tellcallback->paramList(),tellcallback->fType(), @1);
+            if (CMDBlock->addCALLBACKDECL($7, cbfp, @1))
+            {
+               CMDBlock->addAnoLoType(tellcallback);
+               tellvar = DEBUG_NEW telldata::call_back(tellcallback->ID(), cbfp);
+            }
+            else
+               delete cbfp;
+
+            CMDBlock->addID($7,tellvar);
+         }
+         else
+            tellerror("variable already defined in this scope", @7);
+        $$ = tellcallback->ID(); 
+        tellcallback = NULL; delete [] $7;indexed = false;
+   }
 */
