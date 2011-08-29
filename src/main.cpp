@@ -86,7 +86,8 @@ bool TopedApp::OnInit()
    // initialize the TELL pre-processor
    tellPP = DEBUG_NEW parsercmd::TellPreProc();
    // check command line arguments
-   parseCmdLineArgs();
+   if (!parseCmdLineArgs())
+      return false;
    if (_gui)
    {
       // Get the Graphic User Interface (gui system)
@@ -100,7 +101,7 @@ bool TopedApp::OnInit()
                wxOK | wxICON_ERROR);
          dlg1->ShowModal();
          dlg1->Destroy();
-         return FALSE;
+         return false;
       }
       // Diagnose the graphic system and return the appropriate
       // type of rendering (i.e. basic or tenderer)
@@ -143,7 +144,7 @@ bool TopedApp::OnInit()
 
    getTellPathDirs();
    // Create the session log file
-   if (!getLogFileName()) return FALSE;
+   if (!getLogFileName()) return false;
    // It's time to register all internal TELL functions
    // Create the main block parser block - WARNING! BlockSTACK structure MUST already exist!
    CMDBlock = DEBUG_NEW parsercmd::cmdMAIN();
@@ -163,7 +164,7 @@ bool TopedApp::OnInit()
       // Put a rendering info in the log
       printLogWHeader();
    }
-   return TRUE;
+   return true;
 }
 
 //=============================================================================
@@ -444,14 +445,14 @@ void TopedApp::loadPlugIns()
 }
 
 //=============================================================================
-void TopedApp::parseCmdLineArgs()
+bool TopedApp::parseCmdLineArgs()
 {
 
   /* FIXME: it seems the amount of command line options starts to grow
-     for the future it could be useful to change to the migthy 
+     for the future it could be useful to change to the mighty
      getopt_long() parser from unistd.h
   */ 
-
+   bool runTheTool = true;
    if (1 < argc)
    {
       for (int i=1; i<argc; i++)
@@ -473,18 +474,19 @@ void TopedApp::parseCmdLineArgs()
             wxString defOnly = curar.Remove(0,2);
             tellPP->cmdlDefine( std::string(defOnly.mb_str(wxConvUTF8)) );
          }
-	 else if (wxT("-help") == curar) { //no idea how useful this could be for Windows users
-	   std::cout << "Usage: toped {options}* [tll-file]" << std::endl ;
-	   std::cout << "Command line options:" << std::endl ;
-	   std::cout << "  -ogl_thread: " << std::endl ;
-	   std::cout << "  -ogl_safe  : " << std::endl ;
-	   std::cout << "  -nolog     : logging will be suppressed" << std::endl;
-	   std::cout << "  -nogui     : GUI will not be started. Useful for TLL parsing" << std::endl ;
-	   std::cout << "  -I<path>   : includes additional search paths for TLL files" << std::endl ;
-	   std::cout << "  -D<macro>  : equivalent to #define <macro> " << std::endl ;
-	   std::cout << "  -help      : This help message " << std::endl ;
-	   exit(0); //FIXME: *maybe* proper exit routine needed 
-	 }
+         else if (wxT("-help") == curar)
+         { //no idea how useful this could be for Windows users
+            std::cout << "Usage: toped {options}* [tll-file]" << std::endl ;
+            std::cout << "Command line options:" << std::endl ;
+            std::cout << "  -ogl_thread: " << std::endl ;
+            std::cout << "  -ogl_safe  : " << std::endl ;
+            std::cout << "  -nolog     : logging will be suppressed" << std::endl;
+            std::cout << "  -nogui     : GUI will not be started. Useful for TLL parsing" << std::endl ;
+            std::cout << "  -I<path>   : includes additional search paths for TLL files" << std::endl ;
+            std::cout << "  -D<macro>  : equivalent to #define <macro> " << std::endl ;
+            std::cout << "  -help      : This help message " << std::endl ;
+            runTheTool = false;
+         }
          else if (!(0 == curar.Find('-')))
          {
             _inputTellFile.Clear();
@@ -493,13 +495,14 @@ void TopedApp::parseCmdLineArgs()
          else
          {
             std::string invalid_argument(curar.mb_str(wxConvUTF8));
-            std::cout << "Unknown command line option \"" << invalid_argument <<"\". Ignored" << std::endl ;
-	    exit(0); //FIXME: *maybe* proper exit routine needed
-	    //I think it is more convenient to get a clear indication if something is wrong
+            std::cout << "Unknown command line option \"" << invalid_argument <<"\"" << std::endl ;
+            runTheTool = false;
+            //I think it is more convenient to get a clear indication if something is wrong
             //for Windows users other solutions have to be found
          }
       }
    }
+   return runTheTool;
 }
 
 //=============================================================================
