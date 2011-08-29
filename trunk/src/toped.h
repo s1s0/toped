@@ -300,7 +300,7 @@ class TopedApp : public wxApp
       void           getTellPathDirs(); //! Check directories in TLL_INCLUDE_PATH
       void           finishSessionLog();
       void           saveIgnoredCrashLog();
-      void           parseCmdLineArgs();
+      bool           parseCmdLineArgs();
       void           printLogWHeader();
       void           initInternalFunctions(parsercmd::cmdMAIN* mblock);
       wxString       _logFileName;
