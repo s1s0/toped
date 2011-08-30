@@ -575,7 +575,7 @@ namespace  parsercmd {
       void                       restoreVarLocal(telldata::variableMAP&);
       void                       initializeVarLocal();
       bool                       checkDbSortState(DbSortState);
-      FunctionMAP const          funcMAP() const {return _funcMAP;}
+//      FunctionMAP const          funcMAP() const {return _funcMAP;}
       word                       undoDepth() {return _undoDepth;}
       void                       setUndoDepth(word ud) {_undoDepth = ud;}
       virtual                   ~cmdBLOCK();

@@ -2025,7 +2025,7 @@ void parsercmd::cmdMAIN::addUSERFUNC(FuncDeclaration* decl, cmdFUNC* cQ, TpdYYLt
 /*! The method calls CMDBlock::declValidate(...) to check whether a function
 with such name and calling convention already exists. If it doesn't - a new cmdFUNC will
 be created and will be inserted in the _funcMAP. The contents of the new cmdFUNC will be
-empty and cmdFUNC._declarationit will be true.
+empty and cmdFUNC._declaration will be true.
 */
 parsercmd::cmdFUNC* parsercmd::cmdMAIN::addUSERFUNCDECL(FuncDeclaration* decl, TpdYYLtype loc)
 {
