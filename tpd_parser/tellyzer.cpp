@@ -1170,7 +1170,7 @@ int parsercmd::cmdFUNCREF::execute()
       tellerror("Callback statement not evaluated properly. Internal parser error");
       return EXEC_RETURN;
    }
-   telldata::tell_var *ustrct = DEBUG_NEW telldata::call_back( _ID, _funcBody, true);
+   telldata::tell_var *ustrct = DEBUG_NEW telldata::call_back( _ID, _funcBody);
    OPstack.push(ustrct);
    return EXEC_NEXT;
 }
@@ -1333,7 +1333,7 @@ const telldata::TType* parsercmd::cmdBLOCK::getTypeByID(const telldata::typeID I
 
 /*!
  * Creates a new TELL variable in the heap. Called from the parser predominantly
- * for all kinds of variable operations including function parameters
+ * for all kinds of variable operations excluding function parameters
  * @param ID - the typeID of the new variable
  * @param varName - variable name. This is not used normally. It is required
  * only for variables of type call_back, because here in this function an object
@@ -1370,13 +1370,51 @@ telldata::tell_var* parsercmd::cmdBLOCK::newTellvar(telldata::typeID ID, const c
          else if (utype->isComposite())
             return (DEBUG_NEW telldata::user_struct(static_cast<const telldata::TCompType*>(utype)));
          else
-         {
+         { // callback variable
             const telldata::TCallBackType* vartype = static_cast<const telldata::TCallBackType*>(utype);
             parsercmd::cmdCALLBACK* cbfp = DEBUG_NEW cmdCALLBACK(vartype->paramList(),vartype->fType(), loc);
             if (addCALLBACKDECL(varName, cbfp, loc))
                return (DEBUG_NEW telldata::call_back(ID, cbfp));
             else
                delete cbfp;
+         }
+      }
+   }
+   return NULL;
+}
+
+telldata::tell_var* parsercmd::cmdBLOCK::newFuncArg(telldata::typeID ID, const char* varName, TpdYYLtype loc)
+{
+   if (ID & telldata::tn_listmask)
+   {
+      return(DEBUG_NEW telldata::ttlist(ID));
+   }
+   else
+   switch (ID)
+   {
+      case   telldata::tn_real  : return(DEBUG_NEW telldata::ttreal());
+      case    telldata::tn_int  : return(DEBUG_NEW telldata::ttint());
+      case   telldata::tn_bool  : return(DEBUG_NEW telldata::ttbool());
+      case    telldata::tn_pnt  : return(DEBUG_NEW telldata::ttpnt());
+      case    telldata::tn_box  : return(DEBUG_NEW telldata::ttwnd());
+      case    telldata::tn_bnd  : return(DEBUG_NEW telldata::ttbnd());
+      case    telldata::tn_hsh  : return(DEBUG_NEW telldata::tthsh());
+      case telldata::tn_hshstr  : return(DEBUG_NEW telldata::tthshstr());
+      case telldata::tn_string  : return(DEBUG_NEW telldata::ttstring());
+      case telldata::tn_layout  : return(DEBUG_NEW telldata::ttlayout());
+      case telldata::tn_auxilary: return(DEBUG_NEW telldata::ttauxdata());
+      default:
+      {
+         const telldata::TType* utype = getTypeByID(ID);
+         if (NULL == utype)
+            tellerror("Bad type specifier", loc);
+         else if (utype->isComposite())
+            return (DEBUG_NEW telldata::user_struct(static_cast<const telldata::TCompType*>(utype)));
+         else
+         { // callback function argument
+            const telldata::TCallBackType* vartype = static_cast<const telldata::TCallBackType*>(utype);
+            parsercmd::cmdCALLBACK* cbfp = DEBUG_NEW cmdCALLBACK(vartype->paramList(),vartype->fType(), loc);
+            return (DEBUG_NEW telldata::call_back(ID, cbfp));
          }
       }
    }
@@ -1450,6 +1488,9 @@ parsercmd::cmdBLOCK::~cmdBLOCK() {
    for (telldata::TypeList::iterator TMI = _typeAnoLo.begin(); TMI != _typeAnoLo.end(); TMI++)
       delete (*TMI);
    _typeAnoLo.clear();
+   for (CBFuncMAP::iterator FMI = _lclFuncMAP.begin(); FMI != _lclFuncMAP.end(); FMI++)
+      delete FMI->second;
+   _lclFuncMAP.clear();
 }
 
 void parsercmd::cmdBLOCK::copyContents( cmdFUNC* cQ )
@@ -1473,6 +1514,11 @@ void parsercmd::cmdBLOCK::copyContents( cmdFUNC* cQ )
       cQ->_typeAnoLo.push_back(*TMI);
 
    _typeLocal.clear();
+
+   for (CBFuncMAP::iterator FMI = _lclFuncMAP.begin(); FMI != _lclFuncMAP.end(); FMI++)
+      cQ->_lclFuncMAP[FMI->first] = FMI->second;
+
+   _lclFuncMAP.clear();
 
    cQ->_nextLclTypeID = _nextLclTypeID;
 
@@ -1522,36 +1568,25 @@ bool parsercmd::cmdBLOCK::checkDbSortState(DbSortState needsDbResort)
 parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
                                         (const char* fn, telldata::argumentQ* amap) const {
    cmdSTDFUNC *fbody = NULL;
-   typedef FunctionMAP::iterator MM;
-   std::pair<MM,MM> range = _funcMAP.equal_range(fn);
    telldata::argumentQ* arguMap = (NULL == amap) ? DEBUG_NEW telldata::argumentQ : amap;
-   for (MM fb = range.first; fb != range.second; fb++) {
-      fbody = fb->second;
-      if (0 == fbody->argsOK(arguMap)) break;
-      else fbody = NULL;
+   // first check for local functions
+   CBFuncMAP::const_iterator lclFunc = _lclFuncMAP.find(fn);
+   if ( _lclFuncMAP.end() != lclFunc )
+   {
+      fbody = lclFunc->second;
+      if (0 != fbody->argsOK(arguMap))
+         fbody = NULL;
    }
-//   if (NULL == fbody)
-//   { // not found normally, but there is still a hope - it could be a callback!
-//      telldata::tell_var* callbackvar = getID(fn);
-//      if (callbackvar)
-//      {
-//         telldata::typeID vID = callbackvar->get_type();
-//         if (TLCOMPOSIT_TYPE(vID))
-//         {
-//            const telldata::TType* vType = getTypeByID(callbackvar->get_type());
-//            if (!vType->isComposite())
-//            {
-//               telldata::call_back* cbckvar = static_cast<telldata::call_back*>(callbackvar);
-//               fbody = static_cast<cmdSTDFUNC*>(cbckvar->funcBody());
-//               if (fbody)
-//               {
-//                  if (0 != fbody->argsOK(arguMap))
-//                     fbody = NULL;
-//               }
-//            }
-//         }
-//      }
-//   }
+   if (NULL == fbody)
+   {
+      typedef FunctionMAP::iterator MM;
+      std::pair<MM,MM> range = _funcMAP.equal_range(fn);
+      for (MM fb = range.first; fb != range.second; fb++) {
+         fbody = fb->second;
+         if (0 == fbody->argsOK(arguMap)) break;
+         else fbody = NULL;
+      }
+   }
    if (NULL == amap) delete arguMap;
    return fbody;
 }
@@ -1775,16 +1810,29 @@ parsercmd::cmdSTDFUNC::~cmdSTDFUNC() {
 }
 
 //=============================================================================
-parsercmd::cmdFUNC::cmdFUNC(ArgumentLIST* vm, telldata::typeID tt, bool declaration):
+parsercmd::cmdFUNC::cmdFUNC(ArgumentLIST* vm, telldata::typeID tt, bool declaration, TpdYYLtype loc):
          cmdSTDFUNC(vm,tt,true, sdbrDONTCARE), cmdBLOCK(), _declaration(declaration)
 {
    _recursyLevel = 0;
    if (!_declaration)
    {
       // copy the arguments in the structure of the local variables
+      // callback arguments need a special attention
       typedef ArgumentLIST::const_iterator AT;
       for (AT arg = _arguments->begin(); arg != _arguments->end(); arg++)
       {
+         telldata::typeID aID = (*arg)->second->get_type();
+         if (TLCOMPOSIT_TYPE(aID))
+         {
+            const telldata::TType* utype = getTypeByID(aID);
+            if ((NULL != utype) && (!utype->isComposite()))
+            { // we have a callback argument. It means that right here it must
+              // be converted from a variable to a function declaration
+               telldata::call_back* cbVar = static_cast<telldata::call_back*>((*arg)->second);
+               bool valid = addCALLBACKPARAM((*arg)->first, cbVar->fcbBody(), loc);
+               assert(valid); //TODO - what if?
+            }
+         }
          _varLocal[(*arg)->first] = (*arg)->second->selfcopy();
       }
    }
@@ -1849,6 +1897,17 @@ parsercmd::cmdFUNC::BackupList* parsercmd::cmdFUNC::backupOperandStack()
    return los;
 }
 
+bool parsercmd::cmdFUNC::addCALLBACKPARAM(std::string name, cmdCALLBACK* decl, TpdYYLtype)
+{
+   TELL_DEBUG(addCALLBACKPARAM);
+   if ( _lclFuncMAP.end() == _lclFuncMAP.find(name) )
+   { // function with this name is not found in the local function map
+      _lclFuncMAP[name] = decl;
+      return true;
+   }
+   return false;
+}
+
 void parsercmd::cmdFUNC::restoreOperandStack(parsercmd::cmdFUNC::BackupList* los)
 {
    if (!OPstack.empty()) los->push_back(OPstack.top());
@@ -1862,11 +1921,11 @@ void parsercmd::cmdFUNC::restoreOperandStack(parsercmd::cmdFUNC::BackupList* los
 }
 //=============================================================================
 parsercmd::cmdCALLBACK::cmdCALLBACK(const telldata::TypeIdList&  paramlist, telldata::typeID retype, TpdYYLtype loc) :
-   cmdFUNC( DEBUG_NEW parsercmd::ArgumentLIST, retype, true  )
+   cmdFUNC( DEBUG_NEW parsercmd::ArgumentLIST, retype, true, loc)
 {
    for (telldata::TypeIdList::const_iterator CP = paramlist.begin(); CP != paramlist.end(); CP++)
    {
-      telldata::tell_var* lvar = newTellvar(*CP, "", loc);
+      telldata::tell_var* lvar = newCallBackArgument(*CP, loc);
       _arguments->push_back(DEBUG_NEW parsercmd::ArgumentTYPE(std::string(""),lvar));
    }
 }
@@ -1995,7 +2054,8 @@ void parsercmd::cmdMAIN::addIntFUNC(std::string fname , cmdSTDFUNC* cQ)
 void parsercmd::cmdMAIN::addUSERFUNC(FuncDeclaration* decl, cmdFUNC* cQ, TpdYYLtype loc)
 {
    cmdFUNC* declfunc = NULL;
-   if ((telldata::tn_void != decl->type()) && (0 == decl->numReturns())) {
+   if ((telldata::tn_void != decl->type()) && (0 == decl->numReturns()))
+   {
       tellerror("function must return a value", loc);
    }
    else  if (decl->numErrors() > 0) {
@@ -2032,7 +2092,7 @@ parsercmd::cmdFUNC* parsercmd::cmdMAIN::addUSERFUNCDECL(FuncDeclaration* decl, T
    cmdFUNC* cQ = NULL;
    if (CMDBlock->declValidate(decl->name().c_str(),decl->argList(),loc))
    {
-      cQ = DEBUG_NEW parsercmd::cmdFUNC(decl->argListCopy(),decl->type(), true);
+      cQ = DEBUG_NEW parsercmd::cmdFUNC(decl->argListCopy(),decl->type(), true, loc);
       _funcMAP.insert(std::make_pair(decl->name(), cQ));
    }
    return cQ;
@@ -2828,3 +2888,117 @@ void console::toped_logfile::close()
       _file.close();
 }
 
+//==============================================================================
+telldata::call_back::call_back(typeID ID, parsercmd::cmdCALLBACK* fcbBody) :
+   tell_var     ( ID          ),
+   _fcbBody     ( fcbBody     ),
+   _fBody       ( NULL        ),
+   _definition  ( false       )
+{}
+
+telldata::call_back::call_back(typeID ID, parsercmd::cmdSTDFUNC* fBody) :
+   tell_var     ( ID          ),
+   _fcbBody     ( NULL        ),
+   _fBody       ( fBody       ),
+   _definition  ( true        )
+{}
+
+telldata::call_back::call_back(const call_back& cobj) :
+   tell_var     ( cobj.get_type()  ),
+   _fcbBody     ( cobj._fcbBody    ),
+   _fBody       ( cobj._fBody      ),
+   _definition  ( cobj._definition )
+{}
+
+void telldata::call_back::initialize()
+{
+   // TODO -> clean-up the function body for the next call
+   // - effectively undo what has been done in assign
+}
+
+telldata::tell_var* telldata::call_back::selfcopy() const
+{
+   if (NULL == _fBody)
+   {
+      assert(NULL != _fcbBody);
+      return  DEBUG_NEW call_back(_ID, _fcbBody);
+   }
+   else if (NULL == _fcbBody)
+   {
+      assert(NULL != _fBody);
+      return  DEBUG_NEW call_back(_ID, _fBody);
+   }
+   else
+      assert(false);
+}
+
+void telldata::call_back::echo(std::string&, real)
+{
+   assert(false); //TODO
+}
+void telldata::call_back::assign(tell_var* value)
+{
+   call_back* n_value = static_cast<telldata::call_back*>(value);
+   if (!_definition)
+   {
+      if (n_value->_definition)
+      { // callback definition
+         _fcbBody->setFBody(n_value->fBody());
+      }
+      else // regular variable copy
+      {
+//         _fcbBody   = n_value->_fcbBody;
+         assert(false); // Not sure this is a valid case. If you hit this assert
+                        // legally - just add a copy of a function body
+      }
+   }
+   else
+   {
+      assert(false); // Not sure this is a valid case. If you hit this assert
+                     // legally - just add a copy of a function body
+   }
+}
+
+
+
+telldata::tell_var* parsercmd::newCallBackArgument(telldata::typeID ID, TpdYYLtype loc)
+{
+   if (ID & telldata::tn_listmask)
+   {
+      return(DEBUG_NEW telldata::ttlist(ID));
+   }
+   else
+   switch (ID)
+   {
+      case   telldata::tn_real  : return(DEBUG_NEW telldata::ttreal());
+      case    telldata::tn_int  : return(DEBUG_NEW telldata::ttint());
+      case   telldata::tn_bool  : return(DEBUG_NEW telldata::ttbool());
+      case    telldata::tn_pnt  : return(DEBUG_NEW telldata::ttpnt());
+      case    telldata::tn_box  : return(DEBUG_NEW telldata::ttwnd());
+      case    telldata::tn_bnd  : return(DEBUG_NEW telldata::ttbnd());
+      case    telldata::tn_hsh  : return(DEBUG_NEW telldata::tthsh());
+      case telldata::tn_hshstr  : return(DEBUG_NEW telldata::tthshstr());
+      case telldata::tn_string  : return(DEBUG_NEW telldata::ttstring());
+      case telldata::tn_layout  : return(DEBUG_NEW telldata::ttlayout());
+      case telldata::tn_auxilary: return(DEBUG_NEW telldata::ttauxdata());
+      default:
+      {
+         const telldata::TType* utype = CMDBlock->getTypeByID(ID);
+         if (NULL == utype)
+            tellerror("Bad type specifier", loc);
+         else if (utype->isComposite())
+            return (DEBUG_NEW telldata::user_struct(static_cast<const telldata::TCompType*>(utype)));
+         else
+         { // callback variable
+            assert(0);
+//            const telldata::TCallBackType* vartype = static_cast<const telldata::TCallBackType*>(utype);
+//            parsercmd::cmdCALLBACK* cbfp = DEBUG_NEW cmdCALLBACK(vartype->paramList(),vartype->fType(), loc);
+//            if (addCALLBACKDECL(varName, cbfp, loc))
+//               return (DEBUG_NEW telldata::call_back(ID, cbfp));
+//            else
+//               delete cbfp;
+         }
+      }
+   }
+   return NULL;
+}

@@ -351,22 +351,6 @@ namespace telldata {
    };
 
    //==============================================================================
-   class call_back : public tell_var {
-   public:
-                           call_back(const typeID ID, void*, bool defintition = false);
-                           call_back(const call_back&);
-      virtual             ~call_back() {}
-      virtual void         initialize();
-      virtual tell_var*    selfcopy() const  {return DEBUG_NEW call_back(*this);}
-      virtual void         echo(std::string&, real);
-      virtual void         assign(tell_var*);
-      void*                funcBody()        {return _fcbBody;}
-   protected:
-      void*                _fcbBody; /* cmdCALLBACK* */
-      bool                 _definition;
-   };
-
-   //==============================================================================
    // Don't destruct _x and _y here. They are just pointing to the structures in
    // the parent _fieldList and obviously should be destroyed there
    class ttpnt : public user_struct {

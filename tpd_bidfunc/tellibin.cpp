@@ -106,6 +106,9 @@ int tellstdfunc::stdSPRINTF::execute()
       assert((*CI)->second->get_type() == op->get_type());CI++;
       varstack.push(op);
    }
+   //TODO clean-up _arguments
+//   parsercmd::ClearArgumentList(_arguments);
+//   delete _arguments; _arguments = NULL;
    // OK the first one must be the format string - let's get it out
    //
    telldata::ttstring* fttstr = static_cast<telldata::ttstring*>(varstack.top());
