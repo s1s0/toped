@@ -587,65 +587,6 @@ telldata::tell_var* telldata::user_struct::field_var(char*& fname) {
 }
 
 //=============================================================================
-//telldata::call_back::call_back(const TCallBackType* cbType) :
-//   tell_var  ( cbType->ID() ),
-//   _fcbBody  ( NULL         ),
-//   _default  ( true         )
-//{
-//   parsercmd::cmdFUNC* defaultFunc = DEBUG_NEW parsercmd::cmdFUNC()
-//
-//}
-
-telldata::call_back::call_back(typeID ID, void* fBody, bool definition) :
-   tell_var     ( ID          ),
-   _fcbBody     ( fBody       ),
-   _definition  ( definition  )
-{}
-
-telldata::call_back::call_back(const call_back& cobj) :
-   tell_var     ( cobj.get_type()  ),
-   _fcbBody     ( cobj._fcbBody   ),
-   _definition  ( cobj._definition    )
-{}
-
-void telldata::call_back::initialize()
-{
-   // TODO -> clean-up the function body for the next call
-   // - effectively undo what has been done in assign
-}
-
-void telldata::call_back::echo(std::string&, real)
-{
-   assert(false); //TODO
-}
-void telldata::call_back::assign(tell_var* value)
-{
-   call_back* n_value = static_cast<telldata::call_back*>(value);
-   if (!_definition)
-   {
-      if (n_value->_definition)
-      { // callback definition
-         parsercmd::cmdCALLBACK* cback   = static_cast<parsercmd::cmdCALLBACK*>(_fcbBody);
-         parsercmd::cmdSTDFUNC*  fbody   = static_cast<parsercmd::cmdSTDFUNC*>(n_value->funcBody());
-
-//         cback->nameArgs(fbody->getArguments());
-         cback->setFBody(fbody);
-      }
-      else // regular variable copy
-      {
-//         _fcbBody   = n_value->_fcbBody;
-         assert(false); // Not sure this is a valid case. If you hit this assert
-                        // legally - just add a copy of a function body
-      }
-   }
-   else
-   {
-      assert(false); // Not sure this is a valid case. If you hit this assert
-                     // legally - just add a copy of a function body
-   }
-}
-
-//=============================================================================
 telldata::ttpnt::ttpnt (real x, real y) : user_struct(telldata::tn_pnt),
                                          _x(DEBUG_NEW ttreal(x)), _y(DEBUG_NEW ttreal(y))
 {

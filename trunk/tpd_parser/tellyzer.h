@@ -47,12 +47,6 @@ int telllex(void);
 int tellerror (std::string *s);
 
 namespace  parsercmd {
-   class cmdVIRTUAL;
-   class cmdSTDFUNC;
-   class cmdFUNC;
-   class cmdBLOCK;
-   class FuncDeclaration;
-   class cmdCALLBACK;
 
    //! Used by lexer to include multiply files and for error tracing
    class lexer_files {
@@ -103,6 +97,12 @@ namespace  parsercmd {
          NameSet           _parsedFiles; //! parsed files which had #pragma once statement
    };
 
+   class cmdVIRTUAL;
+   class cmdSTDFUNC;
+   class cmdFUNC;
+   class cmdBLOCK;
+   class FuncDeclaration;
+   class cmdCALLBACK;
 //-----------------------------------------------------------------------------
 // Define the types of tell structures
 //-----------------------------------------------------------------------------
@@ -124,6 +124,7 @@ namespace  parsercmd {
 // argumentMAP - ???
 //-----------------------------------------------------------------------------
    typedef  std::multimap<std::string, cmdSTDFUNC*>      FunctionMAP;
+   typedef  std::map<std::string, cmdSTDFUNC*>           CBFuncMAP;
    typedef  std::deque<cmdBLOCK*>                        BlockSTACK;
    typedef  std::deque<cmdVIRTUAL*>                      CmdQUEUE;
    typedef  std::deque<cmdSTDFUNC*>                      UndoQUEUE;
@@ -563,6 +564,7 @@ namespace  parsercmd {
       const telldata::TType*     getTypeByID(const telldata::typeID ID) const;
       telldata::tell_var*        getID(const char*, bool local=false) const;
       telldata::tell_var*        newTellvar(telldata::typeID, const char*, TpdYYLtype);
+      telldata::tell_var*        newFuncArg(telldata::typeID, const char*, TpdYYLtype);
       bool                       defValidate(const std::string& ,const ArgumentLIST*, cmdFUNC*&);
       bool                       declValidate(const std::string&, const ArgumentLIST*, TpdYYLtype);
       cmdSTDFUNC*  const         getFuncBody(const char*, telldata::argumentQ*) const;
@@ -575,15 +577,15 @@ namespace  parsercmd {
       void                       restoreVarLocal(telldata::variableMAP&);
       void                       initializeVarLocal();
       bool                       checkDbSortState(DbSortState);
-//      FunctionMAP const          funcMAP() const {return _funcMAP;}
       word                       undoDepth() {return _undoDepth;}
       void                       setUndoDepth(word ud) {_undoDepth = ud;}
       virtual                   ~cmdBLOCK();
    protected:
-      telldata::variableMAP     _varLocal;  // list of local variables
-      telldata::typeMAP         _typeLocal; // list of local types
-      telldata::TypeList        _typeAnoLo; // list of anonymous local types
-      CmdQUEUE                  _cmdQ;      // list of commands
+      telldata::variableMAP     _varLocal;  //! list of local variables
+      telldata::typeMAP         _typeLocal; //! list of local types
+      telldata::TypeList        _typeAnoLo; //! list of anonymous local types (callbacks only so far)
+      CBFuncMAP                 _lclFuncMAP;//! local function map (callback arguments only)
+      CmdQUEUE                  _cmdQ;      //! list of commands
       static BlockSTACK         _blocks;
       static FunctionMAP        _funcMAP;
       static FunctionMAP        _internalFuncMap;
@@ -638,16 +640,18 @@ namespace  parsercmd {
 
    class cmdFUNC:public cmdSTDFUNC, public cmdBLOCK {
    public:
-                              cmdFUNC(ArgumentLIST*, telldata::typeID, bool);
+                              cmdFUNC(ArgumentLIST*, telldata::typeID, bool, TpdYYLtype);
       virtual int             execute();
       virtual bool            internal() {return false;}
       virtual bool            declaration() {return _declaration;}
       virtual void            undo() {};
       virtual void            undo_cleanup() {};
       void                    set_defined() {_declaration = false;}
+      virtual                ~cmdFUNC() {}
    protected:
       typedef std::stack<telldata::variableMAP*> LocalVarStack;
       typedef std::list<telldata::tell_var*> BackupList;
+      bool                    addCALLBACKPARAM(std::string, cmdCALLBACK*, TpdYYLtype);
       bool                    _declaration;
       BackupList*             backupOperandStack();
       void                    restoreOperandStack(BackupList*);
@@ -744,6 +748,7 @@ namespace  parsercmd {
    telldata::typeID  BoolEx(telldata::typeID, telldata::typeID, std::string, TpdYYLtype, TpdYYLtype);
    telldata::typeID  BoolEx(telldata::typeID, std::string, TpdYYLtype);
 
+   telldata::tell_var* newCallBackArgument(telldata::typeID, TpdYYLtype);
    bool              StructTypeCheck(telldata::typeID, telldata::argumentID*, TpdYYLtype);
    bool              ListIndexCheck(telldata::typeID, TpdYYLtype, telldata::typeID, TpdYYLtype);
    bool              ListSliceCheck(telldata::typeID, TpdYYLtype, telldata::typeID, TpdYYLtype, telldata::typeID, TpdYYLtype);
@@ -777,6 +782,27 @@ namespace  parsercmd {
       word                             _numErrors;
    };
 
+}
+
+namespace telldata {
+   //==============================================================================
+   class call_back : public tell_var {
+   public:
+                           call_back(const typeID ID, parsercmd::cmdCALLBACK*);
+                           call_back(const typeID ID, parsercmd::cmdSTDFUNC*);
+                           call_back(const call_back&);
+      virtual             ~call_back() {}
+      virtual void         initialize();
+      virtual tell_var*    selfcopy() const;  //{return DEBUG_NEW call_back(*this);}
+      virtual void         echo(std::string&, real);
+      virtual void         assign(tell_var*);
+      parsercmd::cmdCALLBACK* fcbBody()        { return _fcbBody;}
+      parsercmd::cmdSTDFUNC*  fBody()          { return _fBody;  }
+   protected:
+      parsercmd::cmdCALLBACK* _fcbBody;
+      parsercmd::cmdSTDFUNC*  _fBody;
+      bool                 _definition;
+   };
 }
 
 namespace console{

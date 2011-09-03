@@ -336,8 +336,7 @@ funcblock:
 
 fblock :
      '{'                                   {
-         CMDBlock = DEBUG_NEW parsercmd::cmdFUNC(cfd->argListCopy(),cfd->type(),false);
-         /*TODO - when argument list is copied THEN the new function shall get its eventual callback declarations from the argument list*/
+         CMDBlock = DEBUG_NEW parsercmd::cmdFUNC(cfd->argListCopy(),cfd->type(),false, @1);
          CMDBlock->pushblk();
       }
      statements '}'                        {
@@ -585,9 +584,7 @@ funcneargument:
 
 funcargument:
      telltypeID tknIDENTIFIER              {
-      tellvar = CMDBlock->newTellvar($1, $2, @1);
-      /*TODO - we need separate fucntions for a regular variable devlaration and function arguments like here
-               This separation is enforced by the eventuall callbacks*/
+      tellvar = CMDBlock->newFuncArg($1, $2, @1);
       cfd->pushArg(DEBUG_NEW parsercmd::ArgumentTYPE($2,tellvar));
       delete [] $2;
    }
