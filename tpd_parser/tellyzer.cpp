@@ -907,38 +907,27 @@ int parsercmd::cmdASSIGN::execute()
 {
    TELL_DEBUG(cmdASSIGN);
    telldata::TellVar *op = OPstack.top();OPstack.pop();
-//   telldata::typeID typeis = _var->get_type();
-//   if (TLISALIST(typeis))
-//   {
-//      typeis = typeis & ~telldata::tn_listmask;
-//   }
-//   if ((TLCOMPOSIT_TYPE(typeis)) && (NULL == CMDBlock->getTypeByID(typeis)))
-//      tellerror("Bad or unsupported type in assign statement");
-//   else
+   if (_indexed)
    {
-      if (_indexed)
+      dword idx = getIndexValue();
+      telldata::TellVar* indexVar = static_cast<telldata::TtList*>(_var)->index_var(idx);
+      if ((NULL != indexVar) && (!_opstackerr))
       {
-         dword idx = getIndexValue();
-         telldata::TellVar* indexVar = static_cast<telldata::TtList*>(_var)->index_var(idx);
-         if ((NULL != indexVar) && (!_opstackerr))
-         {
-            indexVar->assign(op); OPstack.push(indexVar->selfcopy());
-         }
-         else
-         {
-            tellerror("Runtime error.Invalid Index");
-            delete op;
-            return EXEC_ABORT;
-         }
+         indexVar->assign(op); OPstack.push(indexVar->selfcopy());
       }
       else
       {
-         _var->assign(op); OPstack.push(_var->selfcopy());
+         tellerror("Runtime error.Invalid Index");
+         delete op;
+         return EXEC_ABORT;
       }
+   }
+   else
+   {
+      _var->assign(op); OPstack.push(_var->selfcopy());
    }
    delete op;
    return EXEC_NEXT;
-
 }
 
 //=============================================================================
