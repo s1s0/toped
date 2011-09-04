@@ -50,8 +50,8 @@ NameList* tellstdfunc::lstLENGTH::callingConv(const telldata::typeMAP*)
 
 int tellstdfunc::lstLENGTH::execute()
 {
-   telldata::ttlist* pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
-   OPstack.push(DEBUG_NEW telldata::ttint(pl->size()));
+   telldata::TtList* pl = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
+   OPstack.push(DEBUG_NEW telldata::TtInt(pl->size()));
    delete pl;
    return EXEC_NEXT;
 }
@@ -60,22 +60,22 @@ int tellstdfunc::lstLENGTH::execute()
 tellstdfunc::lytPOINTDUMP::lytPOINTDUMP(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlayout()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtLayout()));
 }
 
 int tellstdfunc::lytPOINTDUMP::execute()
 {
-   telldata::ttlayout* layobject = static_cast<telldata::ttlayout*>(OPstack.top());OPstack.pop();
+   telldata::TtLayout* layobject = static_cast<telldata::TtLayout*>(OPstack.top());OPstack.pop();
    real DBscale = PROPC->DBscale();
    // The line below will crash spectacularly if the the target DB was changed after the
    // layout objects were selected. This is a general problem with all the functions of
    // this type
    PointVector plst = layobject->data()->dumpPoints();
 
-   telldata::ttlist *pl = DEBUG_NEW telldata::ttlist(telldata::tn_pnt);
+   telldata::TtList *pl = DEBUG_NEW telldata::TtList(telldata::tn_pnt);
    for (unsigned i = 0; i < plst.size(); i++)
    {
-      telldata::ttpnt* pp = DEBUG_NEW telldata::ttpnt(((real)plst[i].x()) / DBscale,
+      telldata::TtPnt* pp = DEBUG_NEW telldata::TtPnt(((real)plst[i].x()) / DBscale,
                                                       ((real)plst[i].y()) / DBscale );
       pl->add(pp);
    }
@@ -88,18 +88,18 @@ int tellstdfunc::lytPOINTDUMP::execute()
 tellstdfunc::lytTYPEOF::lytTYPEOF(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlayout()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtLayout()));
 }
 
 int tellstdfunc::lytTYPEOF::execute()
 {
-   telldata::ttlayout* layobject = static_cast<telldata::ttlayout*>(OPstack.top());OPstack.pop();
+   telldata::TtLayout* layobject = static_cast<telldata::TtLayout*>(OPstack.top());OPstack.pop();
    // The line below will crash spectacularly if the the target DB was changed after the
    // layout objects were selected. This is a general problem with all the functions of
    // this type
    word ltype = layobject->data()->lType();
 
-   telldata::ttint *lt = DEBUG_NEW telldata::ttint(ltype);
+   telldata::TtInt *lt = DEBUG_NEW telldata::TtInt(ltype);
    OPstack.push(lt);
    delete layobject;
    return EXEC_NEXT;
@@ -123,7 +123,7 @@ NameList* tellstdfunc::stdABS::callingConv(const telldata::typeMAP*)
 int tellstdfunc::stdABS::execute()
 {
    real value = getOpValue(OPstack);
-   OPstack.push(DEBUG_NEW telldata::ttreal(fabs(value)));
+   OPstack.push(DEBUG_NEW telldata::TtReal(fabs(value)));
    return EXEC_NEXT;
 }
 
@@ -131,14 +131,14 @@ int tellstdfunc::stdABS::execute()
 tellstdfunc::stdSIN::stdSIN(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
 }
 
 int tellstdfunc::stdSIN::execute()
 {
    real value = getOpValue(OPstack);
    real angle = (value / 180.0 * M_PI);// translate in radians
-   OPstack.push(DEBUG_NEW telldata::ttreal(sin(angle)));
+   OPstack.push(DEBUG_NEW telldata::TtReal(sin(angle)));
    return EXEC_NEXT;
 }
 
@@ -146,14 +146,14 @@ int tellstdfunc::stdSIN::execute()
 tellstdfunc::stdASIN::stdASIN(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
 }
 
 int tellstdfunc::stdASIN::execute()
 {
    real value = getOpValue(OPstack);
    real angle = (asin(value) * 180.0) / M_PI;// translate in degrees
-   OPstack.push(DEBUG_NEW telldata::ttreal(angle));
+   OPstack.push(DEBUG_NEW telldata::TtReal(angle));
    return EXEC_NEXT;
 }
 
@@ -161,14 +161,14 @@ int tellstdfunc::stdASIN::execute()
 tellstdfunc::stdCOS::stdCOS(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
 }
 
 int tellstdfunc::stdCOS::execute()
 {
    real value = getOpValue(OPstack);
    real angle = (value / 180.0 * M_PI);// translate in radians
-   OPstack.push(DEBUG_NEW telldata::ttreal(cos(angle)));
+   OPstack.push(DEBUG_NEW telldata::TtReal(cos(angle)));
    return EXEC_NEXT;
 }
 
@@ -176,14 +176,14 @@ int tellstdfunc::stdCOS::execute()
 tellstdfunc::stdACOS::stdACOS(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
 }
 
 int tellstdfunc::stdACOS::execute()
 {
    real value = getOpValue(OPstack);
    real angle = (acos(value) * 180.0) / M_PI;// translate in degrees
-   OPstack.push(DEBUG_NEW telldata::ttreal(angle));
+   OPstack.push(DEBUG_NEW telldata::TtReal(angle));
    return EXEC_NEXT;
 }
 
@@ -191,14 +191,14 @@ int tellstdfunc::stdACOS::execute()
 tellstdfunc::stdTAN::stdTAN(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
 }
 
 int tellstdfunc::stdTAN::execute()
 {
    real value = getOpValue(OPstack);
    real angle = (value / 180.0 * M_PI);// translate in radians
-   OPstack.push(DEBUG_NEW telldata::ttreal(tan(angle)));
+   OPstack.push(DEBUG_NEW telldata::TtReal(tan(angle)));
    return EXEC_NEXT;
 }
 
@@ -206,14 +206,14 @@ int tellstdfunc::stdTAN::execute()
 tellstdfunc::stdATAN::stdATAN(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
 }
 
 int tellstdfunc::stdATAN::execute()
 {
    real value = getOpValue(OPstack);
    real angle = (atan(value) * 180.0) / M_PI;// translate in degrees
-   OPstack.push(DEBUG_NEW telldata::ttreal(angle));
+   OPstack.push(DEBUG_NEW telldata::TtReal(angle));
    return EXEC_NEXT;
 }
 
@@ -221,14 +221,14 @@ int tellstdfunc::stdATAN::execute()
 tellstdfunc::stdROUND::stdROUND(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
 }
 
 int tellstdfunc::stdROUND::execute()
 {
    real value = getOpValue(OPstack);
    int4b result = (int4b) rint(value);
-   OPstack.push(DEBUG_NEW telldata::ttint(result));
+   OPstack.push(DEBUG_NEW telldata::TtInt(result));
    return EXEC_NEXT;
 }
 
@@ -236,14 +236,14 @@ int tellstdfunc::stdROUND::execute()
 tellstdfunc::stdCEIL::stdCEIL(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
 }
 
 int tellstdfunc::stdCEIL::execute()
 {
    real value = getOpValue(OPstack);
    int4b result = (int4b) ceil(value);
-   OPstack.push(DEBUG_NEW telldata::ttint(result));
+   OPstack.push(DEBUG_NEW telldata::TtInt(result));
    return EXEC_NEXT;
 }
 
@@ -251,14 +251,14 @@ int tellstdfunc::stdCEIL::execute()
 tellstdfunc::stdFLOOR::stdFLOOR(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
 }
 
 int tellstdfunc::stdFLOOR::execute()
 {
    real value = getOpValue(OPstack);
    int4b result = (int4b) floor(value);
-   OPstack.push(DEBUG_NEW telldata::ttint(result));
+   OPstack.push(DEBUG_NEW telldata::TtInt(result));
    return EXEC_NEXT;
 }
 
@@ -266,8 +266,8 @@ int tellstdfunc::stdFLOOR::execute()
 tellstdfunc::stdFMODULO::stdFMODULO(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
 }
 
 int tellstdfunc::stdFMODULO::execute()
@@ -275,7 +275,7 @@ int tellstdfunc::stdFMODULO::execute()
    real valueY = getOpValue(OPstack);
    real valueX = getOpValue(OPstack);
    real result = fmod(valueX,valueY);
-   OPstack.push(DEBUG_NEW telldata::ttreal(result));
+   OPstack.push(DEBUG_NEW telldata::TtReal(result));
    return EXEC_NEXT;
 }
 
@@ -283,14 +283,14 @@ int tellstdfunc::stdFMODULO::execute()
 tellstdfunc::stdSQRT::stdSQRT(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
 }
 
 int tellstdfunc::stdSQRT::execute()
 {
    real value = getOpValue(OPstack);
    real result = sqrt(value);
-   OPstack.push(DEBUG_NEW telldata::ttreal(result));
+   OPstack.push(DEBUG_NEW telldata::TtReal(result));
    return EXEC_NEXT;
 }
 
@@ -298,8 +298,8 @@ int tellstdfunc::stdSQRT::execute()
 tellstdfunc::stdPOW::stdPOW(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
 }
 
 int tellstdfunc::stdPOW::execute()
@@ -307,7 +307,7 @@ int tellstdfunc::stdPOW::execute()
    real valueY = getOpValue(OPstack);
    real valueX = getOpValue(OPstack);
    real result = pow(valueX,valueY);
-   OPstack.push(DEBUG_NEW telldata::ttreal(result));
+   OPstack.push(DEBUG_NEW telldata::TtReal(result));
    return EXEC_NEXT;
 }
 
@@ -315,14 +315,14 @@ int tellstdfunc::stdPOW::execute()
 tellstdfunc::stdEXP::stdEXP(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
 }
 
 int tellstdfunc::stdEXP::execute()
 {
    real value = getOpValue(OPstack);
    real result = exp(value);
-   OPstack.push(DEBUG_NEW telldata::ttreal(result));
+   OPstack.push(DEBUG_NEW telldata::TtReal(result));
    return EXEC_NEXT;
 }
 
@@ -330,14 +330,14 @@ int tellstdfunc::stdEXP::execute()
 tellstdfunc::stdLOG::stdLOG(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
 }
 
 int tellstdfunc::stdLOG::execute()
 {
    real value = getOpValue(OPstack);
    real result = log(value);
-   OPstack.push(DEBUG_NEW telldata::ttreal(result));
+   OPstack.push(DEBUG_NEW telldata::TtReal(result));
    return EXEC_NEXT;
 }
 
@@ -345,14 +345,14 @@ int tellstdfunc::stdLOG::execute()
 tellstdfunc::stdLOG10::stdLOG10(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
 }
 
 int tellstdfunc::stdLOG10::execute()
 {
    real value = getOpValue(OPstack);
    real result = log10(value);
-   OPstack.push(DEBUG_NEW telldata::ttreal(result));
+   OPstack.push(DEBUG_NEW telldata::TtReal(result));
    return EXEC_NEXT;
 }
 
@@ -360,13 +360,13 @@ int tellstdfunc::stdLOG10::execute()
 tellstdfunc::stdSINH::stdSINH(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
 }
 
 int tellstdfunc::stdSINH::execute()
 {
    real value = getOpValue(OPstack);
-   OPstack.push(DEBUG_NEW telldata::ttreal(sinh(value)));
+   OPstack.push(DEBUG_NEW telldata::TtReal(sinh(value)));
    return EXEC_NEXT;
 }
 
@@ -374,7 +374,7 @@ int tellstdfunc::stdSINH::execute()
 tellstdfunc::stdASINH::stdASINH(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
 }
 
 int tellstdfunc::stdASINH::execute()
@@ -382,9 +382,9 @@ int tellstdfunc::stdASINH::execute()
    real value = getOpValue(OPstack);
 #ifdef WIN32
    real result = log(value + sqrt(value*value + 1.0));
-   OPstack.push(DEBUG_NEW telldata::ttreal(result));
+   OPstack.push(DEBUG_NEW telldata::TtReal(result));
 #else
-   OPstack.push(DEBUG_NEW telldata::ttreal(asinh(value)));
+   OPstack.push(DEBUG_NEW telldata::TtReal(asinh(value)));
 #endif
    return EXEC_NEXT;
 }
@@ -393,13 +393,13 @@ int tellstdfunc::stdASINH::execute()
 tellstdfunc::stdCOSH::stdCOSH(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
 }
 
 int tellstdfunc::stdCOSH::execute()
 {
    real value = getOpValue(OPstack);
-   OPstack.push(DEBUG_NEW telldata::ttreal(cosh(value)));
+   OPstack.push(DEBUG_NEW telldata::TtReal(cosh(value)));
    return EXEC_NEXT;
 }
 
@@ -407,7 +407,7 @@ int tellstdfunc::stdCOSH::execute()
 tellstdfunc::stdACOSH::stdACOSH(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
 }
 
 int tellstdfunc::stdACOSH::execute()
@@ -415,9 +415,9 @@ int tellstdfunc::stdACOSH::execute()
    real value = getOpValue(OPstack);
 #ifdef WIN32
    real result = log( value + sqrt( value*value - 1.0));
-   OPstack.push(DEBUG_NEW telldata::ttreal(result));
+   OPstack.push(DEBUG_NEW telldata::TtReal(result));
 #else
-   OPstack.push(DEBUG_NEW telldata::ttreal(acosh(value)));
+   OPstack.push(DEBUG_NEW telldata::TtReal(acosh(value)));
 #endif
    return EXEC_NEXT;
 }
@@ -426,13 +426,13 @@ int tellstdfunc::stdACOSH::execute()
 tellstdfunc::stdTANH::stdTANH(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
 }
 
 int tellstdfunc::stdTANH::execute()
 {
    real value = getOpValue(OPstack);
-   OPstack.push(DEBUG_NEW telldata::ttreal(tanh(value)));
+   OPstack.push(DEBUG_NEW telldata::TtReal(tanh(value)));
    return EXEC_NEXT;
 }
 
@@ -440,7 +440,7 @@ int tellstdfunc::stdTANH::execute()
 tellstdfunc::stdATANH::stdATANH(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
 }
 
 int tellstdfunc::stdATANH::execute()
@@ -448,9 +448,9 @@ int tellstdfunc::stdATANH::execute()
    real value = getOpValue(OPstack);
 #ifdef WIN32
    real result = log((1.0 + value) / (1.0 - value)) / 2.0;
-   OPstack.push(DEBUG_NEW telldata::ttreal(result));
+   OPstack.push(DEBUG_NEW telldata::TtReal(result));
 #else
-   OPstack.push(DEBUG_NEW telldata::ttreal(atanh(value)));
+   OPstack.push(DEBUG_NEW telldata::TtReal(atanh(value)));
 #endif
    return EXEC_NEXT;
 }

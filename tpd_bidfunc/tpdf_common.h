@@ -145,7 +145,7 @@
 
 namespace tellstdfunc {
 
-   telldata::ttint*     getCurrentLayer();
+   telldata::TtInt*     getCurrentLayer();
    unsigned             secureLayer();
    void                 secureLayer(unsigned);
    bool                 waitGUInput(int, telldata::operandSTACK *,
@@ -156,15 +156,15 @@ namespace tellstdfunc {
                                     word cols = 0,
                                     word rows = 0
                                    );
-   PointVector*         t2tpoints(telldata::ttlist *, real);
-   telldata::ttlist*    make_ttlaylist(laydata::SelectList*);
-   telldata::ttlist*    make_ttlaylist(laydata::AtticList*);
-   laydata::SelectList* get_ttlaylist(telldata::ttlist* llist);
-   laydata::AtticList*  get_shlaylist(telldata::ttlist* llist);
+   PointVector*         t2tpoints(telldata::TtList *, real);
+   telldata::TtList*    make_ttlaylist(laydata::SelectList*);
+   telldata::TtList*    make_ttlaylist(laydata::AtticList*);
+   laydata::SelectList* get_ttlaylist(telldata::TtList* llist);
+   laydata::AtticList*  get_shlaylist(telldata::TtList* llist);
    laydata::DataList*   copyDataList(const laydata::DataList* dlist);
    laydata::SelectList* copySelectList(const laydata::SelectList* dlist);
    void                 cleanSelectList(laydata::SelectList* dlist);
-   void                 clean_ttlaylist(telldata::ttlist* llist);
+   void                 clean_ttlaylist(telldata::TtList* llist);
    void                 clean_atticlist(laydata::AtticList*, bool destroy = false);
    void                 UpdateLV(unsigned int);
    void                 RefreshGL();

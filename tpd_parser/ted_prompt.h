@@ -105,7 +105,7 @@ namespace console {
       virtual void            setString(const wxString&) = 0;
       virtual void            clearString() = 0;
       void                    runTellCommand(const wxString&);
-      void                    mouseLB(const telldata::ttpnt& p);
+      void                    mouseLB(const telldata::TtPnt& p);
       void                    mouseRB();
       void                    cancelLastPoint();
       word                    _numpoints;

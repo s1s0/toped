@@ -2352,7 +2352,7 @@ bool tui::TopedFrame::checkFileOverwriting(const wxString& fileName)
 
 void tui::TopedFrame::OnUncapturedMouseClick(wxCommandEvent& evt)
 {
-   telldata::ttpnt* p = static_cast<telldata::ttpnt*>(evt.GetClientData());
+   telldata::TtPnt* p = static_cast<telldata::TtPnt*>(evt.GetClientData());
    delete p;
 }
 

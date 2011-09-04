@@ -55,7 +55,7 @@ int tellstdfunc::stdSPRINTF::argsOK(argumentQ* amap)
 {
    unsigned numArgs = amap->size();
    if (1 > numArgs) return -1; // i.e. error - at least one argument is expected
-   telldata::argumentID carg((*(*amap)[0]));
+   telldata::ArgumentID carg((*(*amap)[0]));
    if (telldata::tn_string != carg()) return -1; //i.e. error - first argument must be a string
    for (unsigned i = 1; i < numArgs; i++)
    {
@@ -79,17 +79,17 @@ int tellstdfunc::stdSPRINTF::execute()
 {
    word numParams = getWordValue();
    assert(numParams > 0);
-   std::stack<telldata::tell_var*> varstack;
+   std::stack<telldata::TellVar*> varstack;
    // get the function arguments from the argument stack using the info in
    // the arguments structure and push them in a local stack structure.
    while (numParams--)
    {
-      telldata::tell_var *op = OPstack.top();OPstack.pop();
+      telldata::TellVar *op = OPstack.top();OPstack.pop();
       varstack.push(op);
    }
    // OK the first one must be the format string - let's get it out
    //
-   telldata::ttstring* fttstr = static_cast<telldata::ttstring*>(varstack.top());
+   telldata::TtString* fttstr = static_cast<telldata::TtString*>(varstack.top());
    std::string workS(fttstr->value());
    delete fttstr;
    replaceESCs(workS);
@@ -100,7 +100,7 @@ int tellstdfunc::stdSPRINTF::execute()
      // cases to clean-up the heap (varstack contents). Of course it is supposed
      // to replace the format strings from the original string, but this is just
      // in case if there is no error in the operation so far.
-      telldata::tell_var* op = varstack.top();
+      telldata::TellVar* op = varstack.top();
       varstack.pop();
       if (1 == status)
          status = replaceNextFstr(workS, op);
@@ -111,24 +111,24 @@ int tellstdfunc::stdSPRINTF::execute()
    if (checkFstr(workS))
    {
       tell_log(console::MT_ERROR, "printf call contains less arguments than the number of %-tags in the format string");
-      OPstack.push(DEBUG_NEW telldata::ttstring());
+      OPstack.push(DEBUG_NEW telldata::TtString());
       return EXEC_ABORT;
    }
    else if ( 1 == status)
    {
-      OPstack.push(DEBUG_NEW telldata::ttstring(workS));
+      OPstack.push(DEBUG_NEW telldata::TtString(workS));
       return EXEC_NEXT;
    }
    else if ( 0 == status)
    {  // more parameters than expected
       tell_log(console::MT_ERROR, "printf call contains more arguments than the number of %-tags in the format string");
-      OPstack.push(DEBUG_NEW telldata::ttstring());
+      OPstack.push(DEBUG_NEW telldata::TtString());
       return EXEC_ABORT;
    }
    else if (-1 == status)
    {
       tell_log(console::MT_ERROR, "printf discrepancy between the format string and argument type");
-      OPstack.push(DEBUG_NEW telldata::ttstring());
+      OPstack.push(DEBUG_NEW telldata::TtString());
       return EXEC_ABORT;
    }
    assert(false);
@@ -175,7 +175,7 @@ NameList* tellstdfunc::stdECHO::callingConv(const telldata::typeMAP*)
 int tellstdfunc::stdECHO::execute()
 {
    real DBscale = PROPC->DBscale();
-   telldata::tell_var *p = OPstack.top();OPstack.pop();
+   telldata::TellVar *p = OPstack.top();OPstack.pop();
    std::string news;
    p->echo(news, DBscale);
    tell_log(console::MT_INFO,news);
@@ -194,7 +194,7 @@ int tellstdfunc::stdTELLSTATUS::execute()
    MemTrack::TrackListMemoryUsage();
 #else
    real DBscale = PROPC->DBscale();
-   telldata::tell_var *y;
+   telldata::TellVar *y;
    std::string news;
    while (OPstack.size()) {
       y = OPstack.top(); OPstack.pop();
@@ -211,19 +211,19 @@ int tellstdfunc::stdTELLSTATUS::execute()
 tellstdfunc::stdDISTANCE::stdDISTANCE(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_pnt)));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtList(telldata::tn_pnt)));
 }
 
 int tellstdfunc::stdDISTANCE::execute()
 {
    // get the data from the stack
-   telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::TtList *pl = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
 
-   telldata::ttpnt* p1 = NULL;
-   telldata::ttpnt* p2 = NULL;
+   telldata::TtPnt* p1 = NULL;
+   telldata::TtPnt* p2 = NULL;
    for (unsigned i = 0; i < pl->size(); i++) {
       p1 = p2;
-      p2 = static_cast<telldata::ttpnt*>((pl->mlist())[i]);
+      p2 = static_cast<telldata::TtPnt*>((pl->mlist())[i]);
       if (NULL != p1)
       {
          TP ap1 = TP(p1->x(),p1->y(), PROPC->DBscale());
@@ -251,10 +251,10 @@ int tellstdfunc::stdDISTANCE_D::execute()
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(console::op_line, &OPstack)) return EXEC_ABORT;
    // get the data from the stack
-   telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
-   telldata::ttlist* plst = DEBUG_NEW telldata::ttlist(telldata::tn_pnt);
-   plst->add(DEBUG_NEW telldata::ttpnt(w->p1().x(), w->p1().y()));
-   plst->add(DEBUG_NEW telldata::ttpnt(w->p2().x(), w->p2().y()));
+   telldata::TtWnd *w = static_cast<telldata::TtWnd*>(OPstack.top());OPstack.pop();
+   telldata::TtList* plst = DEBUG_NEW telldata::TtList(telldata::tn_pnt);
+   plst->add(DEBUG_NEW telldata::TtPnt(w->p1().x(), w->p1().y()));
+   plst->add(DEBUG_NEW telldata::TtPnt(w->p2().x(), w->p2().y()));
    OPstack.push(plst);
    delete w;
    return stdDISTANCE::execute();
@@ -276,7 +276,7 @@ int tellstdfunc::stdCLEARRULERS::execute()
 tellstdfunc::stdLONGCURSOR::stdLONGCURSOR(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
 }
 
 int tellstdfunc::stdLONGCURSOR::execute()
@@ -329,13 +329,13 @@ int tellstdfunc::stdREDRAW::execute()
 tellstdfunc::stdZOOMWIN::stdZOOMWIN(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttpnt()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttpnt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtPnt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtPnt()));
 }
 
 int tellstdfunc::stdZOOMWIN::execute() {
-   telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-   telldata::ttpnt *p2 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
+   telldata::TtPnt *p1 = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
+   telldata::TtPnt *p2 = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
    real DBscale = PROPC->DBscale();
    DBbox* box = DEBUG_NEW DBbox(TP(p1->x(), p1->y(), DBscale),
                           TP(p2->x(), p2->y(), DBscale));
@@ -350,11 +350,11 @@ int tellstdfunc::stdZOOMWIN::execute() {
 tellstdfunc::stdZOOMWINb::stdZOOMWINb(telldata::typeID retype, bool eor) :
       stdZOOMWIN(DEBUG_NEW parsercmd::ArgumentLIST,retype, eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttwnd()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtWnd()));
 }
 
 int tellstdfunc::stdZOOMWINb::execute() {
-   telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
+   telldata::TtWnd *w = static_cast<telldata::TtWnd*>(OPstack.top());OPstack.pop();
    real DBscale = PROPC->DBscale();
    DBbox* box = DEBUG_NEW DBbox(TP(w->p1().x(), w->p1().y(), DBscale),
                           TP(w->p2().x(), w->p2().y(), DBscale));
@@ -455,7 +455,7 @@ int tellstdfunc::getPOINTLIST::execute() {
 tellstdfunc::stdEXEC::stdEXEC(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 int tellstdfunc::stdEXEC::execute()
@@ -518,7 +518,7 @@ int tellstdfunc::intrnlSORT_DB::execute()
 }
 
 
-bool tellstdfunc::replaceNextFstr(std::string& str, telldata::tell_var* val)
+bool tellstdfunc::replaceNextFstr(std::string& str, telldata::TellVar* val)
 {
    wxString wxStr(str.c_str(), wxConvUTF8);
    wxRegEx src_tmpl(tellstdfunc::fspec_tmpl);
@@ -536,16 +536,16 @@ bool tellstdfunc::replaceNextFstr(std::string& str, telldata::tell_var* val)
       switch (val->get_type())
       {
          case telldata::tn_int    :
-            numChars = sprintf(replacement, formatChars, static_cast<telldata::ttint*>(val)->value());
+            numChars = sprintf(replacement, formatChars, static_cast<telldata::TtInt*>(val)->value());
             break;
          case telldata::tn_real   :
-            numChars = sprintf(replacement, formatChars, static_cast<telldata::ttreal*>(val)->value());
+            numChars = sprintf(replacement, formatChars, static_cast<telldata::TtReal*>(val)->value());
             break;
          case telldata::tn_bool   :
-            numChars = sprintf(replacement, formatChars, static_cast<telldata::ttbool*>(val)->value());
+            numChars = sprintf(replacement, formatChars, static_cast<telldata::TtBool*>(val)->value());
             break;
          case telldata::tn_string : {
-            std::string interStr = static_cast<telldata::ttstring*>(val)->value();
+            std::string interStr = static_cast<telldata::TtString*>(val)->value();
             numChars = sprintf(replacement, formatChars, interStr.c_str());
             break;
          }

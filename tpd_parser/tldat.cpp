@@ -37,28 +37,30 @@
 extern parsercmd::cmdBLOCK*       CMDBlock;
 
 //=============================================================================
-telldata::tell_var* telldata::TCompType::initfield(const typeID ID) const {
-   telldata::tell_var* nvar;
-   if (ID & telldata::tn_listmask) nvar = DEBUG_NEW telldata::ttlist(ID & ~telldata::tn_listmask);
+telldata::TellVar* telldata::TCompType::initfield(const typeID ID) const
+{
+   telldata::TellVar* nvar;
+   if (ID & telldata::tn_listmask) nvar = DEBUG_NEW telldata::TtList(ID & ~telldata::tn_listmask);
    else
-      switch(ID & ~telldata::tn_listmask) {
+      switch(ID & ~telldata::tn_listmask)
+      {
          case tn_void  : assert(false);
-         case tn_int   : nvar = DEBUG_NEW telldata::ttint()    ;break;
-         case tn_real  : nvar = DEBUG_NEW telldata::ttreal()   ;break;
-         case tn_bool  : nvar = DEBUG_NEW telldata::ttbool()   ;break;
-         case tn_string: nvar = DEBUG_NEW telldata::ttstring() ;break;
-         case tn_pnt   : nvar = DEBUG_NEW telldata::ttpnt()    ;break;
-         case tn_box   : nvar = DEBUG_NEW telldata::ttwnd()    ;break;
-         case tn_bnd   : nvar = DEBUG_NEW telldata::ttbnd()    ;break;
-         case tn_hsh   : nvar = DEBUG_NEW telldata::tthsh()    ;break;
-         case tn_hshstr: nvar = DEBUG_NEW telldata::tthshstr() ;break;
-         case tn_layout: nvar = DEBUG_NEW telldata::ttlayout() ;break;
-         case tn_auxilary: nvar = DEBUG_NEW telldata::ttauxdata() ;break;
+         case tn_int   : nvar = DEBUG_NEW telldata::TtInt()    ;break;
+         case tn_real  : nvar = DEBUG_NEW telldata::TtReal()   ;break;
+         case tn_bool  : nvar = DEBUG_NEW telldata::TtBool()   ;break;
+         case tn_string: nvar = DEBUG_NEW telldata::TtString() ;break;
+         case tn_pnt   : nvar = DEBUG_NEW telldata::TtPnt()    ;break;
+         case tn_box   : nvar = DEBUG_NEW telldata::TtWnd()    ;break;
+         case tn_bnd   : nvar = DEBUG_NEW telldata::TtBnd()    ;break;
+         case tn_hsh   : nvar = DEBUG_NEW telldata::TtHsh()    ;break;
+         case tn_hshstr: nvar = DEBUG_NEW telldata::TtHshStr() ;break;
+         case tn_layout: nvar = DEBUG_NEW telldata::TtLayout() ;break;
+         case tn_auxilary: nvar = DEBUG_NEW telldata::TtAuxdata() ;break;
                 default: {
                      assert(_tIDMAP.end() != _tIDMAP.find(ID));
                      const TType* vartype = _tIDMAP.find(ID)->second;
                      if (vartype->isComposite())
-                        nvar = DEBUG_NEW telldata::user_struct(static_cast<const TCompType*>(vartype));
+                        nvar = DEBUG_NEW telldata::TtUserStruct(static_cast<const TCompType*>(vartype));
                      else
                      {
                         assert(false); //TODO callback types
@@ -68,9 +70,11 @@ telldata::tell_var* telldata::TCompType::initfield(const typeID ID) const {
    return nvar;
 }
 
-bool telldata::TCompType::addfield(std::string fname, typeID fID, const TType* utype) {
+bool telldata::TCompType::addfield(std::string fname, typeID fID, const TType* utype)
+{
    // search for a field with this name
-   for (recfieldsID::const_iterator CF = _fields.begin(); CF != _fields.end(); CF++) {
+   for (recfieldsID::const_iterator CF = _fields.begin(); CF != _fields.end(); CF++)
+   {
       if (CF->first == fname) return false;
    }
    _fields.push_back(structRECID(fname,fID));
@@ -128,69 +132,76 @@ telldata::THshStrType::THshStrType() : TCompType(telldata::tn_hshstr)
 };
 
 //=============================================================================
-void telldata::ttreal::assign(tell_var* rt)
+void telldata::TtReal::assign(TellVar* rt)
 {
    if (rt->get_type() == tn_real)
    {
-      _value = static_cast<ttreal*>(rt)->value();
+      _value = static_cast<TtReal*>(rt)->value();
       update_cstat();
    }
    else if (rt->get_type() == tn_int)
    {
-      _value = static_cast<ttint*>(rt)->value();
+      _value = static_cast<TtInt*>(rt)->value();
       update_cstat();
    }
 //   @TODO else ERROR Run time error (or Warning) -> unexpected type in ..bla bla
 }
 
-void telldata::ttreal::echo(std::string& wstr, real) {
+void telldata::TtReal::echo(std::string& wstr, real)
+{
    std::ostringstream ost;
    std::scientific(ost);
    ost << value();
    wstr += ost.str();
 }
 
-const telldata::ttreal& telldata::ttreal::operator = (const ttreal& a) {
+const telldata::TtReal& telldata::TtReal::operator = (const TtReal& a)
+{
    _value = a.value();
    return *this;
 }
 
-const telldata::ttreal& telldata::ttreal::operator = (const ttint& a) {
+const telldata::TtReal& telldata::TtReal::operator = (const TtInt& a)
+{
    _value = a.value();
    return *this;
 }
 //=============================================================================
-void telldata::ttint::assign(tell_var* rt) {
+void telldata::TtInt::assign(TellVar* rt)
+{
    if (rt->get_type() == tn_real)
    {
       // Note! There is no rint() here deliberately - for compatibility
       // with normal C. See Issue 47. There is a tell function rint() with
       // the same functionality as the corresponding C function which
       // shall be used for rounding
-      _value = (int4b) static_cast<ttreal*>(rt)->value();
+      _value = (int4b) static_cast<TtReal*>(rt)->value();
       update_cstat();
    }
    else if (rt->get_type() == tn_int)
    {
-      _value = static_cast<ttint*>(rt)->value();
+      _value = static_cast<TtInt*>(rt)->value();
       update_cstat();
    }
    else
       assert(false);
 }
 
-void telldata::ttint::echo(std::string& wstr, real) {
+void telldata::TtInt::echo(std::string& wstr, real)
+{
    std::ostringstream ost;
    ost << value();
    wstr += ost.str();
 }
 
-const telldata::ttint& telldata::ttint::operator = (const ttint& a) {
+const telldata::TtInt& telldata::TtInt::operator = (const TtInt& a)
+{
    _value = a.value();
    return *this;
 }
 
-const telldata::ttint& telldata::ttint::operator = (const ttreal& a) {
+const telldata::TtInt& telldata::TtInt::operator = (const TtReal& a)
+{
    // if a.value outside the limits -> send a runtime error message
 //   real  rval = a.value();
 //   int4b ival = (int4b)rval;
@@ -199,46 +210,54 @@ const telldata::ttint& telldata::ttint::operator = (const ttreal& a) {
    return *this;
 }
 //=============================================================================
-const telldata::ttbool& telldata::ttbool::operator = (const ttbool& a) {
+const telldata::TtBool& telldata::TtBool::operator = (const TtBool& a)
+{
    _value = a.value();
    return *this;
 }
 
-void telldata::ttbool::assign(tell_var* rt) {
-   _value = static_cast<ttbool*>(rt)->value();
+void telldata::TtBool::assign(TellVar* rt)
+{
+   _value = static_cast<TtBool*>(rt)->value();
    update_cstat();
 }
 
-void telldata::ttbool::echo(std::string& wstr, real) {
+void telldata::TtBool::echo(std::string& wstr, real)
+{
    if (_value) wstr += "true";
    else        wstr += "false";
 }
 
 //=============================================================================
-const telldata::ttstring& telldata::ttstring::operator = (const ttstring& a) {
+const telldata::TtString& telldata::TtString::operator = (const TtString& a)
+{
    _value = a.value();
    return *this;
 }
 
-void telldata::ttstring::assign(tell_var* value) {
-   _value = static_cast<ttstring*>(value)->_value;
+void telldata::TtString::assign(TellVar* value)
+{
+   _value = static_cast<TtString*>(value)->_value;
    update_cstat();
 }
 
-void telldata::ttstring::echo(std::string& wstr, real) {
+void telldata::TtString::echo(std::string& wstr, real)
+{
    std::ostringstream ost;
    ost << "\"" << _value << "\"";
    wstr += ost.str();
 }
 //=============================================================================
-telldata::ttlayout::ttlayout(const ttlayout& cobj) : tell_var(cobj.get_type()) {
+telldata::TtLayout::TtLayout(const TtLayout& cobj) : TellVar(cobj.get_type())
+{
    if (NULL != cobj._selp) _selp = DEBUG_NEW SGBitSet(*(cobj._selp));
    else _selp = NULL;
    _layer = cobj._layer;
    _data = cobj._data; // don't copy the layout data!
 }
 
-const telldata::ttlayout& telldata::ttlayout::operator = (const ttlayout& cobj) {
+const telldata::TtLayout& telldata::TtLayout::operator = (const TtLayout& cobj)
+{
    if (_selp) {delete _selp; _selp = NULL;}
    if (NULL != cobj._selp) _selp = DEBUG_NEW SGBitSet((*cobj._selp));
    _layer = cobj._layer;
@@ -246,7 +265,7 @@ const telldata::ttlayout& telldata::ttlayout::operator = (const ttlayout& cobj) 
    return *this;
 }
 
-void telldata::ttlayout::echo(std::string& wstr, real DBU)
+void telldata::TtLayout::echo(std::string& wstr, real DBU)
 {
    std::ostringstream ost;
    if (NULL == _data)
@@ -261,8 +280,9 @@ void telldata::ttlayout::echo(std::string& wstr, real DBU)
    wstr += ost.str();
 }
 
-void telldata::ttlayout::assign(tell_var* data) {
-   ttlayout* variable = static_cast<ttlayout*>(data);
+void telldata::TtLayout::assign(TellVar* data)
+{
+   TtLayout* variable = static_cast<TtLayout*>(data);
    _data  = variable->_data;
    if (NULL != variable->_selp) _selp = DEBUG_NEW SGBitSet(*(variable->_selp));
    else _selp = NULL;
@@ -271,20 +291,20 @@ void telldata::ttlayout::assign(tell_var* data) {
 }
 
 //=============================================================================
-telldata::ttauxdata::ttauxdata(const ttauxdata& cobj) :
-      tell_var ( cobj.get_type() ),
+telldata::TtAuxdata::TtAuxdata(const TtAuxdata& cobj) :
+      TellVar  ( cobj.get_type() ),
      _data     ( cobj._data      ), // don't copy the layout data!
      _layer    ( cobj._layer     )
 {}
 
-const telldata::ttauxdata& telldata::ttauxdata::operator = (const ttauxdata& cobj)
+const telldata::TtAuxdata& telldata::TtAuxdata::operator = (const TtAuxdata& cobj)
 {
    _layer = cobj._layer;
    _data = cobj._data; // don't copy the layout data!
    return *this;
 }
 
-void telldata::ttauxdata::echo(std::string& wstr, real DBU)
+void telldata::TtAuxdata::echo(std::string& wstr, real DBU)
 {
    std::ostringstream ost;
    if (NULL == _data)
@@ -298,15 +318,16 @@ void telldata::ttauxdata::echo(std::string& wstr, real DBU)
    wstr += ost.str();
 }
 
-void telldata::ttauxdata::assign(tell_var* data)
+void telldata::TtAuxdata::assign(TellVar* data)
 {
-   ttauxdata* variable = static_cast<ttauxdata*>(data);
+   TtAuxdata* variable = static_cast<TtAuxdata*>(data);
    _data  = variable->_data;
    _layer = variable->_layer;
    update_cstat();
 }
 //=============================================================================
-telldata::ttlist::ttlist(const telldata::ttlist& cobj) : tell_var(cobj.get_type()) {
+telldata::TtList::TtList(const telldata::TtList& cobj) : TellVar(cobj.get_type())
+{
    // copy constructor
    unsigned count = cobj._mlist.size();
    _mlist.resize(count);
@@ -315,7 +336,8 @@ telldata::ttlist::ttlist(const telldata::ttlist& cobj) : tell_var(cobj.get_type(
 //     _mlist.push_back(cobj._mlist[i]->selfcopy());
 }
 
-const telldata::ttlist& telldata::ttlist::operator =(const telldata::ttlist& cobj) {
+const telldata::TtList& telldata::TtList::operator =(const telldata::TtList& cobj)
+{
    unsigned count = _mlist.size();
    unsigned i;
    for (i = 0; i < count; i++)
@@ -336,9 +358,9 @@ const telldata::ttlist& telldata::ttlist::operator =(const telldata::ttlist& cob
          // and this introduces the risk to contaminate int lists with a real value
          // and vice versa
          if (telldata::tn_int == localID)
-            _mlist.push_back(DEBUG_NEW ttint(static_cast<ttreal*>(cobj._mlist[i])->value()));
+            _mlist.push_back(DEBUG_NEW TtInt(static_cast<TtReal*>(cobj._mlist[i])->value()));
          else
-            _mlist.push_back(DEBUG_NEW ttreal(static_cast<ttint*>(cobj._mlist[i])->value()));
+            _mlist.push_back(DEBUG_NEW TtReal(static_cast<TtInt*>(cobj._mlist[i])->value()));
       }
       else
       {
@@ -349,7 +371,7 @@ const telldata::ttlist& telldata::ttlist::operator =(const telldata::ttlist& cob
    return *this;
 }
 
-void telldata::ttlist::initialize()
+void telldata::TtList::initialize()
 {
    for (unsigned long i = 0 ; i < _mlist.size(); i++)
    {
@@ -359,7 +381,7 @@ void telldata::ttlist::initialize()
 }
 
 
-void telldata::ttlist::echo(std::string& wstr, real DBU)
+void telldata::TtList::echo(std::string& wstr, real DBU)
 {
    std::ostringstream ost;
    if (_mlist.empty()) {wstr += "empty list";}
@@ -375,17 +397,18 @@ void telldata::ttlist::echo(std::string& wstr, real DBU)
    }
 }
 
-void telldata::ttlist::assign(tell_var* rt) {
-   this->operator = (*(static_cast<ttlist*>(rt)));
+void telldata::TtList::assign(TellVar* rt)
+{
+   this->operator = (*(static_cast<TtList*>(rt)));
 }
 
-telldata::tell_var* telldata::ttlist::index_var(dword index)
+telldata::TellVar* telldata::TtList::index_var(dword index)
 {
    if (_mlist.empty() || (index > (_mlist.size() - 1))) return NULL;
    else return _mlist[index];
 }
 
-void telldata::ttlist::resize(unsigned num, tell_var* initVar)
+void telldata::TtList::resize(unsigned num, TellVar* initVar)
 {
    _mlist.resize(num);
    for (unsigned i = 0; i < num; i++)
@@ -396,19 +419,19 @@ void telldata::ttlist::resize(unsigned num, tell_var* initVar)
    delete initVar;
 }
 
-bool telldata::ttlist::validIndex(dword index)
+bool telldata::TtList::validIndex(dword index)
 {
    dword cursize = _mlist.size();
    if ((0 == cursize) || (index > (cursize - 1))) return false;
    else return true;
 }
 
-void telldata::ttlist::insert(telldata::tell_var* newval)
+void telldata::TtList::insert(telldata::TellVar* newval)
 {
    _mlist.push_back(newval->selfcopy());
 }
 
-void telldata::ttlist::insert(telldata::tell_var* newval, dword index)
+void telldata::TtList::insert(telldata::TellVar* newval, dword index)
 {
    assert(index >=0); assert(index <= _mlist.size());
    if (index == _mlist.size())
@@ -432,13 +455,13 @@ void telldata::ttlist::insert(telldata::tell_var* newval, dword index)
    }
 }
 
-void telldata::ttlist::lunion(telldata::ttlist* inlist)
+void telldata::TtList::lunion(telldata::TtList* inlist)
 {
    for (memlist::const_iterator CI = inlist->_mlist.begin(); CI != inlist->_mlist.end(); CI++)
       _mlist.push_back((*CI)->selfcopy());
 }
 
-void telldata::ttlist::lunion(telldata::ttlist* inlist, dword index)
+void telldata::TtList::lunion(telldata::TtList* inlist, dword index)
 {
    assert(index >=0); assert(index <= _mlist.size());
    if (index == _mlist.size())
@@ -460,10 +483,10 @@ void telldata::ttlist::lunion(telldata::ttlist* inlist, dword index)
    }
 }
 
-telldata::tell_var* telldata::ttlist::erase(dword index)
+telldata::TellVar* telldata::TtList::erase(dword index)
 {
    assert(index >=0); assert(index < _mlist.size());
-   telldata::tell_var* erased = _mlist[index];
+   telldata::TellVar* erased = _mlist[index];
    if (index == (_mlist.size() - 1))
    {
       // remove the last component
@@ -483,11 +506,11 @@ telldata::tell_var* telldata::ttlist::erase(dword index)
    return erased;
 }
 
-telldata::tell_var* telldata::ttlist::erase(dword idxB, dword idxE)
+telldata::TellVar* telldata::TtList::erase(dword idxB, dword idxE)
 {
    assert(idxB >=0); assert(idxB < _mlist.size());
    assert(idxE >=0); assert(idxE < _mlist.size());
-   telldata::ttlist* erased = DEBUG_NEW telldata::ttlist(get_type());
+   telldata::TtList* erased = DEBUG_NEW telldata::TtList(get_type());
    // erase the position at the index
    memlist::iterator CI, CIB, CIE;
    unsigned idx = 0;
@@ -508,21 +531,22 @@ telldata::tell_var* telldata::ttlist::erase(dword idxB, dword idxE)
    return erased;
 }
 
-telldata::ttlist::~ttlist()
+telldata::TtList::~TtList()
 {
    for (unsigned long i = 0 ; i < _mlist.size(); i++)
       delete _mlist[i];
 }
 
 //=============================================================================
-telldata::user_struct::user_struct(const TCompType* tltypedef) : tell_var(tltypedef->ID()) {
+telldata::TtUserStruct::TtUserStruct(const TCompType* tltypedef) : TellVar(tltypedef->ID())
+{
    const recfieldsID& typefields = tltypedef->fields();
    for (recfieldsID::const_iterator CI = typefields.begin(); CI != typefields.end(); CI++)
       _fieldList.push_back(structRECNAME(CI->first,tltypedef->initfield(CI->second)));
 }
 
-telldata::user_struct::user_struct(const TCompType* tltypedef, operandSTACK& OPstack) :
-                                                                tell_var(tltypedef->ID())
+telldata::TtUserStruct::TtUserStruct(const TCompType* tltypedef, operandSTACK& OPstack) :
+   TellVar(tltypedef->ID())
 {
    assert(NULL != tltypedef);
    const recfieldsID& typefields = tltypedef->fields();
@@ -535,23 +559,26 @@ telldata::user_struct::user_struct(const TCompType* tltypedef, operandSTACK& OPs
 }
 
 
-telldata::user_struct::user_struct(const user_struct& cobj) : tell_var(cobj.get_type()) {
+telldata::TtUserStruct::TtUserStruct(const TtUserStruct& cobj) : TellVar(cobj.get_type())
+{
    for (recfieldsNAME::const_iterator CI = cobj._fieldList.begin(); CI != cobj._fieldList.end(); CI++)
       _fieldList.push_back(structRECNAME(CI->first, CI->second->selfcopy()));
 }
 
-telldata::user_struct::~user_struct() {
+telldata::TtUserStruct::~TtUserStruct()
+{
    for (recfieldsNAME::const_iterator CI = _fieldList.begin(); CI != _fieldList.end(); CI++)
       delete CI->second;
 }
 
-void telldata::user_struct::initialize()
+void telldata::TtUserStruct::initialize()
 {
    for (recfieldsNAME::const_iterator CI = _fieldList.begin(); CI != _fieldList.end(); CI++)
       CI->second->initialize();
 }
 
-void telldata::user_struct::echo(std::string& wstr, real DBU) {
+void telldata::TtUserStruct::echo(std::string& wstr, real DBU)
+{
    wstr += "struct members:\n";
    for (recfieldsNAME::const_iterator CI = _fieldList.begin(); CI != _fieldList.end(); CI++) {
       wstr += CI->first; wstr += ": "; CI->second->echo(wstr, DBU);
@@ -559,11 +586,12 @@ void telldata::user_struct::echo(std::string& wstr, real DBU) {
    }
 }
 
-void telldata::user_struct::assign(tell_var* value) {
-   user_struct* n_value = static_cast<telldata::user_struct*>(value);
+void telldata::TtUserStruct::assign(TellVar* value)
+{
+   TtUserStruct* n_value = static_cast<telldata::TtUserStruct*>(value);
    for (recfieldsNAME::const_iterator CI = _fieldList.begin(); CI != _fieldList.end(); CI++) {
-      // find the corresponding field in n_value and get the tell_var
-      tell_var* fieldvar = NULL;
+      // find the corresponding field in n_value and get the TellVar
+      TellVar* fieldvar = NULL;
       for(recfieldsNAME::const_iterator CIV  = n_value->_fieldList.begin();
                                         CIV != n_value->_fieldList.end(); CIV++) {
          if (CI->first == CIV->first) {
@@ -576,113 +604,121 @@ void telldata::user_struct::assign(tell_var* value) {
    }
 }
 
-telldata::tell_var* telldata::user_struct::field_var(char*& fname) {
+telldata::TellVar* telldata::TtUserStruct::field_var(char*& fname)
+{
    std::string fieldName(fname); fieldName.erase(0,1);
 
    for(recfieldsNAME::const_iterator CI  = _fieldList.begin();
-                                     CI != _fieldList.end(); CI++) {
+                                     CI != _fieldList.end(); CI++)
+   {
          if (fieldName == CI->first) return CI->second;
    }
    return NULL;
 }
 
 //=============================================================================
-telldata::ttpnt::ttpnt (real x, real y) : user_struct(telldata::tn_pnt),
-                                         _x(DEBUG_NEW ttreal(x)), _y(DEBUG_NEW ttreal(y))
+telldata::TtPnt::TtPnt (real x, real y) : TtUserStruct(telldata::tn_pnt),
+                                         _x(DEBUG_NEW TtReal(x)), _y(DEBUG_NEW TtReal(y))
 {
    _fieldList.push_back(structRECNAME("x", _x));
    _fieldList.push_back(structRECNAME("y", _y));
 }
 
-telldata::ttpnt::ttpnt(operandSTACK& OPstack) : user_struct(telldata::tn_pnt)
+telldata::TtPnt::TtPnt(operandSTACK& OPstack) : TtUserStruct(telldata::tn_pnt)
 {
-   _y = DEBUG_NEW telldata::ttreal(); _y->assign(OPstack.top());
+   _y = DEBUG_NEW telldata::TtReal(); _y->assign(OPstack.top());
    delete OPstack.top(); OPstack.pop();
-   _x = DEBUG_NEW telldata::ttreal(); _x->assign(OPstack.top());
+   _x = DEBUG_NEW telldata::TtReal(); _x->assign(OPstack.top());
    delete OPstack.top(); OPstack.pop();
    _fieldList.push_back(structRECNAME("x", _x));
    _fieldList.push_back(structRECNAME("y", _y));
 }
 
-telldata::ttpnt::ttpnt(const ttpnt& invar) : user_struct(telldata::tn_pnt) ,
-                         _x(DEBUG_NEW ttreal(invar.x())), _y(DEBUG_NEW ttreal(invar.y()))
+telldata::TtPnt::TtPnt(const TtPnt& invar) : TtUserStruct(telldata::tn_pnt) ,
+                         _x(DEBUG_NEW TtReal(invar.x())), _y(DEBUG_NEW TtReal(invar.y()))
 {
    _fieldList.push_back(structRECNAME("x", _x));
    _fieldList.push_back(structRECNAME("y", _y));
 }
 
-void telldata::ttpnt::assign(tell_var* rt)
+void telldata::TtPnt::assign(TellVar* rt)
 {
-   _x->_value = static_cast<ttpnt*>(rt)->x();
-   _y->_value = static_cast<ttpnt*>(rt)->y();
+   _x->_value = static_cast<TtPnt*>(rt)->x();
+   _y->_value = static_cast<TtPnt*>(rt)->y();
 }
 
-void telldata::ttpnt::echo(std::string& wstr, real)
+void telldata::TtPnt::echo(std::string& wstr, real)
 {
    std::ostringstream ost;
    ost << "{X = " << x() << ", Y = " << y() << "}";
    wstr += ost.str();
 }
 
-const telldata::ttpnt& telldata::ttpnt::operator = (const ttpnt& a)
+const telldata::TtPnt& telldata::TtPnt::operator = (const TtPnt& a)
 {
    _x->_value = a.x(); _y->_value = a.y();
    return *this;
 }
 
 //=============================================================================
-telldata::ttwnd::ttwnd( real bl_x, real bl_y, real tr_x, real tr_y ) :
-                                                       user_struct(tn_box),
-                                       _p1(DEBUG_NEW telldata::ttpnt(bl_x,bl_y)),
-                                       _p2(DEBUG_NEW telldata::ttpnt(tr_x,tr_y)) {
+telldata::TtWnd::TtWnd( real bl_x, real bl_y, real tr_x, real tr_y ) :
+                                                       TtUserStruct(tn_box),
+                                       _p1(DEBUG_NEW telldata::TtPnt(bl_x,bl_y)),
+                                       _p2(DEBUG_NEW telldata::TtPnt(tr_x,tr_y))
+{
    _fieldList.push_back(structRECNAME("p1", _p1));
    _fieldList.push_back(structRECNAME("p2", _p2));
 }
 
-telldata::ttwnd::ttwnd( ttpnt bl, ttpnt tr ) : user_struct(tn_box),
-                 _p1(DEBUG_NEW telldata::ttpnt(bl)), _p2(DEBUG_NEW telldata::ttpnt(tr)) {
+telldata::TtWnd::TtWnd( TtPnt bl, TtPnt tr ) : TtUserStruct(tn_box),
+                 _p1(DEBUG_NEW telldata::TtPnt(bl)), _p2(DEBUG_NEW telldata::TtPnt(tr))
+{
    _fieldList.push_back(structRECNAME("p1", _p1));
    _fieldList.push_back(structRECNAME("p2", _p2));
 }
 
-telldata::ttwnd::ttwnd(const ttwnd& cobj) : user_struct(tn_box),
-    _p1(DEBUG_NEW telldata::ttpnt(cobj.p1())), _p2(DEBUG_NEW telldata::ttpnt(cobj.p2())) {
+telldata::TtWnd::TtWnd(const TtWnd& cobj) : TtUserStruct(tn_box),
+    _p1(DEBUG_NEW telldata::TtPnt(cobj.p1())), _p2(DEBUG_NEW telldata::TtPnt(cobj.p2()))
+{
    _fieldList.push_back(structRECNAME("p1", _p1));
    _fieldList.push_back(structRECNAME("p2", _p2));
 }
 
 
-telldata::ttwnd::ttwnd(operandSTACK& OPstack) : user_struct(telldata::tn_box)
+telldata::TtWnd::TtWnd(operandSTACK& OPstack) : TtUserStruct(telldata::tn_box)
 {
    // Here - just get the pointer to the points in the stack...
-    _p2 = static_cast<telldata::ttpnt*>(OPstack.top());
+    _p2 = static_cast<telldata::TtPnt*>(OPstack.top());
     // .. that's why - don't delete them. The alternative -
     // - to make a selfcopy and then to delete the original from the OPstack
     OPstack.pop();
-    _p1 = static_cast<telldata::ttpnt*>(OPstack.top());
+    _p1 = static_cast<telldata::TtPnt*>(OPstack.top());
     OPstack.pop();
     _fieldList.push_back(structRECNAME("p1", _p1));
     _fieldList.push_back(structRECNAME("p2", _p2));
 }
 
-void telldata::ttwnd::assign(tell_var* rt) {
-   (*_p1) = static_cast<ttwnd*>(rt)->p1();
-   (*_p2) = static_cast<ttwnd*>(rt)->p2();
+void telldata::TtWnd::assign(TellVar* rt)
+{
+   (*_p1) = static_cast<TtWnd*>(rt)->p1();
+   (*_p2) = static_cast<TtWnd*>(rt)->p2();
 }
 
-void telldata::ttwnd::echo(std::string& wstr, real) {
+void telldata::TtWnd::echo(std::string& wstr, real)
+{
    std::ostringstream ost;
    ost << "P1: X = " << p1().x() << ": Y = " << p1().y() << " ; " <<
           "P2: X = " << p2().x() << ": Y = " << p2().y() ;
    wstr += ost.str();
 }
 
-const telldata::ttwnd& telldata::ttwnd::operator = (const ttwnd& a) {
+const telldata::TtWnd& telldata::TtWnd::operator = (const TtWnd& a)
+{
    (*_p1) = a.p1(); (*_p2) = a.p2();
    return *this;
 }
 
-void telldata::ttwnd::normalize(bool& swapx, bool& swapy)
+void telldata::TtWnd::normalize(bool& swapx, bool& swapy)
 {
    real swap;
    swapx = swapy = false;
@@ -698,7 +734,7 @@ void telldata::ttwnd::normalize(bool& swapx, bool& swapy)
    }
 }
 
-void telldata::ttwnd::denormalize(bool swapx, bool swapy)
+void telldata::TtWnd::denormalize(bool swapx, bool swapy)
 {
    real swap;
    if (swapx)
@@ -712,12 +748,12 @@ void telldata::ttwnd::denormalize(bool swapx, bool swapy)
 }
 
 //=============================================================================
-telldata::ttbnd::ttbnd( real p_x, real p_y, real rot, bool flip, real scale) :
-      user_struct(tn_bnd),
-      _p(DEBUG_NEW telldata::ttpnt(p_x, p_y)),
-      _rot(DEBUG_NEW telldata::ttreal(rot)),
-      _flx(DEBUG_NEW telldata::ttbool(flip)),
-      _sc(DEBUG_NEW telldata::ttreal(scale))
+telldata::TtBnd::TtBnd( real p_x, real p_y, real rot, bool flip, real scale) :
+      TtUserStruct(tn_bnd),
+      _p(DEBUG_NEW telldata::TtPnt(p_x, p_y)),
+      _rot(DEBUG_NEW telldata::TtReal(rot)),
+      _flx(DEBUG_NEW telldata::TtBool(flip)),
+      _sc(DEBUG_NEW telldata::TtReal(scale))
 {
    _fieldList.push_back(structRECNAME("p"  , _p  ));
    _fieldList.push_back(structRECNAME("rot", _rot));
@@ -725,12 +761,12 @@ telldata::ttbnd::ttbnd( real p_x, real p_y, real rot, bool flip, real scale) :
    _fieldList.push_back(structRECNAME("sc" , _sc ));
 }
 
-telldata::ttbnd::ttbnd( ttpnt p, ttreal rot, ttbool flip, ttreal scale) :
-      user_struct(tn_bnd),
-      _p(DEBUG_NEW telldata::ttpnt(p)),
-      _rot(DEBUG_NEW telldata::ttreal(rot)),
-      _flx(DEBUG_NEW telldata::ttbool(flip)),
-      _sc(DEBUG_NEW telldata::ttreal(scale))
+telldata::TtBnd::TtBnd( TtPnt p, TtReal rot, TtBool flip, TtReal scale) :
+      TtUserStruct(tn_bnd),
+      _p(DEBUG_NEW telldata::TtPnt(p)),
+      _rot(DEBUG_NEW telldata::TtReal(rot)),
+      _flx(DEBUG_NEW telldata::TtBool(flip)),
+      _sc(DEBUG_NEW telldata::TtReal(scale))
 {
    _fieldList.push_back(structRECNAME("p"  , _p  ));
    _fieldList.push_back(structRECNAME("rot", _rot));
@@ -738,11 +774,11 @@ telldata::ttbnd::ttbnd( ttpnt p, ttreal rot, ttbool flip, ttreal scale) :
    _fieldList.push_back(structRECNAME("sc" , _sc ));
 }
 
-telldata::ttbnd::ttbnd(const ttbnd& cobj) : user_struct(tn_bnd),
-      _p(DEBUG_NEW telldata::ttpnt(cobj.p())),
-      _rot(DEBUG_NEW telldata::ttreal(cobj.rot())),
-      _flx(DEBUG_NEW telldata::ttbool(cobj.flx())),
-      _sc(DEBUG_NEW telldata::ttreal(cobj.sc()))
+telldata::TtBnd::TtBnd(const TtBnd& cobj) : TtUserStruct(tn_bnd),
+      _p(DEBUG_NEW telldata::TtPnt(cobj.p())),
+      _rot(DEBUG_NEW telldata::TtReal(cobj.rot())),
+      _flx(DEBUG_NEW telldata::TtBool(cobj.flx())),
+      _sc(DEBUG_NEW telldata::TtReal(cobj.sc()))
 {
    _fieldList.push_back(structRECNAME("p"  , _p  ));
    _fieldList.push_back(structRECNAME("rot", _rot));
@@ -751,14 +787,14 @@ telldata::ttbnd::ttbnd(const ttbnd& cobj) : user_struct(tn_bnd),
 }
 
 
-telldata::ttbnd::ttbnd(operandSTACK& OPstack) : user_struct(telldata::tn_bnd)
+telldata::TtBnd::TtBnd(operandSTACK& OPstack) : TtUserStruct(telldata::tn_bnd)
 {
    // Here - get the data from the stack and reuse it ... don't delete it.
    // The alternative - to make a selfcopy and then delete the original from the OPstack
-    _sc = static_cast<telldata::ttreal*>(OPstack.top()); OPstack.pop();
-    _flx = static_cast<telldata::ttbool*>(OPstack.top()); OPstack.pop();
-    _rot = static_cast<telldata::ttreal*>(OPstack.top()); OPstack.pop();
-    _p = static_cast<telldata::ttpnt*>(OPstack.top()); OPstack.pop();
+    _sc = static_cast<telldata::TtReal*>(OPstack.top()); OPstack.pop();
+    _flx = static_cast<telldata::TtBool*>(OPstack.top()); OPstack.pop();
+    _rot = static_cast<telldata::TtReal*>(OPstack.top()); OPstack.pop();
+    _p = static_cast<telldata::TtPnt*>(OPstack.top()); OPstack.pop();
 
    _fieldList.push_back(structRECNAME("p"  , _p  ));
    _fieldList.push_back(structRECNAME("rot", _rot));
@@ -766,15 +802,16 @@ telldata::ttbnd::ttbnd(operandSTACK& OPstack) : user_struct(telldata::tn_bnd)
    _fieldList.push_back(structRECNAME("sc" , _sc ));
 }
 
-void telldata::ttbnd::assign(tell_var* rt)
+void telldata::TtBnd::assign(TellVar* rt)
 {
-   (*_p  ) = static_cast<ttbnd*>(rt)->p();
-   (*_rot) = static_cast<ttbnd*>(rt)->rot();
-   (*_flx) = static_cast<ttbnd*>(rt)->flx();
-   (*_sc ) = static_cast<ttbnd*>(rt)->sc();
+   (*_p  ) = static_cast<TtBnd*>(rt)->p();
+   (*_rot) = static_cast<TtBnd*>(rt)->rot();
+   (*_flx) = static_cast<TtBnd*>(rt)->flx();
+   (*_sc ) = static_cast<TtBnd*>(rt)->sc();
 }
 
-void telldata::ttbnd::echo(std::string& wstr, real) {
+void telldata::TtBnd::echo(std::string& wstr, real)
+{
    std::ostringstream ost;
    ost << "P: X = " << p().x() << ": Y = " << p().y() << " ; " <<
           "rot = "  << rot().value() << ": flipX " << (flx().value() ? "true" : "false") << " ; "  <<
@@ -782,7 +819,8 @@ void telldata::ttbnd::echo(std::string& wstr, real) {
    wstr += ost.str();
 }
 
-const telldata::ttbnd& telldata::ttbnd::operator = (const ttbnd& a) {
+const telldata::TtBnd& telldata::TtBnd::operator = (const TtBnd& a)
+{
    (*_p) = a.p();
    (*_rot) = a.rot();
    (*_flx) = a.flx();
@@ -791,102 +829,103 @@ const telldata::ttbnd& telldata::ttbnd::operator = (const ttbnd& a) {
 }
 
 //=============================================================================
-/*   class tthsh : public user_struct {*/
-telldata::tthsh::tthsh (int4b number, std::string name) : user_struct(tn_hsh),
-      _key(DEBUG_NEW telldata::ttint(number)),
-      _value(DEBUG_NEW telldata::ttstring(name))
+/*   class TtHsh : public TtUserStruct {*/
+telldata::TtHsh::TtHsh (int4b number, std::string name) : TtUserStruct(tn_hsh),
+      _key(DEBUG_NEW telldata::TtInt(number)),
+      _value(DEBUG_NEW telldata::TtString(name))
 {
    _fieldList.push_back(structRECNAME("key"  , _key  ));
    _fieldList.push_back(structRECNAME("value", _value  ));
 }
 
-telldata::tthsh::tthsh(const tthsh& cobj) : user_struct(tn_hsh),
-      _key(DEBUG_NEW telldata::ttint(cobj.key())),
-      _value(DEBUG_NEW telldata::ttstring(cobj.value()))
+telldata::TtHsh::TtHsh(const TtHsh& cobj) : TtUserStruct(tn_hsh),
+      _key(DEBUG_NEW telldata::TtInt(cobj.key())),
+      _value(DEBUG_NEW telldata::TtString(cobj.value()))
 {
    _fieldList.push_back(structRECNAME("key"  , _key  ));
    _fieldList.push_back(structRECNAME("value", _value  ));
 }
 
-telldata::tthsh::tthsh(operandSTACK& OPstack) : user_struct(tn_hsh)
+telldata::TtHsh::TtHsh(operandSTACK& OPstack) : TtUserStruct(tn_hsh)
 {
    // Here - get the data from the stack and reuse it ... don't delete it.
    // The alternative - to make a selfcopy and then delete the original from the OPstack
-   _value  = static_cast<telldata::ttstring*>(OPstack.top()); OPstack.pop();
-   _key    = static_cast<telldata::ttint*>(OPstack.top()); OPstack.pop();
+   _value  = static_cast<telldata::TtString*>(OPstack.top()); OPstack.pop();
+   _key    = static_cast<telldata::TtInt*>(OPstack.top()); OPstack.pop();
 
    _fieldList.push_back(structRECNAME("key"  , _key   ));
    _fieldList.push_back(structRECNAME("value", _value ));
 }
 
-void telldata::tthsh::echo(std::string& wstr, real)
+void telldata::TtHsh::echo(std::string& wstr, real)
 {
    std::ostringstream ost;
    ost << "key = "  << key().value() << " : value = \"" << value().value() << "\"";
    wstr += ost.str();
 }
 
-void telldata::tthsh::assign(tell_var* rt)
+void telldata::TtHsh::assign(TellVar* rt)
 {
-   (*_key  ) = static_cast<tthsh*>(rt)->key();
-   (*_value) = static_cast<tthsh*>(rt)->value();
+   (*_key  ) = static_cast<TtHsh*>(rt)->key();
+   (*_value) = static_cast<TtHsh*>(rt)->value();
 }
 
 //=============================================================================
-/*   class tthshstr : public user_struct {*/
-telldata::tthshstr::tthshstr (std::string number, std::string name) : user_struct(tn_hshstr),
-      _key(DEBUG_NEW telldata::ttstring(number)),
-      _value(DEBUG_NEW telldata::ttstring(name))
+/*   class TtHshStr : public TtUserStruct {*/
+telldata::TtHshStr::TtHshStr (std::string number, std::string name) : TtUserStruct(tn_hshstr),
+      _key(DEBUG_NEW telldata::TtString(number)),
+      _value(DEBUG_NEW telldata::TtString(name))
 {
    _fieldList.push_back(structRECNAME("key"  , _key  ));
    _fieldList.push_back(structRECNAME("value", _value  ));
 }
 
-telldata::tthshstr::tthshstr(const tthshstr& cobj) : user_struct(tn_hshstr),
-      _key(DEBUG_NEW telldata::ttstring(cobj.key())),
-      _value(DEBUG_NEW telldata::ttstring(cobj.value()))
+telldata::TtHshStr::TtHshStr(const TtHshStr& cobj) : TtUserStruct(tn_hshstr),
+      _key(DEBUG_NEW telldata::TtString(cobj.key())),
+      _value(DEBUG_NEW telldata::TtString(cobj.value()))
 {
    _fieldList.push_back(structRECNAME("key"  , _key  ));
    _fieldList.push_back(structRECNAME("value", _value  ));
 }
 
-telldata::tthshstr::tthshstr(operandSTACK& OPstack) : user_struct(tn_hshstr)
+telldata::TtHshStr::TtHshStr(operandSTACK& OPstack) : TtUserStruct(tn_hshstr)
 {
    // Here - get the data from the stack and reuse it ... don't delete it.
    // The alternative - to make a selfcopy and then delete the original from the OPstack
-   _value  = static_cast<telldata::ttstring*>(OPstack.top()); OPstack.pop();
-   _key    = static_cast<telldata::ttstring*>(OPstack.top()); OPstack.pop();
+   _value  = static_cast<telldata::TtString*>(OPstack.top()); OPstack.pop();
+   _key    = static_cast<telldata::TtString*>(OPstack.top()); OPstack.pop();
 
    _fieldList.push_back(structRECNAME("key"  , _key   ));
    _fieldList.push_back(structRECNAME("value", _value ));
 }
 
-void telldata::tthshstr::echo(std::string& wstr, real)
+void telldata::TtHshStr::echo(std::string& wstr, real)
 {
    std::ostringstream ost;
    ost << "key = "  << key().value() << " : value = \"" << value().value() << "\"";
    wstr += ost.str();
 }
 
-void telldata::tthshstr::assign(tell_var* rt)
+void telldata::TtHshStr::assign(TellVar* rt)
 {
-   (*_key  ) = static_cast<tthshstr*>(rt)->key();
-   (*_value) = static_cast<tthshstr*>(rt)->value();
+   (*_key  ) = static_cast<TtHshStr*>(rt)->key();
+   (*_value) = static_cast<TtHshStr*>(rt)->value();
 }
 
 
 //=============================================================================
-telldata::argumentID::argumentID(const argumentID& obj2copy) {
+telldata::ArgumentID::ArgumentID(const ArgumentID& obj2copy)
+{
    _ID = obj2copy();
    _command = obj2copy._command;
    if (0 < obj2copy.child().size())
    {
       for(argumentQ::const_iterator CA = obj2copy.child().begin(); CA != obj2copy.child().end(); CA ++)
-         _child.push_back(DEBUG_NEW argumentID(**CA));
+         _child.push_back(DEBUG_NEW ArgumentID(**CA));
    }
 }
 
-void telldata::argumentID::toList(bool cmdUpdate, telldata::typeID alistID)
+void telldata::ArgumentID::toList(bool cmdUpdate, telldata::typeID alistID)
 {
    if (0 < _child.size())
    {// i.e. list is not empty
@@ -904,7 +943,7 @@ void telldata::argumentID::toList(bool cmdUpdate, telldata::typeID alistID)
       static_cast<parsercmd::cmdSTRUCT*>(_command)->setargID(this);
 }
 
-void telldata::argumentID::userStructCheck(const telldata::TType* vtype, bool cmdUpdate)
+void telldata::ArgumentID::userStructCheck(const telldata::TType* vtype, bool cmdUpdate)
 {
    if (vtype->isComposite())
    {
@@ -940,7 +979,7 @@ void telldata::argumentID::userStructCheck(const telldata::TType* vtype, bool cm
             if (!NUMBER_TYPE( (**CA)() )) return; // no match
             else if (CF->second < (**CA)() ) return; // no match
       }
-      // all fields match => we can assign a known ID to the argumentID
+      // all fields match => we can assign a known ID to the ArgumentID
       _ID = vartype->ID();
       if (cmdUpdate)
          static_cast<parsercmd::cmdSTRUCT*>(_command)->setargID(this);
@@ -954,7 +993,7 @@ void telldata::argumentID::userStructCheck(const telldata::TType* vtype, bool cm
 
       const TypeIdList& fParamList = vartype->paramList();
       for (TypeIdList::const_iterator CP = fParamList.begin(); CP != fParamList.end(); CP++)
-         _child.push_back(DEBUG_NEW argumentID(*CP));
+         _child.push_back(DEBUG_NEW ArgumentID(*CP));
 
       std::string fname = frefCmd->funcName();
       parsercmd::cmdSTDFUNC *fc = CMDBlock->getFuncBody(fname.c_str(),&_child);
@@ -972,7 +1011,7 @@ void telldata::argumentID::userStructCheck(const telldata::TType* vtype, bool cm
    }
 }
 
-void telldata::argumentID::userStructListCheck(const telldata::TType* vartype, bool cmdUpdate)
+void telldata::ArgumentID::userStructListCheck(const telldata::TType* vartype, bool cmdUpdate)
 {
    for (argumentQ::iterator CA = _child.begin(); CA != _child.end(); CA++)
       if ( TLUNKNOWN_TYPE( (**CA)() ) ) (*CA)->userStructCheck(vartype, cmdUpdate);
@@ -980,7 +1019,7 @@ void telldata::argumentID::userStructListCheck(const telldata::TType* vartype, b
    toList(cmdUpdate, vartype->ID());
 }
 
-void telldata::argumentID::adjustID(const argumentID& obj2copy)
+void telldata::ArgumentID::adjustID(const ArgumentID& obj2copy)
 {
    if (0 != obj2copy.child().size())
    {
@@ -999,7 +1038,7 @@ void telldata::argumentID::adjustID(const argumentID& obj2copy)
       static_cast<parsercmd::cmdFUNCREF*>(_command)->setFuncBody(_ID);
 }
 
-telldata::argumentID::~argumentID()
+telldata::ArgumentID::~ArgumentID()
 {
    for (argumentQ::iterator CA = _child.begin(); CA != _child.end(); CA++)
       delete (*CA);

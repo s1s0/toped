@@ -47,7 +47,7 @@ extern const wxEventType         wxEVT_CANVAS_PARAMS;
 
 
 //=============================================================================
-telldata::ttint* tellstdfunc::getCurrentLayer()
+telldata::TtInt* tellstdfunc::getCurrentLayer()
 {
    unsigned cl = 0;
    layprop::DrawProperties* drawProp;
@@ -56,7 +56,7 @@ telldata::ttint* tellstdfunc::getCurrentLayer()
       cl = drawProp->curLay();
    }
    PROPC->unlockDrawProp(drawProp);
-   return (DEBUG_NEW telldata::ttint(cl));
+   return (DEBUG_NEW telldata::TtInt(cl));
 }
 
 //=============================================================================
@@ -112,20 +112,20 @@ bool tellstdfunc::waitGUInput(int input_type, telldata::operandSTACK *OPstack,
 }
 
 //=============================================================================
-PointVector* tellstdfunc::t2tpoints(telldata::ttlist *pl, real DBscale) {
+PointVector* tellstdfunc::t2tpoints(telldata::TtList *pl, real DBscale) {
    PointVector *plDB = DEBUG_NEW PointVector();
    plDB->reserve(pl->size());
-   telldata::ttpnt* pt;
+   telldata::TtPnt* pt;
    for (unsigned i = 0; i < pl->size(); i++) {
-      pt = static_cast<telldata::ttpnt*>((pl->mlist())[i]);
+      pt = static_cast<telldata::TtPnt*>((pl->mlist())[i]);
       plDB->push_back(TP(pt->x(), pt->y(), DBscale));
    }
    return plDB;
 }
 
 //=============================================================================
-telldata::ttlist* tellstdfunc::make_ttlaylist(laydata::SelectList* shapesel) {
-   telldata::ttlist* llist = DEBUG_NEW telldata::ttlist(telldata::tn_layout);
+telldata::TtList* tellstdfunc::make_ttlaylist(laydata::SelectList* shapesel) {
+   telldata::TtList* llist = DEBUG_NEW telldata::TtList(telldata::tn_layout);
    laydata::DataList* lslct;
    SGBitSet pntl;
    for (laydata::SelectList::const_iterator CL = shapesel->begin();
@@ -137,19 +137,19 @@ telldata::ttlist* tellstdfunc::make_ttlaylist(laydata::SelectList* shapesel) {
          // copy the pointlist, because it will be deleted with the shapeSel
          if (0 != CI->second.size()) pntl = SGBitSet(CI->second);
          else                        pntl = SGBitSet();
-         llist->add(DEBUG_NEW telldata::ttlayout(CI->first, CL->first, DEBUG_NEW SGBitSet(pntl)));
+         llist->add(DEBUG_NEW telldata::TtLayout(CI->first, CL->first, DEBUG_NEW SGBitSet(pntl)));
       }
    }
    return llist;
 }
 
 //=============================================================================
-void tellstdfunc::clean_ttlaylist(telldata::ttlist* llist) {
+void tellstdfunc::clean_ttlaylist(telldata::TtList* llist) {
    // Several things to be noted here
-   //  - First is kind of strange - data() method of telldata::ttlayout is defined
+   //  - First is kind of strange - data() method of telldata::TtLayout is defined
    // const, yet compiler doesn't complain that it is DELETED here
    //  - Second - the best place to clean-up the lists is of course inside
-   // telldata::ttlayout class, however they don't know anything about laydata::TdtData
+   // telldata::TtLayout class, however they don't know anything about laydata::TdtData
    // though with a strange error message compiler claims that destructors will
    // not be called - and I have no other choice but to believe it.
    // This of course is because of the separation of the project on modules
@@ -157,10 +157,10 @@ void tellstdfunc::clean_ttlaylist(telldata::ttlist* llist) {
    // to use the corresponding destroyer, but that seem to be much more convoluted
    // This looks weird - true, but is doing the job.
    // - Don't try to delete here selp (selected points). It is deleted naturally
-   // by the destructor of the telldata::ttlayout class it doesn't have the visibility
+   // by the destructor of the telldata::TtLayout class it doesn't have the visibility
    // problem of laydata::TdtData
    for (word i = 0 ; i < llist->size(); i++) {
-      delete (static_cast<telldata::ttlayout*>(llist->mlist()[i])->data());
+      delete (static_cast<telldata::TtLayout*>(llist->mlist()[i])->data());
    }
 }
 
@@ -181,8 +181,8 @@ void tellstdfunc::clean_atticlist(laydata::AtticList* nlst, bool destroy)
 }
 
 //=============================================================================
-telldata::ttlist* tellstdfunc::make_ttlaylist(laydata::AtticList* shapesel) {
-   telldata::ttlist* llist = DEBUG_NEW telldata::ttlist(telldata::tn_layout);
+telldata::TtList* tellstdfunc::make_ttlaylist(laydata::AtticList* shapesel) {
+   telldata::TtList* llist = DEBUG_NEW telldata::TtList(telldata::tn_layout);
    laydata::ShapeList* lslct;
    for (laydata::AtticList::const_iterator CL = shapesel->begin();
                                             CL != shapesel->end(); CL++) {
@@ -191,39 +191,39 @@ telldata::ttlist* tellstdfunc::make_ttlaylist(laydata::AtticList* shapesel) {
       for (laydata::ShapeList::const_iterator CI = lslct->begin();
                                              CI != lslct->end(); CI++)
       //   if (sh_deleted == (*CI)->status()) - doesn't seems to need it!
-            llist->add(DEBUG_NEW telldata::ttlayout(*CI, CL->first));
+            llist->add(DEBUG_NEW telldata::TtLayout(*CI, CL->first));
    }
    return llist;
 }
 
 //=============================================================================
-laydata::SelectList* tellstdfunc::get_ttlaylist(telldata::ttlist* llist) {
+laydata::SelectList* tellstdfunc::get_ttlaylist(telldata::TtList* llist) {
    laydata::SelectList* shapesel = DEBUG_NEW laydata::SelectList();
    unsigned clayer;
    SGBitSet* pntl_o;
    for (unsigned i = 0 ; i < llist->mlist().size(); i++) {
-      clayer = static_cast<telldata::ttlayout*>(llist->mlist()[i])->layer();
+      clayer = static_cast<telldata::TtLayout*>(llist->mlist()[i])->layer();
       if (shapesel->end() == shapesel->find(clayer))
          (*shapesel)[clayer] = DEBUG_NEW laydata::DataList();
-      pntl_o = static_cast<telldata::ttlayout*>(llist->mlist()[i])->selp();
+      pntl_o = static_cast<telldata::TtLayout*>(llist->mlist()[i])->selp();
 
       SGBitSet pntl_n;
       if (NULL != pntl_o)  pntl_n = SGBitSet(*pntl_o);
       (*shapesel)[clayer]->push_back(laydata::SelectDataPair(
-        static_cast<telldata::ttlayout*>(llist->mlist()[i])->data(), pntl_n));
+        static_cast<telldata::TtLayout*>(llist->mlist()[i])->data(), pntl_n));
    }
    return shapesel;
 }
 
 //=============================================================================
-laydata::AtticList* tellstdfunc::get_shlaylist(telldata::ttlist* llist) {
+laydata::AtticList* tellstdfunc::get_shlaylist(telldata::TtList* llist) {
    laydata::AtticList* shapesel = DEBUG_NEW laydata::AtticList();
    unsigned clayer;
    for (unsigned i = 0 ; i < llist->mlist().size(); i++) {
-      clayer = static_cast<telldata::ttlayout*>(llist->mlist()[i])->layer();
+      clayer = static_cast<telldata::TtLayout*>(llist->mlist()[i])->layer();
       if (shapesel->end() == shapesel->find(clayer))
          (*shapesel)[clayer] = DEBUG_NEW laydata::ShapeList();
-      (*shapesel)[clayer]->push_back(static_cast<telldata::ttlayout*>
+      (*shapesel)[clayer]->push_back(static_cast<telldata::TtLayout*>
                                                 (llist->mlist()[i])->data());
    }
    return shapesel;

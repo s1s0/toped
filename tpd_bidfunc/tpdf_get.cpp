@@ -40,13 +40,13 @@ extern void tellerror(std::string s);
 tellstdfunc::stdGETLAYTYPE::stdGETLAYTYPE(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype, eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlayout()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtLayout()));
 }
 
 int tellstdfunc::stdGETLAYTYPE::execute()
 {
-   telldata::ttlayout* tx = static_cast<telldata::ttlayout*>(OPstack.top());OPstack.pop();
-   OPstack.push(DEBUG_NEW telldata::ttint(tx->data()->lType()));
+   telldata::TtLayout* tx = static_cast<telldata::TtLayout*>(OPstack.top());OPstack.pop();
+   OPstack.push(DEBUG_NEW telldata::TtInt(tx->data()->lType()));
    delete tx;
    return EXEC_NEXT;
 }
@@ -55,12 +55,12 @@ int tellstdfunc::stdGETLAYTYPE::execute()
 tellstdfunc::stdGETLAYTEXTSTR::stdGETLAYTEXTSTR(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype, eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlayout()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtLayout()));
 }
 
 int tellstdfunc::stdGETLAYTEXTSTR::execute()
 {
-   telldata::ttlayout* tx = static_cast<telldata::ttlayout*>(OPstack.top());OPstack.pop();
+   telldata::TtLayout* tx = static_cast<telldata::TtLayout*>(OPstack.top());OPstack.pop();
    if (laydata::_lmtext != tx->data()->lType())
    {
       tellerror("Runtime error.Invalid layout type"); // FIXME?! tellerror is a parser function. MUST not be used during runtime
@@ -69,7 +69,7 @@ int tellstdfunc::stdGETLAYTEXTSTR::execute()
    }
    else
    {
-      OPstack.push(DEBUG_NEW telldata::ttstring(static_cast<laydata::TdtText*>(tx->data())->text()));
+      OPstack.push(DEBUG_NEW telldata::TtString(static_cast<laydata::TdtText*>(tx->data())->text()));
       delete tx;
       return EXEC_NEXT;
    }
@@ -79,12 +79,12 @@ int tellstdfunc::stdGETLAYTEXTSTR::execute()
 tellstdfunc::stdGETLAYREFSTR::stdGETLAYREFSTR(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype, eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlayout()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtLayout()));
 }
 
 int tellstdfunc::stdGETLAYREFSTR::execute()
 {
-   telldata::ttlayout* tx = static_cast<telldata::ttlayout*>(OPstack.top());OPstack.pop();
+   telldata::TtLayout* tx = static_cast<telldata::TtLayout*>(OPstack.top());OPstack.pop();
    if ((laydata::_lmref != tx->data()->lType()) && (laydata::_lmaref != tx->data()->lType()))
    {
       tellerror("Runtime error.Invalid layout type"); // FIXME?! tellerror is a parser function. MUST not be used during runtime
@@ -93,7 +93,7 @@ int tellstdfunc::stdGETLAYREFSTR::execute()
    }
    else
    {
-      OPstack.push(DEBUG_NEW telldata::ttstring(static_cast<laydata::TdtCellRef*>(tx->data())->cellname()));
+      OPstack.push(DEBUG_NEW telldata::TtString(static_cast<laydata::TdtCellRef*>(tx->data())->cellname()));
       delete tx;
       return EXEC_NEXT;
    }
@@ -107,7 +107,7 @@ tellstdfunc::grcGETLAYERS::grcGETLAYERS(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::grcGETLAYERS::execute()
 {
-   telldata::ttlist* tllull = DEBUG_NEW telldata::ttlist(telldata::tn_int);
+   telldata::TtList* tllull = DEBUG_NEW telldata::TtList(telldata::tn_int);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -118,7 +118,7 @@ int tellstdfunc::grcGETLAYERS::execute()
       {
          grcCell->reportLayers(grcLays);
          for (DWordSet::const_iterator CL = grcLays.begin(); CL != grcLays.end(); CL++)
-            tllull->add(DEBUG_NEW telldata::ttint(*CL));
+            tllull->add(DEBUG_NEW telldata::TtInt(*CL));
       }
       LogFile << LogFile.getFN() << "();"; LogFile.flush();
    }
@@ -131,13 +131,13 @@ int tellstdfunc::grcGETLAYERS::execute()
 tellstdfunc::grcGETDATA::grcGETDATA(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype, eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
 }
 
 int tellstdfunc::grcGETDATA::execute()
 {
    word     la = getWordValue();
-   telldata::ttlist* llist = DEBUG_NEW telldata::ttlist(telldata::tn_auxilary);
+   telldata::TtList* llist = DEBUG_NEW telldata::TtList(telldata::tn_auxilary);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -148,7 +148,7 @@ int tellstdfunc::grcGETDATA::execute()
       {
          grcCell->reportLayData(la,dataList);
          for (auxdata::AuxDataList::const_iterator CD = dataList.begin(); CD != dataList.end(); CD++)
-            llist->add(DEBUG_NEW telldata::ttauxdata(*CD, la));
+            llist->add(DEBUG_NEW telldata::TtAuxdata(*CD, la));
       }
       LogFile << LogFile.getFN() << "();"; LogFile.flush();
    }
@@ -161,7 +161,7 @@ int tellstdfunc::grcGETDATA::execute()
 tellstdfunc::grcCLEANALAYER::grcCLEANALAYER(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype, eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
 }
 
 int tellstdfunc::grcCLEANALAYER::execute()
