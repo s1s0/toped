@@ -1492,7 +1492,7 @@ parsercmd::cmdFUNC* parsercmd::cmdBLOCK::addUSERFUNCDECL(FuncDeclaration*, TpdYY
 
 bool parsercmd::cmdBLOCK::addCALLBACKDECL(std::string name, cmdCALLBACK* decl, TpdYYLtype loc)
 {
-   TELL_DEBUG(addCALLBACKPARAM);
+   TELL_DEBUG(addCALLBACKDECL);
    if ( _lclFuncMAP.end() == _lclFuncMAP.find(name) )
    { // function with this name is not found in the local function map
       _lclFuncMAP[name] = decl;
@@ -1884,7 +1884,6 @@ parsercmd::cmdFUNC::cmdFUNC(ArgumentLIST* vm, telldata::typeID tt, bool declarat
             { // we have a callback argument. It means that right here it must
               // be converted from a variable to a function declaration
                telldata::TtCallBack* cbVar = static_cast<telldata::TtCallBack*>((*arg)->second);
-//               bool valid = addCALLBACKPARAM((*arg)->first, cbVar->fcbBody(), loc);addCALLBACKDECL
                bool valid = addCALLBACKDECL((*arg)->first, cbVar->fcbBody(), loc);
                assert(valid); //TODO - what if?
             }
@@ -1951,17 +1950,6 @@ parsercmd::cmdFUNC::BackupList* parsercmd::cmdFUNC::backupOperandStack()
       los->push_front(OPstack.top());OPstack.pop();
    }
    return los;
-}
-
-bool parsercmd::cmdFUNC::addCALLBACKPARAM(std::string name, cmdCALLBACK* decl, TpdYYLtype)
-{
-   TELL_DEBUG(addCALLBACKPARAM);
-   if ( _lclFuncMAP.end() == _lclFuncMAP.find(name) )
-   { // function with this name is not found in the local function map
-      _lclFuncMAP[name] = decl;
-      return true;
-   }
-   return false;
 }
 
 void parsercmd::cmdFUNC::restoreOperandStack(parsercmd::cmdFUNC::BackupList* los)
