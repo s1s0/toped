@@ -63,9 +63,6 @@ void funcArguFuncA(int a, int b, unifunctype unifunc)
    printf ("[%s] \n",buffer);
 }
 
-funcArguFuncA(2,3,@simpleAdd);
-funcArguFuncA(2,3,@simpleSub);
-
 // ... or anonymous callback type
 void funcArguFuncB(int a, int b, callback int (int,int) unifunc)
 {
@@ -76,4 +73,6 @@ void funcArguFuncB(int a, int b, callback int (int,int) unifunc)
 
 funcArguFuncB(2,3,@simpleAdd);
 funcArguFuncB(2,3,@simpleSub);
+funcArguFuncA(2,3,@simpleAdd);
+funcArguFuncA(2,3,@simpleSub);
 

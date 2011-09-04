@@ -449,6 +449,22 @@ namespace  parsercmd {
       telldata::typeID  _ID;
    };
 
+   /*!
+    * To handle tell functions with variable number of arguments (like printf)
+    * we need to know in run time how many parameters were pushed in the OPstack
+    * This class is doing exactly this. It stores the _numParams field extracted
+    * in parse time and pushes it in the OPstack just before the call of a function
+    * with a variable number of arguments.
+    */
+   class cmdNUMFPARAMS: public cmdVIRTUAL {
+   public:
+                cmdNUMFPARAMS(const telldata::argumentQ* aq) : _numParams(aq->size()) {}
+      virtual  ~cmdNUMFPARAMS()                     {/*nothing to clean-up here*/}
+      int      execute();
+   private:
+      unsigned          _numParams;
+   };
+
    class cmdLISTADD : public cmdVIRTUAL {
    public:
                cmdLISTADD(telldata::tell_var* listarg, bool prefix, bool index) :
@@ -749,11 +765,13 @@ namespace  parsercmd {
    telldata::typeID  BoolEx(telldata::typeID, std::string, TpdYYLtype);
 
    telldata::tell_var* newCallBackArgument(telldata::typeID, TpdYYLtype);
+
    bool              StructTypeCheck(telldata::typeID, telldata::argumentID*, TpdYYLtype);
    bool              ListIndexCheck(telldata::typeID, TpdYYLtype, telldata::typeID, TpdYYLtype);
    bool              ListSliceCheck(telldata::typeID, TpdYYLtype, telldata::typeID, TpdYYLtype, telldata::typeID, TpdYYLtype);
    bool              ListSliceCheck(telldata::typeID, TpdYYLtype, telldata::typeID, TpdYYLtype);
    void              ClearArgumentList(ArgumentLIST*);
+   bool              vplFunc(std::string);
 
 
    /**

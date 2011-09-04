@@ -525,6 +525,9 @@ funccall:
       arguments ')'                        {
       parsercmd::cmdSTDFUNC *fc = CMDBlock->getFuncBody($1,$4);
       if (fc) {
+         if (parsercmd::vplFunc($1))
+            /* functions with a variable parameter list require special attention */
+            CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdNUMFPARAMS($4));
          CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdFUNCCALL(fc,$1));
          $$ = fc->gettype();
       }
