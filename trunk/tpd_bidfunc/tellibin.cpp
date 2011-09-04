@@ -53,34 +53,15 @@ extern const wxEventType         wxEVT_CANVAS_CURSOR;
 //=============================================================================
 int tellstdfunc::stdSPRINTF::argsOK(argumentQ* amap)
 {
-   _arguments = DEBUG_NEW parsercmd::ArgumentLIST();
    unsigned numArgs = amap->size();
    if (1 > numArgs) return -1; // i.e. error - at least one argument is expected
    telldata::argumentID carg((*(*amap)[0]));
    if (telldata::tn_string != carg()) return -1; //i.e. error - first argument must be a string
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
    for (unsigned i = 1; i < numArgs; i++)
    {
       carg = (*(*amap)[i]);
       if (!PRINTF_ABLE(carg()))
          return -1;
-      else
-         switch (carg())
-         {
-            case telldata::tn_int    :
-               _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
-               break;
-            case telldata::tn_real   :
-               _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
-               break;
-            case telldata::tn_bool   :
-               _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
-               break;
-            case telldata::tn_string :
-               _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-               break;
-            default: assert(false);
-         }
    }
    return 0; // OK
 }
@@ -96,19 +77,16 @@ NameList* tellstdfunc::stdSPRINTF::callingConv(const telldata::typeMAP*)
 
 int tellstdfunc::stdSPRINTF::execute()
 {
+   word numParams = getWordValue();
+   assert(numParams > 0);
    std::stack<telldata::tell_var*> varstack;
    // get the function arguments from the argument stack using the info in
    // the arguments structure and push them in a local stack structure.
-   ArgumentLIST::const_reverse_iterator CI = _arguments->rbegin();
-   while (_arguments->rend() != CI)
+   while (numParams--)
    {
       telldata::tell_var *op = OPstack.top();OPstack.pop();
-      assert((*CI)->second->get_type() == op->get_type());CI++;
       varstack.push(op);
    }
-   //TODO clean-up _arguments
-//   parsercmd::ClearArgumentList(_arguments);
-//   delete _arguments; _arguments = NULL;
    // OK the first one must be the format string - let's get it out
    //
    telldata::ttstring* fttstr = static_cast<telldata::ttstring*>(varstack.top());

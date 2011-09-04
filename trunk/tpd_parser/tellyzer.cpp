@@ -1174,6 +1174,15 @@ int parsercmd::cmdFUNCREF::execute()
    OPstack.push(ustrct);
    return EXEC_NEXT;
 }
+
+//=============================================================================
+int parsercmd::cmdNUMFPARAMS::execute()
+{
+   TELL_DEBUG(cmdNUMFPARAMS);
+   OPstack.push(DEBUG_NEW telldata::ttint(_numParams));
+   return EXEC_NEXT;
+}
+
 //=============================================================================
 int parsercmd::cmdFUNCCALL::execute()
 {
@@ -2722,6 +2731,20 @@ void parsercmd::ClearArgumentList(ArgumentLIST* alst) {
       delete (*ALI);
    }
    alst->clear();
+}
+
+/*!
+ * Variable Parameter List TELL functions require a special attention in parse
+ * time. This function checks whether the input string fname matches any of the
+ * names in the VPL functions.
+ * @param fname - the function name to check
+ * @return true if the function name corresponds to a VPL function
+ */
+bool parsercmd::vplFunc(std::string fname)
+{
+   return  (   (std::string("printf")  == fname )
+            || (std::string("sprintf") == fname )
+           );
 }
 
 //-----------------------------------------------------------------------------
