@@ -93,6 +93,22 @@ unifunctype unifuncZ = unifuncA;
 // and using the latter
 printf("Callback of type unifuncZ - returns %d\n",unifuncZ(2,3));
 funcArguFuncA(2,3,unifuncZ);
+
+//callbacks from functions
+void cbTestFunction(int angle, bool sORc)
+{
+  funcArguFuncB(2,3,@simpleAdd);
+  funcArguFuncA(2,3,@simpleAdd);
+  callback real (real) localtrig;
+  if (sORc)
+    localtrig = @sin;
+  else
+    localtrig = @cos;
+  printf("trigo callback of angle %d deg is %e\n", angle, localtrig(angle));
+}
+
+cbTestFunction(30, true);
+cbTestFunction(30, false);
 //=============================================================================
 //
 // Error conditions

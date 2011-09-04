@@ -907,14 +907,14 @@ int parsercmd::cmdASSIGN::execute()
 {
    TELL_DEBUG(cmdASSIGN);
    telldata::TellVar *op = OPstack.top();OPstack.pop();
-   telldata::typeID typeis = _var->get_type();
-   if (TLISALIST(typeis))
-   {
-      typeis = typeis & ~telldata::tn_listmask;
-   }
-   if ((TLCOMPOSIT_TYPE(typeis)) && (NULL == CMDBlock->getTypeByID(typeis)))
-      tellerror("Bad or unsupported type in assign statement");
-   else
+//   telldata::typeID typeis = _var->get_type();
+//   if (TLISALIST(typeis))
+//   {
+//      typeis = typeis & ~telldata::tn_listmask;
+//   }
+//   if ((TLCOMPOSIT_TYPE(typeis)) && (NULL == CMDBlock->getTypeByID(typeis)))
+//      tellerror("Bad or unsupported type in assign statement");
+//   else
    {
       if (_indexed)
       {
@@ -1427,7 +1427,16 @@ telldata::TellVar* parsercmd::cmdBLOCK::newTellvar(telldata::typeID ID, const ch
    return NULL;
 }
 
-telldata::TellVar* parsercmd::cmdBLOCK::newFuncArg(telldata::typeID ID, const char* varName, TpdYYLtype loc)
+/*!
+ * Creates a new TELL variable in the heap. Called from the parser explicitly for
+ * function parameters. The only reason this method exists are Tell callbacks.
+ * Otherwise it is equivalent to newTellvar method.
+ * @param ID- the typeID of the new argument
+ * @param loc the location of the argument identifier in the source TELL file -
+ * for error reporting purposes
+ * @return the new TELL variable. It also can return NULL in case of error
+ */
+telldata::TellVar* parsercmd::cmdBLOCK::newFuncArg(telldata::typeID ID, TpdYYLtype loc)
 {
    if (ID & telldata::tn_listmask)
    {
@@ -1492,10 +1501,14 @@ parsercmd::cmdFUNC* parsercmd::cmdBLOCK::addUSERFUNCDECL(FuncDeclaration*, TpdYY
    return NULL;
 }
 
-bool parsercmd::cmdBLOCK::addCALLBACKDECL(std::string, cmdCALLBACK*, TpdYYLtype)
+bool parsercmd::cmdBLOCK::addCALLBACKDECL(std::string name, cmdCALLBACK* decl, TpdYYLtype loc)
 {
-   TELL_DEBUG(addFUNCDECL);
-   tellerror("Callback definitions (as well as function declarations) can be only global");
+   TELL_DEBUG(addCALLBACKPARAM);
+   if ( _lclFuncMAP.end() == _lclFuncMAP.find(name) )
+   { // function with this name is not found in the local function map
+      _lclFuncMAP[name] = decl;
+      return true;
+   }
    return false;
 }
 
@@ -1882,7 +1895,8 @@ parsercmd::cmdFUNC::cmdFUNC(ArgumentLIST* vm, telldata::typeID tt, bool declarat
             { // we have a callback argument. It means that right here it must
               // be converted from a variable to a function declaration
                telldata::TtCallBack* cbVar = static_cast<telldata::TtCallBack*>((*arg)->second);
-               bool valid = addCALLBACKPARAM((*arg)->first, cbVar->fcbBody(), loc);
+//               bool valid = addCALLBACKPARAM((*arg)->first, cbVar->fcbBody(), loc);addCALLBACKDECL
+               bool valid = addCALLBACKDECL((*arg)->first, cbVar->fcbBody(), loc);
                assert(valid); //TODO - what if?
             }
          }

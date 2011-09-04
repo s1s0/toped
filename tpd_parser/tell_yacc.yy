@@ -587,7 +587,8 @@ funcneargument:
 
 funcargument:
      telltypeID tknIDENTIFIER              {
-      tellvar = CMDBlock->newFuncArg($1, $2, @1);
+      tellvar = CMDBlock->newFuncArg($1, @1);
+      assert(NULL != tellvar);
       cfd->pushArg(DEBUG_NEW parsercmd::ArgumentTYPE($2,tellvar));
       delete [] $2;
    }
@@ -1110,78 +1111,3 @@ void cleanonabort()
    while (!tellindxvar.empty()) tellindxvar.pop(); 
 }
 
-/*
-%type <pblock>         block
-    pblock      - that is actually the list structure type where all commands
-                  are stored for future execution. block is the only predicate
-                  of this type
-block:
-     '{'                                   {
-         CMDBlock = DEBUG_NEW parsercmd::cmdBLOCK();
-         CMDBlock->pushblk();
-      }
-     statements '}'                        {
-         $$ = CMDBlock;
-         CMDBlock = CMDBlock->popblk();
-      }
-;
-*/
-/*
-     tknIF '(' expression ')'       {
-         CMDBlock = DEBUG_NEW parsercmd::cmdBLOCK();
-         CMDBlock->pushblk();
-     }
-     blockstatement {
-         parsercmd::cmdBLOCK* if_block = CMDBlock;
-         CMDBlock = CMDBlock->popblk();
-         if (telldata::tn_bool != $3) tellerror("bool type expected",@3);
-         else CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdIFELSE(if_block, NULL));
-      }
-
-   | tknIF '(' expression ')'       {
-         CMDBlock = DEBUG_NEW parsercmd::cmdBLOCK();
-         CMDBlock->pushblk();
-   }
-   blockstatement tknELSE           {
-         CMDBlock = DEBUG_NEW parsercmd::cmdBLOCK();
-         CMDBlock->pushblk();
-   }
-   blockstatement                   {
-         parsercmd::cmdBLOCK* else_block = CMDBlock;
-         CMDBlock = CMDBlock->popblk();
-         parsercmd::cmdBLOCK* if_block = CMDBlock;
-         CMDBlock = CMDBlock->popblk();
-         if (telldata::tn_bool != $3) tellerror("bool type expected",@3);
-         else CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdIFELSE(if_block,else_block));
-      }
-;
-*/
-/*
-   
-   | tknCALLBACKdef telltypeID '('          {
-        tellcallback = CMDBlock->secureCallBackType(NULL);
-        assert (NULL != tellcallback);
-        tellcallback->setFType($2);
-     }
-     anoarguments ')'  tknIDENTIFIER         {
-         telldata::TellVar* v = CMDBlock->getID($7, true);
-         if (!v) {// if this variableID doesn't exist already in the local scope
-            
-            // add it to the local variable map
-            parsercmd::cmdCALLBACK* cbfp = DEBUG_NEW parsercmd::cmdCALLBACK(tellcallback->paramList(),tellcallback->fType(), @1);
-            if (CMDBlock->addCALLBACKDECL($7, cbfp, @1))
-            {
-               CMDBlock->addAnoLoType(tellcallback);
-               tellvar = DEBUG_NEW telldata::call_back(tellcallback->ID(), cbfp);
-            }
-            else
-               delete cbfp;
-
-            CMDBlock->addID($7,tellvar);
-         }
-         else
-            tellerror("variable already defined in this scope", @7);
-        $$ = tellcallback->ID(); 
-        tellcallback = NULL; delete [] $7;indexed = false;
-   }
-*/
