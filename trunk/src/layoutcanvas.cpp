@@ -551,7 +551,7 @@ void tui::LayoutCanvas::UpdateCoordWin(int coord, CVSSTATUS_TYPE postype, int dc
 void tui::LayoutCanvas::EventMouseClick(int button) {
    wxCommandEvent eventButtonUP(wxEVT_COMMAND_ENTER);
 
-   telldata::ttpnt* ttp = DEBUG_NEW telldata::ttpnt(_releasePoint.x()*PROPC->UU(),
+   telldata::TtPnt* ttp = DEBUG_NEW telldata::TtPnt(_releasePoint.x()*PROPC->UU(),
                                               _releasePoint.y()*PROPC->UU());
    //Post an event to notify the console
    eventButtonUP.SetClientData((void*)ttp);

@@ -183,7 +183,7 @@ are several important points to consider here.
    - TOPED has still ONE active list of selected components. It is stored in
      the active cell structure and can be obtained from TELL using the internal
      variable $seleted(or similar).
-   - All select operatoins return a list of ttlayout that can be stored in
+   - All select operatoins return a list of TtLayout that can be stored in
      a TELL variable of the same type. It is not possible to use this variables
      directly as a parameter for any modification operations (copy/move/delete
      etc.)

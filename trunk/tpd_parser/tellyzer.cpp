@@ -284,11 +284,11 @@ void parsercmd::TellPreProc::reset()
 real parsercmd::cmdVIRTUAL::getOpValue(telldata::operandSTACK& OPs)
 {
    real value = 0;
-   telldata::tell_var *op = OPs.top();OPs.pop();
+   telldata::TellVar *op = OPs.top();OPs.pop();
    if (op->get_type() == telldata::tn_real)
-      value = static_cast<telldata::ttreal*>(op)->value();
+      value = static_cast<telldata::TtReal*>(op)->value();
    else if (op->get_type() == telldata::tn_int)
-      value = static_cast<telldata::ttint*>(op)->value();
+      value = static_cast<telldata::TtInt*>(op)->value();
    delete op;
    return value;
 }
@@ -296,20 +296,20 @@ real parsercmd::cmdVIRTUAL::getOpValue(telldata::operandSTACK& OPs)
 real parsercmd::cmdVIRTUAL::getOpValue(telldata::UNDOPerandQUEUE& OPs, bool front)
 {
    real value = 0;
-   telldata::tell_var *op;
+   telldata::TellVar *op;
    if (front) {op = OPs.front();OPs.pop_front();}
    else       {op = OPs.back();OPs.pop_back();}
    if (op->get_type() == telldata::tn_real)
-      value = static_cast<telldata::ttreal*>(op)->value();
+      value = static_cast<telldata::TtReal*>(op)->value();
    else if (op->get_type() == telldata::tn_int)
-      value = static_cast<telldata::ttint*>(op)->value();
+      value = static_cast<telldata::TtInt*>(op)->value();
    delete op;
    return value;
 }
 
 word parsercmd::cmdVIRTUAL::getWordValue(telldata::operandSTACK& OPs)
 {
-   telldata::ttint  *op = static_cast<telldata::ttint*>(OPs.top());OPs.pop();
+   telldata::TtInt  *op = static_cast<telldata::TtInt*>(OPs.top());OPs.pop();
    word value = 0;
    if ((op->value() < 0 ) || (op->value() > MAX_WORD_VALUE))
       {
@@ -323,9 +323,9 @@ word parsercmd::cmdVIRTUAL::getWordValue(telldata::operandSTACK& OPs)
 
 word parsercmd::cmdVIRTUAL::getWordValue(telldata::UNDOPerandQUEUE& OPs, bool front)
 {
-   telldata::ttint  *op;
-   if (front) {op = static_cast<telldata::ttint*>(OPs.front());OPs.pop_front();}
-   else       {op = static_cast<telldata::ttint*>(OPs.back());OPs.pop_back();}
+   telldata::TtInt  *op;
+   if (front) {op = static_cast<telldata::TtInt*>(OPs.front());OPs.pop_front();}
+   else       {op = static_cast<telldata::TtInt*>(OPs.back());OPs.pop_back();}
    word value = 0;
    if ((op->value() < 0 ) || (op->value() > MAX_WORD_VALUE))
       {
@@ -340,10 +340,10 @@ word parsercmd::cmdVIRTUAL::getWordValue(telldata::UNDOPerandQUEUE& OPs, bool fr
 dword parsercmd::cmdVIRTUAL::getIndexValue(telldata::operandSTACK& OPs)
 {
    dword value = 0;
-   telldata::tell_var *op = OPs.top();OPs.pop();
+   telldata::TellVar *op = OPs.top();OPs.pop();
    if (op->get_type() == telldata::tn_real)
    {
-      real realvalue = static_cast<telldata::ttreal*>(op)->value();
+      real realvalue = static_cast<telldata::TtReal*>(op)->value();
       if ((realvalue < 0) || ((realvalue - int(realvalue)) != 0.0 ) )
       {
          _opstackerr = true;
@@ -353,7 +353,7 @@ dword parsercmd::cmdVIRTUAL::getIndexValue(telldata::operandSTACK& OPs)
    }
    else if (op->get_type() == telldata::tn_int)
    {
-      int4b intvalue = (int4b) rint(static_cast<telldata::ttint*>(op)->value());
+      int4b intvalue = (int4b) rint(static_cast<telldata::TtInt*>(op)->value());
       if (intvalue < 0)
       {
          _opstackerr = true;
@@ -367,7 +367,7 @@ dword parsercmd::cmdVIRTUAL::getIndexValue(telldata::operandSTACK& OPs)
 
 byte parsercmd::cmdVIRTUAL::getByteValue(telldata::operandSTACK& OPs)
 {
-   telldata::ttint  *op = static_cast<telldata::ttint*>(OPs.top());OPs.pop();
+   telldata::TtInt  *op = static_cast<telldata::TtInt*>(OPs.top());OPs.pop();
    byte value = 0;
    if ((op->value() < 0 ) || (op->value() > MAX_BYTE_VALUE))
    {
@@ -381,9 +381,9 @@ byte parsercmd::cmdVIRTUAL::getByteValue(telldata::operandSTACK& OPs)
 
 byte parsercmd::cmdVIRTUAL::getByteValue(telldata::UNDOPerandQUEUE& OPs, bool front)
 {
-   telldata::ttint  *op;
-   if (front) {op = static_cast<telldata::ttint*>(OPs.front());OPs.pop_front();}
-   else       {op = static_cast<telldata::ttint*>(OPs.back());OPs.pop_back();}
+   telldata::TtInt  *op;
+   if (front) {op = static_cast<telldata::TtInt*>(OPs.front());OPs.pop_front();}
+   else       {op = static_cast<telldata::TtInt*>(OPs.back());OPs.pop_back();}
    byte value = 0;
    if ((op->value() < 0 ) || (op->value() > MAX_BYTE_VALUE))
    {
@@ -397,7 +397,7 @@ byte parsercmd::cmdVIRTUAL::getByteValue(telldata::UNDOPerandQUEUE& OPs, bool fr
 
 std::string parsercmd::cmdVIRTUAL::getStringValue(telldata::operandSTACK& OPs)
 {
-   telldata::ttstring  *op = static_cast<telldata::ttstring*>(OPs.top());OPs.pop();
+   telldata::TtString  *op = static_cast<telldata::TtString*>(OPs.top());OPs.pop();
    std::string value = op->value();
    delete op;
    return value;
@@ -405,9 +405,9 @@ std::string parsercmd::cmdVIRTUAL::getStringValue(telldata::operandSTACK& OPs)
 
 std::string parsercmd::cmdVIRTUAL::getStringValue(telldata::UNDOPerandQUEUE& OPs, bool front)
 {
-   telldata::ttstring  *op;
-   if (front) {op = static_cast<telldata::ttstring*>(OPs.front());OPs.pop_front();}
-   else       {op = static_cast<telldata::ttstring*>(OPs.back());OPs.pop_back();}
+   telldata::TtString  *op;
+   if (front) {op = static_cast<telldata::TtString*>(OPs.front());OPs.pop_front();}
+   else       {op = static_cast<telldata::TtString*>(OPs.back());OPs.pop_back();}
    std::string value = op->value();
    delete op;
    return value;
@@ -415,7 +415,7 @@ std::string parsercmd::cmdVIRTUAL::getStringValue(telldata::UNDOPerandQUEUE& OPs
 
 bool parsercmd::cmdVIRTUAL::getBoolValue(telldata::operandSTACK& OPs)
 {
-   telldata::ttbool  *op = static_cast<telldata::ttbool*>(OPs.top());OPs.pop();
+   telldata::TtBool  *op = static_cast<telldata::TtBool*>(OPs.top());OPs.pop();
    bool value = op->value();
    delete op;
    return value;
@@ -423,130 +423,138 @@ bool parsercmd::cmdVIRTUAL::getBoolValue(telldata::operandSTACK& OPs)
 
 bool parsercmd::cmdVIRTUAL::getBoolValue(telldata::UNDOPerandQUEUE& OPs, bool front)
 {
-   telldata::ttbool  *op;
-   if (front) {op = static_cast<telldata::ttbool*>(OPs.front());OPs.pop_front();}
-   else       {op = static_cast<telldata::ttbool*>(OPs.back());OPs.pop_back();}
+   telldata::TtBool  *op;
+   if (front) {op = static_cast<telldata::TtBool*>(OPs.front());OPs.pop_front();}
+   else       {op = static_cast<telldata::TtBool*>(OPs.back());OPs.pop_back();}
    bool value = op->value();
    delete op;
    return value;
 }
 //=============================================================================
-int parsercmd::cmdPLUS::execute() {
+int parsercmd::cmdPLUS::execute()
+{
    TELL_DEBUG(cmdPLUS);
    if (telldata::tn_real == _retype)
    {
       real value2 = getOpValue();
       real value1 = getOpValue();
-      OPstack.push(DEBUG_NEW telldata::ttreal(value1 + value2));
+      OPstack.push(DEBUG_NEW telldata::TtReal(value1 + value2));
    }
    else if (telldata::tn_int == _retype)
    {
       int value2 = getOpValue();
       int value1 = getOpValue();
-      OPstack.push(DEBUG_NEW telldata::ttint(value1 + value2));
+      OPstack.push(DEBUG_NEW telldata::TtInt(value1 + value2));
    }
    else assert(false);
    return EXEC_NEXT;
 }
 
 //=============================================================================
-int parsercmd::cmdCONCATENATE::execute() {
+int parsercmd::cmdCONCATENATE::execute()
+{
    TELL_DEBUG(cmdCONCATENATE);
    std::string op2 = getStringValue(OPstack);
    std::string op1 = getStringValue(OPstack);
-   OPstack.push(DEBUG_NEW telldata::ttstring(op1 + op2));
+   OPstack.push(DEBUG_NEW telldata::TtString(op1 + op2));
    return EXEC_NEXT;
 }
 
 //=============================================================================
-int parsercmd::cmdMINUS::execute() {
+int parsercmd::cmdMINUS::execute()
+{
    TELL_DEBUG(cmdMINUS);
    if (telldata::tn_real == _retype)
    {
       real value2 = getOpValue();
       real value1 = getOpValue();
-      OPstack.push(DEBUG_NEW telldata::ttreal(value1 - value2));
+      OPstack.push(DEBUG_NEW telldata::TtReal(value1 - value2));
    }
    else if (telldata::tn_int == _retype)
    {
       int value2 = getOpValue();
       int value1 = getOpValue();
-      OPstack.push(DEBUG_NEW telldata::ttint(value1 - value2));
+      OPstack.push(DEBUG_NEW telldata::TtInt(value1 - value2));
    }
    else assert(false);
    return EXEC_NEXT;
 }
 
 //=============================================================================
-int parsercmd::cmdSHIFTPNT::execute() {
+int parsercmd::cmdSHIFTPNT::execute()
+{
    TELL_DEBUG(cmdSHIFTPNT);
    real shift;
-   telldata::ttpnt *p;
+   telldata::TtPnt *p;
    if (_swapOperands)
    {
-      p = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
+      p = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
       shift = getOpValue();
    }
    else
    {
       shift = getOpValue();
-      p = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
+      p = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
    }
-   telldata::ttpnt* r = DEBUG_NEW telldata::ttpnt(p->x()+_sign*shift,p->y()+_sign*shift);
+   telldata::TtPnt* r = DEBUG_NEW telldata::TtPnt(p->x()+_sign*shift,p->y()+_sign*shift);
    delete p;
    OPstack.push(r);
    return EXEC_NEXT;
 }
 
 //=============================================================================
-int parsercmd::cmdSHIFTPNT2::execute() {
+int parsercmd::cmdSHIFTPNT2::execute()
+{
    TELL_DEBUG(cmdSHIFTPNT2);
-   telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-   telldata::ttpnt *p  = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-   telldata::ttpnt *r  = DEBUG_NEW telldata::ttpnt(p->x()+_sign*p1->x(),p->y()+_sign*p1->y());
+   telldata::TtPnt *p1 = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
+   telldata::TtPnt *p  = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
+   telldata::TtPnt *r  = DEBUG_NEW telldata::TtPnt(p->x()+_sign*p1->x(),p->y()+_sign*p1->y());
    delete p; delete p1;
    OPstack.push(r);
    return EXEC_NEXT;
 }
 
 //=============================================================================
-int parsercmd::cmdSHIFTPNT3::execute() {
+int parsercmd::cmdSHIFTPNT3::execute()
+{
    TELL_DEBUG(cmdSHIFTPNT3);
    real shift = getOpValue();
-   telldata::ttpnt *p = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-   telldata::ttpnt *r = DEBUG_NEW telldata::ttpnt(p->x()+_signX*shift,p->y()+_signY*shift);
+   telldata::TtPnt *p = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
+   telldata::TtPnt *r = DEBUG_NEW telldata::TtPnt(p->x()+_signX*shift,p->y()+_signY*shift);
    delete p;
    OPstack.push(r);
    return EXEC_NEXT;
 }
 
 //=============================================================================
-int parsercmd::cmdSHIFTPNT4::execute() {
+int parsercmd::cmdSHIFTPNT4::execute()
+{
    TELL_DEBUG(cmdSHIFTPNT4);
-   telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-   telldata::ttpnt *p  = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-   telldata::ttpnt* r = DEBUG_NEW telldata::ttpnt(p->x()+_signX*p1->x(),p->y()+_signY*p1->y());
+   telldata::TtPnt *p1 = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
+   telldata::TtPnt *p  = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
+   telldata::TtPnt* r = DEBUG_NEW telldata::TtPnt(p->x()+_signX*p1->x(),p->y()+_signY*p1->y());
    delete p; delete p1;
    OPstack.push(r);
    return EXEC_NEXT;
 }
 
 //=============================================================================
-int parsercmd::cmdSHIFTBOX::execute() {
+int parsercmd::cmdSHIFTBOX::execute()
+{
    TELL_DEBUG(cmdSHIFTBOX);
-   telldata::ttpnt *p;
-   telldata::ttwnd *w;
+   telldata::TtPnt *p;
+   telldata::TtWnd *w;
    if (_swapOperands)
    {
-      w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
-      p = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
+      w = static_cast<telldata::TtWnd*>(OPstack.top());OPstack.pop();
+      p = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
    }
    else
    {
-      p = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-      w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
+      p = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
+      w = static_cast<telldata::TtWnd*>(OPstack.top());OPstack.pop();
    }
-   telldata::ttwnd* r = DEBUG_NEW telldata::ttwnd(w->p1().x() + _sign*p->x(),w->p1().y() + _sign*p->y(),
+   telldata::TtWnd* r = DEBUG_NEW telldata::TtWnd(w->p1().x() + _sign*p->x(),w->p1().y() + _sign*p->y(),
                         w->p2().x() + _sign*p->x(),w->p2().y() + _sign*p->y());
    OPstack.push(r);
    delete p; delete w;
@@ -554,26 +562,27 @@ int parsercmd::cmdSHIFTBOX::execute() {
 }
 
 //=============================================================================
-int parsercmd::cmdSHIFTBOX3::execute() {
+int parsercmd::cmdSHIFTBOX3::execute()
+{
    TELL_DEBUG(cmdSHIFTBOX3);
    real shift = getOpValue();
-   telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
+   telldata::TtWnd *w = static_cast<telldata::TtWnd*>(OPstack.top());OPstack.pop();
    bool swapx, swapy;
    w->normalize(swapx, swapy);
-   telldata::ttwnd* r;
+   telldata::TtWnd* r;
    if  (1 == _signX)
       if (1 == _signY)
-         r = DEBUG_NEW telldata::ttwnd(w->p1().x()          , w->p1().y()         ,
+         r = DEBUG_NEW telldata::TtWnd(w->p1().x()          , w->p1().y()         ,
                                        w->p2().x() + shift  , w->p2().y() + shift  );
       else
-         r = DEBUG_NEW telldata::ttwnd(w->p1().x()          , w->p1().y() - shift ,
+         r = DEBUG_NEW telldata::TtWnd(w->p1().x()          , w->p1().y() - shift ,
                                        w->p2().x() + shift  , w->p2().y()          );
    else
       if (1 == _signY)
-         r = DEBUG_NEW telldata::ttwnd(w->p1().x() - shift  , w->p1().y()          ,
+         r = DEBUG_NEW telldata::TtWnd(w->p1().x() - shift  , w->p1().y()          ,
                                        w->p2().x()          , w->p2().y() + shift   );
       else
-         r = DEBUG_NEW telldata::ttwnd(w->p1().x() - shift  , w->p1().y() - shift  ,
+         r = DEBUG_NEW telldata::TtWnd(w->p1().x() - shift  , w->p1().y() - shift  ,
                                        w->p2().x()          , w->p2().y()           );
    r->denormalize(swapx, swapy);
    OPstack.push(r);
@@ -582,26 +591,27 @@ int parsercmd::cmdSHIFTBOX3::execute() {
 }
 
 //=============================================================================
-int parsercmd::cmdSHIFTBOX4::execute() {
+int parsercmd::cmdSHIFTBOX4::execute()
+{
    TELL_DEBUG(cmdSHIFTBOX4);
-   telldata::ttpnt *p = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-   telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
+   telldata::TtPnt *p = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
+   telldata::TtWnd *w = static_cast<telldata::TtWnd*>(OPstack.top());OPstack.pop();
    bool swapx, swapy;
    w->normalize(swapx, swapy);
-   telldata::ttwnd* r;
+   telldata::TtWnd* r;
    if  (1 == _signX)
       if (1 == _signY)
-         r = DEBUG_NEW telldata::ttwnd(w->p1().x()          , w->p1().y()         ,
+         r = DEBUG_NEW telldata::TtWnd(w->p1().x()          , w->p1().y()         ,
                                        w->p2().x() + p->x() , w->p2().y() + p->y() );
       else
-         r = DEBUG_NEW telldata::ttwnd(w->p1().x()          , w->p1().y() - p->y(),
+         r = DEBUG_NEW telldata::TtWnd(w->p1().x()          , w->p1().y() - p->y(),
                                        w->p2().x() + p->x() , w->p2().y()          );
    else
       if (1 == _signY)
-         r = DEBUG_NEW telldata::ttwnd(w->p1().x() - p->x() , w->p1().y()          ,
+         r = DEBUG_NEW telldata::TtWnd(w->p1().x() - p->x() , w->p1().y()          ,
                                        w->p2().x()          , w->p2().y() + p->y()  );
       else
-         r = DEBUG_NEW telldata::ttwnd(w->p1().x() - p->x() , w->p1().y() - p->y() ,
+         r = DEBUG_NEW telldata::TtWnd(w->p1().x() - p->x() , w->p1().y() - p->y() ,
                                        w->p2().x()          , w->p2().y()           );
    r->denormalize(swapx, swapy);
    OPstack.push(r);
@@ -610,28 +620,29 @@ int parsercmd::cmdSHIFTBOX4::execute() {
 }
 
 //=============================================================================
-int parsercmd::cmdBLOWBOX::execute() {
+int parsercmd::cmdBLOWBOX::execute()
+{
    TELL_DEBUG(cmdBLOWBOX);
    real shift;
-   telldata::ttwnd *w;
+   telldata::TtWnd *w;
    if (_swapOperands)
    {
-      w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
+      w = static_cast<telldata::TtWnd*>(OPstack.top());OPstack.pop();
       shift = getOpValue();
    }
    else
    {
       shift = getOpValue();
-      w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
+      w = static_cast<telldata::TtWnd*>(OPstack.top());OPstack.pop();
    }
    bool swapx, swapy;
    w->normalize(swapx, swapy);
-   telldata::ttwnd* r;
+   telldata::TtWnd* r;
    if  (1 == _sign)
-      r = DEBUG_NEW telldata::ttwnd(w->p1().x() - shift  , w->p1().y() - shift ,
+      r = DEBUG_NEW telldata::TtWnd(w->p1().x() - shift  , w->p1().y() - shift ,
                                     w->p2().x() + shift  , w->p2().y() + shift  );
    else
-      r = DEBUG_NEW telldata::ttwnd(w->p1().x() + shift  , w->p1().y() + shift  ,
+      r = DEBUG_NEW telldata::TtWnd(w->p1().x() + shift  , w->p1().y() + shift  ,
                                     w->p2().x() - shift  , w->p2().y() - shift   );
    r->denormalize(swapx, swapy);
    OPstack.push(r);
@@ -640,20 +651,22 @@ int parsercmd::cmdBLOWBOX::execute() {
 }
 
 //=============================================================================
-int parsercmd::cmdMULTIPLY::execute() {
+int parsercmd::cmdMULTIPLY::execute()
+{
    TELL_DEBUG(cmdMULTIPLY);
    real value2 = getOpValue();
    real value1 = getOpValue();
-   OPstack.push(DEBUG_NEW telldata::ttreal(value1 * value2));
+   OPstack.push(DEBUG_NEW telldata::TtReal(value1 * value2));
    return EXEC_NEXT;
 }
 
 //=============================================================================
-int parsercmd::cmdDIVISION::execute() {
+int parsercmd::cmdDIVISION::execute()
+{
    TELL_DEBUG(cmdDIVISION);
    real value2 = getOpValue();
    real value1 = getOpValue();
-   OPstack.push(DEBUG_NEW telldata::ttreal(value1 / value2));
+   OPstack.push(DEBUG_NEW telldata::TtReal(value1 / value2));
    return EXEC_NEXT;
 }
 
@@ -662,22 +675,22 @@ int parsercmd::cmdSCALEPNT::execute()
 {
    TELL_DEBUG(cmdSCALEPNT);
    real scaleFactor;
-   telldata::ttpnt *p;
+   telldata::TtPnt *p;
    if (_swapOperands)
    {
-      p  = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
+      p  = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
       scaleFactor = getOpValue();
    }
    else
    {
       scaleFactor = getOpValue();
-      p  = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
+      p  = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
    }
-   telldata::ttpnt* r;
+   telldata::TtPnt* r;
    if (_up)
-      r = DEBUG_NEW telldata::ttpnt(p->x() * scaleFactor,p->y() * scaleFactor);
+      r = DEBUG_NEW telldata::TtPnt(p->x() * scaleFactor,p->y() * scaleFactor);
    else
-      r = DEBUG_NEW telldata::ttpnt(p->x() / scaleFactor, p->y() / scaleFactor);
+      r = DEBUG_NEW telldata::TtPnt(p->x() / scaleFactor, p->y() / scaleFactor);
    OPstack.push(r);
    delete p;
    return EXEC_NEXT;
@@ -688,24 +701,24 @@ int parsercmd::cmdSCALEBOX::execute()
 {
    TELL_DEBUG(cmdSCALEPNT);
    real scaleFactor;
-   telldata::ttwnd* w;
+   telldata::TtWnd* w;
    if (_swapOperands)
    {
-      w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
+      w = static_cast<telldata::TtWnd*>(OPstack.top());OPstack.pop();
       scaleFactor = getOpValue();
    }
    else
    {
       scaleFactor = getOpValue();
-      w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
+      w = static_cast<telldata::TtWnd*>(OPstack.top());OPstack.pop();
    }
 
-   telldata::ttwnd* r;
+   telldata::TtWnd* r;
    if (_up)
-      r = DEBUG_NEW telldata::ttwnd(w->p1().x() * scaleFactor , w->p1().y() * scaleFactor ,
+      r = DEBUG_NEW telldata::TtWnd(w->p1().x() * scaleFactor , w->p1().y() * scaleFactor ,
                                     w->p2().x() * scaleFactor , w->p2().y() * scaleFactor  );
    else
-      r = DEBUG_NEW telldata::ttwnd(w->p1().x() / scaleFactor , w->p1().y() / scaleFactor ,
+      r = DEBUG_NEW telldata::TtWnd(w->p1().x() / scaleFactor , w->p1().y() / scaleFactor ,
                                     w->p2().x() / scaleFactor , w->p2().y() / scaleFactor  );
    OPstack.push(r);
    delete w;
@@ -713,125 +726,139 @@ int parsercmd::cmdSCALEBOX::execute()
 }
 
 //=============================================================================
-int parsercmd::cmdLT::execute() {
+int parsercmd::cmdLT::execute()
+{
    TELL_DEBUG(cmdLT);
    real value2 = getOpValue();
    real value1 = getOpValue();
-   OPstack.push(DEBUG_NEW telldata::ttbool(value1 < value2));
+   OPstack.push(DEBUG_NEW telldata::TtBool(value1 < value2));
    return EXEC_NEXT;
 }
 
 //=============================================================================
-int parsercmd::cmdLET::execute() {
+int parsercmd::cmdLET::execute()
+{
    TELL_DEBUG(cmdLET);
    real value2 = getOpValue();
    real value1 = getOpValue();
-   OPstack.push(DEBUG_NEW telldata::ttbool(value1 <= value2));
+   OPstack.push(DEBUG_NEW telldata::TtBool(value1 <= value2));
    return EXEC_NEXT;
 }
 
 //=============================================================================
-int parsercmd::cmdGT::execute() {
+int parsercmd::cmdGT::execute()
+{
    TELL_DEBUG(cmdGT);
    real value2 = getOpValue();
    real value1 = getOpValue();
-   OPstack.push(DEBUG_NEW telldata::ttbool(value1 > value2));
+   OPstack.push(DEBUG_NEW telldata::TtBool(value1 > value2));
    return EXEC_NEXT;
 }
 
 //=============================================================================
-int parsercmd::cmdGET::execute() {
+int parsercmd::cmdGET::execute()
+{
    TELL_DEBUG(cmdGET);
    real value2 = getOpValue();
    real value1 = getOpValue();
-   OPstack.push(DEBUG_NEW telldata::ttbool(value1 >= value2));
+   OPstack.push(DEBUG_NEW telldata::TtBool(value1 >= value2));
    return EXEC_NEXT;
 }
 
 //=============================================================================
-int parsercmd::cmdEQ::execute() {
+int parsercmd::cmdEQ::execute()
+{
    TELL_DEBUG(cmdEQ);
    if (NUMBER_TYPE(OPstack.top()->get_type()))
-      OPstack.push(DEBUG_NEW telldata::ttbool(getOpValue() == getOpValue()));
+      OPstack.push(DEBUG_NEW telldata::TtBool(getOpValue() == getOpValue()));
    else if (telldata::tn_bool == OPstack.top()->get_type())
-      OPstack.push(DEBUG_NEW telldata::ttbool(getBoolValue() == getBoolValue()));
+      OPstack.push(DEBUG_NEW telldata::TtBool(getBoolValue() == getBoolValue()));
 //   else if (tn_
 // box & poly equal
    return EXEC_NEXT;
 }
 
 //=============================================================================
-int parsercmd::cmdNE::execute() {
+int parsercmd::cmdNE::execute()
+{
    TELL_DEBUG(cmdNE);
    if (NUMBER_TYPE(OPstack.top()->get_type()))
-      OPstack.push(DEBUG_NEW telldata::ttbool(getOpValue() != getOpValue()));
+      OPstack.push(DEBUG_NEW telldata::TtBool(getOpValue() != getOpValue()));
    else if (telldata::tn_bool == OPstack.top()->get_type())
-      OPstack.push(DEBUG_NEW telldata::ttbool(getBoolValue() != getBoolValue()));
+      OPstack.push(DEBUG_NEW telldata::TtBool(getBoolValue() != getBoolValue()));
 //   else if (tn_
 // box & poly equal
    return EXEC_NEXT;
 }
 
 //=============================================================================
-int parsercmd::cmdAND::execute() {
+int parsercmd::cmdAND::execute()
+{
    TELL_DEBUG(cmdAND);
-   telldata::ttbool *op = static_cast<telldata::ttbool*>(OPstack.top());OPstack.pop();
-   static_cast<telldata::ttbool*>(OPstack.top())->AND(op->value());
+   telldata::TtBool *op = static_cast<telldata::TtBool*>(OPstack.top());OPstack.pop();
+   static_cast<telldata::TtBool*>(OPstack.top())->AND(op->value());
    delete op;
    return EXEC_NEXT;
 }
 
 //=============================================================================
-int parsercmd::cmdBWAND::execute() {
+int parsercmd::cmdBWAND::execute()
+{
    TELL_DEBUG(cmdBWAND);
    word op1 = getWordValue();
    word op2 = getWordValue();
-   OPstack.push(DEBUG_NEW telldata::ttint(op1 & op2));
+   OPstack.push(DEBUG_NEW telldata::TtInt(op1 & op2));
    return EXEC_NEXT;
 }
 
 //=============================================================================
-int parsercmd::cmdOR::execute() {
+int parsercmd::cmdOR::execute()
+{
    TELL_DEBUG(cmdOR);
-   telldata::ttbool *op = static_cast<telldata::ttbool*>(OPstack.top());OPstack.pop();
-   static_cast<telldata::ttbool*>(OPstack.top())->OR(op->value());
+   telldata::TtBool *op = static_cast<telldata::TtBool*>(OPstack.top());OPstack.pop();
+   static_cast<telldata::TtBool*>(OPstack.top())->OR(op->value());
    delete op;
    return EXEC_NEXT;
 }
 
 //=============================================================================
-int parsercmd::cmdBWOR::execute() {
+int parsercmd::cmdBWOR::execute()
+{
    TELL_DEBUG(cmdBWAND);
    word op1 = getWordValue();
    word op2 = getWordValue();
-   OPstack.push(DEBUG_NEW telldata::ttint(op1 | op2));
+   OPstack.push(DEBUG_NEW telldata::TtInt(op1 | op2));
    return EXEC_NEXT;
 }
 
 //=============================================================================
-int parsercmd::cmdNOT::execute() {
+int parsercmd::cmdNOT::execute()
+{
    TELL_DEBUG(cmdNOT);
-   static_cast<telldata::ttbool*>(OPstack.top())->NOT();
+   static_cast<telldata::TtBool*>(OPstack.top())->NOT();
    return EXEC_NEXT;
 }
 
 //=============================================================================
-int parsercmd::cmdBWNOT::execute() {
+int parsercmd::cmdBWNOT::execute()
+{
    TELL_DEBUG(cmdNOT);
-   static_cast<telldata::ttint*>(OPstack.top())->NOT();
+   static_cast<telldata::TtInt*>(OPstack.top())->NOT();
    return EXEC_NEXT;
 }
 
 //=============================================================================
-int parsercmd::cmdUMINUS::execute() {
+int parsercmd::cmdUMINUS::execute()
+{
    TELL_DEBUG(cmdUMINUS);
-   if      (_type == telldata::tn_real) static_cast<telldata::ttreal*>(OPstack.top())->uminus();
-   else if (_type == telldata::tn_int ) static_cast<telldata::ttint*>(OPstack.top())->uminus();
+   if      (_type == telldata::tn_real) static_cast<telldata::TtReal*>(OPstack.top())->uminus();
+   else if (_type == telldata::tn_int ) static_cast<telldata::TtInt*>(OPstack.top())->uminus();
    return EXEC_NEXT;
 }
 
 //=============================================================================
-int parsercmd::cmdSTACKRST::execute() {
+int parsercmd::cmdSTACKRST::execute()
+{
    TELL_DEBUG(cmdSTACKRST);
    while (!OPstack.empty()) {
       delete OPstack.top(); OPstack.pop();
@@ -840,37 +867,38 @@ int parsercmd::cmdSTACKRST::execute() {
 }
 
 //=============================================================================
-int parsercmd::cmdLISTSIZE::execute() {
+int parsercmd::cmdLISTSIZE::execute()
+{
    TELL_DEBUG(cmdLISTSIZE);
    dword idx = getIndexValue();
-   telldata::tell_var* initVar;
+   telldata::TellVar* initVar;
    telldata::typeID ID = _var->get_type() & ~telldata::tn_listmask;
    switch (ID)
    {
-      case telldata::tn_real    : initVar = DEBUG_NEW telldata::ttreal()   ; break;
-      case telldata::tn_int     : initVar = DEBUG_NEW telldata::ttint()    ; break;
-      case telldata::tn_bool    : initVar = DEBUG_NEW telldata::ttbool()   ; break;
-      case telldata::tn_pnt     : initVar = DEBUG_NEW telldata::ttpnt()    ; break;
-      case telldata::tn_box     : initVar = DEBUG_NEW telldata::ttwnd()    ; break;
-      case telldata::tn_bnd     : initVar = DEBUG_NEW telldata::ttbnd()    ; break;
-      case telldata::tn_hsh     : initVar = DEBUG_NEW telldata::tthsh()    ; break;
-      case telldata::tn_hshstr  : initVar = DEBUG_NEW telldata::tthshstr() ; break;
-      case telldata::tn_string  : initVar = DEBUG_NEW telldata::ttstring() ; break;
-      case telldata::tn_layout  : initVar = DEBUG_NEW telldata::ttlayout() ; break;
-      case telldata::tn_auxilary: initVar = DEBUG_NEW telldata::ttauxdata(); break;
+      case telldata::tn_real    : initVar = DEBUG_NEW telldata::TtReal()   ; break;
+      case telldata::tn_int     : initVar = DEBUG_NEW telldata::TtInt()    ; break;
+      case telldata::tn_bool    : initVar = DEBUG_NEW telldata::TtBool()   ; break;
+      case telldata::tn_pnt     : initVar = DEBUG_NEW telldata::TtPnt()    ; break;
+      case telldata::tn_box     : initVar = DEBUG_NEW telldata::TtWnd()    ; break;
+      case telldata::tn_bnd     : initVar = DEBUG_NEW telldata::TtBnd()    ; break;
+      case telldata::tn_hsh     : initVar = DEBUG_NEW telldata::TtHsh()    ; break;
+      case telldata::tn_hshstr  : initVar = DEBUG_NEW telldata::TtHshStr() ; break;
+      case telldata::tn_string  : initVar = DEBUG_NEW telldata::TtString() ; break;
+      case telldata::tn_layout  : initVar = DEBUG_NEW telldata::TtLayout() ; break;
+      case telldata::tn_auxilary: initVar = DEBUG_NEW telldata::TtAuxdata(); break;
       default:
       {
          const telldata::TType* utype = CMDBlock->getTypeByID(ID);
          if (NULL == utype)
             assert(false);// unknown base array type ?!
          else if  (utype->isComposite())
-            initVar = DEBUG_NEW telldata::user_struct(static_cast<const telldata::TCompType*>(utype));
+            initVar = DEBUG_NEW telldata::TtUserStruct(static_cast<const telldata::TCompType*>(utype));
          else
             assert(false);//TODO - callback types
       }
    }
 
-   static_cast<telldata::ttlist*>(_var)->resize(idx, initVar);
+   static_cast<telldata::TtList*>(_var)->resize(idx, initVar);
    return EXEC_NEXT;
 }
 
@@ -878,7 +906,7 @@ int parsercmd::cmdLISTSIZE::execute() {
 int parsercmd::cmdASSIGN::execute()
 {
    TELL_DEBUG(cmdASSIGN);
-   telldata::tell_var *op = OPstack.top();OPstack.pop();
+   telldata::TellVar *op = OPstack.top();OPstack.pop();
    telldata::typeID typeis = _var->get_type();
    if (TLISALIST(typeis))
    {
@@ -891,7 +919,7 @@ int parsercmd::cmdASSIGN::execute()
       if (_indexed)
       {
          dword idx = getIndexValue();
-         telldata::tell_var* indexVar = static_cast<telldata::ttlist*>(_var)->index_var(idx);
+         telldata::TellVar* indexVar = static_cast<telldata::TtList*>(_var)->index_var(idx);
          if ((NULL != indexVar) && (!_opstackerr))
          {
             indexVar->assign(op); OPstack.push(indexVar->selfcopy());
@@ -918,7 +946,7 @@ int parsercmd::cmdLISTADD::execute()
 {
    TELL_DEBUG(cmdLISTADD);
 
-   telldata::tell_var *op = OPstack.top();OPstack.pop();
+   telldata::TellVar *op = OPstack.top();OPstack.pop();
    telldata::typeID typeis = _listarg->get_type();
    if (TLISALIST(typeis))
    {
@@ -972,7 +1000,7 @@ dword parsercmd::cmdLISTADD::getIndex()
 int parsercmd::cmdLISTUNION::execute()
 {
    TELL_DEBUG(cmdLISTUNION);
-   telldata::ttlist *op = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::TtList *op = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
    telldata::typeID typeis = _listarg->get_type() & ~telldata::tn_listmask;
 
    if ((TLCOMPOSIT_TYPE(typeis)) && (NULL == CMDBlock->getTypeByID(typeis)))
@@ -1099,7 +1127,7 @@ int parsercmd::cmdPUSH::execute()
       // branch below. It looks to me that it is quite the same as above, apart
       // from the index checks
       dword idx = getIndexValue();
-      telldata::tell_var *listcomp = static_cast<telldata::ttlist*>(_var)->index_var(idx);
+      telldata::TellVar *listcomp = static_cast<telldata::TtList*>(_var)->index_var(idx);
       if ((NULL != listcomp) && (!_opstackerr))
       {
          OPstack.push(listcomp->selfcopy());
@@ -1114,12 +1142,13 @@ int parsercmd::cmdPUSH::execute()
 }
 
 //=============================================================================
-telldata::tell_var* parsercmd::cmdSTRUCT::getList() {
+telldata::TellVar* parsercmd::cmdSTRUCT::getList()
+{
    telldata::typeID comptype = (*_arg)() & ~telldata::tn_listmask;
-   telldata::ttlist *pl = DEBUG_NEW telldata::ttlist(comptype);
+   telldata::TtList *pl = DEBUG_NEW telldata::TtList(comptype);
    unsigned llength = _arg->child().size();
    pl->reserve(llength);
-   telldata::tell_var  *p;
+   telldata::TellVar  *p;
    for (unsigned i = 0; i < llength; i++) {
       p = OPstack.top();OPstack.pop();
       pl->add(p); //Don't delete p; here! And don't get confused!
@@ -1136,22 +1165,22 @@ int parsercmd::cmdSTRUCT::execute()
       tellerror("Structure arguments not evaluated properly. Internal parser error");
       return EXEC_RETURN;
    }
-   telldata::tell_var *ustrct;
+   telldata::TellVar *ustrct;
    if (TLISALIST( (*_arg)() )) ustrct = getList();
    else
    {
       switch( (*_arg)() )
       {
-         case telldata::tn_pnt: ustrct = DEBUG_NEW telldata::ttpnt(OPstack);break;
-         case telldata::tn_box: ustrct = DEBUG_NEW telldata::ttwnd(OPstack);break;
-         case telldata::tn_bnd: ustrct = DEBUG_NEW telldata::ttbnd(OPstack);break;
-         case telldata::tn_hsh: ustrct = DEBUG_NEW telldata::tthsh(OPstack);break;
-         case telldata::tn_hshstr: ustrct = DEBUG_NEW telldata::tthshstr(OPstack);break;
+         case telldata::tn_pnt: ustrct = DEBUG_NEW telldata::TtPnt(OPstack);break;
+         case telldata::tn_box: ustrct = DEBUG_NEW telldata::TtWnd(OPstack);break;
+         case telldata::tn_bnd: ustrct = DEBUG_NEW telldata::TtBnd(OPstack);break;
+         case telldata::tn_hsh: ustrct = DEBUG_NEW telldata::TtHsh(OPstack);break;
+         case telldata::tn_hshstr: ustrct = DEBUG_NEW telldata::TtHshStr(OPstack);break;
          default:
          {
             const telldata::TType* atype = CMDBlock->getTypeByID( (*_arg)() );
             if (atype->isComposite())
-               ustrct = DEBUG_NEW telldata::user_struct(static_cast<const telldata::TCompType*>(atype), OPstack);
+               ustrct = DEBUG_NEW telldata::TtUserStruct(static_cast<const telldata::TCompType*>(atype), OPstack);
             else
                assert(false); // TODO - callback types
          }
@@ -1170,7 +1199,7 @@ int parsercmd::cmdFUNCREF::execute()
       tellerror("Callback statement not evaluated properly. Internal parser error");
       return EXEC_RETURN;
    }
-   telldata::tell_var *ustrct = DEBUG_NEW telldata::call_back( _ID, _funcBody);
+   telldata::TellVar *ustrct = DEBUG_NEW telldata::TtCallBack( _ID, _funcBody);
    OPstack.push(ustrct);
    return EXEC_NEXT;
 }
@@ -1179,7 +1208,7 @@ int parsercmd::cmdFUNCREF::execute()
 int parsercmd::cmdNUMFPARAMS::execute()
 {
    TELL_DEBUG(cmdNUMFPARAMS);
-   OPstack.push(DEBUG_NEW telldata::ttint(_numParams));
+   OPstack.push(DEBUG_NEW telldata::TtInt(_numParams));
    return EXEC_NEXT;
 }
 
@@ -1216,7 +1245,7 @@ int parsercmd::cmdFUNCCALL::execute()
 }
 
 //=============================================================================
-bool parsercmd::cmdRETURN::checkRetype(telldata::argumentID* arg)
+bool parsercmd::cmdRETURN::checkRetype(telldata::ArgumentID* arg)
 {
    if (NULL == arg) return (_retype == telldata::tn_void);
 
@@ -1247,7 +1276,7 @@ parsercmd::cmdBLOCK::cmdBLOCK()
    _varLocal.clear();
 }
 
-telldata::tell_var* parsercmd::cmdBLOCK::getID(const char* name, bool local) const
+telldata::TellVar* parsercmd::cmdBLOCK::getID(const char* name, bool local) const
 {
    TELL_DEBUG(***getID***);
    // Roll back the BlockSTACK until name is found. return NULL otherwise
@@ -1261,19 +1290,22 @@ telldata::tell_var* parsercmd::cmdBLOCK::getID(const char* name, bool local) con
    return NULL;
 }
 
-void parsercmd::cmdBLOCK::addID(const char* name, telldata::tell_var* var) {
+void parsercmd::cmdBLOCK::addID(const char* name, telldata::TellVar* var)
+{
    TELL_DEBUG(addID);
    _varLocal[name] = var;
 }
 
-void parsercmd::cmdBLOCK::addconstID(const char* name, telldata::tell_var* var, bool initialized) {
+void parsercmd::cmdBLOCK::addconstID(const char* name, telldata::TellVar* var, bool initialized)
+{
    TELL_DEBUG(addID);
    _varLocal[name] = var;
    var->const_declaration();
    if (initialized) var->update_cstat();
 }
 
-void parsercmd::cmdBLOCK::addlocaltype(const char* ttypename, telldata::TType* ntype) {
+void parsercmd::cmdBLOCK::addlocaltype(const char* ttypename, telldata::TType* ntype)
+{
    assert(_typeLocal.end() == _typeLocal.find(ttypename));
    _nextLclTypeID = ntype->ID() + 1;
    _typeLocal[ttypename] = ntype;
@@ -1309,20 +1341,23 @@ telldata::TCallBackType* parsercmd::cmdBLOCK::secureCallBackType(const char* tty
    else return NULL;
 }
 
-const telldata::TType* parsercmd::cmdBLOCK::getTypeByName(char*& ttypename) const {
+const telldata::TType* parsercmd::cmdBLOCK::getTypeByName(char*& ttypename) const
+{
    TELL_DEBUG(***gettypeID***);
    // Roll back the BlockSTACK until name is found. return NULL otherwise
    typedef BlockSTACK::const_iterator BS;
    BS blkstart = _blocks.begin();
    BS blkend   = _blocks.end();
-   for (BS cmd = blkstart; cmd != blkend; cmd++) {
+   for (BS cmd = blkstart; cmd != blkend; cmd++)
+   {
         if ((*cmd)->_typeLocal.end() != (*cmd)->_typeLocal.find(ttypename))
             return (*cmd)->_typeLocal[ttypename];
    }
    return NULL;
 }
 
-const telldata::TType* parsercmd::cmdBLOCK::getTypeByID(const telldata::typeID ID) const {
+const telldata::TType* parsercmd::cmdBLOCK::getTypeByID(const telldata::typeID ID) const
+{
    TELL_DEBUG(***getTypeByID***);
    // Roll back the BlockSTACK until name is found. return NULL otherwise
    typedef BlockSTACK::const_iterator BS;
@@ -1345,45 +1380,45 @@ const telldata::TType* parsercmd::cmdBLOCK::getTypeByID(const telldata::typeID I
  * for all kinds of variable operations excluding function parameters
  * @param ID - the typeID of the new variable
  * @param varName - variable name. This is not used normally. It is required
- * only for variables of type call_back, because here in this function an object
+ * only for variables of type TtCallBack, because here in this function an object
  * of a cmdCALLBACK class is instantiated.
  * @param loc the location of the variable identifier in the source TELL file -
  * for error reporting purposes
  * @return the new TELL variable. It also can return NULL in case of error
  */
-telldata::tell_var* parsercmd::cmdBLOCK::newTellvar(telldata::typeID ID, const char* varName, TpdYYLtype loc)
+telldata::TellVar* parsercmd::cmdBLOCK::newTellvar(telldata::typeID ID, const char* varName, TpdYYLtype loc)
 {
    if (ID & telldata::tn_listmask)
    {
-      return(DEBUG_NEW telldata::ttlist(ID));
+      return(DEBUG_NEW telldata::TtList(ID));
    }
    else
    switch (ID)
    {
-      case   telldata::tn_real  : return(DEBUG_NEW telldata::ttreal());
-      case    telldata::tn_int  : return(DEBUG_NEW telldata::ttint());
-      case   telldata::tn_bool  : return(DEBUG_NEW telldata::ttbool());
-      case    telldata::tn_pnt  : return(DEBUG_NEW telldata::ttpnt());
-      case    telldata::tn_box  : return(DEBUG_NEW telldata::ttwnd());
-      case    telldata::tn_bnd  : return(DEBUG_NEW telldata::ttbnd());
-      case    telldata::tn_hsh  : return(DEBUG_NEW telldata::tthsh());
-      case telldata::tn_hshstr  : return(DEBUG_NEW telldata::tthshstr());
-      case telldata::tn_string  : return(DEBUG_NEW telldata::ttstring());
-      case telldata::tn_layout  : return(DEBUG_NEW telldata::ttlayout());
-      case telldata::tn_auxilary: return(DEBUG_NEW telldata::ttauxdata());
+      case   telldata::tn_real  : return(DEBUG_NEW telldata::TtReal());
+      case    telldata::tn_int  : return(DEBUG_NEW telldata::TtInt());
+      case   telldata::tn_bool  : return(DEBUG_NEW telldata::TtBool());
+      case    telldata::tn_pnt  : return(DEBUG_NEW telldata::TtPnt());
+      case    telldata::tn_box  : return(DEBUG_NEW telldata::TtWnd());
+      case    telldata::tn_bnd  : return(DEBUG_NEW telldata::TtBnd());
+      case    telldata::tn_hsh  : return(DEBUG_NEW telldata::TtHsh());
+      case telldata::tn_hshstr  : return(DEBUG_NEW telldata::TtHshStr());
+      case telldata::tn_string  : return(DEBUG_NEW telldata::TtString());
+      case telldata::tn_layout  : return(DEBUG_NEW telldata::TtLayout());
+      case telldata::tn_auxilary: return(DEBUG_NEW telldata::TtAuxdata());
       default:
       {
          const telldata::TType* utype = getTypeByID(ID);
          if (NULL == utype)
             tellerror("Bad type specifier", loc);
          else if (utype->isComposite())
-            return (DEBUG_NEW telldata::user_struct(static_cast<const telldata::TCompType*>(utype)));
+            return (DEBUG_NEW telldata::TtUserStruct(static_cast<const telldata::TCompType*>(utype)));
          else
          { // callback variable
             const telldata::TCallBackType* vartype = static_cast<const telldata::TCallBackType*>(utype);
             parsercmd::cmdCALLBACK* cbfp = DEBUG_NEW cmdCALLBACK(vartype->paramList(),vartype->fType(), loc);
             if (addCALLBACKDECL(varName, cbfp, loc))
-               return (DEBUG_NEW telldata::call_back(ID, cbfp));
+               return (DEBUG_NEW telldata::TtCallBack(ID, cbfp));
             else
                delete cbfp;
          }
@@ -1392,62 +1427,66 @@ telldata::tell_var* parsercmd::cmdBLOCK::newTellvar(telldata::typeID ID, const c
    return NULL;
 }
 
-telldata::tell_var* parsercmd::cmdBLOCK::newFuncArg(telldata::typeID ID, const char* varName, TpdYYLtype loc)
+telldata::TellVar* parsercmd::cmdBLOCK::newFuncArg(telldata::typeID ID, const char* varName, TpdYYLtype loc)
 {
    if (ID & telldata::tn_listmask)
    {
-      return(DEBUG_NEW telldata::ttlist(ID));
+      return(DEBUG_NEW telldata::TtList(ID));
    }
    else
    switch (ID)
    {
-      case   telldata::tn_real  : return(DEBUG_NEW telldata::ttreal());
-      case    telldata::tn_int  : return(DEBUG_NEW telldata::ttint());
-      case   telldata::tn_bool  : return(DEBUG_NEW telldata::ttbool());
-      case    telldata::tn_pnt  : return(DEBUG_NEW telldata::ttpnt());
-      case    telldata::tn_box  : return(DEBUG_NEW telldata::ttwnd());
-      case    telldata::tn_bnd  : return(DEBUG_NEW telldata::ttbnd());
-      case    telldata::tn_hsh  : return(DEBUG_NEW telldata::tthsh());
-      case telldata::tn_hshstr  : return(DEBUG_NEW telldata::tthshstr());
-      case telldata::tn_string  : return(DEBUG_NEW telldata::ttstring());
-      case telldata::tn_layout  : return(DEBUG_NEW telldata::ttlayout());
-      case telldata::tn_auxilary: return(DEBUG_NEW telldata::ttauxdata());
+      case   telldata::tn_real  : return(DEBUG_NEW telldata::TtReal());
+      case    telldata::tn_int  : return(DEBUG_NEW telldata::TtInt());
+      case   telldata::tn_bool  : return(DEBUG_NEW telldata::TtBool());
+      case    telldata::tn_pnt  : return(DEBUG_NEW telldata::TtPnt());
+      case    telldata::tn_box  : return(DEBUG_NEW telldata::TtWnd());
+      case    telldata::tn_bnd  : return(DEBUG_NEW telldata::TtBnd());
+      case    telldata::tn_hsh  : return(DEBUG_NEW telldata::TtHsh());
+      case telldata::tn_hshstr  : return(DEBUG_NEW telldata::TtHshStr());
+      case telldata::tn_string  : return(DEBUG_NEW telldata::TtString());
+      case telldata::tn_layout  : return(DEBUG_NEW telldata::TtLayout());
+      case telldata::tn_auxilary: return(DEBUG_NEW telldata::TtAuxdata());
       default:
       {
          const telldata::TType* utype = getTypeByID(ID);
          if (NULL == utype)
             tellerror("Bad type specifier", loc);
          else if (utype->isComposite())
-            return (DEBUG_NEW telldata::user_struct(static_cast<const telldata::TCompType*>(utype)));
+            return (DEBUG_NEW telldata::TtUserStruct(static_cast<const telldata::TCompType*>(utype)));
          else
          { // callback function argument
             const telldata::TCallBackType* vartype = static_cast<const telldata::TCallBackType*>(utype);
             parsercmd::cmdCALLBACK* cbfp = DEBUG_NEW cmdCALLBACK(vartype->paramList(),vartype->fType(), loc);
-            return (DEBUG_NEW telldata::call_back(ID, cbfp));
+            return (DEBUG_NEW telldata::TtCallBack(ID, cbfp));
          }
       }
    }
    return NULL;
 }
 
-parsercmd::cmdBLOCK* parsercmd::cmdBLOCK::popblk() {
+parsercmd::cmdBLOCK* parsercmd::cmdBLOCK::popblk()
+{
    TELL_DEBUG(cmdBLOCK_popblk);
    _blocks.pop_front();
    return _blocks.front();;
 }
 
-void parsercmd::cmdBLOCK::addFUNC(std::string, cmdSTDFUNC* cQ) {
+void parsercmd::cmdBLOCK::addFUNC(std::string, cmdSTDFUNC* cQ)
+{
    TELL_DEBUG(addFUNC);
    tellerror("Nested function definitions are not allowed");
    if (cQ)    delete cQ;
 }
 
-void parsercmd::cmdBLOCK::addUSERFUNC(FuncDeclaration*, cmdFUNC*, TpdYYLtype) {
+void parsercmd::cmdBLOCK::addUSERFUNC(FuncDeclaration*, cmdFUNC*, TpdYYLtype)
+{
    TELL_DEBUG(addFUNC);
    tellerror("Nested function definitions are not allowed");
 }
 
-parsercmd::cmdFUNC* parsercmd::cmdBLOCK::addUSERFUNCDECL(FuncDeclaration*, TpdYYLtype) {
+parsercmd::cmdFUNC* parsercmd::cmdBLOCK::addUSERFUNCDECL(FuncDeclaration*, TpdYYLtype)
+{
    TELL_DEBUG(addFUNCDECL);
    tellerror("Function definitions can be only global");
    return NULL;
@@ -1460,7 +1499,8 @@ bool parsercmd::cmdBLOCK::addCALLBACKDECL(std::string, cmdCALLBACK*, TpdYYLtype)
    return false;
 }
 
-int parsercmd::cmdBLOCK::execute() {
+int parsercmd::cmdBLOCK::execute()
+{
    TELL_DEBUG(cmdBLOCK_execute);
    int retexec = EXEC_NEXT; // to secure an empty block
    for (CmdQUEUE::const_iterator cmd = _cmdQ.begin(); cmd != _cmdQ.end(); cmd++) {
@@ -1469,7 +1509,8 @@ int parsercmd::cmdBLOCK::execute() {
    return retexec;
 }
 
-parsercmd::cmdBLOCK* parsercmd::cmdBLOCK::cleaner() {
+parsercmd::cmdBLOCK* parsercmd::cmdBLOCK::cleaner()
+{
    TELL_DEBUG(cmdBLOCK_cleaner);
    while (!_cmdQ.empty()) {
       cmdVIRTUAL *a = _cmdQ.front();_cmdQ.pop_front();
@@ -1484,7 +1525,8 @@ parsercmd::cmdBLOCK* parsercmd::cmdBLOCK::cleaner() {
    else return this;
 }
 
-parsercmd::cmdBLOCK::~cmdBLOCK() {
+parsercmd::cmdBLOCK::~cmdBLOCK()
+{
    for (CmdQUEUE::iterator CMDI = _cmdQ.begin(); CMDI != _cmdQ.end(); CMDI++)
       delete *CMDI;
    _cmdQ.clear();
@@ -1575,7 +1617,8 @@ bool parsercmd::cmdBLOCK::checkDbSortState(DbSortState needsDbResort)
 }
 //=============================================================================
 parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
-                                        (const char* fn, telldata::argumentQ* amap) const {
+                                        (const char* fn, telldata::argumentQ* amap) const
+{
    cmdSTDFUNC *fbody = NULL;
    telldata::argumentQ* arguMap = (NULL == amap) ? DEBUG_NEW telldata::argumentQ : amap;
    // first check for local functions
@@ -1615,7 +1658,7 @@ bool  parsercmd::cmdBLOCK::defValidate(const std::string& fn, const ArgumentLIST
    telldata::argumentQ arguMap;
    typedef ArgumentLIST::const_iterator AT;
    for (AT arg = alst->begin(); arg != alst->end(); arg++)
-      arguMap.push_back(DEBUG_NEW telldata::argumentID((*arg)->second->get_type()));
+      arguMap.push_back(DEBUG_NEW telldata::ArgumentID((*arg)->second->get_type()));
    // get the function definitions with this name
    typedef FunctionMAP::iterator MM;
    std::pair<MM,MM> range = _funcMAP.equal_range(fn);
@@ -1656,7 +1699,7 @@ bool  parsercmd::cmdBLOCK::declValidate(const std::string& fn, const ArgumentLIS
    telldata::argumentQ arguMap;
    typedef ArgumentLIST::const_iterator AT;
    for (AT arg = alst->begin(); arg != alst->end(); arg++)
-      arguMap.push_back(DEBUG_NEW telldata::argumentID((*arg)->second->get_type()));
+      arguMap.push_back(DEBUG_NEW telldata::ArgumentID((*arg)->second->get_type()));
    // get the function definitions with this name
    typedef FunctionMAP::iterator MM;
    std::pair<MM,MM> range = _funcMAP.equal_range(fn);
@@ -1713,7 +1756,7 @@ int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap)
 // which type can not be determined without the type of the function parameter.
 // Here is the idea
 // 1. If an unknown type appears in the argument list
-//  a) Create a copy of the argument using argumentID copy constructor
+//  a) Create a copy of the argument using ArgumentID copy constructor
 //  b) Check that the new argument matches the type of the function parameter and
 //     if so:
 //     - assign (adjust) the type of the argument to the type of the parameter
@@ -1740,7 +1783,7 @@ int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap)
    while (i-- > 0)
    {
       telldata::typeID cargID = (*(*amap)[i])();
-      telldata::argumentID carg((*(*amap)[i]));
+      telldata::ArgumentID carg((*(*amap)[i]));
       telldata::typeID lvalID = (*_arguments)[i]->second->get_type();
       if (TLUNKNOWN_TYPE(cargID))
       {
@@ -1764,14 +1807,14 @@ int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap)
          if ( carg() != lvalID)
             break;
          else if (TLUNKNOWN_TYPE( (*(*amap)[i])() ))
-            UnknownArgsCopy.push_back(DEBUG_NEW telldata::argumentID(carg));
+            UnknownArgsCopy.push_back(DEBUG_NEW telldata::ArgumentID(carg));
       }
       else
       {  // for number types - allow compatablity
          if ((!NUMBER_TYPE(lvalID)) || ( carg() > lvalID))
             break;
          else if (TLUNKNOWN_TYPE( (*(*amap)[i])() ))
-            UnknownArgsCopy.push_back(DEBUG_NEW telldata::argumentID(carg));
+            UnknownArgsCopy.push_back(DEBUG_NEW telldata::ArgumentID(carg));
       }
    }
    i++;
@@ -1813,7 +1856,8 @@ NameList* parsercmd::cmdSTDFUNC::callingConv(const telldata::typeMAP* lclTypeDef
    return argtypes;
 }
 
-parsercmd::cmdSTDFUNC::~cmdSTDFUNC() {
+parsercmd::cmdSTDFUNC::~cmdSTDFUNC()
+{
    ClearArgumentList(_arguments);
    delete _arguments;
 }
@@ -1837,7 +1881,7 @@ parsercmd::cmdFUNC::cmdFUNC(ArgumentLIST* vm, telldata::typeID tt, bool declarat
             if ((NULL != utype) && (!utype->isComposite()))
             { // we have a callback argument. It means that right here it must
               // be converted from a variable to a function declaration
-               telldata::call_back* cbVar = static_cast<telldata::call_back*>((*arg)->second);
+               telldata::TtCallBack* cbVar = static_cast<telldata::TtCallBack*>((*arg)->second);
                bool valid = addCALLBACKPARAM((*arg)->first, cbVar->fcbBody(), loc);
                assert(valid); //TODO - what if?
             }
@@ -1859,9 +1903,9 @@ int parsercmd::cmdFUNC::execute()
       //get the argument name
       std::string   argname = (*_arguments)[i]->first;
       // get the tell variable (by name)
-      telldata::tell_var* argvar = _varLocal[argname];
+      telldata::TellVar* argvar = _varLocal[argname];
       // get a value from the operand stack
-      telldata::tell_var* argval = OPstack.top();
+      telldata::TellVar* argval = OPstack.top();
       // replace the value of the local variable with the argument value
       argvar->assign(argval);
       delete argval;OPstack.pop();
@@ -1935,7 +1979,7 @@ parsercmd::cmdCALLBACK::cmdCALLBACK(const telldata::TypeIdList&  paramlist, tell
 {
    for (telldata::TypeIdList::const_iterator CP = paramlist.begin(); CP != paramlist.end(); CP++)
    {
-      telldata::tell_var* lvar = newCallBackArgument(*CP, loc);
+      telldata::TellVar* lvar = newCallBackArgument(*CP, loc);
       _arguments->push_back(DEBUG_NEW parsercmd::ArgumentTYPE(std::string(""),lvar));
    }
 }
@@ -1954,10 +1998,11 @@ int parsercmd::cmdCALLBACK::execute()
    }
 }
 //=============================================================================
-int parsercmd::cmdIFELSE::execute() {
+int parsercmd::cmdIFELSE::execute()
+{
    TELL_DEBUG(cmdIFELSE);
    int retexec = EXEC_NEXT;
-   telldata::ttbool *cond = static_cast<telldata::ttbool*>(OPstack.top());OPstack.pop();
+   telldata::TtBool *cond = static_cast<telldata::TtBool*>(OPstack.top());OPstack.pop();
    if (cond->value())   retexec =  _trueblock->execute();
    else if (_falseblock) retexec = _falseblock->execute();
    delete cond;
@@ -1965,14 +2010,15 @@ int parsercmd::cmdIFELSE::execute() {
 }
 
 //=============================================================================
-int parsercmd::cmdWHILE::execute() {
+int parsercmd::cmdWHILE::execute()
+{
    TELL_DEBUG(cmdWHILE);
    int retexec = EXEC_NEXT;
-   telldata::ttbool *cond;
+   telldata::TtBool *cond;
    bool    condvalue;
    while (true) {
       _condblock->execute();
-      cond = static_cast<telldata::ttbool*>(OPstack.top());OPstack.pop();
+      cond = static_cast<telldata::TtBool*>(OPstack.top());OPstack.pop();
       condvalue = cond->value(); delete cond;
       if (condvalue)    retexec = _body->execute();
       else              return retexec;
@@ -1981,28 +2027,30 @@ int parsercmd::cmdWHILE::execute() {
 }
 
 //=============================================================================
-int parsercmd::cmdREPEAT::execute() {
+int parsercmd::cmdREPEAT::execute()
+{
    TELL_DEBUG(cmdREPEAT);
    int retexec;
-   telldata::ttbool *cond;
+   telldata::TtBool *cond;
    bool    condvalue;
    while (true) {
       retexec = _body->execute();
       if (EXEC_NEXT != retexec) return retexec;
       _condblock->execute();
-      cond = static_cast<telldata::ttbool*>(OPstack.top());OPstack.pop();
+      cond = static_cast<telldata::TtBool*>(OPstack.top());OPstack.pop();
       condvalue = cond->value(); delete cond;
       if (!condvalue)           return retexec;
    }
 }
 
 //=============================================================================
-int parsercmd::cmdFOREACH::execute() {
+int parsercmd::cmdFOREACH::execute()
+{
    TELL_DEBUG(cmdFOREACH);
    int retexec = EXEC_NEXT;
 
    _header->execute();
-   telldata::ttlist* clist = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::TtList* clist = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
    telldata::memlist valist = clist->mlist();
 
    for (telldata::memlist::const_iterator CI = valist.begin(); CI != valist.end(); CI++)
@@ -2118,7 +2166,8 @@ bool parsercmd::cmdMAIN::addCALLBACKDECL(std::string name, cmdCALLBACK* decl, Tp
    return false;
 }
 
-parsercmd::cmdMAIN::cmdMAIN():cmdBLOCK(telldata::tn_usertypes) {
+parsercmd::cmdMAIN::cmdMAIN():cmdBLOCK(telldata::tn_usertypes)
+{
    pushblk();
 };
 
@@ -2133,7 +2182,8 @@ void parsercmd::cmdMAIN::recoveryDone()
    cmdSTDFUNC::_ignoreOnRecovery = false;
 }
 
-parsercmd::cmdMAIN::~cmdMAIN(){
+parsercmd::cmdMAIN::~cmdMAIN()
+{
    while (UNDOcmdQ.size() > 0)
    {
       UNDOcmdQ.back()->undo_cleanup();UNDOcmdQ.pop_back();
@@ -2148,7 +2198,8 @@ parsercmd::cmdMAIN::~cmdMAIN(){
 };
 
 //=============================================================================
-telldata::typeID parsercmd::UMinus(telldata::typeID op1, TpdYYLtype loc1) {
+telldata::typeID parsercmd::UMinus(telldata::typeID op1, TpdYYLtype loc1)
+{
    if (NUMBER_TYPE(op1)) {
       CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdUMINUS(op1));
       return op1;}
@@ -2166,7 +2217,8 @@ telldata::typeID parsercmd::UMinus(telldata::typeID op1, TpdYYLtype loc1) {
 //   box      |blow |shift| or* | string + string => concatenation
 //-----------------------------------------------------------------------------
 telldata::typeID parsercmd::Plus(telldata::typeID op1, telldata::typeID op2,
-                                                  TpdYYLtype loc1, TpdYYLtype loc2) {
+                                                  TpdYYLtype loc1, TpdYYLtype loc2)
+{
    switch (op1)   {
       case  telldata::tn_int:
          switch(op2) {
@@ -2231,7 +2283,8 @@ telldata::typeID parsercmd::Plus(telldata::typeID op1, telldata::typeID op2,
 //   box      |shrink|shift| or* | * TBD
 //-----------------------------------------------------------------------------
 telldata::typeID parsercmd::Minus(telldata::typeID op1, telldata::typeID op2,
-                                                  TpdYYLtype loc1, TpdYYLtype loc2) {
+                                                  TpdYYLtype loc1, TpdYYLtype loc2)
+{
    switch (op1)   {
        case telldata::tn_int:
           switch(op2) {
@@ -2273,7 +2326,8 @@ telldata::typeID parsercmd::Minus(telldata::typeID op1, telldata::typeID op2,
 }
 
 telldata::typeID parsercmd::PointMv(telldata::typeID op1, telldata::typeID op2,
-                                   TpdYYLtype loc1, TpdYYLtype loc2, int xdir, int ydir) {
+                                   TpdYYLtype loc1, TpdYYLtype loc2, int xdir, int ydir)
+{
    switch (op1)   {
       case telldata::tn_pnt:
          switch(op2) {
@@ -2391,7 +2445,7 @@ telldata::typeID parsercmd::Divide(telldata::typeID op1, telldata::typeID op2,
 }
 
 bool parsercmd::StructTypeCheck(telldata::typeID targett,
-                                      telldata::argumentID* op2, TpdYYLtype loc)
+                                      telldata::ArgumentID* op2, TpdYYLtype loc)
 {
    VERIFY(TLUNKNOWN_TYPE((*op2)()));
    const telldata::TType* vartype;
@@ -2450,7 +2504,7 @@ bool parsercmd::ListSliceCheck(telldata::typeID list, TpdYYLtype lloc,
    return true;
 }
 
-telldata::typeID parsercmd::Assign(telldata::tell_var* lval, bool indexed, telldata::argumentID* op2,
+telldata::typeID parsercmd::Assign(telldata::TellVar* lval, bool indexed, telldata::ArgumentID* op2,
                                                                  TpdYYLtype loc)
 {
    if (!lval)
@@ -2504,7 +2558,7 @@ telldata::typeID parsercmd::Assign(telldata::tell_var* lval, bool indexed, telld
    {
       CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdASSIGN(lval, indexed));
       // don't forget to update cmdSTRUCT (if this is the rval) with the
-      // validated argumentID
+      // validated ArgumentID
 //      if (NULL != op2->command())
 //         static_cast<cmdSTRUCT*>(op2->command())->setargID(op2);
       return lvalID;
@@ -2516,7 +2570,7 @@ telldata::typeID parsercmd::Assign(telldata::tell_var* lval, bool indexed, telld
    }
 }
 
-telldata::typeID parsercmd::Uninsert(telldata::tell_var* lval, telldata::argumentID* op2,
+telldata::typeID parsercmd::Uninsert(telldata::TellVar* lval, telldata::ArgumentID* op2,
                                                     parsercmd::cmdLISTADD* unins_cmd, TpdYYLtype loc)
 {
    // List add/insert operators can be described as "composite" operators - i.e.
@@ -2725,7 +2779,8 @@ telldata::typeID parsercmd::BoolEx(telldata::typeID op1, std::string ope, TpdYYL
    }
 }
 
-void parsercmd::ClearArgumentList(ArgumentLIST* alst) {
+void parsercmd::ClearArgumentList(ArgumentLIST* alst)
+{
    if (NULL == alst) return;
    for (ArgumentLIST::iterator ALI = alst->begin(); ALI != alst->end(); ALI++) {
       delete (*ALI)->second;
@@ -2803,50 +2858,58 @@ void console::toped_logfile::init(const std::string logFileName, bool append)
    setlocale(LC_ALL, "English");
 }
 
-console::toped_logfile& console::toped_logfile::operator<< (const byte _i) {
+console::toped_logfile& console::toped_logfile::operator<< (const byte _i)
+{
    if (_enabled)
       _file << static_cast<unsigned short>(_i) ;
    return *this;
 }
 
-console::toped_logfile& console::toped_logfile::operator<< (const word _i) {
+console::toped_logfile& console::toped_logfile::operator<< (const word _i)
+{
    if (_enabled)
       _file << _i ;
    return *this;
 }
 
-console::toped_logfile& console::toped_logfile::operator<< (const int4b _i) {
+console::toped_logfile& console::toped_logfile::operator<< (const int4b _i)
+{
    if (_enabled)
       _file << _i ;
    return *this;
 }
 
-console::toped_logfile& console::toped_logfile::operator<< (const real _r) {
+console::toped_logfile& console::toped_logfile::operator<< (const real _r)
+{
    if (_enabled)
       _file << _r ;
    return *this;
 }
 
-console::toped_logfile& console::toped_logfile::operator<< (const telldata::ttpnt& _p) {
+console::toped_logfile& console::toped_logfile::operator<< (const telldata::TtPnt& _p)
+{
    if (_enabled)
       _file << "{" << _p.x() << "," << _p.y() << "}";
    return *this;
 }
 
-console::toped_logfile& console::toped_logfile::operator<< (const std::string& _s) {
+console::toped_logfile& console::toped_logfile::operator<< (const std::string& _s)
+{
    if (_enabled)
       _file << _s ;
    return *this;
 }
 
-console::toped_logfile& console::toped_logfile::operator<< (const telldata::ttwnd& _w) {
+console::toped_logfile& console::toped_logfile::operator<< (const telldata::TtWnd& _w)
+{
    if (_enabled)
       _file << "{{" << _w.p1().x() << "," << _w.p1().y() << "}," <<
                 "{" << _w.p2().x() << "," << _w.p2().y() << "}}";
    return *this;
 }
 
-console::toped_logfile& console::toped_logfile::operator<< (const telldata::ttbnd& _b) {
+console::toped_logfile& console::toped_logfile::operator<< (const telldata::TtBnd& _b)
+{
    if (_enabled)
       _file << "{{" << _b.p().x() << "," << _b.p().y() << "}," <<
             _b.rot().value() << "," << (_b.flx().value() ? "true" : "false") << "," <<
@@ -2854,13 +2917,15 @@ console::toped_logfile& console::toped_logfile::operator<< (const telldata::ttbn
    return *this;
 }
 
-console::toped_logfile& console::toped_logfile::operator<< (const telldata::tthsh& _h) {
+console::toped_logfile& console::toped_logfile::operator<< (const telldata::TtHsh& _h)
+{
    if (_enabled)
       _file << "{" << _h.key().value() << ",\"" << _h.value().value() << "\"}";
    return *this;
 }
 
-console::toped_logfile& console::toped_logfile::operator<< (const telldata::ttlist& _tl) {
+console::toped_logfile& console::toped_logfile::operator<< (const telldata::TtList& _tl)
+{
    if (_enabled)
    {
       _file << "{";
@@ -2868,28 +2933,28 @@ console::toped_logfile& console::toped_logfile::operator<< (const telldata::ttli
          if (i != 0) _file << ",";
          switch (~telldata::tn_listmask & _tl.get_type()) {
             case telldata::tn_int:
-               _file << static_cast<telldata::ttint*>((_tl.mlist())[i])->value();
+               _file << static_cast<telldata::TtInt*>((_tl.mlist())[i])->value();
                break;
             case telldata::tn_real:
-               _file << static_cast<telldata::ttreal*>((_tl.mlist())[i])->value();
+               _file << static_cast<telldata::TtReal*>((_tl.mlist())[i])->value();
                break;
             case telldata::tn_bool:
-               *this << _2bool(static_cast<telldata::ttbool*>((_tl.mlist())[i])->value());
+               *this << _2bool(static_cast<telldata::TtBool*>((_tl.mlist())[i])->value());
                break;
             case telldata::tn_string:
-               _file << "\"" << static_cast<telldata::ttstring*>((_tl.mlist())[i])->value() << "\"";
+               _file << "\"" << static_cast<telldata::TtString*>((_tl.mlist())[i])->value() << "\"";
                break;
             case telldata::tn_pnt:
-               *this << *(static_cast<telldata::ttpnt*>((_tl.mlist())[i]));
+               *this << *(static_cast<telldata::TtPnt*>((_tl.mlist())[i]));
                break;
             case telldata::tn_box:
-               *this << *(static_cast<telldata::ttwnd*>((_tl.mlist())[i]));
+               *this << *(static_cast<telldata::TtWnd*>((_tl.mlist())[i]));
                break;
             case telldata::tn_bnd:
-               *this << *(static_cast<telldata::ttbnd*>((_tl.mlist())[i]));
+               *this << *(static_cast<telldata::TtBnd*>((_tl.mlist())[i]));
                break;
             case telldata::tn_hsh:
-               *this << *(static_cast<telldata::tthsh*>((_tl.mlist())[i]));
+               *this << *(static_cast<telldata::TtHsh*>((_tl.mlist())[i]));
                break;
    //         case tn_layout:
                default:{assert(false);}
@@ -2913,35 +2978,35 @@ void console::toped_logfile::close()
 }
 
 //==============================================================================
-telldata::call_back::call_back(typeID ID, parsercmd::cmdCALLBACK* fcbBody) :
-   tell_var     ( ID          ),
+telldata::TtCallBack::TtCallBack(typeID ID, parsercmd::cmdCALLBACK* fcbBody) :
+   TellVar      ( ID          ),
    _fcbBody     ( fcbBody     ),
    _fBody       ( NULL        ),
    _definition  ( false       )
 {}
 
-telldata::call_back::call_back(typeID ID, parsercmd::cmdSTDFUNC* fBody) :
-   tell_var     ( ID          ),
+telldata::TtCallBack::TtCallBack(typeID ID, parsercmd::cmdSTDFUNC* fBody) :
+   TellVar      ( ID          ),
    _fcbBody     ( NULL        ),
    _fBody       ( fBody       ),
    _definition  ( true        )
 {}
 
-telldata::call_back::call_back(const call_back& cobj) :
-   tell_var     ( cobj.get_type()  ),
+telldata::TtCallBack::TtCallBack(const TtCallBack& cobj) :
+   TellVar      ( cobj.get_type()  ),
    _fcbBody     ( cobj._fcbBody    ),
    _fBody       ( cobj._fBody      ),
    _definition  ( cobj._definition )
 {}
 
-telldata::call_back::call_back(typeID ID) :
-   tell_var     ( ID          ),
+telldata::TtCallBack::TtCallBack(typeID ID) :
+   TellVar      ( ID          ),
    _fcbBody     ( NULL        ),
    _fBody       ( NULL        ),
    _definition  ( false       )
 {}
 
-void telldata::call_back::initialize()
+void telldata::TtCallBack::initialize()
 {
    // clean-up the function body for the next call
    // - effectively undo what has been done in assign
@@ -2949,16 +3014,16 @@ void telldata::call_back::initialize()
    _fcbBody->unSetFBody();
 }
 
-telldata::tell_var* telldata::call_back::selfcopy() const
+telldata::TellVar* telldata::TtCallBack::selfcopy() const
 {
-   call_back* nvar = DEBUG_NEW call_back(_ID);
+   TtCallBack* nvar = DEBUG_NEW TtCallBack(_ID);
    nvar->_definition = _definition;
    nvar->_fcbBody    = _fcbBody;
    nvar->_fBody      = _fBody;
    return nvar;
 }
 
-void telldata::call_back::echo(std::string& wstr, real)
+void telldata::TtCallBack::echo(std::string& wstr, real)
 {
    std::ostringstream ost;
    if (_fcbBody->declaration())
@@ -2968,9 +3033,9 @@ void telldata::call_back::echo(std::string& wstr, real)
    wstr += ost.str();
 }
 
-void telldata::call_back::assign(tell_var* value)
+void telldata::TtCallBack::assign(TellVar* value)
 {
-   call_back* n_value = static_cast<telldata::call_back*>(value);
+   TtCallBack* n_value = static_cast<telldata::TtCallBack*>(value);
 
    _definition = n_value->_definition;
    _fBody      = n_value->_fBody;
@@ -2987,33 +3052,33 @@ void telldata::call_back::assign(tell_var* value)
 }
 
 //==============================================================================
-telldata::tell_var* parsercmd::newCallBackArgument(telldata::typeID ID, TpdYYLtype loc)
+telldata::TellVar* parsercmd::newCallBackArgument(telldata::typeID ID, TpdYYLtype loc)
 {
    if (ID & telldata::tn_listmask)
    {
-      return(DEBUG_NEW telldata::ttlist(ID));
+      return(DEBUG_NEW telldata::TtList(ID));
    }
    else
    switch (ID)
    {
-      case   telldata::tn_real  : return(DEBUG_NEW telldata::ttreal());
-      case    telldata::tn_int  : return(DEBUG_NEW telldata::ttint());
-      case   telldata::tn_bool  : return(DEBUG_NEW telldata::ttbool());
-      case    telldata::tn_pnt  : return(DEBUG_NEW telldata::ttpnt());
-      case    telldata::tn_box  : return(DEBUG_NEW telldata::ttwnd());
-      case    telldata::tn_bnd  : return(DEBUG_NEW telldata::ttbnd());
-      case    telldata::tn_hsh  : return(DEBUG_NEW telldata::tthsh());
-      case telldata::tn_hshstr  : return(DEBUG_NEW telldata::tthshstr());
-      case telldata::tn_string  : return(DEBUG_NEW telldata::ttstring());
-      case telldata::tn_layout  : return(DEBUG_NEW telldata::ttlayout());
-      case telldata::tn_auxilary: return(DEBUG_NEW telldata::ttauxdata());
+      case   telldata::tn_real  : return(DEBUG_NEW telldata::TtReal());
+      case    telldata::tn_int  : return(DEBUG_NEW telldata::TtInt());
+      case   telldata::tn_bool  : return(DEBUG_NEW telldata::TtBool());
+      case    telldata::tn_pnt  : return(DEBUG_NEW telldata::TtPnt());
+      case    telldata::tn_box  : return(DEBUG_NEW telldata::TtWnd());
+      case    telldata::tn_bnd  : return(DEBUG_NEW telldata::TtBnd());
+      case    telldata::tn_hsh  : return(DEBUG_NEW telldata::TtHsh());
+      case telldata::tn_hshstr  : return(DEBUG_NEW telldata::TtHshStr());
+      case telldata::tn_string  : return(DEBUG_NEW telldata::TtString());
+      case telldata::tn_layout  : return(DEBUG_NEW telldata::TtLayout());
+      case telldata::tn_auxilary: return(DEBUG_NEW telldata::TtAuxdata());
       default:
       {
          const telldata::TType* utype = CMDBlock->getTypeByID(ID);
          if (NULL == utype)
             tellerror("Bad type specifier", loc);
          else if (utype->isComposite())
-            return (DEBUG_NEW telldata::user_struct(static_cast<const telldata::TCompType*>(utype)));
+            return (DEBUG_NEW telldata::TtUserStruct(static_cast<const telldata::TCompType*>(utype)));
          else
          { // callback variable
             assert(0);

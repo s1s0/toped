@@ -53,9 +53,9 @@ namespace parsercmd
 }
 
 /*Current tell variable name*/
-telldata::tell_var *tellvar = NULL;
-std::stack<telldata::tell_var*> tellindxvar;
-telldata::tell_var *tell_lvalue = NULL;
+telldata::TellVar* tellvar = NULL;
+std::stack<telldata::TellVar*> tellindxvar;
+telldata::TellVar* tell_lvalue = NULL;
 /*Current variable is a list*/
 bool indexed = false;
 bool lindexed = false;
@@ -107,7 +107,7 @@ Well some remarks may save some time in the future...
                   the only predicate of this type
     pargumants  - Structure with function call arguments
 
- There are 3 telldata::tell_var* variables defined in the parser.
+ There are 3 telldata::TellVar* variables defined in the parser.
    - tellvar - stores a pointer to the last referenced (or defined) tell
                variable. In all cases cmdPUSH is added to the commands with
                a tellvar argument which means that during the execution phase,
@@ -239,7 +239,7 @@ Ooops! Second thought!
     telldata::typeID           pttname;
    parsercmd::ArgumentLIST*    pfarguments;
     telldata::argumentQ*       plarguments;
-    telldata::argumentID*      parguments;
+    telldata::ArgumentID*      parguments;
    parsercmd::cmdBLOCK*        pblock;
    parsercmd::cmdFUNC*         pfblock;
    parsercmd::FuncDeclaration* pfdeclaration;
@@ -564,8 +564,8 @@ arguments:
 ;
 
 argument :
-     expression                            {$$ = DEBUG_NEW telldata::argumentID($1);}
-   | assignment                            {$$ = DEBUG_NEW telldata::argumentID($1);}
+     expression                            {$$ = DEBUG_NEW telldata::ArgumentID($1);}
+   | assignment                            {$$ = DEBUG_NEW telldata::ArgumentID($1);}
    | structure                             {$$ = $1;}
    | funcreference                         {$$ = $1;}
 ;
@@ -616,7 +616,7 @@ variable:
 
 variabledeclaration:
      telltypeID   tknIDENTIFIER            {
-      telldata::tell_var* v = CMDBlock->getID($2, true);
+      telldata::TellVar* v = CMDBlock->getID($2, true);
       if (!v) {/* if this variableID doesn't exist already in the local scope*/
          /* add it to the local variable map */
          tellvar = CMDBlock->newTellvar($1, $2, @1);
@@ -627,7 +627,7 @@ variabledeclaration:
       $$ = $1; delete [] $2;indexed = false;
    }
    |  telltypeID   tknIDENTIFIER  indxb expression indxe  {
-      telldata::tell_var* v = CMDBlock->getID($2, true);
+      telldata::TellVar* v = CMDBlock->getID($2, true);
       if (!v) {/* if this variableID doesn't exist already in the local scope*/
          /* add it to the local variable map */
          if (parsercmd::ListIndexCheck($1, @1, $4, @4))
@@ -642,7 +642,7 @@ variabledeclaration:
       $$ = $1; delete [] $2;indexed = false;
    }
    | tknCONST telltypeID tknIDENTIFIER      {
-      telldata::tell_var* v = CMDBlock->getID($3, true);
+      telldata::TellVar* v = CMDBlock->getID($3, true);
       if (!v) {/* if this variableID doesn't exist already in the local scope*/
          /* add it to the local variable map */
          tellvar = CMDBlock->newTellvar($2, $3, @2);
@@ -653,7 +653,7 @@ variabledeclaration:
       $$ = $2; delete [] $3;indexed = false;
    }
    | variabledeclaration ',' tknIDENTIFIER  {
-      telldata::tell_var* v = CMDBlock->getID($3, true);
+      telldata::TellVar* v = CMDBlock->getID($3, true);
       if (!v) {/* if this variableID doesn't exist already in the local scope*/
          /* add it to the local variable map */
          tellvar = CMDBlock->newTellvar($1, $3, @1);
@@ -944,11 +944,11 @@ structure:
           There is no way at this moment to determine the type of the input structure
           for (seems) obvious reasons. So - the type check and the eventual pushcmd
           are postponed until we get the recepient - i.e. the lvalue or the
-          function call. $$ is assigned to argumentID, that caries the whole argument
+          function call. $$ is assigned to ArgumentID, that caries the whole argument
           queue listed in structure*/
         parsercmd::cmdSTRUCT* struct_command = DEBUG_NEW parsercmd::cmdSTRUCT();
         CMDBlock->pushcmd(struct_command);
-        $$ = DEBUG_NEW telldata::argumentID(argmap, struct_command);
+        $$ = DEBUG_NEW telldata::ArgumentID(argmap, struct_command);
         //argQClear(argmap);
         argmapstack.pop();
         delete argmap;
@@ -961,13 +961,13 @@ funcreference:
      '@' tknIDENTIFIER                    {
         parsercmd::cmdFUNCREF* funcref = DEBUG_NEW parsercmd::cmdFUNCREF($2);
         CMDBlock->pushcmd(funcref);
-        $$ = DEBUG_NEW telldata::argumentID(funcref);
+        $$ = DEBUG_NEW telldata::ArgumentID(funcref);
         delete [] $2;
    }
 ;
 anonymousvar:
      '(' telltypeID ')'  structure        {
-      telldata::argumentID* op2 = $4;
+      telldata::ArgumentID* op2 = $4;
       // the structure is without a type at this moment, so here we do the type checking
       if (parsercmd::StructTypeCheck($2, op2, @4)) {
          tellvar = CMDBlock->newTellvar($2, "", @1);
@@ -1038,15 +1038,15 @@ unaryexpression :
 
 primaryexpression :
      tknREAL                               {$$ = telldata::tn_real;
-      CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPUSH(DEBUG_NEW telldata::ttreal($1), false, true));}
+      CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPUSH(DEBUG_NEW telldata::TtReal($1), false, true));}
    | tknINT                                {$$ = telldata::tn_int;
-      CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPUSH(DEBUG_NEW telldata::ttint($1), false, true));}
+      CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPUSH(DEBUG_NEW telldata::TtInt($1), false, true));}
    | tknTRUE                               {$$ = telldata::tn_bool;
-      CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPUSH(DEBUG_NEW telldata::ttbool(true), false, true));}
+      CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPUSH(DEBUG_NEW telldata::TtBool(true), false, true));}
    | tknFALSE                              {$$ = telldata::tn_bool;
-      CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPUSH(DEBUG_NEW telldata::ttbool(false), false, true));}
+      CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPUSH(DEBUG_NEW telldata::TtBool(false), false, true));}
    | tknSTRING                             {$$ = telldata::tn_string;
-      CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPUSH(DEBUG_NEW telldata::ttstring($1), false, true));
+      CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPUSH(DEBUG_NEW telldata::TtString($1), false, true));
                                                                 delete [] $1;}
    | variable                              {$$ = $1;
       CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPUSH(tellvar, indexed));}
@@ -1164,7 +1164,7 @@ block:
         tellcallback->setFType($2);
      }
      anoarguments ')'  tknIDENTIFIER         {
-         telldata::tell_var* v = CMDBlock->getID($7, true);
+         telldata::TellVar* v = CMDBlock->getID($7, true);
          if (!v) {// if this variableID doesn't exist already in the local scope
             
             // add it to the local variable map

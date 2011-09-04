@@ -43,7 +43,7 @@ extern wxWindow*                 TopedCanvasW;
 tellstdfunc::stdNEWCELL::stdNEWCELL(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 void tellstdfunc::stdNEWCELL::undo_cleanup()
@@ -95,7 +95,7 @@ int tellstdfunc::stdNEWCELL::execute()
          if (1 < tDesign->cells().size())
          {
             UNDOcmdQ.push_front(this);
-            UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(nm));
+            UNDOPstack.push_front(DEBUG_NEW telldata::TtString(nm));
          }
          // else
          // No undo for the first cell in the library. We don't delete the active
@@ -117,13 +117,13 @@ int tellstdfunc::stdNEWCELL::execute()
 tellstdfunc::stdREMOVECELL::stdREMOVECELL(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 void tellstdfunc::stdREMOVECELL::undo_cleanup()
 {
    getStringValue(UNDOPstack, false);
-   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
    laydata::TdtCell* rmvdcell = static_cast<laydata::TdtCell*>(UNDOUstack.back());UNDOUstack.pop_back();
    clean_ttlaylist(pl);
    delete pl;
@@ -136,7 +136,7 @@ void tellstdfunc::stdREMOVECELL::undo()
    // get the removed cell itself (empty)
    laydata::TdtCell* rmvdcell = static_cast<laydata::TdtCell*>(UNDOUstack.front());UNDOUstack.pop_front();
    // get the contents of the removed cell
-   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
    // get the name of the removed cell
    std::string  nm = getStringValue(UNDOPstack, true);
 
@@ -196,7 +196,7 @@ int tellstdfunc::stdREMOVECELL::execute()
    {  // removal has been successfull
       assert(NULL != rmvdcell);
       UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(cname));
+      UNDOPstack.push_front(DEBUG_NEW telldata::TtString(cname));
       UNDOPstack.push_front(make_ttlaylist(cell_contents));
       UNDOUstack.push_front(rmvdcell);
       clean_atticlist(cell_contents, false);
@@ -210,7 +210,7 @@ int tellstdfunc::stdREMOVECELL::execute()
 //tellstdfunc::stdREMOVEREFDCELL::stdREMOVEREFDCELL(telldata::typeID retype, bool eor) :
 //      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 //{
-//   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+//   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 //}
 //
 //void tellstdfunc::stdREMOVEREFDCELL::undo_cleanup()
@@ -254,7 +254,7 @@ int tellstdfunc::stdREMOVECELL::execute()
 //   //if (removed)
 //   //{  // removal has been successfull
 //   //   UNDOcmdQ.push_front(this);
-//   //   UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(nm));
+//   //   UNDOPstack.push_front(DEBUG_NEW telldata::TtString(nm));
 //   //   UNDOPstack.push_front(make_ttlaylist(cell_contents));
 //   //   LogFile << LogFile.getFN() << "(\""<< nm << "\");"; LogFile.flush();
 //   //}
@@ -267,13 +267,13 @@ int tellstdfunc::stdREMOVECELL::execute()
 tellstdfunc::stdOPENCELL::stdOPENCELL(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 void tellstdfunc::stdOPENCELL::undo_cleanup()
 {
-   telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
-   delete selected; //ttlist does not have active destructor
+   telldata::TtList* selected = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   delete selected; //TtList does not have active destructor
 }
 
 void tellstdfunc::stdOPENCELL::undo()
@@ -285,7 +285,7 @@ void tellstdfunc::stdOPENCELL::undo()
       laydata::TdtDesign* tDesign = (*dbLibDir)();
       VERIFY(tDesign->editPrev(true));
       TpdPost::celltree_open(tDesign->activeCellName());
-      telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
+      telldata::TtList* selected = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
       DWordSet unselable = PROPC->allUnselectable();
       tDesign->selectFromList(get_ttlaylist(selected), unselable);
       DBbox* ovl  = DEBUG_NEW DBbox(tDesign->activeOverlap());
@@ -305,7 +305,7 @@ int tellstdfunc::stdOPENCELL::execute()
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
       std::string oldnm = tDesign->activeCellName();
-      telldata::ttlist* selected = NULL;
+      telldata::TtList* selected = NULL;
       if ("" != oldnm)
       {
          selected = make_ttlaylist(tDesign->shapeSel());
@@ -360,13 +360,13 @@ int tellstdfunc::stdOPENCELL::execute()
 tellstdfunc::stdEDITPUSH::stdEDITPUSH(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttpnt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtPnt()));
 }
 
 void tellstdfunc::stdEDITPUSH::undo_cleanup()
 {
-   telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
-   delete selected; //ttlist does not have active destructor
+   telldata::TtList* selected = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   delete selected; //TtList does not have active destructor
 }
 
 void tellstdfunc::stdEDITPUSH::undo()
@@ -378,7 +378,7 @@ void tellstdfunc::stdEDITPUSH::undo()
       laydata::TdtDesign* tDesign = (*dbLibDir)();
       VERIFY(tDesign->editPrev(true));
       TpdPost::celltree_open(tDesign->activeCellName());
-      telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
+      telldata::TtList* selected = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
       DWordSet unselable = PROPC->allUnselectable();
       tDesign->selectFromList(get_ttlaylist(selected), unselable);
       std::string news("Cell "); news += tDesign->activeCellName(); news += " is opened";
@@ -391,7 +391,7 @@ void tellstdfunc::stdEDITPUSH::undo()
 
 int tellstdfunc::stdEDITPUSH::execute()
 {
-   telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
+   telldata::TtPnt *p1 = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
    real DBscale = PROPC->DBscale();
    TP p1DB = TP(p1->x(), p1->y(), DBscale);
    DWordSet unselable = PROPC->allUnselectable();
@@ -399,7 +399,7 @@ int tellstdfunc::stdEDITPUSH::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      telldata::ttlist* selected = make_ttlaylist(tDesign->shapeSel());
+      telldata::TtList* selected = make_ttlaylist(tDesign->shapeSel());
       if (tDesign->editPush(p1DB, unselable))
       {
          UNDOcmdQ.push_front(this);
@@ -429,8 +429,8 @@ tellstdfunc::stdEDITPOP::stdEDITPOP(telldata::typeID retype, bool eor) :
 
 void tellstdfunc::stdEDITPOP::undo_cleanup()
 {
-   telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
-   delete selected; //ttlist does not have active destructor
+   telldata::TtList* selected = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   delete selected; //TtList does not have active destructor
 }
 
 void tellstdfunc::stdEDITPOP::undo()
@@ -442,7 +442,7 @@ void tellstdfunc::stdEDITPOP::undo()
       laydata::TdtDesign* tDesign = (*dbLibDir)();
       VERIFY(tDesign->editPrev(true));
       TpdPost::celltree_open(tDesign->activeCellName());
-      telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
+      telldata::TtList* selected = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
       DWordSet unselable = PROPC->allUnselectable();
       tDesign->selectFromList(get_ttlaylist(selected), unselable);
       std::string news("Cell "); news += tDesign->activeCellName(); news += " is opened";
@@ -459,7 +459,7 @@ int tellstdfunc::stdEDITPOP::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      telldata::ttlist* selected = make_ttlaylist(tDesign->shapeSel());
+      telldata::TtList* selected = make_ttlaylist(tDesign->shapeSel());
       if (tDesign->editPop())
       {
          UNDOcmdQ.push_front(this);
@@ -488,8 +488,8 @@ tellstdfunc::stdEDITPREV::stdEDITPREV(telldata::typeID retype, bool eor) :
 
 void tellstdfunc::stdEDITPREV::undo_cleanup()
 {
-   telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
-   delete selected; //ttlist does not have active destructor
+   telldata::TtList* selected = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   delete selected; //TtList does not have active destructor
 }
 
 void tellstdfunc::stdEDITPREV::undo()
@@ -501,7 +501,7 @@ void tellstdfunc::stdEDITPREV::undo()
       laydata::TdtDesign* tDesign = (*dbLibDir)();
       VERIFY(tDesign->editPrev(true));
       TpdPost::celltree_open(tDesign->activeCellName());
-      telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
+      telldata::TtList* selected = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
       DWordSet unselable = PROPC->allUnselectable();
       tDesign->selectFromList(get_ttlaylist(selected), unselable);
       std::string news("Cell "); news += tDesign->activeCellName(); news += " is opened";
@@ -518,7 +518,7 @@ int tellstdfunc::stdEDITPREV::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      telldata::ttlist* selected = make_ttlaylist(tDesign->shapeSel());
+      telldata::TtList* selected = make_ttlaylist(tDesign->shapeSel());
       if (tDesign->editPrev(false))
       {
          UNDOcmdQ.push_front(this);
@@ -547,8 +547,8 @@ tellstdfunc::stdEDITTOP::stdEDITTOP(telldata::typeID retype, bool eor) :
 
 void tellstdfunc::stdEDITTOP::undo_cleanup()
 {
-   telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
-   delete selected; //ttlist does not have active destructor
+   telldata::TtList* selected = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   delete selected; //TtList does not have active destructor
 }
 
 void tellstdfunc::stdEDITTOP::undo()
@@ -560,7 +560,7 @@ void tellstdfunc::stdEDITTOP::undo()
       laydata::TdtDesign* tDesign = (*dbLibDir)();
       VERIFY(tDesign->editPrev(true));
       TpdPost::celltree_open(tDesign->activeCellName());
-      telldata::ttlist* selected = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
+      telldata::TtList* selected = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
       DWordSet unselable = PROPC->allUnselectable();
       tDesign->selectFromList(get_ttlaylist(selected), unselable);
       std::string news("Cell "); news += tDesign->activeCellName(); news += " is opened";
@@ -577,7 +577,7 @@ int tellstdfunc::stdEDITTOP::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      telldata::ttlist* selected = make_ttlaylist(tDesign->shapeSel());
+      telldata::TtList* selected = make_ttlaylist(tDesign->shapeSel());
       if (tDesign->editTop())
       {
          UNDOcmdQ.push_front(this);
@@ -603,20 +603,20 @@ int tellstdfunc::stdEDITTOP::execute()
 tellstdfunc::stdGROUP::stdGROUP(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 void tellstdfunc::stdGROUP::undo_cleanup()
 {
    getStringValue(UNDOPstack, false);
-   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete pl;
 }
 
 void tellstdfunc::stdGROUP::undo()
 {
    TEUNDO_DEBUG("group(string) UNDO");
-   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
    DWordSet unselable = PROPC->allUnselectable();
    // get the name of the removed cell
    std::string  cname = getStringValue(UNDOPstack, true);
@@ -661,7 +661,7 @@ int tellstdfunc::stdGROUP::execute()
       if (tDesign->groupSelected(name, dbLibDir))
       {
          UNDOcmdQ.push_front(this);
-         UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(name));
+         UNDOPstack.push_front(DEBUG_NEW telldata::TtString(name));
          UNDOPstack.push_front(make_ttlaylist(tDesign->shapeSel()));
          LogFile << LogFile.getFN() << "(\""<< name << "\");"; LogFile.flush();
          UpdateLV(tDesign->numSelected());
@@ -678,8 +678,8 @@ tellstdfunc::stdUNGROUP::stdUNGROUP(telldata::typeID retype, bool eor) :
 
 void tellstdfunc::stdUNGROUP::undo_cleanup()
 {
-   telldata::ttlist* pl1 = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
-   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList* pl1 = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
    clean_ttlaylist(pl1);
    clean_ttlaylist(pl);
    delete pl;
@@ -699,13 +699,13 @@ void tellstdfunc::stdUNGROUP::undo()
       // now unselect all
       tDesign->unselectAll();
       // get the list of shapes produced by the ungroup from the UNDO stack
-      telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
+      telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
       // select them ...
       tDesign->selectFromList(get_ttlaylist(pl), unselable);
       //... and delete them cleaning up the memory (don't store in the Attic)
       tDesign->deleteSelected(NULL, dbLibDir);
       // now get the list of the ungroupped cell ref's from the UNDO stack
-      telldata::ttlist* pl1 = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
+      telldata::TtList* pl1 = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
       // and add them to the target cell
       tDesign->addList(get_shlaylist(pl1));
       // select the restored cell refs
@@ -765,8 +765,8 @@ int tellstdfunc::stdUNGROUP::execute()
 tellstdfunc::stdRENAMECELL::stdRENAMECELL(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 void tellstdfunc::stdRENAMECELL::undo_cleanup()
@@ -819,8 +819,8 @@ int tellstdfunc::stdRENAMECELL::execute()
          tDesign->renameCell(targetCell, newName);
          LogFile << LogFile.getFN() << "(\""<< newName << "\",\"" << oldName << "\");"; LogFile.flush();
          UNDOcmdQ.push_front(this);
-         UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(oldName));
-         UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(newName));
+         UNDOPstack.push_front(DEBUG_NEW telldata::TtString(oldName));
+         UNDOPstack.push_front(DEBUG_NEW telldata::TtString(newName));
       }
    }
    DATC->unlockTDT(dbLibDir, true);

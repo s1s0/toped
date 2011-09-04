@@ -998,9 +998,9 @@ bool tui::checkToolSize(IconSizes size)
 tellstdfunc::stdADDMENU::stdADDMENU(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 int tellstdfunc::stdADDMENU::execute()
@@ -1021,8 +1021,8 @@ int tellstdfunc::stdADDMENU::execute()
 tellstdfunc::stdTOOLBARSIZE::stdTOOLBARSIZE(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
 }
 
 int tellstdfunc::stdTOOLBARSIZE::execute()
@@ -1050,7 +1050,7 @@ int tellstdfunc::stdTOOLBARSIZE::execute()
 tellstdfunc::stdDEFINETOOLBAR::stdDEFINETOOLBAR(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 int tellstdfunc::stdDEFINETOOLBAR::execute()
@@ -1068,19 +1068,19 @@ int tellstdfunc::stdDEFINETOOLBAR::execute()
 tellstdfunc::stdTOOLBARADDITEM::stdTOOLBARADDITEM(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hshstr)));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtList(telldata::tn_hshstr)));
 }
 
 int tellstdfunc::stdTOOLBARADDITEM::execute()
 {
-   telldata::ttlist *iconCmdMapList = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::TtList *iconCmdMapList = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
    std::string toolbarName = getStringValue();
 
-   telldata::tthshstr* iconCmdMap;
+   telldata::TtHshStr* iconCmdMap;
    for (unsigned i = 0; i < iconCmdMapList->size(); i++)
    {
-      iconCmdMap = static_cast<telldata::tthshstr*>((iconCmdMapList->mlist())[i]);
+      iconCmdMap = static_cast<telldata::TtHshStr*>((iconCmdMapList->mlist())[i]);
       std::string toolName = iconCmdMap->key().value();
       std::string tellCommand = iconCmdMap->value().value();
 
@@ -1102,14 +1102,14 @@ int tellstdfunc::stdTOOLBARADDITEM::execute()
 tellstdfunc::stdTOOLBARADDITEM_S::stdTOOLBARADDITEM_S(telldata::typeID retype, bool eor) :
       stdTOOLBARADDITEM(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::tthshstr()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtHshStr()));
 }
 
 int tellstdfunc::stdTOOLBARADDITEM_S::execute()
 {
-   telldata::tthshstr* iconCmdMap = static_cast<telldata::tthshstr*>(OPstack.top());OPstack.pop();
-   telldata::ttlist *iconCmdMapList = DEBUG_NEW telldata::ttlist(telldata::tn_hshstr);
+   telldata::TtHshStr* iconCmdMap = static_cast<telldata::TtHshStr*>(OPstack.top());OPstack.pop();
+   telldata::TtList *iconCmdMapList = DEBUG_NEW telldata::TtList(telldata::tn_hshstr);
    iconCmdMapList->add(iconCmdMap);
    OPstack.push(iconCmdMapList);
 
@@ -1120,8 +1120,8 @@ int tellstdfunc::stdTOOLBARADDITEM_S::execute()
 tellstdfunc::stdTOOLBARDELETEITEM::stdTOOLBARDELETEITEM(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 int tellstdfunc::stdTOOLBARDELETEITEM::execute()

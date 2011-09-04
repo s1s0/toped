@@ -48,13 +48,13 @@ extern Calbr::CalbrFile*         DRCData;
 tellstdfunc::stdNEWDESIGN::stdNEWDESIGN(telldata::typeID retype, bool eor) :
       stdNEWDESIGNd(DEBUG_NEW parsercmd::ArgumentLIST,retype, eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 int tellstdfunc::stdNEWDESIGN::execute()
 {
    TpdTime timeCreated(time(NULL));
-   OPstack.push(DEBUG_NEW telldata::ttstring(timeCreated()));
+   OPstack.push(DEBUG_NEW telldata::TtString(timeCreated()));
    return stdNEWDESIGNd::execute();
 }
 
@@ -62,8 +62,8 @@ int tellstdfunc::stdNEWDESIGN::execute()
 tellstdfunc::stdNEWDESIGNd::stdNEWDESIGNd(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype, eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 int tellstdfunc::stdNEWDESIGNd::execute()
@@ -83,15 +83,15 @@ int tellstdfunc::stdNEWDESIGNd::execute()
 tellstdfunc::stdNEWDESIGNs::stdNEWDESIGNs(telldata::typeID retype, bool eor) :
       stdNEWDESIGNsd(DEBUG_NEW parsercmd::ArgumentLIST,retype, eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
 }
 
 int tellstdfunc::stdNEWDESIGNs::execute()
 {
    TpdTime timeCreated(time(NULL));
-   OPstack.push(DEBUG_NEW telldata::ttstring(timeCreated()));
+   OPstack.push(DEBUG_NEW telldata::TtString(timeCreated()));
    return stdNEWDESIGNsd::execute();
 }
 
@@ -99,10 +99,10 @@ int tellstdfunc::stdNEWDESIGNs::execute()
 tellstdfunc::stdNEWDESIGNsd::stdNEWDESIGNsd(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype, eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 int tellstdfunc::stdNEWDESIGNsd::execute()
@@ -138,7 +138,7 @@ int tellstdfunc::stdNEWDESIGNsd::execute()
 tellstdfunc::TDTread::TDTread(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 int tellstdfunc::TDTread::execute()
@@ -194,9 +194,9 @@ int tellstdfunc::TDTread::execute()
 tellstdfunc::TDTreadIFF::TDTreadIFF(telldata::typeID retype, bool eor) :
       TDTread(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 int tellstdfunc::TDTreadIFF::execute()
@@ -264,7 +264,7 @@ int tellstdfunc::TDTreadIFF::execute()
 tellstdfunc::TDTloadlib::TDTloadlib(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 int tellstdfunc::TDTloadlib::execute()
@@ -314,7 +314,7 @@ int tellstdfunc::TDTloadlib::execute()
 tellstdfunc::TDTunloadlib::TDTunloadlib(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 int tellstdfunc::TDTunloadlib::execute()
@@ -365,8 +365,8 @@ int tellstdfunc::TDTsave::execute()
 tellstdfunc::TDTsaveIFF::TDTsaveIFF(telldata::typeID retype, bool eor) :
       TDTsave(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 int tellstdfunc::TDTsaveIFF::execute()
@@ -404,7 +404,7 @@ int tellstdfunc::TDTsaveIFF::execute()
 tellstdfunc::TDTsaveas::TDTsaveas(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 int tellstdfunc::TDTsaveas::execute()
@@ -437,12 +437,12 @@ int tellstdfunc::TDTsaveas::execute()
 tellstdfunc::GDSread::GDSread(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype, eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 int tellstdfunc::GDSread::execute() {
    std::string filename = getStringValue();
-   telldata::ttlist* topcells = DEBUG_NEW telldata::ttlist(telldata::tn_string);
+   telldata::TtList* topcells = DEBUG_NEW telldata::TtList(telldata::tn_string);
 
    if (expandFileName(filename))
    {
@@ -461,7 +461,7 @@ int tellstdfunc::GDSread::execute() {
          DATC->unlockGds(AGDSDB);
          for (std::list<std::string>::const_iterator CN = top_cell_list.begin();
                                                    CN != top_cell_list.end(); CN ++)
-            topcells->add(DEBUG_NEW telldata::ttstring(*CN));
+            topcells->add(DEBUG_NEW telldata::TtString(*CN));
          LogFile << LogFile.getFN() << "(\""<< filename << "\");"; LogFile.flush();
       }
 //      else
@@ -486,24 +486,24 @@ int tellstdfunc::GDSread::execute() {
 tellstdfunc::GDSimport::GDSimport(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtList(telldata::tn_hsh)));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
 }
 
 int tellstdfunc::GDSimport::execute()
 {
    bool  over  = getBoolValue();
    bool  recur = getBoolValue();
-   telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::TtList *lll = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
    std::string name = getStringValue();
    // Convert layer map
-   telldata::tthsh* nameh;
+   telldata::TtHsh* nameh;
    USMap gdsLaysStrList;
    for (unsigned i = 0; i < lll->size(); i++)
    {
-      nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
+      nameh = static_cast<telldata::TtHsh*>((lll->mlist())[i]);
       gdsLaysStrList[nameh->key().value()] = nameh->value().value();
    }
    // Prep: We need all used layers, and the name of the GDS DB
@@ -557,29 +557,29 @@ int tellstdfunc::GDSimport::execute()
 tellstdfunc::GDSimportList::GDSimportList(telldata::typeID retype, bool eor) :
                               cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_string)));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtList(telldata::tn_string)));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtList(telldata::tn_hsh)));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
 }
 
 int tellstdfunc::GDSimportList::execute()
 {
    bool  over  = getBoolValue();
    bool  recur = getBoolValue();
-   telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
-   telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::TtList *lll = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
+   telldata::TtList *pl = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
    NameList top_cells;
    for (unsigned i = 0; i < pl->size(); i++)
    {
-      top_cells.push_back((static_cast<telldata::ttstring*>((pl->mlist())[i]))->value());
+      top_cells.push_back((static_cast<telldata::TtString*>((pl->mlist())[i]))->value());
    }
    // Convert layer map
-   telldata::tthsh* nameh;
+   telldata::TtHsh* nameh;
    USMap gdsLaysStrList;
    for (unsigned i = 0; i < lll->size(); i++)
    {
-      nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
+      nameh = static_cast<telldata::TtHsh*>((lll->mlist())[i]);
       gdsLaysStrList[nameh->key().value()] = nameh->value().value();
    }
    ExtLayers* gdsLaysAll = DEBUG_NEW ExtLayers();
@@ -619,23 +619,23 @@ int tellstdfunc::GDSimportList::execute()
 tellstdfunc::GDSexportLIB::GDSexportLIB(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtList(telldata::tn_hsh)));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
 }
 
 int tellstdfunc::GDSexportLIB::execute()
 {
    bool x2048           = getBoolValue();
    std::string filename = getStringValue();
-   telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::TtList *lll = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
 
    // Convert layer map
    USMap gdsLays;
-   telldata::tthsh* nameh;
+   telldata::TtHsh* nameh;
    for (unsigned i = 0; i < lll->size(); i++)
    {
-      nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
+      nameh = static_cast<telldata::TtHsh*>((lll->mlist())[i]);
       gdsLays[nameh->key().value()] = nameh->value().value();
    }
 
@@ -669,27 +669,27 @@ int tellstdfunc::GDSexportLIB::execute()
 tellstdfunc::GDSexportTOP::GDSexportTOP(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtList(telldata::tn_hsh)));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
 }
 
 int tellstdfunc::GDSexportTOP::execute()
 {
    bool  x2048 = getBoolValue();
    std::string filename = getStringValue();
-   telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::TtList *lll = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
    bool  recur = getBoolValue();
    std::string cellname = getStringValue();
 
    // Convert layer map
    USMap gdsLays;
-   telldata::tthsh* nameh;
+   telldata::TtHsh* nameh;
    for (unsigned i = 0; i < lll->size(); i++)
    {
-      nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
+      nameh = static_cast<telldata::TtHsh*>((lll->mlist())[i]);
       gdsLays[nameh->key().value()] = nameh->value().value();
    }
    if (expandFileName(filename))
@@ -735,9 +735,9 @@ int tellstdfunc::GDSexportTOP::execute()
 tellstdfunc::GDSsplit::GDSsplit(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
 }
 
 int tellstdfunc::GDSsplit::execute()
@@ -784,8 +784,8 @@ int tellstdfunc::GDSsplit::execute()
 tellstdfunc::PSexportTOP::PSexportTOP(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 int tellstdfunc::PSexportTOP::execute()
@@ -846,8 +846,8 @@ int tellstdfunc::GDSclose::execute() {
 tellstdfunc::stdREPORTLAY::stdREPORTLAY(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
 }
 
 int tellstdfunc::stdREPORTLAY::execute() {
@@ -861,7 +861,7 @@ int tellstdfunc::stdREPORTLAY::execute() {
       success = dbLibDir->collectUsedLays(cellname, recursive, ull);
    }
    DATC->unlockTDT(dbLibDir, true);
-   telldata::ttlist* tllull = DEBUG_NEW telldata::ttlist(telldata::tn_int);
+   telldata::TtList* tllull = DEBUG_NEW telldata::TtList(telldata::tn_int);
    if (success) {
       ull.sort();ull.unique();
       std::ostringstream ost;
@@ -872,7 +872,7 @@ int tellstdfunc::stdREPORTLAY::execute() {
       tell_log(console::MT_INFO, ost.str());
 
       for(WordList::const_iterator CL = ull.begin() ; CL != ull.end();CL++ )
-         tllull->add(DEBUG_NEW telldata::ttint(*CL));
+         tllull->add(DEBUG_NEW telldata::TtInt(*CL));
       ull.clear();
    }
    else {
@@ -888,13 +888,13 @@ int tellstdfunc::stdREPORTLAY::execute() {
 tellstdfunc::stdREPORTLAYc::stdREPORTLAYc(telldata::typeID retype, bool eor) :
       stdREPORTLAY(DEBUG_NEW parsercmd::ArgumentLIST,retype, eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
 }
 
 int tellstdfunc::stdREPORTLAYc::execute() {
    bool recursive = getBoolValue();
-   OPstack.push(DEBUG_NEW telldata::ttstring(""));
-   OPstack.push(DEBUG_NEW telldata::ttbool(recursive));
+   OPstack.push(DEBUG_NEW telldata::TtString(""));
+   OPstack.push(DEBUG_NEW telldata::TtBool(recursive));
    return stdREPORTLAY::execute();
 }
 
@@ -902,7 +902,7 @@ int tellstdfunc::stdREPORTLAYc::execute() {
 tellstdfunc::GDSreportlay::GDSreportlay(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 int tellstdfunc::GDSreportlay::execute()
@@ -940,19 +940,19 @@ int tellstdfunc::GDSreportlay::execute()
 tellstdfunc::GDSgetlaymap::GDSgetlaymap(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
 }
 
 int tellstdfunc::GDSgetlaymap::execute()
 {
    bool import = getBoolValue();
-   telldata::ttlist* theMap = DEBUG_NEW telldata::ttlist(telldata::tn_hsh);
+   telldata::TtList* theMap = DEBUG_NEW telldata::TtList(telldata::tn_hsh);
    const USMap* laymap = PROPC->getGdsLayMap();
    if (NULL != laymap)
    {
       for (USMap::const_iterator CI = laymap->begin(); CI != laymap->end(); CI++)
       {
-         telldata::tthsh* clay = DEBUG_NEW telldata::tthsh(CI->first, CI->second);
+         telldata::TtHsh* clay = DEBUG_NEW telldata::TtHsh(CI->first, CI->second);
          theMap->add(clay);
       }
    }
@@ -969,7 +969,7 @@ int tellstdfunc::GDSgetlaymap::execute()
             if ( CDT != CGL->second.begin() ) dtypestr << ", ";
             dtypestr << *CDT;
          }
-         telldata::tthsh* clay = DEBUG_NEW telldata::tthsh(CGL->first, dtypestr.str());
+         telldata::TtHsh* clay = DEBUG_NEW telldata::TtHsh(CGL->first, dtypestr.str());
          theMap->add(clay);
       }
    }
@@ -984,7 +984,7 @@ int tellstdfunc::GDSgetlaymap::execute()
          {
             std::ostringstream dtypestr;
             dtypestr << drawProp->getLayerNo( *CDL )<< "; 0";
-            telldata::tthsh* clay = DEBUG_NEW telldata::tthsh(drawProp->getLayerNo( *CDL ), dtypestr.str());
+            telldata::TtHsh* clay = DEBUG_NEW telldata::TtHsh(drawProp->getLayerNo( *CDL ), dtypestr.str());
             theMap->add(clay);
          }
       }
@@ -999,19 +999,19 @@ int tellstdfunc::GDSgetlaymap::execute()
 tellstdfunc::GDSsetlaymap::GDSsetlaymap(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtList(telldata::tn_hsh)));
 }
 
 int tellstdfunc::GDSsetlaymap::execute()
 {
-   telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::TtList *lll = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
 
    // Convert layer map
    USMap* gdsLays = DEBUG_NEW USMap();
-   telldata::tthsh* nameh;
+   telldata::TtHsh* nameh;
    for (unsigned i = 0; i < lll->size(); i++)
    {
-      nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
+      nameh = static_cast<telldata::TtHsh*>((lll->mlist())[i]);
       (*gdsLays)[nameh->key().value()] = nameh->value().value();
    }
    PROPC->setGdsLayMap(gdsLays);
@@ -1038,13 +1038,13 @@ int tellstdfunc::GDSclearlaymap::execute()
 tellstdfunc::CIFread::CIFread(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype, eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 int tellstdfunc::CIFread::execute()
 {
    std::string filename = getStringValue();
-   telldata::ttlist* topcells = DEBUG_NEW telldata::ttlist(telldata::tn_string);
+   telldata::TtList* topcells = DEBUG_NEW telldata::TtList(telldata::tn_string);
    if (expandFileName(filename))
    {
       if (DATC->CIFparse(filename))
@@ -1067,7 +1067,7 @@ int tellstdfunc::CIFread::execute()
          // Convert the string list to TLISTOF(telldata::tn_string)
          std::list<std::string>::const_iterator CN;
          for (CN = top_cell_list.begin(); CN != top_cell_list.end(); CN ++)
-            topcells->add(DEBUG_NEW telldata::ttstring(*CN));
+            topcells->add(DEBUG_NEW telldata::TtString(*CN));
          // Push the top structures in the data stack
          LogFile << LogFile.getFN() << "(\""<< filename << "\");"; LogFile.flush();
       }
@@ -1097,7 +1097,7 @@ int tellstdfunc::CIFread::execute()
 tellstdfunc::CIFreportlay::CIFreportlay(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype, eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 int tellstdfunc::CIFreportlay::execute()
@@ -1131,11 +1131,11 @@ int tellstdfunc::CIFreportlay::execute()
 tellstdfunc::CIFimportList::CIFimportList(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype, eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_string)));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtList(telldata::tn_string)));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtList(telldata::tn_hsh)));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
 }
 
 int tellstdfunc::CIFimportList::execute()
@@ -1144,20 +1144,20 @@ int tellstdfunc::CIFimportList::execute()
    bool  over  = getBoolValue();
    bool  recur = getBoolValue();
    SIMap cifLays;
-   telldata::ttlist *ll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
-   telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::TtList *ll = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
+   telldata::TtList *pl = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
    // Convert layer map
-   telldata::tthsh* nameh;
+   telldata::TtHsh* nameh;
    for (unsigned i = 0; i < ll->size(); i++)
    {
-      nameh = static_cast<telldata::tthsh*>((ll->mlist())[i]);
+      nameh = static_cast<telldata::TtHsh*>((ll->mlist())[i]);
       cifLays[nameh->value().value()] = nameh->key().value();
    }
    // Convert top structure list
    NameList top_cells;
    for (unsigned i = 0; i < pl->size(); i++)
    {
-      top_cells.push_back((static_cast<telldata::ttstring*>((pl->mlist())[i]))->value());
+      top_cells.push_back((static_cast<telldata::TtString*>((pl->mlist())[i]))->value());
    }
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
@@ -1185,11 +1185,11 @@ int tellstdfunc::CIFimportList::execute()
 tellstdfunc::CIFimport::CIFimport(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype, eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtList(telldata::tn_hsh)));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
 }
 
 int tellstdfunc::CIFimport::execute()
@@ -1198,13 +1198,13 @@ int tellstdfunc::CIFimport::execute()
    bool  over  = getBoolValue();
    bool  recur = getBoolValue();
    SIMap cifLays;
-   telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::TtList *lll = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
    std::string name = getStringValue();
    // Convert layer map
-   telldata::tthsh* nameh;
+   telldata::TtHsh* nameh;
    for (unsigned i = 0; i < lll->size(); i++)
    {
-      nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
+      nameh = static_cast<telldata::TtHsh*>((lll->mlist())[i]);
       cifLays[nameh->value().value()] = nameh->key().value();
    }
    // Convert top structure list
@@ -1234,22 +1234,22 @@ int tellstdfunc::CIFimport::execute()
 tellstdfunc::CIFexportLIB::CIFexportLIB(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtList(telldata::tn_hsh)));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
 }
 
 int tellstdfunc::CIFexportLIB::execute()
 {
    bool  verbose = getBoolValue();
    std::string filename = getStringValue();
-   telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::TtList *lll = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
    // Convert layer map
    USMap* cifLays = DEBUG_NEW USMap();
-   telldata::tthsh* nameh;
+   telldata::TtHsh* nameh;
    for (unsigned i = 0; i < lll->size(); i++)
    {
-      nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
+      nameh = static_cast<telldata::TtHsh*>((lll->mlist())[i]);
       (*cifLays)[nameh->key().value()] = nameh->value().value();
    }
    if (expandFileName(filename))
@@ -1282,27 +1282,27 @@ int tellstdfunc::CIFexportLIB::execute()
 tellstdfunc::CIFexportTOP::CIFexportTOP(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtList(telldata::tn_hsh)));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
 }
 
 int tellstdfunc::CIFexportTOP::execute()
 {
    bool  verbose = getBoolValue();
    std::string filename = getStringValue();
-   telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::TtList *lll = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
    bool  recur = getBoolValue();
    std::string cellname = getStringValue();
 
    // Convert layer map
    USMap* cifLays = DEBUG_NEW USMap();
-   telldata::tthsh* nameh;
+   telldata::TtHsh* nameh;
    for (unsigned i = 0; i < lll->size(); i++)
    {
-      nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
+      nameh = static_cast<telldata::TtHsh*>((lll->mlist())[i]);
       (*cifLays)[nameh->key().value()] = nameh->value().value();
    }
 
@@ -1362,19 +1362,19 @@ int tellstdfunc::CIFclose::execute() {
 tellstdfunc::CIFgetlaymap::CIFgetlaymap(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
 }
 
 int tellstdfunc::CIFgetlaymap::execute()
 {
    bool import = getBoolValue();
-   telldata::ttlist* theMap = DEBUG_NEW telldata::ttlist(telldata::tn_hsh);
+   telldata::TtList* theMap = DEBUG_NEW telldata::TtList(telldata::tn_hsh);
    const USMap* laymap = PROPC->getCifLayMap();
    if (NULL != laymap)
    {
       for (USMap::const_iterator CI = laymap->begin(); CI != laymap->end(); CI++)
       {
-         telldata::tthsh* clay = DEBUG_NEW telldata::tthsh(CI->first, CI->second);
+         telldata::TtHsh* clay = DEBUG_NEW telldata::TtHsh(CI->first, CI->second);
          theMap->add(clay);
       }
    }
@@ -1385,7 +1385,7 @@ int tellstdfunc::CIFgetlaymap::execute()
       word laynum = 1;
       for ( NameList::const_iterator CCL = cifLayers.begin(); CCL != cifLayers.end(); CCL++ )
       {
-         telldata::tthsh* clay = DEBUG_NEW telldata::tthsh(laynum++, *CCL);
+         telldata::TtHsh* clay = DEBUG_NEW telldata::TtHsh(laynum++, *CCL);
          theMap->add(clay);
       }
    }
@@ -1400,7 +1400,7 @@ int tellstdfunc::CIFgetlaymap::execute()
          {
             std::ostringstream dtypestr;
             dtypestr << "L" << drawProp->getLayerNo( *CDL );
-            telldata::tthsh* clay = DEBUG_NEW telldata::tthsh(drawProp->getLayerNo( *CDL ), dtypestr.str());
+            telldata::TtHsh* clay = DEBUG_NEW telldata::TtHsh(drawProp->getLayerNo( *CDL ), dtypestr.str());
             theMap->add(clay);
          }
       }
@@ -1415,19 +1415,19 @@ int tellstdfunc::CIFgetlaymap::execute()
 tellstdfunc::CIFsetlaymap::CIFsetlaymap(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtList(telldata::tn_hsh)));
 }
 
 int tellstdfunc::CIFsetlaymap::execute()
 {
-   telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::TtList *lll = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
 
    // Convert layer map
    USMap* cifLays = DEBUG_NEW USMap();
-   telldata::tthsh* nameh;
+   telldata::TtHsh* nameh;
    for (unsigned i = 0; i < lll->size(); i++)
    {
-      nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
+      nameh = static_cast<telldata::TtHsh*>((lll->mlist())[i]);
       (*cifLays)[nameh->key().value()] = nameh->value().value();
    }
    PROPC->setCifLayMap(cifLays);
@@ -1454,12 +1454,12 @@ int tellstdfunc::CIFclearlaymap::execute()
 tellstdfunc::OASread::OASread(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype, eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 int tellstdfunc::OASread::execute() {
    std::string filename = getStringValue();
-   telldata::ttlist* topcells = DEBUG_NEW telldata::ttlist(telldata::tn_string);
+   telldata::TtList* topcells = DEBUG_NEW telldata::TtList(telldata::tn_string);
 
    if (expandFileName(filename))
    {
@@ -1478,7 +1478,7 @@ int tellstdfunc::OASread::execute() {
          DATC->unlockOas(AOASDB);
          for (std::list<std::string>::const_iterator CN = top_cell_list.begin();
                                                    CN != top_cell_list.end(); CN ++)
-            topcells->add(DEBUG_NEW telldata::ttstring(*CN));
+            topcells->add(DEBUG_NEW telldata::TtString(*CN));
          LogFile << LogFile.getFN() << "(\""<< filename << "\");"; LogFile.flush();
       }
       else
@@ -1503,24 +1503,24 @@ int tellstdfunc::OASread::execute() {
 tellstdfunc::OASimport::OASimport(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtList(telldata::tn_hsh)));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
 }
 
 int tellstdfunc::OASimport::execute()
 {
    bool  over  = getBoolValue();
    bool  recur = getBoolValue();
-   telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::TtList *lll = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
    std::string name = getStringValue();
    // Convert layer map
-    telldata::tthsh* nameh;
+    telldata::TtHsh* nameh;
     USMap gdsLaysStrList;
     for (unsigned i = 0; i < lll->size(); i++)
     {
-       nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
+       nameh = static_cast<telldata::TtHsh*>((lll->mlist())[i]);
        gdsLaysStrList[nameh->key().value()] = nameh->value().value();
     }
    //Prep: We need all used layers, and the name of the OASIS DB
@@ -1573,29 +1573,29 @@ int tellstdfunc::OASimport::execute()
 tellstdfunc::OASimportList::OASimportList(telldata::typeID retype, bool eor) :
                               cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_string)));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtList(telldata::tn_string)));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtList(telldata::tn_hsh)));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
 }
 
 int tellstdfunc::OASimportList::execute()
 {
    bool  over  = getBoolValue();
    bool  recur = getBoolValue();
-   telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
-   telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::TtList *lll = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
+   telldata::TtList *pl = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
    NameList top_cells;
    for (unsigned i = 0; i < pl->size(); i++)
    {
-      top_cells.push_back((static_cast<telldata::ttstring*>((pl->mlist())[i]))->value());
+      top_cells.push_back((static_cast<telldata::TtString*>((pl->mlist())[i]))->value());
    }
    // Convert layer map
-   telldata::tthsh* nameh;
+   telldata::TtHsh* nameh;
    USMap oasLaysStrList;
    for (unsigned i = 0; i < lll->size(); i++)
    {
-      nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
+      nameh = static_cast<telldata::TtHsh*>((lll->mlist())[i]);
       oasLaysStrList[nameh->key().value()] = nameh->value().value();
    }
    ExtLayers* oasLaysAll = DEBUG_NEW ExtLayers();
@@ -1648,7 +1648,7 @@ int tellstdfunc::OASclose::execute() {
 tellstdfunc::OASreportlay::OASreportlay(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 int tellstdfunc::OASreportlay::execute()
@@ -1686,19 +1686,19 @@ int tellstdfunc::OASreportlay::execute()
 tellstdfunc::OASgetlaymap::OASgetlaymap(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
 }
 
 int tellstdfunc::OASgetlaymap::execute()
 {
    bool import = getBoolValue();
-   telldata::ttlist* theMap = DEBUG_NEW telldata::ttlist(telldata::tn_hsh);
+   telldata::TtList* theMap = DEBUG_NEW telldata::TtList(telldata::tn_hsh);
    const USMap* laymap = PROPC->getOasLayMap();
    if (NULL != laymap)
    {
       for (USMap::const_iterator CI = laymap->begin(); CI != laymap->end(); CI++)
       {
-         telldata::tthsh* clay = DEBUG_NEW telldata::tthsh(CI->first, CI->second);
+         telldata::TtHsh* clay = DEBUG_NEW telldata::TtHsh(CI->first, CI->second);
          theMap->add(clay);
       }
    }
@@ -1715,7 +1715,7 @@ int tellstdfunc::OASgetlaymap::execute()
             if ( CDT != CGL->second.begin() ) dtypestr << ", ";
             dtypestr << *CDT;
          }
-         telldata::tthsh* clay = DEBUG_NEW telldata::tthsh(CGL->first, dtypestr.str());
+         telldata::TtHsh* clay = DEBUG_NEW telldata::TtHsh(CGL->first, dtypestr.str());
          theMap->add(clay);
       }
    }
@@ -1730,7 +1730,7 @@ int tellstdfunc::OASgetlaymap::execute()
          {
             std::ostringstream dtypestr;
             dtypestr << drawProp->getLayerNo( *CDL )<< "; 0";
-            telldata::tthsh* clay = DEBUG_NEW telldata::tthsh(drawProp->getLayerNo( *CDL ), dtypestr.str());
+            telldata::TtHsh* clay = DEBUG_NEW telldata::TtHsh(drawProp->getLayerNo( *CDL ), dtypestr.str());
             theMap->add(clay);
          }
       }
@@ -1745,19 +1745,19 @@ int tellstdfunc::OASgetlaymap::execute()
 tellstdfunc::OASsetlaymap::OASsetlaymap(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hsh)));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtList(telldata::tn_hsh)));
 }
 
 int tellstdfunc::OASsetlaymap::execute()
 {
-   telldata::ttlist *lll = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::TtList *lll = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
 
    // Convert layer map
    USMap* oasLays = DEBUG_NEW USMap();
-   telldata::tthsh* nameh;
+   telldata::TtHsh* nameh;
    for (unsigned i = 0; i < lll->size(); i++)
    {
-      nameh = static_cast<telldata::tthsh*>((lll->mlist())[i]);
+      nameh = static_cast<telldata::TtHsh*>((lll->mlist())[i]);
       (*oasLays)[nameh->key().value()] = nameh->value().value();
    }
    PROPC->setOasLayMap(oasLays);
@@ -1784,7 +1784,7 @@ int tellstdfunc::OASclearlaymap::execute()
 tellstdfunc::DRCCalibreimport::DRCCalibreimport(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype, eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 int tellstdfunc::DRCCalibreimport::execute()
@@ -1824,8 +1824,8 @@ int tellstdfunc::DRCCalibreimport::execute()
 tellstdfunc::DRCshowerror::DRCshowerror(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype, eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
 }
 
 int tellstdfunc::DRCshowerror::execute()
@@ -1849,7 +1849,7 @@ int tellstdfunc::DRCshowerror::execute()
 tellstdfunc::DRCshowcluster::DRCshowcluster(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype, eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 int tellstdfunc::DRCshowcluster::execute()
@@ -1915,14 +1915,14 @@ int tellstdfunc::DRChideallerrors::execute()
 tellstdfunc::DRCexplainerror_D::DRCexplainerror_D(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype, eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttpnt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtPnt()));
 }
 
 int tellstdfunc::DRCexplainerror_D::execute()
 {
    // get the data from the stack
    assert(telldata::tn_pnt == OPstack.top()->get_type());
-   telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
+   telldata::TtPnt *p1 = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
    real DBscale = PROPC->DBscale();
    TP* p1DB = DEBUG_NEW TP(p1->x(), p1->y(), DBscale);
 
@@ -1963,7 +1963,7 @@ int tellstdfunc::DRCexplainerror::execute()
    if (!tellstdfunc::waitGUInput(console::op_point, &OPstack)) return EXEC_ABORT;
    // get the data from the stack
    assert(telldata::tn_pnt == OPstack.top()->get_type());
-   telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
+   telldata::TtPnt *p1 = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
    real DBscale = PROPC->DBscale();
    TP* p1DB = DEBUG_NEW TP(p1->x(), p1->y(), DBscale);
 

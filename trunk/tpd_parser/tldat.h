@@ -71,21 +71,21 @@ namespace telldata {
    // the most significant bit is a mask flag
    const typeID tn_listmask = typeID(1) << (8 * sizeof(typeID) - 1);
 
-   class tell_var;
+   class TellVar;
    class TType;
-   class ttint;
-   class argumentID;
+   class TtInt;
+   class ArgumentID;
 
    typedef std::pair<std::string, typeID>    structRECID;
-   typedef std::pair<std::string, tell_var*> structRECNAME;
+   typedef std::pair<std::string, TellVar*>  structRECNAME;
    typedef std::deque<structRECID>           recfieldsID;
    typedef std::deque<structRECNAME>         recfieldsNAME;
    typedef std::map<std::string, TType*>     typeMAP;
-   typedef std::map<std::string, tell_var* > variableMAP;
-   typedef std::vector<tell_var*>            memlist;
-   typedef std::deque<argumentID*>           argumentQ;
-   typedef std::stack<telldata::tell_var*>   operandSTACK;
-   typedef std::deque<telldata::tell_var*>   UNDOPerandQUEUE;
+   typedef std::map<std::string, TellVar* >  variableMAP;
+   typedef std::vector<TellVar*>             memlist;
+   typedef std::deque<ArgumentID*>           argumentQ;
+   typedef std::stack<telldata::TellVar*>    operandSTACK;
+   typedef std::deque<telldata::TellVar*>    UNDOPerandQUEUE;
    typedef std::list<typeID>                 TypeIdList;
    typedef std::list<TType*>                 TypeList;
 
@@ -111,7 +111,7 @@ namespace telldata {
    public:
                            TCompType(typeID ID) : TType(ID) {assert(TLCOMPOSIT_TYPE(ID));}
       bool                 addfield(std::string, typeID, const TType* utype);
-      tell_var*            initfield(const typeID) const;
+      TellVar*             initfield(const typeID) const;
       const TType*         findtype(const typeID) const;
       const recfieldsID&   fields() const    {return _fields;}
       virtual bool         isComposite() const    {return true;}
@@ -165,76 +165,76 @@ namespace telldata {
    };
 
    //==============================================================================
-   class tell_var {
+   class TellVar {
    public:
-                           tell_var(typeID ID) : _ID(ID), _changeable(2) {}
-      virtual tell_var*    selfcopy() const = 0;
+                           TellVar(typeID ID) : _ID(ID), _changeable(2) {}
+      virtual TellVar*     selfcopy() const = 0;
       virtual void         echo(std::string&, real) = 0;
       virtual const typeID get_type() const {return _ID;}
-      virtual void         assign(tell_var*) = 0;
-      virtual tell_var*    field_var(char*& fname) {return NULL;}
-      virtual tell_var*    index_var(unsigned index) {return NULL;}
+      virtual void         assign(TellVar*) = 0;
+      virtual TellVar*     field_var(char*& fname) {return NULL;}
+      virtual TellVar*     index_var(unsigned index) {return NULL;}
       virtual void         initialize() = 0;
       void                 update_cstat() {if (1 == _changeable) _changeable = 0;}
       bool                 constant() const {return 0 == _changeable;}
       void                 const_declaration() {_changeable = 1;}
-      virtual             ~tell_var() {};
+      virtual             ~TellVar() {};
    protected:
       typeID              _ID;
       byte                _changeable;
    };
 
    //==============================================================================
-   class ttreal:public tell_var {
+   class TtReal:public TellVar {
    public:
-                           ttreal(real  num=0.0) : tell_var(tn_real), _value(num) {}
-                           ttreal(const ttreal& cobj) :
-                                          tell_var(tn_real), _value(cobj.value()) {}
-      const ttreal&        operator =(const ttreal&);
-      const ttreal&        operator =(const ttint&);
+                           TtReal(real  num=0.0) : TellVar(tn_real), _value(num) {}
+                           TtReal(const TtReal& cobj) :
+                                          TellVar(tn_real), _value(cobj.value()) {}
+      const TtReal&        operator =(const TtReal&);
+      const TtReal&        operator =(const TtInt&);
       virtual void         initialize() {_value = 0.0;}
       virtual void         echo(std::string&, real);
-      virtual void         assign(tell_var*);
+      virtual void         assign(TellVar*);
       real                 value() const        {return _value;};
       void                 uminus()             {_value  = -_value;   };
-      virtual tell_var*    selfcopy() const     {return DEBUG_NEW ttreal(_value);};
-      friend class ttpnt;
+      virtual TellVar*     selfcopy() const     {return DEBUG_NEW TtReal(_value);};
+      friend class TtPnt;
    private:
       real  _value;
    };
 
    //==============================================================================
-   class ttint:public tell_var {
+   class TtInt:public TellVar {
    public:
-                           ttint(int4b  num = 0) : tell_var(tn_int), _value(num) {}
-                           ttint(const ttint& cobj) :
-                                          tell_var(tn_int), _value(cobj.value()) {}
-      const ttint&         operator =(const ttint&);
-      const ttint&         operator =(const ttreal&);
+                           TtInt(int4b  num = 0) : TellVar(tn_int), _value(num) {}
+                           TtInt(const TtInt& cobj) :
+                                          TellVar(tn_int), _value(cobj.value()) {}
+      const TtInt&         operator =(const TtInt&);
+      const TtInt&         operator =(const TtReal&);
       virtual void         initialize() {_value = 0;}
       virtual void         echo(std::string&, real);
-      virtual void         assign(tell_var*);
+      virtual void         assign(TellVar*);
       int4b                value() const        {return _value;};
       void                 uminus()             {_value  = -_value;   };
-      virtual tell_var*    selfcopy() const     {return DEBUG_NEW ttint(_value);};
+      virtual TellVar*     selfcopy() const     {return DEBUG_NEW TtInt(_value);};
       void                 NOT()                {_value = ~_value;}
    protected:
       int4b               _value;
    };
 
    //==============================================================================
-   class ttbool:public tell_var {
+   class TtBool:public TellVar {
    public:
-                           ttbool(bool value = false) :
-                                                tell_var(tn_bool), _value(value) {}
-                           ttbool(const ttbool& cobj) :
-                                         tell_var(tn_bool), _value(cobj.value()) {};
-      const ttbool&        operator = (const ttbool&);
+                           TtBool(bool value = false) :
+                                                TellVar(tn_bool), _value(value) {}
+                           TtBool(const TtBool& cobj) :
+                                         TellVar(tn_bool), _value(cobj.value()) {};
+      const TtBool&        operator = (const TtBool&);
       virtual void         initialize() {_value = false;}
       virtual void         echo(std::string&, real);
-      virtual void         assign(tell_var*);
+      virtual void         assign(TellVar*);
       bool                 value() const        {return _value;};
-      virtual tell_var*    selfcopy() const     {return DEBUG_NEW ttbool(_value);};
+      virtual TellVar*     selfcopy() const     {return DEBUG_NEW TtBool(_value);};
       void                 AND(bool op)         {_value = _value && op;};
       void                 OR(bool op)          {_value = _value || op; };
       void                 NOT()                {_value = !_value;}
@@ -243,40 +243,40 @@ namespace telldata {
    };
 
    //==============================================================================
-   class ttstring: public tell_var {
+   class TtString: public TellVar {
    public:
-                           ttstring() : tell_var(tn_string) {}
-                           ttstring(const std::string& value):
-                                              tell_var(tn_string), _value(value) {};
-                           ttstring(const ttstring& cobj) :
-                                        tell_var(tn_string), _value(cobj.value()){};
-      const ttstring&      operator = (const ttstring&);
+                           TtString() : TellVar(tn_string) {}
+                           TtString(const std::string& value):
+                                              TellVar(tn_string), _value(value) {};
+                           TtString(const TtString& cobj) :
+                                        TellVar(tn_string), _value(cobj.value()){};
+      const TtString&      operator = (const TtString&);
       virtual void         initialize() {_value = "";}
       virtual void         echo(std::string&, real);// {wstr += _value;};
-      virtual void         assign(tell_var*);
-      virtual tell_var*    selfcopy() const    {return DEBUG_NEW ttstring(_value);}
+      virtual void         assign(TellVar*);
+      virtual TellVar*     selfcopy() const    {return DEBUG_NEW TtString(_value);}
       const std::string    value() const       {return _value;};
    private:
       std::string         _value;
    };
 
    //==============================================================================
-   class ttlayout: public tell_var {
+   class TtLayout: public TellVar {
    public:
-                           ttlayout(): tell_var(tn_layout), _data(NULL),
+                           TtLayout(): TellVar(tn_layout), _data(NULL),
                                                       _layer(ERR_LAY), _selp(NULL) {};
-                           ttlayout(laydata::TdtData* pdat, unsigned lay, SGBitSet* selp = NULL):
-                             tell_var(tn_layout), _data(pdat), _layer(lay), _selp(selp) {};
-                           ttlayout(const ttlayout& cobj);
-      const ttlayout&      operator = (const ttlayout&);
+                           TtLayout(laydata::TdtData* pdat, unsigned lay, SGBitSet* selp = NULL):
+                             TellVar(tn_layout), _data(pdat), _layer(lay), _selp(selp) {};
+                           TtLayout(const TtLayout& cobj);
+      const TtLayout&      operator = (const TtLayout&);
       virtual void         initialize() {if (_selp) delete _selp;_data = NULL;}
       virtual void         echo(std::string&, real);
-      virtual void         assign(tell_var*);
-      virtual tell_var*    selfcopy() const {return DEBUG_NEW ttlayout(*this);};
+      virtual void         assign(TellVar*);
+      virtual TellVar*     selfcopy() const {return DEBUG_NEW TtLayout(*this);};
       laydata::TdtData*    data() const     {return _data;};
       unsigned             layer() const    {return _layer;};
       SGBitSet*            selp() const     {return _selp;};
-      virtual             ~ttlayout()       {if (_selp) delete _selp;}
+      virtual             ~TtLayout()       {if (_selp) delete _selp;}
    private:
       laydata::TdtData*    _data;
       unsigned             _layer;
@@ -284,18 +284,18 @@ namespace telldata {
    };
 
    //==============================================================================
-   class ttauxdata: public tell_var {
+   class TtAuxdata: public TellVar {
    public:
-                           ttauxdata(): tell_var(tn_auxilary), _data(NULL),
+                           TtAuxdata(): TellVar(tn_auxilary), _data(NULL),
                              _layer(ERR_LAY) {};
-                           ttauxdata(auxdata::TdtAuxData* pdat, unsigned lay):
-                             tell_var(tn_auxilary), _data(pdat), _layer(lay) {};
-                           ttauxdata(const ttauxdata& cobj);
-      const ttauxdata&     operator = (const ttauxdata&);
+                           TtAuxdata(auxdata::TdtAuxData* pdat, unsigned lay):
+                             TellVar(tn_auxilary), _data(pdat), _layer(lay) {};
+                           TtAuxdata(const TtAuxdata& cobj);
+      const TtAuxdata&     operator = (const TtAuxdata&);
       virtual void         initialize() {_data = NULL;}
       virtual void         echo(std::string&, real);
-      virtual void         assign(tell_var*);
-      virtual tell_var*    selfcopy() const {return DEBUG_NEW ttauxdata(*this);};
+      virtual void         assign(TellVar*);
+      virtual TellVar*     selfcopy() const {return DEBUG_NEW TtAuxdata(*this);};
       auxdata::TdtAuxData* data() const     {return _data;};
       unsigned             layer() const    {return _layer;};
    private:
@@ -304,48 +304,48 @@ namespace telldata {
    };
 
    //==============================================================================
-   class ttlist:public tell_var {
+   class TtList:public TellVar {
    public:
-                           ttlist(typeID ltype): tell_var(ltype) {};
-                           ttlist(const ttlist& cobj);
-      const ttlist&        operator = (const ttlist&);
+                           TtList(typeID ltype): TellVar(ltype) {};
+                           TtList(const TtList& cobj);
+      const TtList&        operator = (const TtList&);
       virtual void         initialize();
       virtual void         echo(std::string&, real);
-      virtual void         assign(tell_var*);
-      virtual tell_var*    selfcopy() const  {return DEBUG_NEW ttlist(*this);}
+      virtual void         assign(TellVar*);
+      virtual TellVar*     selfcopy() const  {return DEBUG_NEW TtList(*this);}
       virtual const typeID get_type() const  {return _ID | tn_listmask;}
       memlist              mlist() const     {return _mlist;}
-      void                 add(tell_var* p) {_mlist.push_back(p);}
+      void                 add(TellVar* p) {_mlist.push_back(p);}
       void                 reserve(unsigned num) {_mlist.reserve(num);}
-      void                 resize(unsigned num, tell_var* initVar);
+      void                 resize(unsigned num, TellVar* initVar);
       void                 reverse()         {std::reverse(_mlist.begin(), _mlist.end());}
       unsigned             size() const      {return _mlist.size();}
-      virtual tell_var*    index_var(dword);
+      virtual TellVar*     index_var(dword);
       bool                 validIndex(dword);
-      void                 insert(telldata::tell_var*, dword);
-      void                 insert(telldata::tell_var*);
-      void                 lunion(telldata::ttlist*, dword);
-      void                 lunion(telldata::ttlist*);
-      tell_var*            erase(dword);
-      tell_var*            erase(dword, dword);
-      virtual             ~ttlist();
+      void                 insert(telldata::TellVar*, dword);
+      void                 insert(telldata::TellVar*);
+      void                 lunion(telldata::TtList*, dword);
+      void                 lunion(telldata::TtList*);
+      TellVar*             erase(dword);
+      TellVar*             erase(dword, dword);
+      virtual             ~TtList();
    private:
       memlist             _mlist;    // the list itself
    };
 
    //==============================================================================
-   class user_struct : public tell_var {
+   class TtUserStruct : public TellVar {
    public:
-                           user_struct(const typeID ID) : tell_var(ID) {};
-                           user_struct(const TCompType*);
-                           user_struct(const TCompType*, operandSTACK&);
-                           user_struct(const user_struct&);
-      virtual             ~user_struct();
+                           TtUserStruct(const typeID ID) : TellVar(ID) {};
+                           TtUserStruct(const TCompType*);
+                           TtUserStruct(const TCompType*, operandSTACK&);
+                           TtUserStruct(const TtUserStruct&);
+      virtual             ~TtUserStruct();
       virtual void         initialize();
-      virtual tell_var*    selfcopy() const  {return DEBUG_NEW user_struct(*this);}
+      virtual TellVar*     selfcopy() const  {return DEBUG_NEW TtUserStruct(*this);}
       virtual void         echo(std::string&, real);
-      virtual void         assign(tell_var*);
-      virtual tell_var*    field_var(char*& fname);
+      virtual void         assign(TellVar*);
+      virtual TellVar*     field_var(char*& fname);
    protected:
       recfieldsNAME        _fieldList;
    };
@@ -353,128 +353,128 @@ namespace telldata {
    //==============================================================================
    // Don't destruct _x and _y here. They are just pointing to the structures in
    // the parent _fieldList and obviously should be destroyed there
-   class ttpnt : public user_struct {
+   class TtPnt : public TtUserStruct {
    public:
-                           ttpnt (real x=0, real y=0);
-                           ttpnt(const ttpnt&);
-                           ttpnt(operandSTACK& OPStack);
-      virtual tell_var*    selfcopy() const    {return DEBUG_NEW ttpnt(*this);}
+                           TtPnt (real x=0, real y=0);
+                           TtPnt(const TtPnt&);
+                           TtPnt(operandSTACK& OPStack);
+      virtual TellVar*     selfcopy() const    {return DEBUG_NEW TtPnt(*this);}
       virtual void         echo(std::string&, real);
-      virtual void         assign(tell_var*);
+      virtual void         assign(TellVar*);
       const real           x() const           {return _x->value();}
       const real           y() const           {return _y->value();}
       void                 scale(real sf)      {_x->_value *= sf;_y->_value *= sf;};
       void                 set_x(const real x) {_x->_value = x; }
       void                 set_y(const real y) {_y->_value = y; }
-      const ttpnt&         operator = (const ttpnt&);
+      const TtPnt&         operator = (const TtPnt&);
    private:
-      ttreal*              _x;
-      ttreal*              _y;
+      TtReal*              _x;
+      TtReal*              _y;
    };
 
    //==============================================================================
    // Don't destruct _p1 and _p1 here. They are just pointing to the structures in
    // the parent _fieldList and obviously should be destroyed there
-   class ttwnd : public user_struct {
+   class TtWnd : public TtUserStruct {
    public:
-                           ttwnd( real bl_x=0.0, real bl_y=0.0,
+                           TtWnd( real bl_x=0.0, real bl_y=0.0,
                                   real tr_x=0.0, real tr_y=0.0);
-                           ttwnd( ttpnt tl, ttpnt br);
-                           ttwnd(operandSTACK& OPStack);
-                           ttwnd(const ttwnd& cobj);
-      virtual tell_var*    selfcopy() const    {return DEBUG_NEW ttwnd(*this);};
+                           TtWnd( TtPnt tl, TtPnt br);
+                           TtWnd(operandSTACK& OPStack);
+                           TtWnd(const TtWnd& cobj);
+      virtual TellVar*     selfcopy() const    {return DEBUG_NEW TtWnd(*this);};
       virtual void         echo(std::string&, real);
-      virtual void         assign(tell_var*);
-      const ttpnt&         p1() const          {return *_p1;};
-      const ttpnt&         p2() const          {return *_p2;};
+      virtual void         assign(TellVar*);
+      const TtPnt&         p1() const          {return *_p1;};
+      const TtPnt&         p2() const          {return *_p2;};
       void                 scale(real sf)      {_p1->scale(sf); _p1->scale(sf);};
-      const ttwnd&         operator = (const ttwnd&);
+      const TtWnd&         operator = (const TtWnd&);
       void                 normalize(bool&, bool&);
       void                 denormalize(bool, bool);
    private:
-      ttpnt*               _p1;
-      ttpnt*               _p2;
+      TtPnt*               _p1;
+      TtPnt*               _p2;
    };
 
    //==============================================================================
    // Don't destruct _p, _rot etc. here. They are just pointing to the structures in
    // the parent _fieldList and obviously should be destroyed there
-   class ttbnd : public user_struct {
+   class TtBnd : public TtUserStruct {
    public:
-                           ttbnd( real p_x=0.0, real p_y=0.0,
+                           TtBnd( real p_x=0.0, real p_y=0.0,
                                   real rot=0.0, bool flx=false, real scale = 1.0);
-                           ttbnd( ttpnt p, ttreal rot, ttbool flx, ttreal sc);
-                           ttbnd(operandSTACK& OPStack);
-                           ttbnd(const ttbnd& cobj);
-      virtual tell_var*    selfcopy() const    {return DEBUG_NEW ttbnd(*this);};
+                           TtBnd( TtPnt p, TtReal rot, TtBool flx, TtReal sc);
+                           TtBnd(operandSTACK& OPStack);
+                           TtBnd(const TtBnd& cobj);
+      virtual TellVar*     selfcopy() const    {return DEBUG_NEW TtBnd(*this);};
       virtual void         echo(std::string&, real);
-      virtual void         assign(tell_var*);
-      const ttpnt&         p() const           {return *_p;}
-      const ttreal&        rot() const         {return *_rot;}
-      const ttbool&        flx() const         {return *_flx;}
-      const ttreal&        sc() const          {return *_sc;}
-      const ttbnd&         operator = (const ttbnd&);
+      virtual void         assign(TellVar*);
+      const TtPnt&         p() const           {return *_p;}
+      const TtReal&        rot() const         {return *_rot;}
+      const TtBool&        flx() const         {return *_flx;}
+      const TtReal&        sc() const          {return *_sc;}
+      const TtBnd&         operator = (const TtBnd&);
    private:
-      ttpnt*               _p;
-      ttreal*              _rot;
-      ttbool*              _flx;
-      ttreal*              _sc;
+      TtPnt*               _p;
+      TtReal*              _rot;
+      TtBool*              _flx;
+      TtReal*              _sc;
    };
 
    //==============================================================================
    // Don't destruct _number and _name here. They are just pointing to the structures in
    // the parent _fieldList and obviously should be destroyed there
-   class tthsh : public user_struct {
+   class TtHsh : public TtUserStruct {
       public:
-                              tthsh (int4b number=1, std::string name = "");
-                              tthsh(const tthsh&);
-                              tthsh(operandSTACK& OPStack);
-         virtual tell_var*    selfcopy() const    {return DEBUG_NEW tthsh(*this);}
+                              TtHsh (int4b number=1, std::string name = "");
+                              TtHsh(const TtHsh&);
+                              TtHsh(operandSTACK& OPStack);
+         virtual TellVar*     selfcopy() const    {return DEBUG_NEW TtHsh(*this);}
          virtual void         echo(std::string&, real);
-         virtual void         assign(tell_var*);
-         const ttint&         key()   const        {return *_key;}
-         const ttstring&      value() const        {return *_value;}
+         virtual void         assign(TellVar*);
+         const TtInt&         key()   const        {return *_key;}
+         const TtString&      value() const        {return *_value;}
 //         void                 set_number(const int4b number)   {_number->_value = number; }
 //         void                 set_name(const std::string name) {_name->_value = name; }
       private:
-         ttint*               _key;
-         ttstring*            _value;
+         TtInt*               _key;
+         TtString*            _value;
    };
 
       //==============================================================================
    // Don't destruct _number and _name here. They are just pointing to the structures in
    // the parent _fieldList and obviously should be destroyed there
-   class tthshstr : public user_struct {
+   class TtHshStr : public TtUserStruct {
       public:
-                              tthshstr (std::string number="", std::string name = "");
-                              tthshstr(const tthshstr&);
-                              tthshstr(operandSTACK& OPStack);
-         virtual tell_var*    selfcopy() const    {return DEBUG_NEW tthshstr(*this);}
+                              TtHshStr (std::string number="", std::string name = "");
+                              TtHshStr(const TtHshStr&);
+                              TtHshStr(operandSTACK& OPStack);
+         virtual TellVar*     selfcopy() const    {return DEBUG_NEW TtHshStr(*this);}
          virtual void         echo(std::string&, real);
-         virtual void         assign(tell_var*);
-         const ttstring&      key()   const        {return *_key;}
-         const ttstring&      value() const        {return *_value;}
+         virtual void         assign(TellVar*);
+         const TtString&      key()   const        {return *_key;}
+         const TtString&      value() const        {return *_value;}
 //         void                 set_number(const int4b number)   {_number->_value = number; }
 //         void                 set_name(const std::string name) {_name->_value = name; }
       private:
-         ttstring*            _key;
-         ttstring*            _value;
+         TtString*            _key;
+         TtString*            _value;
    };
 
    //==============================================================================
-   class argumentID {
+   class ArgumentID {
    public:
-                           argumentID(telldata::typeID ID = telldata::tn_NULL) :
+                           ArgumentID(telldata::typeID ID = telldata::tn_NULL) :
                                                           _ID(ID), _command(NULL){};
-                           argumentID(argumentQ* child, void* cmd) :
+                           ArgumentID(argumentQ* child, void* cmd) :
                                                          _ID(telldata::tn_composite),
                                                     _child(*child), _command(cmd) {};
-                           argumentID(const argumentID&);
-                           argumentID(void* cmd) : _ID(telldata::tn_anyfref),
+                           ArgumentID(const ArgumentID&);
+                           ArgumentID(void* cmd) : _ID(telldata::tn_anyfref),
                                                    _command(cmd) {};
-                           ~argumentID();//               {_child.clear();}
+                           ~ArgumentID();//               {_child.clear();}
       void                 toList(bool, typeID alistID = tn_NULL);
-      void                 adjustID(const argumentID&);
+      void                 adjustID(const ArgumentID&);
       void                 userStructCheck(const telldata::TType*, bool);
       void                 userStructListCheck(const telldata::TType*, bool);
       telldata::typeID     operator () () const        {return _ID;}

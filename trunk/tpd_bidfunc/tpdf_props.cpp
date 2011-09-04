@@ -52,7 +52,7 @@ extern const wxEventType         wxEVT_CANVAS_PARAMS;
 tellstdfunc::stdPROPSAVE::stdPROPSAVE(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 int tellstdfunc::stdPROPSAVE::execute()
@@ -66,11 +66,11 @@ int tellstdfunc::stdPROPSAVE::execute()
 tellstdfunc::stdLAYPROP::stdLAYPROP(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 int tellstdfunc::stdLAYPROP::execute() {
@@ -96,11 +96,11 @@ int tellstdfunc::stdLAYPROP::execute() {
 tellstdfunc::stdLINEDEF::stdLINEDEF(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
 }
 
 int tellstdfunc::stdLINEDEF::execute() {
@@ -124,11 +124,11 @@ int tellstdfunc::stdLINEDEF::execute() {
 tellstdfunc::stdCOLORDEF::stdCOLORDEF(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
 }
 
 int tellstdfunc::stdCOLORDEF::execute() {
@@ -153,12 +153,12 @@ int tellstdfunc::stdCOLORDEF::execute() {
 tellstdfunc::stdFILLDEF::stdFILLDEF(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype, eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_int)));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtList(telldata::tn_int)));
 }
 
 int tellstdfunc::stdFILLDEF::execute() {
-   telldata::ttlist *sl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::TtList *sl = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
    std::string  name = getStringValue();
    if (sl->size() != 128) {
       tell_log(console::MT_ERROR,"Exactly 128 integers expected in a fill pattern. Ignored...");
@@ -169,9 +169,9 @@ int tellstdfunc::stdFILLDEF::execute() {
       {
          // declare the array like this because otherwise it'll be wiped
          byte* ptrn = DEBUG_NEW byte[128];
-         telldata::ttint *cmpnt;
+         telldata::TtInt *cmpnt;
          for (unsigned i = 0; i < 128; i++) {
-            cmpnt = static_cast<telldata::ttint*>((sl->mlist())[i]);
+            cmpnt = static_cast<telldata::TtInt*>((sl->mlist())[i]);
             if (cmpnt->value() > MAX_BYTE_VALUE) {
                tell_log(console::MT_ERROR,"Value out of range in a pattern definition");
             }
@@ -193,9 +193,9 @@ int tellstdfunc::stdFILLDEF::execute() {
 tellstdfunc::stdGRIDDEF::stdGRIDDEF(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 int tellstdfunc::stdGRIDDEF::execute()
@@ -228,12 +228,12 @@ int tellstdfunc::stdGRIDDEF::execute()
 tellstdfunc::stdSETPARAMETER::stdSETPARAMETER(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::tthshstr()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtHshStr()));
 }
 
 int tellstdfunc::stdSETPARAMETER::execute()
 {
-   telldata::tthshstr *paramSet = static_cast<telldata::tthshstr*>(OPstack.top());OPstack.pop();
+   telldata::TtHshStr *paramSet = static_cast<telldata::TtHshStr*>(OPstack.top());OPstack.pop();
    std::string paramName  = paramSet->key().value();
    std::string paramValue = paramSet->value().value();
    analyzeTopedParameters(paramName, paramValue);
@@ -245,16 +245,16 @@ int tellstdfunc::stdSETPARAMETER::execute()
 tellstdfunc::stdSETPARAMETERS::stdSETPARAMETERS(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_hshstr)));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtList(telldata::tn_hshstr)));
 }
 
 int tellstdfunc::stdSETPARAMETERS::execute()
 {
-   telldata::ttlist *paramList = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::TtList *paramList = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
 
    for (unsigned i = 0; i < paramList->size(); i++)
    {
-      telldata::tthshstr* paramSet = static_cast<telldata::tthshstr*>((paramList->mlist())[i]);
+      telldata::TtHshStr* paramSet = static_cast<telldata::TtHshStr*>((paramList->mlist())[i]);
       std::string paramName  = paramSet->key().value();
       std::string paramValue = paramSet->value().value();
       analyzeTopedParameters(paramName, paramValue);
@@ -267,20 +267,20 @@ int tellstdfunc::stdSETPARAMETERS::execute()
 tellstdfunc::stdHIDELAYER::stdHIDELAYER(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST, retype, eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
 }
 
 void tellstdfunc::stdHIDELAYER::undo_cleanup() {
    getWordValue(UNDOPstack, false);
    getBoolValue(UNDOPstack, false);
-   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete pl;
 }
 
 void tellstdfunc::stdHIDELAYER::undo() {
    TEUNDO_DEBUG("hidelayer( word , bool ) UNDO");
-   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
    bool        hide  = getBoolValue(UNDOPstack,true);
    word        layno = getWordValue(UNDOPstack,true);
    layprop::DrawProperties* drawProp;
@@ -338,8 +338,8 @@ int tellstdfunc::stdHIDELAYER::execute()
          }
          DATC->unlockTDT(dbLibDir);
          UNDOcmdQ.push_front(this);
-         UNDOPstack.push_front(DEBUG_NEW telldata::ttint(layno));
-         UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
+         UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(layno));
+         UNDOPstack.push_front(DEBUG_NEW telldata::TtBool(!hide));
          UNDOPstack.push_front(make_ttlaylist(todslct));
          cleanSelectList(todslct);
          drawProp->hideLayer(layno, hide);
@@ -361,29 +361,29 @@ tellstdfunc::stdHIDELAYERS::stdHIDELAYERS(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
 
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_int)));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtList(telldata::tn_int)));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
 }
 
 void tellstdfunc::stdHIDELAYERS::undo_cleanup() {
-   telldata::ttlist *sl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList *sl = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
    getBoolValue(UNDOPstack, false);
-   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete pl; delete sl;
 }
 
 void tellstdfunc::stdHIDELAYERS::undo() {
    TEUNDO_DEBUG("hidelayer( int list , bool ) UNDO");
-   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
    bool        hide  = getBoolValue(UNDOPstack,true);
-   telldata::ttlist *sl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
-   telldata::ttint *laynumber;
+   telldata::TtList *sl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtInt *laynumber;
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
       for (unsigned i = 0; i < sl->size() ; i++)
       {
-         laynumber = static_cast<telldata::ttint*>((sl->mlist())[i]);
+         laynumber = static_cast<telldata::TtInt*>((sl->mlist())[i]);
          drawProp->hideLayer(laynumber->value(), hide);
          TpdPost::layer_status(tui::BT_LAYER_HIDE, laynumber->value(), hide);
       }
@@ -410,12 +410,12 @@ void tellstdfunc::stdHIDELAYERS::undo() {
 int tellstdfunc::stdHIDELAYERS::execute()
 {
    bool        hide  = getBoolValue();
-   telldata::ttlist *sl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::TtList *sl = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
    DWordSet unselable;
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-      telldata::ttlist* undolaylist = DEBUG_NEW telldata::ttlist(telldata::tn_int);
+      telldata::TtList* undolaylist = DEBUG_NEW telldata::TtList(telldata::tn_int);
       laydata::SelectList *todslct = DEBUG_NEW laydata::SelectList();
       laydata::TdtLibDir* dbLibDir = NULL;
       if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
@@ -426,7 +426,7 @@ int tellstdfunc::stdHIDELAYERS::execute()
          // for locking and to issue some warning messages if appropriate
          for (unsigned i = 0; i < sl->size() ; i++)
          {
-            telldata::ttint *laynumber = static_cast<telldata::ttint*>((sl->mlist())[i]);
+            telldata::TtInt *laynumber = static_cast<telldata::TtInt*>((sl->mlist())[i]);
             if (LAST_EDITABLE_LAYNUM < (unsigned)laynumber->value())
             {
                std::ostringstream info;
@@ -444,7 +444,7 @@ int tellstdfunc::stdHIDELAYERS::execute()
                   (*todslct)[laynumber->value()] = DEBUG_NEW laydata::DataList(*((*listselected)[laynumber->value()]));
                }
                TpdPost::layer_status(tui::BT_LAYER_HIDE, laynumber->value(), hide);
-               undolaylist->add(DEBUG_NEW telldata::ttint(*laynumber));
+               undolaylist->add(DEBUG_NEW telldata::TtInt(*laynumber));
             }
          }
          // Now unselect the shapes in the target layers
@@ -455,14 +455,14 @@ int tellstdfunc::stdHIDELAYERS::execute()
       DATC->unlockTDT(dbLibDir);
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(undolaylist);
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
+      UNDOPstack.push_front(DEBUG_NEW telldata::TtBool(!hide));
       UNDOPstack.push_front(make_ttlaylist(todslct));
       cleanSelectList(todslct);
       // ... and at last - lock the layers. Here we're using the list collected for undo
       // otherwise we have to either maintain another list or to do again all the checks above
       for (unsigned i = 0; i < undolaylist->size(); i++)
       {
-         telldata::ttint *laynumber = static_cast<telldata::ttint*>((undolaylist->mlist())[i]);
+         telldata::TtInt *laynumber = static_cast<telldata::TtInt*>((undolaylist->mlist())[i]);
          drawProp->hideLayer(laynumber->value(), hide);
       }
       LogFile << LogFile.getFN() << "("<< *sl << "," <<
@@ -477,7 +477,7 @@ int tellstdfunc::stdHIDELAYERS::execute()
 tellstdfunc::stdHIDECELLMARK::stdHIDECELLMARK(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,true)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
 }
 
 void tellstdfunc::stdHIDECELLMARK::undo_cleanup() {
@@ -506,7 +506,7 @@ int tellstdfunc::stdHIDECELLMARK::execute() {
    if (PROPC->lockDrawProp(drawProp))
    {
       UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
+      UNDOPstack.push_front(DEBUG_NEW telldata::TtBool(!hide));
       drawProp->setCellMarksHidden(hide);
       wxCommandEvent eventGRIDUPD(wxEVT_RENDER_PARAMS);
       eventGRIDUPD.SetId(tui::RPS_CELL_MARK);
@@ -523,7 +523,7 @@ int tellstdfunc::stdHIDECELLMARK::execute() {
 tellstdfunc::stdHIDETEXTMARK::stdHIDETEXTMARK(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
 }
 
 void tellstdfunc::stdHIDETEXTMARK::undo_cleanup() {
@@ -553,7 +553,7 @@ int tellstdfunc::stdHIDETEXTMARK::execute() {
    if (PROPC->lockDrawProp(drawProp))
    {
       UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
+      UNDOPstack.push_front(DEBUG_NEW telldata::TtBool(!hide));
       drawProp->setTextMarksHidden(hide);
       wxCommandEvent eventGRIDUPD(wxEVT_RENDER_PARAMS);
       eventGRIDUPD.SetId(tui::RPS_TEXT_MARK);
@@ -570,7 +570,7 @@ int tellstdfunc::stdHIDETEXTMARK::execute() {
 tellstdfunc::stdHIDECELLBOND::stdHIDECELLBOND(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
 }
 
 void tellstdfunc::stdHIDECELLBOND::undo_cleanup() {
@@ -600,7 +600,7 @@ int tellstdfunc::stdHIDECELLBOND::execute() {
    if (PROPC->lockDrawProp(drawProp))
    {
       UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
+      UNDOPstack.push_front(DEBUG_NEW telldata::TtBool(!hide));
       drawProp->setCellboxHidden(hide);
       wxCommandEvent eventGRIDUPD(wxEVT_RENDER_PARAMS);
       eventGRIDUPD.SetId(tui::RPS_CELL_BOX);
@@ -616,7 +616,7 @@ int tellstdfunc::stdHIDECELLBOND::execute() {
 tellstdfunc::stdHIDETEXTBOND::stdHIDETEXTBOND(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
 }
 
 void tellstdfunc::stdHIDETEXTBOND::undo_cleanup() {
@@ -646,7 +646,7 @@ int tellstdfunc::stdHIDETEXTBOND::execute() {
    if (PROPC->lockDrawProp(drawProp))
    {
       UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!hide));
+      UNDOPstack.push_front(DEBUG_NEW telldata::TtBool(!hide));
       drawProp->setTextboxHidden(hide);
       wxCommandEvent eventGRIDUPD(wxEVT_RENDER_PARAMS);
       eventGRIDUPD.SetId(tui::RPS_TEXT_BOX);
@@ -663,20 +663,20 @@ int tellstdfunc::stdHIDETEXTBOND::execute() {
 tellstdfunc::stdLOCKLAYER::stdLOCKLAYER(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
 }
 
 void tellstdfunc::stdLOCKLAYER::undo_cleanup() {
    getWordValue(UNDOPstack, false);
    getBoolValue(UNDOPstack, false);
-   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete pl;
 }
 
 void tellstdfunc::stdLOCKLAYER::undo() {
    TEUNDO_DEBUG("locklayer( word , bool ) UNDO");
-   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
    bool        lock  = getBoolValue(UNDOPstack, true);
    word        layno = getWordValue(UNDOPstack, true);
    layprop::DrawProperties* drawProp;
@@ -730,8 +730,8 @@ int tellstdfunc::stdLOCKLAYER::execute()
          }
          DATC->unlockTDT(dbLibDir);
          UNDOcmdQ.push_front(this);
-         UNDOPstack.push_front(DEBUG_NEW telldata::ttint(layno));
-         UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!lock));
+         UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(layno));
+         UNDOPstack.push_front(DEBUG_NEW telldata::TtBool(!lock));
          UNDOPstack.push_front(make_ttlaylist(todslct));
          cleanSelectList(todslct);
          drawProp->lockLayer(layno, lock);
@@ -753,29 +753,29 @@ tellstdfunc::stdLOCKLAYERS::stdLOCKLAYERS(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
 
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_int)));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtList(telldata::tn_int)));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
 }
 
 void tellstdfunc::stdLOCKLAYERS::undo_cleanup() {
-   telldata::ttlist *sl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList *sl = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
    getBoolValue(UNDOPstack, false);
-   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete pl; delete sl;
 }
 
 void tellstdfunc::stdLOCKLAYERS::undo() {
    TEUNDO_DEBUG("locklayer( int list , bool ) UNDO");
-   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
    bool        lock  = getBoolValue(UNDOPstack,true);
-   telldata::ttlist *sl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
-   telldata::ttint *laynumber;
+   telldata::TtList *sl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtInt *laynumber;
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
       for (unsigned i = 0; i < sl->size() ; i++)
       {
-         laynumber = static_cast<telldata::ttint*>((sl->mlist())[i]);
+         laynumber = static_cast<telldata::TtInt*>((sl->mlist())[i]);
          drawProp->lockLayer(laynumber->value(), lock);
          TpdPost::layer_status(tui::BT_LAYER_LOCK, laynumber->value(), lock);
       }
@@ -802,11 +802,11 @@ void tellstdfunc::stdLOCKLAYERS::undo() {
 int tellstdfunc::stdLOCKLAYERS::execute()
 {
    bool        lock  = getBoolValue();
-   telldata::ttlist *sl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::TtList *sl = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-      telldata::ttlist* undolaylist = DEBUG_NEW telldata::ttlist(telldata::tn_int);
+      telldata::TtList* undolaylist = DEBUG_NEW telldata::TtList(telldata::tn_int);
       laydata::SelectList *todslct = DEBUG_NEW laydata::SelectList();
       laydata::TdtLibDir* dbLibDir = NULL;
       if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
@@ -817,7 +817,7 @@ int tellstdfunc::stdLOCKLAYERS::execute()
          // for locking and to issue some warning messages if appropriate
          for (unsigned i = 0; i < sl->size() ; i++)
          {
-            telldata::ttint *laynumber = static_cast<telldata::ttint*>((sl->mlist())[i]);
+            telldata::TtInt *laynumber = static_cast<telldata::TtInt*>((sl->mlist())[i]);
             if (LAST_EDITABLE_LAYNUM < (unsigned)laynumber->value())
             {
                std::ostringstream info;
@@ -833,7 +833,7 @@ int tellstdfunc::stdLOCKLAYERS::execute()
                if (lock && (listselected->end() != listselected->find(laynumber->value())))
                   (*todslct)[laynumber->value()] = DEBUG_NEW laydata::DataList(*((*listselected)[laynumber->value()]));
                TpdPost::layer_status(tui::BT_LAYER_LOCK, laynumber->value(), lock);
-               undolaylist->add(DEBUG_NEW telldata::ttint(*laynumber));
+               undolaylist->add(DEBUG_NEW telldata::TtInt(*laynumber));
             }
          }
          // Now unselect the shapes in the target layers
@@ -845,14 +845,14 @@ int tellstdfunc::stdLOCKLAYERS::execute()
       DATC->unlockTDT(dbLibDir);
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(undolaylist);
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!lock));
+      UNDOPstack.push_front(DEBUG_NEW telldata::TtBool(!lock));
       UNDOPstack.push_front(make_ttlaylist(todslct));
       cleanSelectList(todslct);
       // ... and at last - lock the layers. Here we're using the list collected for undo
       // otherwise we have to either maintain another list or to do again all the checks above
       for (unsigned i = 0; i < undolaylist->size(); i++)
       {
-         telldata::ttint *laynumber = static_cast<telldata::ttint*>((undolaylist->mlist())[i]);
+         telldata::TtInt *laynumber = static_cast<telldata::TtInt*>((undolaylist->mlist())[i]);
          drawProp->lockLayer(laynumber->value(), lock);
       }
       LogFile << LogFile.getFN() << "("<< *sl << "," <<
@@ -868,8 +868,8 @@ int tellstdfunc::stdLOCKLAYERS::execute()
 tellstdfunc::stdFILLLAYER::stdFILLLAYER(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
 }
 
 void tellstdfunc::stdFILLLAYER::undo_cleanup() {
@@ -899,8 +899,8 @@ int tellstdfunc::stdFILLLAYER::execute()
    if (PROPC->lockDrawProp(drawProp))
    {
       UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(layno));
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!fill));
+      UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(layno));
+      UNDOPstack.push_front(DEBUG_NEW telldata::TtBool(!fill));
       drawProp->fillLayer(layno, fill);
       TpdPost::layer_status(tui::BT_LAYER_FILL, layno, fill);
       LogFile << LogFile.getFN() << "("<< layno << "," <<
@@ -916,12 +916,12 @@ int tellstdfunc::stdFILLLAYER::execute()
 tellstdfunc::stdFILLLAYERS::stdFILLLAYERS(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_int)));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtList(telldata::tn_int)));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
 }
 
 void tellstdfunc::stdFILLLAYERS::undo_cleanup() {
-   telldata::ttlist *sl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList *sl = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
    getBoolValue(UNDOPstack, false);
    delete sl;
 }
@@ -929,13 +929,13 @@ void tellstdfunc::stdFILLLAYERS::undo_cleanup() {
 void tellstdfunc::stdFILLLAYERS::undo() {
    TEUNDO_DEBUG("filllayer( int list , bool ) UNDO");
    bool        fill  = getBoolValue(UNDOPstack, true);
-   telldata::ttlist *sl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtList *sl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
       for (unsigned i = 0; i < sl->size() ; i++)
       {
-         telldata::ttint* laynumber = static_cast<telldata::ttint*>((sl->mlist())[i]);
+         telldata::TtInt* laynumber = static_cast<telldata::TtInt*>((sl->mlist())[i]);
          word lay = laynumber->value();
          drawProp->fillLayer(lay, fill);
          TpdPost::layer_status(tui::BT_LAYER_FILL, lay, fill);
@@ -949,20 +949,20 @@ void tellstdfunc::stdFILLLAYERS::undo() {
 int tellstdfunc::stdFILLLAYERS::execute()
 {
    bool        fill  = getBoolValue();
-   telldata::ttlist *sl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::TtList *sl = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
       for (unsigned i = 0; i < sl->size() ; i++)
       {
-         telldata::ttint* laynumber = static_cast<telldata::ttint*>((sl->mlist())[i]);
+         telldata::TtInt* laynumber = static_cast<telldata::TtInt*>((sl->mlist())[i]);
          word lay = laynumber->value();
          drawProp->fillLayer(lay, fill);
          TpdPost::layer_status(tui::BT_LAYER_FILL, lay, fill);
       }
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(sl);
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(!fill));
+      UNDOPstack.push_front(DEBUG_NEW telldata::TtBool(!fill));
       LogFile << LogFile.getFN() << "("<< *sl << "," <<
                  LogFile._2bool(fill) << ");"; LogFile.flush();
       RefreshGL();
@@ -976,7 +976,7 @@ int tellstdfunc::stdFILLLAYERS::execute()
 tellstdfunc::stdSAVELAYSTAT::stdSAVELAYSTAT(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 void tellstdfunc::stdSAVELAYSTAT::undo_cleanup()
@@ -1003,7 +1003,7 @@ int tellstdfunc::stdSAVELAYSTAT::execute()
    if (PROPC->lockDrawProp(drawProp))
    {
       UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(sname));
+      UNDOPstack.push_front(DEBUG_NEW telldata::TtString(sname));
       if (!drawProp->saveLaysetStatus(sname))
       {
          std::stringstream info;
@@ -1024,13 +1024,13 @@ int tellstdfunc::stdSAVELAYSTAT::execute()
 tellstdfunc::stdLOADLAYSTAT::stdLOADLAYSTAT(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 void tellstdfunc::stdLOADLAYSTAT::undo_cleanup()
 {
    getStringValue(UNDOPstack, false);
-   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
@@ -1042,7 +1042,7 @@ void tellstdfunc::stdLOADLAYSTAT::undo_cleanup()
 
 void tellstdfunc::stdLOADLAYSTAT::undo() {
    TEUNDO_DEBUG("loadlaystat( string ) UNDO");
-   telldata::ttlist* pl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
    std::string sname  = getStringValue(UNDOPstack, true);
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
@@ -1103,7 +1103,7 @@ int tellstdfunc::stdLOADLAYSTAT::execute()
          }
          DATC->unlockTDT(dbLibDir);
          UNDOcmdQ.push_front(this);
-         UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(sname));
+         UNDOPstack.push_front(DEBUG_NEW telldata::TtString(sname));
          UNDOPstack.push_front(make_ttlaylist(todslct));
          cleanSelectList(todslct);
          drawProp->pushLayerStatus();
@@ -1125,15 +1125,15 @@ int tellstdfunc::stdLOADLAYSTAT::execute()
 tellstdfunc::stdDELLAYSTAT::stdDELLAYSTAT(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 void tellstdfunc::stdDELLAYSTAT::undo_cleanup()
 {
    getStringValue(UNDOPstack, false);
-   telldata::ttlist* undohidel = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
-   telldata::ttlist* undolockl = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
-   telldata::ttlist* undofilll = static_cast<telldata::ttlist*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList* undohidel = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList* undolockl = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList* undofilll = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete undofilll;
    delete undolockl;
    delete undohidel;
@@ -1143,21 +1143,21 @@ void tellstdfunc::stdDELLAYSTAT::undo() {
    TEUNDO_DEBUG("deletelaystat( string ) UNDO");
    // get the layer lists from the undo stack ...
    word activel = getWordValue(UNDOPstack, true);
-   telldata::ttlist* undofilll = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
-   telldata::ttlist* undolockl = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
-   telldata::ttlist* undohidel = static_cast<telldata::ttlist*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtList* undofilll = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtList* undolockl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtList* undohidel = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
    // ...get the layer set name from the undo stack ...
    std::string sname  = getStringValue(UNDOPstack, true);
    // ...convert the layer lists
    WordSet filll;
    for (unsigned i = 0; i < undofilll->size() ; i++)
-      filll.insert(filll.begin(), (static_cast<telldata::ttint*>((undofilll->mlist())[i]))->value());
+      filll.insert(filll.begin(), (static_cast<telldata::TtInt*>((undofilll->mlist())[i]))->value());
    WordSet lockl;
    for (unsigned i = 0; i < undolockl->size() ; i++)
-      lockl.insert(lockl.begin(), (static_cast<telldata::ttint*>((undolockl->mlist())[i]))->value());
+      lockl.insert(lockl.begin(), (static_cast<telldata::TtInt*>((undolockl->mlist())[i]))->value());
    WordSet hidel;
    for (unsigned i = 0; i < undohidel->size() ; i++)
-      hidel.insert(hidel.begin(), (static_cast<telldata::ttint*>((undohidel->mlist())[i]))->value());
+      hidel.insert(hidel.begin(), (static_cast<telldata::TtInt*>((undohidel->mlist())[i]))->value());
    // ... restore the layer set ...
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
@@ -1184,21 +1184,21 @@ int tellstdfunc::stdDELLAYSTAT::execute()
       {
          VERIFY(drawProp->deleteLaysetStatus(sname));
          UNDOcmdQ.push_front(this);
-         UNDOPstack.push_front(DEBUG_NEW telldata::ttstring(sname));
+         UNDOPstack.push_front(DEBUG_NEW telldata::TtString(sname));
          // Push the layer lists in tell form for undo
-         telldata::ttlist* undohidel = DEBUG_NEW telldata::ttlist(telldata::tn_int);
+         telldata::TtList* undohidel = DEBUG_NEW telldata::TtList(telldata::tn_int);
          for (WordSet::const_iterator CL = hidel.begin(); CL != hidel.end(); CL++)
-            undohidel->add(DEBUG_NEW telldata::ttint(*CL));
+            undohidel->add(DEBUG_NEW telldata::TtInt(*CL));
          UNDOPstack.push_front(undohidel);
-         telldata::ttlist* undolockl = DEBUG_NEW telldata::ttlist(telldata::tn_int);
+         telldata::TtList* undolockl = DEBUG_NEW telldata::TtList(telldata::tn_int);
          for (WordSet::const_iterator CL = lockl.begin(); CL != lockl.end(); CL++)
-            undolockl->add(DEBUG_NEW telldata::ttint(*CL));
+            undolockl->add(DEBUG_NEW telldata::TtInt(*CL));
          UNDOPstack.push_front(undolockl);
-         telldata::ttlist* undofilll = DEBUG_NEW telldata::ttlist(telldata::tn_int);
+         telldata::TtList* undofilll = DEBUG_NEW telldata::TtList(telldata::tn_int);
          for (WordSet::const_iterator CL = filll.begin(); CL != filll.end(); CL++)
-            undofilll->add(DEBUG_NEW telldata::ttint(*CL));
+            undofilll->add(DEBUG_NEW telldata::TtInt(*CL));
          UNDOPstack.push_front(undofilll);
-         UNDOPstack.push_front(DEBUG_NEW telldata::ttint(activel));
+         UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(activel));
          TpdPost::layers_state(sname, false);
          LogFile << LogFile.getFN() << "(\""<< sname << "\");"; LogFile.flush();
       }
@@ -1216,8 +1216,8 @@ int tellstdfunc::stdDELLAYSTAT::execute()
 tellstdfunc::stdGRID::stdGRID(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
 }
 
 void tellstdfunc::stdGRID::undo_cleanup() {
@@ -1239,8 +1239,8 @@ int tellstdfunc::stdGRID::execute() {
    if (NULL != PROPC->grid(no))
    {
       UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(no));
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(PROPC->gridVisual(no)));
+      UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(no));
+      UNDOPstack.push_front(DEBUG_NEW telldata::TtBool(PROPC->gridVisual(no)));
       gridON(no,visu);
       LogFile << LogFile.getFN() << "(" << no << "," << LogFile._2bool(visu) << ");";
       LogFile.flush();
@@ -1255,7 +1255,7 @@ int tellstdfunc::stdGRID::execute() {
 tellstdfunc::stdSTEP::stdSTEP(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
 }
 
 void tellstdfunc::stdSTEP::undo_cleanup() {
@@ -1278,7 +1278,7 @@ void tellstdfunc::stdSTEP::undo() {
 int tellstdfunc::stdSTEP::execute() {
    // prepare undo first
    UNDOcmdQ.push_front(this);
-   UNDOPstack.push_front(DEBUG_NEW telldata::ttreal(PROPC->step()));
+   UNDOPstack.push_front(DEBUG_NEW telldata::TtReal(PROPC->step()));
    //
    real    step    = getOpValue();
    PROPC->setStep(step);
@@ -1298,7 +1298,7 @@ int tellstdfunc::stdSTEP::execute() {
 tellstdfunc::stdAUTOPAN::stdAUTOPAN(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
 }
 
 void tellstdfunc::stdAUTOPAN::undo_cleanup() {
@@ -1319,7 +1319,7 @@ void tellstdfunc::stdAUTOPAN::undo() {
 int tellstdfunc::stdAUTOPAN::execute() {
    // prepare undo first
    UNDOcmdQ.push_front(this);
-   UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(PROPC->autopan()));
+   UNDOPstack.push_front(DEBUG_NEW telldata::TtBool(PROPC->autopan()));
    //
    bool autop    = getBoolValue();
    PROPC->setAutoPan(autop);
@@ -1335,7 +1335,7 @@ int tellstdfunc::stdAUTOPAN::execute() {
 tellstdfunc::stdZEROCROSS::stdZEROCROSS(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
 }
 
 void tellstdfunc::stdZEROCROSS::undo_cleanup() {
@@ -1356,7 +1356,7 @@ void tellstdfunc::stdZEROCROSS::undo() {
 int tellstdfunc::stdZEROCROSS::execute() {
    // prepare undo first
    UNDOcmdQ.push_front(this);
-   UNDOPstack.push_front(DEBUG_NEW telldata::ttbool(PROPC->autopan()));
+   UNDOPstack.push_front(DEBUG_NEW telldata::TtBool(PROPC->autopan()));
    //
    bool zeroc    = getBoolValue();
    PROPC->setZeroCross(zeroc);
@@ -1373,7 +1373,7 @@ int tellstdfunc::stdZEROCROSS::execute() {
 tellstdfunc::stdSHAPEANGLE::stdSHAPEANGLE(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
 }
 
 void tellstdfunc::stdSHAPEANGLE::undo_cleanup() {
@@ -1397,7 +1397,7 @@ int tellstdfunc::stdSHAPEANGLE::execute()
    {
       // prepare undo first
       UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(PROPC->markerAngle()));
+      UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(PROPC->markerAngle()));
       //
       PROPC->setMarkerAngle(angle);
       wxCommandEvent eventGRIDUPD(wxEVT_CANVAS_PARAMS);

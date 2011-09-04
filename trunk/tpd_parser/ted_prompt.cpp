@@ -140,7 +140,7 @@ bool console::miniParser::getPoint() {
    double p1,p2;
    p1s.ToDouble(&p1);p2s.ToDouble(&p2);
    // convert the coordinates to ttpoint ...
-   telldata::ttpnt* pp = DEBUG_NEW telldata::ttpnt(p1,p2);
+   telldata::TtPnt* pp = DEBUG_NEW telldata::TtPnt(p1,p2);
    // and push it into the operand stack
    client_stack->push(pp);
    return true;
@@ -159,7 +159,7 @@ bool console::miniParser::getBox()
    src_tmpl.ReplaceAll(&exp,wxT("}"));
    // now we are going to extract the points
    VERIFY(src_tmpl.Compile(point_tmpl));
-   telldata::ttpnt pp[2];
+   telldata::TtPnt pp[2];
    for (int i = 0; i < 2; i++) {
       if (!src_tmpl.Matches(exp)) return false;
       wxString ps = src_tmpl.GetMatch(exp);
@@ -175,9 +175,9 @@ bool console::miniParser::getBox()
       double p1,p2;
       p1s.ToDouble(&p1);p2s.ToDouble(&p2);
       // convert the coordinates to ttpoint ...
-      pp[i] = telldata::ttpnt(p1,p2);
+      pp[i] = telldata::TtPnt(p1,p2);
    }
-   client_stack->push(DEBUG_NEW telldata::ttwnd(pp[0],pp[1]));
+   client_stack->push(DEBUG_NEW telldata::TtWnd(pp[0],pp[1]));
    return true;
 }
 
@@ -194,7 +194,7 @@ bool console::miniParser::getBind()
    src_tmpl.ReplaceAll(&exp,wxT(""));
    // let's extract the point first ...
    VERIFY(src_tmpl.Compile(point_tmpl));
-   telldata::ttpnt pp;
+   telldata::TtPnt pp;
    if (!src_tmpl.Matches(exp)) return false;
    wxString ps = src_tmpl.GetMatch(exp);
    src_tmpl.ReplaceFirst(&exp,wxT(""));
@@ -209,37 +209,37 @@ bool console::miniParser::getBind()
    double p1,p2;
    p1s.ToDouble(&p1);p2s.ToDouble(&p2);
    // convert the coordinates to ttpoint ...
-   pp = telldata::ttpnt(p1,p2);
+   pp = telldata::TtPnt(p1,p2);
    // ... now the rotation ...
    VERIFY(src_tmpl.Compile(real_tmpl));
-   telldata::ttreal rot;
+   telldata::TtReal rot;
    if (!src_tmpl.Matches(exp)) return false;
    ps = src_tmpl.GetMatch(exp);
    src_tmpl.ReplaceFirst(&exp,wxT(""));
    ps.ToDouble(&p1);
-   rot = telldata::ttreal(p1);
+   rot = telldata::TtReal(p1);
 
    // ... the flip ...
    VERIFY(src_tmpl.Compile(bool_tmpl));
-   telldata::ttbool flip;
+   telldata::TtBool flip;
    if (!src_tmpl.Matches(exp)) return false;
    ps = src_tmpl.GetMatch(exp);
    src_tmpl.ReplaceFirst(&exp,wxT(""));
    if (wxT("true") == ps)
-      flip = telldata::ttbool(true);
+      flip = telldata::TtBool(true);
    else
-      flip = telldata::ttbool(false);
+      flip = telldata::TtBool(false);
 
    // ... and finally - the scale ...
    VERIFY(src_tmpl.Compile(real_tmpl));
-   telldata::ttreal scl;
+   telldata::TtReal scl;
    if (!src_tmpl.Matches(exp)) return false;
    ps = src_tmpl.GetMatch(exp);
    src_tmpl.ReplaceFirst(&exp,wxT(""));
    ps.ToDouble(&p1);
-   scl = telldata::ttreal(p1);
+   scl = telldata::TtReal(p1);
 
-   client_stack->push(DEBUG_NEW telldata::ttbnd(pp,rot,flip,scl));
+   client_stack->push(DEBUG_NEW telldata::TtBnd(pp,rot,flip,scl));
    return true;
 }
 
@@ -255,8 +255,8 @@ bool console::miniParser::getList() {
    src_tmpl.ReplaceAll(&exp,wxT(""));
    // now we are going to extract the points
    VERIFY(src_tmpl.Compile(point_tmpl));
-   telldata::ttlist *pl = DEBUG_NEW telldata::ttlist(telldata::tn_pnt);
-   telldata::ttpnt* pp = NULL;
+   telldata::TtList *pl = DEBUG_NEW telldata::TtList(telldata::tn_pnt);
+   telldata::TtPnt* pp = NULL;
    while (src_tmpl.Matches(exp)) {
       wxString ps = src_tmpl.GetMatch(exp);
       src_tmpl.ReplaceFirst(&exp,wxT(""));
@@ -269,7 +269,7 @@ bool console::miniParser::getList() {
       wxString p2s = crd_tmpl.GetMatch(ps);
       double p1,p2;
       p1s.ToDouble(&p1);p2s.ToDouble(&p2);
-      pp = DEBUG_NEW telldata::ttpnt(p1,p2);
+      pp = DEBUG_NEW telldata::TtPnt(p1,p2);
       // add it to the point list
       pl->add(pp);
    }
@@ -481,7 +481,7 @@ void console::TllCmdLine::parseCommand(wxString cmd, bool thread)
    getCommand(thread);
 }
 
-void console::TllCmdLine::mouseLB(const telldata::ttpnt& p) {
+void console::TllCmdLine::mouseLB(const telldata::TtPnt& p) {
    wxString ost1, ost2;
    // prepare the point string for the input log window
    ost1 << wxT("{ ")<< p.x() << wxT(" , ") << p.y() << wxT(" }");
@@ -723,13 +723,13 @@ void console::TedCmdLine::onGUInput(wxCommandEvent& evt)
          _threadWaits4->Signal();
          break;
       case  0:  {// left mouse button
-         telldata::ttpnt* p = static_cast<telldata::ttpnt*>(evt.GetClientData());
+         telldata::TtPnt* p = static_cast<telldata::TtPnt*>(evt.GetClientData());
          mouseLB(*p);
          delete p;
          break;
          }
       case  2: {
-         telldata::ttpnt* p = static_cast<telldata::ttpnt*>(evt.GetClientData());
+         telldata::TtPnt* p = static_cast<telldata::TtPnt*>(evt.GetClientData());
          mouseRB();
          delete p;
          break;

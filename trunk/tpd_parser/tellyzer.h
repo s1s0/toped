@@ -129,7 +129,7 @@ namespace  parsercmd {
    typedef  std::deque<cmdVIRTUAL*>                      CmdQUEUE;
    typedef  std::deque<cmdSTDFUNC*>                      UndoQUEUE;
    typedef  std::deque<void*>                            UndoUQUEUE;
-   typedef  std::pair<std::string,telldata::tell_var*>   ArgumentTYPE;
+   typedef  std::pair<std::string,telldata::TellVar*>    ArgumentTYPE;
    typedef  std::deque<ArgumentTYPE*>                    ArgumentLIST;
    typedef enum {sdbrSORTED, sdbrUNSORTED, sdbrDONTCARE} DbSortState;
 
@@ -362,30 +362,30 @@ namespace  parsercmd {
 
    class cmdLISTSIZE:public cmdVIRTUAL {
    public:
-      cmdLISTSIZE(telldata::tell_var* var): _var(var){};
+      cmdLISTSIZE(telldata::TellVar* var): _var(var){};
       int execute();
    protected:
-      telldata::tell_var*  _var;
+      telldata::TellVar*  _var;
    };
 
    class cmdASSIGN:public cmdVIRTUAL {
    public:
-      cmdASSIGN(telldata::tell_var* var, bool indexed): _var(var), _indexed(indexed) {};
+      cmdASSIGN(telldata::TellVar* var, bool indexed): _var(var), _indexed(indexed) {};
       int execute();
 //      ~cmdASSIGN() {delete _var;}
    protected:
-      telldata::tell_var*  _var;
+      telldata::TellVar*   _var;
       bool                 _indexed;
    };
 
    class cmdPUSH:public cmdVIRTUAL {
    public:
-      cmdPUSH(telldata::tell_var *v, bool indexed, bool constant=false):
+      cmdPUSH(telldata::TellVar *v, bool indexed, bool constant=false):
                         _var(v),  _indexed(indexed), _constant(constant) {};
       int execute();
       virtual ~cmdPUSH() {if (_constant) delete _var;};
    private:
-      telldata::tell_var*  _var;
+      telldata::TellVar*   _var;
       bool                 _indexed;
       bool                 _constant;
    };
@@ -397,22 +397,22 @@ namespace  parsercmd {
     */
    class cmdANOVAR:public cmdVIRTUAL {
    public:
-      cmdANOVAR(telldata::tell_var *v) : _var(v) {};
+      cmdANOVAR(telldata::TellVar *v) : _var(v) {};
       int execute() {return EXEC_NEXT;}
       virtual ~cmdANOVAR() { delete _var;}
    private:
-      telldata::tell_var*  _var;
+      telldata::TellVar*   _var;
    };
 
    class cmdSTRUCT: public cmdVIRTUAL {
    public:
                cmdSTRUCT() : _arg(NULL) {}
-      void     setargID(telldata::argumentID* arg) {_arg = DEBUG_NEW telldata::argumentID(*arg);}
+      void     setargID(telldata::ArgumentID* arg) {_arg = DEBUG_NEW telldata::ArgumentID(*arg);}
       virtual ~cmdSTRUCT()                         {if (NULL != _arg) delete _arg;}
       int      execute();
    private:
-      telldata::tell_var*     getList();
-      telldata::argumentID*  _arg;
+      telldata::TellVar*      getList();
+      telldata::ArgumentID*  _arg;
    };
 
    /*!
@@ -421,10 +421,10 @@ namespace  parsercmd {
     * implemented in TELL. In parse time an object of this class is pushed in the
     * command queue and initialized with the name of the referenced function and
     * with the default typeID for a function reference. A pointer to this object
-    * is also stored in the corresponding argumentID object which will do the
+    * is also stored in the corresponding ArgumentID object which will do the
     * type checks later and eventually update the _funcBody and _ID fields.\n
     * In run time (execute()) those parameters will be transfered to the
-    * corresponding telldata::call_back variable through the operand stack thus
+    * corresponding telldata::TtCallBack variable through the operand stack thus
     * completing the substitution of the original empty function.
     * There are two possible argument checks that an object of this type might
     * get involved in. The first one is a simple assignment. The second one is
@@ -467,8 +467,8 @@ namespace  parsercmd {
 
    class cmdLISTADD : public cmdVIRTUAL {
    public:
-               cmdLISTADD(telldata::tell_var* listarg, bool prefix, bool index) :
-         _listarg(static_cast<telldata::ttlist*>(listarg)), _prefix(prefix), _index(index) {};
+               cmdLISTADD(telldata::TellVar* listarg, bool prefix, bool index) :
+         _listarg(static_cast<telldata::TtList*>(listarg)), _prefix(prefix), _index(index) {};
       int execute();
    protected:
       cmdLISTADD(cmdLISTADD* indxcmd) :
@@ -477,7 +477,7 @@ namespace  parsercmd {
       // don't delete this and don't get confused. It's only a pointer to a variable,
       // that normally should be in the operand stack. List operations are an exception -
       // see the comments in the parser (tell_yacc.yy)
-      telldata::ttlist*     _listarg;
+      telldata::TtList*     _listarg;
       bool                  _prefix;
       bool                  _index;
       bool                  _empty_list;
@@ -491,22 +491,22 @@ namespace  parsercmd {
 
    class cmdLISTSUB : public cmdVIRTUAL {
    public:
-      cmdLISTSUB(telldata::tell_var* listarg, bool prefix, bool index) :
-         _listarg(static_cast<telldata::ttlist*>(listarg)), _prefix(prefix), _index(index) {};
+      cmdLISTSUB(telldata::TellVar* listarg, bool prefix, bool index) :
+         _listarg(static_cast<telldata::TtList*>(listarg)), _prefix(prefix), _index(index) {};
       int execute();
    private:
-      telldata::ttlist*     _listarg;
+      telldata::TtList*     _listarg;
       bool                  _prefix;
       bool                  _index;
    };
 
    class cmdLISTSLICE : public cmdVIRTUAL {
    public:
-      cmdLISTSLICE(telldata::tell_var* listarg, bool prefix, bool index) :
-         _listarg(static_cast<telldata::ttlist*>(listarg)), _prefix(prefix), _index(index) {};
+      cmdLISTSLICE(telldata::TellVar* listarg, bool prefix, bool index) :
+         _listarg(static_cast<telldata::TtList*>(listarg)), _prefix(prefix), _index(index) {};
       int execute();
    private:
-      telldata::ttlist*     _listarg;
+      telldata::TtList*     _listarg;
       bool                  _prefix;
       bool                  _index;
    };
@@ -514,7 +514,7 @@ namespace  parsercmd {
    class cmdRETURN:public cmdVIRTUAL {
    public:
       cmdRETURN(telldata::typeID tID) : _retype(tID) {};
-      bool checkRetype(telldata::argumentID* arg);
+      bool checkRetype(telldata::ArgumentID* arg);
       int execute()  {return EXEC_RETURN;};
    private:
       telldata::typeID  _retype;
@@ -546,7 +546,7 @@ namespace  parsercmd {
                  variable is initialized. Called when an identifier is matched.
                  If _varLocal exists, the variable is added there, otherwise
                  VARglobal map is used
-   > getID     - extracts tell_var* from variableMAP by name. Local variableMAP
+   > getID     - extracts TellVar* from variableMAP by name. Local variableMAP
                  has a priority(if exists). Returns NULL if such a name is not
                  found in both (_varLocal, VARglobal) maps.
    > getfuncID - extracts the cmdBLOCK* from the funcMAP by name. Returns NULL
@@ -570,17 +570,17 @@ namespace  parsercmd {
       virtual void               addUSERFUNC(FuncDeclaration*, cmdFUNC*, TpdYYLtype);
       virtual cmdFUNC*           addUSERFUNCDECL(FuncDeclaration*, TpdYYLtype);
       virtual bool               addCALLBACKDECL(std::string, cmdCALLBACK*, TpdYYLtype);
-      void                       addID(const char*, telldata::tell_var*);
-      void                       addconstID(const char*, telldata::tell_var*, bool initialized);
+      void                       addID(const char*, telldata::TellVar*);
+      void                       addconstID(const char*, telldata::TellVar*, bool initialized);
       void                       addlocaltype(const char*, telldata::TType*);
       void                       addAnoLoType(telldata::TType*);
       telldata::TCompType*       secureCompType(char*&);
       telldata::TCallBackType*   secureCallBackType(const char*);
       const telldata::TType*     getTypeByName(char*&) const;
       const telldata::TType*     getTypeByID(const telldata::typeID ID) const;
-      telldata::tell_var*        getID(const char*, bool local=false) const;
-      telldata::tell_var*        newTellvar(telldata::typeID, const char*, TpdYYLtype);
-      telldata::tell_var*        newFuncArg(telldata::typeID, const char*, TpdYYLtype);
+      telldata::TellVar*         getID(const char*, bool local=false) const;
+      telldata::TellVar*         newTellvar(telldata::typeID, const char*, TpdYYLtype);
+      telldata::TellVar*         newFuncArg(telldata::typeID, const char*, TpdYYLtype);
       bool                       defValidate(const std::string& ,const ArgumentLIST*, cmdFUNC*&);
       bool                       declValidate(const std::string&, const ArgumentLIST*, TpdYYLtype);
       cmdSTDFUNC*  const         getFuncBody(const char*, telldata::argumentQ*) const;
@@ -666,7 +666,7 @@ namespace  parsercmd {
       virtual                ~cmdFUNC() {}
    protected:
       typedef std::stack<telldata::variableMAP*> LocalVarStack;
-      typedef std::list<telldata::tell_var*> BackupList;
+      typedef std::list<telldata::TellVar*> BackupList;
       bool                    addCALLBACKPARAM(std::string, cmdCALLBACK*, TpdYYLtype);
       bool                    _declaration;
       BackupList*             backupOperandStack();
@@ -742,14 +742,14 @@ namespace  parsercmd {
 
    class cmdFOREACH: public cmdVIRTUAL {
    public:
-      cmdFOREACH(telldata::tell_var* var) :
+      cmdFOREACH(telldata::TellVar* var) :
                                        _var(var),_header(NULL), _body(NULL) {};
       void                 addBlocks(cmdBLOCK* hd, cmdBLOCK* bd)
                                                     {_header = hd; _body = bd;}
       int                  execute();
       virtual ~cmdFOREACH();
    private:
-      telldata::tell_var*  _var;
+      telldata::TellVar*   _var;
       cmdBLOCK*            _header;
       cmdBLOCK*            _body;
    };
@@ -760,14 +760,14 @@ namespace  parsercmd {
    telldata::typeID  PointMv(telldata::typeID, telldata::typeID, TpdYYLtype, TpdYYLtype, int, int);
    telldata::typeID  Multiply(telldata::typeID, telldata::typeID, TpdYYLtype, TpdYYLtype);
    telldata::typeID  Divide(telldata::typeID, telldata::typeID, TpdYYLtype, TpdYYLtype);
-   telldata::typeID  Assign(telldata::tell_var*, bool, telldata::argumentID*, TpdYYLtype);
-   telldata::typeID  Uninsert(telldata::tell_var*, telldata::argumentID*, parsercmd::cmdLISTADD*, TpdYYLtype);
+   telldata::typeID  Assign(telldata::TellVar*, bool, telldata::ArgumentID*, TpdYYLtype);
+   telldata::typeID  Uninsert(telldata::TellVar*, telldata::ArgumentID*, parsercmd::cmdLISTADD*, TpdYYLtype);
    telldata::typeID  BoolEx(telldata::typeID, telldata::typeID, std::string, TpdYYLtype, TpdYYLtype);
    telldata::typeID  BoolEx(telldata::typeID, std::string, TpdYYLtype);
 
-   telldata::tell_var* newCallBackArgument(telldata::typeID, TpdYYLtype);
+   telldata::TellVar* newCallBackArgument(telldata::typeID, TpdYYLtype);
 
-   bool              StructTypeCheck(telldata::typeID, telldata::argumentID*, TpdYYLtype);
+   bool              StructTypeCheck(telldata::typeID, telldata::ArgumentID*, TpdYYLtype);
    bool              ListIndexCheck(telldata::typeID, TpdYYLtype, telldata::typeID, TpdYYLtype);
    bool              ListSliceCheck(telldata::typeID, TpdYYLtype, telldata::typeID, TpdYYLtype, telldata::typeID, TpdYYLtype);
    bool              ListSliceCheck(telldata::typeID, TpdYYLtype, telldata::typeID, TpdYYLtype);
@@ -805,20 +805,20 @@ namespace  parsercmd {
 
 namespace telldata {
    //==============================================================================
-   class call_back : public tell_var {
+   class TtCallBack : public TellVar {
    public:
-                           call_back(const typeID ID, parsercmd::cmdCALLBACK*);
-                           call_back(const typeID ID, parsercmd::cmdSTDFUNC*);
-                           call_back(const call_back&);
-      virtual             ~call_back() {}
+                           TtCallBack(const typeID ID, parsercmd::cmdCALLBACK*);
+                           TtCallBack(const typeID ID, parsercmd::cmdSTDFUNC*);
+                           TtCallBack(const TtCallBack&);
+      virtual             ~TtCallBack() {}
       virtual void         initialize();
-      virtual tell_var*    selfcopy() const;  //{return DEBUG_NEW call_back(*this);}
+      virtual TellVar*     selfcopy() const;
       virtual void         echo(std::string&, real);
-      virtual void         assign(tell_var*);
+      virtual void         assign(TellVar*);
       parsercmd::cmdCALLBACK* fcbBody()        { return _fcbBody;}
       parsercmd::cmdSTDFUNC*  fBody()          { return _fBody;  }
    protected:
-                           call_back(const typeID ID);
+                           TtCallBack(const typeID ID);
       parsercmd::cmdCALLBACK* _fcbBody;
       parsercmd::cmdSTDFUNC*  _fBody;
       bool                 _definition;
@@ -840,11 +840,11 @@ namespace console{
          toped_logfile&    operator<< (const int4b);
          toped_logfile&    operator<< (const real);
          toped_logfile&    operator<< (const std::string&);
-         toped_logfile&    operator<< (const telldata::ttpnt&);
-         toped_logfile&    operator<< (const telldata::ttwnd&);
-         toped_logfile&    operator<< (const telldata::ttbnd&);
-         toped_logfile&    operator<< (const telldata::tthsh&);
-         toped_logfile&    operator<< (const telldata::ttlist&);
+         toped_logfile&    operator<< (const telldata::TtPnt&);
+         toped_logfile&    operator<< (const telldata::TtWnd&);
+         toped_logfile&    operator<< (const telldata::TtBnd&);
+         toped_logfile&    operator<< (const telldata::TtHsh&);
+         toped_logfile&    operator<< (const telldata::TtList&);
          toped_logfile&    flush();
       private:
          std::fstream     _file;

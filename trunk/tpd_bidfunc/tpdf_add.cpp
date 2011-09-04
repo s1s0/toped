@@ -42,21 +42,21 @@ extern console::toped_logfile    LogFile;
 tellstdfunc::stdADDBOX::stdADDBOX(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor, parsercmd::sdbrUNSORTED)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttwnd()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtWnd()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
 }
 
 void tellstdfunc::stdADDBOX::undo_cleanup()
 {
    getWordValue(UNDOPstack, false);
-   telldata::ttlayout* bx = static_cast<telldata::ttlayout*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtLayout* bx = static_cast<telldata::TtLayout*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete bx;
 }
 
 void tellstdfunc::stdADDBOX::undo()
 {
    TEUNDO_DEBUG("addbox(box, int) UNDO");
-   telldata::ttlayout* bx = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtLayout* bx = static_cast<telldata::TtLayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    word la = getWordValue(UNDOPstack,true);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
@@ -73,7 +73,7 @@ int tellstdfunc::stdADDBOX::execute()
 {
    word la = getWordValue();
    secureLayer(la);
-   telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
+   telldata::TtWnd *w = static_cast<telldata::TtWnd*>(OPstack.top());OPstack.pop();
    real DBscale = PROPC->DBscale();
    TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
    TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
@@ -81,9 +81,9 @@ int tellstdfunc::stdADDBOX::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(tDesign->putBox(la, p1DB, p2DB),la);
+      telldata::TtLayout* bx = DEBUG_NEW telldata::TtLayout(tDesign->putBox(la, p1DB, p2DB),la);
       UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
+      UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(la));
       OPstack.push(bx); UNDOPstack.push_front(bx->selfcopy());
       LogFile << LogFile.getFN() << "("<< *w << "," << la << ");";LogFile.flush();
    }
@@ -99,7 +99,7 @@ int tellstdfunc::stdADDBOX::execute()
 tellstdfunc::stdADDBOX_D::stdADDBOX_D(telldata::typeID retype, bool eor) :
       stdADDBOX(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor,parsercmd::sdbrUNSORTED)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttwnd()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtWnd()));
 }
 
 int tellstdfunc::stdADDBOX_D::execute()
@@ -112,20 +112,20 @@ int tellstdfunc::stdADDBOX_D::execute()
 tellstdfunc::stdDRAWBOX::stdDRAWBOX(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
 }
 
 void tellstdfunc::stdDRAWBOX::undo_cleanup()
 {
    getWordValue(UNDOPstack, false);
-   telldata::ttlayout* bx = static_cast<telldata::ttlayout*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtLayout* bx = static_cast<telldata::TtLayout*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete bx;
 }
 
 void tellstdfunc::stdDRAWBOX::undo()
 {
    TEUNDO_DEBUG("drawbox(int) UNDO");
-   telldata::ttlayout* bx = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtLayout* bx = static_cast<telldata::TtLayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    word la = getWordValue(UNDOPstack, true);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
@@ -145,7 +145,7 @@ int tellstdfunc::stdDRAWBOX::execute()
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(console::op_dbox, &OPstack)) return EXEC_ABORT;
    // get the data from the stack
-   telldata::ttwnd *w = static_cast<telldata::ttwnd*>(OPstack.top());OPstack.pop();
+   telldata::TtWnd *w = static_cast<telldata::TtWnd*>(OPstack.top());OPstack.pop();
    // get the (final) target layer
    la = secureLayer();
    real DBscale = PROPC->DBscale();
@@ -155,9 +155,9 @@ int tellstdfunc::stdDRAWBOX::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(tDesign->addBox(la, p1DB, p2DB), la);
+      telldata::TtLayout* bx = DEBUG_NEW telldata::TtLayout(tDesign->addBox(la, p1DB, p2DB), la);
       UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
+      UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(la));
       OPstack.push(bx);UNDOPstack.push_front(bx->selfcopy());
       LogFile << "addbox("<< *w << "," << la << ");";LogFile.flush();
    }
@@ -184,23 +184,23 @@ int tellstdfunc::stdDRAWBOX_D::execute()
 tellstdfunc::stdADDBOXr::stdADDBOXr(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor, parsercmd::sdbrUNSORTED)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttpnt()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtPnt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
 }
 
 void tellstdfunc::stdADDBOXr::undo_cleanup()
 {
    getWordValue(UNDOPstack, false);
-   telldata::ttlayout* bx = static_cast<telldata::ttlayout*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtLayout* bx = static_cast<telldata::TtLayout*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete bx;
 }
 
 void tellstdfunc::stdADDBOXr::undo()
 {
    TEUNDO_DEBUG("addbox(point, real, real, int) UNDO");
-   telldata::ttlayout* bx = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtLayout* bx = static_cast<telldata::TtLayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    word la = getWordValue(UNDOPstack, true);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
@@ -219,8 +219,8 @@ int tellstdfunc::stdADDBOXr::execute()
    secureLayer(la);
    real heigth = getOpValue();
    real width  = getOpValue();
-   telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-   telldata::ttpnt  p2 = telldata::ttpnt(p1->x()+width,p1->y()+heigth);
+   telldata::TtPnt *p1 = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
+   telldata::TtPnt  p2 = telldata::TtPnt(p1->x()+width,p1->y()+heigth);
    real DBscale = PROPC->DBscale();
    TP* p1DB = DEBUG_NEW TP(p1->x(), p1->y(), DBscale);
    TP* p2DB = DEBUG_NEW TP(p2.x() , p2.y() , DBscale);
@@ -228,9 +228,9 @@ int tellstdfunc::stdADDBOXr::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(tDesign->putBox(la, p1DB, p2DB), la);
+      telldata::TtLayout* bx = DEBUG_NEW telldata::TtLayout(tDesign->putBox(la, p1DB, p2DB), la);
       UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
+      UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(la));
       OPstack.push(bx);UNDOPstack.push_front(bx->selfcopy());
       LogFile << LogFile.getFN() << "("<< *p1 << "," << width << "," << heigth <<
                                                  "," << la << ");"; LogFile.flush();
@@ -247,9 +247,9 @@ int tellstdfunc::stdADDBOXr::execute()
 tellstdfunc::stdADDBOXr_D::stdADDBOXr_D(telldata::typeID retype, bool eor) :
       stdADDBOXr(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor, parsercmd::sdbrUNSORTED)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttpnt()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtPnt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
 }
 
 int tellstdfunc::stdADDBOXr_D::execute()
@@ -262,22 +262,22 @@ int tellstdfunc::stdADDBOXr_D::execute()
 tellstdfunc::stdADDBOXp::stdADDBOXp(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor, parsercmd::sdbrUNSORTED)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttpnt()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttpnt()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtPnt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtPnt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
 }
 
 void tellstdfunc::stdADDBOXp::undo_cleanup()
 {
    getWordValue(UNDOPstack, false);
-   telldata::ttlayout* bx = static_cast<telldata::ttlayout*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtLayout* bx = static_cast<telldata::TtLayout*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete bx;
 }
 
 void tellstdfunc::stdADDBOXp::undo()
 {
    TEUNDO_DEBUG("addbox(point, point, int) UNDO");
-   telldata::ttlayout* bx = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtLayout* bx = static_cast<telldata::TtLayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    word la = getWordValue(UNDOPstack, true);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
@@ -294,8 +294,8 @@ int tellstdfunc::stdADDBOXp::execute()
 {
    word     la = getWordValue();
    secureLayer(la);
-   telldata::ttpnt *p1 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-   telldata::ttpnt *p2 = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
+   telldata::TtPnt *p1 = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
+   telldata::TtPnt *p2 = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
    real DBscale = PROPC->DBscale();
    TP* p1DB = DEBUG_NEW TP(p1->x(), p1->y(), DBscale);
    TP* p2DB = DEBUG_NEW TP(p2->x(), p2->y(), DBscale);
@@ -303,9 +303,9 @@ int tellstdfunc::stdADDBOXp::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      telldata::ttlayout* bx = DEBUG_NEW telldata::ttlayout(tDesign->putBox(la, p1DB, p2DB), la);
+      telldata::TtLayout* bx = DEBUG_NEW telldata::TtLayout(tDesign->putBox(la, p1DB, p2DB), la);
       UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
+      UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(la));
       OPstack.push(bx); UNDOPstack.push_front(bx->selfcopy());
       LogFile << LogFile.getFN() << "("<< *p1 << "," << *p2 << "," << la << ");";
       LogFile.flush();
@@ -322,8 +322,8 @@ int tellstdfunc::stdADDBOXp::execute()
 tellstdfunc::stdADDBOXp_D::stdADDBOXp_D(telldata::typeID retype, bool eor) :
       stdADDBOXp(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor,parsercmd::sdbrUNSORTED)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttpnt()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttpnt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtPnt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtPnt()));
 }
 
 int tellstdfunc::stdADDBOXp_D::execute()
@@ -336,21 +336,21 @@ int tellstdfunc::stdADDBOXp_D::execute()
 tellstdfunc::stdADDPOLY::stdADDPOLY(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor,parsercmd::sdbrUNSORTED)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_pnt)));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtList(telldata::tn_pnt)));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
 }
 
 void tellstdfunc::stdADDPOLY::undo_cleanup()
 {
    getWordValue(UNDOPstack, false);
-   telldata::ttlayout* ply = static_cast<telldata::ttlayout*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtLayout* ply = static_cast<telldata::TtLayout*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete ply;
 }
 
 void tellstdfunc::stdADDPOLY::undo()
 {
    TEUNDO_DEBUG("addpoly(point list, int) UNDO");
-   telldata::ttlayout* ply = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtLayout* ply = static_cast<telldata::TtLayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    word la = getWordValue(UNDOPstack, true);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
@@ -366,7 +366,7 @@ void tellstdfunc::stdADDPOLY::undo()
 int tellstdfunc::stdADDPOLY::execute()
 {
    word     la = getWordValue();
-   telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::TtList *pl = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
    if (pl->size() >= 3)
    {
       secureLayer(la);
@@ -376,10 +376,10 @@ int tellstdfunc::stdADDPOLY::execute()
       {
          laydata::TdtDesign* tDesign = (*dbLibDir)();
          PointVector* plst = t2tpoints(pl,DBscale);
-         telldata::ttlayout* ply = DEBUG_NEW telldata::ttlayout(tDesign->putPoly(la,plst), la);
+         telldata::TtLayout* ply = DEBUG_NEW telldata::TtLayout(tDesign->putPoly(la,plst), la);
          delete plst;
          UNDOcmdQ.push_front(this);
-         UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
+         UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(la));
          OPstack.push(ply); UNDOPstack.push_front(ply->selfcopy());
          LogFile << LogFile.getFN() << "("<< *pl << "," << la << ");";
          LogFile.flush();
@@ -389,7 +389,7 @@ int tellstdfunc::stdADDPOLY::execute()
    else
    {
       tell_log(console::MT_ERROR,"At least 3 points expected to create a polygon");
-      OPstack.push(DEBUG_NEW telldata::ttlayout());
+      OPstack.push(DEBUG_NEW telldata::TtLayout());
    }
    delete pl;
    RefreshGL();
@@ -400,7 +400,7 @@ int tellstdfunc::stdADDPOLY::execute()
 tellstdfunc::stdADDPOLY_D::stdADDPOLY_D(telldata::typeID retype, bool eor) :
       stdADDPOLY(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor,parsercmd::sdbrUNSORTED)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_pnt)));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtList(telldata::tn_pnt)));
 }
 
 int tellstdfunc::stdADDPOLY_D::execute()
@@ -413,20 +413,20 @@ int tellstdfunc::stdADDPOLY_D::execute()
 tellstdfunc::stdDRAWPOLY::stdDRAWPOLY(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
 }
 
 void tellstdfunc::stdDRAWPOLY::undo_cleanup()
 {
    getWordValue(UNDOPstack, false);
-   telldata::ttlayout* ply = static_cast<telldata::ttlayout*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtLayout* ply = static_cast<telldata::TtLayout*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete ply;
 }
 
 void tellstdfunc::stdDRAWPOLY::undo()
 {
    TEUNDO_DEBUG("drawpoly(int) UNDO");
-   telldata::ttlayout* ply = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtLayout* ply = static_cast<telldata::TtLayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    word la = getWordValue(UNDOPstack, true);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
@@ -446,7 +446,7 @@ int tellstdfunc::stdDRAWPOLY::execute()
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(console::op_dpoly, &OPstack)) return EXEC_ABORT;
    // get the data from the stack
-   telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::TtList *pl = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
    // get the (final) target layer
    la = secureLayer();
    if (pl->size() >= 3)
@@ -457,10 +457,10 @@ int tellstdfunc::stdDRAWPOLY::execute()
       {
          laydata::TdtDesign* tDesign = (*dbLibDir)();
          PointVector* plst = t2tpoints(pl,DBscale);
-         telldata::ttlayout* ply = DEBUG_NEW telldata::ttlayout(tDesign->addPoly(la,plst), la);
+         telldata::TtLayout* ply = DEBUG_NEW telldata::TtLayout(tDesign->addPoly(la,plst), la);
          delete plst;
          UNDOcmdQ.push_front(this);
-         UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
+         UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(la));
          OPstack.push(ply); UNDOPstack.push_front(ply->selfcopy());
          LogFile << "addpoly("<< *pl << "," << la << ");"; LogFile.flush();
       }
@@ -469,7 +469,7 @@ int tellstdfunc::stdDRAWPOLY::execute()
    else
    {
       tell_log(console::MT_ERROR,"At least 3 points expected to create a polygon");
-      OPstack.push(DEBUG_NEW telldata::ttlayout());
+      OPstack.push(DEBUG_NEW telldata::TtLayout());
    }
    delete pl;
    RefreshGL();
@@ -491,22 +491,22 @@ int tellstdfunc::stdDRAWPOLY_D::execute()
 tellstdfunc::stdADDWIRE::stdADDWIRE(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor,parsercmd::sdbrUNSORTED)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_pnt)));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtList(telldata::tn_pnt)));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
 }
 
 void tellstdfunc::stdADDWIRE::undo_cleanup()
 {
    getWordValue(UNDOPstack, false);
-   telldata::ttlayout* wr = static_cast<telldata::ttlayout*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtLayout* wr = static_cast<telldata::TtLayout*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete wr;
 }
 
 void tellstdfunc::stdADDWIRE::undo()
 {
    TEUNDO_DEBUG("addwire(point list, real, int) UNDO");
-   telldata::ttlayout* wr = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtLayout* wr = static_cast<telldata::TtLayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    word la = getWordValue(UNDOPstack, true);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
@@ -523,7 +523,7 @@ int tellstdfunc::stdADDWIRE::execute()
 {
    word     la = getWordValue();
    real      w = getOpValue();
-   telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::TtList *pl = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
    if (pl->size() > 1) {
       secureLayer(la);
       real DBscale = PROPC->DBscale();
@@ -532,11 +532,11 @@ int tellstdfunc::stdADDWIRE::execute()
       {
          laydata::TdtDesign* tDesign = (*dbLibDir)();
          PointVector* plst = t2tpoints(pl,DBscale);
-         telldata::ttlayout* wr = DEBUG_NEW telldata::ttlayout(tDesign->putWire(la,plst,
+         telldata::TtLayout* wr = DEBUG_NEW telldata::TtLayout(tDesign->putWire(la,plst,
                                     static_cast<WireWidth>(rint(w * DBscale))), la);
          delete plst;
          UNDOcmdQ.push_front(this);
-         UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
+         UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(la));
          OPstack.push(wr);UNDOPstack.push_front(wr->selfcopy());
          LogFile << LogFile.getFN() << "("<< *pl << "," << w << "," << la << ");";
          LogFile.flush();
@@ -546,7 +546,7 @@ int tellstdfunc::stdADDWIRE::execute()
    else
    {
       tell_log(console::MT_ERROR,"At least 2 points expected to create a wire");
-      OPstack.push(DEBUG_NEW telldata::ttlayout());
+      OPstack.push(DEBUG_NEW telldata::TtLayout());
    }
    delete pl;
    RefreshGL();
@@ -557,8 +557,8 @@ int tellstdfunc::stdADDWIRE::execute()
 tellstdfunc::stdADDWIRE_D::stdADDWIRE_D(telldata::typeID retype, bool eor) :
       stdADDWIRE(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor,parsercmd::sdbrUNSORTED)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttlist(telldata::tn_pnt)));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtList(telldata::tn_pnt)));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
 }
 
 int tellstdfunc::stdADDWIRE_D::execute()
@@ -571,21 +571,21 @@ int tellstdfunc::stdADDWIRE_D::execute()
 tellstdfunc::stdDRAWWIRE::stdDRAWWIRE(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
 }
 
 void tellstdfunc::stdDRAWWIRE::undo_cleanup()
 {
    getWordValue(UNDOPstack, false);
-   telldata::ttlayout* wr = static_cast<telldata::ttlayout*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtLayout* wr = static_cast<telldata::TtLayout*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete wr;
 }
 
 void tellstdfunc::stdDRAWWIRE::undo()
 {
    TEUNDO_DEBUG("drawwire(real, int) UNDO");
-   telldata::ttlayout* wr = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtLayout* wr = static_cast<telldata::TtLayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    word la = getWordValue(UNDOPstack, true);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
@@ -606,7 +606,7 @@ int tellstdfunc::stdDRAWWIRE::execute()
    real DBscale = PROPC->DBscale();
    if (!tellstdfunc::waitGUInput(static_cast<int>(rint(w * DBscale)), &OPstack)) return EXEC_ABORT;
    // get the data from the stack
-   telldata::ttlist *pl = static_cast<telldata::ttlist*>(OPstack.top());OPstack.pop();
+   telldata::TtList *pl = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
    // get the (final) target layer
    la = secureLayer();
    if (pl->size() > 1)
@@ -616,11 +616,11 @@ int tellstdfunc::stdDRAWWIRE::execute()
       {
          laydata::TdtDesign* tDesign = (*dbLibDir)();
          PointVector* plst = t2tpoints(pl,DBscale);
-         telldata::ttlayout* wr = DEBUG_NEW telldata::ttlayout(tDesign->addWire(la,plst,
+         telldata::TtLayout* wr = DEBUG_NEW telldata::TtLayout(tDesign->addWire(la,plst,
                                     static_cast<WireWidth>(rint(w * DBscale))), la);
          delete plst;
          UNDOcmdQ.push_front(this);
-         UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
+         UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(la));
          OPstack.push(wr);UNDOPstack.push_front(wr->selfcopy());
          LogFile << "addwire(" << *pl << "," << w << "," << la << ");";
          LogFile.flush();
@@ -629,7 +629,7 @@ int tellstdfunc::stdDRAWWIRE::execute()
    }
    else {
       tell_log(console::MT_ERROR,"At least 2 points expected to create a wire");
-      OPstack.push(DEBUG_NEW telldata::ttlayout());
+      OPstack.push(DEBUG_NEW telldata::TtLayout());
    }
    delete pl;
    RefreshGL();
@@ -640,7 +640,7 @@ int tellstdfunc::stdDRAWWIRE::execute()
 tellstdfunc::stdDRAWWIRE_D::stdDRAWWIRE_D(telldata::typeID retype, bool eor) :
       stdDRAWWIRE(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
 }
 
 int tellstdfunc::stdDRAWWIRE_D::execute()
@@ -653,25 +653,25 @@ int tellstdfunc::stdDRAWWIRE_D::execute()
 tellstdfunc::stdADDTEXT::stdADDTEXT(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor,parsercmd::sdbrUNSORTED)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttpnt()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtPnt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
 }
 
 void tellstdfunc::stdADDTEXT::undo_cleanup()
 {
    getWordValue(UNDOPstack, false);
-   telldata::ttlayout* tx = static_cast<telldata::ttlayout*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtLayout* tx = static_cast<telldata::TtLayout*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete tx;
 }
 
 void tellstdfunc::stdADDTEXT::undo()
 {
    TEUNDO_DEBUG("addtext(string, int, point, real, bool, real) UNDO");
-   telldata::ttlayout* tx = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtLayout* tx = static_cast<telldata::TtLayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    word la = getWordValue(UNDOPstack, true);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
@@ -690,7 +690,7 @@ int tellstdfunc::stdADDTEXT::execute()
    real   magn   = getOpValue();
    bool   flip   = getBoolValue();
    real   angle  = getOpValue();
-   telldata::ttpnt  *rpnt  = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
+   telldata::TtPnt  *rpnt  = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
    word      la  = getWordValue();
    std::string text = getStringValue();
    if ("" == text)
@@ -711,9 +711,9 @@ int tellstdfunc::stdADDTEXT::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      telldata::ttlayout* tx = DEBUG_NEW telldata::ttlayout(tDesign->putText(la, text, ori), la);
+      telldata::TtLayout* tx = DEBUG_NEW telldata::TtLayout(tDesign->putText(la, text, ori), la);
       UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
+      UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(la));
       OPstack.push(tx);UNDOPstack.push_front(tx->selfcopy());
       LogFile << LogFile.getFN() << "(\"" << text << "\"," << la << "," << *rpnt <<
             "," << angle << "," << LogFile._2bool(flip) << "," << magn << ");";
@@ -729,21 +729,21 @@ int tellstdfunc::stdADDTEXT::execute()
 tellstdfunc::stdDRAWTEXT::stdDRAWTEXT(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
 }
 
 void tellstdfunc::stdDRAWTEXT::undo_cleanup()
 {
    getWordValue(UNDOPstack, false);
-   telldata::ttlayout* tx = static_cast<telldata::ttlayout*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtLayout* tx = static_cast<telldata::TtLayout*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete tx;
 }
 
 void tellstdfunc::stdDRAWTEXT::undo()
 {
    TEUNDO_DEBUG("addtext(string, int, point, real, bool, real) UNDO");
-   telldata::ttlayout* tx = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtLayout* tx = static_cast<telldata::TtLayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    word la = getWordValue(UNDOPstack, true);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
@@ -770,12 +770,12 @@ int tellstdfunc::stdDRAWTEXT::execute()
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(console::op_tbind, &OPstack, text, ftrans)) return EXEC_ABORT;
    // get the data from the stack
-   telldata::ttbnd *bnd = static_cast<telldata::ttbnd*>(OPstack.top());OPstack.pop();
+   telldata::TtBnd *bnd = static_cast<telldata::TtBnd*>(OPstack.top());OPstack.pop();
    //--------------------------------------------------------------------------
    real              magn   = bnd->sc().value();
    bool              flip   = bnd->flx().value();
    real              angle  = bnd->rot().value();
-   telldata::ttpnt   rpnt   = bnd->p();
+   telldata::TtPnt   rpnt   = bnd->p();
    word              la     = getCurrentLayer()->value();
    delete bnd;
 
@@ -791,9 +791,9 @@ int tellstdfunc::stdDRAWTEXT::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      telldata::ttlayout* tx = DEBUG_NEW telldata::ttlayout(tDesign->addText(la, text, ori), la);
+      telldata::TtLayout* tx = DEBUG_NEW telldata::TtLayout(tDesign->addText(la, text, ori), la);
       UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(la));
+      UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(la));
       OPstack.push(tx);UNDOPstack.push_front(tx->selfcopy());
       LogFile << LogFile.getFN() << "(\"" << text << "\"," << la << "," << rpnt <<
             "," << angle << "," << LogFile._2bool(flip) << "," << magn << ");";
@@ -810,23 +810,23 @@ int tellstdfunc::stdDRAWTEXT::execute()
 tellstdfunc::stdCELLREF::stdCELLREF(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor,parsercmd::sdbrUNSORTED)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttpnt()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtPnt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
 }
 
 void tellstdfunc::stdCELLREF::undo_cleanup()
 {
-   telldata::ttlayout* cl = static_cast<telldata::ttlayout*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtLayout* cl = static_cast<telldata::TtLayout*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete cl;
 }
 
 void tellstdfunc::stdCELLREF::undo()
 {
    TEUNDO_DEBUG("cellref(string, point, real, bool, real) UNDO");
-   telldata::ttlayout* cl = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtLayout* cl = static_cast<telldata::TtLayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -844,7 +844,7 @@ int tellstdfunc::stdCELLREF::execute()
    real   magn   = getOpValue();
    bool   flip   = getBoolValue();
    real   angle  = getOpValue();
-   telldata::ttpnt  *rpnt  = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
+   telldata::TtPnt  *rpnt  = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
    std::string name = getStringValue();
    real DBscale = PROPC->DBscale();
    CTM ori(TP(rpnt->x(), rpnt->y(), DBscale), magn,angle,flip);
@@ -861,7 +861,7 @@ int tellstdfunc::stdCELLREF::execute()
       if (cellFound)
       {
          laydata::TdtDesign* tDesign = (*dbLibDir)();
-         telldata::ttlayout* cl = DEBUG_NEW telldata::ttlayout(tDesign->addCellRef(strdefn,ori), REF_LAY);
+         telldata::TtLayout* cl = DEBUG_NEW telldata::TtLayout(tDesign->addCellRef(strdefn,ori), REF_LAY);
          UNDOcmdQ.push_front(this);
          OPstack.push(cl); UNDOPstack.push_front(cl->selfcopy());
          LogFile << LogFile.getFN() << "(\""<< name << "\"," << *rpnt << "," <<
@@ -889,7 +889,7 @@ int tellstdfunc::stdCELLREF::execute()
 tellstdfunc::stdCELLREF_D::stdCELLREF_D(telldata::typeID retype, bool eor) :
       stdCELLREF(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 int tellstdfunc::stdCELLREF_D::execute()
@@ -912,13 +912,13 @@ int tellstdfunc::stdCELLREF_D::execute()
       // stop the thread and wait for input from the GUI
       if (!tellstdfunc::waitGUInput(console::op_cbind, &OPstack, name)) return EXEC_ABORT;
       // get the data from the stack
-      telldata::ttbnd *bnd = static_cast<telldata::ttbnd*>(OPstack.top());OPstack.pop();
+      telldata::TtBnd *bnd = static_cast<telldata::TtBnd*>(OPstack.top());OPstack.pop();
 
-      OPstack.push(DEBUG_NEW telldata::ttstring(name));
-      OPstack.push(DEBUG_NEW telldata::ttpnt(bnd->p()));
-      OPstack.push(DEBUG_NEW telldata::ttreal(bnd->rot()));
-      OPstack.push(DEBUG_NEW telldata::ttbool(bnd->flx()));
-      OPstack.push(DEBUG_NEW telldata::ttreal(bnd->sc()));
+      OPstack.push(DEBUG_NEW telldata::TtString(name));
+      OPstack.push(DEBUG_NEW telldata::TtPnt(bnd->p()));
+      OPstack.push(DEBUG_NEW telldata::TtReal(bnd->rot()));
+      OPstack.push(DEBUG_NEW telldata::TtBool(bnd->flx()));
+      OPstack.push(DEBUG_NEW telldata::TtReal(bnd->sc()));
       delete bnd;
       return stdCELLREF::execute();
    }
@@ -936,27 +936,27 @@ int tellstdfunc::stdCELLREF_D::execute()
 tellstdfunc::stdCELLAREF::stdCELLAREF(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttpnt()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttpnt()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttpnt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtPnt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtPnt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtPnt()));
 }
 
 void tellstdfunc::stdCELLAREF::undo_cleanup()
 {
-   telldata::ttlayout* cl = static_cast<telldata::ttlayout*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtLayout* cl = static_cast<telldata::TtLayout*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete cl;
 }
 
 void tellstdfunc::stdCELLAREF::undo()
 {
    TEUNDO_DEBUG("cellaref(string, point, real, bool, real) UNDO");
-   telldata::ttlayout* cl = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtLayout* cl = static_cast<telldata::TtLayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -972,15 +972,15 @@ int tellstdfunc::stdCELLAREF::execute()
 {
    // get the parameters from the operand stack
    //cellaref("boza",getpoint(),0,false,1,3,2,{30,0},{0,70});
-   telldata::ttpnt  *stepTPY  = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
-   telldata::ttpnt  *stepTPX  = static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
+   telldata::TtPnt  *stepTPY  = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
+   telldata::TtPnt  *stepTPX  = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
    word   row    = getWordValue();
    word   col    = getWordValue();
    real   magn   = getOpValue();
    bool   flip   = getBoolValue();
    real   angle  = getOpValue();
-   telldata::ttpnt  *rpnt  =
-                     static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
+   telldata::TtPnt  *rpnt  =
+                     static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
    std::string name = getStringValue();
    real DBscale = PROPC->DBscale();
    TP cDispl(stepTPX->x(), stepTPX->y(), DBscale);
@@ -991,7 +991,7 @@ int tellstdfunc::stdCELLAREF::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      telldata::ttlayout* cl = DEBUG_NEW telldata::ttlayout(
+      telldata::TtLayout* cl = DEBUG_NEW telldata::TtLayout(
             tDesign->addCellARef(name,ori,arrprops),REF_LAY);
       UNDOcmdQ.push_front(this);
       OPstack.push(cl); UNDOPstack.push_front(cl->selfcopy());
@@ -1012,27 +1012,27 @@ int tellstdfunc::stdCELLAREF::execute()
 tellstdfunc::stdCELLAREFO::stdCELLAREFO(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttpnt()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttbool()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtPnt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
 }
 
 void tellstdfunc::stdCELLAREFO::undo_cleanup()
 {
-   telldata::ttlayout* cl = static_cast<telldata::ttlayout*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtLayout* cl = static_cast<telldata::TtLayout*>(UNDOPstack.back());UNDOPstack.pop_back();
    delete cl;
 }
 
 void tellstdfunc::stdCELLAREFO::undo()
 {
    TEUNDO_DEBUG("cellaref(string, point, real, bool, real) UNDO");
-   telldata::ttlayout* cl = static_cast<telldata::ttlayout*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtLayout* cl = static_cast<telldata::TtLayout*>(UNDOPstack.front());UNDOPstack.pop_front();
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -1055,8 +1055,8 @@ int tellstdfunc::stdCELLAREFO::execute()
    real   magn   = getOpValue();
    bool   flip   = getBoolValue();
    real   angle  = getOpValue();
-   telldata::ttpnt  *rpnt  =
-                     static_cast<telldata::ttpnt*>(OPstack.top());OPstack.pop();
+   telldata::TtPnt  *rpnt  =
+                     static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
    std::string name = getStringValue();
    real DBscale = PROPC->DBscale();
    TP cDispl(stepX, 0    , DBscale);
@@ -1067,7 +1067,7 @@ int tellstdfunc::stdCELLAREFO::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      telldata::ttlayout* cl = DEBUG_NEW telldata::ttlayout(
+      telldata::TtLayout* cl = DEBUG_NEW telldata::TtLayout(
             tDesign->addCellARef(name,ori,arrprops),REF_LAY);
       UNDOcmdQ.push_front(this);
       OPstack.push(cl); UNDOPstack.push_front(cl->selfcopy());
@@ -1086,11 +1086,11 @@ int tellstdfunc::stdCELLAREFO::execute()
 tellstdfunc::stdCELLAREFO_D::stdCELLAREFO_D(telldata::typeID retype, bool eor) :
       stdCELLAREFO(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttreal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
 }
 
 int tellstdfunc::stdCELLAREFO_D::execute()
@@ -1128,17 +1128,17 @@ int tellstdfunc::stdCELLAREFO_D::execute()
    if (!tellstdfunc::waitGUInput(console::op_abind, &OPstack, name, CTM(), istepX, istepY,col,row))
       return EXEC_ABORT;
    // get the data from the stack
-   telldata::ttbnd *bnd = static_cast<telldata::ttbnd*>(OPstack.top());OPstack.pop();
+   telldata::TtBnd *bnd = static_cast<telldata::TtBnd*>(OPstack.top());OPstack.pop();
 
-   OPstack.push(DEBUG_NEW telldata::ttstring(name));
-   OPstack.push(DEBUG_NEW telldata::ttpnt(bnd->p()));
-   OPstack.push(DEBUG_NEW telldata::ttreal(bnd->rot()));
-   OPstack.push(DEBUG_NEW telldata::ttbool(bnd->flx()));
-   OPstack.push(DEBUG_NEW telldata::ttreal(bnd->sc()));
-   OPstack.push(DEBUG_NEW telldata::ttint(col));
-   OPstack.push(DEBUG_NEW telldata::ttint(row));
-   OPstack.push(DEBUG_NEW telldata::ttreal(stepX));
-   OPstack.push(DEBUG_NEW telldata::ttreal(stepY));
+   OPstack.push(DEBUG_NEW telldata::TtString(name));
+   OPstack.push(DEBUG_NEW telldata::TtPnt(bnd->p()));
+   OPstack.push(DEBUG_NEW telldata::TtReal(bnd->rot()));
+   OPstack.push(DEBUG_NEW telldata::TtBool(bnd->flx()));
+   OPstack.push(DEBUG_NEW telldata::TtReal(bnd->sc()));
+   OPstack.push(DEBUG_NEW telldata::TtInt(col));
+   OPstack.push(DEBUG_NEW telldata::TtInt(row));
+   OPstack.push(DEBUG_NEW telldata::TtReal(stepX));
+   OPstack.push(DEBUG_NEW telldata::TtReal(stepY));
    delete bnd;
    return stdCELLAREFO::execute();
 }
@@ -1147,7 +1147,7 @@ int tellstdfunc::stdCELLAREFO_D::execute()
 tellstdfunc::stdUSINGLAYER::stdUSINGLAYER(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttint()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
 }
 
 void tellstdfunc::stdUSINGLAYER::undo_cleanup()
@@ -1187,7 +1187,7 @@ int tellstdfunc::stdUSINGLAYER::execute()
       }
       TpdPost::layer_default(layno, drawProp->curLay());
       UNDOcmdQ.push_front(this);
-      UNDOPstack.push_front(DEBUG_NEW telldata::ttint(drawProp->curLay()));
+      UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(drawProp->curLay()));
       drawProp->defaultLayer(layno);
       LogFile << LogFile.getFN() << "("<< layno << ");";LogFile.flush();
    }
@@ -1199,7 +1199,7 @@ int tellstdfunc::stdUSINGLAYER::execute()
 tellstdfunc::stdUSINGLAYER_S::stdUSINGLAYER_S(telldata::typeID retype, bool eor) :
       stdUSINGLAYER(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::ttstring()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 int tellstdfunc::stdUSINGLAYER_S::execute()
@@ -1214,7 +1214,7 @@ int tellstdfunc::stdUSINGLAYER_S::execute()
   PROPC->unlockDrawProp(drawProp);
   if (ERR_LAY != layno)
   {
-    OPstack.push(DEBUG_NEW telldata::ttint(layno));
+    OPstack.push(DEBUG_NEW telldata::TtInt(layno));
     return stdUSINGLAYER::execute();
   }
   else
