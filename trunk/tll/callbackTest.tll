@@ -32,6 +32,11 @@ int simpleSub(int a, int b)
   return (a - b);
 }
 
+int simpleUMinus(int a)
+{
+  return -a;
+}
+
 /* The callback type definition follows the function definition syntax
  * with two differencies:
  * - "callback" keyword marks the start of the definition
@@ -76,3 +81,32 @@ funcArguFuncB(2,3,@simpleSub);
 funcArguFuncA(2,3,@simpleAdd);
 funcArguFuncA(2,3,@simpleSub);
 
+//callbacks using build-in functions
+callback real (real) trigo;
+trigo = @sin;
+printf("trigo callback of angle 30 deg is %e\n", trigo(30));
+trigo = @cos;
+printf("trigo callback of angle 30 deg is %e\n", trigo(30));
+
+// assigning one callback variable to another one
+unifunctype unifuncZ = unifuncA;
+// and using the latter
+printf("Callback of type unifuncZ - returns %d\n",unifuncZ(2,3));
+funcArguFuncA(2,3,unifuncZ);
+//=============================================================================
+//
+// Error conditions
+//
+//=============================================================================
+// define a callback type unifunctype ...
+//callback int cbType1(int);
+//printf ("Next line shall report '%s'\n", "Incompatible operand types in assignment");
+//cbType1 cbCall1 = @simpleSub;
+
+//printf ("Next line shall report '%s'\n", "Incompatible operand types in assignment");
+//callback int (int) cbCall2 = @simpleAdd;
+
+//printf ("Next line shall report '%s'\n", "unknown function name or wrong parameter list");
+//funcArguFuncA(2,3,@simpleUMinus);
+//printf ("Next line shall report '%s'\n", "unknown function name or wrong parameter list");
+//funcArguFuncB(2,3,@simpleUMinus);

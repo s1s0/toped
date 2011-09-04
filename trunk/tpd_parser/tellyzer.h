@@ -662,7 +662,7 @@ namespace  parsercmd {
       virtual bool            declaration() {return _declaration;}
       virtual void            undo() {};
       virtual void            undo_cleanup() {};
-      void                    set_defined() {_declaration = false;}
+      void                    setDefined(bool defined = true) {_declaration = !defined;}
       virtual                ~cmdFUNC() {}
    protected:
       typedef std::stack<telldata::variableMAP*> LocalVarStack;
@@ -703,7 +703,8 @@ namespace  parsercmd {
    class cmdCALLBACK : public cmdFUNC {
    public:
                               cmdCALLBACK(const telldata::TypeIdList&, telldata::typeID, TpdYYLtype loc);
-      void                    setFBody(parsercmd::cmdSTDFUNC* fbody) {_fbody = fbody; set_defined();}
+      void                    setFBody(parsercmd::cmdSTDFUNC* fbody) {_fbody = fbody; setDefined();}
+      void                    unSetFBody() {_fbody = NULL; setDefined(false);}
       virtual int             execute();
    private:
       parsercmd::cmdSTDFUNC*  _fbody;
@@ -817,6 +818,7 @@ namespace telldata {
       parsercmd::cmdCALLBACK* fcbBody()        { return _fcbBody;}
       parsercmd::cmdSTDFUNC*  fBody()          { return _fBody;  }
    protected:
+                           call_back(const typeID ID);
       parsercmd::cmdCALLBACK* _fcbBody;
       parsercmd::cmdSTDFUNC*  _fBody;
       bool                 _definition;

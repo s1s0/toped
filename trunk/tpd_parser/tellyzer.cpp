@@ -1930,7 +1930,8 @@ void parsercmd::cmdFUNC::restoreOperandStack(parsercmd::cmdFUNC::BackupList* los
 }
 //=============================================================================
 parsercmd::cmdCALLBACK::cmdCALLBACK(const telldata::TypeIdList&  paramlist, telldata::typeID retype, TpdYYLtype loc) :
-   cmdFUNC( DEBUG_NEW parsercmd::ArgumentLIST, retype, true, loc)
+   cmdFUNC( DEBUG_NEW parsercmd::ArgumentLIST, retype, true, loc),
+   _fbody ( NULL)
 {
    for (telldata::TypeIdList::const_iterator CP = paramlist.begin(); CP != paramlist.end(); CP++)
    {
@@ -2076,7 +2077,7 @@ void parsercmd::cmdMAIN::addUSERFUNC(FuncDeclaration* decl, cmdFUNC* cQ, TpdYYLt
       if (declfunc)
       {// pour over the definition contents in the body created by the declaration
          cQ->copyContents(declfunc);
-         declfunc->set_defined();
+         declfunc->setDefined();
          TpdPost::tellFnAdd(decl->name(), cQ->callingConv(&_typeLocal));
          TpdPost::tellFnSort();
       }
@@ -2933,57 +2934,59 @@ telldata::call_back::call_back(const call_back& cobj) :
    _definition  ( cobj._definition )
 {}
 
+telldata::call_back::call_back(typeID ID) :
+   tell_var     ( ID          ),
+   _fcbBody     ( NULL        ),
+   _fBody       ( NULL        ),
+   _definition  ( false       )
+{}
+
 void telldata::call_back::initialize()
 {
-   // TODO -> clean-up the function body for the next call
+   // clean-up the function body for the next call
    // - effectively undo what has been done in assign
+   _fBody = NULL;
+   _fcbBody->unSetFBody();
 }
 
 telldata::tell_var* telldata::call_back::selfcopy() const
 {
-   if (NULL == _fBody)
-   {
-      assert(NULL != _fcbBody);
-      return  DEBUG_NEW call_back(_ID, _fcbBody);
-   }
-   else if (NULL == _fcbBody)
-   {
-      assert(NULL != _fBody);
-      return  DEBUG_NEW call_back(_ID, _fBody);
-   }
-   else
-      assert(false);
+   call_back* nvar = DEBUG_NEW call_back(_ID);
+   nvar->_definition = _definition;
+   nvar->_fcbBody    = _fcbBody;
+   nvar->_fBody      = _fBody;
+   return nvar;
 }
 
-void telldata::call_back::echo(std::string&, real)
+void telldata::call_back::echo(std::string& wstr, real)
 {
-   assert(false); //TODO
+   std::ostringstream ost;
+   if (_fcbBody->declaration())
+      ost << "NULL";
+   else
+      ost << "pointing to <TODO> function";
+   wstr += ost.str();
 }
+
 void telldata::call_back::assign(tell_var* value)
 {
    call_back* n_value = static_cast<telldata::call_back*>(value);
-   if (!_definition)
+
+   _definition = n_value->_definition;
+   _fBody      = n_value->_fBody;
+   if (_definition)
    {
-      if (n_value->_definition)
-      { // callback definition
-         _fcbBody->setFBody(n_value->fBody());
-      }
-      else // regular variable copy
-      {
-//         _fcbBody   = n_value->_fcbBody;
-         assert(false); // Not sure this is a valid case. If you hit this assert
-                        // legally - just add a copy of a function body
-      }
+      assert(NULL != _fBody);
+      _fcbBody->setFBody(_fBody);
    }
    else
    {
-      assert(false); // Not sure this is a valid case. If you hit this assert
-                     // legally - just add a copy of a function body
+      _fBody = NULL;
+      _fcbBody->unSetFBody();
    }
 }
 
-
-
+//==============================================================================
 telldata::tell_var* parsercmd::newCallBackArgument(telldata::typeID ID, TpdYYLtype loc)
 {
    if (ID & telldata::tn_listmask)
@@ -3014,12 +3017,6 @@ telldata::tell_var* parsercmd::newCallBackArgument(telldata::typeID ID, TpdYYLty
          else
          { // callback variable
             assert(0);
-//            const telldata::TCallBackType* vartype = static_cast<const telldata::TCallBackType*>(utype);
-//            parsercmd::cmdCALLBACK* cbfp = DEBUG_NEW cmdCALLBACK(vartype->paramList(),vartype->fType(), loc);
-//            if (addCALLBACKDECL(varName, cbfp, loc))
-//               return (DEBUG_NEW telldata::call_back(ID, cbfp));
-//            else
-//               delete cbfp;
          }
       }
    }
