@@ -580,7 +580,7 @@ namespace  parsercmd {
       const telldata::TType*     getTypeByID(const telldata::typeID ID) const;
       telldata::TellVar*         getID(const char*, bool local=false) const;
       telldata::TellVar*         newTellvar(telldata::typeID, const char*, TpdYYLtype);
-      telldata::TellVar*         newFuncArg(telldata::typeID, const char*, TpdYYLtype);
+      telldata::TellVar*         newFuncArg(telldata::typeID, TpdYYLtype);
       bool                       defValidate(const std::string& ,const ArgumentLIST*, cmdFUNC*&);
       bool                       declValidate(const std::string&, const ArgumentLIST*, TpdYYLtype);
       cmdSTDFUNC*  const         getFuncBody(const char*, telldata::argumentQ*) const;
@@ -667,7 +667,7 @@ namespace  parsercmd {
    protected:
       typedef std::stack<telldata::variableMAP*> LocalVarStack;
       typedef std::list<telldata::TellVar*> BackupList;
-      bool                    addCALLBACKPARAM(std::string, cmdCALLBACK*, TpdYYLtype);
+//      bool                    addCALLBACKPARAM(std::string, cmdCALLBACK*, TpdYYLtype);
       bool                    _declaration;
       BackupList*             backupOperandStack();
       void                    restoreOperandStack(BackupList*);
