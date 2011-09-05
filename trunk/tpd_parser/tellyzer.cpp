@@ -1885,7 +1885,7 @@ parsercmd::cmdFUNC::cmdFUNC(ArgumentLIST* vm, telldata::typeID tt, bool declarat
               // be converted from a variable to a function declaration
                telldata::TtCallBack* cbVar = static_cast<telldata::TtCallBack*>((*arg)->second);
                bool valid = addCALLBACKDECL((*arg)->first, cbVar->fcbBody(), loc);
-               assert(valid); //TODO - what if?
+               assert(valid); //the eventual error condition should've been cough during variable checks
             }
          }
          _varLocal[(*arg)->first] = (*arg)->second->selfcopy();
@@ -2145,16 +2145,6 @@ parsercmd::cmdFUNC* parsercmd::cmdMAIN::addUSERFUNCDECL(FuncDeclaration* decl, T
       _funcMAP.insert(std::make_pair(decl->name(), cQ));
    }
    return cQ;
-}
-
-bool parsercmd::cmdMAIN::addCALLBACKDECL(std::string name, cmdCALLBACK* decl, TpdYYLtype loc)
-{
-   if (CMDBlock->declValidate(name.c_str(),decl->getArguments(),loc))
-   {
-      _funcMAP.insert(std::make_pair(name, decl));
-      return true;
-   }
-   return false;
 }
 
 parsercmd::cmdMAIN::cmdMAIN():cmdBLOCK(telldata::tn_usertypes)

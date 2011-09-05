@@ -569,7 +569,6 @@ namespace  parsercmd {
       virtual void               addFUNC(std::string, cmdSTDFUNC*);
       virtual void               addUSERFUNC(FuncDeclaration*, cmdFUNC*, TpdYYLtype);
       virtual cmdFUNC*           addUSERFUNCDECL(FuncDeclaration*, TpdYYLtype);
-      virtual bool               addCALLBACKDECL(std::string, cmdCALLBACK*, TpdYYLtype);
       void                       addID(const char*, telldata::TellVar*);
       void                       addconstID(const char*, telldata::TellVar*, bool initialized);
       void                       addlocaltype(const char*, telldata::TType*);
@@ -597,6 +596,7 @@ namespace  parsercmd {
       void                       setUndoDepth(word ud) {_undoDepth = ud;}
       virtual                   ~cmdBLOCK();
    protected:
+      bool                       addCALLBACKDECL(std::string, cmdCALLBACK*, TpdYYLtype);
       telldata::variableMAP     _varLocal;  //! list of local variables
       telldata::typeMAP         _typeLocal; //! list of local types
       telldata::TypeList        _typeAnoLo; //! list of anonymous local types (callbacks only so far)
@@ -618,7 +618,6 @@ namespace  parsercmd {
       void           addIntFUNC(std::string, cmdSTDFUNC*);
       void           addUSERFUNC(FuncDeclaration*, cmdFUNC*, TpdYYLtype);
       cmdFUNC*       addUSERFUNCDECL(FuncDeclaration*, TpdYYLtype);
-      bool           addCALLBACKDECL(std::string, cmdCALLBACK*, TpdYYLtype);
       void           addGlobalType(std::string, telldata::TType*);
       void           recoveryDone();
       virtual       ~cmdMAIN();
