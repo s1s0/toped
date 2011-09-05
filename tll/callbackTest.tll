@@ -94,7 +94,9 @@ unifunctype unifuncZ = unifuncA;
 printf("Callback of type unifuncZ - returns %d\n",unifuncZ(2,3));
 funcArguFuncA(2,3,unifuncZ);
 
-//callbacks from functions
+//
+// callbacks from functions
+//
 void cbTestFunction(int angle, bool sORc)
 {
   funcArguFuncB(2,3,@simpleAdd);
@@ -109,12 +111,28 @@ void cbTestFunction(int angle, bool sORc)
 
 cbTestFunction(30, true);
 cbTestFunction(30, false);
+
+//
+// defining the callback with the same name as the name and param list of the local function
+//
+real bozo(real a)
+{
+  return -a;
+}
+
+callback real Toto (real);
+Toto bozo = @sin; // will overshadow the previous (regular) definition of bozo
+printf("Expected value is   1 -> %f\n", bozo(90)); // i.e. will call sin
+
+//bozo = @bozo; // This one will crash dramatically. Looks like it pushes 
+//the parser in some kind of recursion - TO BE INVESTIGATED!
+//printf("Expected value is -90 -> %f\n", bozo(90)); // i.e. will call sin
+
 //=============================================================================
 //
 // Error conditions
 //
 //=============================================================================
-// define a callback type unifunctype ...
 //callback int cbType1(int);
 //printf ("Next line shall report '%s'\n", "Incompatible operand types in assignment");
 //cbType1 cbCall1 = @simpleSub;
