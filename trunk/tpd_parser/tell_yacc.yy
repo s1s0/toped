@@ -712,10 +712,10 @@ callbacktypedef:
            YYABORT;
         }
         tellcallback->setFType($2);
-        delete [] $3;
      }
      anoarguments ')'                      {
         CMDBlock->addlocaltype($3,tellcallback);
+        delete [] $3;
         tellcallback = NULL;
      }
 ;
