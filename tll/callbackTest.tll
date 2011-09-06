@@ -49,15 +49,15 @@ callback <return_type> <functypename> ([<argument> [, <argument> [...]]])
 callback int unifunctype(int,int);
 
 // ... and a variable unifunc of that type
-unifunctype unifuncA = @simpleAdd;
+unifunctype unifuncA = &simpleAdd;
 printf("Callback of type unifuncA - returns %d\n",unifuncA(2,3));
-unifuncA = @simpleSub;
+unifuncA = &simpleSub;
 printf("Callback of type unifuncA - returns %d\n",unifuncA(2,3));
 
 // or define directly a variable unifunc of anonymous callback type
-callback int (int,int) unifuncB = @simpleAdd;
+callback int (int,int) unifuncB = &simpleAdd;
 printf("Callback of type unifuncB - returns %d\n",unifuncB(2,3));
-unifuncB = @simpleSub;
+unifuncB = &simpleSub;
 printf("Callback of type unifuncB - returns %d\n",unifuncB(2,3));
 
 //same for the function argument list - using a pre-defined callback type
@@ -76,16 +76,16 @@ void funcArguFuncB(int a, int b, callback int (int,int) unifunc)
    printf ("[%s] \n",buffer);
 }
 
-funcArguFuncB(2,3,@simpleAdd);
-funcArguFuncB(2,3,@simpleSub);
-funcArguFuncA(2,3,@simpleAdd);
-funcArguFuncA(2,3,@simpleSub);
+funcArguFuncB(2,3,&simpleAdd);
+funcArguFuncB(2,3,&simpleSub);
+funcArguFuncA(2,3,&simpleAdd);
+funcArguFuncA(2,3,&simpleSub);
 
 //callbacks using build-in functions
 callback real (real) trigo;
-trigo = @sin;
+trigo = &sin;
 printf("trigo callback of angle 30 deg is %e\n", trigo(30));
-trigo = @cos;
+trigo = &cos;
 printf("trigo callback of angle 30 deg is %e\n", trigo(30));
 
 // assigning one callback variable to another one
@@ -99,13 +99,13 @@ funcArguFuncA(2,3,unifuncZ);
 //
 void cbTestFunction(int angle, bool sORc)
 {
-  funcArguFuncB(2,3,@simpleAdd);
-  funcArguFuncA(2,3,@simpleAdd);
+  funcArguFuncB(2,3,&simpleAdd);
+  funcArguFuncA(2,3,&simpleAdd);
   callback real (real) localtrig;
   if (sORc)
-    localtrig = @sin;
+    localtrig = &sin;
   else
-    localtrig = @cos;
+    localtrig = &cos;
   printf("trigo callback of angle %d deg is %e\n", angle, localtrig(angle));
 }
 
@@ -121,10 +121,10 @@ real bozo(real a)
 }
 
 callback real Toto (real);
-Toto bozo = @sin; // will overshadow the previous (regular) definition of bozo
+Toto bozo = &sin; // will overshadow the previous (regular) definition of bozo
 printf("Expected value is   1 -> %f\n", bozo(90)); // i.e. will call sin
 
-//bozo = @bozo; // This one will crash dramatically. Looks like it pushes 
+//bozo = &bozo; // This one will crash dramatically. Looks like it pushes 
 //the parser in some kind of recursion - TO BE INVESTIGATED!
 //printf("Expected value is -90 -> %f\n", bozo(90)); // i.e. will call sin
 
@@ -140,7 +140,7 @@ struct tstruct {
 
 tstruct cbInStruct;
 cbInStruct.angle = 90;
-cbInStruct.operation = @sin;
+cbInStruct.operation = &sin;
 // direct call is not possible i.e.
 // real result = cbInStruct.operation(cbInStruct.angle);
 // will not be allowed by the parser, yet a call is still possible
@@ -153,8 +153,8 @@ printf("Indirect call of a callback in structure - Expected value is   1 -> %f\n
 //
 Ttrigo list cbList[2];
 
-cbList[0] = @sin;
-cbList[1] = @cos;
+cbList[0] = &sin;
+cbList[1] = &cos;
 
 // again here as with a structures - direct call is not possible, we need
 // intermediate variable
@@ -170,12 +170,12 @@ printf("Indirect call of a callback list member - Expected value is   0 -> %f\n"
 //=============================================================================
 //callback int cbType1(int);
 //printf ("Next line shall report '%s'\n", "Incompatible operand types in assignment");
-//cbType1 cbCall1 = @simpleSub;
+//cbType1 cbCall1 = &simpleSub;
 
 //printf ("Next line shall report '%s'\n", "Incompatible operand types in assignment");
-//callback int (int) cbCall2 = @simpleAdd;
+//callback int (int) cbCall2 = &simpleAdd;
 
 //printf ("Next line shall report '%s'\n", "unknown function name or wrong parameter list");
-//funcArguFuncA(2,3,@simpleUMinus);
+//funcArguFuncA(2,3,&simpleUMinus);
 //printf ("Next line shall report '%s'\n", "unknown function name or wrong parameter list");
-//funcArguFuncB(2,3,@simpleUMinus);
+//funcArguFuncB(2,3,&simpleUMinus);

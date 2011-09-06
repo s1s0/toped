@@ -959,7 +959,7 @@ structure:
 ;
 
 funcreference:
-     '@' tknIDENTIFIER                    {
+     tknBWAND tknIDENTIFIER                {
         parsercmd::cmdFUNCREF* funcref = DEBUG_NEW parsercmd::cmdFUNCREF($2);
         CMDBlock->pushcmd(funcref);
         $$ = DEBUG_NEW telldata::ArgumentID(funcref);
