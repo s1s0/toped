@@ -232,7 +232,6 @@ const                      return tknCONST;
 "-"                        return '-';
 "*"                        return '*';
 "/"                        return '/';
-"@"                        return '@';
 "="                        return '=';
 ";"                        return ';';
 0x[0-9A-Fa-f]+    |
