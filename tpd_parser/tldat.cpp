@@ -62,9 +62,7 @@ telldata::TellVar* telldata::TCompType::initfield(const typeID ID) const
                      if (vartype->isComposite())
                         nvar = DEBUG_NEW telldata::TtUserStruct(static_cast<const TCompType*>(vartype));
                      else
-                     {
-                        assert(false); //TODO callback types
-                     }
+                        nvar = DEBUG_NEW telldata::TtCallBack(ID);
                 }
       }
    return nvar;

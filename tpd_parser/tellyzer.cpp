@@ -894,7 +894,7 @@ int parsercmd::cmdLISTSIZE::execute()
          else if  (utype->isComposite())
             initVar = DEBUG_NEW telldata::TtUserStruct(static_cast<const telldata::TCompType*>(utype));
          else
-            assert(false);//TODO - callback types
+            initVar = DEBUG_NEW telldata::TtCallBack(ID);
       }
    }
 
@@ -1171,7 +1171,7 @@ int parsercmd::cmdSTRUCT::execute()
             if (atype->isComposite())
                ustrct = DEBUG_NEW telldata::TtUserStruct(static_cast<const telldata::TCompType*>(atype), OPstack);
             else
-               assert(false); // TODO - callback types
+               assert(false); // parser shall never get to this point or I'm missing something ...
          }
       }
    }
@@ -3007,7 +3007,7 @@ telldata::TellVar* telldata::TtCallBack::selfcopy() const
 void telldata::TtCallBack::echo(std::string& wstr, real)
 {
    std::ostringstream ost;
-   if (_fcbBody->declaration())
+   if ( (NULL == _fcbBody) || (_fcbBody->declaration()) )
       ost << "NULL";
    else
       ost << "pointing to <TODO> function";
@@ -3023,7 +3023,8 @@ void telldata::TtCallBack::assign(TellVar* value)
    if (_definition)
    {
       assert(NULL != _fBody);
-      _fcbBody->setFBody(_fBody);
+      if (NULL != _fcbBody)
+         _fcbBody->setFBody(_fBody);
    }
    else
    {
