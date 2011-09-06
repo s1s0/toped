@@ -809,6 +809,7 @@ namespace telldata {
                            TtCallBack(const typeID ID, parsercmd::cmdCALLBACK*);
                            TtCallBack(const typeID ID, parsercmd::cmdSTDFUNC*);
                            TtCallBack(const TtCallBack&);
+                           TtCallBack(const typeID ID);
       virtual             ~TtCallBack() {}
       virtual void         initialize();
       virtual TellVar*     selfcopy() const;
@@ -817,7 +818,6 @@ namespace telldata {
       parsercmd::cmdCALLBACK* fcbBody()        { return _fcbBody;}
       parsercmd::cmdSTDFUNC*  fBody()          { return _fBody;  }
    protected:
-                           TtCallBack(const typeID ID);
       parsercmd::cmdCALLBACK* _fcbBody;
       parsercmd::cmdSTDFUNC*  _fBody;
       bool                 _definition;

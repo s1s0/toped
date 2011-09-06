@@ -128,6 +128,41 @@ printf("Expected value is   1 -> %f\n", bozo(90)); // i.e. will call sin
 //the parser in some kind of recursion - TO BE INVESTIGATED!
 //printf("Expected value is -90 -> %f\n", bozo(90)); // i.e. will call sin
 
+
+//
+// Call back in a structure
+//
+callback real Ttrigo(real);
+struct tstruct {
+  real    angle;
+  Ttrigo  operation
+};
+
+tstruct cbInStruct;
+cbInStruct.angle = 90;
+cbInStruct.operation = @sin;
+// direct call is not possible i.e.
+// real result = cbInStruct.operation(cbInStruct.angle);
+// will not be allowed by the parser, yet a call is still possible
+// via an intermediate variable
+Ttrigo intermCb = cbInStruct.operation;
+printf("Indirect call of a callback in structure - Expected value is   1 -> %f\n", intermCb(cbInStruct.angle));
+
+//
+// Call back in a list
+//
+Ttrigo list cbList[2];
+
+cbList[0] = @sin;
+cbList[1] = @cos;
+
+// again here as with a structures - direct call is not possible, we need
+// intermediate variable
+intermCb = cbList[0];
+printf("Indirect call of a callback list member - Expected value is   1 -> %f\n", intermCb(90));
+intermCb = cbList[1];
+printf("Indirect call of a callback list member - Expected value is   0 -> %f\n", intermCb(90));
+
 //=============================================================================
 //
 // Error conditions
