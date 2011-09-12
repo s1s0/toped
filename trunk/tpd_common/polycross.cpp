@@ -1426,39 +1426,57 @@ int polycross::YQ::sCompare(const polysegment* seg0, const polysegment* seg1)
    // if it is a crossing point -> compare the slope
    ori = orientation(seg1->lP(), seg1->rP(), seg0->rP());
    if (ori != 0) return ori;
-   // if it is still the same => we have coinciding segments
 
+   // if it is still the same => we have coinciding segments
+   // Here the fun begins.
+   // 1. Retrieve the original Point vectors of both segments, get the indexes
+   //    of the right points and the relative direction of point chains
+   unsigned indx0RP, indx1RP;
+   bool dir0 = true;
+   bool dir1 = true;
+   const PointVector* plist0 = locateOriginals(seg0, indx0RP, dir0);
+   const PointVector* plist1 = locateOriginals(seg1, indx1RP, dir1);
+   unsigned indx0RNP, indx1RNP;
+   int numv0 = plist0->size();
+   int numv1 = plist1->size();
+   int loopsentinel = (numv0 > numv1) ? numv0 : numv1;
+   // 2. Now loop effectively the same (this) function for every next pair of
+   //    segments until they do not coincide
+   do
+   {
+      // calculate the index of the next point in the proper direction
+      if (dir0)  indx0RNP = (indx0RP+1) % numv0;
+      else       indx0RNP = (0 == indx0RP) ? numv0 -1 : indx0RP - 1;
+      //... for both segments
+      if (dir1)  indx1RNP = (indx1RP+1) % numv1;
+      else       indx1RNP = (0 == indx1RP) ? numv1 -1 : indx1RP - 1;
+
+      ori = orientation(&((*plist1)[indx1RP]), &((*plist1)[indx1RNP]), &((*plist0)[indx0RP]));
+      if (0 ==ori)
+         ori = orientation(&((*plist1)[indx1RP]), &((*plist1)[indx1RNP]), &((*plist0)[indx0RNP]));
+      if (0==ori)
+      {//prepare for the next loop
+         indx0RP = indx0RNP;
+         indx1RP = indx1RNP;
+         if (0 ==(--loopsentinel))
+            throw EXPTNpolyCross("Too many iterations in segment compare");
+      }
+   } while (0 == ori);
+   return ori;
+}
+
+const PointVector* polycross::YQ::locateOriginals(const polysegment* seg, unsigned& indxNP, bool& direction)
+{
    // get the original PointVector for the comparing segments
-   const PointVector* plist0 = (1 == seg0->polyNo()) ? opl1() : opl2();
+   const PointVector* plist = (1 == seg->polyNo()) ? opl1() : opl2();
 
    // ... and get the location of the inside segment in that sequence
-   int numv = plist0->size();
-   unsigned indxLP = (*(seg0->lP()) == (*plist0)[seg0->edge()]) ?
-         seg0->edge() : (seg0->edge() + 1) % numv;
-   unsigned indxRP = (*(seg0->rP()) == (*plist0)[seg0->edge()]) ?
-         seg0->edge() : (seg0->edge() + 1) % numv;
+   int numv = plist->size();
+   unsigned indxPP = (*(seg->lP()) == (*plist)[seg->edge()]) ? seg->edge() : (seg->edge() + 1) % numv;
+   indxNP = (*(seg->rP()) == (*plist)[seg->edge()]) ? seg->edge() : (seg->edge() + 1) % numv;
 
-   bool indxpos = (indxRP == ((indxLP + 1) % numv));
-   // we are going to get the next point in the sequence and use it to
-   // determine the position that we need
-   if (indxpos) indxRP = (indxRP+1) % numv;
-   else (0==indxRP) ? indxRP = numv-1 : indxRP--;
-
-   ori = orientation(seg1->lP(), seg1->rP(), &((*plist0)[indxRP]));
-   assert(ori != 0);
-   return ori;
-
-/*   int order;
-   // or like that - both ways it should work
-   if       (*(seg0->lP()) != *(seg1->lP()))
-      order = xyorder(seg0->lP(), seg1->lP());
-   else if  (*(seg0->rP()) != *(seg1->rP()))
-      order = xyorder(seg0->rP(), seg1->rP());
-   else
-      order = (seg0->edge() > seg1->edge()) ? 1 : -1;
-   if (0 == order)
-      throw EXPTNpolyCross("Segments indistinguishable");
-   return order;*/
+   direction = (indxNP == ((indxPP + 1) % numv));
+   return plist;
 }
 
 
