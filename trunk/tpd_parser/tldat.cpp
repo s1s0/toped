@@ -1029,11 +1029,16 @@ void telldata::ArgumentID::adjustID(const ArgumentID& obj2copy)
          if (TLUNKNOWN_TYPE((**CA)())) (*CA)->adjustID(**CB);
    }
    _ID = obj2copy._ID;
-   const telldata::TType* vartype = CMDBlock->getTypeByID(_ID);
-   if (vartype->isComposite())
-      static_cast<parsercmd::cmdSTRUCT*>(_command)->setargID(this);
+   if (TLCOMPOSIT_TYPE( (_ID  & ~telldata::tn_listmask) ))
+   {
+      const telldata::TType* vartype = CMDBlock->getTypeByID(_ID  & ~telldata::tn_listmask);
+      if (vartype->isComposite())
+         static_cast<parsercmd::cmdSTRUCT*>(_command)->setargID(this);
+      else
+         static_cast<parsercmd::cmdFUNCREF*>(_command)->setFuncBody(_ID);
+   }
    else
-      static_cast<parsercmd::cmdFUNCREF*>(_command)->setFuncBody(_ID);
+      static_cast<parsercmd::cmdSTRUCT*>(_command)->setargID(this);
 }
 
 telldata::ArgumentID::~ArgumentID()
