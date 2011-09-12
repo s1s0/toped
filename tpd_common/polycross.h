@@ -372,6 +372,7 @@ namespace polycross
          TopSentinel*      _topSentinel;
          void              initialize(DBbox&);
          int               sCompare(const polysegment*, const polysegment*);
+         const PointVector* locateOriginals(const polysegment*, unsigned&, bool&);
          Threads           _cthreads;
          int               _lastThreadID;
          const segmentlist* _osl1;
