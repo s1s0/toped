@@ -35,7 +35,7 @@ namespace laydata {
    public:
       friend class TdtLibDir;
       friend class ::InputTdtFile;
-                        TdtLibrary(std::string, real, real, int);
+                        TdtLibrary(std::string, real, real, int, time_t, time_t);
       virtual          ~TdtLibrary();
       virtual void      read(InputTdtFile* const);
       void              dbExport(DbExportFile&);
@@ -144,6 +144,7 @@ namespace laydata {
       bool           checkActiveCell();
       bool           checkValidRef(std::string);
       void           fixUnsorted();
+      void           setModified();
       void           storeViewPort(const DBbox& vp)  {_target.storeViewPort(vp);}
       DBbox*         getLastViewPort() const  { return _target.getLastViewPort();}
       TdtCell*       targetECell()            {assert(_target.checkEdit()); return _target.edit();}
@@ -164,12 +165,13 @@ namespace laydata {
       void           tryUnselectAll()const;
       SelectList*    shapeSel()        const {return _target.edit()->shapeSel();}
       SelectList*    copySeList()     const {return _target.edit()->copySeList();}
+      bool           modified() const       {return _modified;}
       //
-      bool           modified;
    private:
-      TdtTmpData*    _tmpdata;      // pointer to a data under construction - for view purposes
-      EditObject     _target;       // edit/view target <- introduced with pedit operations
+      EditObject     _target;       //! edit/view target - introduced with pedit operations
       CTM            _tmpctm;
+      TdtTmpData*    _tmpdata;      //! pointer to a data under construction - for view purposes
+      bool           _modified;
    };
 
    /*! Library directory or Directory of libraries.
@@ -245,7 +247,7 @@ namespace laydata {
       void              deleteHeldCells();
       void              getHeldCells(CellMap*);
       LibCellLists*     getCells(int libID);
-      bool              modified() const {return (NULL == _TEDDB) ? false : _TEDDB->modified;};
+      bool              modified() const {return (NULL == _TEDDB) ? false : _TEDDB->modified();}
       std::string       tedFileName()    {return _tedFileName;}
       bool              neverSaved()     {return _neverSaved;}
    private:

@@ -46,10 +46,16 @@ laydata::TDTHierTree* laydata::TdtLibrary::_hiertree = NULL;
 //-----------------------------------------------------------------------------
 // class TdtLibrary
 //-----------------------------------------------------------------------------
-laydata::TdtLibrary::TdtLibrary(std::string name, real DBU, real UU, int libID) :
-   _name(name), _libID(libID), _DBU(DBU), _UU(UU)
-{
-}
+laydata::TdtLibrary::TdtLibrary(std::string name, real DBU, real UU, int libID,
+                                time_t created, time_t lastUpdated) :
+   _name         ( name        ),
+   _libID        ( libID       ),
+   _DBU          ( DBU         ),
+   _UU           ( UU          ),
+   _created      ( created     ),
+   _lastUpdated  ( lastUpdated )
+
+{}
 
 //void laydata::TdtLibrary::unloadprep(laydata::TdtLibDir* libdir)
 //{
@@ -389,8 +395,9 @@ bool laydata::TdtLibrary::dbHierCheckAncestors(const TdtDefaultCell* comp, const
 //-----------------------------------------------------------------------------
 laydata::TdtLibDir::TdtLibDir()
 {
+   time_t timeNow = time(NULL);
    // create the default library of unknown cells
-   TdtLibrary* undeflib = DEBUG_NEW TdtLibrary("__UNDEFINED__", 1e-9, 1e-3, UNDEFCELL_LIB);
+   TdtLibrary* undeflib = DEBUG_NEW TdtLibrary("__UNDEFINED__", 1e-9, 1e-3, UNDEFCELL_LIB, timeNow, timeNow);
    _libdirectory.insert( _libdirectory.end(), DEBUG_NEW LibItem("__UNDEFINED__", undeflib) );
    // toped data base
    _TEDDB = NULL;
@@ -834,19 +841,17 @@ laydata::LibCellLists* laydata::TdtLibDir::getCells(int libID)
 // class TdtDesign
 //-----------------------------------------------------------------------------
 laydata::TdtDesign::TdtDesign(std::string name, time_t created, time_t lastUpdated,
-           real DBU, real UU)  :    laydata::TdtDesign::TdtLibrary(name, DBU, UU, TARGETDB_LIB)
-{
-   _tmpdata       = NULL;
-   modified       = false;
-   _created       = created;
-   _lastUpdated   = lastUpdated;
-}
+           real DBU, real UU)  :
+   laydata::TdtDesign::TdtLibrary(name, DBU, UU, TARGETDB_LIB, created, lastUpdated),
+   _tmpdata       ( NULL        ),
+   _modified      ( false       )
+{}
 
 void laydata::TdtDesign::read(InputTdtFile* const tedfile)
 {
    TdtLibrary::read(tedfile);
    _tmpdata = NULL;
-   modified = false;
+   _modified = false;
 }
 
 // !!! Do not forget that the indexing[] operations over std::map can alter the structure !!!
@@ -855,7 +860,7 @@ laydata::TdtCell* laydata::TdtDesign::addCell(std::string name, laydata::TdtLibD
 {
    if (_cells.end() != _cells.find(name)) return NULL; // cell already exists in the target library
    laydata::TdtDefaultCell* libcell = libdir->getLibCellDef(name);
-   modified = true;
+   setModified();
    TdtCell* ncl = DEBUG_NEW TdtCell(name);
    _cells[name] = ncl;
    _hiertree = DEBUG_NEW TDTHierTree(ncl, NULL, _hiertree);
@@ -882,7 +887,7 @@ void laydata::TdtDesign::addThisCell(laydata::TdtCell* strdefn, laydata::TdtLibD
    // Make sure cell with this name doesn't exists already in the target library
    std::string cname = strdefn->name();
    assert(_cells.end() == _cells.find(cname));
-   modified = true;
+   setModified();
    // Check whether structure with this name exists in the libraries or among the
    // referenced, but undefined cells
    laydata::TdtDefaultCell* libcell = libdir->getLibCellDef(cname);
@@ -906,7 +911,7 @@ laydata::TdtCell* laydata::TdtDesign::removeCell(std::string& name, laydata::Att
 {
    assert(NULL == _hiertree->GetMember(_cells[name])->Getparent());
 
-   modified = true;
+   setModified();
    // get the cell by name
    TdtCell* remcl = static_cast<laydata::TdtCell*>(_cells[name]);
    //empty the contents of the removed cell and return it in AtticList
@@ -942,7 +947,7 @@ void laydata::TdtDesign::renameCell(TdtDefaultCell* targetCell, std::string newN
 
 void laydata::TdtDesign::removeRefdCell(std::string& name, CellDefList& pcells, laydata::AtticList* fsel, laydata::TdtLibDir* libdir)
 {
-   modified = true;
+   setModified();
    // get the cell by name
    TdtCell* remcl = static_cast<laydata::TdtCell*>(_cells[name]);
    // We need a replacement cell for the references
@@ -998,7 +1003,7 @@ laydata::TdtData* laydata::TdtDesign::addBox(unsigned la, TP* p1, TP* p2 )
 {
    DBbox old_overlap(_target.edit()->cellOverlap());
    QuadTree *actlay = _target.edit()->secureLayer(la);
-   modified = true;
+   setModified();
    TP np1((*p1) * _target.rARTM());
    TP np2((*p2) * _target.rARTM());
    laydata::TdtBox *newshape = DEBUG_NEW TdtBox(np1,np2);
@@ -1011,7 +1016,7 @@ laydata::TdtData* laydata::TdtDesign::addBox(unsigned la, TP* p1, TP* p2 )
 laydata::TdtData* laydata::TdtDesign::putBox(unsigned la, TP* p1, TP* p2 )
 {
    QTreeTmp *actlay = _target.edit()->secureUnsortedLayer(la);
-   modified = true;
+   setModified();
    TP np1((*p1) * _target.rARTM());
    TP np2((*p2) * _target.rARTM());
    laydata::TdtData* newshape = DEBUG_NEW TdtBox(np1,np2);
@@ -1028,6 +1033,12 @@ void laydata::TdtDesign::fixUnsorted()
       do {} while(validateCells());
 }
 
+void laydata::TdtDesign::setModified()
+{
+   _modified = true;
+   _lastUpdated = time(NULL);
+}
+
 laydata::TdtData* laydata::TdtDesign::addPoly(unsigned la, PointVector* pl)
 {
    laydata::ValidPoly check(*pl);
@@ -1040,7 +1051,7 @@ laydata::TdtData* laydata::TdtDesign::addPoly(unsigned la, PointVector* pl)
    laydata::TdtData* newshape;
    DBbox old_overlap(_target.edit()->cellOverlap());
    QuadTree *actlay = _target.edit()->secureLayer(la);
-   modified = true;
+   setModified();
    PointVector vpl = check.getValidated();
    if (check.box())
    {
@@ -1073,7 +1084,7 @@ laydata::TdtData* laydata::TdtDesign::putPoly(unsigned la, PointVector* pl)
    }
    laydata::TdtData* newshape = NULL;
    QTreeTmp *actlay = _target.edit()->secureUnsortedLayer(la);
-   modified = true;
+   setModified();
    PointVector vpl = check.getValidated();
    if (check.box())
    {
@@ -1102,7 +1113,7 @@ laydata::TdtData* laydata::TdtDesign::addWire(unsigned la, PointVector* pl, Wire
    }
    DBbox old_overlap(_target.edit()->cellOverlap());
    QuadTree *actlay = _target.edit()->secureLayer(la);
-   modified = true;
+   setModified();
    PointVector vpl = check.getValidated();
    for(PointVector::iterator PL = vpl.begin(); PL != vpl.end(); PL++)
       (*PL) *= _target.rARTM();
@@ -1123,7 +1134,7 @@ laydata::TdtData* laydata::TdtDesign::putWire(unsigned la, PointVector* pl, Wire
       return NULL;
    }
    QTreeTmp *actlay = _target.edit()->secureUnsortedLayer(la);
-   modified = true;
+   setModified();
    PointVector vpl = check.getValidated();
    for(PointVector::iterator PL = vpl.begin(); PL != vpl.end(); PL++)
       (*PL) *= _target.rARTM();
@@ -1136,7 +1147,7 @@ laydata::TdtData* laydata::TdtDesign::addText(unsigned la, std::string& text, CT
 {
    DBbox old_overlap(_target.edit()->cellOverlap());
    QuadTree *actlay = _target.edit()->secureLayer(la);
-   modified = true;
+   setModified();
    ori *= _target.rARTM();
    laydata::TdtText *newshape = DEBUG_NEW TdtText(text,ori);
    actlay->add(newshape);
@@ -1149,7 +1160,7 @@ laydata::TdtData* laydata::TdtDesign::addText(unsigned la, std::string& text, CT
 laydata::TdtData* laydata::TdtDesign::putText(unsigned la, std::string& text, CTM& ori)
 {
    QTreeTmp *actlay = _target.edit()->secureUnsortedLayer(la);
-   modified = true;
+   setModified();
    ori *= _target.rARTM();
    laydata::TdtData* newshape = DEBUG_NEW TdtText(text,ori);
    actlay->put(newshape);
@@ -1158,7 +1169,7 @@ laydata::TdtData* laydata::TdtDesign::putText(unsigned la, std::string& text, CT
 
 laydata::TdtData* laydata::TdtDesign::addCellRef(laydata::CellDefin strdefn, CTM& ori)
 {
-   modified = true;
+   setModified();
    ori *= _target.rARTM();
    DBbox old_overlap(_target.edit()->cellOverlap());
    TdtData* ncrf = _target.edit()->addCellRef(this, strdefn, ori);
@@ -1180,7 +1191,7 @@ laydata::TdtData* laydata::TdtDesign::addCellARef(std::string& name, CTM& ori,
    if (checkCell(name))
    {
       laydata::CellDefin strdefn = getCellNamePair(name);
-      modified = true;
+      setModified();
       ori *= _target.rARTM();
       DBbox old_overlap(_target.edit()->cellOverlap());
       TdtData* ncrf = _target.edit()->addCellARef(this, strdefn, ori, arrprops);
@@ -1298,7 +1309,7 @@ void laydata::TdtDesign::write(OutputTdtFile* const tedfile) {
       root = root->GetNextRoot(TARGETDB_LIB);
    }
    tedfile->putByte(tedf_DESIGNEND);
-   modified = false;
+   _modified = false;
 }
 
 void laydata::TdtDesign::tmpDraw(const layprop::DrawProperties& drawprop,
@@ -1442,19 +1453,19 @@ bool laydata::TdtDesign::cutPoly(PointVector& pl, AtticList** dasao)
 {
    for (PointVector::iterator CP = pl.begin(); CP != pl.end(); CP ++)
       (*CP) *= _target.rARTM();
-   modified = true;
+   setModified();
    return _target.edit()->cutPolySelected(pl,dasao);
 }
 
 bool laydata::TdtDesign::merge(AtticList** dasao)
 {
-   modified = true;
+   setModified();
    return _target.edit()->mergeSelected(dasao);
 }
 
 bool laydata::TdtDesign::stretch(int bfactor, AtticList** dasao)
 {
-   modified = true;
+   setModified();
    return _target.edit()->stretchSelected(bfactor, dasao);
 }
 

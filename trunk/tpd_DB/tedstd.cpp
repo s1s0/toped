@@ -369,7 +369,7 @@ void InputTdtFile::read(int libRef)
    real          UU = getReal();
    tell_log(console::MT_DESIGNNAME, name);
    if (libRef > 0)
-      _design = DEBUG_NEW laydata::TdtLibrary(name, DBU, UU, libRef);
+      _design = DEBUG_NEW laydata::TdtLibrary(name, DBU, UU, libRef, _created, _lastUpdated);
    else
       _design = DEBUG_NEW laydata::TdtDesign(name,_created, _lastUpdated, DBU,UU);
    _design->read(this);
