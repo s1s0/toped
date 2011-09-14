@@ -2012,7 +2012,7 @@ void tellstdfunc::importGDScell(laydata::TdtLibDir* dbLibDir, const NameList& to
       AGDSDB->convertPrep(top_names, recur);
       ImportDB converter(AGDSDB, dbLibDir, laymap);
       converter.run(top_names, over);
-      (*dbLibDir)()->modified = true;
+      (*dbLibDir)()->setModified();
 #ifdef GDSCONVERT_PROFILING
       profTimer.report("Time elapsed for GDS conversion: ");
 #endif
@@ -2038,7 +2038,7 @@ void tellstdfunc::importCIFcell( laydata::TdtLibDir* dbLibDir, const NameList& t
       ACIFDB->convertPrep(top_names, recur);
       ImportDB converter(ACIFDB, dbLibDir, cifLayers, techno);
       converter.run(top_names, over, false);
-      (*dbLibDir)()->modified = true;
+      (*dbLibDir)()->setModified();
    }
    DATC->unlockCif(ACIFDB, true);
 }
@@ -2062,7 +2062,7 @@ void tellstdfunc::importOAScell(laydata::TdtLibDir* dbLibDir, const NameList& to
       AOASDB->convertPrep(top_names, recur);
       ImportDB converter(AOASDB, dbLibDir, laymap);
       converter.run(top_names, over);
-      (*dbLibDir)()->modified = true;
+      (*dbLibDir)()->setModified();
 #ifdef OASCONVERT_PROFILING
       profTimer.report("Time elapsed for OASIS conversion: ");
 #endif
