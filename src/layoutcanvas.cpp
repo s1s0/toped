@@ -548,18 +548,20 @@ void tui::LayoutCanvas::UpdateCoordWin(int coord, CVSSTATUS_TYPE postype, int dc
    }
 }
 
-void tui::LayoutCanvas::EventMouseClick(int button) {
-   wxCommandEvent eventButtonUP(wxEVT_COMMAND_ENTER);
-
-   telldata::TtPnt* ttp = DEBUG_NEW telldata::TtPnt(_releasePoint.x()*PROPC->UU(),
-                                              _releasePoint.y()*PROPC->UU());
-   //Post an event to notify the console
-   eventButtonUP.SetClientData((void*)ttp);
-   eventButtonUP.SetInt(button);
-   wxPostEvent(Console, eventButtonUP);
-   // send the point to the current temporary object in the data base
-   if (0 == button) {
-      DATC->mousePoint(_releasePoint);
+void tui::LayoutCanvas::EventMouseClick(int button)
+{
+   if (_mouseInput)
+   {
+      wxCommandEvent eventButtonUP(wxEVT_COMMAND_ENTER);
+      telldata::TtPnt* ttp = DEBUG_NEW telldata::TtPnt(_releasePoint.x()*PROPC->UU(),
+                                                 _releasePoint.y()*PROPC->UU());
+      //Post an event to notify the console
+      eventButtonUP.SetClientData((void*)ttp);
+      eventButtonUP.SetInt(button);
+      wxPostEvent(Console, eventButtonUP);
+      // send the point to the current temporary object in the data base
+      if (0 == button)
+         DATC->mousePoint(_releasePoint);
    }
 }
 
