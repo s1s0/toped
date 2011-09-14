@@ -1675,7 +1675,8 @@ void laydata::TdtCell::unselectAll(bool destroy)
       {
          if (destroy)
          {
-            if (sh_selected == CI->first->status())
+            SH_STATUS shStatus = CI->first->status();
+            if ( (sh_selected == shStatus) || (sh_deleted == shStatus) )
                // destroy only fully selected objects
                delete (CI->first);
             else
