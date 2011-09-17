@@ -289,8 +289,11 @@ void tui::FillListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, i
 {
    if ( item == wxNOT_FOUND )
             return;
-//   layprop::tellRGB col(255, 255, 255, 255);
+#ifdef WIN32
+   layprop::tellRGB col(255, 255, 255, 255);
+#else
    layprop::tellRGB col(0, 0, 0, 255);// Black
+#endif
    wxColour color(col.red(), col.green(), col.blue(), col.alpha());
    const byte* ifill;
 
@@ -322,8 +325,8 @@ void tui::FillListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, i
       brush->SetColour(color);
       dc.SetPen( pen );
       dc.SetBrush(*brush);
-   //   dc.SetBackground(*wxBLACK);
-   //   dc.Clear();
+      //dc.SetBackground(*wxBLACK);
+      //dc.Clear();
 
       if ( !(flags & wxODCB_PAINTING_CONTROL) )
       {
