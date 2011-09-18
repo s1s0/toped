@@ -421,9 +421,16 @@ int tellstdfunc::getPOINT::execute() {
    // flag the prompt that we expect a single point & handle a pointer to
    // the operand stack
    Console->waitGUInput(&OPstack, console::op_point, CTM());
+   //
+   wxCommandEvent eventMOUSEIN(wxEVT_MOUSE_INPUT);
+   eventMOUSEIN.SetInt(-1);
+   eventMOUSEIN.SetExtraLong(1);
+   wxPostEvent(TopedCanvasW, eventMOUSEIN);
    // force the thread in wait condition until the ted_prompt has our data
    Console->_threadWaits4->Wait();
    // ... and continue when the thread is woken up
+   eventMOUSEIN.SetExtraLong(0);
+   wxPostEvent(TopedCanvasW, eventMOUSEIN);
    if (Console->mouseIN_OK())  return EXEC_NEXT;
    else return EXEC_RETURN;
 }
