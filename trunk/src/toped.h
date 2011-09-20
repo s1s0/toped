@@ -100,7 +100,7 @@ namespace tui {
       console::TedCmdLine*    cmdline()  const {return _cmdline;}
       browsers::browserTAB*   browsers() const {return _browsers;}
       console::TELLFuncList*  cmdlist()  const {return _cmdbrowser;}
-      wxWindow*               getFrame()       {return this;}
+      wxFrame*                getFrame()       {return this;}
       wxAuiManager*           getAuiManager()  {return &_winManager;}
       void                    initToolBars();
       void                    setIconDir(const std::string& uiDir);

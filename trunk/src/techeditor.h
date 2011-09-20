@@ -89,6 +89,7 @@ class TechEditorDialog : public wxDialog
       wxOwnerDrawnComboBox*   _layerLines;
       wxButton*	            _applyButton;
       wxButton*	            _cancelButton;
+      wxButton*	            _newColorButton;
       wxBoxSizer*	            _sizer;
       wxArrayString           _colorItems; 
       wxArrayString           _lineItems; 
@@ -101,6 +102,7 @@ class TechEditorDialog : public wxDialog
                   TechEditorDialog( wxWindow* parent,wxWindowID id = wxID_ANY);
                   ~TechEditorDialog();
             void  onLayerSelected(wxCommandEvent&);
+            void  OnNewColor(wxCommandEvent&);
       DECLARE_EVENT_TABLE()
 
 };

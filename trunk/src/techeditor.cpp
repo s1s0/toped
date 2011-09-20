@@ -31,10 +31,15 @@
 #include "tpdph.h"
 #include "outbox.h"
 #include "tuidefs.h"
+#include "tui.h"
 #include "viewprop.h"
 #include "techeditor.h"
+#include "toped.h"
+#include "ted_prompt.h"
 
 extern layprop::PropertyCenter*  PROPC;
+extern tui::TopedFrame*          Toped;
+extern console::TllCmdLine*      Console;
 
 const wxString emptyFill = wxT("No Filling");
 
@@ -43,6 +48,7 @@ extern const wxEventType         wxEVT_CMD_BROWSER;
 
 BEGIN_EVENT_TABLE(tui::TechEditorDialog, wxDialog)
    EVT_LISTBOX(ID_TE_LAYER, tui::TechEditorDialog::onLayerSelected) 
+   EVT_BUTTON(BT_TECH_NEWCOLOR   , tui::TechEditorDialog::OnNewColor  )
 END_EVENT_TABLE()
 
 tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id)//, const wxString& title, const wxPoint& pos, const wxSize& size, long style )  
@@ -57,13 +63,18 @@ tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id)//, con
          wxBoxSizer *vsizer0 = DEBUG_NEW wxStaticBoxSizer( wxVERTICAL, this, wxT("Properties") );
             _layerColors = DEBUG_NEW ColorListComboBox();
             prepareColors();
-            wxBoxSizer *vsizer1 = DEBUG_NEW wxStaticBoxSizer( wxVERTICAL, this, wxT("Color") );
+            wxBoxSizer *hsizer1 = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Color") );
                _layerColors->Create(this,wxID_ANY,wxEmptyString,
-                   wxDefaultPosition, wxSize(size.x/2, 30),
+                   wxDefaultPosition, wxSize(size.x/3, 30),
                   NULL,
                   wxCB_READONLY //wxNO_BORDER | wxCB_READONLY
                   );
-            vsizer1->Add(_layerColors);
+
+               hsizer1->Add(_layerColors, 0, wxALL | wxEXPAND, 5);
+               hsizer1->Add(0,0,1);
+               _newColorButton = DEBUG_NEW wxButton(this, tui::BT_TECH_NEWCOLOR, wxT("New"), wxDefaultPosition, wxSize(30, 30));
+               hsizer1->Add(_newColorButton, 0, wxALL | wxEXPAND, 5);
+               hsizer1->SetSizeHints(this);
             
             _layerFills = DEBUG_NEW FillListComboBox();
             prepareFills();
@@ -85,7 +96,7 @@ tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id)//, con
                   );
             vsizer3->Add(_layerLines);
 
-         vsizer0->Add(vsizer1);
+         vsizer0->Add(hsizer1);
          vsizer0->Add(vsizer2);
          vsizer0->Add(vsizer3);
       sizer2->Add(hsizer0, 1, wxEXPAND, 0);
@@ -104,6 +115,36 @@ tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id)//, con
 
 tui::TechEditorDialog::~TechEditorDialog()
 {
+}
+
+void  tui::TechEditorDialog::OnNewColor(wxCommandEvent&)
+{
+   bool success = false;
+   wxString ost;
+   wxRect wnd = GetRect();
+   wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
+   layprop::DrawProperties* drawprop;
+   if (PROPC->lockDrawProp(drawprop))
+   {
+      tui::defineColor dlg(Toped->getFrame(), -1, wxT("Color Definitions"), pos, drawprop);
+      if ( dlg.ShowModal() == wxID_OK )
+      {
+         const layprop::ColorMap colors = dlg.allColors();
+         for(layprop::ColorMap::const_iterator CC = colors.begin() ; CC != colors.end(); CC++)
+         {
+            layprop::tellRGB* coldef = CC->second;
+            ost   << wxT("definecolor(\"") << wxString(CC->first.c_str(), wxConvUTF8)
+                  << wxT("\" , ")      << coldef->red()
+                  << wxT(" , ")        << coldef->green()
+                  << wxT(" , ")        << coldef->blue()
+                  << wxT(" , ")        << coldef->alpha()
+                  << wxT(");");
+         }
+         success = true;
+      }
+   }
+   PROPC->unlockDrawProp(drawprop);
+   if (success) Console->parseCommand(ost);
 }
 
 void  tui::TechEditorDialog::onLayerSelected(wxCommandEvent&)
