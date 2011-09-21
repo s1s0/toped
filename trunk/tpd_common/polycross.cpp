@@ -1527,21 +1527,21 @@ polycross::YQ::~YQ()
 polycross::XQ::XQ( const segmentlist& seg1, const segmentlist& seg2 ) :
       _overlap(*(seg1[0]->lP()))
 {
-   _xqueue = avl_create(E_compare, NULL, NULL);
+   _xQueue = avl_create(E_compare, NULL, NULL);
    createEvents(seg1);
    createEvents(seg2);
-   _sweepline = DEBUG_NEW YQ(_overlap, &seg1, &seg2);
+   _sweepLine = DEBUG_NEW YQ(_overlap, &seg1, &seg2);
 }
 
 polycross::XQ::XQ( const segmentlist& seg, bool loopsegs ) :
-                     _overlap(*(seg[0]->lP())), _loopsegs(loopsegs)
+                     _overlap(*(seg[0]->lP())), _loopSegs(loopsegs)
 {
-   _xqueue = avl_create(E_compare, NULL, NULL);
-   if (_loopsegs)
+   _xQueue = avl_create(E_compare, NULL, NULL);
+   if (_loopSegs)
       createEvents(seg);
    else
       createSEvents(seg);
-   _sweepline = DEBUG_NEW YQ(_overlap, &seg);
+   _sweepLine = DEBUG_NEW YQ(_overlap, &seg);
 }
 
 void polycross::XQ::createEvents(const segmentlist& seg)
@@ -1601,7 +1601,7 @@ void polycross::XQ::addEvent(polysegment* cseg, TEvent* evt, EventTypes etype)
    // now create the vertex with the event inside
    EventVertex* vrtx = DEBUG_NEW EventVertex(evt->evertex());
    // and try to stick it in the AVL tree
-   void** retitem =  avl_probe(_xqueue,vrtx);
+   void** retitem =  avl_probe(_xQueue,vrtx);
    if ((*retitem) != vrtx)
       // coinsiding vertexes from different polygons
       delete(vrtx);
@@ -1615,7 +1615,7 @@ void polycross::XQ::addCrossEvent(const TP* CP, polysegment* aseg, polysegment* 
    // now create the vertex with the event inside
    EventVertex* vrtx = DEBUG_NEW EventVertex(evt->evertex());
    // and try to stick it in the AVL tree
-   void** retitem =  avl_probe(_xqueue,vrtx);
+   void** retitem =  avl_probe(_xQueue,vrtx);
    if ((*retitem) != vrtx)
    {
       // coinsiding vertexes from different polygons
@@ -1641,11 +1641,11 @@ void polycross::XQ::sweep(bool single)
 #endif
    EventVertex* evtlist;
    avl_traverser trav;
-   while (NULL != avl_t_first(&trav,_xqueue))
+   while (NULL != avl_t_first(&trav,_xQueue))
    {
       evtlist = (EventVertex*)trav.avl_node->avl_data;
-      evtlist->sweep(*_sweepline, *this, single);
-      avl_delete(_xqueue,evtlist);
+      evtlist->sweep(*_sweepLine, *this, single);
+      avl_delete(_xQueue,evtlist);
       delete evtlist;
    }
 }
@@ -1656,19 +1656,19 @@ void polycross::XQ::sweep2bind(BindCollection& bindColl) {
 #endif
    EventVertex* evtlist;
    avl_traverser trav;
-   while (NULL != avl_t_first(&trav,_xqueue))
+   while (NULL != avl_t_first(&trav,_xQueue))
    {
       evtlist = (EventVertex*)trav.avl_node->avl_data;
-      evtlist->sweep2bind(*_sweepline, bindColl);
-      avl_delete(_xqueue,evtlist);
+      evtlist->sweep2bind(*_sweepLine, bindColl);
+      avl_delete(_xQueue,evtlist);
       delete evtlist;
    }
 }
 
 polycross::XQ::~XQ()
 {
-   avl_destroy(_xqueue, NULL);
-   delete _sweepline;
+   avl_destroy(_xQueue, NULL);
+   delete _sweepLine;
 }
 
 //==============================================================================
