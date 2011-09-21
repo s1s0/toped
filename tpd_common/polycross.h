@@ -38,7 +38,7 @@ namespace polycross
    class XQ;
    class BindCollection;
    class TEvent;
-   typedef std::list<unsigned> ThreadList;
+   typedef std::set<unsigned> ThreadList;
    typedef enum {_endE, _modifyE, _beginE, _crossE} EventTypes;
 
    int xyorder(const TP*, const TP*);

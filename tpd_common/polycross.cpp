@@ -583,6 +583,10 @@ TP* polycross::TEvent::getIntersect(polysegment* above, polysegment* below,
       CrossPoint = joiningSegments(above, below, lsign, rsign);
       if (NULL != CrossPoint)
       {
+//         if (NULL == iff)
+//            insertCrossPoint(CrossPoint, above, below, eventQ);
+//         else if  (*CrossPoint == *iff)
+//            insertCrossPoint(CrossPoint, above, below, eventQ, true);
          if ((NULL == iff) || (*CrossPoint == *iff))
             insertCrossPoint(CrossPoint, above, below, eventQ);
          else
@@ -607,6 +611,10 @@ TP* polycross::TEvent::getIntersect(polysegment* above, polysegment* below,
       CrossPoint = joiningSegments(below, above, lsign, rsign);
       if (NULL != CrossPoint)
       {
+//         if (NULL == iff)
+//            insertCrossPoint(CrossPoint, above, below, eventQ);
+//         else if  (*CrossPoint == *iff)
+//            insertCrossPoint(CrossPoint, above, below, eventQ, true);
          if ((NULL == iff) || (*CrossPoint == *iff))
             insertCrossPoint(CrossPoint, above, below, eventQ);
          else
@@ -793,7 +801,10 @@ void polycross::TEvent::insertCrossPoint(const TP* CP, polysegment* above,
    cpsegA->linkto(cpsegB);
    cpsegB->linkto(cpsegA);
 #ifdef BO2_DEBUG
-   printf("**Cross point (%i,%i) inserted between segments below :\n", CP->x(), CP->y());
+   if (dontswap)
+      printf("**Cross point (%i,%i) NON-SWAPING inserted between segments below :\n", CP->x(), CP->y());
+   else
+      printf("**Cross point (%i,%i) inserted between segments below :\n", CP->x(), CP->y());
    BO_printseg(above)
    BO_printseg(below)
 #endif
@@ -829,8 +840,8 @@ void polycross::TbEvent::sweep(XQ& eventQ, YQ& sweepline, ThreadList& threadl, b
    SegmentThread* bthr = sweepline.beginThread(_bseg);
    if ((athr->threadAbove() == bthr) || (bthr->threadBelow() == athr))
       throw EXPTNpolyCross("Invalid segment sort in thread begin");
-   threadl.push_back(_aseg->threadID());
-   threadl.push_back(_bseg->threadID());
+   threadl.insert(_aseg->threadID());
+   threadl.insert(_bseg->threadID());
 #ifdef BO2_DEBUG
    printf("Begin 2 threads :\n");
    BO_printseg(_aseg)
@@ -901,10 +912,13 @@ polycross::TeEvent::TeEvent (polysegment* seg1, polysegment* seg2): TEvent()
 
 void polycross::TeEvent::sweep (XQ& eventQ, YQ& sweepline, ThreadList& threadl, bool single)
 {
-   threadl.push_back(_aseg->threadID());
-   threadl.push_back(_bseg->threadID());
+   threadl.insert(_aseg->threadID());
+   threadl.insert(_bseg->threadID());
    SegmentThread* athr = sweepline.getThread(_aseg->threadID());
    SegmentThread* bthr = sweepline.getThread(_bseg->threadID());
+#ifdef BO2_DEBUG
+   printf("End 2 threads\n");
+#endif
    if ((athr->threadAbove() == bthr) || (bthr->threadBelow() == athr))
       throw EXPTNpolyCross("Invalid segment sort in thread end");
    if ((athr->threadBelow() == bthr) && (bthr->threadAbove() == athr))
@@ -926,7 +940,6 @@ void polycross::TeEvent::sweep (XQ& eventQ, YQ& sweepline, ThreadList& threadl, 
    sweepline.endThread(_aseg->threadID());
    sweepline.endThread(_bseg->threadID());
 #ifdef BO2_DEBUG
-   printf("End 2 threads\n");
    BO_printseg(_aseg)
    BO_printseg(_bseg)
    sweepline.report();
@@ -1001,7 +1014,7 @@ void polycross::TmEvent::sweep (XQ& eventQ, YQ& sweepline, ThreadList& threadl, 
          int ori1 = orientation(aseg->lP(), aseg->rP(), _aseg->lP());
          int ori2 = orientation(aseg->lP(), aseg->rP(), _bseg->rP());
          if ((ori1 == ori2) || (0 == ori1 * ori2))
-            threadl.push_back(_bseg->threadID());
+            threadl.insert(_bseg->threadID());
       }
       delete CP;
    }
@@ -1014,7 +1027,7 @@ void polycross::TmEvent::sweep (XQ& eventQ, YQ& sweepline, ThreadList& threadl, 
          int ori1 = orientation(bseg->lP(), bseg->rP(), _aseg->lP());
          int ori2 = orientation(bseg->lP(), bseg->rP(), _bseg->rP());
          if ((ori1 == ori2) || (0 == ori1 * ori2))
-            threadl.push_back(_bseg->threadID());
+            threadl.insert(_bseg->threadID());
       }
       delete CP;
    }
@@ -1063,7 +1076,7 @@ void polycross::TbsEvent::sweep(XQ& eventQ, YQ& sweepline, ThreadList& threadl, 
 {
    // create the threads
    SegmentThread* athr = sweepline.beginThread(_aseg);
-   threadl.push_back(_aseg->threadID());
+   threadl.insert(_aseg->threadID());
 #ifdef BO2_DEBUG
    printf("Begin 1 threads :\n");
    BO_printseg(_aseg)
@@ -1089,7 +1102,7 @@ polycross::TesEvent::TesEvent (polysegment* seg1) : TEvent()
 
 void polycross::TesEvent::sweep (XQ& eventQ, YQ& sweepline, ThreadList& threadl, bool single)
 {
-   threadl.push_back(_aseg->threadID());
+   threadl.insert(_aseg->threadID());
    SegmentThread* athr = sweepline.getThread(_aseg->threadID());
    checkIntersect(athr->threadAbove()->cseg(), athr->threadBelow()->cseg(), eventQ, single);
    // in all cases - check the case when right points are also crossing points
@@ -1110,14 +1123,16 @@ void polycross::TesEvent::sweep (XQ& eventQ, YQ& sweepline, ThreadList& threadl,
 void polycross::TcEvent::sweep(XQ& eventQ, YQ& sweepline, ThreadList& threadl, bool single)
 {
    if ((threadl.end() != std::find(threadl.begin(), threadl.end(),_threadAbove)) ||
-        (threadl.end() != std::find(threadl.begin(), threadl.end(),_threadBelow)))
+       (threadl.end() != std::find(threadl.begin(), threadl.end(),_threadBelow)))
    {
 #ifdef BO2_DEBUG
+      printf("Swiping a crossing point\n");
       printf("SKIP swapping threads %i and % i \n", _threadAbove, _threadBelow);
 #endif
       return;
    }
 #ifdef BO2_DEBUG
+      printf("Swiping a crossing point\n");
       printf("SWAPPING threads % i and %i\n", _threadAbove, _threadBelow);
 #endif
    SegmentThread* below = sweepline.swapThreads(_threadAbove, _threadBelow);
@@ -1459,7 +1474,13 @@ int polycross::YQ::sCompare(const polysegment* seg0, const polysegment* seg1)
          indx0RP = indx0RNP;
          indx1RP = indx1RNP;
          if (0 ==(--loopsentinel))
-            throw EXPTNpolyCross("Too many iterations in segment compare");
+         {
+            // appears that the polygons coincide?
+            if (seg0->polyNo() != seg1->polyNo())
+               ori = 1;
+            else
+               throw EXPTNpolyCross("Too many iterations in segment compare");
+         }
       }
    } while (0 == ori);
    return ori;
