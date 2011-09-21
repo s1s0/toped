@@ -395,18 +395,16 @@ namespace polycross
          void              sweep(bool single);
          void              sweep2bind(BindCollection&);
          void              addCrossEvent(const TP*, polysegment*, polysegment*);
-         YQ*               sweepline() {return _sweepline;}
+         YQ*               sweepline() {return _sweepLine;}
       protected:
          void              createEvents(const segmentlist&);
          void              createSEvents(const segmentlist&);
          void              addEvent(polysegment*, TEvent*, EventTypes);
          static int        E_compare( const void*, const void*, void* );
-         avl_table*        _xqueue;
-         YQ*               _sweepline;
+         avl_table*        _xQueue;
+         YQ*               _sweepLine;
          DBbox             _overlap;
-         TP                _bottom_left;
-         TP                _top_right;
-         bool              _loopsegs;
+         bool              _loopSegs;
    };
 
    //===========================================================================
