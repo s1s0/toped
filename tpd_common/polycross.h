@@ -178,11 +178,12 @@ namespace polycross
    class EventVertex
    {
       public:
-         EventVertex(const TP* evertex) :
-            _evertex(DEBUG_NEW TP(evertex->x(), evertex->y())) {};
-         ~EventVertex();
+                           EventVertex(const TP* evertex) :
+                              _evertex(DEBUG_NEW TP(evertex->x(), evertex->y())) {};
+                          ~EventVertex();
          const TP*         operator () () const {return _evertex;};
          void              addEvent(TEvent*, EventTypes);
+         void              clearAllEvents();
          void              sweep(YQ&, XQ&, bool single);
          void              sweep2bind(YQ&, BindCollection&);
          void              CheckBEM(XQ&, TEvent&, TEvent&);
@@ -402,6 +403,7 @@ namespace polycross
          void              addEvent(polysegment*, TEvent*, EventTypes);
          static int        E_compare( const void*, const void*, void* );
          avl_table*        _xQueue;
+         avl_table*        _xOldQueue;
          YQ*               _sweepLine;
          DBbox             _overlap;
          bool              _loopSegs;

@@ -32,7 +32,7 @@
 #include "outbox.h"
 #include "avl.h"
 
-//#define BO2_DEBUG
+#define BO2_DEBUG
 #define BO_printseg(SEGM) printf("thread %i : polygon %i, segment %i, \
 lP (%i,%i), rP (%i,%i)  \n" , SEGM->threadID(), SEGM->polyNo() , SEGM->edge(), \
 SEGM->lP()->x(), SEGM->lP()->y(), SEGM->rP()->x(),SEGM->rP()->y());
@@ -1252,19 +1252,8 @@ void polycross::EventVertex::sweep2bind(YQ& sweepline, BindCollection& bindColl)
    }
 }
 
-polycross::EventVertex::~EventVertex()
+void polycross::EventVertex::clearAllEvents()
 {
-//   for( int cetype = _endE; cetype <= _crossE; cetype++)
-//   {
-//      Events& simEvents = _events[cetype];
-//      while (!simEvents.empty())
-//      {
-//         TEvent* cevent = simEvents.front(); simEvents.pop_front();
-//         delete cevent;
-//      }
-//   }
-//   delete _evertex;
-
    for (polycross::EventVertex::AllEvents::iterator CE = _events.begin(); CE != _events.end(); CE++)
    {
       Events& simEvents = CE->second;
@@ -1274,6 +1263,11 @@ polycross::EventVertex::~EventVertex()
          delete cevent;
       }
    }
+}
+
+polycross::EventVertex::~EventVertex()
+{
+   clearAllEvents();
    delete _evertex;
 }
 
@@ -1528,6 +1522,7 @@ polycross::XQ::XQ( const segmentlist& seg1, const segmentlist& seg2 ) :
       _overlap(*(seg1[0]->lP()))
 {
    _xQueue = avl_create(E_compare, NULL, NULL);
+   _xOldQueue = avl_create(E_compare, NULL, NULL);
    createEvents(seg1);
    createEvents(seg2);
    _sweepLine = DEBUG_NEW YQ(_overlap, &seg1, &seg2);
@@ -1537,6 +1532,7 @@ polycross::XQ::XQ( const segmentlist& seg, bool loopsegs ) :
                      _overlap(*(seg[0]->lP())), _loopSegs(loopsegs)
 {
    _xQueue = avl_create(E_compare, NULL, NULL);
+   _xOldQueue = avl_create(E_compare, NULL, NULL);
    if (_loopSegs)
       createEvents(seg);
    else
@@ -1614,6 +1610,17 @@ void polycross::XQ::addCrossEvent(const TP* CP, polysegment* aseg, polysegment* 
    TcEvent* evt = DEBUG_NEW TcEvent(CP, aseg, bseg);
    // now create the vertex with the event inside
    EventVertex* vrtx = DEBUG_NEW EventVertex(evt->evertex());
+   // check that such a vertex has been already swiped
+   void* oldVertex = avl_delete(_xOldQueue, vrtx); // i.e. find, remove and return
+   if (NULL != oldVertex)
+   {  // yes, we had been already here, so
+      // delete the EventVertex we've just created ...
+      delete vrtx;
+      // ... and replace it with already existing EventVertex
+      vrtx = static_cast<EventVertex*>(oldVertex);
+      // it's important to clear all events which had been already taken into account
+      vrtx->clearAllEvents();
+   }
    // and try to stick it in the AVL tree
    void** retitem =  avl_probe(_xQueue,vrtx);
    if ((*retitem) != vrtx)
@@ -1646,7 +1653,14 @@ void polycross::XQ::sweep(bool single)
       evtlist = (EventVertex*)trav.avl_node->avl_data;
       evtlist->sweep(*_sweepLine, *this, single);
       avl_delete(_xQueue,evtlist);
+      avl_insert(_xOldQueue, evtlist);
+   }
+   // at this point we can clear all the EventVertexes from the _xOldQueue
+   evtlist = static_cast<EventVertex*>(avl_t_first(&trav,_xOldQueue));
+   while (NULL != evtlist)
+   {
       delete evtlist;
+      evtlist = static_cast<EventVertex*>(avl_t_next(&trav));
    }
 }
 
@@ -1668,6 +1682,7 @@ void polycross::XQ::sweep2bind(BindCollection& bindColl) {
 polycross::XQ::~XQ()
 {
    avl_destroy(_xQueue, NULL);
+   avl_destroy(_xOldQueue, NULL);
    delete _sweepLine;
 }
 
