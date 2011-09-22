@@ -405,8 +405,8 @@ void TpdPost::toped_status(console::TOPEDSTATUS_TYPE tstatus)
 
 void TpdPost::postMenuEvent(int eventID)
 {
-   wxMenuEvent eventDefineColor(wxEVT_COMMAND_MENU_SELECTED, eventID);
-   wxPostEvent(_mainWindow, eventDefineColor);
+   wxMenuEvent aMenuEvent(wxEVT_COMMAND_MENU_SELECTED, eventID);
+   wxPostEvent(_mainWindow, aMenuEvent);
 }
 
 void TpdPost::toped_status(console::TOPEDSTATUS_TYPE tstatus, long int indx)
