@@ -403,6 +403,12 @@ void TpdPost::toped_status(console::TOPEDSTATUS_TYPE tstatus)
    wxPostEvent(_statusBar, eventSTATUSUPD);
 }
 
+void TpdPost::postMenuEvent(int eventID)
+{
+   wxMenuEvent eventDefineColor(wxEVT_COMMAND_MENU_SELECTED, eventID);
+   wxPostEvent(_mainWindow, eventDefineColor);
+}
+
 void TpdPost::toped_status(console::TOPEDSTATUS_TYPE tstatus, long int indx)
 {
    if (NULL == _statusBar) return;
