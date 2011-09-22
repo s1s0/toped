@@ -48,7 +48,8 @@ extern const wxEventType         wxEVT_CMD_BROWSER;
 
 BEGIN_EVENT_TABLE(tui::TechEditorDialog, wxDialog)
    EVT_LISTBOX(ID_TE_LAYER, tui::TechEditorDialog::onLayerSelected) 
-   EVT_BUTTON(BT_TECH_NEWCOLOR   , tui::TechEditorDialog::OnNewColor  )
+//   EVT_BUTTON(BT_TECH_NEWCOLOR   , tui::TechEditorDialog::OnNewColor  )
+   EVT_BUTTON(BT_TECH_NEWCOLOR   , tui::TopedFrame::OnDefineColor )
 END_EVENT_TABLE()
 
 tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id)//, const wxString& title, const wxPoint& pos, const wxSize& size, long style )  
@@ -72,7 +73,7 @@ tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id)//, con
 
                hsizer1->Add(_layerColors, 0, wxALL | wxEXPAND, 5);
                hsizer1->Add(0,0,1);
-               _newColorButton = DEBUG_NEW wxButton(this, tui::BT_TECH_NEWCOLOR, wxT("New"), wxDefaultPosition, wxSize(30, 30));
+               _newColorButton = DEBUG_NEW wxButton(this, tui::BT_TECH_NEWCOLOR, wxT("New"), wxDefaultPosition, wxDefaultSize);
                hsizer1->Add(_newColorButton, 0, wxALL | wxEXPAND, 5);
                hsizer1->SetSizeHints(this);
             
@@ -119,32 +120,33 @@ tui::TechEditorDialog::~TechEditorDialog()
 
 void  tui::TechEditorDialog::OnNewColor(wxCommandEvent&)
 {
-   bool success = false;
-   wxString ost;
-   wxRect wnd = GetRect();
-   wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
-   layprop::DrawProperties* drawprop;
-   if (PROPC->lockDrawProp(drawprop))
-   {
-      tui::defineColor dlg(Toped->getFrame(), -1, wxT("Color Definitions"), pos, drawprop);
-      if ( dlg.ShowModal() == wxID_OK )
-      {
-         const layprop::ColorMap colors = dlg.allColors();
-         for(layprop::ColorMap::const_iterator CC = colors.begin() ; CC != colors.end(); CC++)
-         {
-            layprop::tellRGB* coldef = CC->second;
-            ost   << wxT("definecolor(\"") << wxString(CC->first.c_str(), wxConvUTF8)
-                  << wxT("\" , ")      << coldef->red()
-                  << wxT(" , ")        << coldef->green()
-                  << wxT(" , ")        << coldef->blue()
-                  << wxT(" , ")        << coldef->alpha()
-                  << wxT(");");
-         }
-         success = true;
-      }
-   }
-   PROPC->unlockDrawProp(drawprop);
-   if (success) Console->parseCommand(ost);
+   TpdPost::postMenuEvent(tui::TMSET_DEFCOLOR);
+//   bool success = false;
+//   wxString ost;
+//   wxRect wnd = GetRect();
+//   wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
+//   layprop::DrawProperties* drawprop;
+//   if (PROPC->lockDrawProp(drawprop))
+//   {
+//      tui::defineColor dlg(Toped->getFrame(), -1, wxT("Color Definitions"), pos, drawprop);
+//      if ( dlg.ShowModal() == wxID_OK )
+//      {
+//         const layprop::ColorMap colors = dlg.allColors();
+//         for(layprop::ColorMap::const_iterator CC = colors.begin() ; CC != colors.end(); CC++)
+//         {
+//            layprop::tellRGB* coldef = CC->second;
+//            ost   << wxT("definecolor(\"") << wxString(CC->first.c_str(), wxConvUTF8)
+//                  << wxT("\" , ")      << coldef->red()
+//                  << wxT(" , ")        << coldef->green()
+//                  << wxT(" , ")        << coldef->blue()
+//                  << wxT(" , ")        << coldef->alpha()
+//                  << wxT(");");
+//         }
+//         success = true;
+//      }
+//   }
+//   PROPC->unlockDrawProp(drawprop);
+//   if (success) Console->parseCommand(ost);
 }
 
 void  tui::TechEditorDialog::onLayerSelected(wxCommandEvent&)
