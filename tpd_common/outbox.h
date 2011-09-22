@@ -203,6 +203,7 @@ void tell_log(console::LOG_TYPE, const wxString&);
 class TpdPost {
    public:
                   TpdPost(wxWindow*);
+      static void postMenuEvent(int);
       static void toped_status(console::TOPEDSTATUS_TYPE);
       static void toped_status(console::TOPEDSTATUS_TYPE, long int);
       static void toped_status(console::TOPEDSTATUS_TYPE, std::string);
