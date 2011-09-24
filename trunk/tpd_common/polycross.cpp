@@ -32,7 +32,7 @@
 #include "outbox.h"
 #include "avl.h"
 
-//#define BO2_DEBUG
+#define BO2_DEBUG
 #define BO_printseg(SEGM) printf("thread %i : polygon %i, segment %i, \
 lP (%i,%i), rP (%i,%i)  \n" , SEGM->threadID(), SEGM->polyNo() , SEGM->edge(), \
 SEGM->lP()->x(), SEGM->lP()->y(), SEGM->rP()->x(),SEGM->rP()->y());
@@ -421,6 +421,12 @@ void polycross::polysegment::dump_points(polycross::VPoint*& vlist) {
    }
 }
 
+bool polycross::polysegment::operator == (const polysegment& comp) const
+{
+   return ((_polyNo == comp._polyNo) &&
+           (_edge   == comp._edge  )     );
+}
+
 /*
 #ifdef BO2_DEBUG
       printf("( On EDGE %i ...)\n", _edge );
@@ -531,6 +537,10 @@ polycross::VPoint* polycross::segmentlist::dump_points(bool looped)
 void polycross::TEvent::checkIntersect(polysegment* above, polysegment* below,
                                     XQ& eventQ, bool single, const TP* iff)
 {
+   //TODO (clean-up)
+   // this method shall not be needed anymore. The method below shall be
+   // redefined like here
+   // void polycross::TEvent::getIntersect
    TP* rep = getIntersect(above, below, eventQ, single, iff);
    if (rep != NULL)
       delete rep;
@@ -1001,43 +1011,55 @@ void polycross::TmEvent::sweep (XQ& eventQ, YQ& sweepline, ThreadList& threadl, 
 #endif
    if (0 == _aseg->threadID())
       throw EXPTNpolyCross("Sorted segment expected here");
-   SegmentThread* thr = sweepline.modifyThread(_aseg->threadID(), _bseg);
+   bool smooth; // i.e. the thread sequence is the same
+   SegmentThread* thr = sweepline.modifyThread(_aseg->threadID(), _bseg, smooth);
+   if (smooth)
+      threadl.insert(_bseg->threadID());
 
    // check for intersections of the neighbors with the new segment
-   // and whether or not threads should be swapped
-   TP* CP;
-   if((CP = getIntersect(thr->threadAbove()->cseg(), thr->cseg(), eventQ, single)))
-   {
-      if ((*CP) == *(_bseg->lP()))
-      {
-         polysegment* aseg = thr->threadAbove()->cseg();
-         int ori1 = orientation(aseg->lP(), aseg->rP(), _aseg->lP());
-         int ori2 = orientation(aseg->lP(), aseg->rP(), _bseg->rP());
-         if ((ori1 == ori2) || (0 == ori1 * ori2))
-            threadl.insert(_bseg->threadID());
-      }
-      delete CP;
-   }
+   checkIntersect(thr->threadAbove()->cseg(), thr->cseg(), eventQ, single);
+   checkIntersect(thr->cseg(), thr->threadBelow()->cseg(), eventQ, single);
 
-   if ((CP = getIntersect(thr->cseg(), thr->threadBelow()->cseg(), eventQ, single)))
-   {
-      if ((*CP) == *(_bseg->lP()))
-      {
-         polysegment* bseg = thr->threadBelow()->cseg();
-         int ori1 = orientation(bseg->lP(), bseg->rP(), _aseg->lP());
-         int ori2 = orientation(bseg->lP(), bseg->rP(), _bseg->rP());
-         if ((ori1 == ori2) || (0 == ori1 * ori2))
-            threadl.insert(_bseg->threadID());
-      }
-      delete CP;
-   }
+// TODO (clean-up)
+// After the updates in the sweepline.modifyThread - the code below shall be redundant!
+// It is left here - just in case something had been missed in that update
+//   // check for intersections of the neighbors with the new segment
+//   // and whether or not threads should be swapped
+//   TP* CP;
+//   if((CP = getIntersect(thr->threadAbove()->cseg(), thr->cseg(), eventQ, single)))
+//   {
+//      if ((*CP) == *(_bseg->lP()))
+//      {
+//         polysegment* aseg = thr->threadAbove()->cseg();
+//         int ori1 = orientation(aseg->lP(), aseg->rP(), _aseg->lP());
+//         int ori2 = orientation(aseg->lP(), aseg->rP(), _bseg->rP());
+//         if ((ori1 == ori2) || (0 == ori1 * ori2))
+//            threadl.insert(_bseg->threadID());
+//      }
+//      delete CP;
+//   }
+//
+//   if ((CP = getIntersect(thr->cseg(), thr->threadBelow()->cseg(), eventQ, single)))
+//   {
+//      if ((*CP) == *(_bseg->lP()))
+//      {
+//         polysegment* bseg = thr->threadBelow()->cseg();
+//         int ori1 = orientation(bseg->lP(), bseg->rP(), _aseg->lP());
+//         int ori2 = orientation(bseg->lP(), bseg->rP(), _bseg->rP());
+//         if ((ori1 == ori2) || (0 == ori1 * ori2))
+//            threadl.insert(_bseg->threadID());
+//      }
+//      delete CP;
+//   }
 }
 
 void polycross::TmEvent::sweep2bind(YQ& sweepline, BindCollection& bindColl)
 {
    if (0 == _aseg->threadID())
       throw EXPTNpolyCross("Sorted segment expected here - bind");
-   SegmentThread* thr = sweepline.modifyThread(_aseg->threadID(), _bseg);
+   // TODO - check whether we need the result of the smooth segments here
+   bool todovar;
+   SegmentThread* thr = sweepline.modifyThread(_aseg->threadID(), _bseg, todovar);
 
    // action is taken only for points in the second polygon
    if ( (1 == _aseg->polyNo()) && (_aseg->polyNo() == _bseg->polyNo())) return;
@@ -1280,6 +1302,11 @@ polycross::polysegment* polycross::SegmentThread::set_cseg(polysegment* cs)
    return oldseg;
 }
 
+bool polycross::SegmentThread::operator == (const SegmentThread& cmp) const
+{
+   return ((*_cseg) == *(cmp._cseg));
+}
+
 //==============================================================================
 // YQ
 polycross:: YQ::YQ(DBbox& overlap, const segmentlist* seg1, const segmentlist* seg2)
@@ -1304,7 +1331,7 @@ void polycross:: YQ::initialize(DBbox& overlap)
    _trSent = DEBUG_NEW TP(overlap.p2().x()+1, overlap.p2().y()+1);
    _bottomSentinel = DEBUG_NEW BottomSentinel(DEBUG_NEW polysegment(_blSent, _brSent, -1, 0));
    _cthreads[-2] = _bottomSentinel;
-   _topSentinel = DEBUG_NEW TopSentinel(DEBUG_NEW polysegment(_tlSent, _trSent, -1, 0));
+   _topSentinel = DEBUG_NEW TopSentinel(DEBUG_NEW polysegment(_tlSent, _trSent, -1, 255));
    _cthreads[-1] = _topSentinel;
    _bottomSentinel->set_threadAbove(_topSentinel);
    _topSentinel->set_threadBelow(_bottomSentinel);
@@ -1367,13 +1394,31 @@ polycross::SegmentThread* polycross::YQ::endThread(unsigned threadID)
  * @param newsegment the new segment - to replace the existing one
  * @return the segment thread
  */
-polycross::SegmentThread* polycross::YQ::modifyThread(unsigned threadID, polysegment* newsegment)
+polycross::SegmentThread* polycross::YQ::modifyThread(unsigned threadID, polysegment* newsegment, bool& smooth)
 {
    // get the thread from the _cthreads
    Threads::iterator threadP = _cthreads.find(threadID);
    if (_cthreads.end() == threadP)
       throw EXPTNpolyCross("Segment thread not found in YQ - modify");
    SegmentThread* thread = threadP->second;
+
+   // the check below is to help to the eventual cross event in this
+   // point (where the thread modify is executed) to decide whether 
+   // to skip the thread swaping (i.e. joining/touching etc. corner cases)
+   // find the position of the new incoming segment in the thread queue
+   SegmentThread* above = _bottomSentinel;
+   while (sCompare(newsegment, above->cseg()) > 0)
+      above = above->threadAbove();
+   SegmentThread* below = above->threadBelow();
+   // check whether the position is the same as for the old segment
+   // Note! the thread is already in the queue - hence the fancy check below
+   if (*above == *thread)
+      smooth = ((*below == *(thread->threadBelow()))    );
+   else if (*below == *thread)
+      smooth = ((*above == *(thread->threadAbove()))    );
+   else
+      smooth = false;
+
    newsegment->set_threadID(threadID);
    polysegment* oldsegment = thread->set_cseg(newsegment);
    oldsegment->set_threadID(0);
@@ -1625,7 +1670,7 @@ void polycross::XQ::addCrossEvent(const TP* CP, polysegment* aseg, polysegment* 
    void** retitem =  avl_probe(_xQueue,vrtx);
    if ((*retitem) != vrtx)
    {
-      // coinsiding vertexes from different polygons
+      // Coinciding vertexes from different polygons
       delete(vrtx);
    }
    static_cast<EventVertex*>(*retitem)->addEvent(evt, _crossE);
