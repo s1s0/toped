@@ -130,7 +130,7 @@ namespace polycross
    class polysegment
    {
       public:
-         typedef std::vector<CPoint*> crossCList;
+         typedef std::list<CPoint*> crossCList;
          polysegment(const TP*, const TP*, int, char);
          ~polysegment();
          CPoint*           insertCrossPoint(const TP*);
@@ -146,7 +146,7 @@ namespace polycross
          int               edge() const               {return _edge;}
       protected:
          unsigned          _threadID;
-         crossCList        crosspoints;
+         crossCList        _crossPoints;
          byte              _polyNo;
          int               _edge;
          const TP*         _lP;

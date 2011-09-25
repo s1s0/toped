@@ -32,7 +32,7 @@
 #include "outbox.h"
 #include "avl.h"
 
-//#define BO2_DEBUG
+#define BO2_DEBUG
 #define BO_printseg(SEGM) printf("thread %i : polygon %i, segment %i, \
 lP (%i,%i), rP (%i,%i)  \n" , SEGM->threadID(), SEGM->polyNo() , SEGM->edge(), \
 SEGM->lP()->x(), SEGM->lP()->y(), SEGM->rP()->x(),SEGM->rP()->y());
@@ -365,60 +365,73 @@ polycross::polysegment::polysegment(const TP* p1, const TP* p2, int num, char pl
 
 /**
  * The method creates a new #CPoint object from the input pnt and adds it to the
-crosspoints array. The input point is assumed to be unique. Method is called by
+_crossPoints array. The input point is assumed to be unique. Method is called by
 Event::insertCrossPoint() only.
  * @param pnt the new cross point - assumed to be unique
  * @return the #CPoint that will be linked to its counterpart by the caller
  */
 polycross::CPoint* polycross::polysegment::insertCrossPoint(const TP* pnt) {
    CPoint* cp = DEBUG_NEW CPoint(pnt, _edge);
-   crosspoints.push_back(cp);
+   _crossPoints.push_back(cp);
    return cp;
 }
 
 unsigned polycross::polysegment::normalize(const TP* p1, const TP* p2)
 {
    _lP = p1; _rP = p2;
-   unsigned numcross = crosspoints.size();
-   if (crosspoints.size() > 1)
+   unsigned numcross = _crossPoints.size();
+   if (_crossPoints.size() > 1)
    {
       SortLine functor(p1,p2);
-      std::sort(crosspoints.begin(), crosspoints.end(), functor);
+      _crossPoints.sort(functor);
+//      std::sort(_crossPoints.begin(), _crossPoints.end(), functor);
    }
    return numcross;
 }
 
 /*! Dump the valid segment points and link them. A valid segment points are the
-segment left point and all crossing points except the coinciding ones. Two
+segment left points and all crossing points except the coinciding ones. Two
 segments cross each other in a single point. This is axiomatic of course, but
 here it includes the coinciding or partially coinciding segments. It is rather
 a sanity check here for double crossing points, but BO algo implementation is
 producing such cases exactly when segments partially coincides.
 */
-void polycross::polysegment::dump_points(polycross::VPoint*& vlist) {
+void polycross::polysegment::dump_points(polycross::VPoint*& vlist)
+{
+   // for all left points - create a new VPoint
    vlist = DEBUG_NEW VPoint(_lP, vlist);
-   for (unsigned i = 0; i < crosspoints.size(); i++)
+   crossCList::iterator CCPA = _crossPoints.begin();
+   while(CCPA != _crossPoints.end())
    {
-      unsigned j = 0;
-      for (j = 0; j < i; j++)
+      // Check whether a cross point which links to the same segment has not
+      // been already dumped
+      crossCList::iterator CCPB = _crossPoints.begin();
+      while ((CCPB != _crossPoints.end()) && (CCPB != CCPA))
       {
-         if (crosspoints[i]->link()->edge() == crosspoints[j]->link()->edge())
+         if ((*CCPA)->link()->edge() == (*CCPB)->link()->edge())
             break;
+         else
+            CCPB++;
       }
-      if (j == i)
+      if (CCPA == CCPB)
       {
-         crosspoints[i]->linkage(vlist);
+         // for unique CPoints - use existing objects, don't create a new VPoint,
+         // just link it.
+         (*CCPA)->linkage(vlist);
 #ifdef BO2_DEBUG
-         printf("( %i , %i )\n", crosspoints[i]->cp()->x(), crosspoints[i]->cp()->y());
+         printf("( %i , %i )\n", (*CCPA)->cp()->x(), (*CCPA)->cp()->y());
 #endif
+         CCPA++;
       }
       else
       {
-         // TODO
-         // clean-up the leakage here! crosspoints[i] shall be deleted ?! Check!
 #ifdef BO2_DEBUG
-         printf("(<><><><><> Double cross points on segmets %i and %i)\n", _edge, crosspoints[i]->link()->edge() );
+         printf("(<><><><><> Double cross points on segmets %i and %i)\n", _edge, (*CCPA)->link()->edge() );
 #endif
+         // double point found - not going to be used and shall be removed
+         // to avoid leakages
+         delete (*CCPA);
+         CCPA = _crossPoints.erase(CCPA);
       }
    }
 }
@@ -433,14 +446,14 @@ bool polycross::polysegment::operator == (const polysegment& comp) const
 #ifdef BO2_DEBUG
       printf("( On EDGE %i ...)\n", _edge );
 #endif
-      crossCList::iterator CCP = crosspoints.begin();
-      while (CCP != crosspoints.end())
+      crossCList::iterator CCP = _crossPoints.begin();
+      while (CCP != _crossPoints.end())
       {
 #ifdef BO2_DEBUG
          printf("(....... cross point with edge %i)\n", (*CCP)->link()->edge() );
 #endif
          bool doublecross = false;
-         for (crossCList::const_iterator RCP = crosspoints.begin(); RCP != CCP; RCP++ )
+         for (crossCList::const_iterator RCP = _crossPoints.begin(); RCP != CCP; RCP++ )
          {
             if ((*CCP)->link()->edge() == (*RCP)->link()->edge())
             {
@@ -453,7 +466,7 @@ bool polycross::polysegment::operator == (const polysegment& comp) const
          if (doublecross)
          {
             delete (*CCP);
-            CCP = crosspoints.erase(CCP);
+            CCP = _crossPoints.erase(CCP);
          }
          else CCP++;
       }
@@ -462,15 +475,15 @@ bool polycross::polysegment::operator == (const polysegment& comp) const
 polycross::BPoint* polycross::polysegment::insertBindPoint(const TP* pnt)
 {
    BPoint* cp = DEBUG_NEW BPoint(pnt, _edge);
-   crosspoints.push_back(cp);
+   _crossPoints.push_back(cp);
    return cp;
 }
 
 
 polycross::polysegment::~polysegment()
 {
-//   for (unsigned i = 0; i < crosspoints.size(); i++)
-//      delete (crosspoints[i]);
+//   for (unsigned i = 0; i < _crossPoints.size(); i++)
+//      delete (_crossPoints[i]);
 }
 
 //==============================================================================

@@ -421,13 +421,13 @@ void edge_merge5() {
    addbox(box1,2);
    addpoly(poly1,2);
    select({{4,7},{1,0}});
-   merge();
-   unselect_all();
-   addbox(box2,2);
-   addpoly(poly2,2);
-   select({{7,7},{4,0}});
-   merge();
-   unselect_all();
+//   merge();
+//   unselect_all();
+//   addbox(box2,2);
+//   addpoly(poly2,2);
+//   select({{7,7},{4,0}});
+//   merge();
+//   unselect_all();
 }
 
 void all_cut()
