@@ -410,6 +410,26 @@ void edge_merge4() {
    merge();
 }
 
+void edge_merge5() {
+   newcell("edge_merge5");
+   opencell("edge_merge5");
+
+   box box1 = {{2,0},{3,6}};
+   box box2 = {{5,1},{6,7}};
+   point list poly1 = {{4,2},{4,5},{3,5},{3,7},{2,7},{2,5},{1,5},{1,2},{2,2},{2,1},{3,1},{3,2}};
+   point list poly2 = {{6,5},{6,6},{5,6},{5,5},{4,5},{4,2},{5,2},{5,0},{6,0},{6,2},{7,2},{7,5}};
+   addbox(box1,2);
+   addpoly(poly1,2);
+   select({{4,7},{1,0}});
+   merge();
+   unselect_all();
+   addbox(box2,2);
+   addpoly(poly2,2);
+   select({{7,7},{4,0}});
+   merge();
+   unselect_all();
+}
+
 void all_cut()
 {
    cut_test1();
@@ -442,6 +462,7 @@ void all_merge()
    edge_merge2();
    edge_merge3();
    edge_merge4();
+   edge_merge5();
    zoomall();
 }
 

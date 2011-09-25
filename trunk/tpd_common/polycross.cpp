@@ -32,7 +32,7 @@
 #include "outbox.h"
 #include "avl.h"
 
-#define BO2_DEBUG
+//#define BO2_DEBUG
 #define BO_printseg(SEGM) printf("thread %i : polygon %i, segment %i, \
 lP (%i,%i), rP (%i,%i)  \n" , SEGM->threadID(), SEGM->polyNo() , SEGM->edge(), \
 SEGM->lP()->x(), SEGM->lP()->y(), SEGM->rP()->x(),SEGM->rP()->y());
@@ -414,6 +414,8 @@ void polycross::polysegment::dump_points(polycross::VPoint*& vlist) {
       }
       else
       {
+         // TODO
+         // clean-up the leakage here! crosspoints[i] shall be deleted ?! Check!
 #ifdef BO2_DEBUG
          printf("(<><><><><> Double cross points on segmets %i and %i)\n", _edge, crosspoints[i]->link()->edge() );
 #endif
