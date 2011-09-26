@@ -93,6 +93,7 @@ namespace tui {
       void                    OnAbout(wxCommandEvent& WXUNUSED( event ));
       void                    OnExecExtTextEnter(wxCommandEvent& event);
       void                    OnDefineColor(wxCommandEvent& WXUNUSED(event));
+      void                    OnDefineFill(wxCommandEvent& WXUNUSED(event));
 
 //      wxMenuBar*              getMenuBar(void) {return GetMenuBar();}
       ResourceCenter*         resourceCenter(void) {return _resourceCenter;}
@@ -240,7 +241,6 @@ namespace tui {
 
       void OnEditLayer(wxCommandEvent&);
       void OnDefineLayer(wxCommandEvent&);
-      void  OnDefineFill(wxCommandEvent& WXUNUSED(event));
       void  OnTechEditor(wxCommandEvent& WXUNUSED(event));
       void    OnMenu(wxCommandEvent&);
 
