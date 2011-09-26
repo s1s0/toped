@@ -286,6 +286,8 @@ namespace tui
 		BT_TECH_APPLY,
 		BT_TECH_CANCEL,
       BT_TECH_NEWCOLOR,
+      BT_TECH_NEWFILL,
+      BT_TECH_NEWSTYLE
    } BROWSER_EVT_TYPE;
 
 }

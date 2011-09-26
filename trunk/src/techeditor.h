@@ -90,6 +90,8 @@ class TechEditorDialog : public wxDialog
       wxButton*	            _applyButton;
       wxButton*	            _cancelButton;
       wxButton*	            _newColorButton;
+      wxButton*	            _newFillButton;
+      wxButton*	            _newStyleButton;
       wxBoxSizer*	            _sizer;
       wxArrayString           _colorItems; 
       wxArrayString           _lineItems; 
