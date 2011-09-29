@@ -639,6 +639,32 @@ namespace tui {
    };
 
    //--------------------------------------------------------------------------
+   class defineStyle : public wxDialog
+   {
+   public:
+      typedef  std::map<std::string, byte*         >  fillMAP;
+                     defineStyle(wxFrame *parent, wxWindowID id, const wxString &title,
+                                             wxPoint pos, const layprop::DrawProperties*);
+      virtual       ~defineStyle();
+//      void           OnDefineFill(wxCommandEvent&);
+//      void           OnFillSelected(wxCommandEvent&);
+//      void           OnFillNameAdded(wxCommandEvent& WXUNUSED(event));
+//      fillMAP&       allPatterns() {return _allFills;}
+//   private:
+//      void           nameNormalize(wxString&);
+//      void           fillcopy(const byte*, byte*);
+//      const byte*    getFill(const std::string) const;
+//      fillMAP        _allFills;
+      wxListBox*     _styleList;
+      wxTextCtrl*    _dwstylename;
+//      fill_sample*   _fillsample;
+      wxString       _stylename;
+//      byte           _current_pattern[128];
+
+      DECLARE_EVENT_TABLE();
+   };
+
+   //--------------------------------------------------------------------------
    class cadenceConvert : public wxDialog
    {
    public:

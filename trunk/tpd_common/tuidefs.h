@@ -156,6 +156,7 @@ namespace tui
       TMSET_DEFLAY        ,
       TMSET_DEFCOLOR      ,
       TMSET_DEFFILL       ,
+      TMSET_DEFSTYLE      ,
       TMSET_TECHEDITOR    ,
 
       TMADD_RULER         ,

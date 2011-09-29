@@ -1727,9 +1727,9 @@ void tui::fill_sample::OnPaint(wxPaintEvent&)
 
 //==============================================================================
 BEGIN_EVENT_TABLE(tui::defineFill, wxDialog)
-   EVT_LISTBOX(ID_ITEMLIST     , tui::defineFill::OnFillSelected   )
-    EVT_BUTTON(ID_BTNEDIT      , tui::defineFill::OnDefineFill     )
-    EVT_BUTTON(ID_NEWITEM      , tui::defineFill::OnFillNameAdded  )
+   EVT_LISTBOX(ID_ITEMLIST    , tui::defineFill::OnFillSelected   )
+   EVT_BUTTON(ID_BTNEDIT      , tui::defineFill::OnDefineFill     )
+   EVT_BUTTON(ID_NEWITEM      , tui::defineFill::OnFillNameAdded  )
 END_EVENT_TABLE()
 
 tui::defineFill::defineFill(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, const layprop::DrawProperties* drawProp) :
@@ -1890,7 +1890,78 @@ tui::defineFill::~defineFill()
       delete[] CI->second;
 }
 
+//==============================================================================
+BEGIN_EVENT_TABLE(tui::defineStyle, wxDialog)
+//    EVT_LISTBOX(ID_ITEMLIST   , tui::defineFill::OnFillSelected   )
+//    EVT_BUTTON(ID_BTNEDIT     , tui::defineFill::OnDefineFill     )
+//    EVT_BUTTON(ID_NEWITEM     , tui::defineFill::OnFillNameAdded  )
+END_EVENT_TABLE()
 
+tui::defineStyle::defineStyle(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, const layprop::DrawProperties* drawProp) :
+      wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)
+{
+   NameList all_names;
+   drawProp->allLines(all_names);
+   _styleList = DEBUG_NEW wxListBox(this, ID_ITEMLIST, wxDefaultPosition, wxSize(150,200), 0, NULL, wxLB_SORT);
+   std::string init_style;
+   if (!all_names.empty())
+   {
+      init_style = *(all_names.begin());
+   }
+   for( NameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
+   {
+      _styleList->Append(wxString(CI->c_str(), wxConvUTF8));
+      //byte* pat = DEBUG_NEW byte[128];
+      //fillcopy(drawProp->getFill(*CI), pat);
+      //_allFills[*CI] = pat;
+   }
+   // NOTE! Static boxes MUST be created before all other controls which are about to
+   // be encircled by them. Otherwise the dialog box might work somewhere (Windows & fc8)
+   // but not everywhere! (fc9)
+   wxBoxSizer *hsizer0 = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("New Style") );
+   wxBoxSizer *vsizer3 = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Edit Pattern") );
+
+   _dwstylename  = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxSize(150,-1), 0,
+                                          wxTextValidator(wxFILTER_ASCII, &_stylename));
+//   _stylesample = DEBUG_NEW fill_sample( this, -1, wxDefaultPosition, wxSize(-1,150), init_style, drawProp);
+
+   hsizer0->Add( _dwstylename   , 0, wxALL | wxEXPAND, 5);
+   hsizer0->Add(0,0,1); //
+   hsizer0->Add( DEBUG_NEW wxButton( this, ID_NEWITEM  , wxT("Add")    ), 0, wxALL, 5 );
+
+   wxBoxSizer *vsizer2 = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+//   vsizer2->Add( _fillsample , 0, wxALL | wxEXPAND, 5);
+   vsizer2->Add(0,0,1); //
+   vsizer2->Add(DEBUG_NEW wxButton( this, ID_BTNEDIT  , wxT(" Define ") ), 0, wxALL | wxALIGN_RIGHT, 5);
+
+   // Buttons
+   wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   button_sizer->Add(0,0,1); //
+   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK    , wxT("OK") ), 0, wxALL, 5 );
+   button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel")  ), 0, wxALL, 5 );
+
+   vsizer3->Add( _styleList   , 0, wxALL | wxEXPAND, 5);
+   vsizer3->Add(0,0,1); //
+   vsizer3->Add( vsizer2      , 0, wxEXPAND );
+
+   wxBoxSizer *top_sizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+   top_sizer->Add( hsizer0      , 0, wxEXPAND );
+   top_sizer->Add( vsizer3      , 0, wxEXPAND );
+   top_sizer->Add( button_sizer , 0, wxEXPAND );
+
+   SetSizer( top_sizer );      // use the sizer for layout
+
+   top_sizer->SetSizeHints( this );   // set size hints to honour minimum size
+}
+
+tui::defineStyle::~defineStyle()
+{
+//   delete _dwfilname;
+//   delete _fillsample;
+//   delete _fillList;
+/*   for(fillMAP::const_iterator CI = _allFills.begin(); CI != _allFills.end(); CI++)
+      delete[] CI->second;*/
+}
 //==========================================================================
 tui::nameCboxRecords::nameCboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
             const SIMap& inlays, wxArrayString& all_strings, int row_height, const layprop::DrawProperties* drawProp)
