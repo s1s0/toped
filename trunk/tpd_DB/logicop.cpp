@@ -57,6 +57,21 @@
 #define REPORT_POLYBIND_DEBUG(polyObject)
 #endif
 
+//#define POLYLOOP_DEBUG
+#ifdef POLYLOOP_DEBUG
+#define PLYDUMP_POINT(x,y) \
+   printf("(%i,%i)\n", x, y);
+#define PLYDUMP_START \
+   printf("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv\n");
+#define PLYDUMP_END \
+   printf("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n");
+#else
+#define PLYDUMP_START
+#define PLYDUMP_POINT(x,y)
+#define PLYDUMP_END
+#endif
+
+
 //-----------------------------------------------------------------------------
 // class logic
 //-----------------------------------------------------------------------------
@@ -310,12 +325,15 @@ bool logicop::logic::OR(pcollection& plycol)
          // The eventual following polygons will be inside the first - so
          // their direction is always false
          direction = (0 == lclcol.size());
+         PLYDUMP_START
          do
          {
             pickup = pickup->follower(direction);
             shgen->push_back(TP(pickup->cp()->x(), pickup->cp()->y()));
+            PLYDUMP_POINT(pickup->cp()->x(), pickup->cp()->y())
          } while (pickup != collector);
          lclcol.push_back(shgen);
+         PLYDUMP_END
          result = true;
       }
       collector = collector->next();
@@ -723,7 +741,7 @@ void logicop::CrossFix::traverseOne(polycross::VPoint* const centinel, pcollecti
       {
          traverseOne(collector, plycol);
       }
-      collector = collector->follower(direction, false);
+      collector = collector->follower(direction);
    }
    plycol.push_back(shgen);
 }

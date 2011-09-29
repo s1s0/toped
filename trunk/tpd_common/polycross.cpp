@@ -32,7 +32,7 @@
 #include "outbox.h"
 #include "avl.h"
 
-#define BO2_DEBUG
+//#define BO2_DEBUG
 #define BO_printseg(SEGM) printf("thread %i : polygon %i, segment %i, \
 lP (%i,%i), rP (%i,%i)  \n" , SEGM->threadID(), SEGM->polyNo() , SEGM->edge(), \
 SEGM->lP()->x(), SEGM->lP()->y(), SEGM->rP()->x(),SEGM->rP()->y());
@@ -276,7 +276,7 @@ polycross::VPoint* polycross::VPoint::checkNreorder(VPoint*& pairedShape, bool s
       if (single)
       {
          //we have a touching edges (K case) and we're post-processing
-         //a single polygin - so, let's remove both crossing points
+         //a single polygon - so, let's remove both crossing points
          prevCross->prev()->set_next(this); set_prev(prevCross->prev());
          nextCross->next()->set_prev(this); set_next(nextCross->next());
          prevCrossCouple->prev()->set_next(nextCrossCouple->next());
@@ -289,7 +289,7 @@ polycross::VPoint* polycross::VPoint::checkNreorder(VPoint*& pairedShape, bool s
       {
          //in the case of two polygons the only possible filtering is to remove
          //the vertex point (laylogic.tll:cut_test3a()) which is not having any
-         //impact of the algorithm
+         //impact on the algorithm
          //@TODO
          return nextCross;
       }
@@ -687,6 +687,8 @@ TP* polycross::TEvent::joiningSegments(polysegment* above, polysegment* below, f
 
 TP* polycross::TEvent::oneLineSegments(polysegment* above, polysegment* below, YQ* sweepL)
 {
+   float lps = 0.0;
+   float rps = 0.0;
    float lambdaL = getLambda(above->lP(), above->rP(), below->lP());
    float lambdaR = getLambda(above->lP(), above->rP(), below->rP());
    // coinciding or touching segments -> don't generate anything.
@@ -695,12 +697,77 @@ TP* polycross::TEvent::oneLineSegments(polysegment* above, polysegment* below, Y
    if (0 == (lambdaL * lambdaR)) return NULL;
    bool swaped = false;
    // first of all cases when neither of the lines is enclosing the other one
-   // here we are generating "hidden" cross point, right in the middle of their
-   // coinciding segment
+   // The idea of this check is :
+   // 1. Find-out the common part of the two input segments
+   // 2. For each of the input segments, pick-up the point which is neighboring
+   //    to the one lying inside the opposite segment and does not belong to this
+   //    segment. Example:
+   //    - the above segment is defined by the points A & B
+   //    - the below segment is defined by the points C & D
+   //    if A lies inside CD, find the point N from segment above which is a
+   //    neighbor to A, but it is not B.
+   // 3. Having found those two points in p.2 - check their location against the
+   //    segment defined in p.1
+   //    - if both points lie on the SAME side of the common segment - generate
+   //      a "hidden" cross point, right in the middle of the common segment
+   //    - if both points are on the opposite sides of the segment - do nothing.
+   //
+   // NOTE! this is kind of opposite to the case further down in this method
+   //       where one segment lies entirely inside the other. There, we generate
+   //       a "hidden" cross point when of the control points are on the OPPOSITE
+   //       side of the test segment.
    if ((lambdaL < 0) && (lambdaR > 0))
-      return getMiddle(above->lP(), below->rP()); // return NULL;//
+   {
+      // below->lP is outside above; below->rP is inside
+      // the points below constitute the piece of segment common for both input segments
+      // (above->lP(), below->rP()
+      unsigned indxRP, indxLP, dummy;
+      bool direction = true;
+      int numv;
+      //
+      const PointVector* aboveP = sweepL->locateOriginals(above , dummy, indxLP, direction);
+      numv = aboveP->size();
+      if (!direction) indxLP = (indxLP+1) % numv;
+      else (0==indxLP) ? indxLP = numv-1 : indxLP--;
+
+      const PointVector* belowP = sweepL->locateOriginals(below , indxRP, dummy, direction);
+      numv = belowP->size();
+      if (direction) indxRP = (indxRP+1) % numv;
+      else (0==indxRP) ? indxRP = numv-1 : indxRP--;
+
+      lps = orientation(above->lP(), below->rP(), &((*aboveP)[indxLP]));
+      rps = orientation(above->lP(), below->rP(), &((*belowP)[indxRP]));
+
+      if ((lps * rps) > 0) return getMiddle(above->lP(), below->rP());
+      else                 return NULL;
+   }
    if ((lambdaL > 0) && (lambdaR < 0))
-      return getMiddle(below->lP(), above->rP()); // return NULL;
+   {
+      // below->lP is inside above; below->rP is outside
+      // the points below constitute the piece of segment common for both input segments
+      // (below->lP(), above->rP()
+      unsigned indxRP, indxLP, dummy;
+      bool direction = true;
+      int numv;
+
+      const PointVector* belowP = sweepL->locateOriginals(below , dummy, indxLP, direction);
+      numv = belowP->size();
+      if (!direction) indxLP = (indxLP+1) % numv;
+      else (0==indxLP) ? indxLP = numv-1 : indxLP--;
+
+      const PointVector* aboveP = sweepL->locateOriginals(above , indxRP, dummy, direction);
+      numv = aboveP->size();
+      if (direction) indxRP = (indxRP+1) % numv;
+      else (0==indxRP) ? indxRP = numv-1 : indxRP--;
+
+      lps = orientation(below->lP(), above->rP(), &((*aboveP)[indxLP]));
+      rps = orientation(below->lP(), above->rP(), &((*belowP)[indxRP]));
+
+      if ((lps * rps) > 0) return getMiddle(below->lP(), above->rP());
+      else                 return NULL;
+
+   }
+
    if ((lambdaL < 0) && (lambdaR < 0))
    {
       // below edge points are outside the above segment, this however
@@ -713,21 +780,25 @@ TP* polycross::TEvent::oneLineSegments(polysegment* above, polysegment* below, Y
    // now the cases when one of the lines encloses fully the other one
    polysegment* outside = swaped ? below : above;
    polysegment* inside  = swaped ? above : below;
-   // get the original polygon to which enclosed segment belongs to
-   const PointVector* insideP = (1 == (swaped ?  above->polyNo() : below->polyNo())) ?
-         sweepL->opl1() : sweepL->opl2();
-   // ... and get the location of the inside segment in that sequence
+//   // get the original polygon to which enclosed segment belongs to
+//   const PointVector* insideP = (1 == inside->polyNo()) ? sweepL->opl1() : sweepL->opl2();
+//   // ... and get the location of the inside segment in that sequence
+//   int numv = insideP->size();
+//   unsigned indxLP = (*(inside->lP()) == (*insideP)[inside->edge()]) ?
+//         inside->edge() : (inside->edge() + 1) % numv;
+//   unsigned indxRP = (*(inside->rP()) == (*insideP)[inside->edge()]) ?
+//         inside->edge() : (inside->edge() + 1) % numv;
+//   // we'll pickup the neighboring point(s) of the inside segment and will
+//   // recalculate the lps/rps for them.
+//   bool indxpos = (indxLP == ((indxRP + 1) % numv));
+////   bool indxpos = indxLP > indxRP;
+
+   unsigned indxRP, indxLP;
+   bool direction = true;
+
+   const PointVector* insideP = sweepL->locateOriginals(inside  , indxRP, indxLP, direction);
    int numv = insideP->size();
-   unsigned indxLP = (*(inside->lP()) == (*insideP)[inside->edge()]) ?
-         inside->edge() : (inside->edge() + 1) % numv;
-   unsigned indxRP = (*(inside->rP()) == (*insideP)[inside->edge()]) ?
-         inside->edge() : (inside->edge() + 1) % numv;
-   // we'll pickup the neighboring point(s) of the inside segment and will
-   // recalculate the lps/rps for them.
-   bool indxpos = (indxLP == ((indxRP + 1) % numv));
-//   bool indxpos = indxLP > indxRP;
-   float lps = 0.0;
-   float rps = 0.0;
+
    do
    {
       // make sure indexes are not the same
@@ -738,12 +809,12 @@ TP* polycross::TEvent::oneLineSegments(polysegment* above, polysegment* below, Y
       // they look so weird, to keep the indexes within [0:_numv-1] boundaries
       if (0 == lps)
       {
-         if (indxpos) indxLP = (indxLP+1) % numv;
+         if (direction) indxLP = (indxLP+1) % numv;
          else (0==indxLP) ? indxLP = numv-1 : indxLP--;
       }
       if (0 == rps)
       {
-         if (!indxpos) indxRP = (indxRP+1) % numv;
+         if (!direction) indxRP = (indxRP+1) % numv;
          else (0==indxRP) ? indxRP = numv-1 : indxRP--;
       }
       // calculate lps/rps with the new points
@@ -1501,10 +1572,11 @@ int polycross::YQ::sCompare(const polysegment* seg0, const polysegment* seg1)
    // 1. Retrieve the original Point vectors of both segments, get the indexes
    //    of the right points and the relative direction of point chains
    unsigned indx0RP, indx1RP;
+   unsigned dummy;
    bool dir0 = true;
    bool dir1 = true;
-   const PointVector* plist0 = locateOriginals(seg0, indx0RP, dir0);
-   const PointVector* plist1 = locateOriginals(seg1, indx1RP, dir1);
+   const PointVector* plist0 = locateOriginals(seg0, indx0RP, dummy, dir0);
+   const PointVector* plist1 = locateOriginals(seg1, indx1RP, dummy, dir1);
    unsigned indx0RNP, indx1RNP;
    int numv0 = plist0->size();
    int numv1 = plist1->size();
@@ -1540,14 +1612,15 @@ int polycross::YQ::sCompare(const polysegment* seg0, const polysegment* seg1)
    return ori;
 }
 
-const PointVector* polycross::YQ::locateOriginals(const polysegment* seg, unsigned& indxNP, bool& direction)
+const PointVector* polycross::YQ::locateOriginals(const polysegment* seg,
+                           unsigned& indxNP, unsigned& indxPP, bool& direction)
 {
    // get the original PointVector for the comparing segments
    const PointVector* plist = (1 == seg->polyNo()) ? opl1() : opl2();
 
    // ... and get the location of the inside segment in that sequence
    int numv = plist->size();
-   unsigned indxPP = (*(seg->lP()) == (*plist)[seg->edge()]) ? seg->edge() : (seg->edge() + 1) % numv;
+   indxPP = (*(seg->lP()) == (*plist)[seg->edge()]) ? seg->edge() : (seg->edge() + 1) % numv;
    indxNP = (*(seg->rP()) == (*plist)[seg->edge()]) ? seg->edge() : (seg->edge() + 1) % numv;
 
    direction = (indxNP == ((indxPP + 1) % numv));
