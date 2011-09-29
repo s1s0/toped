@@ -353,6 +353,7 @@ namespace polycross
          SegmentThread*    modifyThread(unsigned, polysegment*, bool& );
          SegmentThread*    swapThreads(unsigned, unsigned);
          SegmentThread*    getThread(unsigned);
+         const PointVector* locateOriginals(const polysegment*, unsigned&, unsigned&, bool&);
          void              report();
          const PointVector* opl1() const {return _osl1->originalPL();}
          const PointVector* opl2() const {return _osl2->originalPL();}
@@ -375,7 +376,6 @@ namespace polycross
          TopSentinel*      _topSentinel;
          void              initialize(DBbox&);
          int               sCompare(const polysegment*, const polysegment*);
-         const PointVector* locateOriginals(const polysegment*, unsigned&, bool&);
          Threads           _cthreads;
          int               _lastThreadID;
          const segmentlist* _osl1;
