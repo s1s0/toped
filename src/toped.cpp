@@ -309,6 +309,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
 
    EVT_MENU( TMSET_DEFCOLOR      , tui::TopedFrame::OnDefineColor )
    EVT_MENU( TMSET_DEFFILL       , tui::TopedFrame::OnDefineFill  )
+   EVT_MENU( TMSET_DEFSTYLE      , tui::TopedFrame::OnDefineStyle )
    EVT_MENU( TMSET_TECHEDITOR    , tui::TopedFrame::OnTechEditor  )
 
    EVT_MENU( TMADD_RULER         , tui::TopedFrame::OnAddRuler    )
@@ -614,6 +615,7 @@ void tui::TopedFrame::initMenuBar() {
    settingsMenu->Append         (TMSET_DEFLAY   , wxT("Define Layer") , wxT("Define a layer"));
    settingsMenu->Append         (TMSET_DEFCOLOR , wxT("Define Color") , wxT("Define a drawing color"));
    settingsMenu->Append         (TMSET_DEFFILL  , wxT("Define Fill")  , wxT("Define a drawing pattern"));
+   settingsMenu->Append         (TMSET_DEFSTYLE , wxT("Define Style") , wxT("Define a style of lines"));
    settingsMenu->Append         (TMSET_TECHEDITOR, wxT("Technology Editor")  , wxT("Define a technology"));
    //---------------------------------------------------------------------------
    // menuBar entry helpMenu
@@ -2176,6 +2178,37 @@ void tui::TopedFrame::OnDefineFill(wxCommandEvent& WXUNUSED(event))
    PROPC->unlockDrawProp(drawprop);
    if (success) Console->parseCommand(ost);
 }
+
+void tui::TopedFrame::OnDefineStyle(wxCommandEvent& WXUNUSED(event))
+{
+   bool success = false;
+   wxString ost;
+   wxRect wnd = GetRect();
+   wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
+   layprop::DrawProperties* drawprop;
+   if (PROPC->lockDrawProp(drawprop))
+   {
+      tui::defineStyle dlg(this, -1, wxT("Style Definition"), pos, drawprop);
+      if ( dlg.ShowModal() == wxID_OK )
+      {
+         /*layprop::FillMap patterns = dlg.allPatterns();
+         for(layprop::FillMap::const_iterator CC = patterns.begin() ; CC != patterns.end(); CC++)
+         {
+            byte* patdef = CC->second;
+            ost   << wxT("definefill(\"") << wxString(CC->first.c_str(), wxConvUTF8)
+                  << wxT("\" , {");
+            ost << patdef[0];
+            for (byte i = 1; i < 128; i++)
+               ost  << wxT(",") << patdef[i];
+            ost   << wxT("});");
+            success = true;
+         }*/
+      }
+   }
+   PROPC->unlockDrawProp(drawprop);
+   if (success) Console->parseCommand(ost);
+}
+
 
 void tui::TopedFrame::OnTechEditor(wxCommandEvent& WXUNUSED(event))
 {

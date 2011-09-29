@@ -94,6 +94,7 @@ namespace tui {
       void                    OnExecExtTextEnter(wxCommandEvent& event);
       void                    OnDefineColor(wxCommandEvent& WXUNUSED(event));
       void                    OnDefineFill(wxCommandEvent& WXUNUSED(event));
+      void                    OnDefineStyle(wxCommandEvent& WXUNUSED(event));
 
 //      wxMenuBar*              getMenuBar(void) {return GetMenuBar();}
       ResourceCenter*         resourceCenter(void) {return _resourceCenter;}
