@@ -32,7 +32,7 @@
 #include "outbox.h"
 #include "avl.h"
 
-//#define BO2_DEBUG
+#define BO2_DEBUG
 #define BO_printseg(SEGM) printf("thread %i : polygon %i, segment %i, \
 lP (%i,%i), rP (%i,%i)  \n" , SEGM->threadID(), SEGM->polyNo() , SEGM->edge(), \
 SEGM->lP()->x(), SEGM->lP()->y(), SEGM->rP()->x(),SEGM->rP()->y());
@@ -1313,10 +1313,52 @@ void polycross::EventVertex::sweep(YQ& sweepline, XQ& eventq, bool single)
 void polycross::EventVertex::CheckBEM(XQ& eventq, TEvent& thr1, TEvent& thr2)
 {
    if (thr1.aseg()->polyNo() == thr2.aseg()->polyNo()) return;
+#ifdef BO2_DEBUG
+   printf("Checking BEM ------------------------\n");
+#endif
    bool sa1sa2 = coincidingSegm(thr1.evertex(), thr1.avertex(), thr2.avertex());
+#ifdef BO2_DEBUG
+   printf("Points: (%d, %d) ; (%d, %d) ; (%d, %d) ;",thr1.evertex()->x(), thr1.evertex()->y(),
+                                                     thr1.avertex()->x(), thr1.avertex()->y(),
+                                                     thr2.avertex()->x(), thr2.avertex()->y());
+   if (sa1sa2)
+      printf("COINCIDING\n");
+   else
+      printf("\n");
+#endif
    bool sa1sb2 = coincidingSegm(thr1.evertex(), thr1.avertex(), thr2.bvertex());
+#ifdef BO2_DEBUG
+   printf("Points: (%d, %d) ; (%d, %d) ; (%d, %d) ;",thr1.evertex()->x(), thr1.evertex()->y(),
+                                                     thr1.avertex()->x(), thr1.avertex()->y(),
+                                                     thr2.bvertex()->x(), thr2.bvertex()->y());
+   if (sa1sb2)
+      printf("COINCIDING\n");
+   else
+      printf("\n");
+#endif
    bool sb1sa2 = coincidingSegm(thr1.evertex(), thr1.bvertex(), thr2.avertex());
+#ifdef BO2_DEBUG
+   printf("Points: (%d, %d) ; (%d, %d) ; (%d, %d) ;",thr1.evertex()->x(), thr1.evertex()->y(),
+                                                     thr1.bvertex()->x(), thr1.bvertex()->y(),
+                                                     thr2.avertex()->x(), thr2.avertex()->y());
+   if (sb1sa2)
+      printf("COINCIDING\n");
+   else
+      printf("\n");
+#endif
    bool sb1sb2 = coincidingSegm(thr1.evertex(), thr1.bvertex(), thr2.bvertex());
+#ifdef BO2_DEBUG
+   printf("Points: (%d, %d) ; (%d, %d) ; (%d, %d) ;",thr1.evertex()->x(), thr1.evertex()->y(),
+                                                     thr1.bvertex()->x(), thr1.bvertex()->y(),
+                                                     thr2.bvertex()->x(), thr2.bvertex()->y());
+   if (sb1sb2)
+      printf("COINCIDING\n");
+   else
+      printf("\n");
+#endif
+#ifdef BO2_DEBUG
+   printf("-------------------------------------\n");
+#endif
    if ((sa1sa2) && (!(sa1sb2 || sb1sa2 ||sb1sb2)))
       thr1.insertCrossPoint(thr1.evertex(), thr1.bseg(), thr2.bseg(), eventq, true );
    else if ((sa1sb2) && (!(sa1sa2 || sb1sa2 ||sb1sb2)))
