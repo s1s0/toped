@@ -44,7 +44,7 @@ namespace polycross
    int xyorder(const TP*, const TP*);
    int orientation(const TP*, const TP*, const TP*);
    float getLambda( const TP* p1, const TP* p2, const TP* p);
-   bool coincidingSegm(const TP*, const TP*, const TP*);
+   char coincidingSegm(const TP*, const TP*, const TP*);
    //===========================================================================
    // Vertex Point
    //===========================================================================
