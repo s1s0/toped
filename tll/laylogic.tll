@@ -438,6 +438,29 @@ void edge_merge5() {
    unselect_all();
 }
 
+void edge_merge6() {
+   newcell("edge_merge6");
+   opencell("edge_merge6");
+   addbox({{  0 , 12 } , {  5 , 13 }});
+   addbox({{  0 ,  8 } , {  5 ,  9 }});
+   addbox({{  0 , 10 } , {  2 , 12 }});
+   addbox({{  0 ,  7 } , {  2 ,  9 }});
+   addbox({{  6 ,  8 } , { 11 ,  9 }});
+   addbox({{  6 , 12 } , { 11 , 13 }});
+   addbox({{  9 , 10 } , { 11 , 12 }});
+   addbox({{  9 ,  7 } , { 11 ,  9 }});
+   addbox({{  6 ,  0 } , { 11 ,  1 }});
+   addbox({{  6 ,  4 } , { 11 ,  5 }});
+   addbox({{  9 ,  4 } , { 11 ,  6 }});
+   addbox({{  9 ,  1 } , { 11 ,  3 }});
+   addbox({{  0 ,  4 } , {  5 ,  5 }});
+   addbox({{  0 ,  0 } , {  5 ,  1 }});
+   addbox({{  0 ,  4 } , {  2 ,  6 }});
+   addbox({{  0 ,  1 } , {  2 ,  3 }});
+   select_all();
+   merge();
+}
+
 void all_cut()
 {
    cut_test1();
@@ -471,6 +494,7 @@ void all_merge()
    edge_merge3();
    edge_merge4();
    edge_merge5();
+   edge_merge6();
    zoomall();
 }
 

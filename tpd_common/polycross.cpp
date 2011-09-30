@@ -102,12 +102,21 @@ float polycross::getLambda( const TP* p1, const TP* p2, const TP* p)
    return lambda;
 }
 
-bool polycross::coincidingSegm(const TP* pa, const TP* pb, const TP* pc)
+/*!
+ * Checks whether two joining segments coincide
+ * @param p common point
+ * @param pa the end point of the first segment
+ * @param pb the end point of the second segment
+ * @return 1 if p, pb, pa are in one line this order
+ *         0 if the input points are not in one line or p is a central point
+ *        -1 if p, pa, pb are lined-up
+ */
+char polycross::coincidingSegm(const TP* p, const TP* pa, const TP* pb)
 {
-   if (0 != orientation(pa, pb, pc)) return false;
-   if ((getLambda(pa, pb, pc) >= 0) || (getLambda(pa, pc, pb) >= 0))
-      return true;
-   else return false;
+   if (0 != orientation(p, pa, pb)) return  0;
+   if (getLambda(p, pa, pb) >= 0)   return  1;
+   if (getLambda(p, pb, pa) >= 0)   return -1;
+   else return 0;
 }
 //==============================================================================
 // VPoint
@@ -1316,7 +1325,7 @@ void polycross::EventVertex::CheckBEM(XQ& eventq, TEvent& thr1, TEvent& thr2)
 #ifdef BO2_DEBUG
    printf("Checking BEM ------------------------\n");
 #endif
-   bool sa1sa2 = coincidingSegm(thr1.evertex(), thr1.avertex(), thr2.avertex());
+   char sa1sa2 = coincidingSegm(thr1.evertex(), thr1.avertex(), thr2.avertex());
 #ifdef BO2_DEBUG
    printf("Points: (%d, %d) ; (%d, %d) ; (%d, %d) ;",thr1.evertex()->x(), thr1.evertex()->y(),
                                                      thr1.avertex()->x(), thr1.avertex()->y(),
@@ -1326,7 +1335,7 @@ void polycross::EventVertex::CheckBEM(XQ& eventq, TEvent& thr1, TEvent& thr2)
    else
       printf("\n");
 #endif
-   bool sa1sb2 = coincidingSegm(thr1.evertex(), thr1.avertex(), thr2.bvertex());
+   char sa1sb2 = coincidingSegm(thr1.evertex(), thr1.avertex(), thr2.bvertex());
 #ifdef BO2_DEBUG
    printf("Points: (%d, %d) ; (%d, %d) ; (%d, %d) ;",thr1.evertex()->x(), thr1.evertex()->y(),
                                                      thr1.avertex()->x(), thr1.avertex()->y(),
@@ -1336,7 +1345,7 @@ void polycross::EventVertex::CheckBEM(XQ& eventq, TEvent& thr1, TEvent& thr2)
    else
       printf("\n");
 #endif
-   bool sb1sa2 = coincidingSegm(thr1.evertex(), thr1.bvertex(), thr2.avertex());
+   char sb1sa2 = coincidingSegm(thr1.evertex(), thr1.bvertex(), thr2.avertex());
 #ifdef BO2_DEBUG
    printf("Points: (%d, %d) ; (%d, %d) ; (%d, %d) ;",thr1.evertex()->x(), thr1.evertex()->y(),
                                                      thr1.bvertex()->x(), thr1.bvertex()->y(),
@@ -1346,7 +1355,7 @@ void polycross::EventVertex::CheckBEM(XQ& eventq, TEvent& thr1, TEvent& thr2)
    else
       printf("\n");
 #endif
-   bool sb1sb2 = coincidingSegm(thr1.evertex(), thr1.bvertex(), thr2.bvertex());
+   char sb1sb2 = coincidingSegm(thr1.evertex(), thr1.bvertex(), thr2.bvertex());
 #ifdef BO2_DEBUG
    printf("Points: (%d, %d) ; (%d, %d) ; (%d, %d) ;",thr1.evertex()->x(), thr1.evertex()->y(),
                                                      thr1.bvertex()->x(), thr1.bvertex()->y(),
@@ -1359,18 +1368,10 @@ void polycross::EventVertex::CheckBEM(XQ& eventq, TEvent& thr1, TEvent& thr2)
 #ifdef BO2_DEBUG
    printf("-------------------------------------\n");
 #endif
-   if ((sa1sa2) && (!(sa1sb2 || sb1sa2 ||sb1sb2)))
-      thr1.insertCrossPoint(thr1.evertex(), thr1.bseg(), thr2.bseg(), eventq, true );
-   else if ((sa1sb2) && (!(sa1sa2 || sb1sa2 ||sb1sb2)))
-      thr1.insertCrossPoint(thr1.evertex(), thr1.bseg(), thr2.aseg(), eventq, true );
-   else if ((sb1sa2) && (!(sa1sa2 || sa1sb2 || sb1sb2)))
-      thr1.insertCrossPoint(thr1.evertex(), thr1.aseg(), thr2.bseg(), eventq, true );
-   else if ((sb1sb2) && (!(sa1sa2 || sa1sb2 || sb1sa2)))
-      thr1.insertCrossPoint(thr1.evertex(), thr1.aseg(), thr2.aseg(), eventq, true );
-   else if (!(sa1sa2 || sa1sb2 || sb1sa2 || sb1sb2))
+   if    ((0 == sa1sa2) && (0 == sa1sb2) && (0 == sb1sa2) && (0 == sb1sb2))
    {
-      float lsign, rsign, rlmul;
       //check for threads, crossing in the event vertex point
+      float lsign, rsign, rlmul;
       lsign = orientation(thr1.avertex(), thr1.bvertex(), thr2.avertex());
       rsign = orientation(thr1.avertex(), thr1.bvertex(), thr2.bvertex());
       rlmul = lsign * rsign;
@@ -1384,6 +1385,30 @@ void polycross::EventVertex::CheckBEM(XQ& eventq, TEvent& thr1, TEvent& thr2)
       thr1.insertCrossPoint(thr1.evertex(), thr1.aseg(), thr2.aseg(), eventq, true );
       thr1.insertCrossPoint(thr1.evertex(), thr1.bseg(), thr2.bseg(), eventq, true );
    }
+   else if ((sa1sa2  != 0) && (0 == sa1sb2) && (0 == sb1sa2) && (0 == sb1sb2))
+      thr1.insertCrossPoint(thr1.evertex(), thr1.bseg(), thr2.bseg(), eventq, true );
+   else if ((sa1sb2  != 0) && (0 == sa1sa2) && (0 == sb1sa2) && (0 == sb1sb2))
+      thr1.insertCrossPoint(thr1.evertex(), thr1.bseg(), thr2.aseg(), eventq, true );
+   else if ((sb1sa2  != 0) && (0 == sa1sa2) && (0 == sa1sb2) && (0 == sb1sb2))
+      thr1.insertCrossPoint(thr1.evertex(), thr1.aseg(), thr2.bseg(), eventq, true );
+   else if ((sb1sb2  != 0) && (0 == sa1sa2) && (0 == sa1sb2) && (0 == sb1sa2))
+      thr1.insertCrossPoint(thr1.evertex(), thr1.aseg(), thr2.aseg(), eventq, true );
+   else if ((0 == sa1sb2) && (0 == sb1sa2))
+      if (sa1sa2 * sb1sb2 < 0)
+         thr1.insertCrossPoint(thr1.evertex(), thr1.bseg(), thr2.bseg(), eventq, true );
+      else
+      {
+         // segment threads overlapping each other - additional cross point is not required
+      }
+   else if ((0 == sa1sa2) && (0 == sb1sb2))
+      if (sa1sb2 * sb1sa2 < 0)
+         thr1.insertCrossPoint(thr1.evertex(), thr1.bseg(), thr2.aseg(), eventq, true );
+      else
+      {
+         // segment threads overlapping each other - additional cross point is not required
+      }
+   else
+      throw EXPTNpolyCross("Unexpected combination of joining segments");
 }
 
 void polycross::EventVertex::sweep2bind(YQ& sweepline, BindCollection& bindColl)
