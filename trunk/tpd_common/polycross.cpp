@@ -32,7 +32,7 @@
 #include "outbox.h"
 #include "avl.h"
 
-#define BO2_DEBUG
+//#define BO2_DEBUG
 #define BO_printseg(SEGM) printf("thread %i : polygon %i, segment %i, \
 lP (%i,%i), rP (%i,%i)  \n" , SEGM->threadID(), SEGM->polyNo() , SEGM->edge(), \
 SEGM->lP()->x(), SEGM->lP()->y(), SEGM->rP()->x(),SEGM->rP()->y());
@@ -231,7 +231,7 @@ second case is when the segments are piercing the third segment Then one
 of the crossing points and the vertex point are redundant and should be
 removed.
 */
-polycross::VPoint* polycross::VPoint::checkNreorder(VPoint*& pairedShape, bool single)
+polycross::VPoint* polycross::VPoint::checkNreorder(VPoint*& pairedShape/*, bool single*/)
 {
    CPoint* nextCross = static_cast<CPoint*>(_next);
    CPoint* prevCross = static_cast<CPoint*>(_prev);
@@ -282,8 +282,8 @@ polycross::VPoint* polycross::VPoint::checkNreorder(VPoint*& pairedShape, bool s
    }
    else
    {
-      if (single)
-      {
+//      if (single)
+//      {
          //we have a touching edges (K case) and we're post-processing
          //a single polygon - so, let's remove both crossing points
          prevCross->prev()->set_next(this); set_prev(prevCross->prev());
@@ -293,15 +293,15 @@ polycross::VPoint* polycross::VPoint::checkNreorder(VPoint*& pairedShape, bool s
          delete prevCross; delete prevCrossCouple;
          delete nextCross; delete nextCrossCouple;
          return this;
-      }
-      else
-      {
-         //in the case of two polygons the only possible filtering is to remove
-         //the vertex point (laylogic.tll:cut_test3a()) which is not having any
-         //impact on the algorithm
-         //@TODO
-         return nextCross;
-      }
+//      }
+//      else
+//      {
+//         //in the case of two polygons the only possible filtering is to remove
+//         //the vertex point (laylogic.tll:cut_test3a()) which is not having any
+//         //impact on the algorithm
+//         //@TODO
+//         return nextCross;
+//      }
 
    }
 }
@@ -1371,19 +1371,20 @@ void polycross::EventVertex::CheckBEM(XQ& eventq, TEvent& thr1, TEvent& thr2)
    if    ((0 == sa1sa2) && (0 == sa1sb2) && (0 == sb1sa2) && (0 == sb1sb2))
    {
       //check for threads, crossing in the event vertex point
-      float lsign, rsign, rlmul;
-      lsign = orientation(thr1.avertex(), thr1.bvertex(), thr2.avertex());
-      rsign = orientation(thr1.avertex(), thr1.bvertex(), thr2.bvertex());
-      rlmul = lsign * rsign;
-      if      (0  < rlmul)  return;// not crossing
-      assert(rlmul); // could not be touching or coinciding
-      lsign = orientation(thr2.avertex(), thr2.bvertex(), thr1.avertex());
-      rsign = orientation(thr2.avertex(), thr2.bvertex(), thr1.bvertex());
-      rlmul = lsign * rsign;
-      if      (0  < rlmul)  return;// not crossing
-      assert(rlmul); // could not be touching or coinciding
-      thr1.insertCrossPoint(thr1.evertex(), thr1.aseg(), thr2.aseg(), eventq, true );
-      thr1.insertCrossPoint(thr1.evertex(), thr1.bseg(), thr2.bseg(), eventq, true );
+      float lsignA = orientation(thr1.evertex(), thr1.avertex(), thr2.avertex());
+      float rsignA = orientation(thr1.evertex(), thr1.avertex(), thr2.bvertex());
+      float lsignB = orientation(thr1.evertex(), thr1.bvertex(), thr2.avertex());
+      float rsignB = orientation(thr1.evertex(), thr1.bvertex(), thr2.bvertex());
+      // it is still possible to get one of the signs eq 0. This is the case
+      // when the points are lined-up, but thr1.evertex() is in the middle
+      float signA = lsignA * rsignA;
+      float signB = lsignB * rsignB;
+      //the BIG question here is WHERE to place the cross points
+      if ((signA < 0) || (signB < 0))
+      {
+         thr1.insertCrossPoint(thr1.evertex(), thr1.bseg(), thr2.bseg(), eventq, true );
+         thr1.insertCrossPoint(thr1.evertex(), thr1.aseg(), thr2.aseg(), eventq, true );
+      }
    }
    else if ((sa1sa2  != 0) && (0 == sa1sb2) && (0 == sb1sa2) && (0 == sb1sb2))
       thr1.insertCrossPoint(thr1.evertex(), thr1.bseg(), thr2.bseg(), eventq, true );

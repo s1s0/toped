@@ -35,8 +35,8 @@
 
 //#define POLYFIX_DEBUG
 #ifdef POLYFIX_DEBUG
-#define REPORT_POLY_DEBUG {  printf("=======================================================\n"); \
-   polycross::VPoint* centinel = _shape;  \
+#define REPORT_POLY_DEBUG(pl) {  printf("=======================================================\n"); \
+   polycross::VPoint* centinel = pl;  \
    polycross::VPoint* looper = centinel;  \
    int pno = 1;   \
    do    {  \
@@ -44,7 +44,7 @@
       looper = looper->next();   \
    } while (centinel != looper);}
 #else
-#define REPORT_POLY_DEBUG
+#define REPORT_POLY_DEBUG(pl)
 #endif
 
 //#define POLYBIND_DEBUG
@@ -59,15 +59,15 @@
 
 //#define POLYLOOP_DEBUG
 #ifdef POLYLOOP_DEBUG
-#define PLYDUMP_POINT(x,y) \
-   printf("(%i,%i)\n", x, y);
+#define PLYDUMP_POINT(p) \
+   printf("(%i,%i)\n", p->x(), p->y());
 #define PLYDUMP_START \
    printf("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv\n");
 #define PLYDUMP_END \
    printf("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n");
 #else
 #define PLYDUMP_START
-#define PLYDUMP_POINT(x,y)
+#define PLYDUMP_POINT(p)
 #define PLYDUMP_END
 #endif
 
@@ -112,46 +112,53 @@ void logicop::logic::reorderCross()
    polycross::VPoint* centinel = _shape1;
    polycross::VPoint* looper = centinel;
    unsigned shape1Num = 0;
+   PLYDUMP_START
    do
    {
       shape1Num++;
+      PLYDUMP_POINT(looper->cp())
       looper = looper->next();
    } while (centinel != looper);
+   PLYDUMP_END
    unsigned loopcount;
    for(loopcount = 0; loopcount < shape1Num; loopcount++)
    {
-      // for every non-crossing point which has cross point neightbors and
+      // for every non-crossing point which has cross point neighbors and
       // all 3 points coincide
       if (looper->visited() &&
           (!looper->prev()->visited() && !looper->next()->visited()) &&
            (*looper->prev()->cp() == *looper->next()->cp()) )
       {
-         looper = looper->checkNreorder(_shape2, false);
+         looper = looper->checkNreorder(_shape2/*, false*/);
       }
       else looper = looper->next();
    }
    _shape1 = looper;
+   REPORT_POLY_DEBUG(_shape1)
 
    centinel = _shape2;
    looper = centinel;
    unsigned shape2Num = 0;
+   PLYDUMP_START
    do
    {
       shape2Num++;
+      PLYDUMP_POINT(looper->cp())
       looper = looper->next();
    } while (centinel != looper);
-
+   PLYDUMP_END
    for(loopcount = 0; loopcount < shape2Num; loopcount++)
    {
       if (looper->visited() &&
           (!looper->prev()->visited() && !looper->next()->visited()) &&
           (*looper->prev()->cp() == *looper->next()->cp()) )
       {
-         looper = looper->checkNreorder(_shape1, false);
+         looper = looper->checkNreorder(_shape1/*, false*/);
       }
       else looper = looper->next();
    }
    _shape2 = looper;
+   REPORT_POLY_DEBUG(_shape2)
 }
 /*!If more than one logical operation has to be executed over the input shapes
 the raw data #_shape1 and #_shape2 can be reused, but has to be recycled beforehand
@@ -330,7 +337,7 @@ bool logicop::logic::OR(pcollection& plycol)
          {
             pickup = pickup->follower(direction);
             shgen->push_back(TP(pickup->cp()->x(), pickup->cp()->y()));
-            PLYDUMP_POINT(pickup->cp()->x(), pickup->cp()->y())
+            PLYDUMP_POINT(pickup->cp())
          } while (pickup != collector);
          lclcol.push_back(shgen);
          PLYDUMP_END
@@ -560,10 +567,10 @@ void logicop::CrossFix::findCrossingPoints()
 //   if ((0 == _crossp) || (!_looped)) return;
    if (0 == _crossp) return;
    _shape = _segl->dump_points(_looped);
-   REPORT_POLY_DEBUG
+   REPORT_POLY_DEBUG(_shape)
    reorderCross();
    cleanRedundant();
-   REPORT_POLY_DEBUG
+   REPORT_POLY_DEBUG(_shape)
    countCross();
 }
 
@@ -598,7 +605,7 @@ void logicop::CrossFix::reorderCross()
           (!looper->prev()->visited() && !looper->next()->visited()) &&
            (*looper->prev()->cp() == *looper->next()->cp()) )
       {
-         looper = looper->checkNreorder(_shape, true);
+         looper = looper->checkNreorder(_shape/*, true*/);
       }
       else looper = looper->next();
    }
