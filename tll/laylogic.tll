@@ -461,6 +461,43 @@ void edge_merge6() {
    merge();
 }
 
+void vertex_cut1() 
+{
+   newcell("vertex_cut1");
+   opencell("vertex_cut1");
+   addbox( { { 2 , 7 } , { 18 , 17.5 } }, 2);
+   select({8.50,8.50});
+   rotate(30, { 2 , 7 });
+   select({3.50,8.00});
+   addpoly( { { 1.5 , 5.5 } , { 4 , 5.5 } , { 4 , 7 } , { 2 , 7 } , { 1.5 , 7 } }, 4);
+   polycut( { { 1.5 , 5.5 } , { 4 , 5.5 } , { 4 , 7 } , { 2 , 7 } , { 1.5 , 7 } });
+}
+
+void vertex_cut2() 
+{
+   newcell("vertex_cut2");
+   opencell("vertex_cut2");
+   addpoly( {{ 2 , 7 } , { 5 , 10 } , { 2 , 13 } , { -1 , 10 }},2);
+   select_all();
+   addpoly({ { 2.5 , 6 } , { 3 , 6 } , { 3 , 7.5 } , { 2 , 7.5 } , { 2 , 7 } , { 2.5 , 7 } }, 4);
+   polycut({ { 2.5 , 6 } , { 3 , 6 } , { 3 , 7.5 } , { 2 , 7.5 } , { 2 , 7 } , { 2.5 , 7 } });
+   move({2,7},{4,7});
+}
+
+void vertex_cut3()
+{
+   newcell("vertex_cut3");
+   opencell("vertex_cut3");
+   addbox( { { 2 , 7 } , { 18 , 17.5 } });
+   select({8.50,8.50});
+   rotate(30,{ 2 , 7 });
+   select({3.50,8.00});
+   addpoly( { { 2.5 , 10 } , { 5.5 , 10 } , { 5.5 , 8.5 } , { 2 , 8.5 } , { 2 , 7 } , { 1.5 , 7 } , { 1.5 ,
+   10 } },4);
+   polycut( { { 2.5 , 10 } , { 5.5 , 10 } , { 5.5 , 8.5 } , { 2 , 8.5 } , { 2 , 7 } , { 1.5 , 7 } , { 1.5 , 10 } });
+   move({ 2 , 7 } , { 8.5 , 7 });
+}
+
 void all_cut()
 {
    cut_test1();
@@ -480,6 +517,9 @@ void all_cut()
    edge_cut4();
    edge_cut5();
    edge_cut6();   
+   vertex_cut1();
+   vertex_cut2();
+   vertex_cut3();
    zoomall();
 }
 
@@ -504,44 +544,7 @@ void all_tests()
    all_merge();
 }
 
-void bug1() 
-{
-   newcell("bug1");
-   opencell("bug1");
-   addbox( { { 2 , 7 } , { 18 , 17.5 } }, 2);
-   select({8.50,8.50});
-   rotate(30, { 2 , 7 });
-   select({3.50,8.00});
-   addpoly( { { 1.5 , 5.5 } , { 4 , 5.5 } , { 4 , 7 } , { 2 , 7 } , { 1.5 , 7 } }, 4);
-//   polycut( { { 1.5 , 5.5 } , { 4 , 5.5 } , { 4 , 7 } , { 2 , 7 } , { 1.5 , 7 } });
-}
-
-void bug2() 
-{
-   newcell("bug2");
-   opencell("bug2");
-   addbox( { { 2 , 7 } , { 18 , 17.5 } },2);
-   select({8.50,8.50});
-   rotate(30, { 2 , 7 });
-   select({3.50,8.00});
-   addpoly({ { 2.5 , 6 } , { 3 , 6 } , { 3 , 7.5 } , { 2 , 7.5 } , { 2 , 7 } , { 2.5 , 7 } }, 4);
-//   polycut({ { 2.5 , 6 } , { 3 , 6 } , { 3 , 7.5 } , { 2 , 7.5 } , { 2 , 7 } , { 2.5 , 7 } });
-}
-
-void bug3()
-{
-   newcell("bug3");
-   opencell("bug3");
-   addbox( { { 2 , 7 } , { 18 , 17.5 } });
-   select({8.50,8.50});
-   rotate(30,{ 2 , 7 });
-   select({3.50,8.00});
-   addpoly( { { 2.5 , 10 } , { 5.5 , 10 } , { 5.5 , 8.5 } , { 2 , 8.5 } , { 2 , 7 } , { 1.5 , 7 } , { 1.5 ,
-   10 } },4);
-//   polycut( { { 2.5 , 10 } , { 5.5 , 10 } , { 5.5 , 8.5 } , { 2 , 8.5 } , { 2 , 7 } , { 1.5 , 7 } , { 1.5 , 10 } });
-}
-
-void bug4() {
+void bug_bowtie() {
    // bowtie
    newcell("bug4");
    opencell("bug4");
