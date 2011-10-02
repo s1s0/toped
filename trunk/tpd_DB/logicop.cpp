@@ -35,7 +35,7 @@
 
 //#define POLYFIX_DEBUG
 #ifdef POLYFIX_DEBUG
-#define REPORT_POLY_DEBUG(pl) {  printf("=======================================================\n"); \
+#define REPORT_POLY_DEBUG(pl, msg) {  printf("=========================== %s ============================\n",msg); \
    polycross::VPoint* centinel = pl;  \
    polycross::VPoint* looper = centinel;  \
    int pno = 1;   \
@@ -44,7 +44,7 @@
       looper = looper->next();   \
    } while (centinel != looper);}
 #else
-#define REPORT_POLY_DEBUG(pl)
+#define REPORT_POLY_DEBUG(pl,msg)
 #endif
 
 //#define POLYBIND_DEBUG
@@ -109,6 +109,8 @@ void logicop::logic::findCrossingPoints()
 
 void logicop::logic::reorderCross()
 {
+   REPORT_POLY_DEBUG(_shape1, "Line 112")
+   REPORT_POLY_DEBUG(_shape2, "Line 113")
    polycross::VPoint* centinel = _shape1;
    polycross::VPoint* looper = centinel;
    unsigned shape1Num = 0;
@@ -129,12 +131,14 @@ void logicop::logic::reorderCross()
           (!looper->prev()->visited() && !looper->next()->visited()) &&
            (*looper->prev()->cp() == *looper->next()->cp()) )
       {
-         looper = looper->checkNreorder(_shape2/*, false*/);
+         looper = looper->checkNreorder(_shape2, false);
+         REPORT_POLY_DEBUG(_shape2, "Line 135")
       }
       else looper = looper->next();
    }
    _shape1 = looper;
-   REPORT_POLY_DEBUG(_shape1)
+   REPORT_POLY_DEBUG(_shape1, "Line 140")
+   REPORT_POLY_DEBUG(_shape2, "Line 141")
 
    centinel = _shape2;
    looper = centinel;
@@ -153,12 +157,13 @@ void logicop::logic::reorderCross()
           (!looper->prev()->visited() && !looper->next()->visited()) &&
           (*looper->prev()->cp() == *looper->next()->cp()) )
       {
-         looper = looper->checkNreorder(_shape1/*, false*/);
+         looper = looper->checkNreorder(_shape1, false);
       }
       else looper = looper->next();
    }
    _shape2 = looper;
-   REPORT_POLY_DEBUG(_shape2)
+   REPORT_POLY_DEBUG(_shape1, "Line 165")
+   REPORT_POLY_DEBUG(_shape2, "Line 166")
 }
 /*!If more than one logical operation has to be executed over the input shapes
 the raw data #_shape1 and #_shape2 can be reused, but has to be recycled beforehand
@@ -567,10 +572,10 @@ void logicop::CrossFix::findCrossingPoints()
 //   if ((0 == _crossp) || (!_looped)) return;
    if (0 == _crossp) return;
    _shape = _segl->dump_points(_looped);
-   REPORT_POLY_DEBUG(_shape)
+   REPORT_POLY_DEBUG(_shape, "Line 575")
    reorderCross();
    cleanRedundant();
-   REPORT_POLY_DEBUG(_shape)
+   REPORT_POLY_DEBUG(_shape, "Line 578")
    countCross();
 }
 
@@ -605,7 +610,7 @@ void logicop::CrossFix::reorderCross()
           (!looper->prev()->visited() && !looper->next()->visited()) &&
            (*looper->prev()->cp() == *looper->next()->cp()) )
       {
-         looper = looper->checkNreorder(_shape/*, true*/);
+         looper = looper->checkNreorder(_shape, true);
       }
       else looper = looper->next();
    }

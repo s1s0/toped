@@ -231,7 +231,7 @@ second case is when the segments are piercing the third segment Then one
 of the crossing points and the vertex point are redundant and should be
 removed.
 */
-polycross::VPoint* polycross::VPoint::checkNreorder(VPoint*& pairedShape/*, bool single*/)
+polycross::VPoint* polycross::VPoint::checkNreorder(VPoint*& pairedShape, bool single)
 {
    CPoint* nextCross = static_cast<CPoint*>(_next);
    CPoint* prevCross = static_cast<CPoint*>(_prev);
@@ -245,7 +245,7 @@ polycross::VPoint* polycross::VPoint::checkNreorder(VPoint*& pairedShape/*, bool
       // swap the links
       prevCross->linkto(nextCrossCouple); nextCrossCouple->linkto(prevCross);
       nextCross->linkto(prevCrossCouple); prevCrossCouple->linkto(nextCross);
-      // ... and don't forget to update the points themselfs
+      // ... and don't forget to update the points themselves
       nextCrossCouple = nextCross->link();
       prevCrossCouple = prevCross->link();
    }
@@ -268,6 +268,7 @@ polycross::VPoint* polycross::VPoint::checkNreorder(VPoint*& pairedShape/*, bool
       nextCross->set_prev(prevCross->prev());
       if (prevCrossCouple->next() != nextCrossCouple)
       {
+         // below we're comparing pointers, not TP's
          if (pairedShape == prevCrossCouple->next())
             pairedShape = nextCrossCouple;
          delete (prevCrossCouple->next());
@@ -282,8 +283,8 @@ polycross::VPoint* polycross::VPoint::checkNreorder(VPoint*& pairedShape/*, bool
    }
    else
    {
-//      if (single)
-//      {
+      if (single)
+      {
          //we have a touching edges (K case) and we're post-processing
          //a single polygon - so, let's remove both crossing points
          prevCross->prev()->set_next(this); set_prev(prevCross->prev());
@@ -293,16 +294,32 @@ polycross::VPoint* polycross::VPoint::checkNreorder(VPoint*& pairedShape/*, bool
          delete prevCross; delete prevCrossCouple;
          delete nextCross; delete nextCrossCouple;
          return this;
-//      }
-//      else
-//      {
-//         //in the case of two polygons the only possible filtering is to remove
-//         //the vertex point (laylogic.tll:cut_test3a()) which is not having any
-//         //impact on the algorithm
-//         //@TODO
-//         return nextCross;
-//      }
-
+      }
+      else
+      {
+         //we have a touching edges (K case) and we're post-processing
+         //a two polygon case - so, let's remove both crossing points
+         // keeping the second polygon intact
+         prevCross->prev()->set_next(this); set_prev(prevCross->prev());
+         nextCross->next()->set_prev(this); set_next(nextCross->next());
+         delete prevCross;
+         delete nextCross;
+         // Cross coupled points are non necessarily neighbors in the second
+         // polygon. We can have a plenty of them in one vertex - so take them
+         // out one by one. First prevCrossCouple...
+         prevCrossCouple->prev()->set_next(prevCrossCouple->next());
+         prevCrossCouple->next()->set_prev(prevCrossCouple->prev());
+         if (prevCrossCouple == pairedShape)
+            pairedShape = prevCrossCouple->prev();
+         delete prevCrossCouple;
+         // ...then nextCrossCouple
+         nextCrossCouple->prev()->set_next(nextCrossCouple->next());
+         nextCrossCouple->next()->set_prev(nextCrossCouple->prev());
+         if (nextCrossCouple == pairedShape)
+            pairedShape = nextCrossCouple->next();
+         delete nextCrossCouple;
+         return this;
+      }
    }
 }
 
