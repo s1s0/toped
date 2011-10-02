@@ -33,7 +33,7 @@
 #include "ttt.h"
 #include "outbox.h"
 
-//#define POLYFIX_DEBUG
+#define POLYFIX_DEBUG
 #ifdef POLYFIX_DEBUG
 #define REPORT_POLY_DEBUG(pl, msg) {  printf("=========================== %s ============================\n",msg); \
    polycross::VPoint* centinel = pl;  \
@@ -109,8 +109,8 @@ void logicop::logic::findCrossingPoints()
 
 void logicop::logic::reorderCross()
 {
-   REPORT_POLY_DEBUG(_shape1, "Line 112")
-   REPORT_POLY_DEBUG(_shape2, "Line 113")
+   REPORT_POLY_DEBUG(_shape1, "Before reorderCross")
+   REPORT_POLY_DEBUG(_shape2, "Before reorderCross")
    polycross::VPoint* centinel = _shape1;
    polycross::VPoint* looper = centinel;
    unsigned shape1Num = 0;
@@ -132,13 +132,13 @@ void logicop::logic::reorderCross()
            (*looper->prev()->cp() == *looper->next()->cp()) )
       {
          looper = looper->checkNreorder(_shape2, false);
-         REPORT_POLY_DEBUG(_shape2, "Line 135")
+         REPORT_POLY_DEBUG(_shape2, "loop")
       }
       else looper = looper->next();
    }
    _shape1 = looper;
-   REPORT_POLY_DEBUG(_shape1, "Line 140")
-   REPORT_POLY_DEBUG(_shape2, "Line 141")
+   REPORT_POLY_DEBUG(_shape1, "Middle of reorderCross")
+   REPORT_POLY_DEBUG(_shape2, "Middle ofreorderCross")
 
    centinel = _shape2;
    looper = centinel;
@@ -162,8 +162,8 @@ void logicop::logic::reorderCross()
       else looper = looper->next();
    }
    _shape2 = looper;
-   REPORT_POLY_DEBUG(_shape1, "Line 165")
-   REPORT_POLY_DEBUG(_shape2, "Line 166")
+   REPORT_POLY_DEBUG(_shape1, "After  reorderCross")
+   REPORT_POLY_DEBUG(_shape2, "After  reorderCross")
 }
 /*!If more than one logical operation has to be executed over the input shapes
 the raw data #_shape1 and #_shape2 can be reused, but has to be recycled beforehand
