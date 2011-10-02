@@ -238,9 +238,21 @@ polycross::VPoint* polycross::VPoint::checkNreorder(VPoint*& pairedShape, bool s
    assert(*(prevCross->cp()) == *(nextCross->cp()));
    CPoint* nextCrossCouple = nextCross->link();
    CPoint* prevCrossCouple = prevCross->link();
-   // Check that crossing points are not cross coupled. If they are - swap
-   // their links to fix them
-   if (!(*(prevCrossCouple->next()->cp()) == *(nextCrossCouple->cp())))
+   // Check that crossing points are not cross coupled i.e. that nextCrossCouple
+   // is after the prevCrossCouple. If they are - swap their links to fix them
+   // Do not forget that there might be other cross points between them as well as
+   // a vertex points
+   VPoint* snV = prevCrossCouple->next();
+   while ( (snV != nextCrossCouple) && (*snV->cp() == *cp()) )
+      snV = snV->next();
+   VPoint *spV = nextCrossCouple->prev();
+   while ( (spV != prevCrossCouple) && (*spV->cp() == *cp()) )
+      spV = spV->prev();
+   if (snV == nextCrossCouple)
+   {
+      assert(spV == prevCrossCouple);
+   }
+   else
    {
       // swap the links
       prevCross->linkto(nextCrossCouple); nextCrossCouple->linkto(prevCross);
@@ -250,8 +262,11 @@ polycross::VPoint* polycross::VPoint::checkNreorder(VPoint*& pairedShape, bool s
       prevCrossCouple = prevCross->link();
    }
    // now check for piercing edge cross points
-   VPoint* spV = prevCrossCouple->prev();
-   VPoint *snV = nextCrossCouple->next();
+   // First find the neighboring points which does not coincide with this vertex
+   spV = prevCrossCouple->prev();
+   while (*spV->cp() == *cp()) spV = spV->prev();
+   snV = nextCrossCouple->next();
+   while (*snV->cp() == *cp()) snV = snV->next();
 
    VPoint* pV = prevCross;
    int oriP, oriN;
@@ -266,15 +281,21 @@ polycross::VPoint* polycross::VPoint::checkNreorder(VPoint*& pairedShape, bool s
       // we have a piercing edge cross - so let's remove the redundant points
       prevCross->prev()->set_next(nextCross);
       nextCross->set_prev(prevCross->prev());
-      if (prevCrossCouple->next() != nextCrossCouple)
+      if ((prevCrossCouple->next() == nextCrossCouple->prev()) && (1 == prevCrossCouple->next()->visited()))
       {
-         // below we're comparing pointers, not TP's
-         if (pairedShape == prevCrossCouple->next())
+         VPoint* deadVertex = prevCrossCouple->next();
+         // there is a single non-crossing point between the cross coupled points
+         // which must be removed
+         if (pairedShape == deadVertex)
             pairedShape = nextCrossCouple;
-         delete (prevCrossCouple->next());
+         prevCrossCouple->set_next(nextCrossCouple);
+         nextCrossCouple->set_prev(prevCrossCouple);
+         delete (deadVertex);
       }
-      prevCrossCouple->prev()->set_next(nextCrossCouple);
-      nextCrossCouple->set_prev(prevCrossCouple->prev());
+      prevCrossCouple->prev()->set_next(prevCrossCouple->next());
+      prevCrossCouple->next()->set_prev(prevCrossCouple->prev());
+      if (prevCrossCouple == pairedShape)
+         pairedShape = prevCrossCouple->prev();
       // delete here the removed crossing points
       delete prevCrossCouple;
       delete prevCross;
