@@ -261,6 +261,26 @@ void tellstdfunc::cleanSelectList(laydata::SelectList* dlist)
    delete dlist;
 }
 
+void tellstdfunc::cleanFadeadList(laydata::SelectList** fadead)
+{
+   for (byte i = 0; i < 3; i++)
+   {
+      for (laydata::SelectList::iterator CI = fadead[i]->begin(); CI != fadead[i]->end(); CI++)
+      {
+         laydata::DataList* sshape = CI->second;
+         if (1 == i) // deleted list only
+         {
+            for (laydata::DataList::iterator CCI = sshape->begin(); CCI  != sshape->end(); CCI++)
+            {
+               if (0 != CCI->second.size()) CCI->second.clear();
+            }
+         }
+         delete sshape;
+      }
+      delete fadead[i];
+   }
+}
+
 /** Filters shapeSel using the mask. Returns new list, containing copy of
 unfiltered components
 */

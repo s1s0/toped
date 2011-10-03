@@ -1349,6 +1349,7 @@ bool laydata::TdtCell::rotateSelected(laydata::TdtDesign* ATDB, const CTM& trans
                   _layers[CL->first]->add(DI->first);
                   DI++;
                }
+               delete checkS;
             }
             else
             {// no conversion, so just add the shape back to the data holder
