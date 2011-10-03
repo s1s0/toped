@@ -37,17 +37,6 @@
 lP (%i,%i), rP (%i,%i)  \n" , SEGM->threadID(), SEGM->polyNo() , SEGM->edge(), \
 SEGM->lP()->x(), SEGM->lP()->y(), SEGM->rP()->x(),SEGM->rP()->y());
 
-//-----------------------------------------------------------------------------
-// The declaration of the avl related functions. They are declared originally
-// in avl.h and redeclared here in C++ manner with extern "C" clause
-//extern "C" {
-//   avl_table* avl_create (avl_comparison_func *, const void *, libavl_allocator *);
-//   void avl_destroy (struct avl_table *, avl_item_func *);
-//   void **avl_probe (struct avl_table *, void *);
-//   void*      avl_delete (avl_table *, const void *);
-//   void*      avl_t_first (avl_traverser *, avl_table *);
-//}
-
 //==============================================================================
 /**
  * Determines the lexicographical order of two points comparing X first.
@@ -431,7 +420,6 @@ unsigned polycross::polysegment::normalize(const TP* p1, const TP* p2)
    {
       SortLine functor(p1,p2);
       _crossPoints.sort(functor);
-//      std::sort(_crossPoints.begin(), _crossPoints.end(), functor);
    }
    return numcross;
 }
@@ -488,36 +476,6 @@ bool polycross::polysegment::operator == (const polysegment& comp) const
    return ((_polyNo == comp._polyNo) &&
            (_edge   == comp._edge  )     );
 }
-
-/*
-#ifdef BO2_DEBUG
-      printf("( On EDGE %i ...)\n", _edge );
-#endif
-      crossCList::iterator CCP = _crossPoints.begin();
-      while (CCP != _crossPoints.end())
-      {
-#ifdef BO2_DEBUG
-         printf("(....... cross point with edge %i)\n", (*CCP)->link()->edge() );
-#endif
-         bool doublecross = false;
-         for (crossCList::const_iterator RCP = _crossPoints.begin(); RCP != CCP; RCP++ )
-         {
-            if ((*CCP)->link()->edge() == (*RCP)->link()->edge())
-            {
-               doublecross = true;
-#ifdef BO2_DEBUG
-               printf("(<><><><><> Double cross points on segmets %i and %i)\n", _edge, (*RCP)->link()->edge() );
-#endif
-            }
-         }
-         if (doublecross)
-         {
-            delete (*CCP);
-            CCP = _crossPoints.erase(CCP);
-         }
-         else CCP++;
-      }
-*/
 
 polycross::BPoint* polycross::polysegment::insertBindPoint(const TP* pnt)
 {
@@ -655,10 +613,6 @@ TP* polycross::TEvent::getIntersect(polysegment* above, polysegment* below,
       CrossPoint = joiningSegments(above, below, lsign, rsign);
       if (NULL != CrossPoint)
       {
-//         if (NULL == iff)
-//            insertCrossPoint(CrossPoint, above, below, eventQ);
-//         else if  (*CrossPoint == *iff)
-//            insertCrossPoint(CrossPoint, above, below, eventQ, true);
          if ((NULL == iff) || (*CrossPoint == *iff))
             insertCrossPoint(CrossPoint, above, below, eventQ);
          else
@@ -683,10 +637,6 @@ TP* polycross::TEvent::getIntersect(polysegment* above, polysegment* below,
       CrossPoint = joiningSegments(below, above, lsign, rsign);
       if (NULL != CrossPoint)
       {
-//         if (NULL == iff)
-//            insertCrossPoint(CrossPoint, above, below, eventQ);
-//         else if  (*CrossPoint == *iff)
-//            insertCrossPoint(CrossPoint, above, below, eventQ, true);
          if ((NULL == iff) || (*CrossPoint == *iff))
             insertCrossPoint(CrossPoint, above, below, eventQ);
          else
@@ -827,19 +777,6 @@ TP* polycross::TEvent::oneLineSegments(polysegment* above, polysegment* below, Y
    // now the cases when one of the lines encloses fully the other one
    polysegment* outside = swaped ? below : above;
    polysegment* inside  = swaped ? above : below;
-//   // get the original polygon to which enclosed segment belongs to
-//   const PointVector* insideP = (1 == inside->polyNo()) ? sweepL->opl1() : sweepL->opl2();
-//   // ... and get the location of the inside segment in that sequence
-//   int numv = insideP->size();
-//   unsigned indxLP = (*(inside->lP()) == (*insideP)[inside->edge()]) ?
-//         inside->edge() : (inside->edge() + 1) % numv;
-//   unsigned indxRP = (*(inside->rP()) == (*insideP)[inside->edge()]) ?
-//         inside->edge() : (inside->edge() + 1) % numv;
-//   // we'll pickup the neighboring point(s) of the inside segment and will
-//   // recalculate the lps/rps for them.
-//   bool indxpos = (indxLP == ((indxRP + 1) % numv));
-////   bool indxpos = indxLP > indxRP;
-
    unsigned indxRP, indxLP;
    bool direction = true;
 
@@ -1152,38 +1089,6 @@ void polycross::TmEvent::sweep (XQ& eventQ, YQ& sweepline, ThreadList& threadl, 
    // check for intersections of the neighbors with the new segment
    checkIntersect(thr->threadAbove()->cseg(), thr->cseg(), eventQ, single);
    checkIntersect(thr->cseg(), thr->threadBelow()->cseg(), eventQ, single);
-
-// TODO (clean-up)
-// After the updates in the sweepline.modifyThread - the code below shall be redundant!
-// It is left here - just in case something had been missed in that update
-//   // check for intersections of the neighbors with the new segment
-//   // and whether or not threads should be swapped
-//   TP* CP;
-//   if((CP = getIntersect(thr->threadAbove()->cseg(), thr->cseg(), eventQ, single)))
-//   {
-//      if ((*CP) == *(_bseg->lP()))
-//      {
-//         polysegment* aseg = thr->threadAbove()->cseg();
-//         int ori1 = orientation(aseg->lP(), aseg->rP(), _aseg->lP());
-//         int ori2 = orientation(aseg->lP(), aseg->rP(), _bseg->rP());
-//         if ((ori1 == ori2) || (0 == ori1 * ori2))
-//            threadl.insert(_bseg->threadID());
-//      }
-//      delete CP;
-//   }
-//
-//   if ((CP = getIntersect(thr->cseg(), thr->threadBelow()->cseg(), eventQ, single)))
-//   {
-//      if ((*CP) == *(_bseg->lP()))
-//      {
-//         polysegment* bseg = thr->threadBelow()->cseg();
-//         int ori1 = orientation(bseg->lP(), bseg->rP(), _aseg->lP());
-//         int ori2 = orientation(bseg->lP(), bseg->rP(), _bseg->rP());
-//         if ((ori1 == ori2) || (0 == ori1 * ori2))
-//            threadl.insert(_bseg->threadID());
-//      }
-//      delete CP;
-//   }
 }
 
 void polycross::TmEvent::sweep2bind(YQ& sweepline, BindCollection& bindColl)
@@ -1872,8 +1777,6 @@ void polycross::XQ::addCrossEvent(const TP* CP, polysegment* aseg, polysegment* 
 
 int polycross::XQ::E_compare( const void* v1, const void* v2, void*)
 {
-   //const TP*  p1 = (*(EventVertex*)v1)();
-   //const TP*  p2 = (*(EventVertex*)v2)();
    const TP* p1 = (*static_cast<const EventVertex*>(v1))();
    const TP* p2 = (*static_cast<const EventVertex*>(v2))();
    return xyorder(p1,p2);
