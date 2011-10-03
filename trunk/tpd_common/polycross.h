@@ -214,7 +214,6 @@ namespace polycross
          polysegment*      bseg() {return _bseg;}
          virtual          ~TEvent() {};
       protected:
-         TP*               getIntersect(polysegment*, polysegment*, XQ&, bool, const TP* iff=NULL);
          void              checkIntersect(polysegment*, polysegment*, XQ&, bool, const TP* iff=NULL);
          const TP*         _evertex;
          void              insertCrossPoint(const TP*, polysegment*, polysegment*,

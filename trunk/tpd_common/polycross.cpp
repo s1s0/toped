@@ -554,17 +554,6 @@ polycross::VPoint* polycross::segmentlist::dump_points(bool looped)
 
 //==============================================================================
 // TEvent
-void polycross::TEvent::checkIntersect(polysegment* above, polysegment* below,
-                                    XQ& eventQ, bool single, const TP* iff)
-{
-   //TODO (clean-up)
-   // this method shall not be needed anymore. The method below shall be
-   // redefined like here
-   // void polycross::TEvent::getIntersect
-   TP* rep = getIntersect(above, below, eventQ, single, iff);
-   if (rep != NULL)
-      delete rep;
-}
 
 /**
  * The method is using orientation() function to do the job. Segments that belong to
@@ -579,7 +568,7 @@ queue. This is used for touching points, i.e. iff can be only a vertex of the
 input segments
  * @return the crossing point between segments if it exists. Otherwise - NULL
  */
-TP* polycross::TEvent::getIntersect(polysegment* above, polysegment* below,
+void polycross::TEvent::checkIntersect(polysegment* above, polysegment* below,
                                        XQ& eventQ, bool single, const TP* iff)
 {
    TP* CrossPoint = NULL;
@@ -590,7 +579,7 @@ TP* polycross::TEvent::getIntersect(polysegment* above, polysegment* below,
         (0 == above->polyNo()) ||
         (!single && (above->polyNo() == below->polyNo())) ||
         ( single && (1 == abs(above->edge() - below->edge())))
-      ) return NULL;
+      ) return;
    // Now test for intersection point existence
    float lsign, rsign, rlmul;
 
@@ -602,11 +591,14 @@ TP* polycross::TEvent::getIntersect(polysegment* above, polysegment* below,
    {
       if ((iff == NULL) &&
            ((CrossPoint = oneLineSegments(above, below, eventQ.sweepline()))))
+      {
          insertCrossPoint(CrossPoint, above, below, eventQ, true);
-      return CrossPoint;
+         delete CrossPoint;
+      }
+      return;
    }
    rlmul = lsign*rsign;
-   if      (0  < rlmul)  return NULL;// not crossing
+   if      (0  < rlmul)  return;// not crossing
    if (0 == rlmul)
    {
       // possibly touching segments
@@ -615,12 +607,9 @@ TP* polycross::TEvent::getIntersect(polysegment* above, polysegment* below,
       {
          if ((NULL == iff) || (*CrossPoint == *iff))
             insertCrossPoint(CrossPoint, above, below, eventQ);
-         else
-         {
-            delete CrossPoint;CrossPoint = NULL;
-         }
+         delete CrossPoint;
       }
-      return CrossPoint;
+      return;
    }
 
    //now check that both above endpoints are on the same side of below segment
@@ -630,7 +619,7 @@ TP* polycross::TEvent::getIntersect(polysegment* above, polysegment* below,
    if ((lsign == 0) && (rsign == 0))
       throw EXPTNpolyCross("Segments shouldn't coincide at this point");
    rlmul = lsign*rsign;
-   if      (0  < rlmul) return NULL;
+   if      (0  < rlmul) return;
    if (0 == rlmul)
    {
       // possibly touching segments
@@ -639,12 +628,9 @@ TP* polycross::TEvent::getIntersect(polysegment* above, polysegment* below,
       {
          if ((NULL == iff) || (*CrossPoint == *iff))
             insertCrossPoint(CrossPoint, above, below, eventQ);
-         else
-         {
-            delete CrossPoint;CrossPoint = NULL;
-         }
+         delete CrossPoint;
       }
-      return CrossPoint;
+      return;
    }
 
    // at this point - the only possibility is that they intersect
@@ -653,8 +639,8 @@ TP* polycross::TEvent::getIntersect(polysegment* above, polysegment* below,
    {
       CrossPoint = getCross(above, below);
       insertCrossPoint(CrossPoint, above, below, eventQ);
+      delete CrossPoint;
    }
-   return CrossPoint;
 }
 
 /**
