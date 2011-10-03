@@ -197,8 +197,7 @@ int tellstdfunc::stdMOVESEL::execute()
    // moveSelected returns 3 select lists : Failed/Deleted/Added
    // This is because of the modify operations
    laydata::SelectList* fadead[3];
-   byte i;
-   for (i = 0; i < 3; fadead[i++] = DEBUG_NEW laydata::SelectList());
+   for (byte i = 0; i < 3; fadead[i++] = DEBUG_NEW laydata::SelectList());
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -211,22 +210,7 @@ int tellstdfunc::stdMOVESEL::execute()
       UNDOPstack.push_front(make_ttlaylist(fadead[0])); // first failed
       UNDOPstack.push_front(make_ttlaylist(fadead[1])); // then deleted
       UNDOPstack.push_front(make_ttlaylist(fadead[2])); // and added
-      for (i = 0; i < 3; i++)
-      {
-         for (laydata::SelectList::iterator CI = fadead[i]->begin(); CI != fadead[i]->end(); CI++)
-         {
-            laydata::DataList* sshape = CI->second;
-            if (1 == i) // deleted list only
-            {
-               for (laydata::DataList::iterator CCI = sshape->begin(); CCI  != sshape->end(); CCI++)
-               {
-                  if (0 != CCI->second.size()) CCI->second.clear();
-               }
-            }
-            delete sshape;
-         }
-         delete fadead[i];
-      }
+      cleanFadeadList(fadead);
       LogFile << LogFile.getFN() << "("<< *p1 << "," << *p2 << ");"; LogFile.flush();
    }
    delete p1; delete p2;
@@ -360,7 +344,7 @@ int tellstdfunc::stdROTATESEL::execute()
       UNDOPstack.push_front(make_ttlaylist(fadead[0])); // first failed
       UNDOPstack.push_front(make_ttlaylist(fadead[1])); // then deleted
       UNDOPstack.push_front(added); // and added
-      for (i = 0; i < 3; delete fadead[i++]);
+      cleanFadeadList(fadead);
       LogFile << LogFile.getFN() << "("<< angle << "," << *p1 << ");"; LogFile.flush();
    }
    delete p1;
@@ -633,9 +617,7 @@ int tellstdfunc::lgcCUTPOLY::execute()
    {
       //cutPoly returns 3 Attic lists -> Delete/AddSelect/AddOnly,
       // create and initialize them here
-      laydata::AtticList* dasao[3];
       PointVector theShape = check.getValidated();
-      for (byte i = 0; i < 3; dasao[i++] = DEBUG_NEW laydata::AtticList());
       DWordSet unselable = PROPC->allUnselectable();
       laydata::TdtLibDir* dbLibDir = NULL;
       if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
@@ -643,39 +625,48 @@ int tellstdfunc::lgcCUTPOLY::execute()
          laydata::TdtDesign* tDesign = (*dbLibDir)();
          if (0 == tDesign->numSelected())
             tell_log(console::MT_ERROR,"No selected shapes. Nothing to cut");
-         else if (tDesign->cutPoly( theShape, dasao))
+         else
          {
-            // push the command for undo
-            UNDOcmdQ.push_front(this);
-            UNDOPstack.push_front(make_ttlaylist(tDesign->shapeSel()));
-            // unselect everything
-            tDesign->unselectAll();
+            laydata::AtticList* dasao[3];
+            for (byte i = 0; i < 3; dasao[i++] = DEBUG_NEW laydata::AtticList());
+            if (tDesign->cutPoly( theShape, dasao))
+            {
+               // push the command for undo
+               UNDOcmdQ.push_front(this);
+               UNDOPstack.push_front(make_ttlaylist(tDesign->shapeSel()));
+               // unselect everything
+               tDesign->unselectAll();
 
-            telldata::TtList* shdeleted = make_ttlaylist(dasao[0]);
-            // select the shapes to delete & delete them ...
-            tDesign->selectFromList(get_ttlaylist(shdeleted), unselable);
-            laydata::AtticList* sh_delist = DEBUG_NEW laydata::AtticList();
-            tDesign->deleteSelected(sh_delist, dbLibDir);
-            // ... not forgetting to save them in the undo data stack for undo
-            UNDOPstack.push_front(make_ttlaylist(sh_delist));
-            // clean-up the delete attic list
-            clean_atticlist(sh_delist); delete sh_delist;
-            delete shdeleted;
+               telldata::TtList* shdeleted = make_ttlaylist(dasao[0]);
+               // select the shapes to delete & delete them ...
+               tDesign->selectFromList(get_ttlaylist(shdeleted), unselable);
+               laydata::AtticList* sh_delist = DEBUG_NEW laydata::AtticList();
+               tDesign->deleteSelected(sh_delist, dbLibDir);
+               // ... not forgetting to save them in the undo data stack for undo
+               UNDOPstack.push_front(make_ttlaylist(sh_delist));
+               // clean-up the delete attic list
+               clean_atticlist(sh_delist); delete sh_delist;
+               delete shdeleted;
 
-            // add the result of the cut...
-            telldata::TtList* shaddselect = make_ttlaylist(dasao[1]);
-            telldata::TtList* shaddonly = make_ttlaylist(dasao[2]);
-            tDesign->addList(dasao[1]);
-            UNDOPstack.push_front(shaddselect);
-            // ... the cut-offs ....
-            tDesign->addList(dasao[2]);
-            UNDOPstack.push_front(shaddonly);
-            // and finally select the_cut
-            tDesign->selectFromList(get_ttlaylist(shaddselect), unselable);
-            LogFile << "polycut("<< *pl << ");"; LogFile.flush();
-            clean_atticlist(dasao[0]); delete (dasao[0]);
-            // delete dasao[1]; delete dasao[2]; - deleted by tDesign->addList
-            UpdateLV(tDesign->numSelected());
+               // add the result of the cut...
+               telldata::TtList* shaddselect = make_ttlaylist(dasao[1]);
+               telldata::TtList* shaddonly = make_ttlaylist(dasao[2]);
+               tDesign->addList(dasao[1]);
+               UNDOPstack.push_front(shaddselect);
+               // ... the cut-offs ....
+               tDesign->addList(dasao[2]);
+               UNDOPstack.push_front(shaddonly);
+               // and finally select the_cut
+               tDesign->selectFromList(get_ttlaylist(shaddselect), unselable);
+               LogFile << "polycut("<< *pl << ");"; LogFile.flush();
+               clean_atticlist(dasao[0]); delete (dasao[0]);
+               // delete dasao[1]; delete dasao[2]; - deleted by tDesign->addList
+               UpdateLV(tDesign->numSelected());
+            }
+            else
+            {
+               for (byte i = 0; i < 3; delete dasao[i++]);
+            }
          }
       }
       DATC->unlockTDT(dbLibDir, true);

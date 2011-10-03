@@ -164,6 +164,7 @@ namespace tellstdfunc {
    laydata::DataList*   copyDataList(const laydata::DataList* dlist);
    laydata::SelectList* copySelectList(const laydata::SelectList* dlist);
    void                 cleanSelectList(laydata::SelectList* dlist);
+   void                 cleanFadeadList(laydata::SelectList**);
    void                 clean_ttlaylist(telldata::TtList* llist);
    void                 clean_atticlist(laydata::AtticList*, bool destroy = false);
    void                 UpdateLV(unsigned int);
