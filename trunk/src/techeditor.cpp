@@ -399,10 +399,10 @@ void tui::LineListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, i
    wxColour color(col.red(), col.green(), col.blue(), col.alpha());
    const layprop::LineSettings *line;
 
-   byte* ifill = DEBUG_NEW byte[128];
-   std::fill(ifill, ifill + 127, 0);
-   for(int i=0; i<=127; i++)
-      ifill[i]=0;
+   //byte* ifill = DEBUG_NEW byte[128];
+   //std::fill(ifill, ifill + 127, 0);
+   //for(int i=0; i<=127; i++)
+   //   ifill[i]=0;
    
    
    wxRect r(rect);
@@ -476,7 +476,7 @@ void tui::LineListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, i
 
 
       
-      brush= tui::makeBrush(ifill, col);        
+      //brush= tui::makeBrush(ifill, col);        
    }
      
    wxPen pen(wxT("black"), width, wxUSER_DASH);
@@ -484,7 +484,7 @@ void tui::LineListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, i
 
    PROPC->unlockDrawProp(drawProp);
  
-   brush->SetColour(color);
+   //brush->SetColour(color);
    dc.SetPen( pen );
    dc.DrawText(GetString( item ),
                rect.x + 5,
@@ -493,5 +493,5 @@ void tui::LineListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, i
 
       dc.DrawLine(r.x+r.width/2 + 5, r.y+r.height/2, r.x+r.width - 5, r.y+r.height/2);
 
-   delete brush;
+   //delete brush;
 }

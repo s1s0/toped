@@ -1072,6 +1072,13 @@ EXPTNdrc_parser::EXPTNdrc_parser(err_message type, std::string info, std::string
    }
 };
 
+EXPTNgui_problem::EXPTNgui_problem(std::string info)
+{
+   std::string news = "Gui problem => ";
+   news += info;
+   tell_log(console::MT_ERROR,news);
+};
+
 //=============================================================================
 LayerMapExt::LayerMapExt(const USMap& inlist, ExtLayers* alist)
    : _theMap(), _status(true), _alist(alist)
