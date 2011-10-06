@@ -39,6 +39,7 @@
 #include "datacenter.h"
 #include "browsers.h"
 #include "toped.h"
+//#include "outbox.h"
 
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
@@ -1890,9 +1891,113 @@ tui::defineFill::~defineFill()
       delete[] CI->second;
 }
 
+
+//==============================================================================
+BEGIN_EVENT_TABLE(tui::style_sample, wxWindow)
+   EVT_PAINT(tui::style_sample::OnPaint)
+END_EVENT_TABLE()
+
+tui::style_sample::style_sample(wxWindow *parent, wxWindowID id, wxPoint pos,
+   wxSize size, std::string init, const layprop::DrawProperties* drawProp) : wxWindow(parent, id, pos, size, wxSUNKEN_BORDER),
+   _pen(wxT("black"), 3, wxUSER_DASH)
+{
+   wxPen pen(wxT("black"), 3, wxUSER_DASH);
+   style_def initStyle;
+   initStyle.pattern = drawProp->getLine(init)->pattern();
+   initStyle.pscale = drawProp->getLine(init)->patscale();
+   initStyle.width = drawProp->getLine(init)->width();
+   setStyle(initStyle);
+}
+
+void tui::style_sample::setStyle(const tui::style_def&  styledef)
+{
+   word pattern = styledef.pattern;
+   /*if (NULL != fill)
+   {
+      wxBitmap stipplebrush((char  *)fill, 32, 32, 1);
+      wxImage image;
+      image = stipplebrush.ConvertToImage();
+      stipplebrush = wxBitmap(image, 1);
+      _brush = wxBrush(stipplebrush);
+   }
+   else
+   {
+      _brush = wxBrush();
+   }
+   _brush.SetColour(*wxWHITE);*/
+   byte width = styledef.width;
+   byte patscale = styledef.pscale;
+
+   wxDash dashes[32];
+   int index = 0;
+         enum statetype {zero, one};
+      int state;
+
+
+      int i = 0;
+
+      int mask = 0x8000;
+      int length = 0;
+      if (pattern & mask) 
+      {
+         state = one; 
+      }
+      else 
+      {
+         state = zero;
+      }
+      for (int i= 0; i < 16; ++i)
+      {
+         if(pattern & mask)
+         {
+            if(state == one) 
+            {
+               length++;
+            }
+            else
+            {
+               dashes[index] = patscale*length;
+               state = one;
+               index++;
+               length = 1;
+            }
+         }
+         else
+         {
+            if(state == zero) 
+            {
+               length++;
+            }
+            else
+            {
+               dashes[index] = patscale*length;
+               state = zero;
+               index++;
+               length = 1;
+            }
+         }
+         mask = mask >> 1;
+      }
+      _pen.SetDashes(index, dashes);
+}
+
+void tui::style_sample::OnPaint(wxPaintEvent&)
+{
+   wxPaintDC dc(this);
+   dc.SetBackground(*wxBLACK);
+   dc.Clear();
+   wxCoord w, h;
+   dc.GetSize(&w, &h);
+   dc.DrawRectangle(0, 0, w, h);
+   dc.SetPen(_pen);
+   dc.DrawLine(1,10,w-1,10);
+
+
+}
+
 //==============================================================================
 BEGIN_EVENT_TABLE(tui::defineStyle, wxDialog)
-//    EVT_LISTBOX(ID_ITEMLIST   , tui::defineFill::OnFillSelected   )
+    EVT_LISTBOX(ID_ITEMLIST   , tui::defineStyle::OnStyleSelected   )
 //    EVT_BUTTON(ID_BTNEDIT     , tui::defineFill::OnDefineFill     )
 //    EVT_BUTTON(ID_NEWITEM     , tui::defineFill::OnFillNameAdded  )
 END_EVENT_TABLE()
@@ -1911,9 +2016,13 @@ tui::defineStyle::defineStyle(wxFrame *parent, wxWindowID id, const wxString &ti
    for( NameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
    {
       _styleList->Append(wxString(CI->c_str(), wxConvUTF8));
-      //byte* pat = DEBUG_NEW byte[128];
-      //fillcopy(drawProp->getFill(*CI), pat);
-      //_allFills[*CI] = pat;
+      const layprop::LineSettings *line;
+      style_def curStyle;
+      line = drawProp->getLine(*CI);
+      curStyle.pattern = line->pattern();
+      curStyle.pscale = line->patscale();
+      curStyle.width = line->width();
+      _allStyles[*CI] = curStyle;
    }
    // NOTE! Static boxes MUST be created before all other controls which are about to
    // be encircled by them. Otherwise the dialog box might work somewhere (Windows & fc8)
@@ -1923,14 +2032,14 @@ tui::defineStyle::defineStyle(wxFrame *parent, wxWindowID id, const wxString &ti
 
    _dwstylename  = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxSize(150,-1), 0,
                                           wxTextValidator(wxFILTER_ASCII, &_stylename));
-//   _stylesample = DEBUG_NEW fill_sample( this, -1, wxDefaultPosition, wxSize(-1,150), init_style, drawProp);
+   _stylesample = DEBUG_NEW style_sample( this, -1, wxDefaultPosition, wxSize(-1,150), init_style, drawProp);
 
    hsizer0->Add( _dwstylename   , 0, wxALL | wxEXPAND, 5);
    hsizer0->Add(0,0,1); //
    hsizer0->Add( DEBUG_NEW wxButton( this, ID_NEWITEM  , wxT("Add")    ), 0, wxALL, 5 );
 
    wxBoxSizer *vsizer2 = DEBUG_NEW wxBoxSizer( wxVERTICAL );
-//   vsizer2->Add( _fillsample , 0, wxALL | wxEXPAND, 5);
+   vsizer2->Add( _stylesample , 0, wxALL | wxEXPAND, 5);
    vsizer2->Add(0,0,1); //
    vsizer2->Add(DEBUG_NEW wxButton( this, ID_BTNEDIT  , wxT(" Define ") ), 0, wxALL | wxALIGN_RIGHT, 5);
 
@@ -1959,8 +2068,30 @@ tui::defineStyle::~defineStyle()
 //   delete _dwfilname;
 //   delete _fillsample;
 //   delete _fillList;
-/*   for(fillMAP::const_iterator CI = _allFills.begin(); CI != _allFills.end(); CI++)
-      delete[] CI->second;*/
+}
+
+void tui::defineStyle::OnStyleSelected(wxCommandEvent& cmdevent)
+{
+   wxString style_name = cmdevent.GetString();
+   try 
+   {
+      _current_style = getStyle(std::string(style_name.mb_str(wxConvUTF8)));
+   }
+   catch(EXPTNgui_problem) { return;}
+   _stylesample->setStyle(_current_style);
+   _stylesample->Refresh();
+}
+
+tui::style_def tui::defineStyle::getStyle(const std::string& style_name)
+{
+  styleMAP::const_iterator style_set = _allStyles.find(style_name);
+  if (_allStyles.end() == style_set) 
+  {
+     std::string err;
+     err += "Style " +  style_name + " doesn't exist";
+     throw(EXPTNgui_problem(err));
+  }
+  return style_set->second;
 }
 //==========================================================================
 tui::nameCboxRecords::nameCboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,

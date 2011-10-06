@@ -349,6 +349,12 @@ class EXPTNdrc_parser : public EXPTN
       EXPTNdrc_parser(err_message, std::string, std::string);
 };
 
+class EXPTNgui_problem : public EXPTN
+{
+   public:
+      EXPTNgui_problem(std::string);
+};
+
 bool        expandFileName(std::string&);
 //std::string getFileNameOnly(std::string);
 //Convert string from UTF8 to wxConvFile

@@ -639,27 +639,47 @@ namespace tui {
    };
 
    //--------------------------------------------------------------------------
+   struct style_def
+   {
+      word     pattern;
+      byte     pscale;
+      byte     width;
+   };
+
+   //--------------------------------------------------------------------------
+   class style_sample : public wxWindow {
+   public:
+                     style_sample(wxWindow*, wxWindowID, wxPoint, wxSize, std::string, const layprop::DrawProperties*);
+      void           setStyle(const tui::style_def& styledef);
+      void           OnPaint(wxPaintEvent&);
+   protected:
+      wxBrush        _brush;
+      wxPen          _pen;
+      DECLARE_EVENT_TABLE();
+   };
+
+
    class defineStyle : public wxDialog
    {
    public:
-      typedef  std::map<std::string, byte*         >  fillMAP;
+      typedef  std::map<std::string, style_def       >  styleMAP;
                      defineStyle(wxFrame *parent, wxWindowID id, const wxString &title,
                                              wxPoint pos, const layprop::DrawProperties*);
       virtual       ~defineStyle();
 //      void           OnDefineFill(wxCommandEvent&);
-//      void           OnFillSelected(wxCommandEvent&);
+      void           OnStyleSelected(wxCommandEvent&);
 //      void           OnFillNameAdded(wxCommandEvent& WXUNUSED(event));
 //      fillMAP&       allPatterns() {return _allFills;}
 //   private:
 //      void           nameNormalize(wxString&);
 //      void           fillcopy(const byte*, byte*);
-//      const byte*    getFill(const std::string) const;
-//      fillMAP        _allFills;
+      style_def      getStyle(const std::string&);
+      styleMAP       _allStyles;
       wxListBox*     _styleList;
       wxTextCtrl*    _dwstylename;
-//      fill_sample*   _fillsample;
+      style_sample*  _stylesample;
       wxString       _stylename;
-//      byte           _current_pattern[128];
+      style_def      _current_style;
 
       DECLARE_EVENT_TABLE();
    };
