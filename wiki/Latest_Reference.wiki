@@ -62,7 +62,8 @@ see also tll/callbackTest.tll
 
 2 types of the usage of callback functions
 
-  # anonymous {{{
+{{{{
+//anonymous
 void funcArguFuncB(int a, int b, callback int (int,int) unifunc)
 {
    int result = unifunc(a,b);
@@ -74,7 +75,8 @@ funcArguFuncB(2,3,&simpleAdd);
 funcArguFuncB(2,3,&simpleSub);
 }}}
 
-  # predefined {{{
+{{{
+// predefined
 /* The callback type definition follows the function definition syntax
  * with two differencies:
  * - "callback" keyword marks the start of the definition
