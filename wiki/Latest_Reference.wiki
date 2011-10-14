@@ -47,5 +47,86 @@ Usage: `toped {options}* [tll-file]`
   #endif
 }}}
 
+== Tell-language ==
+
+=== Lists ===
+
+
+
+=== Callbacks ===
+
+fully introduced in rev1939 (fixes issue 105).
+fixes in rev1947
+
+see also tll/callbackTest.tll
+
+2 types of the usage of callback functions
+
+  # anonymous {{{
+void funcArguFuncB(int a, int b, callback int (int,int) unifunc)
+{
+   int result = unifunc(a,b);
+   string buffer = sprintf ("%d fparam %d is %d", a, b, result);
+   printf ("[%s] \n",buffer);
+}
+
+funcArguFuncB(2,3,&simpleAdd);
+funcArguFuncB(2,3,&simpleSub);
+}}}
+
+  # predefined {{{
+/* The callback type definition follows the function definition syntax
+ * with two differencies:
+ * - "callback" keyword marks the start of the definition
+ * - the argument list is anonymous i.e. just a list of argument types
+   callback <return_type> <functypename> ([<argument> [, <argument> [...]]])
+*/
+// define a callback type unifunctype ...
+callback int unifunctype(int,int);
+
+void funcArguFuncA(int a, int b, unifunctype unifunc)
+{
+   int result = unifunc(a,b);
+   string buffer = sprintf ("%d fparam %d is %d", a, b, result);
+   printf ("[%s] \n",buffer);
+}
+
+funcArguFuncA(2,3,@simpleAdd);
+funcArguFuncA(2,3,@simpleSub);
+}}}
+
+To handle callback functions like variables you may use following definitions
+{{{
+// or define directly a variable unifunc of anonymous callback type
+callback int (int,int) unifuncB = @simpleAdd;
+
+// ... and a variable unifunc of that type
+unifunctype unifuncA = @simpleAdd;
+}}}
+
+
 
 == Tell-functions ==
+
+=== Deprecated ===
+
+  * echo();  ... since rev1900 to rev1094 (issue103); use printf() instead
+
+=== Setting Parametes ===
+
+refer to tpd_bidfunc/tpdf_props.cpp in
+function tellstdfunc::analyzeTopedParameters
+
+{{{
+ setparams({"ADJUST_TEXT_ORIENTATION", "0"});
+ setparams({"SELECT_TEXT_FONT", "0"});
+ setparams({"CELL_VIEW_DEPTH", "0"});
+ setparams({"CELL_DEPTH_ALPHA_EBB", "0"});
+ setparams({"MIN_VISUAL_AREA", "0"});
+ setparams({"GRC_BLINK_PERIOD", "0"});
+ setparams({"HIGHLIGHT_ON_HOVER", "0"});
+ setparams({"UNDO_DEPTH", "0"}); 
+}}}
+
+ 
+ 
