@@ -17,10 +17,24 @@ Usage: `toped {options}* [tll-file]`
   -ogl_safe  : 
   -nolog     : logging will be suppressed //rev1917
   -nogui     : GUI will not be started. Useful for TLL parsing
-  -I<path>   : includes additional search paths for TLL files
-  -D<macro>  : equivalent to #define <macro>
+  -I<path>   : includes additional search paths for TLL files 
+               (multiple entries allowed)
+  -D<macro>  : equivalent to #define <macro> (multiple entries allowed)
   -help      : This help message
 }}}
+
+== Environment variables ==
+
+Also described in in http://www.toped.org.uk/trm_intro.html
+
+{{{
+  TPD_LOCAL .. user specific path, mainly used to store log files
+  TPD_GLOBAL .. global path to a proper toped installation to find fonts, etc. 
+  TLL_INCLUDE_PATH .. list of several paths (seperated by :) for describing 
+                      the location of UDFs (equivalent to -I in the command line)
+}}}
+
+if not set the default path will always be the current path.
 
 == Preprocessing commands ==
 
@@ -51,6 +65,10 @@ Usage: `toped {options}* [tll-file]`
 
 === Lists ===
 
+  * Speed issues: issue 110, r1907
+  
+preallocation of lists allows a significant improvement in terms of 
+execution speed when an application uses dynamic growing/shrinking lists
 
 
 === Callbacks ===
@@ -62,7 +80,7 @@ see also tll/callbackTest.tll
 
 2 types of the usage of callback functions
 
-{{{{
+{{{
 //anonymous
 void funcArguFuncB(int a, int b, callback int (int,int) unifunc)
 {
