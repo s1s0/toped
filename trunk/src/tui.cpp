@@ -1912,22 +1912,10 @@ tui::style_sample::style_sample(wxWindow *parent, wxWindowID id, wxPoint pos,
 void tui::style_sample::setStyle(const tui::style_def&  styledef)
 {
    word pattern = styledef.pattern;
-   /*if (NULL != fill)
-   {
-      wxBitmap stipplebrush((char  *)fill, 32, 32, 1);
-      wxImage image;
-      image = stipplebrush.ConvertToImage();
-      stipplebrush = wxBitmap(image, 1);
-      _brush = wxBrush(stipplebrush);
-   }
-   else
-   {
-      _brush = wxBrush();
-   }
-   _brush.SetColour(*wxWHITE);*/
    byte width = styledef.width;
    byte patscale = styledef.pscale;
 
+   if ((patscale == 0) || (width == 0) || pattern == 0) return;
    wxDash dashes[32];
    int index = 0;
          enum statetype {zero, one};
@@ -1978,6 +1966,7 @@ void tui::style_sample::setStyle(const tui::style_def&  styledef)
          }
          mask = mask >> 1;
       }
+      _pen.SetWidth(width);
       _pen.SetDashes(index, dashes);
 }
 
@@ -1997,9 +1986,12 @@ void tui::style_sample::OnPaint(wxPaintEvent&)
 
 //==============================================================================
 BEGIN_EVENT_TABLE(tui::defineStyle, wxDialog)
-    EVT_LISTBOX(ID_ITEMLIST   , tui::defineStyle::OnStyleSelected   )
+      EVT_LISTBOX(ID_ITEMLIST   , tui::defineStyle::OnStyleSelected   )
 //    EVT_BUTTON(ID_BTNEDIT     , tui::defineFill::OnDefineFill     )
 //    EVT_BUTTON(ID_NEWITEM     , tui::defineFill::OnFillNameAdded  )
+      EVT_TEXT(ID_WIDTHVAL      , tui::defineStyle::OnStylePropChanged )
+      EVT_TEXT(ID_PATVAL        , tui::defineStyle::OnStylePropChanged )
+
 END_EVENT_TABLE()
 
 tui::defineStyle::defineStyle(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, const layprop::DrawProperties* drawProp) :
@@ -2007,7 +1999,7 @@ tui::defineStyle::defineStyle(wxFrame *parent, wxWindowID id, const wxString &ti
 {
    NameList all_names;
    drawProp->allLines(all_names);
-   _styleList = DEBUG_NEW wxListBox(this, ID_ITEMLIST, wxDefaultPosition, wxSize(150,200), 0, NULL, wxLB_SORT);
+   _styleList = DEBUG_NEW wxListBox(this, ID_ITEMLIST, wxDefaultPosition, wxSize(150,100), 0, NULL, wxLB_SORT);
    std::string init_style;
    if (!all_names.empty())
    {
@@ -2032,7 +2024,7 @@ tui::defineStyle::defineStyle(wxFrame *parent, wxWindowID id, const wxString &ti
 
    _dwstylename  = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxSize(150,-1), 0,
                                           wxTextValidator(wxFILTER_ASCII, &_stylename));
-   _stylesample = DEBUG_NEW style_sample( this, -1, wxDefaultPosition, wxSize(-1,150), init_style, drawProp);
+   _stylesample = DEBUG_NEW style_sample( this, -1, wxDefaultPosition, wxSize(-1,25), init_style, drawProp);
 
    hsizer0->Add( _dwstylename   , 0, wxALL | wxEXPAND, 5);
    hsizer0->Add(0,0,1); //
@@ -2041,6 +2033,30 @@ tui::defineStyle::defineStyle(wxFrame *parent, wxWindowID id, const wxString &ti
    wxBoxSizer *vsizer2 = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    vsizer2->Add( _stylesample , 0, wxALL | wxEXPAND, 5);
    vsizer2->Add(0,0,1); //
+   wxBoxSizer *hsizer1 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL);
+   wxBoxSizer *hsizer2 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL);
+   wxBoxSizer *hsizer3 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL);
+   hsizer1->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Pattern:"),
+                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+                                                0, wxALL | wxALIGN_CENTER , 10);
+   _pattern = DEBUG_NEW wxTextCtrl( this, ID_PATVAL , wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
+                                           wxTextValidator(wxFILTER_NUMERIC, &_patternString));
+   hsizer2->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Width  :"),
+                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+                                                0, wxALL | wxALIGN_CENTER , 10);
+   _width    = DEBUG_NEW wxTextCtrl( this, ID_WIDTHVAL , wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
+                                           wxTextValidator(wxFILTER_NUMERIC, &_widthString));
+   hsizer3->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Scale   :"),
+                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+                                                0, wxALL | wxALIGN_CENTER , 10);
+   _patscale    = DEBUG_NEW wxTextCtrl( this, ID_PATSCALEVAL , wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
+                                           wxTextValidator(wxFILTER_NUMERIC, &_patscaleString));
+   hsizer1->Add(_pattern, 0, wxALL | wxEXPAND, 5);
+   hsizer2->Add(_width, 0, wxALL | wxEXPAND, 5);
+   hsizer3->Add(_patscale, 0, wxALL | wxEXPAND, 5);
+   vsizer2->Add( hsizer1 , 0, wxALL | wxEXPAND, 5);
+   vsizer2->Add( hsizer2 , 0, wxALL | wxEXPAND, 5);
+   vsizer2->Add( hsizer3 , 0, wxALL | wxEXPAND, 5);
    vsizer2->Add(DEBUG_NEW wxButton( this, ID_BTNEDIT  , wxT(" Define ") ), 0, wxALL | wxALIGN_RIGHT, 5);
 
    // Buttons
@@ -2080,6 +2096,15 @@ void tui::defineStyle::OnStyleSelected(wxCommandEvent& cmdevent)
    catch(EXPTNgui_problem) { return;}
    _stylesample->setStyle(_current_style);
    _stylesample->Refresh();
+   wxString tempStr;
+   tempStr << _current_style.pattern;
+   _pattern->SetValue(tempStr);
+   tempStr.Clear();
+   tempStr << _current_style.width;
+   _width->SetValue(tempStr);
+   tempStr.Clear();
+   tempStr << _current_style.pscale;
+   _patscale->SetValue(tempStr);
 }
 
 tui::style_def tui::defineStyle::getStyle(const std::string& style_name)
@@ -2093,6 +2118,26 @@ tui::style_def tui::defineStyle::getStyle(const std::string& style_name)
   }
   return style_set->second;
 }
+
+void tui::defineStyle::OnStylePropChanged(wxCommandEvent& event)
+{
+   wxString s_pattern  = _pattern->GetValue();
+   wxString s_width    = _width->GetValue();
+   wxString s_patscale = _patscale->GetValue();
+
+   unsigned long d_pattern;  s_pattern.ToULong(&d_pattern);
+   unsigned long d_width;    s_width.ToULong(&d_width);
+   unsigned long d_patscale; s_patscale.ToULong(&d_patscale);
+   style_def tempStyle;
+   tempStyle.pattern  = d_pattern;
+   tempStyle.width    = d_width;
+   tempStyle.pscale   = d_patscale;
+   _stylesample->setStyle(tempStyle);
+   _stylesample->Refresh();
+   //FindWindow(ID_BTNAPPLY)->Enable(true);
+}
+
+
 //==========================================================================
 tui::nameCboxRecords::nameCboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
             const SIMap& inlays, wxArrayString& all_strings, int row_height, const layprop::DrawProperties* drawProp)

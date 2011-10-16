@@ -50,6 +50,9 @@ namespace tui {
       ID_GREENVAL       ,
       ID_BLUEVAL        ,
       ID_ALPHAVAL       ,
+      ID_WIDTHVAL       ,
+      ID_PATVAL         ,
+      ID_PATSCALEVAL    ,
       ID_BTNEDIT        ,
       ID_BTNAPPLY       ,
       ID_BTNCLEAR       ,
@@ -668,11 +671,11 @@ namespace tui {
       virtual       ~defineStyle();
 //      void           OnDefineFill(wxCommandEvent&);
       void           OnStyleSelected(wxCommandEvent&);
+      void           OnStylePropChanged(wxCommandEvent&);
 //      void           OnFillNameAdded(wxCommandEvent& WXUNUSED(event));
 //      fillMAP&       allPatterns() {return _allFills;}
 //   private:
 //      void           nameNormalize(wxString&);
-//      void           fillcopy(const byte*, byte*);
       style_def      getStyle(const std::string&);
       styleMAP       _allStyles;
       wxListBox*     _styleList;
@@ -680,6 +683,12 @@ namespace tui {
       style_sample*  _stylesample;
       wxString       _stylename;
       style_def      _current_style;
+      wxTextCtrl*    _width;
+      wxString       _widthString;
+      wxTextCtrl*    _patscale;
+      wxString       _patscaleString;
+      wxTextCtrl*    _pattern;
+      wxString       _patternString;
 
       DECLARE_EVENT_TABLE();
    };
