@@ -52,25 +52,24 @@ extern layprop::FontLibrary* fontLib;
 /*===========================================================================
       Select and subsequent operations over the existing TdtData
 =============================================================================
-It appears this is not so strightforward as it seems at first sight. There
+It appears this is not so straightforward as it seems at first sight. There
 are several important points to consider here.
-   - On first place of course fitting this operatoins within the existing
-     data base structure and esspecially make QuadTree trasparent to them.
+   - On first place of course fitting this operations within the existing
+     data base structure and especially make QuadTree transparent to them.
      The latter appears to be quite important, because this structure is
      not existing for the user, yet plays a major role in the database
      integrity. The other thing of a significant importance is that the
      selected structures have to be drawn differently - i.e. they need to be
-     easyly distinguishable on the screen from the other shapes.
+     easily distinguishable on the screen from the other shapes.
    - Minimization of the database. As now the database is build strictly
      on a hierarchical and "conspirative" principles so that every part of
      it holds the absolute minimum of data. For example the layer structure
      does not now shit about the cell it belongs to, it even doesn't know
      what is its layer number. Similarly the shape doesn't know neither it's
      placeholder nor its layer or cell. Everything is on kind of "need to know
-     basis". Lower levels of the database are unaware of the hier levels.
-     Furthermore on certain hierarchical level every component knows only about
-     the neithboring component on the right (next one), but nothing about the
-     one on the left (previous one)
+     basis". Lower levels of the database are unaware of the higher levels.
+     Furthermore on certain hierarchical level every component doesn't know
+     anything even about its neighbors.
    - Select operation assumes however that an operation like move/delete/copy
      etc. is about to follow, i.e. the selected shapes will be accessed shortly
      and this access has to be swift and reliable. Certainly we need some short
@@ -84,7 +83,7 @@ are several important points to consider here.
      How on earth you are going to delete a shape if you know only its next of
      kin? As a matter of fact it is possible ;), the only detail is that
      "Segmentatoin fault" will follow inevitably.
-     Appparently you need to know what is the structure in the upper level
+     Apparently you need to know what is the structure in the upper level
      of the hierarchy (it's father if you want).
    - The vast majority  of the shapes (may be all of them in the near feature)
      are placed in a QuadTree. The objects of this class however "by nature"
@@ -98,9 +97,9 @@ are several important points to consider here.
      the modify or info operation on a TOPED shape. We certainly need to know the
      layer, shape is placed on, and maybe the cell. TELL doesn't know (and doesn't
      want to know) about the TOPED database structure, QuadTree's etc. shit.
-   - Undo list - this is not started yet, but seems obvoius that in order to
-     execute undelete for example QuadTree pointers will not be very helpfull,
-     because they migh be gone already. Instead a layer number will be
+   - Undo list - this is not started yet, but seems obvious that in order to
+     execute undelete for example QuadTree pointers will not be very helpful,
+     because they might be gone already. Instead a layer number will be
      appreciated. All this in case the shape itself is not deleted, but just moved
      in the Attic.
    ----------------------------------------------------------------------------
@@ -109,11 +108,11 @@ are several important points to consider here.
      and speed of drawing) for select operations. Means I don't want to add
      more data to every single shape object.
    - The TELL operations with TOPED shapes on second though seem not to be so
-     convinient and required "by definition" (see the paragraph below)
+     convenient and required "by definition" (see the paragraph below)
    - Pointer to a QuadTree as a parent object to the selected shape seems to
-     be inevitable despite the unstable nature of teh QuadTree - otherwise every
+     be inevitable despite the unstable nature of the QuadTree - otherwise every
      subsequent operation on the selected objects will require searching of the
-     marked components one by one troughout entire cell or at least layer. This
+     marked components one by one throughout entire cell or at least layer. This
      might take more time than the select itself, which doesn't seems to be very
      wise.
    - For undo purposes we will need separate list type for selected components
@@ -129,7 +128,7 @@ are several important points to consider here.
    This is quite tempting. A lot I would say. So what it will give to TELL?
    Ability to keep a list of TOPED objects in a variable, that can be used
    later... and to make a big mess !!!
-   - Object selection in TOPED is done ALWAYS withing a cell. Having a TELL
+   - Object selection in TOPED is done ALWAYS within a cell. Having a TELL
      variable stored somewhere, how the parser will control where the selection
      is from and what is the active cell at the moment?
    - Even if you want to copy or move some group of shapes from one cell to
@@ -162,7 +161,7 @@ are several important points to consider here.
      as deleted. This is to make undo operations possible. It seems appropriate,
      every cell to have an attic where the rubbish will be stored.
    - Select list contains a pointer to the lowest QuadTree placeholder that
-     contains seleted shapes.
+     contains selected shapes.
    - TdtData contains a field that will indicate the status of the shape -
      selected or not. The same field might be used to indicate the shape is
      deleted or any other status. This adds a byte to the every single component.
@@ -183,7 +182,7 @@ are several important points to consider here.
    - TOPED has still ONE active list of selected components. It is stored in
      the active cell structure and can be obtained from TELL using the internal
      variable $seleted(or similar).
-   - All select operatoins return a list of TtLayout that can be stored in
+   - All select operations return a list of TtLayout that can be stored in
      a TELL variable of the same type. It is not possible to use this variables
      directly as a parameter for any modification operations (copy/move/delete
      etc.)
@@ -192,7 +191,7 @@ are several important points to consider here.
    - The TELL component list variables will be used mainly as a parameter of a
      dedicated select function, so that the stored lists can be reselected later.
    The bottom line is: There is always ONE active TOPED list of selected shapes.
-   TELL has an oportunity to reselect a certain list of shapes using a dedicated
+   TELL has an opportunity to reselect a certain list of shapes using a dedicated
    select function. All modifications are executed over the current TOPED list.
    TOPED list of selected components is invalidated after each cell change.
    Thus the mess with the multiply selected lists seems to be sorted.
@@ -2813,6 +2812,8 @@ laydata::ValidWire::ValidWire(PointVector& plist, WireWidth width) :
                                      Validator(plist), _width(width) {
    if (width > MAX_WIRE_WIDTH)
       _status |= shp_width;
+   else if (_plist.size() < 2)
+      _status |= shp_null;
    else
    {
       angles();
@@ -2827,8 +2828,7 @@ Flags acute angles and null wires
  */
 void laydata::ValidWire::angles()
 {
-   // check for a single point
-   if (_plist.size() < 2) _status |= shp_null;
+   assert(_plist.size() > 1);
    PointVector::iterator cp2 = _plist.begin();
    PointVector::iterator cp1 = cp2; cp2++;
    real pAngle = 0.0;
@@ -2875,13 +2875,34 @@ void laydata::ValidWire::angles()
 
 void laydata::ValidWire::endSegments()
 {
-   //TODO shp_shortends
+   unsigned lastIndex = _plist.size() - 1;
+   assert(lastIndex > 0);
+   if (lastIndex < 2) return;
+   TP pA = _plist[0];
+   TP pB = _plist[1];
+   // calculate the distance
+   real A      = pA.y() - pB.y();
+   real B      = pA.x() - pB.x();
+   real length = sqrt(A*A + B*B);
+   if (length < (real)(_width / 2))
+      _status |= shp_shortends;
+
+   pA = _plist[lastIndex--];
+   pB = _plist[lastIndex];
+
+   // calculate the distance
+   A      = pA.y() - pB.y();
+   B      = pA.x() - pB.x();
+   length = sqrt(A*A + B*B);
+   if (length < (real)(_width / 2))
+      _status |= shp_shortends;
 }
 
 /*! Implements  algorithm to check that the wire is not simple crossing.
 Alters the laydata::shp_cross bit of _status if the wire is self-crossing
 */
-void laydata::ValidWire::selfcrossing() {
+void laydata::ValidWire::selfcrossing()
+{
 
    //using BO modified
    logicop::CrossFix fixingpoly(_plist, false);
@@ -2900,8 +2921,33 @@ void laydata::ValidWire::selfcrossing() {
       _status |= laydata::shp_cross;*/
 }
 
-laydata::TdtData* laydata::ValidWire::replacement() {
-   return DEBUG_NEW laydata::TdtWire(_plist, _width);
+laydata::TdtData* laydata::ValidWire::replacement()
+{
+   TdtData *newShape = NULL;
+   if (shp_shortends == status())
+   {
+      TdtData* intershape = DEBUG_NEW TdtWire(_plist, _width);
+      PointVector w2p = intershape->shape2poly();
+      delete intershape;
+      if (0 == w2p.size())
+      {
+         std::ostringstream ost;
+         ost << "Wire check fails - End segments too short, can't generate a valid shape";
+         tell_log(console::MT_ERROR, ost.str());
+      }
+      else
+      {
+         std::ostringstream ost;
+         ost << "Wire check fails - End segments too short, generating an equivalent polygon";
+         tell_log(console::MT_WARNING, ost.str());
+         newShape = DEBUG_NEW TdtPoly(w2p);
+      }
+   }
+   else
+   {
+      newShape = DEBUG_NEW TdtWire(_plist, _width);
+   }
+   return newShape;
 }
 
 std::string laydata::ValidWire::failType() {

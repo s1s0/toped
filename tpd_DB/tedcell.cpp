@@ -1205,7 +1205,7 @@ laydata::TdtData* laydata::TdtCell::checkNreplacePoly(SelectDataPair& sel, Valid
       if (shp_OK == check->status())  // entirely
          return NULL;
       else {// ... well, maybe not entirely...
-         // it is still not clear here why and how the modefied polygon can be
+         // it is still not clear here why and how the modified polygon can be
          // in clockwise order. The case with Sergei's gds - metki
          // assert(!(shp_clock & check->status()));
          laydata::TdtData* newshape = check->replacement();

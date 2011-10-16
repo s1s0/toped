@@ -1458,13 +1458,13 @@ bool ImportDB::pathAcceptable(PointVector& plist, int4b width )
           << _layCrossMap->printSrcLayer()
           << " }";
       tell_log(console::MT_ERROR, ost.str());
+      return false;
    }
-   if (check.valid())
+   else
    {
       plist = check.getValidated();
       return true;
    }
-   else return false;
 }
 
 ImportDB::~ImportDB()
