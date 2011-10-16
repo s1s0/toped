@@ -105,8 +105,8 @@ void logicop::logic::findCrossingPoints()
    _shape1 = _segl1->dump_points();
    _shape2 = _segl2->dump_points();
    reorderCross();
-   REPORT_POLY_DEBUG(_shape1, "Before reorderCross")
-   REPORT_POLY_DEBUG(_shape2, "Before reorderCross")
+   REPORT_POLY_DEBUG(_shape1, "After reorderCross")
+   REPORT_POLY_DEBUG(_shape2, "After reorderCross")
 }
 
 void logicop::logic::reorderCross()
