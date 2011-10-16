@@ -299,11 +299,19 @@ polycross::VPoint* polycross::VPoint::checkNreorder(VPoint*& pairedShape, bool s
          //a single polygon - so, let's remove both crossing points
          prevCross->prev()->set_next(this); set_prev(prevCross->prev());
          nextCross->next()->set_prev(this); set_next(nextCross->next());
-         prevCrossCouple->prev()->set_next(nextCrossCouple->next());
-         nextCrossCouple->next()->set_prev(prevCrossCouple->prev());
-         delete prevCross; delete prevCrossCouple;
-         delete nextCross; delete nextCrossCouple;
-         return this;
+         delete prevCross;
+         delete nextCross;
+         // Cross coupled points are non necessarily neighbors in the second
+         // polygon. We can have a plenty of them in one vertex - so take them
+         // out one by one. First prevCrossCouple...
+         prevCrossCouple->prev()->set_next(prevCrossCouple->next());
+         prevCrossCouple->next()->set_prev(prevCrossCouple->prev());
+         delete prevCrossCouple;
+         // ...then nextCrossCouple
+         nextCrossCouple->prev()->set_next(nextCrossCouple->next());
+         nextCrossCouple->next()->set_prev(nextCrossCouple->prev());
+         delete nextCrossCouple;
+         return _next;
       }
       else
       {
@@ -328,7 +336,7 @@ polycross::VPoint* polycross::VPoint::checkNreorder(VPoint*& pairedShape, bool s
          if (nextCrossCouple == pairedShape)
             pairedShape = nextCrossCouple->next();
          delete nextCrossCouple;
-         return this;
+         return _next;
       }
    }
 }
@@ -1927,3 +1935,199 @@ polycross::BindCollection::~BindCollection()
       delete (*BL);
    _blist.clear();
 }
+
+
+/** Some code sniplets (all of them "almost" working) attempting to preserve
+ * the CVC K case points in checkNreorder() above. It is all about resolving
+ * cut_test3A case. All in all - the idea of preserving those points proved
+ * to be a horrible idea because it is virtually impossible to sort them in
+ * an order suitable for the post-processing.
+ */
+/*
+// we have a touching edges (K case) and we're post-processing two
+// polygon case. The hitch is to remove both crossing points exactly as
+// in the single polygon case above. That would be fine only in 99.9%
+// of the cases though. The exception is the case when we have polygon A
+// entirely inside the polygon B, but with some touching points. It
+// turns out that if we clean-up the cross points in that case there is
+// effectively no way to process that case properly. So we have to deal
+// with it here!
+// Here is the summary of what has to be done:
+// - find-out whether the K case is touching from inside or from outside
+// - if the touching point is from outside - clean-up the crossing points
+// - if the touching points are from inside - we have to keep them BUT!
+//   -- make sure that they are sorted properly i.e. they are not cross
+//      coupled
+// So - let's dance!
+// 1. Get points neighboring to this vertex on this object ...
+// First find the neighboring points which does not coincide with this vertex
+spV = prevCrossCouple->prev();
+while (*spV->cp() == *cp()) spV = spV->prev();
+snV = nextCrossCouple->next();
+while (*snV->cp() == *cp()) snV = snV->next();
+
+pV = prevCross;
+do pV = pV->prev();
+while  (0 == (oriP = orientation(spV->cp(), snV->cp(), pV->cp())));
+
+nV = prevCrossCouple;
+do nV = nV->prev();
+while  (0 == (oriN = orientation(spV->cp(), snV->cp(), nV->cp())));
+
+//         spV = prevCross->prev();
+//         while (*spV->cp() == *cp())     spV = spV->prev();
+//         snV = nextCross->next();
+//         while (*snV->cp() == *cp())     snV = snV->next();
+//         // ... and calculate the orientation of the triangle formed by them and
+//         // this vertex. Make sure they are not lined-up
+//         while  (0 == (oriP = orientation(spV->cp(), snV->cp(), cp() )))
+//            spV = spV->prev();
+//         // 2. Get points neighboring to this vertex on pairedShape object ...
+//         spV = prevCrossCouple->prev();
+//         while (*spV->cp() == *cp())     spV = spV->prev();
+//         snV = nextCrossCouple->next();
+//         while (*snV->cp() == *cp())     snV = snV->next();
+//         // ... and calculate the orientation of the triangle formed by them and
+//         // this vertex. Make sure they are not lined-up
+//         while  (0 == (oriN = orientation(spV->cp(), snV->cp(), cp() )))
+//            spV = spV->prev();
+// 3. Check whether the triangles above are equally oriented
+if (oriN == oriP)
+{ //4. The orientation is the same - means that the vertex is touching
+  //   inside. We have to keep the cross points
+
+//         Code below is doing additional checks and sorting which appears to be
+//         redundant (but one can never be sure with this algo!) essentially it
+//         exploits the cases when there are more than one touching point in a
+//         vertex. The reason it looks redundant is that after the implementation
+//         of the inside/outside K case this should not be possible - i.e. there
+//         can be only one touching point from the inside of the polygon
+//         that there should not be two
+//            if (prevCrossCouple->next() == nextCrossCouple)
+//               // nothing to do here - cross-coupled points are neighbors
+//               assert(nextCrossCouple->prev() == prevCrossCouple);
+//            else if (prevCrossCouple->prev() == nextCrossCouple)
+//               assert(false);
+//            else if (prevCrossCouple->next() == nextCrossCouple->prev())
+//            {
+//               // we have one cross-coupled point between ...
+//               CPoint* inter = static_cast<CPoint*>(prevCrossCouple->next());
+//               // ... make sure it is on the same vertex ...
+//               assert(*prevCrossCouple->cp() == *inter->cp());
+//               // ... make sure it is a cross point ...
+//               assert(0 == inter->visited());
+//               //... OK, swap the intermediate point with the nextCrossCouple
+//               inter->set_next(nextCrossCouple->next());
+//               nextCrossCouple->next()->set_prev(inter);
+//               inter->set_prev(nextCrossCouple);
+//               nextCrossCouple->set_next(inter);
+//               prevCrossCouple->set_next(nextCrossCouple);
+//               nextCrossCouple->set_prev(prevCrossCouple);
+//            }
+//            else
+//            {
+//               // we have 2 or more cross-coupled point between ...
+//               CPoint* interP = static_cast<CPoint*>(prevCrossCouple->next());
+//               CPoint* interN = static_cast<CPoint*>(nextCrossCouple->prev());
+//               // ... make sure they are on the same vertex ...
+//               assert(*prevCrossCouple->cp() == *interP->cp());
+//               assert(*nextCrossCouple->cp() == *interN->cp());
+//               // ... make sure they are crossing points ...
+//               assert(0 == interP->visited());
+//               assert(0 == interN->visited());
+//               interP->set_next(nextCrossCouple->next());
+//               nextCrossCouple->next()->set_prev(interP);
+//               interN->set_prev(nextCrossCouple);
+//               nextCrossCouple->set_next(interN);
+//               prevCrossCouple->set_next(nextCrossCouple);
+//               nextCrossCouple->set_prev(prevCrossCouple);
+//            }
+}
+else
+{ //4. The orientation is different - means that the vertex is touching
+  //   outside. Remove the crossing points
+   prevCross->prev()->set_next(this); set_prev(prevCross->prev());
+   nextCross->next()->set_prev(this); set_next(nextCross->next());
+   delete prevCross;
+   delete nextCross;
+   // Cross coupled points are non necessarily neighbors in the second
+   // polygon. We can have a plenty of them in one vertex - so take them
+   // out one by one. First prevCrossCouple...
+   prevCrossCouple->prev()->set_next(prevCrossCouple->next());
+   prevCrossCouple->next()->set_prev(prevCrossCouple->prev());
+   if (prevCrossCouple == pairedShape)
+      pairedShape = prevCrossCouple->prev();
+   delete prevCrossCouple;
+   // ...then nextCrossCouple
+   nextCrossCouple->prev()->set_next(nextCrossCouple->next());
+   nextCrossCouple->next()->set_prev(nextCrossCouple->prev());
+   if (nextCrossCouple == pairedShape)
+      pairedShape = nextCrossCouple->next();
+   delete nextCrossCouple;
+}
+*/
+
+/*
+         // test orphographical orientation to eventually swap the coupling
+         spV = prevCross->prev();
+         while (*spV->cp() == *cp())     spV = spV->prev();
+         snV = nextCross->next();
+         while (*snV->cp() == *cp())     snV = snV->next();
+         int orderA = xyorder(spV->cp(), snV->cp());
+         assert(0 != orderA);
+         spV = prevCrossCouple->prev();
+         while (*spV->cp() == *cp())     spV = spV->prev();
+         snV = nextCrossCouple->next();
+         while (*snV->cp() == *cp())     snV = snV->next();
+         int orderB = xyorder(spV->cp(), snV->cp());
+         assert(0 != orderB);
+
+         if (orderA != orderB)
+         {
+            // swap the links
+            if (prevCrossCouple->next() == nextCrossCouple)
+            {
+               assert(nextCrossCouple->prev() == prevCrossCouple);
+               spV = prevCrossCouple->prev();
+               snV = nextCrossCouple->next();
+               prevCrossCouple->set_next(snV); snV->set_prev(prevCrossCouple);
+               nextCrossCouple->set_prev(spV); spV->set_next(nextCrossCouple);
+            }
+            else if (prevCrossCouple->prev() == nextCrossCouple)
+               assert(false);
+            else if (prevCrossCouple->next() == nextCrossCouple->prev())
+            {
+               // we have one cross-coupled point between ...
+               CPoint* inter = static_cast<CPoint*>(prevCrossCouple->next());
+               // ... make sure it is on the same vertex ...
+               assert(*prevCrossCouple->cp() == *inter->cp());
+               // ... make sure it is a cross point ...
+               assert(0 == inter->visited());
+               //... OK, swap the intermediate point with the nextCrossCouple
+               inter->set_next(nextCrossCouple->next());
+               nextCrossCouple->next()->set_prev(inter);
+               inter->set_prev(nextCrossCouple);
+               nextCrossCouple->set_next(inter);
+               prevCrossCouple->set_next(nextCrossCouple);
+               nextCrossCouple->set_prev(prevCrossCouple);
+            }
+            else
+            {
+               // we have 2 or more cross-coupled point between ...
+               CPoint* interP = static_cast<CPoint*>(prevCrossCouple->next());
+               CPoint* interN = static_cast<CPoint*>(nextCrossCouple->prev());
+               // ... make sure they are on the same vertex ...
+               assert(*prevCrossCouple->cp() == *interP->cp());
+               assert(*nextCrossCouple->cp() == *interN->cp());
+               // ... make sure they are crossing points ...
+               assert(0 == interP->visited());
+               assert(0 == interN->visited());
+               interP->set_next(nextCrossCouple->next());
+               nextCrossCouple->next()->set_prev(interP);
+               interN->set_prev(nextCrossCouple);
+               nextCrossCouple->set_next(interN);
+               prevCrossCouple->set_next(nextCrossCouple);
+               nextCrossCouple->set_prev(prevCrossCouple);
+            }
+         }
+*/
