@@ -1041,36 +1041,84 @@ void laydata::TdtDesign::setModified()
 
 laydata::TdtData* laydata::TdtDesign::addPoly(unsigned la, PointVector* pl)
 {
+   laydata::TdtData *newshape = NULL;
+   for(PointVector::iterator PL = pl->begin(); PL != pl->end(); PL++)
+      (*PL) *= _target.rARTM();
+
    laydata::ValidPoly check(*pl);
-   if (!check.valid()) {
-      std::ostringstream ost;
-      ost << "Polygon check fails - " << check.failType();
-      tell_log(console::MT_ERROR, ost.str());
-      return NULL;
-   }
-   laydata::TdtData* newshape;
-   DBbox old_overlap(_target.edit()->cellOverlap());
-   QuadTree *actlay = _target.edit()->secureLayer(la);
-   setModified();
-   PointVector vpl = check.getValidated();
-   if (check.box())
+   if (check.valid() || (!check.valid() && check.recoverable()))
    {
-      TP p1(vpl[0] *_target.rARTM());
-      TP p2(vpl[2] *_target.rARTM());
-      newshape = DEBUG_NEW TdtBox(p1,p2);
-      actlay->add(newshape);
+      DBbox old_overlap(_target.edit()->cellOverlap());
+      QuadTree *actlay = _target.edit()->secureLayer(la);
+      setModified();
+      if (check.valid())
+      {
+         PointVector vpl = check.getValidated();
+         if (check.box())
+         {
+            newshape = DEBUG_NEW TdtBox(vpl[0],vpl[2]);
+            actlay->add(newshape);
+         }
+         else
+         {
+            newshape = DEBUG_NEW TdtPoly(vpl);
+            actlay->add(newshape);
+         }
+      }
+      else
+      {
+         std::ostringstream ost;
+         ost << "Polygon check fails - self crossing, generating equivalent shapes";
+         tell_log(console::MT_WARNING, ost.str());
+
+         const ShapeList* nShapes = check.recovered();
+         for (ShapeList::const_iterator CS = nShapes->begin(); CS != nShapes->end(); CS++)
+         {
+            newshape = *CS;
+            actlay->add(newshape);
+         }
+      }
+      if (_target.edit()->overlapChanged(old_overlap, this))
+         do {} while(validateCells());
    }
    else
    {
-      for(PointVector::iterator PL = vpl.begin(); PL != vpl.end(); PL++)
-         (*PL) *= _target.rARTM();
-      newshape = DEBUG_NEW TdtPoly(vpl);
-      actlay->add(newshape);
-
+      std::ostringstream ost;
+      ost << "Polygon check fails - " << check.failType();
+      tell_log(console::MT_ERROR, ost.str());
    }
-   if (_target.edit()->overlapChanged(old_overlap, this))
-      do {} while(validateCells());
    return newshape;
+
+//   laydata::ValidPoly check(*pl);
+//   if (!check.valid()) {
+//      std::ostringstream ost;
+//      ost << "Polygon check fails - " << check.failType();
+//      tell_log(console::MT_ERROR, ost.str());
+//      return NULL;
+//   }
+//   laydata::TdtData* newshape;
+//   DBbox old_overlap(_target.edit()->cellOverlap());
+//   QuadTree *actlay = _target.edit()->secureLayer(la);
+//   setModified();
+//   PointVector vpl = check.getValidated();
+//   if (check.box())
+//   {
+//      TP p1(vpl[0] *_target.rARTM());
+//      TP p2(vpl[2] *_target.rARTM());
+//      newshape = DEBUG_NEW TdtBox(p1,p2);
+//      actlay->add(newshape);
+//   }
+//   else
+//   {
+//      for(PointVector::iterator PL = vpl.begin(); PL != vpl.end(); PL++)
+//         (*PL) *= _target.rARTM();
+//      newshape = DEBUG_NEW TdtPoly(vpl);
+//      actlay->add(newshape);
+//
+//   }
+//   if (_target.edit()->overlapChanged(old_overlap, this))
+//      do {} while(validateCells());
+//   return newshape;
 }
 
 laydata::TdtData* laydata::TdtDesign::putPoly(unsigned la, PointVector* pl)

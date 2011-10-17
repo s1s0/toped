@@ -431,10 +431,12 @@ namespace laydata {
                                 ValidPoly(PointVector&);
       virtual laydata::TdtData* replacement();
       virtual std::string       failType();
+      const ShapeList*          recovered() {return &_recovered;}
    private:
       void                      angles();
       void                      normalize();
       void                      selfcrossing();
+      ShapeList                 _recovered;
    };
 
    //===========================================================================

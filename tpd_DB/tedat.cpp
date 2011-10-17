@@ -2795,7 +2795,20 @@ void laydata::ValidPoly::selfcrossing()
       return;
    }
    if (0 != fixingpoly.crossp() )
+   {
       _status |= laydata::shp_cross;
+
+      pcollection cut_shapes;
+      laydata::TdtData* newshape;
+      if ( fixingpoly.recover(cut_shapes) )
+      {
+         pcollection::const_iterator CI;
+         for (CI = cut_shapes.begin(); CI != cut_shapes.end(); CI++)
+            if (NULL != (newshape = createValidShape(*CI)))
+               _recovered.push_back(newshape);
+         cut_shapes.clear();
+      }
+   }
 }
 
 std::string laydata::ValidPoly::failType() {
