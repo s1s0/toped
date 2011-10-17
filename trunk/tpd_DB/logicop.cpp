@@ -625,7 +625,7 @@ void logicop::CrossFix::cleanRedundant()
    unsigned loopcount;
    for(loopcount = 0; loopcount < shapeNum; loopcount++)
    {
-      // for every non-crossing point which coincides with a neightboring cross point
+      // for every non-crossing point which coincides with a neighboring cross point
       if (
            (looper->visited() &&  (!looper->prev()->visited()) &&
            (*looper->prev()->cp() == *looper->cp()))                 ||
@@ -732,6 +732,18 @@ bool logicop::CrossFix::generate(pcollection& plycol, real bfactor)
    }
    if (0 == plycol.size()) return false;
    else return true;
+}
+
+bool logicop::CrossFix::recover(pcollection& plycol)
+{
+   if (0 == _crossp) return false;
+   polycross::VPoint* centinel = _shape;
+   // Get a non-crossing starting point
+   while (0 == centinel->visited()) centinel = centinel->next();
+   // traverse the resulting points recursively to get all the polygons
+   traverseOne(centinel, plycol);
+   assert( plycol.size() > 1 );
+   return true;
 }
 
 void logicop::CrossFix::traverseOne(polycross::VPoint* const centinel, pcollection& plycol)

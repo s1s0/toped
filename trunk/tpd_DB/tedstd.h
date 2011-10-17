@@ -103,7 +103,8 @@ namespace laydata {
       shp_null       = 0x8000, // 0 area - points are not forming a polygon
    } shape_status;
 
-   const unsigned shp_valid      = shp_cross; //
+   const unsigned shp_valid       = shp_cross; //
+   const unsigned shp_recoverable = shp_null; //
 
    class TdtData;
    class EditObject;
@@ -134,7 +135,7 @@ namespace laydata {
                                                             _plist(plist) {};
       virtual             ~Validator() {};
       bool                 valid()           {return _status < shp_valid;}
-      bool                 recoverable()     {return _status < shp_null;}
+      bool                 recoverable()     {return _status < shp_recoverable;}
       byte                 status()          {return _status;}
       bool                 box()             {return (0 != (_status & shp_box));}
       PointVector          getValidated()    {return _plist;}

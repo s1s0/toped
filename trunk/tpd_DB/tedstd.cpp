@@ -1460,6 +1460,16 @@ bool ImportDB::pathAcceptable(PointVector& plist, int4b width )
       tell_log(console::MT_ERROR, ost.str());
       return false;
    }
+   else if (laydata::shp_shortends == check.status())
+   {
+      //TODO - automatic conversion option
+      std::ostringstream ost;
+      ost << "Wire check fails - { Short end segments "
+          << _layCrossMap->printSrcLayer()
+          << " }";
+      tell_log(console::MT_ERROR, ost.str());
+      return false;
+   }
    else
    {
       plist = check.getValidated();

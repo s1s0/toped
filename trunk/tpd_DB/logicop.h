@@ -127,6 +127,7 @@ namespace logicop {
       //! Do Benttley-Ottman modified
       void                    findCrossingPoints();
       //! Get the fixed polygon(s)
+      bool                    recover(pcollection&);
       bool                    generate(pcollection&, real);
       word                    crossp() {return _crossp;}
    protected:
