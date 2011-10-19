@@ -187,7 +187,7 @@ namespace polycross
          void              clearAllEvents();
          void              sweep(YQ&, XQ&, bool single);
          void              sweep2bind(YQ&, BindCollection&);
-         void              CheckBEM(XQ&, TEvent&, TEvent&);
+         void              CheckBEM(XQ&, TEvent&, TEvent&, bool);
       private:
          typedef std::list<TEvent*> Events;
          typedef std::map<int, Events> AllEvents;
@@ -202,7 +202,7 @@ namespace polycross
    class TEvent
    {
       public:
-         friend void EventVertex::CheckBEM(XQ&, TEvent&, TEvent&);
+         friend void EventVertex::CheckBEM(XQ&, TEvent&, TEvent&, bool);
 //         TEvent(byte shapeID) : _shapeID(shapeID) {};
          virtual void      sweep(XQ&, YQ&, ThreadList&, bool) = 0;
          virtual void      sweep2bind(YQ&, BindCollection&) = 0;
