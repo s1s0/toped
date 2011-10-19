@@ -679,7 +679,7 @@ bool logicop::CrossFix::generate(pcollection& plycol, real bfactor)
    // Get a non-crossing starting point
    while (0 == centinel->visited()) centinel = centinel->next();
    // traverse the resulting points recursively to get all the polygons
-   traverseOne(centinel, plycol);
+   traverseMulti(centinel, plycol);
 //   if (1 == plycol.size()) return true;
    assert( plycol.size() > 1 );
    if (0 > bfactor)
@@ -741,12 +741,11 @@ bool logicop::CrossFix::recover(pcollection& plycol)
    // Get a non-crossing starting point
    while (0 == centinel->visited()) centinel = centinel->next();
    // traverse the resulting points recursively to get all the polygons
-   traverseOne(centinel, plycol);
-   assert( plycol.size() > 1 );
+   traverseSingle(centinel, plycol);
    return true;
 }
 
-void logicop::CrossFix::traverseOne(polycross::VPoint* const centinel, pcollection& plycol)
+void logicop::CrossFix::traverseMulti(polycross::VPoint* const centinel, pcollection& plycol)
 {
    bool direction = true; /*next*/
    PointVector *shgen = DEBUG_NEW PointVector();
@@ -758,9 +757,24 @@ void logicop::CrossFix::traverseOne(polycross::VPoint* const centinel, pcollecti
       shgen->push_back(TP(collector->cp()->x(), collector->cp()->y()));
       if (0 == collector->visited())
       {
-         traverseOne(collector, plycol);
+         traverseMulti(collector, plycol);
       }
       collector = collector->follower(direction);
+   }
+   plycol.push_back(shgen);
+}
+
+void logicop::CrossFix::traverseSingle(polycross::VPoint* const centinel, pcollection& plycol)
+{
+   bool direction = true; /*next*/
+   PointVector *shgen = DEBUG_NEW PointVector();
+   // always push the entry point
+   shgen->push_back(TP(centinel->cp()->x(), centinel->cp()->y()));
+   polycross::VPoint* collector = centinel->next();
+   while ( (collector->cp()) != (centinel->cp()) )
+   {
+      shgen->push_back(TP(collector->cp()->x(), collector->cp()->y()));
+      collector = collector->follower(direction, true);
    }
    plycol.push_back(shgen);
 }

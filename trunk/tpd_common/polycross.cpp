@@ -682,10 +682,11 @@ TP* polycross::TEvent::oneLineSegments(polysegment* above, polysegment* below, Y
    float rps = 0.0;
    float lambdaL = getLambda(above->lP(), above->rP(), below->lP());
    float lambdaR = getLambda(above->lP(), above->rP(), below->rP());
-   // coinciding or touching segments -> don't generate anything.
+   // partially coinciding or joining segments -> don't generate anything.
    // The post-process of begin/end/modify events in a single vertex should
-   // take proper care about those cases
-   if (0 == (lambdaL * lambdaR)) return NULL;
+   // take proper care about those cases. Notable exception are fully 
+   // coinciding segments which shall be handled here
+   if ((lambdaL != lambdaR) && (0 == (lambdaL * lambdaR))) return NULL;
    bool swaped = false;
    // first of all cases when neither of the lines is enclosing the other one
    // The idea of this check is :
@@ -1253,12 +1254,12 @@ void polycross::EventVertex::sweep(YQ& sweepline, XQ& eventq, bool single)
    // checked for joining points between each other
    for (Events::iterator CE1 = nonCrossE.begin(); CE1 != nonCrossE.end(); CE1++)
       for (Events::iterator CE2 = CE1; CE2 != nonCrossE.end(); CE2++)
-         CheckBEM(eventq, **CE1, **CE2);
+         CheckBEM(eventq, **CE1, **CE2, single);
 }
 
-void polycross::EventVertex::CheckBEM(XQ& eventq, TEvent& thr1, TEvent& thr2)
+void polycross::EventVertex::CheckBEM(XQ& eventq, TEvent& thr1, TEvent& thr2, bool single)
 {
-   if (thr1.aseg()->polyNo() == thr2.aseg()->polyNo()) return;
+   if ((!single) && (thr1.aseg()->polyNo() == thr2.aseg()->polyNo())) return;
 #ifdef BO2_DEBUG
    printf("Checking BEM ------------------------\n");
 #endif

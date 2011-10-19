@@ -134,7 +134,8 @@ namespace logicop {
       void                    reset_visited();
       void                    reorderCross();
       void                    cleanRedundant();
-      void                    traverseOne(polycross::VPoint* const, pcollection&);
+      void                    traverseMulti(polycross::VPoint* const, pcollection&);
+      void                    traverseSingle(polycross::VPoint* const, pcollection&);
       void                    countCross();
       //! The raw data, corresponding to _poly, used by all logic methods
       polycross::VPoint*      _shape;
