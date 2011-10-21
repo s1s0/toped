@@ -185,7 +185,7 @@ namespace polycross
          const TP*         operator () () const {return _evertex;};
          void              addEvent(TEvent*, EventTypes);
          void              clearAllEvents();
-         void              sweep(YQ&, XQ&, bool single);
+         void              sweep(YQ&, XQ&, bool, bool);
          void              sweep2bind(YQ&, BindCollection&);
          void              CheckBEM(XQ&, TEvent&, TEvent&, bool);
       private:
@@ -394,7 +394,7 @@ namespace polycross
                            XQ(const segmentlist&, const segmentlist&);
                            XQ(const segmentlist&, bool loopsegs);
          ~XQ();
-         void              sweep(bool single);
+         void              sweep(bool, bool);
          void              sweep2bind(BindCollection&);
          void              addCrossEvent(const TP*, polysegment*, polysegment*);
          YQ*               sweepline() {return _sweepLine;}

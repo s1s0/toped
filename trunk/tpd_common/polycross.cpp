@@ -1232,7 +1232,7 @@ void polycross::EventVertex::addEvent(TEvent* tevent, EventTypes etype)
 }
 
 
-void polycross::EventVertex::sweep(YQ& sweepline, XQ& eventq, bool single)
+void polycross::EventVertex::sweep(YQ& sweepline, XQ& eventq, bool single, bool looped)
 {
 #ifdef BO2_DEBUG
    printf("______________ POINT = ( %i , %i ) ___________\n", _evertex->x(), _evertex->y());
@@ -1250,11 +1250,12 @@ void polycross::EventVertex::sweep(YQ& sweepline, XQ& eventq, bool single)
          }
       }
    }
-   // now - the post-check. All segments belonging to non cross events should be
-   // checked for joining points between each other
-   for (Events::iterator CE1 = nonCrossE.begin(); CE1 != nonCrossE.end(); CE1++)
-      for (Events::iterator CE2 = CE1; CE2 != nonCrossE.end(); CE2++)
-         CheckBEM(eventq, **CE1, **CE2, single);
+   if (looped)
+      // now - the post-check. All segments belonging to non cross events should be
+      // checked for joining points between each other
+      for (Events::iterator CE1 = nonCrossE.begin(); CE1 != nonCrossE.end(); CE1++)
+         for (Events::iterator CE2 = CE1; CE2 != nonCrossE.end(); CE2++)
+            CheckBEM(eventq, **CE1, **CE2, single);
 }
 
 void polycross::EventVertex::CheckBEM(XQ& eventq, TEvent& thr1, TEvent& thr2, bool single)
@@ -1608,10 +1609,12 @@ int polycross::YQ::sCompare(const polysegment* seg0, const polysegment* seg1)
          if (0 ==(--loopsentinel))
          {
             // appears that the polygons coincide?
-            if (seg0->polyNo() != seg1->polyNo())
-               ori = 1;
-            else
-               throw EXPTNpolyCross("Too many iterations in segment compare");
+            ori = 1;
+            // The expression below is valid, exception here are collinear wires
+            // if (seg0->polyNo() != seg1->polyNo())
+            //    ori = 1;
+            // else
+            //    throw EXPTNpolyCross("Too many iterations in segment compare");
          }
       }
    } while (0 == ori);
@@ -1720,9 +1723,27 @@ void polycross::XQ::createSEvents(const segmentlist& seg)
       // determine the type of event from the neighboring segments
       // and create the thread event
       if (seg[s1]->lP() == seg[s2]->lP())
-         addEvent(seg[s1],DEBUG_NEW TbEvent(seg[s1], seg[s2]),_beginE);
+      {
+         int ori = orientation(seg[s2]->lP(), seg[s2]->rP(), seg[s1]->rP());
+         if (0 == ori)
+         { // collinear segments
+            addEvent(seg[s1],DEBUG_NEW TbsEvent(seg[s1]),_beginE);
+            addEvent(seg[s2],DEBUG_NEW TbsEvent(seg[s2]),_beginE);
+         }
+         else
+            addEvent(seg[s1],DEBUG_NEW TbEvent(seg[s1], seg[s2]),_beginE);
+      }
       else if (seg[s1]->rP() == seg[s2]->rP())
-         addEvent(seg[s1],DEBUG_NEW TeEvent(seg[s1], seg[s2]),_endE);
+      {
+         int ori = orientation(seg[s2]->lP(), seg[s2]->rP(), seg[s1]->lP());
+         if (0 == ori)
+         { // collinear segments
+            addEvent(seg[s1],DEBUG_NEW TesEvent(seg[s1]),_endE );
+            addEvent(seg[s2],DEBUG_NEW TesEvent(seg[s2]),_endE );
+         }
+         else
+            addEvent(seg[s1],DEBUG_NEW TeEvent(seg[s1], seg[s2]),_endE);
+      }
       else
          addEvent(seg[s1],DEBUG_NEW TmEvent(seg[s1], seg[s2]),_modifyE);
    }
@@ -1777,7 +1798,7 @@ int polycross::XQ::E_compare( const void* v1, const void* v2, void*)
    return xyorder(p1,p2);
 }
 
-void polycross::XQ::sweep(bool single)
+void polycross::XQ::sweep(bool single, bool looped)
 {
 // see the comment around find parameter in the E_compare
 #ifdef BO2_DEBUG
@@ -1788,7 +1809,7 @@ void polycross::XQ::sweep(bool single)
    while (NULL != avl_t_first(&trav,_xQueue))
    {
       evtlist = (EventVertex*)trav.avl_node->avl_data;
-      evtlist->sweep(*_sweepLine, *this, single);
+      evtlist->sweep(*_sweepLine, *this, single, looped);
       avl_delete(_xQueue,evtlist);
       avl_insert(_xOldQueue, evtlist);
    }
