@@ -94,7 +94,7 @@ void logicop::logic::findCrossingPoints()
    // create the event queue
    polycross::XQ* _eq = DEBUG_NEW polycross::XQ(*_segl1, *_segl2);
    // BO modified algorithm
-   _eq->sweep(false);
+   _eq->sweep(false, true);
    unsigned crossp1 = _segl1->normalize(_poly1, true);
    unsigned crossp2 = _segl2->normalize(_poly2, true);
    assert(crossp1 == crossp2);
@@ -561,7 +561,7 @@ void logicop::CrossFix::findCrossingPoints()
    // create the event queue
    polycross::XQ* _eq = DEBUG_NEW polycross::XQ(*_segl, _looped);
    // BO modified algorithm
-   _eq->sweep(true);
+   _eq->sweep(true, _looped);
    delete _eq;
    _crossp = _segl->normalize(_poly, _looped);
 //   if ((0 == _crossp) || (!_looped)) return;
