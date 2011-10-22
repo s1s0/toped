@@ -882,7 +882,8 @@ laydata::Validator* laydata::TdtPoly::move(const CTM& trans, SGBitSet& plst)
     // should get here only
       PointVector* nshape = movePointsSelected(plst, trans);
       laydata::ValidPoly* check = DEBUG_NEW laydata::ValidPoly(*nshape);
-      if (laydata::shp_OK == check->status()) {
+      if (laydata::shp_OK == check->status())
+      {
          // assign the modified PointVector ONLY if the resulting shape is perfect
          delete [] _pdata;
          _psize = nshape->size();
@@ -897,8 +898,8 @@ laydata::Validator* laydata::TdtPoly::move(const CTM& trans, SGBitSet& plst)
          delete check;
          return NULL;
       }
-      // in all other cases keep the original PointVector, depending on the check->status()
-      // the shape will be replaced, or marked as failed to modify
+      // in all other cases keep the original PointVector, depending on the
+      // check->status() the shape will be replaced, or marked as failed to modify
       nshape->clear(); delete nshape;
       return check;
    }
@@ -974,7 +975,7 @@ laydata::TdtData* laydata::TdtPoly::copy(const CTM& trans)
    // will result in bad results in logic operations! (Issue 52)
    laydata::ValidPoly check(ptlist);
    assert(check.valid());
-   return DEBUG_NEW TdtPoly(check.getValidated());
+   return check.replacement();
 }
 
 bool laydata::TdtPoly::pointInside(TP pnt)
@@ -1415,7 +1416,8 @@ laydata::Validator* laydata::TdtWire::move(const CTM& trans, SGBitSet& plst)
    {
       PointVector* nshape = movePointsSelected(plst, trans);
       laydata::ValidWire* check = DEBUG_NEW laydata::ValidWire(*nshape, _width);
-      if (laydata::shp_OK == check->status()) {
+      if (laydata::shp_OK == check->status())
+      {
          // assign the modified PointVector ONLY if the resulting shape is perfect
          delete [] _pdata;
          _psize = nshape->size();
@@ -1428,8 +1430,8 @@ laydata::Validator* laydata::TdtWire::move(const CTM& trans, SGBitSet& plst)
          delete check;
          return NULL;
       }
-      // in all other cases keep the original PointVector, depending on the check->status()
-      // the shape will be replaced, or marked as failed to modify
+      // in all other cases keep the original PointVector, depending on the
+      // check->status() the shape will be replaced, or marked as failed to modify
       return check;
    }
    else transfer(trans);
@@ -1456,7 +1458,7 @@ laydata::TdtData* laydata::TdtWire::copy(const CTM& trans) {
    //
    ValidWire check(ptlist, _width);
    assert(check.valid());
-   return DEBUG_NEW TdtWire(check.getValidated(),_width);
+   return check.replacement();
 }
 
 void laydata::TdtWire::stretch(int bfactor, ShapeList** decure)
@@ -1479,7 +1481,7 @@ PointVector laydata::TdtWire::shape2poly() const
    cdata.reserve(wcontour.csize());
    wcontour.getVectorData(cdata);
    ValidPoly check(cdata);
-   if (check.valid()) return check.getValidated();
+   if (check.recoverable()) return check.replacement()->shape2poly();
    else return PointVector();
 }
 
@@ -2710,8 +2712,18 @@ laydata::TdtData* laydata::ValidPoly::replacement()
          tell_log(console::MT_WARNING, ost.str());
          ShapeList shpRecovered;
          for (pcollection::const_iterator CI = cut_shapes.begin(); CI != cut_shapes.end(); CI++)
-            if (NULL != (newShape = createValidShape(*CI)))
-               shpRecovered.push_back(newShape);
+         {
+
+            laydata::ValidPoly check(**CI);
+            assert(check.valid());// otherwise go and fix _shapeFix->recover()!
+            PointVector npl = check.getValidated();
+            if (check.box())
+               newShape = DEBUG_NEW laydata::TdtBox(npl[2], npl[0]);
+            else
+               newShape = DEBUG_NEW laydata::TdtPoly(npl);
+            npl.clear();
+            shpRecovered.push_back(newShape);
+         }
          cut_shapes.clear();
       }
    }
@@ -2829,7 +2841,7 @@ std::string laydata::ValidPoly::failType()
 
 laydata::ValidPoly::~ValidPoly()
 {
-   if (NULL == _shapeFix)
+   if (NULL != _shapeFix)
       delete _shapeFix;
 }
 //-----------------------------------------------------------------------------
@@ -2996,10 +3008,9 @@ laydata::TdtData* laydata::ValidWire::replacement()
 }
 
 std::string laydata::ValidWire::failType() {
-//   if (_status & shp_null)  return "Zero area";
-   if      (_status & shp_cross) return "Self-crossing";
-   else if (_status & shp_null ) return "NULL area object";
-   else if (_status & shp_width) return "Wire width too big.";
+   if      (_status & shp_exception) return "Unable to verify the wire";
+   else if (_status & shp_null     ) return "NULL area wire";
+   else if (_status & shp_width    ) return "Wire width too big.";
    else return "OK";
 }
 
@@ -3033,23 +3044,21 @@ int laydata::xangle(const TP& p1, const TP& p2) {
 //-----------------------------------------------------------------------------
 // other...
 //-----------------------------------------------------------------------------
-laydata::TdtData* laydata::createValidShape(PointVector* pl) {
+laydata::TdtData* laydata::createValidShape(PointVector* pl)
+{
    laydata::ValidPoly check(*pl);
    delete pl;
-   if (!check.valid()) {
+   if (!check.valid()) // it's not check.recoverable() here deliberately!
+   {
+      return check.replacement();
+   }
+   else
+   {
       std::ostringstream ost;
       ost << "Resulting shape is invalid - " << check.failType();
       tell_log(console::MT_ERROR, ost.str());
       return NULL;
    }
-   laydata::TdtData* newshape;
-   PointVector npl = check.getValidated();
-   if (check.box())
-      newshape = DEBUG_NEW laydata::TdtBox(npl[2], npl[0]);
-   else
-      newshape = DEBUG_NEW laydata::TdtPoly(npl);
-   npl.clear();
-   return newshape;
 }
 
 laydata::TdtData* laydata::polymerge(const PointVector& _plist0, const PointVector& _plist1)
