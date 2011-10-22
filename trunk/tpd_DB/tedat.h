@@ -429,26 +429,28 @@ namespace laydata {
    class ValidPoly : public Validator {
    public:
                                 ValidPoly(PointVector&);
+      virtual                  ~ValidPoly();
       virtual laydata::TdtData* replacement();
       virtual std::string       failType();
-      const ShapeList*          recovered() {return &_recovered;}
    private:
       void                      angles();
       void                      normalize();
       void                      selfcrossing();
-      ShapeList                 _recovered;
+      logicop::CrossFix*        _shapeFix;
    };
 
    //===========================================================================
    class ValidWire : public Validator {
    public:
                                 ValidWire(PointVector&, WireWidth);
+      virtual                  ~ValidWire();
       virtual laydata::TdtData* replacement();
       virtual std::string       failType();
    private:
       void                      angles();
       void                      endSegments();
       void                      selfcrossing();
+      logicop::CrossFix*        _shapeFix;
       WireWidth                 _width;
    };
    //===========================================================================
