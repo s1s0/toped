@@ -740,7 +740,7 @@ bool logicop::CrossFix::recover(pcollection& plycol)
    polycross::VPoint* centinel = _shape;
    // Get a non-crossing starting point
    while (0 == centinel->visited()) centinel = centinel->next();
-   // traverse the resulting points recursively to get all the polygons
+   // traverse the resulting points to get the polygon
    traverseSingle(centinel, plycol);
    return true;
 }

@@ -75,6 +75,10 @@ private:
    int         _angle;
 };
 
+namespace logicop {
+   class  CrossFix;
+}
+
 namespace laydata {
 
    const word _lmnone   = 0x0000;
@@ -100,7 +104,8 @@ namespace laydata {
       // critical
       shp_cross      = 0x1000, // self crossing sequence
       shp_width      = 0x2000, // wire with width bigger than MAX_WIRE_WIDTH
-      shp_null       = 0x8000, // 0 area - points are not forming a polygon
+      shp_null       = 0x4000, // 0 area - points are not forming a polygon
+      shp_exception  = 0x8000  // exception encountered during the shape checks
    } shape_status;
 
    const unsigned shp_valid       = shp_cross; //
@@ -136,8 +141,11 @@ namespace laydata {
       virtual             ~Validator() {};
       bool                 valid()           {return _status < shp_valid;}
       bool                 recoverable()     {return _status < shp_recoverable;}
+      bool                 acceptable()      {return _status < shp_recoverable;}
       byte                 status()          {return _status;}
       bool                 box()             {return (0 != (_status & shp_box));}
+      bool                 crossing()        {return (0 != (_status & shp_cross));}
+      bool                 shortSegments()   {return (0 != (_status & shp_shortends));}
       PointVector          getValidated()    {return _plist;}
       word                 numpoints()       {return _plist.size();}
       virtual std::string  failType() = 0;

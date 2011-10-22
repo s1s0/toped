@@ -2682,7 +2682,10 @@ std::string laydata::ValidBox::failType()
 //-----------------------------------------------------------------------------
 // class ValidPoly
 //-----------------------------------------------------------------------------
-laydata::ValidPoly::ValidPoly(PointVector& plist) : Validator(plist) {
+laydata::ValidPoly::ValidPoly(PointVector& plist) :
+   Validator    ( plist         ),
+   _shapeFix    ( NULL          )
+{
    angles();
    if (!valid()) return;
    //reorder the chain (if needed) to get the points in anticlockwise order
@@ -2692,12 +2695,30 @@ laydata::ValidPoly::ValidPoly(PointVector& plist) : Validator(plist) {
    selfcrossing();
 }
 
-laydata::TdtData* laydata::ValidPoly::replacement() {
-   laydata::TdtData* newshape;
-   if (box())
-      newshape = DEBUG_NEW laydata::TdtBox(_plist[0], _plist[2]);
-   else newshape = DEBUG_NEW laydata::TdtPoly(_plist);
-   return newshape;
+laydata::TdtData* laydata::ValidPoly::replacement()
+{
+   laydata::TdtData* newShape = NULL;
+   assert(recoverable());
+   if (crossing())
+   {
+      assert(NULL != _shapeFix);
+      pcollection cut_shapes;
+      if ( _shapeFix->recover(cut_shapes) )
+      {
+         std::ostringstream ost;
+         ost << "Polygon check fails - self crossing, generating equivalent polygon";
+         tell_log(console::MT_WARNING, ost.str());
+         ShapeList shpRecovered;
+         for (pcollection::const_iterator CI = cut_shapes.begin(); CI != cut_shapes.end(); CI++)
+            if (NULL != (newShape = createValidShape(*CI)))
+               shpRecovered.push_back(newShape);
+         cut_shapes.clear();
+      }
+   }
+   else if (box())
+      newShape = DEBUG_NEW laydata::TdtBox(_plist[0], _plist[2]);
+   else newShape = DEBUG_NEW laydata::TdtPoly(_plist);
+   return newShape;
 }
 
 /**
@@ -2784,45 +2805,41 @@ is self crossing
 void laydata::ValidPoly::selfcrossing()
 {
    //using BO modified
-   logicop::CrossFix fixingpoly(_plist,true);
+   _shapeFix = DEBUG_NEW logicop::CrossFix(_plist,true);
    try
    {
-      fixingpoly.findCrossingPoints();
+      _shapeFix->findCrossingPoints();
    }
    catch (EXPTNpolyCross&)
    {
-      _status |= laydata::shp_cross;
+      _status |= laydata::shp_exception;
       return;
    }
-   if (0 != fixingpoly.crossp() )
-   {
+   if (0 != _shapeFix->crossp() )
       _status |= laydata::shp_cross;
-
-      pcollection cut_shapes;
-      laydata::TdtData* newshape;
-      if ( fixingpoly.recover(cut_shapes) )
-      {
-         pcollection::const_iterator CI;
-         for (CI = cut_shapes.begin(); CI != cut_shapes.end(); CI++)
-            if (NULL != (newshape = createValidShape(*CI)))
-               _recovered.push_back(newshape);
-         cut_shapes.clear();
-      }
-   }
 }
 
-std::string laydata::ValidPoly::failType() {
-   if      (_status & shp_null) return "NULL area polygon";
-   else if (_status & shp_cross) return "Self-crossing";
-//   else if (_status & shp_acute) return "Acute angle";
+std::string laydata::ValidPoly::failType()
+{
+   if      (_status & shp_exception) return "Unable to verify the polygon";
+   else if (_status & shp_null     ) return "NULL area polygon";
+   else if (_status & shp_cross    ) return "Self-crossing polygon";
    else return "OK";
 }
 
+laydata::ValidPoly::~ValidPoly()
+{
+   if (NULL == _shapeFix)
+      delete _shapeFix;
+}
 //-----------------------------------------------------------------------------
 // class ValidWire
 //-----------------------------------------------------------------------------
 laydata::ValidWire::ValidWire(PointVector& plist, WireWidth width) :
-                                     Validator(plist), _width(width) {
+   Validator    ( plist         ),
+   _shapeFix    ( NULL          ),
+   _width       ( width         )
+{
    if (width > MAX_WIRE_WIDTH)
       _status |= shp_width;
    else if (_plist.size() < 2)
@@ -2916,28 +2933,43 @@ Alters the laydata::shp_cross bit of _status if the wire is self-crossing
 */
 void laydata::ValidWire::selfcrossing()
 {
-
    //using BO modified
-   logicop::CrossFix fixingpoly(_plist, false);
+   _shapeFix = DEBUG_NEW logicop::CrossFix(_plist, false);
    try
    {
-      fixingpoly.findCrossingPoints();
+      _shapeFix->findCrossingPoints();
    }
-   catch (EXPTNpolyCross&) { _status |= laydata::shp_cross; return; }
-   if (0 != fixingpoly.crossp() )
-      _status |= laydata::shp_cross;
+   catch (EXPTNpolyCross&)
+   {
+      _status |= laydata::shp_exception;
+      return;
+   }
 
-/*   tedop::segmentlist segs(_plist, true);
-   tedop::EventQueue Eq(segs); // initialize the event queue
-   tedop::SweepLine  SL(_plist); // initialize the sweep line
-   if (!Eq.check_valid(SL))
-      _status |= laydata::shp_cross;*/
+   if (0 != _shapeFix->crossp() )
+      _status |= laydata::shp_cross;
 }
 
 laydata::TdtData* laydata::ValidWire::replacement()
 {
    TdtData *newShape = NULL;
-   if (shp_shortends == status())
+   assert(recoverable());
+   if (crossing())
+   {
+      pcollection cut_shapes;
+      if ( _shapeFix->recover(cut_shapes) )
+      {
+         std::ostringstream ost;
+         ost << "Wire check fails - self crossing, generating equivalent wire";
+         tell_log(console::MT_WARNING, ost.str());
+         pcollection::const_iterator CI;
+         ShapeList shpRecovered;
+         for (pcollection::const_iterator CI = cut_shapes.begin(); CI != cut_shapes.end(); CI++)
+            if (NULL != (newShape = DEBUG_NEW laydata::TdtWire(**CI, _width)))
+               shpRecovered.push_back(newShape);
+         cut_shapes.clear();
+      }
+   }
+   else if (shortSegments())
    {
       TdtData* intershape = DEBUG_NEW TdtWire(_plist, _width);
       PointVector w2p = intershape->shape2poly();
@@ -2969,6 +3001,12 @@ std::string laydata::ValidWire::failType() {
    else if (_status & shp_null ) return "NULL area object";
    else if (_status & shp_width) return "Wire width too big.";
    else return "OK";
+}
+
+laydata::ValidWire::~ValidWire()
+{
+   if (NULL == _shapeFix)
+      delete _shapeFix;
 }
 
 //-----------------------------------------------------------------------------
