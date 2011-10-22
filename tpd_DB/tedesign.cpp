@@ -1048,13 +1048,16 @@ laydata::TdtData* laydata::TdtDesign::addPoly(unsigned la, PointVector* pl)
    laydata::ValidPoly check(*pl);
    if (check.acceptable())
    {
-      DBbox old_overlap(_target.edit()->cellOverlap());
-      QuadTree *actlay = _target.edit()->secureLayer(la);
-      setModified();
       newshape = check.replacement();
-      actlay->add(newshape);
-      if (_target.edit()->overlapChanged(old_overlap, this))
-         do {} while(validateCells());
+      if (NULL != newshape)
+      {
+         DBbox old_overlap(_target.edit()->cellOverlap());
+         QuadTree *actlay = _target.edit()->secureLayer(la);
+         setModified();
+         actlay->add(newshape);
+         if (_target.edit()->overlapChanged(old_overlap, this))
+            do {} while(validateCells());
+      }
    }
    else
    {
@@ -1067,30 +1070,28 @@ laydata::TdtData* laydata::TdtDesign::addPoly(unsigned la, PointVector* pl)
 
 laydata::TdtData* laydata::TdtDesign::putPoly(unsigned la, PointVector* pl)
 {
+   laydata::TdtData *newshape = NULL;
+   for(PointVector::iterator PL = pl->begin(); PL != pl->end(); PL++)
+      (*PL) *= _target.rARTM();
+
    laydata::ValidPoly check(*pl);
-   if (!check.valid()) {
-      std::ostringstream ost;
-      ost << "Polygon check fails - " << check.failType();
-      tell_log(console::MT_ERROR, ost.str());
-      return NULL;
-   }
-   laydata::TdtData* newshape = NULL;
-   QTreeTmp *actlay = _target.edit()->secureUnsortedLayer(la);
-   setModified();
-   PointVector vpl = check.getValidated();
-   if (check.box())
+   if (check.acceptable())
    {
-      TP p1(vpl[0] *_target.rARTM());
-      TP p2(vpl[2] *_target.rARTM());
-      newshape = DEBUG_NEW TdtBox(p1,p2);
+      newshape = check.replacement();
+      if (NULL != newshape)
+      {
+         QTreeTmp *actlay = _target.edit()->secureUnsortedLayer(la);
+         setModified();
+         actlay->put(newshape);
+
+      }
    }
    else
    {
-      for(PointVector::iterator PL = vpl.begin(); PL != vpl.end(); PL++)
-         (*PL) *= _target.rARTM();
-      newshape = DEBUG_NEW TdtPoly(vpl);
+      std::ostringstream ost;
+      ost << "Validation check fails - " << check.failType();
+      tell_log(console::MT_ERROR, ost.str());
    }
-   actlay->put(newshape);
    return newshape;
 }
 
@@ -1130,12 +1131,7 @@ laydata::TdtData* laydata::TdtDesign::putWire(unsigned la, PointVector* pl, Wire
       (*PL) *= _target.rARTM();
 
    laydata::ValidWire check(*pl,w);
-   if (!check.valid()) {
-      std::ostringstream ost;
-      ost << "Wire check fails - " << check.failType();
-      tell_log(console::MT_ERROR, ost.str());
-   }
-   else
+   if (check.acceptable())
    {
       newshape = check.replacement();
       if (NULL != newshape)
@@ -1144,6 +1140,12 @@ laydata::TdtData* laydata::TdtDesign::putWire(unsigned la, PointVector* pl, Wire
          setModified();
          actlay->put(newshape);
       }
+   }
+   else
+   {
+      std::ostringstream ost;
+      ost << "Validation check fails - " << check.failType();
+      tell_log(console::MT_ERROR, ost.str());
    }
    return newshape;
 }

@@ -1200,7 +1200,7 @@ laydata::DataList* laydata::TdtCell::secureDataList(SelectList& slst, unsigned l
 laydata::TdtData* laydata::TdtCell::checkNreplacePoly(SelectDataPair& sel, Validator* check,
                                              unsigned layno, SelectList** fadead)
 {
-   if (check->valid())
+   if (check->recoverable())
    { // shape is valid ...
       if (shp_OK == check->status())  // entirely
          return NULL;
@@ -1226,7 +1226,7 @@ laydata::TdtData* laydata::TdtCell::checkNreplacePoly(SelectDataPair& sel, Valid
 laydata::TdtData* laydata::TdtCell::checkNreplaceBox(SelectDataPair& sel, Validator* check,
                                              unsigned layno, SelectList** fadead)
 {
-   if (check->valid())
+   if (check->recoverable())
    { // shape is valid, but obviously not a box (if it gets here)
       laydata::TdtData* newshape = check->replacement();
       // add the new shape to the list of new shapes ...

@@ -142,7 +142,7 @@ namespace laydata {
       bool                 valid()           {return _status < shp_valid;}
       bool                 recoverable()     {return _status < shp_recoverable;}
       bool                 acceptable()      {return _status < shp_recoverable;}
-      byte                 status()          {return _status;}
+      unsigned             status()          {return _status;}
       bool                 box()             {return (0 != (_status & shp_box));}
       bool                 crossing()        {return (0 != (_status & shp_cross));}
       bool                 shortSegments()   {return (0 != (_status & shp_shortends));}
