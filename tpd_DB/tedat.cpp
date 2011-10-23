@@ -3063,7 +3063,7 @@ laydata::TdtData* laydata::createValidShape(PointVector* pl)
 {
    laydata::ValidPoly check(*pl);
    delete pl;
-   if (!check.valid()) // it's not check.recoverable() here deliberately!
+   if (check.valid()) // it's not check.recoverable() here deliberately!
    {
       return check.replacement();
    }
