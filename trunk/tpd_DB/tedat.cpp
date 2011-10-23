@@ -1432,6 +1432,7 @@ laydata::Validator* laydata::TdtWire::move(const CTM& trans, SGBitSet& plst)
       }
       // in all other cases keep the original PointVector, depending on the
       // check->status() the shape will be replaced, or marked as failed to modify
+      nshape->clear(); delete nshape;
       return check;
    }
    else transfer(trans);
@@ -1481,8 +1482,18 @@ PointVector laydata::TdtWire::shape2poly() const
    cdata.reserve(wcontour.csize());
    wcontour.getVectorData(cdata);
    ValidPoly check(cdata);
-   if (check.recoverable()) return check.replacement()->shape2poly();
-   else return PointVector();
+   if (check.recoverable())
+   {
+      TdtData* nshape = check.replacement();
+      if (NULL != nshape)
+      {
+         cdata = nshape->shape2poly();
+         delete nshape;
+         return cdata;
+      }
+      return PointVector();
+   }
+   return PointVector();
 }
 
 PointVector laydata::TdtWire::dumpPoints() const
@@ -2723,6 +2734,7 @@ laydata::TdtData* laydata::ValidPoly::replacement()
                newShape = DEBUG_NEW laydata::TdtPoly(npl);
             npl.clear();
             shpRecovered.push_back(newShape);
+            delete *CI;
          }
          cut_shapes.clear();
       }
@@ -2976,8 +2988,11 @@ laydata::TdtData* laydata::ValidWire::replacement()
          pcollection::const_iterator CI;
          ShapeList shpRecovered;
          for (pcollection::const_iterator CI = cut_shapes.begin(); CI != cut_shapes.end(); CI++)
-            if (NULL != (newShape = DEBUG_NEW laydata::TdtWire(**CI, _width)))
-               shpRecovered.push_back(newShape);
+         {
+            newShape = DEBUG_NEW laydata::TdtWire(**CI, _width);
+            shpRecovered.push_back(newShape);
+            delete *CI;
+         }
          cut_shapes.clear();
       }
    }
@@ -3016,7 +3031,7 @@ std::string laydata::ValidWire::failType() {
 
 laydata::ValidWire::~ValidWire()
 {
-   if (NULL == _shapeFix)
+   if (NULL != _shapeFix)
       delete _shapeFix;
 }
 
