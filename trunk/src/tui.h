@@ -661,22 +661,23 @@ namespace tui {
       DECLARE_EVENT_TABLE();
    };
 
+   typedef  std::map<std::string, style_def       >  styleMAP;
 
    class defineStyle : public wxDialog
    {
    public:
-      typedef  std::map<std::string, style_def       >  styleMAP;
+
                      defineStyle(wxFrame *parent, wxWindowID id, const wxString &title,
                                              wxPoint pos, const layprop::DrawProperties*);
       virtual       ~defineStyle();
-//      void           OnDefineFill(wxCommandEvent&);
       void           OnStyleSelected(wxCommandEvent&);
+      void           OnStyleNameAdded(wxCommandEvent&);
       void           OnStylePropChanged(wxCommandEvent&);
-//      void           OnFillNameAdded(wxCommandEvent& WXUNUSED(event));
-//      fillMAP&       allPatterns() {return _allFills;}
-//   private:
-//      void           nameNormalize(wxString&);
+      void           OnStyleApply(wxCommandEvent&);
+      styleMAP&      allStyles() {return _allStyles;}
+   private:
       style_def      getStyle(const std::string&);
+      void           nameNormalize(wxString& str);
       styleMAP       _allStyles;
       wxListBox*     _styleList;
       wxTextCtrl*    _dwstylename;
