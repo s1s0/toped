@@ -1987,11 +1987,11 @@ void tui::style_sample::OnPaint(wxPaintEvent&)
 //==============================================================================
 BEGIN_EVENT_TABLE(tui::defineStyle, wxDialog)
       EVT_LISTBOX(ID_ITEMLIST   , tui::defineStyle::OnStyleSelected   )
-//    EVT_BUTTON(ID_BTNEDIT     , tui::defineFill::OnDefineFill     )
-//    EVT_BUTTON(ID_NEWITEM     , tui::defineFill::OnFillNameAdded  )
+      EVT_BUTTON(ID_NEWITEM     , tui::defineStyle::OnStyleNameAdded   )
+      EVT_BUTTON(ID_BTNAPPLY    , tui::defineStyle::OnStyleApply     )
       EVT_TEXT(ID_WIDTHVAL      , tui::defineStyle::OnStylePropChanged )
       EVT_TEXT(ID_PATVAL        , tui::defineStyle::OnStylePropChanged )
-
+      EVT_TEXT(ID_PATSCALEVAL   , tui::defineStyle::OnStylePropChanged )
 END_EVENT_TABLE()
 
 tui::defineStyle::defineStyle(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, const layprop::DrawProperties* drawProp) :
@@ -2057,7 +2057,8 @@ tui::defineStyle::defineStyle(wxFrame *parent, wxWindowID id, const wxString &ti
    vsizer2->Add( hsizer1 , 0, wxALL | wxEXPAND, 5);
    vsizer2->Add( hsizer2 , 0, wxALL | wxEXPAND, 5);
    vsizer2->Add( hsizer3 , 0, wxALL | wxEXPAND, 5);
-   vsizer2->Add(DEBUG_NEW wxButton( this, ID_BTNEDIT  , wxT(" Define ") ), 0, wxALL | wxALIGN_RIGHT, 5);
+   vsizer2->Add(DEBUG_NEW wxButton( this, ID_BTNAPPLY  , wxT(" Apply ") ), 0, wxALL | wxALIGN_RIGHT, 5);
+   FindWindow(ID_BTNAPPLY)->Enable(false);
 
    // Buttons
    wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
@@ -2081,9 +2082,6 @@ tui::defineStyle::defineStyle(wxFrame *parent, wxWindowID id, const wxString &ti
 
 tui::defineStyle::~defineStyle()
 {
-//   delete _dwfilname;
-//   delete _fillsample;
-//   delete _fillList;
 }
 
 void tui::defineStyle::OnStyleSelected(wxCommandEvent& cmdevent)
@@ -2105,6 +2103,56 @@ void tui::defineStyle::OnStyleSelected(wxCommandEvent& cmdevent)
    tempStr.Clear();
    tempStr << _current_style.pscale;
    _patscale->SetValue(tempStr);
+   FindWindow(ID_BTNAPPLY)->Enable(false);
+}
+
+void tui::defineStyle::OnStyleNameAdded(wxCommandEvent& WXUNUSED(event))
+{
+   wxString style_name = _dwstylename->GetValue();
+   nameNormalize(style_name);
+   if ((wxT("") == style_name) || (wxT(" ") == style_name))
+   {
+      wxString msg;
+      msg << wxT("Empty style name.");
+      wxMessageBox( msg, wxT( "Error" ), wxOK | wxICON_ERROR, this );
+   }
+   else if (_allStyles.end() != _allStyles.find(std::string(style_name.mb_str(wxConvUTF8))))
+   {
+      wxString msg;
+      msg << wxT("Style \"") << style_name << wxT("\" is already defined.");
+      wxMessageBox( msg, wxT( "Error" ), wxOK | wxICON_ERROR, this );
+   }
+   else
+   {
+      std::string s_newcol = std::string(style_name.mb_str(wxConvUTF8));
+      style_def newStyle;
+      newStyle.width = 5; newStyle.pscale = 5; newStyle.pattern = 0x5555;
+      _allStyles[s_newcol] = newStyle;
+      int index = _styleList->Append(style_name);
+      _styleList->Select(index);
+      wxCommandEvent clrsel;
+      clrsel.SetString(style_name);
+      OnStyleSelected(clrsel);
+      _styleList->SetFirstItem(style_name);
+   }
+}
+
+void tui::defineStyle::nameNormalize(wxString& str)
+{
+   wxRegEx regex;
+   // replace tabs with spaces
+   VERIFY(regex.Compile(wxT("\t")));
+   regex.ReplaceAll(&str,wxT(" "));
+   // remove continious spaces
+   VERIFY(regex.Compile(wxT("[[:space:]]{2,}")));
+   regex.ReplaceAll(&str,wxT(""));
+   //remove leading spaces
+   VERIFY(regex.Compile(wxT("^[[:space:]]")));
+   regex.ReplaceAll(&str,wxT(""));
+   // remove trailing spaces
+   VERIFY(regex.Compile(wxT("[[:space:]]$")));
+   regex.ReplaceAll(&str,wxT(""));
+   //remove spaces before brackets and separators
 }
 
 tui::style_def tui::defineStyle::getStyle(const std::string& style_name)
@@ -2134,10 +2182,33 @@ void tui::defineStyle::OnStylePropChanged(wxCommandEvent& event)
    tempStyle.pscale   = d_patscale;
    _stylesample->setStyle(tempStyle);
    _stylesample->Refresh();
-   //FindWindow(ID_BTNAPPLY)->Enable(true);
+   FindWindow(ID_BTNAPPLY)->Enable(true);
 }
 
+void tui::defineStyle::OnStyleApply(wxCommandEvent& event)
+{
 
+   wxString s_name      = _styleList->GetStringSelection();
+   wxString s_pattern   = _pattern->GetValue();
+   wxString s_width     = _width->GetValue();
+   wxString s_patscale  = _patscale->GetValue();
+
+   unsigned long d_pattern;  s_pattern.ToULong(&d_pattern);
+   unsigned long d_width;    s_width.ToULong(&d_width);
+   unsigned long d_patscale; s_patscale.ToULong(&d_patscale);
+
+   style_def defStyle;
+   defStyle.pattern  = d_pattern;
+   defStyle.width    = d_width;
+   defStyle.pscale   = d_patscale;
+
+   std::string ss_name(s_name.mb_str(wxConvUTF8));
+   if (_allStyles.end() != _allStyles.find(ss_name))
+   {
+      _allStyles[ss_name] = defStyle;
+   }
+   FindWindow(ID_BTNAPPLY)->Enable(false);
+}
 //==========================================================================
 tui::nameCboxRecords::nameCboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
             const SIMap& inlays, wxArrayString& all_strings, int row_height, const layprop::DrawProperties* drawProp)

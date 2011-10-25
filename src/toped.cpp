@@ -2191,18 +2191,17 @@ void tui::TopedFrame::OnDefineStyle(wxCommandEvent& WXUNUSED(event))
       tui::defineStyle dlg(this, -1, wxT("Style Definition"), pos, drawprop);
       if ( dlg.ShowModal() == wxID_OK )
       {
-         /*layprop::FillMap patterns = dlg.allPatterns();
-         for(layprop::FillMap::const_iterator CC = patterns.begin() ; CC != patterns.end(); CC++)
+         const tui::styleMAP styles = dlg.allStyles();
+         for(tui::styleMAP::const_iterator CC = styles.begin() ; CC != styles.end(); CC++)
          {
-            byte* patdef = CC->second;
-            ost   << wxT("definefill(\"") << wxString(CC->first.c_str(), wxConvUTF8)
-                  << wxT("\" , {");
-            ost << patdef[0];
-            for (byte i = 1; i < 128; i++)
-               ost  << wxT(",") << patdef[i];
-            ost   << wxT("});");
-            success = true;
-         }*/
+            tui::style_def styleDef = CC->second;
+            ost   << wxT("defineline(\"") << wxString(CC->first.c_str(), wxConvUTF8)
+                  << wxT("\" , \"\" , ")      << styleDef.pattern
+                  << wxT(" , ")        << styleDef.pscale
+                  << wxT(" , ")        << styleDef.width
+                  << wxT(");");
+         }
+         success = true;
       }
    }
    PROPC->unlockDrawProp(drawprop);
