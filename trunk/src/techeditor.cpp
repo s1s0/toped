@@ -51,7 +51,7 @@ BEGIN_EVENT_TABLE(tui::TechEditorDialog, wxDialog)
 //   EVT_BUTTON(BT_TECH_NEWCOLOR   , tui::TechEditorDialog::OnNewColor  )
    EVT_BUTTON(BT_TECH_NEWCOLOR   , tui::TopedFrame::OnDefineColor )
    EVT_BUTTON(BT_TECH_NEWFILL    , tui::TopedFrame::OnDefineFill )
-   //EVT_BUTTON(BT_TECH_NEWFILL    , tui::TopedFrame::OnDefineStyle )
+   EVT_BUTTON(BT_TECH_NEWSTYLE    , tui::TopedFrame::OnDefineStyle )
 END_EVENT_TABLE()
 
 tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id)//, const wxString& title, const wxPoint& pos, const wxSize& size, long style )  
@@ -165,13 +165,20 @@ void  tui::TechEditorDialog::onLayerSelected(wxCommandEvent&)
          fillNumber = _layerFills->FindString(emptyFill);
          _layerFills->SetSelection(fillNumber);
       }
-      //Set active filling
+      //Set active style
 
-
+      std::string lineName = drawProp->getLineName(lay_no);
+      int lineNumber = _layerLines->FindString(wxString(lineName.c_str(), wxConvUTF8));
+      if (lineNumber != wxNOT_FOUND)
+      {
+         _layerLines->SetSelection(lineNumber);
+      }
+      else
+      {
+         tell_log(console::MT_WARNING, "There is no appropriate line style");
+      }
    }
    PROPC->unlockDrawProp(drawProp);
-
-   
 }
 
 void tui::TechEditorDialog::prepareData()
