@@ -2745,6 +2745,42 @@ laydata::TdtData* laydata::ValidPoly::replacement()
    return newShape;
 }
 
+laydata::ShapeList* laydata::ValidPoly::replacements()
+{
+   ShapeList* shpRecovered = DEBUG_NEW ShapeList();
+   assert(recoverable());
+   if (crossing())
+   {
+      assert(NULL != _shapeFix);
+      pcollection cut_shapes;
+      if ( _shapeFix->recoverPoly(cut_shapes) )
+      {
+         std::ostringstream ost;
+         ost << "Polygon check fails - self crossing, generating equivalent polygon";
+         tell_log(console::MT_WARNING, ost.str());
+         for (pcollection::const_iterator CI = cut_shapes.begin(); CI != cut_shapes.end(); CI++)
+         {
+
+            laydata::ValidPoly check(**CI);
+            assert(check.valid());// otherwise go and fix _shapeFix->recover()!
+            PointVector npl = check.getValidated();
+            if (check.box())
+               shpRecovered->push_back(DEBUG_NEW laydata::TdtBox(npl[2], npl[0]));
+            else
+               shpRecovered->push_back(DEBUG_NEW laydata::TdtPoly(npl));
+            npl.clear();
+            delete *CI;
+         }
+         cut_shapes.clear();
+      }
+   }
+   else if (box())
+      shpRecovered->push_back(DEBUG_NEW laydata::TdtBox(_plist[0], _plist[2]));
+   else
+      shpRecovered->push_back(DEBUG_NEW laydata::TdtPoly(_plist));
+   return shpRecovered;
+}
+
 /**
  * Checks the polygon angles. Filters out intermediate points if 0 or 180 deg
    angle is found as well as coinciding points. Function also flags a box if

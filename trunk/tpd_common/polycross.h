@@ -45,6 +45,8 @@ namespace polycross
    int orientation(const TP*, const TP*, const TP*);
    float getLambda( const TP* p1, const TP* p2, const TP* p);
    char coincidingSegm(const TP*, const TP*, const TP*);
+   bool pointInside(const TP*, const PointVector&, bool);
+
    //===========================================================================
    // Vertex Point
    //===========================================================================

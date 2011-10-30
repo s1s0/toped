@@ -68,8 +68,6 @@ namespace logicop {
       //! Prepare #_shape1 and #_shape2 data fields for reuse
       void              reset_visited();
    private:
-      //! Convert a polygon with hole to simple polygon
-      PointVector*      hole2simple(const PointVector&, const PointVector&, const pcollection&);
       //
       void              getShape(pcollection&, polycross::VPoint*);
       //
@@ -79,7 +77,6 @@ namespace logicop {
       //
       polycross::VPoint* getFirstOutside(const PointVector&, polycross::VPoint*);
       //
-      void              cleanupDumped(polycross::VPoint*);
       //! The first input polygon
       const PointVector&      _poly1;
       //! The second input polygon
@@ -127,6 +124,7 @@ namespace logicop {
       //! Do Benttley-Ottman modified
       void                    findCrossingPoints();
       //! Get the fixed polygon(s)
+      bool                    recoverPoly(pcollection&);
       bool                    recover(pcollection&);
       bool                    generate(pcollection&, real);
       word                    crossp() {return _crossp;}
@@ -136,7 +134,9 @@ namespace logicop {
       void                    cleanRedundant();
       void                    traverseMulti(polycross::VPoint* const, pcollection&);
       void                    traverseSingle(polycross::VPoint* const, pcollection&);
+      void                    traverseRecover(polycross::VPoint* const, pcollection&, bool);
       void                    countCross();
+      bool                    checkInside(const PointVector&, const PointVector&);
       //! The raw data, corresponding to _poly, used by all logic methods
       polycross::VPoint*      _shape;
       //! The input polygon
@@ -145,6 +145,11 @@ namespace logicop {
       word                    _crossp;
       bool                    _looped; // true - polygon; false wire
    };
+
+   //! Convert a polygon with hole to simple polygon
+   PointVector*      hole2simple(const PointVector&, const PointVector&, const pcollection&);
+   void              cleanupDumped(polycross::VPoint*);
+
 }
 
 #endif
