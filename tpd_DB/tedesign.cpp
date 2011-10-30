@@ -1039,6 +1039,39 @@ void laydata::TdtDesign::setModified()
    _lastUpdated = time(NULL);
 }
 
+//laydata::TdtData* laydata::TdtDesign::addPoly(unsigned la, PointVector* pl)
+//{
+//   laydata::TdtData *newshape = NULL;
+//   for(PointVector::iterator PL = pl->begin(); PL != pl->end(); PL++)
+//      (*PL) *= _target.rARTM();
+//
+//   laydata::ValidPoly check(*pl);
+//   if (check.acceptable())
+//   {
+//      laydata::ShapeList* newShapes = check.replacements();
+//      if (!newShapes->empty())
+//      {
+//         DBbox old_overlap(_target.edit()->cellOverlap());
+//         QuadTree *actlay = _target.edit()->secureLayer(la);
+//         setModified();
+//         for (laydata::ShapeList::const_iterator CS = newShapes->begin(); CS != newShapes->end(); CS++)
+//         {
+//            actlay->add(*CS);
+//            newshape = *CS;
+//         }
+//         if (_target.edit()->overlapChanged(old_overlap, this))
+//            do {} while(validateCells());
+//      }
+//   }
+//   else
+//   {
+//      std::ostringstream ost;
+//      ost << "Validation check fails - " << check.failType();
+//      tell_log(console::MT_ERROR, ost.str());
+//   }
+//   return newshape;
+//}
+
 laydata::TdtData* laydata::TdtDesign::addPoly(unsigned la, PointVector* pl)
 {
    laydata::TdtData *newshape = NULL;

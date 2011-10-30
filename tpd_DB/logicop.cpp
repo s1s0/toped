@@ -47,7 +47,7 @@
 #define REPORT_POLY_DEBUG(pl,msg)
 #endif
 
-//#define POLYBIND_DEBUG
+#define POLYBIND_DEBUG
 #ifdef POLYBIND_DEBUG
 #define REPORT_POLYBIND_DEBUG(polyObject) \
    printf("=======================================================\n"); \
@@ -414,11 +414,12 @@ polycross::VPoint* logicop::logic::checkCoinciding(const PointVector& plist, pol
    return init;
 }
 
-PointVector* logicop::logic::hole2simple(const PointVector& outside, const PointVector& inside, const pcollection& obstructions)
+//PointVector* logicop::logic::hole2simple(const PointVector& outside, const PointVector& inside, const pcollection& obstructions)
+PointVector* logicop::hole2simple(const PointVector& outside, const PointVector& inside, const pcollection& obstructions)
 {
-   polycross::segmentlist _seg1(outside,1,true);
-   polycross::segmentlist _seg2(inside ,2,true);
-   polycross::XQ _eq(_seg1, _seg2); // create the event queue
+   polycross::segmentlist seg1(outside,1,true);
+   polycross::segmentlist seg2(inside ,2,true);
+   polycross::XQ _eq(seg1, seg2); // create the event queue
    polycross::BindCollection BC;
    try
    {
@@ -428,17 +429,17 @@ PointVector* logicop::logic::hole2simple(const PointVector& outside, const Point
    polycross::BindSegment* sbc = BC.getBindSegment(obstructions);
    if (NULL == sbc) return NULL; // i.e. Can't bind those objects together
    //insert 2 bind points and link them
-   polycross::BPoint* cpsegA = _seg1.insertBindPoint(sbc->poly0seg(), sbc->poly0pnt());
-   polycross::BPoint* cpsegB = _seg2.insertBindPoint(sbc->poly1seg(), sbc->poly1pnt());
+   polycross::BPoint* cpsegA = seg1.insertBindPoint(sbc->poly0seg(), sbc->poly0pnt());
+   polycross::BPoint* cpsegB = seg2.insertBindPoint(sbc->poly1seg(), sbc->poly1pnt());
    cpsegA->linkto(cpsegB);
    cpsegB->linkto(cpsegA);
    // normalize the segment lists
-   _seg1.normalize(outside, true);
-   _seg2.normalize(inside, true);
+   seg1.normalize(outside, true);
+   seg2.normalize(inside, true);
    //
    // dump the new polygons in VList terms
-   polycross::VPoint* outshape = _seg1.dump_points();
-   polycross::VPoint*  inshape = _seg2.dump_points();
+   polycross::VPoint* outshape = seg1.dump_points();
+   polycross::VPoint*  inshape = seg2.dump_points();
    // traverse and form the resulting shape
    polycross::VPoint* centinel = outshape;
    PointVector *shgen = DEBUG_NEW PointVector();
@@ -446,7 +447,8 @@ PointVector* logicop::logic::hole2simple(const PointVector& outside, const Point
    polycross::VPoint* pickup = centinel;
    polycross::VPoint* prev = centinel->prev();
    bool modify = false;
-   do {
+   do
+   {
       shgen->push_back(TP(pickup->cp()->x(), pickup->cp()->y()));
       modify = (-1 == prev->visited());
       prev = pickup;
@@ -458,19 +460,22 @@ PointVector* logicop::logic::hole2simple(const PointVector& outside, const Point
    // Validate the resulting polygon
    laydata::ValidPoly check(*shgen);
 //   delete shgen;
-   if (!check.valid()) {
+   if (!check.valid())
+   {
       std::ostringstream ost;
       ost << ": Resulting shape is invalid - " << check.failType();
       tell_log(console::MT_ERROR, ost.str());
    }
-   else {
+   else
+   {
       if (laydata::shp_OK != check.status())
          *shgen = check.getValidated();
    }
    return shgen;
 }
 
-void logicop::logic::cleanupDumped(polycross::VPoint* centinel)
+//void logicop::logic::cleanupDumped(polycross::VPoint* centinel)
+void logicop::cleanupDumped(polycross::VPoint* centinel)
 {
    polycross::VPoint* shape = centinel;
    polycross::VPoint* cpnt;
@@ -745,6 +750,69 @@ bool logicop::CrossFix::recover(pcollection& plycol)
    return true;
 }
 
+bool logicop::CrossFix::recoverPoly(pcollection& plycol)
+{
+   if (0 == _crossp) return false;
+   // get a random non-crossing point
+   polycross::VPoint* centinel = _shape;
+   while (0 == centinel->visited()) centinel = centinel->next();
+   // Get the top right non-crossing point - the idea is to make sure that it is
+   // not internal to the shape
+   polycross::VPoint* topRight = centinel;
+   polycross::VPoint* collector   = centinel;
+   do
+   {
+      collector = collector->next();
+      if ( (1 == collector->visited()) && (polycross::xyorder(collector->cp(), topRight->cp()) > 0) )
+         topRight = collector->next();
+   } while (collector != centinel);
+   centinel = collector;
+
+   pcollection lclcol; // local collection of the resulting shapes
+   traverseRecover(centinel, lclcol, true);
+   if ( lclcol.empty() ) return false; // i.e. no generated polygons
+   // Validate all resulting polygons
+   pcollection lclvalidated;
+   while (!lclcol.empty())
+   {
+      PointVector* csh = lclcol.front();
+      REPORT_POLYBIND_DEBUG(csh);
+      laydata::ValidPoly check(*csh);
+      delete csh; lclcol.pop_front();
+      if (check.valid())
+         lclvalidated.push_back(DEBUG_NEW PointVector(check.getValidated()));
+   }
+   if (lclvalidated.empty()) return false;
+   // The last part - we have to eventually combine resulting shapes - in case
+   // some of them lies inside the top one
+
+   PointVector* respoly = lclvalidated.front();lclvalidated.pop_front();
+   REPORT_POLYBIND_DEBUG(respoly);
+   while (0 < lclvalidated.size())
+   {
+      PointVector* curpolyA = respoly;
+      PointVector* curpolyB = lclvalidated.front();
+      REPORT_POLYBIND_DEBUG(curpolyB);
+      lclvalidated.pop_front();
+      if (checkInside(*curpolyA, *curpolyB))
+      {
+//         pcollection boza;
+         PointVector* dummy = hole2simple(*curpolyA, *curpolyB, /*boza */lclvalidated);
+         if (NULL != dummy)
+         {
+            delete curpolyA; delete curpolyB;
+            respoly = dummy;
+         }
+         else
+            plycol.push_back(curpolyB);
+      }
+      else
+         plycol.push_back(curpolyB);
+   }
+   plycol.push_back(respoly);
+   return true;
+}
+
 void logicop::CrossFix::traverseMulti(polycross::VPoint* const centinel, pcollection& plycol)
 {
    bool direction = true; /*next*/
@@ -764,6 +832,23 @@ void logicop::CrossFix::traverseMulti(polycross::VPoint* const centinel, pcollec
    plycol.push_back(shgen);
 }
 
+void logicop::CrossFix::traverseRecover(polycross::VPoint* const centinel, pcollection& plycol, bool direction)
+{
+   PointVector *shgen = DEBUG_NEW PointVector();
+   polycross::VPoint* collector = centinel;
+   do
+   {
+      shgen->push_back(TP(collector->cp()->x(), collector->cp()->y()));
+      collector = collector->follower(direction);
+      if (0 == collector->visited())
+      {
+         traverseRecover(collector, plycol, !direction);
+      }
+   }
+   while ( collector->cp() != centinel->cp() );
+   plycol.push_front(shgen);
+}
+
 void logicop::CrossFix::traverseSingle(polycross::VPoint* const centinel, pcollection& plycol)
 {
    bool direction = true; /*next*/
@@ -777,6 +862,16 @@ void logicop::CrossFix::traverseSingle(polycross::VPoint* const centinel, pcolle
       collector = collector->follower(direction, true);
    }
    plycol.push_back(shgen);
+}
+
+bool logicop::CrossFix::checkInside(const PointVector& outside, const PointVector& inside)
+{
+   bool shInside = true;
+   for (PointVector::const_iterator CP = inside.begin(); CP != inside.end(); CP++)
+   {
+      shInside &= polycross::pointInside(&(*CP), outside, true);
+   }
+   return shInside;
 }
 
 logicop::CrossFix::~CrossFix()

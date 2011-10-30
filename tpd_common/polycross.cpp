@@ -107,12 +107,6 @@ char polycross::coincidingSegm(const TP* p, const TP* pa, const TP* pb)
    if (getLambda(p, pb, pa) >= 0)   return -1;
    else return 0;
 }
-//==============================================================================
-// VPoint
-polycross::VPoint::VPoint(const TP* point, VPoint* prev) : _cp(point), _prev(prev)
-{
-   if (_prev) _prev->_next = this;
-}
 
 /**
  * Checks whether the point lies inside a polygon represented by plist. It
@@ -134,7 +128,7 @@ Finally, divide the score by two and if the result is odd - the point is inside.
 parameter, procedure reports the point inside (if true) or outside the polygon
  * @return true if the point is inside the polygon
  */
-bool polycross::VPoint::inside(const PointVector& plist, bool touching)
+bool polycross::pointInside(const TP* cp, const PointVector& plist, bool touching)
 {
    TP p0, p1;
    byte cc = 0;
@@ -142,37 +136,37 @@ bool polycross::VPoint::inside(const PointVector& plist, bool touching)
    for (unsigned i = 0; i < size ; i++)
    {
       p0 = plist[i]; p1 = plist[(i+1) % size];
-      if (((p0.y() <= _cp->y()) && (p1.y() >=  _cp->y()))
-            ||((p0.y() >=  _cp->y()) && (p1.y() <= _cp->y())) )
+      if (((p0.y() <= cp->y()) && (p1.y() >=  cp->y()))
+            ||((p0.y() >=  cp->y()) && (p1.y() <= cp->y())) )
       {
-         int ori = orientation(&p0, &p1, _cp);
-         if ((0==ori) && (getLambda(&p0, &p1, _cp) >= 0))
+         int ori = orientation(&p0, &p1, cp);
+         if ((0==ori) && (getLambda(&p0, &p1, cp) >= 0))
          {
-            //_cp lies on the edge p0-p1
+            //cp lies on the edge p0-p1
             if (touching) return true;
             else return false;
          }
          else
          {
-            if ((p1.y() == p0.y()) && (_cp->x() < p1.x()))
+            if ((p1.y() == p0.y()) && (cp->x() < p1.x()))
             {
-               // segment parallel to the ray and right of _cp
+               // segment parallel to the ray and right of cp
                // check neighboring points
                unsigned indx0 = (0==i) ? size-1 : i-1;
                unsigned indx1 = (i+2) % size;
                p0 = plist[indx0]; p1 = plist[indx1];
-               if (!(((p0.y() <= _cp->y()) && (p1.y() >=  _cp->y()))
-                     ||((p0.y() >=  _cp->y()) && (p1.y() <= _cp->y())) ))
+               if (!(((p0.y() <= cp->y()) && (p1.y() >=  cp->y()))
+                     ||((p0.y() >=  cp->y()) && (p1.y() <= cp->y())) ))
                   cc+=2;
             }
             else if (p1.y() != p0.y())
             {
-               float tngns = (float) (_cp->y() - p0.y())/ (float)(p1.y() - p0.y());
+               float tngns = (float) (cp->y() - p0.y())/ (float)(p1.y() - p0.y());
                float calcx = (float) p0.x() + tngns * (float)(p1.x() - p0.x());
-               if ((float)_cp->x() <= calcx)
+               if ((float)cp->x() <= calcx)
                {
                   // if ray touches the segment
-                  if ((_cp->y() == p0.y()) || (_cp->y() == p1.y())) cc++;
+                  if ((cp->y() == p0.y()) || (cp->y() == p1.y())) cc++;
                   // ray crosses the segment
                   else cc+=2;
                }
@@ -183,6 +177,65 @@ bool polycross::VPoint::inside(const PointVector& plist, bool touching)
    assert(0 == (cc % 2));
    cc /= 2;
    return (cc & 0x01) ? true : false;
+}
+
+//==============================================================================
+// VPoint
+polycross::VPoint::VPoint(const TP* point, VPoint* prev) : _cp(point), _prev(prev)
+{
+   if (_prev) _prev->_next = this;
+}
+
+bool polycross::VPoint::inside(const PointVector& plist, bool touching)
+{
+   return pointInside(_cp, plist, touching);
+//   TP p0, p1;
+//   byte cc = 0;
+//   unsigned size = plist.size();
+//   for (unsigned i = 0; i < size ; i++)
+//   {
+//      p0 = plist[i]; p1 = plist[(i+1) % size];
+//      if (((p0.y() <= _cp->y()) && (p1.y() >=  _cp->y()))
+//            ||((p0.y() >=  _cp->y()) && (p1.y() <= _cp->y())) )
+//      {
+//         int ori = orientation(&p0, &p1, _cp);
+//         if ((0==ori) && (getLambda(&p0, &p1, _cp) >= 0))
+//         {
+//            //_cp lies on the edge p0-p1
+//            if (touching) return true;
+//            else return false;
+//         }
+//         else
+//         {
+//            if ((p1.y() == p0.y()) && (_cp->x() < p1.x()))
+//            {
+//               // segment parallel to the ray and right of _cp
+//               // check neighboring points
+//               unsigned indx0 = (0==i) ? size-1 : i-1;
+//               unsigned indx1 = (i+2) % size;
+//               p0 = plist[indx0]; p1 = plist[indx1];
+//               if (!(((p0.y() <= _cp->y()) && (p1.y() >=  _cp->y()))
+//                     ||((p0.y() >=  _cp->y()) && (p1.y() <= _cp->y())) ))
+//                  cc+=2;
+//            }
+//            else if (p1.y() != p0.y())
+//            {
+//               float tngns = (float) (_cp->y() - p0.y())/ (float)(p1.y() - p0.y());
+//               float calcx = (float) p0.x() + tngns * (float)(p1.x() - p0.x());
+//               if ((float)_cp->x() <= calcx)
+//               {
+//                  // if ray touches the segment
+//                  if ((_cp->y() == p0.y()) || (_cp->y() == p1.y())) cc++;
+//                  // ray crosses the segment
+//                  else cc+=2;
+//               }
+//            }
+//         }
+//      }
+//   }
+//   assert(0 == (cc % 2));
+//   cc /= 2;
+//   return (cc & 0x01) ? true : false;
 }
 
 polycross::VPoint* polycross::VPoint::follower(bool& direction, bool) {
