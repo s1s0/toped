@@ -526,7 +526,10 @@ void polycross::polysegment::dump_points(polycross::VPoint*& vlist)
 #endif
          // double point found - not going to be used and shall be removed
          // to avoid leakages
-         delete (*CCPA);
+		 //FIXME -> this is a leakage, but it must be cleaned-up alltogether with its
+		 // counterpart. If you delete it here alnone, the tool will crash randomly
+		 // further down thw line 
+//         delete (*CCPA);  
          CCPA = _crossPoints.erase(CCPA);
       }
    }
