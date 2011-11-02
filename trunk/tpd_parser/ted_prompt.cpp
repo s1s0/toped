@@ -294,7 +294,8 @@ void* console::parse_thread::Entry()
    }
    do {
       _mutexCondition->Wait();
-      if (TestDestroy())
+	  //if (TestDestroy()) ->see the comment in console::TllCmdLine::stopParserThread()
+      if (Console->exitAproved())
          break; // Thread Exit point
 
       telllloc.first_column = telllloc.first_line = 1;
@@ -355,7 +356,8 @@ console::TllCmdLine::TllCmdLine(wxWindow *canvas) :
    _mouseIN_OK       ( true                  ),
    _canvas           ( canvas                ),
    _canvas_invalid   ( false                 ),
-   _exitRequested    ( false                 )
+   _exitRequested    ( false                 ),
+   _exitAproved      ( false				 )
 {
    Console = this;
    spawnTellThread();
@@ -468,9 +470,18 @@ void console::TllCmdLine::stopParserThread()
       result = _tellThread->_mutex.TryLock();
    } while (wxMUTEX_BUSY == result);
    _tellThread->setCommand(wxT(""));
+   // the local implementation of Delete() - see the comment below
+   setExitAproved();
    _tellThread->_mutex.Unlock();
-   _tellThread->Delete();
    _threadWaits4->Signal();
+   // The line below in combination with testDestroy() on the other side
+   // is the "standard" way to close the parser thread. The trouble is that
+   // the parser thread is normally sleeping waiting a signal from this 
+   // thread and that signal competes with the function below - i.e. we're
+   // getting some kind of an implementation (and not only) dependent 
+   // thread skew which at the end of the day makes the whole thing to 
+   // "work most of the time"
+   //_tellThread->Delete();
 
 }
 
