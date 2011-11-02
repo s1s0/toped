@@ -94,7 +94,9 @@ namespace console {
       void                    set_canvas_invalid(bool val)  { _canvas_invalid = val;}
       bool                    canvas_invalid()              {return _canvas_invalid;}
       void                    setExitRequest(bool val)      { _exitRequested = val;}
+      void                    setExitAproved()              { _exitAproved = true;}
       bool                    exitRequested() const         { return _exitRequested;}
+      bool                    exitAproved() const           { return _exitAproved;}
       bool                    cmdHistoryExists() const      {return !_cmd_history.empty();}
       void                    addTllIncludePath(wxString path){ _tllIncludePath.Add(path);}
       void                    addTllEnvList(wxString pvar)  { _tllIncludePath.AddEnvList(pvar);}
@@ -122,6 +124,7 @@ namespace console {
       wxWindow*               _canvas;
       bool                    _canvas_invalid;
       bool                    _exitRequested;
+	  bool                    _exitAproved;
       wxPathList              _tllIncludePath;
       parse_thread*           _tellThread;
    };
