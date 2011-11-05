@@ -96,15 +96,23 @@ class TechEditorDialog : public wxDialog
       wxArrayString           _colorItems; 
       wxArrayString           _lineItems; 
 
+      wxTextCtrl*             _layerNumber;
+      wxString                _layerNumberString;
+
       void        prepareColors();
       void        prepareFills();
       void        prepareLines();
-      void        prepareData();
+      void        prepareLayers();
+      void        updateData();
    public:
                   TechEditorDialog( wxWindow* parent,wxWindowID id = wxID_ANY);
                   ~TechEditorDialog();
-            void  onLayerSelected(wxCommandEvent&);
-            void  OnNewColor(wxCommandEvent&);
+      void        onLayerSelected(wxCommandEvent&);
+      void        OnColorEditor(wxCommandEvent&);
+      void        OnFillEditor(wxCommandEvent&);
+      void        OnStyleEditor(wxCommandEvent&);
+      void        OnChangeProperty(wxCommandEvent&);
+      void        OnApply(wxCommandEvent&);
       DECLARE_EVENT_TABLE()
 
 };
