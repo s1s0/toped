@@ -212,8 +212,8 @@ namespace laydata {
       NameSet*             rehashChildren();
       ShapeList*           mergePrep(unsigned);
       bool                 unselectPointList(SelectDataPair&, SelectDataPair&);
-      TdtData*             checkNreplacePoly(SelectDataPair&, Validator*, unsigned, SelectList**);
-      TdtData*             checkNreplaceBox(SelectDataPair&, Validator*, unsigned, SelectList**);
+      ShapeList*           checkNreplacePoly(SelectDataPair&, Validator*, unsigned, SelectList**);
+      ShapeList*           checkNreplaceBox(SelectDataPair&, Validator*, unsigned, SelectList**);
       DataList*            secureDataList(SelectList&, unsigned);
       void                 selectAllWrapper(QuadTree*, DataList*, word selmask = laydata::_lmall, bool mark = true);
       void                 selectFromListWrapper(QuadTree*, DataList*, DataList*);

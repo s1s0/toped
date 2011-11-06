@@ -2684,11 +2684,14 @@ laydata::ValidBox::ValidBox(PointVector& plist) : Validator(plist)
    _area = fabs(_area);
 }
 
-laydata::TdtData* laydata::ValidBox::replacement()
+laydata::ShapeList* laydata::ValidBox::replacements()
 {
+   ShapeList* shpRecovered = DEBUG_NEW ShapeList();
    if (box())
-      return DEBUG_NEW laydata::TdtBox(_plist[0], _plist[2]);
-   else return DEBUG_NEW laydata::TdtPoly(_plist);
+      shpRecovered->push_back(DEBUG_NEW laydata::TdtBox(_plist[0], _plist[2]));
+   else
+      shpRecovered->push_back(DEBUG_NEW laydata::TdtPoly(_plist));
+   return shpRecovered;
 }
 
 std::string laydata::ValidBox::failType()
@@ -3011,55 +3014,6 @@ void laydata::ValidWire::selfcrossing()
 
    if (0 != _shapeFix->crossp() )
       _status |= laydata::shp_cross;
-}
-
-laydata::TdtData* laydata::ValidWire::replacement()
-{
-   TdtData *newShape = NULL;
-   assert(recoverable());
-   if (crossing())
-   {
-      pcollection cut_shapes;
-      if ( _shapeFix->recoverWire(cut_shapes) )
-      {
-         std::ostringstream ost;
-         ost << "Wire check fails - self crossing, generating equivalent wire";
-         tell_log(console::MT_WARNING, ost.str());
-         pcollection::const_iterator CI;
-         ShapeList shpRecovered;
-         for (pcollection::const_iterator CI = cut_shapes.begin(); CI != cut_shapes.end(); CI++)
-         {
-            newShape = DEBUG_NEW laydata::TdtWire(**CI, _width);
-            shpRecovered.push_back(newShape);
-            delete *CI;
-         }
-         cut_shapes.clear();
-      }
-   }
-   else if (shortSegments())
-   {
-      TdtData* intershape = DEBUG_NEW TdtWire(_plist, _width);
-      PointVector w2p = intershape->shape2poly();
-      delete intershape;
-      if (0 == w2p.size())
-      {
-         std::ostringstream ost;
-         ost << "Wire check fails - End segments too short, can't generate a valid shape";
-         tell_log(console::MT_ERROR, ost.str());
-      }
-      else
-      {
-         std::ostringstream ost;
-         ost << "Wire check fails - End segments too short, generating an equivalent polygon";
-         tell_log(console::MT_WARNING, ost.str());
-         newShape = DEBUG_NEW TdtPoly(w2p);
-      }
-   }
-   else
-   {
-      newShape = DEBUG_NEW TdtWire(_plist, _width);
-   }
-   return newShape;
 }
 
 laydata::ShapeList* laydata::ValidWire::replacements()
