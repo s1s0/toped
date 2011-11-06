@@ -47,7 +47,7 @@
 #define REPORT_POLY_DEBUG(pl,msg)
 #endif
 
-#define POLYBIND_DEBUG
+//#define POLYBIND_DEBUG
 #ifdef POLYBIND_DEBUG
 #define REPORT_POLYBIND_DEBUG(polyObject) \
    printf("=======================================================\n"); \

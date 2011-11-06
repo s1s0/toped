@@ -149,7 +149,7 @@ namespace laydata {
       PointVector          getValidated()    {return _plist;}
       word                 numpoints()       {return _plist.size();}
       virtual std::string  failType() = 0;
-      virtual TdtData*     replacement() = 0;
+      virtual ShapeList*   replacements() = 0;
    protected:
       unsigned             _status;
       PointVector          _plist;

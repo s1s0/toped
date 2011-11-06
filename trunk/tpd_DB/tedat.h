@@ -417,10 +417,10 @@ namespace laydata {
 
    class ValidBox  : public Validator {
    public:
-                                ValidBox(PointVector&);
-      virtual laydata::TdtData* replacement();
-      virtual std::string       failType();
-      real                      area() {return _area;}
+                                    ValidBox(PointVector&);
+      virtual laydata::ShapeList*   replacements();
+      virtual std::string           failType();
+      real                          area() {return _area;}
    private:
       real              _area;
    };
@@ -428,32 +428,31 @@ namespace laydata {
    //===========================================================================
    class ValidPoly : public Validator {
    public:
-                                ValidPoly(PointVector&);
-      virtual                  ~ValidPoly();
-      virtual laydata::TdtData* replacement();
-      laydata::ShapeList*       replacements();
-      virtual std::string       failType();
+                                   ValidPoly(PointVector&);
+      virtual                     ~ValidPoly();
+      laydata::TdtData*            replacement();
+      virtual laydata::ShapeList*  replacements();
+      virtual std::string          failType();
    private:
-      void                      angles();
-      void                      normalize();
-      void                      selfcrossing();
-      logicop::CrossFix*        _shapeFix;
+      void                         angles();
+      void                         normalize();
+      void                         selfcrossing();
+      logicop::CrossFix*           _shapeFix;
    };
 
    //===========================================================================
    class ValidWire : public Validator {
    public:
-                                ValidWire(PointVector&, WireWidth);
-      virtual                  ~ValidWire();
-      virtual laydata::TdtData* replacement();
-      laydata::ShapeList*       replacements();
-      virtual std::string       failType();
+                                   ValidWire(PointVector&, WireWidth);
+      virtual                     ~ValidWire();
+      virtual laydata::ShapeList*  replacements();
+      virtual std::string          failType();
    private:
-      void                      angles();
-      void                      endSegments();
-      void                      selfcrossing();
-      logicop::CrossFix*        _shapeFix;
-      WireWidth                 _width;
+      void                         angles();
+      void                         endSegments();
+      void                         selfcrossing();
+      logicop::CrossFix*           _shapeFix;
+      WireWidth                    _width;
    };
    //===========================================================================
    int            xangle(const TP&, const TP&);

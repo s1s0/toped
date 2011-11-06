@@ -1197,7 +1197,7 @@ laydata::DataList* laydata::TdtCell::secureDataList(SelectList& slst, unsigned l
    return ssl;
 }
 
-laydata::TdtData* laydata::TdtCell::checkNreplacePoly(SelectDataPair& sel, Validator* check,
+laydata::ShapeList* laydata::TdtCell::checkNreplacePoly(SelectDataPair& sel, Validator* check,
                                              unsigned layno, SelectList** fadead)
 {
    if (check->recoverable())
@@ -1205,16 +1205,14 @@ laydata::TdtData* laydata::TdtCell::checkNreplacePoly(SelectDataPair& sel, Valid
       if (shp_OK == check->status())  // entirely
          return NULL;
       else {// ... well, maybe not entirely...
-         // it is still not clear here why and how the modified polygon can be
-         // in clockwise order. The case with Sergei's gds - metki
-         // assert(!(shp_clock & check->status()));
-         laydata::TdtData* newshape = check->replacement();
+         laydata::ShapeList* newShapes = check->replacements();
          // add the new shape to the list of new shapes ...
-         secureDataList(*(fadead[2]),layno)->push_back(SelectDataPair(newshape, SGBitSet()));
+         for (laydata::ShapeList::const_iterator CS = newShapes->begin(); CS != newShapes->end(); CS++)
+            secureDataList(*(fadead[2]),layno)->push_back(SelectDataPair(*CS, SGBitSet()));
          // ... and put the initial shape(that is to be modified) in the
          // list of deleted shapes
          secureDataList(*(fadead[1]),layno)->push_back(SelectDataPair(sel.first, sel.second));
-         return newshape;
+         return newShapes;
       }
    }
    else {// the produced shape is invalid, so keep the old one and add it to the list of failed
@@ -1223,18 +1221,19 @@ laydata::TdtData* laydata::TdtCell::checkNreplacePoly(SelectDataPair& sel, Valid
    }
 }
 
-laydata::TdtData* laydata::TdtCell::checkNreplaceBox(SelectDataPair& sel, Validator* check,
+laydata::ShapeList* laydata::TdtCell::checkNreplaceBox(SelectDataPair& sel, Validator* check,
                                              unsigned layno, SelectList** fadead)
 {
    if (check->recoverable())
    { // shape is valid, but obviously not a box (if it gets here)
-      laydata::TdtData* newshape = check->replacement();
-      // add the new shape to the list of new shapes ...
-      secureDataList(*(fadead[2]),layno)->push_back(SelectDataPair(newshape, SGBitSet()));
+      laydata::ShapeList* newShapes = check->replacements();
+      // add the new shapes to the list of new shapes ...
+      for (laydata::ShapeList::const_iterator CS = newShapes->begin(); CS != newShapes->end(); CS++)
+         secureDataList(*(fadead[2]),layno)->push_back(SelectDataPair(*CS, SGBitSet()));
       // ... and put the initial shape(that has been modified) in the
       // list of deleted shapes
       secureDataList(*(fadead[1]),layno)->push_back(SelectDataPair(sel.first, sel.second));
-      return newshape;
+      return newShapes;
    }
    else {// the produced shape is invalid, so keep the old one and add it to the list of failed
       secureDataList(*(fadead[0]),layno)->push_back(SelectDataPair(sel.first, sel.second));
@@ -1269,12 +1268,18 @@ bool laydata::TdtCell::moveSelected(laydata::TdtDesign* ATDB, const CTM& trans, 
          if (NULL != (checkS = DI->first->move(trans, DI->second)))
          {
             // modify has been performed and a shape needs validation
-            laydata::TdtData *newshape = NULL;
-            if (NULL != (newshape = checkNreplacePoly(*DI, checkS, CL->first, fadead)))
+            laydata::ShapeList* newShapes;
+            if (NULL != (newShapes = checkNreplacePoly(*DI, checkS, CL->first, fadead)))
             {
                // remove the shape from list of selected shapes and mark it as selected
                DI = lslct->erase(DI);
-               _layers[CL->first]->add(newshape);
+               for (laydata::ShapeList::const_iterator CS = newShapes->begin(); CS != newShapes->end(); CS++)
+               {
+                  // add the new shape to the list of new shapes ...
+                  _layers[CL->first]->add(*CS);
+               }
+               newShapes->clear();
+               delete newShapes;
             }
             else
             {
@@ -1335,14 +1340,20 @@ bool laydata::TdtCell::rotateSelected(laydata::TdtDesign* ATDB, const CTM& trans
             // ... rotate it ...
             if (NULL != (checkS = DI->first->move(trans, DI->second)))
             {// box->polygon conversion has been performed
-               laydata::TdtData *newshape = NULL;
-               if (NULL != (newshape = checkNreplaceBox(*DI, checkS, CL->first, fadead)))
+               laydata::ShapeList* newShapes;
+               if (NULL != (newShapes = checkNreplaceBox(*DI, checkS, CL->first, fadead)))
                {
-                  // remove the shape from list of selected shapes - dont delete the list of
+                  // remove the shape from list of selected shapes - don't delete the list of
                   // selected points BECAUSE it is (could be) used in UNDO
                   DI = lslct->erase(DI);
-                  _layers[CL->first]->add(newshape);
-                  newshape->setStatus(sh_selected);
+                  for (laydata::ShapeList::const_iterator CS = newShapes->begin(); CS != newShapes->end(); CS++)
+                  {
+                     // add the new shape to the list of new shapes ...
+                     _layers[CL->first]->add(*CS);
+                     (*CS)->setStatus(sh_selected);
+                  }
+                  newShapes->clear();
+                  delete newShapes;
                }
                else
                {
