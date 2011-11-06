@@ -2760,7 +2760,6 @@ laydata::ShapeList* laydata::ValidPoly::replacements()
          tell_log(console::MT_WARNING, ost.str());
          for (pcollection::const_iterator CI = cut_shapes.begin(); CI != cut_shapes.end(); CI++)
          {
-
             laydata::ValidPoly check(**CI);
             assert(check.valid());// otherwise go and fix _shapeFix->recover()!
             PointVector npl = check.getValidated();
@@ -3016,7 +3015,7 @@ laydata::TdtData* laydata::ValidWire::replacement()
    if (crossing())
    {
       pcollection cut_shapes;
-      if ( _shapeFix->recover(cut_shapes) )
+      if ( _shapeFix->recoverWire(cut_shapes) )
       {
          std::ostringstream ost;
          ost << "Wire check fails - self crossing, generating equivalent wire";
@@ -3056,6 +3055,58 @@ laydata::TdtData* laydata::ValidWire::replacement()
       newShape = DEBUG_NEW TdtWire(_plist, _width);
    }
    return newShape;
+}
+
+laydata::ShapeList* laydata::ValidWire::replacements()
+{
+   ShapeList* shpRecovered = DEBUG_NEW ShapeList();
+   assert(recoverable());
+   //TdtData *newShape = NULL;
+   if (crossing())
+   {
+      assert(NULL != _shapeFix);
+      pcollection cut_shapes;
+      if ( _shapeFix->recoverWire(cut_shapes) )
+      {
+         std::ostringstream ost;
+         ost << "Wire check fails - self crossing, generating equivalent wires";
+         tell_log(console::MT_WARNING, ost.str());
+         for (pcollection::const_iterator CI = cut_shapes.begin(); CI != cut_shapes.end(); CI++)
+         {
+            laydata::ValidWire check(**CI, _width);
+            assert(check.valid());// otherwise go and fix _shapeFix->recoverWire()!
+            PointVector npl = check.getValidated();
+            shpRecovered->push_back(DEBUG_NEW laydata::TdtWire(npl, _width));
+            npl.clear();
+            delete *CI;
+         }
+         cut_shapes.clear();
+      }
+   }
+   else if (shortSegments())
+   {
+      TdtData* intershape = DEBUG_NEW TdtWire(_plist, _width);
+      PointVector w2p = intershape->shape2poly();
+      delete intershape;
+      if (0 == w2p.size())
+      {
+         std::ostringstream ost;
+         ost << "Wire check fails - End segments too short, can't generate a valid shape";
+         tell_log(console::MT_ERROR, ost.str());
+      }
+      else
+      {
+         std::ostringstream ost;
+         ost << "Wire check fails - End segments too short, generating an equivalent polygon";
+         tell_log(console::MT_WARNING, ost.str());
+         shpRecovered->push_back(DEBUG_NEW TdtPoly(w2p));
+      }
+   }
+   else
+   {
+      shpRecovered->push_back(DEBUG_NEW TdtWire(_plist, _width));
+   }
+   return shpRecovered;
 }
 
 std::string laydata::ValidWire::failType() {

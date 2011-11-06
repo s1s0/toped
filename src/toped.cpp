@@ -906,7 +906,7 @@ void tui::TopedFrame::checkExit( wxCommandEvent& WXUNUSED( event ) )
 
 void tui::TopedFrame::OnExitRequest( wxCommandEvent&  event )
 {
-   switch (event.GetInt())
+  switch (event.GetInt())
    {
       case 0 : Close(FALSE); break; // Exit the application
       case 1 : checkExit(event) ; break; // Make pre-exit checks

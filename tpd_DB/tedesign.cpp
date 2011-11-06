@@ -1128,22 +1128,55 @@ laydata::TdtData* laydata::TdtDesign::putPoly(unsigned la, PointVector* pl)
    return newshape;
 }
 
+//laydata::TdtData* laydata::TdtDesign::addWire(unsigned la, PointVector* pl, WireWidth w)
+//{
+//   laydata::TdtData *newshape = NULL;
+//   for(PointVector::iterator PL = pl->begin(); PL != pl->end(); PL++)
+//      (*PL) *= _target.rARTM();
+//
+//   laydata::ValidWire check(*pl,w);
+//   if (check.acceptable())
+//   {
+//      newshape = check.replacement();
+//      if (NULL != newshape)
+//      {
+//         DBbox old_overlap(_target.edit()->cellOverlap());
+//         QuadTree *actlay = _target.edit()->secureLayer(la);
+//         setModified();
+//         actlay->add(newshape);
+//         if (_target.edit()->overlapChanged(old_overlap, this))
+//            do {} while(validateCells());
+//      }
+//   }
+//   else
+//   {
+//      std::ostringstream ost;
+//      ost << "Wire check fails - " << check.failType();
+//      tell_log(console::MT_ERROR, ost.str());
+//   }
+//   return newshape;
+//}
+
 laydata::TdtData* laydata::TdtDesign::addWire(unsigned la, PointVector* pl, WireWidth w)
 {
    laydata::TdtData *newshape = NULL;
    for(PointVector::iterator PL = pl->begin(); PL != pl->end(); PL++)
       (*PL) *= _target.rARTM();
 
-   laydata::ValidWire check(*pl,w);
+   laydata::ValidWire check(*pl, w);
    if (check.acceptable())
    {
-      newshape = check.replacement();
-      if (NULL != newshape)
+      laydata::ShapeList* newShapes = check.replacements();
+      if (!newShapes->empty())
       {
          DBbox old_overlap(_target.edit()->cellOverlap());
          QuadTree *actlay = _target.edit()->secureLayer(la);
          setModified();
-         actlay->add(newshape);
+         for (laydata::ShapeList::const_iterator CS = newShapes->begin(); CS != newShapes->end(); CS++)
+         {
+            actlay->add(*CS);
+            newshape = *CS;
+         }
          if (_target.edit()->overlapChanged(old_overlap, this))
             do {} while(validateCells());
       }
@@ -1151,7 +1184,7 @@ laydata::TdtData* laydata::TdtDesign::addWire(unsigned la, PointVector* pl, Wire
    else
    {
       std::ostringstream ost;
-      ost << "Wire check fails - " << check.failType();
+      ost << "Validation check fails - " << check.failType();
       tell_log(console::MT_ERROR, ost.str());
    }
    return newshape;

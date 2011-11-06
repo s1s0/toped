@@ -446,6 +446,7 @@ namespace laydata {
                                 ValidWire(PointVector&, WireWidth);
       virtual                  ~ValidWire();
       virtual laydata::TdtData* replacement();
+      laydata::ShapeList*       replacements();
       virtual std::string       failType();
    private:
       void                      angles();

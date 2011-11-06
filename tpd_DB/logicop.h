@@ -135,7 +135,8 @@ namespace logicop {
       void                    cleanRedundant();
       void                    traverseMulti(polycross::VPoint* const, pcollection&);
       void                    traverseSingle(polycross::VPoint* const, pcollection&);
-      void                    traverseRecover(polycross::VPoint* const, pcollection&, bool);
+      void                    traverseRecoverPoly(polycross::VPoint* const, pcollection&, bool);
+      void                    traverseRecoverWire(polycross::VPoint* const, pcollection&);
       void                    countCross();
       bool                    checkInside(const PointVector&, const PointVector&);
       //! The raw data, corresponding to _poly, used by all logic methods
