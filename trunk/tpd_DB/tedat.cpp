@@ -1458,8 +1458,13 @@ laydata::TdtData* laydata::TdtWire::copy(const CTM& trans) {
       ptlist.push_back( TP( _pdata[2*i], _pdata[2*i+1] ) * trans);
    //
    ValidWire check(ptlist, _width);
+   // expected a single valid object (exactly as "this" is!
    assert(check.valid());
-   return check.replacement();
+   laydata::ShapeList* slist = check.replacements();
+   assert(1 == slist->size());
+   TdtData* nshape = *(slist->begin());
+   slist->clear(); delete slist;
+   return nshape;
 }
 
 void laydata::TdtWire::stretch(int bfactor, ShapeList** decure)

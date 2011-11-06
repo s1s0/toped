@@ -33,7 +33,7 @@
 #include "ttt.h"
 #include "outbox.h"
 
-#define POLYFIX_DEBUG
+//#define POLYFIX_DEBUG
 #ifdef POLYFIX_DEBUG
 #define REPORT_POLY_DEBUG(pl, msg) {  printf("=========================== %s ============================\n",msg); \
    polycross::VPoint* centinel = pl;  \
