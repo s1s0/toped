@@ -769,7 +769,7 @@ bool logicop::CrossFix::recoverPoly(pcollection& plycol)
    centinel = collector;
 
    pcollection lclcol; // local collection of the resulting shapes
-   traverseRecover(centinel, lclcol, true);
+   traverseRecoverPoly(centinel, lclcol, true);
    if ( lclcol.empty() ) return false; // i.e. no generated polygons
    // Validate all resulting polygons
    pcollection lclvalidated;
@@ -819,8 +819,8 @@ bool logicop::CrossFix::recoverWire(pcollection& plycol)
    polycross::VPoint* centinel = _shape;
    // Get a non-crossing starting point
    while (0 == centinel->visited()) centinel = centinel->next();
-   // traverse the resulting points to get the polygon
-   traverseSingle(centinel, plycol);
+   // traverse the resulting points to get the wires
+   traverseRecoverWire(centinel, plycol);
    return true;
 }
 
@@ -843,7 +843,7 @@ void logicop::CrossFix::traverseMulti(polycross::VPoint* const centinel, pcollec
    plycol.push_back(shgen);
 }
 
-void logicop::CrossFix::traverseRecover(polycross::VPoint* const centinel, pcollection& plycol, bool direction)
+void logicop::CrossFix::traverseRecoverPoly(polycross::VPoint* const centinel, pcollection& plycol, bool direction)
 {
    PointVector *shgen = DEBUG_NEW PointVector();
    polycross::VPoint* collector = centinel;
@@ -853,7 +853,26 @@ void logicop::CrossFix::traverseRecover(polycross::VPoint* const centinel, pcoll
       collector = collector->follower(direction);
       if (0 == collector->visited())
       {
-         traverseRecover(collector, plycol, !direction);
+         traverseRecoverPoly(collector, plycol, !direction);
+      }
+   }
+   while ( collector->cp() != centinel->cp() );
+   plycol.push_front(shgen);
+}
+
+void logicop::CrossFix::traverseRecoverWire(polycross::VPoint* const centinel, pcollection& plycol)
+{
+   PointVector *shgen = DEBUG_NEW PointVector();
+   polycross::VPoint* collector = centinel;
+   do
+   {
+      shgen->push_back(TP(collector->cp()->x(), collector->cp()->y()));
+      collector = collector->next();
+      if (0 == collector->visited())
+      {
+         shgen->push_back(TP(collector->cp()->x(), collector->cp()->y()));
+         plycol.push_front(shgen);
+         shgen = DEBUG_NEW PointVector();
       }
    }
    while ( collector->cp() != centinel->cp() );
