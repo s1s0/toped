@@ -33,7 +33,7 @@
 #include "ttt.h"
 #include "outbox.h"
 
-//#define POLYFIX_DEBUG
+#define POLYFIX_DEBUG
 #ifdef POLYFIX_DEBUG
 #define REPORT_POLY_DEBUG(pl, msg) {  printf("=========================== %s ============================\n",msg); \
    polycross::VPoint* centinel = pl;  \
@@ -810,6 +810,17 @@ bool logicop::CrossFix::recoverPoly(pcollection& plycol)
          plycol.push_back(curpolyB);
    }
    plycol.push_back(respoly);
+   return true;
+}
+
+bool logicop::CrossFix::recoverWire(pcollection& plycol)
+{
+   if (0 == _crossp) return false;
+   polycross::VPoint* centinel = _shape;
+   // Get a non-crossing starting point
+   while (0 == centinel->visited()) centinel = centinel->next();
+   // traverse the resulting points to get the polygon
+   traverseSingle(centinel, plycol);
    return true;
 }
 

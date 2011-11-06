@@ -125,6 +125,7 @@ namespace logicop {
       void                    findCrossingPoints();
       //! Get the fixed polygon(s)
       bool                    recoverPoly(pcollection&);
+      bool                    recoverWire(pcollection&);
       bool                    recover(pcollection&);
       bool                    generate(pcollection&, real);
       word                    crossp() {return _crossp;}
