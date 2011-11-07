@@ -1039,39 +1039,6 @@ void laydata::TdtDesign::setModified()
    _lastUpdated = time(NULL);
 }
 
-//laydata::TdtData* laydata::TdtDesign::addPoly(unsigned la, PointVector* pl)
-//{
-//   laydata::TdtData *newshape = NULL;
-//   for(PointVector::iterator PL = pl->begin(); PL != pl->end(); PL++)
-//      (*PL) *= _target.rARTM();
-//
-//   laydata::ValidPoly check(*pl);
-//   if (check.acceptable())
-//   {
-//      laydata::ShapeList* newShapes = check.replacements();
-//      if (!newShapes->empty())
-//      {
-//         DBbox old_overlap(_target.edit()->cellOverlap());
-//         QuadTree *actlay = _target.edit()->secureLayer(la);
-//         setModified();
-//         for (laydata::ShapeList::const_iterator CS = newShapes->begin(); CS != newShapes->end(); CS++)
-//         {
-//            actlay->add(*CS);
-//            newshape = *CS;
-//         }
-//         if (_target.edit()->overlapChanged(old_overlap, this))
-//            do {} while(validateCells());
-//      }
-//   }
-//   else
-//   {
-//      std::ostringstream ost;
-//      ost << "Validation check fails - " << check.failType();
-//      tell_log(console::MT_ERROR, ost.str());
-//   }
-//   return newshape;
-//}
-
 laydata::TdtData* laydata::TdtDesign::addPoly(unsigned la, PointVector* pl)
 {
    laydata::TdtData *newshape = NULL;
@@ -1081,13 +1048,17 @@ laydata::TdtData* laydata::TdtDesign::addPoly(unsigned la, PointVector* pl)
    laydata::ValidPoly check(*pl);
    if (check.acceptable())
    {
-      newshape = check.replacement();
-      if (NULL != newshape)
+      laydata::ShapeList* newShapes = check.replacements();
+      if (!newShapes->empty())
       {
          DBbox old_overlap(_target.edit()->cellOverlap());
          QuadTree *actlay = _target.edit()->secureLayer(la);
          setModified();
-         actlay->add(newshape);
+         for (laydata::ShapeList::const_iterator CS = newShapes->begin(); CS != newShapes->end(); CS++)
+         {
+            actlay->add(*CS);
+            newshape = *CS;
+         }
          if (_target.edit()->overlapChanged(old_overlap, this))
             do {} while(validateCells());
       }
@@ -1101,6 +1072,35 @@ laydata::TdtData* laydata::TdtDesign::addPoly(unsigned la, PointVector* pl)
    return newshape;
 }
 
+//laydata::TdtData* laydata::TdtDesign::addPoly(unsigned la, PointVector* pl)
+//{
+//   laydata::TdtData *newshape = NULL;
+//   for(PointVector::iterator PL = pl->begin(); PL != pl->end(); PL++)
+//      (*PL) *= _target.rARTM();
+//
+//   laydata::ValidPoly check(*pl);
+//   if (check.acceptable())
+//   {
+//      newshape = check.replacement();
+//      if (NULL != newshape)
+//      {
+//         DBbox old_overlap(_target.edit()->cellOverlap());
+//         QuadTree *actlay = _target.edit()->secureLayer(la);
+//         setModified();
+//         actlay->add(newshape);
+//         if (_target.edit()->overlapChanged(old_overlap, this))
+//            do {} while(validateCells());
+//      }
+//   }
+//   else
+//   {
+//      std::ostringstream ost;
+//      ost << "Validation check fails - " << check.failType();
+//      tell_log(console::MT_ERROR, ost.str());
+//   }
+//   return newshape;
+//}
+
 laydata::TdtData* laydata::TdtDesign::putPoly(unsigned la, PointVector* pl)
 {
    laydata::TdtData *newshape = NULL;
@@ -1110,14 +1110,19 @@ laydata::TdtData* laydata::TdtDesign::putPoly(unsigned la, PointVector* pl)
    laydata::ValidPoly check(*pl);
    if (check.acceptable())
    {
-      newshape = check.replacement();
-      if (NULL != newshape)
+      laydata::ShapeList* newShapes = check.replacements();
+      if (!newShapes->empty())
       {
          QTreeTmp *actlay = _target.edit()->secureUnsortedLayer(la);
          setModified();
-         actlay->put(newshape);
-
+         for (laydata::ShapeList::const_iterator CS = newShapes->begin(); CS != newShapes->end(); CS++)
+         {
+            actlay->put(*CS);
+            newshape = *CS;
+         }
+         newShapes->clear();
       }
+      delete newShapes;
    }
    else
    {
@@ -1127,6 +1132,33 @@ laydata::TdtData* laydata::TdtDesign::putPoly(unsigned la, PointVector* pl)
    }
    return newshape;
 }
+
+//laydata::TdtData* laydata::TdtDesign::putPoly(unsigned la, PointVector* pl)
+//{
+//   laydata::TdtData *newshape = NULL;
+//   for(PointVector::iterator PL = pl->begin(); PL != pl->end(); PL++)
+//      (*PL) *= _target.rARTM();
+//
+//   laydata::ValidPoly check(*pl);
+//   if (check.acceptable())
+//   {
+//      newshape = check.replacement();
+//      if (NULL != newshape)
+//      {
+//         QTreeTmp *actlay = _target.edit()->secureUnsortedLayer(la);
+//         setModified();
+//         actlay->put(newshape);
+//
+//      }
+//   }
+//   else
+//   {
+//      std::ostringstream ost;
+//      ost << "Validation check fails - " << check.failType();
+//      tell_log(console::MT_ERROR, ost.str());
+//   }
+//   return newshape;
+//}
 
 laydata::TdtData* laydata::TdtDesign::addWire(unsigned la, PointVector* pl, WireWidth w)
 {

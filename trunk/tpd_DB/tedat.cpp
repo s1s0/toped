@@ -974,8 +974,13 @@ laydata::TdtData* laydata::TdtPoly::copy(const CTM& trans)
    // quite possible that (for example) the winding has changed which in turn
    // will result in bad results in logic operations! (Issue 52)
    laydata::ValidPoly check(ptlist);
+   // expected a single valid object (exactly as "this" is!)
    assert(check.valid());
-   return check.replacement();
+   laydata::ShapeList* slist = check.replacements();
+   assert(1 == slist->size());
+   TdtData* nshape = *(slist->begin());
+   slist->clear(); delete slist;
+   return nshape;
 }
 
 bool laydata::TdtPoly::pointInside(TP pnt)
@@ -1065,7 +1070,11 @@ void laydata::TdtPoly::stretch(int bfactor, ShapeList** decure)
    if (vsh.valid() && !(laydata::shp_clock & vsh.status()))
    {
       decure[0]->push_back(this);
-      decure[1]->push_back(vsh.replacement());
+
+      laydata::ShapeList* slist = vsh.replacements();
+      assert(1 == slist->size());
+      decure[1]->push_back(*(slist->begin()));
+      slist->clear(); delete slist;
    }
    else if ( vsh.recoverable() && (!(laydata::shp_clock & vsh.status())) )
    {
@@ -1458,7 +1467,7 @@ laydata::TdtData* laydata::TdtWire::copy(const CTM& trans) {
       ptlist.push_back( TP( _pdata[2*i], _pdata[2*i+1] ) * trans);
    //
    ValidWire check(ptlist, _width);
-   // expected a single valid object (exactly as "this" is!
+   // expected a single valid object (exactly as "this" is!)
    assert(check.valid());
    laydata::ShapeList* slist = check.replacements();
    assert(1 == slist->size());
@@ -1489,15 +1498,16 @@ PointVector laydata::TdtWire::shape2poly() const
    ValidPoly check(cdata);
    if (check.recoverable())
    {
-      TdtData* nshape = check.replacement();
-      if (NULL != nshape)
-      {
-         cdata = nshape->shape2poly();
-         delete nshape;
-         return cdata;
-      }
-      return PointVector();
+      laydata::ShapeList* slist = check.replacements();
+      assert(1 == slist->size());
+      TdtData* nshape = *(slist->begin());
+      slist->clear(); delete slist;
+      cdata = nshape->shape2poly();
+      delete nshape;
+      return cdata;
    }
+   else
+      assert(false);
    return PointVector();
 }
 
@@ -2716,42 +2726,42 @@ laydata::ValidPoly::ValidPoly(PointVector& plist) :
    selfcrossing();
 }
 
-laydata::TdtData* laydata::ValidPoly::replacement()
-{
-   laydata::TdtData* newShape = NULL;
-   assert(recoverable());
-   if (crossing())
-   {
-      assert(NULL != _shapeFix);
-      pcollection cut_shapes;
-      if ( _shapeFix->recover(cut_shapes) )
-      {
-         std::ostringstream ost;
-         ost << "Polygon check fails - self crossing, generating equivalent polygon";
-         tell_log(console::MT_WARNING, ost.str());
-         ShapeList shpRecovered;
-         for (pcollection::const_iterator CI = cut_shapes.begin(); CI != cut_shapes.end(); CI++)
-         {
-
-            laydata::ValidPoly check(**CI);
-            assert(check.valid());// otherwise go and fix _shapeFix->recover()!
-            PointVector npl = check.getValidated();
-            if (check.box())
-               newShape = DEBUG_NEW laydata::TdtBox(npl[2], npl[0]);
-            else
-               newShape = DEBUG_NEW laydata::TdtPoly(npl);
-            npl.clear();
-            shpRecovered.push_back(newShape);
-            delete *CI;
-         }
-         cut_shapes.clear();
-      }
-   }
-   else if (box())
-      newShape = DEBUG_NEW laydata::TdtBox(_plist[0], _plist[2]);
-   else newShape = DEBUG_NEW laydata::TdtPoly(_plist);
-   return newShape;
-}
+//laydata::TdtData* laydata::ValidPoly::replacement()
+//{
+//   laydata::TdtData* newShape = NULL;
+//   assert(recoverable());
+//   if (crossing())
+//   {
+//      assert(NULL != _shapeFix);
+//      pcollection cut_shapes;
+//      if ( _shapeFix->recover(cut_shapes) )
+//      {
+//         std::ostringstream ost;
+//         ost << "Polygon check fails - self crossing, generating equivalent polygon";
+//         tell_log(console::MT_WARNING, ost.str());
+//         ShapeList shpRecovered;
+//         for (pcollection::const_iterator CI = cut_shapes.begin(); CI != cut_shapes.end(); CI++)
+//         {
+//
+//            laydata::ValidPoly check(**CI);
+//            assert(check.valid());// otherwise go and fix _shapeFix->recover()!
+//            PointVector npl = check.getValidated();
+//            if (check.box())
+//               newShape = DEBUG_NEW laydata::TdtBox(npl[2], npl[0]);
+//            else
+//               newShape = DEBUG_NEW laydata::TdtPoly(npl);
+//            npl.clear();
+//            shpRecovered.push_back(newShape);
+//            delete *CI;
+//         }
+//         cut_shapes.clear();
+//      }
+//   }
+//   else if (box())
+//      newShape = DEBUG_NEW laydata::TdtBox(_plist[0], _plist[2]);
+//   else newShape = DEBUG_NEW laydata::TdtPoly(_plist);
+//   return newShape;
+//}
 
 laydata::ShapeList* laydata::ValidPoly::replacements()
 {
@@ -3111,7 +3121,11 @@ laydata::TdtData* laydata::createValidShape(PointVector* pl)
    delete pl;
    if (check.valid()) // it's not check.recoverable() here deliberately!
    {
-      return check.replacement();
+      laydata::ShapeList* slist = check.replacements();
+      assert(1 == slist->size());
+      TdtData* nshape = *(slist->begin());
+      slist->clear(); delete slist;
+      return nshape;
    }
    else
    {
