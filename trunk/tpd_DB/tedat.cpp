@@ -2726,43 +2726,6 @@ laydata::ValidPoly::ValidPoly(PointVector& plist) :
    selfcrossing();
 }
 
-//laydata::TdtData* laydata::ValidPoly::replacement()
-//{
-//   laydata::TdtData* newShape = NULL;
-//   assert(recoverable());
-//   if (crossing())
-//   {
-//      assert(NULL != _shapeFix);
-//      pcollection cut_shapes;
-//      if ( _shapeFix->recover(cut_shapes) )
-//      {
-//         std::ostringstream ost;
-//         ost << "Polygon check fails - self crossing, generating equivalent polygon";
-//         tell_log(console::MT_WARNING, ost.str());
-//         ShapeList shpRecovered;
-//         for (pcollection::const_iterator CI = cut_shapes.begin(); CI != cut_shapes.end(); CI++)
-//         {
-//
-//            laydata::ValidPoly check(**CI);
-//            assert(check.valid());// otherwise go and fix _shapeFix->recover()!
-//            PointVector npl = check.getValidated();
-//            if (check.box())
-//               newShape = DEBUG_NEW laydata::TdtBox(npl[2], npl[0]);
-//            else
-//               newShape = DEBUG_NEW laydata::TdtPoly(npl);
-//            npl.clear();
-//            shpRecovered.push_back(newShape);
-//            delete *CI;
-//         }
-//         cut_shapes.clear();
-//      }
-//   }
-//   else if (box())
-//      newShape = DEBUG_NEW laydata::TdtBox(_plist[0], _plist[2]);
-//   else newShape = DEBUG_NEW laydata::TdtPoly(_plist);
-//   return newShape;
-//}
-
 laydata::ShapeList* laydata::ValidPoly::replacements()
 {
    ShapeList* shpRecovered = DEBUG_NEW ShapeList();
