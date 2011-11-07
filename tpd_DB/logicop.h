@@ -126,7 +126,7 @@ namespace logicop {
       //! Get the fixed polygon(s)
       bool                    recoverPoly(pcollection&);
       bool                    recoverWire(pcollection&);
-      bool                    recover(pcollection&);
+//      bool                    recover(pcollection&);
       bool                    generate(pcollection&, real);
       word                    crossp() {return _crossp;}
    protected:
@@ -134,7 +134,7 @@ namespace logicop {
       void                    reorderCross();
       void                    cleanRedundant();
       void                    traverseMulti(polycross::VPoint* const, pcollection&);
-      void                    traverseSingle(polycross::VPoint* const, pcollection&);
+//      void                    traverseSingle(polycross::VPoint* const, pcollection&);
       void                    traverseRecoverPoly(polycross::VPoint* const, pcollection&, bool);
       void                    traverseRecoverWire(polycross::VPoint* const, pcollection&);
       void                    countCross();

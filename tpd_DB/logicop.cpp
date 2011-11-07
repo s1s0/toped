@@ -739,16 +739,16 @@ bool logicop::CrossFix::generate(pcollection& plycol, real bfactor)
    else return true;
 }
 
-bool logicop::CrossFix::recover(pcollection& plycol)
-{
-   if (0 == _crossp) return false;
-   polycross::VPoint* centinel = _shape;
-   // Get a non-crossing starting point
-   while (0 == centinel->visited()) centinel = centinel->next();
-   // traverse the resulting points to get the polygon
-   traverseSingle(centinel, plycol);
-   return true;
-}
+//bool logicop::CrossFix::recover(pcollection& plycol)
+//{
+//   if (0 == _crossp) return false;
+//   polycross::VPoint* centinel = _shape;
+//   // Get a non-crossing starting point
+//   while (0 == centinel->visited()) centinel = centinel->next();
+//   // traverse the resulting points to get the polygon
+//   traverseSingle(centinel, plycol);
+//   return true;
+//}
 
 bool logicop::CrossFix::recoverPoly(pcollection& plycol)
 {
@@ -879,20 +879,20 @@ void logicop::CrossFix::traverseRecoverWire(polycross::VPoint* const centinel, p
    plycol.push_front(shgen);
 }
 
-void logicop::CrossFix::traverseSingle(polycross::VPoint* const centinel, pcollection& plycol)
-{
-   bool direction = true; /*next*/
-   PointVector *shgen = DEBUG_NEW PointVector();
-   // always push the entry point
-   shgen->push_back(TP(centinel->cp()->x(), centinel->cp()->y()));
-   polycross::VPoint* collector = centinel->next();
-   while ( (collector->cp()) != (centinel->cp()) )
-   {
-      shgen->push_back(TP(collector->cp()->x(), collector->cp()->y()));
-      collector = collector->follower(direction, true);
-   }
-   plycol.push_back(shgen);
-}
+//void logicop::CrossFix::traverseSingle(polycross::VPoint* const centinel, pcollection& plycol)
+//{
+//   bool direction = true; /*next*/
+//   PointVector *shgen = DEBUG_NEW PointVector();
+//   // always push the entry point
+//   shgen->push_back(TP(centinel->cp()->x(), centinel->cp()->y()));
+//   polycross::VPoint* collector = centinel->next();
+//   while ( (collector->cp()) != (centinel->cp()) )
+//   {
+//      shgen->push_back(TP(collector->cp()->x(), collector->cp()->y()));
+//      collector = collector->follower(direction, true);
+//   }
+//   plycol.push_back(shgen);
+//}
 
 bool logicop::CrossFix::checkInside(const PointVector& outside, const PointVector& inside)
 {
