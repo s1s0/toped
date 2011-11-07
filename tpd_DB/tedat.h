@@ -430,7 +430,6 @@ namespace laydata {
    public:
                                    ValidPoly(PointVector&);
       virtual                     ~ValidPoly();
-//      laydata::TdtData*            replacement();
       virtual laydata::ShapeList*  replacements();
       virtual std::string          failType();
    private:
