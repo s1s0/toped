@@ -1,0 +1,21 @@
+#summary Toped on Linux with ATI graphics
+
+= Summary =
+
+For a several years now ATI proprietary graphic drivers for Linux can't quite catch-up with the development of X and other graphic related projects - in result it was simply not quite feasible to use it on a moderately recent Linux distribution. A partial exception was Ubuntu, yet even there the overall picture was a bit dodgy compared with the nVidia performance and support.
+
+All this is a bit pity considering that ATI are producing some cool hardware and also that on Windows there are no such troubles.
+
+
+= Details =
+
+Toped is an openGL tool which relies heavily on a stability and performance of the graphic platform underneath - so as a consequence of the problems described above for quite some time I haven't seen it working as expected on Linux platform with ATI graphic card. The open source radeon driver did a great progress recently and now even the VBO renderer is working. The trouble there are the stipple patterns we're using. They are still not supported - in result all fill patterns are visualised as solid.
+
+With the release of the Gnome 3 the things got even worse, but in a bizarre way it actually provoked some activity in AMD and for the first time in a couple of years I saw a Catalyst driver actually installed from yum and working along with the latest Fedora packages. 
+
+Well... almost working. Here are some sporadic observations of the graphic performance. First general:
+  * fgl_glxgears
+    ** without Desktop effects - tops 1600 FPS
+    ** with Desktop effects activated - around 350 FPS max. Interestingly enough - if I simply move the mouse around it seems to improve the performance up to 600 FPS.
+
+(... to be continued ...)
