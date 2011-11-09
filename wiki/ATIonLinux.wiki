@@ -29,8 +29,14 @@ Toped behaves strange on this background.
   # *Without desktop effects* - with both renderers, the driver crashes on a regular basis. Even in the short periods when it holds - a strange "effects" can be observed - most notably a flashing exchanges between the current and previous screen images. The impression is that some kind of troubles with the back buffers are forcing the driver to do this.
   # *With desktop effects on* - it looks stable. No flashing and no crashes observed. However
      * with the VBO renderer - there are virtually no graphic objects on the screen apart from the texts. Grids and all temporary objects can be seen without a problem. It appears that there is a VBO problem although fonts are using the same VBO mechanism - true in a bit different way.
-     * with the basic renderer - I'm afraid to say - it looks like working. 
+     * *with the basic renderer* - I'm afraid to say - *it looks like working*.
 
-All the above does not come as a big surprise - a plenty of bug reports can be found on the net. Yet it looks like there is a 
+All the above does not come as a big surprise - a plenty of bug reports can be found on the net. So is there a
 
-= Light at the end of the tunnel =
+= Light at the end of the tunnel ? =
+
+It looks like there are some new versions of the driver in the pipe. According to [http://phoronix.com/forums/showthread.php?64252-AMD-Catalyst-11.10-Linux-Driver-Released/page2 this] post version 11.10 has been released although on the [http://support.amd.com/us/gpudownload/linux/Pages/radeon_linux.aspx official AMD site] I still can see only 11.9
+
+Another post in the same forum claims that [http://phoronix.com/forums/showthread.php?64399-AMD-Catalyst-11.12-Will-Be-Even-Better AMD Catalyst 11.12 Will Be Even Better]. Not sure though the all the comments share its optimism.
+
+On the other hand [http://fedoraproject.org/get-fedora Fedora 16 (Verne)] just got out of the oven and not surprisingly there are reports that the latest Catalyst driver does not work with it because of the X version.
