@@ -11,11 +11,26 @@ All this is a bit pity considering that ATI are producing some cool hardware and
 
 Toped is an openGL tool which relies heavily on a stability and performance of the graphic platform underneath - so as a consequence of the problems described above for quite some time I haven't seen it working as expected on Linux platform with ATI graphic card. The open source [http://dri.freedesktop.org/wiki/Radeon radeon]  driver did a great progress recently and now even the VBO renderer is working. The trouble there are the [http://code.google.com/p/toped/wiki/StipplePattersMesa stipple patterns] we're using. They are still not supported - in result all fill patterns are visualised as solid.
 
-With the release of the Gnome 3 the things got even worse, but in a bizarre way it actually provoked some activity in AMD and for the first time in a couple of years I saw a Catalyst driver actually installed from yum and working along with the latest Fedora packages. 
+With the release of the [http://www.gnome.org/gnome-3 Gnome 3] the things got even worse, but in a bizarre way it actually provoked some activity in AMD and for the first time in a couple of years I saw a Catalyst driver actually installed from yum and working along with the latest Fedora packages. 
 
-Well... almost working. Here are some sporadic observations of the graphic performance. First general:
+Well... almost working. Here are some sporadic observations of the graphic performance with [http://www.amd.com/us/products/technologies/amd-catalyst/pages/catalyst.aspx Catalyst] 11.9 installed from [http://rpmfusion.org/ rpmfusion] packages.
+
+First impresions:
   * fgl_glxgears
     ** without Desktop effects - tops 1600 FPS
     ** with Desktop effects activated - around 350 FPS max. Interestingly enough - if I simply move the mouse around it seems to improve the performance up to 600 FPS.
+  * on K desktop the whole thing feels a bit unstable. It tends to crash - for example if you switch off desktop effects.
+  * The original radeon package deals quite well with multi screen configurations, virtually without a need for additional set-up. The Catalyst kind of insist on cloned display configuration. One can run the Catalyst Control Center and change this, but
+    # you have to restart X to activate your new configuration
+    # it returns to a cloned display if you restart the machine
 
-(... to be continued ...)
+Toped behaves strange on this background.
+
+  # *Without desktop effects* - with both renderers, the driver crashes on a regular basis. Even in the short periods when it holds - a strange "effects" can be observed - most notably a flashing exchanges between the current and previous screen images. The impression is that some kind of troubles with the back buffers are forcing the driver to do this.
+  # *With desktop effects on* - it looks stable. No flashing and no crashes observed. However
+     * with the VBO renderer - there are virtually no graphic objects on the screen apart from the texts. Grids and all temporary objects can be seen without a problem. It appears that there is a VBO problem although fonts are using the same VBO mechanism - true in a bit different way.
+     * with the basic renderer - I'm afraid to say - it looks like working. 
+
+All the above does not come as a big surprise - a plenty of bug reports can be found on the net. Yet it looks like there is a 
+
+= Light at the end of the tunnel =
