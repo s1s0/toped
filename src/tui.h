@@ -117,6 +117,8 @@ namespace tui {
       CDGRID_CBOX1        ,
       CDGRID_CBOX2        ,
       CDGRID_CBOX3        ,
+      CDRECOVER_POLY      ,
+      CDRECOVER_WIRE      ,
       CDMISC_LONGCURSOR   ,
       CDMISC_AUTOPAN      ,
       CDMISC_BOLDONHOOVER ,
@@ -247,7 +249,7 @@ namespace tui {
    class nameCboxRecords : public wxPanel {
       public:
                                nameCboxRecords(wxWindow*, wxPoint, wxSize, const SIMap&, wxArrayString&, int, const layprop::DrawProperties*);
-                              ~nameCboxRecords() {delete _cifMap;}
+         virtual              ~nameCboxRecords() {delete _cifMap;}
          SIMap*                getTheMap(layprop::DrawProperties*);
          USMap*                getTheFullMap(layprop::DrawProperties*);
       private:
@@ -267,7 +269,7 @@ namespace tui {
    class nameCbox3Records : public wxPanel {
       public:
                               nameCbox3Records(wxWindow*, wxPoint, wxSize, const ExtLayers&, wxArrayString&, int, const layprop::DrawProperties*);
-                             ~nameCbox3Records() {delete _gdsLayMap;}
+         virtual             ~nameCbox3Records() {delete _gdsLayMap;}
          USMap*               getTheMap();
          USMap*               getTheFullMap();
          word                 getNumRows() const {return _allRecords.size();}
@@ -290,7 +292,7 @@ namespace tui {
    class nameEboxRecords : public wxPanel {
       public:
                               nameEboxRecords(wxWindow*, wxPoint, wxSize, const WordList&, wxArrayString&, int, const layprop::DrawProperties*);
-                             ~nameEboxRecords() {delete _cifMap;}
+         virtual             ~nameEboxRecords() {delete _cifMap;}
          USMap*               getTheMap();
          USMap*               getTheFullMap();
       private:
@@ -311,7 +313,7 @@ namespace tui {
    class nameEbox3Records : public wxPanel {
       public:
                               nameEbox3Records(wxWindow*, wxPoint, wxSize, const WordList&, wxArrayString&, int, const layprop::DrawProperties*);
-                             ~nameEbox3Records() {delete _gdsLayMap;}
+         virtual             ~nameEbox3Records() {delete _gdsLayMap;}
          USMap*               getTheMap();
          USMap*               getTheFullMap();
       private:
@@ -756,6 +758,8 @@ namespace tui {
          void                   OnGridSet1    (wxCommandEvent& WXUNUSED(event));
          void                   OnGridSet2    (wxCommandEvent& WXUNUSED(event));
          void                   OnGridSet3    (wxCommandEvent& WXUNUSED(event));
+         void                   OnRecoverPoly (wxCommandEvent&);
+         void                   OnRecoverWire (wxCommandEvent&);
          void                   OnLongCorsor  (wxCommandEvent&);
          void                   OnAutoPan     (wxCommandEvent&);
          void                   OnBoldOnHoover(wxCommandEvent&);

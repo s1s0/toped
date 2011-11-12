@@ -1629,7 +1629,45 @@ void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
          tell_log(console::MT_ERROR,info.str());
       }
    }
+   else if ("RECOVER_POLY" == name)
+   {//setparams({"RECOVER_POLY", "true"});
+      bool val;
+      if (from_string<bool>(val, value, std::boolalpha))
+      {
+         PROPC->setHighlightOnHover(val);
+         // send an event to update the property dialog
+         wxCommandEvent eventTextOri(wxEVT_CANVAS_PARAMS);
+         eventTextOri.SetId(tui::CPS_RECOVER_POLY);
+         eventTextOri.SetInt(val?1:0);
+         wxPostEvent(TopedMainW, eventTextOri);
+      }
+      else
+      {
+         std::ostringstream info;
+         info << "Invalid \""<< name <<"\" value. Expected \"true\" or \"false\"";
+         tell_log(console::MT_ERROR,info.str());
+      }
+   }
 
+   else if ("RECOVER_WIRE" == name)
+   {//setparams({"RECOVER_POLY", "true"});
+      bool val;
+      if (from_string<bool>(val, value, std::boolalpha))
+      {
+// TODO        PROPC->setHighlightOnHover(val);
+         // send an event to update the property dialog
+         wxCommandEvent eventTextOri(wxEVT_CANVAS_PARAMS);
+         eventTextOri.SetId(tui::CPS_RECOVER_WIRE);
+         eventTextOri.SetInt(val?1:0);
+         wxPostEvent(TopedMainW, eventTextOri);
+      }
+      else
+      {
+         std::ostringstream info;
+         info << "Invalid \""<< name <<"\" value. Expected \"true\" or \"false\"";
+         tell_log(console::MT_ERROR,info.str());
+      }
+   }
 
    else
    {

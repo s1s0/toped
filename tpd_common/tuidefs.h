@@ -233,6 +233,8 @@ namespace tui
       CPS_GRID0_STEP      ,
       CPS_GRID1_STEP      ,
       CPS_GRID2_STEP      ,
+      CPS_RECOVER_POLY    ,
+      CPS_RECOVER_WIRE    ,
       CPS_AUTOPAN         ,
       CPS_ZERO_CROSS      ,
       CPS_LONG_CURSOR     ,

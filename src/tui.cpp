@@ -1922,7 +1922,7 @@ void tui::style_sample::setStyle(const tui::style_def&  styledef)
       int state;
 
 
-      int i = 0;
+//      int i = 0;
 
       int mask = 0x8000;
       int length = 0;
@@ -3039,6 +3039,8 @@ BEGIN_EVENT_TABLE(tui::TopedPropertySheets::CanvasPSheet, wxPanel)
     EVT_TEXT_ENTER(CDMARKER_STEP    ,tui::TopedPropertySheets::CanvasPSheet::OnMarkerStep    )
     EVT_BUTTON    (CDMARKER_STEP_SET,tui::TopedPropertySheets::CanvasPSheet::OnMarkerStep    )
     EVT_RADIOBOX(CDMARKER_MOTION    ,tui::TopedPropertySheets::CanvasPSheet::OnMarkerMotion  )
+    EVT_RADIOBOX(CDRECOVER_POLY     ,tui::TopedPropertySheets::CanvasPSheet::OnRecoverPoly   )
+    EVT_RADIOBOX(CDRECOVER_WIRE     ,tui::TopedPropertySheets::CanvasPSheet::OnRecoverWire   )
     EVT_CHECKBOX(CDGRID_CBOX1       ,tui::TopedPropertySheets::CanvasPSheet::OnGridOn1       )
     EVT_CHECKBOX(CDGRID_CBOX2       ,tui::TopedPropertySheets::CanvasPSheet::OnGridOn2       )
     EVT_CHECKBOX(CDGRID_CBOX3       ,tui::TopedPropertySheets::CanvasPSheet::OnGridOn3       )
@@ -3128,18 +3130,42 @@ tui::TopedPropertySheets::CanvasPSheet::CanvasPSheet(wxWindow* parent) : wxPanel
       gridSizer->Add(gr2Sizer, 0, wxALL | wxALIGN_CENTER | wxEXPAND);
       gridSizer->Add(gr3Sizer, 0, wxALL | wxALIGN_CENTER | wxEXPAND);
 
+      wxBoxSizer *recoverySizer = DEBUG_NEW wxStaticBoxSizer(wxHORIZONTAL, this, wxT("Invalid Input Objects"));
+         static const wxString recoOptions[] = { wxT("Reject"), wxT("Recover")};
+         wxRadioBox* polyReco = DEBUG_NEW wxRadioBox(this, CDRECOVER_POLY, wxT("Polygons"),
+                                                     wxDefaultPosition,
+                                                     wxDefaultSize,
+                                                     WXSIZEOF(recoOptions),
+                                                     recoOptions ,
+                                                     1,
+                                                     wxRA_HORIZONTAL
+                                                    );
+         wxRadioBox* wireReco = DEBUG_NEW wxRadioBox(this, CDRECOVER_WIRE, wxT("Wires"),
+                                                     wxDefaultPosition,
+                                                     wxDefaultSize,
+                                                     WXSIZEOF(recoOptions),
+                                                     recoOptions ,
+                                                     1,
+                                                     wxRA_HORIZONTAL
+                                                    );
+         recoverySizer->Add(polyReco   , 1, wxALL | wxALIGN_CENTER | wxEXPAND, 5);
+         recoverySizer->AddStretchSpacer(0);
+         recoverySizer->Add(wireReco   , 1, wxALL | wxALIGN_CENTER | wxEXPAND, 5);
+
+
       wxCheckBox* longCursor   = DEBUG_NEW wxCheckBox(this, CDMISC_LONGCURSOR  , wxT("Long Cursor"));
       wxCheckBox* autoPan      = DEBUG_NEW wxCheckBox(this, CDMISC_AUTOPAN     , wxT("Auto Pan"));
       wxCheckBox* boldOnHover  = DEBUG_NEW wxCheckBox(this, CDMISC_BOLDONHOOVER, wxT("Highlight on hover"));
       wxCheckBox* zeroCross    = DEBUG_NEW wxCheckBox(this, CDMISC_ZEROCROSS   , wxT("Mark the (0,0) position"));
 
-//   // Pack everything
-   topSizer->Add( markerSizer , 0, wxEXPAND | wxALL, 5);
-   topSizer->Add( gridSizer   , 0, wxEXPAND | wxALL, 5);
-   topSizer->Add( longCursor  , 0, wxEXPAND | wxALL, 5);
-   topSizer->Add( autoPan     , 0, wxEXPAND | wxALL, 5);
-   topSizer->Add( boldOnHover , 0, wxEXPAND | wxALL, 5);
-   topSizer->Add( zeroCross   , 0, wxEXPAND | wxALL, 5);
+   // Pack everything
+   topSizer->Add( markerSizer   , 0, wxEXPAND | wxALL, 2);
+   topSizer->Add( gridSizer     , 0, wxEXPAND | wxALL, 2);
+   topSizer->Add( recoverySizer , 0, wxEXPAND | wxALL, 2);
+   topSizer->Add( longCursor    , 0, wxEXPAND | wxALL, 2);
+   topSizer->Add( autoPan       , 0, wxEXPAND | wxALL, 2);
+   topSizer->Add( boldOnHover   , 0, wxEXPAND | wxALL, 2);
+   topSizer->Add( zeroCross     , 0, wxEXPAND | wxALL, 2);
 //
    SetSizer(topSizer);
    topSizer->Fit(this);
@@ -3157,7 +3183,8 @@ void tui::TopedPropertySheets::CanvasPSheet::OnMarkerStep(wxCommandEvent& WXUNUS
        << wxT(");");
    TpdPost::parseCommand(ost);
 }
-   void tui::TopedPropertySheets::CanvasPSheet::OnMarkerMotion(wxCommandEvent& cmdEvent)
+
+void tui::TopedPropertySheets::CanvasPSheet::OnMarkerMotion(wxCommandEvent& cmdEvent)
 {
    byte intVal;
    switch (cmdEvent.GetInt())
@@ -3240,6 +3267,38 @@ void tui::TopedPropertySheets::CanvasPSheet::OnGridSet3(wxCommandEvent& WXUNUSED
    TpdPost::parseCommand(ost);
 }
 
+void tui::TopedPropertySheets::CanvasPSheet::OnRecoverPoly (wxCommandEvent& cmdEvent)
+{
+   bool boolVal;
+   switch (cmdEvent.GetInt())
+   {
+      case 0: boolVal = false ; break;
+      case 1: boolVal = true  ; break;
+      default: assert(false);
+   }
+   wxString ost;
+   ost << wxT("setparams({\"RECOVER_POLY\",")
+       << (boolVal ? wxT("\"true\"") : wxT("\"false\""))
+       << wxT("});");
+   TpdPost::parseCommand(ost);
+}
+
+void tui::TopedPropertySheets::CanvasPSheet::OnRecoverWire (wxCommandEvent& cmdEvent)
+{
+   bool boolVal;
+   switch (cmdEvent.GetInt())
+   {
+      case 0: boolVal = false ; break;
+      case 1: boolVal = true  ; break;
+      default: assert(false);
+   }
+   wxString ost;
+   ost << wxT("setparams({\"RECOVER_WIRE\",")
+       << (boolVal ? wxT("\"true\"") : wxT("\"false\""))
+       << wxT("});");
+   TpdPost::parseCommand(ost);
+}
+
 void tui::TopedPropertySheets::CanvasPSheet::OnLongCorsor(wxCommandEvent& cmdEvent)
 {
    wxString ost;
@@ -3318,6 +3377,14 @@ void tui::TopedPropertySheets::CanvasPSheet::update(wxCommandEvent& evt)
       case CPS_GRID2_STEP :
          targetControl = FindWindow(CDGRID_SET3);assert(targetControl);
          static_cast<wxTextCtrl*>(targetControl)->SetValue(evt.GetString() );
+         break;
+      case CPS_RECOVER_POLY :
+         targetControl = FindWindow(CDRECOVER_POLY);assert(targetControl);
+         static_cast<wxRadioBox*>(targetControl)->SetSelection(evt.GetInt());
+         break;
+      case CPS_RECOVER_WIRE :
+         targetControl = FindWindow(CDRECOVER_WIRE);assert(targetControl);
+         static_cast<wxRadioBox*>(targetControl)->SetSelection(evt.GetInt());
          break;
       case CPS_LONG_CURSOR    :
          targetControl = FindWindow(CDMISC_LONGCURSOR);assert(targetControl);
