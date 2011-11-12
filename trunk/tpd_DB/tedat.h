@@ -413,8 +413,25 @@ namespace laydata {
       void                 unselectPoints(DBbox&, SGBitSet&) {}
       auxdata::GrcCell*    _structure; // pointer to the cell definition
    };
-//==============================================================================
-
+   //===========================================================================
+   /*!
+    * The only purpose of this class is to ensure a thread safe change of the
+    * ValidPoly::_recovery and ValidWire::_recovery fields. This is a singleton
+    * class which only instantiation is done in the DataCenter constructor and
+    * that instance is private within the DataCenter.
+    * It has two usable methods which are supposed to be the only way to change
+    * the fields mentioned above.
+    */
+   class ValidRecovery {
+      public:
+         static ValidRecovery*      getInstance();
+         void                       setPolyRecovery(bool rcv);
+         void                       setWireRecovery(bool rcv);
+      private:
+                                    ValidRecovery() {}
+         static ValidRecovery*      _singleton;
+   };
+   //===========================================================================
    class ValidBox  : public Validator {
    public:
                                     ValidBox(PointVector&);
@@ -433,10 +450,12 @@ namespace laydata {
       virtual laydata::ShapeList*  replacements();
       virtual std::string          failType();
    private:
+      friend void ValidRecovery::setPolyRecovery(bool);
       void                         angles();
       void                         normalize();
       void                         selfcrossing();
       logicop::CrossFix*           _shapeFix;
+      static bool                  _recovery;
    };
 
    //===========================================================================
@@ -447,11 +466,13 @@ namespace laydata {
       virtual laydata::ShapeList*  replacements();
       virtual std::string          failType();
    private:
+      friend void ValidRecovery::setWireRecovery(bool);
       void                         angles();
       void                         endSegments();
       void                         selfcrossing();
       logicop::CrossFix*           _shapeFix;
       WireWidth                    _width;
+      static bool                  _recovery;
    };
    //===========================================================================
    int            xangle(const TP&, const TP&);

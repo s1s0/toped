@@ -234,8 +234,6 @@ layprop::PropertyCenter::PropertyCenter() :
    _zeroCross         ( false                      ),
    _renderType        ( false                      ),
    _boldOnHover       ( false                      ),
-   _recoverPoly       ( false                      ),
-   _recoverWire       ( false                      ),
    _markerAngle       ( 0                          ),
    _layselmask        ( laydata::_lmall            ),
    _gdsLayMap         ( NULL                       ),

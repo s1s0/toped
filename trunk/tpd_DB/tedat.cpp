@@ -210,7 +210,14 @@ QuadTree                   QuadTree
 shapes                     TdtCellRef/tdtaref
 
 */
+/* Static variables */
+bool                    laydata::ValidPoly::_recovery      = false;
+bool                    laydata::ValidWire::_recovery      = false;
+laydata::ValidRecovery* laydata::ValidRecovery::_singleton = NULL;
 
+
+
+//==============================================================================
 bool laydata::TdtData::pointInside(const TP pnt)
 {
    DBbox ovl = overlap();ovl.normalize();
@@ -2672,6 +2679,31 @@ bool laydata::TdtAuxRef::pointInside(const TP)
    return false;
 }
 
+
+//-----------------------------------------------------------------------------
+// class ValidRecovery
+//-----------------------------------------------------------------------------
+laydata::ValidRecovery*  laydata::ValidRecovery::getInstance()
+{
+   if(NULL == _singleton)
+   {
+      _singleton = new ValidRecovery();
+   }
+   else {
+      assert(false); //This class is supposed to have a single instance!
+   }
+   return _singleton;
+}
+
+void laydata::ValidRecovery::setPolyRecovery(bool rcv)
+{
+   laydata::ValidPoly::_recovery = rcv;
+}
+
+void laydata::ValidRecovery::setWireRecovery(bool rcv)
+{
+   laydata::ValidWire::_recovery = rcv;
+}
 
 //-----------------------------------------------------------------------------
 // class ValidBox

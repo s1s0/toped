@@ -64,6 +64,7 @@ DataCenter::DataCenter(const std::string& localDir, const std::string& globalDir
    _tdtActMxState = dbmxs_unlocked;
    _tdtReqMxState = dbmxs_unlocked;
    _cRenderer = NULL;
+   _objectRecovery = laydata::ValidRecovery::getInstance();
 }
 
 DataCenter::~DataCenter()
@@ -756,6 +757,29 @@ void DataCenter::mouseHoover(TP& position)
       PROPC->unlockDrawProp(drawProp);
    }
 }
+
+void DataCenter::setRecoverPoly(bool rcv)
+{
+   assert(NULL != _objectRecovery);
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      _objectRecovery->setPolyRecovery(rcv);
+   }
+   unlockTDT(dbLibDir, true);
+}
+
+void DataCenter::setRecoverWire(bool rcv)
+{
+   assert(NULL != _objectRecovery);
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      _objectRecovery->setWireRecovery(rcv);
+   }
+   unlockTDT(dbLibDir, true);
+}
+
 
 void DataCenter::openGlDraw(const CTM& layCTM)
 {
