@@ -77,6 +77,8 @@ public:
    void                       render(const CTM&);
    void                       drawFOnly();
    void                       mouseHoover(TP&);
+   void                       setRecoverPoly(bool);
+   void                       setRecoverWire(bool);
    void                       setCmdLayer(word layno) {_curcmdlay = layno;}
    word                       curCmdLay() const       {return _curcmdlay;}
    bool                       modified() const        {return _TEDLIB.modified();};
@@ -112,6 +114,7 @@ private:
    TdtMutexState              _tdtActMxState; //! The actual (current) mutex state of the main DB
    TdtMutexState              _tdtReqMxState; //! The required mutex state of the main DB
    tenderer::TopRend*         _cRenderer;    //! current renderer (in case VFBO rendering is in place)
+   laydata::ValidRecovery*    _objectRecovery;
 };
 
 //=============================================================================

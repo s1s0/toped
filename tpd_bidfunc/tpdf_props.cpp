@@ -1634,7 +1634,7 @@ void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
       bool val;
       if (from_string<bool>(val, value, std::boolalpha))
       {
-         PROPC->setHighlightOnHover(val);
+         DATC->setRecoverPoly(val);
          // send an event to update the property dialog
          wxCommandEvent eventTextOri(wxEVT_CANVAS_PARAMS);
          eventTextOri.SetId(tui::CPS_RECOVER_POLY);
@@ -1654,7 +1654,7 @@ void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
       bool val;
       if (from_string<bool>(val, value, std::boolalpha))
       {
-// TODO        PROPC->setHighlightOnHover(val);
+         DATC->setRecoverWire(val);
          // send an event to update the property dialog
          wxCommandEvent eventTextOri(wxEVT_CANVAS_PARAMS);
          eventTextOri.SetId(tui::CPS_RECOVER_WIRE);
