@@ -227,20 +227,23 @@ void layprop::LayoutGrid::Draw(const DrawProperties& drawprop, const real DBscal
 }
 
 //=============================================================================
-layprop::PropertyCenter::PropertyCenter()
+layprop::PropertyCenter::PropertyCenter() :
+   _drawprop          ( DEBUG_NEW DrawProperties() ),
+   _step              ( 1                          ),
+   _autopan           ( false                      ),
+   _zeroCross         ( false                      ),
+   _renderType        ( false                      ),
+   _boldOnHover       ( false                      ),
+   _recoverPoly       ( false                      ),
+   _recoverWire       ( false                      ),
+   _markerAngle       ( 0                          ),
+   _layselmask        ( laydata::_lmall            ),
+   _gdsLayMap         ( NULL                       ),
+   _cifLayMap         ( NULL                       ),
+   _oasLayMap         ( NULL                       )
 {
    setUU(1);
-   _step              = 1;
-   _markerAngle       = 0;
-   _autopan           = false;
-   _layselmask        = laydata::_lmall;
-   _gdsLayMap         = NULL;
-   _cifLayMap         = NULL;
-   _oasLayMap         = NULL;
-   _zeroCross         = false;
-   _boldOnHover  = false;
-   _drawprop          = DEBUG_NEW DrawProperties();
-   _renderType        = false;
+
 }
 
 //bool layprop::PropertyCenter::isLayerExist(word layno)
