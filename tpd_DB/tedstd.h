@@ -100,16 +100,14 @@ namespace laydata {
       shp_box        = 0x0004, // shape is a box
       shp_acute      = 0x0008, // acute angle
       shp_collinear  = 0x0010, // collinear wire
-      shp_shortends  = 0x0020, // wire with end segments shorter than the width
-      // critical
-      shp_cross      = 0x1000, // self crossing sequence
-      shp_width      = 0x2000, // wire with width bigger than MAX_WIRE_WIDTH
-      shp_null       = 0x4000, // 0 area - points are not forming a polygon
-      shp_exception  = 0x8000  // exception encountered during the shape checks
+      // ambiguous ( can be recovered eventually )
+      shp_cross      = 0x0100, // self crossing sequence
+      shp_shortends  = 0x0200, // wire with end segments shorter than the width
+      // critical  ( unrecoverable, will be rejected )
+      shp_null       = 0x0400, // 0 area - points are not forming a polygon
+      shp_width      = 0x0800, // wire with width bigger than MAX_WIRE_WIDTH
+      shp_exception  = 0x1000  // exception encountered during the shape checks
    } shape_status;
-
-   const unsigned shp_valid       = shp_cross; //
-   const unsigned shp_recoverable = shp_null; //
 
    class TdtData;
    class EditObject;
@@ -139,9 +137,8 @@ namespace laydata {
                            Validator(const PointVector& plist) : _status(shp_OK),
                                                             _plist(plist) {};
       virtual             ~Validator() {};
-      bool                 valid()           {return _status < shp_valid;}
-      bool                 recoverable()     {return _status < shp_recoverable;}
-      bool                 acceptable()      {return _status < shp_recoverable;}
+      bool                 valid()           {return _status < ambiguous();}
+      bool                 acceptable()      {return _status < critical();}
       unsigned             status()          {return _status;}
       bool                 box()             {return (0 != (_status & shp_box));}
       bool                 crossing()        {return (0 != (_status & shp_cross));}
@@ -151,6 +148,8 @@ namespace laydata {
       virtual std::string  failType() = 0;
       virtual ShapeList*   replacements() = 0;
    protected:
+      virtual shape_status critical()        {return ambiguous();}
+      shape_status         ambiguous()       {return shp_cross;}
       unsigned             _status;
       PointVector          _plist;
    };

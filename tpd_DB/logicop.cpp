@@ -810,6 +810,9 @@ bool logicop::CrossFix::recoverWire(pcollection& plycol)
    while (0 == centinel->visited()) centinel = centinel->next();
    // traverse the resulting points to get the wires
    traverseRecoverWire(centinel, plycol);
+   // There is a work still to be done here. We must validate the resulting
+   // wires - they could be "short-ended" hence must be converted to polygons.
+   // !The above must be done in the calling function!
    return true;
 }
 
