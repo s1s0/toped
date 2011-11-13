@@ -1083,7 +1083,7 @@ void laydata::TdtPoly::stretch(int bfactor, ShapeList** decure)
       decure[1]->push_back(*(slist->begin()));
       slist->clear(); delete slist;
    }
-   else if ( vsh.recoverable() && (!(laydata::shp_clock & vsh.status())) )
+   else if ( vsh.acceptable() && (!(laydata::shp_clock & vsh.status())) )
    {
       logicop::CrossFix fixingpoly(*res, true);
       try
@@ -1503,7 +1503,7 @@ PointVector laydata::TdtWire::shape2poly() const
    cdata.reserve(wcontour.csize());
    wcontour.getVectorData(cdata);
    ValidPoly check(cdata);
-   if (check.recoverable())
+   if (check.acceptable())
    {
       laydata::ShapeList* slist = check.replacements();
       assert(1 == slist->size());
@@ -2761,7 +2761,7 @@ laydata::ValidPoly::ValidPoly(PointVector& plist) :
 laydata::ShapeList* laydata::ValidPoly::replacements()
 {
    ShapeList* shpRecovered = DEBUG_NEW ShapeList();
-   assert(recoverable());
+   assert(acceptable());
    if (crossing())
    {
       assert(NULL != _shapeFix);
@@ -2774,7 +2774,7 @@ laydata::ShapeList* laydata::ValidPoly::replacements()
          for (pcollection::const_iterator CI = cut_shapes.begin(); CI != cut_shapes.end(); CI++)
          {
             laydata::ValidPoly check(**CI);
-            assert(check.valid());// otherwise go and fix _shapeFix->recover()!
+            assert(check.valid());// otherwise go and fix _shapeFix->recoverPoly()!
             PointVector npl = check.getValidated();
             if (check.box())
                shpRecovered->push_back(DEBUG_NEW laydata::TdtBox(npl[2], npl[0]));
@@ -2897,6 +2897,11 @@ std::string laydata::ValidPoly::failType()
    else if (_status & shp_null     ) return "NULL area polygon";
    else if (_status & shp_cross    ) return "Self-crossing polygon";
    else return "OK";
+}
+
+laydata::shape_status laydata::ValidPoly::critical()
+{
+   return _recovery ? shp_null : shp_cross;
 }
 
 laydata::ValidPoly::~ValidPoly()
@@ -3024,7 +3029,7 @@ void laydata::ValidWire::selfcrossing()
 laydata::ShapeList* laydata::ValidWire::replacements()
 {
    ShapeList* shpRecovered = DEBUG_NEW ShapeList();
-   assert(recoverable());
+   assert(acceptable());
    //TdtData *newShape = NULL;
    if (crossing())
    {
@@ -3038,9 +3043,30 @@ laydata::ShapeList* laydata::ValidWire::replacements()
          for (pcollection::const_iterator CI = cut_shapes.begin(); CI != cut_shapes.end(); CI++)
          {
             laydata::ValidWire check(**CI, _width);
-            assert(check.valid());// otherwise go and fix _shapeFix->recoverWire()!
             PointVector npl = check.getValidated();
-            shpRecovered->push_back(DEBUG_NEW laydata::TdtWire(npl, _width));
+            if (check.valid())
+            {
+               shpRecovered->push_back(DEBUG_NEW laydata::TdtWire(npl, _width));
+            }
+            else if (check.shortSegments())
+            {
+               laydata::ShapeList* w2p = wire2poly(npl, _width);
+               if (NULL == w2p)
+               {
+                  std::ostringstream ost;
+                  ost << "Wire check fails - End segments too short, can't generate a valid shape";
+                  tell_log(console::MT_ERROR, ost.str());
+               }
+               else
+               {
+                  for (laydata::ShapeList::const_iterator CS = w2p->begin(); CS != w2p->end(); CS++)
+                     shpRecovered->push_back(*CS);
+                  w2p->clear();
+                  delete w2p;
+               }
+            }
+            else
+               assert(false);// go and fix _shapeFix->recoverWire()!
             npl.clear();
             delete *CI;
          }
@@ -3049,10 +3075,8 @@ laydata::ShapeList* laydata::ValidWire::replacements()
    }
    else if (shortSegments())
    {
-      TdtData* intershape = DEBUG_NEW TdtWire(_plist, _width);
-      PointVector w2p = intershape->shape2poly();
-      delete intershape;
-      if (0 == w2p.size())
+      laydata::ShapeList* w2p = wire2poly(_plist, _width);
+      if (NULL == w2p)
       {
          std::ostringstream ost;
          ost << "Wire check fails - End segments too short, can't generate a valid shape";
@@ -3063,7 +3087,10 @@ laydata::ShapeList* laydata::ValidWire::replacements()
          std::ostringstream ost;
          ost << "Wire check fails - End segments too short, generating an equivalent polygon";
          tell_log(console::MT_WARNING, ost.str());
-         shpRecovered->push_back(DEBUG_NEW TdtPoly(w2p));
+         for (laydata::ShapeList::const_iterator CS = w2p->begin(); CS != w2p->end(); CS++)
+            shpRecovered->push_back(*CS);
+         w2p->clear();
+         delete w2p;
       }
    }
    else
@@ -3073,11 +3100,40 @@ laydata::ShapeList* laydata::ValidWire::replacements()
    return shpRecovered;
 }
 
-std::string laydata::ValidWire::failType() {
+laydata::ShapeList* laydata::ValidWire::wire2poly(const PointVector& plst, WireWidth width)
+{
+   unsigned lpsize = plst.size();
+   assert(lpsize);
+   int4b* lpdata = DEBUG_NEW int4b[lpsize*2];
+   for (unsigned i = 0; i < lpsize; i++)
+   {
+      lpdata[2*i  ] = plst[i].x();
+      lpdata[2*i+1] = plst[i].y();
+   }
+
+   PointVector cdata;
+   laydata::WireContour wcontour(lpdata, lpsize, _width);
+   cdata.reserve(wcontour.csize());
+   wcontour.getVectorData(cdata);
+   delete [] lpdata;
+   ValidPoly check(cdata);
+   if (check.acceptable())  return check.replacements();
+   else                     return NULL;
+}
+
+std::string laydata::ValidWire::failType()
+{
    if      (_status & shp_exception) return "Unable to verify the wire";
    else if (_status & shp_null     ) return "NULL area wire";
    else if (_status & shp_width    ) return "Wire width too big.";
+   else if (_status & shp_cross    ) return "Self-crossing wire";
+   else if (_status & shp_shortends) return "Short end segments";
    else return "OK";
+}
+
+laydata::shape_status laydata::ValidWire::critical()
+{
+   return _recovery ? shp_null : shp_cross;
 }
 
 laydata::ValidWire::~ValidWire()

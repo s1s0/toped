@@ -449,6 +449,8 @@ namespace laydata {
       virtual                     ~ValidPoly();
       virtual laydata::ShapeList*  replacements();
       virtual std::string          failType();
+   protected:
+      virtual shape_status         critical();
    private:
       friend void ValidRecovery::setPolyRecovery(bool);
       void                         angles();
@@ -465,11 +467,14 @@ namespace laydata {
       virtual                     ~ValidWire();
       virtual laydata::ShapeList*  replacements();
       virtual std::string          failType();
+   protected:
+      virtual shape_status         critical();
    private:
       friend void ValidRecovery::setWireRecovery(bool);
       void                         angles();
       void                         endSegments();
       void                         selfcrossing();
+      laydata::ShapeList*          wire2poly(const PointVector&, WireWidth);
       logicop::CrossFix*           _shapeFix;
       WireWidth                    _width;
       static bool                  _recovery;
