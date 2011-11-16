@@ -89,6 +89,7 @@ class TechEditorDialog : public wxDialog
       wxOwnerDrawnComboBox*   _layerLines;
       wxButton*	            _applyButton;
       wxButton*	            _cancelButton;
+      wxButton*	            _newLayerButton;
       wxButton*	            _newColorButton;
       wxButton*	            _newFillButton;
       wxButton*	            _newStyleButton;
@@ -98,6 +99,8 @@ class TechEditorDialog : public wxDialog
 
       wxTextCtrl*             _layerNumber;
       wxString                _layerNumberString;
+      wxTextCtrl*             _layerName;
+      wxString                _layerNameString;
 
       void        prepareColors();
       void        prepareFills();
@@ -108,6 +111,7 @@ class TechEditorDialog : public wxDialog
                   TechEditorDialog( wxWindow* parent,wxWindowID id = wxID_ANY);
                   ~TechEditorDialog();
       void        onLayerSelected(wxCommandEvent&);
+      void        OnLayerEditor(wxCommandEvent&);
       void        OnColorEditor(wxCommandEvent&);
       void        OnFillEditor(wxCommandEvent&);
       void        OnStyleEditor(wxCommandEvent&);

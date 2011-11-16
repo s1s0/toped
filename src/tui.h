@@ -67,7 +67,8 @@ namespace tui {
       ID_BTNOUTFILE     ,
       ID_BTNCONVERT     ,
       ID_TE_LAYER       ,
-      ID_BTN_TE_NUM
+      ID_BTN_TE_NUM     ,
+      ID_BTN_TE_NAME
    };
 
    typedef enum
