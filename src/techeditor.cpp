@@ -61,7 +61,7 @@ BEGIN_EVENT_TABLE(tui::TechEditorDialog, wxDialog)
 END_EVENT_TABLE()
 
 tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id)//, const wxString& title, const wxPoint& pos, const wxSize& size, long style )  
-:wxDialog( parent, id, wxT("Technology Editor"), wxDefaultPosition, wxSize(900, 300))//, title, pos, size, style )
+:wxDialog( parent, id, wxT("Technology Editor"), wxDefaultPosition, wxSize(900, 300)) , _curSelect(0)
 {
    wxSize size = GetSize();
 	wxBoxSizer *sizer1= DEBUG_NEW wxBoxSizer(wxVERTICAL);
@@ -185,13 +185,20 @@ void  tui::TechEditorDialog::OnChangeProperty(wxCommandEvent&)
 
 void  tui::TechEditorDialog::onLayerSelected(wxCommandEvent&)
 {
-   int selNumber = _layerList->GetSelection();
-   wxString layerName = _layerList->GetString(selNumber);
+   _curSelect = _layerList->GetSelection();
 
+   updateDialog(_curSelect);
+   FindWindow(BT_TECH_APPLY)->Enable(false);
+}
+
+void  tui::TechEditorDialog::updateDialog(int selectNum)
+{   
+   wxString layerName = _layerList->GetString(selectNum);
+   std::string layName = std::string(layerName.mb_str(wxConvUTF8));
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-      word lay_no = drawProp->getLayerNo(std::string(layerName.mb_str(wxConvUTF8)));
+      word lay_no = drawProp->getLayerNo(layName);
       //Set Layer Number
        wxString tempStr;
        tempStr<<lay_no;
@@ -233,9 +240,15 @@ void  tui::TechEditorDialog::onLayerSelected(wxCommandEvent&)
       {
          tell_log(console::MT_WARNING, "There is no appropriate line style");
       }
+
+      _curLayNo      = lay_no;
+      _curLayerName  = layName;
+      _curColorName  = colorName;
+      _curFillName   = fillName;
+      _curLineName   = lineName;
    }
    PROPC->unlockDrawProp(drawProp);
-   FindWindow(BT_TECH_APPLY)->Enable(false);
+
 }
 
 void tui::TechEditorDialog::updateData()
@@ -314,14 +327,15 @@ void tui::TechEditorDialog::prepareLines()
 }
 
 void tui::TechEditorDialog::OnApply(wxCommandEvent&)
-{
+{   
+ //  updateDialog(_curSelect);
    wxString ost;
-
-   wxString s_name      = _layerName->GetValue();
-   wxString s_number    = _layerNumber->GetValue();
-   wxString s_fill      = _layerFills->GetStringSelection();
-   wxString s_style     = _layerLines->GetStringSelection();
-   wxString s_color     = _layerColors->GetStringSelection();
+  
+   wxString s_name      = wxString(_curLayerName.c_str(), wxConvUTF8);
+   wxString s_number;   s_number << _curLayNo;
+   wxString s_fill      = wxString(_curFillName.c_str(), wxConvUTF8);
+   wxString s_style     = wxString(_curLineName.c_str(), wxConvUTF8);
+   wxString s_color     = wxString(_curColorName.c_str(), wxConvUTF8);
 
    unsigned long d_number;  s_number.ToULong(&d_number);
 
@@ -340,6 +354,7 @@ void tui::TechEditorDialog::OnApply(wxCommandEvent&)
    Console->parseCommand(ost);
    updateData();
    FindWindow(BT_TECH_APPLY)->Enable(false);
+   updateDialog(_curSelect);
 }
 
 void tui::ColorListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, int flags ) const
