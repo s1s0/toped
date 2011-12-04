@@ -87,7 +87,7 @@ tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id)//, con
             wxBoxSizer *hsizer1 = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Color") );
                _layerColors->Create(this,COLOR_COMBO ,wxEmptyString,
                    wxDefaultPosition, wxSize(size.x/3, 30),
-                  NULL,
+//                  NULL,
                   wxCB_READONLY //wxNO_BORDER | wxCB_READONLY
                   );
                hsizer1->Add(_layerColors, 0, wxALL | wxEXPAND, 5);
@@ -100,7 +100,7 @@ tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id)//, con
             wxBoxSizer *hsizer2 = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Fill") );
                _layerFills->Create(this,FILL_COMBO,wxEmptyString,
                    wxDefaultPosition, wxSize(size.x/3, 30),
-                  NULL,
+//                  NULL,
                   wxCB_READONLY //wxNO_BORDER | wxCB_READONLY
                   );
                hsizer2->Add(_layerFills, 0, wxALL | wxEXPAND, 5);
@@ -114,7 +114,7 @@ tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id)//, con
             wxBoxSizer *hsizer3 = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Line Style") );
                _layerLines->Create(this, LINE_COMBO,wxEmptyString,
                    wxDefaultPosition, wxSize(size.x/3, 30),
-                  NULL,
+//                  NULL,
                   wxCB_READONLY //wxNO_BORDER | wxCB_READONLY
                   );
                hsizer3->Add(_layerLines, 0, wxALL | wxEXPAND, 5);

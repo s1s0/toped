@@ -755,7 +755,7 @@ bool logicop::CrossFix::recoverPoly(pcollection& plycol)
       if ( (1 == collector->visited()) && (polycross::xyorder(collector->cp(), topRight->cp()) > 0) )
          topRight = collector->next();
    } while (collector != centinel);
-   centinel = collector;
+   centinel = topRight;
 
    pcollection lclcol; // local collection of the resulting shapes
    traverseRecoverPoly(centinel, lclcol, true);
@@ -876,7 +876,7 @@ bool logicop::CrossFix::checkInside(const PointVector& outside, const PointVecto
    bool shInside = true;
    for (PointVector::const_iterator CP = inside.begin(); CP != inside.end(); CP++)
    {
-      shInside &= polycross::pointInside(&(*CP), outside, true);
+      shInside &= polycross::pointInside(&(*CP), outside, false);
    }
    return shInside;
 }

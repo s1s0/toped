@@ -2805,7 +2805,7 @@ void laydata::ValidPoly::angles()
    real cAngle = 0.0;
    std::stack<real> angle_stack;
    bool prev_cleared = false;
-   while ((angle_stack.size() <= _plist.size()) && (2 < _plist.size()))
+   while ((angle_stack.size() <= (_plist.size()+1)) && (2 < _plist.size()))
    {
       bool eraseP1 = false;
       if (*cp1 == *cp2)
