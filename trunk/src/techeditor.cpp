@@ -66,9 +66,7 @@ tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id)//, con
    wxSize size = GetSize();
 	wxBoxSizer *sizer1= DEBUG_NEW wxBoxSizer(wxVERTICAL);
       wxBoxSizer *sizer2 = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
-         wxBoxSizer *hsizer0 = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Layers") );
          _layerList = DEBUG_NEW wxListBox(this, ID_TE_LAYER, wxDefaultPosition, wxSize(size.x/2, size.y-30));
-            hsizer0->Add(_layerList, 1, wxEXPAND, 0);
          wxBoxSizer *vsizer0 = DEBUG_NEW wxStaticBoxSizer( wxVERTICAL, this, wxT("Properties") );
             wxBoxSizer *hsizer4 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL);
                wxBoxSizer *hsizer5 = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Layer Number") );
@@ -127,7 +125,7 @@ tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id)//, con
          vsizer0->Add(hsizer1);
          vsizer0->Add(hsizer2);
          vsizer0->Add(hsizer3);
-      sizer2->Add(hsizer0, 1, wxEXPAND, 0);
+      sizer2->Add(_layerList, 1, wxEXPAND, 0);
       sizer2->Add(vsizer0, 1, wxEXPAND, 0);
       wxBoxSizer *sizer3 = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
       _applyButton  = DEBUG_NEW wxButton(this, tui::BT_TECH_APPLY, wxT("Apply"));
@@ -186,8 +184,8 @@ void  tui::TechEditorDialog::OnChangeProperty(wxCommandEvent&)
 void  tui::TechEditorDialog::onLayerSelected(wxCommandEvent&)
 {
    _curSelect = _layerList->GetSelection();
-
-   updateDialog(_curSelect);
+   if (wxNOT_FOUND != _curSelect)
+      updateDialog(_curSelect);
    FindWindow(BT_TECH_APPLY)->Enable(false);
 }
 
@@ -240,12 +238,6 @@ void  tui::TechEditorDialog::updateDialog(int selectNum)
       {
          tell_log(console::MT_WARNING, "There is no appropriate line style");
       }
-
-      _curLayNo      = lay_no;
-      _curLayerName  = layName;
-      _curColorName  = colorName;
-      _curFillName   = fillName;
-      _curLineName   = lineName;
    }
    PROPC->unlockDrawProp(drawProp);
 
@@ -253,7 +245,10 @@ void  tui::TechEditorDialog::updateDialog(int selectNum)
 
 void tui::TechEditorDialog::updateData()
 {
+   int currentSelection = _curSelect;
    prepareLayers();
+   _layerList->SetSelection(currentSelection);
+   _curSelect = currentSelection;
    prepareColors();
    prepareFills();
    prepareLines();
@@ -328,14 +323,13 @@ void tui::TechEditorDialog::prepareLines()
 
 void tui::TechEditorDialog::OnApply(wxCommandEvent&)
 {   
- //  updateDialog(_curSelect);
    wxString ost;
   
-   wxString s_name      = wxString(_curLayerName.c_str(), wxConvUTF8);
-   wxString s_number;   s_number << _curLayNo;
-   wxString s_fill      = wxString(_curFillName.c_str(), wxConvUTF8);
-   wxString s_style     = wxString(_curLineName.c_str(), wxConvUTF8);
-   wxString s_color     = wxString(_curColorName.c_str(), wxConvUTF8);
+   wxString s_name         = _layerName->GetValue();
+   wxString s_number       = _layerNumber->GetValue();
+   wxString s_fill         = _layerFills->GetStringSelection();
+   wxString s_style        = _layerLines->GetStringSelection();
+   wxString s_color        = _layerColors->GetStringSelection();
 
    unsigned long d_number;  s_number.ToULong(&d_number);
 
@@ -354,7 +348,7 @@ void tui::TechEditorDialog::OnApply(wxCommandEvent&)
    Console->parseCommand(ost);
    updateData();
    FindWindow(BT_TECH_APPLY)->Enable(false);
-   updateDialog(_curSelect);
+   updateDialog(_curSelect); // TODO remove this from here! We need an event from the second thread when the properties had been changed
 }
 
 void tui::ColorListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, int flags ) const
@@ -518,7 +512,6 @@ void tui::LineListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, i
    wxColour color(col.red(), col.green(), col.blue(), col.alpha());
    const layprop::LineSettings *line;
    wxRect r(rect);
-   wxBrush *brush;
    layprop::DrawProperties* drawProp;
    byte width;
    byte patscale;
@@ -537,7 +530,6 @@ void tui::LineListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, i
       int state;
 
 
-      int i = 0;
 
       int mask = 0x8000;
       int length = 0;
