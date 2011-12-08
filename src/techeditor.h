@@ -103,11 +103,6 @@ class TechEditorDialog : public wxDialog
       wxString                _layerNameString;
       //Data related to current selection
       int                     _curSelect;
-      word                    _curLayNo;
-      std::string             _curLayerName;
-      std::string             _curColorName;
-      std::string             _curFillName;
-      std::string             _curLineName;
 
       void        prepareColors();
       void        prepareFills();
