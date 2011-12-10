@@ -42,7 +42,7 @@
         (wxObject *) NULL \
     ),
 
-//#define RENDER_PROFILING
+#define RENDER_PROFILING
 //#define GDSCONVERT_PROFILING
 //#define PARSER_PROFILING
 
@@ -183,8 +183,8 @@ namespace console {
       void                 OnRenderON();
       void                 OnRenderOFF();
       void                 OnSize(wxSizeEvent& event);
-      void                 OnInitGauge(long int);
-      void                 OnGaugeRun(long int);
+      void                 OnInitGauge(wxFileOffset);
+      void                 OnGaugeRun(wxFileOffset);
       void                 OnCloseGauge();
    private:
       wxStaticBitmap*      _dbLamp;
@@ -205,7 +205,7 @@ class TpdPost {
                   TpdPost(wxWindow*);
       static void postMenuEvent(int);
       static void toped_status(console::TOPEDSTATUS_TYPE);
-      static void toped_status(console::TOPEDSTATUS_TYPE, long int);
+      static void toped_status(console::TOPEDSTATUS_TYPE, wxFileOffset);
       static void toped_status(console::TOPEDSTATUS_TYPE, std::string);
       static void toped_status(console::TOPEDSTATUS_TYPE, wxString);
       static void render_status(bool);
