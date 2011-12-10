@@ -287,8 +287,8 @@ console::TopedStatus::TopedStatus(wxWindow* parent) : wxStatusBar(parent, tui::I
 void console::TopedStatus::OnTopedStatus(wxCommandEvent& evt)
 {
    switch (evt.GetInt()) {
-      case console::TSTS_PRGRSBARON  : OnInitGauge(evt.GetExtraLong()); break;
-      case console::TSTS_PROGRESS    : OnGaugeRun(evt.GetExtraLong()); break;
+      case console::TSTS_PRGRSBARON  : OnInitGauge(*(static_cast<wxFileOffset*>(evt.GetClientData()))); break;
+      case console::TSTS_PROGRESS    : OnGaugeRun(*(static_cast<wxFileOffset*>(evt.GetClientData()))); break;
       case console::TSTS_PRGRSBAROFF : OnCloseGauge(); break;
       case console::TSTS_THREADON    : OnThreadON(evt.GetString()); break;
       case console::TSTS_THREADWAIT  : OnThreadWait(); break;
@@ -332,7 +332,7 @@ void console::TopedStatus::OnRenderOFF()
    Update();
 }
 
-void console::TopedStatus::OnInitGauge(long int init_val)
+void console::TopedStatus::OnInitGauge(wxFileOffset init_val)
 {
     wxRect rect;
     GetFieldRect(1, rect);
@@ -345,7 +345,7 @@ void console::TopedStatus::OnInitGauge(long int init_val)
       _progress = DEBUG_NEW wxGauge(this, wxID_ANY, init_val, wxPoint(rect.x, rect.y), wxSize(rect.width, rect.height));
 }
 
-void console::TopedStatus::OnGaugeRun(long int position)
+void console::TopedStatus::OnGaugeRun(wxFileOffset position)
 {
    if (NULL == _progress) return;
    int adj_position = (int)((real)position * _progressAdj);
@@ -409,12 +409,13 @@ void TpdPost::postMenuEvent(int eventID)
    wxPostEvent(_mainWindow, aMenuEvent);
 }
 
-void TpdPost::toped_status(console::TOPEDSTATUS_TYPE tstatus, long int indx)
+void TpdPost::toped_status(console::TOPEDSTATUS_TYPE tstatus, wxFileOffset indx)
 {
    if (NULL == _statusBar) return;
    wxCommandEvent eventSTATUSUPD(wxEVT_TPDSTATUS);
+   wxFileOffset* foPtr = DEBUG_NEW wxFileOffset(indx);
    eventSTATUSUPD.SetInt(tstatus);
-   eventSTATUSUPD.SetExtraLong(indx);
+   eventSTATUSUPD.SetClientData(foPtr);
    wxPostEvent(_statusBar, eventSTATUSUPD);
 }
 
