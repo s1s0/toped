@@ -34,7 +34,7 @@
 //#include "tedstd.h"
 
 int ciflex(void);
-int ciferror (char *s);
+int ciferror (const char *s);
 
 namespace CIFin {
 
