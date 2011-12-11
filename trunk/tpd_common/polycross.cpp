@@ -308,7 +308,7 @@ polycross::VPoint* polycross::VPoint::checkNreorder(VPoint*& pairedShape, bool s
    spV = prevCrossCouple->prev();
    while (*spV->cp() == *cp()) spV = spV->prev();
    snV = nextCrossCouple->next();
-   while (*snV->cp() == *cp()) snV = snV->next();
+   while ((*snV->cp() == *cp()) || (*snV->cp() == *spV->cp())) snV = snV->next();
 
    VPoint* pV = prevCross;
    int oriP, oriN;
