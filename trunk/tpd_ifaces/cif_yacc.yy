@@ -318,7 +318,7 @@ semiColon:
 %%
 
 /*-------------------------------------------------------------------------*/
-int ciferror (char *s)
+int ciferror (const char *s)
 {  /* Called by yyparse on error */
       std::ostringstream ost;
       ost << "line " << ciflloc.first_line << ": col " << ciflloc.first_column
