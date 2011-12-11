@@ -112,7 +112,7 @@ class TechEditorDialog : public wxDialog
       void        updateDialog(int selectNum);
    public:
                   TechEditorDialog( wxWindow* parent,wxWindowID id = wxID_ANY);
-                  ~TechEditorDialog();
+      virtual    ~TechEditorDialog();
       void        onLayerSelected(wxCommandEvent&);
       void        OnLayerEditor(wxCommandEvent&);
       void        OnColorEditor(wxCommandEvent&);

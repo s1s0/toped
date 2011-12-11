@@ -604,7 +604,7 @@ void logicop::CrossFix::reorderCross()
    unsigned loopcount;
    for(loopcount = 0; loopcount < shapeNum; loopcount++)
    {
-      // for every non-crossing point which has cross point neightbors and
+      // for every non-crossing point which has cross point neighbors and
       // all 3 points coincide
       if (looper->visited() &&
           (!looper->prev()->visited() && !looper->next()->visited()) &&
