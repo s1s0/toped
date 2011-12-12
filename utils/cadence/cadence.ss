@@ -630,5 +630,5 @@
   ;(debug-print-packets "d:\\toped\\vanguard\\display.drf")
   ;(debug-print-layers "d:\\toped\\vanguard\\vis40cb.tf")
    ;(convert (list "d:\\toped\\vanguard\\tell.tll" "d:\\toped\\vanguard\\display.drf" "d:\\toped\\vanguard\\vis40cb.tf"))
-   (convert (list "d:\\toped\\v2\\tell.tll" "d:\\toped\\v2\\display.drf" "d:\\toped\\v2\\BCD30Lib.tf"))
+   ;(convert (list "d:\\toped\\v2\\tell.tll" "d:\\toped\\v2\\display.drf" "d:\\toped\\v2\\BCD30Lib.tf"))
 )
