@@ -102,8 +102,8 @@ void logicop::logic::findCrossingPoints()
    if (1 == _crossp)
       throw EXPTNpolyCross("Only one crossing point found. Can't generate polygons");
    delete _eq;
-   _shape1 = _segl1->dump_points();
-   _shape2 = _segl2->dump_points();
+   _shape1 = _segl1->dump_points(true, _segl2);
+   _shape2 = _segl2->dump_points(true, _segl1);
    reorderCross();
    REPORT_POLY_DEBUG(_shape1, "After reorderCross")
    REPORT_POLY_DEBUG(_shape2, "After reorderCross")
@@ -438,8 +438,8 @@ PointVector* logicop::hole2simple(const PointVector& outside, const PointVector&
    seg2.normalize(inside, true);
    //
    // dump the new polygons in VList terms
-   polycross::VPoint* outshape = seg1.dump_points();
-   polycross::VPoint*  inshape = seg2.dump_points();
+   polycross::VPoint* outshape = seg1.dump_points(true, &seg2);
+   polycross::VPoint*  inshape = seg2.dump_points(true, &seg1);
    // traverse and form the resulting shape
    polycross::VPoint* centinel = outshape;
    PointVector *shgen = DEBUG_NEW PointVector();
@@ -571,7 +571,7 @@ void logicop::CrossFix::findCrossingPoints()
    _crossp = _segl->normalize(_poly, _looped);
 //   if ((0 == _crossp) || (!_looped)) return;
    if (0 == _crossp) return;
-   _shape = _segl->dump_points(_looped);
+   _shape = _segl->dump_points(_looped, _segl);
    REPORT_POLY_DEBUG(_shape, "Line 575")
    reorderCross();
    cleanRedundant();

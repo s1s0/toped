@@ -38,8 +38,10 @@ namespace polycross
    class XQ;
    class BindCollection;
    class TEvent;
+   class polysegment;
    typedef std::set<unsigned> ThreadList;
    typedef enum {_endE, _modifyE, _beginE, _crossE} EventTypes;
+   typedef std::vector<polysegment*> Segments;
 
    int xyorder(const TP*, const TP*);
    int orientation(const TP*, const TP*, const TP*);
@@ -138,7 +140,7 @@ namespace polycross
          CPoint*           insertCrossPoint(const TP*);
          BPoint*           insertBindPoint(const TP* pnt);
          unsigned          normalize(const TP*, const TP*);
-         void              dump_points(polycross::VPoint*&);
+         void              dump_points(polycross::VPoint*&, const Segments&);
          bool              operator == (const polysegment&) const;
          unsigned          threadID() const           {return _threadID;}
          void              set_threadID(unsigned ID)  {_threadID = ID;}
@@ -161,13 +163,12 @@ namespace polycross
    class segmentlist
    {
       public:
-         typedef std::vector<polysegment*> Segments;
          segmentlist(const PointVector&, byte, bool);
          ~segmentlist();
          polysegment*      operator [](unsigned i) const {return _segs[i];};
          unsigned          size() const {return _segs.size();};
          unsigned          normalize(const PointVector&, bool);
-         VPoint*           dump_points(bool looped = true);
+         VPoint*           dump_points(bool looped, const segmentlist*);
          BPoint*           insertBindPoint(unsigned segno, const TP* point);
          const PointVector* originalPL() const {return _originalPL;}
       private:
