@@ -492,7 +492,7 @@ here it includes the coinciding or partially coinciding segments. It is rather
 a sanity check here for double crossing points, but BO algo implementation is
 producing such cases exactly when segments partially coincides.
 */
-void polycross::polysegment::dump_points(polycross::VPoint*& vlist)
+void polycross::polysegment::dump_points(polycross::VPoint*& vlist, const polycross::Segments& allCSegs)
 {
    // for all left points - create a new VPoint
    vlist = DEBUG_NEW VPoint(_lP, vlist);
@@ -522,15 +522,27 @@ void polycross::polysegment::dump_points(polycross::VPoint*& vlist)
       else
       {
 #ifdef BO2_DEBUG
-         printf("(<><><><><> Double cross points on segmets %i and %i)\n", _edge, (*CCPA)->link()->edge() );
+         printf("(<><><><><> Double cross points on segments %i and %i)\n", _edge, (*CCPA)->link()->edge() );
 #endif
-         // double point found - not going to be used and shall be removed
-         // to avoid leakages
-		 //FIXME -> this is a leakage, but it must be cleaned-up alltogether with its
-		 // counterpart. If you delete it here alnone, the tool will crash randomly
-		 // further down thw line 
-//         delete (*CCPA);  
+         // double cross point found - not going to be used and shall be removed
+         // to avoid leakages and side effects. The thing is that its counterpart
+         // also must be removed and it must be retrieved from the list of
+         // crossing points in the opposite segment. Remember ? - points are not
+         // dumped yet, that's what we're doing here.
+         crossCList* ccPoints = &(allCSegs[(*CCPA)->link()->edge()]->_crossPoints);
+         CCPB = ccPoints->begin();
+         while (CCPB != ccPoints->end())
+            if ((*CCPB) == (*CCPA)->link())
+            {
+               assert((*CCPA) == (*CCPB)->link());
+               break;
+            }
+            else CCPB++;
+         assert(CCPB != ccPoints->end());
+         delete (*CCPA);
+         delete (*CCPB);
          CCPA = _crossPoints.erase(CCPA);
+         ccPoints->erase(CCPB);
       }
    }
 }
@@ -598,14 +610,14 @@ unsigned polycross::segmentlist::normalize(const PointVector& plst, bool looped)
    return numcross;
 }
 
-polycross::VPoint* polycross::segmentlist::dump_points(bool looped)
+polycross::VPoint* polycross::segmentlist::dump_points(bool looped, const segmentlist* cSegs)
 {
    VPoint* vlist = NULL;
 #ifdef BO2_DEBUG
       printf("---------------Crossing points found-----------\n");
 #endif
    for (unsigned i = 0; i < _segs.size(); i++)
-      _segs[i]->dump_points(vlist);
+      _segs[i]->dump_points(vlist, cSegs->_segs);
    if (!looped)
       vlist = DEBUG_NEW VPoint(_segs[_segs.size()-1]->rP(), vlist);
    polycross::VPoint* lastV = vlist;
