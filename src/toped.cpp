@@ -1004,12 +1004,12 @@ void tui::TopedFrame::OnTDTRead(wxCommandEvent& evt)
                      dbfext, tpdfOPEN);
    if (wxID_OK == dlg2.ShowModal())
    {
-      wxString filename = dlg2.GetFilename();
+      wxString filename = dlg2.GetPath();
       wxString ost;
-      ost << wxT("tdtread(\"") << dlg2.GetDirectory() << wxT("/") << dlg2.GetFilename() << wxT("\");");
+      ost << wxT("tdtread(\"") << dlg2.GetDirectory() << wxT("/") << dlg2.GetPath() << wxT("\");");
       Console->parseCommand(ost);
       wxString ost1;
-//      ost1 << wxT("File ") << dlg2.GetFilename() << wxT(" loaded");
+//      ost1 << wxT("File ") << dlg2.GetPath() << wxT(" loaded");
 //      SetStatusText(ost1);
       SetTitle(dlg2.GetFilename());
    }
@@ -1024,9 +1024,9 @@ void tui::TopedFrame::OnTDTLoadLib(wxCommandEvent& evt)
       tpdfOPEN);
    if (wxID_OK == dlg2.ShowModal())
    {
-      wxString filename = dlg2.GetFilename();
+      wxString filename = dlg2.GetPath();
       wxString ost;
-      ost << wxT("loadlib(\"") << dlg2.GetDirectory() << wxT("/") << dlg2.GetFilename() << wxT("\");");
+      ost << wxT("loadlib(\"") << dlg2.GetDirectory() << wxT("/") << dlg2.GetPath() << wxT("\");");
       Console->parseCommand(ost);
       wxString ost1;
       SetTitle(dlg2.GetFilename());
@@ -1063,9 +1063,9 @@ void tui::TopedFrame::OnTELLRead(wxCommandEvent& evt)
       tpdfOPEN);
    if (wxID_OK == dlg2.ShowModal())
    {
-      wxString filename = dlg2.GetFilename();
+      wxString filename = dlg2.GetPath();
       wxString ost;
-      ost << wxT("#include \"") << dlg2.GetDirectory() << wxT("/") << dlg2.GetFilename() << wxT("\";");
+      ost << wxT("#include \"") << dlg2.GetDirectory() << wxT("/") << dlg2.GetPath() << wxT("\";");
       Console->parseCommand(ost);
 //      SetStatusText(dlg2.GetFilename() + wxT(" parsed"));
    }
@@ -1082,12 +1082,12 @@ void tui::TopedFrame::OnGDSRead(wxCommandEvent& WXUNUSED(event))
    if (wxID_OK == dlg2.ShowModal())
    {
       SetStatusText(wxT("Parsing GDS file..."));
-      wxString filename = dlg2.GetFilename();
+      wxString filename = dlg2.GetPath();
       wxString ost;
-      ost << wxT("gdsread(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\");");
+      ost << wxT("gdsread(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetPath() << wxT("\");");
       Console->parseCommand(ost);
 //      wxString ost1;
-//      ost1 << wxT("Stream ") << dlg2.GetFilename() << wxT(" loaded");
+//      ost1 << wxT("Stream ") << dlg2.GetPath() << wxT(" loaded");
 //      SetStatusText(ost1);
    }
    else SetStatusText(wxT("Parsing aborted"));
@@ -1404,13 +1404,13 @@ void tui::TopedFrame::OnGDSimport(wxCommandEvent& WXUNUSED(event))
       SetStatusText(wxT("Parsing aborted")); return;
    }
    SetStatusText(wxT("Importing GDS file..."));
-   wxString filename = dlg2.GetFilename();
+   wxString filename = dlg2.GetPath();
    wxString ost_int;
-   ost_int << wxT("gdsread(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\")");
+   ost_int << wxT("gdsread(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetPath() << wxT("\")");
    wxString ost;
    ost << wxT("gdsimport(") << ost_int << wxT(", getgdslaymap(true), true, false );gdsclose();");
    Console->parseCommand(ost);
-//   SetStatusText(wxT("Stream ")+dlg2.GetFilename()+wxT(" imported"));
+//   SetStatusText(wxT("Stream ")+dlg2.GetPath()+wxT(" imported"));
 }
 
 void tui::TopedFrame::OnCIFimport(wxCommandEvent& WXUNUSED(event))
@@ -1424,13 +1424,13 @@ void tui::TopedFrame::OnCIFimport(wxCommandEvent& WXUNUSED(event))
       SetStatusText(wxT("Parsing aborted")); return;
    }
    SetStatusText(wxT("Importing CIF file..."));
-   wxString filename = dlg2.GetFilename();
+   wxString filename = dlg2.GetPath();
    wxString ost_int;
-   ost_int << wxT("cifread(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\")");
+   ost_int << wxT("cifread(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetPath() << wxT("\")");
    wxString ost;
    ost << wxT("cifimport(") << ost_int << wxT(", getciflaymap(true), true, false, 0.0 );cifclose();");
    Console->parseCommand(ost);
-//   SetStatusText(wxT("Stream ")+dlg2.GetFilename()+wxT(" imported"));
+//   SetStatusText(wxT("Stream ")+dlg2.GetPath()+wxT(" imported"));
 }
 
 void tui::TopedFrame::OnGDSexportLIB(wxCommandEvent& WXUNUSED(event)) {
@@ -1558,9 +1558,9 @@ void tui::TopedFrame::OnCIFRead(wxCommandEvent& WXUNUSED(event))
    wxFileDialog dlg2(this, wxT("Select a file"), wxT(""), wxT(""), dbfext, tpdfOPEN);
    if (wxID_OK == dlg2.ShowModal()) {
       SetStatusText(wxT("Parsing CIF file..."));
-      wxString filename = dlg2.GetFilename();
+      wxString filename = dlg2.GetPath();
       wxString ost;
-      ost << wxT("cifread(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\");");
+      ost << wxT("cifread(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetPath() << wxT("\");");
       Console->parseCommand(ost);
    }
    else SetStatusText(wxT("Parsing aborted"));
@@ -1697,9 +1697,9 @@ void tui::TopedFrame::OnOASRead(wxCommandEvent& WXUNUSED(event))
    if (wxID_OK == dlg2.ShowModal())
    {
       SetStatusText(wxT("Parsing Oasis file..."));
-      wxString filename = dlg2.GetFilename();
+      wxString filename = dlg2.GetPath();
       wxString ost;
-      ost << wxT("oasisread(\"") << dlg2.GetDirectory() << wxT("/") << dlg2.GetFilename() << wxT("\");");
+      ost << wxT("oasisread(\"") << dlg2.GetDirectory() << wxT("/") << dlg2.GetPath() << wxT("\");");
       Console->parseCommand(ost);
    }
    else SetStatusText(wxT("Parsing aborted"));
@@ -1716,13 +1716,13 @@ void tui::TopedFrame::OnOASimport(wxCommandEvent& WXUNUSED(event))
       SetStatusText(wxT("Parsing aborted")); return;
    }
    SetStatusText(wxT("Importing Oasis file..."));
-   wxString filename = dlg2.GetFilename();
+   wxString filename = dlg2.GetPath();
    wxString ost_int;
-   ost_int << wxT("oasisread(\"") << dlg2.GetDirectory() << wxT("/") << dlg2.GetFilename() << wxT("\")");
+   ost_int << wxT("oasisread(\"") << dlg2.GetDirectory() << wxT("/") << dlg2.GetPath() << wxT("\")");
    wxString ost;
    ost << wxT("oasisimport(") << ost_int << wxT(", getoasislaymap(true), true, false );oasisclose();");
    Console->parseCommand(ost);
-//   SetStatusText(wxT("Stream ")+dlg2.GetFilename()+wxT(" imported"));
+//   SetStatusText(wxT("Stream ")+dlg2.GetPath()+wxT(" imported"));
 }
 
 void tui::TopedFrame::OnOAStranslate(wxCommandEvent& WXUNUSED(event))
