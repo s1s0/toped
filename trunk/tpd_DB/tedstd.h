@@ -274,7 +274,7 @@ namespace auxdata {
  */
 class InputDBFile {
    public:
-                           InputDBFile( wxString fileName, bool _forceSeek);
+                           InputDBFile( const wxString& fileName, bool _forceSeek);
       virtual             ~InputDBFile();
       bool                 readStream(void*, size_t, bool updateProgress = false);
       size_t               readTextStream(char*, size_t);
@@ -404,7 +404,7 @@ typedef SGHierTree<ForeignCell> ForeignCellTree;
 typedef std::list<ForeignCell*> ForeignCellList;
 class ForeignDbFile : public InputDBFile {
    public:
-                           ForeignDbFile(wxString, bool);
+                           ForeignDbFile(const wxString&, bool);
       virtual             ~ForeignDbFile();
       bool                 reopenFile();
       void                 setPosition(wxFileOffset);

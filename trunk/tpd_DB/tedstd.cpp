@@ -92,7 +92,7 @@ PSegment* PSegment::parallel(TP p)
  * of the class.
  * @param fileName - the fully qualified filename - OS dependent
  */
-InputDBFile::InputDBFile( wxString fileName, bool forceSeek) :
+InputDBFile::InputDBFile( const wxString& fileName, bool forceSeek) :
       _inStream      (      NULL ),
       _gziped        (     false ),
       _ziped         (     false ),
@@ -175,6 +175,7 @@ InputDBFile::InputDBFile( wxString fileName, bool forceSeek) :
       info << "File "<< _fileName <<" can NOT be opened";
       _status = false;
       delete _inStream;
+      _inStream = NULL;
       return;
    }
    _fileLength = _inStream->GetLength();
@@ -1085,7 +1086,7 @@ laydata::WireContourAux::~WireContourAux()
  * of the class.
  * @param fileName - the fully qualified filename - OS dependent
  */
-ForeignDbFile::ForeignDbFile(wxString fileName, bool forceSeek) : InputDBFile(fileName, forceSeek),
+ForeignDbFile::ForeignDbFile(const wxString& fileName, bool forceSeek) : InputDBFile(fileName, forceSeek),
       _hierTree      (      NULL ),
       _convLength    (         0 )
 {

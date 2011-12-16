@@ -93,7 +93,8 @@ bool DataCenter::GDSparse(std::string filename)
 #ifdef GDSCONVERT_PROFILING
       HiResTimer profTimer;
 #endif
-      AGDSDB = DEBUG_NEW GDSin::GdsInFile(wxString(filename.c_str(), wxConvUTF8));
+      wxString fileNameWx(filename.c_str(),wxConvUTF8);
+      AGDSDB = DEBUG_NEW GDSin::GdsInFile(fileNameWx);
 #ifdef GDSCONVERT_PROFILING
       profTimer.report("Time elapsed for GDS parse: ");
 #endif

@@ -215,7 +215,7 @@ namespace GDSin {
    ******************************************************************************/
    class   GdsInFile : public ForeignDbFile {
       public:
-                              GdsInFile(wxString);
+                              GdsInFile(const wxString&);
          virtual             ~GdsInFile();
          bool                 getNextRecord();
          GdsStructure*        getStructure(const std::string);
