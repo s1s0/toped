@@ -183,8 +183,8 @@ namespace console {
       void                 OnRenderON();
       void                 OnRenderOFF();
       void                 OnSize(wxSizeEvent& event);
-      void                 OnInitGauge(wxFileOffset);
-      void                 OnGaugeRun(wxFileOffset);
+      void                 OnInitGauge(wxFileOffset*);
+      void                 OnGaugeRun(wxFileOffset*);
       void                 OnCloseGauge();
    private:
       wxStaticBitmap*      _dbLamp;

@@ -287,15 +287,15 @@ console::TopedStatus::TopedStatus(wxWindow* parent) : wxStatusBar(parent, tui::I
 void console::TopedStatus::OnTopedStatus(wxCommandEvent& evt)
 {
    switch (evt.GetInt()) {
-      case console::TSTS_PRGRSBARON  : OnInitGauge(*(static_cast<wxFileOffset*>(evt.GetClientData()))); break;
-      case console::TSTS_PROGRESS    : OnGaugeRun(*(static_cast<wxFileOffset*>(evt.GetClientData()))); break;
+      case console::TSTS_PRGRSBARON  : OnInitGauge(static_cast<wxFileOffset*>(evt.GetClientData())); break;
+      case console::TSTS_PROGRESS    : OnGaugeRun(static_cast<wxFileOffset*>(evt.GetClientData())); break;
       case console::TSTS_PRGRSBAROFF : OnCloseGauge(); break;
       case console::TSTS_THREADON    : OnThreadON(evt.GetString()); break;
       case console::TSTS_THREADWAIT  : OnThreadWait(); break;
       case console::TSTS_THREADOFF   : OnThreadOFF(); break;
       case console::TSTS_RENDERON    : OnRenderON(); break;
       case console::TSTS_RENDEROFF   : OnRenderOFF(); break;
-      default: assert(false);
+      default: assert(false); break;
    }
 }
 
@@ -332,24 +332,27 @@ void console::TopedStatus::OnRenderOFF()
    Update();
 }
 
-void console::TopedStatus::OnInitGauge(wxFileOffset init_val)
+void console::TopedStatus::OnInitGauge(wxFileOffset* init_val)
 {
     wxRect rect;
     GetFieldRect(1, rect);
-    if (init_val > ((long) 0x7FFFFFF))
+    wxFileOffset initVal = *init_val;
+    delete init_val;
+    if (initVal > ((long) 0x7FFFFFF))
     {
-      _progressAdj = (real) ((long) 0x7ffffff) / ((real)init_val);
+      _progressAdj = (real) ((long) 0x7ffffff) / ((real)initVal);
       _progress = DEBUG_NEW wxGauge(this, wxID_ANY, ((int) 0x7ffffff), wxPoint(rect.x, rect.y), wxSize(rect.width, rect.height));
     }
     else
-      _progress = DEBUG_NEW wxGauge(this, wxID_ANY, init_val, wxPoint(rect.x, rect.y), wxSize(rect.width, rect.height));
+      _progress = DEBUG_NEW wxGauge(this, wxID_ANY, initVal, wxPoint(rect.x, rect.y), wxSize(rect.width, rect.height));
 }
 
-void console::TopedStatus::OnGaugeRun(wxFileOffset position)
+void console::TopedStatus::OnGaugeRun(wxFileOffset* position)
 {
    if (NULL == _progress) return;
-   int adj_position = (int)((real)position * _progressAdj);
+   int adj_position = (int)((real)(*position) * _progressAdj);
    _progress->SetValue(adj_position);
+   delete position;
 }
 
 void console::TopedStatus::OnCloseGauge()
@@ -809,7 +812,7 @@ void console::TELLFuncList::OnCommand(wxCommandEvent& event)
    {
       case console::FT_FUNCTION_ADD:addFunc(event.GetString(), event.GetClientData()); break;
       case console::FT_FUNCTION_SORT:SortItems(wxListCompareFunction,0); break;
-      default: assert(false);
+      default: assert(false); break;
    }
 }
 
