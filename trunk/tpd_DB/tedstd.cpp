@@ -109,7 +109,7 @@ InputDBFile::InputDBFile( const wxString& fileName, bool forceSeek) :
    wxFileName wxImportFN(fileName);
    wxImportFN.Normalize();
    _fileName = wxImportFN.GetFullPath();
-   if (wxImportFN.IsOk())
+   if (wxImportFN.IsOk() && wxImportFN.FileExists())
    {
       wxString theExtention = wxImportFN.GetExt();
       _gziped = (wxT("gz") == wxImportFN.GetExt());
@@ -342,23 +342,27 @@ InputTdtFile::InputTdtFile( wxString fileName, laydata::TdtLibDir* tedlib ) :
       InputDBFile(fileName, true),
       _TEDLIB     (tedlib)
 {
-   try
+   if (status())
    {
-      getFHeader();
-   }
-   catch (EXPTNreadTDT&)
-   {
-      closeStream();
-      setStatus(false);
-   }
-   bool versionOk = (0 ==_revision) &&
-                    (6 < _subrevision) && (11 > _subrevision);
-   if (!versionOk)
-   {
-      std::ostringstream ost;
-      ost << "TDT format revision not supported: 0.7 - 0.9 expected";
-      tell_log(console::MT_ERROR,ost.str());
-      setStatus(versionOk);
+      try
+      {
+         getFHeader();
+      }
+      catch (EXPTNreadTDT&)
+      {
+         closeStream();
+         setStatus(false);
+         return;
+      }
+      bool versionOk = (0 ==_revision) &&
+                       (6 < _subrevision) && (11 > _subrevision);
+      if (!versionOk)
+      {
+         std::ostringstream ost;
+         ost << "TDT format revision not supported: 0.7 - 0.9 expected";
+         tell_log(console::MT_ERROR,ost.str());
+         setStatus(versionOk);
+      }
    }
 }
 
