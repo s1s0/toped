@@ -1006,7 +1006,7 @@ void tui::TopedFrame::OnTDTRead(wxCommandEvent& evt)
    {
       wxString filename = dlg2.GetPath();
       wxString ost;
-      ost << wxT("tdtread(\"") << dlg2.GetDirectory() << wxT("/") << dlg2.GetPath() << wxT("\");");
+      ost << wxT("tdtread(\"") << filename << wxT("\");");
       Console->parseCommand(ost);
       wxString ost1;
 //      ost1 << wxT("File ") << dlg2.GetPath() << wxT(" loaded");
@@ -1026,7 +1026,7 @@ void tui::TopedFrame::OnTDTLoadLib(wxCommandEvent& evt)
    {
       wxString filename = dlg2.GetPath();
       wxString ost;
-      ost << wxT("loadlib(\"") << dlg2.GetDirectory() << wxT("/") << dlg2.GetPath() << wxT("\");");
+      ost << wxT("loadlib(\"") << filename << wxT("\");");
       Console->parseCommand(ost);
       wxString ost1;
       SetTitle(dlg2.GetFilename());
@@ -1065,7 +1065,7 @@ void tui::TopedFrame::OnTELLRead(wxCommandEvent& evt)
    {
       wxString filename = dlg2.GetPath();
       wxString ost;
-      ost << wxT("#include \"") << dlg2.GetDirectory() << wxT("/") << dlg2.GetPath() << wxT("\";");
+      ost << wxT("#include \"") << filename << wxT("\";");
       Console->parseCommand(ost);
 //      SetStatusText(dlg2.GetFilename() + wxT(" parsed"));
    }
@@ -1084,7 +1084,7 @@ void tui::TopedFrame::OnGDSRead(wxCommandEvent& WXUNUSED(event))
       SetStatusText(wxT("Parsing GDS file..."));
       wxString filename = dlg2.GetPath();
       wxString ost;
-      ost << wxT("gdsread(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetPath() << wxT("\");");
+      ost << wxT("gdsread(\"") << filename << wxT("\");");
       Console->parseCommand(ost);
 //      wxString ost1;
 //      ost1 << wxT("Stream ") << dlg2.GetPath() << wxT(" loaded");
@@ -1152,7 +1152,7 @@ void tui::TopedFrame::OnTDTSaveAs(wxCommandEvent& WXUNUSED(event)) {
       }
 
       wxString ost;
-      ost << wxT("tdtsaveas(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\");");
+      ost << wxT("tdtsaveas(\"") << filename << wxT("\");");
       Console->parseCommand(ost);
 //      SetStatusText(wxT("Design saved in file: ")+dlg2.GetFilename());
    }
@@ -1174,7 +1174,7 @@ void tui::TopedFrame::OnPropSave(wxCommandEvent& WXUNUSED(event))
       }
 
       wxString ost;
-      ost << wxT("propsave(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename() << wxT("\");");
+      ost << wxT("propsave(\"") << filename << wxT("\");");
       Console->parseCommand(ost);
 //      SetStatusText(wxT("Design saved in file: ")+dlg2.GetFilename());
    }
@@ -1187,12 +1187,10 @@ void tui::TopedFrame::OnTDTSnapshot(wxCommandEvent& WXUNUSED(event))
                      wxT("Targa files |*.tga"),
                          tpdfSAVE);
    if (wxID_OK != dlg2.ShowModal()) return;
-   wxString filename;
-   filename << dlg2.GetDirectory() << wxT("/") << dlg2.GetFilename();
-//   wxString fname = dlg2.GetPath();
+   wxString filename = dlg2.GetPath();
    if(!checkFileOverwriting(filename)) return;
 
-   // Note the pragmas below. It won't create a proper targa file whithout them!
+   // Note the pragmas below. It won't create a proper targa file without them!
    // See the note in LayoutCanvas::snapshot(...)
 #pragma pack(push,1)
    typedef struct {
@@ -1406,7 +1404,7 @@ void tui::TopedFrame::OnGDSimport(wxCommandEvent& WXUNUSED(event))
    SetStatusText(wxT("Importing GDS file..."));
    wxString filename = dlg2.GetPath();
    wxString ost_int;
-   ost_int << wxT("gdsread(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetPath() << wxT("\")");
+   ost_int << wxT("gdsread(\"") << filename << wxT("\")");
    wxString ost;
    ost << wxT("gdsimport(") << ost_int << wxT(", getgdslaymap(true), true, false );gdsclose();");
    Console->parseCommand(ost);
@@ -1426,7 +1424,7 @@ void tui::TopedFrame::OnCIFimport(wxCommandEvent& WXUNUSED(event))
    SetStatusText(wxT("Importing CIF file..."));
    wxString filename = dlg2.GetPath();
    wxString ost_int;
-   ost_int << wxT("cifread(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetPath() << wxT("\")");
+   ost_int << wxT("cifread(\"") << filename << wxT("\")");
    wxString ost;
    ost << wxT("cifimport(") << ost_int << wxT(", getciflaymap(true), true, false, 0.0 );cifclose();");
    Console->parseCommand(ost);
@@ -1446,9 +1444,7 @@ void tui::TopedFrame::OnGDSexportLIB(wxCommandEvent& WXUNUSED(event)) {
          return;
       }
       wxString ost;
-      ost << wxT("gdsexport(getgdslaymap(false), \"")
-          << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename()
-          << wxT("\", false);");
+      ost << wxT("gdsexport(getgdslaymap(false), \"") << filename << wxT("\", false);");
       Console->parseCommand(ost);
 //      SetStatusText(wxT("Design exported to: ")+dlg2.GetFilename());
    }
@@ -1469,9 +1465,7 @@ void tui::TopedFrame::OnCIFexportLIB(wxCommandEvent& WXUNUSED(event))
          return;
       }
       wxString ost;
-      ost << wxT("cifexport(getciflaymap(false), \"")
-            << dlg2.GetDirectory() << wxT("/") <<dlg2.GetFilename()
-            << wxT("\", false);");
+      ost << wxT("cifexport(getciflaymap(false), \"") << filename << wxT("\", false);");
       Console->parseCommand(ost);
 //      SetStatusText(wxT("Design exported to: ")+dlg2.GetFilename());
    }
@@ -1527,7 +1521,7 @@ void tui::TopedFrame::OnGDSexportCELL(wxCommandEvent& WXUNUSED(event))
                << cellname.c_str() << wxT("\" , ")
                << (recur ? wxT("true") : wxT("false")) << wxT(",")
                << wxlaymap << wxT(", \"")
-               << (dlg2.GetDirectory()).c_str() << wxT("/") <<(dlg2.GetFilename()).c_str()
+               << filename
                << wxT("\", false);");
             if (NULL != laymap2save)
                ost << wxT("setgdslaymap(")
@@ -1560,7 +1554,7 @@ void tui::TopedFrame::OnCIFRead(wxCommandEvent& WXUNUSED(event))
       SetStatusText(wxT("Parsing CIF file..."));
       wxString filename = dlg2.GetPath();
       wxString ost;
-      ost << wxT("cifread(\"") << dlg2.GetDirectory() << wxT("/") <<dlg2.GetPath() << wxT("\");");
+      ost << wxT("cifread(\"") << filename << wxT("\");");
       Console->parseCommand(ost);
    }
    else SetStatusText(wxT("Parsing aborted"));
@@ -1663,7 +1657,7 @@ void tui::TopedFrame::OnCIFexportCELL(wxCommandEvent& WXUNUSED(event))
                << cellname << wxT("\", ")
                << (recur ? wxT("true") : wxT("false")) << wxT(", ")
                << wxlaymap << wxT(", \"")
-               <<  dlg2.GetDirectory().c_str() << wxT("/") << dlg2.GetFilename().c_str() << wxT("\", ")
+               <<  filename << wxT("\", ")
                << (sverbose ? wxT("true") : wxT("false")) << wxT(" );");
             if (NULL != laymap2save)
                ost << wxT("setciflaymap(")
@@ -1699,7 +1693,7 @@ void tui::TopedFrame::OnOASRead(wxCommandEvent& WXUNUSED(event))
       SetStatusText(wxT("Parsing Oasis file..."));
       wxString filename = dlg2.GetPath();
       wxString ost;
-      ost << wxT("oasisread(\"") << dlg2.GetDirectory() << wxT("/") << dlg2.GetPath() << wxT("\");");
+      ost << wxT("oasisread(\"") << filename << wxT("\");");
       Console->parseCommand(ost);
    }
    else SetStatusText(wxT("Parsing aborted"));
@@ -1718,7 +1712,7 @@ void tui::TopedFrame::OnOASimport(wxCommandEvent& WXUNUSED(event))
    SetStatusText(wxT("Importing Oasis file..."));
    wxString filename = dlg2.GetPath();
    wxString ost_int;
-   ost_int << wxT("oasisread(\"") << dlg2.GetDirectory() << wxT("/") << dlg2.GetPath() << wxT("\")");
+   ost_int << wxT("oasisread(\"") << filename << wxT("\")");
    wxString ost;
    ost << wxT("oasisimport(") << ost_int << wxT(", getoasislaymap(true), true, false );oasisclose();");
    Console->parseCommand(ost);
