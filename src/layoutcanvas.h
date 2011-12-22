@@ -74,7 +74,7 @@ namespace tui {
       bool           oglExtMultiDrawArrays()    { return _oglExtMultiDrawArrays;    }
       bool           oglArbVertexBufferObject() { return _oglArbVertexBufferObject; }
 
-      static bool    diagnozeGL();
+      bool           diagnozeGL();
       bool           initStatus() {
 #ifdef __WXGTK__
          return (NULL != _xVisual);
@@ -153,9 +153,9 @@ namespace tui {
       bool           _reperY;        //! Draw a cursor line across the window parallel to the Y axis
       bool           _longCursor;    //! Stretch the cursor across the entire canvas
       bool           _oglThread;     //! Run the openGL drawing in a separate thread
-      static bool    _oglVersion14;  //! OpenGL version >= 1.4 detected
-      static bool    _oglExtMultiDrawArrays; //! GL_EXT_multi_draw_arrays feature is supported
-      static bool    _oglArbVertexBufferObject; //! GL_ARB_vertex_buffer_object feature is supported
+      bool           _oglVersion14;  //! OpenGL version >= 1.4 detected
+      bool           _oglExtMultiDrawArrays; //! GL_EXT_multi_draw_arrays feature is supported
+      bool           _oglArbVertexBufferObject; //! GL_ARB_vertex_buffer_object feature is supported
       word           _blinkInterval; //!
       wxTimer        _blinkTimer;    //! To implement the flashing images
       bool           _blinkOn;
