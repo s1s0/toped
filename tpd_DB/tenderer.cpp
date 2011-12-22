@@ -551,6 +551,7 @@ tenderer::TenderTV::TenderTV(TenderRef* const refCell, bool filled, bool reusabl
    _refCell             ( refCell         ),
    _point_array_offset  ( parray_offset   ),
    _index_array_offset  ( iarray_offset   ),
+   _num_total_strings   ( 0u              ),
    _filled              ( filled          ),
    _reusable            ( reusable        )
 {
