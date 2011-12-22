@@ -90,6 +90,7 @@ bool TopedApp::OnInit()
       return false;
    if (_gui)
    {
+      bool vboRendering = tui::LayoutCanvas::diagnozeGL();
       // Get the Graphic User Interface (gui system)
       Toped = DEBUG_NEW tui::TopedFrame( wxT( "Toped" ), wxPoint(50,50), wxSize(1200,900) );
       // Check we've got the required graphic capabilities. If not - bail out.
@@ -106,7 +107,7 @@ bool TopedApp::OnInit()
       // Diagnose the graphic system and return the appropriate
       // type of rendering (i.e. basic or tenderer)
       if (!_forceBasicRendering)
-         PROPC->setRenderType(Toped->view()->diagnozeGL());
+         PROPC->setRenderType(vboRendering);
 
       // Replace the active console in the wx system with Toped console window
       console::ted_log_ctrl *logWindow = DEBUG_NEW console::ted_log_ctrl(Toped->logwin());

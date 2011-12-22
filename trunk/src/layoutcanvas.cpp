@@ -56,6 +56,9 @@ extern const wxEventType         wxEVT_CURRENT_LAYER;
 // Static members
 //-----------------------------------------------------------------------------
 wxMutex          tui::DrawThread::_mutex;
+bool             tui::LayoutCanvas::_oglVersion14            = false;
+bool             tui::LayoutCanvas::_oglExtMultiDrawArrays   = false;
+bool             tui::LayoutCanvas::_oglArbVertexBufferObject= false;
 
 #include "../ui/crosscursor.xpm"
 
@@ -189,8 +192,11 @@ END_EVENT_TABLE()
 
 tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos,
      const wxSize& size, int* attribList):
- wxGLCanvas(parent, ID_TPD_CANVAS, pos, size, 0,wxT("LayoutCanvas"), attribList)
+   wxGLCanvas(parent, ID_TPD_CANVAS, attribList, pos, size, wxFULL_REPAINT_ON_RESIZE, wxT("LayoutCanvas"))
 {
+   // Explicitly create a new rendering context instance for this canvas.
+   _glRC = DEBUG_NEW wxGLContext(this);
+   SetCurrent(*_glRC);
 //   if (!wxGLCanvas::IsDisplaySupported(attribList)) return;
 #ifdef __WXGTK__
    //  Here we'll have to check that we've got what we've asked for. It is
@@ -327,7 +333,7 @@ void tui::LayoutCanvas::viewshift()
    const int slide_step = 100;
    GetClientSize(&Wcl,&Hcl);
    wxPaintDC dc(this);
-   SetCurrent();
+   SetCurrent(*_glRC);
    glAccum(GL_RETURN, 1.0);
 //   glReadBuffer(GL_FRONT);
 //   glDrawBuffer(GL_BACK);
@@ -347,13 +353,13 @@ bool tui::LayoutCanvas::diagnozeGL()
    GLenum err = glewInit();
    if (GLEW_OK != err)
    {
-      wxString errmessage(wxT("glewInit() returns an error: "));
-      std::string glewerrstr((const char*)glewGetErrorString(err));
-      errmessage << wxString(glewerrstr.c_str(), wxConvUTF8);
-      wxMessageDialog* dlg1 = DEBUG_NEW  wxMessageDialog(this, errmessage, wxT("Toped"),
-                    wxOK | wxICON_ERROR);
-      dlg1->ShowModal();
-      dlg1->Destroy();
+//      wxString errmessage(wxT("glewInit() returns an error: "));
+//      std::string glewerrstr((const char*)glewGetErrorString(err));
+//      errmessage << wxString(glewerrstr.c_str(), wxConvUTF8);
+//      wxMessageDialog* dlg1 = DEBUG_NEW  wxMessageDialog(this, errmessage, wxT("Toped"),
+//                    wxOK | wxICON_ERROR);
+//      dlg1->ShowModal();
+//      dlg1->Destroy();
       VBOrendering = false;
    }
    else
@@ -380,25 +386,20 @@ void tui::LayoutCanvas::OnresizeGL(wxSizeEvent& event) {
 //   // this is also necessary to update the context on some platforms
 //   wxGLCanvas::OnSize(event);
 //    // set GL viewport (not called by wxGLCanvas::OnSize on all platforms...)
-   if (!GetContext()) return;
    int w, h;
    GetClientSize(&w, &h);
    glViewport( 0, 0, (GLint)w, (GLint)h );
    _lpBL = TP(0,0)  * _LayCTM;
    _lpTR = TP(w, h) * _LayCTM;
    _invalidWindow = true;
-#ifdef WIN32
-   SetCurrent();
-#endif
 }
 
 
 void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event)
 {
-   if (!GetContext()) return;
-   // _invalidWindow indicates zooming or refreshing after a tell operation.
    if (_invalidWindow)
    {
+      // _invalidWindow indicates zooming or refreshing after a tell operation.
       if (_oglThread)
       {
          tui::DrawThread *dthrd = DEBUG_NEW tui::DrawThread(this);
@@ -412,9 +413,7 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event)
       {
          _blinkTimer.Stop();
          wxPaintDC dc(this);
-         #ifdef __WXGTK__
-            SetCurrent();
-         #endif
+         SetCurrent(*_glRC);
          glMatrixMode( GL_MODELVIEW );
          glShadeModel( GL_FLAT ); // Single color
          update_viewport();
@@ -442,9 +441,7 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event)
    else
    {
       wxPaintDC dc(this);
-      #ifdef __WXGTK__
-         SetCurrent();
-      #endif
+      SetCurrent(*_glRC);
       glAccum(GL_RETURN, 1.0);
       if       (_tmpWnd)              wnd_paint();
       else if  (_rubberBand)          rubber_paint();
@@ -477,7 +474,7 @@ void tui::LayoutCanvas::longCursor()
 //    #ifndef __WXMOTIF__
 //       if (!GetContext()) return;
 //    #endif
-//    SetCurrent();
+//    SetCurrent(*_glRC);
 //    _status_line.update_coords(cp);
 //    SwapBuffers();
 // }
@@ -1080,9 +1077,7 @@ void tui::LayoutCanvas::OnCMRotate(wxCommandEvent&)
 void tui::LayoutCanvas::OnTimer(wxTimerEvent& WXUNUSED(event))
 {
    wxPaintDC dc(this);
-   #ifdef __WXGTK__
-      SetCurrent();
-   #endif
+   SetCurrent(*_glRC);
    if (_blinkOn)
    {
       glAccum(GL_RETURN, 1.0);
@@ -1192,16 +1187,18 @@ DBbox* tui::LayoutCanvas::zoomDown()
    return DEBUG_NEW DBbox(_lpBL.x(), trY, _lpTR.x(), blY);
 }
 
-tui::LayoutCanvas::~LayoutCanvas(){
+tui::LayoutCanvas::~LayoutCanvas()
+{
+   delete _glRC;
    if (NULL != _crossCur) delete _crossCur;
 }
 
-void* tui::DrawThread::Entry()
+void* tui::DrawThread::Entry(/*wxGLContext* glRC*/)
 {
    if (wxMUTEX_NO_ERROR == _mutex.TryLock())
    {
       wxClientDC dc(_canvas);
-      _canvas->SetCurrent();
+      _canvas->SetCurrent(/*glRC*/);
       glMatrixMode( GL_MODELVIEW );
       glShadeModel( GL_FLAT ); // Single color
       _canvas->update_viewport();
