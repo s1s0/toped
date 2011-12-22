@@ -56,9 +56,6 @@ extern const wxEventType         wxEVT_CURRENT_LAYER;
 // Static members
 //-----------------------------------------------------------------------------
 wxMutex          tui::DrawThread::_mutex;
-bool             tui::LayoutCanvas::_oglVersion14            = false;
-bool             tui::LayoutCanvas::_oglExtMultiDrawArrays   = false;
-bool             tui::LayoutCanvas::_oglArbVertexBufferObject= false;
 
 #include "../ui/crosscursor.xpm"
 
@@ -196,7 +193,7 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos,
 {
    // Explicitly create a new rendering context instance for this canvas.
    _glRC = DEBUG_NEW wxGLContext(this);
-   SetCurrent(*_glRC);
+//   SetCurrent(*_glRC);
 //   if (!wxGLCanvas::IsDisplaySupported(attribList)) return;
 #ifdef __WXGTK__
    //  Here we'll have to check that we've got what we've asked for. It is
@@ -353,13 +350,13 @@ bool tui::LayoutCanvas::diagnozeGL()
    GLenum err = glewInit();
    if (GLEW_OK != err)
    {
-//      wxString errmessage(wxT("glewInit() returns an error: "));
-//      std::string glewerrstr((const char*)glewGetErrorString(err));
-//      errmessage << wxString(glewerrstr.c_str(), wxConvUTF8);
-//      wxMessageDialog* dlg1 = DEBUG_NEW  wxMessageDialog(this, errmessage, wxT("Toped"),
-//                    wxOK | wxICON_ERROR);
-//      dlg1->ShowModal();
-//      dlg1->Destroy();
+      wxString errmessage(wxT("glewInit() returns an error: "));
+      std::string glewerrstr((const char*)glewGetErrorString(err));
+      errmessage << wxString(glewerrstr.c_str(), wxConvUTF8);
+      wxMessageDialog* dlg1 = DEBUG_NEW  wxMessageDialog(this, errmessage, wxT("Toped"),
+                    wxOK | wxICON_ERROR);
+      dlg1->ShowModal();
+      dlg1->Destroy();
       VBOrendering = false;
    }
    else
