@@ -840,10 +840,10 @@ void tenderer::TenderTV::draw(layprop::DrawProperties* drawprop)
    glPushMatrix();
    glMultMatrixd(_refCell->translation());
    drawprop->adjustAlpha(_refCell->alphaDepth() - 1);
-   // Set-up the offset in the binded Vertex buffer
-   glVertexPointer(2, GL_INT, 0, (GLvoid*)(sizeof(int4b) * _point_array_offset));
    // Switch the vertex buffers ON in the openGL engine ...
    glEnableClientState(GL_VERTEX_ARRAY);
+   // Set-up the offset in the binded Vertex buffer
+   glVertexPointer(2, GL_INT, 0, (GLvoid*)(sizeof(int4b) * _point_array_offset));
    // ... and here we go ...
    if  (_alobjvx[line] > 0)
    {// Draw the wire center lines
@@ -1322,9 +1322,9 @@ void tenderer::TenderLay::drawSelected()
    glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
    assert(bufferSize == (GLint)(2 * _num_total_points * sizeof(int4b)));
 
-   glVertexPointer(2, GL_INT, 0, (GLvoid*)(sizeof(int4b) * _stv_array_offset));
    glEnableClientState(GL_VERTEX_ARRAY);
    glEnableClientState(GL_INDEX_ARRAY);
+   glVertexPointer(2, GL_INT, 0, (GLvoid*)(sizeof(int4b) * _stv_array_offset));
 
    if (_asobjix[lstr] > 0)
    {
@@ -1492,8 +1492,8 @@ void tenderer::TenderRefLay::draw(layprop::DrawProperties* drawprop)
    glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
    assert(bufferSize == (GLint)(2 * total_points() * sizeof(int4b)));
 
-   glVertexPointer(2, GL_INT, 0, 0);
    glEnableClientState(GL_VERTEX_ARRAY);
+   glVertexPointer(2, GL_INT, 0, 0);
    if (0 < (_alvrtxs + _asindxs))
    {
       assert(_firstvx); assert(_sizesvx);
