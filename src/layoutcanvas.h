@@ -86,7 +86,7 @@ namespace tui {
       void           snapshot(byte*&, word&, word&);
       void           showInfo();
       void           setOglThread(bool val) {_oglThread = true;}
-      TpdOglContext*  glRC() { return _glRC;}
+      TpdOglContext* glRC() { return _glRC;}
 
       bool           initStatus() {
 #ifdef __WXGTK__

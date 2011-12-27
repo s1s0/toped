@@ -42,7 +42,7 @@
         (wxObject *) NULL \
     ),
 
-#define RENDER_PROFILING
+//#define RENDER_PROFILING
 //#define GDSCONVERT_PROFILING
 //#define PARSER_PROFILING
 
