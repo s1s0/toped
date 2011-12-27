@@ -103,11 +103,9 @@ bool TopedApp::OnInit()
          dlg1->Destroy();
          return false;
       }
-      // Diagnose the graphic system and return the appropriate
-      // type of rendering (i.e. basic or tenderer)
-      bool vboRendering = Toped->view()->diagnozeGL();
+      // store the rendering type in the property database
       if (!_forceBasicRendering)
-         PROPC->setRenderType(vboRendering);
+         PROPC->setRenderType(Toped->view()->glRC()->vboRendering());
 
       // Replace the active console in the wx system with Toped console window
       console::ted_log_ctrl *logWindow = DEBUG_NEW console::ted_log_ctrl(Toped->logwin());
@@ -608,24 +606,7 @@ void TopedApp::getTellPathDirs()
 //=============================================================================
 void TopedApp::printLogWHeader()
 {
-   if (PROPC->renderType())
-   {
-      tell_log(console::MT_INFO,"...using VBO rendering");
-   }
-   else if (_forceBasicRendering)
-   {
-      tell_log(console::MT_INFO,"...basic rendering forced from the command line");
-   }
-   else
-   {
-      if      (!Toped->view()->oglVersion14())
-         tell_log(console::MT_WARNING,"OpenGL version 1.4 is not supported");
-      else if (!Toped->view()->oglArbVertexBufferObject())
-         tell_log(console::MT_WARNING,"OpenGL implementation doesn't support Vertex Buffer Objects");
-      else if (!Toped->view()->oglExtMultiDrawArrays())
-         tell_log(console::MT_WARNING,"OpenGL implementation doesn't support Multi Draw Arrays");
-      tell_log(console::MT_INFO,"...Using basic rendering");
-   }
+   Toped->view()->glRC()->printStatus(_forceBasicRendering);
    tell_log(console::MT_INFO,"Toped loaded.");
    tell_log(console::MT_WARNING,"Please submit your feedback to feedback@toped.org.uk");
 }

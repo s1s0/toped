@@ -47,7 +47,6 @@
 DataCenter*                      DATC  = NULL;
 extern layprop::PropertyCenter*  PROPC;
 extern Calbr::CalbrFile*         DRCData;
-extern const wxEventType         wxEVT_CMD_BROWSER;
 
 //-----------------------------------------------------------------------------
 // class DataCenter
