@@ -61,6 +61,22 @@ namespace tui {
    //};
 
    //=============================================================================
+   class TpdOglContext : public wxGLContext {
+   public:
+                     TpdOglContext(wxGLCanvas*);
+      void           glewContext(wxWindow*);
+      void           printStatus(bool) const;
+      bool           resizeGL(int, int);
+      bool           vboRendering() const             { return _vboRendering;             }
+   private:
+      bool           _oglVersion14;             //! OpenGL version >= 1.4 detected
+      bool           _oglExtMultiDrawArrays;    //! GL_EXT_multi_draw_arrays feature is supported
+      bool           _oglArbVertexBufferObject; //! GL_ARB_vertex_buffer_object feature is supported
+      bool           _vboRendering;
+      bool           _glewInitDone;
+  };
+  
+   //=============================================================================
    class LayoutCanvas : public wxGLCanvas  {
    public:
                      LayoutCanvas(wxWindow *parent, const wxPoint&,
@@ -70,11 +86,8 @@ namespace tui {
       void           snapshot(byte*&, word&, word&);
       void           showInfo();
       void           setOglThread(bool val) {_oglThread = true;}
-      bool           oglVersion14()             { return _oglVersion14;              }
-      bool           oglExtMultiDrawArrays()    { return _oglExtMultiDrawArrays;    }
-      bool           oglArbVertexBufferObject() { return _oglArbVertexBufferObject; }
+      TpdOglContext*  glRC() { return _glRC;}
 
-      bool           diagnozeGL();
       bool           initStatus() {
 #ifdef __WXGTK__
          return (NULL != _xVisual);
@@ -113,7 +126,7 @@ namespace tui {
 
       void           viewshift();
    private:
-      wxGLContext*   _glRC;
+      TpdOglContext* _glRC;
       void           CursorControl(bool, bool);
       void           PointUpdate(int nX, int nY);
       void           update_viewport();
@@ -153,9 +166,6 @@ namespace tui {
       bool           _reperY;        //! Draw a cursor line across the window parallel to the Y axis
       bool           _longCursor;    //! Stretch the cursor across the entire canvas
       bool           _oglThread;     //! Run the openGL drawing in a separate thread
-      bool           _oglVersion14;  //! OpenGL version >= 1.4 detected
-      bool           _oglExtMultiDrawArrays; //! GL_EXT_multi_draw_arrays feature is supported
-      bool           _oglArbVertexBufferObject; //! GL_ARB_vertex_buffer_object feature is supported
       word           _blinkInterval; //!
       wxTimer        _blinkTimer;    //! To implement the flashing images
       bool           _blinkOn;

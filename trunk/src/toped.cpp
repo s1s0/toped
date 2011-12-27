@@ -849,6 +849,10 @@ void tui::TopedFrame::initView()
                       );
    Show();
    _winManager.Update();
+   // At this stage the initial openGL context is considered valid - so we shall be
+   // able to initialize glew
+   _canvas->glRC()->glewContext(this);
+
 }
 
 

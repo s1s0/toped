@@ -44,7 +44,6 @@
 
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
-extern DataCenter*               DRCDATC;
 extern console::TllCmdLine*      Console;
 extern const wxEventType         wxEVT_CANVAS_STATUS;
 extern const wxEventType         wxEVT_CANVAS_CURSOR;
@@ -151,6 +150,77 @@ wxMutex          tui::DrawThread::_mutex;
 ////   glDisable(GL_SCISSOR_TEST);
 //
 //}
+
+tui::TpdOglContext::TpdOglContext(wxGLCanvas* canvas) :
+   wxGLContext               ( canvas     ),
+   _oglVersion14             ( false      ),
+   _oglExtMultiDrawArrays    ( false      ),
+   _oglArbVertexBufferObject ( false      ),
+   _vboRendering             ( false      ),
+   _glewInitDone             ( false      )
+
+{
+}
+
+void tui::TpdOglContext::glewContext(wxWindow* canvas)
+{
+   GLenum err = glewInit();
+   if (GLEW_OK != err)
+   {
+      wxString errmessage(wxT("glewInit() returns an error: "));
+      std::string glewerrstr((const char*)glewGetErrorString(err));
+      errmessage << wxString(glewerrstr.c_str(), wxConvUTF8);
+      wxMessageDialog* dlg1 = DEBUG_NEW  wxMessageDialog(canvas, errmessage, wxT("Toped"),
+                    wxOK | wxICON_ERROR);
+      dlg1->ShowModal();
+      dlg1->Destroy();
+   }
+   else
+   {
+      _oglVersion14             = glewIsSupported("GL_VERSION_1_4");
+      _oglExtMultiDrawArrays    = glewIsSupported("GL_EXT_multi_draw_arrays");
+      _oglArbVertexBufferObject = glewIsSupported("GL_ARB_vertex_buffer_object");
+      _vboRendering = _oglVersion14 && _oglExtMultiDrawArrays && _oglArbVertexBufferObject;
+      _glewInitDone             = true;
+      //@TODO - to avoid the "if" in the subsequent renderer calls
+      // setup the renderer - callback function
+      // oGLRender = (void(__stdcall *)(const CTM&))&DataCenter::openGlRender;
+   }
+}
+
+void tui::TpdOglContext::printStatus(bool forceBasic) const
+{
+   if (forceBasic)
+   {
+      tell_log(console::MT_INFO,"...basic rendering forced from the command line");
+   }
+   else if (_vboRendering)
+   {
+      tell_log(console::MT_INFO,"...using VBO rendering");
+   }
+   else
+   {
+      if      (!_oglVersion14)
+         tell_log(console::MT_WARNING,"OpenGL version 1.4 is not supported");
+      else if (!_oglArbVertexBufferObject)
+         tell_log(console::MT_WARNING,"OpenGL implementation doesn't support Vertex Buffer Objects");
+      else if (!_oglExtMultiDrawArrays)
+         tell_log(console::MT_WARNING,"OpenGL implementation doesn't support Multi Draw Arrays");
+      tell_log(console::MT_INFO,"...Using basic rendering");
+   }
+}
+
+bool tui::TpdOglContext::resizeGL(int w, int h)
+{
+   if (_glewInitDone)
+   {
+      glViewport( 0, 0, (GLint)w, (GLint)h );
+      return true;
+   }
+   else return false;
+}
+
+
 //=============================================================================
 // class LayoutCanvas
 //=============================================================================
@@ -192,8 +262,7 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos,
    wxGLCanvas(parent, ID_TPD_CANVAS, attribList, pos, size, wxFULL_REPAINT_ON_RESIZE, wxT("LayoutCanvas"))
 {
    // Explicitly create a new rendering context instance for this canvas.
-   _glRC = DEBUG_NEW wxGLContext(this);
-//   SetCurrent(*_glRC);
+   _glRC = DEBUG_NEW TpdOglContext(this);
 //   if (!wxGLCanvas::IsDisplaySupported(attribList)) return;
 #ifdef __WXGTK__
    //  Here we'll have to check that we've got what we've asked for. It is
@@ -343,41 +412,6 @@ void tui::LayoutCanvas::viewshift()
    /*   slide = false;*/
 }
 
-bool tui::LayoutCanvas::diagnozeGL()
-{
-   // Try to find-out which renderer to use on start-up
-   bool VBOrendering;
-   GLenum err = glewInit();
-   if (GLEW_OK != err)
-   {
-      wxString errmessage(wxT("glewInit() returns an error: "));
-      std::string glewerrstr((const char*)glewGetErrorString(err));
-      errmessage << wxString(glewerrstr.c_str(), wxConvUTF8);
-      wxMessageDialog* dlg1 = DEBUG_NEW  wxMessageDialog(this, errmessage, wxT("Toped"),
-                    wxOK | wxICON_ERROR);
-      dlg1->ShowModal();
-      dlg1->Destroy();
-      VBOrendering = false;
-   }
-   else
-   {
-      _oglVersion14             = glewIsSupported("GL_VERSION_1_4");
-      _oglExtMultiDrawArrays    = glewIsSupported("GL_EXT_multi_draw_arrays");
-      _oglArbVertexBufferObject = glewIsSupported("GL_ARB_vertex_buffer_object");
-      VBOrendering = _oglVersion14 && _oglExtMultiDrawArrays && _oglArbVertexBufferObject;
-      //@TODO - to avoid the "if" in the subsequent renderer calls
-      // setup the renderer - callback function
-      // oGLRender = (void(__stdcall *)(const CTM&))&DataCenter::openGlRender;
-   }
-   return VBOrendering;
-   //@NOTE: With the Mesa library updates (first noticed in ver. 6.5) - most of the
-   // gl* functions are starting with ASSERT_OUTSIDE_BEGIN_END(...) which in turn
-   // will produce a segmentation. Other openGL implementations are more polite,
-   // but I don't know the result of those calls will be.
-   // So... don't try to put gl stuff here, unless you're sure that it is not
-   // causing troubles and that's the proper place for it.
-
-}
 
 void tui::LayoutCanvas::OnresizeGL(wxSizeEvent& event) {
 //   // this is also necessary to update the context on some platforms
@@ -385,10 +419,9 @@ void tui::LayoutCanvas::OnresizeGL(wxSizeEvent& event) {
 //    // set GL viewport (not called by wxGLCanvas::OnSize on all platforms...)
    int w, h;
    GetClientSize(&w, &h);
-   glViewport( 0, 0, (GLint)w, (GLint)h );
    _lpBL = TP(0,0)  * _LayCTM;
    _lpTR = TP(w, h) * _LayCTM;
-   _invalidWindow = true;
+   _invalidWindow = _glRC->resizeGL(w,h);
 }
 
 
