@@ -460,13 +460,14 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event)
       {
          _blinkTimer.Stop();
          wxPaintDC dc(this);
-         SetCurrent(*_glRC);
+         SetCurrent(*_glRC);  
          glMatrixMode( GL_MODELVIEW );
          glShadeModel( GL_FLAT ); // Single color
          update_viewport();
          // CTM matrix stuff
          glLoadIdentity();
-         glOrtho(_lpBL.x(),_lpTR.x(),_lpTR.y(),_lpBL.y(),-1.0,1.0);
+         if ((_lpBL.x()!=_lpTR.x()) && (_lpTR.y() != _lpBL.y()))
+            glOrtho(_lpBL.x(),_lpTR.x(),_lpTR.y(),_lpBL.y(),-1.0,1.0);
          glClear(GL_COLOR_BUFFER_BIT);
          glEnable(GL_BLEND);
          glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

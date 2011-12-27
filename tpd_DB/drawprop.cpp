@@ -314,8 +314,8 @@ void layprop::TGlfFont::getStringBounds(const std::string* text, DBbox* overlap)
 
 void layprop::TGlfFont::drawString(const std::string* text, bool fill)
 {
-   glVertexPointer(2, GL_FLOAT, 0, NULL);
    glEnableClientState(GL_VERTEX_ARRAY);
+   glVertexPointer(2, GL_FLOAT, 0, NULL);
    if (fill)
       glEnableClientState(GL_INDEX_ARRAY);
    float right_of = 0.0f, left_of = 0.0f;

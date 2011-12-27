@@ -867,7 +867,7 @@ void DataCenter::openGlRender(const CTM& layCTM)
             if ((NULL !=  cgrid) && cgrid->visual())
                _cRenderer->Grid(cgrid->step(), cgrid->color());
          }
-         //       _properties.drawZeroCross(renderer);
+         //_properties.drawZeroCross(renderer);
          if (wxMUTEX_NO_ERROR == _DBLock.TryLock())
          {
 //            TpdPost::toped_status(console::TSTS_RENDERON);
