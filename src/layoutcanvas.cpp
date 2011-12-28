@@ -286,12 +286,14 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos,
    // quite possible that we can't get the requested GL visual. If that is the case
    // we'll have to abandon the init sequence right here, otherwise Toped will
    // crash.
+#if !wxCHECK_VERSION(2,9,0)
    _xVisual = (XVisualInfo*) m_vi;
    if (NULL == _xVisual)
    {
       _crossCur = NULL;
       return;
    }
+#endif
    _blinkTimer.SetOwner(this);
 #endif
    _crossCur = MakeCursor(crosscursor,16, 16);

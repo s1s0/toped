@@ -68,8 +68,8 @@ AC_CHECK_LIB(z, gzsetparams,
              [AC_MSG_ERROR(zlib library not found)])
 
 #Check wxWidgets
- AM_OPTIONS_WXCONFIG
- AM_PATH_WXCONFIG(2.8.9, wxWin=1,,std gl)
+WX_CONFIG_OPTIONS
+WX_CONFIG_CHECK([2.8.9], [wxWin=1],,[std,gl,aui])
  if test "$wxWin" != 1 || test "$wx_ver_ok" != "yes"; then
     AC_MSG_ERROR([
        wxWindows ver.2.8.9 or later must be installed on your system
@@ -150,3 +150,4 @@ AM_COND_IF([UTILS],
 )
 
 AC_OUTPUT
+
