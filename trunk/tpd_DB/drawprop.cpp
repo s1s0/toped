@@ -159,7 +159,7 @@ void layprop::TGlfRSymbol::draw(bool fill)
 {
    glMultiDrawArrays(GL_LINE_LOOP, _firstvx, _csize, _alcntrs);
    if (!fill) return;
-   glDrawElements(GL_TRIANGLES, _alchnks * 3, GL_UNSIGNED_INT, (const GLvoid*)(_firstix));
+   glDrawElements(GL_TRIANGLES, _alchnks * 3, GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_firstix));
 }
 
 layprop::TGlfRSymbol::~TGlfRSymbol()

@@ -327,9 +327,16 @@ void tui::TechEditorDialog::OnApply(wxCommandEvent&)
   
    wxString s_name         = _layerName->GetValue();
    wxString s_number       = _layerNumber->GetValue();
+
+#if wxCHECK_VERSION(2,9,0)
+   wxString s_fill         = static_cast<wxTextEntry*>(_layerFills)->GetStringSelection();
+   wxString s_style        = static_cast<wxTextEntry*>(_layerLines)->GetStringSelection();
+   wxString s_color        = static_cast<wxTextEntry*>(_layerColors)->GetStringSelection();
+#else
    wxString s_fill         = _layerFills->GetStringSelection();
    wxString s_style        = _layerLines->GetStringSelection();
    wxString s_color        = _layerColors->GetStringSelection();
+#endif
 
    unsigned long d_number;  s_number.ToULong(&d_number);
 
