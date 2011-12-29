@@ -90,7 +90,11 @@ namespace tui {
 
       bool           initStatus() {
 #ifdef __WXGTK__
+   #if !wxCHECK_VERSION(2,9,0)
          return (NULL != _xVisual);
+   #else
+         return true;
+   #endif
 #else
          return true;
 #endif

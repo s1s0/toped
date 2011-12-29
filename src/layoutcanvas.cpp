@@ -938,7 +938,7 @@ void tui::LayoutCanvas::OnZoom(wxCommandEvent& evt) {
       case ZOOM_EMPTY  : box = DEBUG_NEW DBbox(DEFAULT_OVL_BOX);
                         break;
       case ZOOM_REFRESH: _invalidWindow = true; Refresh(); return;
-      default: assert(false);
+      default: assert(false); break;
    }
    int Wcl, Hcl;
    GetClientSize(&Wcl,&Hcl);

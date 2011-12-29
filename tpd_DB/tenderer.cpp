@@ -103,7 +103,7 @@ void TeselTempData::storeChunk()
       case GL_TRIANGLE_FAN   : _all_ftfs++; break;
       case GL_TRIANGLE_STRIP : _all_ftss++; break;
       case GL_TRIANGLES      : _all_ftrs++; break;
-      default: assert(0);
+      default: assert(0);break;
    }
 }
 
@@ -164,7 +164,7 @@ void TessellPoly::num_indexs(unsigned& iftrs, unsigned& iftfs, unsigned& iftss) 
          case GL_TRIANGLE_FAN   : iftfs += CCH->size(); break;
          case GL_TRIANGLE_STRIP : iftss += CCH->size(); break;
          case GL_TRIANGLES      : iftrs += CCH->size(); break;
-         default: assert(0);
+         default: assert(0);break;
       }
    }
 }
@@ -709,7 +709,7 @@ void tenderer::TenderTV::collectIndexs(unsigned int* index_array, const TeselCha
                index_array[index_offset[ftss]++] = TCH->index_seq()[i] + cpoint_index;
             break;
          }
-         default: assert(0);
+         default: assert(0);break;
       }
    }
 }
@@ -1281,7 +1281,7 @@ void tenderer::TenderLay::collectSelected(unsigned int* slctd_array)
             _sizslix[lnes][size_sindex[lnes]++] = cchunk->sDataCopy(slctd_array, index_soffset[lnes]);
             break;
          }
-         default: assert(false);
+         default: assert(false);break;
       }
    }
 }

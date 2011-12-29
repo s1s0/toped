@@ -898,7 +898,7 @@ void tui::TopedFrame::OnExitRequest( wxCommandEvent&  event )
    {
       case 0 : Close(FALSE); break; // Exit the application
       case 1 : checkExit(event) ; break; // Make pre-exit checks
-      default: assert(false);
+      default: assert(false); break;
    }
 }
 
@@ -940,7 +940,7 @@ void tui::TopedFrame::OnCanvasStatus(wxCommandEvent& evt)
       case CNVS_DEL_X       : _GLstatus->setdXpos(evt.GetString()); break;
       case CNVS_DEL_Y       : _GLstatus->setdYpos(evt.GetString()); break;
       case CNVS_SELECTED    : _GLstatus->setSelected(evt.GetString());break;
-      default: assert(false);
+      default: assert(false); break;
    }
 }
 
@@ -2384,7 +2384,7 @@ void tui::TopedFrame::OnToolBarSize(wxCommandEvent& evt)
          case  ICON_SIZE_24x24: settingsMenu->Check(TMSET_HTOOLSIZE24 , true );break;
          case  ICON_SIZE_32x32: settingsMenu->Check(TMSET_HTOOLSIZE32 , true );break;
          case  ICON_SIZE_48x48: settingsMenu->Check(TMSET_HTOOLSIZE48 , true );break;
-         default: assert(false);
+         default: assert(false); break;
       }
    else
       switch (sz)
@@ -2393,7 +2393,7 @@ void tui::TopedFrame::OnToolBarSize(wxCommandEvent& evt)
          case  ICON_SIZE_24x24: settingsMenu->Check(TMSET_VTOOLSIZE24 , true );break;
          case  ICON_SIZE_32x32: settingsMenu->Check(TMSET_VTOOLSIZE32 , true );break;
          case  ICON_SIZE_48x48: settingsMenu->Check(TMSET_VTOOLSIZE48 , true );break;
-         default: assert(false);
+         default: assert(false); break;
       }
 }
 

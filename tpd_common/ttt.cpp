@@ -196,14 +196,14 @@ int8b DBbox::cliparea(const DBbox& bx, bool calculate) const
       case 0x01: Aprim = DEBUG_NEW TP(_p1.x(), bx.p1().y());break;
       case 0x04: Aprim = DEBUG_NEW TP(bx.p1().x(), _p1.y());break;
       case 0x05: Aprim = DEBUG_NEW TP(_p1);break;
-      default: assert(false);
+      default: assert(false);break;
    }
    switch (B_place) {
       case 0x00: Bprim = DEBUG_NEW TP(bx.p2());break;
       case 0x02: Bprim = DEBUG_NEW TP(_p2.x(),bx.p2().y());break;
       case 0x08: Bprim = DEBUG_NEW TP(bx.p2().x(),_p2.y());break;
       case 0x0A: Bprim = DEBUG_NEW TP(_p2);break;
-      default: assert(false);
+      default: assert(false);break;
    }
    int8b area =  llabs(((int8b)Aprim->x() - (int8b)Bprim->x()) *
                        ((int8b)Aprim->y() - (int8b)Bprim->y())   );
@@ -241,14 +241,14 @@ int DBbox::clipbox(DBbox& bx) {
       case 0x01: Aprim = DEBUG_NEW TP(_p1.x(), bx.p1().y());break;
       case 0x04: Aprim = DEBUG_NEW TP(bx.p1().x(), _p1.y());break;
       case 0x05: Aprim = DEBUG_NEW TP(_p1);break;
-      default: assert(false);
+      default: assert(false);break;
    }
    switch (B_place) {
       case 0x00: Bprim = DEBUG_NEW TP(bx.p2());break;
       case 0x02: Bprim = DEBUG_NEW TP(_p2.x(),bx.p2().y());break;
       case 0x08: Bprim = DEBUG_NEW TP(bx.p2().x(),_p2.y());break;
       case 0x0A: Bprim = DEBUG_NEW TP(_p2);break;
-      default: assert(false);
+      default: assert(false);break;
    }
    bx = DBbox(*Aprim, *Bprim);
    delete Aprim; delete Bprim;
@@ -306,8 +306,9 @@ DBbox DBbox::getcorner(QuadIdentificators corner)
    return DBbox(_p1.x(),_p1.y(),
                  static_cast<int4b>(rint((_p2.x() + _p1.x()) / 2)),
                  static_cast<int4b>(rint((_p2.y() + _p1.y()) / 2)));
-     default: assert(false);
+     default: assert(false);break;
    }
+   return DBbox(TP()); // dummy, to prevent warnings
 }
 
 DBbox DBbox::operator * (const CTM& op2) const
