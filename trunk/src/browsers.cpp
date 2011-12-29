@@ -570,6 +570,7 @@ void browsers::CellBrowser::collectChildren(const laydata::TDTHierTree *root,
                SetItemImage(lroot,BICN_LIBCELL_HIER,wxTreeItemIcon_Normal);
                SetItemImage(lroot,BICN_LIBCELL_FLAT,wxTreeItemIcon_Expanded);
             }
+            break;
       }
    }
    else
@@ -590,6 +591,7 @@ void browsers::CellBrowser::collectChildren(const laydata::TDTHierTree *root,
                SetItemImage(lroot,BICN_LIBCELL_FLAT_I,wxTreeItemIcon_Normal);
             else
                SetItemImage(lroot,BICN_LIBCELL_FLAT,wxTreeItemIcon_Normal);
+            break;
       }
    }
    wxTreeItemId nroot;
@@ -667,7 +669,7 @@ void browsers::CellBrowser::onCommand( wxCommandEvent& event )
       case tui::BT_CELL_MARK_GRC:
          onTellChangeGrc(event.GetString(), 1 == event.GetExtraLong());
          break;
-      default: assert(false);
+      default: assert(false);break;
    }
 }
 
@@ -803,7 +805,7 @@ void browsers::CellBrowser::onTellAddCell(wxString cellname, wxString parentname
             }
          }
          break;
-      default: assert(false);
+      default: assert(false);break;
    }
 }
 
@@ -889,7 +891,7 @@ void browsers::CellBrowser::onTellRemoveCell(wxString cellname, wxString parentn
          }
          break;
       }
-      default: assert(false);
+      default: assert(false);break;
    }
 }
 
@@ -1283,7 +1285,7 @@ browsers::XdbBrowser::XdbBrowser(   wxWindow *parent,
       case tui::ID_OAS_CELLTREE:
          _cellBrowser = DEBUG_NEW OASCellBrowser(this, tui::ID_OAS_CELLTREE, pos, size, style);
          break;
-      default: assert(false);
+      default: assert(false);break;
    }
 
    wxBoxSizer *thesizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
@@ -1405,7 +1407,7 @@ void browsers::browserTAB::onCommand(wxCommandEvent& event)
       case tui::BT_CLEAROAS_TAB : onTellClearOasTab(); break;
       case tui::BT_ADDDRC_TAB   : onTellAddDRCTab();break;
       case tui::BT_CLEARDRC_TAB : onTellClearDRCTab(); break;
-      default: event.Skip();
+      default: event.Skip();break;
    }
 }
 
@@ -1811,7 +1813,7 @@ void browsers::LayerPanel::onCommand(wxCommandEvent& event)
          delete (layno);
          break;
       }
-      default: event.Skip();
+      default: event.Skip();break;
    }
 }
 
@@ -2029,7 +2031,7 @@ void browsers::LayerBrowser::onCommand(wxCommandEvent& event)
          break;
       }
 //      default: event.Skip();
-      default: assert(false);
+      default: assert(false);break;
    }
 }
 
@@ -2185,7 +2187,7 @@ void browsers::ErrorBrowser::showMenu(wxTreeItemId id, const wxPoint& pt)
          _cluster = GetItemText(GetItemParent(id));
          break;
       default:
-         assert(true);
+         assert(true);break;
       }
    }
    PopupMenu(&menu, pt);

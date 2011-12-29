@@ -124,7 +124,7 @@ const int         UNDEFCELL_LIB     =  0;
 
 // to cast properly the indices parameter in glDrawElements when
 // drawing from VBO
-#define VBO_BUFFER_OFFSET(i) ((void *)NULL + (i))
+#define VBO_BUFFER_OFFSET(i) ((char *)NULL + (i))
 
 
 //==============================================================================

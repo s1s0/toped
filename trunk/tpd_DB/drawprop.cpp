@@ -563,7 +563,7 @@ bool layprop::DrawProperties::addLayer( unsigned layno )
                 lname << "_DRC" << layno;
                 _laySetDrc[layno] = DEBUG_NEW LayerSettings(lname.str(),"","","");
                 return true;
-      default: assert(false);
+      default: assert(false);break;
    }
    return true; // dummy statement to prevent compilation warnings
 }
@@ -604,7 +604,7 @@ bool layprop::DrawProperties::addLayer(std::string name, unsigned layno, std::st
          _laySetDb[layno] = DEBUG_NEW LayerSettings(name,col,fill,sline);
          return new_layer;
       case DRC: //User can't call DRC database directly
-      default: assert(false);
+      default: assert(false); break;
    }
 }
 
@@ -620,7 +620,7 @@ bool layprop::DrawProperties::addLayer(std::string name, unsigned layno)
          if (_laySetDrc.end() != _laySetDrc.find(layno)) return false;
          _laySetDrc[layno] = DEBUG_NEW LayerSettings(name,"","","");
          return true;
-      default: assert(false);
+      default: assert(false); break;
    }
    return false; // dummy statement to prevent compilation warnings
 }
@@ -897,7 +897,7 @@ void layprop::DrawProperties::drawReferenceMarks(const TP& p0, const binding_mar
       }
       case  text_mark:if (_textMarksHidden) return;
       else the_mark = text_mark_bmp;break;
-      default: assert(false);
+      default: assert(false); break;
    }
    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
    glRasterPos2i(p0.x(),p0.y());
@@ -991,7 +991,7 @@ unsigned layprop::DrawProperties::getTenderLay(unsigned layno) const
    {
       case DB: return layno;
       case DRC: return DRC_LAY;
-      default: assert(false);
+      default: assert(false); break;
    }
 }
 
@@ -1202,7 +1202,7 @@ const layprop::LayerSettings*  layprop::DrawProperties::findLayerSettings(unsign
    {
       case DB : ilayset = _laySetDb.find(layno) ; if (_laySetDb.end()  == ilayset) return NULL; break;
       case DRC: ilayset = _laySetDrc.find(layno); if (_laySetDrc.end() == ilayset) return NULL; break;
-      default: assert(false);
+      default: assert(false);break;
    }
    return ilayset->second;
 }
@@ -1213,7 +1213,7 @@ const layprop::LaySetList& layprop::DrawProperties::getCurSetList() const
    {
       case DB : return _laySetDb;
       case DRC: return _laySetDrc;
-      default: assert(false);
+      default: assert(false);break;
    }
 }
 
