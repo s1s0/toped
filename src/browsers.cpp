@@ -2201,7 +2201,7 @@ bool browsers::ErrorBrowser::checkCellName(const std::string &str)
       laydata::TdtDesign *design = (*libDir)();
       activeCell = design->activeCellName();
    DATC->unlockTDT(libDir);
-   bool ret = activeCell.compare(str);
+   bool ret = (0 != activeCell.compare(str));
    return !ret;
 }
 

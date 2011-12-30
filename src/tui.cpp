@@ -2980,23 +2980,23 @@ void tui::TopedPropertySheets::RenderingPSheet::update(wxCommandEvent& evt)
    {
       case RPS_CELL_MARK    :
          targetControl = FindWindow(PDSET_CELLMARK);assert(targetControl);
-         static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt() );
+         static_cast<wxCheckBox*>(targetControl)->SetValue(0 != evt.GetInt() );
          break;
       case RPS_CELL_BOX     :
          targetControl = FindWindow(PDSET_CELLBOX );assert(targetControl);
-         static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt() );
+         static_cast<wxCheckBox*>(targetControl)->SetValue(0 != evt.GetInt() );
          break;
       case RPS_TEXT_MARK   :
          targetControl = FindWindow(PDSET_TEXTMARK);assert(targetControl);
-         static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt());
+         static_cast<wxCheckBox*>(targetControl)->SetValue(0 != evt.GetInt());
          break;
       case RPS_TEXT_BOX     :
          targetControl = FindWindow(PDSET_TEXTBOX );assert(targetControl);
-         static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt());
+         static_cast<wxCheckBox*>(targetControl)->SetValue(0 != evt.GetInt());
          break;
       case RPS_TEXT_ORI     :
          targetControl = FindWindow(PDSET_TEXTORI );assert(targetControl);
-         static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt());
+         static_cast<wxCheckBox*>(targetControl)->SetValue(0 != evt.GetInt());
          break;
       case RPS_VISI_LIMIT   :
          _imageDetail->setValue(evt.GetInt());
@@ -3356,15 +3356,15 @@ void tui::TopedPropertySheets::CanvasPSheet::update(wxCommandEvent& evt)
          break;
       case CPS_GRID0_ON     :
          targetControl = FindWindow(CDGRID_CBOX1);assert(targetControl);
-         static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt() );
+         static_cast<wxCheckBox*>(targetControl)->SetValue(0 != evt.GetInt() );
          break;
       case CPS_GRID1_ON     :
          targetControl = FindWindow(CDGRID_CBOX2);assert(targetControl);
-         static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt() );
+         static_cast<wxCheckBox*>(targetControl)->SetValue(0 != evt.GetInt() );
          break;
       case CPS_GRID2_ON     :
          targetControl = FindWindow(CDGRID_CBOX3);assert(targetControl);
-         static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt() );
+         static_cast<wxCheckBox*>(targetControl)->SetValue(0 != evt.GetInt() );
          break;
       case CPS_GRID0_STEP :
          targetControl = FindWindow(CDGRID_SET1);assert(targetControl);
@@ -3388,19 +3388,19 @@ void tui::TopedPropertySheets::CanvasPSheet::update(wxCommandEvent& evt)
          break;
       case CPS_LONG_CURSOR    :
          targetControl = FindWindow(CDMISC_LONGCURSOR);assert(targetControl);
-         static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt() );
+         static_cast<wxCheckBox*>(targetControl)->SetValue(0 != evt.GetInt() );
          break;
       case CPS_AUTOPAN   :
          targetControl = FindWindow(CDMISC_AUTOPAN);assert(targetControl);
-         static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt() );
+         static_cast<wxCheckBox*>(targetControl)->SetValue(0 != evt.GetInt() );
          break;
       case CPS_BOLD_ON_HOVER :
          targetControl = FindWindow(CDMISC_BOLDONHOOVER); assert(targetControl);
-         static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt());
+         static_cast<wxCheckBox*>(targetControl)->SetValue(0 != evt.GetInt());
          break;
       case CPS_ZERO_CROSS :
          targetControl = FindWindow(CDMISC_ZEROCROSS);assert(targetControl);
-         static_cast<wxCheckBox*>(targetControl)->SetValue(evt.GetInt() );
+         static_cast<wxCheckBox*>(targetControl)->SetValue(0 != evt.GetInt() );
          break;
       default: assert(false);
    }

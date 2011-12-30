@@ -2373,7 +2373,7 @@ void tui::TopedFrame::OnUncapturedMouseClick(wxCommandEvent& evt)
 void tui::TopedFrame::OnToolBarSize(wxCommandEvent& evt)
 {
    tui::IconSizes sz = static_cast<tui::IconSizes>(evt.GetInt());
-   bool direction = static_cast<bool>(evt.GetExtraLong());
+   bool direction = (0l != evt.GetExtraLong());
 
    _resourceCenter->setToolBarSize(direction, sz);
    // update the menu state
@@ -2445,7 +2445,11 @@ void   tui::TopedFrame::OnDRCResults(wxCommandEvent& evt)
 
 void tui::TopedFrame::OnIconize(wxIconizeEvent& evt)
 {
+#if wxCHECK_VERSION(2,9,0)
+   if (!evt.IsIconized())
+#else
    if (!evt.Iconized())
+#endif
    {
       wxCommandEvent eventREFRESH(wxEVT_CANVAS_ZOOM);
       eventREFRESH.SetInt(ZOOM_REFRESH);
