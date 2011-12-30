@@ -177,9 +177,9 @@ void tui::TpdOglContext::glewContext(wxWindow* canvas)
    }
    else
    {
-      _oglVersion14             = glewIsSupported("GL_VERSION_1_4");
-      _oglExtMultiDrawArrays    = glewIsSupported("GL_EXT_multi_draw_arrays");
-      _oglArbVertexBufferObject = glewIsSupported("GL_ARB_vertex_buffer_object");
+      _oglVersion14             = (0 != glewIsSupported("GL_VERSION_1_4"));
+      _oglExtMultiDrawArrays    = (0 != glewIsSupported("GL_EXT_multi_draw_arrays"));
+      _oglArbVertexBufferObject = (0 != glewIsSupported("GL_ARB_vertex_buffer_object"));
       _vboRendering = _oglVersion14 && _oglExtMultiDrawArrays && _oglArbVertexBufferObject;
       _glewInitDone             = true;
       //@TODO - to avoid the "if" in the subsequent renderer calls

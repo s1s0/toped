@@ -183,7 +183,11 @@ void tui::MenuItemHandler::recreate(wxMenuBar *menuBar)
       tell_log(console::MT_ERROR,ost.str());
       return;
    }
+#if wxCHECK_VERSION(2,9,0)
+   menuItem->SetItemLabel(wxString(insertedString.c_str(), wxConvUTF8));
+#else
    menuItem->SetText(wxString(insertedString.c_str(), wxConvUTF8));
+#endif
    menuItem->SetHelp(wxString(_helpString.c_str(), wxConvUTF8));
    //menuItem = DEBUG_NEW wxMenuItem(menu, _ID, insertedString.c_str(), _helpString.c_str());
 
