@@ -148,8 +148,12 @@ namespace console {
    public:
       ted_log_ctrl(wxEvtHandler *pTextCtrl) : wxLog(), _tellLOGW(pTextCtrl){};
    private:
-      void           DoLog(wxLogLevel level, const wxChar *msg, time_t timestamp);
-      void           cmdLineLog(wxLogLevel level, const std::string& msg, time_t timestamp);
+#if wxCHECK_VERSION(2,9,0)
+      void           DoLogRecord(wxLogLevel, const wxString&, const wxLogRecordInfo&);
+#else
+      void           DoLog(wxLogLevel, const wxChar*, time_t);
+#endif
+      void           cmdLineLog(wxLogLevel, const std::string&, time_t);
       wxEvtHandler*  _tellLOGW;
    };
 
