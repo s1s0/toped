@@ -37,7 +37,7 @@ long Calbr::drcPolygon::_precision = 0;
 long Calbr::drcEdge::_precision = 0;
 
 #ifdef WIN32
-   #define tpdSTRxxxCMP stricmp
+   #define tpdSTRxxxCMP _stricmp
 #else
    #define tpdSTRxxxCMP strcasecmp
 #endif

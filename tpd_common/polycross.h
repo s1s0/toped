@@ -135,8 +135,8 @@ namespace polycross
    {
       public:
          typedef std::list<CPoint*> crossCList;
-         polysegment(const TP*, const TP*, int, char);
-         ~polysegment();
+                           polysegment(const TP*, const TP*, int, byte);
+                          ~polysegment();
          CPoint*           insertCrossPoint(const TP*);
          BPoint*           insertBindPoint(const TP* pnt);
          unsigned          normalize(const TP*, const TP*);

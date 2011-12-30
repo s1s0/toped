@@ -139,7 +139,7 @@ namespace laydata {
       virtual             ~Validator() {};
       bool                 valid()           {return _status < ambiguous();}
       bool                 acceptable()      {return _status < critical();}
-      unsigned             status()          {return _status;}
+      int                  status()          {return _status;}
       bool                 box()             {return (0 != (_status & shp_box));}
       bool                 crossing()        {return (0 != (_status & shp_cross));}
       bool                 shortSegments()   {return (0 != (_status & shp_shortends));}
@@ -150,7 +150,7 @@ namespace laydata {
    protected:
       virtual shape_status critical()        {return ambiguous();}
       shape_status         ambiguous()       {return shp_cross;}
-      unsigned             _status;
+      int                  _status;
       PointVector          _plist;
    };
 
