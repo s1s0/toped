@@ -179,6 +179,25 @@ void console::ted_log::OnLOGMessage(wxCommandEvent& evt) {
 
 
 //=============================================================================
+#if wxCHECK_VERSION(2,9,0)
+void console::ted_log_ctrl::DoLogRecord(wxLogLevel level, const wxString& msg, const wxLogRecordInfo& info)
+{
+   if (NULL != _tellLOGW)
+   { // gui mode
+      wxCommandEvent eventLOG(wxEVT_LOG_ERRMESSAGE);
+      eventLOG.SetString(msg);
+      eventLOG.SetInt(level);
+      eventLOG.SetExtraLong(info.timestamp);
+      wxPostEvent(_tellLOGW, eventLOG);
+   }
+   else
+   { // text mode
+      wxString wxMsg(msg);
+      std::string stringmsg(wxMsg.mb_str(wxConvUTF8));
+      cmdLineLog(level, stringmsg, info.timestamp);
+   }
+}
+#else
 void console::ted_log_ctrl::DoLog(wxLogLevel level, const wxChar *msg, time_t timestamp)
 {
    if (NULL != _tellLOGW)
@@ -196,7 +215,7 @@ void console::ted_log_ctrl::DoLog(wxLogLevel level, const wxChar *msg, time_t ti
       cmdLineLog(level, stringmsg, timestamp);
    }
 }
-
+#endif
 void console::ted_log_ctrl::cmdLineLog(wxLogLevel level, const std::string& msg, time_t timestamp)
 {
    const std::string       cmd_mark   = "=> ";
