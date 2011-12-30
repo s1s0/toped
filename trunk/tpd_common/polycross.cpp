@@ -454,7 +454,8 @@ bool polycross::SortLine::operator() (CPoint* cp1, CPoint* cp2) {
 //==============================================================================
 // polysegment
 
-polycross::polysegment::polysegment(const TP* p1, const TP* p2, int num, char plyn) {
+polycross::polysegment::polysegment(const TP* p1, const TP* p2, int num, byte plyn) 
+{
    if (xyorder(p1, p2) < 0) { _lP = p1; _rP = p2; }
    else                     { _lP = p2; _rP = p1; }
    _edge = num; _polyNo = plyn;_threadID = 0;
@@ -742,6 +743,7 @@ TP* polycross::TEvent::joiningSegments(polysegment* above, polysegment* below, f
       else return DEBUG_NEW TP(*(below->rP()));
    }
    assert(false);
+   return NULL; // dummy, to prevent warnings
 }
 
 TP* polycross::TEvent::oneLineSegments(polysegment* above, polysegment* below, YQ* sweepL)

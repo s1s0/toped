@@ -602,10 +602,11 @@ bool layprop::DrawProperties::addLayer(std::string name, unsigned layno, std::st
             tell_log(console::MT_WARNING, ost.str());
          }
          _laySetDb[layno] = DEBUG_NEW LayerSettings(name,col,fill,sline);
-         return new_layer;
-      case DRC: //User can't call DRC database directly
+         break;
+      case DRC: assert(false); break; //User can't call DRC database directly
       default: assert(false); break;
    }
+   return new_layer;
 }
 
 bool layprop::DrawProperties::addLayer(std::string name, unsigned layno)
@@ -993,6 +994,7 @@ unsigned layprop::DrawProperties::getTenderLay(unsigned layno) const
       case DRC: return DRC_LAY;
       default: assert(false); break;
    }
+   return layno; // dummy, to prevent warnings
 }
 
 void layprop::DrawProperties::allLayers(NameList& alllays) const
@@ -1215,6 +1217,7 @@ const layprop::LaySetList& layprop::DrawProperties::getCurSetList() const
       case DRC: return _laySetDrc;
       default: assert(false);break;
    }
+   return _laySetDb; // dummy, to prevent warnings
 }
 
 void layprop::DrawProperties::psWrite(PSFile& psf) const

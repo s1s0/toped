@@ -38,7 +38,7 @@ const dword Oasis::Iso3309Crc32::_crc32AllBits  = 0xffffffffu;
 //===========================================================================
 Oasis::Table::Table(OasisInFile& ofh)
 {
-   _strictMode   = ofh.getUnsignedInt(1);
+   _strictMode   = (0 != ofh.getUnsignedInt(1));
    _offsetStart  = ofh.getUnsignedInt(8);
    _offsetEnd    = 0;
    _ieMode       = tblm_unknown;
@@ -368,7 +368,7 @@ void Oasis::OasisInFile::readStartRecord()
    tell_log(console::MT_INFO, info.str());
    _unit = getReal();
    if (0 > _unit) exception("Unacceptable \"unit\" value (13.10)");
-   _offsetFlag = getUnsignedInt(1);
+   _offsetFlag = (0 != getUnsignedInt(1));
    if (!_offsetFlag)
    {
       // table offset structure is stored in the START record (here)
@@ -1300,7 +1300,7 @@ void Oasis::Cell::readText(OasisInFile& ofn, ImportDB& iDB)
    const byte Lmask   = 0x01;
 
    byte info = ofn.getByte();
-   if (info & Cmask) _mod_text      = ofn.getTextRefName(info & Nmask);
+   if (info & Cmask) _mod_text      = ofn.getTextRefName((0 != (info & Nmask)));
    if (info & Lmask) _mod_tlayer    = ofn.getUnsignedInt(4);
    if (info & Tmask) _mod_tdatatype = ofn.getUnsignedInt(2);
    if (info & Xmask)
@@ -1359,7 +1359,7 @@ void Oasis::Cell::readReference(OasisInFile& ofn, ImportDB& iDB, bool exma)
 
    byte info = ofn.getByte();
 
-   if (info & Cmask) _mod_cellref  = ofn.getCellRefName(info & Nmask);
+   if (info & Cmask) _mod_cellref  = ofn.getCellRefName((0 != (info & Nmask)));
    if (exma)
    {
       magnification = (info & Mmask) ? ofn.getReal() : 1.0;
@@ -1553,7 +1553,7 @@ void Oasis::Cell::skimText(OasisInFile& ofn)
    const byte Lmask   = 0x01;
 
    byte info = ofn.getByte();
-   if (info & Cmask) ofn.getTextRefName(info & Nmask);
+   if (info & Cmask) ofn.getTextRefName((0 != (info & Nmask)));
    dword layno       = (info & Lmask) ? (_mod_layer    = ofn.getUnsignedInt(4)) : _mod_layer();
    word  dtype       = (info & Dmask) ? (_mod_datatype = ofn.getUnsignedInt(2)) : _mod_datatype();
    updateContents(layno, dtype);
@@ -1575,8 +1575,8 @@ void Oasis::Cell::skimReference(OasisInFile& ofn, bool exma)
 
    byte info = ofn.getByte();
 
-   std::string name  = (info & Cmask) ? (_mod_cellref  = ofn.getCellRefName(info & Nmask)) :
-                                                                                  _mod_cellref();
+   std::string name  = (info & Cmask) ? (_mod_cellref  = ofn.getCellRefName((0 != (info & Nmask)))) :
+                                                                                      _mod_cellref();
    if (exma)
    {
       if (info & Amask) ofn.getReal();
@@ -1804,7 +1804,10 @@ Oasis::PointList Oasis::Cell::readPointList(OasisInFile& ofn)
 {
    byte plty = ofn.getByte();
    if (plty >= dt_unknown)
+   {
       ofn.exception("Bad point list type (7.7.8)");
+      return PointList(); // dummy - to prevent warnings
+   }
    else
    {
       PointList result(ofn, (PointListType)plty);
