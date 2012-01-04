@@ -64,6 +64,8 @@ namespace auxdata {
       virtual   bool       pointInside(const TP) const = 0;
       //!
       virtual  PointVector dumpPoints() const = 0;
+      //!
+      virtual  laydata::ShapeList* getRepaired() const = 0;
       //! Set the _selected flag in case the object is entirely overlapped by select_in box
 //      void                 selectInBox(DBbox&, DataList*, bool);
 //      void                 selectThis(DataList*);
@@ -98,6 +100,7 @@ namespace auxdata {
 //         virtual word      numPoints() const {return _psize;}
          virtual bool      pointInside(const TP)const;
          virtual PointVector dumpPoints() const;
+         virtual laydata::ShapeList* getRepaired() const;
       private:
          int4b*            _pdata;
          unsigned          _psize;
@@ -125,6 +128,7 @@ namespace auxdata {
 //         virtual word      numPoints() const {return _psize;}
          virtual bool      pointInside(const TP)const;
          virtual PointVector dumpPoints() const;
+         virtual laydata::ShapeList* getRepaired() const;
       private:
          float             get_distance(const TP&, const TP&, const TP&)const;
          int4b*            _pdata;
@@ -159,6 +163,7 @@ namespace auxdata {
          void                reportLayers(DWordSet&);
          void                reportLayData(unsigned, AuxDataList&);
          bool                cleanLay(unsigned);
+         void                repairData(unsigned, laydata::ShapeList&);
          //
          virtual DBbox       cellOverlap() const        {return _cellOverlap;}
          std::string         name() const               {return _name;}
