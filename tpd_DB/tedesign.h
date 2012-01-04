@@ -106,6 +106,7 @@ namespace laydata {
       TdtData*       addCellRef(laydata::CellDefin strdefn, CTM& ori);
       TdtData*       addCellARef(std::string&, CTM&, ArrayProps&);
       void           addList(AtticList* /*, DWordSet&*/);
+      void           addList(unsigned, ShapeList&);
       TdtCell*       openCell(std::string name);
       bool           editPush(const TP&, const DWordSet&);
       bool           editPrev(const bool undo = false);

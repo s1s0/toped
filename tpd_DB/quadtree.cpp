@@ -60,7 +60,7 @@ char laydata::QuadProps::getPosition(QuadIdentificators quad)
       case qidNE: return getNEQuad();
       case qidSE: return getSEQuad();
       case qidSW: return getSWQuad();
-      default: assert(false);
+      default: assert(false); break;
    }
    // dummy statement to prevent compiler warnings
    return -1;
@@ -210,7 +210,7 @@ laydata::Iterator<DataT>::Iterator(const QTreeTmpl<DataT>& cQuad) :
 }
 
 template <typename DataT>
-laydata::Iterator<DataT>::Iterator(const Iterator& iter):
+laydata::Iterator<DataT>::Iterator(const Iterator<DataT>& iter):
    _cQuad     ( iter._cQuad          ),
    _cData     ( iter._cData          ),
    _qPosStack ( iter._qPosStack      ),
@@ -249,7 +249,7 @@ const typename laydata::Iterator<DataT> laydata::Iterator<DataT>::operator++(int
 }
 
 template <typename DataT>
-bool laydata::Iterator<DataT>::operator==(const Iterator& iter)
+bool laydata::Iterator<DataT>::operator==(const Iterator<DataT>& iter)
 {
    // Presumption here is that there is no point comparing the _qPosStack fields
    // The parity of the _cQuad pointers is considered enough because they must
@@ -261,7 +261,7 @@ bool laydata::Iterator<DataT>::operator==(const Iterator& iter)
 }
 
 template <typename DataT>
-bool laydata::Iterator<DataT>::operator!=(const Iterator& iter)
+bool laydata::Iterator<DataT>::operator!=(const Iterator<DataT>& iter)
 {
    return !operator==(iter);
 }
@@ -339,7 +339,7 @@ laydata::ClipIterator<DataT>::ClipIterator(const QTreeTmpl<DataT>& cQuad, const 
 }
 
 template <typename DataT>
-laydata::ClipIterator<DataT>::ClipIterator(const ClipIterator& iter):
+laydata::ClipIterator<DataT>::ClipIterator(const ClipIterator<DataT>& iter):
    Iterator<DataT> ( iter                 ),
    _clipBox        ( iter._clipBox        )
 {}
@@ -392,7 +392,7 @@ laydata::DrawIterator<DataT>::DrawIterator(const QTreeTmpl<DataT>& cQuad, const 
 }
 
 template <typename DataT>
-laydata::DrawIterator<DataT>::DrawIterator(const DrawIterator& iter):
+laydata::DrawIterator<DataT>::DrawIterator(const DrawIterator<DataT>& iter):
    Iterator<DataT>   ( iter                 ),
    drawprop          ( iter.drawprop        ),
    _transtack        ( iter._transtack      )

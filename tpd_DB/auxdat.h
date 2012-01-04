@@ -36,7 +36,7 @@ namespace auxdata {
    class TdtAuxData  {
    public:
       //! The default constructor.
-                           TdtAuxData(SH_STATUS sel = sh_active) : _status(sel){};
+                           TdtAuxData(SH_STATUS sel = sh_invalid) : _status(sel){};
       //! Return the overlapping box of the object.
       virtual   DBbox      overlap()  const = 0;
       //! A preparation for drawing - calculating all drawing objects using translation matrix stack.
@@ -163,7 +163,9 @@ namespace auxdata {
          void                reportLayers(DWordSet&);
          void                reportLayData(unsigned, AuxDataList&);
          bool                cleanLay(unsigned);
-         void                repairData(unsigned, laydata::ShapeList&);
+         bool                repairData(unsigned, laydata::ShapeList&);
+         bool                cleanRepaired(unsigned la);
+
          //
          virtual DBbox       cellOverlap() const        {return _cellOverlap;}
          std::string         name() const               {return _name;}

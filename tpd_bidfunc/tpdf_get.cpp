@@ -259,24 +259,42 @@ void tellstdfunc::grcREPAIRDATA::undo()
 int tellstdfunc::grcREPAIRDATA::execute()
 {
    word     la = getWordValue();
-//   telldata::TtList* llist = DEBUG_NEW telldata::TtList(telldata::tn_auxilary);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
-//      auxdata::AuxDataList dataList;
-      laydata::TdtCell*   tCell   = (*dbLibDir)()->targetECell();
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      laydata::TdtCell*   tCell   = tDesign->targetECell();
       auxdata::GrcCell* grcCell   = tCell->getGrcCell();
       if (NULL != grcCell)
       {
-         laydata::ShapeList newData;
-         grcCell->repairData(la, newData);
-//         grcCell->reportLayData(la,dataList);
-//         for (auxdata::AuxDataList::const_iterator CD = dataList.begin(); CD != dataList.end(); CD++)
-//            llist->add(DEBUG_NEW telldata::TtAuxdata(*CD, la));
+         laydata::ShapeList newShapes;
+         if (grcCell->repairData(la, newShapes))
+            if (!newShapes.empty())
+            {
+               tDesign->addList(la, newShapes);
+               if (grcCell->cleanRepaired(la))
+               {
+                  tCell->clearGrcCell();
+                  TpdPost::treeMarkGrcMember(tDesign->activeCellName().c_str(), false);
+               }
+            }
+            else
+            {
+               std::stringstream ost;
+               ost << "No recoverable data on layer " << la << ". Check poly/wire recovery settings.";
+               tell_log(console::MT_WARNING, ost.str());
+            }
+         else
+         {
+            std::stringstream ost;
+            ost << "No invalid data on layer " << la << ". Nothing to repair.";
+            tell_log(console::MT_WARNING, ost.str());
+         }
+         LogFile << LogFile.getFN() << "(" << la << ");"; LogFile.flush();
       }
-      LogFile << LogFile.getFN() << "(" << la << ");"; LogFile.flush();
+      else
+         tell_log(console::MT_WARNING,"No invalid data in the current cell. Nothing to repair.");
    }
-//   OPstack.push(llist);
    DATC->unlockTDT(dbLibDir, true);
 
 //   telldata::TtPnt    *p2 = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
@@ -303,6 +321,6 @@ int tellstdfunc::grcREPAIRDATA::execute()
 //   }
 //   delete p1; delete p2;
 //   DATC->unlockTDT(dbLibDir, true);
-//   RefreshGL();
+   RefreshGL();
    return EXEC_NEXT;
 }
