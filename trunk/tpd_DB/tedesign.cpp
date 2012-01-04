@@ -1252,6 +1252,20 @@ void laydata::TdtDesign::addList(AtticList* nlst/*, DWordSet& newLays*/)
    }
 }
 
+void laydata::TdtDesign::addList(unsigned la, ShapeList& newShapes)
+{
+   if (!newShapes.empty())
+   {
+      DBbox old_overlap(_target.edit()->cellOverlap());
+      QuadTree *actlay = _target.edit()->secureLayer(la);
+      setModified();
+      for (laydata::ShapeList::const_iterator CS = newShapes.begin(); CS != newShapes.end(); CS++)
+         actlay->add(*CS);
+      if (_target.edit()->overlapChanged(old_overlap, this))
+         do {} while(validateCells());
+   }
+}
+
 laydata::TdtCell* laydata::TdtDesign::openCell(std::string name)
 {
    if (_cells.end() != _cells.find(name))
