@@ -46,7 +46,7 @@ namespace tellstdfunc {
    const wxString fspec_tmpl     = wxT("%")+flags_tmpl + width_tmpl + prec_tmpl + spec_tmpl;
 //   const wxString dblesc_tmpl    = esc_tmpl + esc_tmpl;
 
-   bool replaceNextFstr(std::string&, telldata::TellVar*);
+   int replaceNextFstr(std::string&, telldata::TellVar*);
    void replaceESCs(std::string&);
    bool checkFstr(const std::string&);
 

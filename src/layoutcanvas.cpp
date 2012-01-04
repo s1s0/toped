@@ -773,6 +773,7 @@ void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event))
             default:
                menu.Append(CM_CONTINUE, wxT("Continue"));
                menu.Append(   CM_ABORT, wxT("Abort"));
+               break;
          }
       }
       else

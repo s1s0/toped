@@ -525,7 +525,7 @@ int tellstdfunc::intrnlSORT_DB::execute()
 }
 
 
-bool tellstdfunc::replaceNextFstr(std::string& str, telldata::TellVar* val)
+int tellstdfunc::replaceNextFstr(std::string& str, telldata::TellVar* val)
 {
    wxString wxStr(str.c_str(), wxConvUTF8);
    wxRegEx src_tmpl(tellstdfunc::fspec_tmpl);
@@ -539,7 +539,7 @@ bool tellstdfunc::replaceNextFstr(std::string& str, telldata::TellVar* val)
       char replacement[1024]; // TODO - any chance for a decent length here?
       str.copy(formatChars, length, start);
       formatChars[length] = 0x00;
-      int numChars;
+      int numChars = -1;
       switch (val->get_type())
       {
          case telldata::tn_int    :
@@ -556,11 +556,12 @@ bool tellstdfunc::replaceNextFstr(std::string& str, telldata::TellVar* val)
             numChars = sprintf(replacement, formatChars, interStr.c_str());
             break;
          }
-         default: assert(false);
-         if (0 > numChars)
-            return -1; //format string found, but there is a discrepancy with the corresponding variable
+         default: assert(false); break;
       }
-      str.replace(start, length, replacement);
+      if (0 > numChars)
+         return -1; //format string found, but there is a discrepancy with the corresponding variable
+      else
+         str.replace(start, length, replacement);
       return 1; // OK
    }
    return 0; // format string not found
