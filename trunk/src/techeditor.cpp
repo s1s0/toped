@@ -44,7 +44,7 @@ extern console::TllCmdLine*      Console;
 const wxString emptyFill = wxT("No Filling");
 
 ///////////////////////////////////////////////////////////////////////////
-extern const wxEventType         wxEVT_CMD_BROWSER;
+//extern const wxEventType         wxEVT_CMD_BROWSER;
 
 BEGIN_EVENT_TABLE(tui::TechEditorDialog, wxDialog)
    EVT_LISTBOX(ID_TE_LAYER       , tui::TechEditorDialog::onLayerSelected) 

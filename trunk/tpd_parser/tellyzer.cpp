@@ -120,7 +120,7 @@ void parsercmd::TellPreProc::define(std::string val)
 void parsercmd::TellPreProc::cmdlDefine(std::string varval)
 {
    size_t eqMark = varval.find('=');
-   if (-1 == eqMark)
+   if (std::string::npos == eqMark)
       _variables[varval] = std::string("");
    else
       _variables[varval.substr(0,eqMark)] = varval.substr(eqMark+1);
@@ -895,6 +895,7 @@ int parsercmd::cmdLISTSIZE::execute()
             initVar = DEBUG_NEW telldata::TtUserStruct(static_cast<const telldata::TCompType*>(utype));
          else
             initVar = DEBUG_NEW telldata::TtCallBack(ID);
+         break;
       }
    }
 
@@ -1172,6 +1173,7 @@ int parsercmd::cmdSTRUCT::execute()
                ustrct = DEBUG_NEW telldata::TtUserStruct(static_cast<const telldata::TCompType*>(atype), OPstack);
             else
                assert(false); // parser shall never get to this point or I'm missing something ...
+            break;
          }
       }
    }
@@ -1411,6 +1413,7 @@ telldata::TellVar* parsercmd::cmdBLOCK::newTellvar(telldata::typeID ID, const ch
             else
                delete cbfp;
          }
+         break;
       }
    }
    return NULL;
@@ -1458,6 +1461,7 @@ telldata::TellVar* parsercmd::cmdBLOCK::newFuncArg(telldata::typeID ID, TpdYYLty
             parsercmd::cmdCALLBACK* cbfp = DEBUG_NEW cmdCALLBACK(vartype->paramList(),vartype->fType(), loc);
             return (DEBUG_NEW telldata::TtCallBack(ID, cbfp));
          }
+         break;
       }
    }
    return NULL;
@@ -1467,7 +1471,7 @@ parsercmd::cmdBLOCK* parsercmd::cmdBLOCK::popblk()
 {
    TELL_DEBUG(cmdBLOCK_popblk);
    _blocks.pop_front();
-   return _blocks.front();;
+   return _blocks.front();
 }
 
 void parsercmd::cmdBLOCK::addFUNC(std::string, cmdSTDFUNC* cQ)
@@ -2007,7 +2011,8 @@ int parsercmd::cmdWHILE::execute()
    int retexec = EXEC_NEXT;
    telldata::TtBool *cond;
    bool    condvalue;
-   while (true) {
+   while (true)
+   {
       _condblock->execute();
       cond = static_cast<telldata::TtBool*>(OPstack.top());OPstack.pop();
       condvalue = cond->value(); delete cond;
@@ -2015,6 +2020,7 @@ int parsercmd::cmdWHILE::execute()
       else              return retexec;
       if (EXEC_NEXT != retexec) return retexec;
    }
+   return EXEC_NEXT; // dummy, to prevent warnings
 }
 
 //=============================================================================
@@ -2024,7 +2030,8 @@ int parsercmd::cmdREPEAT::execute()
    int retexec;
    telldata::TtBool *cond;
    bool    condvalue;
-   while (true) {
+   while (true)
+   {
       retexec = _body->execute();
       if (EXEC_NEXT != retexec) return retexec;
       _condblock->execute();
@@ -2032,6 +2039,7 @@ int parsercmd::cmdREPEAT::execute()
       condvalue = cond->value(); delete cond;
       if (!condvalue)           return retexec;
    }
+   return EXEC_NEXT; // dummy, to prevent warnings
 }
 
 //=============================================================================
@@ -2938,7 +2946,7 @@ console::toped_logfile& console::toped_logfile::operator<< (const telldata::TtLi
                *this << *(static_cast<telldata::TtHsh*>((_tl.mlist())[i]));
                break;
    //         case tn_layout:
-               default:{assert(false);}
+            default:assert(false); break;
          }
       }
       _file << "}";
@@ -3061,10 +3069,9 @@ telldata::TellVar* parsercmd::newCallBackArgument(telldata::typeID ID, TpdYYLtyp
             tellerror("Bad type specifier", loc);
          else if (utype->isComposite())
             return (DEBUG_NEW telldata::TtUserStruct(static_cast<const telldata::TCompType*>(utype)));
-         else
-         { // callback variable
+         else // callback variable
             assert(0);
-         }
+         break;
       }
    }
    return NULL;
