@@ -30,10 +30,8 @@
 
 #include "tpdf_common.h"
 namespace tellstdfunc {
-   using parsercmd::cmdSTDFUNC;
+   using namespace parsercmd;
    using telldata::argumentQ;
-   using parsercmd::ArgumentLIST;
-   using parsercmd::ArgumentTYPE;
 
    TELL_STDCMD_CLASSA(stdGETLAYTYPE     );
    TELL_STDCMD_CLASSA(stdGETLAYTEXTSTR  );
@@ -41,5 +39,6 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(grcGETLAYERS      );
    TELL_STDCMD_CLASSA(grcGETDATA        );
    TELL_STDCMD_CLASSA(grcCLEANALAYER    );
+   TELL_STDCMD_CLASSA_UNDO(grcREPAIRDATA);
 }
 #endif

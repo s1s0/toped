@@ -188,3 +188,121 @@ int tellstdfunc::grcCLEANALAYER::execute()
    RefreshGL();
    return EXEC_NEXT;
 }
+
+
+//=============================================================================
+tellstdfunc::grcREPAIRDATA::grcREPAIRDATA(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
+{
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+}
+
+void tellstdfunc::grcREPAIRDATA::undo_cleanup()
+{
+//   telldata::TtPnt    *p1 = static_cast<telldata::TtPnt*>(UNDOPstack.back());UNDOPstack.pop_back();
+//   telldata::TtPnt    *p2 = static_cast<telldata::TtPnt*>(UNDOPstack.back());UNDOPstack.pop_back();
+//   telldata::TtList* failed = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+//   telldata::TtList* deleted = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+//   telldata::TtList* added = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+//   clean_ttlaylist(deleted);
+//   delete added;
+//   delete deleted;
+//   delete failed;
+//   delete p1;
+//   delete p2;
+}
+
+void tellstdfunc::grcREPAIRDATA::undo()
+{
+//   TEUNDO_DEBUG("move(point point) UNDO");
+//   telldata::TtList* added = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+//   telldata::TtList* deleted = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+//   telldata::TtList* failed = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+//   telldata::TtPnt    *p2 = static_cast<telldata::TtPnt*>(UNDOPstack.front());UNDOPstack.pop_front();
+//   telldata::TtPnt    *p1 = static_cast<telldata::TtPnt*>(UNDOPstack.front());UNDOPstack.pop_front();
+//
+//   real DBscale = PROPC->DBscale();
+//   DWordSet unselable = PROPC->allUnselectable();
+//   laydata::TdtLibDir* dbLibDir = NULL;
+//   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+//   {
+//      laydata::TdtDesign* tDesign = (*dbLibDir)();
+//      tDesign->unselectFromList(get_ttlaylist(failed), unselable);
+//      tDesign->unselectFromList(get_ttlaylist(added), unselable);
+//      laydata::SelectList* fadead[3];
+//      byte i;
+//      for (i = 0; i < 3; fadead[i++] = DEBUG_NEW laydata::SelectList());
+//      tDesign->moveSelected(TP(p1->x(), p1->y(), DBscale), TP(p2->x(), p2->y(), DBscale),fadead);
+//      //@TODO Here - an internal check can be done - all 3 of the fadead lists
+//      // MUST be empty, otherwise - god knows what's wrong!
+//      for (i = 0; i < 3; delete fadead[i++]);
+//      tDesign->selectFromList(get_ttlaylist(failed), unselable);
+//      // put back the replaced (deleted) shapes
+//      tDesign->addList(get_shlaylist(deleted));
+//      // and select them
+//      tDesign->selectFromList(get_ttlaylist(deleted), unselable);
+//      // delete the added shapes
+//      for (word j = 0 ; j < added->mlist().size(); j++) {
+//         tDesign->destroyThis(static_cast<telldata::TtLayout*>(added->mlist()[j])->data(),
+//                              static_cast<telldata::TtLayout*>(added->mlist()[j])->layer(),
+//                              dbLibDir);
+//      }
+//   }
+//   DATC->unlockTDT(dbLibDir, true);
+//   delete failed;
+//   delete deleted;
+//   delete added;
+//   delete p1; delete p2;
+//   RefreshGL();
+}
+
+int tellstdfunc::grcREPAIRDATA::execute()
+{
+   word     la = getWordValue();
+//   telldata::TtList* llist = DEBUG_NEW telldata::TtList(telldata::tn_auxilary);
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+//      auxdata::AuxDataList dataList;
+      laydata::TdtCell*   tCell   = (*dbLibDir)()->targetECell();
+      auxdata::GrcCell* grcCell   = tCell->getGrcCell();
+      if (NULL != grcCell)
+      {
+         laydata::ShapeList newData;
+         grcCell->repairData(la, newData);
+//         grcCell->reportLayData(la,dataList);
+//         for (auxdata::AuxDataList::const_iterator CD = dataList.begin(); CD != dataList.end(); CD++)
+//            llist->add(DEBUG_NEW telldata::TtAuxdata(*CD, la));
+      }
+      LogFile << LogFile.getFN() << "(" << la << ");"; LogFile.flush();
+   }
+//   OPstack.push(llist);
+   DATC->unlockTDT(dbLibDir, true);
+
+//   telldata::TtPnt    *p2 = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
+//   telldata::TtPnt    *p1 = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
+//   real DBscale = PROPC->DBscale();
+//   // moveSelected returns 3 select lists : Failed/Deleted/Added
+//   // This is because of the modify operations
+//   laydata::SelectList* fadead[3];
+//   for (byte i = 0; i < 3; fadead[i++] = DEBUG_NEW laydata::SelectList());
+//   laydata::TdtLibDir* dbLibDir = NULL;
+//   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+//   {
+//      laydata::TdtDesign* tDesign = (*dbLibDir)();
+//      UNDOcmdQ.push_front(this);
+//      UNDOPstack.push_front(p2->selfcopy());
+//      UNDOPstack.push_front(p1->selfcopy());
+//      tDesign->moveSelected(TP(p1->x(), p1->y(), DBscale), TP(p2->x(), p2->y(), DBscale), fadead);
+//      // save for undo operations ...
+//      UNDOPstack.push_front(make_ttlaylist(fadead[0])); // first failed
+//      UNDOPstack.push_front(make_ttlaylist(fadead[1])); // then deleted
+//      UNDOPstack.push_front(make_ttlaylist(fadead[2])); // and added
+//      cleanFadeadList(fadead);
+//      LogFile << LogFile.getFN() << "("<< *p1 << "," << *p2 << ");"; LogFile.flush();
+//   }
+//   delete p1; delete p2;
+//   DATC->unlockTDT(dbLibDir, true);
+//   RefreshGL();
+   return EXEC_NEXT;
+}

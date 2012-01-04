@@ -197,6 +197,37 @@ PointVector auxdata::TdtGrcPoly::dumpPoints() const
    return plist;
 }
 
+laydata::ShapeList* auxdata::TdtGrcPoly::getRepaired() const
+{
+   PointVector pData = dumpPoints();
+   laydata::ValidPoly check(pData);
+   if (check.acceptable())
+   {
+      return check.replacements();
+//      if (!newShapes->empty())
+//      {
+//         DBbox old_overlap(_target.edit()->cellOverlap());
+//         QuadTree *actlay = _target.edit()->secureLayer(la);
+//         setModified();
+//         for (laydata::ShapeList::const_iterator CS = newShapes->begin(); CS != newShapes->end(); CS++)
+//         {
+//            actlay->add(*CS);
+//            newshape = *CS;
+//         }
+//         if (_target.edit()->overlapChanged(old_overlap, this))
+//            do {} while(validateCells());
+//      }
+   }
+   else
+//   {
+//      std::ostringstream ost;
+//      ost << "Validation check fails - " << check.failType();
+//      tell_log(console::MT_ERROR, ost.str());
+//   }
+   return NULL;
+
+   return false;
+}
 
 //==============================================================================
 auxdata::TdtGrcWire::TdtGrcWire(const PointVector& plst, WireWidth width) :
@@ -438,6 +469,38 @@ PointVector auxdata::TdtGrcWire::dumpPoints() const
    for (unsigned i = 0; i < _psize; i++)
       plist.push_back(TP(_pdata[2*i], _pdata[2*i+1]));
    return plist;
+}
+
+laydata::ShapeList* auxdata::TdtGrcWire::getRepaired() const
+{
+   PointVector pData = dumpPoints();
+   laydata::ValidWire check(pData, _width);
+   if (check.acceptable())
+   {
+      return check.replacements();
+//      if (!newShapes->empty())
+//      {
+//         DBbox old_overlap(_target.edit()->cellOverlap());
+//         QuadTree *actlay = _target.edit()->secureLayer(la);
+//         setModified();
+//         for (laydata::ShapeList::const_iterator CS = newShapes->begin(); CS != newShapes->end(); CS++)
+//         {
+//            actlay->add(*CS);
+//            newshape = *CS;
+//         }
+//         newShapes->clear();
+//         if (_target.edit()->overlapChanged(old_overlap, this))
+//            do {} while(validateCells());
+//      }
+//      delete newShapes;
+   }
+   else
+//   {
+//      std::ostringstream ost;
+//      ost << "Validation check fails - " << check.failType();
+//      tell_log(console::MT_ERROR, ost.str());
+//   }
+   return NULL;
 }
 
 //==============================================================================
@@ -696,4 +759,23 @@ bool auxdata::GrcCell::cleanLay(unsigned lay)
       emptycell = _layers.empty();
    }
    return emptycell;
+}
+
+void auxdata::GrcCell::repairData(unsigned lay, laydata::ShapeList& newData)
+{
+   LayerList::const_iterator wl = _layers.find(lay);
+   if (_layers.end() != wl)
+   {
+      for (QuadTree::Iterator DI = wl->second->begin(); DI != wl->second->end(); DI++)
+      {
+         laydata::ShapeList* objReplacement = DI->getRepaired();
+         if (NULL != objReplacement)
+         {
+            for (laydata::ShapeList::const_iterator CS = objReplacement->begin(); CS != objReplacement->end(); CS++)
+               newData.push_back(*CS);
+            delete objReplacement;
+            DI->setStatus(sh_recovered);
+         }
+      }
+   }
 }
