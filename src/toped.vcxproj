@@ -131,7 +131,7 @@
       <AdditionalIncludeDirectories>c:\wxWindows\include;c:\wxWindows\contrib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>odbc32.lib;odbccp32.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;winmm.lib;wxregexud.lib;wxzlibd.lib;wxpngd.lib;wxjpegd.lib;wxtiffd.lib;wxexpatd.lib;wxbase28ud.lib;wxbase28ud_net.lib;wxmsw28ud_core.lib;wxmsw28ud_adv.lib;wxmsw28ud_html.lib;wxbase28ud_xml.lib;wxmsw28ud_gl.lib;wxmsw28ud_xrc.lib;wxmsw28ud_aui.lib;glew32d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;winmm.lib;wxregexud.lib;wxzlibd.lib;wxpngd.lib;wxjpegd.lib;wxtiffd.lib;wxexpatd.lib;wxbase29ud.lib;wxbase29ud_net.lib;wxmsw28ud_core.lib;wxmsw29ud_adv.lib;wxmsw29ud_html.lib;wxbase29ud_xml.lib;wxmsw29ud_gl.lib;wxmsw29ud_xrc.lib;wxmsw29ud_aui.lib;glew32d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>..\Debug\toped.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
