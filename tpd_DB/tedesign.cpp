@@ -1033,6 +1033,21 @@ void laydata::TdtDesign::fixUnsorted()
       do {} while(validateCells());
 }
 
+void laydata::TdtDesign::fixReferenceOverlap(DBbox& old_overlap, TdtCell* targetCell)
+{
+   if (NULL == targetCell)
+   {
+      if (_target.edit()->overlapChanged(old_overlap, this))
+         do {} while(validateCells());
+   }
+   else
+   {
+      if (targetCell->overlapChanged(old_overlap, this))
+         do {} while(validateCells());
+   }
+}
+
+
 void laydata::TdtDesign::setModified()
 {
    _modified = true;

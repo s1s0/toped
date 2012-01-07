@@ -770,11 +770,9 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    mblock->addFUNC("drchideallerrors" ,(DEBUG_NEW            tellstdfunc::DRChideallerrors(telldata::tn_void, true)));
    mblock->addFUNC("drcexplainerror"  ,(DEBUG_NEW           tellstdfunc::DRCexplainerror_D(telldata::tn_void, true)));
    mblock->addFUNC("drcexplainerror"  ,(DEBUG_NEW             tellstdfunc::DRCexplainerror(telldata::tn_void, true)));
-   mblock->addFUNC("getgrclayers"     ,(DEBUG_NEW        tellstdfunc::grcGETLAYERS(TLISTOF(telldata::tn_int), true)));
-   mblock->addFUNC("getgrcdata"       ,(DEBUG_NEW     tellstdfunc::grcGETDATA(TLISTOF(telldata::tn_auxilary), true)));
-
-   mblock->addFUNC("recovergrcdata"   ,(DEBUG_NEW               tellstdfunc::grcREPAIRDATA(telldata::tn_void, true)));
-
+   mblock->addFUNC("grcgetlayers"     ,(DEBUG_NEW        tellstdfunc::grcGETLAYERS(TLISTOF(telldata::tn_int), true)));
+   mblock->addFUNC("grcgetdata"       ,(DEBUG_NEW     tellstdfunc::grcGETDATA(TLISTOF(telldata::tn_auxilary), true)));
+   mblock->addFUNC("grcrecoverdata"   ,(DEBUG_NEW               tellstdfunc::grcREPAIRDATA(telldata::tn_void, true)));
    mblock->addFUNC("cleangrclayer"    ,(DEBUG_NEW              tellstdfunc::grcCLEANALAYER(telldata::tn_void, true)));
    mblock->addFUNC("psexport"         ,(DEBUG_NEW                 tellstdfunc::PSexportTOP(telldata::tn_void,false)));
    mblock->addFUNC("tdtread"          ,(DEBUG_NEW                     tellstdfunc::TDTread(telldata::tn_void, true)));

@@ -199,24 +199,16 @@ tellstdfunc::grcREPAIRDATA::grcREPAIRDATA(telldata::typeID retype, bool eor) :
 
 void tellstdfunc::grcREPAIRDATA::undo_cleanup()
 {
-//   telldata::TtPnt    *p1 = static_cast<telldata::TtPnt*>(UNDOPstack.back());UNDOPstack.pop_back();
-//   telldata::TtPnt    *p2 = static_cast<telldata::TtPnt*>(UNDOPstack.back());UNDOPstack.pop_back();
-//   telldata::TtList* failed = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
-//   telldata::TtList* deleted = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
-//   telldata::TtList* added = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
-//   clean_ttlaylist(deleted);
-//   delete added;
-//   delete deleted;
-//   delete failed;
-//   delete p1;
-//   delete p2;
+   telldata::TtList* newShapes = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList* oldShapes = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   clean_ttlaylist(oldShapes);
+   delete oldShapes;
 }
 
 void tellstdfunc::grcREPAIRDATA::undo()
 {
-//   TEUNDO_DEBUG("move(point point) UNDO");
-//   telldata::TtList* added = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
-//   telldata::TtList* deleted = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtList* oldShapes = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtList* newShapes = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
 //   telldata::TtList* failed = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
 //   telldata::TtPnt    *p2 = static_cast<telldata::TtPnt*>(UNDOPstack.front());UNDOPstack.pop_front();
 //   telldata::TtPnt    *p1 = static_cast<telldata::TtPnt*>(UNDOPstack.front());UNDOPstack.pop_front();
@@ -269,14 +261,29 @@ int tellstdfunc::grcREPAIRDATA::execute()
       {
          laydata::ShapeList newShapes;
          if (grcCell->repairData(la, newShapes))
+         {
             if (!newShapes.empty())
             {
+               UNDOcmdQ.push_front(this);
+               DBbox oldOverlap(tCell->cellOverlap());
                tDesign->addList(la, newShapes);
-               if (grcCell->cleanRepaired(la))
+               UNDOPstack.push_front(make_ttlaylist(newShapes, la));
+               auxdata::AuxDataList oldShapes;
+               switch (grcCell->cleanRepaired(la, oldShapes))
                {
-                  tCell->clearGrcCell();
-                  TpdPost::treeMarkGrcMember(tDesign->activeCellName().c_str(), false);
+                  case -1: // grc cell is empty - clear it up
+                           tCell->clearGrcCell();
+                           TpdPost::treeMarkGrcMember(tDesign->activeCellName().c_str(), false);
+                           break;
+                  case  0: // cell still contains objects and the overlap is the same. Nothing to do
+                           break;
+                  case  1: // cell still contains objects and the overlap has changed.
+                           // update the reference overlaps
+                           tDesign->fixReferenceOverlap(oldOverlap, tCell);
+                           break;
+                  default: assert(false); break;
                }
+               UNDOPstack.push_front(make_ttlaylist(oldShapes, la));
             }
             else
             {
@@ -284,43 +291,19 @@ int tellstdfunc::grcREPAIRDATA::execute()
                ost << "No recoverable data on layer " << la << ". Check poly/wire recovery settings.";
                tell_log(console::MT_WARNING, ost.str());
             }
+            LogFile << LogFile.getFN() << "(" << la << ");"; LogFile.flush();
+         }
          else
          {
             std::stringstream ost;
             ost << "No invalid data on layer " << la << ". Nothing to repair.";
             tell_log(console::MT_WARNING, ost.str());
          }
-         LogFile << LogFile.getFN() << "(" << la << ");"; LogFile.flush();
       }
       else
          tell_log(console::MT_WARNING,"No invalid data in the current cell. Nothing to repair.");
    }
    DATC->unlockTDT(dbLibDir, true);
-
-//   telldata::TtPnt    *p2 = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
-//   telldata::TtPnt    *p1 = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
-//   real DBscale = PROPC->DBscale();
-//   // moveSelected returns 3 select lists : Failed/Deleted/Added
-//   // This is because of the modify operations
-//   laydata::SelectList* fadead[3];
-//   for (byte i = 0; i < 3; fadead[i++] = DEBUG_NEW laydata::SelectList());
-//   laydata::TdtLibDir* dbLibDir = NULL;
-//   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
-//   {
-//      laydata::TdtDesign* tDesign = (*dbLibDir)();
-//      UNDOcmdQ.push_front(this);
-//      UNDOPstack.push_front(p2->selfcopy());
-//      UNDOPstack.push_front(p1->selfcopy());
-//      tDesign->moveSelected(TP(p1->x(), p1->y(), DBscale), TP(p2->x(), p2->y(), DBscale), fadead);
-//      // save for undo operations ...
-//      UNDOPstack.push_front(make_ttlaylist(fadead[0])); // first failed
-//      UNDOPstack.push_front(make_ttlaylist(fadead[1])); // then deleted
-//      UNDOPstack.push_front(make_ttlaylist(fadead[2])); // and added
-//      cleanFadeadList(fadead);
-//      LogFile << LogFile.getFN() << "("<< *p1 << "," << *p2 << ");"; LogFile.flush();
-//   }
-//   delete p1; delete p2;
-//   DATC->unlockTDT(dbLibDir, true);
    RefreshGL();
    return EXEC_NEXT;
 }
