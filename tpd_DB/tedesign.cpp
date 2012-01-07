@@ -907,7 +907,7 @@ void laydata::TdtDesign::addThisCell(laydata::TdtCell* strdefn, laydata::TdtLibD
 
 /*! Removes unreferenced cell and returns its contents if required
 */
-laydata::TdtCell* laydata::TdtDesign::removeCell(std::string& name, laydata::AtticList* fsel, laydata::TdtLibDir* libdir)
+laydata::TdtCell* laydata::TdtDesign::removeTopCell(std::string& name, laydata::AtticList* fsel, laydata::TdtLibDir* libdir)
 {
    assert(NULL == _hiertree->GetMember(_cells[name])->Getparent());
 
@@ -1008,8 +1008,7 @@ laydata::TdtData* laydata::TdtDesign::addBox(unsigned la, TP* p1, TP* p2 )
    TP np2((*p2) * _target.rARTM());
    laydata::TdtBox *newshape = DEBUG_NEW TdtBox(np1,np2);
    actlay->add(newshape);
-   if (_target.edit()->overlapChanged(old_overlap, this))
-      do {} while(validateCells());
+   fixReferenceOverlap(old_overlap);
    return newshape;
 }
 
@@ -1029,8 +1028,7 @@ void laydata::TdtDesign::fixUnsorted()
    TdtCell* editTarget = _target.edit();
    DBbox old_overlap(editTarget->cellOverlap());
    editTarget->fixUnsorted();
-   if (editTarget->overlapChanged(old_overlap, this))
-      do {} while(validateCells());
+   fixReferenceOverlap(old_overlap, editTarget);
 }
 
 void laydata::TdtDesign::fixReferenceOverlap(DBbox& old_overlap, TdtCell* targetCell)
@@ -1074,8 +1072,7 @@ laydata::TdtData* laydata::TdtDesign::addPoly(unsigned la, PointVector* pl)
             actlay->add(*CS);
             newshape = *CS;
          }
-         if (_target.edit()->overlapChanged(old_overlap, this))
-            do {} while(validateCells());
+         fixReferenceOverlap(old_overlap);
       }
    }
    else
@@ -1140,8 +1137,7 @@ laydata::TdtData* laydata::TdtDesign::addWire(unsigned la, PointVector* pl, Wire
             newshape = *CS;
          }
          newShapes->clear();
-         if (_target.edit()->overlapChanged(old_overlap, this))
-            do {} while(validateCells());
+         fixReferenceOverlap(old_overlap);
       }
       delete newShapes;
    }
@@ -1195,8 +1191,7 @@ laydata::TdtData* laydata::TdtDesign::addText(unsigned la, std::string& text, CT
    laydata::TdtText *newshape = DEBUG_NEW TdtText(text,ori);
    actlay->add(newshape);
 
-   if (_target.edit()->overlapChanged(old_overlap, this))
-      do {} while(validateCells());
+   fixReferenceOverlap(old_overlap);
    return newshape;
 }
 
@@ -1222,8 +1217,7 @@ laydata::TdtData* laydata::TdtDesign::addCellRef(laydata::CellDefin strdefn, CTM
    }
    else
    {
-      if (_target.edit()->overlapChanged(old_overlap, this))
-         do {} while(validateCells());
+      fixReferenceOverlap(old_overlap);
    }
    return ncrf;
 }
@@ -1244,8 +1238,7 @@ laydata::TdtData* laydata::TdtDesign::addCellARef(std::string& name, CTM& ori,
       }
       else
       {
-         if (_target.edit()->overlapChanged(old_overlap, this))
-            do {} while(validateCells());
+         fixReferenceOverlap(old_overlap);
       }
       return ncrf;
    }
@@ -1258,13 +1251,12 @@ laydata::TdtData* laydata::TdtDesign::addCellARef(std::string& name, CTM& ori,
    }
 }
 
-void laydata::TdtDesign::addList(AtticList* nlst/*, DWordSet& newLays*/)
+void laydata::TdtDesign::addList(AtticList* nlst, TdtCell* tCell)
 {
-   if (_target.edit()->addList(this, nlst/*, newLays*/))
-   {
-      // needs validation
-      do {} while(validateCells());
-   }
+   TdtCell* targetCell = (NULL == tCell) ? _target.edit() : tCell;
+   DBbox old_overlap(targetCell->cellOverlap());
+   targetCell->addList(this, nlst);
+   fixReferenceOverlap(old_overlap, targetCell);
 }
 
 void laydata::TdtDesign::addList(unsigned la, ShapeList& newShapes)
@@ -1276,8 +1268,7 @@ void laydata::TdtDesign::addList(unsigned la, ShapeList& newShapes)
       setModified();
       for (laydata::ShapeList::const_iterator CS = newShapes.begin(); CS != newShapes.end(); CS++)
          actlay->add(*CS);
-      if (_target.edit()->overlapChanged(old_overlap, this))
-         do {} while(validateCells());
+      fixReferenceOverlap(old_overlap);
    }
 }
 
@@ -1480,30 +1471,30 @@ void laydata::TdtDesign::unselectInBox(TP* p1, TP* p2, const DWordSet& unselable
    }
 }
 
-void laydata::TdtDesign::copySelected( TP p1, TP p2) {
+void laydata::TdtDesign::copySelected( TP p1, TP p2)
+{
    CTM trans;
+   DBbox old_overlap(_target.edit()->cellOverlap());
    p1 *= _target.rARTM();
    p2 *= _target.rARTM();
    int4b dX = p2.x() - p1.x();
    int4b dY = p2.y() - p1.y();
    trans.Translate(dX,dY);
-   if (_target.edit()->copySelected(this, trans)) {
-      // needs validation
-      do {} while(validateCells());
-   }
+   _target.edit()->copySelected(trans);
+   fixReferenceOverlap(old_overlap);
 }
 
 void laydata::TdtDesign::moveSelected( TP p1, TP p2, SelectList** fadead)
 {
    CTM trans;
+   DBbox old_overlap(_target.edit()->cellOverlap());
    p1 *= _target.rARTM();
    p2 *= _target.rARTM();
    int4b dX = p2.x() - p1.x();
    int4b dY = p2.y() - p1.y();
    trans.Translate(dX,dY);
-   if (_target.edit()->moveSelected(this, trans, fadead))
-      // needs validation
-      do {} while(validateCells());
+   _target.edit()->moveSelected(trans, fadead);
+   fixReferenceOverlap(old_overlap);
 }
 
 bool laydata::TdtDesign::cutPoly(PointVector& pl, AtticList** dasao)
@@ -1538,48 +1529,42 @@ void laydata::TdtDesign::rotateSelected( TP p, real angle, SelectList** fadead)
    // If just rotation is applied (second step) operation can not deal
    // with the cases when the referenced cell is flipped
    CTM trans = _target.ARTM();
+   DBbox old_overlap(_target.edit()->cellOverlap());
    trans.Translate(-p.x(),-p.y());
    trans.Rotate(angle);
    trans.Translate(p.x(),p.y());
    trans *= _target.rARTM();
-   if (_target.edit()->rotateSelected(this, trans, fadead))
-//   if (_target.edit()->transferSelected(this, trans))
-      // needs validation
-      do {} while(validateCells());
+   _target.edit()->rotateSelected(trans, fadead);
+//   _target.edit()->transferSelected(this, trans)
+   fixReferenceOverlap(old_overlap);
 }
 
 void laydata::TdtDesign::flipSelected( TP p, bool Xaxis) {
    // Here - same principle as for rotateSelected
-   // othrwise flip toggles between X and Y depending on the angle
+   // Otherwise flip toggles between X and Y depending on the angle
    // of rotation of the active cell reference
    CTM trans = _target.ARTM();
+   DBbox old_overlap(_target.edit()->cellOverlap());
    if (Xaxis)  trans.FlipX(p.y());
    else        trans.FlipY(p.x());
    trans *= _target.rARTM();
-   if (_target.edit()->transferSelected(this, trans)) {
-      // needs validation
-      do {} while(validateCells());
-   }
+   _target.edit()->transferSelected(trans);
+   fixReferenceOverlap(old_overlap);
 }
 
 void laydata::TdtDesign::deleteSelected(laydata::AtticList* fsel,
                                          laydata::TdtLibDir* libdir)
 {
-   //laydata::TdtDesign* ATDB
-   if (_target.edit()->deleteSelected(fsel, libdir))
-   {
-      // needs validation
-      do {} while(validateCells());
-   }
+   DBbox old_overlap(_target.edit()->cellOverlap());
+   _target.edit()->deleteSelected(fsel, libdir);
+   fixReferenceOverlap(old_overlap);
 }
 
 void laydata::TdtDesign::destroyThis(TdtData* ds, unsigned la, laydata::TdtLibDir* libdir)
 {
-   if (_target.edit()->destroyThis(libdir, ds,la))
-   {
-      // needs validation
-      do {} while(validateCells());
-   }
+   DBbox old_overlap(_target.edit()->cellOverlap());
+   _target.edit()->destroyThis(libdir, ds,la);
+   fixReferenceOverlap(old_overlap);
 }
 
 bool laydata::TdtDesign::groupSelected(std::string name, laydata::TdtLibDir* libdir)
@@ -1693,8 +1678,7 @@ laydata::AtticList* laydata::TdtDesign::changeRef(ShapeList* cells4u, std::strin
    }
    laydata::AtticList* shapeUngr = DEBUG_NEW laydata::AtticList();
    (*shapeUngr)[0] = cellsUngr;
-   if (_target.edit()->overlapChanged(old_overlap, this))
-      do {} while(validateCells());
+   fixReferenceOverlap(old_overlap);
    return shapeUngr;
 }
 

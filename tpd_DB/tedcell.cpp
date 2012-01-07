@@ -1115,9 +1115,8 @@ void laydata::TdtCell::selectFromList(SelectList* slist, const DWordSet& unselab
    delete unslist;
 }
 
-bool laydata::TdtCell::copySelected(laydata::TdtDesign* ATDB, const CTM& trans)
+void laydata::TdtCell::copySelected(const CTM& trans)
 {
-   DBbox old_overlap(_cellOverlap);
    DataList copyList;
    DataList::iterator DI;
    TdtData *data_copy;
@@ -1151,12 +1150,10 @@ bool laydata::TdtCell::copySelected(laydata::TdtDesign* ATDB, const CTM& trans)
       CL++;
    }
    fixUnsorted();
-   return overlapChanged(old_overlap, ATDB);
 };
 
-bool laydata::TdtCell::addList(laydata::TdtDesign* ATDB, AtticList* nlst/*, DWordSet& newLays*/)
+void laydata::TdtCell::addList(laydata::TdtDesign* ATDB, AtticList* nlst)
 {
-   DBbox old_overlap(_cellOverlap);
    for (AtticList::const_iterator CL = nlst->begin();
                                    CL != nlst->end(); CL++)
    {
@@ -1183,7 +1180,6 @@ bool laydata::TdtCell::addList(laydata::TdtDesign* ATDB, AtticList* nlst/*, DWor
    nlst->clear();
    delete nlst;
    fixUnsorted();// because put was used
-   return overlapChanged(old_overlap, ATDB);
 }
 
 laydata::DataList* laydata::TdtCell::secureDataList(SelectList& slst, unsigned layno)
@@ -1241,16 +1237,15 @@ laydata::ShapeList* laydata::TdtCell::checkNreplaceBox(SelectDataPair& sel, Vali
    }
 }
 
-bool laydata::TdtCell::moveSelected(laydata::TdtDesign* ATDB, const CTM& trans, SelectList** fadead)
+void laydata::TdtCell::moveSelected(const CTM& trans, SelectList** fadead)
 {
-   DBbox old_overlap(_cellOverlap);
    Validator* checkS = NULL;
    // for every single layer selected
    SelectList::iterator CL = _shapesel.begin();
    while (_shapesel.end() != CL)
    {
       assert((_layers.end() != _layers.find(CL->first)));
-      // before all remove the selected and partially shapes
+      // before all remove the selected and partially shapes
       // from the data holders ...
       if (_layers[CL->first]->deleteMarked(sh_selected, true))
          // ... and validate quadTrees
@@ -1310,12 +1305,10 @@ bool laydata::TdtCell::moveSelected(laydata::TdtDesign* ATDB, const CTM& trans, 
       }
       else CL++;
    }
-   return overlapChanged(old_overlap, ATDB);
 }
 
-bool laydata::TdtCell::rotateSelected(laydata::TdtDesign* ATDB, const CTM& trans, SelectList** fadead)
+void laydata::TdtCell::rotateSelected(const CTM& trans, SelectList** fadead)
 {
-   DBbox old_overlap(_cellOverlap);
    Validator* checkS = NULL;
    // for every single layer selected
    SelectList::iterator CL = _shapesel.begin();
@@ -1380,12 +1373,10 @@ bool laydata::TdtCell::rotateSelected(laydata::TdtDesign* ATDB, const CTM& trans
       }
       else CL++;
    }
-   return overlapChanged(old_overlap, ATDB);
 }
 
-bool laydata::TdtCell::transferSelected(laydata::TdtDesign* ATDB, const CTM& trans)
+void laydata::TdtCell::transferSelected(const CTM& trans)
 {
-   DBbox old_overlap(_cellOverlap);
    // for every single layer selected
    for (SelectList::const_iterator CL = _shapesel.begin();
                                                   CL != _shapesel.end(); CL++)
@@ -1412,13 +1403,12 @@ bool laydata::TdtCell::transferSelected(laydata::TdtDesign* ATDB, const CTM& tra
       }
       _layers[CL->first]->resort();
    }
-   return overlapChanged(old_overlap, ATDB);
 }
 
-bool laydata::TdtCell::deleteSelected(laydata::AtticList* fsel,
+void laydata::TdtCell::deleteSelected(laydata::AtticList* fsel,
                                              laydata::TdtLibDir* libdir )
 {
-   DBbox old_overlap(_cellOverlap);
+//   DBbox old_overlap(_cellOverlap);
    // for every single layer in the select list
    for (SelectList::const_iterator CL = _shapesel.begin(); CL != _shapesel.end(); CL++)
    {
@@ -1438,7 +1428,7 @@ bool laydata::TdtCell::deleteSelected(laydata::AtticList* fsel,
    if (fsel) storeInAttic(*fsel);
    else      unselectAll(true);
    updateHierarchy(libdir);
-   return overlapChanged(old_overlap, (*libdir)());
+//   return overlapChanged(old_overlap, (*libdir)());
 }
 
 bool laydata::TdtCell::cutPolySelected(PointVector& plst, AtticList** dasao)
@@ -1601,11 +1591,10 @@ bool laydata::TdtCell::mergeSelected(AtticList** dasao)
    return !dasao[0]->empty();
 }
 
-bool laydata::TdtCell::destroyThis(laydata::TdtLibDir* libdir, TdtData* ds, unsigned la)
+void laydata::TdtCell::destroyThis(laydata::TdtLibDir* libdir, TdtData* ds, unsigned la)
 {
-   DBbox old_overlap(_cellOverlap);
    laydata::QuadTree* lay = (_layers.find(la))->second;
-   if (!lay) return false;
+   if (!lay) return;
    // for layer la
    if (lay->deleteThis(ds))
    {
@@ -1617,7 +1606,6 @@ bool laydata::TdtCell::destroyThis(laydata::TdtLibDir* libdir, TdtData* ds, unsi
    }
    delete(ds);
    if (REF_LAY == la) updateHierarchy(libdir);
-   return overlapChanged(old_overlap, (*libdir)());
 }
 
 void laydata::TdtCell::selectAll(const DWordSet& unselable, word layselmask)
@@ -2013,14 +2001,6 @@ void laydata::TdtCell::transferLayer(SelectList* slst, unsigned dst)
    // so no need to refresh the overlapping box etc.
 }
 
-//void laydata::TdtCell::resort()
-//{
-//   typedef LayerList::const_iterator LCI;
-//   for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
-//      lay->second->resort();
-//   getCellOverlap();
-//}
-
 void laydata::TdtCell::fixUnsorted()
 {
    typedef TmpLayerMap::const_iterator LCI;
@@ -2074,10 +2054,11 @@ void laydata::TdtCell::storeInAttic(laydata::AtticList& _Attic) {
 bool laydata::TdtCell::overlapChanged(DBbox& old_overlap, laydata::TdtDesign* ATDB)
 {
    getCellOverlap();
-   // Invalidate all parent cells
    if (old_overlap != _cellOverlap)
    {
-      invalidateParents(ATDB);return true;
+      // Invalidate all parent cells
+      invalidateParents(ATDB);
+      return true;
    }
    else return false;
 }
@@ -2191,7 +2172,7 @@ bool laydata::TdtCell::relink(laydata::TdtLibDir* libdir)
    DBbox old_overlap(_cellOverlap);
    DataList *refsList = DEBUG_NEW DataList();
    selectAllWrapper(refsTree, refsList, laydata::_lmref, false);
-   // relink every single cell ref in the list
+   // relink every single cell reference in the list
    DataList::iterator CC = refsList->begin();
    while (CC != refsList->end())
    {

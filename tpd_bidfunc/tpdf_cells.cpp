@@ -70,7 +70,7 @@ void tellstdfunc::stdNEWCELL::undo()
       {
          // if no parent cells - it means that a simple "newcell" was
          // executed - so use the conventional remove cell
-         laydata::TdtCell* rmvdcell = tDesign->removeCell(cname,NULL, dbLibDir);
+         laydata::TdtCell* rmvdcell = tDesign->removeTopCell(cname,NULL, dbLibDir);
          delete (rmvdcell);
       }
       else
@@ -147,7 +147,7 @@ void tellstdfunc::stdREMOVECELL::undo()
       // first add a cell
       tDesign->addThisCell(rmvdcell, dbLibDir);
       // add the cell contents back
-      rmvdcell->addList(tDesign, get_shlaylist(pl));
+      tDesign->addList(get_shlaylist(pl), rmvdcell);
    }
    DATC->unlockTDT(dbLibDir, true);
    // finally - clean-up behind
@@ -181,7 +181,7 @@ int tellstdfunc::stdREMOVECELL::execute()
          if (parentCells.empty())
          {
             cell_contents = DEBUG_NEW laydata::AtticList();
-            rmvdcell = tDesign->removeCell(cname,cell_contents, dbLibDir);
+            rmvdcell = tDesign->removeTopCell(cname,cell_contents, dbLibDir);
          }
          else
          {
@@ -637,7 +637,7 @@ void tellstdfunc::stdGROUP::undo()
       {
          // if no parent cells - it means that a simple "group" was
          // executed - so use the conventional remove cell
-         laydata::TdtCell* rmvdcell = tDesign->removeCell(cname,NULL, dbLibDir);
+         laydata::TdtCell* rmvdcell = tDesign->removeTopCell(cname,NULL, dbLibDir);
          delete (rmvdcell);
       }
       else

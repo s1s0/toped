@@ -92,7 +92,7 @@ namespace laydata {
       int            readLibrary(OutputTdtFile* const);
       TdtCell*       addCell(std::string name, laydata::TdtLibDir*);
       void           addThisCell(laydata::TdtCell* strdefn, laydata::TdtLibDir*);
-      TdtCell*       removeCell(std::string&, laydata::AtticList*, laydata::TdtLibDir*);
+      TdtCell*       removeTopCell(std::string&, laydata::AtticList*, laydata::TdtLibDir*);
       void           renameCell(TdtDefaultCell*, std::string);
       void           removeRefdCell(std::string&, CellDefList&, laydata::AtticList*, laydata::TdtLibDir*);
       TdtData*       addBox(unsigned la, TP* p1, TP* p2);
@@ -105,7 +105,7 @@ namespace laydata {
       TdtData*       putText(unsigned la, std::string& text, CTM& ori);
       TdtData*       addCellRef(laydata::CellDefin strdefn, CTM& ori);
       TdtData*       addCellARef(std::string&, CTM&, ArrayProps&);
-      void           addList(AtticList* /*, DWordSet&*/);
+      void           addList(AtticList*, TdtCell* tCell = NULL);
       void           addList(unsigned, ShapeList&);
       TdtCell*       openCell(std::string name);
       bool           editPush(const TP&, const DWordSet&);
