@@ -144,7 +144,8 @@ telldata::TtList* tellstdfunc::make_ttlaylist(laydata::SelectList* shapesel) {
 }
 
 //=============================================================================
-void tellstdfunc::clean_ttlaylist(telldata::TtList* llist) {
+void tellstdfunc::clean_ttlaylist(telldata::TtList* llist)
+{
    // Several things to be noted here
    //  - First is kind of strange - data() method of telldata::TtLayout is defined
    // const, yet compiler doesn't complain that it is DELETED here
@@ -159,8 +160,18 @@ void tellstdfunc::clean_ttlaylist(telldata::TtList* llist) {
    // - Don't try to delete here selp (selected points). It is deleted naturally
    // by the destructor of the telldata::TtLayout class it doesn't have the visibility
    // problem of laydata::TdtData
-   for (word i = 0 ; i < llist->size(); i++) {
-      delete (static_cast<telldata::TtLayout*>(llist->mlist()[i])->data());
+   for (word i = 0 ; i < llist->size(); i++)
+   {
+      switch (llist->get_type())
+      {
+         case TLISTOF(telldata::tn_layout):
+            delete (static_cast<telldata::TtLayout*>(llist->mlist()[i])->data());
+            break;
+         case TLISTOF(telldata::tn_auxilary):
+            delete (static_cast<telldata::TtAuxdata*>(llist->mlist()[i])->data());
+            break;
+         default: assert(false); break;
+      }
    }
 }
 
@@ -181,18 +192,41 @@ void tellstdfunc::clean_atticlist(laydata::AtticList* nlst, bool destroy)
 }
 
 //=============================================================================
-telldata::TtList* tellstdfunc::make_ttlaylist(laydata::AtticList* shapesel) {
+telldata::TtList* tellstdfunc::make_ttlaylist(laydata::AtticList* shapesel)
+{
    telldata::TtList* llist = DEBUG_NEW telldata::TtList(telldata::tn_layout);
    laydata::ShapeList* lslct;
    for (laydata::AtticList::const_iterator CL = shapesel->begin();
-                                            CL != shapesel->end(); CL++) {
+                                           CL != shapesel->end(); CL++)
+   {
       lslct = CL->second;
       // push each data reference into the TELL list
-      for (laydata::ShapeList::const_iterator CI = lslct->begin();
-                                             CI != lslct->end(); CI++)
+      for (laydata::ShapeList::const_iterator CI  = lslct->begin();
+                                              CI != lslct->end(); CI++)
       //   if (sh_deleted == (*CI)->status()) - doesn't seems to need it!
             llist->add(DEBUG_NEW telldata::TtLayout(*CI, CL->first));
    }
+   return llist;
+}
+
+telldata::TtList* tellstdfunc::make_ttlaylist(laydata::ShapeList& lslct, unsigned lay)
+{
+   telldata::TtList* llist = DEBUG_NEW telldata::TtList(telldata::tn_layout);
+   // push each data reference into the TELL list
+   for (laydata::ShapeList::const_iterator CI  = lslct.begin();
+                                           CI != lslct.end(); CI++)
+   //   if (sh_deleted == (*CI)->status()) - doesn't seems to need it!
+      llist->add(DEBUG_NEW telldata::TtLayout(*CI, lay));
+   return llist;
+}
+
+telldata::TtList* tellstdfunc::make_ttlaylist(auxdata::AuxDataList& lslct, unsigned lay)
+{
+   telldata::TtList* llist = DEBUG_NEW telldata::TtList(telldata::tn_auxilary);
+   // push each data reference into the TELL list
+   for (auxdata::AuxDataList::const_iterator CI  = lslct.begin();
+                                             CI != lslct.end(); CI++)
+      llist->add(DEBUG_NEW telldata::TtAuxdata(*CI, lay));
    return llist;
 }
 

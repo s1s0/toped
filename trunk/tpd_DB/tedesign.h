@@ -145,6 +145,7 @@ namespace laydata {
       bool           checkActiveCell();
       bool           checkValidRef(std::string);
       void           fixUnsorted();
+      void           fixReferenceOverlap(DBbox&, TdtCell* targetCell = NULL);
       void           setModified();
       void           storeViewPort(const DBbox& vp)  {_target.storeViewPort(vp);}
       DBbox*         getLastViewPort() const  { return _target.getLastViewPort();}

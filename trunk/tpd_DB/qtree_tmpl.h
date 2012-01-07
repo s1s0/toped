@@ -55,7 +55,7 @@ namespace laydata {
     * overlapping area. Child QuadTree objects are stored into a dynamic
     * array of up to 4 QTreeTmpl objects (_subQuads). \n
     * From outside a QTreeTmpl object shall behave like a container -
-    * abstracting out as much as possible all of the clipping, sorting etc.
+    * abstracting out as much as possible of the clipping, sorting etc.
     * To achieve that appropriate iterators are defined.
     */
    template <typename DataT>

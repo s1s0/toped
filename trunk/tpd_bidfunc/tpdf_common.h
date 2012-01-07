@@ -30,6 +30,7 @@
 
 #include "tedstd.h"
 #include "tellyzer.h"
+#include "auxdat.h"
 
 
 //-----------------------------------------------------------------------------
@@ -159,6 +160,8 @@ namespace tellstdfunc {
    PointVector*         t2tpoints(telldata::TtList *, real);
    telldata::TtList*    make_ttlaylist(laydata::SelectList*);
    telldata::TtList*    make_ttlaylist(laydata::AtticList*);
+   telldata::TtList*    make_ttlaylist(laydata::ShapeList&, unsigned);
+   telldata::TtList*    make_ttlaylist(auxdata::AuxDataList&, unsigned);
    laydata::SelectList* get_ttlaylist(telldata::TtList* llist);
    laydata::AtticList*  get_shlaylist(telldata::TtList* llist);
    laydata::DataList*   copyDataList(const laydata::DataList* dlist);

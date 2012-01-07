@@ -164,7 +164,7 @@ namespace auxdata {
          void                reportLayData(unsigned, AuxDataList&);
          bool                cleanLay(unsigned);
          bool                repairData(unsigned, laydata::ShapeList&);
-         bool                cleanRepaired(unsigned la);
+         char                cleanRepaired(unsigned la, AuxDataList& recovered);
 
          //
          virtual DBbox       cellOverlap() const        {return _cellOverlap;}

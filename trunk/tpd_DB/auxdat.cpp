@@ -737,20 +737,27 @@ bool auxdata::GrcCell::repairData(unsigned lay, laydata::ShapeList& newData)
    else return false;
 }
 
-bool auxdata::GrcCell::cleanRepaired(unsigned lay)
+/*!
+ * Clears all objects marked as sh_recovered from the quadTree and returns them
+ * in the recovered list. Returns:
+ *     1 if cell is not empty and the overlap has been changed
+ *     0 if the cell is not empty and overlap remains the same
+ *    -1 if the cell is empty and shall be removed
+ */
+char auxdata::GrcCell::cleanRepaired(unsigned lay, AuxDataList& recovered)
 {
    DBbox old_overlap(_cellOverlap);
    LayerList::const_iterator wl = _layers.find(lay);
    if (_layers.end() != wl)
    {
-      AuxDataList cleaned;
+      // gather all invalid objects which had been recovered in an AuxdataList
       for (QuadTree::Iterator DI = wl->second->begin(); DI != wl->second->end(); DI++)
       {
          if (sh_recovered == DI->status())
-            cleaned.push_back(*DI);
+            recovered.push_back(*DI);
       }
-
-      if (wl->second->deleteMarked(sh_recovered))
+      // now remove them from the quadTree
+      if ( wl->second->deleteMarked(sh_recovered) )
       {
          if (wl->second->empty())
          {
@@ -759,8 +766,12 @@ bool auxdata::GrcCell::cleanRepaired(unsigned lay)
          else wl->second->validate();
       }
    }
-   bool emptycell = _layers.empty();
-   return emptycell;
-//   return overlapChanged(old_overlap, (*libdir)());
+   if (_layers.empty())                 return -1; // empty cell
+   else
+   {
+      getCellOverlap();
+      if (old_overlap == _cellOverlap)  return  0; // same overlap
+      else                              return  1; // overlap changed
+   }
 }
 
