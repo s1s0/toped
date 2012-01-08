@@ -434,9 +434,9 @@ unsigned tenderer::TenderSWire::sDataCopy(unsigned* array, unsigned& pindex)
    if (NULL != _slist)
    { // shape is partially selected
       // copy the indexes of the selected segment points
-      for (unsigned i = 0; i < _lsize; i++)
+      for (unsigned i = 0; i < _lsize - 1; i++)
       {
-         if (_slist->check(i) && _slist->check((i+1)%_lsize))
+         if (_slist->check(i) && _slist->check((i+1)))
          {
             array[pindex++] = _loffset + i;
             array[pindex++] = _loffset + ((i+1)%_lsize);
