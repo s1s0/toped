@@ -65,6 +65,39 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace MemTrack
 {
 
+   /*!
+    * We're stepping on a real thin ice here. This class is actually a patch
+    * to get the code functioning in a multithread environment, but it might stop
+    * working at any time with quite severe consequences.
+    * There are number of problems here:
+    * - usage of wxMutex in the overloaded new/delete operators. This leads to a
+    *   circular references, because "new" is called itself by the wxMutex
+    *   constructor. It's easy to get a stack overflow or similar troubles which
+    *   are extreme fun to debug. To fix this we have to use mutexes native to
+    *   the platform and to make sure that the overloaded operator "new" is not
+    *   used there.
+    * - to make sure that we're using a single instance of the mutex, we need
+    *   some kind of static definition which will be initialized at the compiler's
+    *   discretion. In other words the mutex object might or might not be
+    *   initialized at the time when new is first called. This can be resolved
+    *   simply by using a singleton mutex object
+    * - finally there is a problem with the order of destruction as well.
+    *
+    *   The code below is just a very simple workaround, but certainly not a
+    *   proper one.
+    *
+    */
+   class SingletonMux {
+      public:
+         SingletonMux() { _mutex = new wxMutex();}
+         virtual ~SingletonMux() {/* delete _mutex; _mutex = NULL;*/}
+         void Lock()          { if (NULL != _mutex) _mutex->Lock()  ;}
+         void Unlock()        { if (NULL != _mutex) _mutex->Unlock();}
+      private:
+         wxMutex*  _mutex;
+   };
+
+
     /* ------------------------------------------------------------ */
     /* --------------------- class BlockHeader -------------------- */
     /* ------------------------------------------------------------ */
@@ -98,13 +131,13 @@ namespace MemTrack
             static size_t CountBlocks();
             static void   GetBlocks(BlockHeader **blockHeaderPP);
             static bool   TypeGreaterThan(BlockHeader *header1, BlockHeader *header2);
-            static wxMutex memTrackerLock;
+            static SingletonMux memTrackerLock;
     };
 
     /* ---------------------------------------- BlockHeader static member variables */
 
     BlockHeader *BlockHeader::ourFirstNode = NULL;
-    wxMutex BlockHeader::memTrackerLock;
+    SingletonMux BlockHeader::memTrackerLock;
 
     /* ---------------------------------------- BlockHeader constructor */
 

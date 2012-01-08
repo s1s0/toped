@@ -202,6 +202,7 @@ void tellstdfunc::grcREPAIRDATA::undo_cleanup()
    telldata::TtList* newShapes = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
    telldata::TtList* oldShapes = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
    clean_ttlaylist(oldShapes);
+   delete newShapes;
    delete oldShapes;
 }
 
