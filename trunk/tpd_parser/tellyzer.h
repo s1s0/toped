@@ -172,28 +172,34 @@ namespace  parsercmd {
    ******************************************************************************/
    class cmdPLUS:public cmdVIRTUAL {
    public:
-      cmdPLUS(telldata::typeID retype): _retype(retype) {};
-      int execute();
+                  cmdPLUS(telldata::typeID retype): _retype(retype) {};
+      virtual    ~cmdPLUS() {};
+      virtual int execute();
    private:
       telldata::typeID _retype;
    };
 
    class cmdCONCATENATE:public cmdVIRTUAL {
-      int execute();
+   public:
+                  cmdCONCATENATE(){}
+      virtual    ~cmdCONCATENATE(){}
+      virtual int execute();
    };
 
    class cmdMINUS:public cmdVIRTUAL {
    public:
-      cmdMINUS(telldata::typeID retype): _retype(retype) {};
-      int execute();
+                  cmdMINUS(telldata::typeID retype): _retype(retype) {};
+      virtual    ~cmdMINUS(){}
+      virtual int execute();
    private:
       telldata::typeID _retype;
    };
 
    class cmdSHIFTPNT:public cmdVIRTUAL {
    public:
-      cmdSHIFTPNT(int sign, bool swap):_sign(sign), _swapOperands(swap) {};
-      int execute();
+                  cmdSHIFTPNT(int sign, bool swap):_sign(sign), _swapOperands(swap) {};
+      virtual    ~cmdSHIFTPNT(){}
+      virtual int execute();
    private:
       int _sign;
       bool _swapOperands;
@@ -201,16 +207,18 @@ namespace  parsercmd {
 
    class cmdSHIFTPNT2:public cmdVIRTUAL {
    public:
-      cmdSHIFTPNT2(int sign = 1):_sign(sign) {};
-      int execute();
+                  cmdSHIFTPNT2(int sign = 1):_sign(sign) {};
+      virtual    ~cmdSHIFTPNT2() {}
+      virtual int execute();
    private:
       int _sign;
    };
 
    class cmdSHIFTPNT3:public cmdVIRTUAL {
    public:
-      cmdSHIFTPNT3(int signX, int signY): _signX(signX), _signY(signY) {};
-      int execute();
+                  cmdSHIFTPNT3(int signX, int signY): _signX(signX), _signY(signY) {};
+      virtual    ~cmdSHIFTPNT3() {}
+      virtual int execute();
    private:
       int _signX;
       int _signY;
@@ -218,8 +226,9 @@ namespace  parsercmd {
 
    class cmdSHIFTPNT4:public cmdVIRTUAL {
    public:
-      cmdSHIFTPNT4(int signX, int signY): _signX(signX), _signY(signY) {};
-      int execute();
+                  cmdSHIFTPNT4(int signX, int signY): _signX(signX), _signY(signY) {};
+      virtual    ~cmdSHIFTPNT4() {}
+      virtual int execute();
    private:
       int _signX;
       int _signY;
@@ -227,8 +236,9 @@ namespace  parsercmd {
 
    class cmdSHIFTBOX:public cmdVIRTUAL {
    public:
-      cmdSHIFTBOX(int sign, bool swap):_sign(sign), _swapOperands(swap) {};
-      int execute();
+                  cmdSHIFTBOX(int sign, bool swap):_sign(sign), _swapOperands(swap) {};
+      virtual    ~cmdSHIFTBOX() {}
+      virtual int execute();
    private:
       int _sign;
       bool _swapOperands;
@@ -236,8 +246,9 @@ namespace  parsercmd {
 
    class cmdSHIFTBOX3:public cmdVIRTUAL {
    public:
-      cmdSHIFTBOX3(int signX, int signY): _signX(signX), _signY(signY) {};
-      int execute();
+                  cmdSHIFTBOX3(int signX, int signY): _signX(signX), _signY(signY) {};
+      virtual    ~cmdSHIFTBOX3() {}
+      virtual int execute();
    private:
       int _signX;
       int _signY;
@@ -245,8 +256,9 @@ namespace  parsercmd {
 
    class cmdSHIFTBOX4:public cmdVIRTUAL {
    public:
-      cmdSHIFTBOX4(int signX, int signY): _signX(signX), _signY(signY) {};
-      int execute();
+                  cmdSHIFTBOX4(int signX, int signY): _signX(signX), _signY(signY) {};
+      virtual    ~cmdSHIFTBOX4() {}
+      virtual int execute();
    private:
       int _signX;
       int _signY;
@@ -254,25 +266,33 @@ namespace  parsercmd {
 
    class cmdBLOWBOX:public cmdVIRTUAL {
    public:
-      cmdBLOWBOX(int sign, bool swap): _sign(sign), _swapOperands(swap) {};
-      int execute();
+                  cmdBLOWBOX(int sign, bool swap): _sign(sign), _swapOperands(swap) {};
+      virtual    ~cmdBLOWBOX() {}
+      virtual int execute();
    private:
       int _sign;
       bool _swapOperands;
    };
 
    class cmdMULTIPLY:public cmdVIRTUAL {
-      int execute();
+   public:
+                  cmdMULTIPLY() {}
+      virtual    ~cmdMULTIPLY() {}
+      virtual int execute();
    };
 
    class cmdDIVISION:public cmdVIRTUAL {
-      int execute();
+   public:
+                  cmdDIVISION() {}
+      virtual    ~cmdDIVISION() {}
+      virtual int execute();
    };
 
    class cmdSCALEPNT:public cmdVIRTUAL {
    public:
-      cmdSCALEPNT(bool up, bool swap) : _up(up), _swapOperands(swap) {};
-      int execute();
+                  cmdSCALEPNT(bool up, bool swap) : _up(up), _swapOperands(swap) {};
+      virtual    ~cmdSCALEPNT() {}
+      virtual int execute();
    private:
       bool _up;
       bool _swapOperands;
@@ -280,8 +300,9 @@ namespace  parsercmd {
 
    class cmdSCALEBOX:public cmdVIRTUAL {
    public:
-      cmdSCALEBOX(bool up, bool swap) : _up(up), _swapOperands(swap) {};
-      int execute();
+                  cmdSCALEBOX(bool up, bool swap) : _up(up), _swapOperands(swap) {};
+      virtual    ~cmdSCALEBOX() {}
+      virtual int execute();
    private:
       bool _up;
       bool _swapOperands;
@@ -289,90 +310,118 @@ namespace  parsercmd {
 
    class cmdUMINUS:public cmdVIRTUAL {
    public:
-      cmdUMINUS(telldata::typeID type):_type(type) {};
-      int execute();
+                  cmdUMINUS(telldata::typeID type):_type(type) {};
+      virtual    ~cmdUMINUS() {}
+      virtual int execute();
    private:
       telldata::typeID  _type;
    };
 
    class cmdLT:public cmdVIRTUAL {
    public:
-      int execute();
+                  cmdLT() {}
+      virtual    ~cmdLT() {}
+      virtual int execute();
    };
 
    class cmdLET:public cmdVIRTUAL {
    public:
-      int execute();
+                  cmdLET() {}
+      virtual    ~cmdLET() {}
+      virtual int execute();
    };
 
    class cmdGT:public cmdVIRTUAL {
    public:
-      int execute();
+                  cmdGT() {}
+      virtual    ~cmdGT() {}
+      virtual int execute();
    };
 
    class cmdGET:public cmdVIRTUAL {
    public:
-      int execute();
+                  cmdGET() {}
+      virtual    ~cmdGET() {}
+      virtual int execute();
    };
 
    class cmdEQ:public cmdVIRTUAL {
    public:
-      int execute();
+                  cmdEQ() {}
+      virtual    ~cmdEQ() {}
+      virtual int execute();
    };
 
    class cmdNE:public cmdVIRTUAL {
    public:
-      int execute();
+                  cmdNE() {}
+      virtual    ~cmdNE() {}
+      virtual int execute();
    };
 
    class cmdNOT:public cmdVIRTUAL {
    public:
-      int execute();
+                  cmdNOT() {}
+      virtual    ~cmdNOT() {}
+      virtual int execute();
    };
 
    class cmdBWNOT:public cmdVIRTUAL {
    public:
-      int execute();
+                  cmdBWNOT() {}
+      virtual    ~cmdBWNOT() {}
+      virtual int execute();
    };
 
    class cmdAND:public cmdVIRTUAL {
    public:
-      int execute();
+                  cmdAND() {}
+      virtual    ~cmdAND() {}
+      virtual int execute();
    };
 
    class cmdBWAND:public cmdVIRTUAL {
    public:
-      int execute();
+                  cmdBWAND() {}
+      virtual    ~cmdBWAND() {}
+      virtual int execute();
    };
 
    class cmdOR:public cmdVIRTUAL {
    public:
-      int execute();
+                  cmdOR() {}
+      virtual    ~cmdOR() {}
+      virtual int execute();
    };
 
    class cmdBWOR:public cmdVIRTUAL {
    public:
-      int execute();
+                  cmdBWOR() {}
+      virtual    ~cmdBWOR() {}
+      virtual int execute();
    };
 
    class cmdSTACKRST:public cmdVIRTUAL {
    public:
-      int execute();
+                  cmdSTACKRST() {}
+      virtual    ~cmdSTACKRST() {}
+      virtual int execute();
    };
 
    class cmdLISTSIZE:public cmdVIRTUAL {
    public:
-      cmdLISTSIZE(telldata::TellVar* var): _var(var){};
-      int execute();
+                  cmdLISTSIZE(telldata::TellVar* var): _var(var){};
+      virtual    ~cmdLISTSIZE() {}
+      virtual int execute();
    protected:
       telldata::TellVar*  _var;
    };
 
    class cmdASSIGN:public cmdVIRTUAL {
    public:
-      cmdASSIGN(telldata::TellVar* var, bool indexed): _var(var), _indexed(indexed) {};
-      int execute();
-//      ~cmdASSIGN() {delete _var;}
+                  cmdASSIGN(telldata::TellVar* var, bool indexed): _var(var), _indexed(indexed) {};
+      virtual    ~cmdASSIGN() {}
+      virtual int execute();
    protected:
       telldata::TellVar*   _var;
       bool                 _indexed;
@@ -380,10 +429,10 @@ namespace  parsercmd {
 
    class cmdPUSH:public cmdVIRTUAL {
    public:
-      cmdPUSH(telldata::TellVar *v, bool indexed, bool constant=false):
+                  cmdPUSH(telldata::TellVar *v, bool indexed, bool constant=false):
                         _var(v),  _indexed(indexed), _constant(constant) {};
-      int execute();
-      virtual ~cmdPUSH() {if (_constant) delete _var;};
+      virtual    ~cmdPUSH() {if (_constant) delete _var;};
+      virtual int execute();
    private:
       telldata::TellVar*   _var;
       bool                 _indexed;
@@ -397,19 +446,19 @@ namespace  parsercmd {
     */
    class cmdANOVAR:public cmdVIRTUAL {
    public:
-      cmdANOVAR(telldata::TellVar *v) : _var(v) {};
-      int execute() {return EXEC_NEXT;}
-      virtual ~cmdANOVAR() { delete _var;}
+                  cmdANOVAR(telldata::TellVar *v) : _var(v) {};
+      virtual    ~cmdANOVAR() { delete _var;}
+      virtual int execute() {return EXEC_NEXT;}
    private:
       telldata::TellVar*   _var;
    };
 
    class cmdSTRUCT: public cmdVIRTUAL {
    public:
-               cmdSTRUCT() : _arg(NULL) {}
-      void     setargID(telldata::ArgumentID* arg) {_arg = DEBUG_NEW telldata::ArgumentID(*arg);}
-      virtual ~cmdSTRUCT()                         {if (NULL != _arg) delete _arg;}
-      int      execute();
+                  cmdSTRUCT() : _arg(NULL) {}
+      virtual    ~cmdSTRUCT()                         {if (NULL != _arg) delete _arg;}
+      void        setargID(telldata::ArgumentID* arg) {_arg = DEBUG_NEW telldata::ArgumentID(*arg);}
+      virtual int execute();
    private:
       telldata::TellVar*      getList();
       telldata::ArgumentID*  _arg;
@@ -435,13 +484,13 @@ namespace  parsercmd {
     */
    class cmdFUNCREF: public cmdVIRTUAL {
    public:
-               cmdFUNCREF(std::string fn) : _funcBody(NULL), _preCheckfBody(NULL), _funcName(fn), _ID(telldata::tn_anyfref) {}
-      void     setFuncBody(cmdSTDFUNC* funcBody, telldata::typeID ID) {_funcBody = funcBody; _ID = ID;}
-      void     setFuncBody(telldata::typeID ID) {assert(_preCheckfBody); _funcBody = _preCheckfBody; _ID = ID;}
-      void     setPreCheckfBody(cmdSTDFUNC* funcBody) {_preCheckfBody = funcBody;}
+                  cmdFUNCREF(std::string fn) : _funcBody(NULL), _preCheckfBody(NULL), _funcName(fn), _ID(telldata::tn_anyfref) {}
+      virtual    ~cmdFUNCREF()                     {/*nothing to clean-up here*/}
+      void        setFuncBody(cmdSTDFUNC* funcBody, telldata::typeID ID) {_funcBody = funcBody; _ID = ID;}
+      void        setFuncBody(telldata::typeID ID) {assert(_preCheckfBody); _funcBody = _preCheckfBody; _ID = ID;}
+      void        setPreCheckfBody(cmdSTDFUNC* funcBody) {_preCheckfBody = funcBody;}
       std::string funcName() const              {return _funcName;}
-      virtual ~cmdFUNCREF()                     {/*nothing to clean-up here*/}
-      int      execute();
+      virtual int execute();
    private:
       cmdSTDFUNC*       _funcBody;
       cmdSTDFUNC*       _preCheckfBody;
@@ -458,22 +507,23 @@ namespace  parsercmd {
     */
    class cmdNUMFPARAMS: public cmdVIRTUAL {
    public:
-                cmdNUMFPARAMS(const telldata::argumentQ* aq) : _numParams(aq->size()) {}
-      virtual  ~cmdNUMFPARAMS()                     {/*nothing to clean-up here*/}
-      int      execute();
+                  cmdNUMFPARAMS(const telldata::argumentQ* aq) : _numParams(aq->size()) {}
+      virtual    ~cmdNUMFPARAMS()                     {/*nothing to clean-up here*/}
+      virtual int execute();
    private:
       unsigned          _numParams;
    };
 
    class cmdLISTADD : public cmdVIRTUAL {
    public:
-               cmdLISTADD(telldata::TellVar* listarg, bool prefix, bool index) :
-         _listarg(static_cast<telldata::TtList*>(listarg)), _prefix(prefix), _index(index) {};
-      int execute();
+                  cmdLISTADD(telldata::TellVar* listarg, bool prefix, bool index) :
+                     _listarg(static_cast<telldata::TtList*>(listarg)), _prefix(prefix), _index(index) {};
+      virtual    ~cmdLISTADD(){}
+      virtual int execute();
    protected:
-      cmdLISTADD(cmdLISTADD* indxcmd) :
-         _listarg(indxcmd->_listarg),_prefix(indxcmd->_prefix), _index(indxcmd->_index) {};
-      dword                 getIndex();
+                  cmdLISTADD(cmdLISTADD* indxcmd) :
+                     _listarg(indxcmd->_listarg),_prefix(indxcmd->_prefix), _index(indxcmd->_index) {};
+      dword       getIndex();
       // don't delete this and don't get confused. It's only a pointer to a variable,
       // that normally should be in the operand stack. List operations are an exception -
       // see the comments in the parser (tell_yacc.yy)
@@ -485,15 +535,17 @@ namespace  parsercmd {
 
    class cmdLISTUNION : public cmdLISTADD {
    public:
-      cmdLISTUNION(cmdLISTADD* indxcmd) : cmdLISTADD(indxcmd) {}
-      int execute();
+                  cmdLISTUNION(cmdLISTADD* indxcmd) : cmdLISTADD(indxcmd) {}
+      virtual    ~cmdLISTUNION() {}
+      virtual int execute();
    };
 
    class cmdLISTSUB : public cmdVIRTUAL {
    public:
-      cmdLISTSUB(telldata::TellVar* listarg, bool prefix, bool index) :
-         _listarg(static_cast<telldata::TtList*>(listarg)), _prefix(prefix), _index(index) {};
-      int execute();
+                  cmdLISTSUB(telldata::TellVar* listarg, bool prefix, bool index) :
+                     _listarg(static_cast<telldata::TtList*>(listarg)), _prefix(prefix), _index(index) {};
+      virtual    ~cmdLISTSUB() {}
+      virtual int execute();
    private:
       telldata::TtList*     _listarg;
       bool                  _prefix;
@@ -502,9 +554,10 @@ namespace  parsercmd {
 
    class cmdLISTSLICE : public cmdVIRTUAL {
    public:
-      cmdLISTSLICE(telldata::TellVar* listarg, bool prefix, bool index) :
-         _listarg(static_cast<telldata::TtList*>(listarg)), _prefix(prefix), _index(index) {};
-      int execute();
+                  cmdLISTSLICE(telldata::TellVar* listarg, bool prefix, bool index) :
+                    _listarg(static_cast<telldata::TtList*>(listarg)), _prefix(prefix), _index(index) {};
+      virtual    ~cmdLISTSLICE() {}
+      virtual int execute();
    private:
       telldata::TtList*     _listarg;
       bool                  _prefix;
@@ -513,17 +566,19 @@ namespace  parsercmd {
 
    class cmdRETURN:public cmdVIRTUAL {
    public:
-      cmdRETURN(telldata::typeID tID) : _retype(tID) {};
-      bool checkRetype(telldata::ArgumentID* arg);
-      int execute()  {return EXEC_RETURN;};
+                  cmdRETURN(telldata::typeID tID) : _retype(tID) {};
+      virtual    ~cmdRETURN() {}
+      bool        checkRetype(telldata::ArgumentID* arg);
+      virtual int execute()  {return EXEC_RETURN;};
    private:
       telldata::typeID  _retype;
    };
 
    class cmdFUNCCALL: public cmdVIRTUAL {
    public:
-      cmdFUNCCALL(cmdSTDFUNC* bd, std::string fn):_funcbody(bd), _funcname(fn) {};
-      int execute();
+                  cmdFUNCCALL(cmdSTDFUNC* bd, std::string fn):_funcbody(bd), _funcname(fn) {};
+      virtual    ~cmdFUNCCALL() {}
+      virtual int execute();
    protected:
       cmdSTDFUNC*       _funcbody;
       std::string       _funcname;
@@ -564,7 +619,8 @@ namespace  parsercmd {
                                  cmdBLOCK();
                                  cmdBLOCK(telldata::typeID lltID) :
                                                             _nextLclTypeID(lltID){};
-      int                        execute();
+      virtual                   ~cmdBLOCK();
+      virtual int                execute();
       cmdBLOCK*                  cleaner();
       virtual void               addFUNC(std::string, cmdSTDFUNC*);
       virtual void               addUSERFUNC(FuncDeclaration*, cmdFUNC*, TpdYYLtype);
@@ -594,7 +650,6 @@ namespace  parsercmd {
       bool                       checkDbSortState(DbSortState);
       word                       undoDepth() {return _undoDepth;}
       void                       setUndoDepth(word ud) {_undoDepth = ud;}
-      virtual                   ~cmdBLOCK();
    protected:
       bool                       addCALLBACKDECL(std::string, cmdCALLBACK*, TpdYYLtype);
       telldata::variableMAP     _varLocal;  //! list of local variables
@@ -612,21 +667,22 @@ namespace  parsercmd {
 
    class cmdMAIN:public cmdBLOCK {
    public:
-                     cmdMAIN();
-      int            execute();
-      void           addFUNC(std::string, cmdSTDFUNC*);
-      void           addIntFUNC(std::string, cmdSTDFUNC*);
-      void           addUSERFUNC(FuncDeclaration*, cmdFUNC*, TpdYYLtype);
-      cmdFUNC*       addUSERFUNCDECL(FuncDeclaration*, TpdYYLtype);
-      void           addGlobalType(std::string, telldata::TType*);
-      void           recoveryDone();
-      virtual       ~cmdMAIN();
+                                cmdMAIN();
+      virtual                  ~cmdMAIN();
+      virtual int               execute();
+      virtual void              addFUNC(std::string, cmdSTDFUNC*);
+      void                      addIntFUNC(std::string, cmdSTDFUNC*);
+      virtual void              addUSERFUNC(FuncDeclaration*, cmdFUNC*, TpdYYLtype);
+      virtual cmdFUNC*          addUSERFUNCDECL(FuncDeclaration*, TpdYYLtype);
+      void                      addGlobalType(std::string, telldata::TType*);
+      void                      recoveryDone();
    };
 
    class cmdSTDFUNC:public virtual cmdVIRTUAL {
    public:
                                  cmdSTDFUNC(ArgumentLIST* vm, telldata::typeID tt, bool eor, DbSortState rDBt = sdbrSORTED):
                                     _arguments(vm), _returntype(tt), _execOnRecovery(eor), _dbSortStatus(rDBt) {};
+      virtual                   ~cmdSTDFUNC();
       virtual int                execute() = 0;
       virtual void               undo() = 0;
       virtual void               undo_cleanup() = 0;
@@ -642,7 +698,6 @@ namespace  parsercmd {
       static void                setThreadExecution(bool te) {_threadExecution = te;}
       DbSortState                dbSortStatus() {return _dbSortStatus;}
       const ArgumentLIST*        getArguments() {return _arguments;}
-      virtual                   ~cmdSTDFUNC();
       friend void cmdMAIN::recoveryDone();
    protected:
       ArgumentLIST*              _arguments;
@@ -656,13 +711,13 @@ namespace  parsercmd {
    class cmdFUNC:public cmdSTDFUNC, public cmdBLOCK {
    public:
                               cmdFUNC(ArgumentLIST*, telldata::typeID, bool, TpdYYLtype);
+      virtual                ~cmdFUNC() {}
       virtual int             execute();
       virtual bool            internal() {return false;}
       virtual bool            declaration() {return _declaration;}
       virtual void            undo() {};
       virtual void            undo_cleanup() {};
       void                    setDefined(bool defined = true) {_declaration = !defined;}
-      virtual                ~cmdFUNC() {}
    protected:
       typedef std::stack<telldata::variableMAP*> LocalVarStack;
       typedef std::list<telldata::TellVar*> BackupList;
@@ -702,6 +757,7 @@ namespace  parsercmd {
    class cmdCALLBACK : public cmdFUNC {
    public:
                               cmdCALLBACK(const telldata::TypeIdList&, telldata::typeID, TpdYYLtype loc);
+      virtual                ~cmdCALLBACK() {}
       void                    setFBody(parsercmd::cmdSTDFUNC* fbody) {_fbody = fbody; setDefined();}
       void                    unSetFBody() {_fbody = NULL; setDefined(false);}
       virtual int             execute();
@@ -711,9 +767,9 @@ namespace  parsercmd {
 
    class cmdIFELSE: public cmdVIRTUAL {
    public:
-      cmdIFELSE(cmdBLOCK* tb, cmdBLOCK* fb):_trueblock(tb),_falseblock(fb) {};
-      int                     execute();
-      virtual ~cmdIFELSE() {delete _trueblock; delete _falseblock;}
+                              cmdIFELSE(cmdBLOCK* tb, cmdBLOCK* fb):_trueblock(tb),_falseblock(fb) {};
+      virtual                ~cmdIFELSE() {delete _trueblock; delete _falseblock;}
+      virtual int             execute();
    private:
       cmdBLOCK*               _trueblock;
       cmdBLOCK*               _falseblock;
@@ -721,9 +777,9 @@ namespace  parsercmd {
 
    class cmdWHILE: public cmdVIRTUAL {
    public:
-      cmdWHILE(cmdBLOCK* cnd, cmdBLOCK* bd):_condblock(cnd),_body(bd) {};
-      int                  execute();
-      virtual ~cmdWHILE() {delete _condblock; delete _body;}
+                               cmdWHILE(cmdBLOCK* cnd, cmdBLOCK* bd):_condblock(cnd),_body(bd) {};
+      virtual                 ~cmdWHILE() {delete _condblock; delete _body;}
+      virtual int              execute();
    private:
       cmdBLOCK*                _condblock;
       cmdBLOCK*                _body;
@@ -731,9 +787,9 @@ namespace  parsercmd {
 
    class cmdREPEAT: public cmdVIRTUAL {
    public:
-      cmdREPEAT(cmdBLOCK* cnd, cmdBLOCK* bd): _condblock(cnd), _body(bd) {};
-      int                  execute();
-      virtual ~cmdREPEAT() {delete _condblock; delete _body;}
+                               cmdREPEAT(cmdBLOCK* cnd, cmdBLOCK* bd): _condblock(cnd), _body(bd) {};
+      virtual                 ~cmdREPEAT() {delete _condblock; delete _body;}
+      virtual int              execute();
    private:
       cmdBLOCK*                _condblock;
       cmdBLOCK*                _body;
@@ -741,12 +797,12 @@ namespace  parsercmd {
 
    class cmdFOREACH: public cmdVIRTUAL {
    public:
-      cmdFOREACH(telldata::TellVar* var) :
+                           cmdFOREACH(telldata::TellVar* var) :
                                        _var(var),_header(NULL), _body(NULL) {};
+      virtual             ~cmdFOREACH();
       void                 addBlocks(cmdBLOCK* hd, cmdBLOCK* bd)
                                                     {_header = hd; _body = bd;}
-      int                  execute();
-      virtual ~cmdFOREACH();
+      virtual int          execute();
    private:
       telldata::TellVar*   _var;
       cmdBLOCK*            _header;
@@ -774,8 +830,8 @@ namespace  parsercmd {
    bool              vplFunc(std::string);
 
 
-   /**
-      structure used during the parsing
+   /*!
+    * structure used during the parsing
    */
    class FuncDeclaration {
    public:
