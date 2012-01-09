@@ -63,7 +63,7 @@ int tellstdfunc::stdGETLAYTEXTSTR::execute()
    telldata::TtLayout* tx = static_cast<telldata::TtLayout*>(OPstack.top());OPstack.pop();
    if (laydata::_lmtext != tx->data()->lType())
    {
-      tellerror("Runtime error.Invalid layout type"); // FIXME?! tellerror is a parser function. MUST not be used during runtime
+      tellerror(std::string("Runtime error.Invalid layout type")); // FIXME?! tellerror is a parser function. MUST not be used during runtime
       delete tx;
       return EXEC_ABORT;
    }
@@ -87,7 +87,7 @@ int tellstdfunc::stdGETLAYREFSTR::execute()
    telldata::TtLayout* tx = static_cast<telldata::TtLayout*>(OPstack.top());OPstack.pop();
    if ((laydata::_lmref != tx->data()->lType()) && (laydata::_lmaref != tx->data()->lType()))
    {
-      tellerror("Runtime error.Invalid layout type"); // FIXME?! tellerror is a parser function. MUST not be used during runtime
+      tellerror(std::string("Runtime error.Invalid layout type")); // FIXME?! tellerror is a parser function. MUST not be used during runtime
       delete tx;
       return EXEC_ABORT;
    }
