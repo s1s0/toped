@@ -682,6 +682,7 @@ namespace tui {
    private:
       style_def      getStyle(const std::string&);
       void           nameNormalize(wxString& str);
+      void           updateDialog();
       styleMAP       _allStyles;
       wxListBox*     _styleList;
       wxTextCtrl*    _dwstylename;
