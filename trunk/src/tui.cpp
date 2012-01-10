@@ -2092,17 +2092,7 @@ void tui::defineStyle::OnStyleSelected(wxCommandEvent& cmdevent)
       _current_style = getStyle(std::string(style_name.mb_str(wxConvUTF8)));
    }
    catch(EXPTNgui_problem) { return;}
-   _stylesample->setStyle(_current_style);
-   _stylesample->Refresh();
-   wxString tempStr;
-   tempStr << _current_style.pattern;
-   _pattern->SetValue(tempStr);
-   tempStr.Clear();
-   tempStr << _current_style.width;
-   _width->SetValue(tempStr);
-   tempStr.Clear();
-   tempStr << _current_style.pscale;
-   _patscale->SetValue(tempStr);
+   updateDialog();
    FindWindow(ID_BTNAPPLY)->Enable(false);
 }
 
@@ -2134,6 +2124,7 @@ void tui::defineStyle::OnStyleNameAdded(wxCommandEvent& WXUNUSED(event))
       clrsel.SetString(style_name);
       OnStyleSelected(clrsel);
       _styleList->SetFirstItem(style_name);
+      updateDialog();
    }
 }
 
@@ -2153,6 +2144,21 @@ void tui::defineStyle::nameNormalize(wxString& str)
    VERIFY(regex.Compile(wxT("[[:space:]]$")));
    regex.ReplaceAll(&str,wxT(""));
    //remove spaces before brackets and separators
+}
+
+void tui::defineStyle::updateDialog()
+{
+   _stylesample->setStyle(_current_style);
+   _stylesample->Refresh();
+   wxString tempStr;
+   tempStr << _current_style.pattern;
+   _pattern->SetValue(tempStr);
+   tempStr.Clear();
+   tempStr << static_cast<unsigned int>(_current_style.width);
+   _width->SetValue(tempStr);
+   tempStr.Clear();
+   tempStr << static_cast<unsigned int>(_current_style.pscale);
+   _patscale->SetValue(tempStr);
 }
 
 tui::style_def tui::defineStyle::getStyle(const std::string& style_name)

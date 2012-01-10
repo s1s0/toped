@@ -2179,8 +2179,8 @@ void tui::TopedFrame::OnDefineStyle(wxCommandEvent& WXUNUSED(event))
             tui::style_def styleDef = CC->second;
             ost   << wxT("defineline(\"") << wxString(CC->first.c_str(), wxConvUTF8)
                   << wxT("\" , \"\" , ")      << styleDef.pattern
-                  << wxT(" , ")        << styleDef.pscale
-                  << wxT(" , ")        << styleDef.width
+                  << wxT(" , ")        << static_cast<unsigned int>(styleDef.pscale)
+                  << wxT(" , ")        << static_cast<unsigned int>(styleDef.width)
                   << wxT(");");
          }
          success = true;
