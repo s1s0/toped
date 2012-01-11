@@ -281,6 +281,7 @@ namespace GDSin {
    class   GdsStructure : public ForeignCell {
       public:
                               GdsStructure(GdsInFile*, word);
+         virtual             ~GdsStructure() {}
          virtual void         import(ImportDB&);
          ForeignCellTree*     hierOut(ForeignCellTree* Htree, GdsStructure* parent);
          void                 collectLayers(ExtLayers&, bool);

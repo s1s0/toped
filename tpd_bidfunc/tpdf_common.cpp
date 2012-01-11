@@ -231,11 +231,13 @@ telldata::TtList* tellstdfunc::make_ttlaylist(auxdata::AuxDataList& lslct, unsig
 }
 
 //=============================================================================
-laydata::SelectList* tellstdfunc::get_ttlaylist(telldata::TtList* llist) {
+laydata::SelectList* tellstdfunc::get_ttlaylist(telldata::TtList* llist)
+{
    laydata::SelectList* shapesel = DEBUG_NEW laydata::SelectList();
    unsigned clayer;
    SGBitSet* pntl_o;
-   for (unsigned i = 0 ; i < llist->mlist().size(); i++) {
+   for (unsigned i = 0 ; i < llist->mlist().size(); i++)
+   {
       clayer = static_cast<telldata::TtLayout*>(llist->mlist()[i])->layer();
       if (shapesel->end() == shapesel->find(clayer))
          (*shapesel)[clayer] = DEBUG_NEW laydata::DataList();
@@ -250,14 +252,38 @@ laydata::SelectList* tellstdfunc::get_ttlaylist(telldata::TtList* llist) {
 }
 
 //=============================================================================
-laydata::AtticList* tellstdfunc::get_shlaylist(telldata::TtList* llist) {
+laydata::AtticList* tellstdfunc::get_shlaylist(telldata::TtList* llist)
+{
    laydata::AtticList* shapesel = DEBUG_NEW laydata::AtticList();
    unsigned clayer;
-   for (unsigned i = 0 ; i < llist->mlist().size(); i++) {
+   for (unsigned i = 0 ; i < llist->mlist().size(); i++)
+   {
       clayer = static_cast<telldata::TtLayout*>(llist->mlist()[i])->layer();
       if (shapesel->end() == shapesel->find(clayer))
          (*shapesel)[clayer] = DEBUG_NEW laydata::ShapeList();
       (*shapesel)[clayer]->push_back(static_cast<telldata::TtLayout*>
+                                                (llist->mlist()[i])->data());
+   }
+   return shapesel;
+}
+
+//=============================================================================
+auxdata::AuxDataList* tellstdfunc::get_auxdatalist(telldata::TtList* llist, unsigned& clayer)
+{
+   auxdata::AuxDataList* shapesel = DEBUG_NEW auxdata::AuxDataList();
+   bool layerCheck = false;
+   for (unsigned i = 0 ; i < llist->mlist().size(); i++)
+   {
+      if (layerCheck)
+      {
+         assert(clayer ==  static_cast<telldata::TtAuxdata*>(llist->mlist()[i])->layer());
+      }
+      else
+      {
+         clayer = static_cast<telldata::TtAuxdata*>(llist->mlist()[i])->layer();
+         layerCheck = true;
+      }
+      shapesel->push_back(static_cast<telldata::TtAuxdata*>
                                                 (llist->mlist()[i])->data());
    }
    return shapesel;
@@ -406,7 +432,7 @@ void tellstdfunc::gridON(byte No, bool status)
       case 0: eventGRIDUPD.SetId(tui::CPS_GRID0_ON); break;
       case 1: eventGRIDUPD.SetId(tui::CPS_GRID1_ON); break;
       case 2: eventGRIDUPD.SetId(tui::CPS_GRID2_ON); break;
-      default: assert(false);
+      default: assert(false); break;
    }
    eventGRIDUPD.SetInt(status ? 1 : 0);
    wxPostEvent(TopedCanvasW, eventGRIDUPD);

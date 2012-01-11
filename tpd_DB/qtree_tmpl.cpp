@@ -653,7 +653,7 @@ void laydata::QTreeTmpl<DataT>::openGlRender(tenderer::TopRend& rend, const TObj
                wdt->drawSRequest(rend, &(SI->second));
                break;
             }
-            default: wdt->drawRequest(rend);
+            default: wdt->drawRequest(rend); break;
          }
       }
    }

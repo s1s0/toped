@@ -752,7 +752,7 @@ laydata::WireContour::WireContour(const int4b* ldata, unsigned lsize, WireWidth 
             mdlPnts(i-1,  i, i+1 ); break;
          case 5: // 3 coinciding points
                                     break;
-         default: assert(false);
+         default: assert(false); break;
       }
    }
    endPnts(_lsize -2, _lsize -1, false);
