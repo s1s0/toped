@@ -210,43 +210,47 @@ void tellstdfunc::grcREPAIRDATA::undo()
 {
    telldata::TtList* oldShapes = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
    telldata::TtList* newShapes = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
-//   telldata::TtList* failed = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
-//   telldata::TtPnt    *p2 = static_cast<telldata::TtPnt*>(UNDOPstack.front());UNDOPstack.pop_front();
-//   telldata::TtPnt    *p1 = static_cast<telldata::TtPnt*>(UNDOPstack.front());UNDOPstack.pop_front();
-//
-//   real DBscale = PROPC->DBscale();
-//   DWordSet unselable = PROPC->allUnselectable();
-//   laydata::TdtLibDir* dbLibDir = NULL;
-//   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
-//   {
-//      laydata::TdtDesign* tDesign = (*dbLibDir)();
-//      tDesign->unselectFromList(get_ttlaylist(failed), unselable);
-//      tDesign->unselectFromList(get_ttlaylist(added), unselable);
-//      laydata::SelectList* fadead[3];
-//      byte i;
-//      for (i = 0; i < 3; fadead[i++] = DEBUG_NEW laydata::SelectList());
-//      tDesign->moveSelected(TP(p1->x(), p1->y(), DBscale), TP(p2->x(), p2->y(), DBscale),fadead);
-//      //@TODO Here - an internal check can be done - all 3 of the fadead lists
-//      // MUST be empty, otherwise - god knows what's wrong!
-//      for (i = 0; i < 3; delete fadead[i++]);
-//      tDesign->selectFromList(get_ttlaylist(failed), unselable);
-//      // put back the replaced (deleted) shapes
-//      tDesign->addList(get_shlaylist(deleted));
-//      // and select them
-//      tDesign->selectFromList(get_ttlaylist(deleted), unselable);
-//      // delete the added shapes
-//      for (word j = 0 ; j < added->mlist().size(); j++) {
-//         tDesign->destroyThis(static_cast<telldata::TtLayout*>(added->mlist()[j])->data(),
-//                              static_cast<telldata::TtLayout*>(added->mlist()[j])->layer(),
-//                              dbLibDir);
-//      }
-//   }
-//   DATC->unlockTDT(dbLibDir, true);
-//   delete failed;
-//   delete deleted;
-//   delete added;
-//   delete p1; delete p2;
-//   RefreshGL();
+   unsigned grcLayer = 0;
+   auxdata::AuxDataList* grcShapes = get_auxdatalist(oldShapes, grcLayer);
+   laydata::AtticList*   tdtlayers = get_shlaylist(newShapes);
+
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      laydata::TdtCell*   tCell   = tDesign->targetECell();
+      auxdata::GrcCell* grcCell   = tCell->getGrcCell();
+      DBbox oldOverlap(tCell->cellOverlap());
+      // first restore the grc data
+      bool newGrcCellRequired = (NULL == grcCell);
+      if (newGrcCellRequired)
+      {
+         grcCell = DEBUG_NEW auxdata::GrcCell(tCell->name());
+      }
+      auxdata::QTreeTmp* errlay = grcCell->secureUnsortedLayer(grcLayer);
+      for (auxdata::AuxDataList::const_iterator CS = grcShapes->begin(); CS != grcShapes->end(); CS++)
+         errlay->put(*CS);
+      bool emptyCell = grcCell->fixUnsorted();
+      assert(!emptyCell);
+      if (newGrcCellRequired)
+         tCell->addAuxRef(GRC_LAY, grcCell);
+      // now remove the recovered data
+      assert(1 == tdtlayers->size()); // single layer expected only
+      assert(grcLayer == tdtlayers->begin()->first); // make sure we have the same layer
+      laydata::ShapeList* tdtShapes = tdtlayers->begin()->second;
+      for (laydata::ShapeList::const_iterator CS = tdtShapes->begin(); CS != tdtShapes->end(); CS++)
+         tDesign->destroyThis(*CS, grcLayer, dbLibDir);
+      delete tdtShapes;
+
+      tDesign->fixReferenceOverlap(oldOverlap, tCell);
+      TpdPost::treeMarkGrcMember(tDesign->activeCellName().c_str(), true);
+   }
+   DATC->unlockTDT(dbLibDir, true);
+   delete tdtlayers;
+   delete grcShapes;
+   delete newShapes;
+   delete oldShapes;
+   RefreshGL();
 }
 
 int tellstdfunc::grcREPAIRDATA::execute()
@@ -275,11 +279,15 @@ int tellstdfunc::grcREPAIRDATA::execute()
                   case -1: // grc cell is empty - clear it up
                            tCell->clearGrcCell();
                            TpdPost::treeMarkGrcMember(tDesign->activeCellName().c_str(), false);
+                           // Theoretically, the reference overlap of the tdt cell is supposed to
+                           // remain the same (objects from grc moved to tdt)
+                           //tDesign->fixReferenceOverlap(oldOverlap, tCell);
                            break;
                   case  0: // cell still contains objects and the overlap is the same. Nothing to do
                            break;
-                  case  1: // cell still contains objects and the overlap has changed.
-                           // update the reference overlaps
+                  case  1: // grc cell still contains objects and the overlap has changed.
+                           // update the reference overlaps. The tdt cell overlap should be the
+                           // same, but grc overlap did change.
                            tDesign->fixReferenceOverlap(oldOverlap, tCell);
                            break;
                   default: assert(false); break;

@@ -345,7 +345,7 @@ void laydata::TdtLibrary::dbHierAdd(const laydata::TdtDefaultCell* comp, const l
          TpdPost::treeAddMember(comp->name().c_str(), prnt_name.c_str(), 0);
          break;
       }
-      default: assert(false);
+      default: assert(false); break;
    }
 }
 

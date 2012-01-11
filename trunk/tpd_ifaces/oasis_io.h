@@ -279,7 +279,7 @@ namespace Oasis {
    class StdProperties {
       public:
                            StdProperties() : _context(pc_file) {}
-         void              setContext(PropertyContext context) { _context = _context;}
+         void              setContext(PropertyContext context) { _context = context;}
          void              getProperty1(OasisInFile&);
          void              getProperty2(OasisInFile&) {/*@TODO - getProperty2*/}
       private:
@@ -316,6 +316,7 @@ namespace Oasis {
    class Cell : public ForeignCell {
       public:
                            Cell();
+         virtual          ~Cell() {};
          byte              skimCell(OasisInFile&, bool);
          virtual void      import(ImportDB&);
          void              linkReferences(OasisInFile&);

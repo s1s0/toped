@@ -164,6 +164,7 @@ namespace tellstdfunc {
    telldata::TtList*    make_ttlaylist(auxdata::AuxDataList&, unsigned);
    laydata::SelectList* get_ttlaylist(telldata::TtList* llist);
    laydata::AtticList*  get_shlaylist(telldata::TtList* llist);
+   auxdata::AuxDataList* get_auxdatalist(telldata::TtList* llist, unsigned&);
    laydata::DataList*   copyDataList(const laydata::DataList* dlist);
    laydata::SelectList* copySelectList(const laydata::SelectList* dlist);
    void                 cleanSelectList(laydata::SelectList* dlist);

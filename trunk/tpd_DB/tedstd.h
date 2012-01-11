@@ -436,6 +436,7 @@ class ForeignCell {
    public:
                            ForeignCell() : _strctName(""), _traversed(false),
                                     _haveParent(false), _filePos(0), _cellSize(0) {};
+      virtual             ~ForeignCell() {}
       virtual void         import(ImportDB&) = 0;
       bool                 traversed() const                { return _traversed;    }
       void                 set_traversed(bool tf)           { _traversed = tf;      }
@@ -459,6 +460,7 @@ class ForeignCell {
 class LayerCrossMap {
    public:
                               LayerCrossMap() : _tdtLayNumber(0), _tmpLayer(NULL) {}
+      virtual                ~LayerCrossMap()  {}
       laydata::QTreeTmp*      getTmpLayer()     {return _tmpLayer;}
       unsigned                tdtLayNumber()    {return _tdtLayNumber;}
       virtual bool            mapTdtLay(laydata::TdtCell*, word, word)
