@@ -164,6 +164,49 @@ tellstdfunc::grcCLEANALAYER::grcCLEANALAYER(telldata::typeID retype, bool eor) :
    _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
 }
 
+void tellstdfunc::grcCLEANALAYER::undo_cleanup()
+{
+   telldata::TtList* grcShapes = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   clean_ttlaylist(grcShapes);
+   delete grcShapes;
+}
+
+void tellstdfunc::grcCLEANALAYER::undo()
+{
+   telldata::TtList* grcTtShapes = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+   unsigned grcLayer = 0;
+   auxdata::AuxDataList* grcShapes = get_auxdatalist(grcTtShapes, grcLayer);
+
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      laydata::TdtCell*   tCell   = tDesign->targetECell();
+      auxdata::GrcCell* grcCell   = tCell->getGrcCell();
+      DBbox oldOverlap(tCell->cellOverlap());
+      // first restore the grc data
+      bool newGrcCellRequired = (NULL == grcCell);
+      if (newGrcCellRequired)
+      {
+         grcCell = DEBUG_NEW auxdata::GrcCell(tCell->name());
+      }
+      auxdata::QTreeTmp* errlay = grcCell->secureUnsortedLayer(grcLayer);
+      for (auxdata::AuxDataList::const_iterator CS = grcShapes->begin(); CS != grcShapes->end(); CS++)
+         errlay->put(*CS);
+      bool emptyCell = grcCell->fixUnsorted();
+      assert(!emptyCell);
+      if (newGrcCellRequired)
+         tCell->addAuxRef(GRC_LAY, grcCell);
+
+      tDesign->fixReferenceOverlap(oldOverlap, tCell);
+      TpdPost::treeMarkGrcMember(tDesign->activeCellName().c_str(), true);
+   }
+   DATC->unlockTDT(dbLibDir, true);
+   delete grcShapes;
+   delete grcTtShapes;
+   RefreshGL();
+}
+
 int tellstdfunc::grcCLEANALAYER::execute()
 {
    word     la = getWordValue();
@@ -175,14 +218,35 @@ int tellstdfunc::grcCLEANALAYER::execute()
       auxdata::GrcCell* grcCell   = tCell->getGrcCell();
       if (NULL != grcCell)
       {
-         bool cleanCell = grcCell->cleanLay(la);
-         if (cleanCell)
+         DBbox oldOverlap(tCell->cellOverlap());
+         auxdata::AuxDataList grcShapes;
+         char cellState = grcCell->cleanLay(la, grcShapes);
+         if (0 <= cellState)
          {
-            tCell->clearGrcCell();
-            TpdPost::treeMarkGrcMember(tDesign->activeCellName().c_str(), false);
+            UNDOcmdQ.push_front(this);
+            UNDOPstack.push_front(make_ttlaylist(grcShapes, la));
+            if (0 == cellState)
+            {// grc cell is empty - clear it up
+               tCell->clearGrcCell();
+               TpdPost::treeMarkGrcMember(tDesign->activeCellName().c_str(), false);
+            }
+            else if (1 == cellState)
+            {
+               // grc cell still contains objects and the overlap has changed.
+               // update the reference overlaps.
+               tDesign->fixReferenceOverlap(oldOverlap, tCell);
+            }
+            LogFile << LogFile.getFN() << "();"; LogFile.flush();
+         }
+         else
+         {
+            std::stringstream ost;
+            ost << "No invalid data on layer " << la;
+            tell_log(console::MT_WARNING, ost.str());
          }
       }
-      LogFile << LogFile.getFN() << "();"; LogFile.flush();
+      else
+         tell_log(console::MT_WARNING,"No invalid data in the current cell.");
    }
    DATC->unlockTDT(dbLibDir, true);
    RefreshGL();
