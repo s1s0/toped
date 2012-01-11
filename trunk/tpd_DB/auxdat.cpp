@@ -556,7 +556,7 @@ void auxdata::GrcCell::getCellOverlap()
    }
 }
 
-bool auxdata::GrcCell::fixUnsorted()
+bool auxdata::GrcCell::fixUnsorted()//FIXME! The method result is useless! the idea is to return empty cell! (see the callers!)
 {
    bool empty = (0 == _tmpLayers.size());
    if (!empty)
@@ -703,17 +703,38 @@ void auxdata::GrcCell::reportLayData(unsigned lay, AuxDataList& dataList)
    }
 }
 
-bool auxdata::GrcCell::cleanLay(unsigned lay)
+/*!
+ * Clears all the objects on layer @lay and gathers them in the provided list @recovered.
+ * Returns:
+ *    1 if the cell is not empty after the operation
+ *    0 if the cell is empty after the operation
+ *   -1 if the layer @lay does not contain grc data (error condition)
+ */
+char auxdata::GrcCell::cleanLay(unsigned lay, AuxDataList& recovered)
 {
    LayerList::const_iterator wl = _layers.find(lay);
    if (_layers.end() != wl)
    {
-      wl->second->freeMemory();
-      delete (wl->second);
-      _layers.erase(lay);
-
+      // first mark all the shapes from the target layer and gather them in
+      // the list provided
+      for (QuadTree::Iterator DI = wl->second->begin(); DI != wl->second->end(); DI++)
+      {
+         DI->setStatus(sh_selected);
+         recovered.push_back(*DI);
+      }
+      // now remove them from the quadTree
+      if ( wl->second->deleteMarked() )
+      {
+         if (wl->second->empty())
+         {
+            delete wl->second; _layers.erase(lay);
+         }
+         else wl->second->validate();
+      }
+      if (_layers.empty()) return 0;
+      else return 1;
    }
-   return _layers.empty();
+   else return -1;
 }
 
 bool auxdata::GrcCell::repairData(unsigned lay, laydata::ShapeList& newData)

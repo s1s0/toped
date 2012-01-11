@@ -773,7 +773,7 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    mblock->addFUNC("grcgetlayers"     ,(DEBUG_NEW        tellstdfunc::grcGETLAYERS(TLISTOF(telldata::tn_int), true)));
    mblock->addFUNC("grcgetdata"       ,(DEBUG_NEW     tellstdfunc::grcGETDATA(TLISTOF(telldata::tn_auxilary), true)));
    mblock->addFUNC("grcrecoverdata"   ,(DEBUG_NEW               tellstdfunc::grcREPAIRDATA(telldata::tn_void, true)));
-   mblock->addFUNC("cleangrclayer"    ,(DEBUG_NEW              tellstdfunc::grcCLEANALAYER(telldata::tn_void, true)));
+   mblock->addFUNC("grccleanlayer"    ,(DEBUG_NEW              tellstdfunc::grcCLEANALAYER(telldata::tn_void, true)));
    mblock->addFUNC("psexport"         ,(DEBUG_NEW                 tellstdfunc::PSexportTOP(telldata::tn_void,false)));
    mblock->addFUNC("tdtread"          ,(DEBUG_NEW                     tellstdfunc::TDTread(telldata::tn_void, true)));
    mblock->addFUNC("tdtread"          ,(DEBUG_NEW                  tellstdfunc::TDTreadIFF(telldata::tn_void, true)));

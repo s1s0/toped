@@ -162,7 +162,7 @@ namespace auxdata {
          //
          void                reportLayers(DWordSet&);
          void                reportLayData(unsigned, AuxDataList&);
-         bool                cleanLay(unsigned);
+         char                cleanLay(unsigned, AuxDataList&);
          bool                repairData(unsigned, laydata::ShapeList&);
          char                cleanRepaired(unsigned la, AuxDataList& recovered);
 
