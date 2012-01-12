@@ -2278,7 +2278,7 @@ telldata::typeID parsercmd::Minus(telldata::typeID op1, telldata::typeID op2,
        case telldata::tn_int:
           switch(op2) {
              case   telldata::tn_int:CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdMINUS(telldata::tn_int));
-                             return telldata::tn_real;
+                             return telldata::tn_int;
              case  telldata::tn_real:CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdMINUS(telldata::tn_real));
                              return telldata::tn_real;
                    default: tellerror("unexpected operand type",loc2);break;
@@ -2353,7 +2353,7 @@ telldata::typeID parsercmd::Multiply(telldata::typeID op1, telldata::typeID op2,
 {
    switch (op1)
    {
-       case telldata::tn_int:
+      case telldata::tn_int:
       case telldata::tn_real:
          switch(op2)
          {
