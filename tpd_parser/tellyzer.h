@@ -276,16 +276,20 @@ namespace  parsercmd {
 
    class cmdMULTIPLY:public cmdVIRTUAL {
    public:
-                  cmdMULTIPLY() {}
+                  cmdMULTIPLY(telldata::typeID type):_retype(type)  {}
       virtual    ~cmdMULTIPLY() {}
       virtual int execute();
+   private:
+      telldata::typeID  _retype;
    };
 
    class cmdDIVISION:public cmdVIRTUAL {
    public:
-                  cmdDIVISION() {}
+                  cmdDIVISION(telldata::typeID type):_retype(type)  {}
       virtual    ~cmdDIVISION() {}
       virtual int execute();
+   private:
+      telldata::typeID  _retype;
    };
 
    class cmdSCALEPNT:public cmdVIRTUAL {
