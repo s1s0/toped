@@ -69,6 +69,7 @@ namespace parsercmd {
    void     location_step(YYLTYPE *loc);
    void     location_lines(YYLTYPE *loc, int num);
    void     ccomment(YYLTYPE *loc);
+   void     cppcomment(YYLTYPE *loc);
    char*    charcopy(std::string source, bool quotes = false);
    unsigned getllint(char* source);
    int      includefile(char* name, FILE* &handler);
@@ -92,7 +93,7 @@ location_step(&telllloc);
 <*>{lxt_S}                 location_step(&telllloc);
 <*>\n+                     location_lines(&telllloc,yyleng);location_step(&telllloc);
 "/*"                       ccomment(&telllloc); /*comment block C style*/
-"//".*\n                   location_lines(&telllloc,1);location_step(&telllloc);/* comment line */
+"//"                       cppcomment(&telllloc);/* comment line CPP stype*/
 #pragma                    BEGIN(pPRAGMA);
 <pPRAGMA>once            { BEGIN(INITIAL);
                            if (tellPP->pragOnce())
@@ -275,33 +276,49 @@ void parsercmd::location_step(YYLTYPE *loc)
 
 void parsercmd::location_lines(YYLTYPE *loc, int num)
 {
-   loc->last_column = 0;
+   loc->last_column = 1;
    loc->last_line += num;
 }
 
 void parsercmd::ccomment(YYLTYPE *loc)
 {
-   char c, c1;
-
-loop:
-   while ((c = yyinput()) != '*' && c != 0)
+   int c;
+   while(0 < (c = yyinput()))
    {
-      if (0x0A == c) 
+      if(c == '\n')
       {
          loc->last_line++;
          loc->last_column = 1;
       }
-      else loc->last_column++;
+      else 
+      {
+         loc->last_column++;
+         if ('*' == c)
+         {
+            if ('/' == (c = yyinput()))
+               break;
+            else
+               unput(c);
+         }
+      }
    }
+   location_step(loc);
+}
 
-   loc->last_column++;
-   if ((c1 = yyinput()) != '/' && c != 0)
+void parsercmd::cppcomment(YYLTYPE *loc)
+{
+   int c;
+   while(0 < (c = yyinput()))
    {
-      unput(c1);
-      goto loop;
+      if(c == '\n')
+      {
+         loc->last_line++;
+         loc->last_column = 1;
+         break;
+      }
+      else 
+         loc->last_column++;
    }
-   loc->last_column++;
-
    location_step(loc);
 }
 

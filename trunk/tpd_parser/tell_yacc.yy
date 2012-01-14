@@ -248,6 +248,7 @@ Ooops! Second thought!
 
 %start input
 /*---------------------------------------------------------------------------*/
+%token                 END 0 "end of command/file"
 %token                 tknERROR
 %token                 tknIF tknELSE tknWHILE tknREPEAT tknUNTIL tknFOREACH
 %token                 tknSTRUCTdef tknVOIDdef tknREALdef tknBOOLdef tknINTdef
@@ -301,6 +302,9 @@ entrance:
    | tknERROR                              {
       tellerror("Unexpected symbol", @1);
       parsercmd::EOfile();
+   }
+   | END                                   {
+     /*end of file but in our case rather empty input buffer*/
    }
    | error                                 {
       CMDBlock = CMDBlock->cleaner();
