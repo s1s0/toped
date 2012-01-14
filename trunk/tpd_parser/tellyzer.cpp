@@ -654,9 +654,18 @@ int parsercmd::cmdBLOWBOX::execute()
 int parsercmd::cmdMULTIPLY::execute()
 {
    TELL_DEBUG(cmdMULTIPLY);
-   real value2 = getOpValue();
-   real value1 = getOpValue();
-   OPstack.push(DEBUG_NEW telldata::TtReal(value1 * value2));
+   if (telldata::tn_real == _retype)
+   {
+      real value2 = getOpValue();
+      real value1 = getOpValue();
+      OPstack.push(DEBUG_NEW telldata::TtReal(value1 * value2));
+   }
+   else
+   {
+      real value2 = getOpValue();
+      real value1 = getOpValue();
+      OPstack.push(DEBUG_NEW telldata::TtInt(value1 * value2));
+   }
    return EXEC_NEXT;
 }
 
@@ -664,9 +673,18 @@ int parsercmd::cmdMULTIPLY::execute()
 int parsercmd::cmdDIVISION::execute()
 {
    TELL_DEBUG(cmdDIVISION);
-   real value2 = getOpValue();
-   real value1 = getOpValue();
-   OPstack.push(DEBUG_NEW telldata::TtReal(value1 / value2));
+   if (telldata::tn_real == _retype)
+   {
+      real value2 = getOpValue();
+      real value1 = getOpValue();
+      OPstack.push(DEBUG_NEW telldata::TtReal(value1 / value2));
+   }
+   else
+   {
+      int  value2 = getOpValue();
+      int  value1 = getOpValue();
+      OPstack.push(DEBUG_NEW telldata::TtInt(value1 / value2));
+   }
    return EXEC_NEXT;
 }
 
@@ -2354,11 +2372,24 @@ telldata::typeID parsercmd::Multiply(telldata::typeID op1, telldata::typeID op2,
    switch (op1)
    {
       case telldata::tn_int:
+         switch(op2)
+         {
+             case telldata::tn_int: CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdMULTIPLY(telldata::tn_int));
+                                     return telldata::tn_int;
+             case telldata::tn_real: CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdMULTIPLY(telldata::tn_real));
+                                     return telldata::tn_real;
+             case telldata::tn_pnt: CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSCALEPNT(true, true));
+                                     return telldata::tn_pnt;
+             case telldata::tn_box:CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSCALEBOX(true, true));
+                                     return telldata::tn_box;
+                            default: tellerror("unexpected operand type",loc2);break;
+         };
+         break;
       case telldata::tn_real:
          switch(op2)
          {
              case telldata::tn_int:
-             case telldata::tn_real: CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdMULTIPLY());
+             case telldata::tn_real: CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdMULTIPLY(telldata::tn_real));
                                      return telldata::tn_real;
              case telldata::tn_pnt: CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSCALEPNT(true, true));
                                      return telldata::tn_pnt;
@@ -2401,11 +2432,20 @@ telldata::typeID parsercmd::Divide(telldata::typeID op1, telldata::typeID op2,
    switch (op1)
    {
       case telldata::tn_int:
+         switch(op2)
+         {
+            case telldata::tn_int: CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdDIVISION(telldata::tn_int));
+                                   return telldata::tn_int;
+            case telldata::tn_real: CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdDIVISION(telldata::tn_real));
+                                    return telldata::tn_real;
+                           default: tellerror("unexpected operand type",loc2);break;
+         };
+         break;
       case telldata::tn_real:
          switch(op2)
          {
             case telldata::tn_int:
-            case telldata::tn_real: CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdDIVISION());
+            case telldata::tn_real: CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdDIVISION(telldata::tn_real));
                                     return telldata::tn_real;
                            default: tellerror("unexpected operand type",loc2);break;
          };
