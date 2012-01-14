@@ -166,14 +166,14 @@ tellstdfunc::grcCLEANALAYER::grcCLEANALAYER(telldata::typeID retype, bool eor) :
 
 void tellstdfunc::grcCLEANALAYER::undo_cleanup()
 {
-   telldata::TtList* grcShapes = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList* grcShapes = TELL_UNDOOPS_CLEAN(telldata::TtList*);
    clean_ttlaylist(grcShapes);
    delete grcShapes;
 }
 
 void tellstdfunc::grcCLEANALAYER::undo()
 {
-   telldata::TtList* grcTtShapes = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtList* grcTtShapes = TELL_UNDOOPS_UNDO(telldata::TtList*);
    unsigned grcLayer = 0;
    auxdata::AuxDataList* grcShapes = get_auxdatalist(grcTtShapes, grcLayer);
 
@@ -263,8 +263,8 @@ tellstdfunc::grcREPAIRDATA::grcREPAIRDATA(telldata::typeID retype, bool eor) :
 
 void tellstdfunc::grcREPAIRDATA::undo_cleanup()
 {
-   telldata::TtList* newShapes = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
-   telldata::TtList* oldShapes = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList* newShapes = TELL_UNDOOPS_CLEAN(telldata::TtList*);
+   telldata::TtList* oldShapes = TELL_UNDOOPS_CLEAN(telldata::TtList*);
    clean_ttlaylist(oldShapes);
    delete newShapes;
    delete oldShapes;
@@ -272,8 +272,8 @@ void tellstdfunc::grcREPAIRDATA::undo_cleanup()
 
 void tellstdfunc::grcREPAIRDATA::undo()
 {
-   telldata::TtList* oldShapes = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
-   telldata::TtList* newShapes = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtList* oldShapes = TELL_UNDOOPS_UNDO(telldata::TtList*);
+   telldata::TtList* newShapes = TELL_UNDOOPS_UNDO(telldata::TtList*);
    unsigned grcLayer = 0;
    auxdata::AuxDataList* grcShapes = get_auxdatalist(oldShapes, grcLayer);
    laydata::AtticList*   tdtlayers = get_shlaylist(newShapes);

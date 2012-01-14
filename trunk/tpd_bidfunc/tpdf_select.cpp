@@ -44,14 +44,14 @@ tellstdfunc::stdSELECT::stdSELECT(telldata::typeID retype, bool eor) :
 
 void tellstdfunc::stdSELECT::undo_cleanup()
 {
-   telldata::TtWnd *w = static_cast<telldata::TtWnd*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtWnd *w = TELL_UNDOOPS_CLEAN(telldata::TtWnd*);
    delete w;
 }
 
 void tellstdfunc::stdSELECT::undo()
 {
    TEUNDO_DEBUG("select(box) UNDO");
-   telldata::TtWnd *w = static_cast<telldata::TtWnd*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtWnd *w = TELL_UNDOOPS_UNDO(telldata::TtWnd*);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -146,14 +146,14 @@ tellstdfunc::stdSELECTIN::stdSELECTIN(telldata::typeID retype, bool eor) :
 
 void tellstdfunc::stdSELECTIN::undo_cleanup()
 {
-   telldata::TtList* selected = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList* selected = TELL_UNDOOPS_CLEAN(telldata::TtList*);
    delete selected;
 }
 
 void tellstdfunc::stdSELECTIN::undo()
 {
    TEUNDO_DEBUG("select(point) UNDO");
-   telldata::TtList* selected = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtList* selected = TELL_UNDOOPS_UNDO(telldata::TtList*);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -205,13 +205,13 @@ tellstdfunc::stdPNTSELECT::stdPNTSELECT(telldata::typeID retype, bool eor) :
 
 void tellstdfunc::stdPNTSELECT::undo_cleanup()
 {
-   telldata::TtWnd *w = static_cast<telldata::TtWnd*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtWnd *w = TELL_UNDOOPS_CLEAN(telldata::TtWnd*);
    delete w;
 }
 
 void tellstdfunc::stdPNTSELECT::undo() {
    TEUNDO_DEBUG("pselect(box) UNDO");
-   telldata::TtWnd *w = static_cast<telldata::TtWnd*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtWnd *w = TELL_UNDOOPS_UNDO(telldata::TtWnd*);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -273,14 +273,14 @@ tellstdfunc::stdUNSELECT::stdUNSELECT(telldata::typeID retype, bool eor) :
 
 void tellstdfunc::stdUNSELECT::undo_cleanup()
 {
-   telldata::TtWnd *w = static_cast<telldata::TtWnd*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtWnd *w = TELL_UNDOOPS_CLEAN(telldata::TtWnd*);
    delete w;
 }
 
 void tellstdfunc::stdUNSELECT::undo()
 {
    TEUNDO_DEBUG("unselect(box) UNDO");
-   telldata::TtWnd *w = static_cast<telldata::TtWnd*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtWnd *w = TELL_UNDOOPS_UNDO(telldata::TtWnd*);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -374,14 +374,14 @@ tellstdfunc::stdUNSELECTIN::stdUNSELECTIN(telldata::typeID retype, bool eor) :
 
 void tellstdfunc::stdUNSELECTIN::undo_cleanup()
 {
-   telldata::TtList* selected = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList* selected = TELL_UNDOOPS_CLEAN(telldata::TtList*);
    delete selected;
 }
 
 void tellstdfunc::stdUNSELECTIN::undo()
 {
    TEUNDO_DEBUG("unselect(point) UNDO");
-   telldata::TtList* selected = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtList* selected = TELL_UNDOOPS_UNDO(telldata::TtList*);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -431,14 +431,14 @@ tellstdfunc::stdPNTUNSELECT::stdPNTUNSELECT(telldata::typeID retype, bool eor) :
 
 void tellstdfunc::stdPNTUNSELECT::undo_cleanup()
 {
-   telldata::TtWnd *w = static_cast<telldata::TtWnd*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtWnd *w = TELL_UNDOOPS_CLEAN(telldata::TtWnd*);
    delete w;
 }
 
 void tellstdfunc::stdPNTUNSELECT::undo()
 {
    TEUNDO_DEBUG("punselect(box) UNDO");
-   telldata::TtWnd *w = static_cast<telldata::TtWnd*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtWnd *w = TELL_UNDOOPS_UNDO(telldata::TtWnd*);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -498,14 +498,14 @@ tellstdfunc::stdSELECTALL::stdSELECTALL(telldata::typeID retype, bool eor) :
 
 void tellstdfunc::stdSELECTALL::undo_cleanup()
 {
-   telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList* pl = TELL_UNDOOPS_CLEAN(telldata::TtList*);
    delete pl;
 }
 
 void tellstdfunc::stdSELECTALL::undo()
 {
    TEUNDO_DEBUG("select_all() UNDO");
-   telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtList* pl = TELL_UNDOOPS_UNDO(telldata::TtList*);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -544,14 +544,14 @@ tellstdfunc::stdUNSELECTALL::stdUNSELECTALL(telldata::typeID retype, bool eor) :
 
 void tellstdfunc::stdUNSELECTALL::undo_cleanup()
 {
-   telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList* pl = TELL_UNDOOPS_CLEAN(telldata::TtList*);
    delete pl;
 }
 
 void tellstdfunc::stdUNSELECTALL::undo()
 {
    TEUNDO_DEBUG("unselect_all() UNDO");
-   telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtList* pl = TELL_UNDOOPS_UNDO(telldata::TtList*);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {

@@ -46,14 +46,14 @@ tellstdfunc::stdCOPYSEL::stdCOPYSEL(telldata::typeID retype, bool eor) :
 
 void tellstdfunc::stdCOPYSEL::undo_cleanup()
 {
-   telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList* pl = TELL_UNDOOPS_CLEAN(telldata::TtList*);
    delete pl;
 }
 
 void tellstdfunc::stdCOPYSEL::undo()
 {
    TEUNDO_DEBUG("copy(point point) UNDO");
-   telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtList* pl = TELL_UNDOOPS_UNDO(telldata::TtList*);
    DWordSet unselable = PROPC->allUnselectable();
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
@@ -132,11 +132,11 @@ tellstdfunc::stdMOVESEL::stdMOVESEL(telldata::typeID retype, bool eor) :
 
 void tellstdfunc::stdMOVESEL::undo_cleanup()
 {
-   telldata::TtPnt    *p1 = static_cast<telldata::TtPnt*>(UNDOPstack.back());UNDOPstack.pop_back();
-   telldata::TtPnt    *p2 = static_cast<telldata::TtPnt*>(UNDOPstack.back());UNDOPstack.pop_back();
-   telldata::TtList* failed = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
-   telldata::TtList* deleted = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
-   telldata::TtList* added = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtPnt*       p1 = TELL_UNDOOPS_CLEAN(telldata::TtPnt*);
+   telldata::TtPnt*       p2 = TELL_UNDOOPS_CLEAN(telldata::TtPnt*);
+   telldata::TtList*  failed = TELL_UNDOOPS_CLEAN(telldata::TtList*);
+   telldata::TtList* deleted = TELL_UNDOOPS_CLEAN(telldata::TtList*);
+   telldata::TtList*   added = TELL_UNDOOPS_CLEAN(telldata::TtList*);
    clean_ttlaylist(deleted);
    delete added;
    delete deleted;
@@ -148,11 +148,11 @@ void tellstdfunc::stdMOVESEL::undo_cleanup()
 void tellstdfunc::stdMOVESEL::undo()
 {
    TEUNDO_DEBUG("move(point point) UNDO");
-   telldata::TtList* added = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
-   telldata::TtList* deleted = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
-   telldata::TtList* failed = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
-   telldata::TtPnt    *p2 = static_cast<telldata::TtPnt*>(UNDOPstack.front());UNDOPstack.pop_front();
-   telldata::TtPnt    *p1 = static_cast<telldata::TtPnt*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtList* added = TELL_UNDOOPS_UNDO(telldata::TtList*);
+   telldata::TtList* deleted = TELL_UNDOOPS_UNDO(telldata::TtList*);
+   telldata::TtList* failed = TELL_UNDOOPS_UNDO(telldata::TtList*);
+   telldata::TtPnt    *p2 = TELL_UNDOOPS_UNDO(telldata::TtPnt*);
+   telldata::TtPnt    *p1 = TELL_UNDOOPS_UNDO(telldata::TtPnt*);
 
    real DBscale = PROPC->DBscale();
    DWordSet unselable = PROPC->allUnselectable();
@@ -262,11 +262,11 @@ tellstdfunc::stdROTATESEL::stdROTATESEL(telldata::typeID retype, bool eor) :
 
 void tellstdfunc::stdROTATESEL::undo_cleanup()
 {
-   telldata::TtPnt    *p1 = static_cast<telldata::TtPnt*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtPnt       *p1 = TELL_UNDOOPS_CLEAN(telldata::TtPnt*);
    getOpValue(UNDOPstack, false);
-   telldata::TtList* failed = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
-   telldata::TtList* deleted = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
-   telldata::TtList* added = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList* failed  = TELL_UNDOOPS_CLEAN(telldata::TtList*);
+   telldata::TtList* deleted = TELL_UNDOOPS_CLEAN(telldata::TtList*);
+   telldata::TtList* added   = TELL_UNDOOPS_CLEAN(telldata::TtList*);
    clean_ttlaylist(deleted);
    delete added;
    delete deleted;
@@ -277,11 +277,11 @@ void tellstdfunc::stdROTATESEL::undo_cleanup()
 void tellstdfunc::stdROTATESEL::undo()
 {
    TEUNDO_DEBUG("rotate(point real) UNDO");
-   telldata::TtList* added = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
-   telldata::TtList* deleted = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
-   telldata::TtList* failed = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtList* added = TELL_UNDOOPS_UNDO(telldata::TtList*);
+   telldata::TtList* deleted = TELL_UNDOOPS_UNDO(telldata::TtList*);
+   telldata::TtList* failed = TELL_UNDOOPS_UNDO(telldata::TtList*);
    real   angle  = 360 - getOpValue(UNDOPstack, true);
-   telldata::TtPnt    *p1 = static_cast<telldata::TtPnt*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtPnt    *p1 = TELL_UNDOOPS_UNDO(telldata::TtPnt*);
    DWordSet unselable = PROPC->allUnselectable();
    real DBscale = PROPC->DBscale();
    laydata::TdtLibDir* dbLibDir = NULL;
@@ -398,14 +398,14 @@ tellstdfunc::stdFLIPSEL::stdFLIPSEL(telldata::typeID retype, bool eor) :
 void tellstdfunc::stdFLIPSEL::undo_cleanup()
 {
    getWordValue(UNDOPstack, false);
-   telldata::TtPnt    *p1 = static_cast<telldata::TtPnt*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtPnt    *p1 = TELL_UNDOOPS_CLEAN(telldata::TtPnt*);
    delete p1;
 }
 
 void tellstdfunc::stdFLIPSEL::undo()
 {
    TEUNDO_DEBUG("flip(direction, point) UNDO");
-   telldata::TtPnt    *p1 = static_cast<telldata::TtPnt*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtPnt    *p1 = TELL_UNDOOPS_UNDO(telldata::TtPnt*);
    word         direction = getWordValue(UNDOPstack, true);
    real           DBscale = PROPC->DBscale();
    laydata::TdtLibDir* dbLibDir = NULL;
@@ -484,7 +484,7 @@ tellstdfunc::stdDELETESEL::stdDELETESEL(telldata::typeID retype, bool eor) :
 void tellstdfunc::stdDELETESEL::undo_cleanup()
 {
    laydata::CellMap* udurcells = static_cast<laydata::CellMap*>(UNDOUstack.back());UNDOUstack.pop_back();
-   telldata::TtList* und = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList* und = TELL_UNDOOPS_CLEAN(telldata::TtList*);
    clean_ttlaylist(und);
    delete und;
    for (laydata::CellMap::const_iterator CUDU = udurcells->begin(); CUDU != udurcells->end(); CUDU++)
@@ -499,7 +499,7 @@ void tellstdfunc::stdDELETESEL::undo()
 {
    TEUNDO_DEBUG("delete() UNDO");
    // get the removed undefined cells (if any)
-   telldata::TtList* und = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtList* und = TELL_UNDOOPS_UNDO(telldata::TtList*);
    laydata::CellMap* udurcells = static_cast<laydata::CellMap*>(UNDOUstack.front());UNDOUstack.pop_front();
    std::string prnt_name = "";
    DWordSet unselable = PROPC->allUnselectable();
@@ -554,10 +554,10 @@ tellstdfunc::lgcCUTPOLY::lgcCUTPOLY(telldata::typeID retype, bool eor) :
 
 void tellstdfunc::lgcCUTPOLY::undo_cleanup()
 {
-   telldata::TtList* pl4 = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
-   telldata::TtList* pl3 = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
-   telldata::TtList* pl2 = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
-   telldata::TtList* pl1 = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList* pl4 = TELL_UNDOOPS_CLEAN(telldata::TtList*);
+   telldata::TtList* pl3 = TELL_UNDOOPS_CLEAN(telldata::TtList*);
+   telldata::TtList* pl2 = TELL_UNDOOPS_CLEAN(telldata::TtList*);
+   telldata::TtList* pl1 = TELL_UNDOOPS_CLEAN(telldata::TtList*);
    clean_ttlaylist(pl3); // deleted shapes
    delete pl1; delete pl2;
    delete pl3; delete pl4;
@@ -574,26 +574,26 @@ void tellstdfunc::lgcCUTPOLY::undo()
       // now unselect all
       tDesign->unselectAll();
       // get the list of cut-offs
-      telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+      telldata::TtList* pl = TELL_UNDOOPS_UNDO(telldata::TtList*);
       // select them ...
       tDesign->selectFromList(get_ttlaylist(pl), unselable);
       //... and delete them cleaning up the memory (don't store in the Attic)
       tDesign->deleteSelected(NULL, dbLibDir);
       delete pl;
       // now get the list of cuts ...
-      pl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+      pl = TELL_UNDOOPS_UNDO(telldata::TtList*);
       // select them ...
       tDesign->selectFromList(get_ttlaylist(pl), unselable);
       //... and delete them cleaning up the memory (don't store in the Attic)
       tDesign->deleteSelected(NULL, dbLibDir);
       delete pl;
       // now get the list of deleted shapes
-      pl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+      pl = TELL_UNDOOPS_UNDO(telldata::TtList*);
       // put them back
       tDesign->addList(get_shlaylist(pl));
       delete pl;
       // and finally, get the list of shapes being selected before the cut
-      pl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+      pl = TELL_UNDOOPS_UNDO(telldata::TtList*);
       // ... and restore the selection
       tDesign->selectFromList(get_ttlaylist(pl), unselable);
       delete pl;
@@ -748,9 +748,9 @@ tellstdfunc::lgcMERGE::lgcMERGE(telldata::typeID retype, bool eor) :
 
 void tellstdfunc::lgcMERGE::undo_cleanup()
 {
-   telldata::TtList* pl3 = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
-   telldata::TtList* pl2 = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
-   telldata::TtList* pl1 = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList* pl3 = TELL_UNDOOPS_CLEAN(telldata::TtList*);
+   telldata::TtList* pl2 = TELL_UNDOOPS_CLEAN(telldata::TtList*);
+   telldata::TtList* pl1 = TELL_UNDOOPS_CLEAN(telldata::TtList*);
    clean_ttlaylist(pl2);
    delete pl1; delete pl2;
    delete pl3;
@@ -767,19 +767,19 @@ void tellstdfunc::lgcMERGE::undo()
       // now unselect all
       tDesign->unselectAll();
       // get the shapes resulted from the merge operation
-      telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+      telldata::TtList* pl = TELL_UNDOOPS_UNDO(telldata::TtList*);
       // select them ...
       tDesign->selectFromList(get_ttlaylist(pl), unselable);
       //... and delete them cleaning up the memory (don't store in the Attic)
       tDesign->deleteSelected(NULL, dbLibDir);
       delete pl;
       // now get the list of deleted shapes
-      pl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+      pl = TELL_UNDOOPS_UNDO(telldata::TtList*);
       // put them back
       tDesign->addList(get_shlaylist(pl));
       delete pl;
       // and finally, get the list of shapes being selected before the cut
-      pl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+      pl = TELL_UNDOOPS_UNDO(telldata::TtList*);
       // ... and restore the selection
       tDesign->selectFromList(get_ttlaylist(pl), unselable);
       delete pl;
@@ -845,9 +845,9 @@ tellstdfunc::lgcSTRETCH::lgcSTRETCH(telldata::typeID retype, bool eor) :
 
 void tellstdfunc::lgcSTRETCH::undo_cleanup()
 {
-   telldata::TtList* pl3 = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
-   telldata::TtList* pl2 = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
-   telldata::TtList* pl1 = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList* pl3 = TELL_UNDOOPS_CLEAN(telldata::TtList*);
+   telldata::TtList* pl2 = TELL_UNDOOPS_CLEAN(telldata::TtList*);
+   telldata::TtList* pl1 = TELL_UNDOOPS_CLEAN(telldata::TtList*);
    clean_ttlaylist(pl3); // deleted shapes
    delete pl1; delete pl2;
    delete pl3;
@@ -864,19 +864,19 @@ void tellstdfunc::lgcSTRETCH::undo()
       // now unselect all
       tDesign->unselectAll();
       // now get the list of cuts ...
-      telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+      telldata::TtList* pl = TELL_UNDOOPS_UNDO(telldata::TtList*);
       // select them ...
       tDesign->selectFromList(get_ttlaylist(pl), unselable);
       //... and delete them cleaning up the memory (don't store in the Attic)
       tDesign->deleteSelected(NULL, dbLibDir);
       delete pl;
       // now get the list of deleted shapes
-      pl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+      pl = TELL_UNDOOPS_UNDO(telldata::TtList*);
       // put them back
       tDesign->addList(get_shlaylist(pl));
       delete pl;
       // and finally, get the list of shapes being selected before the cut
-      pl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+      pl = TELL_UNDOOPS_UNDO(telldata::TtList*);
       // ... and restore the selection
       tDesign->selectFromList(get_ttlaylist(pl), unselable);
       delete pl;
@@ -961,13 +961,13 @@ tellstdfunc::stdCHANGELAY::stdCHANGELAY(telldata::typeID retype, bool eor) :
 void tellstdfunc::stdCHANGELAY::undo_cleanup()
 {
    getWordValue(UNDOPstack, false);
-   telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList* pl = TELL_UNDOOPS_CLEAN(telldata::TtList*);
    delete pl;
 }
 
 void tellstdfunc::stdCHANGELAY::undo()
 {
-   telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtList* pl = TELL_UNDOOPS_UNDO(telldata::TtList*);
    word src = getWordValue(UNDOPstack, true);
    secureLayDef(src);
    laydata::TdtLibDir* dbLibDir = NULL;
@@ -1020,8 +1020,8 @@ tellstdfunc::stdCHANGEREF::stdCHANGEREF(telldata::typeID retype, bool eor) :
 
 void tellstdfunc::stdCHANGEREF::undo_cleanup()
 {
-   telldata::TtList* pl1 = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
-   telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList* pl1 = TELL_UNDOOPS_CLEAN(telldata::TtList*);
+   telldata::TtList* pl = TELL_UNDOOPS_CLEAN(telldata::TtList*);
    delete pl;
    delete pl1;
 }
@@ -1039,13 +1039,13 @@ void tellstdfunc::stdCHANGEREF::undo()
       // now unselect all
       tDesign->unselectAll();
       // get the list of new references from the UNDO stack
-      telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+      telldata::TtList* pl = TELL_UNDOOPS_UNDO(telldata::TtList*);
       // select them ...
       tDesign->selectFromList(get_ttlaylist(pl), unselable);
       //... and delete them cleaning up the memory (don't store in the Attic)
       tDesign->deleteSelected(NULL, dbLibDir);
       // now get the list of the old cell ref's from the UNDO stack
-      telldata::TtList* pl1 = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+      telldata::TtList* pl1 = TELL_UNDOOPS_UNDO(telldata::TtList*);
       // and add them to the target cell
       tDesign->addList(get_shlaylist(pl1));
       // select the restored cell refs
@@ -1108,8 +1108,8 @@ tellstdfunc::stdCHANGESTRING::stdCHANGESTRING(telldata::typeID retype, bool eor)
 
 void tellstdfunc::stdCHANGESTRING::undo_cleanup()
 {
-   telldata::TtList* pl1 = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
-   telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList* pl1 = TELL_UNDOOPS_CLEAN(telldata::TtList*);
+   telldata::TtList* pl = TELL_UNDOOPS_CLEAN(telldata::TtList*);
    clean_ttlaylist(pl1);delete pl;
    delete pl1;
 }
@@ -1127,13 +1127,13 @@ void tellstdfunc::stdCHANGESTRING::undo()
       // now unselect all
       tDesign->unselectAll();
       // get the list of new texts from the UNDO stack
-      telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+      telldata::TtList* pl = TELL_UNDOOPS_UNDO(telldata::TtList*);
       // select them ...
       tDesign->selectFromList(get_ttlaylist(pl), unselable);
       //... and delete them cleaning up the memory (don't store in the Attic)
       tDesign->deleteSelected(NULL, dbLibDir);
       // now get the list of the old text objects from the UNDO stack
-      telldata::TtList* pl1 = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+      telldata::TtList* pl1 = TELL_UNDOOPS_UNDO(telldata::TtList*);
       // and add them to the target cell
       tDesign->addList(get_shlaylist(pl1));
       // select the restored cell refs
@@ -1216,14 +1216,14 @@ tellstdfunc::stdFLIPXSEL::stdFLIPXSEL(telldata::typeID retype, bool eor) :
 
 void tellstdfunc::stdFLIPXSEL::undo_cleanup()
 {
-   telldata::TtPnt    *p1 = static_cast<telldata::TtPnt*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtPnt    *p1 = TELL_UNDOOPS_CLEAN(telldata::TtPnt*);
    delete p1;
 }
 
 void tellstdfunc::stdFLIPXSEL::undo()
 {
    TEUNDO_DEBUG("flipX(point) UNDO");
-   telldata::TtPnt    *p1 = static_cast<telldata::TtPnt*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtPnt    *p1 = TELL_UNDOOPS_UNDO(telldata::TtPnt*);
    real DBscale = PROPC->DBscale();
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
@@ -1300,14 +1300,14 @@ tellstdfunc::stdFLIPYSEL::stdFLIPYSEL(telldata::typeID retype, bool eor) :
 
 void tellstdfunc::stdFLIPYSEL::undo_cleanup()
 {
-   telldata::TtPnt    *p1 = static_cast<telldata::TtPnt*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtPnt    *p1 = TELL_UNDOOPS_CLEAN(telldata::TtPnt*);
    delete p1;
 }
 
 void tellstdfunc::stdFLIPYSEL::undo()
 {
    TEUNDO_DEBUG("flipY(point) UNDO");
-   telldata::TtPnt    *p1 = static_cast<telldata::TtPnt*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtPnt    *p1 = TELL_UNDOOPS_UNDO(telldata::TtPnt*);
    real DBscale = PROPC->DBscale();
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
