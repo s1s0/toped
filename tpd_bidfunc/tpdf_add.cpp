@@ -49,14 +49,14 @@ tellstdfunc::stdADDBOX::stdADDBOX(telldata::typeID retype, bool eor) :
 void tellstdfunc::stdADDBOX::undo_cleanup()
 {
    getWordValue(UNDOPstack, false);
-   telldata::TtLayout* bx = static_cast<telldata::TtLayout*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtLayout* bx = TELL_UNDOOPS_CLEAN(telldata::TtLayout*);
    delete bx;
 }
 
 void tellstdfunc::stdADDBOX::undo()
 {
    TEUNDO_DEBUG("addbox(box, int) UNDO");
-   telldata::TtLayout* bx = static_cast<telldata::TtLayout*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtLayout* bx = TELL_UNDOOPS_UNDO(telldata::TtLayout*);
    word la = getWordValue(UNDOPstack,true);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
@@ -118,14 +118,14 @@ tellstdfunc::stdDRAWBOX::stdDRAWBOX(telldata::typeID retype, bool eor) :
 void tellstdfunc::stdDRAWBOX::undo_cleanup()
 {
    getWordValue(UNDOPstack, false);
-   telldata::TtLayout* bx = static_cast<telldata::TtLayout*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtLayout* bx = TELL_UNDOOPS_CLEAN(telldata::TtLayout*);
    delete bx;
 }
 
 void tellstdfunc::stdDRAWBOX::undo()
 {
    TEUNDO_DEBUG("drawbox(int) UNDO");
-   telldata::TtLayout* bx = static_cast<telldata::TtLayout*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtLayout* bx = TELL_UNDOOPS_UNDO(telldata::TtLayout*);
    word la = getWordValue(UNDOPstack, true);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
@@ -193,14 +193,14 @@ tellstdfunc::stdADDBOXr::stdADDBOXr(telldata::typeID retype, bool eor) :
 void tellstdfunc::stdADDBOXr::undo_cleanup()
 {
    getWordValue(UNDOPstack, false);
-   telldata::TtLayout* bx = static_cast<telldata::TtLayout*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtLayout* bx = TELL_UNDOOPS_CLEAN(telldata::TtLayout*);
    delete bx;
 }
 
 void tellstdfunc::stdADDBOXr::undo()
 {
    TEUNDO_DEBUG("addbox(point, real, real, int) UNDO");
-   telldata::TtLayout* bx = static_cast<telldata::TtLayout*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtLayout* bx = TELL_UNDOOPS_UNDO(telldata::TtLayout*);
    word la = getWordValue(UNDOPstack, true);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
@@ -270,14 +270,14 @@ tellstdfunc::stdADDBOXp::stdADDBOXp(telldata::typeID retype, bool eor) :
 void tellstdfunc::stdADDBOXp::undo_cleanup()
 {
    getWordValue(UNDOPstack, false);
-   telldata::TtLayout* bx = static_cast<telldata::TtLayout*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtLayout* bx = TELL_UNDOOPS_CLEAN(telldata::TtLayout*);
    delete bx;
 }
 
 void tellstdfunc::stdADDBOXp::undo()
 {
    TEUNDO_DEBUG("addbox(point, point, int) UNDO");
-   telldata::TtLayout* bx = static_cast<telldata::TtLayout*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtLayout* bx = TELL_UNDOOPS_UNDO(telldata::TtLayout*);
    word la = getWordValue(UNDOPstack, true);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
@@ -343,14 +343,14 @@ tellstdfunc::stdADDPOLY::stdADDPOLY(telldata::typeID retype, bool eor) :
 void tellstdfunc::stdADDPOLY::undo_cleanup()
 {
    getWordValue(UNDOPstack, false);
-   telldata::TtLayout* ply = static_cast<telldata::TtLayout*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtLayout* ply = TELL_UNDOOPS_CLEAN(telldata::TtLayout*);
    delete ply;
 }
 
 void tellstdfunc::stdADDPOLY::undo()
 {
    TEUNDO_DEBUG("addpoly(point list, int) UNDO");
-   telldata::TtLayout* ply = static_cast<telldata::TtLayout*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtLayout* ply = TELL_UNDOOPS_UNDO(telldata::TtLayout*);
    word la = getWordValue(UNDOPstack, true);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
@@ -419,14 +419,14 @@ tellstdfunc::stdDRAWPOLY::stdDRAWPOLY(telldata::typeID retype, bool eor) :
 void tellstdfunc::stdDRAWPOLY::undo_cleanup()
 {
    getWordValue(UNDOPstack, false);
-   telldata::TtLayout* ply = static_cast<telldata::TtLayout*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtLayout* ply = TELL_UNDOOPS_CLEAN(telldata::TtLayout*);
    delete ply;
 }
 
 void tellstdfunc::stdDRAWPOLY::undo()
 {
    TEUNDO_DEBUG("drawpoly(int) UNDO");
-   telldata::TtLayout* ply = static_cast<telldata::TtLayout*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtLayout* ply = TELL_UNDOOPS_UNDO(telldata::TtLayout*);
    word la = getWordValue(UNDOPstack, true);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
@@ -499,14 +499,14 @@ tellstdfunc::stdADDWIRE::stdADDWIRE(telldata::typeID retype, bool eor) :
 void tellstdfunc::stdADDWIRE::undo_cleanup()
 {
    getWordValue(UNDOPstack, false);
-   telldata::TtLayout* wr = static_cast<telldata::TtLayout*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtLayout* wr = TELL_UNDOOPS_CLEAN(telldata::TtLayout*);
    delete wr;
 }
 
 void tellstdfunc::stdADDWIRE::undo()
 {
    TEUNDO_DEBUG("addwire(point list, real, int) UNDO");
-   telldata::TtLayout* wr = static_cast<telldata::TtLayout*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtLayout* wr = TELL_UNDOOPS_UNDO(telldata::TtLayout*);
    word la = getWordValue(UNDOPstack, true);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
@@ -578,14 +578,14 @@ tellstdfunc::stdDRAWWIRE::stdDRAWWIRE(telldata::typeID retype, bool eor) :
 void tellstdfunc::stdDRAWWIRE::undo_cleanup()
 {
    getWordValue(UNDOPstack, false);
-   telldata::TtLayout* wr = static_cast<telldata::TtLayout*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtLayout* wr = TELL_UNDOOPS_CLEAN(telldata::TtLayout*);
    delete wr;
 }
 
 void tellstdfunc::stdDRAWWIRE::undo()
 {
    TEUNDO_DEBUG("drawwire(real, int) UNDO");
-   telldata::TtLayout* wr = static_cast<telldata::TtLayout*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtLayout* wr = TELL_UNDOOPS_UNDO(telldata::TtLayout*);
    word la = getWordValue(UNDOPstack, true);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
@@ -664,14 +664,14 @@ tellstdfunc::stdADDTEXT::stdADDTEXT(telldata::typeID retype, bool eor) :
 void tellstdfunc::stdADDTEXT::undo_cleanup()
 {
    getWordValue(UNDOPstack, false);
-   telldata::TtLayout* tx = static_cast<telldata::TtLayout*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtLayout* tx = TELL_UNDOOPS_CLEAN(telldata::TtLayout*);
    delete tx;
 }
 
 void tellstdfunc::stdADDTEXT::undo()
 {
    TEUNDO_DEBUG("addtext(string, int, point, real, bool, real) UNDO");
-   telldata::TtLayout* tx = static_cast<telldata::TtLayout*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtLayout* tx = TELL_UNDOOPS_UNDO(telldata::TtLayout*);
    word la = getWordValue(UNDOPstack, true);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
@@ -736,14 +736,14 @@ tellstdfunc::stdDRAWTEXT::stdDRAWTEXT(telldata::typeID retype, bool eor) :
 void tellstdfunc::stdDRAWTEXT::undo_cleanup()
 {
    getWordValue(UNDOPstack, false);
-   telldata::TtLayout* tx = static_cast<telldata::TtLayout*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtLayout* tx = TELL_UNDOOPS_CLEAN(telldata::TtLayout*);
    delete tx;
 }
 
 void tellstdfunc::stdDRAWTEXT::undo()
 {
    TEUNDO_DEBUG("addtext(string, int, point, real, bool, real) UNDO");
-   telldata::TtLayout* tx = static_cast<telldata::TtLayout*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtLayout* tx = TELL_UNDOOPS_UNDO(telldata::TtLayout*);
    word la = getWordValue(UNDOPstack, true);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
@@ -819,14 +819,14 @@ tellstdfunc::stdCELLREF::stdCELLREF(telldata::typeID retype, bool eor) :
 
 void tellstdfunc::stdCELLREF::undo_cleanup()
 {
-   telldata::TtLayout* cl = static_cast<telldata::TtLayout*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtLayout* cl = TELL_UNDOOPS_CLEAN(telldata::TtLayout*);
    delete cl;
 }
 
 void tellstdfunc::stdCELLREF::undo()
 {
    TEUNDO_DEBUG("cellref(string, point, real, bool, real) UNDO");
-   telldata::TtLayout* cl = static_cast<telldata::TtLayout*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtLayout* cl = TELL_UNDOOPS_UNDO(telldata::TtLayout*);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -949,14 +949,14 @@ tellstdfunc::stdCELLAREF::stdCELLAREF(telldata::typeID retype, bool eor) :
 
 void tellstdfunc::stdCELLAREF::undo_cleanup()
 {
-   telldata::TtLayout* cl = static_cast<telldata::TtLayout*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtLayout* cl = TELL_UNDOOPS_CLEAN(telldata::TtLayout*);
    delete cl;
 }
 
 void tellstdfunc::stdCELLAREF::undo()
 {
    TEUNDO_DEBUG("cellaref(string, point, real, bool, real) UNDO");
-   telldata::TtLayout* cl = static_cast<telldata::TtLayout*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtLayout* cl = TELL_UNDOOPS_UNDO(telldata::TtLayout*);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -1025,14 +1025,14 @@ tellstdfunc::stdCELLAREFO::stdCELLAREFO(telldata::typeID retype, bool eor) :
 
 void tellstdfunc::stdCELLAREFO::undo_cleanup()
 {
-   telldata::TtLayout* cl = static_cast<telldata::TtLayout*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtLayout* cl = TELL_UNDOOPS_CLEAN(telldata::TtLayout*);
    delete cl;
 }
 
 void tellstdfunc::stdCELLAREFO::undo()
 {
    TEUNDO_DEBUG("cellaref(string, point, real, bool, real) UNDO");
-   telldata::TtLayout* cl = static_cast<telldata::TtLayout*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtLayout* cl = TELL_UNDOOPS_UNDO(telldata::TtLayout*);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {

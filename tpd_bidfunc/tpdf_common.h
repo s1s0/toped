@@ -144,6 +144,20 @@
 #define TEUNDO_DEBUG(a)
 #endif
 
+// To avoid confusion when writing undo related methods - two short macros below.
+// The confusion is which SIDE of the UNDOPstack shall be used in undo and cleanup methods
+// The idea is:
+// *undo_cleanup* method must use the BACK of the stack and retrieve the data in
+// the same order it was pushed in
+#ifndef TELL_UNDOOPS_CLEAN
+#define TELL_UNDOOPS_CLEAN(a) static_cast<a>(UNDOPstack.back());UNDOPstack.pop_back()
+#endif
+// *undo* method must use the FRONT of the stack and retrieve the arguments in reverse order
+#ifndef TELL_UNDOOPS_UNDO
+#define TELL_UNDOOPS_UNDO(a) static_cast<a>(UNDOPstack.front());UNDOPstack.pop_front()
+#endif
+
+
 namespace tellstdfunc {
 
    telldata::TtInt*     getCurrentLayer();

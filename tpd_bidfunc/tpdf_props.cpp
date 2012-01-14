@@ -274,13 +274,13 @@ tellstdfunc::stdHIDELAYER::stdHIDELAYER(telldata::typeID retype, bool eor) :
 void tellstdfunc::stdHIDELAYER::undo_cleanup() {
    getWordValue(UNDOPstack, false);
    getBoolValue(UNDOPstack, false);
-   telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList* pl = TELL_UNDOOPS_CLEAN(telldata::TtList*);
    delete pl;
 }
 
 void tellstdfunc::stdHIDELAYER::undo() {
    TEUNDO_DEBUG("hidelayer( word , bool ) UNDO");
-   telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtList* pl = TELL_UNDOOPS_UNDO(telldata::TtList*);
    bool        hide  = getBoolValue(UNDOPstack,true);
    word        layno = getWordValue(UNDOPstack,true);
    layprop::DrawProperties* drawProp;
@@ -366,17 +366,17 @@ tellstdfunc::stdHIDELAYERS::stdHIDELAYERS(telldata::typeID retype, bool eor) :
 }
 
 void tellstdfunc::stdHIDELAYERS::undo_cleanup() {
-   telldata::TtList *sl = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList *sl = TELL_UNDOOPS_CLEAN(telldata::TtList*);
    getBoolValue(UNDOPstack, false);
-   telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList* pl = TELL_UNDOOPS_CLEAN(telldata::TtList*);
    delete pl; delete sl;
 }
 
 void tellstdfunc::stdHIDELAYERS::undo() {
    TEUNDO_DEBUG("hidelayer( int list , bool ) UNDO");
-   telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtList* pl = TELL_UNDOOPS_UNDO(telldata::TtList*);
    bool        hide  = getBoolValue(UNDOPstack,true);
-   telldata::TtList *sl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtList *sl = TELL_UNDOOPS_UNDO(telldata::TtList*);
    telldata::TtInt *laynumber;
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
@@ -670,13 +670,13 @@ tellstdfunc::stdLOCKLAYER::stdLOCKLAYER(telldata::typeID retype, bool eor) :
 void tellstdfunc::stdLOCKLAYER::undo_cleanup() {
    getWordValue(UNDOPstack, false);
    getBoolValue(UNDOPstack, false);
-   telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList* pl = TELL_UNDOOPS_CLEAN(telldata::TtList*);
    delete pl;
 }
 
 void tellstdfunc::stdLOCKLAYER::undo() {
    TEUNDO_DEBUG("locklayer( word , bool ) UNDO");
-   telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtList* pl = TELL_UNDOOPS_UNDO(telldata::TtList*);
    bool        lock  = getBoolValue(UNDOPstack, true);
    word        layno = getWordValue(UNDOPstack, true);
    layprop::DrawProperties* drawProp;
@@ -758,17 +758,17 @@ tellstdfunc::stdLOCKLAYERS::stdLOCKLAYERS(telldata::typeID retype, bool eor) :
 }
 
 void tellstdfunc::stdLOCKLAYERS::undo_cleanup() {
-   telldata::TtList *sl = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList *sl = TELL_UNDOOPS_CLEAN(telldata::TtList*);
    getBoolValue(UNDOPstack, false);
-   telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList* pl = TELL_UNDOOPS_CLEAN(telldata::TtList*);
    delete pl; delete sl;
 }
 
 void tellstdfunc::stdLOCKLAYERS::undo() {
    TEUNDO_DEBUG("locklayer( int list , bool ) UNDO");
-   telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtList* pl = TELL_UNDOOPS_UNDO(telldata::TtList*);
    bool        lock  = getBoolValue(UNDOPstack,true);
-   telldata::TtList *sl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtList *sl = TELL_UNDOOPS_UNDO(telldata::TtList*);
    telldata::TtInt *laynumber;
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
@@ -921,7 +921,7 @@ tellstdfunc::stdFILLLAYERS::stdFILLLAYERS(telldata::typeID retype, bool eor) :
 }
 
 void tellstdfunc::stdFILLLAYERS::undo_cleanup() {
-   telldata::TtList *sl = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList* sl = TELL_UNDOOPS_CLEAN(telldata::TtList*);
    getBoolValue(UNDOPstack, false);
    delete sl;
 }
@@ -929,7 +929,7 @@ void tellstdfunc::stdFILLLAYERS::undo_cleanup() {
 void tellstdfunc::stdFILLLAYERS::undo() {
    TEUNDO_DEBUG("filllayer( int list , bool ) UNDO");
    bool        fill  = getBoolValue(UNDOPstack, true);
-   telldata::TtList *sl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtList *sl = TELL_UNDOOPS_UNDO(telldata::TtList*);
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
@@ -1030,7 +1030,7 @@ tellstdfunc::stdLOADLAYSTAT::stdLOADLAYSTAT(telldata::typeID retype, bool eor) :
 void tellstdfunc::stdLOADLAYSTAT::undo_cleanup()
 {
    getStringValue(UNDOPstack, false);
-   telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList* pl = TELL_UNDOOPS_CLEAN(telldata::TtList*);
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
@@ -1042,7 +1042,7 @@ void tellstdfunc::stdLOADLAYSTAT::undo_cleanup()
 
 void tellstdfunc::stdLOADLAYSTAT::undo() {
    TEUNDO_DEBUG("loadlaystat( string ) UNDO");
-   telldata::TtList* pl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtList* pl = TELL_UNDOOPS_UNDO(telldata::TtList*);
    std::string sname  = getStringValue(UNDOPstack, true);
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
@@ -1131,9 +1131,9 @@ tellstdfunc::stdDELLAYSTAT::stdDELLAYSTAT(telldata::typeID retype, bool eor) :
 void tellstdfunc::stdDELLAYSTAT::undo_cleanup()
 {
    getStringValue(UNDOPstack, false);
-   telldata::TtList* undohidel = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
-   telldata::TtList* undolockl = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
-   telldata::TtList* undofilll = static_cast<telldata::TtList*>(UNDOPstack.back());UNDOPstack.pop_back();
+   telldata::TtList* undohidel = TELL_UNDOOPS_CLEAN(telldata::TtList*);
+   telldata::TtList* undolockl = TELL_UNDOOPS_CLEAN(telldata::TtList*);
+   telldata::TtList* undofilll = TELL_UNDOOPS_CLEAN(telldata::TtList*);
    delete undofilll;
    delete undolockl;
    delete undohidel;
@@ -1143,9 +1143,9 @@ void tellstdfunc::stdDELLAYSTAT::undo() {
    TEUNDO_DEBUG("deletelaystat( string ) UNDO");
    // get the layer lists from the undo stack ...
    word activel = getWordValue(UNDOPstack, true);
-   telldata::TtList* undofilll = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
-   telldata::TtList* undolockl = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
-   telldata::TtList* undohidel = static_cast<telldata::TtList*>(UNDOPstack.front());UNDOPstack.pop_front();
+   telldata::TtList* undofilll = TELL_UNDOOPS_UNDO(telldata::TtList*);
+   telldata::TtList* undolockl = TELL_UNDOOPS_UNDO(telldata::TtList*);
+   telldata::TtList* undohidel = TELL_UNDOOPS_UNDO(telldata::TtList*);
    // ...get the layer set name from the undo stack ...
    std::string sname  = getStringValue(UNDOPstack, true);
    // ...convert the layer lists
