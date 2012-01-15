@@ -1641,7 +1641,7 @@ bool parsercmd::cmdBLOCK::checkDbSortState(DbSortState needsDbResort)
 }
 //=============================================================================
 parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
-                                        (const char* fn, telldata::argumentQ* amap) const
+                                        (const char* fn, telldata::argumentQ* amap, std::string& errmsg) const
 {
    cmdSTDFUNC *fbody = NULL;
    telldata::argumentQ* arguMap = (NULL == amap) ? DEBUG_NEW telldata::argumentQ : amap;
@@ -1657,10 +1657,44 @@ parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
    {
       typedef FunctionMAP::iterator MM;
       std::pair<MM,MM> range = _funcMAP.equal_range(fn);
-      for (MM fb = range.first; fb != range.second; fb++) {
-         fbody = fb->second;
-         if (0 == fbody->argsOK(arguMap)) break;
-         else fbody = NULL;
+      if (range.first == range.second)
+      {
+         std::stringstream errstream;
+         errstream << "Call to undefined function \"" << fn << "\"";
+         errmsg = errstream.str();
+      }
+      else
+      {
+         std::stringstream alPrompt; // argument list prompt
+         unsigned numOverloaded = 0;
+         for (MM fb = range.first; fb != range.second; fb++)
+         {
+            fbody = fb->second;
+            if (0 == fbody->argsOK(arguMap))
+               break;
+            else
+            {
+               if (0 < numOverloaded++) alPrompt << "\n";
+               alPrompt << fn << "( ";
+               NameList* funcCandidate = fbody->callingConv(&_typeLocal);
+               NameList::const_iterator CD = funcCandidate->begin();
+               while(++CD != funcCandidate->end())
+                  alPrompt << *CD << " ";
+               alPrompt << ")";
+               delete funcCandidate;
+               fbody = NULL;
+            }
+         }
+         if (NULL ==fbody)
+         {
+            std::stringstream errstream;
+            if (1 < numOverloaded)
+               errstream << "Wrong arguments in function call. Expecting one of the following:\n";
+            else
+               errstream << "Wrong arguments in function call. Expecting: ";
+            errstream << alPrompt.str();
+            errmsg = errstream.str();
+         }
       }
    }
    if (NULL == amap) delete arguMap;

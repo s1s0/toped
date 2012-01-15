@@ -527,7 +527,8 @@ funccall:
         argmapstack.push(argmap);
    }
       arguments ')'                        {
-      parsercmd::cmdSTDFUNC *fc = CMDBlock->getFuncBody($1,$4);
+      std::string lclErrorMsg;
+      parsercmd::cmdSTDFUNC *fc = CMDBlock->getFuncBody($1,$4,lclErrorMsg);
       if (fc) {
          if (parsercmd::vplFunc($1))
             /* functions with a variable parameter list require special attention */
@@ -536,7 +537,7 @@ funccall:
          $$ = fc->gettype();
       }
       else {
-         tellerror("unknown function name or wrong parameter list",@1);
+         tellerror(lclErrorMsg,@1);
          $$ = telldata::tn_NULL;
       }
       telldata::argQClear(argmap);
