@@ -994,7 +994,8 @@ void telldata::ArgumentID::userStructCheck(const telldata::TType* vtype, bool cm
          _child.push_back(DEBUG_NEW ArgumentID(*CP));
 
       std::string fname = frefCmd->funcName();
-      parsercmd::cmdSTDFUNC *fc = CMDBlock->getFuncBody(fname.c_str(),&_child);
+      std::string dummy;
+      parsercmd::cmdSTDFUNC *fc = CMDBlock->getFuncBody(fname.c_str(),&_child, dummy);
       // whatever the result - clean-up the _child structure
       for (argumentQ::iterator CA = _child.begin(); CA != _child.end(); CA++)
          delete (*CA);

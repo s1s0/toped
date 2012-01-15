@@ -642,7 +642,7 @@ namespace  parsercmd {
       telldata::TellVar*         newFuncArg(telldata::typeID, TpdYYLtype);
       bool                       defValidate(const std::string& ,const ArgumentLIST*, cmdFUNC*&);
       bool                       declValidate(const std::string&, const ArgumentLIST*, TpdYYLtype);
-      cmdSTDFUNC*  const         getFuncBody(const char*, telldata::argumentQ*) const;
+      cmdSTDFUNC*  const         getFuncBody(const char*, telldata::argumentQ*, std::string&) const;
       cmdSTDFUNC*  const         getIntFuncBody(std::string) const;
       void                       pushcmd(cmdVIRTUAL* cmd) {_cmdQ.push_back(cmd);};
       void                       pushblk()                {_blocks.push_front(this);};
