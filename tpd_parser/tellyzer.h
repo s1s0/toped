@@ -73,8 +73,9 @@ namespace  parsercmd {
          bool              check(std::string, std::string&);
          bool              ppIfDef(std::string);
          bool              ppIfNDef(std::string);
+         void              ppPush();
          bool              ppElse(const TpdYYLtype&);
-         void              ppEndIf(const TpdYYLtype&);
+         bool              ppEndIf(const TpdYYLtype&);
          void              checkEOF();
          void              markBOF();
          bool              lastError();

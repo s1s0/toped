@@ -92,8 +92,40 @@ location_step(&telllloc);
 %} /*******************************************************************************/
 <*>{lxt_S}                 location_step(&telllloc);
 <*>\n+                     location_lines(&telllloc,yyleng);location_step(&telllloc);
-"/*"                       ccomment(&telllloc); /*comment block C style*/
-"//"                       cppcomment(&telllloc);/* comment line CPP stype*/
+<*>"/*"                    ccomment(&telllloc); /*comment block C style*/
+<*>"//"                    cppcomment(&telllloc);/* comment line CPP stype*/
+<pPASS>#ifdef              tellPP->ppPush();
+<INITIAL>#ifdef            BEGIN(pIFD);
+<pIFD>{lex_ID}           { if (!tellPP->ppIfDef(yytext))
+                              BEGIN(pPASS);
+                           else
+                              BEGIN(INITIAL);
+                         }
+<pPASS>#ifndef             tellPP->ppPush();
+<INITIAL>#ifndef           BEGIN(pIFND);
+<pIFND>{lex_ID}          { if (!tellPP->ppIfNDef(yytext))
+                              BEGIN(pPASS);
+                           else
+                              BEGIN(INITIAL);
+                         }
+<pPASS>#else             /*nothing to do here*/
+#else                 { if (!tellPP->ppElse(telllloc))
+                              BEGIN(pPASS);
+                           else
+                           {
+                              BEGIN(INITIAL);
+                              if (tellPP->lastError())
+                                 return tknERROR;
+                           }
+                         }
+<*>#endif                { if (!tellPP->ppEndIf(telllloc))
+                           {
+                              BEGIN(INITIAL);
+                              if (tellPP->lastError())
+                                 return tknERROR;
+                           }
+                         }
+<pPASS>.                 /*nothing to do here*/
 #pragma                    BEGIN(pPRAGMA);
 <pPRAGMA>once            { BEGIN(INITIAL);
                            if (tellPP->pragOnce())
@@ -115,33 +147,6 @@ location_step(&telllloc);
                            tellPP->reset();
                            TpdPost::reloadTellFuncs();
                          }
-#ifdef                     BEGIN(pIFD);
-<pIFD>{lex_ID}           { if (!tellPP->ppIfDef(yytext))
-                              BEGIN(pPASS);
-                           else
-                              BEGIN(INITIAL);
-                         }
-#ifndef                    BEGIN(pIFND);
-<pIFND>{lex_ID}          { if (!tellPP->ppIfNDef(yytext))
-                              BEGIN(pPASS);
-                           else
-                              BEGIN(INITIAL);
-                         }
-<*>#else                 { if (!tellPP->ppElse(telllloc))
-                              BEGIN(pPASS);
-                           else
-                           {
-                              BEGIN(INITIAL);
-                              if (tellPP->lastError())
-                                 return tknERROR;
-                           }
-                         }
-<*>#endif                { tellPP->ppEndIf(telllloc);
-                           BEGIN(INITIAL);
-                           if (tellPP->lastError())
-                              return tknERROR;
-                         }
-<pPASS>.*                /*nothing to do here*/
 #define                    BEGIN(pDEFNM);
 <pDEFNM>{lex_ID}[ \t]*\n { parsercmd::newPrepVar(yytext, true);
                            location_lines(&telllloc,1);location_step(&telllloc);
