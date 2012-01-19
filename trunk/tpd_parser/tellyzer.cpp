@@ -173,6 +173,11 @@ bool parsercmd::TellPreProc::ppIfNDef(std::string var)
    return false;
 }
 
+void parsercmd::TellPreProc::ppPush()
+{
+   _ppState.push(ppBYPASS);
+}
+
 bool parsercmd::TellPreProc::ppElse(const TpdYYLtype& loc)
 {
    switch(_ppState.top())
@@ -189,8 +194,9 @@ bool parsercmd::TellPreProc::ppElse(const TpdYYLtype& loc)
 }
 
 
-void parsercmd::TellPreProc::ppEndIf(const TpdYYLtype& loc)
+bool parsercmd::TellPreProc::ppEndIf(const TpdYYLtype& loc)
 {
+   bool bypassStatus = false;
    if (1 == _ppState.size())
    {
       assert(ppINACTIVE == _ppState.top());
@@ -198,7 +204,11 @@ void parsercmd::TellPreProc::ppEndIf(const TpdYYLtype& loc)
       ppError("Unexpected #endif", loc);
    }
    else
+   {
       _ppState.pop();
+      bypassStatus = (ppBYPASS == _ppState.top());
+   }
+   return bypassStatus;
 }
 
 bool parsercmd::TellPreProc::lastError()
