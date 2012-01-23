@@ -158,10 +158,11 @@ int tellstdfunc::TDTread::execute()
             // Gathering the used layers & update the layer definitions
             std::list<std::string> top_cell_list;
             laydata::TDTHierTree* root = tDesign->hiertree()->GetFirstRoot(TARGETDB_LIB);
-            do
+            while (NULL != root)
             {
-               top_cell_list.push_back(std::string(root->GetItem()->name()));
-            } while (NULL != (root = root->GetNextRoot(TARGETDB_LIB)));
+               top_cell_list.push_back(root->GetItem()->name());
+               root = root->GetNextRoot(TARGETDB_LIB);
+            }
             updateLayerDefinitions( dbLibDir, top_cell_list, TARGETDB_LIB);
             // populate the hierarchy browser
             DATC->bpRefreshTdtTab(true, _threadExecution);
