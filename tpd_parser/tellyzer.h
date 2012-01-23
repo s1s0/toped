@@ -79,7 +79,8 @@ namespace  parsercmd {
          void              checkEOF();
          void              markBOF();
          bool              lastError();
-         void              tllFileName(std::string fn) {_tllFN = fn;}
+         void              pushTllFileName(std::string fn) {_tllFN.push(fn);}
+         std::string       popTllFileName();
          bool              pragOnce();
          void              reset();
       private:
@@ -87,12 +88,13 @@ namespace  parsercmd {
          void              ppWarning(std::string, const TpdYYLtype&);
          typedef enum { ppINACTIVE, ppBYPASS, ppACTIVE } PpState;
          typedef std::map <std::string, std::string> VariableMap;
-         typedef std::stack <PpState>  StateStack;
-         typedef std::stack <unsigned> DepthStack;
+         typedef std::stack <PpState>     StateStack;
+         typedef std::stack <unsigned>    DepthStack;
+         typedef std::stack <std::string> FileNameStack;
          VariableMap       _variables;
          std::string       _preDef;
          bool              _lastError; //! Keeps the state of the last operation
-         std::string       _tllFN; //! The name of the currently parsed  tell file
+         FileNameStack     _tllFN;   //! Currently open tll files
          StateStack        _ppState;
          DepthStack        _ifdefDepth;
          NameSet           _parsedFiles; //! parsed files which had #pragma once statement
