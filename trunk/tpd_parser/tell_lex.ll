@@ -374,7 +374,7 @@ int parsercmd::includefile(char* name, FILE* &handler)
             telllloc.first_line = telllloc.last_line = 1;
             telllloc.filename = name;
             /* keep the full file name (in case of #pragma once) */
-            tellPP->tllFileName(nfname);
+            tellPP->pushTllFileName(nfname);
          }
          else
          {
@@ -395,6 +395,8 @@ int parsercmd::EOfile()
 {
    if ( include_stack_ptr > 0 )
    {
+      std::string nfname;
+      std::string infomsg;
       /* get the previous file record from the array */
       parsercmd::lexer_files* prev = include_stack[--include_stack_ptr];
       /* take care to free the memory from the current file name */
@@ -408,6 +410,12 @@ int parsercmd::EOfile()
       /* switch to the restored buffer */
       yy_switch_to_buffer(static_cast<YY_BUFFER_STATE>(prev->lexfilehandler));
       delete prev;
+      nfname = tellPP->popTllFileName();
+      if (!nfname.empty())
+      {
+         infomsg = "Back to \"" + nfname + "\" ...";
+         tell_log(console::MT_INFO,infomsg);
+      }
       return 1;
    }
   return 0;

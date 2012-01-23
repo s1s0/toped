@@ -78,8 +78,7 @@ word parsercmd::cmdBLOCK::_undoDepth = 100;
 //=============================================================================
 parsercmd::TellPreProc::TellPreProc() :
    _preDef      (""   ),
-   _lastError   (false),
-   _tllFN       (""   )
+   _lastError   (false)
 {
    _ppState.push(ppINACTIVE);
    _ifdefDepth.push(0);
@@ -264,16 +263,32 @@ void parsercmd::TellPreProc::ppWarning(std::string msg, const TpdYYLtype& loc)
    tell_log(console::MT_WARNING,ost.str());
 }
 
-bool parsercmd::TellPreProc::pragOnce()
+std::string parsercmd::TellPreProc::popTllFileName()
 {
    assert(!_tllFN.empty());
-   if (_parsedFiles.end() == _parsedFiles.find(_tllFN))
+   _tllFN.pop();
+   if (!_tllFN.empty())
+      return _tllFN.top();
+   else return std::string("");
+}
+
+bool parsercmd::TellPreProc::pragOnce()
+{
+   if(_tllFN.empty())
    {
-      _parsedFiles.insert(_tllFN);
-      return false;
+      tell_log(console::MT_WARNING, "\"pragma once\" found outside a file. Ignored");
+      return true;
    }
    else
-      return true;
+   {
+      if (_parsedFiles.end() == _parsedFiles.find(_tllFN.top()))
+      {
+         _parsedFiles.insert(_tllFN.top());
+         return false;
+      }
+      else
+         return true;
+   }
 }
 
 void parsercmd::TellPreProc::reset()
