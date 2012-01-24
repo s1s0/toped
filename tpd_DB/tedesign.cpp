@@ -1074,6 +1074,7 @@ laydata::TdtData* laydata::TdtDesign::addPoly(unsigned la, PointVector* pl)
          }
          fixReferenceOverlap(old_overlap);
       }
+      delete newShapes;
    }
    else
    {
