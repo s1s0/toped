@@ -59,12 +59,12 @@ namespace tui {
    //      DBbox          _Ycoord;
    //      TP             _cp;
    //};
-
+   class LayoutCanvas;
    //=============================================================================
    class TpdOglContext : public wxGLContext {
    public:
                      TpdOglContext(wxGLCanvas*);
-      void           glewContext(wxWindow*);
+      void           glewContext(LayoutCanvas*);
       void           printStatus(bool) const;
       bool           resizeGL(int, int);
       bool           vboRendering() const             { return _vboRendering;             }
@@ -87,6 +87,7 @@ namespace tui {
       void           showInfo();
       void           setOglThread(bool val) {_oglThread = true;}
       TpdOglContext* glRC() { return _glRC;}
+      void           glewContext() {_glRC->glewContext(this);_initialised = true;}
 
       bool           initStatus() {
 #ifdef __WXGTK__
@@ -173,6 +174,7 @@ namespace tui {
       word           _blinkInterval; //!
       wxTimer        _blinkTimer;    //! To implement the flashing images
       bool           _blinkOn;
+      bool           _initialised;   //!
 #ifdef __WXGTK__
       XVisualInfo*   _xVisual;       //
 #endif

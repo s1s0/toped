@@ -162,8 +162,9 @@ tui::TpdOglContext::TpdOglContext(wxGLCanvas* canvas) :
 {
 }
 
-void tui::TpdOglContext::glewContext(wxWindow* canvas)
+void tui::TpdOglContext::glewContext(LayoutCanvas* canvas)
 {
+   canvas->SetCurrent(*this);
    GLenum err = glewInit();
    if (GLEW_OK != err)
    {
@@ -202,7 +203,6 @@ void tui::TpdOglContext::glewContext(wxWindow* canvas)
    gluTessCallback(TessellPoly::tenderTesel, GLU_TESS_END_DATA,
                    (GLvoid(__stdcall *)())&TessellPoly::teselEnd);
 #endif
-
 }
 
 void tui::TpdOglContext::printStatus(bool forceBasic) const
@@ -315,6 +315,7 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos,
    _apTrigger = 10;
    _blinkInterval = 500;
    _blinkOn = false;
+   _initialised = false;
 }
 
 void   tui::LayoutCanvas::showInfo()
@@ -418,7 +419,6 @@ void tui::LayoutCanvas::viewshift()
    const int slide_step = 100;
    GetClientSize(&Wcl,&Hcl);
    wxPaintDC dc(this);
-   SetCurrent(*_glRC);
    glAccum(GL_RETURN, 1.0);
 //   glReadBuffer(GL_FRONT);
 //   glDrawBuffer(GL_BACK);
@@ -446,6 +446,7 @@ void tui::LayoutCanvas::OnresizeGL(wxSizeEvent& event) {
 
 void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event)
 {
+   if (!_initialised) return;
    if (_invalidWindow)
    {
       // _invalidWindow indicates zooming or refreshing after a tell operation.
@@ -462,7 +463,6 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event)
       {
          _blinkTimer.Stop();
          wxPaintDC dc(this);
-         SetCurrent(*_glRC);  
          glMatrixMode( GL_MODELVIEW );
          glShadeModel( GL_FLAT ); // Single color
          update_viewport();
@@ -491,7 +491,6 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event)
    else
    {
       wxPaintDC dc(this);
-      SetCurrent(*_glRC);
       glAccum(GL_RETURN, 1.0);
       if       (_tmpWnd)              wnd_paint();
       else if  (_rubberBand)          rubber_paint();
@@ -1128,7 +1127,6 @@ void tui::LayoutCanvas::OnCMRotate(wxCommandEvent&)
 void tui::LayoutCanvas::OnTimer(wxTimerEvent& WXUNUSED(event))
 {
    wxPaintDC dc(this);
-   SetCurrent(*_glRC);
    if (_blinkOn)
    {
       glAccum(GL_RETURN, 1.0);
@@ -1249,7 +1247,6 @@ void* tui::DrawThread::Entry(/*wxGLContext* glRC*/)
    if (wxMUTEX_NO_ERROR == _mutex.TryLock())
    {
       wxClientDC dc(_canvas);
-      _canvas->SetCurrent(/*glRC*/);
       glMatrixMode( GL_MODELVIEW );
       glShadeModel( GL_FLAT ); // Single color
       _canvas->update_viewport();
