@@ -101,6 +101,7 @@ namespace telldata {
    class TType {
       public:
                               TType(typeID ID) : _ID(ID) {}
+         virtual             ~TType(){}
          const typeID         ID() const        {return _ID;}
          virtual bool         isComposite() const = 0;
       protected:
@@ -110,6 +111,7 @@ namespace telldata {
    class TCompType : public TType {
    public:
                            TCompType(typeID ID) : TType(ID) {assert(TLCOMPOSIT_TYPE(ID));}
+      virtual             ~TCompType(){}
       bool                 addfield(std::string, typeID, const TType* utype);
       TellVar*             initfield(const typeID) const;
       const TType*         findtype(const typeID) const;
@@ -124,6 +126,7 @@ namespace telldata {
    class TCallBackType : public TType {
    public:
                            TCallBackType(typeID ID) : TType(ID) {assert(TLCOMPOSIT_TYPE(ID));}
+      virtual             ~TCallBackType(){}
       void                 pushArg(typeID);
       void                 setFType(typeID ft)    {_fType = ft; }
       typeID               fType() const          {return _fType;}

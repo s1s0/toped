@@ -1486,7 +1486,7 @@ GDSin::GdsRecord* GDSin::GdsOutFile::setNextRecord(byte rectype, word reclen)
       case gds_ANGLE          :return DEBUG_NEW GdsRecord(rectype, gdsDT_REAL8B  , 8         );
       case gds_PROPATTR       :datatype = gdsDT_INT2B;break;
       case gds_PROPVALUE      :datatype = gdsDT_ASCII;break;
-                       default: assert(false); //the rest should not be used
+                       default: assert(false); break;//the rest should not be used
 //----------------------------------------------------------------------------------
 // The record types below are not used currently in GDS export
 //       case gds_NODE           :datatype = gdsDT_NODATA;break;

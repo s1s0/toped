@@ -211,7 +211,7 @@ int tellstdfunc::stdGRIDDEF::execute()
       case 0: eventGRIDUPD.SetId(tui::CPS_GRID0_STEP); break;
       case 1: eventGRIDUPD.SetId(tui::CPS_GRID1_STEP); break;
       case 2: eventGRIDUPD.SetId(tui::CPS_GRID2_STEP); break;
-      default: assert(false);
+      default: assert(false); break;
    }
    wxString stepString;
    stepString << step;

@@ -1568,7 +1568,7 @@ void tui::pattern_canvas::OnMouseLeftUp(wxMouseEvent& event)
    {
       case 3: cshift = -1;break;
       case 5: cshift = -2;break;
-      default: cshift = 0;
+      default: cshift = 0; break;
    }
    wxPoint position = event.GetPosition();
    for (int bsizex = 0; bsizex < _brushsize; bsizex++)
@@ -1590,7 +1590,7 @@ void tui::pattern_canvas::OnMouseRightUp(wxMouseEvent& event)
    {
       case 3: cshift = -1;break;
       case 5: cshift = -2;break;
-      default: cshift = 0;
+      default: cshift = 0;break;
    }
    wxPoint position = event.GetPosition();
    for (int bsizex = 0; bsizex < _brushsize; bsizex++)
@@ -1675,7 +1675,7 @@ void tui::drawFillDef::OnBrushSize(wxCommandEvent& event)
       case 0: bsize = 1;break;
       case 1: bsize = 3;break;
       case 2: bsize = 5;break;
-      default: bsize = 1;
+      default: bsize = 1;break;
    }
    _sampleDraw->setBrushSize(bsize);
 }
@@ -2091,7 +2091,7 @@ void tui::defineStyle::OnStyleSelected(wxCommandEvent& cmdevent)
    {
       _current_style = getStyle(std::string(style_name.mb_str(wxConvUTF8)));
    }
-   catch(EXPTNgui_problem) { return;}
+   catch(EXPTNgui_problem&) { return;}
    updateDialog();
    FindWindow(ID_BTNAPPLY)->Enable(false);
 }
@@ -3036,7 +3036,7 @@ void tui::TopedPropertySheets::RenderingPSheet::update(wxCommandEvent& evt)
             Toped->view()->setBlinkInterval(100*evt.GetInt());
          }
          break;
-      default: assert(false);
+      default: assert(false); break;
    }
 }
 
@@ -3198,7 +3198,7 @@ void tui::TopedPropertySheets::CanvasPSheet::OnMarkerMotion(wxCommandEvent& cmdE
       case 0: intVal =  0; break;
       case 1: intVal = 45; break;
       case 2: intVal = 90; break;
-      default: assert(false);
+      default: assert(false); break;
    }
    wxString ost;
    ost << wxT("shapeangle(")
@@ -3280,7 +3280,7 @@ void tui::TopedPropertySheets::CanvasPSheet::OnRecoverPoly (wxCommandEvent& cmdE
    {
       case 0: boolVal = false ; break;
       case 1: boolVal = true  ; break;
-      default: assert(false);
+      default: assert(false); break;
    }
    wxString ost;
    ost << wxT("setparams({\"RECOVER_POLY\",")
@@ -3296,7 +3296,7 @@ void tui::TopedPropertySheets::CanvasPSheet::OnRecoverWire (wxCommandEvent& cmdE
    {
       case 0: boolVal = false ; break;
       case 1: boolVal = true  ; break;
-      default: assert(false);
+      default: assert(false); break;
    }
    wxString ost;
    ost << wxT("setparams({\"RECOVER_WIRE\",")
@@ -3357,7 +3357,7 @@ void tui::TopedPropertySheets::CanvasPSheet::update(wxCommandEvent& evt)
             case  0: static_cast<wxRadioBox*>(targetControl)->SetSelection(0); break;
             case 45: static_cast<wxRadioBox*>(targetControl)->SetSelection(1); break;
             case 90: static_cast<wxRadioBox*>(targetControl)->SetSelection(2); break;
-            default: assert(false);
+            default: assert(false); break;
          }
          break;
       case CPS_GRID0_ON     :
@@ -3408,7 +3408,7 @@ void tui::TopedPropertySheets::CanvasPSheet::update(wxCommandEvent& evt)
          targetControl = FindWindow(CDMISC_ZEROCROSS);assert(targetControl);
          static_cast<wxCheckBox*>(targetControl)->SetValue(0 != evt.GetInt() );
          break;
-      default: assert(false);
+      default: assert(false); break;
    }
 }
 

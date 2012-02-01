@@ -115,18 +115,18 @@ namespace console {
    typedef enum
    {
       op_none     = -12 ,
-      op_tbind          ,
-      op_abind          ,
-      op_cbind          ,
-      op_point          ,
-      op_line           ,
-      op_rotate         ,
-      op_flipY          ,
-      op_flipX          ,
-      op_copy           ,
-      op_move           ,
-      op_dpoly          ,
-      op_dbox           ,
+      op_tbind    = -11 ,
+      op_abind    = -10 ,
+      op_cbind    = - 9 ,
+      op_point    = - 8 ,
+      op_line     = - 7 ,
+      op_rotate   = - 6 ,
+      op_flipY    = - 5 ,
+      op_flipX    = - 4 ,
+      op_copy     = - 3 ,
+      op_move     = - 2 ,
+      op_dpoly    = - 1 ,
+      op_dbox     =   0 ,
       op_dwire
    } ACTIVE_OP;
 

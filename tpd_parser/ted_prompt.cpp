@@ -66,7 +66,7 @@ extern YYLTYPE telllloc; // parser current location - global variable, defined i
 
 //extern const wxEventType    wxEVT_LOG_ERRMESSAGE;
 console::TllCmdLine*        Console = NULL;
-extern const wxEventType    wxEVT_CONSOLE_PARSE;
+//extern const wxEventType    wxEVT_CONSOLE_PARSE;
 extern const wxEventType    wxEVT_CANVAS_ZOOM;
 extern const wxEventType    wxEVT_EXECEXTDONE;
 
@@ -514,7 +514,7 @@ void console::TllCmdLine::mouseLB(const telldata::TtPnt& p) {
                               << sc   << wxT("}");
                       break;
          }
-         default                       : ost2 << ost1;
+         default                       : ost2 << ost1; break;
       }
    // ... and separators between the points
    else ost2 << wxT(" , ") << ost1;
@@ -542,7 +542,7 @@ void console::TllCmdLine::mouseRB() {
    switch (_puc->wait4type()) {
       case TLISTOF(telldata::tn_pnt):
       case         telldata::tn_box : close = wxT(" }"); break;
-      default         : close = wxT("")  ;
+      default         : close = wxT("");  break;
    }
    // print it
    tell_log(MT_GUIINPUT, close);
@@ -745,7 +745,7 @@ void console::TedCmdLine::onGUInput(wxCommandEvent& evt)
          delete p;
          break;
          }
-      default: assert(false);
+      default: assert(false); break;
    }
 }
 
