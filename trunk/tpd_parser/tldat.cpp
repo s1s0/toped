@@ -44,7 +44,7 @@ telldata::TellVar* telldata::TCompType::initfield(const typeID ID) const
    else
       switch(ID & ~telldata::tn_listmask)
       {
-         case tn_void  : assert(false);
+         case tn_void  : assert(false); break;
          case tn_int   : nvar = DEBUG_NEW telldata::TtInt()    ;break;
          case tn_real  : nvar = DEBUG_NEW telldata::TtReal()   ;break;
          case tn_bool  : nvar = DEBUG_NEW telldata::TtBool()   ;break;
@@ -63,6 +63,7 @@ telldata::TellVar* telldata::TCompType::initfield(const typeID ID) const
                         nvar = DEBUG_NEW telldata::TtUserStruct(static_cast<const TCompType*>(vartype));
                      else
                         nvar = DEBUG_NEW telldata::TtCallBack(ID);
+                     break;
                 }
       }
    return nvar;
@@ -1087,6 +1088,7 @@ std::string telldata::echoType( const telldata::typeID tID,
                }
             }
          }
+         break;
       }
    }
    if (tID & telldata::tn_listmask)

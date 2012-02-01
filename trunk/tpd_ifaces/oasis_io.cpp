@@ -155,7 +155,7 @@ void  Oasis::Table::getTableRecord(OasisInFile& ofn, TableMode ieMode, bool tabl
    {
       case tblm_implicit: _index = _nextIndex++; break;
       case tblm_explicit: _index = ofn.getUnsignedInt(4); break;
-      default: assert(false);
+      default: assert(false);break;
    }
    if (_table.end() != _table.find(_index))
       ofn.exception("Name record with this index already exists (15.5,16.4,17.4,18.4)");
@@ -484,7 +484,7 @@ void Oasis::OasisInFile::readLibrary()
             TpdPost::toped_status(console::TSTS_PRGRSBAROFF);
             linkReferences();
             return;
-         default: exception("Unexpected record in the current context");
+         default: exception("Unexpected record in the current context");break;
       }
    } while (true);
 }
@@ -553,7 +553,7 @@ qword Oasis::OasisInFile::getUnsignedInt(byte length)
             case 7: btres[bytecounter-1] |= bytein << (8-bytecounter);
                     btres[bytecounter  ]  = (bytein & cmask) >> bytecounter;
                     break;
-            default: exception("Integer is too big (7.2.3)");
+            default: exception("Integer is too big (7.2.3)");break;
          }
          if (bytecounter > length)
             exception("Unsigned integer with unexpected length(7.2.3)");
@@ -593,7 +593,7 @@ int8b Oasis::OasisInFile::getInt(byte length)
                     btres[bytecounter  ]  = (bytein & cmask) >> (bytecounter + 1);
                     break;
             case 7: btres[bytecounter-1] |= bytein;
-            default: exception("Integer is too big (7.2.3)");
+            default: exception("Integer is too big (7.2.3)"); break;
          }
          if (bytecounter > length)
             exception("Unsigned integer with unexpected length(7.2.3)");
@@ -624,7 +624,7 @@ real Oasis::OasisInFile::getReal(char type)
       case 5: numerator   = getUnsignedInt(4); denominator = getUnsignedInt(4); sign = true; break;
       case 6: return getFloat();
       case 7: return getDouble();
-      default: exception("Unexpected \"real\" type.(7.3.3)");
+      default: exception("Unexpected \"real\" type.(7.3.3)");break;
    }
    if (0 == denominator) exception("Denominator is 0 in \"real\" representation (7.3.3)");
    real result = (sign) ? - ((real) numerator / (real) denominator) :
@@ -868,6 +868,8 @@ byte Oasis::Cell::skimCell(OasisInFile& ofn, bool refnum)
             return recType;
       }
    } while (true);
+   assert(false);
+   return 0xFF;
 }
 
 void Oasis::Cell::import(ImportDB& iDB)
@@ -1141,7 +1143,7 @@ void Oasis::Cell::readTrapezoid(OasisInFile& ofn, ImportDB& iDB, byte type)
               deltaB = ofn.getUnsignedInt(4);break;
       case 2: deltaA = ofn.getUnsignedInt(4);break;
       case 3: deltaB = ofn.getUnsignedInt(4);break;
-      default: assert(false);
+      default: assert(false); break;
    }
    if (info & Xmask)
    {
@@ -1510,7 +1512,7 @@ void Oasis::Cell::skimTrapezoid(OasisInFile& ofn, byte type)
       case 1: ofn.getUnsignedInt(4);ofn.getUnsignedInt(4);break;
       case 2: ofn.getUnsignedInt(4);break;
       case 3: ofn.getUnsignedInt(4);break;
-      default: assert(false);
+      default: assert(false);break;
    }
    if (info & Xmask) ofn.getInt(8);
    if (info & Ymask) ofn.getInt(8);
@@ -1640,6 +1642,7 @@ void Oasis::Cell::genCTrapezoids(OasisInFile& ofn, PointVector& laypl,
                }
                else
                   delta = height/2 - width;
+               break;
    }
 
    switch (ctype)
@@ -1797,6 +1800,7 @@ void Oasis::Cell::genCTrapezoids(OasisInFile& ofn, PointVector& laypl,
       default:
          info << "Illegal CTRAPEZOID type "  << ctype << " (28.8)";
          ofn.exception(info.str());
+         break;
    }
 }
 //------------------------------------------------------------------------------
@@ -1925,7 +1929,7 @@ Oasis::PointList::PointList(OasisInFile& ofn, PointListType pltype) : _pltype(pl
       case dt_octangular : readOctangular(ofn) ; break;//+1
       case dt_allangle   : readAllAngle(ofn)   ; break;//+1
       case dt_doubledelta: readDoubleDelta(ofn); break;//+1
-      default: assert(false);
+      default: assert(false); break;
    }
 }
 
@@ -1988,7 +1992,7 @@ void Oasis::PointList::readManhattanE(OasisInFile& ofb)
          case dr_north: _delarr[2*ccrd] = 0    ; _delarr[2*ccrd+1] = idata; break;
          case dr_west : _delarr[2*ccrd] =-idata; _delarr[2*ccrd+1] = 0    ; break;
          case dr_south: _delarr[2*ccrd] = 0    ; _delarr[2*ccrd+1] =-idata; break;
-         default: assert(false);
+         default: assert(false); break;
       }
    }
 }
@@ -2013,7 +2017,7 @@ void Oasis::PointList::readOctangular(OasisInFile& ofb)
          case dr_northwest: _delarr[2*ccrd] =-idata; _delarr[2*ccrd+1] = idata; break;
          case dr_southeast: _delarr[2*ccrd] = idata; _delarr[2*ccrd+1] =-idata; break;
          case dr_southwest: _delarr[2*ccrd] =-idata; _delarr[2*ccrd+1] =-idata; break;
-         default: assert(false);
+         default: assert(false); break;
       }
    }
 }
@@ -2041,7 +2045,7 @@ void Oasis::PointList::calcPoints(PointVector& plst, int4b p1x, int4b p1y, bool 
       case dt_octangular : calcOctangular(plst, p1x, p1y) ; break;
       case dt_allangle   : calcAllAngle(plst, p1x, p1y)   ; break;//+1
       case dt_doubledelta: calcDoubleDelta(plst, p1x, p1y); break;//+1
-      default: assert(false);
+      default: assert(false); break;
    }
 }
 
@@ -2151,7 +2155,7 @@ Oasis::Repetitions::Repetitions(OasisInFile& ofn, RepetitionTypes rptype) :
       case rp_regDia1D: readregDia1D(ofn) ; break;
       case rp_varAny  : readvarAny(ofn)   ; break;
       case rp_varAnyG : readvarAnyG(ofn)  ; break;
-      default: assert(false);
+      default: assert(false); break;
    }
 }
 
@@ -2408,7 +2412,7 @@ void Oasis::StdProperties::getProperty1(OasisInFile& ofn)
          case 13: ofn.propStrings()->getName(ofn.getUnsignedInt(4)); break;// a-string
          case 14: ofn.propStrings()->getName(ofn.getUnsignedInt(4)); break;// b-string
          case 15: ofn.propStrings()->getName(ofn.getUnsignedInt(4)); break;// n-string
-         default: ofn.getReal(propValueType);
+         default: ofn.getReal(propValueType); break;
       }
    }
    if (info & Smask)
@@ -2427,7 +2431,7 @@ Oasis::PathExtensions::PathExtensions(OasisInFile& ofn, ExtensionTypes exType) :
       case ex_flush     :
       case ex_hwidth    : break;
       case ex_explicit  : _exEx = ofn.getInt(2); break;
-      default: assert(false);
+      default: assert(false); break;
    }
 }
 
@@ -2438,7 +2442,7 @@ int4b Oasis::PathExtensions::getExtension(int4b hwidth) const
       case ex_flush     : return 0;
       case ex_hwidth    : return hwidth;
       case ex_explicit  : return _exEx;
-      default: assert(false);
+      default: assert(false); break;
    }
    return 0; // dummy statement
 }
@@ -2467,7 +2471,7 @@ void Oasis::readDelta(OasisInFile& ofb, int4b& deltaX, int4b& deltaY)
          case dr_northwest: deltaX =-(int4b)(data >> 4); deltaY = (data >> 4); break;
          case dr_southeast: deltaX = (data >> 4); deltaY =-(int4b)(data >> 4); break;
          case dr_southwest: deltaX =-(int4b)(data >> 4); deltaY =-(int4b)(data >> 4); break;
-         default: assert(false);
+         default: assert(false); break;
       }
    }
 }

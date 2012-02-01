@@ -77,7 +77,7 @@ namespace parsercmd {
    static void telllex_fatal(std::string);
    void     newPrepVar(std::string source, bool empty);
    void     newPrepVal(std::string source);
-   void     deletePrepVal(std::string source);
+/*   void     deletePrepVal(std::string source);*/
    bool     checkPrepVar(const std::string source);
 }
 using namespace parsercmd;

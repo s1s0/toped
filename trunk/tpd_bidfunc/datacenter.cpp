@@ -597,11 +597,12 @@ void DataCenter::mouseStart(int input_type, std::string name, const CTM trans,
             tDesign->setTmpData( DEBUG_NEW laydata::TdtTmpText(name, eqm) );
             break;
          }
-         case console::op_rotate: tDesign->setTmpCtm( trans );
+         case console::op_rotate: tDesign->setTmpCtm( trans ); break;
          default:
          {
             if (0  < input_type)
                tDesign->setTmpData( DEBUG_NEW laydata::TdtTmpWire(input_type) );
+            break;
          }
       }
    }

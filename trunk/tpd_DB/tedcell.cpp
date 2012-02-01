@@ -548,6 +548,7 @@ void laydata::TdtCell::openGlRender(tenderer::TopRend& rend, const CTM& trans,
                }
                default: assert(0 == cltype);
             }
+            break;
          }
       }
    }
