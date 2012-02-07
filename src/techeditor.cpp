@@ -60,83 +60,70 @@ BEGIN_EVENT_TABLE(tui::TechEditorDialog, wxDialog)
    EVT_BUTTON(BT_TECH_APPLY      , tui::TechEditorDialog::OnApply )
 END_EVENT_TABLE()
 
-tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id)//, const wxString& title, const wxPoint& pos, const wxSize& size, long style )  
-:wxDialog( parent, id, wxT("Technology Editor"), wxDefaultPosition, wxSize(900, 300)) , _curSelect(0)
+tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id) :
+   wxDialog   ( parent, id, wxT("Technology Editor")),
+   _curSelect (     0 )
 {
    wxSize size = GetSize();
-	wxBoxSizer *sizer1= DEBUG_NEW wxBoxSizer(wxVERTICAL);
-      wxBoxSizer *sizer2 = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
-         _layerList = DEBUG_NEW wxListBox(this, ID_TE_LAYER, wxDefaultPosition, wxSize(size.x/2, size.y-30));
-         wxBoxSizer *vsizer0 = DEBUG_NEW wxStaticBoxSizer( wxVERTICAL, this, wxT("Properties") );
-            wxBoxSizer *hsizer4 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL);
-               wxBoxSizer *hsizer5 = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Layer Number") );
-                  _layerNumber = DEBUG_NEW wxTextCtrl( this, ID_BTN_TE_NUM , wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
-                                             wxTextValidator(wxFILTER_NUMERIC, &_layerNumberString));
-                  hsizer5->Add(_layerNumber, 0, wxALL | wxEXPAND, 5);
-               wxBoxSizer *hsizer6 = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Layer Name") );
-                  _layerName = DEBUG_NEW wxTextCtrl( this, ID_BTN_TE_NUM , wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
-                                             wxTextValidator(wxFILTER_ASCII , &_layerNameString));
-                  _newLayerButton = DEBUG_NEW wxButton(this, tui::BT_TECH_NEWLAYER, wxT("New"), wxDefaultPosition, wxDefaultSize);
-                  hsizer6->Add(_layerName, 0, wxALL | wxEXPAND, 5);
-                  hsizer6->Add(_newLayerButton, 0, wxALL | wxEXPAND, 5);
-               hsizer4->Add(hsizer5);
-               hsizer4->Add(hsizer6);
-            _layerColors = DEBUG_NEW ColorListComboBox();
-            wxBoxSizer *hsizer1 = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Color") );
-               _layerColors->Create(this,COLOR_COMBO ,wxEmptyString,
-                   wxDefaultPosition, wxSize(size.x/3, 30),
-//                  NULL,
-                  wxCB_READONLY //wxNO_BORDER | wxCB_READONLY
-                  );
-               hsizer1->Add(_layerColors, 0, wxALL | wxEXPAND, 5);
-               hsizer1->Add(0,0,1);
-               _newColorButton = DEBUG_NEW wxButton(this, tui::BT_TECH_NEWCOLOR, wxT("New"), wxDefaultPosition, wxDefaultSize);
-               hsizer1->Add(_newColorButton, 0, wxALL | wxEXPAND, 5);
-               hsizer1->SetSizeHints(this);
+   _layerList = DEBUG_NEW wxListBox(this, ID_TE_LAYER, wxDefaultPosition, wxDefaultSize);
+   _layerNumber = DEBUG_NEW wxTextCtrl( this, ID_BTN_TE_NUM , wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
+                              wxTextValidator(wxFILTER_NUMERIC, &_layerNumberString));
+   _layerName = DEBUG_NEW wxTextCtrl( this, ID_BTN_TE_NUM , wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
+                                    wxTextValidator(wxFILTER_ASCII , &_layerNameString));
+   _layerColors = DEBUG_NEW ColorListComboBox();
+   _layerColors->Create(this, COLOR_COMBO, wxEmptyString, wxDefaultPosition,wxDefaultSize /*wxSize(size.x/3, 30)*/, wxCB_READONLY );
+   _layerFills = DEBUG_NEW FillListComboBox();
+   _layerFills->Create(this, FILL_COMBO, wxEmptyString, wxDefaultPosition, wxDefaultSize/*wxSize(size.x/3, 30)*/, wxCB_READONLY );
+   _layerLines = DEBUG_NEW  LineListComboBox();
+   _layerLines->Create(this, LINE_COMBO, wxEmptyString, wxDefaultPosition, wxDefaultSize/*wxSize(size.x/3, 30)*/, wxCB_READONLY );
+   _newColorButton = DEBUG_NEW wxButton(this, tui::BT_TECH_NEWCOLOR, wxT("New"   ));
+   _newFillButton  = DEBUG_NEW wxButton(this, tui::BT_TECH_NEWFILL , wxT("New"   ));
+   _newStyleButton = DEBUG_NEW wxButton(this, tui::BT_TECH_NEWSTYLE, wxT("New"   ));
+   _newLayerButton = DEBUG_NEW wxButton(this, tui::BT_TECH_NEWLAYER, wxT("New"   ));
+   _applyButton    = DEBUG_NEW wxButton(this, tui::BT_TECH_APPLY   , wxT("Apply" ));
+   _cancelButton   = DEBUG_NEW wxButton(this, wxID_CANCEL          , wxT("Cancel"));
+
+   wxBoxSizer *topSizer= DEBUG_NEW wxBoxSizer(wxVERTICAL);
+      wxBoxSizer *mainSizer = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
+         wxBoxSizer *propSizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+
+            wxBoxSizer *layDefSizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL);
+               layDefSizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Number:"), wxDefaultPosition, wxDefaultSize),
+                                                            0, wxLEFT | wxALIGN_CENTER_VERTICAL, 5);
+               layDefSizer->Add(_layerNumber, 1, wxRIGHT | wxALIGN_CENTER, 5);
+               layDefSizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Name:"), wxDefaultPosition, wxDefaultSize),
+                                                            0, wxLEFT | wxALIGN_CENTER_VERTICAL, 5);
+               layDefSizer->Add(_layerName, 2, wxRIGHT | wxALIGN_CENTER, 5);
+            wxBoxSizer *colorSizer = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Color") );
+               colorSizer->Add(_layerColors, 3, wxALL | wxEXPAND, 5);
+               colorSizer->Add(_newColorButton, 1, wxALL, 5);
             
-            _layerFills = DEBUG_NEW FillListComboBox();
-            wxBoxSizer *hsizer2 = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Fill") );
-               _layerFills->Create(this,FILL_COMBO,wxEmptyString,
-                   wxDefaultPosition, wxSize(size.x/3, 30),
-//                  NULL,
-                  wxCB_READONLY //wxNO_BORDER | wxCB_READONLY
-                  );
-               hsizer2->Add(_layerFills, 0, wxALL | wxEXPAND, 5);
-               hsizer2->Add(0,0,1);
-               _newFillButton = DEBUG_NEW wxButton(this, tui::BT_TECH_NEWFILL, wxT("New"), wxDefaultPosition, wxDefaultSize);
-               hsizer2->Add(_newFillButton, 0, wxALL | wxEXPAND, 5);
-               hsizer2->SetSizeHints(this);
+            wxBoxSizer *fillSizer = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Fill") );
+               fillSizer->Add(_layerFills, 3, wxALL | wxEXPAND, 5);
+               fillSizer->Add(_newFillButton, 1, wxALL , 5);
 
-            _layerLines = DEBUG_NEW  LineListComboBox();
+            wxBoxSizer *styleSizer = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Line Style") );
+               styleSizer->Add(_layerLines, 3, wxALL | wxEXPAND, 5);
+               styleSizer->Add(_newStyleButton, 1, wxALL, 5);
 
-            wxBoxSizer *hsizer3 = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Line Style") );
-               _layerLines->Create(this, LINE_COMBO,wxEmptyString,
-                   wxDefaultPosition, wxSize(size.x/3, 30),
-//                  NULL,
-                  wxCB_READONLY //wxNO_BORDER | wxCB_READONLY
-                  );
-               hsizer3->Add(_layerLines, 0, wxALL | wxEXPAND, 5);
-               hsizer3->Add(0,0,1);
-               _newStyleButton = DEBUG_NEW wxButton(this, tui::BT_TECH_NEWSTYLE, wxT("New"), wxDefaultPosition, wxDefaultSize);
-               hsizer3->Add(_newStyleButton, 0, wxALL | wxEXPAND, 5);
-               hsizer3->SetSizeHints(this);
+         propSizer->Add(layDefSizer, 0, wxALL | wxEXPAND, 5);
+         propSizer->Add(colorSizer, 0, wxALL | wxEXPAND, 5);
+         propSizer->Add(fillSizer, 0, wxALL | wxEXPAND, 5);
+         propSizer->Add(styleSizer, 0, wxALL | wxEXPAND, 5);
+      mainSizer->Add(_layerList, 1, wxEXPAND, 0);
+      mainSizer->Add(propSizer, 2, wxEXPAND, 0);
 
-         vsizer0->Add(hsizer4);
-         vsizer0->Add(hsizer1);
-         vsizer0->Add(hsizer2);
-         vsizer0->Add(hsizer3);
-      sizer2->Add(_layerList, 1, wxEXPAND, 0);
-      sizer2->Add(vsizer0, 1, wxEXPAND, 0);
-      wxBoxSizer *sizer3 = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
-      _applyButton  = DEBUG_NEW wxButton(this, tui::BT_TECH_APPLY, wxT("Apply"));
-      _cancelButton = DEBUG_NEW wxButton(this, wxID_CANCEL, wxT("Cancel"));
-      sizer3->Add(_applyButton, 1, wxEXPAND|wxBOTTOM, 3);
-      sizer3->Add(_cancelButton, 1, wxEXPAND|wxBOTTOM, 3);
-   sizer1->Add(sizer2);
-   sizer1->Add(sizer3);
+      wxBoxSizer *buttonSizer = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
+         buttonSizer->Add(0,0,1);
+         buttonSizer->Add(_newLayerButton, 0, wxBOTTOM, 3);
+         buttonSizer->Add(0,0,3);
+         buttonSizer->Add(_applyButton   , 0, wxBOTTOM, 3);
+         buttonSizer->Add(_cancelButton  , 0, wxBOTTOM, 3);
+   topSizer->Add(mainSizer, 0, wxEXPAND);
+   topSizer->Add(buttonSizer, 0, wxEXPAND);
 
-   this->SetSizerAndFit(sizer1);
-   sizer1->SetSizeHints( this );
+   this->SetSizerAndFit(topSizer);
+   topSizer->SetSizeHints( this );
 
    FindWindow(BT_TECH_APPLY)->Enable(false);
    updateData();
