@@ -1381,13 +1381,13 @@ void tui::defineColor::OnColorSelected(wxCommandEvent& cmdevent)
    const layprop::tellRGB* scol = getColor(std::string(color_name.mb_str(wxConvUTF8)));
 
    wxString channel;
-   channel << scol->red();
+   channel << (int)scol->red();
    _c_red->SetValue(channel);channel.Clear();
-   channel << scol->green();
+   channel << (int)scol->green();
    _c_green->SetValue(channel);channel.Clear();
-   channel << scol->blue();
+   channel << (int)scol->blue();
    _c_blue->SetValue(channel);channel.Clear();
-   channel << scol->alpha();
+   channel << (int)scol->alpha();
    _c_alpha->SetValue(channel);channel.Clear();
 
    FindWindow(ID_BTNAPPLY)->Enable(false);
