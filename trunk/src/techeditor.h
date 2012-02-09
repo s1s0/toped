@@ -83,7 +83,7 @@ class TechEditorDialog : public wxDialog
 {
 	protected:
       //wxScrolledWindow*     _layerPanel;
-      wxListBox*              _layerList;
+      wxListView*             _layerList;
       wxOwnerDrawnComboBox*   _layerColors;
       wxOwnerDrawnComboBox*   _layerFills;
       wxOwnerDrawnComboBox*   _layerLines;
@@ -113,7 +113,7 @@ class TechEditorDialog : public wxDialog
    public:
                   TechEditorDialog( wxWindow* parent,wxWindowID id = wxID_ANY);
       virtual    ~TechEditorDialog();
-      void        onLayerSelected(wxCommandEvent&);
+      void        onLayerSelected(wxListEvent&);
       void        OnLayerEditor(wxCommandEvent&);
       void        OnColorEditor(wxCommandEvent&);
       void        OnFillEditor(wxCommandEvent&);

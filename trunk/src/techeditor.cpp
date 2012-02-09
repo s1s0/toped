@@ -47,7 +47,7 @@ const wxString emptyFill = wxT("No Filling");
 //extern const wxEventType         wxEVT_CMD_BROWSER;
 
 BEGIN_EVENT_TABLE(tui::TechEditorDialog, wxDialog)
-   EVT_LISTBOX(ID_TE_LAYER       , tui::TechEditorDialog::onLayerSelected) 
+   EVT_LIST_ITEM_FOCUSED(ID_TE_LAYER       , tui::TechEditorDialog::onLayerSelected)
    EVT_BUTTON(BT_TECH_NEWLAYER   , tui::TechEditorDialog::OnLayerEditor )
    EVT_BUTTON(BT_TECH_NEWCOLOR   , tui::TechEditorDialog::OnColorEditor )
    EVT_BUTTON(BT_TECH_NEWFILL    , tui::TechEditorDialog::OnFillEditor )
@@ -64,8 +64,8 @@ tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id) :
    wxDialog   ( parent, id, wxT("Technology Editor")),
    _curSelect (     0 )
 {
-   wxSize size = GetSize();
-   _layerList = DEBUG_NEW wxListBox(this, ID_TE_LAYER, wxDefaultPosition, wxDefaultSize);
+//   wxSize size = GetSize();
+   _layerList = DEBUG_NEW wxListView(this, ID_TE_LAYER, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_VRULES);
    _layerNumber = DEBUG_NEW wxTextCtrl( this, ID_BTN_TE_NUM , wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
                               wxTextValidator(wxFILTER_NUMERIC, &_layerNumberString));
    _layerName = DEBUG_NEW wxTextCtrl( this, ID_BTN_TE_NUM , wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
@@ -168,31 +168,35 @@ void  tui::TechEditorDialog::OnChangeProperty(wxCommandEvent&)
 }
 
 
-void  tui::TechEditorDialog::onLayerSelected(wxCommandEvent&)
+void  tui::TechEditorDialog::onLayerSelected(wxListEvent& levent)
 {
-   _curSelect = _layerList->GetSelection();
+   _curSelect = levent.GetIndex();
+//   _curSelect = _layerList->GetFirstSelected();
    if (wxNOT_FOUND != _curSelect)
       updateDialog(_curSelect);
    FindWindow(BT_TECH_APPLY)->Enable(false);
 }
 
 void  tui::TechEditorDialog::updateDialog(int selectNum)
-{   
-   wxString layerName = _layerList->GetString(selectNum);
-   std::string layName = std::string(layerName.mb_str(wxConvUTF8));
+{
+   wxListItem row;
+   row.SetId(selectNum);
+   //   row.SetColumn(0);
+   if (!_layerList->GetItem(row)) return;
+   wxString layNum = row.GetText();
+   row.SetColumn(1);
+   if (!_layerList->GetItem(row)) return;
+   wxString layerName = row.GetText();
+   _layerNumber->SetValue(layNum);
+   _layerName->SetValue(layerName);
+   unsigned long layNo;
+   layNum.ToULong(&layNo);
+
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-      word lay_no = drawProp->getLayerNo(layName);
-      //Set Layer Number
-       wxString tempStr;
-       tempStr<<lay_no;
-      _layerNumber->SetValue(tempStr);
-
-      //Set active layer name
-      _layerName->SetValue(layerName);
       //Set active color
-      std::string colorName = drawProp->getColorName(lay_no);
+      std::string colorName = drawProp->getColorName(layNo);
       int colorNumber = _layerColors->FindString(wxString(colorName.c_str(), wxConvUTF8));
       if (colorNumber != wxNOT_FOUND)
       {
@@ -203,7 +207,7 @@ void  tui::TechEditorDialog::updateDialog(int selectNum)
          tell_log(console::MT_WARNING, "There is no appropriate color");
       }
       //Set active filling
-      std::string fillName = drawProp->getFillName(lay_no);
+      std::string fillName = drawProp->getFillName(layNo);
       int fillNumber = _layerFills->FindString(wxString(fillName.c_str(), wxConvUTF8));
       if (fillNumber != wxNOT_FOUND)
       {
@@ -215,7 +219,7 @@ void  tui::TechEditorDialog::updateDialog(int selectNum)
          _layerFills->SetSelection(fillNumber);
       }
       //Set active style
-      std::string lineName = drawProp->getLineName(lay_no);
+      std::string lineName = drawProp->getLineName(layNo);
       int lineNumber = _layerLines->FindString(wxString(lineName.c_str(), wxConvUTF8));
       if (lineNumber != wxNOT_FOUND)
       {
@@ -234,7 +238,7 @@ void tui::TechEditorDialog::updateData()
 {
    int currentSelection = _curSelect;
    prepareLayers();
-   _layerList->SetSelection(currentSelection);
+   _layerList->Select(currentSelection, true);
    _curSelect = currentSelection;
    prepareColors();
    prepareFills();
@@ -243,16 +247,33 @@ void tui::TechEditorDialog::updateData()
 
 void tui::TechEditorDialog::prepareLayers()
 {
-   _layerList->Clear();
+   _layerList->ClearAll();
+   _layerList->InsertColumn(0, wxT("No"));
+   _layerList->InsertColumn(1, wxT("Name"));
+
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
       WordList lays = drawProp->getAllLayers();
-
       for(WordList::const_iterator it = lays.begin(); it != lays.end(); ++it)
       {
-         std::string layerName = drawProp->getLayerName((*it));
-         _layerList->Append(wxString(layerName.c_str(), wxConvUTF8));
+         wxListItem row;
+         row.SetMask(wxLIST_MASK_DATA | wxLIST_MASK_TEXT);
+         row.SetId(_layerList->GetItemCount());
+         row.SetData(_layerList->GetItemCount());
+
+         wxString dummy;
+         dummy << *it;
+         row.SetText( dummy);
+         _layerList->InsertItem(row);
+         _layerList->SetColumnWidth(0, wxLIST_AUTOSIZE);
+         //
+         row.SetColumn(1);
+         row.SetMask(wxLIST_MASK_TEXT);
+         row.SetText(wxString(drawProp->getLayerName(*it).c_str(), wxConvUTF8));
+         _layerList->SetItem(row);
+         _layerList->SetColumnWidth(1, wxLIST_AUTOSIZE);
+         //
       }
    }
    PROPC->unlockDrawProp(drawProp);
