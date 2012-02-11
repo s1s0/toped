@@ -657,6 +657,7 @@ namespace tui {
    class style_sample : public wxWindow {
    public:
                      style_sample(wxWindow*, wxWindowID, wxPoint, wxSize, std::string, const layprop::DrawProperties*);
+      virtual       ~style_sample();
       void           setStyle(const tui::style_def& styledef);
       void           OnPaint(wxPaintEvent&);
    protected:
