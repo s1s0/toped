@@ -528,10 +528,6 @@ void tui::LineListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, i
    const layprop::LineSettings *line;
    wxRect r(rect);
    layprop::DrawProperties* drawProp;
-   byte width;
-   byte patscale;
-   wxDash dashes[32];
-   int index = 0;
 
    if (PROPC->lockDrawProp(drawProp))
    {
@@ -539,68 +535,54 @@ void tui::LineListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, i
       std::string lineName(str.mb_str(wxConvUTF8));
       line = drawProp->getLine(lineName);
       word pattern = line->pattern(); 
-      width = line->width();
-      patscale = line->patscale();
-      enum statetype {zero, one};
-      int state;
+      byte width = line->width();
+      byte pathscale = line->patscale();
 
-
-
-      int mask = 0x8000;
-      int length = 0;
-      if (pattern & mask) 
+      std::vector<byte> elements;
+      word mask = 0x8000;
+      bool state;
+      byte curlength = 0;
+      do
       {
-         state = one; 
-      }
-      else 
-      {
-         state = zero;
-      }
-      for (int i= 0; i < 16; ++i)
-      {
-         if(pattern & mask)
+         if (0 == curlength)
          {
-            if(state == one) 
-            {
-               length++;
-            }
-            else
-            {
-               dashes[index] = patscale*length;
-               state = one;
-               index++;
-               length = 1;
-            }
+            state = pattern & mask;
+            curlength++;
          }
          else
          {
-            if(state == zero) 
+            if (((bool)(pattern & mask)) ^ state)
             {
-               length++;
+               state = !state;
+               elements.push_back(curlength);
+               curlength = 1;
             }
             else
-            {
-               dashes[index] = patscale*length;
-               state = zero;
-               index++;
-               length = 1;
-            }
+               curlength++;
          }
          mask = mask >> 1;
-      }
-       dashes[index] = patscale*length;
-   }
-     
-   wxPen pen(wxT("black"), width, wxUSER_DASH);
-   pen.SetDashes(index, dashes);
+      }while (mask);
 
-   PROPC->unlockDrawProp(drawProp);
- 
-   dc.SetPen( pen );
-   dc.DrawText(GetString( item ),
-               rect.x + 5,
-               (rect.y - 1) + ( (rect.height/2) - dc.GetCharHeight()/2 )
-               );
+      unsigned numElements = elements.size();
+      wxDash* dashes = DEBUG_NEW wxDash[numElements];
+      for (unsigned i = 0; i < numElements; i++ )
+         dashes[i] = pathscale * elements[i];
+
+      wxPen pen(wxT("black"), width, wxUSER_DASH);
+      pen.SetWidth(width);
+      pen.SetDashes(numElements, dashes);
+
+      dc.SetPen( pen );
+      dc.DrawText(GetString( item ),
+                  rect.x + 5,
+                  (rect.y - 1) + ( (rect.height/2) - dc.GetCharHeight()/2 )
+                  );
 
       dc.DrawLine(r.x+r.width/2 + 5, r.y+r.height/2, r.x+r.width - 5, r.y+r.height/2);
+
+      pen.SetDashes(0, NULL);
+      delete [] dashes;
+
+   }
+   PROPC->unlockDrawProp(drawProp);
 }

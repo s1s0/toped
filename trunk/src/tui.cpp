@@ -1901,7 +1901,6 @@ tui::style_sample::style_sample(wxWindow *parent, wxWindowID id, wxPoint pos,
    wxSize size, std::string init, const layprop::DrawProperties* drawProp) : wxWindow(parent, id, pos, size, wxSUNKEN_BORDER),
    _pen(wxT("black"), 3, wxUSER_DASH)
 {
-   wxPen pen(wxT("black"), 3, wxUSER_DASH);
    style_def initStyle;
    initStyle.pattern = drawProp->getLine(init)->pattern();
    initStyle.pscale = drawProp->getLine(init)->patscale();
@@ -1913,61 +1912,45 @@ void tui::style_sample::setStyle(const tui::style_def&  styledef)
 {
    word pattern = styledef.pattern;
    byte width = styledef.width;
-   byte patscale = styledef.pscale;
+   byte pathscale = styledef.pscale;
 
-   if ((patscale == 0) || (width == 0) || pattern == 0) return;
-   wxDash dashes[32];
-   int index = 0;
-         enum statetype {zero, one};
-      int state;
-
-
-//      int i = 0;
-
-      int mask = 0x8000;
-      int length = 0;
-      if (pattern & mask) 
+   if ((pathscale == 0) || (width == 0) || pattern == 0) return;
+   std::vector<byte> elements;
+   word mask = 0x8000;
+   bool state;
+   byte curlength = 0;
+   do
+   {
+      if (0 == curlength)
       {
-         state = one; 
+         state = pattern & mask;
+         curlength++;
       }
-      else 
+      else
       {
-         state = zero;
-      }
-      for (int i= 0; i < 16; ++i)
-      {
-         if(pattern & mask)
+         if (((bool)(pattern & mask)) ^ state)
          {
-            if(state == one) 
-            {
-               length++;
-            }
-            else
-            {
-               dashes[index] = patscale*length;
-               state = one;
-               index++;
-               length = 1;
-            }
+            state = !state;
+            elements.push_back(curlength);
+            curlength = 1;
          }
          else
-         {
-            if(state == zero) 
-            {
-               length++;
-            }
-            else
-            {
-               dashes[index] = patscale*length;
-               state = zero;
-               index++;
-               length = 1;
-            }
-         }
-         mask = mask >> 1;
+            curlength++;
       }
-      _pen.SetWidth(width);
-      _pen.SetDashes(index, dashes);
+      mask = mask >> 1;
+   }while (mask);
+
+   unsigned numElements = elements.size();
+   wxDash* dashes = DEBUG_NEW wxDash[numElements];
+   for (unsigned i = 0; i < numElements; i++ )
+      dashes[i] = pathscale * elements[i];
+   _pen.SetWidth(width);
+   wxDash* oldDashes = NULL;
+   _pen.GetDashes(&oldDashes);
+   _pen.SetDashes(0, NULL);
+   if (NULL != oldDashes)
+      delete [] oldDashes;
+   _pen.SetDashes(numElements, dashes);
 }
 
 void tui::style_sample::OnPaint(wxPaintEvent&)
@@ -1980,10 +1963,16 @@ void tui::style_sample::OnPaint(wxPaintEvent&)
    dc.DrawRectangle(0, 0, w, h);
    dc.SetPen(_pen);
    dc.DrawLine(1,10,w-1,10);
-
-
 }
 
+tui::style_sample::~style_sample()
+{
+   wxDash* oldDashes = NULL;
+   _pen.GetDashes(&oldDashes);
+   _pen.SetDashes(0, NULL);
+   if (NULL != oldDashes)
+      delete [] oldDashes;
+}
 //==============================================================================
 BEGIN_EVENT_TABLE(tui::defineStyle, wxDialog)
       EVT_LISTBOX(ID_ITEMLIST   , tui::defineStyle::OnStyleSelected   )
