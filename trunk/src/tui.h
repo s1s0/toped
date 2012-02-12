@@ -775,8 +775,10 @@ namespace tui {
    };
 
    //Return brush for corresponding color and filling
-   //This function is used for visualization in GUI (layer buttons, technology editor etc) 
+   //This function is used for visualisation in GUI (layer buttons, technology editor etc)
    wxBrush* makeBrush(const byte* ifill, const layprop::tellRGB col);
+   //! Makes a structure ready to be used in wxPen for dashed lines
+   unsigned makePenDash(word, byte, wxDash*&);
 }
 
 //Print output of external functions
