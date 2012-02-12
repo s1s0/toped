@@ -538,38 +538,11 @@ void tui::LineListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, i
       byte width = line->width();
       byte pathscale = line->patscale();
 
-      std::vector<byte> elements;
-      word mask = 0x8000;
-      bool state;
-      byte curlength = 0;
-      do
-      {
-         if (0 == curlength)
-         {
-            state = pattern & mask;
-            curlength++;
-         }
-         else
-         {
-            if (((bool)(pattern & mask)) ^ state)
-            {
-               state = !state;
-               elements.push_back(curlength);
-               curlength = 1;
-            }
-            else
-               curlength++;
-         }
-         mask = mask >> 1;
-      }while (mask);
-
-      unsigned numElements = elements.size();
-      wxDash* dashes = DEBUG_NEW wxDash[numElements];
-      for (unsigned i = 0; i < numElements; i++ )
-         dashes[i] = pathscale * elements[i];
+      wxDash* dashes = NULL;
+      unsigned numElements= makePenDash(pattern, pathscale, dashes);
 
       wxPen pen(wxT("black"), width, wxUSER_DASH);
-      pen.SetWidth(width);
+//      pen.SetWidth(width);
       pen.SetDashes(numElements, dashes);
 
       dc.SetPen( pen );
