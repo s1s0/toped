@@ -30,6 +30,7 @@
 #include "tpdph.h"
 #include <math.h>
 #include <sstream>
+#include <bitset>
 #include <wx/colordlg.h>
 #include <wx/regex.h>
 #include <wx/filename.h>
@@ -2002,17 +2003,28 @@ tui::defineStyle::defineStyle(wxFrame *parent, wxWindowID id, const wxString &ti
    hsizer1->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Pattern:"),
                               wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
                                                 0, wxALL | wxALIGN_CENTER , 10);
-   _pattern = DEBUG_NEW wxTextCtrl( this, ID_PATVAL , wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
-                                           wxTextValidator(wxFILTER_NUMERIC, &_patternString));
+   //Boolean validator for style pattern 
+   wxTextValidator boolValidator(wxFILTER_INCLUDE_CHAR_LIST, &_patscaleString);
+   boolValidator.SetCharIncludes(wxT("01"));
+   
+   wxMemoryDC DC;
+   wxFont font(10,wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+   DC.SetFont(font);
+   wxString tempStr = wxString(wxT("0"), pattern_size);
+   int hsz,wsz;
+
+   DC.GetTextExtent(tempStr, &wsz, &hsz);
+   _pattern = DEBUG_NEW wxTextCtrl( this, ID_PATVAL , wxT(""), wxDefaultPosition, wxSize(wsz,-1), wxTE_RIGHT,
+                                           boolValidator);
    hsizer2->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Width  :"),
                               wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
                                                 0, wxALL | wxALIGN_CENTER , 10);
-   _width    = DEBUG_NEW wxTextCtrl( this, ID_WIDTHVAL , wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
+   _width    = DEBUG_NEW wxTextCtrl( this, ID_WIDTHVAL , wxT(""), wxDefaultPosition, wxSize(wsz,-1), wxTE_RIGHT,
                                            wxTextValidator(wxFILTER_NUMERIC, &_widthString));
    hsizer3->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Scale   :"),
                               wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
                                                 0, wxALL | wxALIGN_CENTER , 10);
-   _patscale    = DEBUG_NEW wxTextCtrl( this, ID_PATSCALEVAL , wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
+   _patscale    = DEBUG_NEW wxTextCtrl( this, ID_PATSCALEVAL , wxT(""), wxDefaultPosition, wxSize(wsz,-1), wxTE_RIGHT,
                                            wxTextValidator(wxFILTER_NUMERIC, &_patscaleString));
    hsizer1->Add(_pattern, 0, wxALL | wxEXPAND, 5);
    hsizer2->Add(_width, 0, wxALL | wxEXPAND, 5);
@@ -2113,8 +2125,13 @@ void tui::defineStyle::updateDialog()
 {
    _stylesample->setStyle(_current_style);
    _stylesample->Refresh();
-   wxString tempStr;
-   tempStr << _current_style.pattern;
+      
+   //convert number to boolean string 
+   std::stringstream strbuf;
+   strbuf << std::bitset<16>(_current_style.pattern);
+   std::string ss = strbuf.str();
+
+   wxString tempStr(ss.c_str(), wxConvUTF8);
    _pattern->SetValue(tempStr);
    tempStr.Clear();
    tempStr << static_cast<unsigned int>(_current_style.width);
@@ -2142,7 +2159,37 @@ void tui::defineStyle::OnStylePropChanged(wxCommandEvent& event)
    wxString s_width    = _width->GetValue();
    wxString s_patscale = _patscale->GetValue();
 
-   unsigned long d_pattern;  s_pattern.ToULong(&d_pattern);
+  if((!s_pattern.IsEmpty()) && (s_pattern.Length() < pattern_size))
+   {
+      unsigned long addedLength = pattern_size - s_pattern.Length();
+      wxString str = wxString(wxT('0'), addedLength);
+      s_pattern = str + s_pattern;
+      _pattern->SetValue(s_pattern);
+   }
+   while(s_pattern.Length() > pattern_size) 
+   {
+      s_pattern.RemoveLast();
+      _pattern->SetValue(s_pattern);
+   }
+   unsigned long d_pattern=0;  
+   wxString boolStr(wxT("01"));
+   wxChar c0 = boolStr[0];
+   wxChar c1 = boolStr[1];
+
+   for(size_t i = 0; i < s_pattern.Length(); i++)
+   {
+      d_pattern = d_pattern << 1;
+      wxUniChar c = s_pattern[i];
+       wxChar cg = s_pattern[i];
+      if(cg == c1) 
+      {
+         d_pattern += 1;
+         continue;
+      }
+      if(cg == c0) continue;
+      assert(false);
+   }
+
    unsigned long d_width;    s_width.ToULong(&d_width);
    unsigned long d_patscale; s_patscale.ToULong(&d_patscale);
    style_def tempStyle;
