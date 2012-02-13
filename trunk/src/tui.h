@@ -667,6 +667,7 @@ namespace tui {
    };
 
    typedef  std::map<std::string, style_def       >  styleMAP;
+   const unsigned long pattern_size = 16;
 
    class defineStyle : public wxDialog
    {
