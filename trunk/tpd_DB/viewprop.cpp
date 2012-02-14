@@ -388,7 +388,7 @@ void layprop::PropertyCenter::saveProperties(std::string filename)
       fprintf(prop_file, "screenSetup();\n\n");
       fclose(prop_file);
    }
-   unlockDrawProp(drawProp);
+   unlockDrawProp(drawProp, false);
 }
 
 void layprop::PropertyCenter::setGdsLayMap(USMap* map)
@@ -417,7 +417,7 @@ DWordSet layprop::PropertyCenter::allUnselectable()
    {
       drawProp->allUnselectable(unselectable);
    }
-   unlockDrawProp(drawProp);
+   unlockDrawProp(drawProp, false);
    return unselectable;
 }
 
@@ -438,14 +438,13 @@ bool layprop::PropertyCenter::lockDrawProp(DrawProperties*& propDB, PropertyStat
    }
 }
 
-void layprop::PropertyCenter::unlockDrawProp(DrawProperties*& propDB/*, bool throwexception*/)
+void layprop::PropertyCenter::unlockDrawProp(DrawProperties*& propDB, bool throwexception)
 {
    _drawprop = propDB;
    _drawprop->setState(layprop::DB);
    VERIFY(wxMUTEX_NO_ERROR == _drawPLock.Unlock());
-   assert(NULL != propDB); // TODO <- remove this and replace with the lines below
-//   if (throwexception && (NULL == propDB))
-//      throw EXPTNdrawProperty();
+   if (throwexception && (NULL == propDB))
+      throw EXPTNdrawProperty();
    propDB = NULL;
 }
 

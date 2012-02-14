@@ -1165,7 +1165,7 @@ void tellstdfunc::stdUSINGLAYER::undo()
       TpdPost::layer_default(layno, drawProp->curLay());
       drawProp->defaultLayer(layno);
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, true);
 }
 
 int tellstdfunc::stdUSINGLAYER::execute()
@@ -1191,7 +1191,7 @@ int tellstdfunc::stdUSINGLAYER::execute()
       drawProp->defaultLayer(layno);
       LogFile << LogFile.getFN() << "("<< layno << ");";LogFile.flush();
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp,true);
    return EXEC_NEXT;
 }
 
@@ -1211,7 +1211,7 @@ int tellstdfunc::stdUSINGLAYER_S::execute()
   {
      layno = drawProp->getLayerNo(layname);
   }
-  PROPC->unlockDrawProp(drawProp);
+  PROPC->unlockDrawProp(drawProp, true);
   if (ERR_LAY != layno)
   {
     OPstack.push(DEBUG_NEW telldata::TtInt(layno));

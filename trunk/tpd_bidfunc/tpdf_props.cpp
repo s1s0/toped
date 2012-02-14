@@ -88,7 +88,7 @@ int tellstdfunc::stdLAYPROP::execute() {
       LogFile << LogFile.getFN() << "(\""<< name << "\"," << gdsN << ",\"" <<
             col << "\",\"" << fill <<"\",\"" << sline <<"\");";LogFile.flush();
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, true);
    return EXEC_NEXT;
 }
 
@@ -116,7 +116,7 @@ int tellstdfunc::stdLINEDEF::execute() {
       LogFile << LogFile.getFN() << "(\""<< name << "\" , \"" << col << "\","
             << pattern << " , " << patscale << " , " << width << ");";LogFile.flush();
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, true);
    return EXEC_NEXT;
 }
 
@@ -145,7 +145,7 @@ int tellstdfunc::stdCOLORDEF::execute() {
       LogFile << LogFile.getFN() << "(\""<< name << "\"," << colR << "," <<
                           colG << "," << colB << "," << sat << ");";LogFile.flush();
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, true);
    return EXEC_NEXT;
 }
 
@@ -182,7 +182,7 @@ int tellstdfunc::stdFILLDEF::execute() {
          LogFile << LogFile.getFN() << "(\""<< name << "\"," << *sl << ");";
          LogFile.flush();
       }
-      PROPC->unlockDrawProp(drawProp);
+      PROPC->unlockDrawProp(drawProp, true);
    }
    delete sl;
    return EXEC_NEXT;
@@ -306,7 +306,7 @@ void tellstdfunc::stdHIDELAYER::undo() {
          DATC->unlockTDT(dbLibDir);
       }
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, true);
    delete pl;
    TpdPost::layer_status(tui::BT_LAYER_HIDE, layno, hide);
 }
@@ -352,7 +352,7 @@ int tellstdfunc::stdHIDELAYER::execute()
          tell_log(console::MT_ERROR,"Layer above is the current. Can't be hidden");
       }
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, true);
    return EXEC_NEXT;
 }
 
@@ -404,7 +404,7 @@ void tellstdfunc::stdHIDELAYERS::undo() {
       DATC->unlockTDT(dbLibDir);
    }
    delete pl; delete sl;
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, true);
 }
 
 int tellstdfunc::stdHIDELAYERS::execute()
@@ -468,7 +468,7 @@ int tellstdfunc::stdHIDELAYERS::execute()
       LogFile << LogFile.getFN() << "("<< *sl << "," <<
                                          LogFile._2bool(hide) << ");"; LogFile.flush();
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, true);
    delete sl;
    return EXEC_NEXT;
 }
@@ -497,7 +497,7 @@ void tellstdfunc::stdHIDECELLMARK::undo() {
       wxPostEvent(TopedCanvasW, eventGRIDUPD);
       RefreshGL();
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, true);
 }
 
 int tellstdfunc::stdHIDECELLMARK::execute() {
@@ -515,7 +515,7 @@ int tellstdfunc::stdHIDECELLMARK::execute() {
       LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
       RefreshGL();
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, true);
    return EXEC_NEXT;
 }
 
@@ -544,7 +544,7 @@ void tellstdfunc::stdHIDETEXTMARK::undo() {
       LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
       RefreshGL();
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, true);
 }
 
 int tellstdfunc::stdHIDETEXTMARK::execute() {
@@ -562,7 +562,7 @@ int tellstdfunc::stdHIDETEXTMARK::execute() {
       LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
       RefreshGL();
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, true);
    return EXEC_NEXT;
 }
 
@@ -591,7 +591,7 @@ void tellstdfunc::stdHIDECELLBOND::undo() {
       LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
       RefreshGL();
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, true);
 }
 
 int tellstdfunc::stdHIDECELLBOND::execute() {
@@ -608,7 +608,8 @@ int tellstdfunc::stdHIDECELLBOND::execute() {
       wxPostEvent(TopedCanvasW, eventGRIDUPD);
       LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
       RefreshGL();
-   }PROPC->unlockDrawProp(drawProp);
+   }
+   PROPC->unlockDrawProp(drawProp, true);
    return EXEC_NEXT;
 }
 
@@ -637,7 +638,7 @@ void tellstdfunc::stdHIDETEXTBOND::undo() {
       LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
       RefreshGL();
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, true);
 }
 
 int tellstdfunc::stdHIDETEXTBOND::execute() {
@@ -655,7 +656,7 @@ int tellstdfunc::stdHIDETEXTBOND::execute() {
       LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
       RefreshGL();
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, true);
    return EXEC_NEXT;
 }
 
@@ -700,7 +701,7 @@ void tellstdfunc::stdLOCKLAYER::undo() {
       DATC->unlockTDT(dbLibDir);
    }
    delete pl;
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, true);
    TpdPost::layer_status(tui::BT_LAYER_LOCK, layno, lock);
 }
 
@@ -744,7 +745,7 @@ int tellstdfunc::stdLOCKLAYER::execute()
          tell_log(console::MT_ERROR,"Layer above is the current. Can't be locked.");
       }
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, true);
    return EXEC_NEXT;
 }
 
@@ -796,7 +797,7 @@ void tellstdfunc::stdLOCKLAYERS::undo() {
       DATC->unlockTDT(dbLibDir);
    }
    delete pl; delete sl;
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, true);
 }
 
 int tellstdfunc::stdLOCKLAYERS::execute()
@@ -859,7 +860,7 @@ int tellstdfunc::stdLOCKLAYERS::execute()
                                          LogFile._2bool(lock) << ");"; LogFile.flush();
    }
    delete sl;
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, true);
    return EXEC_NEXT;
 }
 
@@ -888,7 +889,7 @@ void tellstdfunc::stdFILLLAYER::undo() {
       TpdPost::layer_status(tui::BT_LAYER_FILL, layno, fill);
       RefreshGL();
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, true);
 }
 
 int tellstdfunc::stdFILLLAYER::execute()
@@ -907,7 +908,7 @@ int tellstdfunc::stdFILLLAYER::execute()
                  LogFile._2bool(fill) << ");"; LogFile.flush();
       RefreshGL();
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, true);
    return EXEC_NEXT;
 }
 
@@ -943,7 +944,7 @@ void tellstdfunc::stdFILLLAYERS::undo() {
       RefreshGL();
    }
    delete sl;
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, true);
 }
 
 int tellstdfunc::stdFILLLAYERS::execute()
@@ -968,7 +969,7 @@ int tellstdfunc::stdFILLLAYERS::execute()
       RefreshGL();
    }
    delete sl;
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, true);
    return EXEC_NEXT;
 }
 
@@ -993,7 +994,7 @@ void tellstdfunc::stdSAVELAYSTAT::undo() {
       VERIFY(drawProp->deleteLaysetStatus(sname));
       TpdPost::layers_state(sname, false);
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, true);
 }
 
 int tellstdfunc::stdSAVELAYSTAT::execute()
@@ -1016,7 +1017,7 @@ int tellstdfunc::stdSAVELAYSTAT::execute()
       }
       LogFile << LogFile.getFN() << "(\""<< sname << "\");"; LogFile.flush();
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, true);
    return EXEC_NEXT;
 }
 
@@ -1036,7 +1037,7 @@ void tellstdfunc::stdLOADLAYSTAT::undo_cleanup()
    {
       drawProp->popBackLayerStatus();
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, true);
    delete pl;
 }
 
@@ -1065,7 +1066,7 @@ void tellstdfunc::stdLOADLAYSTAT::undo() {
       DATC->unlockTDT(dbLibDir);
    }
    delete pl;
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, true);
 }
 
 int tellstdfunc::stdLOADLAYSTAT::execute()
@@ -1117,7 +1118,7 @@ int tellstdfunc::stdLOADLAYSTAT::execute()
          tell_log(console::MT_ERROR, info.str());
       }
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, true);
    return EXEC_NEXT;
 }
 
@@ -1165,7 +1166,7 @@ void tellstdfunc::stdDELLAYSTAT::undo() {
       drawProp->saveLaysetStatus(sname, hidel, lockl, filll, activel);
       TpdPost::layers_state(sname, true);
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, true);
    // ... and finally - clean-up
    delete undofilll;
    delete undolockl;
@@ -1209,7 +1210,7 @@ int tellstdfunc::stdDELLAYSTAT::execute()
          tell_log(console::MT_ERROR, info.str());
       }
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, true);
    return EXEC_NEXT;
 }
 //=============================================================================
@@ -1446,7 +1447,7 @@ void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
          {
             drawProp->setVisualLimit(val);
          }
-         PROPC->unlockDrawProp(drawProp);
+         PROPC->unlockDrawProp(drawProp, true);
          // send an event to update the property dialog
          wxCommandEvent eventTextOri(wxEVT_RENDER_PARAMS);
          eventTextOri.SetId(tui::RPS_VISI_LIMIT);
@@ -1472,7 +1473,7 @@ void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
          {
             drawProp->setAdjustTextOrientation(val);
          }
-         PROPC->unlockDrawProp(drawProp);
+         PROPC->unlockDrawProp(drawProp, true);
          // send an event to update the property dialog
          wxCommandEvent eventTextOri(wxEVT_RENDER_PARAMS);
          eventTextOri.SetId(tui::RPS_TEXT_ORI);
@@ -1498,7 +1499,7 @@ void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
          {
             drawProp->setCellDepthAlphaEbb(val);
          }
-         PROPC->unlockDrawProp(drawProp);
+         PROPC->unlockDrawProp(drawProp, true);
          // send an event to update the property dialog
          wxCommandEvent event(wxEVT_RENDER_PARAMS);
          event.SetId(tui::RPS_CELL_DAB);
@@ -1527,7 +1528,7 @@ void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
          {
             drawProp->setCellDepthView(0);
          }
-         PROPC->unlockDrawProp(drawProp);
+         PROPC->unlockDrawProp(drawProp, true);
          // send an event to update the property dialog
          wxCommandEvent event(wxEVT_RENDER_PARAMS);
          event.SetId(tui::RPS_CELL_DOV);
@@ -1543,7 +1544,7 @@ void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
          {
             drawProp->setCellDepthView(val);
          }
-         PROPC->unlockDrawProp(drawProp);
+         PROPC->unlockDrawProp(drawProp, true);
          // send an event to update the property dialog
          wxCommandEvent event(wxEVT_RENDER_PARAMS);
          event.SetId(tui::RPS_CELL_DOV);

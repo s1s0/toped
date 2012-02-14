@@ -1236,7 +1236,7 @@ BEGIN_EVENT_TABLE(tui::defineColor, wxDialog)
    EVT_TEXT(ID_ALPHAVAL    , tui::defineColor::OnColorPropChanged )
 END_EVENT_TABLE()
 
-tui::defineColor::defineColor(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, const layprop::DrawProperties* drawProp) :
+tui::defineColor::defineColor(wxWindow *parent, wxWindowID id, const wxString &title, wxPoint pos, const layprop::DrawProperties* drawProp) :
       wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE), _drawProp(drawProp)
 {
    std::string init_color;

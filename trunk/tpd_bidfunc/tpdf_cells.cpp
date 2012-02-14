@@ -316,7 +316,7 @@ int tellstdfunc::stdOPENCELL::execute()
          {
             cellViewPort = drawProp->clipRegion();
          }
-         PROPC->unlockDrawProp(drawProp);
+         PROPC->unlockDrawProp(drawProp, false);
          if (cellViewPort != DEFAULT_OVL_BOX)
             tDesign->storeViewPort(cellViewPort);
       }

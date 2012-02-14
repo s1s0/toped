@@ -1370,7 +1370,7 @@ void tui::TopedFrame::OnGDStranslate(wxCommandEvent& WXUNUSED(event)) {
       }
       delete dlg;
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, false);
    if (success)
       Console->parseCommand(ost);
 
@@ -1521,7 +1521,7 @@ void tui::TopedFrame::OnGDSexportCELL(wxCommandEvent& WXUNUSED(event))
       delete laymap;
       if (NULL != laymap2save) delete laymap2save;
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, false);
    if (success)
       Console->parseCommand(ost);
 }
@@ -1588,7 +1588,7 @@ void tui::TopedFrame::OnCIFtranslate(wxCommandEvent& WXUNUSED(event))
       }
       delete dlg;
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, false);
    if (success) Console->parseCommand(ost);
 }
 
@@ -1656,7 +1656,7 @@ void tui::TopedFrame::OnCIFexportCELL(wxCommandEvent& WXUNUSED(event))
       delete laymap;
       if (NULL != laymap2save) delete laymap2save;
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, false);
    if (success)
    {
       Console->parseCommand(ost);
@@ -1745,7 +1745,7 @@ void tui::TopedFrame::OnOAStranslate(wxCommandEvent& WXUNUSED(event))
       }
       delete dlg;
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp,false);
    if (success)
       Console->parseCommand(ost);
 }
@@ -2066,7 +2066,7 @@ void tui::TopedFrame::OnDefineLayer(wxCommandEvent& event)
       word layno = drawProp->curLay();
       editLayerDlg(layno, drawProp);
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, false);
 }
 
 void tui::TopedFrame::OnEditLayer(wxCommandEvent& evt)
@@ -2077,7 +2077,7 @@ void tui::TopedFrame::OnEditLayer(wxCommandEvent& evt)
       word layno = evt.GetInt();
       editLayerDlg(layno, drawProp);
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, false);
 }
 
 void tui::TopedFrame::editLayerDlg(word layno, const layprop::DrawProperties* drawprop)
@@ -2126,7 +2126,7 @@ void tui::TopedFrame::OnDefineColor(wxCommandEvent& WXUNUSED(event))
          success = true;
       }
    }
-   PROPC->unlockDrawProp(drawprop);
+   PROPC->unlockDrawProp(drawprop, false);
    if (success) Console->parseCommand(ost);
 }
 
@@ -2156,7 +2156,7 @@ void tui::TopedFrame::OnDefineFill(wxCommandEvent& WXUNUSED(event))
          }
       }
    }
-   PROPC->unlockDrawProp(drawprop);
+   PROPC->unlockDrawProp(drawprop, false);
    if (success) Console->parseCommand(ost);
 }
 
@@ -2185,7 +2185,7 @@ void tui::TopedFrame::OnDefineStyle(wxCommandEvent& WXUNUSED(event))
          success = true;
       }
    }
-   PROPC->unlockDrawProp(drawprop);
+   PROPC->unlockDrawProp(drawprop, false);
    if (success) Console->parseCommand(ost);
 }
 

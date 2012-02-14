@@ -813,7 +813,7 @@ int tellstdfunc::PSexportTOP::execute()
                                           << ",\"" << filename << "\");";
                LogFile.flush();
             }
-            PROPC->unlockDrawProp(drawProp);
+            PROPC->unlockDrawProp(drawProp, false);
          }
          else
          {
@@ -989,7 +989,7 @@ int tellstdfunc::GDSgetlaymap::execute()
             theMap->add(clay);
          }
       }
-      PROPC->unlockDrawProp(drawProp);
+      PROPC->unlockDrawProp(drawProp, true);
    }
    OPstack.push(theMap);
    LogFile << LogFile.getFN() << "("<< LogFile._2bool(import)  << ");"; LogFile.flush();
@@ -1405,7 +1405,7 @@ int tellstdfunc::CIFgetlaymap::execute()
             theMap->add(clay);
          }
       }
-      PROPC->unlockDrawProp(drawProp);
+      PROPC->unlockDrawProp(drawProp, true);
    }
    OPstack.push(theMap);
    LogFile << LogFile.getFN() << "("<< LogFile._2bool(import)  << ");"; LogFile.flush();
@@ -1735,7 +1735,7 @@ int tellstdfunc::OASgetlaymap::execute()
             theMap->add(clay);
          }
       }
-      PROPC->unlockDrawProp(drawProp);
+      PROPC->unlockDrawProp(drawProp, true);
    }
    OPstack.push(theMap);
    LogFile << LogFile.getFN() << "("<< LogFile._2bool(import)  << ");"; LogFile.flush();
@@ -1795,7 +1795,7 @@ int tellstdfunc::DRCCalibreimport::execute()
    {
       drawProp->addLayer(DRC_LAY);
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, true);
    std::string filename = getStringValue();
    if(DRCData)
    {

@@ -1806,7 +1806,7 @@ WordList laydata::DrcLibrary::findSelected(const std::string &cell, TP* p1)
             }
          }
       }
-      PROPC->unlockDrawProp(drawProp);
+      PROPC->unlockDrawProp(drawProp, true);
       errorList.unique();
       if(shapes != NULL)
       {

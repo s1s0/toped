@@ -47,6 +47,8 @@ extern const wxEventType         wxEVT_CANVAS_PARAMS;
 
 
 //=============================================================================
+//! Make sure this function is not called when TDT mutex is locked. Otherwise
+//! it will remain locked in case DrawProperties can't be locked
 telldata::TtInt* tellstdfunc::getCurrentLayer()
 {
    unsigned cl = 0;
@@ -55,7 +57,7 @@ telldata::TtInt* tellstdfunc::getCurrentLayer()
    {
       cl = drawProp->curLay();
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, true);
    return (DEBUG_NEW telldata::TtInt(cl));
 }
 
@@ -63,6 +65,8 @@ telldata::TtInt* tellstdfunc::getCurrentLayer()
 //! The whole idea behind this function is to ensure that the target layer is
 //! defined in the property database. Otherwise the user will add a shape
 //! which will be invisible.
+//! Make sure this function is not called when TDT mutex is locked. Otherwise
+//! it will remain locked in case DrawProperties can't be locked
 void tellstdfunc::secureLayer(unsigned layno)
 {
    layprop::DrawProperties* drawProp;
@@ -72,7 +76,7 @@ void tellstdfunc::secureLayer(unsigned layno)
       if (drawProp->addLayer(layno))
          TpdPost::layer_add(drawProp->getLayerName(layno), layno);
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, true);
 }
 
 //=============================================================================
@@ -417,7 +421,7 @@ void tellstdfunc::RefreshGL()
             TpdPost::layer_add(drawProp->getLayerName(*CUL), *CUL);
          PROPC->clearUnpublishedLayers();
       }
-      PROPC->unlockDrawProp(drawProp);
+      PROPC->unlockDrawProp(drawProp, true);
    }
    Console->set_canvas_invalid(true);
 }
@@ -456,7 +460,7 @@ void tellstdfunc::updateLayerDefinitions(laydata::TdtLibDir* LIBDIR, NameList& t
             TpdPost::layer_add(drawProp->getLayerName(*CUL), *CUL);
       }
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, false);
 }
 
 //=============================================================================
@@ -484,7 +488,7 @@ bool tellstdfunc::secureLayDef(unsigned layno)
          success = false;
       }
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, false);
    return success;
 }
 

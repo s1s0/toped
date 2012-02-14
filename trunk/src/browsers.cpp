@@ -1549,7 +1549,7 @@ browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoi
       col   = drawProp->getColor(_layer->layno());
       _brush = tui::makeBrush(ifill, col);
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, false);
    wxColour color(col.red(), col.green(), col.blue());
 
    _pen = DEBUG_NEW wxPen();

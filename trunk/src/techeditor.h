@@ -50,8 +50,12 @@ namespace tui
 class ColorListComboBox : public wxOwnerDrawnComboBox
 {
    public:
+                   ColorListComboBox( layprop::DrawProperties* );
+      virtual     ~ColorListComboBox();
       virtual void OnDrawItem( wxDC& dc, const wxRect& rect, int item, int flags ) const;
       //virtual void OnDrawBackground( wxDC& dc, const wxRect& rect, int item, int flags ) const;
+   private:
+      layprop::ColorMap _colors;
 };
 
 
@@ -84,9 +88,9 @@ class TechEditorDialog : public wxDialog
 	protected:
       //wxScrolledWindow*     _layerPanel;
       wxListView*             _layerList;
-      wxOwnerDrawnComboBox*   _layerColors;
-      wxOwnerDrawnComboBox*   _layerFills;
-      wxOwnerDrawnComboBox*   _layerLines;
+      ColorListComboBox*      _layerColors;
+      FillListComboBox*       _layerFills;
+      LineListComboBox*       _layerLines;
       wxButton*	            _applyButton;
       wxButton*	            _cancelButton;
       wxButton*	            _newLayerButton;

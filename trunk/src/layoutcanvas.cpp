@@ -720,7 +720,7 @@ void tui::LayoutCanvas::OnMouseRightUp(wxMouseEvent& WXUNUSED(event))
          {
             currentOp = drawProp->currentOp();
          }
-         PROPC->unlockDrawProp(drawProp);
+         PROPC->unlockDrawProp(drawProp, false);
          switch (currentOp)
          {
             case console::op_dbox:
@@ -968,7 +968,7 @@ void tui::LayoutCanvas::OnZoom(wxCommandEvent& evt) {
    {
       drawProp->setScrCTM(_LayCTM.Reversed());
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, false);
    delete box;
    _invalidWindow = true;
    Refresh();
@@ -986,7 +986,7 @@ void tui::LayoutCanvas::update_viewport()
    {
       drawProp->setClipRegion(DBbox(_lpBL.x(),_lpTR.y(), _lpTR.x(), _lpBL.y()));
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, false);
    glClearColor(0,0,0,0);
 }
 
@@ -1032,7 +1032,7 @@ void tui::LayoutCanvas::OnMouseIN(wxCommandEvent& evt)
          wxPostEvent(this, eventPOSITION);
       }
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, false);
 }
 
 
