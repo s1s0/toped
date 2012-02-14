@@ -70,12 +70,19 @@ tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id) :
                               wxTextValidator(wxFILTER_NUMERIC, &_layerNumberString));
    _layerName = DEBUG_NEW wxTextCtrl( this, ID_BTN_TE_NUM , wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
                                     wxTextValidator(wxFILTER_ASCII , &_layerNameString));
-   _layerColors = DEBUG_NEW ColorListComboBox();
-   _layerColors->Create(this, COLOR_COMBO, wxEmptyString, wxDefaultPosition,wxDefaultSize /*wxSize(size.x/3, 30)*/, wxCB_READONLY );
-   _layerFills = DEBUG_NEW FillListComboBox();
-   _layerFills->Create(this, FILL_COMBO, wxEmptyString, wxDefaultPosition, wxDefaultSize/*wxSize(size.x/3, 30)*/, wxCB_READONLY );
-   _layerLines = DEBUG_NEW  LineListComboBox();
-   _layerLines->Create(this, LINE_COMBO, wxEmptyString, wxDefaultPosition, wxDefaultSize/*wxSize(size.x/3, 30)*/, wxCB_READONLY );
+
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      _layerColors = DEBUG_NEW ColorListComboBox(drawProp);
+      _layerColors->Create(this, COLOR_COMBO, wxEmptyString, wxDefaultPosition,wxDefaultSize , wxCB_READONLY );
+      _layerFills = DEBUG_NEW FillListComboBox();
+      _layerFills->Create(this, FILL_COMBO, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxCB_READONLY );
+      _layerLines = DEBUG_NEW  LineListComboBox();
+      _layerLines->Create(this, LINE_COMBO, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxCB_READONLY );
+   }
+   PROPC->unlockDrawProp(drawProp, false);
+
    _newColorButton = DEBUG_NEW wxButton(this, tui::BT_TECH_NEWCOLOR, wxT("New"   ));
    _newFillButton  = DEBUG_NEW wxButton(this, tui::BT_TECH_NEWFILL , wxT("New"   ));
    _newStyleButton = DEBUG_NEW wxButton(this, tui::BT_TECH_NEWSTYLE, wxT("New"   ));
@@ -230,7 +237,7 @@ void  tui::TechEditorDialog::updateDialog(int selectNum)
          tell_log(console::MT_WARNING, "There is no appropriate line style");
       }
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, false);
 
 }
 
@@ -276,7 +283,7 @@ void tui::TechEditorDialog::prepareLayers()
          //
       }
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, false);
 }
 
 void tui::TechEditorDialog::prepareColors()
@@ -292,7 +299,7 @@ void tui::TechEditorDialog::prepareColors()
          _layerColors->Append(wxString((*it).c_str(), wxConvUTF8));
       }
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, false);
 }
 
 void tui::TechEditorDialog::prepareFills()
@@ -309,7 +316,7 @@ void tui::TechEditorDialog::prepareFills()
       }
       _layerFills->Append(emptyFill);
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, false);
 }
 
 void tui::TechEditorDialog::prepareLines()
@@ -326,7 +333,7 @@ void tui::TechEditorDialog::prepareLines()
          _layerLines->Append(wxString((*it).c_str(), wxConvUTF8));
       }
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, false);
 }
 
 void tui::TechEditorDialog::OnApply(wxCommandEvent&)
@@ -366,23 +373,40 @@ void tui::TechEditorDialog::OnApply(wxCommandEvent&)
    updateDialog(_curSelect); // TODO remove this from here! We need an event from the second thread when the properties had been changed
 }
 
+tui::ColorListComboBox::ColorListComboBox(layprop::DrawProperties* drawProp) : wxOwnerDrawnComboBox()
+{
+   NameList allColors;
+   drawProp->allColors(allColors);
+   for (NameList::const_iterator CC = allColors.begin(); CC != allColors.end(); CC++)
+   {
+      layprop::tellRGB* coldef = DEBUG_NEW layprop::tellRGB(drawProp->getColor(*CC));
+      _colors[*CC] = coldef;
+   }
+}
+
 void tui::ColorListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, int flags ) const
 {
-   if ( item == wxNOT_FOUND )
-            return;
-   layprop::tellRGB col(0,0,0,0);
+   if ( item == wxNOT_FOUND ) return;
+
+   layprop::tellRGB col(127,127,127,127);
+
+   std::string colorName(GetString( item ).mb_str(wxConvUTF8));
+   layprop::ColorMap::const_iterator colIter = _colors.find(colorName);
+   if (_colors.end() != colIter)
+      col =  *(colIter->second);
+
 
    wxRect r(rect);
    r.Deflate(3);
    r.height -= 2;
 
-   layprop::DrawProperties* drawProp;
-   if (PROPC->lockDrawProp(drawProp))
-   {
-      std::string colorName(GetString( item ).mb_str(wxConvUTF8));
-      col   = drawProp->getColor(colorName);
-   }
-   PROPC->unlockDrawProp(drawProp);
+//   layprop::DrawProperties* drawProp;
+//   if (PROPC->lockDrawProp(drawProp))
+//   {
+//      std::string colorName(GetString( item ).mb_str(wxConvUTF8));
+//      col   = drawProp->getColor(colorName);
+//   }
+//   PROPC->unlockDrawProp(drawProp, false);
    
    wxColour color(col.red(), col.green(), col.blue(), col.alpha());
    wxPen pen( color, 3, wxSOLID );
@@ -440,6 +464,12 @@ void tui::ColorListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, 
 }*/
 
 
+tui::ColorListComboBox::~ColorListComboBox()
+{
+   for (layprop::ColorMap::iterator CMI = _colors.begin(); CMI != _colors.end(); CMI++)
+      delete CMI->second;
+}
+
 void tui::FillListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, int flags ) const
 {
    if ( item == wxNOT_FOUND )
@@ -471,7 +501,7 @@ void tui::FillListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, i
          brush = DEBUG_NEW wxBrush(color, wxTRANSPARENT);
       }
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, false);
    
    if (NULL != brush)
    {
@@ -557,5 +587,5 @@ void tui::LineListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, i
       delete [] dashes;
 
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, false);
 }

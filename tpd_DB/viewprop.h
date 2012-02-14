@@ -122,7 +122,7 @@ namespace layprop {
       void              setOasLayMap(USMap* map);
       DWordSet          allUnselectable();
       bool              lockDrawProp(DrawProperties*&, PropertyState state = DB);
-      void              unlockDrawProp(DrawProperties*&);
+      void              unlockDrawProp(DrawProperties*&, bool throwexception);
 
       void              setStep(real st)                 {_step = st;}
       void              setAutoPan(bool status)          {_autopan = status;}

@@ -1007,6 +1007,11 @@ EXPTNactive_DB::EXPTNactive_DB() {
    tell_log(console::MT_ERROR,news);
 };
 
+EXPTNdrawProperty::EXPTNdrawProperty() {
+   std::string news = "Internal error. Troubles with draw property mutex.";
+   tell_log(console::MT_ERROR,news);
+}
+
 EXPTNactive_GDS::EXPTNactive_GDS() {
    std::string news = "No GDS structure in memory. Parse first";
    tell_log(console::MT_ERROR,news);

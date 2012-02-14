@@ -617,7 +617,7 @@ void DataCenter::mousePoint(TP p)
    {
       currentOp = drawProp->currentOp();
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, false);
    if ((console::op_line == currentOp) || _drawruler)
       PROPC->mousePoint(p);
    if ((console::op_cbind != currentOp) &&
@@ -649,7 +649,7 @@ void DataCenter::mousePointCancel(TP& lp)
    {
       currentOp = drawProp->currentOp();
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, false);
    if (console::op_line == currentOp) return;
    laydata::TdtLibDir* dbLibDir = NULL;
    if (lockTDT(dbLibDir, dbmxs_celllock))
@@ -673,7 +673,7 @@ void DataCenter::mouseStop()
    {
       currentOp = drawProp->currentOp();
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, false);
    if (console::op_line == currentOp)
       PROPC->mouseStop();
    else
@@ -755,7 +755,7 @@ void DataCenter::mouseHoover(TP& position)
             VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
          }
       }
-      PROPC->unlockDrawProp(drawProp);
+      PROPC->unlockDrawProp(drawProp, false);
    }
 }
 
@@ -839,7 +839,7 @@ void DataCenter::openGlDraw(const CTM& layCTM)
          // rather an exception
          tell_log(console::MT_INFO,std::string("Property DB busy. Viewport redraw skipped"));
       }
-      PROPC->unlockDrawProp(drawProp);
+      PROPC->unlockDrawProp(drawProp, false);
    }
 }
 
@@ -933,7 +933,7 @@ void DataCenter::openGlRender(const CTM& layCTM)
          tell_log(console::MT_INFO,std::string("Property DB busy. Viewport redraw skipped"));
          return;
       }
-      PROPC->unlockDrawProp(drawProp);
+      PROPC->unlockDrawProp(drawProp, false);
    }
 }
 
@@ -1010,7 +1010,7 @@ void DataCenter::motionDraw(const CTM& layCTM, TP base, TP newp)
          VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
       }
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, false);
 }
 
 LayerMapCif* DataCenter::secureCifLayMap(const layprop::DrawProperties* drawProp, bool import)

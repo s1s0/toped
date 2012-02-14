@@ -406,7 +406,7 @@ int tellstdfunc::stdZOOMVISIBLE::execute()
          wxPostEvent(TopedCanvasW, eventZOOM);
       }
       // WARNING! Don't throw an exception here. Otherwise the TDT mutex will remain locked!
-      PROPC->unlockDrawProp(drawProp);
+      PROPC->unlockDrawProp(drawProp, false);
    }
    DATC->unlockTDT(dbLibDir, true);
    return EXEC_NEXT;

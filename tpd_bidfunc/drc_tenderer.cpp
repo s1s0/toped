@@ -168,7 +168,7 @@ void Calbr::drcTenderer::showAll(void)
          for(WordList::const_iterator it = lays.begin(); it != lays.end(); ++it)
             drawProp->hideLayer((*it), false);
       }
-      PROPC->unlockDrawProp(drawProp);
+      PROPC->unlockDrawProp(drawProp, true);
       edge zoomEdge;
       zoomEdge.x1 = _min.x();
       zoomEdge.y1 = _min.y();
@@ -194,7 +194,7 @@ void Calbr::drcTenderer::hideAll(void)
       for(WordList::const_iterator it = lays.begin(); it != lays.end(); ++it)
          drawProp->hideLayer((*it), true);
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, true);
    tellstdfunc::RefreshGL();
 }
 
@@ -207,7 +207,7 @@ bool Calbr::drcTenderer::showError(unsigned int numError)
       {
          drawProp->hideLayer(numError, false);
       }
-      PROPC->unlockDrawProp(drawProp);
+      PROPC->unlockDrawProp(drawProp, true);
       tellstdfunc::RefreshGL();
       return true;
    }
@@ -248,7 +248,7 @@ void Calbr::drcTenderer::endWriting()
          PROPC->clearUnpublishedLayers();
       }
    }
-   PROPC->unlockDrawProp(drawProp);
+   PROPC->unlockDrawProp(drawProp, true);
    _ATDB->registerCellRead(_cell, _DRCCell);
 }
 

@@ -545,7 +545,7 @@ namespace tui {
    {
    public:
       typedef  std::map<std::string, layprop::tellRGB*>  colorMAP;
-                        defineColor(wxFrame *parent, wxWindowID id, const wxString &title,
+                        defineColor(wxWindow *parent, wxWindowID id, const wxString &title,
                                              wxPoint pos, const layprop::DrawProperties*);
       virtual          ~defineColor();
       void              OnDefineColor(wxCommandEvent&);

@@ -285,6 +285,12 @@ class EXPTNactive_DB : public EXPTN
       EXPTNactive_DB();
 };
 
+class EXPTNdrawProperty : public EXPTN
+{
+   public:
+      EXPTNdrawProperty();
+};
+
 class EXPTNactive_GDS : public EXPTN
 {
    public:
