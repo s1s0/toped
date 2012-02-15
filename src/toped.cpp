@@ -2117,10 +2117,10 @@ void tui::TopedFrame::OnDefineColor(wxCommandEvent& WXUNUSED(event))
          {
             layprop::tellRGB* coldef = CC->second;
             ost   << wxT("definecolor(\"") << wxString(CC->first.c_str(), wxConvUTF8)
-                  << wxT("\" , ")      << coldef->red()
-                  << wxT(" , ")        << coldef->green()
-                  << wxT(" , ")        << coldef->blue()
-                  << wxT(" , ")        << coldef->alpha()
+                  << wxT("\" , ")      << static_cast <int>(coldef->red())
+                  << wxT(" , ")        << static_cast <int>(coldef->green())
+                  << wxT(" , ")        << static_cast <int>(coldef->blue())
+                  << wxT(" , ")        << static_cast <int>(coldef->alpha())
                   << wxT(");");
          }
          success = true;
@@ -2150,7 +2150,7 @@ void tui::TopedFrame::OnDefineFill(wxCommandEvent& WXUNUSED(event))
                   << wxT("\" , {");
             ost << patdef[0];
             for (byte i = 1; i < 128; i++)
-               ost  << wxT(",") << patdef[i];
+               ost  << wxT(",") << static_cast <int>(patdef[i]);
             ost   << wxT("});");
             success = true;
          }
