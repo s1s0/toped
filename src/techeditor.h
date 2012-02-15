@@ -65,8 +65,12 @@ class ColorListComboBox : public wxOwnerDrawnComboBox
 class FillListComboBox : public wxOwnerDrawnComboBox
 {
    public:
+                   FillListComboBox( layprop::DrawProperties* );
+      virtual     ~FillListComboBox();
       virtual void OnDrawItem( wxDC& dc, const wxRect& rect, int item, int flags ) const;
 //      virtual void OnDrawBackground( wxDC& dc, const wxRect& rect, int item, int flags ) const;
+   private:
+      layprop::FillMap _fills;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -75,9 +79,13 @@ class FillListComboBox : public wxOwnerDrawnComboBox
 class LineListComboBox : public wxOwnerDrawnComboBox
 {
    public:
+                   LineListComboBox( layprop::DrawProperties* );
+      virtual     ~LineListComboBox();
       virtual void OnDrawItem( wxDC& dc, const wxRect& rect, int item, int flags ) const;
       virtual wxCoord OnMeasureItem(size_t size) const {return 24;};
       //virtual void OnDrawBackground( wxDC& dc, const wxRect& rect, int item, int flags ) const;
+   private:
+      layprop::LineMap _lines;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
