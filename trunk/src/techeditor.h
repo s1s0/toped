@@ -99,46 +99,34 @@ class LineListComboBox : public wxOwnerDrawnComboBox
 ///////////////////////////////////////////////////////////////////////////////
 class TechEditorDialog : public wxDialog 
 {
-	protected:
-      //wxScrolledWindow*     _layerPanel;
+   public:
+                              TechEditorDialog( wxWindow* parent,wxWindowID id = wxID_ANY);
+      virtual                ~TechEditorDialog();
+      void                    onLayerSelected(wxListEvent&);
+      void                    OnLayerEditor(wxCommandEvent&);
+      void                    OnColorEditor(wxCommandEvent&);
+      void                    OnFillEditor(wxCommandEvent&);
+      void                    OnStyleEditor(wxCommandEvent&);
+      void                    OnChangeProperty(wxCommandEvent&);
+      void                    OnApply(wxCommandEvent&);
+   private:
+      void                    prepareColors();
+      void                    prepareFills();
+      void                    prepareLines();
+      void                    prepareLayers(layprop::DrawProperties*);
+      void                    updateDialog(int selectNum);
       wxListView*             _layerList;
       ColorListComboBox*      _layerColors;
       FillListComboBox*       _layerFills;
       LineListComboBox*       _layerLines;
-      wxButton*	            _applyButton;
-      wxButton*	            _cancelButton;
-      wxButton*	            _newLayerButton;
-      wxButton*	            _newColorButton;
-      wxButton*	            _newFillButton;
-      wxButton*	            _newStyleButton;
-      wxBoxSizer*	            _sizer;
-      wxArrayString           _colorItems; 
-      wxArrayString           _lineItems; 
 
       wxTextCtrl*             _layerNumber;
       wxString                _layerNumberString;
       wxTextCtrl*             _layerName;
       wxString                _layerNameString;
-      //Data related to current selection
-      int                     _curSelect;
+      int                     _curSelect;//!Data related to current selection
 
-      void        prepareColors();
-      void        prepareFills();
-      void        prepareLines();
-      void        prepareLayers(layprop::DrawProperties*);
-      void        updateDialog(int selectNum);
-   public:
-                  TechEditorDialog( wxWindow* parent,wxWindowID id = wxID_ANY);
-      virtual    ~TechEditorDialog();
-      void        onLayerSelected(wxListEvent&);
-      void        OnLayerEditor(wxCommandEvent&);
-      void        OnColorEditor(wxCommandEvent&);
-      void        OnFillEditor(wxCommandEvent&);
-      void        OnStyleEditor(wxCommandEvent&);
-      void        OnChangeProperty(wxCommandEvent&);
-      void        OnApply(wxCommandEvent&);
       DECLARE_EVENT_TABLE()
-
 };
 }
 
