@@ -2005,7 +2005,14 @@ tui::defineStyle::defineStyle(wxFrame *parent, wxWindowID id, const wxString &ti
                                                 0, wxALL | wxALIGN_CENTER , 10);
    //Boolean validator for style pattern 
    wxTextValidator boolValidator(wxFILTER_INCLUDE_CHAR_LIST, &_patscaleString);
+#if wxCHECK_VERSION(2,9,0)
    boolValidator.SetCharIncludes(wxT("01"));
+#else
+   wxArrayString includeChars;
+   includeChars.Add(wxT("0"));
+   includeChars.Add(wxT("1"));
+   boolValidator.SetIncludes(includeChars);
+#endif
    
    wxMemoryDC DC;
    wxFont font(10,wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
@@ -2179,7 +2186,6 @@ void tui::defineStyle::OnStylePropChanged(wxCommandEvent& event)
    for(size_t i = 0; i < s_pattern.Length(); i++)
    {
       d_pattern = d_pattern << 1;
-      wxUniChar c = s_pattern[i];
        wxChar cg = s_pattern[i];
       if(cg == c1) 
       {
