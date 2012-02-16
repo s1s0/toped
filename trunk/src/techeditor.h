@@ -53,6 +53,8 @@ class ColorListComboBox : public wxOwnerDrawnComboBox
                    ColorListComboBox( layprop::DrawProperties* );
       virtual     ~ColorListComboBox();
       virtual void OnDrawItem( wxDC& dc, const wxRect& rect, int item, int flags ) const;
+      virtual void Clear();
+      void         populate( layprop::DrawProperties* );
       //virtual void OnDrawBackground( wxDC& dc, const wxRect& rect, int item, int flags ) const;
    private:
       layprop::ColorMap _colors;
@@ -68,6 +70,8 @@ class FillListComboBox : public wxOwnerDrawnComboBox
                    FillListComboBox( layprop::DrawProperties* );
       virtual     ~FillListComboBox();
       virtual void OnDrawItem( wxDC& dc, const wxRect& rect, int item, int flags ) const;
+      virtual void Clear();
+      void         populate( layprop::DrawProperties* );
 //      virtual void OnDrawBackground( wxDC& dc, const wxRect& rect, int item, int flags ) const;
    private:
       layprop::FillMap _fills;
@@ -83,6 +87,8 @@ class LineListComboBox : public wxOwnerDrawnComboBox
       virtual     ~LineListComboBox();
       virtual void OnDrawItem( wxDC& dc, const wxRect& rect, int item, int flags ) const;
       virtual wxCoord OnMeasureItem(size_t size) const {return 24;};
+      virtual void Clear();
+      void         populate( layprop::DrawProperties* );
       //virtual void OnDrawBackground( wxDC& dc, const wxRect& rect, int item, int flags ) const;
    private:
       layprop::LineMap _lines;
@@ -119,8 +125,7 @@ class TechEditorDialog : public wxDialog
       void        prepareColors();
       void        prepareFills();
       void        prepareLines();
-      void        prepareLayers();
-      void        updateData();
+      void        prepareLayers(layprop::DrawProperties*);
       void        updateDialog(int selectNum);
    public:
                   TechEditorDialog( wxWindow* parent,wxWindowID id = wxID_ANY);
