@@ -32,7 +32,7 @@
 #include <wx/filename.h>
 #include <wx/dir.h>
 #include <sstream>
-#if WIN32
+#ifdef WIN32
    #include <crtdbg.h>
 #endif
 #ifdef __linux__

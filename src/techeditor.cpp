@@ -127,6 +127,9 @@ tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id) :
 
    FindWindow(BT_TECH_APPLY)->Enable(false);
    _layerList->Select(_curSelect, true);
+#ifdef WIN32
+   updateDialog(_curSelect);
+#endif
 }
 
 tui::TechEditorDialog::~TechEditorDialog()
@@ -196,7 +199,8 @@ void  tui::TechEditorDialog::updateDialog(int selectNum)
 {
    wxListItem row;
    row.SetId(selectNum);
-   //   row.SetColumn(0);
+   row.SetMask(wxLIST_MASK_TEXT);
+   row.SetColumn(0);
    if (!_layerList->GetItem(row)) return;
    _layerNumberString = row.GetText();
    _layerNumber->GetValidator()->TransferToWindow();
@@ -577,7 +581,6 @@ void tui::LineListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, i
    wxColour color(col.red(), col.green(), col.blue(), col.alpha());
 
    wxRect r(rect);
-   layprop::DrawProperties* drawProp;
 
    std::string lineName(GetString( item ).mb_str(wxConvUTF8));
 
