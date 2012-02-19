@@ -103,7 +103,7 @@ class TechEditorDialog : public wxDialog
                               TechEditorDialog( wxWindow* parent,wxWindowID id = wxID_ANY);
       virtual                ~TechEditorDialog();
       void                    onLayerSelected(wxListEvent&);
-      void                    OnLayerEditor(wxCommandEvent&);
+      void                    OnNewLayer(wxCommandEvent&);
       void                    OnColorEditor(wxCommandEvent&);
       void                    OnFillEditor(wxCommandEvent&);
       void                    OnStyleEditor(wxCommandEvent&);
@@ -114,7 +114,8 @@ class TechEditorDialog : public wxDialog
       void                    prepareFills();
       void                    prepareLines();
       void                    prepareLayers(layprop::DrawProperties*);
-      void                    updateDialog(int selectNum);
+      void                    updateDialog();
+      void                    updateLayerList();
       wxListView*             _layerList;
       ColorListComboBox*      _layerColors;
       FillListComboBox*       _layerFills;

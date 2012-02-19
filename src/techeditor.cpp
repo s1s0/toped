@@ -48,7 +48,7 @@ const wxString emptyFill = wxT("No Filling");
 
 BEGIN_EVENT_TABLE(tui::TechEditorDialog, wxDialog)
    EVT_LIST_ITEM_FOCUSED(ID_TE_LAYER       , tui::TechEditorDialog::onLayerSelected)
-   EVT_BUTTON(BT_TECH_NEWLAYER   , tui::TechEditorDialog::OnLayerEditor )
+   EVT_BUTTON(BT_TECH_NEWLAYER   , tui::TechEditorDialog::OnNewLayer )
    EVT_BUTTON(BT_TECH_NEWCOLOR   , tui::TechEditorDialog::OnColorEditor )
    EVT_BUTTON(BT_TECH_NEWFILL    , tui::TechEditorDialog::OnFillEditor )
    EVT_BUTTON(BT_TECH_NEWSTYLE   , tui::TechEditorDialog::OnStyleEditor )
@@ -69,7 +69,7 @@ tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id) :
    {
       _layerList = DEBUG_NEW wxListView(this, ID_TE_LAYER, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_VRULES);
       prepareLayers(drawProp);
-      _layerNumber = DEBUG_NEW wxTextCtrl( this, ID_BTN_TE_NUM , wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
+      _layerNumber = DEBUG_NEW wxTextCtrl( this, ID_BTN_TE_NUM , wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT | wxTE_READONLY,
                               wxTextValidator(wxFILTER_NUMERIC, &_layerNumberString));
       _layerName = DEBUG_NEW wxTextCtrl( this, ID_BTN_TE_NUM , wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
                                     wxTextValidator(wxFILTER_ASCII , &_layerNameString));
@@ -136,7 +136,7 @@ tui::TechEditorDialog::~TechEditorDialog()
 {
 }
 
-void  tui::TechEditorDialog::OnLayerEditor(wxCommandEvent&)
+void  tui::TechEditorDialog::OnNewLayer(wxCommandEvent&)
 {
    wxCommandEvent event;
    Toped->OnDefineLayer(event);
@@ -191,14 +191,14 @@ void  tui::TechEditorDialog::onLayerSelected(wxListEvent& levent)
 {
    _curSelect = levent.GetIndex();
    if (wxNOT_FOUND != _curSelect)
-      updateDialog(_curSelect);
+      updateDialog();
    FindWindow(BT_TECH_APPLY)->Enable(false);
 }
 
-void  tui::TechEditorDialog::updateDialog(int selectNum)
+void  tui::TechEditorDialog::updateDialog()
 {
    wxListItem row;
-   row.SetId(selectNum);
+   row.SetId(_curSelect);
    row.SetMask(wxLIST_MASK_TEXT);
    row.SetColumn(0);
    if (!_layerList->GetItem(row)) return;
@@ -280,6 +280,16 @@ void tui::TechEditorDialog::prepareLayers(layprop::DrawProperties* drawProp)
       _layerList->SetColumnWidth(1, wxLIST_AUTOSIZE);
       //
    }
+}
+
+void tui::TechEditorDialog::updateLayerList()
+{
+   wxListItem row;
+   row.SetId(_curSelect);
+   row.SetMask(wxLIST_MASK_TEXT);
+   row.SetColumn(1);
+   row.SetText(_layerNameString);
+   _layerList->SetItem(row);
 }
 
 void tui::TechEditorDialog::prepareColors()
@@ -364,6 +374,7 @@ void tui::TechEditorDialog::OnApply(wxCommandEvent&)
 
    Console->parseCommand(ost);
    FindWindow(BT_TECH_APPLY)->Enable(false);
+   updateLayerList();
 //   updateDialog(_curSelect); // TODO remove this from here! We need an event from the second thread when the properties had been changed
 }
 
