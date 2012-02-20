@@ -41,23 +41,22 @@ extern layprop::PropertyCenter*  PROPC;
 extern tui::TopedFrame*          Toped;
 extern console::TllCmdLine*      Console;
 
-const wxString emptyFill = wxT("No Filling");
-
 ///////////////////////////////////////////////////////////////////////////
 //extern const wxEventType         wxEVT_CMD_BROWSER;
 
 BEGIN_EVENT_TABLE(tui::TechEditorDialog, wxDialog)
-   EVT_LIST_ITEM_FOCUSED(ID_TE_LAYER       , tui::TechEditorDialog::onLayerSelected)
-   EVT_BUTTON(BT_TECH_NEWLAYER   , tui::TechEditorDialog::OnNewLayer )
-   EVT_BUTTON(BT_TECH_NEWCOLOR   , tui::TechEditorDialog::OnColorEditor )
-   EVT_BUTTON(BT_TECH_NEWFILL    , tui::TechEditorDialog::OnFillEditor )
-   EVT_BUTTON(BT_TECH_NEWSTYLE   , tui::TechEditorDialog::OnStyleEditor )
-   EVT_COMBOBOX(FILL_COMBO       , tui::TechEditorDialog::OnChangeProperty)
-   EVT_COMBOBOX(LINE_COMBO       , tui::TechEditorDialog::OnChangeProperty)
-   EVT_COMBOBOX(COLOR_COMBO      , tui::TechEditorDialog::OnChangeProperty)
-   EVT_TEXT(ID_BTN_TE_NUM        , tui::TechEditorDialog::OnChangeProperty )
-   EVT_TEXT(ID_BTN_TE_NAME       , tui::TechEditorDialog::OnChangeProperty )
-   EVT_BUTTON(BT_TECH_APPLY      , tui::TechEditorDialog::OnApply )
+   EVT_LIST_ITEM_FOCUSED( DTE_LAYERS_LIST  , tui::TechEditorDialog::onLayerSelected  )
+   EVT_CHECKBOX         ( DTE_NEWLAYER     , tui::TechEditorDialog::OnNewLayer       )
+   EVT_BUTTON           ( DTE_NEWCOLOR     , tui::TechEditorDialog::OnColorEditor    )
+   EVT_BUTTON           ( DTE_NEWFILL      , tui::TechEditorDialog::OnFillEditor     )
+   EVT_BUTTON           ( DTE_NEWSTYLE     , tui::TechEditorDialog::OnStyleEditor    )
+   EVT_COMBOBOX         ( DTE_FILL_COMBO   , tui::TechEditorDialog::OnChangeProperty )
+   EVT_COMBOBOX         ( DTE_LINE_COMBO   , tui::TechEditorDialog::OnChangeProperty )
+   EVT_COMBOBOX         ( DTE_COLOR_COMBO  , tui::TechEditorDialog::OnChangeProperty )
+   EVT_TEXT             ( DTE_LAYER_NUM    , tui::TechEditorDialog::OnChangeLayNum   )
+   EVT_TEXT             ( DTE_LAYER_NAME   , tui::TechEditorDialog::OnChangeProperty )
+   EVT_BUTTON           ( DTE_APPLY        , tui::TechEditorDialog::OnApply          )
+   EVT_LIST_COL_CLICK   ( DTE_LAYERS_LIST  , tui::TechEditorDialog::OnLayListSort    )
 END_EVENT_TABLE()
 
 tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id) :
@@ -67,65 +66,62 @@ tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id) :
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-      _layerList = DEBUG_NEW wxListView(this, ID_TE_LAYER, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_VRULES);
+      _layerList = DEBUG_NEW wxListView(this, DTE_LAYERS_LIST, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_VRULES);
       prepareLayers(drawProp);
-      _layerNumber = DEBUG_NEW wxTextCtrl( this, ID_BTN_TE_NUM , wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT | wxTE_READONLY,
+      _layerNumber = DEBUG_NEW wxTextCtrl( this, DTE_LAYER_NUM , wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT | wxTE_READONLY,
                               wxTextValidator(wxFILTER_NUMERIC, &_layerNumberString));
-      _layerName = DEBUG_NEW wxTextCtrl( this, ID_BTN_TE_NUM , wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
+      _layerName = DEBUG_NEW wxTextCtrl( this, DTE_LAYER_NAME , wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
                                     wxTextValidator(wxFILTER_ASCII , &_layerNameString));
 
       _layerColors = DEBUG_NEW ColorListComboBox(drawProp);
-      _layerColors->Create(this, COLOR_COMBO, wxEmptyString, wxDefaultPosition,wxDefaultSize , wxCB_READONLY );
+      _layerColors->Create(this, DTE_COLOR_COMBO, wxEmptyString, wxDefaultPosition,wxDefaultSize , wxCB_READONLY );
       _layerFills = DEBUG_NEW FillListComboBox(drawProp);
-      _layerFills->Create(this, FILL_COMBO, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxCB_READONLY );
+      _layerFills->Create(this, DTE_FILL_COMBO, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxCB_READONLY );
       _layerLines = DEBUG_NEW  LineListComboBox(drawProp);
-      _layerLines->Create(this, LINE_COMBO, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxCB_READONLY );
+      _layerLines->Create(this, DTE_LINE_COMBO, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxCB_READONLY );
    }
    PROPC->unlockDrawProp(drawProp, false);
 
-   wxBoxSizer *topSizer= DEBUG_NEW wxBoxSizer(wxVERTICAL);
-      wxBoxSizer *mainSizer = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
-         wxBoxSizer *propSizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+   wxBoxSizer *mainSizer = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
+      wxBoxSizer *propSizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+         wxBoxSizer *layDefSizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL);
+            layDefSizer->Add( DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("Number:"), wxDefaultPosition, wxDefaultSize),
+                                                         0, wxLEFT | wxALIGN_CENTER_VERTICAL, 5);
+            layDefSizer->Add(_layerNumber, 1, wxRIGHT | wxALIGN_CENTER, 5);
+            layDefSizer->Add( DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("Name:"), wxDefaultPosition, wxDefaultSize),
+                                                         0, wxLEFT | wxALIGN_CENTER_VERTICAL, 5);
+            layDefSizer->Add(_layerName, 2, wxRIGHT | wxALIGN_CENTER, 5);
+            layDefSizer->Add(DEBUG_NEW wxCheckBox(this, tui::DTE_NEWLAYER , wxT("new")) , 1, wxALL | wxALIGN_CENTER | wxEXPAND);
 
-            wxBoxSizer *layDefSizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL);
-               layDefSizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Number:"), wxDefaultPosition, wxDefaultSize),
-                                                            0, wxLEFT | wxALIGN_CENTER_VERTICAL, 5);
-               layDefSizer->Add(_layerNumber, 1, wxRIGHT | wxALIGN_CENTER, 5);
-               layDefSizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Name:"), wxDefaultPosition, wxDefaultSize),
-                                                            0, wxLEFT | wxALIGN_CENTER_VERTICAL, 5);
-               layDefSizer->Add(_layerName, 2, wxRIGHT | wxALIGN_CENTER, 5);
-            wxBoxSizer *colorSizer = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Color") );
-               colorSizer->Add(_layerColors, 3, wxALL | wxEXPAND, 5);
-               colorSizer->Add(DEBUG_NEW wxButton(this, tui::BT_TECH_NEWCOLOR, wxT("New"   )), 1, wxALL, 5);
-            
-            wxBoxSizer *fillSizer = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Fill") );
-               fillSizer->Add(_layerFills, 3, wxALL | wxEXPAND, 5);
-               fillSizer->Add(DEBUG_NEW wxButton(this, tui::BT_TECH_NEWFILL , wxT("New"   )), 1, wxALL , 5);
+         wxBoxSizer *colorSizer = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Color") );
+            colorSizer->Add(_layerColors, 3, wxALL | wxEXPAND, 5);
+            colorSizer->Add(DEBUG_NEW wxButton(this, tui::DTE_NEWCOLOR, wxT("New"   )), 1, wxALL, 5);
 
-            wxBoxSizer *styleSizer = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Line Style") );
-               styleSizer->Add(_layerLines, 3, wxALL | wxEXPAND, 5);
-               styleSizer->Add(DEBUG_NEW wxButton(this, tui::BT_TECH_NEWSTYLE, wxT("New"   )), 1, wxALL, 5);
+         wxBoxSizer *fillSizer = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Fill") );
+            fillSizer->Add(_layerFills, 3, wxALL | wxEXPAND, 5);
+            fillSizer->Add(DEBUG_NEW wxButton(this, tui::DTE_NEWFILL , wxT("New"   )), 1, wxALL , 5);
 
-         propSizer->Add(layDefSizer, 0, wxALL | wxEXPAND, 5);
-         propSizer->Add(colorSizer, 0, wxALL | wxEXPAND, 5);
-         propSizer->Add(fillSizer, 0, wxALL | wxEXPAND, 5);
-         propSizer->Add(styleSizer, 0, wxALL | wxEXPAND, 5);
-      mainSizer->Add(_layerList, 1, wxEXPAND, 0);
-      mainSizer->Add(propSizer, 2, wxEXPAND, 0);
+         wxBoxSizer *styleSizer = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Line Style") );
+            styleSizer->Add(_layerLines, 3, wxALL | wxEXPAND, 5);
+            styleSizer->Add(DEBUG_NEW wxButton(this, tui::DTE_NEWSTYLE, wxT("New"   )), 1, wxALL, 5);
 
-      wxBoxSizer *buttonSizer = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
-         buttonSizer->Add(0,0,1);
-         buttonSizer->Add( DEBUG_NEW wxButton(this, tui::BT_TECH_NEWLAYER, wxT("New"   )), 0, wxBOTTOM, 3);
-         buttonSizer->Add(0,0,3);
-         buttonSizer->Add( DEBUG_NEW wxButton(this, tui::BT_TECH_APPLY   , wxT("Apply" )), 0, wxBOTTOM, 3);
-         buttonSizer->Add( DEBUG_NEW wxButton(this, wxID_CANCEL          , wxT("Cancel")), 0, wxBOTTOM, 3);
-   topSizer->Add(mainSizer, 0, wxEXPAND);
-   topSizer->Add(buttonSizer, 0, wxEXPAND);
+         wxBoxSizer *buttonSizer = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
+            buttonSizer->Add(0,0,1);
+            buttonSizer->Add( DEBUG_NEW wxButton(this, tui::DTE_APPLY   , wxT("Apply" )), 0, wxBOTTOM, 3);
+            buttonSizer->Add( DEBUG_NEW wxButton(this, wxID_CANCEL          , wxT("Cancel")), 0, wxBOTTOM, 3);
 
-   this->SetSizerAndFit(topSizer);
-   topSizer->SetSizeHints( this );
+      propSizer->Add(layDefSizer, 0, wxALL | wxEXPAND, 5);
+      propSizer->Add(colorSizer , 0, wxALL | wxEXPAND, 5);
+      propSizer->Add(fillSizer  , 0, wxALL | wxEXPAND, 5);
+      propSizer->Add(styleSizer , 0, wxALL | wxEXPAND, 5);
+      propSizer->Add(buttonSizer, 0, wxALL | wxEXPAND);
+   mainSizer->Add(_layerList, 1, wxEXPAND, 0);
+   mainSizer->Add(propSizer, 2, wxEXPAND, 0);
 
-   FindWindow(BT_TECH_APPLY)->Enable(false);
+   this->SetSizerAndFit(mainSizer);
+   mainSizer->SetSizeHints( this );
+
+   FindWindow(DTE_APPLY)->Enable(false);
    _layerList->Select(_curSelect, true);
 #ifdef WIN32
    updateDialog(_curSelect);
@@ -136,10 +132,23 @@ tui::TechEditorDialog::~TechEditorDialog()
 {
 }
 
-void  tui::TechEditorDialog::OnNewLayer(wxCommandEvent&)
+void  tui::TechEditorDialog::OnNewLayer(wxCommandEvent& cmdEvent)
 {
-   wxCommandEvent event;
-   Toped->OnDefineLayer(event);
+   bool newChecked = (0 != cmdEvent.GetInt());
+   _layerNumber->SetEditable(newChecked);
+   if (newChecked)
+   {
+      _layerNumberString = "";
+      _layerNumber->GetValidator()->TransferToWindow();
+      _layerNameString = "";
+      _layerName->GetValidator()->TransferToWindow();
+      _layerColors->SetSelection(0);
+      _layerFills->SetSelection(0);
+      _layerLines->SetSelection(0);
+   }
+   else
+      updateDialog();
+   FindWindow(DTE_APPLY)->Enable(false);
 }
 
 void  tui::TechEditorDialog::OnColorEditor(wxCommandEvent&)
@@ -183,16 +192,43 @@ void  tui::TechEditorDialog::OnStyleEditor(wxCommandEvent&)
 
 void  tui::TechEditorDialog::OnChangeProperty(wxCommandEvent&)
 {
-   FindWindow(BT_TECH_APPLY)->Enable(true);
+   if (!static_cast<wxCheckBox*>(FindWindow(tui::DTE_NEWLAYER))->IsChecked())
+      // Make sure it's not a new layer
+      FindWindow(DTE_APPLY)->Enable(true);
+}
+
+void tui::TechEditorDialog::OnChangeLayNum(wxCommandEvent&)
+{
+   if (static_cast<wxCheckBox*>(FindWindow(tui::DTE_NEWLAYER))->IsChecked())
+   {
+      _layerNumber->GetValidator()->TransferFromWindow();
+      unsigned long layNo;
+      _layerNumberString.ToULong(&layNo);
+      bool applyEnable = true;
+      if (LAST_EDITABLE_LAYNUM < layNo)
+         applyEnable = false;
+      else
+      {
+         for(WordList::const_iterator it = _allLayNums.begin(); it != _allLayNums.end(); ++it)
+            if (layNo == *it)
+            {
+               applyEnable = false;
+               break;
+            }
+      }
+      FindWindow(DTE_APPLY)->Enable(applyEnable);
+   }
 }
 
 
 void  tui::TechEditorDialog::onLayerSelected(wxListEvent& levent)
 {
    _curSelect = levent.GetIndex();
+   _layerNumber->SetEditable(false);
+   static_cast<wxCheckBox*>(FindWindow(tui::DTE_NEWLAYER))->SetValue(false);
    if (wxNOT_FOUND != _curSelect)
       updateDialog();
-   FindWindow(BT_TECH_APPLY)->Enable(false);
+   FindWindow(DTE_APPLY)->Enable(false);
 }
 
 void  tui::TechEditorDialog::updateDialog()
@@ -219,36 +255,23 @@ void  tui::TechEditorDialog::updateDialog()
       std::string colorName = drawProp->getColorName(layNo);
       int colorNumber = _layerColors->FindString(wxString(colorName.c_str(), wxConvUTF8));
       if (colorNumber != wxNOT_FOUND)
-      {
          _layerColors->SetSelection(colorNumber);
-      }
       else
-      {
-         tell_log(console::MT_WARNING, "There is no appropriate color");
-      }
+         _layerColors->SetSelection(0);
       //Set active filling
       std::string fillName = drawProp->getFillName(layNo);
       int fillNumber = _layerFills->FindString(wxString(fillName.c_str(), wxConvUTF8));
       if (fillNumber != wxNOT_FOUND)
-      {
          _layerFills->SetSelection(fillNumber);
-      }
       else
-      {
-         fillNumber = _layerFills->FindString(emptyFill);
-         _layerFills->SetSelection(fillNumber);
-      }
+         _layerFills->SetSelection(0);
       //Set active style
       std::string lineName = drawProp->getLineName(layNo);
       int lineNumber = _layerLines->FindString(wxString(lineName.c_str(), wxConvUTF8));
       if (lineNumber != wxNOT_FOUND)
-      {
          _layerLines->SetSelection(lineNumber);
-      }
       else
-      {
-         tell_log(console::MT_WARNING, "There is no appropriate line style");
-      }
+         _layerLines->SetSelection(0);
    }
    PROPC->unlockDrawProp(drawProp, false);
 }
@@ -259,8 +282,8 @@ void tui::TechEditorDialog::prepareLayers(layprop::DrawProperties* drawProp)
    _layerList->InsertColumn(0, wxT("No"));
    _layerList->InsertColumn(1, wxT("Name"));
 
-   WordList lays = drawProp->getAllLayers();
-   for(WordList::const_iterator it = lays.begin(); it != lays.end(); ++it)
+   _allLayNums = drawProp->getAllLayers();
+   for(WordList::const_iterator it = _allLayNums.begin(); it != _allLayNums.end(); ++it)
    {
       wxListItem row;
       row.SetMask(wxLIST_MASK_DATA | wxLIST_MASK_TEXT);
@@ -284,62 +307,54 @@ void tui::TechEditorDialog::prepareLayers(layprop::DrawProperties* drawProp)
 
 void tui::TechEditorDialog::updateLayerList()
 {
-   wxListItem row;
-   row.SetId(_curSelect);
-   row.SetMask(wxLIST_MASK_TEXT);
-   row.SetColumn(1);
-   row.SetText(_layerNameString);
-   _layerList->SetItem(row);
+   if (static_cast<wxCheckBox*>(FindWindow(tui::DTE_NEWLAYER))->IsChecked())
+   { // new layer added
+      unsigned long layNo;
+      _layerNumberString.ToULong(&layNo);
+      _allLayNums.push_back(layNo);
+
+      wxListItem row;
+      unsigned long newItem = _layerList->GetItemCount();
+      row.SetMask(wxLIST_MASK_DATA | wxLIST_MASK_TEXT);
+      row.SetId(newItem);
+      row.SetData(newItem);
+
+      row.SetText( _layerNumberString);
+      _layerList->InsertItem(row);
+      _layerList->SetColumnWidth(0, wxLIST_AUTOSIZE);
+      //
+      row.SetColumn(1);
+      row.SetMask(wxLIST_MASK_TEXT);
+      row.SetText(_layerNameString);
+      _layerList->SetItem(row);
+      _layerList->SetColumnWidth(1, wxLIST_AUTOSIZE);
+
+//      _layerList->Sort(); TODO
+      _layerList->Select(newItem, true);
+      _layerList->EnsureVisible(newItem);
+   }
+   else
+   {  //existing layer changed
+      wxListItem row;
+      row.SetId(_curSelect);
+      row.SetMask(wxLIST_MASK_TEXT);
+      row.SetColumn(1);
+      row.SetText(_layerNameString);
+      _layerList->SetItem(row);
+   }
 }
 
-void tui::TechEditorDialog::prepareColors()
+void tui::TechEditorDialog::OnLayListSort(wxListEvent& cmdEvent)
 {
-   _layerColors->Clear();
-   layprop::DrawProperties* drawProp;
-   if (PROPC->lockDrawProp(drawProp))
+   int col = cmdEvent.GetColumn();
+   if (0 == col)
    {
-      NameList all_names;
-      drawProp->allColors(all_names);
-      for(NameList::const_iterator it=all_names.begin(); it!=all_names.end(); ++it)
-      {
-         _layerColors->Append(wxString((*it).c_str(), wxConvUTF8));
-      }
+      col++;//TODO - sort
    }
-   PROPC->unlockDrawProp(drawProp, false);
-}
-
-void tui::TechEditorDialog::prepareFills()
-{
-   _layerFills->Clear();
-   layprop::DrawProperties* drawProp;
-   if (PROPC->lockDrawProp(drawProp))
+   else
    {
-      NameList all_names;
-      drawProp->allFills(all_names);
-      for(NameList::const_iterator it=all_names.begin(); it!=all_names.end(); ++it)
-      {
-         _layerFills->Append(wxString((*it).c_str(), wxConvUTF8));
-      }
-      _layerFills->Append(emptyFill);
+      col--;//TODO - sort
    }
-   PROPC->unlockDrawProp(drawProp, false);
-}
-
-void tui::TechEditorDialog::prepareLines()
-{
-   _layerLines->Clear();
-   layprop::DrawProperties* drawProp;
-   if (PROPC->lockDrawProp(drawProp))
-   {
-      NameList all_lines;
-      drawProp->allLines(all_lines);
-
-      for(NameList::const_iterator it=all_lines.begin(); it!=all_lines.end(); ++it)
-      {
-         _layerLines->Append(wxString((*it).c_str(), wxConvUTF8));
-      }
-   }
-   PROPC->unlockDrawProp(drawProp, false);
 }
 
 void tui::TechEditorDialog::OnApply(wxCommandEvent&)
@@ -360,11 +375,6 @@ void tui::TechEditorDialog::OnApply(wxCommandEvent&)
 
    unsigned long d_number;  _layerNumberString.ToULong(&d_number);
 
-   //If there is no filling clear s_fill
-   if (!s_fill.Cmp(emptyFill))
-   {
-      s_fill = wxT("");
-   }
    ost   << wxT("layprop(\"")          << _layerNameString
                   << wxT("\" , ")      << d_number //wxT("\" , \"\" , ")
                   << wxT(" , \"")      << s_color
@@ -373,9 +383,10 @@ void tui::TechEditorDialog::OnApply(wxCommandEvent&)
                   << wxT("\");");
 
    Console->parseCommand(ost);
-   FindWindow(BT_TECH_APPLY)->Enable(false);
+
    updateLayerList();
-//   updateDialog(_curSelect); // TODO remove this from here! We need an event from the second thread when the properties had been changed
+   static_cast<wxCheckBox*>(FindWindow(tui::DTE_NEWLAYER))->SetValue(false);
+   FindWindow(DTE_APPLY)->Enable(false);
 }
 
 //=============================================================================
@@ -459,6 +470,7 @@ void tui::ColorListComboBox::populate(layprop::DrawProperties* drawProp)
 {
    NameList allColors;
    drawProp->allColors(allColors);
+   Append(wxT(""));
    for (NameList::const_iterator CC = allColors.begin(); CC != allColors.end(); CC++)
    {
       layprop::tellRGB* coldef = DEBUG_NEW layprop::tellRGB(drawProp->getColor(*CC));
@@ -558,6 +570,7 @@ void tui::FillListComboBox::populate(layprop::DrawProperties* drawProp)
 {
    NameList allColors;
    drawProp->allFills(allColors);
+   Append(wxT(""));
    for (NameList::const_iterator CC = allColors.begin(); CC != allColors.end(); CC++)
    {
       byte* ptrn = DEBUG_NEW byte[128];
@@ -627,6 +640,7 @@ void tui::LineListComboBox::populate(layprop::DrawProperties* drawProp)
 {
    NameList allColors;
    drawProp->allLines(allColors);
+   Append(wxT(""));
    for (NameList::const_iterator CC = allColors.begin(); CC != allColors.end(); CC++)
    {
       _lines[*CC] = DEBUG_NEW layprop::LineSettings(*drawProp->getLine(*CC));

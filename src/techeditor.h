@@ -44,6 +44,20 @@
 
 namespace tui
 {
+   typedef enum {
+      DTE_LAYERS_LIST    ,
+      DTE_NEWLAYER       ,
+      DTE_NEWCOLOR       ,
+      DTE_NEWFILL        ,
+      DTE_NEWSTYLE       ,
+      DTE_FILL_COMBO     ,
+      DTE_LINE_COMBO     ,
+      DTE_COLOR_COMBO    ,
+      DTE_LAYER_NUM      ,
+      DTE_LAYER_NAME     ,
+      DTE_APPLY
+   } DialogTechEditor;
+
 ///////////////////////////////////////////////////////////////////////////////
 /// Class ColorListComboBox
 ///////////////////////////////////////////////////////////////////////////////
@@ -108,11 +122,10 @@ class TechEditorDialog : public wxDialog
       void                    OnFillEditor(wxCommandEvent&);
       void                    OnStyleEditor(wxCommandEvent&);
       void                    OnChangeProperty(wxCommandEvent&);
+      void                    OnChangeLayNum(wxCommandEvent&);
       void                    OnApply(wxCommandEvent&);
+      void                    OnLayListSort(wxListEvent&);
    private:
-      void                    prepareColors();
-      void                    prepareFills();
-      void                    prepareLines();
       void                    prepareLayers(layprop::DrawProperties*);
       void                    updateDialog();
       void                    updateLayerList();
@@ -126,6 +139,7 @@ class TechEditorDialog : public wxDialog
       wxTextCtrl*             _layerName;
       wxString                _layerNameString;
       int                     _curSelect;//!Data related to current selection
+      WordList                _allLayNums;
 
       DECLARE_EVENT_TABLE()
 };
