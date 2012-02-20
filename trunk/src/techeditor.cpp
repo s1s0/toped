@@ -124,7 +124,7 @@ tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id) :
    FindWindow(DTE_APPLY)->Enable(false);
    _layerList->Select(_curSelect, true);
 #ifdef WIN32
-   updateDialog(_curSelect);
+   updateDialog();
 #endif
 }
 
@@ -482,6 +482,7 @@ void tui::ColorListComboBox::populate(layprop::DrawProperties* drawProp)
 
 void tui::ColorListComboBox::Clear()
 {
+   wxOwnerDrawnComboBox::Clear();
    for (layprop::ColorMap::iterator CMI = _colors.begin(); CMI != _colors.end(); CMI++)
       delete CMI->second;
 }
@@ -582,6 +583,7 @@ void tui::FillListComboBox::populate(layprop::DrawProperties* drawProp)
 
 void tui::FillListComboBox::Clear()
 {
+   wxOwnerDrawnComboBox::Clear();
    for (layprop::FillMap::iterator FMI = _fills.begin(); FMI != _fills.end(); FMI++)
       delete [] FMI->second;
 }
@@ -650,6 +652,7 @@ void tui::LineListComboBox::populate(layprop::DrawProperties* drawProp)
 
 void tui::LineListComboBox::Clear()
 {
+   wxOwnerDrawnComboBox::Clear();
    for (layprop::LineMap::iterator LMI = _lines.begin(); LMI != _lines.end(); LMI++)
       delete LMI->second;
 }
