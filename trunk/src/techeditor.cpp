@@ -162,6 +162,7 @@ void  tui::TechEditorDialog::OnColorEditor(wxCommandEvent&)
       _layerColors->populate(drawProp);
    }
    PROPC->unlockDrawProp(drawProp, false);
+   updateDialog();
 }
 
 void  tui::TechEditorDialog::OnFillEditor(wxCommandEvent&)
@@ -175,6 +176,7 @@ void  tui::TechEditorDialog::OnFillEditor(wxCommandEvent&)
       _layerFills->populate(drawProp);
    }
    PROPC->unlockDrawProp(drawProp, false);
+   updateDialog();
 }
 
 void  tui::TechEditorDialog::OnStyleEditor(wxCommandEvent&)
@@ -188,6 +190,7 @@ void  tui::TechEditorDialog::OnStyleEditor(wxCommandEvent&)
       _layerLines->populate(drawProp);
    }
    PROPC->unlockDrawProp(drawProp, false);
+   updateDialog();
 }
 
 void  tui::TechEditorDialog::OnChangeProperty(wxCommandEvent&)
