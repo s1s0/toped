@@ -2148,9 +2148,9 @@ void tui::TopedFrame::OnDefineFill(wxCommandEvent& WXUNUSED(event))
             byte* patdef = CC->second;
             ost   << wxT("definefill(\"") << wxString(CC->first.c_str(), wxConvUTF8)
                   << wxT("\" , {");
-            ost << patdef[0];
+            ost << static_cast <unsigned>(patdef[0]);
             for (byte i = 1; i < 128; i++)
-               ost  << wxT(",") << static_cast <int>(patdef[i]);
+               ost  << wxT(",") << static_cast <unsigned>(patdef[i]);
             ost   << wxT("});");
             success = true;
          }
