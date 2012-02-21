@@ -58,91 +58,94 @@ namespace tui
       DTE_APPLY
    } DialogTechEditor;
 
-///////////////////////////////////////////////////////////////////////////////
-/// Class ColorListComboBox
-///////////////////////////////////////////////////////////////////////////////
-class ColorListComboBox : public wxOwnerDrawnComboBox
-{
-   public:
-                   ColorListComboBox( layprop::DrawProperties* );
-      virtual     ~ColorListComboBox();
-      virtual void OnDrawItem( wxDC& dc, const wxRect& rect, int item, int flags ) const;
-      virtual void Clear();
-      void         populate( layprop::DrawProperties* );
-      //virtual void OnDrawBackground( wxDC& dc, const wxRect& rect, int item, int flags ) const;
-   private:
-      layprop::ColorMap _colors;
-};
+   ///////////////////////////////////////////////////////////////////////////////
+   /// Class ColorListComboBox
+   ///////////////////////////////////////////////////////////////////////////////
+   class ColorListComboBox : public wxOwnerDrawnComboBox
+   {
+      public:
+                      ColorListComboBox( layprop::DrawProperties* );
+         virtual     ~ColorListComboBox();
+         virtual void OnDrawItem( wxDC& dc, const wxRect& rect, int item, int flags ) const;
+         virtual void Clear();
+         void         populate( layprop::DrawProperties* );
+         //virtual void OnDrawBackground( wxDC& dc, const wxRect& rect, int item, int flags ) const;
+      private:
+         layprop::ColorMap _colors;
+   };
 
 
-///////////////////////////////////////////////////////////////////////////////
-/// Class FillingListComboBox
-///////////////////////////////////////////////////////////////////////////////
-class FillListComboBox : public wxOwnerDrawnComboBox
-{
-   public:
-                   FillListComboBox( layprop::DrawProperties* );
-      virtual     ~FillListComboBox();
-      virtual void OnDrawItem( wxDC& dc, const wxRect& rect, int item, int flags ) const;
-      virtual void Clear();
-      void         populate( layprop::DrawProperties* );
-//      virtual void OnDrawBackground( wxDC& dc, const wxRect& rect, int item, int flags ) const;
-   private:
-      layprop::FillMap _fills;
-};
+   ///////////////////////////////////////////////////////////////////////////////
+   /// Class FillingListComboBox
+   ///////////////////////////////////////////////////////////////////////////////
+   class FillListComboBox : public wxOwnerDrawnComboBox
+   {
+      public:
+                      FillListComboBox( layprop::DrawProperties* );
+         virtual     ~FillListComboBox();
+         virtual void OnDrawItem( wxDC& dc, const wxRect& rect, int item, int flags ) const;
+         virtual void Clear();
+         void         populate( layprop::DrawProperties* );
+   //      virtual void OnDrawBackground( wxDC& dc, const wxRect& rect, int item, int flags ) const;
+      private:
+         layprop::FillMap _fills;
+   };
 
-///////////////////////////////////////////////////////////////////////////////
-/// Class LineListComboBox
-///////////////////////////////////////////////////////////////////////////////
-class LineListComboBox : public wxOwnerDrawnComboBox
-{
-   public:
-                   LineListComboBox( layprop::DrawProperties* );
-      virtual     ~LineListComboBox();
-      virtual void OnDrawItem( wxDC& dc, const wxRect& rect, int item, int flags ) const;
-      virtual wxCoord OnMeasureItem(size_t size) const {return 24;};
-      virtual void Clear();
-      void         populate( layprop::DrawProperties* );
-      //virtual void OnDrawBackground( wxDC& dc, const wxRect& rect, int item, int flags ) const;
-   private:
-      layprop::LineMap _lines;
-};
+   ///////////////////////////////////////////////////////////////////////////////
+   /// Class LineListComboBox
+   ///////////////////////////////////////////////////////////////////////////////
+   class LineListComboBox : public wxOwnerDrawnComboBox
+   {
+      public:
+                      LineListComboBox( layprop::DrawProperties* );
+         virtual     ~LineListComboBox();
+         virtual void OnDrawItem( wxDC& dc, const wxRect& rect, int item, int flags ) const;
+         virtual wxCoord OnMeasureItem(size_t size) const {return 24;};
+         virtual void Clear();
+         void         populate( layprop::DrawProperties* );
+         //virtual void OnDrawBackground( wxDC& dc, const wxRect& rect, int item, int flags ) const;
+      private:
+         layprop::LineMap _lines;
+   };
 
-///////////////////////////////////////////////////////////////////////////////
-/// Class TechEditorDialog
-///////////////////////////////////////////////////////////////////////////////
-class TechEditorDialog : public wxDialog 
-{
-   public:
-                              TechEditorDialog( wxWindow* parent,wxWindowID id = wxID_ANY);
-      virtual                ~TechEditorDialog();
-      void                    onLayerSelected(wxListEvent&);
-      void                    OnNewLayer(wxCommandEvent&);
-      void                    OnColorEditor(wxCommandEvent&);
-      void                    OnFillEditor(wxCommandEvent&);
-      void                    OnStyleEditor(wxCommandEvent&);
-      void                    OnChangeProperty(wxCommandEvent&);
-      void                    OnChangeLayNum(wxCommandEvent&);
-      void                    OnApply(wxCommandEvent&);
-      void                    OnLayListSort(wxListEvent&);
-   private:
-      void                    prepareLayers(layprop::DrawProperties*);
-      void                    updateDialog();
-      void                    updateLayerList();
-      wxListView*             _layerList;
-      ColorListComboBox*      _layerColors;
-      FillListComboBox*       _layerFills;
-      LineListComboBox*       _layerLines;
+   ///////////////////////////////////////////////////////////////////////////////
+   /// Class TechEditorDialog
+   ///////////////////////////////////////////////////////////////////////////////
+   class TechEditorDialog : public wxDialog
+   {
+      public:
+                                 TechEditorDialog( wxWindow* parent,wxWindowID id = wxID_ANY);
+         virtual                ~TechEditorDialog();
+         void                    onLayerSelected(wxListEvent&);
+         void                    OnNewLayer(wxCommandEvent&);
+         void                    OnColorEditor(wxCommandEvent&);
+         void                    OnFillEditor(wxCommandEvent&);
+         void                    OnStyleEditor(wxCommandEvent&);
+         void                    OnChangeProperty(wxCommandEvent&);
+         void                    OnChangeLayNum(wxCommandEvent&);
+         void                    OnApply(wxCommandEvent&);
+         void                    OnLayListSort(wxListEvent&);
+      private:
+         void                    prepareLayers(layprop::DrawProperties*);
+         void                    updateDialog();
+         void                    updateLayerList();
+         wxListView*             _layerList;
+         ColorListComboBox*      _layerColors;
+         FillListComboBox*       _layerFills;
+         LineListComboBox*       _layerLines;
 
-      wxTextCtrl*             _layerNumber;
-      wxString                _layerNumberString;
-      wxTextCtrl*             _layerName;
-      wxString                _layerNameString;
-      int                     _curSelect;//!Data related to current selection
-      WordList                _allLayNums;
+         wxTextCtrl*             _layerNumber;
+         wxString                _layerNumberString;
+         wxTextCtrl*             _layerName;
+         wxString                _layerNameString;
+         int                     _curSelect;//!Data related to current selection
+         WordList                _allLayNums;
 
-      DECLARE_EVENT_TABLE()
-};
+         DECLARE_EVENT_TABLE()
+   };
+
+   int wxCALLBACK wxListCtrlItemCompare(long, long, long);
+
 }
 
 #endif //__TECHEDITOR__
