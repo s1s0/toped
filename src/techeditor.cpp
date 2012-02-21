@@ -41,6 +41,7 @@ extern layprop::PropertyCenter*  PROPC;
 extern tui::TopedFrame*          Toped;
 extern console::TllCmdLine*      Console;
 
+wxListView* layerListPtr = NULL; //!Required by SortItem callback
 ///////////////////////////////////////////////////////////////////////////
 //extern const wxEventType         wxEVT_CMD_BROWSER;
 
@@ -67,6 +68,7 @@ tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id) :
    if (PROPC->lockDrawProp(drawProp))
    {
       _layerList = DEBUG_NEW wxListView(this, DTE_LAYERS_LIST, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_VRULES);
+      layerListPtr = _layerList;
       prepareLayers(drawProp);
       _layerNumber = DEBUG_NEW wxTextCtrl( this, DTE_LAYER_NUM , wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT | wxTE_READONLY,
                               wxTextValidator(wxFILTER_NUMERIC, &_layerNumberString));
@@ -145,9 +147,13 @@ void  tui::TechEditorDialog::OnNewLayer(wxCommandEvent& cmdEvent)
       _layerColors->SetSelection(0);
       _layerFills->SetSelection(0);
       _layerLines->SetSelection(0);
+      _layerNumber->SetFocus();
    }
    else
+   {
       updateDialog();
+      _layerName->SetFocus();
+   }
    FindWindow(DTE_APPLY)->Enable(false);
 }
 
@@ -332,9 +338,10 @@ void tui::TechEditorDialog::updateLayerList()
       _layerList->SetItem(row);
       _layerList->SetColumnWidth(1, wxLIST_AUTOSIZE);
 
-//      _layerList->Sort(); TODO
-      _layerList->Select(newItem, true);
-      _layerList->EnsureVisible(newItem);
+      _layerList->SortItems(tui::wxListCtrlItemCompare, 0l);
+      _curSelect = _layerList->FindItem(-1, newItem);
+      _layerList->Select(_curSelect, true);
+      _layerList->EnsureVisible(_curSelect);
    }
    else
    {  //existing layer changed
@@ -350,14 +357,20 @@ void tui::TechEditorDialog::updateLayerList()
 void tui::TechEditorDialog::OnLayListSort(wxListEvent& cmdEvent)
 {
    int col = cmdEvent.GetColumn();
-   if (0 == col)
+   wxListItem row;
+   row.SetId(_curSelect);
+   row.SetMask(wxLIST_MASK_DATA);
+   row.SetColumn(0);
+   if (!_layerList->GetItem(row)) return;
+   long itemSel = row.GetData();
+   switch (col)
    {
-      col++;//TODO - sort
+      case 0: _layerList->SortItems(tui::wxListCtrlItemCompare, 0l);break;
+      case 1: _layerList->SortItems(tui::wxListCtrlItemCompare, 1l);break;
    }
-   else
-   {
-      col--;//TODO - sort
-   }
+   _curSelect = _layerList->FindItem(-1, itemSel);
+   _layerList->Select(_curSelect, true);
+   _layerList->EnsureVisible(_curSelect);
 }
 
 void tui::TechEditorDialog::OnApply(wxCommandEvent&)
@@ -663,5 +676,31 @@ void tui::LineListComboBox::Clear()
 tui::LineListComboBox::~LineListComboBox()
 {
    Clear();
+}
+
+int wxCALLBACK tui::wxListCtrlItemCompare(long item1, long item2, long column)
+{
+   wxListItem li1, li2;
+   li1.SetMask(wxLIST_MASK_TEXT);
+   li1.SetColumn(column);
+   li1.SetId(layerListPtr->FindItem(-1, item1));
+   layerListPtr->GetItem(li1);
+   li2.SetMask(wxLIST_MASK_TEXT);
+   li2.SetColumn(column);
+   li2.SetId(layerListPtr->FindItem(-1, item2));
+   layerListPtr->GetItem(li2);
+   wxString s1 = li1.GetText();
+   wxString s2 = li2.GetText();
+   if (0 == column)
+   {
+      int result;
+      unsigned long ln1, ln2;
+      s1.ToULong(&ln1); s2.ToULong(&ln2);
+      if      (ln1 < ln2) result = -1;
+      else if (ln1 > ln2) result =  1;
+      else result = 0;
+      return result;
+   }
+   else return s1.CompareTo(s2.c_str());
 }
 
