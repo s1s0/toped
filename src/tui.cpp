@@ -1931,13 +1931,19 @@ void tui::style_sample::setStyle(const tui::style_def&  styledef)
 void tui::style_sample::OnPaint(wxPaintEvent&)
 {
    wxPaintDC dc(this);
+   byte width = _pen.GetWidth();
+   _pen.SetWidth(1);
    dc.SetBackground(*wxBLACK);
    dc.Clear();
    wxCoord w, h;
    dc.GetSize(&w, &h);
    dc.DrawRectangle(0, 0, w, h);
    dc.SetPen(_pen);
-   dc.DrawLine(1,10,w-1,10);
+   int wbeg = -width/2;
+   int wend =  width / 2 + width%2;
+   for (int i = wbeg; i < wend; i++)
+      dc.DrawLine(1,h/2+i,w-1,h/2+i);
+   _pen.SetWidth(width);
 }
 
 tui::style_sample::~style_sample()
@@ -2013,14 +2019,13 @@ tui::defineStyle::defineStyle(wxFrame *parent, wxWindowID id, const wxString &ti
    includeChars.Add(wxT("1"));
    boolValidator.SetIncludes(includeChars);
 #endif
-   
    wxMemoryDC DC;
    wxFont font(10,wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
    DC.SetFont(font);
-   wxString tempStr = wxString(wxT("0"), pattern_size);
+   wxString tempStr = wxString(L'0', _pattern_size + 5);
    int hsz,wsz;
-
    DC.GetTextExtent(tempStr, &wsz, &hsz);
+
    _pattern = DEBUG_NEW wxTextCtrl( this, ID_PATVAL , wxT(""), wxDefaultPosition, wxSize(wsz,-1), wxTE_RIGHT,
                                            boolValidator);
    hsizer2->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Width  :"),
@@ -2166,14 +2171,14 @@ void tui::defineStyle::OnStylePropChanged(wxCommandEvent& event)
    wxString s_width    = _width->GetValue();
    wxString s_patscale = _patscale->GetValue();
 
-  if((!s_pattern.IsEmpty()) && (s_pattern.Length() < pattern_size))
+  if((!s_pattern.IsEmpty()) && (s_pattern.Length() < _pattern_size))
    {
-      unsigned long addedLength = pattern_size - s_pattern.Length();
+      unsigned long addedLength = _pattern_size - s_pattern.Length();
       wxString str = wxString(wxT('0'), addedLength);
       s_pattern = str + s_pattern;
       _pattern->SetValue(s_pattern);
    }
-   while(s_pattern.Length() > pattern_size) 
+   while(s_pattern.Length() > _pattern_size)
    {
       s_pattern.RemoveLast();
       _pattern->SetValue(s_pattern);

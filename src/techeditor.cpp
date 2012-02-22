@@ -622,8 +622,6 @@ void tui::LineListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, i
    layprop::tellRGB col(255,0,0,0);
    wxColour color(col.red(), col.green(), col.blue(), col.alpha());
 
-   wxRect r(rect);
-
    std::string lineName(GetString( item ).mb_str(wxConvUTF8));
 
    layprop::LineMap::const_iterator lineSet = _lines.find(lineName);
@@ -637,8 +635,7 @@ void tui::LineListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, i
       wxDash* dashes = NULL;
       unsigned numElements= makePenDash(pattern, pathscale, dashes);
 
-      wxPen pen(wxT("black"), width, wxUSER_DASH);
-//      pen.SetWidth(width);
+      wxPen pen(wxT("black"), 1, wxUSER_DASH);
       pen.SetDashes(numElements, dashes);
 
       dc.SetPen( pen );
@@ -647,7 +644,13 @@ void tui::LineListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, i
                   (rect.y - 1) + ( (rect.height/2) - dc.GetCharHeight()/2 )
                   );
 
-      dc.DrawLine(r.x+r.width/2 + 5, r.y+r.height/2, r.x+r.width - 5, r.y+r.height/2);
+      int wbeg = -width/2;
+      int wend =  width / 2 + width%2;
+      for (int i = wbeg; i < wend; i++)
+         dc.DrawLine(rect.x+rect.width/2   + 5,
+                     rect.y+rect.height/2  + i,
+                     rect.x+rect.width     - 5,
+                     rect.y+rect.height/2  + i );
 
       pen.SetDashes(0, NULL);
       delete [] dashes;
