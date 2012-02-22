@@ -664,7 +664,6 @@ namespace tui {
    };
 
    typedef  std::map<std::string, style_def       >  styleMAP;
-   const unsigned long pattern_size = 16;
 
    class defineStyle : public wxDialog
    {
@@ -694,7 +693,7 @@ namespace tui {
       wxString       _patscaleString;
       wxTextCtrl*    _pattern;
       wxString       _patternString;
-
+      static const size_t   _pattern_size = 16;
       DECLARE_EVENT_TABLE();
    };
 
