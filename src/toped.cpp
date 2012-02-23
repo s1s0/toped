@@ -348,7 +348,7 @@ END_EVENT_TABLE()
 //   EVT_COMMAND(wxID_ANY, wxEVT_INIT_DIALOG , tui::TopedFrame::OnDefineLayer )
 
 tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos,
-                            const wxSize& size ) : wxFrame((wxFrame *)NULL, ID_WIN_TOPED, title, pos, size)
+                            const wxSize& size ) : wxFrame((wxFrame *)NULL, ID_WIN_TOPED, title, pos, size),_exitAproved(false)
 {
    SetIcon(wxIcon( toped16x16_xpm ));
    initView();
@@ -883,7 +883,9 @@ void tui::TopedFrame::checkExit( wxCommandEvent& WXUNUSED( event ) )
             //GetEventHandler()->ProcessEvent(event);
             OnTDTSave(sevent);
          }
-         case wxID_NO: Console->stopParserThread();
+         case wxID_NO:  
+            Console->stopParserThread();
+            setExitAproved();            
          case wxID_CANCEL: return;
       }
    }
@@ -903,6 +905,12 @@ void tui::TopedFrame::OnExitRequest( wxCommandEvent&  event )
 
 void tui::TopedFrame::OnClose(wxCloseEvent& WXUNUSED( event ))
 {
+   wxCommandEvent evt;
+   //Next string is added because this method is calling by two ways
+   //1. Directly using Close system button (need to call checkExit())
+   //2. Indirectly when parse thread is close in TopedFrame::checkExit 
+   //   by Console->stopParserThread(); (checkExit() already called)
+   if (! exitAproved()) checkExit(evt);
    wxMilliSleep(300);
    Destroy();
 }
