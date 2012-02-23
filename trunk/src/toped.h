@@ -113,12 +113,15 @@ namespace tui {
    private:
       void                    initMenuBar();
       void                    initView();
+      void                    setExitAproved()              { _exitAproved = true;}
+       bool                   exitAproved() const          { return _exitAproved;}
       bool                    checkFileOverwriting(const wxString& fileName);
       void                    USMap2wxString(USMap* inmap, wxString& outmap);
       void                    SIMap2wxString(SIMap* inmap, wxString& outmap);
       console::ted_log*       _cmdlog;       // log window
       console::TELLFuncList*  _cmdbrowser;
       console::TedCmdLine*    _cmdline;
+      bool                    _exitAproved;
       //LayoutCanvas*           _laycanvas;
       CanvasStatus*           _GLstatus;
       browsers::browserTAB*   _browsers;  // TDT/GDS/layer browsers
