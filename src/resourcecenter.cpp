@@ -83,7 +83,13 @@ wxMenu* tui::MenuItemHandler::buildPath(wxMenuBar *menuBar, const std::vector<st
       {
          // create at the left of Help menu
          menu = DEBUG_NEW wxMenu();
-         menuBar->Insert(menuBar->GetMenuCount()-1, menu, wxString(menuString.c_str(), wxConvUTF8));
+#ifdef __WXOSX_COCOA__
+	menuBar->Append(menu, wxString(menuString.c_str(), 
+	wxConvUTF8)); 
+#else
+	menuBar->Insert(menuBar->GetMenuCount()-1, menu, wxString(menuString.c_str(), wxConvUTF8));
+#endif
+
          menuID = menuBar->FindMenu(wxString(menuString.c_str(), wxConvUTF8));
       }
 
