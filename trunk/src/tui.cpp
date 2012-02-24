@@ -2855,8 +2855,13 @@ tui::TopedPropertySheets::RenderingPSheet::RenderingPSheet(wxWindow* parent) : w
          wxCheckBox* textOrien  = DEBUG_NEW wxCheckBox(this, PDSET_TEXTORI, wxT("Adjust orientation"));
          wxArrayString allFontNames_wx;
          NameList allFontNames_std;
+#ifdef __WXOSX_COCOA__
+         wxComboBox* allFonts = DEBUG_NEW wxComboBox(this, PDSET_TEXTFONTS,
+               wxT(""), wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_DROPDOWN | wxCB_READONLY);
+#else
          wxComboBox* allFonts = DEBUG_NEW wxComboBox(this, PDSET_TEXTFONTS,
                wxT(""), wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_DROPDOWN | wxCB_READONLY | wxCB_SORT);
+#endif
       topTextSizer->Add(textSizer, 0, wxALL | wxALIGN_CENTER | wxEXPAND);
       topTextSizer->Add(textOrien, 0, wxALL | wxALIGN_LEFT             );
       topTextSizer->Add(allFonts , 0, wxALL | wxALIGN_CENTER | wxEXPAND);
