@@ -56,6 +56,9 @@
 #include "tpdf_select.h"
 #include "tllf_list.h"
 #include "tpdf_get.h"
+#ifdef __WXOSX_COCOA__
+#include "wxcocoa_config.h"
+#endif
 
 tui::TopedFrame*                 Toped = NULL;
 extern DataCenter*               DATC;
@@ -550,7 +553,11 @@ void TopedApp::getGlobalDirs()
    if (!wxGetEnv(wxT("TPD_GLOBAL"), &_globalDir))
    {
       tell_log(console::MT_WARNING,"Environment variable $TPD_GLOBAL is not defined. Trying to use current directory");
-      _globalDir = wxT("./");
+#ifdef __WXOSX_COCOA__
+       _globalDir = wxGetCwd() << "/" << MAC_BUNDLE_NAME << ".app/Contents/MacOs/";
+#else
+       _globalDir = wxT("./");
+#endif
    }
    else
       _globalDir << wxT("/");

@@ -2,12 +2,14 @@
 
 cmake_minimum_required (VERSION 2.6)
 
-project (Toped)
+SET(EXEC_NAME Toped)
+project(${EXEC_NAME})
 SET(CMAKE_BUILD_TYPE Debug)
 ##GLEW
 ## Set to your glew library installation directory
 SET (glew_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/glew/include)
 SET (glew_LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/glew/lib)
+MESSAGE(${glew_LIB_DIR})
 #WXWIDGETS
 ##Windows
 #SET (wxWidgets_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/wxwidgets)
@@ -65,7 +67,9 @@ INCLUDE(${wxWidgets_USE_FILE})
 
 if(APPLE)
 SET(MACOSX_BUNDLE_ICON_FILE "toped.icns")
-add_executable(toped MACOSX_BUNDLE ${toped_SOURCES} ${fonts} ${icons} ${tll} ${user_functions} "toped.icns")
+SET(WITH_MAC_BUNDLE_NAME "toped")
+configure_file (${CMAKE_CURRENT_SOURCE_DIR}/src/wxcocoa_config.h.cmake ${CMAKE_CURRENT_SOURCE_DIR}/src/wxcocoa_config.h)
+add_executable(${EXEC_NAME} MACOSX_BUNDLE ${toped_SOURCES} ${fonts} ${icons} ${tll} ${user_functions} "toped.icns")
 
 SET_SOURCE_FILES_PROPERTIES(	
   ${icons}
@@ -93,12 +97,12 @@ SET_SOURCE_FILES_PROPERTIES(
   MACOSX_PACKAGE_LOCATION MacOS/tll/user_functions/general
 )
 else(APPLE)
-add_executable(toped ${toped_SOURCES} ${fonts} ${icons} ${tll} ${user_functions})
+add_executable(${EXEC_NAME} ${toped_SOURCES} ${fonts} ${icons} ${tll} ${user_functions})
 endif(APPLE)
 link_directories(${TPD_COMMON_DIR} ${TPD_DB_DIR} ${TPD_IFACES_DIR} ${TPD_PARSER_DIR} ${TPD_BIDFUNC_DIR} ${glew_LIB_DIR})
 IF(APPLE)
 
-target_link_libraries(toped ${wxWidgets_LIBRARIES} tpd_bidfunc tpd_parser tpd_ifaces tpd_DB tpd_common GLEW wx_osx_cocoau_gl-2.9 z) 
+target_link_libraries(${EXEC_NAME} ${glew_LIB_DIR}/libGLEW.a ${wxWidgets_LIBRARIES} tpd_bidfunc tpd_parser tpd_ifaces tpd_DB tpd_common wx_osx_cocoau_gl-2.9 z) 
 else(APPLE)
-target_link_libraries(toped ${wxWidgets_LIBRARIES} tpd_bidfunc tpd_parser tpd_ifaces tpd_DB tpd_common GLEW z) 
+target_link_libraries(${EXEC_NAME} ${wxWidgets_LIBRARIES} tpd_bidfunc tpd_parser tpd_ifaces tpd_DB tpd_common GLEW z) 
 endif(APPLE)
