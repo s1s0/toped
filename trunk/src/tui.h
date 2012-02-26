@@ -651,6 +651,19 @@ namespace tui {
    };
 
    //--------------------------------------------------------------------------
+   class StyleBinaryView : public wxTextCtrl {
+   public:
+                     StyleBinaryView(wxWindow*, wxWindowID);
+      virtual void   ChangeValue(const word&);
+      word           GetValue();
+      void           OnKey(wxKeyEvent&);
+   private:
+      wxString       _patternString;
+      static const wxTextPos   _pattern_size = 16;
+      DECLARE_EVENT_TABLE();
+
+   };
+   //--------------------------------------------------------------------------
    class style_sample : public wxWindow {
    public:
                      style_sample(wxWindow*, wxWindowID, wxPoint, wxSize, std::string, const layprop::DrawProperties*);
@@ -687,12 +700,13 @@ namespace tui {
       style_sample*  _stylesample;
       wxString       _stylename;
       style_def      _current_style;
+      StyleBinaryView* _pattern;
       wxTextCtrl*    _width;
       wxString       _widthString;
       wxTextCtrl*    _patscale;
       wxString       _patscaleString;
-      wxTextCtrl*    _pattern;
-      wxString       _patternString;
+//      wxTextCtrl*    _pattern;
+//      wxString       _patternString;
       static const size_t   _pattern_size = 16;
       DECLARE_EVENT_TABLE();
    };
