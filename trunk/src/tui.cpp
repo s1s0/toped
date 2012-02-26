@@ -2010,7 +2010,7 @@ tui::defineStyle::defineStyle(wxFrame *parent, wxWindowID id, const wxString &ti
                               wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
                                                 0, wxALL | wxALIGN_CENTER , 10);
    //Boolean validator for style pattern 
-   wxTextValidator boolValidator(wxFILTER_INCLUDE_CHAR_LIST, &_patscaleString);
+   wxTextValidator boolValidator(wxFILTER_INCLUDE_CHAR_LIST, &_patternString);
 #if wxCHECK_VERSION(2,9,0)
    boolValidator.SetCharIncludes(wxT("01"));
 #else
@@ -2065,6 +2065,11 @@ tui::defineStyle::defineStyle(wxFrame *parent, wxWindowID id, const wxString &ti
    SetSizer( top_sizer );      // use the sizer for layout
 
    top_sizer->SetSizeHints( this );   // set size hints to honour minimum size
+
+//   _styleList->GetString(0);
+   _current_style = getStyle(std::string(_styleList->GetString(0).mb_str(wxConvUTF8)));
+   _styleList->Select(0);
+   updateDialog();
 }
 
 tui::defineStyle::~defineStyle()
@@ -2141,16 +2146,18 @@ void tui::defineStyle::updateDialog()
    //convert number to boolean string 
    std::stringstream strbuf;
    strbuf << std::bitset<16>(_current_style.pattern);
-   std::string ss = strbuf.str();
 
-   wxString tempStr(ss.c_str(), wxConvUTF8);
-   _pattern->SetValue(tempStr);
-   tempStr.Clear();
-   tempStr << static_cast<unsigned int>(_current_style.width);
-   _width->SetValue(tempStr);
-   tempStr.Clear();
-   tempStr << static_cast<unsigned int>(_current_style.pscale);
-   _patscale->SetValue(tempStr);
+   _patternString = wxString(strbuf.str().c_str(), wxConvUTF8);
+//   _pattern->GetValidator()->TransferToWindow();
+   _pattern->ChangeValue(_patternString);
+   _widthString.Clear();
+   _widthString << static_cast<unsigned int>(_current_style.width);
+//   _width->GetValidator()->TransferToWindow();
+   _width->ChangeValue(_widthString);
+   _patscaleString.Clear();
+   _patscaleString << static_cast<unsigned int>(_current_style.pscale);
+//   _patscale->GetValidator()->TransferToWindow();
+   _patscale->ChangeValue(_patscaleString);
 }
 
 tui::style_def tui::defineStyle::getStyle(const std::string& style_name)
@@ -2167,42 +2174,38 @@ tui::style_def tui::defineStyle::getStyle(const std::string& style_name)
 
 void tui::defineStyle::OnStylePropChanged(wxCommandEvent& event)
 {
-   wxString s_pattern  = _pattern->GetValue();
-   wxString s_width    = _width->GetValue();
-   wxString s_patscale = _patscale->GetValue();
+   _pattern->GetValidator()->TransferFromWindow();
+   _width->GetValidator()->TransferFromWindow();
+   _patscale->GetValidator()->TransferFromWindow();
 
-  if((!s_pattern.IsEmpty()) && (s_pattern.Length() < _pattern_size))
+   size_t patLength = _patternString.Length();
+   if ((patLength != _pattern_size) && (0 != patLength))
    {
-      unsigned long addedLength = _pattern_size - s_pattern.Length();
-      wxString str = wxString(wxT('0'), addedLength);
-      s_pattern = str + s_pattern;
-      _pattern->SetValue(s_pattern);
-   }
-   while(s_pattern.Length() > _pattern_size)
-   {
-      s_pattern.RemoveLast();
-      _pattern->SetValue(s_pattern);
+      if (patLength < _pattern_size)
+      {
+         unsigned long addedLength = _pattern_size - patLength;
+         wxChar padding = L'0';
+         wxString str = wxString(padding, addedLength);
+         _patternString = str + _patternString;
+      }
+      else
+      {
+         _patternString.Remove(_pattern_size, patLength - _pattern_size);
+      }
+      _pattern->ChangeValue(_patternString);
    }
    unsigned long d_pattern=0;  
-   wxString boolStr(wxT("01"));
-   wxChar c0 = boolStr[0];
-   wxChar c1 = boolStr[1];
 
-   for(size_t i = 0; i < s_pattern.Length(); i++)
+   for(size_t i = 0; i < _patternString.Length(); i++)
    {
-      d_pattern = d_pattern << 1;
-       wxChar cg = s_pattern[i];
-      if(cg == c1) 
+      if(L'1' == _patternString[i])
       {
-         d_pattern += 1;
-         continue;
+         d_pattern += (1 << i);
       }
-      if(cg == c0) continue;
-      assert(false);
    }
 
-   unsigned long d_width;    s_width.ToULong(&d_width);
-   unsigned long d_patscale; s_patscale.ToULong(&d_patscale);
+   unsigned long d_width;    _widthString.ToULong(&d_width);
+   unsigned long d_patscale; _patscaleString.ToULong(&d_patscale);
    style_def tempStyle;
    tempStyle.pattern  = d_pattern;
    tempStyle.width    = d_width;
@@ -2216,13 +2219,13 @@ void tui::defineStyle::OnStyleApply(wxCommandEvent& event)
 {
 
    wxString s_name      = _styleList->GetStringSelection();
-   wxString s_pattern   = _pattern->GetValue();
-   wxString s_width     = _width->GetValue();
-   wxString s_patscale  = _patscale->GetValue();
+   _pattern->GetValidator()->TransferFromWindow();
+   _width->GetValidator()->TransferFromWindow();
+   _patscale->GetValidator()->TransferFromWindow();
 
-   unsigned long d_pattern;  s_pattern.ToULong(&d_pattern);
-   unsigned long d_width;    s_width.ToULong(&d_width);
-   unsigned long d_patscale; s_patscale.ToULong(&d_patscale);
+   unsigned long d_pattern;  _patternString.ToULong(&d_pattern);
+   unsigned long d_width;    _widthString.ToULong(&d_width);
+   unsigned long d_patscale; _patscaleString.ToULong(&d_patscale);
 
    style_def defStyle;
    defStyle.pattern  = d_pattern;
