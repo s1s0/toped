@@ -50,9 +50,6 @@ namespace tui {
       ID_GREENVAL       ,
       ID_BLUEVAL        ,
       ID_ALPHAVAL       ,
-      ID_WIDTHVAL       ,
-      ID_PATVAL         ,
-      ID_PATSCALEVAL    ,
       ID_BTNEDIT        ,
       ID_BTNAPPLY       ,
       ID_BTNCLEAR       ,
@@ -67,6 +64,16 @@ namespace tui {
       ID_BTNOUTFILE     ,
       ID_BTNCONVERT
    };
+
+   typedef enum {
+      IDLS_NEWSTYLE       ,
+      IDLS_ITEMLIST       ,
+      IDLS_NEWITEM        ,
+      IDLS_BTNAPPLY       ,
+      IDLS_PATVAL         ,
+      IDLS_WIDTHVAL       ,
+      IDLS_PATSCALEVAL
+   } LineStyleIDs;
 
    typedef enum
    {
@@ -687,6 +694,7 @@ namespace tui {
       virtual       ~defineStyle();
       void           OnStyleSelected(wxCommandEvent&);
       void           OnStyleNameAdded(wxCommandEvent&);
+      void           OnStyleNameChanged(wxCommandEvent&);
       void           OnStylePropChanged(wxCommandEvent&);
       void           OnStyleApply(wxCommandEvent&);
       styleMAP&      allStyles() {return _allStyles;}
