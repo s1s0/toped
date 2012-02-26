@@ -1954,18 +1954,98 @@ tui::style_sample::~style_sample()
    if (NULL != oldDashes)
       delete [] oldDashes;
 }
+
+//==============================================================================
+BEGIN_EVENT_TABLE(tui::StyleBinaryView, wxTextCtrl)
+      EVT_CHAR(                  tui::StyleBinaryView::OnKey)
+END_EVENT_TABLE()
+
+tui::StyleBinaryView::StyleBinaryView(wxWindow *parent,  wxWindowID id) :
+   wxTextCtrl(parent, id, wxT("Pattern:"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT)
+{
+   // Calculate the window width
+   wxMemoryDC DC;
+   wxFont font(10,wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+   DC.SetFont(font);
+   wxString tempStr = wxString(L'0', _pattern_size + 5);
+   SetSizeHints(DC.GetTextExtent(tempStr));
+   SetMaxLength(16);
+}
+
+void tui::StyleBinaryView::ChangeValue(const word& value)
+{
+   //convert number to boolean string
+   std::stringstream strbuf;
+   strbuf << std::bitset<16>(value);
+   _patternString = wxString(strbuf.str().c_str(), wxConvUTF8);
+    wxTextCtrl::ChangeValue(_patternString);
+
+}
+
+void tui::StyleBinaryView::OnKey(wxKeyEvent& kEvent)
+{
+   wxTextPos curpos = GetInsertionPoint();
+   switch (kEvent.GetKeyCode())
+   {
+      case WXK_BACK  : curpos = ( 0 == curpos ) ? 0 : curpos-1;
+                       _patternString.SetChar(curpos, L'0');
+                       SetValue(_patternString);
+                       SetInsertionPoint(curpos);
+                       break;
+      case WXK_DELETE: _patternString.SetChar(curpos, L'0');
+                       SetValue(_patternString);
+                       SetInsertionPoint(curpos);
+                       break;
+      case WXK_LEFT  : SetInsertionPoint((            0 == curpos ) ?             0 : --curpos);
+                       break;
+      case WXK_RIGHT : SetInsertionPoint((_pattern_size == curpos ) ? _pattern_size : ++curpos);
+                       break;
+      case (char)'1' : _patternString.SetChar(curpos, L'1');
+                       SetValue(_patternString);
+                       curpos = (_pattern_size == curpos ) ? _pattern_size : curpos+1;
+                       SetInsertionPoint(curpos);
+                       break;
+      case (char)'0' : _patternString.SetChar(curpos, L'0');
+                       SetValue(_patternString);
+                       curpos = (_pattern_size == curpos ) ? _pattern_size : curpos+1;
+                       SetInsertionPoint(curpos);
+                       break;
+      default: kEvent.Skip(); break;
+   }
+}
+
+word tui::StyleBinaryView::GetValue()
+{
+   unsigned dPat;
+   for(size_t i = 0; i < _patternString.Length(); i++)
+   {
+      if(L'1' == _patternString[i])
+         dPat += (1 << i);
+   }
+   assert(dPat <= 0xFFFF);
+   return (word) dPat;
+}
+
 //==============================================================================
 BEGIN_EVENT_TABLE(tui::defineStyle, wxDialog)
       EVT_LISTBOX(ID_ITEMLIST   , tui::defineStyle::OnStyleSelected   )
       EVT_BUTTON(ID_NEWITEM     , tui::defineStyle::OnStyleNameAdded   )
-//      EVT_BUTTON(ID_BTNAPPLY    , tui::defineStyle::OnStyleApply     )
-      EVT_TEXT(ID_WIDTHVAL      , tui::defineStyle::OnStylePropChanged )
+      EVT_BUTTON(ID_BTNAPPLY    , tui::defineStyle::OnStyleApply     )
       EVT_TEXT(ID_PATVAL        , tui::defineStyle::OnStylePropChanged )
+      EVT_TEXT(ID_WIDTHVAL      , tui::defineStyle::OnStylePropChanged )
       EVT_TEXT(ID_PATSCALEVAL   , tui::defineStyle::OnStylePropChanged )
 END_EVENT_TABLE()
 
-tui::defineStyle::defineStyle(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, const layprop::DrawProperties* drawProp) :
-      wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)
+tui::defineStyle::defineStyle(wxFrame *parent, wxWindowID id, const wxString &title,
+                              wxPoint pos, const layprop::DrawProperties* drawProp) :
+   wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE),
+   _styleList     (NULL),
+   _dwstylename   (NULL),
+   _stylesample   (NULL),
+   _pattern       (NULL),
+   _width         (NULL),
+   _patscale      (NULL)
+
 {
    NameList all_names;
    drawProp->allLines(all_names);
@@ -1989,16 +2069,6 @@ tui::defineStyle::defineStyle(wxFrame *parent, wxWindowID id, const wxString &ti
 
    _stylesample = DEBUG_NEW style_sample( this, -1, wxDefaultPosition, wxSize(-1,25), init_style, drawProp);
 
-   //Boolean validator for style pattern 
-   wxTextValidator stylePatValidator(wxFILTER_INCLUDE_CHAR_LIST, &_patternString);
-#if wxCHECK_VERSION(2,9,0)
-   stylePatValidator.SetCharIncludes(wxT("01"));
-#else
-   wxArrayString includeChars;
-   includeChars.Add(wxT("0"));
-   includeChars.Add(wxT("1"));
-   stylePatValidator.SetIncludes(includeChars);
-#endif
    // Calculate the window width
    wxMemoryDC DC;
    wxFont font(10,wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
@@ -2011,62 +2081,57 @@ tui::defineStyle::defineStyle(wxFrame *parent, wxWindowID id, const wxString &ti
    // NOTE! Static boxes MUST be created before all other controls which are about to
    // be encircled by them. Otherwise the dialog box might work somewhere (Windows & fc8)
    // but not everywhere! (fc9)
-   wxBoxSizer *hsizer0 = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("New Style") );
-
-   _dwstylename  = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxSize(150,-1), 0,
-                                          wxTextValidator(wxFILTER_ASCII, &_stylename));
-   hsizer0->Add( _dwstylename   , 0, wxALL | wxEXPAND, 5);
-   hsizer0->Add(0,0,1); //
-   hsizer0->Add( DEBUG_NEW wxButton( this, ID_NEWITEM  , wxT("Add")    ), 0, wxALL, 5 );
-
-   wxBoxSizer *vsizer2 = DEBUG_NEW wxBoxSizer( wxVERTICAL );
-      wxBoxSizer *hsizer1 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL);
-         _pattern = DEBUG_NEW wxTextCtrl( this, ID_PATVAL , wxT(""), wxDefaultPosition, wxSize(wsz,-1), wxTE_RIGHT,
-                                                 stylePatValidator);
-         hsizer1->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Pattern:"),
-                                    wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
-                                                      0, wxALL | wxALIGN_CENTER , 10);
-         hsizer1->Add(_pattern, 0, wxALL | wxEXPAND, 5);
-
-      wxBoxSizer *hsizer2 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL);
-         hsizer2->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Width  :"),
-                                    wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
-                                                      0, wxALL | wxALIGN_CENTER , 10);
-         _width    = DEBUG_NEW wxTextCtrl( this, ID_WIDTHVAL , wxT(""), wxDefaultPosition, wxSize(wsz,-1), wxTE_RIGHT,
-                                                 wxTextValidator(wxFILTER_NUMERIC, &_widthString));
-         hsizer2->Add(_width, 0, wxALL | wxEXPAND, 5);
-      wxBoxSizer *hsizer3 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL);
-         hsizer3->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Scale   :"),
-                                    wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
-                                                      0, wxALL | wxALIGN_CENTER , 10);
-         _patscale    = DEBUG_NEW wxTextCtrl( this, ID_PATSCALEVAL , wxT(""), wxDefaultPosition, wxSize(wsz,-1), wxTE_RIGHT,
-                                                 wxTextValidator(wxFILTER_NUMERIC, &_patscaleString));
-         hsizer3->Add(_patscale, 0, wxALL | wxEXPAND, 5);
-
-
-
-      vsizer2->Add( _stylesample , 0, wxALL | wxEXPAND, 5);
-//      vsizer2->Add(0,0,1); //
-      vsizer2->Add( hsizer1 , 0, wxALL | wxEXPAND, 5);
-      vsizer2->Add( hsizer2 , 0, wxALL | wxEXPAND, 5);
-      vsizer2->Add( hsizer3 , 0, wxALL | wxEXPAND, 5);
-//      vsizer2->Add(DEBUG_NEW wxButton( this, ID_BTNAPPLY  , wxT(" Apply ") ), 0, wxALL | wxALIGN_RIGHT, 5);
-//      FindWindow(ID_BTNAPPLY)->Enable(false);
-
-   wxBoxSizer *vsizer3 = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Pattern") );
-      vsizer3->Add( _styleList   , 0, wxALL | wxEXPAND, 5);
-      vsizer3->Add(0,0,1); //
-      vsizer3->Add( vsizer2      , 0, wxEXPAND );
-
-   // Buttons
-   wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
-      button_sizer->Add(0,0,1); //
-      button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK    , wxT("OK") ), 0, wxALL, 5 );
-      button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel")  ), 0, wxALL, 5 );
-
    wxBoxSizer *top_sizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+      wxBoxSizer *hsizer0 = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("New Style") );
+
+         _dwstylename  = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxSize(150,-1), 0,
+                                                wxTextValidator(wxFILTER_ASCII, &_stylename));
+         hsizer0->Add( _dwstylename   , 0, wxALL | wxEXPAND, 5);
+         hsizer0->Add(0,0,1); //
+         hsizer0->Add( DEBUG_NEW wxButton( this, ID_NEWITEM  , wxT("Add")    ), 0, wxALL, 5 );
+
+      wxBoxSizer *vsizer2 = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+         wxBoxSizer *hsizer1 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL);
+            _pattern = DEBUG_NEW StyleBinaryView(this, ID_PATVAL);
+            hsizer1->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Pattern:"),
+                                       wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+                                                         0, wxALL | wxALIGN_RIGHT , 10);
+            hsizer1->Add(_pattern, 0, wxALL | wxEXPAND, 5);
+
+         wxBoxSizer *hsizer2 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL);
+            hsizer2->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Width   :"),
+                                       wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+                                                         0, wxALL | wxALIGN_RIGHT , 10);
+            _width    = DEBUG_NEW wxTextCtrl( this, ID_WIDTHVAL , wxT(""), wxDefaultPosition, wxSize(wsz,-1), wxTE_RIGHT,
+                                                    wxTextValidator(wxFILTER_NUMERIC, &_widthString));
+            hsizer2->Add(_width, 0, wxALL | wxEXPAND, 5);
+         wxBoxSizer *hsizer3 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL);
+            hsizer3->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Scale   :"),
+                                       wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+                                                         0, wxALL | wxALIGN_RIGHT , 10);
+            _patscale    = DEBUG_NEW wxTextCtrl( this, ID_PATSCALEVAL , wxT(""), wxDefaultPosition, wxSize(wsz,-1), wxTE_RIGHT,
+                                                    wxTextValidator(wxFILTER_NUMERIC, &_patscaleString));
+            hsizer3->Add(_patscale, 0, wxALL | wxEXPAND, 5);
+
+         vsizer2->Add( _stylesample , 0, wxALL | wxEXPAND, 5);
+         vsizer2->Add( hsizer1 , 0, wxALL | wxEXPAND, 5);
+//         vsizer2->Add( hsizer11 , 0, wxALL | wxEXPAND, 5);
+         vsizer2->Add( hsizer2 , 0, wxALL | wxEXPAND, 5);
+         vsizer2->Add( hsizer3 , 0, wxALL | wxEXPAND, 5);
+
+      wxBoxSizer *hsizer4 = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Pattern") );
+         hsizer4->Add( _styleList   , 0, wxALL | wxEXPAND, 5);
+         hsizer4->Add(0,0,1); //
+         hsizer4->Add( vsizer2      , 0, wxEXPAND );
+
+      // Buttons
+      wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+         button_sizer->Add(0,0,1); //
+         button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK    , wxT("OK") ), 0, wxALL, 5 );
+         button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel")  ), 0, wxALL, 5 );
+
    top_sizer->Add( hsizer0      , 0, wxEXPAND );
-   top_sizer->Add( vsizer3      , 0, wxEXPAND );
+   top_sizer->Add( hsizer4      , 0, wxEXPAND );
    top_sizer->Add( button_sizer , 0, wxEXPAND );
 
    SetSizer( top_sizer );      // use the sizer for layout
@@ -2153,17 +2218,14 @@ void tui::defineStyle::updateDialog()
    //convert number to boolean string 
    std::stringstream strbuf;
    strbuf << std::bitset<16>(_current_style.pattern);
+   _pattern->ChangeValue(_current_style.pattern);
 
-   _patternString = wxString(strbuf.str().c_str(), wxConvUTF8);
-//   _pattern->GetValidator()->TransferToWindow();
-   _pattern->ChangeValue(_patternString);
    _widthString.Clear();
    _widthString << static_cast<unsigned int>(_current_style.width);
-//   _width->GetValidator()->TransferToWindow();
    _width->ChangeValue(_widthString);
+
    _patscaleString.Clear();
    _patscaleString << static_cast<unsigned int>(_current_style.pscale);
-//   _patscale->GetValidator()->TransferToWindow();
    _patscale->ChangeValue(_patscaleString);
 }
 
@@ -2181,40 +2243,15 @@ tui::style_def tui::defineStyle::getStyle(const std::string& style_name)
 
 void tui::defineStyle::OnStylePropChanged(wxCommandEvent& event)
 {
-   _pattern->GetValidator()->TransferFromWindow();
+   if ((NULL == _pattern) || (NULL == _width) || (NULL == _patscale))
+      return;
    _width->GetValidator()->TransferFromWindow();
    _patscale->GetValidator()->TransferFromWindow();
-
-   size_t patLength = _patternString.Length();
-   if ((patLength != _pattern_size) && (0 != patLength))
-   {
-      if (patLength < _pattern_size)
-      {
-         unsigned long addedLength = _pattern_size - patLength;
-         wxChar padding = L'0';
-         wxString str = wxString(padding, addedLength);
-         _patternString = str + _patternString;
-      }
-      else
-      {
-         _patternString.Remove(_pattern_size, patLength - _pattern_size);
-      }
-      _pattern->ChangeValue(_patternString);
-   }
-   unsigned long d_pattern=0;  
-
-   for(size_t i = 0; i < _patternString.Length(); i++)
-   {
-      if(L'1' == _patternString[i])
-      {
-         d_pattern += (1 << i);
-      }
-   }
 
    unsigned long d_width;    _widthString.ToULong(&d_width);
    unsigned long d_patscale; _patscaleString.ToULong(&d_patscale);
    style_def tempStyle;
-   tempStyle.pattern  = d_pattern;
+   tempStyle.pattern  = _pattern->GetValue();
    tempStyle.width    = d_width;
    tempStyle.pscale   = d_patscale;
    _stylesample->setStyle(tempStyle);
@@ -2226,11 +2263,10 @@ void tui::defineStyle::OnStyleApply(wxCommandEvent& event)
 {
 
    wxString s_name      = _styleList->GetStringSelection();
-   _pattern->GetValidator()->TransferFromWindow();
    _width->GetValidator()->TransferFromWindow();
    _patscale->GetValidator()->TransferFromWindow();
 
-   unsigned long d_pattern;  _patternString.ToULong(&d_pattern);
+   unsigned long d_pattern  =_pattern->GetValue();
    unsigned long d_width;    _widthString.ToULong(&d_width);
    unsigned long d_patscale; _patscaleString.ToULong(&d_patscale);
 
