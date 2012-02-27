@@ -2016,7 +2016,7 @@ void tui::StyleBinaryView::OnKey(wxKeyEvent& kEvent)
 
 word tui::StyleBinaryView::GetValue()
 {
-   unsigned dPat;
+   unsigned dPat = 0;
    for(size_t i = 0; i < _patternString.Length(); i++)
    {
       if(L'1' == _patternString[i])
