@@ -140,9 +140,9 @@ void  tui::TechEditorDialog::OnNewLayer(wxCommandEvent& cmdEvent)
    _layerNumber->SetEditable(newChecked);
    if (newChecked)
    {
-      _layerNumberString = "";
+      _layerNumberString.Clear();
       _layerNumber->GetValidator()->TransferToWindow();
-      _layerNameString = "";
+      _layerNameString.Clear();
       _layerName->GetValidator()->TransferToWindow();
       _layerColors->SetSelection(0);
       _layerFills->SetSelection(0);
