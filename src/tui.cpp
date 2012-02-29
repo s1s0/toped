@@ -1898,10 +1898,11 @@ BEGIN_EVENT_TABLE(tui::style_sample, wxWindow)
    EVT_PAINT(tui::style_sample::OnPaint)
 END_EVENT_TABLE()
 
-tui::style_sample::style_sample(wxWindow *parent, wxWindowID id, wxPoint pos,
-   wxSize size, std::string init, const layprop::DrawProperties* drawProp) : wxWindow(parent, id, pos, size, wxSUNKEN_BORDER),
+tui::style_sample::style_sample(wxWindow *parent, wxWindowID id , std::string init, const layprop::DrawProperties* drawProp) :
+   wxControl(parent, id),
    _pen(wxT("black"), 3, wxUSER_DASH)
 {
+   SetSizeHints(50,25,-1,25);
    style_def initStyle;
    initStyle.pattern = drawProp->getLine(init)->pattern();
    initStyle.pscale = drawProp->getLine(init)->patscale();
@@ -2068,16 +2069,7 @@ tui::defineStyle::defineStyle(wxFrame *parent, wxWindowID id, const wxString &ti
       _allStyles[*CI] = curStyle;
    }
 
-   _stylesample = DEBUG_NEW style_sample( this, wxID_ANY, wxDefaultPosition, wxSize(-1,25), init_style, drawProp);
-
-   // Calculate the window width
-   wxMemoryDC DC;
-   wxFont font(10,wxFONTFAMILY_TELETYPE, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
-   DC.SetFont(font);
-   wxString tempStr = wxString(L'0', _pattern_size + 5);
-   int hsz,wsz;
-   DC.GetTextExtent(tempStr, &wsz, &hsz);
-
+   _stylesample = DEBUG_NEW style_sample( this, wxID_ANY, init_style, drawProp);
 
    // NOTE! Static boxes MUST be created before all other controls which are about to
    // be encircled by them. Otherwise the dialog box might work somewhere (Windows & fc8)
@@ -2085,46 +2077,41 @@ tui::defineStyle::defineStyle(wxFrame *parent, wxWindowID id, const wxString &ti
    wxBoxSizer *top_sizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
       wxBoxSizer *hsizer0 = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("New Style") );
 
-         _dwstylename  = DEBUG_NEW wxTextCtrl( this, IDLS_NEWSTYLE, wxT(""), wxDefaultPosition, wxSize(150,-1), 0,
+         _dwstylename  = DEBUG_NEW wxTextCtrl( this, IDLS_NEWSTYLE, wxT(""), wxDefaultPosition, wxDefaultSize, 0,
                                                 wxTextValidator(wxFILTER_ASCII, &_stylename));
-         hsizer0->Add( _dwstylename   , 0, wxALL | wxEXPAND, 5);
-         hsizer0->Add(0,0,1); //
+         hsizer0->Add( _dwstylename   , 1, wxALL | wxEXPAND, 5);
          hsizer0->Add( DEBUG_NEW wxButton( this, IDLS_NEWITEM  , wxT("Add")    ), 0, wxALL, 5 );
          FindWindow(IDLS_NEWITEM)->Enable(false);
 
       wxBoxSizer *vsizer2 = DEBUG_NEW wxBoxSizer( wxVERTICAL );
-         wxBoxSizer *hsizer1 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL);
-            _pattern = DEBUG_NEW StyleBinaryView(this, IDLS_PATVAL);
-            hsizer1->Add( DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("Pattern:"),
-                                       wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
-                                                         0, wxALL | wxALIGN_RIGHT , 10);
-            hsizer1->Add(_pattern, 0, wxALL | wxEXPAND, 5);
+         wxFlexGridSizer *gsizer = DEBUG_NEW wxFlexGridSizer(2);
+         gsizer->SetFlexibleDirection(wxHORIZONTAL);
+         _pattern = DEBUG_NEW StyleBinaryView(this, IDLS_PATVAL);
+         gsizer->Add( DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("Pattern:"),
+                                    wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+                                                      0, wxALL | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL , 5);
+         gsizer->Add(_pattern, 0, wxALL | wxEXPAND, 5);
 
-         wxBoxSizer *hsizer2 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL);
-            hsizer2->Add( DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("Width   :"),
-                                       wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
-                                                         0, wxALL | wxALIGN_RIGHT , 10);
-            _width    = DEBUG_NEW wxTextCtrl( this, IDLS_WIDTHVAL , wxT(""), wxDefaultPosition, wxSize(wsz,-1), wxTE_RIGHT,
-                                                    wxTextValidator(wxFILTER_NUMERIC, &_widthString));
-            hsizer2->Add(_width, 0, wxALL | wxEXPAND, 5);
-         wxBoxSizer *hsizer3 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL);
-            hsizer3->Add( DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("Scale   :"),
-                                       wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
-                                                         0, wxALL | wxALIGN_RIGHT , 10);
-            _patscale    = DEBUG_NEW wxTextCtrl( this, IDLS_PATSCALEVAL , wxT(""), wxDefaultPosition, wxSize(wsz,-1), wxTE_RIGHT,
-                                                    wxTextValidator(wxFILTER_NUMERIC, &_patscaleString));
-            hsizer3->Add(_patscale, 0, wxALL | wxEXPAND, 5);
+         gsizer->Add( DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("Width:"),
+                                    wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+                                                      0, wxALL | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL , 5);
+         _width    = DEBUG_NEW wxTextCtrl( this, IDLS_WIDTHVAL , wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
+                                                 wxTextValidator(wxFILTER_NUMERIC, &_widthString));
+         gsizer->Add(_width, 0, wxALL | wxEXPAND, 5);
+         gsizer->Add( DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("Scale:"),
+                                    wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+                                                      0, wxALL | wxALIGN_RIGHT  | wxALIGN_CENTER_VERTICAL, 5);
+         _patscale    = DEBUG_NEW wxTextCtrl( this, IDLS_PATSCALEVAL , wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
+                                                 wxTextValidator(wxFILTER_NUMERIC, &_patscaleString));
+         gsizer->Add(_patscale, 0, wxALL | wxEXPAND, 5);
 
-         vsizer2->Add( _stylesample , 0, wxALL | wxEXPAND, 5);
-         vsizer2->Add( hsizer1 , 0, wxALL | wxEXPAND, 5);
-         vsizer2->Add( hsizer2 , 0, wxALL | wxEXPAND, 5);
-         vsizer2->Add( hsizer3 , 0, wxALL | wxEXPAND, 5);
-         vsizer2->Add(DEBUG_NEW wxButton( this, IDLS_BTNAPPLY , wxT(" Apply ") ), 0, wxALL | wxALIGN_RIGHT, 5);
-         FindWindow(IDLS_BTNAPPLY)->Enable(false);
+      vsizer2->Add( _stylesample , 0, wxALL | wxEXPAND, 5);
+      vsizer2->Add(gsizer, 0, wxALL | wxEXPAND, 5);
+      vsizer2->Add(DEBUG_NEW wxButton( this, IDLS_BTNAPPLY , wxT(" Apply ") ), 0, wxALL | wxALIGN_RIGHT, 5);
+      FindWindow(IDLS_BTNAPPLY)->Enable(false);
 
-      wxBoxSizer *hsizer4 = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Pattern") );
+      wxBoxSizer *hsizer4 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
          hsizer4->Add( _styleList   , 0, wxALL | wxEXPAND, 5);
-         hsizer4->Add(0,0,1); //
          hsizer4->Add( vsizer2      , 0, wxEXPAND );
 
       // Buttons

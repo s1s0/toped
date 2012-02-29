@@ -671,9 +671,9 @@ namespace tui {
 
    };
    //--------------------------------------------------------------------------
-   class style_sample : public wxWindow {
+   class style_sample : public wxControl {
    public:
-                     style_sample(wxWindow*, wxWindowID, wxPoint, wxSize, std::string, const layprop::DrawProperties*);
+                     style_sample(wxWindow*, wxWindowID, std::string, const layprop::DrawProperties*);
       virtual       ~style_sample();
       void           setStyle(const tui::style_def& styledef);
       void           OnPaint(wxPaintEvent&);
@@ -713,9 +713,6 @@ namespace tui {
       wxString       _widthString;
       wxTextCtrl*    _patscale;
       wxString       _patscaleString;
-//      wxTextCtrl*    _pattern;
-//      wxString       _patternString;
-      static const size_t   _pattern_size = 16;
       DECLARE_EVENT_TABLE();
    };
 
