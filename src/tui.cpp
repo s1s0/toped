@@ -1993,7 +1993,8 @@ void tui::StyleBinaryView::OnKey(wxKeyEvent& kEvent)
                        SetValue(_patternString);
                        SetInsertionPoint(curpos);
                        break;
-      case WXK_DELETE: _patternString.SetChar(curpos, L'0');
+      case WXK_DELETE: if(curpos == GetLastPosition()) break;
+                       _patternString.SetChar(curpos, L'0');
                        SetValue(_patternString);
                        SetInsertionPoint(curpos);
                        break;
@@ -2001,12 +2002,14 @@ void tui::StyleBinaryView::OnKey(wxKeyEvent& kEvent)
                        break;
       case WXK_RIGHT : SetInsertionPoint((_pattern_size == curpos ) ? _pattern_size : ++curpos);
                        break;
-      case (char)'1' : _patternString.SetChar(curpos, L'1');
+      case (char)'1' : if(curpos == GetLastPosition()) break;
+                       _patternString.SetChar(curpos, L'1');
                        SetValue(_patternString);
                        curpos = (_pattern_size == curpos ) ? _pattern_size : curpos+1;
                        SetInsertionPoint(curpos);
                        break;
-      case (char)'0' : _patternString.SetChar(curpos, L'0');
+      case (char)'0' : if(curpos == GetLastPosition()) break;
+                       _patternString.SetChar(curpos, L'0');
                        SetValue(_patternString);
                        curpos = (_pattern_size == curpos ) ? _pattern_size : curpos+1;
                        SetInsertionPoint(curpos);
