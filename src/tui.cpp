@@ -481,7 +481,7 @@ tui::getLibList::getLibList(wxFrame *parent, wxWindowID id, const wxString &titl
 }
 
 //==============================================================================
-tui::getCIFimport::getCIFimport(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
+tui::GetCIFimport::GetCIFimport(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
       wxString init, const layprop::DrawProperties* drawProp) : wxDialog(parent, id, title, pos, wxDefaultSize,
                                                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
 {
@@ -514,7 +514,7 @@ tui::getCIFimport::getCIFimport(wxFrame *parent, wxWindowID id, const wxString &
       }
    }
 
-   _layList = DEBUG_NEW tui::nameCboxList(this, wxID_ANY, wxDefaultPosition, wxSize(290,300), inlays, drawProp);
+   _layList = DEBUG_NEW tui::NameCboxList(this, wxID_ANY, wxDefaultPosition, wxSize(290,300), inlays, drawProp);
 
    // The window layout
    wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
@@ -550,7 +550,7 @@ tui::getCIFimport::getCIFimport(wxFrame *parent, wxWindowID id, const wxString &
 }
 
 //==============================================================================
-tui::getCIFexport::getCIFexport(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
+tui::GetCIFexport::GetCIFexport(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
       wxString init, const layprop::DrawProperties* drawProp) : wxDialog(parent, id, title, pos, wxDefaultSize,
                                                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
 {
@@ -575,7 +575,7 @@ tui::getCIFexport::getCIFexport(wxFrame *parent, wxWindowID id, const wxString &
    DATC->unlockTDT(dbLibDir);
    if (init != wxT("")) _nameList->SetStringSelection(init,true);
 
-   _layList = DEBUG_NEW tui::nameEboxList(this, wxID_ANY, wxDefaultPosition, wxSize(290,300), ull, drawProp);
+   _layList = DEBUG_NEW tui::NameEboxList(this, wxID_ANY, wxDefaultPosition, wxSize(290,300), ull, drawProp);
 
    // The window layout
    wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
@@ -605,7 +605,7 @@ tui::getCIFexport::getCIFexport(wxFrame *parent, wxWindowID id, const wxString &
 }
 
 //==============================================================================
-tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
+tui::GetGDSimport::GetGDSimport(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
       wxString init, const layprop::DrawProperties* drawProp) : wxDialog(parent, id, title, pos, wxDefaultSize,
                                                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
 {
@@ -628,7 +628,7 @@ tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &
       _nameList->SetFirstItem(init);
    }
 
-   _layList = DEBUG_NEW tui::nameCbox3List(this, wxID_ANY, wxDefaultPosition, wxSize(300,300),
+   _layList = DEBUG_NEW tui::NameCbox3List(this, wxID_ANY, wxDefaultPosition, wxSize(300,300),
          gdsLayers, drawProp, wxT("GDS layer/type"));
 
    // The window layout
@@ -658,7 +658,7 @@ tui::getGDSimport::getGDSimport(wxFrame *parent, wxWindowID id, const wxString &
 }
 
 //==============================================================================
-tui::getOASimport::getOASimport(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
+tui::GetOASimport::GetOASimport(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
       wxString init, const layprop::DrawProperties* drawProp) : wxDialog(parent, id, title, pos, wxDefaultSize,
                                                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
 {
@@ -681,7 +681,7 @@ tui::getOASimport::getOASimport(wxFrame *parent, wxWindowID id, const wxString &
       _nameList->SetFirstItem(init);
    }
 
-   _layList = DEBUG_NEW tui::nameCbox3List(this, wxID_ANY, wxDefaultPosition, wxSize(300,300),
+   _layList = DEBUG_NEW tui::NameCbox3List(this, wxID_ANY, wxDefaultPosition, wxSize(300,300),
          oasLayers, drawProp, wxT("OAS layer/type"));
 
    // The window layout
@@ -711,7 +711,7 @@ tui::getOASimport::getOASimport(wxFrame *parent, wxWindowID id, const wxString &
 }
 
 //==============================================================================
-tui::getGDSexport::getGDSexport(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
+tui::GetGDSexport::GetGDSexport(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos,
       wxString init, const layprop::DrawProperties* drawProp) : wxDialog(parent, id, title, pos, wxDefaultSize,
                                                    wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)  {
    _recursive = DEBUG_NEW wxCheckBox(this, -1, wxT("Export recursively"));
@@ -1197,22 +1197,22 @@ tui::defineLayer::~defineLayer()
 }
 
 //==============================================================================
-BEGIN_EVENT_TABLE(tui::color_sample, wxWindow)
-   EVT_PAINT(tui::color_sample::OnPaint)
+BEGIN_EVENT_TABLE(tui::ColorSample, wxWindow)
+   EVT_PAINT(tui::ColorSample::OnPaint)
 END_EVENT_TABLE()
 
-tui::color_sample::color_sample(wxWindow *parent, wxWindowID id, wxPoint pos,
+tui::ColorSample::ColorSample(wxWindow *parent, wxWindowID id, wxPoint pos,
    wxSize size, std::string init, const layprop::DrawProperties* drawProp) : wxWindow(parent, id, pos, size, wxSUNKEN_BORDER)
 {
    setColor(drawProp->getColor(init));
 }
 
-void tui::color_sample::setColor(const layprop::tellRGB& col)
+void tui::ColorSample::setColor(const layprop::tellRGB& col)
 {
    _color.Set(col.red(), col.green(), col.blue());
 }
 
-void tui::color_sample::OnPaint(wxPaintEvent&)
+void tui::ColorSample::OnPaint(wxPaintEvent&)
 {
    wxPaintDC dc(this);
    dc.SetBackground(*wxBLACK);
@@ -1225,18 +1225,18 @@ void tui::color_sample::OnPaint(wxPaintEvent&)
    dc.DrawRectangle(0, 0, w, h);
 }
 //==============================================================================
-BEGIN_EVENT_TABLE(tui::defineColor, wxDialog)
-   EVT_LISTBOX(ID_ITEMLIST , tui::defineColor::OnColorSelected    )
-   EVT_BUTTON(ID_BTNEDIT   , tui::defineColor::OnDefineColor      )
-   EVT_BUTTON(ID_NEWITEM   , tui::defineColor::OnColorNameAdded   )
-   EVT_BUTTON(ID_BTNAPPLY  , tui::defineColor::OnApply            )
-   EVT_TEXT(ID_REDVAL      , tui::defineColor::OnColorPropChanged )
-   EVT_TEXT(ID_GREENVAL    , tui::defineColor::OnColorPropChanged )
-   EVT_TEXT(ID_BLUEVAL     , tui::defineColor::OnColorPropChanged )
-   EVT_TEXT(ID_ALPHAVAL    , tui::defineColor::OnColorPropChanged )
+BEGIN_EVENT_TABLE(tui::DefineColor, wxDialog)
+   EVT_LISTBOX(ID_ITEMLIST , tui::DefineColor::OnColorSelected    )
+   EVT_BUTTON(ID_BTNEDIT   , tui::DefineColor::OnDefineColor      )
+   EVT_BUTTON(ID_NEWITEM   , tui::DefineColor::OnColorNameAdded   )
+   EVT_BUTTON(ID_BTNAPPLY  , tui::DefineColor::OnApply            )
+   EVT_TEXT(ID_REDVAL      , tui::DefineColor::OnColorPropChanged )
+   EVT_TEXT(ID_GREENVAL    , tui::DefineColor::OnColorPropChanged )
+   EVT_TEXT(ID_BLUEVAL     , tui::DefineColor::OnColorPropChanged )
+   EVT_TEXT(ID_ALPHAVAL    , tui::DefineColor::OnColorPropChanged )
 END_EVENT_TABLE()
 
-tui::defineColor::defineColor(wxWindow *parent, wxWindowID id, const wxString &title, wxPoint pos, const layprop::DrawProperties* drawProp) :
+tui::DefineColor::DefineColor(wxWindow *parent, wxWindowID id, const wxString &title, wxPoint pos, const layprop::DrawProperties* drawProp) :
       wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE), _drawProp(drawProp)
 {
    std::string init_color;
@@ -1261,7 +1261,7 @@ tui::defineColor::defineColor(wxWindow *parent, wxWindowID id, const wxString &t
 
    _dwcolname  = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxSize(150,-1), 0,
                                           wxTextValidator(wxFILTER_ASCII, &_colname));
-   _colorsample = DEBUG_NEW color_sample( this, -1, wxDefaultPosition, wxSize(-1,50), init_color, _drawProp);
+   _colorsample = DEBUG_NEW ColorSample( this, -1, wxDefaultPosition, wxSize(-1,50), init_color, _drawProp);
 
    _c_red    = DEBUG_NEW wxTextCtrl( this, ID_REDVAL , wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
                                            wxTextValidator(wxFILTER_NUMERIC, &_red));
@@ -1332,7 +1332,7 @@ tui::defineColor::defineColor(wxWindow *parent, wxWindowID id, const wxString &t
 
 }
 
-void tui::defineColor::OnDefineColor(wxCommandEvent& cmdevent)
+void tui::DefineColor::OnDefineColor(wxCommandEvent& cmdevent)
 {
    NameList all_names;
    wxColourData data;
@@ -1376,7 +1376,7 @@ void tui::defineColor::OnDefineColor(wxCommandEvent& cmdevent)
    }
 }
 
-void tui::defineColor::OnColorSelected(wxCommandEvent& cmdevent)
+void tui::DefineColor::OnColorSelected(wxCommandEvent& cmdevent)
 {
     wxString color_name = cmdevent.GetString();
    const layprop::tellRGB* scol = getColor(std::string(color_name.mb_str(wxConvUTF8)));
@@ -1394,7 +1394,7 @@ void tui::defineColor::OnColorSelected(wxCommandEvent& cmdevent)
    FindWindow(ID_BTNAPPLY)->Enable(false);
 }
 
-void tui::defineColor::OnColorPropChanged(wxCommandEvent& WXUNUSED(event))
+void tui::DefineColor::OnColorPropChanged(wxCommandEvent& WXUNUSED(event))
 {
    wxString s_red   =   _c_red->GetValue();
    wxString s_green = _c_green->GetValue();
@@ -1410,7 +1410,7 @@ void tui::defineColor::OnColorPropChanged(wxCommandEvent& WXUNUSED(event))
    FindWindow(ID_BTNAPPLY)->Enable(true);
 }
 
-void tui::defineColor::OnColorNameAdded(wxCommandEvent& WXUNUSED(event))
+void tui::DefineColor::OnColorNameAdded(wxCommandEvent& WXUNUSED(event))
 {
    wxString color_name = _dwcolname->GetValue();
    nameNormalize(color_name);
@@ -1440,7 +1440,7 @@ void tui::defineColor::OnColorNameAdded(wxCommandEvent& WXUNUSED(event))
    }
 }
 
-void tui::defineColor::nameNormalize(wxString& str)
+void tui::DefineColor::nameNormalize(wxString& str)
 {
    wxRegEx regex;
    // replace tabs with spaces
@@ -1458,14 +1458,14 @@ void tui::defineColor::nameNormalize(wxString& str)
    //remove spaces before brackets and separators
 }
 
-const layprop::tellRGB* tui::defineColor::getColor(std::string color_name) const
+const layprop::tellRGB* tui::DefineColor::getColor(std::string color_name) const
 {
    colorMAP::const_iterator col_set = _allColors.find(color_name);
    if (_allColors.end() == col_set) return NULL;
    return col_set->second;
 }
 
-void tui::defineColor::OnApply(wxCommandEvent& WXUNUSED(event))
+void tui::DefineColor::OnApply(wxCommandEvent& WXUNUSED(event))
 {
    wxString s_name  = _colorList->GetStringSelection();
    wxString s_red   =   _c_red->GetValue();
@@ -1487,7 +1487,7 @@ void tui::defineColor::OnApply(wxCommandEvent& WXUNUSED(event))
    FindWindow(ID_BTNAPPLY)->Enable(false);
 }
 
-tui::defineColor::~defineColor()
+tui::DefineColor::~DefineColor()
 {
 //   delete _dwcolname;
 //   delete _colorsample;
@@ -1501,13 +1501,13 @@ tui::defineColor::~defineColor()
 }
 
 //==============================================================================
-BEGIN_EVENT_TABLE(tui::pattern_canvas, wxWindow)
-   EVT_PAINT(tui::pattern_canvas::OnPaint)
-   EVT_LEFT_UP (tui::pattern_canvas::OnMouseLeftUp)
-   EVT_RIGHT_UP(tui::pattern_canvas::OnMouseRightUp)
+BEGIN_EVENT_TABLE(tui::PatternCanvas, wxWindow)
+   EVT_PAINT(tui::PatternCanvas::OnPaint)
+   EVT_LEFT_UP (tui::PatternCanvas::OnMouseLeftUp)
+   EVT_RIGHT_UP(tui::PatternCanvas::OnMouseRightUp)
 END_EVENT_TABLE()
 
-tui::pattern_canvas::pattern_canvas(wxWindow *parent, wxWindowID id, wxPoint pos,
+tui::PatternCanvas::PatternCanvas(wxWindow *parent, wxWindowID id, wxPoint pos,
       wxSize size, const byte* init) :  wxWindow(parent, id, pos, size, wxNO_BORDER)
 {
    if (NULL != init)
@@ -1518,19 +1518,19 @@ tui::pattern_canvas::pattern_canvas(wxWindow *parent, wxWindowID id, wxPoint pos
    _brushsize = 1;
 }
 
-void tui::pattern_canvas::Clear()
+void tui::PatternCanvas::Clear()
 {
    for(byte i = 0; i < 128; i++)
       _pattern[i] = 0x00;
 }
 
-void tui::pattern_canvas::Fill()
+void tui::PatternCanvas::Fill()
 {
    for(byte i = 0; i < 128; i++)
       _pattern[i] = 0xff;
 }
 
-void tui::pattern_canvas::OnPaint(wxPaintEvent&)
+void tui::PatternCanvas::OnPaint(wxPaintEvent&)
 {
    wxPaintDC dc(this);
    dc.SetBackground(*wxWHITE);
@@ -1562,7 +1562,7 @@ void tui::pattern_canvas::OnPaint(wxPaintEvent&)
          }
 }
 
-void tui::pattern_canvas::OnMouseLeftUp(wxMouseEvent& event)
+void tui::PatternCanvas::OnMouseLeftUp(wxMouseEvent& event)
 {
    int cshift;
    switch (_brushsize)
@@ -1584,7 +1584,7 @@ void tui::pattern_canvas::OnMouseLeftUp(wxMouseEvent& event)
    Refresh();
 }
 
-void tui::pattern_canvas::OnMouseRightUp(wxMouseEvent& event)
+void tui::PatternCanvas::OnMouseRightUp(wxMouseEvent& event)
 {
    int cshift;
    switch (_brushsize)
@@ -1607,13 +1607,13 @@ void tui::pattern_canvas::OnMouseRightUp(wxMouseEvent& event)
 }
 
 //==============================================================================
-BEGIN_EVENT_TABLE(tui::drawFillDef, wxDialog)
-   EVT_BUTTON( ID_BTNCLEAR    , tui::drawFillDef::OnClear)
-   EVT_BUTTON( ID_BTNFILL     , tui::drawFillDef::OnFill )
-   EVT_RADIOBOX(ID_RADIOBSIZE , tui::drawFillDef::OnBrushSize)
+BEGIN_EVENT_TABLE(tui::DrawFillDef, wxDialog)
+   EVT_BUTTON( ID_BTNCLEAR    , tui::DrawFillDef::OnClear)
+   EVT_BUTTON( ID_BTNFILL     , tui::DrawFillDef::OnFill )
+   EVT_RADIOBOX(ID_RADIOBSIZE , tui::DrawFillDef::OnBrushSize)
 END_EVENT_TABLE()
 
-tui::drawFillDef::drawFillDef(wxWindow *parent, wxWindowID id, const wxString &title,
+tui::DrawFillDef::DrawFillDef(wxWindow *parent, wxWindowID id, const wxString &title,
    wxPoint pos, const byte* init): wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)
 {
     static const wxString brushsize[] =
@@ -1635,7 +1635,7 @@ tui::drawFillDef::drawFillDef(wxWindow *parent, wxWindowID id, const wxString &t
    vsizer1->Add(DEBUG_NEW wxButton( this, ID_BTNFILL  , wxT(" Fill  "), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT ),
                 0, wxALL | wxALIGN_RIGHT, 5);
 
-   _sampleDraw = DEBUG_NEW pattern_canvas(this, -1, wxDefaultPosition, wxSize(256,256), init);
+   _sampleDraw = DEBUG_NEW PatternCanvas(this, -1, wxDefaultPosition, wxSize(256,256), init);
 
    wxBoxSizer *hsizer1 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    hsizer1->Add( _sampleDraw , 0, wxALL, 5);
@@ -1656,19 +1656,19 @@ tui::drawFillDef::drawFillDef(wxWindow *parent, wxWindowID id, const wxString &t
 
 }
 
-void tui::drawFillDef::OnClear(wxCommandEvent& WXUNUSED(event))
+void tui::DrawFillDef::OnClear(wxCommandEvent& WXUNUSED(event))
 {
    _sampleDraw->Clear();
    _sampleDraw->Refresh();
 }
 
-void tui::drawFillDef::OnFill(wxCommandEvent& WXUNUSED(event))
+void tui::DrawFillDef::OnFill(wxCommandEvent& WXUNUSED(event))
 {
    _sampleDraw->Fill();
    _sampleDraw->Refresh();
 }
 
-void tui::drawFillDef::OnBrushSize(wxCommandEvent& event)
+void tui::DrawFillDef::OnBrushSize(wxCommandEvent& event)
 {
    byte bsize;
    switch (event.GetInt())
@@ -1681,24 +1681,24 @@ void tui::drawFillDef::OnBrushSize(wxCommandEvent& event)
    _sampleDraw->setBrushSize(bsize);
 }
 
-tui::drawFillDef::~drawFillDef()
+tui::DrawFillDef::~DrawFillDef()
 {
    delete _sampleDraw;
 }
 
 
 //==============================================================================
-BEGIN_EVENT_TABLE(tui::fill_sample, wxWindow)
-   EVT_PAINT(tui::fill_sample::OnPaint)
+BEGIN_EVENT_TABLE(tui::FillSample, wxWindow)
+   EVT_PAINT(tui::FillSample::OnPaint)
 END_EVENT_TABLE()
 
-tui::fill_sample::fill_sample(wxWindow *parent, wxWindowID id, wxPoint pos,
+tui::FillSample::FillSample(wxWindow *parent, wxWindowID id, wxPoint pos,
    wxSize size, std::string init, const layprop::DrawProperties* drawProp) : wxWindow(parent, id, pos, size, wxSUNKEN_BORDER)
 {
    setFill(drawProp->getFill(init));
 }
 
-void tui::fill_sample::setFill(const byte* fill)
+void tui::FillSample::setFill(const byte* fill)
 {
    if (NULL != fill)
    {
@@ -1715,7 +1715,7 @@ void tui::fill_sample::setFill(const byte* fill)
    _brush.SetColour(*wxWHITE);
 }
 
-void tui::fill_sample::OnPaint(wxPaintEvent&)
+void tui::FillSample::OnPaint(wxPaintEvent&)
 {
    wxPaintDC dc(this);
    dc.SetBackground(*wxBLACK);
@@ -1728,13 +1728,13 @@ void tui::fill_sample::OnPaint(wxPaintEvent&)
 }
 
 //==============================================================================
-BEGIN_EVENT_TABLE(tui::defineFill, wxDialog)
-   EVT_LISTBOX(ID_ITEMLIST    , tui::defineFill::OnFillSelected   )
-   EVT_BUTTON(ID_BTNEDIT      , tui::defineFill::OnDefineFill     )
-   EVT_BUTTON(ID_NEWITEM      , tui::defineFill::OnFillNameAdded  )
+BEGIN_EVENT_TABLE(tui::DefineFill, wxDialog)
+   EVT_LISTBOX(ID_ITEMLIST    , tui::DefineFill::OnFillSelected   )
+   EVT_BUTTON(ID_BTNEDIT      , tui::DefineFill::OnDefineFill     )
+   EVT_BUTTON(ID_NEWITEM      , tui::DefineFill::OnFillNameAdded  )
 END_EVENT_TABLE()
 
-tui::defineFill::defineFill(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, const layprop::DrawProperties* drawProp) :
+tui::DefineFill::DefineFill(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, const layprop::DrawProperties* drawProp) :
       wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)
 {
    NameList all_names;
@@ -1760,7 +1760,7 @@ tui::defineFill::defineFill(wxFrame *parent, wxWindowID id, const wxString &titl
 
    _dwfilname  = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxSize(150,-1), 0,
                                           wxTextValidator(wxFILTER_ASCII, &_filname));
-   _fillsample = DEBUG_NEW fill_sample( this, -1, wxDefaultPosition, wxSize(-1,150), init_color, drawProp);
+   _fillsample = DEBUG_NEW FillSample( this, -1, wxDefaultPosition, wxSize(-1,150), init_color, drawProp);
 
    hsizer0->Add( _dwfilname   , 0, wxALL | wxEXPAND, 5);
    hsizer0->Add(0,0,1); //
@@ -1793,7 +1793,7 @@ tui::defineFill::defineFill(wxFrame *parent, wxWindowID id, const wxString &titl
 
 }
 
-void tui::defineFill::nameNormalize(wxString& str)
+void tui::DefineFill::nameNormalize(wxString& str)
 {
    wxRegEx regex;
    // replace tabs with spaces
@@ -1811,7 +1811,7 @@ void tui::defineFill::nameNormalize(wxString& str)
    //remove spaces before brackets and separators
 }
 
-void tui::defineFill::OnFillSelected(wxCommandEvent& cmdevent)
+void tui::DefineFill::OnFillSelected(wxCommandEvent& cmdevent)
 {
     wxString fill_name = cmdevent.GetString();
     fillcopy(getFill(std::string(fill_name.mb_str(wxConvUTF8))),_current_pattern);
@@ -1819,7 +1819,7 @@ void tui::defineFill::OnFillSelected(wxCommandEvent& cmdevent)
    _fillsample->Refresh();
 }
 
-void tui::defineFill::OnFillNameAdded(wxCommandEvent& WXUNUSED(event))
+void tui::DefineFill::OnFillNameAdded(wxCommandEvent& WXUNUSED(event))
 {
    wxString fill_name = _dwfilname->GetValue();
    nameNormalize(fill_name);
@@ -1851,10 +1851,10 @@ void tui::defineFill::OnFillNameAdded(wxCommandEvent& WXUNUSED(event))
    }
 }
 
-void tui::defineFill::OnDefineFill(wxCommandEvent& cmdevent)
+void tui::DefineFill::OnDefineFill(wxCommandEvent& cmdevent)
 {
 //   const byte* initpat = getFill(_current_pattern);
-   drawFillDef dialog(this, -1, wxT("Define Pattern"), wxDefaultPosition, _current_pattern);
+   DrawFillDef dialog(this, -1, wxT("Define Pattern"), wxDefaultPosition, _current_pattern);
    if (dialog.ShowModal() == wxID_OK)
    {
       fillcopy(dialog.pattern(),_current_pattern);
@@ -1870,20 +1870,20 @@ void tui::defineFill::OnDefineFill(wxCommandEvent& cmdevent)
    }
 }
 
-const byte* tui::defineFill::getFill(const std::string fill_name) const
+const byte* tui::DefineFill::getFill(const std::string fill_name) const
 {
    fillMAP::const_iterator fill_set = _allFills.find(fill_name);
    if (_allFills.end() == fill_set) return NULL;
    return fill_set->second;
 }
 
-void tui::defineFill::fillcopy(const byte* pattern, byte* nfill)
+void tui::DefineFill::fillcopy(const byte* pattern, byte* nfill)
 {
    for(byte i = 0; i < 128; i++)
       nfill[i] = pattern[i];
 }
 
-tui::defineFill::~defineFill()
+tui::DefineFill::~DefineFill()
 {
 //   delete _dwfilname;
 //   delete _fillsample;
@@ -1894,11 +1894,11 @@ tui::defineFill::~defineFill()
 
 
 //==============================================================================
-BEGIN_EVENT_TABLE(tui::style_sample, wxWindow)
-   EVT_PAINT(tui::style_sample::OnPaint)
+BEGIN_EVENT_TABLE(tui::LineStyleSample, wxWindow)
+   EVT_PAINT(tui::LineStyleSample::OnPaint)
 END_EVENT_TABLE()
 
-tui::style_sample::style_sample(wxWindow *parent, wxWindowID id , std::string init, const layprop::DrawProperties* drawProp) :
+tui::LineStyleSample::LineStyleSample(wxWindow *parent, wxWindowID id , std::string init, const layprop::DrawProperties* drawProp) :
    wxControl(parent, id),
    _pen(wxT("black"), 3, wxUSER_DASH)
 {
@@ -1910,7 +1910,7 @@ tui::style_sample::style_sample(wxWindow *parent, wxWindowID id , std::string in
    setStyle(initStyle);
 }
 
-void tui::style_sample::setStyle(const tui::style_def&  styledef)
+void tui::LineStyleSample::setStyle(const tui::style_def&  styledef)
 {
    word pattern = styledef.pattern;
    byte width = styledef.width;
@@ -1936,7 +1936,7 @@ void tui::style_sample::setStyle(const tui::style_def&  styledef)
    }
 }
 
-void tui::style_sample::OnPaint(wxPaintEvent&)
+void tui::LineStyleSample::OnPaint(wxPaintEvent&)
 {
    wxPaintDC dc(this);
    byte width = _pen.GetWidth();
@@ -1954,7 +1954,7 @@ void tui::style_sample::OnPaint(wxPaintEvent&)
    _pen.SetWidth(width);
 }
 
-tui::style_sample::~style_sample()
+tui::LineStyleSample::~LineStyleSample()
 {
    wxDash* oldDashes = NULL;
    _pen.GetDashes(&oldDashes);
@@ -2038,17 +2038,17 @@ word tui::StyleBinaryView::GetValue()
 }
 
 //==============================================================================
-BEGIN_EVENT_TABLE(tui::defineStyle, wxDialog)
-      EVT_LISTBOX(IDLS_ITEMLIST      , tui::defineStyle::OnStyleSelected    )
-      EVT_BUTTON (IDLS_NEWITEM       , tui::defineStyle::OnStyleNameAdded   )
-      EVT_BUTTON (IDLS_BTNAPPLY      , tui::defineStyle::OnStyleApply       )
-      EVT_TEXT   (IDLS_NEWSTYLE      , tui::defineStyle::OnStyleNameChanged )
-      EVT_TEXT   (IDLS_PATVAL        , tui::defineStyle::OnStylePropChanged )
-      EVT_TEXT   (IDLS_WIDTHVAL      , tui::defineStyle::OnStylePropChanged )
-      EVT_TEXT   (IDLS_PATSCALEVAL   , tui::defineStyle::OnStylePropChanged )
+BEGIN_EVENT_TABLE(tui::DefineLineStyle, wxDialog)
+      EVT_LISTBOX(IDLS_ITEMLIST      , tui::DefineLineStyle::OnStyleSelected    )
+      EVT_BUTTON (IDLS_NEWITEM       , tui::DefineLineStyle::OnStyleNameAdded   )
+      EVT_BUTTON (IDLS_BTNAPPLY      , tui::DefineLineStyle::OnStyleApply       )
+      EVT_TEXT   (IDLS_NEWSTYLE      , tui::DefineLineStyle::OnStyleNameChanged )
+      EVT_TEXT   (IDLS_PATVAL        , tui::DefineLineStyle::OnStylePropChanged )
+      EVT_TEXT   (IDLS_WIDTHVAL      , tui::DefineLineStyle::OnStylePropChanged )
+      EVT_TEXT   (IDLS_PATSCALEVAL   , tui::DefineLineStyle::OnStylePropChanged )
 END_EVENT_TABLE()
 
-tui::defineStyle::defineStyle(wxFrame *parent, wxWindowID id, const wxString &title,
+tui::DefineLineStyle::DefineLineStyle(wxFrame *parent, wxWindowID id, const wxString &title,
                               wxPoint pos, const layprop::DrawProperties* drawProp) :
    wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE),
    _styleList     (NULL),
@@ -2079,7 +2079,7 @@ tui::defineStyle::defineStyle(wxFrame *parent, wxWindowID id, const wxString &ti
       _allStyles[*CI] = curStyle;
    }
 
-   _stylesample = DEBUG_NEW style_sample( this, wxID_ANY, init_style, drawProp);
+   _stylesample = DEBUG_NEW LineStyleSample( this, wxID_ANY, init_style, drawProp);
 
    // NOTE! Static boxes MUST be created before all other controls which are about to
    // be encircled by them. Otherwise the dialog box might work somewhere (Windows & fc8)
@@ -2144,11 +2144,11 @@ tui::defineStyle::defineStyle(wxFrame *parent, wxWindowID id, const wxString &ti
    updateDialog();
 }
 
-tui::defineStyle::~defineStyle()
+tui::DefineLineStyle::~DefineLineStyle()
 {
 }
 
-void tui::defineStyle::OnStyleSelected(wxCommandEvent& cmdevent)
+void tui::DefineLineStyle::OnStyleSelected(wxCommandEvent& cmdevent)
 {
    wxString style_name = cmdevent.GetString();
    try 
@@ -2160,7 +2160,7 @@ void tui::defineStyle::OnStyleSelected(wxCommandEvent& cmdevent)
    FindWindow(IDLS_BTNAPPLY)->Enable(false);
 }
 
-void tui::defineStyle::OnStyleNameAdded(wxCommandEvent& WXUNUSED(event))
+void tui::DefineLineStyle::OnStyleNameAdded(wxCommandEvent& WXUNUSED(event))
 {
    _dwstylename->GetValidator()->TransferFromWindow();
    std::string s_newcol = std::string(_stylename.mb_str(wxConvUTF8));
@@ -2177,7 +2177,7 @@ void tui::defineStyle::OnStyleNameAdded(wxCommandEvent& WXUNUSED(event))
    _dwstylename->GetValidator()->TransferToWindow();
 }
 
-void tui::defineStyle::OnStyleNameChanged(wxCommandEvent&)
+void tui::DefineLineStyle::OnStyleNameChanged(wxCommandEvent&)
 {
    _dwstylename->GetValidator()->TransferFromWindow();
    wxString compVal = _stylename;
@@ -2193,7 +2193,7 @@ void tui::defineStyle::OnStyleNameChanged(wxCommandEvent&)
 }
 
 
-void tui::defineStyle::nameNormalize(wxString& str)
+void tui::DefineLineStyle::nameNormalize(wxString& str)
 {
    wxRegEx regex;
    // replace tabs with spaces
@@ -2211,7 +2211,7 @@ void tui::defineStyle::nameNormalize(wxString& str)
    //remove spaces before brackets and separators
 }
 
-void tui::defineStyle::updateDialog()
+void tui::DefineLineStyle::updateDialog()
 {
    _stylesample->setStyle(_current_style);
    _stylesample->Refresh();
@@ -2230,7 +2230,7 @@ void tui::defineStyle::updateDialog()
    _patscale->ChangeValue(_patscaleString);
 }
 
-tui::style_def tui::defineStyle::getStyle(const std::string& style_name)
+tui::style_def tui::DefineLineStyle::getStyle(const std::string& style_name)
 {
   styleMAP::const_iterator style_set = _allStyles.find(style_name);
   if (_allStyles.end() == style_set) 
@@ -2242,7 +2242,7 @@ tui::style_def tui::defineStyle::getStyle(const std::string& style_name)
   return style_set->second;
 }
 
-void tui::defineStyle::OnStylePropChanged(wxCommandEvent& event)
+void tui::DefineLineStyle::OnStylePropChanged(wxCommandEvent& event)
 {
    if ((NULL == _pattern) || (NULL == _width) || (NULL == _patscale))
       return;
@@ -2260,7 +2260,7 @@ void tui::defineStyle::OnStylePropChanged(wxCommandEvent& event)
    FindWindow(IDLS_BTNAPPLY)->Enable(true);
 }
 
-void tui::defineStyle::OnStyleApply(wxCommandEvent& event)
+void tui::DefineLineStyle::OnStyleApply(wxCommandEvent& event)
 {
 
    wxString s_name      = _styleList->GetStringSelection();
@@ -2284,7 +2284,7 @@ void tui::defineStyle::OnStyleApply(wxCommandEvent& event)
    FindWindow(IDLS_BTNAPPLY)->Enable(false);
 }
 //==========================================================================
-tui::nameCboxRecords::nameCboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
+tui::NameCboxRecords::NameCboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
             const SIMap& inlays, wxArrayString& all_strings, int row_height, const layprop::DrawProperties* drawProp)
             : wxPanel(parent, wxID_ANY, pnt, sz), _drawProp(drawProp)
 {
@@ -2307,7 +2307,7 @@ tui::nameCboxRecords::nameCboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
    }
 }
 
-SIMap* tui::nameCboxRecords::getTheMap(layprop::DrawProperties* drawProp)
+SIMap* tui::NameCboxRecords::getTheMap(layprop::DrawProperties* drawProp)
 {
    SIMap* cif_lay_map = DEBUG_NEW SIMap();
    for (AllRecords::const_iterator CNM = _allRecords.begin(); CNM != _allRecords.end(); CNM++ )
@@ -2329,7 +2329,7 @@ SIMap* tui::nameCboxRecords::getTheMap(layprop::DrawProperties* drawProp)
    return cif_lay_map;
 }
 
-USMap* tui::nameCboxRecords::getTheFullMap(layprop::DrawProperties* drawProp)
+USMap* tui::NameCboxRecords::getTheFullMap(layprop::DrawProperties* drawProp)
 {
    SIMap* umap = getTheMap(drawProp);
    USMap* nmap = _cifMap->updateMap(umap);
@@ -2338,7 +2338,7 @@ USMap* tui::nameCboxRecords::getTheFullMap(layprop::DrawProperties* drawProp)
 }
 
 //==========================================================================
-tui::nameCbox3Records::nameCbox3Records( wxWindow *parent, wxPoint pnt, wxSize sz,
+tui::NameCbox3Records::NameCbox3Records( wxWindow *parent, wxPoint pnt, wxSize sz,
             const ExtLayers& inlays, wxArrayString& all_strings, int row_height, const layprop::DrawProperties* drawProp)
             : wxPanel(parent, wxID_ANY, pnt, sz), _drawProp(drawProp)
 {
@@ -2369,7 +2369,7 @@ tui::nameCbox3Records::nameCbox3Records( wxWindow *parent, wxPoint pnt, wxSize s
    }
 }
 
-USMap* tui::nameCbox3Records::getTheMap()
+USMap* tui::NameCbox3Records::getTheMap()
 {
    USMap* gds_lay_map = DEBUG_NEW USMap();
    for (AllRecords::const_iterator CNM = _allRecords.begin(); CNM != _allRecords.end(); CNM++ )
@@ -2396,7 +2396,7 @@ USMap* tui::nameCbox3Records::getTheMap()
    return gds_lay_map;
 }
 
-USMap* tui::nameCbox3Records::getTheFullMap()
+USMap* tui::NameCbox3Records::getTheFullMap()
 {
    USMap* umap = getTheMap();
    USMap* nmap = _gdsLayMap->updateMap(umap, true);
@@ -2405,11 +2405,11 @@ USMap* tui::nameCbox3Records::getTheFullMap()
 }
 
 //==========================================================================
-BEGIN_EVENT_TABLE(tui::nameCboxList, wxScrolledWindow)
-      EVT_SIZE( tui::nameCboxList::OnSize )
+BEGIN_EVENT_TABLE(tui::NameCboxList, wxScrolledWindow)
+      EVT_SIZE( tui::NameCboxList::OnSize )
 END_EVENT_TABLE()
 
-tui::nameCboxList::nameCboxList(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz, const SIMap& inlays, const layprop::DrawProperties* drawProp) :
+tui::NameCboxList::NameCboxList(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz, const SIMap& inlays, const layprop::DrawProperties* drawProp) :
       wxScrolledWindow(parent, id, pnt, sz, wxBORDER_RAISED)
 {
    // collect all defined layers
@@ -2427,13 +2427,13 @@ tui::nameCboxList::nameCboxList(wxWindow* parent, wxWindowID id, wxPoint pnt, wx
 
    wxSize panelsz = GetClientSize();
    panelsz.SetHeight(panelsz.GetHeight() - line_height);
-   _laypanel = DEBUG_NEW tui::nameCboxRecords(this, wxPoint(0,line_height), panelsz, inlays, all_strings, line_height, drawProp);
+   _laypanel = DEBUG_NEW tui::NameCboxRecords(this, wxPoint(0,line_height), panelsz, inlays, all_strings, line_height, drawProp);
    SetTargetWindow(_laypanel); // trget scrollbar window
    if (inlays.size() > (unsigned) sz.GetHeight() / (line_height + 5))
       SetScrollbars(  0, (line_height+5),  0, inlays.size() );
 }
 
-void tui::nameCboxList::OnSize( wxSizeEvent &WXUNUSED(event) )
+void tui::NameCboxList::OnSize( wxSizeEvent &WXUNUSED(event) )
 {
    //Comment below as well as the part of the method is taken from wx samples scrollsub.cpp
    // We need to override OnSize so that our scrolled window
@@ -2448,11 +2448,11 @@ void tui::nameCboxList::OnSize( wxSizeEvent &WXUNUSED(event) )
 }
 
 //==========================================================================
-BEGIN_EVENT_TABLE(tui::nameCbox3List, wxScrolledWindow)
-      EVT_SIZE( tui::nameCbox3List::OnSize )
+BEGIN_EVENT_TABLE(tui::NameCbox3List, wxScrolledWindow)
+      EVT_SIZE( tui::NameCbox3List::OnSize )
 END_EVENT_TABLE()
 
-tui::nameCbox3List::nameCbox3List(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz,
+tui::NameCbox3List::NameCbox3List(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz,
       const ExtLayers& inlays, const layprop::DrawProperties* drawProp, wxString inName) :
       wxScrolledWindow(parent, id, pnt, sz, wxBORDER_RAISED)
 {
@@ -2471,13 +2471,13 @@ tui::nameCbox3List::nameCbox3List(wxWindow* parent, wxWindowID id, wxPoint pnt, 
 
    wxSize panelsz = GetClientSize();
    panelsz.SetHeight(panelsz.GetHeight() - line_height);
-   _laypanel = DEBUG_NEW tui::nameCbox3Records(this, wxPoint(0,line_height), panelsz, inlays, all_strings, line_height, drawProp);
+   _laypanel = DEBUG_NEW tui::NameCbox3Records(this, wxPoint(0,line_height), panelsz, inlays, all_strings, line_height, drawProp);
    SetTargetWindow(_laypanel); // target scrollbar window
    if (inlays.size() > (unsigned) sz.GetHeight() / (line_height + 5))
       SetScrollbars(  0, (line_height+5),  0, _laypanel->getNumRows() + 1 );
 }
 
-void tui::nameCbox3List::OnSize( wxSizeEvent &WXUNUSED(event) )
+void tui::NameCbox3List::OnSize( wxSizeEvent &WXUNUSED(event) )
 {
    //Comment below as well as the part of the method is taken from wx samples scrollsub.cpp
    // We need to override OnSize so that our scrolled window
@@ -2492,7 +2492,7 @@ void tui::nameCbox3List::OnSize( wxSizeEvent &WXUNUSED(event) )
 }
 
 //==========================================================================
-tui::nameEboxRecords::nameEboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
+tui::NameEboxRecords::NameEboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
             const WordList& inlays, wxArrayString& all_strings, int row_height, const layprop::DrawProperties* drawProp)
             : wxPanel(parent, wxID_ANY, pnt, sz), _drawProp(drawProp)
 {
@@ -2519,7 +2519,7 @@ tui::nameEboxRecords::nameEboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
    }
 }
 
-USMap* tui::nameEboxRecords::getTheMap()
+USMap* tui::NameEboxRecords::getTheMap()
 {
    USMap* cif_lay_map = DEBUG_NEW USMap();
    for (AllRecords::const_iterator CNM = _allRecords.begin(); CNM != _allRecords.end(); CNM++ )
@@ -2534,7 +2534,7 @@ USMap* tui::nameEboxRecords::getTheMap()
    return cif_lay_map;
 }
 
-USMap* tui::nameEboxRecords::getTheFullMap()
+USMap* tui::NameEboxRecords::getTheFullMap()
 {
    USMap* umap = getTheMap();
    USMap* nmap = _cifMap->updateMap(umap);
@@ -2543,11 +2543,11 @@ USMap* tui::nameEboxRecords::getTheFullMap()
 }
 
 //--------------------------------------------------------------------------
-BEGIN_EVENT_TABLE(tui::nameEboxList, wxScrolledWindow)
-      EVT_SIZE( tui::nameEboxList::OnSize )
+BEGIN_EVENT_TABLE(tui::NameEboxList, wxScrolledWindow)
+      EVT_SIZE( tui::NameEboxList::OnSize )
 END_EVENT_TABLE()
 
-tui::nameEboxList::nameEboxList(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz, const WordList& inlays, const layprop::DrawProperties* drawProp) :
+tui::NameEboxList::NameEboxList(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz, const WordList& inlays, const layprop::DrawProperties* drawProp) :
       wxScrolledWindow(parent, id, pnt, sz, wxBORDER_RAISED)
 {
    // collect all defined layers
@@ -2565,13 +2565,13 @@ tui::nameEboxList::nameEboxList(wxWindow* parent, wxWindowID id, wxPoint pnt, wx
 
    wxSize panelsz = GetClientSize();
    panelsz.SetHeight(panelsz.GetHeight() - line_height);
-   _laypanel = DEBUG_NEW tui::nameEboxRecords(this, wxPoint(0,line_height), panelsz, inlays, all_strings, line_height, drawProp);
+   _laypanel = DEBUG_NEW tui::NameEboxRecords(this, wxPoint(0,line_height), panelsz, inlays, all_strings, line_height, drawProp);
    SetTargetWindow(_laypanel); // trget scrollbar window
    if (inlays.size() > (unsigned) sz.GetHeight() / (line_height + 5))
       SetScrollbars(  0, (line_height+5),  0, inlays.size() );
 }
 
-void tui::nameEboxList::OnSize( wxSizeEvent &WXUNUSED(event) )
+void tui::NameEboxList::OnSize( wxSizeEvent &WXUNUSED(event) )
 {
    //Comment below as well as the part of the method is taken from wx samples scrollsub.cpp
    // We need to override OnSize so that our scrolled window
@@ -2586,7 +2586,7 @@ void tui::nameEboxList::OnSize( wxSizeEvent &WXUNUSED(event) )
 }
 
 //==========================================================================
-tui::nameEbox3Records::nameEbox3Records( wxWindow *parent, wxPoint pnt, wxSize sz,
+tui::NameEbox3Records::NameEbox3Records( wxWindow *parent, wxPoint pnt, wxSize sz,
             const WordList& inlays, wxArrayString& all_strings, int row_height, const layprop::DrawProperties* drawProp)
             : wxPanel(parent, wxID_ANY, pnt, sz), _drawProp(drawProp)
 {
@@ -2617,7 +2617,7 @@ tui::nameEbox3Records::nameEbox3Records( wxWindow *parent, wxPoint pnt, wxSize s
    }
 }
 
-USMap* tui::nameEbox3Records::getTheMap()
+USMap* tui::NameEbox3Records::getTheMap()
 {
    USMap* gds_lay_map = DEBUG_NEW USMap();
    for (AllRecords::const_iterator CNM = _allRecords.begin(); CNM != _allRecords.end(); CNM++ )
@@ -2635,7 +2635,7 @@ USMap* tui::nameEbox3Records::getTheMap()
    return gds_lay_map;
 }
 
-USMap* tui::nameEbox3Records::getTheFullMap()
+USMap* tui::NameEbox3Records::getTheFullMap()
 {
    USMap* umap = getTheMap();
    USMap* nmap = _gdsLayMap->updateMap(umap, false);
@@ -2668,7 +2668,7 @@ tui::nameEbox3List::nameEbox3List(wxWindow* parent, wxWindowID id, wxPoint pnt, 
 
    wxSize panelsz = GetClientSize();
    panelsz.SetHeight(panelsz.GetHeight() - line_height);
-   _laypanel = DEBUG_NEW tui::nameEbox3Records(this, wxPoint(0,line_height), panelsz, inlays, all_strings, line_height, drawProp);
+   _laypanel = DEBUG_NEW tui::NameEbox3Records(this, wxPoint(0,line_height), panelsz, inlays, all_strings, line_height, drawProp);
    SetTargetWindow(_laypanel); // target scrollbar window
    if (inlays.size() > (unsigned) sz.GetHeight() / (line_height + 5))
       SetScrollbars(  0, (line_height+5),  0, inlays.size() );
@@ -3525,31 +3525,30 @@ unsigned tui::makePenDash(word pattern, byte scale, wxDash*& dashes)
    assert(pattern);
    std::vector<byte> elements;
    word mask = 0x8000;
+   // It appears that wx expects the first element to be a line, the
+   // following an empty space and so on. i.e. we have to rotate the
+   // pattern until a leading one pops-up;
    while (!(pattern&mask)) pattern = pattern << 1;
-   bool state;
+   bool state = true;
    byte curlength = 0;
    do
    {
-      if (0 == curlength)
+      if (((bool)(pattern & mask)) ^ state)
       {
-         state = pattern & mask;
-         curlength++;
+         state = !state;
+         elements.push_back(curlength);
+         curlength = 1;
       }
       else
-      {
-         if (((bool)(pattern & mask)) ^ state)
-         {
-            state = !state;
-            elements.push_back(curlength);
-            curlength = 1;
-         }
-         else
-            curlength++;
-      }
+         curlength++;
       mask = mask >> 1;
    }while (mask);
    elements.push_back(curlength);
-
+   // It took me some time to figure it out, but it looks like wx requires
+   // an even number of dashes, otherwise the picture is somewhat weird.
+   // So if we have odd number of dashes, then obviously we start and
+   // finish with ones, so the leading and trailing dashes are reduced to
+   // a single one.
    unsigned numElements = elements.size();
    if (numElements % 2)
       elements[0] += elements[--numElements];
