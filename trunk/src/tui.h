@@ -484,56 +484,6 @@ namespace tui {
    };
 
    //--------------------------------------------------------------------------
-   class layset_sample : public wxWindow {
-   public:
-                     layset_sample(wxWindow*, wxWindowID, wxPoint, wxSize, word, const layprop::DrawProperties*);
-      void           setColor(const layprop::tellRGB&);
-      void           setFill(const byte*);
-      void           setLine(const layprop::LineSettings*);
-      void           setSelected(bool selected) {_selected = selected;}
-      void           OnPaint(wxPaintEvent&);
-   protected:
-      void           drawOutline(wxPaintDC&, wxCoord, wxCoord);
-      wxColour             _color;
-      wxBrush              _brush;
-      wxPen                _pen;
-      std::vector<byte>    _dashes;
-      byte                 _linew;
-      bool                 _selected;
-      DECLARE_EVENT_TABLE();
-   };
-
-   //--------------------------------------------------------------------------
-   class defineLayer : public wxDialog {
-   public:
-                                defineLayer(wxFrame*, wxWindowID, const wxString&, wxPoint, word, const layprop::DrawProperties*);
-      virtual                  ~defineLayer();
-      void                      OnColorChanged(wxCommandEvent&);
-      void                      OnFillChanged(wxCommandEvent&);
-      void                      OnLineChanged(wxCommandEvent&);
-      void                      OnSelectedChanged(wxCommandEvent&);
-      void                      OnDefaultColor(wxCommandEvent&);
-      void                      OnDefaultPattern(wxCommandEvent&);
-      void                      OnDefaultLine(wxCommandEvent&);
-      wxString                  layno()       {return _layno;}
-      wxString                  layname()     {return _layname;}
-      wxString                  color();//       {return _colors->GetValue();}
-      wxString                  fill();//        {return _fills->GetValue();}
-      wxString                  line();//        {return _lines->GetValue();}
-   private:
-      wxString                  _layno;
-      wxString                  _layname;
-      wxString                  _fillname;
-      wxComboBox*               _colors;
-      wxComboBox*               _fills;
-      wxComboBox*               _lines;
-      layset_sample*            _sample;
-      wxCheckBox*               _selected;
-      const layprop::DrawProperties*  _drawProp;
-      DECLARE_EVENT_TABLE();
-   };
-
-   //--------------------------------------------------------------------------
    class ColorSample : public wxWindow {
    public:
                      ColorSample(wxWindow*, wxWindowID, wxPoint, wxSize, std::string, const layprop::DrawProperties*);

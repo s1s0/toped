@@ -305,8 +305,6 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
 
    EVT_MENU( TMSET_UNDODEPTH     , tui::TopedFrame::OnUndoDepth   )
 
-   EVT_MENU( TMSET_DEFLAY        , tui::TopedFrame::OnDefineLayer )
-
    EVT_MENU( TMSET_DEFCOLOR      , tui::TopedFrame::OnDefineColor )
    EVT_MENU( TMSET_DEFFILL       , tui::TopedFrame::OnDefineFill  )
    EVT_MENU( TMSET_DEFSTYLE      , tui::TopedFrame::OnDefineStyle )
@@ -612,7 +610,6 @@ void tui::TopedFrame::initMenuBar() {
    //settingsMenu->Append         (TMSET_HTOOLSIZE   , wxT("H. toolbar size") , toolbarHorSizeMenu , wxT("Define horizontal toolbars size"));
    //settingsMenu->Append         (TMSET_VTOOLSIZE   , wxT("V. toolbar size") , toolbarVertSizeMenu , wxT("Define vertical toolbars size"));
    settingsMenu->AppendSeparator();
-   settingsMenu->Append         (TMSET_DEFLAY   , wxT("Define Layer") , wxT("Define a layer"));
    settingsMenu->Append         (TMSET_DEFCOLOR , wxT("Define Color") , wxT("Define a drawing color"));
    settingsMenu->Append         (TMSET_DEFFILL  , wxT("Define Fill")  , wxT("Define a drawing pattern"));
    settingsMenu->Append         (TMSET_DEFSTYLE , wxT("Define Style") , wxT("Define a style of lines"));
@@ -2066,46 +2063,13 @@ void tui::TopedFrame::OnPropertySheet(wxCommandEvent& WXUNUSED(event))
    _propDialog->Show();
 }
 
-void tui::TopedFrame::OnDefineLayer(wxCommandEvent& event)
-{
-   layprop::DrawProperties* drawProp;
-   if (PROPC->lockDrawProp(drawProp))
-   {
-      word layno = drawProp->curLay();
-      editLayerDlg(layno, drawProp);
-   }
-   PROPC->unlockDrawProp(drawProp, false);
-}
-
 void tui::TopedFrame::OnEditLayer(wxCommandEvent& evt)
 {
-   layprop::DrawProperties* drawProp;
-   if (PROPC->lockDrawProp(drawProp))
-   {
-      word layno = evt.GetInt();
-      editLayerDlg(layno, drawProp);
-   }
-   PROPC->unlockDrawProp(drawProp, false);
-}
-
-void tui::TopedFrame::editLayerDlg(word layno, const layprop::DrawProperties* drawprop)
-{
-   bool success = false;
-   wxString ost;
-   wxRect wnd = GetRect();
-   wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
-   tui::defineLayer dlg(this, -1, wxT("Define Layer"), pos, layno, drawprop);
-   if ( dlg.ShowModal() == wxID_OK )
-   {
-      ost      << wxT("layprop(\"") << dlg.layname()
-               << wxT("\" , ")      << dlg.layno()
-               << wxT(" , \"")      << dlg.color()
-               << wxT("\" , \"")    << dlg.fill()
-               << wxT("\" , \"")    << dlg.line()
-               << wxT("\");");
-      success = true;
-   }
-   if (success) Console->parseCommand(ost);
+   word layno = evt.GetInt();
+   //TODO init layer param for the tech editor
+   TechEditorDialog* techDialog = DEBUG_NEW TechEditorDialog(this,ID_TECH_EDITOR);
+   techDialog->ShowModal();
+   delete techDialog;
 }
 
 void tui::TopedFrame::OnDefineColor(wxCommandEvent& WXUNUSED(event))
