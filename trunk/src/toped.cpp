@@ -1348,10 +1348,10 @@ void tui::TopedFrame::OnGDStranslate(wxCommandEvent& WXUNUSED(event)) {
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-      tui::getGDSimport* dlg = NULL;
+      tui::GetGDSimport* dlg = NULL;
       USMap* laymap;
       try {
-         dlg = DEBUG_NEW tui::getGDSimport(this, -1, wxT("Import GDS structure"), pos,
+         dlg = DEBUG_NEW tui::GetGDSimport(this, -1, wxT("Import GDS structure"), pos,
                                              _browsers->tdtSelectedGdsName(), drawProp);
       }
       catch (EXPTN&) {delete dlg;return;}
@@ -1477,9 +1477,9 @@ void tui::TopedFrame::OnGDSexportCELL(wxCommandEvent& WXUNUSED(event))
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-      tui::getGDSexport* dlg = NULL;
+      tui::GetGDSexport* dlg = NULL;
       try {
-         dlg = DEBUG_NEW tui::getGDSexport(this, -1, wxT("GDS export cell"), pos,
+         dlg = DEBUG_NEW tui::GetGDSexport(this, -1, wxT("GDS export cell"), pos,
                                            _browsers->tdtSelectedCellName(), drawProp);
       }
       catch (EXPTN&) {delete dlg;return;}
@@ -1564,9 +1564,9 @@ void tui::TopedFrame::OnCIFtranslate(wxCommandEvent& WXUNUSED(event))
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-      tui::getCIFimport* dlg = NULL;
+      tui::GetCIFimport* dlg = NULL;
       try {
-         dlg = DEBUG_NEW tui::getCIFimport(this, -1, wxT("Import CIF structure"), pos,
+         dlg = DEBUG_NEW tui::GetCIFimport(this, -1, wxT("Import CIF structure"), pos,
                                            _browsers->tdtSelectedCifName(), drawProp);
       }
       catch (EXPTN&) {delete dlg;return;}
@@ -1610,9 +1610,9 @@ void tui::TopedFrame::OnCIFexportCELL(wxCommandEvent& WXUNUSED(event))
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-      tui::getCIFexport* dlg = NULL;
+      tui::GetCIFexport* dlg = NULL;
       try {
-         dlg = DEBUG_NEW tui::getCIFexport(this, -1, wxT("CIF export cell"), pos,
+         dlg = DEBUG_NEW tui::GetCIFexport(this, -1, wxT("CIF export cell"), pos,
                                            _browsers->tdtSelectedCellName(), drawProp);
       }
       catch (EXPTN&) {delete dlg;return;}
@@ -1723,10 +1723,10 @@ void tui::TopedFrame::OnOAStranslate(wxCommandEvent& WXUNUSED(event))
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-      tui::getOASimport* dlg = NULL;
+      tui::GetOASimport* dlg = NULL;
       USMap* laymap;
       try {
-         dlg = DEBUG_NEW tui::getOASimport(this, -1, wxT("Import OASIS structure"), pos,
+         dlg = DEBUG_NEW tui::GetOASimport(this, -1, wxT("Import OASIS structure"), pos,
                                              _browsers->tdtSelectedOasName(), drawProp);
       }
       catch (EXPTN&) {delete dlg;return;}
@@ -2117,7 +2117,7 @@ void tui::TopedFrame::OnDefineColor(wxCommandEvent& WXUNUSED(event))
    layprop::DrawProperties* drawprop;
    if (PROPC->lockDrawProp(drawprop))
    {
-      tui::defineColor dlg(this, -1, wxT("Color Definitions"), pos, drawprop);
+      tui::DefineColor dlg(this, -1, wxT("Color Definitions"), pos, drawprop);
       if ( dlg.ShowModal() == wxID_OK )
       {
          const layprop::ColorMap colors = dlg.allColors();
@@ -2147,7 +2147,7 @@ void tui::TopedFrame::OnDefineFill(wxCommandEvent& WXUNUSED(event))
    layprop::DrawProperties* drawprop;
    if (PROPC->lockDrawProp(drawprop))
    {
-      tui::defineFill dlg(this, -1, wxT("Fill Definition"), pos, drawprop);
+      tui::DefineFill dlg(this, -1, wxT("Fill Definition"), pos, drawprop);
       if ( dlg.ShowModal() == wxID_OK )
       {
          layprop::FillMap patterns = dlg.allPatterns();
@@ -2177,7 +2177,7 @@ void tui::TopedFrame::OnDefineStyle(wxCommandEvent& WXUNUSED(event))
    layprop::DrawProperties* drawprop;
    if (PROPC->lockDrawProp(drawprop))
    {
-      tui::defineStyle dlg(this, -1, wxT("Style Definition"), pos, drawprop);
+      tui::DefineLineStyle dlg(this, -1, wxT("Style Definition"), pos, drawprop);
       if ( dlg.ShowModal() == wxID_OK )
       {
          const tui::styleMAP styles = dlg.allStyles();
