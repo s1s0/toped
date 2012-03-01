@@ -1917,16 +1917,23 @@ void tui::style_sample::setStyle(const tui::style_def&  styledef)
    byte pathscale = styledef.pscale;
 
    if ((pathscale == 0) || (width == 0) || pattern == 0) return;
-
-   wxDash* dashes = NULL;
-   unsigned numElements = makePenDash(pattern, pathscale, dashes);
    _pen.SetWidth(width);
-   wxDash* oldDashes = NULL;
-   _pen.GetDashes(&oldDashes);
-   _pen.SetDashes(0, NULL);
-   if (NULL != oldDashes)
-      delete [] oldDashes;
-   _pen.SetDashes(numElements, dashes);
+   if (MAX_WORD_VALUE == pattern)
+   {
+      _pen.SetStyle(wxSOLID);
+   }
+   else
+   {
+      wxDash* dashes = NULL;
+      unsigned numElements = makePenDash(pattern, pathscale, dashes);
+      wxDash* oldDashes = NULL;
+      _pen.SetStyle(wxUSER_DASH);
+      _pen.GetDashes(&oldDashes);
+      _pen.SetDashes(0, NULL);
+      if (NULL != oldDashes)
+         delete [] oldDashes;
+      _pen.SetDashes(numElements, dashes);
+   }
 }
 
 void tui::style_sample::OnPaint(wxPaintEvent&)
@@ -3515,8 +3522,10 @@ wxBrush* tui::makeBrush(const byte* ifill, const layprop::tellRGB col)
 
 unsigned tui::makePenDash(word pattern, byte scale, wxDash*& dashes)
 {
+   assert(pattern);
    std::vector<byte> elements;
    word mask = 0x8000;
+   while (!(pattern&mask)) pattern = pattern << 1;
    bool state;
    byte curlength = 0;
    do
@@ -3539,8 +3548,11 @@ unsigned tui::makePenDash(word pattern, byte scale, wxDash*& dashes)
       }
       mask = mask >> 1;
    }while (mask);
+   elements.push_back(curlength);
 
    unsigned numElements = elements.size();
+   if (numElements % 2)
+      elements[0] += elements[--numElements];
    dashes = DEBUG_NEW wxDash[numElements];
    for (unsigned i = 0; i < numElements; i++ )
       dashes[i] = scale * elements[i];
