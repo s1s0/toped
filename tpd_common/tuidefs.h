@@ -153,7 +153,6 @@ namespace tui
       TMSET_VTOOLSIZE32   ,
       TMSET_VTOOLSIZE48   ,
       TMSET_UNDODEPTH     ,
-      TMSET_DEFLAY        ,
       TMSET_DEFCOLOR      ,
       TMSET_DEFFILL       ,
       TMSET_DEFSTYLE      ,
