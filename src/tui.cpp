@@ -1482,11 +1482,16 @@ void tui::LineStyleSample::setStyle(const tui::style_def&  styledef)
    byte width = styledef.width;
    byte pathscale = styledef.pscale;
 
-   if ((pathscale == 0) || (width == 0) || pattern == 0) return;
+   if ((pathscale == 0) || (width == 0)) return;
    _pen.SetWidth(width);
+   _pen.SetCap(wxCAP_BUTT);
    if (MAX_WORD_VALUE == pattern)
    {
       _pen.SetStyle(wxSOLID);
+   }
+   else if (0 == pattern)
+   {
+      _pen.SetStyle(wxTRANSPARENT);
    }
    else
    {
