@@ -930,11 +930,11 @@ void tui::DefineColor::OnDefineColor(wxCommandEvent& cmdevent)
       wxColour col = retData.GetColour();
 
       wxString channel;
-      channel << col.Red();
+      channel << static_cast<int>(col.Red());
       _c_red->SetValue(channel);channel.Clear();
-      channel << col.Green();
+      channel << static_cast<int>(col.Green());
       _c_green->SetValue(channel);channel.Clear();
-      channel << col.Blue();
+      channel << static_cast<int>(col.Blue());
       _c_blue->SetValue(channel);channel.Clear();
       _colorsample->setColor(layprop::tellRGB(col.Red(), col.Green(), col.Blue(),178));
       wxCommandEvent dummy;
