@@ -173,10 +173,15 @@ void TessellPoly::num_indexs(unsigned& iftrs, unsigned& iftfs, unsigned& iftss) 
 //
 // TenderCnvx
 //
-unsigned tenderer::TenderCnvx::cDataCopy(int* array, unsigned& pindex)
+unsigned tenderer::TenderCnvx::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    assert(_csize);
-   memcpy(&(array[pindex]), _cdata, 2 * sizeof(int4b) * _csize);
+#ifdef USE_FLOATS
+   for (unsigned i = 0; i < 2 * sizeof(TNDR_GLDATAT) * _csize; i++)
+      array[pindex+i] = (TNDR_GLDATAT) _cdata[i];
+#else
+   memcpy(&(array[pindex]), _cdata, 2 * sizeof(TNDR_GLDATAT) * _csize);
+#endif
    pindex += 2 * _csize;
    return _csize;
 }
@@ -185,13 +190,13 @@ unsigned tenderer::TenderCnvx::cDataCopy(int* array, unsigned& pindex)
 //
 // TenderBox
 //
-unsigned  tenderer::TenderBox::cDataCopy(int* array, unsigned& pindex)
+unsigned  tenderer::TenderBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    assert(_csize);
-   array[pindex++] = _cdata[0];array[pindex++] = _cdata[1];
-   array[pindex++] = _cdata[2];array[pindex++] = _cdata[1];
-   array[pindex++] = _cdata[2];array[pindex++] = _cdata[3];
-   array[pindex++] = _cdata[0];array[pindex++] = _cdata[3];
+   array[pindex++] = (TNDR_GLDATAT)_cdata[0];array[pindex++] = (TNDR_GLDATAT)_cdata[1];
+   array[pindex++] = (TNDR_GLDATAT)_cdata[2];array[pindex++] = (TNDR_GLDATAT)_cdata[1];
+   array[pindex++] = (TNDR_GLDATAT)_cdata[2];array[pindex++] = (TNDR_GLDATAT)_cdata[3];
+   array[pindex++] = (TNDR_GLDATAT)_cdata[0];array[pindex++] = (TNDR_GLDATAT)_cdata[3];
    return _csize;
 }
 
@@ -206,15 +211,22 @@ tenderer::TenderWire::TenderWire(int4b* pdata, unsigned psize, const WireWidth w
    {
       laydata::WireContour wcontour(_ldata, _lsize, width);
       _csize = wcontour.csize();
-      _cdata = DEBUG_NEW int[ 2* _csize];
-      wcontour.getArrayData(_cdata);
+      // this intermediate variable is just to deal with the const-ness of _cdata;
+      int4b* contData = DEBUG_NEW int4b[ 2 * _csize];
+      wcontour.getArrayData(contData);
+      _cdata = contData;
    }
 }
 
-unsigned tenderer::TenderWire::lDataCopy(int* array, unsigned& pindex)
+unsigned tenderer::TenderWire::lDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    assert(_lsize);
-   memcpy(&(array[pindex]), _ldata, 2 * sizeof(int4b) * _lsize);
+#ifdef USE_FLOATS
+   for (unsigned i = 0; i < 2 * sizeof(TNDR_GLDATAT) * _lsize; i++)
+      array[pindex+i] = (TNDR_GLDATAT) _ldata[i];
+#else
+   memcpy(&(array[pindex]), _ldata, 2 * sizeof(TNDR_GLDATAT) * _lsize);
+#endif
    pindex += 2 * _lsize;
    return _lsize;
 }
@@ -243,7 +255,7 @@ tenderer::TenderWire::~TenderWire()
 //
 // TextSOvlBox
 //
-unsigned tenderer::TextSOvlBox::cDataCopy(int* array, unsigned& pindex)
+unsigned tenderer::TextSOvlBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    _offset = pindex/2;
    return TextOvlBox::cDataCopy(array, pindex);
@@ -274,7 +286,7 @@ unsigned tenderer::TenderSCnvx::ssize()
    return ssegs;
 }
 
-unsigned tenderer::TenderSCnvx::cDataCopy(int* array, unsigned& pindex)
+unsigned tenderer::TenderSCnvx::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    _offset = pindex/2;
    return TenderCnvx::cDataCopy(array, pindex);
@@ -319,7 +331,7 @@ unsigned tenderer::TenderSBox::ssize()
    return ssegs;
 }
 
-unsigned tenderer::TenderSBox::cDataCopy(int* array, unsigned& pindex)
+unsigned tenderer::TenderSBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    _offset = pindex/2;
    return TenderBox::cDataCopy(array, pindex);
@@ -364,7 +376,7 @@ unsigned tenderer::TenderSNcvx::ssize()
    return ssegs;
 }
 
-unsigned tenderer::TenderSNcvx::cDataCopy(int* array, unsigned& pindex)
+unsigned tenderer::TenderSNcvx::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    _offset = pindex/2;
    return TenderCnvx::cDataCopy(array, pindex);
@@ -396,13 +408,13 @@ unsigned tenderer::TenderSNcvx::sDataCopy(unsigned* array, unsigned& pindex)
 //
 // TenderSWire
 //
-unsigned tenderer::TenderSWire::cDataCopy(int* array, unsigned& pindex)
+unsigned tenderer::TenderSWire::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    _offset = pindex/2;
    return TenderCnvx::cDataCopy(array, pindex);
 }
 
-unsigned tenderer::TenderSWire::lDataCopy(int* array, unsigned& pindex)
+unsigned tenderer::TenderSWire::lDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    _loffset = pindex/2;
    return TenderWire::lDataCopy(array, pindex);
@@ -484,9 +496,14 @@ tenderer::TextOvlBox::TextOvlBox(const DBbox& obox, const CTM& ctm)
    _obox[6] = tp.x();_obox[7] = tp.y();
 }
 
-unsigned tenderer::TextOvlBox::cDataCopy(int* array, unsigned& pindex)
+unsigned tenderer::TextOvlBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
-   memcpy(&(array[pindex]), _obox, sizeof(int4b) * 8);
+#ifdef USE_FLOATS
+   for (unsigned i = 0; i < sizeof(TNDR_GLDATAT) * 8; i++)
+      array[pindex+i] = (TNDR_GLDATAT) _obox[i];
+#else
+   memcpy(&(array[pindex]), _obox, sizeof(TNDR_GLDATAT) * 8);
+#endif
    pindex += 8;
    return 4;
 }
@@ -517,9 +534,14 @@ tenderer::TenderRef::TenderRef() : _name(""), _ctm(CTM()), _alphaDepth(0)
    for (word i = 0; i < 8; _obox[i++] = 0);
 }
 
-unsigned tenderer::TenderRef::cDataCopy(int* array, unsigned& pindex)
+unsigned tenderer::TenderRef::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
-   memcpy(&(array[pindex]), _obox, sizeof(int4b) * 8);
+#ifdef USE_FLOATS
+   for (unsigned i = 0; i < sizeof(TNDR_GLDATAT) * 8; i++)
+      array[pindex+i] = (TNDR_GLDATAT) _obox[i];
+#else
+   memcpy(&(array[pindex]), _obox, sizeof(TNDR_GLDATAT) * 8);
+#endif
    pindex += 8;
    return 4;
 }
@@ -714,7 +736,7 @@ void tenderer::TenderTV::collectIndexs(unsigned int* index_array, const TeselCha
    }
 }
 
-void tenderer::TenderTV::collect(int* point_array, unsigned int* index_array, unsigned int*)
+void tenderer::TenderTV::collect(TNDR_GLDATAT* point_array, unsigned int* index_array, unsigned int*)
 {
    unsigned line_arr_size = 2 * _alvrtxs[line];
    unsigned fqus_arr_size = 2 * _alvrtxs[cnvx];
@@ -843,7 +865,7 @@ void tenderer::TenderTV::draw(layprop::DrawProperties* drawprop)
    // Switch the vertex buffers ON in the openGL engine ...
    glEnableClientState(GL_VERTEX_ARRAY);
    // Set-up the offset in the binded Vertex buffer
-   glVertexPointer(2, GL_INT, 0, (GLvoid*)(sizeof(int4b) * _point_array_offset));
+   glVertexPointer(2, TNDR_GLENUMT, 0, (GLvoid*)(sizeof(int4b) * _point_array_offset));
    // ... and here we go ...
    if  (_alobjvx[line] > 0)
    {// Draw the wire center lines
@@ -1074,24 +1096,24 @@ void tenderer::TenderLay::ppSlice()
    }
 }
 
-void tenderer::TenderLay::box  (int4b* pdata)
+void tenderer::TenderLay::box  (const int4b* pdata)
 {
    _cslice->registerBox(DEBUG_NEW TenderBox(pdata));
 }
 
-void tenderer::TenderLay::box (int4b* pdata, const SGBitSet* ss)
+void tenderer::TenderLay::box (const int4b* pdata, const SGBitSet* ss)
 {
    TenderSBox* sobj = DEBUG_NEW TenderSBox(pdata, ss);
    registerSBox(sobj);
    _cslice->registerBox(sobj);
 }
 
-void tenderer::TenderLay::poly (int4b* pdata, unsigned psize, const TessellPoly* tpoly)
+void tenderer::TenderLay::poly (const int4b* pdata, unsigned psize, const TessellPoly* tpoly)
 {
    _cslice->registerPoly(DEBUG_NEW TenderNcvx(pdata, psize), tpoly);
 }
 
-void tenderer::TenderLay::poly (int4b* pdata, unsigned psize, const TessellPoly* tpoly, const SGBitSet* ss)
+void tenderer::TenderLay::poly (const int4b* pdata, unsigned psize, const TessellPoly* tpoly, const SGBitSet* ss)
 {
    TenderSNcvx* sobj = DEBUG_NEW TenderSNcvx(pdata, psize, ss);
    registerSPoly(sobj);
@@ -1195,16 +1217,16 @@ unsigned tenderer::TenderLay::total_slctdx()
 
 void tenderer::TenderLay::collect(bool fill, GLuint pbuf, GLuint ibuf)
 {
-   int* cpoint_array = NULL;
+   TNDR_GLDATAT* cpoint_array = NULL;
    unsigned int* cindex_array = NULL;
    _pbuffer = pbuf;
    _ibuffer = ibuf;
    glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
    glBufferData(GL_ARRAY_BUFFER                       ,
-                2 * _num_total_points * sizeof(int4b) ,
+                2 * _num_total_points * sizeof(TNDR_GLDATAT),
                 NULL                                  ,
                 GL_DYNAMIC_DRAW                       );
-   cpoint_array = (int*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+   cpoint_array = (TNDR_GLDATAT*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
    if (0 != _ibuffer)
    {
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibuffer);
@@ -1323,7 +1345,7 @@ void tenderer::TenderLay::drawSelected()
 
    glEnableClientState(GL_VERTEX_ARRAY);
    glEnableClientState(GL_INDEX_ARRAY);
-   glVertexPointer(2, GL_INT, 0, (GLvoid*)(sizeof(int4b) * _stv_array_offset));
+   glVertexPointer(2, TNDR_GLENUMT, 0, (GLvoid*)(sizeof(int4b) * _stv_array_offset));
 
    if (_asobjix[lstr] > 0)
    {
@@ -1436,14 +1458,14 @@ unsigned tenderer::TenderRefLay::total_indexes()
 
 void tenderer::TenderRefLay::collect(GLuint pbuf)
 {
-   int* cpoint_array = NULL;
+   TNDR_GLDATAT* cpoint_array = NULL;
    _pbuffer = pbuf;
    glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
    glBufferData(GL_ARRAY_BUFFER              ,
-                2 * total_points() * sizeof(int4b) ,
+                2 * total_points() * sizeof(TNDR_GLDATAT) ,
                 NULL                         ,
                 GL_DYNAMIC_DRAW               );
-   cpoint_array = (int*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+   cpoint_array = (TNDR_GLDATAT*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 
    // initialise the indexing
    unsigned pntindx = 0;
@@ -1492,7 +1514,7 @@ void tenderer::TenderRefLay::draw(layprop::DrawProperties* drawprop)
    assert(bufferSize == (GLint)(2 * total_points() * sizeof(int4b)));
 
    glEnableClientState(GL_VERTEX_ARRAY);
-   glVertexPointer(2, GL_INT, 0, 0);
+   glVertexPointer(2, TNDR_GLENUMT, 0, 0);
    if (0 < (_alvrtxs + _asindxs))
    {
       assert(_firstvx); assert(_sizesvx);

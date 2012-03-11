@@ -438,12 +438,12 @@ void laydata::TdtBox::openGlPrecalc(layprop::DrawProperties& drawprop , PointVec
 
 void laydata::TdtBox::drawRequest(tenderer::TopRend& rend) const
 {
-   rend.box(const_cast<int4b*>(&_pdata[0]));//TODO Fix the cast!
+   rend.box(&_pdata[0]);
 }
 
 void laydata::TdtBox::drawSRequest(tenderer::TopRend& rend, const SGBitSet* pslist) const
 {
-   rend.box(const_cast<int4b*>(&_pdata[0]), pslist);//TODO Fix the cast!
+   rend.box(&_pdata[0], pslist);
 }
 
 void laydata::TdtBox::openGlDrawLine(layprop::DrawProperties&, const PointVector& ptlist) const
