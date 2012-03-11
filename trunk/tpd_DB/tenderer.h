@@ -127,6 +127,14 @@
 #include <GL/glew.h>
 #include "drawprop.h"
 
+//#define USE_FLOATS
+#ifdef USE_FLOATS
+   #define TNDR_GLDATAT GLfloat
+   #define TNDR_GLENUMT GL_FLOAT
+#else
+   #define TNDR_GLDATAT GLint
+   #define TNDR_GLENUMT GL_INT
+#endif
 //=============================================================================
 //
 //
@@ -213,7 +221,7 @@ namespace tenderer {
       public:
                            TextOvlBox(const DBbox&, const CTM&);
          virtual          ~TextOvlBox() {}
-         virtual unsigned  cDataCopy(int*, unsigned&);
+         virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
       private:
          int4b             _obox[8];
    };
@@ -239,20 +247,20 @@ namespace tenderer {
    */
    class TenderCnvx {
       public:
-                           TenderCnvx(int4b* pdata, unsigned psize) :
+                           TenderCnvx(const int4b* pdata, unsigned psize) :
                                     _cdata(pdata), _csize(psize){}
          virtual          ~TenderCnvx() {};
-         virtual unsigned  cDataCopy(int*, unsigned&);
+         virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
          unsigned          csize()     {return _csize;}
       protected:
-         int4b*            _cdata;  //! the vertexes of the object contour
+         const int4b*      _cdata;  //! the vertexes of the object contour
          unsigned          _csize;  //! the number of vertexes in _cdata
    };
 
    class TenderBox : public TenderCnvx {
       public:
-                           TenderBox(int4b* pdata) : TenderCnvx(pdata, 4) {}
-         virtual unsigned  cDataCopy(int*, unsigned&);
+                           TenderBox(const int4b* pdata) : TenderCnvx(pdata, 4) {}
+         virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
    };
 
    /**
@@ -262,7 +270,7 @@ namespace tenderer {
    */
    class TenderNcvx : public TenderCnvx {
       public:
-                           TenderNcvx(int4b* pdata, unsigned psize) :
+                           TenderNcvx(const int4b* pdata, unsigned psize) :
                                     TenderCnvx(pdata, psize), _tdata(NULL) {}
          void              setTeselData(const TessellPoly* tdata) {_tdata = tdata;}
          virtual          ~TenderNcvx(){};
@@ -288,12 +296,12 @@ namespace tenderer {
                            TenderWire(int4b*, unsigned, const WireWidth, bool);
          virtual          ~TenderWire();
          void              Tesselate();
-         virtual unsigned  lDataCopy(int*, unsigned&);
+         virtual unsigned  lDataCopy(TNDR_GLDATAT*, unsigned&);
          unsigned          lsize()                 {return _lsize;}
          bool              center_line_only()      {return _celno;}
          virtual const TeselChain* tdata()               {return _tdata;}
       protected:
-         int*              _ldata; //! the vertexes of the wires central line
+         int4b*            _ldata; //! the vertexes of the wires central line
          unsigned          _lsize; //! the number of vertexes in the central line
          bool              _celno; //! indicates whether the center line only shall be drawn
          TeselChain*       _tdata; //! wire tesselation data
@@ -356,7 +364,7 @@ namespace tenderer {
                            TextSOvlBox(const DBbox& box, const CTM& mtrx) :
                               TextOvlBox(box, mtrx), TenderSelected(NULL) {}
          virtual          ~TextSOvlBox() {}
-         virtual unsigned  cDataCopy(int*, unsigned&);
+         virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual SlctTypes type() { return llps;}
          virtual unsigned  ssize(){ return 4;}
          virtual unsigned  sDataCopy(unsigned*, unsigned&);
@@ -376,7 +384,7 @@ namespace tenderer {
       public:
                            TenderSCnvx(int4b* pdata, unsigned psize, const SGBitSet* slist) :
                               TenderCnvx(pdata, psize), TenderSelected(slist) {}
-         virtual unsigned  cDataCopy(int*, unsigned&);
+         virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual SlctTypes type() { return ((NULL == _slist) ? llps : lnes);}
          virtual unsigned  ssize();
          virtual unsigned  sDataCopy(unsigned*, unsigned&);
@@ -384,9 +392,9 @@ namespace tenderer {
 
    class TenderSBox : public TenderBox, public TenderSelected {
       public:
-                           TenderSBox(int4b* pdata, const SGBitSet* slist) :
+                           TenderSBox(const int4b* pdata, const SGBitSet* slist) :
                               TenderBox(pdata), TenderSelected(slist) {}
-         virtual unsigned  cDataCopy(int*, unsigned&);
+         virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual SlctTypes type() { return ((NULL == _slist) ? llps : lnes);}
          virtual unsigned  ssize();
          virtual unsigned  sDataCopy(unsigned*, unsigned&);
@@ -402,9 +410,9 @@ namespace tenderer {
    */
    class TenderSNcvx : public TenderNcvx, public TenderSelected  {
       public:
-                           TenderSNcvx(int4b* pdata, unsigned psize, const SGBitSet* slist) :
+                           TenderSNcvx(const int4b* pdata, unsigned psize, const SGBitSet* slist) :
                               TenderNcvx(pdata, psize), TenderSelected(slist) {}
-         virtual unsigned  cDataCopy(int*, unsigned&);
+         virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual SlctTypes type() { return ((NULL == _slist) ? llps : lnes);}
          virtual unsigned  ssize();
          virtual unsigned  sDataCopy(unsigned*, unsigned&);
@@ -426,8 +434,8 @@ namespace tenderer {
       public:
                            TenderSWire(int4b* pdata, unsigned psize, const WireWidth width, bool clo, const SGBitSet* slist) :
                               TenderWire(pdata, psize, width, clo), TenderSelected(slist), _loffset(0u) {}
-         virtual unsigned  cDataCopy(int*, unsigned&);
-         virtual unsigned  lDataCopy(int*, unsigned&);
+         virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
+         virtual unsigned  lDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual SlctTypes type() { return ((NULL == _slist) ? lstr : lnes);}
          virtual unsigned  ssize();
          virtual unsigned  sDataCopy(unsigned*, unsigned&);
@@ -446,12 +454,12 @@ namespace tenderer {
          real* const       translation()  {return _translation;}
          CTM&              ctm()          {return _ctm;}
          word              alphaDepth()   {return _alphaDepth;}
-         unsigned          cDataCopy(int*, unsigned&);
+         unsigned          cDataCopy(TNDR_GLDATAT*, unsigned&);
       private:
          std::string       _name;
          real              _translation[16];
          CTM               _ctm;
-         int4b             _obox[8];
+         TNDR_GLDATAT      _obox[8];
          word              _alphaDepth;
    };
 
@@ -591,7 +599,7 @@ namespace tenderer {
          void              registerWire  (TenderWire*);
          void              registerText  (TenderText*, TextOvlBox*);
 
-         void              collect(int*, unsigned int*, unsigned int*);
+         void              collect(TNDR_GLDATAT*, unsigned int*, unsigned int*);
          void              draw(layprop::DrawProperties*);
          void              drawTexts(layprop::DrawProperties*);
          TenderRef*        swapRefCells(TenderRef*);
@@ -778,10 +786,10 @@ namespace tenderer {
 
                            TenderLay();
                           ~TenderLay();
-         void              box  (int4b*);
-         void              box  (int4b*,                               const SGBitSet*);
-         void              poly (int4b*, unsigned, const TessellPoly*);
-         void              poly (int4b*, unsigned, const TessellPoly*, const SGBitSet*);
+         void              box  (const int4b*);
+         void              box  (const int4b*,                               const SGBitSet*);
+         void              poly (const int4b*, unsigned, const TessellPoly*);
+         void              poly (const int4b*, unsigned, const TessellPoly*, const SGBitSet*);
          void              wire (int4b*, unsigned, WireWidth, bool);
          void              wire (int4b*, unsigned, WireWidth, bool, const SGBitSet*);
          void              text (const std::string*, const CTM&, const DBbox*, const TP&, bool);
@@ -880,11 +888,11 @@ namespace tenderer {
          void              pushCell(std::string, const CTM&, const DBbox&, bool, bool);
          void              popCell()                              {_cellStack.pop();}
          const CTM&        topCTM() const                         {return  _cellStack.top()->ctm();}
-         void              box  (int4b* pdata)                    {_clayer->box(pdata);}
-         void              box  (int4b* pdata, const SGBitSet* ss){_clayer->box(pdata, ss);}
-         void              poly (int4b* pdata, unsigned psize, const TessellPoly* tpoly)
+         void              box  (const int4b* pdata)              {_clayer->box(pdata);}
+         void              box  (const int4b* pdata, const SGBitSet* ss){_clayer->box(pdata, ss);}
+         void              poly (const int4b* pdata, unsigned psize, const TessellPoly* tpoly)
                                                                   {_clayer->poly(pdata, psize, tpoly);}
-         void              poly (int4b* pdata, unsigned psize, const TessellPoly* tpoly, const SGBitSet* ss)
+         void              poly (const int4b* pdata, unsigned psize, const TessellPoly* tpoly, const SGBitSet* ss)
                                                                   {_clayer->poly(pdata, psize, tpoly, ss);}
          void              grcpoly(int4b* pdata, unsigned psize);
          void              wire (int4b*, unsigned, WireWidth);
