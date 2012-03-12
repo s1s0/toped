@@ -887,7 +887,10 @@ void tui::TopedFrame::checkExit( wxCommandEvent& WXUNUSED( event ) )
       }
    }
    else
+   {
       Console->stopParserThread();
+      setExitAproved();
+   }
 }
 
 void tui::TopedFrame::OnExitRequest( wxCommandEvent&  event )
