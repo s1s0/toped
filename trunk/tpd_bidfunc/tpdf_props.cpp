@@ -495,9 +495,9 @@ void tellstdfunc::stdHIDECELLMARK::undo() {
       eventGRIDUPD.SetId(tui::RPS_CELL_MARK);
       eventGRIDUPD.SetInt(hide ? 0 : 1);
       wxPostEvent(TopedCanvasW, eventGRIDUPD);
-      RefreshGL();
    }
    PROPC->unlockDrawProp(drawProp, true);
+   RefreshGL();
 }
 
 int tellstdfunc::stdHIDECELLMARK::execute() {
@@ -513,9 +513,9 @@ int tellstdfunc::stdHIDECELLMARK::execute() {
       eventGRIDUPD.SetInt(hide ? 0 : 1);
       wxPostEvent(TopedCanvasW, eventGRIDUPD);
       LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
-      RefreshGL();
    }
    PROPC->unlockDrawProp(drawProp, true);
+   RefreshGL();
    return EXEC_NEXT;
 }
 
@@ -542,9 +542,9 @@ void tellstdfunc::stdHIDETEXTMARK::undo() {
       eventGRIDUPD.SetInt((hide ? 0 : 1));
       wxPostEvent(TopedCanvasW, eventGRIDUPD);
       LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
-      RefreshGL();
    }
    PROPC->unlockDrawProp(drawProp, true);
+   RefreshGL();
 }
 
 int tellstdfunc::stdHIDETEXTMARK::execute() {
@@ -560,9 +560,9 @@ int tellstdfunc::stdHIDETEXTMARK::execute() {
       eventGRIDUPD.SetInt((hide ? 0 : 1));
       wxPostEvent(TopedCanvasW, eventGRIDUPD);
       LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
-      RefreshGL();
    }
    PROPC->unlockDrawProp(drawProp, true);
+   RefreshGL();
    return EXEC_NEXT;
 }
 
@@ -589,9 +589,9 @@ void tellstdfunc::stdHIDECELLBOND::undo() {
       eventGRIDUPD.SetInt(hide ? 0 : 1);
       wxPostEvent(TopedCanvasW, eventGRIDUPD);
       LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
-      RefreshGL();
    }
    PROPC->unlockDrawProp(drawProp, true);
+   RefreshGL();
 }
 
 int tellstdfunc::stdHIDECELLBOND::execute() {
@@ -607,9 +607,9 @@ int tellstdfunc::stdHIDECELLBOND::execute() {
       eventGRIDUPD.SetInt(hide ? 0 : 1);
       wxPostEvent(TopedCanvasW, eventGRIDUPD);
       LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
-      RefreshGL();
    }
    PROPC->unlockDrawProp(drawProp, true);
+   RefreshGL();
    return EXEC_NEXT;
 }
 
@@ -636,9 +636,9 @@ void tellstdfunc::stdHIDETEXTBOND::undo() {
       eventGRIDUPD.SetInt(hide ? 0 : 1);
       wxPostEvent(TopedCanvasW, eventGRIDUPD);
       LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
-      RefreshGL();
    }
    PROPC->unlockDrawProp(drawProp, true);
+   RefreshGL();
 }
 
 int tellstdfunc::stdHIDETEXTBOND::execute() {
@@ -654,9 +654,9 @@ int tellstdfunc::stdHIDETEXTBOND::execute() {
       eventGRIDUPD.SetInt(hide ? 0 : 1);
       wxPostEvent(TopedCanvasW, eventGRIDUPD);
       LogFile << LogFile.getFN() << "(" << LogFile._2bool(hide) << ");"; LogFile.flush();
-      RefreshGL();
    }
    PROPC->unlockDrawProp(drawProp, true);
+   RefreshGL();
    return EXEC_NEXT;
 }
 
@@ -887,9 +887,9 @@ void tellstdfunc::stdFILLLAYER::undo() {
    {
       drawProp->fillLayer(layno, fill);
       TpdPost::layer_status(tui::BT_LAYER_FILL, layno, fill);
-      RefreshGL();
    }
    PROPC->unlockDrawProp(drawProp, true);
+   RefreshGL();
 }
 
 int tellstdfunc::stdFILLLAYER::execute()
@@ -906,9 +906,9 @@ int tellstdfunc::stdFILLLAYER::execute()
       TpdPost::layer_status(tui::BT_LAYER_FILL, layno, fill);
       LogFile << LogFile.getFN() << "("<< layno << "," <<
                  LogFile._2bool(fill) << ");"; LogFile.flush();
-      RefreshGL();
    }
    PROPC->unlockDrawProp(drawProp, true);
+   RefreshGL();
    return EXEC_NEXT;
 }
 
@@ -941,10 +941,10 @@ void tellstdfunc::stdFILLLAYERS::undo() {
          drawProp->fillLayer(lay, fill);
          TpdPost::layer_status(tui::BT_LAYER_FILL, lay, fill);
       }
-      RefreshGL();
    }
    delete sl;
    PROPC->unlockDrawProp(drawProp, true);
+   RefreshGL();
 }
 
 int tellstdfunc::stdFILLLAYERS::execute()
@@ -966,10 +966,10 @@ int tellstdfunc::stdFILLLAYERS::execute()
       UNDOPstack.push_front(DEBUG_NEW telldata::TtBool(!fill));
       LogFile << LogFile.getFN() << "("<< *sl << "," <<
                  LogFile._2bool(fill) << ");"; LogFile.flush();
-      RefreshGL();
    }
    delete sl;
    PROPC->unlockDrawProp(drawProp, true);
+   RefreshGL();
    return EXEC_NEXT;
 }
 
