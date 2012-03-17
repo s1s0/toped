@@ -125,6 +125,7 @@ namespace tui
          void                    OnChangeLayNum(wxCommandEvent&);
          void                    OnApply(wxCommandEvent&);
          void                    OnLayListSort(wxListEvent&);
+         void                    OnRemotePropUpdate(wxCommandEvent&);
       private:
          void                    prepareLayers(layprop::DrawProperties*);
          void                    updateDialog();

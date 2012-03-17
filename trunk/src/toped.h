@@ -131,6 +131,7 @@ namespace tui {
       TpdPost*                _tPost;
       tui::TopedPropertySheets* _propDialog;
       wxAuiManager            _winManager;
+      wxDialog*               _techEditor;
       //Menu stuff
       wxMenuBar*              menuBar;
       wxMenu*                 fileMenu;

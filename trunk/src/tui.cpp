@@ -44,7 +44,6 @@
 
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
-extern layprop::FontLibrary*     fontLib;
 extern tui::TopedFrame*          Toped;
 
 #if wxCHECK_VERSION(2, 8, 0)

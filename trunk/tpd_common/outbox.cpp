@@ -67,31 +67,33 @@ BEGIN_DECLARE_EVENT_TYPES()
     DECLARE_EVENT_TYPE(wxEVT_EXECEXTPIPE        , 10020)
     DECLARE_EVENT_TYPE(wxEVT_EXECEXTDONE        , 10021)
     DECLARE_EVENT_TYPE(wxEVT_RELOADTELLFUNCS    , 10022)
+    DECLARE_EVENT_TYPE(wxEVT_TECHEDITUPDATE     , 10023)
 END_DECLARE_EVENT_TYPES()
 
-DEFINE_EVENT_TYPE(wxEVT_CANVAS_STATUS)
-DEFINE_EVENT_TYPE(wxEVT_RENDER_PARAMS)
-DEFINE_EVENT_TYPE(wxEVT_CANVAS_PARAMS)
-DEFINE_EVENT_TYPE(wxEVT_CMD_BROWSER)
-DEFINE_EVENT_TYPE(wxEVT_LOG_ERRMESSAGE)
-DEFINE_EVENT_TYPE(wxEVT_MOUSE_ACCEL)
-DEFINE_EVENT_TYPE(wxEVT_MOUSE_INPUT)
-DEFINE_EVENT_TYPE(wxEVT_CANVAS_ZOOM)
-DEFINE_EVENT_TYPE(wxEVT_FUNC_BROWSER)
-DEFINE_EVENT_TYPE(wxEVT_TPDSTATUS)
-DEFINE_EVENT_TYPE(wxEVT_CANVAS_CURSOR)
-DEFINE_EVENT_TYPE(wxEVT_CONSOLE_PARSE)
-DEFINE_EVENT_TYPE(wxEVT_CURRENT_LAYER)
-DEFINE_EVENT_TYPE(wxEVT_TOOLBARSIZE)
-DEFINE_EVENT_TYPE(wxEVT_TOOLBARDEF)
-DEFINE_EVENT_TYPE(wxEVT_TOOLBARADDITEM)
-DEFINE_EVENT_TYPE(wxEVT_TOOLBARDELETEITEM)
-DEFINE_EVENT_TYPE(wxEVT_EDITLAYER)
-DEFINE_EVENT_TYPE(wxEVT_EXITAPP)
-DEFINE_EVENT_TYPE(wxEVT_EXECEXT)
-DEFINE_EVENT_TYPE(wxEVT_EXECEXTPIPE)
-DEFINE_EVENT_TYPE(wxEVT_EXECEXTDONE)
-DEFINE_EVENT_TYPE(wxEVT_RELOADTELLFUNCS)
+DEFINE_EVENT_TYPE(wxEVT_CANVAS_STATUS        )
+DEFINE_EVENT_TYPE(wxEVT_RENDER_PARAMS        )
+DEFINE_EVENT_TYPE(wxEVT_CANVAS_PARAMS        )
+DEFINE_EVENT_TYPE(wxEVT_CMD_BROWSER          )
+DEFINE_EVENT_TYPE(wxEVT_LOG_ERRMESSAGE       )
+DEFINE_EVENT_TYPE(wxEVT_MOUSE_ACCEL          )
+DEFINE_EVENT_TYPE(wxEVT_MOUSE_INPUT          )
+DEFINE_EVENT_TYPE(wxEVT_CANVAS_ZOOM          )
+DEFINE_EVENT_TYPE(wxEVT_FUNC_BROWSER         )
+DEFINE_EVENT_TYPE(wxEVT_TPDSTATUS            )
+DEFINE_EVENT_TYPE(wxEVT_CANVAS_CURSOR        )
+DEFINE_EVENT_TYPE(wxEVT_CONSOLE_PARSE        )
+DEFINE_EVENT_TYPE(wxEVT_CURRENT_LAYER        )
+DEFINE_EVENT_TYPE(wxEVT_TOOLBARSIZE          )
+DEFINE_EVENT_TYPE(wxEVT_TOOLBARDEF           )
+DEFINE_EVENT_TYPE(wxEVT_TOOLBARADDITEM       )
+DEFINE_EVENT_TYPE(wxEVT_TOOLBARDELETEITEM    )
+DEFINE_EVENT_TYPE(wxEVT_EDITLAYER            )
+DEFINE_EVENT_TYPE(wxEVT_EXITAPP              )
+DEFINE_EVENT_TYPE(wxEVT_EXECEXT              )
+DEFINE_EVENT_TYPE(wxEVT_EXECEXTPIPE          )
+DEFINE_EVENT_TYPE(wxEVT_EXECEXTDONE          )
+DEFINE_EVENT_TYPE(wxEVT_RELOADTELLFUNCS      )
+DEFINE_EVENT_TYPE(wxEVT_TECHEDITUPDATE       )
 
 console::TELLFuncList*  CmdList = NULL;
 
@@ -101,6 +103,7 @@ wxWindow*               TpdPost::_layBrowser    = NULL;
 wxWindow*               TpdPost::_cllBrowser    = NULL;
 //wxWindow*               TpdPost::_cmdLine       = NULL;
 wxWindow*               TpdPost::_tllFuncList   = NULL;
+wxDialog*               TpdPost::_techEditor    = NULL;
 wxWindow*               TpdPost::_mainWindow    = NULL;
 
 //==============================================================================
@@ -414,6 +417,7 @@ TpdPost::TpdPost(wxWindow* mainWindow)
    _cllBrowser  = _mainWindow->FindWindow(tui::ID_PNL_CELLS);
 //   _cmdLine     = _mainWindow->FindWindow(tui::ID_CMD_LINE);
    _tllFuncList = _mainWindow->FindWindow(tui::ID_TELL_FUNCS);
+   _techEditor  = NULL;
    CmdList = static_cast<console::TELLFuncList*>(_tllFuncList);
 }
 
@@ -726,6 +730,16 @@ void TpdPost::execPipe(const wxString extCmd)
    wxCommandEvent eventExecExPipe(wxEVT_EXECEXTPIPE);
    eventExecExPipe.SetString(extCmd);
    wxPostEvent(_mainWindow, eventExecExPipe);
+}
+
+void TpdPost::techEditUpdate(console::TECHEDIT_UPDATE_EVT_ENUMS id)
+{
+   if (NULL != (_techEditor))
+   {
+      wxCommandEvent eventUPDATE(wxEVT_TECHEDITUPDATE);
+      eventUPDATE.SetId(id);
+      wxPostEvent(_techEditor, eventUPDATE);
+   }
 }
 
 void TpdPost::quitApp(int exitType)

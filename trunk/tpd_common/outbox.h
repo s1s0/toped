@@ -79,12 +79,20 @@ namespace console {
       TSTS_PRGRSBARON   ,
       TSTS_PROGRESS     ,
       TSTS_PRGRSBAROFF
-   }TOPEDSTATUS_TYPE;
+   } TOPEDSTATUS_TYPE;
 
    typedef enum {
       FT_FUNCTION_ADD  ,
       FT_FUNCTION_SORT
    } FUNCTION_BROWSER_TYPE;
+
+   typedef enum {
+      TEU_COLORS          ,
+      TEU_FILLS           ,
+      TEU_LINES
+   } TECHEDIT_UPDATE_EVT_ENUMS;
+
+
 
 /* Maybe the only place to describe the parameter dictating the behaviour during user input:
    op_dwire  >  0 -> wire where input type is the width. List of points expected.
@@ -239,16 +247,19 @@ class TpdPost {
       static void reloadTellFuncs();
       static void execExt(const wxString);
       static void execPipe(const wxString);
+      static void techEditUpdate(console::TECHEDIT_UPDATE_EVT_ENUMS id);
+      static void SetTechEditWindow(wxDialog* te) {_techEditor = te;}
       static void quitApp(int);
 
    private:
-      static wxWindow* _statusBar;
-      static wxWindow* _topBrowsers;
-      static wxWindow* _layBrowser;
-      static wxWindow* _cllBrowser;
-      static wxWindow* _cmdLine;
-      static wxWindow* _tllFuncList;
-      static wxWindow* _mainWindow;
+      static wxWindow*  _statusBar;
+      static wxWindow*  _topBrowsers;
+      static wxWindow*  _layBrowser;
+      static wxWindow*  _cllBrowser;
+      static wxWindow*  _cmdLine;
+      static wxWindow*  _tllFuncList;
+      static wxWindow*  _mainWindow;
+      static wxDialog*  _techEditor;
 };
 
 //===========================================================================

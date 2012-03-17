@@ -47,7 +47,7 @@ extern console::toped_logfile    LogFile;
 extern layprop::FontLibrary*     fontLib;
 extern const wxEventType         wxEVT_RENDER_PARAMS;
 extern const wxEventType         wxEVT_CANVAS_PARAMS;
-
+extern const wxEventType         wxEVT_TECHEDITUPDATE;
 //=============================================================================
 tellstdfunc::stdPROPSAVE::stdPROPSAVE(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
@@ -115,6 +115,7 @@ int tellstdfunc::stdLINEDEF::execute() {
       drawProp->addLine(name, col, pattern, patscale, width);
       LogFile << LogFile.getFN() << "(\""<< name << "\" , \"" << col << "\","
             << pattern << " , " << patscale << " , " << width << ");";LogFile.flush();
+      TpdPost::techEditUpdate(console::TEU_LINES);
    }
    PROPC->unlockDrawProp(drawProp, true);
    return EXEC_NEXT;
@@ -144,6 +145,7 @@ int tellstdfunc::stdCOLORDEF::execute() {
       drawProp->addColor(name, colR, colG, colB, sat);
       LogFile << LogFile.getFN() << "(\""<< name << "\"," << colR << "," <<
                           colG << "," << colB << "," << sat << ");";LogFile.flush();
+      TpdPost::techEditUpdate(console::TEU_COLORS);
    }
    PROPC->unlockDrawProp(drawProp, true);
    return EXEC_NEXT;
@@ -179,8 +181,8 @@ int tellstdfunc::stdFILLDEF::execute() {
          }
          // error message - included in the method
          drawProp->addFill(name, ptrn);
-         LogFile << LogFile.getFN() << "(\""<< name << "\"," << *sl << ");";
-         LogFile.flush();
+         LogFile << LogFile.getFN() << "(\""<< name << "\"," << *sl << ");"; LogFile.flush();
+         TpdPost::techEditUpdate(console::TEU_FILLS);
       }
       PROPC->unlockDrawProp(drawProp, true);
    }
