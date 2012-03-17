@@ -360,6 +360,7 @@ tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos,
    wxToolTip::Enable(true);
    wxToolTip::SetDelay(3000);
    _propDialog = DEBUG_NEW tui::TopedPropertySheets(this);
+   _techEditor = NULL;
    // Initialize the post system
    _tPost = DEBUG_NEW TpdPost(this);
 }
@@ -2070,9 +2071,12 @@ void tui::TopedFrame::OnEditLayer(wxCommandEvent& evt)
 {
    word layno = evt.GetInt();
    //TODO init layer param for the tech editor
-   TechEditorDialog* techDialog = DEBUG_NEW TechEditorDialog(this,ID_TECH_EDITOR);
-   techDialog->ShowModal();
-   delete techDialog;
+   _techEditor = DEBUG_NEW TechEditorDialog(this,ID_TECH_EDITOR);
+   TpdPost::SetTechEditWindow(_techEditor);
+   _techEditor->ShowModal();
+   delete _techEditor;
+   _techEditor = NULL;
+   TpdPost::SetTechEditWindow(_techEditor);
 }
 
 void tui::TopedFrame::OnDefineColor(wxCommandEvent& WXUNUSED(event))
@@ -2167,9 +2171,12 @@ void tui::TopedFrame::OnDefineStyle(wxCommandEvent& WXUNUSED(event))
 
 void tui::TopedFrame::OnTechEditor(wxCommandEvent& WXUNUSED(event))
 {
-   TechEditorDialog* techDialog = DEBUG_NEW TechEditorDialog(this,ID_TECH_EDITOR);
-   techDialog->ShowModal();
-   delete techDialog;
+   _techEditor = DEBUG_NEW TechEditorDialog(this,ID_TECH_EDITOR);
+   TpdPost::SetTechEditWindow(_techEditor);
+   _techEditor->ShowModal();
+   delete _techEditor;
+   _techEditor = NULL;
+   TpdPost::SetTechEditWindow(_techEditor);
 }
 
 void tui::TopedFrame::OnChangeRef( wxCommandEvent& WXUNUSED( event ))

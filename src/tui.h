@@ -731,7 +731,6 @@ namespace tui {
          void                   OnAutoPan     (wxCommandEvent&);
          void                   OnBoldOnHoover(wxCommandEvent&);
          void                   OnZeroCross   (wxCommandEvent&);
-
          DECLARE_EVENT_TABLE();
       };
       RenderingPSheet*          _renderingSheet;

@@ -40,7 +40,7 @@
 extern layprop::PropertyCenter*  PROPC;
 extern tui::TopedFrame*          Toped;
 extern console::TllCmdLine*      Console;
-
+extern const wxEventType         wxEVT_TECHEDITUPDATE;
 wxListView* layerListPtr = NULL; //!Required by SortItem callback
 ///////////////////////////////////////////////////////////////////////////
 //extern const wxEventType         wxEVT_CMD_BROWSER;
@@ -64,6 +64,10 @@ tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id) :
    wxDialog   ( parent, id, wxT("Technology Editor")),
    _curSelect (     0 )
 {
+   Connect(-1, wxEVT_TECHEDITUPDATE,
+           (wxObjectEventFunction) (wxEventFunction)
+           (wxCommandEventFunction)&TechEditorDialog::OnRemotePropUpdate);
+
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
@@ -132,6 +136,7 @@ tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id) :
 
 tui::TechEditorDialog::~TechEditorDialog()
 {
+   Disconnect(-1, wxEVT_TECHEDITUPDATE);
 }
 
 void  tui::TechEditorDialog::OnNewLayer(wxCommandEvent& cmdEvent)
@@ -403,6 +408,17 @@ void tui::TechEditorDialog::OnApply(wxCommandEvent&)
    updateLayerList();
    static_cast<wxCheckBox*>(FindWindow(tui::DTE_NEWLAYER))->SetValue(false);
    FindWindow(DTE_APPLY)->Enable(false);
+}
+
+void tui::TechEditorDialog::OnRemotePropUpdate(wxCommandEvent& event)
+{
+   switch (event.GetId())
+   {
+      case console::TEU_COLORS: /*TODO */break;
+      case console::TEU_FILLS : /*TODO */break;
+      case console::TEU_LINES : /*TODO */break;
+      default: assert(false); break;
+   }
 }
 
 //=============================================================================
