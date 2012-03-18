@@ -767,9 +767,9 @@ BEGIN_EVENT_TABLE(tui::ColorSample, wxWindow)
 END_EVENT_TABLE()
 
 tui::ColorSample::ColorSample(wxWindow *parent, wxWindowID id, wxPoint pos,
-   wxSize size, std::string init, const layprop::DrawProperties* drawProp) : wxWindow(parent, id, pos, size, wxSUNKEN_BORDER)
+   wxSize size, layprop::tellRGB& init) : wxWindow(parent, id, pos, size, wxSUNKEN_BORDER)
 {
-   setColor(drawProp->getColor(init));
+   setColor(init);
 }
 
 void tui::ColorSample::setColor(const layprop::tellRGB& col)
@@ -804,20 +804,24 @@ END_EVENT_TABLE()
 tui::DefineColor::DefineColor(wxWindow *parent, wxWindowID id, const wxString &title, wxPoint pos, const layprop::DrawProperties* drawProp) :
       wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE), _drawProp(drawProp)
 {
-   std::string init_color;
+   layprop::tellRGB init_color;
    NameList all_names;
    _colorList = DEBUG_NEW wxListBox(this, ID_ITEMLIST, wxDefaultPosition, wxSize(150,200), 0, NULL, wxLB_SORT);
    _drawProp->allColors(all_names);
-   if (!all_names.empty())
-   {
-      init_color = *(all_names.begin());
-   }
-
    for( NameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
    {
       _colorList->Append(wxString(CI->c_str(), wxConvUTF8));
       _allColors[*CI] = DEBUG_NEW layprop::tellRGB(_drawProp->getColor(*CI));
    }
+   if (!all_names.empty())
+   {
+      _colorList->Select(0);
+      init_color = *(_allColors[std::string(_colorList->GetStringSelection().mb_str(wxConvUTF8))]);
+   }
+//   else
+//   {
+//      init_color = _drawProp->getColor("");
+//   }
    // NOTE! Static boxes MUST be created before all other controls which are about to
    // be encircled by them. Otherwise the dialog box might work somewhere (Windows & fc8)
    // but not everywhere! (fc9)
@@ -826,7 +830,7 @@ tui::DefineColor::DefineColor(wxWindow *parent, wxWindowID id, const wxString &t
 
    _dwcolname  = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxSize(150,-1), 0,
                                           wxTextValidator(wxFILTER_ASCII, &_colname));
-   _colorsample = DEBUG_NEW ColorSample( this, -1, wxDefaultPosition, wxSize(-1,50), init_color, _drawProp);
+   _colorsample = DEBUG_NEW ColorSample( this, -1, wxDefaultPosition, wxSize(-1,50), init_color);
 
    _c_red    = DEBUG_NEW wxTextCtrl( this, ID_REDVAL , wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
                                            wxTextValidator(wxFILTER_NUMERIC, &_red));

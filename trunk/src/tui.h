@@ -486,7 +486,7 @@ namespace tui {
    //--------------------------------------------------------------------------
    class ColorSample : public wxWindow {
    public:
-                     ColorSample(wxWindow*, wxWindowID, wxPoint, wxSize, std::string, const layprop::DrawProperties*);
+                     ColorSample(wxWindow*, wxWindowID, wxPoint, wxSize, layprop::tellRGB&);
       void           setColor(const layprop::tellRGB&);
       void           OnPaint(wxPaintEvent&);
    protected:

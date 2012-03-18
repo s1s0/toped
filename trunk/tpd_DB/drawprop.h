@@ -49,8 +49,9 @@ namespace layprop {
    //
    class tellRGB {
       public:
+                           tellRGB() : _red(0), _green(0), _blue(0), _alpha(0) {}
                            tellRGB(byte red, byte green, byte blue, byte alpha) :
-                              _red(red), _green(green), _blue(blue), _alpha(alpha) {};
+                              _red(red), _green(green), _blue(blue), _alpha(alpha) {}
          byte              red()   const {return _red;     };
          byte              green() const {return _green;   };
          byte              blue()  const {return _blue;    };
