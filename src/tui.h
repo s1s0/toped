@@ -498,20 +498,21 @@ namespace tui {
    class DefineColor : public wxDialog
    {
    public:
-      typedef  std::map<std::string, layprop::tellRGB*>  colorMAP;
+      typedef  std::pair<bool, layprop::tellRGB>         RcsColor;
+      typedef  std::map<std::string, RcsColor>           ColorLMap;
                         DefineColor(wxWindow *parent, wxWindowID id, const wxString &title,
                                              wxPoint pos, const layprop::DrawProperties*);
-      virtual          ~DefineColor();
+      virtual          ~DefineColor() {}
       void              OnDefineColor(wxCommandEvent&);
       void              OnColorSelected(wxCommandEvent&);
       void              OnApply(wxCommandEvent& WXUNUSED(event));
       void              OnColorPropChanged(wxCommandEvent& WXUNUSED(event));
       void              OnColorNameAdded(wxCommandEvent& WXUNUSED(event));
-      const colorMAP&   allColors() const {return _allColors;}
+      const ColorLMap&  allColors() const {return _allColors;}
    private:
       void                    nameNormalize(wxString&);
-      const layprop::tellRGB* getColor(std::string color_name) const;
-      colorMAP                _allColors;
+      layprop::tellRGB        getColor(std::string color_name) const;
+      ColorLMap               _allColors;
       wxListBox*              _colorList;
       wxTextCtrl*             _dwcolname;
       ColorSample*            _colorsample;
