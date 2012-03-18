@@ -2156,15 +2156,18 @@ void tui::TopedFrame::OnDefineStyle(wxCommandEvent& WXUNUSED(event))
       tui::DefineLineStyle dlg(this, -1, wxT("Style Definition"), pos, drawprop);
       if ( dlg.ShowModal() == wxID_OK )
       {
-         const tui::styleMAP styles = dlg.allStyles();
-         for(tui::styleMAP::const_iterator CC = styles.begin() ; CC != styles.end(); CC++)
+         const tui::LineStyleMap styles = dlg.allStyles();
+         for(tui::LineStyleMap::const_iterator CC = styles.begin() ; CC != styles.end(); CC++)
          {
-            tui::style_def styleDef = CC->second;
-            ost   << wxT("defineline(\"") << wxString(CC->first.c_str(), wxConvUTF8)
-                  << wxT("\" , \"\" , ")      << styleDef.pattern
-                  << wxT(" , ")        << static_cast<unsigned int>(styleDef.pscale)
-                  << wxT(" , ")        << static_cast<unsigned int>(styleDef.width)
-                  << wxT(");");
+            tui::LineStyleRecord styleDef = CC->second;
+            if (styleDef.modified)
+            {
+               ost   << wxT("defineline(\"") << wxString(CC->first.c_str(), wxConvUTF8)
+                     << wxT("\" , \"\" , ")      << styleDef.pattern
+                     << wxT(" , ")        << static_cast<unsigned int>(styleDef.pscale)
+                     << wxT(" , ")        << static_cast<unsigned int>(styleDef.width)
+                     << wxT(");");
+            }
          }
          success = true;
       }

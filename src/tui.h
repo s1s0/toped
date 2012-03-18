@@ -598,11 +598,12 @@ namespace tui {
    };
 
    //--------------------------------------------------------------------------
-   struct style_def
+   struct LineStyleRecord
    {
       word     pattern;
       byte     pscale;
       byte     width;
+      bool     modified;
    };
 
    //--------------------------------------------------------------------------
@@ -623,7 +624,7 @@ namespace tui {
    public:
                      LineStyleSample(wxWindow*, wxWindowID, std::string, const layprop::DrawProperties*);
       virtual       ~LineStyleSample();
-      void           setStyle(const tui::style_def& styledef);
+      void           setStyle(const tui::LineStyleRecord& styledef);
       void           OnPaint(wxPaintEvent&);
    protected:
       wxBrush        _brush;
@@ -631,34 +632,34 @@ namespace tui {
       DECLARE_EVENT_TABLE();
    };
 
-   typedef  std::map<std::string, style_def       >  styleMAP;
+   typedef  std::map<std::string, LineStyleRecord >  LineStyleMap;
 
    class DefineLineStyle : public wxDialog {
    public:
-                     DefineLineStyle(wxFrame *parent, wxWindowID id, const wxString &title,
+                        DefineLineStyle(wxFrame *parent, wxWindowID id, const wxString &title,
                                              wxPoint pos, const layprop::DrawProperties*);
-      virtual       ~DefineLineStyle();
-      void           OnStyleSelected(wxCommandEvent&);
-      void           OnStyleNameAdded(wxCommandEvent&);
-      void           OnStyleNameChanged(wxCommandEvent&);
-      void           OnStylePropChanged(wxCommandEvent&);
-      void           OnStyleApply(wxCommandEvent&);
-      styleMAP&      allStyles() {return _allStyles;}
+      virtual          ~DefineLineStyle();
+      void              OnStyleSelected(wxCommandEvent&);
+      void              OnStyleNameAdded(wxCommandEvent&);
+      void              OnStyleNameChanged(wxCommandEvent&);
+      void              OnStylePropChanged(wxCommandEvent&);
+      void              OnStyleApply(wxCommandEvent&);
+      LineStyleMap&     allStyles() {return _allStyles;}
    private:
-      style_def      getStyle(const std::string&);
-      void           nameNormalize(wxString& str);
-      void           updateDialog();
-      styleMAP       _allStyles;
-      wxListBox*     _styleList;
-      wxTextCtrl*    _dwstylename;
+      LineStyleRecord   getStyle(const std::string&);
+      void              nameNormalize(wxString& str);
+      void              updateDialog();
+      LineStyleMap      _allStyles;
+      wxListBox*        _styleList;
+      wxTextCtrl*       _dwstylename;
       LineStyleSample*  _stylesample;
-      wxString       _stylename;
-      style_def      _current_style;
-      StyleBinaryView* _pattern;
-      wxTextCtrl*    _width;
-      wxString       _widthString;
-      wxTextCtrl*    _patscale;
-      wxString       _patscaleString;
+      wxString          _stylename;
+      LineStyleRecord   _current_style;
+      StyleBinaryView*  _pattern;
+      wxTextCtrl*       _width;
+      wxString          _widthString;
+      wxTextCtrl*       _patscale;
+      wxString          _patscaleString;
       DECLARE_EVENT_TABLE();
    };
 

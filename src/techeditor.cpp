@@ -178,14 +178,6 @@ void  tui::TechEditorDialog::OnStyleEditor(wxCommandEvent&)
 {
    wxCommandEvent event;
    Toped->OnDefineStyle(event);
-   _layerLines->Clear();
-   layprop::DrawProperties* drawProp;
-   if (PROPC->lockDrawProp(drawProp))
-   {
-      _layerLines->populate(drawProp);
-   }
-   PROPC->unlockDrawProp(drawProp, false);
-   updateDialog();
 }
 
 void  tui::TechEditorDialog::OnChangeProperty(wxCommandEvent&)
@@ -432,7 +424,23 @@ void tui::TechEditorDialog::OnRemotePropUpdate(wxCommandEvent& event)
             _layerFills->SetSelection(0);
          break;
       }
-      case console::TEU_LINES : /*TODO */break;
+      case console::TEU_LINES :
+      {
+         wxString s_line        = _layerLines->GetValue();
+         _layerLines->Clear();
+         layprop::DrawProperties* drawProp;
+         if (PROPC->lockDrawProp(drawProp))
+         {
+            _layerLines->populate(drawProp);
+         }
+         PROPC->unlockDrawProp(drawProp, false);
+         int lineNumber = _layerLines->FindString(s_line);
+         if (lineNumber != wxNOT_FOUND)
+            _layerLines->SetSelection(lineNumber);
+         else
+            _layerLines->SetSelection(0);
+         break;
+      }
       default: assert(false); break;
    }
 }

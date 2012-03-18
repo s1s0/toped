@@ -1451,14 +1451,14 @@ tui::LineStyleSample::LineStyleSample(wxWindow *parent, wxWindowID id , std::str
    _pen(wxT("black"), 3, wxUSER_DASH)
 {
    SetSizeHints(50,25,-1,25);
-   style_def initStyle;
+   LineStyleRecord initStyle;
    initStyle.pattern = drawProp->getLine(init)->pattern();
    initStyle.pscale = drawProp->getLine(init)->patscale();
    initStyle.width = drawProp->getLine(init)->width();
    setStyle(initStyle);
 }
 
-void tui::LineStyleSample::setStyle(const tui::style_def&  styledef)
+void tui::LineStyleSample::setStyle(const tui::LineStyleRecord&  styledef)
 {
    word pattern = styledef.pattern;
    byte width = styledef.width;
@@ -1624,11 +1624,12 @@ tui::DefineLineStyle::DefineLineStyle(wxFrame *parent, wxWindowID id, const wxSt
    {
       _styleList->Append(wxString(CI->c_str(), wxConvUTF8));
       const layprop::LineSettings *line;
-      style_def curStyle;
+      LineStyleRecord curStyle;
       line = drawProp->getLine(*CI);
       curStyle.pattern = line->pattern();
       curStyle.pscale = line->patscale();
       curStyle.width = line->width();
+      curStyle.modified = false;
       _allStyles[*CI] = curStyle;
    }
 
@@ -1717,8 +1718,8 @@ void tui::DefineLineStyle::OnStyleNameAdded(wxCommandEvent& WXUNUSED(event))
 {
    _dwstylename->GetValidator()->TransferFromWindow();
    std::string s_newcol = std::string(_stylename.mb_str(wxConvUTF8));
-   style_def newStyle;
-   newStyle.width = 5; newStyle.pscale = 5; newStyle.pattern = 0x5555;
+   LineStyleRecord newStyle;
+   newStyle.width = 5; newStyle.pscale = 5; newStyle.pattern = 0x5555; newStyle.modified = true;
    _allStyles[s_newcol] = newStyle;
    _styleList->Append(_stylename);
    _styleList->SetStringSelection(_stylename);
@@ -1783,9 +1784,9 @@ void tui::DefineLineStyle::updateDialog()
    _patscale->ChangeValue(_patscaleString);
 }
 
-tui::style_def tui::DefineLineStyle::getStyle(const std::string& style_name)
+tui::LineStyleRecord tui::DefineLineStyle::getStyle(const std::string& style_name)
 {
-  styleMAP::const_iterator style_set = _allStyles.find(style_name);
+  LineStyleMap::const_iterator style_set = _allStyles.find(style_name);
   if (_allStyles.end() == style_set) 
   {
      std::string err;
@@ -1804,7 +1805,7 @@ void tui::DefineLineStyle::OnStylePropChanged(wxCommandEvent& event)
 
    unsigned long d_width;    _widthString.ToULong(&d_width);
    unsigned long d_patscale; _patscaleString.ToULong(&d_patscale);
-   style_def tempStyle;
+   LineStyleRecord tempStyle;
    tempStyle.pattern  = _pattern->GetValue();
    tempStyle.width    = d_width;
    tempStyle.pscale   = d_patscale;
@@ -1824,10 +1825,11 @@ void tui::DefineLineStyle::OnStyleApply(wxCommandEvent& event)
    unsigned long d_width;    _widthString.ToULong(&d_width);
    unsigned long d_patscale; _patscaleString.ToULong(&d_patscale);
 
-   style_def defStyle;
+   LineStyleRecord defStyle;
    defStyle.pattern  = d_pattern;
    defStyle.width    = d_width;
    defStyle.pscale   = d_patscale;
+   defStyle.modified = true;
 
    std::string ss_name(s_name.mb_str(wxConvUTF8));
    if (_allStyles.end() != _allStyles.find(ss_name))
