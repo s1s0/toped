@@ -562,7 +562,7 @@ namespace tui {
 
    class FillSample : public wxWindow {
    public:
-                     FillSample(wxWindow*, wxWindowID, wxPoint, wxSize, std::string, const layprop::DrawProperties*);
+                     FillSample(wxWindow*, wxWindowID, wxPoint, wxSize);
       void           setFill(const byte*);
       void           OnPaint(wxPaintEvent&);
    protected:
