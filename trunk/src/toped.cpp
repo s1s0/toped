@@ -2091,16 +2091,19 @@ void tui::TopedFrame::OnDefineColor(wxCommandEvent& WXUNUSED(event))
       tui::DefineColor dlg(this, -1, wxT("Color Definitions"), pos, drawprop);
       if ( dlg.ShowModal() == wxID_OK )
       {
-         const layprop::ColorMap colors = dlg.allColors();
-         for(layprop::ColorMap::const_iterator CC = colors.begin() ; CC != colors.end(); CC++)
+         const tui::DefineColor::ColorLMap colors = dlg.allColors();
+         for(tui::DefineColor::ColorLMap::const_iterator CC = colors.begin() ; CC != colors.end(); CC++)
          {
-            layprop::tellRGB* coldef = CC->second;
-            ost   << wxT("definecolor(\"") << wxString(CC->first.c_str(), wxConvUTF8)
-                  << wxT("\" , ")      << static_cast <int>(coldef->red())
-                  << wxT(" , ")        << static_cast <int>(coldef->green())
-                  << wxT(" , ")        << static_cast <int>(coldef->blue())
-                  << wxT(" , ")        << static_cast <int>(coldef->alpha())
-                  << wxT(");");
+            if (CC->second.first)
+            {
+               const layprop::tellRGB coldef = CC->second.second;
+               ost   << wxT("definecolor(\"") << wxString(CC->first.c_str(), wxConvUTF8)
+                     << wxT("\" , ")      << static_cast <int>(coldef.red())
+                     << wxT(" , ")        << static_cast <int>(coldef.green())
+                     << wxT(" , ")        << static_cast <int>(coldef.blue())
+                     << wxT(" , ")        << static_cast <int>(coldef.alpha())
+                     << wxT(");");
+            }
          }
          success = true;
       }

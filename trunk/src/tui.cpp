@@ -810,7 +810,7 @@ tui::DefineColor::DefineColor(wxWindow *parent, wxWindowID id, const wxString &t
    for( NameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
    {
       _colorList->Append(wxString(CI->c_str(), wxConvUTF8));
-      _allColors[*CI] = DEBUG_NEW layprop::tellRGB(_drawProp->getColor(*CI));
+      _allColors[*CI] = RcsColor(false,_drawProp->getColor(*CI));
    }
    // NOTE! Static boxes MUST be created before all other controls which are about to
    // be encircled by them. Otherwise the dialog box might work somewhere (Windows & fc8)
@@ -898,11 +898,10 @@ void tui::DefineColor::OnDefineColor(wxCommandEvent& cmdevent)
    wxColourData data;
    _drawProp->allColors(all_names);
    word colnum = 0;
-   const layprop::tellRGB* tell_color;
    for( NameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
    {
-      tell_color= getColor(*CI);
-      wxColour colour(tell_color->red(), tell_color->green(), tell_color->blue());
+      const layprop::tellRGB tell_color= getColor(*CI);
+      wxColour colour(tell_color.red(), tell_color.green(), tell_color.blue());
       if (16 == colnum)
          break;
       else
@@ -925,10 +924,13 @@ void tui::DefineColor::OnDefineColor(wxCommandEvent& cmdevent)
          _red.Printf(wxT("%d"),col.Red()  );
        _green.Printf(wxT("%d"),col.Green());
         _blue.Printf(wxT("%d"),col.Blue() );
-       FindWindow(ID_REDVAL  )->GetValidator()->TransferToWindow();
-       FindWindow(ID_GREENVAL)->GetValidator()->TransferToWindow();
-       FindWindow(ID_BLUEVAL )->GetValidator()->TransferToWindow();
+      static_cast<wxTextCtrl*>(FindWindow(ID_REDVAL  ))->ChangeValue(_red   );
+      static_cast<wxTextCtrl*>(FindWindow(ID_GREENVAL))->ChangeValue(_green );
+      static_cast<wxTextCtrl*>(FindWindow(ID_BLUEVAL ))->ChangeValue(_blue  );
+
       _colorsample->setColor(layprop::tellRGB(col.Red(), col.Green(), col.Blue(),178));
+      _colorsample->Refresh();
+
       wxCommandEvent dummy;
       OnApply(dummy);
    }
@@ -937,18 +939,18 @@ void tui::DefineColor::OnDefineColor(wxCommandEvent& cmdevent)
 void tui::DefineColor::OnColorSelected(wxCommandEvent& cmdevent)
 {
     wxString color_name = cmdevent.GetString();
-   const layprop::tellRGB* scol = getColor(std::string(color_name.mb_str(wxConvUTF8)));
+   const layprop::tellRGB scol = getColor(std::string(color_name.mb_str(wxConvUTF8)));
 
-     _red.Printf(wxT("%d"),scol->red()  );
-   _green.Printf(wxT("%d"),scol->green());
-    _blue.Printf(wxT("%d"),scol->blue() );
-   _alpha.Printf(wxT("%d"),scol->alpha());
+     _red.Printf(wxT("%d"),scol.red()  );
+   _green.Printf(wxT("%d"),scol.green());
+    _blue.Printf(wxT("%d"),scol.blue() );
+   _alpha.Printf(wxT("%d"),scol.alpha());
    static_cast<wxTextCtrl*>(FindWindow(ID_REDVAL  ))->ChangeValue(_red   );
    static_cast<wxTextCtrl*>(FindWindow(ID_GREENVAL))->ChangeValue(_green );
    static_cast<wxTextCtrl*>(FindWindow(ID_BLUEVAL ))->ChangeValue(_blue  );
    static_cast<wxTextCtrl*>(FindWindow(ID_ALPHAVAL))->ChangeValue(_alpha );
 
-   _colorsample->setColor(layprop::tellRGB(scol->red(), scol->green(), scol->blue(), scol->alpha()));
+   _colorsample->setColor(layprop::tellRGB(scol.red(), scol.green(), scol.blue(), scol.alpha()));
    _colorsample->Refresh();
 
    FindWindow(ID_BTNAPPLY)->Enable(false);
@@ -988,9 +990,8 @@ void tui::DefineColor::OnColorNameAdded(wxCommandEvent& WXUNUSED(event))
    }
    else
    {
-      layprop::tellRGB* newcol = DEBUG_NEW layprop::tellRGB(0,0,0,178);
       std::string s_newcol = std::string(color_name.mb_str(wxConvUTF8));
-      _allColors[s_newcol] = newcol;
+      _allColors[s_newcol] = RcsColor(true, layprop::tellRGB(0,0,0,178));
       _colorList->Append(color_name);
       _colorList->SetStringSelection(color_name, true);
       _colorList->EnsureVisible(_colorList->GetSelection());
@@ -1018,11 +1019,11 @@ void tui::DefineColor::nameNormalize(wxString& str)
    //remove spaces before brackets and separators
 }
 
-const layprop::tellRGB* tui::DefineColor::getColor(std::string color_name) const
+layprop::tellRGB tui::DefineColor::getColor(std::string color_name) const
 {
-   colorMAP::const_iterator col_set = _allColors.find(color_name);
-   if (_allColors.end() == col_set) return NULL;
-   return col_set->second;
+   ColorLMap::const_iterator col_set = _allColors.find(color_name);
+   if (_allColors.end() == col_set) return layprop::tellRGB();
+   return col_set->second.second;
 }
 
 void tui::DefineColor::OnApply(wxCommandEvent& WXUNUSED(event))
@@ -1037,28 +1038,14 @@ void tui::DefineColor::OnApply(wxCommandEvent& WXUNUSED(event))
    unsigned long d_blue;   _blue.ToULong(&d_blue);
    unsigned long d_alpha; _alpha.ToULong(&d_alpha);
 
-   layprop::tellRGB* scol = DEBUG_NEW layprop::tellRGB(d_red, d_green, d_blue, d_alpha);
    std::string ss_name(s_name.mb_str(wxConvUTF8));
    if (_allColors.end() != _allColors.find(ss_name))
    {
-      delete _allColors[ss_name];
-      _allColors[ss_name] = scol;
+      _allColors[ss_name] = RcsColor(true,layprop::tellRGB(d_red, d_green, d_blue, d_alpha));
    }
    FindWindow(ID_BTNAPPLY)->Enable(false);
 }
 
-tui::DefineColor::~DefineColor()
-{
-//   delete _dwcolname;
-//   delete _colorsample;
-//   delete _c_red;
-//   delete _c_green;
-//   delete _c_blue;
-//   delete _c_alpha;
-//   delete _colorList;
-   for(colorMAP::const_iterator CI = _allColors.begin(); CI != _allColors.end(); CI++)
-      delete CI->second;
-}
 
 //==============================================================================
 BEGIN_EVENT_TABLE(tui::PatternCanvas, wxWindow)
