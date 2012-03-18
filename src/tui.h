@@ -486,7 +486,7 @@ namespace tui {
    //--------------------------------------------------------------------------
    class ColorSample : public wxWindow {
    public:
-                     ColorSample(wxWindow*, wxWindowID, wxPoint, wxSize, layprop::tellRGB&);
+                     ColorSample(wxWindow*, wxWindowID, wxPoint, wxSize);
       void           setColor(const layprop::tellRGB&);
       void           OnPaint(wxPaintEvent&);
    protected:
@@ -520,10 +520,6 @@ namespace tui {
       wxString                _green;
       wxString                _blue;
       wxString                _alpha;
-      wxTextCtrl*             _c_red;
-      wxTextCtrl*             _c_green;
-      wxTextCtrl*             _c_blue;
-      wxTextCtrl*             _c_alpha;
       const layprop::DrawProperties*  _drawProp;
 
       DECLARE_EVENT_TABLE();
