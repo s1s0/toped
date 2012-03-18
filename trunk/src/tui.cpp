@@ -1240,9 +1240,9 @@ BEGIN_EVENT_TABLE(tui::FillSample, wxWindow)
 END_EVENT_TABLE()
 
 tui::FillSample::FillSample(wxWindow *parent, wxWindowID id, wxPoint pos,
-   wxSize size, std::string init, const layprop::DrawProperties* drawProp) : wxWindow(parent, id, pos, size, wxSUNKEN_BORDER)
+   wxSize size) : wxWindow(parent, id, pos, size, wxSUNKEN_BORDER)
 {
-   setFill(drawProp->getFill(init));
+   setFill(NULL);
 }
 
 void tui::FillSample::setFill(const byte* fill)
@@ -1287,11 +1287,6 @@ tui::DefineFill::DefineFill(wxFrame *parent, wxWindowID id, const wxString &titl
    NameList all_names;
    drawProp->allFills(all_names);
    _fillList = DEBUG_NEW wxListBox(this, ID_ITEMLIST, wxDefaultPosition, wxSize(150,200), 0, NULL, wxLB_SORT);
-   std::string init_color;
-   if (!all_names.empty())
-   {
-      init_color = *(all_names.begin());
-   }
    for( NameList::const_iterator CI = all_names.begin(); CI != all_names.end(); CI++)
    {
       _fillList->Append(wxString(CI->c_str(), wxConvUTF8));
@@ -1307,7 +1302,7 @@ tui::DefineFill::DefineFill(wxFrame *parent, wxWindowID id, const wxString &titl
 
    _dwfilname  = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxSize(150,-1), 0,
                                           wxTextValidator(wxFILTER_ASCII, &_filname));
-   _fillsample = DEBUG_NEW FillSample( this, -1, wxDefaultPosition, wxSize(-1,150), init_color, drawProp);
+   _fillsample = DEBUG_NEW FillSample( this, -1, wxDefaultPosition, wxSize(-1,150));
 
    hsizer0->Add( _dwfilname   , 0, wxALL | wxEXPAND, 5);
    hsizer0->Add(0,0,1); //
@@ -1337,6 +1332,14 @@ tui::DefineFill::DefineFill(wxFrame *parent, wxWindowID id, const wxString &titl
    SetSizer( top_sizer );      // use the sizer for layout
 
    top_sizer->SetSizeHints( this );   // set size hints to honour minimum size
+
+   if (!all_names.empty())
+   {
+      _fillList->Select(0);
+      wxCommandEvent event;
+      event.SetString(_fillList->GetStringSelection());
+      OnFillSelected(event);
+   }
 
 }
 
@@ -1389,12 +1392,12 @@ void tui::DefineFill::OnFillNameAdded(wxCommandEvent& WXUNUSED(event))
       for(byte i = 0; i< 128; i++)
          newpat[i] = 0x55 << ((byte)(i/4)%2);
       _allFills[s_newcol] = newpat;
-      int index = _fillList->Append(fill_name);
-      _fillList->Select(index);
+      _fillList->Append(fill_name);
+      _fillList->SetStringSelection(fill_name, true);
+      _fillList->EnsureVisible(_fillList->GetSelection());
       wxCommandEvent clrsel;
       clrsel.SetString(fill_name);
       OnFillSelected(clrsel);
-      _fillList->SetFirstItem(fill_name);
    }
 }
 
