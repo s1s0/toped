@@ -2124,17 +2124,19 @@ void tui::TopedFrame::OnDefineFill(wxCommandEvent& WXUNUSED(event))
       tui::DefineFill dlg(this, -1, wxT("Fill Definition"), pos, drawprop);
       if ( dlg.ShowModal() == wxID_OK )
       {
-         layprop::FillMap patterns = dlg.allPatterns();
-         for(layprop::FillMap::const_iterator CC = patterns.begin() ; CC != patterns.end(); CC++)
+         tui::DefineFill::FillLMap patterns = dlg.allPatterns();
+         for(tui::DefineFill::FillLMap::const_iterator CC = patterns.begin() ; CC != patterns.end(); CC++)
          {
-            byte* patdef = CC->second;
-            ost   << wxT("definefill(\"") << wxString(CC->first.c_str(), wxConvUTF8)
-                  << wxT("\" , {");
-            ost << static_cast <unsigned>(patdef[0]);
-            for (byte i = 1; i < 128; i++)
-               ost  << wxT(",") << static_cast <unsigned>(patdef[i]);
-            ost   << wxT("});");
-            success = true;
+            if (CC->second.first)
+            {
+               ost   << wxT("definefill(\"") << wxString(CC->first.c_str(), wxConvUTF8)
+                     << wxT("\" , {");
+               ost << static_cast <unsigned>(CC->second.second[0]);
+               for (byte i = 1; i < 128; i++)
+                  ost  << wxT(",") << static_cast <unsigned>(CC->second.second[i]);
+               ost   << wxT("});");
+               success = true;
+            }
          }
       }
    }

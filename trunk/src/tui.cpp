@@ -1292,7 +1292,7 @@ tui::DefineFill::DefineFill(wxFrame *parent, wxWindowID id, const wxString &titl
       _fillList->Append(wxString(CI->c_str(), wxConvUTF8));
       byte* pat = DEBUG_NEW byte[128];
       fillcopy(drawProp->getFill(*CI), pat);
-      _allFills[*CI] = pat;
+      _allFills[*CI] = RcsFill(false,pat);
    }
    // NOTE! Static boxes MUST be created before all other controls which are about to
    // be encircled by them. Otherwise the dialog box might work somewhere (Windows & fc8)
@@ -1391,7 +1391,7 @@ void tui::DefineFill::OnFillNameAdded(wxCommandEvent& WXUNUSED(event))
       byte* newpat = DEBUG_NEW byte[128];
       for(byte i = 0; i< 128; i++)
          newpat[i] = 0x55 << ((byte)(i/4)%2);
-      _allFills[s_newcol] = newpat;
+      _allFills[s_newcol] = RcsFill(true,newpat);
       _fillList->Append(fill_name);
       _fillList->SetStringSelection(fill_name, true);
       _fillList->EnsureVisible(_fillList->GetSelection());
@@ -1414,7 +1414,8 @@ void tui::DefineFill::OnDefineFill(wxCommandEvent& cmdevent)
       std::string ss_name(s_name.mb_str(wxConvUTF8));
       if (_allFills.end() != _allFills.find(ss_name))
       {
-         fillcopy(_current_pattern, _allFills[ss_name]);
+         fillcopy(_current_pattern, _allFills[ss_name].second);
+         _allFills[ss_name].first = true;
       }
 
    }
@@ -1422,12 +1423,12 @@ void tui::DefineFill::OnDefineFill(wxCommandEvent& cmdevent)
 
 const byte* tui::DefineFill::getFill(const std::string fill_name) const
 {
-   fillMAP::const_iterator fill_set = _allFills.find(fill_name);
+   FillLMap::const_iterator fill_set = _allFills.find(fill_name);
    if (_allFills.end() == fill_set) return NULL;
-   return fill_set->second;
+   return fill_set->second.second;
 }
 
-void tui::DefineFill::fillcopy(const byte* pattern, byte* nfill)
+void tui::DefineFill::fillcopy(const byte* pattern, byte nfill[128])
 {
    for(byte i = 0; i < 128; i++)
       nfill[i] = pattern[i];
@@ -1435,11 +1436,8 @@ void tui::DefineFill::fillcopy(const byte* pattern, byte* nfill)
 
 tui::DefineFill::~DefineFill()
 {
-//   delete _dwfilname;
-//   delete _fillsample;
-//   delete _fillList;
-   for(fillMAP::const_iterator CI = _allFills.begin(); CI != _allFills.end(); CI++)
-      delete[] CI->second;
+   for(FillLMap::const_iterator CI = _allFills.begin(); CI != _allFills.end(); CI++)
+      delete[] CI->second.second;
 }
 
 
