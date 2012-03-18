@@ -166,28 +166,12 @@ void  tui::TechEditorDialog::OnColorEditor(wxCommandEvent&)
 {
    wxCommandEvent event;
    Toped->OnDefineColor(event);
-//   _layerColors->Clear();
-//   layprop::DrawProperties* drawProp;
-//   if (PROPC->lockDrawProp(drawProp))
-//   {
-//      _layerColors->populate(drawProp);
-//   }
-//   PROPC->unlockDrawProp(drawProp, false);
-//   updateDialog();
 }
 
 void  tui::TechEditorDialog::OnFillEditor(wxCommandEvent&)
 {
    wxCommandEvent event;
    Toped->OnDefineFill(event);
-   _layerFills->Clear();
-   layprop::DrawProperties* drawProp;
-   if (PROPC->lockDrawProp(drawProp))
-   {
-      _layerFills->populate(drawProp);
-   }
-   PROPC->unlockDrawProp(drawProp, false);
-   updateDialog();
 }
 
 void  tui::TechEditorDialog::OnStyleEditor(wxCommandEvent&)
@@ -431,7 +415,23 @@ void tui::TechEditorDialog::OnRemotePropUpdate(wxCommandEvent& event)
             _layerColors->SetSelection(0);
          break;
       }
-      case console::TEU_FILLS : /*TODO */break;
+      case console::TEU_FILLS :
+      {
+         wxString s_fill        = _layerFills->GetValue();
+         _layerFills->Clear();
+         layprop::DrawProperties* drawProp;
+         if (PROPC->lockDrawProp(drawProp))
+         {
+            _layerFills->populate(drawProp);
+         }
+         PROPC->unlockDrawProp(drawProp, false);
+         int fillNumber = _layerFills->FindString(s_fill);
+         if (fillNumber != wxNOT_FOUND)
+            _layerFills->SetSelection(fillNumber);
+         else
+            _layerFills->SetSelection(0);
+         break;
+      }
       case console::TEU_LINES : /*TODO */break;
       default: assert(false); break;
    }

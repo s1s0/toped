@@ -574,19 +574,20 @@ namespace tui {
    class DefineFill : public wxDialog
    {
    public:
-      typedef  std::map<std::string, byte*         >  fillMAP;
+      typedef  std::pair<bool, byte*>          RcsFill;
+      typedef  std::map<std::string,RcsFill >  FillLMap;
                      DefineFill(wxFrame *parent, wxWindowID id, const wxString &title,
                                              wxPoint pos, const layprop::DrawProperties*);
       virtual       ~DefineFill();
       void           OnDefineFill(wxCommandEvent&);
       void           OnFillSelected(wxCommandEvent&);
       void           OnFillNameAdded(wxCommandEvent& WXUNUSED(event));
-      fillMAP&       allPatterns() {return _allFills;}
+      FillLMap&      allPatterns() {return _allFills;}
    private:
       void           nameNormalize(wxString&);
-      void           fillcopy(const byte*, byte*);
+      void           fillcopy(const byte*, byte[128]);
       const byte*    getFill(const std::string) const;
-      fillMAP        _allFills;
+      FillLMap       _allFills;
       wxListBox*     _fillList;
       wxTextCtrl*    _dwfilname;
       FillSample*    _fillsample;
