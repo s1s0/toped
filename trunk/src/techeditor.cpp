@@ -166,14 +166,14 @@ void  tui::TechEditorDialog::OnColorEditor(wxCommandEvent&)
 {
    wxCommandEvent event;
    Toped->OnDefineColor(event);
-   _layerColors->Clear();
-   layprop::DrawProperties* drawProp;
-   if (PROPC->lockDrawProp(drawProp))
-   {
-      _layerColors->populate(drawProp);
-   }
-   PROPC->unlockDrawProp(drawProp, false);
-   updateDialog();
+//   _layerColors->Clear();
+//   layprop::DrawProperties* drawProp;
+//   if (PROPC->lockDrawProp(drawProp))
+//   {
+//      _layerColors->populate(drawProp);
+//   }
+//   PROPC->unlockDrawProp(drawProp, false);
+//   updateDialog();
 }
 
 void  tui::TechEditorDialog::OnFillEditor(wxCommandEvent&)
@@ -414,7 +414,23 @@ void tui::TechEditorDialog::OnRemotePropUpdate(wxCommandEvent& event)
 {
    switch (event.GetId())
    {
-      case console::TEU_COLORS: /*TODO */break;
+      case console::TEU_COLORS:
+      {
+         wxString s_color        = _layerColors->GetValue();
+         _layerColors->Clear();
+         layprop::DrawProperties* drawProp;
+         if (PROPC->lockDrawProp(drawProp))
+         {
+            _layerColors->populate(drawProp);
+         }
+         PROPC->unlockDrawProp(drawProp, false);
+         int colorNumber = _layerColors->FindString(s_color);
+         if (colorNumber != wxNOT_FOUND)
+            _layerColors->SetSelection(colorNumber);
+         else
+            _layerColors->SetSelection(0);
+         break;
+      }
       case console::TEU_FILLS : /*TODO */break;
       case console::TEU_LINES : /*TODO */break;
       default: assert(false); break;
