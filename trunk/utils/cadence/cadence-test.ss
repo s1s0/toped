@@ -1,4 +1,5 @@
-(module cadence-test scheme
+#lang scheme
+;(module cadence-test scheme
   (require "cadence.ss")
   (define input-list (vector->list (current-command-line-arguments)))
 
@@ -10,4 +11,4 @@
   (convert (list "d:\\toped\\v2\\tell.tll" "d:\\toped\\v2\\display.drf" "d:\\toped\\v2\\BCD30Lib.tf"))
   ;(convert input-list)
   ;(convert (list "tellx.tll" "default.ss" "techfile.ss"))
-  )
+;  )

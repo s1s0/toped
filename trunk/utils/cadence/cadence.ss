@@ -23,7 +23,6 @@
 ;//      $Date$
 ;//      $Author$
 ;//===========================================================================
-
 (module cadence scheme
   (require scheme/base)
   (require scheme/list)
@@ -327,7 +326,9 @@
                    (line-style (cadddr x))
                    (fill (car temp))
                    (outline (cadr temp))
-                   (fill-style (caddr temp))
+                   (fill-style (if (< (length temp) 3) 
+                                   ""
+                                   (caddr temp)))
                    
                    (packet (define-packet name)))
                  (begin
@@ -598,37 +599,4 @@
      (lambda(layer) ((layer 'get-name)))
      layer-list)))
   
-;---------------------------------------------
-;(define d (foldl (lambda (word result) 
-;                   (append result (readlines word))) '() (list "default.drf" "techfile.tf")))
-;(write-to-file "tell.tll" (append (parse d) (layer-setup) (post-proceed)))
-;(write-to-file "tell.tll" (append (parse d))); (layer-setup) (post-proceed)))
-
-;(parse d)
-;(find-layer layer-list "PW")
-;(find-layer layer-list "NBL1")
-;((cadr layer-list) 'get-name)
-#|
-(for-each 
- (lambda(layer)
-   (begin
-     (display "name = ")
-     (display ((layer 'get-name)))
-     (newline)
-     ;(display "streamed=")
-     ;(display ((layer 'get-streamed)))
-     (display "packet=")
-     (display ((layer 'get-packet)))
-     (newline)))
- layer-list)|#
-
-;(define input-list (vector->list (current-command-line-arguments)))
-
-;(define collected-strings (foldl (lambda (word result) 
-;                   (append result (readlines word))) '() input-list))
-;(write-to-file "d:\\1\\tell.tll" (append (parse collected-strings) (layer-setup) (post-proceed)))
-  ;(debug-print-packets "d:\\toped\\vanguard\\display.drf")
-  ;(debug-print-layers "d:\\toped\\vanguard\\vis40cb.tf")
-   ;(convert (list "d:\\toped\\vanguard\\tell.tll" "d:\\toped\\vanguard\\display.drf" "d:\\toped\\vanguard\\vis40cb.tf"))
-   ;(convert (list "d:\\toped\\v2\\tell.tll" "d:\\toped\\v2\\display.drf" "d:\\toped\\v2\\BCD30Lib.tf"))
 )

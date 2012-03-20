@@ -412,7 +412,7 @@ drDefineLineStyle(
 )
 drDefinePacket(
 ;( DisplayName  PacketName           Stipple    LineStyle  Fill       Outline    [FillStyle])
- ( display      softFence            blank      solid      yellow     yellow     outline   )
+ ( display      softFence            blank      solid      yellow     yellow        )
  ( display      hilite5              blank      solid      lime       lime       outline   )
  ( display      P2                   blank      solid      brown      brown      solid     )
  ( display      instanceLbl          blank      solid      gold       gold       outline   )
