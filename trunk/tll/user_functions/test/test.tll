@@ -1,3 +1,7 @@
+#ifndef __TEST_TEST_TLL__
+#define __TEST_TEST_TLL__
+
+
 //===========================================================================
 //                                                                          =
 // ------------------------------------------------------------------------ =
@@ -27,6 +31,11 @@
  *
  *      Functions:
  *
+ * void test_start ();
+ * void test_start (string msg);
+ * void test_end ();
+ * void test_end ( string msg);
+ *
  * bool check_compare_data (<int,real,point>, <int,real,point>);
  * .. compares two data types
  *
@@ -52,6 +61,22 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  **/
 
+#include "general/geometry.tll"
+
+
+void test_start () {
+  printf ("------------- tests are beginning\n");
+}
+void test_start (string msg) {
+  printf ("----- %s ---- [start]\n",msg);
+}
+
+void test_end () {
+  printf ("------------- tests finished\n");
+}
+void test_end (string msg) {
+  printf ("----- %s ---- [end]\n",msg);
+}
 
 /* ATTENTION: for following overloaded functions the order of
    definition might be of importance ! --> has to be checked */
@@ -114,38 +139,41 @@ bool check_compare_data (point sample, point template) {
 //overloaded version for BOOL
 void check_compare_data_echo (bool sample, bool template) {
   if (check_compare_data (sample, template)) {
-    echo ("Test OK");
+    printf ("Test OK\n");
   } else {
-    echo ("Test FAILED");
+    printf ("--> BOOL Test FAILED: sample ( = %d) is not correct\n", sample);
   }
 }
 
 //overloaded version for INT
 void check_compare_data_echo (int sample, int template) {
   if (check_compare_data (sample, template)) {
-    echo ("Test OK");
+    printf ("Test OK\n");
   } else {
-    echo ("Test FAILED");
+    printf ("--> INT Test FAILED: sample ( = %d) is not equal to %d\n", 
+	    sample, template);
   }
 }
 
 //overloaded version for REAL
 void check_compare_data_echo (real sample, real template) {
   if (check_compare_data (sample, template)) {
-    echo ("Test OK");
+    printf ("Test OK\n");
   } else {
-    echo ("Test FAILED");
+    printf ("--> REAL Test FAILED: sample ( = %.15f) is not equal to %.15f\n", 
+	    sample, template);
   }
 }
 
 //overloaded version for points
 void check_compare_data_echo (point sample, point template) {
   if (check_compare_data (sample, template)) {
-    echo ("Test OK");
+    printf ("Test OK\n");
   } else {
-    echo ("Test FAILED");
+    printf ("--> POINT Test FAILED: sample ( = [%.15f, %.15f] ) is not equal to [%.15f, %.15f]\n", 
+	    sample.x, sample.y, template.x, template.y);
   }
 }
 
 
-
+#endif

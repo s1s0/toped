@@ -1,3 +1,5 @@
+#ifndef __DEVICES_FINGER_CAPS_TLL__
+#define __DEVICES_FINGER_CAPS_TLL__
 
 //===========================================================================
 //                                                                          =
@@ -11,19 +13,23 @@
 //   This file is a part of Toped project                                   =
 //   Copyright (C) 2001-2010 Toped developers                               =
 // ------------------------------------------------------------------------ =
-//           $URL$
+//           $URL:$
 //     Originator: Armin Taschwer - analogcmos@gmx.net
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------
-//      $Revision$
-//          $Date$
-//        $Author$
+//      $Revision:$
+//          $Date:$
+//        $Author:$
 //===========================================================================
+
 /**   Description:
  *
- * functions to generate different kind of caps
+ * functions to generate finger-caps on any metal layer
  *
+ *    Functions:
+ *
+ * void draw_finger_cap ( box b, int startlayer, int endlayer );
  */
 
 /** LICENSE:
@@ -43,16 +49,18 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
 
+#include "technology/helper.tll"
+#include "general/wires.tll"
 
 /* simple fingercaps
- * @param area describes the area into which the finger-cap should be places
+ * ATTENTION: the user is responsible for a proper layer choose
+ *   only such layers may be selected on which the VIA-sizes are equal
+ *   otherwise it will end up in DRC errors
+ * @param b describes the area/box into which the finger-cap should be places
  * @param startlayer lowest metal layer (1 = MET1, 2 = MET2, etc.)
  * @param endlayer highest metal layer
  */
 void draw_finger_cap ( box b, int startlayer, int endlayer ) {
-
-  real max_min_w = 0; //width of finger
-  real max_min_s = 0; //gap between fingers
 
   int sl = startlayer;
   int el = endlayer;
@@ -61,28 +69,15 @@ void draw_finger_cap ( box b, int startlayer, int endlayer ) {
     el = startlayer;
     sl = endlayer;
   }
+
   if (sl > MAX_METAL) return;
   if (el > MAX_METAL) el = MAX_METAL;
 
-  // check for the largest minimal wire width / space
-  foreach (int i; seq(sl,el) ) {
-    if (i == 1) {
-      max_min_w = M1_MIN_W;
-      max_min_s = M1_MIN_S;
-    } else if (i == 2) {
-      if (max_min_w < M2_MIN_W) max_min_w = M2_MIN_W;
-      if (max_min_s < M2_MIN_S) max_min_s = M2_MIN_S;
-    } else if (i == 3) {
-      if (max_min_w < M3_MIN_W) max_min_w = M3_MIN_W;
-      if (max_min_s < M3_MIN_S) max_min_s = M3_MIN_S;
-    } else if (i == 4) {
-      if (max_min_w < M4_MIN_W) max_min_w = M4_MIN_W;
-      if (max_min_s < M4_MIN_S) max_min_s = M4_MIN_S;
-    }
-    //needs to be extended if more metals are wanted
-  }
+  real max_min_w = get_max_min_width_metal (sl, el); //width of finger
+  real max_min_s = get_max_min_space_metal (sl, el); //gap between fingers
 
-  int base_y = max_min_w + 2*VIA_ENC; //height of the base segment of the comb
+  //height of the base segment of the comb
+  int base_y = max_min_w + 2*get_max_min_enc_via (sl, el); 
 
   //fingers are always oriented from north to south
   int n_finger = floor((box_width (b) - max_min_w) / (2*max_min_w + 2*max_min_s));
@@ -100,21 +95,18 @@ void draw_finger_cap ( box b, int startlayer, int endlayer ) {
   real y_start;       //
   real x,y;           //changing y values
   real fac;           // -1 if y_start is minimal, otherwise 1
-  real x_start = r_min (b.p1.x, b.p2.x);
+  real x_start = min (b.p1.x, b.p2.x);
   point list comb;
 
   foreach (int i ; seq (sl,el)) {
     // set layer
-    if (i == 1) usinglayer ("MET1");
-    if (i == 2) usinglayer ("MET2");
-    if (i == 3) usinglayer ("MET3");
-    if (i == 4) usinglayer ("MET4");
+    set_metal_layer (i);
 
     if ( fmod(i,2) == 0 ) { //for upper comb
-      y_start = r_max (b.p1.y, b.p2.y);
+      y_start = max (b.p1.y, b.p2.y);
       fac = 1;
     } else { //for lower comb
-      y_start = r_min (b.p1.y, b.p2.y);
+      y_start = min (b.p1.y, b.p2.y);
       fac = -1;
     }
 
@@ -176,19 +168,21 @@ void draw_finger_cap ( box b, int startlayer, int endlayer ) {
     addpoly (comb);
 
     comb = {}; //delete contents
+  } //end foreach
 
-    //draw vias
-    if (i != el) {
-      real via_x_start = r_min (b.p1.x, b.p2.x);
-      real via_x_end = x - max_min_w;
-      real via_y_up = r_max (b.p1.y, b.p2.y);
-      real via_y_down = r_min (b.p1.y, b.p2.y) + base_y;
-      int via_el = i + 1;
-
-      placeVIAarray ( {via_x_start, via_y_up}, 
-		      {via_x_end,   via_y_up - base_y}, i, via_el);
-      placeVIAarray ( {via_x_start, via_y_down}, 
-		      {via_x_end,   via_y_down - base_y}, i, via_el);
-    }
+  //draw vias
+  if (el > sl) {
+    real via_x_start = min (b.p1.x, b.p2.x);
+    real via_x_end = x - max_min_w;
+    real via_y_up = max (b.p1.y, b.p2.y);
+    real via_y_down = min (b.p1.y, b.p2.y) + base_y;
+    
+    place_VIA_array ( {via_x_start, via_y_up}, 
+		      {via_x_end,   via_y_up - base_y}, sl, el);
+    place_VIA_array ( {via_x_start, via_y_down}, 
+		      {via_x_end,   via_y_down - base_y}, sl, el);
   }
 }
+
+
+#endif

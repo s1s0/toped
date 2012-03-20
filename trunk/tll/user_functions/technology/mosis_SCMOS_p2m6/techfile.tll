@@ -1,5 +1,5 @@
-#ifndef __CONFIGURATION_MAIN__
-#define __CONFIGURATION_MAIN__
+#ifndef __TECHNOLOGY_DEFINITIONS__
+#define __TECHNOLOGY_DEFINITIONS__
 
 
 //===========================================================================
@@ -11,25 +11,25 @@
 //                        T      E        L       L                         =
 //                        T      EEEEE    LLLLL   LLLLL                     =
 //                                                                          =
-//   This file is a part of Toped project (C) 2001-2006 Toped developers    =
+//   This file is a part of Toped project                                   =
+//   Copyright (C) 2001-2010 Toped developers                               =
 // ------------------------------------------------------------------------ =
-//           $URL$
-//        Created: Tue Jun 28 13:16:45 BST 2005
-//     Originator: Svilen Krustev - skr@toped.org.uk
-//    Description: Basic screen setup for Toped
+//           $URL:$
+//     Originator: Armin Taschwer - analogcmos@gmx.net
 //---------------------------------------------------------------------------
 //  Revision info
-//---------------------------------------------------------------------------                
-//      $Revision$
-//          $Date$
-//        $Author$
+//---------------------------------------------------------------------------
+//      $Revision:$
+//          $Date:$
+//        $Author:$
 //===========================================================================
 
 /**   Description:
  *
- * main configuration files
- * For a customized configuration it is recommended to copy this and the 
- * appropriate helper files to the user setup directory.
+ * source: http://www.mosis.com/Technical/Designrules/scmos/scmos-main.html
+ * 
+ * Main techfile of the MOSIS SCMOS technology
+ * (to change the Lambda you have to go to the drc.tll file)
  * 
  **/
 
@@ -51,14 +51,19 @@
  **/
 
 
-#include "config/config_misc.tll"
-#include "config/config_pattern.tll"
-#include "config/config_color.tll"
+printf ("Loading techfile ..\n");
+printf ("  /--------------------------------------------------------\n");
+printf ("  | MOSIS  .. http://www.mosis.com\n");
+printf ("  | Options:  SUBM                \n");
+printf ("  | Properties: \n");
+printf ("  |   * 2 poly layer      \n");
+printf ("  |   * 6 metal layer     \n");
+printf ("  \--------------------------------------------------------\n");
 
-setup_color();
-setup_fill();
-setup_line();
-setup_screen();
-setup_parameter();
+
+#include "technology/mosis_SCMOS_p2m6/layer.tll"
+#include "technology/mosis_SCMOS_p2m6/drc.tll"
+
+layerSetup();
 
 #endif
