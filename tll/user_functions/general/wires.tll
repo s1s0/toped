@@ -1,3 +1,6 @@
+#ifndef __GENERAL_WIRES_TLL__
+#define __GENERAL_WIRES_TLL__
+
 
 //===========================================================================
 //                                                                          =
@@ -28,7 +31,7 @@
  * Functions
  * ---------
  * void addwire_on_grid (point list pl, real width, bool fullypoly);
- * void placeVIAarray  (point leftbot, point righttop, int startlay, int stoplay);
+ * void place_VIA_array  (point leftbot, point righttop, int startlay, int stoplay);
  */
 
 /** LICENSE:
@@ -49,11 +52,10 @@
  */
 
 
-// following files need to be included BEFORE including this file !!
-
-/* instead of default_drc you may also use a customized drc file */
-//#include "default_drc.tll"
-//#include "helper.tll"
+#include "general/definitions.tll"
+#include "technology/helper.tll"
+#include "general/geometry.tll"
+#include "general/helper.tll"
 
 
 /* creates a wire which is an polygon but all corners are on-grid
@@ -87,36 +89,36 @@ void addwire_on_grid (point list pl, real width, bool fullypoly) {
   poly[+:] = round_to_grid (vec_mirror(p1) + pl[0]);
 
   if (nb > 2) {
-	int nn = nb -2;
-	foreach ( int n; seq(1,nn) ) {
-	  p1 = vec_normal(pl[n] - pl[n-1]) * hw;
-	  p2 = vec_normal(pl[n+1] - pl[n]) * hw;
-	  p3 = (p1 + p2)/2;
+    int nn = nb -2;
+    foreach ( int n; seq(1,nn) ) {
+      p1 = vec_normal(pl[n] - pl[n-1]) * hw;
+      p2 = vec_normal(pl[n+1] - pl[n]) * hw;
+      p3 = (p1 + p2)/2;
 
-	  //echo(p1); echo(p2);echo (p3);
+      //echo(p1); echo(p2);echo (p3);
 
-	  // (p1 + p2)/2 .. is in relation to the corner (it points to the
+      // (p1 + p2)/2 .. is in relation to the corner (it points to the
       // corner) 
       // b/a = x/b  .. x is the difference between upper point and
       // corner (strahlensatz)
-	  // --> x = b^2/a
+      // --> x = b^2/a
       // refer to "wire_corn_calc.png"
-	  a = vec_len (p3);
+      a = vec_len (p3);
       b2 =  pow(hw,2) - pow(a,2);
-	  x = b2 / a;
-	  p3 = p3*(x/a + 1);
+      x = b2 / a;
+      p3 = p3*(x/a + 1);
 
-	  // echo (p3);
-	  // echo (a); echo(b2); echo(x);
-	  //echo (pl[n] + p3);
-	  //echo (vec_mirror(p3) + pl[n]);
-	  poly[:+] = round_to_grid(pl[n] + p3);
-	  poly[+:] = round_to_grid(vec_mirror(p3) + pl[n]);
-	  if ( ! fullypoly) {
-		addpoly(poly);
-		poly[1:-2]; //removes two points from the middle of the list
-	  }
-	}
+      // echo (p3);
+      // echo (a); echo(b2); echo(x);
+      //echo (pl[n] + p3);
+      //echo (vec_mirror(p3) + pl[n]);
+      poly[:+] = round_to_grid(pl[n] + p3);
+      poly[+:] = round_to_grid(vec_mirror(p3) + pl[n]);
+      if ( ! fullypoly) {
+	addpoly(poly);
+	poly[1:-2]; //removes two points from the middle of the list
+      }
+    }
   }
 
   p1 = vec_normal( pl[nb-1] - pl[nb-2] ) * hw;
@@ -128,9 +130,96 @@ void addwire_on_grid (point list pl, real width, bool fullypoly) {
 }
 
 
-/* ATTENTION placeVIAarray:
- * needs a technology file (at least default_drc.tll) to be included!
- */
+
+//-------------------------------------------------
+//  Function: helper_calc_vias
+//  Description: 
+//    helper function for placeVIAarray
+//-------------------------------------------------
+//  @param leftbot .. left bottom point of the area 
+//  @param righttop .. right bottom point of the area
+//  @param layer .. Via layer
+//  @return {error, viasz, viaspc, viaenc, xx, yy, spcx, spcy }
+//-------------------------------------------------
+real list helper_calc_vias (point leftbot, point righttop, int layer) {
+  real list ret[8];
+
+  real list viap = get_via_parameter (layer);
+  if (length (viap) == 0) {
+    ret[0] = -1; //error
+    return (ret);
+  } else {
+    ret[0] = 0;
+  }
+
+  ret[1] = viap[0]; //size
+  ret[2] = viap[1]; //spacing 
+  ret[3] = viap[2]; //enclosure
+
+  point via = { viap[0], viap[0] };
+  point via_spc = { viap[1], viap[1] };
+  point via_enc = { viap[2], viap[2] };
+
+  point t_dist = vec_abs (righttop - leftbot);
+  point dist = t_dist - (via_enc*2.0 + via); // diagonal without
+                                             // last VIAs+enclosure  
+  if (dist.x < 0) dist.x = 0.0;
+  if (dist.y < 0) dist.y = 0.0;
+
+  /*   x...x...x...x   --> x == vias, . == spaces */
+  int xx = floor(EPS + dist.x / (via.x + via_spc.x)); //number of vias & spaces - 1 via
+  int yy = floor(EPS + dist.y / (via.y + via_spc.y)); //number of vias & spaces - 1 via
+
+  ret[4] = xx;
+  ret[5] = yy;
+
+  real spcx, spcy;
+  real min_w = via.x + 2.0*via_enc.x;
+
+  if (xx == 0) {    
+    if(t_dist.x >= min_w ) {
+      //xx = 1; //just one row
+      spcx = via_spc.x; //suppresses error messages
+    } else {
+      spcx = 0; //forces exit
+    }
+  } else {
+    spcx = (dist.x - xx*via.x)/xx; //max. space between two vias
+  }
+
+  if (yy == 0) {
+    if (t_dist.y >= min_w ) {
+      //yy = 1; //just one row
+      spcy = via_spc.y; //suppresses error messages
+    } else {
+      spcy = 0; //forces exit
+    }
+  } else {
+    spcy = (dist.y - yy*via.y)/yy; //max. space between two vias
+  }
+
+  point spcgrid = floor_to_grid ( {spcx, spcy} );
+
+  ret[6] = spcx;
+  ret[7] = spcy;
+  
+  if (spcgrid.x < (via_spc.x - EPS)) {
+    printf ("WARNING: found DRC violation for X-spacing -- abort function\n");
+    printf ("  spcgrid: [%.15f, %.15f] vs. rule: [%.15f, %.15f]\n", 
+	    spcgrid.x, spcgrid.y, via_spc.x, via_spc.y);
+    ret[0] = -1;
+  } else {
+    if (spcgrid.y < (via_spc.y - EPS)) {
+      printf ("WARNING: found DRC violation for Y-spacing -- abort function\n");
+      printf ("  spcgrid: [%.15f, %.15f] vs. rule: [%.15f, %.15f]\n", 
+	      spcgrid.x, spcgrid.y, via_spc.x, via_spc.y);
+      ret[0] = -1;
+    } 
+  }
+
+  return (ret);
+}
+
 
 /*
  * draws an array on vias into a rectangle defined by leftbot and
@@ -143,15 +232,16 @@ void addwire_on_grid (point list pl, real width, bool fullypoly) {
  * @param stoplay .. specifies the highest metal layer which has to be
  * contacted 
  */
-void placeVIAarray (point leftbot, point righttop, int startlay, int stoplay) {
+void place_VIA_array (point leftbot, point righttop, int startlay, int stoplay) {
   
-  point via_spc = {VIA_SPC, VIA_SPC};
-  point via = { VIA, VIA };
-  box via_bx = { {0,0}, via };
-  point via_enc = {VIA_ENC, VIA_ENC};
+  real list results;
+
+  int alay = startlay;
+  int zlay = stoplay;
 
   point lb = leftbot;
   point rt = righttop;
+
 
   //check input range
   if (leftbot.x > righttop.x) { 
@@ -163,75 +253,12 @@ void placeVIAarray (point leftbot, point righttop, int startlay, int stoplay) {
     rt.y = leftbot.y;
   }
 
-
   point t_dist = vec_abs (rt - lb);
-  point dist = t_dist - (via_enc*2.0 + via); // diagonal without
-                                             // last VIAs+enclosure  
-  if (dist.x < 0) dist.x = 0.0;
-  if (dist.y < 0) dist.y = 0.0;
-
-  /*   x...x...x...x   --> x == vias, . == spaces */
-  int xx = floor(EPS + dist.x / (VIA+VIA_SPC)); //number of vias & spaces - 1 via
-  int yy = floor(EPS + dist.y / (VIA+VIA_SPC)); //number of vias & spaces - 1 via
-  real spcx, spcy;
-  real min_w = VIA + 2.0*VIA_ENC;
-
-  if (xx == 0) {
-    
-    if(t_dist.x >= min_w ) {
-      //xx = 1; //just one row
-      spcx = VIA_SPC; //suppresses error messages
-    } else {
-      spcx = 0; //forces exit
-    }
-  } else {
-    spcx = (dist.x - xx*VIA)/xx; //max. space between two vias
-  }
-
-  if (yy == 0) {
-    if (t_dist.y >= min_w ) {
-      //yy = 1; //just one row
-      spcy = VIA_SPC; //suppresses error messages
-    } else {
-      spcy = 0; //forces exit
-    }
-  } else {
-    spcy = (dist.y - yy*VIA)/yy; //max. space between two vias
-  }
-
-  point spcgrid = floor_to_grid ( {spcx, spcy} );
-
-  int alay = startlay;
-  int zlay = stoplay;
-
-  if (startlay > stoplay) {
-    alay = stoplay;
-    zlay = startlay;
-  }
-
-
-  //debug
-  // echo(lb); echo(rt);
-  // echo(vec_abs(rt-lb));
-  // echo(dist);
-  // echo(spcx);echo(spcy);
-  // echo(spcgrid);
-  // echo( "xx: " );echo( xx );
-  // echo( "yy: " );echo( yy );
-  // echo( "alay ");echo(alay);
-  // echo( "zlay ");echo(zlay);
-  
-  if (spcgrid.x < VIA_SPC) {
-    echo ("WARNING: found DRC violation for X-spacing -- abort function");
-    echo ("  spcgrid: "); echo (spcgrid);
-    return;
-  } else {
-    if (spcgrid.y < VIA_SPC) {
-      echo ("WARNING: found DRC violation for Y-spacing -- abort function");
-      echo ("  spcgrid: "); echo (spcgrid);
-      return;
-    } 
-  }
+  point spcgrid;
+  point pvia_spc;
+  real via, via_spc, via_enc;
+  int xx, yy;
+  box via_bx;
 
   int break = 0; //if break == 1 : do not draw any vias
 
@@ -239,75 +266,76 @@ void placeVIAarray (point leftbot, point righttop, int startlay, int stoplay) {
     //debug
     //echo (lay);
 
-    if (lay == 1) {
-      usinglayer ("MET1");
-      addbox ( { lb, rt } );
-      if (lay >= zlay) { break = 1; }
-      else {
-	usinglayer ("VIA1");
+    set_metal_layer (lay);
+    addbox ( { lb, rt } );
+
+    if (lay < zlay) {
+      set_via_layer (lay);
+      results = helper_calc_vias (lb, rt, lay);
+      if (results[0] < 0) { //error detected?
+	return;
       }
+
+      // return: { error, viasz, viaspc, viaenc, xx, yy, spcx, spcy }
+
+      via = results[1];
+      via_spc = results[2];
+      via_enc = results[3];
+      xx = results[4];
+      yy = results[5];
+      spcgrid.x = results[6];
+      spcgrid.y = results[7];
+      pvia_spc = {via_spc, via_spc};
+      via_bx = { {0,0}, {via,via} };
+
+    } else {
+      break = 1; //no VIAs necessary
     }
 
-    if (lay == 2) {
-      usinglayer ("MET2");
-      addbox ( { lb, rt } );
-      if (lay >= zlay) { break = 1; }
-      else {
-	usinglayer ("VIA2");
-      }
-    }
-    if (lay == 3) {
-      usinglayer ("MET3");
-      addbox ( { lb, rt } );
-      if (lay >= zlay) { break = 1; }
-      else {
-	usinglayer ("VIA3");
-      }
-    }
-    if (lay == 4) {
-      usinglayer ("MET4");
-      addbox ( { lb, rt } );
-      break = 1; 
-    }
-
+    //draw vias
     if ( break == 0 ) {
       int exx = xx+1;
       int eyy = yy+1;
       real px,py;
       point newp, residue;
 
-      foreach (int x; seq (1,exx) ) {
-	foreach (int y; seq (1,eyy) ) {
-	  px = (VIA+spcgrid.x)*(x-1);
-	  py = (VIA+spcgrid.y)*(y-1);
+      int list seqence_exx = seq(1,exx);
+      int list seqence_eyy = seq(1,eyy);
+
+      foreach (int x; seqence_exx ) {
+	foreach (int y; seqence_eyy ) {
+	  px = (via+spcgrid.x)*(x-1);
+	  py = (via+spcgrid.y)*(y-1);
 	  newp = { px, py};
-	  residue = t_dist - newp + via_spc;
+	  residue = t_dist - newp + pvia_spc;
 
-	  if (exx == 1) residue.x = VIA_SPC; //skip warning
-	  if (eyy == 1) residue.y = VIA_SPC; //skip warning
+	  if (exx == 1) residue.x = via_spc; //skip warning
+	  if (eyy == 1) residue.y = via_spc; //skip warning
 
-	  if (residue.x < VIA_SPC) {
-	    echo ("WARNING: found DRC violation in X-direction -- VIA will not drawn");
-	    //echo (rt); echo (newp); echo (rt - newp);
-	    echo ("  residue: "); echo (residue);
-	    echo ("  spcgrid: "); echo (spcgrid);
+	  if (residue.x < via_spc - EPS) {
+	    printf ("WARNING: found DRC violation in X-direction -- VIA will not drawn\n");
+	    printf ("  residue: [%.15f, %.15f],  spcgrid: [%.15f, %.15f]\n", 
+	    	    residue.x, residue.y, spcgrid.x, spcgrid.y);
 	  } else {
-	    if (residue.y < VIA_SPC) {
-	      echo ("WARNING: found DRC violation in Y-direction -- VIA will not drawn");
+	    if (residue.y < via_spc - EPS) {
+	      echo ("WARNING: found DRC violation in Y-direction -- VIA will not drawn\n");
 	      //echo (rt); echo (newp); echo (rt - newp);
-	      echo ("  residue: "); echo (residue);
-	      echo ("  spcgrid: "); echo (spcgrid);
+	      printf ("  residue: [%.15f, %.15f],  spcgrid: [%.15f, %.15f]\n", 
+		      residue.x, residue.y, spcgrid.x, spcgrid.y);
 	    } else {
-	      point sspace = via_enc;
-	      if (exx == 1) sspace.x = floor_of_real_to_grid((t_dist.x - VIA)/2.0);
-	      if (eyy == 1) sspace.y = floor_of_real_to_grid((t_dist.y - VIA)/2.0);
+	      point sspace = {via_enc, via_enc};
+	      if (exx == 1) sspace.x = floor_of_real_to_grid((t_dist.x - via)/2.0);
+	      if (eyy == 1) sspace.y = floor_of_real_to_grid((t_dist.y - via)/2.0);
 	      addbox ( via_bx + lb + sspace + newp );
 	    }
 	  }
-	}
-      }
+	} //foreach yy
+      } //foreach xx
     } else {
       lay = zlay + 1;
     }
   }
 }
+
+
+#endif

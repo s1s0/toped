@@ -1,3 +1,6 @@
+#ifndef __GENERAL_DEFINITIONS_TLL__
+#define __GENERAL_DEFINITIONS_TLL__
+
 
 //===========================================================================
 //                                                                          =
@@ -44,6 +47,10 @@
  */
 
 
+// CONSTANTS
+// ------------------
+
+
 const real PI = 3.14159265358979323844;
 
 //32 bit integer
@@ -54,3 +61,21 @@ const int INT_pINF = 2147483648-1;
 //         number
 const real REAL_mINF = -3.4e38;
 const real REAL_pINF = 3.4e38;
+
+const string STR_NOT_FOUND = "!__not_found__!"; //needed in helper.tll
+
+
+// STRUCTURES
+//-------------------
+
+// edge between point a an point b
+struct edge {
+  point a;
+  point b
+};
+
+
+// #else
+//    printf ("definitions already loaded ..\n");
+
+#endif

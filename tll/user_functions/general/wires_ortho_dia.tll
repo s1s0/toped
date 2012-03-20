@@ -1,3 +1,6 @@
+#ifndef __GENERAL_WIRES_ORTHO_DIA_TLL__
+#define __GENERAL_WIRES_ORTHO_DIA_TLL__
+
 
 //===========================================================================
 //                                                                          =
@@ -53,6 +56,10 @@
  */
 
 
+#include "general/definitions.tll"
+#include "technology/default.tll"
+#include "general/geometry.tll"
+#include "general/helper.tll"
 
 
 /*
@@ -419,3 +426,5 @@ point list create_poly_ortho_dia (point list p, real dev) {
 
   return (ret);
 }
+
+#endif

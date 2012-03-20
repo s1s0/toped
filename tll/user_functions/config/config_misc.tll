@@ -1,6 +1,5 @@
-#ifndef __CONFIGURATION_MAIN__
-#define __CONFIGURATION_MAIN__
-
+#ifndef __CONFIGURATION_MISC__
+#define __CONFIGURATION_MISC__
 
 //===========================================================================
 //                                                                          =
@@ -11,25 +10,28 @@
 //                        T      E        L       L                         =
 //                        T      EEEEE    LLLLL   LLLLL                     =
 //                                                                          =
-//   This file is a part of Toped project (C) 2001-2006 Toped developers    =
+//   This file is a part of Toped project                                   =
+//   Copyright (C) 2001-2010 Toped developers                               =
 // ------------------------------------------------------------------------ =
-//           $URL$
-//        Created: Tue Jun 28 13:16:45 BST 2005
-//     Originator: Svilen Krustev - skr@toped.org.uk
-//    Description: Basic screen setup for Toped
+//           $URL:$
+//     Originator: Armin Taschwer - analogcmos@gmx.net
 //---------------------------------------------------------------------------
 //  Revision info
-//---------------------------------------------------------------------------                
-//      $Revision$
-//          $Date$
-//        $Author$
+//---------------------------------------------------------------------------
+//      $Revision:$
+//          $Date:$
+//        $Author:$
 //===========================================================================
 
 /**   Description:
  *
- * main configuration files
- * For a customized configuration it is recommended to copy this and the 
- * appropriate helper files to the user setup directory.
+ * provides basic configuration for some display parameters
+ * (this file is also intended to be used for miscellaneous parameters)
+ *
+ *    Functions:
+ *
+ *  void setup_screen();
+ *  void setup_parameter();
  * 
  **/
 
@@ -50,15 +52,24 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  **/
 
+void setup_screen() {
+// grid No, step in UU, color
+// unit assumed to be in um
 
-#include "config/config_misc.tll"
-#include "config/config_pattern.tll"
-#include "config/config_color.tll"
+   definegrid(0, .25 , "white"   );
+   definegrid(1, 2   , "cyan"    );
+   definegrid(2, 10  , "yellow"  );
+   grid(0,true);
+   grid(1,true);
+   //step(1);
+   step(0.05);
+   //autopan(true);
+   autopan (false);
+   shapeangle(45);
+}
 
-setup_color();
-setup_fill();
-setup_line();
-setup_screen();
-setup_parameter();
+void setup_parameter() {
+    setparams({"GRC_BLINK_PERIOD", "0"});
+}
 
 #endif
