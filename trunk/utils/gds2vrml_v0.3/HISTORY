@@ -1,3 +1,7 @@
+Version 0.3.1 12dec2011
+-----------------------
+* Bug in libgdsto3d / gdsparse.cpp: _currentstrans needs to be reset (affects flipping of SREF)
+
 Version 0.3 10jan2011
 -----------
 * autotools applied

@@ -948,6 +948,7 @@ void GDSParse::ParseXY()
 	_currentdatatype = -1;
 	_currentmag = 1.0;
 	_currentpresentation = 0;
+	_currentstrans = 0; //[-AT-]: needs to be reset because STRANS will not appear regulary
 }
 
 short GDSParse::GetBitArray()

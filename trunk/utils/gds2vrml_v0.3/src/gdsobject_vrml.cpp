@@ -395,10 +395,11 @@ void GDSObject_vrml::OutputSRefToFile(FILE *fptr, class GDSObjects *Objects, cha
       vrmlo->UnsetBlocked();
       vrmlo->SetSpaces(spaces+2);
 
-      vrmlo->SetRefFlipped(sref->Flipped);
+      //vrmlo->SetRefFlipped(sref->Flipped); //needs to be reset if the object is used more than once
 
       //flipping *before* rotation !! --> flipping is only allowed on X
       if (sref->Flipped) {
+	vrmlo->SetRefFlipped(true); //tell subcells that this reference is flipped
 	SetSpaces(spaces+2);
 	PrintSpaces(fptr); fprintf(fptr, "Transform {   ## SREF --> flipped=TRUE\n");
 	PrintSpaces(fptr); fprintf(fptr, "  children [\n"); //plane 3
@@ -414,6 +415,7 @@ void GDSObject_vrml::OutputSRefToFile(FILE *fptr, class GDSObjects *Objects, cha
 	PrintSpaces(fptr); fprintf(fptr, "    } ## SREF --> flipped=TRUE\n"); //plane 1 of vrmlo->OutputToFile
 	PrintSpaces(fptr); fprintf(fptr, "  ]\n"); //plane 3
 	SetSpaces(spaces-2);
+	vrmlo->SetRefFlipped (false); //reset to previous state
       }
 
 
