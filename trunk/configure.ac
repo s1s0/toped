@@ -130,6 +130,7 @@ AC_CONFIG_FILES([
    tll/user_functions/Makefile
    tll/user_functions/config/Makefile
    tll/user_functions/technology/Makefile
+   tll/user_functions/technology/mosis_SCMOS_p2m6/Makefile
    tll/user_functions/test/Makefile
    tll/user_functions/general/Makefile
    tll/user_functions/general/examples/Makefile

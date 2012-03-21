@@ -12,6 +12,7 @@ SUBDIRS_MAIN = ui                                         \
                tll/user_functions/config                  \
                tll/user_functions/devices                 \
                tll/user_functions/technology/             \
+               tll/user_functions/technology/mosis_SCMOS_p2m6 \
                tll/user_functions/test/                   \
                tll/user_functions/general                 \
                tll/user_functions/general/examples        \
