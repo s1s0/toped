@@ -1,0 +1,86 @@
+#ifndef __TECHNOLOGY_LAYER_DEFINITIONS__
+#define __TECHNOLOGY_LAYER_DEFINITIONS__
+
+//===========================================================================
+//                                                                          =
+// ------------------------------------------------------------------------ =
+//                      TTTTT    EEEE     L       L                         =
+//                      T T T    E        L       L                         =
+//                        T      EEE      L       L                         =
+//                        T      E        L       L                         =
+//                        T      EEEEE    LLLLL   LLLLL                     =
+//                                                                          =
+//   This file is a part of Toped project                                   =
+//   Copyright (C) 2001-2010 Toped developers                               =
+// ------------------------------------------------------------------------ =
+//           $URL:$
+//     Originator: Armin Taschwer - analogcmos@gmx.net
+//---------------------------------------------------------------------------
+//  Revision info
+//---------------------------------------------------------------------------
+//      $Revision:$
+//          $Date:$
+//        $Author:$
+//===========================================================================
+
+/**   Description:
+ *
+ * predefines some layers
+ * 
+ **/
+
+/** LICENSE:
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+ **/
+
+#include "config/config.tll"
+
+void layerSetup() {
+  lmap list cifmap;
+  lmap list gdsmap;
+  
+  //source: http://www.mosis.com/Technical/Designrules/scmos/scmos-main.html
+  
+  //    	     name    Number  Colour       Fill              Selected
+
+  layprop("POLY"     ,46   , "lime green"   ,"checkerboard"   , "selected3" );cifmap[:+] = {{ 46, "CPG" }}; gdsmap[:+] = {{ 46, " 46;  0"}};
+  layprop("POLY2"    ,56   , "dark green"   ,"checkerboard"   , "selected3" );cifmap[:+] = {{ 56, "CEL" }}; gdsmap[:+] = {{ 56, " 56;  0"}};
+  layprop("MET1"     ,49   , "green"        ,"checkerboard"   , "selected3" );cifmap[:+] = {{ 49, "CM1" }}; gdsmap[:+] = {{ 49, " 49;  0"}};
+  layprop("MET2"     ,51   , "red"          ,"checkerboard"   , "selected3" );cifmap[:+] = {{ 51, "CM2" }}; gdsmap[:+] = {{ 51, " 51;  0"}};
+  layprop("MET3"     ,62   , "yellow"       ,"checkerboard"   , "selected3" );cifmap[:+] = {{ 62, "CM3" }}; gdsmap[:+] = {{ 62, " 61;  0"}};
+  layprop("MET4"     ,31   , "magenta"      ,"checkerboard"   , "selected3" );cifmap[:+] = {{ 31, "CM4" }}; gdsmap[:+] = {{ 31, " 31;  0"}};
+  layprop("MET5"     ,33   , "orange"       ,"checkerboard"   , "selected3" );cifmap[:+] = {{ 33, "CM5" }}; gdsmap[:+] = {{ 33, " 33;  0"}};
+  layprop("MET6"     ,37   , "grey"         ,"checkerboard"   , "selected3" );cifmap[:+] = {{ 37, "CM6" }}; gdsmap[:+] = {{ 37, " 37;  0"}};
+  layprop("CONT"     ,25   , "SlateBlue3"   ,"checkerboard"   , "selected3" );cifmap[:+] = {{ 25, "CCC" }}; gdsmap[:+] = {{ 25, " 25;  0"}};
+  layprop("VIA1"     ,50   , "dark green"   ,"checkerboard"   , "selected3" );cifmap[:+] = {{ 50, "CV1" }}; gdsmap[:+] = {{ 50, " 50;  0"}};
+  layprop("VIA2"     ,61   , "dark red"     ,"checkerboard"   , "selected3" );cifmap[:+] = {{ 61, "CV2" }}; gdsmap[:+] = {{ 61, " 61;  0"}};
+  layprop("VIA3"     ,30   , "dark magenta" ,"checkerboard"   , "selected3" );cifmap[:+] = {{ 30, "CV3" }}; gdsmap[:+] = {{ 30, " 30;  0"}};
+  layprop("VIA4"     ,32   , "dark orange"  ,"checkerboard"   , "selected3" );cifmap[:+] = {{ 32, "CV4" }}; gdsmap[:+] = {{ 32, " 32;  0"}};
+  layprop("VIA5"     ,36   , "dark grey"    ,"checkerboard"   , "selected3" );cifmap[:+] = {{ 36, "CV5" }}; gdsmap[:+] = {{ 36, " 36;  0"}};
+
+  layprop("ACTIVE"   ,43   , "dark red"     ,"checkerboard"   , "selected3" );cifmap[:+] = {{ 43, "CAA" }}; gdsmap[:+] = {{ 43, " 43;  0"}};
+  layprop("PPLUS"    ,44   , "blue"         ,"checkerboard"   , "selected3" );cifmap[:+] = {{ 44, "CSP" }}; gdsmap[:+] = {{ 44, " 44;  0"}};
+  layprop("NPLUS"    ,45   , "IndianRed1"   ,"checkerboard"   , "selected3" );cifmap[:+] = {{ 45, "CSN" }}; gdsmap[:+] = {{ 45, " 45;  0"}};
+  layprop("NWELL"    ,42   , "violet red"   ,"checkerboard"   , "selected3" );cifmap[:+] = {{ 42, "CWN" }}; gdsmap[:+] = {{ 42, " 42;  0"}};
+  layprop("PWELL"    ,41   , "SlateBlue1"   ,"checkerboard"   , "selected3" );cifmap[:+] = {{ 41, "CWP" }}; gdsmap[:+] = {{ 41, " 41;  0"}};
+
+  setciflaymap(cifmap);
+  setgdslaymap(gdsmap);
+
+}
+
+
+#endif
