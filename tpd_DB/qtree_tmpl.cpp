@@ -243,6 +243,7 @@ void laydata::QTreeTmpl<DataT>::sort(TObjList& inlist)
    int8b sharea, totalarea = _overlap.boxarea();
    while (inlist.end() != DI)
    {
+      assert(*DI);
       // get the overlap of the current shape
       shovl = (*DI)->overlap();
       sharea = shovl.boxarea();
@@ -731,7 +732,8 @@ byte laydata::QTreeTmpl<DataT>::sequreQuad(QuadIdentificators quad)
       _subQuads = newSubQuads;
       quadPosition = _props.getPosition(quad);
    }
-   return quadPosition;
+   assert(-1 < quadPosition);
+   return (byte) quadPosition;
 }
 
 template <typename DataT>
