@@ -1,6 +1,7 @@
 EXTRA_DIST = activelay.xpm nolay.xpm \
              cellfg.xpm cellf.xpm cellhg.xpm cellh.xpm \
              cellundef.xpm librarydb.xpm targetdb.xpm \
+             cellhg_g.xpm cellh_g.xpm cellfg_g.xpm cellf_g.xpm \
              crosscursor.xpm \
              lock.xpm red_lamp.xpm green_lamp.xpm blue_lamp.xpm \
              toped16x16.xpm toped32x32.xpm \
