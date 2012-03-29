@@ -1692,9 +1692,11 @@ tui::DefineLineStyle::DefineLineStyle(wxFrame *parent, wxWindowID id, const wxSt
 
    top_sizer->SetSizeHints( this );   // set size hints to honour minimum size
 
-//   _styleList->GetString(0);
-   _current_style = getStyle(std::string(_styleList->GetString(0).mb_str(wxConvUTF8)));
-   _styleList->Select(0);
+   if (!all_names.empty())
+   {
+      _current_style = getStyle(std::string(_styleList->GetString(0).mb_str(wxConvUTF8)));
+      _styleList->Select(0);
+   }
    updateDialog();
 }
 
