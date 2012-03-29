@@ -1978,7 +1978,7 @@ bool tenderer::TopRend::preCheckCRS(const laydata::TdtCellRef* ref, layprop::Cel
       case layprop::crc_POSTACTIVE:
          return ((_cellStack.size() - _dovCorrection) < _drawprop->cellDepthView());
       case layprop::crc_ACTIVE:
-         _dovCorrection = _cellStack.size();
+         _dovCorrection = _cellStack.size(); return true;
       default: return true;
    }
    return true;// Dummy statement - to prevent compiler warnings
