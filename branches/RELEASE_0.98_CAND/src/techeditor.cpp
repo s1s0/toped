@@ -128,7 +128,8 @@ tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id) :
    mainSizer->SetSizeHints( this );
 
    FindWindow(DTE_APPLY)->Enable(false);
-   _layerList->Select(_curSelect, true);
+   if (!_allLayNums.empty())
+      _layerList->Select(_curSelect, true);
 #ifdef WIN32
    updateDialog();
 #endif
