@@ -20,7 +20,6 @@
 					</tool>
 					<tool id="org.eclipse.linuxtools.cdt.autotools.core.toolchain.tool.gpp.1636694899" name="GCC C++ Compiler" superClass="org.eclipse.linuxtools.cdt.autotools.core.toolchain.tool.gpp">
 						<option id="gnu.cpp.compiler.option.include.paths.1372383098" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
-							<listOptionValue builtIn="false" value="/usr/lib64/wx/include/gtk2-unicode-release-2.8"/>
 							<listOptionValue builtIn="false" value="/usr/local/include/wx-2.9"/>
 						</option>
 						<option id="gnu.cpp.compiler.option.preprocessor.def.1588880625" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">

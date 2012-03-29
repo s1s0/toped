@@ -47,7 +47,6 @@ extern console::toped_logfile    LogFile;
 extern layprop::FontLibrary*     fontLib;
 extern const wxEventType         wxEVT_RENDER_PARAMS;
 extern const wxEventType         wxEVT_CANVAS_PARAMS;
-extern const wxEventType         wxEVT_TECHEDITUPDATE;
 //=============================================================================
 tellstdfunc::stdPROPSAVE::stdPROPSAVE(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)

@@ -35,14 +35,10 @@
 
 
 CIFin::CifFile* CIFInFile = NULL;
-extern void*   new_cif_lex_buffer( FILE* cifin );
-extern void    delete_cif_lex_buffer( void* b ) ;
 extern int     cifparse(); // Calls the bison generated parser
 namespace CIFin {
    extern void    flushParserBuffer();
 };
-extern FILE*   cifin;
-
 
 //=============================================================================
 CIFin::CifBox::CifBox(CifData* last, dword length, dword width, TP* center, TP* direction) :
