@@ -223,12 +223,7 @@ int TopedApp::OnRun()
 
 void TopedApp::reloadInternalFunctions()
 {
-   parsercmd::cmdBLOCK* lclBlock = CMDBlock->popblk();
-   while (NULL != lclBlock)
-   {
-      CMDBlock = lclBlock;
-      lclBlock = CMDBlock->popblk();
-   }
+   CMDBlock = CMDBlock->cleaner(true);
    delete CMDBlock;
    CMDBlock = DEBUG_NEW parsercmd::cmdMAIN();
    initInternalFunctions(static_cast<parsercmd::cmdMAIN*>(CMDBlock));

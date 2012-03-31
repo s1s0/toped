@@ -628,7 +628,7 @@ namespace  parsercmd {
                                                             _nextLclTypeID(lltID){};
       virtual                   ~cmdBLOCK();
       virtual int                execute();
-      cmdBLOCK*                  cleaner();
+      cmdBLOCK*                  cleaner(bool fullreset = false);
       virtual void               addFUNC(std::string, cmdSTDFUNC*);
       virtual void               addUSERFUNC(FuncDeclaration*, cmdFUNC*, TpdYYLtype);
       virtual cmdFUNC*           addUSERFUNCDECL(FuncDeclaration*, TpdYYLtype);
