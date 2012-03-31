@@ -1513,6 +1513,7 @@ telldata::TellVar* parsercmd::cmdBLOCK::newFuncArg(telldata::typeID ID, TpdYYLty
 parsercmd::cmdBLOCK* parsercmd::cmdBLOCK::popblk()
 {
    TELL_DEBUG(cmdBLOCK_popblk);
+   assert(_blocks.size() > 1);
    _blocks.pop_front();
    return _blocks.front();
 }
@@ -1558,20 +1559,23 @@ int parsercmd::cmdBLOCK::execute()
    return retexec;
 }
 
-parsercmd::cmdBLOCK* parsercmd::cmdBLOCK::cleaner()
+parsercmd::cmdBLOCK* parsercmd::cmdBLOCK::cleaner(bool fullreset)
 {
    TELL_DEBUG(cmdBLOCK_cleaner);
    while (!_cmdQ.empty()) {
       cmdVIRTUAL *a = _cmdQ.front();_cmdQ.pop_front();
       delete a;
    }
-   if (_blocks.size() > 1)
+   while (_blocks.size() > 1)
    {
       parsercmd::cmdBLOCK* dblk = _blocks.front(); _blocks.pop_front();
       delete dblk;
-      return _blocks.front();
    }
-   else return this;
+   if (fullreset)
+      _blocks.clear();
+   else
+      assert(this == _blocks.front());
+   return this;
 }
 
 parsercmd::cmdBLOCK::~cmdBLOCK()
