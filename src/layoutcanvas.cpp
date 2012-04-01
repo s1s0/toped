@@ -313,7 +313,7 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos,
    // DON'T enable it if you're not sure what you're doing!
    _oglThread = false;
    _apTrigger = 10;
-   _blinkInterval = 500;
+   _blinkInterval = 0;
    _blinkOn = false;
    _initialised = false;
 }
