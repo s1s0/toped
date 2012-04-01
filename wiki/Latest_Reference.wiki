@@ -40,10 +40,12 @@ if not set the default path will always be the current path.
 
 *Pragmas*
 
+bug fix for "fullreset" in r2115 (fixes issue 136)
+
 {{{
-  #pragma once   //rev1911: calls the *.tll file only once in actual toped session
-  #pragma prereset //rev1911: 
-  #pragma fullreset //rev1920: deletes any function or variable definitions. TELL stack is "clean" 
+  #pragma once   //r1911: calls the *.tll file only once in actual toped session
+  #pragma prereset //r1911: 
+  #pragma fullreset //r1920: deletes any function or variable definitions. TELL stack is "clean" 
 }}}
 
 *Definitions*
@@ -63,18 +65,26 @@ if not set the default path will always be the current path.
 
 == Tell-language ==
 
-=== Lists ===
+=== Data-Types ===
+==== Lists ====
 
   * Speed issues: issue 110, r1907
   
 preallocation of lists allows a significant improvement in terms of 
 execution speed when an application uses dynamic growing/shrinking lists
 
+==== Points ====
 
+  * operations on points like "a + {1,2}" are not that straightforward
+    * one have to use "a + (point){1,2}"  (point of introduction unknown)
+    * but attention, concept of explicit typecasting is not introduced globally!
+      * another case is known with "foreach" --> here you can use "foreach (int i; int list {1,2,3})" --> note, typecasting is not used with paranthesis!
+      
 === Callbacks ===
 
-fully introduced in rev1939 (fixes issue 105).
-fixes in rev1947
+bug fix in r2116 (fixes issue 137)
+fully introduced in r1939 (fixes issue 105).
+fixes in r1947
 
 see also tll/callbackTest.tll
 
@@ -138,14 +148,14 @@ refer to tpd_bidfunc/tpdf_props.cpp in
 function tellstdfunc::analyzeTopedParameters
 
 {{{
- setparams({"ADJUST_TEXT_ORIENTATION", "0"});
- setparams({"SELECT_TEXT_FONT", "0"});
- setparams({"CELL_VIEW_DEPTH", "0"});
- setparams({"CELL_DEPTH_ALPHA_EBB", "0"});
- setparams({"MIN_VISUAL_AREA", "0"});
- setparams({"GRC_BLINK_PERIOD", "0"});
- setparams({"HIGHLIGHT_ON_HOVER", "0"});
- setparams({"UNDO_DEPTH", "0"}); 
+ setparams({"ADJUST_TEXT_ORIENTATION", "<bool>"}); ("true" .. each text aligned equally, "false" .. aligned to reference)
+ setparams({"SELECT_TEXT_FONT", "<font>"}); ("Arial Normal 1" [Default], "Courier Normal 1", "Crystal 1", "Techno 0", "Techno 1", "Times New Roman 1")
+ setparams({"CELL_VIEW_DEPTH", "<int>"});
+ setparams({"CELL_DEPTH_ALPHA_EBB", "<real>"});
+ setparams({"MIN_VISUAL_AREA", "<real>"});
+ setparams({"GRC_BLINK_PERIOD", "<real>"});
+ setparams({"HIGHLIGHT_ON_HOVER", "<bool>"});
+ setparams({"UNDO_DEPTH", "<int>"}); 
 }}}
 
  

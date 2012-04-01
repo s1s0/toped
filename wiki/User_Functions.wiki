@@ -27,14 +27,15 @@ Overview of User-Defined-Functions (UDF).
 
 {{{
     |- technology
-       |- default
-       |  \_...
+       |- default.tll ... loads the default technology file (means techfile.tll)
+       |- helper.tll  ... some general functions which are useful in the environment of technology
+       |  
        |- <your-fab_process-option-ABC>
-          \_ your_fab.tll     ... master TLL-file. Load this to get a technology into your design
+          \_ techfile.tll     ... master TLL-file. Load this to get a technology into your design. (needs a proper config/config.tll file)
           \_ drc.tll          ... DRC rules for generic devices
           \_ drc_lib_io.tll   ... DRC rules for I/O libraries (pads, esd, etc.)
           \_ drc_lib.tll      ... DRC rules for the digital standard-library
-          \_ map.tll          ... layer definitions
+          \_ layer.tll        ... layer definitions
           \_ devices.tll      ... includes all devices 
           \_ gds_lib.tll      ... includes all standard-cells
           \_ gds_lib_io.tll   ... includes all IO-cells
@@ -58,3 +59,39 @@ should be visible.
 fab. Nontheless, their TELL-Description depends on some technology which 
 implies that the interface to DRC-rules has to be standardized.
 
+== GENERAL ==
+
+=== definitions.tll ===
+=== helper.tll ===
+=== geometry.tll ===
+=== wires.tll ===
+=== wires_ortho_dia.tll ===
+
+== CONFIG ==
+
+=== config.tll ===
+=== config_colors.tll ===
+=== config_colors_rgb.tll ===
+=== config_pattern.tll ===
+=== config_misc.tll ===
+
+== TEST ==
+
+=== test.tll ===
+
+== TOOLS ==
+
+=== Logos ===
+
+== TECHNOLOGY ==
+
+=== default.tll ===
+=== helper.tll ===
+
+=== Technology-Directory (fab-process-name) ===
+
+==== techfile.tll ====
+==== drc.tll ====
+==== layer.tll ====
+
+==== Devices (dev) ===
