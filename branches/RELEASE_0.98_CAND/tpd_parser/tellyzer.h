@@ -659,6 +659,7 @@ namespace  parsercmd {
       void                       setUndoDepth(word ud) {_undoDepth = ud;}
    protected:
       bool                       addCALLBACKDECL(std::string, cmdCALLBACK*, TpdYYLtype);
+      cmdSTDFUNC* const          getLocalFuncBody(const char*, telldata::argumentQ*) const;
       telldata::variableMAP     _varLocal;  //! list of local variables
       telldata::typeMAP         _typeLocal; //! list of local types
       telldata::TypeList        _typeAnoLo; //! list of anonymous local types (callbacks only so far)
