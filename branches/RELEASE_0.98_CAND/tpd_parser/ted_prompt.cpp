@@ -592,6 +592,11 @@ console::TllCmdLine::~TllCmdLine()
 }
 
 //==============================================================================
+BEGIN_EVENT_TABLE( console::TedCmdLine, wxEvtHandler )
+   EVT_TEXT_ENTER(tui::ID_CMD_LINE, console::TedCmdLine::onGetCommand)
+   EVT_CHAR(console::TedCmdLine::onChar)
+END_EVENT_TABLE()
+
 console::TedCmdLine::TedCmdLine(wxWindow* canvas, wxTextCtrl* cmdLineWnd) :
       TllCmdLine  ( canvas      ),
       _cmdLineWnd ( cmdLineWnd  )
@@ -639,20 +644,22 @@ void console::TedCmdLine::onGetCommand(wxCommandEvent& WXUNUSED(event))
    }
 }
 
-void console::TedCmdLine::onKeyUP(wxKeyEvent& event) {
+void console::TedCmdLine::onChar(wxKeyEvent& event)
+{
 
-   if ((WXK_UP != event.GetKeyCode()) &&  (WXK_DOWN != event.GetKeyCode())) {
-      event.Skip();return;
+   switch(event.GetKeyCode())
+   {
+      case WXK_UP   : if (_cmd_history.begin() == _history_position)
+                         _history_position = _cmd_history.end();
+                      else _history_position--;
+                      break;
+      case WXK_DOWN : if (_cmd_history.end() == _history_position)
+                         _history_position = _cmd_history.begin();
+                      else _history_position++;
+                      break;
+            default : event.Skip(); return;
    }
-   if (WXK_DOWN != event.GetKeyCode())
-      if (_cmd_history.begin() == _history_position)
-         _history_position = _cmd_history.end();
-      else _history_position--;
-   else
-      if (_cmd_history.end() == _history_position)
-         _history_position = _cmd_history.begin();
-      else _history_position++;
-      if (_cmd_history.end() == _history_position) setString(wxT(""));
+   if (_cmd_history.end() == _history_position) setString(wxT(""));
    else
    {
       setString(wxString(_history_position->c_str(), wxConvUTF8));

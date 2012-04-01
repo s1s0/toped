@@ -124,7 +124,7 @@ namespace console {
       wxWindow*               _canvas;
       bool                    _canvas_invalid;
       bool                    _exitRequested;
-	  bool                    _exitAproved;
+	  bool                     _exitAproved;
       wxPathList              _tllIncludePath;
       parse_thread*           _tellThread;
    };
@@ -137,7 +137,7 @@ namespace console {
       virtual void            waitExternal(wxString);
       void                    onParseCommand(wxCommandEvent&);
       void                    onGetCommand(wxCommandEvent& WXUNUSED(event));
-      void                    onKeyUP(wxKeyEvent&);
+      void                    onChar(wxKeyEvent&);
       wxTextCtrl*             getWidget()                 {return _cmdLineWnd;}
    protected:
       virtual wxString        getString();
@@ -147,6 +147,7 @@ namespace console {
       void                    onGUInput(wxCommandEvent&);
       void                    onExternalDone(wxCommandEvent&);
       wxTextCtrl*             _cmdLineWnd;
+      DECLARE_EVENT_TABLE();
    };
 
    class TllCCmdLine: public TllCmdLine {

@@ -338,8 +338,6 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_TECUSTOM_COMMAND(wxEVT_EXECEXTPIPE, wxID_ANY, tui::TopedFrame::OnExecExtTextEnter)
    EVT_TECUSTOM_COMMAND(wxEVT_RELOADTELLFUNCS, wxID_ANY, tui::TopedFrame::onReloadTellFuncs)
    EVT_TECUSTOM_COMMAND(wxEVT_CONSOLE_PARSE, wxID_ANY, tui::TopedFrame::onParseCommand)
-   EVT_TEXT_ENTER(tui::ID_CMD_LINE, tui::TopedFrame::onGetCommand)
-   EVT_KEY_UP(tui::TopedFrame::onKeyUP)
 END_EVENT_TABLE()
 
 // See the FIXME note in the botom of browsers.cpp
@@ -371,6 +369,7 @@ tui::TopedFrame::~TopedFrame() {
 //   delete Console;
 //   delete _GLstatus;
 //   delete _browsers;
+   wxWindow::PopEventHandler();
     _winManager.UnInit();
    delete _propDialog;
    delete _canvas;
@@ -787,6 +786,9 @@ void tui::TopedFrame::initView()
                                                 wxSize(1000, 30),
                                                 wxTE_PROCESS_ENTER | wxNO_BORDER );
    _cmdline = DEBUG_NEW console::TedCmdLine(_canvas, cmdlineW);
+   // _cmdline inherits only wxEvtHandler and the line below is required to get the
+   // wxEvents roling for the class instances. 
+   wxWindow::PushEventHandler(_cmdline);
 
 // cmdlineW->SetWindowStyleFlag(wxSW_3D | wxCLIP_CHILDREN);
 
@@ -2485,16 +2487,6 @@ void tui::TopedFrame::onReloadTellFuncs(wxCommandEvent& WXUNUSED(evt))
 void tui::TopedFrame::onParseCommand(wxCommandEvent& evt)
 {
    _cmdline->onParseCommand(evt);
-}
-
-void tui::TopedFrame::onGetCommand(wxCommandEvent& evt)
-{
-   _cmdline->onGetCommand(evt);
-}
-
-void tui::TopedFrame::onKeyUP(wxKeyEvent& evt)
-{
-   _cmdline->onKeyUP(evt);
 }
 
 void tui::TopedFrame::USMap2wxString(USMap* inmap, wxString& outmap)
