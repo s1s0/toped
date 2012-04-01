@@ -1668,6 +1668,26 @@ bool parsercmd::cmdBLOCK::checkDbSortState(DbSortState needsDbResort)
    }
    else return true;
 }
+
+parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getLocalFuncBody(const char* fn, telldata::argumentQ* amap) const
+{
+   // Roll back the BlockSTACK until name is found. return NULL otherwise
+   typedef BlockSTACK::const_iterator BS;
+   BS blkstart = _blocks.begin();
+   BS blkend   = _blocks.end();
+   for (BS cmd = blkstart; cmd != blkend; cmd++)
+   {
+      CBFuncMAP::const_iterator lclFunc = (*cmd)->_lclFuncMAP.find(fn);
+      if ((*cmd)->_lclFuncMAP.end() != lclFunc)
+      {
+         cmdSTDFUNC *fbody = lclFunc->second;
+         if (0 == fbody->argsOK(amap))
+            return fbody;
+      }
+   }
+   return NULL;
+}
+
 //=============================================================================
 parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
                                         (const char* fn, telldata::argumentQ* amap, std::string& errmsg) const
@@ -1675,13 +1695,7 @@ parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
    cmdSTDFUNC *fbody = NULL;
    telldata::argumentQ* arguMap = (NULL == amap) ? DEBUG_NEW telldata::argumentQ : amap;
    // first check for local functions
-   CBFuncMAP::const_iterator lclFunc = _lclFuncMAP.find(fn);
-   if ( _lclFuncMAP.end() != lclFunc )
-   {
-      fbody = lclFunc->second;
-      if (0 != fbody->argsOK(arguMap))
-         fbody = NULL;
-   }
+   fbody = getLocalFuncBody(fn, arguMap);
    if (NULL == fbody)
    {
       typedef FunctionMAP::iterator MM;
