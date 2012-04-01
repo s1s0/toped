@@ -273,8 +273,6 @@ namespace tui {
       void     OnIconize(wxIconizeEvent& evt);
       void  onReloadTellFuncs(wxCommandEvent& WXUNUSED(evt));
       void     onParseCommand(wxCommandEvent& evt);
-      void       onGetCommand(wxCommandEvent& evt);
-      void            onKeyUP(wxKeyEvent& evt);
       // The declaration of the associated event table
       DECLARE_EVENT_TABLE();
    };
