@@ -132,6 +132,7 @@ namespace console {
    class TedCmdLine: public TllCmdLine {
    public:
                               TedCmdLine(wxWindow*, wxTextCtrl*);
+      virtual                ~TedCmdLine();
       virtual void            waitGUInput(telldata::operandSTACK*,console::ACTIVE_OP, const CTM&);
       virtual void            getGUInput(bool from_keyboard);
       virtual void            waitExternal(wxString);

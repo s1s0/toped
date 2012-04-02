@@ -601,6 +601,15 @@ console::TedCmdLine::TedCmdLine(wxWindow* canvas, wxTextCtrl* cmdLineWnd) :
       TllCmdLine  ( canvas      ),
       _cmdLineWnd ( cmdLineWnd  )
 {
+   // _cmdline inherits only wxEvtHandler and the line below is required to get the
+   // wxEvents rolling for the class instances.
+   _cmdLineWnd->PushEventHandler(this);
+
+}
+
+console::TedCmdLine::~TedCmdLine()
+{
+   _cmdLineWnd->PopEventHandler();
 }
 
 // Note! parseCommand and onParseCommand should be overloaded methods, however
