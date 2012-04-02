@@ -369,7 +369,6 @@ tui::TopedFrame::~TopedFrame() {
 //   delete Console;
 //   delete _GLstatus;
 //   delete _browsers;
-   wxWindow::PopEventHandler();
     _winManager.UnInit();
    delete _propDialog;
    delete _canvas;
@@ -786,9 +785,6 @@ void tui::TopedFrame::initView()
                                                 wxSize(1000, 30),
                                                 wxTE_PROCESS_ENTER | wxNO_BORDER );
    _cmdline = DEBUG_NEW console::TedCmdLine(_canvas, cmdlineW);
-   // _cmdline inherits only wxEvtHandler and the line below is required to get the
-   // wxEvents roling for the class instances. 
-   wxWindow::PushEventHandler(_cmdline);
 
 // cmdlineW->SetWindowStyleFlag(wxSW_3D | wxCLIP_CHILDREN);
 
