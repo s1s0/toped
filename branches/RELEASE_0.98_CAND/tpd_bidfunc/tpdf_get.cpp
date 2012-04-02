@@ -100,6 +100,36 @@ int tellstdfunc::stdGETLAYREFSTR::execute()
 }
 
 //=============================================================================
+tellstdfunc::grcGETCELLS::grcGETCELLS(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype, eor)
+{
+}
+
+int tellstdfunc::grcGETCELLS::execute()
+{
+   telldata::TtList* tllull = DEBUG_NEW telldata::TtList(telldata::tn_string);
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
+   {
+      laydata::LibCellLists *cll =  dbLibDir->getCells(TARGETDB_LIB);
+      for (laydata::LibCellLists::iterator curlib = cll->begin(); curlib != cll->end(); curlib++)
+      {
+         laydata::CellMap::const_iterator CL;
+         for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
+         {
+            if (CL->second->checkLayer(GRC_LAY))
+               tllull->add(DEBUG_NEW telldata::TtString(CL->first));
+         }
+      }
+      delete cll;
+      LogFile << LogFile.getFN() << "();"; LogFile.flush();
+   }
+   OPstack.push(tllull);
+   DATC->unlockTDT(dbLibDir, true);
+   return EXEC_NEXT;
+}
+
+//=============================================================================
 tellstdfunc::grcGETLAYERS::grcGETLAYERS(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype, eor)
 {
