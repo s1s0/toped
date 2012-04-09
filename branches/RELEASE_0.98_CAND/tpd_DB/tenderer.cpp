@@ -176,7 +176,7 @@ void TessellPoly::num_indexs(unsigned& iftrs, unsigned& iftfs, unsigned& iftss) 
 unsigned tenderer::TenderCnvx::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    assert(_csize);
-#ifdef USE_FLOATS
+#ifdef TENDERER_USE_FLOATS
    for (unsigned i = 0; i < 2 * _csize; i++)
       array[pindex+i] = (TNDR_GLDATAT) _cdata[i];
 #else
@@ -221,7 +221,7 @@ tenderer::TenderWire::TenderWire(int4b* pdata, unsigned psize, const WireWidth w
 unsigned tenderer::TenderWire::lDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    assert(_lsize);
-#ifdef USE_FLOATS
+#ifdef TENDERER_USE_FLOATS
    for (unsigned i = 0; i < 2 * _lsize; i++)
       array[pindex+i] = (TNDR_GLDATAT) _ldata[i];
 #else
@@ -498,7 +498,7 @@ tenderer::TextOvlBox::TextOvlBox(const DBbox& obox, const CTM& ctm)
 
 unsigned tenderer::TextOvlBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
-#ifdef USE_FLOATS
+#ifdef TENDERER_USE_FLOATS
    for (unsigned i = 0; i <  8; i++)
       array[pindex+i] = (TNDR_GLDATAT) _obox[i];
 #else
@@ -536,7 +536,7 @@ tenderer::TenderRef::TenderRef() : _name(""), _ctm(CTM()), _alphaDepth(0)
 
 unsigned tenderer::TenderRef::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
-#ifdef USE_FLOATS
+#ifdef TENDERER_USE_FLOATS
    for (unsigned i = 0; i <  8; i++)
       array[pindex+i] = (TNDR_GLDATAT) _obox[i];
 #else
