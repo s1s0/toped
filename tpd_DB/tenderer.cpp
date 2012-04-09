@@ -177,7 +177,7 @@ unsigned tenderer::TenderCnvx::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    assert(_csize);
 #ifdef USE_FLOATS
-   for (unsigned i = 0; i < 2 * sizeof(TNDR_GLDATAT) * _csize; i++)
+   for (unsigned i = 0; i < 2 * _csize; i++)
       array[pindex+i] = (TNDR_GLDATAT) _cdata[i];
 #else
    memcpy(&(array[pindex]), _cdata, 2 * sizeof(TNDR_GLDATAT) * _csize);
@@ -222,7 +222,7 @@ unsigned tenderer::TenderWire::lDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    assert(_lsize);
 #ifdef USE_FLOATS
-   for (unsigned i = 0; i < 2 * sizeof(TNDR_GLDATAT) * _lsize; i++)
+   for (unsigned i = 0; i < 2 * _lsize; i++)
       array[pindex+i] = (TNDR_GLDATAT) _ldata[i];
 #else
    memcpy(&(array[pindex]), _ldata, 2 * sizeof(TNDR_GLDATAT) * _lsize);
@@ -499,7 +499,7 @@ tenderer::TextOvlBox::TextOvlBox(const DBbox& obox, const CTM& ctm)
 unsigned tenderer::TextOvlBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
 #ifdef USE_FLOATS
-   for (unsigned i = 0; i < sizeof(TNDR_GLDATAT) * 8; i++)
+   for (unsigned i = 0; i <  8; i++)
       array[pindex+i] = (TNDR_GLDATAT) _obox[i];
 #else
    memcpy(&(array[pindex]), _obox, sizeof(TNDR_GLDATAT) * 8);
@@ -537,7 +537,7 @@ tenderer::TenderRef::TenderRef() : _name(""), _ctm(CTM()), _alphaDepth(0)
 unsigned tenderer::TenderRef::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
 #ifdef USE_FLOATS
-   for (unsigned i = 0; i < sizeof(TNDR_GLDATAT) * 8; i++)
+   for (unsigned i = 0; i <  8; i++)
       array[pindex+i] = (TNDR_GLDATAT) _obox[i];
 #else
    memcpy(&(array[pindex]), _obox, sizeof(TNDR_GLDATAT) * 8);
@@ -865,7 +865,7 @@ void tenderer::TenderTV::draw(layprop::DrawProperties* drawprop)
    // Switch the vertex buffers ON in the openGL engine ...
    glEnableClientState(GL_VERTEX_ARRAY);
    // Set-up the offset in the binded Vertex buffer
-   glVertexPointer(2, TNDR_GLENUMT, 0, (GLvoid*)(sizeof(int4b) * _point_array_offset));
+   glVertexPointer(2, TNDR_GLENUMT, 0, (GLvoid*)(sizeof(TNDR_GLDATAT) * _point_array_offset));
    // ... and here we go ...
    if  (_alobjvx[line] > 0)
    {// Draw the wire center lines
@@ -1314,7 +1314,7 @@ void tenderer::TenderLay::draw(layprop::DrawProperties* drawprop)
    // Check the state of the buffer
    GLint bufferSize;
    glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
-   assert(bufferSize == (GLint)(2 * _num_total_points * sizeof(int4b)));
+   assert(bufferSize == (GLint)(2 * _num_total_points * sizeof(TNDR_GLDATAT)));
    if (0 != _ibuffer)
    {
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibuffer);
@@ -1341,11 +1341,11 @@ void tenderer::TenderLay::drawSelected()
    // Check the state of the buffer
    GLint bufferSize;
    glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
-   assert(bufferSize == (GLint)(2 * _num_total_points * sizeof(int4b)));
+   assert(bufferSize == (GLint)(2 * _num_total_points * sizeof(TNDR_GLDATAT)));
 
    glEnableClientState(GL_VERTEX_ARRAY);
    glEnableClientState(GL_INDEX_ARRAY);
-   glVertexPointer(2, TNDR_GLENUMT, 0, (GLvoid*)(sizeof(int4b) * _stv_array_offset));
+   glVertexPointer(2, TNDR_GLENUMT, 0, (GLvoid*)(sizeof(TNDR_GLDATAT) * _stv_array_offset));
 
    if (_asobjix[lstr] > 0)
    {
@@ -1511,7 +1511,7 @@ void tenderer::TenderRefLay::draw(layprop::DrawProperties* drawprop)
    // Check the state of the buffer
    GLint bufferSize;
    glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
-   assert(bufferSize == (GLint)(2 * total_points() * sizeof(int4b)));
+   assert(bufferSize == (GLint)(2 * total_points() * sizeof(TNDR_GLDATAT)));
 
    glEnableClientState(GL_VERTEX_ARRAY);
    glVertexPointer(2, TNDR_GLENUMT, 0, 0);
