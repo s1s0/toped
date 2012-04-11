@@ -32,6 +32,7 @@
 #include "outbox.h"
 #include "tuidefs.h"
 #include "tui.h"
+#include "tuidefs.h"
 #include "viewprop.h"
 #include "techeditor.h"
 #include "toped.h"
@@ -41,6 +42,7 @@ extern layprop::PropertyCenter*  PROPC;
 extern tui::TopedFrame*          Toped;
 extern console::TllCmdLine*      Console;
 extern const wxEventType         wxEVT_TECHEDITUPDATE;
+extern const wxEventType         wxEVT_CANVAS_ZOOM;
 wxListView* layerListPtr = NULL; //!Required by SortItem callback
 ///////////////////////////////////////////////////////////////////////////
 //extern const wxEventType         wxEVT_CMD_BROWSER;
@@ -381,6 +383,10 @@ void tui::TechEditorDialog::OnApply(wxCommandEvent&)
                   << wxT("\");");
 
    Console->parseCommand(ost);
+   //Refresh layout
+   wxCommandEvent eventZoom(wxEVT_CANVAS_ZOOM);
+   eventZoom.SetInt(tui::ZOOM_REFRESH);
+   wxPostEvent(Toped->view(), eventZoom);
 
    updateLayerList();
    static_cast<wxCheckBox*>(FindWindow(tui::DTE_NEWLAYER))->SetValue(false);
