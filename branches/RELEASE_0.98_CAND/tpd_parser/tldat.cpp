@@ -407,6 +407,37 @@ telldata::TellVar* telldata::TtList::index_var(dword index)
    else return _mlist[index];
 }
 
+telldata::TtList* telldata::TtList::index_range_var(dword index1, dword index2)
+{
+   if (_mlist.empty() || (index1 > (_mlist.size() - 1)) || (index2 > (_mlist.size() - 1)))
+      return NULL;
+   else
+   {
+      assert(index2 > index1);
+      TtList* nlist = DEBUG_NEW telldata::TtList(_ID);
+      nlist->reserve(index2 - index1);
+      for (dword i = index1; i <= index2; i++)
+         nlist->add(_mlist[i]->selfcopy());
+      return nlist;
+   }
+}
+
+bool telldata::TtList::part_assign(dword index1, dword index2, const TtList* rvalue)
+{
+   assert(index2 > index1);
+   assert((index2 - index1) == rvalue->size() - 1);
+   if (_mlist.empty() || (index1 > (_mlist.size() - 1)) || (index2 > (_mlist.size() - 1)))
+      return false;
+   unsigned j = 0;
+   for (unsigned i = index1; i <= index2; i++)
+   {
+      TellVar* tvar = _mlist[i];
+      _mlist[i] = rvalue->_mlist[j++]->selfcopy();
+      delete tvar;
+   }
+   return true;
+}
+
 void telldata::TtList::resize(unsigned num, TellVar* initVar)
 {
    _mlist.resize(num);

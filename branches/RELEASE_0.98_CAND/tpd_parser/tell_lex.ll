@@ -225,6 +225,7 @@ const                      return tknCONST;
 ":+"                       return tknPOSTADD;
 "-:"                       return tknPRESUB;
 ":-"                       return tknPOSTSUB;
+":"                        return ':';
 "("                        return '(';
 ")"                        return ')';
 "{"                        return '{';

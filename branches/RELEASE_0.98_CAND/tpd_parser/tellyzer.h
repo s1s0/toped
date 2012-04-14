@@ -426,23 +426,23 @@ namespace  parsercmd {
 
    class cmdASSIGN:public cmdVIRTUAL {
    public:
-                  cmdASSIGN(telldata::TellVar* var, bool indexed): _var(var), _indexed(indexed) {};
+                  cmdASSIGN(telldata::TellVar* var, byte indexed): _var(var), _indexed(indexed) {};
       virtual    ~cmdASSIGN() {}
       virtual int execute();
    protected:
       telldata::TellVar*   _var;
-      bool                 _indexed;
+      byte                 _indexed;
    };
 
    class cmdPUSH:public cmdVIRTUAL {
    public:
-                  cmdPUSH(telldata::TellVar *v, bool indexed, bool constant=false):
+                  cmdPUSH(telldata::TellVar *v, byte indexed, bool constant=false):
                         _var(v),  _indexed(indexed), _constant(constant) {};
       virtual    ~cmdPUSH() {if (_constant) delete _var;};
       virtual int execute();
    private:
       telldata::TellVar*   _var;
-      bool                 _indexed;
+      byte                 _indexed;
       bool                 _constant;
    };
 
@@ -823,7 +823,7 @@ namespace  parsercmd {
    telldata::typeID  PointMv(telldata::typeID, telldata::typeID, TpdYYLtype, TpdYYLtype, int, int);
    telldata::typeID  Multiply(telldata::typeID, telldata::typeID, TpdYYLtype, TpdYYLtype);
    telldata::typeID  Divide(telldata::typeID, telldata::typeID, TpdYYLtype, TpdYYLtype);
-   telldata::typeID  Assign(telldata::TellVar*, bool, telldata::ArgumentID*, TpdYYLtype);
+   telldata::typeID  Assign(telldata::TellVar*, byte, telldata::ArgumentID*, TpdYYLtype);
    telldata::typeID  Uninsert(telldata::TellVar*, telldata::ArgumentID*, parsercmd::cmdLISTADD*, TpdYYLtype);
    telldata::typeID  BoolEx(telldata::typeID, telldata::typeID, std::string, TpdYYLtype, TpdYYLtype);
    telldata::typeID  BoolEx(telldata::typeID, std::string, TpdYYLtype);

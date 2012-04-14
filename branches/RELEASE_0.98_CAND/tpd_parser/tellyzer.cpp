@@ -951,27 +951,55 @@ int parsercmd::cmdASSIGN::execute()
 {
    TELL_DEBUG(cmdASSIGN);
    telldata::TellVar *op = OPstack.top();OPstack.pop();
-   if (_indexed)
+   switch (_indexed)
    {
-      dword idx = getIndexValue();
-      telldata::TellVar* indexVar = static_cast<telldata::TtList*>(_var)->index_var(idx);
-      if ((NULL != indexVar) && (!_opstackerr))
+      case 0:
       {
-         indexVar->assign(op); OPstack.push(indexVar->selfcopy());
-      }
-      else
-      {
-         tellerror("Runtime error.Invalid Index");
+         _var->assign(op); OPstack.push(_var->selfcopy());
          delete op;
-         return EXEC_ABORT;
+         return EXEC_NEXT;
       }
-   }
-   else
-   {
-      _var->assign(op); OPstack.push(_var->selfcopy());
+      case 1:
+      {
+         dword idx = getIndexValue();
+         telldata::TellVar* indexVar = static_cast<telldata::TtList*>(_var)->index_var(idx);
+         if ((NULL != indexVar) && (!_opstackerr))
+         {
+            indexVar->assign(op); OPstack.push(indexVar->selfcopy());
+            delete op;
+            return EXEC_NEXT;
+         }
+         else
+            tellerror("Runtime error.Invalid Index");
+         break;
+      }
+      case 2:
+      {
+         dword idx2 = getIndexValue();
+         dword idx1 = getIndexValue();
+         telldata::TtList* theList = static_cast<telldata::TtList*>(_var);
+         telldata::TtList* newValue = static_cast<telldata::TtList*>(op);
+
+         if (_opstackerr)
+            tellerror("Runtime error.Invalid Index");
+         if (idx1 >= idx2)
+            tellerror("Runtime error.Second index is expected to be bigger than the first one");
+         else if ((newValue->size() - 1) != (idx2 - idx1))
+            tellerror("Runtime error. Unmatched list range");
+         else if (!theList->part_assign(idx1, idx2, newValue))
+            tellerror("Runtime error.Invalid Index");
+         else
+         {
+            OPstack.push(theList->index_range_var(idx1,idx2));
+            delete op;
+            return EXEC_NEXT;
+         }
+         break;
+      }
+      default: assert(false); break;
    }
    delete op;
-   return EXEC_NEXT;
+   return EXEC_ABORT;
 }
 
 //=============================================================================
@@ -1149,29 +1177,53 @@ int parsercmd::cmdPUSH::execute()
    // times but the variable will exists only the first time, because it will
    // be cleaned-up from the operand stack after the first execution
    TELL_DEBUG(cmdPUSH);
-   if (!_indexed)
+   switch (_indexed)
    {
-     OPstack.push(_var->selfcopy());
-     return EXEC_NEXT;
-   }
-   else
-   {
-      // another class cmdLISTINDEX could be appropriate instead of the logical
-      // branch below. It looks to me that it is quite the same as above, apart
-      // from the index checks
-      dword idx = getIndexValue();
-      telldata::TellVar *listcomp = static_cast<telldata::TtList*>(_var)->index_var(idx);
-      if ((NULL != listcomp) && (!_opstackerr))
+      case 0:
       {
-         OPstack.push(listcomp->selfcopy());
+         OPstack.push(_var->selfcopy());
          return EXEC_NEXT;
       }
-      else
+      case 1:
       {
-         tellerror("Runtime error.Invalid index");
-         return EXEC_ABORT;
+         // another class cmdLISTINDEX could be appropriate instead of the logical
+         // branch below. It looks to me that it is quite the same as above, apart
+         // from the index checks
+         dword idx = getIndexValue();
+         telldata::TellVar *listcomp = static_cast<telldata::TtList*>(_var)->index_var(idx);
+         if ((NULL != listcomp) && (!_opstackerr))
+         {
+            OPstack.push(listcomp->selfcopy());
+            return EXEC_NEXT;
+         }
+         else
+         {
+            tellerror("Runtime error.Invalid index");
+            return EXEC_ABORT;
+         }
       }
+      case 2:
+      {
+         dword idx2 = getIndexValue();
+         dword idx1 = getIndexValue();
+         if (idx1 < idx2)
+         {
+            telldata::TtList* nlist = static_cast<telldata::TtList*>(_var)->index_range_var(idx1,idx2);
+            if ((NULL != nlist) && (!_opstackerr))
+            {
+               OPstack.push(nlist);
+               return EXEC_NEXT;
+            }
+            else
+               tellerror("Runtime error.Index out of range");
+         }
+         else
+            tellerror("Runtime error.Second index is expected to be bigger than the first one");
+         break;
+      }
+      default: assert(false); break;
    }
+   return EXEC_ABORT;
 }
 
 //=============================================================================
@@ -2610,7 +2662,7 @@ bool parsercmd::ListSliceCheck(telldata::typeID list, TpdYYLtype lloc,
    return true;
 }
 
-telldata::typeID parsercmd::Assign(telldata::TellVar* lval, bool indexed, telldata::ArgumentID* op2,
+telldata::typeID parsercmd::Assign(telldata::TellVar* lval, byte indexed, telldata::ArgumentID* op2,
                                                                  TpdYYLtype loc)
 {
    if (!lval)
@@ -2624,12 +2676,15 @@ telldata::typeID parsercmd::Assign(telldata::TellVar* lval, bool indexed, tellda
       return telldata::tn_void;
    }
    telldata::typeID lvalID = lval->get_type();
-   if (indexed)
+   if (1 == indexed)
    {
-      //A slight complication here - when a list component is an lvalue - then we're going
-      //to cheat a little and remove the list flag from the type ID. That's because the entire
-      //list is handled over as lval, instead of the component itself. That's because the
-      //lists are dynamic and the target component will be retrieved during runtime
+      // A slight complication here - when a single list component is an lvalue - then
+      // we have to remove the list flag from the type ID. That's because the entire
+      // list is handled over as lval, instead of the component itself. The latter is
+      // because the lists are dynamic and the target component will be retrieved
+      // during runtime
+      // The above is not valid for index ranges (i.e. 2 == indexed), because an
+      // index range results in a list
       lvalID &= ~telldata::tn_listmask;
    }
    // Here if user structure is used - clarify that it is compatible
