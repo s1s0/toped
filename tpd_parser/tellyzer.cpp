@@ -1611,7 +1611,7 @@ int parsercmd::cmdBLOCK::execute()
    return retexec;
 }
 
-parsercmd::cmdBLOCK* parsercmd::cmdBLOCK::cleaner(bool fullreset)
+void parsercmd::cmdBLOCK::cleaner(bool fullreset)
 {
    TELL_DEBUG(cmdBLOCK_cleaner);
    while (!_cmdQ.empty()) {
@@ -1621,13 +1621,13 @@ parsercmd::cmdBLOCK* parsercmd::cmdBLOCK::cleaner(bool fullreset)
    while (_blocks.size() > 1)
    {
       parsercmd::cmdBLOCK* dblk = _blocks.front(); _blocks.pop_front();
+      assert(dblk != this); // i.e. you must call this method from the bottom of the block hierarchy
       delete dblk;
    }
    if (fullreset)
       _blocks.clear();
    else
       assert(this == _blocks.front());
-   return this;
 }
 
 parsercmd::cmdBLOCK::~cmdBLOCK()

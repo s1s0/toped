@@ -295,7 +295,8 @@ entrance:
       }
       else
       {
-         CMDBlock = CMDBlock->cleaner();
+         CMDBlock = CMDBlock->rootBlock();
+         CMDBlock->cleaner();
          parsercmd::EOfile();
       }
    }
@@ -311,7 +312,8 @@ entrance:
      /*end of file but in our case rather empty input buffer*/
    }
    | error                                 {
-      CMDBlock = CMDBlock->cleaner();
+      CMDBlock = CMDBlock->rootBlock();
+      CMDBlock->cleaner();
       parsercmd::EOfile();
       /*yynerrs = 0;*/
    }
@@ -1119,7 +1121,8 @@ void tellerror (std::string s)
 
 void cleanonabort()
 {
-   CMDBlock = CMDBlock->cleaner();
+   CMDBlock = CMDBlock->rootBlock();
+   CMDBlock->cleaner();
    parsercmd::EOfile();
    while (!foreach_stack.empty())
    {
