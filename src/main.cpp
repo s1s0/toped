@@ -85,7 +85,7 @@ bool TopedApp::OnInit()
    // Initialize Toped properties
    PROPC = DEBUG_NEW layprop::PropertyCenter();
    // Initialize Toped database
-   DATC  = DEBUG_NEW DataCenter(std::string(_localDir.mb_str(wxConvFile)), std::string(_globalDir.mb_str(wxConvFile)));
+   DATC  = DEBUG_NEW DataCenter(std::string(_localDir.mb_str(wxConvUTF8)), std::string(_globalDir.mb_str(wxConvUTF8)));
    // initialize the TELL pre-processor
    tellPP = DEBUG_NEW parsercmd::TellPreProc();
    // check command line arguments
