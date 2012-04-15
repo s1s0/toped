@@ -625,6 +625,8 @@ variable:
    | fieldname                             {$$ = $1; indexed = 0;}
    | listindex                             {$$ = $1; indexed = 1;}
    | listrange                             {$$ = $1; indexed = 2;}
+   /*Note! anonymousvar can't be a lvalue. The same is true for listremove and listslice 
+           That's why the above are not here*/
 ;
 
 variabledeclaration:

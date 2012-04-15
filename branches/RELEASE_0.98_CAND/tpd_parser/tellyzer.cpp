@@ -174,15 +174,16 @@ bool parsercmd::TellPreProc::ppIfNDef(std::string var)
 
 void parsercmd::TellPreProc::ppPush()
 {
-   _ppState.push(ppBYPASS);
+   _ppState.push(ppDEEPBYPASS);
 }
 
 bool parsercmd::TellPreProc::ppElse(const TpdYYLtype& loc)
 {
    switch(_ppState.top())
    {
-      case ppACTIVE: _ppState.pop(); _ppState.push(ppBYPASS); return false;
-      case ppBYPASS: _ppState.pop(); _ppState.push(ppACTIVE); return true;
+      case ppACTIVE    : _ppState.pop(); _ppState.push(ppBYPASS); return false;
+      case ppBYPASS    : _ppState.pop(); _ppState.push(ppACTIVE); return true;
+      case ppDEEPBYPASS:                                          return false;
       default      : {
          _lastError = true;
          ppError("Unexpected #else", loc);
@@ -205,7 +206,8 @@ bool parsercmd::TellPreProc::ppEndIf(const TpdYYLtype& loc)
    else
    {
       _ppState.pop();
-      bypassStatus = (ppBYPASS == _ppState.top());
+      bypassStatus = ((ppBYPASS     == _ppState.top()) ||
+                      (ppDEEPBYPASS == _ppState.top())   );
    }
    return bypassStatus;
 }
@@ -259,7 +261,7 @@ void parsercmd::TellPreProc::ppWarning(std::string msg, const TpdYYLtype& loc)
       std::string fn = loc.filename;
       ost << "in file \"" << fn << "\" : ";
    }
-   ost << msg;
+   ost << "[PREP]" << msg;
    tell_log(console::MT_WARNING,ost.str());
 }
 
