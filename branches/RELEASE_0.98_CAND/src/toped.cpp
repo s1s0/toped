@@ -878,6 +878,7 @@ void tui::TopedFrame::checkExit( wxCommandEvent& WXUNUSED( event ) )
             sevent.SetEventObject(this);
             //GetEventHandler()->ProcessEvent(event);
             OnTDTSave(sevent);
+            setExitAproved(); 
          }
          case wxID_NO:  
             Console->stopParserThread();
@@ -910,8 +911,11 @@ void tui::TopedFrame::OnClose(wxCloseEvent& WXUNUSED( event ))
    //2. Indirectly when parse thread is close in TopedFrame::checkExit 
    //   by Console->stopParserThread(); (checkExit() already called)
    if (! exitAproved()) checkExit(evt);
-   wxMilliSleep(300);
-   Destroy();
+   if (exitAproved())
+   {
+      wxMilliSleep(300);
+      Destroy();
+   }
 }
 
 void tui::TopedFrame::OnAbout( wxCommandEvent& WXUNUSED( event ) ) {
@@ -921,7 +925,7 @@ void tui::TopedFrame::OnAbout( wxCommandEvent& WXUNUSED( event ) ) {
     info.SetIcon(wxIcon( toped32x32_xpm ));
     info.SetWebSite(wxT("www.toped.org.uk"));
     info.SetDescription(wxT("Open source IC layout editor"));
-    info.SetCopyright(wxT("(C) 2001-2009 Toped developers"));
+    info.SetCopyright(wxT("(C) 2001-2012 Toped developers"));
 
     wxAboutBox(info);
 }
