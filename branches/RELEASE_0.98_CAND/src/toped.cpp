@@ -1114,7 +1114,7 @@ void tui::TopedFrame::OnTDTSave(wxCommandEvent&  callingEvent)
       return;
    }
    //
-   wxString wxfilename(tedFileName.c_str(), wxConvFile);
+   wxString wxfilename(tedFileName.c_str(), wxConvUTF8);
    wxFileName datafile( wxfilename );
    assert(datafile.IsOk());
    SetStatusText(wxT("Saving file..."));
