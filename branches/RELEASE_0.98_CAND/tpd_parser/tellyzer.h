@@ -628,7 +628,7 @@ namespace  parsercmd {
                                                             _nextLclTypeID(lltID){};
       virtual                   ~cmdBLOCK();
       virtual int                execute();
-      cmdBLOCK*                  cleaner(bool fullreset = false);
+      void                       cleaner(bool fullreset = false);
       virtual void               addFUNC(std::string, cmdSTDFUNC*);
       virtual void               addUSERFUNC(FuncDeclaration*, cmdFUNC*, TpdYYLtype);
       virtual cmdFUNC*           addUSERFUNCDECL(FuncDeclaration*, TpdYYLtype);
@@ -650,6 +650,7 @@ namespace  parsercmd {
       void                       pushcmd(cmdVIRTUAL* cmd) {_cmdQ.push_back(cmd);};
       void                       pushblk()                {_blocks.push_front(this);};
       cmdBLOCK*                  popblk();
+      cmdBLOCK*                  rootBlock()              {return _blocks.back();}
       void                       copyContents(cmdFUNC*);
       telldata::variableMAP*     copyVarLocal();
       void                       restoreVarLocal(telldata::variableMAP&);
