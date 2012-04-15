@@ -86,7 +86,7 @@ namespace  parsercmd {
       private:
          void              ppError(std::string, const TpdYYLtype&);
          void              ppWarning(std::string, const TpdYYLtype&);
-         typedef enum { ppINACTIVE, ppBYPASS, ppACTIVE } PpState;
+         typedef enum { ppINACTIVE, ppBYPASS, ppACTIVE, ppDEEPBYPASS } PpState;
          typedef std::map <std::string, std::string> VariableMap;
          typedef std::stack <PpState>     StateStack;
          typedef std::stack <unsigned>    DepthStack;

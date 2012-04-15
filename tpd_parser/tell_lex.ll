@@ -34,7 +34,6 @@
 %x pDEFVAL
 %x pIFD
 %x pIFND
-%x pELSE
 %x pIFED
 %x pPASS
 %x pPRAGMA
@@ -108,8 +107,7 @@ location_step(&telllloc);
                            else
                               BEGIN(INITIAL);
                          }
-<pPASS>#else             /*nothing to do here*/
-#else                 { if (!tellPP->ppElse(telllloc))
+<*>#else                 { if (!tellPP->ppElse(telllloc))
                               BEGIN(pPASS);
                            else
                            {
