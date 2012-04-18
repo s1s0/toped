@@ -212,11 +212,9 @@ int TopedApp::OnRun()
          LogFile.init(std::string(_logFileName.mb_str(wxConvFile)), true);
 //      wxLog::AddTraceMask(wxT("thread"));
 //      wxLog::AddTraceMask(wxTRACE_MemAlloc);
+      defaultStartupScript();
       if ( !_inputTellFile.IsEmpty() )
          Console->parseCommand(_inputTellFile);
-      else
-         defaultStartupScript();
-
    }
    return wxApp::OnRun();
 }
