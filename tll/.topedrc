@@ -329,42 +329,14 @@ void colorSetup() {
    definecolor("blue_2"       ,0  , 127, 255, 178);
    definecolor("green_2"      ,127, 255, 0  , 178);
    definecolor("bg_1"         ,224, 224, 224, 178);
+}
+
+
+void lineSetup() {
 //              name       color  pattern pscale width
    defineline("selected1", "", 0xfffd,   5  ,	5);
    defineline("selected2", "", 0xf18f,   2  ,	5);
    defineline("selected3", "", 0xcfcf,   2  ,   5);
-}
-
-void layerSetup() {
-    colorSetup();
-    fillSetup();
-   lmap list cifmap;
-   lmap list gdsmap;
-//    	     name    Number  Colour       Fill              Selected
-   layprop("NWELL"      ,1  ,"yellow"      ,"Dots1"          , "selected3" );cifmap[:+] = {{ 1, "NWLL"}};gdsmap[:+] = {{ 1, " 1; 0"}};
-   layprop("LAYER0"     ,0  ,"past_cyan"   ,"FatDots2"       , "selected3" );cifmap[:+] = {{ 0, "LAY0"}};gdsmap[:+] = {{ 0, " 0; 0"}};
-   layprop("ACTIVE"     ,2  ,"blue"        ,"diagStripeBack" , "selected3" );cifmap[:+] = {{ 2, "ACTI"}};gdsmap[:+] = {{ 2, " 2; 0"}};
-   layprop("UNKWN_1"    ,3  ,"darkGray"    ,""               , "selected3" );cifmap[:+] = {{ 3, "UNK1"}};gdsmap[:+] = {{ 3, " 3; 0"}};
-   layprop("POLY"       ,4  ,"red"         ,"checkerboards"  , "selected2" );cifmap[:+] = {{ 4, "PLY2"}};gdsmap[:+] = {{ 4, " 4; 0"}};
-   layprop("N_IMPL"     ,5  ,"white"       ,""               , "selected3" );cifmap[:+] = {{ 5, "NIMP"}};gdsmap[:+] = {{ 5, " 5; 0"}};
-   layprop("P_IMPL"     ,6  ,"magenta"     ,""               , "selected3" );cifmap[:+] = {{ 6, "PIMP"}};gdsmap[:+] = {{ 6, " 6; 0"}};
-   layprop("CONTACT"    ,7  ,"white"       ,"diagStripeForw" , "selected3" );cifmap[:+] = {{ 7, "CNT" }};gdsmap[:+] = {{ 7, " 7; 0"}};
-   layprop("METAL1"     ,8  ,"green"       ,"checkerboard"   , "selected3" );cifmap[:+] = {{ 8, "MTL1"}};gdsmap[:+] = {{ 8, " 8; 0"}};
-   layprop("PASS"       ,9  ,"darkGray"    ,""               , "selected3" );cifmap[:+] = {{ 9, "PASS"}};gdsmap[:+] = {{ 9, " 9; 0"}};
-   layprop("UNKWN_2"    ,10 ,"white"       ,""               , "selected3" );cifmap[:+] = {{10, "UNK2"}};gdsmap[:+] = {{10, "10; 0"}};
-   layprop("UNKWN_3"    ,11 ,"white"       ,""               , "selected3" );cifmap[:+] = {{11, "UNK3"}};gdsmap[:+] = {{11, "11; 0"}};
-   layprop("UNKWN_3"    ,12 ,"white"       ,""               , "selected3" );
-   layprop("P_FIELD"    ,13 ,"white"       ,""               , "selected3" );cifmap[:+] = {{13, "PFLD"}};gdsmap[:+] = {{13, "13; 0"}};
-   layprop("POLY1"      ,14 ,"cyan"        ,"Cross1"         , "selected3" );cifmap[:+] = {{14, "PLY1"}};gdsmap[:+] = {{14, "14; 0"}};
-   layprop("FUSE"       ,15 ,"white"       ,""               , "selected3" );cifmap[:+] = {{15, "FUSE"}};gdsmap[:+] = {{15, "15; 0"}};
-   layprop("VIA12"      ,17 ,"lightGray"   ,""               , "selected3" );cifmap[:+] = {{17, "VA12"}};gdsmap[:+] = {{17, "17; 0"}};
-   layprop("METAL2"     ,18 ,"darkMagenta" ,""               , "selected3" );cifmap[:+] = {{18, "MTL2"}};gdsmap[:+] = {{18, "18; 0"}};
-   layprop("TEXT"       ,60 ,"darkGray"    ,""               , "selected1" );cifmap[:+] = {{60, "TXT1"}};gdsmap[:+] = {{60, "60;20"}};
-   layprop("TEXT"       ,62 ,"yellow"      ,"horiHash"       , "selected2" );cifmap[:+] = {{62, "TXT2"}};gdsmap[:+] = {{62, "60;40"}};
-   layprop("SCRIBE_LANE",63 ,"white"       ,""       	     , "selected3" );cifmap[:+] = {{63, "SRBL"}};gdsmap[:+] = {{63, "60; 0"}};
-
-//   setciflaymap(cifmap);
-//   setgdslaymap(gdsmap);
 }
 
 void screenSetup() {
@@ -379,5 +351,7 @@ void screenSetup() {
    shapeangle(45);
 }
 
-layerSetup();
+colorSetup();
+fillSetup();
+lineSetup();
 screenSetup();
