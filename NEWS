@@ -1,11 +1,12 @@
-Toped release 0.97 changes and updates
+Toped release 0.9.8 changes and updates
 ----------------------------------------
-- Further work on Calibre DRC visualisation. Browser supports cell name mode now.
-- New utility (gds2vrml) for generation of VRML files
-- Improved memory footprint, improved TELL execution speed
-- Compressed files supported now for all DB formats
-- Plug-in development infrastructure. Header files for a development package are
-  released for the first time. Plug-in example will be available shortly
-- TELL user library initiated and included in the distribution
-- Some new build-in TELL functions including exec renamecell etc.
+- Internal data base redefined to cope with invalid layout objects. Provisions
+  for non-layout data
+- Further work on logical operations and data checks. Automatic data recovery
+  introduced for invalid layout objects.
+- New technology editor
+- Preprocessor introduced in the Tell parser.
+- New build-in TELL functions and operator extensions. Speed optimizations in 
+  code execution
+- TELL user library significantly expanded 
 - Bug fixes and stability improvements
