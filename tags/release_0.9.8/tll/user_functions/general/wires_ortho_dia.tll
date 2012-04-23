@@ -1,0 +1,430 @@
+#ifndef __GENERAL_WIRES_ORTHO_DIA_TLL__
+#define __GENERAL_WIRES_ORTHO_DIA_TLL__
+
+
+//===========================================================================
+//                                                                          =
+// ------------------------------------------------------------------------ =
+//                      TTTTT    EEEE     L       L                         =
+//                      T T T    E        L       L                         =
+//                        T      EEE      L       L                         =
+//                        T      E        L       L                         =
+//                        T      EEEEE    LLLLL   LLLLL                     =
+//                                                                          =
+//   This file is a part of Toped project                                   =
+//   Copyright (C) 2001-2012 Toped developers                               =
+// ------------------------------------------------------------------------ =
+//           $URL$
+//     Originator: Armin Taschwer - analogcmos@gmx.net
+//---------------------------------------------------------------------------
+//  Revision info
+//---------------------------------------------------------------------------
+//      $Revision$
+//          $Date$
+//        $Author$
+//===========================================================================
+
+/**   Description:
+ *
+ * geometric tasks in a TELL-application
+ * GRID, EPS: have to be defined before including this file
+ *       --> see comments below
+ *
+ *      Functions:
+ * 
+ * point list create_line_ortho_dia (point A, point B, real dev)
+ * .. creates a line with orthogonal and diagonal segments only
+ * point list create_poly_ortho_dia (point list p, real dev) ..
+ * .. creates a polyline with orthogonal and diagonal segments only
+ */
+
+/** LICENSE:
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+ */
+
+
+#include "general/definitions.tll"
+#include "technology/default.tll"
+#include "general/geometry.tll"
+#include "general/helper.tll"
+
+
+/*
+ * helper function for "create_line_ortho_dia"
+ * determines the types of standard line segments used to replace an
+ * arbitrary vector. Result will be given as a two value list. The
+ * first represents the type of the first segment, the second one the
+ * type for the second segment. The types: 0 .. vertical up, 1 .. 45°
+ * right up, 2 .. horizontal right, 3 .. 45° right down, 4 .. vertical
+ * down 
+
+ * Before this can be done the position of the vector within a circle
+ * has to be specified 
+ * 
+ *          type
+ * pos    seg1 seg2  description
+ *  1      0    1    90 and 67.5°
+ *  2      1    0    67.5 to 45
+ *  3      1    2    45 to 22.5
+ *  4      2    1    22.5 to 0
+ *  5      2    3    0 to -22.5
+ *  6      3    2    -22.5 to -45
+ *  7      3    4    -45 to -67.5
+ *  8      4    3    -67.5 to -90
+
+ * @param a start-point of vector
+ * @param b end-point of vector
+ * @return 2-component list where first contains type of 1.segment and
+ * sec contains type of 2.segment
+ */
+int list get_orientation_from_vector (point a, point b) {
+  point v;
+  real alpha = 0;
+  int type_addx = 0;
+  int pos;
+  int type1;
+  int type2;
+
+  int list type;
+
+  v = b - a;
+  if (b.x < a.x) {
+    type_addx = 4;
+    v.x = a.x - b.x;
+  } else {
+    v.x = b.x - a.x;
+  }
+  
+
+  // calculate the inclination
+  // only one 45° section is considered --> less rounding errors
+  if (abs(v.y) > v.x) { //this is the section from 45 to 90° and -45
+			//to -90°
+    alpha = 90 - abs(atan (v.x/v.y));
+  } else {
+    alpha = abs(atan (v.y/v.x));
+  }
+
+  // echo (v);
+  // echo ("ALPHA:");echo(alpha);
+
+  //determine the type
+  if (alpha > 67.5) pos = 1;
+  else if (alpha > 45) pos = 2;
+  else if (alpha > 22.5) pos = 3;
+  else pos = 4;
+
+  if (v.y < 0) {
+    pos = 9 - pos;
+  }
+
+  //echo (pos);
+
+  if (pos == 1)      { type1 = 0; type2 = 1; }
+  else if (pos == 2) { type1 = 1; type2 = 0; }
+  else if (pos == 3) { type1 = 1; type2 = 2; }
+  else if (pos == 4) { type1 = 2; type2 = 1; }
+  else if (pos == 5) { type1 = 2; type2 = 3; }
+  else if (pos == 6) { type1 = 3; type2 = 2; }
+  else if (pos == 7) { type1 = 3; type2 = 4; }
+  else if (pos == 8) { type1 = 4; type2 = 3; }
+
+  type1 = type1 + type_addx;
+  type2 = type2 + type_addx;
+  if (type1 == 8) type1 = 4;
+  if (type2 == 8) type2 = 4;
+
+  type = { type1, type2 };
+  return type;
+}
+
+
+/*
+ * helper function for "create_line_ortho_dia"
+ * the returning point depicts a
+ * (pseudo) normalized vector with the wanted orientation
+ * the orientations are defined in function
+ * "get_orientation_of_vector" 
+ * pseudo normalized: the length of the vector is only 1 when
+ * horizontally or vertically. In the 45° case it is sqrt(2)
+ * @param A startpoint
+ * @return point, necessary to build a norm-vector
+ */
+point get_vec_with_orientation (int type) {
+  point nv;
+  if (type == 0)      nv = {  0.0,  1.0 };
+  else if (type == 1) nv = {  1.0,  1.0 }; 
+  else if (type == 2) nv = {  1.0,  0.0 }; 
+  else if (type == 3) nv = {  1.0, -1.0 }; 
+  else if (type == 4) nv = {  0.0, -1.0 }; 
+  else if (type == 5) nv = { -1.0,  1.0 }; 
+  else if (type == 6) nv = { -1.0,  0.0 }; 
+  else if (type == 7) nv = { -1.0, -1.0 }; 
+  else if (type == 8) nv = {  0.0, -1.0 }; //equal to 4 (but should
+					   //not happen) 
+  return nv;
+}
+
+
+
+/* 
+ * helper function for "create_line_ortho_dia"
+ * returns the vector A->B surrounding polygon with a maximum
+ * deviation of fuzzyrange.
+ * @param A Startpoint of vector
+ * @param B Endpoint of vector
+ * @param fuzzyrange maximum deviation from vector
+ * @type type list with two values: 1: primary orientation, 2:
+ * secondary orientation
+ * @return polygon surrounding vector AB
+ */
+point list get_fuzzy_vector (point A, point B, 
+			     int list type, real fuzzyrange) {
+    point list p;
+
+  point vec = B-A;
+  point norm = vec_normal (vec) * fuzzyrange;
+  point invnorm = vec_mirror (norm);
+
+  //fence will start by first point and goes counter-clockwise around the vector
+  int ang_type_left = 0; //which type vector is right of AB, --> for first point
+  int ang_type_right = 0; //
+
+  point list v_type;
+  v_type[:+] = get_vec_with_orientation (type[0]);
+  v_type[:+] = get_vec_with_orientation (type[1]);
+
+  //check which type of the norm-vectors is on the LEFT side of AB
+  //one check is sufficient
+  if (vec_angle_sign (v_type[0], v_type[1]) > 0.0 ) {
+    ang_type_left = 1; //type index 1 is on the left
+    ang_type_right = 0;
+  } else {
+    ang_type_left = 0;
+    ang_type_right = 1;
+  }
+      
+  point intsec2 = vec_intersection (A, A + v_type[ang_type_right],
+				    B, B + vec_mirror(v_type[ang_type_left]), false);
+  point intsec3 = vec_intersection (A, A + v_type[ang_type_left],
+				    B, B + vec_mirror(v_type[ang_type_right]), false);
+
+  // echo (intsec2);
+  // echo (intsec3);
+  // echo (distance_point_to_line (intsec2, A,B));
+  // echo (fuzzyrange);
+
+  //intersections already very close to vector AB ?
+  if ( abs(distance_point_to_line (intsec2, A,B)) <= fuzzyrange) {
+    //makes no difference if one takes intsec2 or intsec3
+      
+    if ( points_equal (A, intsec2) ||
+	 points_equal (A, intsec3) ) {
+      p = { A,B }; //we are very close to the ideal 0°, 45°, 90°
+    } else {
+      p = { A, intsec2, B, intsec3};
+    }
+  } else {
+    //helper vectors in parallel to AB are needed
+    //this is the general case
+
+    //intsec1 and intsec4 are not needed --> please refer to the sketch
+    
+    intsec2 = vec_intersection ( B, B + vec_mirror(v_type[ang_type_left]),
+				 A+invnorm, B+invnorm, false);
+    intsec3 = vec_intersection ( B, B + vec_mirror(v_type[ang_type_right]),
+				 A+norm, B+norm, false);
+
+    p[:+] = A + invnorm;
+    p[:+] = intsec2;
+    p[:+] = B;
+    p[:+] = intsec3;
+    p[:+] = A + norm;
+  }
+
+  return (p);
+}
+
+/**
+ * helper function for "create_line_ortho_dia"
+ * calculates a new intersection point with the fence starting from
+ * point A. The final point is B which is also part of the fence
+ * @param A starting point, should be somewhere on the fence (but on
+ * grid) 
+ * @param B end point 
+ * @param fence list of points describing the fuzzy area around a
+ * vector
+ * @param type list with two values as given from
+ * "get_orientation_from_vector" 
+ * @param count contains the number of the segment
+ * @return the intersection point between  the vector defined by count
+ * and type and the fence. The values are rounded to grid.
+ */ 
+point intersection_with_fuzzy_vector (point A, point B, point list fence, 
+				      int list type, int count) {
+  point ret;
+  point v_type1, v_type2;
+  if ( fmod(count,2) == 1.0) { //count starts with 0
+    v_type1 = get_vec_with_orientation (type[1]);
+    v_type2 = get_vec_with_orientation (type[0]);
+  } else {
+    v_type1 = get_vec_with_orientation (type[0]);
+    v_type2 = get_vec_with_orientation (type[1]);
+  }
+
+  //did we already found the final point in the last iteration ? 
+  if ( is_point_on_line (A, B, B+vec_mirror(v_type1)) ||
+       is_point_on_line (A, B, B+vec_mirror(v_type2)) ) {
+    //echo ("bin da 1");
+    ret = B;
+  } else if ( length(fence) < 5) {
+    //echo ("bin da 2");
+    //inclination of the original vector is already very close to the
+    //ideal 0°, 45° and 90° situation
+    //the final line can be build up with just an additional point
+    //at this point: count = 1 
+
+    //normaly it doesn't care which of the two vectors is the first one
+    ret = fence[2]; //afterwards we are ready
+
+  } else {
+    //echo ("bin da 3");
+    //fence: LEFT vector is defined by indices 4 and 3
+    //       RIGHT vector is defined by indices 0 and 1
+    //       LEFT neighbor of B: def by 3 and 2
+    //       RIGHT neighbor of B: def by 1 and 2
+
+    //determine wheter the LEFT or the RIGHT parallel vector should be
+    //choosen
+    //following assumption work even if A is not on the fence
+    if ( vec_angle_sign ( v_type1, v_type2 ) < 0.0) { //check LEFT side
+      ret = vec_intersection ( A, A + v_type1,
+			       fence[3], fence[4], false);
+      //echo ("left");echo (ret);
+
+      if (is_point_on_vec (ret, fence[3], fence[4]) == false) {
+	ret = vec_intersection (A, A + v_type1,
+				fence[2], fence[3], false);
+	//echo ("left-left"); echo(ret);
+      }
+
+    } else {
+      ret = vec_intersection ( A, A + v_type1,
+			       fence[0], fence[1], false) ;
+      //echo ("right");echo (ret);
+
+      if (is_point_on_vec (ret, fence[0], fence[1]) == false) {
+	//if point is the right side
+	ret = vec_intersection (A, A + v_type1,
+				fence[2], fence[1], false);
+	//echo ("right-right"); echo(ret);
+      }
+    }
+  }
+  return round_to_grid (ret);
+}
+
+
+/*
+ * transform a simple line into a concatenation of orthogonal and
+ * diagonal segments. The deviation from the ideal line is kept within a
+ * certain range.
+ * The aim of this function should be to get arbitrary polygons
+ * DRC-clean
+ * !! it is assumed that A,B already on-grid !!
+ * @param A starting point of line
+ * @param B ending point of line
+ * @param dev maximal allowed deviation from orginal line
+ * @return a list of points representing a DRC clean line.
+ */
+point list create_line_ortho_dia (point A, point B, real dev) {
+  point list vec_equiv; //vector equivalent
+
+  //determine the position of the vector
+  int list type = get_orientation_from_vector (A,B);
+
+  //echo (type);
+
+  //define a polygon around the vector
+  point list fence = get_fuzzy_vector (A, B, type, dev);
+
+  //echo (fence);
+
+   //
+  int count = 0;
+  point newp;
+  int found_endpoint = 0;
+
+  vec_equiv[:+] = A;
+
+  while (found_endpoint != 1) {
+    //while (found_endpoint != 1 && count < 10) { //just for debugging
+    if (count == 0) { //begin with type 1
+      newp = intersection_with_fuzzy_vector (A, B, fence, type, count);
+    } else {
+      newp = intersection_with_fuzzy_vector (newp, B, fence, type, count);
+    }
+
+    //echo (newp);
+
+    vec_equiv [:+] = newp;
+    count = count + 1;    
+
+    if (points_equal (newp, B)) { //it is done
+      found_endpoint = 1;
+    }
+  }
+  //check if new line is DRC-clean (if necessary !?)
+ 
+  return (vec_equiv);
+}
+
+/**
+ * create a DRC-clean polyline. Split the straight lines up into small
+ * pieces of 0°,45°,90° lines. 
+ * @param p polygon
+ * @param dev maximum allowed deviation from original poly-line
+ * @return return poly with orthogonal and diagonal pieces only
+ */
+point list create_poly_ortho_dia (point list p, real dev) {
+  int lp = length(p);
+  int list ll;
+  point list single;
+  point list ret = {};
+  int ii;
+
+  if (length(p) <= 1) {
+    ret = p;
+  } else {
+    int lpp = lp - 1;
+    ll = seq (0, lpp);
+    foreach (int i; ll) {
+      ii = i+1;
+      if (i < lpp) {
+	single = create_line_ortho_dia (p[i],p[ii], dev);
+      } else {
+	single = create_line_ortho_dia (p[i],p[0],dev);
+      }
+
+      single[:-];
+      ret[:+] = single;		
+    }
+  }
+
+  return (ret);
+}
+
+#endif

@@ -1,0 +1,18 @@
+Version 0.3.1 12dec2011
+-----------------------
+* Bug in libgdsto3d / gdsparse.cpp: _currentstrans needs to be reset (affects flipping of SREF)
+
+Version 0.3 10jan2011
+-----------
+* autotools applied
+
+Version 0.2:
+-----------
+* SREF, AREF functional
+compare also to the todo list
+
+Version 0.1:
+------------
+* not all functions as described in gds2pov fully implemented
+  -> OutputARefToFile .. arrays are not yet implemented
+  

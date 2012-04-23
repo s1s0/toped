@@ -1,0 +1,214 @@
+#ifndef __TECHNOLOGY_HELPER_TLL__
+#define __TECHNOLOGY_HELPER_TLL__
+
+//===========================================================================
+//                                                                          =
+// ------------------------------------------------------------------------ =
+//                      TTTTT    EEEE     L       L                         =
+//                      T T T    E        L       L                         =
+//                        T      EEE      L       L                         =
+//                        T      E        L       L                         =
+//                        T      EEEEE    LLLLL   LLLLL                     =
+//                                                                          =
+//   This file is a part of Toped project                                   =
+//   Copyright (C) 2001-2012 Toped developers                               =
+// ------------------------------------------------------------------------ =
+//           $URL:$
+//     Originator: Armin Taschwer - analogcmos@gmx.net
+//---------------------------------------------------------------------------
+//  Revision info
+//---------------------------------------------------------------------------
+//      $Revision:$
+//          $Date:$
+//        $Author:$
+//===========================================================================
+
+/**   Description:
+ *
+ * Defines some functions which should be helpful to work with the techfile
+ * 
+ *
+ *      Functions:
+ *
+ *   int get_max_[via,metal,poly] ();  .. returns max. number of layers used for via or met or poly
+ *   int set_[via,metal,poly]_layer ( int layer ); .. set active layer
+ *   real list get_[via,metal,poly]_parameter ( int layer ); .. get specific parameters 
+ * 
+ **/
+
+/** LICENSE:
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+ **/
+
+
+#include "general/definitions.tll"
+#include "technology/default.tll"
+#include "general/helper.tll"
+
+//-------------------------------------------------
+//  Function: get_nb_metal, get_nb_poly get_nb_via
+//  Description: 
+//  returns the maximum possible number of metal, poly, or via layers
+//-------------------------------------------------
+//  @param 
+//  @return 
+//-------------------------------------------------
+int get_max_via (  )  {
+  return (MAX_VIA);
+}
+
+int get_max_metal (  )  {
+  return (MAX_METAL);
+}
+
+int get_max_poly (  )  {
+  return (MAX_POLY);
+}
+
+
+//-------------------------------------------------
+//  Function: get_via_parameter
+//  Description: 
+//  VIA:  { size, space, enclosure }
+//  MET:  { width, space }
+//  POLY: { width, space }
+//-------------------------------------------------
+//  @param layer corresponds to the key in the corresponding 
+//               lmap list of drc.tll
+//  @return list with parameters, list length is zero if layer is not
+//  specified  
+//-------------------------------------------------
+real list get_via_parameter ( int layer )  {
+  real list ret;
+  int l;
+  if (layer >= 1 && layer <= MAX_VIA) {
+    l = layer - 1; //lists are starting with index 0
+    ret[:+] = VIA_SZ[l];
+    ret[:+] = VIA_SPC[l];
+    ret[:+] = VIA_ENC[l];
+  }
+  return (ret);
+}
+
+real list get_metal_parameter ( int layer )  {
+  real list ret;
+  int l;
+  if (layer >= 1 && layer <= MAX_METAL) {
+    l = layer - 1; //lists are starting with index 0
+    ret[:+] = MET_MIN_W[l];
+    ret[:+] = MET_MIN_S[l];
+  }
+  return (ret);
+}
+
+real list get_poly_parameter ( int layer )  {
+  real list ret;
+  int l;
+  if (layer >= 1 && layer <= MAX_POLY) {
+    l = layer - 1; //lists are starting with index 0
+    ret[:+] = POLY_MIN_W[l];
+    ret[:+] = POLY_MIN_S[l];
+  }
+  return (ret);
+}
+
+//-------------------------------------------------
+//  Function: set_met_layer
+//  Description:
+//  set active metall layer
+//-------------------------------------------------
+//  @param layer corresponds to the key in the corresponding 
+//               lmap list of drc.tll
+//  @return 
+//-------------------------------------------------
+void set_via_layer ( int layer )  {
+  if (layer >= 1 && layer <= MAX_VIA) {
+    string v = llmap_key ( LAYER_VIA, layer );
+    //if (v != STR_NOT_FOUND) { //string comparison needed
+    usinglayer (v);
+    //}
+  }
+}
+
+void set_metal_layer ( int layer )  {
+  if (layer >= 1 && layer <= MAX_METAL) {
+    string v = llmap_key ( LAYER_MET, layer );
+    //if (v != STR_NOT_FOUND) { //string comparison needed
+    usinglayer (v);
+    //}
+  }
+}
+
+void set_poly_layer ( int layer )  {
+  if (layer >= 1 && layer <= MAX_POLY) {
+    string v = llmap_key ( LAYER_POLY, layer );
+    //if (v != STR_NOT_FOUND) { //string comparison needed
+    usinglayer (v);
+    //}
+  }
+}
+
+
+//-------------------------------------------------
+//  Function: get_layer_values
+//  Description: 
+//    mainly helper function for get_max_min_width_metal (), etc.
+//-------------------------------------------------
+//  @param feat list of feature (VIA_SZ, MET_MIN_W, etc.)
+//  @param l_top top layer which has to be considered
+//  @param l_bot bottom layer which to be considered
+//  @return 
+//-------------------------------------------------
+
+real list get_layer_values (real list feat, int l_top, int l_bot) {
+  real list f = feat; //feature
+  int top = l_top;
+  int bot = l_bot;
+
+  if (top < bot) {
+    top = bot;
+    bot = l_top;
+  }
+
+  if (top > length (feat)) top = length(feat);
+  if (bot < 1) bot = 1;
+  bot = bot - 1;
+  top = top - 1;
+  return ( f[bot:-(top-bot+1)]);
+}
+
+
+//-------------------------------------------------
+//  Function: get_max_min_width_metal
+//  Description: 
+//  returns the maximum allowed width in a certain range of metal layers
+//-------------------------------------------------
+//  @param layer_top .. top most layer which has to be considered
+//  @param layer_bot .. bottom most layer which has to be considered
+//  @return if negative an error occured
+//-------------------------------------------------
+real get_max_min_width_metal ( int layer_top, int layer_bot )  {
+  return ( list_max (get_layer_values (MET_MIN_W, layer_top, layer_bot)) );
+}
+real get_max_min_space_metal ( int layer_top, int layer_bot )  {
+  return ( list_max (get_layer_values (MET_MIN_S, layer_top, layer_bot)) );
+}
+real get_max_min_enc_via ( int layer_top, int layer_bot )  {
+  return ( list_max (get_layer_values (VIA_ENC, layer_top, layer_bot)) );
+}
+
+
+#endif

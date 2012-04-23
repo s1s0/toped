@@ -1,0 +1,160 @@
+
+Author: Armin Taschwer
+
+GDS2VRML converts (Calma) GDSII to VRML97 file type. 
+The layer description in general is technology dependent and has to be done 
+manually.
+
+GDS2VRML is hacked from the orginal code of GDS2POV Version 20080229
+( --> http://atchoo.org/gds2pov/ ) and is therefor also available under the 
+GPLv2. To get a running version of the gds2vrml code you need at least the headers 
+and the compiled version of libgdsto3d from the gdsto3d project written by 
+Roger Light.
+--> from v0.3 on the libgdsto3d is included!
+
+=====================================
+Installation:
+------------
+
+If "Makefile.cvs" exists but no "configure" ..
+$ make -f Makefile.cvs
+
+$ ./configure
+$ make
+$ make install
+
+
+=====================================
+Using:
+-----
+
+the simplest usage will be:
+
+$ gds2vrml -i <in.gds> -o <out.wrl> -p <process.proc> -t <top-cell-name>
+
+gds2vrml -h gives you:
+----
+gds2vrml  version v0.2
+Copyright (C) 2004-2008 Roger Light, 2009-2010 Armin Taschwer
+for the original gds2pov refer to http://atchoo.org/gds2pov/
+
+gds2vrml comes with ABSOLUTELY NO WARRANTY.  
+You may distribute gds2pov freely as described in the readme.txt distributed with this 
+file.
+
+gds2vrml is a program for converting a GDS2 file to a VRML scene file.
+
+Usage: gds2vrml [-b] [-c config.txt] [-d] [-e camera.pov] [-h] [-i input.gds] 
+[-o output.pov] [-p process.txt] [-q] [-t topcell] [-v]
+
+Options
+ -b		Output bounding box instead of layout to allow easier and
+		quicker placing of the camera
+ -c		Specify config file
+ -d		Decompose polygons into triangles (use mesh2 object 
+		instead of prism)
+ -e		Use external camera include file instead of specifying camera 
+		internally
+ -g		Generate a process file based on the input gds2 file 
+		(suppresses POV-Ray file generation).
+ -h		Display this help
+ -i		Input GDS2 file (stdin if not specified)
+ -o		Output VRML file (stdout if not specified)
+ -p		Specify process file
+ -q		Quiet output
+ -t		Specify top cell name
+ -v		Verbose output
+------   
+
+Attention, some of the upper described parameters maybe won't work since 
+they are written to be used in the original gds2pov.
+For now (v0.2,v0.3) these parameters are -b, -c, -d, -e, -g
+
+Under the directory macros you will find a script file create_vrml. Just copy 
+this file to your working directories and edit the first two entries 
+properly.
+
+
+=====================================
+Viewing:
+-------
+
+To viewing the vrml files I would recommend view3dscene
+( http://vrmlengine.sourceforge.net/view3dscene.php )
+
+=====================================
+Process-File:
+------------
+
+# Process configuration file for gds2pov
+#
+# Lines starting with a # are comments.
+#
+# This file describes a made up p-sub, single well 4 layer metal CMOS 
+# process.
+#
+# This file consists of Layer entries in the following format:
+#
+# LayerStart: LayerName
+# Layer: LayerNumber (integer)
+# Datatype: (integer)
+# Height: (float) - See NOTE below
+# Thickness: (float) - See NOTE below
+# Red: (float, between 0,1 with 1 being full)
+# Green: (float, between 0,1 with 1 being full)
+# Blue: (float, between 0,1 with 1 being full)
+# Filter: (float, between 0,1 with 1 being full)
+# Metal: (boolean, 0 or 1)
+# Show: (boolean, 0 or 1)
+# LayerEnd
+#
+# Filter defines the transparency of the layer, with 1 being the most
+# transparent. It actually works for values greater than 1, but the povray
+# documentation states that it is limited to 1 so don't rely on it.
+#
+# Metal, when set to 1, will make the layer slightly reflective.
+# Show defines whether the layer is shown or not.
+#
+# The only compulsory items are LayerStart, Layer and LayerEnd. If any value 
+# is ommitted, the default
+# will be used. The defaults are:
+#
+# Datatype: -1       (meaning all datatypes for this layer)
+# Height: 0
+# Thickness: 0       (thickness of 0 means the layer will not be shown)
+# Red: 0.0
+# Green: 0.0
+# Blue: 0.0
+# Filter: 0.0
+# Metal: 0
+# Show: 0            (do *not* show by default)
+#
+#
+# If any layer is not listed in this file it will be ignored in the gds2 
+# file.
+#
+# NOTE
+# ====
+#
+# The numbers given here for Height and Thickness are specified in DB units. 
+# This is defined in your GDS2 file
+# (not the process!), which is why the Height and Thickness must use them. To 
+# find the DB units for your GDS2
+# file, just run the file through GDS2POV and it will provide the 
+# information.
+
+## e.g. Minimum process-file which can be used with GDSII files from Toped 
+## (http://www.toped.org.uk/)
+LayerStart: UNDEF1
+Layer: 1
+Height: 0
+Thickness: 500
+Red: 1
+Green: 1
+Blue: 1
+Filter: 0.1
+Metal: 0
+Show: 1
+LayerEnd
+
+
