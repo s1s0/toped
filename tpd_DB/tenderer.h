@@ -127,8 +127,8 @@
 #include <GL/glew.h>
 #include "drawprop.h"
 
-//#define USE_FLOATS
-#ifdef USE_FLOATS
+#define TENDERER_USE_FLOATS
+#ifdef TENDERER_USE_FLOATS
    #define TNDR_GLDATAT GLfloat
    #define TNDR_GLENUMT GL_FLOAT
 #else

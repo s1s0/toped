@@ -11,7 +11,7 @@
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
 //                                                                          =
-//   This file is a part of Toped project (C) 2001-2007 Toped developers    =
+//   This file is a part of Toped project (C) 2001-2012 Toped developers    =
 // ------------------------------------------------------------------------ =
 //           $URL$
 //        Created: Fri Nov 08 2002
@@ -174,15 +174,16 @@ bool parsercmd::TellPreProc::ppIfNDef(std::string var)
 
 void parsercmd::TellPreProc::ppPush()
 {
-   _ppState.push(ppBYPASS);
+   _ppState.push(ppDEEPBYPASS);
 }
 
 bool parsercmd::TellPreProc::ppElse(const TpdYYLtype& loc)
 {
    switch(_ppState.top())
    {
-      case ppACTIVE: _ppState.pop(); _ppState.push(ppBYPASS); return false;
-      case ppBYPASS: _ppState.pop(); _ppState.push(ppACTIVE); return true;
+      case ppACTIVE    : _ppState.pop(); _ppState.push(ppBYPASS); return false;
+      case ppBYPASS    : _ppState.pop(); _ppState.push(ppACTIVE); return true;
+      case ppDEEPBYPASS:                                          return false;
       default      : {
          _lastError = true;
          ppError("Unexpected #else", loc);
@@ -205,7 +206,8 @@ bool parsercmd::TellPreProc::ppEndIf(const TpdYYLtype& loc)
    else
    {
       _ppState.pop();
-      bypassStatus = (ppBYPASS == _ppState.top());
+      bypassStatus = ((ppBYPASS     == _ppState.top()) ||
+                      (ppDEEPBYPASS == _ppState.top())   );
    }
    return bypassStatus;
 }
@@ -259,7 +261,7 @@ void parsercmd::TellPreProc::ppWarning(std::string msg, const TpdYYLtype& loc)
       std::string fn = loc.filename;
       ost << "in file \"" << fn << "\" : ";
    }
-   ost << msg;
+   ost << "[PREP]" << msg;
    tell_log(console::MT_WARNING,ost.str());
 }
 
@@ -951,27 +953,55 @@ int parsercmd::cmdASSIGN::execute()
 {
    TELL_DEBUG(cmdASSIGN);
    telldata::TellVar *op = OPstack.top();OPstack.pop();
-   if (_indexed)
+   switch (_indexed)
    {
-      dword idx = getIndexValue();
-      telldata::TellVar* indexVar = static_cast<telldata::TtList*>(_var)->index_var(idx);
-      if ((NULL != indexVar) && (!_opstackerr))
+      case 0:
       {
-         indexVar->assign(op); OPstack.push(indexVar->selfcopy());
-      }
-      else
-      {
-         tellerror("Runtime error.Invalid Index");
+         _var->assign(op); OPstack.push(_var->selfcopy());
          delete op;
-         return EXEC_ABORT;
+         return EXEC_NEXT;
       }
-   }
-   else
-   {
-      _var->assign(op); OPstack.push(_var->selfcopy());
+      case 1:
+      {
+         dword idx = getIndexValue();
+         telldata::TellVar* indexVar = static_cast<telldata::TtList*>(_var)->index_var(idx);
+         if ((NULL != indexVar) && (!_opstackerr))
+         {
+            indexVar->assign(op); OPstack.push(indexVar->selfcopy());
+            delete op;
+            return EXEC_NEXT;
+         }
+         else
+            tellerror("Runtime error.Invalid Index");
+         break;
+      }
+      case 2:
+      {
+         dword idx2 = getIndexValue();
+         dword idx1 = getIndexValue();
+         telldata::TtList* theList = static_cast<telldata::TtList*>(_var);
+         telldata::TtList* newValue = static_cast<telldata::TtList*>(op);
+
+         if (_opstackerr)
+            tellerror("Runtime error.Invalid Index");
+         if (idx1 >= idx2)
+            tellerror("Runtime error.Second index is expected to be bigger than the first one");
+         else if ((newValue->size() - 1) != (idx2 - idx1))
+            tellerror("Runtime error. Unmatched list range");
+         else if (!theList->part_assign(idx1, idx2, newValue))
+            tellerror("Runtime error.Invalid Index");
+         else
+         {
+            OPstack.push(theList->index_range_var(idx1,idx2));
+            delete op;
+            return EXEC_NEXT;
+         }
+         break;
+      }
+      default: assert(false); break;
    }
    delete op;
-   return EXEC_NEXT;
+   return EXEC_ABORT;
 }
 
 //=============================================================================
@@ -1149,29 +1179,53 @@ int parsercmd::cmdPUSH::execute()
    // times but the variable will exists only the first time, because it will
    // be cleaned-up from the operand stack after the first execution
    TELL_DEBUG(cmdPUSH);
-   if (!_indexed)
+   switch (_indexed)
    {
-     OPstack.push(_var->selfcopy());
-     return EXEC_NEXT;
-   }
-   else
-   {
-      // another class cmdLISTINDEX could be appropriate instead of the logical
-      // branch below. It looks to me that it is quite the same as above, apart
-      // from the index checks
-      dword idx = getIndexValue();
-      telldata::TellVar *listcomp = static_cast<telldata::TtList*>(_var)->index_var(idx);
-      if ((NULL != listcomp) && (!_opstackerr))
+      case 0:
       {
-         OPstack.push(listcomp->selfcopy());
+         OPstack.push(_var->selfcopy());
          return EXEC_NEXT;
       }
-      else
+      case 1:
       {
-         tellerror("Runtime error.Invalid index");
-         return EXEC_ABORT;
+         // another class cmdLISTINDEX could be appropriate instead of the logical
+         // branch below. It looks to me that it is quite the same as above, apart
+         // from the index checks
+         dword idx = getIndexValue();
+         telldata::TellVar *listcomp = static_cast<telldata::TtList*>(_var)->index_var(idx);
+         if ((NULL != listcomp) && (!_opstackerr))
+         {
+            OPstack.push(listcomp->selfcopy());
+            return EXEC_NEXT;
+         }
+         else
+         {
+            tellerror("Runtime error.Invalid index");
+            return EXEC_ABORT;
+         }
       }
+      case 2:
+      {
+         dword idx2 = getIndexValue();
+         dword idx1 = getIndexValue();
+         if (idx1 < idx2)
+         {
+            telldata::TtList* nlist = static_cast<telldata::TtList*>(_var)->index_range_var(idx1,idx2);
+            if ((NULL != nlist) && (!_opstackerr))
+            {
+               OPstack.push(nlist);
+               return EXEC_NEXT;
+            }
+            else
+               tellerror("Runtime error.Index out of range");
+         }
+         else
+            tellerror("Runtime error.Second index is expected to be bigger than the first one");
+         break;
+      }
+      default: assert(false); break;
    }
+   return EXEC_ABORT;
 }
 
 //=============================================================================
@@ -1513,6 +1567,7 @@ telldata::TellVar* parsercmd::cmdBLOCK::newFuncArg(telldata::typeID ID, TpdYYLty
 parsercmd::cmdBLOCK* parsercmd::cmdBLOCK::popblk()
 {
    TELL_DEBUG(cmdBLOCK_popblk);
+   assert(_blocks.size() > 1);
    _blocks.pop_front();
    return _blocks.front();
 }
@@ -1558,20 +1613,23 @@ int parsercmd::cmdBLOCK::execute()
    return retexec;
 }
 
-parsercmd::cmdBLOCK* parsercmd::cmdBLOCK::cleaner()
+void parsercmd::cmdBLOCK::cleaner(bool fullreset)
 {
    TELL_DEBUG(cmdBLOCK_cleaner);
    while (!_cmdQ.empty()) {
       cmdVIRTUAL *a = _cmdQ.front();_cmdQ.pop_front();
       delete a;
    }
-   if (_blocks.size() > 1)
+   while (_blocks.size() > 1)
    {
       parsercmd::cmdBLOCK* dblk = _blocks.front(); _blocks.pop_front();
+      assert(dblk != this); // i.e. you must call this method from the bottom of the block hierarchy
       delete dblk;
-      return _blocks.front();
    }
-   else return this;
+   if (fullreset)
+      _blocks.clear();
+   else
+      assert(this == _blocks.front());
 }
 
 parsercmd::cmdBLOCK::~cmdBLOCK()
@@ -1664,6 +1722,26 @@ bool parsercmd::cmdBLOCK::checkDbSortState(DbSortState needsDbResort)
    }
    else return true;
 }
+
+parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getLocalFuncBody(const char* fn, telldata::argumentQ* amap) const
+{
+   // Roll back the BlockSTACK until name is found. return NULL otherwise
+   typedef BlockSTACK::const_iterator BS;
+   BS blkstart = _blocks.begin();
+   BS blkend   = _blocks.end();
+   for (BS cmd = blkstart; cmd != blkend; cmd++)
+   {
+      CBFuncMAP::const_iterator lclFunc = (*cmd)->_lclFuncMAP.find(fn);
+      if ((*cmd)->_lclFuncMAP.end() != lclFunc)
+      {
+         cmdSTDFUNC *fbody = lclFunc->second;
+         if (0 == fbody->argsOK(amap))
+            return fbody;
+      }
+   }
+   return NULL;
+}
+
 //=============================================================================
 parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
                                         (const char* fn, telldata::argumentQ* amap, std::string& errmsg) const
@@ -1671,13 +1749,7 @@ parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
    cmdSTDFUNC *fbody = NULL;
    telldata::argumentQ* arguMap = (NULL == amap) ? DEBUG_NEW telldata::argumentQ : amap;
    // first check for local functions
-   CBFuncMAP::const_iterator lclFunc = _lclFuncMAP.find(fn);
-   if ( _lclFuncMAP.end() != lclFunc )
-   {
-      fbody = lclFunc->second;
-      if (0 != fbody->argsOK(arguMap))
-         fbody = NULL;
-   }
+   fbody = getLocalFuncBody(fn, arguMap);
    if (NULL == fbody)
    {
       typedef FunctionMAP::iterator MM;
@@ -2592,7 +2664,7 @@ bool parsercmd::ListSliceCheck(telldata::typeID list, TpdYYLtype lloc,
    return true;
 }
 
-telldata::typeID parsercmd::Assign(telldata::TellVar* lval, bool indexed, telldata::ArgumentID* op2,
+telldata::typeID parsercmd::Assign(telldata::TellVar* lval, byte indexed, telldata::ArgumentID* op2,
                                                                  TpdYYLtype loc)
 {
    if (!lval)
@@ -2606,12 +2678,15 @@ telldata::typeID parsercmd::Assign(telldata::TellVar* lval, bool indexed, tellda
       return telldata::tn_void;
    }
    telldata::typeID lvalID = lval->get_type();
-   if (indexed)
+   if (1 == indexed)
    {
-      //A slight complication here - when a list component is an lvalue - then we're going
-      //to cheat a little and remove the list flag from the type ID. That's because the entire
-      //list is handled over as lval, instead of the component itself. That's because the
-      //lists are dynamic and the target component will be retrieved during runtime
+      // A slight complication here - when a single list component is an lvalue - then
+      // we have to remove the list flag from the type ID. That's because the entire
+      // list is handled over as lval, instead of the component itself. The latter is
+      // because the lists are dynamic and the target component will be retrieved
+      // during runtime
+      // The above is not valid for index ranges (i.e. 2 == indexed), because an
+      // index range results in a list
       lvalID &= ~telldata::tn_listmask;
    }
    // Here if user structure is used - clarify that it is compatible
@@ -2938,7 +3013,7 @@ void console::toped_logfile::init(const std::string logFileName, bool append)
       _file << LFH_SEPARATOR << std::endl;
       _file << LFH_HEADER    << std::endl;
       _file << LFH_SEPARATOR << std::endl;
-      _file << LFH_REVISION  << "0.9.x" << std::endl;
+      _file << LFH_REVISION  << "0.9.8" << std::endl;
       _file << LFH_ENVIRONM  << std::string(wxGetCwd().mb_str(wxConvFile )) << std::endl;
       _file << LFH_TIMESTAMP << timec() << std::endl;
       _file << LFH_SEPARATOR << std::endl;

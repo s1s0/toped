@@ -11,7 +11,7 @@
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
 //                                                                          =
-//   This file is a part of Toped project (C) 2001-2007 Toped developers    =
+//   This file is a part of Toped project (C) 2001-2012 Toped developers    =
 // ------------------------------------------------------------------------ =
 //           $URL$
 //        Created: Wed May  5 23:27:33 BST 2004
@@ -85,7 +85,7 @@ bool TopedApp::OnInit()
    // Initialize Toped properties
    PROPC = DEBUG_NEW layprop::PropertyCenter();
    // Initialize Toped database
-   DATC  = DEBUG_NEW DataCenter(std::string(_localDir.mb_str(wxConvFile)), std::string(_globalDir.mb_str(wxConvFile)));
+   DATC  = DEBUG_NEW DataCenter(std::string(_localDir.mb_str(wxConvUTF8)), std::string(_globalDir.mb_str(wxConvUTF8)));
    // initialize the TELL pre-processor
    tellPP = DEBUG_NEW parsercmd::TellPreProc();
    // check command line arguments
@@ -212,23 +212,17 @@ int TopedApp::OnRun()
          LogFile.init(std::string(_logFileName.mb_str(wxConvFile)), true);
 //      wxLog::AddTraceMask(wxT("thread"));
 //      wxLog::AddTraceMask(wxTRACE_MemAlloc);
+      defaultStartupScript();
       if ( !_inputTellFile.IsEmpty() )
          Console->parseCommand(_inputTellFile);
-      else
-         defaultStartupScript();
-
    }
    return wxApp::OnRun();
 }
 
 void TopedApp::reloadInternalFunctions()
 {
-   parsercmd::cmdBLOCK* lclBlock = CMDBlock->popblk();
-   while (NULL != lclBlock)
-   {
-      CMDBlock = lclBlock;
-      lclBlock = CMDBlock->popblk();
-   }
+   CMDBlock = CMDBlock->rootBlock();
+   CMDBlock->cleaner(true);
    delete CMDBlock;
    CMDBlock = DEBUG_NEW parsercmd::cmdMAIN();
    initInternalFunctions(static_cast<parsercmd::cmdMAIN*>(CMDBlock));
@@ -777,6 +771,7 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    mblock->addFUNC("drchideallerrors" ,(DEBUG_NEW            tellstdfunc::DRChideallerrors(telldata::tn_void, true)));
    mblock->addFUNC("drcexplainerror"  ,(DEBUG_NEW           tellstdfunc::DRCexplainerror_D(telldata::tn_void, true)));
    mblock->addFUNC("drcexplainerror"  ,(DEBUG_NEW             tellstdfunc::DRCexplainerror(telldata::tn_void, true)));
+   mblock->addFUNC("grcgetcells"      ,(DEBUG_NEW      tellstdfunc::grcGETCELLS(TLISTOF(telldata::tn_string), true)));
    mblock->addFUNC("grcgetlayers"     ,(DEBUG_NEW        tellstdfunc::grcGETLAYERS(TLISTOF(telldata::tn_int), true)));
    mblock->addFUNC("grcgetdata"       ,(DEBUG_NEW     tellstdfunc::grcGETDATA(TLISTOF(telldata::tn_auxilary), true)));
    mblock->addFUNC("grcrecoverdata"   ,(DEBUG_NEW               tellstdfunc::grcREPAIRDATA(telldata::tn_void, true)));

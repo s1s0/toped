@@ -11,7 +11,7 @@
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
 //                                                                          =
-//   This file is a part of Toped project (C) 2001-2007 Toped developers    =
+//   This file is a part of Toped project (C) 2001-2012 Toped developers    =
 // ------------------------------------------------------------------------ =
 //           $URL$
 //        Created: Thu May  6 22:04:50 BST 2004
@@ -338,8 +338,6 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_TECUSTOM_COMMAND(wxEVT_EXECEXTPIPE, wxID_ANY, tui::TopedFrame::OnExecExtTextEnter)
    EVT_TECUSTOM_COMMAND(wxEVT_RELOADTELLFUNCS, wxID_ANY, tui::TopedFrame::onReloadTellFuncs)
    EVT_TECUSTOM_COMMAND(wxEVT_CONSOLE_PARSE, wxID_ANY, tui::TopedFrame::onParseCommand)
-   EVT_TEXT_ENTER(tui::ID_CMD_LINE, tui::TopedFrame::onGetCommand)
-   EVT_KEY_UP(tui::TopedFrame::onKeyUP)
 END_EVENT_TABLE()
 
 // See the FIXME note in the botom of browsers.cpp
@@ -880,6 +878,7 @@ void tui::TopedFrame::checkExit( wxCommandEvent& WXUNUSED( event ) )
             sevent.SetEventObject(this);
             //GetEventHandler()->ProcessEvent(event);
             OnTDTSave(sevent);
+            setExitAproved(); 
          }
          case wxID_NO:  
             Console->stopParserThread();
@@ -912,18 +911,21 @@ void tui::TopedFrame::OnClose(wxCloseEvent& WXUNUSED( event ))
    //2. Indirectly when parse thread is close in TopedFrame::checkExit 
    //   by Console->stopParserThread(); (checkExit() already called)
    if (! exitAproved()) checkExit(evt);
-   wxMilliSleep(300);
-   Destroy();
+   if (exitAproved())
+   {
+      wxMilliSleep(300);
+      Destroy();
+   }
 }
 
 void tui::TopedFrame::OnAbout( wxCommandEvent& WXUNUSED( event ) ) {
     wxAboutDialogInfo info;
     info.SetName(wxT("Toped"));
-    info.SetVersion(wxT("0.9.x"));
+    info.SetVersion(wxT("0.9.8"));
     info.SetIcon(wxIcon( toped32x32_xpm ));
     info.SetWebSite(wxT("www.toped.org.uk"));
     info.SetDescription(wxT("Open source IC layout editor"));
-    info.SetCopyright(wxT("(C) 2001-2009 Toped developers"));
+    info.SetCopyright(wxT("(C) 2001-2012 Toped developers"));
 
     wxAboutBox(info);
 }
@@ -1112,7 +1114,7 @@ void tui::TopedFrame::OnTDTSave(wxCommandEvent&  callingEvent)
       return;
    }
    //
-   wxString wxfilename(tedFileName.c_str(), wxConvFile);
+   wxString wxfilename(tedFileName.c_str(), wxConvUTF8);
    wxFileName datafile( wxfilename );
    assert(datafile.IsOk());
    SetStatusText(wxT("Saving file..."));
@@ -2485,16 +2487,6 @@ void tui::TopedFrame::onReloadTellFuncs(wxCommandEvent& WXUNUSED(evt))
 void tui::TopedFrame::onParseCommand(wxCommandEvent& evt)
 {
    _cmdline->onParseCommand(evt);
-}
-
-void tui::TopedFrame::onGetCommand(wxCommandEvent& evt)
-{
-   _cmdline->onGetCommand(evt);
-}
-
-void tui::TopedFrame::onKeyUP(wxKeyEvent& evt)
-{
-   _cmdline->onKeyUP(evt);
 }
 
 void tui::TopedFrame::USMap2wxString(USMap* inmap, wxString& outmap)

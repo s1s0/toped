@@ -11,7 +11,7 @@
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
 //                                                                          =
-//   This file is a part of Toped project (C) 2001-2007 Toped developers    =
+//   This file is a part of Toped project (C) 2001-2012 Toped developers    =
 // ------------------------------------------------------------------------ =
 //           $URL$
 //        Created: Fri Nov 08 2002
@@ -86,7 +86,7 @@ namespace  parsercmd {
       private:
          void              ppError(std::string, const TpdYYLtype&);
          void              ppWarning(std::string, const TpdYYLtype&);
-         typedef enum { ppINACTIVE, ppBYPASS, ppACTIVE } PpState;
+         typedef enum { ppINACTIVE, ppBYPASS, ppACTIVE, ppDEEPBYPASS } PpState;
          typedef std::map <std::string, std::string> VariableMap;
          typedef std::stack <PpState>     StateStack;
          typedef std::stack <unsigned>    DepthStack;
@@ -426,23 +426,23 @@ namespace  parsercmd {
 
    class cmdASSIGN:public cmdVIRTUAL {
    public:
-                  cmdASSIGN(telldata::TellVar* var, bool indexed): _var(var), _indexed(indexed) {};
+                  cmdASSIGN(telldata::TellVar* var, byte indexed): _var(var), _indexed(indexed) {};
       virtual    ~cmdASSIGN() {}
       virtual int execute();
    protected:
       telldata::TellVar*   _var;
-      bool                 _indexed;
+      byte                 _indexed;
    };
 
    class cmdPUSH:public cmdVIRTUAL {
    public:
-                  cmdPUSH(telldata::TellVar *v, bool indexed, bool constant=false):
+                  cmdPUSH(telldata::TellVar *v, byte indexed, bool constant=false):
                         _var(v),  _indexed(indexed), _constant(constant) {};
       virtual    ~cmdPUSH() {if (_constant) delete _var;};
       virtual int execute();
    private:
       telldata::TellVar*   _var;
-      bool                 _indexed;
+      byte                 _indexed;
       bool                 _constant;
    };
 
@@ -628,7 +628,7 @@ namespace  parsercmd {
                                                             _nextLclTypeID(lltID){};
       virtual                   ~cmdBLOCK();
       virtual int                execute();
-      cmdBLOCK*                  cleaner();
+      void                       cleaner(bool fullreset = false);
       virtual void               addFUNC(std::string, cmdSTDFUNC*);
       virtual void               addUSERFUNC(FuncDeclaration*, cmdFUNC*, TpdYYLtype);
       virtual cmdFUNC*           addUSERFUNCDECL(FuncDeclaration*, TpdYYLtype);
@@ -650,6 +650,7 @@ namespace  parsercmd {
       void                       pushcmd(cmdVIRTUAL* cmd) {_cmdQ.push_back(cmd);};
       void                       pushblk()                {_blocks.push_front(this);};
       cmdBLOCK*                  popblk();
+      cmdBLOCK*                  rootBlock()              {return _blocks.back();}
       void                       copyContents(cmdFUNC*);
       telldata::variableMAP*     copyVarLocal();
       void                       restoreVarLocal(telldata::variableMAP&);
@@ -659,6 +660,7 @@ namespace  parsercmd {
       void                       setUndoDepth(word ud) {_undoDepth = ud;}
    protected:
       bool                       addCALLBACKDECL(std::string, cmdCALLBACK*, TpdYYLtype);
+      cmdSTDFUNC* const          getLocalFuncBody(const char*, telldata::argumentQ*) const;
       telldata::variableMAP     _varLocal;  //! list of local variables
       telldata::typeMAP         _typeLocal; //! list of local types
       telldata::TypeList        _typeAnoLo; //! list of anonymous local types (callbacks only so far)
@@ -822,7 +824,7 @@ namespace  parsercmd {
    telldata::typeID  PointMv(telldata::typeID, telldata::typeID, TpdYYLtype, TpdYYLtype, int, int);
    telldata::typeID  Multiply(telldata::typeID, telldata::typeID, TpdYYLtype, TpdYYLtype);
    telldata::typeID  Divide(telldata::typeID, telldata::typeID, TpdYYLtype, TpdYYLtype);
-   telldata::typeID  Assign(telldata::TellVar*, bool, telldata::ArgumentID*, TpdYYLtype);
+   telldata::typeID  Assign(telldata::TellVar*, byte, telldata::ArgumentID*, TpdYYLtype);
    telldata::typeID  Uninsert(telldata::TellVar*, telldata::ArgumentID*, parsercmd::cmdLISTADD*, TpdYYLtype);
    telldata::typeID  BoolEx(telldata::typeID, telldata::typeID, std::string, TpdYYLtype, TpdYYLtype);
    telldata::typeID  BoolEx(telldata::typeID, std::string, TpdYYLtype);
