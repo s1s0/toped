@@ -11,7 +11,7 @@
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
 //                                                                          =
-//   This file is a part of Toped project (C) 2001-2007 Toped developers    =
+//   This file is a part of Toped project (C) 2001-2012 Toped developers    =
 // ------------------------------------------------------------------------ =
 //           $URL$
 //        Created: Wed Dec 26 2001
@@ -74,6 +74,7 @@ namespace telldata {
    class TellVar;
    class TType;
    class TtInt;
+   class TtList;
    class ArgumentID;
 
    typedef std::pair<std::string, typeID>    structRECID;
@@ -176,7 +177,8 @@ namespace telldata {
       virtual const typeID get_type() const {return _ID;}
       virtual void         assign(TellVar*) = 0;
       virtual TellVar*     field_var(char*& fname) {return NULL;}
-      virtual TellVar*     index_var(unsigned index) {return NULL;}
+      virtual TellVar*     index_var(dword index) {return NULL;}
+      virtual TtList*      index_range_var(dword, dword) {return NULL;}
       virtual void         initialize() = 0;
       void                 update_cstat() {if (1 == _changeable) _changeable = 0;}
       bool                 constant() const {return 0 == _changeable;}
@@ -315,6 +317,7 @@ namespace telldata {
       virtual void         initialize();
       virtual void         echo(std::string&, real);
       virtual void         assign(TellVar*);
+      bool                 part_assign(dword, dword, const TtList*);
       virtual TellVar*     selfcopy() const  {return DEBUG_NEW TtList(*this);}
       virtual const typeID get_type() const  {return _ID | tn_listmask;}
       memlist              mlist() const     {return _mlist;}
@@ -324,6 +327,7 @@ namespace telldata {
       void                 reverse()         {std::reverse(_mlist.begin(), _mlist.end());}
       unsigned             size() const      {return _mlist.size();}
       virtual TellVar*     index_var(dword);
+      virtual TtList*      index_range_var(dword, dword);
       bool                 validIndex(dword);
       void                 insert(telldata::TellVar*, dword);
       void                 insert(telldata::TellVar*);
@@ -331,6 +335,7 @@ namespace telldata {
       void                 lunion(telldata::TtList*);
       TellVar*             erase(dword);
       TellVar*             erase(dword, dword);
+      unsigned             size() {return _mlist.size();}
       virtual             ~TtList();
    private:
       memlist             _mlist;    // the list itself

@@ -7,7 +7,7 @@
 //                        T      E        L       L                         =
 //                        T      EEEEE    LLLLL   LLLLL                     =
 //                                                                          =
-//   This file is a part of Toped project (C) 2001-2012 Toped developers    =
+//   This file is a part of Toped project (C) 2001-2006 Toped developers    =
 // ------------------------------------------------------------------------ =
 //           $URL$
 //        Created: Tue Jun 28 13:16:45 BST 2005
@@ -278,27 +278,6 @@ void  fillSetup() {
    0x44 ,0x44 ,0x44 ,0x44 ,0x00 ,0x00 ,0x00 ,0x00
    };
 
-   int list fullfill = {
-   0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,
-   0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,
-   0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,
-   0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,
-   0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,
-   0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,
-   0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,
-   0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,
-   0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,
-   0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,
-   0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,
-   0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,
-   0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,
-   0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,
-   0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,
-   0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,0xff ,0xff
-   };
-
-
-   definefill("fullfill"      , fullfill );
    definefill("diagPatrnForw" , diagPatrnForw   );
    definefill("diagPatrnBack" , diagPatrnBack   );
    definefill("diagStripeForw", diagStripeForw  );
@@ -350,49 +329,29 @@ void colorSetup() {
    definecolor("blue_2"       ,0  , 127, 255, 178);
    definecolor("green_2"      ,127, 255, 0  , 178);
    definecolor("bg_1"         ,224, 224, 224, 178);
+}
+
+
+void lineSetup() {
 //              name       color  pattern pscale width
-   defineline("selected1", "", 0x5555,   5  ,	5);
+   defineline("selected1", "", 0xfffd,   5  ,	5);
    defineline("selected2", "", 0xf18f,   2  ,	5);
    defineline("selected3", "", 0xcfcf,   2  ,   5);
 }
 
-void layerSetup() {
-    colorSetup();
-    fillSetup();
-   lmap list cifmap;
-   lmap list gdsmap;
-//    	     name    Number  Colour       Fill              Selected
-
-   layprop("MET1"     ,8  , "green"       ,"checkerboard"   , "selected3" );cifmap[:+] = {{ 8, "MTL1"}};gdsmap[:+] = {{ 8, " 8; 0"}};
-   layprop("MET2"     ,10  ,"red"       ,"checkerboard"   , "selected3" );cifmap[:+] = {{ 10, "MTL1"}};gdsmap[:+] = {{ 10, " 10; 0"}};
-   layprop("MET3"     ,31  ,"yellow"       ,"checkerboard"   , "selected3" );cifmap[:+] = {{ 31, "MTL1"}};gdsmap[:+] = {{ 31, " 31; 0"}};
-   layprop("MET4"     ,36  ,"magenta"       ,"checkerboard"   , "selected3" );cifmap[:+] = {{ 36, "MTL1"}};gdsmap[:+] = {{ 36, " 36; 0"}};
-   layprop("VIA1"     ,9  ,"darkgreen"       ,"checkerboard"   , "selected3" );cifmap[:+] = {{ 9, "MTL1"}};gdsmap[:+] = {{ 9, " 9; 0"}};
-   layprop("VIA2"     ,30  ,"darkred"       ,"checkerboard"   , "selected3" );cifmap[:+] = {{ 30, "MTL1"}};gdsmap[:+] = {{ 30, " 30; 0"}};
-   layprop("VIA3"     ,35  ,"darkMagenta"       ,"checkerboard"   , "selected3" );cifmap[:+] = {{ 35, "MTL1"}};gdsmap[:+] = {{ 35, " 35; 0"}};
-
-//   setciflaymap(cifmap);
-//   setgdslaymap(gdsmap);
-}
-
 void screenSetup() {
-// grid No, step in UU, color
-// AT: unit assumed to be in um
-
+//   grid No, step in UU, color
    definegrid(0, .25 , "white"   );
    definegrid(1, 2   , "cyan"    );
    definegrid(2, 10  , "yellow"  );
    grid(0,true);
    grid(1,true);
-   //step(1);
-   step(0.05);
-   //autopan(true);
-   autopan (false);
+   step(0.5);
+   autopan(true);
    shapeangle(45);
 }
 
-
-layerSetup();
+colorSetup();
+fillSetup();
+lineSetup();
 screenSetup();
-usinglayer("MET1");
-

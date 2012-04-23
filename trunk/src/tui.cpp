@@ -11,7 +11,7 @@
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
 //                                                                          =
-//   This file is a part of Toped project (C) 2001-2007 Toped developers    =
+//   This file is a part of Toped project (C) 2001-2012 Toped developers    =
 // ------------------------------------------------------------------------ =
 //           $URL$
 //        Created: Thu Jun 17 2004
@@ -1692,9 +1692,11 @@ tui::DefineLineStyle::DefineLineStyle(wxFrame *parent, wxWindowID id, const wxSt
 
    top_sizer->SetSizeHints( this );   // set size hints to honour minimum size
 
-//   _styleList->GetString(0);
-   _current_style = getStyle(std::string(_styleList->GetString(0).mb_str(wxConvUTF8)));
-   _styleList->Select(0);
+   if (!all_names.empty())
+   {
+      _current_style = getStyle(std::string(_styleList->GetString(0).mb_str(wxConvUTF8)));
+      _styleList->Select(0);
+   }
    updateDialog();
 }
 
@@ -2470,9 +2472,9 @@ tui::TopedPropertySheets::RenderingPSheet::RenderingPSheet(wxWindow* parent) : w
       //GRC related rendering properties
       wxBoxSizer *grcSizer = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Invalid objects"));
       _cbGrcBlinkOn = DEBUG_NEW wxCheckBox(this, PDGRC_BLINKON , wxT("blinking"));
-      _cbGrcBlinkOn->SetValue(true);
+      _cbGrcBlinkOn->SetValue(false);
       _cbGrcBlinkFreq = DEBUG_NEW sgSliderControl(this, PDGRC_BLINKFREQ, 1, 10, 5);
-      _cbGrcBlinkFreq->Enable(true);
+      _cbGrcBlinkFreq->Enable(false);
       grcSizer->Add(_cbGrcBlinkOn  , 0, wxALL| wxALIGN_CENTER | wxEXPAND);
       grcSizer->Add(_cbGrcBlinkFreq, 0, wxALL| wxALIGN_CENTER | wxEXPAND);
 

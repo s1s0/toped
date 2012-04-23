@@ -35,14 +35,10 @@
 
 
 CIFin::CifFile* CIFInFile = NULL;
-extern void*   new_cif_lex_buffer( FILE* cifin );
-extern void    delete_cif_lex_buffer( void* b ) ;
 extern int     cifparse(); // Calls the bison generated parser
 namespace CIFin {
    extern void    flushParserBuffer();
 };
-extern FILE*   cifin;
-
 
 //=============================================================================
 CIFin::CifBox::CifBox(CifData* last, dword length, dword width, TP* center, TP* direction) :
@@ -614,7 +610,7 @@ CIFin::CifExportFile::CifExportFile(std::string fn, laydata::TdtCell* topcell,
    TpdTime timec(time(NULL));
 
    _file << "(              CIF   2.0       );"    << std::endl;
-   _file << "(        generator : Toped 0.9.x );"  << std::endl;
+   _file << "(        generator : Toped 0.9.8 );"  << std::endl;
    _file << "(             user : tbd );"          << std::endl;
    _file << "(          machine : tbd );"          << std::endl;
    _file << "(       time stamp : " << timec() << ");" << std::endl;

@@ -11,7 +11,7 @@
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
 //                                                                          =
-//   This file is a part of Toped project (C) 2001-2006 Toped developers    =
+//   This file is a part of Toped project (C) 2001-2012 Toped developers    =
 // ------------------------------------------------------------------------ =
 //           $URL$
 //        Created: Fri Nov 08 2002
@@ -56,9 +56,12 @@ namespace parsercmd
 telldata::TellVar* tellvar = NULL;
 std::stack<telldata::TellVar*> tellindxvar;
 telldata::TellVar* tell_lvalue = NULL;
-/*Current variable is a list*/
-bool indexed = false;
-bool lindexed = false;
+/*Current variable is a list. Legal values are:
+  0 - not indexed
+  1 - 1 index
+  2 - 2 indexes*/
+byte indexed  = 0;
+byte lindexed = 0;
 /*Current commands - parsed, but not yet in the command stack*/
 std::stack<parsercmd::cmdFOREACH*> foreach_stack;
 parsercmd::cmdLISTADD *listadd_command = NULL;
@@ -127,7 +130,7 @@ Well some remarks may save some time in the future...
                variables are parsed, the index itself is defined as an expression 
                to ensure that all kind of indexing is handled, not only direct
                one. The trouble comes when the indexing is not direct because the 
-               tellvar is replaced when the expression in the sqare brackets is 
+               tellvar is replaced when the expression in the square brackets is 
                parsed. This results in a loss of the original tellvar which was 
                pointing to the list variable before that variable is pushed into
                the stack - i.e. the indexing operations would not work with
@@ -267,7 +270,8 @@ Ooops! Second thought!
 %type <pttname>        assignment fieldname funccall telllist
 %type <pttname>        lvalue telltype telltypeID variable anonymousvar
 %type <pttname>        variabledeclaration andexpression eqexpression relexpression
-%type <pttname>        listindex listinsert listremove listslice callbackanotypedef
+%type <pttname>        listindex listrange listinsert listremove listslice 
+%type <pttname>        callbackanotypedef
 %type <pfarguments>    funcarguments
 %type <parguments>     structure argument funcreference
 %type <plarguments>    nearguments arguments
@@ -291,7 +295,8 @@ entrance:
       }
       else
       {
-         CMDBlock = CMDBlock->cleaner();
+         CMDBlock = CMDBlock->rootBlock();
+         CMDBlock->cleaner();
          parsercmd::EOfile();
       }
    }
@@ -307,7 +312,8 @@ entrance:
      /*end of file but in our case rather empty input buffer*/
    }
    | error                                 {
-      CMDBlock = CMDBlock->cleaner();
+      CMDBlock = CMDBlock->rootBlock();
+      CMDBlock->cleaner();
       parsercmd::EOfile();
       /*yynerrs = 0;*/
    }
@@ -614,10 +620,13 @@ variable:
          $$ = telldata::tn_NULL;
       }
       delete [] $1;
-      indexed = false;
+      indexed = 0;
    }
-   | fieldname                             {$$ = $1; indexed = false;}
-   | listindex                             {$$ = $1; indexed = true;}
+   | fieldname                             {$$ = $1; indexed = 0;}
+   | listindex                             {$$ = $1; indexed = 1;}
+   | listrange                             {$$ = $1; indexed = 2;}
+   /*Note! anonymousvar can't be a lvalue. The same is true for listremove and listslice 
+           That's why the above are not here*/
 ;
 
 variabledeclaration:
@@ -630,7 +639,7 @@ variabledeclaration:
       }
       else
          tellerror("variable already defined in this scope", @2);
-      $$ = $1; delete [] $2;indexed = false;
+      $$ = $1; delete [] $2;indexed = 0;
    }
    |  telltypeID   tknIDENTIFIER  indxb expression indxe  {
       telldata::TellVar* v = CMDBlock->getID($2, true);
@@ -645,7 +654,7 @@ variabledeclaration:
       }
       else
          tellerror("variable already defined in this scope", @2);
-      $$ = $1; delete [] $2;indexed = false;
+      $$ = $1; delete [] $2;indexed = 0;
    }
    | tknCONST telltypeID tknIDENTIFIER      {
       telldata::TellVar* v = CMDBlock->getID($3, true);
@@ -656,7 +665,7 @@ variabledeclaration:
       }
       else
          tellerror("variable already defined in this scope", @2);
-      $$ = $2; delete [] $3;indexed = false;
+      $$ = $2; delete [] $3;indexed = 0;
    }
    | variabledeclaration ',' tknIDENTIFIER  {
       telldata::TellVar* v = CMDBlock->getID($3, true);
@@ -666,7 +675,7 @@ variabledeclaration:
          CMDBlock->addID($3,tellvar);
       }
       else tellerror("variable already defined in this scope", @3);
-      $$ = $1; delete [] $3;indexed = false;
+      $$ = $1; delete [] $3;indexed = 0;
    }
 ;
 
@@ -830,12 +839,25 @@ listindex:
     }
 ;
 
+listrange:
+     variable indxb expression ':' expression indxe    {
+      if (parsercmd::ListIndexCheck($1, @1, $3, @3) &&
+          parsercmd::ListIndexCheck($1, @1, $5, @5))
+      {
+         $$ = $1;
+      }
+      else {
+         $$ = telldata::tn_NULL;
+      }
+    }
+;
+
 listinsert:
      variable indxb tknPREADD expression indxe    {
       if (parsercmd::ListIndexCheck($1, @1, $4, @4))
       {
          listadd_command = DEBUG_NEW parsercmd::cmdLISTADD(tellvar,true, true);
-         $$ = $1; tell_lvalue = tellvar; lindexed = true;
+         $$ = $1; tell_lvalue = tellvar; lindexed = 1;
       }
       else {
          $$ = telldata::tn_NULL; listadd_command = NULL;
@@ -844,7 +866,7 @@ listinsert:
    | variable indxb tknPREADD indxe               {
       if ($1 & telldata::tn_listmask) {
          listadd_command = DEBUG_NEW parsercmd::cmdLISTADD(tellvar,true, false);
-         $$ = $1; tell_lvalue = tellvar; lindexed = true;
+         $$ = $1; tell_lvalue = tellvar; lindexed = 1;
       }
       else {
          tellerror("list expected",@1);
@@ -855,7 +877,7 @@ listinsert:
       if (parsercmd::ListIndexCheck($1, @1, $3, @3))
       {
          listadd_command = DEBUG_NEW parsercmd::cmdLISTADD(tellvar,false, true);
-         $$ = $1; tell_lvalue = tellvar; lindexed = true;
+         $$ = $1; tell_lvalue = tellvar; lindexed = 1;
       }
       else {
          $$ = telldata::tn_NULL; listadd_command = NULL;
@@ -864,7 +886,7 @@ listinsert:
    | variable indxb tknPOSTADD indxe              {
       if ($1 & telldata::tn_listmask) {
          listadd_command = DEBUG_NEW parsercmd::cmdLISTADD(tellvar,false, false);
-         $$ = $1; tell_lvalue = tellvar; lindexed = true;
+         $$ = $1; tell_lvalue = tellvar; lindexed = 1;
       }
       else {
          tellerror("list expected",@1);
@@ -1058,8 +1080,8 @@ primaryexpression :
       CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPUSH(tellvar, indexed));}
    | anonymousvar                          {$$ = $1;
       CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdANOVAR(tellvar));}
-   | listremove                            {$$ = $1; indexed = false;}
-   | listslice                             {$$ = $1; indexed = false;}
+   | listremove                            {$$ = $1; indexed = 0;}
+   | listslice                             {$$ = $1; indexed = 0;}
    | '(' expression ')'                    {$$ = $2;}
    | funccall                              {$$ = $1;}
    | tknERROR                              {tellerror("Unexpected symbol", @1);}
@@ -1101,7 +1123,8 @@ void tellerror (std::string s)
 
 void cleanonabort()
 {
-   CMDBlock = CMDBlock->cleaner();
+   CMDBlock = CMDBlock->rootBlock();
+   CMDBlock->cleaner();
    parsercmd::EOfile();
    while (!foreach_stack.empty())
    {

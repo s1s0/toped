@@ -11,7 +11,7 @@
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
 //                                                                          =
-//   This file is a part of Toped project (C) 2001-2007 Toped developers    =
+//   This file is a part of Toped project (C) 2001-2012 Toped developers    =
 // ------------------------------------------------------------------------ =
 //           $URL$
 //        Created: Thu Apr 19 BST 2007 (from tellibin.h Fri Jan 24 2003)
@@ -97,6 +97,36 @@ int tellstdfunc::stdGETLAYREFSTR::execute()
       delete tx;
       return EXEC_NEXT;
    }
+}
+
+//=============================================================================
+tellstdfunc::grcGETCELLS::grcGETCELLS(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype, eor)
+{
+}
+
+int tellstdfunc::grcGETCELLS::execute()
+{
+   telldata::TtList* tllull = DEBUG_NEW telldata::TtList(telldata::tn_string);
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
+   {
+      laydata::LibCellLists *cll =  dbLibDir->getCells(TARGETDB_LIB);
+      for (laydata::LibCellLists::iterator curlib = cll->begin(); curlib != cll->end(); curlib++)
+      {
+         laydata::CellMap::const_iterator CL;
+         for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
+         {
+            if (CL->second->checkLayer(GRC_LAY))
+               tllull->add(DEBUG_NEW telldata::TtString(CL->first));
+         }
+      }
+      delete cll;
+      LogFile << LogFile.getFN() << "();"; LogFile.flush();
+   }
+   OPstack.push(tllull);
+   DATC->unlockTDT(dbLibDir, true);
+   return EXEC_NEXT;
 }
 
 //=============================================================================
