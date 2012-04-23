@@ -6,7 +6,17 @@ Toped is a cross-platform open source project licensed under the GNU General Pub
 
 usage:
 
-   toped <tll_command_file>
+   toped [parameters] <tll_command_file>
+   where parameters can be:
+   -ogl_safe
+      Forces the usage of the basic renderer. 
+   -I<path>
+      Expands the search paths of the parser. Multiply parameters of this kind are acceptable. 
+      Each of them shall contain a single path. 
+   -D<macro>
+      Defines a preprocessor macro. Can be used multiply times.
+   -D<macro>=<replacement>
+      Defines a preprocessor macro. Can be used multiply times.
 
 For further information:
 http://www.toped.org.uk

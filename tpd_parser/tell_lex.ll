@@ -11,7 +11,7 @@
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
 //                                                                          =
-//   This file is a part of Toped project (C) 2001-2006 Toped developers    =
+//   This file is a part of Toped project (C) 2001-2012 Toped developers    =
 // ------------------------------------------------------------------------ =
 //           $URL$
 //        Created: Fri Nov 08 2002
@@ -34,7 +34,6 @@
 %x pDEFVAL
 %x pIFD
 %x pIFND
-%x pELSE
 %x pIFED
 %x pPASS
 %x pPRAGMA
@@ -108,8 +107,7 @@ location_step(&telllloc);
                            else
                               BEGIN(INITIAL);
                          }
-<pPASS>#else             /*nothing to do here*/
-#else                 { if (!tellPP->ppElse(telllloc))
+<*>#else                 { if (!tellPP->ppElse(telllloc))
                               BEGIN(pPASS);
                            else
                            {
@@ -225,6 +223,7 @@ const                      return tknCONST;
 ":+"                       return tknPOSTADD;
 "-:"                       return tknPRESUB;
 ":-"                       return tknPOSTSUB;
+":"                        return ':';
 "("                        return '(';
 ")"                        return ')';
 "{"                        return '{';

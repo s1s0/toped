@@ -11,7 +11,7 @@
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
 //                                                                          =
-//   This file is a part of Toped project (C) 2001-2007 Toped developers    =
+//   This file is a part of Toped project (C) 2001-2012 Toped developers    =
 // ------------------------------------------------------------------------ =
 //           $URL$
 //        Created: Thu Apr 19 BST 2007 (from tellibin.h Fri Jan 24 2003)
@@ -36,6 +36,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(stdGETLAYTYPE       );
    TELL_STDCMD_CLASSA(stdGETLAYTEXTSTR    );
    TELL_STDCMD_CLASSA(stdGETLAYREFSTR     );
+   TELL_STDCMD_CLASSA(grcGETCELLS         );
    TELL_STDCMD_CLASSA(grcGETLAYERS        );
    TELL_STDCMD_CLASSA(grcGETDATA          );
    TELL_STDCMD_CLASSA_UNDO(grcCLEANALAYER );

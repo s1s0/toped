@@ -11,7 +11,7 @@
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
 //                                                                          =
-//   This file is a part of Toped project (C) 2001-2007 Toped developers    =
+//   This file is a part of Toped project (C) 2001-2012 Toped developers    =
 // ------------------------------------------------------------------------ =
 //           $URL$
 //        Created: Sun Mar 17 2002
@@ -124,7 +124,7 @@ namespace console {
       wxWindow*               _canvas;
       bool                    _canvas_invalid;
       bool                    _exitRequested;
-	  bool                    _exitAproved;
+	  bool                     _exitAproved;
       wxPathList              _tllIncludePath;
       parse_thread*           _tellThread;
    };
@@ -132,12 +132,13 @@ namespace console {
    class TedCmdLine: public TllCmdLine {
    public:
                               TedCmdLine(wxWindow*, wxTextCtrl*);
+      virtual                ~TedCmdLine();
       virtual void            waitGUInput(telldata::operandSTACK*,console::ACTIVE_OP, const CTM&);
       virtual void            getGUInput(bool from_keyboard);
       virtual void            waitExternal(wxString);
       void                    onParseCommand(wxCommandEvent&);
       void                    onGetCommand(wxCommandEvent& WXUNUSED(event));
-      void                    onKeyUP(wxKeyEvent&);
+      void                    onChar(wxKeyEvent&);
       wxTextCtrl*             getWidget()                 {return _cmdLineWnd;}
    protected:
       virtual wxString        getString();
@@ -147,6 +148,7 @@ namespace console {
       void                    onGUInput(wxCommandEvent&);
       void                    onExternalDone(wxCommandEvent&);
       wxTextCtrl*             _cmdLineWnd;
+      DECLARE_EVENT_TABLE();
    };
 
    class TllCCmdLine: public TllCmdLine {

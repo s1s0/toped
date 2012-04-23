@@ -11,7 +11,7 @@
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
 //                                                                          =
-//   This file is a part of Toped project (C) 2001-2007 Toped developers    =
+//   This file is a part of Toped project (C) 2001-2012 Toped developers    =
 // ------------------------------------------------------------------------ =
 //           $URL$
 //        Created: Thu Apr 19 BST 2007 (from tellibin.h Fri Jan 24 2003)
@@ -47,7 +47,6 @@ extern console::toped_logfile    LogFile;
 extern layprop::FontLibrary*     fontLib;
 extern const wxEventType         wxEVT_RENDER_PARAMS;
 extern const wxEventType         wxEVT_CANVAS_PARAMS;
-extern const wxEventType         wxEVT_TECHEDITUPDATE;
 //=============================================================================
 tellstdfunc::stdPROPSAVE::stdPROPSAVE(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
@@ -1612,12 +1611,6 @@ void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
       word val;
       if ((from_string<word>(val, value, std::dec)) && (val <= 10))
       {
-//         layprop::DrawProperties* drawProp;
-//         if (PROPC->lockDrawProp(drawProp))
-//         {
-//            drawProp->setCellDepthAlphaEbb(val);
-//         }
-//         PROPC->unlockDrawProp(drawProp);
          // send an event to update the property dialog
          wxCommandEvent event(wxEVT_RENDER_PARAMS);
          event.SetId(tui::RPS_GRC_PERIOD);

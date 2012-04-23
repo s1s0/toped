@@ -11,7 +11,7 @@
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
 //                                                                          =
-//   This file is a part of Toped project (C) 2001-2007 Toped developers    =
+//   This file is a part of Toped project (C) 2001-2012 Toped developers    =
 // ------------------------------------------------------------------------ =
 //           $URL$
 //        Created: Thu May  6 21:56:03 BST 2004
@@ -273,8 +273,6 @@ namespace tui {
       void     OnIconize(wxIconizeEvent& evt);
       void  onReloadTellFuncs(wxCommandEvent& WXUNUSED(evt));
       void     onParseCommand(wxCommandEvent& evt);
-      void       onGetCommand(wxCommandEvent& evt);
-      void            onKeyUP(wxKeyEvent& evt);
       // The declaration of the associated event table
       DECLARE_EVENT_TABLE();
    };

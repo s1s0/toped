@@ -11,7 +11,7 @@
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
 //                                                                          =
-//   This file is a part of Toped project (C) 2001-2007 Toped developers    =
+//   This file is a part of Toped project (C) 2001-2012 Toped developers    =
 // ------------------------------------------------------------------------ =
 //           $URL$
 //        Created: Wed Dec 26 2001
@@ -313,7 +313,7 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos,
    // DON'T enable it if you're not sure what you're doing!
    _oglThread = false;
    _apTrigger = 10;
-   _blinkInterval = 500;
+   _blinkInterval = 0;
    _blinkOn = false;
    _initialised = false;
 }
@@ -915,7 +915,7 @@ void tui::LayoutCanvas::OnChar(wxKeyEvent& event)
       case WXK_DOWN : eventZOOM.SetInt(ZOOM_DOWN ); break;
       case '+'      : eventZOOM.SetInt(ZOOM_IN   ); break;
       case '-'      : eventZOOM.SetInt(ZOOM_OUT  ); break;
-      case WXK_ESCAPE:((TopedFrame*)this->GetParent())->setActiveCmd();
+      case WXK_ESCAPE:((TopedFrame*)this->GetParent())->setActiveCmd();return;
             default : event.Skip(); return;
    }
    OnZoom(eventZOOM);
