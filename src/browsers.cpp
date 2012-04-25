@@ -359,6 +359,16 @@ void browsers::CellBrowser::statusHighlight(wxString top, wxString active, wxStr
          SetItemBold(_activeStructure, true);
          EnsureVisible(_activeStructure);
       }
+      else
+      {
+         //in flat mode if can't find active cell
+         //(it is possible if cell doesn't pass cell filter)
+         //just expand design name item
+         if(_hierarchy_view == false)
+         {            
+            this->Expand(_dbroot);
+         }
+      }
    }
    wxTreeItemId      item;
    if (findItem(selected, item, GetRootItem()))
@@ -395,11 +405,15 @@ void browsers::CellBrowser::updateFlat()
             laydata::CellMap::const_iterator CL;
             for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
             {
-               wxTreeItemId cellitem = AppendItem(_dbroot, wxString( CL->first.c_str(),  wxConvUTF8));
-               if (CL->second->checkLayer(GRC_LAY))
-                  SetItemImage(cellitem,BICN_DBCELL_FLAT_I,wxTreeItemIcon_Normal);
-               else
-                  SetItemImage(cellitem,BICN_DBCELL_FLAT,wxTreeItemIcon_Normal);
+               wxString curCell = wxString( CL->first.c_str(),  wxConvUTF8);
+               if(::wxMatchWild(_cellFilter, curCell, false))
+               {
+                  wxTreeItemId cellitem = AppendItem(_dbroot, curCell);
+                  if (CL->second->checkLayer(GRC_LAY))
+                     SetItemImage(cellitem,BICN_DBCELL_FLAT_I,wxTreeItemIcon_Normal);
+                  else
+                     SetItemImage(cellitem,BICN_DBCELL_FLAT,wxTreeItemIcon_Normal);
+               }
             }
          }
          delete cll;
@@ -422,11 +436,15 @@ void browsers::CellBrowser::updateFlat()
             laydata::CellMap::const_iterator CL;
             for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
             {
-               wxTreeItemId cellitem = AppendItem(libroot, wxString( CL->first.c_str(),  wxConvUTF8));
-               if (CL->second->checkLayer(GRC_LAY))
-                  SetItemImage(cellitem,BICN_LIBCELL_FLAT_I,wxTreeItemIcon_Normal);
-               else
-                  SetItemImage(cellitem,BICN_LIBCELL_FLAT,wxTreeItemIcon_Normal);
+               wxString curCell = wxString( CL->first.c_str(),  wxConvUTF8);
+               if(::wxMatchWild(_cellFilter, curCell, false))
+               {
+                  wxTreeItemId cellitem = AppendItem(libroot, curCell);
+                  if (CL->second->checkLayer(GRC_LAY))
+                     SetItemImage(cellitem,BICN_LIBCELL_FLAT_I,wxTreeItemIcon_Normal);
+                  else
+                     SetItemImage(cellitem,BICN_LIBCELL_FLAT,wxTreeItemIcon_Normal);
+               }
             }
          }
          delete cll;
@@ -447,8 +465,12 @@ void browsers::CellBrowser::updateFlat()
                laydata::CellMap::const_iterator CL;
                for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
                {
-                  wxTreeItemId cellitem = AppendItem(_undefRoot, wxString( (*CL).first.c_str(),  wxConvUTF8));
-                  SetItemImage(cellitem,BICN_UNDEFCELL,wxTreeItemIcon_Normal);
+                  wxString curCell = wxString( (*CL).first.c_str(),  wxConvUTF8);
+                  if(::wxMatchWild(_cellFilter, curCell, false))
+                  {
+                     wxTreeItemId cellitem = AppendItem(_undefRoot, curCell);
+                     SetItemImage(cellitem,BICN_UNDEFCELL,wxTreeItemIcon_Normal);
+                  }
                }
                SortChildren(_undefRoot);
             }
@@ -1137,6 +1159,7 @@ BEGIN_EVENT_TABLE(browsers::TDTbrowser, wxPanel)
    EVT_MENU(tui::TMCELL_REPORTLAY, browsers::TDTbrowser::onReportUsedLayers)
    EVT_BUTTON(tui::BT_CELLS_HIER, browsers::TDTbrowser::onHierView)
    EVT_BUTTON(tui::BT_CELLS_FLAT, browsers::TDTbrowser::onFlatView)
+   EVT_TEXT(tui::ID_CELL_FILTER, browsers::TDTbrowser::onFlatView)
 END_EVENT_TABLE()
 
 browsers::TDTbrowser::TDTbrowser(wxWindow *parent, wxWindowID id,
@@ -1148,6 +1171,7 @@ browsers::TDTbrowser::TDTbrowser(wxWindow *parent, wxWindowID id,
    wxBoxSizer *sizer1   = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    _hierButton = DEBUG_NEW wxButton( this, tui::BT_CELLS_HIER, wxT("Hier") );
    _flatButton = DEBUG_NEW wxButton( this, tui::BT_CELLS_FLAT, wxT("Flat") );
+   _cellFilter = DEBUG_NEW wxTextCtrl(this, tui::ID_CELL_FILTER, wxT("*"), wxDefaultPosition, wxDefaultSize);
    //Set bold font for _hierButton
    wxFont font = _hierButton->GetFont();
    font.SetWeight(wxFONTWEIGHT_BOLD);
@@ -1156,6 +1180,9 @@ browsers::TDTbrowser::TDTbrowser(wxWindow *parent, wxWindowID id,
    sizer1->Add(_hierButton, 1, wxEXPAND|wxBOTTOM, 3);
    sizer1->Add(_flatButton, 1, wxEXPAND|wxBOTTOM, 3);
    _cellBrowser = DEBUG_NEW CellBrowser(this, tui::ID_PNL_CELLS, pos, size, style | wxTR_HIDE_ROOT | wxTR_NO_BUTTONS | wxTR_LINES_AT_ROOT);
+   _cellBrowser->setCellFilter(_cellFilter->GetValue());
+   thesizer->Add(_cellFilter, 0, wxEXPAND|wxTOP, 3);
+   _cellFilter->Show(false); //hide cell filter for initial hierarchy view
    thesizer->Add(_cellBrowser, 1, wxEXPAND | wxBOTTOM);
    thesizer->Add(sizer1, 0, wxEXPAND | wxALL);
 
@@ -1180,7 +1207,8 @@ browsers::TDTbrowser::TDTbrowser(wxWindow *parent, wxWindowID id,
 void browsers::TDTbrowser::onFlatView( wxCommandEvent& event )
 {
    _hierarchy_view = false;
-
+   _cellFilter->Show(true); //show cell filter for flat view
+   _cellBrowser->setCellFilter(_cellFilter->GetValue()); //update filters
    wxString cell_top_str = _cellBrowser->topCellName();
    wxString cell_act_str = _cellBrowser->activeCellName();
    wxString cell_sel_str = _cellBrowser->selectedCellName();
@@ -1204,7 +1232,7 @@ void browsers::TDTbrowser::onFlatView( wxCommandEvent& event )
 void browsers::TDTbrowser::onHierView( wxCommandEvent& event )
 {
    _hierarchy_view = true;
-
+   _cellFilter->Show(false); //hide cell filter for hierarchy view
    wxString cell_top_str = _cellBrowser->topCellName();
    wxString cell_act_str = _cellBrowser->activeCellName();
    wxString cell_sel_str = _cellBrowser->selectedCellName();
