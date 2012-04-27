@@ -122,6 +122,8 @@ namespace browsers
          bool              isDbOrLibItem(const wxTreeItemId);
          wxTreeItemId      _topStructure;
          wxTreeItemId      _activeStructure;
+         wxString          _topCellNameBackup;
+         wxString          _activeCellNameBackup;
          wxTreeItemId      _dbroot; // The actual Root always invisible (because of the libraries)
          LibsRoot          _libsRoot;
          wxTreeItemId      _undefRoot;

@@ -354,6 +354,11 @@ void browsers::CellBrowser::statusHighlight(wxString top, wxString active, wxStr
    {
       if (findItem(top, _topStructure, _dbroot))
          highlightChildren(_topStructure, _editColor);
+      else
+         //Try to check previous name
+         //that could be removed by filter
+         if (findItem(_topCellNameBackup, _topStructure, _dbroot))
+            highlightChildren(_topStructure, _editColor);
       if (findItem(active, _activeStructure, _dbroot))
       {
          SetItemBold(_activeStructure, true);
@@ -361,12 +366,22 @@ void browsers::CellBrowser::statusHighlight(wxString top, wxString active, wxStr
       }
       else
       {
-         //in flat mode if can't find active cell
-         //(it is possible if cell doesn't pass cell filter)
-         //just expand design name item
-         if(_hierarchy_view == false)
-         {            
-            this->Expand(_dbroot);
+         //Try to check previous name
+         //that could be removed by filter
+         if (findItem(_activeCellNameBackup, _activeStructure, _dbroot))
+         {
+            SetItemBold(_activeStructure, true);
+            EnsureVisible(_activeStructure);
+         }
+         else
+         {
+            //in flat mode if can't find active cell
+            //(it is possible if cell doesn't pass cell filter)
+            //just expand design name item
+            if(_hierarchy_view == false)
+            {            
+               this->Expand(_dbroot);
+            }
          }
       }
    }
@@ -377,6 +392,13 @@ void browsers::CellBrowser::statusHighlight(wxString top, wxString active, wxStr
 
 void browsers::CellBrowser::collectInfo( bool hier)
 {
+   //Save previouse names before Unset
+   //Need for case when filter remove active cell from browser
+   if(!activeCellName().IsEmpty())
+      _activeCellNameBackup = activeCellName();
+   if(!topCellName().IsEmpty())
+      _topCellNameBackup = topCellName();
+
    initialize();
    _corrupted = false;
    _hierarchy_view = hier;
