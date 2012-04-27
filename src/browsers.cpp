@@ -388,6 +388,9 @@ void browsers::CellBrowser::collectInfo( bool hier)
 void browsers::CellBrowser::updateFlat()
 {
    laydata::TdtLibDir* dbLibDir = NULL;
+   //if _cellFilter == "*" don't perform filter checking
+   bool filtered = false;
+   if (_cellFilter.Cmp(wxT("*"))) filtered = true; 
    if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
    {
       laydata::LibCellLists *cll;
@@ -406,7 +409,7 @@ void browsers::CellBrowser::updateFlat()
             for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
             {
                wxString curCell = wxString( CL->first.c_str(),  wxConvUTF8);
-               if(::wxMatchWild(_cellFilter, curCell, false))
+               if(!filtered || (filtered && ::wxMatchWild(_cellFilter, curCell, false)))
                {
                   wxTreeItemId cellitem = AppendItem(_dbroot, curCell);
                   if (CL->second->checkLayer(GRC_LAY))
@@ -437,7 +440,7 @@ void browsers::CellBrowser::updateFlat()
             for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
             {
                wxString curCell = wxString( CL->first.c_str(),  wxConvUTF8);
-               if(::wxMatchWild(_cellFilter, curCell, false))
+               if(!filtered || (filtered && ::wxMatchWild(_cellFilter, curCell, false)))
                {
                   wxTreeItemId cellitem = AppendItem(libroot, curCell);
                   if (CL->second->checkLayer(GRC_LAY))
@@ -466,7 +469,7 @@ void browsers::CellBrowser::updateFlat()
                for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
                {
                   wxString curCell = wxString( (*CL).first.c_str(),  wxConvUTF8);
-                  if(::wxMatchWild(_cellFilter, curCell, false))
+                  if(!filtered || (filtered && ::wxMatchWild(_cellFilter, curCell, false)))
                   {
                      wxTreeItemId cellitem = AppendItem(_undefRoot, curCell);
                      SetItemImage(cellitem,BICN_UNDEFCELL,wxTreeItemIcon_Normal);
