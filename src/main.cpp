@@ -649,7 +649,7 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    //-----------------------------------------------------------------------------------------------------------
    telldata::TPointType*   pntype      = DEBUG_NEW telldata::TPointType();
    telldata::TBoxType*     bxtype      = DEBUG_NEW telldata::TBoxType(pntype);
-   telldata::TBindType*     bndtype     = DEBUG_NEW telldata::TBindType(pntype);
+   telldata::TBindType*    bndtype     = DEBUG_NEW telldata::TBindType(pntype);
    telldata::THshType*     hshtype     = DEBUG_NEW telldata::THshType();
    telldata::THshStrType*  hshstrtype  = DEBUG_NEW telldata::THshStrType();
 
