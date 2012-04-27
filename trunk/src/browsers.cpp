@@ -1171,7 +1171,7 @@ browsers::TDTbrowser::TDTbrowser(wxWindow *parent, wxWindowID id,
    wxBoxSizer *sizer1   = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    _hierButton = DEBUG_NEW wxButton( this, tui::BT_CELLS_HIER, wxT("Hier") );
    _flatButton = DEBUG_NEW wxButton( this, tui::BT_CELLS_FLAT, wxT("Flat") );
-   _cellFilter = DEBUG_NEW wxTextCtrl(this, tui::ID_CELL_FILTER, wxT("*"), wxDefaultPosition, wxDefaultSize);
+   _cellFilter = DEBUG_NEW wxTextCtrl(this, tui::ID_CELL_FILTER);
    //Set bold font for _hierButton
    wxFont font = _hierButton->GetFont();
    font.SetWeight(wxFONTWEIGHT_BOLD);
@@ -1180,9 +1180,7 @@ browsers::TDTbrowser::TDTbrowser(wxWindow *parent, wxWindowID id,
    sizer1->Add(_hierButton, 1, wxEXPAND|wxBOTTOM, 3);
    sizer1->Add(_flatButton, 1, wxEXPAND|wxBOTTOM, 3);
    _cellBrowser = DEBUG_NEW CellBrowser(this, tui::ID_PNL_CELLS, pos, size, style | wxTR_HIDE_ROOT | wxTR_NO_BUTTONS | wxTR_LINES_AT_ROOT);
-   _cellBrowser->setCellFilter(_cellFilter->GetValue());
    thesizer->Add(_cellFilter, 0, wxEXPAND|wxTOP, 3);
-   _cellFilter->Show(false); //hide cell filter for initial hierarchy view
    thesizer->Add(_cellBrowser, 1, wxEXPAND | wxBOTTOM);
    thesizer->Add(sizer1, 0, wxEXPAND | wxALL);
 
@@ -1199,6 +1197,10 @@ browsers::TDTbrowser::TDTbrowser(wxWindow *parent, wxWindowID id,
    _imageList->Add( wxIcon( targetdb  ) ); // BICN_TARGETDB
    _imageList->Add( wxIcon( cellundef ) ); // BICN_UNDEFCELL
 
+   wxString filterState = wxT("*");
+   _cellFilter->ChangeValue(filterState);
+   _cellBrowser->setCellFilter(filterState);
+   _cellFilter->Show(false); //hide cell filter for initial hierarchy view
    _cellBrowser->SetImageList(_imageList);
    SetSizerAndFit(thesizer);
    thesizer->SetSizeHints( this );
@@ -1208,7 +1210,8 @@ void browsers::TDTbrowser::onFlatView( wxCommandEvent& event )
 {
    _hierarchy_view = false;
    _cellFilter->Show(true); //show cell filter for flat view
-   _cellBrowser->setCellFilter(_cellFilter->GetValue()); //update filters
+   wxString filterState = _cellFilter->GetValue();
+   _cellBrowser->setCellFilter(filterState); //update filters
    wxString cell_top_str = _cellBrowser->topCellName();
    wxString cell_act_str = _cellBrowser->activeCellName();
    wxString cell_sel_str = _cellBrowser->selectedCellName();
