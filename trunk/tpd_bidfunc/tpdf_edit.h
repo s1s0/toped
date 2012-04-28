@@ -49,11 +49,6 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA_UNDO(stdCHANGELAY      );  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdCHANGEREF      );  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdCHANGESTRING   );  // undo - implemented
-   // Deprecated - to be removed in the next release
-   TELL_STDCMD_CLASSA_UNDO(stdFLIPYSEL       );  // undo - implemented
-   TELL_STDCMD_CLASSB(stdFLIPYSEL_D   , stdFLIPYSEL   );
-   TELL_STDCMD_CLASSA_UNDO(stdFLIPXSEL       );  // undo - implemented
-   TELL_STDCMD_CLASSB(stdFLIPXSEL_D   , stdFLIPXSEL   );
 
 }
 #endif
