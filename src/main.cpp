@@ -830,12 +830,6 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    mblock->addFUNC("copy"             ,(DEBUG_NEW     tellstdfunc::stdCOPYSEL_D(TLISTOF(telldata::tn_layout),false)));
    mblock->addFUNC("rotate"           ,(DEBUG_NEW                tellstdfunc::stdROTATESEL(telldata::tn_void,false)));
    mblock->addFUNC("rotate"           ,(DEBUG_NEW              tellstdfunc::stdROTATESEL_D(telldata::tn_void,false)));
-   //************Deprecated************************
-   mblock->addFUNC("flipX"            ,(DEBUG_NEW                 tellstdfunc::stdFLIPXSEL(telldata::tn_void,false)));
-   mblock->addFUNC("flipX"            ,(DEBUG_NEW               tellstdfunc::stdFLIPXSEL_D(telldata::tn_void,false)));
-   mblock->addFUNC("flipY"            ,(DEBUG_NEW                 tellstdfunc::stdFLIPYSEL(telldata::tn_void,false)));
-   mblock->addFUNC("flipY"            ,(DEBUG_NEW               tellstdfunc::stdFLIPYSEL_D(telldata::tn_void,false)));
-   //**********************************************
    mblock->addFUNC("flip"             ,(DEBUG_NEW                  tellstdfunc::stdFLIPSEL(telldata::tn_void,false)));
    mblock->addFUNC("flip"             ,(DEBUG_NEW                tellstdfunc::stdFLIPSEL_D(telldata::tn_void,false)));
    mblock->addFUNC("delete"           ,(DEBUG_NEW                tellstdfunc::stdDELETESEL(telldata::tn_void,false)));
