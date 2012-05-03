@@ -51,8 +51,9 @@ extern const wxEventType         wxEVT_CANVAS_CURSOR;
 
 
 //=============================================================================
-int tellstdfunc::stdSPRINTF::argsOK(argumentQ* amap)
+int tellstdfunc::stdSPRINTF::argsOK(argumentQ* amap, bool& strict)
 {
+   strict = true;
    unsigned numArgs = amap->size();
    if (1 > numArgs) return -1; // i.e. error - at least one argument is expected
    telldata::ArgumentID carg((*(*amap)[0]));
@@ -136,9 +137,9 @@ int tellstdfunc::stdSPRINTF::execute()
 }
 
 //=============================================================================
-int tellstdfunc::stdPRINTF::argsOK(argumentQ* amap)
+int tellstdfunc::stdPRINTF::argsOK(argumentQ* amap, bool& strict)
 {
-   return stdSPRINTF::argsOK(amap);
+   return stdSPRINTF::argsOK(amap, strict);
 }
 
 NameList* tellstdfunc::stdPRINTF::callingConv(const telldata::typeMAP*)
@@ -159,8 +160,9 @@ int tellstdfunc::stdPRINTF::execute()
 }
 
 //=============================================================================
-int tellstdfunc::stdECHO::argsOK(argumentQ* amap)
+int tellstdfunc::stdECHO::argsOK(argumentQ* amap, bool& strict)
 {
+   strict = true;
    return (!(amap->size() == 1));
 }
 
