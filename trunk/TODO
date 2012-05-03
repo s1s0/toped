@@ -15,7 +15,7 @@ General
     functions
   * There is no log possible for select/unselect from list operations. The
     reason is that we don't have a representation of layout list in TELL.
-    Think about it. Pointetrs are unapropriate of course.
+    Think about it. Pointers are unappropriate of course.
 
   TELL related
   ------------

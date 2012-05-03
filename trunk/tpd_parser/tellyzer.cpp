@@ -1734,8 +1734,9 @@ parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getLocalFuncBody(const char* f
       CBFuncMAP::const_iterator lclFunc = (*cmd)->_lclFuncMAP.find(fn);
       if ((*cmd)->_lclFuncMAP.end() != lclFunc)
       {
+         bool strict;
          cmdSTDFUNC *fbody = lclFunc->second;
-         if (0 == fbody->argsOK(amap))
+         if (0 == fbody->argsOK(amap, strict))
             return fbody;
       }
    }
@@ -1764,10 +1765,11 @@ parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
       {
          std::stringstream alPrompt; // argument list prompt
          unsigned numOverloaded = 0;
+         bool strict;
          for (MM fb = range.first; fb != range.second; fb++)
          {
             fbody = fb->second;
-            if (0 == fbody->argsOK(arguMap))
+            if (0 == fbody->argsOK(arguMap, strict))
                break;
             else
             {
@@ -1807,8 +1809,10 @@ parsercmd::cmdSTDFUNC*  const parsercmd::cmdBLOCK::getIntFuncBody(std::string fu
    return fbody;
 }
 
-bool  parsercmd::cmdBLOCK::defValidate(const std::string& fn, const ArgumentLIST* alst, cmdFUNC*& funcdef)
+bool parsercmd::cmdBLOCK::defValidate(const FuncDeclaration* decl, cmdFUNC*& funcdef)
 {
+   std::string fn = decl->name();
+   const ArgumentLIST* alst = decl->argList();
    // convert ArgumentLIST to argumentMAP
    telldata::argumentQ arguMap;
    typedef ArgumentLIST::const_iterator AT;
@@ -1820,7 +1824,13 @@ bool  parsercmd::cmdBLOCK::defValidate(const std::string& fn, const ArgumentLIST
    bool allow_definition = true;
    for (MM fb = range.first; fb != range.second; fb++)
    {
-      if (0 == fb->second->argsOK(&arguMap))
+      bool strict;
+      if (decl->type() != fb->second->gettype())
+      {// if function with the same name, but different type is defined
+         allow_definition = false;
+         break;
+      }
+      else if (0 == fb->second->argsOK(&arguMap, strict))
       {// if function with this name and parameter list is already defined
          if (fb->second->internal())
          {
@@ -1830,7 +1840,9 @@ bool  parsercmd::cmdBLOCK::defValidate(const std::string& fn, const ArgumentLIST
          }
          else
          {
-            if (!fb->second->declaration())
+            if (fb->second->declaration())
+               funcdef = static_cast<cmdFUNC*>(fb->second);
+            else
             {
                std::ostringstream ost;
                ost << "Warning! User function \""<< fn <<"\" is redefined";
@@ -1838,8 +1850,6 @@ bool  parsercmd::cmdBLOCK::defValidate(const std::string& fn, const ArgumentLIST
                delete (fb->second);
                _funcMAP.erase(fb);
             }
-            else
-               funcdef = static_cast<cmdFUNC*>(fb->second);
             break;
          }
       }
@@ -1848,8 +1858,10 @@ bool  parsercmd::cmdBLOCK::defValidate(const std::string& fn, const ArgumentLIST
    return allow_definition;
 }
 
-bool  parsercmd::cmdBLOCK::declValidate(const std::string& fn, const ArgumentLIST* alst, TpdYYLtype loc)
+bool parsercmd::cmdBLOCK::declValidate(const FuncDeclaration* decl, TpdYYLtype loc)
 {
+   std::string fn = decl->name();
+   const ArgumentLIST* alst = decl->argList();
    // convert ArgumentLIST to argumentMAP
    telldata::argumentQ arguMap;
    typedef ArgumentLIST::const_iterator AT;
@@ -1861,10 +1873,18 @@ bool  parsercmd::cmdBLOCK::declValidate(const std::string& fn, const ArgumentLIS
    bool allow_declaration = true;
    for (MM fb = range.first; fb != range.second; fb++)
    {
-      if (0 == fb->second->argsOK(&arguMap))
+      std::ostringstream ost;
+      ost << "line " << loc.first_line << ": col " << loc.first_column << ": ";
+      bool strict;
+      if (decl->type() != fb->second->gettype())
+      {// if function with the same name, but different type is defined
+         ost << "Overloaded functions must be the same type \"" << fn << "\"";
+         tell_log(console::MT_ERROR, ost.str());
+         allow_declaration = false;
+         break;
+      }
+      else if (0 == fb->second->argsOK(&arguMap, strict))
       {// if function with this name and parameter list is already defined
-         std::ostringstream ost;
-         ost << "line " << loc.first_line << ": col " << loc.first_column << ": ";
          if (fb->second->internal())
          {
             ost << "Can't redeclare internal function \"" << fn << "\"";
@@ -1895,7 +1915,7 @@ bool  parsercmd::cmdBLOCK::declValidate(const std::string& fn, const ArgumentLIS
 }
 
 //=============================================================================
-int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap)
+int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap, bool& strict)
 {
 // This function is rather twisted, but this seems the only way to deal with
 // anonymous user defined structures handled over as input function arguments.
@@ -1929,17 +1949,18 @@ int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap)
 // first function body that matches the entire list of input arguments. This will be most
 // likely undefined. To prevent this we need better checks during the function definition
 // parsing
-   unsigned i = amap->size();
-   if (i != _arguments->size()) return -1;
+   strict = true;
+   unsigned unmapchedArgs = amap->size();
+   if (unmapchedArgs != _arguments->size()) return -1;
    telldata::argumentQ UnknownArgsCopy;
    // :) - some fun here, but it might be confusing - '--' postfix operation is executed
    // always after the comparison, but before the cycle body. So. if all the arguments
-   // are checked (match), the cycle ends-up with i == -1;
-   while (i-- > 0)
+   // are checked (match), the cycle ends-up with unmapchedArgs == -1;
+   while (unmapchedArgs-- > 0)
    {
-      telldata::typeID cargID = (*(*amap)[i])();
-      telldata::ArgumentID carg((*(*amap)[i]));
-      telldata::typeID lvalID = (*_arguments)[i]->second->get_type();
+      telldata::typeID cargID = (*(*amap)[unmapchedArgs])();
+      telldata::ArgumentID carg((*(*amap)[unmapchedArgs]));
+      telldata::typeID lvalID = (*_arguments)[unmapchedArgs]->second->get_type();
       if (TLUNKNOWN_TYPE(cargID))
       {
          const telldata::TType* vartype;
@@ -1961,21 +1982,22 @@ int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap)
          // so check strictly the type
          if ( carg() != lvalID)
             break;
-         else if (TLUNKNOWN_TYPE( (*(*amap)[i])() ))
+         else if (TLUNKNOWN_TYPE( (*(*amap)[unmapchedArgs])() ))
             UnknownArgsCopy.push_back(DEBUG_NEW telldata::ArgumentID(carg));
       }
       else
-      {  // for number types - allow compatablity
+      {  // for number types - allow compatibility
+         strict &= (carg() == lvalID);
          if ((!NUMBER_TYPE(lvalID)) || ( carg() > lvalID))
             break;
-         else if (TLUNKNOWN_TYPE( (*(*amap)[i])() ))
+         else if (TLUNKNOWN_TYPE( (*(*amap)[unmapchedArgs])() ))
             UnknownArgsCopy.push_back(DEBUG_NEW telldata::ArgumentID(carg));
       }
    }
-   i++;
+   unmapchedArgs++;
    if (UnknownArgsCopy.size() > 0)
    {
-      if (i > 0)
+      if (unmapchedArgs > 0)
       {
          for (telldata::argumentQ::iterator CA = UnknownArgsCopy.begin(); CA != UnknownArgsCopy.end(); CA++)
             delete (*CA);
@@ -1990,7 +2012,7 @@ int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap)
             }
       assert(UnknownArgsCopy.size() == 0);
    }
-   return (i);
+   return (unmapchedArgs);
 }
 
 void parsercmd::cmdSTDFUNC::reduce_undo_stack()
@@ -2268,7 +2290,7 @@ void parsercmd::cmdMAIN::addUSERFUNC(FuncDeclaration* decl, cmdFUNC* cQ, TpdYYLt
       tellerror("function definition is ignored because of the errors above", loc);
    }
    /*Check whether such a function is already defined */
-   else if ( CMDBlock->defValidate(decl->name().c_str(), decl->argList(), declfunc) )
+   else if ( CMDBlock->defValidate(decl, declfunc) )
    {
       if (declfunc)
       {// pour over the definition contents in the body created by the declaration
@@ -2296,7 +2318,7 @@ empty and cmdFUNC._declaration will be true.
 parsercmd::cmdFUNC* parsercmd::cmdMAIN::addUSERFUNCDECL(FuncDeclaration* decl, TpdYYLtype loc)
 {
    cmdFUNC* cQ = NULL;
-   if (CMDBlock->declValidate(decl->name().c_str(),decl->argList(),loc))
+   if (CMDBlock->declValidate(decl,loc))
    {
       cQ = DEBUG_NEW parsercmd::cmdFUNC(decl->argListCopy(),decl->type(), true, loc);
       _funcMAP.insert(std::make_pair(decl->name(), cQ));

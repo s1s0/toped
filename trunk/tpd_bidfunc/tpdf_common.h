@@ -119,7 +119,7 @@
       int         execute();                                      \
       void        undo() {};                                      \
       void        undo_cleanup() {};                              \
-      int         argsOK(telldata::argumentQ* amap);              \
+      int         argsOK(telldata::argumentQ* amap, bool&);       \
       NameList*   callingConv(const telldata::typeMAP*);          \
    }
 #endif
@@ -132,7 +132,7 @@
    public:                                                        \
       name(telldata::typeID retype, bool eor):father(retype,eor) {}; \
       int         execute();                                      \
-      int         argsOK(telldata::argumentQ* amap);              \
+      int         argsOK(telldata::argumentQ* amap, bool&);       \
       NameList*   callingConv(const telldata::typeMAP*);          \
    }
 #endif
