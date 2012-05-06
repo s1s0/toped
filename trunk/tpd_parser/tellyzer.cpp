@@ -1763,17 +1763,36 @@ parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
       }
       else
       {
+         cmdSTDFUNC *candFuncBody = NULL;
          std::stringstream alPrompt; // argument list prompt
-         unsigned numOverloaded = 0;
-         bool strict;
+         std::stringstream alaPrompt; // argument list alternative prompt
+         unsigned numMismatches = 0;
+         unsigned numNonStrictMaches = 0;
          for (MM fb = range.first; fb != range.second; fb++)
          {
+            bool strict;
             fbody = fb->second;
             if (0 == fbody->argsOK(arguMap, strict))
-               break;
+            {
+               if (strict)
+                  break; // got the function with strict match!
+               else
+               {
+                  if (0 < numNonStrictMaches++) alaPrompt << "\n";
+                  alaPrompt << fn << "( ";
+                  NameList* funcCandidate = fbody->callingConv(&_typeLocal);
+                  NameList::const_iterator CD = funcCandidate->begin();
+                  while(++CD != funcCandidate->end())
+                     alaPrompt << *CD << " ";
+                  alaPrompt << ")";
+                  delete funcCandidate;
+                  candFuncBody = fbody;
+                  fbody = NULL;
+               }
+            }
             else
             {
-               if (0 < numOverloaded++) alPrompt << "\n";
+               if (0 < numMismatches++) alPrompt << "\n";
                alPrompt << fn << "( ";
                NameList* funcCandidate = fbody->callingConv(&_typeLocal);
                NameList::const_iterator CD = funcCandidate->begin();
@@ -1784,15 +1803,30 @@ parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
                fbody = NULL;
             }
          }
-         if (NULL ==fbody)
+         if (NULL == fbody)
          {
             std::stringstream errstream;
-            if (1 < numOverloaded)
-               errstream << "Wrong arguments in function call. Expecting one of the following:\n";
+            if (NULL == candFuncBody)
+            {
+               if (1 < numMismatches)
+                  errstream << "Wrong arguments in function call. Expecting one of the following:\n";
+               else
+                  errstream << "Wrong arguments in function call. Expecting: ";
+               errstream << alPrompt.str();
+               errmsg = errstream.str();
+            }
             else
-               errstream << "Wrong arguments in function call. Expecting: ";
-            errstream << alPrompt.str();
-            errmsg = errstream.str();
+            {
+               if (1 < numNonStrictMaches)
+               {// more than one non-strict matches
+                  errstream << "Ambiguous function call. Candidates are:\n";
+                  errstream << alaPrompt.str();
+                  errmsg = errstream.str();
+               }
+               else
+                  // single function with non-strict match
+                  fbody = candFuncBody;
+            }
          }
       }
    }
@@ -1821,37 +1855,38 @@ bool parsercmd::cmdBLOCK::defValidate(const FuncDeclaration* decl, cmdFUNC*& fun
    // get the function definitions with this name
    typedef FunctionMAP::iterator MM;
    std::pair<MM,MM> range = _funcMAP.equal_range(fn);
-   bool allow_definition = true;
+   bool allow_definition = false;
    for (MM fb = range.first; fb != range.second; fb++)
    {
       bool strict;
       if (decl->type() != fb->second->gettype())
-      {// if function with the same name, but different type is defined
-         allow_definition = false;
+         // if function with the same name, but different type is defined
+         // - overloaded functions must be the same type
          break;
-      }
       else if (0 == fb->second->argsOK(&arguMap, strict))
-      {// if function with this name and parameter list is already defined
-         if (fb->second->internal())
+      {// if function with this name and parameter list is already declared
+         if (strict)
          {
-            // can't redefine internal function
-            allow_definition = false;
-            break;
-         }
-         else
-         {
-            if (fb->second->declaration())
-               funcdef = static_cast<cmdFUNC*>(fb->second);
+            if (fb->second->internal())
+               // can't redefine internal function
+               break;
             else
             {
-               std::ostringstream ost;
-               ost << "Warning! User function \""<< fn <<"\" is redefined";
-               tell_log(console::MT_WARNING, ost.str());
-               delete (fb->second);
-               _funcMAP.erase(fb);
+               allow_definition = true;
+               if (fb->second->declaration())
+                  funcdef = static_cast<cmdFUNC*>(fb->second);
+               else
+               {//i.e. definition
+                  std::ostringstream ost;
+                  ost << "Warning! User function \""<< fn <<"\" is redefined";
+                  tell_log(console::MT_WARNING, ost.str());
+                  delete (fb->second);
+                  _funcMAP.erase(fb);
+               }
+               break;
             }
-            break;
          }
+         // else - not strict - keep going
       }
    }
    telldata::argQClear(&arguMap);
@@ -1885,30 +1920,38 @@ bool parsercmd::cmdBLOCK::declValidate(const FuncDeclaration* decl, TpdYYLtype l
       }
       else if (0 == fb->second->argsOK(&arguMap, strict))
       {// if function with this name and parameter list is already defined
-         if (fb->second->internal())
+         if (strict)
          {
-            ost << "Can't redeclare internal function \"" << fn << "\"";
-            tell_log(console::MT_ERROR, ost.str());
-            allow_declaration = false;
-            break;
+            if (fb->second->internal())
+            {
+               ost << "Can't redeclare internal function \"" << fn << "\"";
+               tell_log(console::MT_ERROR, ost.str());
+               allow_declaration = false;
+               break;
+            }
+            else if (!fb->second->declaration())
+            {
+               //NOTE! The warnings here and in the following block are quite confusing
+               //      for the user.
+               //ost << "Function \"" << fn << "\" already defined at this point.";
+               //tell_log(console::MT_WARNING, ost.str());
+               allow_declaration = false;
+               break;
+            }
+            else
+            {
+               //ost << "Function \"" << fn << "\" already declared at this point.";
+               //tell_log(console::MT_WARNING, ost.str());
+               allow_declaration = false;
+               break;
+            }
          }
-         else if (!fb->second->declaration())
-         {
-//            NOTE! The warnings here and in the following block are quite confusing
-//                  for the user.
-//            ost << "Function \"" << fn << "\" already defined at this point.";
-//            tell_log(console::MT_WARNING, ost.str());
-            allow_declaration = false;
-            break;
-         }
-         else
-         {
-//            ost << "Function \"" << fn << "\" already declared at this point.";
-//            tell_log(console::MT_WARNING, ost.str());
-            allow_declaration = false;
-            break;
-         }
+         //else
+         // non strict - function overloading - keep going
       }
+      // else -
+      // if arguments are not matched - that's exactly the case of overloaded functions
+      // so - keep going
    }
    telldata::argQClear(&arguMap);
    return allow_declaration;
