@@ -299,10 +299,9 @@ void shifttest() {
 
 }
 */
-void addbox()
+layout addbox()
 {
    echo("Internal function addbox() redefined. This line should never be seen on tell log");
-   
 }
 
 void modify_undo_bug()
