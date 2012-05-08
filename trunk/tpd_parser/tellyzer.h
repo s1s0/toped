@@ -806,14 +806,15 @@ namespace  parsercmd {
 
    class cmdFOREACH: public cmdVIRTUAL {
    public:
-                           cmdFOREACH(telldata::TellVar* var) :
-                                       _var(var),_header(NULL), _body(NULL) {};
+                           cmdFOREACH(telldata::TellVar* var, telldata::TellVar* listvar) :
+                                       _var(var), _listvar(listvar), _header(NULL), _body(NULL) {};
       virtual             ~cmdFOREACH();
       void                 addBlocks(cmdBLOCK* hd, cmdBLOCK* bd)
                                                     {_header = hd; _body = bd;}
       virtual int          execute();
    private:
       telldata::TellVar*   _var;
+      telldata::TellVar*   _listvar;
       cmdBLOCK*            _header;
       cmdBLOCK*            _body;
    };
