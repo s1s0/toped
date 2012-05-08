@@ -470,6 +470,24 @@ telllist:
             $$ = $1;
          }
       }
+   |  structure                      {
+      felist_lvalue = NULL;
+      // the structure is without a type at this moment, so here we do the type checking
+      if (parsercmd::StructTypeCheck(feiterator->get_type() | telldata::tn_listmask, $1, @1)) {
+         tellvar = CMDBlock->newTellvar(feiterator->get_type() | telldata::tn_listmask, "", @1);
+         parsercmd::Assign(tellvar, 0, $1, @1);
+         delete $1;
+         CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdANOVAR(tellvar));
+         $$ = feiterator->get_type() | telldata::tn_listmask;
+      }
+      else {
+         tellerror("Type mismatch", @1);
+         $$ = telldata::tn_NULL;
+         delete $1;
+         /*cleanonabort();*/
+         /*YYABORT;*/
+      }
+   }
    | funccall                       {
          felist_lvalue = NULL;
          if (!($1 & telldata::tn_listmask)) {
