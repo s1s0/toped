@@ -53,9 +53,12 @@ namespace parsercmd
 }
 
 /*Current tell variable name*/
-telldata::TellVar* tellvar = NULL;
+telldata::TellVar* tellvar        = NULL;
 std::stack<telldata::TellVar*> tellindxvar;
-telldata::TellVar* tell_lvalue = NULL;
+telldata::TellVar* tell_lvalue    = NULL;
+telldata::TellVar* felist_lvalue  = NULL;
+telldata::TellVar* feiterator     = NULL;
+
 /*Current variable is a list. Legal values are:
   0 - not indexed
   1 - 1 index
@@ -445,14 +448,39 @@ whilestatement:
 ;
 
 telllist:
-     expression                     {
-         if       (!($1 & telldata::tn_listmask)) {
+     lvalue                        {
+         if (!($1 & telldata::tn_listmask)) {
+            tellerror("list expected",@1);
+            $$ = telldata::tn_NULL;
+            felist_lvalue = NULL;
+         }
+         else {
+            felist_lvalue = tell_lvalue;
+            $$ = $1;
+         }
+      }
+   | anonymousvar                    {
+         felist_lvalue = NULL;
+         if (!($1 & telldata::tn_listmask)) {
+            tellerror("list expected",@1);
+            $$ = telldata::tn_NULL;
+         }
+         else {
+            CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdANOVAR(tellvar));
+            $$ = $1;
+         }
+      }
+   | funccall                       {
+         felist_lvalue = NULL;
+         if (!($1 & telldata::tn_listmask)) {
             tellerror("list expected",@1);
             $$ = telldata::tn_NULL;
          }
          else
             $$ = $1;
       }
+   | listremove                            {felist_lvalue = NULL;$$ = $1;}
+   | listslice                             {felist_lvalue = NULL;$$ = $1;}
 ;
 
 foreachstatement:
@@ -460,10 +488,13 @@ foreachstatement:
          CMDBlock = DEBUG_NEW parsercmd::cmdBLOCK();
          CMDBlock->pushblk();
       }
-     lvalue ';' telllist ')'        {
-         if  (($4 | telldata::tn_listmask) != $6)
+     lvalue ';'                     {
+         feiterator = tell_lvalue;
+      }
+     telllist ')'                   {
+         if  (($4 | telldata::tn_listmask) != $7)
             tellerror("unappropriate variable type",@4);
-         foreach_stack.push(DEBUG_NEW parsercmd::cmdFOREACH(tell_lvalue));
+         foreach_stack.push(DEBUG_NEW parsercmd::cmdFOREACH(feiterator, felist_lvalue));
          CMDBlock = DEBUG_NEW parsercmd::cmdBLOCK();
          CMDBlock->pushblk();
       }

@@ -2263,16 +2263,29 @@ int parsercmd::cmdFOREACH::execute()
    int retexec = EXEC_NEXT;
 
    _header->execute();
-   telldata::TtList* clist = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
-   telldata::memlist valist = clist->mlist();
 
+   telldata::TtList* clist;
+   bool listVariable = (NULL != _listvar);
+   if (listVariable)
+   {
+      clist = static_cast<telldata::TtList*>(_listvar);
+   }
+   else
+   {
+      clist = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
+   }
+
+   telldata::memlist valist = clist->mlist();
    for (telldata::memlist::const_iterator CI = valist.begin(); CI != valist.end(); CI++)
    {
       _var->assign(*CI);
       retexec = _body->execute();
+      if (listVariable)
+         (*CI)->assign(_var);
       if (EXEC_NEXT != retexec) break;
    }
-   delete clist;
+   if (!listVariable)
+      delete clist;
    return retexec;
 }
 
