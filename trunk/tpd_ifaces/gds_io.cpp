@@ -627,6 +627,7 @@ void GDSin::GdsStructure::import(ImportDB& iDB)
 {
    std::string strctName;
    //initializing
+   iDB.calcCrossCoeff(1.0);
    GdsInFile* cf = static_cast<GdsInFile*>(iDB.srcFile());
    const GdsRecord* cr = cf->cRecord();
    cf->setPosition(_filePos);
@@ -1054,7 +1055,7 @@ void GDSin::GdsStructure::importBox(GdsInFile* cf, ImportDB& iDB)
                PointVector   plist;
                plist.reserve(numpoints);
                for(word i = 0; i < numpoints; i++)
-                  plist.push_back(GDSin::get_TP(cr, i));
+                  plist.push_back(GDSin::get_TP(cr, iDB.crossCoeff(), i));
                if (iDB.mapTdtLayer(layer, singleType))
                   iDB.addPoly(plist);
                break;
@@ -1102,7 +1103,7 @@ void GDSin::GdsStructure::importPoly(GdsInFile* cf, ImportDB& iDB)
                   PointVector plist;
                   plist.reserve(numpoints);
                   for(word i = 0; i < numpoints; i++)
-                     plist.push_back(GDSin::get_TP(cr, i));
+                     plist.push_back(GDSin::get_TP(cr, iDB.crossCoeff(), i));
                   if (iDB.mapTdtLayer(layer, singleType))
                      iDB.addPoly(plist);
                }
@@ -1145,10 +1146,13 @@ void GDSin::GdsStructure::importPath(GdsInFile* cf, ImportDB& iDB)
             case gds_PATHTYPE: cr->retData(&pathtype);
                break;
             case gds_WIDTH: cr->retData(&width);
+               width = rint( width * iDB.crossCoeff() );
                break;
             case gds_BGNEXTN:   cr->retData(&bgnextn);
+               bgnextn = rint( bgnextn * iDB.crossCoeff() );
                break;
             case gds_ENDEXTN:   cr->retData(&endextn);
+               endextn = rint( endextn * iDB.crossCoeff() );
                break;
             case gds_PROPATTR:// tell_log(console::MT_WARNING,"GDS path - PROPATTR record ignored");
                cf->incGdsiiWarnings(); break;
@@ -1160,7 +1164,7 @@ void GDSin::GdsStructure::importPath(GdsInFile* cf, ImportDB& iDB)
                   PointVector plist;
                   plist.reserve(numpoints);
                   for(word i = 0; i < numpoints; i++)
-                     plist.push_back(GDSin::get_TP(cr, i));
+                     plist.push_back(GDSin::get_TP(cr, iDB.crossCoeff(), i));
                   if (iDB.mapTdtLayer(layer, singleType))
                      iDB.addPath(plist, width, pathtype, bgnextn, endextn);
                }
@@ -1232,10 +1236,11 @@ void GDSin::GdsStructure::importText(GdsInFile* cf, ImportDB& iDB)
                absAngl    = ba & 0x0002; absAngl    >>= 1; //bit 14
                break;
             case gds_MAG: cr->retData(&magnification);
+               magnification *= iDB.crossCoeff();
                break;
             case gds_ANGLE: cr->retData(&angle);
                break;
-            case gds_XY: magnPoint = GDSin::get_TP(cr);
+            case gds_XY: magnPoint = GDSin::get_TP(cr, iDB.crossCoeff());
                break;
             case gds_STRING: cr->retData(&tString);
                break;
@@ -1291,7 +1296,7 @@ void GDSin::GdsStructure::importSref(GdsInFile* cf, ImportDB& iDB)
                break;
             case gds_ANGLE: cr->retData(&angle);
                break;
-            case gds_XY: magnPoint = GDSin::get_TP(cr);
+            case gds_XY: magnPoint = GDSin::get_TP(cr, iDB.crossCoeff());
                break;
             case gds_PROPATTR:
                cr->retData(&tmp);
@@ -1359,9 +1364,9 @@ void GDSin::GdsStructure::importAref(GdsInFile* cf, ImportDB& iDB)
             case gds_ANGLE: cr->retData(&angle);
                break;
             case gds_XY:
-               refPoint  = GDSin::get_TP(cr,0);
-               cDispl    = GDSin::get_TP(cr,1);
-               rDispl    = GDSin::get_TP(cr,2);
+               refPoint  = GDSin::get_TP(cr,iDB.crossCoeff(), 0);
+               cDispl    = GDSin::get_TP(cr,iDB.crossCoeff(), 1);
+               rDispl    = GDSin::get_TP(cr,iDB.crossCoeff(), 2);
                break;
             case gds_COLROW://return number of columns & rows in the array
                cr->retData(&columns  );
@@ -1922,10 +1927,12 @@ GDSin::GdsSplit::~GdsSplit()
 }
 
 //-----------------------------------------------------------------------------
-TP GDSin::get_TP(const GDSin::GdsRecord *cr, word curnum, byte len)
+TP GDSin::get_TP(const GDSin::GdsRecord *cr, real ccoef, word curnum, byte len)
 {
    int4b GDS_X, GDS_Y;
    cr->retData(&GDS_X, curnum*len*2, len);
    cr->retData(&GDS_Y, curnum*len*2+len, len);
-   return TP(GDS_X,GDS_Y);
+   TP pnt(GDS_X,GDS_Y);
+   pnt *= ccoef;
+   return pnt;
 }

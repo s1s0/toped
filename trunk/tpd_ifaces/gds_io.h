@@ -358,7 +358,7 @@ namespace GDSin {
    };
 
    // Function definition
-   TP get_TP(const GdsRecord* cr, word curnum = 0, byte len=4);
+   TP get_TP(const GdsRecord*, real, word curnum = 0, byte len=4);
 
    class GdsOutFile {
       public:
