@@ -1498,19 +1498,28 @@ void laydata::TdtWire::polyCut(PointVector& cutter, ShapeList** decure)
    catch (EXPTNpolyCross&) {return;}
    pcollection inside_shapes;
    pcollection outside_shapes;
-   laydata::TdtData* newshape;
    // 0 - deleted; 1- cut; 2 - remain
    if (operation.LineCUT(inside_shapes, outside_shapes))
    {
       pcollection::const_iterator CI;
       // add the resulting cut_shapes to the_cut ShapeList
       for (CI = inside_shapes.begin(); CI != inside_shapes.end(); CI++)
-         if (NULL != (newshape = createValidWire(*CI, _width)))
-            decure[1]->push_back(newshape);
+      {
+         laydata::ShapeList* newShapes = createValidWire(*CI, _width);
+         if (NULL == newShapes) continue;
+         for (laydata::ShapeList::const_iterator CS = newShapes->begin(); CS != newShapes->end();CS++)
+            decure[1]->push_back(*CS);
+         delete newShapes;
+      }
       inside_shapes.clear();
       for (CI = outside_shapes.begin(); CI != outside_shapes.end(); CI++)
-         if (NULL != (newshape = createValidWire(*CI, _width)))
-            decure[2]->push_back(newshape);
+      {
+         laydata::ShapeList* newShapes = createValidWire(*CI, _width);
+         if (NULL == newShapes) continue;
+         for (laydata::ShapeList::const_iterator CS = newShapes->begin(); CS != newShapes->end();CS++)
+            decure[2]->push_back(*CS);
+         delete newShapes;
+      }
       outside_shapes.clear();
       // and finally add this to the_delete shapelist
       decure[0]->push_back(this);
@@ -3221,23 +3230,16 @@ laydata::TdtData* laydata::createValidShape(PointVector* pl)
       return NULL;
    }
 }
-
-laydata::TdtData* laydata::createValidWire(PointVector* pl, WireWidth width)
+laydata::ShapeList* laydata::createValidWire(PointVector* pl, WireWidth width)
 {
    laydata::ValidWire check(*pl, width);
    delete pl;
-   if (check.valid()) // it's not check.recoverable() here deliberately!
-   {
-      laydata::ShapeList* slist = check.replacements();
-      assert(1 == slist->size());
-      TdtData* nshape = *(slist->begin());
-      slist->clear(); delete slist;
-      return nshape;
-   }
+   if (check.acceptable())
+      return check.replacements();
    else
    {
       std::ostringstream ost;
-      ost << "Resulting shape is invalid - " << check.failType();
+      ost << "Validation check fails - " << check.failType();
       tell_log(console::MT_ERROR, ost.str());
       return NULL;
    }

@@ -487,7 +487,7 @@ namespace laydata {
 //   void draw_overlapping_box(const DBbox&, const CTM&, const GLushort);
    TdtData* polymerge(const PointVector&, const PointVector&);
    TdtData* createValidShape(PointVector*);
-   TdtData* createValidWire(PointVector*, WireWidth);
+   ShapeList* createValidWire(PointVector*, WireWidth);
 
 
 
