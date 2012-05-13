@@ -666,13 +666,13 @@ int tellstdfunc::lgcCUTPOLY::execute()
             else
             {
                for (byte i = 0; i < 3; delete dasao[i++]);
+               RefreshGL();
             }
          }
       }
       DATC->unlockTDT(dbLibDir, true);
    }
    delete pl;
-//   }
    return EXEC_NEXT;
 }
 

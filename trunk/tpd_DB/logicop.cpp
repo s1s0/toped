@@ -377,8 +377,10 @@ bool logicop::logic::OR(pcollection& plycol)
    return true;
 }
 
-bool logicop::logic::LineCUT(pcollection& wcolIn, pcollection& wcolOut)
+bool logicop::logic::LineCUT(laydata::ShapeList& wIn, laydata::ShapeList& wOut, WireWidth width)
 {
+   pcollection wcolIn;
+   pcollection wcolOut;
    if (0 == _crossp)  return false;
    polycross::VPoint* collector = _shape1;
    bool inOutB = collector->inside(_poly2, true);
@@ -398,7 +400,41 @@ bool logicop::logic::LineCUT(pcollection& wcolIn, pcollection& wcolOut)
    } while (_shape1 != collector);
    if (inOutB)  wcolIn.push_back(shgen);
    else         wcolOut.push_back(shgen);
-   return true;
+   // Validate all resulting polygons
+   bool allValid = true;
+   pcollection::const_iterator CI;
+   for (CI = wcolIn.begin(); CI != wcolIn.end(); CI++)
+   {
+      laydata::ShapeList* newShapes = laydata::createValidWire(*CI, width);
+      if (NULL == newShapes)
+         allValid &= false;
+      else
+      {
+         for (laydata::ShapeList::const_iterator CS = newShapes->begin(); CS != newShapes->end();CS++)
+            wIn.push_back(*CS);
+         delete newShapes;
+      }
+   }
+   for (CI = wcolOut.begin(); CI != wcolOut.end(); CI++)
+   {
+      laydata::ShapeList* newShapes = laydata::createValidWire(*CI, width);
+      if (NULL == newShapes)
+         allValid &= false;
+      else
+      {
+         for (laydata::ShapeList::const_iterator CS = newShapes->begin(); CS != newShapes->end();CS++)
+            wOut.push_back(*CS);
+         delete newShapes;
+      }
+   }
+   if (!allValid)
+   {
+      for (laydata::ShapeList::const_iterator CS = wIn.begin(); CS != wIn.end();CS++)
+         delete(*CS);
+      for (laydata::ShapeList::const_iterator CS = wOut.begin(); CS != wOut.end();CS++)
+         delete(*CS);
+   }
+   return allValid;
 }
 
 void logicop::logic::getShape(pcollection& plycol, polycross::VPoint* centinel)

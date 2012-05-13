@@ -66,7 +66,7 @@ namespace logicop {
       //! Perform logic OR and returns the result in plycol
       bool              OR(pcollection&);
       //! Perform line (wire) cut
-      bool              LineCUT(pcollection&, pcollection&);
+      bool              LineCUT(laydata::ShapeList&, laydata::ShapeList&, WireWidth);
       //! Prepare #_shape1 and #_shape2 data fields for reuse
       void              reset_visited();
    private:
