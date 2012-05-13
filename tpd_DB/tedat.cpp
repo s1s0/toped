@@ -1496,31 +1496,19 @@ void laydata::TdtWire::polyCut(PointVector& cutter, ShapeList** decure)
       operation.findCrossingPoints();
    }
    catch (EXPTNpolyCross&) {return;}
-   pcollection inside_shapes;
-   pcollection outside_shapes;
+   laydata::ShapeList inside_shapes;
+   laydata::ShapeList outside_shapes;
    // 0 - deleted; 1- cut; 2 - remain
-   if (operation.LineCUT(inside_shapes, outside_shapes))
+   if (operation.LineCUT(inside_shapes, outside_shapes, _width))
    {
-      pcollection::const_iterator CI;
+      laydata::ShapeList::const_iterator CI;
       // add the resulting cut_shapes to the_cut ShapeList
       for (CI = inside_shapes.begin(); CI != inside_shapes.end(); CI++)
-      {
-         laydata::ShapeList* newShapes = createValidWire(*CI, _width);
-         if (NULL == newShapes) continue;
-         for (laydata::ShapeList::const_iterator CS = newShapes->begin(); CS != newShapes->end();CS++)
-            decure[1]->push_back(*CS);
-         delete newShapes;
-      }
-      inside_shapes.clear();
+         decure[1]->push_back(*CI);
+//      inside_shapes.clear();
       for (CI = outside_shapes.begin(); CI != outside_shapes.end(); CI++)
-      {
-         laydata::ShapeList* newShapes = createValidWire(*CI, _width);
-         if (NULL == newShapes) continue;
-         for (laydata::ShapeList::const_iterator CS = newShapes->begin(); CS != newShapes->end();CS++)
-            decure[2]->push_back(*CS);
-         delete newShapes;
-      }
-      outside_shapes.clear();
+         decure[2]->push_back(*CI);
+//      outside_shapes.clear();
       // and finally add this to the_delete shapelist
       decure[0]->push_back(this);
    }
