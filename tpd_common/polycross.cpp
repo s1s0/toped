@@ -1730,13 +1730,19 @@ polycross::YQ::~YQ()
 
 //==============================================================================
 // XQ
-polycross::XQ::XQ( const segmentlist& seg1, const segmentlist& seg2 ) :
+polycross::XQ::XQ( const segmentlist& seg1, const segmentlist& seg2, bool loopsegs1, bool loopsegs2 ) :
       _overlap(*(seg1[0]->lP()))
 {
    _xQueue = avl_create(E_compare, NULL, NULL);
    _xOldQueue = avl_create(E_compare, NULL, NULL);
-   createEvents(seg1);
-   createEvents(seg2);
+   if (loopsegs1)
+      createEvents(seg1);
+   else
+      createSEvents(seg1);
+   if (loopsegs2)
+      createEvents(seg2);
+   else
+      createSEvents(seg2);
    _sweepLine = DEBUG_NEW YQ(_overlap, &seg1, &seg2);
 }
 

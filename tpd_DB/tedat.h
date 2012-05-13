@@ -227,7 +227,7 @@ namespace laydata {
          virtual void      psWrite(PSFile&, const layprop::DrawProperties&) const;
          virtual word      numPoints() const {return _psize;}
          virtual bool      pointInside(const TP);
-         virtual void      polyCut(PointVector&, ShapeList**){};
+         virtual void      polyCut(PointVector&, ShapeList**);
          virtual void      stretch(int bfactor, ShapeList**);
          virtual PointVector shape2poly() const;
          virtual PointVector dumpPoints() const;
@@ -487,6 +487,7 @@ namespace laydata {
 //   void draw_overlapping_box(const DBbox&, const CTM&, const GLushort);
    TdtData* polymerge(const PointVector&, const PointVector&);
    TdtData* createValidShape(PointVector*);
+   TdtData* createValidWire(PointVector*, WireWidth);
 
 
 

@@ -69,7 +69,7 @@ are several important points to consider here.
      placeholder nor its layer or cell. Everything is on kind of "need to know
      basis". Lower levels of the database are unaware of the higher levels.
      Furthermore on certain hierarchical level every component doesn't know
-     anything even about its neighbors.
+     anything even about its neighbours.
    - Select operation assumes however that an operation like move/delete/copy
      etc. is about to follow, i.e. the selected shapes will be accessed shortly
      and this access has to be swift and reliable. Certainly we need some short
@@ -1482,6 +1482,41 @@ laydata::TdtData* laydata::TdtWire::copy(const CTM& trans) {
    slist->clear(); delete slist;
    return nshape;
 }
+
+void laydata::TdtWire::polyCut(PointVector& cutter, ShapeList** decure)
+{
+   PointVector plist;
+   plist.reserve(_psize);
+   for (unsigned i = 0; i < _psize; i++)
+      plist.push_back( TP( _pdata[2*i], _pdata[2*i+1] ) );
+
+   logicop::logic operation(plist, cutter, false);
+   try
+   {
+      operation.findCrossingPoints();
+   }
+   catch (EXPTNpolyCross&) {return;}
+   pcollection inside_shapes;
+   pcollection outside_shapes;
+   laydata::TdtData* newshape;
+   // 0 - deleted; 1- cut; 2 - remain
+   if (operation.LineCUT(inside_shapes, outside_shapes))
+   {
+      pcollection::const_iterator CI;
+      // add the resulting cut_shapes to the_cut ShapeList
+      for (CI = inside_shapes.begin(); CI != inside_shapes.end(); CI++)
+         if (NULL != (newshape = createValidWire(*CI, _width)))
+            decure[1]->push_back(newshape);
+      inside_shapes.clear();
+      for (CI = outside_shapes.begin(); CI != outside_shapes.end(); CI++)
+         if (NULL != (newshape = createValidWire(*CI, _width)))
+            decure[2]->push_back(newshape);
+      outside_shapes.clear();
+      // and finally add this to the_delete shapelist
+      decure[0]->push_back(this);
+   }
+}
+
 
 void laydata::TdtWire::stretch(int bfactor, ShapeList** decure)
 {
@@ -3169,6 +3204,27 @@ int laydata::xangle(const TP& p1, const TP& p2) {
 laydata::TdtData* laydata::createValidShape(PointVector* pl)
 {
    laydata::ValidPoly check(*pl);
+   delete pl;
+   if (check.valid()) // it's not check.recoverable() here deliberately!
+   {
+      laydata::ShapeList* slist = check.replacements();
+      assert(1 == slist->size());
+      TdtData* nshape = *(slist->begin());
+      slist->clear(); delete slist;
+      return nshape;
+   }
+   else
+   {
+      std::ostringstream ost;
+      ost << "Resulting shape is invalid - " << check.failType();
+      tell_log(console::MT_ERROR, ost.str());
+      return NULL;
+   }
+}
+
+laydata::TdtData* laydata::createValidWire(PointVector* pl, WireWidth width)
+{
+   laydata::ValidWire check(*pl, width);
    delete pl;
    if (check.valid()) // it's not check.recoverable() here deliberately!
    {
