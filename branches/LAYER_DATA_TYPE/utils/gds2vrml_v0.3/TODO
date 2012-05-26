@@ -1,0 +1,10 @@
+
+
+not supported up to now (V0.2):
+----------------------
+
+* TEXT
+* BOX
+* PATHTYPE: rounding of path-stubs
+* PATH: connection between two path-segments are not an eye-candy
+

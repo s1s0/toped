@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdtprojectproperties>
+<section name="org.eclipse.cdt.internal.ui.wizards.settingswizards.IncludePaths">
+<language name="C Source File">
+
+</language>
+<language name="C++ Source File">
+<includepath>/usr/include/wx-2.8</includepath>
+<includepath>/usr/lib64/wx/include/gtk2-unicode-release-2.8</includepath>
+
+</language>
+</section>
+<section name="org.eclipse.cdt.internal.ui.wizards.settingswizards.Macros">
+<language name="C Source File">
+<macro>
+<name>__WXGTK20__</name><value>1</value>
+</macro>
+
+</language>
+<language name="C++ Source File">
+<macro>
+<name>__WXGTK20__</name><value>1</value>
+</macro>
+
+</language>
+</section>
+</cdtprojectproperties>
