@@ -176,8 +176,8 @@ void tellstdfunc::stdMOVESEL::undo()
       tDesign->selectFromList(get_ttlaylist(deleted), unselable);
       // delete the added shapes
       for (word j = 0 ; j < added->mlist().size(); j++) {
-         tDesign->destroyThis(static_cast<telldata::TtLayout*>(added->mlist()[j])->data(),
-                              static_cast<telldata::TtLayout*>(added->mlist()[j])->layer(),
+         tDesign->destroyThis(             static_cast<telldata::TtLayout*>(added->mlist()[j])->data(),
+                              tell2DBLayer(static_cast<telldata::TtLayout*>(added->mlist()[j])->layer()),
                               dbLibDir);
       }
    }
@@ -305,8 +305,8 @@ void tellstdfunc::stdROTATESEL::undo()
       // delete the added shapes
       for (word j = 0 ; j < added->mlist().size(); j++)
       {
-         tDesign->destroyThis(static_cast<telldata::TtLayout*>(added->mlist()[j])->data(),
-                              static_cast<telldata::TtLayout*>(added->mlist()[j])->layer(),
+         tDesign->destroyThis(             static_cast<telldata::TtLayout*>(added->mlist()[j])->data(),
+                              tell2DBLayer(static_cast<telldata::TtLayout*>(added->mlist()[j])->layer()),
                               dbLibDir);
       }
    }
@@ -969,12 +969,12 @@ void tellstdfunc::stdCHANGELAY::undo()
 {
    telldata::TtList* pl = TELL_UNDOOPS_UNDO(telldata::TtList*);
    word src = getWordValue(UNDOPstack, true);
-   secureLayDef(src);
+   secureLayDef(tell2DBLayer(src));
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      tDesign->transferLayer(get_ttlaylist(pl), src);
+      tDesign->transferLayer(get_ttlaylist(pl), tell2DBLayer(src));
    }
    DATC->unlockTDT(dbLibDir, true);
    delete pl;
@@ -997,8 +997,8 @@ int tellstdfunc::stdCHANGELAY::execute()
       else
       {
          word target = getWordValue();
-         secureLayDef(target);
-         tDesign->transferLayer(target);
+         secureLayDef(tell2DBLayer(target));
+         tDesign->transferLayer(tell2DBLayer(target));
          // prepare undo stacks
          UNDOcmdQ.push_front(this);
          UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(target));

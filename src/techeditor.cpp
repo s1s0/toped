@@ -202,7 +202,7 @@ void tui::TechEditorDialog::OnChangeLayNum(wxCommandEvent&)
          applyEnable = false;
       else
       {
-         for(WordList::const_iterator it = _allLayNums.begin(); it != _allLayNums.end(); ++it)
+         for(LayerTMPList::const_iterator it = _allLayNums.begin(); it != _allLayNums.end(); ++it)
             if (layNo == *it)
             {
                applyEnable = false;
@@ -238,9 +238,9 @@ void  tui::TechEditorDialog::updateDialog()
    _layerNameString = row.GetText();
    _layerName->GetValidator()->TransferToWindow();
 
-   unsigned long layNo;
-   _layerNumberString.ToULong(&layNo);
-
+   unsigned long llayNo;
+   _layerNumberString.ToULong(&llayNo);
+   LayerNumber layNo = llayNo;
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
@@ -276,7 +276,7 @@ void tui::TechEditorDialog::prepareLayers(layprop::DrawProperties* drawProp)
    _layerList->InsertColumn(1, wxT("Name"));
 
    _allLayNums = drawProp->getAllLayers();
-   for(WordList::const_iterator it = _allLayNums.begin(); it != _allLayNums.end(); ++it)
+   for(LayerTMPList::const_iterator it = _allLayNums.begin(); it != _allLayNums.end(); ++it)
    {
       wxListItem row;
       row.SetMask(wxLIST_MASK_DATA | wxLIST_MASK_TEXT);
@@ -304,7 +304,7 @@ void tui::TechEditorDialog::updateLayerList()
    { // new layer added
       unsigned long layNo;
       _layerNumberString.ToULong(&layNo);
-      _allLayNums.push_back(layNo);
+      _allLayNums.push_back((LayerNumber)layNo);
 
       wxListItem row;
       unsigned long newItem = _layerList->GetItemCount();

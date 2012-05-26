@@ -62,7 +62,7 @@ void tellstdfunc::stdADDBOX::undo()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      tDesign->destroyThis(bx->data(),la, dbLibDir);
+      tDesign->destroyThis(bx->data(),tell2DBLayer(la), dbLibDir);
    }
    DATC->unlockTDT(dbLibDir, true);
    delete (bx);
@@ -72,7 +72,7 @@ void tellstdfunc::stdADDBOX::undo()
 int tellstdfunc::stdADDBOX::execute()
 {
    word la = getWordValue();
-   secureLayer(la);
+   secureLayer(tell2DBLayer(la));
    telldata::TtWnd *w = static_cast<telldata::TtWnd*>(OPstack.top());OPstack.pop();
    real DBscale = PROPC->DBscale();
    TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
@@ -81,7 +81,7 @@ int tellstdfunc::stdADDBOX::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      telldata::TtLayout* bx = DEBUG_NEW telldata::TtLayout(tDesign->putBox(la, p1DB, p2DB),la);
+      telldata::TtLayout* bx = DEBUG_NEW telldata::TtLayout(tDesign->putBox(tell2DBLayer(la), p1DB, p2DB),la);
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(la));
       OPstack.push(bx); UNDOPstack.push_front(bx->selfcopy());
@@ -131,7 +131,7 @@ void tellstdfunc::stdDRAWBOX::undo()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      tDesign->destroyThis(bx->data(),la, dbLibDir);
+      tDesign->destroyThis(bx->data(),tell2DBLayer(la), dbLibDir);
    }
    DATC->unlockTDT(dbLibDir, true);
    delete (bx);
@@ -141,13 +141,13 @@ void tellstdfunc::stdDRAWBOX::undo()
 int tellstdfunc::stdDRAWBOX::execute()
 {
    word     la = getWordValue();
-   DATC->setCmdLayer(la);
+   DATC->setCmdLayer(tell2DBLayer(la));
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(console::op_dbox, &OPstack)) return EXEC_ABORT;
    // get the data from the stack
    telldata::TtWnd *w = static_cast<telldata::TtWnd*>(OPstack.top());OPstack.pop();
    // get the (final) target layer
-   la = secureLayer();
+   la = db2TellLayer(secureLayer());
    real DBscale = PROPC->DBscale();
    TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
    TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
@@ -155,7 +155,7 @@ int tellstdfunc::stdDRAWBOX::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      telldata::TtLayout* bx = DEBUG_NEW telldata::TtLayout(tDesign->addBox(la, p1DB, p2DB), la);
+      telldata::TtLayout* bx = DEBUG_NEW telldata::TtLayout(tDesign->addBox(tell2DBLayer(la), p1DB, p2DB), la);
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(la));
       OPstack.push(bx);UNDOPstack.push_front(bx->selfcopy());
@@ -206,7 +206,7 @@ void tellstdfunc::stdADDBOXr::undo()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      tDesign->destroyThis(bx->data(),la, dbLibDir);
+      tDesign->destroyThis(bx->data(),tell2DBLayer(la), dbLibDir);
    }
    DATC->unlockTDT(dbLibDir, true);
    delete (bx);
@@ -216,7 +216,7 @@ void tellstdfunc::stdADDBOXr::undo()
 int tellstdfunc::stdADDBOXr::execute()
 {
    word     la = getWordValue();
-   secureLayer(la);
+   secureLayer(tell2DBLayer(la));
    real heigth = getOpValue();
    real width  = getOpValue();
    telldata::TtPnt *p1 = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
@@ -228,7 +228,7 @@ int tellstdfunc::stdADDBOXr::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      telldata::TtLayout* bx = DEBUG_NEW telldata::TtLayout(tDesign->putBox(la, p1DB, p2DB), la);
+      telldata::TtLayout* bx = DEBUG_NEW telldata::TtLayout(tDesign->putBox(tell2DBLayer(la), p1DB, p2DB), la);
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(la));
       OPstack.push(bx);UNDOPstack.push_front(bx->selfcopy());
@@ -283,7 +283,7 @@ void tellstdfunc::stdADDBOXp::undo()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      tDesign->destroyThis(bx->data(),la, dbLibDir);
+      tDesign->destroyThis(bx->data(),tell2DBLayer(la), dbLibDir);
    }
    DATC->unlockTDT(dbLibDir, true);
    delete (bx);
@@ -293,7 +293,7 @@ void tellstdfunc::stdADDBOXp::undo()
 int tellstdfunc::stdADDBOXp::execute()
 {
    word     la = getWordValue();
-   secureLayer(la);
+   secureLayer(tell2DBLayer(la));
    telldata::TtPnt *p1 = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
    telldata::TtPnt *p2 = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
    real DBscale = PROPC->DBscale();
@@ -303,7 +303,7 @@ int tellstdfunc::stdADDBOXp::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      telldata::TtLayout* bx = DEBUG_NEW telldata::TtLayout(tDesign->putBox(la, p1DB, p2DB), la);
+      telldata::TtLayout* bx = DEBUG_NEW telldata::TtLayout(tDesign->putBox(tell2DBLayer(la), p1DB, p2DB), la);
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(la));
       OPstack.push(bx); UNDOPstack.push_front(bx->selfcopy());
@@ -356,7 +356,7 @@ void tellstdfunc::stdADDPOLY::undo()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      tDesign->destroyThis(ply->data(),la, dbLibDir);
+      tDesign->destroyThis(ply->data(),tell2DBLayer(la), dbLibDir);
    }
    DATC->unlockTDT(dbLibDir, true);
    delete (ply);
@@ -369,14 +369,14 @@ int tellstdfunc::stdADDPOLY::execute()
    telldata::TtList *pl = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
    if (pl->size() >= 3)
    {
-      secureLayer(la);
+      secureLayer(tell2DBLayer(la));
       real DBscale = PROPC->DBscale();
       laydata::TdtLibDir* dbLibDir = NULL;
       if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
       {
          laydata::TdtDesign* tDesign = (*dbLibDir)();
          PointVector* plst = t2tpoints(pl,DBscale);
-         telldata::TtLayout* ply = DEBUG_NEW telldata::TtLayout(tDesign->putPoly(la,plst), la);
+         telldata::TtLayout* ply = DEBUG_NEW telldata::TtLayout(tDesign->putPoly(tell2DBLayer(la),plst), la);
          delete plst;
          UNDOcmdQ.push_front(this);
          UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(la));
@@ -432,7 +432,7 @@ void tellstdfunc::stdDRAWPOLY::undo()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      tDesign->destroyThis(ply->data(),la, dbLibDir);
+      tDesign->destroyThis(ply->data(),tell2DBLayer(la), dbLibDir);
    }
    DATC->unlockTDT(dbLibDir, true);
    delete (ply);
@@ -442,13 +442,13 @@ void tellstdfunc::stdDRAWPOLY::undo()
 int tellstdfunc::stdDRAWPOLY::execute()
 {
    word     la = getWordValue();
-   DATC->setCmdLayer(la);
+   DATC->setCmdLayer(tell2DBLayer(la));
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(console::op_dpoly, &OPstack)) return EXEC_ABORT;
    // get the data from the stack
    telldata::TtList *pl = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
    // get the (final) target layer
-   la = secureLayer();
+   la = db2TellLayer(secureLayer());
    if (pl->size() >= 3)
    {
       real DBscale = PROPC->DBscale();
@@ -457,7 +457,7 @@ int tellstdfunc::stdDRAWPOLY::execute()
       {
          laydata::TdtDesign* tDesign = (*dbLibDir)();
          PointVector* plst = t2tpoints(pl,DBscale);
-         telldata::TtLayout* ply = DEBUG_NEW telldata::TtLayout(tDesign->addPoly(la,plst), la);
+         telldata::TtLayout* ply = DEBUG_NEW telldata::TtLayout(tDesign->addPoly(tell2DBLayer(la),plst), la);
          delete plst;
          UNDOcmdQ.push_front(this);
          UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(la));
@@ -512,7 +512,7 @@ void tellstdfunc::stdADDWIRE::undo()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      tDesign->destroyThis(wr->data(),la, dbLibDir);
+      tDesign->destroyThis(wr->data(),tell2DBLayer(la), dbLibDir);
    }
    DATC->unlockTDT(dbLibDir, true);
    delete (wr);
@@ -525,14 +525,14 @@ int tellstdfunc::stdADDWIRE::execute()
    real      w = getOpValue();
    telldata::TtList *pl = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
    if (pl->size() > 1) {
-      secureLayer(la);
+      secureLayer(tell2DBLayer(la));
       real DBscale = PROPC->DBscale();
       laydata::TdtLibDir* dbLibDir = NULL;
       if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
       {
          laydata::TdtDesign* tDesign = (*dbLibDir)();
          PointVector* plst = t2tpoints(pl,DBscale);
-         telldata::TtLayout* wr = DEBUG_NEW telldata::TtLayout(tDesign->putWire(la,plst,
+         telldata::TtLayout* wr = DEBUG_NEW telldata::TtLayout(tDesign->putWire(tell2DBLayer(la),plst,
                                     static_cast<WireWidth>(rint(w * DBscale))), la);
          delete plst;
          UNDOcmdQ.push_front(this);
@@ -591,7 +591,7 @@ void tellstdfunc::stdDRAWWIRE::undo()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      tDesign->destroyThis(wr->data(),la, dbLibDir);
+      tDesign->destroyThis(wr->data(),tell2DBLayer(la), dbLibDir);
    }
    DATC->unlockTDT(dbLibDir, true);
    delete (wr);
@@ -602,13 +602,13 @@ int tellstdfunc::stdDRAWWIRE::execute()
 {
    word     la = getWordValue();
    real      w = getOpValue();
-   DATC->setCmdLayer(la);
+   DATC->setCmdLayer(tell2DBLayer(la));
    real DBscale = PROPC->DBscale();
    if (!tellstdfunc::waitGUInput(static_cast<int>(rint(w * DBscale)), &OPstack)) return EXEC_ABORT;
    // get the data from the stack
    telldata::TtList *pl = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
    // get the (final) target layer
-   la = secureLayer();
+   la = db2TellLayer(secureLayer());
    if (pl->size() > 1)
    {
       laydata::TdtLibDir* dbLibDir = NULL;
@@ -616,7 +616,7 @@ int tellstdfunc::stdDRAWWIRE::execute()
       {
          laydata::TdtDesign* tDesign = (*dbLibDir)();
          PointVector* plst = t2tpoints(pl,DBscale);
-         telldata::TtLayout* wr = DEBUG_NEW telldata::TtLayout(tDesign->addWire(la,plst,
+         telldata::TtLayout* wr = DEBUG_NEW telldata::TtLayout(tDesign->addWire(tell2DBLayer(la),plst,
                                     static_cast<WireWidth>(rint(w * DBscale))), la);
          delete plst;
          UNDOcmdQ.push_front(this);
@@ -677,7 +677,7 @@ void tellstdfunc::stdADDTEXT::undo()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      tDesign->destroyThis(tx->data(),la, dbLibDir);
+      tDesign->destroyThis(tx->data(),tell2DBLayer(la), dbLibDir);
    }
    DATC->unlockTDT(dbLibDir, true);
    delete (tx);
@@ -703,7 +703,7 @@ int tellstdfunc::stdADDTEXT::execute()
       tell_log(console::MT_ERROR,"Text with size 0. Operation ignored");
       return EXEC_ABORT;
    }
-   secureLayer(la);
+   secureLayer(tell2DBLayer(la));
    real DBscale = PROPC->DBscale();
    CTM ori(TP(rpnt->x(), rpnt->y(), DBscale),
                                      magn*DBscale/OPENGL_FONT_UNIT,angle,flip);
@@ -711,7 +711,7 @@ int tellstdfunc::stdADDTEXT::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      telldata::TtLayout* tx = DEBUG_NEW telldata::TtLayout(tDesign->putText(la, text, ori), la);
+      telldata::TtLayout* tx = DEBUG_NEW telldata::TtLayout(tDesign->putText(tell2DBLayer(la), text, ori), la);
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(la));
       OPstack.push(tx);UNDOPstack.push_front(tx->selfcopy());
@@ -749,7 +749,7 @@ void tellstdfunc::stdDRAWTEXT::undo()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      tDesign->destroyThis(tx->data(),la, dbLibDir);
+      tDesign->destroyThis(tx->data(),tell2DBLayer(la), dbLibDir);
    }
    DATC->unlockTDT(dbLibDir, true);
    delete (tx);
@@ -784,14 +784,14 @@ int tellstdfunc::stdDRAWTEXT::execute()
       tell_log(console::MT_ERROR,"Text with size 0. Operation ignored");
       return EXEC_ABORT;
    }
-   secureLayer(la);
+   secureLayer(tell2DBLayer(la));
    real DBscale = PROPC->DBscale();
    CTM ori(TP(rpnt.x(), rpnt.y(), DBscale), magn*DBscale/OPENGL_FONT_UNIT,angle,flip);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      telldata::TtLayout* tx = DEBUG_NEW telldata::TtLayout(tDesign->addText(la, text, ori), la);
+      telldata::TtLayout* tx = DEBUG_NEW telldata::TtLayout(tDesign->addText(tell2DBLayer(la), text, ori), la);
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(la));
       OPstack.push(tx);UNDOPstack.push_front(tx->selfcopy());
@@ -1162,8 +1162,8 @@ void tellstdfunc::stdUSINGLAYER::undo()
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-      TpdPost::layer_default(layno, drawProp->curLay());
-      drawProp->defaultLayer(layno);
+      TpdPost::layer_default(tell2DBLayer(layno), drawProp->curLay());
+      drawProp->defaultLayer(tell2DBLayer(layno));
    }
    PROPC->unlockDrawProp(drawProp, true);
 }
@@ -1175,20 +1175,20 @@ int tellstdfunc::stdUSINGLAYER::execute()
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-      if (drawProp->layerHidden(layno))
+      if (drawProp->layerHidden(tell2DBLayer(layno)))
       {
-         drawProp->hideLayer(layno, false);
+         drawProp->hideLayer(tell2DBLayer(layno), false);
          TpdPost::layer_status(tui::BT_LAYER_HIDE, layno, false);
       }
-      if (drawProp->layerLocked(layno))
+      if (drawProp->layerLocked(tell2DBLayer(layno)))
       {
-         drawProp->lockLayer(layno, false);
+         drawProp->lockLayer(tell2DBLayer(layno), false);
          TpdPost::layer_status(tui::BT_LAYER_LOCK, layno, false);
       }
       TpdPost::layer_default(layno, drawProp->curLay());
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(drawProp->curLay()));
-      drawProp->defaultLayer(layno);
+      drawProp->defaultLayer(tell2DBLayer(layno));
       LogFile << LogFile.getFN() << "("<< layno << ");";LogFile.flush();
    }
    PROPC->unlockDrawProp(drawProp,true);

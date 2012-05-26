@@ -558,7 +558,7 @@ tui::GetCIFexport::GetCIFexport(wxFrame *parent, wxWindowID id, const wxString &
    _saveMap = DEBUG_NEW wxCheckBox(this, -1, wxT("Save Layer Map"));
    _slang = DEBUG_NEW wxCheckBox(this, -1, wxT("Verbose CIF slang"));
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
-   WordList ull;
+   LayerTMPList ull;
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
    {
@@ -717,7 +717,7 @@ tui::GetGDSexport::GetGDSexport(wxFrame *parent, wxWindowID id, const wxString &
    _recursive->SetValue(true);
    _saveMap = DEBUG_NEW wxCheckBox(this, -1, wxT("Save Layer Map"));
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
-   WordList ull;
+   LayerTMPList ull;
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
    {
@@ -1932,7 +1932,7 @@ USMap* tui::NameCbox3Records::getTheMap()
    for (AllRecords::const_iterator CNM = _allRecords.begin(); CNM != _allRecords.end(); CNM++ )
    {
       if (!CNM->_gdslay->GetValue()) continue;
-      unsigned layno;
+      LayerNumber layno;
       std::string layname = std::string(CNM->_tdtlay->GetValue().mb_str(wxConvUTF8));
       if ("" == layname)
       {
@@ -2050,15 +2050,15 @@ void tui::NameCbox3List::OnSize( wxSizeEvent &WXUNUSED(event) )
 
 //==========================================================================
 tui::NameEboxRecords::NameEboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
-            const WordList& inlays, wxArrayString& all_strings, int row_height, const layprop::DrawProperties* drawProp)
+            const LayerTMPList& inlays, wxArrayString& all_strings, int row_height, const layprop::DrawProperties* drawProp)
             : wxPanel(parent, wxID_ANY, pnt, sz), _drawProp(drawProp)
 {
    word rowno = 0;
    _cifMap = DATC->secureCifLayMap(_drawProp, false);
-   for (WordList::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
+   for (LayerTMPList::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
    {
-      word layno = *CNM;
-      wxString tpdlay  = wxString(_drawProp->getLayerName(*CNM).c_str(), wxConvUTF8);
+      LayerNumber layno = *CNM;
+      wxString tpdlay  = wxString(_drawProp->getLayerName(layno).c_str(), wxConvUTF8);
       wxString ciflay;
       std::string cifName;
       if ( _cifMap->getCifLay(cifName, layno) )
@@ -2104,7 +2104,7 @@ BEGIN_EVENT_TABLE(tui::NameEboxList, wxScrolledWindow)
       EVT_SIZE( tui::NameEboxList::OnSize )
 END_EVENT_TABLE()
 
-tui::NameEboxList::NameEboxList(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz, const WordList& inlays, const layprop::DrawProperties* drawProp) :
+tui::NameEboxList::NameEboxList(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz, const LayerTMPList& inlays, const layprop::DrawProperties* drawProp) :
       wxScrolledWindow(parent, id, pnt, sz, wxBORDER_RAISED)
 {
    // collect all defined layers

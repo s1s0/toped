@@ -27,6 +27,7 @@
 
 #include "tpdph.h"
 #include <sstream>
+#include <math.h>
 #include "auxdat.h"
 
 auxdata::TdtGrcPoly::TdtGrcPoly(const PointVector& plst) :
@@ -522,21 +523,21 @@ void auxdata::GrcCell::dbExport(DbExportFile& exportf) const
    }
 }
 
-void auxdata::GrcCell::collectUsedLays(WordList& laylist) const
+void auxdata::GrcCell::collectUsedLays(LayerTMPList& laylist) const
 {
    for(LayerList::const_iterator CL = _layers.begin(); CL != _layers.end(); CL++)
       if (LAST_EDITABLE_LAYNUM > CL->first)
          laylist.push_back(CL->first);
 }
 
-auxdata::QuadTree* auxdata::GrcCell::secureLayer(unsigned layno)
+auxdata::QuadTree* auxdata::GrcCell::secureLayer(LayerNumber layno)
 {
    if (_layers.end() == _layers.find(layno))
       _layers[layno] = DEBUG_NEW auxdata::QuadTree();
    return _layers[layno];
 }
 
-auxdata::QTreeTmp* auxdata::GrcCell::secureUnsortedLayer(unsigned layno)
+auxdata::QTreeTmp* auxdata::GrcCell::secureUnsortedLayer(LayerNumber layno)
 {
    if (_tmpLayers.end() == _tmpLayers.find(layno))
       _tmpLayers[layno] = DEBUG_NEW auxdata::QTreeTmp(secureLayer(layno));
@@ -579,7 +580,7 @@ void auxdata::GrcCell::openGlDraw(layprop::DrawProperties& drawprop, bool active
    typedef LayerList::const_iterator LCI;
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
    {
-      unsigned curlayno = drawprop.getTenderLay(lay->first);
+      LayerNumber curlayno = drawprop.getTenderLay(lay->first);
       if (!drawprop.layerHidden(curlayno)) drawprop.setCurrentColor(curlayno);
       else continue;
       bool fill = drawprop.setCurrentFill(false);// honor block_fill state)
@@ -599,7 +600,7 @@ void auxdata::GrcCell::openGlRender(tenderer::TopRend& rend, const CTM& trans,
       //second - get internal layer number:
       //       - for regular database it is equal to the TDT layer number
       //       - for DRC database it is common for all layers - DRC_LAY
-      unsigned curlayno = rend.getTenderLay(lay->first);
+      LayerNumber curlayno = rend.getTenderLay(lay->first);
       switch (curlayno)
       {
          case REF_LAY:
@@ -621,7 +622,7 @@ DBbox auxdata::GrcCell::getVisibleOverlap(const layprop::DrawProperties& prop)
    DBbox vlOverlap(DEFAULT_OVL_BOX);
    for (LayerList::const_iterator LCI = _layers.begin(); LCI != _layers.end(); LCI++)
    {
-      unsigned  layno  = LCI->first;
+      LayerNumber  layno  = LCI->first;
       QuadTree* cqTree = LCI->second;
       if (!prop.layerHidden(layno))
          vlOverlap.overlap(cqTree->overlap());
@@ -670,7 +671,7 @@ void auxdata::GrcCell::readTdtLay(InputTdtFile* const tedfile)
 {
    byte      recordtype;
    TdtAuxData*  newData;
-   unsigned  layno    = tedfile->getWord();
+   LayerNumber  layno    = tedfile->getWord();
    QTreeTmp* tmpLayer = secureUnsortedLayer(layno);
    while (tedf_LAYEREND != (recordtype = tedfile->getByte()))
    {

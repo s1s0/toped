@@ -303,7 +303,7 @@ void laydata::TdtDefaultCell::dbExport(DbExportFile&, const CellMap&, const TDTH
    assert(false);
 }
 
-void laydata::TdtDefaultCell::collectUsedLays(const TdtLibDir*, bool, WordList&) const
+void laydata::TdtDefaultCell::collectUsedLays(const TdtLibDir*, bool, LayerTMPList&) const
 {
 }
 
@@ -321,7 +321,7 @@ void laydata::TdtDefaultCell::invalidateParents(laydata::TdtLibrary* ATDB)
    }
 }
 
-bool laydata::TdtDefaultCell::checkLayer(unsigned layno) const
+bool laydata::TdtDefaultCell::checkLayer(LayerNumber layno) const
 {
    return (_layers.end() != _layers.find(layno));
 }
@@ -365,8 +365,8 @@ void laydata::TdtCell::readTdtLay(InputTdtFile* const tedfile)
 {
    byte      recordtype;
    TdtData*  newData;
-   unsigned  layno    = tedfile->getWord();
-   QTreeTmp* tmpLayer = secureUnsortedLayer(layno);
+   word  layno    = tedfile->getWord();
+   QTreeTmp* tmpLayer = secureUnsortedLayer(tell2DBLayer(layno));
    while (tedf_LAYEREND != (recordtype = tedfile->getByte()))
    {
       switch (recordtype)
@@ -400,7 +400,7 @@ void laydata::TdtCell::readTdtRef(InputTdtFile* const tedfile)
    }
 }
 
-laydata::QuadTree* laydata::TdtCell::secureLayer(unsigned layno)
+laydata::QuadTree* laydata::TdtCell::secureLayer(LayerNumber layno)
 {
    // TODO Would be nice to update the code in such a was so the assert below holds
    // assert((layno < LAST_EDITABLE_LAYNUM) || (layno == REF_LAY));
@@ -409,7 +409,7 @@ laydata::QuadTree* laydata::TdtCell::secureLayer(unsigned layno)
    return _layers[layno];
 }
 
-laydata::QTreeTmp* laydata::TdtCell::secureUnsortedLayer(unsigned layno)
+laydata::QTreeTmp* laydata::TdtCell::secureUnsortedLayer(LayerNumber layno)
 {
    // TODO Would be nice to update the code in such a was so the assert below holds
    // assert((layno < LAST_EDITABLE_LAYNUM) || (layno == REF_LAY));
@@ -453,7 +453,7 @@ laydata::TdtCellAref* laydata::TdtCell::addCellARef(laydata::TdtDesign* ATDB,
    return cellaref;
 }
 
-void laydata::TdtCell::addAuxRef(unsigned layno, auxdata::GrcCell* str)
+void laydata::TdtCell::addAuxRef(LayerNumber layno, auxdata::GrcCell* str)
 {
    QuadTree *cellreflayer = secureLayer(layno);
    laydata::TdtAuxRef* cellref = DEBUG_NEW TdtAuxRef(str);
@@ -482,7 +482,7 @@ void laydata::TdtCell::openGlDraw(layprop::DrawProperties& drawprop, bool active
    typedef LayerList::const_iterator LCI;
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
    {
-      unsigned curlayno = drawprop.getTenderLay(lay->first);
+      LayerNumber curlayno = drawprop.getTenderLay(lay->first);
       if (!drawprop.layerHidden(curlayno)) drawprop.setCurrentColor(curlayno);
       else continue;
       // fancy like this (dlist iterator) , because a simple
@@ -509,7 +509,7 @@ void laydata::TdtCell::openGlRender(tenderer::TopRend& rend, const CTM& trans,
       //second - get internal layer number:
       //       - for regular database it is equal to the TDT layer number
       //       - for DRC database it is common for all layers - DRC_LAY
-      unsigned curlayno = rend.getTenderLay(lay->first);
+      LayerNumber curlayno = rend.getTenderLay(lay->first);
       // retrieve the selected objects (if they exists)
       SelectList::const_iterator dlsti;
       const DataList* dlist;
@@ -608,7 +608,7 @@ bool laydata::TdtCell::getShapeOver(TP pnt, const DWordSet& unselable)
 laydata::AtticList* laydata::TdtCell::changeSelect(TP pnt, SH_STATUS status, const DWordSet& unselable)
 {
    laydata::TdtData* prev = NULL;
-   unsigned prevlay;
+   LayerNumber prevlay;
    typedef LayerList::const_iterator LCI;
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
    {
@@ -659,7 +659,7 @@ laydata::AtticList* laydata::TdtCell::changeSelect(TP pnt, SH_STATUS status, con
 void laydata::TdtCell::mouseHoover(TP& position, layprop::DrawProperties& drawprop, const DWordSet& unselable)
 {
    laydata::TdtData* prev = NULL;
-   unsigned prevlay = 0;
+   LayerNumber prevlay = 0;
    typedef LayerList::const_iterator LCI;
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
    {
@@ -683,7 +683,7 @@ void laydata::TdtCell::mouseHoover(TP& position, layprop::DrawProperties& drawpr
    prev->openGlPrecalc(drawprop, points);
    if(0 != points.size())
    {
-      unsigned curlayno = drawprop.getTenderLay(prevlay);
+      LayerNumber curlayno = drawprop.getTenderLay(prevlay);
       drawprop.setCurrentColor(curlayno);
       glLineWidth(5);
       prev->setStatus(sh_selected);
@@ -871,7 +871,7 @@ void laydata::TdtCell::psWrite(PSFile& psf, const layprop::DrawProperties& drawp
    laydata::LayerList::const_iterator wl;
    for (wl = _layers.begin(); wl != _layers.end(); wl++)
    {
-      word curlayno = wl->first;
+      LayerNumber curlayno = wl->first;
       if (!drawprop.layerHidden(curlayno))
       {
          if (REF_LAY != curlayno)
@@ -930,7 +930,7 @@ DBbox laydata::TdtCell::getVisibleOverlap(const layprop::DrawProperties& prop)
    DBbox vlOverlap(DEFAULT_OVL_BOX);
    for (LayerList::const_iterator LCI = _layers.begin(); LCI != _layers.end(); LCI++)
    {
-      unsigned  layno  = LCI->first;
+      LayerNumber  layno  = LCI->first;
       QuadTree* cqTree = LCI->second;
       if (!prop.layerHidden(layno))
       {
@@ -1183,7 +1183,7 @@ void laydata::TdtCell::addList(laydata::TdtDesign* ATDB, AtticList* nlst)
    fixUnsorted();// because put was used
 }
 
-laydata::DataList* laydata::TdtCell::secureDataList(SelectList& slst, unsigned layno)
+laydata::DataList* laydata::TdtCell::secureDataList(SelectList& slst, LayerNumber layno)
 {
    DataList* ssl;
    if (slst.end() != slst.find(layno)) ssl = slst[layno];
@@ -1195,7 +1195,7 @@ laydata::DataList* laydata::TdtCell::secureDataList(SelectList& slst, unsigned l
 }
 
 laydata::ShapeList* laydata::TdtCell::checkNreplacePoly(SelectDataPair& sel, Validator* check,
-                                             unsigned layno, SelectList** fadead)
+                                                        LayerNumber layno, SelectList** fadead)
 {
    if (check->acceptable())
    { // shape is valid ...
@@ -1219,7 +1219,7 @@ laydata::ShapeList* laydata::TdtCell::checkNreplacePoly(SelectDataPair& sel, Val
 }
 
 laydata::ShapeList* laydata::TdtCell::checkNreplaceBox(SelectDataPair& sel, Validator* check,
-                                             unsigned layno, SelectList** fadead)
+                                                       LayerNumber layno, SelectList** fadead)
 {
    if (check->acceptable())
    { // shape is valid, but obviously not a box (if it gets here)
@@ -1592,7 +1592,7 @@ bool laydata::TdtCell::mergeSelected(AtticList** dasao)
    return !dasao[0]->empty();
 }
 
-void laydata::TdtCell::destroyThis(laydata::TdtLibDir* libdir, TdtData* ds, unsigned la)
+void laydata::TdtCell::destroyThis(laydata::TdtLibDir* libdir, TdtData* ds, LayerNumber la)
 {
    laydata::QuadTree* lay = (_layers.find(la))->second;
    if (!lay) return;
@@ -1655,7 +1655,7 @@ void laydata::TdtCell::fullSelect()
    }
 }
 
-void laydata::TdtCell::selectThis(TdtData* dat, unsigned lay)
+void laydata::TdtCell::selectThis(TdtData* dat, LayerNumber lay)
 {
    if (_shapesel.end() == _shapesel.find(lay)) _shapesel[lay] = DEBUG_NEW DataList();
    dat->selectThis(_shapesel[lay]);
@@ -1697,7 +1697,7 @@ void laydata::TdtCell::unselectAll(bool destroy)
    _shapesel.clear();
 }
 
-laydata::ShapeList* laydata::TdtCell::mergePrep(unsigned layno)
+laydata::ShapeList* laydata::TdtCell::mergePrep(LayerNumber layno)
 {
    SelectList::iterator CL = _shapesel.find(layno);
    if (_shapesel.end() == CL) return NULL;
@@ -1830,7 +1830,7 @@ laydata::ShapeList* laydata::TdtCell::ungroupPrep(laydata::TdtLibDir* libdir)
    return csel;
 }
 
-void laydata::TdtCell::transferLayer(unsigned dst)
+void laydata::TdtCell::transferLayer(LayerNumber dst)
 {
    assert(REF_LAY != dst);
    QTreeTmp *dstlay = secureUnsortedLayer(dst);
@@ -1901,7 +1901,7 @@ void laydata::TdtCell::transferLayer(unsigned dst)
    // so no need to refresh the overlapping box etc.
 }
 
-void laydata::TdtCell::transferLayer(SelectList* slst, unsigned dst)
+void laydata::TdtCell::transferLayer(SelectList* slst, LayerNumber dst)
 {
    assert(REF_LAY != dst);
    assert(_shapesel.end() != _shapesel.find(dst));
@@ -2289,7 +2289,7 @@ void laydata::TdtCell::reportSelected(real DBscale) const
    }
 }
 
-void laydata::TdtCell::collectUsedLays(const TdtLibDir* LTDB, bool recursive, WordList& laylist) const
+void laydata::TdtCell::collectUsedLays(const TdtLibDir* LTDB, bool recursive, LayerTMPList& laylist) const
 {
    // first call recursively the method on all children cells
    assert(recursive ? NULL != LTDB : true);

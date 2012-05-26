@@ -138,7 +138,7 @@ namespace auxdata {
 
    typedef laydata::QTreeTmpl<TdtAuxData>    QuadTree;
    typedef laydata::QTStoreTmpl<TdtAuxData>  QTreeTmp;
-   typedef std::map<unsigned, QuadTree*>     LayerList;
+   typedef std::map<LayerNumber, QuadTree*>  LayerList;
    typedef std::list<TdtAuxData*>            AuxDataList;
    typedef  std::map<unsigned, QTreeTmp*>    TmpLayerMap;
 
@@ -153,11 +153,11 @@ namespace auxdata {
          virtual void        openGlDraw(layprop::DrawProperties&, bool active=false) const;
          virtual void        openGlRender(tenderer::TopRend&, const CTM&, bool, bool) const;
          virtual DBbox       getVisibleOverlap(const layprop::DrawProperties&);
-         virtual void        collectUsedLays(WordList&) const;
+         virtual void        collectUsedLays(LayerTMPList&) const;
          virtual void        motionDraw(const layprop::DrawProperties&, CtmQueue&, bool active=false) const;
          //
-         QuadTree*           secureLayer(unsigned layno);
-         QTreeTmp*           secureUnsortedLayer(unsigned layno);
+         QuadTree*           secureLayer(LayerNumber layno);
+         QTreeTmp*           secureUnsortedLayer(LayerNumber layno);
          bool                fixUnsorted();
          //
          void                reportLayers(DWordSet&);

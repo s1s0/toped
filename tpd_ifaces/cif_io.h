@@ -283,7 +283,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          virtual void   definitionFinish();
          virtual void   libraryStart(std::string, TpdTime&, real, real);
          virtual void   libraryFinish();
-         virtual bool   layerSpecification(unsigned);
+         virtual bool   layerSpecification(LayerNumber);
          virtual void   box(const int4b* const);
          virtual void   polygon(const int4b* const, unsigned);
          virtual void   wire(const int4b* const, unsigned, unsigned);

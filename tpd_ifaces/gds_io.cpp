@@ -1669,7 +1669,7 @@ void GDSin::GdsExportFile::definitionFinish()
 
 }
 
-bool GDSin::GdsExportFile::layerSpecification(unsigned layno)
+bool GDSin::GdsExportFile::layerSpecification(LayerNumber layno)
 {
    return (getMappedLayType(_cGdsLayer, _cGdsType, layno));
 }
@@ -1835,7 +1835,7 @@ void GDSin::GdsExportFile::registerCellWritten(std::string cellname)
    _childnames.push_back(cellname);
 }
 
-bool GDSin::GdsExportFile::getMappedLayType(word& gdslay, word& gdstype, word tdtlay)
+bool GDSin::GdsExportFile::getMappedLayType(word& gdslay, word& gdstype, LayerNumber tdtlay)
 {
    bool result = _laymap.getExtLayType(gdslay, gdstype, tdtlay);
    return result;

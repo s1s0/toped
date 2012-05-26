@@ -140,7 +140,7 @@ namespace tui
          wxTextCtrl*             _layerName;
          wxString                _layerNameString;
          int                     _curSelect;//!Data related to current selection
-         WordList                _allLayNums;
+         LayerTMPList            _allLayNums;
 
          DECLARE_EVENT_TABLE()
    };

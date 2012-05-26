@@ -340,9 +340,6 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_TECUSTOM_COMMAND(wxEVT_CONSOLE_PARSE, wxID_ANY, tui::TopedFrame::onParseCommand)
 END_EVENT_TABLE()
 
-// See the FIXME note in the botom of browsers.cpp
-//   EVT_COMMAND(wxID_ANY, wxEVT_INIT_DIALOG , tui::TopedFrame::OnDefineLayer )
-
 tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos,
                             const wxSize& size ) : wxFrame((wxFrame *)NULL, ID_WIN_TOPED, title, pos, size),_exitAproved(false)
 {
@@ -2250,7 +2247,7 @@ void tui::TopedFrame::OnCurrentLayer( wxCommandEvent& WXUNUSED( event ))
    {
       unsigned long vlu;
       dlg->value().ToULong(&vlu);
-      DATC->setCmdLayer((word)vlu);
+      DATC->setCmdLayer((LayerNumber)vlu);
    }
    delete dlg;
 }

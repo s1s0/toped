@@ -854,7 +854,7 @@ tellstdfunc::stdREPORTLAY::stdREPORTLAY(telldata::typeID retype, bool eor) :
 int tellstdfunc::stdREPORTLAY::execute() {
    bool recursive = getBoolValue();
    std::string cellname = getStringValue();
-   WordList ull;
+   LayerTMPList ull;
    bool success = false;
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
@@ -867,12 +867,12 @@ int tellstdfunc::stdREPORTLAY::execute() {
       ull.sort();ull.unique();
       std::ostringstream ost;
       ost << "used layers: {";
-      for(WordList::const_iterator CL = ull.begin() ; CL != ull.end();CL++ )
+      for(LayerTMPList::const_iterator CL = ull.begin() ; CL != ull.end();CL++ )
          ost << " " << *CL << " ";
       ost << "}";
       tell_log(console::MT_INFO, ost.str());
 
-      for(WordList::const_iterator CL = ull.begin() ; CL != ull.end();CL++ )
+      for(LayerTMPList::const_iterator CL = ull.begin() ; CL != ull.end();CL++ )
          tllull->add(DEBUG_NEW telldata::TtInt(*CL));
       ull.clear();
    }

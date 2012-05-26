@@ -51,7 +51,7 @@ extern const wxEventType         wxEVT_CANVAS_PARAMS;
 //! it will remain locked in case DrawProperties can't be locked
 telldata::TtInt* tellstdfunc::getCurrentLayer()
 {
-   unsigned cl = 0;
+   LayerNumber cl = 0;
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
@@ -67,7 +67,7 @@ telldata::TtInt* tellstdfunc::getCurrentLayer()
 //! which will be invisible.
 //! Make sure this function is not called when TDT mutex is locked. Otherwise
 //! it will remain locked in case DrawProperties can't be locked
-void tellstdfunc::secureLayer(unsigned layno)
+void tellstdfunc::secureLayer(LayerNumber layno)
 {
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
@@ -80,9 +80,9 @@ void tellstdfunc::secureLayer(unsigned layno)
 }
 
 //=============================================================================
-unsigned tellstdfunc::secureLayer()
+LayerNumber tellstdfunc::secureLayer()
 {
-   unsigned layno = DATC->curCmdLay();
+   LayerNumber layno = DATC->curCmdLay();
    secureLayer(layno);
    return layno;
 }
@@ -272,7 +272,7 @@ laydata::AtticList* tellstdfunc::get_shlaylist(telldata::TtList* llist)
 }
 
 //=============================================================================
-auxdata::AuxDataList* tellstdfunc::get_auxdatalist(telldata::TtList* llist, unsigned& clayer)
+auxdata::AuxDataList* tellstdfunc::get_auxdatalist(telldata::TtList* llist, LayerNumber& clayer)
 {
    auxdata::AuxDataList* shapesel = DEBUG_NEW auxdata::AuxDataList();
    bool layerCheck = false;
@@ -416,8 +416,8 @@ void tellstdfunc::RefreshGL()
       layprop::DrawProperties* drawProp;
       if (PROPC->lockDrawProp(drawProp))
       {
-         const WordList freshlays = PROPC->upLayers();
-         for(WordList::const_iterator CUL = freshlays.begin(); CUL != freshlays.end(); CUL++)
+         const LayerTMPList freshlays = PROPC->upLayers();
+         for(LayerTMPList::const_iterator CUL = freshlays.begin(); CUL != freshlays.end(); CUL++)
             TpdPost::layer_add(drawProp->getLayerName(*CUL), *CUL);
          PROPC->clearUnpublishedLayers();
       }
@@ -446,14 +446,14 @@ void tellstdfunc::gridON(byte No, bool status)
 void tellstdfunc::updateLayerDefinitions(laydata::TdtLibDir* LIBDIR, NameList& top_cells, int libID)
 {
    // get all the layers used in the design and define them using the default definition
-   WordList ull;
+   LayerTMPList ull;
    for(NameList::const_iterator CTC= top_cells.begin(); CTC != top_cells.end(); CTC++)
       LIBDIR->collectUsedLays(*CTC, true, ull);
    ull.sort(); ull.unique();
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-      for(WordList::const_iterator CUL = ull.begin(); CUL != ull.end(); CUL++)
+      for(LayerTMPList::const_iterator CUL = ull.begin(); CUL != ull.end(); CUL++)
       {
          if (REF_LAY == *CUL) continue;
          if (drawProp->addLayer(*CUL))
@@ -471,7 +471,7 @@ void tellstdfunc::initFuncLib(wxFrame* tpd, wxWindow* cnvs)
 }
 
 //=============================================================================
-bool tellstdfunc::secureLayDef(unsigned layno)
+bool tellstdfunc::secureLayDef(LayerNumber layno)
 {
    bool success = true;
    layprop::DrawProperties* drawProp;

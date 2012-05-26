@@ -164,8 +164,8 @@ void Calbr::drcTenderer::showAll(void)
       layprop::DrawProperties* drawProp;
       if (PROPC->lockDrawProp(drawProp, layprop::DRC))
       {
-         WordList lays = drawProp->getAllLayers();
-         for(WordList::const_iterator it = lays.begin(); it != lays.end(); ++it)
+         LayerTMPList lays = drawProp->getAllLayers();
+         for(LayerTMPList::const_iterator it = lays.begin(); it != lays.end(); ++it)
             drawProp->hideLayer((*it), false);
       }
       PROPC->unlockDrawProp(drawProp, true);
@@ -190,8 +190,8 @@ void Calbr::drcTenderer::hideAll(void)
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp, layprop::DRC))
    {
-      WordList lays = drawProp->getAllLayers();
-      for(WordList::const_iterator it = lays.begin(); it != lays.end(); ++it)
+      LayerTMPList lays = drawProp->getAllLayers();
+      for(LayerTMPList::const_iterator it = lays.begin(); it != lays.end(); ++it)
          drawProp->hideLayer((*it), true);
    }
    PROPC->unlockDrawProp(drawProp, true);
@@ -242,8 +242,8 @@ void Calbr::drcTenderer::endWriting()
    {
       if (!PROPC->upLayers().empty())
       {
-         const WordList freshlays = PROPC->upLayers();
-         for(WordList::const_iterator CUL = freshlays.begin(); CUL != freshlays.end(); CUL++)
+         const LayerTMPList freshlays = PROPC->upLayers();
+         for(LayerTMPList::const_iterator CUL = freshlays.begin(); CUL != freshlays.end(); CUL++)
             drawProp->addLayer((*CUL));
          PROPC->clearUnpublishedLayers();
       }

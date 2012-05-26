@@ -388,7 +388,7 @@ namespace GDSin {
          virtual void         definitionFinish();
          virtual void         libraryStart(std::string, TpdTime&, real, real);
          virtual void         libraryFinish();
-         virtual bool         layerSpecification(unsigned);
+         virtual bool         layerSpecification(LayerNumber);
          virtual void         box(const int4b* const);
          virtual void         polygon(const int4b* const, unsigned);
          virtual void         wire(const int4b* const, unsigned, unsigned);
@@ -398,7 +398,7 @@ namespace GDSin {
          virtual bool         checkCellWritten(std::string) const;
          virtual void         registerCellWritten(std::string);
       private:
-         bool                 getMappedLayType(word&, word&, word);
+         bool                 getMappedLayType(word&, word&, LayerNumber);
          const LayerMapExt&   _laymap;
          std::string          _ccname;
          NameList             _childnames;

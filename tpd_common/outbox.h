@@ -396,13 +396,13 @@ class LayerMapExt {
                            LayerMapExt(const USMap&, ExtLayers*);
                           ~LayerMapExt();
       bool                 getTdtLay(word&, word, word) const;
-      bool                 getExtLayType(word&, word&, word) const;
+      bool                 getExtLayType(word&, word&, LayerNumber) const;
       bool                 status() {return _status;}
       USMap*               updateMap(USMap*, bool);
    private:
       typedef std::map< word, word  >     GdtTdtMap;
-      typedef std::map< word, GdtTdtMap>  GlMap;
-      bool                 parseLayTypeString(wxString, word);
+      typedef std::map< LayerNumber, GdtTdtMap>  GlMap;
+      bool                 parseLayTypeString(wxString, LayerNumber);
       void                 patternNormalize(wxString&);
       void                 getList(wxString, WordList&);
       bool                 separateQuickLists(wxString, wxString&, wxString&);
@@ -417,7 +417,7 @@ class LayerMapCif {
    public:
                            LayerMapCif(const USMap&);
       bool                 getTdtLay(word&, std::string);
-      bool                 getCifLay(std::string&, word);
+      bool                 getCifLay(std::string&, LayerNumber);
       USMap*               updateMap(USMap*);
       USMap*               updateMap(SIMap*);
    private:

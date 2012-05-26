@@ -677,7 +677,7 @@ void CIFin::CifExportFile::libraryFinish()
    // nothing to do for CIF export
 }
 
-bool CIFin::CifExportFile::layerSpecification(unsigned layno)
+bool CIFin::CifExportFile::layerSpecification(LayerNumber layno)
 {
    if (REF_LAY == layno) return true;
    if (_laymap->end() == _laymap->find(layno))

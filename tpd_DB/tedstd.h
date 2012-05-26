@@ -121,9 +121,9 @@ namespace laydata {
    typedef QTStoreTmpl<TdtData>                     QTreeTmp;
    typedef  std::pair<TdtData*, SGBitSet>           SelectDataPair;
    typedef  std::list<SelectDataPair>               DataList;
-   typedef  std::map<unsigned, DataList*>           SelectList;
+   typedef  std::map<LayerNumber, DataList*>        SelectList;
    typedef  std::list<TdtData*>                     ShapeList;
-   typedef  std::map<unsigned,ShapeList*>           AtticList;
+   typedef  std::map<LayerNumber,ShapeList*>        AtticList;
    typedef  std::map<std::string, TdtDefaultCell*>  CellMap;
    typedef  TdtDefaultCell*                         CellDefin;
    typedef  std::deque<const TdtCellRef*>           CellRefStack;
@@ -377,7 +377,7 @@ class DbExportFile {
       virtual void            definitionFinish() = 0;
       virtual void            libraryStart(std::string, TpdTime&, real, real) = 0;
       virtual void            libraryFinish() = 0;
-      virtual bool            layerSpecification(unsigned) = 0;
+      virtual bool            layerSpecification(LayerNumber) = 0;
       virtual void            box(const int4b* const) = 0;
       virtual void            polygon(const int4b* const, unsigned) = 0;
       virtual void            wire(const int4b* const, unsigned, unsigned) = 0;

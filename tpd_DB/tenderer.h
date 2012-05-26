@@ -867,7 +867,7 @@ namespace tenderer {
 
    //-----------------------------------------------------------------------------
    //
-   typedef std::map<unsigned, TenderLay*> DataLay;
+   typedef std::map<LayerNumber, TenderLay*> DataLay;
    typedef std::stack<TenderRef*> CellStack;
 
    /**
@@ -883,8 +883,8 @@ namespace tenderer {
                            TopRend( layprop::DrawProperties* drawprop, real UU );
                           ~TopRend();
          void              Grid( const real, const std::string );
-         void              setLayer(unsigned, bool);
-         bool              chunkExists(unsigned, bool);
+         void              setLayer(LayerNumber, bool);
+         bool              chunkExists(LayerNumber, bool);
          void              pushCell(std::string, const CTM&, const DBbox&, bool, bool);
          void              popCell()                              {_cellStack.pop();}
          const CTM&        topCTM() const                         {return  _cellStack.top()->ctm();}
@@ -906,13 +906,13 @@ namespace tenderer {
          void              grcDraw();
          void              cleanUp();
          void              grcCleanUp();
-         void              setGrcLayer(bool, unsigned);
+         void              setGrcLayer(bool, LayerNumber);
          //return layno if _propertyState == DB or predefined layer in other case
-         unsigned          getTenderLay(unsigned layno);
+         unsigned          getTenderLay(unsigned LayerNumber);
          //set state of DrawProperties
          void              setState(layprop::PropertyState state) {_drawprop->setState(state);};
          // temporary!
-         bool              layerHidden(unsigned layno) const
+         bool              layerHidden(LayerNumber layno) const
                                                          {return  _drawprop->layerHidden(layno)    ;}
          const CTM&        ScrCTM() const                {return  _drawprop->scrCtm()              ;}
          word              visualLimit() const           {return  _drawprop->visualLimit()         ;}

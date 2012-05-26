@@ -204,7 +204,7 @@ void tellstdfunc::grcCLEANALAYER::undo_cleanup()
 void tellstdfunc::grcCLEANALAYER::undo()
 {
    telldata::TtList* grcTtShapes = TELL_UNDOOPS_UNDO(telldata::TtList*);
-   unsigned grcLayer = 0;
+   LayerNumber grcLayer = 0;
    auxdata::AuxDataList* grcShapes = get_auxdatalist(grcTtShapes, grcLayer);
 
    laydata::TdtLibDir* dbLibDir = NULL;
@@ -304,7 +304,7 @@ void tellstdfunc::grcREPAIRDATA::undo()
 {
    telldata::TtList* oldShapes = TELL_UNDOOPS_UNDO(telldata::TtList*);
    telldata::TtList* newShapes = TELL_UNDOOPS_UNDO(telldata::TtList*);
-   unsigned grcLayer = 0;
+   LayerNumber grcLayer = 0;
    auxdata::AuxDataList* grcShapes = get_auxdatalist(oldShapes, grcLayer);
    laydata::AtticList*   tdtlayers = get_shlaylist(newShapes);
 

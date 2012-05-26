@@ -296,7 +296,7 @@ namespace tui {
    //==========================================================================
    class NameEboxRecords : public wxPanel {
       public:
-                              NameEboxRecords(wxWindow*, wxPoint, wxSize, const WordList&, wxArrayString&, int, const layprop::DrawProperties*);
+                              NameEboxRecords(wxWindow*, wxPoint, wxSize, const LayerTMPList&, wxArrayString&, int, const layprop::DrawProperties*);
          virtual             ~NameEboxRecords() {delete _cifMap;}
          USMap*               getTheMap();
          USMap*               getTheFullMap();
@@ -365,7 +365,7 @@ namespace tui {
    //--------------------------------------------------------------------------
    class NameEboxList : public wxScrolledWindow {
       public:
-                              NameEboxList(wxWindow*, wxWindowID, wxPoint, wxSize, const WordList&, const layprop::DrawProperties*);
+                              NameEboxList(wxWindow*, wxWindowID, wxPoint, wxSize, const LayerTMPList&, const layprop::DrawProperties*);
          USMap*               getTheMap()     {return _laypanel->getTheMap();}
          USMap*               getTheFullMap() {return _laypanel->getTheFullMap();}
          void                 OnSize( wxSizeEvent& WXUNUSED(event));

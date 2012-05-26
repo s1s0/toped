@@ -49,7 +49,7 @@ namespace laydata {
       void              relink(TdtLibDir*);
       void              clearLib();
       void              cleanUnreferenced();
-      void              collectUsedLays(WordList&) const;
+      void              collectUsedLays(LayerTMPList&) const;
       void              dbHierAdd(const TdtDefaultCell*, const TdtDefaultCell*);
       void              dbHierAddParent(const TdtDefaultCell*, const TdtDefaultCell*);
       void              dbHierRemoveParent(TdtDefaultCell*, const TdtDefaultCell*, laydata::TdtLibDir*);
@@ -95,18 +95,18 @@ namespace laydata {
       TdtCell*       removeTopCell(std::string&, laydata::AtticList*, laydata::TdtLibDir*);
       void           renameCell(TdtDefaultCell*, std::string);
       void           removeRefdCell(std::string&, CellDefList&, laydata::AtticList*, laydata::TdtLibDir*);
-      TdtData*       addBox(unsigned la, TP* p1, TP* p2);
-      TdtData*       putBox(unsigned la, TP* p1, TP* p2);
-      TdtData*       addPoly(unsigned, PointVector*);
-      TdtData*       putPoly(unsigned, PointVector*);
-      TdtData*       addWire(unsigned, PointVector*, WireWidth);
-      TdtData*       putWire(unsigned, PointVector*, WireWidth);
-      TdtData*       addText(unsigned la, std::string& text, CTM& ori);
-      TdtData*       putText(unsigned la, std::string& text, CTM& ori);
+      TdtData*       addBox(LayerNumber la, TP* p1, TP* p2);
+      TdtData*       putBox(LayerNumber la, TP* p1, TP* p2);
+      TdtData*       addPoly(LayerNumber, PointVector*);
+      TdtData*       putPoly(LayerNumber, PointVector*);
+      TdtData*       addWire(LayerNumber, PointVector*, WireWidth);
+      TdtData*       putWire(LayerNumber, PointVector*, WireWidth);
+      TdtData*       addText(LayerNumber la, std::string& text, CTM& ori);
+      TdtData*       putText(LayerNumber la, std::string& text, CTM& ori);
       TdtData*       addCellRef(laydata::CellDefin strdefn, CTM& ori);
       TdtData*       addCellARef(std::string&, CTM&, ArrayProps&);
       void           addList(AtticList*, TdtCell* tCell = NULL);
-      void           addList(unsigned, ShapeList&);
+      void           addList(LayerNumber, ShapeList&);
       TdtCell*       openCell(std::string name);
       bool           editPush(const TP&, const DWordSet&);
       bool           editPrev(const bool undo = false);
@@ -127,7 +127,7 @@ namespace laydata {
       void           rotateSelected( TP p, real angle, SelectList**);
       void           flipSelected( TP p, bool Xaxis);
       void           deleteSelected(laydata::AtticList*, laydata::TdtLibDir*);
-      void           destroyThis(TdtData* ds, unsigned la, laydata::TdtLibDir* );
+      void           destroyThis(TdtData* ds, LayerNumber la, laydata::TdtLibDir* );
       bool           groupSelected(std::string name, laydata::TdtLibDir*);
       ShapeList*     ungroupPrep(laydata::TdtLibDir*);
       AtticList*     ungroupThis(ShapeList*);
@@ -137,8 +137,8 @@ namespace laydata {
       unsigned int   numSelected() const;
       DBbox          activeOverlap();
       DBbox          getVisibleOverlap(layprop::DrawProperties&);
-      void           transferLayer(unsigned dst);
-      void           transferLayer(laydata::SelectList* slst, unsigned dst);
+      void           transferLayer(LayerNumber dst);
+      void           transferLayer(laydata::SelectList* slst, LayerNumber dst);
       AtticList*     changeRef(ShapeList*, std::string);
       //
       void           collectParentCells(std::string&, CellDefList&);
@@ -241,8 +241,8 @@ namespace laydata {
       CellDefin         linkCellRef(std::string, int);
       CellDefin         addDefaultCell( std::string name, bool );
       void              addThisUndefCell(TdtDefaultCell*);
-      bool              collectUsedLays(std::string, bool, WordList&) const;
-      void              collectUsedLays(int, WordList&) const;
+      bool              collectUsedLays(std::string, bool, LayerTMPList&) const;
+      void              collectUsedLays(int, LayerTMPList&) const;
       void              cleanUndefLib();
       TdtDefaultCell*   displaceUndefinedCell(std::string);
       void              holdUndefinedCell(TdtDefaultCell*);

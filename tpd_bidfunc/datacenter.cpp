@@ -1033,7 +1033,7 @@ LayerMapCif* DataCenter::secureCifLayMap(const layprop::DrawProperties* drawProp
       for ( NameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
       {
          std::ostringstream ciflayname;
-         unsigned layno = drawProp->getLayerNo( *CDL );
+         LayerNumber layno = drawProp->getLayerNo( *CDL );
          ciflayname << "L" << layno;
          theMap[layno] = ciflayname.str();
       }

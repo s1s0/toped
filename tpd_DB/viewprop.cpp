@@ -263,7 +263,7 @@ layprop::PropertyCenter::PropertyCenter() :
 //   fontLib = DEBUG_NEW FontLibrary(ffname, fname, vbo);
 //}
 
-void layprop::PropertyCenter::addUnpublishedLay(word layno)
+void layprop::PropertyCenter::addUnpublishedLay(LayerNumber layno)
 {
    _uplaylist.push_back(layno);
 }

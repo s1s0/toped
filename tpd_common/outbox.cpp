@@ -1139,7 +1139,7 @@ LayerMapExt::~LayerMapExt()
    if (NULL != _alist) delete _alist;
 }
 
-bool LayerMapExt::parseLayTypeString(wxString exp, word tdtLay)
+bool LayerMapExt::parseLayTypeString(wxString exp, LayerNumber tdtLay)
 {
    wxString lay_exp, type_exp;
    if (!separateQuickLists(exp, lay_exp, type_exp)) return false;
@@ -1321,10 +1321,10 @@ bool LayerMapExt::getTdtLay(word& tdtlay, word gdslay, word gdstype) const
    return true;
 }
 
-bool LayerMapExt::getExtLayType(word& gdslay, word& gdstype, word tdtlay) const
+bool LayerMapExt::getExtLayType(word& gdslay, word& gdstype, LayerNumber tdtlay) const
 {
    assert(!_import); // If you hit this - see the comment in the class declaration
-   gdslay  = tdtlay; // the default value
+   gdslay  = db2TellLayer(tdtlay); // the default value
    gdstype = 0;
    if (_theMap.end()       == _theMap.find(tdtlay)       ) return false;
    GlMap::const_iterator glmap = _theMap.find(tdtlay);
@@ -1412,7 +1412,7 @@ bool LayerMapCif::getTdtLay(word& tdtLay, std::string cifLay)
    return false;
 }
 
-bool LayerMapCif::getCifLay(std::string& cifLay, word tdtLay)
+bool LayerMapCif::getCifLay(std::string& cifLay, LayerNumber tdtLay)
 {
    if (_theEmap.end() != _theEmap.find(tdtLay))
    {

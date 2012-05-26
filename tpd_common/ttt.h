@@ -49,14 +49,16 @@ typedef long long int            int8b    ; // 8 bytes
 typedef          double          real     ; // 8 bytes
 
 typedef  dword                            WireWidth;
+typedef  dword                            LayerNumber;
 typedef  std::list<std::string>           NameList;
 typedef  std::set<std::string>            NameSet;
 typedef  std::list<word>                  WordList;
+typedef  std::list<LayerNumber>           LayerTMPList;
 typedef  std::set<word>                   WordSet;
 typedef  std::set<dword>                  DWordSet;
 typedef  std::map<word, WordSet>          ExtLayers;
 typedef  std::map<std::string, int>       SIMap;       // name
-typedef  std::map<unsigned, std::string>  USMap;      // Unsigned - String Map
+typedef  std::map<LayerNumber, std::string>  USMap;      // Unsigned - String Map
 typedef  std::map<word, unsigned long>    SLMap;
 
 enum QuadIdentificators{ qidNW = 0,
@@ -684,6 +686,9 @@ bool  SGHierTree<TYPE>::removeRootItem(const TYPE* comp, SGHierTree*& lst)
    return false;
 }
 
+LayerNumber tell2DBLayer(word layno);
+word db2TellLayer(LayerNumber layno);
+
 //=============================================================================
 // More common constants (instead of #defines)
 //=============================================================================
@@ -693,11 +698,11 @@ const int4b       MIN_INT4B            = (int4b)0x80000001; //  -2 147 483 647
 const int4b       MAX_INT4B            = (int4b)0x7FFFFFFF; //   2 147 483 643
 const WireWidth   MAX_WIRE_WIDTH       = 0x0FFFFFFF;
 //const DBbox MAX_OVL_BOX        = DBbox(MIN_X,MAX_X,MIN_Y,MIN_Y); // maximum overlapping box
-const unsigned    REF_LAY              = 0xffffffff;
-const unsigned    ERR_LAY              = 0xfffffffe;
-const unsigned    DRC_LAY              = 0xfffffffd;
-const unsigned    GRC_LAY              = 0xfffffffc;
-const unsigned    LAST_EDITABLE_LAYNUM = 0x0000ffff;
+const LayerNumber REF_LAY              = 0xffffffff;
+const LayerNumber ERR_LAY              = 0xfffffffe;
+const LayerNumber DRC_LAY              = 0xfffffffd;
+const LayerNumber GRC_LAY              = 0xfffffffc;
+const LayerNumber LAST_EDITABLE_LAYNUM = 0x0000ffff;
 const byte        OPENGL_FONT_UNIT     = 128;
 const byte        GRID_LIMIT           = 5;    // if grid step is less than _GRID_LIMIT pixels, grid is hidden
 const DBbox       DEFAULT_OVL_BOX      = DBbox(TP(0,0));

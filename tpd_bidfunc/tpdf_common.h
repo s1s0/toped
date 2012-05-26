@@ -161,8 +161,8 @@
 namespace tellstdfunc {
 
    telldata::TtInt*     getCurrentLayer();
-   unsigned             secureLayer();
-   void                 secureLayer(unsigned);
+   LayerNumber          secureLayer();
+   void                 secureLayer(LayerNumber);
    bool                 waitGUInput(int, telldata::operandSTACK *,
                                     std::string name = "",
                                     const CTM trans = CTM(),
@@ -178,7 +178,7 @@ namespace tellstdfunc {
    telldata::TtList*    make_ttlaylist(auxdata::AuxDataList&, unsigned);
    laydata::SelectList* get_ttlaylist(telldata::TtList* llist);
    laydata::AtticList*  get_shlaylist(telldata::TtList* llist);
-   auxdata::AuxDataList* get_auxdatalist(telldata::TtList* llist, unsigned&);
+   auxdata::AuxDataList* get_auxdatalist(telldata::TtList* llist, LayerNumber&);
    laydata::DataList*   copyDataList(const laydata::DataList* dlist);
    laydata::SelectList* copySelectList(const laydata::SelectList* dlist);
    void                 cleanSelectList(laydata::SelectList* dlist);
@@ -192,7 +192,7 @@ namespace tellstdfunc {
    void                 initFuncLib(wxFrame*, wxWindow*);
    laydata::SelectList* filter_selist(const laydata::SelectList*, word mask);
    laydata::AtticList*  replace_str(laydata::AtticList*, std::string);
-   bool                 secureLayDef(unsigned);
+   bool                 secureLayDef(LayerNumber);
    void                 createDefaultTDT(std::string, laydata::TdtLibDir*, TpdTime&, bool, parsercmd::UndoQUEUE&, telldata::UNDOPerandQUEUE&);
 
 }

@@ -1556,7 +1556,7 @@ tenderer::TopRend::TopRend( layprop::DrawProperties* drawprop, real UU ) :
    _cellStack.push(DEBUG_NEW TenderRef());
 }
 
-bool tenderer::TopRend::chunkExists(unsigned layno, bool has_selected)
+bool tenderer::TopRend::chunkExists(LayerNumber layno, bool has_selected)
 {
    // Reference layer is processed differently (pushCell), so make sure
    // that we haven't got here with REF_LAY by accident
@@ -1583,7 +1583,7 @@ bool tenderer::TopRend::chunkExists(unsigned layno, bool has_selected)
    return false;
 }
 
-void tenderer::TopRend::setLayer(unsigned layno, bool has_selected)
+void tenderer::TopRend::setLayer(LayerNumber layno, bool has_selected)
 {
    // Reference layer is processed differently (pushCell), so make sure
    // that we haven't got here with REF_LAY by accident
@@ -1935,7 +1935,7 @@ void tenderer::TopRend::grcCleanUp()
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void tenderer::TopRend::setGrcLayer(bool setEData, unsigned layno)
+void tenderer::TopRend::setGrcLayer(bool setEData, LayerNumber layno)
 {
    if (setEData)
    {
@@ -1961,7 +1961,7 @@ void tenderer::TopRend::setGrcLayer(bool setEData, unsigned layno)
    }
 }
 
-unsigned tenderer::TopRend::getTenderLay(unsigned layno)
+unsigned tenderer::TopRend::getTenderLay(LayerNumber layno)
 {
    return _drawprop->getTenderLay(layno);
 }
