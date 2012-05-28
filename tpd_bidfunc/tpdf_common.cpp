@@ -213,7 +213,7 @@ telldata::TtList* tellstdfunc::make_ttlaylist(laydata::AtticList* shapesel)
    return llist;
 }
 
-telldata::TtList* tellstdfunc::make_ttlaylist(laydata::ShapeList& lslct, unsigned lay)
+telldata::TtList* tellstdfunc::make_ttlaylist(laydata::ShapeList& lslct, LayerNumber lay)
 {
    telldata::TtList* llist = DEBUG_NEW telldata::TtList(telldata::tn_layout);
    // push each data reference into the TELL list
@@ -224,7 +224,7 @@ telldata::TtList* tellstdfunc::make_ttlaylist(laydata::ShapeList& lslct, unsigne
    return llist;
 }
 
-telldata::TtList* tellstdfunc::make_ttlaylist(auxdata::AuxDataList& lslct, unsigned lay)
+telldata::TtList* tellstdfunc::make_ttlaylist(auxdata::AuxDataList& lslct, LayerNumber lay)
 {
    telldata::TtList* llist = DEBUG_NEW telldata::TtList(telldata::tn_auxilary);
    // push each data reference into the TELL list
@@ -238,7 +238,7 @@ telldata::TtList* tellstdfunc::make_ttlaylist(auxdata::AuxDataList& lslct, unsig
 laydata::SelectList* tellstdfunc::get_ttlaylist(telldata::TtList* llist)
 {
    laydata::SelectList* shapesel = DEBUG_NEW laydata::SelectList();
-   unsigned clayer;
+   LayerNumber clayer;
    SGBitSet* pntl_o;
    for (unsigned i = 0 ; i < llist->mlist().size(); i++)
    {
@@ -259,7 +259,7 @@ laydata::SelectList* tellstdfunc::get_ttlaylist(telldata::TtList* llist)
 laydata::AtticList* tellstdfunc::get_shlaylist(telldata::TtList* llist)
 {
    laydata::AtticList* shapesel = DEBUG_NEW laydata::AtticList();
-   unsigned clayer;
+   LayerNumber clayer;
    for (unsigned i = 0 ; i < llist->mlist().size(); i++)
    {
       clayer = static_cast<telldata::TtLayout*>(llist->mlist()[i])->layer();

@@ -174,8 +174,8 @@ namespace tellstdfunc {
    PointVector*         t2tpoints(telldata::TtList *, real);
    telldata::TtList*    make_ttlaylist(laydata::SelectList*);
    telldata::TtList*    make_ttlaylist(laydata::AtticList*);
-   telldata::TtList*    make_ttlaylist(laydata::ShapeList&, unsigned);
-   telldata::TtList*    make_ttlaylist(auxdata::AuxDataList&, unsigned);
+   telldata::TtList*    make_ttlaylist(laydata::ShapeList&, LayerNumber);
+   telldata::TtList*    make_ttlaylist(auxdata::AuxDataList&, LayerNumber);
    laydata::SelectList* get_ttlaylist(telldata::TtList* llist);
    laydata::AtticList*  get_shlaylist(telldata::TtList* llist);
    auxdata::AuxDataList* get_auxdatalist(telldata::TtList* llist, LayerNumber&);

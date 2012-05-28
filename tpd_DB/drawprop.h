@@ -121,12 +121,12 @@ namespace layprop {
                              _locked(sl), _filled(sf) {};
                           LayerState(unsigned num, const LayerSettings& lset) : _number(num),
                              _hidden(lset.hidden()), _locked(lset.locked()), _filled(lset.filled()){}
-      unsigned            number() const              {return _number;}
+      LayerNumber         number() const              {return _number;}
       bool                hidden() const              {return _hidden;}
       bool                locked() const              {return _locked;}
       bool                filled() const              {return _filled;}
    private:
-      unsigned            _number;
+      LayerNumber         _number;
       bool                _hidden;
       bool                _locked;
       bool                _filled;

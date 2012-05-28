@@ -176,9 +176,9 @@ int tellstdfunc::grcGETDATA::execute()
       auxdata::GrcCell* grcCell   = tCell->getGrcCell();
       if (NULL != grcCell)
       {
-         grcCell->reportLayData(la,dataList);
+         grcCell->reportLayData(tell2DBLayer(la),dataList);
          for (auxdata::AuxDataList::const_iterator CD = dataList.begin(); CD != dataList.end(); CD++)
-            llist->add(DEBUG_NEW telldata::TtAuxdata(*CD, la));
+            llist->add(DEBUG_NEW telldata::TtAuxdata(*CD, tell2DBLayer(la)));
       }
       LogFile << LogFile.getFN() << "();"; LogFile.flush();
    }
@@ -250,11 +250,11 @@ int tellstdfunc::grcCLEANALAYER::execute()
       {
          DBbox oldOverlap(tCell->cellOverlap());
          auxdata::AuxDataList grcShapes;
-         char cellState = grcCell->cleanLay(la, grcShapes);
+         char cellState = grcCell->cleanLay(tell2DBLayer(la), grcShapes);
          if (0 <= cellState)
          {
             UNDOcmdQ.push_front(this);
-            UNDOPstack.push_front(make_ttlaylist(grcShapes, la));
+            UNDOPstack.push_front(make_ttlaylist(grcShapes, tell2DBLayer(la)));
             if (0 == cellState)
             {// grc cell is empty - clear it up
                tCell->clearGrcCell();
@@ -359,16 +359,16 @@ int tellstdfunc::grcREPAIRDATA::execute()
       if (NULL != grcCell)
       {
          laydata::ShapeList newShapes;
-         if (grcCell->repairData(la, newShapes))
+         if (grcCell->repairData(tell2DBLayer(la), newShapes))
          {
             if (!newShapes.empty())
             {
                UNDOcmdQ.push_front(this);
                DBbox oldOverlap(tCell->cellOverlap());
-               tDesign->addList(la, newShapes);
-               UNDOPstack.push_front(make_ttlaylist(newShapes, la));
+               tDesign->addList(tell2DBLayer(la), newShapes);
+               UNDOPstack.push_front(make_ttlaylist(newShapes, tell2DBLayer(la)));
                auxdata::AuxDataList oldShapes;
-               switch (grcCell->cleanRepaired(la, oldShapes))
+               switch (grcCell->cleanRepaired(tell2DBLayer(la), oldShapes))
                {
                   case -1: // grc cell is empty - clear it up
                            tCell->clearGrcCell();
@@ -386,7 +386,7 @@ int tellstdfunc::grcREPAIRDATA::execute()
                            break;
                   default: assert(false); break;
                }
-               UNDOPstack.push_front(make_ttlaylist(oldShapes, la));
+               UNDOPstack.push_front(make_ttlaylist(oldShapes, tell2DBLayer(la)));
             }
             else
             {

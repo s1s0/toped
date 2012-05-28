@@ -177,7 +177,7 @@ void tellstdfunc::stdMOVESEL::undo()
       // delete the added shapes
       for (word j = 0 ; j < added->mlist().size(); j++) {
          tDesign->destroyThis(             static_cast<telldata::TtLayout*>(added->mlist()[j])->data(),
-                              tell2DBLayer(static_cast<telldata::TtLayout*>(added->mlist()[j])->layer()),
+                          /*tell2DBLayer(*/static_cast<telldata::TtLayout*>(added->mlist()[j])->layer()/*)*/,
                               dbLibDir);
       }
    }
@@ -306,7 +306,7 @@ void tellstdfunc::stdROTATESEL::undo()
       for (word j = 0 ; j < added->mlist().size(); j++)
       {
          tDesign->destroyThis(             static_cast<telldata::TtLayout*>(added->mlist()[j])->data(),
-                              tell2DBLayer(static_cast<telldata::TtLayout*>(added->mlist()[j])->layer()),
+                          /*tell2DBLayer(*/static_cast<telldata::TtLayout*>(added->mlist()[j])->layer()/*)*/,
                               dbLibDir);
       }
    }
