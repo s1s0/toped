@@ -161,10 +161,10 @@ namespace auxdata {
          bool                fixUnsorted();
          //
          void                reportLayers(DWordSet&);
-         void                reportLayData(unsigned, AuxDataList&);
-         char                cleanLay(unsigned, AuxDataList&);
-         bool                repairData(unsigned, laydata::ShapeList&);
-         char                cleanRepaired(unsigned la, AuxDataList& recovered);
+         void                reportLayData(LayerNumber, AuxDataList&);
+         char                cleanLay(LayerNumber, AuxDataList&);
+         bool                repairData(LayerNumber, laydata::ShapeList&);
+         char                cleanRepaired(LayerNumber la, AuxDataList& recovered);
 
          //
          virtual DBbox       cellOverlap() const        {return _cellOverlap;}

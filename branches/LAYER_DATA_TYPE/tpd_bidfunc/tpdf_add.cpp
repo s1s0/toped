@@ -81,7 +81,7 @@ int tellstdfunc::stdADDBOX::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      telldata::TtLayout* bx = DEBUG_NEW telldata::TtLayout(tDesign->putBox(tell2DBLayer(la), p1DB, p2DB),la);
+      telldata::TtLayout* bx = DEBUG_NEW telldata::TtLayout(tDesign->putBox(tell2DBLayer(la), p1DB, p2DB),tell2DBLayer(la));
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(la));
       OPstack.push(bx); UNDOPstack.push_front(bx->selfcopy());
@@ -155,7 +155,7 @@ int tellstdfunc::stdDRAWBOX::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      telldata::TtLayout* bx = DEBUG_NEW telldata::TtLayout(tDesign->addBox(tell2DBLayer(la), p1DB, p2DB), la);
+      telldata::TtLayout* bx = DEBUG_NEW telldata::TtLayout(tDesign->addBox(tell2DBLayer(la), p1DB, p2DB), tell2DBLayer(la));
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(la));
       OPstack.push(bx);UNDOPstack.push_front(bx->selfcopy());
@@ -228,7 +228,7 @@ int tellstdfunc::stdADDBOXr::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      telldata::TtLayout* bx = DEBUG_NEW telldata::TtLayout(tDesign->putBox(tell2DBLayer(la), p1DB, p2DB), la);
+      telldata::TtLayout* bx = DEBUG_NEW telldata::TtLayout(tDesign->putBox(tell2DBLayer(la), p1DB, p2DB), tell2DBLayer(la));
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(la));
       OPstack.push(bx);UNDOPstack.push_front(bx->selfcopy());
@@ -303,7 +303,7 @@ int tellstdfunc::stdADDBOXp::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      telldata::TtLayout* bx = DEBUG_NEW telldata::TtLayout(tDesign->putBox(tell2DBLayer(la), p1DB, p2DB), la);
+      telldata::TtLayout* bx = DEBUG_NEW telldata::TtLayout(tDesign->putBox(tell2DBLayer(la), p1DB, p2DB), tell2DBLayer(la));
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(la));
       OPstack.push(bx); UNDOPstack.push_front(bx->selfcopy());
@@ -376,7 +376,7 @@ int tellstdfunc::stdADDPOLY::execute()
       {
          laydata::TdtDesign* tDesign = (*dbLibDir)();
          PointVector* plst = t2tpoints(pl,DBscale);
-         telldata::TtLayout* ply = DEBUG_NEW telldata::TtLayout(tDesign->putPoly(tell2DBLayer(la),plst), la);
+         telldata::TtLayout* ply = DEBUG_NEW telldata::TtLayout(tDesign->putPoly(tell2DBLayer(la),plst), tell2DBLayer(la));
          delete plst;
          UNDOcmdQ.push_front(this);
          UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(la));
@@ -457,7 +457,7 @@ int tellstdfunc::stdDRAWPOLY::execute()
       {
          laydata::TdtDesign* tDesign = (*dbLibDir)();
          PointVector* plst = t2tpoints(pl,DBscale);
-         telldata::TtLayout* ply = DEBUG_NEW telldata::TtLayout(tDesign->addPoly(tell2DBLayer(la),plst), la);
+         telldata::TtLayout* ply = DEBUG_NEW telldata::TtLayout(tDesign->addPoly(tell2DBLayer(la),plst), tell2DBLayer(la));
          delete plst;
          UNDOcmdQ.push_front(this);
          UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(la));
@@ -533,7 +533,7 @@ int tellstdfunc::stdADDWIRE::execute()
          laydata::TdtDesign* tDesign = (*dbLibDir)();
          PointVector* plst = t2tpoints(pl,DBscale);
          telldata::TtLayout* wr = DEBUG_NEW telldata::TtLayout(tDesign->putWire(tell2DBLayer(la),plst,
-                                    static_cast<WireWidth>(rint(w * DBscale))), la);
+                                    static_cast<WireWidth>(rint(w * DBscale))), tell2DBLayer(la));
          delete plst;
          UNDOcmdQ.push_front(this);
          UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(la));
@@ -617,7 +617,7 @@ int tellstdfunc::stdDRAWWIRE::execute()
          laydata::TdtDesign* tDesign = (*dbLibDir)();
          PointVector* plst = t2tpoints(pl,DBscale);
          telldata::TtLayout* wr = DEBUG_NEW telldata::TtLayout(tDesign->addWire(tell2DBLayer(la),plst,
-                                    static_cast<WireWidth>(rint(w * DBscale))), la);
+                                    static_cast<WireWidth>(rint(w * DBscale))), tell2DBLayer(la));
          delete plst;
          UNDOcmdQ.push_front(this);
          UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(la));
@@ -711,7 +711,7 @@ int tellstdfunc::stdADDTEXT::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      telldata::TtLayout* tx = DEBUG_NEW telldata::TtLayout(tDesign->putText(tell2DBLayer(la), text, ori), la);
+      telldata::TtLayout* tx = DEBUG_NEW telldata::TtLayout(tDesign->putText(tell2DBLayer(la), text, ori), tell2DBLayer(la));
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(la));
       OPstack.push(tx);UNDOPstack.push_front(tx->selfcopy());
@@ -791,7 +791,7 @@ int tellstdfunc::stdDRAWTEXT::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      telldata::TtLayout* tx = DEBUG_NEW telldata::TtLayout(tDesign->addText(tell2DBLayer(la), text, ori), la);
+      telldata::TtLayout* tx = DEBUG_NEW telldata::TtLayout(tDesign->addText(tell2DBLayer(la), text, ori), tell2DBLayer(la));
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(la));
       OPstack.push(tx);UNDOPstack.push_front(tx->selfcopy());

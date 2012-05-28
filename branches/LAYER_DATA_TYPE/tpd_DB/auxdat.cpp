@@ -694,7 +694,7 @@ void auxdata::GrcCell::reportLayers(DWordSet& grcLays)
    }
 }
 
-void auxdata::GrcCell::reportLayData(unsigned lay, AuxDataList& dataList)
+void auxdata::GrcCell::reportLayData(LayerNumber lay, AuxDataList& dataList)
 {
    LayerList::const_iterator wl = _layers.find(lay);
    if (_layers.end() != wl)
@@ -711,7 +711,7 @@ void auxdata::GrcCell::reportLayData(unsigned lay, AuxDataList& dataList)
  *    0 if the cell is empty after the operation
  *   -1 if the layer @lay does not contain grc data (error condition)
  */
-char auxdata::GrcCell::cleanLay(unsigned lay, AuxDataList& recovered)
+char auxdata::GrcCell::cleanLay(LayerNumber lay, AuxDataList& recovered)
 {
    LayerList::const_iterator wl = _layers.find(lay);
    if (_layers.end() != wl)
@@ -738,7 +738,7 @@ char auxdata::GrcCell::cleanLay(unsigned lay, AuxDataList& recovered)
    else return -1;
 }
 
-bool auxdata::GrcCell::repairData(unsigned lay, laydata::ShapeList& newData)
+bool auxdata::GrcCell::repairData(LayerNumber lay, laydata::ShapeList& newData)
 {
    LayerList::const_iterator wl = _layers.find(lay);
    if (_layers.end() != wl)
@@ -766,7 +766,7 @@ bool auxdata::GrcCell::repairData(unsigned lay, laydata::ShapeList& newData)
  *     0 if the cell is not empty and overlap remains the same
  *    -1 if the cell is empty and shall be removed
  */
-char auxdata::GrcCell::cleanRepaired(unsigned lay, AuxDataList& recovered)
+char auxdata::GrcCell::cleanRepaired(LayerNumber lay, AuxDataList& recovered)
 {
    DBbox old_overlap(_cellOverlap);
    LayerList::const_iterator wl = _layers.find(lay);

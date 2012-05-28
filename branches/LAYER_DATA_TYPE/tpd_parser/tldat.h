@@ -279,12 +279,12 @@ namespace telldata {
       virtual void         assign(TellVar*);
       virtual TellVar*     selfcopy() const {return DEBUG_NEW TtLayout(*this);};
       laydata::TdtData*    data() const     {return _data;};
-      unsigned             layer() const    {return _layer;};
+      LayerNumber          layer() const    {return _layer;};
       SGBitSet*            selp() const     {return _selp;};
       virtual             ~TtLayout()       {if (_selp) delete _selp;}
    private:
       laydata::TdtData*    _data;
-      unsigned             _layer;
+      LayerNumber          _layer;
       SGBitSet*            _selp; // selected points;
    };
 
@@ -302,10 +302,10 @@ namespace telldata {
       virtual void         assign(TellVar*);
       virtual TellVar*     selfcopy() const {return DEBUG_NEW TtAuxdata(*this);};
       auxdata::TdtAuxData* data() const     {return _data;};
-      unsigned             layer() const    {return _layer;};
+      LayerNumber          layer() const    {return _layer;};
    private:
       auxdata::TdtAuxData* _data;
-      unsigned             _layer;
+      LayerNumber          _layer;
    };
 
    //==============================================================================
