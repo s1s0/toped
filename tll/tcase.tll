@@ -23,17 +23,17 @@
 
 #include "$TPD_GLOBAL/tll/seed.tll"
 // Some DRC rules defined as global variables
-real _actOverCont = 1.5;
-real _mincont = 2;
-real _contspace = 2.5;
-real _gate2cont = 2.5;
-real _polyOverActive = 2;
-real _nwelltonactive = 9;
-real _welloverpwell = 3;
-real _wellovernwell = 1;
-real _metalovercont = 1;
-real _polyovercont = 1.5;
-real _implantoveract = 2;
+const real _actOverCont = 1.5;
+const real _mincont = 2;
+const real _contspace = 2.5;
+const real _gate2cont = 2.5;
+const real _polyOverActive = 2;
+const real _nwelltonactive = 9;
+const real _welloverpwell = 3;
+const real _wellovernwell = 1;
+const real _metalovercont = 1;
+const real _polyovercont = 1.5;
+const real _implantoveract = 2;
 
 box MOStran(point bound, real W, real L) {
    // active

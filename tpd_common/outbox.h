@@ -172,13 +172,12 @@ namespace console {
          TELLFuncList(wxWindow* parent, wxWindowID id = -1,
                       const wxPoint& pos = wxDefaultPosition,
                       const wxSize& size = wxDefaultSize,
-                      long style = wxLC_REPORT | wxLC_HRULES);
+                      long style = wxLC_REPORT | wxLC_HRULES  | wxLC_SINGLE_SEL);
          virtual             ~TELLFuncList();
          void                 addFunc(wxString, void*);
          void                 OnCommand(wxCommandEvent&);
-         DECLARE_EVENT_TABLE();
       protected:
-         typedef std::list<std::string> ArgList;
+         DECLARE_EVENT_TABLE();
    };
 
    //===========================================================================

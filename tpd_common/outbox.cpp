@@ -770,13 +770,20 @@ void TpdPost::quitApp(int exitType)
 int wxCALLBACK wxListCompareFunction(long item1, long item2, long sortData)
 {
    wxListItem li1, li2;
+   long lItem = wxNOT_FOUND;
    li1.SetMask(wxLIST_MASK_TEXT);
    li1.SetColumn(1);
-   li1.SetId(CmdList->FindItem(-1, item1));
+   lItem = CmdList->FindItem(-1, item1);
+   if (wxNOT_FOUND == lItem) 
+      return -1;
+   li1.SetId(lItem);
    CmdList->GetItem(li1);
    li2.SetMask(wxLIST_MASK_TEXT);
    li2.SetColumn(1);
-   li2.SetId(CmdList->FindItem(-1, item2));
+   lItem = CmdList->FindItem(-1, item2);
+   if (wxNOT_FOUND == lItem) 
+      return 1;
+   li2.SetId(lItem);
    CmdList->GetItem(li2);
    wxString s1 = li1.GetText();
    wxString s2 = li2.GetText();
@@ -794,9 +801,9 @@ console::TELLFuncList::TELLFuncList(wxWindow *parent, wxWindowID id,
    InsertColumn(0, wxT("type"));
    InsertColumn(1, wxT("name"));
    InsertColumn(2, wxT("arguments"));
-   SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
-   SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER);
-   SetColumnWidth(2, wxLIST_AUTOSIZE_USEHEADER);
+//   SetColumnWidth(0, wxLIST_AUTOSIZE_USEHEADER);
+//   SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER);
+//   SetColumnWidth(2, wxLIST_AUTOSIZE_USEHEADER);
 }
 
 
@@ -807,18 +814,19 @@ console::TELLFuncList::~TELLFuncList()
 
 void console::TELLFuncList::addFunc(wxString name, void* arguments)
 {
-   ArgList* arglist = static_cast<ArgList*>(arguments);
+   NameList* arglist = static_cast<NameList*>(arguments);
    wxListItem row;
    row.SetMask(wxLIST_MASK_DATA | wxLIST_MASK_TEXT);
    row.SetId(GetItemCount());
    row.SetData(GetItemCount());
+
    row.SetText( wxString((arglist->front()).c_str(), wxConvUTF8));arglist->pop_front();
    InsertItem(row);
    SetColumnWidth(0, wxLIST_AUTOSIZE);
    //
    row.SetColumn(1);
    row.SetMask(wxLIST_MASK_TEXT);
-   row.SetText(name.c_str());
+   row.SetText(name);
    SetItem(row);
    SetColumnWidth(1, wxLIST_AUTOSIZE);
    //
