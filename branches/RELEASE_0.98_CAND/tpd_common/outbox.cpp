@@ -772,25 +772,6 @@ int wxCALLBACK wxListCompareFunction(TmpWxIntPtr item1, TmpWxIntPtr item2, TmpWx
    std::string s1 = CmdList->getItemFunc(item1);
    std::string s2 = CmdList->getItemFunc(item2);
    return s1.compare(s2);
-//   wxListItem li1, li2;
-//   long lItem = wxNOT_FOUND;
-//   li1.SetMask(wxLIST_MASK_TEXT);
-//   li1.SetColumn(1);
-//   lItem = CmdList->FindItem(-1, item1);
-//   if (wxNOT_FOUND == lItem)
-//      return -1;
-//   li1.SetId(lItem);
-//   CmdList->GetItem(li1);
-//   li2.SetMask(wxLIST_MASK_TEXT);
-//   li2.SetColumn(1);
-//   lItem = CmdList->FindItem(-1, item2);
-//   if (wxNOT_FOUND == lItem)
-//      return 1;
-//   li2.SetId(lItem);
-//   CmdList->GetItem(li2);
-//   wxString s1 = li1.GetText();
-//   wxString s2 = li2.GetText();
-//   return s1.CompareTo(s2.c_str());
 }
 
 BEGIN_EVENT_TABLE( console::TELLFuncList, wxListCtrl )
