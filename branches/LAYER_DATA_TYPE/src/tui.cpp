@@ -506,7 +506,7 @@ tui::GetCIFimport::GetCIFimport(wxFrame *parent, wxWindowID id, const wxString &
    SIMap inlays;
    if (DATC->cifGetLayers(cifLayers))
    {
-      word laynum = 1;
+      LayerNumber laynum = 1;
       for (NameList::iterator NLI = cifLayers.begin(); NLI != cifLayers.end(); NLI++)
       {
          inlays[*NLI] = laynum++;
@@ -1850,7 +1850,7 @@ tui::NameCboxRecords::NameCboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
    for (SIMap::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
    {
       wxString cifln  = wxString(CNM->first.c_str(), wxConvUTF8);
-      word tdtLay;
+      LayerNumber tdtLay;
       if (!_cifMap->getTdtLay(tdtLay, CNM->first)) tdtLay = CNM->second;
       wxString wxics  = wxString(_drawProp->getLayerName(tdtLay).c_str(), wxConvUTF8);
 
@@ -1874,7 +1874,7 @@ SIMap* tui::NameCboxRecords::getTheMap(layprop::DrawProperties* drawProp)
       // the user didn't put a tdt correspondence for this CIF layer - so we'll try to use the CIF name
       if ("" == layname)
          layname = std::string(CNM->_ciflay->GetLabel().mb_str(wxConvUTF8));
-      unsigned layno = _drawProp->getLayerNo(layname);
+      LayerNumber layno = _drawProp->getLayerNo(layname);
       if (ERR_LAY == layno)
       {
 //         layno = drawProp->addLayer(layname);
@@ -1909,7 +1909,7 @@ tui::NameCbox3Records::NameCbox3Records( wxWindow *parent, wxPoint pnt, wxSize s
       {
          wxString sGdsDtype;
          sGdsDtype << *CTP;
-         word wTdtLay;
+         LayerNumber wTdtLay;
          if (!_gdsLayMap->getTdtLay( wTdtLay, CNM->first, *CTP)) wTdtLay = CNM->first;
          wxString sTdtLay(_drawProp->getLayerName(wTdtLay).c_str(), wxConvUTF8);
 

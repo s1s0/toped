@@ -57,9 +57,9 @@ typedef  std::list<LayerNumber>           LayerTMPList;
 typedef  std::set<word>                   WordSet;
 typedef  std::set<dword>                  DWordSet;
 typedef  std::map<word, WordSet>          ExtLayers;
-typedef  std::map<std::string, int>       SIMap;       // name
+typedef  std::map<std::string, LayerNumber>  SIMap;       // name
 typedef  std::map<LayerNumber, std::string>  USMap;      // Unsigned - String Map
-typedef  std::map<word, unsigned long>    SLMap;
+//typedef  std::map<word, unsigned long>    SLMap;
 
 enum QuadIdentificators{ qidNW = 0,
                          qidNE = 1,
