@@ -1306,7 +1306,7 @@ void LayerMapExt::getList(wxString exp, WordList& data)
 
 }
 
-bool LayerMapExt::getTdtLay(word& tdtlay, word gdslay, word gdstype) const
+bool LayerMapExt::getTdtLay(LayerNumber& tdtlay, word gdslay, word gdstype) const
 {
    assert(_import); // If you hit this - see the comment in the class declaration
    // All that this function is doing is:

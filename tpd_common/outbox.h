@@ -395,7 +395,7 @@ class LayerMapExt {
    public:
                            LayerMapExt(const USMap&, ExtLayers*);
                           ~LayerMapExt();
-      bool                 getTdtLay(word&, word, word) const;
+      bool                 getTdtLay(LayerNumber&, word, word) const;
       bool                 getExtLayType(word&, word&, LayerNumber) const;
       bool                 status() {return _status;}
       USMap*               updateMap(USMap*, bool);

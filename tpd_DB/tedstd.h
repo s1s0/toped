@@ -462,14 +462,14 @@ class LayerCrossMap {
                               LayerCrossMap() : _tdtLayNumber(0), _tmpLayer(NULL) {}
       virtual                ~LayerCrossMap()  {}
       laydata::QTreeTmp*      getTmpLayer()     {return _tmpLayer;}
-      unsigned                tdtLayNumber()    {return _tdtLayNumber;}
+      LayerNumber             tdtLayNumber()    {return _tdtLayNumber;}
       virtual bool            mapTdtLay(laydata::TdtCell*, word, word)
                                                          {assert(false); return false;}
       virtual bool            mapTdtLay(laydata::TdtCell*,const std::string&)
                                                          {assert(false); return false;}
       virtual std::string     printSrcLayer() const      {assert(false); return std::string("");}
    protected:
-      unsigned                _tdtLayNumber  ; //! Current layer number
+      LayerNumber             _tdtLayNumber  ; //! Current layer number
       laydata::QTreeTmp*      _tmpLayer      ; //! Current target layer
 };
 
