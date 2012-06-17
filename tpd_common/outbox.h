@@ -416,7 +416,7 @@ class LayerMapExt {
 class LayerMapCif {
    public:
                            LayerMapCif(const USMap&);
-      bool                 getTdtLay(word&, std::string);
+      bool                 getTdtLay(LayerNumber&, std::string);
       bool                 getCifLay(std::string&, LayerNumber);
       USMap*               updateMap(USMap*);
       USMap*               updateMap(SIMap*);

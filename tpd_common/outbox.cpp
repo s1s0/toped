@@ -1402,7 +1402,7 @@ LayerMapCif::LayerMapCif(const USMap& inMap)
    }
 }
 
-bool LayerMapCif::getTdtLay(word& tdtLay, std::string cifLay)
+bool LayerMapCif::getTdtLay(LayerNumber& tdtLay, std::string cifLay)
 {
    if (_theImap.end() != _theImap.find(cifLay))
    {
