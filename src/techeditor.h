@@ -126,11 +126,31 @@ namespace tui
          void                    OnApply(wxCommandEvent&);
          void                    OnLayListSort(wxListEvent&);
          void                    OnRemotePropUpdate(wxCommandEvent&);
+         class LayerListPanel : public wxListView
+         {
+            public:
+               struct LayerLine {
+                                 LayerLine() : _number(0), _name("") {}
+                                 LayerLine(unsigned long number, std::string name) :
+                                    _number(number), _name(name) {}
+                  unsigned long  _number;
+                  std::string    _name;
+               };
+                                 LayerListPanel( wxWindow *parent, wxWindowID winid, long style) :
+                                    wxListView(parent, winid, wxDefaultPosition, wxDefaultSize, style) {}
+               unsigned long     getItemLayerNum(TmpWxIntPtr item1);
+               std::string       getItemLayerName(TmpWxIntPtr item1);
+               void              addItemLayer(unsigned long, unsigned long, std::string);
+               void              clearAll();
+            private:
+               typedef std::map<TmpWxIntPtr,LayerLine> LayerItems;
+               LayerItems        _layerItems;
+         };
       private:
          void                    prepareLayers(layprop::DrawProperties*);
          void                    updateDialog();
          void                    updateLayerList();
-         wxListView*             _layerList;
+         LayerListPanel*         _layerList;
          ColorListComboBox*      _layerColors;
          FillListComboBox*       _layerFills;
          LineListComboBox*       _layerLines;
@@ -145,7 +165,7 @@ namespace tui
          DECLARE_EVENT_TABLE()
    };
 
-   int wxCALLBACK wxListCtrlItemCompare(long, long, long);
+   int wxCALLBACK wxListCtrlItemCompare(TmpWxIntPtr, TmpWxIntPtr, TmpWxIntPtr);
 
 }
 

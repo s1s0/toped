@@ -1,5 +1,6 @@
 Short Term
 ------------
+ - Browser window needs search facilities. For big designs
  - bitwise logical operations. Require unsigned.
  
 General
@@ -13,7 +14,7 @@ General
     functions
   * There is no log possible for select/unselect from list operations. The
     reason is that we don't have a representation of layout list in TELL.
-    Think about it. Pointers are unappropriate of course.
+    Think about it. Pointetrs are unapropriate of course.
 
   TELL related
   ------------

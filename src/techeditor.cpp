@@ -38,12 +38,12 @@
 #include "toped.h"
 #include "ted_prompt.h"
 
-extern layprop::PropertyCenter*  PROPC;
-extern tui::TopedFrame*          Toped;
-extern console::TllCmdLine*      Console;
-extern const wxEventType         wxEVT_TECHEDITUPDATE;
-extern const wxEventType         wxEVT_CANVAS_ZOOM;
-wxListView* layerListPtr = NULL; //!Required by SortItem callback
+extern layprop::PropertyCenter*        PROPC;
+extern tui::TopedFrame*                Toped;
+extern console::TllCmdLine*            Console;
+extern const wxEventType               wxEVT_TECHEDITUPDATE;
+extern const wxEventType               wxEVT_CANVAS_ZOOM;
+tui::TechEditorDialog::LayerListPanel* layerListPtr = NULL; //!Required by SortItem callback
 ///////////////////////////////////////////////////////////////////////////
 //extern const wxEventType         wxEVT_CMD_BROWSER;
 
@@ -73,7 +73,7 @@ tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id) :
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-      _layerList = DEBUG_NEW wxListView(this, DTE_LAYERS_LIST, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_VRULES);
+      _layerList = DEBUG_NEW LayerListPanel(this, DTE_LAYERS_LIST, wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_VRULES);
       layerListPtr = _layerList;
       prepareLayers(drawProp);
       _layerNumber = DEBUG_NEW wxTextCtrl( this, DTE_LAYER_NUM , wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT | wxTE_READONLY,
@@ -271,7 +271,7 @@ void  tui::TechEditorDialog::updateDialog()
 
 void tui::TechEditorDialog::prepareLayers(layprop::DrawProperties* drawProp)
 {
-   _layerList->ClearAll();
+   _layerList->clearAll();
    _layerList->InsertColumn(0, wxT("No"));
    _layerList->InsertColumn(1, wxT("Name"));
 
@@ -279,9 +279,10 @@ void tui::TechEditorDialog::prepareLayers(layprop::DrawProperties* drawProp)
    for(LayerTMPList::const_iterator it = _allLayNums.begin(); it != _allLayNums.end(); ++it)
    {
       wxListItem row;
+      unsigned long newItem = _layerList->GetItemCount();
       row.SetMask(wxLIST_MASK_DATA | wxLIST_MASK_TEXT);
-      row.SetId(_layerList->GetItemCount());
-      row.SetData(_layerList->GetItemCount());
+      row.SetId(newItem);
+      row.SetData(newItem);
 
       wxString dummy;
       dummy << *it;
@@ -295,6 +296,7 @@ void tui::TechEditorDialog::prepareLayers(layprop::DrawProperties* drawProp)
       _layerList->SetItem(row);
       _layerList->SetColumnWidth(1, wxLIST_AUTOSIZE);
       //
+      _layerList->addItemLayer(newItem, *it, drawProp->getLayerName(*it));
    }
 }
 
@@ -321,7 +323,9 @@ void tui::TechEditorDialog::updateLayerList()
       row.SetText(_layerNameString);
       _layerList->SetItem(row);
       _layerList->SetColumnWidth(1, wxLIST_AUTOSIZE);
-
+      //
+      _layerList->addItemLayer(newItem, layNo, std::string(_layerNameString.mb_str(wxConvUTF8)));
+      //
       _layerList->SortItems(tui::wxListCtrlItemCompare, 0l);
       _curSelect = _layerList->FindItem(-1, newItem);
       _layerList->Select(_curSelect, true);
@@ -450,6 +454,31 @@ void tui::TechEditorDialog::OnRemotePropUpdate(wxCommandEvent& event)
       }
       default: assert(false); break;
    }
+}
+
+void tui::TechEditorDialog::LayerListPanel::addItemLayer(unsigned long id, unsigned long num, std::string name)
+{
+   LayerLine item(num, name);
+   _layerItems[id] = item;
+}
+
+unsigned long tui::TechEditorDialog::LayerListPanel::getItemLayerNum(TmpWxIntPtr item1)
+{
+   LayerItems::const_iterator CI = _layerItems.find(item1);
+   assert(CI != _layerItems.end());
+   return CI->second._number;
+}
+
+std::string tui::TechEditorDialog::LayerListPanel::getItemLayerName(TmpWxIntPtr item1)
+{
+   LayerItems::const_iterator CI = _layerItems.find(item1);
+   assert(CI != _layerItems.end());
+   return CI->second._name;
+}
+
+void tui::TechEditorDialog::LayerListPanel::clearAll()
+{
+   _layerItems.clear();
 }
 
 //=============================================================================
@@ -728,29 +757,20 @@ tui::LineListComboBox::~LineListComboBox()
    Clear();
 }
 
-int wxCALLBACK tui::wxListCtrlItemCompare(long item1, long item2, long column)
+int wxCALLBACK tui::wxListCtrlItemCompare(TmpWxIntPtr item1, TmpWxIntPtr item2, TmpWxIntPtr column)
 {
-   wxListItem li1, li2;
-   li1.SetMask(wxLIST_MASK_TEXT);
-   li1.SetColumn(column);
-   li1.SetId(layerListPtr->FindItem(-1, item1));
-   layerListPtr->GetItem(li1);
-   li2.SetMask(wxLIST_MASK_TEXT);
-   li2.SetColumn(column);
-   li2.SetId(layerListPtr->FindItem(-1, item2));
-   layerListPtr->GetItem(li2);
-   wxString s1 = li1.GetText();
-   wxString s2 = li2.GetText();
    if (0 == column)
    {
-      int result;
-      unsigned long ln1, ln2;
-      s1.ToULong(&ln1); s2.ToULong(&ln2);
-      if      (ln1 < ln2) result = -1;
-      else if (ln1 > ln2) result =  1;
-      else result = 0;
-      return result;
+      unsigned long l1 = layerListPtr->getItemLayerNum(item1);
+      unsigned long l2 = layerListPtr->getItemLayerNum(item2);
+      return (l1 == l2) ?  0 :
+             (l1 <  l2) ? -1 : 1;
    }
-   else return s1.CompareTo(s2.c_str());
+   else
+   {
+      std::string s1 = layerListPtr->getItemLayerName(item1);
+      std::string s2 = layerListPtr->getItemLayerName(item2);
+      return s1.compare(s2);
+   }
 }
 
