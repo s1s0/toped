@@ -35,7 +35,7 @@
 #include <list>
 #include <set>
 #include <assert.h>
-
+//#pragma GCC diagnostic warning "-Wconversion"
 //=============================================================================
 // General type declations (compatability)
 //=============================================================================
