@@ -42,6 +42,12 @@
         (wxObject *) NULL \
     ),
 
+#if wxCHECK_VERSION(2,9,0)
+   typedef wxIntPtr        TmpWxIntPtr;
+#else
+   typedef long            TmpWxIntPtr;
+#endif
+
 //#define RENDER_PROFILING
 //#define GDSCONVERT_PROFILING
 //#define PARSER_PROFILING
@@ -172,13 +178,15 @@ namespace console {
          TELLFuncList(wxWindow* parent, wxWindowID id = -1,
                       const wxPoint& pos = wxDefaultPosition,
                       const wxSize& size = wxDefaultSize,
-                      long style = wxLC_REPORT | wxLC_HRULES);
+                      long style = wxLC_REPORT | wxLC_HRULES  | wxLC_SINGLE_SEL);
          virtual             ~TELLFuncList();
          void                 addFunc(wxString, void*);
          void                 OnCommand(wxCommandEvent&);
-         DECLARE_EVENT_TABLE();
+         std::string          getItemFunc(TmpWxIntPtr item1);
       protected:
-         typedef std::list<std::string> ArgList;
+         typedef std::map<TmpWxIntPtr,std::string> FuncItems;
+         FuncItems    _funcItems;
+         DECLARE_EVENT_TABLE();
    };
 
    //===========================================================================
@@ -380,7 +388,7 @@ bool        expandFileName(std::string&);
 //std::string getFileNameOnly(std::string);
 //Convert string from UTF8 to wxConvFile
 std::string convertString(const std::string &str);
-int wxCALLBACK wxListCompareFunction(long, long, long);
+int wxCALLBACK wxListCompareFunction(TmpWxIntPtr, TmpWxIntPtr, TmpWxIntPtr);
 
 
 /** The LayerMapExt is used for GDS/OASIS - TDT layer correspondence in both directions.
