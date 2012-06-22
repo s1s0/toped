@@ -36,10 +36,53 @@ namespace laydata {
 //==============================================================================
    class TdtCellRef;
    class TdtCellAref;
-   typedef  std::map<LayerNumber, QuadTree*>        LayerList;
+   typedef  std::map<LayerNumber, QuadTree*>        LayerContainter;
    typedef  std::map<LayerNumber, QTreeTmp*>        TmpLayerMap;
    typedef  SGHierTree<TdtDefaultCell>              TDTHierTree;
 
+   typedef std::map<LayerDType , QuadTree* >        LayerDMap;
+   typedef std::map<LayerNumber, LayerDMap >        LayerNMap;
+
+
+   class LayerIterator;
+   class LayerHolder {
+   public:
+      friend class LayerIterator;
+      typedef laydata::LayerIterator LayerIterator;
+                                 LayerHolder();
+      const LayerIterator        begin() const;
+      const LayerIterator        end() const;
+      const LayerIterator        find(LayerNumber) const;
+      bool                       empty() const;
+      void                       clear();
+      void                       add(LayerNumber, QuadTree*);
+      void                       erase(LayerNumber);
+      QuadTree*                  operator[](LayerNumber);
+   private:
+      LayerNMap                  _layers;
+      const LayerDType           _DEFAULT_LAY_DATA_TYPE;
+
+   };
+
+   class LayerIterator {
+   public:
+                                LayerIterator();
+                                LayerIterator(const LayerHolder&);
+                                LayerIterator(const LayerHolder&, LayerNumber, LayerDType);
+                                LayerIterator(const LayerIterator&);
+      virtual                  ~LayerIterator();
+      const LayerIterator&      operator++();    //Prefix
+      const LayerIterator       operator++(int); //Postfix
+      bool                      operator==(const LayerIterator&) const;
+      bool                      operator!=(const LayerIterator&) const;
+      QuadTree*                 operator->() const;
+      QuadTree*                 operator*() const;
+      LayerNumber               number();
+   protected:
+      const LayerNMap*          _layerHolder;
+      LayerNMap::const_iterator _cNMap;
+      LayerDMap::const_iterator _cDMap;
+   };
 
 //==============================================================================
    /*!This class is holding the information about current cell - i.e. the cell
@@ -125,7 +168,7 @@ namespace laydata {
          int                 libID() const              {return _libID;}
       protected:
          void                invalidateParents(TdtLibrary*);
-         LayerList           _layers;       //! all layers the cell (including the reference layer)
+         LayerHolder         _layers;       //! all layers the cell (including the reference layer)
          std::string         _name;         //! cell name
          bool                _orphan;       //! cell doesn't have a parent
       private:

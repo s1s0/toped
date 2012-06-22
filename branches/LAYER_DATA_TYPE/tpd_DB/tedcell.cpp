@@ -40,6 +40,172 @@
 
 extern layprop::FontLibrary* fontLib;
 
+//=============================================================================
+laydata::LayerHolder::LayerHolder() :
+   _DEFAULT_LAY_DATA_TYPE (      0 )
+{
+   //TODO?
+}
+
+const laydata::LayerHolder::LayerIterator laydata::LayerHolder::begin() const
+{
+   return LayerIterator(*this);
+}
+
+const laydata::LayerHolder::LayerIterator laydata::LayerHolder::end() const
+{
+   return LayerIterator();
+}
+
+const laydata::LayerIterator laydata::LayerHolder::find(LayerNumber layno) const
+{
+   LayerNMap::const_iterator layer = _layers.find(layno);
+   if (_layers.end() == layer) return LayerIterator();
+   else
+   {
+      LayerDMap allTypes = layer->second;
+      LayerDMap::const_iterator dtype = allTypes.find(_DEFAULT_LAY_DATA_TYPE);
+      if (allTypes.end() == dtype) return LayerIterator();
+      else return LayerIterator(*this, layno, _DEFAULT_LAY_DATA_TYPE);
+   }
+}
+
+bool laydata::LayerHolder::empty() const
+{
+   return _layers.empty();
+}
+
+void laydata::LayerHolder::clear()
+{
+
+}
+
+void laydata::LayerHolder::add(LayerNumber layno, QuadTree* quad)
+{
+   assert(_layers.end() == _layers.find(layno));
+   std::pair<LayerDType , QuadTree*> dtype(_DEFAULT_LAY_DATA_TYPE, quad);
+   LayerDMap dTypes;
+   dTypes.insert(dtype);
+   std::pair<LayerNumber, LayerDMap> layer(layno, dTypes);
+   _layers.insert(layer);
+}
+
+void laydata::LayerHolder::erase(LayerNumber layno)
+{
+   LayerNMap::iterator layer = _layers.find(layno);
+   assert(_layers.end() != layer);
+   layer->second.clear();
+   _layers.erase(layer);
+}
+
+laydata::QuadTree* laydata::LayerHolder::operator[](LayerNumber layno)
+{
+   LayerNMap::iterator layer = _layers.find(layno);
+   if (_layers.end() == layer) return NULL;
+   else
+   {
+      LayerDMap allTypes = layer->second;
+      LayerDMap::iterator dtype = allTypes.find(_DEFAULT_LAY_DATA_TYPE);
+      if (allTypes.end() == dtype) return NULL;
+      else return dtype->second;
+   }
+}
+
+//=============================================================================
+laydata::LayerIterator::LayerIterator():
+   _layerHolder (                        NULL  )
+{
+}
+
+laydata::LayerIterator::LayerIterator( const LayerHolder& lhldr):
+   _layerHolder (&(lhldr._layers)              ),
+   _cNMap       ( _layerHolder->begin()        ),
+   _cDMap       ( _cNMap->second.begin()       )
+{
+}
+
+laydata::LayerIterator::LayerIterator( const LayerHolder& lhldr, LayerNumber layno, LayerDType datno):
+   _layerHolder (&(lhldr._layers)              )
+{
+   _cNMap = _layerHolder->find(layno);
+   assert (_layerHolder->end() != _cNMap);
+   _cDMap = _cNMap->second.find(datno);
+   assert(_cNMap->second.end() != _cDMap);
+}
+
+
+laydata::LayerIterator::LayerIterator(const LayerIterator& liter):
+   _layerHolder ( liter._layerHolder           ),
+   _cNMap       ( liter._cNMap                 ),
+   _cDMap       ( liter._cDMap                 )
+{
+}
+
+laydata::LayerIterator::~LayerIterator()
+{
+}
+
+const laydata::LayerIterator& laydata::LayerIterator::operator++()
+{//Prefix
+   LayerNMap::const_iterator nextNMap = _cNMap;
+   LayerDMap::const_iterator nextDMap = _cDMap;
+   if (++nextDMap != _cNMap->second.end())
+      _cDMap = nextDMap;
+   else if (++nextNMap != _layerHolder->end())
+   {
+      _cNMap= nextNMap;
+      _cDMap = _cNMap->second.begin();
+   }
+   else
+   {
+      _layerHolder = NULL;
+//      _cNMap       = NULL;
+//      _cDMap       = NULL;
+   }
+   return *this;
+}
+
+const laydata::LayerIterator laydata::LayerIterator::operator++(int)
+{//Postfix
+   LayerIterator previous(*this);
+   operator++();
+   return previous;
+}
+
+bool laydata::LayerIterator::operator==(const LayerIterator& liter) const
+{
+   if ((NULL == _layerHolder) && (NULL == liter._layerHolder))
+      return true;
+   else
+      return (    (_layerHolder == liter._layerHolder)
+               && (_cNMap       == liter._cNMap      )
+               && (_cDMap       == liter._cDMap      ) );
+}
+
+bool laydata::LayerIterator::operator!=(const LayerIterator& liter) const
+{
+   return !operator==(liter);
+}
+
+laydata::QuadTree* laydata::LayerIterator::operator->() const
+{
+   if (   (NULL == _layerHolder           )
+       || (_layerHolder->end()  == _cNMap )
+       || (_cNMap->second.end() == _cDMap )) return NULL;
+   return _cDMap->second;
+}
+
+laydata::QuadTree* laydata::LayerIterator::operator*() const
+{
+   return operator->();
+}
+
+LayerNumber laydata::LayerIterator::number()
+{
+   return _cNMap->first;
+}
+
+//=============================================================================
 laydata::EditObject::EditObject()
 {
    _activecell = NULL;   // the curently active cell
@@ -227,10 +393,10 @@ laydata::TdtDefaultCell::TdtDefaultCell(std::string name, int libID, bool orphan
 
 laydata::TdtDefaultCell::~TdtDefaultCell()
 {
-   for (LayerList::iterator lay = _layers.begin(); lay != _layers.end(); lay++)
+   for (LayerIterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
-      lay->second->freeMemory();
-      delete lay->second;
+      lay->freeMemory();
+      delete (*lay);
    }
    _layers.clear();
 }
@@ -314,7 +480,7 @@ void laydata::TdtDefaultCell::invalidateParents(laydata::TdtLibrary* ATDB)
    {
       if (hc->Getparent())
       {
-         LayerList llist = hc->Getparent()->GetItem()->_layers;
+         LayerHolder llist = hc->Getparent()->GetItem()->_layers;
          if (llist.end() != llist.find(REF_LAY)) llist[REF_LAY]->invalidate();
       }
       hc = hc->GetNextMember(this);
@@ -405,7 +571,7 @@ laydata::QuadTree* laydata::TdtCell::secureLayer(LayerNumber layno)
    // TODO Would be nice to update the code in such a was so the assert below holds
    // assert((layno < LAST_EDITABLE_LAYNUM) || (layno == REF_LAY));
    if (_layers.end() == _layers.find(layno))
-      _layers[layno] = DEBUG_NEW QuadTree();
+      _layers.add(layno, DEBUG_NEW QuadTree());
    return _layers[layno];
 }
 
@@ -479,20 +645,19 @@ bool laydata::TdtCell::addChild(laydata::TdtDesign* ATDB, TdtDefaultCell* child)
 void laydata::TdtCell::openGlDraw(layprop::DrawProperties& drawprop, bool active) const
 {
    // Draw figures
-   typedef LayerList::const_iterator LCI;
-   for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
+   for (LayerIterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
-      LayerNumber curlayno = drawprop.getTenderLay(lay->first);
+      LayerNumber curlayno = drawprop.getTenderLay(lay.number());
       if (!drawprop.layerHidden(curlayno)) drawprop.setCurrentColor(curlayno);
       else continue;
       // fancy like this (dlist iterator) , because a simple
       // _shapesel[curlayno] complains about loosing qualifiers (const)
       SelectList::const_iterator dlst;
-      bool fill = drawprop.setCurrentFill(false);// honor block_fill state)
+      bool fill = drawprop.setCurrentFill(false);// honour block_fill state)
       if ((active) && (_shapesel.end() != (dlst = _shapesel.find(curlayno))))
-         lay->second->openGlDraw(drawprop,dlst->second, fill);
+         lay->openGlDraw(drawprop,dlst->second, fill);
       else
-         lay->second->openGlDraw(drawprop, NULL, fill);
+         lay->openGlDraw(drawprop, NULL, fill);
    }
 }
 
@@ -501,15 +666,14 @@ void laydata::TdtCell::openGlRender(tenderer::TopRend& rend, const CTM& trans,
 {
    rend.pushCell(_name, trans, _cellOverlap, active, selected);
    // Draw figures
-   typedef LayerList::const_iterator LCI;
-   for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
+   for (LayerIterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
       //first - to check visibility of the layer
-      if (rend.layerHidden(lay->first)) continue;
+      if (rend.layerHidden(lay.number())) continue;
       //second - get internal layer number:
       //       - for regular database it is equal to the TDT layer number
       //       - for DRC database it is common for all layers - DRC_LAY
-      LayerNumber curlayno = rend.getTenderLay(lay->first);
+      LayerNumber curlayno = rend.getTenderLay(lay.number());
       // retrieve the selected objects (if they exists)
       SelectList::const_iterator dlsti;
       const DataList* dlist;
@@ -528,22 +692,22 @@ void laydata::TdtCell::openGlRender(tenderer::TopRend& rend, const CTM& trans,
       switch (curlayno)
       {
          case GRC_LAY:
-         case REF_LAY: lay->second->openGlRender(rend, dlist); break;
+         case REF_LAY: lay->openGlRender(rend, dlist); break;
          case DRC_LAY: rend.setLayer(curlayno, (NULL != dlist));
-                       lay->second->openGlRender(rend, dlist); break;
+                       lay->openGlRender(rend, dlist); break;
          default     :
          {
-            short cltype = lay->second->clipType(rend);
+            short cltype = lay->clipType(rend);
             switch (cltype)
             {
                case -1: {// full overlap - conditional rendering
                   if ( !rend.chunkExists(curlayno, (NULL != dlist)) )
-                     lay->second->openGlRender(rend, dlist);
+                     lay->openGlRender(rend, dlist);
                   break;
                }
                case  1: {//partial clip - render always
                   rend.setLayer(curlayno, (NULL != dlist));
-                  lay->second->openGlRender(rend, dlist);
+                  lay->openGlRender(rend, dlist);
                   break;
                }
                default: assert(0 == cltype);
@@ -579,13 +743,11 @@ void laydata::TdtCell::motionDraw(const layprop::DrawProperties& drawprop,
       // somewhere up the hierarchy. On this level - no selected shapes
       // whatsoever exists, so just perform a regular draw, but of course
       // without fill
-      typedef LayerList::const_iterator LCI;
-      for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
-         if (!drawprop.layerHidden(lay->first))
+      for (LayerIterator lay = _layers.begin(); lay != _layers.end(); lay++)
+         if (!drawprop.layerHidden(lay.number()))
          {
-            const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(lay->first);
-            QuadTree* curlay = lay->second;
-             for (QuadTree::DrawIterator CI = curlay->begin(drawprop, transtack); CI != curlay->end(); CI++)
+            const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(lay.number());
+            for (QuadTree::DrawIterator CI = lay->begin(drawprop, transtack); CI != lay->end(); CI++)
                CI->motionDraw(drawprop, transtack, NULL);
          }
       transtack.pop_front();
@@ -595,11 +757,10 @@ void laydata::TdtCell::motionDraw(const layprop::DrawProperties& drawprop,
 bool laydata::TdtCell::getShapeOver(TP pnt, const DWordSet& unselable)
 {
    laydata::TdtData* shape = NULL;
-   typedef LayerList::const_iterator LCI;
-   for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
-      if ( (REF_LAY != lay->first)
-          && (unselable.end() == unselable.find(lay->first))
-          && lay->second->getObjectOver(pnt,shape)
+   for (LayerIterator lay = _layers.begin(); lay != _layers.end(); lay++)
+      if ( (REF_LAY != lay.number())
+          && (unselable.end() == unselable.find(lay.number()))
+          && lay->getObjectOver(pnt,shape)
           )
          return true;
    return false;
@@ -609,18 +770,17 @@ laydata::AtticList* laydata::TdtCell::changeSelect(TP pnt, SH_STATUS status, con
 {
    laydata::TdtData* prev = NULL;
    LayerNumber prevlay;
-   typedef LayerList::const_iterator LCI;
-   for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
+   for (LayerIterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
-      if (unselable.end() == unselable.find(lay->first))
+      if (unselable.end() == unselable.find(lay.number()))
       {
          laydata::TdtData* shape = NULL;
-         while (lay->second->getObjectOver(pnt,shape))
+         while (lay->getObjectOver(pnt,shape))
          {
             if ((status != shape->status()) &&
                 ((NULL == prev) || (prev->overlap().boxarea() > shape->overlap().boxarea())))
             {
-                  prev = shape; prevlay = lay->first;
+                  prev = shape; prevlay = lay.number();
             }
          }
       }
@@ -660,18 +820,17 @@ void laydata::TdtCell::mouseHoover(TP& position, layprop::DrawProperties& drawpr
 {
    laydata::TdtData* prev = NULL;
    LayerNumber prevlay = 0;
-   typedef LayerList::const_iterator LCI;
-   for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
+   for (LayerIterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
-      if ( (unselable.end() == unselable.find(lay->first)) )
+      if ( (unselable.end() == unselable.find(lay.number())) )
       {
          laydata::TdtData* shape = NULL;
-         while (lay->second->getObjectOver(position,shape))
+         while (lay->getObjectOver(position,shape))
          {
             if ((sh_active == shape->status()) &&
                 ((NULL == prev) || (prev->overlap().boxarea() > shape->overlap().boxarea())))
             {
-               prev = shape; prevlay = lay->first;
+               prev = shape; prevlay = lay.number();
             }
          }
       }
@@ -701,12 +860,11 @@ laydata::AtticList* laydata::TdtCell::findSelected(TP pnt)
 
    laydata::TdtData *shape = NULL;
    //unsigned prevlay;
-   typedef LayerList::const_iterator LCI;
-   for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
+   for (LayerIterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
       laydata::ShapeList* atl = DEBUG_NEW ShapeList();
-      (*errList)[lay->first] = atl;
-      while(lay->second->getObjectOver(pnt,shape))
+      (*errList)[lay.number()] = atl;
+      while(lay->getObjectOver(pnt,shape))
       {
          atl->push_back(shape);
       }
@@ -722,7 +880,8 @@ laydata::TdtCellRef* laydata::TdtCell::getCellOver(TP pnt, CtmStack& transtack,
 //    laydata::TdtData *shapeobj = NULL;
     laydata::TdtCellRef *cref = NULL;
     // go trough referenced cells ...
-    while (_layers[REF_LAY]->getObjectOver(pnt,cellobj)) {
+    while (_layers[REF_LAY]->getObjectOver(pnt,cellobj))
+    {
       //... and get the one that overlaps pnt.
       cref = static_cast<laydata::TdtCellRef*>(cellobj);
       if (cref->cStructure() && (TARGETDB_LIB == cref->structure()->libID()) )
@@ -770,28 +929,27 @@ void laydata::TdtCell::write(OutputTdtFile* const tedfile, const CellMap& allcel
    tedfile->putByte(tedf_CELL);
    tedfile->putString(name());
    // and now the layers
-   laydata::LayerList::const_iterator wl;
-   for (wl = _layers.begin(); wl != _layers.end(); wl++)
+   for (LayerIterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
-      if (REF_LAY == wl->first)
+      if (REF_LAY == lay.number())
       {
          tedfile->putByte(tedf_REFS);
-         for (QuadTree::Iterator DI = wl->second->begin(); DI != wl->second->end(); DI++)
+         for (QuadTree::Iterator DI = lay->begin(); DI != lay->end(); DI++)
             DI->write(tedfile);
          tedfile->putByte(tedf_REFSEND);
       }
-      else if ( LAST_EDITABLE_LAYNUM >= wl->first )
+      else if ( LAST_EDITABLE_LAYNUM >= lay.number() )
       {
          tedfile->putByte(tedf_LAYER);
-         tedfile->putWord(wl->first);
-         for (QuadTree::Iterator DI = wl->second->begin(); DI != wl->second->end(); DI++)
+         tedfile->putWord(lay.number());
+         for (QuadTree::Iterator DI = lay->begin(); DI != lay->end(); DI++)
             DI->write(tedfile);
          tedfile->putByte(tedf_LAYEREND);
       }
-      else if (GRC_LAY == wl->first)
+      else if (GRC_LAY == lay.number())
       {
          tedfile->putByte(tedf_GRC);
-         for (QuadTree::Iterator DI = wl->second->begin(); DI != wl->second->end(); DI++)
+         for (QuadTree::Iterator DI = lay->begin(); DI != lay->end(); DI++)
             DI->write(tedfile);
          tedfile->putByte(tedf_GRCEND);
       }
@@ -833,14 +991,13 @@ void laydata::TdtCell::dbExport(DbExportFile& exportf, const CellMap& allcells,
    //   with the new value.
 
    // loop the layers
-   LayerList::const_iterator wl;
-   for (wl = _layers.begin(); wl != _layers.end(); wl++)
+   for (LayerIterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
-      if ( (REF_LAY != wl->first) &&
-           (GRC_LAY != wl->first) &&
-           !exportf.layerSpecification(wl->first))
+      if ( (REF_LAY != lay.number()) &&
+           (GRC_LAY != lay.number()) &&
+           !exportf.layerSpecification(lay.number()))
          continue;
-      for (QuadTree::Iterator DI = wl->second->begin(); DI != wl->second->end(); DI++)
+      for (QuadTree::Iterator DI = lay->begin(); DI != lay->end(); DI++)
          DI->dbExport(exportf);
    }
    exportf.definitionFinish();
@@ -868,15 +1025,14 @@ void laydata::TdtCell::psWrite(PSFile& psf, const layprop::DrawProperties& drawp
    }
    psf.cellHeader(name(),_cellOverlap);
    // and now the layers
-   laydata::LayerList::const_iterator wl;
-   for (wl = _layers.begin(); wl != _layers.end(); wl++)
+   for (LayerIterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
-      LayerNumber curlayno = wl->first;
+      LayerNumber curlayno = lay.number();
       if (!drawprop.layerHidden(curlayno))
       {
          if (REF_LAY != curlayno)
             psf.propSet(drawprop.getColorName(curlayno), drawprop.getFillName(curlayno));
-         for (QuadTree::Iterator DI = wl->second->begin(); DI != wl->second->end(); DI++)
+         for (QuadTree::Iterator DI = lay->begin(); DI != lay->end(); DI++)
             DI->psWrite(psf, drawprop);
       }
    }
@@ -914,33 +1070,32 @@ laydata::TDTHierTree* laydata::TdtCell::hierOut(laydata::TDTHierTree*& Htree,
 
 void laydata::TdtCell::getCellOverlap()
 {
-   if (0 == _layers.size())
+   if (_layers.empty())
       _cellOverlap = DEFAULT_OVL_BOX;
    else
    {
-      LayerList::const_iterator LCI = _layers.begin();
-      _cellOverlap = LCI->second->overlap();
+      LayerIterator LCI = _layers.begin();
+      _cellOverlap = LCI->overlap();
       while (++LCI != _layers.end())
-         _cellOverlap.overlap(LCI->second->overlap());
+         _cellOverlap.overlap(LCI->overlap());
    }
 }
 
 DBbox laydata::TdtCell::getVisibleOverlap(const layprop::DrawProperties& prop)
 {
    DBbox vlOverlap(DEFAULT_OVL_BOX);
-   for (LayerList::const_iterator LCI = _layers.begin(); LCI != _layers.end(); LCI++)
+   for (LayerIterator LCI = _layers.begin(); LCI != _layers.end(); LCI++)
    {
-      LayerNumber  layno  = LCI->first;
-      QuadTree* cqTree = LCI->second;
+      LayerNumber  layno  = LCI.number();
       if (!prop.layerHidden(layno))
       {
          if (REF_LAY == layno)
          {
-            for(QuadTree::Iterator CS = cqTree->begin(); CS != cqTree->end(); CS++)
+            for(QuadTree::Iterator CS = LCI->begin(); CS != LCI->end(); CS++)
                CS->vlOverlap(prop, vlOverlap);
          }
          else
-            vlOverlap.overlap(cqTree->overlap());
+            vlOverlap.overlap(LCI->overlap());
       }
    }
    return vlOverlap;
@@ -963,21 +1118,20 @@ void laydata::TdtCell::selectInBox(DBbox select_in, const DWordSet& unselable, w
    if (0ll != select_in.cliparea(_cellOverlap))
    {
       // Select figures within the active layers
-      typedef LayerList::const_iterator LCI;
-      for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
+      for (LayerIterator lay = _layers.begin(); lay != _layers.end(); lay++)
       {
-         if (unselable.end() == unselable.find(lay->first))
+         if (unselable.end() == unselable.find(lay.number()))
          {
             DataList* ssl;
-            if (_shapesel.end() != _shapesel.find(lay->first))
-               ssl = _shapesel[lay->first];
+            if (_shapesel.end() != _shapesel.find(lay.number()))
+               ssl = _shapesel[lay.number()];
             else
                ssl = DEBUG_NEW DataList();
-            for (QuadTree::ClipIterator CI = lay->second->begin(select_in); CI != lay->second->end(); CI++)
+            for (QuadTree::ClipIterator CI = lay->begin(select_in); CI != lay->end(); CI++)
                if (layselmask & CI->lType())
                   CI->selectInBox(select_in, ssl, pntsel);
             if (ssl->empty())  delete ssl;
-            else               _shapesel[lay->first] = ssl;
+            else               _shapesel[lay.number()] = ssl;
          }
       }
    }
@@ -989,20 +1143,19 @@ void laydata::TdtCell::unselectInBox(DBbox select_in, bool pntsel, const DWordSe
    if (0ll != select_in.cliparea(_cellOverlap))
    {
       // Unselect figures within the active layers
-      typedef LayerList::const_iterator LCI;
-      for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
+      for (LayerIterator lay = _layers.begin(); lay != _layers.end(); lay++)
       {
-         if (unselable.end() == unselable.find(lay->first))
+         if (unselable.end() == unselable.find(lay.number()))
          {
             DataList* ssl;
-            if (_shapesel.end() != _shapesel.find(lay->first))
+            if (_shapesel.end() != _shapesel.find(lay.number()))
             {
-               ssl = _shapesel[lay->first];
+               ssl = _shapesel[lay.number()];
 /*          lay->second->unselectInBox(select_in, ssl, pntsel);                */
 //               void laydata::QTreeTmpl<DataT>::unselectInBox(DBbox& unselect_in, TObjDataPairList* unselist,
 //                                                                                bool pselect)
                // check the entire holder for clipping...
-               for (QuadTree::ClipIterator CI = lay->second->begin(select_in); CI != lay->second->end(); CI++)
+               for (QuadTree::ClipIterator CI = lay->begin(select_in); CI != lay->end(); CI++)
                {
                   // now start unselecting from the list
                   DataList::iterator DI = ssl->begin();
@@ -1017,9 +1170,9 @@ void laydata::TdtCell::unselectInBox(DBbox select_in, bool pntsel, const DWordSe
                if (ssl->empty())
                {
                   delete ssl;
-                  _shapesel.erase(_shapesel.find(lay->first));
+                  _shapesel.erase(_shapesel.find(lay.number()));
                }
-               else _shapesel[lay->first] = ssl;
+               else _shapesel[lay.number()] = ssl;
             }
          }
       }
@@ -1420,7 +1573,7 @@ void laydata::TdtCell::deleteSelected(laydata::AtticList* fsel,
       {
          if (_layers[CL->first]->empty())
          {
-            delete _layers[CL->first]; _layers.erase(_layers.find(CL->first));
+            delete _layers[CL->first]; _layers.erase(CL->first);
          }
          else _layers[CL->first]->validate();
       }
@@ -1594,14 +1747,14 @@ bool laydata::TdtCell::mergeSelected(AtticList** dasao)
 
 void laydata::TdtCell::destroyThis(laydata::TdtLibDir* libdir, TdtData* ds, LayerNumber la)
 {
-   laydata::QuadTree* lay = (_layers.find(la))->second;
+   laydata::QuadTree* lay = *(_layers.find(la));
    if (!lay) return;
    // for layer la
    if (lay->deleteThis(ds))
    {
       if (lay->empty())
       {
-         delete lay; _layers.erase(_layers.find(la));
+         delete lay; _layers.erase(la);
       }
       else lay->validate();
    }
@@ -1623,20 +1776,19 @@ void laydata::TdtCell::selectAll(const DWordSet& unselable, word layselmask)
    // for every single shape, it seems better to start from a clean list
    unselectAll();
    // Select figures within the active layers
-   typedef LayerList::const_iterator LCI;
-   for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
+   for (LayerIterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
-      if (unselable.end() == unselable.find(lay->first))
+      if (unselable.end() == unselable.find(lay.number()))
       {
          DataList* ssl = DEBUG_NEW DataList();
-/***/    selectAllWrapper(lay->second, ssl, layselmask);
+/***/    selectAllWrapper(*lay, ssl, layselmask);
          if (ssl->empty())
          {
             delete ssl;
             assert(laydata::_lmall != layselmask);
          }
          else
-            _shapesel[lay->first] = ssl;
+            _shapesel[lay.number()] = ssl;
       }
    }
 }
@@ -1645,13 +1797,12 @@ void laydata::TdtCell::fullSelect()
 {
    unselectAll();
    // Select figures within the active layers
-   typedef LayerList::const_iterator LCI;
-   for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
+   for (LayerIterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
       DataList* ssl = DEBUG_NEW DataList();
-/***/ selectAllWrapper(lay->second,ssl);
+/***/ selectAllWrapper(*lay,ssl);
       assert(!ssl->empty());
-      _shapesel[lay->first] = ssl;
+      _shapesel[lay.number()] = ssl;
    }
 }
 
@@ -1732,9 +1883,11 @@ laydata::AtticList* laydata::TdtCell::groupPrep(laydata::TdtLibDir* libdir)
       lslct = CL->second;
       atl = DEBUG_NEW ShapeList();
       // unlink the fully selected selected shapes
-      if (_layers[CL->first]->deleteMarked()) {
-         if (_layers[CL->first]->empty()) {
-            delete _layers[CL->first]; _layers.erase(_layers.find(CL->first));
+      if (_layers[CL->first]->deleteMarked())
+      {
+         if (_layers[CL->first]->empty())
+         {
+            delete _layers[CL->first]; _layers.erase(CL->first);
          }
          else _layers[CL->first]->validate();
       }
@@ -1792,7 +1945,7 @@ laydata::ShapeList* laydata::TdtCell::ungroupPrep(laydata::TdtLibDir* libdir)
       {
          if (cellrefLayer->empty())
          {
-            delete cellrefLayer; _layers.erase(_layers.find(REF_LAY));
+            delete cellrefLayer; _layers.erase(REF_LAY);
          }
          else cellrefLayer->validate();
       }
@@ -1858,7 +2011,7 @@ void laydata::TdtCell::transferLayer(LayerNumber dst)
             else
             {//..or remove the source layer if it remained empty
                delete _layers[CL->first];
-               _layers.erase(_layers.find(CL->first));
+               _layers.erase(CL->first);
             }
          }
          // traverse the shapes on this layer and add them to the destination layer
@@ -1917,7 +2070,7 @@ void laydata::TdtCell::transferLayer(SelectList* slst, LayerNumber dst)
       else
       {//..or remove the source layer if it remained empty
          delete _layers[dst];
-         _layers.erase(_layers.find(dst));
+         _layers.erase(dst);
       }
    }
    // traversing the input list - it contains the destination layers
@@ -2011,10 +2164,10 @@ void laydata::TdtCell::fixUnsorted()
          lay->second->commit();
       else
       {
-         LayerList::iterator tlay = _layers.find(lay->first);
+         LayerIterator tlay = _layers.find(lay->first);
          assert(tlay != _layers.end());
-         delete tlay->second;
-         _layers.erase(tlay);
+         delete (*tlay);
+         _layers.erase(lay->first);
       }
       delete lay->second;
    }
@@ -2078,9 +2231,8 @@ bool laydata::TdtCell::validateCells(laydata::TdtLibrary* ATDB)
 /*! Validate all layers*/
 void laydata::TdtCell::validateLayers()
 {
-   typedef LayerList::const_iterator LCI;
-   for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
-      lay->second->validate();
+   for (LayerIterator lay = _layers.begin(); lay != _layers.end(); lay++)
+      lay->validate();
 }
 
 dword laydata::TdtCell::getFullySelected(DataList* lslct) const
@@ -2297,9 +2449,9 @@ void laydata::TdtCell::collectUsedLays(const TdtLibDir* LTDB, bool recursive, La
       for (NameSet::const_iterator CC = _children.begin(); CC != _children.end(); CC++)
          LTDB->collectUsedLays(*CC, recursive, laylist);
    // then update with the layers used in this cell
-   for(LayerList::const_iterator CL = _layers.begin(); CL != _layers.end(); CL++)
-      if (LAST_EDITABLE_LAYNUM > CL->first)
-         laylist.push_back(CL->first);
+   for(LayerIterator lay = _layers.begin(); lay != _layers.end(); lay++)
+      if (LAST_EDITABLE_LAYNUM > lay.number())
+         laylist.push_back(lay.number());
 }
 
 void laydata::TdtCell::selectAllWrapper(QuadTree* qtree, DataList* selist, word selmask, bool mark)
