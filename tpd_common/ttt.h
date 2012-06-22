@@ -50,6 +50,7 @@ typedef          double          real     ; // 8 bytes
 
 typedef  dword                            WireWidth;
 typedef  dword                            LayerNumber;
+typedef  dword                            LayerDType;
 typedef  std::list<std::string>           NameList;
 typedef  std::set<std::string>            NameSet;
 typedef  std::list<word>                  WordList;
