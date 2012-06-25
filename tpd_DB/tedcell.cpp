@@ -44,35 +44,40 @@ extern layprop::FontLibrary* fontLib;
 laydata::LayerHolder::LayerHolder() :
    _DEFAULT_LAY_DATA_TYPE (      0 )
 {
-   //TODO?
+   _layers = DEBUG_NEW LayerNMap;
 }
 
-const laydata::LayerHolder::LayerIterator laydata::LayerHolder::begin() const
+laydata::LayerHolder::~LayerHolder()
 {
-   return LayerIterator(*this);
+   delete _layers;
 }
 
-const laydata::LayerHolder::LayerIterator laydata::LayerHolder::end() const
+const laydata::LayerHolder::Iterator laydata::LayerHolder::begin() const
 {
-   return LayerIterator();
+   return Iterator(*this);
 }
 
-const laydata::LayerIterator laydata::LayerHolder::find(LayerNumber layno) const
+const laydata::LayerHolder::Iterator laydata::LayerHolder::end() const
 {
-   LayerNMap::const_iterator layer = _layers.find(layno);
-   if (_layers.end() == layer) return LayerIterator();
+   return Iterator();
+}
+
+const laydata::LayerHolder::Iterator laydata::LayerHolder::find(LayerNumber layno) const
+{
+   LayerNMap::const_iterator layer = _layers->find(layno);
+   if (_layers->end() == layer) return Iterator();
    else
    {
       LayerDMap allTypes = layer->second;
       LayerDMap::const_iterator dtype = allTypes.find(_DEFAULT_LAY_DATA_TYPE);
-      if (allTypes.end() == dtype) return LayerIterator();
-      else return LayerIterator(*this, layno, _DEFAULT_LAY_DATA_TYPE);
+      if (allTypes.end() == dtype) return Iterator();
+      else return Iterator(*this, layno, _DEFAULT_LAY_DATA_TYPE);
    }
 }
 
 bool laydata::LayerHolder::empty() const
 {
-   return _layers.empty();
+   return _layers->empty();
 }
 
 void laydata::LayerHolder::clear()
@@ -82,26 +87,26 @@ void laydata::LayerHolder::clear()
 
 void laydata::LayerHolder::add(LayerNumber layno, QuadTree* quad)
 {
-   assert(_layers.end() == _layers.find(layno));
+   assert(_layers->end() == _layers->find(layno));
    std::pair<LayerDType , QuadTree*> dtype(_DEFAULT_LAY_DATA_TYPE, quad);
    LayerDMap dTypes;
    dTypes.insert(dtype);
    std::pair<LayerNumber, LayerDMap> layer(layno, dTypes);
-   _layers.insert(layer);
+   _layers->insert(layer);
 }
 
 void laydata::LayerHolder::erase(LayerNumber layno)
 {
-   LayerNMap::iterator layer = _layers.find(layno);
-   assert(_layers.end() != layer);
+   LayerNMap::iterator layer = _layers->find(layno);
+   assert(_layers->end() != layer);
    layer->second.clear();
-   _layers.erase(layer);
+   _layers->erase(layer);
 }
 
 laydata::QuadTree* laydata::LayerHolder::operator[](LayerNumber layno)
 {
-   LayerNMap::iterator layer = _layers.find(layno);
-   if (_layers.end() == layer) return NULL;
+   LayerNMap::iterator layer = _layers->find(layno);
+   if (_layers->end() == layer) return NULL;
    else
    {
       LayerDMap allTypes = layer->second;
@@ -118,14 +123,21 @@ laydata::LayerIterator::LayerIterator():
 }
 
 laydata::LayerIterator::LayerIterator( const LayerHolder& lhldr):
-   _layerHolder (&(lhldr._layers)              ),
-   _cNMap       ( _layerHolder->begin()        ),
-   _cDMap       ( _cNMap->second.begin()       )
+   _layerHolder ( lhldr._layers                )
 {
+   _cNMap = _layerHolder->begin();
+   if (_layerHolder->end() == _cNMap)
+      _layerHolder = NULL;
+   else
+   {
+      _cDMap= _cNMap->second.begin();
+      if (_cNMap->second.end() == _cDMap)
+         _layerHolder = NULL;
+   }
 }
 
 laydata::LayerIterator::LayerIterator( const LayerHolder& lhldr, LayerNumber layno, LayerDType datno):
-   _layerHolder (&(lhldr._layers)              )
+   _layerHolder ( lhldr._layers              )
 {
    _cNMap = _layerHolder->find(layno);
    assert (_layerHolder->end() != _cNMap);
@@ -157,11 +169,7 @@ const laydata::LayerIterator& laydata::LayerIterator::operator++()
       _cDMap = _cNMap->second.begin();
    }
    else
-   {
       _layerHolder = NULL;
-//      _cNMap       = NULL;
-//      _cDMap       = NULL;
-   }
    return *this;
 }
 
@@ -393,7 +401,7 @@ laydata::TdtDefaultCell::TdtDefaultCell(std::string name, int libID, bool orphan
 
 laydata::TdtDefaultCell::~TdtDefaultCell()
 {
-   for (LayerIterator lay = _layers.begin(); lay != _layers.end(); lay++)
+   for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
       lay->freeMemory();
       delete (*lay);
@@ -645,7 +653,7 @@ bool laydata::TdtCell::addChild(laydata::TdtDesign* ATDB, TdtDefaultCell* child)
 void laydata::TdtCell::openGlDraw(layprop::DrawProperties& drawprop, bool active) const
 {
    // Draw figures
-   for (LayerIterator lay = _layers.begin(); lay != _layers.end(); lay++)
+   for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
       LayerNumber curlayno = drawprop.getTenderLay(lay.number());
       if (!drawprop.layerHidden(curlayno)) drawprop.setCurrentColor(curlayno);
@@ -666,7 +674,7 @@ void laydata::TdtCell::openGlRender(tenderer::TopRend& rend, const CTM& trans,
 {
    rend.pushCell(_name, trans, _cellOverlap, active, selected);
    // Draw figures
-   for (LayerIterator lay = _layers.begin(); lay != _layers.end(); lay++)
+   for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
       //first - to check visibility of the layer
       if (rend.layerHidden(lay.number())) continue;
@@ -743,7 +751,7 @@ void laydata::TdtCell::motionDraw(const layprop::DrawProperties& drawprop,
       // somewhere up the hierarchy. On this level - no selected shapes
       // whatsoever exists, so just perform a regular draw, but of course
       // without fill
-      for (LayerIterator lay = _layers.begin(); lay != _layers.end(); lay++)
+      for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
          if (!drawprop.layerHidden(lay.number()))
          {
             const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(lay.number());
@@ -757,7 +765,7 @@ void laydata::TdtCell::motionDraw(const layprop::DrawProperties& drawprop,
 bool laydata::TdtCell::getShapeOver(TP pnt, const DWordSet& unselable)
 {
    laydata::TdtData* shape = NULL;
-   for (LayerIterator lay = _layers.begin(); lay != _layers.end(); lay++)
+   for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
       if ( (REF_LAY != lay.number())
           && (unselable.end() == unselable.find(lay.number()))
           && lay->getObjectOver(pnt,shape)
@@ -770,7 +778,7 @@ laydata::AtticList* laydata::TdtCell::changeSelect(TP pnt, SH_STATUS status, con
 {
    laydata::TdtData* prev = NULL;
    LayerNumber prevlay;
-   for (LayerIterator lay = _layers.begin(); lay != _layers.end(); lay++)
+   for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
       if (unselable.end() == unselable.find(lay.number()))
       {
@@ -820,7 +828,7 @@ void laydata::TdtCell::mouseHoover(TP& position, layprop::DrawProperties& drawpr
 {
    laydata::TdtData* prev = NULL;
    LayerNumber prevlay = 0;
-   for (LayerIterator lay = _layers.begin(); lay != _layers.end(); lay++)
+   for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
       if ( (unselable.end() == unselable.find(lay.number())) )
       {
@@ -860,7 +868,7 @@ laydata::AtticList* laydata::TdtCell::findSelected(TP pnt)
 
    laydata::TdtData *shape = NULL;
    //unsigned prevlay;
-   for (LayerIterator lay = _layers.begin(); lay != _layers.end(); lay++)
+   for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
       laydata::ShapeList* atl = DEBUG_NEW ShapeList();
       (*errList)[lay.number()] = atl;
@@ -929,7 +937,7 @@ void laydata::TdtCell::write(OutputTdtFile* const tedfile, const CellMap& allcel
    tedfile->putByte(tedf_CELL);
    tedfile->putString(name());
    // and now the layers
-   for (LayerIterator lay = _layers.begin(); lay != _layers.end(); lay++)
+   for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
       if (REF_LAY == lay.number())
       {
@@ -991,7 +999,7 @@ void laydata::TdtCell::dbExport(DbExportFile& exportf, const CellMap& allcells,
    //   with the new value.
 
    // loop the layers
-   for (LayerIterator lay = _layers.begin(); lay != _layers.end(); lay++)
+   for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
       if ( (REF_LAY != lay.number()) &&
            (GRC_LAY != lay.number()) &&
@@ -1025,7 +1033,7 @@ void laydata::TdtCell::psWrite(PSFile& psf, const layprop::DrawProperties& drawp
    }
    psf.cellHeader(name(),_cellOverlap);
    // and now the layers
-   for (LayerIterator lay = _layers.begin(); lay != _layers.end(); lay++)
+   for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
       LayerNumber curlayno = lay.number();
       if (!drawprop.layerHidden(curlayno))
@@ -1074,7 +1082,7 @@ void laydata::TdtCell::getCellOverlap()
       _cellOverlap = DEFAULT_OVL_BOX;
    else
    {
-      LayerIterator LCI = _layers.begin();
+      LayerHolder::Iterator LCI = _layers.begin();
       _cellOverlap = LCI->overlap();
       while (++LCI != _layers.end())
          _cellOverlap.overlap(LCI->overlap());
@@ -1084,7 +1092,7 @@ void laydata::TdtCell::getCellOverlap()
 DBbox laydata::TdtCell::getVisibleOverlap(const layprop::DrawProperties& prop)
 {
    DBbox vlOverlap(DEFAULT_OVL_BOX);
-   for (LayerIterator LCI = _layers.begin(); LCI != _layers.end(); LCI++)
+   for (LayerHolder::Iterator LCI = _layers.begin(); LCI != _layers.end(); LCI++)
    {
       LayerNumber  layno  = LCI.number();
       if (!prop.layerHidden(layno))
@@ -1118,7 +1126,7 @@ void laydata::TdtCell::selectInBox(DBbox select_in, const DWordSet& unselable, w
    if (0ll != select_in.cliparea(_cellOverlap))
    {
       // Select figures within the active layers
-      for (LayerIterator lay = _layers.begin(); lay != _layers.end(); lay++)
+      for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
       {
          if (unselable.end() == unselable.find(lay.number()))
          {
@@ -1143,7 +1151,7 @@ void laydata::TdtCell::unselectInBox(DBbox select_in, bool pntsel, const DWordSe
    if (0ll != select_in.cliparea(_cellOverlap))
    {
       // Unselect figures within the active layers
-      for (LayerIterator lay = _layers.begin(); lay != _layers.end(); lay++)
+      for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
       {
          if (unselable.end() == unselable.find(lay.number()))
          {
@@ -1776,7 +1784,7 @@ void laydata::TdtCell::selectAll(const DWordSet& unselable, word layselmask)
    // for every single shape, it seems better to start from a clean list
    unselectAll();
    // Select figures within the active layers
-   for (LayerIterator lay = _layers.begin(); lay != _layers.end(); lay++)
+   for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
       if (unselable.end() == unselable.find(lay.number()))
       {
@@ -1797,7 +1805,7 @@ void laydata::TdtCell::fullSelect()
 {
    unselectAll();
    // Select figures within the active layers
-   for (LayerIterator lay = _layers.begin(); lay != _layers.end(); lay++)
+   for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
       DataList* ssl = DEBUG_NEW DataList();
 /***/ selectAllWrapper(*lay,ssl);
@@ -2164,7 +2172,7 @@ void laydata::TdtCell::fixUnsorted()
          lay->second->commit();
       else
       {
-         LayerIterator tlay = _layers.find(lay->first);
+         LayerHolder::Iterator tlay = _layers.find(lay->first);
          assert(tlay != _layers.end());
          delete (*tlay);
          _layers.erase(lay->first);
@@ -2231,7 +2239,7 @@ bool laydata::TdtCell::validateCells(laydata::TdtLibrary* ATDB)
 /*! Validate all layers*/
 void laydata::TdtCell::validateLayers()
 {
-   for (LayerIterator lay = _layers.begin(); lay != _layers.end(); lay++)
+   for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
       lay->validate();
 }
 
@@ -2449,7 +2457,7 @@ void laydata::TdtCell::collectUsedLays(const TdtLibDir* LTDB, bool recursive, La
       for (NameSet::const_iterator CC = _children.begin(); CC != _children.end(); CC++)
          LTDB->collectUsedLays(*CC, recursive, laylist);
    // then update with the layers used in this cell
-   for(LayerIterator lay = _layers.begin(); lay != _layers.end(); lay++)
+   for(LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
       if (LAST_EDITABLE_LAYNUM > lay.number())
          laylist.push_back(lay.number());
 }
