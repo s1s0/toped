@@ -40,7 +40,6 @@ namespace laydata {
    typedef std::map<LayerDType , QuadTree* >        LayerDMap;
    typedef std::map<LayerNumber, LayerDMap >        LayerNMap;
 
-
    class LayerIterator;
    class LayerHolder {
    public:
@@ -58,8 +57,6 @@ namespace laydata {
       QuadTree*                  operator[](LayerNumber);
    private:
       LayerNMap*                 _layers;
-      const LayerDType           _DEFAULT_LAY_DATA_TYPE;
-
    };
 
    class LayerIterator {
@@ -191,7 +188,7 @@ namespace laydata {
       void                 registerCellRef(CellDefin str, CTM trans);
       void                 registerCellARef(CellDefin str, CTM trans, ArrayProps&);
       TdtCellRef*          addCellRef(TdtDesign*, CellDefin str, CTM trans);
-      void                 addAuxRef(LayerNumber layno, auxdata::GrcCell*);
+      void                 addAuxRef(auxdata::GrcCell*);
       TdtCellAref*         addCellARef(TdtDesign*, CellDefin, CTM, ArrayProps&);
       bool                 addChild(TdtDesign*, TdtDefaultCell*);
       virtual void         write(OutputTdtFile* const, const CellMap&, const TDTHierTree*) const;

@@ -226,7 +226,7 @@ void tellstdfunc::grcCLEANALAYER::undo()
       bool emptyCell = grcCell->fixUnsorted();
       assert(!emptyCell);
       if (newGrcCellRequired)
-         tCell->addAuxRef(GRC_LAY, grcCell);
+         tCell->addAuxRef(grcCell);
 
       tDesign->fixReferenceOverlap(oldOverlap, tCell);
       TpdPost::treeMarkGrcMember(tDesign->activeCellName().c_str(), true);
@@ -327,7 +327,7 @@ void tellstdfunc::grcREPAIRDATA::undo()
       bool emptyCell = grcCell->fixUnsorted();
       assert(!emptyCell);
       if (newGrcCellRequired)
-         tCell->addAuxRef(GRC_LAY, grcCell);
+         tCell->addAuxRef(grcCell);
       // now remove the recovered data
       assert(1 == tdtlayers->size()); // single layer expected only
       assert(grcLayer == tdtlayers->begin()->first); // make sure we have the same layer

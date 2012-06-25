@@ -1302,7 +1302,7 @@ void ImportDB::convert(ForeignCell* src_structure, bool overwrite)
       if (emptyCell)
          delete _grc_structure;
       else
-         _dst_structure->addAuxRef(GRC_LAY, _grc_structure);
+         _dst_structure->addAuxRef(_grc_structure);
       _dst_structure->fixUnsorted();
       // and finally - register the cell
       (*_tdt_db)()->registerCellRead(gname, _dst_structure);
