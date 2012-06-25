@@ -34,9 +34,6 @@
 namespace laydata {
 
 //==============================================================================
-   class TdtCellRef;
-   class TdtCellAref;
-   typedef  std::map<LayerNumber, QuadTree*>        LayerContainter;
    typedef  std::map<LayerNumber, QTreeTmp*>        TmpLayerMap;
    typedef  SGHierTree<TdtDefaultCell>              TDTHierTree;
 
@@ -48,18 +45,19 @@ namespace laydata {
    class LayerHolder {
    public:
       friend class LayerIterator;
-      typedef laydata::LayerIterator LayerIterator;
+      typedef laydata::LayerIterator Iterator;
                                  LayerHolder();
-      const LayerIterator        begin() const;
-      const LayerIterator        end() const;
-      const LayerIterator        find(LayerNumber) const;
+      virtual                   ~LayerHolder();
+      const Iterator             begin() const;
+      const Iterator             end() const;
+      const Iterator             find(LayerNumber) const;
       bool                       empty() const;
       void                       clear();
       void                       add(LayerNumber, QuadTree*);
       void                       erase(LayerNumber);
       QuadTree*                  operator[](LayerNumber);
    private:
-      LayerNMap                  _layers;
+      LayerNMap*                 _layers;
       const LayerDType           _DEFAULT_LAY_DATA_TYPE;
 
    };
@@ -107,6 +105,8 @@ namespace laydata {
    When edit in place mode is not active - then the _peditchain is NULL and the
    procedure above is skipped.
    */
+   class TdtCellRef;
+   class TdtCellAref;
    class EditObject {
    public:
                                  EditObject();
