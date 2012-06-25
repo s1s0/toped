@@ -49,12 +49,12 @@ namespace laydata {
       virtual                   ~LayerHolder();
       const Iterator             begin() const;
       const Iterator             end() const;
-      const Iterator             find(LayerNumber) const;
+      const Iterator             find(const LayerDef&) const;
       bool                       empty() const;
       void                       clear();
-      void                       add(LayerNumber, QuadTree*);
-      void                       erase(LayerNumber);
-      QuadTree*                  operator[](LayerNumber);
+      void                       add(const LayerDef&, QuadTree*);
+      void                       erase(const LayerDef&);
+      QuadTree*                  operator[](const LayerDef&);
    private:
       LayerNMap*                 _layers;
    };
@@ -63,7 +63,7 @@ namespace laydata {
    public:
                                 LayerIterator();
                                 LayerIterator(const LayerHolder&);
-                                LayerIterator(const LayerHolder&, LayerNumber, LayerDType);
+                                LayerIterator(const LayerHolder&, const LayerDef&);
                                 LayerIterator(const LayerIterator&);
       virtual                  ~LayerIterator();
       const LayerIterator&      operator++();    //Prefix
@@ -157,7 +157,7 @@ namespace laydata {
                                       const CellMap* = NULL, const TDTHierTree* = NULL) const;
          virtual void        collectUsedLays(const TdtLibDir*, bool, LayerTMPList&) const;
          virtual void        renameChild(std::string, std::string) {assert(false); /* TdTDefaultCell can not be renamed */}
-         bool                checkLayer(LayerNumber) const;
+         bool                checkLayer(const LayerDef&) const;
          void                setName(std::string nname) {_name = nname;}
          bool                orphan() const             {return _orphan;}
          void                setOrphan(bool orph)       {_orphan = orph;}
@@ -183,7 +183,7 @@ namespace laydata {
       virtual void         openGlRender(tenderer::TopRend&, const CTM&, bool, bool) const;
       virtual void         motionDraw(const layprop::DrawProperties&, CtmQueue&,
                                                           bool active=false) const;
-      QuadTree*            secureLayer(LayerNumber layno);
+      QuadTree*            secureLayer(const LayerDef&);
       QTreeTmp*            secureUnsortedLayer(LayerNumber layno);
       void                 registerCellRef(CellDefin str, CTM trans);
       void                 registerCellARef(CellDefin str, CTM trans, ArrayProps&);
