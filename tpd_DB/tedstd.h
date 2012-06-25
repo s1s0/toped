@@ -134,8 +134,8 @@ namespace laydata {
    struct LayerDef {
       LayerDef(LayerNumber num, LayerDType  typ) : _num(num), _typ(typ) {}
       LayerDef(LayerNumber num) : _num(num), _typ(DEFAULT_LAY_DATATYPE) {}
-      LayerNumber num() {return _num;}
-      LayerDType  typ() {return _typ;}
+      LayerNumber num() const {return _num;}
+      LayerDType  typ() const {return _typ;}
    private:
       LayerNumber _num;
       LayerDType  _typ;

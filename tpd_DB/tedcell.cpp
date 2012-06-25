@@ -61,16 +61,16 @@ const laydata::LayerHolder::Iterator laydata::LayerHolder::end() const
    return Iterator();
 }
 
-const laydata::LayerHolder::Iterator laydata::LayerHolder::find(LayerNumber layno) const
+const laydata::LayerHolder::Iterator laydata::LayerHolder::find(const LayerDef& laydef) const
 {
-   LayerNMap::const_iterator layer = _layers->find(layno);
+   LayerNMap::const_iterator layer = _layers->find(laydef.num());
    if (_layers->end() == layer) return Iterator();
    else
    {
       LayerDMap allTypes = layer->second;
-      LayerDMap::const_iterator dtype = allTypes.find(DEFAULT_LAY_DATATYPE);
+      LayerDMap::const_iterator dtype = allTypes.find(laydef.typ());
       if (allTypes.end() == dtype) return Iterator();
-      else return Iterator(*this, layno, DEFAULT_LAY_DATATYPE);
+      else return Iterator(*this, laydef);
    }
 }
 
@@ -84,32 +84,34 @@ void laydata::LayerHolder::clear()
 
 }
 
-void laydata::LayerHolder::add(LayerNumber layno, QuadTree* quad)
+void laydata::LayerHolder::add(const LayerDef& laydef, QuadTree* quad)
 {
-   assert(_layers->end() == _layers->find(layno));
-   std::pair<LayerDType , QuadTree*> dtype(DEFAULT_LAY_DATATYPE, quad);
+   assert(_layers->end() == _layers->find(laydef.num()));
+   std::pair<LayerDType , QuadTree*> dtype(laydef.typ(), quad);
    LayerDMap dTypes;
    dTypes.insert(dtype);
-   std::pair<LayerNumber, LayerDMap> layer(layno, dTypes);
+   std::pair<LayerNumber, LayerDMap> layer(laydef.num(), dTypes);
    _layers->insert(layer);
 }
 
-void laydata::LayerHolder::erase(LayerNumber layno)
+void laydata::LayerHolder::erase(const LayerDef& laydef)
 {
-   LayerNMap::iterator layer = _layers->find(layno);
+   LayerNMap::iterator layer = _layers->find(laydef.num());
    assert(_layers->end() != layer);
-   layer->second.clear();
-   _layers->erase(layer);
+   LayerDMap allTypes = layer->second;
+   allTypes.erase(laydef.typ());
+   if (allTypes.empty())
+      _layers->erase(layer);
 }
 
-laydata::QuadTree* laydata::LayerHolder::operator[](LayerNumber layno)
+laydata::QuadTree* laydata::LayerHolder::operator[](const LayerDef& laydef)
 {
-   LayerNMap::iterator layer = _layers->find(layno);
+   LayerNMap::iterator layer = _layers->find(laydef.num());
    if (_layers->end() == layer) return NULL;
    else
    {
       LayerDMap allTypes = layer->second;
-      LayerDMap::iterator dtype = allTypes.find(DEFAULT_LAY_DATATYPE);
+      LayerDMap::iterator dtype = allTypes.find(laydef.typ());
       if (allTypes.end() == dtype) return NULL;
       else return dtype->second;
    }
@@ -135,12 +137,12 @@ laydata::LayerIterator::LayerIterator( const LayerHolder& lhldr):
    }
 }
 
-laydata::LayerIterator::LayerIterator( const LayerHolder& lhldr, LayerNumber layno, LayerDType datno):
+laydata::LayerIterator::LayerIterator( const LayerHolder& lhldr, const LayerDef& laydef):
    _layerHolder ( lhldr._layers              )
 {
-   _cNMap = _layerHolder->find(layno);
+   _cNMap = _layerHolder->find(laydef.num());
    assert (_layerHolder->end() != _cNMap);
-   _cDMap = _cNMap->second.find(datno);
+   _cDMap = _cNMap->second.find(laydef.typ());
    assert(_cNMap->second.end() != _cDMap);
 }
 
@@ -494,9 +496,9 @@ void laydata::TdtDefaultCell::invalidateParents(laydata::TdtLibrary* ATDB)
    }
 }
 
-bool laydata::TdtDefaultCell::checkLayer(LayerNumber layno) const
+bool laydata::TdtDefaultCell::checkLayer(const LayerDef& laydef) const
 {
-   return (_layers.end() != _layers.find(layno));
+   return (_layers.end() != _layers.find(laydef));
 }
 
 //-----------------------------------------------------------------------------
@@ -573,18 +575,18 @@ void laydata::TdtCell::readTdtRef(InputTdtFile* const tedfile)
    }
 }
 
-laydata::QuadTree* laydata::TdtCell::secureLayer(LayerNumber layno)
+laydata::QuadTree* laydata::TdtCell::secureLayer(const LayerDef& laydef)
 {
-   // TODO Would be nice to update the code in such a was so the assert below holds
+   // TODO Would be nice to update the code in such a way so the assert below holds
    // assert((layno < LAST_EDITABLE_LAYNUM) || (layno == REF_LAY));
-   if (_layers.end() == _layers.find(layno))
-      _layers.add(layno, DEBUG_NEW QuadTree());
-   return _layers[layno];
+   if (_layers.end() == _layers.find(laydef))
+      _layers.add(laydef, DEBUG_NEW QuadTree());
+   return _layers[laydef];
 }
 
 laydata::QTreeTmp* laydata::TdtCell::secureUnsortedLayer(LayerNumber layno)
 {
-   // TODO Would be nice to update the code in such a was so the assert below holds
+   // TODO Would be nice to update the code in such a way so the assert below holds
    // assert((layno < LAST_EDITABLE_LAYNUM) || (layno == REF_LAY));
    if (_tmpLayers.end() == _tmpLayers.find(layno))
       _tmpLayers[layno] = DEBUG_NEW QTreeTmp(secureLayer(layno));
