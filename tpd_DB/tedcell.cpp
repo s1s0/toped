@@ -41,8 +41,7 @@
 extern layprop::FontLibrary* fontLib;
 
 //=============================================================================
-laydata::LayerHolder::LayerHolder() :
-   _DEFAULT_LAY_DATA_TYPE (      0 )
+laydata::LayerHolder::LayerHolder()
 {
    _layers = DEBUG_NEW LayerNMap;
 }
@@ -69,9 +68,9 @@ const laydata::LayerHolder::Iterator laydata::LayerHolder::find(LayerNumber layn
    else
    {
       LayerDMap allTypes = layer->second;
-      LayerDMap::const_iterator dtype = allTypes.find(_DEFAULT_LAY_DATA_TYPE);
+      LayerDMap::const_iterator dtype = allTypes.find(DEFAULT_LAY_DATATYPE);
       if (allTypes.end() == dtype) return Iterator();
-      else return Iterator(*this, layno, _DEFAULT_LAY_DATA_TYPE);
+      else return Iterator(*this, layno, DEFAULT_LAY_DATATYPE);
    }
 }
 
@@ -88,7 +87,7 @@ void laydata::LayerHolder::clear()
 void laydata::LayerHolder::add(LayerNumber layno, QuadTree* quad)
 {
    assert(_layers->end() == _layers->find(layno));
-   std::pair<LayerDType , QuadTree*> dtype(_DEFAULT_LAY_DATA_TYPE, quad);
+   std::pair<LayerDType , QuadTree*> dtype(DEFAULT_LAY_DATATYPE, quad);
    LayerDMap dTypes;
    dTypes.insert(dtype);
    std::pair<LayerNumber, LayerDMap> layer(layno, dTypes);
@@ -110,7 +109,7 @@ laydata::QuadTree* laydata::LayerHolder::operator[](LayerNumber layno)
    else
    {
       LayerDMap allTypes = layer->second;
-      LayerDMap::iterator dtype = allTypes.find(_DEFAULT_LAY_DATA_TYPE);
+      LayerDMap::iterator dtype = allTypes.find(DEFAULT_LAY_DATATYPE);
       if (allTypes.end() == dtype) return NULL;
       else return dtype->second;
    }
@@ -525,7 +524,7 @@ laydata::TdtCell::TdtCell(InputTdtFile* const tedfile, std::string name, int lib
          case    tedf_GRC:
          {
             auxdata::GrcCell* grc_structure = DEBUG_NEW auxdata::GrcCell(tedfile, _name);
-            addAuxRef(GRC_LAY, grc_structure);
+            addAuxRef(grc_structure);
             break;
          }
          default: throw EXPTNreadTDT("LAYER record type expected");
@@ -627,9 +626,9 @@ laydata::TdtCellAref* laydata::TdtCell::addCellARef(laydata::TdtDesign* ATDB,
    return cellaref;
 }
 
-void laydata::TdtCell::addAuxRef(LayerNumber layno, auxdata::GrcCell* str)
+void laydata::TdtCell::addAuxRef(auxdata::GrcCell* str)
 {
-   QuadTree *cellreflayer = secureLayer(layno);
+   QuadTree *cellreflayer = secureLayer(GRC_LAY);
    laydata::TdtAuxRef* cellref = DEBUG_NEW TdtAuxRef(str);
    cellreflayer->add(cellref);
 //   TpdPost::treeMarkGrcMember(_name, true);
