@@ -40,11 +40,31 @@ namespace laydata {
    typedef std::map<LayerDType , QuadTree* >        LayerDMap;
    typedef std::map<LayerNumber, LayerDMap >        LayerNMap;
 
-   class LayerIterator;
+   template <typename DataT>
+   class LayerIterator {
+   public:
+                                LayerIterator();
+                                LayerIterator(const LayerNMap*);
+                                LayerIterator(const LayerNMap*, const LayerDef&);
+                                LayerIterator(const LayerIterator&);
+      virtual                  ~LayerIterator();
+      const LayerIterator&      operator++();    //Prefix
+      const LayerIterator       operator++(int); //Postfix
+      bool                      operator==(const LayerIterator&) const;
+      bool                      operator!=(const LayerIterator&) const;
+      DataT                     operator->() const;
+      DataT                     operator*() const;
+      LayerNumber               number();
+   protected:
+      const LayerNMap*          _layerHolder;
+      LayerNMap::const_iterator _cNMap;
+      LayerDMap::const_iterator _cDMap;
+   };
+
    class LayerHolder {
    public:
-      friend class LayerIterator;
-      typedef laydata::LayerIterator Iterator;
+      friend class LayerIterator<QuadTree*>;
+      typedef LayerIterator<QuadTree*> Iterator;
                                  LayerHolder();
       virtual                   ~LayerHolder();
       const Iterator             begin() const;
@@ -57,26 +77,6 @@ namespace laydata {
       QuadTree*                  operator[](const LayerDef&);
    private:
       LayerNMap*                 _layers;
-   };
-
-   class LayerIterator {
-   public:
-                                LayerIterator();
-                                LayerIterator(const LayerHolder&);
-                                LayerIterator(const LayerHolder&, const LayerDef&);
-                                LayerIterator(const LayerIterator&);
-      virtual                  ~LayerIterator();
-      const LayerIterator&      operator++();    //Prefix
-      const LayerIterator       operator++(int); //Postfix
-      bool                      operator==(const LayerIterator&) const;
-      bool                      operator!=(const LayerIterator&) const;
-      QuadTree*                 operator->() const;
-      QuadTree*                 operator*() const;
-      LayerNumber               number();
-   protected:
-      const LayerNMap*          _layerHolder;
-      LayerNMap::const_iterator _cNMap;
-      LayerDMap::const_iterator _cDMap;
    };
 
 //==============================================================================

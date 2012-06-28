@@ -53,7 +53,7 @@ laydata::LayerHolder::~LayerHolder()
 
 const laydata::LayerHolder::Iterator laydata::LayerHolder::begin() const
 {
-   return Iterator(*this);
+   return Iterator(_layers);
 }
 
 const laydata::LayerHolder::Iterator laydata::LayerHolder::end() const
@@ -70,7 +70,7 @@ const laydata::LayerHolder::Iterator laydata::LayerHolder::find(const LayerDef& 
       LayerDMap allTypes = layer->second;
       LayerDMap::const_iterator dtype = allTypes.find(laydef.typ());
       if (allTypes.end() == dtype) return Iterator();
-      else return Iterator(*this, laydef);
+      else return Iterator(_layers, laydef);
    }
 }
 
@@ -118,13 +118,15 @@ laydata::QuadTree* laydata::LayerHolder::operator[](const LayerDef& laydef)
 }
 
 //=============================================================================
-laydata::LayerIterator::LayerIterator():
+template <typename DataT>
+laydata::LayerIterator<DataT>::LayerIterator():
    _layerHolder (                        NULL  )
 {
 }
 
-laydata::LayerIterator::LayerIterator( const LayerHolder& lhldr):
-   _layerHolder ( lhldr._layers                )
+template <typename DataT>
+laydata::LayerIterator<DataT>::LayerIterator( const LayerNMap* lhldr):
+   _layerHolder ( lhldr                        )
 {
    _cNMap = _layerHolder->begin();
    if (_layerHolder->end() == _cNMap)
@@ -137,8 +139,9 @@ laydata::LayerIterator::LayerIterator( const LayerHolder& lhldr):
    }
 }
 
-laydata::LayerIterator::LayerIterator( const LayerHolder& lhldr, const LayerDef& laydef):
-   _layerHolder ( lhldr._layers              )
+template <typename DataT>
+laydata::LayerIterator<DataT>::LayerIterator( const LayerNMap* lhldr, const LayerDef& laydef):
+   _layerHolder ( lhldr                      )
 {
    _cNMap = _layerHolder->find(laydef.num());
    assert (_layerHolder->end() != _cNMap);
@@ -146,19 +149,21 @@ laydata::LayerIterator::LayerIterator( const LayerHolder& lhldr, const LayerDef&
    assert(_cNMap->second.end() != _cDMap);
 }
 
-
-laydata::LayerIterator::LayerIterator(const LayerIterator& liter):
+template <typename DataT>
+laydata::LayerIterator<DataT>::LayerIterator(const LayerIterator<DataT>& liter):
    _layerHolder ( liter._layerHolder           ),
    _cNMap       ( liter._cNMap                 ),
    _cDMap       ( liter._cDMap                 )
 {
 }
 
-laydata::LayerIterator::~LayerIterator()
+template <typename DataT>
+laydata::LayerIterator<DataT>::~LayerIterator()
 {
 }
 
-const laydata::LayerIterator& laydata::LayerIterator::operator++()
+template <typename DataT>
+const laydata::LayerIterator<DataT>& laydata::LayerIterator<DataT>::operator++()
 {//Prefix
    LayerNMap::const_iterator nextNMap = _cNMap;
    LayerDMap::const_iterator nextDMap = _cDMap;
@@ -174,14 +179,16 @@ const laydata::LayerIterator& laydata::LayerIterator::operator++()
    return *this;
 }
 
-const laydata::LayerIterator laydata::LayerIterator::operator++(int)
+template <typename DataT>
+const laydata::LayerIterator<DataT> laydata::LayerIterator<DataT>::operator++(int)
 {//Postfix
    LayerIterator previous(*this);
    operator++();
    return previous;
 }
 
-bool laydata::LayerIterator::operator==(const LayerIterator& liter) const
+template <typename DataT>
+bool laydata::LayerIterator<DataT>::operator==(const LayerIterator<DataT>& liter) const
 {
    if ((NULL == _layerHolder) && (NULL == liter._layerHolder))
       return true;
@@ -191,12 +198,14 @@ bool laydata::LayerIterator::operator==(const LayerIterator& liter) const
                && (_cDMap       == liter._cDMap      ) );
 }
 
-bool laydata::LayerIterator::operator!=(const LayerIterator& liter) const
+template <typename DataT>
+bool laydata::LayerIterator<DataT>::operator!=(const LayerIterator<DataT>& liter) const
 {
    return !operator==(liter);
 }
 
-laydata::QuadTree* laydata::LayerIterator::operator->() const
+template <typename DataT>
+DataT laydata::LayerIterator<DataT>::operator->() const
 {
    if (   (NULL == _layerHolder           )
        || (_layerHolder->end()  == _cNMap )
@@ -204,12 +213,14 @@ laydata::QuadTree* laydata::LayerIterator::operator->() const
    return _cDMap->second;
 }
 
-laydata::QuadTree* laydata::LayerIterator::operator*() const
+template <typename DataT>
+DataT laydata::LayerIterator<DataT>::operator*() const
 {
    return operator->();
 }
 
-LayerNumber laydata::LayerIterator::number()
+template <typename DataT>
+LayerNumber laydata::LayerIterator<DataT>::number()
 {
    return _cNMap->first;
 }
@@ -2584,3 +2595,8 @@ laydata::TdtCell::~TdtCell()
 {
    unselectAll();
 }
+
+//==============================================================================
+// implicit template instantiation with a certain type parameter
+template class laydata::LayerIterator<laydata::QuadTree*>;
+
