@@ -1162,11 +1162,11 @@ int tellstdfunc::stdCHANGESTRING::execute()
       laydata::SelectList* texts4u = filter_selist(savelist, laydata::_lmtext);
       if (texts4u->empty())
       {
-         for (laydata::SelectList::const_iterator CL = savelist->begin(); CL != savelist->end(); CL++)
-            delete CL->second;
+         for (laydata::SelectList::Iterator CL = savelist->begin(); CL != savelist->end(); CL++)
+            delete *CL;
          delete savelist;
-         for (laydata::SelectList::const_iterator CL = texts4u->begin(); CL != texts4u->end(); CL++)
-            delete CL->second;
+         for (laydata::SelectList::Iterator CL = texts4u->begin(); CL != texts4u->end(); CL++)
+            delete *CL;
          delete texts4u;
          tell_log(console::MT_ERROR,"No text objects selected");
       }
