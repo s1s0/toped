@@ -37,47 +37,7 @@ namespace laydata {
    typedef  std::map<LayerNumber, QTreeTmp*>        TmpLayerMap;
    typedef  SGHierTree<TdtDefaultCell>              TDTHierTree;
 
-   typedef std::map<LayerDType , QuadTree* >        LayerDMap;
-   typedef std::map<LayerNumber, LayerDMap >        LayerNMap;
-
-   template <typename DataT>
-   class LayerIterator {
-   public:
-                                LayerIterator();
-                                LayerIterator(const LayerNMap*);
-                                LayerIterator(const LayerNMap*, const LayerDef&);
-                                LayerIterator(const LayerIterator&);
-      virtual                  ~LayerIterator();
-      const LayerIterator&      operator++();    //Prefix
-      const LayerIterator       operator++(int); //Postfix
-      bool                      operator==(const LayerIterator&) const;
-      bool                      operator!=(const LayerIterator&) const;
-      DataT                     operator->() const;
-      DataT                     operator*() const;
-      LayerNumber               number();
-   protected:
-      const LayerNMap*          _layerHolder;
-      LayerNMap::const_iterator _cNMap;
-      LayerDMap::const_iterator _cDMap;
-   };
-
-   class LayerHolder {
-   public:
-      friend class LayerIterator<QuadTree*>;
-      typedef LayerIterator<QuadTree*> Iterator;
-                                 LayerHolder();
-      virtual                   ~LayerHolder();
-      const Iterator             begin() const;
-      const Iterator             end() const;
-      const Iterator             find(const LayerDef&) const;
-      bool                       empty() const;
-      void                       clear();
-      void                       add(const LayerDef&, QuadTree*);
-      void                       erase(const LayerDef&);
-      QuadTree*                  operator[](const LayerDef&);
-   private:
-      LayerNMap*                 _layers;
-   };
+   typedef LayerContainer<QuadTree*>                LayerHolder;
 
 //==============================================================================
    /*!This class is holding the information about current cell - i.e. the cell

@@ -29,8 +29,7 @@
 #define TEDSTD_H_INCLUDED
 
 #include <string>
-#include "ttt.h"
-#include "outbox.h"
+#include "tedbac.h"
 
 //==============================================================================
 // Toped DaTa (TDT) file markers
@@ -109,7 +108,6 @@ namespace laydata {
       shp_exception  = 0x1000  // exception encountered during the shape checks
    } shape_status;
 
-   class TdtData;
    class EditObject;
    class TdtCell;
    class TdtDefaultCell;
@@ -117,11 +115,8 @@ namespace laydata {
    class TdtDesign;
    class TdtLibrary;
    class TdtLibDir;
-   template <typename DataT>   class QTStoreTmpl;
-   typedef QTStoreTmpl<TdtData>                     QTreeTmp;
-   typedef  std::pair<TdtData*, SGBitSet>           SelectDataPair;
-   typedef  std::list<SelectDataPair>               DataList;
-   typedef  std::map<LayerNumber, DataList*>        SelectList;
+   //   typedef  std::map<LayerNumber, DataList*>        SelectList;
+   typedef  LayerContainer<DataList*>               SelectList;
    typedef  std::list<TdtData*>                     ShapeList;
    typedef  std::map<LayerNumber,ShapeList*>        AtticList;
    typedef  std::map<std::string, TdtDefaultCell*>  CellMap;
@@ -130,17 +125,6 @@ namespace laydata {
    typedef  std::deque<EditObject*>                 EditCellStack;
    typedef  std::list<const CellMap*>               LibCellLists;
    typedef  std::list<TdtDefaultCell*>              CellDefList;
-
-   struct LayerDef {
-      LayerDef(LayerNumber num, LayerDType  typ) : _num(num), _typ(typ) {}
-      LayerDef(LayerNumber num) : _num(num), _typ(DEFAULT_LAY_DATATYPE) {}
-      LayerNumber num() const {return _num;}
-      LayerDType  typ() const {return _typ;}
-   private:
-      LayerNumber _num;
-      LayerDType  _typ;
-   };
-
 
    //==============================================================================
    class Validator {

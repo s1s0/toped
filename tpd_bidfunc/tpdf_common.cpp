@@ -132,16 +132,16 @@ telldata::TtList* tellstdfunc::make_ttlaylist(laydata::SelectList* shapesel) {
    telldata::TtList* llist = DEBUG_NEW telldata::TtList(telldata::tn_layout);
    laydata::DataList* lslct;
    SGBitSet pntl;
-   for (laydata::SelectList::const_iterator CL = shapesel->begin();
+   for (laydata::SelectList::Iterator CL = shapesel->begin();
                                             CL != shapesel->end(); CL++) {
-      lslct = CL->second;
+      lslct = *CL;
       // push each data reference into the TELL list
       for (laydata::DataList::const_iterator CI = lslct->begin();
                                              CI != lslct->end(); CI++) {
          // copy the pointlist, because it will be deleted with the shapeSel
          if (0 != CI->second.size()) pntl = SGBitSet(CI->second);
          else                        pntl = SGBitSet();
-         llist->add(DEBUG_NEW telldata::TtLayout(CI->first, CL->first, DEBUG_NEW SGBitSet(pntl)));
+         llist->add(DEBUG_NEW telldata::TtLayout(CI->first, CL.number(), DEBUG_NEW SGBitSet(pntl)));
       }
    }
    return llist;
@@ -244,7 +244,7 @@ laydata::SelectList* tellstdfunc::get_ttlaylist(telldata::TtList* llist)
    {
       clayer = static_cast<telldata::TtLayout*>(llist->mlist()[i])->layer();
       if (shapesel->end() == shapesel->find(clayer))
-         (*shapesel)[clayer] = DEBUG_NEW laydata::DataList();
+         shapesel->add(clayer, DEBUG_NEW laydata::DataList());
       pntl_o = static_cast<telldata::TtLayout*>(llist->mlist()[i])->selp();
 
       SGBitSet pntl_n;
@@ -308,9 +308,9 @@ laydata::DataList* tellstdfunc::copyDataList(const laydata::DataList* dlist)
 laydata::SelectList* tellstdfunc::copySelectList(const laydata::SelectList* dlist)
 {
    laydata::SelectList* clist = DEBUG_NEW laydata::SelectList();
-   for (laydata::SelectList::const_iterator CDI = dlist->begin(); CDI != dlist->end(); CDI++)
+   for (laydata::SelectList::Iterator CDI = dlist->begin(); CDI != dlist->end(); CDI++)
    {
-      (*clist)[CDI->first] = copyDataList(CDI->second);
+      clist->add(CDI.layDef(), copyDataList(*CDI));
    }
    return clist;
 }
@@ -318,9 +318,9 @@ laydata::SelectList* tellstdfunc::copySelectList(const laydata::SelectList* dlis
 //=============================================================================
 void tellstdfunc::cleanSelectList(laydata::SelectList* dlist)
 {
-   for (laydata::SelectList::const_iterator CDI = dlist->begin(); CDI != dlist->end(); CDI++)
+   for (laydata::SelectList::Iterator CDI = dlist->begin(); CDI != dlist->end(); CDI++)
    {
-      delete CDI->second;
+      delete *CDI;
    }
    delete dlist;
 }
@@ -329,9 +329,9 @@ void tellstdfunc::cleanFadeadList(laydata::SelectList** fadead)
 {
    for (byte i = 0; i < 3; i++)
    {
-      for (laydata::SelectList::iterator CI = fadead[i]->begin(); CI != fadead[i]->end(); CI++)
+      for (laydata::SelectList::Iterator CI = fadead[i]->begin(); CI != fadead[i]->end(); CI++)
       {
-         laydata::DataList* sshape = CI->second;
+         laydata::DataList* sshape = *CI;
          if (1 == i) // deleted list only
          {
             for (laydata::DataList::iterator CCI = sshape->begin(); CCI  != sshape->end(); CCI++)
@@ -352,11 +352,10 @@ laydata::SelectList* tellstdfunc::filter_selist(const laydata::SelectList* shape
 {
    laydata::SelectList* filtered = DEBUG_NEW laydata::SelectList();
 
-   for (laydata::SelectList::const_iterator CL = shapesel->begin();
-                                            CL != shapesel->end(); CL++)
+   for (laydata::SelectList::Iterator CL = shapesel->begin(); CL != shapesel->end(); CL++)
    {
       laydata::DataList* ssl = DEBUG_NEW laydata::DataList();
-      laydata::DataList* lslct = CL->second;
+      laydata::DataList* lslct = *CL;
       for (laydata::DataList::const_iterator CI = lslct->begin();
                                              CI != lslct->end(); CI++)
       {
@@ -368,7 +367,7 @@ laydata::SelectList* tellstdfunc::filter_selist(const laydata::SelectList* shape
          }
       }
       if    (ssl->empty()) delete ssl;
-      else                 (*filtered)[CL->first] = ssl;
+      else                 filtered->add(CL.layDef(), ssl);
    }
    return filtered;
 }

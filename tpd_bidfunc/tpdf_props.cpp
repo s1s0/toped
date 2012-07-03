@@ -330,7 +330,7 @@ int tellstdfunc::stdHIDELAYER::execute()
             laydata::SelectList *listselected = tDesign->shapeSel();
             if (hide && (listselected->end() != listselected->find(layno)))
             {
-               (*todslct)[layno] = DEBUG_NEW laydata::DataList(*((*listselected)[layno]));
+               todslct->add(layno, DEBUG_NEW laydata::DataList(*((*listselected)[layno])));
                DWordSet unselable;
                drawProp->allUnselectable(unselable);
                tDesign->unselectFromList(copySelectList(todslct), unselable);
@@ -442,7 +442,7 @@ int tellstdfunc::stdHIDELAYERS::execute()
             {
                if (hide && (listselected->end() != listselected->find(laynumber->value())))
                {
-                  (*todslct)[laynumber->value()] = DEBUG_NEW laydata::DataList(*((*listselected)[laynumber->value()]));
+                  todslct->add(laynumber->value(), DEBUG_NEW laydata::DataList(*((*listselected)[laynumber->value()])));
                }
                TpdPost::layer_status(tui::BT_LAYER_HIDE, laynumber->value(), hide);
                undolaylist->add(DEBUG_NEW telldata::TtInt(*laynumber));
@@ -723,7 +723,7 @@ int tellstdfunc::stdLOCKLAYER::execute()
             laydata::SelectList *listselected = tDesign->shapeSel();
             if (lock && (listselected->end() != listselected->find(layno)))
             {
-               (*todslct)[layno] = DEBUG_NEW laydata::DataList(*((*listselected)[layno]));
+               todslct->add(layno, DEBUG_NEW laydata::DataList(*((*listselected)[layno])));
                DWordSet unselable;
                drawProp->allUnselectable(unselable);
                tDesign->unselectFromList(copySelectList(todslct), unselable);
@@ -833,7 +833,7 @@ int tellstdfunc::stdLOCKLAYERS::execute()
             else if (lock ^ drawProp->layerLocked(tell2DBLayer(laynumber->value())))
             {
                if (lock && (listselected->end() != listselected->find(laynumber->value())))
-                  (*todslct)[laynumber->value()] = DEBUG_NEW laydata::DataList(*((*listselected)[laynumber->value()]));
+                  todslct->add(laynumber->value(), DEBUG_NEW laydata::DataList(*((*listselected)[laynumber->value()])));
                TpdPost::layer_status(tui::BT_LAYER_LOCK, laynumber->value(), lock);
                undolaylist->add(DEBUG_NEW telldata::TtInt(*laynumber));
             }
@@ -1095,7 +1095,7 @@ int tellstdfunc::stdLOADLAYSTAT::execute()
             for (WordSet::const_iterator CL = hll.begin(); CL != hll.end(); CL++)
             {
                if (listselected->end() != listselected->find(*CL))
-                  (*todslct)[*CL] = DEBUG_NEW laydata::DataList(*((*listselected)[*CL]));
+                  todslct->add(*CL, DEBUG_NEW laydata::DataList(*((*listselected)[*CL])));
             }
             // Now unselect the shapes in the target layers
             DWordSet unselable;
