@@ -28,6 +28,20 @@
 #include "tpdph.h"
 #include "tedbac.h"
 
+
+
+bool laydata::LayerDef::operator==(const LayerDef& cmp) const
+{
+   return ((_num == cmp._num) && (_typ == cmp._typ));
+}
+
+
+bool laydata::LayerDef::operator!=(const LayerDef& cmp) const
+{
+   return ((_num != cmp._num) || (_typ != cmp._typ));
+}
+
+
 //=============================================================================
 template <typename DataT>
 laydata::LayerIterator<DataT>::LayerIterator():
@@ -242,6 +256,8 @@ DataT laydata::LayerContainer<DataT>::operator[](const LayerDef& laydef)
 // implicit template instantiation with a certain type parameter
 template class laydata::LayerIterator<laydata::QuadTree*>;
 template class laydata::LayerContainer<laydata::QuadTree*>;
+template class laydata::LayerIterator<laydata::QTreeTmp*>;
+template class laydata::LayerContainer<laydata::QTreeTmp*>;
 template class laydata::LayerIterator<laydata::DataList*>;
 template class laydata::LayerContainer<laydata::DataList*>;
 template class laydata::LayerIterator<laydata::ShapeList*>;

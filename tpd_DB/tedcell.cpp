@@ -316,7 +316,7 @@ void laydata::TdtDefaultCell::invalidateParents(laydata::TdtLibrary* ATDB)
       if (hc->Getparent())
       {
          LayerHolder llist = hc->Getparent()->GetItem()->_layers;
-         if (llist.end() != llist.find(REF_LAY)) llist[REF_LAY]->invalidate();
+         if (llist.end() != llist.find(REF_LAY_DEF)) llist[REF_LAY_DEF]->invalidate();
       }
       hc = hc->GetNextMember(this);
    }
@@ -387,7 +387,7 @@ void laydata::TdtCell::readTdtRef(InputTdtFile* const tedfile)
 {
    byte      recordtype;
    TdtData*  newData;
-   QTreeTmp* tmpLayer = secureUnsortedLayer(REF_LAY);
+   QTreeTmp* tmpLayer = secureUnsortedLayer(REF_LAY_DEF);
    while (tedf_REFSEND != (recordtype = tedfile->getByte()))
    {
       switch (recordtype)
@@ -410,25 +410,25 @@ laydata::QuadTree* laydata::TdtCell::secureLayer(const LayerDef& laydef)
    return _layers[laydef];
 }
 
-laydata::QTreeTmp* laydata::TdtCell::secureUnsortedLayer(LayerNumber layno)
+laydata::QTreeTmp* laydata::TdtCell::secureUnsortedLayer(const LayerDef& laydef)
 {
    // TODO Would be nice to update the code in such a way so the assert below holds
    // assert((layno < LAST_EDITABLE_LAYNUM) || (layno == REF_LAY));
-   if (_tmpLayers.end() == _tmpLayers.find(layno))
-      _tmpLayers[layno] = DEBUG_NEW QTreeTmp(secureLayer(layno));
-   return _tmpLayers[layno];
+   if (_tmpLayers.end() == _tmpLayers.find(laydef))
+      _tmpLayers.add(laydef, DEBUG_NEW QTreeTmp(secureLayer(laydef)));
+   return _tmpLayers[laydef];
 }
 
 void laydata::TdtCell::registerCellRef(CellDefin str, CTM trans)
 {
-   QTreeTmp *cellreflayer = secureUnsortedLayer(REF_LAY);
+   QTreeTmp *cellreflayer = secureUnsortedLayer(REF_LAY_DEF);
    cellreflayer->put(DEBUG_NEW TdtCellRef(str, trans));
    _children.insert(str->name());
 }
 
 void laydata::TdtCell::registerCellARef(CellDefin str, CTM trans, ArrayProps& arrprops)
 {
-   QTreeTmp *cellreflayer = secureUnsortedLayer(REF_LAY);
+   QTreeTmp *cellreflayer = secureUnsortedLayer(REF_LAY_DEF);
    cellreflayer->put(DEBUG_NEW TdtCellAref(str, trans, arrprops));
   _children.insert(str->name());
 }
@@ -437,7 +437,7 @@ laydata::TdtCellRef* laydata::TdtCell::addCellRef(laydata::TdtDesign* ATDB,
                                  CellDefin str, CTM trans)
 {
    if (!addChild(ATDB, str)) return NULL;
-   QuadTree *cellreflayer = secureLayer(REF_LAY);
+   QuadTree *cellreflayer = secureLayer(REF_LAY_DEF);
    laydata::TdtCellRef* cellref = DEBUG_NEW TdtCellRef(str, trans);
    cellreflayer->add(cellref);
    return cellref;
@@ -447,7 +447,7 @@ laydata::TdtCellAref* laydata::TdtCell::addCellARef(laydata::TdtDesign* ATDB,
           CellDefin str, CTM trans, ArrayProps& arrprops)
 {
    if (!addChild(ATDB, str)) return NULL;
-   QuadTree *cellreflayer = secureLayer(REF_LAY);
+   QuadTree *cellreflayer = secureLayer(REF_LAY_DEF);
    laydata::TdtCellAref* cellaref =
                        DEBUG_NEW TdtCellAref(str, trans, arrprops);
    cellreflayer->add(cellaref);
@@ -456,7 +456,7 @@ laydata::TdtCellAref* laydata::TdtCell::addCellARef(laydata::TdtDesign* ATDB,
 
 void laydata::TdtCell::addAuxRef(auxdata::GrcCell* str)
 {
-   QuadTree *cellreflayer = secureLayer(GRC_LAY);
+   QuadTree *cellreflayer = secureLayer(GRC_LAY_DEF);
    laydata::TdtAuxRef* cellref = DEBUG_NEW TdtAuxRef(str);
    cellreflayer->add(cellref);
 //   TpdPost::treeMarkGrcMember(_name, true);
@@ -593,7 +593,7 @@ bool laydata::TdtCell::getShapeOver(TP pnt, const DWordSet& unselable)
 {
    laydata::TdtData* shape = NULL;
    for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
-      if ( (REF_LAY != lay.number())
+      if ( (REF_LAY_DEF != lay.layDef())
           && (unselable.end() == unselable.find(lay.number()))
           && lay->getObjectOver(pnt,shape)
           )
@@ -710,12 +710,12 @@ laydata::AtticList* laydata::TdtCell::findSelected(TP pnt)
 laydata::TdtCellRef* laydata::TdtCell::getCellOver(TP pnt, CtmStack& transtack,
                      CellRefStack* refstack, const DWordSet& unselable)
 {
-    if (_layers.end() == _layers.find(REF_LAY)) return NULL;
+    if (_layers.end() == _layers.find(REF_LAY_DEF)) return NULL;
     laydata::TdtData *cellobj = NULL;
 //    laydata::TdtData *shapeobj = NULL;
     laydata::TdtCellRef *cref = NULL;
     // go trough referenced cells ...
-    while (_layers[REF_LAY]->getObjectOver(pnt,cellobj))
+    while (_layers[REF_LAY_DEF]->getObjectOver(pnt,cellobj))
     {
       //... and get the one that overlaps pnt.
       cref = static_cast<laydata::TdtCellRef*>(cellobj);
@@ -766,7 +766,7 @@ void laydata::TdtCell::write(OutputTdtFile* const tedfile, const CellMap& allcel
    // and now the layers
    for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
-      if (REF_LAY == lay.number())
+      if (REF_LAY_DEF == lay.layDef())
       {
          tedfile->putByte(tedf_REFS);
          for (QuadTree::Iterator DI = lay->begin(); DI != lay->end(); DI++)
@@ -828,8 +828,8 @@ void laydata::TdtCell::dbExport(DbExportFile& exportf, const CellMap& allcells,
    // loop the layers
    for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
-      if ( (REF_LAY != lay.number()) &&
-           (GRC_LAY != lay.number()) &&
+      if ( (REF_LAY_DEF != lay.layDef()) &&
+           (GRC_LAY_DEF != lay.layDef()) &&
            !exportf.layerSpecification(lay.number()))
          continue;
       for (QuadTree::Iterator DI = lay->begin(); DI != lay->end(); DI++)
@@ -1118,7 +1118,7 @@ void laydata::TdtCell::copySelected(const CTM& trans)
          CL++; continue;
       }
       // Now - Go to copy and sort
-      QTreeTmp* dst = secureUnsortedLayer(CL.number());
+      QTreeTmp* dst = secureUnsortedLayer(CL.layDef());
       DI = CL->begin();
       while (CL->end() != DI)
       {
@@ -1144,7 +1144,7 @@ void laydata::TdtCell::addList(laydata::TdtDesign* ATDB, AtticList* nlst)
    for (AtticList::Iterator CL = nlst->begin(); CL != nlst->end(); CL++)
    {
       // secure the target layer
-      QTreeTmp* wl = secureUnsortedLayer(CL.number());
+      QTreeTmp* wl = secureUnsortedLayer(CL.layDef());
       // It appears that there is no need here to gather all the layers and eventually
       // to make sure that there are defined properties for them later. The point is that
       // the calls to this function are not normally using new layers. This is of course
@@ -1156,7 +1156,7 @@ void laydata::TdtCell::addList(laydata::TdtDesign* ATDB, AtticList* nlst)
          (*DI)->setStatus(sh_active);
          wl->put(*DI);
          //update the hierarchy tree if this is a cell
-         if (REF_LAY == CL.number()) addChild(ATDB,
+         if (REF_LAY_DEF == CL.layDef()) addChild(ATDB,
                             static_cast<TdtCellRef*>(*DI)->structure());
       }
       CL->clear();
@@ -1422,7 +1422,7 @@ bool laydata::TdtCell::cutPolySelected(PointVector& plst, AtticList** dasao)
    {
       assert((_layers.end() != _layers.find(CL.layDef())));
       // omit the layer if there are no fully selected shapes
-      if ((REF_LAY == CL.number()) || (0 == getFullySelected(*CL)))  continue;
+      if ((REF_LAY_DEF == CL.layDef()) || (0 == getFullySelected(*CL)))  continue;
       // initialize the corresponding 3 shape lists -> one per attic list
       // DElete/CUt/REst/
       ShapeList* decure[3];
@@ -1458,7 +1458,7 @@ bool laydata::TdtCell::stretchSelected(int bfactor, AtticList** dasao)
    {
       assert((_layers.end() != _layers.find(CL.layDef())));
       // omit the layer if there are no fully selected shapes
-      if ((REF_LAY == CL.number()) || (0 == getFullySelected(*CL)))  continue;
+      if ((REF_LAY_DEF == CL.layDef()) || (0 == getFullySelected(*CL)))  continue;
       // initialize the corresponding 3 shape lists -> one per attic list
       // DElete/CUt/REst/
       ShapeList* decure[2];
@@ -1487,7 +1487,7 @@ bool laydata::TdtCell::mergeSelected(AtticList** dasao)
       ShapeList* mrgcand = NULL;
       ShapeList* cleared = NULL;
       // omit the layer if there are no fully selected shapes
-      if ((REF_LAY == CL.number()) || (NULL == (mrgcand = mergePrep(CL.number()))))  continue;
+      if ((REF_LAY_DEF == CL.layDef()) || (NULL == (mrgcand = mergePrep(CL.number()))))  continue;
       cleared = DEBUG_NEW ShapeList();
       //
       // A rather convoluted traversing to produce all merged shapes ...
@@ -1747,13 +1747,13 @@ laydata::AtticList* laydata::TdtCell::groupPrep(laydata::TdtLibDir* libdir)
 laydata::ShapeList* laydata::TdtCell::ungroupPrep(laydata::TdtLibDir* libdir)
 {
    ShapeList* csel = DEBUG_NEW ShapeList();
-   if (_shapesel.end() != _shapesel.find(REF_LAY))
+   if (_shapesel.end() != _shapesel.find(REF_LAY_DEF))
    {
       DataList::iterator CI;
       // First of all - we have to preserve the references of the cells which
       // contain invalid (GRC) data. By convention those cells shall not be
       // ungrouped
-      for (CI = _shapesel[REF_LAY]->begin(); CI != _shapesel[REF_LAY]->end(); CI++)
+      for (CI = _shapesel[REF_LAY_DEF]->begin(); CI != _shapesel[REF_LAY_DEF]->end(); CI++)
       {
          TdtCell* structure = static_cast<TdtCellRef*>(CI->first)->cStructure();
          if (structure->checkLayer(GRC_LAY))
@@ -1765,20 +1765,20 @@ laydata::ShapeList* laydata::TdtCell::ungroupPrep(laydata::TdtLibDir* libdir)
          }
       }
 
-      QuadTree* cellrefLayer = _layers[REF_LAY];
+      QuadTree* cellrefLayer = _layers[REF_LAY_DEF];
       // now unlink the selected cell references
       if (cellrefLayer->deleteMarked())
       {
          if (cellrefLayer->empty())
          {
-            delete cellrefLayer; _layers.erase(REF_LAY);
+            delete cellrefLayer; _layers.erase(REF_LAY_DEF);
          }
          else cellrefLayer->validate();
       }
       // now move every single shape in the corresponding csel layer and also
       // return the status of the cells with invalid data.
-      CI = _shapesel[REF_LAY]->begin();
-      while (CI != _shapesel[REF_LAY]->end())
+      CI = _shapesel[REF_LAY_DEF]->begin();
+      while (CI != _shapesel[REF_LAY_DEF]->end())
       {
          // ... but only if it is marked as sh_deleted
          if (sh_deleted == CI->first->status())
@@ -1786,7 +1786,7 @@ laydata::ShapeList* laydata::TdtCell::ungroupPrep(laydata::TdtLibDir* libdir)
             CI->first->setStatus(sh_active);
             csel->push_back(CI->first);
             assert( 0 == CI->second.size() );
-            CI = _shapesel[REF_LAY]->erase(CI);
+            CI = _shapesel[REF_LAY_DEF]->erase(CI);
          }
          else
          {
@@ -1795,16 +1795,16 @@ laydata::ShapeList* laydata::TdtCell::ungroupPrep(laydata::TdtLibDir* libdir)
             CI++;
          }
       }
-      if (_shapesel[REF_LAY]->empty())
+      if (_shapesel[REF_LAY_DEF]->empty())
       {
-         delete _shapesel[REF_LAY];
-         _shapesel.erase(REF_LAY);
+         delete _shapesel[REF_LAY_DEF];
+         _shapesel.erase(REF_LAY_DEF);
       }
    }
    // Don't invalidate parent cells. The reason is, that in result of the
    // ungroup operation, shapes will be just regrouped and the final
    // overlapping box is supposed to remain the same.
-   // The quadTrees of the REF_LAY must be (and is) validated
+   // The quadTrees of the REF_LAY must be (and are) validated
    updateHierarchy(libdir);
    return csel;
 }
@@ -1826,10 +1826,10 @@ void laydata::TdtCell::transferLayer(LayerNumber dst)
    while (_shapesel.end() != CL)
    {
       assert((_layers.end() != _layers.find(CL.layDef())));
-      // we're not doing anything if the current layer appers to be dst,
+      // we're not doing anything if the current layer appears to be dst,
       // i.e. don't mess around if the source and destination layers are the same!
       // The same for the reference layer
-      if ((dst != CL.number()) && (REF_LAY != CL.number()))
+      if ((dst != CL.number()) && (REF_LAY_DEF != CL.layDef()))
       {
          // now remove the selected shapes from the data holders ...
          if (_layers[CL.layDef()]->deleteMarked())
@@ -1907,9 +1907,9 @@ void laydata::TdtCell::transferLayer(SelectList* slst, LayerNumber dst)
    {
       // we're not doing anything if the current layer appears to be dst,
       // i.e. don't mess around if the source and destination layers are the same!
-      if ((dst != CL.number()) && (REF_LAY != CL.number()))
+      if ((dst != CL.number()) && (REF_LAY_DEF != CL.layDef()))
       {
-         QTreeTmp *dstlay = secureUnsortedLayer(CL.number());
+         QTreeTmp *dstlay = secureUnsortedLayer(CL.layDef());
          // traverse the shapes on this layer and add them to the destination layer
          DataList* lslct = *CL;
          DataList::iterator DI = lslct->begin();
@@ -1987,19 +1987,18 @@ void laydata::TdtCell::transferLayer(SelectList* slst, LayerNumber dst)
 
 void laydata::TdtCell::fixUnsorted()
 {
-   typedef TmpLayerMap::const_iterator LCI;
-   for (LCI lay = _tmpLayers.begin(); lay != _tmpLayers.end(); lay++)
+   for (TmpLayerMap::Iterator lay = _tmpLayers.begin(); lay != _tmpLayers.end(); lay++)
    {
-      if (0 != lay->second->numObjects())
-         lay->second->commit();
+      if (0 != lay->numObjects())
+         lay->commit();
       else
       {
-         LayerHolder::Iterator tlay = _layers.find(lay->first);
+         LayerHolder::Iterator tlay = _layers.find(lay.layDef());
          assert(tlay != _layers.end());
          delete (*tlay);
-         _layers.erase(lay->first);
+         _layers.erase(lay.layDef());
       }
-      delete lay->second;
+      delete *lay;
    }
    _tmpLayers.clear();
    getCellOverlap();
@@ -2048,7 +2047,7 @@ bool laydata::TdtCell::overlapChanged(DBbox& old_overlap, laydata::TdtDesign* AT
 
 bool laydata::TdtCell::validateCells(laydata::TdtLibrary* ATDB)
 {
-   QuadTree* wq = (_layers.end() != _layers.find(REF_LAY)) ? _layers[REF_LAY] : NULL;
+   QuadTree* wq = (_layers.end() != _layers.find(REF_LAY_DEF)) ? _layers[REF_LAY_DEF] : NULL;
    if (!(wq && wq->invalid())) return false;
    if (wq->fullValidate())
    {
@@ -2079,7 +2078,7 @@ NameSet* laydata::TdtCell::rehashChildren()
    // the actual list of names of the referenced cells
    NameSet *cellnames = DEBUG_NEW NameSet();
    // get the cells layer
-   QuadTree* refsTree = _layers[REF_LAY];
+   QuadTree* refsTree = _layers[REF_LAY_DEF];
    TdtCellRef* wcl;
    if (refsTree)
    {  // if it is not empty...
@@ -2103,7 +2102,7 @@ void laydata::TdtCell::updateHierarchy(laydata::TdtLibDir* libdir)
    laydata::TdtDesign* ATDB = (*libdir)();
    TdtDefaultCell* childref;
    // Check that there are referenced cells
-   if (_layers.end() == _layers.find(REF_LAY))
+   if (_layers.end() == _layers.find(REF_LAY_DEF))
       if (!_children.empty())
       {
          // Means that all child references has been wiped out by the last
@@ -2148,9 +2147,9 @@ void laydata::TdtCell::updateHierarchy(laydata::TdtLibDir* libdir)
 bool laydata::TdtCell::relink(laydata::TdtLibDir* libdir)
 {
    // get the cells layer
-   if (_layers.end() == _layers.find(REF_LAY)) return false; // nothing to relink
+   if (_layers.end() == _layers.find(REF_LAY_DEF)) return false; // nothing to relink
    // if it is not empty get all cell refs/arefs in a list -
-   QuadTree* refsTree = _layers[REF_LAY];
+   QuadTree* refsTree = _layers[REF_LAY_DEF];
    DBbox old_overlap(_cellOverlap);
    DataList *refsList = DEBUG_NEW DataList();
    selectAllWrapper(refsTree, refsList, laydata::_lmref, false);
@@ -2178,11 +2177,11 @@ bool laydata::TdtCell::relink(laydata::TdtLibDir* libdir)
 
 void laydata::TdtCell::relinkThis(std::string cname, laydata::CellDefin newcelldef, laydata::TdtLibDir* libdir)
 {
-   assert( _layers.end() != _layers.find(REF_LAY) );
+   assert( _layers.end() != _layers.find(REF_LAY_DEF) );
    DBbox old_overlap(_cellOverlap);
    // get all cell references
    DataList *refsList = DEBUG_NEW DataList();
-   QuadTree* refsTree = _layers[REF_LAY];
+   QuadTree* refsTree = _layers[REF_LAY_DEF];
    selectAllWrapper(refsTree, refsList, laydata::_lmref, false);
    //relink only the references to cname
    for (DataList::iterator CC = refsList->begin(); CC != refsList->end(); CC++)
@@ -2262,7 +2261,7 @@ void laydata::TdtCell::reportSelected(real DBscale) const
       for (DataList::const_iterator DP = CL->begin(); DP != CL->end(); DP++)
       {
          std::ostringstream ost;
-         if (REF_LAY != CL.number())
+         if (REF_LAY_DEF != CL.layDef())
             ost << "layer " << CL.number() << " : ";
          DP->first->info(ost, DBscale);
          tell_log(console::MT_INFO, ost.str());
@@ -2369,7 +2368,7 @@ auxdata::GrcCell* laydata::TdtCell::getGrcCell()
       // Note! GRC_LAY by convention is supposed to have a SINGLE data object
       // of type TdtAuxRef
       unsigned numObjects = 0;
-      QuadTree* wl = _layers[GRC_LAY];
+      QuadTree* wl = _layers[GRC_LAY_DEF];
       for (QuadTree::Iterator DI = wl->begin(); DI != wl->end(); DI++)
       {
          theCell = static_cast<laydata::TdtAuxRef*>(*DI)->structure();
@@ -2388,7 +2387,7 @@ void laydata::TdtCell::clearGrcCell()
       // Note! GRC_LAY by convention is supposed to have a SINGLE data object
       // of type TdtAuxRef
       unsigned numObjects = 0;
-      QuadTree* wl = _layers[GRC_LAY];
+      QuadTree* wl = _layers[GRC_LAY_DEF];
       for (QuadTree::Iterator DI = wl->begin(); DI != wl->end(); DI++)
       {
          delete *DI;
@@ -2396,7 +2395,7 @@ void laydata::TdtCell::clearGrcCell()
       }
       assert(1 == numObjects);
       delete (wl);
-      _layers.erase(GRC_LAY);
+      _layers.erase(GRC_LAY_DEF);
    }
 }
 
