@@ -52,14 +52,17 @@ namespace laydata {
 //   };
 
 
-   struct LayerDef {
-      LayerDef(LayerNumber num, LayerDType  typ) : _num(num), _typ(typ) {}
-      LayerDef(LayerNumber num) : _num(num), _typ(DEFAULT_LAY_DATATYPE) {}
-      LayerNumber num() const {return _num;}
-      LayerDType  typ() const {return _typ;}
+   class LayerDef {
+   public:
+                                LayerDef(LayerNumber num, LayerDType  typ) : _num(num), _typ(typ) {}
+                                LayerDef(LayerNumber num) : _num(num), _typ(DEFAULT_LAY_DATATYPE) {}
+      LayerNumber               num() const {return _num;}
+      LayerDType                typ() const {return _typ;}
+      bool                      operator==(const LayerDef&) const;
+      bool                      operator!=(const LayerDef&) const;
    private:
-      LayerNumber _num;
-      LayerDType  _typ;
+      LayerNumber               _num;
+      LayerDType                _typ;
    };
 
    template <typename DataT>
@@ -108,6 +111,8 @@ namespace laydata {
       LayerNMap*                 _layers;
    };
 
+   const LayerDef  REF_LAY_DEF(REF_LAY, DEFAULT_LAY_DATATYPE);
+   const LayerDef  GRC_LAY_DEF(GRC_LAY, DEFAULT_LAY_DATATYPE);
 
 }
 

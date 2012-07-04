@@ -34,10 +34,10 @@
 namespace laydata {
 
 //==============================================================================
-   typedef  std::map<LayerNumber, QTreeTmp*>        TmpLayerMap;
    typedef  SGHierTree<TdtDefaultCell>              TDTHierTree;
 
    typedef LayerContainer<QuadTree*>                LayerHolder;
+   typedef LayerContainer<QTreeTmp*>                TmpLayerMap;
 
 //==============================================================================
    /*!This class is holding the information about current cell - i.e. the cell
@@ -144,7 +144,7 @@ namespace laydata {
       virtual void         motionDraw(const layprop::DrawProperties&, CtmQueue&,
                                                           bool active=false) const;
       QuadTree*            secureLayer(const LayerDef&);
-      QTreeTmp*            secureUnsortedLayer(LayerNumber layno);
+      QTreeTmp*            secureUnsortedLayer(const LayerDef&);
       void                 registerCellRef(CellDefin str, CTM trans);
       void                 registerCellARef(CellDefin str, CTM trans, ArrayProps&);
       TdtCellRef*          addCellRef(TdtDesign*, CellDefin str, CTM trans);
