@@ -1586,11 +1586,10 @@ bool laydata::TdtDesign::groupSelected(std::string name, laydata::TdtLibDir* lib
    TdtCell* newcell = addCell(name, libdir);
    assert(newcell);
    //Get the selected shapes from the current cell and add them to the new cell
-   for(AtticList::const_iterator CL = TBgroup->begin();
-                                                   CL != TBgroup->end(); CL++)
+   for(AtticList::Iterator CL = TBgroup->begin();  CL != TBgroup->end(); CL++)
    {
-      ShapeList* lslct = CL->second;
-      QTreeTmp* wl = newcell->secureUnsortedLayer(CL->first);
+      ShapeList* lslct = *CL;
+      QTreeTmp* wl = newcell->secureUnsortedLayer(CL.number());
       // There is no point here to ensure that the layer definition exists.
       // We are just transferring shapes from one structure to another.
       // securelaydef( CL->first );
@@ -1598,7 +1597,7 @@ bool laydata::TdtDesign::groupSelected(std::string name, laydata::TdtLibDir* lib
                                                      CI != lslct->end(); CI++)
       {
          wl->put(*CI);
-         if (REF_LAY == CL->first) newcell->addChild(this,
+         if (REF_LAY == CL.number()) newcell->addChild(this,
                                     static_cast<TdtCellRef*>(*CI)->structure());
       }
       lslct->clear();
@@ -1674,11 +1673,11 @@ laydata::AtticList* laydata::TdtDesign::changeRef(ShapeList* cells4u, std::strin
          ncrf = _target.edit()->addCellRef(this, strdefn, ori);
       assert(NULL != ncrf);
       ncrf->setStatus(sh_selected);
-      _target.edit()->selectThis(ncrf,0); // FIXME!!! 0 instead of REF_LAY ???
+      _target.edit()->selectThis(ncrf,REF_LAY);
       cellsUngr->push_back(ncrf);
    }
    laydata::AtticList* shapeUngr = DEBUG_NEW laydata::AtticList();
-   (*shapeUngr)[0] = cellsUngr;
+   shapeUngr->add(REF_LAY, cellsUngr);
    fixReferenceOverlap(old_overlap);
    return shapeUngr;
 }
@@ -1794,10 +1793,10 @@ WordList laydata::DrcLibrary::findSelected(const std::string &cell, TP* p1)
          selp = (*p1)*CTM().Reversed(); //Take identity matrix
          //??? Add here Error List construction
          shapes = theCell->findSelected(selp);
-         for(laydata::AtticList::const_iterator it = shapes->begin(); it != shapes->end(); ++it)
+         for(laydata::AtticList::Iterator it = shapes->begin(); it != shapes->end(); ++it)
          {
             word error;
-            shapeList = (*it).second;
+            shapeList = *it;
             for (laydata::ShapeList::const_iterator it2 = shapeList->begin(); it2 != shapeList->end(); ++it2)
             {
                shape = dynamic_cast<TdtData*> (*it2);
@@ -1810,9 +1809,9 @@ WordList laydata::DrcLibrary::findSelected(const std::string &cell, TP* p1)
       errorList.unique();
       if(shapes != NULL)
       {
-         for(laydata::AtticList::iterator it = shapes->begin(); it != shapes->end(); ++it)
+         for(laydata::AtticList::Iterator it = shapes->begin(); it != shapes->end(); ++it)
          {
-            shapeList = (*it).second;
+            shapeList = *it;
             delete shapeList;
          }
 

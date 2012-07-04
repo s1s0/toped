@@ -1084,7 +1084,7 @@ int tellstdfunc::stdCHANGEREF::execute()
             UNDOcmdQ.push_front(this);
             // Push the list of the cells to be ungroupped first
             laydata::AtticList undol;
-            undol[0] = cells4u;
+            undol.add(REF_LAY, cells4u);
             UNDOPstack.push_front(make_ttlaylist(&undol));
             UNDOPstack.push_front(make_ttlaylist(undol2));
             delete cells4u;

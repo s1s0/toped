@@ -39,6 +39,8 @@ namespace laydata {
 
    typedef  std::pair<TdtData*, SGBitSet>           SelectDataPair;
    typedef  std::list<SelectDataPair>               DataList;
+   typedef  std::list<TdtData*>                     ShapeList;
+
 
 //   template <typename DataT>
 //   struct LayerDMap {
@@ -76,8 +78,8 @@ namespace laydata {
       bool                      operator!=(const LayerIterator&) const;
       DataT                     operator->() const;
       DataT                     operator*() const;
-      LayerNumber               number();
-      LayerDef                  layDef();
+      LayerNumber               number() const;
+      LayerDef                  layDef() const;
    protected:
       const LayerNMap*          _layerHolder;
       typename LayerNMap::const_iterator _cNMap;
@@ -97,6 +99,7 @@ namespace laydata {
       const Iterator             end() const;
       const Iterator             find(const LayerDef&) const;
       bool                       empty() const;
+      size_t                     size() const;
       void                       clear();
       void                       add(const LayerDef&, DataT);
       void                       erase(const LayerDef&);

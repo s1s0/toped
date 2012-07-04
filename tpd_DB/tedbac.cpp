@@ -131,13 +131,13 @@ DataT laydata::LayerIterator<DataT>::operator*() const
 }
 
 template <typename DataT>
-LayerNumber laydata::LayerIterator<DataT>::number()
+LayerNumber laydata::LayerIterator<DataT>::number() const
 {
    return _cNMap->first;
 }
 
 template <typename DataT>
-laydata::LayerDef laydata::LayerIterator<DataT>::layDef()
+laydata::LayerDef laydata::LayerIterator<DataT>::layDef() const
 {
    return LayerDef(_cNMap->first, _cDMap->first);
 }
@@ -185,6 +185,12 @@ template <typename DataT>
 bool laydata::LayerContainer<DataT>::empty() const
 {
    return _layers->empty();
+}
+
+template <typename DataT>
+size_t laydata::LayerContainer<DataT>::size() const
+{
+   return _layers->size();
 }
 
 template <typename DataT>
@@ -236,6 +242,7 @@ DataT laydata::LayerContainer<DataT>::operator[](const LayerDef& laydef)
 // implicit template instantiation with a certain type parameter
 template class laydata::LayerIterator<laydata::QuadTree*>;
 template class laydata::LayerContainer<laydata::QuadTree*>;
-template class laydata::LayerContainer<laydata::TdtData*>;
 template class laydata::LayerIterator<laydata::DataList*>;
 template class laydata::LayerContainer<laydata::DataList*>;
+template class laydata::LayerIterator<laydata::ShapeList*>;
+template class laydata::LayerContainer<laydata::ShapeList*>;
