@@ -115,10 +115,8 @@ namespace laydata {
    class TdtDesign;
    class TdtLibrary;
    class TdtLibDir;
-   //   typedef  std::map<LayerNumber, DataList*>        SelectList;
    typedef  LayerContainer<DataList*>               SelectList;
-   typedef  std::list<TdtData*>                     ShapeList;
-   typedef  std::map<LayerNumber,ShapeList*>        AtticList;
+   typedef  LayerContainer<ShapeList*>              AtticList;
    typedef  std::map<std::string, TdtDefaultCell*>  CellMap;
    typedef  TdtDefaultCell*                         CellDefin;
    typedef  std::deque<const TdtCellRef*>           CellRefStack;

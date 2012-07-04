@@ -740,7 +740,7 @@ int tellstdfunc::stdUNGROUP::execute()
          laydata::AtticList* undol = DEBUG_NEW laydata::AtticList();
          UNDOcmdQ.push_front(this);
          // Push the list of the cells to be ungroupped first
-         (*undol)[REF_LAY] = cells4u;
+         undol->add(REF_LAY, cells4u);
          UNDOPstack.push_front(make_ttlaylist(undol));
          // and then ungroup and push the list of the shapes produced in
          //result of the ungroup

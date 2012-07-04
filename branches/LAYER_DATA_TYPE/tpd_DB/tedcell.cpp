@@ -625,7 +625,7 @@ laydata::AtticList* laydata::TdtCell::changeSelect(TP pnt, SH_STATUS status, con
       laydata::AtticList* retlist = DEBUG_NEW AtticList();
       laydata::ShapeList* atl = DEBUG_NEW ShapeList();
       atl->push_back(prev);
-      (*retlist)[prevlay] = atl;
+      retlist->add(prevlay, atl);
       if (sh_selected == status)
       {
          if (_shapesel.end() == _shapesel.find(prevlay))
@@ -698,7 +698,7 @@ laydata::AtticList* laydata::TdtCell::findSelected(TP pnt)
    for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
       laydata::ShapeList* atl = DEBUG_NEW ShapeList();
-      (*errList)[lay.number()] = atl;
+      errList->add(lay.layDef(), atl);
       while(lay->getObjectOver(pnt,shape))
       {
          atl->push_back(shape);
@@ -1023,7 +1023,7 @@ void laydata::TdtCell::selectFromList(SelectList* slist, const DWordSet& unselab
       if ( (_layers.end() != _layers.find(CL.layDef()))
          &&(unselable.end() == unselable.find(CL.number())) )
       {
-         if (_shapesel.end() != _shapesel.find(CL.number()))
+         if (_shapesel.end() != _shapesel.find(CL.layDef()))
             ssl = _shapesel[CL.layDef()];
          else
             ssl = DEBUG_NEW DataList();
@@ -1141,28 +1141,26 @@ void laydata::TdtCell::copySelected(const CTM& trans)
 
 void laydata::TdtCell::addList(laydata::TdtDesign* ATDB, AtticList* nlst)
 {
-   for (AtticList::const_iterator CL = nlst->begin();
-                                   CL != nlst->end(); CL++)
+   for (AtticList::Iterator CL = nlst->begin(); CL != nlst->end(); CL++)
    {
       // secure the target layer
-      QTreeTmp* wl = secureUnsortedLayer(CL->first);
+      QTreeTmp* wl = secureUnsortedLayer(CL.number());
       // It appears that there is no need here to gather all the layers and eventually
       // to make sure that there are defined properties for them later. The point is that
       // the calls to this function are not normally using new layers. This is of course
       // a wild guess for the future and might bring troubles...
       /*newLays.insert(CL->first);*/
-      for (ShapeList::const_iterator DI = CL->second->begin();
-                                    DI != CL->second->end(); DI++)
+      for (ShapeList::const_iterator DI = CL->begin(); DI != CL->end(); DI++)
       {
          // add it to the corresponding layer
          (*DI)->setStatus(sh_active);
          wl->put(*DI);
          //update the hierarchy tree if this is a cell
-         if (REF_LAY == CL->first) addChild(ATDB,
+         if (REF_LAY == CL.number()) addChild(ATDB,
                             static_cast<TdtCellRef*>(*DI)->structure());
       }
-      CL->second->clear();
-      delete (CL->second);
+      CL->clear();
+      delete (*CL);
    }
    nlst->clear();
    delete nlst;
@@ -1446,7 +1444,7 @@ bool laydata::TdtCell::cutPolySelected(PointVector& plst, AtticList** dasao)
       for (i = 0; i < 3; i++)
       {
          if (decure[i]->empty()) delete decure[i];
-         else (*(dasao[i]))[CL.number()] = decure[i];
+         else dasao[i]->add(CL.layDef(), decure[i]);
       }
    }
    return !dasao[0]->empty();
@@ -1473,7 +1471,7 @@ bool laydata::TdtCell::stretchSelected(int bfactor, AtticList** dasao)
       for (i = 0; i < 2; i++)
       {
          if (decure[i]->empty()) delete decure[i];
-         else (*(dasao[i]))[CL.number()] = decure[i];
+         else dasao[i]->add(CL.layDef(), decure[i]);
       }
    }
    return !dasao[0]->empty();
@@ -1566,9 +1564,9 @@ bool laydata::TdtCell::mergeSelected(AtticList** dasao)
       // finally - assign the list of deleted and resulted shapes to the
       // input result (dasao) parameter
       if (cleared->empty()) delete cleared;
-      else (*(dasao[0]))[CL.number()] = cleared;
+      else  dasao[0]->add(CL.layDef(), cleared);
       if (mrgcand->empty()) delete mrgcand;
-      else (*(dasao[1]))[CL.number()] = mrgcand;
+      else  dasao[1]->add(CL.layDef(), mrgcand);
    }
    return !dasao[0]->empty();
 }
@@ -1731,7 +1729,7 @@ laydata::AtticList* laydata::TdtCell::groupPrep(laydata::TdtLibDir* libdir)
          }
          else CI++;
       if (atl->empty()) delete atl;
-      else             (*fsel)[CL.number()] = atl;
+      else              fsel->add(CL.layDef(), atl);
       if (lslct->empty())
       {
          delete lslct;
@@ -2013,8 +2011,8 @@ void laydata::TdtCell::storeInAttic(laydata::AtticList& _Attic) {
    SelectList::Iterator CL = _shapesel.begin();
    while (_shapesel.end() != CL) {
       lslct = *CL;
-      if (_Attic.end() != _Attic.find(CL.number()))  atl = _Attic[CL.number()];
-      else                                         atl = DEBUG_NEW ShapeList();
+      if (_Attic.end() != _Attic.find(CL.layDef()))  atl = _Attic[CL.layDef()];
+      else                                           atl = DEBUG_NEW ShapeList();
       // move every single TdtData in the corresponding Attic "shelf" ...
       DataList::iterator CI = lslct->begin();
       while (CI != lslct->end())
@@ -2027,7 +2025,7 @@ void laydata::TdtCell::storeInAttic(laydata::AtticList& _Attic) {
          }
          else CI++;
       if (atl->empty())    delete atl;
-      else             _Attic[CL.number()] = atl;
+      else             _Attic.add(CL.layDef(), atl);
       if (lslct->empty())  {
          delete lslct;
          _shapesel.erase(CL.layDef());

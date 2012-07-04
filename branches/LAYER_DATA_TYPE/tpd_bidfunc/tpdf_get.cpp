@@ -330,8 +330,8 @@ void tellstdfunc::grcREPAIRDATA::undo()
          tCell->addAuxRef(grcCell);
       // now remove the recovered data
       assert(1 == tdtlayers->size()); // single layer expected only
-      assert(grcLayer == tdtlayers->begin()->first); // make sure we have the same layer
-      laydata::ShapeList* tdtShapes = tdtlayers->begin()->second;
+      assert(grcLayer == tdtlayers->begin().number()); // make sure we have the same layer
+      laydata::ShapeList* tdtShapes = *(tdtlayers->begin());
       for (laydata::ShapeList::const_iterator CS = tdtShapes->begin(); CS != tdtShapes->end(); CS++)
          tDesign->destroyThis(*CS, grcLayer, dbLibDir);
       delete tdtShapes;

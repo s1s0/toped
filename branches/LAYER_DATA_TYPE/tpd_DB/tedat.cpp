@@ -1843,11 +1843,11 @@ void laydata::TdtCellRef::ungroup(laydata::TdtDesign* ATDB, TdtCell* dst, AtticL
       // used here - something else should be done
       // ATDB->securelaydef( CL->first );
       // secure the select layer (for undo)
-      if (nshp->end() != nshp->find(CL.number()))
-         ssl = (*nshp)[CL.number()];
+      if (nshp->end() != nshp->find(CL.layDef()))
+         ssl = (*nshp)[CL.layDef()];
       else {
          ssl = DEBUG_NEW ShapeList();
-         (*nshp)[CL.number()] = ssl;
+         nshp->add(CL.layDef(), ssl);
       }
       // for every single shape on the layer
       for (DataList::const_iterator DI = CL->begin(); DI != CL->end(); DI++)

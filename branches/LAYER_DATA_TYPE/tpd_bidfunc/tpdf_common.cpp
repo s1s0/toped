@@ -183,15 +183,15 @@ void tellstdfunc::clean_ttlaylist(telldata::TtList* llist)
 void tellstdfunc::clean_atticlist(laydata::AtticList* nlst, bool destroy)
 {
    if (NULL == nlst) return;
-   for (laydata::AtticList::const_iterator CL = nlst->begin(); CL != nlst->end(); CL++)
+   for (laydata::AtticList::Iterator CL = nlst->begin(); CL != nlst->end(); CL++)
    {
       if (destroy)
       {
-         for (laydata::ShapeList::const_iterator DI = CL->second->begin(); DI != CL->second->end(); DI++)
+         for (laydata::ShapeList::const_iterator DI = CL->begin(); DI != CL->end(); DI++)
             delete (*DI);
       }
-      CL->second->clear();
-      delete (CL->second);
+      CL->clear();
+      delete (*CL);
    }
 }
 
@@ -200,15 +200,14 @@ telldata::TtList* tellstdfunc::make_ttlaylist(laydata::AtticList* shapesel)
 {
    telldata::TtList* llist = DEBUG_NEW telldata::TtList(telldata::tn_layout);
    laydata::ShapeList* lslct;
-   for (laydata::AtticList::const_iterator CL = shapesel->begin();
-                                           CL != shapesel->end(); CL++)
+   for (laydata::AtticList::Iterator CL = shapesel->begin(); CL != shapesel->end(); CL++)
    {
-      lslct = CL->second;
+      lslct = *CL;
       // push each data reference into the TELL list
       for (laydata::ShapeList::const_iterator CI  = lslct->begin();
                                               CI != lslct->end(); CI++)
       //   if (sh_deleted == (*CI)->status()) - doesn't seems to need it!
-            llist->add(DEBUG_NEW telldata::TtLayout(*CI, CL->first));
+            llist->add(DEBUG_NEW telldata::TtLayout(*CI, CL.number()));
    }
    return llist;
 }
@@ -264,7 +263,7 @@ laydata::AtticList* tellstdfunc::get_shlaylist(telldata::TtList* llist)
    {
       clayer = static_cast<telldata::TtLayout*>(llist->mlist()[i])->layer();
       if (shapesel->end() == shapesel->find(clayer))
-         (*shapesel)[clayer] = DEBUG_NEW laydata::ShapeList();
+         shapesel->add(clayer, DEBUG_NEW laydata::ShapeList());
       (*shapesel)[clayer]->push_back(static_cast<telldata::TtLayout*>
                                                 (llist->mlist()[i])->data());
    }
@@ -376,10 +375,9 @@ laydata::SelectList* tellstdfunc::filter_selist(const laydata::SelectList* shape
 laydata::AtticList* tellstdfunc::replace_str(laydata::AtticList* shapesel, std::string newstr)
 {
    laydata::AtticList* newtextlist = DEBUG_NEW laydata::AtticList();
-   for (laydata::AtticList::iterator CL = shapesel->begin();
-                                            CL != shapesel->end(); CL++)
+   for (laydata::AtticList::Iterator CL = shapesel->begin(); CL != shapesel->end(); CL++)
    {
-      laydata::ShapeList* lslct  = CL->second;
+      laydata::ShapeList* lslct  = *CL;
       laydata::ShapeList* newlst = DEBUG_NEW laydata::ShapeList();
       for (laydata::ShapeList::iterator CI = lslct->begin();
                                              CI != lslct->end(); CI++)
@@ -390,7 +388,7 @@ laydata::AtticList* tellstdfunc::replace_str(laydata::AtticList* shapesel, std::
          newtxt->replaceStr(newstr);
          newlst->push_back(newtxt);
       }
-      (*newtextlist)[CL->first] = newlst;
+      newtextlist->add(CL.layDef(), newlst);
    }
    return newtextlist;
 }
