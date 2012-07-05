@@ -703,6 +703,7 @@ const LayerNumber REF_LAY              = 0xffffffff;
 const LayerNumber ERR_LAY              = 0xfffffffe;
 const LayerNumber DRC_LAY              = 0xfffffffd;
 const LayerNumber GRC_LAY              = 0xfffffffc;
+const LayerNumber NULL_LAY             = 0xfffffff0;
 const LayerNumber LAST_EDITABLE_LAYNUM = 0x0000ffff;
 const byte        OPENGL_FONT_UNIT     = 128;
 const byte        GRID_LIMIT           = 5;    // if grid step is less than _GRID_LIMIT pixels, grid is hidden

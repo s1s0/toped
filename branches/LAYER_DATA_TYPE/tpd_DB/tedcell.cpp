@@ -604,7 +604,7 @@ bool laydata::TdtCell::getShapeOver(TP pnt, const DWordSet& unselable)
 laydata::AtticList* laydata::TdtCell::changeSelect(TP pnt, SH_STATUS status, const DWordSet& unselable)
 {
    laydata::TdtData* prev = NULL;
-   LayerNumber prevlay;
+   LayerDef prevlay(NULL_LAY, DEFAULT_LAY_DATATYPE);
    for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
       if (unselable.end() == unselable.find(lay.number()))
@@ -615,7 +615,7 @@ laydata::AtticList* laydata::TdtCell::changeSelect(TP pnt, SH_STATUS status, con
             if ((status != shape->status()) &&
                 ((NULL == prev) || (prev->overlap().boxarea() > shape->overlap().boxarea())))
             {
-                  prev = shape; prevlay = lay.number();
+                  prev = shape; prevlay = lay.layDef();
             }
          }
       }
@@ -1167,19 +1167,19 @@ void laydata::TdtCell::addList(laydata::TdtDesign* ATDB, AtticList* nlst)
    fixUnsorted();// because put was used
 }
 
-laydata::DataList* laydata::TdtCell::secureDataList(SelectList& slst, LayerNumber layno)
+laydata::DataList* laydata::TdtCell::secureDataList(SelectList& slst, const LayerDef& laydef)
 {
    DataList* ssl;
-   if (slst.end() != slst.find(layno)) ssl = slst[layno];
+   if (slst.end() != slst.find(laydef)) ssl = slst[laydef];
    else {
       ssl = DEBUG_NEW DataList();
-      slst.add(layno, ssl);
+      slst.add(laydef, ssl);
    }
    return ssl;
 }
 
 laydata::ShapeList* laydata::TdtCell::checkNreplacePoly(SelectDataPair& sel, Validator* check,
-                                                        LayerNumber layno, SelectList** fadead)
+                                                        const LayerDef& laydef, SelectList** fadead)
 {
    if (check->acceptable())
    { // shape is valid ...
@@ -1189,35 +1189,35 @@ laydata::ShapeList* laydata::TdtCell::checkNreplacePoly(SelectDataPair& sel, Val
          laydata::ShapeList* newShapes = check->replacements();
          // add the new shape to the list of new shapes ...
          for (laydata::ShapeList::const_iterator CS = newShapes->begin(); CS != newShapes->end(); CS++)
-            secureDataList(*(fadead[2]),layno)->push_back(SelectDataPair(*CS, SGBitSet()));
+            secureDataList(*(fadead[2]),laydef)->push_back(SelectDataPair(*CS, SGBitSet()));
          // ... and put the initial shape(that is to be modified) in the
          // list of deleted shapes
-         secureDataList(*(fadead[1]),layno)->push_back(SelectDataPair(sel.first, sel.second));
+         secureDataList(*(fadead[1]),laydef)->push_back(SelectDataPair(sel.first, sel.second));
          return newShapes;
       }
    }
    else {// the produced shape is invalid, so keep the old one and add it to the list of failed
-      secureDataList(*(fadead[0]),layno)->push_back(SelectDataPair(sel.first, sel.second));
+      secureDataList(*(fadead[0]),laydef)->push_back(SelectDataPair(sel.first, sel.second));
       return NULL;
    }
 }
 
 laydata::ShapeList* laydata::TdtCell::checkNreplaceBox(SelectDataPair& sel, Validator* check,
-                                                       LayerNumber layno, SelectList** fadead)
+                                                       const LayerDef& laydef, SelectList** fadead)
 {
    if (check->acceptable())
    { // shape is valid, but obviously not a box (if it gets here)
       laydata::ShapeList* newShapes = check->replacements();
       // add the new shapes to the list of new shapes ...
       for (laydata::ShapeList::const_iterator CS = newShapes->begin(); CS != newShapes->end(); CS++)
-         secureDataList(*(fadead[2]),layno)->push_back(SelectDataPair(*CS, SGBitSet()));
+         secureDataList(*(fadead[2]),laydef)->push_back(SelectDataPair(*CS, SGBitSet()));
       // ... and put the initial shape(that has been modified) in the
       // list of deleted shapes
-      secureDataList(*(fadead[1]),layno)->push_back(SelectDataPair(sel.first, sel.second));
+      secureDataList(*(fadead[1]),laydef)->push_back(SelectDataPair(sel.first, sel.second));
       return newShapes;
    }
    else {// the produced shape is invalid, so keep the old one and add it to the list of failed
-      secureDataList(*(fadead[0]),layno)->push_back(SelectDataPair(sel.first, sel.second));
+      secureDataList(*(fadead[0]),laydef)->push_back(SelectDataPair(sel.first, sel.second));
       return NULL;
    }
 }
@@ -1571,21 +1571,21 @@ bool laydata::TdtCell::mergeSelected(AtticList** dasao)
    return !dasao[0]->empty();
 }
 
-void laydata::TdtCell::destroyThis(laydata::TdtLibDir* libdir, TdtData* ds, LayerNumber la)
+void laydata::TdtCell::destroyThis(laydata::TdtLibDir* libdir, TdtData* ds, const LayerDef& laydef)
 {
-   laydata::QuadTree* lay = *(_layers.find(la));
+   laydata::QuadTree* lay = *(_layers.find(laydef));
    if (!lay) return;
    // for layer la
    if (lay->deleteThis(ds))
    {
       if (lay->empty())
       {
-         delete lay; _layers.erase(la);
+         delete lay; _layers.erase(laydef);
       }
       else lay->validate();
    }
    delete(ds);
-   if (REF_LAY == la) updateHierarchy(libdir);
+   if (REF_LAY_DEF == laydef) updateHierarchy(libdir);
 }
 
 void laydata::TdtCell::selectAll(const DWordSet& unselable, word layselmask)
@@ -1632,10 +1632,10 @@ void laydata::TdtCell::fullSelect()
    }
 }
 
-void laydata::TdtCell::selectThis(TdtData* dat, LayerNumber lay)
+void laydata::TdtCell::selectThis(TdtData* dat, const LayerDef& laydef)
 {
-   if (_shapesel.end() == _shapesel.find(lay)) _shapesel.add(lay, DEBUG_NEW DataList());
-   dat->selectThis(_shapesel[lay]);
+   if (_shapesel.end() == _shapesel.find(laydef)) _shapesel.add(laydef, DEBUG_NEW DataList());
+   dat->selectThis(_shapesel[laydef]);
    //   _shapesel[lay]->push_back(SelectDataPair(dat, NULL));
    //dat->setStatus(sh_selected);
 }
@@ -1674,9 +1674,9 @@ void laydata::TdtCell::unselectAll(bool destroy)
    _shapesel.clear();
 }
 
-laydata::ShapeList* laydata::TdtCell::mergePrep(LayerNumber layno)
+laydata::ShapeList* laydata::TdtCell::mergePrep(const LayerDef& laydef)
 {
-   SelectList::Iterator CL = _shapesel.find(layno);
+   SelectList::Iterator CL = _shapesel.find(laydef);
    if (_shapesel.end() == CL) return NULL;
    DataList* lslct = *CL;
    ShapeList* atl = DEBUG_NEW ShapeList();
@@ -1809,18 +1809,18 @@ laydata::ShapeList* laydata::TdtCell::ungroupPrep(laydata::TdtLibDir* libdir)
    return csel;
 }
 
-void laydata::TdtCell::transferLayer(LayerNumber dst)
+void laydata::TdtCell::transferLayer(const LayerDef& laydef)
 {
-   assert(REF_LAY != dst);
-   QTreeTmp *dstlay = secureUnsortedLayer(dst);
+   assert(REF_LAY_DEF != laydef);
+   QTreeTmp *dstlay = secureUnsortedLayer(laydef);
    DataList* transfered;
-   if (_shapesel.end() == _shapesel.find(dst))
+   if (_shapesel.end() == _shapesel.find(laydef))
    {
       transfered = DEBUG_NEW DataList();
-      _shapesel.add(dst, transfered);
+      _shapesel.add(laydef, transfered);
    }
    else
-      transfered = _shapesel[dst];
+      transfered = _shapesel[laydef];
    assert(!_shapesel.empty());
    SelectList::Iterator CL = _shapesel.begin();
    while (_shapesel.end() != CL)
@@ -1829,7 +1829,7 @@ void laydata::TdtCell::transferLayer(LayerNumber dst)
       // we're not doing anything if the current layer appears to be dst,
       // i.e. don't mess around if the source and destination layers are the same!
       // The same for the reference layer
-      if ((dst != CL.number()) && (REF_LAY_DEF != CL.layDef()))
+      if ((laydef != CL.layDef()) && (REF_LAY_DEF != CL.layDef()))
       {
          // now remove the selected shapes from the data holders ...
          if (_layers[CL.layDef()]->deleteMarked())
@@ -1882,23 +1882,23 @@ void laydata::TdtCell::transferLayer(LayerNumber dst)
    // so no need to refresh the overlapping box etc.
 }
 
-void laydata::TdtCell::transferLayer(SelectList* slst, LayerNumber dst)
+void laydata::TdtCell::transferLayer(SelectList* slst, const LayerDef& laydef)
 {
-   assert(REF_LAY != dst);
-   assert(_shapesel.end() != _shapesel.find(dst));
+   assert(REF_LAY_DEF != laydef);
+   assert(_shapesel.end() != _shapesel.find(laydef));
    // get the list of the selected shapes, on the source layer
-   DataList* fortransfer = _shapesel[dst];
+   DataList* fortransfer = _shapesel[laydef];
    assert(!fortransfer->empty());
    // now remove the selected shapes from the data holders ...
-   if (_layers[dst]->deleteMarked())
+   if (_layers[laydef]->deleteMarked())
    {
       // ... and validate quadTrees if needed
-      if (!_layers[dst]->empty())
-         _layers[dst]->validate();
+      if (!_layers[laydef]->empty())
+         _layers[laydef]->validate();
       else
       {//..or remove the source layer if it remained empty
-         delete _layers[dst];
-         _layers.erase(dst);
+         delete _layers[laydef];
+         _layers.erase(laydef);
       }
    }
    // traversing the input list - it contains the destination layers
@@ -1907,7 +1907,7 @@ void laydata::TdtCell::transferLayer(SelectList* slst, LayerNumber dst)
    {
       // we're not doing anything if the current layer appears to be dst,
       // i.e. don't mess around if the source and destination layers are the same!
-      if ((dst != CL.number()) && (REF_LAY_DEF != CL.layDef()))
+      if ((laydef != CL.number()) && (REF_LAY_DEF != CL.layDef()))
       {
          QTreeTmp *dstlay = secureUnsortedLayer(CL.layDef());
          // traverse the shapes on this layer and add them to the destination layer
@@ -1955,7 +1955,7 @@ void laydata::TdtCell::transferLayer(SelectList* slst, LayerNumber dst)
    {
       // if the container of the selected shapes is empty -
       delete fortransfer;
-      _shapesel.erase(dst);
+      _shapesel.erase(laydef);
    }
    else
    {
@@ -1970,7 +1970,7 @@ void laydata::TdtCell::transferLayer(SelectList* slst, LayerNumber dst)
       if (fortransfer->end() != DDI)
       {
          //if so put them back in the data holders
-         QTreeTmp *dstlay = secureUnsortedLayer(dst);
+         QTreeTmp *dstlay = secureUnsortedLayer(laydef);
          for(DDI = fortransfer->begin(); DDI != fortransfer->end(); DDI++)
             if (sh_partsel != DDI->first->status())
             {
