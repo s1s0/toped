@@ -957,16 +957,25 @@ void laydata::TdtCell::selectInBox(DBbox select_in, const DWordSet& unselable, w
       {
          if (unselable.end() == unselable.find(lay.number()))
          {
+            bool newDLHolder = false;
             DataList* ssl;
             if (_shapesel.end() != _shapesel.find(lay.layDef()))
                ssl = _shapesel[lay.layDef()];
             else
+            {
                ssl = DEBUG_NEW DataList();
+               newDLHolder = true;
+            }
             for (QuadTree::ClipIterator CI = lay->begin(select_in); CI != lay->end(); CI++)
                if (layselmask & CI->lType())
                   CI->selectInBox(select_in, ssl, pntsel);
-            if (ssl->empty())  delete ssl;
-            else               _shapesel.add(lay.layDef(), ssl);
+            if (ssl->empty())
+            {
+               delete ssl;
+               assert(newDLHolder);
+            }
+            else if (newDLHolder)
+               _shapesel.add(lay.layDef(), ssl);
          }
       }
    }
@@ -1007,7 +1016,6 @@ void laydata::TdtCell::unselectInBox(DBbox select_in, bool pntsel, const DWordSe
                   delete ssl;
                   _shapesel.erase(lay.layDef());
                }
-               else _shapesel.add(lay.layDef(), ssl);
             }
          }
       }

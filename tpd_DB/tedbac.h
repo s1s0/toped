@@ -106,7 +106,7 @@ namespace laydata {
       void                       clear();
       void                       add(const LayerDef&, DataT);
       void                       erase(const LayerDef&);
-      DataT                      operator[](const LayerDef&);
+      DataT&                     operator[](const LayerDef&);
    private:
       LayerNMap*                 _layers;
    };

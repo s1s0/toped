@@ -210,7 +210,9 @@ size_t laydata::LayerContainer<DataT>::size() const
 template <typename DataT>
 void laydata::LayerContainer<DataT>::clear()
 {
-
+   for (typename LayerNMap::iterator layer = _layers->begin(); layer != _layers->end(); layer++)
+      layer->second.clear();
+   _layers->clear();
 }
 
 template <typename DataT>
@@ -236,15 +238,27 @@ void laydata::LayerContainer<DataT>::erase(const LayerDef& laydef)
 }
 
 template <typename DataT>
-DataT laydata::LayerContainer<DataT>::operator[](const LayerDef& laydef)
+DataT& laydata::LayerContainer<DataT>::operator[](const LayerDef& laydef)
 {
    typename LayerNMap::iterator layer = _layers->find(laydef.num());
-   if (_layers->end() == layer) return NULL;
+   if (_layers->end() == layer)
+   {
+      assert(false);
+//      DataT newItem;
+//      add(laydef, newItem);
+//      return newItem;
+   }
    else
    {
       LayerDMap allTypes = layer->second;
       typename LayerDMap::iterator dtype = allTypes.find(laydef.typ());
-      if (allTypes.end() == dtype) return NULL;
+      if (allTypes.end() == dtype)
+      {
+         assert(false);
+//         DataT newItem;
+//         add(laydef, newItem);
+//         return newItem;
+      }
       else return dtype->second;
    }
 }
