@@ -1024,21 +1024,30 @@ void laydata::TdtCell::unselectInBox(DBbox select_in, bool pntsel, const DWordSe
 
 void laydata::TdtCell::selectFromList(SelectList* slist, const DWordSet& unselable)
 {
-   DataList* ssl;
    for (SelectList::Iterator CL = slist->begin(); CL != slist->end(); CL++)
    {
       // if the layer from the list exists in the layout and is not hidden
       if ( (_layers.end() != _layers.find(CL.layDef()))
          &&(unselable.end() == unselable.find(CL.number())) )
       {
+         bool newDLHolder = false;
+         DataList* ssl;
          if (_shapesel.end() != _shapesel.find(CL.layDef()))
             ssl = _shapesel[CL.layDef()];
          else
+         {
             ssl = DEBUG_NEW DataList();
+            newDLHolder = true;
+         }
 //         _layers[CL.number()]->selectFromList(*CL, ssl);
          selectFromListWrapper(_layers[CL.layDef()], *CL, ssl);
-         if (ssl->empty())  delete ssl;
-         else              _shapesel.add(CL.layDef(), ssl);
+         if (ssl->empty())
+         {
+            delete ssl;
+            assert(newDLHolder);
+         }
+         else if (newDLHolder)
+            _shapesel.add(CL.layDef(), ssl);
       }
       delete *CL;
    }
