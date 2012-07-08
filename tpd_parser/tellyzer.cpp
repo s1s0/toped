@@ -928,6 +928,7 @@ int parsercmd::cmdLISTSIZE::execute()
       case telldata::tn_bnd     : initVar = DEBUG_NEW telldata::TtBnd()    ; break;
       case telldata::tn_hsh     : initVar = DEBUG_NEW telldata::TtHsh()    ; break;
       case telldata::tn_hshstr  : initVar = DEBUG_NEW telldata::TtHshStr() ; break;
+      case  telldata::tn_layer  : initVar = DEBUG_NEW telldata::TtLayer()  ; break;
       case telldata::tn_string  : initVar = DEBUG_NEW telldata::TtString() ; break;
       case telldata::tn_layout  : initVar = DEBUG_NEW telldata::TtLayout() ; break;
       case telldata::tn_auxilary: initVar = DEBUG_NEW telldata::TtAuxdata(); break;
@@ -1263,6 +1264,7 @@ int parsercmd::cmdSTRUCT::execute()
          case telldata::tn_bnd: ustrct = DEBUG_NEW telldata::TtBnd(OPstack);break;
          case telldata::tn_hsh: ustrct = DEBUG_NEW telldata::TtHsh(OPstack);break;
          case telldata::tn_hshstr: ustrct = DEBUG_NEW telldata::TtHshStr(OPstack);break;
+         case telldata::tn_layer: ustrct = DEBUG_NEW telldata::TtLayer(OPstack);break;
          default:
          {
             const telldata::TType* atype = CMDBlock->getTypeByID( (*_arg)() );
@@ -1491,6 +1493,7 @@ telldata::TellVar* parsercmd::cmdBLOCK::newTellvar(telldata::typeID ID, const ch
       case    telldata::tn_bnd  : return(DEBUG_NEW telldata::TtBnd());
       case    telldata::tn_hsh  : return(DEBUG_NEW telldata::TtHsh());
       case telldata::tn_hshstr  : return(DEBUG_NEW telldata::TtHshStr());
+      case  telldata::tn_layer  : return(DEBUG_NEW telldata::TtLayer());
       case telldata::tn_string  : return(DEBUG_NEW telldata::TtString());
       case telldata::tn_layout  : return(DEBUG_NEW telldata::TtLayout());
       case telldata::tn_auxilary: return(DEBUG_NEW telldata::TtAuxdata());
@@ -1542,6 +1545,7 @@ telldata::TellVar* parsercmd::cmdBLOCK::newFuncArg(telldata::typeID ID, TpdYYLty
       case    telldata::tn_bnd  : return(DEBUG_NEW telldata::TtBnd());
       case    telldata::tn_hsh  : return(DEBUG_NEW telldata::TtHsh());
       case telldata::tn_hshstr  : return(DEBUG_NEW telldata::TtHshStr());
+      case  telldata::tn_layer  : return(DEBUG_NEW telldata::TtLayer());
       case telldata::tn_string  : return(DEBUG_NEW telldata::TtString());
       case telldata::tn_layout  : return(DEBUG_NEW telldata::TtLayout());
       case telldata::tn_auxilary: return(DEBUG_NEW telldata::TtAuxdata());
@@ -3311,6 +3315,7 @@ telldata::TellVar* parsercmd::newCallBackArgument(telldata::typeID ID, TpdYYLtyp
       case    telldata::tn_bnd  : return(DEBUG_NEW telldata::TtBnd());
       case    telldata::tn_hsh  : return(DEBUG_NEW telldata::TtHsh());
       case telldata::tn_hshstr  : return(DEBUG_NEW telldata::TtHshStr());
+      case  telldata::tn_layer  : return(DEBUG_NEW telldata::TtLayer());
       case telldata::tn_string  : return(DEBUG_NEW telldata::TtString());
       case telldata::tn_layout  : return(DEBUG_NEW telldata::TtLayout());
       case telldata::tn_auxilary: return(DEBUG_NEW telldata::TtAuxdata());

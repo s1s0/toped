@@ -54,6 +54,7 @@ telldata::TellVar* telldata::TCompType::initfield(const typeID ID) const
          case tn_bnd   : nvar = DEBUG_NEW telldata::TtBnd()    ;break;
          case tn_hsh   : nvar = DEBUG_NEW telldata::TtHsh()    ;break;
          case tn_hshstr: nvar = DEBUG_NEW telldata::TtHshStr() ;break;
+         case tn_layer : nvar = DEBUG_NEW telldata::TtLayer()  ;break;
          case tn_layout: nvar = DEBUG_NEW telldata::TtLayout() ;break;
          case tn_auxilary: nvar = DEBUG_NEW telldata::TtAuxdata() ;break;
                 default: {
@@ -130,6 +131,11 @@ telldata::THshStrType::THshStrType() : TCompType(telldata::tn_hshstr)
    addfield("value" , telldata::tn_string, NULL);
 };
 
+telldata::TLayerType::TLayerType() : TCompType(telldata::tn_layer)
+{
+   addfield("num"   , telldata::tn_int, NULL);
+   addfield("typ"   , telldata::tn_int, NULL);
+}
 //=============================================================================
 void telldata::TtReal::assign(TellVar* rt)
 {
@@ -646,6 +652,51 @@ telldata::TellVar* telldata::TtUserStruct::field_var(char*& fname)
    return NULL;
 }
 
+
+//=============================================================================
+telldata::TtLayer::TtLayer (word num, word typ) : TtUserStruct(telldata::tn_layer),
+                                         _num(DEBUG_NEW TtInt(num)), _typ(DEBUG_NEW TtInt(typ))
+{
+   _fieldList.push_back(structRECNAME("num", _num));
+   _fieldList.push_back(structRECNAME("typ", _typ));
+}
+
+telldata::TtLayer::TtLayer(operandSTACK& OPstack) : TtUserStruct(telldata::tn_layer)
+{
+   _typ = DEBUG_NEW telldata::TtInt(); _typ->assign(OPstack.top());
+   delete OPstack.top(); OPstack.pop();
+   _num = DEBUG_NEW telldata::TtInt(); _num->assign(OPstack.top());
+   delete OPstack.top(); OPstack.pop();
+   _fieldList.push_back(structRECNAME("num", _num));
+   _fieldList.push_back(structRECNAME("typ", _typ));
+}
+
+telldata::TtLayer::TtLayer(const TtLayer& invar) : TtUserStruct(telldata::tn_layer) ,
+                         _num(DEBUG_NEW TtInt(invar.num())), _typ(DEBUG_NEW TtInt(invar.typ()))
+{
+   _fieldList.push_back(structRECNAME("num", _num));
+   _fieldList.push_back(structRECNAME("typ", _typ));
+}
+
+void telldata::TtLayer::assign(TellVar* rt)
+{
+   _num->_value = static_cast<TtLayer*>(rt)->num();
+   _typ->_value = static_cast<TtLayer*>(rt)->typ();
+}
+
+void telldata::TtLayer::echo(std::string& wstr, real)
+{
+   std::ostringstream ost;
+   ost << "{num = " << num() << ", typ = " << typ() << "}";
+   wstr += ost.str();
+}
+
+const telldata::TtLayer& telldata::TtLayer::operator = (const TtLayer& a)
+{
+   _num->_value = a.num(); _typ->_value = a.typ();
+   return *this;
+}
+
 //=============================================================================
 telldata::TtPnt::TtPnt (real x, real y) : TtUserStruct(telldata::tn_pnt),
                                          _x(DEBUG_NEW TtReal(x)), _y(DEBUG_NEW TtReal(y))
@@ -1105,6 +1156,7 @@ std::string telldata::echoType( const telldata::typeID tID,
       case telldata::tn_box   : atype = "box"   ; break;
       case telldata::tn_hsh   : atype = "lmap"  ; break;
       case telldata::tn_hshstr: atype = "strmap"; break;
+      case telldata::tn_layer : atype = "layer" ; break;
       default                 :
       {
          atype = "?UNKNOWN TYPE?";
