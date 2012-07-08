@@ -97,6 +97,7 @@ namespace laydata {
       typedef std::map<LayerNumber, std::map<LayerDType , DataT> > LayerNMap;
       typedef LayerIterator<DataT> Iterator;
                                  LayerContainer();
+                                 LayerContainer(const LayerContainer<DataT>&);
       virtual                   ~LayerContainer();
       const Iterator             begin() const;
       const Iterator             end() const;
@@ -107,8 +108,10 @@ namespace laydata {
       void                       add(const LayerDef&, DataT);
       void                       erase(const LayerDef&);
       DataT&                     operator[](const LayerDef&);
+      LayerContainer<DataT>&     operator=(const LayerContainer<DataT>&);
    private:
       LayerNMap*                 _layers;
+      bool                       _copy;
    };
 
    const LayerDef  REF_LAY_DEF(REF_LAY, DEFAULT_LAY_DATATYPE);
