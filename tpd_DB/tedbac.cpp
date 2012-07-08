@@ -161,12 +161,22 @@ template <typename DataT>
 laydata::LayerContainer<DataT>::LayerContainer()
 {
    _layers = DEBUG_NEW LayerNMap;
+   _copy   = false;
+}
+
+template <typename DataT>
+laydata::LayerContainer<DataT>::LayerContainer(const LayerContainer<DataT>& init)
+{
+   _layers = init._layers;
+   _copy = true;
+
 }
 
 template <typename DataT>
 laydata::LayerContainer<DataT>::~LayerContainer()
 {
-   delete _layers;
+   if (!_copy)
+      delete _layers;
 }
 
 template <typename DataT>
@@ -220,8 +230,7 @@ void laydata::LayerContainer<DataT>::add(const LayerDef& laydef, DataT quad)
 {
    assert(_layers->end() == _layers->find(laydef.num()));
 
-   LayerDMap& inter = (*_layers)[laydef.num()];
-   inter[laydef.typ()] = quad;
+   (*_layers)[laydef.num()][laydef.typ()] = quad;
 }
 
 template <typename DataT>
@@ -257,8 +266,16 @@ DataT& laydata::LayerContainer<DataT>::operator[](const LayerDef& laydef)
 //         add(laydef, newItem);
 //         return newItem;
       }
-      else return dtype->second;
+      return (*_layers)[laydef.num()][laydef.typ()];
    }
+}
+
+template <typename DataT>
+laydata::LayerContainer<DataT>& laydata::LayerContainer<DataT>::operator=(const LayerContainer<DataT>& init)
+{
+   _layers = init._layers;
+   _copy = true;
+   return *this;
 }
 
 //=============================================================================
