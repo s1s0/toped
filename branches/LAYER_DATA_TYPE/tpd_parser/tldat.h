@@ -67,7 +67,8 @@ namespace telldata {
    const typeID tn_bnd        = 13;
    const typeID tn_hsh        = 14;
    const typeID tn_hshstr     = 15;
-   const typeID tn_usertypes  = 16;
+   const typeID tn_layer      = 16;
+   const typeID tn_usertypes  = 17;
    // the most significant bit is a mask flag
    const typeID tn_listmask = typeID(1) << (8 * sizeof(typeID) - 1);
 
@@ -168,6 +169,10 @@ namespace telldata {
                            THshStrType();
    };
 
+   class TLayerType : public TCompType {
+      public:
+                           TLayerType();
+   };
    //==============================================================================
    class TellVar {
    public:
@@ -223,7 +228,8 @@ namespace telldata {
       void                 uminus()             {_value  = -_value;   };
       virtual TellVar*     selfcopy() const     {return DEBUG_NEW TtInt(_value);};
       void                 NOT()                {_value = ~_value;}
-   protected:
+      friend class TtLayer;
+   private:
       int4b               _value;
    };
 
@@ -356,6 +362,27 @@ namespace telldata {
       virtual TellVar*     field_var(char*& fname);
    protected:
       recfieldsNAME        _fieldList;
+   };
+
+   //==============================================================================
+   // Don't destruct _x and _y here. They are just pointing to the structures in
+   // the parent _fieldList and obviously should be destroyed there
+   class TtLayer : public TtUserStruct {
+   public:
+                           TtLayer (word x=0, word y=0);
+                           TtLayer(const TtLayer&);
+                           TtLayer(operandSTACK& OPStack);
+      virtual TellVar*     selfcopy() const    {return DEBUG_NEW TtLayer(*this);}
+      virtual void         echo(std::string&, real);
+      virtual void         assign(TellVar*);
+      const word           num() const             {return _num->value();}
+      const word           typ() const             {return _typ->value();}
+      void                 set_num(const word num) {_num->_value = num; }
+      void                 set_typ(const word typ) {_typ->_value = typ; }
+      const TtLayer&       operator = (const TtLayer&);
+   private:
+      TtInt*              _num;
+      TtInt*              _typ;
    };
 
    //==============================================================================

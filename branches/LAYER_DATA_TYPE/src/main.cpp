@@ -652,12 +652,14 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    telldata::TBindType*    bndtype     = DEBUG_NEW telldata::TBindType(pntype);
    telldata::THshType*     hshtype     = DEBUG_NEW telldata::THshType();
    telldata::THshStrType*  hshstrtype  = DEBUG_NEW telldata::THshStrType();
+   telldata::TLayerType*   laytype     = DEBUG_NEW telldata::TLayerType();
 
    mblock->addGlobalType("point"     , pntype);
    mblock->addGlobalType("box"       , bxtype);
    mblock->addGlobalType("bind"      , bndtype);
    mblock->addGlobalType("lmap"      , hshtype);
    mblock->addGlobalType("strmap"    , hshstrtype);
+   mblock->addGlobalType("layer"     , laytype);
    //-----------------------------------------------------------------------------------------------------------
    // Internal variables
    //-----------------------------------------------------------------------------------------------------------
