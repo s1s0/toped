@@ -219,11 +219,8 @@ template <typename DataT>
 void laydata::LayerContainer<DataT>::add(const LayerDef& laydef, DataT quad)
 {
    assert(_layers->end() == _layers->find(laydef.num()));
-   std::pair<LayerDType , DataT> dtype(laydef.typ(), quad);
-   LayerDMap dTypes;
-   dTypes.insert(dtype);
-   std::pair<LayerNumber, LayerDMap> layer(laydef.num(), dTypes);
-   _layers->insert(layer);
+   LayerDMap inter = (*_layers)[laydef.num()];
+   inter[laydef.typ()] = quad;
 }
 
 template <typename DataT>
