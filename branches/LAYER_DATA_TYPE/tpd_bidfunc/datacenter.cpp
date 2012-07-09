@@ -51,19 +51,29 @@ extern Calbr::CalbrFile*         DRCData;
 //-----------------------------------------------------------------------------
 // class DataCenter
 //-----------------------------------------------------------------------------
-DataCenter::DataCenter(const std::string& localDir, const std::string& globalDir)
+DataCenter::DataCenter(const std::string& localDir, const std::string& globalDir) :
+   _curcmdlay      ( ERR_LAY, DEFAULT_LAY_DATATYPE          ),
+   _drawruler      ( false                                  ),
+   _localDir       ( localDir                               ),
+   _globalDir      ( globalDir                              ),
+   _TEDLIB         (                                        ),
+   _DRCDB          ( NULL                                   ),
+   _GDSDB          ( NULL                                   ),
+   _CIFDB          ( NULL                                   ),
+   _OASDB          ( NULL                                   ),
+   _DBLock         (                                        ),
+   _DRCLock        (                                        ),
+   _GDSLock        (                                        ),
+   _CIFLock        (                                        ),
+   _OASLock        (                                        ),
+   _bpSync         ( NULL                                   ),
+   _tdtActMxState  ( dbmxs_unlocked                         ),
+   _tdtReqMxState  ( dbmxs_unlocked                         ),
+   _cRenderer      ( NULL                                   ),
+   _objectRecovery ( laydata::ValidRecovery::getInstance()  )
+
 {
-   _localDir = localDir;
-   _globalDir = globalDir;
-   _GDSDB = NULL; _CIFDB = NULL;_OASDB = NULL; _DRCDB = NULL;
-   _bpSync = NULL;
-   // initializing the static cell hierarchy tree
    laydata::TdtLibrary::initHierTreePtr();
-   _drawruler = false;
-   _tdtActMxState = dbmxs_unlocked;
-   _tdtReqMxState = dbmxs_unlocked;
-   _cRenderer = NULL;
-   _objectRecovery = laydata::ValidRecovery::getInstance();
 }
 
 DataCenter::~DataCenter()

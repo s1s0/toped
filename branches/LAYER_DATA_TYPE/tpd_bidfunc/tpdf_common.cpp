@@ -67,24 +67,24 @@ telldata::TtInt* tellstdfunc::getCurrentLayer()
 //! which will be invisible.
 //! Make sure this function is not called when TDT mutex is locked. Otherwise
 //! it will remain locked in case DrawProperties can't be locked
-void tellstdfunc::secureLayer(LayerNumber layno)
+void tellstdfunc::secureLayer(const LayerDef& laydef)
 {
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
       // check whether it's defined and make a default definition if it isn't
-      if (drawProp->addLayer(layno))
-         TpdPost::layer_add(drawProp->getLayerName(layno), layno);
+      if (drawProp->addLayer(laydef.num()))
+         TpdPost::layer_add(drawProp->getLayerName(laydef.num()), laydef.num());
    }
    PROPC->unlockDrawProp(drawProp, true);
 }
 
 //=============================================================================
-LayerNumber tellstdfunc::secureLayer()
+LayerDef tellstdfunc::secureLayer()
 {
-   LayerNumber layno = DATC->curCmdLay();
-   secureLayer(layno);
-   return layno;
+   LayerDef laydef = DATC->curCmdLay();
+   secureLayer(laydef);
+   return laydef;
 }
 
 //=============================================================================
@@ -237,11 +237,10 @@ telldata::TtList* tellstdfunc::make_ttlaylist(auxdata::AuxDataList& lslct, Layer
 laydata::SelectList* tellstdfunc::get_ttlaylist(telldata::TtList* llist)
 {
    laydata::SelectList* shapesel = DEBUG_NEW laydata::SelectList();
-   LayerNumber clayer;
    SGBitSet* pntl_o;
    for (unsigned i = 0 ; i < llist->mlist().size(); i++)
    {
-      clayer = static_cast<telldata::TtLayout*>(llist->mlist()[i])->layer();
+      LayerDef clayer(static_cast<telldata::TtLayout*>(llist->mlist()[i])->layer());
       if (shapesel->end() == shapesel->find(clayer))
          shapesel->add(clayer, DEBUG_NEW laydata::DataList());
       pntl_o = static_cast<telldata::TtLayout*>(llist->mlist()[i])->selp();
@@ -258,10 +257,9 @@ laydata::SelectList* tellstdfunc::get_ttlaylist(telldata::TtList* llist)
 laydata::AtticList* tellstdfunc::get_shlaylist(telldata::TtList* llist)
 {
    laydata::AtticList* shapesel = DEBUG_NEW laydata::AtticList();
-   LayerNumber clayer;
    for (unsigned i = 0 ; i < llist->mlist().size(); i++)
    {
-      clayer = static_cast<telldata::TtLayout*>(llist->mlist()[i])->layer();
+      LayerDef clayer(static_cast<telldata::TtLayout*>(llist->mlist()[i])->layer());
       if (shapesel->end() == shapesel->find(clayer))
          shapesel->add(clayer, DEBUG_NEW laydata::ShapeList());
       (*shapesel)[clayer]->push_back(static_cast<telldata::TtLayout*>

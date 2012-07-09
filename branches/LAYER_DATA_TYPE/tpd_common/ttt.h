@@ -137,6 +137,19 @@ const int         UNDEFCELL_LIB     =  0;
 // drawing from VBO
 #define VBO_BUFFER_OFFSET(i) ((char *)NULL + (i))
 
+//==============================================================================
+class LayerDef {
+public:
+                             LayerDef(LayerNumber num, LayerDType  typ) : _num(num), _typ(typ) {}
+                             LayerDef(LayerNumber num) : _num(num), _typ(0 /*DEFAULT_LAY_DATATYPE*/) {}
+   LayerNumber               num() const {return _num;}
+   LayerDType                typ() const {return _typ;}
+   bool                      operator==(const LayerDef& cmp) const {return ((_num == cmp._num) && (_typ == cmp._typ));}
+   bool                      operator!=(const LayerDef& cmp) const {return ((_num != cmp._num) || (_typ != cmp._typ));}
+private:
+   LayerNumber               _num;
+   LayerDType                _typ;
+};
 
 //==============================================================================
 class SGBitSet {
@@ -712,6 +725,10 @@ const DBbox       DEFAULT_ZOOM_BOX     = DBbox(TP(-2000,-2000), TP(20000,20000))
 const real        DEFAULT_DBU          = 1e-9;
 const real        DEFAULT_UU           = 1e-3;
 const LayerDType  DEFAULT_LAY_DATATYPE = 0;
+const LayerDef    REF_LAY_DEF(REF_LAY, DEFAULT_LAY_DATATYPE);
+const LayerDef    GRC_LAY_DEF(GRC_LAY, DEFAULT_LAY_DATATYPE);
+const LayerDef    TLL_LAY_DEF(0, DEFAULT_LAY_DATATYPE);
+
 
 
 #endif

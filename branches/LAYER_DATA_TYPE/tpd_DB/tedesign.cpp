@@ -999,10 +999,10 @@ void laydata::TdtDesign::collectParentCells(std::string& cname, CellDefList& par
    }
 }
 
-laydata::TdtData* laydata::TdtDesign::addBox(LayerNumber la, TP* p1, TP* p2 )
+laydata::TdtData* laydata::TdtDesign::addBox(const LayerDef& laydef, TP* p1, TP* p2 )
 {
    DBbox old_overlap(_target.edit()->cellOverlap());
-   QuadTree *actlay = _target.edit()->secureLayer(la);
+   QuadTree *actlay = _target.edit()->secureLayer(laydef);
    setModified();
    TP np1((*p1) * _target.rARTM());
    TP np2((*p2) * _target.rARTM());
@@ -1052,7 +1052,7 @@ void laydata::TdtDesign::setModified()
    _lastUpdated = time(NULL);
 }
 
-laydata::TdtData* laydata::TdtDesign::addPoly(LayerNumber la, PointVector* pl)
+laydata::TdtData* laydata::TdtDesign::addPoly(const LayerDef& laydef, PointVector* pl)
 {
    laydata::TdtData *newshape = NULL;
    for(PointVector::iterator PL = pl->begin(); PL != pl->end(); PL++)
@@ -1065,7 +1065,7 @@ laydata::TdtData* laydata::TdtDesign::addPoly(LayerNumber la, PointVector* pl)
       if (!newShapes->empty())
       {
          DBbox old_overlap(_target.edit()->cellOverlap());
-         QuadTree *actlay = _target.edit()->secureLayer(la);
+         QuadTree *actlay = _target.edit()->secureLayer(laydef);
          setModified();
          for (laydata::ShapeList::const_iterator CS = newShapes->begin(); CS != newShapes->end(); CS++)
          {
@@ -1117,7 +1117,7 @@ laydata::TdtData* laydata::TdtDesign::putPoly(LayerNumber la, PointVector* pl)
    return newshape;
 }
 
-laydata::TdtData* laydata::TdtDesign::addWire(LayerNumber la, PointVector* pl, WireWidth w)
+laydata::TdtData* laydata::TdtDesign::addWire(const LayerDef& laydef, PointVector* pl, WireWidth w)
 {
    laydata::TdtData *newshape = NULL;
    for(PointVector::iterator PL = pl->begin(); PL != pl->end(); PL++)
@@ -1130,7 +1130,7 @@ laydata::TdtData* laydata::TdtDesign::addWire(LayerNumber la, PointVector* pl, W
       if (!newShapes->empty())
       {
          DBbox old_overlap(_target.edit()->cellOverlap());
-         QuadTree *actlay = _target.edit()->secureLayer(la);
+         QuadTree *actlay = _target.edit()->secureLayer(laydef);
          setModified();
          for (laydata::ShapeList::const_iterator CS = newShapes->begin(); CS != newShapes->end(); CS++)
          {
@@ -1561,10 +1561,10 @@ void laydata::TdtDesign::deleteSelected(laydata::AtticList* fsel,
    fixReferenceOverlap(old_overlap);
 }
 
-void laydata::TdtDesign::destroyThis(TdtData* ds, LayerNumber la, laydata::TdtLibDir* libdir)
+void laydata::TdtDesign::destroyThis(TdtData* ds, const LayerDef& laydef, laydata::TdtLibDir* libdir)
 {
    DBbox old_overlap(_target.edit()->cellOverlap());
-   _target.edit()->destroyThis(libdir, ds,la);
+   _target.edit()->destroyThis(libdir, ds, laydef);
    fixReferenceOverlap(old_overlap);
 }
 

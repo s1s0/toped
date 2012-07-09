@@ -176,8 +176,8 @@ void tellstdfunc::stdMOVESEL::undo()
       tDesign->selectFromList(get_ttlaylist(deleted), unselable);
       // delete the added shapes
       for (word j = 0 ; j < added->mlist().size(); j++) {
-         tDesign->destroyThis(             static_cast<telldata::TtLayout*>(added->mlist()[j])->data(),
-                          /*tell2DBLayer(*/static_cast<telldata::TtLayout*>(added->mlist()[j])->layer()/*)*/,
+         tDesign->destroyThis(static_cast<telldata::TtLayout*>(added->mlist()[j])->data()  ,
+                              static_cast<telldata::TtLayout*>(added->mlist()[j])->layer() ,
                               dbLibDir);
       }
    }
@@ -305,9 +305,9 @@ void tellstdfunc::stdROTATESEL::undo()
       // delete the added shapes
       for (word j = 0 ; j < added->mlist().size(); j++)
       {
-         tDesign->destroyThis(             static_cast<telldata::TtLayout*>(added->mlist()[j])->data(),
-                          /*tell2DBLayer(*/static_cast<telldata::TtLayout*>(added->mlist()[j])->layer()/*)*/,
-                              dbLibDir);
+         tDesign->destroyThis( static_cast<telldata::TtLayout*>(added->mlist()[j])->data() ,
+                               static_cast<telldata::TtLayout*>(added->mlist()[j])->layer(),
+                               dbLibDir);
       }
    }
    DATC->unlockTDT(dbLibDir, true);

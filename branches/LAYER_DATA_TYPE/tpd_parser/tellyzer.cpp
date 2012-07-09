@@ -3169,6 +3169,13 @@ console::toped_logfile& console::toped_logfile::operator<< (const telldata::TtHs
    return *this;
 }
 
+console::toped_logfile& console::toped_logfile::operator<< (const telldata::TtLayer& _l)
+{
+   if (_enabled)
+      _file << "{" << _l.num() << ",\"" << _l.typ() << "\"}";
+   return *this;
+}
+
 console::toped_logfile& console::toped_logfile::operator<< (const telldata::TtList& _tl)
 {
    if (_enabled)

@@ -79,9 +79,9 @@ public:
    void                       mouseHoover(TP&);
    void                       setRecoverPoly(bool);
    void                       setRecoverWire(bool);
-   void                       setCmdLayer(LayerNumber layno) {_curcmdlay = layno;}
-   LayerNumber                curCmdLay() const       {return _curcmdlay;}
-   bool                       modified() const        {return _TEDLIB.modified();};
+   void                       setCmdLayer(const LayerDef& laydef) {_curcmdlay = laydef;}
+   LayerDef                   curCmdLay() const                   {return _curcmdlay;}
+   bool                       modified() const                    {return _TEDLIB.modified();};
 
    //------------------------------------------------------------------------------------------------
    void                       switchDrawRuler(bool st) {_drawruler = st;}
@@ -96,7 +96,7 @@ protected:
    void                       openGlDraw(const CTM&);
    void                       openGlRender(const CTM&); // alternative to openGlDraw
 private:
-   LayerNumber                _curcmdlay;    //! layer used during current drawing operation
+   LayerDef                   _curcmdlay;    //! layer used during current drawing operation
    bool                       _drawruler;    //! draw a ruler while composing a shape interactively
    std::string                _localDir;
    std::string                _globalDir;

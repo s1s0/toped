@@ -253,12 +253,17 @@ void telldata::TtString::echo(std::string& wstr, real)
    wstr += ost.str();
 }
 //=============================================================================
-telldata::TtLayout::TtLayout(const TtLayout& cobj) : TellVar(cobj.get_type())
+telldata::TtLayout::TtLayout(const TtLayout& cobj) :
+   TellVar(cobj.get_type()),
+   _data  ( cobj._data    ),// don't copy the layout data!
+   _layer ( cobj._layer   )
+//   _selp  () // selected points;
+
 {
    if (NULL != cobj._selp) _selp = DEBUG_NEW SGBitSet(*(cobj._selp));
    else _selp = NULL;
-   _layer = cobj._layer;
-   _data = cobj._data; // don't copy the layout data!
+//   _layer = cobj._layer;
+//   _data = cobj._data; // don't copy the layout data!
 }
 
 const telldata::TtLayout& telldata::TtLayout::operator = (const TtLayout& cobj)
@@ -277,8 +282,9 @@ void telldata::TtLayout::echo(std::string& wstr, real DBU)
       ost << "< !EMPTY! >";
    else
    {
-      if ( LAST_EDITABLE_LAYNUM > _layer)
-         ost << "layer " << _layer << " :";
+      if ( LAST_EDITABLE_LAYNUM > _layer.num())
+         ost << "layer " << _layer.num() << " :"
+             << "dtype " << _layer.typ() << " :";
       _data->info(ost, DBU);
    }
    if (_selp && (_selp->size() > 0)) ost << " - partially selected";
@@ -654,8 +660,8 @@ telldata::TellVar* telldata::TtUserStruct::field_var(char*& fname)
 
 
 //=============================================================================
-telldata::TtLayer::TtLayer (word num, word typ) : TtUserStruct(telldata::tn_layer),
-                                         _num(DEBUG_NEW TtInt(num)), _typ(DEBUG_NEW TtInt(typ))
+telldata::TtLayer::TtLayer (const LayerDef& laydef) : TtUserStruct(telldata::tn_layer),
+                                         _num(DEBUG_NEW TtInt(laydef.num())), _typ(DEBUG_NEW TtInt(laydef.typ()))
 {
    _fieldList.push_back(structRECNAME("num", _num));
    _fieldList.push_back(structRECNAME("typ", _typ));
