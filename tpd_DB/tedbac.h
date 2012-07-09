@@ -52,19 +52,6 @@ namespace laydata {
 //   };
 
 
-   class LayerDef {
-   public:
-                                LayerDef(LayerNumber num, LayerDType  typ) : _num(num), _typ(typ) {}
-                                LayerDef(LayerNumber num) : _num(num), _typ(DEFAULT_LAY_DATATYPE) {}
-      LayerNumber               num() const {return _num;}
-      LayerDType                typ() const {return _typ;}
-      bool                      operator==(const LayerDef&) const;
-      bool                      operator!=(const LayerDef&) const;
-   private:
-      LayerNumber               _num;
-      LayerDType                _typ;
-   };
-
    template <typename DataT>
    class LayerIterator {
    public:

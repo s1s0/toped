@@ -95,11 +95,11 @@ namespace laydata {
       TdtCell*       removeTopCell(std::string&, laydata::AtticList*, laydata::TdtLibDir*);
       void           renameCell(TdtDefaultCell*, std::string);
       void           removeRefdCell(std::string&, CellDefList&, laydata::AtticList*, laydata::TdtLibDir*);
-      TdtData*       addBox(LayerNumber la, TP* p1, TP* p2);
+      TdtData*       addBox(const LayerDef&, TP*, TP*);
       TdtData*       putBox(LayerNumber la, TP* p1, TP* p2);
-      TdtData*       addPoly(LayerNumber, PointVector*);
+      TdtData*       addPoly(const LayerDef&, PointVector*);
       TdtData*       putPoly(LayerNumber, PointVector*);
-      TdtData*       addWire(LayerNumber, PointVector*, WireWidth);
+      TdtData*       addWire(const LayerDef&, PointVector*, WireWidth);
       TdtData*       putWire(LayerNumber, PointVector*, WireWidth);
       TdtData*       addText(LayerNumber la, std::string& text, CTM& ori);
       TdtData*       putText(LayerNumber la, std::string& text, CTM& ori);
@@ -127,7 +127,7 @@ namespace laydata {
       void           rotateSelected( TP p, real angle, SelectList**);
       void           flipSelected( TP p, bool Xaxis);
       void           deleteSelected(laydata::AtticList*, laydata::TdtLibDir*);
-      void           destroyThis(TdtData* ds, LayerNumber la, laydata::TdtLibDir* );
+      void           destroyThis(TdtData*, const LayerDef&, laydata::TdtLibDir* );
       bool           groupSelected(std::string name, laydata::TdtLibDir*);
       ShapeList*     ungroupPrep(laydata::TdtLibDir*);
       AtticList*     ungroupThis(ShapeList*);

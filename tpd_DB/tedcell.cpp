@@ -604,7 +604,7 @@ bool laydata::TdtCell::getShapeOver(TP pnt, const DWordSet& unselable)
 laydata::AtticList* laydata::TdtCell::changeSelect(TP pnt, SH_STATUS status, const DWordSet& unselable)
 {
    laydata::TdtData* prev = NULL;
-   LayerDef prevlay(NULL_LAY, DEFAULT_LAY_DATATYPE);
+   LayerDef prevlay(ERR_LAY, DEFAULT_LAY_DATATYPE);
    for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
       if (unselable.end() == unselable.find(lay.number()))

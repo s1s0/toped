@@ -29,19 +29,6 @@
 #include "tedbac.h"
 
 
-
-bool laydata::LayerDef::operator==(const LayerDef& cmp) const
-{
-   return ((_num == cmp._num) && (_typ == cmp._typ));
-}
-
-
-bool laydata::LayerDef::operator!=(const LayerDef& cmp) const
-{
-   return ((_num != cmp._num) || (_typ != cmp._typ));
-}
-
-
 //=============================================================================
 template <typename DataT>
 laydata::LayerIterator<DataT>::LayerIterator():
@@ -151,7 +138,7 @@ LayerNumber laydata::LayerIterator<DataT>::number() const
 }
 
 template <typename DataT>
-laydata::LayerDef laydata::LayerIterator<DataT>::layDef() const
+LayerDef laydata::LayerIterator<DataT>::layDef() const
 {
    return LayerDef(_cNMap->first, _cDMap->first);
 }

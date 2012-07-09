@@ -276,8 +276,8 @@ namespace telldata {
    public:
                            TtLayout(): TellVar(tn_layout), _data(NULL),
                                                       _layer(ERR_LAY), _selp(NULL) {};
-                           TtLayout(laydata::TdtData* pdat, unsigned lay, SGBitSet* selp = NULL):
-                             TellVar(tn_layout), _data(pdat), _layer(lay), _selp(selp) {};
+                           TtLayout(laydata::TdtData* pdat, const LayerDef laydef, SGBitSet* selp = NULL):
+                             TellVar(tn_layout), _data(pdat), _layer(laydef), _selp(selp) {};
                            TtLayout(const TtLayout& cobj);
       const TtLayout&      operator = (const TtLayout&);
       virtual void         initialize() {if (_selp) delete _selp;_data = NULL;}
@@ -285,12 +285,12 @@ namespace telldata {
       virtual void         assign(TellVar*);
       virtual TellVar*     selfcopy() const {return DEBUG_NEW TtLayout(*this);};
       laydata::TdtData*    data() const     {return _data;};
-      LayerNumber          layer() const    {return _layer;};
+      LayerDef             layer() const    {return _layer;};
       SGBitSet*            selp() const     {return _selp;};
       virtual             ~TtLayout()       {if (_selp) delete _selp;}
    private:
       laydata::TdtData*    _data;
-      LayerNumber          _layer;
+      LayerDef             _layer;
       SGBitSet*            _selp; // selected points;
    };
 
@@ -369,7 +369,7 @@ namespace telldata {
    // the parent _fieldList and obviously should be destroyed there
    class TtLayer : public TtUserStruct {
    public:
-                           TtLayer (word x=0, word y=0);
+                           TtLayer (const LayerDef& = TLL_LAY_DEF);
                            TtLayer(const TtLayer&);
                            TtLayer(operandSTACK& OPStack);
       virtual TellVar*     selfcopy() const    {return DEBUG_NEW TtLayer(*this);}

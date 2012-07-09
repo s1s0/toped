@@ -161,8 +161,8 @@
 namespace tellstdfunc {
 
    telldata::TtInt*     getCurrentLayer();
-   LayerNumber          secureLayer();
-   void                 secureLayer(LayerNumber);
+   LayerDef             secureLayer();
+   void                 secureLayer(const LayerDef&);
    bool                 waitGUInput(int, telldata::operandSTACK *,
                                     std::string name = "",
                                     const CTM trans = CTM(),
