@@ -955,29 +955,31 @@ int tellstdfunc::lgcSTRETCH::execute()
 tellstdfunc::stdCHANGELAY::stdCHANGELAY(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtLayer()));
 }
 
 void tellstdfunc::stdCHANGELAY::undo_cleanup()
 {
-   getWordValue(UNDOPstack, false);
-   telldata::TtList* pl = TELL_UNDOOPS_CLEAN(telldata::TtList*);
+   telldata::TtLayer*  tlay = TELL_UNDOOPS_CLEAN(telldata::TtLayer*);
+   telldata::TtList*   pl   = TELL_UNDOOPS_CLEAN(telldata::TtList*);
    delete pl;
+   delete tlay;
 }
 
 void tellstdfunc::stdCHANGELAY::undo()
 {
-   telldata::TtList* pl = TELL_UNDOOPS_UNDO(telldata::TtList*);
-   word src = getWordValue(UNDOPstack, true);
-   secureLayDef(tell2DBLayer(src));
+   telldata::TtList*   pl   = TELL_UNDOOPS_UNDO(telldata::TtList*);
+   telldata::TtLayer*  tlay = TELL_UNDOOPS_UNDO(telldata::TtLayer*);
+   LayerDef laydef(tlay->value());
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      tDesign->transferLayer(get_ttlaylist(pl), tell2DBLayer(src));
+      tDesign->transferLayer(get_ttlaylist(pl),laydef);
    }
    DATC->unlockTDT(dbLibDir, true);
    delete pl;
+   delete tlay;
    RefreshGL();
 }
 
@@ -996,14 +998,15 @@ int tellstdfunc::stdCHANGELAY::execute()
       }
       else
       {
-         word target = getWordValue();
-         secureLayDef(tell2DBLayer(target));
-         tDesign->transferLayer(tell2DBLayer(target));
+         telldata::TtLayer* tlay = static_cast<telldata::TtLayer*>(OPstack.top());OPstack.pop();
+         LayerDef laydef(tlay->value());
+         secureLayer(laydef);
+         tDesign->transferLayer(laydef);
          // prepare undo stacks
          UNDOcmdQ.push_front(this);
-         UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(target));
+         UNDOPstack.push_front(tlay);
          UNDOPstack.push_front(make_ttlaylist(listselected));
-         LogFile << "changelayer("<< target << ");";LogFile.flush();
+         LogFile << "changelayer("<< *tlay << ");";LogFile.flush();
          RefreshGL();
       }
    }

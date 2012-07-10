@@ -49,16 +49,16 @@ extern const wxEventType         wxEVT_CANVAS_PARAMS;
 //=============================================================================
 //! Make sure this function is not called when TDT mutex is locked. Otherwise
 //! it will remain locked in case DrawProperties can't be locked
-telldata::TtInt* tellstdfunc::getCurrentLayer()
+telldata::TtLayer* tellstdfunc::getCurrentLayer()
 {
-   LayerNumber cl = 0;
+   LayerDef cl(TLL_LAY_DEF);
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
       cl = drawProp->curLay();
    }
    PROPC->unlockDrawProp(drawProp, true);
-   return (DEBUG_NEW telldata::TtInt(cl));
+   return (DEBUG_NEW telldata::TtLayer(cl));
 }
 
 //=============================================================================
@@ -466,26 +466,26 @@ void tellstdfunc::initFuncLib(wxFrame* tpd, wxWindow* cnvs)
 }
 
 //=============================================================================
-bool tellstdfunc::secureLayDef(LayerNumber layno)
-{
-   bool success = true;
-   layprop::DrawProperties* drawProp;
-   if (PROPC->lockDrawProp(drawProp))
-   {
-      if (layno != REF_LAY)
-      {
-         if (drawProp->addLayer(layno))
-            PROPC->addUnpublishedLay(layno);
-      }
-      else
-      {
-         // TODO -add message here
-         success = false;
-      }
-   }
-   PROPC->unlockDrawProp(drawProp, false);
-   return success;
-}
+//bool tellstdfunc::secureLayDef(LayerNumber layno)
+//{
+//   bool success = true;
+//   layprop::DrawProperties* drawProp;
+//   if (PROPC->lockDrawProp(drawProp))
+//   {
+//      if (layno != REF_LAY)
+//      {
+//         if (drawProp->addLayer(layno))
+//            PROPC->addUnpublishedLay(layno);
+//      }
+//      else
+//      {
+//         // TODO -add message here
+//         success = false;
+//      }
+//   }
+//   PROPC->unlockDrawProp(drawProp, false);
+//   return success;
+//}
 
 //=============================================================================
 void tellstdfunc::createDefaultTDT(std::string dbname,

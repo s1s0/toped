@@ -96,13 +96,13 @@ namespace laydata {
       void           renameCell(TdtDefaultCell*, std::string);
       void           removeRefdCell(std::string&, CellDefList&, laydata::AtticList*, laydata::TdtLibDir*);
       TdtData*       addBox(const LayerDef&, TP*, TP*);
-      TdtData*       putBox(LayerNumber la, TP* p1, TP* p2);
+      TdtData*       putBox(const LayerDef&, TP*, TP*);
       TdtData*       addPoly(const LayerDef&, PointVector*);
-      TdtData*       putPoly(LayerNumber, PointVector*);
+      TdtData*       putPoly(const LayerDef&, PointVector*);
       TdtData*       addWire(const LayerDef&, PointVector*, WireWidth);
-      TdtData*       putWire(LayerNumber, PointVector*, WireWidth);
-      TdtData*       addText(LayerNumber la, std::string& text, CTM& ori);
-      TdtData*       putText(LayerNumber la, std::string& text, CTM& ori);
+      TdtData*       putWire(const LayerDef&, PointVector*, WireWidth);
+      TdtData*       addText(const LayerDef&, std::string& text, CTM& ori);
+      TdtData*       putText(const LayerDef&, std::string&, CTM&);
       TdtData*       addCellRef(laydata::CellDefin strdefn, CTM& ori);
       TdtData*       addCellARef(std::string&, CTM&, ArrayProps&);
       void           addList(AtticList*, TdtCell* tCell = NULL);
@@ -137,8 +137,8 @@ namespace laydata {
       unsigned int   numSelected() const;
       DBbox          activeOverlap();
       DBbox          getVisibleOverlap(layprop::DrawProperties&);
-      void           transferLayer(LayerNumber dst);
-      void           transferLayer(laydata::SelectList* slst, LayerNumber dst);
+      void           transferLayer(const LayerDef&);
+      void           transferLayer(laydata::SelectList*, const LayerDef&);
       AtticList*     changeRef(ShapeList*, std::string);
       //
       void           collectParentCells(std::string&, CellDefList&);
