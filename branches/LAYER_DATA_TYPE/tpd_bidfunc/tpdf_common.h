@@ -160,7 +160,7 @@
 
 namespace tellstdfunc {
 
-   telldata::TtInt*     getCurrentLayer();
+   telldata::TtLayer*   getCurrentLayer();
    LayerDef             secureLayer();
    void                 secureLayer(const LayerDef&);
    bool                 waitGUInput(int, telldata::operandSTACK *,
@@ -192,7 +192,7 @@ namespace tellstdfunc {
    void                 initFuncLib(wxFrame*, wxWindow*);
    laydata::SelectList* filter_selist(const laydata::SelectList*, word mask);
    laydata::AtticList*  replace_str(laydata::AtticList*, std::string);
-   bool                 secureLayDef(LayerNumber);
+//   bool                 secureLayDef(LayerNumber);
    void                 createDefaultTDT(std::string, laydata::TdtLibDir*, TpdTime&, bool, parsercmd::UndoQUEUE&, telldata::UNDOPerandQUEUE&);
 
 }

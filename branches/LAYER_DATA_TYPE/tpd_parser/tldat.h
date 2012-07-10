@@ -276,7 +276,7 @@ namespace telldata {
    public:
                            TtLayout(): TellVar(tn_layout), _data(NULL),
                                                       _layer(ERR_LAY), _selp(NULL) {};
-                           TtLayout(laydata::TdtData* pdat, const LayerDef laydef, SGBitSet* selp = NULL):
+                           TtLayout(laydata::TdtData* pdat, const LayerDef& laydef, SGBitSet* selp = NULL):
                              TellVar(tn_layout), _data(pdat), _layer(laydef), _selp(selp) {};
                            TtLayout(const TtLayout& cobj);
       const TtLayout&      operator = (const TtLayout&);
@@ -377,6 +377,7 @@ namespace telldata {
       virtual void         assign(TellVar*);
       const word           num() const             {return _num->value();}
       const word           typ() const             {return _typ->value();}
+      LayerDef             value() const           {return LayerDef(_num->value(), _typ->value());}
       void                 set_num(const word num) {_num->_value = num; }
       void                 set_typ(const word typ) {_typ->_value = typ; }
       const TtLayer&       operator = (const TtLayer&);

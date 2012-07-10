@@ -1012,9 +1012,9 @@ laydata::TdtData* laydata::TdtDesign::addBox(const LayerDef& laydef, TP* p1, TP*
    return newshape;
 }
 
-laydata::TdtData* laydata::TdtDesign::putBox(LayerNumber la, TP* p1, TP* p2 )
+laydata::TdtData* laydata::TdtDesign::putBox(const LayerDef& laydef, TP* p1, TP* p2 )
 {
-   QTreeTmp *actlay = _target.edit()->secureUnsortedLayer(la);
+   QTreeTmp *actlay = _target.edit()->secureUnsortedLayer(laydef);
    setModified();
    TP np1((*p1) * _target.rARTM());
    TP np2((*p2) * _target.rARTM());
@@ -1085,7 +1085,7 @@ laydata::TdtData* laydata::TdtDesign::addPoly(const LayerDef& laydef, PointVecto
    return newshape;
 }
 
-laydata::TdtData* laydata::TdtDesign::putPoly(LayerNumber la, PointVector* pl)
+laydata::TdtData* laydata::TdtDesign::putPoly(const LayerDef& laydef, PointVector* pl)
 {
    laydata::TdtData *newshape = NULL;
    for(PointVector::iterator PL = pl->begin(); PL != pl->end(); PL++)
@@ -1097,7 +1097,7 @@ laydata::TdtData* laydata::TdtDesign::putPoly(LayerNumber la, PointVector* pl)
       laydata::ShapeList* newShapes = check.replacements();
       if (!newShapes->empty())
       {
-         QTreeTmp *actlay = _target.edit()->secureUnsortedLayer(la);
+         QTreeTmp *actlay = _target.edit()->secureUnsortedLayer(laydef);
          setModified();
          for (laydata::ShapeList::const_iterator CS = newShapes->begin(); CS != newShapes->end(); CS++)
          {
@@ -1151,7 +1151,7 @@ laydata::TdtData* laydata::TdtDesign::addWire(const LayerDef& laydef, PointVecto
    return newshape;
 }
 
-laydata::TdtData* laydata::TdtDesign::putWire(LayerNumber la, PointVector* pl, WireWidth w)
+laydata::TdtData* laydata::TdtDesign::putWire(const LayerDef& laydef, PointVector* pl, WireWidth w)
 {
    laydata::TdtData *newshape = NULL;
    for(PointVector::iterator PL = pl->begin(); PL != pl->end(); PL++)
@@ -1163,7 +1163,7 @@ laydata::TdtData* laydata::TdtDesign::putWire(LayerNumber la, PointVector* pl, W
       laydata::ShapeList* newShapes = check.replacements();
       if (!newShapes->empty())
       {
-         QTreeTmp *actlay = _target.edit()->secureUnsortedLayer(la);
+         QTreeTmp *actlay = _target.edit()->secureUnsortedLayer(laydef);
          setModified();
          for (laydata::ShapeList::const_iterator CS = newShapes->begin(); CS != newShapes->end(); CS++)
          {
@@ -1183,10 +1183,10 @@ laydata::TdtData* laydata::TdtDesign::putWire(LayerNumber la, PointVector* pl, W
    return newshape;
 }
 
-laydata::TdtData* laydata::TdtDesign::addText(LayerNumber la, std::string& text, CTM& ori)
+laydata::TdtData* laydata::TdtDesign::addText(const LayerDef& laydef, std::string& text, CTM& ori)
 {
    DBbox old_overlap(_target.edit()->cellOverlap());
-   QuadTree *actlay = _target.edit()->secureLayer(la);
+   QuadTree *actlay = _target.edit()->secureLayer(laydef);
    setModified();
    ori *= _target.rARTM();
    laydata::TdtText *newshape = DEBUG_NEW TdtText(text,ori);
@@ -1196,9 +1196,9 @@ laydata::TdtData* laydata::TdtDesign::addText(LayerNumber la, std::string& text,
    return newshape;
 }
 
-laydata::TdtData* laydata::TdtDesign::putText(LayerNumber la, std::string& text, CTM& ori)
+laydata::TdtData* laydata::TdtDesign::putText(const LayerDef& laydef, std::string& text, CTM& ori)
 {
-   QTreeTmp *actlay = _target.edit()->secureUnsortedLayer(la);
+   QTreeTmp *actlay = _target.edit()->secureUnsortedLayer(laydef);
    setModified();
    ori *= _target.rARTM();
    laydata::TdtData* newshape = DEBUG_NEW TdtText(text,ori);
@@ -1712,14 +1712,14 @@ void laydata::TdtDesign::tryUnselectAll() const {
       _target.edit()->unselectAll();
 }
 
-void laydata::TdtDesign::transferLayer(LayerNumber dst)
+void laydata::TdtDesign::transferLayer(const LayerDef& laydef)
 {
-   _target.edit()->transferLayer(dst);
+   _target.edit()->transferLayer(laydef);
 }
 
-void laydata::TdtDesign::transferLayer(laydata::SelectList* slst, LayerNumber dst)
+void laydata::TdtDesign::transferLayer(laydata::SelectList* slst, const LayerDef& laydef)
 {
-   _target.edit()->transferLayer(slst, dst);
+   _target.edit()->transferLayer(slst, laydef);
 }
 
 laydata::TdtDesign::~TdtDesign()
