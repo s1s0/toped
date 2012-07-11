@@ -1504,7 +1504,7 @@ bool laydata::TdtCell::mergeSelected(AtticList** dasao)
       ShapeList* mrgcand = NULL;
       ShapeList* cleared = NULL;
       // omit the layer if there are no fully selected shapes
-      if ((REF_LAY_DEF == CL.layDef()) || (NULL == (mrgcand = mergePrep(CL.number()))))  continue;
+      if ((REF_LAY_DEF == CL.layDef()) || (NULL == (mrgcand = mergePrep(CL.layDef()))))  continue;
       cleared = DEBUG_NEW ShapeList();
       //
       // A rather convoluted traversing to produce all merged shapes ...
