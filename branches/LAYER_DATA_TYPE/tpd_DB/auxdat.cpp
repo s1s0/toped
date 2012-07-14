@@ -523,7 +523,7 @@ void auxdata::GrcCell::dbExport(DbExportFile& exportf) const
    }
 }
 
-void auxdata::GrcCell::collectUsedLays(LayerTMPList& laylist) const
+void auxdata::GrcCell::collectUsedLays(LayerDefList& laylist) const
 {
    for(LayerList::const_iterator CL = _layers.begin(); CL != _layers.end(); CL++)
       if (LAST_EDITABLE_LAYNUM > CL->first)

@@ -263,9 +263,9 @@ layprop::PropertyCenter::PropertyCenter() :
 //   fontLib = DEBUG_NEW FontLibrary(ffname, fname, vbo);
 //}
 
-void layprop::PropertyCenter::addUnpublishedLay(LayerNumber layno)
+void layprop::PropertyCenter::addUnpublishedLay(const LayerDef& laydef)
 {
-   _uplaylist.push_back(layno);
+   _uplaylist.push_back(laydef);
 }
 
 const layprop::LayoutGrid* layprop::PropertyCenter::grid(byte No) const {

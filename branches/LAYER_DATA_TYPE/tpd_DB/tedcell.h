@@ -115,7 +115,7 @@ namespace laydata {
          virtual void        dbExport(DbExportFile&, const CellMap&, const TDTHierTree*) const;
          virtual void        psWrite(PSFile&, const layprop::DrawProperties&,
                                       const CellMap* = NULL, const TDTHierTree* = NULL) const;
-         virtual void        collectUsedLays(const TdtLibDir*, bool, LayerTMPList&) const;
+         virtual void        collectUsedLays(const TdtLibDir*, bool, LayerDefList&) const;
          virtual void        renameChild(std::string, std::string) {assert(false); /* TdTDefaultCell can not be renamed */}
          bool                checkLayer(const LayerDef&) const;
          void                setName(std::string nname) {_name = nname;}
@@ -196,7 +196,7 @@ namespace laydata {
       virtual bool         relink(TdtLibDir*);
       virtual void         relinkThis(std::string, laydata::CellDefin, laydata::TdtLibDir*);
       void                 reportSelected(real) const;
-      virtual void         collectUsedLays(const TdtLibDir*, bool, LayerTMPList&) const;
+      virtual void         collectUsedLays(const TdtLibDir*, bool, LayerDefList&) const;
       bool                 overlapChanged(DBbox&, TdtDesign*);
       virtual DBbox        getVisibleOverlap(const layprop::DrawProperties&);
       virtual void         renameChild(std::string, std::string);

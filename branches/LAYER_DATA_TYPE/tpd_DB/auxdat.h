@@ -153,7 +153,7 @@ namespace auxdata {
          virtual void        openGlDraw(layprop::DrawProperties&, bool active=false) const;
          virtual void        openGlRender(tenderer::TopRend&, const CTM&, bool, bool) const;
          virtual DBbox       getVisibleOverlap(const layprop::DrawProperties&);
-         virtual void        collectUsedLays(LayerTMPList&) const;
+         virtual void        collectUsedLays(LayerDefList&) const;
          virtual void        motionDraw(const layprop::DrawProperties&, CtmQueue&, bool active=false) const;
          //
          QuadTree*           secureLayer(LayerNumber layno);

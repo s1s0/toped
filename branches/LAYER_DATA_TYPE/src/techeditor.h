@@ -140,7 +140,7 @@ namespace tui
                                     wxListView(parent, winid, wxDefaultPosition, wxDefaultSize, style) {}
                unsigned long     getItemLayerNum(TmpWxIntPtr item1);
                std::string       getItemLayerName(TmpWxIntPtr item1);
-               void              addItemLayer(unsigned long, unsigned long, std::string);
+               void              addItemLayer(unsigned long, const LayerDef& laydef, std::string);
                void              clearAll();
             private:
                typedef std::map<TmpWxIntPtr,LayerLine> LayerItems;
@@ -160,7 +160,7 @@ namespace tui
          wxTextCtrl*             _layerName;
          wxString                _layerNameString;
          int                     _curSelect;//!Data related to current selection
-         LayerTMPList            _allLayNums;
+         LayerDefList            _allLayNums;
 
          DECLARE_EVENT_TABLE()
    };

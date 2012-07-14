@@ -1504,7 +1504,7 @@ void tenderer::TenderRefLay::collect(GLuint pbuf)
 
 void tenderer::TenderRefLay::draw(layprop::DrawProperties* drawprop)
 {
-   drawprop->setCurrentColor(REF_LAY);
+   drawprop->setCurrentColor(REF_LAY_DEF);
    drawprop->setLineProps(false);
    // Bind the buffer
    glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);

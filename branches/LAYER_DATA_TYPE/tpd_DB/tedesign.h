@@ -49,7 +49,7 @@ namespace laydata {
       void              relink(TdtLibDir*);
       void              clearLib();
       void              cleanUnreferenced();
-      void              collectUsedLays(LayerTMPList&) const;
+      void              collectUsedLays(LayerDefList&) const;
       void              dbHierAdd(const TdtDefaultCell*, const TdtDefaultCell*);
       void              dbHierAddParent(const TdtDefaultCell*, const TdtDefaultCell*);
       void              dbHierRemoveParent(TdtDefaultCell*, const TdtDefaultCell*, laydata::TdtLibDir*);
@@ -241,8 +241,8 @@ namespace laydata {
       CellDefin         linkCellRef(std::string, int);
       CellDefin         addDefaultCell( std::string name, bool );
       void              addThisUndefCell(TdtDefaultCell*);
-      bool              collectUsedLays(std::string, bool, LayerTMPList&) const;
-      void              collectUsedLays(int, LayerTMPList&) const;
+      bool              collectUsedLays(std::string, bool, LayerDefList&) const;
+      void              collectUsedLays(int, LayerDefList&) const;
       void              cleanUndefLib();
       TdtDefaultCell*   displaceUndefinedCell(std::string);
       void              holdUndefinedCell(TdtDefaultCell*);

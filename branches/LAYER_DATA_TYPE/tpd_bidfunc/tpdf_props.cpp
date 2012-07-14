@@ -290,7 +290,7 @@ void tellstdfunc::stdHIDELAYER::undo() {
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-      drawProp->hideLayer(laydef.num(), hide);
+      drawProp->hideLayer(laydef, hide);
       DWordSet unselable;
       drawProp->allUnselectable(unselable);
       if (pl->size() > 0)
@@ -324,7 +324,7 @@ int tellstdfunc::stdHIDELAYER::execute()
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-      if (laydef.num() != drawProp->curLay())
+      if (laydef != drawProp->curLay())
       {
          laydata::SelectList *todslct = DEBUG_NEW laydata::SelectList();
          laydata::TdtLibDir* dbLibDir = NULL;
@@ -348,7 +348,7 @@ int tellstdfunc::stdHIDELAYER::execute()
          UNDOPstack.push_front(DEBUG_NEW telldata::TtBool(!hide));
          UNDOPstack.push_front(make_ttlaylist(todslct));
          cleanSelectList(todslct);
-         drawProp->hideLayer(laydef.num(), hide);
+         drawProp->hideLayer(laydef, hide);
          TpdPost::layer_status(tui::BT_LAYER_HIDE, laydef.num(), hide);
          LogFile << LogFile.getFN() << "("<< *tlay << "," <<
                     LogFile._2bool(hide) << ");"; LogFile.flush();
@@ -391,7 +391,7 @@ void tellstdfunc::stdHIDELAYERS::undo() {
       for (unsigned i = 0; i < sl->size() ; i++)
       {
          tlay = static_cast<telldata::TtLayer*>((sl->mlist())[i]);
-         drawProp->hideLayer(tlay->value().num(), hide);
+         drawProp->hideLayer(tlay->value(), hide);
          TpdPost::layer_status(tui::BT_LAYER_HIDE, tlay->value().num(), hide);
       }
       DWordSet unselable;
@@ -441,11 +441,11 @@ int tellstdfunc::stdHIDELAYERS::execute()
                info << "Layer number "<< laydef.num() <<" out of range ... ignored";
                tell_log(console::MT_WARNING,info.str());
             }
-            else if (laydef.num() == drawProp->curLay())
+            else if (laydef == drawProp->curLay())
             {
                tell_log(console::MT_WARNING,"Current layer ... ignored");
             }
-            else if (hide ^ drawProp->layerHidden(laydef.num()))
+            else if (hide ^ drawProp->layerHidden(laydef))
             {
                if (hide && (listselected->end() != listselected->find(laydef)))
                {
@@ -471,7 +471,7 @@ int tellstdfunc::stdHIDELAYERS::execute()
       for (unsigned i = 0; i < undolaylist->size(); i++)
       {
          telldata::TtLayer *tlay = static_cast<telldata::TtLayer*>((undolaylist->mlist())[i]);
-         drawProp->hideLayer(tlay->value().num(), hide);
+         drawProp->hideLayer(tlay->value(), hide);
       }
       LogFile << LogFile.getFN() << "("<< *sl << "," <<
                                          LogFile._2bool(hide) << ");"; LogFile.flush();
@@ -695,7 +695,7 @@ void tellstdfunc::stdLOCKLAYER::undo()
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-      drawProp->lockLayer(laydef.num(), lock);
+      drawProp->lockLayer(laydef, lock);
       DWordSet unselable;
       drawProp->allUnselectable(unselable);
       laydata::TdtLibDir* dbLibDir = NULL;
@@ -726,7 +726,7 @@ int tellstdfunc::stdLOCKLAYER::execute()
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-      if (laydef.num() != drawProp->curLay())
+      if (laydef != drawProp->curLay())
       {
          laydata::SelectList *todslct = DEBUG_NEW laydata::SelectList();
          laydata::TdtLibDir* dbLibDir = NULL;
@@ -749,7 +749,7 @@ int tellstdfunc::stdLOCKLAYER::execute()
          UNDOPstack.push_front(DEBUG_NEW telldata::TtBool(!lock));
          UNDOPstack.push_front(make_ttlaylist(todslct));
          cleanSelectList(todslct);
-         drawProp->lockLayer(laydef.num(), lock);
+         drawProp->lockLayer(laydef, lock);
          TpdPost::layer_status(tui::BT_LAYER_LOCK, laydef.num(), lock);
          LogFile << LogFile.getFN() << "("<< *tlay << "," <<
                     LogFile._2bool(lock) << ");"; LogFile.flush();
@@ -792,7 +792,7 @@ void tellstdfunc::stdLOCKLAYERS::undo() {
       for (unsigned i = 0; i < sl->size() ; i++)
       {
          tlay = static_cast<telldata::TtLayer*>((sl->mlist())[i]);
-         drawProp->lockLayer(tlay->value().num(), lock);
+         drawProp->lockLayer(tlay->value(), lock);
          TpdPost::layer_status(tui::BT_LAYER_LOCK, tlay->value().num(), lock);
       }
       DWordSet unselable;
@@ -841,11 +841,11 @@ int tellstdfunc::stdLOCKLAYERS::execute()
                info << "Layer number "<< laydef.num() <<" out of range ... ignored";
                tell_log(console::MT_WARNING,info.str());
             }
-            else if (laydef.num() == drawProp->curLay())
+            else if (laydef == drawProp->curLay())
             {
                tell_log(console::MT_WARNING,"Current layer ... ignored");
             }
-            else if (lock ^ drawProp->layerLocked(laydef.num()))
+            else if (lock ^ drawProp->layerLocked(laydef))
             {
                if (lock && (listselected->end() != listselected->find(laydef)))
                   todslct->add(laydef.num(), DEBUG_NEW laydata::DataList(*((*listselected)[laydef])));
@@ -870,7 +870,7 @@ int tellstdfunc::stdLOCKLAYERS::execute()
       for (unsigned i = 0; i < undolaylist->size(); i++)
       {
          telldata::TtLayer* tlay = static_cast<telldata::TtLayer*>((undolaylist->mlist())[i]);
-         drawProp->lockLayer(tlay->value().num(), lock);
+         drawProp->lockLayer(tlay->value(), lock);
       }
       LogFile << LogFile.getFN() << "("<< *sl << "," <<
                                          LogFile._2bool(lock) << ");"; LogFile.flush();
@@ -903,7 +903,7 @@ void tellstdfunc::stdFILLLAYER::undo() {
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-      drawProp->fillLayer(laydef.num(), fill);
+      drawProp->fillLayer(laydef, fill);
       TpdPost::layer_status(tui::BT_LAYER_FILL, laydef.num(), fill);
    }
    PROPC->unlockDrawProp(drawProp, true);
@@ -922,7 +922,7 @@ int tellstdfunc::stdFILLLAYER::execute()
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(tlay->selfcopy());
       UNDOPstack.push_front(DEBUG_NEW telldata::TtBool(!fill));
-      drawProp->fillLayer(laydef.num(), fill);
+      drawProp->fillLayer(laydef, fill);
       TpdPost::layer_status(tui::BT_LAYER_FILL, laydef.num(), fill);
       LogFile << LogFile.getFN() << "("<< *tlay << "," <<
                  LogFile._2bool(fill) << ");"; LogFile.flush();
@@ -958,7 +958,7 @@ void tellstdfunc::stdFILLLAYERS::undo() {
       for (unsigned i = 0; i < sl->size() ; i++)
       {
          telldata::TtLayer* tlay = static_cast<telldata::TtLayer*>((sl->mlist())[i]);
-         drawProp->fillLayer(tlay->value().num(), fill);
+         drawProp->fillLayer(tlay->value(), fill);
          TpdPost::layer_status(tui::BT_LAYER_FILL, tlay->value().num(), fill);
       }
    }
@@ -977,7 +977,7 @@ int tellstdfunc::stdFILLLAYERS::execute()
       for (unsigned i = 0; i < sl->size() ; i++)
       {
          telldata::TtLayer* tlay = static_cast<telldata::TtLayer*>((sl->mlist())[i]);
-         drawProp->fillLayer(tlay->value().num(), fill);
+         drawProp->fillLayer(tlay->value(), fill);
          TpdPost::layer_status(tui::BT_LAYER_FILL, tlay->value().num(), fill);
       }
       UNDOcmdQ.push_front(this);

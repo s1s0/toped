@@ -315,7 +315,7 @@ laydata::TdtDefaultCell* laydata::TdtLibrary::displaceCell(const std::string& ce
    return celldef;
 }
 
-void laydata::TdtLibrary::collectUsedLays(LayerTMPList& laylist) const
+void laydata::TdtLibrary::collectUsedLays(LayerDefList& laylist) const
 {
    for (CellMap::const_iterator CC = _cells.begin(); CC != _cells.end(); CC++)
    {
@@ -323,8 +323,8 @@ void laydata::TdtLibrary::collectUsedLays(LayerTMPList& laylist) const
    }
    laylist.sort();
    laylist.unique();
-   if ( (0 < laylist.size()) && (0 == laylist.front()) )
-      laylist.pop_front();
+//   if ( (0 < laylist.size()) && (0 == laylist.front()) )
+//      laylist.pop_front();
 }
 
 void laydata::TdtLibrary::dbHierAdd(const laydata::TdtDefaultCell* comp, const laydata::TdtDefaultCell* prnt)
@@ -716,7 +716,7 @@ void laydata::TdtLibDir::addThisUndefCell(TdtDefaultCell* rcell)
    undeflib->addThisUndefCell(rcell);
 }
 
-bool laydata::TdtLibDir::collectUsedLays(std::string cellname, bool recursive, LayerTMPList& laylist) const
+bool laydata::TdtLibDir::collectUsedLays(std::string cellname, bool recursive, LayerDefList& laylist) const
 {
    TdtCell* topcell = NULL;
    if (NULL != _TEDDB) topcell = static_cast<laydata::TdtCell*>(_TEDDB->checkCell(cellname));
@@ -737,7 +737,7 @@ bool laydata::TdtLibDir::collectUsedLays(std::string cellname, bool recursive, L
    }
 }
 
-void laydata::TdtLibDir::collectUsedLays( int libID, LayerTMPList& laylist) const
+void laydata::TdtLibDir::collectUsedLays( int libID, LayerDefList& laylist) const
 {
    assert(UNDEFCELL_LIB != libID);
    laydata::TdtLibrary* curlib = (TARGETDB_LIB == libID) ? _TEDDB : _libdirectory[libID]->second;

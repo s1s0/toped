@@ -532,36 +532,37 @@ layprop::FontLibrary::~FontLibrary()
 }
 
 //=============================================================================
-layprop::DrawProperties::DrawProperties() : _clipRegion(0,0)
+layprop::DrawProperties::DrawProperties() :
+   _curlay                ( TLL_LAY_DEF         ),
+   _clipRegion            ( 0,0                 ),
+   _visualLimit           ( 40                  ),
+   _cellDepthAlphaEbb     ( 0                   ),
+   _cellDepthView         ( 0                   ),
+   _cellMarksHidden       ( true                ),
+   _cellBoxHidden         ( true                ),
+   _textMarksHidden       ( true                ),
+   _textBoxHidden         ( true                ),
+   _adjustTextOrientation ( false               ),
+   _currentOp             ( console::op_none    ),
+   _blockFill             ( false               ),
+   _refStack              ( NULL                ),
+   _drawingLayer          ( TLL_LAY_DEF         ),
+   _propertyState         ( DB                  )
 {
-   _blockFill             = false;
-   _drawingLayer          = 0;
-   _cellMarksHidden       = true;
-   _textMarksHidden       = true;
-   _cellBoxHidden         = true;
-   _textBoxHidden         = true;
-   _refStack              = NULL;
-   _propertyState         = DB;
-   _adjustTextOrientation = false;
-   _currentOp             = console::op_none;
-   _curlay                = 1;
-   _visualLimit           = 40;
-   _cellDepthAlphaEbb     = 0;
-   _cellDepthView         = 0;
 }
 
-bool layprop::DrawProperties::addLayer( LayerNumber layno )
+bool layprop::DrawProperties::addLayer( const LayerDef& laydef )
 {
    std::ostringstream lname;
    switch (_propertyState)
    {
-      case DB : if (_laySetDb.end() != _laySetDb.find(layno)) return false;
-                lname << "_UNDEF" << layno;
-                _laySetDb[layno] = DEBUG_NEW LayerSettings(lname.str(),"","","");
+      case DB : if (_laySetDb.end() != _laySetDb.find(laydef)) return false;
+                lname << "_UNDEF" << laydef.num() << "_" << laydef.typ();
+                _laySetDb[laydef] = DEBUG_NEW LayerSettings(lname.str(),"","","");
                 return true;
-      case DRC: if (_laySetDrc.end() != _laySetDrc.find(layno)) return false;
-                lname << "_DRC" << layno;
-                _laySetDrc[layno] = DEBUG_NEW LayerSettings(lname.str(),"","","");
+      case DRC: if (_laySetDrc.end() != _laySetDrc.find(laydef)) return false;
+                lname << "_DRC" << laydef.num() << "_" << laydef.typ();
+                _laySetDrc[laydef] = DEBUG_NEW LayerSettings(lname.str(),"","","");
                 return true;
       default: assert(false);break;
    }
@@ -601,7 +602,7 @@ bool layprop::DrawProperties::addLayer(std::string name, LayerNumber layno, std:
             ost << "Warning! Layer "<<layno<<" redefined";
             tell_log(console::MT_WARNING, ost.str());
          }
-         _laySetDb[layno] = DEBUG_NEW LayerSettings(name,col,fill,sline);
+         _laySetDb.add(layno, DEBUG_NEW LayerSettings(name,col,fill,sline));
          break;
       case DRC: assert(false); break; //User can't call DRC database directly
       default: assert(false); break;
@@ -609,17 +610,17 @@ bool layprop::DrawProperties::addLayer(std::string name, LayerNumber layno, std:
    return new_layer;
 }
 
-bool layprop::DrawProperties::addLayer(std::string name, LayerNumber layno)
+bool layprop::DrawProperties::addLayer(std::string name, const LayerDef& laydef)
 {
    switch(_propertyState)
    {
       case DB:
-         if (_laySetDb.end() != _laySetDb.find(layno)) return false;
-         _laySetDb[layno] = DEBUG_NEW LayerSettings(name,"","","");
+         if (_laySetDb.end() != _laySetDb.find(laydef)) return false;
+         _laySetDb[laydef] = DEBUG_NEW LayerSettings(name,"","","");
          return true;
       case DRC:
-         if (_laySetDrc.end() != _laySetDrc.find(layno)) return false;
-         _laySetDrc[layno] = DEBUG_NEW LayerSettings(name,"","","");
+         if (_laySetDrc.end() != _laySetDrc.find(laydef)) return false;
+         _laySetDrc[laydef] = DEBUG_NEW LayerSettings(name,"","","");
          return true;
       default: assert(false); break;
    }
@@ -628,12 +629,15 @@ bool layprop::DrawProperties::addLayer(std::string name, LayerNumber layno)
 
 LayerNumber layprop::DrawProperties::addLayer(std::string name)
 {
-   LayerNumber layno = 1;
-   LaySetList::const_reverse_iterator lastLayNo = getCurSetList().rbegin();
-   if (getCurSetList().rend() != lastLayNo)
-      layno = lastLayNo->first;
-   while (!addLayer(name, layno)) {layno++;}
-   return layno;
+   LayerDef laydef(TLL_LAY_DEF);
+   // get the last layer number;
+   for (LaySetList::Iterator CL = getCurSetList().begin(); CL != getCurSetList().end(); CL++)
+      laydef = CL.layDef();
+//   LaySetList::Iterator lastLayNo = getCurSetList().rbegin();
+//   if (getCurSetList().rend() != lastLayNo)
+//      layno = lastLayNo->first;
+   assert(addLayer(name, laydef));
+   return laydef.num();
 }
 
 void layprop::DrawProperties::addLine(std::string name, std::string col, word pattern,
@@ -674,9 +678,9 @@ void layprop::DrawProperties::addFill(std::string name, byte* ptrn) {
 }
 
 
-void layprop::DrawProperties::setCurrentColor(LayerNumber layno)
+void layprop::DrawProperties::setCurrentColor(const LayerDef& laydef)
 {
-   _drawingLayer = layno;
+   _drawingLayer = laydef;
    const layprop::tellRGB& theColor = getColor(_drawingLayer);
    glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
 }
@@ -696,7 +700,7 @@ void layprop::DrawProperties::setGridColor(std::string colname) const
 
 bool layprop::DrawProperties::setCurrentFill(bool force_fill) const
 {
-   if ((REF_LAY == _drawingLayer) || (GRC_LAY == _drawingLayer)) return true;
+   if ((REF_LAY_DEF == _drawingLayer) || (GRC_LAY_DEF == _drawingLayer)) return true;
    // The lines below are doing effectively
    // byte* ifill = _layFill[_layset[_drawingLayer]->getfill]
    const LayerSettings* ilayset = findLayerSettings(_drawingLayer);
@@ -728,10 +732,10 @@ bool layprop::DrawProperties::setCurrentFill(bool force_fill) const
    else return false;
 }
 
-bool layprop::DrawProperties::layerFilled(LayerNumber layno) const
+bool layprop::DrawProperties::layerFilled(const LayerDef& laydef) const
 {
-   assert(REF_LAY != layno);
-   const LayerSettings* ilayset = findLayerSettings(layno);
+   assert(REF_LAY_DEF != laydef);
+   const LayerSettings* ilayset = findLayerSettings(laydef);
    if ((NULL != ilayset) && !_blockFill)
    {
       if(ilayset->filled()) return true;
@@ -752,25 +756,25 @@ void layprop::DrawProperties::adjustAlpha(word factor)
    }
 }
 
-bool  layprop::DrawProperties::layerHidden(LayerNumber layno) const
+bool  layprop::DrawProperties::layerHidden(const LayerDef& laydef) const
 {
-   if ((REF_LAY == layno) || (GRC_LAY == layno)) return false;
-   const LayerSettings* ilayset = findLayerSettings(layno);
+   if ((REF_LAY_DEF == laydef) || (GRC_LAY_DEF == laydef)) return false;
+   const LayerSettings* ilayset = findLayerSettings(laydef);
    if (NULL != ilayset) return ilayset->hidden();
    else return true;
 }
 
-bool  layprop::DrawProperties::layerLocked(LayerNumber layno) const
+bool  layprop::DrawProperties::layerLocked(const LayerDef& laydef) const
 {
-   if (REF_LAY == layno) return false;
-   const LayerSettings* ilayset = findLayerSettings(layno);
+   if (REF_LAY_DEF == laydef) return false;
+   const LayerSettings* ilayset = findLayerSettings(laydef);
    if (NULL != ilayset) return ilayset->locked();
    else return true;
 }
 
-bool layprop::DrawProperties::selectable(LayerNumber layno) const
+bool layprop::DrawProperties::selectable(const LayerDef& laydef) const
 {
-   return (!layerHidden(layno) && !layerLocked(layno));
+   return (!layerHidden(laydef) && !layerLocked(laydef));
 }
 
 void layprop::DrawProperties::drawTextBoundary(const PointVector& ptlist) const
@@ -807,7 +811,7 @@ void layprop::DrawProperties::drawCellBoundary(const PointVector& ptlist) const
 
 void layprop::DrawProperties::setLineProps(bool selected) const
 {
-   if (REF_LAY == _drawingLayer)
+   if (REF_LAY_DEF == _drawingLayer)
    {
       glEnable(GL_LINE_STIPPLE);
       glLineStipple(1,0xf18f);
@@ -907,37 +911,37 @@ void layprop::DrawProperties::drawReferenceMarks(const TP& p0, const binding_mar
 
 LayerNumber layprop::DrawProperties::getLayerNo(std::string name) const
 {
-   for (LaySetList::const_iterator CL = getCurSetList().begin(); CL != getCurSetList().end(); CL++)
+   for (LaySetList::Iterator CL = getCurSetList().begin(); CL != getCurSetList().end(); CL++)
    {
-      if (name == CL->second->name()) return CL->first;
+      if (name == CL->name()) return CL.number();
    }
    return ERR_LAY;
 }
 
-LayerTMPList layprop::DrawProperties::getAllLayers() const
+LayerDefList layprop::DrawProperties::getAllLayers() const
 {
-   LayerTMPList listLayers;
-   for( LaySetList::const_iterator it = getCurSetList().begin(); it != getCurSetList().end(); it++)
-      listLayers.push_back(it->first);
+   LayerDefList listLayers;
+   for( LaySetList::Iterator CL = getCurSetList().begin(); CL != getCurSetList().end(); CL++)
+      listLayers.push_back(CL.layDef());
    return listLayers;
 }
 
 void layprop::DrawProperties::allUnselectable(DWordSet& layset)
 {
-   for( LaySetList::const_iterator it = getCurSetList().begin(); it != getCurSetList().end(); it++)
+   for( LaySetList::Iterator CL = getCurSetList().begin(); CL != getCurSetList().end(); CL++)
    {
-      if (it->second->hidden() || it->second->locked())
-         layset.insert(it->first);
+      if (CL->hidden() || CL->locked())
+         layset.insert(CL.number());
    }
    layset.insert(GRC_LAY);
 }
 
 void layprop::DrawProperties::allInvisible(DWordSet& layset)
 {
-   for( LaySetList::const_iterator it = getCurSetList().begin(); it != getCurSetList().end(); it++)
+   for( LaySetList::Iterator CL = getCurSetList().begin(); CL != getCurSetList().end(); CL++)
    {
-      if (it->second->hidden())
-         layset.insert(it->first);
+      if (CL->hidden())
+         layset.insert(CL.number());
    }
 }
 //WordList layprop::PropertyCenter::getLockedLayers() const
@@ -948,16 +952,16 @@ void layprop::DrawProperties::allInvisible(DWordSet& layset)
 //   return lockedLayers;
 //}
 
-std::string layprop::DrawProperties::getLayerName(LayerNumber layno) const
+std::string layprop::DrawProperties::getLayerName(const LayerDef& laydef) const
 {
-   const LayerSettings* ilayset = findLayerSettings(layno);
+   const LayerSettings* ilayset = findLayerSettings(laydef);
    if (NULL != ilayset) return ilayset->name();
    else return "";
 }
 
-std::string layprop::DrawProperties::getColorName(LayerNumber layno) const
+std::string layprop::DrawProperties::getColorName(const LayerDef& laydef) const
 {
-   const LayerSettings* ilayset = findLayerSettings(layno);
+   const LayerSettings* ilayset = findLayerSettings(laydef);
    if (NULL != ilayset)
    {
       return ilayset->color();
@@ -965,9 +969,9 @@ std::string layprop::DrawProperties::getColorName(LayerNumber layno) const
    else return "";
 }
 
-std::string layprop::DrawProperties::getFillName(LayerNumber layno) const
+std::string layprop::DrawProperties::getFillName(const LayerDef& laydef) const
 {
-   const LayerSettings* ilayset = findLayerSettings(layno);
+   const LayerSettings* ilayset = findLayerSettings(laydef);
    if (NULL != ilayset)
    {
       return ilayset->fill();
@@ -975,9 +979,9 @@ std::string layprop::DrawProperties::getFillName(LayerNumber layno) const
    else return "";
 }
 
-std::string layprop::DrawProperties::getLineName(LayerNumber layno) const
+std::string layprop::DrawProperties::getLineName(const LayerDef& laydef) const
 {
-   const LayerSettings* ilayset = findLayerSettings(layno);
+   const LayerSettings* ilayset = findLayerSettings(laydef);
    if (NULL != ilayset)
    {
       return ilayset->sline();
@@ -999,8 +1003,8 @@ LayerNumber layprop::DrawProperties::getTenderLay(LayerNumber layno) const
 
 void layprop::DrawProperties::allLayers(NameList& alllays) const
 {
-   for (LaySetList::const_iterator CL = getCurSetList().begin(); CL != getCurSetList().end(); CL++)
-      if (REF_LAY != CL->first) alllays.push_back(CL->second->name());
+   for (LaySetList::Iterator CL = getCurSetList().begin(); CL != getCurSetList().end(); CL++)
+      if (REF_LAY_DEF != CL.layDef()) alllays.push_back(CL->name());
 }
 
 void layprop::DrawProperties::allColors(NameList& colist) const
@@ -1021,9 +1025,9 @@ void layprop::DrawProperties::allLines(NameList& linelist) const
       linelist.push_back(CI->first);
 }
 
-const layprop::LineSettings* layprop::DrawProperties::getLine(LayerNumber layno) const
+const layprop::LineSettings* layprop::DrawProperties::getLine(const LayerDef& laydef) const
 {
-   const LayerSettings* ilayset = findLayerSettings(layno);
+   const LayerSettings* ilayset = findLayerSettings(laydef);
    if (NULL == ilayset) return &_defaultSeline;
    LineMap::const_iterator line = _lineSet.find(ilayset->sline());
    if (_lineSet.end() == line) return &_defaultSeline;
@@ -1043,9 +1047,9 @@ const layprop::LineSettings* layprop::DrawProperties::getLine(std::string line_n
 // but is safer and preserves constness
 }
 
-const byte* layprop::DrawProperties::getFill(LayerNumber layno) const
+const byte* layprop::DrawProperties::getFill(const LayerDef& laydef) const
 {
-   const LayerSettings* ilayset = findLayerSettings(layno);
+   const LayerSettings* ilayset = findLayerSettings(laydef);
    if (NULL == ilayset) return &_defaultFill[0];
    FillMap::const_iterator fill_set = _layFill.find(ilayset->fill());
    if (_layFill.end() == fill_set) return &_defaultFill[0];
@@ -1065,9 +1069,9 @@ const byte* layprop::DrawProperties::getFill(std::string fill_name) const
 // but is safer and preserves constness
 }
 
-const layprop::tellRGB& layprop::DrawProperties::getColor(LayerNumber layno) const
+const layprop::tellRGB& layprop::DrawProperties::getColor(const LayerDef& laydef) const
 {
-   const LayerSettings* ilayset = findLayerSettings(layno);
+   const LayerSettings* ilayset = findLayerSettings(laydef);
    if (NULL == ilayset) return _defaultColor;
    ColorMap::const_iterator col_set = _layColors.find(ilayset->color());
    if (_layColors.end() == col_set) return _defaultColor;
@@ -1136,19 +1140,17 @@ void layprop::DrawProperties::saveColors(FILE* prop_file) const
 
 void layprop::DrawProperties::saveLayers(FILE* prop_file) const
 {
-   LaySetList::const_iterator CI;
    fprintf(prop_file, "void  layerSetup() {\n");
    fprintf(prop_file, "   colorSetup(); fillSetup(); lineSetup();\n");
-   for( CI = getCurSetList().begin(); CI != getCurSetList().end(); CI++)
+   for( LaySetList::Iterator CI = getCurSetList().begin(); CI != getCurSetList().end(); CI++ )
    {
-      if (0 == CI->first) continue;
-      LayerSettings* the_layer = CI->second;
+      if (REF_LAY_DEF == CI.layDef()) continue;
       fprintf(prop_file, "   layprop(\"%s\", %d , \"%s\", \"%s\", \"%s\");\n",
-              the_layer->name().c_str()  ,
-              CI->first                  ,
-              the_layer->color().c_str() ,
-              the_layer->fill().c_str()  ,
-              the_layer->sline().c_str()  );
+              CI->name().c_str()         ,
+              CI.number()                ,
+              CI->color().c_str()        ,
+              CI->fill().c_str()         ,
+              CI->sline().c_str()         );
    }
    fprintf(prop_file, "}\n\n");
 }
@@ -1197,16 +1199,16 @@ void layprop::DrawProperties::saveLayState(FILE* prop_file) const
 
 }
 
-const layprop::LayerSettings*  layprop::DrawProperties::findLayerSettings(LayerNumber layno) const
+const layprop::LayerSettings*  layprop::DrawProperties::findLayerSettings(const LayerDef& laydef) const
 {
-   LaySetList::const_iterator ilayset;
+   LaySetList::Iterator ilayset;
    switch (_propertyState)
    {
-      case DB : ilayset = _laySetDb.find(layno) ; if (_laySetDb.end()  == ilayset) return NULL; break;
-      case DRC: ilayset = _laySetDrc.find(layno); if (_laySetDrc.end() == ilayset) return NULL; break;
+      case DB : ilayset = _laySetDb.find(laydef) ; if (_laySetDb.end()  == ilayset) return NULL; break;
+      case DRC: ilayset = _laySetDrc.find(laydef); if (_laySetDrc.end() == ilayset) return NULL; break;
       default: assert(false);break;
    }
-   return ilayset->second;
+   return *ilayset;
 }
 
 const layprop::LaySetList& layprop::DrawProperties::getCurSetList() const
@@ -1233,26 +1235,26 @@ void layprop::DrawProperties::psWrite(PSFile& psf) const
       psf.defineFill( CI->first.c_str() , CI->second);
 }
 
-void  layprop::DrawProperties::hideLayer(LayerNumber layno, bool hide)
+void  layprop::DrawProperties::hideLayer(const LayerDef& laydef, bool hide)
 {
    // No error messages here, because of possible range use
-   LayerSettings* ilayset = const_cast<LayerSettings*>(findLayerSettings(layno));
+   LayerSettings* ilayset = const_cast<LayerSettings*>(findLayerSettings(laydef));
    if (NULL != ilayset)
       ilayset->_hidden = hide;
 }
 
-void  layprop::DrawProperties::lockLayer(LayerNumber layno, bool lock)
+void  layprop::DrawProperties::lockLayer(const LayerDef& laydef, bool lock)
 {
    // No error messages here, because of possible range use
-   LayerSettings* ilayset = const_cast<LayerSettings*>(findLayerSettings(layno));
+   LayerSettings* ilayset = const_cast<LayerSettings*>(findLayerSettings(laydef));
    if (NULL != ilayset)
       ilayset->_locked = lock;
 }
 
-void  layprop::DrawProperties::fillLayer(LayerNumber layno, bool fill)
+void  layprop::DrawProperties::fillLayer(const LayerDef& laydef, bool fill)
 {
    // No error messages here, because of possible range use
-   LayerSettings* ilayset = const_cast<LayerSettings*>(findLayerSettings(layno));
+   LayerSettings* ilayset = const_cast<LayerSettings*>(findLayerSettings(laydef));
    if (NULL != ilayset)
       ilayset->fillLayer(fill);
 }
@@ -1260,11 +1262,11 @@ void  layprop::DrawProperties::fillLayer(LayerNumber layno, bool fill)
 layprop::DrawProperties::~DrawProperties() {
    //clear all databases
    setState(layprop::DRC);
-   for (LaySetList::const_iterator LSI = getCurSetList().begin(); LSI != getCurSetList().end(); LSI++)
-      delete LSI->second;
+   for (LaySetList::Iterator LSI = getCurSetList().begin(); LSI != getCurSetList().end(); LSI++)
+      delete (*LSI);
    setState(layprop::DB);
-   for (LaySetList::const_iterator LSI = getCurSetList().begin(); LSI != getCurSetList().end(); LSI++)
-      delete LSI->second;
+   for (LaySetList::Iterator LSI = getCurSetList().begin(); LSI != getCurSetList().end(); LSI++)
+      delete (*LSI);
 
    for (ColorMap::iterator CMI = _layColors.begin(); CMI != _layColors.end(); CMI++)
       delete CMI->second;
@@ -1284,11 +1286,11 @@ void layprop::DrawProperties::pushLayerStatus()
 {
    _layStateHistory.push_front(LayStateList());
    LayStateList& clist = _layStateHistory.front();
-   for (LaySetList::const_iterator CL = _laySetDb.begin(); CL != _laySetDb.end(); CL++)
+   for (LaySetList::Iterator CL = _laySetDb.begin(); CL != _laySetDb.end(); CL++)
    {
-      clist.second.push_back(LayerState(CL->first, *(CL->second)));
+      clist.second.push_back(LayerState(CL.number(), *(*CL)));
    }
-   clist.first = _curlay;
+   clist.first = _curlay.num();
 }
 
 /*! Shall be called by the undo method of loadlaystatus TELL function.
@@ -1301,18 +1303,18 @@ void layprop::DrawProperties::popLayerStatus()
    LayStateList& clist = _layStateHistory.front();
    for (std::list<LayerState>::const_iterator CL = clist.second.begin(); CL != clist.second.end(); CL++)
    {
-      LaySetList::iterator clay;
+      LaySetList::Iterator clay;
       if (_laySetDb.end() != (clay = _laySetDb.find(CL->number())))
       {
-         clay->second->_filled = CL->filled();
+         clay->_filled = CL->filled();
          TpdPost::layer_status(tui::BT_LAYER_FILL, CL->number(), CL->filled());
-         clay->second->_hidden = CL->hidden();
+         clay->_hidden = CL->hidden();
          TpdPost::layer_status(tui::BT_LAYER_HIDE, CL->number(), CL->hidden());
-         clay->second->_locked = CL->locked();
+         clay->_locked = CL->locked();
          TpdPost::layer_status(tui::BT_LAYER_LOCK, CL->number(), CL->locked());
       }
    }
-   TpdPost::layer_default(clist.first, _curlay);
+   TpdPost::layer_default(clist.first, _curlay.num());
    _curlay = clist.first;
    _layStateHistory.pop_front();
 }
@@ -1332,11 +1334,11 @@ bool layprop::DrawProperties::saveLaysetStatus(const std::string& sname)
 {
    LayStateList clist;
    bool status = true;
-   for (LaySetList::const_iterator CL = _laySetDb.begin(); CL != _laySetDb.end(); CL++)
+   for (LaySetList::Iterator CL = _laySetDb.begin(); CL != _laySetDb.end(); CL++)
    {
-      clist.second.push_back(LayerState(CL->first, *(CL->second)));
+      clist.second.push_back(LayerState(CL.number(), *(*CL)));
    }
-   clist.first = _curlay;
+   clist.first = _curlay.num();
    if (_layStateMap.end() != _layStateMap.find(sname)) status = false;
    _layStateMap[sname] = clist;
    return status;
@@ -1347,12 +1349,12 @@ bool layprop::DrawProperties::saveLaysetStatus(const std::string& sname, const W
 {
    LayStateList clist;
    bool status = true;
-   for (LaySetList::const_iterator CL = _laySetDb.begin(); CL != _laySetDb.end(); CL++)
+   for (LaySetList::Iterator CL = _laySetDb.begin(); CL != _laySetDb.end(); CL++)
    {
-      bool hiden  = (hidel.end() != hidel.find(CL->first));
-      bool locked = (lockl.end() != lockl.find(CL->first));
-      bool filled = (filll.end() != filll.find(CL->first));
-      clist.second.push_back(LayerState(CL->first, hiden, locked, filled));
+      bool hiden  = (hidel.end() != hidel.find(CL.number()));
+      bool locked = (lockl.end() != lockl.find(CL.number()));
+      bool filled = (filll.end() != filll.find(CL.number()));
+      clist.second.push_back(LayerState(CL.number(), hiden, locked, filled));
    }
    clist.first = alay;
    if (_layStateMap.end() == _layStateMap.find(sname)) status = false;
@@ -1366,18 +1368,18 @@ bool layprop::DrawProperties::loadLaysetStatus(const std::string& sname)
    LayStateList clist = _layStateMap[sname];
    for (std::list<LayerState>::const_iterator CL = clist.second.begin(); CL != clist.second.end(); CL++)
    {
-      LaySetList::iterator clay;
+      LaySetList::Iterator clay;
       if (_laySetDb.end() != (clay = _laySetDb.find(CL->number())))
       {
-         clay->second->_filled = CL->filled();
+         clay->_filled = CL->filled();
          TpdPost::layer_status(tui::BT_LAYER_FILL, CL->number(), CL->filled());
-         clay->second->_hidden = CL->hidden();
+         clay->_hidden = CL->hidden();
          TpdPost::layer_status(tui::BT_LAYER_HIDE, CL->number(), CL->hidden());
-         clay->second->_locked = CL->locked();
+         clay->_locked = CL->locked();
          TpdPost::layer_status(tui::BT_LAYER_LOCK, CL->number(), CL->locked());
       }
    }
-   TpdPost::layer_default(clist.first, _curlay);
+   TpdPost::layer_default(clist.first, _curlay.num());
    _curlay = clist.first;
    return true;
 }
@@ -1403,5 +1405,4 @@ bool layprop::DrawProperties::getLaysetStatus(const std::string& sname, WordSet&
    activel = clist.first;
    return true;
 }
-
 

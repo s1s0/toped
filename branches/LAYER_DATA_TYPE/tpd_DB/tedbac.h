@@ -30,6 +30,10 @@
 #include "ttt.h"
 #include "outbox.h"
 
+namespace layprop {
+   class LayerSettings;
+}
+
 namespace laydata {
    class TdtData;
    template <typename DataT>       class QTStoreTmpl;
@@ -105,5 +109,7 @@ namespace laydata {
    const LayerDef  GRC_LAY_DEF(GRC_LAY, DEFAULT_LAY_DATATYPE);
 
 }
+
+typedef  std::list<LayerDef>             LayerDefList;
 
 #endif //TEDBAC_H_INCLUDED

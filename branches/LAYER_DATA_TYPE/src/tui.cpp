@@ -558,7 +558,7 @@ tui::GetCIFexport::GetCIFexport(wxFrame *parent, wxWindowID id, const wxString &
    _saveMap = DEBUG_NEW wxCheckBox(this, -1, wxT("Save Layer Map"));
    _slang = DEBUG_NEW wxCheckBox(this, -1, wxT("Verbose CIF slang"));
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
-   LayerTMPList ull;
+   LayerDefList ull;
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
    {
@@ -717,7 +717,7 @@ tui::GetGDSexport::GetGDSexport(wxFrame *parent, wxWindowID id, const wxString &
    _recursive->SetValue(true);
    _saveMap = DEBUG_NEW wxCheckBox(this, -1, wxT("Save Layer Map"));
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
-   LayerTMPList ull;
+   LayerDefList ull;
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
    {
@@ -2050,21 +2050,21 @@ void tui::NameCbox3List::OnSize( wxSizeEvent &WXUNUSED(event) )
 
 //==========================================================================
 tui::NameEboxRecords::NameEboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
-            const LayerTMPList& inlays, wxArrayString& all_strings, int row_height, const layprop::DrawProperties* drawProp)
+            const LayerDefList& inlays, wxArrayString& all_strings, int row_height, const layprop::DrawProperties* drawProp)
             : wxPanel(parent, wxID_ANY, pnt, sz), _drawProp(drawProp)
 {
    word rowno = 0;
    _cifMap = DATC->secureCifLayMap(_drawProp, false);
-   for (LayerTMPList::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
+   for (LayerDefList::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
    {
-      LayerNumber layno = *CNM;
-      wxString tpdlay  = wxString(_drawProp->getLayerName(layno).c_str(), wxConvUTF8);
+//      LayerNumber layno = *CNM;
+      wxString tpdlay  = wxString(_drawProp->getLayerName(*CNM).c_str(), wxConvUTF8);
       wxString ciflay;
       std::string cifName;
-      if ( _cifMap->getCifLay(cifName, layno) )
+      if ( _cifMap->getCifLay(cifName, CNM->num()) )
          ciflay = wxString(cifName.c_str(), wxConvUTF8);
       else
-         ciflay << wxT("L") << layno;
+         ciflay << wxT("L") << CNM->num();
       if (4 < ciflay.Length()) ciflay.Clear(); // Should not be longer than 4
       wxCheckBox* dwtpdlays  = DEBUG_NEW wxCheckBox( this, wxID_ANY, tpdlay,
             wxPoint(  5,(row_height+5)*rowno + 5), wxSize(100,row_height) );
@@ -2104,7 +2104,7 @@ BEGIN_EVENT_TABLE(tui::NameEboxList, wxScrolledWindow)
       EVT_SIZE( tui::NameEboxList::OnSize )
 END_EVENT_TABLE()
 
-tui::NameEboxList::NameEboxList(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz, const LayerTMPList& inlays, const layprop::DrawProperties* drawProp) :
+tui::NameEboxList::NameEboxList(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz, const LayerDefList& inlays, const layprop::DrawProperties* drawProp) :
       wxScrolledWindow(parent, id, pnt, sz, wxBORDER_RAISED)
 {
    // collect all defined layers
@@ -2144,18 +2144,18 @@ void tui::NameEboxList::OnSize( wxSizeEvent &WXUNUSED(event) )
 
 //==========================================================================
 tui::NameEbox3Records::NameEbox3Records( wxWindow *parent, wxPoint pnt, wxSize sz,
-            const LayerTMPList& inlays, wxArrayString& all_strings, int row_height, const layprop::DrawProperties* drawProp)
+            const LayerDefList& inlays, wxArrayString& all_strings, int row_height, const layprop::DrawProperties* drawProp)
             : wxPanel(parent, wxID_ANY, pnt, sz), _drawProp(drawProp)
 {
    _gdsLayMap= DATC->secureGdsLayMap(_drawProp, false);
    word rowno = 0;
-   for (LayerTMPList::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
+   for (LayerDefList::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
    {
       word wGdsLay, wGdsType;
-      if (!_gdsLayMap->getExtLayType(wGdsLay, wGdsType, *CNM))
+      if (!_gdsLayMap->getExtLayType(wGdsLay, wGdsType, CNM->num()))
       {
-         wGdsLay  = db2TellLayer(*CNM);
-         wGdsType = 0;
+         wGdsLay  = db2TellLayer(CNM->num());
+         wGdsType = CNM->typ();
       }
       wxString tpdlay  = wxString(_drawProp->getLayerName(*CNM).c_str(), wxConvUTF8);
       wxString gdslay, gdstype;
@@ -2205,7 +2205,7 @@ BEGIN_EVENT_TABLE(tui::nameEbox3List, wxScrolledWindow)
       EVT_SIZE( tui::nameEbox3List::OnSize )
 END_EVENT_TABLE()
 
-tui::nameEbox3List::nameEbox3List(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz, const LayerTMPList& inlays, const layprop::DrawProperties* drawProp) :
+tui::nameEbox3List::nameEbox3List(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz, const LayerDefList& inlays, const layprop::DrawProperties* drawProp) :
       wxScrolledWindow(parent, id, pnt, sz, wxBORDER_RAISED)
 {
    // collect all defined layers

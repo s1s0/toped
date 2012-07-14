@@ -54,7 +54,6 @@ typedef  dword                            LayerDType;
 typedef  std::list<std::string>           NameList;
 typedef  std::set<std::string>            NameSet;
 typedef  std::list<word>                  WordList;
-typedef  std::list<LayerNumber>           LayerTMPList;
 typedef  std::set<word>                   WordSet;
 typedef  std::set<dword>                  DWordSet;
 typedef  std::map<word, WordSet>          ExtLayers;
@@ -146,6 +145,8 @@ public:
    LayerDType                typ() const {return _typ;}
    bool                      operator==(const LayerDef& cmp) const {return ((_num == cmp._num) && (_typ == cmp._typ));}
    bool                      operator!=(const LayerDef& cmp) const {return ((_num != cmp._num) || (_typ != cmp._typ));}
+   bool                      operator< (const LayerDef& cmp) const {return (_num == cmp._num) ? (_typ < cmp._typ) : (_num < cmp._num);}
+
 private:
    LayerNumber               _num;
    LayerDType                _typ;

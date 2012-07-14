@@ -74,7 +74,7 @@ void tellstdfunc::secureLayer(const LayerDef& laydef)
    {
       // check whether it's defined and make a default definition if it isn't
       if (drawProp->addLayer(laydef.num()))
-         TpdPost::layer_add(drawProp->getLayerName(laydef.num()), laydef.num());
+         TpdPost::layer_add(drawProp->getLayerName(laydef), laydef.num());
    }
    PROPC->unlockDrawProp(drawProp, true);
 }
@@ -411,9 +411,9 @@ void tellstdfunc::RefreshGL()
       layprop::DrawProperties* drawProp;
       if (PROPC->lockDrawProp(drawProp))
       {
-         const LayerTMPList freshlays = PROPC->upLayers();
-         for(LayerTMPList::const_iterator CUL = freshlays.begin(); CUL != freshlays.end(); CUL++)
-            TpdPost::layer_add(drawProp->getLayerName(*CUL), *CUL);
+         const LayerDefList freshlays = PROPC->upLayers();
+         for(LayerDefList::const_iterator CUL = freshlays.begin(); CUL != freshlays.end(); CUL++)
+            TpdPost::layer_add(drawProp->getLayerName(*CUL), CUL->num());
          PROPC->clearUnpublishedLayers();
       }
       PROPC->unlockDrawProp(drawProp, true);
@@ -441,18 +441,18 @@ void tellstdfunc::gridON(byte No, bool status)
 void tellstdfunc::updateLayerDefinitions(laydata::TdtLibDir* LIBDIR, NameList& top_cells, int libID)
 {
    // get all the layers used in the design and define them using the default definition
-   LayerTMPList ull;
+   LayerDefList ull;
    for(NameList::const_iterator CTC= top_cells.begin(); CTC != top_cells.end(); CTC++)
       LIBDIR->collectUsedLays(*CTC, true, ull);
    ull.sort(); ull.unique();
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-      for(LayerTMPList::const_iterator CUL = ull.begin(); CUL != ull.end(); CUL++)
+      for(LayerDefList::const_iterator CUL = ull.begin(); CUL != ull.end(); CUL++)
       {
-         if (REF_LAY == *CUL) continue;
+         if (REF_LAY_DEF == *CUL) continue;
          if (drawProp->addLayer(*CUL))
-            TpdPost::layer_add(drawProp->getLayerName(*CUL), *CUL);
+            TpdPost::layer_add(drawProp->getLayerName(*CUL), CUL->num());
       }
    }
    PROPC->unlockDrawProp(drawProp, false);
