@@ -280,7 +280,7 @@ namespace layprop {
          void                       drawTextBoundary(const PointVector& ptlist) const;
          void                       drawCellBoundary(const PointVector& ptlist) const;
          void                       setGridColor(std::string colname) const;
-         LayerNumber                getTenderLay(LayerNumber layno) const;//!return layno if _propertyState == DB or predefined layer otherwise
+         LayerDef                   getTenderLay(const LayerDef&) const;//!return the same if _propertyState == DB or predefined layer otherwise
          void                       psWrite(PSFile&) const;
          void                       adjustAlpha(word factor);
          const CTM&                 scrCtm() const       {return  _scrCtm;}

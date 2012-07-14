@@ -34,6 +34,9 @@ namespace layprop {
    class LayerSettings;
 }
 
+namespace tenderer {
+   class TenderLay;
+}
 namespace laydata {
    class TdtData;
    template <typename DataT>       class QTStoreTmpl;

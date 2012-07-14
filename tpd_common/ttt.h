@@ -727,6 +727,8 @@ const real        DEFAULT_DBU          = 1e-9;
 const real        DEFAULT_UU           = 1e-3;
 const LayerDType  DEFAULT_LAY_DATATYPE = 0;
 const LayerDef    REF_LAY_DEF(REF_LAY, DEFAULT_LAY_DATATYPE);
+const LayerDef    ERR_LAY_DEF(ERR_LAY, DEFAULT_LAY_DATATYPE);
+const LayerDef    DRC_LAY_DEF(DRC_LAY, DEFAULT_LAY_DATATYPE);
 const LayerDef    GRC_LAY_DEF(GRC_LAY, DEFAULT_LAY_DATATYPE);
 const LayerDef    TLL_LAY_DEF(0, DEFAULT_LAY_DATATYPE);
 
