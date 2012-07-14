@@ -1556,56 +1556,56 @@ tenderer::TopRend::TopRend( layprop::DrawProperties* drawprop, real UU ) :
    _cellStack.push(DEBUG_NEW TenderRef());
 }
 
-bool tenderer::TopRend::chunkExists(LayerNumber layno, bool has_selected)
+bool tenderer::TopRend::chunkExists(const LayerDef& laydef, bool has_selected)
 {
    // Reference layer is processed differently (pushCell), so make sure
    // that we haven't got here with REF_LAY by accident
-   assert(REF_LAY != layno);
+   assert(REF_LAY_DEF != laydef);
    if (NULL != _clayer)
    { // post process the current layer
       _clayer->ppSlice();
       _cslctd_array_offset += _clayer->total_slctdx();
    }
-   if (_data.end() != _data.find(layno))
+   if (_data.end() != _data.find(laydef))
    {
-      _clayer = _data[layno];
-      if (_clayer->chunkExists(_cellStack.top(), _drawprop->layerFilled(layno) ) ) return true;
+      _clayer = _data[laydef];
+      if (_clayer->chunkExists(_cellStack.top(), _drawprop->layerFilled(laydef) ) ) return true;
    }
    else
    {
       _clayer = DEBUG_NEW TenderLay();
-      _data[layno] = _clayer;
+      _data.add(laydef, _clayer);
    }
    if (has_selected)
-      _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(layno), true, _cslctd_array_offset);
+      _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(laydef), true, _cslctd_array_offset);
    else
-      _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(layno), true);
+      _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(laydef), true);
    return false;
 }
 
-void tenderer::TopRend::setLayer(LayerNumber layno, bool has_selected)
+void tenderer::TopRend::setLayer(const LayerDef& laydef, bool has_selected)
 {
    // Reference layer is processed differently (pushCell), so make sure
    // that we haven't got here with REF_LAY by accident
-   assert(REF_LAY != layno);
+   assert(REF_LAY_DEF != laydef);
    if (NULL != _clayer)
    { // post process the current layer
       _clayer->ppSlice();
       _cslctd_array_offset += _clayer->total_slctdx();
    }
-   if (_data.end() != _data.find(layno))
+   if (_data.end() != _data.find(laydef))
    {
-      _clayer = _data[layno];
+      _clayer = _data[laydef];
    }
    else
    {
       _clayer = DEBUG_NEW TenderLay();
-      _data[layno] = _clayer;
+      _data.add(laydef, _clayer);
    }
    if (has_selected)
-      _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(layno), false, _cslctd_array_offset);
+      _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(laydef), false, _cslctd_array_offset);
    else
-      _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(layno), false);
+      _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(laydef), false);
 }
 
 void tenderer::TopRend::pushCell(std::string cname, const CTM& trans, const DBbox& overlap, bool active, bool selected)
@@ -1727,16 +1727,16 @@ bool tenderer::TopRend::collect()
    // post process the last slices in the layers and also gather the number
    // of required virtual buffers
    //
-   DataLay::iterator CCLAY = _data.begin();
+   DataLay::Iterator CCLAY = _data.begin();
    unsigned num_total_slctdx = 0; // Initialize the number of total selected indexes
    unsigned num_total_strings = 0;
    while (CCLAY != _data.end())
    {
-      CCLAY->second->ppSlice();
-      num_total_strings += CCLAY->second->total_strings();
-      if ((0 == CCLAY->second->total_points()) && (0 == CCLAY->second->total_strings()))
+      CCLAY->ppSlice();
+      num_total_strings += CCLAY->total_strings();
+      if ((0 == CCLAY->total_points()) && (0 == CCLAY->total_strings()))
       {
-         delete (CCLAY->second);
+         delete (*CCLAY);
          // Note! Careful here with the map iteration and erasing! Erase method
          // of map<> template doesn't return an iterator (unlike the list<>).
          // Despite the temptation to assume that the iterator will be valid after
@@ -1747,13 +1747,14 @@ bool tenderer::TopRend::collect()
          // The implementation below seems to be the cleanest way to do this,
          // although it relies on my understanding of the way "++" operator should
          // be implemented
-         _data.erase(CCLAY++);
+         _data.erase(CCLAY.layDef());
+         CCLAY++;
       }
-      else if (0 != CCLAY->second->total_points())
+      else if (0 != CCLAY->total_points())
       {
-         num_total_slctdx += CCLAY->second->total_slctdx();
+         num_total_slctdx += CCLAY->total_slctdx();
          _num_ogl_buffers++;
-         if (0 < CCLAY->second->total_indexs())
+         if (0 < CCLAY->total_indexs())
             _num_ogl_buffers++;
          CCLAY++;
       }
@@ -1777,16 +1778,16 @@ bool tenderer::TopRend::collect()
    unsigned current_buffer = 0;
    //
    // collect the point arrays
-   for (DataLay::const_iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
+   for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {
-      if (0 == CLAY->second->total_points())
+      if (0 == CLAY->total_points())
       {
-         assert(0 != CLAY->second->total_strings());
+         assert(0 != CLAY->total_strings());
          continue;
       }
       GLuint pbuf = _ogl_buffers[current_buffer++];
-      GLuint ibuf = (0 == CLAY->second->total_indexs()) ? 0u : _ogl_buffers[current_buffer++];
-      CLAY->second->collect(_drawprop->layerFilled(CLAY->first), pbuf, ibuf);
+      GLuint ibuf = (0 == CLAY->total_indexs()) ? 0u : _ogl_buffers[current_buffer++];
+      CLAY->collect(_drawprop->layerFilled(CLAY.layDef()), pbuf, ibuf);
    }
    //
    // collect the indexes of the selected objects
@@ -1799,11 +1800,11 @@ bool tenderer::TopRend::collect()
                                               NULL                              ,
                                               GL_DYNAMIC_DRAW                    );
       unsigned int* sindex_array = (unsigned int*)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
-      for (DataLay::const_iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
+      for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
       {
-         if (0 == CLAY->second->total_slctdx())
+         if (0 == CLAY->total_slctdx())
             continue;
-         CLAY->second->collectSelected(sindex_array);
+         CLAY->collectSelected(sindex_array);
       }
       glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
    }
@@ -1826,19 +1827,20 @@ bool tenderer::TopRend::grcCollect()
    // post process the last slices in the layers and also gather the number
    // of required virtual buffers
    //
-   DataLay::iterator CCLAY = _grcData.begin();
+   DataLay::Iterator CCLAY = _grcData.begin();
    while (CCLAY != _grcData.end())
    {
-      CCLAY->second->ppSlice();
-      if (0 == CCLAY->second->total_points())
+      CCLAY->ppSlice();
+      if (0 == CCLAY->total_points())
       {
-         delete (CCLAY->second);
-         _grcData.erase(CCLAY++);
+         delete (*CCLAY);
+         _grcData.erase(CCLAY.layDef());
+         CCLAY++;
       }
-      else if (0 != CCLAY->second->total_points())
+      else if (0 != CCLAY->total_points())
       {
          _num_ogl_grc_buffers++;
-         if (0 < CCLAY->second->total_indexs())
+         if (0 < CCLAY->total_indexs())
             _num_ogl_grc_buffers++;
          CCLAY++;
       }
@@ -1856,16 +1858,16 @@ bool tenderer::TopRend::grcCollect()
    unsigned current_buffer = 0;
    //
    // collect the point arrays
-   for (DataLay::const_iterator CLAY = _grcData.begin(); CLAY != _grcData.end(); CLAY++)
+   for (DataLay::Iterator CLAY = _grcData.begin(); CLAY != _grcData.end(); CLAY++)
    {
-      if (0 == CLAY->second->total_points())
+      if (0 == CLAY->total_points())
       {
-         assert(0 != CLAY->second->total_strings());
+         assert(0 != CLAY->total_strings());
          continue;
       }
       GLuint pbuf = _ogl_grc_buffers[current_buffer++];
-      GLuint ibuf = (0 == CLAY->second->total_indexs()) ? 0u : _ogl_grc_buffers[current_buffer++];
-      CLAY->second->collect(_drawprop->layerFilled(CLAY->first), pbuf, ibuf);
+      GLuint ibuf = (0 == CLAY->total_indexs()) ? 0u : _ogl_grc_buffers[current_buffer++];
+      CLAY->collect(_drawprop->layerFilled(CLAY.layDef()), pbuf, ibuf);
    }
    //
    // collect the indexes of the selected objects
@@ -1876,30 +1878,30 @@ bool tenderer::TopRend::grcCollect()
 
 void tenderer::TopRend::draw()
 {
-   for (DataLay::const_iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
+   for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {// for every layer
-      _drawprop->setCurrentColor(CLAY->first);
+      _drawprop->setCurrentColor(CLAY.layDef());
       _drawprop->setCurrentFill(true); // force fill (ignore block_fill state)
       _drawprop->setLineProps(false);
-      if (0 != CLAY->second->total_slctdx())
+      if (0 != CLAY->total_slctdx())
       {// redraw selected contours only
          _drawprop->setLineProps(true);
          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _sbuffer);
          glPushMatrix();
          glMultMatrixd(_activeCS->translation());
-         CLAY->second->drawSelected(  );
+         CLAY->drawSelected();
          glPopMatrix();
          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
          _drawprop->setLineProps(false);
       }
       // draw everything
-      if (0 != CLAY->second->total_points())
-         CLAY->second->draw(_drawprop);
+      if (0 != CLAY->total_points())
+         CLAY->draw(_drawprop);
       // draw texts
-      if (0 != CLAY->second->total_strings())
+      if (0 != CLAY->total_strings())
       {
          fontLib->bindFont();
-         CLAY->second->drawTexts(_drawprop);
+         CLAY->drawTexts(_drawprop);
       }
    }
    // draw reference boxes
@@ -1909,14 +1911,14 @@ void tenderer::TopRend::draw()
 
 void tenderer::TopRend::grcDraw()
 {
-   for (DataLay::const_iterator CLAY = _grcData.begin(); CLAY != _grcData.end(); CLAY++)
+   for (DataLay::Iterator CLAY = _grcData.begin(); CLAY != _grcData.end(); CLAY++)
    {// for every layer
-      _drawprop->setCurrentColor(CLAY->first);
+      _drawprop->setCurrentColor(CLAY.layDef());
       _drawprop->setCurrentFill(true); // force fill (ignore block_fill state)
       _drawprop->setLineProps(false);
       // draw everything
-      if (0 != CLAY->second->total_points())
-         CLAY->second->draw(_drawprop);
+      if (0 != CLAY->total_points())
+         CLAY->draw(_drawprop);
    }
    checkOGLError("grcDraw");
 }
@@ -1935,19 +1937,19 @@ void tenderer::TopRend::grcCleanUp()
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void tenderer::TopRend::setGrcLayer(bool setEData, LayerNumber layno)
+void tenderer::TopRend::setGrcLayer(bool setEData, const LayerDef& laydef)
 {
    if (setEData)
    {
       assert(_grcLayer == NULL);
-      if (_grcData.end() != _grcData.find(layno))
+      if (_grcData.end() != _grcData.find(laydef))
       {
-         _grcLayer = _grcData[layno];
+         _grcLayer = _grcData[laydef];
       }
       else
       {
          _grcLayer = DEBUG_NEW TenderLay();
-         _grcData[layno] = _grcLayer;
+         _grcData.add(laydef, _grcLayer);
       }
       _grcLayer->newSlice(_cellStack.top(), false, false);
    }
@@ -1961,9 +1963,9 @@ void tenderer::TopRend::setGrcLayer(bool setEData, LayerNumber layno)
    }
 }
 
-unsigned tenderer::TopRend::getTenderLay(LayerNumber layno)
+LayerDef tenderer::TopRend::getTenderLay(const LayerDef& laydef)
 {
-   return _drawprop->getTenderLay(layno);
+   return _drawprop->getTenderLay(laydef);
 }
 
 bool tenderer::TopRend::preCheckCRS(const laydata::TdtCellRef* ref, layprop::CellRefChainType& crchain)
@@ -1989,13 +1991,13 @@ tenderer::TopRend::~TopRend()
 //   char debug_message[256];
 //   unsigned long all_points_drawn = 0;
 //   unsigned      allLayers = 0;
-   for (DataLay::const_iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
+   for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {
 //      all_points_drawn += CLAY->second->total_points();
 //      allLayers++;
 //      sprintf (debug_message, "Layer %i:  %i points", CLAY->first, CLAY->second->total_points());
 //      tell_log(console::MT_INFO,debug_message);
-      delete (CLAY->second);
+      delete (*CLAY);
    }
    //
    assert(1 == _cellStack.size());
@@ -2014,8 +2016,8 @@ tenderer::TopRend::~TopRend()
       _ogl_buffers = NULL;
    }
    // GRC clean-up
-   for (DataLay::const_iterator CLAY = _grcData.begin(); CLAY != _grcData.end(); CLAY++)
-      delete (CLAY->second);
+   for (DataLay::Iterator CLAY = _grcData.begin(); CLAY != _grcData.end(); CLAY++)
+      delete (*CLAY);
    if (NULL != _ogl_grc_buffers)
    {
       glDeleteBuffers(_num_ogl_grc_buffers, _ogl_grc_buffers);

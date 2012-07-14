@@ -281,4 +281,6 @@ template class laydata::LayerContainer<laydata::ShapeList*>;
 //------------------------------------------------------------------------------
 template class laydata::LayerIterator<layprop::LayerSettings*>;
 template class laydata::LayerContainer<layprop::LayerSettings*>;
+template class laydata::LayerIterator<tenderer::TenderLay*>;
+template class laydata::LayerContainer<tenderer::TenderLay*>;
 

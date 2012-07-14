@@ -249,7 +249,7 @@ void laydata::TdtDefaultCell::openGlRender(tenderer::TopRend& rend, const CTM& t
    fontLib->getStringBounds(&_name, &pure_ovl);
    //
    rend.pushCell(_name, trans, DEFAULT_ZOOM_BOX, false, selected);
-   rend.setLayer(ERR_LAY, false);
+   rend.setLayer(ERR_LAY_DEF, false);
    rend.text(&_name, ftm, pure_ovl, TP(), false);
    rend.popCell();
    //
@@ -482,7 +482,7 @@ void laydata::TdtCell::openGlDraw(layprop::DrawProperties& drawprop, bool active
    // Draw figures
    for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
-      LayerDef curlayno = drawprop.getTenderLay(lay.number());
+      LayerDef curlayno = drawprop.getTenderLay(lay.layDef());
       if (!drawprop.layerHidden(curlayno)) drawprop.setCurrentColor(curlayno);
       else continue;
       // fancy like this (dlist iterator) , because a simple
@@ -504,15 +504,15 @@ void laydata::TdtCell::openGlRender(tenderer::TopRend& rend, const CTM& trans,
    for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
       //first - to check visibility of the layer
-      if (rend.layerHidden(lay.number())) continue;
+      if (rend.layerHidden(lay.layDef())) continue;
       //second - get internal layer number:
       //       - for regular database it is equal to the TDT layer number
       //       - for DRC database it is common for all layers - DRC_LAY
-      LayerNumber curlayno = rend.getTenderLay(lay.number());
+      LayerDef curLayDef = rend.getTenderLay(lay.number());
       // retrieve the selected objects (if they exists)
       SelectList::Iterator dlsti;
       const DataList* dlist;
-      if (active && (_shapesel.end() != (dlsti = _shapesel.find(curlayno))))
+      if (active && (_shapesel.end() != (dlsti = _shapesel.find(curLayDef))))
          dlist = *dlsti;
       else
          dlist = NULL;
@@ -524,11 +524,11 @@ void laydata::TdtCell::openGlRender(tenderer::TopRend& rend, const CTM& trans,
       // - the cell references of course
       // - the DRC DB - because it is using a single layer besides it doesn't
       //   utilize the reference mechanism at all.
-      switch (curlayno)
+      switch (curLayDef.num())
       {
          case GRC_LAY:
          case REF_LAY: lay->openGlRender(rend, dlist); break;
-         case DRC_LAY: rend.setLayer(curlayno, (NULL != dlist));
+         case DRC_LAY: rend.setLayer(curLayDef, (NULL != dlist));
                        lay->openGlRender(rend, dlist); break;
          default     :
          {
@@ -536,12 +536,12 @@ void laydata::TdtCell::openGlRender(tenderer::TopRend& rend, const CTM& trans,
             switch (cltype)
             {
                case -1: {// full overlap - conditional rendering
-                  if ( !rend.chunkExists(curlayno, (NULL != dlist)) )
+                  if ( !rend.chunkExists(curLayDef, (NULL != dlist)) )
                      lay->openGlRender(rend, dlist);
                   break;
                }
                case  1: {//partial clip - render always
-                  rend.setLayer(curlayno, (NULL != dlist));
+                  rend.setLayer(curLayDef, (NULL != dlist));
                   lay->openGlRender(rend, dlist);
                   break;
                }
@@ -654,7 +654,7 @@ laydata::AtticList* laydata::TdtCell::changeSelect(TP pnt, SH_STATUS status, con
 void laydata::TdtCell::mouseHoover(TP& position, layprop::DrawProperties& drawprop, const DWordSet& unselable)
 {
    laydata::TdtData* prev = NULL;
-   LayerNumber prevlay = 0;
+   LayerDef prevlay(NULL_LAY);
    for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
       if ( (unselable.end() == unselable.find(lay.number())) )
@@ -665,12 +665,13 @@ void laydata::TdtCell::mouseHoover(TP& position, layprop::DrawProperties& drawpr
             if ((sh_active == shape->status()) &&
                 ((NULL == prev) || (prev->overlap().boxarea() > shape->overlap().boxarea())))
             {
-               prev = shape; prevlay = lay.number();
+               prev = shape; prevlay = lay.layDef();
             }
          }
       }
    }
    if (NULL == prev) return;
+   assert(LayerDef(NULL_LAY) != prevlay);
    //-------------------------------------------------------------
    PointVector points;
 

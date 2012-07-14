@@ -580,8 +580,8 @@ void auxdata::GrcCell::openGlDraw(layprop::DrawProperties& drawprop, bool active
    typedef LayerList::const_iterator LCI;
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
    {
-      LayerNumber curlayno = drawprop.getTenderLay(lay->first);
-      if (!drawprop.layerHidden(curlayno)) drawprop.setCurrentColor(curlayno);
+      LayerDef layDef = drawprop.getTenderLay(lay->first);
+      if (!drawprop.layerHidden(layDef)) drawprop.setCurrentColor(layDef);
       else continue;
       bool fill = drawprop.setCurrentFill(false);// honor block_fill state)
       lay->second->openGlDraw(drawprop, NULL, fill);
@@ -600,17 +600,17 @@ void auxdata::GrcCell::openGlRender(tenderer::TopRend& rend, const CTM& trans,
       //second - get internal layer number:
       //       - for regular database it is equal to the TDT layer number
       //       - for DRC database it is common for all layers - DRC_LAY
-      LayerNumber curlayno = rend.getTenderLay(lay->first);
-      switch (curlayno)
+      LayerDef layDef = rend.getTenderLay(lay->first);
+      switch (layDef.num())
       {
          case REF_LAY:
          case GRC_LAY:
          case DRC_LAY: assert(false); break;
          default     :
          {
-            rend.setGrcLayer(true, curlayno);
+            rend.setGrcLayer(true, layDef);
             lay->second->openGlRender(rend, NULL);
-            rend.setGrcLayer(false, curlayno);
+            rend.setGrcLayer(false, layDef);
             break;
          }
       }

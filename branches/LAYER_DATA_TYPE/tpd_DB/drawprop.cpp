@@ -558,11 +558,11 @@ bool layprop::DrawProperties::addLayer( const LayerDef& laydef )
    {
       case DB : if (_laySetDb.end() != _laySetDb.find(laydef)) return false;
                 lname << "_UNDEF" << laydef.num() << "_" << laydef.typ();
-                _laySetDb[laydef] = DEBUG_NEW LayerSettings(lname.str(),"","","");
+                _laySetDb.add(laydef, DEBUG_NEW LayerSettings(lname.str(),"","",""));
                 return true;
       case DRC: if (_laySetDrc.end() != _laySetDrc.find(laydef)) return false;
                 lname << "_DRC" << laydef.num() << "_" << laydef.typ();
-                _laySetDrc[laydef] = DEBUG_NEW LayerSettings(lname.str(),"","","");
+                _laySetDrc.add(laydef, DEBUG_NEW LayerSettings(lname.str(),"","",""));
                 return true;
       default: assert(false);break;
    }
@@ -598,6 +598,7 @@ bool layprop::DrawProperties::addLayer(std::string name, LayerNumber layno, std:
          {
             new_layer = false;
             delete _laySetDb[layno];
+            _laySetDb.erase(layno);
             std::ostringstream ost;
             ost << "Warning! Layer "<<layno<<" redefined";
             tell_log(console::MT_WARNING, ost.str());
@@ -989,16 +990,16 @@ std::string layprop::DrawProperties::getLineName(const LayerDef& laydef) const
    else return "";
 }
 
-LayerNumber layprop::DrawProperties::getTenderLay(LayerNumber layno) const
+LayerDef layprop::DrawProperties::getTenderLay(const LayerDef& laydef) const
 {
 //   if (REF_LAY == layno) return layno;//no references yet in the DRC DB
    switch (_propertyState)
    {
-      case DB: return layno;
-      case DRC: return DRC_LAY;
+      case DB: return laydef;
+      case DRC: return DRC_LAY_DEF;
       default: assert(false); break;
    }
-   return layno; // dummy, to prevent warnings
+   return laydef; // dummy, to prevent warnings
 }
 
 void layprop::DrawProperties::allLayers(NameList& alllays) const
