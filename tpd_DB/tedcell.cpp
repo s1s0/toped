@@ -304,7 +304,7 @@ void laydata::TdtDefaultCell::dbExport(DbExportFile&, const CellMap&, const TDTH
    assert(false);
 }
 
-void laydata::TdtDefaultCell::collectUsedLays(const TdtLibDir*, bool, LayerTMPList&) const
+void laydata::TdtDefaultCell::collectUsedLays(const TdtLibDir*, bool, LayerDefList&) const
 {
 }
 
@@ -482,7 +482,7 @@ void laydata::TdtCell::openGlDraw(layprop::DrawProperties& drawprop, bool active
    // Draw figures
    for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
-      LayerNumber curlayno = drawprop.getTenderLay(lay.number());
+      LayerDef curlayno = drawprop.getTenderLay(lay.number());
       if (!drawprop.layerHidden(curlayno)) drawprop.setCurrentColor(curlayno);
       else continue;
       // fancy like this (dlist iterator) , because a simple
@@ -567,7 +567,7 @@ void laydata::TdtCell::motionDraw(const layprop::DrawProperties& drawprop,
       SelectList::Iterator llst;
       DataList::iterator dlst;
       for (llst = _shapesel.begin(); llst != _shapesel.end(); llst++) {
-         const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(llst.number());
+         const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(llst.layDef());
          for (dlst = llst->begin(); dlst != llst->end(); dlst++)
             if (!((actop == console::op_copy) && (sh_partsel == dlst->first->status())))
                dlst->first->motionDraw(drawprop, transtack, &(dlst->second));
@@ -579,9 +579,9 @@ void laydata::TdtCell::motionDraw(const layprop::DrawProperties& drawprop,
       // whatsoever exists, so just perform a regular draw, but of course
       // without fill
       for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
-         if (!drawprop.layerHidden(lay.number()))
+         if (!drawprop.layerHidden(lay.layDef()))
          {
-            const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(lay.number());
+            const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(lay.layDef());
             for (QuadTree::DrawIterator CI = lay->begin(drawprop, transtack); CI != lay->end(); CI++)
                CI->motionDraw(drawprop, transtack, NULL);
          }
@@ -677,7 +677,7 @@ void laydata::TdtCell::mouseHoover(TP& position, layprop::DrawProperties& drawpr
    prev->openGlPrecalc(drawprop, points);
    if(0 != points.size())
    {
-      LayerNumber curlayno = drawprop.getTenderLay(prevlay);
+      LayerDef curlayno = drawprop.getTenderLay(prevlay);
       drawprop.setCurrentColor(curlayno);
       glLineWidth(5);
       prev->setStatus(sh_selected);
@@ -862,11 +862,10 @@ void laydata::TdtCell::psWrite(PSFile& psf, const layprop::DrawProperties& drawp
    // and now the layers
    for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
-      LayerNumber curlayno = lay.number();
-      if (!drawprop.layerHidden(curlayno))
+      if (!drawprop.layerHidden(lay.layDef()))
       {
-         if (REF_LAY != curlayno)
-            psf.propSet(drawprop.getColorName(curlayno), drawprop.getFillName(curlayno));
+         if (REF_LAY_DEF != lay.layDef())
+            psf.propSet(drawprop.getColorName(lay.layDef()), drawprop.getFillName(lay.layDef()));
          for (QuadTree::Iterator DI = lay->begin(); DI != lay->end(); DI++)
             DI->psWrite(psf, drawprop);
       }
@@ -921,10 +920,9 @@ DBbox laydata::TdtCell::getVisibleOverlap(const layprop::DrawProperties& prop)
    DBbox vlOverlap(DEFAULT_OVL_BOX);
    for (LayerHolder::Iterator LCI = _layers.begin(); LCI != _layers.end(); LCI++)
    {
-      LayerNumber  layno  = LCI.number();
-      if (!prop.layerHidden(layno))
+      if (!prop.layerHidden(LCI.layDef()))
       {
-         if (REF_LAY == layno)
+         if (REF_LAY_DEF == LCI.layDef())
          {
             for(QuadTree::Iterator CS = LCI->begin(); CS != LCI->end(); CS++)
                CS->vlOverlap(prop, vlOverlap);
@@ -2286,7 +2284,7 @@ void laydata::TdtCell::reportSelected(real DBscale) const
    }
 }
 
-void laydata::TdtCell::collectUsedLays(const TdtLibDir* LTDB, bool recursive, LayerTMPList& laylist) const
+void laydata::TdtCell::collectUsedLays(const TdtLibDir* LTDB, bool recursive, LayerDefList& laylist) const
 {
    // first call recursively the method on all children cells
    assert(recursive ? NULL != LTDB : true);
@@ -2296,7 +2294,7 @@ void laydata::TdtCell::collectUsedLays(const TdtLibDir* LTDB, bool recursive, La
    // then update with the layers used in this cell
    for(LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
       if (LAST_EDITABLE_LAYNUM > lay.number())
-         laylist.push_back(lay.number());
+         laylist.push_back(lay.layDef());
 }
 
 void laydata::TdtCell::selectAllWrapper(QuadTree* qtree, DataList* selist, word selmask, bool mark)

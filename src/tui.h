@@ -296,7 +296,7 @@ namespace tui {
    //==========================================================================
    class NameEboxRecords : public wxPanel {
       public:
-                              NameEboxRecords(wxWindow*, wxPoint, wxSize, const LayerTMPList&, wxArrayString&, int, const layprop::DrawProperties*);
+                              NameEboxRecords(wxWindow*, wxPoint, wxSize, const LayerDefList&, wxArrayString&, int, const layprop::DrawProperties*);
          virtual             ~NameEboxRecords() {delete _cifMap;}
          USMap*               getTheMap();
          USMap*               getTheFullMap();
@@ -317,7 +317,7 @@ namespace tui {
    //==========================================================================
    class NameEbox3Records : public wxPanel {
       public:
-                              NameEbox3Records(wxWindow*, wxPoint, wxSize, const LayerTMPList&, wxArrayString&, int, const layprop::DrawProperties*);
+                              NameEbox3Records(wxWindow*, wxPoint, wxSize, const LayerDefList&, wxArrayString&, int, const layprop::DrawProperties*);
          virtual             ~NameEbox3Records() {delete _gdsLayMap;}
          USMap*               getTheMap();
          USMap*               getTheFullMap();
@@ -365,7 +365,7 @@ namespace tui {
    //--------------------------------------------------------------------------
    class NameEboxList : public wxScrolledWindow {
       public:
-                              NameEboxList(wxWindow*, wxWindowID, wxPoint, wxSize, const LayerTMPList&, const layprop::DrawProperties*);
+                              NameEboxList(wxWindow*, wxWindowID, wxPoint, wxSize, const LayerDefList&, const layprop::DrawProperties*);
          USMap*               getTheMap()     {return _laypanel->getTheMap();}
          USMap*               getTheFullMap() {return _laypanel->getTheFullMap();}
          void                 OnSize( wxSizeEvent& WXUNUSED(event));
@@ -377,7 +377,7 @@ namespace tui {
    //--------------------------------------------------------------------------
    class nameEbox3List : public wxScrolledWindow {
       public:
-                              nameEbox3List(wxWindow*, wxWindowID, wxPoint, wxSize, const LayerTMPList&, const layprop::DrawProperties*);
+                              nameEbox3List(wxWindow*, wxWindowID, wxPoint, wxSize, const LayerDefList&, const layprop::DrawProperties*);
          USMap*               getTheMap()     {return _laypanel->getTheMap();}
          USMap*               getTheFullMap() {return _laypanel->getTheFullMap();}
          void                 OnSize( wxSizeEvent& WXUNUSED(event));

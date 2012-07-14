@@ -269,7 +269,7 @@ laydata::LayerContainer<DataT>& laydata::LayerContainer<DataT>::operator=(const 
 
 
 //==============================================================================
-// implicit template instantiation with a certain type parameter
+// implicit template instantiation with certain type parameters
 template class laydata::LayerIterator<laydata::QuadTree*>;
 template class laydata::LayerContainer<laydata::QuadTree*>;
 template class laydata::LayerIterator<laydata::QTreeTmp*>;
@@ -278,3 +278,7 @@ template class laydata::LayerIterator<laydata::DataList*>;
 template class laydata::LayerContainer<laydata::DataList*>;
 template class laydata::LayerIterator<laydata::ShapeList*>;
 template class laydata::LayerContainer<laydata::ShapeList*>;
+//------------------------------------------------------------------------------
+template class laydata::LayerIterator<layprop::LayerSettings*>;
+template class laydata::LayerContainer<layprop::LayerSettings*>;
+

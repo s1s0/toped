@@ -108,7 +108,7 @@ namespace layprop {
                        ~PropertyCenter();
 //      bool              isLayerExist(word);
 //      bool              isLayerExist(std::string);
-      void              addUnpublishedLay(LayerNumber);
+      void              addUnpublishedLay(const LayerDef&);
       void              saveProperties(std::string);
       //
       const LayoutGrid* grid(byte) const;
@@ -137,7 +137,7 @@ namespace layprop {
                                                          {_supp_data.tmp_draw( base, newp, _UU, layCTM, stepDB());}
       void              mousePoint(const TP& lp)         {_supp_data.mousePoint(lp);}
       void              mouseStop()                      {_supp_data.mouseStop();}
-      const LayerTMPList&  upLayers()                       {_uplaylist.sort(); _uplaylist.unique(); return _uplaylist;}
+      const LayerDefList&  upLayers()                       {_uplaylist.sort(); _uplaylist.unique(); return _uplaylist;}
       void              clearUnpublishedLayers()         {_uplaylist.clear();}
       void              setRenderType(bool rt)           {_renderType = rt;}
       real              step() const                     {return _step;}
@@ -169,7 +169,7 @@ namespace layprop {
       bool                 _boldOnHover;  //
       byte                 _markerAngle;  // angle of restriction during shape drawing (0,45,90)
       SupplementaryData    _supp_data;    // supplementary data
-      LayerTMPList         _uplaylist;    // unpublished layer list
+      LayerDefList         _uplaylist;    // unpublished layer list
       word                 _layselmask;   // layout shape type selection mask
       USMap*               _gdsLayMap;    //
       USMap*               _cifLayMap;    //

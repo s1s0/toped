@@ -202,8 +202,8 @@ void tui::TechEditorDialog::OnChangeLayNum(wxCommandEvent&)
          applyEnable = false;
       else
       {
-         for(LayerTMPList::const_iterator it = _allLayNums.begin(); it != _allLayNums.end(); ++it)
-            if (layNo == *it)
+         for(LayerDefList::const_iterator it = _allLayNums.begin(); it != _allLayNums.end(); ++it)
+            if (layNo == it->num())
             {
                applyEnable = false;
                break;
@@ -276,7 +276,7 @@ void tui::TechEditorDialog::prepareLayers(layprop::DrawProperties* drawProp)
    _layerList->InsertColumn(1, wxT("Name"));
 
    _allLayNums = drawProp->getAllLayers();
-   for(LayerTMPList::const_iterator it = _allLayNums.begin(); it != _allLayNums.end(); ++it)
+   for(LayerDefList::const_iterator it = _allLayNums.begin(); it != _allLayNums.end(); ++it)
    {
       wxListItem row;
       unsigned long newItem = _layerList->GetItemCount();
@@ -285,7 +285,7 @@ void tui::TechEditorDialog::prepareLayers(layprop::DrawProperties* drawProp)
       row.SetData(newItem);
 
       wxString dummy;
-      dummy << *it;
+      dummy << it->num();
       row.SetText( dummy);
       _layerList->InsertItem(row);
       _layerList->SetColumnWidth(0, wxLIST_AUTOSIZE);
@@ -456,9 +456,9 @@ void tui::TechEditorDialog::OnRemotePropUpdate(wxCommandEvent& event)
    }
 }
 
-void tui::TechEditorDialog::LayerListPanel::addItemLayer(unsigned long id, unsigned long num, std::string name)
+void tui::TechEditorDialog::LayerListPanel::addItemLayer(unsigned long id, const LayerDef& laydef, std::string name)
 {
-   LayerLine item(num, name);
+   LayerLine item(laydef.num(), name);
    _layerItems[id] = item;
 }
 

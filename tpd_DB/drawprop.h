@@ -248,7 +248,8 @@ namespace layprop {
    typedef  std::map<std::string, tellRGB*      >        ColorMap;
    typedef  std::map<std::string, byte*         >        FillMap;
    typedef  std::map<std::string, LineSettings* >        LineMap;
-   typedef  std::map<LayerNumber, LayerSettings*>        LaySetList;
+//   typedef  std::map<LayerNumber, LayerSettings*>        LaySetList;
+   typedef  laydata::LayerContainer<LayerSettings*>      LaySetList;
    typedef  std::pair <LayerNumber, std::list<LayerState> > LayStateList;
 
    //==============================================================================
@@ -268,7 +269,7 @@ namespace layprop {
                                     DrawProperties();
                                    ~DrawProperties();
          // Called during the rendering - protected in the render initialization
-         void                       setCurrentColor(LayerNumber layno);
+         void                       setCurrentColor(const LayerDef&);
          bool                       setCurrentFill(bool) const;
          void                       setLineProps(bool selected = false) const;
          void                       initDrawRefStack(laydata::CellRefStack*);
@@ -317,15 +318,15 @@ namespace layprop {
          void                       allInvisible(DWordSet&);
          // Properly protected in tpd_bidfunc or the functions called from there
          bool                       addLayer(std::string, LayerNumber, std::string, std::string, std::string);
-         bool                       addLayer(std::string, LayerNumber);
-         bool                       addLayer(LayerNumber);
+         bool                       addLayer(std::string, const LayerDef&);
+         bool                       addLayer(const LayerDef&);
          LayerNumber                addLayer(std::string);
          void                       addColor(std::string name, byte R, byte G, byte B, byte A);
          void                       addFill(std::string name, byte *ptrn);
          void                       addLine(std::string, std::string, word, byte, byte);
-         void                       hideLayer(LayerNumber layno, bool hide);
-         void                       lockLayer(LayerNumber layno, bool lock);
-         void                       fillLayer(LayerNumber layno, bool fill);
+         void                       hideLayer(const LayerDef&, bool);
+         void                       lockLayer(const LayerDef&, bool lock);
+         void                       fillLayer(const LayerDef&, bool fill);
          void                       pushLayerStatus();
          void                       popLayerStatus();
          void                       popBackLayerStatus();
@@ -345,26 +346,26 @@ namespace layprop {
          void                       setTextboxHidden(bool hide)      {_textBoxHidden = hide;}
          void                       setAdjustTextOrientation(bool ori)
                                                                      {_adjustTextOrientation = ori;}
-         void                       defaultLayer(LayerNumber layno)  {_curlay = layno;}
-         LayerNumber                curLay() const                   {return _curlay;}
+         void                       defaultLayer(LayerDef layno)     {_curlay = layno;}
+         LayerDef                   curLay() const                   {return _curlay;}
 
          // Used in dialogue boxes and drawing - partially protected for now
-         bool                       layerHidden(LayerNumber layno) const;
-         bool                       layerLocked(LayerNumber layno) const;
-         bool                       layerFilled(LayerNumber layno) const;
-         bool                       selectable(LayerNumber layno) const;
+         bool                       layerHidden(const LayerDef&) const;
+         bool                       layerLocked(const LayerDef&) const;
+         bool                       layerFilled(const LayerDef&) const;
+         bool                       selectable(const LayerDef&) const;
 
          // Used in dialogue boxes an protected during construction of the dialogue boxes
-         LayerTMPList               getAllLayers() const;
-         std::string                getLayerName(LayerNumber layno) const;
-         std::string                getColorName(LayerNumber layno) const;
-         std::string                getFillName(LayerNumber layno) const;
-         std::string                getLineName(LayerNumber layno) const;
-         const byte*                getFill(LayerNumber layno) const;
+         LayerDefList               getAllLayers() const;
+         std::string                getLayerName(const LayerDef&) const;
+         std::string                getColorName(const LayerDef&) const;
+         std::string                getFillName(const LayerDef&) const;
+         std::string                getLineName(const LayerDef&) const;
+         const byte*                getFill(const LayerDef&) const;
          const byte*                getFill(std::string) const;
-         const tellRGB&             getColor(LayerNumber layno) const;
+         const tellRGB&             getColor(const LayerDef&) const;
          const tellRGB&             getColor(std::string) const;
-         const LineSettings*        getLine(LayerNumber layno) const;
+         const LineSettings*        getLine(const LayerDef&) const;
          const LineSettings*        getLine(std::string) const;
          void                       allLayers(NameList&) const;
          void                       allColors(NameList&) const;
@@ -375,13 +376,13 @@ namespace layprop {
          typedef std::deque<LayStateList>            LayStateHistory;
          typedef std::map<std::string, LayStateList> LayStateMap;
          const LaySetList&          getCurSetList() const;
-         const LayerSettings*       findLayerSettings(LayerNumber) const;
+         const LayerSettings*       findLayerSettings(const LayerDef&) const;
          LaySetList                 _laySetDb;
          LaySetList                 _laySetDrc;
          ColorMap                   _layColors;
          FillMap                    _layFill;
          LineMap                    _lineSet;
-         LayerNumber                _curlay;       // current drawing layer
+         LayerDef                   _curlay;       // current drawing layer
          DBbox                      _clipRegion;
          CTM                        _scrCtm;
          word                       _visualLimit;   // that would be 40 pixels
@@ -396,7 +397,7 @@ namespace layprop {
          bool                       _blockFill;
          laydata::CellRefStack*     _refStack;
          CtmStack                   _tranStack;
-         LayerNumber                _drawingLayer;
+         LayerDef                   _drawingLayer;
          LayStateMap                _layStateMap;  //
          LayStateHistory            _layStateHistory; //! for undo purposes of layer status related TELL function
          static const tellRGB       _defaultColor;
