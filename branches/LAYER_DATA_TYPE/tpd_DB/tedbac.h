@@ -125,5 +125,6 @@ namespace auxdata {
 
 
 typedef  std::list<LayerDef>             LayerDefList;
+typedef  std::set<LayerDef>              LayerDefSet;
 
 #endif //TEDBAC_H_INCLUDED

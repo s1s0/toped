@@ -1091,8 +1091,8 @@ void tellstdfunc::stdLOADLAYSTAT::undo() {
 int tellstdfunc::stdLOADLAYSTAT::execute()
 {
    std::string   sname  = getStringValue();
-   WordSet hidel, lockl, filll;
-   unsigned activel = 0;
+   LayerDefSet hidel, lockl, filll;
+   LayerDef activel(TLL_LAY_DEF);
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
@@ -1100,7 +1100,7 @@ int tellstdfunc::stdLOADLAYSTAT::execute()
       {
          // the list containing all deselected shapes
          laydata::SelectList *todslct = DEBUG_NEW laydata::SelectList();
-         WordSet hll(hidel); // combined locked and hidden layers
+         LayerDefSet hll(hidel); // combined locked and hidden layers
          hll.insert(lockl.begin(), lockl.end());
 
          laydata::TdtLibDir* dbLibDir = NULL;
@@ -1110,7 +1110,7 @@ int tellstdfunc::stdLOADLAYSTAT::execute()
             laydata::SelectList *listselected = tDesign->shapeSel();
             // first thing is to pick-up the selected shapes of the layers which
             // will be locked or hidden
-            for (WordSet::const_iterator CL = hll.begin(); CL != hll.end(); CL++)
+            for (LayerDefSet::const_iterator CL = hll.begin(); CL != hll.end(); CL++)
             {
                if (listselected->end() != listselected->find(*CL))
                   todslct->add(*CL, DEBUG_NEW laydata::DataList(*((*listselected)[*CL])));
@@ -1162,31 +1162,32 @@ void tellstdfunc::stdDELLAYSTAT::undo_cleanup()
 void tellstdfunc::stdDELLAYSTAT::undo() {
    TEUNDO_DEBUG("deletelaystat( string ) UNDO");
    // get the layer lists from the undo stack ...
-   word activel = getWordValue(UNDOPstack, true);
-   telldata::TtList* undofilll = TELL_UNDOOPS_UNDO(telldata::TtList*);
-   telldata::TtList* undolockl = TELL_UNDOOPS_UNDO(telldata::TtList*);
-   telldata::TtList* undohidel = TELL_UNDOOPS_UNDO(telldata::TtList*);
+   telldata::TtLayer* activetlay = TELL_UNDOOPS_UNDO(telldata::TtLayer*);
+   telldata::TtList* undofilll   = TELL_UNDOOPS_UNDO(telldata::TtList*);
+   telldata::TtList* undolockl   = TELL_UNDOOPS_UNDO(telldata::TtList*);
+   telldata::TtList* undohidel   = TELL_UNDOOPS_UNDO(telldata::TtList*);
    // ...get the layer set name from the undo stack ...
    std::string sname  = getStringValue(UNDOPstack, true);
    // ...convert the layer lists
-   WordSet filll;
+   LayerDefSet filll;
    for (unsigned i = 0; i < undofilll->size() ; i++)
-      filll.insert(filll.begin(), (static_cast<telldata::TtInt*>((undofilll->mlist())[i]))->value());
-   WordSet lockl;
+      filll.insert(filll.begin(), (static_cast<telldata::TtLayer*>((undofilll->mlist())[i]))->value());
+   LayerDefSet lockl;
    for (unsigned i = 0; i < undolockl->size() ; i++)
-      lockl.insert(lockl.begin(), (static_cast<telldata::TtInt*>((undolockl->mlist())[i]))->value());
-   WordSet hidel;
+      lockl.insert(lockl.begin(), (static_cast<telldata::TtLayer*>((undolockl->mlist())[i]))->value());
+   LayerDefSet hidel;
    for (unsigned i = 0; i < undohidel->size() ; i++)
-      hidel.insert(hidel.begin(), (static_cast<telldata::TtInt*>((undohidel->mlist())[i]))->value());
+      hidel.insert(hidel.begin(), (static_cast<telldata::TtLayer*>((undohidel->mlist())[i]))->value());
    // ... restore the layer set ...
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-      drawProp->saveLaysetStatus(sname, hidel, lockl, filll, activel);
+      drawProp->saveLaysetStatus(sname, hidel, lockl, filll, activetlay->value());
       TpdPost::layers_state(sname, true);
    }
    PROPC->unlockDrawProp(drawProp, true);
    // ... and finally - clean-up
+   delete activetlay;
    delete undofilll;
    delete undolockl;
    delete undohidel;
@@ -1195,8 +1196,8 @@ void tellstdfunc::stdDELLAYSTAT::undo() {
 int tellstdfunc::stdDELLAYSTAT::execute()
 {
    std::string   sname  = getStringValue();
-   WordSet hidel, lockl, filll;
-   unsigned activel = 0;
+   LayerDefSet hidel, lockl, filll;
+   LayerDef activel(TLL_LAY_DEF);
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
@@ -1206,19 +1207,19 @@ int tellstdfunc::stdDELLAYSTAT::execute()
          UNDOcmdQ.push_front(this);
          UNDOPstack.push_front(DEBUG_NEW telldata::TtString(sname));
          // Push the layer lists in tell form for undo
-         telldata::TtList* undohidel = DEBUG_NEW telldata::TtList(telldata::tn_int);
-         for (WordSet::const_iterator CL = hidel.begin(); CL != hidel.end(); CL++)
-            undohidel->add(DEBUG_NEW telldata::TtInt(*CL));
+         telldata::TtList* undohidel = DEBUG_NEW telldata::TtList(telldata::tn_layer);
+         for (LayerDefSet::const_iterator CL = hidel.begin(); CL != hidel.end(); CL++)
+            undohidel->add(DEBUG_NEW telldata::TtLayer(*CL));
          UNDOPstack.push_front(undohidel);
-         telldata::TtList* undolockl = DEBUG_NEW telldata::TtList(telldata::tn_int);
-         for (WordSet::const_iterator CL = lockl.begin(); CL != lockl.end(); CL++)
-            undolockl->add(DEBUG_NEW telldata::TtInt(*CL));
+         telldata::TtList* undolockl = DEBUG_NEW telldata::TtList(telldata::tn_layer);
+         for (LayerDefSet::const_iterator CL = lockl.begin(); CL != lockl.end(); CL++)
+            undolockl->add(DEBUG_NEW telldata::TtLayer(*CL));
          UNDOPstack.push_front(undolockl);
-         telldata::TtList* undofilll = DEBUG_NEW telldata::TtList(telldata::tn_int);
-         for (WordSet::const_iterator CL = filll.begin(); CL != filll.end(); CL++)
-            undofilll->add(DEBUG_NEW telldata::TtInt(*CL));
+         telldata::TtList* undofilll = DEBUG_NEW telldata::TtList(telldata::tn_layer);
+         for (LayerDefSet::const_iterator CL = filll.begin(); CL != filll.end(); CL++)
+            undofilll->add(DEBUG_NEW telldata::TtLayer(*CL));
          UNDOPstack.push_front(undofilll);
-         UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(activel));
+         UNDOPstack.push_front(DEBUG_NEW telldata::TtLayer(activel));
          TpdPost::layers_state(sname, false);
          LogFile << LogFile.getFN() << "(\""<< sname << "\");"; LogFile.flush();
       }

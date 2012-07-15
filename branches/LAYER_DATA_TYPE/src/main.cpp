@@ -726,8 +726,8 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    mblock->addFUNC("undo"             ,(DEBUG_NEW                     tellstdfunc::stdUNDO(telldata::tn_void,false)));
    //
    mblock->addFUNC("report_selected"  ,(DEBUG_NEW              tellstdfunc::stdREPORTSLCTD(telldata::tn_void,true )));
-   mblock->addFUNC("report_layers"    ,(DEBUG_NEW        tellstdfunc::stdREPORTLAY(TLISTOF(telldata::tn_int),true )));
-   mblock->addFUNC("report_layers"    ,(DEBUG_NEW       tellstdfunc::stdREPORTLAYc(TLISTOF(telldata::tn_int),true )));
+   mblock->addFUNC("report_layers"    ,(DEBUG_NEW      tellstdfunc::stdREPORTLAY(TLISTOF(telldata::tn_layer),true )));
+   mblock->addFUNC("report_layers"    ,(DEBUG_NEW     tellstdfunc::stdREPORTLAYc(TLISTOF(telldata::tn_layer),true )));
    mblock->addFUNC("report_gdslayers" ,(DEBUG_NEW                tellstdfunc::GDSreportlay(telldata::tn_void,true )));
    mblock->addFUNC("report_ciflayers" ,(DEBUG_NEW                tellstdfunc::CIFreportlay(telldata::tn_void,true )));
    mblock->addFUNC("report_oasislayers",(DEBUG_NEW               tellstdfunc::OASreportlay(telldata::tn_void,true )));

@@ -862,7 +862,7 @@ int tellstdfunc::stdREPORTLAY::execute() {
       success = dbLibDir->collectUsedLays(cellname, recursive, ull);
    }
    DATC->unlockTDT(dbLibDir, true);
-   telldata::TtList* tllull = DEBUG_NEW telldata::TtList(telldata::tn_int);
+   telldata::TtList* tllull = DEBUG_NEW telldata::TtList(telldata::tn_layer);
    if (success) {
       ull.sort();ull.unique();
       std::ostringstream ost;
@@ -873,7 +873,7 @@ int tellstdfunc::stdREPORTLAY::execute() {
       tell_log(console::MT_INFO, ost.str());
 
       for(LayerDefList::const_iterator CL = ull.begin() ; CL != ull.end();CL++ )
-         tllull->add(DEBUG_NEW telldata::TtInt(CL->num()));
+         tllull->add(DEBUG_NEW telldata::TtLayer(*CL));
       ull.clear();
    }
    else {
