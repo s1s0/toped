@@ -275,7 +275,7 @@ namespace telldata {
    class TtLayout: public TellVar {
    public:
                            TtLayout(): TellVar(tn_layout), _data(NULL),
-                                                      _layer(ERR_LAY), _selp(NULL) {};
+                                                      _layer(ERR_LAY_DEF), _selp(NULL) {};
                            TtLayout(laydata::TdtData* pdat, const LayerDef& laydef, SGBitSet* selp = NULL):
                              TellVar(tn_layout), _data(pdat), _layer(laydef), _selp(selp) {};
                            TtLayout(const TtLayout& cobj);
@@ -298,9 +298,9 @@ namespace telldata {
    class TtAuxdata: public TellVar {
    public:
                            TtAuxdata(): TellVar(tn_auxilary), _data(NULL),
-                             _layer(ERR_LAY) {};
-                           TtAuxdata(auxdata::TdtAuxData* pdat, unsigned lay):
-                             TellVar(tn_auxilary), _data(pdat), _layer(lay) {};
+                             _layer(ERR_LAY_DEF) {};
+                           TtAuxdata(auxdata::TdtAuxData* pdat, const LayerDef& laydef):
+                             TellVar(tn_auxilary), _data(pdat), _layer(laydef) {};
                            TtAuxdata(const TtAuxdata& cobj);
       const TtAuxdata&     operator = (const TtAuxdata&);
       virtual void         initialize() {_data = NULL;}
@@ -308,10 +308,10 @@ namespace telldata {
       virtual void         assign(TellVar*);
       virtual TellVar*     selfcopy() const {return DEBUG_NEW TtAuxdata(*this);};
       auxdata::TdtAuxData* data() const     {return _data;};
-      LayerNumber          layer() const    {return _layer;};
+      LayerDef             layer() const    {return _layer;};
    private:
       auxdata::TdtAuxData* _data;
-      LayerNumber          _layer;
+      LayerDef             _layer;
    };
 
    //==============================================================================

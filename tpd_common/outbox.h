@@ -238,9 +238,9 @@ class TpdPost {
       static void clearCIFtab();
       static void clearOAStab();
       static void clearDRCtab();
-      static void layer_status(int, const word, const bool);
-      static void layer_add(const std::string, const word);
-      static void layer_default(const word, const word);
+      static void layer_status(int, const LayerDef&, const bool);
+      static void layer_add(const std::string, const LayerDef&);
+      static void layer_default(const LayerDef&, const LayerDef&);
       static void layers_state(const std::string& name, bool add);
       static void resetTDTtab(const std::string);
       static void celltree_open(const std::string);

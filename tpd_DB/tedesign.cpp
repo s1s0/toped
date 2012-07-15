@@ -1260,12 +1260,12 @@ void laydata::TdtDesign::addList(AtticList* nlst, TdtCell* tCell)
    fixReferenceOverlap(old_overlap, targetCell);
 }
 
-void laydata::TdtDesign::addList(LayerNumber la, ShapeList& newShapes)
+void laydata::TdtDesign::addList(const LayerDef& laydef, ShapeList& newShapes)
 {
    if (!newShapes.empty())
    {
       DBbox old_overlap(_target.edit()->cellOverlap());
-      QuadTree *actlay = _target.edit()->secureLayer(la);
+      QuadTree *actlay = _target.edit()->secureLayer(laydef);
       setModified();
       for (laydata::ShapeList::const_iterator CS = newShapes.begin(); CS != newShapes.end(); CS++)
          actlay->add(*CS);

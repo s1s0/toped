@@ -161,12 +161,13 @@ int tellstdfunc::grcGETLAYERS::execute()
 tellstdfunc::grcGETDATA::grcGETDATA(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype, eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtLayer()));
 }
 
 int tellstdfunc::grcGETDATA::execute()
 {
-   word     la = getWordValue();
+//   word     la = getWordValue();
+   telldata::TtLayer* tlay = static_cast<telldata::TtLayer*>(OPstack.top());OPstack.pop();
    telldata::TtList* llist = DEBUG_NEW telldata::TtList(telldata::tn_auxilary);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
@@ -176,9 +177,9 @@ int tellstdfunc::grcGETDATA::execute()
       auxdata::GrcCell* grcCell   = tCell->getGrcCell();
       if (NULL != grcCell)
       {
-         grcCell->reportLayData(tell2DBLayer(la),dataList);
+         grcCell->reportLayData(tlay->value(),dataList);
          for (auxdata::AuxDataList::const_iterator CD = dataList.begin(); CD != dataList.end(); CD++)
-            llist->add(DEBUG_NEW telldata::TtAuxdata(*CD, tell2DBLayer(la)));
+            llist->add(DEBUG_NEW telldata::TtAuxdata(*CD, tlay->value()));
       }
       LogFile << LogFile.getFN() << "();"; LogFile.flush();
    }
@@ -191,7 +192,7 @@ int tellstdfunc::grcGETDATA::execute()
 tellstdfunc::grcCLEANALAYER::grcCLEANALAYER(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype, eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtLayer()));
 }
 
 void tellstdfunc::grcCLEANALAYER::undo_cleanup()
@@ -204,7 +205,7 @@ void tellstdfunc::grcCLEANALAYER::undo_cleanup()
 void tellstdfunc::grcCLEANALAYER::undo()
 {
    telldata::TtList* grcTtShapes = TELL_UNDOOPS_UNDO(telldata::TtList*);
-   LayerNumber grcLayer = 0;
+   LayerDef grcLayer(TLL_LAY_DEF);
    auxdata::AuxDataList* grcShapes = get_auxdatalist(grcTtShapes, grcLayer);
 
    laydata::TdtLibDir* dbLibDir = NULL;
@@ -239,7 +240,8 @@ void tellstdfunc::grcCLEANALAYER::undo()
 
 int tellstdfunc::grcCLEANALAYER::execute()
 {
-   word     la = getWordValue();
+   telldata::TtLayer* tlay = static_cast<telldata::TtLayer*>(OPstack.top());OPstack.pop();
+//   word     la = getWordValue();
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -250,11 +252,11 @@ int tellstdfunc::grcCLEANALAYER::execute()
       {
          DBbox oldOverlap(tCell->cellOverlap());
          auxdata::AuxDataList grcShapes;
-         char cellState = grcCell->cleanLay(tell2DBLayer(la), grcShapes);
+         char cellState = grcCell->cleanLay(tlay->value(), grcShapes);
          if (0 <= cellState)
          {
             UNDOcmdQ.push_front(this);
-            UNDOPstack.push_front(make_ttlaylist(grcShapes, tell2DBLayer(la)));
+            UNDOPstack.push_front(make_ttlaylist(grcShapes, tlay->value()));
             if (0 == cellState)
             {// grc cell is empty - clear it up
                tCell->clearGrcCell();
@@ -271,7 +273,7 @@ int tellstdfunc::grcCLEANALAYER::execute()
          else
          {
             std::stringstream ost;
-            ost << "No invalid data on layer " << la;
+            ost << "No invalid data on layer " << tlay->value().num();
             tell_log(console::MT_WARNING, ost.str());
          }
       }
@@ -288,7 +290,7 @@ int tellstdfunc::grcCLEANALAYER::execute()
 tellstdfunc::grcREPAIRDATA::grcREPAIRDATA(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtLayer()));
 }
 
 void tellstdfunc::grcREPAIRDATA::undo_cleanup()
@@ -304,7 +306,7 @@ void tellstdfunc::grcREPAIRDATA::undo()
 {
    telldata::TtList* oldShapes = TELL_UNDOOPS_UNDO(telldata::TtList*);
    telldata::TtList* newShapes = TELL_UNDOOPS_UNDO(telldata::TtList*);
-   LayerNumber grcLayer = 0;
+   LayerDef grcLayer(TLL_LAY_DEF);
    auxdata::AuxDataList* grcShapes = get_auxdatalist(oldShapes, grcLayer);
    laydata::AtticList*   tdtlayers = get_shlaylist(newShapes);
 
@@ -349,7 +351,9 @@ void tellstdfunc::grcREPAIRDATA::undo()
 
 int tellstdfunc::grcREPAIRDATA::execute()
 {
-   word     la = getWordValue();
+//   word     la = getWordValue();
+   telldata::TtLayer* tlay = static_cast<telldata::TtLayer*>(OPstack.top());OPstack.pop();
+
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -359,16 +363,16 @@ int tellstdfunc::grcREPAIRDATA::execute()
       if (NULL != grcCell)
       {
          laydata::ShapeList newShapes;
-         if (grcCell->repairData(tell2DBLayer(la), newShapes))
+         if (grcCell->repairData(tlay->value(), newShapes))
          {
             if (!newShapes.empty())
             {
                UNDOcmdQ.push_front(this);
                DBbox oldOverlap(tCell->cellOverlap());
-               tDesign->addList(tell2DBLayer(la), newShapes);
-               UNDOPstack.push_front(make_ttlaylist(newShapes, tell2DBLayer(la)));
+               tDesign->addList(tlay->value(), newShapes);
+               UNDOPstack.push_front(make_ttlaylist(newShapes, tlay->value()));
                auxdata::AuxDataList oldShapes;
-               switch (grcCell->cleanRepaired(tell2DBLayer(la), oldShapes))
+               switch (grcCell->cleanRepaired(tlay->value(), oldShapes))
                {
                   case -1: // grc cell is empty - clear it up
                            tCell->clearGrcCell();
@@ -386,20 +390,20 @@ int tellstdfunc::grcREPAIRDATA::execute()
                            break;
                   default: assert(false); break;
                }
-               UNDOPstack.push_front(make_ttlaylist(oldShapes, tell2DBLayer(la)));
+               UNDOPstack.push_front(make_ttlaylist(oldShapes, tlay->value()));
             }
             else
             {
                std::stringstream ost;
-               ost << "No recoverable data on layer " << la << ". Check poly/wire recovery settings.";
+               ost << "No recoverable data on layer " << tlay->value().num() << ". Check poly/wire recovery settings.";
                tell_log(console::MT_WARNING, ost.str());
             }
-            LogFile << LogFile.getFN() << "(" << la << ");"; LogFile.flush();
+            LogFile << LogFile.getFN() << "(" << *tlay << ");"; LogFile.flush();
          }
          else
          {
             std::stringstream ost;
-            ost << "No invalid data on layer " << la << ". Nothing to repair.";
+            ost << "No invalid data on layer " << tlay->value().num() << ". Nothing to repair.";
             tell_log(console::MT_WARNING, ost.str());
          }
       }

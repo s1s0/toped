@@ -1202,7 +1202,7 @@ void tellstdfunc::stdUSINGLAYER::undo()
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-      TpdPost::layer_default(tlay->value().num(), drawProp->curLay().num());
+      TpdPost::layer_default(tlay->value(), drawProp->curLay());
       drawProp->defaultLayer(tlay->value());
    }
    PROPC->unlockDrawProp(drawProp, true);
@@ -1221,14 +1221,14 @@ int tellstdfunc::stdUSINGLAYER::execute()
       if (drawProp->layerHidden(laydef))
       {
          drawProp->hideLayer(laydef, false);
-         TpdPost::layer_status(tui::BT_LAYER_HIDE, laydef.num(), false);
+         TpdPost::layer_status(tui::BT_LAYER_HIDE, laydef, false);
       }
       if (drawProp->layerLocked(laydef))
       {
          drawProp->lockLayer(laydef, false);
-         TpdPost::layer_status(tui::BT_LAYER_LOCK, laydef.num(), false);
+         TpdPost::layer_status(tui::BT_LAYER_LOCK, laydef, false);
       }
-      TpdPost::layer_default(laydef.num(), drawProp->curLay().num());
+      TpdPost::layer_default(laydef, drawProp->curLay());
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(DEBUG_NEW telldata::TtLayer(drawProp->curLay()));
       drawProp->defaultLayer(laydef);

@@ -322,8 +322,9 @@ void telldata::TtAuxdata::echo(std::string& wstr, real DBU)
       ost << "< !EMPTY! >";
    else
    {
-      if ( LAST_EDITABLE_LAYNUM > _layer)
-         ost << "layer " << _layer << " :";
+      if ( LAST_EDITABLE_LAYNUM > _layer.num())
+         ost << "layer " << _layer.num() << " :"
+             << "dtype " << _layer.typ() << " :";
       _data->info(ost, DBU);
    }
    wstr += ost.str();
