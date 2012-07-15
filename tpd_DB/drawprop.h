@@ -117,16 +117,16 @@ namespace layprop {
    //
    class LayerState {
    public:
-                          LayerState(unsigned num, bool sh, bool sl, bool sf) : _number(num), _hidden(sh),
+                          LayerState(const LayerDef& laydef, bool sh, bool sl, bool sf) : _laydef(laydef), _hidden(sh),
                              _locked(sl), _filled(sf) {};
-                          LayerState(unsigned num, const LayerSettings& lset) : _number(num),
+                          LayerState(const LayerDef& laydef, const LayerSettings& lset) : _laydef(laydef),
                              _hidden(lset.hidden()), _locked(lset.locked()), _filled(lset.filled()){}
-      LayerNumber         number() const              {return _number;}
+      LayerDef            layDef() const              {return _laydef;}
       bool                hidden() const              {return _hidden;}
       bool                locked() const              {return _locked;}
       bool                filled() const              {return _filled;}
    private:
-      LayerNumber         _number;
+      LayerDef            _laydef;
       bool                _hidden;
       bool                _locked;
       bool                _filled;
@@ -248,9 +248,8 @@ namespace layprop {
    typedef  std::map<std::string, tellRGB*      >        ColorMap;
    typedef  std::map<std::string, byte*         >        FillMap;
    typedef  std::map<std::string, LineSettings* >        LineMap;
-//   typedef  std::map<LayerNumber, LayerSettings*>        LaySetList;
    typedef  laydata::LayerContainer<LayerSettings*>      LaySetList;
-   typedef  std::pair <LayerNumber, std::list<LayerState> > LayStateList;
+   typedef  std::pair <LayerDef, std::list<LayerState> > LayStateList;
 
    //==============================================================================
    /*! This class serves as a carrying case for all drawing properties during the
@@ -331,10 +330,10 @@ namespace layprop {
          void                       popLayerStatus();
          void                       popBackLayerStatus();
          bool                       saveLaysetStatus(const std::string&);
-         bool                       saveLaysetStatus(const std::string&, const WordSet&, const WordSet&, const WordSet&, unsigned);
+         bool                       saveLaysetStatus(const std::string&, const LayerDefSet&, const LayerDefSet&, const LayerDefSet&, const LayerDef&);
          bool                       loadLaysetStatus(const std::string&);
          bool                       deleteLaysetStatus(const std::string&);
-         bool                       getLaysetStatus(const std::string&, WordSet&, WordSet&, WordSet&, unsigned);
+         bool                       getLaysetStatus(const std::string&, LayerDefSet&, LayerDefSet&, LayerDefSet&, LayerDef&);
          void                       savePatterns(FILE*) const;
          void                       saveColors(FILE*) const;
          void                       saveLayers(FILE*) const;
