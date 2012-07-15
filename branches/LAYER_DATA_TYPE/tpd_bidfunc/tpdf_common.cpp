@@ -141,7 +141,7 @@ telldata::TtList* tellstdfunc::make_ttlaylist(laydata::SelectList* shapesel) {
          // copy the pointlist, because it will be deleted with the shapeSel
          if (0 != CI->second.size()) pntl = SGBitSet(CI->second);
          else                        pntl = SGBitSet();
-         llist->add(DEBUG_NEW telldata::TtLayout(CI->first, CL.number(), DEBUG_NEW SGBitSet(pntl)));
+         llist->add(DEBUG_NEW telldata::TtLayout(CI->first, CL.layDef(), DEBUG_NEW SGBitSet(pntl)));
       }
    }
    return llist;
@@ -207,7 +207,7 @@ telldata::TtList* tellstdfunc::make_ttlaylist(laydata::AtticList* shapesel)
       for (laydata::ShapeList::const_iterator CI  = lslct->begin();
                                               CI != lslct->end(); CI++)
       //   if (sh_deleted == (*CI)->status()) - doesn't seems to need it!
-            llist->add(DEBUG_NEW telldata::TtLayout(*CI, CL.number()));
+            llist->add(DEBUG_NEW telldata::TtLayout(*CI, CL.layDef()));
    }
    return llist;
 }

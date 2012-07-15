@@ -291,7 +291,7 @@ void tellstdfunc::stdHIDELAYER::undo() {
    if (PROPC->lockDrawProp(drawProp))
    {
       drawProp->hideLayer(laydef, hide);
-      DWordSet unselable;
+      LayerDefSet unselable;
       drawProp->allUnselectable(unselable);
       if (pl->size() > 0)
       {
@@ -336,7 +336,7 @@ int tellstdfunc::stdHIDELAYER::execute()
             if (hide && (listselected->end() != listselected->find(laydef)))
             {
                todslct->add(laydef, DEBUG_NEW laydata::DataList(*((*listselected)[laydef])));
-               DWordSet unselable;
+               LayerDefSet unselable;
                drawProp->allUnselectable(unselable);
                tDesign->unselectFromList(copySelectList(todslct), unselable);
             }
@@ -394,7 +394,7 @@ void tellstdfunc::stdHIDELAYERS::undo() {
          drawProp->hideLayer(tlay->value(), hide);
          TpdPost::layer_status(tui::BT_LAYER_HIDE, tlay->value(), hide);
       }
-      DWordSet unselable;
+      LayerDefSet unselable;
       drawProp->allUnselectable(unselable);
       laydata::TdtLibDir* dbLibDir = NULL;
       if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
@@ -418,7 +418,7 @@ int tellstdfunc::stdHIDELAYERS::execute()
 {
    bool        hide  = getBoolValue();
    telldata::TtList *sl = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
-   DWordSet unselable;
+   LayerDefSet unselable;
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
@@ -696,7 +696,7 @@ void tellstdfunc::stdLOCKLAYER::undo()
    if (PROPC->lockDrawProp(drawProp))
    {
       drawProp->lockLayer(laydef, lock);
-      DWordSet unselable;
+      LayerDefSet unselable;
       drawProp->allUnselectable(unselable);
       laydata::TdtLibDir* dbLibDir = NULL;
       if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
@@ -737,7 +737,7 @@ int tellstdfunc::stdLOCKLAYER::execute()
             if (lock && (listselected->end() != listselected->find(laydef)))
             {
                todslct->add(laydef, DEBUG_NEW laydata::DataList(*((*listselected)[laydef])));
-               DWordSet unselable;
+               LayerDefSet unselable;
                drawProp->allUnselectable(unselable);
                tDesign->unselectFromList(copySelectList(todslct), unselable);
             }
@@ -795,7 +795,7 @@ void tellstdfunc::stdLOCKLAYERS::undo() {
          drawProp->lockLayer(tlay->value(), lock);
          TpdPost::layer_status(tui::BT_LAYER_LOCK, tlay->value(), lock);
       }
-      DWordSet unselable;
+      LayerDefSet unselable;
       drawProp->allUnselectable(unselable);
       laydata::TdtLibDir* dbLibDir = NULL;
       if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
@@ -854,7 +854,7 @@ int tellstdfunc::stdLOCKLAYERS::execute()
             }
          }
          // Now unselect the shapes in the target layers
-         DWordSet unselable;
+         LayerDefSet unselable;
          drawProp->allUnselectable(unselable);
          tDesign->unselectFromList(copySelectList(todslct), unselable);
          UpdateLV(tDesign->numSelected());
@@ -1068,7 +1068,7 @@ void tellstdfunc::stdLOADLAYSTAT::undo() {
    if (PROPC->lockDrawProp(drawProp))
    {
       drawProp->popLayerStatus();
-      DWordSet unselable;
+      LayerDefSet unselable;
       drawProp->allUnselectable(unselable);
       laydata::TdtLibDir* dbLibDir = NULL;
       if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
@@ -1116,7 +1116,7 @@ int tellstdfunc::stdLOADLAYSTAT::execute()
                   todslct->add(*CL, DEBUG_NEW laydata::DataList(*((*listselected)[*CL])));
             }
             // Now unselect the shapes in the target layers
-            DWordSet unselable;
+            LayerDefSet unselable;
             drawProp->allUnselectable(unselable);
             tDesign->unselectFromList(copySelectList(todslct), unselable);
             UpdateLV(tDesign->numSelected());

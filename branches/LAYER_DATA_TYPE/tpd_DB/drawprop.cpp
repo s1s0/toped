@@ -927,22 +927,22 @@ LayerDefList layprop::DrawProperties::getAllLayers() const
    return listLayers;
 }
 
-void layprop::DrawProperties::allUnselectable(DWordSet& layset)
+void layprop::DrawProperties::allUnselectable(LayerDefSet& layset)
 {
    for( LaySetList::Iterator CL = getCurSetList().begin(); CL != getCurSetList().end(); CL++)
    {
       if (CL->hidden() || CL->locked())
-         layset.insert(CL.number());
+         layset.insert(CL.layDef());
    }
-   layset.insert(GRC_LAY);
+   layset.insert(GRC_LAY_DEF);
 }
 
-void layprop::DrawProperties::allInvisible(DWordSet& layset)
+void layprop::DrawProperties::allInvisible(LayerDefSet& layset)
 {
    for( LaySetList::Iterator CL = getCurSetList().begin(); CL != getCurSetList().end(); CL++)
    {
       if (CL->hidden())
-         layset.insert(CL.number());
+         layset.insert(CL.layDef());
    }
 }
 //WordList layprop::PropertyCenter::getLockedLayers() const

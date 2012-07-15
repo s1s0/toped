@@ -755,7 +755,7 @@ void DataCenter::mouseHoover(TP& position)
 {
    if (_TEDLIB())
    {
-      DWordSet unselectable = PROPC->allUnselectable();
+      LayerDefSet unselectable = PROPC->allUnselectable();
       layprop::DrawProperties* drawProp;
       if (PROPC->lockDrawProp(drawProp))
       {

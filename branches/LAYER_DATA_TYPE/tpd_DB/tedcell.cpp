@@ -508,7 +508,7 @@ void laydata::TdtCell::openGlRender(tenderer::TopRend& rend, const CTM& trans,
       //second - get internal layer number:
       //       - for regular database it is equal to the TDT layer number
       //       - for DRC database it is common for all layers - DRC_LAY
-      LayerDef curLayDef = rend.getTenderLay(lay.number());
+      LayerDef curLayDef = rend.getTenderLay(lay.layDef());
       // retrieve the selected objects (if they exists)
       SelectList::Iterator dlsti;
       const DataList* dlist;
@@ -589,25 +589,25 @@ void laydata::TdtCell::motionDraw(const layprop::DrawProperties& drawprop,
    }
 }
 
-bool laydata::TdtCell::getShapeOver(TP pnt, const DWordSet& unselable)
+bool laydata::TdtCell::getShapeOver(TP pnt, const LayerDefSet& unselable)
 {
    laydata::TdtData* shape = NULL;
    for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
       if ( (REF_LAY_DEF != lay.layDef())
-          && (unselable.end() == unselable.find(lay.number()))
+          && (unselable.end() == unselable.find(lay.layDef()))
           && lay->getObjectOver(pnt,shape)
           )
          return true;
    return false;
 }
 
-laydata::AtticList* laydata::TdtCell::changeSelect(TP pnt, SH_STATUS status, const DWordSet& unselable)
+laydata::AtticList* laydata::TdtCell::changeSelect(TP pnt, SH_STATUS status, const LayerDefSet& unselable)
 {
    laydata::TdtData* prev = NULL;
    LayerDef prevlay(ERR_LAY, DEFAULT_LAY_DATATYPE);
    for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
-      if (unselable.end() == unselable.find(lay.number()))
+      if (unselable.end() == unselable.find(lay.layDef()))
       {
          laydata::TdtData* shape = NULL;
          while (lay->getObjectOver(pnt,shape))
@@ -651,13 +651,13 @@ laydata::AtticList* laydata::TdtCell::changeSelect(TP pnt, SH_STATUS status, con
    else return NULL;
 }
 
-void laydata::TdtCell::mouseHoover(TP& position, layprop::DrawProperties& drawprop, const DWordSet& unselable)
+void laydata::TdtCell::mouseHoover(TP& position, layprop::DrawProperties& drawprop, const LayerDefSet& unselable)
 {
    laydata::TdtData* prev = NULL;
    LayerDef prevlay(NULL_LAY);
    for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
-      if ( (unselable.end() == unselable.find(lay.number())) )
+      if ( (unselable.end() == unselable.find(lay.layDef())) )
       {
          laydata::TdtData* shape = NULL;
          while (lay->getObjectOver(position,shape))
@@ -709,7 +709,7 @@ laydata::AtticList* laydata::TdtCell::findSelected(TP pnt)
 }
 
 laydata::TdtCellRef* laydata::TdtCell::getCellOver(TP pnt, CtmStack& transtack,
-                     CellRefStack* refstack, const DWordSet& unselable)
+                     CellRefStack* refstack, const LayerDefSet& unselable)
 {
     if (_layers.end() == _layers.find(REF_LAY_DEF)) return NULL;
     laydata::TdtData *cellobj = NULL;
@@ -945,7 +945,7 @@ void laydata::TdtCell::renameChild(std::string oldName, std::string newName)
    }
 }
 
-void laydata::TdtCell::selectInBox(DBbox select_in, const DWordSet& unselable, word layselmask, bool pntsel)
+void laydata::TdtCell::selectInBox(DBbox select_in, const LayerDefSet& unselable, word layselmask, bool pntsel)
 {
    if (laydata::_lmnone == layselmask) return;
    // check that current cell is within
@@ -954,7 +954,7 @@ void laydata::TdtCell::selectInBox(DBbox select_in, const DWordSet& unselable, w
       // Select figures within the active layers
       for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
       {
-         if (unselable.end() == unselable.find(lay.number()))
+         if (unselable.end() == unselable.find(lay.layDef()))
          {
             bool newDLHolder = false;
             DataList* ssl;
@@ -980,7 +980,7 @@ void laydata::TdtCell::selectInBox(DBbox select_in, const DWordSet& unselable, w
    }
 }
 
-void laydata::TdtCell::unselectInBox(DBbox select_in, bool pntsel, const DWordSet& unselable)
+void laydata::TdtCell::unselectInBox(DBbox select_in, bool pntsel, const LayerDefSet& unselable)
 {
    // check that current cell is within
    if (0ll != select_in.cliparea(_cellOverlap))
@@ -988,7 +988,7 @@ void laydata::TdtCell::unselectInBox(DBbox select_in, bool pntsel, const DWordSe
       // Unselect figures within the active layers
       for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
       {
-         if (unselable.end() == unselable.find(lay.number()))
+         if (unselable.end() == unselable.find(lay.layDef()))
          {
             DataList* ssl;
             if (_shapesel.end() != _shapesel.find(lay.layDef()))
@@ -1021,13 +1021,13 @@ void laydata::TdtCell::unselectInBox(DBbox select_in, bool pntsel, const DWordSe
    }
 }
 
-void laydata::TdtCell::selectFromList(SelectList* slist, const DWordSet& unselable)
+void laydata::TdtCell::selectFromList(SelectList* slist, const LayerDefSet& unselable)
 {
    for (SelectList::Iterator CL = slist->begin(); CL != slist->end(); CL++)
    {
       // if the layer from the list exists in the layout and is not hidden
       if ( (_layers.end() != _layers.find(CL.layDef()))
-         &&(unselable.end() == unselable.find(CL.number())) )
+         &&(unselable.end() == unselable.find(CL.layDef())) )
       {
          bool newDLHolder = false;
          DataList* ssl;
@@ -1053,7 +1053,7 @@ void laydata::TdtCell::selectFromList(SelectList* slist, const DWordSet& unselab
    delete slist;
 }
 
- void laydata::TdtCell::unselectFromList(SelectList* unslist, const DWordSet& unselable)
+ void laydata::TdtCell::unselectFromList(SelectList* unslist, const LayerDefSet& unselable)
  {
    DataList* lslct = NULL;
    DataList::iterator CI;
@@ -1062,7 +1062,7 @@ void laydata::TdtCell::selectFromList(SelectList* slist, const DWordSet& unselab
    {
       // if the corresponding layer in the select list exists and is not locked
       if ( (_shapesel.end() != _shapesel.find(CUL.layDef()))
-         &&(unselable.end() == unselable.find(CUL.number())) )
+         &&(unselable.end() == unselable.find(CUL.layDef())) )
       {
          // start looping every shape to be unselected
          for(DataList::iterator CUI = CUL->begin(); CUI != CUL->end(); CUI++)
@@ -1265,7 +1265,7 @@ void laydata::TdtCell::moveSelected(const CTM& trans, SelectList** fadead)
          {
             // modify has been performed and a shape needs validation
             laydata::ShapeList* newShapes;
-            if (NULL != (newShapes = checkNreplacePoly(*DI, checkS, CL.number(), fadead)))
+            if (NULL != (newShapes = checkNreplacePoly(*DI, checkS, CL.layDef(), fadead)))
             {
                // remove the shape from list of selected shapes and mark it as selected
                DI = lslct->erase(DI);
@@ -1334,7 +1334,7 @@ void laydata::TdtCell::rotateSelected(const CTM& trans, SelectList** fadead)
             if (NULL != (checkS = DI->first->move(trans, DI->second)))
             {// box->polygon conversion has been performed
                laydata::ShapeList* newShapes;
-               if (NULL != (newShapes = checkNreplaceBox(*DI, checkS, CL.number(), fadead)))
+               if (NULL != (newShapes = checkNreplaceBox(*DI, checkS, CL.layDef(), fadead)))
                {
                   // remove the shape from list of selected shapes - don't delete the list of
                   // selected points BECAUSE it is (could be) used in UNDO
@@ -1604,7 +1604,7 @@ void laydata::TdtCell::destroyThis(laydata::TdtLibDir* libdir, TdtData* ds, cons
    if (REF_LAY_DEF == laydef) updateHierarchy(libdir);
 }
 
-void laydata::TdtCell::selectAll(const DWordSet& unselable, word layselmask)
+void laydata::TdtCell::selectAll(const LayerDefSet& unselable, word layselmask)
 {
    // This method might be called redundant, because the result of the
    // call selectInBox(overlap(),...) will produce the same results.
@@ -1620,7 +1620,7 @@ void laydata::TdtCell::selectAll(const DWordSet& unselable, word layselmask)
    // Select figures within the active layers
    for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
-      if (unselable.end() == unselable.find(lay.number()))
+      if (unselable.end() == unselable.find(lay.layDef()))
       {
          DataList* ssl = DEBUG_NEW DataList();
 /***/    selectAllWrapper(*lay, ssl, layselmask);
@@ -1923,7 +1923,7 @@ void laydata::TdtCell::transferLayer(SelectList* slst, const LayerDef& laydef)
    {
       // we're not doing anything if the current layer appears to be dst,
       // i.e. don't mess around if the source and destination layers are the same!
-      if ((laydef != CL.number()) && (REF_LAY_DEF != CL.layDef()))
+      if ((laydef != CL.layDef()) && (REF_LAY_DEF != CL.layDef()))
       {
          QTreeTmp *dstlay = secureUnsortedLayer(CL.layDef());
          // traverse the shapes on this layer and add them to the destination layer

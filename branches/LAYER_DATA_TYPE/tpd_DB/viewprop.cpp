@@ -409,9 +409,9 @@ void layprop::PropertyCenter::setOasLayMap(USMap* map)
    _oasLayMap = map;
 }
 
-DWordSet layprop::PropertyCenter::allUnselectable()
+LayerDefSet layprop::PropertyCenter::allUnselectable()
 {
-   DWordSet unselectable;
+   LayerDefSet unselectable;
    layprop::DrawProperties* drawProp;
    if (lockDrawProp(drawProp))
    {

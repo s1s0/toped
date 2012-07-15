@@ -313,8 +313,8 @@ namespace layprop {
                                                          {_cellDepthAlphaEbb = ebb;}
          void                       setCellDepthView(byte dov)
                                                          {_cellDepthView = dov;}
-         void                       allUnselectable(DWordSet&);
-         void                       allInvisible(DWordSet&);
+         void                       allUnselectable(LayerDefSet&);
+         void                       allInvisible(LayerDefSet&);
          // Properly protected in tpd_bidfunc or the functions called from there
          bool                       addLayer(std::string, LayerNumber, std::string, std::string, std::string);
          bool                       addLayer(std::string, const LayerDef&);

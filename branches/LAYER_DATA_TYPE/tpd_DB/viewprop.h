@@ -120,7 +120,7 @@ namespace layprop {
       void              setGdsLayMap(USMap* map);
       void              setCifLayMap(USMap* map);
       void              setOasLayMap(USMap* map);
-      DWordSet          allUnselectable();
+      LayerDefSet       allUnselectable();
       bool              lockDrawProp(DrawProperties*&, PropertyState state = DB);
       void              unlockDrawProp(DrawProperties*&, bool throwexception);
 

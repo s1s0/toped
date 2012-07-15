@@ -286,7 +286,7 @@ void tellstdfunc::stdOPENCELL::undo()
       VERIFY(tDesign->editPrev(true));
       TpdPost::celltree_open(tDesign->activeCellName());
       telldata::TtList* selected = TELL_UNDOOPS_UNDO(telldata::TtList*);
-      DWordSet unselable = PROPC->allUnselectable();
+      LayerDefSet unselable = PROPC->allUnselectable();
       tDesign->selectFromList(get_ttlaylist(selected), unselable);
       DBbox* ovl  = DEBUG_NEW DBbox(tDesign->activeOverlap());
       wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
@@ -379,7 +379,7 @@ void tellstdfunc::stdEDITPUSH::undo()
       VERIFY(tDesign->editPrev(true));
       TpdPost::celltree_open(tDesign->activeCellName());
       telldata::TtList* selected = TELL_UNDOOPS_UNDO(telldata::TtList*);
-      DWordSet unselable = PROPC->allUnselectable();
+      LayerDefSet unselable = PROPC->allUnselectable();
       tDesign->selectFromList(get_ttlaylist(selected), unselable);
       std::string news("Cell "); news += tDesign->activeCellName(); news += " is opened";
       tell_log(console::MT_INFO,news);
@@ -394,7 +394,7 @@ int tellstdfunc::stdEDITPUSH::execute()
    telldata::TtPnt *p1 = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
    real DBscale = PROPC->DBscale();
    TP p1DB = TP(p1->x(), p1->y(), DBscale);
-   DWordSet unselable = PROPC->allUnselectable();
+   LayerDefSet unselable = PROPC->allUnselectable();
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -443,7 +443,7 @@ void tellstdfunc::stdEDITPOP::undo()
       VERIFY(tDesign->editPrev(true));
       TpdPost::celltree_open(tDesign->activeCellName());
       telldata::TtList* selected = TELL_UNDOOPS_UNDO(telldata::TtList*);
-      DWordSet unselable = PROPC->allUnselectable();
+      LayerDefSet unselable = PROPC->allUnselectable();
       tDesign->selectFromList(get_ttlaylist(selected), unselable);
       std::string news("Cell "); news += tDesign->activeCellName(); news += " is opened";
       tell_log(console::MT_INFO,news);
@@ -502,7 +502,7 @@ void tellstdfunc::stdEDITPREV::undo()
       VERIFY(tDesign->editPrev(true));
       TpdPost::celltree_open(tDesign->activeCellName());
       telldata::TtList* selected = TELL_UNDOOPS_UNDO(telldata::TtList*);
-      DWordSet unselable = PROPC->allUnselectable();
+      LayerDefSet unselable = PROPC->allUnselectable();
       tDesign->selectFromList(get_ttlaylist(selected), unselable);
       std::string news("Cell "); news += tDesign->activeCellName(); news += " is opened";
       tell_log(console::MT_INFO,news);
@@ -561,7 +561,7 @@ void tellstdfunc::stdEDITTOP::undo()
       VERIFY(tDesign->editPrev(true));
       TpdPost::celltree_open(tDesign->activeCellName());
       telldata::TtList* selected = TELL_UNDOOPS_UNDO(telldata::TtList*);
-      DWordSet unselable = PROPC->allUnselectable();
+      LayerDefSet unselable = PROPC->allUnselectable();
       tDesign->selectFromList(get_ttlaylist(selected), unselable);
       std::string news("Cell "); news += tDesign->activeCellName(); news += " is opened";
       tell_log(console::MT_INFO,news);
@@ -617,7 +617,7 @@ void tellstdfunc::stdGROUP::undo()
 {
    TEUNDO_DEBUG("group(string) UNDO");
    telldata::TtList* pl = TELL_UNDOOPS_UNDO(telldata::TtList*);
-   DWordSet unselable = PROPC->allUnselectable();
+   LayerDefSet unselable = PROPC->allUnselectable();
    // get the name of the removed cell
    std::string  cname = getStringValue(UNDOPstack, true);
    laydata::TdtLibDir* dbLibDir = NULL;
@@ -689,7 +689,7 @@ void tellstdfunc::stdUNGROUP::undo_cleanup()
 void tellstdfunc::stdUNGROUP::undo()
 {
    TEUNDO_DEBUG("ungroup() UNDO");
-   DWordSet unselable = PROPC->allUnselectable();
+   LayerDefSet unselable = PROPC->allUnselectable();
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {

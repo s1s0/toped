@@ -137,18 +137,18 @@ tellstdfunc::grcGETLAYERS::grcGETLAYERS(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::grcGETLAYERS::execute()
 {
-   telldata::TtList* tllull = DEBUG_NEW telldata::TtList(telldata::tn_int);
+   telldata::TtList* tllull = DEBUG_NEW telldata::TtList(telldata::tn_layer);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
-      DWordSet grcLays;
+      LayerDefSet grcLays;
       laydata::TdtCell*   tCell   = (*dbLibDir)()->targetECell();
       auxdata::GrcCell* grcCell   = tCell->getGrcCell();
       if (NULL != grcCell)
       {
          grcCell->reportLayers(grcLays);
-         for (DWordSet::const_iterator CL = grcLays.begin(); CL != grcLays.end(); CL++)
-            tllull->add(DEBUG_NEW telldata::TtInt(*CL));
+         for (LayerDefSet::const_iterator CL = grcLays.begin(); CL != grcLays.end(); CL++)
+            tllull->add(DEBUG_NEW telldata::TtLayer(*CL));
       }
       LogFile << LogFile.getFN() << "();"; LogFile.flush();
    }
@@ -332,7 +332,7 @@ void tellstdfunc::grcREPAIRDATA::undo()
          tCell->addAuxRef(grcCell);
       // now remove the recovered data
       assert(1 == tdtlayers->size()); // single layer expected only
-      assert(grcLayer == tdtlayers->begin().number()); // make sure we have the same layer
+      assert(grcLayer == tdtlayers->begin().layDef()); // make sure we have the same layer
       laydata::ShapeList* tdtShapes = *(tdtlayers->begin());
       for (laydata::ShapeList::const_iterator CS = tdtShapes->begin(); CS != tdtShapes->end(); CS++)
          tDesign->destroyThis(*CS, grcLayer, dbLibDir);

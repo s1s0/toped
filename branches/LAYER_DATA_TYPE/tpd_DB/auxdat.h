@@ -160,7 +160,7 @@ namespace auxdata {
          QTreeTmp*           secureUnsortedLayer(const LayerDef&);
          bool                fixUnsorted();
          //
-         void                reportLayers(DWordSet&);
+         void                reportLayers(LayerDefSet&);
          void                reportLayData(const LayerDef&, AuxDataList&);
          char                cleanLay(const LayerDef&, AuxDataList&);
          bool                repairData(const LayerDef&, laydata::ShapeList&);
