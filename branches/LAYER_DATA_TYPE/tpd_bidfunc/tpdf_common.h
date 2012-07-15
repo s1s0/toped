@@ -174,11 +174,11 @@ namespace tellstdfunc {
    PointVector*         t2tpoints(telldata::TtList *, real);
    telldata::TtList*    make_ttlaylist(laydata::SelectList*);
    telldata::TtList*    make_ttlaylist(laydata::AtticList*);
-   telldata::TtList*    make_ttlaylist(laydata::ShapeList&, LayerNumber);
-   telldata::TtList*    make_ttlaylist(auxdata::AuxDataList&, LayerNumber);
+   telldata::TtList*    make_ttlaylist(laydata::ShapeList&, const LayerDef&);
+   telldata::TtList*    make_ttlaylist(auxdata::AuxDataList&, const LayerDef&);
    laydata::SelectList* get_ttlaylist(telldata::TtList* llist);
    laydata::AtticList*  get_shlaylist(telldata::TtList* llist);
-   auxdata::AuxDataList* get_auxdatalist(telldata::TtList* llist, LayerNumber&);
+   auxdata::AuxDataList* get_auxdatalist(telldata::TtList* llist, LayerDef&);
    laydata::DataList*   copyDataList(const laydata::DataList* dlist);
    laydata::SelectList* copySelectList(const laydata::SelectList* dlist);
    void                 cleanSelectList(laydata::SelectList* dlist);

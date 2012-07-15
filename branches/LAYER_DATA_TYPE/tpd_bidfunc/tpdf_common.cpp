@@ -73,8 +73,8 @@ void tellstdfunc::secureLayer(const LayerDef& laydef)
    if (PROPC->lockDrawProp(drawProp))
    {
       // check whether it's defined and make a default definition if it isn't
-      if (drawProp->addLayer(laydef.num()))
-         TpdPost::layer_add(drawProp->getLayerName(laydef), laydef.num());
+      if (drawProp->addLayer(laydef))
+         TpdPost::layer_add(drawProp->getLayerName(laydef), laydef);
    }
    PROPC->unlockDrawProp(drawProp, true);
 }
@@ -212,24 +212,24 @@ telldata::TtList* tellstdfunc::make_ttlaylist(laydata::AtticList* shapesel)
    return llist;
 }
 
-telldata::TtList* tellstdfunc::make_ttlaylist(laydata::ShapeList& lslct, LayerNumber lay)
+telldata::TtList* tellstdfunc::make_ttlaylist(laydata::ShapeList& lslct, const LayerDef& laydef)
 {
    telldata::TtList* llist = DEBUG_NEW telldata::TtList(telldata::tn_layout);
    // push each data reference into the TELL list
    for (laydata::ShapeList::const_iterator CI  = lslct.begin();
                                            CI != lslct.end(); CI++)
    //   if (sh_deleted == (*CI)->status()) - doesn't seems to need it!
-      llist->add(DEBUG_NEW telldata::TtLayout(*CI, lay));
+      llist->add(DEBUG_NEW telldata::TtLayout(*CI, laydef));
    return llist;
 }
 
-telldata::TtList* tellstdfunc::make_ttlaylist(auxdata::AuxDataList& lslct, LayerNumber lay)
+telldata::TtList* tellstdfunc::make_ttlaylist(auxdata::AuxDataList& lslct, const LayerDef& laydef)
 {
    telldata::TtList* llist = DEBUG_NEW telldata::TtList(telldata::tn_auxilary);
    // push each data reference into the TELL list
    for (auxdata::AuxDataList::const_iterator CI  = lslct.begin();
                                              CI != lslct.end(); CI++)
-      llist->add(DEBUG_NEW telldata::TtAuxdata(*CI, lay));
+      llist->add(DEBUG_NEW telldata::TtAuxdata(*CI, laydef));
    return llist;
 }
 
@@ -269,7 +269,7 @@ laydata::AtticList* tellstdfunc::get_shlaylist(telldata::TtList* llist)
 }
 
 //=============================================================================
-auxdata::AuxDataList* tellstdfunc::get_auxdatalist(telldata::TtList* llist, LayerNumber& clayer)
+auxdata::AuxDataList* tellstdfunc::get_auxdatalist(telldata::TtList* llist, LayerDef& laydef)
 {
    auxdata::AuxDataList* shapesel = DEBUG_NEW auxdata::AuxDataList();
    bool layerCheck = false;
@@ -277,11 +277,11 @@ auxdata::AuxDataList* tellstdfunc::get_auxdatalist(telldata::TtList* llist, Laye
    {
       if (layerCheck)
       {
-         assert(clayer ==  static_cast<telldata::TtAuxdata*>(llist->mlist()[i])->layer());
+         assert(laydef ==  static_cast<telldata::TtAuxdata*>(llist->mlist()[i])->layer());
       }
       else
       {
-         clayer = static_cast<telldata::TtAuxdata*>(llist->mlist()[i])->layer();
+         laydef = static_cast<telldata::TtAuxdata*>(llist->mlist()[i])->layer();
          layerCheck = true;
       }
       shapesel->push_back(static_cast<telldata::TtAuxdata*>
@@ -413,7 +413,7 @@ void tellstdfunc::RefreshGL()
       {
          const LayerDefList freshlays = PROPC->upLayers();
          for(LayerDefList::const_iterator CUL = freshlays.begin(); CUL != freshlays.end(); CUL++)
-            TpdPost::layer_add(drawProp->getLayerName(*CUL), CUL->num());
+            TpdPost::layer_add(drawProp->getLayerName(*CUL), *CUL);
          PROPC->clearUnpublishedLayers();
       }
       PROPC->unlockDrawProp(drawProp, true);
@@ -452,7 +452,7 @@ void tellstdfunc::updateLayerDefinitions(laydata::TdtLibDir* LIBDIR, NameList& t
       {
          if (REF_LAY_DEF == *CUL) continue;
          if (drawProp->addLayer(*CUL))
-            TpdPost::layer_add(drawProp->getLayerName(*CUL), CUL->num());
+            TpdPost::layer_add(drawProp->getLayerName(*CUL), *CUL);
       }
    }
    PROPC->unlockDrawProp(drawProp, false);

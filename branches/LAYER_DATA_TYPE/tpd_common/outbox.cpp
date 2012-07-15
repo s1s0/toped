@@ -568,34 +568,34 @@ void TpdPost::clearDRCtab()
    wxPostEvent(_topBrowsers, eventADDTAB);
 }
 
-void TpdPost::layer_status(int btype, const word layno, const bool status)
+void TpdPost::layer_status(int btype, const LayerDef& laydef, const bool status)
 {
    if (NULL == _layBrowser) return;
    wxCommandEvent eventLAYER_STATUS(wxEVT_CMD_BROWSER);
    eventLAYER_STATUS.SetExtraLong(status);
    eventLAYER_STATUS.SetInt(btype);
-   word *laynotemp = DEBUG_NEW word(layno);
+   word *laynotemp = DEBUG_NEW word(laydef.num());
    eventLAYER_STATUS.SetClientData(static_cast<void*> (laynotemp));
    wxPostEvent(_layBrowser, eventLAYER_STATUS);
 }
 
-void TpdPost::layer_add(const std::string name, const word layno)
+void TpdPost::layer_add(const std::string name, const LayerDef& laydef)
 {
    if (NULL == _layBrowser) return;
    wxCommandEvent eventLAYER_ADD(wxEVT_CMD_BROWSER);
-   word *laynotemp = DEBUG_NEW word(layno);
+   word *laynotemp = DEBUG_NEW word(laydef.num());
    eventLAYER_ADD.SetClientData(static_cast<void*> (laynotemp));
    eventLAYER_ADD.SetString(wxString(name.c_str(), wxConvUTF8));
    eventLAYER_ADD.SetInt(tui::BT_LAYER_ADD);
    wxPostEvent(_layBrowser, eventLAYER_ADD);
 }
 
-void TpdPost::layer_default(const word newlay, const word oldlay)
+void TpdPost::layer_default(const LayerDef& newlaydef, const LayerDef& oldlaydef)
 {
    if (NULL == _layBrowser) return;
    wxCommandEvent eventLAYER_DEF(wxEVT_CMD_BROWSER);
-   eventLAYER_DEF.SetExtraLong(newlay);
-   word *laynotemp = DEBUG_NEW word(oldlay);
+   eventLAYER_DEF.SetExtraLong(newlaydef.num());
+   word *laynotemp = DEBUG_NEW word(oldlaydef.num());
    eventLAYER_DEF.SetClientData(static_cast<void*> (laynotemp));
    eventLAYER_DEF.SetInt(tui::BT_LAYER_DEFAULT);
    wxPostEvent(_layBrowser, eventLAYER_DEF);

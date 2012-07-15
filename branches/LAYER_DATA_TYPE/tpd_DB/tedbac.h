@@ -37,6 +37,7 @@ namespace layprop {
 namespace tenderer {
    class TenderLay;
 }
+
 namespace laydata {
    class TdtData;
    template <typename DataT>       class QTStoreTmpl;
@@ -112,6 +113,16 @@ namespace laydata {
    const LayerDef  GRC_LAY_DEF(GRC_LAY, DEFAULT_LAY_DATATYPE);
 
 }
+
+namespace auxdata {
+   class TdtAuxData;
+   typedef laydata::QTStoreTmpl<TdtAuxData>     QTreeTmp;
+   typedef laydata::QTreeTmpl<TdtAuxData>       QuadTree;
+   typedef laydata::LayerContainer<QuadTree*>   LayerHolder;
+//   typedef std::list<TdtAuxData*>               AuxDataList;
+   typedef laydata::LayerContainer<QTreeTmp*>   TmpLayerMap;
+}
+
 
 typedef  std::list<LayerDef>             LayerDefList;
 

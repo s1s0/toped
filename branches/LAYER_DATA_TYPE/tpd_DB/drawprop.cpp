@@ -1315,7 +1315,7 @@ void layprop::DrawProperties::popLayerStatus()
          TpdPost::layer_status(tui::BT_LAYER_LOCK, CL->number(), CL->locked());
       }
    }
-   TpdPost::layer_default(clist.first, _curlay.num());
+   TpdPost::layer_default(clist.first, _curlay);
    _curlay = clist.first;
    _layStateHistory.pop_front();
 }
@@ -1380,7 +1380,7 @@ bool layprop::DrawProperties::loadLaysetStatus(const std::string& sname)
          TpdPost::layer_status(tui::BT_LAYER_LOCK, CL->number(), CL->locked());
       }
    }
-   TpdPost::layer_default(clist.first, _curlay.num());
+   TpdPost::layer_default(clist.first, _curlay);
    _curlay = clist.first;
    return true;
 }
