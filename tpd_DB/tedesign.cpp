@@ -1287,7 +1287,7 @@ laydata::TdtCell* laydata::TdtDesign::openCell(std::string name)
    return NULL; // Active cell has not changed if name is not found
 }
 
-bool laydata::TdtDesign::editPush(const TP& pnt, const DWordSet& unselable)
+bool laydata::TdtDesign::editPush(const TP& pnt, const LayerDefSet& unselable)
 {
    if (_target.checkEdit()) {//
       CtmStack transtack;
@@ -1431,7 +1431,7 @@ void laydata::TdtDesign::mouseRotate()
    if (_tmpdata) _tmpdata->objRotate();
 }
 
-void laydata::TdtDesign::selectInBox(TP* p1, TP* p2, const DWordSet& unselable, word layselmask, bool pntsel)
+void laydata::TdtDesign::selectInBox(TP* p1, TP* p2, const LayerDefSet& unselable, word layselmask, bool pntsel)
 {
    if (_target.checkEdit())
    {
@@ -1441,7 +1441,7 @@ void laydata::TdtDesign::selectInBox(TP* p1, TP* p2, const DWordSet& unselable, 
    }
 }
 
-laydata::AtticList* laydata::TdtDesign::changeSelect(TP* p1, const DWordSet& unselable, bool select)
+laydata::AtticList* laydata::TdtDesign::changeSelect(TP* p1, const LayerDefSet& unselable, bool select)
 {
    if (_target.checkEdit()) {
       TP selp = (*p1) * _target.rARTM();
@@ -1451,7 +1451,7 @@ laydata::AtticList* laydata::TdtDesign::changeSelect(TP* p1, const DWordSet& uns
 }
 
 
-void laydata::TdtDesign::mouseHoover(TP& position, layprop::DrawProperties& drawprop, const DWordSet& unselable)
+void laydata::TdtDesign::mouseHoover(TP& position, layprop::DrawProperties& drawprop, const LayerDefSet& unselable)
 {
    if (_target.checkEdit())
    {
@@ -1464,7 +1464,7 @@ void laydata::TdtDesign::mouseHoover(TP& position, layprop::DrawProperties& draw
    }
 }
 
-void laydata::TdtDesign::unselectInBox(TP* p1, TP* p2, const DWordSet& unselable, bool pntsel) {
+void laydata::TdtDesign::unselectInBox(TP* p1, TP* p2, const LayerDefSet& unselable, bool pntsel) {
    if (_target.checkEdit()) {
       DBbox unselect_in((*p1)*_target.rARTM(), (*p2)*_target.rARTM());
       unselect_in.normalize();
@@ -1589,7 +1589,7 @@ bool laydata::TdtDesign::groupSelected(std::string name, laydata::TdtLibDir* lib
    for(AtticList::Iterator CL = TBgroup->begin();  CL != TBgroup->end(); CL++)
    {
       ShapeList* lslct = *CL;
-      QTreeTmp* wl = newcell->secureUnsortedLayer(CL.number());
+      QTreeTmp* wl = newcell->secureUnsortedLayer(CL.layDef());
       // There is no point here to ensure that the layer definition exists.
       // We are just transferring shapes from one structure to another.
       // securelaydef( CL->first );

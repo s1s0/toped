@@ -1836,7 +1836,7 @@ void laydata::TdtCellRef::ungroup(laydata::TdtDesign* ATDB, TdtCell* dst, AtticL
    for (SelectList::Iterator CL = cstr->shapeSel()->begin(); CL != cstr->shapeSel()->end(); CL++)
    {
       // secure the target layer
-      QTreeTmp* wl = dst->secureUnsortedLayer(CL.number());
+      QTreeTmp* wl = dst->secureUnsortedLayer(CL.layDef());
       // There is no point here to ensure that the layer definition exists.
       // We are just transferring shapes from one structure to another.
       // Of course ATDB is undefined (forward defined) here, so if the method has to be
@@ -1862,7 +1862,7 @@ void laydata::TdtCellRef::ungroup(laydata::TdtDesign* ATDB, TdtCell* dst, AtticL
          if (REF_LAY == CL.number()) dst->addChild(ATDB,
                             static_cast<TdtCellRef*>(data_copy)->cStructure());
          // add it to the selection list of the dst cell
-         dst->selectThis(data_copy,CL.number());
+         dst->selectThis(data_copy,CL.layDef());
       }
    }
    cstr->unselectAll();

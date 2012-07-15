@@ -527,7 +527,7 @@ void auxdata::GrcCell::collectUsedLays(LayerDefList& laylist) const
 {
    for(LayerHolder::Iterator CL = _layers.begin(); CL != _layers.end(); CL++)
       if (LAST_EDITABLE_LAYNUM > CL.number())
-         laylist.push_back(CL.number());
+         laylist.push_back(CL.layDef());
 }
 
 auxdata::QuadTree* auxdata::GrcCell::secureLayer(const LayerDef& laydef)
@@ -685,11 +685,11 @@ void auxdata::GrcCell::readTdtLay(InputTdtFile* const tedfile)
    }
 }
 
-void auxdata::GrcCell::reportLayers(DWordSet& grcLays)
+void auxdata::GrcCell::reportLayers(LayerDefSet& grcLays)
 {
    for (LayerHolder::Iterator wl = _layers.begin(); wl != _layers.end(); wl++)
    {
-      grcLays.insert(wl.number());
+      grcLays.insert(wl.layDef());
    }
 }
 

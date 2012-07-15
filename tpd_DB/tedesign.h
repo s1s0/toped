@@ -108,7 +108,7 @@ namespace laydata {
       void           addList(AtticList*, TdtCell* tCell = NULL);
       void           addList(const LayerDef&, ShapeList&);
       TdtCell*       openCell(std::string name);
-      bool           editPush(const TP&, const DWordSet&);
+      bool           editPush(const TP&, const LayerDefSet&);
       bool           editPrev(const bool undo = false);
       bool           editPop();
       bool           editTop();
@@ -153,16 +153,16 @@ namespace laydata {
       std::string    activeCellName()  const {return _target.name();}
 
 
-      void           selectFromList(SelectList* ss, const DWordSet& unselable)
+      void           selectFromList(SelectList* ss, const LayerDefSet& unselable)
                                             {_target.edit()->selectFromList(ss, unselable);}
-      void           unselectFromList(SelectList* ss, const DWordSet& unselable)
+      void           unselectFromList(SelectList* ss, const LayerDefSet& unselable)
                                             {_target.edit()->unselectFromList(ss, unselable);}
-      void           selectInBox(TP*, TP*, const DWordSet&, word layselmask, bool);
-      void           unselectInBox(TP*, TP*, const DWordSet&, bool);
-      AtticList*     changeSelect(TP*, const DWordSet&, bool);
-      void           mouseHoover(TP&, layprop::DrawProperties&, const DWordSet&);
+      void           selectInBox(TP*, TP*, const LayerDefSet&, word layselmask, bool);
+      void           unselectInBox(TP*, TP*, const LayerDefSet&, bool);
+      AtticList*     changeSelect(TP*, const LayerDefSet&, bool);
+      void           mouseHoover(TP&, layprop::DrawProperties&, const LayerDefSet&);
       void           unselectAll()    const {_target.edit()->unselectAll(false);}
-      void           selectAll(const DWordSet& unselable, word layselmask) const
+      void           selectAll(const LayerDefSet& unselable, word layselmask) const
                                              {       _target.edit()->selectAll(unselable, layselmask);}
       void           tryUnselectAll()const;
       SelectList*    shapeSel()        const {return _target.edit()->shapeSel();}

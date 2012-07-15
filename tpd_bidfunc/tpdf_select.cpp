@@ -59,7 +59,7 @@ void tellstdfunc::stdSELECT::undo()
       real DBscale = PROPC->DBscale();
       TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
       TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
-      DWordSet unselable = PROPC->allUnselectable();
+      LayerDefSet unselable = PROPC->allUnselectable();
       tDesign->unselectInBox(p1DB, p2DB, unselable, false);
       delete p1DB; delete p2DB;
       UpdateLV(tDesign->numSelected());
@@ -79,7 +79,7 @@ int tellstdfunc::stdSELECT::execute()
       real DBscale = PROPC->DBscale();
       TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
       TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
-      DWordSet unselable = PROPC->allUnselectable();
+      LayerDefSet unselable = PROPC->allUnselectable();
       tDesign->selectInBox(p1DB, p2DB, unselable, PROPC->layselmask(), false);
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(w);
@@ -123,7 +123,7 @@ void tellstdfunc::stdSELECT_TL::undo() {
 int tellstdfunc::stdSELECT_TL::execute()
 {
    telldata::TtList* pl = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
-   DWordSet unselable = PROPC->allUnselectable();
+   LayerDefSet unselable = PROPC->allUnselectable();
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -158,7 +158,7 @@ void tellstdfunc::stdSELECTIN::undo()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      DWordSet unselable = PROPC->allUnselectable();
+      LayerDefSet unselable = PROPC->allUnselectable();
       tDesign->unselectFromList(get_ttlaylist(selected), unselable);
       UpdateLV(tDesign->numSelected());
    }
@@ -174,7 +174,7 @@ int tellstdfunc::stdSELECTIN::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      DWordSet unselectable = PROPC->allUnselectable();
+      LayerDefSet unselectable = PROPC->allUnselectable();
       real DBscale = PROPC->DBscale();
       TP* p1DB = DEBUG_NEW TP(p1->x(), p1->y(), DBscale);
       laydata::AtticList* selectedl = tDesign->changeSelect(p1DB, unselectable, true);
@@ -219,7 +219,7 @@ void tellstdfunc::stdPNTSELECT::undo() {
       real DBscale = PROPC->DBscale();
       TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
       TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
-      DWordSet unselable = PROPC->allUnselectable();
+      LayerDefSet unselable = PROPC->allUnselectable();
       tDesign->unselectInBox(p1DB, p2DB, unselable, true);
       delete p1DB; delete p2DB;
       UpdateLV(tDesign->numSelected());
@@ -239,7 +239,7 @@ int tellstdfunc::stdPNTSELECT::execute()
       real DBscale = PROPC->DBscale();
       TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
       TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
-      DWordSet unselable = PROPC->allUnselectable();
+      LayerDefSet unselable = PROPC->allUnselectable();
       tDesign->selectInBox(p1DB,  p2DB, unselable, PROPC->layselmask(), true);
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(w);
@@ -288,7 +288,7 @@ void tellstdfunc::stdUNSELECT::undo()
       real DBscale = PROPC->DBscale();
       TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
       TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
-      DWordSet unselable = PROPC->allUnselectable();
+      LayerDefSet unselable = PROPC->allUnselectable();
       tDesign->selectInBox(p1DB, p2DB, unselable, PROPC->layselmask(), false);
       delete p1DB; delete p2DB;
       UpdateLV(tDesign->numSelected());
@@ -308,7 +308,7 @@ int tellstdfunc::stdUNSELECT::execute()
       real DBscale = PROPC->DBscale();
       TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
       TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
-      DWordSet unselable = PROPC->allUnselectable();
+      LayerDefSet unselable = PROPC->allUnselectable();
       tDesign->unselectInBox(p1DB, p2DB, unselable, false);
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(w);
@@ -356,7 +356,7 @@ int tellstdfunc::stdUNSELECT_TL::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      DWordSet unselable = PROPC->allUnselectable();
+      LayerDefSet unselable = PROPC->allUnselectable();
       tDesign->unselectFromList(get_ttlaylist(pl), unselable);
       OPstack.push(make_ttlaylist(tDesign->shapeSel()));
       UpdateLV(tDesign->numSelected());
@@ -386,7 +386,7 @@ void tellstdfunc::stdUNSELECTIN::undo()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      DWordSet unselable = PROPC->allUnselectable();
+      LayerDefSet unselable = PROPC->allUnselectable();
       tDesign->selectFromList(get_ttlaylist(selected), unselable);
       UpdateLV(tDesign->numSelected());
    }
@@ -404,7 +404,7 @@ int tellstdfunc::stdUNSELECTIN::execute()
       laydata::TdtDesign* tDesign = (*dbLibDir)();
       real DBscale = PROPC->DBscale();
       TP* p1DB = DEBUG_NEW TP(p1->x(), p1->y(), DBscale);
-      DWordSet unselectable = PROPC->allUnselectable();
+      LayerDefSet unselectable = PROPC->allUnselectable();
       laydata::AtticList* selectedl = tDesign->changeSelect(p1DB,unselectable,false);
       delete p1DB;
       if (NULL != selectedl)
@@ -448,7 +448,7 @@ void tellstdfunc::stdPNTUNSELECT::undo()
       real DBscale = PROPC->DBscale();
       TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
       TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
-      DWordSet unselable = PROPC->allUnselectable();
+      LayerDefSet unselable = PROPC->allUnselectable();
       tDesign->selectInBox(p1DB, p2DB, unselable, PROPC->layselmask(), true);
       delete p1DB; delete p2DB;
       UpdateLV(tDesign->numSelected());
@@ -468,7 +468,7 @@ int tellstdfunc::stdPNTUNSELECT::execute()
       real DBscale = PROPC->DBscale();
       TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
       TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
-      DWordSet unselable = PROPC->allUnselectable();
+      LayerDefSet unselable = PROPC->allUnselectable();
       tDesign->unselectInBox(p1DB, p2DB, unselable, true);
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(w);
@@ -512,7 +512,7 @@ void tellstdfunc::stdSELECTALL::undo()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      DWordSet unselable = PROPC->allUnselectable();
+      LayerDefSet unselable = PROPC->allUnselectable();
       tDesign->unselectAll();
       tDesign->selectFromList(get_ttlaylist(pl), unselable);
       UpdateLV(tDesign->numSelected());
@@ -527,7 +527,7 @@ int tellstdfunc::stdSELECTALL::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      DWordSet unselectable = PROPC->allUnselectable();
+      LayerDefSet unselectable = PROPC->allUnselectable();
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(make_ttlaylist(tDesign->shapeSel()));
       tDesign->selectAll(unselectable, PROPC->layselmask());
@@ -558,7 +558,7 @@ void tellstdfunc::stdUNSELECTALL::undo()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      DWordSet unselable = PROPC->allUnselectable();
+      LayerDefSet unselable = PROPC->allUnselectable();
       tDesign->selectFromList(get_ttlaylist(pl), unselable);
       UpdateLV(tDesign->numSelected());
    }

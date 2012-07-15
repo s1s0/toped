@@ -55,7 +55,6 @@ typedef  std::list<std::string>           NameList;
 typedef  std::set<std::string>            NameSet;
 typedef  std::list<word>                  WordList;
 typedef  std::set<word>                   WordSet;
-typedef  std::set<dword>                  DWordSet;
 typedef  std::map<word, WordSet>          ExtLayers;
 typedef  std::map<std::string, LayerNumber>  SIMap;       // name
 typedef  std::map<LayerNumber, std::string>  USMap;      // Unsigned - String Map

@@ -157,15 +157,15 @@ namespace laydata {
                                    const CellMap* = NULL, const TDTHierTree* = NULL) const;
       virtual TDTHierTree* hierOut(TDTHierTree*&, TdtCell*, CellMap*, const TdtLibDir*);
       virtual DBbox        cellOverlap() const {return _cellOverlap;}
-      void                 selectInBox(DBbox, const DWordSet&, word, bool pntsel = false);
+      void                 selectInBox(DBbox, const LayerDefSet&, word, bool pntsel = false);
 //      void                 select_inside(const TP);
-      void                 selectFromList(SelectList*, const DWordSet&);
+      void                 selectFromList(SelectList*, const LayerDefSet&);
 //      void                 selectAll(bool select_locked = false);
-      void                 selectAll(const DWordSet&, word);
+      void                 selectAll(const LayerDefSet&, word);
       void                 fullSelect();
       void                 selectThis(TdtData*, const LayerDef&);
-      void                 unselectInBox(DBbox, bool, const DWordSet&);
-      void                 unselectFromList(SelectList*, const DWordSet&);
+      void                 unselectInBox(DBbox, bool, const LayerDefSet&);
+      void                 unselectFromList(SelectList*, const LayerDefSet&);
       void                 unselectAll(bool destroy=false);
       void                 addList(TdtDesign*, AtticList*);
       void                 copySelected(const CTM&);
@@ -186,10 +186,10 @@ namespace laydata {
       bool                 cutPolySelected(PointVector&, AtticList**);
       bool                 mergeSelected(AtticList**);
       bool                 stretchSelected(int bfactor, AtticList**);
-      AtticList*           changeSelect(TP, SH_STATUS status, const DWordSet&);
-      void                 mouseHoover(TP&, layprop::DrawProperties&, const DWordSet&);
+      AtticList*           changeSelect(TP, SH_STATUS status, const LayerDefSet&);
+      void                 mouseHoover(TP&, layprop::DrawProperties&, const LayerDefSet&);
       laydata::AtticList*  findSelected(TP);
-      TdtCellRef*          getCellOver(TP, CtmStack&, CellRefStack*, const DWordSet&);
+      TdtCellRef*          getCellOver(TP, CtmStack&, CellRefStack*, const LayerDefSet&);
       SelectList*          shapeSel()        {return &_shapesel;};
       SelectList*          copySeList() const;
       virtual void         updateHierarchy(TdtLibDir*);
@@ -205,7 +205,7 @@ namespace laydata {
    private:
       void                 readTdtLay(InputTdtFile* const);
       void                 readTdtRef(InputTdtFile* const);
-      bool                 getShapeOver(TP, const DWordSet&);
+      bool                 getShapeOver(TP, const LayerDefSet&);
       void                 getCellOverlap();
       void                 storeInAttic(AtticList&);
       dword                getFullySelected(DataList*) const;
