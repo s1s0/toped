@@ -138,18 +138,28 @@ const int         UNDEFCELL_LIB     =  0;
 //==============================================================================
 class LayerDef {
 public:
+                             LayerDef()
+                             {
+                                int boza = 0;
+                                boza++;
+                             }
                              LayerDef(LayerNumber num, LayerDType  typ) : _num(num), _typ(typ) {}
                              LayerDef(LayerNumber num) : _num(num), _typ(0 /*DEFAULT_LAY_DATATYPE*/) {}
+                             LayerDef(const LayerDef& laydef) : _num(laydef.num()), _typ(laydef.typ()) {}
    LayerNumber               num() const {return _num;}
    LayerDType                typ() const {return _typ;}
    bool                      operator==(const LayerDef& cmp) const {return ((_num == cmp._num) && (_typ == cmp._typ));}
    bool                      operator!=(const LayerDef& cmp) const {return ((_num != cmp._num) || (_typ != cmp._typ));}
+   const LayerDef            operator++(int)/*Postfix*/ {LayerDef current(*this); _num++; return current;}
    bool                      operator< (const LayerDef& cmp) const {return (_num == cmp._num) ? (_typ < cmp._typ) : (_num < cmp._num);}
-
+   friend  std::ostream& operator <<(std::ostream &os, const LayerDef &obj);
 private:
    LayerNumber               _num;
    LayerDType                _typ;
 };
+
+typedef  std::map<LayerDef, std::string>  ExpLayMap;      // Export Layer Map
+typedef  std::map<std::string, LayerDef>  ImpLayMap;      // Import Layer Map
 
 //==============================================================================
 class SGBitSet {

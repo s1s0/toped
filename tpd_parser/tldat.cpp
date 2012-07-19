@@ -52,7 +52,7 @@ telldata::TellVar* telldata::TCompType::initfield(const typeID ID) const
          case tn_pnt   : nvar = DEBUG_NEW telldata::TtPnt()    ;break;
          case tn_box   : nvar = DEBUG_NEW telldata::TtWnd()    ;break;
          case tn_bnd   : nvar = DEBUG_NEW telldata::TtBnd()    ;break;
-         case tn_hsh   : nvar = DEBUG_NEW telldata::TtHsh()    ;break;
+         case tn_laymap: nvar = DEBUG_NEW telldata::TtLMap()   ;break;
          case tn_hshstr: nvar = DEBUG_NEW telldata::TtHshStr() ;break;
          case tn_layer : nvar = DEBUG_NEW telldata::TtLayer()  ;break;
          case tn_layout: nvar = DEBUG_NEW telldata::TtLayout() ;break;
@@ -118,9 +118,9 @@ telldata::TBindType::TBindType(TPointType* pfld) : TCompType(telldata::tn_bnd)
 };
 
 //=============================================================================
-telldata::THshType::THshType() : TCompType(telldata::tn_hsh)
+telldata::TLMapType::TLMapType(TLayerType* lfld) : TCompType(telldata::tn_laymap)
 {
-   addfield("key"   , telldata::tn_int   , NULL);
+   addfield("layer" , telldata::tn_layer , lfld);
    addfield("value" , telldata::tn_string, NULL);
 };
 
@@ -917,45 +917,48 @@ const telldata::TtBnd& telldata::TtBnd::operator = (const TtBnd& a)
 }
 
 //=============================================================================
-/*   class TtHsh : public TtUserStruct {*/
-telldata::TtHsh::TtHsh (int4b number, std::string name) : TtUserStruct(tn_hsh),
-      _key(DEBUG_NEW telldata::TtInt(number)),
-      _value(DEBUG_NEW telldata::TtString(name))
+/*   class TtLMap : public TtUserStruct {*/
+telldata::TtLMap::TtLMap (const LayerDef& laydef, std::string value) : TtUserStruct(tn_laymap),
+      _layer(DEBUG_NEW telldata::TtLayer(laydef)),
+      _value(DEBUG_NEW telldata::TtString(value))
 {
-   _fieldList.push_back(structRECNAME("key"  , _key  ));
+   _fieldList.push_back(structRECNAME("key"  , _layer  ));
    _fieldList.push_back(structRECNAME("value", _value  ));
 }
 
-telldata::TtHsh::TtHsh(const TtHsh& cobj) : TtUserStruct(tn_hsh),
-      _key(DEBUG_NEW telldata::TtInt(cobj.key())),
+telldata::TtLMap::TtLMap(const TtLMap& cobj) : TtUserStruct(tn_laymap),
+      _layer(DEBUG_NEW telldata::TtLayer(cobj.layer())),
       _value(DEBUG_NEW telldata::TtString(cobj.value()))
 {
-   _fieldList.push_back(structRECNAME("key"  , _key  ));
+   _fieldList.push_back(structRECNAME("key"  , _layer  ));
    _fieldList.push_back(structRECNAME("value", _value  ));
 }
 
-telldata::TtHsh::TtHsh(operandSTACK& OPstack) : TtUserStruct(tn_hsh)
+telldata::TtLMap::TtLMap(operandSTACK& OPstack) : TtUserStruct(tn_laymap)
 {
    // Here - get the data from the stack and reuse it ... don't delete it.
    // The alternative - to make a selfcopy and then delete the original from the OPstack
    _value  = static_cast<telldata::TtString*>(OPstack.top()); OPstack.pop();
-   _key    = static_cast<telldata::TtInt*>(OPstack.top()); OPstack.pop();
+   _layer  = static_cast<telldata::TtLayer*>(OPstack.top()); OPstack.pop();
 
-   _fieldList.push_back(structRECNAME("key"  , _key   ));
-   _fieldList.push_back(structRECNAME("value", _value ));
+   _fieldList.push_back(structRECNAME("_layer", _layer ));
+   _fieldList.push_back(structRECNAME("value" , _value ));
 }
 
-void telldata::TtHsh::echo(std::string& wstr, real)
+void telldata::TtLMap::echo(std::string& wstr, real)
 {
    std::ostringstream ost;
-   ost << "key = "  << key().value() << " : value = \"" << value().value() << "\"";
+   ost << "layer = "
+       << layer().value()
+       << " : value = \""
+       << value().value() << "\"";
    wstr += ost.str();
 }
 
-void telldata::TtHsh::assign(TellVar* rt)
+void telldata::TtLMap::assign(TellVar* rt)
 {
-   (*_key  ) = static_cast<TtHsh*>(rt)->key();
-   (*_value) = static_cast<TtHsh*>(rt)->value();
+   (*_layer  ) = static_cast<TtLMap*>(rt)->layer();
+   (*_value) = static_cast<TtLMap*>(rt)->value();
 }
 
 //=============================================================================
@@ -1161,7 +1164,7 @@ std::string telldata::echoType( const telldata::typeID tID,
       case telldata::tn_auxilary: atype = "auxdata"; break;
       case telldata::tn_pnt   : atype = "point" ; break;
       case telldata::tn_box   : atype = "box"   ; break;
-      case telldata::tn_hsh   : atype = "lmap"  ; break;
+      case telldata::tn_laymap: atype = "lmap"  ; break;
       case telldata::tn_hshstr: atype = "strmap"; break;
       case telldata::tn_layer : atype = "layer" ; break;
       default                 :

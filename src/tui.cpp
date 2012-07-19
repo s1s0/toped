@@ -1850,9 +1850,9 @@ tui::NameCboxRecords::NameCboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
    for (SIMap::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
    {
       wxString cifln  = wxString(CNM->first.c_str(), wxConvUTF8);
-      LayerNumber tdtLay;
-      if (!_cifMap->getTdtLay(tdtLay, CNM->first)) tdtLay = CNM->second;
-      wxString wxics  = wxString(_drawProp->getLayerName(tdtLay).c_str(), wxConvUTF8);
+      LayerDef tdtLayDef(ERR_LAY_DEF);
+      if (!_cifMap->getTdtLay(tdtLayDef, CNM->first)) tdtLayDef = CNM->second;
+      wxString wxics  = wxString(_drawProp->getLayerName(tdtLayDef).c_str(), wxConvUTF8);
 
       wxCheckBox* dwciflay  = DEBUG_NEW wxCheckBox( this, wxID_ANY, cifln,
          wxPoint(  5,(row_height+5)*rowno + 5), wxSize(100,row_height) );
@@ -1864,9 +1864,9 @@ tui::NameCboxRecords::NameCboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
    }
 }
 
-SIMap* tui::NameCboxRecords::getTheMap(layprop::DrawProperties* drawProp)
+ImpLayMap* tui::NameCboxRecords::getTheMap(layprop::DrawProperties* drawProp)
 {
-   SIMap* cif_lay_map = DEBUG_NEW SIMap();
+   ImpLayMap* cif_lay_map = DEBUG_NEW ImpLayMap();
    for (AllRecords::const_iterator CNM = _allRecords.begin(); CNM != _allRecords.end(); CNM++ )
    {
       if (!CNM->_ciflay->GetValue()) continue;
@@ -1874,22 +1874,22 @@ SIMap* tui::NameCboxRecords::getTheMap(layprop::DrawProperties* drawProp)
       // the user didn't put a tdt correspondence for this CIF layer - so we'll try to use the CIF name
       if ("" == layname)
          layname = std::string(CNM->_ciflay->GetLabel().mb_str(wxConvUTF8));
-      LayerNumber layno = _drawProp->getLayerNo(layname);
-      if (ERR_LAY == layno)
+      LayerDef laydef = _drawProp->getLayerNo(layname);
+      if (ERR_LAY_DEF == laydef)
       {
 //         layno = drawProp->addLayer(layname);
-         layno = drawProp->addLayer(layname);
-         TpdPost::layer_add(layname, layno);
+         laydef = drawProp->addLayer(layname);
+         TpdPost::layer_add(layname, laydef);
       }
-      (*cif_lay_map)[std::string(CNM->_ciflay->GetLabel().mb_str(wxConvUTF8))] = layno;
+      (*cif_lay_map)[std::string(CNM->_ciflay->GetLabel().mb_str(wxConvUTF8))] = laydef;
    }
    return cif_lay_map;
 }
 
-USMap* tui::NameCboxRecords::getTheFullMap(layprop::DrawProperties* drawProp)
+ExpLayMap* tui::NameCboxRecords::getTheFullMap(layprop::DrawProperties* drawProp)
 {
-   SIMap* umap = getTheMap(drawProp);
-   USMap* nmap = _cifMap->updateMap(umap);
+   ImpLayMap* umap = getTheMap(drawProp);
+   ExpLayMap* nmap = _cifMap->updateMap(umap);
    delete umap;
    return nmap;
 }
@@ -1926,37 +1926,37 @@ tui::NameCbox3Records::NameCbox3Records( wxWindow *parent, wxPoint pnt, wxSize s
    }
 }
 
-USMap* tui::NameCbox3Records::getTheMap()
+ExpLayMap* tui::NameCbox3Records::getTheMap()
 {
-   USMap* gds_lay_map = DEBUG_NEW USMap();
+   ExpLayMap* gds_lay_map = DEBUG_NEW ExpLayMap();
    for (AllRecords::const_iterator CNM = _allRecords.begin(); CNM != _allRecords.end(); CNM++ )
    {
       if (!CNM->_gdslay->GetValue()) continue;
-      LayerNumber layno;
+      LayerDef laydef(ERR_LAY_DEF);
       std::string layname = std::string(CNM->_tdtlay->GetValue().mb_str(wxConvUTF8));
       if ("" == layname)
       {
          long lint;
          CNM->_gdslay->GetLabel().ToLong(&lint);
-         layno = lint;
+         laydef = LayerDef((LayerNumber)lint);
       }
-      else layno = _drawProp->getLayerNo(layname);
+      else laydef = _drawProp->getLayerNo(layname);
       std::ostringstream gdslaytype;
-      if (gds_lay_map->end() != gds_lay_map->find(layno))
-         gdslaytype << (*gds_lay_map)[layno] << ","
+      if (gds_lay_map->end() != gds_lay_map->find(laydef))
+         gdslaytype << (*gds_lay_map)[laydef] << ","
                     <<  std::string(CNM->_gdstype->GetLabel().mb_str(wxConvUTF8));
       else
          gdslaytype <<  std::string(CNM->_gdslay->GetLabel().mb_str(wxConvUTF8)) << ";"
                     <<  std::string(CNM->_gdstype->GetLabel().mb_str(wxConvUTF8))   ;
-      (*gds_lay_map)[layno] = gdslaytype.str();
+      (*gds_lay_map)[laydef] = gdslaytype.str();
    }
    return gds_lay_map;
 }
 
-USMap* tui::NameCbox3Records::getTheFullMap()
+ExpLayMap* tui::NameCbox3Records::getTheFullMap()
 {
-   USMap* umap = getTheMap();
-   USMap* nmap = _gdsLayMap->updateMap(umap, true);
+   ExpLayMap* umap = getTheMap();
+   ExpLayMap* nmap = _gdsLayMap->updateMap(umap, true);
    delete umap;
    return nmap;
 }
@@ -2057,11 +2057,10 @@ tui::NameEboxRecords::NameEboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
    _cifMap = DATC->secureCifLayMap(_drawProp, false);
    for (LayerDefList::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
    {
-//      LayerNumber layno = *CNM;
       wxString tpdlay  = wxString(_drawProp->getLayerName(*CNM).c_str(), wxConvUTF8);
       wxString ciflay;
       std::string cifName;
-      if ( _cifMap->getCifLay(cifName, CNM->num()) )
+      if ( _cifMap->getCifLay(cifName, *CNM) )
          ciflay = wxString(cifName.c_str(), wxConvUTF8);
       else
          ciflay << wxT("L") << CNM->num();
@@ -2076,25 +2075,25 @@ tui::NameEboxRecords::NameEboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
    }
 }
 
-USMap* tui::NameEboxRecords::getTheMap()
+ExpLayMap* tui::NameEboxRecords::getTheMap()
 {
-   USMap* cif_lay_map = DEBUG_NEW USMap();
+   ExpLayMap* cif_lay_map = DEBUG_NEW ExpLayMap();
    for (AllRecords::const_iterator CNM = _allRecords.begin(); CNM != _allRecords.end(); CNM++ )
    {
       if (!CNM->_tdtlay->GetValue()) continue;
       std::string layname = std::string(CNM->_tdtlay->GetLabel().mb_str(wxConvUTF8));
       assert("" != layname);
-      unsigned layno = _drawProp->getLayerNo(layname);
-      assert(layno);
+      LayerNumber layno = _drawProp->getLayerNo(layname);
+      assert(ERR_LAY != layno);
       (*cif_lay_map)[layno] = std::string(CNM->_ciflay->GetValue().mb_str(wxConvUTF8));
    }
    return cif_lay_map;
 }
 
-USMap* tui::NameEboxRecords::getTheFullMap()
+ExpLayMap* tui::NameEboxRecords::getTheFullMap()
 {
-   USMap* umap = getTheMap();
-   USMap* nmap = _cifMap->updateMap(umap);
+   ExpLayMap* umap = getTheMap();
+   ExpLayMap* nmap = _cifMap->updateMap(umap);
    delete umap;
    return nmap;
 }
@@ -2174,28 +2173,28 @@ tui::NameEbox3Records::NameEbox3Records( wxWindow *parent, wxPoint pnt, wxSize s
    }
 }
 
-USMap* tui::NameEbox3Records::getTheMap()
+ExpLayMap* tui::NameEbox3Records::getTheMap()
 {
-   USMap* gds_lay_map = DEBUG_NEW USMap();
+   ExpLayMap* gds_lay_map = DEBUG_NEW ExpLayMap();
    for (AllRecords::const_iterator CNM = _allRecords.begin(); CNM != _allRecords.end(); CNM++ )
    {
       if (!CNM->_tdtlay->GetValue()) continue;
       std::string layname = std::string(CNM->_tdtlay->GetLabel().mb_str(wxConvUTF8));
       assert("" != layname);
-      unsigned layno = _drawProp->getLayerNo(layname);
-      assert(layno);
+      LayerDef laydef = _drawProp->getLayerNo(layname);
+      assert(ERR_LAY_DEF != laydef);
       std::ostringstream gdslaytype;
       gdslaytype <<  std::string(CNM->_gdslay->GetValue().mb_str(wxConvUTF8)) << ";"
                  <<  std::string(CNM->_gdstype->GetValue().mb_str(wxConvUTF8))   ;
-      (*gds_lay_map)[layno] = gdslaytype.str();
+      (*gds_lay_map)[laydef] = gdslaytype.str();
    }
    return gds_lay_map;
 }
 
-USMap* tui::NameEbox3Records::getTheFullMap()
+ExpLayMap* tui::NameEbox3Records::getTheFullMap()
 {
-   USMap* umap = getTheMap();
-   USMap* nmap = _gdsLayMap->updateMap(umap, false);
+   ExpLayMap* umap = getTheMap();
+   ExpLayMap* nmap = _gdsLayMap->updateMap(umap, false);
    delete umap;
    return nmap;
 }

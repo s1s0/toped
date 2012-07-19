@@ -1124,11 +1124,11 @@ EXPTNgui_problem::EXPTNgui_problem(std::string info)
 };
 
 //=============================================================================
-LayerMapExt::LayerMapExt(const USMap& inlist, ExtLayers* alist)
+LayerMapExt::LayerMapExt(const ExpLayMap& inlist, ExtLayers* alist)
    : _theMap(), _status(true), _alist(alist)
 {
    _import = (NULL != _alist);
-   for (USMap::const_iterator CE = inlist.begin(); CE != inlist.end(); CE++)
+   for (ExpLayMap::const_iterator CE = inlist.begin(); CE != inlist.end(); CE++)
    {
       wxString exp(CE->second.c_str(), wxConvUTF8);
       patternNormalize(exp);
@@ -1141,7 +1141,7 @@ LayerMapExt::~LayerMapExt()
    if (NULL != _alist) delete _alist;
 }
 
-bool LayerMapExt::parseLayTypeString(wxString exp, LayerNumber tdtLay)
+bool LayerMapExt::parseLayTypeString(wxString exp, const LayerDef& tdtLaydef)
 {
    wxString lay_exp, type_exp;
    if (!separateQuickLists(exp, lay_exp, type_exp)) return false;
@@ -1164,14 +1164,14 @@ bool LayerMapExt::parseLayTypeString(wxString exp, LayerNumber tdtLay)
             // get all GDS data types for the current layer and copy them
             // to the map
                for ( WordSet::const_iterator CT = (*_alist)[*CL].begin(); CT != (*_alist)[*CL].end(); CT++)
-                  _theMap[*CL].insert(std::make_pair(*CT, tdtLay));
+                  _theMap[*CL].insert(std::make_pair(*CT, tdtLaydef.num()));
             }
             else
             {// for particular (listed) data type
                WordList dtlst;
                getList( type_exp , dtlst);
                for ( WordList::const_iterator CT = dtlst.begin(); CT != dtlst.end(); CT++)
-                  _theMap[*CL].insert(std::make_pair(*CT, tdtLay));
+                  _theMap[*CL].insert(std::make_pair(*CT, tdtLaydef.num()));
             }
          }
          // else ignore the mapped GDS layer
@@ -1191,7 +1191,7 @@ bool LayerMapExt::parseLayTypeString(wxString exp, LayerNumber tdtLay)
       }
       if (wxT('*') == type_exp)
       { // for all data types - same as data type = 0
-         _theMap[tdtLay].insert(std::make_pair(0, llst.front()));
+         _theMap[tdtLaydef].insert(std::make_pair(0, llst.front()));
       }
       else
       {// for particular (listed) data type
@@ -1202,13 +1202,13 @@ bool LayerMapExt::parseLayTypeString(wxString exp, LayerNumber tdtLay)
             wxString wxmsg;
             wxmsg << wxT("Can't export to multiple types. Expression \"")
                   << type_exp << wxT("\"")
-                  << wxT(" for layer ") << tdtLay
+                  << wxT(" for layer ") << tdtLaydef.num()
                   << wxT(" is coerced to a single data type ")
                   << dtlst.front();
             std::string msg(wxmsg.mb_str(wxConvUTF8));
             tell_log(console::MT_ERROR,msg);
          }
-         _theMap[tdtLay].insert(std::make_pair(dtlst.front(), llst.front()));
+         _theMap[tdtLaydef].insert(std::make_pair(dtlst.front(), llst.front()));
       }
    }
 
@@ -1336,9 +1336,9 @@ bool LayerMapExt::getExtLayType(word& gdslay, word& gdstype, LayerNumber tdtlay)
    return true;
 }
 
-USMap* LayerMapExt::generateAMap()
+ExpLayMap* LayerMapExt::generateAMap()
 {
-   USMap* wMap = new USMap();
+   ExpLayMap* wMap = new ExpLayMap();
    if (_import)
    {
       for (GlMap::const_iterator CTL = _theMap.begin(); CTL != _theMap.end(); CTL++)
@@ -1366,12 +1366,12 @@ USMap* LayerMapExt::generateAMap()
    return wMap;
 }
 
-USMap* LayerMapExt::updateMap(USMap* update, bool import)
+ExpLayMap* LayerMapExt::updateMap(ExpLayMap* update, bool import)
 {
    assert(_import == import);
    // first generate the output from the current map
-   USMap* wMap = generateAMap();
-   for (USMap::const_iterator CE = update->begin(); CE != update->end(); CE++)
+   ExpLayMap* wMap = generateAMap();
+   for (ExpLayMap::const_iterator CE = update->begin(); CE != update->end(); CE++)
    {
       // the idea behind this parsing is simply to check the syntax and
       // to protect ourself from saving rubbish
@@ -1386,7 +1386,7 @@ USMap* LayerMapExt::updateMap(USMap* update, bool import)
       else
       {
          wxString wxmsg;
-         wxmsg << wxT("Can't make sence from the input string for layer ") << CE->first;
+         wxmsg << wxT("Can't make sence from the input string for layer ") << CE->first.num();
          std::string msg(wxmsg.mb_str(wxConvUTF8));
          tell_log(console::MT_ERROR,msg);
       }
@@ -1395,16 +1395,16 @@ USMap* LayerMapExt::updateMap(USMap* update, bool import)
 }
 
 //=============================================================================
-LayerMapCif::LayerMapCif(const USMap& inMap)
+LayerMapCif::LayerMapCif(const ExpLayMap& inMap)
 {
-   for (USMap::const_iterator CI = inMap.begin(); CI != inMap.end(); CI++ )
+   for (ExpLayMap::const_iterator CI = inMap.begin(); CI != inMap.end(); CI++ )
    {
       _theImap[CI->second] = CI->first;
       _theEmap[CI->first] = CI->second;
    }
 }
 
-bool LayerMapCif::getTdtLay(LayerNumber& tdtLay, std::string cifLay)
+bool LayerMapCif::getTdtLay(LayerDef& tdtLay, std::string cifLay)
 {
    if (_theImap.end() != _theImap.find(cifLay))
    {
@@ -1414,7 +1414,7 @@ bool LayerMapCif::getTdtLay(LayerNumber& tdtLay, std::string cifLay)
    return false;
 }
 
-bool LayerMapCif::getCifLay(std::string& cifLay, LayerNumber tdtLay)
+bool LayerMapCif::getCifLay(std::string& cifLay, const LayerDef& tdtLay)
 {
    if (_theEmap.end() != _theEmap.find(tdtLay))
    {
@@ -1424,32 +1424,32 @@ bool LayerMapCif::getCifLay(std::string& cifLay, LayerNumber tdtLay)
    return false;
 }
 
-USMap* LayerMapCif::updateMap(USMap* update)
+ExpLayMap* LayerMapCif::updateMap(ExpLayMap* update)
 {
-   for (USMap::const_iterator CMI = update->begin(); CMI != update->end(); CMI++)
+   for (ExpLayMap::const_iterator CMI = update->begin(); CMI != update->end(); CMI++)
    {
       _theEmap[CMI->first] = CMI->second;
    }
 
-   for (USMap::const_iterator CME = _theEmap.begin(); CME != _theEmap.end(); CME++)
+   for (ExpLayMap::const_iterator CME = _theEmap.begin(); CME != _theEmap.end(); CME++)
    {
       _theImap[CME->second] = CME->first;
    }
-   return DEBUG_NEW USMap(_theEmap);
+   return DEBUG_NEW ExpLayMap(_theEmap);
 }
 
-USMap* LayerMapCif::updateMap(SIMap* update)
+ExpLayMap* LayerMapCif::updateMap(ImpLayMap* update)
 {
-   for (SIMap::const_iterator CMI = update->begin(); CMI != update->end(); CMI++)
+   for (ImpLayMap::const_iterator CMI = update->begin(); CMI != update->end(); CMI++)
    {
       _theImap[CMI->first] = CMI->second;
    }
 
-   for (SIMap::const_iterator CME = _theImap.begin(); CME != _theImap.end(); CME++)
+   for (ImpLayMap::const_iterator CME = _theImap.begin(); CME != _theImap.end(); CME++)
    {
       _theEmap[CME->second] = CME->first;
    }
-   return DEBUG_NEW USMap(_theEmap);
+   return DEBUG_NEW ExpLayMap(_theEmap);
 }
 
 //=============================================================================

@@ -628,7 +628,7 @@ bool layprop::DrawProperties::addLayer(std::string name, const LayerDef& laydef)
    return false; // dummy statement to prevent compilation warnings
 }
 
-LayerNumber layprop::DrawProperties::addLayer(std::string name)
+LayerDef layprop::DrawProperties::addLayer(std::string name)
 {
    LayerDef laydef(TLL_LAY_DEF);
    // get the last layer layDef;
@@ -638,7 +638,7 @@ LayerNumber layprop::DrawProperties::addLayer(std::string name)
 //   if (getCurSetList().rend() != lastLayNo)
 //      layno = lastLayNo->first;
    assert(addLayer(name, laydef));
-   return laydef.num();
+   return laydef;
 }
 
 void layprop::DrawProperties::addLine(std::string name, std::string col, word pattern,
@@ -1285,7 +1285,7 @@ layprop::DrawProperties::~DrawProperties() {
  */
 void layprop::DrawProperties::pushLayerStatus()
 {
-   _layStateHistory.push_front(LayStateList(_curlay.num(), std::list<LayerState>()));
+   _layStateHistory.push_front(LayStateList(_curlay, std::list<LayerState>()));
    LayStateList& clist = _layStateHistory.front();
    for (LaySetList::Iterator CL = _laySetDb.begin(); CL != _laySetDb.end(); CL++)
    {

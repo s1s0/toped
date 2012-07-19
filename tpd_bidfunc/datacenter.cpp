@@ -1025,16 +1025,16 @@ void DataCenter::motionDraw(const CTM& layCTM, TP base, TP newp)
 
 LayerMapCif* DataCenter::secureCifLayMap(const layprop::DrawProperties* drawProp, bool import)
 {
-   const USMap* savedMap = PROPC->getCifLayMap();
+   const ExpLayMap* savedMap = PROPC->getCifLayMap();
    if (NULL != savedMap) return DEBUG_NEW LayerMapCif(*savedMap);
-   USMap theMap;
+   ExpLayMap theMap;
    if (import)
    {// Generate the default CIF layer map for import
       NameList cifLayers;
       cifGetLayers(cifLayers);
-      word laynum = 1;
+      LayerDef laydef(TLL_LAY_DEF);
       for ( NameList::const_iterator CCL = cifLayers.begin(); CCL != cifLayers.end(); CCL++ )
-         theMap[laynum] = *CCL;
+         theMap[laydef++] = *CCL;
    }
    else
    {// Generate the default CIF layer map for export
@@ -1043,7 +1043,7 @@ LayerMapCif* DataCenter::secureCifLayMap(const layprop::DrawProperties* drawProp
       for ( NameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
       {
          std::ostringstream ciflayname;
-         LayerNumber layno = drawProp->getLayerNo( *CDL );
+         LayerDef layno = drawProp->getLayerNo( *CDL );
          ciflayname << "L" << layno;
          theMap[layno] = ciflayname.str();
       }
@@ -1053,11 +1053,11 @@ LayerMapCif* DataCenter::secureCifLayMap(const layprop::DrawProperties* drawProp
 
 LayerMapExt* DataCenter::secureGdsLayMap(const layprop::DrawProperties* drawProp, bool import)
 {
-   const USMap* savedMap = PROPC->getGdsLayMap();
+   const ExpLayMap* savedMap = PROPC->getGdsLayMap();
    LayerMapExt* theGdsMap;
    if (NULL == savedMap)
    {
-      USMap theMap;
+      ExpLayMap theMap;
       if (import)
       { // generate default import GDS layer map
          ExtLayers* gdsLayers = DEBUG_NEW ExtLayers();

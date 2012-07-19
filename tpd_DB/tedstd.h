@@ -452,17 +452,17 @@ class ForeignCell {
 // ExtLayers is used for GDS/OASIS, NameList is used for CIF
 class LayerCrossMap {
    public:
-                              LayerCrossMap() : _tdtLayNumber(0), _tmpLayer(NULL) {}
+                              LayerCrossMap() : _tdtLayNumber(TLL_LAY_DEF), _tmpLayer(NULL) {}
       virtual                ~LayerCrossMap()  {}
       laydata::QTreeTmp*      getTmpLayer()     {return _tmpLayer;}
-      LayerNumber             tdtLayNumber()    {return _tdtLayNumber;}
+      LayerDef                tdtLayNumber()    {return _tdtLayNumber;}
       virtual bool            mapTdtLay(laydata::TdtCell*, word, word)
                                                          {assert(false); return false;}
       virtual bool            mapTdtLay(laydata::TdtCell*,const std::string&)
                                                          {assert(false); return false;}
       virtual std::string     printSrcLayer() const      {assert(false); return std::string("");}
    protected:
-      LayerNumber             _tdtLayNumber  ; //! Current layer number
+      LayerDef                _tdtLayNumber  ; //! Current layer number
       laydata::QTreeTmp*      _tmpLayer      ; //! Current target layer
 };
 
@@ -481,12 +481,12 @@ class ENumberLayerCM : public LayerCrossMap {
 
 class ENameLayerCM : public LayerCrossMap {
    public:
-                              ENameLayerCM(const SIMap& lmap) :
+                              ENameLayerCM(const ImpLayMap& lmap) :
                                  _layMap(lmap), _extLayName("") {}
       virtual bool            mapTdtLay(laydata::TdtCell*, const std::string&);
       virtual std::string     printSrcLayer() const;
    private:
-      const SIMap&            _layMap;
+      const ImpLayMap&         _layMap;
       std::string             _extLayName;
 };
 
@@ -494,7 +494,7 @@ class ENameLayerCM : public LayerCrossMap {
 class ImportDB {
    public:
                               ImportDB(ForeignDbFile*, laydata::TdtLibDir*, const LayerMapExt&);
-                              ImportDB(ForeignDbFile*, laydata::TdtLibDir*, const SIMap&, real);
+                              ImportDB(ForeignDbFile*, laydata::TdtLibDir*, const ImpLayMap&, real);
                              ~ImportDB();
       void                    run(const NameList&, bool, bool reopenFile = true);
       bool                    mapTdtLayer(std::string);

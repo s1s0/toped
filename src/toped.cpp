@@ -1349,7 +1349,7 @@ void tui::TopedFrame::OnGDStranslate(wxCommandEvent& WXUNUSED(event)) {
    if (PROPC->lockDrawProp(drawProp))
    {
       tui::GetGDSimport* dlg = NULL;
-      USMap* laymap;
+      ExpLayMap* laymap;
       try {
          dlg = DEBUG_NEW tui::GetGDSimport(this, -1, wxT("Import GDS structure"), pos,
                                              _browsers->tdtSelectedGdsName(), drawProp);
@@ -1358,7 +1358,7 @@ void tui::TopedFrame::OnGDStranslate(wxCommandEvent& WXUNUSED(event)) {
       if ( dlg->ShowModal() == wxID_OK )
       {
          laymap = dlg->getGdsLayerMap();
-         USMap* laymap2save = NULL;
+         ExpLayMap* laymap2save = NULL;
          if (dlg->getSaveMap()) laymap2save = dlg->getFullGdsLayerMap();
 
          wxString wxlaymap, wxlaymap2save;
@@ -1485,8 +1485,8 @@ void tui::TopedFrame::OnGDSexportCELL(wxCommandEvent& WXUNUSED(event))
       catch (EXPTN&) {delete dlg;return;}
       wxString cellname;
       bool recur;
-      USMap* laymap;
-      USMap* laymap2save = NULL;
+      ExpLayMap* laymap;
+      ExpLayMap* laymap2save = NULL;
       if ( dlg->ShowModal() == wxID_OK ) {
          cellname = dlg->get_selectedcell();
          recur = dlg->get_recursive();
@@ -1573,8 +1573,8 @@ void tui::TopedFrame::OnCIFtranslate(wxCommandEvent& WXUNUSED(event))
       if ( dlg->ShowModal() == wxID_OK )
       {
          // get the layer map first
-         SIMap* laymap = dlg->getCifLayerMap(drawProp);
-         USMap* laymap2save = NULL;
+         ImpLayMap* laymap = dlg->getCifLayerMap(drawProp);
+         ExpLayMap* laymap2save = NULL;
          if (dlg->getSaveMap()) laymap2save = dlg->getFullCifLayerMap(drawProp);
          wxString wxlaymap, wxlaymap2save;
          SIMap2wxString(laymap      , wxlaymap     );
@@ -1619,8 +1619,8 @@ void tui::TopedFrame::OnCIFexportCELL(wxCommandEvent& WXUNUSED(event))
       wxString cellname;
       bool recur;
       bool sverbose;
-      USMap* laymap;
-      USMap* laymap2save = NULL;
+      ExpLayMap* laymap;
+      ExpLayMap* laymap2save = NULL;
       if ( dlg->ShowModal() == wxID_OK ) {
          cellname = dlg->get_selectedcell();
          recur    = dlg->get_recursive();
@@ -1724,7 +1724,7 @@ void tui::TopedFrame::OnOAStranslate(wxCommandEvent& WXUNUSED(event))
    if (PROPC->lockDrawProp(drawProp))
    {
       tui::GetOASimport* dlg = NULL;
-      USMap* laymap;
+      ExpLayMap* laymap;
       try {
          dlg = DEBUG_NEW tui::GetOASimport(this, -1, wxT("Import OASIS structure"), pos,
                                              _browsers->tdtSelectedOasName(), drawProp);
@@ -1733,7 +1733,7 @@ void tui::TopedFrame::OnOAStranslate(wxCommandEvent& WXUNUSED(event))
       if ( dlg->ShowModal() == wxID_OK )
       {
          laymap = dlg->getOasLayerMap();
-         USMap* laymap2save = NULL;
+         ExpLayMap* laymap2save = NULL;
          if (dlg->getSaveMap()) laymap2save = dlg->getFullOasLayerMap();
 
          wxString wxlaymap, wxlaymap2save;
@@ -2486,19 +2486,19 @@ void tui::TopedFrame::onParseCommand(wxCommandEvent& evt)
    _cmdline->onParseCommand(evt);
 }
 
-void tui::TopedFrame::USMap2wxString(USMap* inmap, wxString& outmap)
+void tui::TopedFrame::USMap2wxString(ExpLayMap* inmap, wxString& outmap)
 {
    std::string soutmap;
-   layprop::USMap2String(inmap, soutmap);
+   layprop::ExtLayerMap2String(inmap, soutmap);
    outmap = wxString(soutmap.c_str(), wxConvUTF8);
 }
 
-void tui::TopedFrame::SIMap2wxString(SIMap* inmap, wxString& outmap)
+void tui::TopedFrame::SIMap2wxString(ImpLayMap* inmap, wxString& outmap)
 {
    std::ostringstream laymapstr;
    word recno = 0;
    laymapstr << "{";
-   for (SIMap::const_iterator CLN = inmap->begin(); CLN != inmap->end(); CLN++)
+   for (ImpLayMap::const_iterator CLN = inmap->begin(); CLN != inmap->end(); CLN++)
    {
       if (recno != 0)
          laymapstr << ",";
