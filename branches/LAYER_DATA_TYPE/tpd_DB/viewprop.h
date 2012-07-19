@@ -117,9 +117,9 @@ namespace layprop {
       void              drawGrid(const DrawProperties*) const;
       void              drawZeroCross(const DrawProperties*) const;
       void              setUU(real);
-      void              setGdsLayMap(USMap* map);
-      void              setCifLayMap(USMap* map);
-      void              setOasLayMap(USMap* map);
+      void              setGdsLayMap(ExpLayMap* map);
+      void              setCifLayMap(ExpLayMap* map);
+      void              setOasLayMap(ExpLayMap* map);
       LayerDefSet       allUnselectable();
       bool              lockDrawProp(DrawProperties*&, PropertyState state = DB);
       void              unlockDrawProp(DrawProperties*&, bool throwexception);
@@ -149,9 +149,9 @@ namespace layprop {
       bool              zeroCross() const                {return _zeroCross;}
       byte              markerAngle() const              {return _markerAngle;}
       word              layselmask() const               {return _layselmask;}
-      const USMap*      getGdsLayMap() const             {return _gdsLayMap;}
-      const USMap*      getCifLayMap() const             {return _cifLayMap;}
-      const USMap*      getOasLayMap() const             {return _oasLayMap;}
+      const ExpLayMap*  getGdsLayMap() const             {return _gdsLayMap;}
+      const ExpLayMap*  getCifLayMap() const             {return _cifLayMap;}
+      const ExpLayMap*  getOasLayMap() const             {return _oasLayMap;}
       bool              gridVisual(word no)              {return grid(no)->visual();}
       bool              renderType() const               {return _renderType;}
    private:
@@ -171,13 +171,14 @@ namespace layprop {
       SupplementaryData    _supp_data;    // supplementary data
       LayerDefList         _uplaylist;    // unpublished layer list
       word                 _layselmask;   // layout shape type selection mask
-      USMap*               _gdsLayMap;    //
-      USMap*               _cifLayMap;    //
-      USMap*               _oasLayMap;    //
+      ExpLayMap*           _gdsLayMap;    //
+      ExpLayMap*           _cifLayMap;    //
+      ExpLayMap*           _oasLayMap;    //
       wxMutex              _drawPLock;    // DrawPropwerties lock
    };
 
-   void USMap2String(USMap*, std::string&);
+//   void USMap2String(USMap*, std::string&);
+   void ExtLayerMap2String(ExpLayMap*, std::string&);
 
 }
 #endif

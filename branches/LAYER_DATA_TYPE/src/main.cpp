@@ -650,16 +650,16 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    telldata::TPointType*   pntype      = DEBUG_NEW telldata::TPointType();
    telldata::TBoxType*     bxtype      = DEBUG_NEW telldata::TBoxType(pntype);
    telldata::TBindType*    bndtype     = DEBUG_NEW telldata::TBindType(pntype);
-   telldata::THshType*     hshtype     = DEBUG_NEW telldata::THshType();
-   telldata::THshStrType*  hshstrtype  = DEBUG_NEW telldata::THshStrType();
    telldata::TLayerType*   laytype     = DEBUG_NEW telldata::TLayerType();
+   telldata::TLMapType*    lmaptype    = DEBUG_NEW telldata::TLMapType(laytype);
+   telldata::THshStrType*  hshstrtype  = DEBUG_NEW telldata::THshStrType();
 
    mblock->addGlobalType("point"     , pntype);
    mblock->addGlobalType("box"       , bxtype);
    mblock->addGlobalType("bind"      , bndtype);
-   mblock->addGlobalType("lmap"      , hshtype);
-   mblock->addGlobalType("strmap"    , hshstrtype);
    mblock->addGlobalType("layer"     , laytype);
+   mblock->addGlobalType("lmap"      , lmaptype);
+   mblock->addGlobalType("strmap"    , hshstrtype);
    //-----------------------------------------------------------------------------------------------------------
    // Internal variables
    //-----------------------------------------------------------------------------------------------------------
@@ -746,7 +746,7 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    mblock->addFUNC("cifexport"        ,(DEBUG_NEW                tellstdfunc::CIFexportLIB(telldata::tn_void,false)));
    mblock->addFUNC("cifexport"        ,(DEBUG_NEW                tellstdfunc::CIFexportTOP(telldata::tn_void,false)));
    mblock->addFUNC("cifclose"         ,(DEBUG_NEW                    tellstdfunc::CIFclose(telldata::tn_void, true)));
-   mblock->addFUNC("getciflaymap"     ,(DEBUG_NEW        tellstdfunc::CIFgetlaymap(TLISTOF(telldata::tn_hsh), true)));
+   mblock->addFUNC("getciflaymap"     ,(DEBUG_NEW     tellstdfunc::CIFgetlaymap(TLISTOF(telldata::tn_laymap), true)));
    mblock->addFUNC("setciflaymap"     ,(DEBUG_NEW                tellstdfunc::CIFsetlaymap(telldata::tn_void, true)));
    mblock->addFUNC("clearciflaymap"   ,(DEBUG_NEW              tellstdfunc::CIFclearlaymap(telldata::tn_void, true)));
    mblock->addFUNC("gdsread"          ,(DEBUG_NEW          tellstdfunc::GDSread(TLISTOF(telldata::tn_string), true)));
@@ -756,15 +756,15 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    mblock->addFUNC("gdsexport"        ,(DEBUG_NEW                tellstdfunc::GDSexportTOP(telldata::tn_void,false)));
    mblock->addFUNC("gdssplit"         ,(DEBUG_NEW                    tellstdfunc::GDSsplit(telldata::tn_void,false)));
    mblock->addFUNC("gdsclose"         ,(DEBUG_NEW                    tellstdfunc::GDSclose(telldata::tn_void, true)));
-   mblock->addFUNC("getgdslaymap"     ,(DEBUG_NEW        tellstdfunc::GDSgetlaymap(TLISTOF(telldata::tn_hsh), true)));
+   mblock->addFUNC("getgdslaymap"     ,(DEBUG_NEW     tellstdfunc::GDSgetlaymap(TLISTOF(telldata::tn_laymap), true)));
    mblock->addFUNC("setgdslaymap"     ,(DEBUG_NEW                tellstdfunc::GDSsetlaymap(telldata::tn_void, true)));
    mblock->addFUNC("cleargdslaymap"   ,(DEBUG_NEW              tellstdfunc::GDSclearlaymap(telldata::tn_void, true)));
    mblock->addFUNC("oasisread"        ,(DEBUG_NEW          tellstdfunc::OASread(TLISTOF(telldata::tn_string), true)));
    mblock->addFUNC("oasisimport"      ,(DEBUG_NEW               tellstdfunc::OASimportList(telldata::tn_void, true)));
    mblock->addFUNC("oasisimport"      ,(DEBUG_NEW                   tellstdfunc::OASimport(telldata::tn_void, true)));
    mblock->addFUNC("oasisclose"       ,(DEBUG_NEW                    tellstdfunc::OASclose(telldata::tn_void, true)));
-   mblock->addFUNC("getoasislaymap"   ,(DEBUG_NEW        tellstdfunc::OASgetlaymap(TLISTOF(telldata::tn_hsh), true)));
-   mblock->addFUNC("setoasislaymap"   ,(DEBUG_NEW        tellstdfunc::OASsetlaymap(TLISTOF(telldata::tn_hsh), true)));
+   mblock->addFUNC("getoasislaymap"   ,(DEBUG_NEW     tellstdfunc::OASgetlaymap(TLISTOF(telldata::tn_laymap), true)));
+   mblock->addFUNC("setoasislaymap"   ,(DEBUG_NEW     tellstdfunc::OASsetlaymap(TLISTOF(telldata::tn_laymap), true)));
    mblock->addFUNC("clearoasislaymap" ,(DEBUG_NEW              tellstdfunc::OASclearlaymap(telldata::tn_void, true)));
    mblock->addFUNC("drccalibreimport" ,(DEBUG_NEW            tellstdfunc::DRCCalibreimport(telldata::tn_void, true)));
    mblock->addFUNC("drcshowerror"     ,(DEBUG_NEW                tellstdfunc::DRCshowerror(telldata::tn_void, true)));

@@ -319,7 +319,7 @@ namespace layprop {
          bool                       addLayer(std::string, LayerNumber, std::string, std::string, std::string);
          bool                       addLayer(std::string, const LayerDef&);
          bool                       addLayer(const LayerDef&);
-         LayerNumber                addLayer(std::string);
+         LayerDef                   addLayer(std::string);
          void                       addColor(std::string name, byte R, byte G, byte B, byte A);
          void                       addFill(std::string name, byte *ptrn);
          void                       addLine(std::string, std::string, word, byte, byte);

@@ -30,6 +30,14 @@
 #include <sstream>
 #include <algorithm>
 #include "ttt.h"
+
+
+std::ostream&             operator <<(std::ostream& os, const LayerDef& obj)
+{
+      os << "{ " << obj.num() << "," << obj.typ() << "}";
+      return os;
+}
+
 //-----------------------------------------------------------------------------
 // class TP
 //-----------------------------------------------------------------------------

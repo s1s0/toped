@@ -116,8 +116,8 @@ namespace tui {
       void                    setExitAproved()              { _exitAproved = true;}
        bool                   exitAproved() const          { return _exitAproved;}
       bool                    checkFileOverwriting(const wxString& fileName);
-      void                    USMap2wxString(USMap* inmap, wxString& outmap);
-      void                    SIMap2wxString(SIMap* inmap, wxString& outmap);
+      void                    USMap2wxString(ExpLayMap* inmap, wxString& outmap);
+      void                    SIMap2wxString(ImpLayMap* inmap, wxString& outmap);
       console::ted_log*       _cmdlog;       // log window
       console::TELLFuncList*  _cmdbrowser;
       console::TedCmdLine*    _cmdline;

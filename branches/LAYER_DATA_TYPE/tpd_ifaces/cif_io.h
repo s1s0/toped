@@ -277,7 +277,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
 
    class CifExportFile : public DbExportFile {
       public:
-                        CifExportFile(std::string, laydata::TdtCell*, USMap*, bool, bool);
+                        CifExportFile(std::string, laydata::TdtCell*, ExpLayMap*, bool, bool);
          virtual       ~CifExportFile();
          virtual void   definitionStart(std::string);
          virtual void   definitionFinish();
@@ -294,7 +294,7 @@ The user extensions below - as described in http://www.rulabinsky.com/cavd/text/
          virtual void   registerCellWritten(std::string);
       private:
          bool           pathConvert(PointVector&, unsigned, int4b );
-         USMap*         _laymap;          //! Toped-CIF layer map
+         ExpLayMap*     _laymap;          //! Toped-CIF layer map
          SIMap          _cellmap;         //! tdt-cif map of all exported cells
          std::fstream   _file;            //! Output file handler
          bool           _verbose;         //! CIF output type

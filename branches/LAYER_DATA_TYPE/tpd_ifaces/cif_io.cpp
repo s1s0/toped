@@ -600,7 +600,7 @@ void CIFin::CifFile::getAllCells(wxListBox& cellsBox) const
 
 //=============================================================================
 CIFin::CifExportFile::CifExportFile(std::string fn, laydata::TdtCell* topcell,
-   USMap* laymap, bool recur, bool verbose) :  DbExportFile(fn, topcell, recur),
+   ExpLayMap* laymap, bool recur, bool verbose) :  DbExportFile(fn, topcell, recur),
       _laymap(laymap), _verbose(verbose), _lastcellnum(0)
 {
    std::string fname(convertString(_fileName));

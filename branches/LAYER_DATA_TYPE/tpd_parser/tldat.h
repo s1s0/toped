@@ -65,7 +65,7 @@ namespace telldata {
    const typeID tn_pnt        = 11;
    const typeID tn_box        = 12;
    const typeID tn_bnd        = 13;
-   const typeID tn_hsh        = 14;
+   const typeID tn_laymap     = 14;
    const typeID tn_hshstr     = 15;
    const typeID tn_layer      = 16;
    const typeID tn_usertypes  = 17;
@@ -158,9 +158,15 @@ namespace telldata {
    };
 
    //==============================================================================
-   class THshType : public TCompType {
+   class TLayerType : public TCompType {
       public:
-                           THshType();
+                           TLayerType();
+   };
+
+   //==============================================================================
+   class TLMapType : public TCompType {
+      public:
+                           TLMapType(TLayerType*);
    };
 
     //==============================================================================
@@ -169,10 +175,6 @@ namespace telldata {
                            THshStrType();
    };
 
-   class TLayerType : public TCompType {
-      public:
-                           TLayerType();
-   };
    //==============================================================================
    class TellVar {
    public:
@@ -458,22 +460,22 @@ namespace telldata {
    };
 
    //==============================================================================
-   // Don't destruct _number and _name here. They are just pointing to the structures in
+   // Don't destruct _layer and _value here. They are just pointing to the structures in
    // the parent _fieldList and obviously should be destroyed there
-   class TtHsh : public TtUserStruct {
+   class TtLMap : public TtUserStruct {
       public:
-                              TtHsh (int4b number=1, std::string name = "");
-                              TtHsh(const TtHsh&);
-                              TtHsh(operandSTACK& OPStack);
-         virtual TellVar*     selfcopy() const    {return DEBUG_NEW TtHsh(*this);}
+                              TtLMap (const LayerDef& laydef = TLL_LAY_DEF, std::string value = "");
+                              TtLMap(const TtLMap&);
+                              TtLMap(operandSTACK& OPStack);
+         virtual TellVar*     selfcopy() const    {return DEBUG_NEW TtLMap(*this);}
          virtual void         echo(std::string&, real);
          virtual void         assign(TellVar*);
-         const TtInt&         key()   const        {return *_key;}
+         const TtLayer&       layer() const        {return *_layer;}
          const TtString&      value() const        {return *_value;}
 //         void                 set_number(const int4b number)   {_number->_value = number; }
 //         void                 set_name(const std::string name) {_name->_value = name; }
       private:
-         TtInt*               _key;
+         TtLayer*             _layer;
          TtString*            _value;
    };
 

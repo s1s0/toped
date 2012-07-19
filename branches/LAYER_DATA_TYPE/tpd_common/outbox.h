@@ -401,20 +401,20 @@ int wxCALLBACK wxListCompareFunction(TmpWxIntPtr, TmpWxIntPtr, TmpWxIntPtr);
  */
 class LayerMapExt {
    public:
-                           LayerMapExt(const USMap&, ExtLayers*);
+                           LayerMapExt(const ExpLayMap&, ExtLayers*);
                           ~LayerMapExt();
       bool                 getTdtLay(LayerNumber&, word, word) const;
       bool                 getExtLayType(word&, word&, LayerNumber) const;
       bool                 status() {return _status;}
-      USMap*               updateMap(USMap*, bool);
+      ExpLayMap*           updateMap(ExpLayMap*, bool);
    private:
       typedef std::map< word, word  >     GdtTdtMap;
-      typedef std::map< LayerNumber, GdtTdtMap>  GlMap;
-      bool                 parseLayTypeString(wxString, LayerNumber);
+      typedef std::map< LayerDef, GdtTdtMap>  GlMap;
+      bool                 parseLayTypeString(wxString, const LayerDef&);
       void                 patternNormalize(wxString&);
       void                 getList(wxString, WordList&);
       bool                 separateQuickLists(wxString, wxString&, wxString&);
-      USMap*               generateAMap();
+      ExpLayMap*           generateAMap();
       GlMap                _theMap;
       bool                 _status;
       bool                 _import;
@@ -423,14 +423,14 @@ class LayerMapExt {
 
 class LayerMapCif {
    public:
-                           LayerMapCif(const USMap&);
-      bool                 getTdtLay(LayerNumber&, std::string);
-      bool                 getCifLay(std::string&, LayerNumber);
-      USMap*               updateMap(USMap*);
-      USMap*               updateMap(SIMap*);
+                           LayerMapCif(const ExpLayMap&);
+      bool                 getTdtLay(LayerDef&, std::string);
+      bool                 getCifLay(std::string&, const LayerDef&);
+      ExpLayMap*           updateMap(ExpLayMap*);
+      ExpLayMap*           updateMap(ImpLayMap*);
    private:
-      USMap                _theEmap;
-      SIMap                _theImap;
+      ExpLayMap            _theEmap;
+      ImpLayMap            _theImap;
 };
 
 #ifdef TIME_PROFILING

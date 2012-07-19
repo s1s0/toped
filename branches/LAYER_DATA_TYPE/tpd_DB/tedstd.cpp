@@ -1209,7 +1209,7 @@ std::string ENumberLayerCM::printSrcLayer() const
 bool ENameLayerCM::mapTdtLay(laydata::TdtCell* dstStruct, const std::string& extName)
 {
    _extLayName = extName;
-   SIMap::const_iterator layno;
+   ImpLayMap::const_iterator layno;
    if ( _layMap.end() != (layno = _layMap.find(_extLayName)) )
    {
       _tdtLayNumber = layno->second;
@@ -1237,7 +1237,7 @@ ImportDB::ImportDB(ForeignDbFile* src_lib, laydata::TdtLibDir* tdt_db, const Lay
    _layCrossMap = DEBUG_NEW ENumberLayerCM(theLayMap);
 }
 
-ImportDB::ImportDB(ForeignDbFile* src_lib, laydata::TdtLibDir* tdt_db, const SIMap& theLayMap, real techno) :
+ImportDB::ImportDB(ForeignDbFile* src_lib, laydata::TdtLibDir* tdt_db, const ImpLayMap& theLayMap, real techno) :
       _src_lib    ( src_lib                                    ),
       _tdt_db     ( tdt_db                                     ),
       _dbuCoeff   ( src_lib->libUnits() / (*_tdt_db)()->DBU()  ),
