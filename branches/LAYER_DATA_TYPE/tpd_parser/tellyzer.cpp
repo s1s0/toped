@@ -3208,6 +3208,9 @@ console::toped_logfile& console::toped_logfile::operator<< (const telldata::TtLi
             case telldata::tn_laymap:
                *this << *(static_cast<telldata::TtLMap*>((_tl.mlist())[i]));
                break;
+            case telldata::tn_layer:
+               *this << *(static_cast<telldata::TtLayer*>((_tl.mlist())[i]));
+               break;
    //         case tn_layout:
             default:assert(false); break;
          }

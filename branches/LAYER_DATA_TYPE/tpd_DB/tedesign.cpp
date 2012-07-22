@@ -1597,7 +1597,7 @@ bool laydata::TdtDesign::groupSelected(std::string name, laydata::TdtLibDir* lib
                                                      CI != lslct->end(); CI++)
       {
          wl->put(*CI);
-         if (REF_LAY == CL.number()) newcell->addChild(this,
+         if (REF_LAY_DEF == CL.layDef()) newcell->addChild(this,
                                     static_cast<TdtCellRef*>(*CI)->structure());
       }
       lslct->clear();

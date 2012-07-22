@@ -868,7 +868,7 @@ int tellstdfunc::stdREPORTLAY::execute() {
       std::ostringstream ost;
       ost << "used layers: {";
       for(LayerDefList::const_iterator CL = ull.begin() ; CL != ull.end();CL++ )
-         ost << " {" << CL->num() << "," << CL->typ() << "} ";
+         ost << *CL;
       ost << "}";
       tell_log(console::MT_INFO, ost.str());
 

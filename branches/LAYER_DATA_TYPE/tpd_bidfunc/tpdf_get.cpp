@@ -273,7 +273,7 @@ int tellstdfunc::grcCLEANALAYER::execute()
          else
          {
             std::stringstream ost;
-            ost << "No invalid data on layer " << tlay->value().num();
+            ost << "No invalid data on layer " << tlay->value();
             tell_log(console::MT_WARNING, ost.str());
          }
       }
@@ -395,7 +395,7 @@ int tellstdfunc::grcREPAIRDATA::execute()
             else
             {
                std::stringstream ost;
-               ost << "No recoverable data on layer " << tlay->value().num() << ". Check poly/wire recovery settings.";
+               ost << "No recoverable data on layer " << tlay->value() << ". Check poly/wire recovery settings.";
                tell_log(console::MT_WARNING, ost.str());
             }
             LogFile << LogFile.getFN() << "(" << *tlay << ");"; LogFile.flush();
@@ -403,7 +403,7 @@ int tellstdfunc::grcREPAIRDATA::execute()
          else
          {
             std::stringstream ost;
-            ost << "No invalid data on layer " << tlay->value().num() << ". Nothing to repair.";
+            ost << "No invalid data on layer " << tlay->value() << ". Nothing to repair.";
             tell_log(console::MT_WARNING, ost.str());
          }
       }

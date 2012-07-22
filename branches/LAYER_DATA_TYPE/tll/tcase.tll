@@ -21,7 +21,7 @@
 //        $Author$
 //===========================================================================
 
-#include "$TPD_GLOBAL/tll/seed.tll"
+//#include "$TPD_GLOBAL/tll/seed.tll"
 // Some DRC rules defined as global variables
 const real _actOverCont = 1.5;
 const real _mincont = 2;
@@ -38,10 +38,10 @@ const real _implantoveract = 2;
 box MOStran(point bound, real W, real L) {
    // active
    real activeW = L + 2*_gate2cont + 2*_mincont + 2*_actOverCont;
-   addbox(bound,activeW,W,2);
+   addbox(bound,activeW,W,{2, 0});
    // gate
    point gateB = {bound.x + (activeW - L)/2, bound.y -_polyOverActive};
-   addbox(gateB, L,  W + 2*_polyOverActive,4); // as above
+   addbox(gateB, L,  W + 2*_polyOverActive,{4, 0}); // as above
    // add contacts...
    point contBL = bound /| _actOverCont;
    point contBR = bound |\ _actOverCont;
@@ -56,7 +56,7 @@ box MOStran(point bound, real W, real L) {
    if (W < 2*_actOverCont + _mincont) 
       echo("Can't fit even a single contact !");
    else {
-      usinglayer(7);
+      usinglayer({7,0});
       real numconts = (W - 2*_actOverCont) / (_mincont + _contspace);
       while (numconts > 0) {
          addbox(contactL+contBL); 
@@ -65,7 +65,7 @@ box MOStran(point bound, real W, real L) {
          contBR.y = contBR.y + _contspace + _mincont;
          numconts = numconts - 1;
       }
-      usinglayer(8);
+      usinglayer({8,0});
       point metlTL = {contBL.x + _metalovercont + _mincont , contBL.y - _contspace + _metalovercont};
       point metlTR = {contBR.x - _metalovercont - _mincont , contBR.y - _contspace + _metalovercont};
       addbox(metlBL, metlTL);
@@ -78,8 +78,8 @@ void Invertor(point bound, real NW, real NL, real PW, real PL) {
    MOStran(bound,NW,NL);
    bound.y = bound.y + NW + _nwelltonactive + _welloverpwell;
    box ptrActive = MOStran(bound,PW,PL);
-   addbox((ptrActive /| _welloverpwell ) |/ _welloverpwell , 1);
-   addbox((ptrActive /| _implantoveract) |/ _implantoveract, 6);
+   addbox((ptrActive /| _welloverpwell ) |/ _welloverpwell , {1, 0});
+   addbox((ptrActive /| _implantoveract) |/ _implantoveract, {6, 0});
 }
 
 void builkcont(point p1, point p2)
@@ -90,22 +90,22 @@ void builkcont(point p1, point p2)
    if (abs(distance.x) > abs(distance.y))
    {
       real numconts = (distance.x - 2*_actOverCont) / (_mincont + _contspace);
-      generated[:+] = addbox({p1.x, p1.y -actW/2}, distance.x, actW, 2);
+      generated[:+] = addbox({p1.x, p1.y -actW/2}, distance.x, actW, {2, 0});
       real curcont = 0;
       while (curcont < numconts) 
       {
-         generated[:+] = addbox({p1.x + curcont*(_contspace + _mincont) + _actOverCont, p1.y-_mincont/2},_mincont, _mincont,7);
+         generated[:+] = addbox({p1.x + curcont*(_contspace + _mincont) + _actOverCont, p1.y-_mincont/2},_mincont, _mincont,{7, 0});
          curcont = curcont + 1;
       }
    }
    else
    {
       real numconts = (distance.y - 2*_actOverCont) / (_mincont + _contspace);
-      generated[:+] = addbox({p1.x - actW/2,p1.y}, actW, distance.y,2);
+      generated[:+] = addbox({p1.x - actW/2,p1.y}, actW, distance.y,{2, 0});
       real curcont = 0;
       while (curcont < numconts) 
       {
-         generated[:+] = addbox({p1.x -_mincont/2, p1.y + curcont*(_contspace + _mincont) + _actOverCont},_mincont, _mincont,7);
+         generated[:+] = addbox({p1.x -_mincont/2, p1.y + curcont*(_contspace + _mincont) + _actOverCont},_mincont, _mincont,{7, 0});
          curcont = curcont + 1;
       }
    }
@@ -224,45 +224,45 @@ void testcellarefs() {
       displ = displ + (point){-4*arrsgrid,arrsgrid};
    }
 
-   addbox({ -48 ,   0 } , { 6  , 58 }, 6);
-   addbox({ 0   ,   0 } , { 54 , 58 }, 6);
-   addbox({ 0   , -48 } , { 54 , 10 }, 6);
-   addbox({ -48 , -48 } , { 6  , 10 }, 6);
+   addbox({ -48 ,   0 } , { 6  , 58 }, {6,0});
+   addbox({ 0   ,   0 } , { 54 , 58 }, {6,0});
+   addbox({ 0   , -48 } , { 54 , 10 }, {6,0});
+   addbox({ -48 , -48 } , { 6  , 10 }, {6,0});
 
 }
 
 void testtexts() {
    newcell("textrefs");
    opencell("textrefs");
-   addtext("Text   0 deg -- test", 4, {10,10},   0, false, 2);
-   addtext("Text  90 deg -- test", 4, {10,10},  90, false, 2);
-   addtext("text 180 deg -- test", 4, {10,10}, 180, false, 2);
-   addtext("Text 270 deg -- test", 4, {10,10}, 270, false, 2);
-   addtext("Text   0 deg fx test", 4, {50,15},   0,  true, 2);
-   addtext("Text  90 deg fx test", 4, {50,15},  90,  true, 2);
-   addtext("Text 180 deg fx test", 4, {50,15}, 180,  true, 2);
-   addtext("Text 270 deg fx test", 4, {50,15}, 270,  true, 2);
+   addtext("Text   0 deg -- test", {4,0}, {10,10},   0, false, 2);
+   addtext("Text  90 deg -- test", {4,0}, {10,10},  90, false, 2);
+   addtext("text 180 deg -- test", {4,0}, {10,10}, 180, false, 2);
+   addtext("Text 270 deg -- test", {4,0}, {10,10}, 270, false, 2);
+   addtext("Text   0 deg fx test", {4,0}, {50,15},   0,  true, 2);
+   addtext("Text  90 deg fx test", {4,0}, {50,15},  90,  true, 2);
+   addtext("Text 180 deg fx test", {4,0}, {50,15}, 180,  true, 2);
+   addtext("Text 270 deg fx test", {4,0}, {50,15}, 270,  true, 2);
 
-   addtext("Text  45 deg -- test", 4, {10,65},  45, false, 2);
-   addtext("Text 135 deg -- test", 4, {10,65}, 135, false, 2);
-   addtext("Text 225 deg -- test", 4, {10,65}, 225, false, 2);
-   addtext("Text 315 deg -- test", 4, {10,65}, 315, false, 2);
-   addtext("Text  45 deg fx test", 4, {50,65},  45,  true, 2);
-   addtext("Text 135 deg fx test", 4, {50,65}, 135,  true, 2);
-   addtext("Text 225 deg fx test", 4, {50,65}, 225,  true, 2);
-   addtext("Text 315 deg fx test", 4, {50,65}, 315,  true, 2);
+   addtext("Text  45 deg -- test", {4,0}, {10,65},  45, false, 2);
+   addtext("Text 135 deg -- test", {4,0}, {10,65}, 135, false, 2);
+   addtext("Text 225 deg -- test", {4,0}, {10,65}, 225, false, 2);
+   addtext("Text 315 deg -- test", {4,0}, {10,65}, 315, false, 2);
+   addtext("Text  45 deg fx test", {4,0}, {50,65},  45,  true, 2);
+   addtext("Text 135 deg fx test", {4,0}, {50,65}, 135,  true, 2);
+   addtext("Text 225 deg fx test", {4,0}, {50,65}, 225,  true, 2);
+   addtext("Text 315 deg fx test", {4,0}, {50,65}, 315,  true, 2);
 
-   addtext("Toped", 4, { 0, 90},   0, false, 20);
+   addtext("Toped", {4,0}, { 0, 90},   0, false, 20);
 }
 
 void allLayTypes() {
 // For rubber band draw checks during interactive move/rotate/flip etc. operations
    newcell("allLayTypes");
    opencell("allLayTypes");
-   addbox({{0,0},{11.5,5.5}},6);
-   addpoly({{0,6},{12,6},{12,0},{14,0},{14,8},{0,8}},2);
-   addwire({{-2,8},{-2,-2},{14,-2}},3,8);
-   addtext("a-z", 14, {1,1}, 0,  false, 4);
+   addbox({{0,0},{11.5,5.5}},{6,0});
+   addpoly({{0,6},{12,6},{12,0},{14,0},{14,8},{0,8}},{2,0});
+   addwire({{-2,8},{-2,-2},{14,-2}},3,{8,0});
+   addtext("a-z", {14,0}, {1,1}, 0,  false, 4);
 }
 /*
 void shifttest() {
@@ -308,8 +308,8 @@ void modify_undo_bug()
 {
    newcell("modify_undo_bug");
    opencell("modify_undo_bug");
-   usinglayer(7);
-   addbox({{2.5,11.5},{4.5,9.5}},7);
+   usinglayer({7,0});
+   addbox({{2.5,11.5},{4.5,9.5}},{7,0});
    select_all();
    copy({4,10.5},{14,10.5});
    select_all();
@@ -433,7 +433,7 @@ newcell("Fcell");
 opencell("Fcell");
 point list pl1 =
 {{0,0},{0,10},{6,10},{6,8},{2,8},{2,6},{4,6},{4,4},{2,4},{2,2},{2,0}};
-addpoly(pl1,2);
+addpoly(pl1,{2,0});
 testcellrefs();
 testcellarefs();
 testtexts();
