@@ -533,14 +533,14 @@ void auxdata::GrcCell::collectUsedLays(LayerDefList& laylist) const
 auxdata::QuadTree* auxdata::GrcCell::secureLayer(const LayerDef& laydef)
 {
    if (_layers.end() == _layers.find(laydef))
-      _layers[laydef] = DEBUG_NEW auxdata::QuadTree();
+      _layers.add(laydef, DEBUG_NEW auxdata::QuadTree());
    return _layers[laydef];
 }
 
 auxdata::QTreeTmp* auxdata::GrcCell::secureUnsortedLayer(const LayerDef& laydef)
 {
    if (_tmpLayers.end() == _tmpLayers.find(laydef))
-      _tmpLayers[laydef] = DEBUG_NEW auxdata::QTreeTmp(secureLayer(laydef));
+      _tmpLayers.add(laydef, DEBUG_NEW auxdata::QTreeTmp(secureLayer(laydef)));
    return _tmpLayers[laydef];
 }
 

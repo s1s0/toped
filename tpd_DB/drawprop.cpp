@@ -617,11 +617,11 @@ bool layprop::DrawProperties::addLayer(std::string name, const LayerDef& laydef)
    {
       case DB:
          if (_laySetDb.end() != _laySetDb.find(laydef)) return false;
-         _laySetDb[laydef] = DEBUG_NEW LayerSettings(name,"","","");
+         _laySetDb.add(laydef, DEBUG_NEW LayerSettings(name,"","",""));
          return true;
       case DRC:
          if (_laySetDrc.end() != _laySetDrc.find(laydef)) return false;
-         _laySetDrc[laydef] = DEBUG_NEW LayerSettings(name,"","","");
+         _laySetDrc.add(laydef, DEBUG_NEW LayerSettings(name,"","",""));
          return true;
       default: assert(false); break;
    }
@@ -634,9 +634,7 @@ LayerDef layprop::DrawProperties::addLayer(std::string name)
    // get the last layer layDef;
    for (LaySetList::Iterator CL = getCurSetList().begin(); CL != getCurSetList().end(); CL++)
       laydef = CL.layDef();
-//   LaySetList::Iterator lastLayNo = getCurSetList().rbegin();
-//   if (getCurSetList().rend() != lastLayNo)
-//      layno = lastLayNo->first;
+   laydef++;
    assert(addLayer(name, laydef));
    return laydef;
 }

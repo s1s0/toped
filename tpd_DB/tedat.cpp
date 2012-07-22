@@ -1859,7 +1859,7 @@ void laydata::TdtCellRef::ungroup(laydata::TdtDesign* ATDB, TdtCell* dst, AtticL
          // ... and to the list of the new shapes (for undo)
          ssl->push_back(data_copy);
          //update the hierarchy tree if this is a cell
-         if (REF_LAY == CL.number()) dst->addChild(ATDB,
+         if (REF_LAY_DEF == CL.layDef()) dst->addChild(ATDB,
                             static_cast<TdtCellRef*>(data_copy)->cStructure());
          // add it to the selection list of the dst cell
          dst->selectThis(data_copy,CL.layDef());
