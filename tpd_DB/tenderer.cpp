@@ -1747,8 +1747,7 @@ bool tenderer::TopRend::collect()
          // The implementation below seems to be the cleanest way to do this,
          // although it relies on my understanding of the way "++" operator should
          // be implemented
-         _data.erase(CCLAY.layDef());
-         CCLAY++;
+         _data.erase(CCLAY++.layDef());
       }
       else if (0 != CCLAY->total_points())
       {
@@ -1785,7 +1784,9 @@ bool tenderer::TopRend::collect()
          assert(0 != CLAY->total_strings());
          continue;
       }
+      assert(current_buffer < _num_ogl_buffers);
       GLuint pbuf = _ogl_buffers[current_buffer++];
+      assert( (0 == CLAY->total_indexs()) || (current_buffer < _num_ogl_buffers) );
       GLuint ibuf = (0 == CLAY->total_indexs()) ? 0u : _ogl_buffers[current_buffer++];
       CLAY->collect(_drawprop->layerFilled(CLAY.layDef()), pbuf, ibuf);
    }
@@ -1834,8 +1835,7 @@ bool tenderer::TopRend::grcCollect()
       if (0 == CCLAY->total_points())
       {
          delete (*CCLAY);
-         _grcData.erase(CCLAY.layDef());
-         CCLAY++;
+         _grcData.erase(CCLAY++.layDef());
       }
       else if (0 != CCLAY->total_points())
       {

@@ -231,6 +231,12 @@ void laydata::LayerContainer<DataT>::erase(const LayerDef& laydef)
       _layers->erase(layer);
 }
 
+//template <typename DataT>
+//void laydata::LayerContainer<DataT>::erase(LayerIterator<DataT> liter)
+//{
+//
+//}
+
 template <typename DataT>
 DataT& laydata::LayerContainer<DataT>::operator[](const LayerDef& laydef)
 {
