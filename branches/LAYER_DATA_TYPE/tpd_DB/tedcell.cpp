@@ -1301,9 +1301,9 @@ void laydata::TdtCell::moveSelected(const CTM& trans, SelectList** fadead)
          // of the above might work fine sometimes which makes the bug hunt a real fun!
          // (thanks to Sergey)
          delete lslct;
-         _shapesel.erase(CL.layDef());
+         _shapesel.erase(CL++.layDef());
       }
-      CL++;
+      else  ++CL;
    }
 }
 
@@ -1368,9 +1368,9 @@ void laydata::TdtCell::rotateSelected(const CTM& trans, SelectList** fadead)
       {
          // at the end, if the container of the selected shapes is empty -
          delete lslct;
-         _shapesel.erase(CL.layDef());
+         _shapesel.erase(CL++.layDef());
       }
-      CL++;
+      else ++CL;
    }
 }
 
@@ -1749,9 +1749,9 @@ laydata::AtticList* laydata::TdtCell::groupPrep(laydata::TdtLibDir* libdir)
       if (lslct->empty())
       {
          delete lslct;
-         _shapesel.erase(CL.layDef());
+         _shapesel.erase(CL++.layDef());
       }
-      CL++;
+      else ++CL;
    }
    // Don't invalidate parent cells. The reason is, that the new cell will
    // be refereced in the same place, so the final overlapping box is supposed
@@ -1885,11 +1885,11 @@ void laydata::TdtCell::transferLayer(const LayerDef& laydef)
          {
             // if the container of the selected shapes is empty -
             delete lslct;
-            _shapesel.erase(CL.layDef());
+            _shapesel.erase(CL++.layDef());
          }
-         CL++;
+         else ++CL;
       }
-      else CL++;
+      else ++CL;
    }
    // finally - validate the destination layer.
    fixUnsorted();
@@ -2043,9 +2043,9 @@ void laydata::TdtCell::storeInAttic(laydata::AtticList& _Attic) {
       else             _Attic.add(CL.layDef(), atl);
       if (lslct->empty())  {
          delete lslct;
-         _shapesel.erase(CL.layDef());
+         _shapesel.erase(CL++.layDef());
       }
-      CL++;
+      else ++CL;
    }
 }
 

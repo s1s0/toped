@@ -102,6 +102,7 @@ namespace laydata {
       void                       clear();
       void                       add(const LayerDef&, DataT);
       void                       erase(const LayerDef&);
+//      void                       erase(LayerIterator<DataT>);
       DataT&                     operator[](const LayerDef&);
       LayerContainer<DataT>&     operator=(const LayerContainer<DataT>&);
    private:
