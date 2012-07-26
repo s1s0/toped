@@ -74,6 +74,8 @@ void tellstdfunc::stdADDBOX::undo()
 int tellstdfunc::stdADDBOX::execute()
 {
    telldata::TtLayer* tlay = static_cast<telldata::TtLayer*>(OPstack.top());OPstack.pop();
+   LayerDef laydef(tlay->value());
+   secureLayer(laydef);
    telldata::TtWnd*      w = static_cast<telldata::TtWnd*>(OPstack.top());OPstack.pop();
    real DBscale = PROPC->DBscale();
    TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
@@ -82,7 +84,7 @@ int tellstdfunc::stdADDBOX::execute()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      telldata::TtLayout* bx = DEBUG_NEW telldata::TtLayout(tDesign->putBox(tlay->value(), p1DB, p2DB),tlay->value());
+      telldata::TtLayout* bx = DEBUG_NEW telldata::TtLayout(tDesign->putBox(laydef, p1DB, p2DB),laydef);
       UNDOcmdQ.push_front(this);
       UNDOPstack.push_front(tlay->selfcopy());
       OPstack.push(bx); UNDOPstack.push_front(bx->selfcopy());
@@ -308,6 +310,7 @@ int tellstdfunc::stdADDBOXp::execute()
 {
    telldata::TtLayer* tlay = static_cast<telldata::TtLayer*>(OPstack.top());OPstack.pop();
    LayerDef laydef(tlay->value());
+   secureLayer(laydef);
    telldata::TtPnt *p1 = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
    telldata::TtPnt *p2 = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
    real DBscale = PROPC->DBscale();
