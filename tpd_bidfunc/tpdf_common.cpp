@@ -133,7 +133,8 @@ telldata::TtList* tellstdfunc::make_ttlaylist(laydata::SelectList* shapesel) {
    laydata::DataList* lslct;
    SGBitSet pntl;
    for (laydata::SelectList::Iterator CL = shapesel->begin();
-                                            CL != shapesel->end(); CL++) {
+                                            CL != shapesel->end(); CL++)
+   {
       lslct = *CL;
       // push each data reference into the TELL list
       for (laydata::DataList::const_iterator CI = lslct->begin();

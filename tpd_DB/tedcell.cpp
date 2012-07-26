@@ -1131,7 +1131,7 @@ void laydata::TdtCell::copySelected(const CTM& trans)
       // omit the layer if there are no fully selected shapes
       if (0 == (numshapes =  getFullySelected(*CL)))
       {
-         CL++; continue;
+         ++CL; continue;
       }
       // Now - Go to copy and sort
       QTreeTmp* dst = secureUnsortedLayer(CL.layDef());
@@ -1150,7 +1150,7 @@ void laydata::TdtCell::copySelected(const CTM& trans)
          DI = CL->erase(DI);
          CL->push_front(SelectDataPair(data_copy,SGBitSet()));
       }
-      CL++;
+      ++CL;
    }
    fixUnsorted();
 };
@@ -1964,7 +1964,7 @@ void laydata::TdtCell::transferLayer(SelectList* slst, const LayerDef& laydef)
             DI++;
          }
       }
-      CL++;
+      ++CL;
    }
    fixUnsorted();
    if (fortransfer->empty())
