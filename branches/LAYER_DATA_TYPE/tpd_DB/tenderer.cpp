@@ -1755,10 +1755,10 @@ bool tenderer::TopRend::collect()
          _num_ogl_buffers++;
          if (0 < CCLAY->total_indexs())
             _num_ogl_buffers++;
-         CCLAY++;
+         ++CCLAY;
       }
       else
-         CCLAY++;
+         ++CCLAY;
    }
    if (0 < _refLayer.total_points())  _num_ogl_buffers ++; // reference boxes
    if (0 < num_total_slctdx      )  _num_ogl_buffers++;  // selected
@@ -1842,10 +1842,10 @@ bool tenderer::TopRend::grcCollect()
          _num_ogl_grc_buffers++;
          if (0 < CCLAY->total_indexs())
             _num_ogl_grc_buffers++;
-         CCLAY++;
+         ++CCLAY;
       }
       else
-         CCLAY++;
+         ++CCLAY;
    }
    // Check whether we have to continue after traversing
    if (0 == _num_ogl_grc_buffers) return false;
