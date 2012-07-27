@@ -984,7 +984,7 @@ int tellstdfunc::GDSgetlaymap::execute()
          for ( NameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
          {
             std::ostringstream dtypestr;
-            dtypestr << drawProp->getLayerNo( *CDL )<< "; 0";
+            dtypestr << drawProp->getLayerNo( *CDL );
             telldata::TtLMap* clay = DEBUG_NEW telldata::TtLMap(drawProp->getLayerNo( *CDL ), dtypestr.str());
             theMap->add(clay);
          }
@@ -1730,7 +1730,7 @@ int tellstdfunc::OASgetlaymap::execute()
          for ( NameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
          {
             std::ostringstream dtypestr;
-            dtypestr << drawProp->getLayerNo( *CDL )<< "; 0";
+            dtypestr << drawProp->getLayerNo( *CDL );
             telldata::TtLMap* clay = DEBUG_NEW telldata::TtLMap(drawProp->getLayerNo( *CDL ), dtypestr.str());
             theMap->add(clay);
          }

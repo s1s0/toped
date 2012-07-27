@@ -2083,9 +2083,9 @@ ExpLayMap* tui::NameEboxRecords::getTheMap()
       if (!CNM->_tdtlay->GetValue()) continue;
       std::string layname = std::string(CNM->_tdtlay->GetLabel().mb_str(wxConvUTF8));
       assert("" != layname);
-      LayerNumber layno = _drawProp->getLayerNo(layname);
-      assert(ERR_LAY != layno);
-      (*cif_lay_map)[layno] = std::string(CNM->_ciflay->GetValue().mb_str(wxConvUTF8));
+      LayerDef laydef = _drawProp->getLayerNo(layname);
+      assert(ERR_LAY_DEF != laydef);
+      (*cif_lay_map)[laydef] = std::string(CNM->_ciflay->GetValue().mb_str(wxConvUTF8));
    }
    return cif_lay_map;
 }

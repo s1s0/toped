@@ -908,13 +908,13 @@ void layprop::DrawProperties::drawReferenceMarks(const TP& p0, const binding_mar
    glBitmap(16,16,7,7,0,0, the_mark);
 }
 
-LayerNumber layprop::DrawProperties::getLayerNo(std::string name) const
+LayerDef layprop::DrawProperties::getLayerNo(std::string name) const
 {
    for (LaySetList::Iterator CL = getCurSetList().begin(); CL != getCurSetList().end(); CL++)
    {
-      if (name == CL->name()) return CL.number();
+      if (name == CL->name()) return CL.layDef();
    }
-   return ERR_LAY;
+   return ERR_LAY_DEF;
 }
 
 LayerDefList layprop::DrawProperties::getAllLayers() const

@@ -1253,15 +1253,15 @@ int tellstdfunc::stdUSINGLAYER_S::execute()
 {
   std::string layname = getStringValue();
   layprop::DrawProperties* drawProp;
-  unsigned layno = ERR_LAY;
+  LayerDef laydef(ERR_LAY_DEF);
   if (PROPC->lockDrawProp(drawProp))
   {
-     layno = drawProp->getLayerNo(layname);
+     laydef = drawProp->getLayerNo(layname);
   }
   PROPC->unlockDrawProp(drawProp, true);
-  if (ERR_LAY != layno)
+  if (ERR_LAY_DEF != laydef)
   {
-    OPstack.push(DEBUG_NEW telldata::TtInt(layno));
+    OPstack.push(DEBUG_NEW telldata::TtLayer(laydef));
     return stdUSINGLAYER::execute();
   }
   else
