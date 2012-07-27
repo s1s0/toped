@@ -1669,9 +1669,9 @@ void GDSin::GdsExportFile::definitionFinish()
 
 }
 
-bool GDSin::GdsExportFile::layerSpecification(LayerNumber layno)
+bool GDSin::GdsExportFile::layerSpecification(const LayerDef& laydef)
 {
-   return (getMappedLayType(_cGdsLayer, _cGdsType, layno));
+   return (getMappedLayType(_cGdsLayer, _cGdsType, laydef));
 }
 
 void GDSin::GdsExportFile::box(const int4b* const pdata)
@@ -1835,9 +1835,9 @@ void GDSin::GdsExportFile::registerCellWritten(std::string cellname)
    _childnames.push_back(cellname);
 }
 
-bool GDSin::GdsExportFile::getMappedLayType(word& gdslay, word& gdstype, LayerNumber tdtlay)
+bool GDSin::GdsExportFile::getMappedLayType(word& gdslay, word& gdstype, const LayerDef& laydef)
 {
-   bool result = _laymap.getExtLayType(gdslay, gdstype, tdtlay);
+   bool result = _laymap.getExtLayType(gdslay, gdstype, laydef);
    return result;
    //It should not be a problem if the tdtlay is not listed in the map. Then
    // we take the default mapping which is gdslay = tdtlay; gdstype = 0

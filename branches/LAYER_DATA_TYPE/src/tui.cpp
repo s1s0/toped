@@ -2151,11 +2151,12 @@ tui::NameEbox3Records::NameEbox3Records( wxWindow *parent, wxPoint pnt, wxSize s
    for (LayerDefList::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
    {
       word wGdsLay, wGdsType;
-      if (!_gdsLayMap->getExtLayType(wGdsLay, wGdsType, CNM->num()))
-      {
-         wGdsLay  = db2TellLayer(CNM->num());
-         wGdsType = CNM->typ();
-      }
+      _gdsLayMap->getExtLayType(wGdsLay, wGdsType, *CNM);
+//      if (!_gdsLayMap->getExtLayType(wGdsLay, wGdsType, *CNM))
+//      {
+//         wGdsLay  = db2TellLayer(CNM->num());
+//         wGdsType = CNM->typ();
+//      }
       wxString tpdlay  = wxString(_drawProp->getLayerName(*CNM).c_str(), wxConvUTF8);
       wxString gdslay, gdstype;
       gdslay << wGdsLay;

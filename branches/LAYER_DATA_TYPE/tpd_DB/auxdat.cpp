@@ -517,7 +517,7 @@ void auxdata::GrcCell::dbExport(DbExportFile& exportf) const
    for (wl = _layers.begin(); wl != _layers.end(); wl++)
    {
       assert(LAST_EDITABLE_LAYNUM > wl.number());
-      if ( !exportf.layerSpecification(wl.number()) ) continue;
+      if ( !exportf.layerSpecification(wl.layDef()) ) continue;
       for (QuadTree::Iterator DI = wl->begin(); DI != wl->end(); DI++)
          DI->dbExport(exportf);
    }

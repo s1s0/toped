@@ -831,7 +831,7 @@ void laydata::TdtCell::dbExport(DbExportFile& exportf, const CellMap& allcells,
    {
       if ( (REF_LAY_DEF != lay.layDef()) &&
            (GRC_LAY_DEF != lay.layDef()) &&
-           !exportf.layerSpecification(lay.number()))
+           !exportf.layerSpecification(lay.layDef()))
          continue;
       for (QuadTree::Iterator DI = lay->begin(); DI != lay->end(); DI++)
          DI->dbExport(exportf);
