@@ -370,7 +370,7 @@ namespace layprop {
          void                       allColors(NameList&) const;
          void                       allFills(NameList&) const;
          void                       allLines(NameList&) const;
-         LayerNumber                getLayerNo(std::string name) const;
+         LayerDef                   getLayerNo(std::string name) const;
       private:
          typedef std::deque<LayStateList>            LayStateHistory;
          typedef std::map<std::string, LayStateList> LayStateMap;
