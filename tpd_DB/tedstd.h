@@ -370,7 +370,7 @@ class DbExportFile {
       virtual void            definitionFinish() = 0;
       virtual void            libraryStart(std::string, TpdTime&, real, real) = 0;
       virtual void            libraryFinish() = 0;
-      virtual bool            layerSpecification(LayerNumber) = 0;
+      virtual bool            layerSpecification(const LayerDef&) = 0;
       virtual void            box(const int4b* const) = 0;
       virtual void            polygon(const int4b* const, unsigned) = 0;
       virtual void            wire(const int4b* const, unsigned, unsigned) = 0;

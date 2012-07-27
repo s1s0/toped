@@ -60,6 +60,29 @@ typedef  std::map<std::string, LayerNumber>  SIMap;       // name
 typedef  std::map<LayerNumber, std::string>  USMap;      // Unsigned - String Map
 //typedef  std::map<word, unsigned long>    SLMap;
 
+//=============================================================================
+// Some common constants
+//=============================================================================
+const byte        MAX_BYTE_VALUE       = 255;
+const word        MAX_WORD_VALUE       = 65535;
+const int4b       MIN_INT4B            = (int4b)0x80000001; //  -2 147 483 647
+const int4b       MAX_INT4B            = (int4b)0x7FFFFFFF; //   2 147 483 643
+const WireWidth   MAX_WIRE_WIDTH       = 0x0FFFFFFF;
+//const DBbox MAX_OVL_BOX        = DBbox(MIN_X,MAX_X,MIN_Y,MIN_Y); // maximum overlapping box
+const LayerNumber REF_LAY              = 0xffffffff;
+const LayerNumber ERR_LAY              = 0xfffffffe;
+const LayerNumber DRC_LAY              = 0xfffffffd;
+const LayerNumber GRC_LAY              = 0xfffffffc;
+const LayerNumber NULL_LAY             = 0xfffffff0;
+const LayerNumber LAST_EDITABLE_LAYNUM = 0x0000ffff;
+const byte        OPENGL_FONT_UNIT     = 128;
+const byte        GRID_LIMIT           = 5;    // if grid step is less than _GRID_LIMIT pixels, grid is hidden
+const real        DEFAULT_DBU          = 1e-9;
+const real        DEFAULT_UU           = 1e-3;
+const LayerDType  DEFAULT_LAY_DATATYPE = 0;
+
+
+
 enum QuadIdentificators{ qidNW = 0,
                          qidNE = 1,
                          qidSE = 2,
@@ -139,7 +162,7 @@ const int         UNDEFCELL_LIB     =  0;
 class LayerDef {
 public:
                              LayerDef()
-                             {
+                             {// TODO clean me up!
                                 int boza = 0;
                                 boza++;
                              }
@@ -148,6 +171,7 @@ public:
                              LayerDef(const LayerDef& laydef) : _num(laydef.num()), _typ(laydef.typ()) {}
    LayerNumber               num() const {return _num;}
    LayerDType                typ() const {return _typ;}
+   void                      toGds(word& lay, word& typ) const {assert(MAX_WORD_VALUE >= _num);assert(MAX_WORD_VALUE >= _typ); lay = (word)_num; typ = (word)_typ;}
    bool                      operator==(const LayerDef& cmp) const {return ((_num == cmp._num) && (_typ == cmp._typ));}
    bool                      operator!=(const LayerDef& cmp) const {return ((_num != cmp._num) || (_typ != cmp._typ));}
    const LayerDef            operator++(int)/*Postfix*/ {LayerDef current(*this); _num++; return current;}
@@ -711,36 +735,16 @@ bool  SGHierTree<TYPE>::removeRootItem(const TYPE* comp, SGHierTree*& lst)
 }
 
 LayerNumber tell2DBLayer(word layno);
-word db2TellLayer(LayerNumber layno);
 
 //=============================================================================
-// More common constants (instead of #defines)
+// more common constants
 //=============================================================================
-const byte        MAX_BYTE_VALUE       = 255;
-const word        MAX_WORD_VALUE       = 65535;
-const int4b       MIN_INT4B            = (int4b)0x80000001; //  -2 147 483 647
-const int4b       MAX_INT4B            = (int4b)0x7FFFFFFF; //   2 147 483 643
-const WireWidth   MAX_WIRE_WIDTH       = 0x0FFFFFFF;
-//const DBbox MAX_OVL_BOX        = DBbox(MIN_X,MAX_X,MIN_Y,MIN_Y); // maximum overlapping box
-const LayerNumber REF_LAY              = 0xffffffff;
-const LayerNumber ERR_LAY              = 0xfffffffe;
-const LayerNumber DRC_LAY              = 0xfffffffd;
-const LayerNumber GRC_LAY              = 0xfffffffc;
-const LayerNumber NULL_LAY             = 0xfffffff0;
-const LayerNumber LAST_EDITABLE_LAYNUM = 0x0000ffff;
-const byte        OPENGL_FONT_UNIT     = 128;
-const byte        GRID_LIMIT           = 5;    // if grid step is less than _GRID_LIMIT pixels, grid is hidden
 const DBbox       DEFAULT_OVL_BOX      = DBbox(TP(0,0));
 const DBbox       DEFAULT_ZOOM_BOX     = DBbox(TP(-2000,-2000), TP(20000,20000));
-const real        DEFAULT_DBU          = 1e-9;
-const real        DEFAULT_UU           = 1e-3;
-const LayerDType  DEFAULT_LAY_DATATYPE = 0;
 const LayerDef    REF_LAY_DEF(REF_LAY, DEFAULT_LAY_DATATYPE);
 const LayerDef    ERR_LAY_DEF(ERR_LAY, DEFAULT_LAY_DATATYPE);
 const LayerDef    DRC_LAY_DEF(DRC_LAY, DEFAULT_LAY_DATATYPE);
 const LayerDef    GRC_LAY_DEF(GRC_LAY, DEFAULT_LAY_DATATYPE);
 const LayerDef    TLL_LAY_DEF(0, DEFAULT_LAY_DATATYPE);
-
-
 
 #endif

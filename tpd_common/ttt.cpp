@@ -716,4 +716,3 @@ unsigned GCD(unsigned arg1, unsigned arg2)
 }
 
 LayerNumber tell2DBLayer(word layno) {return (LayerNumber) layno;}
-word db2TellLayer(LayerNumber layno) {return (word) layno;}

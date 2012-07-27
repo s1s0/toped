@@ -404,7 +404,7 @@ class LayerMapExt {
                            LayerMapExt(const ExpLayMap&, ExtLayers*);
                           ~LayerMapExt();
       bool                 getTdtLay(LayerNumber&, word, word) const;
-      bool                 getExtLayType(word&, word&, LayerNumber) const;
+      bool                 getExtLayType(word&, word&, const LayerDef&) const;
       bool                 status() {return _status;}
       ExpLayMap*           updateMap(ExpLayMap*, bool);
    private:

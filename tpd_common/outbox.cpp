@@ -1323,11 +1323,10 @@ bool LayerMapExt::getTdtLay(LayerNumber& tdtlay, word gdslay, word gdstype) cons
    return true;
 }
 
-bool LayerMapExt::getExtLayType(word& gdslay, word& gdstype, LayerNumber tdtlay) const
+bool LayerMapExt::getExtLayType(word& gdslay, word& gdstype, const LayerDef& tdtlay) const
 {
    assert(!_import); // If you hit this - see the comment in the class declaration
-   gdslay  = db2TellLayer(tdtlay); // the default value
-   gdstype = 0;
+   tdtlay.toGds(gdslay, gdstype);
    if (_theMap.end()       == _theMap.find(tdtlay)       ) return false;
    GlMap::const_iterator glmap = _theMap.find(tdtlay);
    if (1 != glmap->second.size())   return false;
