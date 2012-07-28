@@ -1057,21 +1057,21 @@ LayerMapExt* DataCenter::secureGdsLayMap(const layprop::DrawProperties* drawProp
    LayerMapExt* theGdsMap;
    if (NULL == savedMap)
    {
-      ExpLayMap theMap;
+      ExpLayMap theMap; // std::map<LayerDef, std::string>
       if (import)
       { // generate default import GDS layer map
-         ExtLayers* gdsLayers = DEBUG_NEW ExtLayers();
+         ExtLayers* gdsLayers = DEBUG_NEW ExtLayers(); //std::map<word, WordSet>
          gdsGetLayers(*gdsLayers);
          for ( ExtLayers::const_iterator CGL = gdsLayers->begin(); CGL != gdsLayers->end(); CGL++ )
          {
-            std::ostringstream dtypestr;
-            dtypestr << CGL->first << ";";
+            std::ostringstream laynumstr;
+            laynumstr << CGL->first << ";";
             for ( WordSet::const_iterator CDT = CGL->second.begin(); CDT != CGL->second.end(); CDT++ )
             {
-               if ( CDT != CGL->second.begin() ) dtypestr << ", ";
-               dtypestr << *CDT;
+               std::ostringstream dtypestr;
+               dtypestr << laynumstr << *CDT;
+               theMap[CGL->first] = dtypestr.str();
             }
-            theMap[CGL->first] = dtypestr.str();
          }
          theGdsMap = DEBUG_NEW LayerMapExt(theMap, gdsLayers);
       }
