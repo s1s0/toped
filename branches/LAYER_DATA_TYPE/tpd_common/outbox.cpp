@@ -1385,7 +1385,7 @@ ExpLayMap* LayerMapExt::updateMap(ExpLayMap* update, bool import)
       else
       {
          wxString wxmsg;
-         wxmsg << wxT("Can't make sence from the input string for layer ") << CE->first.num();
+         wxmsg << wxT("Can't make sense from the input string for layer ") << CE->first.num();
          std::string msg(wxmsg.mb_str(wxConvUTF8));
          tell_log(console::MT_ERROR,msg);
       }
