@@ -1069,7 +1069,7 @@ LayerMapExt* DataCenter::secureGdsLayMap(const layprop::DrawProperties* drawProp
             for ( WordSet::const_iterator CDT = CGL->second.begin(); CDT != CGL->second.end(); CDT++ )
             {
                std::ostringstream dtypestr;
-               dtypestr << laynumstr << *CDT;
+               dtypestr << laynumstr.str() << *CDT;
                theMap[CGL->first] = dtypestr.str();
             }
          }
