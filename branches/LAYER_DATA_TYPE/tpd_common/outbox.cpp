@@ -1152,7 +1152,7 @@ bool LayerMapExt::parseLayTypeString(wxString exp, const LayerDef& tdtLaydef)
    getList(  lay_exp , llst);
 
    if (NULL != _alist)
-   {// GDS to TDT conversion
+   {// import i.e. GDS to TDT conversion
       // ... for every listed layer
       for ( WordList::const_iterator CL = llst.begin(); CL != llst.end(); CL++ )
       {
@@ -1164,21 +1164,21 @@ bool LayerMapExt::parseLayTypeString(wxString exp, const LayerDef& tdtLaydef)
             // get all GDS data types for the current layer and copy them
             // to the map
                for ( WordSet::const_iterator CT = (*_alist)[*CL].begin(); CT != (*_alist)[*CL].end(); CT++)
-                  _theMap[*CL].insert(std::make_pair(*CT, tdtLaydef.num()));
+                  _theMap[LayerDef(*CL,*CT)] = tdtLaydef;
             }
             else
             {// for particular (listed) data type
                WordList dtlst;
                getList( type_exp , dtlst);
                for ( WordList::const_iterator CT = dtlst.begin(); CT != dtlst.end(); CT++)
-                  _theMap[*CL].insert(std::make_pair(*CT, tdtLaydef.num()));
+                  _theMap[LayerDef(*CL,*CT)] = tdtLaydef;
             }
          }
          // else ignore the mapped GDS layer
       }
    }
    else
-   {// TDT to GDS conversion
+   {// export i.e. TDT to GDS conversion
       if (1 < llst.size())
       {
          wxString wxmsg;
@@ -1191,7 +1191,7 @@ bool LayerMapExt::parseLayTypeString(wxString exp, const LayerDef& tdtLaydef)
       }
       if (wxT('*') == type_exp)
       { // for all data types - same as data type = 0
-         _theMap[tdtLaydef].insert(std::make_pair(0, llst.front()));
+         _theMap[tdtLaydef] = LayerDef(llst.front(),0);
       }
       else
       {// for particular (listed) data type
@@ -1208,7 +1208,7 @@ bool LayerMapExt::parseLayTypeString(wxString exp, const LayerDef& tdtLaydef)
             std::string msg(wxmsg.mb_str(wxConvUTF8));
             tell_log(console::MT_ERROR,msg);
          }
-         _theMap[tdtLaydef].insert(std::make_pair(dtlst.front(), llst.front()));
+         _theMap[tdtLaydef] = LayerDef(llst.front(), dtlst.front());
       }
    }
 
@@ -1308,18 +1308,14 @@ void LayerMapExt::getList(wxString exp, WordList& data)
 
 }
 
-bool LayerMapExt::getTdtLay(LayerNumber& tdtlay, word gdslay, word gdstype) const
+bool LayerMapExt::getTdtLay(LayerDef& tdtlay, word gdslay, word gdstype) const
 {
    assert(_import); // If you hit this - see the comment in the class declaration
-   // All that this function is doing is:
-   // tdtlay = _theMap[gdslay][gdstype]
-   // A number of protections are in place though as well as const_cast
-   tdtlay = gdslay; // the default value
-   if (_theMap.end()       == _theMap.find(gdslay)       ) return false;
-   GlMap::const_iterator glmap = _theMap.find(gdslay);
-   if (glmap->second.end() == glmap->second.find(gdstype)) return false;
-   GdtTdtMap::const_iterator tltype = glmap->second.find(gdstype);
-   tdtlay = tltype->second;
+   LayerDef gdsLaydef(gdslay, gdstype);
+   tdtlay = gdsLaydef; // the default value
+   GlMap::const_iterator iterTdtLay = _theMap.find(gdsLaydef);
+   if (_theMap.end()       == iterTdtLay ) return false;
+   tdtlay = iterTdtLay->second;
    return true;
 }
 
@@ -1329,9 +1325,7 @@ bool LayerMapExt::getExtLayType(word& gdslay, word& gdstype, const LayerDef& tdt
    tdtlay.toGds(gdslay, gdstype);
    if (_theMap.end()       == _theMap.find(tdtlay)       ) return false;
    GlMap::const_iterator glmap = _theMap.find(tdtlay);
-   if (1 != glmap->second.size())   return false;
-   gdstype =  glmap->second.begin()->first;
-   gdslay =   glmap->second.begin()->second;
+   glmap->second.toGds(gdslay, gdstype);
    return true;
 }
 
@@ -1342,24 +1336,18 @@ ExpLayMap* LayerMapExt::generateAMap()
    {
       for (GlMap::const_iterator CTL = _theMap.begin(); CTL != _theMap.end(); CTL++)
       {
-         for (GdtTdtMap::const_iterator CGT = CTL->second.begin(); CGT != CTL->second.end(); CGT++)
-         {
-            std::ostringstream lay_type;
-            lay_type << CTL->first << ";" << CGT->first;
-            (*wMap)[CGT->second] = lay_type.str();
-         }
+         std::ostringstream lay_type;
+         lay_type << CTL->first.num() << ";" << CTL->first.typ();
+         (*wMap)[CTL->second] = lay_type.str();
       }
    }
    else
    {
       for (GlMap::const_iterator CTL = _theMap.begin(); CTL != _theMap.end(); CTL++)
       {
-         for (GdtTdtMap::const_iterator CGT = CTL->second.begin(); CGT != CTL->second.end(); CGT++)
-         {
-            std::ostringstream lay_type;
-            lay_type << CGT->second << ";" << CGT->first;
-            (*wMap)[CTL->first] = lay_type.str();
-         }
+         std::ostringstream lay_type;
+         lay_type << CTL->second.num() << ";" << CTL->second.typ();
+         (*wMap)[CTL->first] = lay_type.str();
       }
    }
    return wMap;

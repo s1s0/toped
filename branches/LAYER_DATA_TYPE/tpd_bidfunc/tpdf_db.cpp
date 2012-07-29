@@ -963,15 +963,14 @@ int tellstdfunc::GDSgetlaymap::execute()
       DATC->gdsGetLayers(gdsLayers);
       for ( ExtLayers::const_iterator CGL = gdsLayers.begin(); CGL != gdsLayers.end(); CGL++ )
       {
-         std::ostringstream dtypestr;
-         dtypestr << CGL->first << ";";
+         std::ostringstream laynumstr;
+         laynumstr << CGL->first << ";";
          for ( WordSet::const_iterator CDT = CGL->second.begin(); CDT != CGL->second.end(); CDT++ )
          {
-            if ( CDT != CGL->second.begin() ) dtypestr << ", ";
-            dtypestr << *CDT;
+            std::ostringstream dtypestr;
+            dtypestr << laynumstr.str() << *CDT;
+            theMap->add(DEBUG_NEW telldata::TtLMap(CGL->first, dtypestr.str()));
          }
-         telldata::TtLMap* clay = DEBUG_NEW telldata::TtLMap(CGL->first, dtypestr.str());
-         theMap->add(clay);
       }
    }
    else
@@ -984,8 +983,9 @@ int tellstdfunc::GDSgetlaymap::execute()
          for ( NameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
          {
             std::ostringstream dtypestr;
-            dtypestr << drawProp->getLayerNo( *CDL );
-            telldata::TtLMap* clay = DEBUG_NEW telldata::TtLMap(drawProp->getLayerNo( *CDL ), dtypestr.str());
+            LayerDef laydef(drawProp->getLayerNo( *CDL ));
+            dtypestr << laydef.num() << ";" << laydef.typ();
+            telldata::TtLMap* clay = DEBUG_NEW telldata::TtLMap(laydef, dtypestr.str());
             theMap->add(clay);
          }
       }
@@ -1709,15 +1709,14 @@ int tellstdfunc::OASgetlaymap::execute()
       DATC->oasGetLayers(oasLayers);
       for ( ExtLayers::const_iterator CGL = oasLayers.begin(); CGL != oasLayers.end(); CGL++ )
       {
-         std::ostringstream dtypestr;
-         dtypestr << CGL->first << ";";
+         std::ostringstream laynumstr;
+         laynumstr << CGL->first << ";";
          for ( WordSet::const_iterator CDT = CGL->second.begin(); CDT != CGL->second.end(); CDT++ )
          {
-            if ( CDT != CGL->second.begin() ) dtypestr << ", ";
-            dtypestr << *CDT;
+            std::ostringstream dtypestr;
+            dtypestr << laynumstr.str() << *CDT;
+            theMap->add(DEBUG_NEW telldata::TtLMap(CGL->first, dtypestr.str()));
          }
-         telldata::TtLMap* clay = DEBUG_NEW telldata::TtLMap(CGL->first, dtypestr.str());
-         theMap->add(clay);
       }
    }
    else
@@ -1730,8 +1729,9 @@ int tellstdfunc::OASgetlaymap::execute()
          for ( NameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
          {
             std::ostringstream dtypestr;
-            dtypestr << drawProp->getLayerNo( *CDL );
-            telldata::TtLMap* clay = DEBUG_NEW telldata::TtLMap(drawProp->getLayerNo( *CDL ), dtypestr.str());
+            LayerDef laydef(drawProp->getLayerNo( *CDL ));
+            dtypestr << laydef.num() << ";" << laydef.typ();
+            telldata::TtLMap* clay = DEBUG_NEW telldata::TtLMap(laydef, dtypestr.str());
             theMap->add(clay);
          }
       }

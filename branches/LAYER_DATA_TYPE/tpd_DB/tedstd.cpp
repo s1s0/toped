@@ -1187,10 +1187,10 @@ bool ENumberLayerCM::mapTdtLay(laydata::TdtCell* dstStruct, word extLayer, word 
 {
    _extLayNumber = extLayer;
    _extDataType  = extDataType;
-   LayerNumber  newTdtLayNumber;
-   if (_layMap.getTdtLay(newTdtLayNumber, _extLayNumber, _extDataType))
+   LayerDef  newTdtLayDef;
+   if (_layMap.getTdtLay(newTdtLayDef, _extLayNumber, _extDataType))
    {
-      _tdtLayNumber = newTdtLayNumber;
+      _tdtLayNumber = newTdtLayDef;
       _tmpLayer     = dstStruct->secureUnsortedLayer(_tdtLayNumber);
       return true;
    }
