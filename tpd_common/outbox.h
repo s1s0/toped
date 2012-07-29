@@ -403,13 +403,12 @@ class LayerMapExt {
    public:
                            LayerMapExt(const ExpLayMap&, ExtLayers*);
                           ~LayerMapExt();
-      bool                 getTdtLay(LayerNumber&, word, word) const;
+      bool                 getTdtLay(LayerDef&, word, word) const;
       bool                 getExtLayType(word&, word&, const LayerDef&) const;
       bool                 status() {return _status;}
       ExpLayMap*           updateMap(ExpLayMap*, bool);
    private:
-      typedef std::map< word, word  >     GdtTdtMap;
-      typedef std::map< LayerDef, GdtTdtMap>  GlMap;
+      typedef std::map< LayerDef, LayerDef>  GlMap;
       bool                 parseLayTypeString(wxString, const LayerDef&);
       void                 patternNormalize(wxString&);
       void                 getList(wxString, WordList&);

@@ -1909,7 +1909,7 @@ tui::NameCbox3Records::NameCbox3Records( wxWindow *parent, wxPoint pnt, wxSize s
       {
          wxString sGdsDtype;
          sGdsDtype << *CTP;
-         LayerNumber wTdtLay;
+         LayerDef wTdtLay;
          if (!_gdsLayMap->getTdtLay( wTdtLay, CNM->first, *CTP)) wTdtLay = CNM->first;
          wxString sTdtLay(_drawProp->getLayerName(wTdtLay).c_str(), wxConvUTF8);
 
