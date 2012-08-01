@@ -1881,7 +1881,7 @@ ImpLayMap* tui::NameCboxRecords::getTheMap(layprop::DrawProperties* drawProp)
          laydef = drawProp->addLayer(layname);
          TpdPost::layer_add(layname, laydef);
       }
-      (*cif_lay_map)[std::string(CNM->_ciflay->GetLabel().mb_str(wxConvUTF8))] = laydef;
+      cif_lay_map->insert(std::pair<std::string,LayerDef>(std::string(CNM->_ciflay->GetLabel().mb_str(wxConvUTF8)), laydef));
    }
    return cif_lay_map;
 }
@@ -1909,7 +1909,7 @@ tui::NameCbox3Records::NameCbox3Records( wxWindow *parent, wxPoint pnt, wxSize s
       {
          wxString sGdsDtype;
          sGdsDtype << *CTP;
-         LayerDef wTdtLay;
+         LayerDef wTdtLay(ERR_LAY_DEF);
          if (!_gdsLayMap->getTdtLay( wTdtLay, CNM->first, *CTP)) wTdtLay = CNM->first;
          wxString sTdtLay(_drawProp->getLayerName(wTdtLay).c_str(), wxConvUTF8);
 

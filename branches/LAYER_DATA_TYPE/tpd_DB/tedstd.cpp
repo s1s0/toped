@@ -1187,7 +1187,7 @@ bool ENumberLayerCM::mapTdtLay(laydata::TdtCell* dstStruct, word extLayer, word 
 {
    _extLayNumber = extLayer;
    _extDataType  = extDataType;
-   LayerDef  newTdtLayDef;
+   LayerDef  newTdtLayDef(ERR_LAY_DEF);
    if (_layMap.getTdtLay(newTdtLayDef, _extLayNumber, _extDataType))
    {
       _tdtLayNumber = newTdtLayDef;

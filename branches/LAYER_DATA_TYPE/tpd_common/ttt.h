@@ -57,7 +57,7 @@ typedef  std::list<word>                  WordList;
 typedef  std::set<word>                   WordSet;
 typedef  std::map<word, WordSet>          ExtLayers;
 typedef  std::map<std::string, LayerNumber>  SIMap;       // name
-typedef  std::map<LayerNumber, std::string>  USMap;      // Unsigned - String Map
+//typedef  std::map<LayerNumber, std::string>  USMap;      // Unsigned - String Map
 //typedef  std::map<word, unsigned long>    SLMap;
 
 //=============================================================================
@@ -154,28 +154,19 @@ const int         UNDEFCELL_LIB     =  0;
       }                                                         \
    while (0)
 
-// to cast properly the indices parameter in glDrawElements when
-// drawing from VBO
-#define VBO_BUFFER_OFFSET(i) ((char *)NULL + (i))
-
 //==============================================================================
 class LayerDef {
 public:
-                             LayerDef()
-                             {// TODO clean me up!
-                                int boza = 0;
-                                boza++;
-                             }
                              LayerDef(LayerNumber num, LayerDType  typ) : _num(num), _typ(typ) {}
-                             LayerDef(LayerNumber num) : _num(num), _typ(0 /*DEFAULT_LAY_DATATYPE*/) {}
+                             LayerDef(LayerNumber num) : _num(num), _typ(DEFAULT_LAY_DATATYPE) {}
                              LayerDef(const LayerDef& laydef) : _num(laydef.num()), _typ(laydef.typ()) {}
    LayerNumber               num() const {return _num;}
    LayerDType                typ() const {return _typ;}
-   void                      toGds(word& lay, word& typ) const {assert(MAX_WORD_VALUE >= _num);assert(MAX_WORD_VALUE >= _typ); lay = (word)_num; typ = (word)_typ;}
-   bool                      operator==(const LayerDef& cmp) const {return ((_num == cmp._num) && (_typ == cmp._typ));}
-   bool                      operator!=(const LayerDef& cmp) const {return ((_num != cmp._num) || (_typ != cmp._typ));}
-   const LayerDef            operator++(int)/*Postfix*/ {LayerDef current(*this); _num++; return current;}
-   bool                      operator< (const LayerDef& cmp) const {return (_num == cmp._num) ? (_typ < cmp._typ) : (_num < cmp._num);}
+   void                      toGds(word& lay, word& typ) const;
+   bool                      operator==(const LayerDef& cmp) const;
+   bool                      operator!=(const LayerDef& cmp) const;
+   const LayerDef            operator++(int)/*Postfix*/;
+   bool                      operator< (const LayerDef& cmp) const;
    friend  std::ostream& operator <<(std::ostream &os, const LayerDef &obj);
 private:
    LayerNumber               _num;

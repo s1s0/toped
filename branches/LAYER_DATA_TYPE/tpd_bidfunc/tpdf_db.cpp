@@ -1152,7 +1152,7 @@ int tellstdfunc::CIFimportList::execute()
    for (unsigned i = 0; i < ll->size(); i++)
    {
       nameh = static_cast<telldata::TtLMap*>((ll->mlist())[i]);
-      cifLays[nameh->value().value()] = nameh->layer().value();
+      cifLays.insert(std::pair<std::string,LayerDef>(nameh->value().value(), nameh->layer().value()));
    }
    // Convert top structure list
    NameList top_cells;
@@ -1206,7 +1206,7 @@ int tellstdfunc::CIFimport::execute()
    for (unsigned i = 0; i < lll->size(); i++)
    {
       nameh = static_cast<telldata::TtLMap*>((lll->mlist())[i]);
-      cifLays[nameh->value().value()] = nameh->layer().value();
+      cifLays.insert(std::pair<std::string, LayerDef>(nameh->value().value(), nameh->layer().value()));
    }
    // Convert top structure list
    NameList top_cells;
