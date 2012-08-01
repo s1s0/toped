@@ -982,10 +982,8 @@ int tellstdfunc::GDSgetlaymap::execute()
          drawProp->allLayers(tdtLayers);
          for ( NameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
          {
-            std::ostringstream dtypestr;
             LayerDef laydef(drawProp->getLayerNo( *CDL ));
-            dtypestr << laydef.num() << ";" << laydef.typ();
-            telldata::TtLMap* clay = DEBUG_NEW telldata::TtLMap(laydef, dtypestr.str());
+            telldata::TtLMap* clay = DEBUG_NEW telldata::TtLMap(laydef, laydef.toQList());
             theMap->add(clay);
          }
       }
@@ -1728,10 +1726,8 @@ int tellstdfunc::OASgetlaymap::execute()
          drawProp->allLayers(tdtLayers);
          for ( NameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
          {
-            std::ostringstream dtypestr;
             LayerDef laydef(drawProp->getLayerNo( *CDL ));
-            dtypestr << laydef.num() << ";" << laydef.typ();
-            telldata::TtLMap* clay = DEBUG_NEW telldata::TtLMap(laydef, dtypestr.str());
+            telldata::TtLMap* clay = DEBUG_NEW telldata::TtLMap(laydef, laydef.toQList());
             theMap->add(clay);
          }
       }

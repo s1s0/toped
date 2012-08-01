@@ -63,6 +63,18 @@ void LayerDef::toGds(word& lay, word& typ) const
    typ = (word)_typ;
 }
 
+std::string LayerDef::toQList() const
+{
+   std::ostringstream result;
+   result << _num << ";" << _typ;
+   return result.str();
+}
+
+bool LayerDef::editable() const
+{
+   return (!(_num > LAST_EDITABLE_LAYNUM));
+}
+
 std::ostream& operator <<(std::ostream& os, const LayerDef& obj)
 {
    os << "{ " << obj.num() << "," << obj.typ() << "}";

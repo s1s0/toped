@@ -1081,10 +1081,8 @@ LayerMapExt* DataCenter::secureGdsLayMap(const layprop::DrawProperties* drawProp
          drawProp->allLayers(tdtLayers);
          for ( NameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
          {
-            std::ostringstream dtypestr;
             LayerDef laydef(drawProp->getLayerNo( *CDL ));
-            dtypestr << laydef.num() << ";" << laydef.typ();
-            theMap[laydef] = dtypestr.str();
+            theMap[laydef] = laydef.toQList();
          }
          theGdsMap = DEBUG_NEW LayerMapExt(theMap, NULL);
       }

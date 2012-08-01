@@ -282,7 +282,7 @@ void telldata::TtLayout::echo(std::string& wstr, real DBU)
       ost << "< !EMPTY! >";
    else
    {
-      if ( LAST_EDITABLE_LAYNUM > _layer.num())
+      if ( _layer.editable() )
          ost << "layer " << _layer.num() << " :"
              << "dtype " << _layer.typ() << " :";
       _data->info(ost, DBU);
@@ -322,7 +322,7 @@ void telldata::TtAuxdata::echo(std::string& wstr, real DBU)
       ost << "< !EMPTY! >";
    else
    {
-      if ( LAST_EDITABLE_LAYNUM > _layer.num())
+      if ( _layer.editable())
          ost << "layer " << _layer.num() << " :"
              << "dtype " << _layer.typ() << " :";
       _data->info(ost, DBU);
