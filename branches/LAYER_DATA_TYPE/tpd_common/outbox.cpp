@@ -1335,20 +1335,12 @@ ExpLayMap* LayerMapExt::generateAMap()
    if (_import)
    {
       for (GlMap::const_iterator CTL = _theMap.begin(); CTL != _theMap.end(); CTL++)
-      {
-         std::ostringstream lay_type;
-         lay_type << CTL->first.num() << ";" << CTL->first.typ();
-         (*wMap)[CTL->second] = lay_type.str();
-      }
+         (*wMap)[CTL->second] = CTL->first.toQList();
    }
    else
    {
       for (GlMap::const_iterator CTL = _theMap.begin(); CTL != _theMap.end(); CTL++)
-      {
-         std::ostringstream lay_type;
-         lay_type << CTL->second.num() << ";" << CTL->second.typ();
-         (*wMap)[CTL->first] = lay_type.str();
-      }
+         (*wMap)[CTL->first] = CTL->second.toQList();
    }
    return wMap;
 }

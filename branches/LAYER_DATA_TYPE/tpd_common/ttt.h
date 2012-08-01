@@ -163,6 +163,8 @@ public:
    LayerNumber               num() const {return _num;}
    LayerDType                typ() const {return _typ;}
    void                      toGds(word& lay, word& typ) const;
+   std::string               toQList() const;
+   bool                      editable() const;
    bool                      operator==(const LayerDef& cmp) const;
    bool                      operator!=(const LayerDef& cmp) const;
    const LayerDef            operator++(int)/*Postfix*/;
