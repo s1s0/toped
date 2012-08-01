@@ -37,35 +37,26 @@ laydata::LayerIterator<DataT>::LayerIterator():
 }
 
 template <typename DataT>
-laydata::LayerIterator<DataT>::LayerIterator( const LayerNMap* lhldr):
+laydata::LayerIterator<DataT>::LayerIterator( const LayerDefMap* lhldr):
    _layerHolder ( lhldr                        )
 {
    _cNMap = _layerHolder->begin();
    if (_layerHolder->end() == _cNMap)
       _layerHolder = NULL;
-   else
-   {
-      _cDMap= _cNMap->second.begin();
-      if (_cNMap->second.end() == _cDMap)
-         _layerHolder = NULL;
-   }
 }
 
 template <typename DataT>
-laydata::LayerIterator<DataT>::LayerIterator( const LayerNMap* lhldr, const LayerDef& laydef):
+laydata::LayerIterator<DataT>::LayerIterator( const LayerDefMap* lhldr, const LayerDef& laydef):
    _layerHolder ( lhldr                      )
 {
-   _cNMap = _layerHolder->find(laydef.num());
+   _cNMap = _layerHolder->find(laydef);
    assert (_layerHolder->end() != _cNMap);
-   _cDMap = _cNMap->second.find(laydef.typ());
-   assert(_cNMap->second.end() != _cDMap);
 }
 
 template <typename DataT>
 laydata::LayerIterator<DataT>::LayerIterator(const LayerIterator<DataT>& liter):
    _layerHolder ( liter._layerHolder           ),
-   _cNMap       ( liter._cNMap                 ),
-   _cDMap       ( liter._cDMap                 )
+   _cNMap       ( liter._cNMap                 )
 {
 }
 
@@ -77,15 +68,9 @@ laydata::LayerIterator<DataT>::~LayerIterator()
 template <typename DataT>
 const laydata::LayerIterator<DataT>& laydata::LayerIterator<DataT>::operator++()
 {//Prefix
-   typename LayerNMap::const_iterator nextNMap = _cNMap;
-   typename LayerDMap::const_iterator nextDMap = _cDMap;
-   if (++nextDMap != _cNMap->second.end())
-      _cDMap = nextDMap;
-   else if (++nextNMap != _layerHolder->end())
-   {
+   typename LayerDefMap::const_iterator nextNMap = _cNMap;
+   if (++nextNMap != _layerHolder->end())
       _cNMap= nextNMap;
-      _cDMap = _cNMap->second.begin();
-   }
    else
       _layerHolder = NULL;
    return *this;
@@ -106,8 +91,7 @@ bool laydata::LayerIterator<DataT>::operator==(const LayerIterator<DataT>& liter
       return true;
    else
       return (    (_layerHolder == liter._layerHolder)
-               && (_cNMap       == liter._cNMap      )
-               && (_cDMap       == liter._cDMap      ) );
+               && (_cNMap       == liter._cNMap      ) );
 }
 
 template <typename DataT>
@@ -120,9 +104,8 @@ template <typename DataT>
 DataT laydata::LayerIterator<DataT>::operator->() const
 {
    if (   (NULL == _layerHolder           )
-       || (_layerHolder->end()  == _cNMap )
-       || (_cNMap->second.end() == _cDMap )) return NULL;
-   return _cDMap->second;
+       || (_layerHolder->end()  == _cNMap )) return NULL;
+   return _cNMap->second;
 }
 
 template <typename DataT>
@@ -134,20 +117,20 @@ DataT laydata::LayerIterator<DataT>::operator*() const
 template <typename DataT>
 LayerNumber laydata::LayerIterator<DataT>::number() const
 {
-   return _cNMap->first;
+   return _cNMap->first.num();
 }
 
 template <typename DataT>
 LayerDef laydata::LayerIterator<DataT>::layDef() const
 {
-   return LayerDef(_cNMap->first, _cDMap->first);
+   return LayerDef(_cNMap->first);
 }
 
 //=============================================================================
 template <typename DataT>
 laydata::LayerContainer<DataT>::LayerContainer()
 {
-   _layers = DEBUG_NEW LayerNMap;
+   _layers = DEBUG_NEW LayerDefMap;
    _copy   = false;
 }
 
@@ -181,15 +164,9 @@ const typename laydata::LayerIterator<DataT> laydata::LayerContainer<DataT>::end
 template <typename DataT>
 const typename laydata::LayerIterator<DataT> laydata::LayerContainer<DataT>::find(const LayerDef& laydef) const
 {
-   typename LayerNMap::const_iterator layer = _layers->find(laydef.num());
+   typename LayerDefMap::const_iterator layer = _layers->find(laydef);
    if (_layers->end() == layer) return Iterator();
-   else
-   {
-      LayerDMap allTypes = layer->second;
-      typename LayerDMap::const_iterator dtype = allTypes.find(laydef.typ());
-      if (allTypes.end() == dtype) return Iterator();
-      else return Iterator(_layers, laydef);
-   }
+   else return Iterator(_layers, laydef);
 }
 
 template <typename DataT>
@@ -207,28 +184,23 @@ size_t laydata::LayerContainer<DataT>::size() const
 template <typename DataT>
 void laydata::LayerContainer<DataT>::clear()
 {
-   for (typename LayerNMap::iterator layer = _layers->begin(); layer != _layers->end(); layer++)
-      layer->second.clear();
    _layers->clear();
 }
 
 template <typename DataT>
 void laydata::LayerContainer<DataT>::add(const LayerDef& laydef, DataT quad)
 {
-   assert(_layers->end() == _layers->find(laydef.num()));
+   assert(_layers->end() == _layers->find(laydef));
 
-   (*_layers)[laydef.num()][laydef.typ()] = quad;
+   _layers->insert(std::pair<LayerDef, DataT>(laydef, quad));
 }
 
 template <typename DataT>
 void laydata::LayerContainer<DataT>::erase(const LayerDef& laydef)
 {
-   typename LayerNMap::iterator layer = _layers->find(laydef.num());
+   typename LayerDefMap::iterator layer = _layers->find(laydef);
    assert(_layers->end() != layer);
-   LayerDMap allTypes = layer->second;
-   allTypes.erase(laydef.typ());
-   if (allTypes.empty())
-      _layers->erase(layer);
+   _layers->erase(layer);
 }
 
 //template <typename DataT>
@@ -240,27 +212,10 @@ void laydata::LayerContainer<DataT>::erase(const LayerDef& laydef)
 template <typename DataT>
 DataT& laydata::LayerContainer<DataT>::operator[](const LayerDef& laydef)
 {
-   typename LayerNMap::iterator layer = _layers->find(laydef.num());
+   typename LayerDefMap::iterator layer = _layers->find(laydef);
    if (_layers->end() == layer)
-   {
       assert(false);
-//      DataT newItem;
-//      add(laydef, newItem);
-//      return newItem;
-   }
-   else
-   {
-      LayerDMap allTypes = layer->second;
-      typename LayerDMap::iterator dtype = allTypes.find(laydef.typ());
-      if (allTypes.end() == dtype)
-      {
-         assert(false);
-//         DataT newItem;
-//         add(laydef, newItem);
-//         return newItem;
-      }
-      return (*_layers)[laydef.num()][laydef.typ()];
-   }
+   return (*_layers)[laydef];
 }
 
 template <typename DataT>

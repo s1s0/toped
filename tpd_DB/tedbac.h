@@ -51,23 +51,19 @@ namespace laydata {
 
 
 //   template <typename DataT>
-//   struct LayerDMap {
-//      typedef std::map<LayerDType , DataT     >     Type;
-//   };
-//   template <typename DataT>
-//   struct LayerNMap {
-//      typedef std::map<LayerNumber, typename LayerDMap<DataT>::Type >  Type;
+//   struct LayerDefMap {
+//      typedef std::map<LayerDef , DataT     >     Type;
 //   };
 
 
    template <typename DataT>
    class LayerIterator {
    public:
-      typedef                       std::map<LayerDType , DataT>   LayerDMap;
-      typedef std::map<LayerNumber, std::map<LayerDType , DataT> > LayerNMap;
+      typedef std::map<LayerDef , DataT     > LayerDefMap;
+//      typedef typename LayerDefMap<DataT>::Type LayerDefMap;
                                 LayerIterator();
-                                LayerIterator(const LayerNMap*);
-                                LayerIterator(const LayerNMap*, const LayerDef&);
+                                LayerIterator(const LayerDefMap*);
+                                LayerIterator(const LayerDefMap*, const LayerDef&);
                                 LayerIterator(const LayerIterator&);
       virtual                  ~LayerIterator();
       const LayerIterator&      operator++();    //Prefix
@@ -79,17 +75,16 @@ namespace laydata {
       LayerNumber               number() const;
       LayerDef                  layDef() const;
    protected:
-      const LayerNMap*          _layerHolder;
-      typename LayerNMap::const_iterator _cNMap;
-      typename LayerDMap::const_iterator _cDMap;
+      const LayerDefMap*        _layerHolder;
+      typename LayerDefMap::const_iterator _cNMap;
    };
 
    template <typename DataT>
    class LayerContainer {
    public:
       friend class LayerIterator<DataT>;
-      typedef                       std::map<LayerDType , DataT>   LayerDMap;
-      typedef std::map<LayerNumber, std::map<LayerDType , DataT> > LayerNMap;
+      typedef std::map<LayerDef , DataT     > LayerDefMap;
+//      typedef typename LayerDefMap<DataT>::Type LayerDefMap;
       typedef LayerIterator<DataT> Iterator;
                                  LayerContainer();
                                  LayerContainer(const LayerContainer<DataT>&);
@@ -106,7 +101,7 @@ namespace laydata {
       DataT&                     operator[](const LayerDef&);
       LayerContainer<DataT>&     operator=(const LayerContainer<DataT>&);
    private:
-      LayerNMap*                 _layers;
+      LayerDefMap*               _layers;
       bool                       _copy;
    };
 
