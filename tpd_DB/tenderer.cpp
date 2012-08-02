@@ -1747,7 +1747,7 @@ bool tenderer::TopRend::collect()
          // The implementation below seems to be the cleanest way to do this,
          // although it relies on my understanding of the way "++" operator should
          // be implemented
-         _data.erase(CCLAY++.layDef());
+         _data.erase(CCLAY++());
       }
       else if (0 != CCLAY->total_points())
       {
@@ -1788,7 +1788,7 @@ bool tenderer::TopRend::collect()
       GLuint pbuf = _ogl_buffers[current_buffer++];
       assert( (0 == CLAY->total_indexs()) || (current_buffer < _num_ogl_buffers) );
       GLuint ibuf = (0 == CLAY->total_indexs()) ? 0u : _ogl_buffers[current_buffer++];
-      CLAY->collect(_drawprop->layerFilled(CLAY.layDef()), pbuf, ibuf);
+      CLAY->collect(_drawprop->layerFilled(CLAY()), pbuf, ibuf);
    }
    //
    // collect the indexes of the selected objects
@@ -1835,7 +1835,7 @@ bool tenderer::TopRend::grcCollect()
       if (0 == CCLAY->total_points())
       {
          delete (*CCLAY);
-         _grcData.erase(CCLAY++.layDef());
+         _grcData.erase(CCLAY++());
       }
       else if (0 != CCLAY->total_points())
       {
@@ -1867,7 +1867,7 @@ bool tenderer::TopRend::grcCollect()
       }
       GLuint pbuf = _ogl_grc_buffers[current_buffer++];
       GLuint ibuf = (0 == CLAY->total_indexs()) ? 0u : _ogl_grc_buffers[current_buffer++];
-      CLAY->collect(_drawprop->layerFilled(CLAY.layDef()), pbuf, ibuf);
+      CLAY->collect(_drawprop->layerFilled(CLAY()), pbuf, ibuf);
    }
    //
    // collect the indexes of the selected objects
@@ -1880,7 +1880,7 @@ void tenderer::TopRend::draw()
 {
    for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {// for every layer
-      _drawprop->setCurrentColor(CLAY.layDef());
+      _drawprop->setCurrentColor(CLAY());
       _drawprop->setCurrentFill(true); // force fill (ignore block_fill state)
       _drawprop->setLineProps(false);
       if (0 != CLAY->total_slctdx())
@@ -1913,7 +1913,7 @@ void tenderer::TopRend::grcDraw()
 {
    for (DataLay::Iterator CLAY = _grcData.begin(); CLAY != _grcData.end(); CLAY++)
    {// for every layer
-      _drawprop->setCurrentColor(CLAY.layDef());
+      _drawprop->setCurrentColor(CLAY());
       _drawprop->setCurrentFill(true); // force fill (ignore block_fill state)
       _drawprop->setLineProps(false);
       // draw everything

@@ -115,15 +115,15 @@ DataT laydata::LayerIterator<DataT>::operator*() const
 }
 
 template <typename DataT>
-LayerNumber laydata::LayerIterator<DataT>::number() const
+LayerDef laydata::LayerIterator<DataT>::operator()() const
 {
-   return _cNMap->first.num();
+   return _cNMap->first;
 }
 
 template <typename DataT>
-LayerDef laydata::LayerIterator<DataT>::layDef() const
+LayerNumber laydata::LayerIterator<DataT>::number() const
 {
-   return _cNMap->first;
+   return _cNMap->first.num();
 }
 
 template <typename DataT>

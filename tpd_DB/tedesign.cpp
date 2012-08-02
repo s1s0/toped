@@ -1589,7 +1589,7 @@ bool laydata::TdtDesign::groupSelected(std::string name, laydata::TdtLibDir* lib
    for(AtticList::Iterator CL = TBgroup->begin();  CL != TBgroup->end(); CL++)
    {
       ShapeList* lslct = *CL;
-      QTreeTmp* wl = newcell->secureUnsortedLayer(CL.layDef());
+      QTreeTmp* wl = newcell->secureUnsortedLayer(CL());
       // There is no point here to ensure that the layer definition exists.
       // We are just transferring shapes from one structure to another.
       // securelaydef( CL->first );
@@ -1597,7 +1597,7 @@ bool laydata::TdtDesign::groupSelected(std::string name, laydata::TdtLibDir* lib
                                                      CI != lslct->end(); CI++)
       {
          wl->put(*CI);
-         if (REF_LAY_DEF == CL.layDef()) newcell->addChild(this,
+         if (REF_LAY_DEF == CL()) newcell->addChild(this,
                                     static_cast<TdtCellRef*>(*CI)->structure());
       }
       lslct->clear();

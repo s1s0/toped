@@ -633,7 +633,7 @@ LayerDef layprop::DrawProperties::addLayer(std::string name)
    LayerDef laydef(TLL_LAY_DEF);
    // get the last layer layDef;
    for (LaySetList::Iterator CL = getCurSetList().begin(); CL != getCurSetList().end(); CL++)
-      laydef = CL.layDef();
+      laydef = CL();
    laydef++;
    assert(addLayer(name, laydef));
    return laydef;
@@ -912,7 +912,7 @@ LayerDef layprop::DrawProperties::getLayerNo(std::string name) const
 {
    for (LaySetList::Iterator CL = getCurSetList().begin(); CL != getCurSetList().end(); CL++)
    {
-      if (name == CL->name()) return CL.layDef();
+      if (name == CL->name()) return CL();
    }
    return ERR_LAY_DEF;
 }
@@ -921,7 +921,7 @@ LayerDefList layprop::DrawProperties::getAllLayers() const
 {
    LayerDefList listLayers;
    for( LaySetList::Iterator CL = getCurSetList().begin(); CL != getCurSetList().end(); CL++)
-      listLayers.push_back(CL.layDef());
+      listLayers.push_back(CL());
    return listLayers;
 }
 
@@ -930,7 +930,7 @@ void layprop::DrawProperties::allUnselectable(LayerDefSet& layset)
    for( LaySetList::Iterator CL = getCurSetList().begin(); CL != getCurSetList().end(); CL++)
    {
       if (CL->hidden() || CL->locked())
-         layset.insert(CL.layDef());
+         layset.insert(CL());
    }
    layset.insert(GRC_LAY_DEF);
 }
@@ -940,7 +940,7 @@ void layprop::DrawProperties::allInvisible(LayerDefSet& layset)
    for( LaySetList::Iterator CL = getCurSetList().begin(); CL != getCurSetList().end(); CL++)
    {
       if (CL->hidden())
-         layset.insert(CL.layDef());
+         layset.insert(CL());
    }
 }
 //WordList layprop::PropertyCenter::getLockedLayers() const
@@ -1003,7 +1003,7 @@ LayerDef layprop::DrawProperties::getTenderLay(const LayerDef& laydef) const
 void layprop::DrawProperties::allLayers(NameList& alllays) const
 {
    for (LaySetList::Iterator CL = getCurSetList().begin(); CL != getCurSetList().end(); CL++)
-      if (REF_LAY_DEF != CL.layDef()) alllays.push_back(CL->name());
+      if (REF_LAY_DEF != CL()) alllays.push_back(CL->name());
 }
 
 void layprop::DrawProperties::allColors(NameList& colist) const
@@ -1143,7 +1143,7 @@ void layprop::DrawProperties::saveLayers(FILE* prop_file) const
    fprintf(prop_file, "   colorSetup(); fillSetup(); lineSetup();\n");
    for( LaySetList::Iterator CI = getCurSetList().begin(); CI != getCurSetList().end(); CI++ )
    {
-      if (REF_LAY_DEF == CI.layDef()) continue;
+      if (REF_LAY_DEF == CI()) continue;
       fprintf(prop_file, "   layprop(\"%s\", %d , \"%s\", \"%s\", \"%s\");\n",
               CI->name().c_str()         ,
               CI.number()                ,
@@ -1287,7 +1287,7 @@ void layprop::DrawProperties::pushLayerStatus()
    LayStateList& clist = _layStateHistory.front();
    for (LaySetList::Iterator CL = _laySetDb.begin(); CL != _laySetDb.end(); CL++)
    {
-      clist.second.push_back(LayerState(CL.layDef(), *(*CL)));
+      clist.second.push_back(LayerState(CL(), *(*CL)));
    }
 //   clist.first = _curlay.num();
 }
@@ -1335,7 +1335,7 @@ bool layprop::DrawProperties::saveLaysetStatus(const std::string& sname)
    bool status = true;
    for (LaySetList::Iterator CL = _laySetDb.begin(); CL != _laySetDb.end(); CL++)
    {
-      clist.second.push_back(LayerState(CL.layDef(), *(*CL)));
+      clist.second.push_back(LayerState(CL(), *(*CL)));
    }
 //   clist.first = _curlay;
    if (_layStateMap.end() != _layStateMap.find(sname)) status = false;
@@ -1350,10 +1350,10 @@ bool layprop::DrawProperties::saveLaysetStatus(const std::string& sname, const L
    bool status = true;
    for (LaySetList::Iterator CL = _laySetDb.begin(); CL != _laySetDb.end(); CL++)
    {
-      bool hiden  = (hidel.end() != hidel.find(CL.layDef()));
-      bool locked = (lockl.end() != lockl.find(CL.layDef()));
-      bool filled = (filll.end() != filll.find(CL.layDef()));
-      clist.second.push_back(LayerState(CL.layDef(), hiden, locked, filled));
+      bool hiden  = (hidel.end() != hidel.find(CL()));
+      bool locked = (lockl.end() != lockl.find(CL()));
+      bool filled = (filll.end() != filll.find(CL()));
+      clist.second.push_back(LayerState(CL(), hiden, locked, filled));
    }
 //   clist.first = alaydef;
    if (_layStateMap.end() == _layStateMap.find(sname)) status = false;

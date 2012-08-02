@@ -1836,18 +1836,18 @@ void laydata::TdtCellRef::ungroup(laydata::TdtDesign* ATDB, TdtCell* dst, AtticL
    for (SelectList::Iterator CL = cstr->shapeSel()->begin(); CL != cstr->shapeSel()->end(); CL++)
    {
       // secure the target layer
-      QTreeTmp* wl = dst->secureUnsortedLayer(CL.layDef());
+      QTreeTmp* wl = dst->secureUnsortedLayer(CL());
       // There is no point here to ensure that the layer definition exists.
       // We are just transferring shapes from one structure to another.
       // Of course ATDB is undefined (forward defined) here, so if the method has to be
       // used here - something else should be done
       // ATDB->securelaydef( CL->first );
       // secure the select layer (for undo)
-      if (nshp->end() != nshp->find(CL.layDef()))
-         ssl = (*nshp)[CL.layDef()];
+      if (nshp->end() != nshp->find(CL()))
+         ssl = (*nshp)[CL()];
       else {
          ssl = DEBUG_NEW ShapeList();
-         nshp->add(CL.layDef(), ssl);
+         nshp->add(CL(), ssl);
       }
       // for every single shape on the layer
       for (DataList::const_iterator DI = CL->begin(); DI != CL->end(); DI++)
@@ -1859,10 +1859,10 @@ void laydata::TdtCellRef::ungroup(laydata::TdtDesign* ATDB, TdtCell* dst, AtticL
          // ... and to the list of the new shapes (for undo)
          ssl->push_back(data_copy);
          //update the hierarchy tree if this is a cell
-         if (REF_LAY_DEF == CL.layDef()) dst->addChild(ATDB,
+         if (REF_LAY_DEF == CL()) dst->addChild(ATDB,
                             static_cast<TdtCellRef*>(data_copy)->cStructure());
          // add it to the selection list of the dst cell
-         dst->selectThis(data_copy,CL.layDef());
+         dst->selectThis(data_copy,CL());
       }
    }
    cstr->unselectAll();
