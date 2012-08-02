@@ -438,7 +438,7 @@ int tellstdfunc::stdHIDELAYERS::execute()
             if (!laydef.editable())
             {
                std::ostringstream info;
-               info << "Layer number "<< laydef.num() <<" out of range ... ignored";
+               info << "Layer number "<< laydef <<" out of range ... ignored";
                tell_log(console::MT_WARNING,info.str());
             }
             else if (laydef == drawProp->curLay())
@@ -838,7 +838,7 @@ int tellstdfunc::stdLOCKLAYERS::execute()
             if (!laydef.editable())
             {
                std::ostringstream info;
-               info << "Layer number "<< laydef.num() <<" out of range ... ignored";
+               info << "Layer number "<< laydef <<" out of range ... ignored";
                tell_log(console::MT_WARNING,info.str());
             }
             else if (laydef == drawProp->curLay())

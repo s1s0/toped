@@ -499,10 +499,9 @@ auxdata::GrcCell::~GrcCell()
 
 void auxdata::GrcCell::write(OutputTdtFile* const tedfile) const
 {
-   LayerHolder::Iterator wl;
-   for (wl = _layers.begin(); wl != _layers.end(); wl++)
+   for (LayerHolder::Iterator wl = _layers.begin(); wl != _layers.end(); wl++)
    {
-      assert(LAST_EDITABLE_LAYNUM >= wl.number());
+      assert(wl.editable());
       tedfile->putByte(tedf_LAYER);
       tedfile->putWord(wl.number());
       for (QuadTree::Iterator DI = wl->begin(); DI != wl->end(); DI++)
@@ -513,10 +512,9 @@ void auxdata::GrcCell::write(OutputTdtFile* const tedfile) const
 
 void auxdata::GrcCell::dbExport(DbExportFile& exportf) const
 {
-   LayerHolder::Iterator wl;
-   for (wl = _layers.begin(); wl != _layers.end(); wl++)
+   for (LayerHolder::Iterator wl = _layers.begin(); wl != _layers.end(); wl++)
    {
-      assert(LAST_EDITABLE_LAYNUM > wl.number());
+      assert(wl.editable());
       if ( !exportf.layerSpecification(wl.layDef()) ) continue;
       for (QuadTree::Iterator DI = wl->begin(); DI != wl->end(); DI++)
          DI->dbExport(exportf);
@@ -526,7 +524,7 @@ void auxdata::GrcCell::dbExport(DbExportFile& exportf) const
 void auxdata::GrcCell::collectUsedLays(LayerDefList& laylist) const
 {
    for(LayerHolder::Iterator CL = _layers.begin(); CL != _layers.end(); CL++)
-      if (LAST_EDITABLE_LAYNUM > CL.number())
+      if (CL.editable())
          laylist.push_back(CL.layDef());
 }
 

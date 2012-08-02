@@ -123,7 +123,13 @@ LayerNumber laydata::LayerIterator<DataT>::number() const
 template <typename DataT>
 LayerDef laydata::LayerIterator<DataT>::layDef() const
 {
-   return LayerDef(_cNMap->first);
+   return _cNMap->first;
+}
+
+template <typename DataT>
+bool laydata::LayerIterator<DataT>::editable() const
+{
+   return _cNMap->first.editable();
 }
 
 //=============================================================================

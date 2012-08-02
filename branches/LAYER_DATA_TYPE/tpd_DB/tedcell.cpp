@@ -774,7 +774,7 @@ void laydata::TdtCell::write(OutputTdtFile* const tedfile, const CellMap& allcel
             DI->write(tedfile);
          tedfile->putByte(tedf_REFSEND);
       }
-      else if ( LAST_EDITABLE_LAYNUM >= lay.number() )
+      else if ( lay.editable() )
       {
          tedfile->putByte(tedf_LAYER);
          tedfile->putWord(lay.number());
@@ -2294,7 +2294,7 @@ void laydata::TdtCell::collectUsedLays(const TdtLibDir* LTDB, bool recursive, La
          LTDB->collectUsedLays(*CC, recursive, laylist);
    // then update with the layers used in this cell
    for(LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
-      if (LAST_EDITABLE_LAYNUM > lay.number())
+      if (lay.editable())
          laylist.push_back(lay.layDef());
 }
 
