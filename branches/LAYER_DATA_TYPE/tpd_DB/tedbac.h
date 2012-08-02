@@ -72,8 +72,8 @@ namespace laydata {
       bool                      operator!=(const LayerIterator&) const;
       DataT                     operator->() const;
       DataT                     operator*() const;
+      LayerDef                  operator()() const;
       LayerNumber               number() const;
-      LayerDef                  layDef() const;
       bool                      editable() const;
    protected:
       const LayerDefMap*        _layerHolder;

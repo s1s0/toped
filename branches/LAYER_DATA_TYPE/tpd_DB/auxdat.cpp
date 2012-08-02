@@ -515,7 +515,7 @@ void auxdata::GrcCell::dbExport(DbExportFile& exportf) const
    for (LayerHolder::Iterator wl = _layers.begin(); wl != _layers.end(); wl++)
    {
       assert(wl.editable());
-      if ( !exportf.layerSpecification(wl.layDef()) ) continue;
+      if ( !exportf.layerSpecification(wl()) ) continue;
       for (QuadTree::Iterator DI = wl->begin(); DI != wl->end(); DI++)
          DI->dbExport(exportf);
    }
@@ -525,7 +525,7 @@ void auxdata::GrcCell::collectUsedLays(LayerDefList& laylist) const
 {
    for(LayerHolder::Iterator CL = _layers.begin(); CL != _layers.end(); CL++)
       if (CL.editable())
-         laylist.push_back(CL.layDef());
+         laylist.push_back(CL());
 }
 
 auxdata::QuadTree* auxdata::GrcCell::secureLayer(const LayerDef& laydef)
@@ -578,7 +578,7 @@ void auxdata::GrcCell::openGlDraw(layprop::DrawProperties& drawprop, bool active
    typedef LayerHolder::Iterator LCI;
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
    {
-      LayerDef layDef = drawprop.getTenderLay(lay.layDef());
+      LayerDef layDef = drawprop.getTenderLay(lay());
       if (!drawprop.layerHidden(layDef)) drawprop.setCurrentColor(layDef);
       else continue;
       bool fill = drawprop.setCurrentFill(false);// honour block_fill state)
@@ -594,11 +594,11 @@ void auxdata::GrcCell::openGlRender(tenderer::TopRend& rend, const CTM& trans,
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
    {
       //first - to check visibility of the layer
-      if (rend.layerHidden(lay.layDef())) continue;
+      if (rend.layerHidden(lay())) continue;
       //second - get internal layer number:
       //       - for regular database it is equal to the TDT layer number
       //       - for DRC database it is common for all layers - DRC_LAY
-      LayerDef layDef = rend.getTenderLay(lay.layDef());
+      LayerDef layDef = rend.getTenderLay(lay());
       switch (layDef.num())
       {
          case REF_LAY:
@@ -622,7 +622,7 @@ DBbox auxdata::GrcCell::getVisibleOverlap(const layprop::DrawProperties& prop)
    {
 //      LayerNumber  layno  = LCI->first;
 //      QuadTree* cqTree = LCI->second;
-      if (!prop.layerHidden(LCI.layDef()))
+      if (!prop.layerHidden(LCI()))
          vlOverlap.overlap(LCI->overlap());
    }
    return vlOverlap;
@@ -654,9 +654,9 @@ void auxdata::GrcCell::motionDraw(const layprop::DrawProperties& drawprop,
       // without fill
       typedef LayerHolder::Iterator LCI;
       for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
-         if (!drawprop.layerHidden(lay.layDef()))
+         if (!drawprop.layerHidden(lay()))
          {
-            const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(lay.layDef());
+            const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(lay());
              for (QuadTree::DrawIterator CI = lay->begin(drawprop, transtack); CI != lay->end(); CI++)
                CI->motionDraw(drawprop, transtack, NULL);
          }
@@ -687,7 +687,7 @@ void auxdata::GrcCell::reportLayers(LayerDefSet& grcLays)
 {
    for (LayerHolder::Iterator wl = _layers.begin(); wl != _layers.end(); wl++)
    {
-      grcLays.insert(wl.layDef());
+      grcLays.insert(wl());
    }
 }
 

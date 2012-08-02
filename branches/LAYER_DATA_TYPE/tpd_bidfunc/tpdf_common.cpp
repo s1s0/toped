@@ -142,7 +142,7 @@ telldata::TtList* tellstdfunc::make_ttlaylist(laydata::SelectList* shapesel) {
          // copy the pointlist, because it will be deleted with the shapeSel
          if (0 != CI->second.size()) pntl = SGBitSet(CI->second);
          else                        pntl = SGBitSet();
-         llist->add(DEBUG_NEW telldata::TtLayout(CI->first, CL.layDef(), DEBUG_NEW SGBitSet(pntl)));
+         llist->add(DEBUG_NEW telldata::TtLayout(CI->first, CL(), DEBUG_NEW SGBitSet(pntl)));
       }
    }
    return llist;
@@ -208,7 +208,7 @@ telldata::TtList* tellstdfunc::make_ttlaylist(laydata::AtticList* shapesel)
       for (laydata::ShapeList::const_iterator CI  = lslct->begin();
                                               CI != lslct->end(); CI++)
       //   if (sh_deleted == (*CI)->status()) - doesn't seems to need it!
-            llist->add(DEBUG_NEW telldata::TtLayout(*CI, CL.layDef()));
+            llist->add(DEBUG_NEW telldata::TtLayout(*CI, CL()));
    }
    return llist;
 }
@@ -308,7 +308,7 @@ laydata::SelectList* tellstdfunc::copySelectList(const laydata::SelectList* dlis
    laydata::SelectList* clist = DEBUG_NEW laydata::SelectList();
    for (laydata::SelectList::Iterator CDI = dlist->begin(); CDI != dlist->end(); CDI++)
    {
-      clist->add(CDI.layDef(), copyDataList(*CDI));
+      clist->add(CDI(), copyDataList(*CDI));
    }
    return clist;
 }
@@ -365,7 +365,7 @@ laydata::SelectList* tellstdfunc::filter_selist(const laydata::SelectList* shape
          }
       }
       if    (ssl->empty()) delete ssl;
-      else                 filtered->add(CL.layDef(), ssl);
+      else                 filtered->add(CL(), ssl);
    }
    return filtered;
 }
@@ -387,7 +387,7 @@ laydata::AtticList* tellstdfunc::replace_str(laydata::AtticList* shapesel, std::
          newtxt->replaceStr(newstr);
          newlst->push_back(newtxt);
       }
-      newtextlist->add(CL.layDef(), newlst);
+      newtextlist->add(CL(), newlst);
    }
    return newtextlist;
 }
