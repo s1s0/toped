@@ -283,8 +283,7 @@ void telldata::TtLayout::echo(std::string& wstr, real DBU)
    else
    {
       if ( _layer.editable() )
-         ost << "layer " << _layer.num() << " :"
-             << "dtype " << _layer.typ() << " :";
+         ost << "layer " << _layer << " :";
       _data->info(ost, DBU);
    }
    if (_selp && (_selp->size() > 0)) ost << " - partially selected";
@@ -323,8 +322,7 @@ void telldata::TtAuxdata::echo(std::string& wstr, real DBU)
    else
    {
       if ( _layer.editable())
-         ost << "layer " << _layer.num() << " :"
-             << "dtype " << _layer.typ() << " :";
+         ost << "layer " << _layer << " :";
       _data->info(ost, DBU);
    }
    wstr += ost.str();

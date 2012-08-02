@@ -74,6 +74,7 @@ namespace laydata {
       DataT                     operator*() const;
       LayerNumber               number() const;
       LayerDef                  layDef() const;
+      bool                      editable() const;
    protected:
       const LayerDefMap*        _layerHolder;
       typename LayerDefMap::const_iterator _cNMap;
