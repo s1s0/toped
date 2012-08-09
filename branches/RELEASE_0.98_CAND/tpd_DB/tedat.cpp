@@ -2371,10 +2371,10 @@ void laydata::TdtText::openGlDrawLine(layprop::DrawProperties& drawprop, const P
    drawprop.drawReferenceMarks(ptlist[4], layprop::text_mark);
    // draw the text itself
    glPushMatrix();
-   double ori_mtrx[] = { drawprop.topCtm().a(), drawprop.topCtm().b(),0,0,
-                         drawprop.topCtm().c(), drawprop.topCtm().d(),0,0,
-                                             0,                     0,0,0,
-                                 ptlist[4].x(),         ptlist[4].y(),0,1};
+   double ori_mtrx[] = { drawprop.topCtm().a(),  drawprop.topCtm().b(),0,0,
+                         drawprop.topCtm().c(),  drawprop.topCtm().d(),0,0,
+                                             0,                      0,0,0,
+                        (double) ptlist[4].x(), (double) ptlist[4].y(),0,1};
    glMultMatrixd(ori_mtrx);
    // correction of the glf shift - as explained in the openGlPrecalc above
    glTranslatef(_correction.x(), _correction.y(), 1);
@@ -2394,10 +2394,10 @@ void laydata::TdtText::openGlDrawFill(layprop::DrawProperties& drawprop, const P
 {
    if (0 == ptlist.size()) return;
    glPushMatrix();
-   double ori_mtrx[] = { drawprop.topCtm().a(), drawprop.topCtm().b(),0,0,
-                         drawprop.topCtm().c(), drawprop.topCtm().d(),0,0,
-                                             0,                     0,0,0,
-                                 ptlist[4].x(),         ptlist[4].y(),0,1};
+   double ori_mtrx[] = { drawprop.topCtm().a(),  drawprop.topCtm().b(),0,0,
+                         drawprop.topCtm().c(),  drawprop.topCtm().d(),0,0,
+                                             0,                      0,0,0,
+                        (double) ptlist[4].x(), (double) ptlist[4].y(),0,1};
    glMultMatrixd(ori_mtrx);
    // correction of the glf shift - as explained in the openGlPrecalc above
    glTranslatef(_correction.x(), _correction.y(), 1);
