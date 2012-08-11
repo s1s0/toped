@@ -55,7 +55,7 @@ namespace logicop {
    class logic {
    public:
       //! The class constructor preparing all data fields
-                        logic(const PointVector&, const PointVector&, bool looped1 = true, bool looped2 = true);
+                        logic(const PointVector&, const PointVector&);
                         ~logic();
       //! Do Benttley-Ottman modified
       void              findCrossingPoints();
@@ -65,8 +65,6 @@ namespace logicop {
       bool              ANDNOT(pcollection&);
       //! Perform logic OR and returns the result in plycol
       bool              OR(pcollection&);
-      //! Perform line (wire) cut
-      bool              LineCUT(laydata::ShapeList&, laydata::ShapeList&, WireWidth);
       //! Prepare #_shape1 and #_shape2 data fields for reuse
       void              reset_visited();
    private:
@@ -89,10 +87,6 @@ namespace logicop {
       polycross::VPoint*      _shape2;
       //! Number of crossing points found from the constructor
       unsigned                _crossp;
-      //! Whether the object is closed - i.e. polygon/box - true; wire - false
-      bool                    _looped1;
-      //! Whether the object is closed - i.e. polygon/box - true; wire - false
-      bool                    _looped2;
       polycross::segmentlist* _segl1;
       polycross::segmentlist* _segl2;
 

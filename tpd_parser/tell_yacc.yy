@@ -53,12 +53,9 @@ namespace parsercmd
 }
 
 /*Current tell variable name*/
-telldata::TellVar* tellvar        = NULL;
+telldata::TellVar* tellvar = NULL;
 std::stack<telldata::TellVar*> tellindxvar;
-telldata::TellVar* tell_lvalue    = NULL;
-telldata::TellVar* felist_lvalue  = NULL;
-telldata::TellVar* feiterator     = NULL;
-
+telldata::TellVar* tell_lvalue = NULL;
 /*Current variable is a list. Legal values are:
   0 - not indexed
   1 - 1 index
@@ -448,57 +445,14 @@ whilestatement:
 ;
 
 telllist:
-     lvalue                        {
-         if (!($1 & telldata::tn_listmask)) {
-            tellerror("list expected",@1);
-            $$ = telldata::tn_NULL;
-            felist_lvalue = NULL;
-         }
-         else {
-            felist_lvalue = tell_lvalue;
-            $$ = $1;
-         }
-      }
-   | anonymousvar                    {
-         felist_lvalue = NULL;
-         if (!($1 & telldata::tn_listmask)) {
-            tellerror("list expected",@1);
-            $$ = telldata::tn_NULL;
-         }
-         else {
-            CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdANOVAR(tellvar));
-            $$ = $1;
-         }
-      }
-   |  structure                      {
-      felist_lvalue = NULL;
-      // the structure is without a type at this moment, so here we do the type checking
-      if (parsercmd::StructTypeCheck(feiterator->get_type() | telldata::tn_listmask, $1, @1)) {
-         tellvar = CMDBlock->newTellvar(feiterator->get_type() | telldata::tn_listmask, "", @1);
-         parsercmd::Assign(tellvar, 0, $1, @1);
-         delete $1;
-         CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdANOVAR(tellvar));
-         $$ = feiterator->get_type() | telldata::tn_listmask;
-      }
-      else {
-         tellerror("Type mismatch", @1);
-         $$ = telldata::tn_NULL;
-         delete $1;
-         /*cleanonabort();*/
-         /*YYABORT;*/
-      }
-   }
-   | funccall                       {
-         felist_lvalue = NULL;
-         if (!($1 & telldata::tn_listmask)) {
+     expression                     {
+         if       (!($1 & telldata::tn_listmask)) {
             tellerror("list expected",@1);
             $$ = telldata::tn_NULL;
          }
          else
             $$ = $1;
       }
-   | listremove                            {felist_lvalue = NULL;$$ = $1;}
-   | listslice                             {felist_lvalue = NULL;$$ = $1;}
 ;
 
 foreachstatement:
@@ -506,13 +460,10 @@ foreachstatement:
          CMDBlock = DEBUG_NEW parsercmd::cmdBLOCK();
          CMDBlock->pushblk();
       }
-     lvalue ';'                     {
-         feiterator = tell_lvalue;
-      }
-     telllist ')'                   {
-         if  (($4 | telldata::tn_listmask) != $7)
+     lvalue ';' telllist ')'        {
+         if  (($4 | telldata::tn_listmask) != $6)
             tellerror("unappropriate variable type",@4);
-         foreach_stack.push(DEBUG_NEW parsercmd::cmdFOREACH(feiterator, felist_lvalue));
+         foreach_stack.push(DEBUG_NEW parsercmd::cmdFOREACH(tell_lvalue));
          CMDBlock = DEBUG_NEW parsercmd::cmdBLOCK();
          CMDBlock->pushblk();
       }

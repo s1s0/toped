@@ -413,8 +413,6 @@ int tellstdfunc::stdUNSELECTIN::execute()
          UNDOPstack.push_front(make_ttlaylist(selectedl));
          OPstack.push(make_ttlaylist(selectedl));
          LogFile << LogFile.getFN() << "("<< *p1 << ");"; LogFile.flush();
-         for(laydata::AtticList::iterator CI = selectedl->begin();CI != selectedl->end(); CI++)
-            delete CI->second;
          delete selectedl;
          UpdateLV(tDesign->numSelected());
       }

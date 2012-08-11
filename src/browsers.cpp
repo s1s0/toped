@@ -354,35 +354,10 @@ void browsers::CellBrowser::statusHighlight(wxString top, wxString active, wxStr
    {
       if (findItem(top, _topStructure, _dbroot))
          highlightChildren(_topStructure, _editColor);
-      else
-         //Try to check previous name
-         //that could be removed by filter
-         if (findItem(_topCellNameBackup, _topStructure, _dbroot))
-            highlightChildren(_topStructure, _editColor);
       if (findItem(active, _activeStructure, _dbroot))
       {
          SetItemBold(_activeStructure, true);
          EnsureVisible(_activeStructure);
-      }
-      else
-      {
-         //Try to check previous name
-         //that could be removed by filter
-         if (findItem(_activeCellNameBackup, _activeStructure, _dbroot))
-         {
-            SetItemBold(_activeStructure, true);
-            EnsureVisible(_activeStructure);
-         }
-         else
-         {
-            //in flat mode if can't find active cell
-            //(it is possible if cell doesn't pass cell filter)
-            //just expand design name item
-            if(_hierarchy_view == false)
-            {            
-               this->Expand(_dbroot);
-            }
-         }
       }
    }
    wxTreeItemId      item;
@@ -392,13 +367,6 @@ void browsers::CellBrowser::statusHighlight(wxString top, wxString active, wxStr
 
 void browsers::CellBrowser::collectInfo( bool hier)
 {
-   //Save previouse names before Unset
-   //Need for case when filter remove active cell from browser
-   if(!activeCellName().IsEmpty())
-      _activeCellNameBackup = activeCellName();
-   if(!topCellName().IsEmpty())
-      _topCellNameBackup = topCellName();
-
    initialize();
    _corrupted = false;
    _hierarchy_view = hier;
@@ -410,9 +378,6 @@ void browsers::CellBrowser::collectInfo( bool hier)
 void browsers::CellBrowser::updateFlat()
 {
    laydata::TdtLibDir* dbLibDir = NULL;
-   //if _cellFilter == "*" don't perform filter checking
-   bool filtered = false;
-   if (_cellFilter.Cmp(wxT("*"))) filtered = true; 
    if (DATC->lockTDT(dbLibDir, dbmxs_liblock))
    {
       laydata::LibCellLists *cll;
@@ -430,15 +395,11 @@ void browsers::CellBrowser::updateFlat()
             laydata::CellMap::const_iterator CL;
             for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
             {
-               wxString curCell = wxString( CL->first.c_str(),  wxConvUTF8);
-               if(!filtered || (filtered && ::wxMatchWild(_cellFilter, curCell, false)))
-               {
-                  wxTreeItemId cellitem = AppendItem(_dbroot, curCell);
-                  if (CL->second->checkLayer(GRC_LAY))
-                     SetItemImage(cellitem,BICN_DBCELL_FLAT_I,wxTreeItemIcon_Normal);
-                  else
-                     SetItemImage(cellitem,BICN_DBCELL_FLAT,wxTreeItemIcon_Normal);
-               }
+               wxTreeItemId cellitem = AppendItem(_dbroot, wxString( CL->first.c_str(),  wxConvUTF8));
+               if (CL->second->checkLayer(GRC_LAY))
+                  SetItemImage(cellitem,BICN_DBCELL_FLAT_I,wxTreeItemIcon_Normal);
+               else
+                  SetItemImage(cellitem,BICN_DBCELL_FLAT,wxTreeItemIcon_Normal);
             }
          }
          delete cll;
@@ -461,15 +422,11 @@ void browsers::CellBrowser::updateFlat()
             laydata::CellMap::const_iterator CL;
             for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
             {
-               wxString curCell = wxString( CL->first.c_str(),  wxConvUTF8);
-               if(!filtered || (filtered && ::wxMatchWild(_cellFilter, curCell, false)))
-               {
-                  wxTreeItemId cellitem = AppendItem(libroot, curCell);
-                  if (CL->second->checkLayer(GRC_LAY))
-                     SetItemImage(cellitem,BICN_LIBCELL_FLAT_I,wxTreeItemIcon_Normal);
-                  else
-                     SetItemImage(cellitem,BICN_LIBCELL_FLAT,wxTreeItemIcon_Normal);
-               }
+               wxTreeItemId cellitem = AppendItem(libroot, wxString( CL->first.c_str(),  wxConvUTF8));
+               if (CL->second->checkLayer(GRC_LAY))
+                  SetItemImage(cellitem,BICN_LIBCELL_FLAT_I,wxTreeItemIcon_Normal);
+               else
+                  SetItemImage(cellitem,BICN_LIBCELL_FLAT,wxTreeItemIcon_Normal);
             }
          }
          delete cll;
@@ -490,12 +447,8 @@ void browsers::CellBrowser::updateFlat()
                laydata::CellMap::const_iterator CL;
                for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
                {
-                  wxString curCell = wxString( (*CL).first.c_str(),  wxConvUTF8);
-                  if(!filtered || (filtered && ::wxMatchWild(_cellFilter, curCell, false)))
-                  {
-                     wxTreeItemId cellitem = AppendItem(_undefRoot, curCell);
-                     SetItemImage(cellitem,BICN_UNDEFCELL,wxTreeItemIcon_Normal);
-                  }
+                  wxTreeItemId cellitem = AppendItem(_undefRoot, wxString( (*CL).first.c_str(),  wxConvUTF8));
+                  SetItemImage(cellitem,BICN_UNDEFCELL,wxTreeItemIcon_Normal);
                }
                SortChildren(_undefRoot);
             }
@@ -1184,7 +1137,6 @@ BEGIN_EVENT_TABLE(browsers::TDTbrowser, wxPanel)
    EVT_MENU(tui::TMCELL_REPORTLAY, browsers::TDTbrowser::onReportUsedLayers)
    EVT_BUTTON(tui::BT_CELLS_HIER, browsers::TDTbrowser::onHierView)
    EVT_BUTTON(tui::BT_CELLS_FLAT, browsers::TDTbrowser::onFlatView)
-   EVT_TEXT(tui::ID_CELL_FILTER, browsers::TDTbrowser::onFlatView)
 END_EVENT_TABLE()
 
 browsers::TDTbrowser::TDTbrowser(wxWindow *parent, wxWindowID id,
@@ -1196,7 +1148,6 @@ browsers::TDTbrowser::TDTbrowser(wxWindow *parent, wxWindowID id,
    wxBoxSizer *sizer1   = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    _hierButton = DEBUG_NEW wxButton( this, tui::BT_CELLS_HIER, wxT("Hier") );
    _flatButton = DEBUG_NEW wxButton( this, tui::BT_CELLS_FLAT, wxT("Flat") );
-   _cellFilter = DEBUG_NEW wxTextCtrl(this, tui::ID_CELL_FILTER);
    //Set bold font for _hierButton
    wxFont font = _hierButton->GetFont();
    font.SetWeight(wxFONTWEIGHT_BOLD);
@@ -1205,7 +1156,6 @@ browsers::TDTbrowser::TDTbrowser(wxWindow *parent, wxWindowID id,
    sizer1->Add(_hierButton, 1, wxEXPAND|wxBOTTOM, 3);
    sizer1->Add(_flatButton, 1, wxEXPAND|wxBOTTOM, 3);
    _cellBrowser = DEBUG_NEW CellBrowser(this, tui::ID_PNL_CELLS, pos, size, style | wxTR_HIDE_ROOT | wxTR_NO_BUTTONS | wxTR_LINES_AT_ROOT);
-   thesizer->Add(_cellFilter, 0, wxEXPAND|wxTOP, 3);
    thesizer->Add(_cellBrowser, 1, wxEXPAND | wxBOTTOM);
    thesizer->Add(sizer1, 0, wxEXPAND | wxALL);
 
@@ -1222,10 +1172,6 @@ browsers::TDTbrowser::TDTbrowser(wxWindow *parent, wxWindowID id,
    _imageList->Add( wxIcon( targetdb  ) ); // BICN_TARGETDB
    _imageList->Add( wxIcon( cellundef ) ); // BICN_UNDEFCELL
 
-   wxString filterState = wxT("*");
-   _cellFilter->ChangeValue(filterState);
-   _cellBrowser->setCellFilter(filterState);
-   _cellFilter->Show(false); //hide cell filter for initial hierarchy view
    _cellBrowser->SetImageList(_imageList);
    SetSizerAndFit(thesizer);
    thesizer->SetSizeHints( this );
@@ -1234,9 +1180,7 @@ browsers::TDTbrowser::TDTbrowser(wxWindow *parent, wxWindowID id,
 void browsers::TDTbrowser::onFlatView( wxCommandEvent& event )
 {
    _hierarchy_view = false;
-   _cellFilter->Show(true); //show cell filter for flat view
-   wxString filterState = _cellFilter->GetValue();
-   _cellBrowser->setCellFilter(filterState); //update filters
+
    wxString cell_top_str = _cellBrowser->topCellName();
    wxString cell_act_str = _cellBrowser->activeCellName();
    wxString cell_sel_str = _cellBrowser->selectedCellName();
@@ -1260,7 +1204,7 @@ void browsers::TDTbrowser::onFlatView( wxCommandEvent& event )
 void browsers::TDTbrowser::onHierView( wxCommandEvent& event )
 {
    _hierarchy_view = true;
-   _cellFilter->Show(false); //hide cell filter for hierarchy view
+
    wxString cell_top_str = _cellBrowser->topCellName();
    wxString cell_act_str = _cellBrowser->activeCellName();
    wxString cell_sel_str = _cellBrowser->selectedCellName();

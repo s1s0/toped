@@ -84,7 +84,7 @@ namespace polycross
          CPoint(const TP* cp, int edge) : VPoint(&_crossingP), _link(NULL), _visited(0),
          _edge(edge), _crossingP(cp->x(), cp->y()) {};
 //         virtual ~CPoint() {delete _cp;}
-         virtual VPoint*   follower(bool& direction, bool modify = false);
+         virtual VPoint*  follower(bool& direction, bool modify = false);
          bool              inside(const PointVector&, bool touching = false) {return true;}
          char              visited() const {return _visited;}
          void              linkto(CPoint* link) {_link = link;}
@@ -394,7 +394,7 @@ namespace polycross
    //===========================================================================
    class XQ {
       public:
-                           XQ(const segmentlist&, const segmentlist&, bool loopsegs1 = true, bool loopsegs2 = true);
+                           XQ(const segmentlist&, const segmentlist&);
                            XQ(const segmentlist&, bool loopsegs);
          ~XQ();
          void              sweep(bool, bool);

@@ -69,7 +69,7 @@ are several important points to consider here.
      placeholder nor its layer or cell. Everything is on kind of "need to know
      basis". Lower levels of the database are unaware of the higher levels.
      Furthermore on certain hierarchical level every component doesn't know
-     anything even about its neighbours.
+     anything even about its neighbors.
    - Select operation assumes however that an operation like move/delete/copy
      etc. is about to follow, i.e. the selected shapes will be accessed shortly
      and this access has to be swift and reliable. Certainly we need some short
@@ -1483,38 +1483,6 @@ laydata::TdtData* laydata::TdtWire::copy(const CTM& trans) {
    return nshape;
 }
 
-void laydata::TdtWire::polyCut(PointVector& cutter, ShapeList** decure)
-{
-   PointVector plist;
-   plist.reserve(_psize);
-   for (unsigned i = 0; i < _psize; i++)
-      plist.push_back( TP( _pdata[2*i], _pdata[2*i+1] ) );
-
-   logicop::logic operation(plist, cutter, false);
-   try
-   {
-      operation.findCrossingPoints();
-   }
-   catch (EXPTNpolyCross&) {return;}
-   laydata::ShapeList inside_shapes;
-   laydata::ShapeList outside_shapes;
-   // 0 - deleted; 1- cut; 2 - remain
-   if (operation.LineCUT(inside_shapes, outside_shapes, _width))
-   {
-      laydata::ShapeList::const_iterator CI;
-      // add the resulting cut_shapes to the_cut ShapeList
-      for (CI = inside_shapes.begin(); CI != inside_shapes.end(); CI++)
-         decure[1]->push_back(*CI);
-//      inside_shapes.clear();
-      for (CI = outside_shapes.begin(); CI != outside_shapes.end(); CI++)
-         decure[2]->push_back(*CI);
-//      outside_shapes.clear();
-      // and finally add this to the_delete shapelist
-      decure[0]->push_back(this);
-   }
-}
-
-
 void laydata::TdtWire::stretch(int bfactor, ShapeList** decure)
 {
    //@TODO cut bfactor from both sides
@@ -2403,10 +2371,10 @@ void laydata::TdtText::openGlDrawLine(layprop::DrawProperties& drawprop, const P
    drawprop.drawReferenceMarks(ptlist[4], layprop::text_mark);
    // draw the text itself
    glPushMatrix();
-   double ori_mtrx[] = { drawprop.topCtm().a(), drawprop.topCtm().b(),0,0,
-                         drawprop.topCtm().c(), drawprop.topCtm().d(),0,0,
-                                             0,                     0,0,0,
-                                 ptlist[4].x(),         ptlist[4].y(),0,1};
+   double ori_mtrx[] = { drawprop.topCtm().a(),  drawprop.topCtm().b(),0,0,
+                         drawprop.topCtm().c(),  drawprop.topCtm().d(),0,0,
+                                             0,                      0,0,0,
+                        (double) ptlist[4].x(), (double) ptlist[4].y(),0,1};
    glMultMatrixd(ori_mtrx);
    // correction of the glf shift - as explained in the openGlPrecalc above
    glTranslatef(_correction.x(), _correction.y(), 1);
@@ -2426,10 +2394,10 @@ void laydata::TdtText::openGlDrawFill(layprop::DrawProperties& drawprop, const P
 {
    if (0 == ptlist.size()) return;
    glPushMatrix();
-   double ori_mtrx[] = { drawprop.topCtm().a(), drawprop.topCtm().b(),0,0,
-                         drawprop.topCtm().c(), drawprop.topCtm().d(),0,0,
-                                             0,                     0,0,0,
-                                 ptlist[4].x(),         ptlist[4].y(),0,1};
+   double ori_mtrx[] = { drawprop.topCtm().a(),  drawprop.topCtm().b(),0,0,
+                         drawprop.topCtm().c(),  drawprop.topCtm().d(),0,0,
+                                             0,                      0,0,0,
+                        (double) ptlist[4].x(), (double) ptlist[4].y(),0,1};
    glMultMatrixd(ori_mtrx);
    // correction of the glf shift - as explained in the openGlPrecalc above
    glTranslatef(_correction.x(), _correction.y(), 1);
@@ -3214,20 +3182,6 @@ laydata::TdtData* laydata::createValidShape(PointVector* pl)
    {
       std::ostringstream ost;
       ost << "Resulting shape is invalid - " << check.failType();
-      tell_log(console::MT_ERROR, ost.str());
-      return NULL;
-   }
-}
-laydata::ShapeList* laydata::createValidWire(PointVector* pl, WireWidth width)
-{
-   laydata::ValidWire check(*pl, width);
-   delete pl;
-   if (check.acceptable())
-      return check.replacements();
-   else
-   {
-      std::ostringstream ost;
-      ost << "Validation check fails - " << check.failType();
       tell_log(console::MT_ERROR, ost.str());
       return NULL;
    }

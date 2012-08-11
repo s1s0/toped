@@ -6,6 +6,7 @@ Short Term
 General
 =========
   * Text resize
+  * cut doesn't work with wire
   * Parser needs well defined error recovery policy
   * select edge with double click - needs algo for edge proximity. The same algo
     can be used for editpush selecting (optional?)

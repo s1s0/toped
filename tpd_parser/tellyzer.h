@@ -643,8 +643,8 @@ namespace  parsercmd {
       telldata::TellVar*         getID(const char*, bool local=false) const;
       telldata::TellVar*         newTellvar(telldata::typeID, const char*, TpdYYLtype);
       telldata::TellVar*         newFuncArg(telldata::typeID, TpdYYLtype);
-      bool                       defValidate(const FuncDeclaration* decl, cmdFUNC*&);
-      bool                       declValidate(const FuncDeclaration*, TpdYYLtype);
+      bool                       defValidate(const std::string& ,const ArgumentLIST*, cmdFUNC*&);
+      bool                       declValidate(const std::string&, const ArgumentLIST*, TpdYYLtype);
       cmdSTDFUNC*  const         getFuncBody(const char*, telldata::argumentQ*, std::string&) const;
       cmdSTDFUNC*  const         getIntFuncBody(std::string) const;
       void                       pushcmd(cmdVIRTUAL* cmd) {_cmdQ.push_back(cmd);};
@@ -697,7 +697,7 @@ namespace  parsercmd {
       virtual void               undo_cleanup() = 0;
       void                       reduce_undo_stack();
       virtual NameList*          callingConv(const telldata::typeMAP*);
-      virtual int                argsOK(telldata::argumentQ* amap, bool&);
+      virtual int                argsOK(telldata::argumentQ* amap);
       telldata::typeID           gettype() const {return _returntype;};
       virtual bool               internal() {return true;}
       virtual bool               declaration() {return false;}
@@ -806,15 +806,14 @@ namespace  parsercmd {
 
    class cmdFOREACH: public cmdVIRTUAL {
    public:
-                           cmdFOREACH(telldata::TellVar* var, telldata::TellVar* listvar) :
-                                       _var(var), _listvar(listvar), _header(NULL), _body(NULL) {};
+                           cmdFOREACH(telldata::TellVar* var) :
+                                       _var(var),_header(NULL), _body(NULL) {};
       virtual             ~cmdFOREACH();
       void                 addBlocks(cmdBLOCK* hd, cmdBLOCK* bd)
                                                     {_header = hd; _body = bd;}
       virtual int          execute();
    private:
       telldata::TellVar*   _var;
-      telldata::TellVar*   _listvar;
       cmdBLOCK*            _header;
       cmdBLOCK*            _body;
    };

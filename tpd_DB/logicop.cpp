@@ -81,14 +81,10 @@ produced. As a second step, two raw data structures are produced, that replicate
 the input polygons, but contain also the crossing points with the required links
 between them. These data structures will be used in all subsequently called
 methods, implementing the actual logic operations*/
-logicop::logic::logic(const PointVector& poly1, const PointVector& poly2, bool looped1, bool looped2) :
-   _poly1   ( poly1  ),
-   _poly2   ( poly2  ),
-   _looped1 ( looped1),
-   _looped2 ( looped2)
-{
-   _segl1 = DEBUG_NEW polycross::segmentlist(poly1,1,_looped1);
-   _segl2 = DEBUG_NEW polycross::segmentlist(poly2,2,_looped2);
+logicop::logic::logic(const PointVector& poly1, const PointVector& poly2) :
+                                                _poly1(poly1), _poly2(poly2) {
+   _segl1 = DEBUG_NEW polycross::segmentlist(poly1,1,true);
+   _segl2 = DEBUG_NEW polycross::segmentlist(poly2,2,true);
    _shape1 = NULL;
    _shape2 = NULL;
 }
@@ -96,18 +92,18 @@ logicop::logic::logic(const PointVector& poly1, const PointVector& poly2, bool l
 void logicop::logic::findCrossingPoints()
 {
    // create the event queue
-   polycross::XQ* _eq = DEBUG_NEW polycross::XQ(*_segl1, *_segl2, _looped1, _looped2);
+   polycross::XQ* _eq = DEBUG_NEW polycross::XQ(*_segl1, *_segl2);
    // BO modified algorithm
-   _eq->sweep(false, _looped1);
-   unsigned crossp1 = _segl1->normalize(_poly1, _looped1);
-   unsigned crossp2 = _segl2->normalize(_poly2, _looped2);
+   _eq->sweep(false, true);
+   unsigned crossp1 = _segl1->normalize(_poly1, true);
+   unsigned crossp2 = _segl2->normalize(_poly2, true);
    assert(crossp1 == crossp2);
    _crossp = crossp1;
-   if (_looped1 && _looped2 && (1 == _crossp))
+   if (1 == _crossp)
       throw EXPTNpolyCross("Only one crossing point found. Can't generate polygons");
    delete _eq;
-   _shape1 = _segl1->dump_points(_looped1, _segl2);
-   _shape2 = _segl2->dump_points(_looped2, _segl1);
+   _shape1 = _segl1->dump_points(true, _segl2);
+   _shape2 = _segl2->dump_points(true, _segl1);
    reorderCross();
    REPORT_POLY_DEBUG(_shape1, "After reorderCross")
    REPORT_POLY_DEBUG(_shape2, "After reorderCross")
@@ -194,7 +190,7 @@ bool logicop::logic::AND(pcollection& plycol) {
    {
       // get first external and non crossing  point
       if ((NULL == (centinel = getFirstOutside(_poly2, _shape1))) &&
-          (NULL == (centinel = getFirstOutside(_poly1, _shape2))) )
+           (NULL == (centinel = getFirstOutside(_poly1, _shape2))) )
       {
          assert(false);
       }
@@ -375,66 +371,6 @@ bool logicop::logic::OR(pcollection& plycol)
    }
    plycol.push_back(respoly);
    return true;
-}
-
-bool logicop::logic::LineCUT(laydata::ShapeList& wIn, laydata::ShapeList& wOut, WireWidth width)
-{
-   pcollection wcolIn;
-   pcollection wcolOut;
-   if (0 == _crossp)  return false;
-   polycross::VPoint* collector = _shape1;
-   bool inOutB = collector->inside(_poly2, true);
-
-   PointVector* shgen = DEBUG_NEW PointVector();
-   do {
-      shgen->push_back(TP(collector->cp()->x(), collector->cp()->y()));
-      if (0 == collector->visited())
-      {// i.e. crossing point
-         if (inOutB)  wcolIn.push_back(shgen);
-         else         wcolOut.push_back(shgen);
-         shgen = DEBUG_NEW PointVector();
-         shgen->push_back(TP(collector->cp()->x(), collector->cp()->y()));
-         inOutB = !inOutB;
-      }
-      collector = collector->next();
-   } while (_shape1 != collector);
-   if (inOutB)  wcolIn.push_back(shgen);
-   else         wcolOut.push_back(shgen);
-   // Validate all resulting polygons
-   bool allValid = true;
-   pcollection::const_iterator CI;
-   for (CI = wcolIn.begin(); CI != wcolIn.end(); CI++)
-   {
-      laydata::ShapeList* newShapes = laydata::createValidWire(*CI, width);
-      if (NULL == newShapes)
-         allValid &= false;
-      else
-      {
-         for (laydata::ShapeList::const_iterator CS = newShapes->begin(); CS != newShapes->end();CS++)
-            wIn.push_back(*CS);
-         delete newShapes;
-      }
-   }
-   for (CI = wcolOut.begin(); CI != wcolOut.end(); CI++)
-   {
-      laydata::ShapeList* newShapes = laydata::createValidWire(*CI, width);
-      if (NULL == newShapes)
-         allValid &= false;
-      else
-      {
-         for (laydata::ShapeList::const_iterator CS = newShapes->begin(); CS != newShapes->end();CS++)
-            wOut.push_back(*CS);
-         delete newShapes;
-      }
-   }
-   if (!allValid)
-   {
-      for (laydata::ShapeList::const_iterator CS = wIn.begin(); CS != wIn.end();CS++)
-         delete(*CS);
-      for (laydata::ShapeList::const_iterator CS = wOut.begin(); CS != wOut.end();CS++)
-         delete(*CS);
-   }
-   return allValid;
 }
 
 void logicop::logic::getShape(pcollection& plycol, polycross::VPoint* centinel)

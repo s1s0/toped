@@ -35,9 +35,8 @@
 extern layprop::PropertyCenter*  PROPC;
 
 //============================================================================
-int tellstdfunc::lstLENGTH::argsOK(argumentQ* amap, bool& strict)
+int tellstdfunc::lstLENGTH::argsOK(argumentQ* amap)
 {
-   strict = true;
    return (!((amap->size() == 1) && ( (*((*amap)[0]))() &  telldata::tn_listmask  )));
 }
 
@@ -107,9 +106,8 @@ int tellstdfunc::lytTYPEOF::execute()
 }
 
 //============================================================================
-int tellstdfunc::stdABS::argsOK(argumentQ* amap, bool& strict)
+int tellstdfunc::stdABS::argsOK(argumentQ* amap)
 {
-   strict = true;
    return !((amap->size() == 1) && (( (*((*amap)[0]))() == telldata::tn_real  ) ||
                                     ( (*((*amap)[0]))() == telldata::tn_int   )   ));
 }

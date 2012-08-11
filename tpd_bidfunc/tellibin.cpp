@@ -51,9 +51,8 @@ extern const wxEventType         wxEVT_CANVAS_CURSOR;
 
 
 //=============================================================================
-int tellstdfunc::stdSPRINTF::argsOK(argumentQ* amap, bool& strict)
+int tellstdfunc::stdSPRINTF::argsOK(argumentQ* amap)
 {
-   strict = true;
    unsigned numArgs = amap->size();
    if (1 > numArgs) return -1; // i.e. error - at least one argument is expected
    telldata::ArgumentID carg((*(*amap)[0]));
@@ -137,9 +136,9 @@ int tellstdfunc::stdSPRINTF::execute()
 }
 
 //=============================================================================
-int tellstdfunc::stdPRINTF::argsOK(argumentQ* amap, bool& strict)
+int tellstdfunc::stdPRINTF::argsOK(argumentQ* amap)
 {
-   return stdSPRINTF::argsOK(amap, strict);
+   return stdSPRINTF::argsOK(amap);
 }
 
 NameList* tellstdfunc::stdPRINTF::callingConv(const telldata::typeMAP*)
@@ -160,9 +159,8 @@ int tellstdfunc::stdPRINTF::execute()
 }
 
 //=============================================================================
-int tellstdfunc::stdECHO::argsOK(argumentQ* amap, bool& strict)
+int tellstdfunc::stdECHO::argsOK(argumentQ* amap)
 {
-   strict = true;
    return (!(amap->size() == 1));
 }
 
@@ -518,11 +516,7 @@ int tellstdfunc::intrnlSORT_DB::execute()
       tDesign->fixUnsorted();
       LogFile << "// $sort_db( );"; LogFile.flush();
    }
-   else
-   {
-      assert(false);
-   }
-   DATC->unlockTDT(dbLibDir, false);
+   DATC->unlockTDT(dbLibDir, true);
    return EXEC_NEXT;
 }
 

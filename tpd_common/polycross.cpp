@@ -1730,19 +1730,13 @@ polycross::YQ::~YQ()
 
 //==============================================================================
 // XQ
-polycross::XQ::XQ( const segmentlist& seg1, const segmentlist& seg2, bool loopsegs1, bool loopsegs2 ) :
+polycross::XQ::XQ( const segmentlist& seg1, const segmentlist& seg2 ) :
       _overlap(*(seg1[0]->lP()))
 {
    _xQueue = avl_create(E_compare, NULL, NULL);
    _xOldQueue = avl_create(E_compare, NULL, NULL);
-   if (loopsegs1)
-      createEvents(seg1);
-   else
-      createSEvents(seg1);
-   if (loopsegs2)
-      createEvents(seg2);
-   else
-      createSEvents(seg2);
+   createEvents(seg1);
+   createEvents(seg2);
    _sweepLine = DEBUG_NEW YQ(_overlap, &seg1, &seg2);
 }
 
@@ -1780,56 +1774,48 @@ TbsEvent and TesEvent
 */
 void polycross::XQ::createSEvents(const segmentlist& seg)
 {
-   if (1 == seg.size())
-   {
-      addEvent(seg[0],DEBUG_NEW TbsEvent(seg[0]),_beginE);
-      addEvent(seg[0],DEBUG_NEW TesEvent(seg[0]),_endE);
-   }
+   unsigned s1, s2;
+   // first point
+   s1 = 0;
+   if       ( (seg[s1]->rP() == seg[s1+1]->lP()) || (seg[s1]->rP() == seg[s1+1]->rP()) )
+      addEvent(seg[s1],DEBUG_NEW TbsEvent(seg[s1]),_beginE);//lP is a begin
    else
-   {
-      unsigned s1, s2;
-      // first point
-      s1 = 0;
-      if       ( (seg[s1]->rP() == seg[s1+1]->lP()) || (seg[s1]->rP() == seg[s1+1]->rP()) )
-         addEvent(seg[s1],DEBUG_NEW TbsEvent(seg[s1]),_beginE);//lP is a begin
-      else
-         addEvent(seg[s1],DEBUG_NEW TesEvent(seg[s1]),_endE  );// rp is an end
-      // last point
-      s1 = seg.size() - 1;
-      if       ( (seg[s1]->rP() == seg[s1-1]->lP()) || (seg[s1]->rP() == seg[s1-1]->rP()) )
-         addEvent(seg[s1],DEBUG_NEW TbsEvent(seg[s1]),_beginE);//lP is a begin
-      else
-         addEvent(seg[s1],DEBUG_NEW TesEvent(seg[s1]),_endE  );// rp is an end
+      addEvent(seg[s1],DEBUG_NEW TesEvent(seg[s1]),_endE  );// rp is an end
+   // last point
+   s1 = seg.size() - 1;
+   if       ( (seg[s1]->rP() == seg[s1-1]->lP()) || (seg[s1]->rP() == seg[s1-1]->rP()) )
+      addEvent(seg[s1],DEBUG_NEW TbsEvent(seg[s1]),_beginE);//lP is a begin
+   else
+      addEvent(seg[s1],DEBUG_NEW TesEvent(seg[s1]),_endE  );// rp is an end
 
-      for(s1 = 0, s2 = 1 ; s2 < seg.size(); s1++, s2++ )
+   for(s1 = 0, s2 = 1 ; s2 < seg.size(); s1++, s2++ )
+   {
+      // determine the type of event from the neighboring segments
+      // and create the thread event
+      if (seg[s1]->lP() == seg[s2]->lP())
       {
-         // determine the type of event from the neighbouring segments
-         // and create the thread event
-         if (seg[s1]->lP() == seg[s2]->lP())
-         {
-            int ori = orientation(seg[s2]->lP(), seg[s2]->rP(), seg[s1]->rP());
-            if (0 == ori)
-            { // collinear segments
-               addEvent(seg[s1],DEBUG_NEW TbsEvent(seg[s1]),_beginE);
-               addEvent(seg[s2],DEBUG_NEW TbsEvent(seg[s2]),_beginE);
-            }
-            else
-               addEvent(seg[s1],DEBUG_NEW TbEvent(seg[s1], seg[s2]),_beginE);
-         }
-         else if (seg[s1]->rP() == seg[s2]->rP())
-         {
-            int ori = orientation(seg[s2]->lP(), seg[s2]->rP(), seg[s1]->lP());
-            if (0 == ori)
-            { // collinear segments
-               addEvent(seg[s1],DEBUG_NEW TesEvent(seg[s1]),_endE );
-               addEvent(seg[s2],DEBUG_NEW TesEvent(seg[s2]),_endE );
-            }
-            else
-               addEvent(seg[s1],DEBUG_NEW TeEvent(seg[s1], seg[s2]),_endE);
+         int ori = orientation(seg[s2]->lP(), seg[s2]->rP(), seg[s1]->rP());
+         if (0 == ori)
+         { // collinear segments
+            addEvent(seg[s1],DEBUG_NEW TbsEvent(seg[s1]),_beginE);
+            addEvent(seg[s2],DEBUG_NEW TbsEvent(seg[s2]),_beginE);
          }
          else
-            addEvent(seg[s1],DEBUG_NEW TmEvent(seg[s1], seg[s2]),_modifyE);
+            addEvent(seg[s1],DEBUG_NEW TbEvent(seg[s1], seg[s2]),_beginE);
       }
+      else if (seg[s1]->rP() == seg[s2]->rP())
+      {
+         int ori = orientation(seg[s2]->lP(), seg[s2]->rP(), seg[s1]->lP());
+         if (0 == ori)
+         { // collinear segments
+            addEvent(seg[s1],DEBUG_NEW TesEvent(seg[s1]),_endE );
+            addEvent(seg[s2],DEBUG_NEW TesEvent(seg[s2]),_endE );
+         }
+         else
+            addEvent(seg[s1],DEBUG_NEW TeEvent(seg[s1], seg[s2]),_endE);
+      }
+      else
+         addEvent(seg[s1],DEBUG_NEW TmEvent(seg[s1], seg[s2]),_modifyE);
    }
 }
 

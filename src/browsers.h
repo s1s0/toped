@@ -96,7 +96,6 @@ namespace browsers
          void              statusHighlight(wxString, wxString, wxString);
          wxString          rbCellName();
          virtual void      collectInfo(bool);
-         void              setCellFilter(wxString & filter) {_cellFilter = filter;};
       protected:
          wxTreeItemId      _rbCellID;
          virtual void      onItemRightClick(wxTreeEvent&);
@@ -122,15 +121,12 @@ namespace browsers
          bool              isDbOrLibItem(const wxTreeItemId);
          wxTreeItemId      _topStructure;
          wxTreeItemId      _activeStructure;
-         wxString          _topCellNameBackup;
-         wxString          _activeCellNameBackup;
          wxTreeItemId      _dbroot; // The actual Root always invisible (because of the libraries)
          LibsRoot          _libsRoot;
          wxTreeItemId      _undefRoot;
          bool              _hierarchy_view;
          wxColor           _listColor;
          wxColor           _editColor;
-         wxString          _cellFilter;
          DECLARE_EVENT_TABLE();
    };
 
@@ -194,7 +190,6 @@ namespace browsers
          wxImageList*      _imageList;
          wxButton*         _hierButton;
          wxButton*         _flatButton;
-         wxTextCtrl*       _cellFilter;
          CellBrowser*      _cellBrowser;
          bool              _hierarchy_view;
          DECLARE_EVENT_TABLE();
