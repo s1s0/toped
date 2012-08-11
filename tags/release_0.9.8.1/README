@@ -1,0 +1,29 @@
+
+TOPED - VLSI Layout Editor
+-------------------------------
+
+Toped is a cross-platform open source project licensed under the GNU General Public License
+
+usage:
+
+   toped [parameters] <tll_command_file>
+   where parameters can be:
+   -ogl_safe
+      Forces the usage of the basic renderer. 
+   -I<path>
+      Expands the search paths of the parser. Multiply parameters of this kind are acceptable. 
+      Each of them shall contain a single path. 
+   -D<macro>
+      Defines a preprocessor macro. Can be used multiply times.
+   -D<macro>=<replacement>
+      Defines a preprocessor macro. Can be used multiply times.
+
+For further information:
+http://www.toped.org.uk
+http://toped.googlecode.com
+
+Mailing list: http://groups.google.com/group/toped-devel
+Mail:  toped-devel@googlegroups.com 
+       feedback@toped.org.uk
+
+

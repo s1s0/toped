@@ -1,0 +1,53 @@
+//===========================================================================
+//                                                                          =
+// ------------------------------------------------------------------------ =
+//                      TTTTT    EEEE     L       L                         =
+//                      T T T    E        L       L                         =
+//                        T      EEE      L       L                         =
+//                        T      E        L       L                         =
+//                        T      EEEEE    LLLLL   LLLLL                     =
+//                                                                          =
+//   This file is a part of Toped project (C) 2001-2012 Toped developers    =
+// ------------------------------------------------------------------------ =
+//           $URL$
+//        Created: Sun Dec 16 2007
+//     Originator: Svilen Krustev - skr@toped.org.uk
+//    Description: Some basic TELL functions and tests for arc/circles
+//---------------------------------------------------------------------------
+//  Revision info
+//---------------------------------------------------------------------------
+//      $Revision$
+//          $Date$
+//        $Author$
+//===========================================================================
+#include "$TPD_GLOBAL/tll/seed.tll"
+
+
+point list arc(point center, int radius, int start, int stop, int numsteps)
+{
+   real step = abs(stop -start) / numsteps;
+   real current = start;
+   point list the_arc;
+   while (current <= stop)
+   {
+      point cur_point;
+      cur_point.x = center.x + radius * cos(current);
+      cur_point.y = center.y + radius * sin(current);
+      current = current + step;
+      the_arc[:+] = cur_point;
+   }
+   return the_arc;
+}
+
+newcell("arc_test");
+opencell("arc_test");
+addpoly(arc({10,10},5, 270, 450, 12),8);
+addpoly(arc({1,1},3, 0, 360, 32),4);
+
+point list sector;
+sector = arc({20,20},10, 270, 450, 16);
+sector[:+] = {{20,25}};
+sector[:+] = arc({20,20}, 5,  90, 270, 16);
+addpoly(sector,2);
+
+
