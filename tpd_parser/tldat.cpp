@@ -83,8 +83,11 @@ bool telldata::TCompType::addfield(std::string fname, typeID fID, const TType* u
 
 const telldata::TType* telldata::TCompType::findtype(const typeID basetype) const
 {
-   assert(_tIDMAP.end() != _tIDMAP.find(basetype));
-   return _tIDMAP.find(basetype)->second;
+   typeIDMAP::const_iterator theType = _tIDMAP.find(basetype);
+   if (_tIDMAP.end() != theType)
+      return theType->second;
+   else
+      return NULL;
 }
 
 //=============================================================================
@@ -975,6 +978,7 @@ void telldata::ArgumentID::toList(bool cmdUpdate, telldata::typeID alistID)
 
 void telldata::ArgumentID::userStructCheck(const telldata::TType* vtype, bool cmdUpdate)
 {
+   assert(vtype);
    if (vtype->isComposite())
    {
       const telldata::TCompType* vartype = static_cast<const telldata::TCompType*>(vtype);
@@ -991,13 +995,20 @@ void telldata::ArgumentID::userStructCheck(const telldata::TType* vtype, bool cm
             if (TLISALIST(CF->second))
             {// check the list fields
                if (TLCOMPOSIT_TYPE((CF->second & (~telldata::tn_listmask))))
-                  (*CA)->userStructListCheck(vartype->findtype(CF->second), cmdUpdate);
+               {
+                  const telldata::TType* tType = vartype->findtype(CF->second);
+                  if (NULL != tType)
+                     (*CA)->userStructListCheck(tType, cmdUpdate);
+               }
                else
                   (*CA)->toList(cmdUpdate, CF->second & ~telldata::tn_listmask);
             }
             else
-               // call in recursion the userStructCheck method of the child
-               (*CA)->userStructCheck(vartype->findtype(CF->second), cmdUpdate);
+            {
+               const telldata::TType* tType = vartype->findtype(CF->second);
+               if (NULL != tType)
+                  (*CA)->userStructCheck(tType, cmdUpdate);
+            }
          }
          if (!NUMBER_TYPE( CF->second ))
          {
@@ -1044,6 +1055,7 @@ void telldata::ArgumentID::userStructCheck(const telldata::TType* vtype, bool cm
 
 void telldata::ArgumentID::userStructListCheck(const telldata::TType* vartype, bool cmdUpdate)
 {
+   assert(vartype);
    for (argumentQ::iterator CA = _child.begin(); CA != _child.end(); CA++)
       if ( TLUNKNOWN_TYPE( (**CA)() ) ) (*CA)->userStructCheck(vartype, cmdUpdate);
 

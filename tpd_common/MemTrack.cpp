@@ -592,7 +592,7 @@ namespace MemTrack
                 uniqueTypeIndex++;
             }
         }
-        assert(uniqueTypeIndex = numUniqueTypes);
+        assert(uniqueTypeIndex == numUniqueTypes);
 
         // Sort the digests by total memory usage.
         std::sort(
