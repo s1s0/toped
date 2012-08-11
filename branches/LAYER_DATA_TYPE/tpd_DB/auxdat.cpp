@@ -416,13 +416,13 @@ float auxdata::TdtGrcWire::get_distance(const TP& p1, const TP& p2, const TP& p0
       // if the segment is parallel to Y axis
       if ( ((p0.y() >= p1.y()) && (p0.y() <= p2.y()))
          ||((p0.y() <= p1.y()) && (p0.y() >= p2.y())) )
-         return fabsf(p0.x() - p1.x());
+         return std::fabsf((float)(p0.x() - p1.x()));
       else return -1;
    else if (p1.y() == p2.y())
       // if the segment is parallel to X axis
       if ( ((p0.x() >= p1.x()) && (p0.x() <= p2.x()))
          ||((p0.x() <= p1.x()) && (p0.x() >= p2.x())) )
-         return fabsf(p0.y() - p1.y());
+         return std::fabsf((float)(p0.y() - p1.y()));
       else return -1;
    else {
       // segment is not parallel to any axis
@@ -436,7 +436,7 @@ float auxdata::TdtGrcWire::get_distance(const TP& p1, const TP& p2, const TP& p0
       // now check that the new coordinate is on the p1-p2 line
       if ((((Y >= p1.y()) && (Y <= p2.y()))||((Y <= p1.y()) && (Y >= p2.y()))) &&
           (((X >= p1.x()) && (X <= p2.x()))||((X <= p1.x()) && (X >= p2.x())))   )
-         return fabsf(Cn / sqrt(dist));
+         return std::fabsf((float)(Cn / sqrt(dist)));
       else return -1;
    }
 }
