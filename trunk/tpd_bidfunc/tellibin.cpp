@@ -518,11 +518,7 @@ int tellstdfunc::intrnlSORT_DB::execute()
       tDesign->fixUnsorted();
       LogFile << "// $sort_db( );"; LogFile.flush();
    }
-   else
-   {
-      assert(false);
-   }
-   DATC->unlockTDT(dbLibDir, false);
+   DATC->unlockTDT(dbLibDir, true);
    return EXEC_NEXT;
 }
 

@@ -365,7 +365,7 @@ bool laydata::ClipIterator<DataT>::secureNonEmptyDown()
    if (0ll == _clipBox.cliparea(Iterator<DataT>::_cQuad->_overlap)) return false;
    while (0 == Iterator<DataT>::_cQuad->_props._numObjects)
    {
-      return nextSubQuad(0,Iterator<DataT>::_cQuad->_props.numSubQuads());
+      return this->nextSubQuad(0,Iterator<DataT>::_cQuad->_props.numSubQuads());
    }
    Iterator<DataT>::_cData = 0;
    return true;
@@ -424,7 +424,7 @@ bool laydata::DrawIterator<DataT>::secureNonEmptyDown()
    else if (!areal.visible(drawprop->scrCtm(), drawprop->visualLimit())) return false;
    while (0 == Iterator<DataT>::_cQuad->_props._numObjects)
    {
-      return nextSubQuad(0,Iterator<DataT>::_cQuad->_props.numSubQuads());
+      return this->nextSubQuad(0,Iterator<DataT>::_cQuad->_props.numSubQuads());
    }
    Iterator<DataT>::_cData = 0;
    return true;
