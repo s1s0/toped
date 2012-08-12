@@ -782,7 +782,7 @@ void laydata::TdtCell::write(OutputTdtFile* const tedfile, const CellMap& allcel
             DI->write(tedfile);
          tedfile->putByte(tedf_LAYEREND);
       }
-      else if (GRC_LAY == lay.number())
+      else if (GRC_LAY_DEF == lay())
       {
          tedfile->putByte(tedf_GRC);
          for (QuadTree::Iterator DI = lay->begin(); DI != lay->end(); DI++)

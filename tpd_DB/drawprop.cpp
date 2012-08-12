@@ -1144,12 +1144,14 @@ void layprop::DrawProperties::saveLayers(FILE* prop_file) const
    for( LaySetList::Iterator CI = getCurSetList().begin(); CI != getCurSetList().end(); CI++ )
    {
       if (REF_LAY_DEF == CI()) continue;
-      fprintf(prop_file, "   layprop(\"%s\", %d , \"%s\", \"%s\", \"%s\");\n",
-              CI->name().c_str()         ,
-              CI.number()                ,
-              CI->color().c_str()        ,
-              CI->fill().c_str()         ,
-              CI->sline().c_str()         );
+      std::stringstream wstr;
+      wstr << "   layprop(\"" << CI->name()  <<
+              "\", "          << CI()        <<
+              ", \""          << CI->color() <<
+              "\", \""        << CI->fill()  <<
+              "\", \""        << CI->sline() <<
+              "\");"          << std::endl;
+      fprintf(prop_file, "%s", wstr.str().c_str());
    }
    fprintf(prop_file, "}\n\n");
 }

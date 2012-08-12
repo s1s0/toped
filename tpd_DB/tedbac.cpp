@@ -121,12 +121,6 @@ LayerDef laydata::LayerIterator<DataT>::operator()() const
 }
 
 template <typename DataT>
-LayerNumber laydata::LayerIterator<DataT>::number() const
-{
-   return _cNMap->first.num();
-}
-
-template <typename DataT>
 bool laydata::LayerIterator<DataT>::editable() const
 {
    return _cNMap->first.editable();
