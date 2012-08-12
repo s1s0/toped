@@ -75,11 +75,13 @@ const LayerNumber DRC_LAY              = 0xfffffffd;
 const LayerNumber GRC_LAY              = 0xfffffffc;
 const LayerNumber NULL_LAY             = 0xfffffff0;
 const LayerNumber LAST_EDITABLE_LAYNUM = 0x0000ffff;
+const LayerNumber LAST_EDITABLE_LAYTYP = 0x0000ffff;
 const byte        OPENGL_FONT_UNIT     = 128;
 const byte        GRID_LIMIT           = 5;    // if grid step is less than _GRID_LIMIT pixels, grid is hidden
 const real        DEFAULT_DBU          = 1e-9;
 const real        DEFAULT_UU           = 1e-3;
 const LayerDType  DEFAULT_LAY_DATATYPE = 0;
+const LayerNumber DEFAULT_LAY_NUMBER   = 0;
 
 
 
