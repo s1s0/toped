@@ -503,7 +503,7 @@ void auxdata::GrcCell::write(OutputTdtFile* const tedfile) const
    {
       assert(wl.editable());
       tedfile->putByte(tedf_LAYER);
-      tedfile->putWord(wl.number());
+      tedfile->putLayer(wl());
       for (QuadTree::Iterator DI = wl->begin(); DI != wl->end(); DI++)
          DI->write(tedfile);
       tedfile->putByte(tedf_LAYEREND);

@@ -77,7 +77,7 @@ bool LayerDef::editable() const
 
 std::ostream& operator <<(std::ostream& os, const LayerDef& obj)
 {
-   os << "{ " << obj.num() << "," << obj.typ() << "}";
+   os << "{ " << obj.num() << ", " << obj.typ() << "}";
    return os;
 }
 
