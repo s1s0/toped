@@ -355,7 +355,7 @@ void tui::TechEditorDialog::updateLayerList()
       _layerList->SetItem(row);
       _layerList->SetColumnWidth(2, wxLIST_AUTOSIZE);
       //
-      _layerList->addItemLayer(newItem, layNo, std::string(_layerNameString.mb_str(wxConvUTF8)));
+      _layerList->addItemLayer(newItem, layDef, std::string(_layerNameString.mb_str(wxConvUTF8)));
       //
       _layerList->SortItems(tui::wxListCtrlItemCompare, 0l);
       _curSelect = _layerList->FindItem(-1, newItem);

@@ -969,7 +969,7 @@ int tellstdfunc::GDSgetlaymap::execute()
          {
             std::ostringstream dtypestr;
             dtypestr << laynumstr.str() << *CDT;
-            theMap->add(DEBUG_NEW telldata::TtLMap(CGL->first, dtypestr.str()));
+            theMap->add(DEBUG_NEW telldata::TtLMap(LayerDef(CGL->first, *CDT), dtypestr.str()));
          }
       }
    }
@@ -1384,7 +1384,7 @@ int tellstdfunc::CIFgetlaymap::execute()
       word laynum = 1;
       for ( NameList::const_iterator CCL = cifLayers.begin(); CCL != cifLayers.end(); CCL++ )
       {
-         telldata::TtLMap* clay = DEBUG_NEW telldata::TtLMap(laynum++, *CCL);
+         telldata::TtLMap* clay = DEBUG_NEW telldata::TtLMap(LayerDef(laynum++,DEFAULT_LAY_DATATYPE), *CCL);
          theMap->add(clay);
       }
    }
@@ -1713,7 +1713,7 @@ int tellstdfunc::OASgetlaymap::execute()
          {
             std::ostringstream dtypestr;
             dtypestr << laynumstr.str() << *CDT;
-            theMap->add(DEBUG_NEW telldata::TtLMap(CGL->first, dtypestr.str()));
+            theMap->add(DEBUG_NEW telldata::TtLMap(LayerDef(CGL->first, *CDT), dtypestr.str()));
          }
       }
    }
@@ -1789,7 +1789,7 @@ int tellstdfunc::DRCCalibreimport::execute()
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp, layprop::DRC))
    {
-      drawProp->addLayer(DRC_LAY);
+      drawProp->addLayer(DRC_LAY_DEF);
    }
    PROPC->unlockDrawProp(drawProp, true);
    std::string filename = getStringValue();

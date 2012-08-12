@@ -117,7 +117,7 @@ int tellstdfunc::grcGETCELLS::execute()
          laydata::CellMap::const_iterator CL;
          for (CL = (*curlib)->begin(); CL != (*curlib)->end(); CL++)
          {
-            if (CL->second->checkLayer(GRC_LAY))
+            if (CL->second->checkLayer(GRC_LAY_DEF))
                tllull->add(DEBUG_NEW telldata::TtString(CL->first));
          }
       }

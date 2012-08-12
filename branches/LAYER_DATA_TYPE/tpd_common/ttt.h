@@ -73,7 +73,7 @@ const LayerNumber REF_LAY              = 0xffffffff;
 const LayerNumber ERR_LAY              = 0xfffffffe;
 const LayerNumber DRC_LAY              = 0xfffffffd;
 const LayerNumber GRC_LAY              = 0xfffffffc;
-const LayerNumber NULL_LAY             = 0xfffffff0;
+//const LayerNumber NULL_LAY             = 0xfffffff0;
 const LayerNumber LAST_EDITABLE_LAYNUM = 0x0000ffff;
 const LayerNumber LAST_EDITABLE_LAYTYP = 0x0000ffff;
 const byte        OPENGL_FONT_UNIT     = 128;
@@ -160,7 +160,6 @@ const int         UNDEFCELL_LIB     =  0;
 class LayerDef {
 public:
                              LayerDef(LayerNumber num, LayerDType  typ) : _num(num), _typ(typ) {}
-                             LayerDef(LayerNumber num) : _num(num), _typ(DEFAULT_LAY_DATATYPE) {}
                              LayerDef(const LayerDef& laydef) : _num(laydef.num()), _typ(laydef.typ()) {}
    LayerNumber               num() const {return _num;}
    LayerDType                typ() const {return _typ;}

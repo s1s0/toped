@@ -668,8 +668,8 @@ void auxdata::GrcCell::readTdtLay(InputTdtFile* const tedfile)
 {
    byte      recordtype;
    TdtAuxData*  newData;
-   LayerNumber  layno    = tedfile->getWord();
-   QTreeTmp* tmpLayer = secureUnsortedLayer(layno);
+   LayerDef  laydef(tedfile->getLayer());
+   QTreeTmp* tmpLayer = secureUnsortedLayer(laydef);
    while (tedf_LAYEREND != (recordtype = tedfile->getByte()))
    {
       switch (recordtype)
