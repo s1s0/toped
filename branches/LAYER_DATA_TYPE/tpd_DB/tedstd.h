@@ -54,9 +54,10 @@ const byte tedf_REFS            = 0x8C;
 const byte tedf_REFSEND         = 0x8D;
 const byte tedf_GRC             = 0x8E;
 const byte tedf_GRCEND          = 0x8F;
+const byte tedf_DATATYPE        = 0x90;
 //
 const byte TED_CUR_REVISION     = 0x00;
-const byte TED_CUR_SUBREVISION  = 0x0A;
+const byte TED_CUR_SUBREVISION  = 0x0B;
 
 //==============================================================================
 class PSegment {
@@ -310,6 +311,7 @@ class InputTdtFile : public InputDBFile {
       void                 cleanup();
       byte                 getByte();
       word                 getWord();
+      LayerDef             getLayer();
       int4b                get4b();
       WireWidth            get4ub();
       real                 getReal();
@@ -344,6 +346,7 @@ public:
    void                 putReal(const real);
    void                 putByte(const byte ch) {fputc(ch, _file);};
    void                 putWord(const word);
+   void                 putLayer(const LayerDef&);
    void                 put4b(const int4b);
    void                 put4ub(const WireWidth);
    void                 putTP(const TP*);

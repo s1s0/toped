@@ -758,4 +758,3 @@ unsigned GCD(unsigned arg1, unsigned arg2)
       return GCD(arg2, remainder);
 }
 
-LayerNumber tell2DBLayer(word layno) {return (LayerNumber) layno;}

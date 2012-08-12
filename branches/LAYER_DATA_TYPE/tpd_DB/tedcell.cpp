@@ -366,8 +366,8 @@ void laydata::TdtCell::readTdtLay(InputTdtFile* const tedfile)
 {
    byte      recordtype;
    TdtData*  newData;
-   word  layno    = tedfile->getWord();
-   QTreeTmp* tmpLayer = secureUnsortedLayer(tell2DBLayer(layno));
+   LayerDef  laydef    = tedfile->getLayer();
+   QTreeTmp* tmpLayer = secureUnsortedLayer(laydef);
    while (tedf_LAYEREND != (recordtype = tedfile->getByte()))
    {
       switch (recordtype)
@@ -777,7 +777,7 @@ void laydata::TdtCell::write(OutputTdtFile* const tedfile, const CellMap& allcel
       else if ( lay.editable() )
       {
          tedfile->putByte(tedf_LAYER);
-         tedfile->putWord(lay.number());
+         tedfile->putLayer(lay());
          for (QuadTree::Iterator DI = lay->begin(); DI != lay->end(); DI++)
             DI->write(tedfile);
          tedfile->putByte(tedf_LAYEREND);

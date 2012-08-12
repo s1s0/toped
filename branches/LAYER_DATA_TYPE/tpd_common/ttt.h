@@ -729,8 +729,6 @@ bool  SGHierTree<TYPE>::removeRootItem(const TYPE* comp, SGHierTree*& lst)
    return false;
 }
 
-LayerNumber tell2DBLayer(word layno);
-
 //=============================================================================
 // more common constants
 //=============================================================================
