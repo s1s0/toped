@@ -54,6 +54,7 @@ namespace tui
       DTE_LINE_COMBO     ,
       DTE_COLOR_COMBO    ,
       DTE_LAYER_NUM      ,
+      DTE_LAYER_TYPE     ,
       DTE_LAYER_NAME     ,
       DTE_APPLY
    } DialogTechEditor;
@@ -123,6 +124,7 @@ namespace tui
          void                    OnStyleEditor(wxCommandEvent&);
          void                    OnChangeProperty(wxCommandEvent&);
          void                    OnChangeLayNum(wxCommandEvent&);
+         void                    OnChangeLayType(wxCommandEvent&);
          void                    OnApply(wxCommandEvent&);
          void                    OnLayListSort(wxListEvent&);
          void                    OnRemotePropUpdate(wxCommandEvent&);
@@ -130,15 +132,16 @@ namespace tui
          {
             public:
                struct LayerLine {
-                                 LayerLine() : _number(0), _name("") {}
-                                 LayerLine(unsigned long number, std::string name) :
-                                    _number(number), _name(name) {}
-                  unsigned long  _number;
+                                 LayerLine() : _laydef(DEFAULT_LAY_NUMBER, DEFAULT_LAY_DATATYPE), _name("") {}
+                                 LayerLine(LayerDef laydef, std::string name) :
+                                    _laydef(laydef), _name(name) {}
+                  LayerDef       _laydef;
                   std::string    _name;
                };
                                  LayerListPanel( wxWindow *parent, wxWindowID winid, long style) :
                                     wxListView(parent, winid, wxDefaultPosition, wxDefaultSize, style) {}
                unsigned long     getItemLayerNum(TmpWxIntPtr item1);
+               unsigned long     getItemLayerTyp(TmpWxIntPtr item1);
                std::string       getItemLayerName(TmpWxIntPtr item1);
                void              addItemLayer(unsigned long, const LayerDef& laydef, std::string);
                void              clearAll();
@@ -150,14 +153,17 @@ namespace tui
          void                    prepareLayers(layprop::DrawProperties*);
          void                    updateDialog();
          void                    updateLayerList();
+         void                    checkNewLayer();
          LayerListPanel*         _layerList;
          ColorListComboBox*      _layerColors;
          FillListComboBox*       _layerFills;
          LineListComboBox*       _layerLines;
 
          wxTextCtrl*             _layerNumber;
-         wxString                _layerNumberString;
+         wxTextCtrl*             _layerDtype;
          wxTextCtrl*             _layerName;
+         wxString                _layerNumberString;
+         wxString                _layerDtypeString;
          wxString                _layerNameString;
          int                     _curSelect;//!Data related to current selection
          LayerDefList            _allLayNums;
