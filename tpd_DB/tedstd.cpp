@@ -355,11 +355,11 @@ InputTdtFile::InputTdtFile( wxString fileName, laydata::TdtLibDir* tedlib ) :
          return;
       }
       bool versionOk = (0 ==_revision) &&
-                       (6 < _subrevision) && (11 > _subrevision);
+                       (9 < _subrevision) && (12 > _subrevision);
       if (!versionOk)
       {
          std::ostringstream ost;
-         ost << "TDT format revision not supported: 0.7 - 0.9 expected";
+         ost << "TDT format revision not supported: 0.10 or 0.11 expected";
          tell_log(console::MT_ERROR,ost.str());
          setStatus(versionOk);
       }
@@ -406,6 +406,20 @@ word InputTdtFile::getWord()
    if (!readStream(&result,sizeof(word), true))
       throw EXPTNreadTDT("Wrong number of bytes read");
    return result;
+}
+
+LayerDef InputTdtFile::getLayer()
+{
+   word laynum = 0;
+   word laytyp = 0;
+   if (!readStream(&laynum,sizeof(word), true))
+      throw EXPTNreadTDT("Wrong number of bytes read");
+   if (!((_revision == 0x00) && (_subrevision < 0x0B)))
+   {
+      if (!readStream(&laytyp,sizeof(word), true))
+         throw EXPTNreadTDT("Wrong number of bytes read");
+   }
+   return LayerDef(laynum,laytyp);
 }
 
 int4b InputTdtFile::get4b()
@@ -582,6 +596,14 @@ void OutputTdtFile::putWord(const word data) {
    fwrite(&data,2,1,_file);
 }
 
+void OutputTdtFile::putLayer(const LayerDef& laydef)
+{
+   word data = laydef.num();
+   fwrite(&data,2,1,_file);
+   data = laydef.typ();
+   fwrite(&data,2,1,_file);
+}
+
 void OutputTdtFile::put4b(const int4b data) {
    fwrite(&data,4,1,_file);
 }
@@ -664,7 +686,7 @@ bool laydata::pathConvert(PointVector& plist, int4b begext, int4b endext )
 {
    word numpoints = plist.size();
    TP P1 = plist[0];
-   // find the first neighboring point which is not equivalent to P1
+   // find the first neighbouring point which is not equivalent to P1
    int fnbr = 1;
    while ((fnbr < numpoints) && (P1 == plist[fnbr]))
       fnbr++;
