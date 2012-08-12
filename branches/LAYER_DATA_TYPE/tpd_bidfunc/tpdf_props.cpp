@@ -66,7 +66,7 @@ tellstdfunc::stdLAYPROP::stdLAYPROP(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
    _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtLayer()));
    _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
    _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
    _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
@@ -76,18 +76,20 @@ int tellstdfunc::stdLAYPROP::execute() {
    std::string sline = getStringValue();
    std::string fill  = getStringValue();
    std::string col   = getStringValue();
-   word        gdsN  = getWordValue();
+   telldata::TtLayer* tlay = static_cast<telldata::TtLayer*>(OPstack.top());OPstack.pop();
+   LayerDef laydef(tlay->value());
    std::string name  = getStringValue();
    // error message - included in the method
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-      drawProp->addLayer(name, (LayerNumber)gdsN, col, fill, sline);
-      TpdPost::layer_add(name,gdsN);
-      LogFile << LogFile.getFN() << "(\""<< name << "\"," << gdsN << ",\"" <<
+      drawProp->addLayer(name, laydef, col, fill, sline);
+      TpdPost::layer_add(name,laydef);
+      LogFile << LogFile.getFN() << "(\""<< name << "\"," << (*tlay) << ",\"" <<
             col << "\",\"" << fill <<"\",\"" << sline <<"\");";LogFile.flush();
    }
    PROPC->unlockDrawProp(drawProp, true);
+   delete tlay;
    return EXEC_NEXT;
 }
 

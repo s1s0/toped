@@ -437,10 +437,12 @@ void tui::TechEditorDialog::OnApply(wxCommandEvent&)
 #endif
 
    unsigned long d_number;  _layerNumberString.ToULong(&d_number);
+   unsigned long d_type  ;  _layerDtypeString.ToULong(&d_type);
 
    ost   << wxT("layprop(\"")          << _layerNameString
-                  << wxT("\" , ")      << d_number //wxT("\" , \"\" , ")
-                  << wxT(" , \"")      << s_color
+                  << wxT("\" , {")     << d_number
+                  << wxT(", ")         << d_type
+                  << wxT("} , \"")     << s_color
                   << wxT("\" , \"")    << s_fill
                   << wxT("\" , \"")    << s_style
                   << wxT("\");");

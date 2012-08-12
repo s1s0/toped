@@ -316,7 +316,7 @@ namespace layprop {
          void                       allUnselectable(LayerDefSet&);
          void                       allInvisible(LayerDefSet&);
          // Properly protected in tpd_bidfunc or the functions called from there
-         bool                       addLayer(std::string, LayerNumber, std::string, std::string, std::string);
+         bool                       addLayer(std::string, const LayerDef&, std::string, std::string, std::string);
          bool                       addLayer(std::string, const LayerDef&);
          bool                       addLayer(const LayerDef&);
          LayerDef                   addLayer(std::string);

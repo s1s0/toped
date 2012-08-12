@@ -569,7 +569,7 @@ bool layprop::DrawProperties::addLayer( const LayerDef& laydef )
    return true; // dummy statement to prevent compilation warnings
 }
 
-bool layprop::DrawProperties::addLayer(std::string name, LayerNumber layno, std::string col,
+bool layprop::DrawProperties::addLayer(std::string name, const LayerDef& laydef, std::string col,
                                        std::string fill, std::string sline)
 {
    if ((col != "") && (_layColors.end() == _layColors.find(col)))
@@ -594,16 +594,16 @@ bool layprop::DrawProperties::addLayer(std::string name, LayerNumber layno, std:
    switch(_propertyState)
    {
       case DB:
-         if (_laySetDb.end() != _laySetDb.find(layno))
+         if (_laySetDb.end() != _laySetDb.find(laydef))
          {
             new_layer = false;
-            delete _laySetDb[layno];
-            _laySetDb.erase(layno);
+            delete _laySetDb[laydef];
+            _laySetDb.erase(laydef);
             std::ostringstream ost;
-            ost << "Warning! Layer "<<layno<<" redefined";
+            ost << "Warning! Layer "<<laydef<<" redefined";
             tell_log(console::MT_WARNING, ost.str());
          }
-         _laySetDb.add(layno, DEBUG_NEW LayerSettings(name,col,fill,sline));
+         _laySetDb.add(laydef, DEBUG_NEW LayerSettings(name,col,fill,sline));
          break;
       case DRC: assert(false); break; //User can't call DRC database directly
       default: assert(false); break;
