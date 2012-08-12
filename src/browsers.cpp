@@ -1563,17 +1563,15 @@ void browsers::browserTAB::onTellClearDRCTab()
 }
 
 //====================================================================
-browsers::LayerInfo::LayerInfo(const LayerInfo& lay)
-{
-   _name  = lay._name;
-   _layno = lay._layno;
-}
+browsers::LayerInfo::LayerInfo(const LayerInfo& lay) :
+   _name   (lay._name  ),
+   _laydef (lay._laydef)
+{}
 
-browsers::LayerInfo::LayerInfo(const std::string &name, const word layno)
-{
-   _name  = name;
-   _layno = layno;
-};
+browsers::LayerInfo::LayerInfo(const std::string &name, const LayerDef& laydef) :
+   _name   (name  ),
+   _laydef (laydef)
+{}
 
 //====================================================================
 BEGIN_EVENT_TABLE(browsers::LayerButton, wxPanel)
@@ -1600,9 +1598,9 @@ browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoi
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-      _filled  = drawProp->layerFilled(_layer->layno());
-      const byte* ifill = drawProp->getFill(_layer->layno());
-      col   = drawProp->getColor(_layer->layno());
+      _filled  = drawProp->layerFilled(_layer->laydef());
+      const byte* ifill = drawProp->getFill(_layer->laydef());
+      col   = drawProp->getColor(_layer->laydef());
       _brush = tui::makeBrush(ifill, col);
    }
    PROPC->unlockDrawProp(drawProp, false);
@@ -1648,7 +1646,7 @@ void browsers::LayerButton::preparePicture()
    int curw = clearence;
 
    char temp[100];
-   sprintf(temp, "%3i", _layer->layno());
+   sprintf(temp, "%3i", _layer->laydef().num());
    wxString layno(temp, wxConvUTF8);
    int hno,wno;
    DC.GetTextExtent(layno, &wno, &hno);
@@ -1716,19 +1714,19 @@ void browsers::LayerButton::onLeftClick(wxMouseEvent &event)
    wxString cmd;
    if (event.ShiftDown())
    {//Hide layer
-      cmd << wxT("hidelayer(") <<_layer->layno() << wxT(", ");
+      cmd << wxT("hidelayer({") << _layer->laydef().num() << wxT(", ") << _layer->laydef().typ() << wxT("}, ");
       if (_hidden) cmd << wxT("false") << wxT(");");
       else cmd << wxT("true") << wxT(");");
    }
    else if (event.ControlDown())
    {// Lock Layer
-      cmd << wxT("locklayer(") <<_layer->layno() << wxT(", ");
+      cmd << wxT("locklayer({") << _layer->laydef().num() << wxT(", ") << _layer->laydef().typ() << wxT("}, ");
       if (_locked) cmd << wxT("false") << wxT(");");
       else cmd << wxT("true") << wxT(");");
    }
    else
    {//Select layer
-      cmd << wxT("usinglayer(") << _layer->layno()<< wxT(");");
+      cmd << wxT("usinglayer({") << _layer->laydef().num() << wxT(", ") << _layer->laydef().typ() << wxT("});");
    }
    TpdPost::parseCommand(cmd);
 }
@@ -1736,7 +1734,7 @@ void browsers::LayerButton::onLeftClick(wxMouseEvent &event)
 void browsers::LayerButton::onMiddleClick(wxMouseEvent &event)
 {
    wxString cmd;
-   cmd << wxT("filllayer(") <<_layer->layno() << wxT(", ");
+   cmd << wxT("filllayer({") << _layer->laydef().num() << wxT(", ") << _layer->laydef().typ() << wxT("}, ");
    if (_filled) cmd << wxT("false") << wxT(");");
       else cmd << wxT("true") << wxT(");");
    TpdPost::parseCommand(cmd);
@@ -1753,7 +1751,7 @@ void  browsers::LayerButton::OnEditLayer(wxCommandEvent&)
 {
    wxCommandEvent eventEditLayer(wxEVT_EDITLAYER);
 
-   eventEditLayer.SetInt(_layer->layno());
+   eventEditLayer.SetInt(_layer->laydef().num());
    // This is supposed to work according to the wx documentation, but compiler
    // says ... not a member of wxWindow ...
    //ProcessWindowEvent(eventEditLayer);
@@ -1814,7 +1812,7 @@ browsers::LayerPanel::~LayerPanel()
 {
 }
 
-browsers::LayerButton* browsers::LayerPanel::checkDefined(word key)
+browsers::LayerButton* browsers::LayerPanel::checkDefined(const LayerDef& key)
 {
    if (_buttonMap.end() == _buttonMap.find(key)) return NULL;
    return _buttonMap[key];
@@ -1828,45 +1826,44 @@ void browsers::LayerPanel::onCommand(wxCommandEvent& event)
    {
       case tui::BT_LAYER_DEFAULT:
       {
-         word *oldlay = static_cast<word*>(event.GetClientData());
-         word layno = event.GetExtraLong();
-         if ((wbutton = checkDefined(*oldlay))) wbutton->selectLayer(false);
-         if ((wbutton = checkDefined( layno ))) wbutton->selectLayer(true);
-         delete (oldlay);
+         std::pair<LayerDef, LayerDef>* laydefs = static_cast<std::pair<LayerDef, LayerDef>*> (event.GetClientData());
+         if ((wbutton = checkDefined(laydefs->second))) wbutton->selectLayer(false);
+         if ((wbutton = checkDefined(laydefs->first ))) wbutton->selectLayer(true);
+         delete (laydefs);
          break;
       }
       case    tui::BT_LAYER_HIDE:
       {
-         word *layno = static_cast<word*>(event.GetClientData());
+         LayerDef *laydef = static_cast<LayerDef*>(event.GetClientData());
          bool status = (1 == event.GetExtraLong());
-         if ((wbutton = checkDefined(*layno))) wbutton->hideLayer(status);
-         delete (layno);
+         if ((wbutton = checkDefined(*laydef))) wbutton->hideLayer(status);
+         delete (laydef);
          break;
       }
       case    tui::BT_LAYER_LOCK:
       {
          //_layerlist->lockLayer((word)event.GetExtraLong(),event.IsChecked());
-         word *layno = static_cast<word*>(event.GetClientData());
+         LayerDef *laydef = static_cast<LayerDef*>(event.GetClientData());
          bool status = (1 == event.GetExtraLong());
-         if ((wbutton = checkDefined(*layno))) wbutton->lockLayer(status);
-         delete (layno);
+         if ((wbutton = checkDefined(*laydef))) wbutton->lockLayer(status);
+         delete (laydef);
          break;
       }
       case    tui::BT_LAYER_FILL:
       {
-         word *layno = static_cast<word*>(event.GetClientData());
+         LayerDef *laydef = static_cast<LayerDef*>(event.GetClientData());
          bool status = (1 == event.GetExtraLong());
-         if ((wbutton = checkDefined(*layno))) wbutton->fillLayer(status);
-         delete (layno);
+         if ((wbutton = checkDefined(*laydef))) wbutton->fillLayer(status);
+         delete (laydef);
          break;
       }
       case     tui::BT_LAYER_ADD:
       {
-         word *layno = static_cast<word*>(event.GetClientData());
+         LayerDef *laydef = static_cast<LayerDef*>(event.GetClientData());
          std::string name = std::string(event.GetString().mb_str(wxConvFile ));
-         LayerInfo layer(name, *layno);
+         LayerInfo layer(name, *laydef);
          addButton(layer);
-         delete (layno);
+         delete (laydef);
          break;
       }
       default: event.Skip();break;
@@ -1877,7 +1874,7 @@ void  browsers::LayerPanel::addButton(LayerInfo& layer)
 {
    LayerButton* wbutton;
    int szx, szy;
-   if ((wbutton = checkDefined( layer.layno() )))
+   if ((wbutton = checkDefined( layer.laydef() )))
    {
       //Button already exists, replace it
       //layerButton = DEBUG_NEW LayerButton(this, tui::TMDUMMY_LAYER+_buttonCount, wxPoint (0, _buttonCount*30), wxSize(200, 30),
@@ -1889,7 +1886,7 @@ void  browsers::LayerPanel::addButton(LayerInfo& layer)
       ID = wbutton->GetId();
       LayerButton* layerButton = DEBUG_NEW LayerButton(this, ID, wxPoint (x, y), wxSize(szx, szy),
          wxBU_AUTODRAW|wxNO_BORDER, wxDefaultValidator, _T("button"), &layer);
-      _buttonMap[layer.layno()] = layerButton;
+      _buttonMap[layer.laydef()] = layerButton;
       delete wbutton;
    }
    else
@@ -1899,7 +1896,7 @@ void  browsers::LayerPanel::addButton(LayerInfo& layer)
       LayerButton* layerButton = DEBUG_NEW LayerButton(this, tui::TMDUMMY_LAYER+_buttonCount,
                                           wxPoint (0, _buttonCount*buttonHeight), wxSize(szx, buttonHeight),
                                           wxBU_AUTODRAW, wxDefaultValidator, _T("button"), &layer);
-      _buttonMap[layer.layno()] = layerButton;
+      _buttonMap[layer.laydef()] = layerButton;
       _buttonCount++;
       this->SetScrollbars(0, buttonHeight, 0, _buttonCount);
       //Reorder buttons
@@ -1926,8 +1923,8 @@ wxString browsers::LayerPanel::getAllSelected()
    wxString layers = wxT("{");
    for(LayerButtonMap::iterator it = _buttonMap.begin(); it != _buttonMap.end(); it++)
    {
-      word layNo = (it->second)->getLayNo();
-      layers << wxT(" ") <<  layNo << wxT(",");
+      LayerDef laydef((it->second)->getLayDef());
+      layers << wxT(" {") <<  laydef.num() << wxT(",") <<  laydef.typ() << wxT("} ,");
    }
    layers.RemoveLast();
    layers << wxT("}");
