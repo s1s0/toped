@@ -321,7 +321,7 @@ void tellstdfunc::stdHIDELAYER::undo() {
 int tellstdfunc::stdHIDELAYER::execute()
 {
    bool        hide  = getBoolValue();
-   telldata::TtLayer*  tlay = TELL_UNDOOPS_UNDO(telldata::TtLayer*);
+   telldata::TtLayer* tlay = static_cast<telldata::TtLayer*>(OPstack.top());OPstack.pop();
    LayerDef laydef(tlay->value());
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))

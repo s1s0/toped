@@ -224,12 +224,12 @@ namespace browsers
    class LayerInfo {
       public:
                               LayerInfo(const LayerInfo& lay);
-                              LayerInfo(const std::string &name, const word layno);
+                              LayerInfo(const std::string&, const LayerDef&);
          std::string          name()               { return _name;  }
-         word                 layno()              { return _layno; }
+         LayerDef             laydef()             { return _laydef; }
       private:
          std::string          _name;
-         word                 _layno;
+         LayerDef             _laydef;
    };
 
    //===========================================================================
@@ -254,7 +254,7 @@ namespace browsers
          void                 lockLayer(bool);
          void                 fillLayer(bool);
          void                 preparePicture();
-         word                 getLayNo()          {return _layer->layno();}
+         LayerDef             getLayDef()          {return _layer->laydef();}
 
       private:
          int                  _buttonWidth;
@@ -283,11 +283,11 @@ namespace browsers
          wxString             getAllSelected();
          void                 onPaint(wxPaintEvent&);
       private:
-         typedef std::map <word, LayerButton*> LayerButtonMap;
+         typedef std::map <LayerDef, LayerButton*> LayerButtonMap;
 
          void                 onCommand(wxCommandEvent&);
          void                 addButton(LayerInfo& layer);
-         LayerButton*         checkDefined(word);
+         LayerButton*         checkDefined(const LayerDef&);
          LayerButtonMap       _buttonMap;
          int                  _buttonCount;
          DECLARE_EVENT_TABLE();
