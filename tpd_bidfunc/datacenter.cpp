@@ -52,7 +52,7 @@ extern Calbr::CalbrFile*         DRCData;
 // class DataCenter
 //-----------------------------------------------------------------------------
 DataCenter::DataCenter(const std::string& localDir, const std::string& globalDir) :
-   _curcmdlay      ( ERR_LAY, DEFAULT_LAY_DATATYPE          ),
+   _curcmdlay      ( ERR_LAY_DEF                            ),
    _drawruler      ( false                                  ),
    _localDir       ( localDir                               ),
    _globalDir      ( globalDir                              ),
@@ -1070,7 +1070,7 @@ LayerMapExt* DataCenter::secureGdsLayMap(const layprop::DrawProperties* drawProp
             {
                std::ostringstream dtypestr;
                dtypestr << laynumstr.str() << *CDT;
-               theMap[CGL->first] = dtypestr.str();
+               theMap[LayerDef(CGL->first,*CDT)] = dtypestr.str();
             }
          }
          theGdsMap = DEBUG_NEW LayerMapExt(theMap, gdsLayers);

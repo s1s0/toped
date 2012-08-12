@@ -434,7 +434,7 @@ void browsers::CellBrowser::updateFlat()
                if(!filtered || (filtered && ::wxMatchWild(_cellFilter, curCell, false)))
                {
                   wxTreeItemId cellitem = AppendItem(_dbroot, curCell);
-                  if (CL->second->checkLayer(GRC_LAY))
+                  if (CL->second->checkLayer(GRC_LAY_DEF))
                      SetItemImage(cellitem,BICN_DBCELL_FLAT_I,wxTreeItemIcon_Normal);
                   else
                      SetItemImage(cellitem,BICN_DBCELL_FLAT,wxTreeItemIcon_Normal);
@@ -465,7 +465,7 @@ void browsers::CellBrowser::updateFlat()
                if(!filtered || (filtered && ::wxMatchWild(_cellFilter, curCell, false)))
                {
                   wxTreeItemId cellitem = AppendItem(libroot, curCell);
-                  if (CL->second->checkLayer(GRC_LAY))
+                  if (CL->second->checkLayer(GRC_LAY_DEF))
                      SetItemImage(cellitem,BICN_LIBCELL_FLAT_I,wxTreeItemIcon_Normal);
                   else
                      SetItemImage(cellitem,BICN_LIBCELL_FLAT,wxTreeItemIcon_Normal);
@@ -585,7 +585,7 @@ void browsers::CellBrowser::collectChildren(const laydata::TDTHierTree *root,
 {
    const laydata::TdtDefaultCell* cellItem = root->GetItem();
    const laydata::TDTHierTree* child= root->GetChild(libID);
-   bool withGrc = cellItem->checkLayer(GRC_LAY);
+   bool withGrc = cellItem->checkLayer(GRC_LAY_DEF);
    int rootLibID = cellItem->libID();
    if (child)
    {
@@ -1750,8 +1750,8 @@ void browsers::LayerButton::onRightClick(wxMouseEvent& evt)
 void  browsers::LayerButton::OnEditLayer(wxCommandEvent&)
 {
    wxCommandEvent eventEditLayer(wxEVT_EDITLAYER);
-
-   eventEditLayer.SetInt(_layer->laydef().num());
+   LayerDef* laydef = DEBUG_NEW LayerDef(_layer->laydef());
+   eventEditLayer.SetClientData(static_cast<void*>(laydef));
    // This is supposed to work according to the wx documentation, but compiler
    // says ... not a member of wxWindow ...
    //ProcessWindowEvent(eventEditLayer);

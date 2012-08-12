@@ -1851,7 +1851,7 @@ tui::NameCboxRecords::NameCboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
    {
       wxString cifln  = wxString(CNM->first.c_str(), wxConvUTF8);
       LayerDef tdtLayDef(ERR_LAY_DEF);
-      if (!_cifMap->getTdtLay(tdtLayDef, CNM->first)) tdtLayDef = CNM->second;
+      if (!_cifMap->getTdtLay(tdtLayDef, CNM->first)) tdtLayDef = LayerDef(CNM->second, DEFAULT_LAY_DATATYPE);
       wxString wxics  = wxString(_drawProp->getLayerName(tdtLayDef).c_str(), wxConvUTF8);
 
       wxCheckBox* dwciflay  = DEBUG_NEW wxCheckBox( this, wxID_ANY, cifln,
@@ -1910,7 +1910,7 @@ tui::NameCbox3Records::NameCbox3Records( wxWindow *parent, wxPoint pnt, wxSize s
          wxString sGdsDtype;
          sGdsDtype << *CTP;
          LayerDef wTdtLay(ERR_LAY_DEF);
-         if (!_gdsLayMap->getTdtLay( wTdtLay, CNM->first, *CTP)) wTdtLay = CNM->first;
+         if (!_gdsLayMap->getTdtLay( wTdtLay, CNM->first, *CTP)) wTdtLay = LayerDef(CNM->first, *CTP);
          wxString sTdtLay(_drawProp->getLayerName(wTdtLay).c_str(), wxConvUTF8);
 
          wxCheckBox* dwgdslay  = DEBUG_NEW wxCheckBox( this, wxID_ANY, sGdsLay,
@@ -1938,7 +1938,7 @@ ExpLayMap* tui::NameCbox3Records::getTheMap()
       {
          long lint;
          CNM->_gdslay->GetLabel().ToLong(&lint);
-         laydef = LayerDef((LayerNumber)lint);
+         laydef = LayerDef((LayerNumber)lint, DEFAULT_LAY_DATATYPE);
       }
       else laydef = _drawProp->getLayerNo(layname);
       std::ostringstream gdslaytype;

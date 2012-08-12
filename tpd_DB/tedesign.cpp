@@ -1610,7 +1610,7 @@ bool laydata::TdtDesign::groupSelected(std::string name, laydata::TdtLibDir* lib
                                     getCellNamePair(name),CTM(TP(0,0),1,0,false));
    //select the new cell
    ref->setStatus(sh_selected);
-   _target.edit()->selectThis(ref,REF_LAY);
+   _target.edit()->selectThis(ref,REF_LAY_DEF);
    //Just for the records. No shapes are moved to the Attic during this operation
    //Undo is possible simply by ungrouping the new cell
    return true;
@@ -1673,11 +1673,11 @@ laydata::AtticList* laydata::TdtDesign::changeRef(ShapeList* cells4u, std::strin
          ncrf = _target.edit()->addCellRef(this, strdefn, ori);
       assert(NULL != ncrf);
       ncrf->setStatus(sh_selected);
-      _target.edit()->selectThis(ncrf,REF_LAY);
+      _target.edit()->selectThis(ncrf,REF_LAY_DEF);
       cellsUngr->push_back(ncrf);
    }
    laydata::AtticList* shapeUngr = DEBUG_NEW laydata::AtticList();
-   shapeUngr->add(REF_LAY, cellsUngr);
+   shapeUngr->add(REF_LAY_DEF, cellsUngr);
    fixReferenceOverlap(old_overlap);
    return shapeUngr;
 }

@@ -2068,12 +2068,13 @@ void tui::TopedFrame::OnPropertySheet(wxCommandEvent& WXUNUSED(event))
 
 void tui::TopedFrame::OnEditLayer(wxCommandEvent& evt)
 {
-   word layno = evt.GetInt();
+   LayerDef* laydef = static_cast<LayerDef*>(evt.GetClientData());
    //TODO init layer param for the tech editor
    _techEditor = DEBUG_NEW TechEditorDialog(this,ID_TECH_EDITOR);
    TpdPost::SetTechEditWindow(_techEditor);
    _techEditor->ShowModal();
    delete _techEditor;
+   delete laydef;
    _techEditor = NULL;
    TpdPost::SetTechEditWindow(_techEditor);
 }
@@ -2247,7 +2248,7 @@ void tui::TopedFrame::OnCurrentLayer( wxCommandEvent& WXUNUSED( event ))
    {
       unsigned long vlu;
       dlg->value().ToULong(&vlu);
-      DATC->setCmdLayer((LayerNumber)vlu);
+      DATC->setCmdLayer(LayerDef((LayerNumber)vlu, DEFAULT_LAY_DATATYPE));
    }
    delete dlg;
 }

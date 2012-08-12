@@ -61,7 +61,7 @@ namespace Calbr
          virtual              ~drcRenderer() {};
          virtual void         startWriting(const std::string &cell)=0;
          virtual void         setError(unsigned int numError) {};
-         virtual bool         showError(unsigned int numError) {return false;};
+         virtual bool         showError(unsigned int numError) {return false;}
          virtual void         showAll() {};
          virtual void         hideAll() {};
          void                 setTranformation(CTM &ctm) {_ctm = ctm;};
@@ -143,7 +143,7 @@ namespace Calbr
          edge                 getZoom(long ordinal);
          edge                 getZoom(void);
       private:
-         unsigned int         _num;
+         unsigned int         _num;//TODO Replace with LayerDef
          long                 _curResCount; //current result count
          long                 _origResCount;//original result count
          std::string          _ruleCheckName;

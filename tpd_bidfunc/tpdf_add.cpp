@@ -873,7 +873,7 @@ void tellstdfunc::stdCELLREF::undo()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      tDesign->destroyThis(cl->data(),REF_LAY, dbLibDir);
+      tDesign->destroyThis(cl->data(),REF_LAY_DEF, dbLibDir);
    }
    DATC->unlockTDT(dbLibDir, true);
    delete (cl);
@@ -903,7 +903,7 @@ int tellstdfunc::stdCELLREF::execute()
       if (cellFound)
       {
          laydata::TdtDesign* tDesign = (*dbLibDir)();
-         telldata::TtLayout* cl = DEBUG_NEW telldata::TtLayout(tDesign->addCellRef(strdefn,ori), REF_LAY);
+         telldata::TtLayout* cl = DEBUG_NEW telldata::TtLayout(tDesign->addCellRef(strdefn,ori), REF_LAY_DEF);
          UNDOcmdQ.push_front(this);
          OPstack.push(cl); UNDOPstack.push_front(cl->selfcopy());
          LogFile << LogFile.getFN() << "(\""<< name << "\"," << *rpnt << "," <<
@@ -1003,7 +1003,7 @@ void tellstdfunc::stdCELLAREF::undo()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      tDesign->destroyThis(cl->data(),REF_LAY, dbLibDir);
+      tDesign->destroyThis(cl->data(),REF_LAY_DEF, dbLibDir);
    }
    DATC->unlockTDT(dbLibDir, true);
    delete (cl);
@@ -1034,7 +1034,7 @@ int tellstdfunc::stdCELLAREF::execute()
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
       telldata::TtLayout* cl = DEBUG_NEW telldata::TtLayout(
-            tDesign->addCellARef(name,ori,arrprops),REF_LAY);
+            tDesign->addCellARef(name,ori,arrprops),REF_LAY_DEF);
       UNDOcmdQ.push_front(this);
       OPstack.push(cl); UNDOPstack.push_front(cl->selfcopy());
       LogFile << LogFile.getFN() << "(\""<< name << "\"," << *rpnt << "," <<
@@ -1079,7 +1079,7 @@ void tellstdfunc::stdCELLAREFO::undo()
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      tDesign->destroyThis(cl->data(),REF_LAY, dbLibDir);
+      tDesign->destroyThis(cl->data(),REF_LAY_DEF, dbLibDir);
    }
    DATC->unlockTDT(dbLibDir, true);
    delete (cl);
@@ -1110,7 +1110,7 @@ int tellstdfunc::stdCELLAREFO::execute()
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
       telldata::TtLayout* cl = DEBUG_NEW telldata::TtLayout(
-            tDesign->addCellARef(name,ori,arrprops),REF_LAY);
+            tDesign->addCellARef(name,ori,arrprops),REF_LAY_DEF);
       UNDOcmdQ.push_front(this);
       OPstack.push(cl); UNDOPstack.push_front(cl->selfcopy());
       LogFile << LogFile.getFN() << "(\""<< name << "\"," << *rpnt << "," <<

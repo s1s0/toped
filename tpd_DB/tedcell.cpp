@@ -366,7 +366,7 @@ void laydata::TdtCell::readTdtLay(InputTdtFile* const tedfile)
 {
    byte      recordtype;
    TdtData*  newData;
-   LayerDef  laydef    = tedfile->getLayer();
+   LayerDef  laydef(tedfile->getLayer());
    QTreeTmp* tmpLayer = secureUnsortedLayer(laydef);
    while (tedf_LAYEREND != (recordtype = tedfile->getByte()))
    {
@@ -604,7 +604,7 @@ bool laydata::TdtCell::getShapeOver(TP pnt, const LayerDefSet& unselable)
 laydata::AtticList* laydata::TdtCell::changeSelect(TP pnt, SH_STATUS status, const LayerDefSet& unselable)
 {
    laydata::TdtData* prev = NULL;
-   LayerDef prevlay(ERR_LAY, DEFAULT_LAY_DATATYPE);
+   LayerDef prevlay(ERR_LAY_DEF);
    for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
       if (unselable.end() == unselable.find(lay()))
@@ -654,7 +654,7 @@ laydata::AtticList* laydata::TdtCell::changeSelect(TP pnt, SH_STATUS status, con
 void laydata::TdtCell::mouseHoover(TP& position, layprop::DrawProperties& drawprop, const LayerDefSet& unselable)
 {
    laydata::TdtData* prev = NULL;
-   LayerDef prevlay(NULL_LAY);
+   LayerDef prevlay(ERR_LAY_DEF);
    for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
       if ( (unselable.end() == unselable.find(lay())) )
@@ -671,7 +671,7 @@ void laydata::TdtCell::mouseHoover(TP& position, layprop::DrawProperties& drawpr
       }
    }
    if (NULL == prev) return;
-   assert(LayerDef(NULL_LAY) != prevlay);
+   assert(LayerDef(ERR_LAY_DEF) != prevlay);
    //-------------------------------------------------------------
    PointVector points;
 
@@ -1772,7 +1772,7 @@ laydata::ShapeList* laydata::TdtCell::ungroupPrep(laydata::TdtLibDir* libdir)
       for (CI = _shapesel[REF_LAY_DEF]->begin(); CI != _shapesel[REF_LAY_DEF]->end(); CI++)
       {
          TdtCell* structure = static_cast<TdtCellRef*>(CI->first)->cStructure();
-         if (structure->checkLayer(GRC_LAY))
+         if (structure->checkLayer(GRC_LAY_DEF))
          {
             CI->first->setStatus(sh_preserved);
             std::ostringstream ost;
@@ -2379,7 +2379,7 @@ void laydata::TdtCell::selectFromListWrapper(QuadTree* qtree, DataList* src, Dat
 auxdata::GrcCell* laydata::TdtCell::getGrcCell()
 {
    auxdata::GrcCell* theCell = NULL;
-   if (checkLayer(GRC_LAY))
+   if (checkLayer(GRC_LAY_DEF))
    {
       // Note! GRC_LAY by convention is supposed to have a SINGLE data object
       // of type TdtAuxRef
@@ -2398,7 +2398,7 @@ auxdata::GrcCell* laydata::TdtCell::getGrcCell()
 
 void laydata::TdtCell::clearGrcCell()
 {
-   if (checkLayer(GRC_LAY))
+   if (checkLayer(GRC_LAY_DEF))
    {
       // Note! GRC_LAY by convention is supposed to have a SINGLE data object
       // of type TdtAuxRef
