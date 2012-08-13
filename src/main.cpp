@@ -28,6 +28,7 @@
 #include "tpdph.h"
 #include <GL/glew.h>
 #include <wx/wx.h>
+#include <wx/tooltip.h>
 #include <wx/filefn.h>
 #include <wx/filename.h>
 #include <wx/dir.h>
@@ -159,7 +160,8 @@ bool TopedApp::OnInit()
       // Finally show the Toped frame
       SetTopWindow(Toped);
       Toped->Show(TRUE);
-      // First thing after initializing openGL - load available layout fonts
+      wxToolTip::SetDelay(500);
+      // First thing after initialising openGL - load available layout fonts
       loadGlfFonts();
       // at this stage - the tool shall be considered fully functional
       //--------------------------------------------------------------------------
