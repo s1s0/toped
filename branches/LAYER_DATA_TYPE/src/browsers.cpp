@@ -1616,7 +1616,10 @@ browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoi
    //***Draw main picture***
    preparePicture();
 
-   wxString caption(_layer->name().c_str(),wxConvUTF8);
+   wxString caption;
+   caption << "{" << _layer->laydef().num()
+           << "," << _layer->laydef().typ()
+           << "}" << wxString(_layer->name().c_str(),wxConvUTF8);
    SetToolTip(caption);
 
 }
@@ -1645,13 +1648,13 @@ void browsers::LayerButton::preparePicture()
    DC.Clear();
    int curw = clearence;
 
-   char temp[100];
-   sprintf(temp, "%3i", _layer->laydef().num());
-   wxString layno(temp, wxConvUTF8);
-   int hno,wno;
-   DC.GetTextExtent(layno, &wno, &hno);
-   DC.DrawText(layno, 0, int((_buttonHeight - hno)/2));
-   curw += wno + clearence;
+//   char temp[100];
+//   sprintf(temp, "%3i", _layer->laydef().num());
+//   wxString layno(temp, wxConvUTF8);
+//   int hno,wno;
+//   DC.GetTextExtent(layno, &wno, &hno);
+//   DC.DrawText(layno, 0, int((_buttonHeight - hno)/2));
+//   curw += wno + clearence;
 
    if (_selected)
    {
@@ -1742,7 +1745,9 @@ void browsers::LayerButton::onMiddleClick(wxMouseEvent &event)
 
 void browsers::LayerButton::onRightClick(wxMouseEvent& evt)
 {
-   wxMenu menu;
+   wxMenu menu(GetToolTipText());
+//   wxString boza = ;
+//   menu.SetTitle(boza);
    menu.Append(LAYERCURRENTEDIT, wxT("Edit layer...")); //if selected call LayerButton::OnEditLayer tui::TMLAY_EDIT
    PopupMenu(&menu);
 }
