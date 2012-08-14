@@ -1851,7 +1851,7 @@ tui::NameCboxRecords::NameCboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
    {
       wxString cifln  = wxString(CNM->first.c_str(), wxConvUTF8);
       LayerDef tdtLayDef(ERR_LAY_DEF);
-      if (!_cifMap->getTdtLay(tdtLayDef, CNM->first)) tdtLayDef = LayerDef(CNM->second, DEFAULT_LAY_DATATYPE);
+      if (!_cifMap->getTdtLay(tdtLayDef, CNM->first)) tdtLayDef = LayerDef(CNM->second, DEFAULT_DTYPE);
       wxString wxics  = wxString(_drawProp->getLayerName(tdtLayDef).c_str(), wxConvUTF8);
 
       wxCheckBox* dwciflay  = DEBUG_NEW wxCheckBox( this, wxID_ANY, cifln,
@@ -1938,7 +1938,7 @@ ExpLayMap* tui::NameCbox3Records::getTheMap()
       {
          long lint;
          CNM->_gdslay->GetLabel().ToLong(&lint);
-         laydef = LayerDef((LayerNumber)lint, DEFAULT_LAY_DATATYPE);
+         laydef = LayerDef((LayerNumber)lint, DEFAULT_DTYPE);
       }
       else laydef = _drawProp->getLayerNo(layname);
       std::ostringstream gdslaytype;
@@ -2420,7 +2420,7 @@ tui::TopedPropertySheets::RenderingPSheet::RenderingPSheet(wxWindow* parent) : w
       // Image details (Quality)
       wxBoxSizer *imgSizer  = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Image detail (square pixels)"));
          _imageDetail = DEBUG_NEW sgSliderControl(this, PDIMG_DETAIL, 1, 100, 40);
-      imgSizer->Add(_imageDetail, 0, wxALL | wxALIGN_CENTER | wxEXPAND);
+      imgSizer->Add(_imageDetail, 0, wxUP | wxALIGN_CENTER | wxEXPAND,10);
 
       // Cell related rendering properties
       wxBoxSizer *topCellSizer = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Cells"));
@@ -2428,20 +2428,20 @@ tui::TopedPropertySheets::RenderingPSheet::RenderingPSheet(wxWindow* parent) : w
          wxBoxSizer *cellSizer = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
             wxCheckBox* cellOvlBox = DEBUG_NEW wxCheckBox(this, PDSET_CELLBOX , wxT("Overlapping box"));
             wxCheckBox* cellMarks  = DEBUG_NEW wxCheckBox(this, PDSET_CELLMARK, wxT("Reference marks"));
-         cellSizer->Add(cellOvlBox, 1, wxALL | wxALIGN_CENTER | wxEXPAND);
-         cellSizer->Add(cellMarks , 1, wxALL | wxALIGN_CENTER | wxEXPAND);
+         cellSizer->Add(cellOvlBox, 1, wxALL | wxALIGN_CENTER | wxEXPAND,5);
+         cellSizer->Add(cellMarks , 1, wxALL | wxALIGN_CENTER | wxEXPAND,5);
          // Cell Depth of view
          wxBoxSizer *cdovSizer = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Visible hierarchy depth"));
          _cbDepthOfViewLimit = DEBUG_NEW wxCheckBox(this, PDCELL_CHECKDOV , wxT("unlimited"));
          _cbDepthOfViewLimit->SetValue(true);
          _cellDepthOfView = DEBUG_NEW sgSliderControl(this, PDCELL_DOV, 1, 8, 8);
          _cellDepthOfView->Enable(false);
-         cdovSizer->Add(_cbDepthOfViewLimit, 0, wxALL| wxALIGN_CENTER | wxEXPAND);
-         cdovSizer->Add(   _cellDepthOfView, 0, wxALL| wxALIGN_CENTER | wxEXPAND);
+         cdovSizer->Add(_cbDepthOfViewLimit, 0, wxALL| wxALIGN_CENTER | wxEXPAND, 5);
+         cdovSizer->Add(   _cellDepthOfView, 0, wxUP| wxALIGN_CENTER | wxEXPAND, 5);
          // Cell Depth brightness ebb (shadow)
          wxBoxSizer *ebbSizer  = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Hierarchy depth opacity"));
             _cellDepthEbb = DEBUG_NEW sgSliderControl(this, PDCELL_DAB, 0, 80, 0);
-         ebbSizer->Add(_cellDepthEbb, 0, wxALL | wxALIGN_CENTER | wxEXPAND);
+         ebbSizer->Add(_cellDepthEbb, 0, wxUP | wxALIGN_CENTER | wxEXPAND, 10);
       // Pack all cell related properties
       topCellSizer->Add(cellSizer , 0, wxALL | wxALIGN_CENTER | wxEXPAND);
       topCellSizer->Add(10,10,0);
