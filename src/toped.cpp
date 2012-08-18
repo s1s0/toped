@@ -2239,18 +2239,23 @@ void tui::TopedFrame::OnCurrentLayer( wxCommandEvent& WXUNUSED( event ))
 {
    wxRect wnd = GetRect();
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
-   tui::getSize* dlg = NULL;
-   try {
-      dlg = DEBUG_NEW tui::getSize(this, -1, wxT("Change current layer"), pos, 1, 0, 2);
-   }
-   catch (EXPTN&) {delete dlg;return;}
-   if ( dlg->ShowModal() == wxID_OK )
+   tui::DefaultLayer* dlg = NULL;
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
    {
-      unsigned long vlu;
-      dlg->value().ToULong(&vlu);
-      DATC->setCmdLayer(LayerDef((LayerNumber)vlu, DEFAULT_LAY_DATATYPE));
+      try {
+         dlg = DEBUG_NEW tui::DefaultLayer(this, wxID_ANY, wxT("Change current layer"), pos, drawProp);
+      }
+      catch (EXPTN&) {delete dlg;return;}
+      if ( dlg->ShowModal() == wxID_OK )
+      {
+   //      unsigned long vlu;
+   //      dlg->value().ToULong(&vlu);
+   //      DATC->setCmdLayer(LayerDef((LayerNumber)vlu, DEFAULT_DTYPE));
+      }
+      delete dlg;
    }
-   delete dlg;
+   PROPC->unlockDrawProp(drawProp, false);
 }
 
 void tui::TopedFrame::OnMenu(wxCommandEvent& event)

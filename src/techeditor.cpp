@@ -95,19 +95,20 @@ tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id) :
 
    wxBoxSizer *mainSizer = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
       wxBoxSizer *propSizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
-         wxBoxSizer *layDefSizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL);
-            layDefSizer->Add( DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("Number:"), wxDefaultPosition, wxDefaultSize),
-                                                         0, wxLEFT | wxALIGN_CENTER_VERTICAL, 5);
-            layDefSizer->Add(_layerNumber, 1, wxRIGHT | wxALIGN_CENTER, 5);
-
-            layDefSizer->Add( DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("Dtype:"), wxDefaultPosition, wxDefaultSize),
-                                                         0, wxLEFT | wxALIGN_CENTER_VERTICAL, 5);
-            layDefSizer->Add(_layerDtype, 1, wxRIGHT | wxALIGN_CENTER, 5);
+         wxFlexGridSizer *layDefSizer = DEBUG_NEW wxFlexGridSizer( 2,4,3,3);
+         layDefSizer->AddGrowableCol(3,1);
+            layDefSizer->Add( DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("Number:"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+                                                         0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL);
+            layDefSizer->Add(_layerNumber, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL);
             layDefSizer->Add( DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("Name:"), wxDefaultPosition, wxDefaultSize),
-                                                         0, wxLEFT | wxALIGN_CENTER_VERTICAL, 5);
-            layDefSizer->Add(_layerName, 2, wxRIGHT | wxALIGN_CENTER, 5);
-            layDefSizer->Add(DEBUG_NEW wxCheckBox(this, tui::DTE_NEWLAYER , wxT("new")) , 1, wxALL | wxALIGN_CENTER | wxEXPAND);
-
+                                                      0, wxLEFT | wxALIGN_CENTER_VERTICAL);
+            layDefSizer->Add(_layerName, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxEXPAND);
+            layDefSizer->Add( DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("Dtype:"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+                                                         0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL);
+            layDefSizer->Add(_layerDtype, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL);
+            layDefSizer->AddSpacer(1);
+            layDefSizer->Add(DEBUG_NEW wxCheckBox(this, tui::DTE_NEWLAYER , wxT("new"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+                                                         0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL);
          wxBoxSizer *colorSizer = DEBUG_NEW wxStaticBoxSizer( wxHORIZONTAL, this, wxT("Color") );
             colorSizer->Add(_layerColors, 3, wxALL | wxEXPAND, 5);
             colorSizer->Add(DEBUG_NEW wxButton(this, tui::DTE_NEWCOLOR, wxT("New"   )), 1, wxALL, 5);

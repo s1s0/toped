@@ -94,8 +94,8 @@ void Calbr::drcTenderer::addPoly(const CoordsVector   &coords)
          plDB.push_back(tempPoint);
          //plDB.push_back(TP(tempPoint.x(), tempPoint.y(), DBscale));
       }
-      laydata::QTreeTmp* dwl = _DRCCell->secureUnsortedLayer(LayerDef(_numError,DEFAULT_LAY_DATATYPE));
-      PROPC->addUnpublishedLay(LayerDef(_numError, DEFAULT_LAY_DATATYPE));
+      laydata::QTreeTmp* dwl = _DRCCell->secureUnsortedLayer(LayerDef(_numError,DEFAULT_DTYPE));
+      PROPC->addUnpublishedLay(LayerDef(_numError, DEFAULT_DTYPE));
 
       laydata::TdtPolyEXT *shape = DEBUG_NEW laydata::TdtPolyEXT(plDB);
       shape->setLong(_numError);
@@ -137,8 +137,8 @@ void Calbr::drcTenderer::addLine(const edge &edge)
    real      w = 0.01;   //width of line
    word      width = static_cast<word>(rint(w * DBscale));
 
-   laydata::QTreeTmp* dwl = _DRCCell->secureUnsortedLayer(LayerDef(_numError, DEFAULT_LAY_DATATYPE));
-   PROPC->addUnpublishedLay(LayerDef(_numError, DEFAULT_LAY_DATATYPE));
+   laydata::QTreeTmp* dwl = _DRCCell->secureUnsortedLayer(LayerDef(_numError, DEFAULT_DTYPE));
+   PROPC->addUnpublishedLay(LayerDef(_numError, DEFAULT_DTYPE));
 
 
    /*laydata::ValidWire check(plDB, width);
@@ -205,7 +205,7 @@ bool Calbr::drcTenderer::showError(unsigned int numError)
       layprop::DrawProperties* drawProp;
       if (PROPC->lockDrawProp(drawProp, layprop::DRC))
       {
-         drawProp->hideLayer(LayerDef(_numError, DEFAULT_LAY_DATATYPE), false);
+         drawProp->hideLayer(LayerDef(_numError, DEFAULT_DTYPE), false);
       }
       PROPC->unlockDrawProp(drawProp, true);
       tellstdfunc::RefreshGL();

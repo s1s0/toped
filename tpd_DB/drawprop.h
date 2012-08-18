@@ -267,7 +267,7 @@ namespace layprop {
       public:
                                     DrawProperties();
                                    ~DrawProperties();
-         // Called during the rendering - protected in the render initialization
+         // Called during the rendering - protected in the render initialisation
          void                       setCurrentColor(const LayerDef&);
          bool                       setCurrentFill(bool) const;
          void                       setLineProps(bool selected = false) const;
