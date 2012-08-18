@@ -1384,7 +1384,7 @@ int tellstdfunc::CIFgetlaymap::execute()
       word laynum = 1;
       for ( NameList::const_iterator CCL = cifLayers.begin(); CCL != cifLayers.end(); CCL++ )
       {
-         telldata::TtLMap* clay = DEBUG_NEW telldata::TtLMap(LayerDef(laynum++,DEFAULT_LAY_DATATYPE), *CCL);
+         telldata::TtLMap* clay = DEBUG_NEW telldata::TtLMap(LayerDef(laynum++,DEFAULT_DTYPE), *CCL);
          theMap->add(clay);
       }
    }

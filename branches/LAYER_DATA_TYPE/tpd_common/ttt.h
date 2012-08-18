@@ -73,15 +73,14 @@ const LayerNumber REF_LAY              = 0xffffffff;
 const LayerNumber ERR_LAY              = 0xfffffffe;
 const LayerNumber DRC_LAY              = 0xfffffffd;
 const LayerNumber GRC_LAY              = 0xfffffffc;
-//const LayerNumber NULL_LAY             = 0xfffffff0;
 const LayerNumber LAST_EDITABLE_LAYNUM = 0x0000ffff;
-const LayerNumber LAST_EDITABLE_LAYTYP = 0x0000ffff;
+const LayerDType  LAST_EDITABLE_LAYTYP = 0x0000ffff;
+const LayerNumber DEFAULT_LAY          = 0x0;
+const LayerDType  DEFAULT_DTYPE        = 0x0;
 const byte        OPENGL_FONT_UNIT     = 128;
 const byte        GRID_LIMIT           = 5;    // if grid step is less than _GRID_LIMIT pixels, grid is hidden
 const real        DEFAULT_DBU          = 1e-9;
 const real        DEFAULT_UU           = 1e-3;
-const LayerDType  DEFAULT_LAY_DATATYPE = 0;
-const LayerNumber DEFAULT_LAY_NUMBER   = 0;
 
 
 
@@ -733,10 +732,10 @@ bool  SGHierTree<TYPE>::removeRootItem(const TYPE* comp, SGHierTree*& lst)
 //=============================================================================
 const DBbox       DEFAULT_OVL_BOX      = DBbox(TP(0,0));
 const DBbox       DEFAULT_ZOOM_BOX     = DBbox(TP(-2000,-2000), TP(20000,20000));
-const LayerDef    REF_LAY_DEF(REF_LAY, DEFAULT_LAY_DATATYPE);
-const LayerDef    ERR_LAY_DEF(ERR_LAY, DEFAULT_LAY_DATATYPE);
-const LayerDef    DRC_LAY_DEF(DRC_LAY, DEFAULT_LAY_DATATYPE);
-const LayerDef    GRC_LAY_DEF(GRC_LAY, DEFAULT_LAY_DATATYPE);
-const LayerDef    TLL_LAY_DEF(0, DEFAULT_LAY_DATATYPE);
+const LayerDef    REF_LAY_DEF(REF_LAY    , DEFAULT_DTYPE);
+const LayerDef    ERR_LAY_DEF(ERR_LAY    , DEFAULT_DTYPE);
+const LayerDef    DRC_LAY_DEF(DRC_LAY    , DEFAULT_DTYPE);
+const LayerDef    GRC_LAY_DEF(GRC_LAY    , DEFAULT_DTYPE);
+const LayerDef    TLL_LAY_DEF(DEFAULT_LAY, DEFAULT_DTYPE);
 
 #endif

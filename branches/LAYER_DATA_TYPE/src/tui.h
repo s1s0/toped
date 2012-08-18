@@ -250,6 +250,21 @@ namespace tui {
          wxListBox*  _nameList;
    };
 
+
+   //==========================================================================
+   class DefaultLayer : public wxDialog{
+   public:
+                               DefaultLayer(wxFrame*, wxWindowID, const wxString&, wxPoint, layprop::DrawProperties*);
+   private:
+      wxCheckBox*              _newlay;
+      wxTextCtrl*              _layNum;
+      wxTextCtrl*              _layTyp;
+      wxComboBox*              _alllay;
+      wxString                 _layNumString;
+      wxString                 _layTypString;
+      layprop::DrawProperties* _drawProp;
+   };
+
    //==========================================================================
    class NameCboxRecords : public wxPanel {
       public:

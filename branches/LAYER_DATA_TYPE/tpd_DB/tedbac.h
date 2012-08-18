@@ -105,9 +105,6 @@ namespace laydata {
       bool                       _copy;
    };
 
-   const LayerDef  REF_LAY_DEF(REF_LAY, DEFAULT_LAY_DATATYPE);
-   const LayerDef  GRC_LAY_DEF(GRC_LAY, DEFAULT_LAY_DATATYPE);
-
 }
 
 namespace auxdata {

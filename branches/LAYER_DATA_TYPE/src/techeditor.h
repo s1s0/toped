@@ -132,7 +132,7 @@ namespace tui
          {
             public:
                struct LayerLine {
-                                 LayerLine() : _laydef(DEFAULT_LAY_NUMBER, DEFAULT_LAY_DATATYPE), _name("") {}
+                                 LayerLine() : _laydef(TLL_LAY_DEF), _name("") {}
                                  LayerLine(LayerDef laydef, std::string name) :
                                     _laydef(laydef), _name(name) {}
                   LayerDef       _laydef;
