@@ -868,10 +868,11 @@ BEGIN_EVENT_TABLE(tui::DefaultLayer, wxDialog)
    EVT_LIST_COL_CLICK   ( DTE_LAYERS_LIST  , tui::DefaultLayer::OnLayListSort    )
 END_EVENT_TABLE()
 
-tui::DefaultLayer::DefaultLayer(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos) :
+tui::DefaultLayer::DefaultLayer(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, bool check) :
    wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
-   _curSelect     ( 0),
-   _iniSelect     ( 0)
+   _curSelect     (     0),
+   _iniSelect     (     0),
+   _checkValidity ( check)
 {
    _layerList = DEBUG_NEW LayerListPanel(this, DTE_LAYERS_LIST, wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_VRULES);
    layerListPtr = _layerList;
@@ -895,7 +896,7 @@ tui::DefaultLayer::DefaultLayer(wxFrame *parent, wxWindowID id, const wxString &
    mainSizer->SetSizeHints( this );
    _layerList->select(curLayer, _iniSelect);
    _curSelect = _iniSelect;
-   FindWindow(wxID_OK)->Enable(false);
+   FindWindow(wxID_OK)->Enable(!_checkValidity);
 }
 
 void tui::DefaultLayer::OnLayListSort(wxListEvent& cmdEvent)
@@ -921,7 +922,7 @@ void tui::DefaultLayer::OnLayListSort(wxListEvent& cmdEvent)
 void  tui::DefaultLayer::OnLayerSelected(wxListEvent& levent)
 {
    _curSelect = levent.GetIndex();
-   FindWindow(wxID_OK)->Enable((_curSelect != _iniSelect));
+   FindWindow(wxID_OK)->Enable((!_checkValidity) || (_curSelect != _iniSelect));
 }
 
 tui::DefaultLayer::~DefaultLayer()

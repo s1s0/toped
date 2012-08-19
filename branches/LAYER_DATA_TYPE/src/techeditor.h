@@ -180,7 +180,7 @@ namespace tui
    //==========================================================================
    class DefaultLayer : public wxDialog {
    public:
-                                 DefaultLayer(wxFrame*, wxWindowID, const wxString&, wxPoint);
+                                 DefaultLayer(wxFrame*, wxWindowID, const wxString&, wxPoint, bool);
       virtual                   ~DefaultLayer();
       void                       OnLayListSort(wxListEvent& cmdEvent);
       void                       OnLayerSelected(wxListEvent& levent);
@@ -189,6 +189,7 @@ namespace tui
       LayerListPanel*            _layerList;
       int                        _curSelect;
       int                        _iniSelect;
+      bool                       _checkValidity;
       DECLARE_EVENT_TABLE()
    };
 

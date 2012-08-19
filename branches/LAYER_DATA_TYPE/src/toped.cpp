@@ -2221,14 +2221,14 @@ void tui::TopedFrame::OnChangeLayer( wxCommandEvent& WXUNUSED( event ))
 {
    wxRect wnd = GetRect();
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
-   tui::getSize* dlg = NULL;
+   tui::DefaultLayer* dlg = NULL;
    try {
-      dlg = DEBUG_NEW tui::getSize(this, -1, wxT("Transfer to layer"), pos, 1, 0, 2);
+      dlg = DEBUG_NEW tui::DefaultLayer(this, wxID_ANY, wxT("Transfer to layer"), pos, false);
    }
    catch (EXPTN&) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK )
    {
-      wxString ost; ost << wxT("changelayer(")<<dlg->value()<<wxT(");");
+      wxString ost; ost << wxT("changelayer({") << dlg->value().num() << wxT(",") << dlg->value().typ() << wxT("});");
       Console->parseCommand(ost);
    }
    delete dlg;
@@ -2240,7 +2240,7 @@ void tui::TopedFrame::OnCurrentLayer( wxCommandEvent& WXUNUSED( event ))
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
    tui::DefaultLayer* dlg = NULL;
    try {
-      dlg = DEBUG_NEW tui::DefaultLayer(this, wxID_ANY, wxT("Change current layer"), pos);
+      dlg = DEBUG_NEW tui::DefaultLayer(this, wxID_ANY, wxT("Change current layer"), pos, true);
    }
    catch (EXPTN&) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK )
