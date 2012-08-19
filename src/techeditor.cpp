@@ -48,7 +48,8 @@ tui::LayerListPanel*                   layerListPtr = NULL; //!Required by SortI
 //extern const wxEventType         wxEVT_CMD_BROWSER;
 
 BEGIN_EVENT_TABLE(tui::TechEditorDialog, wxDialog)
-   EVT_LIST_ITEM_FOCUSED( DTE_LAYERS_LIST  , tui::TechEditorDialog::onLayerSelected  )
+   EVT_LIST_ITEM_FOCUSED( DTE_LAYERS_LIST  , tui::TechEditorDialog::OnLayerSelected  )
+   EVT_LIST_COL_CLICK   ( DTE_LAYERS_LIST  , tui::TechEditorDialog::OnLayListSort    )
    EVT_CHECKBOX         ( DTE_NEWLAYER     , tui::TechEditorDialog::OnNewLayer       )
    EVT_BUTTON           ( DTE_NEWCOLOR     , tui::TechEditorDialog::OnColorEditor    )
    EVT_BUTTON           ( DTE_NEWFILL      , tui::TechEditorDialog::OnFillEditor     )
@@ -60,10 +61,9 @@ BEGIN_EVENT_TABLE(tui::TechEditorDialog, wxDialog)
    EVT_TEXT             ( DTE_LAYER_TYPE   , tui::TechEditorDialog::OnChangeLayType  )
    EVT_TEXT             ( DTE_LAYER_NAME   , tui::TechEditorDialog::OnChangeProperty )
    EVT_BUTTON           ( DTE_APPLY        , tui::TechEditorDialog::OnApply          )
-   EVT_LIST_COL_CLICK   ( DTE_LAYERS_LIST  , tui::TechEditorDialog::OnLayListSort    )
 END_EVENT_TABLE()
 
-tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id) :
+tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id, const LayerDef laydef) :
    wxDialog   ( parent, id, wxT("Technology Editor")),
    _curSelect (     0 )
 {
@@ -138,8 +138,12 @@ tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id) :
    mainSizer->SetSizeHints( this );
 
    FindWindow(DTE_APPLY)->Enable(false);
-   if (!_layerList->empty())
-      _layerList->Select(_curSelect, true);
+   if (ERR_LAY_DEF == laydef)
+   {
+      if (!_layerList->empty())
+         _layerList->Select(_curSelect, true);
+   }
+   else _layerList->select(laydef, _curSelect);
 #ifdef WIN32
    updateDialog();
 #endif
@@ -220,7 +224,7 @@ void tui::TechEditorDialog::OnChangeLayType(wxCommandEvent&)
    }
 }
 
-void  tui::TechEditorDialog::onLayerSelected(wxListEvent& levent)
+void  tui::TechEditorDialog::OnLayerSelected(wxListEvent& levent)
 {
    _curSelect = levent.GetIndex();
    _layerNumber->SetEditable(false);
@@ -554,6 +558,14 @@ bool tui::LayerListPanel::checkExist(const LayerDef& laydef)
    return false;
 }
 
+LayerDef tui::LayerListPanel::getLayer(int index)
+{
+   LayerItems::const_iterator CI = _layerItems.find(index);
+   if (CI != _layerItems.end())
+      return CI->second._laydef;
+   return ERR_LAY_DEF;
+}
+
 bool tui::LayerListPanel::empty()
 {
    return _layerItems.empty();
@@ -562,6 +574,16 @@ bool tui::LayerListPanel::empty()
 void tui::LayerListPanel::clearAll()
 {
    _layerItems.clear();
+}
+
+void tui::LayerListPanel::select(LayerDef layDef, int& curSelect)
+{
+   for(LayerItems::const_iterator it = _layerItems.begin(); it != _layerItems.end(); ++it)
+      if (layDef == it->second._laydef)
+      {
+         curSelect = it->first;
+         Select(curSelect, true);
+      }
 }
 
 //=============================================================================
@@ -838,6 +860,74 @@ void tui::LineListComboBox::Clear()
 tui::LineListComboBox::~LineListComboBox()
 {
    Clear();
+}
+
+//==========================================================================
+BEGIN_EVENT_TABLE(tui::DefaultLayer, wxDialog)
+   EVT_LIST_ITEM_FOCUSED( DTE_LAYERS_LIST  , tui::DefaultLayer::OnLayerSelected  )
+   EVT_LIST_COL_CLICK   ( DTE_LAYERS_LIST  , tui::DefaultLayer::OnLayListSort    )
+END_EVENT_TABLE()
+
+tui::DefaultLayer::DefaultLayer(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos) :
+   wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
+   _curSelect     ( 0),
+   _iniSelect     ( 0)
+{
+   _layerList = DEBUG_NEW LayerListPanel(this, DTE_LAYERS_LIST, wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_VRULES);
+   layerListPtr = _layerList;
+   LayerDef curLayer(TLL_LAY_DEF);
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      _layerList->prepareLayers(drawProp);
+      curLayer = drawProp->curLay();
+   }
+   PROPC->unlockDrawProp(drawProp, false);
+
+
+   wxBoxSizer *mainSizer = DEBUG_NEW wxBoxSizer(wxVERTICAL);
+      wxBoxSizer *butSizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+         butSizer->Add(DEBUG_NEW wxButton( this, wxID_OK    , wxT("OK")     )/*, wxBOTTOM, 5 */);
+         butSizer->Add(DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") )/*, wxBOTTOM, 5 */);
+   mainSizer->Add(_layerList, 10, wxEXPAND      | wxALL, 5);
+   mainSizer->Add(butSizer  ,  1, wxALIGN_RIGHT | wxALL, 5);
+   this->SetSizerAndFit(mainSizer);
+   mainSizer->SetSizeHints( this );
+   _layerList->select(curLayer, _iniSelect);
+   _curSelect = _iniSelect;
+   FindWindow(wxID_OK)->Enable(false);
+}
+
+void tui::DefaultLayer::OnLayListSort(wxListEvent& cmdEvent)
+{
+   int col = cmdEvent.GetColumn();
+   wxListItem row;
+   row.SetId(_curSelect);
+   row.SetMask(wxLIST_MASK_DATA);
+   row.SetColumn(0);
+   if (!_layerList->GetItem(row)) return;
+   long itemSel = row.GetData();
+   switch (col)
+   {
+      case 0: _layerList->SortItems(tui::wxListCtrlItemCompare, 0l);break;
+      case 1: _layerList->SortItems(tui::wxListCtrlItemCompare, 1l);break;
+      case 2: _layerList->SortItems(tui::wxListCtrlItemCompare, 2l);break;
+   }
+   _curSelect = _layerList->FindItem(-1, itemSel);
+   _layerList->Select(_curSelect, true);
+   _layerList->EnsureVisible(_curSelect);
+}
+
+void  tui::DefaultLayer::OnLayerSelected(wxListEvent& levent)
+{
+   _curSelect = levent.GetIndex();
+   FindWindow(wxID_OK)->Enable((_curSelect != _iniSelect));
+}
+
+tui::DefaultLayer::~DefaultLayer()
+{
+   delete _layerList;
+   layerListPtr = NULL;
 }
 
 int wxCALLBACK tui::wxListCtrlItemCompare(TmpWxIntPtr item1, TmpWxIntPtr item2, TmpWxIntPtr column)

@@ -1842,53 +1842,6 @@ void tui::DefineLineStyle::OnStyleApply(wxCommandEvent& event)
 }
 
 //==========================================================================
-tui::DefaultLayer::DefaultLayer(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos, layprop::DrawProperties* drawProp) :
-      wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE),
-      _drawProp(drawProp)
-{
-   // get all the layer names
-   LayerDefList allLayers = _drawProp->getAllLayers();
-   LayerDef curLayer = _drawProp->curLay();
-   wxArrayString allStrings;
-   int cbSelection = 0;
-   int cbCurrent = 0;
-   for( LayerDefList::const_iterator CI = allLayers.begin(); CI != allLayers.end(); CI++)
-   {
-      std::string layName = _drawProp->getLayerName(*CI);
-      allStrings.Add(wxString(layName.c_str(), wxConvUTF8));
-      if (curLayer == *CI)
-         cbSelection = cbCurrent;
-      ++cbCurrent;
-   }
-
-   _newlay = DEBUG_NEW wxCheckBox( this, wxID_ANY, wxT("new"),  wxDefaultPosition, wxDefaultSize, wxALIGN_LEFT );
-   _alllay = DEBUG_NEW wxComboBox( this, wxID_ANY, wxT(""),  wxDefaultPosition, wxDefaultSize, allStrings, wxCB_DROPDOWN | wxCB_READONLY/* | wxCB_SORT*/);
-   _layNum = DEBUG_NEW wxTextCtrl( this, DTE_LAYER_NUM , wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT | wxTE_READONLY,
-                           wxTextValidator(wxFILTER_NUMERIC, &_layNumString));
-   _layTyp = DEBUG_NEW wxTextCtrl( this, DTE_LAYER_TYPE , wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT | wxTE_READONLY,
-                           wxTextValidator(wxFILTER_NUMERIC, &_layTypString));
-
-   wxBoxSizer *mainSizer = DEBUG_NEW wxBoxSizer(wxVERTICAL);
-      wxBoxSizer *r1Sizer = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
-         r1Sizer->Add(_alllay , 1, wxEXPAND/*, wxEXPAND | wxALL, 5*/);
-         r1Sizer->Add(_newlay , 0/*, wxALIGN_RIGHT | wxALL, 5*/);
-      wxBoxSizer *r2Sizer = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
-         r2Sizer->Add(DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("Number:"))/*, 0, wxALIGN_RIGHT | wxALL | wxALIGN_CENTER_VERTICAL, 5*/);
-         r2Sizer->Add(_layNum/*, wxALL, 5*/);
-         r2Sizer->Add(DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("Type:"))/*, 0, wxALIGN_RIGHT | wxALL | wxALIGN_CENTER_VERTICAL, 5*/);
-         r2Sizer->Add(_layTyp/*, wxALL, 5*/);
-      wxBoxSizer *butSizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
-         butSizer->Add(DEBUG_NEW wxButton( this, wxID_OK    , wxT("OK")     )/*, wxBOTTOM, 5 */);
-         butSizer->Add(DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") )/*, wxBOTTOM, 5 */);
-      mainSizer->Add(r1Sizer , 0, wxEXPAND      | wxALL, 5);
-      mainSizer->Add(r2Sizer , 0,                 wxALL, 5);
-      mainSizer->Add(butSizer, 0, wxALIGN_RIGHT | wxALL, 5);
-   this->SetSizerAndFit(mainSizer);
-   mainSizer->SetSizeHints( this );
-   _alllay->SetSelection(cbSelection);
-}
-
-//==========================================================================
 tui::NameCboxRecords::NameCboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
             const SIMap& inlays, wxArrayString& all_strings, int row_height, const layprop::DrawProperties* drawProp)
             : wxPanel(parent, wxID_ANY, pnt, sz), _drawProp(drawProp)

@@ -2069,8 +2069,7 @@ void tui::TopedFrame::OnPropertySheet(wxCommandEvent& WXUNUSED(event))
 void tui::TopedFrame::OnEditLayer(wxCommandEvent& evt)
 {
    LayerDef* laydef = static_cast<LayerDef*>(evt.GetClientData());
-   //TODO init layer param for the tech editor
-   _techEditor = DEBUG_NEW TechEditorDialog(this,ID_TECH_EDITOR);
+   _techEditor = DEBUG_NEW TechEditorDialog(this,ID_TECH_EDITOR, *laydef);
    TpdPost::SetTechEditWindow(_techEditor);
    _techEditor->ShowModal();
    delete _techEditor;
@@ -2179,7 +2178,7 @@ void tui::TopedFrame::OnDefineStyle(wxCommandEvent& WXUNUSED(event))
 
 void tui::TopedFrame::OnTechEditor(wxCommandEvent& WXUNUSED(event))
 {
-   _techEditor = DEBUG_NEW TechEditorDialog(this,ID_TECH_EDITOR);
+   _techEditor = DEBUG_NEW TechEditorDialog(this,ID_TECH_EDITOR, ERR_LAY_DEF);
    TpdPost::SetTechEditWindow(_techEditor);
    _techEditor->ShowModal();
    delete _techEditor;
@@ -2240,22 +2239,17 @@ void tui::TopedFrame::OnCurrentLayer( wxCommandEvent& WXUNUSED( event ))
    wxRect wnd = GetRect();
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
    tui::DefaultLayer* dlg = NULL;
-   layprop::DrawProperties* drawProp;
-   if (PROPC->lockDrawProp(drawProp))
-   {
-      try {
-         dlg = DEBUG_NEW tui::DefaultLayer(this, wxID_ANY, wxT("Change current layer"), pos, drawProp);
-      }
-      catch (EXPTN&) {delete dlg;return;}
-      if ( dlg->ShowModal() == wxID_OK )
-      {
-   //      unsigned long vlu;
-   //      dlg->value().ToULong(&vlu);
-   //      DATC->setCmdLayer(LayerDef((LayerNumber)vlu, DEFAULT_DTYPE));
-      }
-      delete dlg;
+   try {
+      dlg = DEBUG_NEW tui::DefaultLayer(this, wxID_ANY, wxT("Change current layer"), pos);
    }
-   PROPC->unlockDrawProp(drawProp, false);
+   catch (EXPTN&) {delete dlg;return;}
+   if ( dlg->ShowModal() == wxID_OK )
+   {
+      LayerDef laydef = dlg->value();
+      if (ERR_LAY_DEF != laydef)
+         DATC->setCmdLayer(dlg->value());
+   }
+   delete dlg;
 }
 
 void tui::TopedFrame::OnMenu(wxCommandEvent& event)

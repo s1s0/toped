@@ -130,7 +130,9 @@ namespace tui
          void              prepareLayers(layprop::DrawProperties*);
          void              updateLayerList(const LayerDef&, const wxString&, int&, bool);
          bool              checkExist(const LayerDef&);
+         LayerDef          getLayer(int index);
          bool              empty();
+         void              select(LayerDef layDef, int& curSelect);
       private:
          typedef std::map<TmpWxIntPtr,LayerLine> LayerItems;
          void              clearAll();
@@ -143,9 +145,9 @@ namespace tui
    class TechEditorDialog : public wxDialog
    {
       public:
-                                 TechEditorDialog( wxWindow* parent,wxWindowID id = wxID_ANY);
+                                 TechEditorDialog( wxWindow* parent,wxWindowID id, const LayerDef laydef);
          virtual                ~TechEditorDialog();
-         void                    onLayerSelected(wxListEvent&);
+         void                    OnLayerSelected(wxListEvent&);
          void                    OnNewLayer(wxCommandEvent&);
          void                    OnColorEditor(wxCommandEvent&);
          void                    OnFillEditor(wxCommandEvent&);
@@ -172,6 +174,22 @@ namespace tui
          wxString                _layerNameString;
          int                     _curSelect;//!Data related to current selection
          DECLARE_EVENT_TABLE()
+   };
+
+
+   //==========================================================================
+   class DefaultLayer : public wxDialog {
+   public:
+                                 DefaultLayer(wxFrame*, wxWindowID, const wxString&, wxPoint);
+      virtual                   ~DefaultLayer();
+      void                       OnLayListSort(wxListEvent& cmdEvent);
+      void                       OnLayerSelected(wxListEvent& levent);
+      LayerDef                   value() {return _layerList->getLayer(_curSelect);}
+   private:
+      LayerListPanel*            _layerList;
+      int                        _curSelect;
+      int                        _iniSelect;
+      DECLARE_EVENT_TABLE()
    };
 
    int wxCALLBACK wxListCtrlItemCompare(TmpWxIntPtr, TmpWxIntPtr, TmpWxIntPtr);
