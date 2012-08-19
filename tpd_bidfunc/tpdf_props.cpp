@@ -72,7 +72,8 @@ tellstdfunc::stdLAYPROP::stdLAYPROP(telldata::typeID retype, bool eor) :
    _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
-int tellstdfunc::stdLAYPROP::execute() {
+int tellstdfunc::stdLAYPROP::execute()
+{
    std::string sline = getStringValue();
    std::string fill  = getStringValue();
    std::string col   = getStringValue();
@@ -90,6 +91,37 @@ int tellstdfunc::stdLAYPROP::execute() {
    }
    PROPC->unlockDrawProp(drawProp, true);
    delete tlay;
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::stdLAYPROP_T::stdLAYPROP_T(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
+{
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+}
+
+int tellstdfunc::stdLAYPROP_T::execute() {
+   std::string sline = getStringValue();
+   std::string fill  = getStringValue();
+   std::string col   = getStringValue();
+   word        layno = getWordValue();
+   LayerDef laydef(layno, DEFAULT_DTYPE);
+   std::string name  = getStringValue();
+   tell_log(console::MT_WARNING, "The function \"layprop(string,int,string,string,string)\" is depreciated.\nPlease use \"layprop(string,layer,string,string,string)\" instead");
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      drawProp->addLayer(name, laydef, col, fill, sline);
+      TpdPost::layer_add(name,laydef);
+      LogFile << LogFile.getFN() << "(\""<< name << "\"," << telldata::TtLayer(laydef) << ",\"" <<
+            col << "\",\"" << fill <<"\",\"" << sline <<"\");";LogFile.flush();
+   }
+   PROPC->unlockDrawProp(drawProp, true);
    return EXEC_NEXT;
 }
 
