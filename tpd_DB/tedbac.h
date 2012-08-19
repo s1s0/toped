@@ -30,32 +30,14 @@
 #include "ttt.h"
 #include "outbox.h"
 
-namespace layprop {
-   class LayerSettings;
-}
-
-namespace tenderer {
-   class TenderLay;
-}
-
 namespace laydata {
-   class TdtData;
-   template <typename DataT>       class QTStoreTmpl;
-   template <typename DataT>       class QTreeTmpl;
-   typedef QTStoreTmpl<TdtData>    QTreeTmp;
-   typedef QTreeTmpl<TdtData>      QuadTree;
-
-   typedef  std::pair<TdtData*, SGBitSet>           SelectDataPair;
-   typedef  std::list<SelectDataPair>               DataList;
-   typedef  std::list<TdtData*>                     ShapeList;
-
-
 //   template <typename DataT>
 //   struct LayerDefMap {
 //      typedef std::map<LayerDef , DataT     >     Type;
 //   };
 
 
+   //==========================================================================
    template <typename DataT>
    class LayerIterator {
    public:
@@ -79,6 +61,7 @@ namespace laydata {
       typename LayerDefMap::const_iterator _cNMap;
    };
 
+   //==========================================================================
    template <typename DataT>
    class LayerContainer {
    public:
@@ -105,6 +88,25 @@ namespace laydata {
       bool                       _copy;
    };
 
+   //==========================================================================
+   class TdtData;
+   template <typename DataT>       class QTStoreTmpl;
+   template <typename DataT>       class QTreeTmpl;
+   typedef QTStoreTmpl<TdtData>    QTreeTmp;
+   typedef QTreeTmpl<TdtData>      QuadTree;
+
+   typedef  std::pair<TdtData*, SGBitSet>           SelectDataPair;
+   typedef  std::list<SelectDataPair>               DataList;
+   typedef  std::list<TdtData*>                     ShapeList;
+
+}
+
+namespace layprop {
+   class LayerSettings;
+}
+
+namespace tenderer {
+   class TenderLay;
 }
 
 namespace auxdata {
@@ -115,9 +117,5 @@ namespace auxdata {
 //   typedef std::list<TdtAuxData*>               AuxDataList;
    typedef laydata::LayerContainer<QTreeTmp*>   TmpLayerMap;
 }
-
-
-typedef  std::list<LayerDef>             LayerDefList;
-typedef  std::set<LayerDef>              LayerDefSet;
 
 #endif //TEDBAC_H_INCLUDED

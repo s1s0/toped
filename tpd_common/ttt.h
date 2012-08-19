@@ -177,6 +177,9 @@ private:
 
 typedef  std::map<LayerDef, std::string>  ExpLayMap;      // Export Layer Map
 typedef  std::map<std::string, LayerDef>  ImpLayMap;      // Import Layer Map
+typedef  std::list<LayerDef>              LayerDefList;
+typedef  std::set<LayerDef>               LayerDefSet;
+
 
 //==============================================================================
 class SGBitSet {
