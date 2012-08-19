@@ -263,9 +263,9 @@ layprop::PropertyCenter::PropertyCenter() :
 //   fontLib = DEBUG_NEW FontLibrary(ffname, fname, vbo);
 //}
 
-void layprop::PropertyCenter::addUnpublishedLay(word layno)
+void layprop::PropertyCenter::addUnpublishedLay(const LayerDef& laydef)
 {
-   _uplaylist.push_back(layno);
+   _uplaylist.push_back(laydef);
 }
 
 const layprop::LayoutGrid* layprop::PropertyCenter::grid(byte No) const {
@@ -323,17 +323,17 @@ void layprop::PropertyCenter::saveLayerMaps(FILE* prop_file) const
    std::string sLayMap;
    if (NULL != _gdsLayMap)
    {
-      USMap2String(_gdsLayMap, sLayMap);
+      ExtLayerMap2String(_gdsLayMap, sLayMap);
       fprintf(prop_file, "  setgdslaymap( %s );\n", sLayMap.c_str());
    }
    if (NULL != _cifLayMap)
    {
-      USMap2String(_cifLayMap, sLayMap);
+      ExtLayerMap2String(_cifLayMap, sLayMap);
       fprintf(prop_file, "  setciflaymap( %s );\n", sLayMap.c_str());
    }
    if (NULL != _oasLayMap)
    {
-      USMap2String(_oasLayMap, sLayMap);
+      ExtLayerMap2String(_oasLayMap, sLayMap);
       fprintf(prop_file, "  setoaslaymap( %s );\n", sLayMap.c_str());
    }
    fprintf(prop_file, "}\n\n");
@@ -391,27 +391,27 @@ void layprop::PropertyCenter::saveProperties(std::string filename)
    unlockDrawProp(drawProp, false);
 }
 
-void layprop::PropertyCenter::setGdsLayMap(USMap* map)
+void layprop::PropertyCenter::setGdsLayMap(ExpLayMap* map)
 {
    if (NULL != _gdsLayMap) delete _gdsLayMap;
    _gdsLayMap = map;
 }
 
-void layprop::PropertyCenter::setCifLayMap(USMap* map)
+void layprop::PropertyCenter::setCifLayMap(ExpLayMap* map)
 {
    if (NULL != _cifLayMap) delete _cifLayMap;
    _cifLayMap = map;
 }
 
-void layprop::PropertyCenter::setOasLayMap(USMap* map)
+void layprop::PropertyCenter::setOasLayMap(ExpLayMap* map)
 {
    if (NULL != _oasLayMap) delete _oasLayMap;
    _oasLayMap = map;
 }
 
-DWordSet layprop::PropertyCenter::allUnselectable()
+LayerDefSet layprop::PropertyCenter::allUnselectable()
 {
-   DWordSet unselectable;
+   LayerDefSet unselectable;
    layprop::DrawProperties* drawProp;
    if (lockDrawProp(drawProp))
    {
@@ -462,12 +462,28 @@ layprop::PropertyCenter::~PropertyCenter()
 }
 
 
-void layprop::USMap2String(USMap* inmap, std::string& outmap)
+//void layprop::USMap2String(USMap* inmap, std::string& outmap)
+//{
+//   std::ostringstream laymapstr;
+//   word recno = 0;
+//   laymapstr << "{";
+//   for (USMap::const_iterator CLN = inmap->begin(); CLN != inmap->end(); CLN++)
+//   {
+//      if (recno != 0)
+//         laymapstr << ",";
+//      laymapstr << "{" << CLN->first << ",\"" << CLN->second << "\"}";
+//      recno++;
+//   }
+//   laymapstr << "}";
+//   outmap = laymapstr.str();
+//}
+
+void layprop::ExtLayerMap2String(ExpLayMap* inmap, std::string& outmap)
 {
    std::ostringstream laymapstr;
    word recno = 0;
    laymapstr << "{";
-   for (USMap::const_iterator CLN = inmap->begin(); CLN != inmap->end(); CLN++)
+   for (ExpLayMap::const_iterator CLN = inmap->begin(); CLN != inmap->end(); CLN++)
    {
       if (recno != 0)
          laymapstr << ",";

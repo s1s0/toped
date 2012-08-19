@@ -49,16 +49,16 @@ extern const wxEventType         wxEVT_CANVAS_PARAMS;
 //=============================================================================
 //! Make sure this function is not called when TDT mutex is locked. Otherwise
 //! it will remain locked in case DrawProperties can't be locked
-telldata::TtInt* tellstdfunc::getCurrentLayer()
+telldata::TtLayer* tellstdfunc::getCurrentLayer()
 {
-   unsigned cl = 0;
+   LayerDef cl(TLL_LAY_DEF);
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
       cl = drawProp->curLay();
    }
    PROPC->unlockDrawProp(drawProp, true);
-   return (DEBUG_NEW telldata::TtInt(cl));
+   return (DEBUG_NEW telldata::TtLayer(cl));
 }
 
 //=============================================================================
@@ -67,24 +67,24 @@ telldata::TtInt* tellstdfunc::getCurrentLayer()
 //! which will be invisible.
 //! Make sure this function is not called when TDT mutex is locked. Otherwise
 //! it will remain locked in case DrawProperties can't be locked
-void tellstdfunc::secureLayer(unsigned layno)
+void tellstdfunc::secureLayer(const LayerDef& laydef)
 {
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
       // check whether it's defined and make a default definition if it isn't
-      if (drawProp->addLayer(layno))
-         TpdPost::layer_add(drawProp->getLayerName(layno), layno);
+      if (drawProp->addLayer(laydef))
+         TpdPost::layer_add(drawProp->getLayerName(laydef), laydef);
    }
    PROPC->unlockDrawProp(drawProp, true);
 }
 
 //=============================================================================
-unsigned tellstdfunc::secureLayer()
+LayerDef tellstdfunc::secureLayer()
 {
-   unsigned layno = DATC->curCmdLay();
-   secureLayer(layno);
-   return layno;
+   LayerDef laydef = DATC->curCmdLay();
+   secureLayer(laydef);
+   return laydef;
 }
 
 //=============================================================================
@@ -132,16 +132,17 @@ telldata::TtList* tellstdfunc::make_ttlaylist(laydata::SelectList* shapesel) {
    telldata::TtList* llist = DEBUG_NEW telldata::TtList(telldata::tn_layout);
    laydata::DataList* lslct;
    SGBitSet pntl;
-   for (laydata::SelectList::const_iterator CL = shapesel->begin();
-                                            CL != shapesel->end(); CL++) {
-      lslct = CL->second;
+   for (laydata::SelectList::Iterator CL = shapesel->begin();
+                                            CL != shapesel->end(); CL++)
+   {
+      lslct = *CL;
       // push each data reference into the TELL list
       for (laydata::DataList::const_iterator CI = lslct->begin();
                                              CI != lslct->end(); CI++) {
          // copy the pointlist, because it will be deleted with the shapeSel
          if (0 != CI->second.size()) pntl = SGBitSet(CI->second);
          else                        pntl = SGBitSet();
-         llist->add(DEBUG_NEW telldata::TtLayout(CI->first, CL->first, DEBUG_NEW SGBitSet(pntl)));
+         llist->add(DEBUG_NEW telldata::TtLayout(CI->first, CL(), DEBUG_NEW SGBitSet(pntl)));
       }
    }
    return llist;
@@ -183,15 +184,15 @@ void tellstdfunc::clean_ttlaylist(telldata::TtList* llist)
 void tellstdfunc::clean_atticlist(laydata::AtticList* nlst, bool destroy)
 {
    if (NULL == nlst) return;
-   for (laydata::AtticList::const_iterator CL = nlst->begin(); CL != nlst->end(); CL++)
+   for (laydata::AtticList::Iterator CL = nlst->begin(); CL != nlst->end(); CL++)
    {
       if (destroy)
       {
-         for (laydata::ShapeList::const_iterator DI = CL->second->begin(); DI != CL->second->end(); DI++)
+         for (laydata::ShapeList::const_iterator DI = CL->begin(); DI != CL->end(); DI++)
             delete (*DI);
       }
-      CL->second->clear();
-      delete (CL->second);
+      CL->clear();
+      delete (*CL);
    }
 }
 
@@ -200,37 +201,36 @@ telldata::TtList* tellstdfunc::make_ttlaylist(laydata::AtticList* shapesel)
 {
    telldata::TtList* llist = DEBUG_NEW telldata::TtList(telldata::tn_layout);
    laydata::ShapeList* lslct;
-   for (laydata::AtticList::const_iterator CL = shapesel->begin();
-                                           CL != shapesel->end(); CL++)
+   for (laydata::AtticList::Iterator CL = shapesel->begin(); CL != shapesel->end(); CL++)
    {
-      lslct = CL->second;
+      lslct = *CL;
       // push each data reference into the TELL list
       for (laydata::ShapeList::const_iterator CI  = lslct->begin();
                                               CI != lslct->end(); CI++)
       //   if (sh_deleted == (*CI)->status()) - doesn't seems to need it!
-            llist->add(DEBUG_NEW telldata::TtLayout(*CI, CL->first));
+            llist->add(DEBUG_NEW telldata::TtLayout(*CI, CL()));
    }
    return llist;
 }
 
-telldata::TtList* tellstdfunc::make_ttlaylist(laydata::ShapeList& lslct, unsigned lay)
+telldata::TtList* tellstdfunc::make_ttlaylist(laydata::ShapeList& lslct, const LayerDef& laydef)
 {
    telldata::TtList* llist = DEBUG_NEW telldata::TtList(telldata::tn_layout);
    // push each data reference into the TELL list
    for (laydata::ShapeList::const_iterator CI  = lslct.begin();
                                            CI != lslct.end(); CI++)
    //   if (sh_deleted == (*CI)->status()) - doesn't seems to need it!
-      llist->add(DEBUG_NEW telldata::TtLayout(*CI, lay));
+      llist->add(DEBUG_NEW telldata::TtLayout(*CI, laydef));
    return llist;
 }
 
-telldata::TtList* tellstdfunc::make_ttlaylist(auxdata::AuxDataList& lslct, unsigned lay)
+telldata::TtList* tellstdfunc::make_ttlaylist(auxdata::AuxDataList& lslct, const LayerDef& laydef)
 {
    telldata::TtList* llist = DEBUG_NEW telldata::TtList(telldata::tn_auxilary);
    // push each data reference into the TELL list
    for (auxdata::AuxDataList::const_iterator CI  = lslct.begin();
                                              CI != lslct.end(); CI++)
-      llist->add(DEBUG_NEW telldata::TtAuxdata(*CI, lay));
+      llist->add(DEBUG_NEW telldata::TtAuxdata(*CI, laydef));
    return llist;
 }
 
@@ -238,13 +238,12 @@ telldata::TtList* tellstdfunc::make_ttlaylist(auxdata::AuxDataList& lslct, unsig
 laydata::SelectList* tellstdfunc::get_ttlaylist(telldata::TtList* llist)
 {
    laydata::SelectList* shapesel = DEBUG_NEW laydata::SelectList();
-   unsigned clayer;
    SGBitSet* pntl_o;
    for (unsigned i = 0 ; i < llist->mlist().size(); i++)
    {
-      clayer = static_cast<telldata::TtLayout*>(llist->mlist()[i])->layer();
+      LayerDef clayer(static_cast<telldata::TtLayout*>(llist->mlist()[i])->layer());
       if (shapesel->end() == shapesel->find(clayer))
-         (*shapesel)[clayer] = DEBUG_NEW laydata::DataList();
+         shapesel->add(clayer, DEBUG_NEW laydata::DataList());
       pntl_o = static_cast<telldata::TtLayout*>(llist->mlist()[i])->selp();
 
       SGBitSet pntl_n;
@@ -259,12 +258,11 @@ laydata::SelectList* tellstdfunc::get_ttlaylist(telldata::TtList* llist)
 laydata::AtticList* tellstdfunc::get_shlaylist(telldata::TtList* llist)
 {
    laydata::AtticList* shapesel = DEBUG_NEW laydata::AtticList();
-   unsigned clayer;
    for (unsigned i = 0 ; i < llist->mlist().size(); i++)
    {
-      clayer = static_cast<telldata::TtLayout*>(llist->mlist()[i])->layer();
+      LayerDef clayer(static_cast<telldata::TtLayout*>(llist->mlist()[i])->layer());
       if (shapesel->end() == shapesel->find(clayer))
-         (*shapesel)[clayer] = DEBUG_NEW laydata::ShapeList();
+         shapesel->add(clayer, DEBUG_NEW laydata::ShapeList());
       (*shapesel)[clayer]->push_back(static_cast<telldata::TtLayout*>
                                                 (llist->mlist()[i])->data());
    }
@@ -272,7 +270,7 @@ laydata::AtticList* tellstdfunc::get_shlaylist(telldata::TtList* llist)
 }
 
 //=============================================================================
-auxdata::AuxDataList* tellstdfunc::get_auxdatalist(telldata::TtList* llist, unsigned& clayer)
+auxdata::AuxDataList* tellstdfunc::get_auxdatalist(telldata::TtList* llist, LayerDef& laydef)
 {
    auxdata::AuxDataList* shapesel = DEBUG_NEW auxdata::AuxDataList();
    bool layerCheck = false;
@@ -280,11 +278,11 @@ auxdata::AuxDataList* tellstdfunc::get_auxdatalist(telldata::TtList* llist, unsi
    {
       if (layerCheck)
       {
-         assert(clayer ==  static_cast<telldata::TtAuxdata*>(llist->mlist()[i])->layer());
+         assert(laydef ==  static_cast<telldata::TtAuxdata*>(llist->mlist()[i])->layer());
       }
       else
       {
-         clayer = static_cast<telldata::TtAuxdata*>(llist->mlist()[i])->layer();
+         laydef = static_cast<telldata::TtAuxdata*>(llist->mlist()[i])->layer();
          layerCheck = true;
       }
       shapesel->push_back(static_cast<telldata::TtAuxdata*>
@@ -308,9 +306,9 @@ laydata::DataList* tellstdfunc::copyDataList(const laydata::DataList* dlist)
 laydata::SelectList* tellstdfunc::copySelectList(const laydata::SelectList* dlist)
 {
    laydata::SelectList* clist = DEBUG_NEW laydata::SelectList();
-   for (laydata::SelectList::const_iterator CDI = dlist->begin(); CDI != dlist->end(); CDI++)
+   for (laydata::SelectList::Iterator CDI = dlist->begin(); CDI != dlist->end(); CDI++)
    {
-      (*clist)[CDI->first] = copyDataList(CDI->second);
+      clist->add(CDI(), copyDataList(*CDI));
    }
    return clist;
 }
@@ -318,9 +316,9 @@ laydata::SelectList* tellstdfunc::copySelectList(const laydata::SelectList* dlis
 //=============================================================================
 void tellstdfunc::cleanSelectList(laydata::SelectList* dlist)
 {
-   for (laydata::SelectList::const_iterator CDI = dlist->begin(); CDI != dlist->end(); CDI++)
+   for (laydata::SelectList::Iterator CDI = dlist->begin(); CDI != dlist->end(); CDI++)
    {
-      delete CDI->second;
+      delete *CDI;
    }
    delete dlist;
 }
@@ -329,9 +327,9 @@ void tellstdfunc::cleanFadeadList(laydata::SelectList** fadead)
 {
    for (byte i = 0; i < 3; i++)
    {
-      for (laydata::SelectList::iterator CI = fadead[i]->begin(); CI != fadead[i]->end(); CI++)
+      for (laydata::SelectList::Iterator CI = fadead[i]->begin(); CI != fadead[i]->end(); CI++)
       {
-         laydata::DataList* sshape = CI->second;
+         laydata::DataList* sshape = *CI;
          if (1 == i) // deleted list only
          {
             for (laydata::DataList::iterator CCI = sshape->begin(); CCI  != sshape->end(); CCI++)
@@ -352,11 +350,10 @@ laydata::SelectList* tellstdfunc::filter_selist(const laydata::SelectList* shape
 {
    laydata::SelectList* filtered = DEBUG_NEW laydata::SelectList();
 
-   for (laydata::SelectList::const_iterator CL = shapesel->begin();
-                                            CL != shapesel->end(); CL++)
+   for (laydata::SelectList::Iterator CL = shapesel->begin(); CL != shapesel->end(); CL++)
    {
       laydata::DataList* ssl = DEBUG_NEW laydata::DataList();
-      laydata::DataList* lslct = CL->second;
+      laydata::DataList* lslct = *CL;
       for (laydata::DataList::const_iterator CI = lslct->begin();
                                              CI != lslct->end(); CI++)
       {
@@ -368,7 +365,7 @@ laydata::SelectList* tellstdfunc::filter_selist(const laydata::SelectList* shape
          }
       }
       if    (ssl->empty()) delete ssl;
-      else                 (*filtered)[CL->first] = ssl;
+      else                 filtered->add(CL(), ssl);
    }
    return filtered;
 }
@@ -377,10 +374,9 @@ laydata::SelectList* tellstdfunc::filter_selist(const laydata::SelectList* shape
 laydata::AtticList* tellstdfunc::replace_str(laydata::AtticList* shapesel, std::string newstr)
 {
    laydata::AtticList* newtextlist = DEBUG_NEW laydata::AtticList();
-   for (laydata::AtticList::iterator CL = shapesel->begin();
-                                            CL != shapesel->end(); CL++)
+   for (laydata::AtticList::Iterator CL = shapesel->begin(); CL != shapesel->end(); CL++)
    {
-      laydata::ShapeList* lslct  = CL->second;
+      laydata::ShapeList* lslct  = *CL;
       laydata::ShapeList* newlst = DEBUG_NEW laydata::ShapeList();
       for (laydata::ShapeList::iterator CI = lslct->begin();
                                              CI != lslct->end(); CI++)
@@ -391,7 +387,7 @@ laydata::AtticList* tellstdfunc::replace_str(laydata::AtticList* shapesel, std::
          newtxt->replaceStr(newstr);
          newlst->push_back(newtxt);
       }
-      (*newtextlist)[CL->first] = newlst;
+      newtextlist->add(CL(), newlst);
    }
    return newtextlist;
 }
@@ -416,8 +412,8 @@ void tellstdfunc::RefreshGL()
       layprop::DrawProperties* drawProp;
       if (PROPC->lockDrawProp(drawProp))
       {
-         const WordList freshlays = PROPC->upLayers();
-         for(WordList::const_iterator CUL = freshlays.begin(); CUL != freshlays.end(); CUL++)
+         const LayerDefList freshlays = PROPC->upLayers();
+         for(LayerDefList::const_iterator CUL = freshlays.begin(); CUL != freshlays.end(); CUL++)
             TpdPost::layer_add(drawProp->getLayerName(*CUL), *CUL);
          PROPC->clearUnpublishedLayers();
       }
@@ -446,16 +442,16 @@ void tellstdfunc::gridON(byte No, bool status)
 void tellstdfunc::updateLayerDefinitions(laydata::TdtLibDir* LIBDIR, NameList& top_cells, int libID)
 {
    // get all the layers used in the design and define them using the default definition
-   WordList ull;
+   LayerDefList ull;
    for(NameList::const_iterator CTC= top_cells.begin(); CTC != top_cells.end(); CTC++)
       LIBDIR->collectUsedLays(*CTC, true, ull);
    ull.sort(); ull.unique();
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
-      for(WordList::const_iterator CUL = ull.begin(); CUL != ull.end(); CUL++)
+      for(LayerDefList::const_iterator CUL = ull.begin(); CUL != ull.end(); CUL++)
       {
-         if (REF_LAY == *CUL) continue;
+         if (REF_LAY_DEF == *CUL) continue;
          if (drawProp->addLayer(*CUL))
             TpdPost::layer_add(drawProp->getLayerName(*CUL), *CUL);
       }
@@ -471,26 +467,26 @@ void tellstdfunc::initFuncLib(wxFrame* tpd, wxWindow* cnvs)
 }
 
 //=============================================================================
-bool tellstdfunc::secureLayDef(unsigned layno)
-{
-   bool success = true;
-   layprop::DrawProperties* drawProp;
-   if (PROPC->lockDrawProp(drawProp))
-   {
-      if (layno != REF_LAY)
-      {
-         if (drawProp->addLayer(layno))
-            PROPC->addUnpublishedLay(layno);
-      }
-      else
-      {
-         // TODO -add message here
-         success = false;
-      }
-   }
-   PROPC->unlockDrawProp(drawProp, false);
-   return success;
-}
+//bool tellstdfunc::secureLayDef(LayerNumber layno)
+//{
+//   bool success = true;
+//   layprop::DrawProperties* drawProp;
+//   if (PROPC->lockDrawProp(drawProp))
+//   {
+//      if (layno != REF_LAY)
+//      {
+//         if (drawProp->addLayer(layno))
+//            PROPC->addUnpublishedLay(layno);
+//      }
+//      else
+//      {
+//         // TODO -add message here
+//         success = false;
+//      }
+//   }
+//   PROPC->unlockDrawProp(drawProp, false);
+//   return success;
+//}
 
 //=============================================================================
 void tellstdfunc::createDefaultTDT(std::string dbname,

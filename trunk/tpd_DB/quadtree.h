@@ -32,8 +32,6 @@
 
 namespace laydata {
 
-   template <typename DataT>   class QTreeTmpl;
-   typedef QTreeTmpl<TdtData>  QuadTree;
    typedef unsigned            QuadsIter;
 
    template <typename DataT>

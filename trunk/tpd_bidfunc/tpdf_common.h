@@ -160,9 +160,9 @@
 
 namespace tellstdfunc {
 
-   telldata::TtInt*     getCurrentLayer();
-   unsigned             secureLayer();
-   void                 secureLayer(unsigned);
+   telldata::TtLayer*   getCurrentLayer();
+   LayerDef             secureLayer();
+   void                 secureLayer(const LayerDef&);
    bool                 waitGUInput(int, telldata::operandSTACK *,
                                     std::string name = "",
                                     const CTM trans = CTM(),
@@ -174,11 +174,11 @@ namespace tellstdfunc {
    PointVector*         t2tpoints(telldata::TtList *, real);
    telldata::TtList*    make_ttlaylist(laydata::SelectList*);
    telldata::TtList*    make_ttlaylist(laydata::AtticList*);
-   telldata::TtList*    make_ttlaylist(laydata::ShapeList&, unsigned);
-   telldata::TtList*    make_ttlaylist(auxdata::AuxDataList&, unsigned);
+   telldata::TtList*    make_ttlaylist(laydata::ShapeList&, const LayerDef&);
+   telldata::TtList*    make_ttlaylist(auxdata::AuxDataList&, const LayerDef&);
    laydata::SelectList* get_ttlaylist(telldata::TtList* llist);
    laydata::AtticList*  get_shlaylist(telldata::TtList* llist);
-   auxdata::AuxDataList* get_auxdatalist(telldata::TtList* llist, unsigned&);
+   auxdata::AuxDataList* get_auxdatalist(telldata::TtList* llist, LayerDef&);
    laydata::DataList*   copyDataList(const laydata::DataList* dlist);
    laydata::SelectList* copySelectList(const laydata::SelectList* dlist);
    void                 cleanSelectList(laydata::SelectList* dlist);
@@ -192,7 +192,7 @@ namespace tellstdfunc {
    void                 initFuncLib(wxFrame*, wxWindow*);
    laydata::SelectList* filter_selist(const laydata::SelectList*, word mask);
    laydata::AtticList*  replace_str(laydata::AtticList*, std::string);
-   bool                 secureLayDef(unsigned);
+//   bool                 secureLayDef(LayerNumber);
    void                 createDefaultTDT(std::string, laydata::TdtLibDir*, TpdTime&, bool, parsercmd::UndoQUEUE&, telldata::UNDOPerandQUEUE&);
 
 }

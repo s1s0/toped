@@ -15,6 +15,7 @@
 					<tool id="org.eclipse.linuxtools.cdt.autotools.core.toolchain.tool.gcc.552583433" name="GCC C Compiler" superClass="org.eclipse.linuxtools.cdt.autotools.core.toolchain.tool.gcc">
 						<option id="gnu.c.compiler.option.preprocessor.def.symbols.1343224305" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
 							<listOptionValue builtIn="false" value="__WXGTK20__=1"/>
+							<listOptionValue builtIn="false" value="_GNU_SOURCE=1"/>
 						</option>
 						<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.98362440" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 					</tool>
@@ -24,6 +25,7 @@
 						</option>
 						<option id="gnu.cpp.compiler.option.preprocessor.def.1588880625" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 							<listOptionValue builtIn="false" value="__WXGTK20__=1"/>
+							<listOptionValue builtIn="false" value="_GNU_SOURCE=1"/>
 						</option>
 						<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1877802056" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 					</tool>

@@ -1833,26 +1833,24 @@ void laydata::TdtCellRef::ungroup(laydata::TdtDesign* ATDB, TdtCell* dst, AtticL
       return;
    }
    cstr->fullSelect();
-   for (SelectList::const_iterator CL = cstr->shapeSel()->begin();
-                                   CL != cstr->shapeSel()->end(); CL++)
+   for (SelectList::Iterator CL = cstr->shapeSel()->begin(); CL != cstr->shapeSel()->end(); CL++)
    {
       // secure the target layer
-      QTreeTmp* wl = dst->secureUnsortedLayer(CL->first);
+      QTreeTmp* wl = dst->secureUnsortedLayer(CL());
       // There is no point here to ensure that the layer definition exists.
       // We are just transferring shapes from one structure to another.
       // Of course ATDB is undefined (forward defined) here, so if the method has to be
       // used here - something else should be done
       // ATDB->securelaydef( CL->first );
       // secure the select layer (for undo)
-      if (nshp->end() != nshp->find(CL->first))
-         ssl = (*nshp)[CL->first];
+      if (nshp->end() != nshp->find(CL()))
+         ssl = (*nshp)[CL()];
       else {
          ssl = DEBUG_NEW ShapeList();
-         (*nshp)[CL->first] = ssl;
+         nshp->add(CL(), ssl);
       }
       // for every single shape on the layer
-      for (DataList::const_iterator DI = CL->second->begin();
-                                    DI != CL->second->end(); DI++)
+      for (DataList::const_iterator DI = CL->begin(); DI != CL->end(); DI++)
       {
          // create a new copy of the data
          data_copy = DI->first->copy(_translation);
@@ -1861,10 +1859,10 @@ void laydata::TdtCellRef::ungroup(laydata::TdtDesign* ATDB, TdtCell* dst, AtticL
          // ... and to the list of the new shapes (for undo)
          ssl->push_back(data_copy);
          //update the hierarchy tree if this is a cell
-         if (REF_LAY == CL->first) dst->addChild(ATDB,
+         if (REF_LAY_DEF == CL()) dst->addChild(ATDB,
                             static_cast<TdtCellRef*>(data_copy)->cStructure());
          // add it to the selection list of the dst cell
-         dst->selectThis(data_copy,CL->first);
+         dst->selectThis(data_copy,CL());
       }
    }
    cstr->unselectAll();

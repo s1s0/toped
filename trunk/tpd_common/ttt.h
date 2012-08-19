@@ -35,9 +35,9 @@
 #include <list>
 #include <set>
 #include <assert.h>
-
+//#pragma GCC diagnostic warning "-Wconversion"
 //=============================================================================
-// General type declations (compatability)
+// General type declarations (compatibility)
 //=============================================================================
 typedef unsigned char            byte     ; // 1 byte
 typedef unsigned short           word     ; // 2 bytes
@@ -49,15 +49,40 @@ typedef long long int            int8b    ; // 8 bytes
 typedef          double          real     ; // 8 bytes
 
 typedef  dword                            WireWidth;
+typedef  dword                            LayerNumber;
+typedef  dword                            LayerDType;
 typedef  std::list<std::string>           NameList;
 typedef  std::set<std::string>            NameSet;
 typedef  std::list<word>                  WordList;
 typedef  std::set<word>                   WordSet;
-typedef  std::set<dword>                  DWordSet;
 typedef  std::map<word, WordSet>          ExtLayers;
-typedef  std::map<std::string, int>       SIMap;       // name
-typedef  std::map<unsigned, std::string>  USMap;      // Unsigned - String Map
-typedef  std::map<word, unsigned long>    SLMap;
+typedef  std::map<std::string, LayerNumber>  SIMap;       // name
+//typedef  std::map<LayerNumber, std::string>  USMap;      // Unsigned - String Map
+//typedef  std::map<word, unsigned long>    SLMap;
+
+//=============================================================================
+// Some common constants
+//=============================================================================
+const byte        MAX_BYTE_VALUE       = 255;
+const word        MAX_WORD_VALUE       = 65535;
+const int4b       MIN_INT4B            = (int4b)0x80000001; //  -2 147 483 647
+const int4b       MAX_INT4B            = (int4b)0x7FFFFFFF; //   2 147 483 643
+const WireWidth   MAX_WIRE_WIDTH       = 0x0FFFFFFF;
+//const DBbox MAX_OVL_BOX        = DBbox(MIN_X,MAX_X,MIN_Y,MIN_Y); // maximum overlapping box
+const LayerNumber REF_LAY              = 0xffffffff;
+const LayerNumber ERR_LAY              = 0xfffffffe;
+const LayerNumber DRC_LAY              = 0xfffffffd;
+const LayerNumber GRC_LAY              = 0xfffffffc;
+const LayerNumber LAST_EDITABLE_LAYNUM = 0x0000ffff;
+const LayerDType  LAST_EDITABLE_LAYTYP = 0x0000ffff;
+const LayerNumber DEFAULT_LAY          = 0x0;
+const LayerDType  DEFAULT_DTYPE        = 0x0;
+const byte        OPENGL_FONT_UNIT     = 128;
+const byte        GRID_LIMIT           = 5;    // if grid step is less than _GRID_LIMIT pixels, grid is hidden
+const real        DEFAULT_DBU          = 1e-9;
+const real        DEFAULT_UU           = 1e-3;
+
+
 
 enum QuadIdentificators{ qidNW = 0,
                          qidNE = 1,
@@ -130,9 +155,30 @@ const int         UNDEFCELL_LIB     =  0;
       }                                                         \
    while (0)
 
-// to cast properly the indices parameter in glDrawElements when
-// drawing from VBO
-#define VBO_BUFFER_OFFSET(i) ((char *)NULL + (i))
+//==============================================================================
+class LayerDef {
+public:
+                             LayerDef(LayerNumber num, LayerDType  typ) : _num(num), _typ(typ) {}
+                             LayerDef(const LayerDef& laydef) : _num(laydef.num()), _typ(laydef.typ()) {}
+   LayerNumber               num() const {return _num;}
+   LayerDType                typ() const {return _typ;}
+   void                      toGds(word& lay, word& typ) const;
+   std::string               toQList() const;
+   bool                      editable() const;
+   bool                      operator==(const LayerDef& cmp) const;
+   bool                      operator!=(const LayerDef& cmp) const;
+   const LayerDef            operator++(int)/*Postfix*/;
+   bool                      operator< (const LayerDef& cmp) const;
+   friend  std::ostream& operator <<(std::ostream &os, const LayerDef &obj);
+private:
+   LayerNumber               _num;
+   LayerDType                _typ;
+};
+
+typedef  std::map<LayerDef, std::string>  ExpLayMap;      // Export Layer Map
+typedef  std::map<std::string, LayerDef>  ImpLayMap;      // Import Layer Map
+typedef  std::list<LayerDef>              LayerDefList;
+typedef  std::set<LayerDef>               LayerDefSet;
 
 
 //==============================================================================
@@ -685,24 +731,14 @@ bool  SGHierTree<TYPE>::removeRootItem(const TYPE* comp, SGHierTree*& lst)
 }
 
 //=============================================================================
-// More common constants (instead of #defines)
+// more common constants
 //=============================================================================
-const byte        MAX_BYTE_VALUE       = 255;
-const word        MAX_WORD_VALUE       = 65535;
-const int4b       MIN_INT4B            = (int4b)0x80000001; //  -2 147 483 647
-const int4b       MAX_INT4B            = (int4b)0x7FFFFFFF; //   2 147 483 643
-const WireWidth   MAX_WIRE_WIDTH       = 0x0FFFFFFF;
-//const DBbox MAX_OVL_BOX        = DBbox(MIN_X,MAX_X,MIN_Y,MIN_Y); // maximum overlapping box
-const unsigned    REF_LAY              = 0xffffffff;
-const unsigned    ERR_LAY              = 0xfffffffe;
-const unsigned    DRC_LAY              = 0xfffffffd;
-const unsigned    GRC_LAY              = 0xfffffffc;
-const unsigned    LAST_EDITABLE_LAYNUM = 0x0000ffff;
-const byte        OPENGL_FONT_UNIT     = 128;
-const byte        GRID_LIMIT           = 5;    // if grid step is less than _GRID_LIMIT pixels, grid is hidden
 const DBbox       DEFAULT_OVL_BOX      = DBbox(TP(0,0));
 const DBbox       DEFAULT_ZOOM_BOX     = DBbox(TP(-2000,-2000), TP(20000,20000));
-const real        DEFAULT_DBU          = 1e-9;
-const real        DEFAULT_UU           = 1e-3;
+const LayerDef    REF_LAY_DEF(REF_LAY    , DEFAULT_DTYPE);
+const LayerDef    ERR_LAY_DEF(ERR_LAY    , DEFAULT_DTYPE);
+const LayerDef    DRC_LAY_DEF(DRC_LAY    , DEFAULT_DTYPE);
+const LayerDef    GRC_LAY_DEF(GRC_LAY    , DEFAULT_DTYPE);
+const LayerDef    TLL_LAY_DEF(DEFAULT_LAY, DEFAULT_DTYPE);
 
 #endif

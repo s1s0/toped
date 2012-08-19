@@ -94,8 +94,8 @@ void Calbr::drcTenderer::addPoly(const CoordsVector   &coords)
          plDB.push_back(tempPoint);
          //plDB.push_back(TP(tempPoint.x(), tempPoint.y(), DBscale));
       }
-      laydata::QTreeTmp* dwl = _DRCCell->secureUnsortedLayer(_numError);
-      PROPC->addUnpublishedLay(_numError);
+      laydata::QTreeTmp* dwl = _DRCCell->secureUnsortedLayer(LayerDef(_numError,DEFAULT_DTYPE));
+      PROPC->addUnpublishedLay(LayerDef(_numError, DEFAULT_DTYPE));
 
       laydata::TdtPolyEXT *shape = DEBUG_NEW laydata::TdtPolyEXT(plDB);
       shape->setLong(_numError);
@@ -137,8 +137,8 @@ void Calbr::drcTenderer::addLine(const edge &edge)
    real      w = 0.01;   //width of line
    word      width = static_cast<word>(rint(w * DBscale));
 
-   laydata::QTreeTmp* dwl = _DRCCell->secureUnsortedLayer(_numError);
-   PROPC->addUnpublishedLay(_numError);
+   laydata::QTreeTmp* dwl = _DRCCell->secureUnsortedLayer(LayerDef(_numError, DEFAULT_DTYPE));
+   PROPC->addUnpublishedLay(LayerDef(_numError, DEFAULT_DTYPE));
 
 
    /*laydata::ValidWire check(plDB, width);
@@ -164,8 +164,8 @@ void Calbr::drcTenderer::showAll(void)
       layprop::DrawProperties* drawProp;
       if (PROPC->lockDrawProp(drawProp, layprop::DRC))
       {
-         WordList lays = drawProp->getAllLayers();
-         for(WordList::const_iterator it = lays.begin(); it != lays.end(); ++it)
+         LayerDefList lays = drawProp->getAllLayers();
+         for(LayerDefList::const_iterator it = lays.begin(); it != lays.end(); ++it)
             drawProp->hideLayer((*it), false);
       }
       PROPC->unlockDrawProp(drawProp, true);
@@ -190,8 +190,8 @@ void Calbr::drcTenderer::hideAll(void)
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp, layprop::DRC))
    {
-      WordList lays = drawProp->getAllLayers();
-      for(WordList::const_iterator it = lays.begin(); it != lays.end(); ++it)
+      LayerDefList lays = drawProp->getAllLayers();
+      for(LayerDefList::const_iterator it = lays.begin(); it != lays.end(); ++it)
          drawProp->hideLayer((*it), true);
    }
    PROPC->unlockDrawProp(drawProp, true);
@@ -205,7 +205,7 @@ bool Calbr::drcTenderer::showError(unsigned int numError)
       layprop::DrawProperties* drawProp;
       if (PROPC->lockDrawProp(drawProp, layprop::DRC))
       {
-         drawProp->hideLayer(numError, false);
+         drawProp->hideLayer(LayerDef(_numError, DEFAULT_DTYPE), false);
       }
       PROPC->unlockDrawProp(drawProp, true);
       tellstdfunc::RefreshGL();
@@ -242,8 +242,8 @@ void Calbr::drcTenderer::endWriting()
    {
       if (!PROPC->upLayers().empty())
       {
-         const WordList freshlays = PROPC->upLayers();
-         for(WordList::const_iterator CUL = freshlays.begin(); CUL != freshlays.end(); CUL++)
+         const LayerDefList freshlays = PROPC->upLayers();
+         for(LayerDefList::const_iterator CUL = freshlays.begin(); CUL != freshlays.end(); CUL++)
             drawProp->addLayer((*CUL));
          PROPC->clearUnpublishedLayers();
       }

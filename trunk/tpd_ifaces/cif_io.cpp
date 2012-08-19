@@ -600,7 +600,7 @@ void CIFin::CifFile::getAllCells(wxListBox& cellsBox) const
 
 //=============================================================================
 CIFin::CifExportFile::CifExportFile(std::string fn, laydata::TdtCell* topcell,
-   USMap* laymap, bool recur, bool verbose) :  DbExportFile(fn, topcell, recur),
+   ExpLayMap* laymap, bool recur, bool verbose) :  DbExportFile(fn, topcell, recur),
       _laymap(laymap), _verbose(verbose), _lastcellnum(0)
 {
    std::string fname(convertString(_fileName));
@@ -677,10 +677,10 @@ void CIFin::CifExportFile::libraryFinish()
    // nothing to do for CIF export
 }
 
-bool CIFin::CifExportFile::layerSpecification(unsigned layno)
+bool CIFin::CifExportFile::layerSpecification(const LayerDef& laydef)
 {
-   if (REF_LAY == layno) return true;
-   if (_laymap->end() == _laymap->find(layno))
+   if (REF_LAY_DEF == laydef) return true;
+   if (_laymap->end() == _laymap->find(laydef))
    {
       //std::stringstream message;
       //message << "   Layer " << layno <<" not found in the layer map and will not be converted";
@@ -688,9 +688,9 @@ bool CIFin::CifExportFile::layerSpecification(unsigned layno)
       return false;
    }
    if (_verbose)
-      _file << "   Layer "<< (*_laymap)[layno] << " objects follow;" << std::endl;
+      _file << "   Layer "<< (*_laymap)[laydef] << " objects follow;" << std::endl;
    else
-      _file << "L " << (*_laymap)[layno] << ";" << std::endl;
+      _file << "L " << (*_laymap)[laydef] << ";" << std::endl;
    return true;
 }
 

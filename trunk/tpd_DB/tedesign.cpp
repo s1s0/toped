@@ -315,7 +315,7 @@ laydata::TdtDefaultCell* laydata::TdtLibrary::displaceCell(const std::string& ce
    return celldef;
 }
 
-void laydata::TdtLibrary::collectUsedLays(WordList& laylist) const
+void laydata::TdtLibrary::collectUsedLays(LayerDefList& laylist) const
 {
    for (CellMap::const_iterator CC = _cells.begin(); CC != _cells.end(); CC++)
    {
@@ -323,8 +323,8 @@ void laydata::TdtLibrary::collectUsedLays(WordList& laylist) const
    }
    laylist.sort();
    laylist.unique();
-   if ( (0 < laylist.size()) && (0 == laylist.front()) )
-      laylist.pop_front();
+//   if ( (0 < laylist.size()) && (0 == laylist.front()) )
+//      laylist.pop_front();
 }
 
 void laydata::TdtLibrary::dbHierAdd(const laydata::TdtDefaultCell* comp, const laydata::TdtDefaultCell* prnt)
@@ -716,7 +716,7 @@ void laydata::TdtLibDir::addThisUndefCell(TdtDefaultCell* rcell)
    undeflib->addThisUndefCell(rcell);
 }
 
-bool laydata::TdtLibDir::collectUsedLays(std::string cellname, bool recursive, WordList& laylist) const
+bool laydata::TdtLibDir::collectUsedLays(std::string cellname, bool recursive, LayerDefList& laylist) const
 {
    TdtCell* topcell = NULL;
    if (NULL != _TEDDB) topcell = static_cast<laydata::TdtCell*>(_TEDDB->checkCell(cellname));
@@ -737,7 +737,7 @@ bool laydata::TdtLibDir::collectUsedLays(std::string cellname, bool recursive, W
    }
 }
 
-void laydata::TdtLibDir::collectUsedLays( int libID, WordList& laylist) const
+void laydata::TdtLibDir::collectUsedLays( int libID, LayerDefList& laylist) const
 {
    assert(UNDEFCELL_LIB != libID);
    laydata::TdtLibrary* curlib = (TARGETDB_LIB == libID) ? _TEDDB : _libdirectory[libID]->second;
@@ -999,10 +999,10 @@ void laydata::TdtDesign::collectParentCells(std::string& cname, CellDefList& par
    }
 }
 
-laydata::TdtData* laydata::TdtDesign::addBox(unsigned la, TP* p1, TP* p2 )
+laydata::TdtData* laydata::TdtDesign::addBox(const LayerDef& laydef, TP* p1, TP* p2 )
 {
    DBbox old_overlap(_target.edit()->cellOverlap());
-   QuadTree *actlay = _target.edit()->secureLayer(la);
+   QuadTree *actlay = _target.edit()->secureLayer(laydef);
    setModified();
    TP np1((*p1) * _target.rARTM());
    TP np2((*p2) * _target.rARTM());
@@ -1012,9 +1012,9 @@ laydata::TdtData* laydata::TdtDesign::addBox(unsigned la, TP* p1, TP* p2 )
    return newshape;
 }
 
-laydata::TdtData* laydata::TdtDesign::putBox(unsigned la, TP* p1, TP* p2 )
+laydata::TdtData* laydata::TdtDesign::putBox(const LayerDef& laydef, TP* p1, TP* p2 )
 {
-   QTreeTmp *actlay = _target.edit()->secureUnsortedLayer(la);
+   QTreeTmp *actlay = _target.edit()->secureUnsortedLayer(laydef);
    setModified();
    TP np1((*p1) * _target.rARTM());
    TP np2((*p2) * _target.rARTM());
@@ -1052,7 +1052,7 @@ void laydata::TdtDesign::setModified()
    _lastUpdated = time(NULL);
 }
 
-laydata::TdtData* laydata::TdtDesign::addPoly(unsigned la, PointVector* pl)
+laydata::TdtData* laydata::TdtDesign::addPoly(const LayerDef& laydef, PointVector* pl)
 {
    laydata::TdtData *newshape = NULL;
    for(PointVector::iterator PL = pl->begin(); PL != pl->end(); PL++)
@@ -1065,7 +1065,7 @@ laydata::TdtData* laydata::TdtDesign::addPoly(unsigned la, PointVector* pl)
       if (!newShapes->empty())
       {
          DBbox old_overlap(_target.edit()->cellOverlap());
-         QuadTree *actlay = _target.edit()->secureLayer(la);
+         QuadTree *actlay = _target.edit()->secureLayer(laydef);
          setModified();
          for (laydata::ShapeList::const_iterator CS = newShapes->begin(); CS != newShapes->end(); CS++)
          {
@@ -1085,7 +1085,7 @@ laydata::TdtData* laydata::TdtDesign::addPoly(unsigned la, PointVector* pl)
    return newshape;
 }
 
-laydata::TdtData* laydata::TdtDesign::putPoly(unsigned la, PointVector* pl)
+laydata::TdtData* laydata::TdtDesign::putPoly(const LayerDef& laydef, PointVector* pl)
 {
    laydata::TdtData *newshape = NULL;
    for(PointVector::iterator PL = pl->begin(); PL != pl->end(); PL++)
@@ -1097,7 +1097,7 @@ laydata::TdtData* laydata::TdtDesign::putPoly(unsigned la, PointVector* pl)
       laydata::ShapeList* newShapes = check.replacements();
       if (!newShapes->empty())
       {
-         QTreeTmp *actlay = _target.edit()->secureUnsortedLayer(la);
+         QTreeTmp *actlay = _target.edit()->secureUnsortedLayer(laydef);
          setModified();
          for (laydata::ShapeList::const_iterator CS = newShapes->begin(); CS != newShapes->end(); CS++)
          {
@@ -1117,7 +1117,7 @@ laydata::TdtData* laydata::TdtDesign::putPoly(unsigned la, PointVector* pl)
    return newshape;
 }
 
-laydata::TdtData* laydata::TdtDesign::addWire(unsigned la, PointVector* pl, WireWidth w)
+laydata::TdtData* laydata::TdtDesign::addWire(const LayerDef& laydef, PointVector* pl, WireWidth w)
 {
    laydata::TdtData *newshape = NULL;
    for(PointVector::iterator PL = pl->begin(); PL != pl->end(); PL++)
@@ -1130,7 +1130,7 @@ laydata::TdtData* laydata::TdtDesign::addWire(unsigned la, PointVector* pl, Wire
       if (!newShapes->empty())
       {
          DBbox old_overlap(_target.edit()->cellOverlap());
-         QuadTree *actlay = _target.edit()->secureLayer(la);
+         QuadTree *actlay = _target.edit()->secureLayer(laydef);
          setModified();
          for (laydata::ShapeList::const_iterator CS = newShapes->begin(); CS != newShapes->end(); CS++)
          {
@@ -1151,7 +1151,7 @@ laydata::TdtData* laydata::TdtDesign::addWire(unsigned la, PointVector* pl, Wire
    return newshape;
 }
 
-laydata::TdtData* laydata::TdtDesign::putWire(unsigned la, PointVector* pl, WireWidth w)
+laydata::TdtData* laydata::TdtDesign::putWire(const LayerDef& laydef, PointVector* pl, WireWidth w)
 {
    laydata::TdtData *newshape = NULL;
    for(PointVector::iterator PL = pl->begin(); PL != pl->end(); PL++)
@@ -1163,7 +1163,7 @@ laydata::TdtData* laydata::TdtDesign::putWire(unsigned la, PointVector* pl, Wire
       laydata::ShapeList* newShapes = check.replacements();
       if (!newShapes->empty())
       {
-         QTreeTmp *actlay = _target.edit()->secureUnsortedLayer(la);
+         QTreeTmp *actlay = _target.edit()->secureUnsortedLayer(laydef);
          setModified();
          for (laydata::ShapeList::const_iterator CS = newShapes->begin(); CS != newShapes->end(); CS++)
          {
@@ -1183,10 +1183,10 @@ laydata::TdtData* laydata::TdtDesign::putWire(unsigned la, PointVector* pl, Wire
    return newshape;
 }
 
-laydata::TdtData* laydata::TdtDesign::addText(unsigned la, std::string& text, CTM& ori)
+laydata::TdtData* laydata::TdtDesign::addText(const LayerDef& laydef, std::string& text, CTM& ori)
 {
    DBbox old_overlap(_target.edit()->cellOverlap());
-   QuadTree *actlay = _target.edit()->secureLayer(la);
+   QuadTree *actlay = _target.edit()->secureLayer(laydef);
    setModified();
    ori *= _target.rARTM();
    laydata::TdtText *newshape = DEBUG_NEW TdtText(text,ori);
@@ -1196,9 +1196,9 @@ laydata::TdtData* laydata::TdtDesign::addText(unsigned la, std::string& text, CT
    return newshape;
 }
 
-laydata::TdtData* laydata::TdtDesign::putText(unsigned la, std::string& text, CTM& ori)
+laydata::TdtData* laydata::TdtDesign::putText(const LayerDef& laydef, std::string& text, CTM& ori)
 {
-   QTreeTmp *actlay = _target.edit()->secureUnsortedLayer(la);
+   QTreeTmp *actlay = _target.edit()->secureUnsortedLayer(laydef);
    setModified();
    ori *= _target.rARTM();
    laydata::TdtData* newshape = DEBUG_NEW TdtText(text,ori);
@@ -1260,12 +1260,12 @@ void laydata::TdtDesign::addList(AtticList* nlst, TdtCell* tCell)
    fixReferenceOverlap(old_overlap, targetCell);
 }
 
-void laydata::TdtDesign::addList(unsigned la, ShapeList& newShapes)
+void laydata::TdtDesign::addList(const LayerDef& laydef, ShapeList& newShapes)
 {
    if (!newShapes.empty())
    {
       DBbox old_overlap(_target.edit()->cellOverlap());
-      QuadTree *actlay = _target.edit()->secureLayer(la);
+      QuadTree *actlay = _target.edit()->secureLayer(laydef);
       setModified();
       for (laydata::ShapeList::const_iterator CS = newShapes.begin(); CS != newShapes.end(); CS++)
          actlay->add(*CS);
@@ -1287,7 +1287,7 @@ laydata::TdtCell* laydata::TdtDesign::openCell(std::string name)
    return NULL; // Active cell has not changed if name is not found
 }
 
-bool laydata::TdtDesign::editPush(const TP& pnt, const DWordSet& unselable)
+bool laydata::TdtDesign::editPush(const TP& pnt, const LayerDefSet& unselable)
 {
    if (_target.checkEdit()) {//
       CtmStack transtack;
@@ -1431,7 +1431,7 @@ void laydata::TdtDesign::mouseRotate()
    if (_tmpdata) _tmpdata->objRotate();
 }
 
-void laydata::TdtDesign::selectInBox(TP* p1, TP* p2, const DWordSet& unselable, word layselmask, bool pntsel)
+void laydata::TdtDesign::selectInBox(TP* p1, TP* p2, const LayerDefSet& unselable, word layselmask, bool pntsel)
 {
    if (_target.checkEdit())
    {
@@ -1441,7 +1441,7 @@ void laydata::TdtDesign::selectInBox(TP* p1, TP* p2, const DWordSet& unselable, 
    }
 }
 
-laydata::AtticList* laydata::TdtDesign::changeSelect(TP* p1, const DWordSet& unselable, bool select)
+laydata::AtticList* laydata::TdtDesign::changeSelect(TP* p1, const LayerDefSet& unselable, bool select)
 {
    if (_target.checkEdit()) {
       TP selp = (*p1) * _target.rARTM();
@@ -1451,7 +1451,7 @@ laydata::AtticList* laydata::TdtDesign::changeSelect(TP* p1, const DWordSet& uns
 }
 
 
-void laydata::TdtDesign::mouseHoover(TP& position, layprop::DrawProperties& drawprop, const DWordSet& unselable)
+void laydata::TdtDesign::mouseHoover(TP& position, layprop::DrawProperties& drawprop, const LayerDefSet& unselable)
 {
    if (_target.checkEdit())
    {
@@ -1464,7 +1464,7 @@ void laydata::TdtDesign::mouseHoover(TP& position, layprop::DrawProperties& draw
    }
 }
 
-void laydata::TdtDesign::unselectInBox(TP* p1, TP* p2, const DWordSet& unselable, bool pntsel) {
+void laydata::TdtDesign::unselectInBox(TP* p1, TP* p2, const LayerDefSet& unselable, bool pntsel) {
    if (_target.checkEdit()) {
       DBbox unselect_in((*p1)*_target.rARTM(), (*p2)*_target.rARTM());
       unselect_in.normalize();
@@ -1561,10 +1561,10 @@ void laydata::TdtDesign::deleteSelected(laydata::AtticList* fsel,
    fixReferenceOverlap(old_overlap);
 }
 
-void laydata::TdtDesign::destroyThis(TdtData* ds, unsigned la, laydata::TdtLibDir* libdir)
+void laydata::TdtDesign::destroyThis(TdtData* ds, const LayerDef& laydef, laydata::TdtLibDir* libdir)
 {
    DBbox old_overlap(_target.edit()->cellOverlap());
-   _target.edit()->destroyThis(libdir, ds,la);
+   _target.edit()->destroyThis(libdir, ds, laydef);
    fixReferenceOverlap(old_overlap);
 }
 
@@ -1586,11 +1586,10 @@ bool laydata::TdtDesign::groupSelected(std::string name, laydata::TdtLibDir* lib
    TdtCell* newcell = addCell(name, libdir);
    assert(newcell);
    //Get the selected shapes from the current cell and add them to the new cell
-   for(AtticList::const_iterator CL = TBgroup->begin();
-                                                   CL != TBgroup->end(); CL++)
+   for(AtticList::Iterator CL = TBgroup->begin();  CL != TBgroup->end(); CL++)
    {
-      ShapeList* lslct = CL->second;
-      QTreeTmp* wl = newcell->secureUnsortedLayer(CL->first);
+      ShapeList* lslct = *CL;
+      QTreeTmp* wl = newcell->secureUnsortedLayer(CL());
       // There is no point here to ensure that the layer definition exists.
       // We are just transferring shapes from one structure to another.
       // securelaydef( CL->first );
@@ -1598,7 +1597,7 @@ bool laydata::TdtDesign::groupSelected(std::string name, laydata::TdtLibDir* lib
                                                      CI != lslct->end(); CI++)
       {
          wl->put(*CI);
-         if (REF_LAY == CL->first) newcell->addChild(this,
+         if (REF_LAY_DEF == CL()) newcell->addChild(this,
                                     static_cast<TdtCellRef*>(*CI)->structure());
       }
       lslct->clear();
@@ -1611,7 +1610,7 @@ bool laydata::TdtDesign::groupSelected(std::string name, laydata::TdtLibDir* lib
                                     getCellNamePair(name),CTM(TP(0,0),1,0,false));
    //select the new cell
    ref->setStatus(sh_selected);
-   _target.edit()->selectThis(ref,REF_LAY);
+   _target.edit()->selectThis(ref,REF_LAY_DEF);
    //Just for the records. No shapes are moved to the Attic during this operation
    //Undo is possible simply by ungrouping the new cell
    return true;
@@ -1674,11 +1673,11 @@ laydata::AtticList* laydata::TdtDesign::changeRef(ShapeList* cells4u, std::strin
          ncrf = _target.edit()->addCellRef(this, strdefn, ori);
       assert(NULL != ncrf);
       ncrf->setStatus(sh_selected);
-      _target.edit()->selectThis(ncrf,0);
+      _target.edit()->selectThis(ncrf,REF_LAY_DEF);
       cellsUngr->push_back(ncrf);
    }
    laydata::AtticList* shapeUngr = DEBUG_NEW laydata::AtticList();
-   (*shapeUngr)[0] = cellsUngr;
+   shapeUngr->add(REF_LAY_DEF, cellsUngr);
    fixReferenceOverlap(old_overlap);
    return shapeUngr;
 }
@@ -1713,14 +1712,14 @@ void laydata::TdtDesign::tryUnselectAll() const {
       _target.edit()->unselectAll();
 }
 
-void laydata::TdtDesign::transferLayer(unsigned dst)
+void laydata::TdtDesign::transferLayer(const LayerDef& laydef)
 {
-   _target.edit()->transferLayer(dst);
+   _target.edit()->transferLayer(laydef);
 }
 
-void laydata::TdtDesign::transferLayer(laydata::SelectList* slst, unsigned dst)
+void laydata::TdtDesign::transferLayer(laydata::SelectList* slst, const LayerDef& laydef)
 {
-   _target.edit()->transferLayer(slst, dst);
+   _target.edit()->transferLayer(slst, laydef);
 }
 
 laydata::TdtDesign::~TdtDesign()
@@ -1794,10 +1793,10 @@ WordList laydata::DrcLibrary::findSelected(const std::string &cell, TP* p1)
          selp = (*p1)*CTM().Reversed(); //Take identity matrix
          //??? Add here Error List construction
          shapes = theCell->findSelected(selp);
-         for(laydata::AtticList::const_iterator it = shapes->begin(); it != shapes->end(); ++it)
+         for(laydata::AtticList::Iterator it = shapes->begin(); it != shapes->end(); ++it)
          {
             word error;
-            shapeList = (*it).second;
+            shapeList = *it;
             for (laydata::ShapeList::const_iterator it2 = shapeList->begin(); it2 != shapeList->end(); ++it2)
             {
                shape = dynamic_cast<TdtData*> (*it2);
@@ -1810,9 +1809,9 @@ WordList laydata::DrcLibrary::findSelected(const std::string &cell, TP* p1)
       errorList.unique();
       if(shapes != NULL)
       {
-         for(laydata::AtticList::iterator it = shapes->begin(); it != shapes->end(); ++it)
+         for(laydata::AtticList::Iterator it = shapes->begin(); it != shapes->end(); ++it)
          {
-            shapeList = (*it).second;
+            shapeList = *it;
             delete shapeList;
          }
 

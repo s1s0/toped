@@ -30,6 +30,57 @@
 #include <sstream>
 #include <algorithm>
 #include "ttt.h"
+
+
+//-----------------------------------------------------------------------------
+// class LayerDef
+//-----------------------------------------------------------------------------
+bool LayerDef::operator==(const LayerDef& cmp) const
+{
+   return ((_num == cmp._num) && (_typ == cmp._typ));
+}
+
+bool LayerDef::operator!=(const LayerDef& cmp) const
+{
+   return ((_num != cmp._num) || (_typ != cmp._typ));
+}
+
+const LayerDef LayerDef::operator++(int)/*Postfix*/
+{
+   LayerDef current(*this); _num++; return current;
+}
+
+bool LayerDef::operator< (const LayerDef& cmp) const
+{
+   return (_num == cmp._num) ? (_typ < cmp._typ) : (_num < cmp._num);
+}
+
+void LayerDef::toGds(word& lay, word& typ) const
+{
+   assert(MAX_WORD_VALUE >= _num);
+   assert(MAX_WORD_VALUE >= _typ);
+   lay = (word)_num;
+   typ = (word)_typ;
+}
+
+std::string LayerDef::toQList() const
+{
+   std::ostringstream result;
+   result << _num << ";" << _typ;
+   return result.str();
+}
+
+bool LayerDef::editable() const
+{
+   return (!(_num > LAST_EDITABLE_LAYNUM));
+}
+
+std::ostream& operator <<(std::ostream& os, const LayerDef& obj)
+{
+   os << "{ " << obj.num() << ", " << obj.typ() << "}";
+   return os;
+}
+
 //-----------------------------------------------------------------------------
 // class TP
 //-----------------------------------------------------------------------------

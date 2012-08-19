@@ -29,8 +29,7 @@
 #define TEDSTD_H_INCLUDED
 
 #include <string>
-#include "ttt.h"
-#include "outbox.h"
+#include "tedbac.h"
 
 //==============================================================================
 // Toped DaTa (TDT) file markers
@@ -55,9 +54,10 @@ const byte tedf_REFS            = 0x8C;
 const byte tedf_REFSEND         = 0x8D;
 const byte tedf_GRC             = 0x8E;
 const byte tedf_GRCEND          = 0x8F;
+const byte tedf_DATATYPE        = 0x90;
 //
 const byte TED_CUR_REVISION     = 0x00;
-const byte TED_CUR_SUBREVISION  = 0x0A;
+const byte TED_CUR_SUBREVISION  = 0x0B;
 
 //==============================================================================
 class PSegment {
@@ -109,7 +109,6 @@ namespace laydata {
       shp_exception  = 0x1000  // exception encountered during the shape checks
    } shape_status;
 
-   class TdtData;
    class EditObject;
    class TdtCell;
    class TdtDefaultCell;
@@ -117,13 +116,8 @@ namespace laydata {
    class TdtDesign;
    class TdtLibrary;
    class TdtLibDir;
-   template <typename DataT>   class QTStoreTmpl;
-   typedef QTStoreTmpl<TdtData>                     QTreeTmp;
-   typedef  std::pair<TdtData*, SGBitSet>           SelectDataPair;
-   typedef  std::list<SelectDataPair>               DataList;
-   typedef  std::map<unsigned, DataList*>           SelectList;
-   typedef  std::list<TdtData*>                     ShapeList;
-   typedef  std::map<unsigned,ShapeList*>           AtticList;
+   typedef  LayerContainer<DataList*>               SelectList;
+   typedef  LayerContainer<ShapeList*>              AtticList;
    typedef  std::map<std::string, TdtDefaultCell*>  CellMap;
    typedef  TdtDefaultCell*                         CellDefin;
    typedef  std::deque<const TdtCellRef*>           CellRefStack;
@@ -317,6 +311,7 @@ class InputTdtFile : public InputDBFile {
       void                 cleanup();
       byte                 getByte();
       word                 getWord();
+      LayerDef             getLayer();
       int4b                get4b();
       WireWidth            get4ub();
       real                 getReal();
@@ -351,6 +346,7 @@ public:
    void                 putReal(const real);
    void                 putByte(const byte ch) {fputc(ch, _file);};
    void                 putWord(const word);
+   void                 putLayer(const LayerDef&);
    void                 put4b(const int4b);
    void                 put4ub(const WireWidth);
    void                 putTP(const TP*);
@@ -377,7 +373,7 @@ class DbExportFile {
       virtual void            definitionFinish() = 0;
       virtual void            libraryStart(std::string, TpdTime&, real, real) = 0;
       virtual void            libraryFinish() = 0;
-      virtual bool            layerSpecification(unsigned) = 0;
+      virtual bool            layerSpecification(const LayerDef&) = 0;
       virtual void            box(const int4b* const) = 0;
       virtual void            polygon(const int4b* const, unsigned) = 0;
       virtual void            wire(const int4b* const, unsigned, unsigned) = 0;
@@ -459,17 +455,17 @@ class ForeignCell {
 // ExtLayers is used for GDS/OASIS, NameList is used for CIF
 class LayerCrossMap {
    public:
-                              LayerCrossMap() : _tdtLayNumber(0), _tmpLayer(NULL) {}
+                              LayerCrossMap() : _tdtLayNumber(TLL_LAY_DEF), _tmpLayer(NULL) {}
       virtual                ~LayerCrossMap()  {}
       laydata::QTreeTmp*      getTmpLayer()     {return _tmpLayer;}
-      unsigned                tdtLayNumber()    {return _tdtLayNumber;}
+      LayerDef                tdtLayNumber()    {return _tdtLayNumber;}
       virtual bool            mapTdtLay(laydata::TdtCell*, word, word)
                                                          {assert(false); return false;}
       virtual bool            mapTdtLay(laydata::TdtCell*,const std::string&)
                                                          {assert(false); return false;}
       virtual std::string     printSrcLayer() const      {assert(false); return std::string("");}
    protected:
-      unsigned                _tdtLayNumber  ; //! Current layer number
+      LayerDef                _tdtLayNumber  ; //! Current layer number
       laydata::QTreeTmp*      _tmpLayer      ; //! Current target layer
 };
 
@@ -488,12 +484,12 @@ class ENumberLayerCM : public LayerCrossMap {
 
 class ENameLayerCM : public LayerCrossMap {
    public:
-                              ENameLayerCM(const SIMap& lmap) :
+                              ENameLayerCM(const ImpLayMap& lmap) :
                                  _layMap(lmap), _extLayName("") {}
       virtual bool            mapTdtLay(laydata::TdtCell*, const std::string&);
       virtual std::string     printSrcLayer() const;
    private:
-      const SIMap&            _layMap;
+      const ImpLayMap&         _layMap;
       std::string             _extLayName;
 };
 
@@ -501,7 +497,7 @@ class ENameLayerCM : public LayerCrossMap {
 class ImportDB {
    public:
                               ImportDB(ForeignDbFile*, laydata::TdtLibDir*, const LayerMapExt&);
-                              ImportDB(ForeignDbFile*, laydata::TdtLibDir*, const SIMap&, real);
+                              ImportDB(ForeignDbFile*, laydata::TdtLibDir*, const ImpLayMap&, real);
                              ~ImportDB();
       void                    run(const NameList&, bool, bool reopenFile = true);
       bool                    mapTdtLayer(std::string);

@@ -51,19 +51,29 @@ extern Calbr::CalbrFile*         DRCData;
 //-----------------------------------------------------------------------------
 // class DataCenter
 //-----------------------------------------------------------------------------
-DataCenter::DataCenter(const std::string& localDir, const std::string& globalDir)
+DataCenter::DataCenter(const std::string& localDir, const std::string& globalDir) :
+   _curcmdlay      ( ERR_LAY_DEF                            ),
+   _drawruler      ( false                                  ),
+   _localDir       ( localDir                               ),
+   _globalDir      ( globalDir                              ),
+   _TEDLIB         (                                        ),
+   _DRCDB          ( NULL                                   ),
+   _GDSDB          ( NULL                                   ),
+   _CIFDB          ( NULL                                   ),
+   _OASDB          ( NULL                                   ),
+   _DBLock         (                                        ),
+   _DRCLock        (                                        ),
+   _GDSLock        (                                        ),
+   _CIFLock        (                                        ),
+   _OASLock        (                                        ),
+   _bpSync         ( NULL                                   ),
+   _tdtActMxState  ( dbmxs_unlocked                         ),
+   _tdtReqMxState  ( dbmxs_unlocked                         ),
+   _cRenderer      ( NULL                                   ),
+   _objectRecovery ( laydata::ValidRecovery::getInstance()  )
+
 {
-   _localDir = localDir;
-   _globalDir = globalDir;
-   _GDSDB = NULL; _CIFDB = NULL;_OASDB = NULL; _DRCDB = NULL;
-   _bpSync = NULL;
-   // initializing the static cell hierarchy tree
    laydata::TdtLibrary::initHierTreePtr();
-   _drawruler = false;
-   _tdtActMxState = dbmxs_unlocked;
-   _tdtReqMxState = dbmxs_unlocked;
-   _cRenderer = NULL;
-   _objectRecovery = laydata::ValidRecovery::getInstance();
 }
 
 DataCenter::~DataCenter()
@@ -745,7 +755,7 @@ void DataCenter::mouseHoover(TP& position)
 {
    if (_TEDLIB())
    {
-      DWordSet unselectable = PROPC->allUnselectable();
+      LayerDefSet unselectable = PROPC->allUnselectable();
       layprop::DrawProperties* drawProp;
       if (PROPC->lockDrawProp(drawProp))
       {
@@ -1015,16 +1025,16 @@ void DataCenter::motionDraw(const CTM& layCTM, TP base, TP newp)
 
 LayerMapCif* DataCenter::secureCifLayMap(const layprop::DrawProperties* drawProp, bool import)
 {
-   const USMap* savedMap = PROPC->getCifLayMap();
+   const ExpLayMap* savedMap = PROPC->getCifLayMap();
    if (NULL != savedMap) return DEBUG_NEW LayerMapCif(*savedMap);
-   USMap theMap;
+   ExpLayMap theMap;
    if (import)
    {// Generate the default CIF layer map for import
       NameList cifLayers;
       cifGetLayers(cifLayers);
-      word laynum = 1;
+      LayerDef laydef(TLL_LAY_DEF);
       for ( NameList::const_iterator CCL = cifLayers.begin(); CCL != cifLayers.end(); CCL++ )
-         theMap[laynum] = *CCL;
+         theMap[laydef++] = *CCL;
    }
    else
    {// Generate the default CIF layer map for export
@@ -1033,9 +1043,9 @@ LayerMapCif* DataCenter::secureCifLayMap(const layprop::DrawProperties* drawProp
       for ( NameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
       {
          std::ostringstream ciflayname;
-         unsigned layno = drawProp->getLayerNo( *CDL );
-         ciflayname << "L" << layno;
-         theMap[layno] = ciflayname.str();
+         LayerDef laydef = drawProp->getLayerNo( *CDL );
+         ciflayname << "L" << laydef;
+         theMap[laydef] = ciflayname.str();
       }
    }
    return DEBUG_NEW LayerMapCif(theMap);
@@ -1043,25 +1053,25 @@ LayerMapCif* DataCenter::secureCifLayMap(const layprop::DrawProperties* drawProp
 
 LayerMapExt* DataCenter::secureGdsLayMap(const layprop::DrawProperties* drawProp, bool import)
 {
-   const USMap* savedMap = PROPC->getGdsLayMap();
+   const ExpLayMap* savedMap = PROPC->getGdsLayMap();
    LayerMapExt* theGdsMap;
    if (NULL == savedMap)
    {
-      USMap theMap;
+      ExpLayMap theMap; // std::map<LayerDef, std::string>
       if (import)
       { // generate default import GDS layer map
-         ExtLayers* gdsLayers = DEBUG_NEW ExtLayers();
+         ExtLayers* gdsLayers = DEBUG_NEW ExtLayers(); //std::map<word, WordSet>
          gdsGetLayers(*gdsLayers);
          for ( ExtLayers::const_iterator CGL = gdsLayers->begin(); CGL != gdsLayers->end(); CGL++ )
          {
-            std::ostringstream dtypestr;
-            dtypestr << CGL->first << ";";
+            std::ostringstream laynumstr;
+            laynumstr << CGL->first << ";";
             for ( WordSet::const_iterator CDT = CGL->second.begin(); CDT != CGL->second.end(); CDT++ )
             {
-               if ( CDT != CGL->second.begin() ) dtypestr << ", ";
-               dtypestr << *CDT;
+               std::ostringstream dtypestr;
+               dtypestr << laynumstr.str() << *CDT;
+               theMap[LayerDef(CGL->first,*CDT)] = dtypestr.str();
             }
-            theMap[CGL->first] = dtypestr.str();
          }
          theGdsMap = DEBUG_NEW LayerMapExt(theMap, gdsLayers);
       }
@@ -1071,9 +1081,8 @@ LayerMapExt* DataCenter::secureGdsLayMap(const layprop::DrawProperties* drawProp
          drawProp->allLayers(tdtLayers);
          for ( NameList::const_iterator CDL = tdtLayers.begin(); CDL != tdtLayers.end(); CDL++ )
          {
-            std::ostringstream dtypestr;
-            dtypestr << drawProp->getLayerNo( *CDL )<< "; 0";
-            theMap[drawProp->getLayerNo( *CDL )] = dtypestr.str();
+            LayerDef laydef(drawProp->getLayerNo( *CDL ));
+            theMap[laydef] = laydef.toQList();
          }
          theGdsMap = DEBUG_NEW LayerMapExt(theMap, NULL);
       }
