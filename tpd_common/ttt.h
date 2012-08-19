@@ -37,7 +37,7 @@
 #include <assert.h>
 //#pragma GCC diagnostic warning "-Wconversion"
 //=============================================================================
-// General type declations (compatability)
+// General type declarations (compatibility)
 //=============================================================================
 typedef unsigned char            byte     ; // 1 byte
 typedef unsigned short           word     ; // 2 bytes
