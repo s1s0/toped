@@ -110,6 +110,34 @@ namespace tui
    };
 
    ///////////////////////////////////////////////////////////////////////////////
+   /// Class LayerListPanel
+   ///////////////////////////////////////////////////////////////////////////////
+   class LayerListPanel : public wxListView
+   {
+      public:
+         struct LayerLine {
+                           LayerLine() : _laydef(TLL_LAY_DEF), _name("") {}
+                           LayerLine(LayerDef laydef, std::string name) :
+                              _laydef(laydef), _name(name) {}
+            LayerDef       _laydef;
+            std::string    _name;
+         };
+                           LayerListPanel( wxWindow *parent, wxWindowID winid, long style) :
+                              wxListView(parent, winid, wxDefaultPosition, wxDefaultSize, style) {}
+         unsigned long     getItemLayerNum(TmpWxIntPtr item1);
+         unsigned long     getItemLayerTyp(TmpWxIntPtr item1);
+         std::string       getItemLayerName(TmpWxIntPtr item1);
+         void              prepareLayers(layprop::DrawProperties*);
+         void              updateLayerList(const LayerDef&, const wxString&, int&, bool);
+         bool              checkExist(const LayerDef&);
+         bool              empty();
+      private:
+         typedef std::map<TmpWxIntPtr,LayerLine> LayerItems;
+         void              clearAll();
+         LayerItems        _layerItems;
+   };
+
+   ///////////////////////////////////////////////////////////////////////////////
    /// Class TechEditorDialog
    ///////////////////////////////////////////////////////////////////////////////
    class TechEditorDialog : public wxDialog
@@ -128,31 +156,8 @@ namespace tui
          void                    OnApply(wxCommandEvent&);
          void                    OnLayListSort(wxListEvent&);
          void                    OnRemotePropUpdate(wxCommandEvent&);
-         class LayerListPanel : public wxListView
-         {
-            public:
-               struct LayerLine {
-                                 LayerLine() : _laydef(TLL_LAY_DEF), _name("") {}
-                                 LayerLine(LayerDef laydef, std::string name) :
-                                    _laydef(laydef), _name(name) {}
-                  LayerDef       _laydef;
-                  std::string    _name;
-               };
-                                 LayerListPanel( wxWindow *parent, wxWindowID winid, long style) :
-                                    wxListView(parent, winid, wxDefaultPosition, wxDefaultSize, style) {}
-               unsigned long     getItemLayerNum(TmpWxIntPtr item1);
-               unsigned long     getItemLayerTyp(TmpWxIntPtr item1);
-               std::string       getItemLayerName(TmpWxIntPtr item1);
-               void              addItemLayer(unsigned long, const LayerDef& laydef, std::string);
-               void              clearAll();
-            private:
-               typedef std::map<TmpWxIntPtr,LayerLine> LayerItems;
-               LayerItems        _layerItems;
-         };
       private:
-         void                    prepareLayers(layprop::DrawProperties*);
          void                    updateDialog();
-         void                    updateLayerList();
          void                    checkNewLayer();
          LayerListPanel*         _layerList;
          ColorListComboBox*      _layerColors;
@@ -166,8 +171,6 @@ namespace tui
          wxString                _layerDtypeString;
          wxString                _layerNameString;
          int                     _curSelect;//!Data related to current selection
-         LayerDefList            _allLayNums;
-
          DECLARE_EVENT_TABLE()
    };
 
