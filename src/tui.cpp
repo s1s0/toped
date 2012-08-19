@@ -506,7 +506,7 @@ tui::GetCIFimport::GetCIFimport(wxFrame *parent, wxWindowID id, const wxString &
    SIMap inlays;
    if (DATC->cifGetLayers(cifLayers))
    {
-      word laynum = 1;
+      LayerNumber laynum = 1;
       for (NameList::iterator NLI = cifLayers.begin(); NLI != cifLayers.end(); NLI++)
       {
          inlays[*NLI] = laynum++;
@@ -558,7 +558,7 @@ tui::GetCIFexport::GetCIFexport(wxFrame *parent, wxWindowID id, const wxString &
    _saveMap = DEBUG_NEW wxCheckBox(this, -1, wxT("Save Layer Map"));
    _slang = DEBUG_NEW wxCheckBox(this, -1, wxT("Verbose CIF slang"));
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
-   WordList ull;
+   LayerDefList ull;
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
    {
@@ -717,7 +717,7 @@ tui::GetGDSexport::GetGDSexport(wxFrame *parent, wxWindowID id, const wxString &
    _recursive->SetValue(true);
    _saveMap = DEBUG_NEW wxCheckBox(this, -1, wxT("Save Layer Map"));
    _nameList = DEBUG_NEW wxListBox(this, -1, wxDefaultPosition, wxSize(-1,300));
-   WordList ull;
+   LayerDefList ull;
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
    {
@@ -1840,6 +1840,7 @@ void tui::DefineLineStyle::OnStyleApply(wxCommandEvent& event)
    }
    FindWindow(IDLS_BTNAPPLY)->Enable(false);
 }
+
 //==========================================================================
 tui::NameCboxRecords::NameCboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
             const SIMap& inlays, wxArrayString& all_strings, int row_height, const layprop::DrawProperties* drawProp)
@@ -1850,9 +1851,9 @@ tui::NameCboxRecords::NameCboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
    for (SIMap::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
    {
       wxString cifln  = wxString(CNM->first.c_str(), wxConvUTF8);
-      word tdtLay;
-      if (!_cifMap->getTdtLay(tdtLay, CNM->first)) tdtLay = CNM->second;
-      wxString wxics  = wxString(_drawProp->getLayerName(tdtLay).c_str(), wxConvUTF8);
+      LayerDef tdtLayDef(ERR_LAY_DEF);
+      if (!_cifMap->getTdtLay(tdtLayDef, CNM->first)) tdtLayDef = LayerDef(CNM->second, DEFAULT_DTYPE);
+      wxString wxics  = wxString(_drawProp->getLayerName(tdtLayDef).c_str(), wxConvUTF8);
 
       wxCheckBox* dwciflay  = DEBUG_NEW wxCheckBox( this, wxID_ANY, cifln,
          wxPoint(  5,(row_height+5)*rowno + 5), wxSize(100,row_height) );
@@ -1864,9 +1865,9 @@ tui::NameCboxRecords::NameCboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
    }
 }
 
-SIMap* tui::NameCboxRecords::getTheMap(layprop::DrawProperties* drawProp)
+ImpLayMap* tui::NameCboxRecords::getTheMap(layprop::DrawProperties* drawProp)
 {
-   SIMap* cif_lay_map = DEBUG_NEW SIMap();
+   ImpLayMap* cif_lay_map = DEBUG_NEW ImpLayMap();
    for (AllRecords::const_iterator CNM = _allRecords.begin(); CNM != _allRecords.end(); CNM++ )
    {
       if (!CNM->_ciflay->GetValue()) continue;
@@ -1874,22 +1875,22 @@ SIMap* tui::NameCboxRecords::getTheMap(layprop::DrawProperties* drawProp)
       // the user didn't put a tdt correspondence for this CIF layer - so we'll try to use the CIF name
       if ("" == layname)
          layname = std::string(CNM->_ciflay->GetLabel().mb_str(wxConvUTF8));
-      unsigned layno = _drawProp->getLayerNo(layname);
-      if (ERR_LAY == layno)
+      LayerDef laydef = _drawProp->getLayerNo(layname);
+      if (ERR_LAY_DEF == laydef)
       {
 //         layno = drawProp->addLayer(layname);
-         layno = drawProp->addLayer(layname);
-         TpdPost::layer_add(layname, layno);
+         laydef = drawProp->addLayer(layname);
+         TpdPost::layer_add(layname, laydef);
       }
-      (*cif_lay_map)[std::string(CNM->_ciflay->GetLabel().mb_str(wxConvUTF8))] = layno;
+      cif_lay_map->insert(std::pair<std::string,LayerDef>(std::string(CNM->_ciflay->GetLabel().mb_str(wxConvUTF8)), laydef));
    }
    return cif_lay_map;
 }
 
-USMap* tui::NameCboxRecords::getTheFullMap(layprop::DrawProperties* drawProp)
+ExpLayMap* tui::NameCboxRecords::getTheFullMap(layprop::DrawProperties* drawProp)
 {
-   SIMap* umap = getTheMap(drawProp);
-   USMap* nmap = _cifMap->updateMap(umap);
+   ImpLayMap* umap = getTheMap(drawProp);
+   ExpLayMap* nmap = _cifMap->updateMap(umap);
    delete umap;
    return nmap;
 }
@@ -1909,8 +1910,8 @@ tui::NameCbox3Records::NameCbox3Records( wxWindow *parent, wxPoint pnt, wxSize s
       {
          wxString sGdsDtype;
          sGdsDtype << *CTP;
-         word wTdtLay;
-         if (!_gdsLayMap->getTdtLay( wTdtLay, CNM->first, *CTP)) wTdtLay = CNM->first;
+         LayerDef wTdtLay(ERR_LAY_DEF);
+         if (!_gdsLayMap->getTdtLay( wTdtLay, CNM->first, *CTP)) wTdtLay = LayerDef(CNM->first, *CTP);
          wxString sTdtLay(_drawProp->getLayerName(wTdtLay).c_str(), wxConvUTF8);
 
          wxCheckBox* dwgdslay  = DEBUG_NEW wxCheckBox( this, wxID_ANY, sGdsLay,
@@ -1926,37 +1927,37 @@ tui::NameCbox3Records::NameCbox3Records( wxWindow *parent, wxPoint pnt, wxSize s
    }
 }
 
-USMap* tui::NameCbox3Records::getTheMap()
+ExpLayMap* tui::NameCbox3Records::getTheMap()
 {
-   USMap* gds_lay_map = DEBUG_NEW USMap();
+   ExpLayMap* gds_lay_map = DEBUG_NEW ExpLayMap();
    for (AllRecords::const_iterator CNM = _allRecords.begin(); CNM != _allRecords.end(); CNM++ )
    {
       if (!CNM->_gdslay->GetValue()) continue;
-      unsigned layno;
+      LayerDef laydef(ERR_LAY_DEF);
       std::string layname = std::string(CNM->_tdtlay->GetValue().mb_str(wxConvUTF8));
       if ("" == layname)
       {
          long lint;
          CNM->_gdslay->GetLabel().ToLong(&lint);
-         layno = lint;
+         laydef = LayerDef((LayerNumber)lint, DEFAULT_DTYPE);
       }
-      else layno = _drawProp->getLayerNo(layname);
+      else laydef = _drawProp->getLayerNo(layname);
       std::ostringstream gdslaytype;
-      if (gds_lay_map->end() != gds_lay_map->find(layno))
-         gdslaytype << (*gds_lay_map)[layno] << ","
+      if (gds_lay_map->end() != gds_lay_map->find(laydef))
+         gdslaytype << (*gds_lay_map)[laydef] << ","
                     <<  std::string(CNM->_gdstype->GetLabel().mb_str(wxConvUTF8));
       else
          gdslaytype <<  std::string(CNM->_gdslay->GetLabel().mb_str(wxConvUTF8)) << ";"
                     <<  std::string(CNM->_gdstype->GetLabel().mb_str(wxConvUTF8))   ;
-      (*gds_lay_map)[layno] = gdslaytype.str();
+      (*gds_lay_map)[laydef] = gdslaytype.str();
    }
    return gds_lay_map;
 }
 
-USMap* tui::NameCbox3Records::getTheFullMap()
+ExpLayMap* tui::NameCbox3Records::getTheFullMap()
 {
-   USMap* umap = getTheMap();
-   USMap* nmap = _gdsLayMap->updateMap(umap, true);
+   ExpLayMap* umap = getTheMap();
+   ExpLayMap* nmap = _gdsLayMap->updateMap(umap, true);
    delete umap;
    return nmap;
 }
@@ -2050,21 +2051,20 @@ void tui::NameCbox3List::OnSize( wxSizeEvent &WXUNUSED(event) )
 
 //==========================================================================
 tui::NameEboxRecords::NameEboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
-            const WordList& inlays, wxArrayString& all_strings, int row_height, const layprop::DrawProperties* drawProp)
+            const LayerDefList& inlays, wxArrayString& all_strings, int row_height, const layprop::DrawProperties* drawProp)
             : wxPanel(parent, wxID_ANY, pnt, sz), _drawProp(drawProp)
 {
    word rowno = 0;
    _cifMap = DATC->secureCifLayMap(_drawProp, false);
-   for (WordList::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
+   for (LayerDefList::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
    {
-      word layno = *CNM;
       wxString tpdlay  = wxString(_drawProp->getLayerName(*CNM).c_str(), wxConvUTF8);
       wxString ciflay;
       std::string cifName;
-      if ( _cifMap->getCifLay(cifName, layno) )
+      if ( _cifMap->getCifLay(cifName, *CNM) )
          ciflay = wxString(cifName.c_str(), wxConvUTF8);
       else
-         ciflay << wxT("L") << layno;
+         ciflay << wxT("L") << CNM->num();
       if (4 < ciflay.Length()) ciflay.Clear(); // Should not be longer than 4
       wxCheckBox* dwtpdlays  = DEBUG_NEW wxCheckBox( this, wxID_ANY, tpdlay,
             wxPoint(  5,(row_height+5)*rowno + 5), wxSize(100,row_height) );
@@ -2076,25 +2076,25 @@ tui::NameEboxRecords::NameEboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
    }
 }
 
-USMap* tui::NameEboxRecords::getTheMap()
+ExpLayMap* tui::NameEboxRecords::getTheMap()
 {
-   USMap* cif_lay_map = DEBUG_NEW USMap();
+   ExpLayMap* cif_lay_map = DEBUG_NEW ExpLayMap();
    for (AllRecords::const_iterator CNM = _allRecords.begin(); CNM != _allRecords.end(); CNM++ )
    {
       if (!CNM->_tdtlay->GetValue()) continue;
       std::string layname = std::string(CNM->_tdtlay->GetLabel().mb_str(wxConvUTF8));
       assert("" != layname);
-      unsigned layno = _drawProp->getLayerNo(layname);
-      assert(layno);
-      (*cif_lay_map)[layno] = std::string(CNM->_ciflay->GetValue().mb_str(wxConvUTF8));
+      LayerDef laydef = _drawProp->getLayerNo(layname);
+      assert(ERR_LAY_DEF != laydef);
+      (*cif_lay_map)[laydef] = std::string(CNM->_ciflay->GetValue().mb_str(wxConvUTF8));
    }
    return cif_lay_map;
 }
 
-USMap* tui::NameEboxRecords::getTheFullMap()
+ExpLayMap* tui::NameEboxRecords::getTheFullMap()
 {
-   USMap* umap = getTheMap();
-   USMap* nmap = _cifMap->updateMap(umap);
+   ExpLayMap* umap = getTheMap();
+   ExpLayMap* nmap = _cifMap->updateMap(umap);
    delete umap;
    return nmap;
 }
@@ -2104,7 +2104,7 @@ BEGIN_EVENT_TABLE(tui::NameEboxList, wxScrolledWindow)
       EVT_SIZE( tui::NameEboxList::OnSize )
 END_EVENT_TABLE()
 
-tui::NameEboxList::NameEboxList(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz, const WordList& inlays, const layprop::DrawProperties* drawProp) :
+tui::NameEboxList::NameEboxList(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz, const LayerDefList& inlays, const layprop::DrawProperties* drawProp) :
       wxScrolledWindow(parent, id, pnt, sz, wxBORDER_RAISED)
 {
    // collect all defined layers
@@ -2144,19 +2144,20 @@ void tui::NameEboxList::OnSize( wxSizeEvent &WXUNUSED(event) )
 
 //==========================================================================
 tui::NameEbox3Records::NameEbox3Records( wxWindow *parent, wxPoint pnt, wxSize sz,
-            const WordList& inlays, wxArrayString& all_strings, int row_height, const layprop::DrawProperties* drawProp)
+            const LayerDefList& inlays, wxArrayString& all_strings, int row_height, const layprop::DrawProperties* drawProp)
             : wxPanel(parent, wxID_ANY, pnt, sz), _drawProp(drawProp)
 {
    _gdsLayMap= DATC->secureGdsLayMap(_drawProp, false);
    word rowno = 0;
-   for (WordList::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
+   for (LayerDefList::const_iterator CNM = inlays.begin(); CNM != inlays.end(); CNM++)
    {
       word wGdsLay, wGdsType;
-      if (!_gdsLayMap->getExtLayType(wGdsLay, wGdsType, *CNM))
-      {
-         wGdsLay  = *CNM;
-         wGdsType = 0;
-      }
+      _gdsLayMap->getExtLayType(wGdsLay, wGdsType, *CNM);
+//      if (!_gdsLayMap->getExtLayType(wGdsLay, wGdsType, *CNM))
+//      {
+//         wGdsLay  = db2TellLayer(CNM->num());
+//         wGdsType = CNM->typ();
+//      }
       wxString tpdlay  = wxString(_drawProp->getLayerName(*CNM).c_str(), wxConvUTF8);
       wxString gdslay, gdstype;
       gdslay << wGdsLay;
@@ -2174,28 +2175,28 @@ tui::NameEbox3Records::NameEbox3Records( wxWindow *parent, wxPoint pnt, wxSize s
    }
 }
 
-USMap* tui::NameEbox3Records::getTheMap()
+ExpLayMap* tui::NameEbox3Records::getTheMap()
 {
-   USMap* gds_lay_map = DEBUG_NEW USMap();
+   ExpLayMap* gds_lay_map = DEBUG_NEW ExpLayMap();
    for (AllRecords::const_iterator CNM = _allRecords.begin(); CNM != _allRecords.end(); CNM++ )
    {
       if (!CNM->_tdtlay->GetValue()) continue;
       std::string layname = std::string(CNM->_tdtlay->GetLabel().mb_str(wxConvUTF8));
       assert("" != layname);
-      unsigned layno = _drawProp->getLayerNo(layname);
-      assert(layno);
+      LayerDef laydef = _drawProp->getLayerNo(layname);
+      assert(ERR_LAY_DEF != laydef);
       std::ostringstream gdslaytype;
       gdslaytype <<  std::string(CNM->_gdslay->GetValue().mb_str(wxConvUTF8)) << ";"
                  <<  std::string(CNM->_gdstype->GetValue().mb_str(wxConvUTF8))   ;
-      (*gds_lay_map)[layno] = gdslaytype.str();
+      (*gds_lay_map)[laydef] = gdslaytype.str();
    }
    return gds_lay_map;
 }
 
-USMap* tui::NameEbox3Records::getTheFullMap()
+ExpLayMap* tui::NameEbox3Records::getTheFullMap()
 {
-   USMap* umap = getTheMap();
-   USMap* nmap = _gdsLayMap->updateMap(umap, false);
+   ExpLayMap* umap = getTheMap();
+   ExpLayMap* nmap = _gdsLayMap->updateMap(umap, false);
    delete umap;
    return nmap;
 }
@@ -2205,7 +2206,7 @@ BEGIN_EVENT_TABLE(tui::nameEbox3List, wxScrolledWindow)
       EVT_SIZE( tui::nameEbox3List::OnSize )
 END_EVENT_TABLE()
 
-tui::nameEbox3List::nameEbox3List(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz, const WordList& inlays, const layprop::DrawProperties* drawProp) :
+tui::nameEbox3List::nameEbox3List(wxWindow* parent, wxWindowID id, wxPoint pnt, wxSize sz, const LayerDefList& inlays, const layprop::DrawProperties* drawProp) :
       wxScrolledWindow(parent, id, pnt, sz, wxBORDER_RAISED)
 {
    // collect all defined layers
@@ -2420,7 +2421,7 @@ tui::TopedPropertySheets::RenderingPSheet::RenderingPSheet(wxWindow* parent) : w
       // Image details (Quality)
       wxBoxSizer *imgSizer  = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Image detail (square pixels)"));
          _imageDetail = DEBUG_NEW sgSliderControl(this, PDIMG_DETAIL, 1, 100, 40);
-      imgSizer->Add(_imageDetail, 0, wxALL | wxALIGN_CENTER | wxEXPAND);
+      imgSizer->Add(_imageDetail, 0, wxUP | wxALIGN_CENTER | wxEXPAND,10);
 
       // Cell related rendering properties
       wxBoxSizer *topCellSizer = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Cells"));
@@ -2428,20 +2429,20 @@ tui::TopedPropertySheets::RenderingPSheet::RenderingPSheet(wxWindow* parent) : w
          wxBoxSizer *cellSizer = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
             wxCheckBox* cellOvlBox = DEBUG_NEW wxCheckBox(this, PDSET_CELLBOX , wxT("Overlapping box"));
             wxCheckBox* cellMarks  = DEBUG_NEW wxCheckBox(this, PDSET_CELLMARK, wxT("Reference marks"));
-         cellSizer->Add(cellOvlBox, 1, wxALL | wxALIGN_CENTER | wxEXPAND);
-         cellSizer->Add(cellMarks , 1, wxALL | wxALIGN_CENTER | wxEXPAND);
+         cellSizer->Add(cellOvlBox, 1, wxALL | wxALIGN_CENTER | wxEXPAND,5);
+         cellSizer->Add(cellMarks , 1, wxALL | wxALIGN_CENTER | wxEXPAND,5);
          // Cell Depth of view
          wxBoxSizer *cdovSizer = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Visible hierarchy depth"));
          _cbDepthOfViewLimit = DEBUG_NEW wxCheckBox(this, PDCELL_CHECKDOV , wxT("unlimited"));
          _cbDepthOfViewLimit->SetValue(true);
          _cellDepthOfView = DEBUG_NEW sgSliderControl(this, PDCELL_DOV, 1, 8, 8);
          _cellDepthOfView->Enable(false);
-         cdovSizer->Add(_cbDepthOfViewLimit, 0, wxALL| wxALIGN_CENTER | wxEXPAND);
-         cdovSizer->Add(   _cellDepthOfView, 0, wxALL| wxALIGN_CENTER | wxEXPAND);
+         cdovSizer->Add(_cbDepthOfViewLimit, 0, wxALL| wxALIGN_CENTER | wxEXPAND, 5);
+         cdovSizer->Add(   _cellDepthOfView, 0, wxUP| wxALIGN_CENTER | wxEXPAND, 5);
          // Cell Depth brightness ebb (shadow)
          wxBoxSizer *ebbSizer  = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Hierarchy depth opacity"));
             _cellDepthEbb = DEBUG_NEW sgSliderControl(this, PDCELL_DAB, 0, 80, 0);
-         ebbSizer->Add(_cellDepthEbb, 0, wxALL | wxALIGN_CENTER | wxEXPAND);
+         ebbSizer->Add(_cellDepthEbb, 0, wxUP | wxALIGN_CENTER | wxEXPAND, 10);
       // Pack all cell related properties
       topCellSizer->Add(cellSizer , 0, wxALL | wxALIGN_CENTER | wxEXPAND);
       topCellSizer->Add(10,10,0);

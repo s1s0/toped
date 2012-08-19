@@ -867,7 +867,7 @@ namespace tenderer {
 
    //-----------------------------------------------------------------------------
    //
-   typedef std::map<unsigned, TenderLay*> DataLay;
+   typedef laydata::LayerContainer<TenderLay*> DataLay;
    typedef std::stack<TenderRef*> CellStack;
 
    /**
@@ -883,8 +883,8 @@ namespace tenderer {
                            TopRend( layprop::DrawProperties* drawprop, real UU );
                           ~TopRend();
          void              Grid( const real, const std::string );
-         void              setLayer(unsigned, bool);
-         bool              chunkExists(unsigned, bool);
+         void              setLayer(const LayerDef&, bool);
+         bool              chunkExists(const LayerDef&, bool);
          void              pushCell(std::string, const CTM&, const DBbox&, bool, bool);
          void              popCell()                              {_cellStack.pop();}
          const CTM&        topCTM() const                         {return  _cellStack.top()->ctm();}
@@ -906,14 +906,14 @@ namespace tenderer {
          void              grcDraw();
          void              cleanUp();
          void              grcCleanUp();
-         void              setGrcLayer(bool, unsigned);
+         void              setGrcLayer(bool, const LayerDef&);
          //return layno if _propertyState == DB or predefined layer in other case
-         unsigned          getTenderLay(unsigned layno);
+         LayerDef          getTenderLay(const LayerDef&);
          //set state of DrawProperties
          void              setState(layprop::PropertyState state) {_drawprop->setState(state);};
          // temporary!
-         bool              layerHidden(unsigned layno) const
-                                                         {return  _drawprop->layerHidden(layno)    ;}
+         bool              layerHidden(const LayerDef& laydef) const
+                                                         {return  _drawprop->layerHidden(laydef)    ;}
          const CTM&        ScrCTM() const                {return  _drawprop->scrCtm()              ;}
          word              visualLimit() const           {return  _drawprop->visualLimit()         ;}
          const DBbox&      clipRegion() const            {return  _drawprop->clipRegion()          ;}

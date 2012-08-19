@@ -49,7 +49,7 @@ namespace laydata {
       void              relink(TdtLibDir*);
       void              clearLib();
       void              cleanUnreferenced();
-      void              collectUsedLays(WordList&) const;
+      void              collectUsedLays(LayerDefList&) const;
       void              dbHierAdd(const TdtDefaultCell*, const TdtDefaultCell*);
       void              dbHierAddParent(const TdtDefaultCell*, const TdtDefaultCell*);
       void              dbHierRemoveParent(TdtDefaultCell*, const TdtDefaultCell*, laydata::TdtLibDir*);
@@ -95,20 +95,20 @@ namespace laydata {
       TdtCell*       removeTopCell(std::string&, laydata::AtticList*, laydata::TdtLibDir*);
       void           renameCell(TdtDefaultCell*, std::string);
       void           removeRefdCell(std::string&, CellDefList&, laydata::AtticList*, laydata::TdtLibDir*);
-      TdtData*       addBox(unsigned la, TP* p1, TP* p2);
-      TdtData*       putBox(unsigned la, TP* p1, TP* p2);
-      TdtData*       addPoly(unsigned, PointVector*);
-      TdtData*       putPoly(unsigned, PointVector*);
-      TdtData*       addWire(unsigned, PointVector*, WireWidth);
-      TdtData*       putWire(unsigned, PointVector*, WireWidth);
-      TdtData*       addText(unsigned la, std::string& text, CTM& ori);
-      TdtData*       putText(unsigned la, std::string& text, CTM& ori);
+      TdtData*       addBox(const LayerDef&, TP*, TP*);
+      TdtData*       putBox(const LayerDef&, TP*, TP*);
+      TdtData*       addPoly(const LayerDef&, PointVector*);
+      TdtData*       putPoly(const LayerDef&, PointVector*);
+      TdtData*       addWire(const LayerDef&, PointVector*, WireWidth);
+      TdtData*       putWire(const LayerDef&, PointVector*, WireWidth);
+      TdtData*       addText(const LayerDef&, std::string& text, CTM& ori);
+      TdtData*       putText(const LayerDef&, std::string&, CTM&);
       TdtData*       addCellRef(laydata::CellDefin strdefn, CTM& ori);
       TdtData*       addCellARef(std::string&, CTM&, ArrayProps&);
       void           addList(AtticList*, TdtCell* tCell = NULL);
-      void           addList(unsigned, ShapeList&);
+      void           addList(const LayerDef&, ShapeList&);
       TdtCell*       openCell(std::string name);
-      bool           editPush(const TP&, const DWordSet&);
+      bool           editPush(const TP&, const LayerDefSet&);
       bool           editPrev(const bool undo = false);
       bool           editPop();
       bool           editTop();
@@ -127,7 +127,7 @@ namespace laydata {
       void           rotateSelected( TP p, real angle, SelectList**);
       void           flipSelected( TP p, bool Xaxis);
       void           deleteSelected(laydata::AtticList*, laydata::TdtLibDir*);
-      void           destroyThis(TdtData* ds, unsigned la, laydata::TdtLibDir* );
+      void           destroyThis(TdtData*, const LayerDef&, laydata::TdtLibDir* );
       bool           groupSelected(std::string name, laydata::TdtLibDir*);
       ShapeList*     ungroupPrep(laydata::TdtLibDir*);
       AtticList*     ungroupThis(ShapeList*);
@@ -137,8 +137,8 @@ namespace laydata {
       unsigned int   numSelected() const;
       DBbox          activeOverlap();
       DBbox          getVisibleOverlap(layprop::DrawProperties&);
-      void           transferLayer(unsigned dst);
-      void           transferLayer(laydata::SelectList* slst, unsigned dst);
+      void           transferLayer(const LayerDef&);
+      void           transferLayer(laydata::SelectList*, const LayerDef&);
       AtticList*     changeRef(ShapeList*, std::string);
       //
       void           collectParentCells(std::string&, CellDefList&);
@@ -153,16 +153,16 @@ namespace laydata {
       std::string    activeCellName()  const {return _target.name();}
 
 
-      void           selectFromList(SelectList* ss, const DWordSet& unselable)
+      void           selectFromList(SelectList* ss, const LayerDefSet& unselable)
                                             {_target.edit()->selectFromList(ss, unselable);}
-      void           unselectFromList(SelectList* ss, const DWordSet& unselable)
+      void           unselectFromList(SelectList* ss, const LayerDefSet& unselable)
                                             {_target.edit()->unselectFromList(ss, unselable);}
-      void           selectInBox(TP*, TP*, const DWordSet&, word layselmask, bool);
-      void           unselectInBox(TP*, TP*, const DWordSet&, bool);
-      AtticList*     changeSelect(TP*, const DWordSet&, bool);
-      void           mouseHoover(TP&, layprop::DrawProperties&, const DWordSet&);
+      void           selectInBox(TP*, TP*, const LayerDefSet&, word layselmask, bool);
+      void           unselectInBox(TP*, TP*, const LayerDefSet&, bool);
+      AtticList*     changeSelect(TP*, const LayerDefSet&, bool);
+      void           mouseHoover(TP&, layprop::DrawProperties&, const LayerDefSet&);
       void           unselectAll()    const {_target.edit()->unselectAll(false);}
-      void           selectAll(const DWordSet& unselable, word layselmask) const
+      void           selectAll(const LayerDefSet& unselable, word layselmask) const
                                              {       _target.edit()->selectAll(unselable, layselmask);}
       void           tryUnselectAll()const;
       SelectList*    shapeSel()        const {return _target.edit()->shapeSel();}
@@ -241,8 +241,8 @@ namespace laydata {
       CellDefin         linkCellRef(std::string, int);
       CellDefin         addDefaultCell( std::string name, bool );
       void              addThisUndefCell(TdtDefaultCell*);
-      bool              collectUsedLays(std::string, bool, WordList&) const;
-      void              collectUsedLays(int, WordList&) const;
+      bool              collectUsedLays(std::string, bool, LayerDefList&) const;
+      void              collectUsedLays(int, LayerDefList&) const;
       void              cleanUndefLib();
       TdtDefaultCell*   displaceUndefinedCell(std::string);
       void              holdUndefinedCell(TdtDefaultCell*);

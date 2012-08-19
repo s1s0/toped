@@ -255,8 +255,8 @@ namespace tui {
       public:
                                NameCboxRecords(wxWindow*, wxPoint, wxSize, const SIMap&, wxArrayString&, int, const layprop::DrawProperties*);
          virtual              ~NameCboxRecords() {delete _cifMap;}
-         SIMap*                getTheMap(layprop::DrawProperties*);
-         USMap*                getTheFullMap(layprop::DrawProperties*);
+         ImpLayMap*            getTheMap(layprop::DrawProperties*);
+         ExpLayMap*            getTheFullMap(layprop::DrawProperties*);
       private:
          class LayerRecord {
             public:
@@ -275,8 +275,8 @@ namespace tui {
       public:
                               NameCbox3Records(wxWindow*, wxPoint, wxSize, const ExtLayers&, wxArrayString&, int, const layprop::DrawProperties*);
          virtual             ~NameCbox3Records() {delete _gdsLayMap;}
-         USMap*               getTheMap();
-         USMap*               getTheFullMap();
+         ExpLayMap*           getTheMap();
+         ExpLayMap*           getTheFullMap();
          word                 getNumRows() const {return _allRecords.size();}
       private:
          class LayerRecord {
@@ -296,10 +296,10 @@ namespace tui {
    //==========================================================================
    class NameEboxRecords : public wxPanel {
       public:
-                              NameEboxRecords(wxWindow*, wxPoint, wxSize, const WordList&, wxArrayString&, int, const layprop::DrawProperties*);
+                              NameEboxRecords(wxWindow*, wxPoint, wxSize, const LayerDefList&, wxArrayString&, int, const layprop::DrawProperties*);
          virtual             ~NameEboxRecords() {delete _cifMap;}
-         USMap*               getTheMap();
-         USMap*               getTheFullMap();
+         ExpLayMap*           getTheMap();
+         ExpLayMap*           getTheFullMap();
       private:
          class LayerRecord {
             public:
@@ -317,10 +317,10 @@ namespace tui {
    //==========================================================================
    class NameEbox3Records : public wxPanel {
       public:
-                              NameEbox3Records(wxWindow*, wxPoint, wxSize, const WordList&, wxArrayString&, int, const layprop::DrawProperties*);
+                              NameEbox3Records(wxWindow*, wxPoint, wxSize, const LayerDefList&, wxArrayString&, int, const layprop::DrawProperties*);
          virtual             ~NameEbox3Records() {delete _gdsLayMap;}
-         USMap*               getTheMap();
-         USMap*               getTheFullMap();
+         ExpLayMap*           getTheMap();
+         ExpLayMap*           getTheFullMap();
       private:
          class LayerRecord {
             public:
@@ -340,9 +340,9 @@ namespace tui {
    class NameCboxList : public wxScrolledWindow {
       public:
                               NameCboxList(wxWindow*, wxWindowID, wxPoint, wxSize, const SIMap&, const layprop::DrawProperties*);
-         SIMap*               getTheMap(layprop::DrawProperties* drawProp)
+         ImpLayMap*           getTheMap(layprop::DrawProperties* drawProp)
                                               {return _laypanel->getTheMap(drawProp);}
-         USMap*               getTheFullMap(layprop::DrawProperties* drawProp)
+         ExpLayMap*           getTheFullMap(layprop::DrawProperties* drawProp)
                                               {return _laypanel->getTheFullMap(drawProp);}
          void                 OnSize( wxSizeEvent& WXUNUSED(event));
       private:
@@ -354,8 +354,8 @@ namespace tui {
    class NameCbox3List : public wxScrolledWindow {
       public:
                               NameCbox3List(wxWindow*, wxWindowID, wxPoint, wxSize, const ExtLayers&, const layprop::DrawProperties*, wxString);
-         USMap*               getTheMap()     {return _laypanel->getTheMap();}
-         USMap*               getTheFullMap() {return _laypanel->getTheFullMap();}
+         ExpLayMap*           getTheMap()     {return _laypanel->getTheMap();}
+         ExpLayMap*           getTheFullMap() {return _laypanel->getTheFullMap();}
          void                 OnSize( wxSizeEvent& WXUNUSED(event));
       private:
          tui::NameCbox3Records*   _laypanel;
@@ -365,9 +365,9 @@ namespace tui {
    //--------------------------------------------------------------------------
    class NameEboxList : public wxScrolledWindow {
       public:
-                              NameEboxList(wxWindow*, wxWindowID, wxPoint, wxSize, const WordList&, const layprop::DrawProperties*);
-         USMap*               getTheMap()     {return _laypanel->getTheMap();}
-         USMap*               getTheFullMap() {return _laypanel->getTheFullMap();}
+                              NameEboxList(wxWindow*, wxWindowID, wxPoint, wxSize, const LayerDefList&, const layprop::DrawProperties*);
+         ExpLayMap*           getTheMap()     {return _laypanel->getTheMap();}
+         ExpLayMap*           getTheFullMap() {return _laypanel->getTheFullMap();}
          void                 OnSize( wxSizeEvent& WXUNUSED(event));
       private:
          tui::NameEboxRecords* _laypanel;
@@ -377,9 +377,9 @@ namespace tui {
    //--------------------------------------------------------------------------
    class nameEbox3List : public wxScrolledWindow {
       public:
-                              nameEbox3List(wxWindow*, wxWindowID, wxPoint, wxSize, const WordList&, const layprop::DrawProperties*);
-         USMap*               getTheMap()     {return _laypanel->getTheMap();}
-         USMap*               getTheFullMap() {return _laypanel->getTheFullMap();}
+                              nameEbox3List(wxWindow*, wxWindowID, wxPoint, wxSize, const LayerDefList&, const layprop::DrawProperties*);
+         ExpLayMap*           getTheMap()     {return _laypanel->getTheMap();}
+         ExpLayMap*           getTheFullMap() {return _laypanel->getTheFullMap();}
          void                 OnSize( wxSizeEvent& WXUNUSED(event));
       private:
          tui::NameEbox3Records* _laypanel;
@@ -396,9 +396,9 @@ namespace tui {
       bool              getOverwrite()    const {return _overwrite->GetValue();}
       bool              getRecursive()    const {return _recursive->GetValue();}
       bool              getSaveMap()      const {return _saveMap->GetValue();}
-      SIMap*            getCifLayerMap(layprop::DrawProperties* drawProp)
+      ImpLayMap*        getCifLayerMap(layprop::DrawProperties* drawProp)
                                                 {return _layList->getTheMap(drawProp);}
-      USMap*            getFullCifLayerMap(layprop::DrawProperties* drawProp)
+      ExpLayMap*        getFullCifLayerMap(layprop::DrawProperties* drawProp)
                                                 {return _layList->getTheFullMap(drawProp);}
    private:
       wxCheckBox*       _overwrite;
@@ -418,8 +418,8 @@ namespace tui {
       bool              get_recursive()    const {return _recursive->GetValue();}
       bool              get_slang()        const {return _slang->GetValue();}
       bool              getSaveMap()      const {return _saveMap->GetValue();}
-      USMap*            getCifLayerMap()         {return _layList->getTheMap();}
-      USMap*            getFullCifLayerMap()     {return _layList->getTheFullMap();}
+      ExpLayMap*        getCifLayerMap()         {return _layList->getTheMap();}
+      ExpLayMap*        getFullCifLayerMap()     {return _layList->getTheFullMap();}
    private:
       wxCheckBox*       _recursive;
       wxCheckBox*       _saveMap;
@@ -437,8 +437,8 @@ namespace tui {
       bool              get_overwrite()    const {return _overwrite->GetValue();};
       bool              get_recursive()    const {return _recursive->GetValue();};
       bool              getSaveMap()       const {return _saveMap->GetValue();}
-      USMap*            getGdsLayerMap()         {return _layList->getTheMap();}
-      USMap*            getFullGdsLayerMap()     {return _layList->getTheFullMap();}
+      ExpLayMap*        getGdsLayerMap()         {return _layList->getTheMap();}
+      ExpLayMap*        getFullGdsLayerMap()     {return _layList->getTheFullMap();}
    private:
       wxCheckBox*       _overwrite;
       wxCheckBox*       _recursive;
@@ -456,8 +456,8 @@ namespace tui {
       bool              get_overwrite()    const {return _overwrite->GetValue();};
       bool              get_recursive()    const {return _recursive->GetValue();};
       bool              getSaveMap()       const {return _saveMap->GetValue();}
-      USMap*            getOasLayerMap()         {return _layList->getTheMap();}
-      USMap*            getFullOasLayerMap()     {return _layList->getTheFullMap();}
+      ExpLayMap*        getOasLayerMap()         {return _layList->getTheMap();}
+      ExpLayMap*        getFullOasLayerMap()     {return _layList->getTheFullMap();}
    private:
       wxCheckBox*       _overwrite;
       wxCheckBox*       _recursive;
@@ -474,8 +474,8 @@ namespace tui {
       wxString          get_selectedcell() const {return _nameList->GetStringSelection();};
       bool              get_recursive()    const {return _recursive->GetValue();};
       bool              getSaveMap()       const {return _saveMap->GetValue();}
-      USMap*            getGdsLayerMap()         {return _layList->getTheMap();}
-      USMap*            getFullGdsLayerMap()     {return _layList->getTheFullMap();}
+      ExpLayMap*        getGdsLayerMap()         {return _layList->getTheMap();}
+      ExpLayMap*        getFullGdsLayerMap()     {return _layList->getTheFullMap();}
       private:
       wxCheckBox*       _recursive;
       wxCheckBox*       _saveMap;

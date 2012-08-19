@@ -28,6 +28,10 @@
 #ifndef LAYERPROP_H
 #define LAYERPROP_H
 
+// to cast properly the indices parameter in glDrawElements when
+// drawing from VBO
+#define VBO_BUFFER_OFFSET(i) ((char *)NULL + (i))
+
 #include "drawprop.h"
 namespace layprop {
 
@@ -108,7 +112,7 @@ namespace layprop {
                        ~PropertyCenter();
 //      bool              isLayerExist(word);
 //      bool              isLayerExist(std::string);
-      void              addUnpublishedLay(word);
+      void              addUnpublishedLay(const LayerDef&);
       void              saveProperties(std::string);
       //
       const LayoutGrid* grid(byte) const;
@@ -117,10 +121,10 @@ namespace layprop {
       void              drawGrid(const DrawProperties*) const;
       void              drawZeroCross(const DrawProperties*) const;
       void              setUU(real);
-      void              setGdsLayMap(USMap* map);
-      void              setCifLayMap(USMap* map);
-      void              setOasLayMap(USMap* map);
-      DWordSet          allUnselectable();
+      void              setGdsLayMap(ExpLayMap* map);
+      void              setCifLayMap(ExpLayMap* map);
+      void              setOasLayMap(ExpLayMap* map);
+      LayerDefSet       allUnselectable();
       bool              lockDrawProp(DrawProperties*&, PropertyState state = DB);
       void              unlockDrawProp(DrawProperties*&, bool throwexception);
 
@@ -137,7 +141,7 @@ namespace layprop {
                                                          {_supp_data.tmp_draw( base, newp, _UU, layCTM, stepDB());}
       void              mousePoint(const TP& lp)         {_supp_data.mousePoint(lp);}
       void              mouseStop()                      {_supp_data.mouseStop();}
-      const WordList&   upLayers()                       {_uplaylist.sort(); _uplaylist.unique(); return _uplaylist;}
+      const LayerDefList&  upLayers()                       {_uplaylist.sort(); _uplaylist.unique(); return _uplaylist;}
       void              clearUnpublishedLayers()         {_uplaylist.clear();}
       void              setRenderType(bool rt)           {_renderType = rt;}
       real              step() const                     {return _step;}
@@ -149,9 +153,9 @@ namespace layprop {
       bool              zeroCross() const                {return _zeroCross;}
       byte              markerAngle() const              {return _markerAngle;}
       word              layselmask() const               {return _layselmask;}
-      const USMap*      getGdsLayMap() const             {return _gdsLayMap;}
-      const USMap*      getCifLayMap() const             {return _cifLayMap;}
-      const USMap*      getOasLayMap() const             {return _oasLayMap;}
+      const ExpLayMap*  getGdsLayMap() const             {return _gdsLayMap;}
+      const ExpLayMap*  getCifLayMap() const             {return _cifLayMap;}
+      const ExpLayMap*  getOasLayMap() const             {return _oasLayMap;}
       bool              gridVisual(word no)              {return grid(no)->visual();}
       bool              renderType() const               {return _renderType;}
    private:
@@ -169,15 +173,16 @@ namespace layprop {
       bool                 _boldOnHover;  //
       byte                 _markerAngle;  // angle of restriction during shape drawing (0,45,90)
       SupplementaryData    _supp_data;    // supplementary data
-      WordList             _uplaylist;    // unpublished layer list
+      LayerDefList         _uplaylist;    // unpublished layer list
       word                 _layselmask;   // layout shape type selection mask
-      USMap*               _gdsLayMap;    //
-      USMap*               _cifLayMap;    //
-      USMap*               _oasLayMap;    //
+      ExpLayMap*           _gdsLayMap;    //
+      ExpLayMap*           _cifLayMap;    //
+      ExpLayMap*           _oasLayMap;    //
       wxMutex              _drawPLock;    // DrawPropwerties lock
    };
 
-   void USMap2String(USMap*, std::string&);
+//   void USMap2String(USMap*, std::string&);
+   void ExtLayerMap2String(ExpLayMap*, std::string&);
 
 }
 #endif

@@ -54,7 +54,7 @@ void tellstdfunc::stdCOPYSEL::undo()
 {
    TEUNDO_DEBUG("copy(point point) UNDO");
    telldata::TtList* pl = TELL_UNDOOPS_UNDO(telldata::TtList*);
-   DWordSet unselable = PROPC->allUnselectable();
+   LayerDefSet unselable = PROPC->allUnselectable();
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -155,7 +155,7 @@ void tellstdfunc::stdMOVESEL::undo()
    telldata::TtPnt    *p1 = TELL_UNDOOPS_UNDO(telldata::TtPnt*);
 
    real DBscale = PROPC->DBscale();
-   DWordSet unselable = PROPC->allUnselectable();
+   LayerDefSet unselable = PROPC->allUnselectable();
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -176,8 +176,8 @@ void tellstdfunc::stdMOVESEL::undo()
       tDesign->selectFromList(get_ttlaylist(deleted), unselable);
       // delete the added shapes
       for (word j = 0 ; j < added->mlist().size(); j++) {
-         tDesign->destroyThis(static_cast<telldata::TtLayout*>(added->mlist()[j])->data(),
-                              static_cast<telldata::TtLayout*>(added->mlist()[j])->layer(),
+         tDesign->destroyThis(static_cast<telldata::TtLayout*>(added->mlist()[j])->data()  ,
+                              static_cast<telldata::TtLayout*>(added->mlist()[j])->layer() ,
                               dbLibDir);
       }
    }
@@ -282,7 +282,7 @@ void tellstdfunc::stdROTATESEL::undo()
    telldata::TtList* failed = TELL_UNDOOPS_UNDO(telldata::TtList*);
    real   angle  = 360 - getOpValue(UNDOPstack, true);
    telldata::TtPnt    *p1 = TELL_UNDOOPS_UNDO(telldata::TtPnt*);
-   DWordSet unselable = PROPC->allUnselectable();
+   LayerDefSet unselable = PROPC->allUnselectable();
    real DBscale = PROPC->DBscale();
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
@@ -305,9 +305,9 @@ void tellstdfunc::stdROTATESEL::undo()
       // delete the added shapes
       for (word j = 0 ; j < added->mlist().size(); j++)
       {
-         tDesign->destroyThis(static_cast<telldata::TtLayout*>(added->mlist()[j])->data(),
-                              static_cast<telldata::TtLayout*>(added->mlist()[j])->layer(),
-                              dbLibDir);
+         tDesign->destroyThis( static_cast<telldata::TtLayout*>(added->mlist()[j])->data() ,
+                               static_cast<telldata::TtLayout*>(added->mlist()[j])->layer(),
+                               dbLibDir);
       }
    }
    DATC->unlockTDT(dbLibDir, true);
@@ -335,7 +335,7 @@ int tellstdfunc::stdROTATESEL::execute()
       laydata::TdtDesign* tDesign = (*dbLibDir)();
       tDesign->rotateSelected(TP(p1->x(), p1->y(), DBscale), angle, fadead);
       telldata::TtList* added = make_ttlaylist(fadead[2]);
-      DWordSet unselable = PROPC->allUnselectable();
+      LayerDefSet unselable = PROPC->allUnselectable();
       tDesign->selectFromList(get_ttlaylist(added), unselable);
       // save for undo operations ...
       UNDOcmdQ.push_front(this);
@@ -502,7 +502,7 @@ void tellstdfunc::stdDELETESEL::undo()
    telldata::TtList* und = TELL_UNDOOPS_UNDO(telldata::TtList*);
    laydata::CellMap* udurcells = static_cast<laydata::CellMap*>(UNDOUstack.front());UNDOUstack.pop_front();
    std::string prnt_name = "";
-   DWordSet unselable = PROPC->allUnselectable();
+   LayerDefSet unselable = PROPC->allUnselectable();
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -566,7 +566,7 @@ void tellstdfunc::lgcCUTPOLY::undo_cleanup()
 void tellstdfunc::lgcCUTPOLY::undo()
 {
    TEUNDO_DEBUG("cutpoly() UNDO");
-   DWordSet unselable = PROPC->allUnselectable();
+   LayerDefSet unselable = PROPC->allUnselectable();
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -618,7 +618,7 @@ int tellstdfunc::lgcCUTPOLY::execute()
       //cutPoly returns 3 Attic lists -> Delete/AddSelect/AddOnly,
       // create and initialize them here
       PointVector theShape = check.getValidated();
-      DWordSet unselable = PROPC->allUnselectable();
+      LayerDefSet unselable = PROPC->allUnselectable();
       laydata::TdtLibDir* dbLibDir = NULL;
       if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
       {
@@ -759,7 +759,7 @@ void tellstdfunc::lgcMERGE::undo_cleanup()
 void tellstdfunc::lgcMERGE::undo()
 {
    TEUNDO_DEBUG("merge() UNDO");
-   DWordSet unselable = PROPC->allUnselectable();
+   LayerDefSet unselable = PROPC->allUnselectable();
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -856,7 +856,7 @@ void tellstdfunc::lgcSTRETCH::undo_cleanup()
 void tellstdfunc::lgcSTRETCH::undo()
 {
    TEUNDO_DEBUG("bloat() UNDO");
-   DWordSet unselable = PROPC->allUnselectable();
+   LayerDefSet unselable = PROPC->allUnselectable();
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -897,7 +897,7 @@ int tellstdfunc::lgcSTRETCH::execute()
       //expand/shrink returns 2 Attic lists -> Delete/AddSelect,
       // create and initialize them here
       laydata::AtticList* dasao[2];
-      DWordSet unselable = PROPC->allUnselectable();
+      LayerDefSet unselable = PROPC->allUnselectable();
       for (byte i = 0; i < 2; dasao[i++] = DEBUG_NEW laydata::AtticList());
       laydata::TdtLibDir* dbLibDir = NULL;
       if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
@@ -955,29 +955,31 @@ int tellstdfunc::lgcSTRETCH::execute()
 tellstdfunc::stdCHANGELAY::stdCHANGELAY(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtLayer()));
 }
 
 void tellstdfunc::stdCHANGELAY::undo_cleanup()
 {
-   getWordValue(UNDOPstack, false);
-   telldata::TtList* pl = TELL_UNDOOPS_CLEAN(telldata::TtList*);
+   telldata::TtLayer*  tlay = TELL_UNDOOPS_CLEAN(telldata::TtLayer*);
+   telldata::TtList*   pl   = TELL_UNDOOPS_CLEAN(telldata::TtList*);
    delete pl;
+   delete tlay;
 }
 
 void tellstdfunc::stdCHANGELAY::undo()
 {
-   telldata::TtList* pl = TELL_UNDOOPS_UNDO(telldata::TtList*);
-   word src = getWordValue(UNDOPstack, true);
-   secureLayDef(src);
+   telldata::TtList*   pl   = TELL_UNDOOPS_UNDO(telldata::TtList*);
+   telldata::TtLayer*  tlay = TELL_UNDOOPS_UNDO(telldata::TtLayer*);
+   LayerDef laydef(tlay->value());
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
-      tDesign->transferLayer(get_ttlaylist(pl), src);
+      tDesign->transferLayer(get_ttlaylist(pl),laydef);
    }
    DATC->unlockTDT(dbLibDir, true);
    delete pl;
+   delete tlay;
    RefreshGL();
 }
 
@@ -996,19 +998,36 @@ int tellstdfunc::stdCHANGELAY::execute()
       }
       else
       {
-         word target = getWordValue();
-         secureLayDef(target);
-         tDesign->transferLayer(target);
+         telldata::TtLayer* tlay = static_cast<telldata::TtLayer*>(OPstack.top());OPstack.pop();
+         LayerDef laydef(tlay->value());
+         secureLayer(laydef);
+         tDesign->transferLayer(laydef);
          // prepare undo stacks
          UNDOcmdQ.push_front(this);
-         UNDOPstack.push_front(DEBUG_NEW telldata::TtInt(target));
+         UNDOPstack.push_front(tlay);
          UNDOPstack.push_front(make_ttlaylist(listselected));
-         LogFile << "changelayer("<< target << ");";LogFile.flush();
+         LogFile << "changelayer("<< *tlay << ");";LogFile.flush();
          RefreshGL();
       }
    }
    DATC->unlockTDT(dbLibDir, true);
    return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::stdCHANGELAY_T::stdCHANGELAY_T(telldata::typeID retype, bool eor) :
+      stdCHANGELAY(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
+{
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+}
+
+int tellstdfunc::stdCHANGELAY_T::execute()
+{
+   word layNum = getWordValue();
+   tell_log(console::MT_WARNING, "The function \"changelayer(int)\" is depreciated.\nPlease use \"changelayer(layer)\" instead");
+   LayerDef laydef(layNum, DEFAULT_DTYPE);
+   OPstack.push(DEBUG_NEW telldata::TtLayer(laydef));
+   return stdCHANGELAY::execute();
 }
 
 //=============================================================================
@@ -1029,7 +1048,7 @@ void tellstdfunc::stdCHANGEREF::undo_cleanup()
 void tellstdfunc::stdCHANGEREF::undo()
 {
    TEUNDO_DEBUG("ungroup() CHANGEREF");
-   DWordSet unselable = PROPC->allUnselectable();
+   LayerDefSet unselable = PROPC->allUnselectable();
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -1084,7 +1103,7 @@ int tellstdfunc::stdCHANGEREF::execute()
             UNDOcmdQ.push_front(this);
             // Push the list of the cells to be ungroupped first
             laydata::AtticList undol;
-            undol[0] = cells4u;
+            undol.add(REF_LAY_DEF, cells4u);
             UNDOPstack.push_front(make_ttlaylist(&undol));
             UNDOPstack.push_front(make_ttlaylist(undol2));
             delete cells4u;
@@ -1117,7 +1136,7 @@ void tellstdfunc::stdCHANGESTRING::undo_cleanup()
 void tellstdfunc::stdCHANGESTRING::undo()
 {
    TEUNDO_DEBUG("ungroup() CHANGESTR");
-   DWordSet unselable = PROPC->allUnselectable();
+   LayerDefSet unselable = PROPC->allUnselectable();
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -1151,7 +1170,7 @@ void tellstdfunc::stdCHANGESTRING::undo()
 int tellstdfunc::stdCHANGESTRING::execute()
 {
    std::string newstring = getStringValue();
-   DWordSet unselable = PROPC->allUnselectable();
+   LayerDefSet unselable = PROPC->allUnselectable();
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -1162,11 +1181,11 @@ int tellstdfunc::stdCHANGESTRING::execute()
       laydata::SelectList* texts4u = filter_selist(savelist, laydata::_lmtext);
       if (texts4u->empty())
       {
-         for (laydata::SelectList::const_iterator CL = savelist->begin(); CL != savelist->end(); CL++)
-            delete CL->second;
+         for (laydata::SelectList::Iterator CL = savelist->begin(); CL != savelist->end(); CL++)
+            delete *CL;
          delete savelist;
-         for (laydata::SelectList::const_iterator CL = texts4u->begin(); CL != texts4u->end(); CL++)
-            delete CL->second;
+         for (laydata::SelectList::Iterator CL = texts4u->begin(); CL != texts4u->end(); CL++)
+            delete *CL;
          delete texts4u;
          tell_log(console::MT_ERROR,"No text objects selected");
       }

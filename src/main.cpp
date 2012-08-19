@@ -28,6 +28,7 @@
 #include "tpdph.h"
 #include <GL/glew.h>
 #include <wx/wx.h>
+#include <wx/tooltip.h>
 #include <wx/filefn.h>
 #include <wx/filename.h>
 #include <wx/dir.h>
@@ -159,7 +160,8 @@ bool TopedApp::OnInit()
       // Finally show the Toped frame
       SetTopWindow(Toped);
       Toped->Show(TRUE);
-      // First thing after initializing openGL - load available layout fonts
+      wxToolTip::SetDelay(500);
+      // First thing after initialising openGL - load available layout fonts
       loadGlfFonts();
       // at this stage - the tool shall be considered fully functional
       //--------------------------------------------------------------------------
@@ -650,13 +652,15 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    telldata::TPointType*   pntype      = DEBUG_NEW telldata::TPointType();
    telldata::TBoxType*     bxtype      = DEBUG_NEW telldata::TBoxType(pntype);
    telldata::TBindType*    bndtype     = DEBUG_NEW telldata::TBindType(pntype);
-   telldata::THshType*     hshtype     = DEBUG_NEW telldata::THshType();
+   telldata::TLayerType*   laytype     = DEBUG_NEW telldata::TLayerType();
+   telldata::TLMapType*    lmaptype    = DEBUG_NEW telldata::TLMapType(laytype);
    telldata::THshStrType*  hshstrtype  = DEBUG_NEW telldata::THshStrType();
 
    mblock->addGlobalType("point"     , pntype);
    mblock->addGlobalType("box"       , bxtype);
    mblock->addGlobalType("bind"      , bndtype);
-   mblock->addGlobalType("lmap"      , hshtype);
+   mblock->addGlobalType("layer"     , laytype);
+   mblock->addGlobalType("lmap"      , lmaptype);
    mblock->addGlobalType("strmap"    , hshstrtype);
    //-----------------------------------------------------------------------------------------------------------
    // Internal variables
@@ -724,8 +728,8 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    mblock->addFUNC("undo"             ,(DEBUG_NEW                     tellstdfunc::stdUNDO(telldata::tn_void,false)));
    //
    mblock->addFUNC("report_selected"  ,(DEBUG_NEW              tellstdfunc::stdREPORTSLCTD(telldata::tn_void,true )));
-   mblock->addFUNC("report_layers"    ,(DEBUG_NEW        tellstdfunc::stdREPORTLAY(TLISTOF(telldata::tn_int),true )));
-   mblock->addFUNC("report_layers"    ,(DEBUG_NEW       tellstdfunc::stdREPORTLAYc(TLISTOF(telldata::tn_int),true )));
+   mblock->addFUNC("report_layers"    ,(DEBUG_NEW      tellstdfunc::stdREPORTLAY(TLISTOF(telldata::tn_layer),true )));
+   mblock->addFUNC("report_layers"    ,(DEBUG_NEW     tellstdfunc::stdREPORTLAYc(TLISTOF(telldata::tn_layer),true )));
    mblock->addFUNC("report_gdslayers" ,(DEBUG_NEW                tellstdfunc::GDSreportlay(telldata::tn_void,true )));
    mblock->addFUNC("report_ciflayers" ,(DEBUG_NEW                tellstdfunc::CIFreportlay(telldata::tn_void,true )));
    mblock->addFUNC("report_oasislayers",(DEBUG_NEW               tellstdfunc::OASreportlay(telldata::tn_void,true )));
@@ -744,7 +748,7 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    mblock->addFUNC("cifexport"        ,(DEBUG_NEW                tellstdfunc::CIFexportLIB(telldata::tn_void,false)));
    mblock->addFUNC("cifexport"        ,(DEBUG_NEW                tellstdfunc::CIFexportTOP(telldata::tn_void,false)));
    mblock->addFUNC("cifclose"         ,(DEBUG_NEW                    tellstdfunc::CIFclose(telldata::tn_void, true)));
-   mblock->addFUNC("getciflaymap"     ,(DEBUG_NEW        tellstdfunc::CIFgetlaymap(TLISTOF(telldata::tn_hsh), true)));
+   mblock->addFUNC("getciflaymap"     ,(DEBUG_NEW     tellstdfunc::CIFgetlaymap(TLISTOF(telldata::tn_laymap), true)));
    mblock->addFUNC("setciflaymap"     ,(DEBUG_NEW                tellstdfunc::CIFsetlaymap(telldata::tn_void, true)));
    mblock->addFUNC("clearciflaymap"   ,(DEBUG_NEW              tellstdfunc::CIFclearlaymap(telldata::tn_void, true)));
    mblock->addFUNC("gdsread"          ,(DEBUG_NEW          tellstdfunc::GDSread(TLISTOF(telldata::tn_string), true)));
@@ -754,15 +758,15 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    mblock->addFUNC("gdsexport"        ,(DEBUG_NEW                tellstdfunc::GDSexportTOP(telldata::tn_void,false)));
    mblock->addFUNC("gdssplit"         ,(DEBUG_NEW                    tellstdfunc::GDSsplit(telldata::tn_void,false)));
    mblock->addFUNC("gdsclose"         ,(DEBUG_NEW                    tellstdfunc::GDSclose(telldata::tn_void, true)));
-   mblock->addFUNC("getgdslaymap"     ,(DEBUG_NEW        tellstdfunc::GDSgetlaymap(TLISTOF(telldata::tn_hsh), true)));
+   mblock->addFUNC("getgdslaymap"     ,(DEBUG_NEW     tellstdfunc::GDSgetlaymap(TLISTOF(telldata::tn_laymap), true)));
    mblock->addFUNC("setgdslaymap"     ,(DEBUG_NEW                tellstdfunc::GDSsetlaymap(telldata::tn_void, true)));
    mblock->addFUNC("cleargdslaymap"   ,(DEBUG_NEW              tellstdfunc::GDSclearlaymap(telldata::tn_void, true)));
    mblock->addFUNC("oasisread"        ,(DEBUG_NEW          tellstdfunc::OASread(TLISTOF(telldata::tn_string), true)));
    mblock->addFUNC("oasisimport"      ,(DEBUG_NEW               tellstdfunc::OASimportList(telldata::tn_void, true)));
    mblock->addFUNC("oasisimport"      ,(DEBUG_NEW                   tellstdfunc::OASimport(telldata::tn_void, true)));
    mblock->addFUNC("oasisclose"       ,(DEBUG_NEW                    tellstdfunc::OASclose(telldata::tn_void, true)));
-   mblock->addFUNC("getoasislaymap"   ,(DEBUG_NEW        tellstdfunc::OASgetlaymap(TLISTOF(telldata::tn_hsh), true)));
-   mblock->addFUNC("setoasislaymap"   ,(DEBUG_NEW        tellstdfunc::OASsetlaymap(TLISTOF(telldata::tn_hsh), true)));
+   mblock->addFUNC("getoasislaymap"   ,(DEBUG_NEW     tellstdfunc::OASgetlaymap(TLISTOF(telldata::tn_laymap), true)));
+   mblock->addFUNC("setoasislaymap"   ,(DEBUG_NEW     tellstdfunc::OASsetlaymap(TLISTOF(telldata::tn_laymap), true)));
    mblock->addFUNC("clearoasislaymap" ,(DEBUG_NEW              tellstdfunc::OASclearlaymap(telldata::tn_void, true)));
    mblock->addFUNC("drccalibreimport" ,(DEBUG_NEW            tellstdfunc::DRCCalibreimport(telldata::tn_void, true)));
    mblock->addFUNC("drcshowerror"     ,(DEBUG_NEW                tellstdfunc::DRCshowerror(telldata::tn_void, true)));
@@ -772,7 +776,7 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    mblock->addFUNC("drcexplainerror"  ,(DEBUG_NEW           tellstdfunc::DRCexplainerror_D(telldata::tn_void, true)));
    mblock->addFUNC("drcexplainerror"  ,(DEBUG_NEW             tellstdfunc::DRCexplainerror(telldata::tn_void, true)));
    mblock->addFUNC("grcgetcells"      ,(DEBUG_NEW      tellstdfunc::grcGETCELLS(TLISTOF(telldata::tn_string), true)));
-   mblock->addFUNC("grcgetlayers"     ,(DEBUG_NEW        tellstdfunc::grcGETLAYERS(TLISTOF(telldata::tn_int), true)));
+   mblock->addFUNC("grcgetlayers"     ,(DEBUG_NEW      tellstdfunc::grcGETLAYERS(TLISTOF(telldata::tn_layer), true)));
    mblock->addFUNC("grcgetdata"       ,(DEBUG_NEW     tellstdfunc::grcGETDATA(TLISTOF(telldata::tn_auxilary), true)));
    mblock->addFUNC("grcrecoverdata"   ,(DEBUG_NEW               tellstdfunc::grcREPAIRDATA(telldata::tn_void, true)));
    mblock->addFUNC("grccleanlayer"    ,(DEBUG_NEW              tellstdfunc::grcCLEANALAYER(telldata::tn_void, true)));
@@ -790,16 +794,22 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    mblock->addFUNC("edittop"          ,(DEBUG_NEW                  tellstdfunc::stdEDITTOP(telldata::tn_void, true)));
    mblock->addFUNC("editprev"         ,(DEBUG_NEW                 tellstdfunc::stdEDITPREV(telldata::tn_void, true)));
    mblock->addFUNC("usinglayer"       ,(DEBUG_NEW               tellstdfunc::stdUSINGLAYER(telldata::tn_void, true)));
+   mblock->addFUNC("usinglayer"       ,(DEBUG_NEW             tellstdfunc::stdUSINGLAYER_T(telldata::tn_void, true)));
    mblock->addFUNC("usinglayer"       ,(DEBUG_NEW             tellstdfunc::stdUSINGLAYER_S(telldata::tn_void, true)));
    mblock->addFUNC("addbox"           ,(DEBUG_NEW                 tellstdfunc::stdADDBOX(telldata::tn_layout,false)));
+   mblock->addFUNC("addbox"           ,(DEBUG_NEW               tellstdfunc::stdADDBOX_T(telldata::tn_layout,false)));
    mblock->addFUNC("addbox"           ,(DEBUG_NEW               tellstdfunc::stdADDBOX_D(telldata::tn_layout,false)));
    mblock->addFUNC("addbox"           ,(DEBUG_NEW                tellstdfunc::stdADDBOXr(telldata::tn_layout,false)));
+   mblock->addFUNC("addbox"           ,(DEBUG_NEW              tellstdfunc::stdADDBOXr_T(telldata::tn_layout,false)));
    mblock->addFUNC("addbox"           ,(DEBUG_NEW              tellstdfunc::stdADDBOXr_D(telldata::tn_layout,false)));
    mblock->addFUNC("addbox"           ,(DEBUG_NEW                tellstdfunc::stdADDBOXp(telldata::tn_layout,false)));
+   mblock->addFUNC("addbox"           ,(DEBUG_NEW              tellstdfunc::stdADDBOXp_T(telldata::tn_layout,false)));
    mblock->addFUNC("addbox"           ,(DEBUG_NEW              tellstdfunc::stdADDBOXp_D(telldata::tn_layout,false)));
    mblock->addFUNC("addpoly"          ,(DEBUG_NEW                tellstdfunc::stdADDPOLY(telldata::tn_layout,false)));
+   mblock->addFUNC("addpoly"          ,(DEBUG_NEW              tellstdfunc::stdADDPOLY_T(telldata::tn_layout,false)));
    mblock->addFUNC("addpoly"          ,(DEBUG_NEW              tellstdfunc::stdADDPOLY_D(telldata::tn_layout,false)));
    mblock->addFUNC("addwire"          ,(DEBUG_NEW                tellstdfunc::stdADDWIRE(telldata::tn_layout,false)));
+   mblock->addFUNC("addwire"          ,(DEBUG_NEW              tellstdfunc::stdADDWIRE_T(telldata::tn_layout,false)));
    mblock->addFUNC("addwire"          ,(DEBUG_NEW              tellstdfunc::stdADDWIRE_D(telldata::tn_layout,false)));
    mblock->addFUNC("addtext"          ,(DEBUG_NEW                tellstdfunc::stdADDTEXT(telldata::tn_layout,false)));
    mblock->addFUNC("addtext"          ,(DEBUG_NEW               tellstdfunc::stdDRAWTEXT(telldata::tn_layout,false)));
@@ -843,6 +853,7 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    mblock->addFUNC("resize"           ,(DEBUG_NEW                  tellstdfunc::lgcSTRETCH(telldata::tn_void,false)));
    // layer/reference operations
    mblock->addFUNC("changelayer"      ,(DEBUG_NEW                tellstdfunc::stdCHANGELAY(telldata::tn_void,false)));
+   mblock->addFUNC("changelayer"      ,(DEBUG_NEW              tellstdfunc::stdCHANGELAY_T(telldata::tn_void,false)));
    mblock->addFUNC("changeref"        ,(DEBUG_NEW                tellstdfunc::stdCHANGEREF(telldata::tn_void,false)));
    mblock->addFUNC("changestr"        ,(DEBUG_NEW             tellstdfunc::stdCHANGESTRING(telldata::tn_void,false)));
    //-----------------------------------------------------------------------------------------------------------
@@ -858,6 +869,7 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    mblock->addFUNC("zoomall"          ,(DEBUG_NEW                  tellstdfunc::stdZOOMALL(telldata::tn_void, true)));
    mblock->addFUNC("zoomvisible"      ,(DEBUG_NEW              tellstdfunc::stdZOOMVISIBLE(telldata::tn_void, true)));
    mblock->addFUNC("layprop"          ,(DEBUG_NEW                  tellstdfunc::stdLAYPROP(telldata::tn_void, true)));
+   mblock->addFUNC("layprop"          ,(DEBUG_NEW                tellstdfunc::stdLAYPROP_T(telldata::tn_void, true)));
    mblock->addFUNC("hidelayer"        ,(DEBUG_NEW                tellstdfunc::stdHIDELAYER(telldata::tn_void, true)));
    mblock->addFUNC("hidelayer"        ,(DEBUG_NEW               tellstdfunc::stdHIDELAYERS(telldata::tn_void, true)));
    mblock->addFUNC("hidecellmarks"    ,(DEBUG_NEW             tellstdfunc::stdHIDECELLMARK(telldata::tn_void, true)));
@@ -883,10 +895,13 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    mblock->addFUNC("getpoint"         ,(DEBUG_NEW                    tellstdfunc::getPOINT(telldata::tn_pnt ,false)));
    mblock->addFUNC("getpointlist"     ,(DEBUG_NEW        tellstdfunc::getPOINTLIST(TLISTOF(telldata::tn_pnt),false)));
    mblock->addFUNC("addbox"           ,(DEBUG_NEW                tellstdfunc::stdDRAWBOX(telldata::tn_layout,false)));
+   mblock->addFUNC("addbox"           ,(DEBUG_NEW              tellstdfunc::stdDRAWBOX_T(telldata::tn_layout,false)));
    mblock->addFUNC("addbox"           ,(DEBUG_NEW              tellstdfunc::stdDRAWBOX_D(telldata::tn_layout,false)));
    mblock->addFUNC("addpoly"          ,(DEBUG_NEW               tellstdfunc::stdDRAWPOLY(telldata::tn_layout,false)));
+   mblock->addFUNC("addpoly"          ,(DEBUG_NEW             tellstdfunc::stdDRAWPOLY_T(telldata::tn_layout,false)));
    mblock->addFUNC("addpoly"          ,(DEBUG_NEW             tellstdfunc::stdDRAWPOLY_D(telldata::tn_layout,false)));
    mblock->addFUNC("addwire"          ,(DEBUG_NEW               tellstdfunc::stdDRAWWIRE(telldata::tn_layout,false)));
+   mblock->addFUNC("addwire"          ,(DEBUG_NEW             tellstdfunc::stdDRAWWIRE_T(telldata::tn_layout,false)));
    mblock->addFUNC("addwire"          ,(DEBUG_NEW             tellstdfunc::stdDRAWWIRE_D(telldata::tn_layout,false)));
    mblock->addFUNC("propsave"         ,(DEBUG_NEW                 tellstdfunc::stdPROPSAVE(telldata::tn_void, true)));
    mblock->addFUNC("addmenu"          ,(DEBUG_NEW                  tellstdfunc::stdADDMENU(telldata::tn_void, true)));

@@ -568,35 +568,34 @@ void TpdPost::clearDRCtab()
    wxPostEvent(_topBrowsers, eventADDTAB);
 }
 
-void TpdPost::layer_status(int btype, const word layno, const bool status)
+void TpdPost::layer_status(int btype, const LayerDef& laydef, const bool status)
 {
    if (NULL == _layBrowser) return;
    wxCommandEvent eventLAYER_STATUS(wxEVT_CMD_BROWSER);
    eventLAYER_STATUS.SetExtraLong(status);
    eventLAYER_STATUS.SetInt(btype);
-   word *laynotemp = DEBUG_NEW word(layno);
-   eventLAYER_STATUS.SetClientData(static_cast<void*> (laynotemp));
+   LayerDef *laydeftemp = DEBUG_NEW LayerDef(laydef);
+   eventLAYER_STATUS.SetClientData(static_cast<void*> (laydeftemp));
    wxPostEvent(_layBrowser, eventLAYER_STATUS);
 }
 
-void TpdPost::layer_add(const std::string name, const word layno)
+void TpdPost::layer_add(const std::string name, const LayerDef& laydef)
 {
    if (NULL == _layBrowser) return;
    wxCommandEvent eventLAYER_ADD(wxEVT_CMD_BROWSER);
-   word *laynotemp = DEBUG_NEW word(layno);
-   eventLAYER_ADD.SetClientData(static_cast<void*> (laynotemp));
+   LayerDef *laydeftemp = DEBUG_NEW LayerDef(laydef);
+   eventLAYER_ADD.SetClientData(static_cast<void*> (laydeftemp));
    eventLAYER_ADD.SetString(wxString(name.c_str(), wxConvUTF8));
    eventLAYER_ADD.SetInt(tui::BT_LAYER_ADD);
    wxPostEvent(_layBrowser, eventLAYER_ADD);
 }
 
-void TpdPost::layer_default(const word newlay, const word oldlay)
+void TpdPost::layer_default(const LayerDef& newlaydef, const LayerDef& oldlaydef)
 {
    if (NULL == _layBrowser) return;
    wxCommandEvent eventLAYER_DEF(wxEVT_CMD_BROWSER);
-   eventLAYER_DEF.SetExtraLong(newlay);
-   word *laynotemp = DEBUG_NEW word(oldlay);
-   eventLAYER_DEF.SetClientData(static_cast<void*> (laynotemp));
+   std::pair<LayerDef, LayerDef>* laydefs = DEBUG_NEW std::pair<LayerDef, LayerDef> (newlaydef,oldlaydef);
+   eventLAYER_DEF.SetClientData(static_cast<void*> (laydefs));
    eventLAYER_DEF.SetInt(tui::BT_LAYER_DEFAULT);
    wxPostEvent(_layBrowser, eventLAYER_DEF);
 }
@@ -1124,11 +1123,11 @@ EXPTNgui_problem::EXPTNgui_problem(std::string info)
 };
 
 //=============================================================================
-LayerMapExt::LayerMapExt(const USMap& inlist, ExtLayers* alist)
+LayerMapExt::LayerMapExt(const ExpLayMap& inlist, ExtLayers* alist)
    : _theMap(), _status(true), _alist(alist)
 {
    _import = (NULL != _alist);
-   for (USMap::const_iterator CE = inlist.begin(); CE != inlist.end(); CE++)
+   for (ExpLayMap::const_iterator CE = inlist.begin(); CE != inlist.end(); CE++)
    {
       wxString exp(CE->second.c_str(), wxConvUTF8);
       patternNormalize(exp);
@@ -1141,7 +1140,7 @@ LayerMapExt::~LayerMapExt()
    if (NULL != _alist) delete _alist;
 }
 
-bool LayerMapExt::parseLayTypeString(wxString exp, word tdtLay)
+bool LayerMapExt::parseLayTypeString(wxString exp, const LayerDef& tdtLaydef)
 {
    wxString lay_exp, type_exp;
    if (!separateQuickLists(exp, lay_exp, type_exp)) return false;
@@ -1152,7 +1151,7 @@ bool LayerMapExt::parseLayTypeString(wxString exp, word tdtLay)
    getList(  lay_exp , llst);
 
    if (NULL != _alist)
-   {// GDS to TDT conversion
+   {// import i.e. GDS to TDT conversion
       // ... for every listed layer
       for ( WordList::const_iterator CL = llst.begin(); CL != llst.end(); CL++ )
       {
@@ -1164,21 +1163,21 @@ bool LayerMapExt::parseLayTypeString(wxString exp, word tdtLay)
             // get all GDS data types for the current layer and copy them
             // to the map
                for ( WordSet::const_iterator CT = (*_alist)[*CL].begin(); CT != (*_alist)[*CL].end(); CT++)
-                  _theMap[*CL].insert(std::make_pair(*CT, tdtLay));
+                  _theMap.insert(std::pair<LayerDef,LayerDef>(LayerDef(*CL,*CT),tdtLaydef));
             }
             else
             {// for particular (listed) data type
                WordList dtlst;
                getList( type_exp , dtlst);
                for ( WordList::const_iterator CT = dtlst.begin(); CT != dtlst.end(); CT++)
-                  _theMap[*CL].insert(std::make_pair(*CT, tdtLay));
+                  _theMap.insert(std::pair<LayerDef,LayerDef>(LayerDef(*CL,*CT),tdtLaydef));
             }
          }
          // else ignore the mapped GDS layer
       }
    }
    else
-   {// TDT to GDS conversion
+   {// export i.e. TDT to GDS conversion
       if (1 < llst.size())
       {
          wxString wxmsg;
@@ -1191,7 +1190,7 @@ bool LayerMapExt::parseLayTypeString(wxString exp, word tdtLay)
       }
       if (wxT('*') == type_exp)
       { // for all data types - same as data type = 0
-         _theMap[tdtLay].insert(std::make_pair(0, llst.front()));
+         _theMap.insert(std::pair<LayerDef,LayerDef>(tdtLaydef, LayerDef(llst.front(),0)));
       }
       else
       {// for particular (listed) data type
@@ -1202,13 +1201,13 @@ bool LayerMapExt::parseLayTypeString(wxString exp, word tdtLay)
             wxString wxmsg;
             wxmsg << wxT("Can't export to multiple types. Expression \"")
                   << type_exp << wxT("\"")
-                  << wxT(" for layer ") << tdtLay
+                  << wxT(" for layer ") << tdtLaydef.num()
                   << wxT(" is coerced to a single data type ")
                   << dtlst.front();
             std::string msg(wxmsg.mb_str(wxConvUTF8));
             tell_log(console::MT_ERROR,msg);
          }
-         _theMap[tdtLay].insert(std::make_pair(dtlst.front(), llst.front()));
+         _theMap.insert(std::pair<LayerDef,LayerDef>(tdtLaydef, LayerDef(llst.front(), dtlst.front())));
       }
    }
 
@@ -1308,70 +1307,49 @@ void LayerMapExt::getList(wxString exp, WordList& data)
 
 }
 
-bool LayerMapExt::getTdtLay(word& tdtlay, word gdslay, word gdstype) const
+bool LayerMapExt::getTdtLay(LayerDef& tdtlay, word gdslay, word gdstype) const
 {
    assert(_import); // If you hit this - see the comment in the class declaration
-   // All that this function is doing is:
-   // tdtlay = _theMap[gdslay][gdstype]
-   // A number of protections are in place though as well as const_cast
-   tdtlay = gdslay; // the default value
-   if (_theMap.end()       == _theMap.find(gdslay)       ) return false;
-   GlMap::const_iterator glmap = _theMap.find(gdslay);
-   if (glmap->second.end() == glmap->second.find(gdstype)) return false;
-   GdtTdtMap::const_iterator tltype = glmap->second.find(gdstype);
-   tdtlay = tltype->second;
+   LayerDef gdsLaydef(gdslay, gdstype);
+   tdtlay = gdsLaydef; // the default value
+   GlMap::const_iterator iterTdtLay = _theMap.find(gdsLaydef);
+   if (_theMap.end()       == iterTdtLay ) return false;
+   tdtlay = iterTdtLay->second;
    return true;
 }
 
-bool LayerMapExt::getExtLayType(word& gdslay, word& gdstype, word tdtlay) const
+bool LayerMapExt::getExtLayType(word& gdslay, word& gdstype, const LayerDef& tdtlay) const
 {
    assert(!_import); // If you hit this - see the comment in the class declaration
-   gdslay  = tdtlay; // the default value
-   gdstype = 0;
+   tdtlay.toGds(gdslay, gdstype);
    if (_theMap.end()       == _theMap.find(tdtlay)       ) return false;
    GlMap::const_iterator glmap = _theMap.find(tdtlay);
-   if (1 != glmap->second.size())   return false;
-   gdstype =  glmap->second.begin()->first;
-   gdslay =   glmap->second.begin()->second;
+   glmap->second.toGds(gdslay, gdstype);
    return true;
 }
 
-USMap* LayerMapExt::generateAMap()
+ExpLayMap* LayerMapExt::generateAMap()
 {
-   USMap* wMap = new USMap();
+   ExpLayMap* wMap = new ExpLayMap();
    if (_import)
    {
       for (GlMap::const_iterator CTL = _theMap.begin(); CTL != _theMap.end(); CTL++)
-      {
-         for (GdtTdtMap::const_iterator CGT = CTL->second.begin(); CGT != CTL->second.end(); CGT++)
-         {
-            std::ostringstream lay_type;
-            lay_type << CTL->first << ";" << CGT->first;
-            (*wMap)[CGT->second] = lay_type.str();
-         }
-      }
+         (*wMap)[CTL->second] = CTL->first.toQList();
    }
    else
    {
       for (GlMap::const_iterator CTL = _theMap.begin(); CTL != _theMap.end(); CTL++)
-      {
-         for (GdtTdtMap::const_iterator CGT = CTL->second.begin(); CGT != CTL->second.end(); CGT++)
-         {
-            std::ostringstream lay_type;
-            lay_type << CGT->second << ";" << CGT->first;
-            (*wMap)[CTL->first] = lay_type.str();
-         }
-      }
+         (*wMap)[CTL->first] = CTL->second.toQList();
    }
    return wMap;
 }
 
-USMap* LayerMapExt::updateMap(USMap* update, bool import)
+ExpLayMap* LayerMapExt::updateMap(ExpLayMap* update, bool import)
 {
    assert(_import == import);
    // first generate the output from the current map
-   USMap* wMap = generateAMap();
-   for (USMap::const_iterator CE = update->begin(); CE != update->end(); CE++)
+   ExpLayMap* wMap = generateAMap();
+   for (ExpLayMap::const_iterator CE = update->begin(); CE != update->end(); CE++)
    {
       // the idea behind this parsing is simply to check the syntax and
       // to protect ourself from saving rubbish
@@ -1386,7 +1364,7 @@ USMap* LayerMapExt::updateMap(USMap* update, bool import)
       else
       {
          wxString wxmsg;
-         wxmsg << wxT("Can't make sence from the input string for layer ") << CE->first;
+         wxmsg << wxT("Can't make sense from the input string for layer ") << CE->first.num();
          std::string msg(wxmsg.mb_str(wxConvUTF8));
          tell_log(console::MT_ERROR,msg);
       }
@@ -1395,26 +1373,27 @@ USMap* LayerMapExt::updateMap(USMap* update, bool import)
 }
 
 //=============================================================================
-LayerMapCif::LayerMapCif(const USMap& inMap)
+LayerMapCif::LayerMapCif(const ExpLayMap& inMap)
 {
-   for (USMap::const_iterator CI = inMap.begin(); CI != inMap.end(); CI++ )
+   for (ExpLayMap::const_iterator CI = inMap.begin(); CI != inMap.end(); CI++ )
    {
-      _theImap[CI->second] = CI->first;
-      _theEmap[CI->first] = CI->second;
+      _theImap.insert(std::pair<std::string, LayerDef>(CI->second, CI->first));
+      _theEmap.insert(std::pair<LayerDef,std::string>(CI->first, CI->second));
    }
 }
 
-bool LayerMapCif::getTdtLay(word& tdtLay, std::string cifLay)
+bool LayerMapCif::getTdtLay(LayerDef& tdtLay, std::string cifLay)
 {
-   if (_theImap.end() != _theImap.find(cifLay))
+   ImpLayMap::const_iterator CLI = _theImap.find(cifLay);
+   if (_theImap.end() != CLI)
    {
-      tdtLay = _theImap[cifLay];
+      tdtLay = CLI->second;
       return true;
    }
    return false;
 }
 
-bool LayerMapCif::getCifLay(std::string& cifLay, word tdtLay)
+bool LayerMapCif::getCifLay(std::string& cifLay, const LayerDef& tdtLay)
 {
    if (_theEmap.end() != _theEmap.find(tdtLay))
    {
@@ -1424,32 +1403,34 @@ bool LayerMapCif::getCifLay(std::string& cifLay, word tdtLay)
    return false;
 }
 
-USMap* LayerMapCif::updateMap(USMap* update)
+ExpLayMap* LayerMapCif::updateMap(ExpLayMap* update)
 {
-   for (USMap::const_iterator CMI = update->begin(); CMI != update->end(); CMI++)
+   _theEmap.clear();
+   for (ExpLayMap::const_iterator CMI = update->begin(); CMI != update->end(); CMI++)
    {
-      _theEmap[CMI->first] = CMI->second;
+      _theEmap.insert(std::pair<LayerDef, std::string>(CMI->first,CMI->second));
    }
-
-   for (USMap::const_iterator CME = _theEmap.begin(); CME != _theEmap.end(); CME++)
+   _theImap.clear();
+   for (ExpLayMap::const_iterator CME = _theEmap.begin(); CME != _theEmap.end(); CME++)
    {
-      _theImap[CME->second] = CME->first;
+      _theImap.insert(std::pair<std::string, LayerDef>(CME->second, CME->first));
    }
-   return DEBUG_NEW USMap(_theEmap);
+   return DEBUG_NEW ExpLayMap(_theEmap);
 }
 
-USMap* LayerMapCif::updateMap(SIMap* update)
+ExpLayMap* LayerMapCif::updateMap(ImpLayMap* update)
 {
-   for (SIMap::const_iterator CMI = update->begin(); CMI != update->end(); CMI++)
+   _theImap.clear();
+   for (ImpLayMap::const_iterator CMI = update->begin(); CMI != update->end(); CMI++)
    {
-      _theImap[CMI->first] = CMI->second;
+      _theImap.insert(std::pair<std::string, LayerDef>(CMI->first, CMI->second));
    }
-
-   for (SIMap::const_iterator CME = _theImap.begin(); CME != _theImap.end(); CME++)
+   _theEmap.clear();
+   for (ImpLayMap::const_iterator CME = _theImap.begin(); CME != _theImap.end(); CME++)
    {
-      _theEmap[CME->second] = CME->first;
+      _theEmap.insert(std::pair<LayerDef, std::string>(CME->second,CME->first));
    }
-   return DEBUG_NEW USMap(_theEmap);
+   return DEBUG_NEW ExpLayMap(_theEmap);
 }
 
 //=============================================================================

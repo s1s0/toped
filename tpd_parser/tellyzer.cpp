@@ -926,8 +926,9 @@ int parsercmd::cmdLISTSIZE::execute()
       case telldata::tn_pnt     : initVar = DEBUG_NEW telldata::TtPnt()    ; break;
       case telldata::tn_box     : initVar = DEBUG_NEW telldata::TtWnd()    ; break;
       case telldata::tn_bnd     : initVar = DEBUG_NEW telldata::TtBnd()    ; break;
-      case telldata::tn_hsh     : initVar = DEBUG_NEW telldata::TtHsh()    ; break;
+      case telldata::tn_laymap  : initVar = DEBUG_NEW telldata::TtLMap()   ; break;
       case telldata::tn_hshstr  : initVar = DEBUG_NEW telldata::TtHshStr() ; break;
+      case telldata::tn_layer   : initVar = DEBUG_NEW telldata::TtLayer()  ; break;
       case telldata::tn_string  : initVar = DEBUG_NEW telldata::TtString() ; break;
       case telldata::tn_layout  : initVar = DEBUG_NEW telldata::TtLayout() ; break;
       case telldata::tn_auxilary: initVar = DEBUG_NEW telldata::TtAuxdata(); break;
@@ -1258,11 +1259,12 @@ int parsercmd::cmdSTRUCT::execute()
    {
       switch( (*_arg)() )
       {
-         case telldata::tn_pnt: ustrct = DEBUG_NEW telldata::TtPnt(OPstack);break;
-         case telldata::tn_box: ustrct = DEBUG_NEW telldata::TtWnd(OPstack);break;
-         case telldata::tn_bnd: ustrct = DEBUG_NEW telldata::TtBnd(OPstack);break;
-         case telldata::tn_hsh: ustrct = DEBUG_NEW telldata::TtHsh(OPstack);break;
+         case telldata::tn_pnt   : ustrct = DEBUG_NEW telldata::TtPnt(OPstack);break;
+         case telldata::tn_box   : ustrct = DEBUG_NEW telldata::TtWnd(OPstack);break;
+         case telldata::tn_bnd   : ustrct = DEBUG_NEW telldata::TtBnd(OPstack);break;
+         case telldata::tn_laymap: ustrct = DEBUG_NEW telldata::TtLMap(OPstack);break;
          case telldata::tn_hshstr: ustrct = DEBUG_NEW telldata::TtHshStr(OPstack);break;
+         case telldata::tn_layer : ustrct = DEBUG_NEW telldata::TtLayer(OPstack);break;
          default:
          {
             const telldata::TType* atype = CMDBlock->getTypeByID( (*_arg)() );
@@ -1489,8 +1491,9 @@ telldata::TellVar* parsercmd::cmdBLOCK::newTellvar(telldata::typeID ID, const ch
       case    telldata::tn_pnt  : return(DEBUG_NEW telldata::TtPnt());
       case    telldata::tn_box  : return(DEBUG_NEW telldata::TtWnd());
       case    telldata::tn_bnd  : return(DEBUG_NEW telldata::TtBnd());
-      case    telldata::tn_hsh  : return(DEBUG_NEW telldata::TtHsh());
+      case telldata::tn_laymap  : return(DEBUG_NEW telldata::TtLMap());
       case telldata::tn_hshstr  : return(DEBUG_NEW telldata::TtHshStr());
+      case  telldata::tn_layer  : return(DEBUG_NEW telldata::TtLayer());
       case telldata::tn_string  : return(DEBUG_NEW telldata::TtString());
       case telldata::tn_layout  : return(DEBUG_NEW telldata::TtLayout());
       case telldata::tn_auxilary: return(DEBUG_NEW telldata::TtAuxdata());
@@ -1540,8 +1543,9 @@ telldata::TellVar* parsercmd::cmdBLOCK::newFuncArg(telldata::typeID ID, TpdYYLty
       case    telldata::tn_pnt  : return(DEBUG_NEW telldata::TtPnt());
       case    telldata::tn_box  : return(DEBUG_NEW telldata::TtWnd());
       case    telldata::tn_bnd  : return(DEBUG_NEW telldata::TtBnd());
-      case    telldata::tn_hsh  : return(DEBUG_NEW telldata::TtHsh());
+      case telldata::tn_laymap  : return(DEBUG_NEW telldata::TtLMap());
       case telldata::tn_hshstr  : return(DEBUG_NEW telldata::TtHshStr());
+      case  telldata::tn_layer  : return(DEBUG_NEW telldata::TtLayer());
       case telldata::tn_string  : return(DEBUG_NEW telldata::TtString());
       case telldata::tn_layout  : return(DEBUG_NEW telldata::TtLayout());
       case telldata::tn_auxilary: return(DEBUG_NEW telldata::TtAuxdata());
@@ -3158,10 +3162,17 @@ console::toped_logfile& console::toped_logfile::operator<< (const telldata::TtBn
    return *this;
 }
 
-console::toped_logfile& console::toped_logfile::operator<< (const telldata::TtHsh& _h)
+console::toped_logfile& console::toped_logfile::operator<< (const telldata::TtLMap& _h)
 {
    if (_enabled)
-      _file << "{" << _h.key().value() << ",\"" << _h.value().value() << "\"}";
+      _file << "{" << _h.layer().value() << ",\"" << _h.value().value() << "\"}";
+   return *this;
+}
+
+console::toped_logfile& console::toped_logfile::operator<< (const telldata::TtLayer& _l)
+{
+   if (_enabled)
+      _file << "{" << _l.num() << "," << _l.typ() << "}";
    return *this;
 }
 
@@ -3194,8 +3205,11 @@ console::toped_logfile& console::toped_logfile::operator<< (const telldata::TtLi
             case telldata::tn_bnd:
                *this << *(static_cast<telldata::TtBnd*>((_tl.mlist())[i]));
                break;
-            case telldata::tn_hsh:
-               *this << *(static_cast<telldata::TtHsh*>((_tl.mlist())[i]));
+            case telldata::tn_laymap:
+               *this << *(static_cast<telldata::TtLMap*>((_tl.mlist())[i]));
+               break;
+            case telldata::tn_layer:
+               *this << *(static_cast<telldata::TtLayer*>((_tl.mlist())[i]));
                break;
    //         case tn_layout:
             default:assert(false); break;
@@ -3309,8 +3323,9 @@ telldata::TellVar* parsercmd::newCallBackArgument(telldata::typeID ID, TpdYYLtyp
       case    telldata::tn_pnt  : return(DEBUG_NEW telldata::TtPnt());
       case    telldata::tn_box  : return(DEBUG_NEW telldata::TtWnd());
       case    telldata::tn_bnd  : return(DEBUG_NEW telldata::TtBnd());
-      case    telldata::tn_hsh  : return(DEBUG_NEW telldata::TtHsh());
+      case telldata::tn_laymap  : return(DEBUG_NEW telldata::TtLMap());
       case telldata::tn_hshstr  : return(DEBUG_NEW telldata::TtHshStr());
+      case  telldata::tn_layer  : return(DEBUG_NEW telldata::TtLayer());
       case telldata::tn_string  : return(DEBUG_NEW telldata::TtString());
       case telldata::tn_layout  : return(DEBUG_NEW telldata::TtLayout());
       case telldata::tn_auxilary: return(DEBUG_NEW telldata::TtAuxdata());

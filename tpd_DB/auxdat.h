@@ -136,11 +136,11 @@ namespace auxdata {
          WireWidth         _width;
    };
 
-   typedef laydata::QTreeTmpl<TdtAuxData>    QuadTree;
-   typedef laydata::QTStoreTmpl<TdtAuxData>  QTreeTmp;
-   typedef std::map<unsigned, QuadTree*>     LayerList;
-   typedef std::list<TdtAuxData*>            AuxDataList;
-   typedef  std::map<unsigned, QTreeTmp*>    TmpLayerMap;
+//   typedef laydata::QTreeTmpl<TdtAuxData>       QuadTree;
+//   typedef laydata::QTStoreTmpl<TdtAuxData>     QTreeTmp;
+//   typedef laydata::LayerContainer<QuadTree*>   LayerHolder;
+   typedef std::list<TdtAuxData*>               AuxDataList;
+//   typedef  std::map<unsigned, QTreeTmp*>       TmpLayerMap;
 
 
    class GrcCell {
@@ -153,18 +153,18 @@ namespace auxdata {
          virtual void        openGlDraw(layprop::DrawProperties&, bool active=false) const;
          virtual void        openGlRender(tenderer::TopRend&, const CTM&, bool, bool) const;
          virtual DBbox       getVisibleOverlap(const layprop::DrawProperties&);
-         virtual void        collectUsedLays(WordList&) const;
+         virtual void        collectUsedLays(LayerDefList&) const;
          virtual void        motionDraw(const layprop::DrawProperties&, CtmQueue&, bool active=false) const;
          //
-         QuadTree*           secureLayer(unsigned layno);
-         QTreeTmp*           secureUnsortedLayer(unsigned layno);
+         QuadTree*           secureLayer(const LayerDef&);
+         QTreeTmp*           secureUnsortedLayer(const LayerDef&);
          bool                fixUnsorted();
          //
-         void                reportLayers(DWordSet&);
-         void                reportLayData(unsigned, AuxDataList&);
-         char                cleanLay(unsigned, AuxDataList&);
-         bool                repairData(unsigned, laydata::ShapeList&);
-         char                cleanRepaired(unsigned la, AuxDataList& recovered);
+         void                reportLayers(LayerDefSet&);
+         void                reportLayData(const LayerDef&, AuxDataList&);
+         char                cleanLay(const LayerDef&, AuxDataList&);
+         bool                repairData(const LayerDef&, laydata::ShapeList&);
+         char                cleanRepaired(const LayerDef&, AuxDataList& recovered);
 
          //
          virtual DBbox       cellOverlap() const        {return _cellOverlap;}
@@ -173,7 +173,7 @@ namespace auxdata {
          void                readTdtLay(InputTdtFile* const);
          void                getCellOverlap();
          std::string         _name;         //! cell name
-         LayerList           _layers;       //! all layers in the cell
+         LayerHolder         _layers;       //! all layers in the cell
          DBbox               _cellOverlap;  //! Overlap of the entire cell
          TmpLayerMap         _tmpLayers;    //! All layers with unsorted data
    };

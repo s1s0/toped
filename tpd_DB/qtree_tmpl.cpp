@@ -46,28 +46,28 @@ laydata::QTreeTmpl<DataT>::QTreeTmpl() : _overlap(DEFAULT_OVL_BOX), _subQuads(NU
 
 /*! A convenience method initializing the QTreeTmpl::Iterator*/
 template <typename DataT>
-const typename laydata::QTreeTmpl<DataT>::Iterator laydata::QTreeTmpl<DataT>::begin()
+const typename laydata::Iterator<DataT> laydata::QTreeTmpl<DataT>::begin()
 {
    return Iterator(*this);
 }
 
 /*! A convenience method initializing the QTreeTmpl::ClipIterator*/
 template <typename DataT>
-const typename laydata::QTreeTmpl<DataT>::ClipIterator laydata::QTreeTmpl<DataT>::begin(const DBbox& clip)
+const typename laydata::ClipIterator<DataT> laydata::QTreeTmpl<DataT>::begin(const DBbox& clip)
 {
    return ClipIterator(*this, clip);
 }
 
 /*! A convenience method initializing the QTreeTmpl::DrawIterator*/
 template <typename DataT>
-const typename laydata::QTreeTmpl<DataT>::DrawIterator laydata::QTreeTmpl<DataT>::begin(const layprop::DrawProperties& drawprop, const CtmQueue& transtack)
+const typename laydata::DrawIterator<DataT> laydata::QTreeTmpl<DataT>::begin(const layprop::DrawProperties& drawprop, const CtmQueue& transtack)
 {
    return DrawIterator(*this, drawprop, transtack);
 }
 
 /*! A convenience method returning an empty iterator*/
 template <typename DataT>
-const typename laydata::QTreeTmpl<DataT>::Iterator laydata::QTreeTmpl<DataT>::end()
+const typename laydata::Iterator<DataT> laydata::QTreeTmpl<DataT>::end()
 {
    return Iterator();
 }

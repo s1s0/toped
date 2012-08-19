@@ -65,9 +65,10 @@ namespace telldata {
    const typeID tn_pnt        = 11;
    const typeID tn_box        = 12;
    const typeID tn_bnd        = 13;
-   const typeID tn_hsh        = 14;
+   const typeID tn_laymap     = 14;
    const typeID tn_hshstr     = 15;
-   const typeID tn_usertypes  = 16;
+   const typeID tn_layer      = 16;
+   const typeID tn_usertypes  = 17;
    // the most significant bit is a mask flag
    const typeID tn_listmask = typeID(1) << (8 * sizeof(typeID) - 1);
 
@@ -157,9 +158,15 @@ namespace telldata {
    };
 
    //==============================================================================
-   class THshType : public TCompType {
+   class TLayerType : public TCompType {
       public:
-                           THshType();
+                           TLayerType();
+   };
+
+   //==============================================================================
+   class TLMapType : public TCompType {
+      public:
+                           TLMapType(TLayerType*);
    };
 
     //==============================================================================
@@ -223,7 +230,8 @@ namespace telldata {
       void                 uminus()             {_value  = -_value;   };
       virtual TellVar*     selfcopy() const     {return DEBUG_NEW TtInt(_value);};
       void                 NOT()                {_value = ~_value;}
-   protected:
+      friend class TtLayer;
+   private:
       int4b               _value;
    };
 
@@ -269,9 +277,9 @@ namespace telldata {
    class TtLayout: public TellVar {
    public:
                            TtLayout(): TellVar(tn_layout), _data(NULL),
-                                                      _layer(ERR_LAY), _selp(NULL) {};
-                           TtLayout(laydata::TdtData* pdat, unsigned lay, SGBitSet* selp = NULL):
-                             TellVar(tn_layout), _data(pdat), _layer(lay), _selp(selp) {};
+                                                      _layer(ERR_LAY_DEF), _selp(NULL) {};
+                           TtLayout(laydata::TdtData* pdat, const LayerDef& laydef, SGBitSet* selp = NULL):
+                             TellVar(tn_layout), _data(pdat), _layer(laydef), _selp(selp) {};
                            TtLayout(const TtLayout& cobj);
       const TtLayout&      operator = (const TtLayout&);
       virtual void         initialize() {if (_selp) delete _selp;_data = NULL;}
@@ -279,12 +287,12 @@ namespace telldata {
       virtual void         assign(TellVar*);
       virtual TellVar*     selfcopy() const {return DEBUG_NEW TtLayout(*this);};
       laydata::TdtData*    data() const     {return _data;};
-      unsigned             layer() const    {return _layer;};
+      LayerDef             layer() const    {return _layer;};
       SGBitSet*            selp() const     {return _selp;};
       virtual             ~TtLayout()       {if (_selp) delete _selp;}
    private:
       laydata::TdtData*    _data;
-      unsigned             _layer;
+      LayerDef             _layer;
       SGBitSet*            _selp; // selected points;
    };
 
@@ -292,9 +300,9 @@ namespace telldata {
    class TtAuxdata: public TellVar {
    public:
                            TtAuxdata(): TellVar(tn_auxilary), _data(NULL),
-                             _layer(ERR_LAY) {};
-                           TtAuxdata(auxdata::TdtAuxData* pdat, unsigned lay):
-                             TellVar(tn_auxilary), _data(pdat), _layer(lay) {};
+                             _layer(ERR_LAY_DEF) {};
+                           TtAuxdata(auxdata::TdtAuxData* pdat, const LayerDef& laydef):
+                             TellVar(tn_auxilary), _data(pdat), _layer(laydef) {};
                            TtAuxdata(const TtAuxdata& cobj);
       const TtAuxdata&     operator = (const TtAuxdata&);
       virtual void         initialize() {_data = NULL;}
@@ -302,10 +310,10 @@ namespace telldata {
       virtual void         assign(TellVar*);
       virtual TellVar*     selfcopy() const {return DEBUG_NEW TtAuxdata(*this);};
       auxdata::TdtAuxData* data() const     {return _data;};
-      unsigned             layer() const    {return _layer;};
+      LayerDef             layer() const    {return _layer;};
    private:
       auxdata::TdtAuxData* _data;
-      unsigned             _layer;
+      LayerDef             _layer;
    };
 
    //==============================================================================
@@ -356,6 +364,28 @@ namespace telldata {
       virtual TellVar*     field_var(char*& fname);
    protected:
       recfieldsNAME        _fieldList;
+   };
+
+   //==============================================================================
+   // Don't destruct _x and _y here. They are just pointing to the structures in
+   // the parent _fieldList and obviously should be destroyed there
+   class TtLayer : public TtUserStruct {
+   public:
+                           TtLayer (const LayerDef& = TLL_LAY_DEF);
+                           TtLayer(const TtLayer&);
+                           TtLayer(operandSTACK& OPStack);
+      virtual TellVar*     selfcopy() const    {return DEBUG_NEW TtLayer(*this);}
+      virtual void         echo(std::string&, real);
+      virtual void         assign(TellVar*);
+      const word           num() const             {return _num->value();}
+      const word           typ() const             {return _typ->value();}
+      LayerDef             value() const           {return LayerDef(_num->value(), _typ->value());}
+      void                 set_num(const word num) {_num->_value = num; }
+      void                 set_typ(const word typ) {_typ->_value = typ; }
+      const TtLayer&       operator = (const TtLayer&);
+   private:
+      TtInt*              _num;
+      TtInt*              _typ;
    };
 
    //==============================================================================
@@ -430,22 +460,22 @@ namespace telldata {
    };
 
    //==============================================================================
-   // Don't destruct _number and _name here. They are just pointing to the structures in
+   // Don't destruct _layer and _value here. They are just pointing to the structures in
    // the parent _fieldList and obviously should be destroyed there
-   class TtHsh : public TtUserStruct {
+   class TtLMap : public TtUserStruct {
       public:
-                              TtHsh (int4b number=1, std::string name = "");
-                              TtHsh(const TtHsh&);
-                              TtHsh(operandSTACK& OPStack);
-         virtual TellVar*     selfcopy() const    {return DEBUG_NEW TtHsh(*this);}
+                              TtLMap (const LayerDef& laydef = TLL_LAY_DEF, std::string value = "");
+                              TtLMap(const TtLMap&);
+                              TtLMap(operandSTACK& OPStack);
+         virtual TellVar*     selfcopy() const    {return DEBUG_NEW TtLMap(*this);}
          virtual void         echo(std::string&, real);
          virtual void         assign(TellVar*);
-         const TtInt&         key()   const        {return *_key;}
+         const TtLayer&       layer() const        {return *_layer;}
          const TtString&      value() const        {return *_value;}
 //         void                 set_number(const int4b number)   {_number->_value = number; }
 //         void                 set_name(const std::string name) {_name->_value = name; }
       private:
-         TtInt*               _key;
+         TtLayer*             _layer;
          TtString*            _value;
    };
 

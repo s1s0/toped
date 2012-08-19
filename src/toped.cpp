@@ -340,9 +340,6 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_TECUSTOM_COMMAND(wxEVT_CONSOLE_PARSE, wxID_ANY, tui::TopedFrame::onParseCommand)
 END_EVENT_TABLE()
 
-// See the FIXME note in the botom of browsers.cpp
-//   EVT_COMMAND(wxID_ANY, wxEVT_INIT_DIALOG , tui::TopedFrame::OnDefineLayer )
-
 tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos,
                             const wxSize& size ) : wxFrame((wxFrame *)NULL, ID_WIN_TOPED, title, pos, size),_exitAproved(false)
 {
@@ -1352,7 +1349,7 @@ void tui::TopedFrame::OnGDStranslate(wxCommandEvent& WXUNUSED(event)) {
    if (PROPC->lockDrawProp(drawProp))
    {
       tui::GetGDSimport* dlg = NULL;
-      USMap* laymap;
+      ExpLayMap* laymap;
       try {
          dlg = DEBUG_NEW tui::GetGDSimport(this, -1, wxT("Import GDS structure"), pos,
                                              _browsers->tdtSelectedGdsName(), drawProp);
@@ -1361,7 +1358,7 @@ void tui::TopedFrame::OnGDStranslate(wxCommandEvent& WXUNUSED(event)) {
       if ( dlg->ShowModal() == wxID_OK )
       {
          laymap = dlg->getGdsLayerMap();
-         USMap* laymap2save = NULL;
+         ExpLayMap* laymap2save = NULL;
          if (dlg->getSaveMap()) laymap2save = dlg->getFullGdsLayerMap();
 
          wxString wxlaymap, wxlaymap2save;
@@ -1488,8 +1485,8 @@ void tui::TopedFrame::OnGDSexportCELL(wxCommandEvent& WXUNUSED(event))
       catch (EXPTN&) {delete dlg;return;}
       wxString cellname;
       bool recur;
-      USMap* laymap;
-      USMap* laymap2save = NULL;
+      ExpLayMap* laymap;
+      ExpLayMap* laymap2save = NULL;
       if ( dlg->ShowModal() == wxID_OK ) {
          cellname = dlg->get_selectedcell();
          recur = dlg->get_recursive();
@@ -1576,8 +1573,8 @@ void tui::TopedFrame::OnCIFtranslate(wxCommandEvent& WXUNUSED(event))
       if ( dlg->ShowModal() == wxID_OK )
       {
          // get the layer map first
-         SIMap* laymap = dlg->getCifLayerMap(drawProp);
-         USMap* laymap2save = NULL;
+         ImpLayMap* laymap = dlg->getCifLayerMap(drawProp);
+         ExpLayMap* laymap2save = NULL;
          if (dlg->getSaveMap()) laymap2save = dlg->getFullCifLayerMap(drawProp);
          wxString wxlaymap, wxlaymap2save;
          SIMap2wxString(laymap      , wxlaymap     );
@@ -1622,8 +1619,8 @@ void tui::TopedFrame::OnCIFexportCELL(wxCommandEvent& WXUNUSED(event))
       wxString cellname;
       bool recur;
       bool sverbose;
-      USMap* laymap;
-      USMap* laymap2save = NULL;
+      ExpLayMap* laymap;
+      ExpLayMap* laymap2save = NULL;
       if ( dlg->ShowModal() == wxID_OK ) {
          cellname = dlg->get_selectedcell();
          recur    = dlg->get_recursive();
@@ -1727,7 +1724,7 @@ void tui::TopedFrame::OnOAStranslate(wxCommandEvent& WXUNUSED(event))
    if (PROPC->lockDrawProp(drawProp))
    {
       tui::GetOASimport* dlg = NULL;
-      USMap* laymap;
+      ExpLayMap* laymap;
       try {
          dlg = DEBUG_NEW tui::GetOASimport(this, -1, wxT("Import OASIS structure"), pos,
                                              _browsers->tdtSelectedOasName(), drawProp);
@@ -1736,7 +1733,7 @@ void tui::TopedFrame::OnOAStranslate(wxCommandEvent& WXUNUSED(event))
       if ( dlg->ShowModal() == wxID_OK )
       {
          laymap = dlg->getOasLayerMap();
-         USMap* laymap2save = NULL;
+         ExpLayMap* laymap2save = NULL;
          if (dlg->getSaveMap()) laymap2save = dlg->getFullOasLayerMap();
 
          wxString wxlaymap, wxlaymap2save;
@@ -2071,12 +2068,12 @@ void tui::TopedFrame::OnPropertySheet(wxCommandEvent& WXUNUSED(event))
 
 void tui::TopedFrame::OnEditLayer(wxCommandEvent& evt)
 {
-   word layno = evt.GetInt();
-   //TODO init layer param for the tech editor
-   _techEditor = DEBUG_NEW TechEditorDialog(this,ID_TECH_EDITOR);
+   LayerDef* laydef = static_cast<LayerDef*>(evt.GetClientData());
+   _techEditor = DEBUG_NEW TechEditorDialog(this,ID_TECH_EDITOR, *laydef);
    TpdPost::SetTechEditWindow(_techEditor);
    _techEditor->ShowModal();
    delete _techEditor;
+   delete laydef;
    _techEditor = NULL;
    TpdPost::SetTechEditWindow(_techEditor);
 }
@@ -2181,7 +2178,7 @@ void tui::TopedFrame::OnDefineStyle(wxCommandEvent& WXUNUSED(event))
 
 void tui::TopedFrame::OnTechEditor(wxCommandEvent& WXUNUSED(event))
 {
-   _techEditor = DEBUG_NEW TechEditorDialog(this,ID_TECH_EDITOR);
+   _techEditor = DEBUG_NEW TechEditorDialog(this,ID_TECH_EDITOR, ERR_LAY_DEF);
    TpdPost::SetTechEditWindow(_techEditor);
    _techEditor->ShowModal();
    delete _techEditor;
@@ -2224,14 +2221,14 @@ void tui::TopedFrame::OnChangeLayer( wxCommandEvent& WXUNUSED( event ))
 {
    wxRect wnd = GetRect();
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
-   tui::getSize* dlg = NULL;
+   tui::DefaultLayer* dlg = NULL;
    try {
-      dlg = DEBUG_NEW tui::getSize(this, -1, wxT("Transfer to layer"), pos, 1, 0, 2);
+      dlg = DEBUG_NEW tui::DefaultLayer(this, wxID_ANY, wxT("Transfer to layer"), pos, false);
    }
    catch (EXPTN&) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK )
    {
-      wxString ost; ost << wxT("changelayer(")<<dlg->value()<<wxT(");");
+      wxString ost; ost << wxT("changelayer({") << dlg->value().num() << wxT(",") << dlg->value().typ() << wxT("});");
       Console->parseCommand(ost);
    }
    delete dlg;
@@ -2241,16 +2238,16 @@ void tui::TopedFrame::OnCurrentLayer( wxCommandEvent& WXUNUSED( event ))
 {
    wxRect wnd = GetRect();
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
-   tui::getSize* dlg = NULL;
+   tui::DefaultLayer* dlg = NULL;
    try {
-      dlg = DEBUG_NEW tui::getSize(this, -1, wxT("Change current layer"), pos, 1, 0, 2);
+      dlg = DEBUG_NEW tui::DefaultLayer(this, wxID_ANY, wxT("Change current layer"), pos, true);
    }
    catch (EXPTN&) {delete dlg;return;}
    if ( dlg->ShowModal() == wxID_OK )
    {
-      unsigned long vlu;
-      dlg->value().ToULong(&vlu);
-      DATC->setCmdLayer((word)vlu);
+      LayerDef laydef = dlg->value();
+      if (ERR_LAY_DEF != laydef)
+         DATC->setCmdLayer(dlg->value());
    }
    delete dlg;
 }
@@ -2489,19 +2486,19 @@ void tui::TopedFrame::onParseCommand(wxCommandEvent& evt)
    _cmdline->onParseCommand(evt);
 }
 
-void tui::TopedFrame::USMap2wxString(USMap* inmap, wxString& outmap)
+void tui::TopedFrame::USMap2wxString(ExpLayMap* inmap, wxString& outmap)
 {
    std::string soutmap;
-   layprop::USMap2String(inmap, soutmap);
+   layprop::ExtLayerMap2String(inmap, soutmap);
    outmap = wxString(soutmap.c_str(), wxConvUTF8);
 }
 
-void tui::TopedFrame::SIMap2wxString(SIMap* inmap, wxString& outmap)
+void tui::TopedFrame::SIMap2wxString(ImpLayMap* inmap, wxString& outmap)
 {
    std::ostringstream laymapstr;
    word recno = 0;
    laymapstr << "{";
-   for (SIMap::const_iterator CLN = inmap->begin(); CLN != inmap->end(); CLN++)
+   for (ImpLayMap::const_iterator CLN = inmap->begin(); CLN != inmap->end(); CLN++)
    {
       if (recno != 0)
          laymapstr << ",";

@@ -355,11 +355,11 @@ InputTdtFile::InputTdtFile( wxString fileName, laydata::TdtLibDir* tedlib ) :
          return;
       }
       bool versionOk = (0 ==_revision) &&
-                       (6 < _subrevision) && (11 > _subrevision);
+                       (9 < _subrevision) && (12 > _subrevision);
       if (!versionOk)
       {
          std::ostringstream ost;
-         ost << "TDT format revision not supported: 0.7 - 0.9 expected";
+         ost << "TDT format revision not supported: 0.10 or 0.11 expected";
          tell_log(console::MT_ERROR,ost.str());
          setStatus(versionOk);
       }
@@ -406,6 +406,20 @@ word InputTdtFile::getWord()
    if (!readStream(&result,sizeof(word), true))
       throw EXPTNreadTDT("Wrong number of bytes read");
    return result;
+}
+
+LayerDef InputTdtFile::getLayer()
+{
+   word laynum = 0;
+   word laytyp = 0;
+   if (!readStream(&laynum,sizeof(word), true))
+      throw EXPTNreadTDT("Wrong number of bytes read");
+   if (!((_revision == 0x00) && (_subrevision < 0x0B)))
+   {
+      if (!readStream(&laytyp,sizeof(word), true))
+         throw EXPTNreadTDT("Wrong number of bytes read");
+   }
+   return LayerDef(laynum,laytyp);
 }
 
 int4b InputTdtFile::get4b()
@@ -582,6 +596,14 @@ void OutputTdtFile::putWord(const word data) {
    fwrite(&data,2,1,_file);
 }
 
+void OutputTdtFile::putLayer(const LayerDef& laydef)
+{
+   word data = laydef.num();
+   fwrite(&data,2,1,_file);
+   data = laydef.typ();
+   fwrite(&data,2,1,_file);
+}
+
 void OutputTdtFile::put4b(const int4b data) {
    fwrite(&data,4,1,_file);
 }
@@ -664,7 +686,7 @@ bool laydata::pathConvert(PointVector& plist, int4b begext, int4b endext )
 {
    word numpoints = plist.size();
    TP P1 = plist[0];
-   // find the first neighboring point which is not equivalent to P1
+   // find the first neighbouring point which is not equivalent to P1
    int fnbr = 1;
    while ((fnbr < numpoints) && (P1 == plist[fnbr]))
       fnbr++;
@@ -1187,10 +1209,10 @@ bool ENumberLayerCM::mapTdtLay(laydata::TdtCell* dstStruct, word extLayer, word 
 {
    _extLayNumber = extLayer;
    _extDataType  = extDataType;
-   word  newTdtLayNumber;
-   if (_layMap.getTdtLay(newTdtLayNumber, _extLayNumber, _extDataType))
+   LayerDef  newTdtLayDef(ERR_LAY_DEF);
+   if (_layMap.getTdtLay(newTdtLayDef, _extLayNumber, _extDataType))
    {
-      _tdtLayNumber = newTdtLayNumber;
+      _tdtLayNumber = newTdtLayDef;
       _tmpLayer     = dstStruct->secureUnsortedLayer(_tdtLayNumber);
       return true;
    }
@@ -1209,7 +1231,7 @@ std::string ENumberLayerCM::printSrcLayer() const
 bool ENameLayerCM::mapTdtLay(laydata::TdtCell* dstStruct, const std::string& extName)
 {
    _extLayName = extName;
-   SIMap::const_iterator layno;
+   ImpLayMap::const_iterator layno;
    if ( _layMap.end() != (layno = _layMap.find(_extLayName)) )
    {
       _tdtLayNumber = layno->second;
@@ -1237,7 +1259,7 @@ ImportDB::ImportDB(ForeignDbFile* src_lib, laydata::TdtLibDir* tdt_db, const Lay
    _layCrossMap = DEBUG_NEW ENumberLayerCM(theLayMap);
 }
 
-ImportDB::ImportDB(ForeignDbFile* src_lib, laydata::TdtLibDir* tdt_db, const SIMap& theLayMap, real techno) :
+ImportDB::ImportDB(ForeignDbFile* src_lib, laydata::TdtLibDir* tdt_db, const ImpLayMap& theLayMap, real techno) :
       _src_lib    ( src_lib                                    ),
       _tdt_db     ( tdt_db                                     ),
       _dbuCoeff   ( src_lib->libUnits() / (*_tdt_db)()->DBU()  ),
@@ -1302,7 +1324,7 @@ void ImportDB::convert(ForeignCell* src_structure, bool overwrite)
       if (emptyCell)
          delete _grc_structure;
       else
-         _dst_structure->addAuxRef(GRC_LAY, _grc_structure);
+         _dst_structure->addAuxRef(_grc_structure);
       _dst_structure->fixUnsorted();
       // and finally - register the cell
       (*_tdt_db)()->registerCellRead(gname, _dst_structure);

@@ -27,6 +27,7 @@
 
 #include "tpdph.h"
 #include <sstream>
+#include <math.h>
 #include "auxdat.h"
 
 auxdata::TdtGrcPoly::TdtGrcPoly(const PointVector& plst) :
@@ -415,13 +416,13 @@ float auxdata::TdtGrcWire::get_distance(const TP& p1, const TP& p2, const TP& p0
       // if the segment is parallel to Y axis
       if ( ((p0.y() >= p1.y()) && (p0.y() <= p2.y()))
          ||((p0.y() <= p1.y()) && (p0.y() >= p2.y())) )
-         return fabsf(p0.x() - p1.x());
+         return fabsf((float)(p0.x() - p1.x()));
       else return -1;
    else if (p1.y() == p2.y())
       // if the segment is parallel to X axis
       if ( ((p0.x() >= p1.x()) && (p0.x() <= p2.x()))
          ||((p0.x() <= p1.x()) && (p0.x() >= p2.x())) )
-         return fabsf(p0.y() - p1.y());
+         return fabsf((float)(p0.y() - p1.y()));
       else return -1;
    else {
       // segment is not parallel to any axis
@@ -435,7 +436,7 @@ float auxdata::TdtGrcWire::get_distance(const TP& p1, const TP& p2, const TP& p0
       // now check that the new coordinate is on the p1-p2 line
       if ((((Y >= p1.y()) && (Y <= p2.y()))||((Y <= p1.y()) && (Y >= p2.y()))) &&
           (((X >= p1.x()) && (X <= p2.x()))||((X <= p1.x()) && (X >= p2.x())))   )
-         return fabsf(Cn / sqrt(dist));
+         return fabsf((float)(Cn / sqrt(dist)));
       else return -1;
    }
 }
@@ -488,23 +489,22 @@ auxdata::GrcCell::GrcCell(InputTdtFile* const tedfile, std::string name) :
 
 auxdata::GrcCell::~GrcCell()
 {
-   for (LayerList::iterator lay = _layers.begin(); lay != _layers.end(); lay++)
+   for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
-      lay->second->freeMemory();
-      delete lay->second;
+      lay->freeMemory();
+      delete (*lay);
    }
    _layers.clear();
 }
 
 void auxdata::GrcCell::write(OutputTdtFile* const tedfile) const
 {
-   LayerList::const_iterator wl;
-   for (wl = _layers.begin(); wl != _layers.end(); wl++)
+   for (LayerHolder::Iterator wl = _layers.begin(); wl != _layers.end(); wl++)
    {
-      assert(LAST_EDITABLE_LAYNUM >= wl->first);
+      assert(wl.editable());
       tedfile->putByte(tedf_LAYER);
-      tedfile->putWord(wl->first);
-      for (QuadTree::Iterator DI = wl->second->begin(); DI != wl->second->end(); DI++)
+      tedfile->putLayer(wl());
+      for (QuadTree::Iterator DI = wl->begin(); DI != wl->end(); DI++)
          DI->write(tedfile);
       tedfile->putByte(tedf_LAYEREND);
    }
@@ -512,35 +512,34 @@ void auxdata::GrcCell::write(OutputTdtFile* const tedfile) const
 
 void auxdata::GrcCell::dbExport(DbExportFile& exportf) const
 {
-   LayerList::const_iterator wl;
-   for (wl = _layers.begin(); wl != _layers.end(); wl++)
+   for (LayerHolder::Iterator wl = _layers.begin(); wl != _layers.end(); wl++)
    {
-      assert(LAST_EDITABLE_LAYNUM > wl->first);
-      if ( !exportf.layerSpecification(wl->first) ) continue;
-      for (QuadTree::Iterator DI = wl->second->begin(); DI != wl->second->end(); DI++)
+      assert(wl.editable());
+      if ( !exportf.layerSpecification(wl()) ) continue;
+      for (QuadTree::Iterator DI = wl->begin(); DI != wl->end(); DI++)
          DI->dbExport(exportf);
    }
 }
 
-void auxdata::GrcCell::collectUsedLays(WordList& laylist) const
+void auxdata::GrcCell::collectUsedLays(LayerDefList& laylist) const
 {
-   for(LayerList::const_iterator CL = _layers.begin(); CL != _layers.end(); CL++)
-      if (LAST_EDITABLE_LAYNUM > CL->first)
-         laylist.push_back(CL->first);
+   for(LayerHolder::Iterator CL = _layers.begin(); CL != _layers.end(); CL++)
+      if (CL.editable())
+         laylist.push_back(CL());
 }
 
-auxdata::QuadTree* auxdata::GrcCell::secureLayer(unsigned layno)
+auxdata::QuadTree* auxdata::GrcCell::secureLayer(const LayerDef& laydef)
 {
-   if (_layers.end() == _layers.find(layno))
-      _layers[layno] = DEBUG_NEW auxdata::QuadTree();
-   return _layers[layno];
+   if (_layers.end() == _layers.find(laydef))
+      _layers.add(laydef, DEBUG_NEW auxdata::QuadTree());
+   return _layers[laydef];
 }
 
-auxdata::QTreeTmp* auxdata::GrcCell::secureUnsortedLayer(unsigned layno)
+auxdata::QTreeTmp* auxdata::GrcCell::secureUnsortedLayer(const LayerDef& laydef)
 {
-   if (_tmpLayers.end() == _tmpLayers.find(layno))
-      _tmpLayers[layno] = DEBUG_NEW auxdata::QTreeTmp(secureLayer(layno));
-   return _tmpLayers[layno];
+   if (_tmpLayers.end() == _tmpLayers.find(laydef))
+      _tmpLayers.add(laydef, DEBUG_NEW auxdata::QTreeTmp(secureLayer(laydef)));
+   return _tmpLayers[laydef];
 }
 
 void auxdata::GrcCell::getCellOverlap()
@@ -549,10 +548,10 @@ void auxdata::GrcCell::getCellOverlap()
       _cellOverlap = DEFAULT_OVL_BOX;
    else
    {
-      LayerList::const_iterator LCI = _layers.begin();
-      _cellOverlap = LCI->second->overlap();
+      LayerHolder::Iterator LCI = _layers.begin();
+      _cellOverlap = LCI->overlap();
       while (++LCI != _layers.end())
-         _cellOverlap.overlap(LCI->second->overlap());
+         _cellOverlap.overlap(LCI->overlap());
    }
 }
 
@@ -561,11 +560,11 @@ bool auxdata::GrcCell::fixUnsorted()//FIXME! The method result is useless! the i
    bool empty = (0 == _tmpLayers.size());
    if (!empty)
    {
-      typedef TmpLayerMap::const_iterator LCI;
+      typedef TmpLayerMap::Iterator LCI;
       for (LCI lay = _tmpLayers.begin(); lay != _tmpLayers.end(); lay++)
       {
-         lay->second->commit();
-         delete lay->second;
+         lay->commit();
+         delete (*lay);
       }
       _tmpLayers.clear();
       getCellOverlap();
@@ -576,14 +575,14 @@ bool auxdata::GrcCell::fixUnsorted()//FIXME! The method result is useless! the i
 void auxdata::GrcCell::openGlDraw(layprop::DrawProperties& drawprop, bool active) const
 {
    // Draw figures
-   typedef LayerList::const_iterator LCI;
+   typedef LayerHolder::Iterator LCI;
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
    {
-      unsigned curlayno = drawprop.getTenderLay(lay->first);
-      if (!drawprop.layerHidden(curlayno)) drawprop.setCurrentColor(curlayno);
+      LayerDef layDef = drawprop.getTenderLay(lay());
+      if (!drawprop.layerHidden(layDef)) drawprop.setCurrentColor(layDef);
       else continue;
-      bool fill = drawprop.setCurrentFill(false);// honor block_fill state)
-      lay->second->openGlDraw(drawprop, NULL, fill);
+      bool fill = drawprop.setCurrentFill(false);// honour block_fill state)
+      lay->openGlDraw(drawprop, NULL, fill);
    }
 }
 
@@ -591,25 +590,25 @@ void auxdata::GrcCell::openGlRender(tenderer::TopRend& rend, const CTM& trans,
                                      bool selected, bool active) const
 {
    // Draw figures
-   typedef LayerList::const_iterator LCI;
+   typedef LayerHolder::Iterator LCI;
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
    {
       //first - to check visibility of the layer
-      if (rend.layerHidden(lay->first)) continue;
+      if (rend.layerHidden(lay())) continue;
       //second - get internal layer number:
       //       - for regular database it is equal to the TDT layer number
       //       - for DRC database it is common for all layers - DRC_LAY
-      unsigned curlayno = rend.getTenderLay(lay->first);
-      switch (curlayno)
+      LayerDef layDef = rend.getTenderLay(lay());
+      switch (layDef.num())
       {
          case REF_LAY:
          case GRC_LAY:
          case DRC_LAY: assert(false); break;
          default     :
          {
-            rend.setGrcLayer(true, curlayno);
-            lay->second->openGlRender(rend, NULL);
-            rend.setGrcLayer(false, curlayno);
+            rend.setGrcLayer(true, layDef);
+            lay->openGlRender(rend, NULL);
+            rend.setGrcLayer(false, layDef);
             break;
          }
       }
@@ -619,12 +618,12 @@ void auxdata::GrcCell::openGlRender(tenderer::TopRend& rend, const CTM& trans,
 DBbox auxdata::GrcCell::getVisibleOverlap(const layprop::DrawProperties& prop)
 {
    DBbox vlOverlap(DEFAULT_OVL_BOX);
-   for (LayerList::const_iterator LCI = _layers.begin(); LCI != _layers.end(); LCI++)
+   for (LayerHolder::Iterator LCI = _layers.begin(); LCI != _layers.end(); LCI++)
    {
-      unsigned  layno  = LCI->first;
-      QuadTree* cqTree = LCI->second;
-      if (!prop.layerHidden(layno))
-         vlOverlap.overlap(cqTree->overlap());
+//      LayerNumber  layno  = LCI->first;
+//      QuadTree* cqTree = LCI->second;
+      if (!prop.layerHidden(LCI()))
+         vlOverlap.overlap(LCI->overlap());
    }
    return vlOverlap;
 }
@@ -653,13 +652,12 @@ void auxdata::GrcCell::motionDraw(const layprop::DrawProperties& drawprop,
       // somewhere up the hierarchy. On this level - no selected shapes
       // whatsoever exists, so just perform a regular draw, but of course
       // without fill
-      typedef LayerList::const_iterator LCI;
+      typedef LayerHolder::Iterator LCI;
       for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
-         if (!drawprop.layerHidden(lay->first))
+         if (!drawprop.layerHidden(lay()))
          {
-            const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(lay->first);
-            QuadTree* curlay = lay->second;
-             for (QuadTree::DrawIterator CI = curlay->begin(drawprop, transtack); CI != curlay->end(); CI++)
+            const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(lay());
+             for (QuadTree::DrawIterator CI = lay->begin(drawprop, transtack); CI != lay->end(); CI++)
                CI->motionDraw(drawprop, transtack, NULL);
          }
 //      transtack.pop_front();
@@ -670,8 +668,8 @@ void auxdata::GrcCell::readTdtLay(InputTdtFile* const tedfile)
 {
    byte      recordtype;
    TdtAuxData*  newData;
-   unsigned  layno    = tedfile->getWord();
-   QTreeTmp* tmpLayer = secureUnsortedLayer(layno);
+   LayerDef  laydef(tedfile->getLayer());
+   QTreeTmp* tmpLayer = secureUnsortedLayer(laydef);
    while (tedf_LAYEREND != (recordtype = tedfile->getByte()))
    {
       switch (recordtype)
@@ -685,20 +683,20 @@ void auxdata::GrcCell::readTdtLay(InputTdtFile* const tedfile)
    }
 }
 
-void auxdata::GrcCell::reportLayers(DWordSet& grcLays)
+void auxdata::GrcCell::reportLayers(LayerDefSet& grcLays)
 {
-   for (LayerList::const_iterator wl = _layers.begin(); wl != _layers.end(); wl++)
+   for (LayerHolder::Iterator wl = _layers.begin(); wl != _layers.end(); wl++)
    {
-      grcLays.insert(wl->first);
+      grcLays.insert(wl());
    }
 }
 
-void auxdata::GrcCell::reportLayData(unsigned lay, AuxDataList& dataList)
+void auxdata::GrcCell::reportLayData(const LayerDef& laydef, AuxDataList& dataList)
 {
-   LayerList::const_iterator wl = _layers.find(lay);
+   LayerHolder::Iterator wl = _layers.find(laydef);
    if (_layers.end() != wl)
    {
-      for (QuadTree::Iterator DI = wl->second->begin(); DI != wl->second->end(); DI++)
+      for (QuadTree::Iterator DI = wl->begin(); DI != wl->end(); DI++)
          dataList.push_back(*DI);
    }
 }
@@ -710,26 +708,26 @@ void auxdata::GrcCell::reportLayData(unsigned lay, AuxDataList& dataList)
  *    0 if the cell is empty after the operation
  *   -1 if the layer @lay does not contain grc data (error condition)
  */
-char auxdata::GrcCell::cleanLay(unsigned lay, AuxDataList& recovered)
+char auxdata::GrcCell::cleanLay(const LayerDef& laydef, AuxDataList& recovered)
 {
-   LayerList::const_iterator wl = _layers.find(lay);
+   LayerHolder::Iterator wl = _layers.find(laydef);
    if (_layers.end() != wl)
    {
       // first mark all the shapes from the target layer and gather them in
       // the list provided
-      for (QuadTree::Iterator DI = wl->second->begin(); DI != wl->second->end(); DI++)
+      for (QuadTree::Iterator DI = wl->begin(); DI != wl->end(); DI++)
       {
          DI->setStatus(sh_selected);
          recovered.push_back(*DI);
       }
       // now remove them from the quadTree
-      if ( wl->second->deleteMarked() )
+      if ( wl->deleteMarked() )
       {
-         if (wl->second->empty())
+         if (wl->empty())
          {
-            delete wl->second; _layers.erase(lay);
+            delete *wl; _layers.erase(laydef);
          }
-         else wl->second->validate();
+         else wl->validate();
       }
       if (_layers.empty()) return 0;
       else return 1;
@@ -737,12 +735,12 @@ char auxdata::GrcCell::cleanLay(unsigned lay, AuxDataList& recovered)
    else return -1;
 }
 
-bool auxdata::GrcCell::repairData(unsigned lay, laydata::ShapeList& newData)
+bool auxdata::GrcCell::repairData(const LayerDef& laydef, laydata::ShapeList& newData)
 {
-   LayerList::const_iterator wl = _layers.find(lay);
+   LayerHolder::Iterator wl = _layers.find(laydef);
    if (_layers.end() != wl)
    {
-      for (QuadTree::Iterator DI = wl->second->begin(); DI != wl->second->end(); DI++)
+      for (QuadTree::Iterator DI = wl->begin(); DI != wl->end(); DI++)
       {
          laydata::ShapeList* objReplacement = DI->getRepaired();
          if (NULL != objReplacement)
@@ -765,26 +763,26 @@ bool auxdata::GrcCell::repairData(unsigned lay, laydata::ShapeList& newData)
  *     0 if the cell is not empty and overlap remains the same
  *    -1 if the cell is empty and shall be removed
  */
-char auxdata::GrcCell::cleanRepaired(unsigned lay, AuxDataList& recovered)
+char auxdata::GrcCell::cleanRepaired(const LayerDef& laydef, AuxDataList& recovered)
 {
    DBbox old_overlap(_cellOverlap);
-   LayerList::const_iterator wl = _layers.find(lay);
+   LayerHolder::Iterator wl = _layers.find(laydef);
    if (_layers.end() != wl)
    {
       // gather all invalid objects which had been recovered in an AuxdataList
-      for (QuadTree::Iterator DI = wl->second->begin(); DI != wl->second->end(); DI++)
+      for (QuadTree::Iterator DI = wl->begin(); DI != wl->end(); DI++)
       {
          if (sh_recovered == DI->status())
             recovered.push_back(*DI);
       }
       // now remove them from the quadTree
-      if ( wl->second->deleteMarked(sh_recovered) )
+      if ( wl->deleteMarked(sh_recovered) )
       {
-         if (wl->second->empty())
+         if (wl->empty())
          {
-            delete wl->second; _layers.erase(lay);
+            delete (*wl); _layers.erase(laydef);
          }
-         else wl->second->validate();
+         else wl->validate();
       }
    }
    if (_layers.empty())                 return -1; // empty cell

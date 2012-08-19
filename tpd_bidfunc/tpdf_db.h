@@ -90,7 +90,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(PSexportTOP      );
 
    void  importGDScell(laydata::TdtLibDir*, const NameList&, const LayerMapExt&, parsercmd::UndoQUEUE&, telldata::UNDOPerandQUEUE&, bool, bool, bool);
-   void  importCIFcell(laydata::TdtLibDir*, const NameList&, const SIMap&      , parsercmd::UndoQUEUE&, telldata::UNDOPerandQUEUE&, bool, bool, bool, real);
+   void  importCIFcell(laydata::TdtLibDir*, const NameList&, const ImpLayMap&  , parsercmd::UndoQUEUE&, telldata::UNDOPerandQUEUE&, bool, bool, bool, real);
    void  importOAScell(laydata::TdtLibDir*, const NameList&, const LayerMapExt&, parsercmd::UndoQUEUE&, telldata::UNDOPerandQUEUE&, bool, bool, bool);
 
 }
