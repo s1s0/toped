@@ -1406,25 +1406,26 @@ tellstdfunc::stdUSINGLAYER_S::stdUSINGLAYER_S(telldata::typeID retype, bool eor)
 
 int tellstdfunc::stdUSINGLAYER_S::execute()
 {
-  std::string layname = getStringValue();
-  layprop::DrawProperties* drawProp;
-  LayerDef laydef(ERR_LAY_DEF);
-  if (PROPC->lockDrawProp(drawProp))
-  {
-     laydef = drawProp->getLayerNo(layname);
-  }
-  PROPC->unlockDrawProp(drawProp, true);
-  if (ERR_LAY_DEF != laydef)
-  {
-    OPstack.push(DEBUG_NEW telldata::TtLayer(laydef));
-    return stdUSINGLAYER::execute();
-  }
-  else
-  {// no layer with this name
-    std::string news = "layer \"";
-    news += layname; news += "\" is not defined";
-    tell_log(console::MT_ERROR,news);
-    return EXEC_ABORT;
-  }
+   std::string layname = getStringValue();
+   layprop::DrawProperties* drawProp;
+   LayerDef laydef(ERR_LAY_DEF);
+   if (PROPC->lockDrawProp(drawProp))
+   {
+      laydef = drawProp->getLayerNo(layname);
+   }
+   PROPC->unlockDrawProp(drawProp, true);
+   if (ERR_LAY_DEF != laydef)
+   {
+      OPstack.push(DEBUG_NEW telldata::TtLayer(laydef));
+      return stdUSINGLAYER::execute();
+   }
+   else
+   { // no layer with this name
+      std::string news = "layer \"";
+      news += layname;
+      news += "\" is not defined";
+      tell_log(console::MT_ERROR, news);
+      return EXEC_ABORT;
+   }
 }
 

@@ -869,6 +869,7 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    mblock->addFUNC("zoomall"          ,(DEBUG_NEW                  tellstdfunc::stdZOOMALL(telldata::tn_void, true)));
    mblock->addFUNC("zoomvisible"      ,(DEBUG_NEW              tellstdfunc::stdZOOMVISIBLE(telldata::tn_void, true)));
    mblock->addFUNC("layprop"          ,(DEBUG_NEW                  tellstdfunc::stdLAYPROP(telldata::tn_void, true)));
+   mblock->addFUNC("layprop"          ,(DEBUG_NEW                tellstdfunc::stdLAYPROP_T(telldata::tn_void, true)));
    mblock->addFUNC("hidelayer"        ,(DEBUG_NEW                tellstdfunc::stdHIDELAYER(telldata::tn_void, true)));
    mblock->addFUNC("hidelayer"        ,(DEBUG_NEW               tellstdfunc::stdHIDELAYERS(telldata::tn_void, true)));
    mblock->addFUNC("hidecellmarks"    ,(DEBUG_NEW             tellstdfunc::stdHIDECELLMARK(telldata::tn_void, true)));
