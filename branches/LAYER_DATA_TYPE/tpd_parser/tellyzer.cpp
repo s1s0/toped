@@ -3172,7 +3172,7 @@ console::toped_logfile& console::toped_logfile::operator<< (const telldata::TtLM
 console::toped_logfile& console::toped_logfile::operator<< (const telldata::TtLayer& _l)
 {
    if (_enabled)
-      _file << "{" << _l.num() << ",\"" << _l.typ() << "\"}";
+      _file << "{" << _l.num() << "," << _l.typ() << "}";
    return *this;
 }
 
