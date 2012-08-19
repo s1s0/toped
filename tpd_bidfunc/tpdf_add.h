@@ -33,20 +33,28 @@ namespace tellstdfunc {
    using telldata::argumentQ;
 
    TELL_STDCMD_CLASSA_UNDO(stdADDBOX      );  // undo - implemented
+   TELL_STDCMD_CLASSB(stdADDBOX_T     , stdADDBOX     );
    TELL_STDCMD_CLASSB(stdADDBOX_D     , stdADDBOX     );
    TELL_STDCMD_CLASSA_UNDO(stdDRAWBOX     );  // undo - implemented
+   TELL_STDCMD_CLASSB(stdDRAWBOX_T    , stdDRAWBOX    );
    TELL_STDCMD_CLASSB(stdDRAWBOX_D    , stdDRAWBOX    );
    TELL_STDCMD_CLASSA_UNDO(stdADDBOXr     );  // undo - implemented
+   TELL_STDCMD_CLASSB(stdADDBOXr_T    , stdADDBOXr    );
    TELL_STDCMD_CLASSB(stdADDBOXr_D    , stdADDBOXr    );
    TELL_STDCMD_CLASSA_UNDO(stdADDBOXp     );  // undo - implemented
+   TELL_STDCMD_CLASSB(stdADDBOXp_T    , stdADDBOXp    );
    TELL_STDCMD_CLASSB(stdADDBOXp_D    , stdADDBOXp    );
    TELL_STDCMD_CLASSA_UNDO(stdADDPOLY     );  // undo - implemented
+   TELL_STDCMD_CLASSB(stdADDPOLY_T    , stdADDPOLY    );
    TELL_STDCMD_CLASSB(stdADDPOLY_D    , stdADDPOLY    );
    TELL_STDCMD_CLASSA_UNDO(stdDRAWPOLY    );  // undo - implemented
+   TELL_STDCMD_CLASSB(stdDRAWPOLY_T   , stdDRAWPOLY   );
    TELL_STDCMD_CLASSB(stdDRAWPOLY_D   , stdDRAWPOLY   );
    TELL_STDCMD_CLASSA_UNDO(stdADDWIRE     );  // undo - implemented
+   TELL_STDCMD_CLASSB(stdADDWIRE_T    , stdADDWIRE    );
    TELL_STDCMD_CLASSB(stdADDWIRE_D    , stdADDWIRE    );
    TELL_STDCMD_CLASSA_UNDO(stdDRAWWIRE    );  // undo - implemented
+   TELL_STDCMD_CLASSB(stdDRAWWIRE_T   , stdDRAWWIRE   );
    TELL_STDCMD_CLASSB(stdDRAWWIRE_D   , stdDRAWWIRE   );
    TELL_STDCMD_CLASSA_UNDO(stdADDTEXT     );  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdDRAWTEXT    );  // undo - implemented
@@ -56,6 +64,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA_UNDO(stdCELLAREFO   );  // undo - implemented
    TELL_STDCMD_CLASSB(stdCELLAREFO_D  , stdCELLAREFO  );
    TELL_STDCMD_CLASSA_UNDO(stdUSINGLAYER  );  // undo - implemented
+   TELL_STDCMD_CLASSB(stdUSINGLAYER_T , stdUSINGLAYER );  //
    TELL_STDCMD_CLASSB(stdUSINGLAYER_S , stdUSINGLAYER );  //
 }
 #endif

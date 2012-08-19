@@ -1015,6 +1015,22 @@ int tellstdfunc::stdCHANGELAY::execute()
 }
 
 //=============================================================================
+tellstdfunc::stdCHANGELAY_T::stdCHANGELAY_T(telldata::typeID retype, bool eor) :
+      stdCHANGELAY(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
+{
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+}
+
+int tellstdfunc::stdCHANGELAY_T::execute()
+{
+   word layNum = getWordValue();
+   tell_log(console::MT_WARNING, "The function \"changelayer(int)\" is depreciated.\nPlease use \"changelayer(layer)\" instead");
+   LayerDef laydef(layNum, DEFAULT_DTYPE);
+   OPstack.push(DEBUG_NEW telldata::TtLayer(laydef));
+   return stdCHANGELAY::execute();
+}
+
+//=============================================================================
 tellstdfunc::stdCHANGEREF::stdCHANGEREF(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
