@@ -100,6 +100,23 @@ int tellstdfunc::stdADDBOX::execute()
 }
 
 //=============================================================================
+tellstdfunc::stdADDBOX_T::stdADDBOX_T(telldata::typeID retype, bool eor) :
+      stdADDBOX(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor,parsercmd::sdbrUNSORTED)
+{
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtWnd()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+}
+
+int tellstdfunc::stdADDBOX_T::execute()
+{
+   word layNum = getWordValue();
+   tell_log(console::MT_WARNING, "The function \"addbox(box,int)\" is depreciated.\nPlease use \"addbox(box,layer)\" instead");
+   LayerDef laydef(layNum, DEFAULT_DTYPE);
+   OPstack.push(DEBUG_NEW telldata::TtLayer(laydef));
+   return stdADDBOX::execute();
+}
+
+//=============================================================================
 tellstdfunc::stdADDBOX_D::stdADDBOX_D(telldata::typeID retype, bool eor) :
       stdADDBOX(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor,parsercmd::sdbrUNSORTED)
 {
@@ -176,6 +193,22 @@ int tellstdfunc::stdDRAWBOX::execute()
    DATC->unlockTDT(dbLibDir, true);
    RefreshGL();
    return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::stdDRAWBOX_T::stdDRAWBOX_T(telldata::typeID retype, bool eor) :
+      stdDRAWBOX(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
+{
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+}
+
+int tellstdfunc::stdDRAWBOX_T::execute()
+{
+   word layNum = getWordValue();
+   tell_log(console::MT_WARNING, "The function \"addbox(int)\" is depreciated.\nPlease use \"addbox(layer)\" instead");
+   LayerDef laydef(layNum, DEFAULT_DTYPE);
+   OPstack.push(DEBUG_NEW telldata::TtLayer(laydef));
+   return stdDRAWBOX::execute();
 }
 
 //=============================================================================
@@ -258,6 +291,25 @@ int tellstdfunc::stdADDBOXr::execute()
 }
 
 //=============================================================================
+tellstdfunc::stdADDBOXr_T::stdADDBOXr_T(telldata::typeID retype, bool eor) :
+      stdADDBOXr(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor, parsercmd::sdbrUNSORTED)
+{
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtPnt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+}
+
+int tellstdfunc::stdADDBOXr_T::execute()
+{
+   word layNum = getWordValue();
+   tell_log(console::MT_WARNING, "The function \"addbox(point,real,real,int)\" is depreciated.\nPlease use \"addbox(point,real,real,layer)\" instead");
+   LayerDef laydef(layNum, DEFAULT_DTYPE);
+   OPstack.push(DEBUG_NEW telldata::TtLayer(laydef));
+   return stdADDBOXr::execute();
+}
+
+//=============================================================================
 tellstdfunc::stdADDBOXr_D::stdADDBOXr_D(telldata::typeID retype, bool eor) :
       stdADDBOXr(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor, parsercmd::sdbrUNSORTED)
 {
@@ -334,6 +386,24 @@ int tellstdfunc::stdADDBOXp::execute()
    DATC->unlockTDT(dbLibDir, true);
    RefreshGL();
    return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::stdADDBOXp_T::stdADDBOXp_T(telldata::typeID retype, bool eor) :
+      stdADDBOXp(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor,parsercmd::sdbrUNSORTED)
+{
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtPnt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtPnt()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+}
+
+int tellstdfunc::stdADDBOXp_T::execute()
+{
+   word layNum = getWordValue();
+   tell_log(console::MT_WARNING, "The function \"addbox(point,point,int)\" is depreciated.\nPlease use \"addbox(point,point,layer)\" instead");
+   LayerDef laydef(layNum, DEFAULT_DTYPE);
+   OPstack.push(DEBUG_NEW telldata::TtLayer(laydef));
+   return stdADDBOXp::execute();
 }
 
 //=============================================================================
@@ -416,6 +486,23 @@ int tellstdfunc::stdADDPOLY::execute()
    delete tlay;
    RefreshGL();
    return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::stdADDPOLY_T::stdADDPOLY_T(telldata::typeID retype, bool eor) :
+      stdADDPOLY(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor,parsercmd::sdbrUNSORTED)
+{
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtList(telldata::tn_pnt)));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+}
+
+int tellstdfunc::stdADDPOLY_T::execute()
+{
+   word layNum = getWordValue();
+   tell_log(console::MT_WARNING, "The function \"addpoly(int list,int)\" is depreciated.\nPlease use \"addpoly(int list,layer)\" instead");
+   LayerDef laydef(layNum, DEFAULT_DTYPE);
+   OPstack.push(DEBUG_NEW telldata::TtLayer(laydef));
+   return stdADDPOLY::execute();
 }
 
 //=============================================================================
@@ -503,6 +590,23 @@ int tellstdfunc::stdDRAWPOLY::execute()
 }
 
 //=============================================================================
+tellstdfunc::stdDRAWPOLY_T::stdDRAWPOLY_T(telldata::typeID retype, bool eor) :
+      stdDRAWPOLY(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
+{
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+
+}
+
+int tellstdfunc::stdDRAWPOLY_T::execute()
+{
+   word layNum = getWordValue();
+   tell_log(console::MT_WARNING, "The function \"addpoly(int)\" is depreciated.\nPlease use \"addpoly(layer)\" instead");
+   LayerDef laydef(layNum, DEFAULT_DTYPE);
+   OPstack.push(DEBUG_NEW telldata::TtLayer(laydef));
+   return stdDRAWPOLY::execute();
+}
+
+//=============================================================================
 tellstdfunc::stdDRAWPOLY_D::stdDRAWPOLY_D(telldata::typeID retype, bool eor) :
       stdDRAWPOLY(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {}
@@ -581,6 +685,24 @@ int tellstdfunc::stdADDWIRE::execute()
    delete tlay;
    RefreshGL();
    return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::stdADDWIRE_T::stdADDWIRE_T(telldata::typeID retype, bool eor) :
+      stdADDWIRE(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor,parsercmd::sdbrUNSORTED)
+{
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtList(telldata::tn_pnt)));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+}
+
+int tellstdfunc::stdADDWIRE_T::execute()
+{
+   word layNum = getWordValue();
+   tell_log(console::MT_WARNING, "The function \"addwire(int list,real,int)\" is depreciated.\nPlease use \"addwire(int list,real,layer)\" instead");
+   LayerDef laydef(layNum, DEFAULT_DTYPE);
+   OPstack.push(DEBUG_NEW telldata::TtLayer(laydef));
+   return stdADDWIRE::execute();
 }
 
 //=============================================================================
@@ -668,6 +790,23 @@ int tellstdfunc::stdDRAWWIRE::execute()
    delete tlay;
    RefreshGL();
    return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::stdDRAWWIRE_T::stdDRAWWIRE_T(telldata::typeID retype, bool eor) :
+      stdDRAWWIRE(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
+{
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtReal()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+}
+
+int tellstdfunc::stdDRAWWIRE_T::execute()
+{
+   word layNum = getWordValue();
+   tell_log(console::MT_WARNING, "The function \"addwire(real,int)\" is depreciated.\nPlease use \"addwire(real,layer)\" instead");
+   LayerDef laydef(layNum, DEFAULT_DTYPE);
+   OPstack.push(DEBUG_NEW telldata::TtLayer(laydef));
+   return stdDRAWWIRE::execute();
 }
 
 //=============================================================================
@@ -1243,6 +1382,22 @@ int tellstdfunc::stdUSINGLAYER::execute()
 }
 
 //=============================================================================
+tellstdfunc::stdUSINGLAYER_T::stdUSINGLAYER_T(telldata::typeID retype, bool eor) :
+      stdUSINGLAYER(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
+{
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
+}
+
+int tellstdfunc::stdUSINGLAYER_T::execute()
+{
+   word layNum = getWordValue();
+   tell_log(console::MT_WARNING, "The function \"usinglayer(int)\" is depreciated.\nPlease use \"usinglayer(layer)\" instead");
+   LayerDef laydef(layNum, DEFAULT_DTYPE);
+   OPstack.push(DEBUG_NEW telldata::TtLayer(laydef));
+   return stdUSINGLAYER::execute();
+}
+
+//=============================================================================
 tellstdfunc::stdUSINGLAYER_S::stdUSINGLAYER_S(telldata::typeID retype, bool eor) :
       stdUSINGLAYER(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
@@ -1272,3 +1427,4 @@ int tellstdfunc::stdUSINGLAYER_S::execute()
     return EXEC_ABORT;
   }
 }
+

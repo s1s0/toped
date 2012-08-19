@@ -47,6 +47,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA_UNDO(lgcMERGE          );  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(lgcSTRETCH        );  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdCHANGELAY      );  // undo - implemented
+   TELL_STDCMD_CLASSB(stdCHANGELAY_T  , stdCHANGELAY  );
    TELL_STDCMD_CLASSA_UNDO(stdCHANGEREF      );  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdCHANGESTRING   );  // undo - implemented
 
