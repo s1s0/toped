@@ -2317,12 +2317,16 @@ int parsercmd::cmdMAIN::execute()
       if (EXEC_NEXT == retexec) retexec = a->execute();
       delete a;
    }
-   if (_dbUnsorted)
+   try
    {
-      cmdSTDFUNC* sortFunc = getIntFuncBody("$sort_db");
-      sortFunc->execute();
-      _dbUnsorted = false;
+      if (_dbUnsorted)
+      {
+         cmdSTDFUNC* sortFunc = getIntFuncBody("$sort_db");
+         sortFunc->execute();
+         _dbUnsorted = false;
+      }
    }
+   catch (EXPTN&) {return EXEC_ABORT;}
    return retexec;
 }
 
