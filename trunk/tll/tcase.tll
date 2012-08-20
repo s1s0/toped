@@ -21,7 +21,7 @@
 //        $Author$
 //===========================================================================
 
-//#include "$TPD_GLOBAL/tll/seed.tll"
+#include "$TPD_GLOBAL/tll/seed.tll"
 // Some DRC rules defined as global variables
 const real _actOverCont = 1.5;
 const real _mincont = 2;
