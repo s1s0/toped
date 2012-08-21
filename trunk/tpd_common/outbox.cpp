@@ -101,7 +101,7 @@ wxWindow*               TpdPost::_statusBar     = NULL;
 wxWindow*               TpdPost::_topBrowsers   = NULL;
 wxWindow*               TpdPost::_layBrowser    = NULL;
 wxWindow*               TpdPost::_cllBrowser    = NULL;
-//wxWindow*               TpdPost::_cmdLine       = NULL;
+wxWindow*               TpdPost::_cmdLine       = NULL;
 wxWindow*               TpdPost::_tllFuncList   = NULL;
 wxDialog*               TpdPost::_techEditor    = NULL;
 wxWindow*               TpdPost::_mainWindow    = NULL;
@@ -415,7 +415,7 @@ TpdPost::TpdPost(wxWindow* mainWindow)
    _topBrowsers = _mainWindow->FindWindow(tui::ID_WIN_BROWSERS);
    _layBrowser  = _mainWindow->FindWindow(tui::ID_PNL_LAYERS);
    _cllBrowser  = _mainWindow->FindWindow(tui::ID_PNL_CELLS);
-//   _cmdLine     = _mainWindow->FindWindow(tui::ID_CMD_LINE);
+   _cmdLine     = _mainWindow->FindWindow(tui::ID_CMD_LINE);
    _tllFuncList = _mainWindow->FindWindow(tui::ID_TELL_FUNCS);
    _techEditor  = NULL;
    CmdList = static_cast<console::TELLFuncList*>(_tllFuncList);
@@ -534,6 +534,20 @@ void TpdPost::addDRCtab()
    wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
    eventADDTAB.SetInt(tui::BT_ADDDRC_TAB);
    wxPostEvent(_topBrowsers, eventADDTAB);
+}
+
+//Handle double click to name of function, add the function to command line
+//There is hack here: direct access to command line using pointer to window
+void TpdPost::addTextToCmd(const std::string& text)
+{
+   assert(_cmdLine);
+   wxTextCtrl* cmd = static_cast<wxTextCtrl*>(_cmdLine);
+   cmd->WriteText(text);
+   //Set cursor between parenthesis
+   long cursorPos = cmd->GetInsertionPoint()- 2;
+   cmd->SetInsertionPoint(cursorPos);
+   //Make commandline active
+   cmd->SetFocus();
 }
 
 void TpdPost::clearGDStab()
@@ -775,6 +789,7 @@ int wxCALLBACK wxListCompareFunction(TmpWxIntPtr item1, TmpWxIntPtr item2, TmpWx
 
 BEGIN_EVENT_TABLE( console::TELLFuncList, wxListCtrl )
    EVT_TECUSTOM_COMMAND(wxEVT_FUNC_BROWSER, -1, TELLFuncList::OnCommand)
+   EVT_LEFT_DCLICK(TELLFuncList::onLMouseDblClk)
 END_EVENT_TABLE()
 
 console::TELLFuncList::TELLFuncList(wxWindow *parent, wxWindowID id,
@@ -848,6 +863,23 @@ void console::TELLFuncList::OnCommand(wxCommandEvent& event)
       case console::FT_FUNCTION_SORT:SortItems(wxListCompareFunction,0); break;
       default: assert(false); break;
    }
+}
+
+void console::TELLFuncList::onLMouseDblClk(wxMouseEvent& event)
+{
+   wxString cmd; 
+   int flags;
+   wxPoint pt = event.GetPosition();
+   long id = HitTest(pt, flags);
+   if(id != wxNOT_FOUND)
+   {
+      wxString func = GetItemText(id, 1);
+      cmd << func << wxT("();");
+      std::string tempstr( cmd.mb_str(wxConvUTF8 ) );
+      TpdPost::addTextToCmd(tempstr);
+   }
+   else
+      event.Skip();
 }
 
 //=============================================================================
