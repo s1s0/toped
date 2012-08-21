@@ -182,6 +182,7 @@ namespace console {
          virtual             ~TELLFuncList();
          void                 addFunc(wxString, void*);
          void                 OnCommand(wxCommandEvent&);
+         void                 onLMouseDblClk(wxMouseEvent&);
          std::string          getItemFunc(TmpWxIntPtr item1);
       protected:
          typedef std::map<TmpWxIntPtr,std::string> FuncItems;
@@ -234,6 +235,7 @@ class TpdPost {
       static void addCIFtab(bool);
       static void addOAStab(bool);
       static void addDRCtab();
+      static void addTextToCmd(const std::string& text);
       static void clearGDStab();
       static void clearCIFtab();
       static void clearOAStab();
