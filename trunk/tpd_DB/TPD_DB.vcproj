@@ -259,6 +259,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\tedbac.cpp"
+				>
+			</File>
+			<File
 				RelativePath="tedcell.cpp"
 				>
 				<FileConfiguration
@@ -397,6 +401,10 @@
 			</File>
 			<File
 				RelativePath=".\tedat_ext.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tedbac.h"
 				>
 			</File>
 			<File
