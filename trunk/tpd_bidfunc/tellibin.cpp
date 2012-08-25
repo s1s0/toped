@@ -76,6 +76,13 @@ NameList* tellstdfunc::stdSPRINTF::callingConv(const telldata::typeMAP*)
    return argtypes;
 }
 
+std::string tellstdfunc::stdSPRINTF::getHelp()
+{
+   std::string str("Write formatted data to the Tell log\n");
+   str += "void printf( format [,param [,param [,…]]] )";
+   return str;
+}
+
 int tellstdfunc::stdSPRINTF::execute()
 {
    word numParams = getWordValue();
@@ -172,6 +179,13 @@ NameList* tellstdfunc::stdECHO::callingConv(const telldata::typeMAP*)
    argtypes->push_back("void");
    argtypes->push_back("<...anything...>");
    return argtypes;
+}
+
+std::string tellstdfunc::stdECHO::getHelp()
+{
+   std::string str("Prints the value of a TELL variable\n");
+   str += "void echo( variable )";
+   return str;
 }
 
 int tellstdfunc::stdECHO::execute()

@@ -708,12 +708,14 @@ void TpdPost::parseCommand(const wxString cmd)
    wxPostEvent(_mainWindow, eventPARSE);
 }
 
-void TpdPost::tellFnAdd(const std::string name, void* arguments)
+void TpdPost::tellFnAdd(const std::string name, const std::string help, void* arguments)
 {
    wxCommandEvent eventFUNCTION_ADD(wxEVT_FUNC_BROWSER);
    eventFUNCTION_ADD.SetString(wxString(name.c_str(), wxConvUTF8));
    eventFUNCTION_ADD.SetClientData(arguments);
    eventFUNCTION_ADD.SetInt(console::FT_FUNCTION_ADD);
+   wxStringClientData *helpString = DEBUG_NEW wxStringClientData(wxString(help.c_str(), wxConvUTF8));
+   eventFUNCTION_ADD.SetClientObject(helpString);
    wxPostEvent(_tllFuncList, eventFUNCTION_ADD);
 }
 
@@ -789,6 +791,7 @@ int wxCALLBACK wxListCompareFunction(TmpWxIntPtr item1, TmpWxIntPtr item2, TmpWx
 
 BEGIN_EVENT_TABLE( console::TELLFuncList, wxListCtrl )
    EVT_TECUSTOM_COMMAND(wxEVT_FUNC_BROWSER, -1, TELLFuncList::OnCommand)
+   EVT_MOTION(TELLFuncList::onMouseMove)
    EVT_LEFT_DCLICK(TELLFuncList::onLMouseDblClk)
 END_EVENT_TABLE()
 
@@ -810,8 +813,9 @@ console::TELLFuncList::~TELLFuncList()
    DeleteAllItems();
 }
 
-void console::TELLFuncList::addFunc(wxString name, void* arguments)
+void console::TELLFuncList::addFunc(wxString name, wxClientData* helpObject, void* arguments)
 {
+   wxString helpString = static_cast<wxStringClientData*>(helpObject)->GetData();
    NameList* arglist = static_cast<NameList*>(arguments);
    wxListItem row;
    int curItemNum = GetItemCount();
@@ -830,6 +834,7 @@ void console::TELLFuncList::addFunc(wxString name, void* arguments)
    SetColumnWidth(1, wxLIST_AUTOSIZE);
    //
    _funcItems[(TmpWxIntPtr)curItemNum] = name.mb_str(wxConvUTF8);
+   _helpItems[name] = helpString;
    //
    wxString strlist(wxT("( "));
    while (!arglist->empty())
@@ -859,10 +864,24 @@ void console::TELLFuncList::OnCommand(wxCommandEvent& event)
    int command = event.GetInt();
    switch (command)
    {
-      case console::FT_FUNCTION_ADD:addFunc(event.GetString(), event.GetClientData()); break;
+      case console::FT_FUNCTION_ADD:addFunc(event.GetString(), event.GetClientObject(), event.GetClientData()); break;
       case console::FT_FUNCTION_SORT:SortItems(wxListCompareFunction,0); break;
       default: assert(false); break;
    }
+}
+void console::TELLFuncList::onMouseMove(wxMouseEvent& event)
+{
+   int flags;
+   wxPoint pt = event.GetPosition();
+   long id = HitTest(pt, flags);
+   if(id != wxNOT_FOUND)
+   {
+      wxString funcName = GetItemText(id, 1); 
+      wxString toolTip = _helpItems[funcName];
+      this->SetToolTip(toolTip);
+   }
+   else
+      event.Skip();
 }
 
 void console::TELLFuncList::onLMouseDblClk(wxMouseEvent& event)
