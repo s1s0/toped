@@ -180,13 +180,16 @@ namespace console {
                       const wxSize& size = wxDefaultSize,
                       long style = wxLC_REPORT | wxLC_HRULES  | wxLC_SINGLE_SEL);
          virtual             ~TELLFuncList();
-         void                 addFunc(wxString, void*);
+         void                 addFunc(wxString, wxClientData*, void*);
          void                 OnCommand(wxCommandEvent&);
+         void                 onMouseMove(wxMouseEvent&);
          void                 onLMouseDblClk(wxMouseEvent&);
          std::string          getItemFunc(TmpWxIntPtr item1);
       protected:
-         typedef std::map<TmpWxIntPtr,std::string> FuncItems;
+         typedef std::map<TmpWxIntPtr, std::string> FuncItems;
+         typedef std::map<wxString, std::string> HelpItems;
          FuncItems    _funcItems;
+         HelpItems    _helpItems;
          DECLARE_EVENT_TABLE();
    };
 
@@ -252,7 +255,7 @@ class TpdPost {
       static void treeRenameMember(const char*, const char*);
       static void treeMarkGrcMember(const char*, bool);
       static void parseCommand(const wxString);
-      static void tellFnAdd(const std::string, void*);
+      static void tellFnAdd(const std::string, const std::string, void*);
       static void tellFnSort();
       static void reloadTellFuncs();
       static void execExt(const wxString);

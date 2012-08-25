@@ -121,6 +121,7 @@
       void        undo_cleanup() {};                              \
       int         argsOK(telldata::argumentQ* amap, bool&);       \
       NameList*   callingConv(const telldata::typeMAP*);          \
+      std::string getHelp();                                      \
    }
 #endif
 
