@@ -816,6 +816,7 @@ console::TELLFuncList::~TELLFuncList()
 void console::TELLFuncList::addFunc(wxString name, wxClientData* helpObject, void* arguments)
 {
    wxString helpString = static_cast<wxStringClientData*>(helpObject)->GetData();
+   delete helpObject;
    NameList* arglist = static_cast<NameList*>(arguments);
    wxListItem row;
    int curItemNum = GetItemCount();
