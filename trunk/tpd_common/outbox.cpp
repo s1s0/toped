@@ -542,7 +542,7 @@ void TpdPost::addTextToCmd(const std::string& text)
 {
    assert(_cmdLine);
    wxTextCtrl* cmd = static_cast<wxTextCtrl*>(_cmdLine);
-   cmd->WriteText(text);
+   cmd->WriteText(wxString(text.c_str(), wxConvUTF8));
    //Set cursor between parenthesis
    long cursorPos = cmd->GetInsertionPoint()- 2;
    cmd->SetInsertionPoint(cursorPos);
@@ -877,9 +877,18 @@ void console::TELLFuncList::onMouseMove(wxMouseEvent& event)
    long id = HitTest(pt, flags);
    if(id != wxNOT_FOUND)
    {
-      wxString funcName = GetItemText(id, 1); 
-      wxString toolTip = _helpItems[funcName];
-      this->SetToolTip(toolTip);
+      wxListItem row;
+      row.SetId(id);
+      row.SetMask(wxLIST_MASK_TEXT);
+      row.SetColumn(1);
+      if (GetItem(row))
+      {
+         wxString funcName = row.GetText();
+         wxString toolTip = _helpItems[funcName];
+         SetToolTip(toolTip);
+      }
+      else
+         event.Skip();
    }
    else
       event.Skip();
@@ -893,10 +902,19 @@ void console::TELLFuncList::onLMouseDblClk(wxMouseEvent& event)
    long id = HitTest(pt, flags);
    if(id != wxNOT_FOUND)
    {
-      wxString func = GetItemText(id, 1);
-      cmd << func << wxT("();");
-      std::string tempstr( cmd.mb_str(wxConvUTF8 ) );
-      TpdPost::addTextToCmd(tempstr);
+      wxListItem row;
+      row.SetId(id);
+      row.SetMask(wxLIST_MASK_TEXT);
+      row.SetColumn(1);
+      if (GetItem(row))
+      {
+         wxString func = row.GetText();
+         cmd << func << wxT("();");
+         std::string tempstr( cmd.mb_str(wxConvUTF8 ) );
+         TpdPost::addTextToCmd(tempstr);
+      }
+      else
+         event.Skip();
    }
    else
       event.Skip();
