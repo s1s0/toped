@@ -187,7 +187,7 @@ namespace console {
          std::string          getItemFunc(TmpWxIntPtr item1);
       protected:
          typedef std::map<TmpWxIntPtr, std::string> FuncItems;
-         typedef std::map<wxString, std::string> HelpItems;
+         typedef std::map<wxString, wxString> HelpItems;
          FuncItems    _funcItems;
          HelpItems    _helpItems;
          DECLARE_EVENT_TABLE();

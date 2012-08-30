@@ -1617,9 +1617,9 @@ browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoi
    preparePicture();
 
    wxString caption;
-   caption << "{" << _layer->laydef().num()
-           << "," << _layer->laydef().typ()
-           << "}" << wxString(_layer->name().c_str(),wxConvUTF8);
+   caption << wxT("{") << _layer->laydef().num()
+           << wxT(",") << _layer->laydef().typ()
+           << wxT("}") << wxString(_layer->name().c_str(),wxConvUTF8);
    SetToolTip(caption);
 
 }
@@ -1745,7 +1745,7 @@ void browsers::LayerButton::onMiddleClick(wxMouseEvent &event)
 
 void browsers::LayerButton::onRightClick(wxMouseEvent& evt)
 {
-   wxMenu menu(GetToolTipText());
+   wxMenu menu(GetToolTip()->GetTip());
 //   wxString boza = ;
 //   menu.SetTitle(boza);
    menu.Append(LAYERCURRENTEDIT, wxT("Edit layer...")); //if selected call LayerButton::OnEditLayer tui::TMLAY_EDIT
