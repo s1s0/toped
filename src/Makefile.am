@@ -22,11 +22,13 @@ toped_SOURCES = browsers.cpp layoutcanvas.cpp main.cpp resourcecenter.cpp \
 #########################################################################
 #LEX_OUTPUT_ROOT = lex.tell
 INCLUDES = -I$(top_srcdir)/tpd_common    \
+           -I$(top_srcdir)/tpd_GL        \
            -I$(top_srcdir)/tpd_DB        \
            -I$(top_srcdir)/tpd_ifaces	  \
            -I$(top_srcdir)/tpd_parser    \
            -I$(top_srcdir)/tpd_bidfunc
 toped_LDADD = $(top_builddir)/tpd_common/libtpd_common.la     \
+              $(top_builddir)/tpd_GL/libtpd_GL.la             \
               $(top_builddir)/tpd_DB/libtpd_DB.la             \
               $(top_builddir)/tpd_ifaces/libtpd_ifaces.la     \
               $(top_builddir)/tpd_parser/libtpd_parser.la     \

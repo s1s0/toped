@@ -1,5 +1,6 @@
 SUBDIRS_MAIN = ui                                         \
                tpd_common                                 \
+               tpd_GL                                     \
                tpd_DB                                     \
                tpd_ifaces                                 \
                tpd_parser                                 \
