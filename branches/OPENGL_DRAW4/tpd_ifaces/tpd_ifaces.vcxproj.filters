@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{dd9f045c-7025-497c-8c02-1e5ec887e298}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{78f6c53e-3d24-44a0-816a-6d8e4a2d668d}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl</Extensions>
+    </Filter>
+    <Filter Include="FlexBison Files">
+      <UniqueIdentifier>{071231db-ac56-42dd-8903-e7371caa9bca}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="calbr_reader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cif_io.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cif_lex.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cif_yacc.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="gds_io.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="oasis_io.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tpdph.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="calbr_reader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cif_io.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cif_yacc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gds_io.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="oasis_io.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tpdph.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="cif_lex.ll">
+      <Filter>FlexBison Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="cif_yacc.yy">
+      <Filter>FlexBison Files</Filter>
+    </CustomBuild>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,181 @@
+//===========================================================================
+//                                                                          =
+// ------------------------------------------------------------------------ =
+//                      TTTTT    EEEE     L       L                         =
+//                      T T T    E        L       L                         =
+//                        T      EEE      L       L                         =
+//                        T      E        L       L                         =
+//                        T      EEEEE    LLLLL   LLLLL                     =
+//                                                                          =
+//   This file is a part of Toped project (C) 2001-2012 Toped developers    =
+// ------------------------------------------------------------------------ =
+//           $URL$
+//        Created: Tue Jun 28 13:16:45 BST 2005
+//     Originator: Svilen Krustev - skr@toped.org.uk
+//    Description: Basic TELL callback tests
+//---------------------------------------------------------------------------
+//  Revision info
+//---------------------------------------------------------------------------
+//      $Revision$
+//          $Date$
+//        $Author$
+//===========================================================================
+
+
+int simpleAdd(int a, int b)
+{
+  return (a + b);
+}
+
+int simpleSub(int a, int b)
+{
+  return (a - b);
+}
+
+int simpleUMinus(int a)
+{
+  return -a;
+}
+
+/* The callback type definition follows the function definition syntax
+ * with two differencies:
+ * - "callback" keyword marks the start of the definition
+ * - the argument list is anonymous i.e. just a list of argument types
+callback <return_type> <functypename> ([<argument> [, <argument> [...]]])
+*/
+
+
+// define a callback type unifunctype ...
+callback int unifunctype(int,int);
+
+// ... and a variable unifunc of that type
+unifunctype unifuncA = &simpleAdd;
+printf("Callback of type unifuncA - returns %d\n",unifuncA(2,3));
+unifuncA = &simpleSub;
+printf("Callback of type unifuncA - returns %d\n",unifuncA(2,3));
+
+// or define directly a variable unifunc of anonymous callback type
+callback int (int,int) unifuncB = &simpleAdd;
+printf("Callback of type unifuncB - returns %d\n",unifuncB(2,3));
+unifuncB = &simpleSub;
+printf("Callback of type unifuncB - returns %d\n",unifuncB(2,3));
+
+//same for the function argument list - using a pre-defined callback type
+void funcArguFuncA(int a, int b, unifunctype unifunc)
+{
+   int result = unifunc(a,b);
+   string buffer = sprintf ("%d fparam %d is %d", a, b, result);
+   printf ("[%s] \n",buffer);
+}
+
+// ... or anonymous callback type
+void funcArguFuncB(int a, int b, callback int (int,int) unifunc)
+{
+   int result = unifunc(a,b);
+   string buffer = sprintf ("%d fparam %d is %d", a, b, result);
+   printf ("[%s] \n",buffer);
+}
+
+funcArguFuncB(2,3,&simpleAdd);
+funcArguFuncB(2,3,&simpleSub);
+funcArguFuncA(2,3,&simpleAdd);
+funcArguFuncA(2,3,&simpleSub);
+
+//callbacks using build-in functions
+callback real (real) trigo;
+trigo = &sin;
+printf("trigo callback of angle 30 deg is %e\n", trigo(30));
+trigo = &cos;
+printf("trigo callback of angle 30 deg is %e\n", trigo(30));
+
+// assigning one callback variable to another one
+unifunctype unifuncZ = unifuncA;
+// and using the latter
+printf("Callback of type unifuncZ - returns %d\n",unifuncZ(2,3));
+funcArguFuncA(2,3,unifuncZ);
+
+//
+// callbacks from functions
+//
+void cbTestFunction(int angle, bool sORc)
+{
+  funcArguFuncB(2,3,&simpleAdd);
+  funcArguFuncA(2,3,&simpleAdd);
+  callback real (real) localtrig;
+  if (sORc)
+    localtrig = &sin;
+  else
+    localtrig = &cos;
+  printf("trigo callback of angle %d deg is %e\n", angle, localtrig(angle));
+}
+
+cbTestFunction(30, true);
+cbTestFunction(30, false);
+
+//
+// defining the callback with the same name as the name and param list of the local function
+//
+real bozo(real a)
+{
+  return -a;
+}
+
+callback real Toto (real);
+Toto bozo = &sin; // will overshadow the previous (regular) definition of bozo
+printf("Expected value is   1 -> %f\n", bozo(90)); // i.e. will call sin
+
+//bozo = &bozo; // This one will crash dramatically. Looks like it pushes 
+//the parser in some kind of recursion - TO BE INVESTIGATED!
+//printf("Expected value is -90 -> %f\n", bozo(90)); // i.e. will call sin
+
+
+//
+// Call back in a structure
+//
+callback real Ttrigo(real);
+struct tstruct {
+  real    angle;
+  Ttrigo  operation
+};
+
+tstruct cbInStruct;
+cbInStruct.angle = 90;
+cbInStruct.operation = &sin;
+// direct call is not possible i.e.
+// real result = cbInStruct.operation(cbInStruct.angle);
+// will not be allowed by the parser, yet a call is still possible
+// via an intermediate variable
+Ttrigo intermCb = cbInStruct.operation;
+printf("Indirect call of a callback in structure - Expected value is   1 -> %f\n", intermCb(cbInStruct.angle));
+
+//
+// Call back in a list
+//
+Ttrigo list cbList[2];
+
+cbList[0] = &sin;
+cbList[1] = &cos;
+
+// again here as with a structures - direct call is not possible, we need
+// intermediate variable
+intermCb = cbList[0];
+printf("Indirect call of a callback list member - Expected value is   1 -> %f\n", intermCb(90));
+intermCb = cbList[1];
+printf("Indirect call of a callback list member - Expected value is   0 -> %f\n", intermCb(90));
+
+//=============================================================================
+//
+// Error conditions
+//
+//=============================================================================
+//callback int cbType1(int);
+//printf ("Next line shall report '%s'\n", "Incompatible operand types in assignment");
+//cbType1 cbCall1 = &simpleSub;
+
+//printf ("Next line shall report '%s'\n", "Incompatible operand types in assignment");
+//callback int (int) cbCall2 = &simpleAdd;
+
+//printf ("Next line shall report '%s'\n", "unknown function name or wrong parameter list");
+//funcArguFuncA(2,3,&simpleUMinus);
+//printf ("Next line shall report '%s'\n", "unknown function name or wrong parameter list");
+//funcArguFuncB(2,3,&simpleUMinus);
