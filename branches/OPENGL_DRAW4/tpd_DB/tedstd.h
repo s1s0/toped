@@ -81,18 +81,6 @@ namespace logicop {
 
 namespace laydata {
 
-   const word _lmnone   = 0x0000;
-   const word _lmbox    = 0x0001;
-   const word _lmpoly   = 0x0002;
-   const word _lmwire   = 0x0004;
-   const word _lmtext   = 0x0008;
-   const word _lmref    = 0x0010;
-   const word _lmaref   = 0x0020;
-   const word _lmpref   = 0x0040;
-   const word _lmapref  = 0x0080;
-   const word _lmgrcref = 0x0100;
-   const word _lmall    = 0xffff;
-
    typedef enum {
       shp_OK         = 0x0000,
       shp_ident      = 0x0001, // identical or one line points removed
@@ -112,7 +100,7 @@ namespace laydata {
    class EditObject;
    class TdtCell;
    class TdtDefaultCell;
-   class TdtCellRef;
+//   class TdtCellRef;
    class TdtDesign;
    class TdtLibrary;
    class TdtLibDir;
@@ -120,7 +108,7 @@ namespace laydata {
    typedef  LayerContainer<ShapeList*>              AtticList;
    typedef  std::map<std::string, TdtDefaultCell*>  CellMap;
    typedef  TdtDefaultCell*                         CellDefin;
-   typedef  std::deque<const TdtCellRef*>           CellRefStack;
+//   typedef  std::deque<const TdtCellRef*>           CellRefStack;
    typedef  std::deque<EditObject*>                 EditCellStack;
    typedef  std::list<const CellMap*>               LibCellLists;
    typedef  std::list<TdtDefaultCell*>              CellDefList;
@@ -173,58 +161,6 @@ namespace laydata {
    bool pathConvert(PointVector&, int4b, int4b );
 
 
-   /**
-    * The primary subject of this class is to generate the wire contour
-    * from its central line. It is supposed to deal with all of the corner
-    * cases and especially when the wire contains collinear segments. The
-    * class requires the point data in integer array format. It is not
-    * copying the original data - just stores a pointer to it. Thats' why
-    * there is no destructor defined.
-    */
-   class WireContour {
-      public:
-                           WireContour(const int4b*, unsigned, const WireWidth);
-         unsigned          csize()         {return _cdata.size(); } //! return the number of the contour points
-         unsigned          lsize()         {return _lsize;        } //! return the number of the central line points
-         void              getArrayData(int4b*);
-         void              getVectorData(PointVector&);
-         DBbox             getCOverlap();
-      private:
-         typedef std::list<TP> PointList;
-         void              endPnts(word, word, bool);
-         void              mdlPnts(word, word, word);
-         void              mdlAcutePnts(word, word, word, int, int);
-         byte              chkCollinear(word,word,word);
-         void              colPnts(word,word,word);
-         TP                mdlCPnt(word, word);
-         int               orientation(word, word, word);
-         double            getLambda(word i1, word i2, word ii);
-         int               xangle(word i1, word i2);
-         const int4b*      _ldata; //! The original wire central line. Do not delete it. Do not alter it!
-         const unsigned    _lsize; //! The number of points in the wire central line
-         const WireWidth   _width; //! The width of the wire
-         PointList         _cdata; //! The generated contour line in a list of points form
-   };
-
-   /**
-    * An auxiliary class to wrap around the WireContour class. It makes WireContour
-    * usable with a point list input data or with data which needs coordinate
-    * transformations. Also it defines a method to dump the wire contour in a PointVector
-    * format which is usable by the basic renderer.
-    */
-   class WireContourAux {
-      public:
-                          WireContourAux(const int4b*, unsigned, const WireWidth, const CTM&);
-                          WireContourAux(const PointVector&, const WireWidth);
-                          WireContourAux(const PointVector&, const WireWidth, const TP);
-                         ~WireContourAux();
-         void             getRenderingData(PointVector&);
-         void             getLData(PointVector&);
-         void             getCData(PointVector&);
-      private:
-         WireContour*     _wcObject;
-         int4b*           _ldata;
-   };
 }
 
 namespace auxdata {

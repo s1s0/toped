@@ -29,7 +29,7 @@
 #include <sstream>
 #include "tenderer.h"
 #include "viewprop.h"
-#include "tedat.h"
+//#include "tedat.h"
 
 
 GLUtriangulatorObj*          TessellPoly::tenderTesel = NULL;
