@@ -806,8 +806,7 @@ int tellstdfunc::PSexportTOP::execute()
             layprop::DrawProperties* drawProp;
             if (PROPC->lockDrawProp(drawProp))
             {
-               PSFile psex(filename);
-               drawProp->psWrite(psex);
+               PSFile psex(filename, *drawProp);
                tDesign->psWrite(psex, excell, *drawProp);
                LogFile << LogFile.getFN() << "(\""<< cellname << "\","
                                           << ",\"" << filename << "\");";

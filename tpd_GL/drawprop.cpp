@@ -1597,18 +1597,6 @@ const layprop::LaySetList& layprop::DrawProperties::getCurSetList() const
    return _laySetDb; // dummy, to prevent warnings
 }
 
-void layprop::DrawProperties::psWrite(PSFile& psf) const
-{
-   for(ColorMap::const_iterator CI = _layColors.begin(); CI != _layColors.end(); CI++)
-   {
-      tellRGB* the_color = CI->second;
-      psf.defineColor( CI->first.c_str() , the_color->red(),
-                       the_color->green(), the_color->blue() );
-   }
-
-   for(FillMap::const_iterator CI = _layFill.begin(); CI != _layFill.end(); CI++)
-      psf.defineFill( CI->first.c_str() , CI->second);
-}
 
 void  layprop::DrawProperties::hideLayer(const LayerDef& laydef, bool hide)
 {
