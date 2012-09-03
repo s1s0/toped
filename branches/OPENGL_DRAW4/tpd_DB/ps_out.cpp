@@ -31,7 +31,7 @@
 #include "outbox.h"
 #include "ps_out.h"
 
-PSFile::PSFile(std::string fname)
+PSFile::PSFile(std::string fname, const layprop::DrawProperties& drawProp)
 {
    _fname = fname;
    _hierarchical = false;
@@ -58,6 +58,7 @@ PSFile::PSFile(std::string fname)
    fprintf(_psfh,"%%%%BoundingBox: (atend)\n");
    fprintf(_psfh,"%%%%EndComments\n");
    writeStdDefs();
+   writeProperties(drawProp);
 }
 
 void PSFile::writeStdDefs()
@@ -71,6 +72,23 @@ void PSFile::writeStdDefs()
    fprintf(_psfh,"/dp{gsave setlinecap setlinewidth ustrokepath false upath grestore dpl}bd\n");
    fprintf(_psfh,"/dc_ {ustroke}bd\n");
    fprintf(_psfh,"/tc_ {0.5 0.5 0.5 setrgbcolor}bd\n");
+}
+
+void PSFile::writeProperties(const layprop::DrawProperties& drawProp)
+{
+   NameList allColors;
+   drawProp.allColors(allColors);
+   for (NameList::const_iterator CC = allColors.begin(); CC != allColors.end(); CC++)
+   {
+      layprop::tellRGB coldef(drawProp.getColor(*CC));
+      defineColor( CC->c_str() , coldef.red(), coldef.green(), coldef.blue() );
+   }
+   NameList allPatterns;
+   drawProp.allFills(allPatterns);
+   for (NameList::const_iterator CC = allPatterns.begin(); CC != allPatterns.end(); CC++)
+   {
+      defineFill( CC->c_str() , drawProp.getFill(*CC));
+   }
 }
 
 bool PSFile::checkCellWritten(std::string cellname)

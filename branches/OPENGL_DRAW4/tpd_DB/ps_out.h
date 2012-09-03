@@ -28,13 +28,13 @@
 #ifndef PS_OUT_H_DEFINED
 #define PS_OUT_H_DEFINED
 
-#include "tedstd.h"
+#include "drawprop.h"
 
       //namespace ...
 
 class PSFile {
 public:
-                  PSFile(std::string);
+                  PSFile(std::string, const layprop::DrawProperties&);
    bool           checkCellWritten(std::string);
    void           registerCellWritten(std::string);
    void           cellHeader(std::string, DBbox);
@@ -52,6 +52,7 @@ public:
                  ~PSFile();
 protected:
    void           writeStdDefs();
+   void           writeProperties(const layprop::DrawProperties&);
    FILE*          _psfh;
    std::string    _fname;
    NameList       _childnames;
