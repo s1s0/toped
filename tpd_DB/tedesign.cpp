@@ -33,7 +33,6 @@
 #include "tedat.h"
 #include "viewprop.h"
 #include "tenderer.h"
-#include "ps_out.h"
 
 extern layprop::PropertyCenter*  PROPC;
 
@@ -187,23 +186,6 @@ void laydata::TdtLibrary::dbExport(DbExportFile& exportF)
       exportF.topcell()->dbExport(exportF, _cells, root_cell);
    }
    exportF.libraryFinish();
-}
-
-void laydata::TdtLibrary::psWrite(PSFile& psf, const TdtCell* top, const layprop::DrawProperties& drawprop)
-{
-   laydata::TDTHierTree* root_cell = _hiertree->GetMember(top);
-   if (psf.hier())
-   {
-      top->psWrite(psf, drawprop, &_cells, root_cell);
-      psf.pspage_header(top->cellOverlap());
-      psf.pspage_footer(top->name());
-   }
-   else
-   {
-      psf.pspage_header(top->cellOverlap());
-      top->psWrite(psf, drawprop, &_cells, root_cell);
-      psf.pspage_footer(top->name());
-   }
 }
 
 laydata::TdtDefaultCell* laydata::TdtLibrary::checkCell(std::string name, bool undeflib)

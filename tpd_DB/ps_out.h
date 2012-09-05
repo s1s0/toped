@@ -33,32 +33,32 @@
 
       //namespace ...
 
-class PSFile {
-public:
-                  PSFile(std::string, const layprop::DrawProperties&);
-   bool           checkCellWritten(std::string);
-   void           registerCellWritten(std::string);
-   void           cellHeader(std::string, DBbox);
-   void           cellFooter();
-   void           propSet(std::string, std::string);
-   void           poly(const int4b* const, unsigned, const DBbox);
-   void           wire(const int4b* const, unsigned, WireWidth, const DBbox);
-   void           text(std::string, const CTM);
-   void           cellref(std::string, const CTM);
-   void           pspage_header(const DBbox);
-   void           pspage_footer(std::string);
-   bool           hier()   {return _hierarchical;}
-                 ~PSFile();
-protected:
-   void           writeStdDefs();
-   void           writeProperties(const layprop::DrawProperties&);
-   void           defineColor(std::string, byte, byte, byte);
-   void           defineFill(std::string, const byte*);
-   FILE*          _psfh;
-   std::string    _fname;
-   NameList       _childnames;
-   bool           _hierarchical;
-};
+//class PSFile {
+//public:
+//                  PSFile(std::string, const layprop::DrawProperties&);
+//   bool           checkCellWritten(std::string);
+//   void           registerCellWritten(std::string);
+//   void           cellHeader(std::string, DBbox);
+//   void           cellFooter();
+//   void           propSet(std::string, std::string);
+//   void           poly(const int4b* const, unsigned, const DBbox);
+//   void           wire(const int4b* const, unsigned, WireWidth, const DBbox);
+//   void           text(std::string, const CTM);
+//   void           cellref(std::string, const CTM);
+//   void           pspage_header(const DBbox);
+//   void           pspage_footer(std::string);
+//   bool           hier()   {return _hierarchical;}
+//                 ~PSFile();
+//protected:
+//   void           writeStdDefs();
+//   void           writeProperties(const layprop::DrawProperties&);
+//   void           defineColor(std::string, byte, byte, byte);
+//   void           defineFill(std::string, const byte*);
+//   FILE*          _psfh;
+//   std::string    _fname;
+//   NameList       _childnames;
+//   bool           _hierarchical;
+//};
 
 
    class PsExportFile : public DbExportFile {

@@ -113,8 +113,6 @@ namespace laydata {
          virtual DBbox       getVisibleOverlap(const layprop::DrawProperties&);
          virtual void        write(OutputTdtFile* const, const CellMap&, const TDTHierTree*) const;
          virtual void        dbExport(DbExportFile&, const CellMap&, const TDTHierTree*) const;
-         virtual void        psWrite(PSFile&, const layprop::DrawProperties&,
-                                      const CellMap* = NULL, const TDTHierTree* = NULL) const;
          virtual void        collectUsedLays(const TdtLibDir*, bool, LayerDefList&) const;
          virtual void        renameChild(std::string, std::string) {assert(false); /* TdTDefaultCell can not be renamed */}
          bool                checkLayer(const LayerDef&) const;
@@ -153,8 +151,6 @@ namespace laydata {
       bool                 addChild(TdtDesign*, TdtDefaultCell*);
       virtual void         write(OutputTdtFile* const, const CellMap&, const TDTHierTree*) const;
       virtual void         dbExport(DbExportFile&, const CellMap&, const TDTHierTree*) const;
-      virtual void         psWrite(PSFile&, const layprop::DrawProperties&,
-                                   const CellMap* = NULL, const TDTHierTree* = NULL) const;
       virtual TDTHierTree* hierOut(TDTHierTree*&, TdtCell*, CellMap*, const TdtLibDir*);
       virtual DBbox        cellOverlap() const {return _cellOverlap;}
       void                 selectInBox(DBbox, const LayerDefSet&, word, bool pntsel = false);
