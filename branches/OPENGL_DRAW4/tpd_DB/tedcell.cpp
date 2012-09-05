@@ -35,7 +35,6 @@
 #include "viewprop.h"
 #include "tedesign.h"
 #include "tenderer.h"
-#include "ps_out.h"
 #include "outbox.h"
 
 extern layprop::FontLibrary* fontLib;
@@ -257,11 +256,6 @@ void laydata::TdtDefaultCell::openGlRender(tenderer::TopRend& rend, const CTM& t
 
 
 void laydata::TdtDefaultCell::motionDraw(const layprop::DrawProperties&, CtmQueue&, bool active) const
-{
-}
-
-void laydata::TdtDefaultCell::psWrite(PSFile&, const layprop::DrawProperties&,
-      const CellMap*, const TDTHierTree*) const
 {
 }
 
@@ -837,43 +831,6 @@ void laydata::TdtCell::dbExport(DbExportFile& exportf, const CellMap& allcells,
          DI->dbExport(exportf);
    }
    exportf.definitionFinish();
-}
-
-void laydata::TdtCell::psWrite(PSFile& psf, const layprop::DrawProperties& drawprop,
-                               const CellMap* allcells, const TDTHierTree* root) const
-{
-   if (psf.hier())
-   {
-      assert( root );
-      assert( allcells );
-      // We going to write the cells in hierarchical order. Children - first!
-      const laydata::TDTHierTree* Child= root->GetChild(ALL_LIB);
-      while (Child)
-      {
-         allcells->find(Child->GetItem()->name())->second->psWrite(psf, drawprop, allcells, Child);
-         Child = Child->GetBrother(ALL_LIB);
-      }
-      // If no more children and the cell has not been written yet
-      if (psf.checkCellWritten(name())) return;
-      //
-      std::string message = "...converting " + name();
-      tell_log(console::MT_INFO, message);
-   }
-   psf.cellHeader(name(),_cellOverlap);
-   // and now the layers
-   for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
-   {
-      if (!drawprop.layerHidden(lay()))
-      {
-         if (REF_LAY_DEF != lay())
-            psf.propSet(drawprop.getColorName(lay()), drawprop.getFillName(lay()));
-         for (QuadTree::Iterator DI = lay->begin(); DI != lay->end(); DI++)
-            DI->psWrite(psf, drawprop);
-      }
-   }
-   psf.cellFooter();
-   if (psf.hier())
-      psf.registerCellWritten(name());
 }
 
 laydata::TDTHierTree* laydata::TdtCell::hierOut(laydata::TDTHierTree*& Htree,

@@ -40,7 +40,6 @@
 #include "tedcell.h"
 #include "logicop.h"
 #include "tenderer.h"
-#include "ps_out.h"
 #include "outbox.h"
 
 //GLubyte select_mark[30] = {0x00, 0x00, 0x00, 0x00, 0x3F, 0xF8, 0x3F, 0xF8, 0x30, 0x18,
@@ -609,11 +608,6 @@ void laydata::TdtBox::dbExport(DbExportFile& exportF) const
    exportF.box(_pdata);
 }
 
-void laydata::TdtBox::psWrite(PSFile& gdsf, const layprop::DrawProperties&) const
-{
-   gdsf.poly(_pdata, 4, overlap());
-}
-
 DBbox laydata::TdtBox::overlap() const
 {
    return DBbox(_pdata[p1x], _pdata[p1y], _pdata[p2x], _pdata[p2y]);
@@ -1146,11 +1140,6 @@ void laydata::TdtPoly::dbExport(DbExportFile& exportF) const
    exportF.polygon(_pdata, _psize);
 }
 
-void laydata::TdtPoly::psWrite(PSFile& gdsf, const layprop::DrawProperties&) const
-{
-   gdsf.poly(_pdata, _psize, overlap());
-}
-
 DBbox laydata::TdtPoly::overlap() const
 {
    DBbox ovl(_pdata[0], _pdata[1]) ;
@@ -1587,11 +1576,6 @@ void laydata::TdtWire::dbExport(DbExportFile& exportF) const
    exportF.wire(_pdata, _psize, _width);
 }
 
-void laydata::TdtWire::psWrite(PSFile& gdsf, const layprop::DrawProperties&) const
-{
-   gdsf.wire(_pdata, _psize, _width, overlap());
-}
-
 DBbox laydata::TdtWire::overlap() const
 {
    laydata::WireContour wcontour(_pdata, _psize, _width);
@@ -1808,15 +1792,6 @@ std::string laydata::TdtCellRef::cellname() const
 void laydata::TdtCellRef::dbExport(DbExportFile& exportF) const
 {
    exportF.ref(_structure->name(), _translation);
-}
-
-void laydata::TdtCellRef::psWrite(PSFile& psf, const layprop::DrawProperties& drawprop) const
-{
-   psf.cellref(_structure->name(), _translation);
-   if (!psf.hier())
-   {
-     _structure->psWrite(psf, drawprop);
-   }
 }
 
 void laydata::TdtCellRef::ungroup(laydata::TdtDesign* ATDB, TdtCell* dst, AtticList* nshp)
@@ -2198,25 +2173,6 @@ void laydata::TdtCellAref::dbExport(DbExportFile& exportF) const
    exportF.aref(_structure->name(), _translation, _arrprops);
 }
 
-void laydata::TdtCellAref::psWrite(PSFile& psf, const layprop::DrawProperties& drawprop) const
-{
-   for (int i = 0; i < _arrprops.cols(); i++)
-   {// start/stop rows
-      for(int j = 0; j < _arrprops.rows(); j++)
-      { // start/stop columns
-         // for each of the visual array figures...
-         // ... get the translation matrix ...
-         CTM refCTM(_arrprops.displ(i,j), 1, 0, false);
-         refCTM *= _translation;
-         psf.cellref(_structure->name(), refCTM);
-         if (!psf.hier())
-         {
-            _structure->psWrite(psf, drawprop);
-         }
-      }
-   }
-}
-
 void  laydata::TdtCellAref::ungroup(laydata::TdtDesign* ATDB, TdtCell* dst, laydata::AtticList* nshp) {
    for (word i = 0; i < _arrprops.cols(); i++)
       for(word j = 0; j < _arrprops.rows(); j++) {
@@ -2497,14 +2453,6 @@ void laydata::TdtText::dbExport(DbExportFile& exportF) const
    exportF.text(_text, _translation);
 }
 
-void laydata::TdtText::psWrite(PSFile& gdsf, const layprop::DrawProperties& drawprop) const
-{
-   CTM fmtrx(_translation);
-   fmtrx.Scale(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT);
-   CTM ffmtrx(fmtrx.a(), fmtrx.b(), fmtrx.c(), fmtrx.d(), _translation.tx(), _translation.ty());
-   gdsf.text(_text, ffmtrx);
-}
-
 bool laydata::TdtText::pointInside(const TP pnt)
 {
    PointVector plist;
@@ -2697,11 +2645,6 @@ void laydata::TdtAuxRef::dbExport(DbExportFile& exportF) const
 {
    assert(NULL != _structure);
    _structure->dbExport(exportF);
-}
-
-void laydata::TdtAuxRef::psWrite(PSFile&, const layprop::DrawProperties&) const
-{
-   assert(false);//TODO
 }
 
 bool laydata::TdtAuxRef::pointInside(const TP)

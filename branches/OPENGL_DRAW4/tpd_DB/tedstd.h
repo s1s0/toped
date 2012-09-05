@@ -464,5 +464,4 @@ class ImportDB {
 };
 
 
-class PSFile;
 #endif

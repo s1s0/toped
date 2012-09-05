@@ -80,8 +80,6 @@ namespace laydata {
       virtual   void       write(OutputTdtFile* const tedfile) const = 0;
       //! Export the TdtData object in external format.
       virtual   void       dbExport(DbExportFile&) const = 0;
-      //! Write the TdtData object in PS file.
-      virtual   void       psWrite(PSFile&, const layprop::DrawProperties&) const = 0;
       //!
       virtual   bool       pointInside(const TP);
       //! shape cut with the input polygon
@@ -139,7 +137,6 @@ namespace laydata {
       virtual void         info(std::ostringstream&, real) const;
       virtual void         write(OutputTdtFile* const tedfile) const;
       virtual void         dbExport(DbExportFile&) const;
-      virtual void         psWrite(PSFile&, const layprop::DrawProperties&) const;
       virtual word         numPoints() const {return 4;};
       virtual void         polyCut(PointVector&, ShapeList**);
       virtual void         stretch(int bfactor, ShapeList**);
@@ -184,7 +181,6 @@ namespace laydata {
          virtual void      info(std::ostringstream&, real) const;
          virtual void      write(OutputTdtFile* const tedfile) const;
          virtual void      dbExport(DbExportFile&) const;
-         virtual void      psWrite(PSFile&, const layprop::DrawProperties&) const;
          virtual word      numPoints() const {return _psize;}
          virtual bool      pointInside(const TP);
          virtual void      polyCut(PointVector&, ShapeList**);
@@ -224,7 +220,6 @@ namespace laydata {
          virtual void      info(std::ostringstream&, real) const;
          virtual void      write(OutputTdtFile* const tedfile) const;
          virtual void      dbExport(DbExportFile&) const;
-         virtual void      psWrite(PSFile&, const layprop::DrawProperties&) const;
          virtual word      numPoints() const {return _psize;}
          virtual bool      pointInside(const TP);
          virtual void      polyCut(PointVector&, ShapeList**);
@@ -269,7 +264,6 @@ namespace laydata {
       virtual void         info(std::ostringstream&, real) const;
       virtual void         write(OutputTdtFile* const tedfile) const;
       virtual void         dbExport(DbExportFile&) const;
-      virtual void         psWrite(PSFile&, const layprop::DrawProperties&) const;
       virtual void         ungroup(TdtDesign*, TdtCell*, AtticList*);
       virtual word         numPoints() const {return 1;};
       virtual bool         pointInside(const TP);
@@ -315,7 +309,6 @@ namespace laydata {
       virtual void         info(std::ostringstream&, real) const;
       virtual void         write(OutputTdtFile* const tedfile) const;
       virtual void         dbExport(DbExportFile&) const;
-      virtual void         psWrite(PSFile&, const layprop::DrawProperties&) const;
       virtual word         lType() const {return _lmaref;}
       void                 ungroup(TdtDesign*, TdtCell*, AtticList*);
       ArrayProps           arrayProps() const {return _arrprops;}
@@ -348,7 +341,6 @@ namespace laydata {
       virtual void         info(std::ostringstream&, real) const;
       virtual void         write(OutputTdtFile* const tedfile) const;
       virtual void         dbExport(DbExportFile&) const;
-      virtual void         psWrite(PSFile&, const layprop::DrawProperties&) const;
       virtual word         numPoints() const {return 1;};
       virtual bool         pointInside(const TP);
       virtual void         polyCut(PointVector&, ShapeList**) {};
@@ -394,7 +386,6 @@ namespace laydata {
       virtual void         info(std::ostringstream&, real) const;
       virtual void         write(OutputTdtFile* const tedfile) const;
       virtual void         dbExport(DbExportFile&) const;
-      virtual void         psWrite(PSFile&, const layprop::DrawProperties&) const;
 //      virtual void         ungroup(TdtDesign*, TdtCell*, AtticList*);
       virtual word         numPoints() const {return 1;};
       virtual bool         pointInside(const TP);
