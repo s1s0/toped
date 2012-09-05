@@ -312,7 +312,7 @@ class DbExportFile {
       virtual bool            layerSpecification(const LayerDef&) = 0;
       virtual void            box(const int4b* const) = 0;
       virtual void            polygon(const int4b* const, unsigned) = 0;
-      virtual void            wire(const int4b* const, unsigned, unsigned) = 0;
+      virtual void            wire(const int4b* const, unsigned, WireWidth) = 0;
       virtual void            text(const std::string&, const CTM&) = 0;
       virtual void            ref(const std::string&, const CTM&) = 0;
       virtual void            aref(const std::string&, const CTM&, const laydata::ArrayProps&) = 0;

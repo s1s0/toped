@@ -27,8 +27,9 @@
 
 #ifndef PS_OUT_H_DEFINED
 #define PS_OUT_H_DEFINED
-
+#include <fstream>
 #include "drawprop.h"
+#include "tedstd.h"
 
       //namespace ...
 
@@ -59,4 +60,33 @@ protected:
    bool           _hierarchical;
 };
 
+
+   class PsExportFile : public DbExportFile {
+      public:
+                        PsExportFile(std::string, laydata::TdtCell*, /*ExpLayMap*, */const layprop::DrawProperties&, bool);
+         virtual       ~PsExportFile();
+         virtual void   definitionStart(std::string);
+         virtual void   definitionFinish();
+         virtual void   libraryStart(std::string, TpdTime&, real, real);
+         virtual void   libraryFinish();
+         virtual bool   layerSpecification(const LayerDef&);
+         virtual void   box(const int4b* const);
+         virtual void   polygon(const int4b* const, unsigned);
+         virtual void   wire(const int4b* const, unsigned, WireWidth);
+         virtual void   text(const std::string&, const CTM&);
+         virtual void   ref(const std::string&, const CTM&);
+         virtual void   aref(const std::string&, const CTM&, const laydata::ArrayProps&);
+         virtual bool   checkCellWritten(std::string) const;
+         virtual void   registerCellWritten(std::string);
+      private:
+         void           writeStdDefs();
+         void           writeProperties();
+         void           defineColor(std::string, byte, byte, byte);
+         void           defineFill(std::string, const byte*);
+         bool           _hierarchical;
+         NameList       _childnames;
+         DBbox          _totaloverlap;
+         const layprop::DrawProperties& _drawProp;
+         std::fstream   _file;            //! Output file handler
+   };
 #endif // PS_OUT_H_DEFINED
