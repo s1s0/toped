@@ -24,14 +24,10 @@ LEX_OUTPUT_ROOT = lex.tell
 
 ###############################################################################
 INCLUDES =                                                                    \
-                 -I$(top_srcdir)/tpd_common                                   \
-                 -I$(top_srcdir)/tpd_GL                                       \
-                 -I$(top_srcdir)/tpd_DB
+                 -I$(top_srcdir)/tpd_common
 
 libtpd_parser_la_LIBADD =                                                     \
-                 $(top_builddir)/tpd_common/libtpd_common.la                  \
-                 $(top_builddir)/tpd_GL/libtpd_GL.la                          \
-                 $(top_builddir)/tpd_DB/libtpd_DB.la
+                 $(top_builddir)/tpd_common/libtpd_common.la
 
 libtpd_parser_ladir=$(includedir)/toped_$(PACKAGE_VERSION)/tpd
 

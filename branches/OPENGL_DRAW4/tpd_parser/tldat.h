@@ -180,7 +180,6 @@ namespace telldata {
    public:
                            TellVar(typeID ID) : _ID(ID), _changeable(2) {}
       virtual TellVar*     selfcopy() const = 0;
-      virtual void         echo(std::string&, real) = 0;
       virtual const typeID get_type() const {return _ID;}
       virtual void         assign(TellVar*) = 0;
       virtual TellVar*     field_var(char*& fname) {return NULL;}
@@ -205,7 +204,6 @@ namespace telldata {
       const TtReal&        operator =(const TtReal&);
       const TtReal&        operator =(const TtInt&);
       virtual void         initialize() {_value = 0.0;}
-      virtual void         echo(std::string&, real);
       virtual void         assign(TellVar*);
       real                 value() const        {return _value;};
       void                 uminus()             {_value  = -_value;   };
@@ -224,7 +222,6 @@ namespace telldata {
       const TtInt&         operator =(const TtInt&);
       const TtInt&         operator =(const TtReal&);
       virtual void         initialize() {_value = 0;}
-      virtual void         echo(std::string&, real);
       virtual void         assign(TellVar*);
       int4b                value() const        {return _value;};
       void                 uminus()             {_value  = -_value;   };
@@ -244,7 +241,6 @@ namespace telldata {
                                          TellVar(tn_bool), _value(cobj.value()) {};
       const TtBool&        operator = (const TtBool&);
       virtual void         initialize() {_value = false;}
-      virtual void         echo(std::string&, real);
       virtual void         assign(TellVar*);
       bool                 value() const        {return _value;};
       virtual TellVar*     selfcopy() const     {return DEBUG_NEW TtBool(_value);};
@@ -265,7 +261,6 @@ namespace telldata {
                                         TellVar(tn_string), _value(cobj.value()){};
       const TtString&      operator = (const TtString&);
       virtual void         initialize() {_value = "";}
-      virtual void         echo(std::string&, real);// {wstr += _value;};
       virtual void         assign(TellVar*);
       virtual TellVar*     selfcopy() const    {return DEBUG_NEW TtString(_value);}
       const std::string    value() const       {return _value;};
@@ -283,7 +278,6 @@ namespace telldata {
                            TtLayout(const TtLayout& cobj);
       const TtLayout&      operator = (const TtLayout&);
       virtual void         initialize() {if (_selp) delete _selp;_data = NULL;}
-      virtual void         echo(std::string&, real);
       virtual void         assign(TellVar*);
       virtual TellVar*     selfcopy() const {return DEBUG_NEW TtLayout(*this);};
       laydata::TdtData*    data() const     {return _data;};
@@ -306,7 +300,6 @@ namespace telldata {
                            TtAuxdata(const TtAuxdata& cobj);
       const TtAuxdata&     operator = (const TtAuxdata&);
       virtual void         initialize() {_data = NULL;}
-      virtual void         echo(std::string&, real);
       virtual void         assign(TellVar*);
       virtual TellVar*     selfcopy() const {return DEBUG_NEW TtAuxdata(*this);};
       auxdata::TdtAuxData* data() const     {return _data;};
@@ -323,7 +316,6 @@ namespace telldata {
                            TtList(const TtList& cobj);
       const TtList&        operator = (const TtList&);
       virtual void         initialize();
-      virtual void         echo(std::string&, real);
       virtual void         assign(TellVar*);
       bool                 part_assign(dword, dword, const TtList*);
       virtual TellVar*     selfcopy() const  {return DEBUG_NEW TtList(*this);}
@@ -359,9 +351,9 @@ namespace telldata {
       virtual             ~TtUserStruct();
       virtual void         initialize();
       virtual TellVar*     selfcopy() const  {return DEBUG_NEW TtUserStruct(*this);}
-      virtual void         echo(std::string&, real);
       virtual void         assign(TellVar*);
       virtual TellVar*     field_var(char*& fname);
+      const recfieldsNAME& fieldList() {return _fieldList;}
    protected:
       recfieldsNAME        _fieldList;
    };
@@ -375,7 +367,6 @@ namespace telldata {
                            TtLayer(const TtLayer&);
                            TtLayer(operandSTACK& OPStack);
       virtual TellVar*     selfcopy() const    {return DEBUG_NEW TtLayer(*this);}
-      virtual void         echo(std::string&, real);
       virtual void         assign(TellVar*);
       const word           num() const             {return _num->value();}
       const word           typ() const             {return _typ->value();}
@@ -397,7 +388,6 @@ namespace telldata {
                            TtPnt(const TtPnt&);
                            TtPnt(operandSTACK& OPStack);
       virtual TellVar*     selfcopy() const    {return DEBUG_NEW TtPnt(*this);}
-      virtual void         echo(std::string&, real);
       virtual void         assign(TellVar*);
       const real           x() const           {return _x->value();}
       const real           y() const           {return _y->value();}
@@ -421,7 +411,6 @@ namespace telldata {
                            TtWnd(operandSTACK& OPStack);
                            TtWnd(const TtWnd& cobj);
       virtual TellVar*     selfcopy() const    {return DEBUG_NEW TtWnd(*this);};
-      virtual void         echo(std::string&, real);
       virtual void         assign(TellVar*);
       const TtPnt&         p1() const          {return *_p1;};
       const TtPnt&         p2() const          {return *_p2;};
@@ -445,7 +434,6 @@ namespace telldata {
                            TtBnd(operandSTACK& OPStack);
                            TtBnd(const TtBnd& cobj);
       virtual TellVar*     selfcopy() const    {return DEBUG_NEW TtBnd(*this);};
-      virtual void         echo(std::string&, real);
       virtual void         assign(TellVar*);
       const TtPnt&         p() const           {return *_p;}
       const TtReal&        rot() const         {return *_rot;}
@@ -468,7 +456,6 @@ namespace telldata {
                               TtLMap(const TtLMap&);
                               TtLMap(operandSTACK& OPStack);
          virtual TellVar*     selfcopy() const    {return DEBUG_NEW TtLMap(*this);}
-         virtual void         echo(std::string&, real);
          virtual void         assign(TellVar*);
          const TtLayer&       layer() const        {return *_layer;}
          const TtString&      value() const        {return *_value;}
@@ -488,7 +475,6 @@ namespace telldata {
                               TtHshStr(const TtHshStr&);
                               TtHshStr(operandSTACK& OPStack);
          virtual TellVar*     selfcopy() const    {return DEBUG_NEW TtHshStr(*this);}
-         virtual void         echo(std::string&, real);
          virtual void         assign(TellVar*);
          const TtString&      key()   const        {return *_key;}
          const TtString&      value() const        {return *_value;}

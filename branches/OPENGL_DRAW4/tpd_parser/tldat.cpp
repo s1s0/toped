@@ -31,9 +31,6 @@
 #include "tldat.h"
 #include "tellyzer.h"
 
-#include "tedat.h"   //<< Must find a way to remove this from here. See line 243 - it's all about it!
-#include "auxdat.h" //<< Must find a way to remove this from here. See line 282 - it's all about it!
-
 extern parsercmd::cmdBLOCK*       CMDBlock;
 
 //=============================================================================
@@ -155,14 +152,6 @@ void telldata::TtReal::assign(TellVar* rt)
 //   @TODO else ERROR Run time error (or Warning) -> unexpected type in ..bla bla
 }
 
-void telldata::TtReal::echo(std::string& wstr, real)
-{
-   std::ostringstream ost;
-   std::scientific(ost);
-   ost << value();
-   wstr += ost.str();
-}
-
 const telldata::TtReal& telldata::TtReal::operator = (const TtReal& a)
 {
    _value = a.value();
@@ -195,13 +184,6 @@ void telldata::TtInt::assign(TellVar* rt)
       assert(false);
 }
 
-void telldata::TtInt::echo(std::string& wstr, real)
-{
-   std::ostringstream ost;
-   ost << value();
-   wstr += ost.str();
-}
-
 const telldata::TtInt& telldata::TtInt::operator = (const TtInt& a)
 {
    _value = a.value();
@@ -230,12 +212,6 @@ void telldata::TtBool::assign(TellVar* rt)
    update_cstat();
 }
 
-void telldata::TtBool::echo(std::string& wstr, real)
-{
-   if (_value) wstr += "true";
-   else        wstr += "false";
-}
-
 //=============================================================================
 const telldata::TtString& telldata::TtString::operator = (const TtString& a)
 {
@@ -249,12 +225,6 @@ void telldata::TtString::assign(TellVar* value)
    update_cstat();
 }
 
-void telldata::TtString::echo(std::string& wstr, real)
-{
-   std::ostringstream ost;
-   ost << "\"" << _value << "\"";
-   wstr += ost.str();
-}
 //=============================================================================
 telldata::TtLayout::TtLayout(const TtLayout& cobj) :
    TellVar(cobj.get_type()),
@@ -276,21 +246,6 @@ const telldata::TtLayout& telldata::TtLayout::operator = (const TtLayout& cobj)
    _layer = cobj._layer;
    _data = cobj._data; // don't copy the layout data!
    return *this;
-}
-
-void telldata::TtLayout::echo(std::string& wstr, real DBU)
-{
-   std::ostringstream ost;
-   if (NULL == _data)
-      ost << "< !EMPTY! >";
-   else
-   {
-      if ( _layer.editable() )
-         ost << "layer " << _layer << " :";
-      _data->info(ost, DBU);
-   }
-   if (_selp && (_selp->size() > 0)) ost << " - partially selected";
-   wstr += ost.str();
 }
 
 void telldata::TtLayout::assign(TellVar* data)
@@ -315,20 +270,6 @@ const telldata::TtAuxdata& telldata::TtAuxdata::operator = (const TtAuxdata& cob
    _layer = cobj._layer;
    _data = cobj._data; // don't copy the layout data!
    return *this;
-}
-
-void telldata::TtAuxdata::echo(std::string& wstr, real DBU)
-{
-   std::ostringstream ost;
-   if (NULL == _data)
-      ost << "< !EMPTY! >";
-   else
-   {
-      if ( _layer.editable())
-         ost << "layer " << _layer << " :";
-      _data->info(ost, DBU);
-   }
-   wstr += ost.str();
 }
 
 void telldata::TtAuxdata::assign(TellVar* data)
@@ -391,23 +332,6 @@ void telldata::TtList::initialize()
       delete _mlist[i];
    }
    _mlist.clear();
-}
-
-
-void telldata::TtList::echo(std::string& wstr, real DBU)
-{
-   std::ostringstream ost;
-   if (_mlist.empty()) {wstr += "empty list";}
-   else
-   {
-      wstr += " list members: { ";
-      for (unsigned i = 0; i < _mlist.size(); i++)
-      {
-         if (i > 0)  wstr += " , ";
-         (_mlist[i])->echo(wstr, DBU);
-      }
-      wstr += " } ";
-   }
 }
 
 void telldata::TtList::assign(TellVar* rt)
@@ -621,15 +545,6 @@ void telldata::TtUserStruct::initialize()
       CI->second->initialize();
 }
 
-void telldata::TtUserStruct::echo(std::string& wstr, real DBU)
-{
-   wstr += "struct members:\n";
-   for (recfieldsNAME::const_iterator CI = _fieldList.begin(); CI != _fieldList.end(); CI++) {
-      wstr += CI->first; wstr += ": "; CI->second->echo(wstr, DBU);
-      wstr += "\n";
-   }
-}
-
 void telldata::TtUserStruct::assign(TellVar* value)
 {
    TtUserStruct* n_value = static_cast<telldata::TtUserStruct*>(value);
@@ -692,13 +607,6 @@ void telldata::TtLayer::assign(TellVar* rt)
    _typ->_value = static_cast<TtLayer*>(rt)->typ();
 }
 
-void telldata::TtLayer::echo(std::string& wstr, real)
-{
-   std::ostringstream ost;
-   ost << "{num = " << num() << ", typ = " << typ() << "}";
-   wstr += ost.str();
-}
-
 const telldata::TtLayer& telldata::TtLayer::operator = (const TtLayer& a)
 {
    _num->_value = a.num(); _typ->_value = a.typ();
@@ -734,13 +642,6 @@ void telldata::TtPnt::assign(TellVar* rt)
 {
    _x->_value = static_cast<TtPnt*>(rt)->x();
    _y->_value = static_cast<TtPnt*>(rt)->y();
-}
-
-void telldata::TtPnt::echo(std::string& wstr, real)
-{
-   std::ostringstream ost;
-   ost << "{X = " << x() << ", Y = " << y() << "}";
-   wstr += ost.str();
 }
 
 const telldata::TtPnt& telldata::TtPnt::operator = (const TtPnt& a)
@@ -791,14 +692,6 @@ void telldata::TtWnd::assign(TellVar* rt)
 {
    (*_p1) = static_cast<TtWnd*>(rt)->p1();
    (*_p2) = static_cast<TtWnd*>(rt)->p2();
-}
-
-void telldata::TtWnd::echo(std::string& wstr, real)
-{
-   std::ostringstream ost;
-   ost << "P1: X = " << p1().x() << ": Y = " << p1().y() << " ; " <<
-          "P2: X = " << p2().x() << ": Y = " << p2().y() ;
-   wstr += ost.str();
 }
 
 const telldata::TtWnd& telldata::TtWnd::operator = (const TtWnd& a)
@@ -899,15 +792,6 @@ void telldata::TtBnd::assign(TellVar* rt)
    (*_sc ) = static_cast<TtBnd*>(rt)->sc();
 }
 
-void telldata::TtBnd::echo(std::string& wstr, real)
-{
-   std::ostringstream ost;
-   ost << "P: X = " << p().x() << ": Y = " << p().y() << " ; " <<
-          "rot = "  << rot().value() << ": flipX " << (flx().value() ? "true" : "false") << " ; "  <<
-          "scale = " << sc().value();
-   wstr += ost.str();
-}
-
 const telldata::TtBnd& telldata::TtBnd::operator = (const TtBnd& a)
 {
    (*_p) = a.p();
@@ -946,16 +830,6 @@ telldata::TtLMap::TtLMap(operandSTACK& OPstack) : TtUserStruct(tn_laymap)
    _fieldList.push_back(structRECNAME("value" , _value ));
 }
 
-void telldata::TtLMap::echo(std::string& wstr, real)
-{
-   std::ostringstream ost;
-   ost << "layer = "
-       << layer().value()
-       << " : value = \""
-       << value().value() << "\"";
-   wstr += ost.str();
-}
-
 void telldata::TtLMap::assign(TellVar* rt)
 {
    (*_layer  ) = static_cast<TtLMap*>(rt)->layer();
@@ -989,13 +863,6 @@ telldata::TtHshStr::TtHshStr(operandSTACK& OPstack) : TtUserStruct(tn_hshstr)
 
    _fieldList.push_back(structRECNAME("key"  , _key   ));
    _fieldList.push_back(structRECNAME("value", _value ));
-}
-
-void telldata::TtHshStr::echo(std::string& wstr, real)
-{
-   std::ostringstream ost;
-   ost << "key = "  << key().value() << " : value = \"" << value().value() << "\"";
-   wstr += ost.str();
 }
 
 void telldata::TtHshStr::assign(TellVar* rt)
