@@ -3282,15 +3282,15 @@ telldata::TellVar* telldata::TtCallBack::selfcopy() const
    return nvar;
 }
 
-void telldata::TtCallBack::echo(std::string& wstr, real)
-{
-   std::ostringstream ost;
-   if ( (NULL == _fcbBody) || (_fcbBody->declaration()) )
-      ost << "NULL";
-   else
-      ost << "pointing to <TODO> function";
-   wstr += ost.str();
-}
+//void telldata::TtCallBack::echo(std::string& wstr, real)
+//{
+//   std::ostringstream ost;
+//   if ( (NULL == _fcbBody) || (_fcbBody->declaration()) )
+//      ost << "NULL";
+//   else
+//      ost << "pointing to <TODO> function";
+//   wstr += ost.str();
+//}
 
 void telldata::TtCallBack::assign(TellVar* value)
 {
