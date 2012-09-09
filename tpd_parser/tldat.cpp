@@ -520,7 +520,8 @@ telldata::TtUserStruct::TtUserStruct(const TCompType* tltypedef, operandSTACK& O
    const recfieldsID& typefields = tltypedef->fields();
    for (recfieldsID::const_reverse_iterator CI = typefields.rbegin(); CI != typefields.rend(); CI++)
    {// for every member of the structure
-      assert(OPstack.top()->get_type() == CI->second);
+      assert((OPstack.top()->get_type() == CI->second)
+           ||(NUMBER_TYPE(OPstack.top()->get_type()) && NUMBER_TYPE(CI->second)));
       _fieldList.push_back(structRECNAME(CI->first,OPstack.top()->selfcopy()));
       delete(OPstack.top());OPstack.pop();
    }

@@ -742,8 +742,9 @@ void tellstdfunc::echoWrapper(telldata::TellVar* p, std::ostringstream& ost)
    }
    else switch (p->get_type())
    {
-      case telldata::tn_NULL      :assert(false);/*TODO*/break;
-      case telldata::tn_void      :assert(false);/*TODO*/break;
+      case telldata::tn_NULL      :assert(false);break;
+      case telldata::tn_void      :assert(false);break;
+      case telldata::tn_composite :assert(false);break;
       case telldata::tn_int:
       {
          ost << static_cast<telldata::TtInt*>(p)->value();
@@ -804,7 +805,7 @@ void tellstdfunc::echoWrapper(telldata::TellVar* p, std::ostringstream& ost)
             ost << "pointing to <TODO> function";
          break;
       }
-      case telldata::tn_composite:
+      case telldata::tn_usertypes:
       {
          telldata::TtUserStruct* wvar = static_cast<telldata::TtUserStruct*>(p);
          ost << "struct members:\n";
@@ -860,10 +861,8 @@ void tellstdfunc::echoWrapper(telldata::TellVar* p, std::ostringstream& ost)
          ost << "{num = "  << wvar->num()
              << ", typ = " << wvar->typ()
              << "}";
-         ost << ost.str();
          break;
       }
-      case telldata::tn_usertypes :assert(false);/*TODO*/break;
-      default                     :assert(false);/*TODO*/break;
+      default                     :assert(false);/* Did you introduce a new type recently? This function must be updated*/break;
    }
 }
