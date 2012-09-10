@@ -29,11 +29,10 @@
 #include <sstream>
 #include "tenderer.h"
 #include "viewprop.h"
-//#include "tedat.h"
-
+#include "trend.h"
 
 GLUtriangulatorObj*          TessellPoly::tenderTesel = NULL;
-extern layprop::FontLibrary* fontLib;
+extern trend::FontLibrary* fontLib;
 
 //=============================================================================
 //
@@ -1961,11 +1960,6 @@ void tenderer::TopRend::setGrcLayer(bool setEData, const LayerDef& laydef)
       _grcLayer = NULL;
 //      _cslctd_array_offset += _elayer->total_slctdx();
    }
-}
-
-LayerDef tenderer::TopRend::getTenderLay(const LayerDef& laydef)
-{
-   return _drawprop->getTenderLay(laydef);
 }
 
 bool tenderer::TopRend::preCheckCRS(const laydata::TdtCellRef* ref, layprop::CellRefChainType& crchain)

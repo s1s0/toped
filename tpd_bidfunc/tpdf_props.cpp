@@ -35,6 +35,7 @@
 #include "datacenter.h"
 #include "tuidefs.h"
 #include "viewprop.h"
+#include "trend.h"
 #include "ted_prompt.h"
 
 extern parsercmd::cmdBLOCK*      CMDBlock;
@@ -44,7 +45,7 @@ extern console::TllCmdLine*      Console;
 extern wxWindow*                 TopedCanvasW;
 extern wxFrame*                  TopedMainW;
 extern console::toped_logfile    LogFile;
-extern layprop::FontLibrary*     fontLib;
+extern trend::FontLibrary*       fontLib;
 extern const wxEventType         wxEVT_RENDER_PARAMS;
 extern const wxEventType         wxEVT_CANVAS_PARAMS;
 //=============================================================================

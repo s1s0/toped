@@ -40,13 +40,14 @@
 #include "tedcell.h"
 #include "logicop.h"
 #include "tenderer.h"
+#include "trend.h"
 #include "outbox.h"
 
 //GLubyte select_mark[30] = {0x00, 0x00, 0x00, 0x00, 0x3F, 0xF8, 0x3F, 0xF8, 0x30, 0x18,
 //                           0x30, 0x18, 0x30, 0x18, 0x30, 0x18, 0x30, 0x18, 0x30, 0x18,
 //                           0x30, 0x18, 0x3F, 0xF8, 0x3F, 0xF8, 0x00, 0x00, 0x00, 0x00};
 
-extern layprop::FontLibrary* fontLib;
+extern trend::FontLibrary* fontLib;
 
 /*===========================================================================
       Select and subsequent operations over the existing TdtData

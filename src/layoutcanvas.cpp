@@ -156,7 +156,7 @@ tui::TpdOglContext::TpdOglContext(wxGLCanvas* canvas) :
    _oglVersion14             ( false      ),
    _oglExtMultiDrawArrays    ( false      ),
    _oglArbVertexBufferObject ( false      ),
-   _vboRendering             ( false      ),
+   _useVboRendering             ( false      ),
    _glewInitDone             ( false      )
 
 {
@@ -179,9 +179,11 @@ void tui::TpdOglContext::glewContext(LayoutCanvas* canvas)
    else
    {
       _oglVersion14             = (0 != glewIsSupported("GL_VERSION_1_4"));
+      _oglVersion33             = (0 != glewIsSupported("GL_VERSION_3_3"));
       _oglExtMultiDrawArrays    = (0 != glewIsSupported("GL_EXT_multi_draw_arrays"));
       _oglArbVertexBufferObject = (0 != glewIsSupported("GL_ARB_vertex_buffer_object"));
-      _vboRendering = _oglVersion14 && _oglExtMultiDrawArrays && _oglArbVertexBufferObject;
+      _useVboRendering = _oglVersion14 && _oglExtMultiDrawArrays && _oglArbVertexBufferObject;
+      _useShaders               = _oglVersion33;
       _glewInitDone             = true;
       //@TODO - to avoid the "if" in the subsequent renderer calls
       // setup the renderer - callback function
@@ -211,7 +213,7 @@ void tui::TpdOglContext::printStatus(bool forceBasic) const
    {
       tell_log(console::MT_INFO,"...basic rendering forced from the command line");
    }
-   else if (_vboRendering)
+   else if (_useVboRendering)
    {
       tell_log(console::MT_INFO,"...using VBO rendering");
    }

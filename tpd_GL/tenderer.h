@@ -34,7 +34,7 @@
    updates in terms of graphic effects, 3D rendering, shaders etc.
 
    It must be clear that the main rendering acceleration is coming from the structure
-   of the Toped database. The QuadTree dominates by far any other rendering optimization
+   of the Toped database. The QuadTree dominates by far any other rendering optimisation
    especially on big databases where the speed really matters. This is the main reason
    behind the fact that the original renderer demonstrates comparable results with
    TopRend. There are virtually no enhancements possible there though. It should be
@@ -42,7 +42,7 @@
    changes the visual window, the data stream from the Toped DB traverser can't be
    predicted. Different objects will be streamed out depending on the location and
    size of the visual window, but also depending on the current visual properties -
-   colors, lines, fills, layer status, cell depth, visual details etc. The assumption
+   colours, lines, fills, layer status, cell depth, visual details etc. The assumption
    though (and I hope it's a fact) is that the overall amount of the data is optimal
    with respect to the quality of the image.
 
@@ -97,7 +97,7 @@
    the second step depends entirely on the implementation of the TopRend.
 
    Memory usage:
-   Only the first step consumes memory but it is minimized. There is no data copying
+   Only the first step consumes memory but it is minimised. There is no data copying
    instead data references are stored only. Technically the second step does consume
    memory of course, but this is the memory consumed by the graphic driver to map the
    VBO in the CPU memory. The TopRend copies the data directly in the VBOs
@@ -135,6 +135,11 @@
    #define TNDR_GLDATAT GLint
    #define TNDR_GLENUMT GL_INT
 #endif
+
+// to cast properly the indices parameter in glDrawElements when
+// drawing from VBO
+#define VBO_BUFFER_OFFSET(i) ((char *)NULL + (i))
+
 //=============================================================================
 //
 //
@@ -907,23 +912,23 @@ namespace tenderer {
          void              cleanUp();
          void              grcCleanUp();
          void              setGrcLayer(bool, const LayerDef&);
-         //return layno if _propertyState == DB or predefined layer in other case
-         LayerDef          getTenderLay(const LayerDef&);
-         //set state of DrawProperties
-         void              setState(layprop::PropertyState state) {_drawprop->setState(state);};
-         // temporary!
+
+         LayerDef          getTenderLay(const LayerDef& laydef)
+                                                         {return _drawprop->getTenderLay(laydef)   ;}
+         void              setState(layprop::PropertyState state)
+                                                         {        _drawprop->setState(state)       ;}
          bool              layerHidden(const LayerDef& laydef) const
-                                                         {return  _drawprop->layerHidden(laydef)    ;}
-         const CTM&        ScrCTM() const                {return  _drawprop->scrCtm()              ;}
-         word              visualLimit() const           {return  _drawprop->visualLimit()         ;}
-         const DBbox&      clipRegion() const            {return  _drawprop->clipRegion()          ;}
+                                                         {return _drawprop->layerHidden(laydef)    ;}
+         const CTM&        ScrCTM() const                {return _drawprop->scrCtm()               ;}
+         word              visualLimit() const           {return _drawprop->visualLimit()          ;}
+         const DBbox&      clipRegion() const            {return _drawprop->clipRegion()           ;}
          void              postCheckCRS(const laydata::TdtCellRef* ref)
                                                          {        _drawprop->postCheckCRS(ref)     ;}
          bool              preCheckCRS(const laydata::TdtCellRef*, layprop::CellRefChainType&);
          void              initDrawRefStack(laydata::CellRefStack* crs)
-                                                         {        _drawprop->initDrawRefStack(crs) ;}
-         void              clearDrawRefStack()           {        _drawprop->clearDrawRefStack()   ;}
-         bool              adjustTextOrientation() const {return  _drawprop->adjustTextOrientation();}
+                                                         {       _drawprop->initDrawRefStack(crs)  ;}
+         void              clearDrawRefStack()           {       _drawprop->clearDrawRefStack()    ;}
+         bool              adjustTextOrientation() const {return _drawprop->adjustTextOrientation();}
       private:
          layprop::DrawProperties*   _drawprop;
          real              _UU;

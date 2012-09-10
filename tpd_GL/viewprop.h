@@ -28,10 +28,6 @@
 #ifndef LAYERPROP_H
 #define LAYERPROP_H
 
-// to cast properly the indices parameter in glDrawElements when
-// drawing from VBO
-#define VBO_BUFFER_OFFSET(i) ((char *)NULL + (i))
-
 #include "drawprop.h"
 namespace layprop {
 
