@@ -67,12 +67,15 @@ namespace tui {
       void           glewContext(LayoutCanvas*);
       void           printStatus(bool) const;
       bool           resizeGL(int, int);
-      bool           vboRendering() const             { return _vboRendering;             }
+      bool           useVboRendering() const          { return _useVboRendering;             }
+      bool           useShaders() const               { return _useShaders;                  }
    private:
       bool           _oglVersion14;             //! OpenGL version >= 1.4 detected
+      bool           _oglVersion33;             //! OpenGL version >= 3.3 detected
       bool           _oglExtMultiDrawArrays;    //! GL_EXT_multi_draw_arrays feature is supported
       bool           _oglArbVertexBufferObject; //! GL_ARB_vertex_buffer_object feature is supported
-      bool           _vboRendering;
+      bool           _useVboRendering;
+      bool           _useShaders;
       bool           _glewInitDone;
   };
   

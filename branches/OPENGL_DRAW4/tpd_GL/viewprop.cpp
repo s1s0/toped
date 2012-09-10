@@ -35,8 +35,9 @@
 #include "viewprop.h"
 #include "outbox.h"
 #include "tenderer.h"
+#include "trend.h"
 
-layprop::FontLibrary*                 fontLib = NULL;
+extern trend::FontLibrary*            fontLib;
 layprop::PropertyCenter*              PROPC   = NULL;
 
 layprop::SDLine::SDLine(const TP& p1,const TP& p2, const real UU) : _ln(p1,p2)

@@ -35,9 +35,10 @@
 #include "viewprop.h"
 #include "tedesign.h"
 #include "tenderer.h"
+#include "trend.h"
 #include "outbox.h"
 
-extern layprop::FontLibrary* fontLib;
+extern trend::FontLibrary* fontLib;
 
 //=============================================================================
 laydata::EditObject::EditObject()

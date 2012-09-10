@@ -44,6 +44,7 @@
 #endif
 #include "toped.h"
 #include "viewprop.h"
+#include "trend.h"
 #include "datacenter.h"
 #include "calbr_reader.h"
 #include "glf.h"
@@ -64,7 +65,7 @@
 tui::TopedFrame*                 Toped = NULL;
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
-extern layprop::FontLibrary*     fontLib;
+extern trend::FontLibrary*       fontLib;
 extern parsercmd::cmdBLOCK*      CMDBlock;
 extern parsercmd::TellPreProc*   tellPP;
 extern console::toped_logfile    LogFile;
@@ -78,7 +79,6 @@ bool TopedApp::OnInit()
 {
    getLocalDirs();
    getGlobalDirs();
-//   DATC = DEBUG_NEW DataCenter();
    _forceBasicRendering = false;
    _noLog               = false;
    _gui                 = true;
@@ -109,7 +109,7 @@ bool TopedApp::OnInit()
       }
       // store the rendering type in the property database
       if (!_forceBasicRendering)
-         PROPC->setRenderType(Toped->view()->glRC()->vboRendering());
+         PROPC->setRenderType(Toped->view()->glRC()->useVboRendering());
 
       // Replace the active console in the wx system with Toped console window
       console::ted_log_ctrl *logWindow = DEBUG_NEW console::ted_log_ctrl(Toped->logwin());
@@ -278,7 +278,7 @@ bool TopedApp::getLogFileName()
 void TopedApp::loadGlfFonts()
 {
    wxDir fontDirectory(_tpdFontDir);
-   fontLib = DEBUG_NEW layprop::FontLibrary(PROPC->renderType());
+   fontLib = DEBUG_NEW trend::FontLibrary(PROPC->renderType());
    if (fontDirectory.IsOpened())
    {
       wxString curFN;

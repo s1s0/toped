@@ -3,6 +3,7 @@ lib_LTLIBRARIES = libtpd_GL.la
 noinst_HEADERS =                                                              \
                  tpdph.h                                                      \
                  viewprop.h                                                   \
+                 trend.h                                                      \
                  glf.h 
 
 libtpd_GL_la_HEADERS =                                                        \
@@ -14,6 +15,7 @@ libtpd_GL_la_SOURCES =                                                        \
                  drawprop.cpp                                                 \
                  tenderer.cpp                                                 \
                  viewprop.cpp                                                 \
+                 trend.cpp                                                    \
                  glf.cpp 
 
 ###############################################################################
