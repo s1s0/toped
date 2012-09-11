@@ -75,7 +75,6 @@ public:
    void                       mouseRotate();
    void                       motionDraw(const CTM&, TP, TP);
    void                       render(const CTM&);
-   void                       drawFOnly();
    void                       mouseHoover(TP&);
    void                       setRecoverPoly(bool);
    void                       setRecoverWire(bool);
@@ -113,7 +112,6 @@ private:
    wxCondition*               _bpSync;       //! Synchronization for cell browser panels
    TdtMutexState              _tdtActMxState; //! The actual (current) mutex state of the main DB
    TdtMutexState              _tdtReqMxState; //! The required mutex state of the main DB
-   tenderer::TopRend*         _cRenderer;    //! current renderer (in case VFBO rendering is in place)
    laydata::ValidRecovery*    _objectRecovery;
 };
 

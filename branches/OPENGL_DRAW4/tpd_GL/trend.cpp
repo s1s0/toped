@@ -30,10 +30,12 @@
 #include "trend.h"
 #include <GL/glew.h>
 #include "glf.h"
+#include "viewprop.h"
 
 
-trend::FontLibrary*            fontLib = NULL;
-trend::TrendCenter*            TRENDC  = NULL;
+trend::FontLibrary*              fontLib = NULL;
+trend::TrendCenter*              TRENDC  = NULL;
+extern layprop::PropertyCenter*  PROPC;
 
 //=============================================================================
 //
@@ -493,7 +495,8 @@ trend::FontLibrary::~FontLibrary()
 
 
 //=============================================================================
-trend::TrendCenter::TrendCenter(bool gui, bool forceBasic, bool sprtVbo, bool sprtShaders)
+trend::TrendCenter::TrendCenter(bool gui, bool forceBasic, bool sprtVbo, bool sprtShaders) :
+   _cRenderer     (              NULL)
 {
    if      (!gui)             _renderType = tocom;
    else if ( forceBasic )     _renderType = tolder;
@@ -504,8 +507,43 @@ trend::TrendCenter::TrendCenter(bool gui, bool forceBasic, bool sprtVbo, bool sp
 
 }
 
+tenderer::TopRend* trend::TrendCenter::secureRenderer(layprop::DrawProperties* drawProp)
+{
+   switch (renderType())
+   {
+      case tocom    : assert(false);          break;// shouldn't end-up here ever
+      case tolder   : assert(false);          break;// TODO
+      case tenderer :
+      {
+         if (NULL != _cRenderer)
+         {
+      //            _cRenderer->cleanUp();
+            _cRenderer->grcCleanUp();
+            delete _cRenderer;
+         }
+         _cRenderer = new tenderer::TopRend( drawProp, PROPC->UU() );
+         return _cRenderer;
+      }
+      case toshader : assert(false);          break;// TODO
+      default: assert(false); break;
+   }
+   return NULL;
+}
+
+void trend::TrendCenter::drawFOnly()
+{
+   switch (TRENDC->renderType())
+   {
+      case trend::tocom    : assert(false);          break;// shouldn't end-up here ever
+      case trend::tolder   :                         break;// basic (i.e. openGL 1.1)
+      case trend::tenderer : if (NULL != _cRenderer) _cRenderer->grcDraw();   break;// VBO
+      case trend::toshader : assert(false);          break;//TODO
+      default: assert(false); break;
+   }
+}
+
 trend::TrendCenter::~TrendCenter()
 {
    delete fontLib;
-
+   if (NULL != _cRenderer) delete _cRenderer;
 }

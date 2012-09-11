@@ -40,10 +40,11 @@
 #include "datacenter.h"
 #include "ted_prompt.h"
 #include "tedat.h"
-#include "tenderer.h"
+#include "trend.h"
 
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
+extern trend::TrendCenter*       TRENDC;
 extern console::TllCmdLine*      Console;
 extern const wxEventType         wxEVT_CANVAS_STATUS;
 extern const wxEventType         wxEVT_CANVAS_CURSOR;
@@ -478,7 +479,7 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event)
          glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
          glClear(GL_ACCUM_BUFFER_BIT);
          DATC->render(_LayCTM);
-         if (0 == _blinkInterval) DATC->drawFOnly();
+         if (0 == _blinkInterval) TRENDC->drawFOnly();
          glAccum(GL_LOAD, 1.0);
          _invalidWindow = false;
          if (_rubberBand) rubber_paint();
@@ -1140,7 +1141,7 @@ void tui::LayoutCanvas::OnTimer(wxTimerEvent& WXUNUSED(event))
    }
    else
    {
-      DATC->drawFOnly();
+      TRENDC->drawFOnly();
    }
    SwapBuffers();
    _blinkOn = !_blinkOn;

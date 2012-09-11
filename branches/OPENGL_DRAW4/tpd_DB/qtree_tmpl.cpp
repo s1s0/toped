@@ -627,7 +627,7 @@ short laydata::QTreeTmpl<DataT>::clipType(tenderer::TopRend& rend) const
    DBbox clip = rend.clipRegion();
    DBbox areal = _overlap.overlap(rend.topCTM());
    int8b clip_area = clip.cliparea(areal);
-   if ( ( 0ll == clip_area ) || (!areal.visible(rend.ScrCTM(), rend.visualLimit())) ) return 0;
+   if ( ( 0ll == clip_area ) || (!areal.visible(rend.scrCTM(), rend.visualLimit())) ) return 0;
    if (0ll < clip_area) return 1;
    else return -1;
 }

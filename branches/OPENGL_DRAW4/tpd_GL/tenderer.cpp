@@ -1643,7 +1643,7 @@ void tenderer::TopRend::wire (int4b* pdata, unsigned psize, WireWidth width)
 {
    // first check whether to draw only the center line
    DBbox wsquare = DBbox(TP(0,0),TP(width,width));
-   bool center_line_only = !wsquare.visible(topCTM() * ScrCTM(), visualLimit());
+   bool center_line_only = !wsquare.visible(topCTM() * scrCTM(), visualLimit());
    _clayer->wire(pdata, psize, width, center_line_only);
 }
 
@@ -1651,7 +1651,7 @@ void tenderer::TopRend::wire (int4b* pdata, unsigned psize, WireWidth width, con
 {
    // first check whether to draw only the center line
    DBbox wsquare = DBbox(TP(0,0),TP(width,width));
-   bool center_line_only = !wsquare.visible(topCTM() * ScrCTM(), visualLimit());
+   bool center_line_only = !wsquare.visible(topCTM() * scrCTM(), visualLimit());
    _clayer->wire(pdata, psize, width, center_line_only,psel);
 }
 
@@ -1659,7 +1659,7 @@ void tenderer::TopRend::grcwire (int4b* pdata, unsigned psize, WireWidth width)
 {
    // first check whether to draw only the center line
    DBbox wsquare = DBbox(TP(0,0),TP(width,width));
-   bool center_line_only = !wsquare.visible(topCTM() * ScrCTM(), visualLimit());
+   bool center_line_only = !wsquare.visible(topCTM() * scrCTM(), visualLimit());
    _grcLayer->wire(pdata, psize, width, center_line_only);
 }
 
@@ -1686,7 +1686,7 @@ void tenderer::TopRend::text (const std::string* txt, const CTM& ftmtrx, const D
       _clayer->text(txt, ftmtrx, &ovl, cor, false);
 }
 
-void tenderer::TopRend::Grid(const real step, const std::string color)
+void tenderer::TopRend::grid(const real step, const std::string color)
 {
    int gridstep = (int)rint(step / _UU);
    if ( abs((int)(_drawprop->scrCtm().a() * gridstep)) > GRID_LIMIT)
