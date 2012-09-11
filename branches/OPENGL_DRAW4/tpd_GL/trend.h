@@ -34,6 +34,12 @@
 
 namespace trend {
 
+   typedef enum { tocom      // command line
+                 ,tolder     // basic (i.e. openGL 1.1)
+                 ,tenderer   // VBO
+                 , toshader  // shaders
+                } RenderType;
+
    //=============================================================================
    //
    //
@@ -126,7 +132,7 @@ namespace trend {
       public:
                                 FontLibrary(bool);
                                ~FontLibrary();
-         bool                   LoadLayoutFont(std::string);
+         bool                   loadLayoutFont(std::string);
          bool                   selectFont(std::string);
          void                   getStringBounds(const std::string*, DBbox*);
          void                   drawString(const std::string*, bool);
@@ -134,7 +140,7 @@ namespace trend {
          void                   drawSolidString(std::string);
          bool                   bindFont();
          void                   unbindFont();
-         void                   allFontNames(NameList&);
+//         void                   allFontNames(NameList&);
          word                   numFonts();
          std::string            getActiveFontName() const {return _activeFontName;}
       private:
@@ -142,12 +148,23 @@ namespace trend {
          typedef std::map<std::string, int>       RamFontCollectionMap;
          OglFontCollectionMap   _oglFont;
          RamFontCollectionMap   _ramFont;
-         bool                   _fti; // font type implementation ()
+         bool                   _fti; // font type implementation (false - basic, true - VBO)
          std::string            _activeFontName;
    };
 
-   class TrendCenter {
 
+   class TrendCenter {
+      public:
+                                TrendCenter(bool gui, bool forceBasic=true, bool sprtVbo=false, bool sprtShaders=false);
+         virtual               ~TrendCenter();
+         RenderType             renderType() const {return _renderType;}
+//         bool                   loadLayoutFont(std::string name) {return _fontLib->loadLayoutFont(name);}
+//         bool                   selectFont(std::string name)     {return _fontLib->selectFont(name);}
+//         std::string            getActiveFontName() const        {return _fontLib->getActiveFontName();}
+//         word                   numFonts()                       {return _fontLib->numFonts();}
+      private:
+         RenderType             _renderType;
+//         FontLibrary*           _fontLib;
    };
 }
 

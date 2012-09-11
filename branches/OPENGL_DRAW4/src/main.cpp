@@ -65,6 +65,7 @@
 tui::TopedFrame*                 Toped = NULL;
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
+extern trend::TrendCenter*       TRENDC;
 extern trend::FontLibrary*       fontLib;
 extern parsercmd::cmdBLOCK*      CMDBlock;
 extern parsercmd::TellPreProc*   tellPP;
@@ -107,10 +108,11 @@ bool TopedApp::OnInit()
          dlg1->Destroy();
          return false;
       }
-      // store the rendering type in the property database
-      if (!_forceBasicRendering)
-         PROPC->setRenderType(Toped->view()->glRC()->useVboRendering());
-
+      // OK - we've got some kind of graphics we can manage - so create the rendering center
+      TRENDC = DEBUG_NEW trend::TrendCenter(true
+                                            ,_forceBasicRendering
+                                            ,Toped->view()->glRC()->useVboRendering()
+                                            ,Toped->view()->glRC()->useShaders());
       // Replace the active console in the wx system with Toped console window
       console::ted_log_ctrl *logWindow = DEBUG_NEW console::ted_log_ctrl(Toped->logwin());
       delete wxLog::SetActiveTarget(logWindow);
@@ -139,6 +141,7 @@ bool TopedApp::OnInit()
       #endif
 
       DEBUG_NEW console::TllCCmdLine();
+      TRENDC = DEBUG_NEW trend::TrendCenter(false);
       loadGlfFonts();
       console::ted_log_ctrl *logWindow = DEBUG_NEW console::ted_log_ctrl(NULL);
       delete wxLog::SetActiveTarget(logWindow);
@@ -242,6 +245,7 @@ int TopedApp::OnExit()
    if (DRCData) delete DRCData;
    delete CMDBlock;
    delete PROPC;
+   delete TRENDC;
    delete DATC;
    // unload the eventual plug-ins
    for (PluginList::const_iterator CP = _plugins.begin(); CP != _plugins.end(); CP++)
@@ -278,7 +282,6 @@ bool TopedApp::getLogFileName()
 void TopedApp::loadGlfFonts()
 {
    wxDir fontDirectory(_tpdFontDir);
-   fontLib = DEBUG_NEW trend::FontLibrary(PROPC->renderType());
    if (fontDirectory.IsOpened())
    {
       wxString curFN;
@@ -288,7 +291,7 @@ void TopedApp::loadGlfFonts()
          {
             std::string ffname(_tpdFontDir.mb_str(wxConvFile));
             ffname += curFN.mb_str(wxConvFile);
-            if (fontLib->LoadLayoutFont(ffname))
+            if (fontLib->loadLayoutFont(ffname))
             {
                wxCommandEvent eventLoadFont(wxEVT_RENDER_PARAMS);
                eventLoadFont.SetId(tui::RPS_LD_FONT);

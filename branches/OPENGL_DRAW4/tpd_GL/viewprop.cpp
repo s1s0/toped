@@ -233,7 +233,6 @@ layprop::PropertyCenter::PropertyCenter() :
    _step              ( 1                          ),
    _autopan           ( false                      ),
    _zeroCross         ( false                      ),
-   _renderType        ( false                      ),
    _boldOnHover       ( false                      ),
    _markerAngle       ( 0                          ),
    _layselmask        ( laydata::_lmall            ),
@@ -459,7 +458,6 @@ layprop::PropertyCenter::~PropertyCenter()
    if (NULL != _oasLayMap) delete _oasLayMap;
    assert(_drawprop);
    delete _drawprop;
-   delete fontLib;
 }
 
 

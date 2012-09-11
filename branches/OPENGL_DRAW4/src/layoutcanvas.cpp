@@ -156,7 +156,8 @@ tui::TpdOglContext::TpdOglContext(wxGLCanvas* canvas) :
    _oglVersion14             ( false      ),
    _oglExtMultiDrawArrays    ( false      ),
    _oglArbVertexBufferObject ( false      ),
-   _useVboRendering             ( false      ),
+   _useVboRendering          ( false      ),
+   _useShaders               ( false      ),
    _glewInitDone             ( false      )
 
 {

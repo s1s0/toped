@@ -39,6 +39,7 @@
 #include "outbox.h"
 #include "tedat.h"
 #include "viewprop.h"
+#include "trend.h"
 #include "ps_out.h"
 #include "tenderer.h"
 #include "calbr_reader.h"
@@ -47,6 +48,7 @@
 DataCenter*                      DATC  = NULL;
 extern layprop::PropertyCenter*  PROPC;
 extern Calbr::CalbrFile*         DRCData;
+extern trend::TrendCenter*       TRENDC;
 
 //-----------------------------------------------------------------------------
 // class DataCenter
@@ -737,17 +739,27 @@ void DataCenter::mouseRotate()
 
 void DataCenter::render(const CTM& layCTM)
 {
-   if (PROPC->renderType())
-      openGlRender(layCTM);
-   else
-      openGlDraw(layCTM);
+   //TODO code below is temporary
+   switch (TRENDC->renderType())
+   {
+      case trend::tocom    : assert(false);          break;// shouldn't end-up here ever
+      case trend::tolder   : openGlDraw(layCTM);     break;// basic (i.e. openGL 1.1)
+      case trend::tenderer : openGlRender(layCTM);   break;// VBO
+      case trend::toshader : assert(false);          break;//TODO
+      default: assert(false); break;
+   }
 }
 
 void DataCenter::drawFOnly()
 {
-   if (PROPC->renderType())
+   //TODO code below is temporary
+   switch (TRENDC->renderType())
    {
-      if (NULL != _cRenderer) _cRenderer->grcDraw();
+      case trend::tocom    : assert(false);          break;// shouldn't end-up here ever
+      case trend::tolder   :                         break;// basic (i.e. openGL 1.1)
+      case trend::tenderer : if (NULL != _cRenderer) _cRenderer->grcDraw();   break;// VBO
+      case trend::toshader : assert(false);          break;//TODO
+      default: assert(false); break;
    }
 }
 

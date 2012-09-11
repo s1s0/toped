@@ -139,7 +139,6 @@ namespace layprop {
       void              mouseStop()                      {_supp_data.mouseStop();}
       const LayerDefList&  upLayers()                       {_uplaylist.sort(); _uplaylist.unique(); return _uplaylist;}
       void              clearUnpublishedLayers()         {_uplaylist.clear();}
-      void              setRenderType(bool rt)           {_renderType = rt;}
       real              step() const                     {return _step;}
       int4b             stepDB() const                   {return (word)rint(_step*_DBscale);}
       real              UU() const                       {return _UU;}
@@ -153,7 +152,6 @@ namespace layprop {
       const ExpLayMap*  getCifLayMap() const             {return _cifLayMap;}
       const ExpLayMap*  getOasLayMap() const             {return _oasLayMap;}
       bool              gridVisual(word no)              {return grid(no)->visual();}
-      bool              renderType() const               {return _renderType;}
    private:
       DrawProperties*      _drawprop;
       void                 saveScreenProps(FILE*) const;
@@ -165,7 +163,6 @@ namespace layprop {
       real                 _step;         // current marker step
       bool                 _autopan;      // view window moves automatically during shape drawing
       bool                 _zeroCross;    //
-      bool                 _renderType;   //
       bool                 _boldOnHover;  //
       byte                 _markerAngle;  // angle of restriction during shape drawing (0,45,90)
       SupplementaryData    _supp_data;    // supplementary data

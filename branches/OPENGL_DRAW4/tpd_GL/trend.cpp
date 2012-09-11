@@ -33,6 +33,8 @@
 
 
 trend::FontLibrary*            fontLib = NULL;
+trend::TrendCenter*            TRENDC  = NULL;
+
 //=============================================================================
 //
 //
@@ -323,7 +325,7 @@ trend::FontLibrary::FontLibrary(bool fti) :
    if (!_fti) glfInit();
 }
 
-bool trend::FontLibrary::LoadLayoutFont(std::string fontfile)
+bool trend::FontLibrary::loadLayoutFont(std::string fontfile)
 {
    if (_fti)
    {
@@ -456,19 +458,19 @@ void  trend::FontLibrary::unbindFont()
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void trend::FontLibrary::allFontNames(NameList& allFontNames)
-{
-   if (_fti)
-   {
-      for(OglFontCollectionMap::const_iterator CF = _oglFont.begin(); CF != _oglFont.end(); CF++)
-         allFontNames.push_back(CF->first);
-   }
-   else
-   {
-      for(RamFontCollectionMap::const_iterator CF = _ramFont.begin(); CF != _ramFont.end(); CF++)
-         allFontNames.push_back(CF->first);
-   }
-}
+//void trend::FontLibrary::allFontNames(NameList& allFontNames)
+//{
+//   if (_fti)
+//   {
+//      for(OglFontCollectionMap::const_iterator CF = _oglFont.begin(); CF != _oglFont.end(); CF++)
+//         allFontNames.push_back(CF->first);
+//   }
+//   else
+//   {
+//      for(RamFontCollectionMap::const_iterator CF = _ramFont.begin(); CF != _ramFont.end(); CF++)
+//         allFontNames.push_back(CF->first);
+//   }
+//}
 
 word trend::FontLibrary::numFonts()
 {
@@ -490,3 +492,20 @@ trend::FontLibrary::~FontLibrary()
 }
 
 
+//=============================================================================
+trend::TrendCenter::TrendCenter(bool gui, bool forceBasic, bool sprtVbo, bool sprtShaders)
+{
+   if      (!gui)             _renderType = tocom;
+   else if ( forceBasic )     _renderType = tolder;
+   else if ( sprtShaders)     _renderType = toshader;
+   else if ( sprtVbo    )     _renderType = tenderer;
+   else                       _renderType = tolder;
+   fontLib = DEBUG_NEW trend::FontLibrary(_renderType > tolder);
+
+}
+
+trend::TrendCenter::~TrendCenter()
+{
+   delete fontLib;
+
+}
