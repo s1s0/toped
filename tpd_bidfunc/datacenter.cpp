@@ -71,7 +71,6 @@ DataCenter::DataCenter(const std::string& localDir, const std::string& globalDir
    _bpSync         ( NULL                                   ),
    _tdtActMxState  ( dbmxs_unlocked                         ),
    _tdtReqMxState  ( dbmxs_unlocked                         ),
-   _cRenderer      ( NULL                                   ),
    _objectRecovery ( laydata::ValidRecovery::getInstance()  )
 
 {
@@ -80,7 +79,6 @@ DataCenter::DataCenter(const std::string& localDir, const std::string& globalDir
 
 DataCenter::~DataCenter()
 {
-   if (NULL != _cRenderer) delete _cRenderer;
    laydata::TdtLibrary::clearEntireHierTree();
    if (NULL != _GDSDB    ) delete _GDSDB;
    if (NULL != _CIFDB    ) delete _CIFDB;
@@ -750,19 +748,6 @@ void DataCenter::render(const CTM& layCTM)
    }
 }
 
-void DataCenter::drawFOnly()
-{
-   //TODO code below is temporary
-   switch (TRENDC->renderType())
-   {
-      case trend::tocom    : assert(false);          break;// shouldn't end-up here ever
-      case trend::tolder   :                         break;// basic (i.e. openGL 1.1)
-      case trend::tenderer : if (NULL != _cRenderer) _cRenderer->grcDraw();   break;// VBO
-      case trend::toshader : assert(false);          break;//TODO
-      default: assert(false); break;
-   }
-}
-
 void DataCenter::mouseHoover(TP& position)
 {
    if (_TEDLIB())
@@ -876,19 +861,20 @@ void DataCenter::openGlRender(const CTM& layCTM)
       layprop::DrawProperties* drawProp;
       if (PROPC->lockDrawProp(drawProp))
       {
-         if (NULL != _cRenderer)
-         {
-//            _cRenderer->cleanUp();
-            _cRenderer->grcCleanUp();
-            delete _cRenderer;
-         }
-         _cRenderer = new tenderer::TopRend( drawProp, PROPC->UU() );
+//         if (NULL != _cRenderer)
+//         {
+////            _cRenderer->cleanUp();
+//            _cRenderer->grcCleanUp();
+//            delete _cRenderer;
+//         }
+//         _cRenderer = new tenderer::TopRend( drawProp, PROPC->UU() );
+         tenderer::TopRend* cRenderer = TRENDC->secureRenderer(drawProp);
          // render the grid
          for (byte gridNo = 0; gridNo < 3; gridNo++)
          {
             const layprop::LayoutGrid* cgrid = PROPC->grid(gridNo);
             if ((NULL !=  cgrid) && cgrid->visual())
-               _cRenderer->Grid(cgrid->step(), cgrid->color());
+               cRenderer->grid(cgrid->step(), cgrid->color());
          }
          //_properties.drawZeroCross(renderer);
          if (wxMUTEX_NO_ERROR == _DBLock.TryLock())
@@ -900,7 +886,7 @@ void DataCenter::openGlRender(const CTM& layCTM)
             #endif
             // There is no need to check for an active cell. If there isn't one
             // the function will return silently.
-            _TEDLIB()->openGlRender(*_cRenderer);
+            _TEDLIB()->openGlRender(*cRenderer);
             // Draw DRC data (if any)
             // TODO! clean-up the DRC stuff here - lock/unlock and more importantly
             // DrcLibrary <-> CalibrFile i.e. _DRCDB <-> DRCData. The end of the line shall be
@@ -911,7 +897,7 @@ void DataCenter::openGlRender(const CTM& layCTM)
                {
                   std::string cellName = DRCData->cellName();
                   CTM cellCTM = DRCData->getCTM(cellName);
-                  _DRCDB->openGlRender(*_cRenderer, cellName, cellCTM);
+                  _DRCDB->openGlRender(*cRenderer, cellName, cellCTM);
                   VERIFY(wxMUTEX_NO_ERROR == _DRCLock.Unlock());
                }
             }
@@ -919,18 +905,18 @@ void DataCenter::openGlRender(const CTM& layCTM)
             rendTimer.report("Time elapsed for data traversing: ");
             #endif
             // The version with the central VBO's
-            if (_cRenderer->collect())
+            if (cRenderer->collect())
             {
                #ifdef RENDER_PROFILING
                   rendTimer.report("Time elapsed for data copying   : ");
                #endif
-               _cRenderer->draw();
+               cRenderer->draw();
                #ifdef RENDER_PROFILING
                   rendTimer.report("    Total elapsed rendering time: ");
                #endif
-               _cRenderer->cleanUp();
+               cRenderer->cleanUp();
             }
-            if (_cRenderer->grcCollect())
+            if (cRenderer->grcCollect())
             {
 //               _cRenderer->grcDraw();
 //               _cRenderer->grcCleanUp();
@@ -978,7 +964,7 @@ void DataCenter::openGlRender(const CTM& layCTM)
 //         {
 //            const layprop::LayoutGrid* cgrid = PROPC->grid(gridNo);
 //            if ((NULL !=  cgrid) && cgrid->visual())
-//               renderer->Grid(cgrid->step(), cgrid->color());
+//               renderer->grid(cgrid->step(), cgrid->color());
 //         }
 //         //       _properties.drawZeroCross(renderer);
 //         if (wxMUTEX_NO_ERROR == _DBLock.TryLock())

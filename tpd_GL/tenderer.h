@@ -887,7 +887,7 @@ namespace tenderer {
       public:
                            TopRend( layprop::DrawProperties* drawprop, real UU );
                           ~TopRend();
-         void              Grid( const real, const std::string );
+         void              grid( const real, const std::string );
          void              setLayer(const LayerDef&, bool);
          bool              chunkExists(const LayerDef&, bool);
          void              pushCell(std::string, const CTM&, const DBbox&, bool, bool);
@@ -919,7 +919,7 @@ namespace tenderer {
                                                          {        _drawprop->setState(state)       ;}
          bool              layerHidden(const LayerDef& laydef) const
                                                          {return _drawprop->layerHidden(laydef)    ;}
-         const CTM&        ScrCTM() const                {return _drawprop->scrCtm()               ;}
+         const CTM&        scrCTM() const                {return _drawprop->scrCtm()               ;}
          word              visualLimit() const           {return _drawprop->visualLimit()          ;}
          const DBbox&      clipRegion() const            {return _drawprop->clipRegion()           ;}
          void              postCheckCRS(const laydata::TdtCellRef* ref)
