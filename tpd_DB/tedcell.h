@@ -103,7 +103,7 @@ namespace laydata {
                              TdtDefaultCell(std::string, int , bool );
          virtual            ~TdtDefaultCell();
          virtual void        openGlDraw(layprop::DrawProperties&, bool active=false) const;
-         virtual void        openGlRender(tenderer::TopRend&, const CTM&, bool, bool) const;
+         virtual void        openGlRender(BaseTrend&, const CTM&, bool, bool) const;
          virtual void        motionDraw(const layprop::DrawProperties&, CtmQueue&, bool active=false) const;
          virtual TDTHierTree* hierOut(TDTHierTree*& Htree, TdtCell*, CellMap*, const TdtLibDir*);
          virtual bool        relink(TdtLibDir*);
@@ -138,7 +138,7 @@ namespace laydata {
       virtual             ~TdtCell();
       virtual void         openGlDraw(layprop::DrawProperties&,
                                                           bool active=false) const;
-      virtual void         openGlRender(tenderer::TopRend&, const CTM&, bool, bool) const;
+      virtual void         openGlRender(BaseTrend&, const CTM&, bool, bool) const;
       virtual void         motionDraw(const layprop::DrawProperties&, CtmQueue&,
                                                           bool active=false) const;
       QuadTree*            secureLayer(const LayerDef&);

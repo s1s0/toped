@@ -29,8 +29,7 @@
 #define TREND_H_
 
 #include "ttt.h"
-#include "tenderer.h"
-//#include "outbox.h"
+#include "basetrend.h"
 
 namespace trend {
 
@@ -158,16 +157,15 @@ namespace trend {
                                 TrendCenter(bool gui, bool forceBasic=true, bool sprtVbo=false, bool sprtShaders=false);
          virtual               ~TrendCenter();
          RenderType             renderType() const {return _renderType;}
-         tenderer::TopRend*     secureRenderer(layprop::DrawProperties* drawProp);
+         BaseTrend*             secureRenderer(layprop::DrawProperties* drawProp);
          void                   drawFOnly();
 //         bool                   loadLayoutFont(std::string name) {return _fontLib->loadLayoutFont(name);}
 //         bool                   selectFont(std::string name)     {return _fontLib->selectFont(name);}
 //         std::string            getActiveFontName() const        {return _fontLib->getActiveFontName();}
 //         word                   numFonts()                       {return _fontLib->numFonts();}
       private:
-         tenderer::TopRend*     _cRenderer;    //! current renderer (in case VFBO rendering is in place)
+         BaseTrend*             _cRenderer;    //! current renderer (in case VFBO rendering is in place)
          RenderType             _renderType;
-
 //         FontLibrary*           _fontLib;
    };
 }

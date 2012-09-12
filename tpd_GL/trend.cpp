@@ -30,6 +30,7 @@
 #include "trend.h"
 #include <GL/glew.h>
 #include "glf.h"
+#include "tenderer.h"
 #include "viewprop.h"
 
 
@@ -498,22 +499,22 @@ trend::FontLibrary::~FontLibrary()
 trend::TrendCenter::TrendCenter(bool gui, bool forceBasic, bool sprtVbo, bool sprtShaders) :
    _cRenderer     (              NULL)
 {
-   if      (!gui)             _renderType = tocom;
-   else if ( forceBasic )     _renderType = tolder;
-   else if ( sprtShaders)     _renderType = toshader;
-   else if ( sprtVbo    )     _renderType = tenderer;
-   else                       _renderType = tolder;
-   fontLib = DEBUG_NEW trend::FontLibrary(_renderType > tolder);
+   if      (!gui)             _renderType = trend::tocom;
+   else if ( forceBasic )     _renderType = trend::tolder;
+   else if ( sprtShaders)     _renderType = trend::toshader;
+   else if ( sprtVbo    )     _renderType = trend::tenderer;
+   else                       _renderType = trend::tolder;
+   fontLib = DEBUG_NEW trend::FontLibrary(_renderType > trend::tolder);
 
 }
 
-tenderer::TopRend* trend::TrendCenter::secureRenderer(layprop::DrawProperties* drawProp)
+BaseTrend* trend::TrendCenter::secureRenderer(layprop::DrawProperties* drawProp)
 {
    switch (renderType())
    {
-      case tocom    : assert(false);          break;// shouldn't end-up here ever
-      case tolder   : assert(false);          break;// TODO
-      case tenderer :
+      case trend::tocom    : assert(false);          break;// shouldn't end-up here ever
+      case trend::tolder   : assert(false);          break;// TODO
+      case trend::tenderer :
       {
          if (NULL != _cRenderer)
          {
@@ -521,10 +522,10 @@ tenderer::TopRend* trend::TrendCenter::secureRenderer(layprop::DrawProperties* d
             _cRenderer->grcCleanUp();
             delete _cRenderer;
          }
-         _cRenderer = new tenderer::TopRend( drawProp, PROPC->UU() );
+         _cRenderer = DEBUG_NEW tenderer::TopRend( drawProp, PROPC->UU() );
          return _cRenderer;
       }
-      case toshader : assert(false);          break;// TODO
+      case trend::toshader : assert(false);          break;// TODO
       default: assert(false); break;
    }
    return NULL;

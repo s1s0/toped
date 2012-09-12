@@ -240,7 +240,7 @@ void laydata::TdtDefaultCell::openGlDraw(layprop::DrawProperties&, bool active) 
 {
 }
 
-void laydata::TdtDefaultCell::openGlRender(tenderer::TopRend& rend, const CTM& trans,
+void laydata::TdtDefaultCell::openGlRender(BaseTrend& rend, const CTM& trans,
                                            bool selected, bool) const
 {
    CTM ftm(TP(), 3000/OPENGL_FONT_UNIT, 45, false);
@@ -491,7 +491,7 @@ void laydata::TdtCell::openGlDraw(layprop::DrawProperties& drawprop, bool active
    }
 }
 
-void laydata::TdtCell::openGlRender(tenderer::TopRend& rend, const CTM& trans,
+void laydata::TdtCell::openGlRender(BaseTrend& rend, const CTM& trans,
                                      bool selected, bool active) const
 {
    rend.pushCell(_name, trans, _cellOverlap, active, selected);

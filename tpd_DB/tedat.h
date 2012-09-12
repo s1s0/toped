@@ -31,7 +31,7 @@
 #include <map>
 #include <vector>
 #include "tedstd.h"
-#include "tenderer.h"
+#include "basetrend.h"
 #include "drawprop.h"
 
 namespace laydata {
@@ -69,9 +69,9 @@ namespace laydata {
       virtual   void       openGlDrawSel(const PointVector&, const SGBitSet*) const = 0;
       //! Clean-up the calculated drawing objects
       virtual   void       openGlPostClean(layprop::DrawProperties&, PointVector& ptlist) const {ptlist.clear();}
-      virtual   void       drawRequest(tenderer::TopRend&) const = 0;
+      virtual   void       drawRequest(BaseTrend&) const = 0;
       //! Draw the outlines of the selected objects
-      virtual   void       drawSRequest(tenderer::TopRend&, const SGBitSet*) const = 0;
+      virtual   void       drawSRequest(BaseTrend&, const SGBitSet*) const = 0;
       //! Draw the objects in motion during copy/move and similar operations
       virtual   void       motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const = 0;
       //! Print an object description on the toped console.
@@ -130,8 +130,8 @@ namespace laydata {
       virtual void         openGlDrawLine(layprop::DrawProperties&, const PointVector&) const;
       virtual void         openGlDrawFill(layprop::DrawProperties&, const PointVector&) const;
       virtual void         openGlDrawSel(const PointVector&, const SGBitSet*) const;
-      virtual void         drawRequest(tenderer::TopRend&) const;
-      virtual void         drawSRequest(tenderer::TopRend&, const SGBitSet*) const;
+      virtual void         drawRequest(BaseTrend&) const;
+      virtual void         drawSRequest(BaseTrend&, const SGBitSet*) const;
       virtual void         motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
 
       virtual void         info(std::ostringstream&, real) const;
@@ -174,8 +174,8 @@ namespace laydata {
          virtual void      openGlDrawLine(layprop::DrawProperties&, const PointVector&) const;
          virtual void      openGlDrawFill(layprop::DrawProperties&, const PointVector&) const;
          virtual void      openGlDrawSel(const PointVector&, const SGBitSet*) const;
-         virtual void      drawRequest(tenderer::TopRend&) const;
-         virtual void      drawSRequest(tenderer::TopRend&, const SGBitSet*) const;
+         virtual void      drawRequest(BaseTrend&) const;
+         virtual void      drawSRequest(BaseTrend&, const SGBitSet*) const;
          virtual void      motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
 
          virtual void      info(std::ostringstream&, real) const;
@@ -213,8 +213,8 @@ namespace laydata {
          virtual void      openGlDrawLine(layprop::DrawProperties&, const PointVector&) const;
          virtual void      openGlDrawFill(layprop::DrawProperties&, const PointVector&) const;
          virtual void      openGlDrawSel(const PointVector&, const SGBitSet*) const;
-         virtual void      drawRequest(tenderer::TopRend&) const;
-         virtual void      drawSRequest(tenderer::TopRend&, const SGBitSet*) const;
+         virtual void      drawRequest(BaseTrend&) const;
+         virtual void      drawSRequest(BaseTrend&, const SGBitSet*) const;
          virtual void      motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
 
          virtual void      info(std::ostringstream&, real) const;
@@ -257,8 +257,8 @@ namespace laydata {
       virtual void         openGlDrawFill(layprop::DrawProperties&, const PointVector&) const;
       virtual void         openGlDrawSel(const PointVector&, const SGBitSet*) const;
       virtual void         openGlPostClean(layprop::DrawProperties&, PointVector& ptlist) const;
-      virtual void         drawRequest(tenderer::TopRend&) const;
-      virtual void         drawSRequest(tenderer::TopRend&, const SGBitSet*) const;
+      virtual void         drawRequest(BaseTrend&) const;
+      virtual void         drawSRequest(BaseTrend&, const SGBitSet*) const;
       virtual void         motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
 
       virtual void         info(std::ostringstream&, real) const;
@@ -301,8 +301,8 @@ namespace laydata {
       virtual void         openGlDrawLine(layprop::DrawProperties&, const PointVector&) const;
       virtual void         openGlDrawFill(layprop::DrawProperties&, const PointVector&) const;
       virtual void         openGlDrawSel(const PointVector&, const SGBitSet*) const;
-      virtual void         drawRequest(tenderer::TopRend&) const;
-      virtual void         drawSRequest(tenderer::TopRend&, const SGBitSet*) const;
+      virtual void         drawRequest(BaseTrend&) const;
+      virtual void         drawSRequest(BaseTrend&, const SGBitSet*) const;
       virtual void         motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
       virtual bool         pointInside(const TP);
 
@@ -334,8 +334,8 @@ namespace laydata {
       virtual void         openGlDrawFill(layprop::DrawProperties&, const PointVector&) const;
       virtual void         openGlDrawSel(const PointVector&, const SGBitSet*) const;
       virtual void         openGlPostClean(layprop::DrawProperties&, PointVector& ptlist) const;
-      virtual void         drawRequest(tenderer::TopRend&) const;
-      virtual void         drawSRequest(tenderer::TopRend&, const SGBitSet*) const;
+      virtual void         drawRequest(BaseTrend&) const;
+      virtual void         drawSRequest(BaseTrend&, const SGBitSet*) const;
       virtual void         motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
 
       virtual void         info(std::ostringstream&, real) const;
@@ -379,8 +379,8 @@ namespace laydata {
       virtual void         openGlDrawFill(layprop::DrawProperties&, const PointVector&) const;
       virtual void         openGlDrawSel(const PointVector&, const SGBitSet*) const;
       virtual void         openGlPostClean(layprop::DrawProperties&, PointVector& ptlist) const;
-      virtual void         drawRequest(tenderer::TopRend&) const;
-      virtual void         drawSRequest(tenderer::TopRend&, const SGBitSet*) const;
+      virtual void         drawRequest(BaseTrend&) const;
+      virtual void         drawSRequest(BaseTrend&, const SGBitSet*) const;
       virtual void         motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
 
       virtual void         info(std::ostringstream&, real) const;

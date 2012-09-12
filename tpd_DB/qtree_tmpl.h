@@ -79,8 +79,8 @@ namespace laydata {
       const DrawIterator   begin(const layprop::DrawProperties&, const CtmQueue&);
       const Iterator       end();
       void                 openGlDraw(layprop::DrawProperties&, const TObjDataPairList*, bool) const;
-      void                 openGlRender(tenderer::TopRend&, const TObjDataPairList*) const;
-      short                clipType(tenderer::TopRend&) const;
+      void                 openGlRender(BaseTrend&, const TObjDataPairList*) const;
+      short                clipType(BaseTrend&) const;
       void                 add(DataT* shape);
       bool                 deleteMarked(SH_STATUS stat=sh_selected, bool partselect=false);
       bool                 deleteThis(DataT*);
