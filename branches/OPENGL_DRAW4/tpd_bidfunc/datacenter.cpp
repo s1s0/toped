@@ -41,7 +41,7 @@
 #include "viewprop.h"
 #include "trend.h"
 #include "ps_out.h"
-#include "tenderer.h"
+#include "basetrend.h"
 #include "calbr_reader.h"
 
 // Global variables
@@ -868,7 +868,7 @@ void DataCenter::openGlRender(const CTM& layCTM)
 //            delete _cRenderer;
 //         }
 //         _cRenderer = new tenderer::TopRend( drawProp, PROPC->UU() );
-         tenderer::TopRend* cRenderer = TRENDC->secureRenderer(drawProp);
+         BaseTrend* cRenderer = TRENDC->secureRenderer(drawProp);
          // render the grid
          for (byte gridNo = 0; gridNo < 3; gridNo++)
          {

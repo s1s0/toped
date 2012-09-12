@@ -4,11 +4,12 @@ noinst_HEADERS =                                                              \
                  tpdph.h                                                      \
                  viewprop.h                                                   \
                  trend.h                                                      \
+                 tenderer.h                                                   \
                  glf.h 
 
 libtpd_GL_la_HEADERS =                                                        \
                  drawprop.h                                                   \
-                 tenderer.h
+                 basetrend.h
 
 libtpd_GL_la_SOURCES =                                                        \
                  tpdph.cpp                                                    \
@@ -16,6 +17,7 @@ libtpd_GL_la_SOURCES =                                                        \
                  tenderer.cpp                                                 \
                  viewprop.cpp                                                 \
                  trend.cpp                                                    \
+                 basetrend.cpp                                                \
                  glf.cpp 
 
 ###############################################################################

@@ -1316,7 +1316,7 @@ void laydata::TdtDesign::openGlDraw(layprop::DrawProperties& drawprop)
    }
 }
 
-void laydata::TdtDesign::openGlRender(tenderer::TopRend& rend)
+void laydata::TdtDesign::openGlRender(BaseTrend& rend)
 {
    if (_target.checkEdit())
    {
@@ -1827,7 +1827,7 @@ void laydata::DrcLibrary::openGlDraw(layprop::DrawProperties& drawProp, std::str
    drawProp.setState(layprop::DB);
 }
 
-void laydata::DrcLibrary::openGlRender(tenderer::TopRend& renderer, std::string cell, CTM& cctm)
+void laydata::DrcLibrary::openGlRender(BaseTrend& renderer, std::string cell, CTM& cctm)
 {
    renderer.setState(layprop::DRC);
    laydata::TdtDefaultCell* dst_structure = checkCell(cell);
