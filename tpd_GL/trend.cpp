@@ -496,8 +496,8 @@ trend::FontLibrary::~FontLibrary()
 
 
 //=============================================================================
-trend::TrendCenter::TrendCenter(bool gui, bool forceBasic, bool sprtVbo, bool sprtShaders) :
-   _cRenderer     (              NULL)
+trend::TrendCenter::TrendCenter(bool gui, bool forceBasic, bool sprtVbo, bool sprtShaders) //:
+//   _cRenderer     (              NULL)
 {
    if      (!gui)             _renderType = trend::tocom;
    else if ( forceBasic )     _renderType = trend::tolder;
@@ -508,8 +508,14 @@ trend::TrendCenter::TrendCenter(bool gui, bool forceBasic, bool sprtVbo, bool sp
 
 }
 
-BaseTrend* trend::TrendCenter::secureRenderer(layprop::DrawProperties* drawProp)
+trend::Collect* trend::TrendCenter::secureCollector(layprop::DrawProperties* drawProp)
 {
+   return DEBUG_NEW trend::Collect(drawProp, PROPC->UU());
+}
+
+tenderer::TopRend* trend::TrendCenter::secureRenderer(layprop::DrawProperties* drawProp)
+{
+
    switch (renderType())
    {
       case trend::tocom    : assert(false);          break;// shouldn't end-up here ever
@@ -533,18 +539,18 @@ BaseTrend* trend::TrendCenter::secureRenderer(layprop::DrawProperties* drawProp)
 
 void trend::TrendCenter::drawFOnly()
 {
-   switch (TRENDC->renderType())
-   {
-      case trend::tocom    : assert(false);          break;// shouldn't end-up here ever
-      case trend::tolder   :                         break;// basic (i.e. openGL 1.1)
-      case trend::tenderer : if (NULL != _cRenderer) _cRenderer->grcDraw();   break;// VBO
-      case trend::toshader : assert(false);          break;//TODO
-      default: assert(false); break;
-   }
+//   switch (TRENDC->renderType())
+//   {
+//      case trend::tocom    : assert(false);          break;// shouldn't end-up here ever
+//      case trend::tolder   :                         break;// basic (i.e. openGL 1.1)
+//      case trend::tenderer : if (NULL != _cRenderer) _cRenderer->grcDraw();   break;// VBO
+//      case trend::toshader : assert(false);          break;//TODO
+//      default: assert(false); break;
+//   }
 }
 
 trend::TrendCenter::~TrendCenter()
 {
    delete fontLib;
-   if (NULL != _cRenderer) delete _cRenderer;
+//   if (NULL != _cRenderer) delete _cRenderer;
 }

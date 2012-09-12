@@ -861,14 +861,7 @@ void DataCenter::openGlRender(const CTM& layCTM)
       layprop::DrawProperties* drawProp;
       if (PROPC->lockDrawProp(drawProp))
       {
-//         if (NULL != _cRenderer)
-//         {
-////            _cRenderer->cleanUp();
-//            _cRenderer->grcCleanUp();
-//            delete _cRenderer;
-//         }
-//         _cRenderer = new tenderer::TopRend( drawProp, PROPC->UU() );
-         BaseTrend* cRenderer = TRENDC->secureRenderer(drawProp);
+         tenderer::TopRend * cRenderer = TRENDC->secureRenderer(drawProp);
          // render the grid
          for (byte gridNo = 0; gridNo < 3; gridNo++)
          {
@@ -879,6 +872,7 @@ void DataCenter::openGlRender(const CTM& layCTM)
          //_properties.drawZeroCross(renderer);
          if (wxMUTEX_NO_ERROR == _DBLock.TryLock())
          {
+            trend::Collect* cCollector = TRENDC->secureCollector(drawProp);
 //            TpdPost::toped_status(console::TSTS_RENDERON);
             TpdPost::render_status(true);
             #ifdef RENDER_PROFILING
@@ -886,7 +880,7 @@ void DataCenter::openGlRender(const CTM& layCTM)
             #endif
             // There is no need to check for an active cell. If there isn't one
             // the function will return silently.
-            _TEDLIB()->openGlRender(*cRenderer);
+            _TEDLIB()->openGlRender(*cCollector);
             // Draw DRC data (if any)
             // TODO! clean-up the DRC stuff here - lock/unlock and more importantly
             // DrcLibrary <-> CalibrFile i.e. _DRCDB <-> DRCData. The end of the line shall be
@@ -897,7 +891,7 @@ void DataCenter::openGlRender(const CTM& layCTM)
                {
                   std::string cellName = DRCData->cellName();
                   CTM cellCTM = DRCData->getCTM(cellName);
-                  _DRCDB->openGlRender(*cRenderer, cellName, cellCTM);
+                  _DRCDB->openGlRender(*cCollector, cellName, cellCTM);
                   VERIFY(wxMUTEX_NO_ERROR == _DRCLock.Unlock());
                }
             }

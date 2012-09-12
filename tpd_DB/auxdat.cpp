@@ -113,12 +113,12 @@ void auxdata::TdtGrcPoly::openGlDrawSel(const PointVector& ptlist, const SGBitSe
    }
 }
 
-void auxdata::TdtGrcPoly::drawRequest(BaseTrend& rend) const
+void auxdata::TdtGrcPoly::drawRequest(trend::Collect& rend) const
 {
    rend.grcpoly(_pdata, _psize);
 }
 
-void auxdata::TdtGrcPoly::drawSRequest(BaseTrend& rend, const SGBitSet*) const
+void auxdata::TdtGrcPoly::drawSRequest(trend::Collect& rend, const SGBitSet*) const
 {
    rend.poly(_pdata, _psize, NULL, NULL);
 }
@@ -346,14 +346,14 @@ void auxdata::TdtGrcWire::openGlDrawSel(const PointVector& ptlist, const SGBitSe
    }
 }
 
-void auxdata::TdtGrcWire::drawRequest(BaseTrend& rend) const
+void auxdata::TdtGrcWire::drawRequest(trend::Collect& rend) const
 {
 //   rend.fwire(_pdata, _psize, _width);
    rend.grcwire(_pdata, _psize, _width);
 
 }
 
-void auxdata::TdtGrcWire::drawSRequest(BaseTrend& rend, const SGBitSet*) const
+void auxdata::TdtGrcWire::drawSRequest(trend::Collect& rend, const SGBitSet*) const
 {
    rend.wire(_pdata, _psize, _width, NULL);
 }
@@ -586,7 +586,7 @@ void auxdata::GrcCell::openGlDraw(layprop::DrawProperties& drawprop, bool active
    }
 }
 
-void auxdata::GrcCell::openGlRender(BaseTrend& rend, const CTM& trans,
+void auxdata::GrcCell::openGlRender(trend::Collect& rend, const CTM& trans,
                                      bool selected, bool active) const
 {
    // Draw figures

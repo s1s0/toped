@@ -620,7 +620,7 @@ void laydata::QTreeTmpl<DataT>::openGlDraw(layprop::DrawProperties& drawprop,
 }
 
 template <typename DataT>
-short laydata::QTreeTmpl<DataT>::clipType(BaseTrend& rend) const
+short laydata::QTreeTmpl<DataT>::clipType(trend::Collect& rend) const
 {
    if (empty()) return 0;
    // check the entire holder for clipping...
@@ -633,7 +633,7 @@ short laydata::QTreeTmpl<DataT>::clipType(BaseTrend& rend) const
 }
 
 template <typename DataT>
-void laydata::QTreeTmpl<DataT>::openGlRender(BaseTrend& rend, const TObjDataPairList* slst) const
+void laydata::QTreeTmpl<DataT>::openGlRender(trend::Collect& rend, const TObjDataPairList* slst) const
 {
    // The drawing will be faster like this for the cells without selected shapes
    // that will be the wast majority of the cases. A bit bigger code though.
