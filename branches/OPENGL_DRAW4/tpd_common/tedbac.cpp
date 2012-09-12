@@ -244,6 +244,8 @@ template class laydata::LayerIterator<layprop::LayerSettings*>;
 template class laydata::LayerContainer<layprop::LayerSettings*>;
 template class laydata::LayerIterator<tenderer::TenderLay*>;
 template class laydata::LayerContainer<tenderer::TenderLay*>;
+template class laydata::LayerIterator<trend::TenderLay*>;
+template class laydata::LayerContainer<trend::TenderLay*>;
 //------------------------------------------------------------------------------
 template class laydata::LayerIterator<auxdata::QuadTree*>;
 template class laydata::LayerContainer<auxdata::QuadTree*>;

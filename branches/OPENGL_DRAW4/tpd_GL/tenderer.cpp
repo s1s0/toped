@@ -1410,7 +1410,8 @@ tenderer::TenderRefLay::~TenderRefLay()
 // class TopRend
 //
 tenderer::TopRend::TopRend( layprop::DrawProperties* drawprop, real UU ) :
-   BaseTrend             (drawprop, UU) ,
+    _drawprop            ( drawprop   ),
+    _UU                  ( UU         ),
    _clayer               (       NULL ),
    _grcLayer             (       NULL ),
    _cslctd_array_offset  (       0u   ),

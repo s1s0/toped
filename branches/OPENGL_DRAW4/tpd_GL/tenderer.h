@@ -136,6 +136,17 @@
    #define TNDR_GLENUMT GL_INT
 #endif
 
+// to cast properly the indices parameter in glDrawElements when
+// drawing from VBO
+#define VBO_BUFFER_OFFSET(i) ((char *)NULL + (i))
+
+//=============================================================================
+//
+//
+//
+//=============================================================================
+typedef std::list<word> TeselVertices;
+
 //=============================================================================
 //
 //
@@ -806,37 +817,55 @@ namespace tenderer {
       the previous view must be considered invalid. The object structure created
       by this class is shown in the documentation of the module.
    */
-   class TopRend : public BaseTrend {
+   class TopRend {
       public:
-                             TopRend( layprop::DrawProperties* drawprop, real UU );
-         virtual            ~TopRend();
-         virtual void        grid( const real, const std::string );
-         virtual void        setLayer(const LayerDef&, bool);
-         virtual bool        chunkExists(const LayerDef&, bool);
-         virtual void        pushCell(std::string, const CTM&, const DBbox&, bool, bool);
-         virtual void        popCell()                              {_cellStack.pop();}
-         virtual const CTM&  topCTM() const                         {return  _cellStack.top()->ctm();}
-         virtual void        box  (const int4b* pdata)              {_clayer->box(pdata);}
-         virtual void        box  (const int4b* pdata, const SGBitSet* ss){_clayer->box(pdata, ss);}
-         virtual void        poly (const int4b* pdata, unsigned psize, const TessellPoly* tpoly)
+                           TopRend( layprop::DrawProperties* drawprop, real UU );
+                          ~TopRend();
+         void              grid( const real, const std::string );
+         void              setLayer(const LayerDef&, bool);
+         bool              chunkExists(const LayerDef&, bool);
+         void              pushCell(std::string, const CTM&, const DBbox&, bool, bool);
+         void              popCell()                              {_cellStack.pop();}
+         const CTM&        topCTM() const                         {return  _cellStack.top()->ctm();}
+         void              box  (const int4b* pdata)              {_clayer->box(pdata);}
+         void              box  (const int4b* pdata, const SGBitSet* ss){_clayer->box(pdata, ss);}
+         void              poly (const int4b* pdata, unsigned psize, const TessellPoly* tpoly)
                                                                   {_clayer->poly(pdata, psize, tpoly);}
-         virtual void        poly (const int4b* pdata, unsigned psize, const TessellPoly* tpoly, const SGBitSet* ss)
+         void              poly (const int4b* pdata, unsigned psize, const TessellPoly* tpoly, const SGBitSet* ss)
                                                                   {_clayer->poly(pdata, psize, tpoly, ss);}
-         virtual void        grcpoly(int4b* pdata, unsigned psize);
-         virtual void        wire (int4b*, unsigned, WireWidth);
-         virtual void        wire (int4b*, unsigned, WireWidth, const SGBitSet*);
-         virtual void        grcwire (int4b*, unsigned, WireWidth);
-         virtual void        arefOBox(std::string, const CTM&, const DBbox&, bool);
-         virtual void        text (const std::string*, const CTM&, const DBbox&, const TP&, bool);
-         virtual bool        collect();
-         virtual bool        grcCollect();
-         virtual void        draw();
-         virtual void        grcDraw();
-         virtual void        cleanUp();
-         virtual void        grcCleanUp();
-         virtual void        setGrcLayer(bool, const LayerDef&);
-         virtual bool        preCheckCRS(const laydata::TdtCellRef*, layprop::CellRefChainType&);
+         void              grcpoly(int4b* pdata, unsigned psize);
+         void              wire (int4b*, unsigned, WireWidth);
+         void              wire (int4b*, unsigned, WireWidth, const SGBitSet*);
+         void              grcwire (int4b*, unsigned, WireWidth);
+         void              arefOBox(std::string, const CTM&, const DBbox&, bool);
+         void              text (const std::string*, const CTM&, const DBbox&, const TP&, bool);
+         bool              collect();
+         bool              grcCollect();
+         void              draw();
+         void              grcDraw();
+         void              cleanUp();
+         void              grcCleanUp();
+         void              setGrcLayer(bool, const LayerDef&);
+
+         LayerDef          getTenderLay(const LayerDef& laydef)
+                                                         {return _drawprop->getTenderLay(laydef)   ;}
+         void              setState(layprop::PropertyState state)
+                                                         {        _drawprop->setState(state)       ;}
+         bool              layerHidden(const LayerDef& laydef) const
+                                                         {return _drawprop->layerHidden(laydef)    ;}
+         const CTM&        scrCTM() const                {return _drawprop->scrCtm()               ;}
+         word              visualLimit() const           {return _drawprop->visualLimit()          ;}
+         const DBbox&      clipRegion() const            {return _drawprop->clipRegion()           ;}
+         void              postCheckCRS(const laydata::TdtCellRef* ref)
+                                                         {        _drawprop->postCheckCRS(ref)     ;}
+         bool              preCheckCRS(const laydata::TdtCellRef*, layprop::CellRefChainType&);
+         void              initDrawRefStack(laydata::CellRefStack* crs)
+                                                         {       _drawprop->initDrawRefStack(crs)  ;}
+         void              clearDrawRefStack()           {       _drawprop->clearDrawRefStack()    ;}
+         bool              adjustTextOrientation() const {return _drawprop->adjustTextOrientation();}
       private:
+         layprop::DrawProperties*   _drawprop;
+         real              _UU;
          DataLay           _data;            //!All editable data for drawing
          DataLay           _grcData;         //!All GRC      data for drawing
          TenderLay*        _clayer;          //!Working variable pointing to the current edit slice
