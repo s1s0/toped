@@ -157,8 +157,9 @@ namespace trend {
                                 TrendCenter(bool gui, bool forceBasic=true, bool sprtVbo=false, bool sprtShaders=false);
          virtual               ~TrendCenter();
          RenderType             renderType() const {return _renderType;}
-//         TrendBase*               secureCollector(layprop::DrawProperties* drawProp);
          trend::TrendBase*      secureRenderer(layprop::DrawProperties* drawProp);
+         void                   drawGrid();
+         void                   drawZeroCross();
          void                   drawFOnly();
 //         bool                   loadLayoutFont(std::string name) {return _fontLib->loadLayoutFont(name);}
 //         bool                   selectFont(std::string name)     {return _fontLib->selectFont(name);}

@@ -862,14 +862,8 @@ void DataCenter::openGlRender(const CTM& layCTM)
       if (PROPC->lockDrawProp(drawProp))
       {
          trend::TrendBase* cRenderer = TRENDC->secureRenderer(drawProp);
-         // render the grid
-         for (byte gridNo = 0; gridNo < 3; gridNo++)
-         {
-            const layprop::LayoutGrid* cgrid = PROPC->grid(gridNo);
-            if ((NULL !=  cgrid) && cgrid->visual())
-               cRenderer->grid(cgrid->step(), cgrid->color());
-         }
-         //_properties.drawZeroCross(renderer);
+         TRENDC->drawGrid();
+         TRENDC->drawZeroCross();
          if (wxMUTEX_NO_ERROR == _DBLock.TryLock())
          {
 //            TpdPost::toped_status(console::TSTS_RENDERON);
