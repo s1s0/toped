@@ -250,7 +250,7 @@ namespace trend {
                            TenderTV(TrendRef* const, bool, bool, unsigned, unsigned);
          virtual          ~TenderTV();
 
-         virtual void      collect(TNDR_GLDATAT*, unsigned int*, unsigned int*);
+         virtual void      collect(TNDR_GLDATAT*, unsigned int*);
          virtual void      draw(layprop::DrawProperties*);
          virtual void      drawTexts(layprop::DrawProperties*);
       private:

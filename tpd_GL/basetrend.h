@@ -271,7 +271,7 @@ namespace trend {
    /**
       Represents non-convex polygons - most of the poly objects in the DB. Inherits
       TrendCnvx. The only addition is the tesselation data (_tdata) which is
-      utilized if the object is to be filled.
+      utilised if the object is to be filled.
    */
    class TrendNcvx : public TrendCnvx {
       public:
@@ -595,7 +595,7 @@ namespace trend {
       public:
          enum {fqss, ftrs, ftfs, ftss} NcvxTypes;
          enum {cont, line, cnvx, ncvx} ObjtTypes;
-         typedef std::list<TrendText*> TenderStrings;
+         typedef std::list<TrendText*> TrendStrings;
          typedef std::list<TextOvlBox*> RefTxtList;
                            TrendTV(TrendRef* const, bool, bool, unsigned, unsigned);
          virtual          ~TrendTV();
@@ -604,10 +604,10 @@ namespace trend {
          void              registerWire  (TrendWire*);
          void              registerText  (TrendText*, TextOvlBox*);
 
-         virtual void      collect(TNDR_GLDATAT*, unsigned int*, unsigned int*) = 0;
+         virtual void      collect(TNDR_GLDATAT*, unsigned int*) = 0;
          virtual void      draw(layprop::DrawProperties*) = 0;
          virtual void      drawTexts(layprop::DrawProperties*) = 0;
-         TrendRef*        swapRefCells(TrendRef*);
+         TrendRef*         swapRefCells(TrendRef*);
 
          unsigned          num_total_points();
          unsigned          num_total_indexs();
@@ -622,7 +622,7 @@ namespace trend {
          SliceWires        _line_data; //! Line data
          SliceObjects      _cnvx_data; //! Convex polygon data (Only boxes are here at the moment. TODO - all convex polygons)
          SlicePolygons     _ncvx_data; //! Non convex data
-         TenderStrings     _text_data; //! Text (strings)
+         TrendStrings      _text_data; //! Text (strings)
          RefTxtList        _txto_data; //! Text overlapping boxes
          // vertex related data
          unsigned          _alvrtxs[4]; //! array with the total number of vertexes
@@ -775,8 +775,8 @@ namespace trend {
    */
    class TrendLay {
       public:
-         typedef std::list<TrendTV*>     TenderTVList;
-         typedef std::list<TrendReTV*>   TenderReTVList;
+         typedef std::list<TrendTV*>     TrendTVList;
+         typedef std::list<TrendReTV*>   TrendReTVList;
          typedef std::map<std::string, TrendTV*> ReusableTTVMap;
 
                            TrendLay();
@@ -809,8 +809,8 @@ namespace trend {
          void              registerSOBox (TextSOvlBox*);
          ReusableTTVMap    _reusableFData; // reusable filled chunks
          ReusableTTVMap    _reusableCData; // reusable contour chunks
-         TenderTVList      _layData;
-         TenderReTVList    _reLayData;
+         TrendTVList       _layData;
+         TrendReTVList     _reLayData;
          TrendTV*          _cslice;    //!Working variable pointing to the current slice
          unsigned          _num_total_points;
          unsigned          _num_total_indexs;

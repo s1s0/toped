@@ -30,6 +30,7 @@
 #include "trend.h"
 #include <GL/glew.h>
 #include "glf.h"
+#include "tolder.h"
 #include "tenderer.h"
 #include "viewprop.h"
 
@@ -519,7 +520,11 @@ trend::TrendBase* trend::TrendCenter::secureRenderer(layprop::DrawProperties* dr
    switch (renderType())
    {
       case trend::tocom    : assert(false);          break;// shouldn't end-up here ever
-      case trend::tolder   : assert(false);          break;// TODO
+      case trend::tolder   :
+      {
+         _cRenderer = DEBUG_NEW trend::Tolder( drawProp, PROPC->UU() );
+         return _cRenderer;
+      }
       case trend::tenderer :
       {
          if (NULL != _cRenderer)
@@ -539,14 +544,23 @@ trend::TrendBase* trend::TrendCenter::secureRenderer(layprop::DrawProperties* dr
 
 void trend::TrendCenter::drawFOnly()
 {
-//   switch (TRENDC->renderType())
-//   {
-//      case trend::tocom    : assert(false);          break;// shouldn't end-up here ever
-//      case trend::tolder   :                         break;// basic (i.e. openGL 1.1)
-//      case trend::tenderer : if (NULL != _cRenderer) _cRenderer->grcDraw();   break;// VBO
-//      case trend::toshader : assert(false);          break;//TODO
-//      default: assert(false); break;
-//   }
+   if (NULL != _cRenderer) _cRenderer->grcDraw();
+}
+
+void trend::TrendCenter::drawGrid()
+{
+   // render the grid
+   for (byte gridNo = 0; gridNo < 3; gridNo++)
+   {
+      const layprop::LayoutGrid* cgrid = PROPC->grid(gridNo);
+      if ((NULL !=  cgrid) && cgrid->visual())
+         _cRenderer->grid(cgrid->step(), cgrid->color());
+   }
+}
+
+void trend::TrendCenter::drawZeroCross()
+{
+   // TODO
 }
 
 trend::TrendCenter::~TrendCenter()

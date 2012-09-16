@@ -698,7 +698,7 @@ trend::TrendTV::~TrendTV()
       delete (*CSO);
    for (SlicePolygons::const_iterator CSO = _ncvx_data.begin(); CSO != _ncvx_data.end(); CSO++)
       delete (*CSO);
-   for (TenderStrings::const_iterator CSO = _text_data.begin(); CSO != _text_data.end(); CSO++)
+   for (TrendStrings::const_iterator CSO = _text_data.begin(); CSO != _text_data.end(); CSO++)
       delete (*CSO);
    for (RefTxtList::const_iterator CSO = _txto_data.begin(); CSO != _txto_data.end(); CSO++)
       delete (*CSO);
@@ -878,10 +878,10 @@ unsigned trend::TrendLay::total_slctdx()
 
 trend::TrendLay::~TrendLay()
 {
-   for (TenderTVList::const_iterator TLAY = _layData.begin(); TLAY != _layData.end(); TLAY++)
+   for (TrendTVList::const_iterator TLAY = _layData.begin(); TLAY != _layData.end(); TLAY++)
       delete (*TLAY);
 
-   for (TenderReTVList::const_iterator TLAY = _reLayData.begin(); TLAY != _reLayData.end(); TLAY++)
+   for (TrendReTVList::const_iterator TLAY = _reLayData.begin(); TLAY != _reLayData.end(); TLAY++)
       delete (*TLAY);
 }
 
@@ -890,12 +890,12 @@ trend::TrendLay::~TrendLay()
 //
 // class TrendRefLay
 //
-trend::TrendRefLay::TrendRefLay()
-{
-   _alvrtxs = 0u;
-   _alobjvx = 0u;
-   _asindxs = 0u;
-   _asobjix = 0u;
+trend::TrendRefLay::TrendRefLay() :
+   _alvrtxs    (      0u),
+   _alobjvx    (      0u),
+   _asindxs    (      0u),
+   _asobjix    (      0u)
+   {
 }
 
 void trend::TrendRefLay::addCellOBox(TrendRef* cRefBox, word alphaDepth, bool selected)

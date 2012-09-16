@@ -14,9 +14,9 @@
 //   This file is a part of Toped project (C) 2001-2009 Toped developers    =
 // ------------------------------------------------------------------------ =
 //           $URL$
-//        Created: Sun Jan 11 2008
+//        Created: Sun Sep 16 BST 2012
 //     Originator: Svilen Krustev - skr@toped.org.uk
-//    Description: OpenGL renderer
+//    Description: OpenGL Basic renderer
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------
@@ -27,19 +27,14 @@
 
 #include "tpdph.h"
 #include <sstream>
-#include "tenderer.h"
+#include "tolder.h"
 #include "viewprop.h"
 #include "trend.h"
 
-extern trend::FontLibrary* fontLib;
 
-//=============================================================================
-//
-// class TenderTV
-//
-trend::TenderTV::TenderTV(TrendRef* const refCell, bool filled, bool reusable,
+trend::TolderTV::TolderTV(TrendRef* const refCell, bool filled, bool reusable,
                    unsigned parray_offset, unsigned iarray_offset) :
-   TrendTV(refCell, filled, reusable, parray_offset, iarray_offset),
+   TrendTV              (refCell, filled, reusable, parray_offset, iarray_offset),
    _point_array_offset  ( parray_offset   ),
    _index_array_offset  ( iarray_offset   )
 {
@@ -53,9 +48,10 @@ trend::TenderTV::TenderTV(TrendRef* const refCell, bool filled, bool reusable,
       _sizesvx[i] = NULL;
       _firstvx[i] = NULL;
    }
+
 }
 
-void trend::TenderTV::collectIndexs(unsigned int* index_array, const TeselChain* tdata, unsigned* size_index,
+void trend::TolderTV::collectIndexs(unsigned int* index_array, const TeselChain* tdata, unsigned* size_index,
                              unsigned* index_offset, unsigned cpoint_index)
 {
    for (TeselChain::const_iterator TCH = tdata->begin(); TCH != tdata->end(); TCH++)
@@ -65,7 +61,7 @@ void trend::TenderTV::collectIndexs(unsigned int* index_array, const TeselChain*
          case GL_QUAD_STRIP     :
          {
             assert(_sizesix[fqss]);
-            _firstix[fqss][size_index[fqss]  ] = sizeof(unsigned) * index_offset[fqss];
+            _firstix[fqss][size_index[fqss]  ] = /*sizeof(unsigned) * */index_offset[fqss];
             _sizesix[fqss][size_index[fqss]++] = TCH->size();
             for (unsigned i = 0; i < TCH->size(); i++)
                index_array[index_offset[fqss]++] = TCH->index_seq()[i] + cpoint_index;
@@ -74,7 +70,7 @@ void trend::TenderTV::collectIndexs(unsigned int* index_array, const TeselChain*
          case GL_TRIANGLES      :
          {
             assert(_sizesix[ftrs]);
-            _firstix[ftrs][size_index[ftrs]  ] = sizeof(unsigned) * index_offset[ftrs];
+            _firstix[ftrs][size_index[ftrs]  ] = /*sizeof(unsigned) * */index_offset[ftrs];
             _sizesix[ftrs][size_index[ftrs]++] = TCH->size();
             for (unsigned i = 0; i < TCH->size(); i++)
                index_array[index_offset[ftrs]++] = TCH->index_seq()[i] + cpoint_index;
@@ -83,7 +79,7 @@ void trend::TenderTV::collectIndexs(unsigned int* index_array, const TeselChain*
          case GL_TRIANGLE_FAN   :
          {
             assert(_sizesix[ftfs]);
-            _firstix[ftfs][size_index[ftfs]  ] = sizeof(unsigned) * index_offset[ftfs];
+            _firstix[ftfs][size_index[ftfs]  ] = /*sizeof(unsigned) * */index_offset[ftfs];
             _sizesix[ftfs][size_index[ftfs]++] = TCH->size();
             for (unsigned i = 0; i < TCH->size(); i++)
                index_array[index_offset[ftfs]++] = TCH->index_seq()[i] + cpoint_index;
@@ -92,7 +88,7 @@ void trend::TenderTV::collectIndexs(unsigned int* index_array, const TeselChain*
          case GL_TRIANGLE_STRIP :
          {
             assert(_sizesix[ftss]);
-            _firstix[ftss][size_index[ftss]  ] = sizeof(unsigned) * index_offset[ftss];
+            _firstix[ftss][size_index[ftss]  ] = /*sizeof(unsigned) * */index_offset[ftss];
             _sizesix[ftss][size_index[ftss]++] = TCH->size();
             for (unsigned i = 0; i < TCH->size(); i++)
                index_array[index_offset[ftss]++] = TCH->index_seq()[i] + cpoint_index;
@@ -103,7 +99,7 @@ void trend::TenderTV::collectIndexs(unsigned int* index_array, const TeselChain*
    }
 }
 
-void trend::TenderTV::collect(TNDR_GLDATAT* point_array, unsigned int* index_array)
+void trend::TolderTV::collect(TNDR_GLDATAT* point_array, unsigned int* index_array)
 {
    unsigned line_arr_size = 2 * _alvrtxs[line];
    unsigned fqus_arr_size = 2 * _alvrtxs[cnvx];
@@ -223,98 +219,101 @@ void trend::TenderTV::collect(TNDR_GLDATAT* point_array, unsigned int* index_arr
    }
 }
 
-void trend::TenderTV::draw(layprop::DrawProperties* drawprop)
+void trend::TolderTV::draw(layprop::DrawProperties* drawprop)
 {
    // First - deal with openGL translation matrix
    glPushMatrix();
    glMultMatrixd(_refCell->translation());
    drawprop->adjustAlpha(_refCell->alphaDepth() - 1);
-   // Switch the vertex buffers ON in the openGL engine ...
-   glEnableClientState(GL_VERTEX_ARRAY);
-   // Set-up the offset in the binded Vertex buffer
-   glVertexPointer(2, TNDR_GLENUMT, 0, (GLvoid*)(sizeof(TNDR_GLDATAT) * _point_array_offset));
+//   // Switch the vertex buffers ON in the openGL engine ...
+//   glEnableClientState(GL_VERTEX_ARRAY);
+//   // Set-up the offset in the binded Vertex buffer
+//   glVertexPointer(2, TNDR_GLENUMT, 0, (GLvoid*)(sizeof(TNDR_GLDATAT) * _point_array_offset));
    // ... and here we go ...
    if  (_alobjvx[line] > 0)
-   {// Draw the wire center lines
+   {// Draw the wire centre lines
       assert(_firstvx[line]);
       assert(_sizesvx[line]);
-      glMultiDrawArrays(GL_LINE_STRIP, _firstvx[line], _sizesvx[line], _alobjvx[line]);
+      //TODO
+//      glMultiDrawArrays(GL_LINE_STRIP, _firstvx[line], _sizesvx[line], _alobjvx[line]);
    }
    if  (_alobjvx[cnvx] > 0)
-   {// Draw convex polygons (TODO replace GL_QUADS to GL_POLY)
+   {// Draw convex polygons
       assert(_firstvx[cnvx]);
       assert(_sizesvx[cnvx]);
-      glMultiDrawArrays(GL_LINE_LOOP, _firstvx[cnvx], _sizesvx[cnvx], _alobjvx[cnvx]);
-      glMultiDrawArrays(GL_QUADS, _firstvx[cnvx], _sizesvx[cnvx], _alobjvx[cnvx]);
+      //TODO
+//      glMultiDrawArrays(GL_LINE_LOOP, _firstvx[cnvx], _sizesvx[cnvx], _alobjvx[cnvx]);
+//      glMultiDrawArrays(GL_QUADS, _firstvx[cnvx], _sizesvx[cnvx], _alobjvx[cnvx]);
    }
    if  (_alobjvx[ncvx] > 0)
    {// Draw non-convex polygons
-      glEnableClientState(GL_INDEX_ARRAY);
+//      glEnableClientState(GL_INDEX_ARRAY);
       assert(_firstvx[ncvx]);
       assert(_sizesvx[ncvx]);
-      glMultiDrawArrays(GL_LINE_LOOP, _firstvx[ncvx], _sizesvx[ncvx], _alobjvx[ncvx]);
+      //TODO
+//      glMultiDrawArrays(GL_LINE_LOOP, _firstvx[ncvx], _sizesvx[ncvx], _alobjvx[ncvx]);
       if (_alobjix[fqss] > 0)
       {
          assert(_sizesix[fqss]);
          assert(_firstix[fqss]);
-         // The line below works on Windows, but doesn't work (hangs) on Linux with nVidia driver.
-         // The suspect is (const GLvoid**)_firstix[fqss] but it's quite possible that it is a driver bug
-         // Besides - everybody is saying that there is no speed benefit from this operation
-         //glMultiDrawElements(GL_QUAD_STRIP    , _sizesix[fqss], GL_UNSIGNED_INT, (const GLvoid**)_firstix[fqss], _alobjix[fqss]);
          for (unsigned i= 0; i < _alobjix[fqss]; i++)
-            glDrawElements(GL_QUAD_STRIP, _sizesix[fqss][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_firstix[fqss][i]));
+         {
+            //TODO
+//            glDrawElements(GL_QUAD_STRIP, _sizesix[fqss][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_firstix[fqss][i]));
+         }
       }
       if (_alobjix[ftrs] > 0)
       {
          assert(_sizesix[ftrs]);
          assert(_firstix[ftrs]);
-         //glMultiDrawElements(GL_TRIANGLES     , _sizesix[ftrs], GL_UNSIGNED_INT, (const GLvoid**)_firstix[ftrs], _alobjix[ftrs]);
          for (unsigned i= 0; i < _alobjix[ftrs]; i++)
-            glDrawElements(GL_TRIANGLES, _sizesix[ftrs][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_firstix[ftrs][i]));
+         {
+            //TODO
+//            glDrawElements(GL_TRIANGLES, _sizesix[ftrs][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_firstix[ftrs][i]));
+         }
       }
       if (_alobjix[ftfs] > 0)
       {
          assert(_sizesix[ftfs]);
          assert(_firstix[ftfs]);
-         //glMultiDrawElements(GL_TRIANGLE_FAN  , _sizesix[ftfs], GL_UNSIGNED_INT, (const GLvoid**)_firstix[ftfs], _alobjix[ftfs]);
          for (unsigned i= 0; i < _alobjix[ftfs]; i++)
-            glDrawElements(GL_TRIANGLE_FAN, _sizesix[ftfs][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_firstix[ftfs][i]));
+         {
+            //TODO
+//            glDrawElements(GL_TRIANGLE_FAN, _sizesix[ftfs][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_firstix[ftfs][i]));
+         }
       }
       if (_alobjix[ftss] > 0)
       {
          assert(_sizesix[ftss]);
          assert(_firstix[ftss]);
-         //glMultiDrawElements(GL_TRIANGLE_STRIP, _sizesix[ftss], GL_UNSIGNED_INT, (const GLvoid**)_firstix[ftss], _alobjix[ftss]);
          for (unsigned i= 0; i < _alobjix[ftss]; i++)
-            glDrawElements(GL_TRIANGLE_STRIP, _sizesix[ftss][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_firstix[ftss][i]));
+         {
+            //TODO
+//            glDrawElements(GL_TRIANGLE_STRIP, _sizesix[ftss][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_firstix[ftss][i]));
+         }
       }
-      glDisableClientState(GL_INDEX_ARRAY);
+//      glDisableClientState(GL_INDEX_ARRAY);
    }
    if (_alobjvx[cont] > 0)
    {// Draw the remaining non-filled shapes of any kind
       assert(_firstvx[cont]);
       assert(_sizesvx[cont]);
-      glMultiDrawArrays(GL_LINE_LOOP, _firstvx[cont], _sizesvx[cont], _alobjvx[cont]);
+      // TODO
+//      glMultiDrawArrays(GL_LINE_LOOP, _firstvx[cont], _sizesvx[cont], _alobjvx[cont]);
    }
-   // Switch the vertex buffers OFF in the openGL engine ...
-   glDisableClientState(GL_VERTEX_ARRAY);
-   // ... and finally restore the openGL translation matrix
+//   // Switch the vertex buffers OFF in the openGL engine ...
+//   glDisableClientState(GL_VERTEX_ARRAY);
+//   // ... and finally restore the openGL translation matrix
    glPopMatrix();
+
 }
 
-void trend::TenderTV::drawTexts(layprop::DrawProperties* drawprop)
+void trend::TolderTV::drawTexts(layprop::DrawProperties*)
 {
-   glPushMatrix();
-   glMultMatrixd(_refCell->translation());
-   drawprop->adjustAlpha(_refCell->alphaDepth() - 1);
-
-   for (TrendStrings::const_iterator TSTR = _text_data.begin(); TSTR != _text_data.end(); TSTR++)
-      (*TSTR)->draw(_filled);
-
-   glPopMatrix();
+   //TODO
 }
 
-trend::TenderTV::~TenderTV()
+trend::TolderTV::~TolderTV()
 {
    if (NULL != _sizesvx[cont]) delete [] _sizesvx[cont];
    if (NULL != _sizesvx[line]) delete [] _sizesvx[line];
@@ -336,33 +335,31 @@ trend::TenderTV::~TenderTV()
    if (NULL != _firstix[ftfs]) delete [] _firstix[ftfs];
    if (NULL != _firstix[ftss]) delete [] _firstix[ftss];
 }
-
 //=============================================================================
 //
-// class TenderReTV
+// class TolderReTV
 //
-void trend::TenderReTV::draw(layprop::DrawProperties* drawprop)
+void trend::TolderReTV::draw(layprop::DrawProperties*)
 {
-   TrendRef* sref_cell = _chunk->swapRefCells(_refCell);
-   _chunk->draw(drawprop);
-   _chunk->swapRefCells(sref_cell);
+   //TODO
 }
 
-void trend::TenderReTV::drawTexts(layprop::DrawProperties* drawprop)
+void trend::TolderReTV::drawTexts(layprop::DrawProperties*)
 {
-   TrendRef* sref_cell = _chunk->swapRefCells(_refCell);
-   _chunk->drawTexts(drawprop);
-   _chunk->swapRefCells(sref_cell);
+   //TODO
 }
 
 //=============================================================================
 //
-// class TenderLay
+// class TolderLay
 //
-trend::TenderLay::TenderLay():
+trend::TolderLay::TolderLay():
    TrendLay              (             ),
+   _cpoint_array         (        NULL ),
+   _cindex_array         (        NULL ),
    _stv_array_offset     (          0u ),
    _slctd_array_offset   (          0u )
+
 {
    for (int i = lstr; i <= lnes; i++)
    {
@@ -371,12 +368,7 @@ trend::TenderLay::TenderLay():
    }
 }
 
-/**
- * Create a new object of TenderTV type which will be referred to by _cslice
- * @param ctrans Current translation matrix of the new object
- * @param fill Whether to fill the drawing objects
- */
-void trend::TenderLay::newSlice(TrendRef* const ctrans, bool fill, bool reusable, unsigned slctd_array_offset)
+void trend::TolderLay::newSlice(TrendRef* const ctrans, bool fill, bool reusable, unsigned slctd_array_offset)
 {
    assert( 0 == total_slctdx());
    _slctd_array_offset = slctd_array_offset;
@@ -384,12 +376,12 @@ void trend::TenderLay::newSlice(TrendRef* const ctrans, bool fill, bool reusable
    newSlice(ctrans, fill, reusable);
 }
 
-void trend::TenderLay::newSlice(TrendRef* const ctrans, bool fill, bool reusable)
+void trend::TolderLay::newSlice(TrendRef* const ctrans, bool fill, bool reusable)
 {
-   _cslice = DEBUG_NEW TenderTV(ctrans, fill, reusable, 2 * _num_total_points, _num_total_indexs);
+   _cslice = DEBUG_NEW TolderTV(ctrans, fill, reusable, 2 * _num_total_points, _num_total_indexs);
 }
 
-bool trend::TenderLay::chunkExists(TrendRef* const ctrans, bool filled)
+bool trend::TolderLay::chunkExists(TrendRef* const ctrans, bool filled)
 {
    ReusableTTVMap::iterator achunk;
    if (filled)
@@ -402,44 +394,20 @@ bool trend::TenderLay::chunkExists(TrendRef* const ctrans, bool filled)
       if (_reusableCData.end() == ( achunk =_reusableCData.find(ctrans->name()) ) )
          return false;
    }
-   _reLayData.push_back(DEBUG_NEW TenderReTV(achunk->second, ctrans));
+   _reLayData.push_back(DEBUG_NEW TolderReTV(achunk->second, ctrans));
    return true;
 }
 
-void trend::TenderLay::collect(bool fill, GLuint pbuf, GLuint ibuf)
+void trend::TolderLay::collect(bool fill, GLuint, GLuint)
 {
-   TNDR_GLDATAT* cpoint_array = NULL;
-   unsigned int* cindex_array = NULL;
-   _pbuffer = pbuf;
-   _ibuffer = ibuf;
-   glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
-   glBufferData(GL_ARRAY_BUFFER                       ,
-                2 * _num_total_points * sizeof(TNDR_GLDATAT),
-                NULL                                  ,
-                GL_DYNAMIC_DRAW                       );
-   cpoint_array = (TNDR_GLDATAT*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-   if (0 != _ibuffer)
-   {
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibuffer);
-      glBufferData(GL_ELEMENT_ARRAY_BUFFER           ,
-                   _num_total_indexs * sizeof(unsigned) ,
-                   NULL                              ,
-                   GL_DYNAMIC_DRAW                    );
-      cindex_array = (unsigned int*)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
-   }
+   _cpoint_array = DEBUG_NEW TNDR_GLDATAT[2 * _num_total_points];
+   if (0 != _num_total_indexs)
+      _cindex_array = DEBUG_NEW unsigned int[_num_total_indexs];
    for (TrendTVList::const_iterator TLAY = _layData.begin(); TLAY != _layData.end(); TLAY++)
-      (*TLAY)->collect(cpoint_array, cindex_array);
-   // Unmap the buffers
-   glUnmapBuffer(GL_ARRAY_BUFFER);
-//   glBindBuffer(GL_ARRAY_BUFFER, 0);
-   if (0 != _ibuffer)
-   {
-      glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
-//      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-   }
+      (*TLAY)->collect(_cpoint_array, _cindex_array);
 }
 
-void trend::TenderLay::collectSelected(unsigned int* slctd_array)
+void trend::TolderLay::collectSelected(unsigned int* slctd_array)
 {
    unsigned      slct_arr_size = _asindxs[lstr] + _asindxs[llps] + _asindxs[lnes];
    if (0 == slct_arr_size) return;
@@ -476,21 +444,21 @@ void trend::TenderLay::collectSelected(unsigned int* slctd_array)
          case lstr : // LINES
          {
             assert(_sizslix[lstr]);
-            _fstslix[lstr][size_sindex[lstr]  ] = sizeof(unsigned) * index_soffset[lstr];
+            _fstslix[lstr][size_sindex[lstr]  ] = /*sizeof(unsigned) * */index_soffset[lstr];
             _sizslix[lstr][size_sindex[lstr]++] = cchunk->sDataCopy(slctd_array, index_soffset[lstr]);
             break;
          }
          case llps      : // LINE_LOOP
          {
             assert(_sizslix[llps]);
-            _fstslix[llps][size_sindex[llps]  ] = sizeof(unsigned) * index_soffset[llps];
+            _fstslix[llps][size_sindex[llps]  ] = /*sizeof(unsigned) * */index_soffset[llps];
             _sizslix[llps][size_sindex[llps]++] = cchunk->sDataCopy(slctd_array, index_soffset[llps]);
             break;
          }
          case lnes   : // LINE_STRIP
          {
             assert(_sizslix[lnes]);
-            _fstslix[lnes][size_sindex[lnes]  ] = sizeof(unsigned) * index_soffset[lnes];
+            _fstslix[lnes][size_sindex[lnes]  ] = /*sizeof(unsigned) * */index_soffset[lnes];
             _sizslix[lnes][size_sindex[lnes]++] = cchunk->sDataCopy(slctd_array, index_soffset[lnes]);
             break;
          }
@@ -499,19 +467,20 @@ void trend::TenderLay::collectSelected(unsigned int* slctd_array)
    }
 }
 
-void trend::TenderLay::draw(layprop::DrawProperties* drawprop)
+void trend::TolderLay::draw(layprop::DrawProperties* drawprop)
 {
-   glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
+//   glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
    // Check the state of the buffer
-   GLint bufferSize;
-   glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
-   assert(bufferSize == (GLint)(2 * _num_total_points * sizeof(TNDR_GLDATAT)));
-   if (0 != _ibuffer)
-   {
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibuffer);
-      glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
-      assert(bufferSize == (GLint)(_num_total_indexs * sizeof(unsigned)));
-   }
+//   GLint bufferSize;
+//   glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
+//   assert(bufferSize == (GLint)(2 * _num_total_points * sizeof(TNDR_GLDATAT)));
+//   if (0 != _ibuffer)
+//   {
+//      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibuffer);
+//      glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
+//      assert(bufferSize == (GLint)(_num_total_indexs * sizeof(unsigned)));
+//   }
+   //TODO- push _cpoint_array and _cindex_array in the drawprop
    for (TrendTVList::const_iterator TLAY = _layData.begin(); TLAY != _layData.end(); TLAY++)
    {
       (*TLAY)->draw(drawprop);
@@ -521,68 +490,62 @@ void trend::TenderLay::draw(layprop::DrawProperties* drawprop)
       (*TLAY)->draw(drawprop);
    }
 
-   glBindBuffer(GL_ARRAY_BUFFER, 0);
-   if (0 != _ibuffer)
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+//   glBindBuffer(GL_ARRAY_BUFFER, 0);
+//   if (0 != _ibuffer)
+//      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void trend::TenderLay::drawSelected()
+void trend::TolderLay::drawSelected()
 {
-   glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
+//   glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
    // Check the state of the buffer
-   GLint bufferSize;
-   glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
-   assert(bufferSize == (GLint)(2 * _num_total_points * sizeof(TNDR_GLDATAT)));
+//   GLint bufferSize;
+//   glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
+//   assert(bufferSize == (GLint)(2 * _num_total_points * sizeof(TNDR_GLDATAT)));
 
-   glEnableClientState(GL_VERTEX_ARRAY);
-   glEnableClientState(GL_INDEX_ARRAY);
-   glVertexPointer(2, TNDR_GLENUMT, 0, (GLvoid*)(sizeof(TNDR_GLDATAT) * _stv_array_offset));
+//   glEnableClientState(GL_VERTEX_ARRAY);
+//   glEnableClientState(GL_INDEX_ARRAY);
+//   glVertexPointer(2, TNDR_GLENUMT, 0, /*(GLvoid*)(sizeof(TNDR_GLDATAT) * */_stv_array_offset));
 
    if (_asobjix[lstr] > 0)
    {
       assert(_sizslix[lstr]);
       assert(_fstslix[lstr]);
-      //glMultiDrawElements(GL_LINE_STRIP, _sizslix[lstr], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[lstr], _asobjix[lstr]);
-      for (unsigned i= 0; i < _asobjix[lstr]; i++)
-         glDrawElements(GL_LINE_STRIP, _sizslix[lstr][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_fstslix[lstr][i]));
+      //TODO
+//      for (unsigned i= 0; i < _asobjix[lstr]; i++)
+//         glDrawElements(GL_LINE_STRIP, _sizslix[lstr][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_fstslix[lstr][i]));
    }
    if (_asobjix[llps] > 0)
    {
+      //TODO
       assert(_sizslix[llps]);
       assert(_fstslix[llps]);
-         //glMultiDrawElements(GL_LINE_LOOP     , _sizslix[llps], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[llps], _alobjix[llps]);
-      for (unsigned i= 0; i < _asobjix[llps]; i++)
-         glDrawElements(GL_LINE_LOOP, _sizslix[llps][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_fstslix[llps][i]));
+//      for (unsigned i= 0; i < _asobjix[llps]; i++)
+//         glDrawElements(GL_LINE_LOOP, _sizslix[llps][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_fstslix[llps][i]));
    }
    if (_asobjix[lnes] > 0)
    {
+      //TODO
       assert(_sizslix[lnes]);
       assert(_fstslix[lnes]);
-         //glMultiDrawElements(GL_LINES  , _sizslix[lnes], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[lnes], _alobjix[lnes]);
-      for (unsigned i= 0; i < _asobjix[lnes]; i++)
-         glDrawElements(GL_LINES, _sizslix[lnes][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_fstslix[lnes][i]));
+//      for (unsigned i= 0; i < _asobjix[lnes]; i++)
+//         glDrawElements(GL_LINES, _sizslix[lnes][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_fstslix[lnes][i]));
    }
-   glDisableClientState(GL_INDEX_ARRAY);
-   glDisableClientState(GL_VERTEX_ARRAY);
-
-
-   glBindBuffer(GL_ARRAY_BUFFER, 0);
+//   glDisableClientState(GL_INDEX_ARRAY);
+//   glDisableClientState(GL_VERTEX_ARRAY);
+//   glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void trend::TenderLay::drawTexts(layprop::DrawProperties* drawprop)
+void trend::TolderLay::drawTexts(layprop::DrawProperties* drawprop)
 {
-   for (TrendTVList::const_iterator TLAY = _layData.begin(); TLAY != _layData.end(); TLAY++)
-   {
-      (*TLAY)->drawTexts(drawprop);
-   }
-   for (TrendReTVList::const_iterator TLAY = _reLayData.begin(); TLAY != _reLayData.end(); TLAY++)
-   {
-      (*TLAY)->drawTexts(drawprop);
-   }
+   //TODO
 }
 
-trend::TenderLay::~TenderLay()
+trend::TolderLay::~TolderLay()
 {
+   delete [] _cpoint_array;
+   if (NULL != _cindex_array)  delete [] _cindex_array;
+
    if (NULL != _sizslix[lstr]) delete [] _sizslix[lstr];
    if (NULL != _sizslix[llps]) delete [] _sizslix[llps];
    if (NULL != _sizslix[lnes]) delete [] _sizslix[lnes];
@@ -592,13 +555,13 @@ trend::TenderLay::~TenderLay()
    if (NULL != _fstslix[lnes]) delete [] _fstslix[lnes];
 }
 
-
 //=============================================================================
 //
-// class TenderRefLay
+// class TolderRefLay
 //
-trend::TenderRefLay::TenderRefLay() :
+trend::TolderRefLay::TolderRefLay() :
    TrendRefLay    (      ),
+   _cpoint_array  ( NULL ),
    _sizesvx       ( NULL ),
    _firstvx       ( NULL ),
    _sizslix       ( NULL ),
@@ -606,16 +569,17 @@ trend::TenderRefLay::TenderRefLay() :
 {
 }
 
-void trend::TenderRefLay::collect(GLuint pbuf)
+void trend::TolderRefLay::collect(GLuint)
 {
-   TNDR_GLDATAT* cpoint_array = NULL;
-   _pbuffer = pbuf;
-   glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
-   glBufferData(GL_ARRAY_BUFFER              ,
-                2 * total_points() * sizeof(TNDR_GLDATAT) ,
-                NULL                         ,
-                GL_DYNAMIC_DRAW               );
-   cpoint_array = (TNDR_GLDATAT*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+//   _pbuffer = pbuf;
+//   glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
+//   glBufferData(GL_ARRAY_BUFFER              ,
+//                2 * total_points() * sizeof(TNDR_GLDATAT) ,
+//                NULL                         ,
+//                GL_DYNAMIC_DRAW               );
+//   cpoint_array = (TNDR_GLDATAT*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+   _cpoint_array = DEBUG_NEW TNDR_GLDATAT[2 * total_points()];
+
 
    // initialise the indexing
    unsigned pntindx = 0;
@@ -636,52 +600,28 @@ void trend::TenderRefLay::collect(GLuint pbuf)
       if (1 < (*CSH)->alphaDepth())
       {
          _firstvx[szindx  ] = pntindx/2;
-         _sizesvx[szindx++] = (*CSH)->cDataCopy(cpoint_array, pntindx);
+         _sizesvx[szindx++] = (*CSH)->cDataCopy(_cpoint_array, pntindx);
       }
    }
    for (RefBoxList::const_iterator CSH = _cellSRefBoxes.begin(); CSH != _cellSRefBoxes.end(); CSH++)
    {
       _fstslix[szindx-_alobjvx] = _firstvx[szindx] = pntindx/2;
-      _sizslix[szindx-_alobjvx] = _sizesvx[szindx] = (*CSH)->cDataCopy(cpoint_array, pntindx);
+      _sizslix[szindx-_alobjvx] = _sizesvx[szindx] = (*CSH)->cDataCopy(_cpoint_array, pntindx);
       szindx++;
    }
    assert(pntindx == 2 * (_alvrtxs + _asindxs));
    assert(szindx  ==     (_alobjvx + _asobjix));
 
-   // Unmap the buffers
-   glUnmapBuffer(GL_ARRAY_BUFFER);
 }
 
-void trend::TenderRefLay::draw(layprop::DrawProperties* drawprop)
+void trend::TolderRefLay::draw(layprop::DrawProperties* drawprop)
 {
-   drawprop->setCurrentColor(REF_LAY_DEF);
-   drawprop->setLineProps(false);
-   // Bind the buffer
-   glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
-   // Check the state of the buffer
-   GLint bufferSize;
-   glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
-   assert(bufferSize == (GLint)(2 * total_points() * sizeof(TNDR_GLDATAT)));
-
-   glEnableClientState(GL_VERTEX_ARRAY);
-   glVertexPointer(2, TNDR_GLENUMT, 0, 0);
-   if (0 < (_alvrtxs + _asindxs))
-   {
-      assert(_firstvx); assert(_sizesvx);
-      glMultiDrawArrays(GL_LINE_LOOP, _firstvx, _sizesvx, _alobjvx + _asobjix);
-      if (0 < _asindxs)
-      {
-         assert(_fstslix); assert(_sizslix);
-         drawprop->setLineProps(true);
-         glMultiDrawArrays(GL_LINE_LOOP, _fstslix, _sizslix, _asobjix);
-         drawprop->setLineProps(false);
-      }
-   }
-   glDisableClientState(GL_VERTEX_ARRAY);
+   //TODO
 }
 
-trend::TenderRefLay::~TenderRefLay()
+trend::TolderRefLay::~TolderRefLay()
 {
+   if (NULL != _cpoint_array) delete [] _cpoint_array;
    if (NULL != _sizesvx) delete [] (_sizesvx);
    if (NULL != _firstvx) delete [] (_firstvx);
    if (NULL != _sizslix) delete [] (_sizslix);
@@ -690,19 +630,52 @@ trend::TenderRefLay::~TenderRefLay()
 
 //=============================================================================
 //
-// class Tenderer
+// class Tolder
 //
-trend::Tenderer::Tenderer( layprop::DrawProperties* drawprop, real UU ) :
+trend::Tolder::Tolder( layprop::DrawProperties* drawprop, real UU ) :
     TrendBase            (drawprop, UU),
-   _num_ogl_buffers      (       0u   ),
-   _num_ogl_grc_buffers  (       0u   ),
-   _ogl_buffers          (       NULL ),
-   _ogl_grc_buffers      (       NULL )
+    _sindex_array        (       NULL )
 {
-   _refLayer = DEBUG_NEW TenderRefLay();
+   _refLayer = DEBUG_NEW TolderRefLay();
 }
 
-bool trend::Tenderer::chunkExists(const LayerDef& laydef, bool has_selected)
+
+void trend::Tolder::grid( const real, const std::string )
+{
+   //TODO
+}
+
+void trend::Tolder::setLayer(const LayerDef& laydef, bool has_selected)
+{
+   // Reference layer is processed differently (pushCell), so make sure
+   // that we haven't got here with REF_LAY by accident
+   assert(REF_LAY_DEF != laydef);
+   if (NULL != _clayer)
+   { // post process the current layer
+      _clayer->ppSlice();
+      _cslctd_array_offset += _clayer->total_slctdx();
+   }
+   if (_data.end() != _data.find(laydef))
+   {
+      _clayer = _data[laydef];
+   }
+   else
+   {
+      _clayer = DEBUG_NEW TolderLay();
+      _data.add(laydef, _clayer);
+   }
+   if (has_selected)
+      _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(laydef), false, _cslctd_array_offset);
+   else
+      _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(laydef), false);
+}
+
+void trend::Tolder::setGrcLayer(bool, const LayerDef&)
+{
+   //TODO
+}
+
+bool trend::Tolder::chunkExists(const LayerDef& laydef, bool has_selected)
 {
    // Reference layer is processed differently (pushCell), so make sure
    // that we haven't got here with REF_LAY by accident
@@ -719,7 +692,7 @@ bool trend::Tenderer::chunkExists(const LayerDef& laydef, bool has_selected)
    }
    else
    {
-      _clayer = DEBUG_NEW TenderLay();
+      _clayer = DEBUG_NEW TolderLay();
       _data.add(laydef, _clayer);
    }
    if (has_selected)
@@ -729,73 +702,14 @@ bool trend::Tenderer::chunkExists(const LayerDef& laydef, bool has_selected)
    return false;
 }
 
-void trend::Tenderer::setLayer(const LayerDef& laydef, bool has_selected)
+bool trend::Tolder::collect()
 {
-   // Reference layer is processed differently (pushCell), so make sure
-   // that we haven't got here with REF_LAY by accident
-   assert(REF_LAY_DEF != laydef);
-   if (NULL != _clayer)
-   { // post process the current layer
-      _clayer->ppSlice();
-      _cslctd_array_offset += _clayer->total_slctdx();
-   }
-   if (_data.end() != _data.find(laydef))
-   {
-      _clayer = _data[laydef];
-   }
-   else
-   {
-      _clayer = DEBUG_NEW TenderLay();
-      _data.add(laydef, _clayer);
-   }
-   if (has_selected)
-      _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(laydef), false, _cslctd_array_offset);
-   else
-      _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(laydef), false);
-}
-
-void trend::Tenderer::grid(const real step, const std::string color)
-{
-   int gridstep = (int)rint(step / _UU);
-   if ( abs((int)(_drawprop->scrCtm().a() * gridstep)) > GRID_LIMIT)
-   {
-      _drawprop->setGridColor(color);
-      // set first grid step to be multiply on the step
-      TP bl = TP(_drawprop->clipRegion().p1().x(),_drawprop->clipRegion().p2().y());
-      TP tr = TP(_drawprop->clipRegion().p2().x(),_drawprop->clipRegion().p1().y());
-      int signX = (bl.x() > 0) ? 1 : -1;
-      int X_is = (int)((rint(abs(bl.x()) / gridstep)) * gridstep * signX);
-      int signY = (tr.y() > 0) ? 1 : -1;
-      int Y_is = (int)((rint(abs(tr.y()) / gridstep)) * gridstep * signY);
-
-      word arr_size = ( (((tr.x() - X_is + 1) / gridstep) + 1) * (((bl.y() - Y_is + 1) / gridstep) + 1) );
-      int* point_array = DEBUG_NEW int[arr_size * 2];
-      int index = 0;
-      for (int i = X_is; i < tr.x()+1; i += gridstep)
-      {
-         for (int j = Y_is; j < bl.y()+1; j += gridstep)
-         {
-            point_array[index++] = i;
-            point_array[index++] = j;
-         }
-      }
-      assert(index <= (arr_size*2));
-      glEnableClientState(GL_VERTEX_ARRAY);
-      glVertexPointer(2, GL_INT, 0, point_array);
-      glDrawArrays(GL_POINTS, 0, arr_size);
-      glDisableClientState(GL_VERTEX_ARRAY);
-      delete [] point_array;
-   }
-}
-
-bool trend::Tenderer::collect()
-{
-   // First filter-out the layers that doesn't have any objects on them,
-   // post process the last slices in the layers and also gather the number
-   // of required virtual buffers
+   // First filter-out the layers that doesn't have any objects on them and
+   // post process the last slices in the layers
    //
    DataLay::Iterator CCLAY = _data.begin();
-   unsigned num_total_slctdx = 0; // Initialize the number of total selected indexes
+   unsigned num_total_buffers = 0;
+   unsigned num_total_slctdx = 0; // Initialise the number of total selected indexes
    unsigned num_total_strings = 0;
    while (CCLAY != _data.end())
    {
@@ -819,30 +733,23 @@ bool trend::Tenderer::collect()
       else if (0 != CCLAY->total_points())
       {
          num_total_slctdx += CCLAY->total_slctdx();
-         _num_ogl_buffers++;
-         if (0 < CCLAY->total_indexs())
-            _num_ogl_buffers++;
+         num_total_buffers++;
+//         if (0 < CCLAY->total_indexs())
+//            num_total_buffers++;
          ++CCLAY;
       }
       else
          ++CCLAY;
    }
-   if (0 < _refLayer->total_points())  _num_ogl_buffers ++; // reference boxes
-   if (0 < num_total_slctdx      )     _num_ogl_buffers++;  // selected
+   if (0 < _refLayer->total_points())  num_total_buffers++; // reference boxes
+   if (0 < num_total_slctdx      )     num_total_buffers++;  // selected
    // Check whether we have to continue after traversing
-   if (0 == _num_ogl_buffers)
+   if (0 == num_total_buffers)
    {
       if (0 == num_total_strings)  return false;
       else                         return true;
    }
    //--------------------------------------------------------------------------
-   //
-   // generate all VBOs
-   //
-   _ogl_buffers = DEBUG_NEW GLuint [_num_ogl_buffers];
-   glGenBuffers(_num_ogl_buffers, _ogl_buffers);
-   unsigned current_buffer = 0;
-   //
    // collect the point arrays
    for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {
@@ -851,99 +758,38 @@ bool trend::Tenderer::collect()
          assert(0 != CLAY->total_strings());
          continue;
       }
-      assert(current_buffer < _num_ogl_buffers);
-      GLuint pbuf = _ogl_buffers[current_buffer++];
-      assert( (0 == CLAY->total_indexs()) || (current_buffer < _num_ogl_buffers) );
-      GLuint ibuf = (0 == CLAY->total_indexs()) ? 0u : _ogl_buffers[current_buffer++];
-      CLAY->collect(_drawprop->layerFilled(CLAY()), pbuf, ibuf);
+      CLAY->collect(_drawprop->layerFilled(CLAY()), 0, 0);
    }
-   //
+   //--------------------------------------------------------------------------
    // collect the indexes of the selected objects
    if (0 < num_total_slctdx)
    {// selected objects buffer
-      _sbuffer = _ogl_buffers[current_buffer++];
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _sbuffer);
-      glBufferData(GL_ELEMENT_ARRAY_BUFFER           ,
-                   num_total_slctdx * sizeof(unsigned) ,
-                                              NULL                              ,
-                                              GL_DYNAMIC_DRAW                    );
-      unsigned int* sindex_array = (unsigned int*)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
+      _sindex_array = DEBUG_NEW unsigned int[num_total_slctdx];
       for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
       {
          if (0 == CLAY->total_slctdx())
             continue;
-         CLAY->collectSelected(sindex_array);
+         CLAY->collectSelected(_sindex_array);
       }
-      glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
    }
-   //
+   //--------------------------------------------------------------------------
    // collect the reference boxes
    if (0 < _refLayer->total_points())
    {
-      GLuint pbuf = _ogl_buffers[current_buffer++];
-      _refLayer->collect(pbuf);
+      _refLayer->collect(0);
    }
    //
    // that's about it...
-   checkOGLError("collect");
    return true;
 }
 
-bool trend::Tenderer::grcCollect()
+bool trend::Tolder::grcCollect()
 {
-   // First filter-out the layers that doesn't have any objects on them,
-   // post process the last slices in the layers and also gather the number
-   // of required virtual buffers
-   //
-   DataLay::Iterator CCLAY = _grcData.begin();
-   while (CCLAY != _grcData.end())
-   {
-      CCLAY->ppSlice();
-      if (0 == CCLAY->total_points())
-      {
-         delete (*CCLAY);
-         _grcData.erase(CCLAY++());
-      }
-      else if (0 != CCLAY->total_points())
-      {
-         _num_ogl_grc_buffers++;
-         if (0 < CCLAY->total_indexs())
-            _num_ogl_grc_buffers++;
-         ++CCLAY;
-      }
-      else
-         ++CCLAY;
-   }
-   // Check whether we have to continue after traversing
-   if (0 == _num_ogl_grc_buffers) return false;
-   //--------------------------------------------------------------------------
-   //
-   // generate all VBOs
-   //
-   _ogl_grc_buffers = DEBUG_NEW GLuint [_num_ogl_grc_buffers];
-   glGenBuffers(_num_ogl_grc_buffers, _ogl_grc_buffers);
-   unsigned current_buffer = 0;
-   //
-   // collect the point arrays
-   for (DataLay::Iterator CLAY = _grcData.begin(); CLAY != _grcData.end(); CLAY++)
-   {
-      if (0 == CLAY->total_points())
-      {
-         assert(0 != CLAY->total_strings());
-         continue;
-      }
-      GLuint pbuf = _ogl_grc_buffers[current_buffer++];
-      GLuint ibuf = (0 == CLAY->total_indexs()) ? 0u : _ogl_grc_buffers[current_buffer++];
-      CLAY->collect(_drawprop->layerFilled(CLAY()), pbuf, ibuf);
-   }
-   //
-   // collect the indexes of the selected objects
-   // that's about it...
-   checkOGLError("grcCollect");
+   //TODO
    return true;
 }
 
-void trend::Tenderer::draw()
+void trend::Tolder::draw()
 {
    for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {// for every layer
@@ -953,12 +799,12 @@ void trend::Tenderer::draw()
       if (0 != CLAY->total_slctdx())
       {// redraw selected contours only
          _drawprop->setLineProps(true);
-         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _sbuffer);
+//         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _sbuffer);
          glPushMatrix();
          glMultMatrixd(_activeCS->translation());
          CLAY->drawSelected();
          glPopMatrix();
-         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+//         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
          _drawprop->setLineProps(false);
       }
       // draw everything
@@ -967,8 +813,9 @@ void trend::Tenderer::draw()
       // draw texts
       if (0 != CLAY->total_strings())
       {
-         fontLib->bindFont();
-         CLAY->drawTexts(_drawprop);
+         //TODO
+//         fontLib->bindFont();
+//         CLAY->drawTexts(_drawprop);
       }
    }
    // draw reference boxes
@@ -976,85 +823,26 @@ void trend::Tenderer::draw()
    checkOGLError("draw");
 }
 
-void trend::Tenderer::grcDraw()
+void trend::Tolder::grcDraw()
 {
-   for (DataLay::Iterator CLAY = _grcData.begin(); CLAY != _grcData.end(); CLAY++)
-   {// for every layer
-      _drawprop->setCurrentColor(CLAY());
-      _drawprop->setCurrentFill(true); // force fill (ignore block_fill state)
-      _drawprop->setLineProps(false);
-      // draw everything
-      if (0 != CLAY->total_points())
-         CLAY->draw(_drawprop);
-   }
-   checkOGLError("grcDraw");
+   //TODO
 }
 
-void trend::Tenderer::cleanUp()
+void trend::Tolder::cleanUp()
 {
-   // Clean-up the buffers
-   glBindBuffer(GL_ARRAY_BUFFER, 0);
-   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+   //TODO
 }
 
-void trend::Tenderer::grcCleanUp()
+void trend::Tolder::grcCleanUp()
 {
-   // Clean-up the buffers
-   glBindBuffer(GL_ARRAY_BUFFER, 0);
-   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+   //TODO
 }
 
-void trend::Tenderer::setGrcLayer(bool setEData, const LayerDef& laydef)
+trend::Tolder::~Tolder()
 {
-   if (setEData)
-   {
-      assert(_grcLayer == NULL);
-      if (_grcData.end() != _grcData.find(laydef))
-      {
-         _grcLayer = _grcData[laydef];
-      }
-      else
-      {
-         _grcLayer = DEBUG_NEW TenderLay();
-         _grcData.add(laydef, _grcLayer);
-      }
-      _grcLayer->newSlice(_cellStack.top(), false, false);
-   }
-   else
-   {
-      assert(_grcLayer != NULL);
-      // post process the current layer
-      _grcLayer->ppSlice();
-      _grcLayer = NULL;
-//      _cslctd_array_offset += _elayer->total_slctdx();
-   }
-}
-
-trend::Tenderer::~Tenderer()
-{
-   for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
-   {
-      delete (*CLAY);
-   }
    delete _refLayer;
-   //
-//   sprintf (debug_message, "Rendering summary: %lu vertexes in %i buffers", all_points_drawn, allLayers);
-//   tell_log(console::MT_WARNING,debug_message);
-   //
-   if (NULL != _ogl_buffers)
-   {
-      glDeleteBuffers(_num_ogl_buffers, _ogl_buffers);
-      delete [] _ogl_buffers;
-      _ogl_buffers = NULL;
-   }
-   // GRC clean-up
-   for (DataLay::Iterator CLAY = _grcData.begin(); CLAY != _grcData.end(); CLAY++)
-      delete (*CLAY);
-   if (NULL != _ogl_grc_buffers)
-   {
-      glDeleteBuffers(_num_ogl_grc_buffers, _ogl_grc_buffers);
-      delete [] _ogl_grc_buffers;
-      _ogl_grc_buffers = NULL;
-   }
+   if (NULL != _sindex_array)
+      delete [] _sindex_array;
+
 }
 
