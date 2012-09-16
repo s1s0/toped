@@ -247,7 +247,7 @@ namespace trend {
    */
    class TenderTV : public TrendTV {
       public:
-                           TenderTV(TenderRef* const, bool, bool, unsigned, unsigned);
+                           TenderTV(TrendRef* const, bool, bool, unsigned, unsigned);
          virtual          ~TenderTV();
 
          virtual void      collect(TNDR_GLDATAT*, unsigned int*, unsigned int*);
@@ -296,7 +296,7 @@ namespace trend {
    */
    class TenderReTV : public TrendReTV {
       public:
-                           TenderReTV(TrendTV* const chunk, TenderRef* const refCell):
+                           TenderReTV(TrendTV* const chunk, TrendRef* const refCell):
                               TrendReTV(chunk, refCell) {}
          virtual void      draw(layprop::DrawProperties*);
          virtual void      drawTexts(layprop::DrawProperties*);
@@ -402,9 +402,9 @@ namespace trend {
       public:
                            TenderLay();
          virtual          ~TenderLay();
-         virtual void      newSlice(TenderRef* const, bool, bool /*, bool, unsigned*/);
-         virtual void      newSlice(TenderRef* const, bool, bool, unsigned slctd_array_offset);
-         virtual bool      chunkExists(TenderRef* const, bool);
+         virtual void      newSlice(TrendRef* const, bool, bool /*, bool, unsigned*/);
+         virtual void      newSlice(TrendRef* const, bool, bool, unsigned slctd_array_offset);
+         virtual bool      chunkExists(TrendRef* const, bool);
          virtual void      draw(layprop::DrawProperties*);
          virtual void      drawSelected();
          virtual void      drawTexts(layprop::DrawProperties*);

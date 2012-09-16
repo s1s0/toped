@@ -170,9 +170,9 @@ void TessellPoly::num_indexs(unsigned& iftrs, unsigned& iftfs, unsigned& iftss) 
 
 //=============================================================================
 //
-// TenderCnvx
+// TrendCnvx
 //
-unsigned trend::TenderCnvx::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
+unsigned trend::TrendCnvx::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    assert(_csize);
 #ifdef TENDERER_USE_FLOATS
@@ -187,9 +187,9 @@ unsigned trend::TenderCnvx::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 
 //=============================================================================
 //
-// TenderBox
+// TrendBox
 //
-unsigned  trend::TenderBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
+unsigned  trend::TrendBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    assert(_csize);
    array[pindex++] = (TNDR_GLDATAT)_cdata[0];array[pindex++] = (TNDR_GLDATAT)_cdata[1];
@@ -201,10 +201,10 @@ unsigned  trend::TenderBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 
 //=============================================================================
 //
-// TenderWire
+// TrendWire
 //
-trend::TenderWire::TenderWire(int4b* pdata, unsigned psize, const WireWidth width, bool clo)
-   : TenderNcvx(NULL, 0), _ldata(pdata), _lsize(psize), _celno(clo), _tdata(NULL)
+trend::TrendWire::TrendWire(int4b* pdata, unsigned psize, const WireWidth width, bool clo)
+   : TrendNcvx(NULL, 0), _ldata(pdata), _lsize(psize), _celno(clo), _tdata(NULL)
 {
    if (!_celno)
    {
@@ -217,7 +217,7 @@ trend::TenderWire::TenderWire(int4b* pdata, unsigned psize, const WireWidth widt
    }
 }
 
-unsigned trend::TenderWire::lDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
+unsigned trend::TrendWire::lDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    assert(_lsize);
 #ifdef TENDERER_USE_FLOATS
@@ -238,13 +238,13 @@ unsigned trend::TenderWire::lDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
     indexes in pairs - one from the front, and the other from the back of the
     array. Then this can be drawn as GL_QUAD_STRIP
 */
-void trend::TenderWire::Tesselate()
+void trend::TrendWire::Tesselate()
 {
    _tdata = DEBUG_NEW TeselChain();
    _tdata->push_back( TeselChunk(_cdata, _csize, 0));
 }
 
-trend::TenderWire::~TenderWire()
+trend::TrendWire::~TrendWire()
 {
    if (NULL != _cdata) delete [] _cdata;
    if (NULL != _tdata) delete _tdata;
@@ -270,9 +270,9 @@ unsigned trend::TextSOvlBox::sDataCopy(unsigned* array, unsigned& pindex)
 
 //=============================================================================
 //
-// TenderSCnvx
+// TrendSCnvx
 //
-unsigned trend::TenderSCnvx::ssize()
+unsigned trend::TrendSCnvx::ssize()
 {
    if (NULL == _slist) return _csize;
    // get the number of selected segments first - don't forget that here
@@ -285,13 +285,13 @@ unsigned trend::TenderSCnvx::ssize()
    return ssegs;
 }
 
-unsigned trend::TenderSCnvx::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
+unsigned trend::TrendSCnvx::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    _offset = pindex/2;
-   return TenderCnvx::cDataCopy(array, pindex);
+   return TrendCnvx::cDataCopy(array, pindex);
 }
 
-unsigned trend::TenderSCnvx::sDataCopy(unsigned* array, unsigned& pindex)
+unsigned trend::TrendSCnvx::sDataCopy(unsigned* array, unsigned& pindex)
 {
    if (NULL != _slist)
    { // shape is partially selected
@@ -315,9 +315,9 @@ unsigned trend::TenderSCnvx::sDataCopy(unsigned* array, unsigned& pindex)
 
 //=============================================================================
 //
-// TenderSBox
+// TrendSBox
 //
-unsigned trend::TenderSBox::ssize()
+unsigned trend::TrendSBox::ssize()
 {
    if (NULL == _slist) return _csize;
    // get the number of selected segments first - don't forget that here
@@ -330,13 +330,13 @@ unsigned trend::TenderSBox::ssize()
    return ssegs;
 }
 
-unsigned trend::TenderSBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
+unsigned trend::TrendSBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    _offset = pindex/2;
-   return TenderBox::cDataCopy(array, pindex);
+   return TrendBox::cDataCopy(array, pindex);
 }
 
-unsigned trend::TenderSBox::sDataCopy(unsigned* array, unsigned& pindex)
+unsigned trend::TrendSBox::sDataCopy(unsigned* array, unsigned& pindex)
 {
    if (NULL != _slist)
    { // shape is partially selected
@@ -360,9 +360,9 @@ unsigned trend::TenderSBox::sDataCopy(unsigned* array, unsigned& pindex)
 
 //=============================================================================
 //
-// TenderSNcvx
+// TrendSNcvx
 //
-unsigned trend::TenderSNcvx::ssize()
+unsigned trend::TrendSNcvx::ssize()
 {
    if (NULL == _slist) return _csize;
    // get the number of selected segments first - don't forget that here
@@ -375,13 +375,13 @@ unsigned trend::TenderSNcvx::ssize()
    return ssegs;
 }
 
-unsigned trend::TenderSNcvx::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
+unsigned trend::TrendSNcvx::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    _offset = pindex/2;
-   return TenderCnvx::cDataCopy(array, pindex);
+   return TrendCnvx::cDataCopy(array, pindex);
 }
 
-unsigned trend::TenderSNcvx::sDataCopy(unsigned* array, unsigned& pindex)
+unsigned trend::TrendSNcvx::sDataCopy(unsigned* array, unsigned& pindex)
 {
    if (NULL != _slist)
    { // shape is partially selected
@@ -405,21 +405,21 @@ unsigned trend::TenderSNcvx::sDataCopy(unsigned* array, unsigned& pindex)
 
 //=============================================================================
 //
-// TenderSWire
+// TrendSWire
 //
-unsigned trend::TenderSWire::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
+unsigned trend::TrendSWire::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    _offset = pindex/2;
-   return TenderCnvx::cDataCopy(array, pindex);
+   return TrendCnvx::cDataCopy(array, pindex);
 }
 
-unsigned trend::TenderSWire::lDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
+unsigned trend::TrendSWire::lDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    _loffset = pindex/2;
-   return TenderWire::lDataCopy(array, pindex);
+   return TrendWire::lDataCopy(array, pindex);
 }
 
-unsigned trend::TenderSWire::ssize()
+unsigned trend::TrendSWire::ssize()
 {
    if (NULL == _slist) return _lsize;
    // get the number of selected segments first - don't forget that here
@@ -440,7 +440,7 @@ unsigned trend::TenderSWire::ssize()
    return ssegs;
 }
 
-unsigned trend::TenderSWire::sDataCopy(unsigned* array, unsigned& pindex)
+unsigned trend::TrendSWire::sDataCopy(unsigned* array, unsigned& pindex)
 {
    if (NULL != _slist)
    { // shape is partially selected
@@ -509,9 +509,9 @@ unsigned trend::TextOvlBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 
 //=============================================================================
 //
-// class TenderRef
+// class TrendRef
 //
-trend::TenderRef::TenderRef(std::string name, const CTM& ctm, const DBbox& obox,
+trend::TrendRef::TrendRef(std::string name, const CTM& ctm, const DBbox& obox,
                    word alphaDepth)
    : _name(name), _ctm(ctm), _alphaDepth(alphaDepth)
 {
@@ -527,13 +527,13 @@ trend::TenderRef::TenderRef(std::string name, const CTM& ctm, const DBbox& obox,
 }
 
 
-trend::TenderRef::TenderRef() : _name(""), _ctm(CTM()), _alphaDepth(0)
+trend::TrendRef::TrendRef() : _name(""), _ctm(CTM()), _alphaDepth(0)
 {
    _ctm.oglForm(_translation);
    for (word i = 0; i < 8; _obox[i++] = 0);
 }
 
-unsigned trend::TenderRef::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
+unsigned trend::TrendRef::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
 #ifdef TENDERER_USE_FLOATS
    for (unsigned i = 0; i <  8; i++)
@@ -547,14 +547,14 @@ unsigned trend::TenderRef::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 
 //=============================================================================
 //
-// class TenderText
+// class TrendText
 //
-trend::TenderText::TenderText(const std::string* text, const CTM& ctm) : _text(text)
+trend::TrendText::TrendText(const std::string* text, const CTM& ctm) : _text(text)
 {
    ctm.oglForm(_ftm);
 }
 
-void trend::TenderText::draw(bool fill)
+void trend::TrendText::draw(bool fill)
 {
    glPushMatrix();
    glMultMatrixd(_ftm);
@@ -567,7 +567,7 @@ void trend::TenderText::draw(bool fill)
 //
 // class TrendTV
 //
-trend::TrendTV::TrendTV(TenderRef* const refCell, bool filled, bool reusable,
+trend::TrendTV::TrendTV(TrendRef* const refCell, bool filled, bool reusable,
                    unsigned parray_offset, unsigned iarray_offset) :
    _refCell             ( refCell         ),
    _num_total_strings   ( 0u              ),
@@ -586,7 +586,7 @@ trend::TrendTV::TrendTV(TenderRef* const refCell, bool filled, bool reusable,
    }
 }
 
-void trend::TrendTV::registerBox (TenderCnvx* cobj)
+void trend::TrendTV::registerBox (TrendCnvx* cobj)
 {
    unsigned allpoints = cobj->csize();
    if (_filled)
@@ -603,7 +603,7 @@ void trend::TrendTV::registerBox (TenderCnvx* cobj)
    }
 }
 
-void trend::TrendTV::registerPoly (TenderNcvx* cobj, const TessellPoly* tchain)
+void trend::TrendTV::registerPoly (TrendNcvx* cobj, const TessellPoly* tchain)
 {
    unsigned allpoints = cobj->csize();
    if (_filled && tchain && tchain->valid())
@@ -625,7 +625,7 @@ void trend::TrendTV::registerPoly (TenderNcvx* cobj, const TessellPoly* tchain)
    }
 }
 
-void trend::TrendTV::registerWire (TenderWire* cobj)
+void trend::TrendTV::registerWire (TrendWire* cobj)
 {
    unsigned allpoints = cobj->csize();
    _line_data.push_back(cobj);
@@ -651,7 +651,7 @@ void trend::TrendTV::registerWire (TenderWire* cobj)
    }
 }
 
-void trend::TrendTV::registerText (TenderText* cobj, TextOvlBox* oobj)
+void trend::TrendTV::registerText (TrendText* cobj, TextOvlBox* oobj)
 {
    _text_data.push_back(cobj);
    _num_total_strings++;
@@ -681,9 +681,9 @@ unsigned trend::TrendTV::num_total_indexs()
           );
 }
 
-trend::TenderRef* trend::TrendTV::swapRefCells(TenderRef* newRefCell)
+trend::TrendRef* trend::TrendTV::swapRefCells(TrendRef* newRefCell)
 {
-   TenderRef* the_swap = _refCell;
+   TrendRef* the_swap = _refCell;
    _refCell = newRefCell;
    return the_swap;
 }
@@ -759,36 +759,36 @@ void trend::TrendLay::ppSlice()
 
 void trend::TrendLay::box  (const int4b* pdata)
 {
-   _cslice->registerBox(DEBUG_NEW TenderBox(pdata));
+   _cslice->registerBox(DEBUG_NEW TrendBox(pdata));
 }
 
 void trend::TrendLay::box (const int4b* pdata, const SGBitSet* ss)
 {
-   TenderSBox* sobj = DEBUG_NEW TenderSBox(pdata, ss);
+   TrendSBox* sobj = DEBUG_NEW TrendSBox(pdata, ss);
    registerSBox(sobj);
    _cslice->registerBox(sobj);
 }
 
 void trend::TrendLay::poly (const int4b* pdata, unsigned psize, const TessellPoly* tpoly)
 {
-   _cslice->registerPoly(DEBUG_NEW TenderNcvx(pdata, psize), tpoly);
+   _cslice->registerPoly(DEBUG_NEW TrendNcvx(pdata, psize), tpoly);
 }
 
 void trend::TrendLay::poly (const int4b* pdata, unsigned psize, const TessellPoly* tpoly, const SGBitSet* ss)
 {
-   TenderSNcvx* sobj = DEBUG_NEW TenderSNcvx(pdata, psize, ss);
+   TrendSNcvx* sobj = DEBUG_NEW TrendSNcvx(pdata, psize, ss);
    registerSPoly(sobj);
    _cslice->registerPoly(sobj, tpoly);
 }
 
 void trend::TrendLay::wire (int4b* pdata, unsigned psize, WireWidth width, bool center_only)
 {
-   _cslice->registerWire(DEBUG_NEW TenderWire(pdata, psize, width, center_only));
+   _cslice->registerWire(DEBUG_NEW TrendWire(pdata, psize, width, center_only));
 }
 
 void trend::TrendLay::wire (int4b* pdata, unsigned psize, WireWidth width, bool center_only, const SGBitSet* ss)
 {
-   TenderSWire* sobj = DEBUG_NEW TenderSWire(pdata, psize, width, center_only, ss);
+   TrendSWire* sobj = DEBUG_NEW TrendSWire(pdata, psize, width, center_only, ss);
    registerSWire(sobj);
    _cslice->registerWire(sobj);
 }
@@ -811,11 +811,11 @@ void trend::TrendLay::text (const std::string* txt, const CTM& ftmtrx, const DBb
 
    CTM ftm(ftmtrx.a(), ftmtrx.b(), ftmtrx.c(), ftmtrx.d(), 0, 0);
    ftm.Translate(cor * ftmtrx);
-   _cslice->registerText(DEBUG_NEW TenderText(txt, ftm), cobj);
+   _cslice->registerText(DEBUG_NEW TrendText(txt, ftm), cobj);
 }
 
 
-void trend::TrendLay::registerSBox (TenderSBox* sobj)
+void trend::TrendLay::registerSBox (TrendSBox* sobj)
 {
    _slct_data.push_back(sobj);
    if ( sobj->partSelected() )
@@ -838,7 +838,7 @@ void trend::TrendLay::registerSOBox (TextSOvlBox* sobj)
 }
 
 
-void trend::TrendLay::registerSPoly (TenderSNcvx* sobj)
+void trend::TrendLay::registerSPoly (TrendSNcvx* sobj)
 {
    _slct_data.push_back(sobj);
    if ( sobj->partSelected() )
@@ -853,7 +853,7 @@ void trend::TrendLay::registerSPoly (TenderSNcvx* sobj)
    }
 }
 
-void trend::TrendLay::registerSWire (TenderSWire* sobj)
+void trend::TrendLay::registerSWire (TrendSWire* sobj)
 {
    _slct_data.push_back(sobj);
    if ( sobj->partSelected() )
@@ -898,7 +898,7 @@ trend::TrendRefLay::TrendRefLay()
    _asobjix = 0u;
 }
 
-void trend::TrendRefLay::addCellOBox(TenderRef* cRefBox, word alphaDepth, bool selected)
+void trend::TrendRefLay::addCellOBox(TrendRef* cRefBox, word alphaDepth, bool selected)
 {
    if (selected)
    {
@@ -952,12 +952,12 @@ trend::TrendBase::TrendBase( layprop::DrawProperties* drawprop, real UU ) :
    _dovCorrection      (         0 )
 {
    // Initialize the cell (CTM) stack
-   _cellStack.push(DEBUG_NEW TenderRef());
+   _cellStack.push(DEBUG_NEW TrendRef());
 }
 
 void trend::TrendBase::pushCell(std::string cname, const CTM& trans, const DBbox& overlap, bool active, bool selected)
 {
-   TenderRef* cRefBox = DEBUG_NEW TenderRef(cname,
+   TrendRef* cRefBox = DEBUG_NEW TrendRef(cname,
                                             trans * _cellStack.top()->ctm(),
                                             overlap,
                                             _cellStack.size()
@@ -969,7 +969,7 @@ void trend::TrendBase::pushCell(std::string cname, const CTM& trans, const DBbox
       // them up. Don't get confused - we need cRefBox during the collecting
       // and drawing phase so we can't really delete them here or after they're
       // poped-up from _cellStack. The confusion is coming from the "duality"
-      // of the TenderRef - once as a cell reference with CTM, view depth etc.
+      // of the TrendRef - once as a cell reference with CTM, view depth etc.
       // and then as a placeholder of the overlapping reference box
       _hiddenRefBoxes.push_back(cRefBox);
 
@@ -1015,7 +1015,7 @@ void trend::TrendBase::arefOBox(std::string cname, const CTM& trans, const DBbox
 {
    if (selected || (!_drawprop->isCellBoxHidden()))
    {
-      TenderRef* cRefBox = DEBUG_NEW TenderRef(cname,
+      TrendRef* cRefBox = DEBUG_NEW TrendRef(cname,
                                                trans * _cellStack.top()->ctm(),
                                                overlap,
                                                _cellStack.size()

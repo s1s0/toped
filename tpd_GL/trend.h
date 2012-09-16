@@ -30,7 +30,6 @@
 
 #include "ttt.h"
 #include "basetrend.h"
-#include "tenderer.h"
 
 namespace trend {
 
@@ -159,15 +158,14 @@ namespace trend {
          virtual               ~TrendCenter();
          RenderType             renderType() const {return _renderType;}
 //         TrendBase*               secureCollector(layprop::DrawProperties* drawProp);
-         trend::TrendBase*        secureRenderer(layprop::DrawProperties* drawProp);
+         trend::TrendBase*      secureRenderer(layprop::DrawProperties* drawProp);
          void                   drawFOnly();
 //         bool                   loadLayoutFont(std::string name) {return _fontLib->loadLayoutFont(name);}
 //         bool                   selectFont(std::string name)     {return _fontLib->selectFont(name);}
 //         std::string            getActiveFontName() const        {return _fontLib->getActiveFontName();}
 //         word                   numFonts()                       {return _fontLib->numFonts();}
       private:
-         TrendBase*               _cCollector;
-         trend::TrendBase*        _cRenderer;    //! current renderer (in case VFBO rendering is in place)
+         trend::TrendBase*      _cRenderer;    //! current renderer (in case VFBO rendering is in place)
          RenderType             _renderType;
 //         FontLibrary*           _fontLib;
    };
