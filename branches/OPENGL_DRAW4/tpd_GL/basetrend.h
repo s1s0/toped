@@ -234,9 +234,9 @@ namespace trend {
    /**
    * Text objects
    */
-   class TenderText {
+   class TrendText {
       public:
-                           TenderText(const std::string*, const CTM&);
+                           TrendText(const std::string*, const CTM&);
          void              draw(bool);
       private:
          const std::string* _text;
@@ -250,11 +250,11 @@ namespace trend {
       from the original object to a VBO mapped in the CPU memory
       This class is also a base for the Tender* class hierarchy.
    */
-   class TenderCnvx {
+   class TrendCnvx {
       public:
-                           TenderCnvx(const int4b* pdata, unsigned psize) :
+                           TrendCnvx(const int4b* pdata, unsigned psize) :
                                     _cdata(pdata), _csize(psize){}
-         virtual          ~TenderCnvx() {};
+         virtual          ~TrendCnvx() {};
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
          unsigned          csize()     {return _csize;}
       protected:
@@ -262,23 +262,23 @@ namespace trend {
          unsigned          _csize;  //! the number of vertexes in _cdata
    };
 
-   class TenderBox : public TenderCnvx {
+   class TrendBox : public TrendCnvx {
       public:
-                           TenderBox(const int4b* pdata) : TenderCnvx(pdata, 4) {}
+                           TrendBox(const int4b* pdata) : TrendCnvx(pdata, 4) {}
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
    };
 
    /**
       Represents non-convex polygons - most of the poly objects in the DB. Inherits
-      TenderCnvx. The only addition is the tesselation data (_tdata) which is
+      TrendCnvx. The only addition is the tesselation data (_tdata) which is
       utilized if the object is to be filled.
    */
-   class TenderNcvx : public TenderCnvx {
+   class TrendNcvx : public TrendCnvx {
       public:
-                           TenderNcvx(const int4b* pdata, unsigned psize) :
-                                    TenderCnvx(pdata, psize), _tdata(NULL) {}
+                           TrendNcvx(const int4b* pdata, unsigned psize) :
+                                    TrendCnvx(pdata, psize), _tdata(NULL) {}
          void              setTeselData(const TessellPoly* tdata) {_tdata = tdata;}
-         virtual          ~TenderNcvx(){};
+         virtual          ~TrendNcvx(){};
          virtual const TeselChain* tdata()              {return _tdata->tdata();}
       private:
          const TessellPoly*    _tdata; //! polygon tesselation data
@@ -287,7 +287,7 @@ namespace trend {
    /**
       Holds the wires from the data base. This class is not quite trivial and it
       causes all kinds of troubles in the overall class hierarchy. It inherits
-      TenderNcvx (is it a good idea?). Theoretically in the general case this is a
+      TrendNcvx (is it a good idea?). Theoretically in the general case this is a
       non-convex polygon. The wire as a DB object is very specific though. Only the
       central line is stored. The contour is calculated if required on the fly from
       the build-in methods called from the constructor. Instead of using general
@@ -296,10 +296,10 @@ namespace trend {
       hierarchy which generates vertex and index data which means that it has to be
       properly cleaned-up.
    */
-   class TenderWire : public TenderNcvx {
+   class TrendWire : public TrendNcvx {
       public:
-                           TenderWire(int4b*, unsigned, const WireWidth, bool);
-         virtual          ~TenderWire();
+                           TrendWire(int4b*, unsigned, const WireWidth, bool);
+         virtual          ~TrendWire();
          void              Tesselate();
          virtual unsigned  lDataCopy(TNDR_GLDATAT*, unsigned&);
          unsigned          lsize()                 {return _lsize;}
@@ -350,11 +350,11 @@ namespace trend {
          because the only additional data transfered is the index array of
          the selected vertexes. Vertex data is already there and will be reused.
    */
-   class TenderSelected {
+   class TrendSelected {
       public:
-                           TenderSelected(const SGBitSet* slist) :
+                           TrendSelected(const SGBitSet* slist) :
                               _slist(slist), _offset(0) {}
-         virtual          ~TenderSelected() {}
+         virtual          ~TrendSelected() {}
          bool              partSelected() {return (NULL != _slist);}
          virtual SlctTypes type() = 0;
          virtual unsigned  ssize() = 0;
@@ -364,10 +364,10 @@ namespace trend {
          unsigned          _offset; //! The offset of the first vertex in the point VBO
    };
 
-   class TextSOvlBox : public TextOvlBox, public TenderSelected {
+   class TextSOvlBox : public TextOvlBox, public TrendSelected {
       public:
                            TextSOvlBox(const DBbox& box, const CTM& mtrx) :
-                              TextOvlBox(box, mtrx), TenderSelected(NULL) {}
+                              TextOvlBox(box, mtrx), TrendSelected(NULL) {}
          virtual          ~TextSOvlBox() {}
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual SlctTypes type() { return llps;}
@@ -385,20 +385,20 @@ namespace trend {
       worths to be mentioned. It updates the inherited _offset field which is vital
       for the consequent indexing of the selected vertexes.
    */
-   class TenderSCnvx : public TenderCnvx, public TenderSelected {
+   class TrendSCnvx : public TrendCnvx, public TrendSelected {
       public:
-                           TenderSCnvx(int4b* pdata, unsigned psize, const SGBitSet* slist) :
-                              TenderCnvx(pdata, psize), TenderSelected(slist) {}
+                           TrendSCnvx(int4b* pdata, unsigned psize, const SGBitSet* slist) :
+                              TrendCnvx(pdata, psize), TrendSelected(slist) {}
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual SlctTypes type() { return ((NULL == _slist) ? llps : lnes);}
          virtual unsigned  ssize();
          virtual unsigned  sDataCopy(unsigned*, unsigned&);
    };
 
-   class TenderSBox : public TenderBox, public TenderSelected {
+   class TrendSBox : public TrendBox, public TrendSelected {
       public:
-                           TenderSBox(const int4b* pdata, const SGBitSet* slist) :
-                              TenderBox(pdata), TenderSelected(slist) {}
+                           TrendSBox(const int4b* pdata, const SGBitSet* slist) :
+                              TrendBox(pdata), TrendSelected(slist) {}
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual SlctTypes type() { return ((NULL == _slist) ? llps : lnes);}
          virtual unsigned  ssize();
@@ -411,12 +411,12 @@ namespace trend {
       Implements the virtual methods of its parents. Doesn't have any own fields or
       methods.
       The re-implementation of the cDataCopy() has the same function as described in
-      TenderSCnvx class
+      TrendSCnvx class
    */
-   class TenderSNcvx : public TenderNcvx, public TenderSelected  {
+   class TrendSNcvx : public TrendNcvx, public TrendSelected  {
       public:
-                           TenderSNcvx(const int4b* pdata, unsigned psize, const SGBitSet* slist) :
-                              TenderNcvx(pdata, psize), TenderSelected(slist) {}
+                           TrendSNcvx(const int4b* pdata, unsigned psize, const SGBitSet* slist) :
+                              TrendNcvx(pdata, psize), TrendSelected(slist) {}
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual SlctTypes type() { return ((NULL == _slist) ? llps : lnes);}
          virtual unsigned  ssize();
@@ -435,10 +435,10 @@ namespace trend {
       updates inherited _offset field. lDataCopy in turn updates _loffset field.
       Both of them vital for proper indexing of the selected vertexes.
    */
-   class TenderSWire : public TenderWire, public TenderSelected {
+   class TrendSWire : public TrendWire, public TrendSelected {
       public:
-                           TenderSWire(int4b* pdata, unsigned psize, const WireWidth width, bool clo, const SGBitSet* slist) :
-                              TenderWire(pdata, psize, width, clo), TenderSelected(slist), _loffset(0u) {}
+                           TrendSWire(int4b* pdata, unsigned psize, const WireWidth width, bool clo, const SGBitSet* slist) :
+                              TrendWire(pdata, psize, width, clo), TrendSelected(slist), _loffset(0u) {}
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual unsigned  lDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual SlctTypes type() { return ((NULL == _slist) ? lstr : lnes);}
@@ -451,10 +451,10 @@ namespace trend {
    /**
    *  Cell reference boxes & reference related data
    */
-   class TenderRef {
+   class TrendRef {
       public:
-                           TenderRef(std::string, const CTM&, const DBbox&, word);
-                           TenderRef();
+                           TrendRef(std::string, const CTM&, const DBbox&, word);
+                           TrendRef();
          std::string       name()         {return _name;}
          real* const       translation()  {return _translation;}
          CTM&              ctm()          {return _ctm;}
@@ -468,11 +468,11 @@ namespace trend {
          word              _alphaDepth;
    };
 
-   typedef std::list<TenderCnvx*>      SliceObjects;
-   typedef std::list<TenderNcvx*>      SlicePolygons;
-   typedef std::list<TenderWire*>      SliceWires;
-   typedef std::list<TenderSelected*>  SliceSelected;
-   typedef std::list<TenderRef*>       RefBoxList;
+   typedef std::list<TrendCnvx*>      SliceObjects;
+   typedef std::list<TrendNcvx*>      SlicePolygons;
+   typedef std::list<TrendWire*>      SliceWires;
+   typedef std::list<TrendSelected*>  SliceSelected;
+   typedef std::list<TrendRef*>       RefBoxList;
 
    /**
       TENDERer Translation View - is the most fundamental class of the TrendBase.
@@ -595,19 +595,19 @@ namespace trend {
       public:
          enum {fqss, ftrs, ftfs, ftss} NcvxTypes;
          enum {cont, line, cnvx, ncvx} ObjtTypes;
-         typedef std::list<TenderText*> TenderStrings;
+         typedef std::list<TrendText*> TenderStrings;
          typedef std::list<TextOvlBox*> RefTxtList;
-                           TrendTV(TenderRef* const, bool, bool, unsigned, unsigned);
+                           TrendTV(TrendRef* const, bool, bool, unsigned, unsigned);
          virtual          ~TrendTV();
-         void              registerBox   (TenderCnvx*);
-         void              registerPoly  (TenderNcvx*, const TessellPoly*);
-         void              registerWire  (TenderWire*);
-         void              registerText  (TenderText*, TextOvlBox*);
+         void              registerBox   (TrendCnvx*);
+         void              registerPoly  (TrendNcvx*, const TessellPoly*);
+         void              registerWire  (TrendWire*);
+         void              registerText  (TrendText*, TextOvlBox*);
 
          virtual void      collect(TNDR_GLDATAT*, unsigned int*, unsigned int*) = 0;
          virtual void      draw(layprop::DrawProperties*) = 0;
          virtual void      drawTexts(layprop::DrawProperties*) = 0;
-         TenderRef*        swapRefCells(TenderRef*);
+         TrendRef*        swapRefCells(TrendRef*);
 
          unsigned          num_total_points();
          unsigned          num_total_indexs();
@@ -616,7 +616,7 @@ namespace trend {
          bool              filled() const       {return _filled;}
          std::string       cellName()           {return _refCell->name();}
       protected:
-         TenderRef*        _refCell;
+         TrendRef*        _refCell;
          // collected data lists
          SliceObjects      _cont_data; //! Contour data
          SliceWires        _line_data; //! Line data
@@ -668,14 +668,14 @@ namespace trend {
    */
    class TrendReTV {
       public:
-                           TrendReTV(TrendTV* const chunk, TenderRef* const refCell):
+                           TrendReTV(TrendTV* const chunk, TrendRef* const refCell):
                               _chunk(chunk), _refCell(refCell) {}
          virtual          ~TrendReTV() {}
          virtual void      draw(layprop::DrawProperties*) = 0;
          virtual void      drawTexts(layprop::DrawProperties*) = 0;
       protected:
          TrendTV*  const   _chunk;
-         TenderRef* const  _refCell;
+         TrendRef* const  _refCell;
 
    };
 
@@ -788,9 +788,9 @@ namespace trend {
          void              wire (int4b*, unsigned, WireWidth, bool);
          void              wire (int4b*, unsigned, WireWidth, bool, const SGBitSet*);
          void              text (const std::string*, const CTM&, const DBbox*, const TP&, bool);
-         virtual void      newSlice(TenderRef* const, bool, bool /*, bool, unsigned*/) = 0;
-         virtual void      newSlice(TenderRef* const, bool, bool, unsigned slctd_array_offset) = 0;
-         virtual bool      chunkExists(TenderRef* const, bool) = 0;
+         virtual void      newSlice(TrendRef* const, bool, bool /*, bool, unsigned*/) = 0;
+         virtual void      newSlice(TrendRef* const, bool, bool, unsigned slctd_array_offset) = 0;
+         virtual bool      chunkExists(TrendRef* const, bool) = 0;
          void              ppSlice();
          virtual void      draw(layprop::DrawProperties*) = 0;
          virtual void      drawSelected() = 0;
@@ -803,9 +803,9 @@ namespace trend {
          unsigned          total_strings(){return _num_total_strings;}
 
       protected:
-         void              registerSBox  (TenderSBox*);
-         void              registerSPoly (TenderSNcvx*);
-         void              registerSWire (TenderSWire*);
+         void              registerSBox  (TrendSBox*);
+         void              registerSPoly (TrendSNcvx*);
+         void              registerSWire (TrendSWire*);
          void              registerSOBox (TextSOvlBox*);
          ReusableTTVMap    _reusableFData; // reusable filled chunks
          ReusableTTVMap    _reusableCData; // reusable contour chunks
@@ -832,7 +832,7 @@ namespace trend {
       public:
                            TrendRefLay();
          virtual          ~TrendRefLay();
-         void              addCellOBox(TenderRef*, word, bool);
+         void              addCellOBox(TrendRef*, word, bool);
          virtual void      collect(GLuint) = 0;
          virtual void      draw(layprop::DrawProperties*) = 0;
          unsigned          total_points();
@@ -851,7 +851,7 @@ namespace trend {
    //-----------------------------------------------------------------------------
    //
    typedef laydata::LayerContainer<TrendLay*> DataLay;
-   typedef std::stack<TenderRef*> CellStack;
+   typedef std::stack<TrendRef*> CellStack;
 
    /**
       Toped RENDerer BASE is the front-end class, the interface to the rest of the
@@ -919,7 +919,7 @@ namespace trend {
          CellStack         _cellStack;       //!Required during data traversing stage
          unsigned          _cslctd_array_offset; //! Current selected array offset
          //
-         TenderRef*        _activeCS;
+         TrendRef*        _activeCS;
          byte              _dovCorrection;   //! Cell ref Depth of view correction (for Edit in Place purposes)
          RefBoxList        _hiddenRefBoxes;  //! Those cRefBox objects which didn't ended in the TrendRefLay structures
    };
