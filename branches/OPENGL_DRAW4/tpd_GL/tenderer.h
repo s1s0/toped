@@ -423,9 +423,9 @@ namespace trend {
    };
 
    /**
-      Responsible for visualising the overlap boxes of the references. Relatively
-      trivial class. One object of this class should be created only. All reference
-      boxes are processed in a single VBO. This includes the selected ones.
+      Responsible for visualising the overlap boxes of the references. Implements
+      pure virtual classes of its parent for the tenderer. All reference boxes
+      are processed in a single VBO. This includes the selected ones.
    */
    class TenderRefLay : public TrendRefLay {
       public:
@@ -444,12 +444,9 @@ namespace trend {
    };
 
    /**
-      Toped RENDERER is the front-end class, the interface to the rest of the world.
-      All render views are initiated using an object of this class. There should be
-      only one object of this class at a time. The object of this class must be
-      destroyed before the next rendering view is invoked. The data gathered for
-      the previous view must be considered invalid. The object structure created
-      by this class is shown in the documentation of the module.
+      Toped rENDERER is the front-end class for the VBO renderer. All data parsing
+      functionality is implemented in the parent class. VBO collection and drawing
+      is implemented here.
    */
    class Tenderer : public TrendBase {
       public:

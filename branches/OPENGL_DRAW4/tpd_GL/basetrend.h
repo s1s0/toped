@@ -62,18 +62,18 @@
    \verbatim
                      Layer 1                Layer 2                     Layer N
                    -------------         --------------              --------------
-                  |  TrendLay   |      |  TrendLay   |            |  TrendLay   |
+                  |   TrendLay   |      |  TrendLay    |            |  TrendLay    |
                   |              |      |              |            |              |
                   |  ----------  |      |  ----------  |            |  ----------  |
-      cell_A      | | TrendTV | |      | | TrendTV | |     |      | | TrendTV | |
+      cell_A      | | TrendTV  | |      | | TrendTV  | |     |      | | TrendTV  | |
                   |  ----------  |      |  ----------  |     |      |  ----------  |
                   |  ----------  |      |  ----------  |     |      |  ----------  |
-      cell_B      | | TrendTV | |      | | TrendTV | |     |      | | TrendTV | |
+      cell_B      | | TrendTV  | |      | | TrendTV  | |     |      | | TrendTV  | |
                   |  ----------  |      |  ----------  |     |      |  ----------  |
                   |    ______    |      |    ______    |     |      |    ______    |
                   |              |      |              |     |      |              |
                   |  ----------  |      |  ----------  |     |      |  ----------  |
-      cell_Z      | | TrendTV | |      | | TrendTV | |     |      | | TrendTV | |
+      cell_Z      | | TrendTV  | |      | | TrendTV  | |     |      | | TrendTV  | |
                   |  ----------  |      |  ----------  |            |  ----------  |
                    --------------        --------------              --------------
                           v                     v                           v
@@ -680,27 +680,25 @@ namespace trend {
    };
 
    /**
-      TENDER LAYer represents a DB layer in the rendering view. It generates,
-      stores and sorts all the TrendTV objects (one per DB cell) and also
-      initialises the corresponding virtual buffers (the vertex and eventually
-      the index) for this layer. This class is responsible also for gathering of
-      the selected data indexes.
+      Toper RENDering LAYer represents a DB layer in the rendering view. It
+      generates and stores all the TrendTV objects (one per DB cell).
 
       A new TederTV object is created by the newSlice() method during the DB
       traversing. A reference to it is stored in the _layData list as well as
       in the _cslice field. All subsequent calls to box(), poly() and wire()
-      methods create the corresponding object of class Tender* and store them
+      methods create the corresponding object of class Trend* and store them
       calling the corresponding methods of _cslice object (of TrendTV class).
       If the data is selected then an object of the overloaded class is created
       and a reference to it is stored in _slct_data list as well.
 
       TrendLay keeps track of the total current amount of vertexes
-      (_num_total_points) and indexes (_num_total_indexs) in order to initialize
+      (_num_total_points) and indexes (_num_total_indexs) in order to initialise
       properly the offset fields of the generated TrendTV objects. When a new
       slice of class TrendTV is created, the current slice is post processed
       (method ppSlice()) in order to update the fields mentioned above. The
-      final values stored in those fields are used later to reserve a proper
-      amount of memory for the VBO's belonging to this layer.
+      final values stored in those fields are used by the child classes later
+      to reserve eventually a proper amount of memory for the VBO's belonging
+      to this layer.
 
       The rendering of the selected objects is done in this class. TrendTV does
       hold the object vertex data, but it is completely unaware of selection
@@ -826,9 +824,9 @@ namespace trend {
    };
 
    /**
-      Responsible for visualizing the overlap boxes of the references. Relatively
-      trivial class. One object of this class should be created only. All reference
-      boxes are processed in a single VBO. This includes the selected ones.
+      Responsible for visualising the overlap boxes of the references. Pure virtual and
+      relatively trivial class. One object of this class should be created only. All
+      reference boxes are processed in a single VBO. This includes the selected ones.
    */
    class TrendRefLay {
       public:
@@ -856,12 +854,13 @@ namespace trend {
    typedef std::stack<TenderRef*> CellStack;
 
    /**
-      Toped RENDERER is the front-end class, the interface to the rest of the world.
-      All render views are initiated using an object of this class. There should be
-      only one object of this class at a time. The object of this class must be
-      destroyed before the next rendering view is invoked. The data gathered for
-      the previous view must be considered invalid. The object structure created
-      by this class is shown in the documentation of the module.
+      Toped RENDerer BASE is the front-end class, the interface to the rest of the
+      world. Pure virtual. All data collection and render views are initiated using
+      an object of this class. There should be only one object of this class at a
+      time. The object of this class must be destroyed before the next data collection
+      or rendering view is invoked. The data gathered from the previous view must be
+      considered invalid. The object structure created by this class is shown in
+      the documentation of the module.
    */
    class TrendBase {
       public:
