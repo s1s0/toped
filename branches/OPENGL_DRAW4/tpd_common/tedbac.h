@@ -109,7 +109,7 @@ namespace tenderer {
    class TenderLay;
 }
 namespace trend {
-   class TenderLay;
+   class TrendLay;
 }
 namespace auxdata {
    class TdtAuxData;

@@ -508,12 +508,12 @@ trend::TrendCenter::TrendCenter(bool gui, bool forceBasic, bool sprtVbo, bool sp
 
 }
 
-trend::Collect* trend::TrendCenter::secureCollector(layprop::DrawProperties* drawProp)
-{
-   return DEBUG_NEW trend::Collect(drawProp, PROPC->UU());
-}
+//trend::TrendBase* trend::TrendCenter::secureCollector(layprop::DrawProperties* drawProp)
+//{
+//   return DEBUG_NEW trend::TrendBase(drawProp, PROPC->UU());
+//}
 
-tenderer::TopRend* trend::TrendCenter::secureRenderer(layprop::DrawProperties* drawProp)
+trend::TrendBase* trend::TrendCenter::secureRenderer(layprop::DrawProperties* drawProp)
 {
 
    switch (renderType())
@@ -528,7 +528,7 @@ tenderer::TopRend* trend::TrendCenter::secureRenderer(layprop::DrawProperties* d
             _cRenderer->grcCleanUp();
             delete _cRenderer;
          }
-         _cRenderer = DEBUG_NEW tenderer::TopRend( drawProp, PROPC->UU() );
+         _cRenderer = DEBUG_NEW trend::Tenderer( drawProp, PROPC->UU() );
          return _cRenderer;
       }
       case trend::toshader : assert(false);          break;// TODO

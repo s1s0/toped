@@ -30,14 +30,14 @@
    serious attempt in this project to utilize the power of todays graphic hardware via
    openGL library. The original rendering (which is preserved) is implementing the
    simplest possible rendering approach and is using the most basic openGL functions to
-   achieve maximum compatibility. The goal of the Collect is to be a base for future
+   achieve maximum compatibility. The goal of the TrendBase is to be a base for future
    updates in terms of graphic effects, 3D rendering, shaders etc.
 
    It must be clear that the main rendering acceleration is coming from the structure
    of the Toped database. The QuadTree dominates by far any other rendering optimisation
    especially on big databases where the speed really matters. This is the main reason
    behind the fact that the original renderer demonstrates comparable results with
-   Collect. There are virtually no enhancements possible there though. It should be
+   TrendBase. There are virtually no enhancements possible there though. It should be
    noted also that each rendering view in this context is unique. Indeed, when the user
    changes the visual window, the data stream from the Toped DB traverser can't be
    predicted. Different objects will be streamed out depending on the location and
@@ -50,7 +50,7 @@
    on its property to filter-out quickly and effectively all invisible objects. The
    Toped DB is generally a hierarchical cell tree. Each cell contains a linear list
    of layers which in turn contains a QuadTree of the layout objects. The main task
-   of the Collect is to convert the data stream from the DB traversing into arrays
+   of the TrendBase is to convert the data stream from the DB traversing into arrays
    of vertexes (VBOs) convenient for the graphical hardware.
 
    This is done in 3 steps:
@@ -62,18 +62,18 @@
    \verbatim
                      Layer 1                Layer 2                     Layer N
                    -------------         --------------              --------------
-                  |  TenderLay   |      |  TenderLay   |            |  TenderLay   |
+                  |  TrendLay   |      |  TrendLay   |            |  TrendLay   |
                   |              |      |              |            |              |
                   |  ----------  |      |  ----------  |            |  ----------  |
-      cell_A      | | TenderTV | |      | | TenderTV | |     |      | | TenderTV | |
+      cell_A      | | TrendTV | |      | | TrendTV | |     |      | | TrendTV | |
                   |  ----------  |      |  ----------  |     |      |  ----------  |
                   |  ----------  |      |  ----------  |     |      |  ----------  |
-      cell_B      | | TenderTV | |      | | TenderTV | |     |      | | TenderTV | |
+      cell_B      | | TrendTV | |      | | TrendTV | |     |      | | TrendTV | |
                   |  ----------  |      |  ----------  |     |      |  ----------  |
                   |    ______    |      |    ______    |     |      |    ______    |
                   |              |      |              |     |      |              |
                   |  ----------  |      |  ----------  |     |      |  ----------  |
-      cell_Z      | | TenderTV | |      | | TenderTV | |     |      | | TenderTV | |
+      cell_Z      | | TrendTV | |      | | TrendTV | |     |      | | TrendTV | |
                   |  ----------  |      |  ----------  |            |  ----------  |
                    --------------        --------------              --------------
                           v                     v                           v
@@ -94,18 +94,18 @@
    The first step is the most time consuming from all three, but this is mainly the
    Toped DB traversing which is assumed optimal. The last one is the quickest one
    and the speed there can be improved even more if shaders are used. The speed of
-   the second step depends entirely on the implementation of the Collect.
+   the second step depends entirely on the implementation of the TrendBase.
 
    Memory usage:
    Only the first step consumes memory but it is minimised. There is no data copying
    instead data references are stored only. Technically the second step does consume
    memory of course, but this is the memory consumed by the graphic driver to map the
-   VBO in the CPU memory. The Collect copies the data directly in the VBOs
+   VBO in the CPU memory. The TrendBase copies the data directly in the VBOs
 
    Note, that the flow described above allows the screen to be redrawn very quickly
    using the third step only. This opens the door to all kinds of graphical effects.
 
-   As shown on the graph above the Collect ends-up with a number of VBOs for
+   As shown on the graph above the TrendBase ends-up with a number of VBOs for
    drawing. They are generated "per layer" basis. For each used layer there might
    be maximum two buffers:
    - point VBO - containing the vertexes of all objects on this layer across all
@@ -316,7 +316,7 @@ namespace trend {
 
    /**
       Very small pure virtual class which primary purpose is to minimize the
-      memory usage of the Collect by reusing the vertex data. It also optimises
+      memory usage of the TrendBase by reusing the vertex data. It also optimises
       the amount of data transfered to the graphic card as a whole.
       Here is the idea.
 
@@ -331,7 +331,7 @@ namespace trend {
          for the selected objects.
          - to introduce additional selection related fields in all Tender classes
          and to alter the processing depending on the values of those fields.
-         This will increase the overall memory usage of the Collect, because
+         This will increase the overall memory usage of the TrendBase, because
          every graphical object will have more fields which will be unused
          actually most of the time. Besides it will (theoretically) slow down
          the processing, because will introduce conditional statements in all
@@ -475,10 +475,10 @@ namespace trend {
    typedef std::list<TenderRef*>       RefBoxList;
 
    /**
-      TENDERer Translation View - is the most fundamental class of the Collect.
+      TENDERer Translation View - is the most fundamental class of the TrendBase.
       It sorts and stores a layer slice of the cell data. Most of the memory
       consumption during the first processing step (traversing and sorting) is
-      concentrated in this class and naturally most of the Collect data processing
+      concentrated in this class and naturally most of the TrendBase data processing
       happens in the methods of this class. The input data stream is sorted in 4
       "bins" in a form of Tender object lists. The corresponding objects are
       created by register* methods. Vertex or index data is not copied during this
@@ -489,7 +489,7 @@ namespace trend {
       line bin because of its central line.
       \verbatim
       ---------------------------------------------------------------
-      | Collect   |    not filled      |        filled      |        |
+      | TrendBase   |    not filled      |        filled      |        |
       |   data    |--------------------|--------------------|  enum  |
       | (vertexes)|  box | poly | wire |  box | poly | wire |        |
       |-----------|------|------|------|------|------|------|--------|
@@ -546,7 +546,7 @@ namespace trend {
       -------------------------------------------------------------------------
       ... || cont | line  | cnvx | ncvx || cont | line  | cnvx | ncvx || ...
       ... ||----------------------------||----------------------------|| ...
-      ... || this TenderTV object data  ||  next TenderTV object data || ...
+      ... || this TrendTV object data  ||  next TrendTV object data || ...
       -------------------------------------------------------------------------
       \endverbatim
 
@@ -557,7 +557,7 @@ namespace trend {
       -------------------------------------------------------------------------
       ... || ftrs | ftfs  | ftss | fqss || ftrs | ftfs  | ftss | fqss || ...
       ... ||----------------------------||----------------------------|| ...
-      ... ||  this TenderTV index data  ||  next TenderTV index data  || ...
+      ... ||  this TrendTV index data  ||  next TrendTV index data  || ...
       -------------------------------------------------------------------------
       \endverbatim
 
@@ -591,23 +591,23 @@ namespace trend {
       -------------------------------------------------------------------
       \endverbatim
    */
-   class TenderTV {
+   class TrendTV {
       public:
          enum {fqss, ftrs, ftfs, ftss} NcvxTypes;
          enum {cont, line, cnvx, ncvx} ObjtTypes;
          typedef std::list<TenderText*> TenderStrings;
          typedef std::list<TextOvlBox*> RefTxtList;
-                           TenderTV(TenderRef* const, bool, bool, unsigned, unsigned);
-                          ~TenderTV();
+                           TrendTV(TenderRef* const, bool, bool, unsigned, unsigned);
+         virtual          ~TrendTV();
          void              registerBox   (TenderCnvx*);
          void              registerPoly  (TenderNcvx*, const TessellPoly*);
          void              registerWire  (TenderWire*);
          void              registerText  (TenderText*, TextOvlBox*);
 
-//         void              collect(TNDR_GLDATAT*, unsigned int*, unsigned int*);
-//         void              draw(layprop::DrawProperties*);
-//         void              drawTexts(layprop::DrawProperties*);
-//         TenderRef*        swapRefCells(TenderRef*);
+         virtual void      collect(TNDR_GLDATAT*, unsigned int*, unsigned int*) = 0;
+         virtual void      draw(layprop::DrawProperties*) = 0;
+         virtual void      drawTexts(layprop::DrawProperties*) = 0;
+         TenderRef*        swapRefCells(TenderRef*);
 
          unsigned          num_total_points();
          unsigned          num_total_indexs();
@@ -616,8 +616,6 @@ namespace trend {
          bool              filled() const       {return _filled;}
          std::string       cellName()           {return _refCell->name();}
       protected:
-//         void              collectIndexs(unsigned int*, const TeselChain*, unsigned*, unsigned*, unsigned);
-
          TenderRef*        _refCell;
          // collected data lists
          SliceObjects      _cont_data; //! Contour data
@@ -629,16 +627,9 @@ namespace trend {
          // vertex related data
          unsigned          _alvrtxs[4]; //! array with the total number of vertexes
          unsigned          _alobjvx[4]; //! array with the total number of objects that will be drawn with vertex related functions
-         GLsizei*          _sizesvx[4]; //! arrays of sizes for vertex sets
-         GLsizei*          _firstvx[4]; //! arrays of first vertexes
          // index related data for non-convex polygons
          unsigned          _alindxs[4]; //! array with the total number of indexes
          unsigned          _alobjix[4]; //! array with the total number of objects that will be drawn with index related functions
-         GLsizei*          _sizesix[4]; //! arrays of sizes for indexes sets
-         GLuint*           _firstix[4]; //! arrays of first indexes
-         // offsets in the VBO
-         unsigned          _point_array_offset; //! The offset of this chunk of vertex data in the vertex VBO
-         unsigned          _index_array_offset; //! The offset of this chunk of index  data in the index  VBO
          //
          unsigned          _num_total_strings;
          bool              _filled;
@@ -646,7 +637,7 @@ namespace trend {
    };
 
    /**
-      Very small class which holds the reusable TenderTV chunks. Here is what it is.
+      Very small class which holds the reusable TrendTV chunks. Here is what it is.
       The view usually contains relatively small number of cells which are referenced
       multiply times. They do contain the same data, but it should be visualized
       using different translation matrices. The simplest case is an array of cells
@@ -660,37 +651,38 @@ namespace trend {
       the traversing for its location. There can be 3 cases:
 
          - the chunk is outside the view window - it is then discarded and is not
-         reaching the Collect at all.
+         reaching the TrendBase at all.
          - the chunk is partially inside the view window - it is traversed, but
          its data is considered unique and no further attempts to reuse it.
          - the chunk is entirely inside the view window
 
       The latter case is the interesting one. Before creating a new chunk of data
-      (TenderTV object), Collect is checking whether it already exists
-      (TenderLay::chunkExists). If it does - it is registered here, a new TenderReTV
+      (TrendTV object), TrendBase is checking whether it already exists
+      (TrendLay::chunkExists). If it does - it is registered here, a new TrendReTV
       object is created and the traversing of the current layer is skipped. If the
-      chunk doesn't exists, then a TenderTV object is created, but it is also
+      chunk doesn't exists, then a TrendTV object is created, but it is also
       registered as "reusable" and the traversing continues as normal.
 
       This class requires only a draw() method which takes care to replace temporary
-      the translation matrix of the referenced TenderTV and then calls TenderTV::draw()
+      the translation matrix of the referenced TrendTV and then calls TrendTV::draw()
    */
-   class TenderReTV {
+   class TrendReTV {
       public:
-                           TenderReTV(TenderTV* const chunk, TenderRef* const refCell):
+                           TrendReTV(TrendTV* const chunk, TenderRef* const refCell):
                               _chunk(chunk), _refCell(refCell) {}
-//         void              draw(layprop::DrawProperties*);
-//         void              drawTexts(layprop::DrawProperties*);
-      private:
-         TenderTV* const   _chunk;
+         virtual          ~TrendReTV() {}
+         virtual void      draw(layprop::DrawProperties*) = 0;
+         virtual void      drawTexts(layprop::DrawProperties*) = 0;
+      protected:
+         TrendTV*  const   _chunk;
          TenderRef* const  _refCell;
 
    };
 
    /**
       TENDER LAYer represents a DB layer in the rendering view. It generates,
-      stores and sorts all the TenderTV objects (one per DB cell) and also
-      Initializes the corresponding virtual buffers (the vertex and eventually
+      stores and sorts all the TrendTV objects (one per DB cell) and also
+      initialises the corresponding virtual buffers (the vertex and eventually
       the index) for this layer. This class is responsible also for gathering of
       the selected data indexes.
 
@@ -698,36 +690,36 @@ namespace trend {
       traversing. A reference to it is stored in the _layData list as well as
       in the _cslice field. All subsequent calls to box(), poly() and wire()
       methods create the corresponding object of class Tender* and store them
-      calling the corresponding methods of _cslice object (of TenderTV class).
+      calling the corresponding methods of _cslice object (of TrendTV class).
       If the data is selected then an object of the overloaded class is created
       and a reference to it is stored in _slct_data list as well.
 
-      TenderLay keeps track of the total current amount of vertexes
+      TrendLay keeps track of the total current amount of vertexes
       (_num_total_points) and indexes (_num_total_indexs) in order to initialize
-      properly the offset fields of the generated TenderTV objects. When a new
-      slice of class TenderTV is created, the current slice is post processed
+      properly the offset fields of the generated TrendTV objects. When a new
+      slice of class TrendTV is created, the current slice is post processed
       (method ppSlice()) in order to update the fields mentioned above. The
       final values stored in those fields are used later to reserve a proper
       amount of memory for the VBO's belonging to this layer.
 
-      The rendering of the selected objects is done in this class. TenderTV does
+      The rendering of the selected objects is done in this class. TrendTV does
       hold the object vertex data, but it is completely unaware of selection
       related properties. The primary reason for this is that data can be
-      selected only in one of the generated TenderTV objects, because only one
+      selected only in one of the generated TrendTV objects, because only one
       of them eventually belongs to the active cell. Having an additional VBO
-      per TenderTV object for selected data would be a waste of course, because
+      per TrendTV object for selected data would be a waste of course, because
       all but one of them will be empty anyway. Instead a single VBO is generated
       for the entire rendering view with the indexes of all selected vertexes in
       the active cell across all layers.
 
       Selected objects will be rendered twice. Once - together with all other
-      objects in the TenderTV objects and again here, in this class in order to
+      objects in the TrendTV objects and again here, in this class in order to
       highlight them. An object can be fully or partially selected and depending
       on this it shall be rendered using the corresponding data structure:
 
       \verbatim
        --------------------------------------------------------------
-      |  Collect  |  fully selected    | partially selected |        |
+      |  TrendBase  |  fully selected    | partially selected |        |
       |    data   |--------------------|--------------------|  enum  |
       | (indexes) |  box | poly | wire |  box | poly | wire |        |
       |-----------|------|------|------|------|------|------|--------|
@@ -737,7 +729,7 @@ namespace trend {
       --------------------------------------------------------------
       \endverbatim
 
-      In the manner similar to TenderTV class, TenderLay sorts the selected objects
+      In the manner similar to TrendTV class, TrendLay sorts the selected objects
       in three "bins" and gathers some statistics about each of them. One position
       per bin is stored in each of the array fields (_asindxs[3], _asobjix[3],
       _sizslix[3], _fstslix[3]) representing the overall amount of indexes, the
@@ -747,7 +739,7 @@ namespace trend {
       slice representing the active cell in the vertex buffer. This is done by the
       selected objects themselves when vertex VBOs are collected via the
       re-implementation of cDataCopy virtual methods in the TenderS* classes.
-      TenderLay doesn't take part in this process, TenderTV class is not aware of
+      TrendLay doesn't take part in this process, TrendTV class is not aware of
       it either - it happens "naturally" thanks to the class hierarchy.
 
       The collectSelected() method implements the second step of the processing of
@@ -760,7 +752,7 @@ namespace trend {
       -------------------------------------------------------------------------
       ... ||   lstr  |   llps  |  lnes  ||   lstr  |   llps  |  lnes  || ...
       ... ||----------------------------||----------------------------|| ...
-      ... ||  this TenderLay index data ||  next TenderLay index data || ...
+      ... ||  this TrendLay index data ||  next TrendLay index data || ...
       -------------------------------------------------------------------------
       \endverbatim
 
@@ -783,14 +775,14 @@ namespace trend {
       | lnes | glMultiDrawElements(GL_LINES      ...) |    x   |   x   |
       ----------------------------------------------------------------
    */
-   class TenderLay {
+   class TrendLay {
       public:
-         typedef std::list<TenderTV*>     TenderTVList;
-         typedef std::list<TenderReTV*>   TenderReTVList;
-         typedef std::map<std::string, TenderTV*> ReusableTTVMap;
+         typedef std::list<TrendTV*>     TenderTVList;
+         typedef std::list<TrendReTV*>   TenderReTVList;
+         typedef std::map<std::string, TrendTV*> ReusableTTVMap;
 
-                           TenderLay();
-                          ~TenderLay();
+                           TrendLay();
+         virtual          ~TrendLay();
          void              box  (const int4b*);
          void              box  (const int4b*,                               const SGBitSet*);
          void              poly (const int4b*, unsigned, const TessellPoly*);
@@ -798,21 +790,21 @@ namespace trend {
          void              wire (int4b*, unsigned, WireWidth, bool);
          void              wire (int4b*, unsigned, WireWidth, bool, const SGBitSet*);
          void              text (const std::string*, const CTM&, const DBbox*, const TP&, bool);
-         void              newSlice(TenderRef* const, bool, bool /*, bool, unsigned*/);
-         void              newSlice(TenderRef* const, bool, bool, unsigned slctd_array_offset);
-         bool              chunkExists(TenderRef* const, bool);
+         virtual void      newSlice(TenderRef* const, bool, bool /*, bool, unsigned*/) = 0;
+         virtual void      newSlice(TenderRef* const, bool, bool, unsigned slctd_array_offset) = 0;
+         virtual bool      chunkExists(TenderRef* const, bool) = 0;
          void              ppSlice();
-//         void              draw(layprop::DrawProperties*);
-//         void              drawSelected();
-//         void              drawTexts(layprop::DrawProperties*);
-//         void              collect(bool, GLuint, GLuint);
-//         void              collectSelected(unsigned int*);
+         virtual void      draw(layprop::DrawProperties*) = 0;
+         virtual void      drawSelected() = 0;
+         virtual void      drawTexts(layprop::DrawProperties*) = 0;
+         virtual void      collect(bool, GLuint, GLuint) = 0;
+         virtual void      collectSelected(unsigned int*) = 0;
          unsigned          total_points() {return _num_total_points;}
          unsigned          total_indexs() {return _num_total_indexs;}
          unsigned          total_slctdx();
          unsigned          total_strings(){return _num_total_strings;}
 
-      private:
+      protected:
          void              registerSBox  (TenderSBox*);
          void              registerSPoly (TenderSNcvx*);
          void              registerSWire (TenderSWire*);
@@ -821,23 +813,16 @@ namespace trend {
          ReusableTTVMap    _reusableCData; // reusable contour chunks
          TenderTVList      _layData;
          TenderReTVList    _reLayData;
-         TenderTV*         _cslice;    //!Working variable pointing to the current slice
+         TrendTV*          _cslice;    //!Working variable pointing to the current slice
          unsigned          _num_total_points;
          unsigned          _num_total_indexs;
          unsigned          _num_total_slctdx;
          unsigned          _num_total_strings;
-         GLuint            _pbuffer;
-         GLuint            _ibuffer;
          // Data related to selected objects
          SliceSelected     _slct_data;
          // index related data for selected objects
          unsigned          _asindxs[3]; //! array with the total number of indexes of selected objects
          unsigned          _asobjix[3]; //! array with the total number of selected objects
-         GLsizei*          _sizslix[3]; //! arrays of sizes for indexes sets of selected objects
-         GLuint*           _fstslix[3]; //! arrays of first indexes for selected objects
-         // offsets in the VBO
-         unsigned          _stv_array_offset; //! first point in the TenderTV with selected objects in this layer
-         unsigned          _slctd_array_offset; //! first point in the VBO with selected indexes
    };
 
    /**
@@ -845,34 +830,29 @@ namespace trend {
       trivial class. One object of this class should be created only. All reference
       boxes are processed in a single VBO. This includes the selected ones.
    */
-   class TenderRefLay {
+   class TrendRefLay {
       public:
-                           TenderRefLay();
-                          ~TenderRefLay();
+                           TrendRefLay();
+         virtual          ~TrendRefLay();
          void              addCellOBox(TenderRef*, word, bool);
-         void              collect(GLuint);
-         void              draw(layprop::DrawProperties*);
+         virtual void      collect(GLuint) = 0;
+         virtual void      draw(layprop::DrawProperties*) = 0;
          unsigned          total_points();
          unsigned          total_indexes();
-      private:
+      protected:
          RefBoxList        _cellRefBoxes;
          RefBoxList        _cellSRefBoxes;
-         GLuint            _pbuffer;
          // vertex related data
          unsigned          _alvrtxs; //! total number of vertexes
          unsigned          _alobjvx; //! total number of objects that will be drawn with vertex related functions
-         GLsizei*          _sizesvx; //! array of sizes for vertex sets
-         GLsizei*          _firstvx; //! array of first vertexes
          // index related data for selected boxes
          unsigned          _asindxs; //! total number of selected vertexes
          unsigned          _asobjix; //! total number of objects that will be drawn with index related functions
-         GLsizei*          _sizslix; //! array of sizes for indexes sets
-         GLsizei*          _fstslix; //! array of first indexes
    };
 
    //-----------------------------------------------------------------------------
    //
-   typedef laydata::LayerContainer<TenderLay*> DataLay;
+   typedef laydata::LayerContainer<TrendLay*> DataLay;
    typedef std::stack<TenderRef*> CellStack;
 
    /**
@@ -883,13 +863,14 @@ namespace trend {
       the previous view must be considered invalid. The object structure created
       by this class is shown in the documentation of the module.
    */
-   class Collect {
+   class TrendBase {
       public:
-                           Collect( layprop::DrawProperties* drawprop, real UU );
-                          ~Collect();
-         void              grid( const real, const std::string );
-         void              setLayer(const LayerDef&, bool);
-         bool              chunkExists(const LayerDef&, bool);
+                           TrendBase( layprop::DrawProperties* drawprop, real UU );
+         virtual          ~TrendBase();
+         virtual void      grid( const real, const std::string ) = 0;
+         virtual void      setLayer(const LayerDef&, bool) = 0;
+         virtual void      setGrcLayer(bool, const LayerDef&) = 0;
+         virtual bool      chunkExists(const LayerDef&, bool) = 0;
          void              pushCell(std::string, const CTM&, const DBbox&, bool, bool);
          void              popCell()                              {_cellStack.pop();}
          const CTM&        topCTM() const                         {return  _cellStack.top()->ctm();}
@@ -905,13 +886,12 @@ namespace trend {
          void              grcwire (int4b*, unsigned, WireWidth);
          void              arefOBox(std::string, const CTM&, const DBbox&, bool);
          void              text (const std::string*, const CTM&, const DBbox&, const TP&, bool);
-//         bool              collect();
-//         bool              grcCollect();
-//         void              draw();
-//         void              grcDraw();
-//         void              cleanUp();
-//         void              grcCleanUp();
-         void              setGrcLayer(bool, const LayerDef&);
+         virtual bool      collect() = 0;
+         virtual bool      grcCollect() = 0;
+         virtual void      draw() = 0;
+         virtual void      grcDraw() = 0;
+         virtual void      cleanUp() = 0;
+         virtual void      grcCleanUp() = 0;
 
          LayerDef          getTenderLay(const LayerDef& laydef)
                                                          {return _drawprop->getTenderLay(laydef)   ;}
@@ -929,25 +909,20 @@ namespace trend {
                                                          {       _drawprop->initDrawRefStack(crs)  ;}
          void              clearDrawRefStack()           {       _drawprop->clearDrawRefStack()    ;}
          bool              adjustTextOrientation() const {return _drawprop->adjustTextOrientation();}
-      private:
+      protected:
          layprop::DrawProperties*   _drawprop;
          real              _UU;
          DataLay           _data;            //!All editable data for drawing
          DataLay           _grcData;         //!All GRC      data for drawing
-         TenderLay*        _clayer;          //!Working variable pointing to the current edit slice
-         TenderLay*        _grcLayer;        //!Working variable pointing to the current GRC  slice
-         TenderRefLay      _refLayer;
+         TrendLay*         _clayer;          //!Working variable pointing to the current edit slice
+         TrendLay*         _grcLayer;        //!Working variable pointing to the current GRC  slice
+         TrendRefLay*      _refLayer;
          CellStack         _cellStack;       //!Required during data traversing stage
          unsigned          _cslctd_array_offset; //! Current selected array offset
          //
-         unsigned          _num_ogl_buffers; //! Number of generated openGL VBOs
-         unsigned          _num_ogl_grc_buffers; //!
-//         GLuint*           _ogl_buffers;     //! Array with the "names" of all openGL buffers
-//         GLuint*           _ogl_grc_buffers; //! Array with the "names" of the GRC related openGL buffers
-//         GLuint            _sbuffer;         //! The "name" of the selected index buffer
          TenderRef*        _activeCS;
          byte              _dovCorrection;   //! Cell ref Depth of view correction (for Edit in Place purposes)
-         RefBoxList        _hiddenRefBoxes;  //! Those cRefBox objects which didn't ended in the TenderRefLay structures
+         RefBoxList        _hiddenRefBoxes;  //! Those cRefBox objects which didn't ended in the TrendRefLay structures
    };
 
    void checkOGLError(std::string);

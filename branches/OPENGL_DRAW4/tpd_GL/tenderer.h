@@ -30,14 +30,14 @@
    serious attempt in this project to utilize the power of todays graphic hardware via
    openGL library. The original rendering (which is preserved) is implementing the
    simplest possible rendering approach and is using the most basic openGL functions to
-   achieve maximum compatibility. The goal of the TopRend is to be a base for future
+   achieve maximum compatibility. The goal of the Tenderer is to be a base for future
    updates in terms of graphic effects, 3D rendering, shaders etc.
 
    It must be clear that the main rendering acceleration is coming from the structure
    of the Toped database. The QuadTree dominates by far any other rendering optimisation
    especially on big databases where the speed really matters. This is the main reason
    behind the fact that the original renderer demonstrates comparable results with
-   TopRend. There are virtually no enhancements possible there though. It should be
+   Tenderer. There are virtually no enhancements possible there though. It should be
    noted also that each rendering view in this context is unique. Indeed, when the user
    changes the visual window, the data stream from the Toped DB traverser can't be
    predicted. Different objects will be streamed out depending on the location and
@@ -50,7 +50,7 @@
    on its property to filter-out quickly and effectively all invisible objects. The
    Toped DB is generally a hierarchical cell tree. Each cell contains a linear list
    of layers which in turn contains a QuadTree of the layout objects. The main task
-   of the TopRend is to convert the data stream from the DB traversing into arrays
+   of the Tenderer is to convert the data stream from the DB traversing into arrays
    of vertexes (VBOs) convenient for the graphical hardware.
 
    This is done in 3 steps:
@@ -94,18 +94,18 @@
    The first step is the most time consuming from all three, but this is mainly the
    Toped DB traversing which is assumed optimal. The last one is the quickest one
    and the speed there can be improved even more if shaders are used. The speed of
-   the second step depends entirely on the implementation of the TopRend.
+   the second step depends entirely on the implementation of the Tenderer.
 
    Memory usage:
    Only the first step consumes memory but it is minimised. There is no data copying
    instead data references are stored only. Technically the second step does consume
    memory of course, but this is the memory consumed by the graphic driver to map the
-   VBO in the CPU memory. The TopRend copies the data directly in the VBOs
+   VBO in the CPU memory. The Tenderer copies the data directly in the VBOs
 
    Note, that the flow described above allows the screen to be redrawn very quickly
    using the third step only. This opens the door to all kinds of graphical effects.
 
-   As shown on the graph above the TopRend ends-up with a number of VBOs for
+   As shown on the graph above the Tenderer ends-up with a number of VBOs for
    drawing. They are generated "per layer" basis. For each used layer there might
    be maximum two buffers:
    - point VBO - containing the vertexes of all objects on this layer across all
@@ -127,292 +127,12 @@
 #include <GL/glew.h>
 #include "basetrend.h"
 
-#define TENDERER_USE_FLOATS
-#ifdef TENDERER_USE_FLOATS
-   #define TNDR_GLDATAT GLfloat
-   #define TNDR_GLENUMT GL_FLOAT
-#else
-   #define TNDR_GLDATAT GLint
-   #define TNDR_GLENUMT GL_INT
-#endif
-
-// to cast properly the indices parameter in glDrawElements when
-// drawing from VBO
-#define VBO_BUFFER_OFFSET(i) ((char *)NULL + (i))
-
-//=============================================================================
-//
-//
-//
-//=============================================================================
-typedef std::list<word> TeselVertices;
-
-//=============================================================================
-//
-//
-//
-//=============================================================================
-namespace tenderer {
+namespace trend {
    /**
-   *  Text reference boxes
-   */
-   class TextOvlBox {
-      public:
-                           TextOvlBox(const DBbox&, const CTM&);
-         virtual          ~TextOvlBox() {}
-         virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
-      private:
-         int4b             _obox[8];
-   };
-
-   /**
-   * Text objects
-   */
-   class TenderText {
-      public:
-                           TenderText(const std::string*, const CTM&);
-         void              draw(bool);
-      private:
-         const std::string* _text;
-         real              _ftm[16]; //! Font translation matrix
-   };
-
-   /**
-      Represents convex polygons. Those are mainly the boxes from the data base.
-      Stores a reference to the vertex array of the original object and its size.
-      The only non-trivial method is cDataCopy which transfers the vertex data
-      from the original object to a VBO mapped in the CPU memory
-      This class is also a base for the Tender* class hierarchy.
-   */
-   class TenderCnvx {
-      public:
-                           TenderCnvx(const int4b* pdata, unsigned psize) :
-                                    _cdata(pdata), _csize(psize){}
-         virtual          ~TenderCnvx() {};
-         virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
-         unsigned          csize()     {return _csize;}
-      protected:
-         const int4b*      _cdata;  //! the vertexes of the object contour
-         unsigned          _csize;  //! the number of vertexes in _cdata
-   };
-
-   class TenderBox : public TenderCnvx {
-      public:
-                           TenderBox(const int4b* pdata) : TenderCnvx(pdata, 4) {}
-         virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
-   };
-
-   /**
-      Represents non-convex polygons - most of the poly objects in the DB. Inherits
-      TenderCnvx. The only addition is the tesselation data (_tdata) which is
-      utilized if the object is to be filled.
-   */
-   class TenderNcvx : public TenderCnvx {
-      public:
-                           TenderNcvx(const int4b* pdata, unsigned psize) :
-                                    TenderCnvx(pdata, psize), _tdata(NULL) {}
-         void              setTeselData(const TessellPoly* tdata) {_tdata = tdata;}
-         virtual          ~TenderNcvx(){};
-         virtual const TeselChain* tdata()              {return _tdata->tdata();}
-      private:
-         const TessellPoly*    _tdata; //! polygon tesselation data
-   };
-
-   /**
-      Holds the wires from the data base. This class is not quite trivial and it
-      causes all kinds of troubles in the overall class hierarchy. It inherits
-      TenderNcvx (is it a good idea?). Theoretically in the general case this is a
-      non-convex polygon. The wire as a DB object is very specific though. Only the
-      central line is stored. The contour is calculated if required on the fly from
-      the build-in methods called from the constructor. Instead of using general
-      purpose tesselation (slow!), the tesselation data is extracted directly from
-      the contour data virtually without calculations. This is the only class in the
-      hierarchy which generates vertex and index data which means that it has to be
-      properly cleaned-up.
-   */
-   class TenderWire : public TenderNcvx {
-      public:
-                           TenderWire(int4b*, unsigned, const WireWidth, bool);
-         virtual          ~TenderWire();
-         void              Tesselate();
-         virtual unsigned  lDataCopy(TNDR_GLDATAT*, unsigned&);
-         unsigned          lsize()                 {return _lsize;}
-         bool              center_line_only()      {return _celno;}
-         virtual const TeselChain* tdata()               {return _tdata;}
-      protected:
-         int4b*            _ldata; //! the vertexes of the wires central line
-         unsigned          _lsize; //! the number of vertexes in the central line
-         bool              _celno; //! indicates whether the center line only shall be drawn
-         TeselChain*       _tdata; //! wire tesselation data
-   };
-
-   typedef enum {lstr, llps, lnes} SlctTypes;
-
-   /**
-      Very small pure virtual class which primary purpose is to minimize the
-      memory usage of the TopRend by reusing the vertex data. It also optimises
-      the amount of data transfered to the graphic card as a whole.
-      Here is the idea.
-
-      In most of the rendering cases there will be no data selected in the
-      active cell so this class will not be used at all. When a data is
-      selected though, the graphical objects have to be rendered twice - once
-      as normal objects and the second time - to highlight them in some way.
-      There are several ways to achieve this:
-         - to store the selected objects in a separate tree during traversing
-         and sorting and then to render them separately. This however implies
-         that the memory usage and data transfer to the GPU will be doubled
-         for the selected objects.
-         - to introduce additional selection related fields in all Tender classes
-         and to alter the processing depending on the values of those fields.
-         This will increase the overall memory usage of the TopRend, because
-         every graphical object will have more fields which will be unused
-         actually most of the time. Besides it will (theoretically) slow down
-         the processing, because will introduce conditional statements in all
-         stages of the object processing.
-         - The introduction of this class is an attempt to utilize the best of
-         the ideas above, but without their drawbacks. A selected object with
-         the corresponding selection related fields will be generated only on
-         demand. The classes which deal with selected objects will inherit
-         their respective parents and this class which will bring the
-         additional selection related fields and methods. Selected objects
-         will be rendered twice. Once - together with all other objects and
-         then once again - to highlight them. Note though, that it will happen
-         virtually without additional memory usage, because the second pass
-         will reuse the data in their parent objects and will just index it.
-         The amount of additional data to the GPU is also minimized,
-         because the only additional data transfered is the index array of
-         the selected vertexes. Vertex data is already there and will be reused.
-   */
-   class TenderSelected {
-      public:
-                           TenderSelected(const SGBitSet* slist) :
-                              _slist(slist), _offset(0) {}
-         virtual          ~TenderSelected() {}
-         bool              partSelected() {return (NULL != _slist);}
-         virtual SlctTypes type() = 0;
-         virtual unsigned  ssize() = 0;
-         virtual unsigned  sDataCopy(unsigned*, unsigned&) = 0;
-      protected:
-         const SGBitSet*   _slist;  //! A bit set array with selected vertexes
-         unsigned          _offset; //! The offset of the first vertex in the point VBO
-   };
-
-   class TextSOvlBox : public TextOvlBox, public TenderSelected {
-      public:
-                           TextSOvlBox(const DBbox& box, const CTM& mtrx) :
-                              TextOvlBox(box, mtrx), TenderSelected(NULL) {}
-         virtual          ~TextSOvlBox() {}
-         virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
-         virtual SlctTypes type() { return llps;}
-         virtual unsigned  ssize(){ return 4;}
-         virtual unsigned  sDataCopy(unsigned*, unsigned&);
-   };
-
-
-   /**
-      Holds a selected or partially selected convex polygon. Its primary purpose is
-      to generate the indexes for the contour (_cdata) data of its primary parent.
-      Implements the virtual methods of its parents. Doesn't have any own fields or
-      methods.
-      The re-implementation of the cDataCopy() method inherited from the primary parent
-      worths to be mentioned. It updates the inherited _offset field which is vital
-      for the consequent indexing of the selected vertexes.
-   */
-   class TenderSCnvx : public TenderCnvx, public TenderSelected {
-      public:
-                           TenderSCnvx(int4b* pdata, unsigned psize, const SGBitSet* slist) :
-                              TenderCnvx(pdata, psize), TenderSelected(slist) {}
-         virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
-         virtual SlctTypes type() { return ((NULL == _slist) ? llps : lnes);}
-         virtual unsigned  ssize();
-         virtual unsigned  sDataCopy(unsigned*, unsigned&);
-   };
-
-   class TenderSBox : public TenderBox, public TenderSelected {
-      public:
-                           TenderSBox(const int4b* pdata, const SGBitSet* slist) :
-                              TenderBox(pdata), TenderSelected(slist) {}
-         virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
-         virtual SlctTypes type() { return ((NULL == _slist) ? llps : lnes);}
-         virtual unsigned  ssize();
-         virtual unsigned  sDataCopy(unsigned*, unsigned&);
-   };
-
-   /**
-      Holds a selected or partially selected non-convex polygon. Its primary purpose
-      is to generate the indexes for the contour (_cdata) data of its primary parent.
-      Implements the virtual methods of its parents. Doesn't have any own fields or
-      methods.
-      The re-implementation of the cDataCopy() has the same function as described in
-      TenderSCnvx class
-   */
-   class TenderSNcvx : public TenderNcvx, public TenderSelected  {
-      public:
-                           TenderSNcvx(const int4b* pdata, unsigned psize, const SGBitSet* slist) :
-                              TenderNcvx(pdata, psize), TenderSelected(slist) {}
-         virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
-         virtual SlctTypes type() { return ((NULL == _slist) ? llps : lnes);}
-         virtual unsigned  ssize();
-         virtual unsigned  sDataCopy(unsigned*, unsigned&);
-   };
-
-   /**
-      Holds a selected or partially selected wires. Like its primary parent this is
-      not quite trivial class. Because of the specifics of the wire storage it has
-      to store an additional VBO offset parameter for the central line. Note that
-      unlike other selected objects, this one is indexing primary the central line
-      data (_ldata) of its parent and in addition the contour data (_cdata) in
-      some of the selection cases. The class implements all virtual methods of its
-      parents.
-      Here the re-implementation of two methods has to be highlighted. cDataCopy()
-      updates inherited _offset field. lDataCopy in turn updates _loffset field.
-      Both of them vital for proper indexing of the selected vertexes.
-   */
-   class TenderSWire : public TenderWire, public TenderSelected {
-      public:
-                           TenderSWire(int4b* pdata, unsigned psize, const WireWidth width, bool clo, const SGBitSet* slist) :
-                              TenderWire(pdata, psize, width, clo), TenderSelected(slist), _loffset(0u) {}
-         virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
-         virtual unsigned  lDataCopy(TNDR_GLDATAT*, unsigned&);
-         virtual SlctTypes type() { return ((NULL == _slist) ? lstr : lnes);}
-         virtual unsigned  ssize();
-         virtual unsigned  sDataCopy(unsigned*, unsigned&);
-      private:
-         unsigned          _loffset;
-   };
-
-   /**
-   *  Cell reference boxes & reference related data
-   */
-   class TenderRef {
-      public:
-                           TenderRef(std::string, const CTM&, const DBbox&, word);
-                           TenderRef();
-         std::string       name()         {return _name;}
-         real* const       translation()  {return _translation;}
-         CTM&              ctm()          {return _ctm;}
-         word              alphaDepth()   {return _alphaDepth;}
-         unsigned          cDataCopy(TNDR_GLDATAT*, unsigned&);
-      private:
-         std::string       _name;
-         real              _translation[16];
-         CTM               _ctm;
-         TNDR_GLDATAT      _obox[8];
-         word              _alphaDepth;
-   };
-
-   typedef std::list<TenderCnvx*>      SliceObjects;
-   typedef std::list<TenderNcvx*>      SlicePolygons;
-   typedef std::list<TenderWire*>      SliceWires;
-   typedef std::list<TenderSelected*>  SliceSelected;
-   typedef std::list<TenderRef*>       RefBoxList;
-
-   /**
-      TENDERer Translation View - is the most fundamental class of the TopRend.
+      TENDERer Translation View - is the most fundamental class of the Tenderer.
       It sorts and stores a layer slice of the cell data. Most of the memory
       consumption during the first processing step (traversing and sorting) is
-      concentrated in this class and naturally most of the TopRend data processing
+      concentrated in this class and naturally most of the Tenderer data processing
       happens in the methods of this class. The input data stream is sorted in 4
       "bins" in a form of Tender object lists. The corresponding objects are
       created by register* methods. Vertex or index data is not copied during this
@@ -423,7 +143,7 @@ namespace tenderer {
       line bin because of its central line.
       \verbatim
       ---------------------------------------------------------------
-      | TopRend   |    not filled      |        filled      |        |
+      | Tenderer   |    not filled      |        filled      |        |
       |   data    |--------------------|--------------------|  enum  |
       | (vertexes)|  box | poly | wire |  box | poly | wire |        |
       |-----------|------|------|------|------|------|------|--------|
@@ -525,58 +245,23 @@ namespace tenderer {
       -------------------------------------------------------------------
       \endverbatim
    */
-   class TenderTV {
+   class TenderTV : public TrendTV {
       public:
-         enum {fqss, ftrs, ftfs, ftss} NcvxTypes;
-         enum {cont, line, cnvx, ncvx} ObjtTypes;
-         typedef std::list<TenderText*> TenderStrings;
-         typedef std::list<TextOvlBox*> RefTxtList;
                            TenderTV(TenderRef* const, bool, bool, unsigned, unsigned);
-                          ~TenderTV();
-         void              registerBox   (TenderCnvx*);
-         void              registerPoly  (TenderNcvx*, const TessellPoly*);
-         void              registerWire  (TenderWire*);
-         void              registerText  (TenderText*, TextOvlBox*);
+         virtual          ~TenderTV();
 
-         void              collect(TNDR_GLDATAT*, unsigned int*, unsigned int*);
-         void              draw(layprop::DrawProperties*);
-         void              drawTexts(layprop::DrawProperties*);
-         TenderRef*        swapRefCells(TenderRef*);
-
-         unsigned          num_total_points();
-         unsigned          num_total_indexs();
-         unsigned          num_total_strings()  {return _num_total_strings;}
-         bool              reusable() const     {return _reusable;}
-         bool              filled() const       {return _filled;}
-         std::string       cellName()           {return _refCell->name();}
-      protected:
+         virtual void      collect(TNDR_GLDATAT*, unsigned int*, unsigned int*);
+         virtual void      draw(layprop::DrawProperties*);
+         virtual void      drawTexts(layprop::DrawProperties*);
+      private:
          void              collectIndexs(unsigned int*, const TeselChain*, unsigned*, unsigned*, unsigned);
-
-         TenderRef*        _refCell;
-         // collected data lists
-         SliceObjects      _cont_data; //! Contour data
-         SliceWires        _line_data; //! Line data
-         SliceObjects      _cnvx_data; //! Convex polygon data (Only boxes are here at the moment. TODO - all convex polygons)
-         SlicePolygons     _ncvx_data; //! Non convex data
-         TenderStrings     _text_data; //! Text (strings)
-         RefTxtList        _txto_data; //! Text overlapping boxes
-         // vertex related data
-         unsigned          _alvrtxs[4]; //! array with the total number of vertexes
-         unsigned          _alobjvx[4]; //! array with the total number of objects that will be drawn with vertex related functions
          GLsizei*          _sizesvx[4]; //! arrays of sizes for vertex sets
          GLsizei*          _firstvx[4]; //! arrays of first vertexes
-         // index related data for non-convex polygons
-         unsigned          _alindxs[4]; //! array with the total number of indexes
-         unsigned          _alobjix[4]; //! array with the total number of objects that will be drawn with index related functions
          GLsizei*          _sizesix[4]; //! arrays of sizes for indexes sets
          GLuint*           _firstix[4]; //! arrays of first indexes
          // offsets in the VBO
          unsigned          _point_array_offset; //! The offset of this chunk of vertex data in the vertex VBO
          unsigned          _index_array_offset; //! The offset of this chunk of index  data in the index  VBO
-         //
-         unsigned          _num_total_strings;
-         bool              _filled;
-         bool              _reusable;
    };
 
    /**
@@ -594,13 +279,13 @@ namespace tenderer {
       the traversing for its location. There can be 3 cases:
 
          - the chunk is outside the view window - it is then discarded and is not
-         reaching the TopRend at all.
+         reaching the Tenderer at all.
          - the chunk is partially inside the view window - it is traversed, but
          its data is considered unique and no further attempts to reuse it.
          - the chunk is entirely inside the view window
 
       The latter case is the interesting one. Before creating a new chunk of data
-      (TenderTV object), TopRend is checking whether it already exists
+      (TenderTV object), Tenderer is checking whether it already exists
       (TenderLay::chunkExists). If it does - it is registered here, a new TenderReTV
       object is created and the traversing of the current layer is skipped. If the
       chunk doesn't exists, then a TenderTV object is created, but it is also
@@ -609,16 +294,12 @@ namespace tenderer {
       This class requires only a draw() method which takes care to replace temporary
       the translation matrix of the referenced TenderTV and then calls TenderTV::draw()
    */
-   class TenderReTV {
+   class TenderReTV : public TrendReTV {
       public:
-                           TenderReTV(TenderTV* const chunk, TenderRef* const refCell):
-                              _chunk(chunk), _refCell(refCell) {}
-         void              draw(layprop::DrawProperties*);
-         void              drawTexts(layprop::DrawProperties*);
-      private:
-         TenderTV* const   _chunk;
-         TenderRef* const  _refCell;
-
+                           TenderReTV(TrendTV* const chunk, TenderRef* const refCell):
+                              TrendReTV(chunk, refCell) {}
+         virtual void      draw(layprop::DrawProperties*);
+         virtual void      drawTexts(layprop::DrawProperties*);
    };
 
    /**
@@ -661,7 +342,7 @@ namespace tenderer {
 
       \verbatim
        --------------------------------------------------------------
-      |  TopRend  |  fully selected    | partially selected |        |
+      |  Tenderer  |  fully selected    | partially selected |        |
       |    data   |--------------------|--------------------|  enum  |
       | (indexes) |  box | poly | wire |  box | poly | wire |        |
       |-----------|------|------|------|------|------|------|--------|
@@ -717,56 +398,23 @@ namespace tenderer {
       | lnes | glMultiDrawElements(GL_LINES      ...) |    x   |   x   |
       ----------------------------------------------------------------
    */
-   class TenderLay {
+   class TenderLay : public TrendLay {
       public:
-         typedef std::list<TenderTV*>     TenderTVList;
-         typedef std::list<TenderReTV*>   TenderReTVList;
-         typedef std::map<std::string, TenderTV*> ReusableTTVMap;
-
                            TenderLay();
-                          ~TenderLay();
-         void              box  (const int4b*);
-         void              box  (const int4b*,                               const SGBitSet*);
-         void              poly (const int4b*, unsigned, const TessellPoly*);
-         void              poly (const int4b*, unsigned, const TessellPoly*, const SGBitSet*);
-         void              wire (int4b*, unsigned, WireWidth, bool);
-         void              wire (int4b*, unsigned, WireWidth, bool, const SGBitSet*);
-         void              text (const std::string*, const CTM&, const DBbox*, const TP&, bool);
-         void              newSlice(TenderRef* const, bool, bool /*, bool, unsigned*/);
-         void              newSlice(TenderRef* const, bool, bool, unsigned slctd_array_offset);
-         bool              chunkExists(TenderRef* const, bool);
-         void              ppSlice();
-         void              draw(layprop::DrawProperties*);
-         void              drawSelected();
-         void              drawTexts(layprop::DrawProperties*);
-         void              collect(bool, GLuint, GLuint);
-         void              collectSelected(unsigned int*);
-         unsigned          total_points() {return _num_total_points;}
-         unsigned          total_indexs() {return _num_total_indexs;}
-         unsigned          total_slctdx();
-         unsigned          total_strings(){return _num_total_strings;}
+         virtual          ~TenderLay();
+         virtual void      newSlice(TenderRef* const, bool, bool /*, bool, unsigned*/);
+         virtual void      newSlice(TenderRef* const, bool, bool, unsigned slctd_array_offset);
+         virtual bool      chunkExists(TenderRef* const, bool);
+         virtual void      draw(layprop::DrawProperties*);
+         virtual void      drawSelected();
+         virtual void      drawTexts(layprop::DrawProperties*);
+         virtual void      collect(bool, GLuint, GLuint);
+         virtual void      collectSelected(unsigned int*);
 
       private:
-         void              registerSBox  (TenderSBox*);
-         void              registerSPoly (TenderSNcvx*);
-         void              registerSWire (TenderSWire*);
-         void              registerSOBox (TextSOvlBox*);
-         ReusableTTVMap    _reusableFData; // reusable filled chunks
-         ReusableTTVMap    _reusableCData; // reusable contour chunks
-         TenderTVList      _layData;
-         TenderReTVList    _reLayData;
-         TenderTV*         _cslice;    //!Working variable pointing to the current slice
-         unsigned          _num_total_points;
-         unsigned          _num_total_indexs;
-         unsigned          _num_total_slctdx;
-         unsigned          _num_total_strings;
          GLuint            _pbuffer;
          GLuint            _ibuffer;
-         // Data related to selected objects
-         SliceSelected     _slct_data;
          // index related data for selected objects
-         unsigned          _asindxs[3]; //! array with the total number of indexes of selected objects
-         unsigned          _asobjix[3]; //! array with the total number of selected objects
          GLsizei*          _sizslix[3]; //! arrays of sizes for indexes sets of selected objects
          GLuint*           _fstslix[3]; //! arrays of first indexes for selected objects
          // offsets in the VBO
@@ -775,39 +423,25 @@ namespace tenderer {
    };
 
    /**
-      Responsible for visualizing the overlap boxes of the references. Relatively
+      Responsible for visualising the overlap boxes of the references. Relatively
       trivial class. One object of this class should be created only. All reference
       boxes are processed in a single VBO. This includes the selected ones.
    */
-   class TenderRefLay {
+   class TenderRefLay : public TrendRefLay {
       public:
                            TenderRefLay();
-                          ~TenderRefLay();
-         void              addCellOBox(TenderRef*, word, bool);
-         void              collect(GLuint);
-         void              draw(layprop::DrawProperties*);
-         unsigned          total_points();
-         unsigned          total_indexes();
+         virtual          ~TenderRefLay();
+         virtual void      collect(GLuint);
+         virtual void      draw(layprop::DrawProperties*);
       private:
-         RefBoxList        _cellRefBoxes;
-         RefBoxList        _cellSRefBoxes;
          GLuint            _pbuffer;
          // vertex related data
-         unsigned          _alvrtxs; //! total number of vertexes
-         unsigned          _alobjvx; //! total number of objects that will be drawn with vertex related functions
          GLsizei*          _sizesvx; //! array of sizes for vertex sets
          GLsizei*          _firstvx; //! array of first vertexes
          // index related data for selected boxes
-         unsigned          _asindxs; //! total number of selected vertexes
-         unsigned          _asobjix; //! total number of objects that will be drawn with index related functions
          GLsizei*          _sizslix; //! array of sizes for indexes sets
          GLsizei*          _fstslix; //! array of first indexes
    };
-
-   //-----------------------------------------------------------------------------
-   //
-   typedef laydata::LayerContainer<TenderLay*> DataLay;
-   typedef std::stack<TenderRef*> CellStack;
 
    /**
       Toped RENDERER is the front-end class, the interface to the rest of the world.
@@ -817,74 +451,28 @@ namespace tenderer {
       the previous view must be considered invalid. The object structure created
       by this class is shown in the documentation of the module.
    */
-   class TopRend {
+   class Tenderer : public TrendBase {
       public:
-                           TopRend( layprop::DrawProperties* drawprop, real UU );
-                          ~TopRend();
-         void              grid( const real, const std::string );
-         void              setLayer(const LayerDef&, bool);
-         bool              chunkExists(const LayerDef&, bool);
-         void              pushCell(std::string, const CTM&, const DBbox&, bool, bool);
-         void              popCell()                              {_cellStack.pop();}
-         const CTM&        topCTM() const                         {return  _cellStack.top()->ctm();}
-         void              box  (const int4b* pdata)              {_clayer->box(pdata);}
-         void              box  (const int4b* pdata, const SGBitSet* ss){_clayer->box(pdata, ss);}
-         void              poly (const int4b* pdata, unsigned psize, const TessellPoly* tpoly)
-                                                                  {_clayer->poly(pdata, psize, tpoly);}
-         void              poly (const int4b* pdata, unsigned psize, const TessellPoly* tpoly, const SGBitSet* ss)
-                                                                  {_clayer->poly(pdata, psize, tpoly, ss);}
-         void              grcpoly(int4b* pdata, unsigned psize);
-         void              wire (int4b*, unsigned, WireWidth);
-         void              wire (int4b*, unsigned, WireWidth, const SGBitSet*);
-         void              grcwire (int4b*, unsigned, WireWidth);
-         void              arefOBox(std::string, const CTM&, const DBbox&, bool);
-         void              text (const std::string*, const CTM&, const DBbox&, const TP&, bool);
-         bool              collect();
-         bool              grcCollect();
-         void              draw();
-         void              grcDraw();
-         void              cleanUp();
-         void              grcCleanUp();
-         void              setGrcLayer(bool, const LayerDef&);
-
-         LayerDef          getTenderLay(const LayerDef& laydef)
-                                                         {return _drawprop->getTenderLay(laydef)   ;}
-         void              setState(layprop::PropertyState state)
-                                                         {        _drawprop->setState(state)       ;}
-         bool              layerHidden(const LayerDef& laydef) const
-                                                         {return _drawprop->layerHidden(laydef)    ;}
-         const CTM&        scrCTM() const                {return _drawprop->scrCtm()               ;}
-         word              visualLimit() const           {return _drawprop->visualLimit()          ;}
-         const DBbox&      clipRegion() const            {return _drawprop->clipRegion()           ;}
-         void              postCheckCRS(const laydata::TdtCellRef* ref)
-                                                         {        _drawprop->postCheckCRS(ref)     ;}
-         bool              preCheckCRS(const laydata::TdtCellRef*, layprop::CellRefChainType&);
-         void              initDrawRefStack(laydata::CellRefStack* crs)
-                                                         {       _drawprop->initDrawRefStack(crs)  ;}
-         void              clearDrawRefStack()           {       _drawprop->clearDrawRefStack()    ;}
-         bool              adjustTextOrientation() const {return _drawprop->adjustTextOrientation();}
+                           Tenderer( layprop::DrawProperties* drawprop, real UU );
+         virtual          ~Tenderer();
+         virtual void      grid( const real, const std::string );
+         virtual void      setLayer(const LayerDef&, bool);
+         virtual void      setGrcLayer(bool, const LayerDef&);
+         virtual bool      chunkExists(const LayerDef&, bool);
+         virtual bool      collect();
+         virtual bool      grcCollect();
+         virtual void      draw();
+         virtual void      grcDraw();
+         virtual void      cleanUp();
+         virtual void      grcCleanUp();
       private:
-         layprop::DrawProperties*   _drawprop;
-         real              _UU;
-         DataLay           _data;            //!All editable data for drawing
-         DataLay           _grcData;         //!All GRC      data for drawing
-         TenderLay*        _clayer;          //!Working variable pointing to the current edit slice
-         TenderLay*        _grcLayer;        //!Working variable pointing to the current GRC  slice
-         TenderRefLay      _refLayer;
-         CellStack         _cellStack;       //!Required during data traversing stage
-         unsigned          _cslctd_array_offset; //! Current selected array offset
-         //
          unsigned          _num_ogl_buffers; //! Number of generated openGL VBOs
          unsigned          _num_ogl_grc_buffers; //!
          GLuint*           _ogl_buffers;     //! Array with the "names" of all openGL buffers
          GLuint*           _ogl_grc_buffers; //! Array with the "names" of the GRC related openGL buffers
          GLuint            _sbuffer;         //! The "name" of the selected index buffer
-         TenderRef*        _activeCS;
-         byte              _dovCorrection;   //! Cell ref Depth of view correction (for Edit in Place purposes)
-         RefBoxList        _hiddenRefBoxes;  //! Those cRefBox objects which didn't ended in the TenderRefLay structures
    };
 
-   void checkOGLError(std::string);
 }
 
 #endif //TENDERER_H
