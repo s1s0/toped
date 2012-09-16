@@ -436,12 +436,12 @@ void laydata::TdtBox::openGlPrecalc(layprop::DrawProperties& drawprop , PointVec
    ptlist.push_back(TP(_pdata[p1x], _pdata[p2y]) * drawprop.topCtm());
 }
 
-void laydata::TdtBox::drawRequest(trend::Collect& rend) const
+void laydata::TdtBox::drawRequest(trend::TrendBase& rend) const
 {
    rend.box(&_pdata[0]);
 }
 
-void laydata::TdtBox::drawSRequest(trend::Collect& rend, const SGBitSet* pslist) const
+void laydata::TdtBox::drawSRequest(trend::TrendBase& rend, const SGBitSet* pslist) const
 {
    rend.box(&_pdata[0], pslist);
 }
@@ -774,12 +774,12 @@ void laydata::TdtPoly::openGlPrecalc(layprop::DrawProperties& drawprop, PointVec
    }
 }
 
-void laydata::TdtPoly::drawRequest(trend::Collect& rend) const
+void laydata::TdtPoly::drawRequest(trend::TrendBase& rend) const
 {
    rend.poly(_pdata, _psize, &_teseldata);
 }
 
-void laydata::TdtPoly::drawSRequest(trend::Collect& rend, const SGBitSet* pslist) const
+void laydata::TdtPoly::drawSRequest(trend::TrendBase& rend, const SGBitSet* pslist) const
 {
    rend.poly(_pdata, _psize, &_teseldata, pslist);
 }
@@ -1244,12 +1244,12 @@ void laydata::TdtWire::openGlPrecalc(layprop::DrawProperties& drawprop, PointVec
    }
 }
 
-void laydata::TdtWire::drawRequest(trend::Collect& rend) const
+void laydata::TdtWire::drawRequest(trend::TrendBase& rend) const
 {
    rend.wire(_pdata, _psize, _width);
 }
 
-void laydata::TdtWire::drawSRequest(trend::Collect& rend, const SGBitSet* pslist) const
+void laydata::TdtWire::drawSRequest(trend::TrendBase& rend, const SGBitSet* pslist) const
 {
    rend.wire(_pdata, _psize, _width, pslist);
 }
@@ -1668,7 +1668,7 @@ void laydata::TdtCellRef::openGlPrecalc(layprop::DrawProperties& drawprop, Point
    drawprop.drawReferenceMarks(TP(0,0) * newtrans, layprop::cell_mark);
 }
 
-void laydata::TdtCellRef::drawRequest(trend::Collect& rend) const
+void laydata::TdtCellRef::drawRequest(trend::TrendBase& rend) const
 {
    // get overlapping box of the structure ...
    DBbox obox(structure()->cellOverlap());
@@ -1698,7 +1698,7 @@ void laydata::TdtCellRef::vlOverlap(const layprop::DrawProperties& prop, DBbox& 
    vlOvl.overlap(strOverlap);
 }
 
-void laydata::TdtCellRef::drawSRequest(trend::Collect& rend, const SGBitSet*) const
+void laydata::TdtCellRef::drawSRequest(trend::TrendBase& rend, const SGBitSet*) const
 {
    // get overlapping box of the structure ...
    DBbox obox(structure()->cellOverlap());
@@ -1988,7 +1988,7 @@ void laydata::TdtCellAref::openGlPrecalc(layprop::DrawProperties& drawprop, Poin
    }
 }
 
-void laydata::TdtCellAref::drawRequest(trend::Collect& rend) const
+void laydata::TdtCellAref::drawRequest(trend::TrendBase& rend) const
 {
 
    // make sure that the referenced structure exists
@@ -2080,7 +2080,7 @@ void laydata::TdtCellAref::drawRequest(trend::Collect& rend) const
    }
 }
 
-void laydata::TdtCellAref::drawSRequest(trend::Collect& rend, const SGBitSet*) const
+void laydata::TdtCellAref::drawSRequest(trend::TrendBase& rend, const SGBitSet*) const
 {
    //@FIXME! array of cells selected! It will give confusing results in "edit in place"
    drawRequest(rend);
@@ -2323,7 +2323,7 @@ void laydata::TdtText::openGlPrecalc(layprop::DrawProperties& drawprop, PointVec
    }
 }
 
-void laydata::TdtText::drawRequest(trend::Collect& rend) const
+void laydata::TdtText::drawRequest(trend::TrendBase& rend) const
 {
    // font translation matrix
    CTM ftmtrx =  _translation * rend.topCTM();
@@ -2339,7 +2339,7 @@ void laydata::TdtText::drawRequest(trend::Collect& rend) const
       rend.text(&_text, _translation, _overlap, _correction, false);
 }
 
-void laydata::TdtText::drawSRequest(trend::Collect& rend, const SGBitSet*) const
+void laydata::TdtText::drawSRequest(trend::TrendBase& rend, const SGBitSet*) const
 {
    // font translation matrix
    CTM ftmtrx =  _translation * rend.topCTM();
@@ -2608,7 +2608,7 @@ void  laydata::TdtAuxRef::openGlPostClean(layprop::DrawProperties& drawprop, Poi
    ptlist.clear();
 }
 
-void  laydata::TdtAuxRef::drawRequest(trend::Collect& rend) const
+void  laydata::TdtAuxRef::drawRequest(trend::TrendBase& rend) const
 {
    // get overlapping box of the structure ...
    DBbox obox(_structure->cellOverlap());
@@ -2619,7 +2619,7 @@ void  laydata::TdtAuxRef::drawRequest(trend::Collect& rend) const
    _structure->openGlRender(rend, CTM(), false, false);
 }
 
-void  laydata::TdtAuxRef::drawSRequest(trend::Collect& rend, const SGBitSet*) const
+void  laydata::TdtAuxRef::drawSRequest(trend::TrendBase& rend, const SGBitSet*) const
 {
    // This object is not supposed to be selected.
    assert(false);
