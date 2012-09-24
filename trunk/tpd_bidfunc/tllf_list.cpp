@@ -49,13 +49,6 @@ NameList* tellstdfunc::lstLENGTH::callingConv(const telldata::typeMAP*)
    return argtypes;
 }
 
-std::string tellstdfunc::lstLENGTH::getHelp()
-{
-   std::string str("Returns the list length\n");
-   str += "int length( llst )";
-   return str;
-}
-
 int tellstdfunc::lstLENGTH::execute()
 {
    telldata::TtList* pl = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
@@ -127,13 +120,6 @@ NameList* tellstdfunc::stdABS::callingConv(const telldata::typeMAP*)
    argtypes->push_back("real");
    argtypes->push_back("real");
    return argtypes;
-}
-
-std::string tellstdfunc::stdABS::getHelp()
-{
-   std::string str("Returns the absolute value of the argument.\n");
-   str += "real abs ( real X )";
-   return str;
 }
 
 int tellstdfunc::stdABS::execute()

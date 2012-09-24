@@ -695,7 +695,6 @@ namespace  parsercmd {
       virtual int                execute() = 0;
       virtual void               undo() = 0;
       virtual void               undo_cleanup() = 0;
-      virtual std::string        getHelp() {return std::string("");};
       void                       reduce_undo_stack();
       virtual NameList*          callingConv(const telldata::typeMAP*);
       virtual int                argsOK(telldata::argumentQ* amap, bool&);
