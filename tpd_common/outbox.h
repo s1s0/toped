@@ -170,6 +170,16 @@ namespace console {
       void           cmdLineLog(wxLogLevel, const std::string&, time_t);
       wxEvtHandler*  _tellLOGW;
    };
+   //===========================================================================
+   class HelpObject
+   {
+   public:
+      HelpObject(const wxString &helpFile);
+      wxString    getHelp(const wxString &funcName);
+   private:
+      typedef std::map<wxString, wxString> HelpItems;
+      HelpItems   _helpItems;
+   };
 
    //===========================================================================
    class TELLFuncList : public wxListView
@@ -180,16 +190,16 @@ namespace console {
                       const wxSize& size = wxDefaultSize,
                       long style = wxLC_REPORT | wxLC_HRULES  | wxLC_SINGLE_SEL);
          virtual             ~TELLFuncList();
-         void                 addFunc(wxString, wxClientData*, void*);
+         void                 addFunc(wxString, void*);
+         void                 setHelpObject(HelpObject *helpObject) {_helpObject = helpObject;};
          void                 OnCommand(wxCommandEvent&);
          void                 onMouseMove(wxMouseEvent&);
          void                 onLMouseDblClk(wxMouseEvent&);
          std::string          getItemFunc(TmpWxIntPtr item1);
       protected:
          typedef std::map<TmpWxIntPtr, std::string> FuncItems;
-         typedef std::map<wxString, wxString> HelpItems;
          FuncItems    _funcItems;
-         HelpItems    _helpItems;
+         HelpObject*  _helpObject;
          DECLARE_EVENT_TABLE();
    };
 
@@ -255,7 +265,7 @@ class TpdPost {
       static void treeRenameMember(const char*, const char*);
       static void treeMarkGrcMember(const char*, bool);
       static void parseCommand(const wxString);
-      static void tellFnAdd(const std::string, const std::string, void*);
+      static void tellFnAdd(const std::string, void*);
       static void tellFnSort();
       static void reloadTellFuncs();
       static void execExt(const wxString);

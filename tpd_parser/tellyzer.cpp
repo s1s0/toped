@@ -2333,7 +2333,7 @@ int parsercmd::cmdMAIN::execute()
 void parsercmd::cmdMAIN::addFUNC(std::string fname , cmdSTDFUNC* cQ)
 {
    _funcMAP.insert(std::make_pair(fname,cQ));
-   TpdPost::tellFnAdd(fname, cQ->getHelp(), cQ->callingConv(NULL));
+   TpdPost::tellFnAdd(fname, cQ->callingConv(NULL));
 }
 
 void parsercmd::cmdMAIN::addIntFUNC(std::string fname , cmdSTDFUNC* cQ)
@@ -2360,7 +2360,7 @@ void parsercmd::cmdMAIN::addUSERFUNC(FuncDeclaration* decl, cmdFUNC* cQ, TpdYYLt
       {// pour over the definition contents in the body created by the declaration
          cQ->copyContents(declfunc);
          declfunc->setDefined();
-         TpdPost::tellFnAdd(decl->name(), cQ->getHelp(), cQ->callingConv(&_typeLocal));
+         TpdPost::tellFnAdd(decl->name(), cQ->callingConv(&_typeLocal));
          TpdPost::tellFnSort();
       }
       else

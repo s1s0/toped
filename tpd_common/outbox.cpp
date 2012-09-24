@@ -33,6 +33,9 @@
 #include <wx/string.h>
 #include <wx/regex.h>
 #include <wx/filename.h>
+#include <wx/wfstream.h>
+#include <wx/txtstrm.h>
+
 #include "outbox.h"
 #include "tuidefs.h"
 #include "../ui/red_lamp.xpm"
@@ -708,14 +711,12 @@ void TpdPost::parseCommand(const wxString cmd)
    wxPostEvent(_mainWindow, eventPARSE);
 }
 
-void TpdPost::tellFnAdd(const std::string name, const std::string help, void* arguments)
+void TpdPost::tellFnAdd(const std::string name, void* arguments)
 {
    wxCommandEvent eventFUNCTION_ADD(wxEVT_FUNC_BROWSER);
    eventFUNCTION_ADD.SetString(wxString(name.c_str(), wxConvUTF8));
    eventFUNCTION_ADD.SetClientData(arguments);
    eventFUNCTION_ADD.SetInt(console::FT_FUNCTION_ADD);
-   wxStringClientData *helpString = DEBUG_NEW wxStringClientData(wxString(help.c_str(), wxConvUTF8));
-   eventFUNCTION_ADD.SetClientObject(helpString);
    wxPostEvent(_tllFuncList, eventFUNCTION_ADD);
 }
 
@@ -789,6 +790,47 @@ int wxCALLBACK wxListCompareFunction(TmpWxIntPtr item1, TmpWxIntPtr item2, TmpWx
    return s1.compare(s2);
 }
 
+console::HelpObject::HelpObject(const wxString &helpFile)
+{
+   wxInputStream* fstream = DEBUG_NEW wxFFileInputStream(helpFile);
+   if(!fstream || !fstream->IsOk())
+   {
+      wxString errMessage(wxT("Can't open "));
+      errMessage += helpFile + wxT("\n");
+      wxMessageBox(errMessage);
+      delete fstream;
+      return;
+   }
+   wxTextInputStream inFile(*fstream);
+   wxString funcName, funcHelp;
+   while (!fstream->Eof())
+   {
+      funcName = inFile.ReadWord();
+      funcHelp = inFile.ReadLine();
+      if (_helpItems.end()!= _helpItems.find(funcName))
+      {
+         //if help for function already exists 
+         wxString errMessage(wxT("Help for function\n"));
+         errMessage += funcName + wxT("\n");
+         errMessage += wxT("already exists");
+         wxMessageBox(errMessage);
+      }
+      else
+      {
+         //Remove tabs and \n
+         funcHelp.Replace(wxT("\\n"), wxT("\n"));
+         funcHelp.Replace(wxT("\t"), wxT(""));
+         _helpItems[funcName] = funcHelp;
+      }
+   }
+   delete fstream;
+}
+
+wxString console::HelpObject::getHelp(const wxString &funcName)
+{
+   return _helpItems[funcName];
+}
+
 BEGIN_EVENT_TABLE( console::TELLFuncList, wxListCtrl )
    EVT_TECUSTOM_COMMAND(wxEVT_FUNC_BROWSER, -1, TELLFuncList::OnCommand)
    EVT_MOTION(TELLFuncList::onMouseMove)
@@ -811,12 +853,11 @@ console::TELLFuncList::TELLFuncList(wxWindow *parent, wxWindowID id,
 console::TELLFuncList::~TELLFuncList()
 {
    DeleteAllItems();
+   if (_helpObject != NULL) delete _helpObject;
 }
 
-void console::TELLFuncList::addFunc(wxString name, wxClientData* helpObject, void* arguments)
+void console::TELLFuncList::addFunc(wxString name, void* arguments)
 {
-   wxString helpString = static_cast<wxStringClientData*>(helpObject)->GetData();
-   delete helpObject;
    NameList* arglist = static_cast<NameList*>(arguments);
    wxListItem row;
    int curItemNum = GetItemCount();
@@ -835,7 +876,15 @@ void console::TELLFuncList::addFunc(wxString name, wxClientData* helpObject, voi
    SetColumnWidth(1, wxLIST_AUTOSIZE);
    //
    _funcItems[(TmpWxIntPtr)curItemNum] = name.mb_str(wxConvUTF8);
-   _helpItems[name] = helpString;
+   if((_helpObject->getHelp(name)).IsEmpty())
+   {
+      //if help for function already exists 
+      /*wxString errMessage(wxT("Help for function "));
+      errMessage += name;
+      errMessage += wxT(" doesn't exist.\n");
+      errMessage += wxT("Add description to file $TPD_GLOBAL\\funchelp.txt");
+      wxMessageBox(errMessage);*/
+   }
    //
    wxString strlist(wxT("( "));
    while (!arglist->empty())
@@ -865,7 +914,7 @@ void console::TELLFuncList::OnCommand(wxCommandEvent& event)
    int command = event.GetInt();
    switch (command)
    {
-      case console::FT_FUNCTION_ADD:addFunc(event.GetString(), event.GetClientObject(), event.GetClientData()); break;
+      case console::FT_FUNCTION_ADD:addFunc(event.GetString(), event.GetClientData()); break;
       case console::FT_FUNCTION_SORT:SortItems(wxListCompareFunction,0); break;
       default: assert(false); break;
    }
@@ -884,7 +933,7 @@ void console::TELLFuncList::onMouseMove(wxMouseEvent& event)
       if (GetItem(row))
       {
          wxString funcName = row.GetText();
-         wxString toolTip = _helpItems[funcName];
+         wxString toolTip = _helpObject->getHelp(funcName);
          SetToolTip(toolTip);
       }
       else
