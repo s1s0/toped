@@ -41,14 +41,14 @@ namespace trend {
          virtual void      draw(layprop::DrawProperties*);
          virtual void      drawTexts(layprop::DrawProperties*);
       private:
-         void              collectIndexs(unsigned int*, const TeselChain*, unsigned*, unsigned*, unsigned);
-         GLsizei*          _sizesvx[4]; //! arrays of sizes for vertex sets
-         GLsizei*          _firstvx[4]; //! arrays of first vertexes
-         GLsizei*          _sizesix[4]; //! arrays of sizes for indexes sets
-         GLuint*           _firstix[4]; //! arrays of first indexes
+//         void              collectIndexs(unsigned int*, const TeselChain*, unsigned*, unsigned*, unsigned);
+//         GLsizei*          _sizesvx[4]; //! arrays of sizes for vertex sets
+//         GLsizei*          _firstvx[4]; //! arrays of first vertexes
+//         GLsizei*          _sizesix[4]; //! arrays of sizes for indexes sets
+//         GLuint*           _firstix[4]; //! arrays of first indexes
 //         // offsets in the VBO
-         unsigned          _point_array_offset; //! The offset of this chunk of vertex data in the vertex VBO
-         unsigned          _index_array_offset; //! The offset of this chunk of index  data in the index  VBO
+//         unsigned          _point_array_offset; //! The offset of this chunk of vertex data in the vertex VBO
+//         unsigned          _index_array_offset; //! The offset of this chunk of index  data in the index  VBO
    };
 
    class TolderReTV : public TrendReTV {
@@ -76,8 +76,8 @@ namespace trend {
          TNDR_GLDATAT*     _cpoint_array;
          unsigned int*     _cindex_array;
 //         // index related data for selected objects
-         GLsizei*          _sizslix[3]; //! arrays of sizes for indexes sets of selected objects
-         GLuint*           _fstslix[3]; //! arrays of first indexes for selected objects
+//         GLsizei*          _sizslix[3]; //! arrays of sizes for indexes sets of selected objects
+//         GLuint*           _fstslix[3]; //! arrays of first indexes for selected objects
 //         // offsets in the buffer
          unsigned          _stv_array_offset; //! first point in the TolderTV with selected objects in this layer
          unsigned          _slctd_array_offset; //! first point in the VBO with selected indexes

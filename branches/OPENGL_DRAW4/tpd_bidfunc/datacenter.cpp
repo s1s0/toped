@@ -737,15 +737,16 @@ void DataCenter::mouseRotate()
 
 void DataCenter::render(const CTM& layCTM)
 {
+   openGlRender(layCTM);
    //TODO code below is temporary
-   switch (TRENDC->renderType())
-   {
-      case trend::tocom    : assert(false);          break;// shouldn't end-up here ever
-      case trend::tolder   : openGlDraw(layCTM);     break;// basic (i.e. openGL 1.1)
-      case trend::tenderer : openGlRender(layCTM);   break;// VBO
-      case trend::toshader : assert(false);          break;//TODO
-      default: assert(false); break;
-   }
+//   switch (TRENDC->renderType())
+//   {
+//      case trend::tocom    : assert(false);          break;// shouldn't end-up here ever
+//      case trend::tolder   : openGlDraw(layCTM);     break;// basic (i.e. openGL 1.1)
+//      case trend::tenderer : openGlRender(layCTM);   break;// VBO
+//      case trend::toshader : assert(false);          break;//TODO
+//      default: assert(false); break;
+//   }
 }
 
 void DataCenter::mouseHoover(TP& position)
