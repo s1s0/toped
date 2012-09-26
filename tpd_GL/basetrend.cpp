@@ -185,6 +185,19 @@ unsigned trend::TrendCnvx::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
    return _csize;
 }
 
+void trend::TrendCnvx::drctDrawContour()
+{
+   glBegin(GL_LINE_LOOP);
+   for (unsigned i = 0; i < _csize; i++)
+      glVertex2i(_cdata[2*i], _cdata[2*i+1]);
+   glEnd();
+
+}
+
+void trend::TrendCnvx::drctDrawFill()
+{
+}
+
 //=============================================================================
 //
 // TrendBox
@@ -199,6 +212,26 @@ unsigned  trend::TrendBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
    return _csize;
 }
 
+void trend::TrendBox::drctDrawContour()
+{
+   glBegin(GL_LINE_LOOP);
+      glVertex2i(_cdata[0], _cdata[1]);
+      glVertex2i(_cdata[2], _cdata[1]);
+      glVertex2i(_cdata[2], _cdata[3]);
+      glVertex2i(_cdata[0], _cdata[3]);
+   glEnd();
+}
+
+void trend::TrendBox::drctDrawFill()
+{
+   glBegin(GL_POLYGON);
+      glVertex2i(_cdata[0], _cdata[1]);
+      glVertex2i(_cdata[2], _cdata[1]);
+      glVertex2i(_cdata[2], _cdata[3]);
+      glVertex2i(_cdata[0], _cdata[3]);
+   glEnd();
+
+}
 //=============================================================================
 //
 // TrendWire

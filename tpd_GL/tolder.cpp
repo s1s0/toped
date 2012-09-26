@@ -34,189 +34,190 @@
 
 trend::TolderTV::TolderTV(TrendRef* const refCell, bool filled, bool reusable,
                    unsigned parray_offset, unsigned iarray_offset) :
-   TrendTV              (refCell, filled, reusable, parray_offset, iarray_offset),
-   _point_array_offset  ( parray_offset   ),
-   _index_array_offset  ( iarray_offset   )
+   TrendTV              (refCell, filled, reusable, parray_offset, iarray_offset)
+//   _point_array_offset  ( parray_offset   ),
+//   _index_array_offset  ( iarray_offset   )
 {
-   for (int i = fqss; i <= ftss; i++)
-   {
-      _sizesix[i] = NULL;
-      _firstix[i] = NULL;
-   }
-   for (int i = cont; i <= ncvx; i++)
-   {
-      _sizesvx[i] = NULL;
-      _firstvx[i] = NULL;
-   }
-
+//   for (int i = fqss; i <= ftss; i++)
+//   {
+//      _sizesix[i] = NULL;
+//      _firstix[i] = NULL;
+//   }
+//   for (int i = cont; i <= ncvx; i++)
+//   {
+//      _sizesvx[i] = NULL;
+//      _firstvx[i] = NULL;
+//   }
+//
 }
 
-void trend::TolderTV::collectIndexs(unsigned int* index_array, const TeselChain* tdata, unsigned* size_index,
-                             unsigned* index_offset, unsigned cpoint_index)
-{
-   for (TeselChain::const_iterator TCH = tdata->begin(); TCH != tdata->end(); TCH++)
-   {
-      switch (TCH->type())
-      {
-         case GL_QUAD_STRIP     :
-         {
-            assert(_sizesix[fqss]);
-            _firstix[fqss][size_index[fqss]  ] = /*sizeof(unsigned) * */index_offset[fqss];
-            _sizesix[fqss][size_index[fqss]++] = TCH->size();
-            for (unsigned i = 0; i < TCH->size(); i++)
-               index_array[index_offset[fqss]++] = TCH->index_seq()[i] + cpoint_index;
-            break;
-         }
-         case GL_TRIANGLES      :
-         {
-            assert(_sizesix[ftrs]);
-            _firstix[ftrs][size_index[ftrs]  ] = /*sizeof(unsigned) * */index_offset[ftrs];
-            _sizesix[ftrs][size_index[ftrs]++] = TCH->size();
-            for (unsigned i = 0; i < TCH->size(); i++)
-               index_array[index_offset[ftrs]++] = TCH->index_seq()[i] + cpoint_index;
-            break;
-         }
-         case GL_TRIANGLE_FAN   :
-         {
-            assert(_sizesix[ftfs]);
-            _firstix[ftfs][size_index[ftfs]  ] = /*sizeof(unsigned) * */index_offset[ftfs];
-            _sizesix[ftfs][size_index[ftfs]++] = TCH->size();
-            for (unsigned i = 0; i < TCH->size(); i++)
-               index_array[index_offset[ftfs]++] = TCH->index_seq()[i] + cpoint_index;
-            break;
-         }
-         case GL_TRIANGLE_STRIP :
-         {
-            assert(_sizesix[ftss]);
-            _firstix[ftss][size_index[ftss]  ] = /*sizeof(unsigned) * */index_offset[ftss];
-            _sizesix[ftss][size_index[ftss]++] = TCH->size();
-            for (unsigned i = 0; i < TCH->size(); i++)
-               index_array[index_offset[ftss]++] = TCH->index_seq()[i] + cpoint_index;
-            break;
-         }
-         default: assert(0);break;
-      }
-   }
-}
+//void trend::TolderTV::collectIndexs(unsigned int* index_array, const TeselChain* tdata, unsigned* size_index,
+//                             unsigned* index_offset, unsigned cpoint_index)
+//{
+//   for (TeselChain::const_iterator TCH = tdata->begin(); TCH != tdata->end(); TCH++)
+//   {
+//      switch (TCH->type())
+//      {
+//         case GL_QUAD_STRIP     :
+//         {
+//            assert(_sizesix[fqss]);
+//            _firstix[fqss][size_index[fqss]  ] = /*sizeof(unsigned) * */index_offset[fqss];
+//            _sizesix[fqss][size_index[fqss]++] = TCH->size();
+//            for (unsigned i = 0; i < TCH->size(); i++)
+//               index_array[index_offset[fqss]++] = TCH->index_seq()[i] + cpoint_index;
+//            break;
+//         }
+//         case GL_TRIANGLES      :
+//         {
+//            assert(_sizesix[ftrs]);
+//            _firstix[ftrs][size_index[ftrs]  ] = /*sizeof(unsigned) * */index_offset[ftrs];
+//            _sizesix[ftrs][size_index[ftrs]++] = TCH->size();
+//            for (unsigned i = 0; i < TCH->size(); i++)
+//               index_array[index_offset[ftrs]++] = TCH->index_seq()[i] + cpoint_index;
+//            break;
+//         }
+//         case GL_TRIANGLE_FAN   :
+//         {
+//            assert(_sizesix[ftfs]);
+//            _firstix[ftfs][size_index[ftfs]  ] = /*sizeof(unsigned) * */index_offset[ftfs];
+//            _sizesix[ftfs][size_index[ftfs]++] = TCH->size();
+//            for (unsigned i = 0; i < TCH->size(); i++)
+//               index_array[index_offset[ftfs]++] = TCH->index_seq()[i] + cpoint_index;
+//            break;
+//         }
+//         case GL_TRIANGLE_STRIP :
+//         {
+//            assert(_sizesix[ftss]);
+//            _firstix[ftss][size_index[ftss]  ] = /*sizeof(unsigned) * */index_offset[ftss];
+//            _sizesix[ftss][size_index[ftss]++] = TCH->size();
+//            for (unsigned i = 0; i < TCH->size(); i++)
+//               index_array[index_offset[ftss]++] = TCH->index_seq()[i] + cpoint_index;
+//            break;
+//         }
+//         default: assert(0);break;
+//      }
+//   }
+//}
 
 void trend::TolderTV::collect(TNDR_GLDATAT* point_array, unsigned int* index_array)
 {
-   unsigned line_arr_size = 2 * _alvrtxs[line];
-   unsigned fqus_arr_size = 2 * _alvrtxs[cnvx];
-   unsigned cont_arr_size = 2 * _alvrtxs[cont];
-   unsigned poly_arr_size = 2 * _alvrtxs[ncvx];
-   // initialise the indexing
-   unsigned pntindx = 0;
-
-   if  (_alobjvx[line] > 0)
-   {// collect all central lines of the wires
-      unsigned  szindx  = 0;
-      _firstvx[line] = DEBUG_NEW int[_alobjvx[line]];
-      _sizesvx[line] = DEBUG_NEW int[_alobjvx[line]];
-      for (SliceWires::const_iterator CSH = _line_data.begin(); CSH != _line_data.end(); CSH++)
-      { // shapes in the current translation (layer within the cell)
-         _firstvx[line][szindx  ] = pntindx/2;
-         _sizesvx[line][szindx++] = (*CSH)->lDataCopy(&(point_array[_point_array_offset]), pntindx);
-      }
-      assert(pntindx == line_arr_size);
-      assert(szindx  == _alobjvx[line]);
-   }
-
-   if  (_alobjvx[cnvx] > 0)
-   {// collect all convex polygons
-      unsigned  szindx  = 0;
-      _firstvx[cnvx] = DEBUG_NEW int[_alobjvx[cnvx]];
-      _sizesvx[cnvx] = DEBUG_NEW int[_alobjvx[cnvx]];
-      for (SliceObjects::const_iterator CSH = _cnvx_data.begin(); CSH != _cnvx_data.end(); CSH++)
-      { // shapes in the current translation (layer within the cell)
-         _firstvx[cnvx][szindx  ] = pntindx/2;
-         _sizesvx[cnvx][szindx++] = (*CSH)->cDataCopy(&(point_array[_point_array_offset]), pntindx);
-      }
-      assert(pntindx == line_arr_size + fqus_arr_size);
-      assert(szindx  == _alobjvx[cnvx]);
-   }
-
-   if  (_alobjvx[ncvx] > 0)
-   {// collect all non-convex polygons
-      unsigned  szindx  = 0;
-      _firstvx[ncvx] = DEBUG_NEW int[_alobjvx[ncvx]];
-      _sizesvx[ncvx] = DEBUG_NEW int[_alobjvx[ncvx]];
-      if (NULL != index_array)
-      {
-         assert(_alobjix[fqss] + _alobjix[ftrs] + _alobjix[ftfs] + _alobjix[ftss]);
-         if (0 < _alobjix[fqss])
-         {
-            _sizesix[fqss] = DEBUG_NEW GLsizei[_alobjix[fqss]];
-            _firstix[fqss] = DEBUG_NEW GLuint[_alobjix[fqss]];
-         }
-         if (0 < _alobjix[ftrs])
-         {
-            _sizesix[ftrs] = DEBUG_NEW GLsizei[_alobjix[ftrs]];
-            _firstix[ftrs] = DEBUG_NEW GLuint[_alobjix[ftrs]];
-         }
-         if (0 < _alobjix[ftfs])
-         {
-            _sizesix[ftfs] = DEBUG_NEW GLsizei[_alobjix[ftfs]];
-            _firstix[ftfs] = DEBUG_NEW GLuint[_alobjix[ftfs]];
-         }
-         if (0 < _alobjix[ftss])
-         {
-            _sizesix[ftss] = DEBUG_NEW GLsizei[_alobjix[ftss]];
-            _firstix[ftss] = DEBUG_NEW GLuint[_alobjix[ftss]];
-         }
-      }
-      unsigned size_index[4];
-      unsigned index_offset[4];
-      size_index[fqss] = size_index[ftrs] = size_index[ftfs] = size_index[ftss] = 0u;
-      index_offset[fqss] = _index_array_offset;
-      index_offset[ftrs] = index_offset[fqss] + _alindxs[fqss];
-      index_offset[ftfs] = index_offset[ftrs] + _alindxs[ftrs];
-      index_offset[ftss] = index_offset[ftfs] + _alindxs[ftfs];
-      for (SlicePolygons::const_iterator CSH = _ncvx_data.begin(); CSH != _ncvx_data.end(); CSH++)
-      { // shapes in the current translation (layer within the cell)
-
-         if (NULL != (*CSH)->tdata())
-            collectIndexs( index_array     ,
-                          (*CSH)->tdata()  ,
-                           size_index      ,
-                           index_offset    ,
-                           pntindx/2
-                         );
-         _firstvx[ncvx][szindx  ] = pntindx/2;
-         _sizesvx[ncvx][szindx++] = (*CSH)->cDataCopy(&(point_array[_point_array_offset]), pntindx);
-
-      }
-      assert(size_index[fqss] == _alobjix[fqss]);
-      assert(size_index[ftrs] == _alobjix[ftrs]);
-      assert(size_index[ftfs] == _alobjix[ftfs]);
-      assert(size_index[ftss] == _alobjix[ftss]);
-      assert(index_offset[fqss] == (_index_array_offset + _alindxs[fqss]));
-      assert(index_offset[ftrs] == (_index_array_offset + _alindxs[fqss] + _alindxs[ftrs]));
-      assert(index_offset[ftfs] == (_index_array_offset + _alindxs[fqss] + _alindxs[ftrs] + _alindxs[ftfs] ));
-      assert(index_offset[ftss] == (_index_array_offset + _alindxs[fqss] + _alindxs[ftrs] + _alindxs[ftfs] + _alindxs[ftss] ));
-      assert(pntindx == line_arr_size + fqus_arr_size + poly_arr_size);
-      assert(szindx  == _alobjvx[ncvx]);
-   }
-
-   if  (_alobjvx[cont] > 0)
-   {// collect all contours (only non-filled objects here)
-      unsigned  szindx  = 0;
-      _firstvx[cont] = DEBUG_NEW int[_alobjvx[cont]];
-      _sizesvx[cont] = DEBUG_NEW int[_alobjvx[cont]];
-      for (SliceObjects::const_iterator CSH = _cont_data.begin(); CSH != _cont_data.end(); CSH++)
-      { // shapes in the current translation (layer within the cell)
-         _firstvx[cont][szindx  ] = pntindx/2;
-         _sizesvx[cont][szindx++] = (*CSH)->cDataCopy(&(point_array[_point_array_offset]), pntindx);
-      }
-      //... and text overlapping boxes
-      for (RefTxtList::const_iterator CSH = _txto_data.begin(); CSH != _txto_data.end(); CSH++)
-      { // shapes in the current translation (layer within the cell)
-         _firstvx[cont][szindx  ] = pntindx/2;
-         _sizesvx[cont][szindx++] = (*CSH)->cDataCopy(&(point_array[_point_array_offset]), pntindx);
-      }
-      assert(pntindx == line_arr_size + fqus_arr_size + cont_arr_size + poly_arr_size);
-      assert(szindx  == _alobjvx[cont] );
-   }
+   assert(false);
+//   unsigned line_arr_size = 2 * _alvrtxs[line];
+//   unsigned fqus_arr_size = 2 * _alvrtxs[cnvx];
+//   unsigned cont_arr_size = 2 * _alvrtxs[cont];
+//   unsigned poly_arr_size = 2 * _alvrtxs[ncvx];
+//   // initialise the indexing
+//   unsigned pntindx = 0;
+//
+//   if  (_alobjvx[line] > 0)
+//   {// collect all central lines of the wires
+//      unsigned  szindx  = 0;
+//      _firstvx[line] = DEBUG_NEW int[_alobjvx[line]];
+//      _sizesvx[line] = DEBUG_NEW int[_alobjvx[line]];
+//      for (SliceWires::const_iterator CSH = _line_data.begin(); CSH != _line_data.end(); CSH++)
+//      { // shapes in the current translation (layer within the cell)
+//         _firstvx[line][szindx  ] = pntindx/2;
+//         _sizesvx[line][szindx++] = (*CSH)->lDataCopy(&(point_array[_point_array_offset]), pntindx);
+//      }
+//      assert(pntindx == line_arr_size);
+//      assert(szindx  == _alobjvx[line]);
+//   }
+//
+//   if  (_alobjvx[cnvx] > 0)
+//   {// collect all convex polygons
+//      unsigned  szindx  = 0;
+//      _firstvx[cnvx] = DEBUG_NEW int[_alobjvx[cnvx]];
+//      _sizesvx[cnvx] = DEBUG_NEW int[_alobjvx[cnvx]];
+//      for (SliceObjects::const_iterator CSH = _cnvx_data.begin(); CSH != _cnvx_data.end(); CSH++)
+//      { // shapes in the current translation (layer within the cell)
+//         _firstvx[cnvx][szindx  ] = pntindx/2;
+//         _sizesvx[cnvx][szindx++] = (*CSH)->cDataCopy(&(point_array[_point_array_offset]), pntindx);
+//      }
+//      assert(pntindx == line_arr_size + fqus_arr_size);
+//      assert(szindx  == _alobjvx[cnvx]);
+//   }
+//
+//   if  (_alobjvx[ncvx] > 0)
+//   {// collect all non-convex polygons
+//      unsigned  szindx  = 0;
+//      _firstvx[ncvx] = DEBUG_NEW int[_alobjvx[ncvx]];
+//      _sizesvx[ncvx] = DEBUG_NEW int[_alobjvx[ncvx]];
+//      if (NULL != index_array)
+//      {
+//         assert(_alobjix[fqss] + _alobjix[ftrs] + _alobjix[ftfs] + _alobjix[ftss]);
+//         if (0 < _alobjix[fqss])
+//         {
+//            _sizesix[fqss] = DEBUG_NEW GLsizei[_alobjix[fqss]];
+//            _firstix[fqss] = DEBUG_NEW GLuint[_alobjix[fqss]];
+//         }
+//         if (0 < _alobjix[ftrs])
+//         {
+//            _sizesix[ftrs] = DEBUG_NEW GLsizei[_alobjix[ftrs]];
+//            _firstix[ftrs] = DEBUG_NEW GLuint[_alobjix[ftrs]];
+//         }
+//         if (0 < _alobjix[ftfs])
+//         {
+//            _sizesix[ftfs] = DEBUG_NEW GLsizei[_alobjix[ftfs]];
+//            _firstix[ftfs] = DEBUG_NEW GLuint[_alobjix[ftfs]];
+//         }
+//         if (0 < _alobjix[ftss])
+//         {
+//            _sizesix[ftss] = DEBUG_NEW GLsizei[_alobjix[ftss]];
+//            _firstix[ftss] = DEBUG_NEW GLuint[_alobjix[ftss]];
+//         }
+//      }
+//      unsigned size_index[4];
+//      unsigned index_offset[4];
+//      size_index[fqss] = size_index[ftrs] = size_index[ftfs] = size_index[ftss] = 0u;
+//      index_offset[fqss] = _index_array_offset;
+//      index_offset[ftrs] = index_offset[fqss] + _alindxs[fqss];
+//      index_offset[ftfs] = index_offset[ftrs] + _alindxs[ftrs];
+//      index_offset[ftss] = index_offset[ftfs] + _alindxs[ftfs];
+//      for (SlicePolygons::const_iterator CSH = _ncvx_data.begin(); CSH != _ncvx_data.end(); CSH++)
+//      { // shapes in the current translation (layer within the cell)
+//
+//         if (NULL != (*CSH)->tdata())
+//            collectIndexs( index_array     ,
+//                          (*CSH)->tdata()  ,
+//                           size_index      ,
+//                           index_offset    ,
+//                           pntindx/2
+//                         );
+//         _firstvx[ncvx][szindx  ] = pntindx/2;
+//         _sizesvx[ncvx][szindx++] = (*CSH)->cDataCopy(&(point_array[_point_array_offset]), pntindx);
+//
+//      }
+//      assert(size_index[fqss] == _alobjix[fqss]);
+//      assert(size_index[ftrs] == _alobjix[ftrs]);
+//      assert(size_index[ftfs] == _alobjix[ftfs]);
+//      assert(size_index[ftss] == _alobjix[ftss]);
+//      assert(index_offset[fqss] == (_index_array_offset + _alindxs[fqss]));
+//      assert(index_offset[ftrs] == (_index_array_offset + _alindxs[fqss] + _alindxs[ftrs]));
+//      assert(index_offset[ftfs] == (_index_array_offset + _alindxs[fqss] + _alindxs[ftrs] + _alindxs[ftfs] ));
+//      assert(index_offset[ftss] == (_index_array_offset + _alindxs[fqss] + _alindxs[ftrs] + _alindxs[ftfs] + _alindxs[ftss] ));
+//      assert(pntindx == line_arr_size + fqus_arr_size + poly_arr_size);
+//      assert(szindx  == _alobjvx[ncvx]);
+//   }
+//
+//   if  (_alobjvx[cont] > 0)
+//   {// collect all contours (only non-filled objects here)
+//      unsigned  szindx  = 0;
+//      _firstvx[cont] = DEBUG_NEW int[_alobjvx[cont]];
+//      _sizesvx[cont] = DEBUG_NEW int[_alobjvx[cont]];
+//      for (SliceObjects::const_iterator CSH = _cont_data.begin(); CSH != _cont_data.end(); CSH++)
+//      { // shapes in the current translation (layer within the cell)
+//         _firstvx[cont][szindx  ] = pntindx/2;
+//         _sizesvx[cont][szindx++] = (*CSH)->cDataCopy(&(point_array[_point_array_offset]), pntindx);
+//      }
+//      //... and text overlapping boxes
+//      for (RefTxtList::const_iterator CSH = _txto_data.begin(); CSH != _txto_data.end(); CSH++)
+//      { // shapes in the current translation (layer within the cell)
+//         _firstvx[cont][szindx  ] = pntindx/2;
+//         _sizesvx[cont][szindx++] = (*CSH)->cDataCopy(&(point_array[_point_array_offset]), pntindx);
+//      }
+//      assert(pntindx == line_arr_size + fqus_arr_size + cont_arr_size + poly_arr_size);
+//      assert(szindx  == _alobjvx[cont] );
+//   }
 }
 
 void trend::TolderTV::draw(layprop::DrawProperties* drawprop)
@@ -225,37 +226,26 @@ void trend::TolderTV::draw(layprop::DrawProperties* drawprop)
    glPushMatrix();
    glMultMatrixd(_refCell->translation());
    drawprop->adjustAlpha(_refCell->alphaDepth() - 1);
-//   // Switch the vertex buffers ON in the openGL engine ...
-//   glEnableClientState(GL_VERTEX_ARRAY);
-//   // Set-up the offset in the binded Vertex buffer
-//   glVertexPointer(2, TNDR_GLENUMT, 0, (GLvoid*)(sizeof(TNDR_GLDATAT) * _point_array_offset));
    // ... and here we go ...
    if  (_alobjvx[line] > 0)
    {// Draw the wire centre lines
-      assert(_firstvx[line]);
-      assert(_sizesvx[line]);
       //TODO
 //      glMultiDrawArrays(GL_LINE_STRIP, _firstvx[line], _sizesvx[line], _alobjvx[line]);
    }
    if  (_alobjvx[cnvx] > 0)
    {// Draw convex polygons
-      assert(_firstvx[cnvx]);
-      assert(_sizesvx[cnvx]);
       //TODO
-//      glMultiDrawArrays(GL_LINE_LOOP, _firstvx[cnvx], _sizesvx[cnvx], _alobjvx[cnvx]);
-//      glMultiDrawArrays(GL_QUADS, _firstvx[cnvx], _sizesvx[cnvx], _alobjvx[cnvx]);
+      unsigned  szindx  = 0;
+      for (SliceObjects::const_iterator CSH = _cnvx_data.begin(); CSH != _cnvx_data.end(); CSH++)
+      {
+         (*CSH)->drctDrawContour();
+         (*CSH)->drctDrawFill();
+      }
    }
    if  (_alobjvx[ncvx] > 0)
    {// Draw non-convex polygons
-//      glEnableClientState(GL_INDEX_ARRAY);
-      assert(_firstvx[ncvx]);
-      assert(_sizesvx[ncvx]);
-      //TODO
-//      glMultiDrawArrays(GL_LINE_LOOP, _firstvx[ncvx], _sizesvx[ncvx], _alobjvx[ncvx]);
       if (_alobjix[fqss] > 0)
       {
-         assert(_sizesix[fqss]);
-         assert(_firstix[fqss]);
          for (unsigned i= 0; i < _alobjix[fqss]; i++)
          {
             //TODO
@@ -264,8 +254,6 @@ void trend::TolderTV::draw(layprop::DrawProperties* drawprop)
       }
       if (_alobjix[ftrs] > 0)
       {
-         assert(_sizesix[ftrs]);
-         assert(_firstix[ftrs]);
          for (unsigned i= 0; i < _alobjix[ftrs]; i++)
          {
             //TODO
@@ -274,8 +262,6 @@ void trend::TolderTV::draw(layprop::DrawProperties* drawprop)
       }
       if (_alobjix[ftfs] > 0)
       {
-         assert(_sizesix[ftfs]);
-         assert(_firstix[ftfs]);
          for (unsigned i= 0; i < _alobjix[ftfs]; i++)
          {
             //TODO
@@ -284,8 +270,6 @@ void trend::TolderTV::draw(layprop::DrawProperties* drawprop)
       }
       if (_alobjix[ftss] > 0)
       {
-         assert(_sizesix[ftss]);
-         assert(_firstix[ftss]);
          for (unsigned i= 0; i < _alobjix[ftss]; i++)
          {
             //TODO
@@ -296,16 +280,10 @@ void trend::TolderTV::draw(layprop::DrawProperties* drawprop)
    }
    if (_alobjvx[cont] > 0)
    {// Draw the remaining non-filled shapes of any kind
-      assert(_firstvx[cont]);
-      assert(_sizesvx[cont]);
       // TODO
 //      glMultiDrawArrays(GL_LINE_LOOP, _firstvx[cont], _sizesvx[cont], _alobjvx[cont]);
    }
-//   // Switch the vertex buffers OFF in the openGL engine ...
-//   glDisableClientState(GL_VERTEX_ARRAY);
-//   // ... and finally restore the openGL translation matrix
    glPopMatrix();
-
 }
 
 void trend::TolderTV::drawTexts(layprop::DrawProperties*)
@@ -315,25 +293,25 @@ void trend::TolderTV::drawTexts(layprop::DrawProperties*)
 
 trend::TolderTV::~TolderTV()
 {
-   if (NULL != _sizesvx[cont]) delete [] _sizesvx[cont];
-   if (NULL != _sizesvx[line]) delete [] _sizesvx[line];
-   if (NULL != _sizesvx[cnvx]) delete [] _sizesvx[cnvx];
-   if (NULL != _sizesvx[ncvx]) delete [] _sizesvx[ncvx];
-
-   if (NULL != _sizesix[fqss]) delete [] _sizesix[fqss];
-   if (NULL != _sizesix[ftrs]) delete [] _sizesix[ftrs];
-   if (NULL != _sizesix[ftfs]) delete [] _sizesix[ftfs];
-   if (NULL != _sizesix[ftss]) delete [] _sizesix[ftss];
-
-   if (NULL != _firstvx[cont]) delete [] _firstvx[cont];
-   if (NULL != _firstvx[line]) delete [] _firstvx[line];
-   if (NULL != _firstvx[cnvx]) delete [] _firstvx[cnvx];
-   if (NULL != _firstvx[ncvx]) delete [] _firstvx[ncvx];
-
-   if (NULL != _firstix[fqss]) delete [] _firstix[fqss];
-   if (NULL != _firstix[ftrs]) delete [] _firstix[ftrs];
-   if (NULL != _firstix[ftfs]) delete [] _firstix[ftfs];
-   if (NULL != _firstix[ftss]) delete [] _firstix[ftss];
+//   if (NULL != _sizesvx[cont]) delete [] _sizesvx[cont];
+//   if (NULL != _sizesvx[line]) delete [] _sizesvx[line];
+//   if (NULL != _sizesvx[cnvx]) delete [] _sizesvx[cnvx];
+//   if (NULL != _sizesvx[ncvx]) delete [] _sizesvx[ncvx];
+//
+//   if (NULL != _sizesix[fqss]) delete [] _sizesix[fqss];
+//   if (NULL != _sizesix[ftrs]) delete [] _sizesix[ftrs];
+//   if (NULL != _sizesix[ftfs]) delete [] _sizesix[ftfs];
+//   if (NULL != _sizesix[ftss]) delete [] _sizesix[ftss];
+//
+//   if (NULL != _firstvx[cont]) delete [] _firstvx[cont];
+//   if (NULL != _firstvx[line]) delete [] _firstvx[line];
+//   if (NULL != _firstvx[cnvx]) delete [] _firstvx[cnvx];
+//   if (NULL != _firstvx[ncvx]) delete [] _firstvx[ncvx];
+//
+//   if (NULL != _firstix[fqss]) delete [] _firstix[fqss];
+//   if (NULL != _firstix[ftrs]) delete [] _firstix[ftrs];
+//   if (NULL != _firstix[ftfs]) delete [] _firstix[ftfs];
+//   if (NULL != _firstix[ftss]) delete [] _firstix[ftss];
 }
 //=============================================================================
 //
@@ -361,11 +339,11 @@ trend::TolderLay::TolderLay():
    _slctd_array_offset   (          0u )
 
 {
-   for (int i = lstr; i <= lnes; i++)
-   {
-      _sizslix[i] = NULL;
-      _fstslix[i] = NULL;
-   }
+//   for (int i = lstr; i <= lnes; i++)
+//   {
+//      _sizslix[i] = NULL;
+//      _fstslix[i] = NULL;
+//   }
 }
 
 void trend::TolderLay::newSlice(TrendRef* const ctrans, bool fill, bool reusable, unsigned slctd_array_offset)
@@ -400,71 +378,73 @@ bool trend::TolderLay::chunkExists(TrendRef* const ctrans, bool filled)
 
 void trend::TolderLay::collect(bool fill, GLuint, GLuint)
 {
-   _cpoint_array = DEBUG_NEW TNDR_GLDATAT[2 * _num_total_points];
-   if (0 != _num_total_indexs)
-      _cindex_array = DEBUG_NEW unsigned int[_num_total_indexs];
-   for (TrendTVList::const_iterator TLAY = _layData.begin(); TLAY != _layData.end(); TLAY++)
-      (*TLAY)->collect(_cpoint_array, _cindex_array);
+   assert(false);
+//   _cpoint_array = DEBUG_NEW TNDR_GLDATAT[2 * _num_total_points];
+//   if (0 != _num_total_indexs)
+//      _cindex_array = DEBUG_NEW unsigned int[_num_total_indexs];
+//   for (TrendTVList::const_iterator TLAY = _layData.begin(); TLAY != _layData.end(); TLAY++)
+//      (*TLAY)->collect(_cpoint_array, _cindex_array);
 }
 
 void trend::TolderLay::collectSelected(unsigned int* slctd_array)
 {
-   unsigned      slct_arr_size = _asindxs[lstr] + _asindxs[llps] + _asindxs[lnes];
-   if (0 == slct_arr_size) return;
-
-   // initialise the indexing arrays of selected objects
-   if (0 < _asobjix[lstr])
-   {
-      _sizslix[lstr] = DEBUG_NEW GLsizei[_asobjix[lstr]];
-      _fstslix[lstr] = DEBUG_NEW GLuint[_asobjix[lstr]];
-   }
-   if (0 < _asobjix[llps])
-   {
-      _sizslix[llps] = DEBUG_NEW GLsizei[_asobjix[llps]];
-      _fstslix[llps] = DEBUG_NEW GLuint[_asobjix[llps]];
-   }
-   if (0 < _asobjix[lnes])
-   {
-      _sizslix[lnes] = DEBUG_NEW GLsizei[_asobjix[lnes]];
-      _fstslix[lnes] = DEBUG_NEW GLuint[_asobjix[lnes]];
-   }
-   unsigned size_sindex[3];
-   unsigned index_soffset[3];
-   size_sindex[lstr] = size_sindex[llps] = size_sindex[lnes] = 0u;
-   index_soffset[lstr] = _slctd_array_offset;
-   index_soffset[llps] = index_soffset[lstr] + _asindxs[lstr];
-   index_soffset[lnes] = index_soffset[llps] + _asindxs[llps];
-
-
-   for (SliceSelected::const_iterator SSL = _slct_data.begin(); SSL != _slct_data.end(); SSL++)
-   {
-      TrendSelected* cchunk = *SSL;
-      switch (cchunk->type())
-      {
-         case lstr : // LINES
-         {
-            assert(_sizslix[lstr]);
-            _fstslix[lstr][size_sindex[lstr]  ] = /*sizeof(unsigned) * */index_soffset[lstr];
-            _sizslix[lstr][size_sindex[lstr]++] = cchunk->sDataCopy(slctd_array, index_soffset[lstr]);
-            break;
-         }
-         case llps      : // LINE_LOOP
-         {
-            assert(_sizslix[llps]);
-            _fstslix[llps][size_sindex[llps]  ] = /*sizeof(unsigned) * */index_soffset[llps];
-            _sizslix[llps][size_sindex[llps]++] = cchunk->sDataCopy(slctd_array, index_soffset[llps]);
-            break;
-         }
-         case lnes   : // LINE_STRIP
-         {
-            assert(_sizslix[lnes]);
-            _fstslix[lnes][size_sindex[lnes]  ] = /*sizeof(unsigned) * */index_soffset[lnes];
-            _sizslix[lnes][size_sindex[lnes]++] = cchunk->sDataCopy(slctd_array, index_soffset[lnes]);
-            break;
-         }
-         default: assert(false);break;
-      }
-   }
+   assert(false);
+//   unsigned      slct_arr_size = _asindxs[lstr] + _asindxs[llps] + _asindxs[lnes];
+//   if (0 == slct_arr_size) return;
+//
+//   // initialise the indexing arrays of selected objects
+//   if (0 < _asobjix[lstr])
+//   {
+//      _sizslix[lstr] = DEBUG_NEW GLsizei[_asobjix[lstr]];
+//      _fstslix[lstr] = DEBUG_NEW GLuint[_asobjix[lstr]];
+//   }
+//   if (0 < _asobjix[llps])
+//   {
+//      _sizslix[llps] = DEBUG_NEW GLsizei[_asobjix[llps]];
+//      _fstslix[llps] = DEBUG_NEW GLuint[_asobjix[llps]];
+//   }
+//   if (0 < _asobjix[lnes])
+//   {
+//      _sizslix[lnes] = DEBUG_NEW GLsizei[_asobjix[lnes]];
+//      _fstslix[lnes] = DEBUG_NEW GLuint[_asobjix[lnes]];
+//   }
+//   unsigned size_sindex[3];
+//   unsigned index_soffset[3];
+//   size_sindex[lstr] = size_sindex[llps] = size_sindex[lnes] = 0u;
+//   index_soffset[lstr] = _slctd_array_offset;
+//   index_soffset[llps] = index_soffset[lstr] + _asindxs[lstr];
+//   index_soffset[lnes] = index_soffset[llps] + _asindxs[llps];
+//
+//
+//   for (SliceSelected::const_iterator SSL = _slct_data.begin(); SSL != _slct_data.end(); SSL++)
+//   {
+//      TrendSelected* cchunk = *SSL;
+//      switch (cchunk->type())
+//      {
+//         case lstr : // LINES
+//         {
+//            assert(_sizslix[lstr]);
+//            _fstslix[lstr][size_sindex[lstr]  ] = /*sizeof(unsigned) * */index_soffset[lstr];
+//            _sizslix[lstr][size_sindex[lstr]++] = cchunk->sDataCopy(slctd_array, index_soffset[lstr]);
+//            break;
+//         }
+//         case llps      : // LINE_LOOP
+//         {
+//            assert(_sizslix[llps]);
+//            _fstslix[llps][size_sindex[llps]  ] = /*sizeof(unsigned) * */index_soffset[llps];
+//            _sizslix[llps][size_sindex[llps]++] = cchunk->sDataCopy(slctd_array, index_soffset[llps]);
+//            break;
+//         }
+//         case lnes   : // LINE_STRIP
+//         {
+//            assert(_sizslix[lnes]);
+//            _fstslix[lnes][size_sindex[lnes]  ] = /*sizeof(unsigned) * */index_soffset[lnes];
+//            _sizslix[lnes][size_sindex[lnes]++] = cchunk->sDataCopy(slctd_array, index_soffset[lnes]);
+//            break;
+//         }
+//         default: assert(false);break;
+//      }
+//   }
 }
 
 void trend::TolderLay::draw(layprop::DrawProperties* drawprop)
@@ -509,8 +489,6 @@ void trend::TolderLay::drawSelected()
 
    if (_asobjix[lstr] > 0)
    {
-      assert(_sizslix[lstr]);
-      assert(_fstslix[lstr]);
       //TODO
 //      for (unsigned i= 0; i < _asobjix[lstr]; i++)
 //         glDrawElements(GL_LINE_STRIP, _sizslix[lstr][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_fstslix[lstr][i]));
@@ -518,16 +496,12 @@ void trend::TolderLay::drawSelected()
    if (_asobjix[llps] > 0)
    {
       //TODO
-      assert(_sizslix[llps]);
-      assert(_fstslix[llps]);
 //      for (unsigned i= 0; i < _asobjix[llps]; i++)
 //         glDrawElements(GL_LINE_LOOP, _sizslix[llps][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_fstslix[llps][i]));
    }
    if (_asobjix[lnes] > 0)
    {
       //TODO
-      assert(_sizslix[lnes]);
-      assert(_fstslix[lnes]);
 //      for (unsigned i= 0; i < _asobjix[lnes]; i++)
 //         glDrawElements(GL_LINES, _sizslix[lnes][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_fstslix[lnes][i]));
    }
@@ -546,13 +520,13 @@ trend::TolderLay::~TolderLay()
    delete [] _cpoint_array;
    if (NULL != _cindex_array)  delete [] _cindex_array;
 
-   if (NULL != _sizslix[lstr]) delete [] _sizslix[lstr];
-   if (NULL != _sizslix[llps]) delete [] _sizslix[llps];
-   if (NULL != _sizslix[lnes]) delete [] _sizslix[lnes];
-
-   if (NULL != _fstslix[lstr]) delete [] _fstslix[lstr];
-   if (NULL != _fstslix[llps]) delete [] _fstslix[llps];
-   if (NULL != _fstslix[lnes]) delete [] _fstslix[lnes];
+//   if (NULL != _sizslix[lstr]) delete [] _sizslix[lstr];
+//   if (NULL != _sizslix[llps]) delete [] _sizslix[llps];
+//   if (NULL != _sizslix[lnes]) delete [] _sizslix[lnes];
+//
+//   if (NULL != _fstslix[lstr]) delete [] _fstslix[lstr];
+//   if (NULL != _fstslix[llps]) delete [] _fstslix[llps];
+//   if (NULL != _fstslix[lnes]) delete [] _fstslix[lnes];
 }
 
 //=============================================================================
@@ -571,47 +545,48 @@ trend::TolderRefLay::TolderRefLay() :
 
 void trend::TolderRefLay::collect(GLuint)
 {
-//   _pbuffer = pbuf;
-//   glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
-//   glBufferData(GL_ARRAY_BUFFER              ,
-//                2 * total_points() * sizeof(TNDR_GLDATAT) ,
-//                NULL                         ,
-//                GL_DYNAMIC_DRAW               );
-//   cpoint_array = (TNDR_GLDATAT*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-   _cpoint_array = DEBUG_NEW TNDR_GLDATAT[2 * total_points()];
-
-
-   // initialise the indexing
-   unsigned pntindx = 0;
-   unsigned  szindx  = 0;
-   if (0 < (_alvrtxs + _asindxs))
-   {
-      _firstvx = DEBUG_NEW GLsizei[_alobjvx + _asobjix];
-      _sizesvx = DEBUG_NEW GLsizei[_alobjvx + _asobjix];
-      if (0 < _asobjix)
-      {
-         _fstslix = DEBUG_NEW GLsizei[_asobjix];
-         _sizslix = DEBUG_NEW GLsizei[_asobjix];
-      }
-   }
-   // collect the cell overlapping boxes
-   for (RefBoxList::const_iterator CSH = _cellRefBoxes.begin(); CSH != _cellRefBoxes.end(); CSH++)
-   {
-      if (1 < (*CSH)->alphaDepth())
-      {
-         _firstvx[szindx  ] = pntindx/2;
-         _sizesvx[szindx++] = (*CSH)->cDataCopy(_cpoint_array, pntindx);
-      }
-   }
-   for (RefBoxList::const_iterator CSH = _cellSRefBoxes.begin(); CSH != _cellSRefBoxes.end(); CSH++)
-   {
-      _fstslix[szindx-_alobjvx] = _firstvx[szindx] = pntindx/2;
-      _sizslix[szindx-_alobjvx] = _sizesvx[szindx] = (*CSH)->cDataCopy(_cpoint_array, pntindx);
-      szindx++;
-   }
-   assert(pntindx == 2 * (_alvrtxs + _asindxs));
-   assert(szindx  ==     (_alobjvx + _asobjix));
-
+   assert(false);
+////   _pbuffer = pbuf;
+////   glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
+////   glBufferData(GL_ARRAY_BUFFER              ,
+////                2 * total_points() * sizeof(TNDR_GLDATAT) ,
+////                NULL                         ,
+////                GL_DYNAMIC_DRAW               );
+////   cpoint_array = (TNDR_GLDATAT*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+//   _cpoint_array = DEBUG_NEW TNDR_GLDATAT[2 * total_points()];
+//
+//
+//   // initialise the indexing
+//   unsigned pntindx = 0;
+//   unsigned  szindx  = 0;
+//   if (0 < (_alvrtxs + _asindxs))
+//   {
+//      _firstvx = DEBUG_NEW GLsizei[_alobjvx + _asobjix];
+//      _sizesvx = DEBUG_NEW GLsizei[_alobjvx + _asobjix];
+//      if (0 < _asobjix)
+//      {
+//         _fstslix = DEBUG_NEW GLsizei[_asobjix];
+//         _sizslix = DEBUG_NEW GLsizei[_asobjix];
+//      }
+//   }
+//   // collect the cell overlapping boxes
+//   for (RefBoxList::const_iterator CSH = _cellRefBoxes.begin(); CSH != _cellRefBoxes.end(); CSH++)
+//   {
+//      if (1 < (*CSH)->alphaDepth())
+//      {
+//         _firstvx[szindx  ] = pntindx/2;
+//         _sizesvx[szindx++] = (*CSH)->cDataCopy(_cpoint_array, pntindx);
+//      }
+//   }
+//   for (RefBoxList::const_iterator CSH = _cellSRefBoxes.begin(); CSH != _cellSRefBoxes.end(); CSH++)
+//   {
+//      _fstslix[szindx-_alobjvx] = _firstvx[szindx] = pntindx/2;
+//      _sizslix[szindx-_alobjvx] = _sizesvx[szindx] = (*CSH)->cDataCopy(_cpoint_array, pntindx);
+//      szindx++;
+//   }
+//   assert(pntindx == 2 * (_alvrtxs + _asindxs));
+//   assert(szindx  ==     (_alobjvx + _asobjix));
+//
 }
 
 void trend::TolderRefLay::draw(layprop::DrawProperties* drawprop)
@@ -749,35 +724,35 @@ bool trend::Tolder::collect()
       if (0 == num_total_strings)  return false;
       else                         return true;
    }
-   //--------------------------------------------------------------------------
-   // collect the point arrays
-   for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
-   {
-      if (0 == CLAY->total_points())
-      {
-         assert(0 != CLAY->total_strings());
-         continue;
-      }
-      CLAY->collect(_drawprop->layerFilled(CLAY()), 0, 0);
-   }
-   //--------------------------------------------------------------------------
-   // collect the indexes of the selected objects
-   if (0 < num_total_slctdx)
-   {// selected objects buffer
-      _sindex_array = DEBUG_NEW unsigned int[num_total_slctdx];
-      for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
-      {
-         if (0 == CLAY->total_slctdx())
-            continue;
-         CLAY->collectSelected(_sindex_array);
-      }
-   }
-   //--------------------------------------------------------------------------
-   // collect the reference boxes
-   if (0 < _refLayer->total_points())
-   {
-      _refLayer->collect(0);
-   }
+//   //--------------------------------------------------------------------------
+//   // collect the point arrays
+//   for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
+//   {
+//      if (0 == CLAY->total_points())
+//      {
+//         assert(0 != CLAY->total_strings());
+//         continue;
+//      }
+//      CLAY->collect(_drawprop->layerFilled(CLAY()), 0, 0);
+//   }
+//   //--------------------------------------------------------------------------
+//   // collect the indexes of the selected objects
+//   if (0 < num_total_slctdx)
+//   {// selected objects buffer
+//      _sindex_array = DEBUG_NEW unsigned int[num_total_slctdx];
+//      for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
+//      {
+//         if (0 == CLAY->total_slctdx())
+//            continue;
+//         CLAY->collectSelected(_sindex_array);
+//      }
+//   }
+//   //--------------------------------------------------------------------------
+//   // collect the reference boxes
+//   if (0 < _refLayer->total_points())
+//   {
+//      _refLayer->collect(0);
+//   }
    //
    // that's about it...
    return true;

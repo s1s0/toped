@@ -256,6 +256,8 @@ namespace trend {
                                     _cdata(pdata), _csize(psize){}
          virtual          ~TrendCnvx() {};
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
+         virtual void      drctDrawContour();
+         virtual void      drctDrawFill();
          unsigned          csize()     {return _csize;}
       protected:
          const int4b*      _cdata;  //! the vertexes of the object contour
@@ -266,6 +268,8 @@ namespace trend {
       public:
                            TrendBox(const int4b* pdata) : TrendCnvx(pdata, 4) {}
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
+         virtual void      drctDrawContour();
+         virtual void      drctDrawFill();
    };
 
    /**
@@ -489,7 +493,7 @@ namespace trend {
       line bin because of its central line.
       \verbatim
       ---------------------------------------------------------------
-      | TrendBase   |    not filled      |        filled      |        |
+      | TrendBase |    not filled      |        filled      |        |
       |   data    |--------------------|--------------------|  enum  |
       | (vertexes)|  box | poly | wire |  box | poly | wire |        |
       |-----------|------|------|------|------|------|------|--------|
@@ -546,7 +550,7 @@ namespace trend {
       -------------------------------------------------------------------------
       ... || cont | line  | cnvx | ncvx || cont | line  | cnvx | ncvx || ...
       ... ||----------------------------||----------------------------|| ...
-      ... || this TrendTV object data  ||  next TrendTV object data || ...
+      ... || this TrendTV object data   ||  next TrendTV object data  || ...
       -------------------------------------------------------------------------
       \endverbatim
 
@@ -557,7 +561,7 @@ namespace trend {
       -------------------------------------------------------------------------
       ... || ftrs | ftfs  | ftss | fqss || ftrs | ftfs  | ftss | fqss || ...
       ... ||----------------------------||----------------------------|| ...
-      ... ||  this TrendTV index data  ||  next TrendTV index data  || ...
+      ... ||  this TrendTV index data   ||  next TrendTV index data   || ...
       -------------------------------------------------------------------------
       \endverbatim
 
