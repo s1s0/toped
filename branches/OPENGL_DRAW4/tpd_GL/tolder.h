@@ -62,16 +62,6 @@ namespace trend {
          virtual void      drawTexts(layprop::DrawProperties*);
          virtual void      collect(bool, GLuint, GLuint);
          virtual void      collectSelected(unsigned int*);
-
-      private:
-         TNDR_GLDATAT*     _cpoint_array;
-         unsigned int*     _cindex_array;
-//         // index related data for selected objects
-//         GLsizei*          _sizslix[3]; //! arrays of sizes for indexes sets of selected objects
-//         GLuint*           _fstslix[3]; //! arrays of first indexes for selected objects
-//         // offsets in the buffer
-         unsigned          _stv_array_offset; //! first point in the TolderTV with selected objects in this layer
-         unsigned          _slctd_array_offset; //! first point in the VBO with selected indexes
    };
 
    class TolderRefLay : public TrendRefLay {
@@ -80,14 +70,6 @@ namespace trend {
          virtual          ~TolderRefLay();
          virtual void      collect(GLuint);
          virtual void      draw(layprop::DrawProperties*);
-      private:
-         TNDR_GLDATAT*     _cpoint_array;
-         // vertex related data
-         GLsizei*          _sizesvx; //! array of sizes for vertex sets
-         GLsizei*          _firstvx; //! array of first vertexes
-         // index related data for selected boxes
-         GLsizei*          _sizslix; //! array of sizes for indexes sets
-         GLsizei*          _fstslix; //! array of first indexes
    };
 
    class Tolder : public TrendBase {
