@@ -40,15 +40,6 @@ namespace trend {
          virtual void      collect(TNDR_GLDATAT*, unsigned int*);
          virtual void      draw(layprop::DrawProperties*);
          virtual void      drawTexts(layprop::DrawProperties*);
-      private:
-//         void              collectIndexs(unsigned int*, const TeselChain*, unsigned*, unsigned*, unsigned);
-//         GLsizei*          _sizesvx[4]; //! arrays of sizes for vertex sets
-//         GLsizei*          _firstvx[4]; //! arrays of first vertexes
-//         GLsizei*          _sizesix[4]; //! arrays of sizes for indexes sets
-//         GLuint*           _firstix[4]; //! arrays of first indexes
-//         // offsets in the VBO
-//         unsigned          _point_array_offset; //! The offset of this chunk of vertex data in the vertex VBO
-//         unsigned          _index_array_offset; //! The offset of this chunk of index  data in the index  VBO
    };
 
    class TolderReTV : public TrendReTV {
