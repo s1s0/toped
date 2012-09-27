@@ -307,6 +307,8 @@ namespace trend {
          virtual          ~TrendWire();
          void              Tesselate();
          virtual unsigned  lDataCopy(TNDR_GLDATAT*, unsigned&);
+         virtual void      drctDrawFill();
+         virtual void      drctDrawCLine();
          unsigned          lsize()                 {return _lsize;}
          bool              center_line_only()      {return _celno;}
          virtual const TeselChain* tdata()               {return _tdata;}

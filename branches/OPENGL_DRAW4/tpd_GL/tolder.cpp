@@ -41,7 +41,7 @@ trend::TolderTV::TolderTV(TrendRef* const refCell, bool filled, bool reusable,
 
 void trend::TolderTV::collect(TNDR_GLDATAT* point_array, unsigned int* index_array)
 {
-   assert(false);
+   assert(false); // should not be called in this implementation
 }
 
 void trend::TolderTV::draw(layprop::DrawProperties* drawprop)
@@ -53,8 +53,10 @@ void trend::TolderTV::draw(layprop::DrawProperties* drawprop)
    // ... and here we go ...
    if  (_alobjvx[line] > 0)
    {// Draw the wire centre lines
-      //TODO
-//      glMultiDrawArrays(GL_LINE_STRIP, _firstvx[line], _sizesvx[line], _alobjvx[line]);
+      for (SliceWires::const_iterator CSH = _line_data.begin(); CSH != _line_data.end(); CSH++)
+      {
+         (*CSH)->drctDrawCLine();
+      }
    }
    if  (_alobjvx[cnvx] > 0)
    {// Draw convex polygons
@@ -80,9 +82,16 @@ void trend::TolderTV::draw(layprop::DrawProperties* drawprop)
    glPopMatrix();
 }
 
-void trend::TolderTV::drawTexts(layprop::DrawProperties*)
+void trend::TolderTV::drawTexts(layprop::DrawProperties* drawprop)
 {
-   //TODO
+   glPushMatrix();
+   glMultMatrixd(_refCell->translation());
+   drawprop->adjustAlpha(_refCell->alphaDepth() - 1);
+
+   for (TrendStrings::const_iterator TSTR = _text_data.begin(); TSTR != _text_data.end(); TSTR++)
+      (*TSTR)->draw(_filled);
+
+   glPopMatrix();
 }
 
 trend::TolderTV::~TolderTV()
@@ -227,18 +236,6 @@ void trend::TolderLay::collectSelected(unsigned int* slctd_array)
 
 void trend::TolderLay::draw(layprop::DrawProperties* drawprop)
 {
-//   glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
-   // Check the state of the buffer
-//   GLint bufferSize;
-//   glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
-//   assert(bufferSize == (GLint)(2 * _num_total_points * sizeof(TNDR_GLDATAT)));
-//   if (0 != _ibuffer)
-//   {
-//      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibuffer);
-//      glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
-//      assert(bufferSize == (GLint)(_num_total_indexs * sizeof(unsigned)));
-//   }
-   //TODO- push _cpoint_array and _cindex_array in the drawprop
    for (TrendTVList::const_iterator TLAY = _layData.begin(); TLAY != _layData.end(); TLAY++)
    {
       (*TLAY)->draw(drawprop);
@@ -247,10 +244,6 @@ void trend::TolderLay::draw(layprop::DrawProperties* drawprop)
    {
       (*TLAY)->draw(drawprop);
    }
-
-//   glBindBuffer(GL_ARRAY_BUFFER, 0);
-//   if (0 != _ibuffer)
-//      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 void trend::TolderLay::drawSelected()
@@ -290,7 +283,14 @@ void trend::TolderLay::drawSelected()
 
 void trend::TolderLay::drawTexts(layprop::DrawProperties* drawprop)
 {
-   //TODO
+   for (TrendTVList::const_iterator TLAY = _layData.begin(); TLAY != _layData.end(); TLAY++)
+   {
+      (*TLAY)->drawTexts(drawprop);
+   }
+   for (TrendReTVList::const_iterator TLAY = _reLayData.begin(); TLAY != _reLayData.end(); TLAY++)
+   {
+      (*TLAY)->drawTexts(drawprop);
+   }
 }
 
 trend::TolderLay::~TolderLay()
@@ -566,9 +566,7 @@ void trend::Tolder::draw()
       // draw texts
       if (0 != CLAY->total_strings())
       {
-         //TODO
-//         fontLib->bindFont();
-//         CLAY->drawTexts(_drawprop);
+         CLAY->drawTexts(_drawprop);
       }
    }
    // draw reference boxes
