@@ -281,8 +281,9 @@ namespace trend {
       public:
                            TrendNcvx(const int4b* pdata, unsigned psize) :
                                     TrendCnvx(pdata, psize), _tdata(NULL) {}
-         void              setTeselData(const TessellPoly* tdata) {_tdata = tdata;}
          virtual          ~TrendNcvx(){};
+         void              setTeselData(const TessellPoly* tdata) {_tdata = tdata;}
+         virtual void      drctDrawFill();
          virtual const TeselChain* tdata()              {return _tdata->tdata();}
       private:
          const TessellPoly*    _tdata; //! polygon tesselation data

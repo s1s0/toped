@@ -196,6 +196,7 @@ void trend::TrendCnvx::drctDrawContour()
 
 void trend::TrendCnvx::drctDrawFill()
 {
+   assert(false);//How did we get here?
 }
 
 //=============================================================================
@@ -232,6 +233,26 @@ void trend::TrendBox::drctDrawFill()
    glEnd();
 
 }
+//=============================================================================
+//
+// TrendNcvx
+//
+
+void trend::TrendNcvx::drctDrawFill()
+{
+   for ( TeselChain::const_iterator CCH = _tdata->tdata()->begin(); CCH != _tdata->tdata()->end(); CCH++ )
+   {
+      glBegin(CCH->type());
+      for(unsigned cindx = 0 ; cindx < CCH->size(); cindx++)
+      {
+         unsigned vindex = CCH->index_seq()[cindx];
+         glVertex2i(_cdata[2*vindex], _cdata[2*vindex+1]);
+      }
+      glEnd();
+   }
+
+}
+
 //=============================================================================
 //
 // TrendWire
