@@ -250,7 +250,6 @@ void trend::TrendNcvx::drctDrawFill()
       }
       glEnd();
    }
-
 }
 
 //=============================================================================
@@ -282,6 +281,29 @@ unsigned trend::TrendWire::lDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 #endif
    pindex += 2 * _lsize;
    return _lsize;
+}
+
+void trend::TrendWire::drctDrawCLine()
+{
+   glBegin(GL_LINE_STRIP);
+   for (unsigned i = 0; i < _lsize; i++)
+      glVertex2i(_ldata[2*i], _ldata[2*i+1]);
+   glEnd();
+
+}
+
+void trend::TrendWire::drctDrawFill()
+{
+   for ( TeselChain::const_iterator TCH = _tdata->begin(); TCH != _tdata->end(); TCH++ )
+   {
+      glBegin(TCH->type());
+      for(unsigned cindx = 0 ; cindx < TCH->size(); cindx++)
+      {
+         unsigned vindex = TCH->index_seq()[cindx];
+         glVertex2i(_cdata[2*vindex], _cdata[2*vindex+1]);
+      }
+      glEnd();
+   }
 }
 
 /** For wire tessellation we can use the common polygon tessellation procedure.
