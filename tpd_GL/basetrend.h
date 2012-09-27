@@ -343,7 +343,7 @@ namespace trend {
          actually most of the time. Besides it will (theoretically) slow down
          the processing, because will introduce conditional statements in all
          stages of the object processing.
-         - The introduction of this class is an attempt to utilize the best of
+         - The introduction of this class is an attempt to utilise the best of
          the ideas above, but without their drawbacks. A selected object with
          the corresponding selection related fields will be generated only on
          demand. The classes which deal with selected objects will inherit
@@ -353,7 +353,7 @@ namespace trend {
          then once again - to highlight them. Note though, that it will happen
          virtually without additional memory usage, because the second pass
          will reuse the data in their parent objects and will just index it.
-         The amount of additional data to the GPU is also minimized,
+         The amount of additional data to the GPU is also minimised,
          because the only additional data transfered is the index array of
          the selected vertexes. Vertex data is already there and will be reused.
    */
@@ -366,6 +366,7 @@ namespace trend {
          virtual SlctTypes type() = 0;
          virtual unsigned  ssize() = 0;
          virtual unsigned  sDataCopy(unsigned*, unsigned&) = 0;
+         virtual void      drctDrawSlctd() = 0;
       protected:
          const SGBitSet*   _slist;  //! A bit set array with selected vertexes
          unsigned          _offset; //! The offset of the first vertex in the point VBO
@@ -380,6 +381,7 @@ namespace trend {
          virtual SlctTypes type() { return llps;}
          virtual unsigned  ssize(){ return 4;}
          virtual unsigned  sDataCopy(unsigned*, unsigned&);
+         virtual void      drctDrawSlctd();
    };
 
 
@@ -400,6 +402,7 @@ namespace trend {
          virtual SlctTypes type() { return ((NULL == _slist) ? llps : lnes);}
          virtual unsigned  ssize();
          virtual unsigned  sDataCopy(unsigned*, unsigned&);
+         virtual void      drctDrawSlctd();
    };
 
    class TrendSBox : public TrendBox, public TrendSelected {
@@ -410,6 +413,7 @@ namespace trend {
          virtual SlctTypes type() { return ((NULL == _slist) ? llps : lnes);}
          virtual unsigned  ssize();
          virtual unsigned  sDataCopy(unsigned*, unsigned&);
+         virtual void      drctDrawSlctd();
    };
 
    /**
@@ -428,6 +432,7 @@ namespace trend {
          virtual SlctTypes type() { return ((NULL == _slist) ? llps : lnes);}
          virtual unsigned  ssize();
          virtual unsigned  sDataCopy(unsigned*, unsigned&);
+         virtual void      drctDrawSlctd();
    };
 
    /**
@@ -451,6 +456,7 @@ namespace trend {
          virtual SlctTypes type() { return ((NULL == _slist) ? lstr : lnes);}
          virtual unsigned  ssize();
          virtual unsigned  sDataCopy(unsigned*, unsigned&);
+         virtual void      drctDrawSlctd();
       private:
          unsigned          _loffset;
    };
@@ -467,6 +473,7 @@ namespace trend {
          CTM&              ctm()          {return _ctm;}
          word              alphaDepth()   {return _alphaDepth;}
          unsigned          cDataCopy(TNDR_GLDATAT*, unsigned&);
+         void              drctDrawContour();
       private:
          std::string       _name;
          real              _translation[16];

@@ -191,7 +191,6 @@ void trend::TrendCnvx::drctDrawContour()
    for (unsigned i = 0; i < _csize; i++)
       glVertex2i(_cdata[2*i], _cdata[2*i+1]);
    glEnd();
-
 }
 
 void trend::TrendCnvx::drctDrawFill()
@@ -289,7 +288,6 @@ void trend::TrendWire::drctDrawCLine()
    for (unsigned i = 0; i < _lsize; i++)
       glVertex2i(_ldata[2*i], _ldata[2*i+1]);
    glEnd();
-
 }
 
 void trend::TrendWire::drctDrawFill()
@@ -344,6 +342,10 @@ unsigned trend::TextSOvlBox::sDataCopy(unsigned* array, unsigned& pindex)
    return ssize();
 }
 
+void trend::TextSOvlBox::drctDrawSlctd()
+{
+   //TODO
+}
 //=============================================================================
 //
 // TrendSCnvx
@@ -387,6 +389,30 @@ unsigned trend::TrendSCnvx::sDataCopy(unsigned* array, unsigned& pindex)
          array[pindex++] = _offset + i;
    }
    return ssize();
+}
+
+void trend::TrendSCnvx::drctDrawSlctd()
+{// same as for non-convex polygon
+   if (NULL == _slist)
+   {
+      glBegin(GL_LINE_LOOP);
+      for (unsigned i = 0; i < _csize; i++)
+         glVertex2i(_cdata[2*i], _cdata[2*i+1]);
+      glEnd();
+   }
+   else
+   {// shape is partially selected
+      glBegin(GL_LINES);
+      for (unsigned i = 0; i < _csize; i++)
+      {
+         if (_slist->check(i) && _slist->check((i+1)%_csize))
+         {
+            glVertex2i(_cdata[2*i], _cdata[2*i+1]);
+            glVertex2i(_cdata[2*((i+1)%_csize)], _cdata[2*((i+1)%_csize)+1]);
+         }
+      }
+      glEnd();
+   }
 }
 
 //=============================================================================
@@ -434,6 +460,38 @@ unsigned trend::TrendSBox::sDataCopy(unsigned* array, unsigned& pindex)
    return ssize();
 }
 
+void trend::TrendSBox::drctDrawSlctd()
+{
+   if (NULL == _slist)
+   {// shape is fully selected
+      glBegin(GL_LINE_LOOP);
+         glVertex2i(_cdata[0], _cdata[1]);
+         glVertex2i(_cdata[2], _cdata[1]);
+         glVertex2i(_cdata[2], _cdata[3]);
+         glVertex2i(_cdata[0], _cdata[3]);
+      glEnd();
+   }
+   else
+   {// shape is partially selected
+      glBegin(GL_LINES);
+      for (unsigned i = 0; i < _csize; i++)
+      {
+         if (_slist->check(i) && _slist->check((i+1)%_csize))
+         {
+            switch(i)
+            {
+               case 0: glVertex2i(_cdata[0], _cdata[1]);glVertex2i(_cdata[2], _cdata[1]); break;
+               case 1: glVertex2i(_cdata[2], _cdata[1]);glVertex2i(_cdata[2], _cdata[3]); break;
+               case 2: glVertex2i(_cdata[2], _cdata[3]);glVertex2i(_cdata[0], _cdata[3]); break;
+               case 3: glVertex2i(_cdata[0], _cdata[3]);glVertex2i(_cdata[0], _cdata[1]); break;
+               default: assert(false); break;
+            }
+         }
+      }
+      glEnd();
+   }
+}
+
 //=============================================================================
 //
 // TrendSNcvx
@@ -477,6 +535,30 @@ unsigned trend::TrendSNcvx::sDataCopy(unsigned* array, unsigned& pindex)
          array[pindex++] = _offset + i;
    }
    return ssize();
+}
+
+void trend::TrendSNcvx::drctDrawSlctd()
+{// same as for convex polygons
+   if (NULL == _slist)
+   {
+      glBegin(GL_LINE_LOOP);
+      for (unsigned i = 0; i < _csize; i++)
+         glVertex2i(_cdata[2*i], _cdata[2*i+1]);
+      glEnd();
+   }
+   else
+   {// shape is partially selected
+      glBegin(GL_LINES);
+      for (unsigned i = 0; i < _csize; i++)
+      {
+         if (_slist->check(i) && _slist->check((i+1)%_csize))
+         {
+            glVertex2i(_cdata[2*i], _cdata[2*i+1]);
+            glVertex2i(_cdata[2*((i+1)%_csize)], _cdata[2*((i+1)%_csize)+1]);
+         }
+      }
+      glEnd();
+   }
 }
 
 //=============================================================================
@@ -552,6 +634,44 @@ unsigned trend::TrendSWire::sDataCopy(unsigned* array, unsigned& pindex)
    return ssize();
 }
 
+void trend::TrendSWire::drctDrawSlctd()
+{
+   if (NULL == _slist)
+   {
+      glBegin(GL_LINE_STRIP);
+      for (unsigned i = 0; i < _lsize; i++)
+         glVertex2i(_ldata[2*i], _ldata[2*i+1]);
+      glEnd();
+   }
+   else
+   {// shape is partially selected
+      glBegin(GL_LINES);
+      for (unsigned i = 0; i < _lsize - 1; i++)
+      {
+         if (_slist->check(i) && _slist->check(i+1))
+         {
+            glVertex2i(_ldata[2*i], _ldata[2*i+1]);
+            glVertex2i(_ldata[2*(i+1)], _ldata[2*(i+1)+1]);
+         }
+      }
+      if (!_celno)
+      {
+         // And the edge points!
+         if (_slist->check(0)       ) // if first point is selected
+         {
+            glVertex2i(_cdata[_csize-2], _cdata[_csize-1]);
+            glVertex2i(_cdata[_csize], _cdata[_csize+1]);
+         }
+         if (_slist->check(_lsize-1))// if last point is selected
+         {
+            glVertex2i(_cdata[0], _cdata[1]);
+            glVertex2i(_cdata[(2*_csize)-2], _cdata[(2*_csize)-1]);
+         }
+      }
+      glEnd();
+   }
+}
+
 //=============================================================================
 //
 // class TextOvlBox
@@ -619,6 +739,14 @@ unsigned trend::TrendRef::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 #endif
    pindex += 8;
    return 4;
+}
+
+void trend::TrendRef::drctDrawContour()
+{
+   glBegin(GL_LINE_LOOP);
+   for (unsigned i = 0; i < 4; i++)
+      glVertex2i(_obox[2*i], _obox[2*i+1]);
+   glEnd();
 }
 
 //=============================================================================
