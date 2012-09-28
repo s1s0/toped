@@ -703,6 +703,13 @@ unsigned trend::TextOvlBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
    return 4;
 }
 
+void trend::TextOvlBox::drctDrawContour()
+{
+   glBegin(GL_LINE_LOOP);
+   for (unsigned i = 0; i < 4; i++)
+      glVertex2i(_obox[2*i], _obox[2*i+1]);
+   glEnd();
+}
 //=============================================================================
 //
 // class TrendRef
@@ -1262,6 +1269,10 @@ trend::TrendBase::~TrendBase()
    {
       delete (*CLAY);
    }
+   delete _refLayer;
+   // GRC clean-up
+   for (DataLay::Iterator CLAY = _grcData.begin(); CLAY != _grcData.end(); CLAY++)
+      delete (*CLAY);
    //
    assert(1 == _cellStack.size());
    delete (_cellStack.top()); _cellStack.pop();

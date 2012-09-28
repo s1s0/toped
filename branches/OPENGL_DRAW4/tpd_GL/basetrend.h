@@ -227,6 +227,7 @@ namespace trend {
                            TextOvlBox(const DBbox&, const CTM&);
          virtual          ~TextOvlBox() {}
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
+         virtual void      drctDrawContour();
       private:
          int4b             _obox[8];
    };
@@ -618,7 +619,7 @@ namespace trend {
          void              registerWire  (TrendWire*);
          void              registerText  (TrendText*, TextOvlBox*);
 
-         virtual void      collect(TNDR_GLDATAT*, unsigned int*) = 0;
+         virtual void      collect(TNDR_GLDATAT*, unsigned int*)  {assert(false);}
          virtual void      draw(layprop::DrawProperties*) = 0;
          virtual void      drawTexts(layprop::DrawProperties*) = 0;
          TrendRef*         swapRefCells(TrendRef*);
@@ -809,8 +810,8 @@ namespace trend {
          virtual void      draw(layprop::DrawProperties*) = 0;
          virtual void      drawSelected() = 0;
          virtual void      drawTexts(layprop::DrawProperties*) = 0;
-         virtual void      collect(bool, GLuint, GLuint) = 0;
-         virtual void      collectSelected(unsigned int*) = 0;
+         virtual void      collect(bool, GLuint, GLuint) { assert(false); }
+         virtual void      collectSelected(unsigned int*) { assert(false); }
          unsigned          total_points() {return _num_total_points;}
          unsigned          total_indexs() {return _num_total_indexs;}
          unsigned          total_slctdx();
@@ -847,7 +848,7 @@ namespace trend {
                            TrendRefLay();
          virtual          ~TrendRefLay();
          void              addCellOBox(TrendRef*, word, bool);
-         virtual void      collect(GLuint) = 0;
+         virtual void      collect(GLuint)  { assert(false); }
          virtual void      draw(layprop::DrawProperties*) = 0;
          unsigned          total_points();
          unsigned          total_indexes();

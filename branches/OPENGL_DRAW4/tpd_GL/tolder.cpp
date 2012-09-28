@@ -31,19 +31,10 @@
 #include "viewprop.h"
 #include "trend.h"
 
-
-trend::TolderTV::TolderTV(TrendRef* const refCell, bool filled, bool reusable,
-                   unsigned parray_offset, unsigned iarray_offset) :
-   TrendTV              (refCell, filled, reusable, parray_offset, iarray_offset)
-{
-}
-
-
-void trend::TolderTV::collect(TNDR_GLDATAT* point_array, unsigned int* index_array)
-{
-   assert(false); // should not be called in this implementation
-}
-
+//=============================================================================
+//
+// class TolderTV
+//
 void trend::TolderTV::draw(layprop::DrawProperties* drawprop)
 {
    // First - deal with openGL translation matrix
@@ -80,6 +71,10 @@ void trend::TolderTV::draw(layprop::DrawProperties* drawprop)
       {
          (*CSH)->drctDrawContour();
       }
+      for (RefTxtList::const_iterator CSH = _txto_data.begin(); CSH != _txto_data.end(); CSH++)
+      {
+         (*CSH)->drctDrawContour();
+      }
    }
    glPopMatrix();
 }
@@ -94,10 +89,6 @@ void trend::TolderTV::drawTexts(layprop::DrawProperties* drawprop)
       (*TSTR)->draw(_filled);
 
    glPopMatrix();
-}
-
-trend::TolderTV::~TolderTV()
-{
 }
 
 //=============================================================================
@@ -122,11 +113,6 @@ void trend::TolderReTV::drawTexts(layprop::DrawProperties* drawprop)
 //
 // class TolderLay
 //
-trend::TolderLay::TolderLay():
-   TrendLay              (             )
-{
-}
-
 void trend::TolderLay::newSlice(TrendRef* const ctrans, bool fill, bool reusable, unsigned)
 {
    assert( 0 == total_slctdx());
@@ -153,16 +139,6 @@ bool trend::TolderLay::chunkExists(TrendRef* const ctrans, bool filled)
    }
    _reLayData.push_back(DEBUG_NEW TolderReTV(achunk->second, ctrans));
    return true;
-}
-
-void trend::TolderLay::collect(bool fill, GLuint, GLuint)
-{
-   assert(false);// should not be called in this implementation
-}
-
-void trend::TolderLay::collectSelected(unsigned int* slctd_array)
-{
-   assert(false);// should not be called in this implementation
 }
 
 void trend::TolderLay::draw(layprop::DrawProperties* drawprop)
@@ -198,23 +174,10 @@ void trend::TolderLay::drawTexts(layprop::DrawProperties* drawprop)
    }
 }
 
-trend::TolderLay::~TolderLay()
-{
-}
-
 //=============================================================================
 //
 // class TolderRefLay
 //
-trend::TolderRefLay::TolderRefLay() :
-   TrendRefLay    (      )
-{
-}
-
-void trend::TolderRefLay::collect(GLuint)
-{
-   assert(false);
-}
 
 void trend::TolderRefLay::draw(layprop::DrawProperties* drawprop)
 {
@@ -235,25 +198,38 @@ void trend::TolderRefLay::draw(layprop::DrawProperties* drawprop)
    }
 }
 
-trend::TolderRefLay::~TolderRefLay()
-{
-}
-
 //=============================================================================
 //
 // class Tolder
 //
 trend::Tolder::Tolder( layprop::DrawProperties* drawprop, real UU ) :
-    TrendBase            (drawprop, UU),
-    _sindex_array        (       NULL )
+    TrendBase            (drawprop, UU)
 {
    _refLayer = DEBUG_NEW TolderRefLay();
 }
 
 
-void trend::Tolder::grid( const real, const std::string )
+void trend::Tolder::grid( const real step, const std::string color)
 {
-   //TODO
+   int gridstep = (int)rint(step / _UU);
+   if ( abs((int)(_drawprop->scrCtm().a() * gridstep)) > GRID_LIMIT)
+   {
+      _drawprop->setGridColor(color);
+      // set first grid step to be multiply on the step
+      TP bl = TP(_drawprop->clipRegion().p1().x(),_drawprop->clipRegion().p2().y());
+      TP tr = TP(_drawprop->clipRegion().p2().x(),_drawprop->clipRegion().p1().y());
+      int signX = (bl.x() > 0) ? 1 : -1;
+      int X_is = (int)((rint(abs(bl.x()) / gridstep)) * gridstep * signX);
+      int signY = (tr.y() > 0) ? 1 : -1;
+      int Y_is = (int)((rint(abs(tr.y()) / gridstep)) * gridstep * signY);
+
+      //... and finaly draw the grid
+      glBegin(GL_POINTS);
+      for (int i = X_is; i < tr.x()+1; i += gridstep)
+         for (int j = Y_is; j < bl.y()+1; j += gridstep)
+            glVertex2i(i,j);
+      glEnd();
+   }
 }
 
 void trend::Tolder::setLayer(const LayerDef& laydef, bool has_selected)
@@ -361,7 +337,8 @@ bool trend::Tolder::collect()
       else                         return true;
    }
    //
-   // that's about it...
+   // that's about it, there is nothing to collect down the hierarchy in
+   // this implementation
    return true;
 }
 
@@ -410,7 +387,7 @@ void trend::Tolder::grcDraw()
 
 void trend::Tolder::cleanUp()
 {
-   //TODO
+   // nothing to do in this implementation here
 }
 
 void trend::Tolder::grcCleanUp()
@@ -421,8 +398,5 @@ void trend::Tolder::grcCleanUp()
 trend::Tolder::~Tolder()
 {
    delete _refLayer;
-   if (NULL != _sindex_array)
-      delete [] _sindex_array;
-
 }
 
