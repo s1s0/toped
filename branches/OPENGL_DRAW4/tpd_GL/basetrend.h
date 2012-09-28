@@ -882,6 +882,7 @@ namespace trend {
                            TrendBase( layprop::DrawProperties* drawprop, real UU );
          virtual          ~TrendBase();
          virtual void      grid( const real, const std::string ) = 0;
+         virtual void      zeroCross( ) = 0;
          virtual void      setLayer(const LayerDef&, bool) = 0;
          virtual void      setGrcLayer(bool, const LayerDef&) = 0;
          virtual bool      chunkExists(const LayerDef&, bool) = 0;

@@ -1304,17 +1304,17 @@ bool laydata::TdtDesign::editTop() {
    return _target.top();
 }
 
-void laydata::TdtDesign::openGlDraw(layprop::DrawProperties& drawprop)
-{
-   if (_target.checkEdit())
-   {
-      drawprop.initCtmStack();
-      drawprop.initDrawRefStack(_target.pEditChain());
-      _target.view()->openGlDraw(drawprop, _target.isCell());
-      drawprop.clearCtmStack();
-      drawprop.clearDrawRefStack();
-   }
-}
+//void laydata::TdtDesign::openGlDraw(layprop::DrawProperties& drawprop)
+//{
+//   if (_target.checkEdit())
+//   {
+//      drawprop.initCtmStack();
+//      drawprop.initDrawRefStack(_target.pEditChain());
+//      _target.view()->openGlDraw(drawprop, _target.isCell());
+//      drawprop.clearCtmStack();
+//      drawprop.clearDrawRefStack();
+//   }
+//}
 
 void laydata::TdtDesign::openGlRender(trend::TrendBase& rend)
 {
@@ -1812,20 +1812,20 @@ laydata::TdtDefaultCell* laydata::DrcLibrary::checkCell(std::string name)
    else return _cells[name];
 }
 
-void laydata::DrcLibrary::openGlDraw(layprop::DrawProperties& drawProp, std::string cell)
-{
-   drawProp.setState(layprop::DRC);
-   laydata::TdtDefaultCell* dst_structure = checkCell(cell);
-   if (dst_structure)
-   {
-      drawProp.initCtmStack();
-//    drawProp->initDrawRefStack(NULL); // no references yet in the DRC DB
-      dst_structure->openGlDraw(drawProp);
-//    drawProp->clearCtmStack();
-      drawProp.clearDrawRefStack();
-   }
-   drawProp.setState(layprop::DB);
-}
+//void laydata::DrcLibrary::openGlDraw(layprop::DrawProperties& drawProp, std::string cell)
+//{
+//   drawProp.setState(layprop::DRC);
+//   laydata::TdtDefaultCell* dst_structure = checkCell(cell);
+//   if (dst_structure)
+//   {
+//      drawProp.initCtmStack();
+////    drawProp->initDrawRefStack(NULL); // no references yet in the DRC DB
+//      dst_structure->openGlDraw(drawProp);
+////    drawProp->clearCtmStack();
+//      drawProp.clearDrawRefStack();
+//   }
+//   drawProp.setState(layprop::DB);
+//}
 
 void laydata::DrcLibrary::openGlRender(trend::TrendBase& renderer, std::string cell, CTM& cctm)
 {

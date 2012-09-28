@@ -551,73 +551,73 @@ byte laydata::QTreeTmpl<DataT>::biggest(int8b* array) const
  *  Draws also the select marks in case shape is selected.\n
  *  This is the cherry of the QTreeTmpl algorithm cake
  */
-template <typename DataT>
-void laydata::QTreeTmpl<DataT>::openGlDraw(layprop::DrawProperties& drawprop,
-                                                   const TObjDataPairList* slst, bool fill) const
-{
-   if (empty()) return;
-   // check the entire holder for clipping...
-   DBbox clip = drawprop.clipRegion();
-   DBbox areal = _overlap.overlap(drawprop.topCtm());
-   if      ( 0ll == clip.cliparea(areal)     ) return;
-   else if (!areal.visible(drawprop.scrCtm(), drawprop.visualLimit())) return;
-   // The drawing will be faster like this for the cells without selected shapes
-   // that will be the wast majority of the cases. A bit bigger code though.
-   // Seems the bargain is worth it.
-   if (slst)
-   {
-      for (QuadsIter i = 0; i < _props._numObjects; i++)
-      {
-         DataT* wdt = _data[i];
-         PointVector points;
-         // pre-calculate drawing data
-         wdt->openGlPrecalc(drawprop, points);
-         if (0 != points.size())
-         {
-            // draw the shape fill (contents of refs, arefs and texts)
-            if (fill)  wdt->openGlDrawFill(drawprop, points);
-            // draw the outline of the shapes and overlapping boxes
-            wdt->openGlDrawLine(drawprop, points);
-            if ((sh_selected == wdt->status()) || (sh_partsel == wdt->status()))
-            {
-               drawprop.setLineProps(true);
-               if       (sh_selected == wdt->status())
-                  wdt->openGlDrawSel(points, NULL);
-               else if  (sh_partsel  == wdt->status())
-               {
-                  typename TObjDataPairList::const_iterator SI;
-                  for (SI = slst->begin(); SI != slst->end(); SI++)
-                     if (SI->first == wdt) break;
-                  assert(SI != slst->end());
-                  wdt->openGlDrawSel(points, &(SI->second));
-               }
-               drawprop.setLineProps(false);
-            }
-            wdt->openGlPostClean(drawprop, points);
-         }
-      }
-   }
-   else
-   {
-      // if there are no selected shapes
-      for (QuadsIter i = 0; i < _props._numObjects; i++)
-      {
-         DataT* wdt = _data[i];
-         PointVector points;
-         // pre-calculate drawing data
-         wdt->openGlPrecalc(drawprop, points);
-         // draw the shape fill (contents of refs, arefs and texts)
-         if (fill)  wdt->openGlDrawFill(drawprop, points);
-         // draw the outline of the shapes and overlapping boxes
-         wdt->openGlDrawLine(drawprop, points);
-         // clean-up
-         wdt->openGlPostClean(drawprop, points);
-      }
-   }
-
-   for (byte i = 0; i < _props.numSubQuads(); i++)
-      _subQuads[i]->openGlDraw(drawprop, slst, fill);
-}
+//template <typename DataT>
+//void laydata::QTreeTmpl<DataT>::openGlDraw(layprop::DrawProperties& drawprop,
+//                                                   const TObjDataPairList* slst, bool fill) const
+//{
+//   if (empty()) return;
+//   // check the entire holder for clipping...
+//   DBbox clip = drawprop.clipRegion();
+//   DBbox areal = _overlap.overlap(drawprop.topCtm());
+//   if      ( 0ll == clip.cliparea(areal)     ) return;
+//   else if (!areal.visible(drawprop.scrCtm(), drawprop.visualLimit())) return;
+//   // The drawing will be faster like this for the cells without selected shapes
+//   // that will be the wast majority of the cases. A bit bigger code though.
+//   // Seems the bargain is worth it.
+//   if (slst)
+//   {
+//      for (QuadsIter i = 0; i < _props._numObjects; i++)
+//      {
+//         DataT* wdt = _data[i];
+//         PointVector points;
+//         // pre-calculate drawing data
+//         wdt->openGlPrecalc(drawprop, points);
+//         if (0 != points.size())
+//         {
+//            // draw the shape fill (contents of refs, arefs and texts)
+//            if (fill)  wdt->openGlDrawFill(drawprop, points);
+//            // draw the outline of the shapes and overlapping boxes
+//            wdt->openGlDrawLine(drawprop, points);
+//            if ((sh_selected == wdt->status()) || (sh_partsel == wdt->status()))
+//            {
+//               drawprop.setLineProps(true);
+//               if       (sh_selected == wdt->status())
+//                  wdt->openGlDrawSel(points, NULL);
+//               else if  (sh_partsel  == wdt->status())
+//               {
+//                  typename TObjDataPairList::const_iterator SI;
+//                  for (SI = slst->begin(); SI != slst->end(); SI++)
+//                     if (SI->first == wdt) break;
+//                  assert(SI != slst->end());
+//                  wdt->openGlDrawSel(points, &(SI->second));
+//               }
+//               drawprop.setLineProps(false);
+//            }
+//            wdt->openGlPostClean(drawprop, points);
+//         }
+//      }
+//   }
+//   else
+//   {
+//      // if there are no selected shapes
+//      for (QuadsIter i = 0; i < _props._numObjects; i++)
+//      {
+//         DataT* wdt = _data[i];
+//         PointVector points;
+//         // pre-calculate drawing data
+//         wdt->openGlPrecalc(drawprop, points);
+//         // draw the shape fill (contents of refs, arefs and texts)
+//         if (fill)  wdt->openGlDrawFill(drawprop, points);
+//         // draw the outline of the shapes and overlapping boxes
+//         wdt->openGlDrawLine(drawprop, points);
+//         // clean-up
+//         wdt->openGlPostClean(drawprop, points);
+//      }
+//   }
+//
+//   for (byte i = 0; i < _props.numSubQuads(); i++)
+//      _subQuads[i]->openGlDraw(drawprop, slst, fill);
+//}
 
 template <typename DataT>
 short laydata::QTreeTmpl<DataT>::clipType(trend::TrendBase& rend) const

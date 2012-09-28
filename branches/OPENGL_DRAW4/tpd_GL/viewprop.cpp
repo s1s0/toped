@@ -204,28 +204,28 @@ void layprop::SupplementaryData::mouseStop()
 //*****************************************************************************
 // class LayoutGrid
 //*****************************************************************************
-void layprop::LayoutGrid::Draw(const DrawProperties& drawprop, const real DBscale)
-{
-   int gridstep = (int)rint(_step / DBscale);
-   if (_visual && ( abs((int)(drawprop.scrCtm().a() * gridstep)) > GRID_LIMIT))
-   {
-      drawprop.setGridColor(_color);
-      // set first grid step to be multiply on the step
-      TP bl = TP(drawprop.clipRegion().p1().x(),drawprop.clipRegion().p2().y());
-      TP tr = TP(drawprop.clipRegion().p2().x(),drawprop.clipRegion().p1().y());
-      int signX = (bl.x() > 0) ? 1 : -1;
-      int X_is = (int)((rint(abs(bl.x()) / gridstep)) * gridstep * signX);
-      int signY = (tr.y() > 0) ? 1 : -1;
-      int Y_is = (int)((rint(abs(tr.y()) / gridstep)) * gridstep * signY);
-
-      //... and finaly draw the grid
-      glBegin(GL_POINTS);
-      for (int i = X_is; i < tr.x()+1; i += gridstep)
-         for (int j = Y_is; j < bl.y()+1; j += gridstep)
-            glVertex2i(i,j);
-      glEnd();
-   }
-}
+//void layprop::LayoutGrid::Draw(const DrawProperties& drawprop, const real DBscale)
+//{
+//   int gridstep = (int)rint(_step / DBscale);
+//   if (_visual && ( abs((int)(drawprop.scrCtm().a() * gridstep)) > GRID_LIMIT))
+//   {
+//      drawprop.setGridColor(_color);
+//      // set first grid step to be multiply on the step
+//      TP bl = TP(drawprop.clipRegion().p1().x(),drawprop.clipRegion().p2().y());
+//      TP tr = TP(drawprop.clipRegion().p2().x(),drawprop.clipRegion().p1().y());
+//      int signX = (bl.x() > 0) ? 1 : -1;
+//      int X_is = (int)((rint(abs(bl.x()) / gridstep)) * gridstep * signX);
+//      int signY = (tr.y() > 0) ? 1 : -1;
+//      int Y_is = (int)((rint(abs(tr.y()) / gridstep)) * gridstep * signY);
+//
+//      //... and finaly draw the grid
+//      glBegin(GL_POINTS);
+//      for (int i = X_is; i < tr.x()+1; i += gridstep)
+//         for (int j = Y_is; j < bl.y()+1; j += gridstep)
+//            glVertex2i(i,j);
+//      glEnd();
+//   }
+//}
 
 //=============================================================================
 layprop::PropertyCenter::PropertyCenter() :
@@ -290,27 +290,27 @@ bool layprop::PropertyCenter::viewGrid(byte No, bool status) {
    return status;
 }
 
-void layprop::PropertyCenter::drawGrid(const DrawProperties* drawProp) const
-{
-   typedef gridlist::const_iterator CI;
-   for(CI p = _grid.begin(); p != _grid.end(); p++)
-      p->second->Draw(*drawProp, _UU);
-}
+//void layprop::PropertyCenter::drawGrid(const DrawProperties* drawProp) const
+//{
+//   typedef gridlist::const_iterator CI;
+//   for(CI p = _grid.begin(); p != _grid.end(); p++)
+//      p->second->Draw(*drawProp, _UU);
+//}
 
-void layprop::PropertyCenter::drawZeroCross(const DrawProperties* drawProp) const
-{
-   if (!_zeroCross) return;
-   glLineStipple(1,0xcccc);
-   glEnable(GL_LINE_STIPPLE);
-   glBegin(GL_LINES);
-   glColor4f((GLfloat)1, (GLfloat)1, (GLfloat)1, (GLfloat)0.7); // gray
-   glVertex2i(0, drawProp->clipRegion().p1().y());
-   glVertex2i(0, drawProp->clipRegion().p2().y());
-   glVertex2i(drawProp->clipRegion().p1().x(), 0);
-   glVertex2i(drawProp->clipRegion().p2().x(), 0);
-   glEnd();
-   glDisable(GL_LINE_STIPPLE);
-}
+//void layprop::PropertyCenter::drawZeroCross(const DrawProperties* drawProp) const
+//{
+//   if (!_zeroCross) return;
+//   glLineStipple(1,0xcccc);
+//   glEnable(GL_LINE_STIPPLE);
+//   glBegin(GL_LINES);
+//   glColor4f((GLfloat)1, (GLfloat)1, (GLfloat)1, (GLfloat)0.7); // gray
+//   glVertex2i(0, drawProp->clipRegion().p1().y());
+//   glVertex2i(0, drawProp->clipRegion().p2().y());
+//   glVertex2i(drawProp->clipRegion().p1().x(), 0);
+//   glVertex2i(drawProp->clipRegion().p2().x(), 0);
+//   glEnd();
+//   glDisable(GL_LINE_STIPPLE);
+//}
 
 void layprop::PropertyCenter::setUU(real UU) {
    _UU = UU;

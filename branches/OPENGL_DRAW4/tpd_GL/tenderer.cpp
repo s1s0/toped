@@ -788,6 +788,11 @@ void trend::Tenderer::grid(const real step, const std::string color)
    }
 }
 
+void trend::Tenderer::zeroCross()
+{
+   //TODO
+}
+
 bool trend::Tenderer::collect()
 {
    // First filter-out the layers that doesn't have any objects on them,

@@ -735,19 +735,19 @@ void DataCenter::mouseRotate()
    unlockTDT(dbLibDir);
 }
 
-void DataCenter::render(const CTM& layCTM)
-{
-   openGlRender(layCTM);
-   //TODO code below is temporary
-//   switch (TRENDC->renderType())
-//   {
-//      case trend::tocom    : assert(false);          break;// shouldn't end-up here ever
-//      case trend::tolder   : openGlDraw(layCTM);     break;// basic (i.e. openGL 1.1)
-//      case trend::tenderer : openGlRender(layCTM);   break;// VBO
-//      case trend::toshader : assert(false);          break;//TODO
-//      default: assert(false); break;
-//   }
-}
+//void DataCenter::render(const CTM& layCTM)
+//{
+//   openGlRender(layCTM);
+//   //TODO code below is temporary
+////   switch (TRENDC->renderType())
+////   {
+////      case trend::tocom    : assert(false);          break;// shouldn't end-up here ever
+////      case trend::tolder   : openGlDraw(layCTM);     break;// basic (i.e. openGL 1.1)
+////      case trend::tenderer : openGlRender(layCTM);   break;// VBO
+////      case trend::toshader : assert(false);          break;//TODO
+////      default: assert(false); break;
+////   }
+//}
 
 void DataCenter::mouseHoover(TP& position)
 {
@@ -790,68 +790,68 @@ void DataCenter::setRecoverWire(bool rcv)
 }
 
 
-void DataCenter::openGlDraw(const CTM& layCTM)
-{
-   if (_TEDLIB())
-   {
-      // Don't block the drawing if the databases are
-      // locked. This will block all redraw activities including UI
-      // which have nothing to do with the DB. Drop a message in the log
-      // and keep going!
-      layprop::DrawProperties* drawProp;
-      if (PROPC->lockDrawProp(drawProp))
-      {
-         PROPC->drawGrid(drawProp);
-         PROPC->drawZeroCross(drawProp);
-         if (wxMUTEX_NO_ERROR == _DBLock.TryLock())
-         {
-//            TpdPost::toped_status(console::TSTS_RENDERON);
-            TpdPost::render_status(true);
-            #ifdef RENDER_PROFILING
-               HiResTimer rendTimer;
-            #endif
-            // There is no need to check for an active cell. If there isn't one
-            // the function will return silently.
-            _TEDLIB()->openGlDraw(*drawProp);
-            // Draw DRC data (if any)
-            // TODO! clean-up the DRC stuff here - see the comment below in the
-            // openGlRender method
-            if(_DRCDB)
-            {
-               if (wxMUTEX_NO_ERROR == _DRCLock.TryLock())
-               {
-                  std::string cell = DRCData->cellName();
-                  _DRCDB->openGlDraw(*drawProp, cell);
-                  VERIFY(wxMUTEX_NO_ERROR == _DRCLock.Unlock());
-               }
-            }
-            #ifdef RENDER_PROFILING
-               rendTimer.report("Total elapsed rendering time");
-            #endif
-            VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
-//            TpdPost::toped_status(console::TSTS_RENDEROFF);
-            TpdPost::render_status(false);
-         }
-         else
-         {
-            // If DB is locked - skip the DB drawing, but draw all the property DB stuff
-            tell_log(console::MT_INFO,std::string("DB busy. Viewport redraw skipped"));
-         }
-         PROPC->drawRulers(layCTM);
-      }
-      else
-      {
-         // If property DB is locked - we can't do much drawing even if the
-         // DB is not locked. In the same time there should not be an operation
-         // which holds the property DB lock for a long time. So it should be
-         // rather an exception
-         tell_log(console::MT_INFO,std::string("Property DB busy. Viewport redraw skipped"));
-      }
-      PROPC->unlockDrawProp(drawProp, false);
-   }
-}
+//void DataCenter::openGlDraw(const CTM& layCTM)
+//{
+//   if (_TEDLIB())
+//   {
+//      // Don't block the drawing if the databases are
+//      // locked. This will block all redraw activities including UI
+//      // which have nothing to do with the DB. Drop a message in the log
+//      // and keep going!
+//      layprop::DrawProperties* drawProp;
+//      if (PROPC->lockDrawProp(drawProp))
+//      {
+//         PROPC->drawGrid(drawProp);
+//         PROPC->drawZeroCross(drawProp);
+//         if (wxMUTEX_NO_ERROR == _DBLock.TryLock())
+//         {
+////            TpdPost::toped_status(console::TSTS_RENDERON);
+//            TpdPost::render_status(true);
+//            #ifdef RENDER_PROFILING
+//               HiResTimer rendTimer;
+//            #endif
+//            // There is no need to check for an active cell. If there isn't one
+//            // the function will return silently.
+//            _TEDLIB()->openGlDraw(*drawProp);
+//            // Draw DRC data (if any)
+//            // TODO! clean-up the DRC stuff here - see the comment below in the
+//            // openGlRender method
+//            if(_DRCDB)
+//            {
+//               if (wxMUTEX_NO_ERROR == _DRCLock.TryLock())
+//               {
+//                  std::string cell = DRCData->cellName();
+//                  _DRCDB->openGlDraw(*drawProp, cell);
+//                  VERIFY(wxMUTEX_NO_ERROR == _DRCLock.Unlock());
+//               }
+//            }
+//            #ifdef RENDER_PROFILING
+//               rendTimer.report("Total elapsed rendering time");
+//            #endif
+//            VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
+////            TpdPost::toped_status(console::TSTS_RENDEROFF);
+//            TpdPost::render_status(false);
+//         }
+//         else
+//         {
+//            // If DB is locked - skip the DB drawing, but draw all the property DB stuff
+//            tell_log(console::MT_INFO,std::string("DB busy. Viewport redraw skipped"));
+//         }
+//         PROPC->drawRulers(layCTM);
+//      }
+//      else
+//      {
+//         // If property DB is locked - we can't do much drawing even if the
+//         // DB is not locked. In the same time there should not be an operation
+//         // which holds the property DB lock for a long time. So it should be
+//         // rather an exception
+//         tell_log(console::MT_INFO,std::string("Property DB busy. Viewport redraw skipped"));
+//      }
+//      PROPC->unlockDrawProp(drawProp, false);
+//   }
+//}
 
-void DataCenter::openGlRender(const CTM& layCTM)
+void DataCenter::render(const CTM& layCTM)
 {
    if (_TEDLIB())
    {
@@ -933,60 +933,6 @@ void DataCenter::openGlRender(const CTM& layCTM)
    }
 }
 
-
-//tenderer::TopRend* DataCenter::openGlRenderIt(const CTM& layCTM)
-//{
-//   tenderer::TopRend* renderer = NULL;
-//   if (_TEDLIB())
-//   {
-//      // Don't block the drawing if the databases are
-//      // locked. This will block all redraw activities including UI
-//      // which have nothing to do with the DB. Drop a message in the log
-//      // and keep going!
-//      layprop::DrawProperties* drawProp;
-//      if (PROPC->lockDrawProp(drawProp))
-//      {
-//         renderer = DEBUG_NEW tenderer::TopRend( drawProp, PROPC->UU() );
-//         // render the grid
-//         for (byte gridNo = 0; gridNo < 3; gridNo++)
-//         {
-//            const layprop::LayoutGrid* cgrid = PROPC->grid(gridNo);
-//            if ((NULL !=  cgrid) && cgrid->visual())
-//               renderer->grid(cgrid->step(), cgrid->color());
-//         }
-//         //       _properties.drawZeroCross(renderer);
-//         if (wxMUTEX_NO_ERROR == _DBLock.TryLock())
-//         {
-//            TpdPost::render_status(true);
-//            // There is no need to check for an active cell. If there isn't one
-//            // the function will return silently.
-//            _TEDLIB()->openGlRender(*renderer);
-//            // Draw DRC data (if any)
-//            //_DRCDB->openGlDraw(_properties.drawprop());
-//            //TODO the block below should get into the line above
-//
-//            renderer->collect();
-//            VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
-//            TpdPost::render_status(false);
-//         }
-//         else
-//         {
-//            // If DB is locked - skip the DB drawing, but draw all the property DB stuff
-//            tell_log(console::MT_INFO,std::string("DB busy. Viewport redraw skipped"));
-//         }
-//      }
-//      else
-//      {
-//         // If property DB is locked - we can't do much drawing even if the
-//         // DB is not locked. In the same time there should not be an operation
-//         // which holds the property DB lock for a long time. So it should be
-//         // rather an exception
-//         tell_log(console::MT_INFO,std::string("Property DB busy. Viewport redraw skipped"));
-//      }
-//      PROPC->unlockDrawProp(drawProp);
-//   }
-//   return renderer;
-//}
 
 void DataCenter::motionDraw(const CTM& layCTM, TP base, TP newp)
 {
