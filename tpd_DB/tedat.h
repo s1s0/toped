@@ -59,16 +59,16 @@ namespace laydata {
       virtual   void       transfer(const CTM&) = 0;
       //! Copy the object and move it using the input CTM
       virtual   TdtData*   copy(const CTM&) = 0;
-      //! A preparation for drawing - calculating all drawing objects using translation matrix stack.
-      virtual   void       openGlPrecalc(layprop::DrawProperties&, PointVector&) const = 0;
-      //! Draw the outline of the objects
-      virtual   void       openGlDrawLine(layprop::DrawProperties&, const PointVector&) const = 0;
-      //! Draw the object texture
-      virtual   void       openGlDrawFill(layprop::DrawProperties&, const PointVector&) const = 0;
-      //! Draw the outlines of the selected objects
-      virtual   void       openGlDrawSel(const PointVector&, const SGBitSet*) const = 0;
-      //! Clean-up the calculated drawing objects
-      virtual   void       openGlPostClean(layprop::DrawProperties&, PointVector& ptlist) const {ptlist.clear();}
+//      //! A preparation for drawing - calculating all drawing objects using translation matrix stack.
+//      virtual   void       openGlPrecalc(layprop::DrawProperties&, PointVector&) const = 0;
+//      //! Draw the outline of the objects
+//      virtual   void       openGlDrawLine(layprop::DrawProperties&, const PointVector&) const = 0;
+//      //! Draw the object texture
+//      virtual   void       openGlDrawFill(layprop::DrawProperties&, const PointVector&) const = 0;
+//      //! Draw the outlines of the selected objects
+//      virtual   void       openGlDrawSel(const PointVector&, const SGBitSet*) const = 0;
+//      //! Clean-up the calculated drawing objects
+//      virtual   void       openGlPostClean(layprop::DrawProperties&, PointVector& ptlist) const {ptlist.clear();}
       virtual   void       drawRequest(trend::TrendBase&) const = 0;
       //! Draw the outlines of the selected objects
       virtual   void       drawSRequest(trend::TrendBase&, const SGBitSet*) const = 0;
@@ -126,10 +126,10 @@ namespace laydata {
       virtual void         transfer(const CTM&);
       virtual TdtData*     copy(const CTM&);
 
-      virtual void         openGlPrecalc(layprop::DrawProperties&, PointVector&) const;
-      virtual void         openGlDrawLine(layprop::DrawProperties&, const PointVector&) const;
-      virtual void         openGlDrawFill(layprop::DrawProperties&, const PointVector&) const;
-      virtual void         openGlDrawSel(const PointVector&, const SGBitSet*) const;
+//      virtual void         openGlPrecalc(layprop::DrawProperties&, PointVector&) const;
+//      virtual void         openGlDrawLine(layprop::DrawProperties&, const PointVector&) const;
+//      virtual void         openGlDrawFill(layprop::DrawProperties&, const PointVector&) const;
+//      virtual void         openGlDrawSel(const PointVector&, const SGBitSet*) const;
       virtual void         drawRequest(trend::TrendBase&) const;
       virtual void         drawSRequest(trend::TrendBase&, const SGBitSet*) const;
       virtual void         motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
@@ -170,10 +170,10 @@ namespace laydata {
          virtual void      transfer(const CTM&);
          virtual TdtData*  copy(const CTM&);
 
-         virtual void      openGlPrecalc(layprop::DrawProperties&, PointVector&) const;
-         virtual void      openGlDrawLine(layprop::DrawProperties&, const PointVector&) const;
-         virtual void      openGlDrawFill(layprop::DrawProperties&, const PointVector&) const;
-         virtual void      openGlDrawSel(const PointVector&, const SGBitSet*) const;
+//         virtual void      openGlPrecalc(layprop::DrawProperties&, PointVector&) const;
+//         virtual void      openGlDrawLine(layprop::DrawProperties&, const PointVector&) const;
+//         virtual void      openGlDrawFill(layprop::DrawProperties&, const PointVector&) const;
+//         virtual void      openGlDrawSel(const PointVector&, const SGBitSet*) const;
          virtual void      drawRequest(trend::TrendBase&) const;
          virtual void      drawSRequest(trend::TrendBase&, const SGBitSet*) const;
          virtual void      motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
@@ -209,10 +209,10 @@ namespace laydata {
          virtual void      transfer(const CTM&);
          virtual TdtData*  copy(const CTM&);
 
-         virtual void      openGlPrecalc(layprop::DrawProperties&, PointVector&) const;
-         virtual void      openGlDrawLine(layprop::DrawProperties&, const PointVector&) const;
-         virtual void      openGlDrawFill(layprop::DrawProperties&, const PointVector&) const;
-         virtual void      openGlDrawSel(const PointVector&, const SGBitSet*) const;
+//         virtual void      openGlPrecalc(layprop::DrawProperties&, PointVector&) const;
+//         virtual void      openGlDrawLine(layprop::DrawProperties&, const PointVector&) const;
+//         virtual void      openGlDrawFill(layprop::DrawProperties&, const PointVector&) const;
+//         virtual void      openGlDrawSel(const PointVector&, const SGBitSet*) const;
          virtual void      drawRequest(trend::TrendBase&) const;
          virtual void      drawSRequest(trend::TrendBase&, const SGBitSet*) const;
          virtual void      motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
@@ -252,11 +252,11 @@ namespace laydata {
       virtual TdtData*     copy(const CTM& trans) {return DEBUG_NEW TdtCellRef(
                                                _structure,_translation*trans);}
 //       TdtCellRef*          getShapeOver(TP);
-      virtual void         openGlPrecalc(layprop::DrawProperties&, PointVector&) const;
-      virtual void         openGlDrawLine(layprop::DrawProperties&, const PointVector&) const;
-      virtual void         openGlDrawFill(layprop::DrawProperties&, const PointVector&) const;
-      virtual void         openGlDrawSel(const PointVector&, const SGBitSet*) const;
-      virtual void         openGlPostClean(layprop::DrawProperties&, PointVector& ptlist) const;
+//      virtual void         openGlPrecalc(layprop::DrawProperties&, PointVector&) const;
+//      virtual void         openGlDrawLine(layprop::DrawProperties&, const PointVector&) const;
+//      virtual void         openGlDrawFill(layprop::DrawProperties&, const PointVector&) const;
+//      virtual void         openGlDrawSel(const PointVector&, const SGBitSet*) const;
+//      virtual void         openGlPostClean(layprop::DrawProperties&, PointVector& ptlist) const;
       virtual void         drawRequest(trend::TrendBase&) const;
       virtual void         drawSRequest(trend::TrendBase&, const SGBitSet*) const;
       virtual void         motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
@@ -297,10 +297,10 @@ namespace laydata {
       virtual TdtData*     copy(const CTM& trans) {return DEBUG_NEW TdtCellAref(
                               _structure,_translation * trans, _arrprops);}
 
-      virtual void         openGlPrecalc(layprop::DrawProperties&, PointVector&) const;
-      virtual void         openGlDrawLine(layprop::DrawProperties&, const PointVector&) const;
-      virtual void         openGlDrawFill(layprop::DrawProperties&, const PointVector&) const;
-      virtual void         openGlDrawSel(const PointVector&, const SGBitSet*) const;
+//      virtual void         openGlPrecalc(layprop::DrawProperties&, PointVector&) const;
+//      virtual void         openGlDrawLine(layprop::DrawProperties&, const PointVector&) const;
+//      virtual void         openGlDrawFill(layprop::DrawProperties&, const PointVector&) const;
+//      virtual void         openGlDrawSel(const PointVector&, const SGBitSet*) const;
       virtual void         drawRequest(trend::TrendBase&) const;
       virtual void         drawSRequest(trend::TrendBase&, const SGBitSet*) const;
       virtual void         motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
@@ -329,11 +329,11 @@ namespace laydata {
       virtual void         transfer(const CTM& trans)  {_translation *= trans;}
       virtual TdtData*     copy(const CTM& trans) {return DEBUG_NEW TdtText(
                                                   _text,_translation * trans);}
-      virtual void         openGlPrecalc(layprop::DrawProperties&, PointVector&) const;
-      virtual void         openGlDrawLine(layprop::DrawProperties&, const PointVector&) const;
-      virtual void         openGlDrawFill(layprop::DrawProperties&, const PointVector&) const;
-      virtual void         openGlDrawSel(const PointVector&, const SGBitSet*) const;
-      virtual void         openGlPostClean(layprop::DrawProperties&, PointVector& ptlist) const;
+//      virtual void         openGlPrecalc(layprop::DrawProperties&, PointVector&) const;
+//      virtual void         openGlDrawLine(layprop::DrawProperties&, const PointVector&) const;
+//      virtual void         openGlDrawFill(layprop::DrawProperties&, const PointVector&) const;
+//      virtual void         openGlDrawSel(const PointVector&, const SGBitSet*) const;
+//      virtual void         openGlPostClean(layprop::DrawProperties&, PointVector& ptlist) const;
       virtual void         drawRequest(trend::TrendBase&) const;
       virtual void         drawSRequest(trend::TrendBase&, const SGBitSet*) const;
       virtual void         motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
@@ -374,11 +374,11 @@ namespace laydata {
       virtual void         transfer(const CTM&) {assert(false);}
       virtual TdtData*     copy(const CTM& trans) {assert(false);return NULL;}
 //       TdtCellRef*          getShapeOver(TP);
-      virtual void         openGlPrecalc(layprop::DrawProperties&, PointVector&) const;
-      virtual void         openGlDrawLine(layprop::DrawProperties&, const PointVector&) const;
-      virtual void         openGlDrawFill(layprop::DrawProperties&, const PointVector&) const;
-      virtual void         openGlDrawSel(const PointVector&, const SGBitSet*) const;
-      virtual void         openGlPostClean(layprop::DrawProperties&, PointVector& ptlist) const;
+//      virtual void         openGlPrecalc(layprop::DrawProperties&, PointVector&) const;
+//      virtual void         openGlDrawLine(layprop::DrawProperties&, const PointVector&) const;
+//      virtual void         openGlDrawFill(layprop::DrawProperties&, const PointVector&) const;
+//      virtual void         openGlDrawSel(const PointVector&, const SGBitSet*) const;
+//      virtual void         openGlPostClean(layprop::DrawProperties&, PointVector& ptlist) const;
       virtual void         drawRequest(trend::TrendBase&) const;
       virtual void         drawSRequest(trend::TrendBase&, const SGBitSet*) const;
       virtual void         motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;

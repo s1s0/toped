@@ -74,6 +74,7 @@ namespace trend {
                            Tolder( layprop::DrawProperties* drawprop, real UU );
          virtual          ~Tolder();
          virtual void      grid( const real, const std::string );
+         virtual void      zeroCross();
          virtual void      setLayer(const LayerDef&, bool);
          virtual void      setGrcLayer(bool, const LayerDef&);
          virtual bool      chunkExists(const LayerDef&, bool);

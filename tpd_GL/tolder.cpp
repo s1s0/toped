@@ -232,6 +232,20 @@ void trend::Tolder::grid( const real step, const std::string color)
    }
 }
 
+void trend::Tolder::zeroCross()
+{
+   glLineStipple(1,0xcccc);
+   glEnable(GL_LINE_STIPPLE);
+   glBegin(GL_LINES);
+   glColor4f((GLfloat)1, (GLfloat)1, (GLfloat)1, (GLfloat)0.7); // gray
+   glVertex2i(0, _drawprop->clipRegion().p1().y());
+   glVertex2i(0, _drawprop->clipRegion().p2().y());
+   glVertex2i(_drawprop->clipRegion().p1().x(), 0);
+   glVertex2i(_drawprop->clipRegion().p2().x(), 0);
+   glEnd();
+   glDisable(GL_LINE_STIPPLE);
+}
+
 void trend::Tolder::setLayer(const LayerDef& laydef, bool has_selected)
 {
    // Reference layer is processed differently (pushCell), so make sure

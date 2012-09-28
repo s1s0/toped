@@ -566,7 +566,8 @@ void trend::TrendCenter::drawGrid()
 
 void trend::TrendCenter::drawZeroCross()
 {
-   // TODO
+   if (PROPC->zeroCross())
+      _cRenderer->zeroCross();
 }
 
 trend::TrendCenter::~TrendCenter()

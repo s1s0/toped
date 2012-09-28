@@ -111,7 +111,7 @@ namespace laydata {
       bool           editPrev(const bool undo = false);
       bool           editPop();
       bool           editTop();
-      void           openGlDraw(layprop::DrawProperties&);
+//      void           openGlDraw(layprop::DrawProperties&);
       void           openGlRender(trend::TrendBase&);
       void           tmpDraw(const layprop::DrawProperties&, TP, TP);
       void           setTmpData(TdtTmpData* tmpdata) {_tmpdata = tmpdata;}
@@ -269,7 +269,7 @@ namespace laydata {
       TdtDefaultCell*      checkCell(std::string name);
       void                 registerCellRead(std::string, TdtCell*);
       WordList             findSelected(const std::string &cell, TP*); //use for DRCexplainerror
-      void                 openGlDraw(layprop::DrawProperties&, std::string);
+//      void                 openGlDraw(layprop::DrawProperties&, std::string);
       void                 openGlRender(trend::TrendBase&, std::string, CTM&);
       std::string          name()            const {return _name;}
    protected:
