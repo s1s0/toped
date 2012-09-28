@@ -1032,24 +1032,12 @@ void trend::Tenderer::setGrcLayer(bool setEData, const LayerDef& laydef)
 
 trend::Tenderer::~Tenderer()
 {
-   for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
-   {
-      delete (*CLAY);
-   }
-   delete _refLayer;
-   //
-//   sprintf (debug_message, "Rendering summary: %lu vertexes in %i buffers", all_points_drawn, allLayers);
-//   tell_log(console::MT_WARNING,debug_message);
-   //
    if (NULL != _ogl_buffers)
    {
       glDeleteBuffers(_num_ogl_buffers, _ogl_buffers);
       delete [] _ogl_buffers;
       _ogl_buffers = NULL;
    }
-   // GRC clean-up
-   for (DataLay::Iterator CLAY = _grcData.begin(); CLAY != _grcData.end(); CLAY++)
-      delete (*CLAY);
    if (NULL != _ogl_grc_buffers)
    {
       glDeleteBuffers(_num_ogl_grc_buffers, _ogl_grc_buffers);

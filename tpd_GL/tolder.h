@@ -34,10 +34,10 @@ namespace trend {
 
    class TolderTV : public TrendTV {
       public:
-                           TolderTV(TrendRef* const, bool, bool, unsigned, unsigned);
-         virtual          ~TolderTV();
-
-         virtual void      collect(TNDR_GLDATAT*, unsigned int*);
+                           TolderTV(TrendRef* const refCell, bool filled, bool reusable,
+                                          unsigned parray_offset, unsigned iarray_offset) :
+                                 TrendTV(refCell, filled, reusable, parray_offset, iarray_offset) {}
+         virtual          ~TolderTV() {}
          virtual void      draw(layprop::DrawProperties*);
          virtual void      drawTexts(layprop::DrawProperties*);
    };
@@ -52,23 +52,20 @@ namespace trend {
 
    class TolderLay : public TrendLay {
       public:
-                           TolderLay();
-         virtual          ~TolderLay();
+                           TolderLay() : TrendLay() {}
+         virtual          ~TolderLay() {}
          virtual void      newSlice(TrendRef* const, bool, bool /*, bool, unsigned*/);
          virtual void      newSlice(TrendRef* const, bool, bool, unsigned slctd_array_offset);
          virtual bool      chunkExists(TrendRef* const, bool);
          virtual void      draw(layprop::DrawProperties*);
          virtual void      drawSelected();
          virtual void      drawTexts(layprop::DrawProperties*);
-         virtual void      collect(bool, GLuint, GLuint);
-         virtual void      collectSelected(unsigned int*);
    };
 
    class TolderRefLay : public TrendRefLay {
       public:
-                           TolderRefLay();
-         virtual          ~TolderRefLay();
-         virtual void      collect(GLuint);
+                           TolderRefLay() : TrendRefLay() {}
+         virtual          ~TolderRefLay() {}
          virtual void      draw(layprop::DrawProperties*);
    };
 
@@ -86,13 +83,6 @@ namespace trend {
          virtual void      grcDraw();
          virtual void      cleanUp();
          virtual void      grcCleanUp();
-      private:
-         unsigned int*     _sindex_array;
-//         unsigned          _num_ogl_buffers; //! Number of generated openGL VBOs
-//         unsigned          _num_ogl_grc_buffers; //!
-//         GLuint*           _ogl_buffers;     //! Array with the "names" of all openGL buffers
-//         GLuint*           _ogl_grc_buffers; //! Array with the "names" of the GRC related openGL buffers
-//         GLuint            _sbuffer;         //! The "name" of the selected index buffer
    };
 
 }

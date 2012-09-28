@@ -522,6 +522,12 @@ trend::TrendBase* trend::TrendCenter::secureRenderer(layprop::DrawProperties* dr
       case trend::tocom    : assert(false);          break;// shouldn't end-up here ever
       case trend::tolder   :
       {
+         if (NULL != _cRenderer)
+         {
+      //            _cRenderer->cleanUp();
+            _cRenderer->grcCleanUp();
+            delete _cRenderer;
+         }
          _cRenderer = DEBUG_NEW trend::Tolder( drawProp, PROPC->UU() );
          return _cRenderer;
       }
@@ -566,5 +572,5 @@ void trend::TrendCenter::drawZeroCross()
 trend::TrendCenter::~TrendCenter()
 {
    delete fontLib;
-//   if (NULL != _cRenderer) delete _cRenderer;
+   if (NULL != _cRenderer) delete _cRenderer;
 }
