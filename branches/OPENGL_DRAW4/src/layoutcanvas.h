@@ -135,16 +135,16 @@ namespace tui {
       void           viewshift();
    private:
       TpdOglContext* _glRC;
-      void           CursorControl(bool, bool);
-      void           PointUpdate(int nX, int nY);
-      void           update_viewport();
-      void           wnd_paint();
-      void           rubber_paint();
+      void           cursorControl(bool, bool);
+      void           pointUpdate(int nX, int nY);
+      void           updateViewport();
+      void           wndPaint();
+      void           rubberPaint();
       void           boldOnHover();
       void           longCursor();
       void           drawZeroMark();
-      void           UpdateCoordWin(int coord, CVSSTATUS_TYPE postype, int dcoord, CVSSTATUS_TYPE dpostype);
-      void           EventMouseClick(int button);
+      void           updateCoordWin(int coord, CVSSTATUS_TYPE postype, int dcoord, CVSSTATUS_TYPE dpostype);
+      void           eventMouseClick(int button);
       DBbox*         zoomIn();
       DBbox*         zoomOut();
       DBbox*         zoomLeft();
@@ -152,8 +152,8 @@ namespace tui {
       DBbox*         zoomUp();
       DBbox*         zoomDown();
 //      void           drawInterim(const TP&);
-      CTM            _LayCTM;        //! Layout translation matrix
-      TP             _ScrMark;        //! Current marker position in DB units
+      CTM            _layCTM;        //! Layout translation matrix
+      TP             _scrMark;        //! Current marker position in DB units
       TP             _scrMarkOld;     //! Old marker position  in DB units
       TP             _nScrMark;      //! Normalized marker position in DB units
       TP             _nScrMarkOld;   //! Normalized Old marker position  in DB units
