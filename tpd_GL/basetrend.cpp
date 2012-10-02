@@ -1093,9 +1093,11 @@ trend::TrendLay::~TrendLay()
 {
    for (TrendTVList::const_iterator TLAY = _layData.begin(); TLAY != _layData.end(); TLAY++)
       delete (*TLAY);
-
    for (TrendReTVList::const_iterator TLAY = _reLayData.begin(); TLAY != _reLayData.end(); TLAY++)
       delete (*TLAY);
+// not required?!
+//   for (SliceSelected::const_iterator TLAY = _slct_data.begin(); TLAY != _slct_data.end(); TLAY++)
+//      delete (*TLAY);
 }
 
 
@@ -1158,7 +1160,7 @@ trend::TrendRefLay::~TrendRefLay()
 trend::TrendBase::TrendBase( layprop::DrawProperties* drawprop, real UU ) :
    _drawprop           ( drawprop  ),
    _UU                 (        UU ),
-   _data               ( _allData  ),
+   _data               ( &_allData ),
    _clayer             (      NULL ),
    _grcLayer           (      NULL ),
    _cslctd_array_offset(        0u ),
@@ -1199,12 +1201,12 @@ void trend::TrendBase::setHoover(bool hoover)
 {
    if (hoover)
    {
-      _data = _hvrData;
+      _data = &_hvrData;
       assert(_hvrData.empty());
    }
    else
    {
-      _data = _allData;
+      _data = &_allData;
       for (DataLay::Iterator CLAY = _hvrData.begin(); CLAY != _hvrData.end(); CLAY++)
       {
          delete (*CLAY);
@@ -1290,14 +1292,18 @@ trend::TrendBase::~TrendBase()
    {
       delete (*CLAY);
    }
+   _allData.clear();
    for (DataLay::Iterator CLAY = _hvrData.begin(); CLAY != _hvrData.end(); CLAY++)
    {
       delete (*CLAY);
    }
-   delete _refLayer;
+   _hvrData.clear();
    // GRC clean-up
    for (DataLay::Iterator CLAY = _grcData.begin(); CLAY != _grcData.end(); CLAY++)
+   {
       delete (*CLAY);
+   }
+   delete _refLayer;
    //
    assert(1 == _cellStack.size());
    delete (_cellStack.top()); _cellStack.pop();

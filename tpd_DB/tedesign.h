@@ -111,7 +111,6 @@ namespace laydata {
       bool           editPrev(const bool undo = false);
       bool           editPop();
       bool           editTop();
-//      void           openGlDraw(layprop::DrawProperties&);
       void           openGlRender(trend::TrendBase&);
       void           tmpDraw(const layprop::DrawProperties&, TP, TP);
       void           setTmpData(TdtTmpData* tmpdata) {_tmpdata = tmpdata;}
