@@ -1433,16 +1433,14 @@ laydata::AtticList* laydata::TdtDesign::changeSelect(TP* p1, const LayerDefSet& 
 }
 
 
-void laydata::TdtDesign::mouseHoover(TP& position, layprop::DrawProperties& drawprop, const LayerDefSet& unselable)
+void laydata::TdtDesign::mouseHoover(TP& position, trend::TrendBase& rend, const LayerDefSet& unselable)
 {
    if (_target.checkEdit())
    {
       TP selp = position * _target.rARTM();
-      drawprop.initCtmStack();
-      CTM actm(_target.ARTM());
-      drawprop.pushCtm(actm);
-      _target.edit()->mouseHoover(selp, drawprop, unselable);
-      drawprop.clearCtmStack();
+//      rend.initDrawRefStack(_target.pEditChain());
+      _target.edit()->mouseHoover(selp, rend, unselable);
+//      rend.clearDrawRefStack();
    }
 }
 

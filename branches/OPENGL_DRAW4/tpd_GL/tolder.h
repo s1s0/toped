@@ -76,6 +76,7 @@ namespace trend {
          virtual void      grid( const real, const std::string );
          virtual void      zeroCross();
          virtual void      setLayer(const LayerDef&, bool);
+         virtual void      setHvrLayer(const LayerDef&);
          virtual void      setGrcLayer(bool, const LayerDef&);
          virtual bool      chunkExists(const LayerDef&, bool);
          virtual bool      collect();

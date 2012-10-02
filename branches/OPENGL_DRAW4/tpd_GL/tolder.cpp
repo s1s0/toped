@@ -271,6 +271,13 @@ void trend::Tolder::setLayer(const LayerDef& laydef, bool has_selected)
       _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(laydef), false);
 }
 
+void trend::Tolder::setHvrLayer(const LayerDef& laydef)
+{
+   _clayer = DEBUG_NEW TolderLay();
+   _data.add(laydef, _clayer);
+   _clayer->newSlice(_cellStack.top(), false, false, 0 /*_cslctd_array_offset*/);
+}
+
 void trend::Tolder::setGrcLayer(bool, const LayerDef&)
 {
    //TODO

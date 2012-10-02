@@ -509,43 +509,76 @@ trend::TrendCenter::TrendCenter(bool gui, bool forceBasic, bool sprtVbo, bool sp
 
 }
 
-//trend::TrendBase* trend::TrendCenter::secureCollector(layprop::DrawProperties* drawProp)
-//{
-//   return DEBUG_NEW trend::TrendBase(drawProp, PROPC->UU());
-//}
-
-trend::TrendBase* trend::TrendCenter::secureRenderer(layprop::DrawProperties* drawProp)
+trend::TrendBase* trend::TrendCenter::secureRenderer()
 {
-
-   switch (renderType())
+   // Don't block the drawing if the databases are
+   // locked. This will block all redraw activities including UI
+   // which have nothing to do with the DB. Drop a message in the log
+   // and keep going!
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
    {
-      case trend::tocom    : assert(false);          break;// shouldn't end-up here ever
-      case trend::tolder   :
+      switch (_renderType)
       {
-         if (NULL != _cRenderer)
+         case trend::tocom    : assert(false);          break;// shouldn't end-up here ever
+         case trend::tolder   :
          {
-      //            _cRenderer->cleanUp();
-            _cRenderer->grcCleanUp();
-            delete _cRenderer;
+            if (NULL != _cRenderer)
+            {
+         //            _cRenderer->cleanUp();
+               _cRenderer->grcCleanUp();
+               delete _cRenderer;
+            }
+            _cRenderer = DEBUG_NEW trend::Tolder( drawProp, PROPC->UU() );
+            return _cRenderer;
          }
-         _cRenderer = DEBUG_NEW trend::Tolder( drawProp, PROPC->UU() );
+         case trend::tenderer :
+         {
+            if (NULL != _cRenderer)
+            {
+         //            _cRenderer->cleanUp();
+               _cRenderer->grcCleanUp();
+               delete _cRenderer;
+            }
+            _cRenderer = DEBUG_NEW trend::Tenderer( drawProp, PROPC->UU() );
+            return _cRenderer;
+         }
+         case trend::toshader : assert(false);          break;// TODO
+         default: assert(false); break;
+      }
+      return NULL;
+   }
+   else
+   {
+      // If property DB is locked - we can't do much drawing even if the
+      // DB is not locked. In the same time there should not be an operation
+      // which holds the property DB lock for a long time. So it should be
+      // rather an exception
+      tell_log(console::MT_INFO,std::string("Property DB busy. Viewport redraw skipped"));
+      return NULL;
+   }
+}
+
+trend::TrendBase* trend::TrendCenter::getRenderer()
+{
+   if (NULL != _cRenderer)
+   {
+      if (PROPC->lockDrawProp(_cRenderer->drawprop()))
+      {
+         _cRenderer->setHoover(true);
          return _cRenderer;
       }
-      case trend::tenderer :
-      {
-         if (NULL != _cRenderer)
-         {
-      //            _cRenderer->cleanUp();
-            _cRenderer->grcCleanUp();
-            delete _cRenderer;
-         }
-         _cRenderer = DEBUG_NEW trend::Tenderer( drawProp, PROPC->UU() );
-         return _cRenderer;
-      }
-      case trend::toshader : assert(false);          break;// TODO
-      default: assert(false); break;
    }
    return NULL;
+}
+
+void trend::TrendCenter::releaseRenderer()
+{
+   if (NULL != _cRenderer)
+   {
+      _cRenderer->setHoover(false);
+      PROPC->unlockDrawProp(_cRenderer->drawprop(), false);
+   }
 }
 
 void trend::TrendCenter::drawFOnly()

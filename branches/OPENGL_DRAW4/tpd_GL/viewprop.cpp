@@ -50,7 +50,7 @@ layprop::SDLine::SDLine(const TP& p1,const TP& p2, const real UU) : _ln(p1,p2)
    strdist << _length * UU;
    _value = strdist.str();
    _center = TP((_ln.p1().x() + _ln.p2().x()) / 2, (_ln.p1().y() + _ln.p2().y()) / 2 );
-   // get the angle coefficient of the ruler and calculate the corresponing
+   // get the angle coefficient of the ruler and calculate the corresponding
    // functions - will be used during the drawing
    real angle_rad = atan2(_A , -_B);
    _sinus     = sin(angle_rad);
