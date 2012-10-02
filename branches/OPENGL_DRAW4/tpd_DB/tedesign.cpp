@@ -1304,18 +1304,6 @@ bool laydata::TdtDesign::editTop() {
    return _target.top();
 }
 
-//void laydata::TdtDesign::openGlDraw(layprop::DrawProperties& drawprop)
-//{
-//   if (_target.checkEdit())
-//   {
-//      drawprop.initCtmStack();
-//      drawprop.initDrawRefStack(_target.pEditChain());
-//      _target.view()->openGlDraw(drawprop, _target.isCell());
-//      drawprop.clearCtmStack();
-//      drawprop.clearDrawRefStack();
-//   }
-//}
-
 void laydata::TdtDesign::openGlRender(trend::TrendBase& rend)
 {
    if (_target.checkEdit())

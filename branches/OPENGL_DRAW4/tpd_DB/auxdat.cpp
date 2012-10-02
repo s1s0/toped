@@ -78,41 +78,6 @@ DBbox auxdata::TdtGrcPoly::overlap() const
    return ovl;
 }
 
-//void auxdata::TdtGrcPoly::openGlPrecalc(layprop::DrawProperties& drawprop, PointVector& ptlist) const
-//{
-//   // translate the points using the current CTM
-//   ptlist.reserve(_psize);
-//   for (unsigned i = 0; i < _psize; i++)
-//   {
-//      ptlist.push_back(TP(_pdata[2*i], _pdata[2*i+1]) * drawprop.topCtm());
-//   }
-//}
-
-//void auxdata::TdtGrcPoly::openGlDrawLine(layprop::DrawProperties&, const PointVector& ptlist) const
-//{
-//   glBegin(GL_LINE_LOOP);
-//   for (unsigned i = 0; i < ptlist.size(); i++)
-//      glVertex2i(ptlist[i].x(), ptlist[i].y());
-//   glEnd();
-//}
-
-//void auxdata::TdtGrcPoly::openGlDrawFill(layprop::DrawProperties&, const PointVector&) const
-//{
-//   // Not filled!
-//}
-
-//void auxdata::TdtGrcPoly::openGlDrawSel(const PointVector& ptlist, const SGBitSet*) const
-//{
-//   assert(0 != ptlist.size());
-//   if (sh_selected == status())
-//   {
-//      glBegin(GL_LINE_LOOP);
-//      for (unsigned i = 0; i < ptlist.size(); i++)
-//         glVertex2i(ptlist[i].x(), ptlist[i].y());
-//      glEnd();
-//   }
-//}
-
 void auxdata::TdtGrcPoly::drawRequest(trend::TrendBase& rend) const
 {
    rend.grcpoly(_pdata, _psize);
@@ -260,91 +225,6 @@ DBbox auxdata::TdtGrcWire::overlap() const
    laydata::WireContour wcontour(_pdata, _psize, _width);
    return wcontour.getCOverlap();
 }
-
-//void auxdata::TdtGrcWire::openGlPrecalc(layprop::DrawProperties& drawprop, PointVector& ptlist) const
-//{
-//   // first check whether to draw only the center line
-//   DBbox wsquare = DBbox(TP(0,0),TP((int4b)_width, (int4b)_width));
-//   bool center_line_only = !wsquare.visible(drawprop.topCtm() * drawprop.scrCtm(), drawprop.visualLimit());
-//   if (center_line_only)
-//   {
-//      ptlist.reserve(_psize+1);
-//      ptlist.push_back(TP(_psize, 0));
-//      for (unsigned i = 0; i < _psize; i++)
-//         ptlist.push_back(TP( _pdata[2*i], _pdata[2*i+1] ) * drawprop.topCtm());
-//   }
-//   else
-//   {
-//      laydata::WireContourAux wcontour(_pdata, _psize, _width, drawprop.topCtm());
-//      wcontour.getRenderingData(ptlist);
-//   }
-//}
-
-//void auxdata::TdtGrcWire::openGlDrawLine(layprop::DrawProperties&, const PointVector& ptlist) const
-//{
-//   if (0 == ptlist.size()) return;
-//   word lsize = ptlist[0].x();
-//   word csize = ptlist[0].y();
-//   // the central line
-//   if (0 == lsize) return;
-//   glBegin(GL_LINE_STRIP);
-//   for (word i = 0; i < lsize; i++)
-//      glVertex2i(ptlist[i+1].x(), ptlist[i+1].y());
-//   glEnd();
-//   // the contour
-//   if (0 == csize) return;
-//   glBegin(GL_LINE_LOOP);
-//   for (word i = lsize; i <= lsize + csize; i++)
-//      glVertex2i(ptlist[i].x(), ptlist[i].y());
-//   glEnd();
-//}
-
-//void auxdata::TdtGrcWire::openGlDrawFill(layprop::DrawProperties&, const PointVector&) const
-//{
-//   // Never filled
-//}
-
-//void auxdata::TdtGrcWire::openGlDrawSel(const PointVector& ptlist, const SGBitSet* pslist) const
-//{
-//   if (0 == ptlist.size()) return;
-//   word lsize = ptlist[0].x();
-//   word csize = ptlist[0].y();
-//   if (0 == lsize) return;
-//   if (sh_selected == status())
-//   {
-//      glBegin(GL_LINE_STRIP);
-//      for (word i = 0; i < lsize; i++)
-//         glVertex2i(ptlist[i+1].x(), ptlist[i+1].y());
-//      glEnd();
-//   }
-//   else if (sh_partsel == status())
-//   {
-//      assert(pslist);
-//      glBegin(GL_LINES);
-//      for (unsigned i = 0; i < _psize-1; i++)
-//      {
-//         if (pslist->check(i) && pslist->check((i+1)%_psize))
-//         {
-//            glVertex2i(ptlist[i+1].x(), ptlist[i+1].y());
-//            glVertex2i(ptlist[(i+1)%_psize + 1].x(), ptlist[(i+1)%_psize + 1].y());
-//         }
-//      }
-//      if (csize > 0)
-//      {
-//         if (pslist->check(0))
-//         {// if only the first is selected
-//            glVertex2i(ptlist[lsize+csize/2].x(), ptlist[lsize+csize/2].y());
-//            glVertex2i(ptlist[lsize+csize/2+1].x(), ptlist[lsize+csize/2 + 1].y());
-//         }
-//         if (pslist->check(_psize-1))
-//         {// if only the last is selected
-//            glVertex2i(ptlist[lsize+1].x(), ptlist[lsize+1].y());
-//            glVertex2i(ptlist[lsize+csize].x(), ptlist[lsize+csize].y());
-//         }
-//      }
-//      glEnd();
-//   }
-//}
 
 void auxdata::TdtGrcWire::drawRequest(trend::TrendBase& rend) const
 {
@@ -585,20 +465,6 @@ bool auxdata::GrcCell::fixUnsorted()//FIXME! The method result is useless! the i
    }
    return empty;
 }
-
-//void auxdata::GrcCell::openGlDraw(layprop::DrawProperties& drawprop, bool active) const
-//{
-//   // Draw figures
-//   typedef LayerHolder::Iterator LCI;
-//   for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
-//   {
-//      LayerDef layDef = drawprop.getTenderLay(lay());
-//      if (!drawprop.layerHidden(layDef)) drawprop.setCurrentColor(layDef);
-//      else continue;
-//      bool fill = drawprop.setCurrentFill(false);// honour block_fill state)
-//      lay->openGlDraw(drawprop, NULL, fill);
-//   }
-//}
 
 void auxdata::GrcCell::openGlRender(trend::TrendBase& rend, const CTM& trans,
                                      bool selected, bool active) const

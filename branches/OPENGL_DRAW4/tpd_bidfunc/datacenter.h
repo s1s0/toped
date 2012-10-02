@@ -91,9 +91,6 @@ public:
    TdtMutexState              tdtMxState() const {return _tdtActMxState;}
    std::string                localDir() const {return _localDir;}
 
-//protected:
-//   void                       openGlDraw(const CTM&);
-//   void                       openGlRender(const CTM&); // alternative to openGlDraw
 private:
    LayerDef                   _curcmdlay;    //! layer used during current drawing operation
    bool                       _drawruler;    //! draw a ruler while composing a shape interactively

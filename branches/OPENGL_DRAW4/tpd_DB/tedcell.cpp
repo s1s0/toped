@@ -236,10 +236,6 @@ laydata::TdtDefaultCell::~TdtDefaultCell()
    _layers.clear();
 }
 
-//void laydata::TdtDefaultCell::openGlDraw(layprop::DrawProperties&, bool active) const
-//{
-//}
-
 void laydata::TdtDefaultCell::openGlRender(trend::TrendBase& rend, const CTM& trans,
                                            bool selected, bool) const
 {
@@ -472,25 +468,6 @@ bool laydata::TdtCell::addChild(laydata::TdtDesign* ATDB, TdtDefaultCell* child)
    return true;
 }
 
-//void laydata::TdtCell::openGlDraw(layprop::DrawProperties& drawprop, bool active) const
-//{
-//   // Draw figures
-//   for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
-//   {
-//      LayerDef curlayno = drawprop.getTenderLay(lay());
-//      if (!drawprop.layerHidden(curlayno)) drawprop.setCurrentColor(curlayno);
-//      else continue;
-//      // fancy like this (dlist iterator) , because a simple
-//      // _shapesel[curlayno] complains about loosing qualifiers (const)
-//      SelectList::Iterator dlst;
-//      bool fill = drawprop.setCurrentFill(false);// honour block_fill state)
-//      if ((active) && (_shapesel.end() != (dlst = _shapesel.find(curlayno))))
-//         lay->openGlDraw(drawprop,*dlst, fill);
-//      else
-//         lay->openGlDraw(drawprop, NULL, fill);
-//   }
-//}
-
 void laydata::TdtCell::openGlRender(trend::TrendBase& rend, const CTM& trans,
                                      bool selected, bool active) const
 {
@@ -669,25 +646,8 @@ void laydata::TdtCell::mouseHoover(TP& position, trend::TrendBase& rend, const L
    if (NULL == prev) return;
    assert(LayerDef(ERR_LAY_DEF) != prevlay);
    //
-//   rend.pushCell(_name, unity, _cellOverlap, true, true);
    rend.setHvrLayer(rend.getTenderLay(prevlay));
    prev->drawSRequest(rend, NULL);
-//   rend.popCell();
-   //-------------------------------------------------------------
-   //TODO - Get this code into the renderers!
-//   PointVector points;
-//   prev->openGlPrecalc(drawprop, points);
-//   if(0 != points.size())
-//   {
-//      LayerDef curlayno = drawprop.getTenderLay(prevlay);
-//      drawprop.setCurrentColor(curlayno);
-//      glLineWidth(5);
-//      prev->setStatus(sh_selected);
-//      prev->openGlDrawSel(points, NULL);
-//      prev->setStatus(sh_active);
-//      glLineWidth(1);
-//   }
-//   prev->openGlPostClean(drawprop, points);
 }
 
 

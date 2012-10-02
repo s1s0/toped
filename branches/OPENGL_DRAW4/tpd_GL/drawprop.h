@@ -219,7 +219,7 @@ namespace layprop {
    a friend class PropertyCenter is doing this. The reason for this is primarily
    thread safety.
    - Changeable properties - these are changed during the drawing process - for
-   example current drawing layer, colors etc.
+   example current drawing layer, colours etc.
     */
    class DrawProperties {
       public:
@@ -242,11 +242,6 @@ namespace layprop {
          const CTM&                 scrCtm() const       {return  _scrCtm;}
          word                       visualLimit() const  {return _visualLimit;}
          const DBbox&               clipRegion() const   {return _clipRegion;}
-//         void                       initCtmStack()       {_tranStack.push(CTM());}
-//         void                       clearCtmStack()      {while (!_tranStack.empty()) _tranStack.pop();}
-//         void                       pushCtm(CTM& last)   {_tranStack.push(last);}
-//         void                       popCtm()             {_tranStack.pop();}
-//         const CTM&                 topCtm() const       {assert(_tranStack.size());return _tranStack.top();}
          void                       setState (PropertyState state)
                                                          {_propertyState = state;};
 //         LayerNumber                drawingLayer() const {return _drawingLayer;}
@@ -352,7 +347,6 @@ namespace layprop {
          console::ACTIVE_OP         _currentOp;    //
          bool                       _blockFill;
          laydata::CellRefStack*     _refStack;
-//         CtmStack                   _tranStack;
          LayerDef                   _drawingLayer;
          LayStateMap                _layStateMap;  //
          LayStateHistory            _layStateHistory; //! for undo purposes of layer status related TELL function

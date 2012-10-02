@@ -78,7 +78,6 @@ namespace laydata {
       const ClipIterator   begin(const DBbox&);
       const DrawIterator   begin(const layprop::DrawProperties&, const CtmQueue&);
       const Iterator       end();
-//      void                 openGlDraw(layprop::DrawProperties&, const TObjDataPairList*, bool) const;
       void                 openGlRender(trend::TrendBase&, const TObjDataPairList*) const;
       short                clipType(trend::TrendBase&) const;
       void                 add(DataT* shape);
