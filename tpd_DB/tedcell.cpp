@@ -646,8 +646,9 @@ laydata::AtticList* laydata::TdtCell::changeSelect(TP pnt, SH_STATUS status, con
    else return NULL;
 }
 
-void laydata::TdtCell::mouseHoover(TP& position, layprop::DrawProperties& drawprop, const LayerDefSet& unselable)
+void laydata::TdtCell::mouseHoover(TP& position, trend::TrendBase& rend, const LayerDefSet& unselable)
 {
+   const CTM unity;
    laydata::TdtData* prev = NULL;
    LayerDef prevlay(ERR_LAY_DEF);
    for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
@@ -667,6 +668,11 @@ void laydata::TdtCell::mouseHoover(TP& position, layprop::DrawProperties& drawpr
    }
    if (NULL == prev) return;
    assert(LayerDef(ERR_LAY_DEF) != prevlay);
+   //
+//   rend.pushCell(_name, unity, _cellOverlap, true, true);
+   rend.setHvrLayer(rend.getTenderLay(prevlay));
+   prev->drawSRequest(rend, NULL);
+//   rend.popCell();
    //-------------------------------------------------------------
    //TODO - Get this code into the renderers!
 //   PointVector points;

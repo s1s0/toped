@@ -884,9 +884,11 @@ namespace trend {
          virtual void      grid( const real, const std::string ) = 0;
          virtual void      zeroCross( ) = 0;
          virtual void      setLayer(const LayerDef&, bool) = 0;
+         virtual void      setHvrLayer(const LayerDef&) = 0;
          virtual void      setGrcLayer(bool, const LayerDef&) = 0;
          virtual bool      chunkExists(const LayerDef&, bool) = 0;
          void              pushCell(std::string, const CTM&, const DBbox&, bool, bool);
+         void              setHoover(bool);
          void              popCell()                              {_cellStack.pop();}
          const CTM&        topCTM() const                         {return  _cellStack.top()->ctm();}
          void              box  (const int4b* pdata)              {_clayer->box(pdata);}
@@ -924,10 +926,13 @@ namespace trend {
                                                          {       _drawprop->initDrawRefStack(crs)  ;}
          void              clearDrawRefStack()           {       _drawprop->clearDrawRefStack()    ;}
          bool              adjustTextOrientation() const {return _drawprop->adjustTextOrientation();}
+         layprop::DrawProperties*&   drawprop()          {return _drawprop                         ;}
       protected:
          layprop::DrawProperties*   _drawprop;
          real              _UU;
-         DataLay           _data;            //!All editable data for drawing
+         DataLay&          _data;
+         DataLay           _allData;         //!All editable data for drawing
+         DataLay           _hvrData;         //!All hoover data for drawing
          DataLay           _grcData;         //!All GRC      data for drawing
          TrendLay*         _clayer;          //!Working variable pointing to the current edit slice
          TrendLay*         _grcLayer;        //!Working variable pointing to the current GRC  slice
@@ -935,7 +940,7 @@ namespace trend {
          CellStack         _cellStack;       //!Required during data traversing stage
          unsigned          _cslctd_array_offset; //! Current selected array offset
          //
-         TrendRef*        _activeCS;
+         TrendRef*         _activeCS;
          byte              _dovCorrection;   //! Cell ref Depth of view correction (for Edit in Place purposes)
          RefBoxList        _hiddenRefBoxes;  //! Those cRefBox objects which didn't ended in the TrendRefLay structures
    };

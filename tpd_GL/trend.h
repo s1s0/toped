@@ -156,8 +156,10 @@ namespace trend {
       public:
                                 TrendCenter(bool gui, bool forceBasic=true, bool sprtVbo=false, bool sprtShaders=false);
          virtual               ~TrendCenter();
-         RenderType             renderType() const {return _renderType;}
-         trend::TrendBase*      secureRenderer(layprop::DrawProperties* drawProp);
+//         RenderType             renderType() const {return _renderType;}
+         trend::TrendBase*      secureRenderer();
+         trend::TrendBase*      getRenderer();
+         void                   releaseRenderer();
          void                   drawGrid();
          void                   drawZeroCross();
          void                   drawFOnly();

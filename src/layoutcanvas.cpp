@@ -464,7 +464,7 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event)
          _blinkTimer.Stop();
          wxPaintDC dc(this);
          glMatrixMode( GL_MODELVIEW );
-         glShadeModel( GL_FLAT ); // Single color
+         glShadeModel( GL_FLAT ); // Single colour
          updateViewport();
          // CTM matrix stuff
          glLoadIdentity();

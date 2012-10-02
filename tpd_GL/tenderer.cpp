@@ -754,6 +754,13 @@ void trend::Tenderer::setLayer(const LayerDef& laydef, bool has_selected)
       _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(laydef), false);
 }
 
+void trend::Tenderer::setHvrLayer(const LayerDef& laydef)
+{
+   _clayer = DEBUG_NEW TenderLay();
+   _data.add(laydef, _clayer);
+   _clayer->newSlice(_cellStack.top(), false, false, 0 /*_cslctd_array_offset*/);
+}
+
 void trend::Tenderer::grid(const real step, const std::string color)
 {
    int gridstep = (int)rint(step / _UU);

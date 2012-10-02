@@ -715,8 +715,10 @@ void trend::TextOvlBox::drctDrawContour()
 // class TrendRef
 //
 trend::TrendRef::TrendRef(std::string name, const CTM& ctm, const DBbox& obox,
-                   word alphaDepth)
-   : _name(name), _ctm(ctm), _alphaDepth(alphaDepth)
+                   word alphaDepth) :
+   _name          ( name         ),
+   _ctm           ( ctm          ),
+   _alphaDepth    ( alphaDepth   )
 {
    _ctm.oglForm(_translation);
    TP tp = TP(obox.p1().x(), obox.p1().y()) * _ctm;
@@ -1156,6 +1158,7 @@ trend::TrendRefLay::~TrendRefLay()
 trend::TrendBase::TrendBase( layprop::DrawProperties* drawprop, real UU ) :
    _drawprop           ( drawprop  ),
    _UU                 (        UU ),
+   _data               ( _allData  ),
    _clayer             (      NULL ),
    _grcLayer           (      NULL ),
    _cslctd_array_offset(        0u ),
@@ -1189,6 +1192,24 @@ void trend::TrendBase::pushCell(std::string cname, const CTM& trans, const DBbox
    {
       assert(NULL == _activeCS);
       _activeCS = cRefBox;
+   }
+}
+
+void trend::TrendBase::setHoover(bool hoover)
+{
+   if (hoover)
+   {
+      _data = _hvrData;
+      assert(_hvrData.empty());
+   }
+   else
+   {
+      _data = _allData;
+      for (DataLay::Iterator CLAY = _hvrData.begin(); CLAY != _hvrData.end(); CLAY++)
+      {
+         delete (*CLAY);
+      }
+      _hvrData.clear();
    }
 }
 
@@ -1265,7 +1286,11 @@ bool trend::TrendBase::preCheckCRS(const laydata::TdtCellRef* ref, layprop::Cell
 
 trend::TrendBase::~TrendBase()
 {
-   for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
+   for (DataLay::Iterator CLAY = _allData.begin(); CLAY != _allData.end(); CLAY++)
+   {
+      delete (*CLAY);
+   }
+   for (DataLay::Iterator CLAY = _hvrData.begin(); CLAY != _hvrData.end(); CLAY++)
    {
       delete (*CLAY);
    }
