@@ -930,7 +930,7 @@ namespace trend {
       protected:
          layprop::DrawProperties*   _drawprop;
          real              _UU;
-         DataLay&          _data;
+         DataLay*          _data;
          DataLay           _allData;         //!All editable data for drawing
          DataLay           _hvrData;         //!All hoover data for drawing
          DataLay           _grcData;         //!All GRC      data for drawing
