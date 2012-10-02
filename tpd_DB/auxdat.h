@@ -39,18 +39,9 @@ namespace auxdata {
                            TdtAuxData(SH_STATUS sel = sh_invalid) : _status(sel){};
       //! Return the overlapping box of the object.
       virtual   DBbox      overlap()  const = 0;
-      //! A preparation for drawing - calculating all drawing objects using translation matrix stack.
-//      virtual   void       openGlPrecalc(layprop::DrawProperties&, PointVector&) const = 0;
-//      //! Draw the outline of the objects
-//      virtual   void       openGlDrawLine(layprop::DrawProperties&, const PointVector&) const = 0;
-//      //! Draw the object texture
-//      virtual   void       openGlDrawFill(layprop::DrawProperties&, const PointVector&) const = 0;
-//      //! Draw the outlines of the selected objects
-//      virtual   void       openGlDrawSel(const PointVector&, const SGBitSet*) const = 0;
-//      //! Clean-up the calculated drawing objects
-//      virtual   void       openGlPostClean(layprop::DrawProperties&, PointVector& ptlist) const {ptlist.clear();}
+      //! Draw request (rendering)
       virtual   void       drawRequest(trend::TrendBase&) const = 0;
-      //! Draw the outlines of the selected objects
+      //! Draw request (rendering) - if the object is selected
       virtual   void       drawSRequest(trend::TrendBase&, const SGBitSet*) const = 0;
       //! Draw the objects in motion during copy/move and similar operations
       virtual   void       motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const = 0;
@@ -87,13 +78,10 @@ namespace auxdata {
          virtual          ~TdtGrcPoly();
          virtual DBbox     overlap() const;
 
-//         virtual void      openGlPrecalc(layprop::DrawProperties&, PointVector&) const;
-//         virtual void      openGlDrawLine(layprop::DrawProperties&, const PointVector&) const;
-//         virtual void      openGlDrawFill(layprop::DrawProperties&, const PointVector&) const;
-//         virtual void      openGlDrawSel(const PointVector&, const SGBitSet*) const;
          virtual void      drawRequest(trend::TrendBase&) const;
          virtual void      drawSRequest(trend::TrendBase&, const SGBitSet*) const;
          virtual void      motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
+
          virtual void      info(std::ostringstream&, real) const;
          virtual void      write(OutputTdtFile* const tedfile) const;
          virtual void      dbExport(DbExportFile&) const;
@@ -115,13 +103,10 @@ namespace auxdata {
          virtual          ~TdtGrcWire();
          virtual DBbox     overlap() const;
 
-//         virtual void      openGlPrecalc(layprop::DrawProperties&, PointVector&) const;
-//         virtual void      openGlDrawLine(layprop::DrawProperties&, const PointVector&) const;
-//         virtual void      openGlDrawFill(layprop::DrawProperties&, const PointVector&) const;
-//         virtual void      openGlDrawSel(const PointVector&, const SGBitSet*) const;
          virtual void      drawRequest(trend::TrendBase&) const;
          virtual void      drawSRequest(trend::TrendBase&, const SGBitSet*) const;
          virtual void      motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
+
          virtual void      info(std::ostringstream&, real) const;
          virtual void      write(OutputTdtFile* const tedfile) const;
          virtual void      dbExport(DbExportFile&) const;
@@ -150,7 +135,6 @@ namespace auxdata {
          virtual            ~GrcCell();
          virtual void        write(OutputTdtFile* const) const;
          void                dbExport(DbExportFile&) const;
-//         virtual void        openGlDraw(layprop::DrawProperties&, bool active=false) const;
          virtual void        openGlRender(trend::TrendBase&, const CTM&, bool, bool) const;
          virtual DBbox       getVisibleOverlap(const layprop::DrawProperties&);
          virtual void        collectUsedLays(LayerDefList&) const;
