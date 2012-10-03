@@ -256,14 +256,14 @@ void trend::Tolder::setLayer(const LayerDef& laydef, bool has_selected)
       _clayer->ppSlice();
       _cslctd_array_offset += _clayer->total_slctdx();
    }
-   if (_data->end() != _data->find(laydef))
+   if (_data.end() != _data.find(laydef))
    {
-      _clayer = (*_data)[laydef];
+      _clayer = _data[laydef];
    }
    else
    {
       _clayer = DEBUG_NEW TolderLay();
-      _data->add(laydef, _clayer);
+      _data.add(laydef, _clayer);
    }
    if (has_selected)
       _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(laydef), false, _cslctd_array_offset);
@@ -273,9 +273,12 @@ void trend::Tolder::setLayer(const LayerDef& laydef, bool has_selected)
 
 void trend::Tolder::setHvrLayer(const LayerDef& laydef)
 {
-   _clayer = DEBUG_NEW TolderLay();
-   _data->add(laydef, _clayer);
-   _clayer->newSlice(_cellStack.top(), false, false, 0 /*_cslctd_array_offset*/);
+   if (REF_LAY_DEF != laydef)
+   {
+      _clayer = DEBUG_NEW TolderLay();
+      _data.add(laydef, _clayer);
+      _clayer->newSlice(_cellStack.top(), false, false, 0 /*_cslctd_array_offset*/);
+   }
 }
 
 void trend::Tolder::setGrcLayer(bool, const LayerDef&)
@@ -293,15 +296,15 @@ bool trend::Tolder::chunkExists(const LayerDef& laydef, bool has_selected)
       _clayer->ppSlice();
       _cslctd_array_offset += _clayer->total_slctdx();
    }
-   if (_data->end() != _data->find(laydef))
+   if (_data.end() != _data.find(laydef))
    {
-      _clayer = (*_data)[laydef];
+      _clayer = _data[laydef];
       if (_clayer->chunkExists(_cellStack.top(), _drawprop->layerFilled(laydef) ) ) return true;
    }
    else
    {
       _clayer = DEBUG_NEW TolderLay();
-      _data->add(laydef, _clayer);
+      _data.add(laydef, _clayer);
    }
    if (has_selected)
       _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(laydef), true, _cslctd_array_offset);
@@ -315,11 +318,11 @@ bool trend::Tolder::collect()
    // First filter-out the layers that doesn't have any objects on them and
    // post process the last slices in the layers
    //
-   DataLay::Iterator CCLAY = _data->begin();
+   DataLay::Iterator CCLAY = _data.begin();
    unsigned num_total_buffers = 0;
    unsigned num_total_slctdx = 0; // Initialise the number of total selected indexes
    unsigned num_total_strings = 0;
-   while (CCLAY != _data->end())
+   while (CCLAY != _data.end())
    {
       CCLAY->ppSlice();
       num_total_strings += CCLAY->total_strings();
@@ -336,7 +339,7 @@ bool trend::Tolder::collect()
          // The implementation below seems to be the cleanest way to do this,
          // although it relies on my understanding of the way "++" operator should
          // be implemented
-         _data->erase(CCLAY++());
+         _data.erase(CCLAY++());
       }
       else if (0 != CCLAY->total_points())
       {
@@ -349,6 +352,7 @@ bool trend::Tolder::collect()
       else
          ++CCLAY;
    }
+   _clayer = NULL;
    if (0 < _refLayer->total_points())  num_total_buffers++; // reference boxes
    if (0 < num_total_slctdx      )     num_total_buffers++;  // selected
    // Check whether we have to continue after traversing
@@ -371,7 +375,7 @@ bool trend::Tolder::grcCollect()
 
 void trend::Tolder::draw()
 {
-   for (DataLay::Iterator CLAY = _data->begin(); CLAY != _data->end(); CLAY++)
+   for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {// for every layer
       _drawprop->setCurrentColor(CLAY());
       _drawprop->setCurrentFill(true); // force fill (ignore block_fill state)
@@ -408,15 +412,17 @@ void trend::Tolder::grcDraw()
 
 void trend::Tolder::cleanUp()
 {
-   // nothing to do in this implementation here
+   TrendBase::cleanUp();
 }
 
 void trend::Tolder::grcCleanUp()
 {
    //TODO
+   TrendBase::grcCleanUp();
 }
 
 trend::Tolder::~Tolder()
 {
+   delete _refLayer;
 }
 

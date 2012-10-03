@@ -1160,7 +1160,6 @@ trend::TrendRefLay::~TrendRefLay()
 trend::TrendBase::TrendBase( layprop::DrawProperties* drawprop, real UU ) :
    _drawprop           ( drawprop  ),
    _UU                 (        UU ),
-   _data               ( &_allData ),
    _clayer             (      NULL ),
    _grcLayer           (      NULL ),
    _cslctd_array_offset(        0u ),
@@ -1194,24 +1193,6 @@ void trend::TrendBase::pushCell(std::string cname, const CTM& trans, const DBbox
    {
       assert(NULL == _activeCS);
       _activeCS = cRefBox;
-   }
-}
-
-void trend::TrendBase::setHoover(bool hoover)
-{
-   if (hoover)
-   {
-      _data = &_hvrData;
-      assert(_hvrData.empty());
-   }
-   else
-   {
-      _data = &_allData;
-      for (DataLay::Iterator CLAY = _hvrData.begin(); CLAY != _hvrData.end(); CLAY++)
-      {
-         delete (*CLAY);
-      }
-      _hvrData.clear();
    }
 }
 
@@ -1286,29 +1267,30 @@ bool trend::TrendBase::preCheckCRS(const laydata::TdtCellRef* ref, layprop::Cell
    return true;// Dummy statement - to prevent compiler warnings
 }
 
-trend::TrendBase::~TrendBase()
+void trend::TrendBase::cleanUp()
 {
-   for (DataLay::Iterator CLAY = _allData.begin(); CLAY != _allData.end(); CLAY++)
+   for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {
       delete (*CLAY);
    }
-   _allData.clear();
-   for (DataLay::Iterator CLAY = _hvrData.begin(); CLAY != _hvrData.end(); CLAY++)
-   {
-      delete (*CLAY);
-   }
-   _hvrData.clear();
-   // GRC clean-up
-   for (DataLay::Iterator CLAY = _grcData.begin(); CLAY != _grcData.end(); CLAY++)
-   {
-      delete (*CLAY);
-   }
-   delete _refLayer;
-   //
+   _data.clear();
    assert(1 == _cellStack.size());
    delete (_cellStack.top()); _cellStack.pop();
    for (RefBoxList::const_iterator CSH = _hiddenRefBoxes.begin(); CSH != _hiddenRefBoxes.end(); CSH++)
       delete (*CSH);
+   _activeCS = NULL;
+}
+
+void trend::TrendBase::grcCleanUp()
+{
+   for (DataLay::Iterator CLAY = _grcData.begin(); CLAY != _grcData.end(); CLAY++)
+   {
+      delete (*CLAY);
+   }
+}
+
+trend::TrendBase::~TrendBase()
+{
 }
 
 void trend::checkOGLError(std::string loc)

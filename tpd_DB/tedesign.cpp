@@ -1426,9 +1426,9 @@ void laydata::TdtDesign::mouseHoover(TP& position, trend::TrendBase& rend, const
    if (_target.checkEdit())
    {
       TP selp = position * _target.rARTM();
-//      rend.initDrawRefStack(_target.pEditChain());
+      rend.initDrawRefStack(_target.pEditChain());
       _target.edit()->mouseHoover(selp, rend, unselable);
-//      rend.clearDrawRefStack();
+      rend.clearDrawRefStack();
    }
 }
 

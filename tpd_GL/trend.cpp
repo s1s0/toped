@@ -497,8 +497,9 @@ trend::FontLibrary::~FontLibrary()
 
 
 //=============================================================================
-trend::TrendCenter::TrendCenter(bool gui, bool forceBasic, bool sprtVbo, bool sprtShaders) //:
-//   _cRenderer     (              NULL)
+trend::TrendCenter::TrendCenter(bool gui, bool forceBasic, bool sprtVbo, bool sprtShaders) :
+   _cRenderer     (              NULL),
+   _hRenderer     (              NULL)
 {
    if      (!gui)             _renderType = trend::tocom;
    else if ( forceBasic )     _renderType = trend::tolder;
@@ -509,12 +510,13 @@ trend::TrendCenter::TrendCenter(bool gui, bool forceBasic, bool sprtVbo, bool sp
 
 }
 
-trend::TrendBase* trend::TrendCenter::secureRenderer()
+trend::TrendBase* trend::TrendCenter::getCRenderer()
 {
    // Don't block the drawing if the databases are
    // locked. This will block all redraw activities including UI
    // which have nothing to do with the DB. Drop a message in the log
    // and keep going!
+   assert(NULL == _hRenderer);
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
@@ -522,27 +524,9 @@ trend::TrendBase* trend::TrendCenter::secureRenderer()
       {
          case trend::tocom    : assert(false);          break;// shouldn't end-up here ever
          case trend::tolder   :
-         {
-            if (NULL != _cRenderer)
-            {
-         //            _cRenderer->cleanUp();
-               _cRenderer->grcCleanUp();
-               delete _cRenderer;
-            }
-            _cRenderer = DEBUG_NEW trend::Tolder( drawProp, PROPC->UU() );
-            return _cRenderer;
-         }
+            _cRenderer = DEBUG_NEW trend::Tolder( drawProp, PROPC->UU() );break;
          case trend::tenderer :
-         {
-            if (NULL != _cRenderer)
-            {
-         //            _cRenderer->cleanUp();
-               _cRenderer->grcCleanUp();
-               delete _cRenderer;
-            }
-            _cRenderer = DEBUG_NEW trend::Tenderer( drawProp, PROPC->UU() );
-            return _cRenderer;
-         }
+            _cRenderer = DEBUG_NEW trend::Tenderer( drawProp, PROPC->UU() ); break;
          case trend::toshader : assert(false);          break;// TODO
          default: assert(false); break;
       }
@@ -559,31 +543,47 @@ trend::TrendBase* trend::TrendCenter::secureRenderer()
    }
 }
 
-trend::TrendBase* trend::TrendCenter::getRenderer()
+trend::TrendBase* trend::TrendCenter::getHRenderer()
 {
-   if (NULL != _cRenderer)
+   assert(NULL == _hRenderer);
+   layprop::DrawProperties* drawProp;
+   if (PROPC->lockDrawProp(drawProp))
    {
-      if (PROPC->lockDrawProp(_cRenderer->drawprop()))
+      switch (_renderType)
       {
-         _cRenderer->setHoover(true);
-         return _cRenderer;
+         case trend::tocom    : assert(false);          break;// shouldn't end-up here ever
+         case trend::tolder   :
+            _hRenderer = DEBUG_NEW trend::Tolder( drawProp, PROPC->UU() ); break;
+         case trend::tenderer :
+            _hRenderer = DEBUG_NEW trend::Tenderer( drawProp, PROPC->UU() ); break;
+         case trend::toshader : assert(false);          break;// TODO
+         default: assert(false); break;
       }
+      return _hRenderer;
    }
-   return NULL;
+   else
+      return NULL;
 }
 
-void trend::TrendCenter::releaseRenderer()
+void trend::TrendCenter::releaseCRenderer()
 {
-   if (NULL != _cRenderer)
-   {
-      _cRenderer->setHoover(false);
-      PROPC->unlockDrawProp(_cRenderer->drawprop(), false);
-   }
+   assert(NULL != _cRenderer);
+   PROPC->unlockDrawProp(_cRenderer->drawprop(), false);
+   delete (_cRenderer);
+   _cRenderer = NULL;
+}
+
+void trend::TrendCenter::releaseHRenderer()
+{
+   assert(NULL != _hRenderer);
+   PROPC->unlockDrawProp(_hRenderer->drawprop(), false);
+   delete (_hRenderer);
+   _hRenderer = NULL;
 }
 
 void trend::TrendCenter::drawFOnly()
 {
-   if (NULL != _cRenderer) _cRenderer->grcDraw();
+//   if (NULL != _cRenderer) _cRenderer->grcDraw(); // TODO
 }
 
 void trend::TrendCenter::drawGrid()
