@@ -518,7 +518,7 @@ trend::TrendBase* trend::TrendCenter::getCRenderer()
    // and keep going!
    assert(NULL == _cRenderer);
    layprop::DrawProperties* drawProp;
-   if (PROPC->lockDrawProp(drawProp))
+   if (PROPC->tryLockDrawProp(drawProp))
    {
       switch (_renderType)
       {
@@ -546,7 +546,7 @@ trend::TrendBase* trend::TrendCenter::getHRenderer()
 {
    assert(NULL == _hRenderer);
    layprop::DrawProperties* drawProp;
-   if (PROPC->lockDrawProp(drawProp))
+   if (PROPC->tryLockDrawProp(drawProp))
    {
       switch (_renderType)
       {

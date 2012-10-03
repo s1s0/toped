@@ -438,6 +438,18 @@ bool layprop::PropertyCenter::lockDrawProp(DrawProperties*& propDB, PropertyStat
    }
 }
 
+bool layprop::PropertyCenter::tryLockDrawProp(DrawProperties*& propDB, PropertyState state)
+{
+   if (wxMUTEX_NO_ERROR == _drawPLock.TryLock())
+   {
+      assert(NULL != _drawprop);
+      _drawprop->setState(state);
+      propDB = _drawprop;
+      return (true);
+   }
+   else return false;
+}
+
 void layprop::PropertyCenter::unlockDrawProp(DrawProperties*& propDB, bool throwexception)
 {
    _drawprop = propDB;

@@ -140,7 +140,7 @@ namespace laydata {
       AtticList*     changeRef(ShapeList*, std::string);
       //
       void           collectParentCells(std::string&, CellDefList&);
-      bool           checkActiveCell();
+      bool           checkActiveCell() {return (NULL != _target.edit());}
       bool           checkValidRef(std::string);
       void           fixUnsorted();
       void           fixReferenceOverlap(DBbox&, TdtCell* targetCell = NULL);
