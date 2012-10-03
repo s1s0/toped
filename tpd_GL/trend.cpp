@@ -516,7 +516,7 @@ trend::TrendBase* trend::TrendCenter::getCRenderer()
    // locked. This will block all redraw activities including UI
    // which have nothing to do with the DB. Drop a message in the log
    // and keep going!
-   assert(NULL == _hRenderer);
+   assert(NULL == _cRenderer);
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
@@ -530,7 +530,6 @@ trend::TrendBase* trend::TrendCenter::getCRenderer()
          case trend::toshader : assert(false);          break;// TODO
          default: assert(false); break;
       }
-      return NULL;
    }
    else
    {
@@ -539,8 +538,8 @@ trend::TrendBase* trend::TrendCenter::getCRenderer()
       // which holds the property DB lock for a long time. So it should be
       // rather an exception
       tell_log(console::MT_INFO,std::string("Property DB busy. Viewport redraw skipped"));
-      return NULL;
    }
+   return _cRenderer;
 }
 
 trend::TrendBase* trend::TrendCenter::getHRenderer()
@@ -559,10 +558,8 @@ trend::TrendBase* trend::TrendCenter::getHRenderer()
          case trend::toshader : assert(false);          break;// TODO
          default: assert(false); break;
       }
-      return _hRenderer;
    }
-   else
-      return NULL;
+   return _hRenderer;
 }
 
 void trend::TrendCenter::releaseCRenderer()
