@@ -1670,11 +1670,6 @@ DBbox laydata::TdtDesign::getVisibleOverlap(layprop::DrawProperties& prop)
    else return ovl;
 }
 
-bool laydata::TdtDesign::checkActiveCell()
-{
-   return (NULL != _target.edit());
-};
-
 void laydata::TdtDesign::tryUnselectAll() const {
    if (NULL != _target.edit())
       _target.edit()->unselectAll();
