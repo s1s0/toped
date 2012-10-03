@@ -712,15 +712,15 @@ bool trend::Tenderer::chunkExists(const LayerDef& laydef, bool has_selected)
       _clayer->ppSlice();
       _cslctd_array_offset += _clayer->total_slctdx();
    }
-   if (_data->end() != _data->find(laydef))
+   if (_data.end() != _data.find(laydef))
    {
-      _clayer = (*_data)[laydef];
+      _clayer = _data[laydef];
       if (_clayer->chunkExists(_cellStack.top(), _drawprop->layerFilled(laydef) ) ) return true;
    }
    else
    {
       _clayer = DEBUG_NEW TenderLay();
-      _data->add(laydef, _clayer);
+      _data.add(laydef, _clayer);
    }
    if (has_selected)
       _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(laydef), true, _cslctd_array_offset);
@@ -739,14 +739,14 @@ void trend::Tenderer::setLayer(const LayerDef& laydef, bool has_selected)
       _clayer->ppSlice();
       _cslctd_array_offset += _clayer->total_slctdx();
    }
-   if (_data->end() != _data->find(laydef))
+   if (_data.end() != _data.find(laydef))
    {
-      _clayer = (*_data)[laydef];
+      _clayer = _data[laydef];
    }
    else
    {
       _clayer = DEBUG_NEW TenderLay();
-      _data->add(laydef, _clayer);
+      _data.add(laydef, _clayer);
    }
    if (has_selected)
       _clayer->newSlice(_cellStack.top(), _drawprop->layerFilled(laydef), false, _cslctd_array_offset);
@@ -756,9 +756,12 @@ void trend::Tenderer::setLayer(const LayerDef& laydef, bool has_selected)
 
 void trend::Tenderer::setHvrLayer(const LayerDef& laydef)
 {
-   _clayer = DEBUG_NEW TenderLay();
-   _data->add(laydef, _clayer);
-   _clayer->newSlice(_cellStack.top(), false, false, 0 /*_cslctd_array_offset*/);
+   if (REF_LAY_DEF != laydef)
+   {
+      _clayer = DEBUG_NEW TenderLay();
+      _data.add(laydef, _clayer);
+      _clayer->newSlice(_cellStack.top(), false, false, 0 /*_cslctd_array_offset*/);
+   }
 }
 
 void trend::Tenderer::grid(const real step, const std::string color)
@@ -806,10 +809,10 @@ bool trend::Tenderer::collect()
    // post process the last slices in the layers and also gather the number
    // of required virtual buffers
    //
-   DataLay::Iterator CCLAY = _data->begin();
+   DataLay::Iterator CCLAY = _data.begin();
    unsigned num_total_slctdx = 0; // Initialize the number of total selected indexes
    unsigned num_total_strings = 0;
-   while (CCLAY != _data->end())
+   while (CCLAY != _data.end())
    {
       CCLAY->ppSlice();
       num_total_strings += CCLAY->total_strings();
@@ -826,7 +829,7 @@ bool trend::Tenderer::collect()
          // The implementation below seems to be the cleanest way to do this,
          // although it relies on my understanding of the way "++" operator should
          // be implemented
-         _data->erase(CCLAY++());
+         _data.erase(CCLAY++());
       }
       else if (0 != CCLAY->total_points())
       {
@@ -839,6 +842,7 @@ bool trend::Tenderer::collect()
       else
          ++CCLAY;
    }
+   _clayer = NULL;
    if (0 < _refLayer->total_points())  _num_ogl_buffers ++; // reference boxes
    if (0 < num_total_slctdx      )     _num_ogl_buffers++;  // selected
    // Check whether we have to continue after traversing
@@ -856,7 +860,7 @@ bool trend::Tenderer::collect()
    unsigned current_buffer = 0;
    //
    // collect the point arrays
-   for (DataLay::Iterator CLAY = _data->begin(); CLAY != _data->end(); CLAY++)
+   for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {
       if (0 == CLAY->total_points())
       {
@@ -880,7 +884,7 @@ bool trend::Tenderer::collect()
                                               NULL                              ,
                                               GL_DYNAMIC_DRAW                    );
       unsigned int* sindex_array = (unsigned int*)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
-      for (DataLay::Iterator CLAY = _data->begin(); CLAY != _data->end(); CLAY++)
+      for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
       {
          if (0 == CLAY->total_slctdx())
             continue;
@@ -957,7 +961,7 @@ bool trend::Tenderer::grcCollect()
 
 void trend::Tenderer::draw()
 {
-   for (DataLay::Iterator CLAY = _data->begin(); CLAY != _data->end(); CLAY++)
+   for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {// for every layer
       _drawprop->setCurrentColor(CLAY());
       _drawprop->setCurrentFill(true); // force fill (ignore block_fill state)
@@ -1007,6 +1011,13 @@ void trend::Tenderer::cleanUp()
    // Clean-up the buffers
    glBindBuffer(GL_ARRAY_BUFFER, 0);
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+   if (NULL != _ogl_buffers)
+   {
+      glDeleteBuffers(_num_ogl_buffers, _ogl_buffers);
+      delete [] _ogl_buffers;
+      _ogl_buffers = NULL;
+   }
+   TrendBase::cleanUp();
 }
 
 void trend::Tenderer::grcCleanUp()
@@ -1014,6 +1025,13 @@ void trend::Tenderer::grcCleanUp()
    // Clean-up the buffers
    glBindBuffer(GL_ARRAY_BUFFER, 0);
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+   if (NULL != _ogl_grc_buffers)
+   {
+      glDeleteBuffers(_num_ogl_grc_buffers, _ogl_grc_buffers);
+      delete [] _ogl_grc_buffers;
+      _ogl_grc_buffers = NULL;
+   }
+   TrendBase::grcCleanUp();
 }
 
 void trend::Tenderer::setGrcLayer(bool setEData, const LayerDef& laydef)
@@ -1044,17 +1062,6 @@ void trend::Tenderer::setGrcLayer(bool setEData, const LayerDef& laydef)
 
 trend::Tenderer::~Tenderer()
 {
-   if (NULL != _ogl_buffers)
-   {
-      glDeleteBuffers(_num_ogl_buffers, _ogl_buffers);
-      delete [] _ogl_buffers;
-      _ogl_buffers = NULL;
-   }
-   if (NULL != _ogl_grc_buffers)
-   {
-      glDeleteBuffers(_num_ogl_grc_buffers, _ogl_grc_buffers);
-      delete [] _ogl_grc_buffers;
-      _ogl_grc_buffers = NULL;
-   }
+   delete _refLayer;
 }
 

@@ -157,9 +157,10 @@ namespace trend {
                                 TrendCenter(bool gui, bool forceBasic=true, bool sprtVbo=false, bool sprtShaders=false);
          virtual               ~TrendCenter();
 //         RenderType             renderType() const {return _renderType;}
-         trend::TrendBase*      secureRenderer();
-         trend::TrendBase*      getRenderer();
-         void                   releaseRenderer();
+         trend::TrendBase*      getCRenderer();
+         trend::TrendBase*      getHRenderer();
+         void                   releaseCRenderer();
+         void                   releaseHRenderer();
          void                   drawGrid();
          void                   drawZeroCross();
          void                   drawFOnly();
@@ -168,7 +169,8 @@ namespace trend {
 //         std::string            getActiveFontName() const        {return _fontLib->getActiveFontName();}
 //         word                   numFonts()                       {return _fontLib->numFonts();}
       private:
-         trend::TrendBase*      _cRenderer;    //! current renderer (in case VFBO rendering is in place)
+         trend::TrendBase*      _cRenderer;    //! current renderer
+         trend::TrendBase*      _hRenderer;    //! hoover renderer
          RenderType             _renderType;
 //         FontLibrary*           _fontLib;
    };

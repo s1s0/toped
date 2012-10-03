@@ -751,17 +751,20 @@ void DataCenter::mouseHoover(TP& position)
    if (_TEDLIB())
    {
       LayerDefSet unselectable = PROPC->allUnselectable();
-      trend::TrendBase* cRenderer = TRENDC->getRenderer();
+      trend::TrendBase* cRenderer = TRENDC->getHRenderer();
       if (NULL != cRenderer)
       {
          if (wxMUTEX_NO_ERROR == _DBLock.TryLock())
          {
             _TEDLIB()->mouseHoover(position, *cRenderer, unselectable);
             if (cRenderer->collect())
+            {
                cRenderer->draw();
+            }
             VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
          }
-         TRENDC->releaseRenderer();
+         cRenderer->cleanUp();
+         TRENDC->releaseHRenderer();
       }
    }
 }
@@ -792,7 +795,7 @@ void DataCenter::render(const CTM& layCTM)
 {
    if (_TEDLIB())
    {
-      trend::TrendBase* cRenderer = TRENDC->secureRenderer();
+      trend::TrendBase* cRenderer = TRENDC->getCRenderer();
       if (NULL != cRenderer)
       {
          TRENDC->drawGrid();
@@ -804,20 +807,20 @@ void DataCenter::render(const CTM& layCTM)
             // There is no need to check for an active cell. If there isn't one
             // the function will return silently.
             _TEDLIB()->openGlRender(*cRenderer);
-            // Draw DRC data (if any)
-            // TODO! clean-up the DRC stuff here - lock/unlock and more importantly
-            // DrcLibrary <-> CalibrFile i.e. _DRCDB <-> DRCData. The end of the line shall be
-            // the removal of the DRCData object
-            if(_DRCDB)
-            {
-               if (wxMUTEX_NO_ERROR == _DRCLock.TryLock())
-               {
-                  std::string cellName = DRCData->cellName();
-                  CTM cellCTM = DRCData->getCTM(cellName);
-                  _DRCDB->openGlRender(*cRenderer, cellName, cellCTM);
-                  VERIFY(wxMUTEX_NO_ERROR == _DRCLock.Unlock());
-               }
-            }
+//            // Draw DRC data (if any)
+//            // TODO! clean-up the DRC stuff here - lock/unlock and more importantly
+//            // DrcLibrary <-> CalibrFile i.e. _DRCDB <-> DRCData. The end of the line shall be
+//            // the removal of the DRCData object
+//            if(_DRCDB)
+//            {
+//               if (wxMUTEX_NO_ERROR == _DRCLock.TryLock())
+//               {
+//                  std::string cellName = DRCData->cellName();
+//                  CTM cellCTM = DRCData->getCTM(cellName);
+//                  _DRCDB->openGlRender(*cRenderer, cellName, cellCTM);
+//                  VERIFY(wxMUTEX_NO_ERROR == _DRCLock.Unlock());
+//               }
+//            }
             RENTIMER_REPORT("Time elapsed for data traversing: ");
             if (cRenderer->collect())
             {
@@ -826,11 +829,11 @@ void DataCenter::render(const CTM& layCTM)
                RENTIMER_REPORT("    Total elapsed rendering time: ");
                cRenderer->cleanUp();
             }
-            if (cRenderer->grcCollect())
-            {
-//               _cRenderer->grcDraw();
-//               _cRenderer->grcCleanUp();
-            }
+//            if (cRenderer->grcCollect())
+//            {
+////               _cRenderer->grcDraw();
+////               _cRenderer->grcCleanUp();
+//            }
             VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
             TpdPost::render_status(false);
          }
@@ -840,7 +843,7 @@ void DataCenter::render(const CTM& layCTM)
             tell_log(console::MT_INFO,std::string("DB busy. Viewport redraw skipped"));
          }
          PROPC->drawRulers(layCTM);
-         TRENDC->releaseRenderer();
+         TRENDC->releaseCRenderer();
       }
    }
 }

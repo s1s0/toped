@@ -888,7 +888,6 @@ namespace trend {
          virtual void      setGrcLayer(bool, const LayerDef&) = 0;
          virtual bool      chunkExists(const LayerDef&, bool) = 0;
          void              pushCell(std::string, const CTM&, const DBbox&, bool, bool);
-         void              setHoover(bool);
          void              popCell()                              {_cellStack.pop();}
          const CTM&        topCTM() const                         {return  _cellStack.top()->ctm();}
          void              box  (const int4b* pdata)              {_clayer->box(pdata);}
@@ -907,8 +906,8 @@ namespace trend {
          virtual bool      grcCollect() = 0;
          virtual void      draw() = 0;
          virtual void      grcDraw() = 0;
-         virtual void      cleanUp() = 0;
-         virtual void      grcCleanUp() = 0;
+         virtual void      cleanUp();
+         virtual void      grcCleanUp();
 
          LayerDef          getTenderLay(const LayerDef& laydef)
                                                          {return _drawprop->getTenderLay(laydef)   ;}
@@ -930,9 +929,7 @@ namespace trend {
       protected:
          layprop::DrawProperties*   _drawprop;
          real              _UU;
-         DataLay*          _data;
-         DataLay           _allData;         //!All editable data for drawing
-         DataLay           _hvrData;         //!All hoover data for drawing
+         DataLay           _data;            //!All editable data for drawing
          DataLay           _grcData;         //!All GRC      data for drawing
          TrendLay*         _clayer;          //!Working variable pointing to the current edit slice
          TrendLay*         _grcLayer;        //!Working variable pointing to the current GRC  slice
