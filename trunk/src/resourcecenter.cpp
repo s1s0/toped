@@ -27,6 +27,7 @@
 
 #include "tpdph.h"
 #include <sstream>
+#include <functional>
 #include "resourcecenter.h"
 
 #include "ted_prompt.h"

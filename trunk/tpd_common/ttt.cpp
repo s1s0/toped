@@ -29,6 +29,7 @@
 #include <math.h>
 #include <sstream>
 #include <algorithm>
+#include <functional>
 #include "ttt.h"
 
 
