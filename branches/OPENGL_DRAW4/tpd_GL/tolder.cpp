@@ -281,9 +281,30 @@ void trend::Tolder::setHvrLayer(const LayerDef& laydef)
    }
 }
 
-void trend::Tolder::setGrcLayer(bool, const LayerDef&)
+void trend::Tolder::setGrcLayer(bool setEData, const LayerDef& laydef)
 {
-   //TODO
+   if (setEData)
+   {
+      assert(_grcLayer == NULL);
+      if (_grcData.end() != _grcData.find(laydef))
+      {
+         _grcLayer = _grcData[laydef];
+      }
+      else
+      {
+         _grcLayer = DEBUG_NEW TolderLay();
+         _grcData.add(laydef, _grcLayer);
+      }
+      _grcLayer->newSlice(_cellStack.top(), false, false);
+   }
+   else
+   {
+      assert(_grcLayer != NULL);
+      // post process the current layer
+      _grcLayer->ppSlice();
+      _grcLayer = NULL;
+//      _cslctd_array_offset += _elayer->total_slctdx();
+   }
 }
 
 bool trend::Tolder::chunkExists(const LayerDef& laydef, bool has_selected)
@@ -369,7 +390,33 @@ bool trend::Tolder::collect()
 
 bool trend::Tolder::grcCollect()
 {
-   //TODO
+   // First filter-out the layers that doesn't have any objects on them,
+   // post process the last slices in the layers and also gather the number
+   // of required virtual buffers
+   //
+   unsigned num_total_buffers = 0;
+
+   DataLay::Iterator CCLAY = _grcData.begin();
+   while (CCLAY != _grcData.end())
+   {
+      CCLAY->ppSlice();
+      if (0 == CCLAY->total_points())
+      {
+         delete (*CCLAY);
+         _grcData.erase(CCLAY++());
+      }
+      else if (0 != CCLAY->total_points())
+      {
+         num_total_buffers++;
+         if (0 < CCLAY->total_indexs())
+            num_total_buffers++;
+         ++CCLAY;
+      }
+      else
+         ++CCLAY;
+   }
+   // Check whether we have to continue after traversing
+   if (0 == num_total_buffers) return false;
    return true;
 }
 
@@ -383,12 +430,10 @@ void trend::Tolder::draw()
       if (0 != CLAY->total_slctdx())
       {// redraw selected contours only
          _drawprop->setLineProps(true);
-//         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _sbuffer);
          glPushMatrix();
          glMultMatrixd(_activeCS->translation());
          CLAY->drawSelected();
          glPopMatrix();
-//         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
          _drawprop->setLineProps(false);
       }
       // draw everything
@@ -407,7 +452,16 @@ void trend::Tolder::draw()
 
 void trend::Tolder::grcDraw()
 {
-   //TODO
+   for (DataLay::Iterator CLAY = _grcData.begin(); CLAY != _grcData.end(); CLAY++)
+   {// for every layer
+      _drawprop->setCurrentColor(CLAY());
+      _drawprop->setCurrentFill(true); // force fill (ignore block_fill state)
+      _drawprop->setLineProps(false);
+      // draw everything
+      if (0 != CLAY->total_points())
+         CLAY->draw(_drawprop);
+   }
+   checkOGLError("grcDraw");
 }
 
 void trend::Tolder::cleanUp()
@@ -417,7 +471,6 @@ void trend::Tolder::cleanUp()
 
 void trend::Tolder::grcCleanUp()
 {
-   //TODO
    TrendBase::grcCleanUp();
 }
 
