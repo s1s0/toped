@@ -1,4 +1,5 @@
 #summary GLX visual with accumulation buffers on Fedora 9
+#labels Deprecated
 
  
 <p align=right> *08/10/2008*
