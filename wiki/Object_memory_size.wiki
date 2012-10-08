@@ -1,4 +1,5 @@
 #summary A memo about the amount of memory taken by the objects
+#labels Deprecated
 
 <p align=right> *25/04/2010*
 </p>
