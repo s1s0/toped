@@ -827,13 +827,13 @@ void DataCenter::render(const CTM& layCTM)
                RENTIMER_REPORT("Time elapsed for data copying   : ");
                cRenderer->draw();
                RENTIMER_REPORT("    Total elapsed rendering time: ");
-               cRenderer->cleanUp();
             }
-//            if (cRenderer->grcCollect())
-//            {
-////               _cRenderer->grcDraw();
-////               _cRenderer->grcCleanUp();
-//            }
+            cRenderer->cleanUp();
+            if (cRenderer->grcCollect())
+            {
+               cRenderer->grcDraw();
+               cRenderer->grcCleanUp();
+            }
             VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
             TpdPost::render_status(false);
          }
@@ -841,6 +841,7 @@ void DataCenter::render(const CTM& layCTM)
          {
             // If DB is locked - skip the DB drawing, but draw all the property DB stuff
             tell_log(console::MT_INFO,std::string("DB busy. Viewport redraw skipped"));
+            cRenderer->cleanUp();
          }
          PROPC->drawRulers(layCTM);
          TRENDC->releaseCRenderer();
