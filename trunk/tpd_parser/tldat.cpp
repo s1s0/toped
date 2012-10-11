@@ -37,11 +37,16 @@
 extern parsercmd::cmdBLOCK*       CMDBlock;
 
 //=============================================================================
-telldata::TellVar* telldata::TCompType::initfield(const typeID ID) const
+telldata::TellVar* telldata::TCompType::initfield(const typeID ID, unsigned lSize) const
 {
-   telldata::TellVar* nvar;
-   if (ID & telldata::tn_listmask) nvar = DEBUG_NEW telldata::TtList(ID & ~telldata::tn_listmask);
+   if ((ID & telldata::tn_listmask) && (0 == lSize))
+   {
+      telldata::TtList* nvar = DEBUG_NEW telldata::TtList(ID & ~telldata::tn_listmask);
+      return nvar;
+   }
    else
+   {
+      telldata::TellVar* nvar;
       switch(ID & ~telldata::tn_listmask)
       {
          case tn_void  : assert(false); break;
@@ -67,17 +72,30 @@ telldata::TellVar* telldata::TCompType::initfield(const typeID ID) const
                      break;
                 }
       }
-   return nvar;
+      if (ID & telldata::tn_listmask)
+      {
+         assert(0 < lSize);
+         telldata::TtList* lvar = DEBUG_NEW telldata::TtList(ID & ~telldata::tn_listmask);
+         lvar->resize(lSize, nvar);
+         return lvar;
+
+      }
+      else
+      {
+         assert(0 == lSize);
+         return nvar;
+      }
+   }
 }
 
-bool telldata::TCompType::addfield(std::string fname, typeID fID, const TType* utype)
+bool telldata::TCompType::addfield(std::string fname, typeID fID, const TType* utype, unsigned lSize)
 {
    // search for a field with this name
    for (recfieldsID::const_iterator CF = _fields.begin(); CF != _fields.end(); CF++)
    {
-      if (CF->first == fname) return false;
+      if (CF->_fName == fname) return false;
    }
-   _fields.push_back(structRECID(fname,fID));
+   _fields.push_back(UserTypeField(fname,fID,lSize));
     if (NULL != utype) _tIDMAP[fID] = utype;
     return true;
 }
@@ -586,7 +604,7 @@ telldata::TtUserStruct::TtUserStruct(const TCompType* tltypedef) : TellVar(tltyp
 {
    const recfieldsID& typefields = tltypedef->fields();
    for (recfieldsID::const_iterator CI = typefields.begin(); CI != typefields.end(); CI++)
-      _fieldList.push_back(structRECNAME(CI->first,tltypedef->initfield(CI->second)));
+      _fieldList.push_back(structRECNAME(CI->_fName,tltypedef->initfield(CI->_fType, CI->_lSize)));
 }
 
 telldata::TtUserStruct::TtUserStruct(const TCompType* tltypedef, operandSTACK& OPstack) :
@@ -596,16 +614,16 @@ telldata::TtUserStruct::TtUserStruct(const TCompType* tltypedef, operandSTACK& O
    const recfieldsID& typefields = tltypedef->fields();
    for (recfieldsID::const_reverse_iterator CI = typefields.rbegin(); CI != typefields.rend(); CI++)
    {// for every member of the structure
-      if (CI->second == OPstack.top()->get_type())
+      if (CI->_fType == OPstack.top()->get_type())
       {
-         _fieldList.push_back(structRECNAME(CI->first,OPstack.top()->selfcopy()));
+         _fieldList.push_back(structRECNAME(CI->_fName,OPstack.top()->selfcopy()));
       }
-      else if (NUMBER_TYPE(CI->second) && NUMBER_TYPE(OPstack.top()->get_type()) && (CI->second > OPstack.top()->get_type()))
+      else if (NUMBER_TYPE(CI->_fType) && NUMBER_TYPE(OPstack.top()->get_type()) && (CI->_fType > OPstack.top()->get_type()))
       {
          assert(tn_int == OPstack.top()->get_type());
-         assert(tn_real == CI->second);
+         assert(tn_real == CI->_fType);
          TtReal* dummy = DEBUG_NEW TtReal(static_cast<TtInt*>(OPstack.top())->value());
-         _fieldList.push_back(structRECNAME(CI->first,dummy));
+         _fieldList.push_back(structRECNAME(CI->_fName,dummy));
       }
       else
          assert(false);
@@ -1062,33 +1080,33 @@ void telldata::ArgumentID::userStructCheck(const telldata::TType* vtype, bool cm
       {
          if ( TLUNKNOWN_TYPE( (**CA)() ) )
          {
-            if (TLISALIST(CF->second))
+            if (TLISALIST(CF->_fType))
             {// check the list fields
-               if (TLCOMPOSIT_TYPE((CF->second & (~telldata::tn_listmask))))
+               if (TLCOMPOSIT_TYPE((CF->_fType & (~telldata::tn_listmask))))
                {
-                  const telldata::TType* tType = vartype->findtype(CF->second);
+                  const telldata::TType* tType = vartype->findtype(CF->_fType);
                   if (NULL != tType)
                      (*CA)->userStructListCheck(tType, cmdUpdate);
                }
                else
-                  (*CA)->toList(cmdUpdate, CF->second & ~telldata::tn_listmask);
+                  (*CA)->toList(cmdUpdate, CF->_fType & ~telldata::tn_listmask);
             }
             else
             {
-               const telldata::TType* tType = vartype->findtype(CF->second);
+               const telldata::TType* tType = vartype->findtype(CF->_fType);
                if (NULL != tType)
                   (*CA)->userStructCheck(tType, cmdUpdate);
             }
          }
-         if (!NUMBER_TYPE( CF->second ))
+         if (!NUMBER_TYPE( CF->_fType ))
          {
             // for non-number types there is no internal conversion,
             // so check strictly the type
-            if ( (**CA)() != CF->second) return; // no match
+            if ( (**CA)() != CF->_fType) return; // no match
          }
          else // for number types - allow compatibility (int to real only)
             if (!NUMBER_TYPE( (**CA)() )) return; // no match
-            else if (CF->second < (**CA)() ) return; // no match
+            else if (CF->_fType < (**CA)() ) return; // no match
       }
       // all fields match => we can assign a known ID to the ArgumentID
       _ID = vartype->ID();

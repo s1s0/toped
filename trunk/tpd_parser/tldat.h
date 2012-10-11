@@ -78,10 +78,19 @@ namespace telldata {
    class TtList;
    class ArgumentID;
 
-   typedef std::pair<std::string, typeID>    structRECID;
+   struct UserTypeField {
+                    UserTypeField (std::string fName, typeID fType, unsigned lSize):
+                       _fName(fName),
+                       _fType(fType),
+                       _lSize(lSize){if (!TLISALIST(_fType)) assert(0 == lSize);}
+      std::string   _fName;
+      typeID        _fType;
+      unsigned      _lSize; // initial list size
+   };
+
    typedef std::pair<std::string, TellVar*>  structRECNAME;
-   typedef std::deque<structRECID>           recfieldsID;
-   typedef std::deque<structRECNAME>         recfieldsNAME;
+   typedef std::list<UserTypeField>          recfieldsID;
+   typedef std::list<structRECNAME>          recfieldsNAME;
    typedef std::map<std::string, TType*>     typeMAP;
    typedef std::map<std::string, TellVar* >  variableMAP;
    typedef std::vector<TellVar*>             memlist;
@@ -96,8 +105,8 @@ namespace telldata {
    /*Every block (parsercmd::cmdBLOCK) defined maintains a table (map) to the
      locally defined user types in a form <typename - TCompType>. Every user type
      (telldata::TCompType), maintains a table (map) to the user defined types
-     (telldata::TCompType) used in this type in a form <ID - TCompType. The latter is
-     updated by addfield method. Thus the TCompType can execute its own copy
+     (telldata::TCompType) used in this type in a form <ID - TCompType>. The latter is
+     updated by addfield method. Thus the TtUserStruct can execute its own copy
      constructor
    */
    class TType {
@@ -114,8 +123,8 @@ namespace telldata {
    public:
                            TCompType(typeID ID) : TType(ID) {assert(TLCOMPOSIT_TYPE(ID));}
       virtual             ~TCompType(){}
-      bool                 addfield(std::string, typeID, const TType* utype);
-      TellVar*             initfield(const typeID) const;
+      bool                 addfield(std::string, typeID, const TType*, unsigned lSize = 0);
+      TellVar*             initfield(const typeID, unsigned lSize) const;
       const TType*         findtype(const typeID) const;
       const recfieldsID&   fields() const    {return _fields;}
       virtual bool         isComposite() const    {return true;}
