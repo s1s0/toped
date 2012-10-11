@@ -730,13 +730,23 @@ variabledeclaration:
 
 fielddeclaration:
      telltypeID  tknIDENTIFIER              {
-      const telldata::TType* ftype =
-            CMDBlock->getTypeByID($1 & ~telldata::tn_listmask);
+      const telldata::TType* ftype = CMDBlock->getTypeByID($1 & ~telldata::tn_listmask);
       if (!tellstruct->addfield($2, $1, ftype)) {
          tellerror("field with this name already defined in this strucutre", @2);
          $$ = false; // indicates that definition fails
       }
       else $$ = true;
+      delete [] $2;
+   }
+   |  telltypeID   tknIDENTIFIER  indxb tknINT indxe  {
+      if ($4 > 0) {
+         const telldata::TType* ftype = CMDBlock->getTypeByID($1 & ~telldata::tn_listmask);
+         if (!tellstruct->addfield($2, $1, ftype, $4)) {
+            tellerror("field with this name already defined in this strucutre", @2);
+            $$ = false; // indicates that definition fails
+         }
+         else $$ = true;
+      }
       delete [] $2;
    }
 ;
