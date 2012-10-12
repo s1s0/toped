@@ -121,7 +121,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../tpd_common; ../tpd_DB"
+				AdditionalIncludeDirectories="../tpd_common; ../tpd_DB;../tpd_GL"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_UNICODE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -220,6 +220,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ps_out.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\tpdph.cpp"
 				>
 				<FileConfiguration
@@ -254,6 +258,10 @@
 			</File>
 			<File
 				RelativePath=".\oasis_io.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ps_out.h"
 				>
 			</File>
 			<File
