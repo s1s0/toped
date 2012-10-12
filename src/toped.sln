@@ -4,6 +4,7 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TPD_DB", "..\tpd_DB\TPD_DB.vcproj", "{7CC90726-FAE0-415A-B2E4-552D1070B4F0}"
 	ProjectSection(ProjectDependencies) = postProject
 		{1F34EAB3-4E2E-4043-B43D-8C3FDAB14ADB} = {1F34EAB3-4E2E-4043-B43D-8C3FDAB14ADB}
+		{93C841E8-0BF1-480F-B702-9B6A685788AD} = {93C841E8-0BF1-480F-B702-9B6A685788AD}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "toped", "toped.vcproj", "{07EF8990-20F5-4E03-803A-7BC622A4B5E1}"
@@ -13,6 +14,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "toped", "toped.vcproj", "{0
 		{7B327037-492B-48F9-B3D7-127E213900AE} = {7B327037-492B-48F9-B3D7-127E213900AE}
 		{1F34EAB3-4E2E-4043-B43D-8C3FDAB14ADB} = {1F34EAB3-4E2E-4043-B43D-8C3FDAB14ADB}
 		{BA923FBF-9C73-4ACF-900B-FEEF9DC0D4E2} = {BA923FBF-9C73-4ACF-900B-FEEF9DC0D4E2}
+		{93C841E8-0BF1-480F-B702-9B6A685788AD} = {93C841E8-0BF1-480F-B702-9B6A685788AD}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tpd_common", "..\tpd_common\tpd_common.vcproj", "{1F34EAB3-4E2E-4043-B43D-8C3FDAB14ADB}"
@@ -20,6 +22,7 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tpd_parser", "..\tpd_parser\tpd_parser.vcproj", "{1A934334-9615-4C20-871C-660795FCF7C0}"
 	ProjectSection(ProjectDependencies) = postProject
 		{1F34EAB3-4E2E-4043-B43D-8C3FDAB14ADB} = {1F34EAB3-4E2E-4043-B43D-8C3FDAB14ADB}
+		{93C841E8-0BF1-480F-B702-9B6A685788AD} = {93C841E8-0BF1-480F-B702-9B6A685788AD}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tpd_bidfunc", "..\tpd_bidfunc\tpd_bidfunc.vcproj", "{7B327037-492B-48F9-B3D7-127E213900AE}"
@@ -34,6 +37,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tpd_ifaces", "..\tpd_ifaces
 	ProjectSection(ProjectDependencies) = postProject
 		{7CC90726-FAE0-415A-B2E4-552D1070B4F0} = {7CC90726-FAE0-415A-B2E4-552D1070B4F0}
 		{1F34EAB3-4E2E-4043-B43D-8C3FDAB14ADB} = {1F34EAB3-4E2E-4043-B43D-8C3FDAB14ADB}
+		{93C841E8-0BF1-480F-B702-9B6A685788AD} = {93C841E8-0BF1-480F-B702-9B6A685788AD}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gds2vrml_v0.3", "..\utils\gds2vrml_v0.3\gds2vrml_v0.3.vcproj", "{EEF1AE51-DE72-4A66-990F-DB3C64A96033}"
@@ -42,6 +46,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gds2vrml_v0.3", "..\utils\g
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libgdsto3d", "..\utils\gds2vrml_v0.3\libgdsto3d\libgdsto3d.vcproj", "{2887EDF7-649E-4815-AD50-309554AE355E}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tpd_GL", "..\tpd_GL\tpd_GL.vcproj", "{93C841E8-0BF1-480F-B702-9B6A685788AD}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1F34EAB3-4E2E-4043-B43D-8C3FDAB14ADB} = {1F34EAB3-4E2E-4043-B43D-8C3FDAB14ADB}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -81,6 +90,10 @@ Global
 		{2887EDF7-649E-4815-AD50-309554AE355E}.Debug|Win32.Build.0 = Debug|Win32
 		{2887EDF7-649E-4815-AD50-309554AE355E}.Release|Win32.ActiveCfg = Release|Win32
 		{2887EDF7-649E-4815-AD50-309554AE355E}.Release|Win32.Build.0 = Release|Win32
+		{93C841E8-0BF1-480F-B702-9B6A685788AD}.Debug|Win32.ActiveCfg = Debug|Win32
+		{93C841E8-0BF1-480F-B702-9B6A685788AD}.Debug|Win32.Build.0 = Debug|Win32
+		{93C841E8-0BF1-480F-B702-9B6A685788AD}.Release|Win32.ActiveCfg = Release|Win32
+		{93C841E8-0BF1-480F-B702-9B6A685788AD}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
