@@ -208,16 +208,16 @@ int tellstdfunc::stdTELLSTATUS::execute()
 #ifdef DB_MEMORY_TRACE
    MemTrack::TrackListMemoryUsage();
 #else
-   real DBscale = PROPC->DBscale();
-   telldata::TellVar *y;
-   std::string news;
-   while (OPstack.size()) {
-      y = OPstack.top(); OPstack.pop();
-      y->echo(news, DBscale);
-      tell_log(console::MT_ERROR,news);
-   }
-   news = "Bottom of the operand stack reached";
-   tell_log(console::MT_ERROR,news);
+   //real DBscale = PROPC->DBscale();
+   //telldata::TellVar *y;
+   //std::string news;
+   //while (OPstack.size()) {
+   //   y = OPstack.top(); OPstack.pop();
+   //   y->echo(news, DBscale);
+   //   tell_log(console::MT_ERROR,news);
+   //}
+   //news = "Bottom of the operand stack reached";
+   //tell_log(console::MT_ERROR,news);
 #endif
    return EXEC_NEXT;
 }
