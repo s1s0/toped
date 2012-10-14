@@ -30,6 +30,7 @@
 
 #include "ttt.h"
 #include "basetrend.h"
+#include "toshader.h" //FIXME this is themporary here!
 
 namespace trend {
 
@@ -151,12 +152,34 @@ namespace trend {
          std::string            _activeFontName;
    };
 
+   //=============================================================================
+   //
+   // Class to take care about the shaders initialisation
+   //
+   class Shaders {
+      public:
+                                 Shaders();
+         virtual                ~Shaders();
+         void                    loadShadersCode(const std::string&);
+         bool                    status() const { return _status;}
+      private:
+         bool                    compileShader(const std::string&, GLint&, GLint);
+         char*                   loadFile(const std::string&, GLint&);
+         void                    getInfoLog(GLint);
+         std::string             _fnShdrVertex;
+         std::string             _fnShdrFragment;
+         GLint                   _idShdrVertex;
+         GLint                   _idShdrFragment;
+         bool                    _status;
+   };
+
 
    class TrendCenter {
       public:
                                 TrendCenter(bool gui, bool forceBasic=true, bool sprtVbo=false, bool sprtShaders=false);
          virtual               ~TrendCenter();
 //         RenderType             renderType() const {return _renderType;}
+         void                   initShaders(const std::string&);
          trend::TrendBase*      getCRenderer();
          trend::TrendBase*      getHRenderer();
          void                   releaseCRenderer();
@@ -171,8 +194,9 @@ namespace trend {
       private:
          trend::TrendBase*      _cRenderer;    //! current renderer
          trend::TrendBase*      _hRenderer;    //! hoover renderer
+//         FontLibrary*           _fontLib; // TODO (eventually) - remove the global variable fontLib! Make it local here.
+         trend::Shaders*        _cShaders;     //! the shader init object (valid in toshader case only)
          RenderType             _renderType;
-//         FontLibrary*           _fontLib;
    };
 }
 

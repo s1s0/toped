@@ -164,7 +164,10 @@ bool TopedApp::OnInit()
       SetTopWindow(Toped);
       Toped->Show(TRUE);
       wxToolTip::SetDelay(500);
-      // First thing after initialising openGL - load available layout fonts
+      // First thing after initialising openGL - load the shaders (eventually)
+      std::string stdShaderDir(_tpdShadersDir.mb_str(wxConvFile));
+      TRENDC->initShaders(stdShaderDir);
+      // and then - load available layout fonts
       loadGlfFonts();
       // at this stage - the tool shall be considered fully functional
       //--------------------------------------------------------------------------
@@ -597,6 +600,15 @@ void TopedApp::getGlobalDirs()
    else
       // Don't generate a noise about plug-in directory.
       _tpdPlugInDir = wxT("");
+   // Check shaders directory
+   wxFileName shadderFolder(_globalDir);
+   shadderFolder.AppendDir(wxT("shaders"));
+   shadderFolder.Normalize();
+   if (shadderFolder.DirExists())
+      _tpdShadersDir = shadderFolder.GetFullPath();
+   else
+      // Don't generate a noise about shaders directory.
+      _tpdShadersDir = wxT("");
 }
 
 void TopedApp::getTellPathDirs()

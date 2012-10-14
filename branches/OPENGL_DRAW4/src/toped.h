@@ -310,6 +310,7 @@ class TopedApp : public wxApp
       wxString       _tpdFontDir;
       wxString       _tpdResourceDir;
       wxString       _tpdPlugInDir;
+      wxString       _tpdShadersDir;
       wxString       _globalDir;
       wxString       _localDir;
       wxString       _inputTellFile;
