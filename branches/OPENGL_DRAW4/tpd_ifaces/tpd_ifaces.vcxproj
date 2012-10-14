@@ -74,11 +74,11 @@
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <ExecutablePath>C:\Users\skr\sgSoft\GnuWin32\bin;$(ExecutablePath)</ExecutablePath>
-    <IncludePath>C:\Users\skr\sgSoft\wxWidgets-2.9.3\include;$(IncludePath);C:\Users\skr\sgSoft\glew-1.9.0\include;C:\Users\skr\sgSoft\zlib-1.2.5</IncludePath>
+    <IncludePath>C:\Users\skr\sgSoft\wxWidgets-2.9.3\lib\vc_lib\mswu;C:\Users\skr\sgSoft\wxWidgets-2.9.3\include;$(IncludePath);C:\Users\skr\sgSoft\glew-1.9.0\include;C:\Users\skr\sgSoft\zlib-1.2.5</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ExecutablePath>C:\Users\skr\sgSoft\GnuWin32\bin;$(ExecutablePath)</ExecutablePath>
-    <IncludePath>C:\Users\skr\sgSoft\wxWidgets-2.9.3\include;$(IncludePath);C:\Users\skr\sgSoft\glew-1.9.0\include;C:\Users\skr\sgSoft\zlib-1.2.5</IncludePath>
+    <IncludePath>C:\Users\skr\sgSoft\wxWidgets-2.9.3\lib\vc_lib\mswu;C:\Users\skr\sgSoft\wxWidgets-2.9.3\include;$(IncludePath);C:\Users\skr\sgSoft\glew-1.9.0\include;C:\Users\skr\sgSoft\zlib-1.2.5</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
@@ -95,17 +95,17 @@
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>../tpd_common; ../tpd_DB;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;_UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>../tpd_common; ../tpd_DB;../tpd_GL;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <PrecompiledHeader />
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>tpdph.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>.\Release/tpd_ifaces.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\Release/</AssemblerListingLocation>
-      <ObjectFileName>.\Release/</ObjectFileName>
-      <ProgramDataBaseFileName>.\Release/</ProgramDataBaseFileName>
+      <PrecompiledHeaderOutputFile>$(IntDir)\$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </ClCompile>
@@ -119,7 +119,7 @@
     </Lib>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>.\Release/tpd_ifaces.bsc</OutputFile>
+      <OutputFile>$(IntDir)\$(TargetName).bsc</OutputFile>
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -127,18 +127,17 @@
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>../tpd_common; ../tpd_DB;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../tpd_common; ../tpd_DB;../tpd_GL;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;_UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
+      <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>tpdph.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>.\Release/tpd_ifaces.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\Release/</AssemblerListingLocation>
-      <ObjectFileName>.\Release/</ObjectFileName>
-      <ProgramDataBaseFileName>.\Release/</ProgramDataBaseFileName>
+      <PrecompiledHeaderOutputFile>$(IntDir)\$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </ClCompile>
@@ -152,23 +151,23 @@
     </Lib>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>.\Release/tpd_ifaces.bsc</OutputFile>
+      <OutputFile>$(IntDir)\$(TargetName).bsc</OutputFile>
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>../tpd_common; ../tpd_DB;../tpd_GL;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;_UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>tpdph.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>.\Debug/tpd_ifaces.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\Debug/</AssemblerListingLocation>
-      <ObjectFileName>.\Debug/</ObjectFileName>
-      <ProgramDataBaseFileName>.\Debug/</ProgramDataBaseFileName>
+      <PrecompiledHeaderOutputFile>$(IntDir)\$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
       <BrowseInformation>true</BrowseInformation>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -184,7 +183,7 @@
     </Lib>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>.\Debug/tpd_ifaces.bsc</OutputFile>
+      <OutputFile>$(IntDir)\$(TargetName).bsc</OutputFile>
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -194,12 +193,12 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;_UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>tpdph.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>.\Debug/tpd_ifaces.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\Debug/</AssemblerListingLocation>
-      <ObjectFileName>.\Debug/</ObjectFileName>
-      <ProgramDataBaseFileName>.\Debug/</ProgramDataBaseFileName>
+      <PrecompiledHeaderOutputFile>$(IntDir)\$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
       <BrowseInformation>true</BrowseInformation>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -215,7 +214,7 @@
     </Lib>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>.\Debug/tpd_ifaces.bsc</OutputFile>
+      <OutputFile>$(IntDir)\$(TargetName).bsc</OutputFile>
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -252,47 +251,47 @@
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="cif_lex.ll">
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating CIF scanner ...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating CIF scanner</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating CIF scanner ...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">flex.exe -Pcif -o%(Filename).cpp %(Filename)%(Extension)
 </Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">flex.exe -Pcif -o%(Filename).cpp %(Filename)%(Extension)
 </Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">cif_yacc.h;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">cif_yacc.h</AdditionalInputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">cif_yacc.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">cif_lex.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">cif_lex.cpp;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating CIF scanner ...</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating CIF scanner</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating CIF scanner ...</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">flex.exe -Pcif -o%(Filename).cpp %(Filename)%(Extension)
 </Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">flex.exe -Pcif -o%(Filename).cpp %(Filename)%(Extension)
 </Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">cif_yacc.h;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">cif_yacc.h</AdditionalInputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">cif_yacc.h;%(AdditionalInputs)</AdditionalInputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">cif_lex.cpp;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">cif_lex.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="cif_yacc.yy">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating CIF parser</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating CIF parser</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">bison.exe  -p cif -d -t -v -o %(Filename).cpp %(Filename)%(Extension)
-move %(Filename).hpp %(Filename).h
+ move %(Filename).hpp %(Filename).h
 </Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">bison.exe  -p cif -d -t -v -o %(Filename).cpp %(Filename)%(Extension)
 move %(Filename).hpp %(Filename).h
 </Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Filename).cpp;%(Filename).h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Filename).cpp;%(Filename).h</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).cpp;%(Filename).h;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating CIF parser</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating CIF parser</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">bison.exe  -p cif -d -t -v -o %(Filename).cpp %(Filename)%(Extension)
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">bison.exe  -p cif -d -v -o %(Filename).cpp %(Filename)%(Extension)
 move %(Filename).hpp %(Filename).h
 </Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">bison.exe  -p cif -d -t -v -o %(Filename).cpp %(Filename)%(Extension)
 move %(Filename).hpp %(Filename).h
 </Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(Filename).cpp;%(Filename).h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(Filename).cpp;%(Filename).h</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).cpp;%(Filename).h;%(Outputs)</Outputs>
     </CustomBuild>
   </ItemGroup>

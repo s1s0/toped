@@ -76,45 +76,55 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
-    <IncludePath>C:\Users\skr\sgSoft\wxWidgets-2.9.3\include;$(IncludePath);C:\Users\skr\sgSoft\glew-1.9.0\include</IncludePath>
+    <IncludePath>C:\Users\skr\sgSoft\wxWidgets-2.9.3\lib\vc_lib\mswu;C:\Users\skr\sgSoft\wxWidgets-2.9.3\include;$(IncludePath);C:\Users\skr\sgSoft\glew-1.9.0\include</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\Users\skr\sgSoft\wxWidgets-2.9.3\include;$(IncludePath);C:\Users\skr\sgSoft\glew-1.9.0\include</IncludePath>
+    <IncludePath>C:\Users\skr\sgSoft\wxWidgets-2.9.3\lib\vc_lib\mswu;C:\Users\skr\sgSoft\wxWidgets-2.9.3\include;$(IncludePath);C:\Users\skr\sgSoft\glew-1.9.0\include</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>../tpd_common; ../tpd_DB; ../tpd_parser; ../tpd_ifaces;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\tpd_common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>tpdph.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>.\Debug/tpd_GL.pch</PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderOutputFile>$(IntDir)\$(TargetName).pch</PrecompiledHeaderOutputFile>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
     </ClCompile>
     <Lib>
       <OutputFile>$(SolutionDir)$(Platform)\$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>
     </Lib>
+    <Bscmake>
+      <OutputFile>$(IntDir)\$(TargetName).bsc</OutputFile>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>../tpd_common; ../tpd_DB; ../tpd_parser; ../tpd_ifaces;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\tpd_common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>tpdph.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderOutputFile>.\Debug/tpd_GL.pch</PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderOutputFile>$(IntDir)\$(TargetName).pch</PrecompiledHeaderOutputFile>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
     </ClCompile>
     <Lib>
       <OutputFile>$(SolutionDir)$(Platform)\$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>
     </Lib>
+    <Bscmake>
+      <OutputFile>$(IntDir)\$(TargetName).bsc</OutputFile>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -123,13 +133,24 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>Create</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <PrecompiledHeaderFile>tpdph.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>$(IntDir)\$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <AdditionalIncludeDirectories>..\tpd_common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
     <Lib>
       <OutputFile>$(SolutionDir)$(Platform)\$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>
+      <LinkTimeCodeGeneration>
+      </LinkTimeCodeGeneration>
     </Lib>
+    <Bscmake>
+      <OutputFile>$(IntDir)\$(TargetName).bsc</OutputFile>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -138,13 +159,21 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>Create</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <PrecompiledHeaderFile>tpdph.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>$(IntDir)\$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <AdditionalIncludeDirectories>..\tpd_common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Lib>
       <OutputFile>$(SolutionDir)$(Platform)\$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>
     </Lib>
+    <Bscmake>
+      <OutputFile>$(IntDir)\$(TargetName).bsc</OutputFile>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="basetrend.cpp" />
@@ -165,9 +194,6 @@
     <ClInclude Include="tpdph.h" />
     <ClInclude Include="trend.h" />
     <ClInclude Include="viewprop.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\tpd_common\tpd_common.vcxproj">
