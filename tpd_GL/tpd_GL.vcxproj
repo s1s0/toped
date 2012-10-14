@@ -181,6 +181,7 @@
     <ClCompile Include="glf.cpp" />
     <ClCompile Include="tenderer.cpp" />
     <ClCompile Include="tolder.cpp" />
+    <ClCompile Include="toshader.cpp" />
     <ClCompile Include="tpdph.cpp" />
     <ClCompile Include="trend.cpp" />
     <ClCompile Include="viewprop.cpp" />
@@ -191,6 +192,7 @@
     <ClInclude Include="glf.h" />
     <ClInclude Include="tenderer.h" />
     <ClInclude Include="tolder.h" />
+    <ClInclude Include="toshader.h" />
     <ClInclude Include="tpdph.h" />
     <ClInclude Include="trend.h" />
     <ClInclude Include="viewprop.h" />

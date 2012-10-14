@@ -27,6 +27,7 @@
 
 #include "tpdph.h"
 #include <sstream>
+#include <fstream>
 #include "trend.h"
 #include <GL/glew.h>
 #include "glf.h"
@@ -495,19 +496,141 @@ trend::FontLibrary::~FontLibrary()
       glfClose();
 }
 
+//=============================================================================
+trend::Shaders::Shaders() :
+   _fnShdrVertex     ( "vertex.glsl"      ),
+   _fnShdrFragment   ( "fragment.glsl"    ),
+   _idShdrVertex     ( -1                 ),
+   _idShdrFragment   ( -1                 ),
+   _status           ( true               )
+{
+}
+
+void trend::Shaders::loadShadersCode(const std::string& codeDirectory)
+{
+   _fnShdrVertex   = codeDirectory + _fnShdrVertex;
+   _fnShdrFragment = codeDirectory + _fnShdrFragment;
+   if(  (_status &= compileShader(_fnShdrVertex  , _idShdrVertex  , GL_VERTEX_SHADER  ))
+      &&(_status &= compileShader(_fnShdrFragment, _idShdrFragment, GL_FRAGMENT_SHADER))
+     )
+   {
+      GLuint idProgram = glCreateProgram();
+
+      // TODO bind attribute locations
+
+      // attach the shaders
+      glAttachShader(idProgram, _idShdrVertex  );
+      glAttachShader(idProgram, _idShdrFragment);
+      // link
+      glLinkProgram(idProgram);
+      //
+      glUseProgram(idProgram);
+   }
+}
+
+bool trend::Shaders::compileShader(const std::string& fname, GLint& idShader, GLint sType)
+{
+   GLint allLenShaders;
+   const GLchar* allStrShaders = loadFile(fname, allLenShaders);
+   if (0 != allLenShaders)
+   {
+      idShader = glCreateShader( sType );
+      glShaderSource(idShader, 1, &allStrShaders, &allLenShaders);
+      glCompileShader(idShader);
+      GLint statusOK;
+      glGetShaderiv(idShader, GL_COMPILE_STATUS, &statusOK);
+      if (statusOK)
+      {
+         std::stringstream info;
+         info << "Shader " << fname << " compiled";
+         tell_log(console::MT_INFO, info.str());
+      }
+      else
+      {
+         std::stringstream info;
+         info << "Shader " << fname << " failed to compile. See the log below:";
+         tell_log(console::MT_ERROR, info.str());
+         getInfoLog(idShader);
+      }
+      delete [] allStrShaders;
+      return (GL_TRUE == statusOK);
+   }
+   else
+      return false;
+}
+
+char* trend::Shaders::loadFile(const std::string& fName, GLint& fSize)
+{
+   std::ifstream file(fName, std::ios::in | std::ios::binary | std::ios::ate );
+   if (file.is_open())
+   {
+      std::ifstream::pos_type size = file.tellg();
+      fSize = (GLint) size;
+      char* memBlock = DEBUG_NEW char [size];
+      file.seekg(0, std::ios::beg);
+      file.read(memBlock, size);
+      file.close();
+      return memBlock;
+   }
+   else
+   {
+      std::stringstream info;
+      info << "Can't load the shader file \"" << fName << "\"";
+      tell_log(console::MT_ERROR, info.str());
+      fSize = 0;
+      return NULL;
+   }
+}
+
+void trend::Shaders::getInfoLog(GLint idShader)
+{
+   int      lenInfoLog = 0;
+   int      lenFetched = 0;
+   GLchar*  infoLog    = NULL;
+
+   glGetShaderiv(idShader, GL_INFO_LOG_LENGTH, &lenInfoLog);
+
+   if (lenInfoLog > 0)
+   {
+      infoLog = DEBUG_NEW GLchar[lenInfoLog];
+      glGetShaderInfoLog(idShader, lenInfoLog, &lenFetched, infoLog);
+      tell_log(console::MT_INFO,infoLog);
+      delete infoLog;
+   }
+}
+
+trend::Shaders::~Shaders()
+{
+}
 
 //=============================================================================
 trend::TrendCenter::TrendCenter(bool gui, bool forceBasic, bool sprtVbo, bool sprtShaders) :
    _cRenderer     (              NULL),
-   _hRenderer     (              NULL)
+   _hRenderer     (              NULL),
+   _cShaders      (              NULL)
 {
    if      (!gui)             _renderType = trend::tocom;
    else if ( forceBasic )     _renderType = trend::tolder;
    else if ( sprtShaders)     _renderType = trend::toshader;
    else if ( sprtVbo    )     _renderType = trend::tenderer;
    else                       _renderType = trend::tolder;
+   if (trend::toshader== _renderType)
+      _cShaders = DEBUG_NEW trend::Shaders();
    fontLib = DEBUG_NEW trend::FontLibrary(_renderType > trend::tolder);
+}
 
+void trend::TrendCenter::initShaders(const std::string& codeDirectory)
+{
+   if (trend::toshader == _renderType)
+   {
+      assert(_cShaders);
+      _cShaders->loadShadersCode(codeDirectory);
+      if (!_cShaders->status())
+      {
+         tell_log(console::MT_WARNING, "Falling back to VBO rendering because of the errors above");
+         _renderType = trend::tenderer;
+      }
+   }
 }
 
 trend::TrendBase* trend::TrendCenter::getCRenderer()
