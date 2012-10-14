@@ -6,6 +6,7 @@ noinst_HEADERS =                                                              \
                  trend.h                                                      \
                  tolder.h                                                     \
                  tenderer.h                                                   \
+                 toshader.h                                                   \
                  glf.h 
 
 libtpd_GL_la_HEADERS =                                                        \
@@ -20,6 +21,7 @@ libtpd_GL_la_SOURCES =                                                        \
                  basetrend.cpp                                                \
                  tolder.cpp                                                   \
                  tenderer.cpp                                                 \
+                 toshader.cpp                                                 \
                  glf.cpp 
 
 ###############################################################################
