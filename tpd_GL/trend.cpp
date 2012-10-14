@@ -27,6 +27,7 @@
 
 #include "tpdph.h"
 #include <sstream>
+#include <iostream>
 #include <fstream>
 #include "trend.h"
 #include <GL/glew.h>
@@ -561,7 +562,7 @@ bool trend::Shaders::compileShader(const std::string& fname, GLint& idShader, GL
 
 char* trend::Shaders::loadFile(const std::string& fName, GLint& fSize)
 {
-   std::ifstream file(fName, std::ios::in | std::ios::binary | std::ios::ate );
+   std::ifstream file(fName.c_str(), std::ios::in | std::ios::binary | std::ios::ate );
    if (file.is_open())
    {
       std::ifstream::pos_type size = file.tellg();
