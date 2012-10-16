@@ -253,7 +253,7 @@ namespace trend {
          virtual void      collect(TNDR_GLDATAT*, unsigned int*);
          virtual void      draw(layprop::DrawProperties*);
          virtual void      drawTexts(layprop::DrawProperties*);
-      private:
+      protected:
          void              collectIndexs(unsigned int*, const TeselChain*, unsigned*, unsigned*, unsigned);
          GLsizei*          _sizesvx[4]; //! arrays of sizes for vertex sets
          GLsizei*          _firstvx[4]; //! arrays of first vertexes
@@ -411,7 +411,7 @@ namespace trend {
          virtual void      collect(bool, GLuint, GLuint);
          virtual void      collectSelected(unsigned int*);
 
-      private:
+      protected:
          GLuint            _pbuffer;
          GLuint            _ibuffer;
          // index related data for selected objects
@@ -433,7 +433,7 @@ namespace trend {
          virtual          ~TenderRefLay();
          virtual void      collect(GLuint);
          virtual void      draw(layprop::DrawProperties*);
-      private:
+      protected:
          GLuint            _pbuffer;
          // vertex related data
          GLsizei*          _sizesvx; //! array of sizes for vertex sets
@@ -464,7 +464,7 @@ namespace trend {
          virtual void      grcDraw();
          virtual void      cleanUp();
          virtual void      grcCleanUp();
-      private:
+      protected:
          unsigned          _num_ogl_buffers; //! Number of generated openGL VBOs
          unsigned          _num_ogl_grc_buffers; //!
          GLuint*           _ogl_buffers;     //! Array with the "names" of all openGL buffers
