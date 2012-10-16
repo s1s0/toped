@@ -34,6 +34,7 @@
 #include "glf.h"
 #include "tolder.h"
 #include "tenderer.h"
+#include "toshader.h"
 #include "viewprop.h"
 
 

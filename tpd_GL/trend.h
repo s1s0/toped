@@ -30,7 +30,6 @@
 
 #include "ttt.h"
 #include "basetrend.h"
-#include "toshader.h" //FIXME this is themporary here!
 
 namespace trend {
 
