@@ -166,13 +166,14 @@ namespace trend {
          char*                   loadFile(const std::string&, GLint&);
          void                    getShadersLog(GLint);
          void                    getProgramsLog(GLint);
+         bool                    bindUniforms(GLuint);
          std::string             _fnShdrVertex;
          std::string             _fnShdrFragment;
          GLint                   _idShdrVertex;
          GLint                   _idShdrFragment;
+         GlslUniVarNames         _glslUniVarNames;
          bool                    _status;
    };
-
 
    class TrendCenter {
       public:

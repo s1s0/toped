@@ -219,6 +219,15 @@ class TessellPoly {
 //
 //=============================================================================
 namespace trend {
+
+   //! All uniform Variables in the shaders in the form glslu_<variable_name>
+   enum glsl_Uniforms {  glslu_in_CTM
+                       , glslu_Color
+                      };
+   //! The actual location of all uniform variables in the shaders after glLinkProgram
+   typedef std::map<glsl_Uniforms, GLuint>      GlslUniVarLoc;
+   typedef std::map<glsl_Uniforms, std::string> GlslUniVarNames;
+
    /**
    *  Text reference boxes
    */

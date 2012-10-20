@@ -242,7 +242,7 @@ namespace layprop {
          const CTM&                 scrCtm() const       {return  _scrCtm;}
          word                       visualLimit() const  {return _visualLimit;}
          const DBbox&               clipRegion() const   {return _clipRegion;}
-         void                       initCtmStack()       {_tranStack.push(CTM());}
+         void                       initCtmStack()       {_tranStack.push(CTM(_clipRegion.p1(), _clipRegion.p2()));}
          void                       clearCtmStack()      {while (!_tranStack.empty()) _tranStack.pop();}
          void                       pushCtm(CTM& last)   {_tranStack.push(last);}
          void                       popCtm()             {_tranStack.pop();}

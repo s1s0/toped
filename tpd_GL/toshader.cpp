@@ -32,8 +32,8 @@
 
 #define TSHDR_LOC_VERTEX 0
 #define TSHDR_LOC_CTM    1
-extern trend::FontLibrary* fontLib;
-
+extern trend::FontLibrary*  fontLib;
+       trend::GlslUniVarLoc glslUniVarLoc;
 //=============================================================================
 //
 // class ToshaderTV
@@ -45,33 +45,22 @@ trend::ToshaderTV::ToshaderTV(TrendRef* const refCell, bool filled, bool reusabl
 
 void trend::ToshaderTV::setCtm(layprop::DrawProperties* drawprop)
 {
-   CTM ctmOrtho(drawprop->clipRegion().p1(), drawprop->clipRegion().p2());
-   ctmOrtho *= _refCell->ctm();
+   drawprop->pushCtm(_refCell->ctm() * drawprop->topCtm());
+   //CTM ctmOrtho(drawprop->clipRegion().p1(), drawprop->clipRegion().p2());
+   //ctmOrtho = _refCell->ctm() * ctmOrtho;
    real mtrxOrtho [16];
-   ctmOrtho.oglForm(mtrxOrtho);
-   GLuint location = glGetUniformLocation(3, "in_CTM");
-   if( location >= 0 )
-   {
-      glUniformMatrix4dv(location, 1, GL_FALSE, mtrxOrtho);
-  }
-
+   drawprop->topCtm().oglForm(mtrxOrtho);
+   glUniformMatrix4dv(glslUniVarLoc[glslu_in_CTM], 1, GL_FALSE, mtrxOrtho);
 }
 
 void trend::ToshaderTV::draw(layprop::DrawProperties* drawprop)
 {
    // First - deal with openGL translation matrix
-   //glPushMatrix();
-   //glMultMatrixd(_refCell->translation());
-//   CTM ctmOrtho(drawprop->clipRegion().p1(), drawprop->clipRegion().p2());
-//   ctmOrtho *= _refCell->ctm();
-//   float mtrxOrtho [16];
-//   ctmOrtho.oglForm(mtrxOrtho);
-//   glUniformMatrix4fv(TSHDR_LOC_CTM, 1, GL_FALSE, mtrxOrtho);
+   setCtm(drawprop);
    //TODO - colors! drawprop->adjustAlpha(_refCell->alphaDepth() - 1);
    // Switch the vertex buffers ON in the openGL engine ...
    // Set-up the offset in the binded Vertex buffer
    //glVertexPointer(2, TNDR_GLENUMT, 0, (GLvoid*)(sizeof(TNDR_GLDATAT) * _point_array_offset));
-   setCtm(drawprop);
    glEnableVertexAttribArray(TSHDR_LOC_VERTEX);  // glEnableClientState(GL_VERTEX_ARRAY)
    glVertexAttribPointer(TSHDR_LOC_VERTEX, 2, TNDR_GLENUMT, GL_FALSE, 0, (GLvoid*)(sizeof(TNDR_GLDATAT) * _point_array_offset));
    // ... and here we go ...
@@ -140,16 +129,18 @@ void trend::ToshaderTV::draw(layprop::DrawProperties* drawprop)
    // Switch the vertex buffers OFF in the openGL engine ...
    glDisableVertexAttribArray(TSHDR_LOC_VERTEX); //glDisableClientState(GL_VERTEX_ARRAY);
    // ... and finally restore the openGL translation matrix
-   //glPopMatrix();
+   drawprop->popCtm();
 }
 
 //=============================================================================
 //
 // class ToshaderReTV
 //
-void trend::ToshaderReTV::draw(layprop::DrawProperties*)
+void trend::ToshaderReTV::draw(layprop::DrawProperties* drawprop)
 {
-   //TODO
+   TrendRef* sref_cell = _chunk->swapRefCells(_refCell);
+   _chunk->draw(drawprop);
+   _chunk->swapRefCells(sref_cell);
 }
 
 void trend::ToshaderReTV::drawTexts(layprop::DrawProperties*)
@@ -205,28 +196,28 @@ bool trend::ToshaderLay::chunkExists(TrendRef* const ctrans, bool filled)
 void trend::ToshaderLay::draw(layprop::DrawProperties* drawprop)
 {
    glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
-   //// Check the state of the buffer
-   //GLint bufferSize;
-   //glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
-   //assert(bufferSize == (GLint)(2 * _num_total_points * sizeof(TNDR_GLDATAT)));
-   //if (0 != _ibuffer)
-   //{
-   //   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibuffer);
-   //   glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
-   //   assert(bufferSize == (GLint)(_num_total_indexs * sizeof(unsigned)));
-   //}
+   // Check the state of the buffer
+   GLint bufferSize;
+   glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
+   assert(bufferSize == (GLint)(2 * _num_total_points * sizeof(TNDR_GLDATAT)));
+   if (0 != _ibuffer)
+   {
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibuffer);
+      glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
+      assert(bufferSize == (GLint)(_num_total_indexs * sizeof(unsigned)));
+   }
    for (TrendTVList::const_iterator TLAY = _layData.begin(); TLAY != _layData.end(); TLAY++)
    {
       (*TLAY)->draw(drawprop);
    }
-   //for (TrendReTVList::const_iterator TLAY = _reLayData.begin(); TLAY != _reLayData.end(); TLAY++)
-   //{
-   //   (*TLAY)->draw(drawprop);
-   //}
+   for (TrendReTVList::const_iterator TLAY = _reLayData.begin(); TLAY != _reLayData.end(); TLAY++)
+   {
+      (*TLAY)->draw(drawprop);
+   }
 
-   //glBindBuffer(GL_ARRAY_BUFFER, 0);
-   //if (0 != _ibuffer)
-   //   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+   glBindBuffer(GL_ARRAY_BUFFER, 0);
+   if (0 != _ibuffer)
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 void trend::ToshaderLay::drawSelected()
@@ -268,8 +259,8 @@ trend::ToshaderRefLay::~ToshaderRefLay()
 //
 // class Toshader
 //
-trend::Toshader::Toshader( layprop::DrawProperties* drawprop, real UU ) :
-    Tenderer             (drawprop, UU)
+trend::Toshader::Toshader( layprop::DrawProperties* drawprop, real UU) :
+    Tenderer             (drawprop, UU )
 {
    _refLayer = DEBUG_NEW ToshaderRefLay();// FIXME! this object is creted twice - here and in the parent constructor
 }
@@ -349,7 +340,7 @@ void trend::Toshader::zeroCross()
 
 void trend::Toshader::draw()
 {
-   //glUseProgram(3);
+   _drawprop->initCtmStack();
    for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {// for every layer
       //TODO - all the commented code below should be valid
@@ -382,6 +373,7 @@ void trend::Toshader::draw()
    //TODO - all the commented code below should be valid
    //if (0 < _refLayer->total_points())   _refLayer->draw(_drawprop);
    checkOGLError("draw");
+   _drawprop->clearCtmStack();
 }
 
 void trend::Toshader::grcDraw()

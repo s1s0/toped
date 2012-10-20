@@ -569,9 +569,9 @@ CTM::CTM(const TP& bl, const TP& tr)
    {
       _a = 2.0f / (real)(tr.x() - bl.x());
       _b = _c = 0.0f;
-      _d = 2.0f / (real)(bl.y() - tr.y());
+      _d = 2.0f / (real)(tr.y() - bl.y());
       _tx = -((real)(tr.x() + bl.x()) / (real)(tr.x() - bl.x()));
-      _ty = -((real)(bl.y() + tr.y()) / (real)(bl.y() - tr.y()));
+      _ty = -((real)(tr.y() + bl.y()) / (real)(tr.y() - bl.y()));
    }
 }
 
