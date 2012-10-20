@@ -47,12 +47,12 @@ void trend::ToshaderTV::setCtm(layprop::DrawProperties* drawprop)
 {
    CTM ctmOrtho(drawprop->clipRegion().p1(), drawprop->clipRegion().p2());
    ctmOrtho *= _refCell->ctm();
-   float mtrxOrtho [16];
+   real mtrxOrtho [16];
    ctmOrtho.oglForm(mtrxOrtho);
    GLuint location = glGetUniformLocation(3, "in_CTM");
    if( location >= 0 )
    {
-      glUniformMatrix4fv(location, 1, GL_FALSE, mtrxOrtho);
+      glUniformMatrix4dv(location, 1, GL_FALSE, mtrxOrtho);
   }
 
 }
