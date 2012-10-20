@@ -517,6 +517,11 @@ void trend::Shaders::loadShadersCode(const std::string& codeDirectory)
      )
    {
       GLuint idProgram = glCreateProgram();
+      if (0 == idProgram)
+      {
+         _status = false;
+         return;
+      }
 
       // TODO bind attribute locations
 
@@ -525,8 +530,22 @@ void trend::Shaders::loadShadersCode(const std::string& codeDirectory)
       glAttachShader(idProgram, _idShdrFragment);
       // link
       glLinkProgram(idProgram);
-      //
-      glUseProgram(idProgram);
+      GLint programOK;
+      glGetProgramiv(idProgram, GL_LINK_STATUS, &programOK);
+      if (programOK)
+      {
+         std::stringstream info;
+         info << "GLSL program linked";
+         tell_log(console::MT_INFO, info.str());
+         glUseProgram(idProgram);
+      }
+      else
+      {
+         std::stringstream info;
+         info << "GLSL linking failed. See the log below:";
+         tell_log(console::MT_ERROR, info.str());
+         getProgramsLog(idProgram);
+      }
    }
 }
 
@@ -552,7 +571,7 @@ bool trend::Shaders::compileShader(const std::string& fname, GLint& idShader, GL
          std::stringstream info;
          info << "Shader " << fname << " failed to compile. See the log below:";
          tell_log(console::MT_ERROR, info.str());
-         getInfoLog(idShader);
+         getShadersLog(idShader);
       }
       delete [] allStrShaders;
       return (GL_TRUE == statusOK);
@@ -584,7 +603,7 @@ char* trend::Shaders::loadFile(const std::string& fName, GLint& fSize)
    }
 }
 
-void trend::Shaders::getInfoLog(GLint idShader)
+void trend::Shaders::getShadersLog(GLint idShader)
 {
    int      lenInfoLog = 0;
    int      lenFetched = 0;
@@ -596,6 +615,23 @@ void trend::Shaders::getInfoLog(GLint idShader)
    {
       infoLog = DEBUG_NEW GLchar[lenInfoLog];
       glGetShaderInfoLog(idShader, lenInfoLog, &lenFetched, infoLog);
+      tell_log(console::MT_INFO,infoLog);
+      delete infoLog;
+   }
+}
+
+void trend::Shaders::getProgramsLog(GLint idProgram)
+{
+   int      lenInfoLog = 0;
+   int      lenFetched = 0;
+   GLchar*  infoLog    = NULL;
+
+   glGetProgramiv(idProgram, GL_INFO_LOG_LENGTH, &lenInfoLog);
+
+   if (lenInfoLog > 0)
+   {
+      infoLog = DEBUG_NEW GLchar[lenInfoLog];
+      glGetProgramInfoLog(idProgram, lenInfoLog, &lenFetched, infoLog);
       tell_log(console::MT_INFO,infoLog);
       delete infoLog;
    }
@@ -652,7 +688,8 @@ trend::TrendBase* trend::TrendCenter::getCRenderer()
             _cRenderer = DEBUG_NEW trend::Tolder( drawProp, PROPC->UU() );break;
          case trend::tenderer :
             _cRenderer = DEBUG_NEW trend::Tenderer( drawProp, PROPC->UU() ); break;
-         case trend::toshader : assert(false);          break;// TODO
+         case trend::toshader : 
+            _cRenderer = DEBUG_NEW trend::Toshader( drawProp, PROPC->UU() ); break;
          default: assert(false); break;
       }
    }

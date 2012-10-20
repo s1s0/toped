@@ -241,7 +241,7 @@ public:
    CTM(const TP&, real, real, bool);
    CTM(real va,real vb,real vc,real vd,real vtx,real vty) :
     _a(va), _b(vb), _c(vc), _d(vd), _tx(vtx), _ty(vty) {};
-//   CTM(const CTM& mtrx) { *this = *mtrx;};
+   CTM(const TP&, const TP&); //! Create an orthographic matrix (mimic of openGL glOrtho)
    CTM  Translate(real X, real Y) {return (*this *= CTM(1,0,0,1,X,Y));}
    CTM  Translate(const TP&);
    CTM  Scale(real X, real Y)     {return (*this *= CTM(X,0,0,Y,0,0));}
@@ -253,6 +253,7 @@ public:
    CTM  Reversed() const;
    void Decompose(TP&, real&, real&, bool&) const;
    void oglForm(real* const) const;
+   void oglForm(float* const) const;
    void setCTM(real a, real b, real c, real d, real tx, real ty)
                           {_a = a; _b = b; _c = c; _d = d; _tx = tx; _ty = ty;};
    CTM  operator =  (const CTM& op2);
