@@ -164,7 +164,8 @@ namespace trend {
       private:
          bool                    compileShader(const std::string&, GLint&, GLint);
          char*                   loadFile(const std::string&, GLint&);
-         void                    getInfoLog(GLint);
+         void                    getShadersLog(GLint);
+         void                    getProgramsLog(GLint);
          std::string             _fnShdrVertex;
          std::string             _fnShdrFragment;
          GLint                   _idShdrVertex;

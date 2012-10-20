@@ -36,19 +36,9 @@ namespace trend {
       public:
                            ToshaderTV(TrendRef* const, bool, bool, unsigned, unsigned);
          virtual          ~ToshaderTV() {};
-
-         //virtual void      collect(TNDR_GLDATAT*, unsigned int*);
          virtual void      draw(layprop::DrawProperties*);
+         void              setCtm(layprop::DrawProperties*);
          //virtual void      drawTexts(layprop::DrawProperties*);
-      //private:
-      //   void              collectIndexs(unsigned int*, const TeselChain*, unsigned*, unsigned*, unsigned);
-      //   GLsizei*          _sizesvx[4]; //! arrays of sizes for vertex sets
-      //   GLsizei*          _firstvx[4]; //! arrays of first vertexes
-      //   GLsizei*          _sizesix[4]; //! arrays of sizes for indexes sets
-      //   GLuint*           _firstix[4]; //! arrays of first indexes
-      //   // offsets in the VBO
-      //   unsigned          _point_array_offset; //! The offset of this chunk of vertex data in the vertex VBO
-      //   unsigned          _index_array_offset; //! The offset of this chunk of index  data in the index  VBO
    };
 
    class ToshaderReTV : public TenderReTV {
@@ -69,34 +59,13 @@ namespace trend {
          virtual void      draw(layprop::DrawProperties*);
          virtual void      drawSelected();
          virtual void      drawTexts(layprop::DrawProperties*);
-         //virtual void      collect(bool, GLuint, GLuint);
-         //virtual void      collectSelected(unsigned int*);
-
-      //private:
-      //   GLuint            _pbuffer;
-      //   GLuint            _ibuffer;
-      //   // index related data for selected objects
-      //   GLsizei*          _sizslix[3]; //! arrays of sizes for indexes sets of selected objects
-      //   GLuint*           _fstslix[3]; //! arrays of first indexes for selected objects
-      //   // offsets in the VBO
-      //   unsigned          _stv_array_offset; //! first point in the TenderTV with selected objects in this layer
-      //   unsigned          _slctd_array_offset; //! first point in the VBO with selected indexes
    };
 
    class ToshaderRefLay : public TenderRefLay {
       public:
                            ToshaderRefLay();
          virtual          ~ToshaderRefLay();
-         //virtual void      collect(GLuint);
          virtual void      draw(layprop::DrawProperties*);
-   //   private:
-   //      GLuint            _pbuffer;
-   //      // vertex related data
-   //      GLsizei*          _sizesvx; //! array of sizes for vertex sets
-   //      GLsizei*          _firstvx; //! array of first vertexes
-   //      // index related data for selected boxes
-   //      GLsizei*          _sizslix; //! array of sizes for indexes sets
-   //      GLsizei*          _fstslix; //! array of first indexes
    };
 
    class Toshader : public Tenderer {
@@ -109,18 +78,10 @@ namespace trend {
          virtual void      setHvrLayer(const LayerDef&);
          virtual void      setGrcLayer(bool, const LayerDef&);
          virtual bool      chunkExists(const LayerDef&, bool);
-         //virtual bool      collect();
-         //virtual bool      grcCollect();
          virtual void      draw();
          virtual void      grcDraw();
-         virtual void      cleanUp();
-         virtual void      grcCleanUp();
-      //private:
-      //   unsigned          _num_ogl_buffers; //! Number of generated openGL VBOs
-      //   unsigned          _num_ogl_grc_buffers; //!
-      //   GLuint*           _ogl_buffers;     //! Array with the "names" of all openGL buffers
-      //   GLuint*           _ogl_grc_buffers; //! Array with the "names" of the GRC related openGL buffers
-      //   GLuint            _sbuffer;         //! The "name" of the selected index buffer
+         //virtual void      cleanUp();
+         //virtual void      grcCleanUp();
    };
 
 }

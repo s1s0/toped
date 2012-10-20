@@ -27,6 +27,12 @@
 
 #include "tpdph.h"
 #include "toshader.h"
+#include "viewprop.h"
+#include "trend.h"
+
+#define TSHDR_LOC_VERTEX 0
+#define TSHDR_LOC_CTM    1
+extern trend::FontLibrary* fontLib;
 
 //=============================================================================
 //
@@ -37,9 +43,104 @@ trend::ToshaderTV::ToshaderTV(TrendRef* const refCell, bool filled, bool reusabl
    TenderTV(refCell, filled, reusable, parray_offset, iarray_offset)
 {}
 
-void trend::ToshaderTV::draw(layprop::DrawProperties*)
+void trend::ToshaderTV::setCtm(layprop::DrawProperties* drawprop)
 {
-   //TODO
+   CTM ctmOrtho(drawprop->clipRegion().p1(), drawprop->clipRegion().p2());
+   ctmOrtho *= _refCell->ctm();
+   float mtrxOrtho [16];
+   ctmOrtho.oglForm(mtrxOrtho);
+   GLuint location = glGetUniformLocation(3, "in_CTM");
+   if( location >= 0 )
+   {
+      glUniformMatrix4fv(location, 1, GL_FALSE, mtrxOrtho);
+  }
+
+}
+
+void trend::ToshaderTV::draw(layprop::DrawProperties* drawprop)
+{
+   // First - deal with openGL translation matrix
+   //glPushMatrix();
+   //glMultMatrixd(_refCell->translation());
+//   CTM ctmOrtho(drawprop->clipRegion().p1(), drawprop->clipRegion().p2());
+//   ctmOrtho *= _refCell->ctm();
+//   float mtrxOrtho [16];
+//   ctmOrtho.oglForm(mtrxOrtho);
+//   glUniformMatrix4fv(TSHDR_LOC_CTM, 1, GL_FALSE, mtrxOrtho);
+   //TODO - colors! drawprop->adjustAlpha(_refCell->alphaDepth() - 1);
+   // Switch the vertex buffers ON in the openGL engine ...
+   // Set-up the offset in the binded Vertex buffer
+   //glVertexPointer(2, TNDR_GLENUMT, 0, (GLvoid*)(sizeof(TNDR_GLDATAT) * _point_array_offset));
+   setCtm(drawprop);
+   glEnableVertexAttribArray(TSHDR_LOC_VERTEX);  // glEnableClientState(GL_VERTEX_ARRAY)
+   glVertexAttribPointer(TSHDR_LOC_VERTEX, 2, TNDR_GLENUMT, GL_FALSE, 0, (GLvoid*)(sizeof(TNDR_GLDATAT) * _point_array_offset));
+   // ... and here we go ...
+   if  (_alobjvx[line] > 0)
+   {// Draw the wire center lines
+      assert(_firstvx[line]);
+      assert(_sizesvx[line]);
+      glMultiDrawArrays(GL_LINE_STRIP, _firstvx[line], _sizesvx[line], _alobjvx[line]);
+   }
+   if  (_alobjvx[cnvx] > 0)
+   {// Draw convex polygons (TODO replace GL_QUADS to GL_POLY)
+      assert(_firstvx[cnvx]);
+      assert(_sizesvx[cnvx]);
+      glMultiDrawArrays(GL_LINE_LOOP, _firstvx[cnvx], _sizesvx[cnvx], _alobjvx[cnvx]);
+      glMultiDrawArrays(GL_QUADS, _firstvx[cnvx], _sizesvx[cnvx], _alobjvx[cnvx]);
+   }
+   if  (_alobjvx[ncvx] > 0)
+   {// Draw non-convex polygons
+      glEnableClientState(GL_INDEX_ARRAY);
+      assert(_firstvx[ncvx]);
+      assert(_sizesvx[ncvx]);
+      glMultiDrawArrays(GL_LINE_LOOP, _firstvx[ncvx], _sizesvx[ncvx], _alobjvx[ncvx]);
+      if (_alobjix[fqss] > 0)
+      {
+         assert(_sizesix[fqss]);
+         assert(_firstix[fqss]);
+         // The line below works on Windows, but doesn't work (hangs) on Linux with nVidia driver.
+         // The suspect is (const GLvoid**)_firstix[fqss] but it's quite possible that it is a driver bug
+         // Besides - everybody is saying that there is no speed benefit from this operation
+         //glMultiDrawElements(GL_QUAD_STRIP    , _sizesix[fqss], GL_UNSIGNED_INT, (const GLvoid**)_firstix[fqss], _alobjix[fqss]);
+         for (unsigned i= 0; i < _alobjix[fqss]; i++)
+            glDrawElements(GL_QUAD_STRIP, _sizesix[fqss][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_firstix[fqss][i]));
+      }
+      if (_alobjix[ftrs] > 0)
+      {
+         assert(_sizesix[ftrs]);
+         assert(_firstix[ftrs]);
+         //glMultiDrawElements(GL_TRIANGLES     , _sizesix[ftrs], GL_UNSIGNED_INT, (const GLvoid**)_firstix[ftrs], _alobjix[ftrs]);
+         for (unsigned i= 0; i < _alobjix[ftrs]; i++)
+            glDrawElements(GL_TRIANGLES, _sizesix[ftrs][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_firstix[ftrs][i]));
+      }
+      if (_alobjix[ftfs] > 0)
+      {
+         assert(_sizesix[ftfs]);
+         assert(_firstix[ftfs]);
+         //glMultiDrawElements(GL_TRIANGLE_FAN  , _sizesix[ftfs], GL_UNSIGNED_INT, (const GLvoid**)_firstix[ftfs], _alobjix[ftfs]);
+         for (unsigned i= 0; i < _alobjix[ftfs]; i++)
+            glDrawElements(GL_TRIANGLE_FAN, _sizesix[ftfs][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_firstix[ftfs][i]));
+      }
+      if (_alobjix[ftss] > 0)
+      {
+         assert(_sizesix[ftss]);
+         assert(_firstix[ftss]);
+         //glMultiDrawElements(GL_TRIANGLE_STRIP, _sizesix[ftss], GL_UNSIGNED_INT, (const GLvoid**)_firstix[ftss], _alobjix[ftss]);
+         for (unsigned i= 0; i < _alobjix[ftss]; i++)
+            glDrawElements(GL_TRIANGLE_STRIP, _sizesix[ftss][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_firstix[ftss][i]));
+      }
+      glDisableClientState(GL_INDEX_ARRAY);
+   }
+   if (_alobjvx[cont] > 0)
+   {// Draw the remaining non-filled shapes of any kind
+      assert(_firstvx[cont]);
+      assert(_sizesvx[cont]);
+      glMultiDrawArrays(GL_LINE_LOOP, _firstvx[cont], _sizesvx[cont], _alobjvx[cont]);
+   }
+   // Switch the vertex buffers OFF in the openGL engine ...
+   glDisableVertexAttribArray(TSHDR_LOC_VERTEX); //glDisableClientState(GL_VERTEX_ARRAY);
+   // ... and finally restore the openGL translation matrix
+   //glPopMatrix();
 }
 
 //=============================================================================
@@ -103,7 +204,29 @@ bool trend::ToshaderLay::chunkExists(TrendRef* const ctrans, bool filled)
 
 void trend::ToshaderLay::draw(layprop::DrawProperties* drawprop)
 {
-   //TODO
+   glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
+   //// Check the state of the buffer
+   //GLint bufferSize;
+   //glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
+   //assert(bufferSize == (GLint)(2 * _num_total_points * sizeof(TNDR_GLDATAT)));
+   //if (0 != _ibuffer)
+   //{
+   //   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibuffer);
+   //   glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
+   //   assert(bufferSize == (GLint)(_num_total_indexs * sizeof(unsigned)));
+   //}
+   for (TrendTVList::const_iterator TLAY = _layData.begin(); TLAY != _layData.end(); TLAY++)
+   {
+      (*TLAY)->draw(drawprop);
+   }
+   //for (TrendReTVList::const_iterator TLAY = _reLayData.begin(); TLAY != _reLayData.end(); TLAY++)
+   //{
+   //   (*TLAY)->draw(drawprop);
+   //}
+
+   //glBindBuffer(GL_ARRAY_BUFFER, 0);
+   //if (0 != _ibuffer)
+   //   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 void trend::ToshaderLay::drawSelected()
@@ -226,7 +349,39 @@ void trend::Toshader::zeroCross()
 
 void trend::Toshader::draw()
 {
-// TODO
+   //glUseProgram(3);
+   for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
+   {// for every layer
+      //TODO - all the commented code below should be valid
+      //_drawprop->setCurrentColor(CLAY());
+      //_drawprop->setCurrentFill(true); // force fill (ignore block_fill state)
+      //_drawprop->setLineProps(false);
+      //if (0 != CLAY->total_slctdx())
+      //{// redraw selected contours only
+      //   _drawprop->setLineProps(true);
+      //   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _sbuffer);
+      //   glPushMatrix();
+      //   glMultMatrixd(_activeCS->translation());
+      //   CLAY->drawSelected();
+      //   glPopMatrix();
+      //   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+      //   _drawprop->setLineProps(false);
+      //}
+      // draw everything
+      if (0 != CLAY->total_points())
+         CLAY->draw(_drawprop);
+      // draw texts
+      //TODO - all the commented code below should be valid
+      //if (0 != CLAY->total_strings())
+      //{
+      //   fontLib->bindFont();
+      //   CLAY->drawTexts(_drawprop);
+      //}
+   }
+   // draw reference boxes
+   //TODO - all the commented code below should be valid
+   //if (0 < _refLayer->total_points())   _refLayer->draw(_drawprop);
+   checkOGLError("draw");
 }
 
 void trend::Toshader::grcDraw()
