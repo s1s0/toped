@@ -70,7 +70,7 @@ namespace trend {
 
    class Toshader : public Tenderer {
       public:
-                           Toshader( layprop::DrawProperties* drawprop, real UU );
+                           Toshader( layprop::DrawProperties*, real UU);
          virtual          ~Toshader();
          virtual void      grid( const real, const std::string );
          virtual void      zeroCross();

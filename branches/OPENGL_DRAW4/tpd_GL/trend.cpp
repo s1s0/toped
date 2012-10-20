@@ -41,6 +41,7 @@
 trend::FontLibrary*              fontLib = NULL;
 trend::TrendCenter*              TRENDC  = NULL;
 extern layprop::PropertyCenter*  PROPC;
+extern trend::GlslUniVarLoc      glslUniVarLoc;
 
 //=============================================================================
 //
@@ -506,6 +507,9 @@ trend::Shaders::Shaders() :
    _idShdrFragment   ( -1                 ),
    _status           ( true               )
 {
+   // initialize all uniform variables names
+   _glslUniVarNames[glslu_in_CTM] = "in_CTM";
+//   _glslUniVarNames[glslu_in_CTM] = "in_CTM";
 }
 
 void trend::Shaders::loadShadersCode(const std::string& codeDirectory)
@@ -537,7 +541,7 @@ void trend::Shaders::loadShadersCode(const std::string& codeDirectory)
          std::stringstream info;
          info << "GLSL program linked";
          tell_log(console::MT_INFO, info.str());
-         glUseProgram(idProgram);
+         _status = bindUniforms(idProgram);
       }
       else
       {
@@ -545,8 +549,31 @@ void trend::Shaders::loadShadersCode(const std::string& codeDirectory)
          info << "GLSL linking failed. See the log below:";
          tell_log(console::MT_ERROR, info.str());
          getProgramsLog(idProgram);
+         _status = false;
+      }
+      if (_status)
+         glUseProgram(idProgram);
+   }
+}
+
+bool trend::Shaders::bindUniforms(GLuint idProgram)
+{
+   for (GlslUniVarNames::const_iterator CV = _glslUniVarNames.begin(); CV != _glslUniVarNames.end(); CV++)
+   {
+      GLuint location = glGetUniformLocation(idProgram, CV->second.c_str());
+      if( location >= 0 )
+      {
+         glslUniVarLoc[CV->first] = location;
+      }
+      else
+      {
+         std::stringstream info;
+         info << "Can't bind variable \"" << CV->second << "\"";
+         tell_log(console::MT_ERROR, info.str());
+         return false;
       }
    }
+   return true;
 }
 
 bool trend::Shaders::compileShader(const std::string& fname, GLint& idShader, GLint sType)
