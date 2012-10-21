@@ -595,11 +595,17 @@ void layprop::DrawProperties::addFill(std::string name, byte* ptrn) {
 }
 
 
-void layprop::DrawProperties::setCurrentColor(const LayerDef& laydef)
+bool layprop::DrawProperties::setCurrentColor(const LayerDef& laydef, layprop::tellRGB& theColor)
 {
-   _drawingLayer = laydef;
-   const layprop::tellRGB& theColor = getColor(_drawingLayer);
-   glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
+   if (_drawingLayer == laydef)
+      return false;
+   else
+   {
+      _drawingLayer = laydef;
+   /*const layprop::tellRGB& */theColor = getColor(_drawingLayer);
+      return true;
+   //glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
+   }
 }
 
 void layprop::DrawProperties::setGridColor(std::string colname) const

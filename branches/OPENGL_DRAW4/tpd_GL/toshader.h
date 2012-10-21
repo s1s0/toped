@@ -82,6 +82,8 @@ namespace trend {
          virtual void      grcDraw();
          //virtual void      cleanUp();
          //virtual void      grcCleanUp();
+      private:
+         void              setColor(const LayerDef& layer);
    };
 
 }
