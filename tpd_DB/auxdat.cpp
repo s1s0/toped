@@ -536,7 +536,10 @@ void auxdata::GrcCell::motionDraw(const layprop::DrawProperties& drawprop,
       for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
          if (!drawprop.layerHidden(lay()))
          {
-            const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(lay());
+            layprop::tellRGB theColor;
+            if (const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(lay(), theColor))
+               glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
+//            const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(lay());
              for (QuadTree::DrawIterator CI = lay->begin(drawprop, transtack); CI != lay->end(); CI++)
                CI->motionDraw(drawprop, transtack, NULL);
          }

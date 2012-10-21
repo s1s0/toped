@@ -222,7 +222,9 @@ namespace trend {
 
    //! All uniform Variables in the shaders in the form glslu_<variable_name>
    enum glsl_Uniforms {  glslu_in_CTM
-                       , glslu_Color
+                       , glslu_in_Z
+                       , glslu_in_Color
+                       , glslu_in_Alpha
                       };
    //! The actual location of all uniform variables in the shaders after glLinkProgram
    typedef std::map<glsl_Uniforms, GLuint>      GlslUniVarLoc;

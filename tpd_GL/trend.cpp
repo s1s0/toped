@@ -508,8 +508,10 @@ trend::Shaders::Shaders() :
    _status           ( true               )
 {
    // initialize all uniform variables names
-   _glslUniVarNames[glslu_in_CTM] = "in_CTM";
-//   _glslUniVarNames[glslu_in_CTM] = "in_CTM";
+   _glslUniVarNames[glslu_in_CTM]   = "in_CTM";
+   _glslUniVarNames[glslu_in_Z]     = "in_Z";
+   _glslUniVarNames[glslu_in_Color] = "in_Color";
+   _glslUniVarNames[glslu_in_Alpha] = "in_Alpha";
 }
 
 void trend::Shaders::loadShadersCode(const std::string& codeDirectory)

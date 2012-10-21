@@ -46,8 +46,6 @@ trend::ToshaderTV::ToshaderTV(TrendRef* const refCell, bool filled, bool reusabl
 void trend::ToshaderTV::setCtm(layprop::DrawProperties* drawprop)
 {
    drawprop->pushCtm(_refCell->ctm() * drawprop->topCtm());
-   //CTM ctmOrtho(drawprop->clipRegion().p1(), drawprop->clipRegion().p2());
-   //ctmOrtho = _refCell->ctm() * ctmOrtho;
    real mtrxOrtho [16];
    drawprop->topCtm().oglForm(mtrxOrtho);
    glUniformMatrix4dv(glslUniVarLoc[glslu_in_CTM], 1, GL_FALSE, mtrxOrtho);
@@ -57,11 +55,11 @@ void trend::ToshaderTV::draw(layprop::DrawProperties* drawprop)
 {
    // First - deal with openGL translation matrix
    setCtm(drawprop);
-   //TODO - colors! drawprop->adjustAlpha(_refCell->alphaDepth() - 1);
-   // Switch the vertex buffers ON in the openGL engine ...
-   // Set-up the offset in the binded Vertex buffer
-   //glVertexPointer(2, TNDR_GLENUMT, 0, (GLvoid*)(sizeof(TNDR_GLDATAT) * _point_array_offset));
+   //TODO - colors! 
+   //drawprop->adjustAlpha(_refCell->alphaDepth() - 1);
+   // Activate the vertex buffers in the vartex shader ...
    glEnableVertexAttribArray(TSHDR_LOC_VERTEX);  // glEnableClientState(GL_VERTEX_ARRAY)
+   // Set-up the offset in the binded Vertex buffer
    glVertexAttribPointer(TSHDR_LOC_VERTEX, 2, TNDR_GLENUMT, GL_FALSE, 0, (GLvoid*)(sizeof(TNDR_GLDATAT) * _point_array_offset));
    // ... and here we go ...
    if  (_alobjvx[line] > 0)
@@ -337,14 +335,29 @@ void trend::Toshader::zeroCross()
    //TODO
 }
 
+void trend::Toshader::setColor(const LayerDef& layer)
+{
+   layprop::tellRGB tellColor;
+   if (_drawprop->setCurrentColor(layer, tellColor))
+   {
+      float oglColor[4];
+      oglColor[0] = (float)tellColor.red()   / 255.0f ;
+      oglColor[1] = (float)tellColor.green() / 255.0f ;
+      oglColor[2] = (float)tellColor.blue()  / 255.0f ;
+      oglColor[3] = (float)tellColor.alpha() / 255.0f ;
+      glUniform3fv(glslUniVarLoc[glslu_in_Color], 1, oglColor);
+      glUniform1f(glslUniVarLoc[glslu_in_Alpha], oglColor[3]);
+   }
+}
 
 void trend::Toshader::draw()
 {
    _drawprop->initCtmStack();
    for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {// for every layer
+      setColor(CLAY());
       //TODO - all the commented code below should be valid
-      //_drawprop->setCurrentColor(CLAY());
+
       //_drawprop->setCurrentFill(true); // force fill (ignore block_fill state)
       //_drawprop->setLineProps(false);
       //if (0 != CLAY->total_slctdx())

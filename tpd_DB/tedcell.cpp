@@ -538,8 +538,12 @@ void laydata::TdtCell::motionDraw(const layprop::DrawProperties& drawprop,
       //temporary draw of the active cell - moving selected shapes
       SelectList::Iterator llst;
       DataList::iterator dlst;
-      for (llst = _shapesel.begin(); llst != _shapesel.end(); llst++) {
-         const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(llst());
+      for (llst = _shapesel.begin(); llst != _shapesel.end(); llst++) 
+      {
+         layprop::tellRGB theColor;
+         if (const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(llst(), theColor))
+            glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
+//         const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(llst());
          for (dlst = llst->begin(); dlst != llst->end(); dlst++)
             if (!((actop == console::op_copy) && (sh_partsel == dlst->first->status())))
                dlst->first->motionDraw(drawprop, transtack, &(dlst->second));
@@ -553,7 +557,10 @@ void laydata::TdtCell::motionDraw(const layprop::DrawProperties& drawprop,
       for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
          if (!drawprop.layerHidden(lay()))
          {
-            const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(lay());
+            layprop::tellRGB theColor;
+            if (const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(lay(), theColor))
+               glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
+//            const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(lay());
             for (QuadTree::DrawIterator CI = lay->begin(drawprop, transtack); CI != lay->end(); CI++)
                CI->motionDraw(drawprop, transtack, NULL);
          }
