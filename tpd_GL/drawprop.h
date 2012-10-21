@@ -244,7 +244,7 @@ namespace layprop {
          const DBbox&               clipRegion() const   {return _clipRegion;}
          void                       initCtmStack()       {_tranStack.push(CTM(_clipRegion.p1(), _clipRegion.p2()));}
          void                       clearCtmStack()      {while (!_tranStack.empty()) _tranStack.pop();}
-         void                       pushCtm(CTM& last)   {_tranStack.push(last);}
+         void                       pushCtm(const CTM& last)   {_tranStack.push(last);}
          void                       popCtm()             {_tranStack.pop();}
          const CTM&                 topCtm() const       {assert(_tranStack.size());return _tranStack.top();}
          void                       setState (PropertyState state)

@@ -657,7 +657,6 @@ void trend::TenderRefLay::draw(layprop::DrawProperties* drawprop)
    layprop::tellRGB theColor;
    if (drawprop->setCurrentColor(REF_LAY_DEF, theColor))
       glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
-//   drawprop->setCurrentColor(REF_LAY_DEF);
    drawprop->setLineProps(false);
    // Bind the buffer
    glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
@@ -969,7 +968,6 @@ void trend::Tenderer::draw()
       layprop::tellRGB theColor;
       if (_drawprop->setCurrentColor(CLAY(), theColor))
          glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
-//      _drawprop->setCurrentColor(CLAY());
       _drawprop->setCurrentFill(true); // force fill (ignore block_fill state)
       _drawprop->setLineProps(false);
       if (0 != CLAY->total_slctdx())
@@ -1005,7 +1003,6 @@ void trend::Tenderer::grcDraw()
       layprop::tellRGB theColor;
       if (_drawprop->setCurrentColor(CLAY(), theColor))
          glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
-//      _drawprop->setCurrentColor(CLAY());
       _drawprop->setCurrentFill(true); // force fill (ignore block_fill state)
       _drawprop->setLineProps(false);
       // draw everything

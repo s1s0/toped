@@ -543,7 +543,6 @@ void laydata::TdtCell::motionDraw(const layprop::DrawProperties& drawprop,
          layprop::tellRGB theColor;
          if (const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(llst(), theColor))
             glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
-//         const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(llst());
          for (dlst = llst->begin(); dlst != llst->end(); dlst++)
             if (!((actop == console::op_copy) && (sh_partsel == dlst->first->status())))
                dlst->first->motionDraw(drawprop, transtack, &(dlst->second));
