@@ -184,7 +184,6 @@ void trend::TolderRefLay::draw(layprop::DrawProperties* drawprop)
    layprop::tellRGB theColor;
    if (drawprop->setCurrentColor(REF_LAY_DEF, theColor))
       glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
-   //drawprop->setCurrentColor(REF_LAY_DEF);
    drawprop->setLineProps(false);
 
    for (RefBoxList::const_iterator CSH = _cellRefBoxes.begin(); CSH != _cellRefBoxes.end(); CSH++)
@@ -430,7 +429,6 @@ void trend::Tolder::draw()
       layprop::tellRGB theColor;
       if (_drawprop->setCurrentColor(CLAY(), theColor))
          glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
-//      _drawprop->setCurrentColor(CLAY());
       _drawprop->setCurrentFill(true); // force fill (ignore block_fill state)
       _drawprop->setLineProps(false);
       if (0 != CLAY->total_slctdx())
@@ -463,7 +461,6 @@ void trend::Tolder::grcDraw()
       layprop::tellRGB theColor;
       if (_drawprop->setCurrentColor(CLAY(), theColor))
          glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
-//      _drawprop->setCurrentColor(CLAY());
       _drawprop->setCurrentFill(true); // force fill (ignore block_fill state)
       _drawprop->setLineProps(false);
       // draw everything
