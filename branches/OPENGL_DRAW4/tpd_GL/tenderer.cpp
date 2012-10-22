@@ -961,14 +961,35 @@ bool trend::Tenderer::grcCollect()
    return true;
 }
 
+void trend::Tenderer::setColor(const LayerDef& layer)
+{
+   layprop::tellRGB theColor;
+   if (_drawprop->setCurrentColor(layer, theColor))
+      glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
+
+}
+
+void trend::Tenderer::setStipple()
+{
+   const byte* tellStipple = _drawprop->getCurrentFill();
+   if (NULL == tellStipple)
+   {
+      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+   }
+   else
+   {
+      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+      glEnable(GL_POLYGON_STIPPLE);
+      glPolygonStipple(tellStipple);
+   }
+}
+
 void trend::Tenderer::draw()
 {
    for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {// for every layer
-      layprop::tellRGB theColor;
-      if (_drawprop->setCurrentColor(CLAY(), theColor))
-         glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
-      _drawprop->setCurrentFill(true); // force fill (ignore block_fill state)
+      setColor(CLAY());
+      setStipple();
       _drawprop->setLineProps(false);
       if (0 != CLAY->total_slctdx())
       {// redraw selected contours only
@@ -1000,10 +1021,8 @@ void trend::Tenderer::grcDraw()
 {
    for (DataLay::Iterator CLAY = _grcData.begin(); CLAY != _grcData.end(); CLAY++)
    {// for every layer
-      layprop::tellRGB theColor;
-      if (_drawprop->setCurrentColor(CLAY(), theColor))
-         glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
-      _drawprop->setCurrentFill(true); // force fill (ignore block_fill state)
+      setColor(CLAY());
+      setStipple();
       _drawprop->setLineProps(false);
       // draw everything
       if (0 != CLAY->total_points())

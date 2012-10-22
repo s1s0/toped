@@ -184,6 +184,7 @@ void trend::TolderRefLay::draw(layprop::DrawProperties* drawprop)
    layprop::tellRGB theColor;
    if (drawprop->setCurrentColor(REF_LAY_DEF, theColor))
       glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
+   //drawprop->setCurrentColor(REF_LAY_DEF);
    drawprop->setLineProps(false);
 
    for (RefBoxList::const_iterator CSH = _cellRefBoxes.begin(); CSH != _cellRefBoxes.end(); CSH++)
@@ -422,14 +423,35 @@ bool trend::Tolder::grcCollect()
    return true;
 }
 
+void trend::Tolder::setColor(const LayerDef& layer)
+{
+   layprop::tellRGB theColor;
+   if (_drawprop->setCurrentColor(layer, theColor))
+      glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
+
+}
+
+void trend::Tolder::setStipple()
+{
+   const byte* tellStipple = _drawprop->getCurrentFill();
+   if (NULL == tellStipple)
+   {
+      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+   }
+   else
+   {
+      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+      glEnable(GL_POLYGON_STIPPLE);
+      glPolygonStipple(tellStipple);
+   }
+}
+
 void trend::Tolder::draw()
 {
    for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {// for every layer
-      layprop::tellRGB theColor;
-      if (_drawprop->setCurrentColor(CLAY(), theColor))
-         glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
-      _drawprop->setCurrentFill(true); // force fill (ignore block_fill state)
+      setColor(CLAY());
+      setStipple();
       _drawprop->setLineProps(false);
       if (0 != CLAY->total_slctdx())
       {// redraw selected contours only
@@ -458,10 +480,8 @@ void trend::Tolder::grcDraw()
 {
    for (DataLay::Iterator CLAY = _grcData.begin(); CLAY != _grcData.end(); CLAY++)
    {// for every layer
-      layprop::tellRGB theColor;
-      if (_drawprop->setCurrentColor(CLAY(), theColor))
-         glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
-      _drawprop->setCurrentFill(true); // force fill (ignore block_fill state)
+      setColor(CLAY());
+      setStipple();
       _drawprop->setLineProps(false);
       // draw everything
       if (0 != CLAY->total_points())

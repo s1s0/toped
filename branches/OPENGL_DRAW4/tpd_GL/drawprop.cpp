@@ -621,38 +621,61 @@ void layprop::DrawProperties::setGridColor(std::string colname) const
    }
 }
 
-bool layprop::DrawProperties::setCurrentFill(bool force_fill) const
+// CLEAN THIS UP
+//bool layprop::DrawProperties::setCurrentFill(bool force_fill) const
+//{
+//   if ((REF_LAY_DEF == _drawingLayer) || (GRC_LAY_DEF == _drawingLayer)) return true;
+//   // The lines below are doing effectively
+//   // byte* ifill = _layFill[_layset[_drawingLayer]->getfill]
+//   const LayerSettings* ilayset = findLayerSettings(_drawingLayer);
+//   if ( (NULL != ilayset) && (!_blockFill || force_fill ) )
+//   {
+//      if(ilayset->filled())
+//      { // layer is filled
+//         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+//         FillMap::const_iterator ifillset = _layFill.find(ilayset->fill());
+//         if (_layFill.end() == ifillset)
+//         { // no stipple defined - will use solid fill
+////            glDisable(GL_POLYGON_STIPPLE);
+//            glEnable(GL_POLYGON_STIPPLE);
+//            glPolygonStipple(_defaultFill);
+//         }
+//         else
+//         { // no stipple is defined
+//            glEnable(GL_POLYGON_STIPPLE);
+//            glPolygonStipple(ifillset->second);
+//         }
+//         return true;
+//      }
+//      else
+//      {
+//         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+//         return false;
+//      }
+//   }
+//   else return false;
+//}
+
+const byte* layprop::DrawProperties::getCurrentFill(/*bool force_fill*/) const
 {
-   if ((REF_LAY_DEF == _drawingLayer) || (GRC_LAY_DEF == _drawingLayer)) return true;
-   // The lines below are doing effectively
-   // byte* ifill = _layFill[_layset[_drawingLayer]->getfill]
+   assert((REF_LAY_DEF != _drawingLayer) && 
+          (GRC_LAY_DEF != _drawingLayer)    );
+   // Retrive the layer settings
    const LayerSettings* ilayset = findLayerSettings(_drawingLayer);
-   if ( (NULL != ilayset) && (!_blockFill || force_fill ) )
+   if (NULL != ilayset) 
    {
       if(ilayset->filled())
       { // layer is filled
-         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
          FillMap::const_iterator ifillset = _layFill.find(ilayset->fill());
          if (_layFill.end() == ifillset)
-         { // no stipple defined - will use solid fill
-//            glDisable(GL_POLYGON_STIPPLE);
-            glEnable(GL_POLYGON_STIPPLE);
-            glPolygonStipple(_defaultFill);
-         }
+            // no stipple defined - will use default fill
+            return _defaultFill;
          else
-         { // no stipple is defined
-            glEnable(GL_POLYGON_STIPPLE);
-            glPolygonStipple(ifillset->second);
-         }
-         return true;
+            return ifillset->second;
       }
-      else
-      {
-         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-         return false;
-      }
+      else return NULL;
    }
-   else return false;
+   else return NULL;
 }
 
 bool layprop::DrawProperties::layerFilled(const LayerDef& laydef) const

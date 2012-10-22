@@ -225,6 +225,8 @@ namespace trend {
                        , glslu_in_Z
                        , glslu_in_Color
                        , glslu_in_Alpha
+                       , glslu_in_Stipple
+                       , glslu_in_StippleEn
                       };
    //! The actual location of all uniform variables in the shaders after glLinkProgram
    typedef std::map<glsl_Uniforms, GLuint>      GlslUniVarLoc;
@@ -938,6 +940,8 @@ namespace trend {
          bool              adjustTextOrientation() const {return _drawprop->adjustTextOrientation();}
          layprop::DrawProperties*&   drawprop()          {return _drawprop                         ;}
       protected:
+         virtual void      setColor(const LayerDef& layer) = 0;
+         virtual void      setStipple() = 0;
          layprop::DrawProperties*   _drawprop;
          real              _UU;
          DataLay           _data;            //!All editable data for drawing

@@ -227,7 +227,7 @@ namespace layprop {
                                    ~DrawProperties();
          // Called during the rendering - protected in the render initialisation
          bool                       setCurrentColor(const LayerDef&, layprop::tellRGB&);
-         bool                       setCurrentFill(bool) const;
+         const byte*                getCurrentFill() const;
          void                       setLineProps(bool selected = false) const;
          void                       initDrawRefStack(laydata::CellRefStack*);
          void                       clearDrawRefStack();
