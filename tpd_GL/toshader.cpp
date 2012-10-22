@@ -350,15 +350,35 @@ void trend::Toshader::setColor(const LayerDef& layer)
    }
 }
 
+void trend::Toshader::setStipple()
+{
+   const byte* tellStipple = _drawprop->getCurrentFill();
+   if (NULL == tellStipple)
+   {
+      glUniform1ui(glslUniVarLoc[glslu_in_StippleEn], 0);
+   }
+   else
+   {
+      // the matrix above must be converted to something eatable by the shader
+      GLuint shdrStipple [32];
+      for (unsigned i = 0; i < 32; i++)
+         shdrStipple[i] = ((GLuint)(tellStipple[4*i + 3]) << 8*3)
+                        | ((GLuint)(tellStipple[4*i + 2]) << 8*2)
+                        | ((GLuint)(tellStipple[4*i + 1]) << 8*1)
+                        | ((GLuint)(tellStipple[4*i + 0]) << 8*0);
+      glUniform1uiv(glslUniVarLoc[glslu_in_Stipple], 32, shdrStipple);
+      glUniform1ui(glslUniVarLoc[glslu_in_StippleEn], 1);
+   }
+}
+
 void trend::Toshader::draw()
 {
    _drawprop->initCtmStack();
    for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {// for every layer
       setColor(CLAY());
+      setStipple();
       //TODO - all the commented code below should be valid
-
-      //_drawprop->setCurrentFill(true); // force fill (ignore block_fill state)
       //_drawprop->setLineProps(false);
       //if (0 != CLAY->total_slctdx())
       //{// redraw selected contours only
