@@ -1,4 +1,4 @@
-// Fragment Shader – file "minimal.frag"
+// Fragment Shader ï¿½ file "minimal.frag"
 
 #version 330
 
@@ -16,8 +16,8 @@ void main(void)
    if (in_StippleEn)
    {
       uvec2 ufCoord = uvec2(gl_FragCoord.x, gl_FragCoord.y);
-      uint index = ufCoord.y % 32;
-      uint mask  = uint(1) << (ufCoord.x % 32);
+      uint index = 31u - (ufCoord.y % 32u);
+      uint mask  = uint(1) << (ufCoord.x % 32u);
       dropThePixel = !bool(in_Stipple[index] & mask);
    }
    if (dropThePixel)
