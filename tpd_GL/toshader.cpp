@@ -48,7 +48,10 @@ void trend::ToshaderTV::setCtm(layprop::DrawProperties* drawprop)
    drawprop->pushCtm(_refCell->ctm() * drawprop->topCtm());
    real mtrxOrtho [16];
    drawprop->topCtm().oglForm(mtrxOrtho);
-   glUniformMatrix4dv(glslUniVarLoc[glslu_in_CTM], 1, GL_FALSE, mtrxOrtho);
+   float boza[16];
+   for (int i = 0; i < 16; i++)
+      boza[i] = mtrxOrtho[i];
+   glUniformMatrix4fv(glslUniVarLoc[glslu_in_CTM], 1, GL_FALSE, boza);
 }
 
 void trend::ToshaderTV::draw(layprop::DrawProperties* drawprop)
