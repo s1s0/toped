@@ -1,9 +1,9 @@
-// Vertex Shader – file "minimal.vert"
+// Vertex Shader ï¿½ file "minimal.vert"
 
 #version 330
 
 layout (location = 0) in      vec2  in_Vertex;
-uniform dmat4 in_CTM;
+uniform mat4 in_CTM;
 uniform float in_Z = 0;
 
 void main(void)
