@@ -37,16 +37,19 @@ namespace trend {
                            ToshaderTV(TrendRef* const, bool, bool, unsigned, unsigned);
          virtual          ~ToshaderTV() {};
          virtual void      draw(layprop::DrawProperties*);
+         virtual void      drawTexts(layprop::DrawProperties*);
+      protected:
+         void              drawLines();
+         void              drawTriQuads();
          void              setCtm(layprop::DrawProperties*);
-         //virtual void      drawTexts(layprop::DrawProperties*);
    };
 
    class ToshaderReTV : public TenderReTV {
       public:
                            ToshaderReTV(TrendTV* const chunk, TrendRef* const refCell):
                               TenderReTV(chunk, refCell) {}
-         virtual void      draw(layprop::DrawProperties*);
-         virtual void      drawTexts(layprop::DrawProperties*);
+//         virtual void      draw(layprop::DrawProperties*);
+//         virtual void      drawTexts(layprop::DrawProperties*);
    };
 
    class ToshaderLay : public TenderLay {
@@ -56,9 +59,9 @@ namespace trend {
          virtual void      newSlice(TrendRef* const, bool, bool /*, bool, unsigned*/);
          virtual void      newSlice(TrendRef* const, bool, bool, unsigned slctd_array_offset);
          virtual bool      chunkExists(TrendRef* const, bool);
-         virtual void      draw(layprop::DrawProperties*);
+//         virtual void      draw(layprop::DrawProperties*);
          virtual void      drawSelected();
-         virtual void      drawTexts(layprop::DrawProperties*);
+//         virtual void      drawTexts(layprop::DrawProperties*);
    };
 
    class ToshaderRefLay : public TenderRefLay {
