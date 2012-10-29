@@ -30,8 +30,7 @@
 #include "viewprop.h"
 #include "trend.h"
 
-#define TSHDR_LOC_VERTEX 0
-#define TSHDR_LOC_CTM    1
+#define TSHDR_LOC_VERTEX 0 // TODO -> get this into something like glslUniVarLoc
 extern trend::FontLibrary*  fontLib;
        trend::GlslUniVarLoc glslUniVarLoc;
 //=============================================================================
@@ -43,47 +42,54 @@ trend::ToshaderTV::ToshaderTV(TrendRef* const refCell, bool filled, bool reusabl
    TenderTV(refCell, filled, reusable, parray_offset, iarray_offset)
 {}
 
-void trend::ToshaderTV::setCtm(layprop::DrawProperties* drawprop)
-{
-   drawprop->pushCtm(_refCell->ctm() * drawprop->topCtm());
-   real mtrxOrtho [16];
-   drawprop->topCtm().oglForm(mtrxOrtho);
-   float boza[16];
-   for (int i = 0; i < 16; i++)
-      boza[i] = mtrxOrtho[i];
-   glUniformMatrix4fv(glslUniVarLoc[glslu_in_CTM], 1, GL_FALSE, boza);
-}
-
 void trend::ToshaderTV::draw(layprop::DrawProperties* drawprop)
 {
    // First - deal with openGL translation matrix
    setCtm(drawprop);
    //TODO - colors! 
    //drawprop->adjustAlpha(_refCell->alphaDepth() - 1);
-   // Activate the vertex buffers in the vartex shader ...
+   // Activate the vertex buffers in the vertex shader ...
    glEnableVertexAttribArray(TSHDR_LOC_VERTEX);  // glEnableClientState(GL_VERTEX_ARRAY)
    // Set-up the offset in the binded Vertex buffer
    glVertexAttribPointer(TSHDR_LOC_VERTEX, 2, TNDR_GLENUMT, GL_FALSE, 0, (GLvoid*)(sizeof(TNDR_GLDATAT) * _point_array_offset));
    // ... and here we go ...
-   if  (_alobjvx[line] > 0)
-   {// Draw the wire center lines
-      assert(_firstvx[line]);
-      assert(_sizesvx[line]);
-      glMultiDrawArrays(GL_LINE_STRIP, _firstvx[line], _sizesvx[line], _alobjvx[line]);
-   }
+   drawTriQuads();
+   // TODO we need glGetUniform here! or some state in the drawprop!
+   glUniform1ui(glslUniVarLoc[glslu_in_StippleEn], 0);
+   drawLines();
+   glUniform1ui(glslUniVarLoc[glslu_in_StippleEn], 1);
+   // Switch the vertex buffers OFF in the openGL engine ...
+   glDisableVertexAttribArray(TSHDR_LOC_VERTEX); //glDisableClientState(GL_VERTEX_ARRAY);
+   // ... and finally restore the openGL translation matrix
+   drawprop->popCtm();
+}
+
+void trend::ToshaderTV::drawTexts(layprop::DrawProperties* drawprop)
+{
+   //   glPushMatrix();
+   //   glMultMatrixd(_refCell->translation());
+   setCtm(drawprop);
+   //TODO - colors!
+   //drawprop->adjustAlpha(_refCell->alphaDepth() - 1);
+
+   for (TrendStrings::const_iterator TSTR = _text_data.begin(); TSTR != _text_data.end(); TSTR++)
+      (*TSTR)->draw(_filled);
+
+//   glPopMatrix();
+   drawprop->popCtm();
+}
+
+void trend::ToshaderTV::drawTriQuads()
+{
    if  (_alobjvx[cnvx] > 0)
    {// Draw convex polygons (TODO replace GL_QUADS to GL_POLY)
       assert(_firstvx[cnvx]);
       assert(_sizesvx[cnvx]);
-      glMultiDrawArrays(GL_LINE_LOOP, _firstvx[cnvx], _sizesvx[cnvx], _alobjvx[cnvx]);
       glMultiDrawArrays(GL_QUADS, _firstvx[cnvx], _sizesvx[cnvx], _alobjvx[cnvx]);
    }
    if  (_alobjvx[ncvx] > 0)
    {// Draw non-convex polygons
       glEnableClientState(GL_INDEX_ARRAY);
-      assert(_firstvx[ncvx]);
-      assert(_sizesvx[ncvx]);
-      glMultiDrawArrays(GL_LINE_LOOP, _firstvx[ncvx], _sizesvx[ncvx], _alobjvx[ncvx]);
       if (_alobjix[fqss] > 0)
       {
          assert(_sizesix[fqss]);
@@ -121,33 +127,63 @@ void trend::ToshaderTV::draw(layprop::DrawProperties* drawprop)
       }
       glDisableClientState(GL_INDEX_ARRAY);
    }
+}
+
+void trend::ToshaderTV::drawLines()
+{
+   if  (_alobjvx[line] > 0)
+   {// Draw the wire center lines
+      assert(_firstvx[line]);
+      assert(_sizesvx[line]);
+      glMultiDrawArrays(GL_LINE_STRIP, _firstvx[line], _sizesvx[line], _alobjvx[line]);
+   }
+   if  (_alobjvx[cnvx] > 0)
+   {// Draw convex polygons
+      assert(_firstvx[cnvx]);
+      assert(_sizesvx[cnvx]);
+      glMultiDrawArrays(GL_LINE_LOOP, _firstvx[cnvx], _sizesvx[cnvx], _alobjvx[cnvx]);
+   }
+   if  (_alobjvx[ncvx] > 0)
+   {// Draw non-convex polygons
+      glEnableClientState(GL_INDEX_ARRAY);
+      assert(_firstvx[ncvx]);
+      assert(_sizesvx[ncvx]);
+      glMultiDrawArrays(GL_LINE_LOOP, _firstvx[ncvx], _sizesvx[ncvx], _alobjvx[ncvx]);
+   }
    if (_alobjvx[cont] > 0)
    {// Draw the remaining non-filled shapes of any kind
       assert(_firstvx[cont]);
       assert(_sizesvx[cont]);
       glMultiDrawArrays(GL_LINE_LOOP, _firstvx[cont], _sizesvx[cont], _alobjvx[cont]);
    }
-   // Switch the vertex buffers OFF in the openGL engine ...
-   glDisableVertexAttribArray(TSHDR_LOC_VERTEX); //glDisableClientState(GL_VERTEX_ARRAY);
-   // ... and finally restore the openGL translation matrix
-   drawprop->popCtm();
+}
+
+
+void trend::ToshaderTV::setCtm(layprop::DrawProperties* drawprop)
+{
+   drawprop->pushCtm(_refCell->ctm() * drawprop->topCtm());
+   float mtrxOrtho [16];
+   drawprop->topCtm().oglForm(mtrxOrtho);
+   glUniformMatrix4fv(glslUniVarLoc[glslu_in_CTM], 1, GL_FALSE, mtrxOrtho);
 }
 
 //=============================================================================
 //
 // class ToshaderReTV
 //
-void trend::ToshaderReTV::draw(layprop::DrawProperties* drawprop)
-{
-   TrendRef* sref_cell = _chunk->swapRefCells(_refCell);
-   _chunk->draw(drawprop);
-   _chunk->swapRefCells(sref_cell);
-}
-
-void trend::ToshaderReTV::drawTexts(layprop::DrawProperties*)
-{
-   //TODO
-}
+//void trend::ToshaderReTV::draw(layprop::DrawProperties* drawprop)
+//{
+//   TrendRef* sref_cell = _chunk->swapRefCells(_refCell);
+//   _chunk->draw(drawprop);
+//   _chunk->swapRefCells(sref_cell);
+//}
+//
+//void trend::ToshaderReTV::drawTexts(layprop::DrawProperties* drawprop)
+//{
+//   TrendRef* sref_cell = _chunk->swapRefCells(_refCell);
+//   _chunk->drawTexts(drawprop);
+//   _chunk->swapRefCells(sref_cell);
+//}
 
 
 //=============================================================================
@@ -194,42 +230,42 @@ bool trend::ToshaderLay::chunkExists(TrendRef* const ctrans, bool filled)
    return true;
 }
 
-void trend::ToshaderLay::draw(layprop::DrawProperties* drawprop)
-{
-   glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
-   // Check the state of the buffer
-   GLint bufferSize;
-   glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
-   assert(bufferSize == (GLint)(2 * _num_total_points * sizeof(TNDR_GLDATAT)));
-   if (0 != _ibuffer)
-   {
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibuffer);
-      glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
-      assert(bufferSize == (GLint)(_num_total_indexs * sizeof(unsigned)));
-   }
-   for (TrendTVList::const_iterator TLAY = _layData.begin(); TLAY != _layData.end(); TLAY++)
-   {
-      (*TLAY)->draw(drawprop);
-   }
-   for (TrendReTVList::const_iterator TLAY = _reLayData.begin(); TLAY != _reLayData.end(); TLAY++)
-   {
-      (*TLAY)->draw(drawprop);
-   }
-
-   glBindBuffer(GL_ARRAY_BUFFER, 0);
-   if (0 != _ibuffer)
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-}
+//void trend::ToshaderLay::draw(layprop::DrawProperties* drawprop)
+//{
+//   glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
+//   // Check the state of the buffer
+//   GLint bufferSize;
+//   glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
+//   assert(bufferSize == (GLint)(2 * _num_total_points * sizeof(TNDR_GLDATAT)));
+//   if (0 != _ibuffer)
+//   {
+//      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibuffer);
+//      glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
+//      assert(bufferSize == (GLint)(_num_total_indexs * sizeof(unsigned)));
+//   }
+//   for (TrendTVList::const_iterator TLAY = _layData.begin(); TLAY != _layData.end(); TLAY++)
+//   {
+//      (*TLAY)->draw(drawprop);
+//   }
+//   for (TrendReTVList::const_iterator TLAY = _reLayData.begin(); TLAY != _reLayData.end(); TLAY++)
+//   {
+//      (*TLAY)->draw(drawprop);
+//   }
+//
+//   glBindBuffer(GL_ARRAY_BUFFER, 0);
+//   if (0 != _ibuffer)
+//      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+//}
 
 void trend::ToshaderLay::drawSelected()
 {
    //TODO
 }
 
-void trend::ToshaderLay::drawTexts(layprop::DrawProperties* drawprop)
-{
-   //TODO
-}
+//void trend::ToshaderLay::drawTexts(layprop::DrawProperties* drawprop)
+//{
+//   //TODO
+//}
 
 trend::ToshaderLay::~ToshaderLay()
 {
@@ -362,7 +398,7 @@ void trend::Toshader::setStipple()
    }
    else
    {
-      // the matrix above must be converted to something eatable by the shader
+      // the matrix above must be converted to something suitable by the shader
       GLuint shdrStipple [32];
       for (unsigned i = 0; i < 32; i++)
          shdrStipple[i] = ((GLuint)(tellStipple[4*i + 3]) << 8*3)
@@ -398,12 +434,11 @@ void trend::Toshader::draw()
       if (0 != CLAY->total_points())
          CLAY->draw(_drawprop);
       // draw texts
-      //TODO - all the commented code below should be valid
-      //if (0 != CLAY->total_strings())
-      //{
-      //   fontLib->bindFont();
-      //   CLAY->drawTexts(_drawprop);
-      //}
+      if (0 != CLAY->total_strings())
+      {
+         fontLib->bindFont();
+         CLAY->drawTexts(_drawprop);
+      }
    }
    // draw reference boxes
    //TODO - all the commented code below should be valid
