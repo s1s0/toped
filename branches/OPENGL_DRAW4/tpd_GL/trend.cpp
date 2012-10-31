@@ -325,145 +325,150 @@ trend::TGlfFont::~TGlfFont()
 
 //=============================================================================
 //
+// SgFontLib
 //
-//
-trend::FontLibrary::FontLibrary(bool fti) :
-   _fti(fti), _activeFontName("")
+trend::SgFontLib::SgFontLib() :
+    trend::FontLibrary  ()
 {
-   if (!_fti) glfInit();
 }
 
-bool trend::FontLibrary::loadLayoutFont(std::string fontfile)
+bool trend::SgFontLib::loadLayoutFont(std::string fontfile)
 {
-   if (_fti)
+   // Parse the font library
+   TGlfFont* curFont = DEBUG_NEW TGlfFont(fontfile, _activeFontName);
+   if (!curFont->status())
    {
-      // Parse the font library
-      TGlfFont* curFont = DEBUG_NEW TGlfFont(fontfile, _activeFontName);
-      if (!curFont->status())
-      {
-         // fit it in a VBO
-         curFont->collect();
-         _oglFont[_activeFontName] = curFont;
-         return true;
-      }
+      // fit it in a VBO
+      curFont->collect();
+      _oglFont[_activeFontName] = curFont;
+      return true;
+   }
+   return false;
+}
+
+bool trend::SgFontLib::selectFont(std::string fname)
+{
+   if (_oglFont.end() != _oglFont.find(fname))
+   {
+      _activeFontName = fname;
+      return true;
+   }
+   return false;
+}
+
+void trend::SgFontLib::getStringBounds(const std::string* text, DBbox* overlap)
+{
+   assert(NULL != _oglFont[_activeFontName]); // make sure that fonts are initialised
+   _oglFont[_activeFontName]->getStringBounds(text, overlap);
+}
+
+void trend::SgFontLib::drawString(const std::string* text, bool fill)
+{
+   _oglFont[_activeFontName]->drawString(text, fill);
+}
+
+void trend::SgFontLib::drawWiredString(std::string text)
+{
+   bindFont();
+   _oglFont[_activeFontName]->drawString(&text, false);
+   unbindFont();
+}
+
+void trend::SgFontLib::drawSolidString(std::string text)
+{
+   bindFont();
+   _oglFont[_activeFontName]->drawString(&text, true);
+   unbindFont();
+}
+
+void trend::SgFontLib::bindFont()
+{
+   if (NULL != _oglFont[_activeFontName])
+      _oglFont[_activeFontName]->bindBuffers();
+}
+
+void  trend::SgFontLib::unbindFont()
+{
+   glBindBuffer(GL_ARRAY_BUFFER, 0);
+   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+word trend::SgFontLib::numFonts()
+{
+   return _oglFont.size();
+}
+
+trend::SgFontLib::~SgFontLib()
+{
+   for (OglFontCollectionMap::const_iterator CF = _oglFont.begin(); CF != _oglFont.end(); CF++)
+      delete (CF->second);
+}
+
+
+//=============================================================================
+//
+// RpFontLib
+//
+trend::RpFontLib::RpFontLib() :
+    trend::FontLibrary  ()
+{
+   glfInit();
+}
+
+bool trend::RpFontLib::loadLayoutFont(std::string fontfile)
+{
+   char* chFontName = NULL;
+   int fontDescriptor = glfLoadFont(fontfile.c_str(), chFontName);
+   if ( -1 == fontDescriptor )
+   {
+      std::ostringstream ost1;
+      ost1<<"Error loading font file \"" << fontfile << "\". All text objects will not be properly processed";
+      tell_log(console::MT_ERROR,ost1.str());
       return false;
    }
    else
    {
-      char* chFontName = NULL;
-      int fontDescriptor = glfLoadFont(fontfile.c_str(), chFontName);
-      if ( -1 == fontDescriptor )
-      {
-         std::ostringstream ost1;
-         ost1<<"Error loading font file \"" << fontfile << "\". All text objects will not be properly processed";
-         tell_log(console::MT_ERROR,ost1.str());
-         return false;
-      }
-      else
-      {
-         assert(chFontName);
-         _activeFontName = std::string(chFontName);
-         _ramFont[_activeFontName] = fontDescriptor;
-         return true;
-      }
+      assert(chFontName);
+      _activeFontName = std::string(chFontName);
+      _ramFont[_activeFontName] = fontDescriptor;
+      return true;
    }
 }
 
-bool trend::FontLibrary::selectFont(std::string fname)
+bool trend::RpFontLib::selectFont(std::string fname)
 {
-   if (_fti)
+   if (_ramFont.end() != _ramFont.find(fname))
    {
-      if (_oglFont.end() != _oglFont.find(fname))
+      if (0 == glfSelectFont(_ramFont[fname]))
       {
          _activeFontName = fname;
          return true;
       }
-      return false;
+      else return false;
    }
-   else
-   {
-      if (_ramFont.end() != _ramFont.find(fname))
-      {
-         if (0 == glfSelectFont(_ramFont[fname]))
-         {
-            _activeFontName = fname;
-            return true;
-         }
-         else return false;
-      }
-      return false;
-   }
+   return false;
 }
 
-void trend::FontLibrary::getStringBounds(const std::string* text, DBbox* overlap)
+void trend::RpFontLib::getStringBounds(const std::string* text, DBbox* overlap)
 {
-   if (_fti)
-   {
-      assert(NULL != _oglFont[_activeFontName]); // make sure that fonts are initialized
-      _oglFont[_activeFontName]->getStringBounds(text, overlap);
-   }
-   else
-   {
-      float minx, miny, maxx, maxy;
-      glfGetStringBounds(text->c_str(),&minx, &miny, &maxx, &maxy);
-      (*overlap) = DBbox(TP(minx,miny,OPENGL_FONT_UNIT), TP(maxx,maxy,OPENGL_FONT_UNIT));
-   }
+   float minx, miny, maxx, maxy;
+   glfGetStringBounds(text->c_str(),&minx, &miny, &maxx, &maxy);
+   (*overlap) = DBbox(TP(minx,miny,OPENGL_FONT_UNIT), TP(maxx,maxy,OPENGL_FONT_UNIT));
 }
 
-void trend::FontLibrary::drawString(const std::string* text, bool fill)
+void trend::RpFontLib::drawString(const std::string* text, bool fill)
 {
-   if (_fti)
-   {
-     _oglFont[_activeFontName]->drawString(text, fill);
-   }
-   else
-   {
-      glfDrawTopedString(text->c_str(), fill);
-   }
+   glfDrawTopedString(text->c_str(), fill);
 }
 
-void trend::FontLibrary::drawWiredString(std::string text)
+void trend::RpFontLib::drawWiredString(std::string text)
 {
-   if (_fti)
-   {
-      bindFont();
-      _oglFont[_activeFontName]->drawString(&text, false);
-      unbindFont();
-   }
-   else
-   {
       glfDrawWiredString(text.c_str());
-   }
 }
 
-void trend::FontLibrary::drawSolidString(std::string text)
+void trend::RpFontLib::drawSolidString(std::string text)
 {
-   if (_fti)
-   {
-      bindFont();
-      _oglFont[_activeFontName]->drawString(&text, true);
-      unbindFont();
-   }
-   else
-   {
-      glfDrawSolidString(text.c_str());
-   }
-}
-
-bool  trend::FontLibrary::bindFont()
-{
-   assert(_fti);
-   if (NULL != _oglFont[_activeFontName])
-      return _oglFont[_activeFontName]->bindBuffers();
-   else
-      return false;
-}
-
-void  trend::FontLibrary::unbindFont()
-{
-   assert(_fti);
-   glBindBuffer(GL_ARRAY_BUFFER, 0);
-   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+   glfDrawSolidString(text.c_str());
 }
 
 //void trend::FontLibrary::allFontNames(NameList& allFontNames)
@@ -480,23 +485,14 @@ void  trend::FontLibrary::unbindFont()
 //   }
 //}
 
-word trend::FontLibrary::numFonts()
+word trend::RpFontLib::numFonts()
 {
-   if (_fti)
-      return _oglFont.size();
-   else
-      return _ramFont.size();
+   return _ramFont.size();
 }
 
-trend::FontLibrary::~FontLibrary()
+trend::RpFontLib::~RpFontLib()
 {
-   if (_fti)
-   {
-      for (OglFontCollectionMap::const_iterator CF = _oglFont.begin(); CF != _oglFont.end(); CF++)
-         delete (CF->second);
-   }
-   else
-      glfClose();
+   glfClose();
 }
 
 //=============================================================================
@@ -685,7 +681,19 @@ trend::TrendCenter::TrendCenter(bool gui, bool forceBasic, bool sprtVbo, bool sp
    else                       _renderType = trend::tolder;
    if (trend::toshader== _renderType)
       _cShaders = DEBUG_NEW trend::Shaders();
-   fontLib = DEBUG_NEW trend::FontLibrary(_renderType > trend::tolder);
+//   fontLib = DEBUG_NEW trend::FontLibrary(_renderType > trend::tolder);
+
+   switch (_renderType)
+   {
+      case trend::tocom    : assert(false);          break;// TODO?
+      case trend::tolder   :
+         fontLib = DEBUG_NEW trend::RpFontLib();     break;
+      case trend::tenderer :
+         fontLib = DEBUG_NEW trend::SgFontLib();     break;
+      case trend::toshader :
+         fontLib = DEBUG_NEW trend::SgFontLib();     break;
+      default: assert(false); break;
+   }
 }
 
 void trend::TrendCenter::initShaders(const std::string& codeDirectory)
