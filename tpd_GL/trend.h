@@ -124,33 +124,59 @@ namespace trend {
 
    //=============================================================================
    //
-   // Wrapper to abstract-out the Glf implementation. Should be temporary until
-   // new implementation is up&running
+   // Wrapper to abstract-out the Glf implementation.
    //
    class FontLibrary {
       public:
-                                FontLibrary(bool);
-                               ~FontLibrary();
-         bool                   loadLayoutFont(std::string);
-         bool                   selectFont(std::string);
-         void                   getStringBounds(const std::string*, DBbox*);
-         void                   drawString(const std::string*, bool);
-         void                   drawWiredString(std::string);
-         void                   drawSolidString(std::string);
-         bool                   bindFont();
-         void                   unbindFont();
-//         void                   allFontNames(NameList&);
-         word                   numFonts();
+                                FontLibrary() : _activeFontName() {};
+         virtual               ~FontLibrary(){};
+         virtual bool           loadLayoutFont(std::string) = 0;
+         virtual bool           selectFont(std::string) = 0;
+         virtual void           getStringBounds(const std::string*, DBbox*) = 0;
+         virtual void           drawString(const std::string*, bool) = 0;
+         virtual void           drawWiredString(std::string) = 0;
+         virtual void           drawSolidString(std::string) = 0;
+         virtual word           numFonts() = 0;
+         virtual void           bindFont()           {assert(false);}
+         virtual void           unbindFont()         {assert(false);}
          std::string            getActiveFontName() const {return _activeFontName;}
-      private:
-         typedef std::map<std::string, TGlfFont*> OglFontCollectionMap;
-         typedef std::map<std::string, int>       RamFontCollectionMap;
-         OglFontCollectionMap   _oglFont;
-         RamFontCollectionMap   _ramFont;
-         bool                   _fti; // font type implementation (false - basic, true - VBO)
+      protected:
          std::string            _activeFontName;
    };
 
+   class SgFontLib : public FontLibrary {
+      public:
+                                SgFontLib();
+         virtual               ~SgFontLib();
+         virtual bool           loadLayoutFont(std::string);
+         virtual bool           selectFont(std::string);
+         virtual void           getStringBounds(const std::string*, DBbox*);
+         virtual void           drawString(const std::string*, bool);
+         virtual void           drawWiredString(std::string);
+         virtual void           drawSolidString(std::string);
+         virtual word           numFonts();
+         virtual void           bindFont();
+         virtual void           unbindFont();
+      private:
+         typedef std::map<std::string, TGlfFont*> OglFontCollectionMap;
+         OglFontCollectionMap   _oglFont;
+   };
+
+   class RpFontLib : public FontLibrary {
+      public:
+                                RpFontLib();
+         virtual               ~RpFontLib();
+         virtual bool           loadLayoutFont(std::string);
+         virtual bool           selectFont(std::string);
+         virtual void           getStringBounds(const std::string*, DBbox*);
+         virtual void           drawString(const std::string*, bool);
+         virtual void           drawWiredString(std::string);
+         virtual void           drawSolidString(std::string);
+         virtual word           numFonts();
+      private:
+         typedef std::map<std::string, int>       RamFontCollectionMap;
+         RamFontCollectionMap   _ramFont;
+   };
    //=============================================================================
    //
    // Class to take care about the shaders initialisation
