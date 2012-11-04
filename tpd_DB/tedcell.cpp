@@ -38,7 +38,8 @@
 #include "trend.h"
 #include "outbox.h"
 
-extern trend::FontLibrary* fontLib;
+extern trend::TrendCenter*       TRENDC;
+
 
 //=============================================================================
 laydata::EditObject::EditObject()
@@ -241,8 +242,7 @@ void laydata::TdtDefaultCell::openGlRender(trend::TrendBase& rend, const CTM& tr
 {
    CTM ftm(TP(), 3000/OPENGL_FONT_UNIT, 45, false);
    DBbox pure_ovl(0,0,0,0);
-   assert(NULL != fontLib); // check that font library is initialised
-   fontLib->getStringBounds(_name, &pure_ovl);
+   TRENDC->getStringBounds(_name, &pure_ovl);
    //
    rend.pushCell(_name, trans, DEFAULT_ZOOM_BOX, false, selected);
    rend.setLayer(ERR_LAY_DEF, false);

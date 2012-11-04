@@ -31,8 +31,9 @@
 #include "viewprop.h"
 #include "trend.h"
 
-GLUtriangulatorObj*          TessellPoly::tenderTesel = NULL;
-extern trend::FontLibrary* fontLib;
+GLUtriangulatorObj*  TessellPoly::tenderTesel = NULL;
+extern trend::TrendCenter*            TRENDC;
+
 
 //=============================================================================
 //
@@ -772,7 +773,7 @@ void trend::TrendText::draw(bool fill)
    glPushMatrix();
    glMultMatrixd(_ftm);
    glScalef(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT, 1);
-   fontLib->drawString(*_text, fill);
+   TRENDC->drawString(*_text, fill);
    glPopMatrix();
 }
 

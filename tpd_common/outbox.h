@@ -233,6 +233,7 @@ class TpdPost {
       static void toped_status(console::TOPEDSTATUS_TYPE, std::string);
       static void toped_status(console::TOPEDSTATUS_TYPE, wxString);
       static void render_status(bool);
+      static void addFont(const std::string&);
       static void refreshTDTtab(bool, bool);
       static void addGDStab(bool);
       static void addCIFtab(bool);

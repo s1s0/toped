@@ -31,7 +31,7 @@
 #include "viewprop.h"
 #include "trend.h"
 
-extern trend::FontLibrary* fontLib;
+extern trend::TrendCenter*        TRENDC;
 
 //=============================================================================
 //
@@ -1008,7 +1008,7 @@ void trend::Tenderer::draw()
       // draw texts
       if (0 != CLAY->total_strings())
       {
-         fontLib->bindFont();
+         TRENDC->bindFont();
          CLAY->drawTexts(_drawprop);
       }
    }

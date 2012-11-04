@@ -31,7 +31,7 @@
 #include "trend.h"
 
 #define TSHDR_LOC_VERTEX 0 // TODO -> get this into something like glslUniVarLoc
-extern trend::FontLibrary*  fontLib;
+extern trend::TrendCenter*         TRENDC;
        trend::GlslUniVarLoc glslUniVarLoc;
 //=============================================================================
 //
@@ -436,7 +436,7 @@ void trend::Toshader::draw()
       // draw texts
       if (0 != CLAY->total_strings())
       {
-         fontLib->bindFont();
+         TRENDC->bindFont();
          CLAY->drawTexts(_drawprop);
       }
    }
