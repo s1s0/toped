@@ -772,7 +772,7 @@ void trend::TrendText::draw(bool fill)
    glPushMatrix();
    glMultMatrixd(_ftm);
    glScalef(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT, 1);
-   fontLib->drawString(_text, fill);
+   fontLib->drawString(*_text, fill);
    glPopMatrix();
 }
 

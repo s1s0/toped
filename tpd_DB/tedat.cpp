@@ -1821,7 +1821,7 @@ laydata::TdtText::TdtText(std::string text, CTM trans) : TdtData(),
       if (!isprint(text[charnum])) text[charnum] = '?';
    assert(NULL != fontLib); // check that font library is initialised
    DBbox pure_ovl(0,0,0,0);
-   fontLib->getStringBounds(&_text, &pure_ovl);
+   fontLib->getStringBounds(_text, &pure_ovl);
    _overlap = DBbox(TP(0,0), TP((pure_ovl.p2().x() - pure_ovl.p1().x()),
                                 (pure_ovl.p2().y() - pure_ovl.p1().y())) );
    _correction = TP(-pure_ovl.p1().x(), -pure_ovl.p1().y());
@@ -1832,7 +1832,7 @@ laydata::TdtText::TdtText(InputTdtFile* const tedfile) : TdtData(),
 {
    assert(NULL != fontLib); // check that font library is initialised
    DBbox pure_ovl(0,0,0,0);
-   fontLib->getStringBounds(&_text, &pure_ovl);
+   fontLib->getStringBounds(_text, &pure_ovl);
    _overlap = DBbox(TP(0,0), TP((pure_ovl.p2().x() - pure_ovl.p1().x()),
                     (pure_ovl.p2().y() - pure_ovl.p1().y())) );
    _correction = TP(-pure_ovl.p1().x(), -pure_ovl.p1().y());
@@ -1843,7 +1843,7 @@ void laydata::TdtText::replaceStr(std::string newstr)
    _text = newstr;
    assert(NULL != fontLib); // check that font library is initialised
    DBbox pure_ovl(0,0,0,0);
-   fontLib->getStringBounds(&_text, &pure_ovl);
+   fontLib->getStringBounds(_text, &pure_ovl);
    _overlap = DBbox(TP(0,0), TP((pure_ovl.p2().x() - pure_ovl.p1().x()),
                     (pure_ovl.p2().y() - pure_ovl.p1().y())) );
    _correction = TP(-pure_ovl.p1().x(), -pure_ovl.p1().y());
@@ -2797,7 +2797,7 @@ laydata::TdtTmpText::TdtTmpText(std::string text, CTM trans) : _text(text),
    for (unsigned charnum = 0; charnum < text.length(); charnum++)
       if (!isprint(text[charnum])) text[charnum] = '?';
    assert(NULL != fontLib); // check that font library is initialised
-   fontLib->getStringBounds(&_text, &_overlap);
+   fontLib->getStringBounds(_text, &_overlap);
 }
 
 
