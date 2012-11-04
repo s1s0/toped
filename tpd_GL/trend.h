@@ -31,6 +31,8 @@
 #include "ttt.h"
 #include "basetrend.h"
 
+#define TSHDR_LOC_VERTEX 0 // TODO -> get this into something like glslUniVarLoc
+
 namespace trend {
 
    typedef enum { tocom      // command line
@@ -108,12 +110,12 @@ namespace trend {
     * Base class handling a particular GLF font. Contains the parsing of the
     * GLF files and used for string drawing when the basic rendering is active.
     */
-   class TGlfFont {
+   class TolderGlfFont {
       public:
-                        TGlfFont(std::string, std::string&);
-         virtual       ~TGlfFont();
+                        TolderGlfFont(std::string, std::string&);
+         virtual       ~TolderGlfFont();
          virtual void   getStringBounds(const std::string&, DBbox*);
-         virtual bool   bindBuffers() {return true;}
+         virtual void   bindBuffers() {assert(false);}
          virtual void   drawString(const std::string&, bool);
          byte           status()        {return _status;}
       protected:
@@ -137,14 +139,14 @@ namespace trend {
     * construction the container _tsymbols is empty. The container _symbol is
     * used in all other methods.
     */
-   class TGlfVboFont : public TGlfFont {
+   class TenderGlfFont : public TolderGlfFont {
       public:
-                        TGlfVboFont(std::string, std::string&);
-         virtual       ~TGlfVboFont();
+                        TenderGlfFont(std::string, std::string&);
+         virtual       ~TenderGlfFont();
          virtual void   getStringBounds(const std::string&, DBbox*);
-         virtual bool   bindBuffers();
+         virtual void   bindBuffers();
          virtual void   drawString(const std::string&, bool);
-      private:
+      protected:
          void           collect(const word, const word);
          typedef std::map<byte, TGlfRSymbol*> FontMap;
          FontMap        _symbols    ;
@@ -152,6 +154,12 @@ namespace trend {
          GLuint         _ibuffer    ;
    };
 
+   class ToshaderGlfFont : public TenderGlfFont {
+      public:
+                        ToshaderGlfFont(std::string, std::string&);
+         virtual       ~ToshaderGlfFont() {}
+         virtual void   drawString(const std::string&, bool);
+   };
    //=============================================================================
    //
    // Class to take care about the shaders initialisation
@@ -200,7 +208,7 @@ namespace trend {
          void                   bindFont();
          void                   unbindFont();
       private:
-         typedef std::map<std::string, TGlfFont*> OglFontCollectionMap;
+         typedef std::map<std::string, TolderGlfFont*> OglFontCollectionMap;
          trend::TrendBase*      _cRenderer;    //! current renderer
          trend::TrendBase*      _hRenderer;    //! hoover renderer
          trend::Shaders*        _cShaders;     //! the shader init object (valid in toshader case only)

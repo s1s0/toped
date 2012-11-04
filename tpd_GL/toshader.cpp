@@ -30,7 +30,6 @@
 #include "viewprop.h"
 #include "trend.h"
 
-#define TSHDR_LOC_VERTEX 0 // TODO -> get this into something like glslUniVarLoc
 extern trend::TrendCenter*         TRENDC;
        trend::GlslUniVarLoc glslUniVarLoc;
 //=============================================================================
@@ -89,7 +88,6 @@ void trend::ToshaderTV::drawTriQuads()
    }
    if  (_alobjvx[ncvx] > 0)
    {// Draw non-convex polygons
-      glEnableClientState(GL_INDEX_ARRAY);
       if (_alobjix[fqss] > 0)
       {
          assert(_sizesix[fqss]);
@@ -125,7 +123,6 @@ void trend::ToshaderTV::drawTriQuads()
          for (unsigned i= 0; i < _alobjix[ftss]; i++)
             glDrawElements(GL_TRIANGLE_STRIP, _sizesix[ftss][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_firstix[ftss][i]));
       }
-      glDisableClientState(GL_INDEX_ARRAY);
    }
 }
 

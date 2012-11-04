@@ -163,7 +163,7 @@ trend::TGlfRSymbol::~TGlfRSymbol()
 //
 //
 //
-trend::TGlfFont::TGlfFont(std::string filename, std::string& fontname) :
+trend::TolderGlfFont::TolderGlfFont(std::string filename, std::string& fontname) :
    _status    (             0    ),
    _pitch     (             0.1f ),
    _spaceWidth(             0.5f )
@@ -208,7 +208,7 @@ trend::TGlfFont::TGlfFont(std::string filename, std::string& fontname) :
    fclose(ffile);
 }
 
-void trend::TGlfFont::getStringBounds(const std::string& text, DBbox* overlap)
+void trend::TolderGlfFont::getStringBounds(const std::string& text, DBbox* overlap)
 {
    // initialise the boundaries
    float top, bottom, left, right;
@@ -242,7 +242,7 @@ void trend::TGlfFont::getStringBounds(const std::string& text, DBbox* overlap)
    (*overlap) = DBbox(TP(left, bottom, OPENGL_FONT_UNIT), TP(right, top, OPENGL_FONT_UNIT));
 }
 
-void trend::TGlfFont::drawString(const std::string& text, bool fill)
+void trend::TolderGlfFont::drawString(const std::string& text, bool fill)
 {
    float right_of = 0.0f, left_of = 0.0f;
    for (unsigned i = 0; i < text.length() ; i++)
@@ -270,7 +270,7 @@ void trend::TGlfFont::drawString(const std::string& text, bool fill)
    }
 }
 
-trend::TGlfFont::~TGlfFont()
+trend::TolderGlfFont::~TolderGlfFont()
 {
    for (TFontMap::const_iterator CS = _tsymbols.begin(); CS != _tsymbols.end(); CS++)
       delete (CS->second);
@@ -280,8 +280,8 @@ trend::TGlfFont::~TGlfFont()
 //
 //
 //
-trend::TGlfVboFont::TGlfVboFont(std::string filename, std::string& fontname) :
-   TGlfFont   ( filename, fontname )
+trend::TenderGlfFont::TenderGlfFont(std::string filename, std::string& fontname) :
+   TolderGlfFont   ( filename, fontname )
 {
    if (0 == _status)
    {
@@ -296,7 +296,7 @@ trend::TGlfVboFont::TGlfVboFont(std::string filename, std::string& fontname) :
    }
 }
 
-void trend::TGlfVboFont::collect(const word all_vertexes, const word all_indexes)
+void trend::TenderGlfFont::collect(const word all_vertexes, const word all_indexes)
 {
    // Create the VBO
    GLuint ogl_buffers[2];
@@ -339,9 +339,9 @@ void trend::TGlfVboFont::collect(const word all_vertexes, const word all_indexes
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-bool trend::TGlfVboFont::bindBuffers()
+void trend::TenderGlfFont::bindBuffers()
 {
-   if ((0 ==_pbuffer) || (0 == _ibuffer)) return false;
+   if ((0 ==_pbuffer) || (0 == _ibuffer)) return;
    glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
 //   GLint bufferSize;
 //   glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
@@ -350,11 +350,9 @@ bool trend::TGlfVboFont::bindBuffers()
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibuffer);
 //   glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
 //   bufferSize++;
-
-   return true;
 }
 
-void trend::TGlfVboFont::getStringBounds(const std::string& text, DBbox* overlap)
+void trend::TenderGlfFont::getStringBounds(const std::string& text, DBbox* overlap)
 {
    // initialise the boundaries
    float top, bottom, left, right;
@@ -388,7 +386,7 @@ void trend::TGlfVboFont::getStringBounds(const std::string& text, DBbox* overlap
    (*overlap) = DBbox(TP(left, bottom, OPENGL_FONT_UNIT), TP(right, top, OPENGL_FONT_UNIT));
 }
 
-void trend::TGlfVboFont::drawString(const std::string& text, bool fill)
+void trend::TenderGlfFont::drawString(const std::string& text, bool fill)
 {
    glEnableClientState(GL_VERTEX_ARRAY);
    glVertexPointer(2, GL_FLOAT, 0, NULL);
@@ -423,13 +421,53 @@ void trend::TGlfVboFont::drawString(const std::string& text, bool fill)
    glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-trend::TGlfVboFont::~TGlfVboFont()
+trend::TenderGlfFont::~TenderGlfFont()
 {
    for (FontMap::const_iterator CS = _symbols.begin(); CS != _symbols.end(); CS++)
       delete (CS->second);
    GLuint ogl_buffers[2] = {_pbuffer, _ibuffer};
    glDeleteBuffers(2, ogl_buffers);
 }
+
+//=============================================================================
+trend::ToshaderGlfFont::ToshaderGlfFont(std::string filename, std::string& fontname) :
+   TenderGlfFont(filename, fontname)
+{}
+
+void trend::ToshaderGlfFont::drawString(const std::string& text, bool fill)
+{
+   // Activate the vertex buffers in the vertex shader ...
+   glEnableVertexAttribArray(TSHDR_LOC_VERTEX);  // glEnableClientState(GL_VERTEX_ARRAY)
+   // Set-up the offset in the binded Vertex buffer
+   glVertexAttribPointer(TSHDR_LOC_VERTEX, 2, GL_FLOAT, GL_FALSE, 0, 0/*(GLvoid*)(sizeof(TNDR_GLDATAT) * _point_array_offset)*/);
+   float right_of = 0.0f, left_of = 0.0f;
+   for (unsigned i = 0; i < text.length() ; i++)
+   {
+      FontMap::const_iterator CSI = _symbols.find(text[i]);
+      if (i != 0)
+      {
+         // move one _pitch right
+         if ((0x20 == text[i]) || (_symbols.end() == CSI))
+            left_of = 0.0f;
+         else
+            left_of = -CSI->second->minX()+_pitch;
+         glTranslatef(left_of+right_of, 0, 0);
+      }
+      if ((0x20 == text[i]) || (_symbols.end() == CSI))
+      {
+         glTranslatef(_spaceWidth, 0, 0);
+         right_of = 0.0f;
+      }
+      else
+      {
+         CSI->second->draw(fill);
+         right_of = CSI->second->maxX();
+      }
+   }
+   glDisableVertexAttribArray(TSHDR_LOC_VERTEX);
+}
+
+
 
 //=============================================================================
 trend::Shaders::Shaders() :
@@ -729,18 +767,18 @@ void trend::TrendCenter::drawZeroCross()
 void trend::TrendCenter::loadLayoutFont(std::string fontfile)
 {
    // Parse the font library
-   TGlfFont* curFont = NULL;
+   TolderGlfFont* curFont = NULL;
    switch (_renderType)
    {
       case trend::tocom    : assert(false);          break;// TODO?
       case trend::tolder   :
-         curFont = DEBUG_NEW trend::TGlfFont(fontfile, _activeFontName);
+         curFont = DEBUG_NEW trend::TolderGlfFont(fontfile, _activeFontName);
          break;
       case trend::tenderer :
-         curFont = DEBUG_NEW trend::TGlfVboFont(fontfile, _activeFontName);
+         curFont = DEBUG_NEW trend::TenderGlfFont(fontfile, _activeFontName);
          break;
       case trend::toshader :
-//         curFont = DEBUG_NEW trend::TGlfShrFont(fontfile, _activeFontName); //TODO
+         curFont = DEBUG_NEW trend::ToshaderGlfFont(fontfile, _activeFontName);
          assert(false);
          break;
       default: assert(false); break;
@@ -816,3 +854,4 @@ trend::TrendCenter::~TrendCenter()
       delete (CF->second);
    if (NULL != _cRenderer) delete _cRenderer;
 }
+
