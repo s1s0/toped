@@ -65,7 +65,6 @@ tui::TopedFrame*                 Toped = NULL;
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
 extern trend::TrendCenter*       TRENDC;
-extern trend::FontLibrary*       fontLib;
 extern parsercmd::cmdBLOCK*      CMDBlock;
 extern parsercmd::TellPreProc*   tellPP;
 extern console::toped_logfile    LogFile;
@@ -107,7 +106,7 @@ bool TopedApp::OnInit()
          dlg1->Destroy();
          return false;
       }
-      // OK - we've got some kind of graphics we can manage - so create the rendering center
+      // OK - we've got some kind of graphics we can manage - so create the rendering centre
       TRENDC = DEBUG_NEW trend::TrendCenter(true
                                             ,_forceBasicRendering
                                             ,Toped->view()->glRC()->useVboRendering()
@@ -293,17 +292,11 @@ void TopedApp::loadGlfFonts()
          {
             std::string ffname(_tpdFontDir.mb_str(wxConvFile));
             ffname += curFN.mb_str(wxConvFile);
-            if (fontLib->loadLayoutFont(ffname))
-            {
-               wxCommandEvent eventLoadFont(wxEVT_RENDER_PARAMS);
-               eventLoadFont.SetId(tui::RPS_LD_FONT);
-               eventLoadFont.SetString(wxString(fontLib->getActiveFontName().c_str(), wxConvUTF8));
-               wxPostEvent(Toped, eventLoadFont);
-            }
+            TRENDC->loadLayoutFont(ffname);
          } while (fontDirectory.GetNext(&curFN));
       }
    }
-   if (0 == fontLib->numFonts())
+   if (0 == TRENDC->numFonts())
    {
       wxString errmsg;
       errmsg << wxT("Can't load layout fonts.\n")
@@ -322,7 +315,7 @@ void TopedApp::loadGlfFonts()
       eventLoadFont.SetId(tui::RPS_SLCT_FONT);
       eventLoadFont.SetString(wxT("Arial Normal 1"));
       wxPostEvent(Toped, eventLoadFont);
-      fontLib->selectFont("Arial Normal 1");
+      TRENDC->selectFont("Arial Normal 1");
    }
 }
 

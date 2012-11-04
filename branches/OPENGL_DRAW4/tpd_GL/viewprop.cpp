@@ -37,8 +37,8 @@
 #include "tenderer.h"
 #include "trend.h"
 
-extern trend::FontLibrary*            fontLib;
-layprop::PropertyCenter*              PROPC   = NULL;
+extern trend::TrendCenter*       TRENDC;
+layprop::PropertyCenter*         PROPC   = NULL;
 
 layprop::SDLine::SDLine(const TP& p1,const TP& p2, const real UU) : _ln(p1,p2)
 {
@@ -91,8 +91,7 @@ void layprop::SDLine::draw(const DBline& long_mark, const DBline& short_mark, co
    glScalef(scaledpix, scaledpix, 1);
    glRotatef(_angle, 0, 0, 1);
 
-   assert(NULL != fontLib);
-   fontLib->drawSolidString(_value);
+   TRENDC->drawSolidString(_value);
 
    glDisable(GL_POLYGON_SMOOTH); //- for solid fill
    glEnable(GL_POLYGON_STIPPLE);

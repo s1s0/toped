@@ -37,7 +37,6 @@
 #include "viewprop.h"
 
 
-trend::FontLibrary*              fontLib = NULL;
 trend::TrendCenter*              TRENDC  = NULL;
 extern layprop::PropertyCenter*  PROPC;
 extern trend::GlslUniVarLoc      glslUniVarLoc;
@@ -714,19 +713,7 @@ trend::TrendCenter::TrendCenter(bool gui, bool forceBasic, bool sprtVbo, bool sp
    else                       _renderType = trend::tolder;
    if (trend::toshader== _renderType)
       _cShaders = DEBUG_NEW trend::Shaders();
-   fontLib = DEBUG_NEW trend::FontLibrary(_renderType);
-
-//   switch (_renderType)
-//   {
-//      case trend::tocom    : assert(false);          break;// TODO?
-//      case trend::tolder   :
-//         fontLib = DEBUG_NEW trend::RpFontLib();     break;
-//      case trend::tenderer :
-//         fontLib = DEBUG_NEW trend::FontLibrary();     break;
-//      case trend::toshader :
-//         fontLib = DEBUG_NEW trend::FontLibrary();     break;
-//      default: assert(false); break;
-//   }
+   _fontLib = DEBUG_NEW trend::FontLibrary(_renderType);
 }
 
 void trend::TrendCenter::initShaders(const std::string& codeDirectory)
@@ -834,8 +821,14 @@ void trend::TrendCenter::drawZeroCross()
       _cRenderer->zeroCross();
 }
 
+void trend::TrendCenter::loadLayoutFont(std::string ffname)
+{
+   if (_fontLib->loadLayoutFont(ffname))
+      TpdPost::addFont(_fontLib->getActiveFontName());
+}
+
 trend::TrendCenter::~TrendCenter()
 {
-   delete fontLib;
+   delete _fontLib;
    if (NULL != _cRenderer) delete _cRenderer;
 }

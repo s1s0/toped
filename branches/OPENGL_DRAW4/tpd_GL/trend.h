@@ -215,14 +215,20 @@ namespace trend {
          void                   drawGrid();
          void                   drawZeroCross();
          void                   drawFOnly();
-//         bool                   loadLayoutFont(std::string name) {return _fontLib->loadLayoutFont(name);}
-//         bool                   selectFont(std::string name)     {return _fontLib->selectFont(name);}
-//         std::string            getActiveFontName() const        {return _fontLib->getActiveFontName();}
-//         word                   numFonts()                       {return _fontLib->numFonts();}
+         //Font handling
+         void                   getStringBounds(const std::string& str, DBbox* box) {return _fontLib->getStringBounds(str,box);}
+         void                   drawString(const std::string& str, bool fill) { _fontLib->drawString(str, fill);}
+         void                   drawWiredString(const std::string& str) {       _fontLib->drawWiredString(str);}
+         void                   drawSolidString(const std::string& str) {       _fontLib->drawSolidString(str);}
+         bool                   selectFont(std::string str)             {return _fontLib->selectFont(str);}
+         word                   numFonts()                              {return _fontLib->numFonts();}
+         void                   bindFont()                              {       _fontLib->bindFont();}
+         void                   loadLayoutFont(std::string);
+
       private:
          trend::TrendBase*      _cRenderer;    //! current renderer
          trend::TrendBase*      _hRenderer;    //! hoover renderer
-//         FontLibrary*           _fontLib; // TODO (eventually) - remove the global variable fontLib! Make it local here.
+         FontLibrary*           _fontLib;      //! current font rendering
          trend::Shaders*        _cShaders;     //! the shader init object (valid in toshader case only)
          RenderType             _renderType;
    };

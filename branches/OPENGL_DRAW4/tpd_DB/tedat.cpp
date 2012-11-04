@@ -47,7 +47,8 @@
 //                           0x30, 0x18, 0x30, 0x18, 0x30, 0x18, 0x30, 0x18, 0x30, 0x18,
 //                           0x30, 0x18, 0x3F, 0xF8, 0x3F, 0xF8, 0x00, 0x00, 0x00, 0x00};
 
-extern trend::FontLibrary* fontLib;
+extern trend::TrendCenter*       TRENDC;
+
 
 /*===========================================================================
       Select and subsequent operations over the existing TdtData
@@ -1819,9 +1820,8 @@ laydata::TdtText::TdtText(std::string text, CTM trans) : TdtData(),
 {
    for (unsigned charnum = 0; charnum < text.length(); charnum++)
       if (!isprint(text[charnum])) text[charnum] = '?';
-   assert(NULL != fontLib); // check that font library is initialised
    DBbox pure_ovl(0,0,0,0);
-   fontLib->getStringBounds(_text, &pure_ovl);
+   TRENDC->getStringBounds(_text, &pure_ovl);
    _overlap = DBbox(TP(0,0), TP((pure_ovl.p2().x() - pure_ovl.p1().x()),
                                 (pure_ovl.p2().y() - pure_ovl.p1().y())) );
    _correction = TP(-pure_ovl.p1().x(), -pure_ovl.p1().y());
@@ -1830,9 +1830,8 @@ laydata::TdtText::TdtText(std::string text, CTM trans) : TdtData(),
 laydata::TdtText::TdtText(InputTdtFile* const tedfile) : TdtData(),
    _text(tedfile->getString()), _translation(tedfile->getCTM()), _overlap(TP())
 {
-   assert(NULL != fontLib); // check that font library is initialised
    DBbox pure_ovl(0,0,0,0);
-   fontLib->getStringBounds(_text, &pure_ovl);
+   TRENDC->getStringBounds(_text, &pure_ovl);
    _overlap = DBbox(TP(0,0), TP((pure_ovl.p2().x() - pure_ovl.p1().x()),
                     (pure_ovl.p2().y() - pure_ovl.p1().y())) );
    _correction = TP(-pure_ovl.p1().x(), -pure_ovl.p1().y());
@@ -1841,9 +1840,8 @@ laydata::TdtText::TdtText(InputTdtFile* const tedfile) : TdtData(),
 void laydata::TdtText::replaceStr(std::string newstr)
 {
    _text = newstr;
-   assert(NULL != fontLib); // check that font library is initialised
    DBbox pure_ovl(0,0,0,0);
-   fontLib->getStringBounds(_text, &pure_ovl);
+   TRENDC->getStringBounds(_text, &pure_ovl);
    _overlap = DBbox(TP(0,0), TP((pure_ovl.p2().x() - pure_ovl.p1().x()),
                     (pure_ovl.p2().y() - pure_ovl.p1().y())) );
    _correction = TP(-pure_ovl.p1().x(), -pure_ovl.p1().y());
@@ -1922,7 +1920,7 @@ void laydata::TdtText::motionDraw(const layprop::DrawProperties& drawprop,
       // correction of the glf shift - as explained in the openGlPrecalc above
       glTranslatef(_correction.x(), _correction.y(), 1);
       glScalef(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT, 1);
-      fontLib->drawWiredString(_text);
+      TRENDC->drawWiredString(_text);
       glPopMatrix();
    }
 }
@@ -2796,8 +2794,7 @@ laydata::TdtTmpText::TdtTmpText(std::string text, CTM trans) : _text(text),
 {
    for (unsigned charnum = 0; charnum < text.length(); charnum++)
       if (!isprint(text[charnum])) text[charnum] = '?';
-   assert(NULL != fontLib); // check that font library is initialised
-   fontLib->getStringBounds(_text, &_overlap);
+   TRENDC->getStringBounds(_text, &_overlap);
 }
 
 
@@ -2807,14 +2804,15 @@ void laydata::TdtTmpText::draw(const layprop::DrawProperties&, CtmQueue& transta
    // font translation matrix
    CTM ftmtrx =  _translation * transtack.front();
    glPushMatrix();
-   double ori_mtrx[] = { ftmtrx.a(), ftmtrx.b(),0,0,
-   ftmtrx.c(), ftmtrx.d(),0,0,
-            0,          0,0,0,
-            ftmtrx.tx(),ftmtrx.ty(),0,1};
-            glMultMatrixd(ori_mtrx);
-            // correction of the glf shift - as explained in the openGlPrecalc above
-            glTranslatef(-_overlap.p1().x(), -_overlap.p1().y(), 1);
-            glScalef(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT, 1);
-            fontLib->drawWiredString(_text);
-            glPopMatrix();
+   double ori_mtrx[] = { ftmtrx.a(), ftmtrx.b() ,0,0,
+                         ftmtrx.c(), ftmtrx.d() ,0,0,
+                         0,          0          ,0,0,
+                         ftmtrx.tx(),ftmtrx.ty(),0,1
+                       };
+   glMultMatrixd(ori_mtrx);
+   // correction of the glf shift - as explained in the openGlPrecalc above
+   glTranslatef(-_overlap.p1().x(), -_overlap.p1().y(), 1);
+   glScalef(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT, 1);
+   TRENDC->drawWiredString(_text);
+   glPopMatrix();
 }
