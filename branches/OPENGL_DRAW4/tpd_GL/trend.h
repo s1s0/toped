@@ -152,32 +152,6 @@ namespace trend {
          GLuint         _ibuffer    ;
    };
 
-
-   //=============================================================================
-   //
-   // Wrapper to abstract-out the Glf implementation.
-   //
-   class FontLibrary {//: public FontLibrary {
-      public:
-                                FontLibrary(RenderType);
-                               ~FontLibrary();
-         bool                   loadLayoutFont(std::string);
-         bool                   selectFont(std::string);
-         void                   getStringBounds(const std::string&, DBbox*);
-         void                   drawString(const std::string&, bool);
-         void                   drawWiredString(const std::string&);
-         void                   drawSolidString(const std::string&);
-         word                   numFonts();
-         void                   bindFont();
-         void                   unbindFont();
-         std::string            getActiveFontName() const {return _activeFontName;}
-      private:
-         typedef std::map<std::string, TGlfFont*> OglFontCollectionMap;
-         OglFontCollectionMap   _oglFont;
-         std::string            _activeFontName;
-         RenderType             _renderType;
-   };
-
    //=============================================================================
    //
    // Class to take care about the shaders initialisation
@@ -216,20 +190,22 @@ namespace trend {
          void                   drawZeroCross();
          void                   drawFOnly();
          //Font handling
-         void                   getStringBounds(const std::string& str, DBbox* box) {return _fontLib->getStringBounds(str,box);}
-         void                   drawString(const std::string& str, bool fill) { _fontLib->drawString(str, fill);}
-         void                   drawWiredString(const std::string& str) {       _fontLib->drawWiredString(str);}
-         void                   drawSolidString(const std::string& str) {       _fontLib->drawSolidString(str);}
-         bool                   selectFont(std::string str)             {return _fontLib->selectFont(str);}
-         word                   numFonts()                              {return _fontLib->numFonts();}
-         void                   bindFont()                              {       _fontLib->bindFont();}
          void                   loadLayoutFont(std::string);
-
+         void                   getStringBounds(const std::string&, DBbox*);
+         void                   drawString(const std::string& str, bool fill);
+         void                   drawWiredString(const std::string& str);
+         void                   drawSolidString(const std::string& str);
+         bool                   selectFont(std::string str);
+         word                   numFonts();
+         void                   bindFont();
+         void                   unbindFont();
       private:
+         typedef std::map<std::string, TGlfFont*> OglFontCollectionMap;
          trend::TrendBase*      _cRenderer;    //! current renderer
          trend::TrendBase*      _hRenderer;    //! hoover renderer
-         FontLibrary*           _fontLib;      //! current font rendering
          trend::Shaders*        _cShaders;     //! the shader init object (valid in toshader case only)
+         OglFontCollectionMap   _oglFont;
+         std::string            _activeFontName;
          RenderType             _renderType;
    };
 }
