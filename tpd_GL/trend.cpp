@@ -432,102 +432,6 @@ trend::TGlfVboFont::~TGlfVboFont()
 }
 
 //=============================================================================
-//
-// FontLibrary
-//
-trend::FontLibrary::FontLibrary(RenderType renderType) :
-   _activeFontName  (          ),
-   _renderType      (renderType)
-{
-}
-
-bool trend::FontLibrary::loadLayoutFont(std::string fontfile)
-{
-   // Parse the font library
-   TGlfFont* curFont = NULL;
-   switch (_renderType)
-   {
-      case trend::tocom    : assert(false);          break;// TODO?
-      case trend::tolder   :
-         curFont = DEBUG_NEW trend::TGlfFont(fontfile, _activeFontName);
-         break;
-      case trend::tenderer :
-         curFont = DEBUG_NEW trend::TGlfVboFont(fontfile, _activeFontName);
-         break;
-      case trend::toshader :
-//         curFont = DEBUG_NEW trend::TGlfShrFont(fontfile, _activeFontName); //TODO
-         assert(false);
-         break;
-      default: assert(false); break;
-   }
-
-   if (!curFont->status())
-   {
-      _oglFont[_activeFontName] = curFont;
-      return true;
-   }
-   return false;
-}
-
-bool trend::FontLibrary::selectFont(std::string fname)
-{
-   if (_oglFont.end() != _oglFont.find(fname))
-   {
-      _activeFontName = fname;
-      return true;
-   }
-   return false;
-}
-
-void trend::FontLibrary::getStringBounds(const std::string& text, DBbox* overlap)
-{
-   assert(NULL != _oglFont[_activeFontName]); // make sure that fonts are initialised
-   _oglFont[_activeFontName]->getStringBounds(text, overlap);
-}
-
-void trend::FontLibrary::drawString(const std::string& text, bool fill)
-{
-   _oglFont[_activeFontName]->drawString(text, fill);
-}
-
-void trend::FontLibrary::drawWiredString(const std::string& text)
-{
-   bindFont();
-   _oglFont[_activeFontName]->drawString(text, false);
-   unbindFont();
-}
-
-void trend::FontLibrary::drawSolidString(const std::string& text)
-{
-   bindFont();
-   _oglFont[_activeFontName]->drawString(text, true);
-   unbindFont();
-}
-
-void trend::FontLibrary::bindFont()
-{
-   if (NULL != _oglFont[_activeFontName])
-      _oglFont[_activeFontName]->bindBuffers();
-}
-
-void  trend::FontLibrary::unbindFont()
-{
-   glBindBuffer(GL_ARRAY_BUFFER, 0);
-   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-}
-
-word trend::FontLibrary::numFonts()
-{
-   return _oglFont.size();
-}
-
-trend::FontLibrary::~FontLibrary()
-{
-   for (OglFontCollectionMap::const_iterator CF = _oglFont.begin(); CF != _oglFont.end(); CF++)
-      delete (CF->second);
-}
-
-//=============================================================================
 trend::Shaders::Shaders() :
    _fnShdrVertex     ( "vertex.glsl"      ),
    _fnShdrFragment   ( "fragment.glsl"    ),
@@ -702,9 +606,11 @@ trend::Shaders::~Shaders()
 
 //=============================================================================
 trend::TrendCenter::TrendCenter(bool gui, bool forceBasic, bool sprtVbo, bool sprtShaders) :
-   _cRenderer     (              NULL),
-   _hRenderer     (              NULL),
-   _cShaders      (              NULL)
+   _cRenderer       (              NULL),
+   _hRenderer       (              NULL),
+   _cShaders        (              NULL),
+   _activeFontName  (                  )
+
 {
    if      (!gui)             _renderType = trend::tocom;
    else if ( forceBasic )     _renderType = trend::tolder;
@@ -713,7 +619,6 @@ trend::TrendCenter::TrendCenter(bool gui, bool forceBasic, bool sprtVbo, bool sp
    else                       _renderType = trend::tolder;
    if (trend::toshader== _renderType)
       _cShaders = DEBUG_NEW trend::Shaders();
-   _fontLib = DEBUG_NEW trend::FontLibrary(_renderType);
 }
 
 void trend::TrendCenter::initShaders(const std::string& codeDirectory)
@@ -821,14 +726,93 @@ void trend::TrendCenter::drawZeroCross()
       _cRenderer->zeroCross();
 }
 
-void trend::TrendCenter::loadLayoutFont(std::string ffname)
+void trend::TrendCenter::loadLayoutFont(std::string fontfile)
 {
-   if (_fontLib->loadLayoutFont(ffname))
-      TpdPost::addFont(_fontLib->getActiveFontName());
+   // Parse the font library
+   TGlfFont* curFont = NULL;
+   switch (_renderType)
+   {
+      case trend::tocom    : assert(false);          break;// TODO?
+      case trend::tolder   :
+         curFont = DEBUG_NEW trend::TGlfFont(fontfile, _activeFontName);
+         break;
+      case trend::tenderer :
+         curFont = DEBUG_NEW trend::TGlfVboFont(fontfile, _activeFontName);
+         break;
+      case trend::toshader :
+//         curFont = DEBUG_NEW trend::TGlfShrFont(fontfile, _activeFontName); //TODO
+         assert(false);
+         break;
+      default: assert(false); break;
+   }
+
+   if (!curFont->status())
+   {
+      _oglFont[_activeFontName] = curFont;
+      TpdPost::addFont(_activeFontName);
+   }
+}
+
+void trend::TrendCenter::getStringBounds(const std::string& text, DBbox* overlap)
+{
+   assert(NULL != _oglFont[_activeFontName]); // make sure that fonts are initialised
+   _oglFont[_activeFontName]->getStringBounds(text, overlap);
+
+}
+
+void trend::TrendCenter::drawString(const std::string& text, bool fill)
+{
+   _oglFont[_activeFontName]->drawString(text, fill);
+}
+
+void trend::TrendCenter::drawWiredString(const std::string& text)
+{
+   bindFont();
+   _oglFont[_activeFontName]->drawString(text, false);
+   unbindFont();
+
+}
+
+void trend::TrendCenter::drawSolidString(const std::string& text)
+{
+   bindFont();
+   _oglFont[_activeFontName]->drawString(text, true);
+   unbindFont();
+
+}
+
+bool trend::TrendCenter::selectFont(std::string fname)
+{
+   if (_oglFont.end() != _oglFont.find(fname))
+   {
+      _activeFontName = fname;
+      return true;
+   }
+   return false;
+}
+
+word trend::TrendCenter::numFonts()
+{
+   return _oglFont.size();
+
+}
+
+void trend::TrendCenter::bindFont()
+{
+   if (NULL != _oglFont[_activeFontName])
+      _oglFont[_activeFontName]->bindBuffers();
+
+}
+
+void trend::TrendCenter::unbindFont()
+{
+   glBindBuffer(GL_ARRAY_BUFFER, 0);
+   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 trend::TrendCenter::~TrendCenter()
 {
-   delete _fontLib;
+   for (OglFontCollectionMap::const_iterator CF = _oglFont.begin(); CF != _oglFont.end(); CF++)
+      delete (CF->second);
    if (NULL != _cRenderer) delete _cRenderer;
 }
