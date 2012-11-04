@@ -31,8 +31,6 @@
 #include <string>
 #include "drawprop.h"
 #include "viewprop.h"
-//#include "ps_out.h"
-#include "glf.h"
 #include "tuidefs.h"
 
 

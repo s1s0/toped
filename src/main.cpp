@@ -47,7 +47,6 @@
 #include "trend.h"
 #include "datacenter.h"
 #include "calbr_reader.h"
-#include "glf.h"
 
 #include "tellibin.h"
 #include "tpdf_db.h"
