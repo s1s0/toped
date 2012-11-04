@@ -39,20 +39,29 @@ namespace trend {
                  , toshader  // shaders
                 } RenderType;
 
-   //=============================================================================
-   //
-   //
-   //
+   /**
+    * This class contains a raw symbol data from the GLF font files. It is used to
+    * parse the symbol data from the file and if the current renderer is the tolder
+    * it is used directly for symbol drawing.
+    * If a VBO or shader rendering is used, then the objects of this class serve as
+    * an intermediate data container for parsed symbol data before loading the font
+    * VBOs.
+    */
    class TGlfSymbol {
       public:
                         TGlfSymbol(FILE*);
                        ~TGlfSymbol();
          void           dataCopy(GLfloat*, GLuint*, word);
+         void           draw(bool);
          byte           alvrtxs()   { return _alvrtxs;}
          byte           alchnks()   { return _alchnks;}
+         float          minX()      { return _minX;   }
+         float          maxX()      { return _maxX;   }
+         float          minY()      { return _minY;   }
+         float          maxY()      { return _maxY;   }
          friend class TGlfRSymbol;
       protected:
-         byte           _alvrtxs;    //! Number of vertexs
+         byte           _alvrtxs;    //! Number of vertexes
          byte           _alcntrs;    //! Number of contours
          byte           _alchnks;    //! Number of index (tesselation) chunks
 
@@ -66,10 +75,12 @@ namespace trend {
          float          _maxY;
    };
 
-   //=============================================================================
-   //
-   //
-   //
+   /**
+    * Contains the data necessary to handle a GLF symbol when a VBO or shader
+    * rendering is used. An object of this class is constructed using the
+    * corresponding TGlfSymbol object and the most important method is draw
+    * When a basic rendering is used - no objects of this class are created.
+    */
    class TGlfRSymbol {
       public:
                         TGlfRSymbol(TGlfSymbol*, word, word);
@@ -93,32 +104,52 @@ namespace trend {
          float          _maxY;
    };
 
-   //=============================================================================
-   //
-   //
-   //
+   /**
+    * Base class handling a particular GLF font. Contains the parsing of the
+    * GLF files and used for string drawing when the basic rendering is active.
+    */
    class TGlfFont {
       public:
-         TGlfFont(std::string, std::string&);
-                       ~TGlfFont();
-         void           getStringBounds(const std::string*, DBbox*);
-         void           collect();
-         bool           bindBuffers();
-         void           drawString(const std::string*, bool);
+                        TGlfFont(std::string, std::string&);
+         virtual       ~TGlfFont();
+         virtual void   getStringBounds(const std::string*, DBbox*);
+         virtual bool   bindBuffers() {return true;}
+         virtual void   drawString(const std::string*, bool);
          byte           status()        {return _status;}
-      private:
+      protected:
          typedef std::map<byte, TGlfSymbol*> TFontMap;
+         byte           _status     ; //! of the initial font parsing in the constructor
+         float          _pitch      ; //! Here it means the space between the symbols
+         float          _spaceWidth ; //! The size of the space symbol
+         TFontMap       _tsymbols   ;
+   };
+
+   /**
+    * Objects of this class are used when a VBO or shader rendering is active.
+    * The main difference with its parent class is the collect method which loads
+    * the entire font into an openGL VBO during the construction. The virtual
+    * methods are updated accordingly.
+    * One point to note here is that despite the fact that it inherits _tsymbol
+    * field from its parent - it is used only as an intermediate container during
+    * the construction. The collect method called by the constructor kind of
+    * upgrades all TGlfSymbol objects of the _tsymbol field to TGlfRSymbol objects
+    * of the _symbol field and at the same time clears the former. So after the
+    * construction the container _tsymbols is empty. The container _symbol is
+    * used in all other methods.
+    */
+   class TGlfVboFont : public TGlfFont {
+      public:
+                        TGlfVboFont(std::string, std::string&);
+         virtual       ~TGlfVboFont();
+         virtual void   getStringBounds(const std::string*, DBbox*);
+         virtual bool   bindBuffers();
+         virtual void   drawString(const std::string*, bool);
+      private:
+         void           collect(const word, const word);
          typedef std::map<byte, TGlfRSymbol*> FontMap;
-         FontMap        _symbols;
-         TFontMap       _tsymbols;
-         word           _all_vertexes;
-         word           _all_indexes;
-         byte           _status;
-         byte           _numSymbols;
-         float          _pitch;
-         float          _spaceWidth;
-         GLuint         _pbuffer;
-         GLuint         _ibuffer;
+         FontMap        _symbols    ;
+         GLuint         _pbuffer    ;
+         GLuint         _ibuffer    ;
    };
 
 
@@ -126,57 +157,27 @@ namespace trend {
    //
    // Wrapper to abstract-out the Glf implementation.
    //
-   class FontLibrary {
+   class FontLibrary {//: public FontLibrary {
       public:
-                                FontLibrary() : _activeFontName() {};
-         virtual               ~FontLibrary(){};
-         virtual bool           loadLayoutFont(std::string) = 0;
-         virtual bool           selectFont(std::string) = 0;
-         virtual void           getStringBounds(const std::string*, DBbox*) = 0;
-         virtual void           drawString(const std::string*, bool) = 0;
-         virtual void           drawWiredString(std::string) = 0;
-         virtual void           drawSolidString(std::string) = 0;
-         virtual word           numFonts() = 0;
-         virtual void           bindFont()           {assert(false);}
-         virtual void           unbindFont()         {assert(false);}
+                                FontLibrary(RenderType);
+                               ~FontLibrary();
+         bool                   loadLayoutFont(std::string);
+         bool                   selectFont(std::string);
+         void                   getStringBounds(const std::string*, DBbox*);
+         void                   drawString(const std::string*, bool);
+         void                   drawWiredString(std::string);
+         void                   drawSolidString(std::string);
+         word                   numFonts();
+         void                   bindFont();
+         void                   unbindFont();
          std::string            getActiveFontName() const {return _activeFontName;}
-      protected:
-         std::string            _activeFontName;
-   };
-
-   class SgFontLib : public FontLibrary {
-      public:
-                                SgFontLib();
-         virtual               ~SgFontLib();
-         virtual bool           loadLayoutFont(std::string);
-         virtual bool           selectFont(std::string);
-         virtual void           getStringBounds(const std::string*, DBbox*);
-         virtual void           drawString(const std::string*, bool);
-         virtual void           drawWiredString(std::string);
-         virtual void           drawSolidString(std::string);
-         virtual word           numFonts();
-         virtual void           bindFont();
-         virtual void           unbindFont();
       private:
          typedef std::map<std::string, TGlfFont*> OglFontCollectionMap;
          OglFontCollectionMap   _oglFont;
+         std::string            _activeFontName;
+         RenderType             _renderType;
    };
 
-   class RpFontLib : public FontLibrary {
-      public:
-                                RpFontLib();
-         virtual               ~RpFontLib();
-         virtual bool           loadLayoutFont(std::string);
-         virtual bool           selectFont(std::string);
-         virtual void           getStringBounds(const std::string*, DBbox*);
-         virtual void           drawString(const std::string*, bool);
-         virtual void           drawWiredString(std::string);
-         virtual void           drawSolidString(std::string);
-         virtual word           numFonts();
-      private:
-         typedef std::map<std::string, int>       RamFontCollectionMap;
-         RamFontCollectionMap   _ramFont;
-   };
    //=============================================================================
    //
    // Class to take care about the shaders initialisation
