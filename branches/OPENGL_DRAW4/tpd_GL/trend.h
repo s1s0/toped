@@ -112,9 +112,9 @@ namespace trend {
       public:
                         TGlfFont(std::string, std::string&);
          virtual       ~TGlfFont();
-         virtual void   getStringBounds(const std::string*, DBbox*);
+         virtual void   getStringBounds(const std::string&, DBbox*);
          virtual bool   bindBuffers() {return true;}
-         virtual void   drawString(const std::string*, bool);
+         virtual void   drawString(const std::string&, bool);
          byte           status()        {return _status;}
       protected:
          typedef std::map<byte, TGlfSymbol*> TFontMap;
@@ -141,9 +141,9 @@ namespace trend {
       public:
                         TGlfVboFont(std::string, std::string&);
          virtual       ~TGlfVboFont();
-         virtual void   getStringBounds(const std::string*, DBbox*);
+         virtual void   getStringBounds(const std::string&, DBbox*);
          virtual bool   bindBuffers();
-         virtual void   drawString(const std::string*, bool);
+         virtual void   drawString(const std::string&, bool);
       private:
          void           collect(const word, const word);
          typedef std::map<byte, TGlfRSymbol*> FontMap;
@@ -163,10 +163,10 @@ namespace trend {
                                ~FontLibrary();
          bool                   loadLayoutFont(std::string);
          bool                   selectFont(std::string);
-         void                   getStringBounds(const std::string*, DBbox*);
-         void                   drawString(const std::string*, bool);
-         void                   drawWiredString(std::string);
-         void                   drawSolidString(std::string);
+         void                   getStringBounds(const std::string&, DBbox*);
+         void                   drawString(const std::string&, bool);
+         void                   drawWiredString(const std::string&);
+         void                   drawSolidString(const std::string&);
          word                   numFonts();
          void                   bindFont();
          void                   unbindFont();
