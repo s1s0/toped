@@ -205,7 +205,7 @@ bool Calbr::drcTenderer::showError(unsigned int numError)
       layprop::DrawProperties* drawProp;
       if (PROPC->lockDrawProp(drawProp, layprop::DRC))
       {
-         drawProp->hideLayer(LayerDef(_numError, DEFAULT_DTYPE), false);
+         drawProp->hideLayer(LayerDef(numError, DEFAULT_DTYPE), false);
       }
       PROPC->unlockDrawProp(drawProp, true);
       tellstdfunc::RefreshGL();

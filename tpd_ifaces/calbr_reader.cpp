@@ -658,32 +658,35 @@ void   Calbr::CalbrFile::addRuleCheck(drcRuleCheck* check)
 
 void   Calbr::CalbrFile::showError(const std::string& cell, const std::string& error, long  number)
 {
-   Calbr::cellNameStruct* cellStruct =_cellDRCMap[cell];
-   RuleChecksVector* ruleCheck = &(cellStruct->_RuleChecks);
-   edge zoom;
-   RuleChecksVector::const_iterator it;
-   for(it = ruleCheck->begin(); it!= ruleCheck->end(); ++it)
+   if(_cellDRCMap.find(cell) != _cellDRCMap.end())
    {
-      std::string x = (*it)->ruleCheckName();
-      if((*it)->ruleCheckName() == error)
+      Calbr::cellNameStruct* cellStruct =_cellDRCMap[cell];
+      RuleChecksVector* ruleCheck = &(cellStruct->_RuleChecks);
+      edge zoom;
+      RuleChecksVector::const_iterator it;
+      for(it = ruleCheck->begin(); it!= ruleCheck->end(); ++it)
       {
-         _curCellName = cell;
-         _render->hideAll();
-         if(_render->showError((*it)->num()))
+         std::string x = (*it)->ruleCheckName();
+         if((*it)->ruleCheckName() == error)
          {
-            try
+            _curCellName = cell;
+            _render->hideAll();
+            if(_render->showError((*it)->num()))
             {
-               zoom = (*it)->getZoom(number);
+               try
+               {
+                  zoom = (*it)->getZoom(number);
+               }
+               catch (EXPTNdrc_reader&)
+               {
+                  return;
+               }
+               _render->zoom(zoom);
             }
-            catch (EXPTNdrc_reader&)
-            {
-               return;
-            }
-            _render->zoom(zoom);
          }
       }
+      assert(it == ruleCheck->end());
    }
-   assert(it == ruleCheck->end());
 }
 
 
