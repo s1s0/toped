@@ -17,9 +17,6 @@
     <ClCompile Include="drawprop.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="glf.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="tenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -44,9 +41,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="drawprop.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="glf.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="tenderer.h">

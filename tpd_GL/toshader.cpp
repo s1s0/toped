@@ -65,16 +65,21 @@ void trend::ToshaderTV::draw(layprop::DrawProperties* drawprop)
 
 void trend::ToshaderTV::drawTexts(layprop::DrawProperties* drawprop)
 {
-   //   glPushMatrix();
-   //   glMultMatrixd(_refCell->translation());
    setCtm(drawprop);
    //TODO - colors!
    //drawprop->adjustAlpha(_refCell->alphaDepth() - 1);
 
    for (TrendStrings::const_iterator TSTR = _text_data.begin(); TSTR != _text_data.end(); TSTR++)
+   {
+      CTM ctm( drawprop->topCtm() * (*TSTR)->ctm());
+      ctm.Scale(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT);
+      drawprop->pushCtm(ctm);
+      float mtrxOrtho[16];
+      ctm.oglForm(mtrxOrtho);
+      glUniformMatrix4fv(glslUniVarLoc[glslu_in_CTM], 1, GL_FALSE, mtrxOrtho);
       (*TSTR)->draw(_filled);
-
-//   glPopMatrix();
+      drawprop->popCtm();
+   }
    drawprop->popCtm();
 }
 

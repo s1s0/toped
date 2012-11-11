@@ -86,8 +86,15 @@ void trend::TolderTV::drawTexts(layprop::DrawProperties* drawprop)
    drawprop->adjustAlpha(_refCell->alphaDepth() - 1);
 
    for (TrendStrings::const_iterator TSTR = _text_data.begin(); TSTR != _text_data.end(); TSTR++)
+   {
+      real ftm[16];
+      (*TSTR)->ctm().oglForm(ftm);
+      glPushMatrix();
+      glMultMatrixd(ftm);
+      glScalef(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT, 1);
       (*TSTR)->draw(_filled);
-
+      glPopMatrix();
+   }
    glPopMatrix();
 }
 

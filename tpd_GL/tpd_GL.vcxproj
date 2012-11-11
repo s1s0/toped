@@ -178,7 +178,6 @@
   <ItemGroup>
     <ClCompile Include="basetrend.cpp" />
     <ClCompile Include="drawprop.cpp" />
-    <ClCompile Include="glf.cpp" />
     <ClCompile Include="tenderer.cpp" />
     <ClCompile Include="tolder.cpp" />
     <ClCompile Include="toshader.cpp" />
@@ -189,7 +188,6 @@
   <ItemGroup>
     <ClInclude Include="basetrend.h" />
     <ClInclude Include="drawprop.h" />
-    <ClInclude Include="glf.h" />
     <ClInclude Include="tenderer.h" />
     <ClInclude Include="tolder.h" />
     <ClInclude Include="toshader.h" />
