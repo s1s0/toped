@@ -87,7 +87,8 @@ namespace trend {
       public:
                         TGlfRSymbol(TGlfSymbol*, word, word);
                        ~TGlfRSymbol();
-         void           draw(bool);
+         void           drawSolid();
+         void           drawWired();
          float          minX() { return _minX; }
          float          maxX() { return _maxX; }
          float          minY() { return _minY; }
@@ -116,7 +117,7 @@ namespace trend {
          virtual       ~TolderGlfFont();
          virtual void   getStringBounds(const std::string&, DBbox*);
          virtual void   bindBuffers() {assert(false);}
-         virtual void   drawString(const std::string&, bool);
+         virtual void   drawString(const std::string&, bool, layprop::DrawProperties*);
          byte           status()        {return _status;}
       protected:
          typedef std::map<byte, TGlfSymbol*> TFontMap;
@@ -145,7 +146,7 @@ namespace trend {
          virtual       ~TenderGlfFont();
          virtual void   getStringBounds(const std::string&, DBbox*);
          virtual void   bindBuffers();
-         virtual void   drawString(const std::string&, bool);
+         virtual void   drawString(const std::string&, bool, layprop::DrawProperties*);
       protected:
          void           collect(const word, const word);
          typedef std::map<byte, TGlfRSymbol*> FontMap;
@@ -158,7 +159,7 @@ namespace trend {
       public:
                         ToshaderGlfFont(std::string, std::string&);
          virtual       ~ToshaderGlfFont() {}
-         virtual void   drawString(const std::string&, bool);
+         virtual void   drawString(const std::string&, bool, layprop::DrawProperties*);
    };
    //=============================================================================
    //
@@ -200,7 +201,7 @@ namespace trend {
          //Font handling
          void                   loadLayoutFont(std::string);
          void                   getStringBounds(const std::string&, DBbox*);
-         void                   drawString(const std::string& str, bool fill);
+         void                   drawString(const std::string& str, bool fill, layprop::DrawProperties*);
          void                   drawWiredString(const std::string& str);
          void                   drawSolidString(const std::string& str);
          bool                   selectFont(std::string str);

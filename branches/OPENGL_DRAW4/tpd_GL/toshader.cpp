@@ -84,7 +84,7 @@ void trend::ToshaderTV::drawTexts(layprop::DrawProperties* drawprop)
       float mtrxOrtho[16];
       drawprop->topCtm().oglForm(mtrxOrtho);
       glUniformMatrix4fv(glslUniVarLoc[glslu_in_CTM], 1, GL_FALSE, mtrxOrtho);
-      (*TSTR)->draw(_filled);
+      (*TSTR)->draw(_filled, drawprop);
       drawprop->popCtm();
    }
    drawprop->popCtm();
