@@ -763,18 +763,20 @@ void trend::TrendRef::drctDrawContour()
 //
 // class TrendText
 //
-trend::TrendText::TrendText(const std::string* text, const CTM& ctm) : _text(text)
+trend::TrendText::TrendText(const std::string* text, const CTM& ctm) : 
+   _text ( text   ),
+   _ctm  ( ctm    )
 {
-   ctm.oglForm(_ftm);
+   //ctm.oglForm(_ftm);
 }
 
 void trend::TrendText::draw(bool fill)
 {
-   glPushMatrix();
-   glMultMatrixd(_ftm);
-   glScalef(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT, 1);
+   //glPushMatrix();
+   //glMultMatrixd(_ftm);
+   //glScalef(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT, 1);
    TRENDC->drawString(*_text, fill);
-   glPopMatrix();
+   //glPopMatrix();
 }
 
 //=============================================================================

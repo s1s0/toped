@@ -451,16 +451,16 @@ void trend::ToshaderGlfFont::drawString(const std::string& text, bool fill)
             left_of = 0.0f;
          else
             left_of = -CSI->second->minX()+_pitch;
-         glTranslatef(left_of+right_of, 0, 0);
+//         glTranslatef(left_of+right_of, 0, 0);
       }
       if ((0x20 == text[i]) || (_symbols.end() == CSI))
       {
-         glTranslatef(_spaceWidth, 0, 0);
+//         glTranslatef(_spaceWidth, 0, 0);
          right_of = 0.0f;
       }
       else
       {
-         CSI->second->draw(fill);
+         CSI->second->draw(false/*fill*/);
          right_of = CSI->second->maxX();
       }
    }
@@ -779,7 +779,6 @@ void trend::TrendCenter::loadLayoutFont(std::string fontfile)
          break;
       case trend::toshader :
          curFont = DEBUG_NEW trend::ToshaderGlfFont(fontfile, _activeFontName);
-         assert(false);
          break;
       default: assert(false); break;
    }

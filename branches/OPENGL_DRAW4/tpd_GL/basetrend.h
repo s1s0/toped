@@ -252,9 +252,11 @@ namespace trend {
       public:
                            TrendText(const std::string*, const CTM&);
          void              draw(bool);
+         const CTM&        ctm() const {return _ctm;}
       private:
          const std::string* _text;
-         real              _ftm[16]; //! Font translation matrix
+         CTM                _ctm; //! Font Translation matrix
+//         real              _ftm[16]; //! Font translation matrix
    };
 
    /**
