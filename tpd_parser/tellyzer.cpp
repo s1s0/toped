@@ -2156,11 +2156,17 @@ int parsercmd::cmdFUNC::execute()
    }
    else
    {
-      // we must reinitialize local variables - otherwise we'll get unexpected
+      // we must reinitialise local variables - otherwise we'll get unexpected
       // results - for example local lists are not empty!
       initializeVarLocal();
    }
-   if (EXEC_ABORT == retexec) return retexec;
+   if (EXEC_ABORT == retexec)
+   {
+      std::stringstream info;
+      info << "Called in UDF \"" << funcname << "\"";
+      tell_log(console::MT_ERROR, info.str());
+      return retexec;
+   }
    else return EXEC_NEXT;
 }
 
