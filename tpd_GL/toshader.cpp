@@ -71,11 +71,18 @@ void trend::ToshaderTV::drawTexts(layprop::DrawProperties* drawprop)
 
    for (TrendStrings::const_iterator TSTR = _text_data.begin(); TSTR != _text_data.end(); TSTR++)
    {
-      CTM ctm( drawprop->topCtm() * (*TSTR)->ctm());
-      ctm.Scale(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT);
-      drawprop->pushCtm(ctm);
+      //  Things to remember...
+      // Font has to be translated using its own matrix in which
+      // tx/ty are forced to zero. 
+      // The text binding point is multiplied ALONE with the current
+      // translation matrix, but NEVER with the font matrix.
+      CTM ftm((*TSTR)->ctm());
+      CTM ctm( ftm.a(), ftm.b(), ftm.c(), ftm.d(), 0,0);
+      ctm.Scale((real)OPENGL_FONT_UNIT, (real)OPENGL_FONT_UNIT);
+      ctm.Translate(TP(ftm.tx(), ftm.ty()));
+      drawprop->pushCtm(ctm * drawprop->topCtm());
       float mtrxOrtho[16];
-      ctm.oglForm(mtrxOrtho);
+      drawprop->topCtm().oglForm(mtrxOrtho);
       glUniformMatrix4fv(glslUniVarLoc[glslu_in_CTM], 1, GL_FALSE, mtrxOrtho);
       (*TSTR)->draw(_filled);
       drawprop->popCtm();
