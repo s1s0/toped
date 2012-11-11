@@ -266,7 +266,7 @@ Ooops! Second thought!
 %token                 tknPOSTADD tknPOSTSUB tknCONST
 %token <parsestr>      tknIDENTIFIER tknTYPEdef tknFIELD tknSTRING
 %token <real>          tknREAL
-%token <integer>       tknINT
+%token <integer>       tknUINT
 /* parser types*/
 %type <pttname>        primaryexpression unaryexpression
 %type <pttname>        multiexpression addexpression expression
@@ -738,14 +738,27 @@ fielddeclaration:
       else $$ = true;
       delete [] $2;
    }
-   |  telltypeID   tknIDENTIFIER  indxb tknINT indxe  {
+   |  telltypeID   tknIDENTIFIER  indxb tknUINT indxe  {
       if ($4 > 0) {
-         const telldata::TType* ftype = CMDBlock->getTypeByID($1 & ~telldata::tn_listmask);
-         if (!tellstruct->addfield($2, $1, ftype, $4)) {
-            tellerror("field with this name already defined in this strucutre", @2);
-            $$ = false; // indicates that definition fails
+         if ($1 & telldata::tn_listmask) {
+            const telldata::TType* ftype = CMDBlock->getTypeByID($1 & ~telldata::tn_listmask);
+            if (tellstruct->addfield($2, $1, ftype, $4)) {
+               $$ = true;
+            }
+            else {
+               tellerror("field with this name already defined in this strucutre", @2);
+               $$ = false; // indicates that definition fails
+            }
          }
-         else $$ = true;
+         else
+         {
+            tellerror("type modifier \"list\" expected after the type name", @1);
+            $$ = false;
+         }
+      }
+      else {
+         tellerror("list size must be > 0", @4);
+         $$ = false;
       }
       delete [] $2;
    }
@@ -1126,7 +1139,7 @@ unaryexpression :
 primaryexpression :
      tknREAL                               {$$ = telldata::tn_real;
       CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPUSH(DEBUG_NEW telldata::TtReal($1), false, true));}
-   | tknINT                                {$$ = telldata::tn_int;
+   | tknUINT                               {$$ = telldata::tn_int;
       CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPUSH(DEBUG_NEW telldata::TtInt($1), false, true));}
    | tknTRUE                               {$$ = telldata::tn_bool;
       CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPUSH(DEBUG_NEW telldata::TtBool(true), false, true));}

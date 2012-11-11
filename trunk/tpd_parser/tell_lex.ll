@@ -240,7 +240,7 @@ const                      return tknCONST;
 "="                        return '=';
 ";"                        return ';';
 0x[0-9A-Fa-f]+    |
-{lxt_D}+                 { telllval.integer = parsercmd::getllint(yytext); return tknINT;}
+{lxt_D}+                 { telllval.integer = parsercmd::getllint(yytext); return tknUINT;}
 {lxt_D}+"."{lxt_D}*({lxt_E})?  |
 {lxt_D}*"."{lxt_D}+({lxt_E})?  |
 {lxt_D}+{lxt_E}          { telllval.real = atof(yytext); return tknREAL;}
