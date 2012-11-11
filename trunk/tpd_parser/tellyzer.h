@@ -148,7 +148,7 @@ namespace  parsercmd {
    ******************************************************************************/
    class cmdVIRTUAL {
    public:
-      cmdVIRTUAL(): _opstackerr(false) {};
+                   cmdVIRTUAL(): _opstackerr(false) {};
       virtual int  execute() = 0;
               real getOpValue(telldata::operandSTACK& OPs = OPstack);
               word getWordValue(telldata::operandSTACK& OPs = OPstack);
