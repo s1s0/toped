@@ -251,7 +251,7 @@ namespace trend {
    class TrendText {
       public:
                            TrendText(const std::string*, const CTM&);
-         void              draw(bool);
+         void              draw(bool, layprop::DrawProperties*);
          const CTM&        ctm() const {return _ctm;}
       private:
          const std::string* _text;

@@ -146,10 +146,13 @@ trend::TGlfRSymbol::TGlfRSymbol(TGlfSymbol* tsym, word voffset, word ioffset)
    _maxY = tsym->_maxY;
 }
 
-void trend::TGlfRSymbol::draw(bool fill)
+void trend::TGlfRSymbol::drawWired()
 {
    glMultiDrawArrays(GL_LINE_LOOP, _firstvx, _csize, _alcntrs);
-   if (!fill) return;
+}
+
+void trend::TGlfRSymbol::drawSolid()
+{
    glDrawElements(GL_TRIANGLES, _alchnks * 3, GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_firstix));
 }
 
@@ -242,7 +245,7 @@ void trend::TolderGlfFont::getStringBounds(const std::string& text, DBbox* overl
    (*overlap) = DBbox(TP(left, bottom, OPENGL_FONT_UNIT), TP(right, top, OPENGL_FONT_UNIT));
 }
 
-void trend::TolderGlfFont::drawString(const std::string& text, bool fill)
+void trend::TolderGlfFont::drawString(const std::string& text, bool fill, layprop::DrawProperties*)
 {
    float right_of = 0.0f, left_of = 0.0f;
    for (unsigned i = 0; i < text.length() ; i++)
@@ -386,7 +389,7 @@ void trend::TenderGlfFont::getStringBounds(const std::string& text, DBbox* overl
    (*overlap) = DBbox(TP(left, bottom, OPENGL_FONT_UNIT), TP(right, top, OPENGL_FONT_UNIT));
 }
 
-void trend::TenderGlfFont::drawString(const std::string& text, bool fill)
+void trend::TenderGlfFont::drawString(const std::string& text, bool fill, layprop::DrawProperties*)
 {
    glEnableClientState(GL_VERTEX_ARRAY);
    glVertexPointer(2, GL_FLOAT, 0, NULL);
@@ -412,7 +415,9 @@ void trend::TenderGlfFont::drawString(const std::string& text, bool fill)
       }
       else
       {
-         CSI->second->draw(fill);
+         CSI->second->drawWired();
+         if (fill)
+            CSI->second->drawSolid();
          right_of = CSI->second->maxX();
       }
    }
@@ -434,12 +439,12 @@ trend::ToshaderGlfFont::ToshaderGlfFont(std::string filename, std::string& fontn
    TenderGlfFont(filename, fontname)
 {}
 
-void trend::ToshaderGlfFont::drawString(const std::string& text, bool fill)
+void trend::ToshaderGlfFont::drawString(const std::string& text, bool fill, layprop::DrawProperties* drawprop)
 {
    // Activate the vertex buffers in the vertex shader ...
-   glEnableVertexAttribArray(TSHDR_LOC_VERTEX);  // glEnableClientState(GL_VERTEX_ARRAY)
+   glEnableVertexAttribArray(TSHDR_LOC_VERTEX);
    // Set-up the offset in the binded Vertex buffer
-   glVertexAttribPointer(TSHDR_LOC_VERTEX, 2, GL_FLOAT, GL_FALSE, 0, 0/*(GLvoid*)(sizeof(TNDR_GLDATAT) * _point_array_offset)*/);
+   glVertexAttribPointer(TSHDR_LOC_VERTEX, 2, GL_FLOAT, GL_FALSE, 0, 0);
    float right_of = 0.0f, left_of = 0.0f;
    for (unsigned i = 0; i < text.length() ; i++)
    {
@@ -447,21 +452,28 @@ void trend::ToshaderGlfFont::drawString(const std::string& text, bool fill)
       if (i != 0)
       {
          // move one _pitch right
-         if ((0x20 == text[i]) || (_symbols.end() == CSI))
-            left_of = 0.0f;
-         else
-            left_of = -CSI->second->minX()+_pitch;
-//         glTranslatef(left_of+right_of, 0, 0);
+         if (!((0x20 == text[i]) || (_symbols.end() == CSI)))
+            left_of += -CSI->second->minX()+_pitch;
+
+         CTM ctm;
+         ctm.Translate(left_of+right_of, 0);
+         ctm *= drawprop->topCtm();
+         float mtrxOrtho[16];
+         ctm.oglForm(mtrxOrtho);
+         glUniformMatrix4fv(glslUniVarLoc[glslu_in_CTM], 1, GL_FALSE, mtrxOrtho);
       }
       if ((0x20 == text[i]) || (_symbols.end() == CSI))
       {
-//         glTranslatef(_spaceWidth, 0, 0);
-         right_of = 0.0f;
+         right_of += _spaceWidth;
       }
       else
       {
-         CSI->second->draw(false/*fill*/);
-         right_of = CSI->second->maxX();
+         glUniform1ui(glslUniVarLoc[glslu_in_StippleEn], 0);
+         CSI->second->drawWired();
+         glUniform1ui(glslUniVarLoc[glslu_in_StippleEn], 1);
+         if (fill)
+            CSI->second->drawSolid();
+         right_of += CSI->second->maxX();
       }
    }
    glDisableVertexAttribArray(TSHDR_LOC_VERTEX);
@@ -797,15 +809,15 @@ void trend::TrendCenter::getStringBounds(const std::string& text, DBbox* overlap
 
 }
 
-void trend::TrendCenter::drawString(const std::string& text, bool fill)
+void trend::TrendCenter::drawString(const std::string& text, bool fill, layprop::DrawProperties* drawprop)
 {
-   _oglFont[_activeFontName]->drawString(text, fill);
+   _oglFont[_activeFontName]->drawString(text, fill, drawprop);
 }
 
 void trend::TrendCenter::drawWiredString(const std::string& text)
 {
    bindFont();
-   _oglFont[_activeFontName]->drawString(text, false);
+   _oglFont[_activeFontName]->drawString(text, false,NULL);
    unbindFont();
 
 }
@@ -813,7 +825,7 @@ void trend::TrendCenter::drawWiredString(const std::string& text)
 void trend::TrendCenter::drawSolidString(const std::string& text)
 {
    bindFont();
-   _oglFont[_activeFontName]->drawString(text, true);
+   _oglFont[_activeFontName]->drawString(text, true, NULL);
    unbindFont();
 
 }

@@ -770,12 +770,12 @@ trend::TrendText::TrendText(const std::string* text, const CTM& ctm) :
    //ctm.oglForm(_ftm);
 }
 
-void trend::TrendText::draw(bool fill)
+void trend::TrendText::draw(bool fill, layprop::DrawProperties* drawprop)
 {
    //glPushMatrix();
    //glMultMatrixd(_ftm);
    //glScalef(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT, 1);
-   TRENDC->drawString(*_text, fill);
+   TRENDC->drawString(*_text, fill, drawprop);
    //glPopMatrix();
 }
 

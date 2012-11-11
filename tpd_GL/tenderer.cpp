@@ -315,7 +315,7 @@ void trend::TenderTV::drawTexts(layprop::DrawProperties* drawprop)
       glPushMatrix();
       glMultMatrixd(ftm);
       glScalef(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT, 1);
-      (*TSTR)->draw(_filled);
+      (*TSTR)->draw(_filled, drawprop);
       glPopMatrix();
    }
    glPopMatrix();
