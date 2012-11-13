@@ -477,9 +477,10 @@
                            (packet (find-in-object-list packet-list packet-name)))
                        (if (not (eq? packet null))
                            (let* ((number (number->string((layer 'get-number))))
+                                  (datatype (number->string((layer 'get-data-type))))
                                   (colour ((packet 'get-fill)))
                                   (stipple ((packet 'get-stipple))))
-                             (list (string-append "layprop(\"" name "\",\t" number ",\t\"" colour "\",\t"
+                             (list (string-append "layprop(\"" name "\",\t { " number " , " datatype "} ,\t\"" colour "\",\t"
                                                   "\"" stipple "\",\t" "\"selected3\");"))) 
                            (error "can't find packet" packet-name)))
                      '())))
