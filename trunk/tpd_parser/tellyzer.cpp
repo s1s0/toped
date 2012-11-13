@@ -973,7 +973,19 @@ int parsercmd::cmdASSIGN::execute()
             return EXEC_NEXT;
          }
          else
-            tellerror("Runtime error.Invalid Index");
+         {
+            std::stringstream info;
+            unsigned maxSize = static_cast<telldata::TtList*>(_var)->size();
+            info << "Runtime error. Invalid index in assign lvalue. Requested: "<< idx << "; Valid: ";
+            if (0 == maxSize)
+               info << " none (empty list)";
+            else if (1 == maxSize)
+               info << "[0]";
+            else
+               info << "[0 - " << maxSize - 1 << "]";
+            tellerror(info.str());
+            return EXEC_ABORT;
+         }
          break;
       }
       case 2:
@@ -1032,7 +1044,16 @@ int parsercmd::cmdLISTADD::execute()
       }
       else
       {
-         tellerror("Runtime error.Invalid index");
+         std::stringstream info;
+         unsigned maxSize = _listarg->size();
+         info << "Runtime error. Invalid index in list insert. Requested: "<< idx << "; Valid: ";
+         if (0 == maxSize)
+            info << " none (empty list)";
+         else if (1 == maxSize)
+            info << "[0]";
+         else
+            info << "[0 - " << maxSize - 1 << "]";
+         tellerror(info.str());
          return EXEC_ABORT;
       }
    }
@@ -1083,7 +1104,16 @@ int parsercmd::cmdLISTUNION::execute()
       }
       else
       {
-         tellerror("Runtime error.Invalid Index");
+         std::stringstream info;
+         unsigned maxSize = _listarg->size();
+         info << "Runtime error. Invalid index in list union. Requested: "<< idx << "; Valid: ";
+         if (0 == maxSize)
+            info << " none (empty list)";
+         else if (1 == maxSize)
+            info << "[0]";
+         else
+            info << "[0 - " << maxSize - 1 << "]";
+         tellerror(info.str());
          return EXEC_ABORT;
       }
    }
@@ -1112,7 +1142,16 @@ int parsercmd::cmdLISTSUB::execute()
    }
    else
    {
-      tellerror("Runtime error.Invalid index");
+      std::stringstream info;
+      unsigned maxSize = _listarg->size();
+      info << "Runtime error. Invalid index in list reduce. Requested: "<< idx << "; Valid: ";
+      if (0 == maxSize)
+         info << " none (empty list)";
+      else if (1 == maxSize)
+         info << "[0]";
+      else
+         info << "[0 - " << maxSize - 1 << "]";
+      tellerror(info.str());
       return EXEC_ABORT;
    }
 }
@@ -1166,7 +1205,16 @@ int parsercmd::cmdLISTSLICE::execute()
    }
    else
    {
-      tellerror("Runtime error.Invalid index");
+      std::stringstream info;
+      unsigned maxSize = _listarg->size();
+      info << "Runtime error. Invalid index in list slice. Requested: ["<< idxB << " - " << idxE << "]; Valid: ";
+      if (0 == maxSize)
+         info << " none (empty list)";
+      else if (1 == maxSize)
+         info << "[0]";
+      else
+         info << "[0 - " << maxSize - 1 << "]";
+      tellerror(info.str());
       return EXEC_ABORT;
    }
 }
@@ -1201,7 +1249,16 @@ int parsercmd::cmdPUSH::execute()
          }
          else
          {
-            tellerror("Runtime error.Invalid index");
+            std::stringstream info;
+            unsigned maxSize = static_cast<telldata::TtList*>(_var)->size();
+            info << "Runtime error. Invalid index. Requested: "<< idx << "; Valid: ";
+            if (0 == maxSize)
+               info << " none (empty list)";
+            else if (1 == maxSize)
+               info << "[0]";
+            else
+               info << "[0 - " << maxSize - 1 << "]";
+            tellerror(info.str());
             return EXEC_ABORT;
          }
       }
