@@ -526,23 +526,18 @@ void telldata::TtList::lunion(telldata::TtList* inlist)
 void telldata::TtList::lunion(telldata::TtList* inlist, dword index)
 {
    assert(index >=0); assert(index <= _mlist.size());
-   if (index == _mlist.size())
+   unsigned oldSize = _mlist.size();
+   unsigned newSize = oldSize + inlist->size();
+   // avoiding the insert method - looks too dangerous and clunky in this case.
+   // see https://code.google.com/p/toped/issues/detail?id=154
+   _mlist.resize(newSize);
+   if (index < oldSize)
    {
-      for (telldata::memlist::const_iterator CCI = inlist->_mlist.begin(); CCI != inlist->_mlist.end(); CCI++)
-         _mlist.push_back((*CCI)->selfcopy());
+      for (unsigned i=1; i <= oldSize - index; i++)
+         _mlist[newSize - i] = _mlist[oldSize - i];
    }
-   else
-   {
-      memlist::iterator CI;
-      unsigned idx = 0;
-      for(CI = _mlist.begin(); CI != _mlist.end(); CI++, idx++)
-      {
-         if (idx == index) break;
-      }
-      assert(NULL != (*CI));
-      for (telldata::memlist::const_iterator CCI = inlist->_mlist.begin(); CCI != inlist->_mlist.end(); CCI++)
-         _mlist.insert(CI, (*CCI)->selfcopy());
-   }
+   for(unsigned i=0; i < inlist->size(); i++)
+      _mlist[index+i] = inlist->mlist()[i]->selfcopy();
 }
 
 telldata::TellVar* telldata::TtList::erase(dword index)
