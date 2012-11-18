@@ -88,6 +88,7 @@ namespace trend {
       protected:
          virtual void      setColor(const LayerDef& layer);
          virtual void      setStipple();
+         virtual void      setLine(bool);
    };
 
 }

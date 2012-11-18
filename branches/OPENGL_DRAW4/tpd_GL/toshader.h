@@ -32,6 +32,9 @@
 #include "tenderer.h"
 
 namespace trend {
+
+   void              setShaderCtm(layprop::DrawProperties*, const TrendRef*);
+
    class ToshaderTV : public TenderTV {
       public:
                            ToshaderTV(TrendRef* const, bool, bool, unsigned, unsigned);
@@ -41,7 +44,6 @@ namespace trend {
       protected:
          void              drawLines();
          void              drawTriQuads();
-         void              setCtm(layprop::DrawProperties*);
    };
 
    class ToshaderReTV : public TenderReTV {
@@ -88,6 +90,7 @@ namespace trend {
       protected:
          virtual void      setColor(const LayerDef& layer);
          virtual void      setStipple();
+         virtual void      setLine(bool);
    };
 
 }

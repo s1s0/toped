@@ -453,13 +453,30 @@ void trend::Tolder::setStipple()
    }
 }
 
+void trend::Tolder::setLine(bool selected)
+{
+   layprop::LineSettings curLine;
+   _drawprop->getCurrentLine(curLine, selected);
+   glLineWidth(curLine.width());
+   if (0xffff == curLine.pattern())
+   {
+      glDisable(GL_LINE_STIPPLE);
+      /*glDisable(GL_LINE_SMOOTH);*/
+   }
+   else
+   {
+      glEnable(GL_LINE_STIPPLE);
+      /*glEnable(GL_LINE_SMOOTH);*/
+      glLineStipple(curLine.patscale(),curLine.pattern());
+   }
+}
+
 void trend::Tolder::draw()
 {
    for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {// for every layer
       setColor(CLAY());
       setStipple();
-      _drawprop->setLineProps(false);
       if (0 != CLAY->total_slctdx())
       {// redraw selected contours only
          _drawprop->setLineProps(true);
@@ -467,8 +484,8 @@ void trend::Tolder::draw()
          glMultMatrixd(_activeCS->translation());
          CLAY->drawSelected();
          glPopMatrix();
-         _drawprop->setLineProps(false);
       }
+      _drawprop->setLineProps(false);
       // draw everything
       if (0 != CLAY->total_points())
          CLAY->draw(_drawprop);

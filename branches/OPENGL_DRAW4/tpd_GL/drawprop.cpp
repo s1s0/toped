@@ -783,6 +783,29 @@ void layprop::DrawProperties::setLineProps(bool selected) const
    }
 }
 
+void layprop::DrawProperties::getCurrentLine(layprop::LineSettings& lineSet, bool selected) const
+{
+   if (REF_LAY_DEF == _drawingLayer)
+   {
+      LineSettings dummy(std::string(""),0xf18f, 1, selected ? 3 : 1);
+      lineSet = dummy;
+   }
+   else
+   {
+      const layprop::LineSettings* theLine = getLine(_drawingLayer);
+      if (selected)
+      {
+         LineSettings dummy(theLine->color(),theLine->pattern(), theLine->patscale(), theLine->width());
+         lineSet = dummy;
+      }
+      else
+      {
+         LineSettings dummy(theLine->color(),0xffff, 1, 1);
+         lineSet = dummy;
+      }
+   }
+}
+
 void layprop::DrawProperties::initDrawRefStack(laydata::CellRefStack* refStack)
 {
    _refStack = refStack;

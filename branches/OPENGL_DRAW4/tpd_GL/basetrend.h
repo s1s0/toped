@@ -486,7 +486,7 @@ namespace trend {
                            TrendRef();
          std::string       name()         {return _name;}
          real* const       translation()  {return _translation;}
-         CTM&              ctm()          {return _ctm;}
+         const CTM&        ctm() const    {return _ctm;}
          word              alphaDepth()   {return _alphaDepth;}
          unsigned          cDataCopy(TNDR_GLDATAT*, unsigned&);
          void              drctDrawContour();
@@ -944,6 +944,7 @@ namespace trend {
       protected:
          virtual void      setColor(const LayerDef& layer) = 0;
          virtual void      setStipple() = 0;
+         virtual void      setLine(bool) = 0;
          layprop::DrawProperties*   _drawprop;
          real              _UU;
          DataLay           _data;            //!All editable data for drawing
