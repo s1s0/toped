@@ -912,40 +912,43 @@ int parsercmd::cmdSTACKRST::execute()
 }
 
 //=============================================================================
-int parsercmd::cmdLISTSIZE::execute()
+parsercmd::cmdLISTSIZE::cmdLISTSIZE(telldata::TellVar* var):
+   _var(var)
 {
-   TELL_DEBUG(cmdLISTSIZE);
-   dword idx = getIndexValue();
-   telldata::TellVar* initVar;
    telldata::typeID ID = _var->get_type() & ~telldata::tn_listmask;
    switch (ID)
    {
-      case telldata::tn_real    : initVar = DEBUG_NEW telldata::TtReal()   ; break;
-      case telldata::tn_int     : initVar = DEBUG_NEW telldata::TtInt()    ; break;
-      case telldata::tn_bool    : initVar = DEBUG_NEW telldata::TtBool()   ; break;
-      case telldata::tn_pnt     : initVar = DEBUG_NEW telldata::TtPnt()    ; break;
-      case telldata::tn_box     : initVar = DEBUG_NEW telldata::TtWnd()    ; break;
-      case telldata::tn_bnd     : initVar = DEBUG_NEW telldata::TtBnd()    ; break;
-      case telldata::tn_laymap  : initVar = DEBUG_NEW telldata::TtLMap()   ; break;
-      case telldata::tn_hshstr  : initVar = DEBUG_NEW telldata::TtHshStr() ; break;
-      case telldata::tn_layer   : initVar = DEBUG_NEW telldata::TtLayer()  ; break;
-      case telldata::tn_string  : initVar = DEBUG_NEW telldata::TtString() ; break;
-      case telldata::tn_layout  : initVar = DEBUG_NEW telldata::TtLayout() ; break;
-      case telldata::tn_auxilary: initVar = DEBUG_NEW telldata::TtAuxdata(); break;
+      case telldata::tn_real    : _initVar = DEBUG_NEW telldata::TtReal()   ; break;
+      case telldata::tn_int     : _initVar = DEBUG_NEW telldata::TtInt()    ; break;
+      case telldata::tn_bool    : _initVar = DEBUG_NEW telldata::TtBool()   ; break;
+      case telldata::tn_pnt     : _initVar = DEBUG_NEW telldata::TtPnt()    ; break;
+      case telldata::tn_box     : _initVar = DEBUG_NEW telldata::TtWnd()    ; break;
+      case telldata::tn_bnd     : _initVar = DEBUG_NEW telldata::TtBnd()    ; break;
+      case telldata::tn_laymap  : _initVar = DEBUG_NEW telldata::TtLMap()   ; break;
+      case telldata::tn_hshstr  : _initVar = DEBUG_NEW telldata::TtHshStr() ; break;
+      case telldata::tn_layer   : _initVar = DEBUG_NEW telldata::TtLayer()  ; break;
+      case telldata::tn_string  : _initVar = DEBUG_NEW telldata::TtString() ; break;
+      case telldata::tn_layout  : _initVar = DEBUG_NEW telldata::TtLayout() ; break;
+      case telldata::tn_auxilary: _initVar = DEBUG_NEW telldata::TtAuxdata(); break;
       default:
       {
          const telldata::TType* utype = CMDBlock->getTypeByID(ID);
          if (NULL == utype)
             assert(false);// unknown base array type ?!
          else if  (utype->isComposite())
-            initVar = DEBUG_NEW telldata::TtUserStruct(static_cast<const telldata::TCompType*>(utype));
+            _initVar = DEBUG_NEW telldata::TtUserStruct(static_cast<const telldata::TCompType*>(utype));
          else
-            initVar = DEBUG_NEW telldata::TtCallBack(ID);
+            _initVar = DEBUG_NEW telldata::TtCallBack(ID);
          break;
       }
    }
+}
 
-   static_cast<telldata::TtList*>(_var)->resize(idx, initVar);
+int parsercmd::cmdLISTSIZE::execute()
+{
+   TELL_DEBUG(cmdLISTSIZE);
+   dword idx = getIndexValue();
+   static_cast<telldata::TtList*>(_var)->resize(idx, _initVar);
    return EXEC_NEXT;
 }
 
