@@ -484,11 +484,13 @@ void trend::Toshader::draw()
       if (0 != CLAY->total_slctdx())
       {// redraw selected contours only
          setLine(true);
+         glUniform1ui(glslUniVarLoc[glslu_in_StippleEn], 0);
          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _sbuffer);
          setShaderCtm(_drawprop, _activeCS);
          CLAY->drawSelected();
          _drawprop->popCtm();
          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+         glUniform1ui(glslUniVarLoc[glslu_in_StippleEn], 1);
       }
       setLine(false);
       // draw everything
