@@ -467,6 +467,7 @@ namespace trend {
       protected:
          virtual void      setColor(const LayerDef& layer);
          virtual void      setStipple();
+         virtual void      setLine(bool);
          unsigned          _num_ogl_buffers; //! Number of generated openGL VBOs
          unsigned          _num_ogl_grc_buffers; //!
          GLuint*           _ogl_buffers;     //! Array with the "names" of all openGL buffers

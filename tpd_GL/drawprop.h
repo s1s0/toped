@@ -140,8 +140,9 @@ namespace layprop {
    class LineSettings
    {
       public:
-         LineSettings(std::string color, word pattern, byte patscale, byte width) :
-            _color(color), _pattern(pattern), _patscale(patscale), _width(width) {};
+                        LineSettings():_color(""), _pattern(0xffff), _patscale(1), _width(1){};
+                        LineSettings(std::string color, word pattern, byte patscale, byte width) :
+                           _color(color), _pattern(pattern), _patscale(patscale), _width(width) {};
          std::string    color()     const {return _color;   }
          word           pattern()   const {return _pattern; }
          byte           patscale()  const {return _patscale;}
@@ -229,6 +230,7 @@ namespace layprop {
          bool                       setCurrentColor(const LayerDef&, layprop::tellRGB&);
          const byte*                getCurrentFill() const;
          void                       setLineProps(bool selected = false) const;
+         void                       getCurrentLine(LineSettings&, bool) const;
          void                       initDrawRefStack(laydata::CellRefStack*);
          void                       clearDrawRefStack();
          void                       postCheckCRS(const laydata::TdtCellRef*);

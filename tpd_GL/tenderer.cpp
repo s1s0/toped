@@ -991,24 +991,41 @@ void trend::Tenderer::setStipple()
    }
 }
 
+void trend::Tenderer::setLine(bool selected)
+{
+   layprop::LineSettings curLine;
+   _drawprop->getCurrentLine(curLine, selected);
+   glLineWidth(curLine.width());
+   if (0xffff == curLine.pattern())
+   {
+      glDisable(GL_LINE_STIPPLE);
+      /*glDisable(GL_LINE_SMOOTH);*/
+   }
+   else
+   {
+      glEnable(GL_LINE_STIPPLE);
+      /*glEnable(GL_LINE_SMOOTH);*/
+      glLineStipple(curLine.patscale(),curLine.pattern());
+   }
+}
+
 void trend::Tenderer::draw()
 {
    for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {// for every layer
       setColor(CLAY());
       setStipple();
-      _drawprop->setLineProps(false);
       if (0 != CLAY->total_slctdx())
       {// redraw selected contours only
-         _drawprop->setLineProps(true);
+         setLine(true);
          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _sbuffer);
          glPushMatrix();
          glMultMatrixd(_activeCS->translation());
          CLAY->drawSelected();
          glPopMatrix();
          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-         _drawprop->setLineProps(false);
       }
+      setLine(true);
       // draw everything
       if (0 != CLAY->total_points())
          CLAY->draw(_drawprop);
