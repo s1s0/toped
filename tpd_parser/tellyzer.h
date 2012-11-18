@@ -417,11 +417,12 @@ namespace  parsercmd {
 
    class cmdLISTSIZE:public cmdVIRTUAL {
    public:
-                  cmdLISTSIZE(telldata::TellVar* var): _var(var){};
+                  cmdLISTSIZE(telldata::TellVar* var);
       virtual    ~cmdLISTSIZE() {}
       virtual int execute();
    protected:
       telldata::TellVar*  _var;
+      telldata::TellVar*  _initVar;
    };
 
    class cmdASSIGN:public cmdVIRTUAL {
