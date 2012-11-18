@@ -65,7 +65,7 @@ END_EVENT_TABLE()
 
 tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id, const LayerDef laydef) :
    wxDialog   ( parent, id, wxT("Technology Editor")),
-   _curSelect (     0 )
+   _curSelect ( wxNOT_FOUND )
 {
    Connect(-1, wxEVT_TECHEDITUPDATE,
            (wxObjectEventFunction) (wxEventFunction)
@@ -137,13 +137,19 @@ tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id, const 
    this->SetSizerAndFit(mainSizer);
    mainSizer->SetSizeHints( this );
 
-   FindWindow(DTE_APPLY)->Enable(false);
    if (ERR_LAY_DEF == laydef)
    {
-      if (!_layerList->empty())
+      if (_layerList->empty())
+      {
+         static_cast<wxCheckBox*>(FindWindow(tui::DTE_NEWLAYER))->SetValue(true);
+         _layerNumber->SetEditable(true);
+         _layerDtype->SetEditable(true);
+      }
+      else
          _layerList->Select(_curSelect, true);
    }
    else _layerList->select(laydef, _curSelect);
+   FindWindow(DTE_APPLY)->Enable(false);
 #ifdef WIN32
    updateDialog();
 #endif
@@ -201,9 +207,18 @@ void  tui::TechEditorDialog::OnStyleEditor(wxCommandEvent&)
 
 void  tui::TechEditorDialog::OnChangeProperty(wxCommandEvent&)
 {
-   if (!static_cast<wxCheckBox*>(FindWindow(tui::DTE_NEWLAYER))->IsChecked())
-      // Make sure it's not a new layer
-      FindWindow(DTE_APPLY)->Enable(true);
+   _layerName->GetValidator()->TransferFromWindow();
+   if (!_layerNameString.empty())
+   {
+      if (static_cast<wxCheckBox*>(FindWindow(tui::DTE_NEWLAYER))->IsChecked())
+         checkNewLayer();
+      else if (wxNOT_FOUND  != _curSelect)
+         FindWindow(DTE_APPLY)->Enable(true);
+      else
+         FindWindow(DTE_APPLY)->Enable(false);
+   }
+   else
+      FindWindow(DTE_APPLY)->Enable(false);
 }
 
 void tui::TechEditorDialog::OnChangeLayNum(wxCommandEvent&)
@@ -228,6 +243,7 @@ void  tui::TechEditorDialog::OnLayerSelected(wxListEvent& levent)
 {
    _curSelect = levent.GetIndex();
    _layerNumber->SetEditable(false);
+   _layerDtype->SetEditable(false);
    static_cast<wxCheckBox*>(FindWindow(tui::DTE_NEWLAYER))->SetValue(false);
    if (wxNOT_FOUND != _curSelect)
       updateDialog();
@@ -236,6 +252,7 @@ void  tui::TechEditorDialog::OnLayerSelected(wxListEvent& levent)
 
 void  tui::TechEditorDialog::updateDialog()
 {
+   if (wxNOT_FOUND == _curSelect) return;
    wxListItem row;
    row.SetId(_curSelect);
    row.SetMask(wxLIST_MASK_TEXT);
@@ -290,7 +307,7 @@ void  tui::TechEditorDialog::updateDialog()
 void tui::TechEditorDialog::checkNewLayer()
 {
    bool applyEnable = true;
-   if (_layerDtypeString.empty() || _layerNumberString.empty())
+   if (_layerDtypeString.empty() || _layerNumberString.empty() || _layerNameString.empty())
       applyEnable = false;
    else
    {
