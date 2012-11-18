@@ -368,6 +368,8 @@ void trend::TenderReTV::drawTexts(layprop::DrawProperties* drawprop)
 //
 trend::TenderLay::TenderLay():
    TrendLay              (             ),
+   _pbuffer              (          0u ),
+   _ibuffer              (          0u ),
    _stv_array_offset     (          0u ),
    _slctd_array_offset   (          0u )
 {
@@ -606,6 +608,7 @@ trend::TenderLay::~TenderLay()
 //
 trend::TenderRefLay::TenderRefLay() :
    TrendRefLay    (      ),
+   _pbuffer       (   0u ),
    _sizesvx       ( NULL ),
    _firstvx       ( NULL ),
    _sizslix       ( NULL ),
@@ -706,7 +709,8 @@ trend::Tenderer::Tenderer( layprop::DrawProperties* drawprop, real UU ) :
    _num_ogl_buffers      (       0u   ),
    _num_ogl_grc_buffers  (       0u   ),
    _ogl_buffers          (       NULL ),
-   _ogl_grc_buffers      (       NULL )
+   _ogl_grc_buffers      (       NULL ),
+   _sbuffer              (       0u   )
 {
    _refLayer = DEBUG_NEW TenderRefLay();
 }

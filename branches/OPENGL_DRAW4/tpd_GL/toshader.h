@@ -57,13 +57,11 @@ namespace trend {
    class ToshaderLay : public TenderLay {
       public:
                            ToshaderLay();
-         virtual          ~ToshaderLay();
+         virtual          ~ToshaderLay() {}
          virtual void      newSlice(TrendRef* const, bool, bool /*, bool, unsigned*/);
          virtual void      newSlice(TrendRef* const, bool, bool, unsigned slctd_array_offset);
          virtual bool      chunkExists(TrendRef* const, bool);
-//         virtual void      draw(layprop::DrawProperties*);
          virtual void      drawSelected();
-//         virtual void      drawTexts(layprop::DrawProperties*);
    };
 
    class ToshaderRefLay : public TenderRefLay {
