@@ -329,7 +329,33 @@ trend::ToshaderRefLay::ToshaderRefLay() :
 
 void trend::ToshaderRefLay::draw(layprop::DrawProperties* drawprop)
 {
-   //TODO
+   // Bind the buffer
+   glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
+   // Check the state of the buffer
+   GLint bufferSize;
+   glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
+   assert(bufferSize == (GLint)(2 * total_points() * sizeof(TNDR_GLDATAT)));
+
+   glEnableVertexAttribArray(TSHDR_LOC_VERTEX);  // glEnableClientState(GL_VERTEX_ARRAY)
+   // Set-up the offset in the binded Vertex buffer
+   glVertexAttribPointer(TSHDR_LOC_VERTEX, 2, TNDR_GLENUMT, GL_FALSE, 0, 0);
+   // ... and here we go ...
+   //glEnableClientState(GL_VERTEX_ARRAY);
+   //glVertexPointer(2, TNDR_GLENUMT, 0, 0);
+   if (0 < (_alvrtxs + _asindxs))
+   {
+      assert(_firstvx); assert(_sizesvx);
+      glMultiDrawArrays(GL_LINE_LOOP, _firstvx, _sizesvx, _alobjvx + _asobjix);
+      if (0 < _asindxs)
+      {
+         assert(_fstslix); assert(_sizslix);
+         drawprop->setLineProps(true);
+         glMultiDrawArrays(GL_LINE_LOOP, _fstslix, _sizslix, _asobjix);
+         drawprop->setLineProps(false);
+      }
+   }
+   glDisableVertexAttribArray(TSHDR_LOC_VERTEX);
+   //glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 trend::ToshaderRefLay::~ToshaderRefLay()
@@ -461,6 +487,7 @@ void trend::Toshader::setLine(bool selected)
    layprop::LineSettings curLine;
    _drawprop->getCurrentLine(curLine, selected);
    glLineWidth(curLine.width());
+   // TODO - geometry shader
    //if (0xffff == curLine.pattern())
    //{
    //   glDisable(GL_LINE_STIPPLE);
@@ -504,8 +531,16 @@ void trend::Toshader::draw()
       }
    }
    // draw reference boxes
-   //TODO - all the commented code below should be valid
-   //if (0 < _refLayer->total_points())   _refLayer->draw(_drawprop);
+   if (0 < _refLayer->total_points())   
+   {
+      setColor(REF_LAY_DEF);
+      setLine(false);
+      glUniform1ui(glslUniVarLoc[glslu_in_StippleEn], 0);
+      float mtrxOrtho [16];
+      _drawprop->topCtm().oglForm(mtrxOrtho);
+      glUniformMatrix4fv(glslUniVarLoc[glslu_in_CTM], 1, GL_FALSE, mtrxOrtho);
+      _refLayer->draw(_drawprop);
+   }
    checkOGLError("draw");
    _drawprop->clearCtmStack();
 }
