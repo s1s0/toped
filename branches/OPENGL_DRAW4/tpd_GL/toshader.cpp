@@ -438,10 +438,10 @@ void trend::Toshader::setStipple()
       // the matrix above must be converted to something suitable by the shader
       GLuint shdrStipple [32];
       for (unsigned i = 0; i < 32; i++)
-         shdrStipple[i] = ((GLuint)(tellStipple[4*i + 3]) << 8*3)
-                        | ((GLuint)(tellStipple[4*i + 2]) << 8*2)
-                        | ((GLuint)(tellStipple[4*i + 1]) << 8*1)
-                        | ((GLuint)(tellStipple[4*i + 0]) << 8*0);
+         shdrStipple[i] = ((GLuint)(tellStipple[4*i + 0]) << 8*3)
+                        | ((GLuint)(tellStipple[4*i + 1]) << 8*2)
+                        | ((GLuint)(tellStipple[4*i + 2]) << 8*1)
+                        | ((GLuint)(tellStipple[4*i + 3]) << 8*0);
       glUniform1uiv(glslUniVarLoc[glslu_in_Stipple], 32, shdrStipple);
       glUniform1ui(glslUniVarLoc[glslu_in_StippleEn], 1);
    }
