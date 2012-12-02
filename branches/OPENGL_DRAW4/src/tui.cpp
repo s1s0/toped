@@ -1249,7 +1249,9 @@ void tui::FillSample::setFill(const byte* fill)
 {
    if (NULL != fill)
    {
-      wxBitmap stipplebrush((char  *)fill, 32, 32, 1);
+      byte converted[128];
+      fillcopy(fill, converted);
+      wxBitmap stipplebrush((char  *)converted, 32, 32, 1);
       wxImage image;
       image = stipplebrush.ConvertToImage();
       stipplebrush = wxBitmap(image, 1);
@@ -1260,6 +1262,26 @@ void tui::FillSample::setFill(const byte* fill)
       _brush = wxBrush();
    }
    _brush.SetColour(*wxWHITE);
+}
+
+void tui::FillSample::fillcopy(const byte* pattern, byte nfill[128])
+{
+   //reverse the bits sequence in each byte
+   for (byte i = 0; i < 128; i++)
+   {
+      byte v = pattern[i]; // input bits to be reversed
+      byte r = v         ; // r will be reversed bits of v; first get LSB of v
+      int s = sizeof(v) * CHAR_BIT - 1; // extra shift needed at end
+
+      for (v >>= 1; v; v >>= 1)
+      {
+        r <<= 1;
+        r |= v & 1;
+        s--;
+      }
+      r <<= s; // shift when v's highest bits are zero
+      nfill[i] = r;
+   }
 }
 
 void tui::FillSample::OnPaint(wxPaintEvent&)

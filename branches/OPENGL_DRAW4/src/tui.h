@@ -566,6 +566,7 @@ namespace tui {
       void           setFill(const byte*);
       void           OnPaint(wxPaintEvent&);
    protected:
+      void           fillcopy(const byte* pattern, byte nfill[128]);
       wxBrush        _brush;
       DECLARE_EVENT_TABLE();
    };
