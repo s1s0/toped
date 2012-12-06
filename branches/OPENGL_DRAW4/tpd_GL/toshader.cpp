@@ -305,8 +305,6 @@ void trend::ToshaderRefLay::draw(layprop::DrawProperties* drawprop)
    // Set-up the offset in the binded Vertex buffer
    glVertexAttribPointer(TSHDR_LOC_VERTEX, 2, TNDR_GLENUMT, GL_FALSE, 0, 0);
    // ... and here we go ...
-   //glEnableClientState(GL_VERTEX_ARRAY);
-   //glVertexPointer(2, TNDR_GLENUMT, 0, 0);
    if (0 < (_alvrtxs + _asindxs))
    {
       assert(_firstvx); assert(_sizesvx);
