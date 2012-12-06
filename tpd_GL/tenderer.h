@@ -423,7 +423,7 @@ namespace trend {
    };
 
    /**
-      Responsible for visualising the overlap boxes of the references. Implements
+      Responsible for visualizing the overlap boxes of the references. Implements
       pure virtual classes of its parent for the tenderer. All reference boxes
       are processed in a single VBO. This includes the selected ones.
    */
