@@ -989,9 +989,13 @@ void trend::Tenderer::setStipple()
    }
    else
    {
+      byte FlipStillple [128];
+      for (word i = 0; i < 32; i++)
+         for (word j = 0; j < 4; j++)
+            FlipStillple[(31-i)*4 + j] = tellStipple[i*4 + j];
       glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
       glEnable(GL_POLYGON_STIPPLE);
-      glPolygonStipple(tellStipple);
+      glPolygonStipple(FlipStillple);
    }
 }
 
@@ -1029,7 +1033,7 @@ void trend::Tenderer::draw()
          glPopMatrix();
          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
       }
-      setLine(true);
+      setLine(false);
       // draw everything
       if (0 != CLAY->total_points())
          CLAY->draw(_drawprop);
