@@ -434,13 +434,19 @@ void trend::Toshader::setStipple()
    else
    {
       // the matrix above must be converted to something suitable by the shader
-      GLuint shdrStipple [32];
+      // the size of the array below should be 32 of course. The AMD platform however
+      // behaves in a weird way, so the simplest workaround is to to expand the
+      // array with one and to bind the first one to 0. The bug was reported here:
+      // http://devgurus.amd.com/thread/160053
+      // Note that the fragment shader is updated accordingly.
+      GLuint shdrStipple [33];
+      shdrStipple[0] = 0;
       for (unsigned i = 0; i < 32; i++)
-         shdrStipple[i] = ((GLuint)(tellStipple[4*i + 0]) << 8*3)
+         shdrStipple[i+1] = ((GLuint)(tellStipple[4*i + 0]) << 8*3)
                         | ((GLuint)(tellStipple[4*i + 1]) << 8*2)
                         | ((GLuint)(tellStipple[4*i + 2]) << 8*1)
                         | ((GLuint)(tellStipple[4*i + 3]) << 8*0);
-      glUniform1uiv(glslUniVarLoc[glslu_in_Stipple], 32, shdrStipple);
+      glUniform1uiv(glslUniVarLoc[glslu_in_Stipple], 33, shdrStipple);
       glUniform1ui(glslUniVarLoc[glslu_in_StippleEn], 1);
    }
 }
