@@ -44,7 +44,6 @@
 #endif
 #include "toped.h"
 #include "viewprop.h"
-#include "trend.h"
 #include "datacenter.h"
 #include "calbr_reader.h"
 
@@ -78,7 +77,7 @@ bool TopedApp::OnInit()
 {
    getLocalDirs();
    getGlobalDirs();
-   _forceBasicRendering = false;
+   _forceRenderType     = trend::rtTBD;
    _noLog               = false;
    _gui                 = true;
    wxImage::AddHandler(DEBUG_NEW wxPNGHandler);
@@ -108,7 +107,7 @@ bool TopedApp::OnInit()
       }
       // OK - we've got some kind of graphics we can manage - so create the rendering centre
       TRENDC = DEBUG_NEW trend::TrendCenter(true
-                                            ,_forceBasicRendering
+                                            ,_forceRenderType
                                             ,Toped->view()->glRC()->useVboRendering()
                                             ,Toped->view()->glRC()->useShaders());
       // Replace the active console in the wx system with Toped console window
@@ -451,13 +450,30 @@ bool TopedApp::parseCmdLineArgs()
    bool runTheTool = true;
    if (1 < argc)
    {
-      for (int i=1; i<argc; i++)
+      int curarNum = 1;
+      while (curarNum < argc)
       {
-         wxString curar(argv[i]);
-         if (wxT("-ogl_thread") == curar) Toped->setOglThread(true);
-         else if (wxT("-ogl_safe") == curar) _forceBasicRendering = true;
-         else if (wxT("-nolog")    == curar) _noLog               = true;
-         else if (wxT("-nogui")    == curar) _gui                 = false;
+         wxString curar(argv[curarNum++]);
+         if      (wxT("-ogl_thread") == curar) Toped->setOglThread(true);
+         else if (wxT("-ogl_safe")   == curar)
+         {
+            std::cout << "Obsolete command line option \"-ogl_safe\". "
+                      << "Use -render <type> instead"<< std::endl ;
+            runTheTool = false;
+         }
+         else if (wxT("-render")      == curar)
+         {
+            wxString forceRenderType(argv[curarNum++]);
+            if      (wxT("basic")  == forceRenderType) _forceRenderType = trend::rtTolder;
+            else if (wxT("vbo")    == forceRenderType) _forceRenderType = trend::rtTenderer;
+            else if (wxT("shader") == forceRenderType) _forceRenderType = trend::rtToshader;
+            else {
+               std::cout << "  -render <type> : One of \"basic\", \"vbo\" or \"shader\" expected" << std::endl;
+               runTheTool = false;
+            }
+         }
+         else if (wxT("-nolog")      == curar) _noLog               = true;
+         else if (wxT("-nogui")      == curar) _gui                 = false;
          else if (0 == curar.Find(wxT("-I")))
          {
             // Store the include paths in a temporary location until we have a
@@ -475,12 +491,13 @@ bool TopedApp::parseCmdLineArgs()
             std::cout << "Usage: toped {options}* [tll-file]" << std::endl ;
             std::cout << "Command line options:" << std::endl ;
             std::cout << "  -ogl_thread: " << std::endl ;
-            std::cout << "  -ogl_safe  : " << std::endl ;
-            std::cout << "  -nolog     : logging will be suppressed" << std::endl;
-            std::cout << "  -nogui     : GUI will not be started. Useful for TLL parsing" << std::endl ;
-            std::cout << "  -I<path>   : includes additional search paths for TLL files" << std::endl ;
-            std::cout << "  -D<macro>  : equivalent to #define <macro> " << std::endl ;
-            std::cout << "  -help      : This help message " << std::endl ;
+//            std::cout << "  -ogl_safe  : " << std::endl ;
+            std::cout << "  -render <type> : enforce openGL render type. One of \"basic\", \"vbo\" or \"shader\"" << std::endl;
+            std::cout << "  -nolog         : logging will be suppressed" << std::endl;
+            std::cout << "  -nogui         : GUI will not be started. Useful for TLL parsing" << std::endl ;
+            std::cout << "  -I<path>       : includes additional search paths for TLL files" << std::endl ;
+            std::cout << "  -D<macro>      : equivalent to #define <macro> " << std::endl ;
+            std::cout << "  -help          : This help message " << std::endl ;
             runTheTool = false;
          }
          else if (!(0 == curar.Find('-')))
@@ -616,7 +633,7 @@ void TopedApp::getTellPathDirs()
 //=============================================================================
 void TopedApp::printLogWHeader()
 {
-   Toped->view()->glRC()->printStatus(_forceBasicRendering);
+   TRENDC->reportRenderer(_forceRenderType);
    tell_log(console::MT_INFO,"Toped loaded.");
    tell_log(console::MT_WARNING,"Please submit your feedback to feedback@toped.org.uk");
 }

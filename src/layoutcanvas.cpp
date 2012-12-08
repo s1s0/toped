@@ -206,26 +206,25 @@ void tui::TpdOglContext::glewContext(LayoutCanvas* canvas)
 #endif
 }
 
-void tui::TpdOglContext::printStatus(bool forceBasic) const
+void tui::TpdOglContext::printStatus() const
 {
-   if (forceBasic)
-   {
-      tell_log(console::MT_INFO,"...basic rendering forced from the command line");
-   }
-   else if (_useVboRendering)
-   {
-      tell_log(console::MT_INFO,"...using VBO rendering");
-   }
+   tell_log(console::MT_INFO,"GLEW diagnostics:");
+   if      (_oglVersion14)
+      tell_log(console::MT_INFO,"OpenGL version 1.4 supported");
    else
-   {
-      if      (!_oglVersion14)
-         tell_log(console::MT_WARNING,"OpenGL version 1.4 is not supported");
-      else if (!_oglArbVertexBufferObject)
-         tell_log(console::MT_WARNING,"OpenGL implementation doesn't support Vertex Buffer Objects");
-      else if (!_oglExtMultiDrawArrays)
-         tell_log(console::MT_WARNING,"OpenGL implementation doesn't support Multi Draw Arrays");
-      tell_log(console::MT_INFO,"...Using basic rendering");
-   }
+      tell_log(console::MT_INFO,"OpenGL version 1.4 is not supported");
+   if      (_oglVersion33)
+      tell_log(console::MT_INFO,"OpenGL version 3.3 supported");
+   else
+      tell_log(console::MT_INFO,"OpenGL version 3.3 is not supported");
+   if (_oglArbVertexBufferObject)
+      tell_log(console::MT_INFO,"OpenGL implementation supports Vertex Buffer Objects");
+   else
+      tell_log(console::MT_INFO,"OpenGL implementation doesn't support Vertex Buffer Objects");
+   if (_oglExtMultiDrawArrays)
+      tell_log(console::MT_INFO,"OpenGL implementation supports Multi Draw Arrays");
+   else
+      tell_log(console::MT_INFO,"OpenGL implementation doesn't support Multi Draw Arrays");
 }
 
 bool tui::TpdOglContext::resizeGL(int w, int h)
@@ -377,6 +376,7 @@ void   tui::LayoutCanvas::showInfo()
    std::ostringstream glewmsg;
    glewmsg << "Using GLEW " << glewGetString(GLEW_VERSION);
    tell_log(console::MT_INFO, glewmsg.str());
+   _glRC->printStatus();
 }
 
 void tui::LayoutCanvas::snapshot(byte*& theImage, word& szW, word& szH)

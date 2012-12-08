@@ -65,7 +65,7 @@ namespace tui {
    public:
                      TpdOglContext(wxGLCanvas*);
       void           glewContext(LayoutCanvas*);
-      void           printStatus(bool) const;
+      void           printStatus() const;
       bool           resizeGL(int, int);
       bool           useVboRendering() const          { return _useVboRendering;             }
       bool           useShaders() const               { return _useShaders;                  }

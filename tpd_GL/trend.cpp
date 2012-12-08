@@ -655,32 +655,97 @@ trend::Shaders::~Shaders()
 }
 
 //=============================================================================
-trend::TrendCenter::TrendCenter(bool gui, bool forceBasic, bool sprtVbo, bool sprtShaders) :
+trend::TrendCenter::TrendCenter(bool gui, RenderType cmdLineReq, bool sprtVbo, bool sprtShaders) :
    _cRenderer       (              NULL),
    _hRenderer       (              NULL),
    _cShaders        (              NULL),
    _activeFontName  (                  )
 
 {
-   if      (!gui)             _renderType = trend::tocom;
-   else if ( forceBasic )     _renderType = trend::tolder;
-   else if ( sprtShaders)     _renderType = trend::toshader;
-   else if ( sprtVbo    )     _renderType = trend::tenderer;
-   else                       _renderType = trend::tolder;
-   if (trend::toshader== _renderType)
+   if      (!gui)             _renderType = trend::rtTocom;
+   else if ( sprtShaders)     _renderType = trend::rtToshader;
+   else if ( sprtVbo    )     _renderType = trend::rtTenderer;
+   else                       _renderType = trend::rtTolder;
+   if ((cmdLineReq != trend::rtTBD) & (cmdLineReq < _renderType))
+      _renderType = cmdLineReq;
+   if (trend::rtToshader== _renderType)
       _cShaders = DEBUG_NEW trend::Shaders();
+}
+
+void trend::TrendCenter::reportRenderer(RenderType cmdLineReq) const
+{
+   switch (cmdLineReq)
+   {
+      case trend::rtTolder  :
+      {
+         if (cmdLineReq > _renderType)
+            tell_log(console::MT_WARNING, "Platform dosn't support basic rendering as requested on the command line. Using text mode.");
+         else
+            tell_log(console::MT_INFO, "Basic rendering enforced from the command line.");
+         break;
+      }
+      case trend::rtTenderer:
+      {
+         if (cmdLineReq > _renderType)
+         {
+            std::string info = "Platform dosn't support VBO rendering as requested on the command line.";
+            if      (trend::rtTolder == _renderType)
+               info += "Using basic rendering.";
+            else if (trend::rtTocom  == _renderType)
+               info += "Using text mode.";
+            else
+               assert(false);
+            tell_log(console::MT_WARNING, info);
+         }
+         else
+            tell_log(console::MT_INFO, "VBO rendering enforced from the command line.");
+         break;
+      }
+      case trend::rtToshader:
+      {
+         if (cmdLineReq > _renderType)
+         {
+            std::string info = "Platform dosn't support shaders as requested on the command line.";
+            if      (trend::rtTenderer == _renderType)
+               info += "Using VBO rendering.";
+            else if (trend::rtTolder == _renderType)
+               info += "Using basic rendering.";
+            else if (trend::rtTocom  == _renderType)
+               info += "Using text mode.";
+            else
+               assert(false);
+            tell_log(console::MT_WARNING, info);
+         }
+         else
+            tell_log(console::MT_INFO, "Shader rendering enforced from the command line.");
+         break;
+      }
+      case trend::rtTBD     : {
+         switch (_renderType)
+         {
+            case trend::rtTocom   : /* Don't clutter the command line with nonsence*/ break;
+            case trend::rtTolder  : tell_log(console::MT_INFO,"Using basic rendering."); break;
+            case trend::rtTenderer: tell_log(console::MT_INFO,"Using VBO rendering.");break;
+            case trend::rtToshader: tell_log(console::MT_INFO,"Using shader rendering.");break;
+            default: assert(false); break;
+         }
+         break;
+      }
+      case trend::rtTocom   : assert(false); /*if you hit this and -nogui cmdline option has been removed, remove the assert*/ break;
+      default: assert(false); break;
+   }
 }
 
 void trend::TrendCenter::initShaders(const std::string& codeDirectory)
 {
-   if (trend::toshader == _renderType)
+   if (trend::rtToshader == _renderType)
    {
       assert(_cShaders);
       _cShaders->loadShadersCode(codeDirectory);
       if (!_cShaders->status())
       {
          tell_log(console::MT_WARNING, "Falling back to VBO rendering because of the errors above");
-         _renderType = trend::tenderer;
+         _renderType = trend::rtTenderer;
       }
    }
 }
@@ -697,12 +762,12 @@ trend::TrendBase* trend::TrendCenter::getCRenderer()
    {
       switch (_renderType)
       {
-         case trend::tocom    : assert(false);          break;// shouldn't end-up here ever
-         case trend::tolder   :
+         case trend::rtTocom    : assert(false);          break;// shouldn't end-up here ever
+         case trend::rtTolder   :
             _cRenderer = DEBUG_NEW trend::Tolder( drawProp, PROPC->UU() );break;
-         case trend::tenderer :
+         case trend::rtTenderer :
             _cRenderer = DEBUG_NEW trend::Tenderer( drawProp, PROPC->UU() ); break;
-         case trend::toshader : 
+         case trend::rtToshader : 
             _cRenderer = DEBUG_NEW trend::Toshader( drawProp, PROPC->UU() ); break;
          default: assert(false); break;
       }
@@ -726,12 +791,12 @@ trend::TrendBase* trend::TrendCenter::getHRenderer()
    {
       switch (_renderType)
       {
-         case trend::tocom    : assert(false);          break;// shouldn't end-up here ever
-         case trend::tolder   :
+         case trend::rtTocom    : assert(false);          break;// shouldn't end-up here ever
+         case trend::rtTolder   :
             _hRenderer = DEBUG_NEW trend::Tolder( drawProp, PROPC->UU() ); break;
-         case trend::tenderer :
+         case trend::rtTenderer :
             _hRenderer = DEBUG_NEW trend::Tenderer( drawProp, PROPC->UU() ); break;
-         case trend::toshader : assert(false);          break;// TODO
+         case trend::rtToshader : assert(false);          break;// TODO
          default: assert(false); break;
       }
    }
@@ -782,14 +847,14 @@ void trend::TrendCenter::loadLayoutFont(std::string fontfile)
    TolderGlfFont* curFont = NULL;
    switch (_renderType)
    {
-      case trend::tocom    : assert(false);          break;// TODO?
-      case trend::tolder   :
+      case trend::rtTocom    : assert(false);          break;// TODO?
+      case trend::rtTolder   :
          curFont = DEBUG_NEW trend::TolderGlfFont(fontfile, _activeFontName);
          break;
-      case trend::tenderer :
+      case trend::rtTenderer :
          curFont = DEBUG_NEW trend::TenderGlfFont(fontfile, _activeFontName);
          break;
-      case trend::toshader :
+      case trend::rtToshader :
          curFont = DEBUG_NEW trend::ToshaderGlfFont(fontfile, _activeFontName);
          break;
       default: assert(false); break;
