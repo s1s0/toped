@@ -1,0 +1,28 @@
+void  layerSetup() {
+   layprop("PWELL", 1 , "orange", "Dots1", "");
+   layprop("ACTIVE", 2 , "blue", "", "");
+   layprop("GUARD", 3 , "", "", "");
+   layprop("GATE", 5 , "green", "checkerboards", "");
+   layprop("P+", 6 , "darkMagenta", "Dots1", "");
+   layprop("N+", 7 , "past_blue", "Dots1", "");
+   layprop("CONTACT", 8 , "white", "", "selected1");
+   layprop("METALL", 9 , "red", "checkerboard", "");
+   layprop("PASS", 12 , "cyan", "checkbd3", "");
+   layprop("BIP", 17 , "", "", "");
+   layprop("CAP", 18 , "", "", "");
+   layprop("add1", 19 , "", "", "");
+   layprop("add2", 20 , "", "", "");
+   layprop("add3", 21 , "", "", "");
+   layprop("CAP2", 23 , "", "", "");
+   layprop("MARK", 25 , "", "", "");
+   layprop("add4", 27 , "", "", "");
+   layprop("drc", 30 , "", "", "");
+}
+
+
+layerSetup();
+
+tdtread("examples/foll.tdt");
+opencell("FOLL");
+
+

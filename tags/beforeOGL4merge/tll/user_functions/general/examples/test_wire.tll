@@ -1,0 +1,48 @@
+
+// demonstrates how the distinct wire-creation could be applied
+// advantage: all of the points are on-grid
+
+#include "config.tll"
+#include "user_functions/technology/default_drc.tll"
+#include "user_functions/general/helper.tll"
+#include "user_functions/general/geometry.tll"
+#include "user_functions/general/wires.tll"
+
+newdesign("wire_test");
+newcell("wire");
+opencell("wire");
+
+//start of design
+
+point list a = { {0,0}, {100,100}, {200,100} };
+point list b = { {50,0}, {130,70}, {200,70} };
+
+addwire_on_grid (a, 30, true);
+addwire_on_grid (b, 20, false);
+
+
+point list c;
+real width = 30;
+real dist = width + 10;
+point center = { 0,0};
+point dia = { 300, 300 };
+
+foreach (int t ; seq(1,10)) {
+
+    c[:+] = { center.x + dia.x + (t-1)*dist, center.y + dia.y + (t-1)*dist };
+    c[:+] = { center.x + dia.x + (t-1)*dist, center.y - dia.y - (t-1)*dist };
+    c[:+] = { center.x - dia.x - (t-1)*dist, center.y - dia.y - (t-1)*dist };
+    c[:+] = { center.x - dia.x - (t-1)*dist, center.y + dia.y + (t)*dist };
+    
+}
+
+addwire_on_grid (c, width, true);
+
+//end of design
+
+//tdtsave();
+
+//convert to gds
+//gdsexport ("via",true, getgdslaymap(false),"via.gds", false);
+
+zoomall();

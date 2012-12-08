@@ -1,0 +1,68 @@
+#ifndef __CONFIGURATION_COLOR__
+#define __CONFIGURATION_COLOR__
+
+//===========================================================================
+//                                                                          =
+// ------------------------------------------------------------------------ =
+//                      TTTTT    EEEE     L       L                         =
+//                      T T T    E        L       L                         =
+//                        T      EEE      L       L                         =
+//                        T      E        L       L                         =
+//                        T      EEEEE    LLLLL   LLLLL                     =
+//                                                                          =
+//   This file is a part of Toped project                                   =
+//   Copyright (C) 2001-2010 Toped developers                               =
+// ------------------------------------------------------------------------ =
+//           $URL:$
+//     Originator: Armin Taschwer - analogcmos@gmx.net
+//---------------------------------------------------------------------------
+//  Revision info
+//---------------------------------------------------------------------------
+//      $Revision:$
+//          $Date:$
+//        $Author:$
+//===========================================================================
+
+/**   Description:
+ *
+ * provides basic configuration of colors
+ * "config_color_rgb.tll" is created automatically --> see comments below
+ *
+ *    Functions:
+ *
+ *  void setup_color();
+ * 
+ **/
+
+/** LICENSE:
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+ **/
+
+
+
+void setup_color() {
+
+//                              R    G    B   Alpha 
+
+
+//following file was created automatically by the command
+//  showrgb | sed -re "s/[ ]*([0-9]+)[ ]+([0-9]+)[ ]+([0-9]+)[\t ]+([a-zA-Z0-9 ]+)/\tdefinecolor \( \"\4\", \1, \2, \3, 178 \)\;/" > config_color_rgb.tll
+
+#include "config/config_color_rgb.tll"
+
+}
+
+#endif

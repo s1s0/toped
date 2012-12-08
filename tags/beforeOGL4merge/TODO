@@ -1,0 +1,44 @@
+Short Term
+------------
+ - Browser window needs search facilities. For big designs
+ - bitwise logical operations. Require unsigned.
+ 
+General
+=========
+  * Text resize
+  * Parser needs well defined error recovery policy
+  * select edge with double click - needs algo for edge proximity. The same algo
+    can be used for editpush selecting (optional?)
+  * getpointlist(PARAMETERS) - general management of temporary images from TELL
+    The end of the line here is to include online DRC checks as TELL callback
+    functions
+  * There is no log possible for select/unselect from list operations. The
+    reason is that we don't have a representation of layout list in TELL.
+    Think about it. Pointetrs are unapropriate of course.
+
+  TELL related
+  ------------
+  * break, continue, jump/goto statements and label (for the f.... jump)
+  * return statements when there are multiply paths
+  * logical operations between figures in TELL! (maybe Toped engine should be used here)
+  * Introduce default parameter values.
+
+
+  Graphics
+  ---------
+  * Shaders
+
+Dialog stuff
+============
+   * ICONS!
+   * Grid definition dialog is ugly - text windows are not resizing properly. 
+   * The number of the digits after the decimal point must be intact with the 
+     current step. There is some piece of code left in tui.cpp (getSize::getSize)
+     to be used as a starting point for this
+
+
+Global options of the editor
+============================
+  * Ungroup over tdtaref results in a list of tdtref's
+  * Reference point when grouping -> current (0,0), or bottom left point 
+    of the selected shapes

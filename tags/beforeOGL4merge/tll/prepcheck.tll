@@ -1,0 +1,51 @@
+// Any of the definitions below can be defined on the command line using the gcc syntax
+// example: -Dsingle -Dprintf=echo
+#define printf      echo
+#define single
+#define singleNspace  
+
+#ifdef single
+   #define message1      "Single is defined"
+#else
+   bamboozle = 0; // unknown variable shall not be reported. Parser doesn't see it!
+   #define message1     "Single is not defined"
+#endif
+
+#ifndef singleNspace
+   bamboozle = 0; // unknown variable shall not be reported. Parser doesn't see it!
+   #define message2      "singleNspace is not defined"
+#else
+   #define message2      "singleNspace is defined"
+#endif
+
+printf(message1);
+printf(message2);
+
+int test_var = 1;
+#define singleNspace test_var = 2;
+
+printf("Next line shall print 2");
+singleNspace
+printf(test_var);
+
+#undef singleNspace
+
+#ifdef singleNspace
+   bamboozle = 0; // unknown variable shall not be reported. Parser doesn't see it!
+   #define message2      "singleNspace is still defined"
+#else
+   // Warning (redefined) expected on the next line
+   #define message2      "singleNspace is undefined now"
+#endif
+
+printf(message2);
+
+#undef NONdefined // Warning expected here
+
+// The lines below shall be uncommented one by one because each of them
+// will cause the parser to bail-out
+#ifdef UnterminatedIF
+//printf("Lexer shall report error @col 44"); bamboozle = 0;//Check the error location reported by the parser!
+//#else // <- Lexer shall report Error - "Unexpected #else"
+//#endif //<- Lexer shall repot Error - "Unexpected #endif"
+
