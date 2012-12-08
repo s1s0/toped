@@ -31,8 +31,6 @@
 #include <string>
 #include "drawprop.h"
 #include "viewprop.h"
-#include "ps_out.h"
-#include "glf.h"
 #include "tuidefs.h"
 
 
@@ -54,9 +52,14 @@ GLubyte array_mark_bmp[30]= {
    0x11, 0x10, 0x08, 0x20, 0x04, 0x40, 0x02, 0x80, 0x01, 0x00
 };
 
-const layprop::tellRGB        layprop::DrawProperties::_defaultColor(127,127,127,127);
-const layprop::LineSettings   layprop::DrawProperties::_defaultSeline("", 0xffff, 1, 3);
-const byte                    layprop::DrawProperties::_defaultFill [128] = {
+const layprop::tellRGB        layprop::DrawProperties::_dfltColor(127,127,127,127);
+const layprop::LineSettings   layprop::DrawProperties::_dfltLine    ("", 0xffff, 1, 1);
+const layprop::LineSettings   layprop::DrawProperties::_dfltSLine   ("", 0xffff, 1, 3);
+const layprop::LineSettings   layprop::DrawProperties::_dfltCellBnd ("", 0xf18f, 1, 1);
+const layprop::LineSettings   layprop::DrawProperties::_dfltCellSBnd("", 0xf18f, 1, 3);
+const layprop::LineSettings   layprop::DrawProperties::_dfltTextBnd ("", 0x3030, 1, 1);
+const layprop::LineSettings   layprop::DrawProperties::_dfltTextSBnd("", 0x3030, 1, 3);
+const byte                    layprop::DrawProperties::_dfltFill [128] = {
    0xAA, 0xAA, 0xAA, 0xAA, 0x00, 0x00, 0x00, 0x00,
    0xAA, 0xAA, 0xAA, 0xAA, 0x00, 0x00, 0x00, 0x00,
    0xAA, 0xAA, 0xAA, 0xAA, 0x00, 0x00, 0x00, 0x00,
@@ -76,459 +79,377 @@ const byte                    layprop::DrawProperties::_defaultFill [128] = {
 };
 
 //=============================================================================
-//
-//
-//
-layprop::TGlfSymbol::TGlfSymbol(FILE* ffile)
+/*!
+ * The main troubles here are with the precision of the calculations. They are
+ * getting more obvious when the points are on a long distances from each other.
+ * All of the functions used make their calculations in real arithmetics, but
+ * some return the result in integer. For angles close to 0 it became apparent
+ * that the results doesn't quite match.
+ * @param ldata
+ * @param lsize
+ * @param width
+ * @return
+ */
+laydata::WireContour::WireContour(const int4b* ldata, unsigned lsize, WireWidth width) :
+   _ldata(ldata), _lsize(lsize), _width(width)
 {
-   fread(&_alvrtxs, 1, 1, ffile);
-   _vdata = DEBUG_NEW float[2 * _alvrtxs];
-   fread(&_alchnks, 1, 1, ffile);
-   _idata = DEBUG_NEW byte[3 * _alchnks];
-   fread(&_alcntrs, 1, 1, ffile);
-   _cdata = DEBUG_NEW byte[_alcntrs];
-   // init the symbol boundaries
-   _minX = _minY =  10;
-   _maxX = _maxY = -10;
-   // get the vertexes
-   for (byte i = 0; i < _alvrtxs; i++)
+   endPnts(0,1, true);
+   for (unsigned i = 1; i < _lsize - 1; i++)
    {
-      float vX, vY;
-      fread(&vX, 4, 1, ffile);
-      fread(&vY, 4, 1, ffile);
-      // update the symbol boundaries
-      if      (vX < _minX) _minX = vX;
-      else if (vX > _maxX) _maxX = vX;
-      if      (vY < _minY) _minY = vY;
-      else if (vY > _maxY) _maxY = vY;
-      _vdata[2*i  ] = vX;
-      _vdata[2*i+1] = vY;
-   }
-   // get index chunks
-   for (byte i = 0; i < _alchnks; i++)
-      fread(&(_idata[i*3]), 3, 1, ffile);
-   // get contour data
-   for (byte i = 0; i < _alcntrs; i++)
-      fread(&(_cdata[i  ]), 1, 1, ffile);
-}
-
-void layprop::TGlfSymbol::dataCopy(GLfloat* vxarray, GLuint* ixarray, word ioffset)
-{
-   memcpy(vxarray, _vdata, _alvrtxs * sizeof(float) * 2);
-   for (word i = 0; i < _alchnks * 3; i++)
-      ixarray[i] = _idata[i] + ioffset;
-}
-
-layprop::TGlfSymbol::~TGlfSymbol()
-{
-   delete [] _vdata;
-   delete [] _idata;
-   delete [] _cdata;
-}
-
-//=============================================================================
-//
-//
-//
-layprop::TGlfRSymbol::TGlfRSymbol(TGlfSymbol* tsym, word voffset, word ioffset)
-{
-   _alcntrs = tsym->_alcntrs;
-   _alchnks = tsym->_alchnks;
-   //
-   _csize = DEBUG_NEW GLsizei[_alcntrs];
-   _firstvx = DEBUG_NEW GLint[_alcntrs];
-   for (unsigned i = 0; i < _alcntrs; i++)
-   {
-      _csize[i] = tsym->_cdata[i] + 1;
-      _firstvx[i] = voffset;
-      if (0 != i)
+      switch (chkCollinear(i-1, i, i+1))
       {
-         _firstvx[i] += (tsym->_cdata[i-1] + 1);
-         _csize[i]   -= (tsym->_cdata[i-1] + 1);
-      }
-   }
-   _firstix = ioffset  * sizeof(unsigned);
-   //
-   _minX = tsym->_minX;
-   _maxX = tsym->_maxX;
-   _minY = tsym->_minY;
-   _maxY = tsym->_maxY;
-}
-
-void layprop::TGlfRSymbol::draw(bool fill)
-{
-   glMultiDrawArrays(GL_LINE_LOOP, _firstvx, _csize, _alcntrs);
-   if (!fill) return;
-   glDrawElements(GL_TRIANGLES, _alchnks * 3, GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_firstix));
-}
-
-layprop::TGlfRSymbol::~TGlfRSymbol()
-{
-   delete [] _firstvx;
-   delete [] _csize;
-}
-
-//=============================================================================
-//
-//
-//
-layprop::TGlfFont::TGlfFont(std::string filename, std::string& fontname) :
-   _status(0), _pitch(0.1f), _spaceWidth(0.5f)
-{
-   FILE* ffile = fopen(filename.c_str(), "rb");
-   _pbuffer = 0;
-   _ibuffer = 0;
-   if (NULL == ffile)
-   {
-      _status = 1;
-      //@ TODO tellerror(...)
-      return;
-   }
-   char fileh[4];
-   fread(fileh, 3, 1, ffile);
-   fileh[3] = 0x0;
-   if (strcmp(fileh, "GLF"))
-   {
-      _status = 2;
-      //@TODO tellerror(..."filename doesn't appear to be a font file");
-   }
-   else
-   {
-      // Get the font name
-      char fname [97];
-      fread(fname, 96, 1, ffile);
-      fname[96] = 0x0;
-      fontname = fname;
-      // Get the layDef of symbols
-      fread(&_numSymbols, 1, 1, ffile);
-      // Read the rest  of bytes to 128 (unused)
-      byte unused [28];
-      fread(unused, 28, 1, ffile);
-      // Finally - start parsing the symbol data
-      _all_vertexes = 0;
-      _all_indexes = 0;
-      for (byte i = 0; i < _numSymbols; i++)
-      {
-         byte asciiCode;
-         fread(&asciiCode, 1, 1, ffile);
-         TGlfSymbol* csymbol = DEBUG_NEW TGlfSymbol(ffile);
-         _tsymbols[asciiCode] = csymbol;
-         _all_vertexes += csymbol->alvrtxs();
-         _all_indexes  += 3 * csymbol->alchnks(); // only triangles!
-      }
-   }
-   fclose(ffile);
-}
-
-void layprop::TGlfFont::collect()
-{
-   // Create the VBO
-   GLuint ogl_buffers[2];
-   glGenBuffers(2, ogl_buffers);
-   _pbuffer = ogl_buffers[0];
-   _ibuffer = ogl_buffers[1];
-   // Bind the buffers
-   glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
-   glBufferData(GL_ARRAY_BUFFER                   ,
-                2 * _all_vertexes * sizeof(float) ,
-                NULL                              ,
-                GL_STATIC_DRAW                     );
-   float* cpoint_array = (float*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-
-   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibuffer);
-   glBufferData(GL_ELEMENT_ARRAY_BUFFER         ,
-                _all_indexes * sizeof(int)      ,
-                NULL                            ,
-                GL_STATIC_DRAW                   );
-   GLuint* cindex_array = (GLuint*)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
-
-   //... and collect them deleting meanwhile the temporary objects
-   word vrtx_indx = 0;
-   word indx_indx = 0;
-   for (TFontMap::const_iterator CRS = _tsymbols.begin(); CRS != _tsymbols.end(); CRS++)
-   {
-      TGlfRSymbol* csymbol = DEBUG_NEW TGlfRSymbol(CRS->second, vrtx_indx, indx_indx);
-      CRS->second->dataCopy(&(cpoint_array[2 * vrtx_indx]), &(cindex_array[indx_indx]), vrtx_indx);
-      vrtx_indx += CRS->second->alvrtxs();
-      indx_indx += 3 * CRS->second->alchnks();
-      _symbols[CRS->first] = csymbol;
-      delete CRS->second;
-   }
-   _tsymbols.clear();
-   assert(_all_vertexes == vrtx_indx);
-   assert(_all_indexes  == indx_indx);
-   glUnmapBuffer(GL_ARRAY_BUFFER);
-   glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
-   glBindBuffer(GL_ARRAY_BUFFER, 0);
-   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-}
-
-bool layprop::TGlfFont::bindBuffers()
-{
-   if ((0 ==_pbuffer) || (0 == _ibuffer)) return false;
-   glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
-   GLint bufferSize;
-   glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
-   bufferSize++;
-
-   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibuffer);
-   glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
-   bufferSize++;
-
-   return true;
-}
-
-void layprop::TGlfFont::getStringBounds(const std::string* text, DBbox* overlap)
-{
-   // initialise the boundaries
-   float top, bottom, left, right;
-   if ((0x20 == (*text)[0]) ||  (_symbols.end() == _symbols.find((*text)[0])))
-   {
-      left =   0.0f; right  = _spaceWidth;
-      top  = -_spaceWidth; bottom = _spaceWidth;
-   }
-   else
-   {
-      left   = _symbols[(*text)[0]]->minX();
-      right  = _symbols[(*text)[0]]->maxX();
-      bottom = _symbols[(*text)[0]]->minY();
-      top    = _symbols[(*text)[0]]->maxY();
-   }
-   // traverse the rest of the string
-   for (unsigned i = 1; i < text->length() ; i++)
-   {
-      FontMap::const_iterator CSI = _symbols.find((*text)[i]);
-      if ((0x20 == (*text)[i]) || (_symbols.end() == CSI))
-         right += _spaceWidth;
-      else
-      {
-         right += CSI->second->maxX() - CSI->second->minX() + _pitch;
-
-         /* Update top/bottom bounds */
-         if (CSI->second->minY() < bottom) bottom = CSI->second->minY();
-         if (CSI->second->maxY() > top   ) top    = CSI->second->maxY();
-      }
-   }
-   (*overlap) = DBbox(TP(left, bottom, OPENGL_FONT_UNIT), TP(right, top, OPENGL_FONT_UNIT));
-}
-
-void layprop::TGlfFont::drawString(const std::string* text, bool fill)
-{
-   glEnableClientState(GL_VERTEX_ARRAY);
-   glVertexPointer(2, GL_FLOAT, 0, NULL);
-   if (fill)
-      glEnableClientState(GL_INDEX_ARRAY);
-   float right_of = 0.0f, left_of = 0.0f;
-   for (unsigned i = 0; i < text->length() ; i++)
-   {
-      FontMap::const_iterator CSI = _symbols.find((*text)[i]);
-      if (i != 0)
-      {
-         // move one _pitch right
-         if ((0x20 == (*text)[i]) || (_symbols.end() == CSI))
-            left_of = 0.0f;
-         else
-            left_of = -CSI->second->minX()+_pitch;
-         glTranslatef(left_of+right_of, 0, 0);
-      }
-      if ((0x20 == (*text)[i]) || (_symbols.end() == CSI))
-      {
-         glTranslatef(_spaceWidth, 0, 0);
-         right_of = 0.0f;
-      }
-      else
-      {
-         CSI->second->draw(fill);
-         right_of = CSI->second->maxX();
-      }
-   }
-   if (fill)
-      glDisableClientState(GL_INDEX_ARRAY);
-   glDisableClientState(GL_VERTEX_ARRAY);
-}
-
-layprop::TGlfFont::~TGlfFont()
-{
-   for (FontMap::const_iterator CS = _symbols.begin(); CS != _symbols.end(); CS++)
-      delete (CS->second);
-   GLuint ogl_buffers[2] = {_pbuffer, _ibuffer};
-   glDeleteBuffers(2, ogl_buffers);
-}
-
-//=============================================================================
-//
-//
-//
-layprop::FontLibrary::FontLibrary(bool fti) :
-   _fti(fti), _activeFontName("")
-{
-   if (!_fti) glfInit();
-}
-
-bool layprop::FontLibrary::LoadLayoutFont(std::string fontfile)
-{
-   if (_fti)
-   {
-      // Parse the font library
-      TGlfFont* curFont = DEBUG_NEW TGlfFont(fontfile, _activeFontName);
-      if (!curFont->status())
-      {
-         // fit it in a VBO
-         curFont->collect();
-         _oglFont[_activeFontName] = curFont;
-         return true;
-      }
-      return false;
-   }
-   else
-   {
-      char* chFontName = NULL;
-      int fontDescriptor = glfLoadFont(fontfile.c_str(), chFontName);
-      if ( -1 == fontDescriptor )
-      {
-         std::ostringstream ost1;
-         ost1<<"Error loading font file \"" << fontfile << "\". All text objects will not be properly processed";
-         tell_log(console::MT_ERROR,ost1.str());
-         return false;
-      }
-      else
-      {
-         assert(chFontName);
-         _activeFontName = std::string(chFontName);
-         _ramFont[_activeFontName] = fontDescriptor;
-         return true;
-      }
-   }
-}
-
-bool layprop::FontLibrary::selectFont(std::string fname)
-{
-   if (_fti)
-   {
-      if (_oglFont.end() != _oglFont.find(fname))
-      {
-         _activeFontName = fname;
-         return true;
-      }
-      return false;
-   }
-   else
-   {
-      if (_ramFont.end() != _ramFont.find(fname))
-      {
-         if (0 == glfSelectFont(_ramFont[fname]))
-         {
-            _activeFontName = fname;
-            return true;
+         case 0: {// points not in one line
+            int angle1 = xangle(i  , i-1);
+            int angle2 = xangle(i  , i+1);
+            int ang = abs(angle1 - angle2);
+            if (0 == ang)
+               colPnts(i-1,  i, i+1 );
+            else if (180 == ang)
+               mdlPnts(i-1,  i, i+1 );
+            if ((ang < 90) || (ang > 270))
+               mdlAcutePnts(i-1,  i, i+1, angle1, angle2); // acute angle
+            else
+               mdlPnts(i-1,  i, i+1 );
+            break;
          }
-         else return false;
+         case 1: //i-1 and i coincide
+            endPnts( i, i+1, true); break;
+         case 2: // i and i+1 coincide
+            endPnts(i-1,  i,false); break;
+         case 3: // collinear points
+            colPnts(i-1,  i, i+1 ); break;
+         case 4: // 3 points in one line with i2 in the middle
+            mdlPnts(i-1,  i, i+1 ); break;
+         case 5: // 3 coinciding points
+                                    break;
+         default: assert(false); break;
       }
-      return false;
+   }
+   endPnts(_lsize -2, _lsize -1, false);
+}
+
+/*!
+ * Dumps the generated wire contour in the @plist vector. For optimal performance the
+ * vector object shall be properly allocated using something like reserve(csize())
+ * before calling this method. The method will cope with @plist vectors which already
+ * contain some data. It will just add the contour at the end of the @plist.
+ */
+void laydata::WireContour::getVectorData(PointVector& plist)
+{
+   for (PointList::const_iterator CP = _cdata.begin(); CP != _cdata.end(); CP++)
+   {
+      plist.push_back(*CP);
    }
 }
 
-void layprop::FontLibrary::getStringBounds(const std::string* text, DBbox* overlap)
+/*!
+ * Dumps the generated wire contour in the @contour array. The array must be allocated
+ * before calling this function. The size of the array can be taken from the function
+ * csize()
+ */
+void laydata::WireContour::getArrayData(int4b* contour)
 {
-   if (_fti)
+   word index = 0;
+   for (PointList::const_iterator CP = _cdata.begin(); CP != _cdata.end(); CP++)
    {
-      assert(NULL != _oglFont[_activeFontName]); // make sure that fonts are initialized
-      _oglFont[_activeFontName]->getStringBounds(text, overlap);
+      contour[index++] = CP->x();
+      contour[index++] = CP->y();
+   }
+}
+
+DBbox laydata::WireContour::getCOverlap()
+{
+   PointList::const_iterator CP = _cdata.begin();
+   DBbox ovl(*CP);
+   while (CP != _cdata.end())
+   {
+      ovl.overlap(*CP); CP++;
+   }
+   return ovl;
+}
+
+void laydata::WireContour::mdlPnts(word i1, word i2, word i3)
+{
+   double    w = _width/2;
+   i1 *= 2; i2 *= 2; i3 *= 2;
+   double  x32 = _ldata[i3  ] - _ldata[i2  ];
+   double  x21 = _ldata[i2  ] - _ldata[i1  ];
+   double  y32 = _ldata[i3+1] - _ldata[i2+1];
+   double  y21 = _ldata[i2+1] - _ldata[i1+1];
+   double   L1 = sqrt(x21*x21 + y21*y21); //the length of segment 1
+   double   L2 = sqrt(x32*x32 + y32*y32); //the length of segment 2
+   double denom = x32 * y21 - x21 * y32;
+   if ((0 == denom) || (0 == L1) || (0 == L2)) return;
+   // the corrections
+   double xcorr = w * ((x32 * L1 - x21 * L2) / denom);
+   double ycorr = w * ((y21 * L2 - y32 * L1) / denom);
+   _cdata.push_front(TP((int4b) rint(_ldata[i2  ] - xcorr),(int4b) rint(_ldata[i2+1] + ycorr)));
+   _cdata.push_back (TP((int4b) rint(_ldata[i2  ] + xcorr),(int4b) rint(_ldata[i2+1] - ycorr)));
+}
+
+void laydata::WireContour::endPnts(word i1, word i2, bool first)
+{
+   double     w = _width/2;
+   i1 *= 2; i2 *= 2;
+   double denom = first ? (_ldata[i2  ] - _ldata[i1  ]) : (_ldata[i1  ] - _ldata[i2  ]);
+   double   nom = first ? (_ldata[i2+1] - _ldata[i1+1]) : (_ldata[i1+1] - _ldata[i2+1]);
+   double xcorr, ycorr; // the corrections
+   if ((0 == nom) && (0 == denom)) return;
+   double signX = (  nom > 0) ? (first ? 1.0 : -1.0) : (first ? -1.0 : 1.0);
+   double signY = (denom > 0) ? (first ? 1.0 : -1.0) : (first ? -1.0 : 1.0);
+   if      (0 == denom) // vertical
+   {
+      xcorr =signX * w ; ycorr = 0        ;
+   }
+   else if (0 == nom  )// horizontal |----|
+   {
+      xcorr = 0        ; ycorr = signY * w;
    }
    else
    {
-      float minx, miny, maxx, maxy;
-      glfGetStringBounds(text->c_str(),&minx, &miny, &maxx, &maxy);
-      (*overlap) = DBbox(TP(minx,miny,OPENGL_FONT_UNIT), TP(maxx,maxy,OPENGL_FONT_UNIT));
+      double sl   = nom / denom;
+      double sqsl = signY*sqrt( sl*sl + 1);
+      xcorr = rint(w * (sl / sqsl));
+      ycorr = rint(w * ( 1 / sqsl));
    }
+   word it = first ? i1 : i2;
+   _cdata.push_front(TP((int4b) rint(_ldata[it  ] - xcorr),(int4b) rint(_ldata[it+1] + ycorr)));
+   _cdata.push_back (TP((int4b) rint(_ldata[it  ] + xcorr),(int4b) rint(_ldata[it+1] - ycorr)));
 }
 
-void layprop::FontLibrary::drawString(const std::string* text, bool fill)
+byte laydata::WireContour::chkCollinear(word i1, word i2, word i3)
 {
-   if (_fti)
+   if ( 0 != orientation(i1, i2, i3)) return 0; // points not in one line
+   float lambda1 = getLambda  (i3, i2, i1);
+   float lambda2 = getLambda  (i1, i2, i3);
+   if ((_ldata[2*i1] == _ldata[2*i3]) && (_ldata[2*i1+1] == _ldata[2*i3+1]))
+      return 3;
+   if ((0.0 == lambda1) && (0.0 == lambda2)) return 5; // 3 coinciding points
+   if ((0.0 <  lambda1) || (0.0 <  lambda2))
+      return 3; // colinear points
+   if (0.0 == lambda1) return 1; //i2 and i3 coincide
+   if (0.0 == lambda2) return 2; //i2 and i1 coincide
+   return 4; // 3 points in one line sequenced with i2 in the middle
+}
+
+void laydata::WireContour::colPnts(word i1, word i2, word i3)
+{
+   TP extPnt = mdlCPnt(i1, i2);
+   // Now - this is cheating! We're altering temporary one the central line
+   // points and the reason is - to use the existing methods which deal with
+   // point indexes
+   TP swap(_ldata[2*i2], _ldata[2*i2 + 1]);
+   const_cast<int4b*>(_ldata)[2*i2  ] = extPnt.x();
+   const_cast<int4b*>(_ldata)[2*i2+1] = extPnt.y();
+   endPnts(i1, i2,false);
+   endPnts(i2 ,i3,true );
+   const_cast<int4b*>(_ldata)[2*i2  ] = swap.x();
+   const_cast<int4b*>(_ldata)[2*i2+1] = swap.y();
+}
+
+TP laydata::WireContour::mdlCPnt(word i1, word i2)
+{
+   i1 *= 2; i2 *= 2;
+   double    w = _width / 2;
+   double   x21 = _ldata[i2]   - _ldata[i1]  ;
+   double   y21 = _ldata[i2+1] - _ldata[i1+1];
+   double    L1 = sqrt(x21*x21 + y21*y21); //the length of the segment
+   assert(L1 != 0.0);
+   double xcorr = (w * x21)  / L1;
+   double ycorr = (w * y21)  / L1;
+   return TP((int4b) rint(_ldata[i2] + xcorr), (int4b) rint(_ldata[i2+1] + ycorr));
+}
+
+
+void laydata::WireContour::mdlAcutePnts(word i1, word i2, word i3, int angle1, int angle2)
+{
+   mdlPnts(i1,  i2, i3 );
+   //
+   i1 *= 2; i2 *= 2; i3 *= 2;
+   int ysign = ((angle1 - angle2) >  0) && ((angle1 -angle2) < 90 )?  1 : - 1;
+   CTM mtrx1;//
+   mtrx1.Rotate(angle1);
+   mtrx1.Translate(_ldata[i2], _ldata[i2+1]);
+   TP p1 ( -((int4b)_width/2),  ysign * ((int4b)_width/2));
+//   TP p1a(  ((int4b)_width/2), -ysign * ((int4b)_width/2));
+   p1 *= mtrx1;
+//   p1a*= mtrx1;
+
+   CTM mtrx2;
+   mtrx2.Rotate(angle2);
+   mtrx2.Translate(_ldata[i2], _ldata[i2+1]);
+   TP p2 ( -((int4b)_width/2), -ysign * ((int4b)_width/2));
+//   TP p2a(  ((int4b)_width/2),  ysign * ((int4b)_width/2));
+   p2 *= mtrx2;
+//   p2a*= mtrx2;
+
+   TP pi = _cdata.front(); _cdata.pop_front();
+   TP pe = _cdata.back();  _cdata.pop_back();
+   if (-1 == ysign)
    {
-     _oglFont[_activeFontName]->drawString(text, fill);
+      _cdata.push_front(p1);
+      _cdata.push_front(p2);
+//      _cdata.push_back (p1a);
+//      _cdata.push_back (p2a);
+      _cdata.push_back (pe);
+      _cdata.push_back (pe);
    }
    else
    {
-      glfDrawTopedString(text->c_str(), fill);
+      _cdata.push_front(pi);
+      _cdata.push_front(pi);
+//      _cdata.push_front(p1a);
+//      _cdata.push_front(p2a);
+      _cdata.push_back (p1);
+      _cdata.push_back (p2);
    }
 }
 
-void layprop::FontLibrary::drawWiredString(std::string text)
+int laydata::WireContour::orientation(word i1, word i2, word i3)
 {
-   if (_fti)
-   {
-      bindFont();
-      _oglFont[_activeFontName]->drawString(&text, false);
-      unbindFont();
+   i1 *= 2; i2 *= 2; i3 *=2;
+   // twice the "oriented" area of the enclosed triangle
+   real area = (real(_ldata[i1]) - real(_ldata[i3])) * (real(_ldata[i2+1]) - real(_ldata[i3+1]))
+             - (real(_ldata[i2]) - real(_ldata[i3])) * (real(_ldata[i1+1]) - real(_ldata[i3+1]));
+   if (0 == area) return 0;
+   else
+      return (area > 0) ? 1 : -1;
+}
+
+double laydata::WireContour::getLambda(word i1, word i2, word ii)
+{
+   i1 *= 2; i2 *= 2; ii *=2;
+   double denomX = _ldata[i2  ] - _ldata[ii  ];
+   double denomY = _ldata[i2+1] - _ldata[ii+1];
+   double lambda;
+   if      (0.0 != denomX) lambda = double(_ldata[ii  ] - _ldata[i1  ]) / denomX;
+   else if (0.0 != denomY) lambda = double(_ldata[ii+1] - _ldata[i1+1]) / denomY;
+   // point coincides with the lp vertex of the segment
+   else lambda = 0;
+   return lambda;
+}
+
+//-----------------------------------------------------------------------------
+/*! Returns the angle between the line and the X axis
+*/
+int laydata::WireContour::xangle(word i1, word i2)
+{
+   i1 *= 2; i2 *= 2;
+   const long double Pi = 3.1415926535897932384626433832795;
+   if (_ldata[i1] == _ldata[i2])
+   { //vertical line
+      assert(_ldata[i1+1] != _ldata[i2+1]); // make sure both points do not coincide
+      if   (_ldata[i2+1] > _ldata[i1+1]) return  90;
+      else                               return -90;
+   }
+   else if (_ldata[i1+1] == _ldata[i2+1])
+   { // horizontal line
+      if (_ldata[i2]    > _ldata[i1]   ) return 0;
+      else                               return 180;
    }
    else
-   {
-      glfDrawWiredString(text.c_str());
-   }
+      return (int)rint(180*atan2(double(_ldata[i2+1] - _ldata[i1+1]),
+                                 double(_ldata[i2]   - _ldata[i1]  ) ) /Pi);
 }
 
-void layprop::FontLibrary::drawSolidString(std::string text)
+//=============================================================================
+/*!
+ * Takes the original wire central line @parray, makes the appropriate transformations
+ * using the @translation and stores the resulting wire in _ldata. Then it creates the
+ * WireContour object and initializes it with the transformed data.
+ */
+laydata::WireContourAux::WireContourAux(const int4b* parray, unsigned lsize, const WireWidth width, const CTM& translation)
 {
-   if (_fti)
+   _ldata = DEBUG_NEW int[2 * lsize];
+   for (unsigned i = 0; i < lsize; i++)
    {
-      bindFont();
-      _oglFont[_activeFontName]->drawString(&text, true);
-      unbindFont();
+      TP cpoint(parray[2*i], parray[2*i+1]);
+      cpoint *= translation;
+      _ldata[2*i  ] = cpoint.x();
+      _ldata[2*i+1] = cpoint.y();
    }
-   else
-   {
-      glfDrawSolidString(text.c_str());
-   }
+   DBbox wadjust(TP(), TP(width,width));
+   wadjust = wadjust * translation;
+   WireWidth adjwidth = abs(wadjust.p1().x() - wadjust.p2().x());
+   _wcObject = DEBUG_NEW laydata::WireContour(_ldata, lsize, adjwidth);
 }
 
-bool  layprop::FontLibrary::bindFont()
+/*!
+ * Accelerates the WireContour usage with PointVector input data. Converts the @plist
+ * into array format and stores the result in _ldata. Then creates the
+ * WireContour object and initializes it with the _ldata array.
+ */
+laydata::WireContourAux::WireContourAux(const PointVector& plist, const WireWidth width)
 {
-   assert(_fti);
-   if (NULL != _oglFont[_activeFontName])
-      return _oglFont[_activeFontName]->bindBuffers();
-   else
-      return false;
-}
-
-void  layprop::FontLibrary::unbindFont()
-{
-   assert(_fti);
-   glBindBuffer(GL_ARRAY_BUFFER, 0);
-   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-}
-
-void layprop::FontLibrary::allFontNames(NameList& allFontNames)
-{
-   if (_fti)
+   word psize = plist.size();
+   _ldata = DEBUG_NEW int[2 * psize];
+   for (unsigned i = 0; i < psize; i++)
    {
-      for(OglFontCollectionMap::const_iterator CF = _oglFont.begin(); CF != _oglFont.end(); CF++)
-         allFontNames.push_back(CF->first);
+      _ldata[2*i  ] = plist[i].x();
+      _ldata[2*i+1] = plist[i].y();
    }
-   else
-   {
-      for(RamFontCollectionMap::const_iterator CF = _ramFont.begin(); CF != _ramFont.end(); CF++)
-         allFontNames.push_back(CF->first);
-   }
+   _wcObject = DEBUG_NEW laydata::WireContour(_ldata, psize, width);
 }
 
-word layprop::FontLibrary::numFonts()
+laydata::WireContourAux::WireContourAux(const PointVector& plist, const WireWidth width, const TP extraP)
 {
-   if (_fti)
-      return _oglFont.size();
-   else
-      return _ramFont.size();
+   unsigned psize = plist.size() + 1;
+   _ldata = DEBUG_NEW int[2 * psize];
+   for (unsigned i = 0; i < (unsigned)(psize - 1); i++)
+   {
+      _ldata[2*i  ] = plist[i].x();
+      _ldata[2*i+1] = plist[i].y();
+   }
+   _ldata[2*psize - 2] = extraP.x();
+   _ldata[2*psize - 1] = extraP.y();
+
+   _wcObject = DEBUG_NEW laydata::WireContour(_ldata, psize, width);
 }
 
-layprop::FontLibrary::~FontLibrary()
+/*!
+ * Dumps the wire central line and the contour generated by _wxObject in @plist
+ * vector in a format which can be used directly by the methods of the basic
+ * renderer. The @plist must be empty.
+ * The format is: plist[0].x() returns the number of the central line points;
+ * plist[0].y() returns the number of the wire contour points. The central
+ * line points start from plist[1]. The contour points - follow.
+ */
+void laydata::WireContourAux::getRenderingData(PointVector& plist)
 {
-   if (_fti)
-   {
-      for (OglFontCollectionMap::const_iterator CF = _oglFont.begin(); CF != _oglFont.end(); CF++)
-         delete (CF->second);
-   }
-   else
-      glfClose();
+   assert(_wcObject);
+   assert(0 == plist.size());
+   word lsize = _wcObject->lsize();
+   word csize = _wcObject->csize();
+   plist.reserve(lsize + csize + 1);
+   plist.push_back(TP(lsize, csize));
+   for (int i = 0; i < lsize; i++)
+      plist.push_back(TP(_ldata[2*i], _ldata[2*i+1]));
+   _wcObject->getVectorData(plist);
+}
+
+void laydata::WireContourAux::getLData(PointVector& plist)
+{
+   assert(_wcObject);
+   assert(0 == plist.size());
+   word lsize = _wcObject->lsize();
+   plist.reserve(lsize);
+   for (int i = 0; i < lsize; i++)
+      plist.push_back(TP(_ldata[2*i], _ldata[2*i+1]));
+}
+
+void laydata::WireContourAux::getCData(PointVector& plist)
+{
+   assert(_wcObject);
+   assert(0 == plist.size());
+   plist.reserve(_wcObject->csize());
+   _wcObject->getVectorData(plist);
+}
+
+
+laydata::WireContourAux::~WireContourAux()
+{
+   delete _wcObject;
+   delete [] _ldata;
 }
 
 //=============================================================================
@@ -677,18 +598,24 @@ void layprop::DrawProperties::addFill(std::string name, byte* ptrn) {
 }
 
 
-void layprop::DrawProperties::setCurrentColor(const LayerDef& laydef)
+bool layprop::DrawProperties::setCurrentColor(const LayerDef& laydef, layprop::tellRGB& theColor)
 {
-   _drawingLayer = laydef;
-   const layprop::tellRGB& theColor = getColor(_drawingLayer);
-   glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
+   if (_drawingLayer == laydef)
+      return false;
+   else
+   {
+      _drawingLayer = laydef;
+   /*const layprop::tellRGB& */theColor = getColor(_drawingLayer);
+      return true;
+   //glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
+   }
 }
 
 void layprop::DrawProperties::setGridColor(std::string colname) const
 {
    if (_layColors.end() == _layColors.find(colname))
    // put a default gray color if color is not found
-      glColor4ub(_defaultColor.red(), _defaultColor.green(), _defaultColor.blue(), _defaultColor.alpha());
+      glColor4ub(_dfltColor.red(), _dfltColor.green(), _dfltColor.blue(), _dfltColor.alpha());
    else
    {
       tellRGB* gcol = _layColors.find(colname)->second;
@@ -697,38 +624,26 @@ void layprop::DrawProperties::setGridColor(std::string colname) const
    }
 }
 
-bool layprop::DrawProperties::setCurrentFill(bool force_fill) const
+const byte* layprop::DrawProperties::getCurrentFill(/*bool force_fill*/) const
 {
-   if ((REF_LAY_DEF == _drawingLayer) || (GRC_LAY_DEF == _drawingLayer)) return true;
-   // The lines below are doing effectively
-   // byte* ifill = _layFill[_layset[_drawingLayer]->getfill]
+   assert((REF_LAY_DEF != _drawingLayer) && 
+          (GRC_LAY_DEF != _drawingLayer)    );
+   // Retrive the layer settings
    const LayerSettings* ilayset = findLayerSettings(_drawingLayer);
-   if ( (NULL != ilayset) && (!_blockFill || force_fill ) )
+   if (NULL != ilayset) 
    {
       if(ilayset->filled())
       { // layer is filled
-         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
          FillMap::const_iterator ifillset = _layFill.find(ilayset->fill());
          if (_layFill.end() == ifillset)
-         { // no stipple defined - will use solid fill
-//            glDisable(GL_POLYGON_STIPPLE);
-            glEnable(GL_POLYGON_STIPPLE);
-            glPolygonStipple(_defaultFill);
-         }
+            // no stipple defined - will use default fill
+            return _dfltFill;
          else
-         { // no stipple is defined
-            glEnable(GL_POLYGON_STIPPLE);
-            glPolygonStipple(ifillset->second);
-         }
-         return true;
+            return ifillset->second;
       }
-      else
-      {
-         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-         return false;
-      }
+      else return NULL;
    }
-   else return false;
+   else return NULL;
 }
 
 bool layprop::DrawProperties::layerFilled(const LayerDef& laydef) const
@@ -776,64 +691,26 @@ bool layprop::DrawProperties::selectable(const LayerDef& laydef) const
    return (!layerHidden(laydef) && !layerLocked(laydef));
 }
 
-void layprop::DrawProperties::drawTextBoundary(const PointVector& ptlist) const
-{
-   if (_textBoxHidden) return;
-   else
-   {
-//      glColor4f(1.0, 1.0, 1.0, 0.5);
-      glLineStipple(1,0x3030);
-      glEnable(GL_LINE_STIPPLE);
-      glBegin(GL_LINE_LOOP);
-      for (unsigned i = 0; i < 4; i++)
-         glVertex2i(ptlist[i].x(), ptlist[i].y());
-      glEnd();
-      glDisable(GL_LINE_STIPPLE);
-   }
-}
-
-void layprop::DrawProperties::drawCellBoundary(const PointVector& ptlist) const
-{
-   if (_cellBoxHidden) return;
-   else
-   {
-      glColor4f(1.0, 1.0, 1.0, 0.5);
-      glLineStipple(1,0xf18f);
-      glEnable(GL_LINE_STIPPLE);
-      glBegin(GL_LINE_LOOP);
-      for (unsigned i = 0; i < 4; i++)
-         glVertex2i(ptlist[i].x(), ptlist[i].y());
-      glEnd();
-      glDisable(GL_LINE_STIPPLE);
-   }
-}
-
-void layprop::DrawProperties::setLineProps(bool selected) const
+void layprop::DrawProperties::getCurrentLine(layprop::LineSettings& lineSet, bool selected) const
 {
    if (REF_LAY_DEF == _drawingLayer)
    {
-      glEnable(GL_LINE_STIPPLE);
-      glLineStipple(1,0xf18f);
       if (selected)
-         glLineWidth(3);
+         lineSet = _dfltCellSBnd;
       else
-         glLineWidth(1);
+         lineSet = _dfltCellBnd;
    }
    else
    {
-      const layprop::LineSettings* theLine = getLine(_drawingLayer);
       if (selected)
       {
-         glLineWidth(theLine->width());
-         glEnable(GL_LINE_STIPPLE);
-         /*glEnable(GL_LINE_SMOOTH);*/
-         glLineStipple(theLine->patscale(),theLine->pattern());
+         const layprop::LineSettings* theLine = getLine(_drawingLayer);
+         LineSettings dummy(theLine->color(),theLine->pattern(), theLine->patscale(), theLine->width());
+         lineSet = dummy;
       }
       else
       {
-         glLineWidth(1);
-         glDisable(GL_LINE_SMOOTH);
-         glDisable(GL_LINE_STIPPLE);
+         lineSet = _dfltLine;
       }
    }
 }
@@ -1027,9 +904,9 @@ void layprop::DrawProperties::allLines(NameList& linelist) const
 const layprop::LineSettings* layprop::DrawProperties::getLine(const LayerDef& laydef) const
 {
    const LayerSettings* ilayset = findLayerSettings(laydef);
-   if (NULL == ilayset) return &_defaultSeline;
+   if (NULL == ilayset) return &_dfltSLine;
    LineMap::const_iterator line = _lineSet.find(ilayset->sline());
-   if (_lineSet.end() == line) return &_defaultSeline;
+   if (_lineSet.end() == line) return &_dfltSLine;
    return line->second;
 // All the stuff above is equivalent to
 //   return _layFill[_layset[layno]->sline()];
@@ -1039,7 +916,7 @@ const layprop::LineSettings* layprop::DrawProperties::getLine(const LayerDef& la
 const layprop::LineSettings* layprop::DrawProperties::getLine(std::string line_name) const
 {
    LineMap::const_iterator line = _lineSet.find(line_name);
-   if (_lineSet.end() == line) return &_defaultSeline;
+   if (_lineSet.end() == line) return &_dfltSLine;
    return line->second;
 // All the stuff above is equivalent to
 //   return _layFill[_layset[layno]->sline()];
@@ -1049,9 +926,9 @@ const layprop::LineSettings* layprop::DrawProperties::getLine(std::string line_n
 const byte* layprop::DrawProperties::getFill(const LayerDef& laydef) const
 {
    const LayerSettings* ilayset = findLayerSettings(laydef);
-   if (NULL == ilayset) return &_defaultFill[0];
+   if (NULL == ilayset) return &_dfltFill[0];
    FillMap::const_iterator fill_set = _layFill.find(ilayset->fill());
-   if (_layFill.end() == fill_set) return &_defaultFill[0];
+   if (_layFill.end() == fill_set) return &_dfltFill[0];
    return fill_set->second;
 // All the stuff above is equivalent to
 //   return _layFill[_layset[layno]->fill()];
@@ -1061,7 +938,7 @@ const byte* layprop::DrawProperties::getFill(const LayerDef& laydef) const
 const byte* layprop::DrawProperties::getFill(std::string fill_name) const
 {
    FillMap::const_iterator fill_set = _layFill.find(fill_name);
-   if (_layFill.end() == fill_set) return &_defaultFill[0];
+   if (_layFill.end() == fill_set) return &_dfltFill[0];
    return fill_set->second;
 // All the stuff above is equivalent to
 //   return _layFill[fill_name];
@@ -1071,9 +948,9 @@ const byte* layprop::DrawProperties::getFill(std::string fill_name) const
 const layprop::tellRGB& layprop::DrawProperties::getColor(const LayerDef& laydef) const
 {
    const LayerSettings* ilayset = findLayerSettings(laydef);
-   if (NULL == ilayset) return _defaultColor;
+   if (NULL == ilayset) return _dfltColor;
    ColorMap::const_iterator col_set = _layColors.find(ilayset->color());
-   if (_layColors.end() == col_set) return _defaultColor;
+   if (_layColors.end() == col_set) return _dfltColor;
    return *(col_set->second);
 // All the stuff above is equivalent to
 //   return _layColors[_layset[layno]->color()];
@@ -1083,7 +960,7 @@ const layprop::tellRGB& layprop::DrawProperties::getColor(const LayerDef& laydef
 const layprop::tellRGB& layprop::DrawProperties::getColor(std::string color_name) const
 {
    ColorMap::const_iterator col_set = _layColors.find(color_name);
-   if (_layColors.end() == col_set) return _defaultColor;
+   if (_layColors.end() == col_set) return _dfltColor;
    return *(col_set->second);
 // All the stuff above is equivalent to
 //   return _layColors[color_name];
@@ -1223,18 +1100,6 @@ const layprop::LaySetList& layprop::DrawProperties::getCurSetList() const
    return _laySetDb; // dummy, to prevent warnings
 }
 
-void layprop::DrawProperties::psWrite(PSFile& psf) const
-{
-   for(ColorMap::const_iterator CI = _layColors.begin(); CI != _layColors.end(); CI++)
-   {
-      tellRGB* the_color = CI->second;
-      psf.defineColor( CI->first.c_str() , the_color->red(),
-                       the_color->green(), the_color->blue() );
-   }
-
-   for(FillMap::const_iterator CI = _layFill.begin(); CI != _layFill.end(); CI++)
-      psf.defineFill( CI->first.c_str() , CI->second);
-}
 
 void  layprop::DrawProperties::hideLayer(const LayerDef& laydef, bool hide)
 {

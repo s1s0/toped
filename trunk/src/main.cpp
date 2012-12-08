@@ -46,7 +46,6 @@
 #include "viewprop.h"
 #include "datacenter.h"
 #include "calbr_reader.h"
-#include "glf.h"
 
 #include "tellibin.h"
 #include "tpdf_db.h"
@@ -64,7 +63,7 @@
 tui::TopedFrame*                 Toped = NULL;
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
-extern layprop::FontLibrary*     fontLib;
+extern trend::TrendCenter*       TRENDC;
 extern parsercmd::cmdBLOCK*      CMDBlock;
 extern parsercmd::TellPreProc*   tellPP;
 extern console::toped_logfile    LogFile;
@@ -78,8 +77,7 @@ bool TopedApp::OnInit()
 {
    getLocalDirs();
    getGlobalDirs();
-//   DATC = DEBUG_NEW DataCenter();
-   _forceBasicRendering = false;
+   _forceRenderType     = trend::rtTBD;
    _noLog               = false;
    _gui                 = true;
    wxImage::AddHandler(DEBUG_NEW wxPNGHandler);
@@ -107,10 +105,11 @@ bool TopedApp::OnInit()
          dlg1->Destroy();
          return false;
       }
-      // store the rendering type in the property database
-      if (!_forceBasicRendering)
-         PROPC->setRenderType(Toped->view()->glRC()->vboRendering());
-
+      // OK - we've got some kind of graphics we can manage - so create the rendering centre
+      TRENDC = DEBUG_NEW trend::TrendCenter(true
+                                            ,_forceRenderType
+                                            ,Toped->view()->glRC()->useVboRendering()
+                                            ,Toped->view()->glRC()->useShaders());
       // Replace the active console in the wx system with Toped console window
       console::ted_log_ctrl *logWindow = DEBUG_NEW console::ted_log_ctrl(Toped->logwin());
       delete wxLog::SetActiveTarget(logWindow);
@@ -139,6 +138,7 @@ bool TopedApp::OnInit()
       #endif
 
       DEBUG_NEW console::TllCCmdLine();
+      TRENDC = DEBUG_NEW trend::TrendCenter(false);
       loadGlfFonts();
       console::ted_log_ctrl *logWindow = DEBUG_NEW console::ted_log_ctrl(NULL);
       delete wxLog::SetActiveTarget(logWindow);
@@ -161,7 +161,10 @@ bool TopedApp::OnInit()
       SetTopWindow(Toped);
       Toped->Show(TRUE);
       wxToolTip::SetDelay(500);
-      // First thing after initialising openGL - load available layout fonts
+      // First thing after initialising openGL - load the shaders (eventually)
+      std::string stdShaderDir(_tpdShadersDir.mb_str(wxConvFile));
+      TRENDC->initShaders(stdShaderDir);
+      // and then - load available layout fonts
       loadGlfFonts();
       // at this stage - the tool shall be considered fully functional
       //--------------------------------------------------------------------------
@@ -242,6 +245,7 @@ int TopedApp::OnExit()
    if (DRCData) delete DRCData;
    delete CMDBlock;
    delete PROPC;
+   delete TRENDC;
    delete DATC;
    // unload the eventual plug-ins
    for (PluginList::const_iterator CP = _plugins.begin(); CP != _plugins.end(); CP++)
@@ -278,7 +282,6 @@ bool TopedApp::getLogFileName()
 void TopedApp::loadGlfFonts()
 {
    wxDir fontDirectory(_tpdFontDir);
-   fontLib = DEBUG_NEW layprop::FontLibrary(PROPC->renderType());
    if (fontDirectory.IsOpened())
    {
       wxString curFN;
@@ -288,17 +291,11 @@ void TopedApp::loadGlfFonts()
          {
             std::string ffname(_tpdFontDir.mb_str(wxConvFile));
             ffname += curFN.mb_str(wxConvFile);
-            if (fontLib->LoadLayoutFont(ffname))
-            {
-               wxCommandEvent eventLoadFont(wxEVT_RENDER_PARAMS);
-               eventLoadFont.SetId(tui::RPS_LD_FONT);
-               eventLoadFont.SetString(wxString(fontLib->getActiveFontName().c_str(), wxConvUTF8));
-               wxPostEvent(Toped, eventLoadFont);
-            }
+            TRENDC->loadLayoutFont(ffname);
          } while (fontDirectory.GetNext(&curFN));
       }
    }
-   if (0 == fontLib->numFonts())
+   if (0 == TRENDC->numFonts())
    {
       wxString errmsg;
       errmsg << wxT("Can't load layout fonts.\n")
@@ -317,7 +314,7 @@ void TopedApp::loadGlfFonts()
       eventLoadFont.SetId(tui::RPS_SLCT_FONT);
       eventLoadFont.SetString(wxT("Arial Normal 1"));
       wxPostEvent(Toped, eventLoadFont);
-      fontLib->selectFont("Arial Normal 1");
+      TRENDC->selectFont("Arial Normal 1");
    }
 }
 
@@ -453,13 +450,30 @@ bool TopedApp::parseCmdLineArgs()
    bool runTheTool = true;
    if (1 < argc)
    {
-      for (int i=1; i<argc; i++)
+      int curarNum = 1;
+      while (curarNum < argc)
       {
-         wxString curar(argv[i]);
-         if (wxT("-ogl_thread") == curar) Toped->setOglThread(true);
-         else if (wxT("-ogl_safe") == curar) _forceBasicRendering = true;
-         else if (wxT("-nolog")    == curar) _noLog               = true;
-         else if (wxT("-nogui")    == curar) _gui                 = false;
+         wxString curar(argv[curarNum++]);
+         if      (wxT("-ogl_thread") == curar) Toped->setOglThread(true);
+         else if (wxT("-ogl_safe")   == curar)
+         {
+            std::cout << "Obsolete command line option \"-ogl_safe\". "
+                      << "Use -render <type> instead"<< std::endl ;
+            runTheTool = false;
+         }
+         else if (wxT("-render")      == curar)
+         {
+            wxString forceRenderType(argv[curarNum++]);
+            if      (wxT("basic")  == forceRenderType) _forceRenderType = trend::rtTolder;
+            else if (wxT("vbo")    == forceRenderType) _forceRenderType = trend::rtTenderer;
+            else if (wxT("shader") == forceRenderType) _forceRenderType = trend::rtToshader;
+            else {
+               std::cout << "  -render <type> : One of \"basic\", \"vbo\" or \"shader\" expected" << std::endl;
+               runTheTool = false;
+            }
+         }
+         else if (wxT("-nolog")      == curar) _noLog               = true;
+         else if (wxT("-nogui")      == curar) _gui                 = false;
          else if (0 == curar.Find(wxT("-I")))
          {
             // Store the include paths in a temporary location until we have a
@@ -477,12 +491,13 @@ bool TopedApp::parseCmdLineArgs()
             std::cout << "Usage: toped {options}* [tll-file]" << std::endl ;
             std::cout << "Command line options:" << std::endl ;
             std::cout << "  -ogl_thread: " << std::endl ;
-            std::cout << "  -ogl_safe  : " << std::endl ;
-            std::cout << "  -nolog     : logging will be suppressed" << std::endl;
-            std::cout << "  -nogui     : GUI will not be started. Useful for TLL parsing" << std::endl ;
-            std::cout << "  -I<path>   : includes additional search paths for TLL files" << std::endl ;
-            std::cout << "  -D<macro>  : equivalent to #define <macro> " << std::endl ;
-            std::cout << "  -help      : This help message " << std::endl ;
+//            std::cout << "  -ogl_safe  : " << std::endl ;
+            std::cout << "  -render <type> : enforce openGL render type. One of \"basic\", \"vbo\" or \"shader\"" << std::endl;
+            std::cout << "  -nolog         : logging will be suppressed" << std::endl;
+            std::cout << "  -nogui         : GUI will not be started. Useful for TLL parsing" << std::endl ;
+            std::cout << "  -I<path>       : includes additional search paths for TLL files" << std::endl ;
+            std::cout << "  -D<macro>      : equivalent to #define <macro> " << std::endl ;
+            std::cout << "  -help          : This help message " << std::endl ;
             runTheTool = false;
          }
          else if (!(0 == curar.Find('-')))
@@ -594,6 +609,15 @@ void TopedApp::getGlobalDirs()
    else
       // Don't generate a noise about plug-in directory.
       _tpdPlugInDir = wxT("");
+   // Check shaders directory
+   wxFileName shadderFolder(_globalDir);
+   shadderFolder.AppendDir(wxT("shaders"));
+   shadderFolder.Normalize();
+   if (shadderFolder.DirExists())
+      _tpdShadersDir = shadderFolder.GetFullPath();
+   else
+      // Don't generate a noise about shaders directory.
+      _tpdShadersDir = wxT("");
 }
 
 void TopedApp::getTellPathDirs()
@@ -609,7 +633,7 @@ void TopedApp::getTellPathDirs()
 //=============================================================================
 void TopedApp::printLogWHeader()
 {
-   Toped->view()->glRC()->printStatus(_forceBasicRendering);
+   TRENDC->reportRenderer(_forceRenderType);
    tell_log(console::MT_INFO,"Toped loaded.");
    tell_log(console::MT_WARNING,"Please submit your feedback to feedback@toped.org.uk");
 }

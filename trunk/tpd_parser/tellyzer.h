@@ -911,7 +911,7 @@ namespace telldata {
       virtual             ~TtCallBack() {}
       virtual void         initialize();
       virtual TellVar*     selfcopy() const;
-      virtual void         echo(std::string&, real);
+//      virtual void         echo(std::string&, real);
       virtual void         assign(TellVar*);
       parsercmd::cmdCALLBACK* fcbBody()        { return _fcbBody;}
       parsercmd::cmdSTDFUNC*  fBody()          { return _fBody;  }

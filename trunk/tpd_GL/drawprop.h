@@ -31,8 +31,78 @@
 #include <GL/glew.h>
 #include <string>
 #include <math.h>
-#include "tedstd.h"
+#include "tedbac.h"
 
+namespace laydata {
+   const word _lmnone   = 0x0000;
+   const word _lmbox    = 0x0001;
+   const word _lmpoly   = 0x0002;
+   const word _lmwire   = 0x0004;
+   const word _lmtext   = 0x0008;
+   const word _lmref    = 0x0010;
+   const word _lmaref   = 0x0020;
+   const word _lmpref   = 0x0040;
+   const word _lmapref  = 0x0080;
+   const word _lmgrcref = 0x0100;
+   const word _lmall    = 0xffff;
+
+
+   class TdtCellRef;
+   typedef  std::deque<const TdtCellRef*>           CellRefStack;
+
+   /**
+    * The primary subject of this class is to generate the wire contour
+    * from its central line. It is supposed to deal with all of the corner
+    * cases and especially when the wire contains collinear segments. The
+    * class requires the point data in integer array format. It is not
+    * copying the original data - just stores a pointer to it. Thats' why
+    * there is no destructor defined.
+    */
+   class WireContour {
+      public:
+                           WireContour(const int4b*, unsigned, const WireWidth);
+         unsigned          csize()         {return _cdata.size(); } //! return the number of the contour points
+         unsigned          lsize()         {return _lsize;        } //! return the number of the central line points
+         void              getArrayData(int4b*);
+         void              getVectorData(PointVector&);
+         DBbox             getCOverlap();
+      private:
+         typedef std::list<TP> PointList;
+         void              endPnts(word, word, bool);
+         void              mdlPnts(word, word, word);
+         void              mdlAcutePnts(word, word, word, int, int);
+         byte              chkCollinear(word,word,word);
+         void              colPnts(word,word,word);
+         TP                mdlCPnt(word, word);
+         int               orientation(word, word, word);
+         double            getLambda(word i1, word i2, word ii);
+         int               xangle(word i1, word i2);
+         const int4b*      _ldata; //! The original wire central line. Do not delete it. Do not alter it!
+         const unsigned    _lsize; //! The number of points in the wire central line
+         const WireWidth   _width; //! The width of the wire
+         PointList         _cdata; //! The generated contour line in a list of points form
+   };
+
+   /**
+    * An auxiliary class to wrap around the WireContour class. It makes WireContour
+    * usable with a point list input data or with data which needs coordinate
+    * transformations. Also it defines a method to dump the wire contour in a PointVector
+    * format which is usable by the basic renderer.
+    */
+   class WireContourAux {
+      public:
+                          WireContourAux(const int4b*, unsigned, const WireWidth, const CTM&);
+                          WireContourAux(const PointVector&, const WireWidth);
+                          WireContourAux(const PointVector&, const WireWidth, const TP);
+                         ~WireContourAux();
+         void             getRenderingData(PointVector&);
+         void             getLData(PointVector&);
+         void             getCData(PointVector&);
+      private:
+         WireContour*     _wcObject;
+         int4b*           _ldata;
+   };
+}
 namespace layprop {
 
    typedef enum {cell_mark, array_mark, text_mark} binding_marks;
@@ -70,8 +140,9 @@ namespace layprop {
    class LineSettings
    {
       public:
-         LineSettings(std::string color, word pattern, byte patscale, byte width) :
-            _color(color), _pattern(pattern), _patscale(patscale), _width(width) {};
+                        LineSettings():_color(""), _pattern(0xffff), _patscale(1), _width(1){};
+                        LineSettings(std::string color, word pattern, byte patscale, byte width) :
+                           _color(color), _pattern(pattern), _patscale(patscale), _width(width) {};
          std::string    color()     const {return _color;   }
          word           pattern()   const {return _pattern; }
          byte           patscale()  const {return _patscale;}
@@ -133,118 +204,6 @@ namespace layprop {
    };
 
    //=============================================================================
-   //
-   //
-   //
-   class TGlfSymbol {
-      public:
-                        TGlfSymbol(FILE*);
-                       ~TGlfSymbol();
-         void           dataCopy(GLfloat*, GLuint*, word);
-         byte           alvrtxs()   { return _alvrtxs;}
-         byte           alchnks()   { return _alchnks;}
-         friend class TGlfRSymbol;
-      protected:
-         byte           _alvrtxs;    //! Number of vertexs
-         byte           _alcntrs;    //! Number of contours
-         byte           _alchnks;    //! Number of index (tesselation) chunks
-
-         float*         _vdata;      //! Vertex data
-         byte*          _cdata;      //! Contour data
-         byte*          _idata;      //! Index data
-
-         float          _minX;
-         float          _maxX;
-         float          _minY;
-         float          _maxY;
-   };
-
-   //=============================================================================
-   //
-   //
-   //
-   class TGlfRSymbol {
-      public:
-                        TGlfRSymbol(TGlfSymbol*, word, word);
-                       ~TGlfRSymbol();
-         void           draw(bool);
-         float          minX() { return _minX; }
-         float          maxX() { return _maxX; }
-         float          minY() { return _minY; }
-         float          maxY() { return _maxY; }
-      private:
-         GLint*         _firstvx;    //! first vertex in the font matrix
-         GLuint         _firstix;    //! first index in the font matrix
-         byte           _alcntrs;    //! Number of contours
-         byte           _alchnks;    //! Number of index (tesselation) chunks
-
-         GLsizei*       _csize;      //! Sizes of the contours
-
-         float          _minX;
-         float          _maxX;
-         float          _minY;
-         float          _maxY;
-   };
-
-   //=============================================================================
-   //
-   //
-   //
-   class TGlfFont {
-      public:
-         TGlfFont(std::string, std::string&);
-                       ~TGlfFont();
-         void           getStringBounds(const std::string*, DBbox*);
-         void           collect();
-         bool           bindBuffers();
-         void           drawString(const std::string*, bool);
-         byte           status()        {return _status;}
-      private:
-         typedef std::map<byte, TGlfSymbol*> TFontMap;
-         typedef std::map<byte, TGlfRSymbol*> FontMap;
-         FontMap        _symbols;
-         TFontMap       _tsymbols;
-         word           _all_vertexes;
-         word           _all_indexes;
-         byte           _status;
-         byte           _numSymbols;
-         float          _pitch;
-         float          _spaceWidth;
-         GLuint         _pbuffer;
-         GLuint         _ibuffer;
-   };
-
-
-   //=============================================================================
-   //
-   // Wrapper to abstract-out the Glf implementation. Should be temporary until
-   // new implementation is up&running
-   //
-   class FontLibrary {
-      public:
-                                FontLibrary(bool);
-                               ~FontLibrary();
-         bool                   LoadLayoutFont(std::string);
-         bool                   selectFont(std::string);
-         void                   getStringBounds(const std::string*, DBbox*);
-         void                   drawString(const std::string*, bool);
-         void                   drawWiredString(std::string);
-         void                   drawSolidString(std::string);
-         bool                   bindFont();
-         void                   unbindFont();
-         void                   allFontNames(NameList&);
-         word                   numFonts();
-         std::string            getActiveFontName() const {return _activeFontName;}
-      private:
-         typedef std::map<std::string, TGlfFont*> OglFontCollectionMap;
-         typedef std::map<std::string, int>       RamFontCollectionMap;
-         OglFontCollectionMap   _oglFont;
-         RamFontCollectionMap   _ramFont;
-         bool                   _fti; // font type implementation ()
-         std::string            _activeFontName;
-   };
-
-   //=============================================================================
    typedef  std::map<std::string, tellRGB*      >        ColorMap;
    typedef  std::map<std::string, byte*         >        FillMap;
    typedef  std::map<std::string, LineSettings* >        LineMap;
@@ -261,33 +220,30 @@ namespace layprop {
    a friend class PropertyCenter is doing this. The reason for this is primarily
    thread safety.
    - Changeable properties - these are changed during the drawing process - for
-   example current drawing layer, colors etc.
+   example current drawing layer, colours etc.
     */
    class DrawProperties {
       public:
                                     DrawProperties();
                                    ~DrawProperties();
          // Called during the rendering - protected in the render initialisation
-         void                       setCurrentColor(const LayerDef&);
-         bool                       setCurrentFill(bool) const;
-         void                       setLineProps(bool selected = false) const;
+         bool                       setCurrentColor(const LayerDef&, layprop::tellRGB&);
+         const byte*                getCurrentFill() const;
+         void                       getCurrentLine(LineSettings&, bool) const;
          void                       initDrawRefStack(laydata::CellRefStack*);
          void                       clearDrawRefStack();
          void                       postCheckCRS(const laydata::TdtCellRef*);
          CellRefChainType           preCheckCRS(const laydata::TdtCellRef*);
          void                       drawReferenceMarks(const TP&, const binding_marks) const;
-         void                       drawTextBoundary(const PointVector& ptlist) const;
-         void                       drawCellBoundary(const PointVector& ptlist) const;
          void                       setGridColor(std::string colname) const;
          LayerDef                   getTenderLay(const LayerDef&) const;//!return the same if _propertyState == DB or predefined layer otherwise
-         void                       psWrite(PSFile&) const;
          void                       adjustAlpha(word factor);
          const CTM&                 scrCtm() const       {return  _scrCtm;}
          word                       visualLimit() const  {return _visualLimit;}
          const DBbox&               clipRegion() const   {return _clipRegion;}
-         void                       initCtmStack()       {_tranStack.push(CTM());}
+         void                       initCtmStack()       {_tranStack.push(CTM(_clipRegion.p1(), _clipRegion.p2()));}
          void                       clearCtmStack()      {while (!_tranStack.empty()) _tranStack.pop();}
-         void                       pushCtm(CTM& last)   {_tranStack.push(last);}
+         void                       pushCtm(const CTM& last)   {_tranStack.push(last);}
          void                       popCtm()             {_tranStack.pop();}
          const CTM&                 topCtm() const       {assert(_tranStack.size());return _tranStack.top();}
          void                       setState (PropertyState state)
@@ -399,9 +355,14 @@ namespace layprop {
          LayerDef                   _drawingLayer;
          LayStateMap                _layStateMap;  //
          LayStateHistory            _layStateHistory; //! for undo purposes of layer status related TELL function
-         static const tellRGB       _defaultColor;
-         static const byte          _defaultFill[128];
-         static const LineSettings  _defaultSeline;
+         static const tellRGB       _dfltColor;
+         static const byte          _dfltFill[128];
+         static const LineSettings  _dfltLine     ; //! Default Line
+         static const LineSettings  _dfltSLine    ; //! Default Selected Line
+         static const LineSettings  _dfltCellBnd  ; //! Default Cell Boundary
+         static const LineSettings  _dfltCellSBnd ; //! Default Selected Cell Boundary
+         static const LineSettings  _dfltTextBnd  ; //! Default Text Boundary
+         static const LineSettings  _dfltTextSBnd ; //! Default Selected Text Boundary
          PropertyState              _propertyState; //type of drawing
    };
 

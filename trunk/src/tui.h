@@ -741,6 +741,9 @@ namespace tui {
    wxBrush* makeBrush(const byte* ifill, const layprop::tellRGB col);
    //! Makes a structure ready to be used in wxPen for dashed lines
    unsigned makePenDash(word, byte, wxDash*&);
+
+   void     tllFill2XBM(const byte* pattern, byte nfill[128]);
+
 }
 
 //Print output of external functions

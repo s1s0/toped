@@ -86,7 +86,7 @@ tui::CanvasStatus::CanvasStatus(wxWindow* parent, wxWindowID id ,
 
    SetFont(fontX);
    wxBoxSizer *thesizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
-   SetBackgroundColour(wxColour(wxT("LIGHT_GRAY")));
+//   SetBackgroundColour(wxColour(wxT("LIGHT_GRAY")));
    SetForegroundColour(wxColour(wxT("BLACK")));
    X_pos = DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("0.00"), wxDefaultPosition,wxSize(120,-1),
                                                    wxST_NO_AUTORESIZE | wxALIGN_RIGHT );

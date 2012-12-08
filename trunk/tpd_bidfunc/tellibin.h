@@ -70,6 +70,8 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA(stdEXIT          );  //
    //
    TELL_STDCMD_CLASSA(intrnlSORT_DB    );
+
+   void echoWrapper(telldata::TellVar*, std::ostringstream&);
 }
 
 #endif

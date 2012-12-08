@@ -176,11 +176,10 @@ NameList* tellstdfunc::stdECHO::callingConv(const telldata::typeMAP*)
 
 int tellstdfunc::stdECHO::execute()
 {
-   real DBscale = PROPC->DBscale();
    telldata::TellVar *p = OPstack.top();OPstack.pop();
-   std::string news;
-   p->echo(news, DBscale);
-   tell_log(console::MT_INFO,news);
+   std::ostringstream ost;
+   echoWrapper(p,ost);
+   tell_log(console::MT_INFO,ost.str());
    delete p;
    return EXEC_NEXT;
 }
@@ -195,16 +194,16 @@ int tellstdfunc::stdTELLSTATUS::execute()
 #ifdef DB_MEMORY_TRACE
    MemTrack::TrackListMemoryUsage();
 #else
-   real DBscale = PROPC->DBscale();
-   telldata::TellVar *y;
-   std::string news;
-   while (OPstack.size()) {
-      y = OPstack.top(); OPstack.pop();
-      y->echo(news, DBscale);
-      tell_log(console::MT_ERROR,news);
-   }
-   news = "Bottom of the operand stack reached";
-   tell_log(console::MT_ERROR,news);
+   //real DBscale = PROPC->DBscale();
+   //telldata::TellVar *y;
+   //std::string news;
+   //while (OPstack.size()) {
+   //   y = OPstack.top(); OPstack.pop();
+   //   y->echo(news, DBscale);
+   //   tell_log(console::MT_ERROR,news);
+   //}
+   //news = "Bottom of the operand stack reached";
+   //tell_log(console::MT_ERROR,news);
 #endif
    return EXEC_NEXT;
 }
@@ -705,3 +704,151 @@ UNDO/REDO operation - some preliminary thoughts
    Note 3: It is a real trouble how to log select/unselect from list! Have no
            idea really!!! Something really to think hard...
 */
+
+void tellstdfunc::echoWrapper(telldata::TellVar* p, std::ostringstream& ost)
+{
+   if ( TLISALIST( p->get_type() ) )
+   {
+      telldata::TtList* wvar = static_cast<telldata::TtList*>(p);
+      if (wvar->mlist().empty())
+      {
+         ost << "empty list";
+      }
+      else
+      {
+         ost << " list members: { ";
+         for (unsigned i = 0; i < wvar->mlist().size(); i++)
+         {
+            if (i > 0)  ost << " , ";
+            echoWrapper(wvar->mlist()[i], ost);
+         }
+         ost << " } ";
+      }
+
+   }
+   else switch (p->get_type())
+   {
+      case telldata::tn_NULL      :assert(false);break;
+      case telldata::tn_void      :assert(false);break;
+      case telldata::tn_composite :assert(false);break;
+      case telldata::tn_int:
+      {
+         ost << static_cast<telldata::TtInt*>(p)->value();
+         break;
+      }
+      case telldata::tn_real:
+      {
+         std::scientific(ost);
+         ost << static_cast<telldata::TtReal*>(p)->value();
+         break;
+      }
+      case telldata::tn_bool:
+      {
+         if (static_cast<telldata::TtBool*>(p)->value())
+            ost << "true";
+         else
+            ost << "false";
+         break;
+      }
+      case telldata::tn_string:
+      {
+         ost << "\"" << static_cast<telldata::TtString*>(p)->value() << "\"";
+         break;
+      }
+      case telldata::tn_layout:
+      {
+         telldata::TtLayout* wvar = static_cast<telldata::TtLayout*>(p);
+         if (NULL == wvar->data())
+            ost << "< !EMPTY! >";
+         else
+         {
+            if ( wvar->layer().editable() )
+               ost << "layer " << wvar->layer() << " :";
+            wvar->data()->info(ost, PROPC->DBscale());
+         }
+         if (wvar->selp() && (wvar->selp()->size() > 0)) ost << " - partially selected";
+         break;
+      }
+      case telldata::tn_auxilary:
+      {
+         telldata::TtAuxdata* wvar = static_cast<telldata::TtAuxdata*>(p);
+         if (NULL == wvar->data())
+            ost << "< !EMPTY! >";
+         else
+         {
+            if ( wvar->layer().editable() )
+               ost << "layer " << wvar->layer() << " :";
+            wvar->data()->info(ost, PROPC->DBscale());
+         }
+         break;
+      }
+      case telldata::tn_anyfref:
+      {
+         telldata::TtCallBack* wvar = static_cast<telldata::TtCallBack*>(p);
+         if ( (NULL == wvar->fcbBody()) || (wvar->fcbBody()->declaration()) )
+            ost << "NULL";
+         else
+            ost << "pointing to <TODO> function";
+         break;
+      }
+      case telldata::tn_usertypes:
+      {
+         telldata::TtUserStruct* wvar = static_cast<telldata::TtUserStruct*>(p);
+         ost << "struct members:\n";
+         for (telldata::recfieldsNAME::const_iterator CI = wvar->fieldList().begin(); CI != wvar->fieldList().end(); CI++)
+         {
+            ost << CI->first << ": ";
+            echoWrapper(CI->second, ost);
+            ost << "\n";
+         }
+         break;
+      }
+      case telldata::tn_pnt:
+      {
+         telldata::TtPnt* wvar = static_cast<telldata::TtPnt*>(p);
+         ost << "{X = "  << wvar->x()
+             << ", Y = " << wvar->y()
+             << "}";
+         break;
+      }
+      case telldata::tn_box:
+      {
+         telldata::TtWnd* wvar = static_cast<telldata::TtWnd*>(p);
+         ost << "P1: X = " << wvar->p1().x() << ": Y = " << wvar->p1().y() << " ; " <<
+                "P2: X = " << wvar->p2().x() << ": Y = " << wvar->p2().y() ;
+         break;
+      }
+      case telldata::tn_bnd:
+      {
+         telldata::TtBnd* wvar = static_cast<telldata::TtBnd*>(p);
+         ost << "P: X = " << wvar->p().x() << ": Y = " << wvar->p().y() << " ; " <<
+                "rot = "  << wvar->rot().value() << ": flipX " << (wvar->flx().value() ? "true" : "false") << " ; "  <<
+                "scale = " << wvar->sc().value();
+         break;
+      }
+      case telldata::tn_laymap:
+      {
+         telldata::TtLMap* wvar = static_cast<telldata::TtLMap*>(p);
+         ost << "layer = "
+             << wvar->layer().value()
+             << " : value = \""
+             << wvar->value().value() << "\"";
+         break;
+      }
+      case telldata::tn_hshstr:
+      {
+         telldata::TtHshStr* wvar = static_cast<telldata::TtHshStr*>(p);
+         ost << "key = "  << wvar->key().value() << " : value = \"" << wvar->value().value() << "\"";
+         break;
+      }
+      case telldata::tn_layer:
+      {
+         telldata::TtLayer* wvar = static_cast<telldata::TtLayer*>(p);
+         ost << "{num = "  << wvar->num()
+             << ", typ = " << wvar->typ()
+             << "}";
+         break;
+      }
+      default                     :assert(false);/* Did you introduce a new type recently? This function must be updated*/break;
+   }
+}

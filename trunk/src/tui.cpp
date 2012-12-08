@@ -1249,7 +1249,9 @@ void tui::FillSample::setFill(const byte* fill)
 {
    if (NULL != fill)
    {
-      wxBitmap stipplebrush((char  *)fill, 32, 32, 1);
+      byte converted[128];
+      tllFill2XBM(fill, converted);
+      wxBitmap stipplebrush((char  *)converted, 32, 32, 1);
       wxImage image;
       image = stipplebrush.ConvertToImage();
       stipplebrush = wxBitmap(image, 1);
@@ -1403,7 +1405,6 @@ void tui::DefineFill::OnFillNameAdded(wxCommandEvent& WXUNUSED(event))
 
 void tui::DefineFill::OnDefineFill(wxCommandEvent& cmdevent)
 {
-//   const byte* initpat = getFill(_current_pattern);
    DrawFillDef dialog(this, -1, wxT("Define Pattern"), wxDefaultPosition, _current_pattern);
    if (dialog.ShowModal() == wxID_OK)
    {
@@ -3046,8 +3047,10 @@ void tui::TopedPropertySheets::CanvasPSheet::update(wxCommandEvent& evt)
 //Return brush for corresponding color and filling 
 wxBrush* tui::makeBrush(const byte* ifill, const layprop::tellRGB col)
 {
-   wxBrush *brush;
-   wxBitmap *stipplebrush = DEBUG_NEW wxBitmap((char  *)ifill, 32, 32, 1);
+   byte ptrn[128];
+   tllFill2XBM(ifill, ptrn);
+
+   wxBitmap *stipplebrush = DEBUG_NEW wxBitmap((char  *)ptrn, 32, 32, 1);
    wxImage image;
    image = stipplebrush->ConvertToImage();
 #ifdef WIN32
@@ -3072,7 +3075,7 @@ wxBrush* tui::makeBrush(const byte* ifill, const layprop::tellRGB col)
    //Recreate bitmap with new color
    stipplebrush = DEBUG_NEW wxBitmap(image, 1);
 #endif
-   brush = DEBUG_NEW wxBrush(   *stipplebrush);
+   wxBrush* brush = DEBUG_NEW wxBrush(   *stipplebrush);
    delete stipplebrush;
    return brush;
 }
@@ -3115,4 +3118,24 @@ unsigned tui::makePenDash(word pattern, byte scale, wxDash*& dashes)
       dashes[i] = scale * elements[i];
    return numElements;
 
+}
+
+void tui::tllFill2XBM(const byte* pattern, byte nfill[128])
+{
+   //reverse the bits sequence in each byte
+   for (byte i = 0; i < 128; i++)
+   {
+      byte v = pattern[i]; // input bits to be reversed
+      byte r = v         ; // r will be reversed bits of v; first get LSB of v
+      int s = sizeof(v) * CHAR_BIT - 1; // extra shift needed at end
+
+      for (v >>= 1; v; v >>= 1)
+      {
+        r <<= 1;
+        r |= v & 1;
+        s--;
+      }
+      r <<= s; // shift when v's highest bits are zero
+      nfill[i] = r;
+   }
 }

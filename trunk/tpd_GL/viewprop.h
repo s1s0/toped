@@ -28,10 +28,6 @@
 #ifndef LAYERPROP_H
 #define LAYERPROP_H
 
-// to cast properly the indices parameter in glDrawElements when
-// drawing from VBO
-#define VBO_BUFFER_OFFSET(i) ((char *)NULL + (i))
-
 #include "drawprop.h"
 namespace layprop {
 
@@ -76,7 +72,7 @@ namespace layprop {
                         LayoutGrid(real st, std::string cl) :_step(st), _color(cl),
                                                                   _visual(false) {};
       void              Init(real st, std::string cl) {_step = st; _color = cl;}
-      void              Draw(const DrawProperties&, const real);
+//      void              Draw(const DrawProperties&, const real);
       real              step() const           {return _step;}
       bool              visual() const         {return _visual;}
       std::string       color() const          {return _color;}
@@ -118,14 +114,15 @@ namespace layprop {
       const LayoutGrid* grid(byte) const;
       void              setGrid(byte, real, std::string);
       bool              viewGrid(byte, bool);
-      void              drawGrid(const DrawProperties*) const;
-      void              drawZeroCross(const DrawProperties*) const;
+//      void              drawGrid(const DrawProperties*) const;
+//      void              drawZeroCross(const DrawProperties*) const;
       void              setUU(real);
       void              setGdsLayMap(ExpLayMap* map);
       void              setCifLayMap(ExpLayMap* map);
       void              setOasLayMap(ExpLayMap* map);
       LayerDefSet       allUnselectable();
       bool              lockDrawProp(DrawProperties*&, PropertyState state = DB);
+      bool              tryLockDrawProp(DrawProperties*&, PropertyState state = DB);
       void              unlockDrawProp(DrawProperties*&, bool throwexception);
 
       void              setStep(real st)                 {_step = st;}
@@ -143,7 +140,6 @@ namespace layprop {
       void              mouseStop()                      {_supp_data.mouseStop();}
       const LayerDefList&  upLayers()                       {_uplaylist.sort(); _uplaylist.unique(); return _uplaylist;}
       void              clearUnpublishedLayers()         {_uplaylist.clear();}
-      void              setRenderType(bool rt)           {_renderType = rt;}
       real              step() const                     {return _step;}
       int4b             stepDB() const                   {return (word)rint(_step*_DBscale);}
       real              UU() const                       {return _UU;}
@@ -157,7 +153,6 @@ namespace layprop {
       const ExpLayMap*  getCifLayMap() const             {return _cifLayMap;}
       const ExpLayMap*  getOasLayMap() const             {return _oasLayMap;}
       bool              gridVisual(word no)              {return grid(no)->visual();}
-      bool              renderType() const               {return _renderType;}
    private:
       DrawProperties*      _drawprop;
       void                 saveScreenProps(FILE*) const;
@@ -169,7 +164,6 @@ namespace layprop {
       real                 _step;         // current marker step
       bool                 _autopan;      // view window moves automatically during shape drawing
       bool                 _zeroCross;    //
-      bool                 _renderType;   //
       bool                 _boldOnHover;  //
       byte                 _markerAngle;  // angle of restriction during shape drawing (0,45,90)
       SupplementaryData    _supp_data;    // supplementary data

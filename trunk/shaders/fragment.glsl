@@ -11,12 +11,12 @@
 //                    T     O   O   P       E       D   D                   =
 //                    T      OOO    P       EEEEE   DDDD                    =
 //                                                                          =
-//   This file is a part of Toped project (C) 2001-2012 Toped developers    =
+//   This file is a part of Toped project (C) 2001-2009 Toped developers    =
 // ------------------------------------------------------------------------ =
 //           $URL$
-//        Created: Sun Jan 07 2007
+//        Created: Sat Dec  8 2012
 //     Originator: Svilen Krustev - skr@toped.org.uk
-//    Description: Post Script output
+//    Description: GLSL Fragment shader
 //---------------------------------------------------------------------------
 //  Revision info
 //---------------------------------------------------------------------------
@@ -25,37 +25,28 @@
 //        $Author$
 //===========================================================================
 
-#ifndef PS_OUT_H_DEFINED
-#define PS_OUT_H_DEFINED
+#version 330
 
-#include "tedstd.h"
+uniform vec3  in_Color;
+uniform float in_Alpha;
+uniform uint  in_Stipple[33];
+uniform bool  in_StippleEn = false;
 
-      //namespace ...
+//in  vec4 gl_FragCoord;
+out vec4 out_Color;
 
-class PSFile {
-public:
-                  PSFile(std::string);
-   bool           checkCellWritten(std::string);
-   void           registerCellWritten(std::string);
-   void           cellHeader(std::string, DBbox);
-   void           cellFooter();
-   void           propSet(std::string, std::string);
-   void           defineColor(std::string, byte, byte, byte);
-   void           defineFill(std::string, const byte*);
-   void           poly(const int4b* const, unsigned, const DBbox);
-   void           wire(const int4b* const, unsigned, WireWidth, const DBbox);
-   void           text(std::string, const CTM);
-   void           cellref(std::string, const CTM);
-   void           pspage_header(const DBbox);
-   void           pspage_footer(std::string);
-   bool           hier()   {return _hierarchical;}
-                 ~PSFile();
-protected:
-   void           writeStdDefs();
-   FILE*          _psfh;
-   std::string    _fname;
-   NameList       _childnames;
-   bool           _hierarchical;
-};
-
-#endif // PS_OUT_H_DEFINED
+void main(void)
+{
+   bool dropThePixel = false;
+   if (in_StippleEn)
+   {
+      uvec2 ufCoord = uvec2(gl_FragCoord.x, gl_FragCoord.y);
+      uint index = 31u - (ufCoord.y % 32u);
+      uint mask  = uint(0x80000000) >> (ufCoord.x % 32u);
+      dropThePixel = !bool(in_Stipple[index+uint(1)] & mask);
+   }
+   if (dropThePixel)
+      discard;
+   else
+      out_Color = vec4(in_Color,in_Alpha);
+}

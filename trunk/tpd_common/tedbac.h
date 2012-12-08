@@ -108,7 +108,9 @@ namespace layprop {
 namespace tenderer {
    class TenderLay;
 }
-
+namespace trend {
+   class TrendLay;
+}
 namespace auxdata {
    class TdtAuxData;
    typedef laydata::QTStoreTmpl<TdtAuxData>     QTreeTmp;

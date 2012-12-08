@@ -2,14 +2,14 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Header Files">
-      <UniqueIdentifier>{91b593c8-cfb1-440b-b9ea-d568c01a125b}</UniqueIdentifier>
+      <UniqueIdentifier>{516d3a61-7037-43b2-9f20-3713ad18a82f}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl</Extensions>
     </Filter>
     <Filter Include="FlexBison Files">
-      <UniqueIdentifier>{df625323-a53a-46ec-8f1c-c59e264fdc9d}</UniqueIdentifier>
+      <UniqueIdentifier>{7b553e49-ff60-4ad6-88d6-18282e5ca430}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{101263c1-1040-43f1-9844-af8715824147}</UniqueIdentifier>
+      <UniqueIdentifier>{bb081cd0-546f-4d34-a476-527c6cb13319}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
     </Filter>
   </ItemGroup>

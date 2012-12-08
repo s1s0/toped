@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../tpd_common; ../tpd_DB; ../tpd_parser; ../tpd_ifaces"
+				AdditionalIncludeDirectories="../tpd_common; ../tpd_DB; ../tpd_parser; ../tpd_ifaces;../tpd_GL"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_UNICODE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"

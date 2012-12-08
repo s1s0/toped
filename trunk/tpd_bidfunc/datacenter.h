@@ -75,7 +75,6 @@ public:
    void                       mouseRotate();
    void                       motionDraw(const CTM&, TP, TP);
    void                       render(const CTM&);
-   void                       drawFOnly();
    void                       mouseHoover(TP&);
    void                       setRecoverPoly(bool);
    void                       setRecoverWire(bool);
@@ -92,15 +91,12 @@ public:
    TdtMutexState              tdtMxState() const {return _tdtActMxState;}
    std::string                localDir() const {return _localDir;}
 
-protected:
-   void                       openGlDraw(const CTM&);
-   void                       openGlRender(const CTM&); // alternative to openGlDraw
 private:
    LayerDef                   _curcmdlay;    //! layer used during current drawing operation
    bool                       _drawruler;    //! draw a ruler while composing a shape interactively
    std::string                _localDir;
    std::string                _globalDir;
-   laydata::TdtLibDir         _TEDLIB;       //! catalog of available TDT libraries
+   laydata::TdtLibDir         _TEDLIB;       //! catalogue of available TDT libraries
    laydata::DrcLibrary*       _DRCDB;        //! DRC data
    ForeignDbFile*             _GDSDB;        //! GDS parsed data
    ForeignDbFile*             _CIFDB;        //! CIF parsed data
@@ -113,7 +109,6 @@ private:
    wxCondition*               _bpSync;       //! Synchronization for cell browser panels
    TdtMutexState              _tdtActMxState; //! The actual (current) mutex state of the main DB
    TdtMutexState              _tdtReqMxState; //! The required mutex state of the main DB
-   tenderer::TopRend*         _cRenderer;    //! current renderer (in case VFBO rendering is in place)
    laydata::ValidRecovery*    _objectRecovery;
 };
 
@@ -233,7 +228,7 @@ private:
 //=============================================================================
 
 //=============================================================================
-// How to synchronize between the cell browsers and corresponding DB in memory
+// How to synchronise between the cell browsers and corresponding DB in memory
 //                                  or
 //                 Cell browsers messages/events explained
 //=============================================================================
@@ -293,7 +288,7 @@ private:
 //       (3) gdsclose();     // generates self contained event
 //     The GDS cell browser will easily crash
 //
-//     Obviously we need some kind of thread synchronization for refresh events.
+//     Obviously we need some kind of thread synchronisation for refresh events.
 //     This is implemented in the bp*() methods. They put the parser thread in
 //     sleep until the corresponding _*Lock mutex is not locked/unlocked by the
 //     main thread, and the latter will happen when the cell browser is
@@ -308,7 +303,7 @@ private:
 //     When we have a mix between self contained and refresh events this "later"
 //     generates the same problem as before even though the messages will be
 //     processed in strict succession. In this case, it's not possible to
-//     resolve the issue using threads synchronization as above, because we do
+//     resolve the issue using threads synchronisation as above, because we do
 //     control only a single thread. It appears that PostEvent in this case
 //     can not be used. When a refresh event occurs in this situation, the
 //     event queue must be flushed and then the new event must be processed
