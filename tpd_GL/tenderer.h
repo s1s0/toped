@@ -434,6 +434,7 @@ namespace trend {
          virtual void      collect(GLuint);
          virtual void      draw(layprop::DrawProperties*);
       protected:
+         virtual void      setLine(layprop::DrawProperties*, bool);
          GLuint            _pbuffer;
          // vertex related data
          GLsizei*          _sizesvx; //! array of sizes for vertex sets

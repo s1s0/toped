@@ -229,15 +229,12 @@ namespace layprop {
          // Called during the rendering - protected in the render initialisation
          bool                       setCurrentColor(const LayerDef&, layprop::tellRGB&);
          const byte*                getCurrentFill() const;
-         void                       setLineProps(bool selected = false) const;
          void                       getCurrentLine(LineSettings&, bool) const;
          void                       initDrawRefStack(laydata::CellRefStack*);
          void                       clearDrawRefStack();
          void                       postCheckCRS(const laydata::TdtCellRef*);
          CellRefChainType           preCheckCRS(const laydata::TdtCellRef*);
          void                       drawReferenceMarks(const TP&, const binding_marks) const;
-         void                       drawTextBoundary(const PointVector& ptlist) const;
-         void                       drawCellBoundary(const PointVector& ptlist) const;
          void                       setGridColor(std::string colname) const;
          LayerDef                   getTenderLay(const LayerDef&) const;//!return the same if _propertyState == DB or predefined layer otherwise
          void                       adjustAlpha(word factor);
@@ -358,9 +355,14 @@ namespace layprop {
          LayerDef                   _drawingLayer;
          LayStateMap                _layStateMap;  //
          LayStateHistory            _layStateHistory; //! for undo purposes of layer status related TELL function
-         static const tellRGB       _defaultColor;
-         static const byte          _defaultFill[128];
-         static const LineSettings  _defaultSeline;
+         static const tellRGB       _dfltColor;
+         static const byte          _dfltFill[128];
+         static const LineSettings  _dfltLine     ; //! Default Line
+         static const LineSettings  _dfltSLine    ; //! Default Selected Line
+         static const LineSettings  _dfltCellBnd  ; //! Default Cell Boundary
+         static const LineSettings  _dfltCellSBnd ; //! Default Selected Cell Boundary
+         static const LineSettings  _dfltTextBnd  ; //! Default Text Boundary
+         static const LineSettings  _dfltTextSBnd ; //! Default Selected Text Boundary
          PropertyState              _propertyState; //type of drawing
    };
 
