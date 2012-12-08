@@ -35,15 +35,16 @@
 
 namespace trend {
 
-   typedef enum { tocom      // command line
-                 ,tolder     // basic (i.e. openGL 1.1)
-                 ,tenderer   // VBO
-                 , toshader  // shaders
+   typedef enum { rtTBD        // To be defined
+                 ,rtTocom      // command line
+                 ,rtTolder     // basic (i.e. openGL 1.1)
+                 ,rtTenderer   // VBO
+                 ,rtToshader   // shaders
                 } RenderType;
 
    /**
     * This class contains a raw symbol data from the GLF font files. It is used to
-    * parse the symbol data from the file and if the current renderer is the tolder
+    * parse the symbol data from the file and if the current renderer is the rtTolder
     * it is used directly for symbol drawing.
     * If a VBO or shader rendering is used, then the objects of this class serve as
     * an intermediate data container for parsed symbol data before loading the font
@@ -187,9 +188,10 @@ namespace trend {
 
    class TrendCenter {
       public:
-                                TrendCenter(bool gui, bool forceBasic=true, bool sprtVbo=false, bool sprtShaders=false);
+                                TrendCenter(bool, RenderType cmdLineReq=trend::rtTBD, bool sprtVbo=false, bool sprtShaders=false);
          virtual               ~TrendCenter();
 //         RenderType             renderType() const {return _renderType;}
+         void                   reportRenderer(RenderType) const;
          void                   initShaders(const std::string&);
          trend::TrendBase*      getCRenderer();
          trend::TrendBase*      getHRenderer();
@@ -212,7 +214,7 @@ namespace trend {
          typedef std::map<std::string, TolderGlfFont*> OglFontCollectionMap;
          trend::TrendBase*      _cRenderer;    //! current renderer
          trend::TrendBase*      _hRenderer;    //! hoover renderer
-         trend::Shaders*        _cShaders;     //! the shader init object (valid in toshader case only)
+         trend::Shaders*        _cShaders;     //! the shader init object (valid in rtToshader case only)
          OglFontCollectionMap   _oglFont;
          std::string            _activeFontName;
          RenderType             _renderType;
