@@ -312,13 +312,30 @@ void trend::ToshaderRefLay::draw(layprop::DrawProperties* drawprop)
       if (0 < _asindxs)
       {
          assert(_fstslix); assert(_sizslix);
-         drawprop->setLineProps(true);
+         setLine(drawprop, true);
          glMultiDrawArrays(GL_LINE_LOOP, _fstslix, _sizslix, _asobjix);
-         drawprop->setLineProps(false);
+         setLine(drawprop, false);
       }
    }
    glDisableVertexAttribArray(TSHDR_LOC_VERTEX);
    //glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+void trend::ToshaderRefLay::setLine(layprop::DrawProperties* drawprop, bool selected)
+{
+   layprop::LineSettings curLine;
+   drawprop->getCurrentLine(curLine, selected);
+   glLineWidth(curLine.width());
+   // TODO - awaits geometry shader
+//   if (0xffff == curLine.pattern())
+//   {
+//      glDisable(GL_LINE_STIPPLE);
+//   }
+//   else
+//   {
+//      glEnable(GL_LINE_STIPPLE);
+//      glLineStipple(curLine.patscale(),curLine.pattern());
+//   }
 }
 
 trend::ToshaderRefLay::~ToshaderRefLay()

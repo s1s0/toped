@@ -67,6 +67,8 @@ namespace trend {
                            TolderRefLay() : TrendRefLay() {}
          virtual          ~TolderRefLay() {}
          virtual void      draw(layprop::DrawProperties*);
+      protected:
+         virtual void      setLine(layprop::DrawProperties*, bool);
    };
 
    class Tolder : public TrendBase {

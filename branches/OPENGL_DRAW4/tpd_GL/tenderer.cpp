@@ -667,7 +667,7 @@ void trend::TenderRefLay::draw(layprop::DrawProperties* drawprop)
    layprop::tellRGB theColor;
    if (drawprop->setCurrentColor(REF_LAY_DEF, theColor))
       glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
-   drawprop->setLineProps(false);
+   setLine(drawprop, false);
    // Bind the buffer
    glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
    // Check the state of the buffer
@@ -684,12 +684,29 @@ void trend::TenderRefLay::draw(layprop::DrawProperties* drawprop)
       if (0 < _asindxs)
       {
          assert(_fstslix); assert(_sizslix);
-         drawprop->setLineProps(true);
+         setLine(drawprop, true);
          glMultiDrawArrays(GL_LINE_LOOP, _fstslix, _sizslix, _asobjix);
-         drawprop->setLineProps(false);
+         setLine(drawprop, false);
       }
    }
    glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+void trend::TenderRefLay::setLine(layprop::DrawProperties* drawprop, bool selected)
+{
+   layprop::LineSettings curLine;
+   drawprop->getCurrentLine(curLine, selected);
+   glLineWidth(curLine.width());
+   if (0xffff == curLine.pattern())
+   {
+      glDisable(GL_LINE_STIPPLE);
+   }
+   else
+   {
+      glEnable(GL_LINE_STIPPLE);
+      glLineStipple(curLine.patscale(),curLine.pattern());
+   }
+
 }
 
 trend::TenderRefLay::~TenderRefLay()
@@ -1055,7 +1072,7 @@ void trend::Tenderer::grcDraw()
    {// for every layer
       setColor(CLAY());
       setStipple();
-      _drawprop->setLineProps(false);
+      setLine(false);
       // draw everything
       if (0 != CLAY->total_points())
          CLAY->draw(_drawprop);

@@ -69,6 +69,8 @@ namespace trend {
                            ToshaderRefLay();
          virtual          ~ToshaderRefLay();
          virtual void      draw(layprop::DrawProperties*);
+      protected:
+         virtual void      setLine(layprop::DrawProperties*, bool);
    };
 
    class Toshader : public Tenderer {

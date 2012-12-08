@@ -868,6 +868,7 @@ namespace trend {
          unsigned          total_points();
          unsigned          total_indexes();
       protected:
+         virtual void      setLine(layprop::DrawProperties*,bool) = 0;
          RefBoxList        _cellRefBoxes;
          RefBoxList        _cellSRefBoxes;
          // vertex related data

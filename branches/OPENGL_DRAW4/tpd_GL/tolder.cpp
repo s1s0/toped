@@ -192,7 +192,7 @@ void trend::TolderRefLay::draw(layprop::DrawProperties* drawprop)
    if (drawprop->setCurrentColor(REF_LAY_DEF, theColor))
       glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
    //drawprop->setCurrentColor(REF_LAY_DEF);
-   drawprop->setLineProps(false);
+   setLine(drawprop, false);
 
    for (RefBoxList::const_iterator CSH = _cellRefBoxes.begin(); CSH != _cellRefBoxes.end(); CSH++)
    {
@@ -201,13 +201,28 @@ void trend::TolderRefLay::draw(layprop::DrawProperties* drawprop)
          (*CSH)->drctDrawContour();
       }
    }
-   drawprop->setLineProps(true);
+   setLine(drawprop, true);
    for (RefBoxList::const_iterator CSH = _cellSRefBoxes.begin(); CSH != _cellSRefBoxes.end(); CSH++)
    {
       (*CSH)->drctDrawContour();
    }
 }
 
+void trend::TolderRefLay::setLine(layprop::DrawProperties* drawprop, bool selected)
+{
+   layprop::LineSettings curLine;
+   drawprop->getCurrentLine(curLine, selected);
+   glLineWidth(curLine.width());
+   if (0xffff == curLine.pattern())
+   {
+      glDisable(GL_LINE_STIPPLE);
+   }
+   else
+   {
+      glEnable(GL_LINE_STIPPLE);
+      glLineStipple(curLine.patscale(),curLine.pattern());
+   }
+}
 //=============================================================================
 //
 // class Tolder
@@ -465,12 +480,10 @@ void trend::Tolder::setLine(bool selected)
    if (0xffff == curLine.pattern())
    {
       glDisable(GL_LINE_STIPPLE);
-      /*glDisable(GL_LINE_SMOOTH);*/
    }
    else
    {
       glEnable(GL_LINE_STIPPLE);
-      /*glEnable(GL_LINE_SMOOTH);*/
       glLineStipple(curLine.patscale(),curLine.pattern());
    }
 }
@@ -483,13 +496,13 @@ void trend::Tolder::draw()
       setStipple();
       if (0 != CLAY->total_slctdx())
       {// redraw selected contours only
-         _drawprop->setLineProps(true);
+         setLine(true);
          glPushMatrix();
          glMultMatrixd(_activeCS->translation());
          CLAY->drawSelected();
          glPopMatrix();
       }
-      _drawprop->setLineProps(false);
+      setLine(false);
       // draw everything
       if (0 != CLAY->total_points())
          CLAY->draw(_drawprop);
@@ -510,7 +523,7 @@ void trend::Tolder::grcDraw()
    {// for every layer
       setColor(CLAY());
       setStipple();
-      _drawprop->setLineProps(false);
+      setLine(false);
       // draw everything
       if (0 != CLAY->total_points())
          CLAY->draw(_drawprop);
