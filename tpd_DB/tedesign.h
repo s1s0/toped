@@ -39,7 +39,6 @@ namespace laydata {
       virtual          ~TdtLibrary();
       virtual void      read(InputTdtFile* const);
       void              dbExport(DbExportFile&);
-      void              psWrite(PSFile&, const TdtCell*, const layprop::DrawProperties&);
       TdtDefaultCell*   checkCell(std::string name, bool undeflib = false);
       void              recreateHierarchy(const laydata::TdtLibDir* );
       void              registerCellRead(std::string, TdtCell*);
@@ -112,8 +111,7 @@ namespace laydata {
       bool           editPrev(const bool undo = false);
       bool           editPop();
       bool           editTop();
-      void           openGlDraw(layprop::DrawProperties&);
-      void           openGlRender(tenderer::TopRend&);
+      void           openGlRender(trend::TrendBase&);
       void           tmpDraw(const layprop::DrawProperties&, TP, TP);
       void           setTmpData(TdtTmpData* tmpdata) {_tmpdata = tmpdata;}
       void           setTmpCtm(CTM tmpctm)        {_tmpctm  = tmpctm; }
@@ -142,7 +140,7 @@ namespace laydata {
       AtticList*     changeRef(ShapeList*, std::string);
       //
       void           collectParentCells(std::string&, CellDefList&);
-      bool           checkActiveCell();
+      bool           checkActiveCell() {return (NULL != _target.edit());}
       bool           checkValidRef(std::string);
       void           fixUnsorted();
       void           fixReferenceOverlap(DBbox&, TdtCell* targetCell = NULL);
@@ -160,7 +158,7 @@ namespace laydata {
       void           selectInBox(TP*, TP*, const LayerDefSet&, word layselmask, bool);
       void           unselectInBox(TP*, TP*, const LayerDefSet&, bool);
       AtticList*     changeSelect(TP*, const LayerDefSet&, bool);
-      void           mouseHoover(TP&, layprop::DrawProperties&, const LayerDefSet&);
+      void           mouseHoover(TP&, trend::TrendBase&, const LayerDefSet&);
       void           unselectAll()    const {_target.edit()->unselectAll(false);}
       void           selectAll(const LayerDefSet& unselable, word layselmask) const
                                              {       _target.edit()->selectAll(unselable, layselmask);}
@@ -270,8 +268,8 @@ namespace laydata {
       TdtDefaultCell*      checkCell(std::string name);
       void                 registerCellRead(std::string, TdtCell*);
       WordList             findSelected(const std::string &cell, TP*); //use for DRCexplainerror
-      void                 openGlDraw(layprop::DrawProperties&, std::string);
-      void                 openGlRender(tenderer::TopRend&, std::string, CTM&);
+//      void                 openGlDraw(layprop::DrawProperties&, std::string);
+      void                 openGlRender(trend::TrendBase&, std::string, CTM&);
       std::string          name()            const {return _name;}
    protected:
 

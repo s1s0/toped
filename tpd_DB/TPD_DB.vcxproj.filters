@@ -2,28 +2,31 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{4176b039-2a28-497f-ba59-564ac8d68dc6}</UniqueIdentifier>
+      <UniqueIdentifier>{13a4c6bf-7114-4b9c-bee2-0d9363535606}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
     </Filter>
     <Filter Include="Header Files">
-      <UniqueIdentifier>{4461ae34-a238-4ae9-b8d6-898824aa134f}</UniqueIdentifier>
+      <UniqueIdentifier>{a25a9845-311d-4db4-9f02-3cd1f104bd35}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="drawprop.cpp">
+    <ClCompile Include="auxdat.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="logicop.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ps_out.cpp">
+    <ClCompile Include="qtree_tmpl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="quadtree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="tedat.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tedat_ext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="tedcell.cpp">
@@ -35,30 +38,27 @@
     <ClCompile Include="tedstd.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tenderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="tpdph.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="viewprop.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="drawprop.h">
+    <ClInclude Include="auxdat.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="logicop.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ps_out.h">
+    <ClInclude Include="qtree_tmpl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="quadtree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="tedat.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tedat_ext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="tedcell.h">
@@ -70,13 +70,7 @@
     <ClInclude Include="tedstd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="tenderer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="tpdph.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="viewprop.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

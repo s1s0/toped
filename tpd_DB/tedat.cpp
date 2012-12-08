@@ -40,14 +40,15 @@
 #include "tedcell.h"
 #include "logicop.h"
 #include "tenderer.h"
-#include "ps_out.h"
+#include "trend.h"
 #include "outbox.h"
 
 //GLubyte select_mark[30] = {0x00, 0x00, 0x00, 0x00, 0x3F, 0xF8, 0x3F, 0xF8, 0x30, 0x18,
 //                           0x30, 0x18, 0x30, 0x18, 0x30, 0x18, 0x30, 0x18, 0x30, 0x18,
 //                           0x30, 0x18, 0x3F, 0xF8, 0x3F, 0xF8, 0x00, 0x00, 0x00, 0x00};
 
-extern layprop::FontLibrary* fontLib;
+extern trend::TrendCenter*       TRENDC;
+
 
 /*===========================================================================
       Select and subsequent operations over the existing TdtData
@@ -343,44 +344,6 @@ bool  laydata::TdtData::unselect(DBbox& select_in, SelectDataPair& SI, bool psel
    return false;
 }
 
-   // Some thoughts here about the drawing optimization.
-   // For optimal drawing speed we have to fulfill several requirements
-   // 1. Data processing has to be minimized - i.e. calculations of
-   //    the overlapping boxes, wire generation etc. has to be performed
-   //    once. The same concerns the coordinate conversion.
-   // 2. Minimize the altertion of the line&fill styles and colors, i.e.
-   //    Objects with the same drawing properties have to be groupped
-   //    together
-   // (The structure of the database in memory is out of discussion here)
-   // Achieving the first objective is simple - calculation are performed
-   // once in openGlPrecalc() and then reused in the rest of the openGL_*
-   // functions. It is quite not clear however where is the balance here,
-   // because calculations might be cheaper than the memory access in
-   // terms of CPU cycles.
-   // There is a big exception here - texts. Esspecially solid texts
-   // As all other shapes every symbol should be drawn twice - once the
-   // outline (wired symbol in glf terms) and then the fill (the solid part)
-   // Here data processing is done twice. To avoid this - we have to
-   // code glf procedures that follow the rule 1 - i.e. to calculate first
-   // the entire string in terms of polygons and then to draw the lines
-   // and the fill as appripriate using the new data.
-   //
-   // The second objective seems to be a problem as well
-   // - drawing color as a rule is the same for the entire layer.
-   //   -- this means that the reference marks and overlapping boxes of the
-   //      texts shold be drawn in the color of the layer (not in gray)
-   //   -- for the reference marks of the cell references as well as for
-   //      their overlapping boxes this will be a problem because we'll
-   //      have to change the color for one box only (and one mark)
-   // - line style - here the things are more compicated. The partially
-   //   selected shapes will certainly need a change in the line style
-   //   and possibly even the color. This also means that the tricks with
-   //   drawing first the unslected shapes and then the selected ones
-   //   will barely improve the things - how many shapes will be grouped
-   //   in a single quadree cell? - they shouldn't be much if the quadtree
-   //   algo works properly. Then why bother ?
-   //
-
 //-----------------------------------------------------------------------------
 // class TdtBox
 //-----------------------------------------------------------------------------
@@ -426,71 +389,16 @@ void laydata::TdtBox::normalize(SGBitSet& psel)
    }
 }
 
-void laydata::TdtBox::openGlPrecalc(layprop::DrawProperties& drawprop , PointVector& ptlist) const
-{
-   // translate the points using the current CTM
-   ptlist.reserve(4);
-   ptlist.push_back(TP(_pdata[p1x], _pdata[p1y]) * drawprop.topCtm());
-   ptlist.push_back(TP(_pdata[p2x], _pdata[p1y]) * drawprop.topCtm());
-   ptlist.push_back(TP(_pdata[p2x], _pdata[p2y]) * drawprop.topCtm());
-   ptlist.push_back(TP(_pdata[p1x], _pdata[p2y]) * drawprop.topCtm());
-}
-
-void laydata::TdtBox::drawRequest(tenderer::TopRend& rend) const
+void laydata::TdtBox::drawRequest(trend::TrendBase& rend) const
 {
    rend.box(&_pdata[0]);
 }
 
-void laydata::TdtBox::drawSRequest(tenderer::TopRend& rend, const SGBitSet* pslist) const
+void laydata::TdtBox::drawSRequest(trend::TrendBase& rend, const SGBitSet* pslist) const
 {
    rend.box(&_pdata[0], pslist);
 }
 
-void laydata::TdtBox::openGlDrawLine(layprop::DrawProperties&, const PointVector& ptlist) const
-{
-   glBegin(GL_LINE_LOOP);
-   for (unsigned i = 0; i < 4; i++)
-      glVertex2i(ptlist[i].x(), ptlist[i].y());
-   glEnd();
-}
-
-void laydata::TdtBox::openGlDrawFill(layprop::DrawProperties&, const PointVector& ptlist) const
-{
-   // We can't draw directly a box here because if the entire cell is rotated
-   // on angle <> 90, then it's not a box anymore
-   //glRecti(ptlist[0].x(),ptlist[0].y(), ptlist[2].x(),ptlist[2].y());
-   //
-   glBegin(GL_POLYGON);
-   for (unsigned i = 0; i < 4; i++)
-      glVertex2i(ptlist[i].x(), ptlist[i].y());
-   glEnd();
-}
-
-void laydata::TdtBox::openGlDrawSel(const PointVector& ptlist, const SGBitSet* pslist) const
-{
-   assert(0 != ptlist.size());
-   if (sh_selected == status())
-   {
-      glBegin(GL_LINE_LOOP);
-      for (unsigned i = 0; i < 4; i++)
-         glVertex2i(ptlist[i].x(), ptlist[i].y());
-      glEnd();
-   }
-   else if (sh_partsel == status())
-   {
-      assert(pslist);
-      glBegin(GL_LINES);
-      for (unsigned i = 0; i < 4; i++)
-      {
-         if (pslist->check(i) && pslist->check((i+1)%4))
-         {
-            glVertex2i(ptlist[i].x(), ptlist[i].y());
-            glVertex2i(ptlist[(i+1)%4].x(), ptlist[(i+1)%4].y());
-         }
-      }
-      glEnd();
-   }
-}
 
 void laydata::TdtBox::motionDraw(const layprop::DrawProperties&, CtmQueue& transtack,
                                                 SGBitSet* plst) const
@@ -607,11 +515,6 @@ void laydata::TdtBox::write(OutputTdtFile* const tedfile) const {
 void laydata::TdtBox::dbExport(DbExportFile& exportF) const
 {
    exportF.box(_pdata);
-}
-
-void laydata::TdtBox::psWrite(PSFile& gdsf, const layprop::DrawProperties&) const
-{
-   gdsf.poly(_pdata, 4, overlap());
 }
 
 DBbox laydata::TdtBox::overlap() const
@@ -769,73 +672,14 @@ laydata::TdtPoly::TdtPoly(InputTdtFile* const tedfile) : TdtData()
    _teseldata.tessellate(_pdata, _psize);
 }
 
-void laydata::TdtPoly::openGlPrecalc(layprop::DrawProperties& drawprop, PointVector& ptlist) const
-{
-   // translate the points using the current CTM
-   ptlist.reserve(_psize);
-   for (unsigned i = 0; i < _psize; i++)
-   {
-      ptlist.push_back(TP(_pdata[2*i], _pdata[2*i+1]) * drawprop.topCtm());
-   }
-}
-
-void laydata::TdtPoly::drawRequest(tenderer::TopRend& rend) const
+void laydata::TdtPoly::drawRequest(trend::TrendBase& rend) const
 {
    rend.poly(_pdata, _psize, &_teseldata);
 }
 
-void laydata::TdtPoly::drawSRequest(tenderer::TopRend& rend, const SGBitSet* pslist) const
+void laydata::TdtPoly::drawSRequest(trend::TrendBase& rend, const SGBitSet* pslist) const
 {
    rend.poly(_pdata, _psize, &_teseldata, pslist);
-}
-
-void laydata::TdtPoly::openGlDrawLine(layprop::DrawProperties&, const PointVector& ptlist) const
-{
-   glBegin(GL_LINE_LOOP);
-   for (unsigned i = 0; i < ptlist.size(); i++)
-      glVertex2i(ptlist[i].x(), ptlist[i].y());
-   glEnd();
-}
-
-void laydata::TdtPoly::openGlDrawFill(layprop::DrawProperties&, const PointVector& ptlist) const
-{
-   for ( TeselChain::const_iterator CCH = _teseldata.tdata()->begin(); CCH != _teseldata.tdata()->end(); CCH++ )
-   {
-      glBegin(CCH->type());
-      for(unsigned cindx = 0 ; cindx < CCH->size(); cindx++)
-      {
-         unsigned vindex = CCH->index_seq()[cindx];
-         glVertex2i(ptlist[vindex].x(), ptlist[vindex].y());
-      }
-      glEnd();
-   }
-}
-
-void laydata::TdtPoly::openGlDrawSel(const PointVector& ptlist, const SGBitSet* pslist) const
-{
-   assert(0 != ptlist.size());
-   if (sh_selected == status())
-   {
-      glBegin(GL_LINE_LOOP);
-      for (unsigned i = 0; i < ptlist.size(); i++)
-         glVertex2i(ptlist[i].x(), ptlist[i].y());
-      glEnd();
-   }
-   else if (sh_partsel == status())
-   {
-      assert(pslist);
-      unsigned numpoints = ptlist.size();
-      glBegin(GL_LINES);
-      for (unsigned i = 0; i < numpoints; i++)
-      {
-         if (pslist->check(i) && pslist->check((i+1)%numpoints))
-         {
-            glVertex2i(ptlist[i].x(), ptlist[i].y());
-            glVertex2i(ptlist[(i+1)%numpoints].x(), ptlist[(i+1)%numpoints].y());
-         }
-      }
-      glEnd();
-   }
 }
 
 void laydata::TdtPoly::motionDraw(const layprop::DrawProperties&, CtmQueue& transtack,
@@ -1146,11 +990,6 @@ void laydata::TdtPoly::dbExport(DbExportFile& exportF) const
    exportF.polygon(_pdata, _psize);
 }
 
-void laydata::TdtPoly::psWrite(PSFile& gdsf, const layprop::DrawProperties&) const
-{
-   gdsf.poly(_pdata, _psize, overlap());
-}
-
 DBbox laydata::TdtPoly::overlap() const
 {
    DBbox ovl(_pdata[0], _pdata[1]) ;
@@ -1235,112 +1074,14 @@ laydata::TdtWire::TdtWire(InputTdtFile* const tedfile) : TdtData()
    }
 }
 
-void laydata::TdtWire::openGlPrecalc(layprop::DrawProperties& drawprop, PointVector& ptlist) const
-{
-   // first check whether to draw only the center line
-   DBbox wsquare = DBbox(TP(0,0),TP((int4b)_width, (int4b)_width));
-   bool center_line_only = !wsquare.visible(drawprop.topCtm() * drawprop.scrCtm(), drawprop.visualLimit());
-   if (center_line_only)
-   {
-      ptlist.reserve(_psize+1);
-      ptlist.push_back(TP(_psize, 0));
-      for (unsigned i = 0; i < _psize; i++)
-         ptlist.push_back(TP( _pdata[2*i], _pdata[2*i+1] ) * drawprop.topCtm());
-   }
-   else
-   {
-      laydata::WireContourAux wcontour(_pdata, _psize, _width, drawprop.topCtm());
-      wcontour.getRenderingData(ptlist);
-   }
-}
-
-void laydata::TdtWire::drawRequest(tenderer::TopRend& rend) const
+void laydata::TdtWire::drawRequest(trend::TrendBase& rend) const
 {
    rend.wire(_pdata, _psize, _width);
 }
 
-void laydata::TdtWire::drawSRequest(tenderer::TopRend& rend, const SGBitSet* pslist) const
+void laydata::TdtWire::drawSRequest(trend::TrendBase& rend, const SGBitSet* pslist) const
 {
    rend.wire(_pdata, _psize, _width, pslist);
-}
-
-void laydata::TdtWire::openGlDrawLine(layprop::DrawProperties&, const PointVector& ptlist) const
-{
-   if (0 == ptlist.size()) return;
-   word lsize = ptlist[0].x();
-   word csize = ptlist[0].y();
-   // the central line
-   if (0 == lsize) return;
-   glBegin(GL_LINE_STRIP);
-   for (word i = 0; i < lsize; i++)
-      glVertex2i(ptlist[i+1].x(), ptlist[i+1].y());
-   glEnd();
-   // the contour
-   if (0 == csize) return;
-   glBegin(GL_LINE_LOOP);
-   for (word i = lsize; i <= lsize + csize; i++)
-      glVertex2i(ptlist[i].x(), ptlist[i].y());
-   glEnd();
-}
-
-void laydata::TdtWire::openGlDrawFill(layprop::DrawProperties&, const PointVector& ptlist) const
-{
-   if (0 == ptlist.size()) return;
-   word lsize = ptlist[0].x();
-   word csize = ptlist[0].y();
-   if ((0 == lsize) || (0 == csize)) return;
-
-   word findex = lsize + 1        ; // forward  index
-   word bindex = lsize + csize    ; // backward index
-   glBegin(GL_QUAD_STRIP);
-   for (word i = 0; i < csize / 2; i++)
-   {
-      glVertex2i(ptlist[findex].x(), ptlist[findex].y());findex++;
-      glVertex2i(ptlist[bindex].x(), ptlist[bindex].y());bindex--;
-   }
-   glEnd();
-}
-
-void laydata::TdtWire::openGlDrawSel(const PointVector& ptlist, const SGBitSet* pslist) const
-{
-   if (0 == ptlist.size()) return;
-   word lsize = ptlist[0].x();
-   word csize = ptlist[0].y();
-   if (0 == lsize) return;
-   if (sh_selected == status())
-   {
-      glBegin(GL_LINE_STRIP);
-      for (word i = 0; i < lsize; i++)
-         glVertex2i(ptlist[i+1].x(), ptlist[i+1].y());
-      glEnd();
-   }
-   else if (sh_partsel == status())
-   {
-      assert(pslist);
-      glBegin(GL_LINES);
-      for (unsigned i = 0; i < _psize-1; i++)
-      {
-         if (pslist->check(i) && pslist->check((i+1)%_psize))
-         {
-            glVertex2i(ptlist[i+1].x(), ptlist[i+1].y());
-            glVertex2i(ptlist[(i+1)%_psize + 1].x(), ptlist[(i+1)%_psize + 1].y());
-         }
-      }
-      if (csize > 0)
-      {
-         if (pslist->check(0))
-         {// if only the first is selected
-            glVertex2i(ptlist[lsize+csize/2].x(), ptlist[lsize+csize/2].y());
-            glVertex2i(ptlist[lsize+csize/2+1].x(), ptlist[lsize+csize/2 + 1].y());
-         }
-         if (pslist->check(_psize-1))
-         {// if only the last is selected
-            glVertex2i(ptlist[lsize+1].x(), ptlist[lsize+1].y());
-            glVertex2i(ptlist[lsize+csize].x(), ptlist[lsize+csize].y());
-         }
-      }
-      glEnd();
-   }
 }
 
 void laydata::TdtWire::motionDraw(const layprop::DrawProperties& drawprop,
@@ -1362,7 +1103,22 @@ void laydata::TdtWire::motionDraw(const layprop::DrawProperties& drawprop,
       laydata::WireContourAux wcontour(_pdata, _psize, _width, trans);
       wcontour.getRenderingData(ptlist);
    }
-   openGlDrawLine(const_cast<layprop::DrawProperties&>(drawprop), ptlist);
+//   openGlDrawLine(const_cast<layprop::DrawProperties&>(drawprop), ptlist);
+//   if (0 == ptlist.size()) return;
+   word lsize = ptlist[0].x();
+   word csize = ptlist[0].y();
+   // the central line
+   if (0 == lsize) return;
+   glBegin(GL_LINE_STRIP);
+   for (word i = 0; i < lsize; i++)
+      glVertex2i(ptlist[i+1].x(), ptlist[i+1].y());
+   glEnd();
+   // the contour
+   if (0 == csize) return;
+   glBegin(GL_LINE_LOOP);
+   for (word i = lsize; i <= lsize + csize; i++)
+      glVertex2i(ptlist[i].x(), ptlist[i].y());
+   glEnd();
 }
 
 bool laydata::TdtWire::pointInside(TP pnt)
@@ -1587,11 +1343,6 @@ void laydata::TdtWire::dbExport(DbExportFile& exportF) const
    exportF.wire(_pdata, _psize, _width);
 }
 
-void laydata::TdtWire::psWrite(PSFile& gdsf, const layprop::DrawProperties&) const
-{
-   gdsf.wire(_pdata, _psize, _width, overlap());
-}
-
 DBbox laydata::TdtWire::overlap() const
 {
    laydata::WireContour wcontour(_pdata, _psize, _width);
@@ -1657,39 +1408,13 @@ laydata::TdtCellRef::TdtCellRef(InputTdtFile* const tedfile)
    _translation = tedfile->getCTM();
 }
 
-void laydata::TdtCellRef::openGlPrecalc(layprop::DrawProperties& drawprop, PointVector& ptlist) const
-{
-   // calculate the current translation matrix
-   CTM newtrans = _translation * drawprop.topCtm();
-   // get overlapping box of the structure ...
-   DBbox obox(DEFAULT_ZOOM_BOX);
-   if (structure())
-      obox = structure()->cellOverlap();
-   // ... translate it to the current coordinates ...
-   DBbox areal = obox.overlap(newtrans);
-   // check that the cell (or part of it) is in the visual window
-   DBbox clip = drawprop.clipRegion();
-   if (0ll == clip.cliparea(areal)) return;
-   // check that the cell area is bigger that the MIN_VISUAL_AREA
-   if (!areal.visible(drawprop.scrCtm(), drawprop.visualLimit())) return;
-   // If we get here - means that the cell (or part of it) is visible
-   ptlist.reserve(4);
-   ptlist.push_back(obox.p1() * newtrans);
-   ptlist.push_back(TP(obox.p2().x(), obox.p1().y()) * newtrans);
-   ptlist.push_back(obox.p2() * newtrans);
-   ptlist.push_back(TP(obox.p1().x(), obox.p2().y()) * newtrans);
-   drawprop.pushCtm(newtrans);
-   // draw the cell mark ...
-   drawprop.drawReferenceMarks(TP(0,0) * newtrans, layprop::cell_mark);
-}
-
-void laydata::TdtCellRef::drawRequest(tenderer::TopRend& rend) const
+void laydata::TdtCellRef::drawRequest(trend::TrendBase& rend) const
 {
    // get overlapping box of the structure ...
    DBbox obox(structure()->cellOverlap());
    // ... translate it to the current coordinates ...
    DBbox areal = obox.overlap(_translation * rend.topCTM());
-   if (!areal.visible(rend.ScrCTM(), rend.visualLimit())) return;
+   if (!areal.visible(rend.scrCTM(), rend.visualLimit())) return;
    // draw the cell mark ...
 //   rend.drawReferenceMarks(TP(0,0) * newtrans, layprop::cell_mark);
    //
@@ -1713,13 +1438,13 @@ void laydata::TdtCellRef::vlOverlap(const layprop::DrawProperties& prop, DBbox& 
    vlOvl.overlap(strOverlap);
 }
 
-void laydata::TdtCellRef::drawSRequest(tenderer::TopRend& rend, const SGBitSet*) const
+void laydata::TdtCellRef::drawSRequest(trend::TrendBase& rend, const SGBitSet*) const
 {
    // get overlapping box of the structure ...
    DBbox obox(structure()->cellOverlap());
    // ... translate it to the current coordinates ...
    DBbox areal = obox.overlap(_translation * rend.topCTM());
-   if (!areal.visible(rend.ScrCTM(), rend.visualLimit())) return;
+   if (!areal.visible(rend.scrCTM(), rend.visualLimit())) return;
    // draw the cell mark ...
 //   rend.drawReferenceMarks(TP(0,0) * newtrans, layprop::cell_mark);
    //
@@ -1731,42 +1456,6 @@ void laydata::TdtCellRef::drawSRequest(tenderer::TopRend& rend, const SGBitSet*)
           (layprop::crc_ACTIVE    == crchain)    ) rend.postCheckCRS(this);
    }
 
-}
-
-void laydata::TdtCellRef::openGlDrawLine(layprop::DrawProperties& drawprop, const PointVector& ptlist) const
-{
-   if (0 == ptlist.size()) return;
-   drawprop.drawCellBoundary(ptlist);
-}
-
-
-void laydata::TdtCellRef::openGlDrawFill(layprop::DrawProperties& drawprop, const PointVector& ptlist) const
-{
-   if ((NULL == structure()) || (0 == ptlist.size())) return;
-   // draw the structure itself. Pop/push ref stuff is when edit in place is active
-   layprop::CellRefChainType crchain = drawprop.preCheckCRS(this);
-   structure()->openGlDraw(drawprop, (layprop::crc_ACTIVE == crchain));
-   if (layprop::crc_VIEW != crchain) drawprop.postCheckCRS(this);
-}
-
-void laydata::TdtCellRef::openGlDrawSel(const PointVector& ptlist, const SGBitSet*) const
-{
-   assert(0 != ptlist.size());
-   if (sh_selected == status())
-   {
-      glBegin(GL_LINE_LOOP);
-      for (unsigned i = 0; i < 4; i++)
-         glVertex2i(ptlist[i].x(), ptlist[i].y());
-      glEnd();
-   }
-}
-
-void laydata::TdtCellRef::openGlPostClean(layprop::DrawProperties& drawprop, PointVector& ptlist) const
-{
-   if (0 == ptlist.size()) return;
-   ptlist.clear();
-   // get the font matrix out of the stack (pushed in precalc)
-   drawprop.popCtm();
 }
 
 void laydata::TdtCellRef::motionDraw(const layprop::DrawProperties& drawprop,
@@ -1808,15 +1497,6 @@ std::string laydata::TdtCellRef::cellname() const
 void laydata::TdtCellRef::dbExport(DbExportFile& exportF) const
 {
    exportF.ref(_structure->name(), _translation);
-}
-
-void laydata::TdtCellRef::psWrite(PSFile& psf, const layprop::DrawProperties& drawprop) const
-{
-   psf.cellref(_structure->name(), _translation);
-   if (!psf.hier())
-   {
-     _structure->psWrite(psf, drawprop);
-   }
 }
 
 void laydata::TdtCellRef::ungroup(laydata::TdtDesign* ATDB, TdtCell* dst, AtticList* nshp)
@@ -1928,91 +1608,7 @@ laydata::TdtCellAref::TdtCellAref(InputTdtFile* const tedfile) : TdtCellRef(tedf
    }
 }
 
-
-void laydata::TdtCellAref::openGlPrecalc(layprop::DrawProperties& drawprop, PointVector& ptlist) const
-{
-   // make sure that the referenced structure exists
-   assert(structure());
-   // Get the areal of entire matrix, but NOT TRANSLATED !
-   DBbox array_overlap = clearOverlap();
-   // Calculate the CTM for the array
-   CTM newtrans = _translation * drawprop.topCtm();
-   // ... get the current visual (clipping) window, and make a REVERSE TRANSLATION
-   DBbox clip = drawprop.clipRegion().overlap(newtrans.Reversed());
-   // initialize the visual box from the overlap area of the array ...
-   DBbox visual_box(array_overlap);
-   // ... and check the visibility of entire array. if mutual_position
-   // is 1, visual_box will be modified and will contain the visual region
-   // of the array
-   int mutual_position = clip.clipbox(visual_box);
-   // if array is entirely outside the visual window - bail out
-   if (0 == mutual_position) return;
-
-   // If we get here - means that the array (or part of it) is visible
-   // draw the cell mark ...
-   drawprop.drawReferenceMarks(TP(0,0) * newtrans, layprop::array_mark);
-   // ... and the overlapping box
-   ptlist.reserve(6); //0:3 - the overlapping box; 4 - number of columns; 5 - number of rows
-   ptlist.push_back(               array_overlap.p1()                  * newtrans);
-   ptlist.push_back(TP(array_overlap.p2().x(), array_overlap.p1().y()) * newtrans);
-   ptlist.push_back(               array_overlap.p2()                  * newtrans);
-   ptlist.push_back(TP(array_overlap.p1().x(), array_overlap.p2().y()) * newtrans);
-
-   // We are going to draw "something", so push the new translation matrix in the stack
-   drawprop.pushCtm(newtrans);
-   if (structure()->cellOverlap().visible(drawprop.topCtm() * drawprop.scrCtm(), drawprop.visualLimit()))
-   {
-      // a single structure is big enough to be visible
-      // now calculate the start/stop values of the visible references in the matrix
-      if (-1 == mutual_position) {
-         // entire matrix is visible
-         ptlist.push_back(TP(0,_arrprops.cols()));
-         ptlist.push_back(TP(0,_arrprops.rows()));
-      }
-      else {
-         int stst[4];
-         real cstepX = (array_overlap.p2().x() - array_overlap.p1().x()) / _arrprops.cols();
-         real cstepY = (array_overlap.p2().y() - array_overlap.p1().y()) / _arrprops.rows();
-         // matrix is partially visible
-         stst[0] = array_overlap.p1().x() < clip.p1().x() ?
-               (int) rint(fabs((clip.p1().x() - array_overlap.p1().x()) / cstepX)) : 0;
-         stst[2] = array_overlap.p1().y() < clip.p1().y() ?
-               (int) rint(fabs((clip.p1().y() - array_overlap.p1().y()) / cstepY)) : 0;
-         stst[1] = stst[0] + (int) rint(fabs((visual_box.p2().x() - visual_box.p1().x()) / cstepX));
-         stst[3] = stst[2] + (int) rint(fabs((visual_box.p2().y() - visual_box.p1().y()) / cstepY));
-         // add an extra row/column from both sides to ensure visibility of the`
-         // border areas
-         stst[0] -= (0 == stst[0]) ? 0 : 1;
-         stst[2] -= (0 == stst[2]) ? 0 : 1;
-         stst[1] += (_arrprops.cols() == stst[1]) ? 0 : 1;
-         stst[3] += (_arrprops.rows() == stst[3]) ? 0 : 1;
-         // Adjust for negative steps
-         if (_arrprops.colStep().x() < 0)
-         {
-            int swap = stst[0];
-            stst[0] = _arrprops.cols() - stst[1];
-            stst[1] = _arrprops.cols() - swap;
-         }
-         if (_arrprops.rowStep().y() < 0)
-         {
-            int swap = stst[2];
-            stst[2] = _arrprops.rows() - stst[3];
-            stst[3] = _arrprops.rows() - swap;
-         }
-
-         ptlist.push_back(TP(stst[0],stst[1]));
-         ptlist.push_back(TP(stst[2],stst[3]));
-      }
-   }
-   else
-   {
-      // a single structure is too small
-      ptlist.push_back(TP(0,0));
-      ptlist.push_back(TP(0,0));
-   }
-}
-
-void laydata::TdtCellAref::drawRequest(tenderer::TopRend& rend) const
+void laydata::TdtCellAref::drawRequest(trend::TrendBase& rend) const
 {
 
    // make sure that the referenced structure exists
@@ -2038,7 +1634,7 @@ void laydata::TdtCellAref::drawRequest(tenderer::TopRend& rend) const
    //@FIXME! Edit in place array of cells!
    DBbox obox(structure()->cellOverlap());
    int col_beg, col_end, row_beg, row_end;
-   if (obox.visible(rend.topCTM() * rend.ScrCTM(), rend.visualLimit()))
+   if (obox.visible(rend.topCTM() * rend.scrCTM(), rend.visualLimit()))
    {
       // a single structure is big enough to be visible
       // now calculate the start/stop values of the visible references in the matrix
@@ -2104,50 +1700,10 @@ void laydata::TdtCellAref::drawRequest(tenderer::TopRend& rend) const
    }
 }
 
-void laydata::TdtCellAref::drawSRequest(tenderer::TopRend& rend, const SGBitSet*) const
+void laydata::TdtCellAref::drawSRequest(trend::TrendBase& rend, const SGBitSet*) const
 {
    //@FIXME! array of cells selected! It will give confusing results in "edit in place"
    drawRequest(rend);
-}
-
-
-void laydata::TdtCellAref::openGlDrawLine(layprop::DrawProperties& drawprop, const PointVector& ptlist) const
-{
-   if (0 == ptlist.size()) return;
-   drawprop.drawCellBoundary(ptlist);
-}
-
-void laydata::TdtCellAref::openGlDrawFill(layprop::DrawProperties& drawprop, const PointVector& ptlist) const
-{
-   if (0 == ptlist.size()) return;
-   for (int i = ptlist[4].x(); i < ptlist[4].y(); i++)
-   {// start/stop rows
-      for(int j = ptlist[5].x(); j < ptlist[5].y(); j++)
-      { // start/stop columns
-         // for each of the visual array figures...
-         // ... get the translation matrix ...
-         CTM refCTM(_arrprops.displ(i,j), 1, 0, false);
-         refCTM *= drawprop.topCtm();
-         // ...draw the structure itself, not forgetting to push/pop the refCTM
-         drawprop.pushCtm(refCTM);
-         structure()->openGlDraw(drawprop);
-         drawprop.popCtm();
-      }
-   }
-   // push is done in the precalc()
-//   drawprop.popCtm();
-}
-
-void laydata::TdtCellAref::openGlDrawSel(const PointVector& ptlist, const SGBitSet*) const
-{
-   assert(0 != ptlist.size());
-   if (sh_selected == status())
-   {
-      glBegin(GL_LINE_LOOP);
-      for (unsigned i = 0; i < 4; i++)
-         glVertex2i(ptlist[i].x(), ptlist[i].y());
-      glEnd();
-   }
 }
 
 void laydata::TdtCellAref::motionDraw(const layprop::DrawProperties& drawprop,
@@ -2196,25 +1752,6 @@ void laydata::TdtCellAref::write(OutputTdtFile* const tedfile) const {
 void laydata::TdtCellAref::dbExport(DbExportFile& exportF) const
 {
    exportF.aref(_structure->name(), _translation, _arrprops);
-}
-
-void laydata::TdtCellAref::psWrite(PSFile& psf, const layprop::DrawProperties& drawprop) const
-{
-   for (int i = 0; i < _arrprops.cols(); i++)
-   {// start/stop rows
-      for(int j = 0; j < _arrprops.rows(); j++)
-      { // start/stop columns
-         // for each of the visual array figures...
-         // ... get the translation matrix ...
-         CTM refCTM(_arrprops.displ(i,j), 1, 0, false);
-         refCTM *= _translation;
-         psf.cellref(_structure->name(), refCTM);
-         if (!psf.hier())
-         {
-            _structure->psWrite(psf, drawprop);
-         }
-      }
-   }
 }
 
 void  laydata::TdtCellAref::ungroup(laydata::TdtDesign* ATDB, TdtCell* dst, laydata::AtticList* nshp) {
@@ -2283,9 +1820,8 @@ laydata::TdtText::TdtText(std::string text, CTM trans) : TdtData(),
 {
    for (unsigned charnum = 0; charnum < text.length(); charnum++)
       if (!isprint(text[charnum])) text[charnum] = '?';
-   assert(NULL != fontLib); // check that font library is initialised
    DBbox pure_ovl(0,0,0,0);
-   fontLib->getStringBounds(&_text, &pure_ovl);
+   TRENDC->getStringBounds(_text, &pure_ovl);
    _overlap = DBbox(TP(0,0), TP((pure_ovl.p2().x() - pure_ovl.p1().x()),
                                 (pure_ovl.p2().y() - pure_ovl.p1().y())) );
    _correction = TP(-pure_ovl.p1().x(), -pure_ovl.p1().y());
@@ -2294,9 +1830,8 @@ laydata::TdtText::TdtText(std::string text, CTM trans) : TdtData(),
 laydata::TdtText::TdtText(InputTdtFile* const tedfile) : TdtData(),
    _text(tedfile->getString()), _translation(tedfile->getCTM()), _overlap(TP())
 {
-   assert(NULL != fontLib); // check that font library is initialised
    DBbox pure_ovl(0,0,0,0);
-   fontLib->getStringBounds(&_text, &pure_ovl);
+   TRENDC->getStringBounds(_text, &pure_ovl);
    _overlap = DBbox(TP(0,0), TP((pure_ovl.p2().x() - pure_ovl.p1().x()),
                     (pure_ovl.p2().y() - pure_ovl.p1().y())) );
    _correction = TP(-pure_ovl.p1().x(), -pure_ovl.p1().y());
@@ -2305,73 +1840,44 @@ laydata::TdtText::TdtText(InputTdtFile* const tedfile) : TdtData(),
 void laydata::TdtText::replaceStr(std::string newstr)
 {
    _text = newstr;
-   assert(NULL != fontLib); // check that font library is initialised
    DBbox pure_ovl(0,0,0,0);
-   fontLib->getStringBounds(&_text, &pure_ovl);
+   TRENDC->getStringBounds(_text, &pure_ovl);
    _overlap = DBbox(TP(0,0), TP((pure_ovl.p2().x() - pure_ovl.p1().x()),
                     (pure_ovl.p2().y() - pure_ovl.p1().y())) );
    _correction = TP(-pure_ovl.p1().x(), -pure_ovl.p1().y());
 }
 
-void laydata::TdtText::openGlPrecalc(layprop::DrawProperties& drawprop, PointVector& ptlist) const
-{
-   //  Things to remember...
-   // Font has to be translated using its own matrix in which
-   // tx/ty are forced to zero. Below they are not used (and not zeroed)
-   // because of the conversion to the openGL matrix.
-   // The text binding point is multiplied ALONE with the current
-   // translation matrix, but NEVER with the font matrix.
-   // All this as far as I remember is described in the PS manual
-   // OpenGL seems to have more primitive font handling - no offense
-   // IMHO.
-   // The other "discovery" for the GLUT font rendering...
-   // They are talking in the doc's that stroke fonts can vary from
-   // 119.05 units down to 33.33 units. It is not quite clear however
-   // how big (in pixels say) is one unit. After a lot of experiments
-   // it appears that if you draw a character with font scale = 1, then
-   // you will get a font with height 119.05 units. In order to translate
-   // the font to DBU's I need to multiply it by DBU and divide it to 119.05
-   // This is done in the tellibin - int tellstdfunc::stdADDTEXT::execute()
-   // Things to consider ...
-   // And the last, but not the least...
-   // GDSII text justification
-   //====================================================================
-   // the correction is needed to fix the bottom left corner of the
-   // text overlapping box to the binding point. glf library normally
-   // draws the first symbol centered around the bounding point
-   CTM correction;
-   correction.Translate(-_overlap.p1().x(), -_overlap.p1().y());
-   DBbox _over = _overlap.overlap(correction);
-   // font translation matrix
-   CTM ftmtrx =  _translation * drawprop.topCtm();
-   DBbox wsquare(TP(0,0), TP(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT));
-   if ( wsquare.visible(ftmtrx * drawprop.scrCtm(), drawprop.visualLimit()) )
-   {
-      // If we get here - means that the text is visible
-      CTM adjTranslation = (drawprop.adjustTextOrientation()) ?
-                            renderingAdjustment(ftmtrx) : _translation;
-      CTM adj_ftmtrx     = (drawprop.adjustTextOrientation()) ?
-                            adjTranslation * drawprop.topCtm() : ftmtrx;
-      // get the text overlapping box ...
-      ptlist.reserve(5);
-      ptlist.push_back(_over.p1() * ftmtrx);
-      ptlist.push_back(TP(_over.p2().x(), _over.p1().y()) * ftmtrx);
-      ptlist.push_back(_over.p2() * ftmtrx);
-      ptlist.push_back(TP(_over.p1().x(), _over.p2().y()) * ftmtrx);
-      // ... and text bounding point (see the comment above)
-      ptlist.push_back(TP(static_cast<int4b>(adjTranslation.tx()),
-                          static_cast<int4b>(adjTranslation.ty()))  * drawprop.topCtm());
-      // push the font matrix - will be used for text drawing
-      drawprop.pushCtm(adj_ftmtrx);
-   }
-}
+//  Things to remember...
+// Font has to be translated using its own matrix in which
+// tx/ty are forced to zero. Below they are not used (and not zeroed)
+// because of the conversion to the openGL matrix.
+// The text binding point is multiplied ALONE with the current
+// translation matrix, but NEVER with the font matrix.
+// All this as far as I remember is described in the PS manual
+// OpenGL seems to have more primitive font handling - no offense
+// IMHO.
+// The other "discovery" for the GLUT font rendering...
+// They are talking in the doc's that stroke fonts can vary from
+// 119.05 units down to 33.33 units. It is not quite clear however
+// how big (in pixels say) is one unit. After a lot of experiments
+// it appears that if you draw a character with font scale = 1, then
+// you will get a font with height 119.05 units. In order to translate
+// the font to DBU's I need to multiply it by DBU and divide it to 119.05
+// This is done in the tellibin - int tellstdfunc::stdADDTEXT::execute()
+// Things to consider ...
+// And the last, but not the least...
+// GDSII text justification
+//====================================================================
+// the correction is needed to fix the bottom left corner of the
+// text overlapping box to the binding point. glf library normally
+// draws the first symbol centered around the bounding point
 
-void laydata::TdtText::drawRequest(tenderer::TopRend& rend) const
+void laydata::TdtText::drawRequest(trend::TrendBase& rend) const
 {
    // font translation matrix
    CTM ftmtrx =  _translation * rend.topCTM();
    DBbox wsquare(TP(0,0), TP(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT));
-   if (!wsquare.visible(ftmtrx * rend.ScrCTM(), rend.visualLimit()) ) return;
+   if (!wsquare.visible(ftmtrx * rend.scrCTM(), rend.visualLimit()) ) return;
    // If we get here - means that the text is visible
    // draw the cell mark ...
    //   rend.drawReferenceMarks(TP(0,0) * newtrans, layprop::cell_mark);
@@ -2382,83 +1888,16 @@ void laydata::TdtText::drawRequest(tenderer::TopRend& rend) const
       rend.text(&_text, _translation, _overlap, _correction, false);
 }
 
-void laydata::TdtText::drawSRequest(tenderer::TopRend& rend, const SGBitSet*) const
+void laydata::TdtText::drawSRequest(trend::TrendBase& rend, const SGBitSet*) const
 {
    // font translation matrix
    CTM ftmtrx =  _translation * rend.topCTM();
    DBbox wsquare(TP(0,0), TP(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT));
-   if (!wsquare.visible(ftmtrx * rend.ScrCTM(), rend.visualLimit()) ) return;
+   if (!wsquare.visible(ftmtrx * rend.scrCTM(), rend.visualLimit()) ) return;
    // If we get here - means that the text is visible
    // draw the cell mark ...
    //   rend.drawReferenceMarks(TP(0,0) * newtrans, layprop::cell_mark);
    rend.text(&_text, _translation, _overlap, _correction, true);
-}
-
-void laydata::TdtText::openGlDrawLine(layprop::DrawProperties& drawprop, const PointVector& ptlist) const
-{
-   if (0 == ptlist.size()) return;
-   drawprop.drawTextBoundary(ptlist);
-   drawprop.drawReferenceMarks(ptlist[4], layprop::text_mark);
-   // draw the text itself
-   glPushMatrix();
-   double ori_mtrx[] = { drawprop.topCtm().a(),  drawprop.topCtm().b(),0,0,
-                         drawprop.topCtm().c(),  drawprop.topCtm().d(),0,0,
-                                             0,                      0,0,0,
-                        (double) ptlist[4].x(), (double) ptlist[4].y(),0,1};
-   glMultMatrixd(ori_mtrx);
-   // correction of the glf shift - as explained in the openGlPrecalc above
-   glTranslatef(_correction.x(), _correction.y(), 1);
-   // The only difference between glut and glf appears to be the size:-
-   // glf is not using the font unit, so we need to scale it back up (see below)
-   // but... it uses real numbers - that is not what we need. That's why -
-   // keeping the font unit will help to convert the font metrics back to
-   // integer coordinates
-   glScalef(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT, 1);
-
-   assert(NULL != fontLib); // check that font library is initialised
-   fontLib->drawString(&_text, false);
-   glPopMatrix();
-}
-
-void laydata::TdtText::openGlDrawFill(layprop::DrawProperties& drawprop, const PointVector& ptlist) const
-{
-   if (0 == ptlist.size()) return;
-   glPushMatrix();
-   double ori_mtrx[] = { drawprop.topCtm().a(),  drawprop.topCtm().b(),0,0,
-                         drawprop.topCtm().c(),  drawprop.topCtm().d(),0,0,
-                                             0,                      0,0,0,
-                        (double) ptlist[4].x(), (double) ptlist[4].y(),0,1};
-   glMultMatrixd(ori_mtrx);
-   // correction of the glf shift - as explained in the openGlPrecalc above
-   glTranslatef(_correction.x(), _correction.y(), 1);
-   // The only difference between glut and glf appears to be the size:-
-   // glf is not using the font unit, so we need to scale it back up (see below)
-   // but... it uses real numbers - that is not what we need. That's why -
-   // keeping the font unit will help to convert the font metrics back to
-   // integer coordinates
-   glScalef(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT, 1);
-   fontLib->drawString(&_text, true);
-   glPopMatrix();
-}
-
-void laydata::TdtText::openGlDrawSel(const PointVector& ptlist, const SGBitSet*) const
-{
-   assert(0 != ptlist.size());
-   if (sh_selected == status())
-   {
-      glBegin(GL_LINE_LOOP);
-      for (unsigned i = 0; i < 4; i++)
-         glVertex2i(ptlist[i].x(), ptlist[i].y());
-      glEnd();
-   }
-}
-
-void laydata::TdtText::openGlPostClean(layprop::DrawProperties& drawprop, PointVector& ptlist) const
-{
-   if (0 == ptlist.size()) return;
-   ptlist.clear();
-   // get the font matrix out of the stack (pushed in precalc)
-   drawprop.popCtm();
 }
 
 void laydata::TdtText::motionDraw(const layprop::DrawProperties& drawprop,
@@ -2481,7 +1920,7 @@ void laydata::TdtText::motionDraw(const layprop::DrawProperties& drawprop,
       // correction of the glf shift - as explained in the openGlPrecalc above
       glTranslatef(_correction.x(), _correction.y(), 1);
       glScalef(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT, 1);
-      fontLib->drawWiredString(_text);
+      TRENDC->drawWiredString(_text);
       glPopMatrix();
    }
 }
@@ -2495,14 +1934,6 @@ void laydata::TdtText::write(OutputTdtFile* const tedfile) const {
 void laydata::TdtText::dbExport(DbExportFile& exportF) const
 {
    exportF.text(_text, _translation);
-}
-
-void laydata::TdtText::psWrite(PSFile& gdsf, const layprop::DrawProperties& drawprop) const
-{
-   CTM fmtrx(_translation);
-   fmtrx.Scale(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT);
-   CTM ffmtrx(fmtrx.a(), fmtrx.b(), fmtrx.c(), fmtrx.d(), _translation.tx(), _translation.ty());
-   gdsf.text(_text, ffmtrx);
 }
 
 bool laydata::TdtText::pointInside(const TP pnt)
@@ -2612,65 +2043,18 @@ void  laydata::TdtAuxRef::vlOverlap(const layprop::DrawProperties& prop, DBbox& 
    vlOvl.overlap(strOverlap);
 }
 
-void  laydata::TdtAuxRef::openGlPrecalc(layprop::DrawProperties& drawprop, PointVector& ptlist) const
-{
-      // calculate the current translation matrix
-      CTM newtrans = drawprop.topCtm();
-      // get overlapping box of the structure ...
-      DBbox obox(DEFAULT_ZOOM_BOX);
-      if (_structure)
-         obox = _structure->cellOverlap();
-      // ... translate it to the current coordinates ...
-      DBbox areal = obox.overlap(newtrans);
-      // check that the cell (or part of it) is in the visual window
-      DBbox clip = drawprop.clipRegion();
-      if (0ll == clip.cliparea(areal)) return;
-      // check that the cell area is bigger that the MIN_VISUAL_AREA
-      if (!areal.visible(drawprop.scrCtm(), drawprop.visualLimit())) return;
-      // If we get here - means that the cell (or part of it) is visible
-      ptlist.reserve(4);
-      ptlist.push_back(obox.p1() * newtrans);
-      ptlist.push_back(TP(obox.p2().x(), obox.p1().y()) * newtrans);
-      ptlist.push_back(obox.p2() * newtrans);
-      ptlist.push_back(TP(obox.p1().x(), obox.p2().y()) * newtrans);
-}
-
-void  laydata::TdtAuxRef::openGlDrawLine(layprop::DrawProperties& drawprop, const PointVector& ptlist) const
-{
-//   if (0 == ptlist.size()) return;
-//   drawprop.drawCellBoundary(ptlist);
-}
-
-void  laydata::TdtAuxRef::openGlDrawFill(layprop::DrawProperties& drawprop, const PointVector& ptlist) const
-{
-   if ((NULL == _structure) || (0 == ptlist.size())) return;
-   // draw the structure itself
-   _structure->openGlDraw(drawprop, false);
-}
-
-void  laydata::TdtAuxRef::openGlDrawSel(const PointVector&, const SGBitSet*) const
-{
-
-}
-
-void  laydata::TdtAuxRef::openGlPostClean(layprop::DrawProperties& drawprop, PointVector& ptlist) const
-{
-   if (0 == ptlist.size()) return;
-   ptlist.clear();
-}
-
-void  laydata::TdtAuxRef::drawRequest(tenderer::TopRend& rend) const
+void  laydata::TdtAuxRef::drawRequest(trend::TrendBase& rend) const
 {
    // get overlapping box of the structure ...
    DBbox obox(_structure->cellOverlap());
    // ... translate it to the current coordinates ...
    DBbox areal = obox.overlap(rend.topCTM());
-   if (!areal.visible(rend.ScrCTM(), rend.visualLimit())) return;
+   if (!areal.visible(rend.scrCTM(), rend.visualLimit())) return;
 
    _structure->openGlRender(rend, CTM(), false, false);
 }
 
-void  laydata::TdtAuxRef::drawSRequest(tenderer::TopRend& rend, const SGBitSet*) const
+void  laydata::TdtAuxRef::drawSRequest(trend::TrendBase& rend, const SGBitSet*) const
 {
    // This object is not supposed to be selected.
    assert(false);
@@ -2697,11 +2081,6 @@ void laydata::TdtAuxRef::dbExport(DbExportFile& exportF) const
 {
    assert(NULL != _structure);
    _structure->dbExport(exportF);
-}
-
-void laydata::TdtAuxRef::psWrite(PSFile&, const layprop::DrawProperties&) const
-{
-   assert(false);//TODO
 }
 
 bool laydata::TdtAuxRef::pointInside(const TP)
@@ -3415,8 +2794,7 @@ laydata::TdtTmpText::TdtTmpText(std::string text, CTM trans) : _text(text),
 {
    for (unsigned charnum = 0; charnum < text.length(); charnum++)
       if (!isprint(text[charnum])) text[charnum] = '?';
-   assert(NULL != fontLib); // check that font library is initialised
-   fontLib->getStringBounds(&_text, &_overlap);
+   TRENDC->getStringBounds(_text, &_overlap);
 }
 
 
@@ -3426,14 +2804,15 @@ void laydata::TdtTmpText::draw(const layprop::DrawProperties&, CtmQueue& transta
    // font translation matrix
    CTM ftmtrx =  _translation * transtack.front();
    glPushMatrix();
-   double ori_mtrx[] = { ftmtrx.a(), ftmtrx.b(),0,0,
-   ftmtrx.c(), ftmtrx.d(),0,0,
-            0,          0,0,0,
-            ftmtrx.tx(),ftmtrx.ty(),0,1};
-            glMultMatrixd(ori_mtrx);
-            // correction of the glf shift - as explained in the openGlPrecalc above
-            glTranslatef(-_overlap.p1().x(), -_overlap.p1().y(), 1);
-            glScalef(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT, 1);
-            fontLib->drawWiredString(_text);
-            glPopMatrix();
+   double ori_mtrx[] = { ftmtrx.a(), ftmtrx.b() ,0,0,
+                         ftmtrx.c(), ftmtrx.d() ,0,0,
+                         0,          0          ,0,0,
+                         ftmtrx.tx(),ftmtrx.ty(),0,1
+                       };
+   glMultMatrixd(ori_mtrx);
+   // correction of the glf shift - as explained in the openGlPrecalc above
+   glTranslatef(-_overlap.p1().x(), -_overlap.p1().y(), 1);
+   glScalef(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT, 1);
+   TRENDC->drawWiredString(_text);
+   glPopMatrix();
 }

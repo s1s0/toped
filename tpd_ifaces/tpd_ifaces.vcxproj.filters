@@ -2,15 +2,15 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{dd9f045c-7025-497c-8c02-1e5ec887e298}</UniqueIdentifier>
+      <UniqueIdentifier>{c9443ef9-888b-4ed9-80f3-d583f479b340}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
     </Filter>
     <Filter Include="Header Files">
-      <UniqueIdentifier>{78f6c53e-3d24-44a0-816a-6d8e4a2d668d}</UniqueIdentifier>
+      <UniqueIdentifier>{106db3c6-26eb-4bde-9e5d-010cd1d27eb8}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl</Extensions>
     </Filter>
     <Filter Include="FlexBison Files">
-      <UniqueIdentifier>{071231db-ac56-42dd-8903-e7371caa9bca}</UniqueIdentifier>
+      <UniqueIdentifier>{ae4692c0-6673-48fc-a4e9-11606239fbda}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -32,6 +32,9 @@
     <ClCompile Include="oasis_io.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ps_out.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="tpdph.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -50,6 +53,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="oasis_io.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ps_out.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="tpdph.h">

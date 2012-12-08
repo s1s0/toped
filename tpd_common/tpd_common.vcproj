@@ -182,10 +182,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\glf.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\MemTrack.cpp"
 				>
 			</File>
@@ -228,6 +224,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\tedbac.cpp"
+				>
 			</File>
 			<File
 				RelativePath=".\tpdph.cpp"
@@ -283,10 +283,6 @@
 				>
 			</File>
 			<File
-				RelativePath="glf.h"
-				>
-			</File>
-			<File
 				RelativePath=".\MemTrack.h"
 				>
 			</File>
@@ -296,6 +292,10 @@
 			</File>
 			<File
 				RelativePath="polycross.h"
+				>
+			</File>
+			<File
+				RelativePath=".\tedbac.h"
 				>
 			</File>
 			<File

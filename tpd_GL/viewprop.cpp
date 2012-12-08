@@ -35,9 +35,10 @@
 #include "viewprop.h"
 #include "outbox.h"
 #include "tenderer.h"
+#include "trend.h"
 
-layprop::FontLibrary*                 fontLib = NULL;
-layprop::PropertyCenter*              PROPC   = NULL;
+extern trend::TrendCenter*       TRENDC;
+layprop::PropertyCenter*         PROPC   = NULL;
 
 layprop::SDLine::SDLine(const TP& p1,const TP& p2, const real UU) : _ln(p1,p2)
 {
@@ -49,7 +50,7 @@ layprop::SDLine::SDLine(const TP& p1,const TP& p2, const real UU) : _ln(p1,p2)
    strdist << _length * UU;
    _value = strdist.str();
    _center = TP((_ln.p1().x() + _ln.p2().x()) / 2, (_ln.p1().y() + _ln.p2().y()) / 2 );
-   // get the angle coefficient of the ruler and calculate the corresponing
+   // get the angle coefficient of the ruler and calculate the corresponding
    // functions - will be used during the drawing
    real angle_rad = atan2(_A , -_B);
    _sinus     = sin(angle_rad);
@@ -90,8 +91,7 @@ void layprop::SDLine::draw(const DBline& long_mark, const DBline& short_mark, co
    glScalef(scaledpix, scaledpix, 1);
    glRotatef(_angle, 0, 0, 1);
 
-   assert(NULL != fontLib);
-   fontLib->drawSolidString(_value);
+   TRENDC->drawSolidString(_value);
 
    glDisable(GL_POLYGON_SMOOTH); //- for solid fill
    glEnable(GL_POLYGON_STIPPLE);
@@ -203,28 +203,28 @@ void layprop::SupplementaryData::mouseStop()
 //*****************************************************************************
 // class LayoutGrid
 //*****************************************************************************
-void layprop::LayoutGrid::Draw(const DrawProperties& drawprop, const real DBscale)
-{
-   int gridstep = (int)rint(_step / DBscale);
-   if (_visual && ( abs((int)(drawprop.scrCtm().a() * gridstep)) > GRID_LIMIT))
-   {
-      drawprop.setGridColor(_color);
-      // set first grid step to be multiply on the step
-      TP bl = TP(drawprop.clipRegion().p1().x(),drawprop.clipRegion().p2().y());
-      TP tr = TP(drawprop.clipRegion().p2().x(),drawprop.clipRegion().p1().y());
-      int signX = (bl.x() > 0) ? 1 : -1;
-      int X_is = (int)((rint(abs(bl.x()) / gridstep)) * gridstep * signX);
-      int signY = (tr.y() > 0) ? 1 : -1;
-      int Y_is = (int)((rint(abs(tr.y()) / gridstep)) * gridstep * signY);
-
-      //... and finaly draw the grid
-      glBegin(GL_POINTS);
-      for (int i = X_is; i < tr.x()+1; i += gridstep)
-         for (int j = Y_is; j < bl.y()+1; j += gridstep)
-            glVertex2i(i,j);
-      glEnd();
-   }
-}
+//void layprop::LayoutGrid::Draw(const DrawProperties& drawprop, const real DBscale)
+//{
+//   int gridstep = (int)rint(_step / DBscale);
+//   if (_visual && ( abs((int)(drawprop.scrCtm().a() * gridstep)) > GRID_LIMIT))
+//   {
+//      drawprop.setGridColor(_color);
+//      // set first grid step to be multiply on the step
+//      TP bl = TP(drawprop.clipRegion().p1().x(),drawprop.clipRegion().p2().y());
+//      TP tr = TP(drawprop.clipRegion().p2().x(),drawprop.clipRegion().p1().y());
+//      int signX = (bl.x() > 0) ? 1 : -1;
+//      int X_is = (int)((rint(abs(bl.x()) / gridstep)) * gridstep * signX);
+//      int signY = (tr.y() > 0) ? 1 : -1;
+//      int Y_is = (int)((rint(abs(tr.y()) / gridstep)) * gridstep * signY);
+//
+//      //... and finaly draw the grid
+//      glBegin(GL_POINTS);
+//      for (int i = X_is; i < tr.x()+1; i += gridstep)
+//         for (int j = Y_is; j < bl.y()+1; j += gridstep)
+//            glVertex2i(i,j);
+//      glEnd();
+//   }
+//}
 
 //=============================================================================
 layprop::PropertyCenter::PropertyCenter() :
@@ -232,7 +232,6 @@ layprop::PropertyCenter::PropertyCenter() :
    _step              ( 1                          ),
    _autopan           ( false                      ),
    _zeroCross         ( false                      ),
-   _renderType        ( false                      ),
    _boldOnHover       ( false                      ),
    _markerAngle       ( 0                          ),
    _layselmask        ( laydata::_lmall            ),
@@ -290,27 +289,27 @@ bool layprop::PropertyCenter::viewGrid(byte No, bool status) {
    return status;
 }
 
-void layprop::PropertyCenter::drawGrid(const DrawProperties* drawProp) const
-{
-   typedef gridlist::const_iterator CI;
-   for(CI p = _grid.begin(); p != _grid.end(); p++)
-      p->second->Draw(*drawProp, _UU);
-}
+//void layprop::PropertyCenter::drawGrid(const DrawProperties* drawProp) const
+//{
+//   typedef gridlist::const_iterator CI;
+//   for(CI p = _grid.begin(); p != _grid.end(); p++)
+//      p->second->Draw(*drawProp, _UU);
+//}
 
-void layprop::PropertyCenter::drawZeroCross(const DrawProperties* drawProp) const
-{
-   if (!_zeroCross) return;
-   glLineStipple(1,0xcccc);
-   glEnable(GL_LINE_STIPPLE);
-   glBegin(GL_LINES);
-   glColor4f((GLfloat)1, (GLfloat)1, (GLfloat)1, (GLfloat)0.7); // gray
-   glVertex2i(0, drawProp->clipRegion().p1().y());
-   glVertex2i(0, drawProp->clipRegion().p2().y());
-   glVertex2i(drawProp->clipRegion().p1().x(), 0);
-   glVertex2i(drawProp->clipRegion().p2().x(), 0);
-   glEnd();
-   glDisable(GL_LINE_STIPPLE);
-}
+//void layprop::PropertyCenter::drawZeroCross(const DrawProperties* drawProp) const
+//{
+//   if (!_zeroCross) return;
+//   glLineStipple(1,0xcccc);
+//   glEnable(GL_LINE_STIPPLE);
+//   glBegin(GL_LINES);
+//   glColor4f((GLfloat)1, (GLfloat)1, (GLfloat)1, (GLfloat)0.7); // gray
+//   glVertex2i(0, drawProp->clipRegion().p1().y());
+//   glVertex2i(0, drawProp->clipRegion().p2().y());
+//   glVertex2i(drawProp->clipRegion().p1().x(), 0);
+//   glVertex2i(drawProp->clipRegion().p2().x(), 0);
+//   glEnd();
+//   glDisable(GL_LINE_STIPPLE);
+//}
 
 void layprop::PropertyCenter::setUU(real UU) {
    _UU = UU;
@@ -438,6 +437,18 @@ bool layprop::PropertyCenter::lockDrawProp(DrawProperties*& propDB, PropertyStat
    }
 }
 
+bool layprop::PropertyCenter::tryLockDrawProp(DrawProperties*& propDB, PropertyState state)
+{
+   if (wxMUTEX_NO_ERROR == _drawPLock.TryLock())
+   {
+      assert(NULL != _drawprop);
+      _drawprop->setState(state);
+      propDB = _drawprop;
+      return (true);
+   }
+   else return false;
+}
+
 void layprop::PropertyCenter::unlockDrawProp(DrawProperties*& propDB, bool throwexception)
 {
    _drawprop = propDB;
@@ -458,7 +469,6 @@ layprop::PropertyCenter::~PropertyCenter()
    if (NULL != _oasLayMap) delete _oasLayMap;
    assert(_drawprop);
    delete _drawprop;
-   delete fontLib;
 }
 
 

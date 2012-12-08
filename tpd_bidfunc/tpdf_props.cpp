@@ -35,6 +35,7 @@
 #include "datacenter.h"
 #include "tuidefs.h"
 #include "viewprop.h"
+#include "trend.h"
 #include "ted_prompt.h"
 
 extern parsercmd::cmdBLOCK*      CMDBlock;
@@ -44,7 +45,7 @@ extern console::TllCmdLine*      Console;
 extern wxWindow*                 TopedCanvasW;
 extern wxFrame*                  TopedMainW;
 extern console::toped_logfile    LogFile;
-extern layprop::FontLibrary*     fontLib;
+extern trend::TrendCenter*       TRENDC;
 extern const wxEventType         wxEVT_RENDER_PARAMS;
 extern const wxEventType         wxEVT_CANVAS_PARAMS;
 //=============================================================================
@@ -1617,7 +1618,7 @@ void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
    }
    else if ("SELECT_TEXT_FONT" == name)
    {
-      if (fontLib->selectFont(value))
+      if (TRENDC->selectFont(value))
       {
          wxCommandEvent eventLoadFont(wxEVT_RENDER_PARAMS);
          eventLoadFont.SetId(tui::RPS_SLCT_FONT);
@@ -1628,7 +1629,7 @@ void tellstdfunc::analyzeTopedParameters(std::string name, std::string value)
          //TODO The trouble with font changing on the fly is that the
          // overlapping boxes of the existing texts shall be reevaluated.
          // This means that the database shall be traversed and all text
-         // objects shall call fontLib->getStringBounds(...)
+         // objects shall call TRENDC->getStringBounds(...)
       }
       else
       {

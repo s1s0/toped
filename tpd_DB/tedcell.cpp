@@ -35,10 +35,11 @@
 #include "viewprop.h"
 #include "tedesign.h"
 #include "tenderer.h"
-#include "ps_out.h"
+#include "trend.h"
 #include "outbox.h"
 
-extern layprop::FontLibrary* fontLib;
+extern trend::TrendCenter*       TRENDC;
+
 
 //=============================================================================
 laydata::EditObject::EditObject()
@@ -236,17 +237,12 @@ laydata::TdtDefaultCell::~TdtDefaultCell()
    _layers.clear();
 }
 
-void laydata::TdtDefaultCell::openGlDraw(layprop::DrawProperties&, bool active) const
-{
-}
-
-void laydata::TdtDefaultCell::openGlRender(tenderer::TopRend& rend, const CTM& trans,
+void laydata::TdtDefaultCell::openGlRender(trend::TrendBase& rend, const CTM& trans,
                                            bool selected, bool) const
 {
    CTM ftm(TP(), 3000/OPENGL_FONT_UNIT, 45, false);
    DBbox pure_ovl(0,0,0,0);
-   assert(NULL != fontLib); // check that font library is initialised
-   fontLib->getStringBounds(&_name, &pure_ovl);
+   TRENDC->getStringBounds(_name, &pure_ovl);
    //
    rend.pushCell(_name, trans, DEFAULT_ZOOM_BOX, false, selected);
    rend.setLayer(ERR_LAY_DEF, false);
@@ -257,11 +253,6 @@ void laydata::TdtDefaultCell::openGlRender(tenderer::TopRend& rend, const CTM& t
 
 
 void laydata::TdtDefaultCell::motionDraw(const layprop::DrawProperties&, CtmQueue&, bool active) const
-{
-}
-
-void laydata::TdtDefaultCell::psWrite(PSFile&, const layprop::DrawProperties&,
-      const CellMap*, const TDTHierTree*) const
 {
 }
 
@@ -477,26 +468,7 @@ bool laydata::TdtCell::addChild(laydata::TdtDesign* ATDB, TdtDefaultCell* child)
    return true;
 }
 
-void laydata::TdtCell::openGlDraw(layprop::DrawProperties& drawprop, bool active) const
-{
-   // Draw figures
-   for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
-   {
-      LayerDef curlayno = drawprop.getTenderLay(lay());
-      if (!drawprop.layerHidden(curlayno)) drawprop.setCurrentColor(curlayno);
-      else continue;
-      // fancy like this (dlist iterator) , because a simple
-      // _shapesel[curlayno] complains about loosing qualifiers (const)
-      SelectList::Iterator dlst;
-      bool fill = drawprop.setCurrentFill(false);// honour block_fill state)
-      if ((active) && (_shapesel.end() != (dlst = _shapesel.find(curlayno))))
-         lay->openGlDraw(drawprop,*dlst, fill);
-      else
-         lay->openGlDraw(drawprop, NULL, fill);
-   }
-}
-
-void laydata::TdtCell::openGlRender(tenderer::TopRend& rend, const CTM& trans,
+void laydata::TdtCell::openGlRender(trend::TrendBase& rend, const CTM& trans,
                                      bool selected, bool active) const
 {
    rend.pushCell(_name, trans, _cellOverlap, active, selected);
@@ -566,8 +538,11 @@ void laydata::TdtCell::motionDraw(const layprop::DrawProperties& drawprop,
       //temporary draw of the active cell - moving selected shapes
       SelectList::Iterator llst;
       DataList::iterator dlst;
-      for (llst = _shapesel.begin(); llst != _shapesel.end(); llst++) {
-         const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(llst());
+      for (llst = _shapesel.begin(); llst != _shapesel.end(); llst++) 
+      {
+         layprop::tellRGB theColor;
+         if (const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(llst(), theColor))
+            glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
          for (dlst = llst->begin(); dlst != llst->end(); dlst++)
             if (!((actop == console::op_copy) && (sh_partsel == dlst->first->status())))
                dlst->first->motionDraw(drawprop, transtack, &(dlst->second));
@@ -581,7 +556,10 @@ void laydata::TdtCell::motionDraw(const layprop::DrawProperties& drawprop,
       for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
          if (!drawprop.layerHidden(lay()))
          {
-            const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(lay());
+            layprop::tellRGB theColor;
+            if (const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(lay(), theColor))
+               glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
+//            const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(lay());
             for (QuadTree::DrawIterator CI = lay->begin(drawprop, transtack); CI != lay->end(); CI++)
                CI->motionDraw(drawprop, transtack, NULL);
          }
@@ -651,7 +629,7 @@ laydata::AtticList* laydata::TdtCell::changeSelect(TP pnt, SH_STATUS status, con
    else return NULL;
 }
 
-void laydata::TdtCell::mouseHoover(TP& position, layprop::DrawProperties& drawprop, const LayerDefSet& unselable)
+void laydata::TdtCell::mouseHoover(TP& position, trend::TrendBase& rend, const LayerDefSet& unselable)
 {
    laydata::TdtData* prev = NULL;
    LayerDef prevlay(ERR_LAY_DEF);
@@ -672,21 +650,12 @@ void laydata::TdtCell::mouseHoover(TP& position, layprop::DrawProperties& drawpr
    }
    if (NULL == prev) return;
    assert(LayerDef(ERR_LAY_DEF) != prevlay);
-   //-------------------------------------------------------------
-   PointVector points;
-
-   prev->openGlPrecalc(drawprop, points);
-   if(0 != points.size())
-   {
-      LayerDef curlayno = drawprop.getTenderLay(prevlay);
-      drawprop.setCurrentColor(curlayno);
-      glLineWidth(5);
-      prev->setStatus(sh_selected);
-      prev->openGlDrawSel(points, NULL);
-      prev->setStatus(sh_active);
-      glLineWidth(1);
-   }
-   prev->openGlPostClean(drawprop, points);
+   //
+   const CTM unity;
+   rend.pushCell(_name, unity, _cellOverlap, true, false);
+   rend.setHvrLayer(rend.getTenderLay(prevlay));
+   prev->drawSRequest(rend, NULL);
+   rend.popCell();
 }
 
 
@@ -837,43 +806,6 @@ void laydata::TdtCell::dbExport(DbExportFile& exportf, const CellMap& allcells,
          DI->dbExport(exportf);
    }
    exportf.definitionFinish();
-}
-
-void laydata::TdtCell::psWrite(PSFile& psf, const layprop::DrawProperties& drawprop,
-                               const CellMap* allcells, const TDTHierTree* root) const
-{
-   if (psf.hier())
-   {
-      assert( root );
-      assert( allcells );
-      // We going to write the cells in hierarchical order. Children - first!
-      const laydata::TDTHierTree* Child= root->GetChild(ALL_LIB);
-      while (Child)
-      {
-         allcells->find(Child->GetItem()->name())->second->psWrite(psf, drawprop, allcells, Child);
-         Child = Child->GetBrother(ALL_LIB);
-      }
-      // If no more children and the cell has not been written yet
-      if (psf.checkCellWritten(name())) return;
-      //
-      std::string message = "...converting " + name();
-      tell_log(console::MT_INFO, message);
-   }
-   psf.cellHeader(name(),_cellOverlap);
-   // and now the layers
-   for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
-   {
-      if (!drawprop.layerHidden(lay()))
-      {
-         if (REF_LAY_DEF != lay())
-            psf.propSet(drawprop.getColorName(lay()), drawprop.getFillName(lay()));
-         for (QuadTree::Iterator DI = lay->begin(); DI != lay->end(); DI++)
-            DI->psWrite(psf, drawprop);
-      }
-   }
-   psf.cellFooter();
-   if (psf.hier())
-      psf.registerCellWritten(name());
 }
 
 laydata::TDTHierTree* laydata::TdtCell::hierOut(laydata::TDTHierTree*& Htree,

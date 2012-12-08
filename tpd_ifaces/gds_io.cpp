@@ -1712,7 +1712,7 @@ void GDSin::GdsExportFile::polygon(const int4b* const pdata, unsigned psize)
    flush(wr);
 }
 
-void GDSin::GdsExportFile::wire(const int4b* const pdata, unsigned psize, unsigned width)
+void GDSin::GdsExportFile::wire(const int4b* const pdata, unsigned psize, WireWidth width)
 {
    GDSin::GdsRecord* wr = setNextRecord(gds_PATH);
    flush(wr);

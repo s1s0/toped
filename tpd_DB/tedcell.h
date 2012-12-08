@@ -102,8 +102,7 @@ namespace laydata {
       public:
                              TdtDefaultCell(std::string, int , bool );
          virtual            ~TdtDefaultCell();
-         virtual void        openGlDraw(layprop::DrawProperties&, bool active=false) const;
-         virtual void        openGlRender(tenderer::TopRend&, const CTM&, bool, bool) const;
+         virtual void        openGlRender(trend::TrendBase&, const CTM&, bool, bool) const;
          virtual void        motionDraw(const layprop::DrawProperties&, CtmQueue&, bool active=false) const;
          virtual TDTHierTree* hierOut(TDTHierTree*& Htree, TdtCell*, CellMap*, const TdtLibDir*);
          virtual bool        relink(TdtLibDir*);
@@ -113,8 +112,6 @@ namespace laydata {
          virtual DBbox       getVisibleOverlap(const layprop::DrawProperties&);
          virtual void        write(OutputTdtFile* const, const CellMap&, const TDTHierTree*) const;
          virtual void        dbExport(DbExportFile&, const CellMap&, const TDTHierTree*) const;
-         virtual void        psWrite(PSFile&, const layprop::DrawProperties&,
-                                      const CellMap* = NULL, const TDTHierTree* = NULL) const;
          virtual void        collectUsedLays(const TdtLibDir*, bool, LayerDefList&) const;
          virtual void        renameChild(std::string, std::string) {assert(false); /* TdTDefaultCell can not be renamed */}
          bool                checkLayer(const LayerDef&) const;
@@ -138,9 +135,7 @@ namespace laydata {
                            TdtCell(std::string);
                            TdtCell(InputTdtFile* const, std::string, int);
       virtual             ~TdtCell();
-      virtual void         openGlDraw(layprop::DrawProperties&,
-                                                          bool active=false) const;
-      virtual void         openGlRender(tenderer::TopRend&, const CTM&, bool, bool) const;
+      virtual void         openGlRender(trend::TrendBase&, const CTM&, bool, bool) const;
       virtual void         motionDraw(const layprop::DrawProperties&, CtmQueue&,
                                                           bool active=false) const;
       QuadTree*            secureLayer(const LayerDef&);
@@ -153,8 +148,6 @@ namespace laydata {
       bool                 addChild(TdtDesign*, TdtDefaultCell*);
       virtual void         write(OutputTdtFile* const, const CellMap&, const TDTHierTree*) const;
       virtual void         dbExport(DbExportFile&, const CellMap&, const TDTHierTree*) const;
-      virtual void         psWrite(PSFile&, const layprop::DrawProperties&,
-                                   const CellMap* = NULL, const TDTHierTree* = NULL) const;
       virtual TDTHierTree* hierOut(TDTHierTree*&, TdtCell*, CellMap*, const TdtLibDir*);
       virtual DBbox        cellOverlap() const {return _cellOverlap;}
       void                 selectInBox(DBbox, const LayerDefSet&, word, bool pntsel = false);
@@ -187,7 +180,7 @@ namespace laydata {
       bool                 mergeSelected(AtticList**);
       bool                 stretchSelected(int bfactor, AtticList**);
       AtticList*           changeSelect(TP, SH_STATUS status, const LayerDefSet&);
-      void                 mouseHoover(TP&, layprop::DrawProperties&, const LayerDefSet&);
+      void                 mouseHoover(TP&, trend::TrendBase&, const LayerDefSet&);
       laydata::AtticList*  findSelected(TP);
       TdtCellRef*          getCellOver(TP, CtmStack&, CellRefStack*, const LayerDefSet&);
       SelectList*          shapeSel()        {return &_shapesel;};

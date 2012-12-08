@@ -31,7 +31,7 @@
 #include <map>
 #include <vector>
 #include "tedstd.h"
-#include "tenderer.h"
+#include "basetrend.h"
 #include "drawprop.h"
 
 namespace laydata {
@@ -59,19 +59,10 @@ namespace laydata {
       virtual   void       transfer(const CTM&) = 0;
       //! Copy the object and move it using the input CTM
       virtual   TdtData*   copy(const CTM&) = 0;
-      //! A preparation for drawing - calculating all drawing objects using translation matrix stack.
-      virtual   void       openGlPrecalc(layprop::DrawProperties&, PointVector&) const = 0;
-      //! Draw the outline of the objects
-      virtual   void       openGlDrawLine(layprop::DrawProperties&, const PointVector&) const = 0;
-      //! Draw the object texture
-      virtual   void       openGlDrawFill(layprop::DrawProperties&, const PointVector&) const = 0;
-      //! Draw the outlines of the selected objects
-      virtual   void       openGlDrawSel(const PointVector&, const SGBitSet*) const = 0;
-      //! Clean-up the calculated drawing objects
-      virtual   void       openGlPostClean(layprop::DrawProperties&, PointVector& ptlist) const {ptlist.clear();}
-      virtual   void       drawRequest(tenderer::TopRend&) const = 0;
-      //! Draw the outlines of the selected objects
-      virtual   void       drawSRequest(tenderer::TopRend&, const SGBitSet*) const = 0;
+      //! Draw request (rendering)
+      virtual   void       drawRequest(trend::TrendBase&) const = 0;
+      //! Draw request (rendering) - if the object is selected
+      virtual   void       drawSRequest(trend::TrendBase&, const SGBitSet*) const = 0;
       //! Draw the objects in motion during copy/move and similar operations
       virtual   void       motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const = 0;
       //! Print an object description on the toped console.
@@ -80,8 +71,6 @@ namespace laydata {
       virtual   void       write(OutputTdtFile* const tedfile) const = 0;
       //! Export the TdtData object in external format.
       virtual   void       dbExport(DbExportFile&) const = 0;
-      //! Write the TdtData object in PS file.
-      virtual   void       psWrite(PSFile&, const layprop::DrawProperties&) const = 0;
       //!
       virtual   bool       pointInside(const TP);
       //! shape cut with the input polygon
@@ -128,18 +117,13 @@ namespace laydata {
       virtual void         transfer(const CTM&);
       virtual TdtData*     copy(const CTM&);
 
-      virtual void         openGlPrecalc(layprop::DrawProperties&, PointVector&) const;
-      virtual void         openGlDrawLine(layprop::DrawProperties&, const PointVector&) const;
-      virtual void         openGlDrawFill(layprop::DrawProperties&, const PointVector&) const;
-      virtual void         openGlDrawSel(const PointVector&, const SGBitSet*) const;
-      virtual void         drawRequest(tenderer::TopRend&) const;
-      virtual void         drawSRequest(tenderer::TopRend&, const SGBitSet*) const;
+      virtual void         drawRequest(trend::TrendBase&) const;
+      virtual void         drawSRequest(trend::TrendBase&, const SGBitSet*) const;
       virtual void         motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
 
       virtual void         info(std::ostringstream&, real) const;
       virtual void         write(OutputTdtFile* const tedfile) const;
       virtual void         dbExport(DbExportFile&) const;
-      virtual void         psWrite(PSFile&, const layprop::DrawProperties&) const;
       virtual word         numPoints() const {return 4;};
       virtual void         polyCut(PointVector&, ShapeList**);
       virtual void         stretch(int bfactor, ShapeList**);
@@ -173,18 +157,13 @@ namespace laydata {
          virtual void      transfer(const CTM&);
          virtual TdtData*  copy(const CTM&);
 
-         virtual void      openGlPrecalc(layprop::DrawProperties&, PointVector&) const;
-         virtual void      openGlDrawLine(layprop::DrawProperties&, const PointVector&) const;
-         virtual void      openGlDrawFill(layprop::DrawProperties&, const PointVector&) const;
-         virtual void      openGlDrawSel(const PointVector&, const SGBitSet*) const;
-         virtual void      drawRequest(tenderer::TopRend&) const;
-         virtual void      drawSRequest(tenderer::TopRend&, const SGBitSet*) const;
+         virtual void      drawRequest(trend::TrendBase&) const;
+         virtual void      drawSRequest(trend::TrendBase&, const SGBitSet*) const;
          virtual void      motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
 
          virtual void      info(std::ostringstream&, real) const;
          virtual void      write(OutputTdtFile* const tedfile) const;
          virtual void      dbExport(DbExportFile&) const;
-         virtual void      psWrite(PSFile&, const layprop::DrawProperties&) const;
          virtual word      numPoints() const {return _psize;}
          virtual bool      pointInside(const TP);
          virtual void      polyCut(PointVector&, ShapeList**);
@@ -213,18 +192,13 @@ namespace laydata {
          virtual void      transfer(const CTM&);
          virtual TdtData*  copy(const CTM&);
 
-         virtual void      openGlPrecalc(layprop::DrawProperties&, PointVector&) const;
-         virtual void      openGlDrawLine(layprop::DrawProperties&, const PointVector&) const;
-         virtual void      openGlDrawFill(layprop::DrawProperties&, const PointVector&) const;
-         virtual void      openGlDrawSel(const PointVector&, const SGBitSet*) const;
-         virtual void      drawRequest(tenderer::TopRend&) const;
-         virtual void      drawSRequest(tenderer::TopRend&, const SGBitSet*) const;
+         virtual void      drawRequest(trend::TrendBase&) const;
+         virtual void      drawSRequest(trend::TrendBase&, const SGBitSet*) const;
          virtual void      motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
 
          virtual void      info(std::ostringstream&, real) const;
          virtual void      write(OutputTdtFile* const tedfile) const;
          virtual void      dbExport(DbExportFile&) const;
-         virtual void      psWrite(PSFile&, const layprop::DrawProperties&) const;
          virtual word      numPoints() const {return _psize;}
          virtual bool      pointInside(const TP);
          virtual void      polyCut(PointVector&, ShapeList**);
@@ -257,19 +231,13 @@ namespace laydata {
       virtual TdtData*     copy(const CTM& trans) {return DEBUG_NEW TdtCellRef(
                                                _structure,_translation*trans);}
 //       TdtCellRef*          getShapeOver(TP);
-      virtual void         openGlPrecalc(layprop::DrawProperties&, PointVector&) const;
-      virtual void         openGlDrawLine(layprop::DrawProperties&, const PointVector&) const;
-      virtual void         openGlDrawFill(layprop::DrawProperties&, const PointVector&) const;
-      virtual void         openGlDrawSel(const PointVector&, const SGBitSet*) const;
-      virtual void         openGlPostClean(layprop::DrawProperties&, PointVector& ptlist) const;
-      virtual void         drawRequest(tenderer::TopRend&) const;
-      virtual void         drawSRequest(tenderer::TopRend&, const SGBitSet*) const;
+      virtual void         drawRequest(trend::TrendBase&) const;
+      virtual void         drawSRequest(trend::TrendBase&, const SGBitSet*) const;
       virtual void         motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
 
       virtual void         info(std::ostringstream&, real) const;
       virtual void         write(OutputTdtFile* const tedfile) const;
       virtual void         dbExport(DbExportFile&) const;
-      virtual void         psWrite(PSFile&, const layprop::DrawProperties&) const;
       virtual void         ungroup(TdtDesign*, TdtCell*, AtticList*);
       virtual word         numPoints() const {return 1;};
       virtual bool         pointInside(const TP);
@@ -303,19 +271,14 @@ namespace laydata {
       virtual TdtData*     copy(const CTM& trans) {return DEBUG_NEW TdtCellAref(
                               _structure,_translation * trans, _arrprops);}
 
-      virtual void         openGlPrecalc(layprop::DrawProperties&, PointVector&) const;
-      virtual void         openGlDrawLine(layprop::DrawProperties&, const PointVector&) const;
-      virtual void         openGlDrawFill(layprop::DrawProperties&, const PointVector&) const;
-      virtual void         openGlDrawSel(const PointVector&, const SGBitSet*) const;
-      virtual void         drawRequest(tenderer::TopRend&) const;
-      virtual void         drawSRequest(tenderer::TopRend&, const SGBitSet*) const;
+      virtual void         drawRequest(trend::TrendBase&) const;
+      virtual void         drawSRequest(trend::TrendBase&, const SGBitSet*) const;
       virtual void         motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
-      virtual bool         pointInside(const TP);
 
+      virtual bool         pointInside(const TP);
       virtual void         info(std::ostringstream&, real) const;
       virtual void         write(OutputTdtFile* const tedfile) const;
       virtual void         dbExport(DbExportFile&) const;
-      virtual void         psWrite(PSFile&, const layprop::DrawProperties&) const;
       virtual word         lType() const {return _lmaref;}
       void                 ungroup(TdtDesign*, TdtCell*, AtticList*);
       ArrayProps           arrayProps() const {return _arrprops;}
@@ -336,19 +299,13 @@ namespace laydata {
       virtual void         transfer(const CTM& trans)  {_translation *= trans;}
       virtual TdtData*     copy(const CTM& trans) {return DEBUG_NEW TdtText(
                                                   _text,_translation * trans);}
-      virtual void         openGlPrecalc(layprop::DrawProperties&, PointVector&) const;
-      virtual void         openGlDrawLine(layprop::DrawProperties&, const PointVector&) const;
-      virtual void         openGlDrawFill(layprop::DrawProperties&, const PointVector&) const;
-      virtual void         openGlDrawSel(const PointVector&, const SGBitSet*) const;
-      virtual void         openGlPostClean(layprop::DrawProperties&, PointVector& ptlist) const;
-      virtual void         drawRequest(tenderer::TopRend&) const;
-      virtual void         drawSRequest(tenderer::TopRend&, const SGBitSet*) const;
+      virtual void         drawRequest(trend::TrendBase&) const;
+      virtual void         drawSRequest(trend::TrendBase&, const SGBitSet*) const;
       virtual void         motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
 
       virtual void         info(std::ostringstream&, real) const;
       virtual void         write(OutputTdtFile* const tedfile) const;
       virtual void         dbExport(DbExportFile&) const;
-      virtual void         psWrite(PSFile&, const layprop::DrawProperties&) const;
       virtual word         numPoints() const {return 1;};
       virtual bool         pointInside(const TP);
       virtual void         polyCut(PointVector&, ShapeList**) {};
@@ -382,19 +339,13 @@ namespace laydata {
       virtual void         transfer(const CTM&) {assert(false);}
       virtual TdtData*     copy(const CTM& trans) {assert(false);return NULL;}
 //       TdtCellRef*          getShapeOver(TP);
-      virtual void         openGlPrecalc(layprop::DrawProperties&, PointVector&) const;
-      virtual void         openGlDrawLine(layprop::DrawProperties&, const PointVector&) const;
-      virtual void         openGlDrawFill(layprop::DrawProperties&, const PointVector&) const;
-      virtual void         openGlDrawSel(const PointVector&, const SGBitSet*) const;
-      virtual void         openGlPostClean(layprop::DrawProperties&, PointVector& ptlist) const;
-      virtual void         drawRequest(tenderer::TopRend&) const;
-      virtual void         drawSRequest(tenderer::TopRend&, const SGBitSet*) const;
+      virtual void         drawRequest(trend::TrendBase&) const;
+      virtual void         drawSRequest(trend::TrendBase&, const SGBitSet*) const;
       virtual void         motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
 
       virtual void         info(std::ostringstream&, real) const;
       virtual void         write(OutputTdtFile* const tedfile) const;
       virtual void         dbExport(DbExportFile&) const;
-      virtual void         psWrite(PSFile&, const layprop::DrawProperties&) const;
 //      virtual void         ungroup(TdtDesign*, TdtCell*, AtticList*);
       virtual word         numPoints() const {return 1;};
       virtual bool         pointInside(const TP);

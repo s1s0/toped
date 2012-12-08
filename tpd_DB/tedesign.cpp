@@ -33,7 +33,6 @@
 #include "tedat.h"
 #include "viewprop.h"
 #include "tenderer.h"
-#include "ps_out.h"
 
 extern layprop::PropertyCenter*  PROPC;
 
@@ -187,23 +186,6 @@ void laydata::TdtLibrary::dbExport(DbExportFile& exportF)
       exportF.topcell()->dbExport(exportF, _cells, root_cell);
    }
    exportF.libraryFinish();
-}
-
-void laydata::TdtLibrary::psWrite(PSFile& psf, const TdtCell* top, const layprop::DrawProperties& drawprop)
-{
-   laydata::TDTHierTree* root_cell = _hiertree->GetMember(top);
-   if (psf.hier())
-   {
-      top->psWrite(psf, drawprop, &_cells, root_cell);
-      psf.pspage_header(top->cellOverlap());
-      psf.pspage_footer(top->name());
-   }
-   else
-   {
-      psf.pspage_header(top->cellOverlap());
-      top->psWrite(psf, drawprop, &_cells, root_cell);
-      psf.pspage_footer(top->name());
-   }
 }
 
 laydata::TdtDefaultCell* laydata::TdtLibrary::checkCell(std::string name, bool undeflib)
@@ -1322,19 +1304,7 @@ bool laydata::TdtDesign::editTop() {
    return _target.top();
 }
 
-void laydata::TdtDesign::openGlDraw(layprop::DrawProperties& drawprop)
-{
-   if (_target.checkEdit())
-   {
-      drawprop.initCtmStack();
-      drawprop.initDrawRefStack(_target.pEditChain());
-      _target.view()->openGlDraw(drawprop, _target.isCell());
-      drawprop.clearCtmStack();
-      drawprop.clearDrawRefStack();
-   }
-}
-
-void laydata::TdtDesign::openGlRender(tenderer::TopRend& rend)
+void laydata::TdtDesign::openGlRender(trend::TrendBase& rend)
 {
    if (_target.checkEdit())
    {
@@ -1451,16 +1421,14 @@ laydata::AtticList* laydata::TdtDesign::changeSelect(TP* p1, const LayerDefSet& 
 }
 
 
-void laydata::TdtDesign::mouseHoover(TP& position, layprop::DrawProperties& drawprop, const LayerDefSet& unselable)
+void laydata::TdtDesign::mouseHoover(TP& position, trend::TrendBase& rend, const LayerDefSet& unselable)
 {
    if (_target.checkEdit())
    {
       TP selp = position * _target.rARTM();
-      drawprop.initCtmStack();
-      CTM actm(_target.ARTM());
-      drawprop.pushCtm(actm);
-      _target.edit()->mouseHoover(selp, drawprop, unselable);
-      drawprop.clearCtmStack();
+      rend.initDrawRefStack(_target.pEditChain());
+      _target.edit()->mouseHoover(selp, rend, unselable);
+      rend.clearDrawRefStack();
    }
 }
 
@@ -1702,11 +1670,6 @@ DBbox laydata::TdtDesign::getVisibleOverlap(layprop::DrawProperties& prop)
    else return ovl;
 }
 
-bool laydata::TdtDesign::checkActiveCell()
-{
-   return (NULL != _target.edit());
-};
-
 void laydata::TdtDesign::tryUnselectAll() const {
    if (NULL != _target.edit())
       _target.edit()->unselectAll();
@@ -1830,22 +1793,22 @@ laydata::TdtDefaultCell* laydata::DrcLibrary::checkCell(std::string name)
    else return _cells[name];
 }
 
-void laydata::DrcLibrary::openGlDraw(layprop::DrawProperties& drawProp, std::string cell)
-{
-   drawProp.setState(layprop::DRC);
-   laydata::TdtDefaultCell* dst_structure = checkCell(cell);
-   if (dst_structure)
-   {
-      drawProp.initCtmStack();
-//    drawProp->initDrawRefStack(NULL); // no references yet in the DRC DB
-      dst_structure->openGlDraw(drawProp);
-//    drawProp->clearCtmStack();
-      drawProp.clearDrawRefStack();
-   }
-   drawProp.setState(layprop::DB);
-}
+//void laydata::DrcLibrary::openGlDraw(layprop::DrawProperties& drawProp, std::string cell)
+//{
+//   drawProp.setState(layprop::DRC);
+//   laydata::TdtDefaultCell* dst_structure = checkCell(cell);
+//   if (dst_structure)
+//   {
+//      drawProp.initCtmStack();
+////    drawProp->initDrawRefStack(NULL); // no references yet in the DRC DB
+//      dst_structure->openGlDraw(drawProp);
+////    drawProp->clearCtmStack();
+//      drawProp.clearDrawRefStack();
+//   }
+//   drawProp.setState(layprop::DB);
+//}
 
-void laydata::DrcLibrary::openGlRender(tenderer::TopRend& renderer, std::string cell, CTM& cctm)
+void laydata::DrcLibrary::openGlRender(trend::TrendBase& renderer, std::string cell, CTM& cctm)
 {
    renderer.setState(layprop::DRC);
    laydata::TdtDefaultCell* dst_structure = checkCell(cell);

@@ -559,6 +559,22 @@ CTM::CTM(const TP& dp, real scale, real rotation, bool reflX)
    Translate((real) dp.x(),(real) dp.y());
 }
 
+CTM::CTM(const TP& bl, const TP& tr)
+{
+   if ((tr.x() == bl.x()) || (tr.y() == bl.y()))
+   {
+      Initialize();
+   }
+   else
+   {
+      _a = 2.0f / (real)(tr.x() - bl.x());
+      _b = _c = 0.0f;
+      _d = 2.0f / (real)(tr.y() - bl.y());
+      _tx = -((real)(tr.x() + bl.x()) / (real)(tr.x() - bl.x()));
+      _ty = -((real)(tr.y() + bl.y()) / (real)(tr.y() - bl.y()));
+   }
+}
+
 CTM CTM::Translate( const TP& pnt )
 {
    return (*this *= CTM(1,0,0,1,pnt.x(),pnt.y()));
@@ -651,6 +667,14 @@ void CTM::Decompose(TP& trans, real& rot, real& scale, bool& flipX) const
 }
 
 void CTM::oglForm(real* const oglm) const
+{
+   oglm[ 0] =   _a; oglm[ 1] =   _b; oglm[ 2] = 0.0f; oglm[ 3] = 0.0f;
+   oglm[ 4] =   _c; oglm[ 5] =   _d; oglm[ 6] = 0.0f; oglm[ 7] = 0.0f;
+   oglm[ 8] = 0.0f; oglm[ 9] = 0.0f; oglm[10] = 1.0f; oglm[11] = 0.0f;
+   oglm[12] =  _tx; oglm[13] =  _ty; oglm[14] = 0.0f; oglm[15] = 1.0f;
+}
+
+void CTM::oglForm(float* const oglm) const
 {
    oglm[ 0] =   _a; oglm[ 1] =   _b; oglm[ 2] = 0.0f; oglm[ 3] = 0.0f;
    oglm[ 4] =   _c; oglm[ 5] =   _d; oglm[ 6] = 0.0f; oglm[ 7] = 0.0f;

@@ -17931,7 +17931,7 @@ else
 fi
 
 
-ac_config_files="$ac_config_files Makefile ui/Makefile tpd_common/Makefile tpd_DB/Makefile tpd_ifaces/Makefile tpd_parser/Makefile tpd_bidfunc/Makefile src/Makefile fonts/Makefile icons/Makefile utils/cadence/Makefile tll/Makefile tll/user_functions/Makefile tll/user_functions/config/Makefile tll/user_functions/technology/Makefile tll/user_functions/technology/mosis_SCMOS_p2m6/Makefile tll/user_functions/test/Makefile tll/user_functions/general/Makefile tll/user_functions/general/examples/Makefile tll/user_functions/tools/Makefile tll/user_functions/tools/logos/Makefile tll/user_functions/tools/logos/examples/Makefile tll/user_functions/devices/Makefile"
+ac_config_files="$ac_config_files Makefile ui/Makefile tpd_common/Makefile tpd_GL/Makefile tpd_DB/Makefile tpd_ifaces/Makefile tpd_parser/Makefile tpd_bidfunc/Makefile src/Makefile fonts/Makefile icons/Makefile utils/cadence/Makefile tll/Makefile tll/user_functions/Makefile tll/user_functions/config/Makefile tll/user_functions/technology/Makefile tll/user_functions/technology/mosis_SCMOS_p2m6/Makefile tll/user_functions/test/Makefile tll/user_functions/general/Makefile tll/user_functions/general/examples/Makefile tll/user_functions/tools/Makefile tll/user_functions/tools/logos/Makefile tll/user_functions/tools/logos/examples/Makefile tll/user_functions/devices/Makefile"
 
 
 if test -z "$UTILS_TRUE"; then :
@@ -19069,6 +19069,7 @@ do
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "ui/Makefile") CONFIG_FILES="$CONFIG_FILES ui/Makefile" ;;
     "tpd_common/Makefile") CONFIG_FILES="$CONFIG_FILES tpd_common/Makefile" ;;
+    "tpd_GL/Makefile") CONFIG_FILES="$CONFIG_FILES tpd_GL/Makefile" ;;
     "tpd_DB/Makefile") CONFIG_FILES="$CONFIG_FILES tpd_DB/Makefile" ;;
     "tpd_ifaces/Makefile") CONFIG_FILES="$CONFIG_FILES tpd_ifaces/Makefile" ;;
     "tpd_parser/Makefile") CONFIG_FILES="$CONFIG_FILES tpd_parser/Makefile" ;;

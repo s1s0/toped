@@ -474,6 +474,14 @@ void TpdPost::render_status(bool on_off)
       static_cast<console::TopedStatus*>(_statusBar)->OnRenderOFF();
 }
 
+void TpdPost::addFont(const std::string& fname)
+{
+   wxCommandEvent eventLoadFont(wxEVT_RENDER_PARAMS);
+   eventLoadFont.SetId(tui::RPS_LD_FONT);
+   eventLoadFont.SetString(wxString(fname.c_str(), wxConvUTF8));
+   wxPostEvent(_mainWindow, eventLoadFont);
+}
+
 void TpdPost::refreshTDTtab(bool targetDB, bool threadExecution)
 {
    if (NULL == _topBrowsers) return;

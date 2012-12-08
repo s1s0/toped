@@ -391,7 +391,7 @@ namespace GDSin {
          virtual bool         layerSpecification(const LayerDef&);
          virtual void         box(const int4b* const);
          virtual void         polygon(const int4b* const, unsigned);
-         virtual void         wire(const int4b* const, unsigned, unsigned);
+         virtual void         wire(const int4b* const, unsigned, WireWidth);
          virtual void         text(const std::string&, const CTM&);
          virtual void         ref(const std::string&, const CTM&);
          virtual void         aref(const std::string&, const CTM&, const laydata::ArrayProps&);

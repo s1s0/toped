@@ -118,6 +118,7 @@ AC_CONFIG_FILES([
    Makefile
    ui/Makefile
    tpd_common/Makefile
+   tpd_GL/Makefile
    tpd_DB/Makefile
    tpd_ifaces/Makefile
    tpd_parser/Makefile

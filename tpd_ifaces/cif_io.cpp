@@ -719,7 +719,7 @@ void CIFin::CifExportFile::polygon(const int4b* const pdata, unsigned psize)
    _file << ";"<< std::endl;
 }
 
-void CIFin::CifExportFile::wire(const int4b* const pdata, unsigned psize, unsigned width)
+void CIFin::CifExportFile::wire(const int4b* const pdata, unsigned psize, WireWidth width)
 {
    // Convert data to point list
    PointVector plist;
