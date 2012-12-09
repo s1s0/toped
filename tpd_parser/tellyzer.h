@@ -525,12 +525,12 @@ namespace  parsercmd {
    class cmdLISTADD : public cmdVIRTUAL {
    public:
                   cmdLISTADD(telldata::TellVar* listarg, bool prefix, bool index) :
-                     _listarg(static_cast<telldata::TtList*>(listarg)), _prefix(prefix), _index(index) {};
+                     _listarg(static_cast<telldata::TtList*>(listarg)), _prefix(prefix), _index(index), _empty_list(true){};
       virtual    ~cmdLISTADD(){}
       virtual int execute();
    protected:
                   cmdLISTADD(cmdLISTADD* indxcmd) :
-                     _listarg(indxcmd->_listarg),_prefix(indxcmd->_prefix), _index(indxcmd->_index) {};
+                     _listarg(indxcmd->_listarg),_prefix(indxcmd->_prefix), _index(indxcmd->_index), _empty_list(true) {};
       dword       getIndex();
       // don't delete this and don't get confused. It's only a pointer to a variable,
       // that normally should be in the operand stack. List operations are an exception -

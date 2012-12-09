@@ -156,7 +156,11 @@ BEGIN_EVENT_TABLE(tui::ExternalProcess, wxProcess)
    EVT_TIMER(wxID_ANY, tui::ExternalProcess::OnTimer)
 END_EVENT_TABLE()
 
-tui::ExternalProcess::ExternalProcess(wxEvtHandler* parent) : wxProcess(parent), _idleTimer(this)
+tui::ExternalProcess::ExternalProcess(wxEvtHandler* parent) :
+   wxProcess     ( parent       ),
+   _idleTimer    ( this         ),
+   _tes          (         NULL ),
+   _tis          (         NULL )
 {
    Redirect();
    _idleTimer.Start(100);

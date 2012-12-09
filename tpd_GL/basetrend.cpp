@@ -87,12 +87,24 @@ TeselChunk::~TeselChunk()
 //=============================================================================
 //
 
-TeselTempData::TeselTempData(unsigned offset) :_the_chain(NULL), _cindexes(),
-           _all_ftrs(0), _all_ftfs(0), _all_ftss(0), _offset(offset)
+TeselTempData::TeselTempData(unsigned offset) :
+   _the_chain   (    NULL),
+   _ctype       (      0 ),
+   _cindexes    (        ),
+   _all_ftrs    (      0 ),
+   _all_ftfs    (      0 ),
+   _all_ftss    (      0 ),
+   _offset      ( offset )
 {}
 
-TeselTempData::TeselTempData(TeselChain* tc) : _the_chain(tc), _cindexes(),
-           _all_ftrs(0), _all_ftfs(0), _all_ftss(0), _offset(0)
+TeselTempData::TeselTempData(TeselChain* tc) :
+   _the_chain   ( tc     ),
+   _ctype       (      0 ),
+   _cindexes    (        ),
+   _all_ftrs    (      0 ),
+   _all_ftfs    (      0 ),
+   _all_ftss    (      0 ),
+   _offset      (      0 )
 {}
 
 void TeselTempData::storeChunk()
@@ -929,6 +941,7 @@ trend::TrendLay::TrendLay():
    _cslice               (        NULL ),
    _num_total_points     (          0u ),
    _num_total_indexs     (          0u ),
+   _num_total_slctdx     (          0u ),
    _num_total_strings    (          0u )
 {
    for (int i = lstr; i <= lnes; i++)
