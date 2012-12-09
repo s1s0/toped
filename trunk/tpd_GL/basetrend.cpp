@@ -1165,6 +1165,7 @@ trend::TrendBase::TrendBase( layprop::DrawProperties* drawprop, real UU ) :
    _UU                 (        UU ),
    _clayer             (      NULL ),
    _grcLayer           (      NULL ),
+   _refLayer           (      NULL ),
    _cslctd_array_offset(        0u ),
    _activeCS           (      NULL ),
    _dovCorrection      (         0 )
@@ -1294,6 +1295,7 @@ void trend::TrendBase::grcCleanUp()
 
 trend::TrendBase::~TrendBase()
 {
+   if (_refLayer) delete _refLayer;
 }
 
 void trend::checkOGLError(std::string loc)

@@ -301,7 +301,7 @@ void trend::ToshaderRefLay::draw(layprop::DrawProperties* drawprop)
    glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
    assert(bufferSize == (GLint)(2 * total_points() * sizeof(TNDR_GLDATAT)));
 
-   glEnableVertexAttribArray(TSHDR_LOC_VERTEX);  // glEnableClientState(GL_VERTEX_ARRAY)
+   glEnableVertexAttribArray(TSHDR_LOC_VERTEX);
    // Set-up the offset in the binded Vertex buffer
    glVertexAttribPointer(TSHDR_LOC_VERTEX, 2, TNDR_GLENUMT, GL_FALSE, 0, 0);
    // ... and here we go ...
@@ -349,9 +349,9 @@ trend::ToshaderRefLay::~ToshaderRefLay()
 // class Toshader
 //
 trend::Toshader::Toshader( layprop::DrawProperties* drawprop, real UU) :
-    Tenderer             (drawprop, UU )
+    Tenderer             (drawprop, UU, false )
 {
-   _refLayer = DEBUG_NEW ToshaderRefLay();// FIXME! this object is creted twice - here and in the parent constructor
+   _refLayer = DEBUG_NEW ToshaderRefLay();
 }
 
 bool trend::Toshader::chunkExists(const LayerDef& laydef, bool has_selected)
@@ -564,6 +564,6 @@ void trend::Toshader::setGrcLayer(bool setEData, const LayerDef& laydef)
 
 trend::Toshader::~Toshader()
 {
-//   delete _refLayer;// FIXME! this object is creted twice - here and in the parent constructor
+//   delete _refLayer; //>>> deleted in the parent constructor
 }
 

@@ -929,5 +929,6 @@ trend::TrendCenter::~TrendCenter()
    for (OglFontCollectionMap::const_iterator CF = _oglFont.begin(); CF != _oglFont.end(); CF++)
       delete (CF->second);
    if (NULL != _cRenderer) delete _cRenderer;
+   if (NULL != _cShaders) delete _cShaders;
 }
 
