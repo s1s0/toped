@@ -74,24 +74,24 @@
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Users\skr\sgSoft\wxWidgets-2.9.3\lib\vc_lib\mswu;$(IncludePath);C:\Users\skr\sgSoft\wxWidgets-2.9.3\include;C:\Users\skr\sgSoft\glew-1.9.0\include</IncludePath>
-    <LibraryPath>C:\Users\skr\sgSoft\glew-1.9.0\lib;C:\Users\skr\sgSoft\wxWidgets-2.9.3\lib\vc_lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(TPD_DEV)\wxWidgets\lib\vc_lib\mswu;$(IncludePath);$(TPD_DEV)\wxWidgets\include;$(TPD_DEV)\glew\include</IncludePath>
+    <LibraryPath>$(TPD_DEV)\glew\lib;$(TPD_DEV)\wxWidgets\lib\vc_lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Users\skr\sgSoft\wxWidgets-2.9.3\lib\vc_lib\mswu;$(IncludePath);C:\Users\skr\sgSoft\wxWidgets-2.9.3\include;C:\Users\skr\sgSoft\glew-1.9.0\include</IncludePath>
+    <IncludePath>$(TPD_DEV)\wxWidgets\lib\vc_lib\mswu;$(IncludePath);$(TPD_DEV)\wxWidgets\include;$(TPD_DEV)\glew\include</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\skr\sgSoft\wxWidgets-2.9.3\lib\vc_lib\mswud;$(IncludePath);C:\Users\skr\sgSoft\wxWidgets-2.9.3\include;C:\Users\skr\sgSoft\glew-1.9.0\include</IncludePath>
-    <LibraryPath>C:\Users\skr\sgSoft\glew-1.9.0\lib;C:\Users\skr\sgSoft\wxWidgets-2.9.3\lib\vc_lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(TPD_DEV)\wxWidgets\lib\vc_lib\mswud;$(IncludePath);$(TPD_DEV)\wxWidgets\include;$(TPD_DEV)\glew\include</IncludePath>
+    <LibraryPath>$(TPD_DEV)\glew\lib;$(TPD_DEV)\wxWidgets\lib\vc_lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\skr\sgSoft\wxWidgets-2.9.3\lib\vc_lib\mswud;$(IncludePath);C:\Users\skr\sgSoft\wxWidgets-2.9.3\include;C:\Users\skr\sgSoft\glew-1.9.0\include</IncludePath>
-    <LibraryPath>C:\Users\skr\sgSoft\glew-1.9.0\lib;C:\Users\skr\sgSoft\wxWidgets-2.9.3\lib\vc_lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(TPD_DEV)\wxWidgets\lib\vc_lib\mswud;$(IncludePath);$(TPD_DEV)\wxWidgets\include;$(TPD_DEV)\glew\include</IncludePath>
+    <LibraryPath>$(TPD_DEV)\glew\lib;$(TPD_DEV)\wxWidgets\lib\vc_lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>

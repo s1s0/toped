@@ -73,18 +73,18 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
-    <IncludePath>C:\Users\skr\sgSoft\wxWidgets-2.9.3\lib\vc_lib\mswu;C:\Users\skr\sgSoft\wxWidgets-2.9.3\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(TPD_DEV)\wxWidgets\lib\vc_lib\mswu;$(TPD_DEV)\wxWidgets\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\Users\skr\sgSoft\wxWidgets-2.9.3\lib\vc_lib\mswu;C:\Users\skr\sgSoft\wxWidgets-2.9.3\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(TPD_DEV)\wxWidgets\lib\vc_lib\mswu;$(TPD_DEV)\wxWidgets\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
-    <IncludePath>C:\Users\skr\sgSoft\wxWidgets-2.9.3\lib\vc_lib\mswud;C:\Users\skr\sgSoft\wxWidgets-2.9.3\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(TPD_DEV)\wxWidgets\lib\vc_lib\mswud;$(TPD_DEV)\wxWidgets\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Users\skr\sgSoft\wxWidgets-2.9.3\lib\vc_lib\mswud;C:\Users\skr\sgSoft\wxWidgets-2.9.3\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(TPD_DEV)\wxWidgets\lib\vc_lib\mswud;$(TPD_DEV)\wxWidgets\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
