@@ -1404,19 +1404,20 @@ BEGIN_EVENT_TABLE(browsers::browserTAB, wxAuiNotebook)
    EVT_TECUSTOM_COMMAND(wxEVT_CMD_BROWSER, wxID_ANY, browsers::browserTAB::onCommand)
 END_EVENT_TABLE()
 //==============================================================================
-browsers::browserTAB::browserTAB(wxWindow *parent, wxWindowID id,const
-   wxPoint& pos, const wxSize& size, long style) :
-                                 wxAuiNotebook(parent, id, pos, size, style)
+browsers::browserTAB::browserTAB(wxWindow *parent, wxWindowID id,const wxPoint& pos, const wxSize& size, long style) :
+   wxAuiNotebook( parent, id, pos, size, style),
+   _gdsStruct   ( NULL ),
+   _cifStruct   ( NULL ),
+   _drcStruct   ( NULL ),
+   _oasStruct   ( NULL ),
+   _gdsPageIndex(    0 ),
+   _cifPageIndex(    0 )
 {
    _tdtStruct = DEBUG_NEW TDTbrowser(this, tui::ID_TPD_CELLTREE);
    AddPage(_tdtStruct, wxT("Cells"));
    _layers = DEBUG_NEW LayerBrowser(this,  tui::ID_TPD_LAYERS);
    AddPage(_layers, wxT("Layers"));
 
-   _gdsStruct = NULL;
-   _cifStruct = NULL;
-   _drcStruct = NULL;
-   _oasStruct = NULL;
 }
 
 browsers::browserTAB::~browserTAB()

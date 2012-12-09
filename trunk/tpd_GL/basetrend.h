@@ -623,8 +623,8 @@ namespace trend {
    */
    class TrendTV {
       public:
-         enum {fqss, ftrs, ftfs, ftss} NcvxTypes;
-         enum {cont, line, cnvx, ncvx} ObjtTypes;
+         typedef enum {fqss, ftrs, ftfs, ftss} NcvxTypes;
+         typedef enum {cont, line, cnvx, ncvx} ObjtTypes;
          typedef std::list<TrendText*> TrendStrings;
          typedef std::list<TextOvlBox*> RefTxtList;
                            TrendTV(TrendRef* const, bool, bool, unsigned, unsigned);

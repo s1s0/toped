@@ -155,6 +155,7 @@ wxMutex          tui::DrawThread::_mutex;
 tui::TpdOglContext::TpdOglContext(wxGLCanvas* canvas) :
    wxGLContext               ( canvas     ),
    _oglVersion14             ( false      ),
+   _oglVersion33             ( false      ),
    _oglExtMultiDrawArrays    ( false      ),
    _oglArbVertexBufferObject ( false      ),
    _useVboRendering          ( false      ),
@@ -274,10 +275,27 @@ END_EVENT_TABLE()
 //   EVT_MENU(      CM_CHLAY, TopedFrame::OnCurrentLayer      )
 //   EVT_LEFT_DOWN        ( tui::LayoutCanvas::OnMouseLeftDown   )
 
-tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos,
-     const wxSize& size, int* attribList):
-   wxGLCanvas(parent, ID_TPD_CANVAS, attribList, pos, size, wxFULL_REPAINT_ON_RESIZE, wxT("LayoutCanvas"))
-{
+tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos, const wxSize& size, int* attribList):
+   wxGLCanvas(parent, ID_TPD_CANVAS, attribList, pos, size, wxFULL_REPAINT_ON_RESIZE, wxT("LayoutCanvas")),
+   _whRatio         (     1 ),
+   _tmpWnd          ( false ),
+   _mouseInput      ( false ),
+   _rubberBand      ( false ),
+   _restrictedMove  ( false ),
+   _invalidWindow   ( false ),
+   _reperX          ( false ),
+   _reperY          ( false ),
+   _longCursor      ( false ),
+   _oglThread       ( false ),
+   _apTrigger       ( 10    ),
+   _blinkInterval   ( 0     ),
+   _blinkOn         ( false ),
+   _initialised     ( false )
+#ifdef __WXGTK__
+  ,_xVisual         ( NULL  )
+#endif
+
+   {
    // Explicitly create a new rendering context instance for this canvas.
    _glRC = DEBUG_NEW TpdOglContext(this);
 //   if (!wxGLCanvas::IsDisplaySupported(attribList)) return;
@@ -298,23 +316,12 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos,
 #endif
    _crossCur = MakeCursor(crosscursor,16, 16);
    SetCursor(*_crossCur);
-   _tmpWnd = false;
-   _mouseInput = false;
-   _rubberBand = false;
-   _restrictedMove = false;
-   _invalidWindow = false;
-   _reperX = _reperY = _longCursor = false;
-   // Running the openGL drawing in a separate thread
+   // Running the openGL drawing in a separate thread - _oglThread
    // This appears to be a bad idea especially on some platforms.
    // Google it for some opinions.
    // The code is there, but I never got it running reliably if at all
    // The option stays for the sake of experiment.
    // DON'T enable it if you're not sure what you're doing!
-   _oglThread = false;
-   _apTrigger = 10;
-   _blinkInterval = 0;
-   _blinkOn = false;
-   _initialised = false;
 }
 
 void   tui::LayoutCanvas::showInfo()
