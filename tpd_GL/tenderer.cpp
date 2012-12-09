@@ -721,7 +721,7 @@ trend::TenderRefLay::~TenderRefLay()
 //
 // class Tenderer
 //
-trend::Tenderer::Tenderer( layprop::DrawProperties* drawprop, real UU ) :
+trend::Tenderer::Tenderer( layprop::DrawProperties* drawprop, real UU, bool createRefLay ) :
     TrendBase            (drawprop, UU),
    _num_ogl_buffers      (       0u   ),
    _num_ogl_grc_buffers  (       0u   ),
@@ -729,7 +729,8 @@ trend::Tenderer::Tenderer( layprop::DrawProperties* drawprop, real UU ) :
    _ogl_grc_buffers      (       NULL ),
    _sbuffer              (       0u   )
 {
-   _refLayer = DEBUG_NEW TenderRefLay();
+   if (createRefLay)
+      _refLayer = DEBUG_NEW TenderRefLay();
 }
 
 bool trend::Tenderer::chunkExists(const LayerDef& laydef, bool has_selected)
@@ -1136,6 +1137,6 @@ void trend::Tenderer::setGrcLayer(bool setEData, const LayerDef& laydef)
 
 trend::Tenderer::~Tenderer()
 {
-   delete _refLayer;
+//   delete _refLayer; //>> deleted by the parent constructor
 }
 

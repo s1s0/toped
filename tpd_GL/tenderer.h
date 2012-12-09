@@ -451,7 +451,7 @@ namespace trend {
    */
    class Tenderer : public TrendBase {
       public:
-                           Tenderer( layprop::DrawProperties* drawprop, real UU );
+                           Tenderer( layprop::DrawProperties* , real, bool createRefLay = true);
          virtual          ~Tenderer();
          virtual void      grid( const real, const std::string );
          virtual void      zeroCross();
