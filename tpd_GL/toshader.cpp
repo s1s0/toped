@@ -31,7 +31,6 @@
 #include "trend.h"
 
 extern trend::TrendCenter*         TRENDC;
-       trend::GlslUniVarLoc glslUniVarLoc;
 
        
 void trend::setShaderCtm(layprop::DrawProperties* drawprop, const TrendRef* refCell)
@@ -39,7 +38,7 @@ void trend::setShaderCtm(layprop::DrawProperties* drawprop, const TrendRef* refC
    drawprop->pushCtm(refCell->ctm() * drawprop->topCtm());
    float mtrxOrtho [16];
    drawprop->topCtm().oglForm(mtrxOrtho);
-   glUniformMatrix4fv(glslUniVarLoc[glslu_in_CTM], 1, GL_FALSE, mtrxOrtho);
+   glUniformMatrix4fv(TRENDC->getUniformLoc(glslu_in_CTM), 1, GL_FALSE, mtrxOrtho);
 }
        
 //=============================================================================
@@ -64,9 +63,9 @@ void trend::ToshaderTV::draw(layprop::DrawProperties* drawprop)
    // ... and here we go ...
    drawTriQuads();
    // TODO we need glGetUniform here! or some state in the drawprop!
-   glUniform1ui(glslUniVarLoc[glslu_in_StippleEn], 0);
+   glUniform1ui(TRENDC->getUniformLoc(glslu_in_StippleEn), 0);
    drawLines();
-   glUniform1ui(glslUniVarLoc[glslu_in_StippleEn], 1);
+   glUniform1ui(TRENDC->getUniformLoc(glslu_in_StippleEn), 1);
    // Switch the vertex buffers OFF in the openGL engine ...
    glDisableVertexAttribArray(TSHDR_LOC_VERTEX);
    // ... and finally restore the openGL translation matrix
@@ -93,7 +92,7 @@ void trend::ToshaderTV::drawTexts(layprop::DrawProperties* drawprop)
       drawprop->pushCtm(ctm * drawprop->topCtm());
       float mtrxOrtho[16];
       drawprop->topCtm().oglForm(mtrxOrtho);
-      glUniformMatrix4fv(glslUniVarLoc[glslu_in_CTM], 1, GL_FALSE, mtrxOrtho);
+      glUniformMatrix4fv(TRENDC->getUniformLoc(glslu_in_CTM), 1, GL_FALSE, mtrxOrtho);
       (*TSTR)->draw(_filled, drawprop);
       drawprop->popCtm();
    }
@@ -436,8 +435,8 @@ void trend::Toshader::setColor(const LayerDef& layer)
       oglColor[1] = (float)tellColor.green() / 255.0f ;
       oglColor[2] = (float)tellColor.blue()  / 255.0f ;
       oglColor[3] = (float)tellColor.alpha() / 255.0f ;
-      glUniform3fv(glslUniVarLoc[glslu_in_Color], 1, oglColor);
-      glUniform1f(glslUniVarLoc[glslu_in_Alpha], oglColor[3]);
+      glUniform3fv(TRENDC->getUniformLoc(glslu_in_Color), 1, oglColor);
+      glUniform1f(TRENDC->getUniformLoc(glslu_in_Alpha), oglColor[3]);
    }
 }
 
@@ -446,7 +445,7 @@ void trend::Toshader::setStipple()
    const byte* tellStipple = _drawprop->getCurrentFill();
    if (NULL == tellStipple)
    {
-      glUniform1ui(glslUniVarLoc[glslu_in_StippleEn], 0);
+      glUniform1ui(TRENDC->getUniformLoc(glslu_in_StippleEn), 0);
    }
    else
    {
@@ -463,8 +462,8 @@ void trend::Toshader::setStipple()
                         | ((GLuint)(tellStipple[4*i + 1]) << 8*2)
                         | ((GLuint)(tellStipple[4*i + 2]) << 8*1)
                         | ((GLuint)(tellStipple[4*i + 3]) << 8*0);
-      glUniform1uiv(glslUniVarLoc[glslu_in_Stipple], 33, shdrStipple);
-      glUniform1ui(glslUniVarLoc[glslu_in_StippleEn], 1);
+      glUniform1uiv(TRENDC->getUniformLoc(glslu_in_Stipple), 33, shdrStipple);
+      glUniform1ui(TRENDC->getUniformLoc(glslu_in_StippleEn), 1);
    }
 }
 
@@ -490,22 +489,11 @@ void trend::Toshader::setLine(bool selected)
 void trend::Toshader::draw()
 {
    _drawprop->initCtmStack();
+   TRENDC->setGlslProg(glslp_VF);
    for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {// for every layer
       setColor(CLAY());
       setStipple();
-      if (0 != CLAY->total_slctdx())
-      {// redraw selected contours only
-         setLine(true);
-         glUniform1ui(glslUniVarLoc[glslu_in_StippleEn], 0);
-         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _sbuffer);
-         setShaderCtm(_drawprop, _activeCS);
-         CLAY->drawSelected();
-         _drawprop->popCtm();
-         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-         glUniform1ui(glslUniVarLoc[glslu_in_StippleEn], 1);
-      }
-      setLine(false);
       // draw everything
       if (0 != CLAY->total_points())
          CLAY->draw(_drawprop);
@@ -516,15 +504,29 @@ void trend::Toshader::draw()
          CLAY->drawTexts(_drawprop);
       }
    }
+   TRENDC->setGlslProg(glslp_VG);
+   glUniform1ui(TRENDC->getUniformLoc(glslu_in_StippleEn), 0);
+   for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
+   {// for every layer
+      if (0 != CLAY->total_slctdx())
+      {// redraw selected contours only
+         setColor(CLAY());
+         setLine(true);
+         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _sbuffer);
+         setShaderCtm(_drawprop, _activeCS);
+         CLAY->drawSelected();
+         _drawprop->popCtm();
+         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+      }
+   }
    // draw reference boxes
    if (0 < _refLayer->total_points())   
    {
       setColor(REF_LAY_DEF);
       setLine(false);
-      glUniform1ui(glslUniVarLoc[glslu_in_StippleEn], 0);
       float mtrxOrtho [16];
       _drawprop->topCtm().oglForm(mtrxOrtho);
-      glUniformMatrix4fv(glslUniVarLoc[glslu_in_CTM], 1, GL_FALSE, mtrxOrtho);
+      glUniformMatrix4fv(TRENDC->getUniformLoc(glslu_in_CTM), 1, GL_FALSE, mtrxOrtho);
       _refLayer->draw(_drawprop);
    }
    checkOGLError("draw");

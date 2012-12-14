@@ -278,16 +278,16 @@ END_EVENT_TABLE()
 tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos, const wxSize& size, int* attribList):
    wxGLCanvas(parent, ID_TPD_CANVAS, attribList, pos, size, wxFULL_REPAINT_ON_RESIZE, wxT("LayoutCanvas")),
    _whRatio         (     1 ),
+   _apTrigger       ( 10    ),
    _tmpWnd          ( false ),
+   _invalidWindow   ( false ),
    _mouseInput      ( false ),
    _rubberBand      ( false ),
    _restrictedMove  ( false ),
-   _invalidWindow   ( false ),
    _reperX          ( false ),
    _reperY          ( false ),
    _longCursor      ( false ),
    _oglThread       ( false ),
-   _apTrigger       ( 10    ),
    _blinkInterval   ( 0     ),
    _blinkOn         ( false ),
    _initialised     ( false )

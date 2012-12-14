@@ -168,22 +168,30 @@ namespace trend {
    //
    class Shaders {
       public:
-                                 Shaders();
-         virtual                ~Shaders();
-         void                    loadShadersCode(const std::string&);
-         bool                    status() const { return _status;}
+                                Shaders();
+         virtual               ~Shaders();
+         void                   loadShadersCode(const std::string&);
+         bool                   status() const { return _status;}
+         void                   useProgram(const glsl_Programs);
+         GLint                  getUniformLoc(const glsl_Uniforms) const;
       private:
-         bool                    compileShader(const std::string&, GLint&, GLint);
-         char*                   loadFile(const std::string&, GLint&);
-         void                    getShadersLog(GLint);
-         void                    getProgramsLog(GLint);
-         bool                    bindUniforms(GLuint);
-         std::string             _fnShdrVertex;
-         std::string             _fnShdrFragment;
-         GLint                   _idShdrVertex;
-         GLint                   _idShdrFragment;
-         GlslUniVarNames         _glslUniVarNames;
-         bool                    _status;
+         bool                   compileShader(const std::string&, GLint&, GLint);
+         bool                   linkProgram(const glsl_Programs);
+         bool                   bindVFUniforms(const glsl_Programs pType);
+         char*                  loadFile(const std::string&, GLint&);
+         void                   getShadersLog(GLint);
+         void                   getProgramsLog(GLint);
+         std::string            _fnShdrVertex;
+         std::string            _fnShdrGeometry;
+         std::string            _fnShdrFragment;
+         GLint                  _idShdrVertex;
+         GLint                  _idShdrGeometry;
+         GLint                  _idShdrFragment;
+         GlslProgramIDs         _idPrograms;
+         GlslUniVarAllNames     _glslUniVarNames;
+         GlslUniVarAllLoc       _glslUniVarLoc;
+         glsl_Programs          _curProgram;
+         bool                   _status;
    };
 
    class TrendCenter {
@@ -210,6 +218,9 @@ namespace trend {
          word                   numFonts();
          void                   bindFont();
          void                   unbindFont();
+         //Shader handling
+         GLint                  getUniformLoc(const glsl_Uniforms) const;
+         void                   setGlslProg(const glsl_Programs) const;
       private:
          typedef std::map<std::string, TolderGlfFont*> OglFontCollectionMap;
          trend::TrendBase*      _cRenderer;    //! current renderer
