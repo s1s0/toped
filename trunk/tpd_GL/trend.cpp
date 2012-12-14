@@ -39,7 +39,13 @@
 
 trend::TrendCenter*              TRENDC  = NULL;
 extern layprop::PropertyCenter*  PROPC;
-extern trend::GlslUniVarLoc      glslUniVarLoc;
+
+//-----------------------------------------------------------------------------
+// Initialize some static members
+//-----------------------------------------------------------------------------
+// All GLSL programs
+//trend::GlslProgramIDs        trend::Shaders::_idPrograms;
+
 
 //=============================================================================
 //
@@ -460,7 +466,7 @@ void trend::ToshaderGlfFont::drawString(const std::string& text, bool fill, layp
          ctm *= drawprop->topCtm();
          float mtrxOrtho[16];
          ctm.oglForm(mtrxOrtho);
-         glUniformMatrix4fv(glslUniVarLoc[glslu_in_CTM], 1, GL_FALSE, mtrxOrtho);
+         glUniformMatrix4fv(TRENDC->getUniformLoc(glslu_in_CTM), 1, GL_FALSE, mtrxOrtho);
       }
       if ((0x20 == text[i]) || (_symbols.end() == CSI))
       {
@@ -468,9 +474,9 @@ void trend::ToshaderGlfFont::drawString(const std::string& text, bool fill, layp
       }
       else
       {
-         glUniform1ui(glslUniVarLoc[glslu_in_StippleEn], 0);
+         glUniform1ui(TRENDC->getUniformLoc(glslu_in_StippleEn), 0);
          CSI->second->drawWired();
-         glUniform1ui(glslUniVarLoc[glslu_in_StippleEn], 1);
+         glUniform1ui(TRENDC->getUniformLoc(glslu_in_StippleEn), 1);
          if (fill)
             CSI->second->drawSolid();
          right_of += CSI->second->maxX();
@@ -484,72 +490,124 @@ void trend::ToshaderGlfFont::drawString(const std::string& text, bool fill, layp
 //=============================================================================
 trend::Shaders::Shaders() :
    _fnShdrVertex     ( "vertex.glsl"      ),
+   _fnShdrGeometry   ( "geometry.glsl"    ),
    _fnShdrFragment   ( "fragment.glsl"    ),
    _idShdrVertex     ( -1                 ),
+   _idShdrGeometry   ( -1                 ),
    _idShdrFragment   ( -1                 ),
-   _status           ( true               )
+   _status           ( true               ),
+   _curProgram       ( glslp_NULL         )
 {
-   // initialize all uniform variables names
-   _glslUniVarNames[glslu_in_CTM]       = "in_CTM";
-   _glslUniVarNames[glslu_in_Z]         = "in_Z";
-   _glslUniVarNames[glslu_in_Color]     = "in_Color";
-   _glslUniVarNames[glslu_in_Alpha]     = "in_Alpha";
-   _glslUniVarNames[glslu_in_Stipple]   = "in_Stipple";
-   _glslUniVarNames[glslu_in_StippleEn] = "in_StippleEn";
+   // initialize all uniform variable names
+   _glslUniVarNames[glslp_VF][glslu_in_CTM]       = "in_CTM";
+   _glslUniVarNames[glslp_VF][glslu_in_Z]         = "in_Z";
+   _glslUniVarNames[glslp_VF][glslu_in_Color]     = "in_Color";
+   _glslUniVarNames[glslp_VF][glslu_in_Alpha]     = "in_Alpha";
+   _glslUniVarNames[glslp_VF][glslu_in_Stipple]   = "in_Stipple";
+   _glslUniVarNames[glslp_VF][glslu_in_StippleEn] = "in_StippleEn";
+
+   _glslUniVarNames[glslp_VG][glslu_in_CTM]       = "in_CTM";
+   _glslUniVarNames[glslp_VG][glslu_in_Z]         = "in_Z";
+   _glslUniVarNames[glslp_VG][glslu_in_Color]     = "in_Color";
+   _glslUniVarNames[glslp_VG][glslu_in_Alpha]     = "in_Alpha";
+   _glslUniVarNames[glslp_VG][glslu_in_Stipple]   = "in_Stipple";
+   _glslUniVarNames[glslp_VG][glslu_in_StippleEn] = "in_StippleEn";
+   //
+   _idPrograms[glslp_VF] = -1;
+   _idPrograms[glslp_VG] = -1;
+}
+
+void trend::Shaders::useProgram(const glsl_Programs pType)
+{
+   _curProgram = pType;
+   assert(-1 != _idPrograms[_curProgram]);
+   glUseProgram(_idPrograms[pType]);
+}
+
+GLint trend::Shaders::getUniformLoc(const glsl_Uniforms var) const
+{
+   assert((_idPrograms.end() != _idPrograms.find(_curProgram)) &&
+                         (-1 != (_idPrograms.find(_curProgram))->second));
+   GlslUniVarAllLoc::const_iterator varSet = _glslUniVarLoc.find(_curProgram);
+   assert(_glslUniVarLoc.end() != varSet);
+   GlslUniVarLoc::const_iterator varLoc    = varSet->second.find(var);
+   assert(varSet->second.end() != varLoc);
+   return varLoc->second;
 }
 
 void trend::Shaders::loadShadersCode(const std::string& codeDirectory)
 {
    _fnShdrVertex   = codeDirectory + _fnShdrVertex;
+   _fnShdrGeometry = codeDirectory + _fnShdrGeometry;
    _fnShdrFragment = codeDirectory + _fnShdrFragment;
    if(  (_status &= compileShader(_fnShdrVertex  , _idShdrVertex  , GL_VERTEX_SHADER  ))
+      &&(_status &= compileShader(_fnShdrGeometry, _idShdrGeometry, GL_GEOMETRY_SHADER))
       &&(_status &= compileShader(_fnShdrFragment, _idShdrFragment, GL_FRAGMENT_SHADER))
      )
    {
-      GLuint idProgram = glCreateProgram();
-      if (0 == idProgram)
-      {
-         _status = false;
-         return;
-      }
-
-      // TODO bind attribute locations
-
-      // attach the shaders
-      glAttachShader(idProgram, _idShdrVertex  );
-      glAttachShader(idProgram, _idShdrFragment);
-      // link
-      glLinkProgram(idProgram);
-      GLint programOK;
-      glGetProgramiv(idProgram, GL_LINK_STATUS, &programOK);
-      if (programOK)
-      {
-         std::stringstream info;
-         info << "GLSL program linked";
-         tell_log(console::MT_INFO, info.str());
-         _status = bindUniforms(idProgram);
-      }
-      else
-      {
-         std::stringstream info;
-         info << "GLSL linking failed. See the log below:";
-         tell_log(console::MT_ERROR, info.str());
-         getProgramsLog(idProgram);
-         _status = false;
-      }
-      if (_status)
-         glUseProgram(idProgram);
+      _status &= linkProgram(glslp_VF);
+      _status &= linkProgram(glslp_VG);
    }
 }
 
-bool trend::Shaders::bindUniforms(GLuint idProgram)
+bool trend::Shaders::linkProgram(const glsl_Programs pType)
 {
-   for (GlslUniVarNames::const_iterator CV = _glslUniVarNames.begin(); CV != _glslUniVarNames.end(); CV++)
+   GLint program = glCreateProgram();
+   if (0 == program)
    {
-      GLuint location = glGetUniformLocation(idProgram, CV->second.c_str());
+      return false;
+   }
+
+   // TODO bind attribute locations
+
+   std::stringstream info;
+   switch (pType)
+   {
+      case glslp_VF:
+      {
+         glAttachShader(program, _idShdrVertex  );
+         glAttachShader(program, _idShdrFragment);
+         info << "GLSL program VF";
+         break;
+      }
+      case glslp_VG:
+      {
+         glAttachShader(program, _idShdrVertex  );
+         glAttachShader(program, _idShdrGeometry);
+         glAttachShader(program, _idShdrFragment);
+         info << "GLSL program VG";
+         break;
+      }
+      default: assert(false); break;
+   }
+   // link
+   glLinkProgram(program);
+   GLint programOK;
+   glGetProgramiv(program, GL_LINK_STATUS, &programOK);
+   if (programOK)
+   {
+      info << " linked";
+      tell_log(console::MT_INFO, info.str());
+      _idPrograms[pType] = program;
+      return bindVFUniforms(pType);
+   }
+   else
+   {
+      info << " link failed. See the log below:";
+      tell_log(console::MT_ERROR, info.str());
+      getProgramsLog(program);
+      return false;
+   }
+}
+
+bool trend::Shaders::bindVFUniforms(const glsl_Programs pType)
+{
+   for (GlslUniVarNames::const_iterator CV = _glslUniVarNames[pType].begin(); CV != _glslUniVarNames[pType].end(); CV++)
+   {
+      GLuint location = glGetUniformLocation(_idPrograms[pType], CV->second.c_str());
       if( location >= 0 )
       {
-         glslUniVarLoc[CV->first] = location;
+         _glslUniVarLoc[pType][CV->first] = location;
       }
       else
       {
@@ -742,7 +800,11 @@ void trend::TrendCenter::initShaders(const std::string& codeDirectory)
    {
       assert(_cShaders);
       _cShaders->loadShadersCode(codeDirectory);
-      if (!_cShaders->status())
+      if (_cShaders->status())
+      {
+         _cShaders->useProgram(glslp_VF);
+      }
+      else
       {
          tell_log(console::MT_WARNING, "Falling back to VBO rendering because of the errors above");
          _renderType = trend::rtTenderer;
@@ -922,6 +984,18 @@ void trend::TrendCenter::unbindFont()
 {
    glBindBuffer(GL_ARRAY_BUFFER, 0);
    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+GLint trend::TrendCenter::getUniformLoc(const glsl_Uniforms var) const
+{
+   assert(_cShaders);
+   return _cShaders->getUniformLoc(var);
+}
+
+void trend::TrendCenter::setGlslProg(const glsl_Programs prog) const
+{
+   assert(_cShaders);
+   _cShaders->useProgram(prog);
 }
 
 trend::TrendCenter::~TrendCenter()

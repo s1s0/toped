@@ -1408,8 +1408,8 @@ browsers::browserTAB::browserTAB(wxWindow *parent, wxWindowID id,const wxPoint& 
    wxAuiNotebook( parent, id, pos, size, style),
    _gdsStruct   ( NULL ),
    _cifStruct   ( NULL ),
-   _drcStruct   ( NULL ),
    _oasStruct   ( NULL ),
+   _drcStruct   ( NULL ),
    _gdsPageIndex(    0 ),
    _cifPageIndex(    0 )
 {

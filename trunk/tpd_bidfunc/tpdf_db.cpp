@@ -1785,7 +1785,7 @@ tellstdfunc::DRCCalibreimport::DRCCalibreimport(telldata::typeID retype, bool eo
 
 int tellstdfunc::DRCCalibreimport::execute()
 {
-   layprop::DrawProperties* drawProp;
+//   layprop::DrawProperties* drawProp;
    std::string filename = getStringValue();
    if(DRCData)
    {
