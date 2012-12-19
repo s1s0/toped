@@ -226,14 +226,18 @@ namespace trend {
                        , glslu_in_Color
                        , glslu_in_Alpha
                        , glslu_in_Stipple
+                       , glslu_in_LStipple
                        , glslu_in_StippleEn
+                       , glslu_in_LStippleEn
+                       , glslu_in_ScreenSize
+                       , glslu_in_PatScale
                       };
    enum glsl_Programs { glslp_NULL
                        ,glslp_VF
                        ,glslp_VG
                       };
    //! The actual location of all uniform variables in the shaders after glLinkProgram
-   typedef std::map<glsl_Uniforms, GLuint>          GlslUniVarLoc;
+   typedef std::map<glsl_Uniforms, GLint>           GlslUniVarLoc;
    typedef std::map<glsl_Programs, GlslUniVarLoc>   GlslUniVarAllLoc;
    typedef std::map<glsl_Uniforms, std::string>     GlslUniVarNames;
    typedef std::map<glsl_Programs, GlslUniVarNames> GlslUniVarAllNames;

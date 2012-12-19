@@ -499,19 +499,26 @@ trend::Shaders::Shaders() :
    _curProgram       ( glslp_NULL         )
 {
    // initialize all uniform variable names
-   _glslUniVarNames[glslp_VF][glslu_in_CTM]       = "in_CTM";
-   _glslUniVarNames[glslp_VF][glslu_in_Z]         = "in_Z";
-   _glslUniVarNames[glslp_VF][glslu_in_Color]     = "in_Color";
-   _glslUniVarNames[glslp_VF][glslu_in_Alpha]     = "in_Alpha";
-   _glslUniVarNames[glslp_VF][glslu_in_Stipple]   = "in_Stipple";
-   _glslUniVarNames[glslp_VF][glslu_in_StippleEn] = "in_StippleEn";
+   _glslUniVarNames[glslp_VF][glslu_in_CTM]        = "in_CTM";
+   _glslUniVarNames[glslp_VF][glslu_in_Z]          = "in_Z";
+   _glslUniVarNames[glslp_VF][glslu_in_Color]      = "in_Color";
+   _glslUniVarNames[glslp_VF][glslu_in_Alpha]      = "in_Alpha";
+   _glslUniVarNames[glslp_VF][glslu_in_Stipple]    = "in_Stipple";
+   _glslUniVarNames[glslp_VF][glslu_in_LStipple]   = "in_LStipple";
+   _glslUniVarNames[glslp_VF][glslu_in_StippleEn]  = "in_StippleEn";
+   _glslUniVarNames[glslp_VF][glslu_in_LStippleEn] = "in_LStippleEn";
 
-   _glslUniVarNames[glslp_VG][glslu_in_CTM]       = "in_CTM";
-   _glslUniVarNames[glslp_VG][glslu_in_Z]         = "in_Z";
-   _glslUniVarNames[glslp_VG][glslu_in_Color]     = "in_Color";
-   _glslUniVarNames[glslp_VG][glslu_in_Alpha]     = "in_Alpha";
-   _glslUniVarNames[glslp_VG][glslu_in_Stipple]   = "in_Stipple";
-   _glslUniVarNames[glslp_VG][glslu_in_StippleEn] = "in_StippleEn";
+
+   _glslUniVarNames[glslp_VG][glslu_in_CTM]        = "in_CTM";
+   _glslUniVarNames[glslp_VG][glslu_in_Z]          = "in_Z";
+   _glslUniVarNames[glslp_VG][glslu_in_Color]      = "in_Color";
+   _glslUniVarNames[glslp_VG][glslu_in_Alpha]      = "in_Alpha";
+   _glslUniVarNames[glslp_VG][glslu_in_Stipple]    = "in_Stipple";
+   _glslUniVarNames[glslp_VG][glslu_in_LStipple]   = "in_LStipple";
+   _glslUniVarNames[glslp_VG][glslu_in_StippleEn]  = "in_StippleEn";
+   _glslUniVarNames[glslp_VG][glslu_in_LStippleEn] = "in_LStippleEn";
+   _glslUniVarNames[glslp_VG][glslu_in_ScreenSize] = "in_ScreenSize";
+   _glslUniVarNames[glslp_VG][glslu_in_PatScale]   = "in_PatScale";
    //
    _idPrograms[glslp_VF] = -1;
    _idPrograms[glslp_VG] = -1;
@@ -522,6 +529,13 @@ void trend::Shaders::useProgram(const glsl_Programs pType)
    _curProgram = pType;
    assert(-1 != _idPrograms[_curProgram]);
    glUseProgram(_idPrograms[pType]);
+   if (glslp_VG == _curProgram)
+   {
+      // view port
+      GLfloat vport[4];
+      glGetFloatv(GL_VIEWPORT, vport);
+      glUniform2fv(getUniformLoc(glslu_in_ScreenSize), 1, &vport[2]);
+   }
 }
 
 GLint trend::Shaders::getUniformLoc(const glsl_Uniforms var) const
@@ -589,7 +603,7 @@ bool trend::Shaders::linkProgram(const glsl_Programs pType)
       info << " linked";
       tell_log(console::MT_INFO, info.str());
       _idPrograms[pType] = program;
-      return bindVFUniforms(pType);
+      return bindUniforms(pType);
    }
    else
    {
@@ -600,11 +614,11 @@ bool trend::Shaders::linkProgram(const glsl_Programs pType)
    }
 }
 
-bool trend::Shaders::bindVFUniforms(const glsl_Programs pType)
+bool trend::Shaders::bindUniforms(const glsl_Programs pType)
 {
    for (GlslUniVarNames::const_iterator CV = _glslUniVarNames[pType].begin(); CV != _glslUniVarNames[pType].end(); CV++)
    {
-      GLuint location = glGetUniformLocation(_idPrograms[pType], CV->second.c_str());
+      GLint location = glGetUniformLocation(_idPrograms[pType], CV->second.c_str());
       if( location >= 0 )
       {
          _glslUniVarLoc[pType][CV->first] = location;
