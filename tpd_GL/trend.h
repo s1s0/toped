@@ -177,7 +177,7 @@ namespace trend {
       private:
          bool                   compileShader(const std::string&, GLint&, GLint);
          bool                   linkProgram(const glsl_Programs);
-         bool                   bindVFUniforms(const glsl_Programs pType);
+         bool                   bindUniforms(const glsl_Programs pType);
          char*                  loadFile(const std::string&, GLint&);
          void                   getShadersLog(GLint);
          void                   getProgramsLog(GLint);

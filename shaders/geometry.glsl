@@ -30,12 +30,23 @@
 layout(lines) in;
 layout(line_strip, max_vertices=2) out;
 
+uniform vec2 in_ScreenSize;
+uniform uint in_PatScale = 1u;
+
+noperspective out float patternCoord;
 
 void main()
 {
+   vec2 p0Pos = in_ScreenSize.xy * gl_in[0].gl_Position.xy / gl_in[0].gl_Position.w;
+   vec2 p1Pos = in_ScreenSize.xy * gl_in[1].gl_Position.xy / gl_in[1].gl_Position.w;
+
    gl_Position = gl_in[0].gl_Position;
+   patternCoord = 0.0;
    EmitVertex();
+   
    gl_Position = gl_in[1].gl_Position;
+   patternCoord = 0.5 * length(p1Pos - p0Pos) / float(in_PatScale);
    EmitVertex();
+
    EndPrimitive();
 }

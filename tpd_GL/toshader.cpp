@@ -472,18 +472,15 @@ void trend::Toshader::setLine(bool selected)
    layprop::LineSettings curLine;
    _drawprop->getCurrentLine(curLine, selected);
    glLineWidth(curLine.width());
-   // TODO - geometry shader
-   //if (0xffff == curLine.pattern())
-   //{
-   //   glDisable(GL_LINE_STIPPLE);
-   //   /*glDisable(GL_LINE_SMOOTH);*/
-   //}
-   //else
-   //{
-   //   glEnable(GL_LINE_STIPPLE);
-   //   /*glEnable(GL_LINE_SMOOTH);*/
-   //   glLineStipple(curLine.patscale(),curLine.pattern());
-   //}
+   if (0xffff == curLine.pattern())
+      glUniform1ui(TRENDC->getUniformLoc(glslu_in_LStippleEn), 0);
+   else
+   {
+      GLuint lPattern = curLine.pattern();
+      glUniform1ui(TRENDC->getUniformLoc(glslu_in_LStipple), lPattern);
+      glUniform1ui(TRENDC->getUniformLoc(glslu_in_PatScale), curLine.patscale());
+      glUniform1ui(TRENDC->getUniformLoc(glslu_in_LStippleEn), 1);
+   }
 }
 
 void trend::Toshader::draw()
@@ -493,6 +490,7 @@ void trend::Toshader::draw()
    for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {// for every layer
       setColor(CLAY());
+      setLine(false);
       setStipple();
       // draw everything
       if (0 != CLAY->total_points())
