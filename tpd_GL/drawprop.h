@@ -126,6 +126,7 @@ namespace layprop {
          byte              green() const {return _green;   };
          byte              blue()  const {return _blue;    };
          byte              alpha() const {return _alpha;   };
+         void              setAlpha(byte alpha) {_alpha = alpha;}
       private:
          byte              _red;
          byte              _green;
@@ -230,6 +231,7 @@ namespace layprop {
          bool                       setCurrentColor(const LayerDef&, layprop::tellRGB&);
          const byte*                getCurrentFill() const;
          void                       getCurrentLine(LineSettings&, bool) const;
+         bool                       getAlpha(word factor, layprop::tellRGB& theColor);
          void                       initDrawRefStack(laydata::CellRefStack*);
          void                       clearDrawRefStack();
          void                       postCheckCRS(const laydata::TdtCellRef*);
@@ -237,7 +239,6 @@ namespace layprop {
          void                       drawReferenceMarks(const TP&, const binding_marks) const;
          void                       setGridColor(std::string colname) const;
          LayerDef                   getTenderLay(const LayerDef&) const;//!return the same if _propertyState == DB or predefined layer otherwise
-         void                       adjustAlpha(word factor);
          const CTM&                 scrCtm() const       {return  _scrCtm;}
          word                       visualLimit() const  {return _visualLimit;}
          const DBbox&               clipRegion() const   {return _clipRegion;}

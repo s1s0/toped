@@ -42,6 +42,7 @@ namespace trend {
          virtual void      draw(layprop::DrawProperties*);
          virtual void      drawTexts(layprop::DrawProperties*);
       protected:
+         void              setAlpha(layprop::DrawProperties*);
          void              drawLines();
          void              drawTriQuads();
    };

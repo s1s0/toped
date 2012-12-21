@@ -40,7 +40,7 @@ void trend::TolderTV::draw(layprop::DrawProperties* drawprop)
    // First - deal with openGL translation matrix
    glPushMatrix();
    glMultMatrixd(_refCell->translation());
-   drawprop->adjustAlpha(_refCell->alphaDepth() - 1);
+   setAlpha(drawprop);
    // ... and here we go ...
    if  (_alobjvx[line] > 0)
    {// Draw the wire centre lines
@@ -83,8 +83,7 @@ void trend::TolderTV::drawTexts(layprop::DrawProperties* drawprop)
 {
    glPushMatrix();
    glMultMatrixd(_refCell->translation());
-   drawprop->adjustAlpha(_refCell->alphaDepth() - 1);
-
+   setAlpha(drawprop);
    for (TrendStrings::const_iterator TSTR = _text_data.begin(); TSTR != _text_data.end(); TSTR++)
    {
       real ftm[16];

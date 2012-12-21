@@ -658,16 +658,17 @@ bool layprop::DrawProperties::layerFilled(const LayerDef& laydef) const
    else return false;
 }
 
-void layprop::DrawProperties::adjustAlpha(word factor)
+bool layprop::DrawProperties::getAlpha(word factor, layprop::tellRGB& theColor)
 {
-   const layprop::tellRGB& theColor = getColor(_drawingLayer);
-   byte alpha = theColor.alpha();
+   theColor = getColor(_drawingLayer);
    word resultingEbb = factor * _cellDepthAlphaEbb;
    if (0 < factor)
    {
-      alpha = (resultingEbb > (word)alpha) ? 0 : alpha - resultingEbb;
-      glColor4ub(theColor.red(), theColor.green(), theColor.blue(), alpha);
+      byte alpha = (resultingEbb > (word)theColor.alpha()) ? 0 : theColor.alpha() - resultingEbb;
+      theColor.setAlpha(alpha);
+      return true;
    }
+   return false;
 }
 
 bool  layprop::DrawProperties::layerHidden(const LayerDef& laydef) const

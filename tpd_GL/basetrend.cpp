@@ -916,6 +916,15 @@ trend::TrendRef* trend::TrendTV::swapRefCells(TrendRef* newRefCell)
    return the_swap;
 }
 
+void trend::TrendTV::setAlpha(layprop::DrawProperties* drawprop)
+{
+   layprop::tellRGB tellColor;
+   if (drawprop->getAlpha(_refCell->alphaDepth() - 1, tellColor))
+   {
+      glColor4ub(tellColor.red(), tellColor.green(), tellColor.blue(), tellColor.alpha());
+   }
+}
+
 trend::TrendTV::~TrendTV()
 {
    for (SliceWires::const_iterator CSO = _line_data.begin(); CSO != _line_data.end(); CSO++)
