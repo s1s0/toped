@@ -54,15 +54,13 @@ void trend::ToshaderTV::draw(layprop::DrawProperties* drawprop)
 {
    // First - deal with openGL translation matrix
    setShaderCtm(drawprop, _refCell);
-   //TODO - colors! 
-   //drawprop->adjustAlpha(_refCell->alphaDepth() - 1);
+   setAlpha(drawprop);
    // Activate the vertex buffers in the vertex shader ...
    glEnableVertexAttribArray(TSHDR_LOC_VERTEX);  // glEnableClientState(GL_VERTEX_ARRAY)
    // Set-up the offset in the binded Vertex buffer
    glVertexAttribPointer(TSHDR_LOC_VERTEX, 2, TNDR_GLENUMT, GL_FALSE, 0, (GLvoid*)(sizeof(TNDR_GLDATAT) * _point_array_offset));
    // ... and here we go ...
    drawTriQuads();
-   // TODO we need glGetUniform here! or some state in the drawprop!
    glUniform1ui(TRENDC->getUniformLoc(glslu_in_StippleEn), 0);
    drawLines();
    glUniform1ui(TRENDC->getUniformLoc(glslu_in_StippleEn), 1);
@@ -75,9 +73,7 @@ void trend::ToshaderTV::draw(layprop::DrawProperties* drawprop)
 void trend::ToshaderTV::drawTexts(layprop::DrawProperties* drawprop)
 {
    setShaderCtm(drawprop, _refCell);
-   //TODO - colors!
-   //drawprop->adjustAlpha(_refCell->alphaDepth() - 1);
-
+   setAlpha(drawprop);
    for (TrendStrings::const_iterator TSTR = _text_data.begin(); TSTR != _text_data.end(); TSTR++)
    {
       //  Things to remember...
@@ -173,6 +169,16 @@ void trend::ToshaderTV::drawLines()
       assert(_firstvx[cont]);
       assert(_sizesvx[cont]);
       glMultiDrawArrays(GL_LINE_LOOP, _firstvx[cont], _sizesvx[cont], _alobjvx[cont]);
+   }
+}
+
+void trend::ToshaderTV::setAlpha(layprop::DrawProperties* drawprop)
+{
+   layprop::tellRGB tellColor;
+   if (drawprop->getAlpha(_refCell->alphaDepth() - 1, tellColor))
+   {
+      float alpha = (float)tellColor.alpha() / 255.0f;
+      glUniform1f(TRENDC->getUniformLoc(glslu_in_Alpha), alpha);
    }
 }
 
@@ -325,16 +331,15 @@ void trend::ToshaderRefLay::setLine(layprop::DrawProperties* drawprop, bool sele
    layprop::LineSettings curLine;
    drawprop->getCurrentLine(curLine, selected);
    glLineWidth(curLine.width());
-   // TODO - awaits geometry shader
-//   if (0xffff == curLine.pattern())
-//   {
-//      glDisable(GL_LINE_STIPPLE);
-//   }
-//   else
-//   {
-//      glEnable(GL_LINE_STIPPLE);
-//      glLineStipple(curLine.patscale(),curLine.pattern());
-//   }
+   if (0xffff == curLine.pattern())
+      glUniform1ui(TRENDC->getUniformLoc(glslu_in_LStippleEn), 0);
+   else
+   {
+      GLuint lPattern = curLine.pattern();
+      glUniform1ui(TRENDC->getUniformLoc(glslu_in_LStipple), lPattern);
+      glUniform1ui(TRENDC->getUniformLoc(glslu_in_PatScale), curLine.patscale());
+      glUniform1ui(TRENDC->getUniformLoc(glslu_in_LStippleEn), 1);
+   }
 }
 
 trend::ToshaderRefLay::~ToshaderRefLay()
@@ -502,6 +507,7 @@ void trend::Toshader::draw()
          CLAY->drawTexts(_drawprop);
       }
    }
+   // Lines with stipples
    TRENDC->setGlslProg(glslp_VG);
    glUniform1ui(TRENDC->getUniformLoc(glslu_in_StippleEn), 0);
    for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)

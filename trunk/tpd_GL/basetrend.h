@@ -658,6 +658,7 @@ namespace trend {
          bool              filled() const       {return _filled;}
          std::string       cellName()           {return _refCell->name();}
       protected:
+         virtual void      setAlpha(layprop::DrawProperties*);
          TrendRef*        _refCell;
          // collected data lists
          SliceObjects      _cont_data; //! Contour data
