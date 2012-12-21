@@ -77,6 +77,8 @@ namespace tui {
       bool           _useVboRendering;
       bool           _useShaders;
       bool           _glewInitDone;
+      int            _ww;
+      int            _wh;
   };
   
    //=============================================================================

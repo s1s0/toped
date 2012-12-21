@@ -160,8 +160,9 @@ tui::TpdOglContext::TpdOglContext(wxGLCanvas* canvas) :
    _oglArbVertexBufferObject ( false      ),
    _useVboRendering          ( false      ),
    _useShaders               ( false      ),
-   _glewInitDone             ( false      )
-
+   _glewInitDone             ( false      ),
+   _ww                       ( 0          ),
+   _wh                       ( 0          )
 {
 }
 
@@ -230,8 +231,9 @@ void tui::TpdOglContext::printStatus() const
 
 bool tui::TpdOglContext::resizeGL(int w, int h)
 {
-   if (_glewInitDone)
+   if (_glewInitDone && ((_ww != w) || (_wh != h)))
    {
+      _ww = w; _wh = h;
       glViewport( 0, 0, (GLint)w, (GLint)h );
       return true;
    }
