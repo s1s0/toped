@@ -872,7 +872,8 @@ trend::TrendBase* trend::TrendCenter::getHRenderer()
             _hRenderer = DEBUG_NEW trend::Tolder( drawProp, PROPC->UU() ); break;
          case trend::rtTenderer :
             _hRenderer = DEBUG_NEW trend::Tenderer( drawProp, PROPC->UU() ); break;
-         case trend::rtToshader : assert(false);          break;// TODO
+         case trend::rtToshader :
+            _hRenderer = DEBUG_NEW trend::Toshader( drawProp, PROPC->UU() ); break;
          default: assert(false); break;
       }
    }
