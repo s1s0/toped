@@ -730,6 +730,7 @@ trend::Shaders::~Shaders()
 trend::TrendCenter::TrendCenter(bool gui, RenderType cmdLineReq, bool sprtVbo, bool sprtShaders) :
    _cRenderer       (              NULL),
    _hRenderer       (              NULL),
+   _mRenderer       (              NULL),
    _cShaders        (              NULL),
    _activeFontName  (                  )
 
@@ -880,6 +881,28 @@ trend::TrendBase* trend::TrendCenter::getHRenderer()
    return _hRenderer;
 }
 
+trend::TrendBase* trend::TrendCenter::getMRenderer(console::ACTIVE_OP& curOp)
+{
+   assert(NULL == _mRenderer);
+   layprop::DrawProperties* drawProp;
+   if (PROPC->tryLockDrawProp(drawProp))
+   {
+      switch (_renderType)
+      {
+         case trend::rtTocom    : assert(false);          break;// shouldn't end-up here ever
+         case trend::rtTolder   :
+            _mRenderer = DEBUG_NEW trend::Tolder( drawProp, PROPC->UU() ); break;
+         case trend::rtTenderer :
+            _mRenderer = DEBUG_NEW trend::Tenderer( drawProp, PROPC->UU() ); break;
+         case trend::rtToshader :
+            _mRenderer = DEBUG_NEW trend::Toshader( drawProp, PROPC->UU() ); break;
+         default: assert(false); break;
+      }
+      curOp = drawProp->currentOp();
+   }
+   return _mRenderer;
+}
+
 void trend::TrendCenter::releaseCRenderer()
 {
    assert(NULL != _cRenderer);
@@ -894,6 +917,14 @@ void trend::TrendCenter::releaseHRenderer()
    PROPC->unlockDrawProp(_hRenderer->drawprop(), false);
    delete (_hRenderer);
    _hRenderer = NULL;
+}
+
+void trend::TrendCenter::releaseMRenderer()
+{
+   assert(NULL != _mRenderer);
+   PROPC->unlockDrawProp(_mRenderer->drawprop(), false);
+   delete (_mRenderer);
+   _mRenderer = NULL;
 }
 
 void trend::TrendCenter::drawFOnly()

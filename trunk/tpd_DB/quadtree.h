@@ -83,15 +83,15 @@ namespace laydata {
    class DrawIterator : public Iterator<DataT> {
    public:
                                 DrawIterator();
-                                DrawIterator(const QTreeTmpl<DataT>&, const layprop::DrawProperties&, const CtmQueue& );
+                                DrawIterator(const QTreeTmpl<DataT>&, const layprop::DrawProperties&, const CTM& );
                                 DrawIterator(const DrawIterator&);
       virtual                  ~DrawIterator() {}
       const DrawIterator&       operator++();    //Prefix
       const DrawIterator        operator++(int); //Postfix
    protected:
       virtual bool              secureNonEmptyDown();
-      const layprop::DrawProperties* drawprop;
-      const CtmQueue*           _transtack;
+      const layprop::DrawProperties* _drawprop;
+      const CTM                 _ctm;
    };
 
 #ifdef WIN32

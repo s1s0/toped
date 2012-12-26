@@ -64,7 +64,7 @@ namespace laydata {
       //! Draw request (rendering) - if the object is selected
       virtual   void       drawSRequest(trend::TrendBase&, const SGBitSet*) const = 0;
       //! Draw the objects in motion during copy/move and similar operations
-      virtual   void       motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const = 0;
+      virtual   void       motionDraw(trend::TrendBase&, SGBitSet*) const = 0;
       //! Print an object description on the toped console.
       virtual   void       info(std::ostringstream&, real) const = 0;
       //! Write the TdtData object in TDT file.
@@ -119,7 +119,7 @@ namespace laydata {
 
       virtual void         drawRequest(trend::TrendBase&) const;
       virtual void         drawSRequest(trend::TrendBase&, const SGBitSet*) const;
-      virtual void         motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
+      virtual void         motionDraw(trend::TrendBase&, SGBitSet*) const;
 
       virtual void         info(std::ostringstream&, real) const;
       virtual void         write(OutputTdtFile* const tedfile) const;
@@ -159,7 +159,7 @@ namespace laydata {
 
          virtual void      drawRequest(trend::TrendBase&) const;
          virtual void      drawSRequest(trend::TrendBase&, const SGBitSet*) const;
-         virtual void      motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
+         virtual void      motionDraw(trend::TrendBase&, SGBitSet*) const;
 
          virtual void      info(std::ostringstream&, real) const;
          virtual void      write(OutputTdtFile* const tedfile) const;
@@ -194,7 +194,7 @@ namespace laydata {
 
          virtual void      drawRequest(trend::TrendBase&) const;
          virtual void      drawSRequest(trend::TrendBase&, const SGBitSet*) const;
-         virtual void      motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
+         virtual void      motionDraw(trend::TrendBase&, SGBitSet*) const;
 
          virtual void      info(std::ostringstream&, real) const;
          virtual void      write(OutputTdtFile* const tedfile) const;
@@ -233,7 +233,7 @@ namespace laydata {
 //       TdtCellRef*          getShapeOver(TP);
       virtual void         drawRequest(trend::TrendBase&) const;
       virtual void         drawSRequest(trend::TrendBase&, const SGBitSet*) const;
-      virtual void         motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
+      virtual void         motionDraw(trend::TrendBase&, SGBitSet*) const;
 
       virtual void         info(std::ostringstream&, real) const;
       virtual void         write(OutputTdtFile* const tedfile) const;
@@ -273,7 +273,7 @@ namespace laydata {
 
       virtual void         drawRequest(trend::TrendBase&) const;
       virtual void         drawSRequest(trend::TrendBase&, const SGBitSet*) const;
-      virtual void         motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
+      virtual void         motionDraw(trend::TrendBase&, SGBitSet*) const;
 
       virtual bool         pointInside(const TP);
       virtual void         info(std::ostringstream&, real) const;
@@ -301,7 +301,7 @@ namespace laydata {
                                                   _text,_translation * trans);}
       virtual void         drawRequest(trend::TrendBase&) const;
       virtual void         drawSRequest(trend::TrendBase&, const SGBitSet*) const;
-      virtual void         motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
+      virtual void         motionDraw(trend::TrendBase&, SGBitSet*) const;
 
       virtual void         info(std::ostringstream&, real) const;
       virtual void         write(OutputTdtFile* const tedfile) const;
@@ -341,7 +341,7 @@ namespace laydata {
 //       TdtCellRef*          getShapeOver(TP);
       virtual void         drawRequest(trend::TrendBase&) const;
       virtual void         drawSRequest(trend::TrendBase&, const SGBitSet*) const;
-      virtual void         motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const;
+      virtual void         motionDraw(trend::TrendBase&, SGBitSet*) const;
 
       virtual void         info(std::ostringstream&, real) const;
       virtual void         write(OutputTdtFile* const tedfile) const;

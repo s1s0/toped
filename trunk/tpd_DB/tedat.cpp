@@ -400,34 +400,12 @@ void laydata::TdtBox::drawSRequest(trend::TrendBase& rend, const SGBitSet* pslis
 }
 
 
-void laydata::TdtBox::motionDraw(const layprop::DrawProperties&, CtmQueue& transtack,
-                                                SGBitSet* plst) const
+void laydata::TdtBox::motionDraw(trend::TrendBase& rend, SGBitSet* plst) const
 {
-   CTM trans = transtack.front();
    if (sh_partsel == status())
-   {
-      TP pt1, pt2;
-      CTM strans = transtack.back();
-      assert(plst);
-      PointVector* nshape = movePointsSelected(*plst, trans, strans);
-      pt1 = (*nshape)[0]; pt2 = (*nshape)[2];
-      glRecti(pt1.x(),pt1.y(),pt2.x(),pt2.y());
-      nshape->clear(); delete nshape;
-   }
+      rend.boxm(&_pdata[0], plst);
    else
-   {
-      PointVector ptlist;
-      ptlist.reserve(4);
-      ptlist.push_back(TP(_pdata[p1x], _pdata[p1y]) * trans);
-      ptlist.push_back(TP(_pdata[p2x], _pdata[p1y]) * trans);
-      ptlist.push_back(TP(_pdata[p2x], _pdata[p2y]) * trans);
-      ptlist.push_back(TP(_pdata[p1x], _pdata[p2y]) * trans);
-      glBegin(GL_LINE_LOOP);
-      for (unsigned i = 0; i < 4; i++)
-         glVertex2i(ptlist[i].x(), ptlist[i].y());
-      glEnd();
-      ptlist.clear();
-   }
+      rend.box(&_pdata[0]);
 }
 
 void  laydata::TdtBox::selectPoints(DBbox& select_in, SGBitSet& pntlst) {
@@ -682,34 +660,12 @@ void laydata::TdtPoly::drawSRequest(trend::TrendBase& rend, const SGBitSet* psli
    rend.poly(_pdata, _psize, &_teseldata, pslist);
 }
 
-void laydata::TdtPoly::motionDraw(const layprop::DrawProperties&, CtmQueue& transtack,
-                                 SGBitSet* plst) const
+void laydata::TdtPoly::motionDraw(trend::TrendBase& rend, SGBitSet* plst) const
 {
-   CTM trans = transtack.front();
-   PointVector* ptlist;
    if (sh_partsel == status())
-   {
-      CTM strans = transtack.back();
-      assert(plst);
-      ptlist = movePointsSelected(*plst, trans, strans);
-   }
+      rend.polym(_pdata, _psize, &_teseldata, plst);
    else
-   {
-      ptlist = DEBUG_NEW PointVector;
-      ptlist->reserve(_psize);
-      for (unsigned i = 0; i < _psize; i++)
-      {
-         ptlist->push_back( TP(_pdata[2*i], _pdata[2*i+1]) * trans);
-      }
-   }
-   glBegin(GL_LINE_LOOP);
-   for (unsigned i = 0; i < _psize; i++)
-   {
-      glVertex2i((*ptlist)[i].x(), (*ptlist)[i].y());
-   }
-   glEnd();
-   ptlist->clear();
-   delete ptlist;
+      rend.poly(_pdata, _psize, &_teseldata);
 }
 
 void  laydata::TdtPoly::selectPoints(DBbox& select_in, SGBitSet& pntlst) {
@@ -1084,41 +1040,12 @@ void laydata::TdtWire::drawSRequest(trend::TrendBase& rend, const SGBitSet* psli
    rend.wire(_pdata, _psize, _width, pslist);
 }
 
-void laydata::TdtWire::motionDraw(const layprop::DrawProperties& drawprop,
-               CtmQueue& transtack, SGBitSet* plst) const
+void laydata::TdtWire::motionDraw(trend::TrendBase& rend, SGBitSet* plst) const
 {
-   CTM trans = transtack.front();
-   PointVector ptlist;
    if (sh_partsel == status())
-   {
-      CTM strans = transtack.back();
-      assert(plst);
-      PointVector* modified = movePointsSelected(*plst, trans, strans);
-      laydata::WireContourAux wcontour(*modified, _width);
-      wcontour.getRenderingData(ptlist);
-      modified->clear(); delete modified;
-   }
+      rend.wirem(_pdata, _psize, _width, plst);
    else
-   { //full select
-      laydata::WireContourAux wcontour(_pdata, _psize, _width, trans);
-      wcontour.getRenderingData(ptlist);
-   }
-//   openGlDrawLine(const_cast<layprop::DrawProperties&>(drawprop), ptlist);
-//   if (0 == ptlist.size()) return;
-   word lsize = ptlist[0].x();
-   word csize = ptlist[0].y();
-   // the central line
-   if (0 == lsize) return;
-   glBegin(GL_LINE_STRIP);
-   for (word i = 0; i < lsize; i++)
-      glVertex2i(ptlist[i+1].x(), ptlist[i+1].y());
-   glEnd();
-   // the contour
-   if (0 == csize) return;
-   glBegin(GL_LINE_LOOP);
-   for (word i = lsize; i <= lsize + csize; i++)
-      glVertex2i(ptlist[i].x(), ptlist[i].y());
-   glEnd();
+      rend.wire(_pdata, _psize, _width);
 }
 
 bool laydata::TdtWire::pointInside(TP pnt)
@@ -1458,13 +1385,11 @@ void laydata::TdtCellRef::drawSRequest(trend::TrendBase& rend, const SGBitSet*) 
 
 }
 
-void laydata::TdtCellRef::motionDraw(const layprop::DrawProperties& drawprop,
-                 CtmQueue& transtack, SGBitSet*) const
+void laydata::TdtCellRef::motionDraw(trend::TrendBase& rend, SGBitSet*) const
 {
    if (structure())
    {
-      transtack.push_front(_translation * transtack.front());
-      structure()->motionDraw(drawprop, transtack);
+      structure()->motionDraw(rend, _translation, false);
    }
 }
 
@@ -1706,8 +1631,7 @@ void laydata::TdtCellAref::drawSRequest(trend::TrendBase& rend, const SGBitSet*)
    drawRequest(rend);
 }
 
-void laydata::TdtCellAref::motionDraw(const layprop::DrawProperties& drawprop,
-                 CtmQueue& transtack, SGBitSet*) const
+void laydata::TdtCellAref::motionDraw(trend::TrendBase& rend, SGBitSet*) const
 {
    assert(structure());
    for (int i = 0; i < _arrprops.cols(); i++)
@@ -1718,8 +1642,7 @@ void laydata::TdtCellAref::motionDraw(const layprop::DrawProperties& drawprop,
          // ... get the translation matrix ...
          CTM refCTM(_arrprops.displ(i,j), 1, 0, false);
          refCTM *= _translation;
-         transtack.push_front(refCTM * transtack.front());
-         structure()->motionDraw(drawprop, transtack);
+         structure()->motionDraw(rend, refCTM, false);
       }
    }
 }
@@ -1900,29 +1823,29 @@ void laydata::TdtText::drawSRequest(trend::TrendBase& rend, const SGBitSet*) con
    rend.text(&_text, _translation, _overlap, _correction, true);
 }
 
-void laydata::TdtText::motionDraw(const layprop::DrawProperties& drawprop,
-               CtmQueue& transtack, SGBitSet*) const
+void laydata::TdtText::motionDraw(trend::TrendBase& rend, SGBitSet*) const
 {
-   //====================================================================
-   // font translation matrix
-   CTM ftmtrx =  _translation * transtack.front();
-   DBbox wsquare(TP(0, 0),TP(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT));
-   if (wsquare.visible(ftmtrx * drawprop.scrCtm(), drawprop.visualLimit()))
-   {
-      if (drawprop.adjustTextOrientation())
-         ftmtrx = renderingAdjustment(ftmtrx) * transtack.front();
-      glPushMatrix();
-      double ori_mtrx[] = { ftmtrx.a(), ftmtrx.b(),0,0,
-                            ftmtrx.c(), ftmtrx.d(),0,0,
-                                     0,          0,0,0,
-                           ftmtrx.tx(),ftmtrx.ty(),0,1};
-      glMultMatrixd(ori_mtrx);
-      // correction of the glf shift - as explained in the openGlPrecalc above
-      glTranslatef(_correction.x(), _correction.y(), 1);
-      glScalef(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT, 1);
-      TRENDC->drawWiredString(_text);
-      glPopMatrix();
-   }
+   drawRequest(rend);
+//   //====================================================================
+//   // font translation matrix
+//   CTM ftmtrx =  _translation * transtack.front();
+//   DBbox wsquare(TP(0, 0),TP(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT));
+//   if (wsquare.visible(ftmtrx * drawprop.scrCtm(), drawprop.visualLimit()))
+//   {
+//      if (drawprop.adjustTextOrientation())
+//         ftmtrx = renderingAdjustment(ftmtrx) * transtack.front();
+//      glPushMatrix();
+//      double ori_mtrx[] = { ftmtrx.a(), ftmtrx.b(),0,0,
+//                            ftmtrx.c(), ftmtrx.d(),0,0,
+//                                     0,          0,0,0,
+//                           ftmtrx.tx(),ftmtrx.ty(),0,1};
+//      glMultMatrixd(ori_mtrx);
+//      // correction of the glf shift - as explained in the openGlPrecalc above
+//      glTranslatef(_correction.x(), _correction.y(), 1);
+//      glScalef(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT, 1);
+//      TRENDC->drawWiredString(_text);
+//      glPopMatrix();
+//   }
 }
 
 void laydata::TdtText::write(OutputTdtFile* const tedfile) const {
@@ -2060,10 +1983,10 @@ void  laydata::TdtAuxRef::drawSRequest(trend::TrendBase& rend, const SGBitSet*) 
    assert(false);
 }
 
-void  laydata::TdtAuxRef::motionDraw(const layprop::DrawProperties& drawprop, CtmQueue& transtack, SGBitSet*) const
+void  laydata::TdtAuxRef::motionDraw(trend::TrendBase& rend, SGBitSet*) const
 {
    assert(NULL != _structure);
-   _structure->motionDraw(drawprop, transtack);
+   _structure->motionDraw(rend);
 }
 
 void laydata::TdtAuxRef::info(std::ostringstream&, real) const
@@ -2758,11 +2681,12 @@ void laydata::TdtTmpWire::drawline(const PointVector& centerLine, const PointVec
 //
 void laydata::TdtTmpCellRef::draw(const layprop::DrawProperties& drawprop, CtmQueue& transtack) const
 {
-   if (NULL != _structure)
-   {
-      transtack.push_front(_translation * transtack.front());
-      _structure->motionDraw(drawprop, transtack);
-   }
+   // TODO
+//   if (NULL != _structure)
+//   {
+//      transtack.push_front(_translation * transtack.front());
+//      _structure->motionDraw(drawprop, transtack);
+//   }
 }
 
 //==============================================================================
@@ -2770,21 +2694,22 @@ void laydata::TdtTmpCellRef::draw(const layprop::DrawProperties& drawprop, CtmQu
 void laydata::TdtTmpCellAref::draw(const layprop::DrawProperties& drawprop,
                                        CtmQueue& transtack) const
 {
-   if (NULL != _structure)
-   {
-      for (int i = 0; i < _arrprops.cols(); i++)
-      {// start/stop rows
-         for(int j = 0; j < _arrprops.rows(); j++)
-         { // start/stop columns
-            // for each of the visual array figures...
-            // ... get the translation matrix ...
-            CTM refCTM(_arrprops.displ(i,j), 1, 0, false);
-            refCTM *= _translation;
-            transtack.push_front(refCTM * transtack.front());
-            _structure->motionDraw(drawprop, transtack);
-         }
-      }
-   }
+   // TODO
+//   if (NULL != _structure)
+//   {
+//      for (int i = 0; i < _arrprops.cols(); i++)
+//      {// start/stop rows
+//         for(int j = 0; j < _arrprops.rows(); j++)
+//         { // start/stop columns
+//            // for each of the visual array figures...
+//            // ... get the translation matrix ...
+//            CTM refCTM(_arrprops.displ(i,j), 1, 0, false);
+//            refCTM *= _translation;
+//            transtack.push_front(refCTM * transtack.front());
+//            _structure->motionDraw(drawprop, transtack);
+//         }
+//      }
+//   }
 }
 
 //==============================================================================

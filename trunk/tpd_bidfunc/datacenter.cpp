@@ -746,7 +746,7 @@ void DataCenter::mouseRotate()
    unlockTDT(dbLibDir);
 }
 
-void DataCenter::mouseHoover(TP& position)
+void DataCenter::mouseHooverDraw(TP& position)
 {
    if (_TEDLIB())
    {
@@ -852,10 +852,10 @@ void DataCenter::render(const CTM& layCTM)
 
 void DataCenter::motionDraw(const CTM& layCTM, TP base, TP newp)
 {
-   layprop::DrawProperties* drawProp;
-   if (PROPC->lockDrawProp(drawProp))
+   console::ACTIVE_OP currentOp;
+   trend::TrendBase* mRenderer = TRENDC->getMRenderer(currentOp);
+   if (NULL != mRenderer)
    {
-      console::ACTIVE_OP currentOp = drawProp->currentOp();
       if ((console::op_line == currentOp) || _drawruler)
       {
          // ruller
@@ -863,12 +863,34 @@ void DataCenter::motionDraw(const CTM& layCTM, TP base, TP newp)
       }
       if ((console::op_line != currentOp)  && (NULL !=_TEDLIB()))
       {
-         while (wxMUTEX_NO_ERROR != _DBLock.TryLock());
-         _TEDLIB()->tmpDraw(*drawProp, base, newp);
-         VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
+         if (wxMUTEX_NO_ERROR == _DBLock.TryLock())
+         {
+            _TEDLIB()->motionDraw(*mRenderer, base, newp);
+            if (mRenderer->collect())
+               mRenderer->draw();
+            VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
+         }
       }
+      mRenderer->cleanUp();
+      TRENDC->releaseMRenderer();
    }
-   PROPC->unlockDrawProp(drawProp, false);
+//   layprop::DrawProperties* drawProp;
+//   if (PROPC->lockDrawProp(drawProp))
+//   {
+//      console::ACTIVE_OP currentOp = drawProp->currentOp();
+//      if ((console::op_line == currentOp) || _drawruler)
+//      {
+//         // ruller
+//         PROPC->tmp_draw(layCTM, base, newp);
+//      }
+//      if ((console::op_line != currentOp)  && (NULL !=_TEDLIB()))
+//      {
+//         while (wxMUTEX_NO_ERROR != _DBLock.TryLock());
+//         _TEDLIB()->tmpDraw(*drawProp, base, newp);
+//         VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
+//      }
+//   }
+//   PROPC->unlockDrawProp(drawProp, false);
 }
 
 LayerMapCif* DataCenter::secureCifLayMap(const layprop::DrawProperties* drawProp, bool import)

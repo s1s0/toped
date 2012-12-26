@@ -75,7 +75,7 @@ public:
    void                       mouseRotate();
    void                       motionDraw(const CTM&, TP, TP);
    void                       render(const CTM&);
-   void                       mouseHoover(TP&);
+   void                       mouseHooverDraw(TP&);
    void                       setRecoverPoly(bool);
    void                       setRecoverWire(bool);
    void                       setCmdLayer(const LayerDef& laydef) {_curcmdlay = laydef;}

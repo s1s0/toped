@@ -555,7 +555,7 @@ void tui::LayoutCanvas::rubberPaint()
 
 void tui::LayoutCanvas::boldOnHover()
 {
-   DATC->mouseHoover(_scrMark);
+   DATC->mouseHooverDraw(_scrMark);
 }
 
 void tui::LayoutCanvas::cursorControl(bool shift, bool ctl)
