@@ -341,6 +341,7 @@ namespace trend {
          bool              center_line_only()      {return _celno;}
          virtual const TeselChain* tdata()               {return _tdata;}
       protected:
+                           TrendWire(unsigned, const WireWidth, bool);
          int4b*            _ldata; //! the vertexes of the wires central line
          unsigned          _lsize; //! the number of vertexes in the central line
          bool              _celno; //! indicates whether the center line only shall be drawn
@@ -350,7 +351,7 @@ namespace trend {
    typedef enum {lstr, llps, lnes} SlctTypes;
 
    /**
-      Very small pure virtual class which primary purpose is to minimize the
+      Very small pure virtual class which primary purpose is to minimise the
       memory usage of the TrendBase by reusing the vertex data. It also optimises
       the amount of data transfered to the graphic card as a whole.
       Here is the idea.
@@ -485,8 +486,41 @@ namespace trend {
          virtual unsigned  ssize();
          virtual unsigned  sDataCopy(unsigned*, unsigned&);
          virtual void      drctDrawSlctd();
+      protected:
+                           TrendSWire(unsigned psize, const WireWidth width, bool clo, const SGBitSet* slist) :
+                              TrendWire(psize, width, clo), TrendSelected(slist), _loffset(0u) {}
       private:
          unsigned          _loffset;
+   };
+
+   class TrendSMBox : public TrendSBox {
+      public:
+                           TrendSMBox(const int4b* pdata, const SGBitSet* slist, const CTM& rmm);
+         virtual          ~TrendSMBox();
+      private:
+         PointVector*      movePointsSelected(const SGBitSet&, const CTM&, const CTM& = CTM()) const;
+         enum {
+               p1x  = 0,
+               p1y  = 1,
+               p2x  = 2,
+               p2y  = 3
+         };
+   };
+
+   class TrendSMNcvx : public TrendSNcvx{
+      public:
+                           TrendSMNcvx(const int4b* pdata, unsigned psize, const SGBitSet* slist, const CTM& rmm);
+                          ~TrendSMNcvx();
+      private:
+         PointVector*      movePointsSelected(const SGBitSet&, const CTM&, const CTM& = CTM()) const;
+   };
+
+   class TrendSMWire : public TrendSWire {
+      public:
+                           TrendSMWire(int4b* pdata, unsigned psize, const WireWidth width, bool clo, const SGBitSet* slist, const CTM& rmm);
+         virtual          ~TrendSMWire();
+      private:
+         PointVector*      movePointsSelected(const SGBitSet&, const CTM&, const CTM& = CTM()) const;
    };
 
    /**
@@ -517,7 +551,7 @@ namespace trend {
    typedef std::list<TrendRef*>       RefBoxList;
 
    /**
-      TENDERer Translation View - is the most fundamental class of the TrendBase.
+      Toped RENDerer Translation View - is the most fundamental class of the TrendBase.
       It sorts and stores a layer slice of the cell data. Most of the memory
       consumption during the first processing step (traversing and sorting) is
       concentrated in this class and naturally most of the TrendBase data processing
@@ -826,10 +860,13 @@ namespace trend {
          virtual          ~TrendLay();
          void              box  (const int4b*);
          void              box  (const int4b*,                               const SGBitSet*);
+         void              box  (const int4b*,                               const SGBitSet*, const CTM&);
          void              poly (const int4b*, unsigned, const TessellPoly*);
          void              poly (const int4b*, unsigned, const TessellPoly*, const SGBitSet*);
+         void              poly (const int4b*, unsigned, const TessellPoly*, const SGBitSet*, const CTM&);
          void              wire (int4b*, unsigned, WireWidth, bool);
          void              wire (int4b*, unsigned, WireWidth, bool, const SGBitSet*);
+         void              wire (int4b*, unsigned, WireWidth, bool, const SGBitSet*, const CTM&);
          void              text (const std::string*, const CTM&, const DBbox*, const TP&, bool);
          virtual void      newSlice(TrendRef* const, bool, bool /*, bool, unsigned*/) = 0;
          virtual void      newSlice(TrendRef* const, bool, bool, unsigned slctd_array_offset) = 0;
@@ -917,17 +954,22 @@ namespace trend {
          virtual void      setGrcLayer(bool, const LayerDef&) = 0;
          virtual bool      chunkExists(const LayerDef&, bool) = 0;
          void              pushCell(std::string, const CTM&, const DBbox&, bool, bool);
+         void              setRmm(const CTM&);
          void              popCell()                              {_cellStack.pop();}
          const CTM&        topCTM() const                         {return  _cellStack.top()->ctm();}
          void              box  (const int4b* pdata)              {_clayer->box(pdata);}
          void              box  (const int4b* pdata, const SGBitSet* ss){_clayer->box(pdata, ss);}
+         void              boxm (const int4b* pdata, const SGBitSet* ss){assert(_rmm);_clayer->box(pdata, ss, *_rmm);}
          void              poly (const int4b* pdata, unsigned psize, const TessellPoly* tpoly)
                                                                   {_clayer->poly(pdata, psize, tpoly);}
          void              poly (const int4b* pdata, unsigned psize, const TessellPoly* tpoly, const SGBitSet* ss)
                                                                   {_clayer->poly(pdata, psize, tpoly, ss);}
+         void              polym(const int4b* pdata, unsigned psize, const TessellPoly* tpoly, const SGBitSet* ss)
+                                                                  {assert(_rmm);_clayer->poly(pdata, psize, tpoly, ss, *_rmm);}
          void              grcpoly(int4b* pdata, unsigned psize);
          void              wire (int4b*, unsigned, WireWidth);
          void              wire (int4b*, unsigned, WireWidth, const SGBitSet*);
+         void              wirem(int4b*, unsigned, WireWidth, const SGBitSet*);
          void              grcwire (int4b*, unsigned, WireWidth);
          void              arefOBox(std::string, const CTM&, const DBbox&, bool);
          void              text (const std::string*, const CTM&, const DBbox&, const TP&, bool);
@@ -972,6 +1014,7 @@ namespace trend {
          TrendRef*         _activeCS;
          byte              _dovCorrection;   //! Cell ref Depth of view correction (for Edit in Place purposes)
          RefBoxList        _hiddenRefBoxes;  //! Those cRefBox objects which didn't ended in the TrendRefLay structures
+         CTM*              _rmm;             //!Reverse motion matrix
    };
 
    void checkOGLError(std::string);

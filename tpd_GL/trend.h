@@ -203,8 +203,10 @@ namespace trend {
          void                   initShaders(const std::string&);
          trend::TrendBase*      getCRenderer();
          trend::TrendBase*      getHRenderer();
+         trend::TrendBase*      getMRenderer(console::ACTIVE_OP&);
          void                   releaseCRenderer();
          void                   releaseHRenderer();
+         void                   releaseMRenderer();
          void                   drawGrid();
          void                   drawZeroCross();
          void                   drawFOnly();
@@ -225,6 +227,7 @@ namespace trend {
          typedef std::map<std::string, TolderGlfFont*> OglFontCollectionMap;
          trend::TrendBase*      _cRenderer;    //! current renderer
          trend::TrendBase*      _hRenderer;    //! hoover renderer
+         trend::TrendBase*      _mRenderer;    //! motion renderer
          trend::Shaders*        _cShaders;     //! the shader init object (valid in rtToshader case only)
          OglFontCollectionMap   _oglFont;
          std::string            _activeFontName;

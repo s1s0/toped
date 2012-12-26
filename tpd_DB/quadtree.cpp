@@ -377,16 +377,16 @@ bool laydata::ClipIterator<DataT>::secureNonEmptyDown()
 template <typename DataT>
 laydata::DrawIterator<DataT>::DrawIterator() :
    Iterator<DataT>   (                      ),
-   drawprop          ( NULL                 ),
-   _transtack        ( NULL                 )
+   _drawprop          ( NULL                 ),
+   _ctm              (                      )
 {
 }
 
 template <typename DataT>
-laydata::DrawIterator<DataT>::DrawIterator(const QTreeTmpl<DataT>& cQuad, const layprop::DrawProperties& props, const CtmQueue& transtack) :
+laydata::DrawIterator<DataT>::DrawIterator(const QTreeTmpl<DataT>& cQuad, const layprop::DrawProperties& props, const CTM& ctm) :
    Iterator<DataT>   ( cQuad                ),
-   drawprop          (&props                ),
-   _transtack        (&transtack            )
+   _drawprop          (&props                ),
+   _ctm              ( ctm                  )
 {
    secureNonEmptyDown();
 }
@@ -394,8 +394,8 @@ laydata::DrawIterator<DataT>::DrawIterator(const QTreeTmpl<DataT>& cQuad, const 
 template <typename DataT>
 laydata::DrawIterator<DataT>::DrawIterator(const DrawIterator<DataT>& iter):
    Iterator<DataT>   ( iter                 ),
-   drawprop          ( iter.drawprop        ),
-   _transtack        ( iter._transtack      )
+   _drawprop          ( iter._drawprop        ),
+   _ctm              ( iter._ctm            )
 {}
 
 template <typename DataT>
@@ -416,12 +416,11 @@ const typename laydata::DrawIterator<DataT> laydata::DrawIterator<DataT>::operat
 template <typename DataT>
 bool laydata::DrawIterator<DataT>::secureNonEmptyDown()
 {
-   assert(drawprop);
-   assert(_transtack);
-   DBbox clip = drawprop->clipRegion();
-   DBbox areal = Iterator<DataT>::_cQuad->_overlap.overlap(_transtack->front());
+   assert(_drawprop);
+   DBbox clip = _drawprop->clipRegion();
+   DBbox areal = Iterator<DataT>::_cQuad->_overlap.overlap(_ctm);
    if      (0ll == clip.cliparea(areal)      ) return false;
-   else if (!areal.visible(drawprop->scrCtm(), drawprop->visualLimit())) return false;
+   else if (!areal.visible(_drawprop->scrCtm(), _drawprop->visualLimit())) return false;
    while (0 == Iterator<DataT>::_cQuad->_props._numObjects)
    {
       return this->nextSubQuad(0,Iterator<DataT>::_cQuad->_props.numSubQuads());

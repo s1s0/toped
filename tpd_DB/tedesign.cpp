@@ -1315,6 +1315,43 @@ void laydata::TdtDesign::openGlRender(trend::TrendBase& rend)
    }
 }
 
+void laydata::TdtDesign::motionDraw(trend::TrendBase& rend, const TP& base, const TP& newp)
+{
+   console::ACTIVE_OP curConsoleOp = rend.drawprop()->currentOp();
+   if (_tmpdata)
+   {
+      //TODO
+//      glColor4f((GLfloat)1.0, (GLfloat)1.0, (GLfloat)1.0, (GLfloat)0.7);
+//      tmp_stack.push_front(CTM(newp - base,1,0,false));
+//      _tmpdata->draw(drawprop, tmp_stack);
+   }
+   else if ((curConsoleOp != console::op_none) && _target.checkEdit())
+   {
+      CTM newpos = _target.ARTM();
+      if ((console::op_copy == curConsoleOp) || (console::op_move == curConsoleOp))
+      {
+         TP pBase(base *_target.rARTM());
+         TP pNew(newp * _target.rARTM());
+         newpos = CTM(pNew - pBase,1,0,false) * newpos;
+         rend.setRmm(CTM(pNew - pBase,1,0,false));
+      }
+      else if ((console::op_flipX == curConsoleOp) || (console::op_flipY == curConsoleOp))
+      {
+         if (console::op_flipX == curConsoleOp)
+            newpos =  newpos.FlipX(newp.y());
+         else
+            newpos = newpos.FlipY(newp.x());
+      }
+      else if (console::op_rotate == curConsoleOp)
+      {
+         newpos = _target.ARTM();
+         newpos.Translate(-newp.x(),-newp.y());
+         newpos *= _tmpctm;
+         newpos.Translate(newp.x(),newp.y());
+      }
+      _target.edit()->motionDraw(rend, newpos, true);
+   }
+}
 
 void laydata::TdtDesign::write(OutputTdtFile* const tedfile) {
    tedfile->putByte(tedf_DESIGN);
@@ -1329,50 +1366,6 @@ void laydata::TdtDesign::write(OutputTdtFile* const tedfile) {
    }
    tedfile->putByte(tedf_DESIGNEND);
    _modified = false;
-}
-
-void laydata::TdtDesign::tmpDraw(const layprop::DrawProperties& drawprop,
-                                          TP base, TP newp) {
-   CtmQueue tmp_stack;
-   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-   if (_tmpdata)
-   {
-      glColor4f((GLfloat)1.0, (GLfloat)1.0, (GLfloat)1.0, (GLfloat)0.7);
-      tmp_stack.push_front(CTM(newp - base,1,0,false));
-      _tmpdata->draw(drawprop, tmp_stack);
-   }
-   else if ((drawprop.currentOp() != console::op_none) && _target.checkEdit())
-   {
-      if ((console::op_copy == drawprop.currentOp()) || (console::op_move == drawprop.currentOp()))
-      {
-         base *= _target.rARTM();
-         newp *= _target.rARTM();
-         tmp_stack.push_front(CTM(_target.ARTM()));
-         tmp_stack.push_front(CTM(newp - base,1,0,false)*_target.ARTM());
-      }
-      else if ((console::op_flipX == drawprop.currentOp()) || (console::op_flipY == drawprop.currentOp()))
-      {
-         CTM newpos = _target.ARTM();
-         tmp_stack.push_front(newpos);
-         if (console::op_flipX == drawprop.currentOp())
-            newpos.FlipX(newp.y());
-         else
-            newpos.FlipY(newp.x());
-         tmp_stack.push_front(newpos);
-      }
-      else if (console::op_rotate == drawprop.currentOp())
-      {
-         CTM newpos = _target.ARTM();
-         tmp_stack.push_front(_target.ARTM());
-         newpos.Translate(-newp.x(),-newp.y());
-         newpos *= _tmpctm;
-         newpos.Translate(newp.x(),newp.y());
-         tmp_stack.push_front(newpos);
-      }
-      _target.edit()->motionDraw(drawprop, tmp_stack, true);
-      tmp_stack.clear();
-   }
-   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 void laydata::TdtDesign::mousePoint(TP p)

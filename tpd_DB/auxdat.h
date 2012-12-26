@@ -138,7 +138,7 @@ namespace auxdata {
          virtual void        openGlRender(trend::TrendBase&, const CTM&, bool, bool) const;
          virtual DBbox       getVisibleOverlap(const layprop::DrawProperties&);
          virtual void        collectUsedLays(LayerDefList&) const;
-         virtual void        motionDraw(const layprop::DrawProperties&, CtmQueue&, bool active=false) const;
+         virtual void        motionDraw(trend::TrendBase&/*, CtmQueue&, bool active=false*/) const;
          //
          QuadTree*           secureLayer(const LayerDef&);
          QTreeTmp*           secureUnsortedLayer(const LayerDef&);

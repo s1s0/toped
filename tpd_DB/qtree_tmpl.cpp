@@ -60,9 +60,9 @@ const typename laydata::ClipIterator<DataT> laydata::QTreeTmpl<DataT>::begin(con
 
 /*! A convenience method initializing the QTreeTmpl::DrawIterator*/
 template <typename DataT>
-const typename laydata::DrawIterator<DataT> laydata::QTreeTmpl<DataT>::begin(const layprop::DrawProperties& drawprop, const CtmQueue& transtack)
+const typename laydata::DrawIterator<DataT> laydata::QTreeTmpl<DataT>::begin(const layprop::DrawProperties& drawprop, const CTM& ctm)
 {
-   return DrawIterator(*this, drawprop, transtack);
+   return DrawIterator(*this, drawprop, ctm);
 }
 
 /*! A convenience method returning an empty iterator*/

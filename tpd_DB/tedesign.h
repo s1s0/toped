@@ -112,7 +112,7 @@ namespace laydata {
       bool           editPop();
       bool           editTop();
       void           openGlRender(trend::TrendBase&);
-      void           tmpDraw(const layprop::DrawProperties&, TP, TP);
+      void           motionDraw(trend::TrendBase&, const TP&, const TP&);
       void           setTmpData(TdtTmpData* tmpdata) {_tmpdata = tmpdata;}
       void           setTmpCtm(CTM tmpctm)        {_tmpctm  = tmpctm; }
       void           mousePoint(TP p);

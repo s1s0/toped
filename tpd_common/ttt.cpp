@@ -404,6 +404,50 @@ DBline DBline::operator  =  (const DBline& ln)
 }
 
 //-----------------------------------------------------------------------------
+// class PSegment
+//-----------------------------------------------------------------------------
+PSegment::PSegment(TP p1,TP p2)
+{
+   _A = p2.y() - p1.y();
+   _B = p1.x() - p2.x();
+   _C = -(_A*p1.x() + _B*p1.y());
+   _angle = 0;
+}
+
+byte PSegment::crossP(PSegment seg, TP& crossp)
+{
+   // segments will coinside if    A1/A2 == B1/B2 == C1/C2
+   // segments will be parallel if A1/A2 == B1/B2 != C1/C2
+   if (0 == (_A*seg._B - seg._A*_B)) return 1;
+   real X,Y;
+   if ((0 != _A) && (0 != seg._B)) {
+      X = - ((_C - (_B/seg._B) * seg._C) / (_A - (_B/seg._B) * seg._A));
+      Y = - ((seg._C - (seg._A/_A) * _C) / (seg._B - (seg._A/_A) * _B));
+   }
+   else if ((0 != _B) && (0 != seg._A)) {
+      X = - (seg._C - (seg._B/_B) * _C) / (seg._A - (seg._B/_B) * _A);
+      Y = - (_C - (_A/seg._A) * seg._C) / (_B - (_A/seg._A) * seg._B);
+   }
+   else assert(0);
+   crossp.setX((int4b)rint(X));
+   crossp.setY((int4b)rint(Y));
+   return 0;
+}
+
+PSegment* PSegment::ortho(TP p)
+{
+   PSegment* seg = DEBUG_NEW PSegment(-_B, _A, _B*p.x() - _A*p.y());
+   return seg;
+}
+
+PSegment* PSegment::parallel(TP p)
+{
+   PSegment* seg = DEBUG_NEW PSegment( _A, _B, -_A*p.x() - _B*p.y());
+   return seg;
+}
+
+
+//-----------------------------------------------------------------------------
 // class SGBitSet
 //-----------------------------------------------------------------------------
 SGBitSet::SGBitSet(word  bit_length)

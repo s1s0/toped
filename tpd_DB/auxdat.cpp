@@ -508,42 +508,20 @@ DBbox auxdata::GrcCell::getVisibleOverlap(const layprop::DrawProperties& prop)
    return vlOverlap;
 }
 
-void auxdata::GrcCell::motionDraw(const layprop::DrawProperties& drawprop,
-                                          CtmQueue& transtack, bool active) const
+void auxdata::GrcCell::motionDraw(trend::TrendBase& rend/*, CtmQueue& transtack, bool active*/) const
 {
-//   if (active)
-//   {
-//      // If this is the active cell, then we will have to visualize the
-//      // selected shapes in move. Partially selected fellas are processed
-//      // only if the current operation is move
-//      console::ACTIVE_OP actop = drawprop.currentOp();
-//      //temporary draw of the active cell - moving selected shapes
-//      SelectList::const_iterator llst;
-//      DataList::iterator dlst;
-//      for (llst = _shapesel.begin(); llst != _shapesel.end(); llst++) {
-//         const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(llst->first);
-//         for (dlst = llst->second->begin(); dlst != llst->second->end(); dlst++)
-//            if (!((actop == console::op_copy) && (sh_partsel == dlst->first->status())))
-//               dlst->first->motionDraw(drawprop, transtack, &(dlst->second));
+   //TODO
+//   typedef LayerHolder::Iterator LCI;
+//   for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
+//      if (!drawprop.layerHidden(lay()))
+//      {
+//         layprop::tellRGB theColor;
+//         if (const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(lay(), theColor))
+//            glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
+//         for (QuadTree::DrawIterator CI = lay->begin(drawprop, transtack); CI != lay->end(); CI++)
+//            CI->motionDraw(drawprop, transtack, NULL);
 //      }
-//   }
-//   else {
-      // Here we draw obviously a cell which reference has been selected
-      // somewhere up the hierarchy. On this level - no selected shapes
-      // whatsoever exists, so just perform a regular draw, but of course
-      // without fill
-      typedef LayerHolder::Iterator LCI;
-      for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
-         if (!drawprop.layerHidden(lay()))
-         {
-            layprop::tellRGB theColor;
-            if (const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(lay(), theColor))
-               glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
-            for (QuadTree::DrawIterator CI = lay->begin(drawprop, transtack); CI != lay->end(); CI++)
-               CI->motionDraw(drawprop, transtack, NULL);
-         }
-//      transtack.pop_front();
-//   }
+////      transtack.pop_front();
 }
 
 void auxdata::GrcCell::readTdtLay(InputTdtFile* const tedfile)

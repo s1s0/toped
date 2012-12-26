@@ -252,7 +252,7 @@ void laydata::TdtDefaultCell::openGlRender(trend::TrendBase& rend, const CTM& tr
 }
 
 
-void laydata::TdtDefaultCell::motionDraw(const layprop::DrawProperties&, CtmQueue&, bool active) const
+void laydata::TdtDefaultCell::motionDraw(trend::TrendBase&, const CTM&, bool active) const
 {
 }
 
@@ -526,45 +526,52 @@ void laydata::TdtCell::openGlRender(trend::TrendBase& rend, const CTM& trans,
    rend.popCell();
 }
 
-void laydata::TdtCell::motionDraw(const layprop::DrawProperties& drawprop,
-                                          CtmQueue& transtack, bool active) const
+void laydata::TdtCell::motionDraw(trend::TrendBase& rend, const CTM& trans, bool active) const
 {
+   rend.pushCell(_name, trans, _cellOverlap, active, false);
    if (active)
    {
-      // If this is the active cell, then we will have to visualize the
+      // If this is the active cell, then we will have to visualise the
       // selected shapes in move. Partially selected fellas are processed
       // only if the current operation is move
-      console::ACTIVE_OP actop = drawprop.currentOp();
+
+      // First - store the reverse motion matrix
+      console::ACTIVE_OP actop = rend.drawprop()->currentOp();
       //temporary draw of the active cell - moving selected shapes
       SelectList::Iterator llst;
       DataList::iterator dlst;
       for (llst = _shapesel.begin(); llst != _shapesel.end(); llst++) 
       {
-         layprop::tellRGB theColor;
-         if (const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(llst(), theColor))
-            glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
-         for (dlst = llst->begin(); dlst != llst->end(); dlst++)
-            if (!((actop == console::op_copy) && (sh_partsel == dlst->first->status())))
-               dlst->first->motionDraw(drawprop, transtack, &(dlst->second));
+         if (rend.layerHidden(llst())) continue;
+         else
+         {
+            if (REF_LAY_DEF != llst())
+               rend.setLayer(llst(), false);
+            for (dlst = llst->begin(); dlst != llst->end(); dlst++)
+               if (!((actop == console::op_copy) && (sh_partsel == dlst->first->status())))
+                  dlst->first->motionDraw(rend, &(dlst->second));
+         }
       }
    }
-   else {
+   else
+   {
       // Here we draw obviously a cell which reference has been selected
       // somewhere up the hierarchy. On this level - no selected shapes
       // whatsoever exists, so just perform a regular draw, but of course
       // without fill
       for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
-         if (!drawprop.layerHidden(lay()))
+      {
+         if (rend.layerHidden(lay())) continue;
+         else
          {
-            layprop::tellRGB theColor;
-            if (const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(lay(), theColor))
-               glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
-//            const_cast<layprop::DrawProperties&>(drawprop).setCurrentColor(lay());
-            for (QuadTree::DrawIterator CI = lay->begin(drawprop, transtack); CI != lay->end(); CI++)
-               CI->motionDraw(drawprop, transtack, NULL);
+            if (REF_LAY_DEF != lay())
+               rend.setLayer(lay(), false);
+            for (QuadTree::DrawIterator CI = lay->begin(*(rend.drawprop()), rend.topCTM()); CI != lay->end(); CI++)
+               CI->motionDraw(rend, NULL);
          }
-      transtack.pop_front();
+      }
    }
+   rend.popCell();
 }
 
 bool laydata::TdtCell::getShapeOver(TP pnt, const LayerDefSet& unselable)

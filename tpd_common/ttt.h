@@ -345,6 +345,23 @@ private:
    TP    _p2;
 };
 
+//==============================================================================
+class PSegment {
+public:
+               PSegment() : _A(0), _B(0), _C(0), _angle(0) {};
+               PSegment(real A, real B, real C) : _A(A), _B(B), _C(C), _angle(0) {};
+               PSegment(TP,TP);
+   byte        crossP(PSegment, TP&);
+   bool        empty() {return ((0 == _A) && (0 == _B));};
+   PSegment*   ortho(TP);
+   PSegment*   parallel(TP);
+   PSegment    operator = (const PSegment s) {_A = s._A; _B = s._B; _C = s._C; return *this;};
+private:
+   real        _A, _B, _C;
+   int         _angle;
+};
+
+
 typedef  std::vector<TP>         PointVector;
 typedef  std::stack<CTM>         CtmStack;
 typedef  std::deque<CTM>         CtmQueue;

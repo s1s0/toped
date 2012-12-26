@@ -76,7 +76,7 @@ namespace laydata {
                           ~QTreeTmpl();
       const Iterator       begin();
       const ClipIterator   begin(const DBbox&);
-      const DrawIterator   begin(const layprop::DrawProperties&, const CtmQueue&);
+      const DrawIterator   begin(const layprop::DrawProperties&, const CTM&);
       const Iterator       end();
       void                 openGlRender(trend::TrendBase&, const TObjDataPairList*) const;
       short                clipType(trend::TrendBase&) const;

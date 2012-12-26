@@ -243,7 +243,6 @@ void trend::TrendBox::drctDrawFill()
       glVertex2i(_cdata[2], _cdata[3]);
       glVertex2i(_cdata[0], _cdata[3]);
    glEnd();
-
 }
 //=============================================================================
 //
@@ -268,8 +267,12 @@ void trend::TrendNcvx::drctDrawFill()
 //
 // TrendWire
 //
-trend::TrendWire::TrendWire(int4b* pdata, unsigned psize, const WireWidth width, bool clo)
-   : TrendNcvx(NULL, 0), _ldata(pdata), _lsize(psize), _celno(clo), _tdata(NULL)
+trend::TrendWire::TrendWire(int4b* pdata, unsigned psize, const WireWidth width, bool clo) :
+   TrendNcvx (NULL, 0),
+   _ldata    (pdata  ),
+   _lsize    (psize  ),
+   _celno    (clo    ),
+   _tdata    (NULL   )
 {
    if (!_celno)
    {
@@ -280,6 +283,15 @@ trend::TrendWire::TrendWire(int4b* pdata, unsigned psize, const WireWidth width,
       wcontour.getArrayData(contData);
       _cdata = contData;
    }
+}
+
+trend::TrendWire::TrendWire(unsigned psize, const WireWidth width, bool clo) :
+   TrendNcvx (NULL, 0),
+   _ldata    (NULL   ),
+   _lsize    (psize  ),
+   _celno    (clo    ),
+   _tdata    (NULL   )
+{
 }
 
 unsigned trend::TrendWire::lDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
@@ -723,6 +735,207 @@ void trend::TextOvlBox::drctDrawContour()
       glVertex2i(_obox[2*i], _obox[2*i+1]);
    glEnd();
 }
+
+
+//=============================================================================
+//
+// class TrendSMBox
+//
+
+trend::TrendSMBox::TrendSMBox(const int4b* pdata, const SGBitSet* slist, const CTM& rmm) :
+   TrendSBox(pdata, slist)
+{
+   //   PointVector* nshape = movePointsSelected(*_slist, _rmm->Reversed(), strans);
+   //   pt1 = (*nshape)[0]*(*_rmm); pt2 = (*nshape)[2]*(*_rmm);
+   // The lines above - just a reminder of what the line below is actually doing
+   PointVector* nshape = movePointsSelected(*_slist, CTM(), rmm);
+   int4b* mdata = DEBUG_NEW int4b[4];
+   mdata[0] = (*nshape)[0].x();
+   mdata[1] = (*nshape)[0].y();
+   mdata[2] = (*nshape)[2].x();
+   mdata[3] = (*nshape)[2].y();
+   _cdata = mdata;
+   nshape->clear(); delete nshape;
+}
+
+trend::TrendSMBox::~TrendSMBox()
+{
+   delete [] _cdata;
+}
+
+PointVector* trend::TrendSMBox::movePointsSelected(const SGBitSet& pset,
+                                    const CTM&  movedM, const CTM& stableM) const {
+  // convert box to polygon
+   PointVector* mlist = DEBUG_NEW PointVector();
+   mlist->push_back(TP(_cdata[p1x], _cdata[p1y]));
+   mlist->push_back(TP(_cdata[p2x], _cdata[p1y]));
+   mlist->push_back(TP(_cdata[p2x], _cdata[p2y]));
+   mlist->push_back(TP(_cdata[p1x], _cdata[p2y]));
+
+   word size = mlist->size();
+   PSegment seg1,seg0;
+   // Things to remember in this algo...
+   // Each of the points in the initial mlist is recalculated in the seg1.crossP
+   // method. This actually means that on pass 0 (i == 0), no points are
+   // recalculated because seg0 at that moment is empty. On pass 1 (i == 1),
+   // point mlist[1] is recalculated etc. The catch comes on the last pass
+   // (i == size) when constructing the seg1, we need mlist[0] and mlist[1], but
+   // mlist[1] has been already recalculated and multiplying it with CTM
+   // matrix again has pretty funny effect.
+   // That's why another condition is introduced -> if (i == size)
+   for (unsigned i = 0; i <= size; i++) {
+      if (i == size)
+         if (pset.check(i%size) && pset.check((i+1) % size))
+            seg1 = PSegment((*mlist)[(i  ) % size] * movedM,
+                            (*mlist)[(i+1) % size]         );
+         else
+            seg1 = PSegment((*mlist)[(i  ) % size] * stableM,
+                            (*mlist)[(i+1) % size]          );
+      else
+         if (pset.check(i%size) && pset.check((i+1) % size))
+            seg1 = PSegment((*mlist)[(i  ) % size] * movedM,
+                            (*mlist)[(i+1) % size] * movedM);
+         else
+            seg1 = PSegment((*mlist)[(i  ) % size] * stableM,
+                            (*mlist)[(i+1) % size] * stableM);
+      if (!seg0.empty()) {
+         seg1.crossP(seg0,(*mlist)[i%size]);
+      }
+      seg0 = seg1;
+   }
+   return mlist;
+}
+
+//=============================================================================
+//
+// class TrendSMNcvx
+//
+trend::TrendSMNcvx::TrendSMNcvx(const int4b* pdata, unsigned psize, const SGBitSet* slist, const CTM& rmm) :
+   TrendSNcvx(pdata, psize, slist)
+{
+   PointVector* nshape = movePointsSelected(*_slist, CTM(), rmm);
+   int4b* mdata = DEBUG_NEW int4b[2*_csize];
+
+   for (unsigned i = 0; i < _csize; i++)
+   {
+      mdata[2*i  ] = (*nshape)[i].x();
+      mdata[2*i+1] = (*nshape)[i].y();
+   }
+   _cdata = mdata;
+   nshape->clear(); delete nshape;
+}
+
+trend::TrendSMNcvx::~TrendSMNcvx()
+{
+   delete [] _cdata;
+}
+
+PointVector* trend::TrendSMNcvx::movePointsSelected(const SGBitSet& pset,
+                                    const CTM&  movedM, const CTM& stableM) const {
+   PointVector* mlist = DEBUG_NEW PointVector();
+   mlist->reserve(_csize);
+   for (unsigned i = 0 ; i < _csize; i++ )
+      mlist->push_back(TP(_cdata[2*i], _cdata[2*i+1]));
+
+   PSegment seg1,seg0;
+   // See the note about this algo in TdtBox::movePointsSelected above
+   for (unsigned i = 0; i <= _csize; i++) {
+      if (i == _csize)
+         if (pset.check(i % _csize) && pset.check((i+1) % _csize))
+            seg1 = PSegment((*mlist)[(i  ) % _csize] * movedM,
+                            (*mlist)[(i+1) % _csize]         );
+         else
+            seg1 = PSegment((*mlist)[(i  ) % _csize] * stableM,
+                            (*mlist)[(i+1) % _csize]         );
+      else
+         if (pset.check(i % _csize) && pset.check((i+1) % _csize))
+            seg1 = PSegment((*mlist)[(i  ) % _csize] * movedM,
+                            (*mlist)[(i+1) % _csize] * movedM);
+         else
+            seg1 = PSegment((*mlist)[(i  ) % _csize] * stableM,
+                            (*mlist)[(i+1) % _csize] * stableM);
+      if (!seg0.empty()) {
+         seg1.crossP(seg0,(*mlist)[ i % _csize]);
+      }
+      seg0 = seg1;
+   }
+   return mlist;
+}
+
+//=============================================================================
+//
+// class TrendSMWire
+//
+trend::TrendSMWire::TrendSMWire(int4b* pdata, unsigned psize, const WireWidth width, bool clo, const SGBitSet* slist, const CTM& rmm) :
+   TrendSWire(psize, width, clo, slist)
+{
+   _ldata = pdata;
+   PointVector* nshape = movePointsSelected(*_slist, CTM(), rmm);
+   int4b* mdata = DEBUG_NEW int4b[2*_lsize];
+
+   for (unsigned i = 0; i < _lsize; i++)
+   {
+      mdata[2*i  ] = (*nshape)[i].x();
+      mdata[2*i+1] = (*nshape)[i].y();
+   }
+   _ldata = mdata;
+   nshape->clear(); delete nshape;
+
+   if (!_celno)
+   {
+      laydata::WireContour wcontour(_ldata, _lsize, width);
+      _csize = wcontour.csize();
+      int4b* contData = DEBUG_NEW int4b[ 2 * _csize];
+      wcontour.getArrayData(contData);
+      _cdata = contData;
+   }
+}
+
+trend::TrendSMWire::~TrendSMWire()
+{
+   delete [] _ldata;
+}
+
+PointVector* trend::TrendSMWire::movePointsSelected(const SGBitSet& pset,
+                                    const CTM& movedM, const CTM& stableM) const
+{
+   PointVector* mlist = DEBUG_NEW PointVector();
+   mlist->reserve(_lsize);
+   for (unsigned i = 0 ; i < _lsize; i++ )
+      mlist->push_back(TP(_ldata[2*i], _ldata[2*i+1]));
+
+   PSegment* seg1 = NULL;
+   PSegment* seg0 = NULL;
+   for (unsigned i = 0; i < _lsize; i++)
+   {
+      if ((_lsize-1) == i)
+      {
+         if (pset.check(_lsize-1))
+            seg1 = seg1->ortho((*mlist)[_lsize-1] * movedM);
+         else
+            seg1 = seg1->ortho((*mlist)[_lsize-1] * stableM);
+      }
+      else
+      {
+         const CTM& transM = ((pset.check(i) && pset.check(i+1))) ?
+                                                               movedM : stableM;
+         seg1 = DEBUG_NEW PSegment((*mlist)[(i  )] * transM, (*mlist)[(i+1)] * transM);
+         if (0 == i)
+         {
+            if (pset.check(0))
+               seg0 = seg1->ortho((*mlist)[i] * movedM);
+            else
+               seg0 = seg1->ortho((*mlist)[i] * stableM);
+         }
+      }
+      if (!seg0->empty()) seg1->crossP(*seg0,(*mlist)[i]);
+      if (NULL != seg0) delete seg0;
+      seg0 = seg1;
+   }
+   if (NULL != seg0) delete seg0;
+   return mlist;
+}
+
 //=============================================================================
 //
 // class TrendRef
@@ -745,7 +958,10 @@ trend::TrendRef::TrendRef(std::string name, const CTM& ctm, const DBbox& obox,
 }
 
 
-trend::TrendRef::TrendRef() : _name(""), _ctm(CTM()), _alphaDepth(0)
+trend::TrendRef::TrendRef() :
+   _name       ( ""   ),
+   _ctm        (      ),
+   _alphaDepth ( 0    )
 {
    _ctm.oglForm(_translation);
    for (word i = 0; i < 8; _obox[i++] = 0);
@@ -1007,6 +1223,13 @@ void trend::TrendLay::box (const int4b* pdata, const SGBitSet* ss)
    _cslice->registerBox(sobj);
 }
 
+void trend::TrendLay::box (const int4b* pdata, const SGBitSet* ss, const CTM& rmm)
+{
+   TrendSBox* sobj = DEBUG_NEW TrendSMBox(pdata, ss, rmm);
+   registerSBox(sobj);
+   _cslice->registerBox(sobj);
+}
+
 void trend::TrendLay::poly (const int4b* pdata, unsigned psize, const TessellPoly* tpoly)
 {
    _cslice->registerPoly(DEBUG_NEW TrendNcvx(pdata, psize), tpoly);
@@ -1019,6 +1242,13 @@ void trend::TrendLay::poly (const int4b* pdata, unsigned psize, const TessellPol
    _cslice->registerPoly(sobj, tpoly);
 }
 
+void trend::TrendLay::poly (const int4b* pdata, unsigned psize, const TessellPoly* tpoly, const SGBitSet* ss, const CTM& rmm)
+{
+   TrendSNcvx* sobj = DEBUG_NEW TrendSMNcvx(pdata, psize, ss, rmm);
+   registerSPoly(sobj);
+   _cslice->registerPoly(sobj, tpoly);
+}
+
 void trend::TrendLay::wire (int4b* pdata, unsigned psize, WireWidth width, bool center_only)
 {
    _cslice->registerWire(DEBUG_NEW TrendWire(pdata, psize, width, center_only));
@@ -1027,6 +1257,13 @@ void trend::TrendLay::wire (int4b* pdata, unsigned psize, WireWidth width, bool 
 void trend::TrendLay::wire (int4b* pdata, unsigned psize, WireWidth width, bool center_only, const SGBitSet* ss)
 {
    TrendSWire* sobj = DEBUG_NEW TrendSWire(pdata, psize, width, center_only, ss);
+   registerSWire(sobj);
+   _cslice->registerWire(sobj);
+}
+
+void trend::TrendLay::wire (int4b* pdata, unsigned psize, WireWidth width, bool center_only, const SGBitSet* ss, const CTM& rmm)
+{
+   TrendSWire* sobj = DEBUG_NEW TrendSMWire(pdata, psize, width, center_only, ss, rmm);
    registerSWire(sobj);
    _cslice->registerWire(sobj);
 }
@@ -1190,19 +1427,25 @@ trend::TrendBase::TrendBase( layprop::DrawProperties* drawprop, real UU ) :
    _refLayer           (      NULL ),
    _cslctd_array_offset(        0u ),
    _activeCS           (      NULL ),
-   _dovCorrection      (         0 )
+   _dovCorrection      (         0 ),
+   _rmm                (      NULL )
 {
    // Initialize the cell (CTM) stack
    _cellStack.push(DEBUG_NEW TrendRef());
 }
 
+void trend::TrendBase::setRmm(const CTM& mm)
+{
+   _rmm = DEBUG_NEW CTM(mm.Reversed());
+}
+
 void trend::TrendBase::pushCell(std::string cname, const CTM& trans, const DBbox& overlap, bool active, bool selected)
 {
    TrendRef* cRefBox = DEBUG_NEW TrendRef(cname,
-                                            trans * _cellStack.top()->ctm(),
-                                            overlap,
-                                            _cellStack.size()
-                                           );
+                                          trans * _cellStack.top()->ctm(),
+                                          overlap,
+                                          _cellStack.size()
+                                         );
    if (selected || (!_drawprop->isCellBoxHidden()))
       _refLayer->addCellOBox(cRefBox, _cellStack.size(), selected);
    else
@@ -1242,6 +1485,14 @@ void trend::TrendBase::wire (int4b* pdata, unsigned psize, WireWidth width, cons
    DBbox wsquare = DBbox(TP(0,0),TP(width,width));
    bool center_line_only = !wsquare.visible(topCTM() * scrCTM(), visualLimit());
    _clayer->wire(pdata, psize, width, center_line_only,psel);
+}
+
+void trend::TrendBase::wirem(int4b* pdata, unsigned psize, WireWidth width, const SGBitSet* psel)
+{
+   // first check whether to draw only the center line
+   DBbox wsquare = DBbox(TP(0,0),TP(width,width));
+   bool center_line_only = !wsquare.visible(topCTM() * scrCTM(), visualLimit());
+   _clayer->wire(pdata, psize, width, center_line_only,psel,*_rmm);
 }
 
 void trend::TrendBase::grcwire (int4b* pdata, unsigned psize, WireWidth width)
@@ -1318,6 +1569,7 @@ void trend::TrendBase::grcCleanUp()
 trend::TrendBase::~TrendBase()
 {
    if (_refLayer) delete _refLayer;
+   if (_rmm)      delete _rmm;
 }
 
 void trend::checkOGLError(std::string loc)
