@@ -874,23 +874,6 @@ void DataCenter::motionDraw(const CTM& layCTM, TP base, TP newp)
       mRenderer->cleanUp();
       TRENDC->releaseMRenderer();
    }
-//   layprop::DrawProperties* drawProp;
-//   if (PROPC->lockDrawProp(drawProp))
-//   {
-//      console::ACTIVE_OP currentOp = drawProp->currentOp();
-//      if ((console::op_line == currentOp) || _drawruler)
-//      {
-//         // ruller
-//         PROPC->tmp_draw(layCTM, base, newp);
-//      }
-//      if ((console::op_line != currentOp)  && (NULL !=_TEDLIB()))
-//      {
-//         while (wxMUTEX_NO_ERROR != _DBLock.TryLock());
-//         _TEDLIB()->tmpDraw(*drawProp, base, newp);
-//         VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
-//      }
-//   }
-//   PROPC->unlockDrawProp(drawProp, false);
 }
 
 LayerMapCif* DataCenter::secureCifLayMap(const layprop::DrawProperties* drawProp, bool import)

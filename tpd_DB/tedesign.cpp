@@ -1320,10 +1320,9 @@ void laydata::TdtDesign::motionDraw(trend::TrendBase& rend, const TP& base, cons
    console::ACTIVE_OP curConsoleOp = rend.drawprop()->currentOp();
    if (_tmpdata)
    {
-      //TODO
-//      glColor4f((GLfloat)1.0, (GLfloat)1.0, (GLfloat)1.0, (GLfloat)0.7);
-//      tmp_stack.push_front(CTM(newp - base,1,0,false));
-//      _tmpdata->draw(drawprop, tmp_stack);
+      rend.setRmm(CTM(base - newp,1,0,false));
+      rend.setLayer(TMP_LAY_DEF, false);
+      _tmpdata->draw(rend);
    }
    else if ((curConsoleOp != console::op_none) && _target.checkEdit())
    {

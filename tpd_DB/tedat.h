@@ -445,7 +445,7 @@ namespace laydata {
 //==============================================================================
    class TdtTmpData {
       public:
-         virtual void      draw(const layprop::DrawProperties&, CtmQueue&) const = 0;
+         virtual void      draw(trend::TrendBase&) const = 0;
          //! Add a point to the TdtData object. Used to handle the objects under construction on the screen.
          virtual void      addpoint(TP){assert(false);}
          //! Removes a point from the TdtData object. Used to handle the objects under construction on the screen.
@@ -462,7 +462,7 @@ namespace laydata {
       public:
                            TdtTmpBox() : _p1(NULL), _p2(NULL) {};
          virtual          ~TdtTmpBox();
-         virtual void      draw(const layprop::DrawProperties&, CtmQueue& ) const;
+         virtual void      draw(trend::TrendBase&) const;
          virtual void      addpoint(TP);
          virtual void      rmpoint(TP&);
       private:
@@ -475,7 +475,7 @@ namespace laydata {
       public:
                            TdtTmpPoly() {};
          virtual          ~TdtTmpPoly() {};
-         virtual void      draw(const layprop::DrawProperties&, CtmQueue& ) const;
+         virtual void      draw(trend::TrendBase&) const;
          virtual void      addpoint(TP p)  {_plist.push_back(p);}
          virtual void      rmpoint(TP&);
       private:
@@ -487,12 +487,10 @@ namespace laydata {
       public:
                            TdtTmpWire(WireWidth width) : _width(width)  {};
          virtual          ~TdtTmpWire(){};
-         virtual void      draw(const layprop::DrawProperties&, CtmQueue& ) const;
+         virtual void      draw(trend::TrendBase&) const;
          virtual void      addpoint(TP);
          virtual void      rmpoint(TP&);
       private:
-         typedef std::list<TP>     TmpPlist;
-         void              drawline(const PointVector&, const PointVector&) const;
          PointVector       _plist;
          WireWidth         _width;
    };
@@ -503,7 +501,7 @@ namespace laydata {
                            TdtTmpCellRef(CellDefin str, CTM trans) :
                                        _structure(str), _translation(trans) {};
          virtual          ~TdtTmpCellRef(){};
-         virtual void      draw(const layprop::DrawProperties&, CtmQueue&) const;
+         virtual void      draw(trend::TrendBase&) const;
          void              objFlip()   {_translation.FlipY(0.0)   ;}
          void              objRotate() {_translation.Rotate( 90.0);}
       protected:
@@ -517,7 +515,7 @@ namespace laydata {
                            TdtTmpCellAref(CellDefin str, CTM trans, ArrayProps& arrprops) :
                               TdtTmpCellRef(str, trans), _arrprops(arrprops) {};
          virtual          ~TdtTmpCellAref(){};
-         virtual void      draw(const layprop::DrawProperties&, CtmQueue&) const;
+         virtual void      draw(trend::TrendBase&) const;
       private:
          ArrayProps        _arrprops;
    };
@@ -527,7 +525,7 @@ namespace laydata {
       public:
                            TdtTmpText(std::string text, CTM trans);
          virtual          ~TdtTmpText(){};
-         virtual void      draw(const layprop::DrawProperties&, CtmQueue&) const;
+         virtual void      draw(trend::TrendBase&) const;
          void              objFlip()   {_translation.FlipY(0.0)   ;}
          void              objRotate() {_translation.Rotate( 90.0);}
       protected:

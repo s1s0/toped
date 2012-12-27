@@ -427,7 +427,7 @@ void laydata::WireContourAux::getRenderingData(PointVector& plist)
    _wcObject->getVectorData(plist);
 }
 
-void laydata::WireContourAux::getLData(PointVector& plist)
+void laydata::WireContourAux::getVectorLData(PointVector& plist)
 {
    assert(_wcObject);
    assert(0 == plist.size());
@@ -437,7 +437,7 @@ void laydata::WireContourAux::getLData(PointVector& plist)
       plist.push_back(TP(_ldata[2*i], _ldata[2*i+1]));
 }
 
-void laydata::WireContourAux::getCData(PointVector& plist)
+void laydata::WireContourAux::getVectorCData(PointVector& plist)
 {
    assert(_wcObject);
    assert(0 == plist.size());
@@ -445,6 +445,18 @@ void laydata::WireContourAux::getCData(PointVector& plist)
    _wcObject->getVectorData(plist);
 }
 
+void laydata::WireContourAux::getArrayLData(int4b* parr)
+{
+   assert(_wcObject);
+   memcpy(parr, _ldata, sizeof(int4b)* 2 * _wcObject->lsize());
+}
+
+void laydata::WireContourAux::getArrayCData(int4b* parr)
+{
+   assert(_wcObject);
+   _wcObject->getArrayData(parr);
+
+}
 
 laydata::WireContourAux::~WireContourAux()
 {

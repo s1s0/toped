@@ -96,8 +96,12 @@ namespace laydata {
                           WireContourAux(const PointVector&, const WireWidth, const TP);
                          ~WireContourAux();
          void             getRenderingData(PointVector&);
-         void             getLData(PointVector&);
-         void             getCData(PointVector&);
+         void             getVectorLData(PointVector&);
+         void             getVectorCData(PointVector&);
+         void             getArrayLData(int4b*);
+         void             getArrayCData(int4b*);
+         unsigned         csize()         {return _wcObject->csize(); } //! return the number of the contour points
+         unsigned         lsize()         {return _wcObject->lsize(); } //! return the number of the central line points
       private:
          WireContour*     _wcObject;
          int4b*           _ldata;

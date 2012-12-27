@@ -244,11 +244,33 @@ void trend::TrendBox::drctDrawFill()
       glVertex2i(_cdata[0], _cdata[3]);
    glEnd();
 }
+
+//=============================================================================
+//
+// TrendTBox
+//
+trend::TrendTBox::TrendTBox(const TP& p1, const CTM& rmm) :
+   TrendBox(NULL)
+{
+   TP p2 = p1 * rmm;
+   int4b* contData = DEBUG_NEW int4b[4];
+   contData[0] = p1.x();
+   contData[1] = p1.y();
+   contData[2] = p2.x();
+   contData[3] = p2.y();
+   _cdata = contData;
+}
+
+trend::TrendTBox::~TrendTBox()
+{
+   assert(_cdata);
+   delete [] (_cdata);
+}
+
 //=============================================================================
 //
 // TrendNcvx
 //
-
 void trend::TrendNcvx::drctDrawFill()
 {
    for ( TeselChain::const_iterator CCH = _tdata->tdata()->begin(); CCH != _tdata->tdata()->end(); CCH++ )
@@ -265,9 +287,35 @@ void trend::TrendNcvx::drctDrawFill()
 
 //=============================================================================
 //
+// TrendTNcvx
+//
+trend::TrendTNcvx::TrendTNcvx(const PointVector& plist, const CTM& rmm) :
+   TrendNcvx( NULL, plist.size()+1)
+{
+   dword numpnts = plist.size();
+   int4b* contData = DEBUG_NEW int4b[2*(numpnts+1)];
+   for (word i = 0; i < numpnts; i++)
+   {
+      contData[2*i  ] = plist[i].x();
+      contData[2*i+1] = plist[i].y();
+   }
+   TP newp(plist[numpnts-1] * rmm);
+   contData[2*numpnts  ] = newp.x();
+   contData[2*numpnts+1] = newp.y();
+   _cdata = contData;
+}
+
+trend::TrendTNcvx::~TrendTNcvx()
+{
+   assert(_cdata);
+   delete [] (_cdata);
+}
+
+//=============================================================================
+//
 // TrendWire
 //
-trend::TrendWire::TrendWire(int4b* pdata, unsigned psize, const WireWidth width, bool clo) :
+trend::TrendWire::TrendWire(int4b* pdata, unsigned psize, WireWidth width, bool clo) :
    TrendNcvx (NULL, 0),
    _ldata    (pdata  ),
    _lsize    (psize  ),
@@ -349,6 +397,31 @@ trend::TrendWire::~TrendWire()
    if (NULL != _tdata) delete _tdata;
 }
 
+//=============================================================================
+//
+// TrendTWire
+//
+trend::TrendTWire::TrendTWire(const PointVector& plist, WireWidth width, bool clo, const CTM& rmm) :
+   TrendWire(plist.size()+1, width, clo)
+{
+   dword num_points = plist.size();
+   assert(0 < num_points);
+   laydata::WireContourAux wcontour(plist, width, TP(plist[num_points-1] * rmm));
+
+   int4b* centData = DEBUG_NEW int4b[ 2 * _lsize];
+   wcontour.getArrayLData(centData);
+   _ldata = centData;
+
+   _csize = wcontour.csize();
+   int4b* contData = DEBUG_NEW int4b[ 2 * _csize];
+   wcontour.getArrayCData(contData);
+   _cdata = contData;
+}
+
+trend::TrendTWire::~TrendTWire()
+{
+   delete [] _ldata;
+}
 //=============================================================================
 //
 // TextSOvlBox
@@ -1216,6 +1289,11 @@ void trend::TrendLay::box  (const int4b* pdata)
    _cslice->registerBox(DEBUG_NEW TrendBox(pdata));
 }
 
+void trend::TrendLay::box  (const TP& p1, const CTM& rmm)
+{
+   _cslice->registerBox(DEBUG_NEW TrendTBox(p1, rmm));
+}
+
 void trend::TrendLay::box (const int4b* pdata, const SGBitSet* ss)
 {
    TrendSBox* sobj = DEBUG_NEW TrendSBox(pdata, ss);
@@ -1235,6 +1313,11 @@ void trend::TrendLay::poly (const int4b* pdata, unsigned psize, const TessellPol
    _cslice->registerPoly(DEBUG_NEW TrendNcvx(pdata, psize), tpoly);
 }
 
+void trend::TrendLay::poly (const PointVector& pdata, const CTM& rmm)
+{
+   _cslice->registerPoly(DEBUG_NEW TrendTNcvx(pdata, rmm), NULL);
+}
+
 void trend::TrendLay::poly (const int4b* pdata, unsigned psize, const TessellPoly* tpoly, const SGBitSet* ss)
 {
    TrendSNcvx* sobj = DEBUG_NEW TrendSNcvx(pdata, psize, ss);
@@ -1252,6 +1335,12 @@ void trend::TrendLay::poly (const int4b* pdata, unsigned psize, const TessellPol
 void trend::TrendLay::wire (int4b* pdata, unsigned psize, WireWidth width, bool center_only)
 {
    _cslice->registerWire(DEBUG_NEW TrendWire(pdata, psize, width, center_only));
+}
+
+void trend::TrendLay::wire (const PointVector& pdata, WireWidth width, bool center_only, const CTM& rmm)
+{
+   _cslice->registerWire(DEBUG_NEW TrendTWire(pdata, width, center_only, rmm));
+
 }
 
 void trend::TrendLay::wire (int4b* pdata, unsigned psize, WireWidth width, bool center_only, const SGBitSet* ss)
@@ -1479,6 +1568,14 @@ void trend::TrendBase::wire (int4b* pdata, unsigned psize, WireWidth width)
    _clayer->wire(pdata, psize, width, center_line_only);
 }
 
+void trend::TrendBase::wiret(const PointVector& pdata, WireWidth width)
+{
+   // first check whether to draw only the center line
+   DBbox wsquare = DBbox(TP(0,0),TP(width,width));
+   bool center_line_only = !wsquare.visible(topCTM() * scrCTM(), visualLimit());
+   _clayer->wire(pdata, width, center_line_only, *_rmm);
+}
+
 void trend::TrendBase::wire (int4b* pdata, unsigned psize, WireWidth width, const SGBitSet* psel)
 {
    // first check whether to draw only the center line
@@ -1524,6 +1621,11 @@ void trend::TrendBase::text (const std::string* txt, const CTM& ftmtrx, const DB
       _clayer->text(txt, ftmtrx, NULL, cor, false);
    else
       _clayer->text(txt, ftmtrx, &ovl, cor, false);
+}
+
+void trend::TrendBase::textt(const std::string* txt, const CTM& ftmtrx, const TP& cor)
+{
+   _clayer->text(txt, ftmtrx*(*_rmm), NULL, cor, false);
 }
 
 bool trend::TrendBase::preCheckCRS(const laydata::TdtCellRef* ref, layprop::CellRefChainType& crchain)
