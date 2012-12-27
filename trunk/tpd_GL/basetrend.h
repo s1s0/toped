@@ -300,6 +300,11 @@ namespace trend {
          virtual void      drctDrawFill();
    };
 
+   class TrendTBox : public TrendBox {
+      public:
+                           TrendTBox(const TP&, const CTM&);
+         virtual          ~TrendTBox();
+   };
    /**
       Represents non-convex polygons - most of the poly objects in the DB. Inherits
       TrendCnvx. The only addition is the tesselation data (_tdata) which is
@@ -317,6 +322,12 @@ namespace trend {
          const TessellPoly*    _tdata; //! polygon tesselation data
    };
 
+   class TrendTNcvx : public TrendNcvx {
+      public:
+                           TrendTNcvx(const PointVector&, const CTM&);
+         virtual          ~TrendTNcvx();
+   };
+
    /**
       Holds the wires from the data base. This class is not quite trivial and it
       causes all kinds of troubles in the overall class hierarchy. It inherits
@@ -331,7 +342,7 @@ namespace trend {
    */
    class TrendWire : public TrendNcvx {
       public:
-                           TrendWire(int4b*, unsigned, const WireWidth, bool);
+                           TrendWire(int4b*, unsigned, WireWidth, bool);
          virtual          ~TrendWire();
          void              Tesselate();
          virtual unsigned  lDataCopy(TNDR_GLDATAT*, unsigned&);
@@ -346,6 +357,12 @@ namespace trend {
          unsigned          _lsize; //! the number of vertexes in the central line
          bool              _celno; //! indicates whether the center line only shall be drawn
          TeselChain*       _tdata; //! wire tesselation data
+   };
+
+   class TrendTWire : public TrendWire {
+      public:
+                           TrendTWire(const PointVector& pdata, WireWidth width, bool center_only, const CTM& rmm);
+         virtual          ~TrendTWire();
    };
 
    typedef enum {lstr, llps, lnes} SlctTypes;
@@ -861,12 +878,15 @@ namespace trend {
          void              box  (const int4b*);
          void              box  (const int4b*,                               const SGBitSet*);
          void              box  (const int4b*,                               const SGBitSet*, const CTM&);
+         void              box  (const TP&, const CTM&);
          void              poly (const int4b*, unsigned, const TessellPoly*);
          void              poly (const int4b*, unsigned, const TessellPoly*, const SGBitSet*);
          void              poly (const int4b*, unsigned, const TessellPoly*, const SGBitSet*, const CTM&);
+         void              poly (const PointVector&, const CTM&);
          void              wire (int4b*, unsigned, WireWidth, bool);
          void              wire (int4b*, unsigned, WireWidth, bool, const SGBitSet*);
          void              wire (int4b*, unsigned, WireWidth, bool, const SGBitSet*, const CTM&);
+         void              wire (const PointVector&, WireWidth, bool, const CTM&);
          void              text (const std::string*, const CTM&, const DBbox*, const TP&, bool);
          virtual void      newSlice(TrendRef* const, bool, bool /*, bool, unsigned*/) = 0;
          virtual void      newSlice(TrendRef* const, bool, bool, unsigned slctd_array_offset) = 0;
@@ -960,19 +980,23 @@ namespace trend {
          void              box  (const int4b* pdata)              {_clayer->box(pdata);}
          void              box  (const int4b* pdata, const SGBitSet* ss){_clayer->box(pdata, ss);}
          void              boxm (const int4b* pdata, const SGBitSet* ss){assert(_rmm);_clayer->box(pdata, ss, *_rmm);}
+         void              boxt (const TP& p1)                    {_clayer->box(p1, *_rmm);}
          void              poly (const int4b* pdata, unsigned psize, const TessellPoly* tpoly)
                                                                   {_clayer->poly(pdata, psize, tpoly);}
          void              poly (const int4b* pdata, unsigned psize, const TessellPoly* tpoly, const SGBitSet* ss)
                                                                   {_clayer->poly(pdata, psize, tpoly, ss);}
          void              polym(const int4b* pdata, unsigned psize, const TessellPoly* tpoly, const SGBitSet* ss)
                                                                   {assert(_rmm);_clayer->poly(pdata, psize, tpoly, ss, *_rmm);}
+         void              polyt(const PointVector& pdata)        {_clayer->poly(pdata, *_rmm);}
          void              grcpoly(int4b* pdata, unsigned psize);
          void              wire (int4b*, unsigned, WireWidth);
          void              wire (int4b*, unsigned, WireWidth, const SGBitSet*);
          void              wirem(int4b*, unsigned, WireWidth, const SGBitSet*);
+         void              wiret(const PointVector&, WireWidth);
          void              grcwire (int4b*, unsigned, WireWidth);
          void              arefOBox(std::string, const CTM&, const DBbox&, bool);
          void              text (const std::string*, const CTM&, const DBbox&, const TP&, bool);
+         void              textt(const std::string*, const CTM&, const TP&);
          virtual bool      collect() = 0;
          virtual bool      grcCollect() = 0;
          virtual void      draw() = 0;

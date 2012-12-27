@@ -178,7 +178,7 @@ namespace laydata {
     *  This object contains pointers to all loaded libraries. Current database
     *  is a special case. The other special case is the library of undefined
     *  cells. It is always defined and always located in the 0 slot of the
-    *  Catalog. Undefined cell library is not accessible outside of the scope of
+    *  Catalogue. Undefined cell library is not accessible outside of the scope of
     *  this class
     *
     *  Current database is accessible using the class functor. The class is

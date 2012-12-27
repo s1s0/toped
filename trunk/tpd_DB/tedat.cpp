@@ -1826,26 +1826,6 @@ void laydata::TdtText::drawSRequest(trend::TrendBase& rend, const SGBitSet*) con
 void laydata::TdtText::motionDraw(trend::TrendBase& rend, SGBitSet*) const
 {
    drawRequest(rend);
-//   //====================================================================
-//   // font translation matrix
-//   CTM ftmtrx =  _translation * transtack.front();
-//   DBbox wsquare(TP(0, 0),TP(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT));
-//   if (wsquare.visible(ftmtrx * drawprop.scrCtm(), drawprop.visualLimit()))
-//   {
-//      if (drawprop.adjustTextOrientation())
-//         ftmtrx = renderingAdjustment(ftmtrx) * transtack.front();
-//      glPushMatrix();
-//      double ori_mtrx[] = { ftmtrx.a(), ftmtrx.b(),0,0,
-//                            ftmtrx.c(), ftmtrx.d(),0,0,
-//                                     0,          0,0,0,
-//                           ftmtrx.tx(),ftmtrx.ty(),0,1};
-//      glMultMatrixd(ori_mtrx);
-//      // correction of the glf shift - as explained in the openGlPrecalc above
-//      glTranslatef(_correction.x(), _correction.y(), 1);
-//      glScalef(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT, 1);
-//      TRENDC->drawWiredString(_text);
-//      glPopMatrix();
-//   }
 }
 
 void laydata::TdtText::write(OutputTdtFile* const tedfile) const {
@@ -2574,12 +2554,10 @@ laydata::TdtData* laydata::polymerge(const PointVector& _plist0, const PointVect
 
 //==============================================================================
 //
-void laydata::TdtTmpBox::draw(const layprop::DrawProperties&, CtmQueue& transtack) const
+void laydata::TdtTmpBox::draw(trend::TrendBase& rend) const
 {
-   CTM trans = transtack.front();
-   if (!(_p1)) return;
-   TP pt2 = (*_p1) * trans;
-   glRecti(_p1->x(),_p1->y(),pt2.x(),pt2.y());
+   if (_p1)
+      rend.boxt(*_p1);
 }
 
 void  laydata::TdtTmpBox::addpoint(TP p)
@@ -2606,20 +2584,10 @@ laydata::TdtTmpBox::~TdtTmpBox()
 
 //==============================================================================
 //
-void laydata::TdtTmpPoly::draw(const layprop::DrawProperties&, CtmQueue& transtack) const
+void laydata::TdtTmpPoly::draw(trend::TrendBase& rend) const
 {
-   CTM trans = transtack.front();
-   dword numpnts;
-   if ((numpnts = _plist.size()) == 0) return;
-   word i;
-   glBegin(GL_LINE_STRIP);
-   for (i = 0; i < numpnts; i++)
-      glVertex2i(_plist[i].x(), _plist[i].y());
-   TP newp = _plist[numpnts-1] * trans;
-   glVertex2i(newp.x(), newp.y());
-   if ((numpnts > 2) || ((2 == numpnts) && (newp != _plist[numpnts-1])))
-      glVertex2i(_plist[0].x(), _plist[0].y());
-   glEnd();
+   if (0 != _plist.size())
+      rend.polyt(_plist);
 }
 
 void laydata::TdtTmpPoly::rmpoint(TP& lp)
@@ -2631,17 +2599,10 @@ void laydata::TdtTmpPoly::rmpoint(TP& lp)
 
 //==============================================================================
 //
-void laydata::TdtTmpWire::draw(const layprop::DrawProperties& drawprop, CtmQueue& transtack) const
+void laydata::TdtTmpWire::draw(trend::TrendBase& rend) const
 {
-   dword num_points = _plist.size();
-   if (num_points == 0) return;
-   laydata::WireContourAux wcontour(_plist, _width, TP(_plist[num_points-1] * transtack.front()));
-   PointVector centerLine;
-   PointVector contourLine;
-   wcontour.getLData(centerLine);
-   wcontour.getCData(contourLine);
-
-   drawline(centerLine, contourLine);
+   if (0 != _plist.size())
+      rend.wiret(_plist, _width);
 }
 
 void  laydata::TdtTmpWire::addpoint(TP lp)
@@ -2657,59 +2618,32 @@ void  laydata::TdtTmpWire::rmpoint(TP& lp)
    if (_plist.size() > 0) lp = _plist.back();
 };
 
-void laydata::TdtTmpWire::drawline(const PointVector& centerLine, const PointVector& contourLine) const
+//==============================================================================
+//
+void laydata::TdtTmpCellRef::draw(trend::TrendBase& rend) const
 {
-   int num_lpoints = centerLine.size();
-   if (0 == num_lpoints) return;
-   // to keep MS VC++ happy - define the counter outside the loops
-   int i;
-   glBegin(GL_LINE_STRIP);
-   for (i = 0; i < num_lpoints; i++)
-      glVertex2i(centerLine[i].x(), centerLine[i].y());
-   glEnd();
-   // now check whether to draw only the center line
-   int num_cpoints = contourLine.size();
-   if (0 == num_cpoints) return;
-   // draw the wire contour
-   glBegin(GL_LINE_LOOP);
-   for (i = 0; i < num_cpoints; i ++)
-      glVertex2i(contourLine[i].x(), contourLine[i].y());
-   glEnd();
+   if (NULL != _structure)
+      _structure->motionDraw(rend,_translation, false);
 }
 
 //==============================================================================
 //
-void laydata::TdtTmpCellRef::draw(const layprop::DrawProperties& drawprop, CtmQueue& transtack) const
+void laydata::TdtTmpCellAref::draw(trend::TrendBase& rend) const
 {
-   // TODO
-//   if (NULL != _structure)
-//   {
-//      transtack.push_front(_translation * transtack.front());
-//      _structure->motionDraw(drawprop, transtack);
-//   }
-}
-
-//==============================================================================
-//
-void laydata::TdtTmpCellAref::draw(const layprop::DrawProperties& drawprop,
-                                       CtmQueue& transtack) const
-{
-   // TODO
-//   if (NULL != _structure)
-//   {
-//      for (int i = 0; i < _arrprops.cols(); i++)
-//      {// start/stop rows
-//         for(int j = 0; j < _arrprops.rows(); j++)
-//         { // start/stop columns
-//            // for each of the visual array figures...
-//            // ... get the translation matrix ...
-//            CTM refCTM(_arrprops.displ(i,j), 1, 0, false);
-//            refCTM *= _translation;
-//            transtack.push_front(refCTM * transtack.front());
-//            _structure->motionDraw(drawprop, transtack);
-//         }
-//      }
-//   }
+   if (NULL != _structure)
+   {
+      for (int i = 0; i < _arrprops.cols(); i++)
+      {// start/stop rows
+         for(int j = 0; j < _arrprops.rows(); j++)
+         { // start/stop columns
+            // for each of the visual array figures...
+            // ... get the translation matrix ...
+            CTM refCTM(_arrprops.displ(i,j), 1, 0, false);
+            refCTM *= _translation;
+            _structure->motionDraw(rend, refCTM, false);
+         }
+      }
+   }
 }
 
 //==============================================================================
@@ -2723,21 +2657,12 @@ laydata::TdtTmpText::TdtTmpText(std::string text, CTM trans) : _text(text),
 }
 
 
-void laydata::TdtTmpText::draw(const layprop::DrawProperties&, CtmQueue& transtack) const
+void laydata::TdtTmpText::draw(trend::TrendBase& rend) const
 {
-   //====================================================================
    // font translation matrix
-   CTM ftmtrx =  _translation * transtack.front();
-   glPushMatrix();
-   double ori_mtrx[] = { ftmtrx.a(), ftmtrx.b() ,0,0,
-                         ftmtrx.c(), ftmtrx.d() ,0,0,
-                         0,          0          ,0,0,
-                         ftmtrx.tx(),ftmtrx.ty(),0,1
-                       };
-   glMultMatrixd(ori_mtrx);
-   // correction of the glf shift - as explained in the openGlPrecalc above
-   glTranslatef(-_overlap.p1().x(), -_overlap.p1().y(), 1);
-   glScalef(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT, 1);
-   TRENDC->drawWiredString(_text);
-   glPopMatrix();
+   CTM ftmtrx =  _translation * rend.topCTM();
+   DBbox wsquare(TP(0,0), TP(OPENGL_FONT_UNIT, OPENGL_FONT_UNIT));
+   if (!wsquare.visible(ftmtrx * rend.scrCTM(), rend.visualLimit()) ) return;
+   rend.textt(&_text, _translation, TP(-_overlap.p1().x(), -_overlap.p1().y()));
+
 }

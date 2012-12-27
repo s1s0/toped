@@ -73,6 +73,7 @@ const LayerNumber REF_LAY              = 0xffffffff;
 const LayerNumber ERR_LAY              = 0xfffffffe;
 const LayerNumber DRC_LAY              = 0xfffffffd;
 const LayerNumber GRC_LAY              = 0xfffffffc;
+const LayerNumber TMP_LAY              = 0xfffffffb;
 const LayerNumber LAST_EDITABLE_LAYNUM = 0x0000ffff;
 const LayerDType  LAST_EDITABLE_LAYTYP = 0x0000ffff;
 const LayerNumber DEFAULT_LAY          = 0x0;
@@ -757,6 +758,7 @@ const LayerDef    REF_LAY_DEF(REF_LAY    , DEFAULT_DTYPE);
 const LayerDef    ERR_LAY_DEF(ERR_LAY    , DEFAULT_DTYPE);
 const LayerDef    DRC_LAY_DEF(DRC_LAY    , DEFAULT_DTYPE);
 const LayerDef    GRC_LAY_DEF(GRC_LAY    , DEFAULT_DTYPE);
+const LayerDef    TMP_LAY_DEF(TMP_LAY    , DEFAULT_DTYPE);
 const LayerDef    TLL_LAY_DEF(DEFAULT_LAY, DEFAULT_DTYPE);
 
 #endif
