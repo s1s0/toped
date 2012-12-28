@@ -239,7 +239,7 @@ namespace trend {
          virtual          ~TrxTextOvlBox() {}
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual void      drctDrawContour();
-      private:
+      protected:
          int4b             _obox[8];
    };
 

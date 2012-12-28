@@ -749,7 +749,10 @@ unsigned trend::TrxTextSOvlBox::sDataCopy(unsigned* array, unsigned& pindex)
 
 void trend::TrxTextSOvlBox::drctDrawSlctd()
 {
-   //TODO
+   glBegin(GL_LINE_LOOP);
+   for (unsigned i = 0; i < 4; i++)
+      glVertex2i(_obox[2*i], _obox[2*i+1]);
+   glEnd();
 }
 
 //=============================================================================
