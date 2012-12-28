@@ -183,6 +183,7 @@
     <ClCompile Include="toshader.cpp" />
     <ClCompile Include="tpdph.cpp" />
     <ClCompile Include="trend.cpp" />
+    <ClCompile Include="trendat.cpp" />
     <ClCompile Include="viewprop.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -193,6 +194,7 @@
     <ClInclude Include="toshader.h" />
     <ClInclude Include="tpdph.h" />
     <ClInclude Include="trend.h" />
+    <ClInclude Include="trendat.h" />
     <ClInclude Include="viewprop.h" />
   </ItemGroup>
   <ItemGroup>
