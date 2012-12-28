@@ -478,7 +478,7 @@ void trend::TenderLay::collectSelected(unsigned int* slctd_array)
 
    for (SliceSelected::const_iterator SSL = _slct_data.begin(); SSL != _slct_data.end(); SSL++)
    {
-      TrendSelected* cchunk = *SSL;
+      TrxSelected* cchunk = *SSL;
       switch (cchunk->type())
       {
          case lstr : // LINES
