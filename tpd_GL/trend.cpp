@@ -495,8 +495,8 @@ trend::Shaders::Shaders() :
    _idShdrVertex     ( -1                 ),
    _idShdrGeometry   ( -1                 ),
    _idShdrFragment   ( -1                 ),
-   _status           ( true               ),
-   _curProgram       ( glslp_NULL         )
+   _curProgram       ( glslp_NULL         ),
+   _status           ( true               )
 {
    // initialize all uniform variable names
    _glslUniVarNames[glslp_VF][glslu_in_CTM]        = "in_CTM";

@@ -34,7 +34,7 @@ namespace trend {
 
    class TolderTV : public TrendTV {
       public:
-                           TolderTV(TrendRef* const refCell, bool filled, bool reusable,
+                           TolderTV(TrxCellRef* const refCell, bool filled, bool reusable,
                                           unsigned parray_offset, unsigned iarray_offset) :
                                  TrendTV(refCell, filled, reusable, parray_offset, iarray_offset) {}
          virtual          ~TolderTV() {}
@@ -44,7 +44,7 @@ namespace trend {
 
    class TolderReTV : public TrendReTV {
       public:
-                           TolderReTV(TrendTV* const chunk, TrendRef* const refCell):
+                           TolderReTV(TrendTV* const chunk, TrxCellRef* const refCell):
                               TrendReTV(chunk, refCell) {}
          virtual void      draw(layprop::DrawProperties*);
          virtual void      drawTexts(layprop::DrawProperties*);
@@ -54,9 +54,9 @@ namespace trend {
       public:
                            TolderLay() : TrendLay() {}
          virtual          ~TolderLay() {}
-         virtual void      newSlice(TrendRef* const, bool, bool /*, bool, unsigned*/);
-         virtual void      newSlice(TrendRef* const, bool, bool, unsigned slctd_array_offset);
-         virtual bool      chunkExists(TrendRef* const, bool);
+         virtual void      newSlice(TrxCellRef* const, bool, bool /*, bool, unsigned*/);
+         virtual void      newSlice(TrxCellRef* const, bool, bool, unsigned slctd_array_offset);
+         virtual bool      chunkExists(TrxCellRef* const, bool);
          virtual void      draw(layprop::DrawProperties*);
          virtual void      drawSelected();
          virtual void      drawTexts(layprop::DrawProperties*);

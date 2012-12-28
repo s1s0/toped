@@ -37,7 +37,7 @@ extern trend::TrendCenter*        TRENDC;
 //
 // class TenderTV
 //
-trend::TenderTV::TenderTV(TrendRef* const refCell, bool filled, bool reusable,
+trend::TenderTV::TenderTV(TrxCellRef* const refCell, bool filled, bool reusable,
                    unsigned parray_offset, unsigned iarray_offset) :
    TrendTV(refCell, filled, reusable, parray_offset, iarray_offset),
    _point_array_offset  ( parray_offset   ),
@@ -349,14 +349,14 @@ trend::TenderTV::~TenderTV()
 //
 void trend::TenderReTV::draw(layprop::DrawProperties* drawprop)
 {
-   TrendRef* sref_cell = _chunk->swapRefCells(_refCell);
+   TrxCellRef* sref_cell = _chunk->swapRefCells(_refCell);
    _chunk->draw(drawprop);
    _chunk->swapRefCells(sref_cell);
 }
 
 void trend::TenderReTV::drawTexts(layprop::DrawProperties* drawprop)
 {
-   TrendRef* sref_cell = _chunk->swapRefCells(_refCell);
+   TrxCellRef* sref_cell = _chunk->swapRefCells(_refCell);
    _chunk->drawTexts(drawprop);
    _chunk->swapRefCells(sref_cell);
 }
@@ -384,7 +384,7 @@ trend::TenderLay::TenderLay():
  * @param ctrans Current translation matrix of the new object
  * @param fill Whether to fill the drawing objects
  */
-void trend::TenderLay::newSlice(TrendRef* const ctrans, bool fill, bool reusable, unsigned slctd_array_offset)
+void trend::TenderLay::newSlice(TrxCellRef* const ctrans, bool fill, bool reusable, unsigned slctd_array_offset)
 {
    assert( 0 == total_slctdx());
    _slctd_array_offset = slctd_array_offset;
@@ -392,12 +392,12 @@ void trend::TenderLay::newSlice(TrendRef* const ctrans, bool fill, bool reusable
    newSlice(ctrans, fill, reusable);
 }
 
-void trend::TenderLay::newSlice(TrendRef* const ctrans, bool fill, bool reusable)
+void trend::TenderLay::newSlice(TrxCellRef* const ctrans, bool fill, bool reusable)
 {
    _cslice = DEBUG_NEW TenderTV(ctrans, fill, reusable, 2 * _num_total_points, _num_total_indexs);
 }
 
-bool trend::TenderLay::chunkExists(TrendRef* const ctrans, bool filled)
+bool trend::TenderLay::chunkExists(TrxCellRef* const ctrans, bool filled)
 {
    ReusableTTVMap::iterator achunk;
    if (filled)

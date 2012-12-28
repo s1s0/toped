@@ -471,6 +471,33 @@ namespace trend {
          virtual          ~TrxTWire();
    };
 
+
+   //==========================================================================
+   //
+   // Cell references
+   //
+   //==========================================================================
+   /**
+   *  Cell reference boxes & reference related data
+   */
+   class TrxCellRef {
+      public:
+                           TrxCellRef(std::string, const CTM&, const DBbox&, word);
+                           TrxCellRef();
+         std::string       name()         {return _name;}
+         real* const       translation()  {return _translation;}
+         const CTM&        ctm() const    {return _ctm;}
+         word              alphaDepth()   {return _alphaDepth;}
+         unsigned          cDataCopy(TNDR_GLDATAT*, unsigned&);
+         void              drctDrawContour();
+      private:
+         std::string       _name;
+         real              _translation[16];
+         CTM               _ctm;
+         TNDR_GLDATAT      _obox[8];
+         word              _alphaDepth;
+   };
+
 }
 
 

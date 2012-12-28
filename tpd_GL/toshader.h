@@ -33,11 +33,11 @@
 
 namespace trend {
 
-   void              setShaderCtm(layprop::DrawProperties*, const TrendRef*);
+   void              setShaderCtm(layprop::DrawProperties*, const TrxCellRef*);
 
    class ToshaderTV : public TenderTV {
       public:
-                           ToshaderTV(TrendRef* const, bool, bool, unsigned, unsigned);
+                           ToshaderTV(TrxCellRef* const, bool, bool, unsigned, unsigned);
          virtual          ~ToshaderTV() {};
          virtual void      draw(layprop::DrawProperties*);
          virtual void      drawTexts(layprop::DrawProperties*);
@@ -49,7 +49,7 @@ namespace trend {
 
    class ToshaderReTV : public TenderReTV {
       public:
-                           ToshaderReTV(TrendTV* const chunk, TrendRef* const refCell):
+                           ToshaderReTV(TrendTV* const chunk, TrxCellRef* const refCell):
                               TenderReTV(chunk, refCell) {}
 //         virtual void      draw(layprop::DrawProperties*);
 //         virtual void      drawTexts(layprop::DrawProperties*);
@@ -59,9 +59,9 @@ namespace trend {
       public:
                            ToshaderLay();
          virtual          ~ToshaderLay() {}
-         virtual void      newSlice(TrendRef* const, bool, bool /*, bool, unsigned*/);
-         virtual void      newSlice(TrendRef* const, bool, bool, unsigned slctd_array_offset);
-         virtual bool      chunkExists(TrendRef* const, bool);
+         virtual void      newSlice(TrxCellRef* const, bool, bool /*, bool, unsigned*/);
+         virtual void      newSlice(TrxCellRef* const, bool, bool, unsigned slctd_array_offset);
+         virtual bool      chunkExists(TrxCellRef* const, bool);
          virtual void      drawSelected();
    };
 
