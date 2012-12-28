@@ -241,7 +241,7 @@ void trend::TenderTV::draw(layprop::DrawProperties* drawprop)
       glMultiDrawArrays(GL_LINE_STRIP, _firstvx[line], _sizesvx[line], _alobjvx[line]);
    }
    if  (_alobjvx[cnvx] > 0)
-   {// Draw convex polygons (TODO replace GL_QUADS to GL_POLY)
+   {// Draw convex polygons
       assert(_firstvx[cnvx]);
       assert(_sizesvx[cnvx]);
       glMultiDrawArrays(GL_LINE_LOOP, _firstvx[cnvx], _sizesvx[cnvx], _alobjvx[cnvx]);
