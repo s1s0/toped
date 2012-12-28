@@ -105,7 +105,7 @@ trend::TrendTV::TrendTV(TrendRef* const refCell, bool filled, bool reusable,
    }
 }
 
-void trend::TrendTV::registerBox (TrendCnvx* cobj)
+void trend::TrendTV::registerBox (TrxCnvx* cobj)
 {
    unsigned allpoints = cobj->csize();
    if (_filled)
@@ -122,7 +122,7 @@ void trend::TrendTV::registerBox (TrendCnvx* cobj)
    }
 }
 
-void trend::TrendTV::registerPoly (TrendNcvx* cobj, const TessellPoly* tchain)
+void trend::TrendTV::registerPoly (TrxNcvx* cobj, const TessellPoly* tchain)
 {
    unsigned allpoints = cobj->csize();
    if (_filled && tchain && tchain->valid())
@@ -144,7 +144,7 @@ void trend::TrendTV::registerPoly (TrendNcvx* cobj, const TessellPoly* tchain)
    }
 }
 
-void trend::TrendTV::registerWire (TrendWire* cobj)
+void trend::TrendTV::registerWire (TrxWire* cobj)
 {
    unsigned allpoints = cobj->csize();
    _line_data.push_back(cobj);
@@ -170,7 +170,7 @@ void trend::TrendTV::registerWire (TrendWire* cobj)
    }
 }
 
-void trend::TrendTV::registerText (TrendText* cobj, TextOvlBox* oobj)
+void trend::TrendTV::registerText (TrxText* cobj, TrxTextOvlBox* oobj)
 {
    _text_data.push_back(cobj);
    _num_total_strings++;
@@ -288,73 +288,73 @@ void trend::TrendLay::ppSlice()
 
 void trend::TrendLay::box  (const int4b* pdata)
 {
-   _cslice->registerBox(DEBUG_NEW TrendBox(pdata));
+   _cslice->registerBox(DEBUG_NEW TrxBox(pdata));
 }
 
 void trend::TrendLay::box  (const TP& p1, const CTM& rmm)
 {
-   _cslice->registerBox(DEBUG_NEW TrendTBox(p1, rmm));
+   _cslice->registerBox(DEBUG_NEW TrxTBox(p1, rmm));
 }
 
 void trend::TrendLay::box (const int4b* pdata, const SGBitSet* ss)
 {
-   TrendSBox* sobj = DEBUG_NEW TrendSBox(pdata, ss);
+   TrxSBox* sobj = DEBUG_NEW TrxSBox(pdata, ss);
    registerSBox(sobj);
    _cslice->registerBox(sobj);
 }
 
 void trend::TrendLay::box (const int4b* pdata, const SGBitSet* ss, const CTM& rmm)
 {
-   TrendSBox* sobj = DEBUG_NEW TrendSMBox(pdata, ss, rmm);
+   TrxSBox* sobj = DEBUG_NEW TrxSMBox(pdata, ss, rmm);
    registerSBox(sobj);
    _cslice->registerBox(sobj);
 }
 
 void trend::TrendLay::poly (const int4b* pdata, unsigned psize, const TessellPoly* tpoly)
 {
-   _cslice->registerPoly(DEBUG_NEW TrendNcvx(pdata, psize), tpoly);
+   _cslice->registerPoly(DEBUG_NEW TrxNcvx(pdata, psize), tpoly);
 }
 
 void trend::TrendLay::poly (const PointVector& pdata, const CTM& rmm)
 {
-   _cslice->registerPoly(DEBUG_NEW TrendTNcvx(pdata, rmm), NULL);
+   _cslice->registerPoly(DEBUG_NEW TrxTNcvx(pdata, rmm), NULL);
 }
 
 void trend::TrendLay::poly (const int4b* pdata, unsigned psize, const TessellPoly* tpoly, const SGBitSet* ss)
 {
-   TrendSNcvx* sobj = DEBUG_NEW TrendSNcvx(pdata, psize, ss);
+   TrxSNcvx* sobj = DEBUG_NEW TrxSNcvx(pdata, psize, ss);
    registerSPoly(sobj);
    _cslice->registerPoly(sobj, tpoly);
 }
 
 void trend::TrendLay::poly (const int4b* pdata, unsigned psize, const TessellPoly* tpoly, const SGBitSet* ss, const CTM& rmm)
 {
-   TrendSNcvx* sobj = DEBUG_NEW TrendSMNcvx(pdata, psize, ss, rmm);
+   TrxSNcvx* sobj = DEBUG_NEW TrxSMNcvx(pdata, psize, ss, rmm);
    registerSPoly(sobj);
    _cslice->registerPoly(sobj, tpoly);
 }
 
 void trend::TrendLay::wire (int4b* pdata, unsigned psize, WireWidth width, bool center_only)
 {
-   _cslice->registerWire(DEBUG_NEW TrendWire(pdata, psize, width, center_only));
+   _cslice->registerWire(DEBUG_NEW TrxWire(pdata, psize, width, center_only));
 }
 
 void trend::TrendLay::wire (const PointVector& pdata, WireWidth width, bool center_only, const CTM& rmm)
 {
-   _cslice->registerWire(DEBUG_NEW TrendTWire(pdata, width, center_only, rmm));
+   _cslice->registerWire(DEBUG_NEW TrxTWire(pdata, width, center_only, rmm));
 
 }
 
 void trend::TrendLay::wire (int4b* pdata, unsigned psize, WireWidth width, bool center_only, const SGBitSet* ss)
 {
-   TrendSWire* sobj = DEBUG_NEW TrendSWire(pdata, psize, width, center_only, ss);
+   TrxSWire* sobj = DEBUG_NEW TrxSWire(pdata, psize, width, center_only, ss);
    registerSWire(sobj);
    _cslice->registerWire(sobj);
 }
 
 void trend::TrendLay::wire (int4b* pdata, unsigned psize, WireWidth width, bool center_only, const SGBitSet* ss, const CTM& rmm)
 {
-   TrendSWire* sobj = DEBUG_NEW TrendSMWire(pdata, psize, width, center_only, ss, rmm);
+   TrxSWire* sobj = DEBUG_NEW TrxSMWire(pdata, psize, width, center_only, ss, rmm);
    registerSWire(sobj);
    _cslice->registerWire(sobj);
 }
@@ -362,26 +362,26 @@ void trend::TrendLay::wire (int4b* pdata, unsigned psize, WireWidth width, bool 
 void trend::TrendLay::text (const std::string* txt, const CTM& ftmtrx, const DBbox* ovl, const TP& cor, bool sel)
 {
    // Make sure that selected shapes don't come unexpected
-   TextOvlBox* cobj = NULL;
+   TrxTextOvlBox* cobj = NULL;
    if (sel)
    {
       assert(ovl);
-      TextSOvlBox* sobj = DEBUG_NEW TextSOvlBox((*ovl) , ftmtrx);
+      TrxTextSOvlBox* sobj = DEBUG_NEW TrxTextSOvlBox((*ovl) , ftmtrx);
       registerSOBox(sobj);
       cobj = sobj;
    }
    else if (ovl)
    {
-      cobj = DEBUG_NEW TextOvlBox((*ovl) , ftmtrx);
+      cobj = DEBUG_NEW TrxTextOvlBox((*ovl) , ftmtrx);
    }
 
    CTM ftm(ftmtrx.a(), ftmtrx.b(), ftmtrx.c(), ftmtrx.d(), 0, 0);
    ftm.Translate(cor * ftmtrx);
-   _cslice->registerText(DEBUG_NEW TrendText(txt, ftm), cobj);
+   _cslice->registerText(DEBUG_NEW TrxText(txt, ftm), cobj);
 }
 
 
-void trend::TrendLay::registerSBox (TrendSBox* sobj)
+void trend::TrendLay::registerSBox (TrxSBox* sobj)
 {
    _slct_data.push_back(sobj);
    if ( sobj->partSelected() )
@@ -396,7 +396,7 @@ void trend::TrendLay::registerSBox (TrendSBox* sobj)
    }
 }
 
-void trend::TrendLay::registerSOBox (TextSOvlBox* sobj)
+void trend::TrendLay::registerSOBox (TrxTextSOvlBox* sobj)
 {
    _slct_data.push_back(sobj);
    _asindxs[llps] += 4;
@@ -404,7 +404,7 @@ void trend::TrendLay::registerSOBox (TextSOvlBox* sobj)
 }
 
 
-void trend::TrendLay::registerSPoly (TrendSNcvx* sobj)
+void trend::TrendLay::registerSPoly (TrxSNcvx* sobj)
 {
    _slct_data.push_back(sobj);
    if ( sobj->partSelected() )
@@ -419,7 +419,7 @@ void trend::TrendLay::registerSPoly (TrendSNcvx* sobj)
    }
 }
 
-void trend::TrendLay::registerSWire (TrendSWire* sobj)
+void trend::TrendLay::registerSWire (TrxSWire* sobj)
 {
    _slct_data.push_back(sobj);
    if ( sobj->partSelected() )

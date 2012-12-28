@@ -182,10 +182,10 @@ namespace trend {
          word              _alphaDepth;
    };
 
-   typedef std::list<TrendCnvx*>      SliceObjects;
-   typedef std::list<TrendNcvx*>      SlicePolygons;
-   typedef std::list<TrendWire*>      SliceWires;
-   typedef std::list<TrendSelected*>  SliceSelected;
+   typedef std::list<TrxCnvx*>      SliceObjects;
+   typedef std::list<TrxNcvx*>      SlicePolygons;
+   typedef std::list<TrxWire*>      SliceWires;
+   typedef std::list<TrxSelected*>  SliceSelected;
    typedef std::list<TrendRef*>       RefBoxList;
 
    /**
@@ -309,14 +309,14 @@ namespace trend {
       public:
          typedef enum {fqss, ftrs, ftfs, ftss} NcvxTypes;
          typedef enum {cont, line, cnvx, ncvx} ObjtTypes;
-         typedef std::list<TrendText*> TrendStrings;
-         typedef std::list<TextOvlBox*> RefTxtList;
+         typedef std::list<TrxText*> TrendStrings;
+         typedef std::list<TrxTextOvlBox*> RefTxtList;
                            TrendTV(TrendRef* const, bool, bool, unsigned, unsigned);
          virtual          ~TrendTV();
-         void              registerBox   (TrendCnvx*);
-         void              registerPoly  (TrendNcvx*, const TessellPoly*);
-         void              registerWire  (TrendWire*);
-         void              registerText  (TrendText*, TextOvlBox*);
+         void              registerBox   (TrxCnvx*);
+         void              registerPoly  (TrxNcvx*, const TessellPoly*);
+         void              registerWire  (TrxWire*);
+         void              registerText  (TrxText*, TrxTextOvlBox*);
 
          virtual void      collect(TNDR_GLDATAT*, unsigned int*)  {assert(false);}
          virtual void      draw(layprop::DrawProperties*) = 0;
@@ -524,10 +524,10 @@ namespace trend {
          unsigned          total_strings(){return _num_total_strings;}
 
       protected:
-         void              registerSBox  (TrendSBox*);
-         void              registerSPoly (TrendSNcvx*);
-         void              registerSWire (TrendSWire*);
-         void              registerSOBox (TextSOvlBox*);
+         void              registerSBox  (TrxSBox*);
+         void              registerSPoly (TrxSNcvx*);
+         void              registerSWire (TrxSWire*);
+         void              registerSOBox (TrxTextSOvlBox*);
          ReusableTTVMap    _reusableFData; // reusable filled chunks
          ReusableTTVMap    _reusableCData; // reusable contour chunks
          TrendTVList       _layData;

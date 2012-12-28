@@ -181,9 +181,9 @@ void TessellPoly::num_indexs(unsigned& iftrs, unsigned& iftfs, unsigned& iftss) 
 
 //=============================================================================
 //
-// TrendCnvx
+// TrxCnvx
 //
-unsigned trend::TrendCnvx::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
+unsigned trend::TrxCnvx::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    assert(_csize);
 #ifdef TENDERER_USE_FLOATS
@@ -196,7 +196,7 @@ unsigned trend::TrendCnvx::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
    return _csize;
 }
 
-void trend::TrendCnvx::drctDrawContour()
+void trend::TrxCnvx::drctDrawContour()
 {
    glBegin(GL_LINE_LOOP);
    for (unsigned i = 0; i < _csize; i++)
@@ -204,16 +204,16 @@ void trend::TrendCnvx::drctDrawContour()
    glEnd();
 }
 
-void trend::TrendCnvx::drctDrawFill()
+void trend::TrxCnvx::drctDrawFill()
 {
    assert(false);//How did we get here?
 }
 
 //=============================================================================
 //
-// TrendBox
+// TrxBox
 //
-unsigned  trend::TrendBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
+unsigned  trend::TrxBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    assert(_csize);
    array[pindex++] = (TNDR_GLDATAT)_cdata[0];array[pindex++] = (TNDR_GLDATAT)_cdata[1];
@@ -223,7 +223,7 @@ unsigned  trend::TrendBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
    return _csize;
 }
 
-void trend::TrendBox::drctDrawContour()
+void trend::TrxBox::drctDrawContour()
 {
    glBegin(GL_LINE_LOOP);
       glVertex2i(_cdata[0], _cdata[1]);
@@ -233,7 +233,7 @@ void trend::TrendBox::drctDrawContour()
    glEnd();
 }
 
-void trend::TrendBox::drctDrawFill()
+void trend::TrxBox::drctDrawFill()
 {
    glBegin(GL_POLYGON);
       glVertex2i(_cdata[0], _cdata[1]);
@@ -245,9 +245,9 @@ void trend::TrendBox::drctDrawFill()
 
 //=============================================================================
 //
-// TrendNcvx
+// TrxNcvx
 //
-void trend::TrendNcvx::drctDrawFill()
+void trend::TrxNcvx::drctDrawFill()
 {
    for ( TeselChain::const_iterator CCH = _tdata->tdata()->begin(); CCH != _tdata->tdata()->end(); CCH++ )
    {
@@ -263,10 +263,10 @@ void trend::TrendNcvx::drctDrawFill()
 
 //=============================================================================
 //
-// TrendWire
+// TrxWire
 //
-trend::TrendWire::TrendWire(int4b* pdata, unsigned psize, WireWidth width, bool clo) :
-   TrendNcvx (NULL, 0),
+trend::TrxWire::TrxWire(int4b* pdata, unsigned psize, WireWidth width, bool clo) :
+   TrxNcvx (NULL, 0),
    _ldata    (pdata  ),
    _lsize    (psize  ),
    _celno    (clo    ),
@@ -283,8 +283,8 @@ trend::TrendWire::TrendWire(int4b* pdata, unsigned psize, WireWidth width, bool 
    }
 }
 
-trend::TrendWire::TrendWire(unsigned psize, const WireWidth width, bool clo) :
-   TrendNcvx (NULL, 0),
+trend::TrxWire::TrxWire(unsigned psize, const WireWidth width, bool clo) :
+   TrxNcvx (NULL, 0),
    _ldata    (NULL   ),
    _lsize    (psize  ),
    _celno    (clo    ),
@@ -292,7 +292,7 @@ trend::TrendWire::TrendWire(unsigned psize, const WireWidth width, bool clo) :
 {
 }
 
-unsigned trend::TrendWire::lDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
+unsigned trend::TrxWire::lDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    assert(_lsize);
 #ifdef TENDERER_USE_FLOATS
@@ -305,7 +305,7 @@ unsigned trend::TrendWire::lDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
    return _lsize;
 }
 
-void trend::TrendWire::drctDrawCLine()
+void trend::TrxWire::drctDrawCLine()
 {
    glBegin(GL_LINE_STRIP);
    for (unsigned i = 0; i < _lsize; i++)
@@ -313,7 +313,7 @@ void trend::TrendWire::drctDrawCLine()
    glEnd();
 }
 
-void trend::TrendWire::drctDrawFill()
+void trend::TrxWire::drctDrawFill()
 {
    for ( TeselChain::const_iterator TCH = _tdata->begin(); TCH != _tdata->end(); TCH++ )
    {
@@ -335,13 +335,13 @@ void trend::TrendWire::drctDrawFill()
     indexes in pairs - one from the front, and the other from the back of the
     array. Then this can be drawn as GL_QUAD_STRIP
 */
-void trend::TrendWire::Tesselate()
+void trend::TrxWire::Tesselate()
 {
    _tdata = DEBUG_NEW TeselChain();
    _tdata->push_back( TeselChunk(_cdata, _csize, 0));
 }
 
-trend::TrendWire::~TrendWire()
+trend::TrxWire::~TrxWire()
 {
    if (NULL != _cdata) delete [] _cdata;
    if (NULL != _tdata) delete _tdata;
@@ -349,15 +349,15 @@ trend::TrendWire::~TrendWire()
 
 //=============================================================================
 //
-// class TrendText
+// class TrxText
 //
-trend::TrendText::TrendText(const std::string* text, const CTM& ctm) :
+trend::TrxText::TrxText(const std::string* text, const CTM& ctm) :
    _text ( text   ),
    _ctm  ( ctm    )
 {
 }
 
-void trend::TrendText::draw(bool fill, layprop::DrawProperties* drawprop)
+void trend::TrxText::draw(bool fill, layprop::DrawProperties* drawprop)
 {
    TRENDC->drawString(*_text, fill, drawprop);
 }
@@ -365,9 +365,9 @@ void trend::TrendText::draw(bool fill, layprop::DrawProperties* drawprop)
 
 //=============================================================================
 //
-// class TextOvlBox
+// class TrxTextOvlBox
 //
-trend::TextOvlBox::TextOvlBox(const DBbox& obox, const CTM& ctm)
+trend::TrxTextOvlBox::TrxTextOvlBox(const DBbox& obox, const CTM& ctm)
 {
    // Don't get confused here! It's not a stupid code. Think about
    // boxes rotated to 45 deg for example and you'll see why
@@ -382,7 +382,7 @@ trend::TextOvlBox::TextOvlBox(const DBbox& obox, const CTM& ctm)
    _obox[6] = tp.x();_obox[7] = tp.y();
 }
 
-unsigned trend::TextOvlBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
+unsigned trend::TrxTextOvlBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
 #ifdef TENDERER_USE_FLOATS
    for (unsigned i = 0; i <  8; i++)
@@ -394,7 +394,7 @@ unsigned trend::TextOvlBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
    return 4;
 }
 
-void trend::TextOvlBox::drctDrawContour()
+void trend::TrxTextOvlBox::drctDrawContour()
 {
    glBegin(GL_LINE_LOOP);
    for (unsigned i = 0; i < 4; i++)
@@ -405,9 +405,9 @@ void trend::TextOvlBox::drctDrawContour()
 
 //=============================================================================
 //
-// TrendSCnvx
+// TrxSCnvx
 //
-unsigned trend::TrendSCnvx::ssize()
+unsigned trend::TrxSCnvx::ssize()
 {
    if (NULL == _slist) return _csize;
    // get the number of selected segments first - don't forget that here
@@ -420,13 +420,13 @@ unsigned trend::TrendSCnvx::ssize()
    return ssegs;
 }
 
-unsigned trend::TrendSCnvx::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
+unsigned trend::TrxSCnvx::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    _offset = pindex/2;
-   return TrendCnvx::cDataCopy(array, pindex);
+   return TrxCnvx::cDataCopy(array, pindex);
 }
 
-unsigned trend::TrendSCnvx::sDataCopy(unsigned* array, unsigned& pindex)
+unsigned trend::TrxSCnvx::sDataCopy(unsigned* array, unsigned& pindex)
 {
    if (NULL != _slist)
    { // shape is partially selected
@@ -448,7 +448,7 @@ unsigned trend::TrendSCnvx::sDataCopy(unsigned* array, unsigned& pindex)
    return ssize();
 }
 
-void trend::TrendSCnvx::drctDrawSlctd()
+void trend::TrxSCnvx::drctDrawSlctd()
 {// same as for non-convex polygon
    if (NULL == _slist)
    {
@@ -474,9 +474,9 @@ void trend::TrendSCnvx::drctDrawSlctd()
 
 //=============================================================================
 //
-// TrendSBox
+// TrxSBox
 //
-unsigned trend::TrendSBox::ssize()
+unsigned trend::TrxSBox::ssize()
 {
    if (NULL == _slist) return _csize;
    // get the number of selected segments first - don't forget that here
@@ -489,13 +489,13 @@ unsigned trend::TrendSBox::ssize()
    return ssegs;
 }
 
-unsigned trend::TrendSBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
+unsigned trend::TrxSBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    _offset = pindex/2;
-   return TrendBox::cDataCopy(array, pindex);
+   return TrxBox::cDataCopy(array, pindex);
 }
 
-unsigned trend::TrendSBox::sDataCopy(unsigned* array, unsigned& pindex)
+unsigned trend::TrxSBox::sDataCopy(unsigned* array, unsigned& pindex)
 {
    if (NULL != _slist)
    { // shape is partially selected
@@ -517,7 +517,7 @@ unsigned trend::TrendSBox::sDataCopy(unsigned* array, unsigned& pindex)
    return ssize();
 }
 
-void trend::TrendSBox::drctDrawSlctd()
+void trend::TrxSBox::drctDrawSlctd()
 {
    if (NULL == _slist)
    {// shape is fully selected
@@ -551,9 +551,9 @@ void trend::TrendSBox::drctDrawSlctd()
 
 //=============================================================================
 //
-// TrendSNcvx
+// TrxSNcvx
 //
-unsigned trend::TrendSNcvx::ssize()
+unsigned trend::TrxSNcvx::ssize()
 {
    if (NULL == _slist) return _csize;
    // get the number of selected segments first - don't forget that here
@@ -566,13 +566,13 @@ unsigned trend::TrendSNcvx::ssize()
    return ssegs;
 }
 
-unsigned trend::TrendSNcvx::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
+unsigned trend::TrxSNcvx::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    _offset = pindex/2;
-   return TrendCnvx::cDataCopy(array, pindex);
+   return TrxCnvx::cDataCopy(array, pindex);
 }
 
-unsigned trend::TrendSNcvx::sDataCopy(unsigned* array, unsigned& pindex)
+unsigned trend::TrxSNcvx::sDataCopy(unsigned* array, unsigned& pindex)
 {
    if (NULL != _slist)
    { // shape is partially selected
@@ -594,7 +594,7 @@ unsigned trend::TrendSNcvx::sDataCopy(unsigned* array, unsigned& pindex)
    return ssize();
 }
 
-void trend::TrendSNcvx::drctDrawSlctd()
+void trend::TrxSNcvx::drctDrawSlctd()
 {// same as for convex polygons
    if (NULL == _slist)
    {
@@ -620,21 +620,21 @@ void trend::TrendSNcvx::drctDrawSlctd()
 
 //=============================================================================
 //
-// TrendSWire
+// TrxSWire
 //
-unsigned trend::TrendSWire::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
+unsigned trend::TrxSWire::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    _offset = pindex/2;
-   return TrendCnvx::cDataCopy(array, pindex);
+   return TrxCnvx::cDataCopy(array, pindex);
 }
 
-unsigned trend::TrendSWire::lDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
+unsigned trend::TrxSWire::lDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    _loffset = pindex/2;
-   return TrendWire::lDataCopy(array, pindex);
+   return TrxWire::lDataCopy(array, pindex);
 }
 
-unsigned trend::TrendSWire::ssize()
+unsigned trend::TrxSWire::ssize()
 {
    if (NULL == _slist) return _lsize;
    // get the number of selected segments first - don't forget that here
@@ -655,7 +655,7 @@ unsigned trend::TrendSWire::ssize()
    return ssegs;
 }
 
-unsigned trend::TrendSWire::sDataCopy(unsigned* array, unsigned& pindex)
+unsigned trend::TrxSWire::sDataCopy(unsigned* array, unsigned& pindex)
 {
    if (NULL != _slist)
    { // shape is partially selected
@@ -691,7 +691,7 @@ unsigned trend::TrendSWire::sDataCopy(unsigned* array, unsigned& pindex)
    return ssize();
 }
 
-void trend::TrendSWire::drctDrawSlctd()
+void trend::TrxSWire::drctDrawSlctd()
 {
    if (NULL == _slist)
    {
@@ -731,15 +731,15 @@ void trend::TrendSWire::drctDrawSlctd()
 
 //=============================================================================
 //
-// TextSOvlBox
+// TrxTextSOvlBox
 //
-unsigned trend::TextSOvlBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
+unsigned trend::TrxTextSOvlBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 {
    _offset = pindex/2;
-   return TextOvlBox::cDataCopy(array, pindex);
+   return TrxTextOvlBox::cDataCopy(array, pindex);
 }
 
-unsigned trend::TextSOvlBox::sDataCopy(unsigned* array, unsigned& pindex)
+unsigned trend::TrxTextSOvlBox::sDataCopy(unsigned* array, unsigned& pindex)
 {
    assert (NULL == _slist);
    for (unsigned i = 0; i < 4; i++)
@@ -747,18 +747,18 @@ unsigned trend::TextSOvlBox::sDataCopy(unsigned* array, unsigned& pindex)
    return ssize();
 }
 
-void trend::TextSOvlBox::drctDrawSlctd()
+void trend::TrxTextSOvlBox::drctDrawSlctd()
 {
    //TODO
 }
 
 //=============================================================================
 //
-// class TrendSMBox
+// class TrxSMBox
 //
 
-trend::TrendSMBox::TrendSMBox(const int4b* pdata, const SGBitSet* slist, const CTM& rmm) :
-   TrendSBox(pdata, slist)
+trend::TrxSMBox::TrxSMBox(const int4b* pdata, const SGBitSet* slist, const CTM& rmm) :
+   TrxSBox(pdata, slist)
 {
    //   PointVector* nshape = movePointsSelected(*_slist, _rmm->Reversed(), strans);
    //   pt1 = (*nshape)[0]*(*_rmm); pt2 = (*nshape)[2]*(*_rmm);
@@ -773,12 +773,12 @@ trend::TrendSMBox::TrendSMBox(const int4b* pdata, const SGBitSet* slist, const C
    nshape->clear(); delete nshape;
 }
 
-trend::TrendSMBox::~TrendSMBox()
+trend::TrxSMBox::~TrxSMBox()
 {
    delete [] _cdata;
 }
 
-PointVector* trend::TrendSMBox::movePointsSelected(const SGBitSet& pset,
+PointVector* trend::TrxSMBox::movePointsSelected(const SGBitSet& pset,
                                     const CTM&  movedM, const CTM& stableM) const {
   // convert box to polygon
    PointVector* mlist = DEBUG_NEW PointVector();
@@ -823,10 +823,10 @@ PointVector* trend::TrendSMBox::movePointsSelected(const SGBitSet& pset,
 
 //=============================================================================
 //
-// class TrendSMNcvx
+// class TrxSMNcvx
 //
-trend::TrendSMNcvx::TrendSMNcvx(const int4b* pdata, unsigned psize, const SGBitSet* slist, const CTM& rmm) :
-   TrendSNcvx(pdata, psize, slist)
+trend::TrxSMNcvx::TrxSMNcvx(const int4b* pdata, unsigned psize, const SGBitSet* slist, const CTM& rmm) :
+   TrxSNcvx(pdata, psize, slist)
 {
    PointVector* nshape = movePointsSelected(*_slist, CTM(), rmm);
    int4b* mdata = DEBUG_NEW int4b[2*_csize];
@@ -840,12 +840,12 @@ trend::TrendSMNcvx::TrendSMNcvx(const int4b* pdata, unsigned psize, const SGBitS
    nshape->clear(); delete nshape;
 }
 
-trend::TrendSMNcvx::~TrendSMNcvx()
+trend::TrxSMNcvx::~TrxSMNcvx()
 {
    delete [] _cdata;
 }
 
-PointVector* trend::TrendSMNcvx::movePointsSelected(const SGBitSet& pset,
+PointVector* trend::TrxSMNcvx::movePointsSelected(const SGBitSet& pset,
                                     const CTM&  movedM, const CTM& stableM) const {
    PointVector* mlist = DEBUG_NEW PointVector();
    mlist->reserve(_csize);
@@ -879,10 +879,10 @@ PointVector* trend::TrendSMNcvx::movePointsSelected(const SGBitSet& pset,
 
 //=============================================================================
 //
-// class TrendSMWire
+// class TrxSMWire
 //
-trend::TrendSMWire::TrendSMWire(int4b* pdata, unsigned psize, const WireWidth width, bool clo, const SGBitSet* slist, const CTM& rmm) :
-   TrendSWire(psize, width, clo, slist)
+trend::TrxSMWire::TrxSMWire(int4b* pdata, unsigned psize, const WireWidth width, bool clo, const SGBitSet* slist, const CTM& rmm) :
+   TrxSWire(psize, width, clo, slist)
 {
    _ldata = pdata;
    PointVector* nshape = movePointsSelected(*_slist, CTM(), rmm);
@@ -906,12 +906,12 @@ trend::TrendSMWire::TrendSMWire(int4b* pdata, unsigned psize, const WireWidth wi
    }
 }
 
-trend::TrendSMWire::~TrendSMWire()
+trend::TrxSMWire::~TrxSMWire()
 {
    delete [] _ldata;
 }
 
-PointVector* trend::TrendSMWire::movePointsSelected(const SGBitSet& pset,
+PointVector* trend::TrxSMWire::movePointsSelected(const SGBitSet& pset,
                                     const CTM& movedM, const CTM& stableM) const
 {
    PointVector* mlist = DEBUG_NEW PointVector();
@@ -953,10 +953,10 @@ PointVector* trend::TrendSMWire::movePointsSelected(const SGBitSet& pset,
 
 //=============================================================================
 //
-// TrendTBox
+// TrxTBox
 //
-trend::TrendTBox::TrendTBox(const TP& p1, const CTM& rmm) :
-   TrendBox(NULL)
+trend::TrxTBox::TrxTBox(const TP& p1, const CTM& rmm) :
+   TrxBox(NULL)
 {
    TP p2 = p1 * rmm;
    int4b* contData = DEBUG_NEW int4b[4];
@@ -967,7 +967,7 @@ trend::TrendTBox::TrendTBox(const TP& p1, const CTM& rmm) :
    _cdata = contData;
 }
 
-trend::TrendTBox::~TrendTBox()
+trend::TrxTBox::~TrxTBox()
 {
    assert(_cdata);
    delete [] (_cdata);
@@ -975,10 +975,10 @@ trend::TrendTBox::~TrendTBox()
 
 //=============================================================================
 //
-// TrendTNcvx
+// TrxTNcvx
 //
-trend::TrendTNcvx::TrendTNcvx(const PointVector& plist, const CTM& rmm) :
-   TrendNcvx( NULL, plist.size()+1)
+trend::TrxTNcvx::TrxTNcvx(const PointVector& plist, const CTM& rmm) :
+   TrxNcvx( NULL, plist.size()+1)
 {
    dword numpnts = plist.size();
    int4b* contData = DEBUG_NEW int4b[2*(numpnts+1)];
@@ -993,7 +993,7 @@ trend::TrendTNcvx::TrendTNcvx(const PointVector& plist, const CTM& rmm) :
    _cdata = contData;
 }
 
-trend::TrendTNcvx::~TrendTNcvx()
+trend::TrxTNcvx::~TrxTNcvx()
 {
    assert(_cdata);
    delete [] (_cdata);
@@ -1001,10 +1001,10 @@ trend::TrendTNcvx::~TrendTNcvx()
 
 //=============================================================================
 //
-// TrendTWire
+// TrxTWire
 //
-trend::TrendTWire::TrendTWire(const PointVector& plist, WireWidth width, bool clo, const CTM& rmm) :
-   TrendWire(plist.size()+1, width, clo)
+trend::TrxTWire::TrxTWire(const PointVector& plist, WireWidth width, bool clo, const CTM& rmm) :
+   TrxWire(plist.size()+1, width, clo)
 {
    dword num_points = plist.size();
    assert(0 < num_points);
@@ -1020,7 +1020,7 @@ trend::TrendTWire::TrendTWire(const PointVector& plist, WireWidth width, bool cl
    _cdata = contData;
 }
 
-trend::TrendTWire::~TrendTWire()
+trend::TrxTWire::~TrxTWire()
 {
    delete [] _ldata;
 }

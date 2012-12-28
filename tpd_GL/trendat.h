@@ -135,11 +135,11 @@ namespace trend {
       from the original object to a VBO mapped in the GPU buffers.
       This class is also a base for the Trx* class hierarchy.
    */
-   class TrendCnvx {
+   class TrxCnvx {
       public:
-                           TrendCnvx(const int4b* pdata, unsigned psize) :
+                           TrxCnvx(const int4b* pdata, unsigned psize) :
                                     _cdata(pdata), _csize(psize){}
-         virtual          ~TrendCnvx() {};
+         virtual          ~TrxCnvx() {};
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual void      drctDrawContour();
          virtual void      drctDrawFill();
@@ -153,10 +153,10 @@ namespace trend {
     * A specialisation of the parent class to cover the specifics of the box
     * rendering
     */
-   class TrendBox : public TrendCnvx {
+   class TrxBox : public TrxCnvx {
       public:
-                           TrendBox(const int4b* pdata) : TrendCnvx(pdata, 4) {}
-         virtual          ~TrendBox() {};
+                           TrxBox(const int4b* pdata) : TrxCnvx(pdata, 4) {}
+         virtual          ~TrxBox() {};
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual void      drctDrawContour();
          virtual void      drctDrawFill();
@@ -164,14 +164,14 @@ namespace trend {
 
    /**
       Represents non-convex polygons - most of the polygon objects in the DB.
-      Inherits TrendCnvx. The only addition is the tesselation data (_tdata)
+      Inherits TrxCnvx. The only addition is the tesselation data (_tdata)
       which is utilised if the object is to be filled.
    */
-   class TrendNcvx : public TrendCnvx {
+   class TrxNcvx : public TrxCnvx {
       public:
-                           TrendNcvx(const int4b* pdata, unsigned psize) :
-                                    TrendCnvx(pdata, psize), _tdata(NULL) {}
-         virtual          ~TrendNcvx(){};
+                           TrxNcvx(const int4b* pdata, unsigned psize) :
+                                    TrxCnvx(pdata, psize), _tdata(NULL) {}
+         virtual          ~TrxNcvx(){};
          void              setTeselData(const TessellPoly* tdata) {_tdata = tdata;}
          virtual void      drctDrawFill();
          virtual const TeselChain* tdata()              {return _tdata->tdata();}
@@ -182,7 +182,7 @@ namespace trend {
    /**
       Holds the wires from the data base. This class is not quite trivial and it
       causes all kinds of troubles in the overall class hierarchy. It inherits
-      TrendNcvx (is it a good idea?). Theoretically in the general case this is a
+      TrxNcvx (is it a good idea?). Theoretically in the general case this is a
       non-convex polygon. The wire as a DB object is very specific though. Only the
       central line is stored. The contour is calculated if required on the fly from
       the build-in methods called from the constructor. Instead of using general
@@ -191,10 +191,10 @@ namespace trend {
       in the hierarchy which generates vertex and index data which means that it has
       to be properly cleaned-up.
    */
-   class TrendWire : public TrendNcvx {
+   class TrxWire : public TrxNcvx {
       public:
-                           TrendWire(int4b*, unsigned, WireWidth, bool);
-         virtual          ~TrendWire();
+                           TrxWire(int4b*, unsigned, WireWidth, bool);
+         virtual          ~TrxWire();
          void              Tesselate();
          virtual unsigned  lDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual void      drctDrawFill();
@@ -203,7 +203,7 @@ namespace trend {
          bool              center_line_only()      {return _celno;}
          virtual const TeselChain* tdata()               {return _tdata;}
       protected:
-                           TrendWire(unsigned, const WireWidth, bool);
+                           TrxWire(unsigned, const WireWidth, bool);
          int4b*            _ldata; //! the vertexes of the wires central line
          unsigned          _lsize; //! the number of vertexes in the central line
          bool              _celno; //! indicates whether the center line only shall be drawn
@@ -220,9 +220,9 @@ namespace trend {
    * hierarchy objects, and also they are rendered separately. That's why they
    * are defined outside that hierarchy.
    */
-   class TrendText {
+   class TrxText {
       public:
-                           TrendText(const std::string*, const CTM&);
+                           TrxText(const std::string*, const CTM&);
          void              draw(bool, layprop::DrawProperties*);
          const CTM&        ctm() const {return _ctm;}
       private:
@@ -233,10 +233,10 @@ namespace trend {
    /**
    *  Text reference boxes
    */
-   class TextOvlBox {
+   class TrxTextOvlBox {
       public:
-                           TextOvlBox(const DBbox&, const CTM&);
-         virtual          ~TextOvlBox() {}
+                           TrxTextOvlBox(const DBbox&, const CTM&);
+         virtual          ~TrxTextOvlBox() {}
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual void      drctDrawContour();
       private:
@@ -286,11 +286,11 @@ namespace trend {
          because the only additional data transfered is the index array of
          the selected vertexes. Vertex data is already there and will be reused.
    */
-   class TrendSelected {
+   class TrxSelected {
       public:
-                           TrendSelected(const SGBitSet* slist) :
+                           TrxSelected(const SGBitSet* slist) :
                               _slist(slist), _offset(0) {}
-         virtual          ~TrendSelected() {}
+         virtual          ~TrxSelected() {}
          bool              partSelected() {return (NULL != _slist);}
          virtual SlctTypes type() = 0;
          virtual unsigned  ssize() = 0;
@@ -310,10 +310,10 @@ namespace trend {
       worths to be mentioned. It updates the inherited _offset field which is vital
       for the consequent indexing of the selected vertexes.
    */
-   class TrendSCnvx : public TrendCnvx, public TrendSelected {
+   class TrxSCnvx : public TrxCnvx, public TrxSelected {
       public:
-                           TrendSCnvx(int4b* pdata, unsigned psize, const SGBitSet* slist) :
-                              TrendCnvx(pdata, psize), TrendSelected(slist) {}
+                           TrxSCnvx(int4b* pdata, unsigned psize, const SGBitSet* slist) :
+                              TrxCnvx(pdata, psize), TrxSelected(slist) {}
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual SlctTypes type() { return ((NULL == _slist) ? llps : lnes);}
          virtual unsigned  ssize();
@@ -321,10 +321,10 @@ namespace trend {
          virtual void      drctDrawSlctd();
    };
 
-   class TrendSBox : public TrendBox, public TrendSelected {
+   class TrxSBox : public TrxBox, public TrxSelected {
       public:
-                           TrendSBox(const int4b* pdata, const SGBitSet* slist) :
-                              TrendBox(pdata), TrendSelected(slist) {}
+                           TrxSBox(const int4b* pdata, const SGBitSet* slist) :
+                              TrxBox(pdata), TrxSelected(slist) {}
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual SlctTypes type() { return ((NULL == _slist) ? llps : lnes);}
          virtual unsigned  ssize();
@@ -338,12 +338,12 @@ namespace trend {
       Implements the virtual methods of its parents. Doesn't have any own fields or
       methods.
       The re-implementation of the cDataCopy() has the same function as described in
-      TrendSCnvx class
+      TrxSCnvx class
    */
-   class TrendSNcvx : public TrendNcvx, public TrendSelected  {
+   class TrxSNcvx : public TrxNcvx, public TrxSelected  {
       public:
-                           TrendSNcvx(const int4b* pdata, unsigned psize, const SGBitSet* slist) :
-                              TrendNcvx(pdata, psize), TrendSelected(slist) {}
+                           TrxSNcvx(const int4b* pdata, unsigned psize, const SGBitSet* slist) :
+                              TrxNcvx(pdata, psize), TrxSelected(slist) {}
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual SlctTypes type() { return ((NULL == _slist) ? llps : lnes);}
          virtual unsigned  ssize();
@@ -363,10 +363,10 @@ namespace trend {
       updates inherited _offset field. lDataCopy in turn updates _loffset field.
       Both of them vital for proper indexing of the selected vertexes.
    */
-   class TrendSWire : public TrendWire, public TrendSelected {
+   class TrxSWire : public TrxWire, public TrxSelected {
       public:
-                           TrendSWire(int4b* pdata, unsigned psize, const WireWidth width, bool clo, const SGBitSet* slist) :
-                              TrendWire(pdata, psize, width, clo), TrendSelected(slist), _loffset(0u) {}
+                           TrxSWire(int4b* pdata, unsigned psize, const WireWidth width, bool clo, const SGBitSet* slist) :
+                              TrxWire(pdata, psize, width, clo), TrxSelected(slist), _loffset(0u) {}
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual unsigned  lDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual SlctTypes type() { return ((NULL == _slist) ? lstr : lnes);}
@@ -374,17 +374,17 @@ namespace trend {
          virtual unsigned  sDataCopy(unsigned*, unsigned&);
          virtual void      drctDrawSlctd();
       protected:
-                           TrendSWire(unsigned psize, const WireWidth width, bool clo, const SGBitSet* slist) :
-                              TrendWire(psize, width, clo), TrendSelected(slist), _loffset(0u) {}
+                           TrxSWire(unsigned psize, const WireWidth width, bool clo, const SGBitSet* slist) :
+                              TrxWire(psize, width, clo), TrxSelected(slist), _loffset(0u) {}
       private:
          unsigned          _loffset;
    };
 
-   class TextSOvlBox : public TextOvlBox, public TrendSelected {
+   class TrxTextSOvlBox : public TrxTextOvlBox, public TrxSelected {
       public:
-                           TextSOvlBox(const DBbox& box, const CTM& mtrx) :
-                              TextOvlBox(box, mtrx), TrendSelected(NULL) {}
-         virtual          ~TextSOvlBox() {}
+                           TrxTextSOvlBox(const DBbox& box, const CTM& mtrx) :
+                              TrxTextOvlBox(box, mtrx), TrxSelected(NULL) {}
+         virtual          ~TrxTextSOvlBox() {}
          virtual unsigned  cDataCopy(TNDR_GLDATAT*, unsigned&);
          virtual SlctTypes type() { return llps;}
          virtual unsigned  ssize(){ return 4;}
@@ -397,10 +397,10 @@ namespace trend {
    // Moving objects from the DB (move/copy/rotate/flip visualising)
    //
    //==========================================================================
-   class TrendSMBox : public TrendSBox {
+   class TrxSMBox : public TrxSBox {
       public:
-                           TrendSMBox(const int4b* pdata, const SGBitSet* slist, const CTM& rmm);
-         virtual          ~TrendSMBox();
+                           TrxSMBox(const int4b* pdata, const SGBitSet* slist, const CTM& rmm);
+         virtual          ~TrxSMBox();
       private:
          PointVector*      movePointsSelected(const SGBitSet&, const CTM&, const CTM& = CTM()) const;
          enum {
@@ -411,18 +411,18 @@ namespace trend {
          };
    };
 
-   class TrendSMNcvx : public TrendSNcvx{
+   class TrxSMNcvx : public TrxSNcvx{
       public:
-                           TrendSMNcvx(const int4b* pdata, unsigned psize, const SGBitSet* slist, const CTM& rmm);
-                          ~TrendSMNcvx();
+                           TrxSMNcvx(const int4b* pdata, unsigned psize, const SGBitSet* slist, const CTM& rmm);
+                          ~TrxSMNcvx();
       private:
          PointVector*      movePointsSelected(const SGBitSet&, const CTM&, const CTM& = CTM()) const;
    };
 
-   class TrendSMWire : public TrendSWire {
+   class TrxSMWire : public TrxSWire {
       public:
-                           TrendSMWire(int4b* pdata, unsigned psize, const WireWidth width, bool clo, const SGBitSet* slist, const CTM& rmm);
-         virtual          ~TrendSMWire();
+                           TrxSMWire(int4b* pdata, unsigned psize, const WireWidth width, bool clo, const SGBitSet* slist, const CTM& rmm);
+         virtual          ~TrxSMWire();
       private:
          PointVector*      movePointsSelected(const SGBitSet&, const CTM&, const CTM& = CTM()) const;
    };
@@ -439,10 +439,10 @@ namespace trend {
     * created in the constructor. It takes the first point selected by the user and
     * creates a box generating the second point in the current marker location.
     */
-   class TrendTBox : public TrendBox {
+   class TrxTBox : public TrxBox {
       public:
-                           TrendTBox(const TP&, const CTM&);
-         virtual          ~TrendTBox();
+                           TrxTBox(const TP&, const CTM&);
+         virtual          ~TrxTBox();
    };
 
    /**
@@ -452,10 +452,10 @@ namespace trend {
     * by the user (mouse clicks), but also adds one more vertex in the current position
     * of the marker.
     */
-   class TrendTNcvx : public TrendNcvx {
+   class TrxTNcvx : public TrxNcvx {
       public:
-                           TrendTNcvx(const PointVector&, const CTM&);
-         virtual          ~TrendTNcvx();
+                           TrxTNcvx(const PointVector&, const CTM&);
+         virtual          ~TrxTNcvx();
    };
 
 
@@ -465,10 +465,10 @@ namespace trend {
     * It takes vertexes which are already marked (entered) by the user (mouse clicks),
     * but also adds one more vertex in the current position of the marker.
     */
-   class TrendTWire : public TrendWire {
+   class TrxTWire : public TrxWire {
       public:
-                           TrendTWire(const PointVector& pdata, WireWidth width, bool center_only, const CTM& rmm);
-         virtual          ~TrendTWire();
+                           TrxTWire(const PointVector& pdata, WireWidth width, bool center_only, const CTM& rmm);
+         virtual          ~TrxTWire();
    };
 
 }
