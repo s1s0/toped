@@ -238,7 +238,8 @@ void trend::Tolder::grid( const real step, const std::string color)
    int gridstep = (int)rint(step / _UU);
    if ( abs((int)(_drawprop->scrCtm().a() * gridstep)) > GRID_LIMIT)
    {
-      _drawprop->setGridColor(color);
+      layprop::tellRGB theColor(_drawprop->getColor(color));
+      glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
       // set first grid step to be multiply on the step
       TP bl = TP(_drawprop->clipRegion().p1().x(),_drawprop->clipRegion().p2().y());
       TP tr = TP(_drawprop->clipRegion().p2().x(),_drawprop->clipRegion().p1().y());

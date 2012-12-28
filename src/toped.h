@@ -29,6 +29,7 @@
 #define TOPED_H_INCLUDED
 
 #include <wx/wx.h>
+#include "layoutcanvas.h"
 #include <wx/glcanvas.h>
 #include <wx/laywin.h>
 #include <wx/aui/aui.h>
@@ -36,7 +37,6 @@
 #include <wx/timer.h>
 #include <wx/dynlib.h>
 #include "ted_prompt.h"
-#include "layoutcanvas.h"
 #include "tui.h"
 #include "resourcecenter.h"
 #include "browsers.h"
