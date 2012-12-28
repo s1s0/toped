@@ -490,6 +490,7 @@ namespace trend {
          word              alphaDepth()   {return _alphaDepth;}
          unsigned          cDataCopy(TNDR_GLDATAT*, unsigned&);
          void              drctDrawContour();
+         void              drctDrawRefMark();
       private:
          std::string       _name;
          real              _translation[16];
