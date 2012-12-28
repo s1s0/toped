@@ -33,7 +33,7 @@
 extern trend::TrendCenter*         TRENDC;
 
        
-void trend::setShaderCtm(layprop::DrawProperties* drawprop, const TrendRef* refCell)
+void trend::setShaderCtm(layprop::DrawProperties* drawprop, const TrxCellRef* refCell)
 {
    drawprop->pushCtm(refCell->ctm() * drawprop->topCtm());
    float mtrxOrtho [16];
@@ -45,7 +45,7 @@ void trend::setShaderCtm(layprop::DrawProperties* drawprop, const TrendRef* refC
 //
 // class ToshaderTV
 //
-trend::ToshaderTV::ToshaderTV(TrendRef* const refCell, bool filled, bool reusable,
+trend::ToshaderTV::ToshaderTV(TrxCellRef* const refCell, bool filled, bool reusable,
                                     unsigned parray_offset, unsigned iarray_offset) :
    TenderTV(refCell, filled, reusable, parray_offset, iarray_offset)
 {}
@@ -188,14 +188,14 @@ void trend::ToshaderTV::setAlpha(layprop::DrawProperties* drawprop)
 //
 //void trend::ToshaderReTV::draw(layprop::DrawProperties* drawprop)
 //{
-//   TrendRef* sref_cell = _chunk->swapRefCells(_refCell);
+//   TrxCellRef* sref_cell = _chunk->swapRefCells(_refCell);
 //   _chunk->draw(drawprop);
 //   _chunk->swapRefCells(sref_cell);
 //}
 //
 //void trend::ToshaderReTV::drawTexts(layprop::DrawProperties* drawprop)
 //{
-//   TrendRef* sref_cell = _chunk->swapRefCells(_refCell);
+//   TrxCellRef* sref_cell = _chunk->swapRefCells(_refCell);
 //   _chunk->drawTexts(drawprop);
 //   _chunk->swapRefCells(sref_cell);
 //}
@@ -215,7 +215,7 @@ trend::ToshaderLay::ToshaderLay():
  * @param ctrans Current translation matrix of the new object
  * @param fill Whether to fill the drawing objects
  */
-void trend::ToshaderLay::newSlice(TrendRef* const ctrans, bool fill, bool reusable, unsigned slctd_array_offset)
+void trend::ToshaderLay::newSlice(TrxCellRef* const ctrans, bool fill, bool reusable, unsigned slctd_array_offset)
 {
    assert( 0 == total_slctdx());
    _slctd_array_offset = slctd_array_offset;
@@ -223,12 +223,12 @@ void trend::ToshaderLay::newSlice(TrendRef* const ctrans, bool fill, bool reusab
    newSlice(ctrans, fill, reusable);
 }
 
-void trend::ToshaderLay::newSlice(TrendRef* const ctrans, bool fill, bool reusable)
+void trend::ToshaderLay::newSlice(TrxCellRef* const ctrans, bool fill, bool reusable)
 {
    _cslice = DEBUG_NEW ToshaderTV(ctrans, fill, reusable, 2 * _num_total_points, _num_total_indexs);
 }
 
-bool trend::ToshaderLay::chunkExists(TrendRef* const ctrans, bool filled)
+bool trend::ToshaderLay::chunkExists(TrxCellRef* const ctrans, bool filled)
 {
    ReusableTTVMap::iterator achunk;
    if (filled)

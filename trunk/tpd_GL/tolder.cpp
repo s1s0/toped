@@ -103,14 +103,14 @@ void trend::TolderTV::drawTexts(layprop::DrawProperties* drawprop)
 //
 void trend::TolderReTV::draw(layprop::DrawProperties* drawprop)
 {
-   TrendRef* sref_cell = _chunk->swapRefCells(_refCell);
+   TrxCellRef* sref_cell = _chunk->swapRefCells(_refCell);
    _chunk->draw(drawprop);
    _chunk->swapRefCells(sref_cell);
 }
 
 void trend::TolderReTV::drawTexts(layprop::DrawProperties* drawprop)
 {
-   TrendRef* sref_cell = _chunk->swapRefCells(_refCell);
+   TrxCellRef* sref_cell = _chunk->swapRefCells(_refCell);
    _chunk->drawTexts(drawprop);
    _chunk->swapRefCells(sref_cell);
 }
@@ -119,18 +119,18 @@ void trend::TolderReTV::drawTexts(layprop::DrawProperties* drawprop)
 //
 // class TolderLay
 //
-void trend::TolderLay::newSlice(TrendRef* const ctrans, bool fill, bool reusable, unsigned)
+void trend::TolderLay::newSlice(TrxCellRef* const ctrans, bool fill, bool reusable, unsigned)
 {
    assert( 0 == total_slctdx());
    newSlice(ctrans, fill, reusable);
 }
 
-void trend::TolderLay::newSlice(TrendRef* const ctrans, bool fill, bool reusable)
+void trend::TolderLay::newSlice(TrxCellRef* const ctrans, bool fill, bool reusable)
 {
    _cslice = DEBUG_NEW TolderTV(ctrans, fill, reusable, 2 * _num_total_points, _num_total_indexs);
 }
 
-bool trend::TolderLay::chunkExists(TrendRef* const ctrans, bool filled)
+bool trend::TolderLay::chunkExists(TrxCellRef* const ctrans, bool filled)
 {
    ReusableTTVMap::iterator achunk;
    if (filled)

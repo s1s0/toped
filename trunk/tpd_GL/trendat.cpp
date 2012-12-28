@@ -1025,3 +1025,55 @@ trend::TrxTWire::~TrxTWire()
    delete [] _ldata;
 }
 
+
+//=============================================================================
+//
+// class TrxCellRef
+//
+trend::TrxCellRef::TrxCellRef(std::string name, const CTM& ctm, const DBbox& obox,
+                   word alphaDepth) :
+   _name          ( name         ),
+   _ctm           ( ctm          ),
+   _alphaDepth    ( alphaDepth   )
+{
+   _ctm.oglForm(_translation);
+   TP tp = TP(obox.p1().x(), obox.p1().y()) * _ctm;
+   _obox[0] = tp.x();_obox[1] = tp.y();
+   tp = TP(obox.p2().x(), obox.p1().y()) * _ctm;
+   _obox[2] = tp.x();_obox[3] = tp.y();
+   tp = TP(obox.p2().x(), obox.p2().y()) * _ctm;
+   _obox[4] = tp.x();_obox[5] = tp.y();
+   tp = TP(obox.p1().x(), obox.p2().y()) * _ctm;
+   _obox[6] = tp.x();_obox[7] = tp.y();
+}
+
+
+trend::TrxCellRef::TrxCellRef() :
+   _name       ( ""   ),
+   _ctm        (      ),
+   _alphaDepth ( 0    )
+{
+   _ctm.oglForm(_translation);
+   for (word i = 0; i < 8; _obox[i++] = 0);
+}
+
+unsigned trend::TrxCellRef::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
+{
+#ifdef TENDERER_USE_FLOATS
+   for (unsigned i = 0; i <  8; i++)
+      array[pindex+i] = (TNDR_GLDATAT) _obox[i];
+#else
+   memcpy(&(array[pindex]), _obox, sizeof(TNDR_GLDATAT) * 8);
+#endif
+   pindex += 8;
+   return 4;
+}
+
+void trend::TrxCellRef::drctDrawContour()
+{
+   glBegin(GL_LINE_LOOP);
+   for (unsigned i = 0; i < 4; i++)
+      glVertex2i(_obox[2*i], _obox[2*i+1]);
+   glEnd();
+}
+

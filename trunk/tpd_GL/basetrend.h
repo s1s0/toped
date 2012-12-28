@@ -161,32 +161,11 @@ namespace trend {
    typedef std::map<glsl_Programs, GLint>           GlslProgramIDs;
 
 
-   /**
-   *  Cell reference boxes & reference related data
-   */
-   class TrendRef {
-      public:
-                           TrendRef(std::string, const CTM&, const DBbox&, word);
-                           TrendRef();
-         std::string       name()         {return _name;}
-         real* const       translation()  {return _translation;}
-         const CTM&        ctm() const    {return _ctm;}
-         word              alphaDepth()   {return _alphaDepth;}
-         unsigned          cDataCopy(TNDR_GLDATAT*, unsigned&);
-         void              drctDrawContour();
-      private:
-         std::string       _name;
-         real              _translation[16];
-         CTM               _ctm;
-         TNDR_GLDATAT      _obox[8];
-         word              _alphaDepth;
-   };
-
    typedef std::list<TrxCnvx*>      SliceObjects;
    typedef std::list<TrxNcvx*>      SlicePolygons;
    typedef std::list<TrxWire*>      SliceWires;
    typedef std::list<TrxSelected*>  SliceSelected;
-   typedef std::list<TrendRef*>       RefBoxList;
+   typedef std::list<TrxCellRef*>   RefBoxList;
 
    /**
       Toped RENDerer Translation View - is the most fundamental class of the TrendBase.
@@ -311,7 +290,7 @@ namespace trend {
          typedef enum {cont, line, cnvx, ncvx} ObjtTypes;
          typedef std::list<TrxText*> TrendStrings;
          typedef std::list<TrxTextOvlBox*> RefTxtList;
-                           TrendTV(TrendRef* const, bool, bool, unsigned, unsigned);
+                           TrendTV(TrxCellRef* const, bool, bool, unsigned, unsigned);
          virtual          ~TrendTV();
          void              registerBox   (TrxCnvx*);
          void              registerPoly  (TrxNcvx*, const TessellPoly*);
@@ -321,7 +300,7 @@ namespace trend {
          virtual void      collect(TNDR_GLDATAT*, unsigned int*)  {assert(false);}
          virtual void      draw(layprop::DrawProperties*) = 0;
          virtual void      drawTexts(layprop::DrawProperties*) = 0;
-         TrendRef*         swapRefCells(TrendRef*);
+         TrxCellRef*       swapRefCells(TrxCellRef*);
 
          unsigned          num_total_points();
          unsigned          num_total_indexs();
@@ -331,7 +310,7 @@ namespace trend {
          std::string       cellName()           {return _refCell->name();}
       protected:
          virtual void      setAlpha(layprop::DrawProperties*);
-         TrendRef*        _refCell;
+         TrxCellRef*       _refCell;
          // collected data lists
          SliceObjects      _cont_data; //! Contour data
          SliceWires        _line_data; //! Line data
@@ -383,14 +362,14 @@ namespace trend {
    */
    class TrendReTV {
       public:
-                           TrendReTV(TrendTV* const chunk, TrendRef* const refCell):
+                           TrendReTV(TrendTV* const chunk, TrxCellRef* const refCell):
                               _chunk(chunk), _refCell(refCell) {}
          virtual          ~TrendReTV() {}
          virtual void      draw(layprop::DrawProperties*) = 0;
          virtual void      drawTexts(layprop::DrawProperties*) = 0;
       protected:
          TrendTV*  const   _chunk;
-         TrendRef* const  _refCell;
+         TrxCellRef* const _refCell;
 
    };
 
@@ -509,9 +488,9 @@ namespace trend {
          void              wire (int4b*, unsigned, WireWidth, bool, const SGBitSet*, const CTM&);
          void              wire (const PointVector&, WireWidth, bool, const CTM&);
          void              text (const std::string*, const CTM&, const DBbox*, const TP&, bool);
-         virtual void      newSlice(TrendRef* const, bool, bool /*, bool, unsigned*/) = 0;
-         virtual void      newSlice(TrendRef* const, bool, bool, unsigned slctd_array_offset) = 0;
-         virtual bool      chunkExists(TrendRef* const, bool) = 0;
+         virtual void      newSlice(TrxCellRef* const, bool, bool /*, bool, unsigned*/) = 0;
+         virtual void      newSlice(TrxCellRef* const, bool, bool, unsigned slctd_array_offset) = 0;
+         virtual bool      chunkExists(TrxCellRef* const, bool) = 0;
          void              ppSlice();
          virtual void      draw(layprop::DrawProperties*) = 0;
          virtual void      drawSelected() = 0;
@@ -553,7 +532,7 @@ namespace trend {
       public:
                            TrendRefLay();
          virtual          ~TrendRefLay();
-         void              addCellOBox(TrendRef*, word, bool);
+         void              addCellOBox(TrxCellRef*, word, bool);
          virtual void      collect(GLuint)  { assert(false); }
          virtual void      draw(layprop::DrawProperties*) = 0;
          unsigned          total_points();
@@ -573,7 +552,7 @@ namespace trend {
    //-----------------------------------------------------------------------------
    //
    typedef laydata::LayerContainer<TrendLay*> DataLay;
-   typedef std::stack<TrendRef*> CellStack;
+   typedef std::stack<TrxCellRef*> CellStack;
 
    /**
       Toped RENDerer BASE is the front-end class, the interface to the rest of the
@@ -656,7 +635,7 @@ namespace trend {
          CellStack         _cellStack;       //!Required during data traversing stage
          unsigned          _cslctd_array_offset; //! Current selected array offset
          //
-         TrendRef*         _activeCS;
+         TrxCellRef*       _activeCS;
          byte              _dovCorrection;   //! Cell ref Depth of view correction (for Edit in Place purposes)
          RefBoxList        _hiddenRefBoxes;  //! Those cRefBox objects which didn't ended in the TrendRefLay structures
          CTM*              _rmm;             //!Reverse motion matrix

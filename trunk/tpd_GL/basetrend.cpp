@@ -33,60 +33,9 @@
 
 //=============================================================================
 //
-// class TrendRef
-//
-trend::TrendRef::TrendRef(std::string name, const CTM& ctm, const DBbox& obox,
-                   word alphaDepth) :
-   _name          ( name         ),
-   _ctm           ( ctm          ),
-   _alphaDepth    ( alphaDepth   )
-{
-   _ctm.oglForm(_translation);
-   TP tp = TP(obox.p1().x(), obox.p1().y()) * _ctm;
-   _obox[0] = tp.x();_obox[1] = tp.y();
-   tp = TP(obox.p2().x(), obox.p1().y()) * _ctm;
-   _obox[2] = tp.x();_obox[3] = tp.y();
-   tp = TP(obox.p2().x(), obox.p2().y()) * _ctm;
-   _obox[4] = tp.x();_obox[5] = tp.y();
-   tp = TP(obox.p1().x(), obox.p2().y()) * _ctm;
-   _obox[6] = tp.x();_obox[7] = tp.y();
-}
-
-
-trend::TrendRef::TrendRef() :
-   _name       ( ""   ),
-   _ctm        (      ),
-   _alphaDepth ( 0    )
-{
-   _ctm.oglForm(_translation);
-   for (word i = 0; i < 8; _obox[i++] = 0);
-}
-
-unsigned trend::TrendRef::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
-{
-#ifdef TENDERER_USE_FLOATS
-   for (unsigned i = 0; i <  8; i++)
-      array[pindex+i] = (TNDR_GLDATAT) _obox[i];
-#else
-   memcpy(&(array[pindex]), _obox, sizeof(TNDR_GLDATAT) * 8);
-#endif
-   pindex += 8;
-   return 4;
-}
-
-void trend::TrendRef::drctDrawContour()
-{
-   glBegin(GL_LINE_LOOP);
-   for (unsigned i = 0; i < 4; i++)
-      glVertex2i(_obox[2*i], _obox[2*i+1]);
-   glEnd();
-}
-
-//=============================================================================
-//
 // class TrendTV
 //
-trend::TrendTV::TrendTV(TrendRef* const refCell, bool filled, bool reusable,
+trend::TrendTV::TrendTV(TrxCellRef* const refCell, bool filled, bool reusable,
                    unsigned parray_offset, unsigned iarray_offset) :
    _refCell             ( refCell         ),
    _num_total_strings   ( 0u              ),
@@ -200,9 +149,9 @@ unsigned trend::TrendTV::num_total_indexs()
           );
 }
 
-trend::TrendRef* trend::TrendTV::swapRefCells(TrendRef* newRefCell)
+trend::TrxCellRef* trend::TrendTV::swapRefCells(TrxCellRef* newRefCell)
 {
-   TrendRef* the_swap = _refCell;
+   TrxCellRef* the_swap = _refCell;
    _refCell = newRefCell;
    return the_swap;
 }
@@ -466,7 +415,7 @@ trend::TrendRefLay::TrendRefLay() :
    {
 }
 
-void trend::TrendRefLay::addCellOBox(TrendRef* cRefBox, word alphaDepth, bool selected)
+void trend::TrendRefLay::addCellOBox(TrxCellRef* cRefBox, word alphaDepth, bool selected)
 {
    if (selected)
    {
@@ -522,7 +471,7 @@ trend::TrendBase::TrendBase( layprop::DrawProperties* drawprop, real UU ) :
    _rmm                (      NULL )
 {
    // Initialize the cell (CTM) stack
-   _cellStack.push(DEBUG_NEW TrendRef());
+   _cellStack.push(DEBUG_NEW TrxCellRef());
 }
 
 void trend::TrendBase::setRmm(const CTM& mm)
@@ -532,7 +481,7 @@ void trend::TrendBase::setRmm(const CTM& mm)
 
 void trend::TrendBase::pushCell(std::string cname, const CTM& trans, const DBbox& overlap, bool active, bool selected)
 {
-   TrendRef* cRefBox = DEBUG_NEW TrendRef(cname,
+   TrxCellRef* cRefBox = DEBUG_NEW TrxCellRef(cname,
                                           trans * _cellStack.top()->ctm(),
                                           overlap,
                                           _cellStack.size()
@@ -544,7 +493,7 @@ void trend::TrendBase::pushCell(std::string cname, const CTM& trans, const DBbox
       // them up. Don't get confused - we need cRefBox during the collecting
       // and drawing phase so we can't really delete them here or after they're
       // poped-up from _cellStack. The confusion is coming from the "duality"
-      // of the TrendRef - once as a cell reference with CTM, view depth etc.
+      // of the TrxCellRef - once as a cell reference with CTM, view depth etc.
       // and then as a placeholder of the overlapping reference box
       _hiddenRefBoxes.push_back(cRefBox);
 
@@ -606,7 +555,7 @@ void trend::TrendBase::arefOBox(std::string cname, const CTM& trans, const DBbox
 {
    if (selected || (!_drawprop->isCellBoxHidden()))
    {
-      TrendRef* cRefBox = DEBUG_NEW TrendRef(cname,
+      TrxCellRef* cRefBox = DEBUG_NEW TrxCellRef(cname,
                                                trans * _cellStack.top()->ctm(),
                                                overlap,
                                                _cellStack.size()
