@@ -32,6 +32,12 @@
 GLUtriangulatorObj*  TessellPoly::tenderTesel = NULL;
 extern trend::TrendCenter*            TRENDC;
 
+GLubyte cell_mark_bmp[30] = {
+   0x01, 0x00, 0x02, 0x80, 0x04, 0x40, 0x08, 0x20, 0x18, 0x18,
+   0x24, 0x48, 0x42, 0x84, 0x81, 0x02, 0x42, 0x84, 0x24, 0x48,
+   0x18, 0x18, 0x08, 0x20, 0x04, 0x40, 0x02, 0x80, 0x01, 0x00
+};
+
 
 //=============================================================================
 //
@@ -1080,3 +1086,30 @@ void trend::TrxCellRef::drctDrawContour()
    glEnd();
 }
 
+void trend::TrxCellRef::drctDrawRefMark()
+{
+//   GLubyte* the_mark;
+//   switch (mark_type)
+//   {
+//      case  cell_mark:if (_cellMarksHidden) return;
+//      else
+//      {
+//         glColor4f((GLfloat)1.0, (GLfloat)1.0, (GLfloat)1.0, (GLfloat)0.8);
+//         the_mark = cell_mark_bmp;
+//         break;
+//      }
+//      case array_mark:if (_cellMarksHidden) return;
+//      else
+//      {
+//         glColor4f((GLfloat)1.0, (GLfloat)1.0, (GLfloat)1.0, (GLfloat)0.8);
+//         the_mark = array_mark_bmp;
+//         break;
+//      }
+//      case  text_mark:if (_textMarksHidden) return;
+//      else the_mark = text_mark_bmp;break;
+//      default: assert(false); break;
+//   }
+   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+   glRasterPos2i(_obox[0],_obox[1]);
+   glBitmap(16,16,7,7,0,0, cell_mark_bmp);
+}

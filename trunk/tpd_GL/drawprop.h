@@ -274,6 +274,7 @@ namespace layprop {
                                                          {_cellDepthView = dov;}
          void                       allUnselectable(LayerDefSet&);
          void                       allInvisible(LayerDefSet&);
+         bool                       cellMarksHidden()    {return _cellMarksHidden;}
          // Properly protected in tpd_bidfunc or the functions called from there
          bool                       addLayer(std::string, const LayerDef&, std::string, std::string, std::string);
          bool                       addLayer(std::string, const LayerDef&);
