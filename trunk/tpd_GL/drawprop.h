@@ -28,7 +28,6 @@
 #ifndef DRAWPROP_H
 #define DRAWPROP_H
 
-#include <GL/glew.h>
 #include <string>
 #include <math.h>
 #include "tedbac.h"
@@ -240,8 +239,7 @@ namespace layprop {
          void                       clearDrawRefStack();
          void                       postCheckCRS(const laydata::TdtCellRef*);
          CellRefChainType           preCheckCRS(const laydata::TdtCellRef*);
-         void                       drawReferenceMarks(const TP&, const binding_marks) const;
-         void                       setGridColor(std::string colname) const;
+//         void                       drawReferenceMarks(const TP&, const binding_marks) const;
          LayerDef                   getTenderLay(const LayerDef&) const;//!return the same if _propertyState == DB or predefined layer otherwise
          const CTM&                 scrCtm() const       {return  _scrCtm;}
          word                       visualLimit() const  {return _visualLimit;}

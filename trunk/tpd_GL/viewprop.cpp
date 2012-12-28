@@ -26,13 +26,12 @@
 //===========================================================================
 
 #include "tpdph.h"
+#include "viewprop.h"
 #include <sstream>
 #include <fstream>
 #include <iostream>
 #include <iomanip>
 #include "ttt.h"
-#include <GL/glew.h>
-#include "viewprop.h"
 #include "outbox.h"
 #include "tenderer.h"
 #include "trend.h"

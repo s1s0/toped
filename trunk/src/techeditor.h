@@ -31,15 +31,7 @@
 #ifndef __TECHEDITOR__
 #define __TECHEDITOR__
 
-#include <wx/panel.h>
-#include <wx/string.h>
-#include <wx/gdicmn.h>
-#include <wx/font.h>
-#include <wx/colour.h>
-#include <wx/settings.h>
-#include <wx/button.h>
-#include <wx/sizer.h>
-#include <wx/dialog.h>
+#include <wx/wx.h>
 #include "tui.h"
 
 namespace tui

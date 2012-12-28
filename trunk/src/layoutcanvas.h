@@ -28,11 +28,11 @@
 #ifndef LAYOUTCANVAS_H
 #define LAYOUTCANVAS_H
 
-#include <string>
 #include <GL/glew.h>
 #include <wx/glcanvas.h>
 #include <wx/cursor.h>
 #include <wx/image.h>
+#include <string>
 #include "ttt.h"
 #include "tuidefs.h"
 

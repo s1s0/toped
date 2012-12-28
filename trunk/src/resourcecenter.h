@@ -29,7 +29,6 @@
 
 #include <string>
 #include <vector>
-#include <GL/glew.h>
 #include <wx/wx.h>
 #include <wx/laywin.h>
 #include "tpdf_common.h"

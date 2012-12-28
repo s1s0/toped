@@ -26,7 +26,6 @@
 //===========================================================================
 
 #include "tpdph.h"
-#include <GL/glew.h>
 #include <wx/wx.h>
 #include <wx/tooltip.h>
 #include <wx/filefn.h>

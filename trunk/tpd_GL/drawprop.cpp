@@ -26,7 +26,6 @@
 //===========================================================================
 
 #include "tpdph.h"
-#include <GL/glew.h>
 #include <sstream>
 #include <string>
 #include "drawprop.h"
@@ -34,23 +33,23 @@
 #include "tuidefs.h"
 
 
-GLubyte cell_mark_bmp[30] = {
-   0x01, 0x00, 0x02, 0x80, 0x04, 0x40, 0x08, 0x20, 0x18, 0x18,
-   0x24, 0x48, 0x42, 0x84, 0x81, 0x02, 0x42, 0x84, 0x24, 0x48,
-   0x18, 0x18, 0x08, 0x20, 0x04, 0x40, 0x02, 0x80, 0x01, 0x00
-};
-
-GLubyte text_mark_bmp[30] = {
-   0x01, 0x00, 0x02, 0x80, 0x04, 0x40, 0x09, 0x20, 0x11, 0x10,
-   0x21, 0x08, 0x41, 0x04, 0x8F, 0xE2, 0x40, 0x04, 0x20, 0x08,
-   0x10, 0x10, 0x08, 0x20, 0x04, 0x40, 0x02, 0x80, 0x01, 0x00
-};
-
-GLubyte array_mark_bmp[30]= {
-   0x01, 0x00, 0x02, 0x80, 0x04, 0x40, 0x08, 0x20, 0x10, 0x10,
-   0x20, 0x08, 0x50, 0x0A, 0x8F, 0xE2, 0x44, 0x44, 0x22, 0x88,
-   0x11, 0x10, 0x08, 0x20, 0x04, 0x40, 0x02, 0x80, 0x01, 0x00
-};
+//GLubyte cell_mark_bmp[30] = {
+//   0x01, 0x00, 0x02, 0x80, 0x04, 0x40, 0x08, 0x20, 0x18, 0x18,
+//   0x24, 0x48, 0x42, 0x84, 0x81, 0x02, 0x42, 0x84, 0x24, 0x48,
+//   0x18, 0x18, 0x08, 0x20, 0x04, 0x40, 0x02, 0x80, 0x01, 0x00
+//};
+//
+//GLubyte text_mark_bmp[30] = {
+//   0x01, 0x00, 0x02, 0x80, 0x04, 0x40, 0x09, 0x20, 0x11, 0x10,
+//   0x21, 0x08, 0x41, 0x04, 0x8F, 0xE2, 0x40, 0x04, 0x20, 0x08,
+//   0x10, 0x10, 0x08, 0x20, 0x04, 0x40, 0x02, 0x80, 0x01, 0x00
+//};
+//
+//GLubyte array_mark_bmp[30]= {
+//   0x01, 0x00, 0x02, 0x80, 0x04, 0x40, 0x08, 0x20, 0x10, 0x10,
+//   0x20, 0x08, 0x50, 0x0A, 0x8F, 0xE2, 0x44, 0x44, 0x22, 0x88,
+//   0x11, 0x10, 0x08, 0x20, 0x04, 0x40, 0x02, 0x80, 0x01, 0x00
+//};
 
 const layprop::tellRGB        layprop::DrawProperties::_dfltColor(127,127,127,127);
 const layprop::LineSettings   layprop::DrawProperties::_dfltLine    ("", 0xffff, 1, 1);
@@ -617,26 +616,12 @@ bool layprop::DrawProperties::setCurrentColor(const LayerDef& laydef, layprop::t
    else
    {
       _drawingLayer = laydef;
-   /*const layprop::tellRGB& */theColor = getColor(_drawingLayer);
+      theColor = getColor(_drawingLayer);
       return true;
-   //glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
    }
 }
 
-void layprop::DrawProperties::setGridColor(std::string colname) const
-{
-   if (_layColors.end() == _layColors.find(colname))
-   // put a default gray color if color is not found
-      glColor4ub(_dfltColor.red(), _dfltColor.green(), _dfltColor.blue(), _dfltColor.alpha());
-   else
-   {
-      tellRGB* gcol = _layColors.find(colname)->second;
-      assert(NULL != gcol);
-      glColor4ub(gcol->red(), gcol->green(), gcol->blue(), gcol->alpha());
-   }
-}
-
-const byte* layprop::DrawProperties::getCurrentFill(/*bool force_fill*/) const
+const byte* layprop::DrawProperties::getCurrentFill() const
 {
    assert((REF_LAY_DEF != _drawingLayer) && 
           (GRC_LAY_DEF != _drawingLayer)    );
@@ -770,33 +755,33 @@ layprop::CellRefChainType layprop::DrawProperties::preCheckCRS(const laydata::Td
    else return crc_VIEW;
 }
 
-void layprop::DrawProperties::drawReferenceMarks(const TP& p0, const binding_marks mark_type) const
-{
-   GLubyte* the_mark;
-   switch (mark_type)
-   {
-      case  cell_mark:if (_cellMarksHidden) return;
-      else
-      {
-         glColor4f((GLfloat)1.0, (GLfloat)1.0, (GLfloat)1.0, (GLfloat)0.8);
-         the_mark = cell_mark_bmp;
-         break;
-      }
-      case array_mark:if (_cellMarksHidden) return;
-      else
-      {
-         glColor4f((GLfloat)1.0, (GLfloat)1.0, (GLfloat)1.0, (GLfloat)0.8);
-         the_mark = array_mark_bmp;
-         break;
-      }
-      case  text_mark:if (_textMarksHidden) return;
-      else the_mark = text_mark_bmp;break;
-      default: assert(false); break;
-   }
-   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-   glRasterPos2i(p0.x(),p0.y());
-   glBitmap(16,16,7,7,0,0, the_mark);
-}
+//void layprop::DrawProperties::drawReferenceMarks(const TP& p0, const binding_marks mark_type) const
+//{
+//   GLubyte* the_mark;
+//   switch (mark_type)
+//   {
+//      case  cell_mark:if (_cellMarksHidden) return;
+//      else
+//      {
+//         glColor4f((GLfloat)1.0, (GLfloat)1.0, (GLfloat)1.0, (GLfloat)0.8);
+//         the_mark = cell_mark_bmp;
+//         break;
+//      }
+//      case array_mark:if (_cellMarksHidden) return;
+//      else
+//      {
+//         glColor4f((GLfloat)1.0, (GLfloat)1.0, (GLfloat)1.0, (GLfloat)0.8);
+//         the_mark = array_mark_bmp;
+//         break;
+//      }
+//      case  text_mark:if (_textMarksHidden) return;
+//      else the_mark = text_mark_bmp;break;
+//      default: assert(false); break;
+//   }
+//   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+//   glRasterPos2i(p0.x(),p0.y());
+//   glBitmap(16,16,7,7,0,0, the_mark);
+//}
 
 LayerDef layprop::DrawProperties::getLayerNo(std::string name) const
 {

@@ -27,10 +27,8 @@
 
 #include "tpdph.h"
 #include <sstream>
-#include <GL/glew.h>
-#include <wx/sizer.h>
+#include <wx/wx.h>
 #include <wx/filename.h>
-#include <wx/image.h>
 #include <wx/aboutdlg.h>
 #include <wx/tooltip.h>
 #include <wx/txtstrm.h>
