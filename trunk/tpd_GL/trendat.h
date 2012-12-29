@@ -490,7 +490,6 @@ namespace trend {
          word              alphaDepth()   {return _alphaDepth;}
          unsigned          cDataCopy(TNDR_GLDATAT*, unsigned&);
          void              drctDrawContour();
-         void              drctDrawRefMark();
       private:
          std::string       _name;
          real              _translation[16];
@@ -499,6 +498,25 @@ namespace trend {
          word              _alphaDepth;
    };
 
+   //==========================================================================
+   //
+   // Object marks
+   //
+   //==========================================================================
+   class TrxMarks {
+      public:
+                           TrxMarks() {}
+         void              addRefMark(const TP&, const CTM&);
+         void              addTextMark(const TP&, const CTM&);
+         void              addARefMark(const TP&, const CTM&);
+         bool              empty();
+         void              drctDraw();
+      private:
+         typedef std::list<TP> PointList;
+         PointList         _refMarks;
+         PointList         _textMarks;
+         PointList         _arefMarks;
+   };
 }
 
 

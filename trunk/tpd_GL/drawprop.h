@@ -252,10 +252,14 @@ namespace layprop {
          void                       setState (PropertyState state)
                                                          {_propertyState = state;};
 //         LayerNumber                drawingLayer() const {return _drawingLayer;}
-         bool                       isTextBoxHidden() const
+         bool                       textBoxHidden() const
                                                          {return _textBoxHidden;}
-         bool                       isCellBoxHidden() const
+         bool                       textMarksHidden() const
+                                                         {return _textMarksHidden;}
+         bool                       cellBoxHidden() const
                                                          {return _cellBoxHidden;}
+         bool                       cellMarksHidden() const
+                                                         {return _cellMarksHidden;}
          bool                       adjustTextOrientation() const
                                                          {return _adjustTextOrientation;}
          byte                       cellDepthView()      {return _cellDepthView;}
@@ -274,7 +278,6 @@ namespace layprop {
                                                          {_cellDepthView = dov;}
          void                       allUnselectable(LayerDefSet&);
          void                       allInvisible(LayerDefSet&);
-         bool                       cellMarksHidden()    {return _cellMarksHidden;}
          // Properly protected in tpd_bidfunc or the functions called from there
          bool                       addLayer(std::string, const LayerDef&, std::string, std::string, std::string);
          bool                       addLayer(std::string, const LayerDef&);

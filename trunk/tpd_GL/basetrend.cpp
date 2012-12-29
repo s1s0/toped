@@ -486,7 +486,7 @@ void trend::TrendBase::pushCell(std::string cname, const CTM& trans, const DBbox
                                           overlap,
                                           _cellStack.size()
                                          );
-   if (selected || (!_drawprop->isCellBoxHidden()))
+   if (selected || (!_drawprop->cellBoxHidden()))
       _refLayer->addCellOBox(cRefBox, _cellStack.size(), selected);
    else
       // This list is to keep track of the hidden cRefBox - so we can clean
@@ -502,6 +502,10 @@ void trend::TrendBase::pushCell(std::string cname, const CTM& trans, const DBbox
    {
       assert(NULL == _activeCS);
       _activeCS = cRefBox;
+   }
+   else if (!_drawprop->cellMarksHidden())
+   {
+      _marks.addRefMark(overlap.p1(), _cellStack.top()->ctm());
    }
 }
 
@@ -553,7 +557,12 @@ void trend::TrendBase::grcwire (int4b* pdata, unsigned psize, WireWidth width)
 
 void trend::TrendBase::arefOBox(std::string cname, const CTM& trans, const DBbox& overlap, bool selected)
 {
-   if (selected || (!_drawprop->isCellBoxHidden()))
+   if (!_drawprop->cellMarksHidden())
+   {
+      _marks.addARefMark(overlap.p1(), trans * _cellStack.top()->ctm());
+   }
+
+   if (selected || (!_drawprop->cellBoxHidden()))
    {
       TrxCellRef* cRefBox = DEBUG_NEW TrxCellRef(cname,
                                                trans * _cellStack.top()->ctm(),
@@ -568,10 +577,14 @@ void trend::TrendBase::text (const std::string* txt, const CTM& ftmtrx, const DB
 {
    if (sel)
       _clayer->text(txt, ftmtrx, &ovl, cor, true);
-   else if (_drawprop->isTextBoxHidden())
+   else if (_drawprop->textBoxHidden())
       _clayer->text(txt, ftmtrx, NULL, cor, false);
    else
       _clayer->text(txt, ftmtrx, &ovl, cor, false);
+   if (!_drawprop->textMarksHidden())
+   {
+      _marks.addTextMark(ovl.p1(),ftmtrx*_cellStack.top()->ctm());
+   }
 }
 
 void trend::TrendBase::textt(const std::string* txt, const CTM& ftmtrx, const TP& cor)
