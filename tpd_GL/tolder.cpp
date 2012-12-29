@@ -546,6 +546,6 @@ void trend::Tolder::grcCleanUp()
 
 trend::Tolder::~Tolder()
 {
-   delete _refLayer;
+//   delete _refLayer; //>> deleted by the parent constructor
 }
 
