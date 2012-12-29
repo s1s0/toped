@@ -631,13 +631,14 @@ namespace trend {
          DataLay           _grcData;         //!All GRC      data for drawing
          TrendLay*         _clayer;          //!Working variable pointing to the current edit slice
          TrendLay*         _grcLayer;        //!Working variable pointing to the current GRC  slice
-         TrendRefLay*      _refLayer;
+         TrendRefLay*      _refLayer;        //!All cell references with visible overlapping boxes
          CellStack         _cellStack;       //!Required during data traversing stage
          unsigned          _cslctd_array_offset; //! Current selected array offset
          //
          TrxCellRef*       _activeCS;
-         byte              _dovCorrection;   //! Cell ref Depth of view correction (for Edit in Place purposes)
-         RefBoxList        _hiddenRefBoxes;  //! Those cRefBox objects which didn't ended in the TrendRefLay structures
+         byte              _dovCorrection;   //!Cell ref Depth of view correction (for Edit in Place purposes)
+         RefBoxList        _hiddenRefBoxes;  //!Those cRefBox objects which didn't ended in the TrendRefLay structures
+         TrxMarks          _marks;           //!All kinds of object marks
          CTM*              _rmm;             //!Reverse motion matrix
    };
 

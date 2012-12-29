@@ -32,12 +32,23 @@
 GLUtriangulatorObj*  TessellPoly::tenderTesel = NULL;
 extern trend::TrendCenter*            TRENDC;
 
-GLubyte cell_mark_bmp[30] = {
+GLubyte ref_mark_bmp[30] = {
    0x01, 0x00, 0x02, 0x80, 0x04, 0x40, 0x08, 0x20, 0x18, 0x18,
    0x24, 0x48, 0x42, 0x84, 0x81, 0x02, 0x42, 0x84, 0x24, 0x48,
    0x18, 0x18, 0x08, 0x20, 0x04, 0x40, 0x02, 0x80, 0x01, 0x00
 };
 
+GLubyte text_mark_bmp[30] = {
+   0x01, 0x00, 0x02, 0x80, 0x04, 0x40, 0x09, 0x20, 0x11, 0x10,
+   0x21, 0x08, 0x41, 0x04, 0x8F, 0xE2, 0x40, 0x04, 0x20, 0x08,
+   0x10, 0x10, 0x08, 0x20, 0x04, 0x40, 0x02, 0x80, 0x01, 0x00
+};
+
+GLubyte aref_mark_bmp[30]= {
+   0x01, 0x00, 0x02, 0x80, 0x04, 0x40, 0x08, 0x20, 0x10, 0x10,
+   0x20, 0x08, 0x50, 0x0A, 0x8F, 0xE2, 0x44, 0x44, 0x22, 0x88,
+   0x11, 0x10, 0x08, 0x20, 0x04, 0x40, 0x02, 0x80, 0x01, 0x00
+};
 
 //=============================================================================
 //
@@ -1086,30 +1097,48 @@ void trend::TrxCellRef::drctDrawContour()
    glEnd();
 }
 
-void trend::TrxCellRef::drctDrawRefMark()
+void trend::TrxMarks::addRefMark(const TP& p, const CTM& ctm)
 {
-//   GLubyte* the_mark;
-//   switch (mark_type)
-//   {
-//      case  cell_mark:if (_cellMarksHidden) return;
-//      else
-//      {
-//         glColor4f((GLfloat)1.0, (GLfloat)1.0, (GLfloat)1.0, (GLfloat)0.8);
-//         the_mark = cell_mark_bmp;
-//         break;
-//      }
-//      case array_mark:if (_cellMarksHidden) return;
-//      else
-//      {
-//         glColor4f((GLfloat)1.0, (GLfloat)1.0, (GLfloat)1.0, (GLfloat)0.8);
-//         the_mark = array_mark_bmp;
-//         break;
-//      }
-//      case  text_mark:if (_textMarksHidden) return;
-//      else the_mark = text_mark_bmp;break;
-//      default: assert(false); break;
-//   }
-   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-   glRasterPos2i(_obox[0],_obox[1]);
-   glBitmap(16,16,7,7,0,0, cell_mark_bmp);
+   _refMarks.push_back(p*ctm);
 }
+
+void trend::TrxMarks::addTextMark(const TP& p, const CTM& ctm)
+{
+   _textMarks.push_back(p*ctm);
+}
+
+void trend::TrxMarks::addARefMark(const TP& p, const CTM& ctm)
+{
+   _arefMarks.push_back(p*ctm);
+}
+
+bool trend::TrxMarks::empty()
+{
+   return (   _refMarks.empty()
+          && _textMarks.empty()
+          && _arefMarks.empty()
+          );
+}
+
+void trend::TrxMarks::drctDraw()
+{
+   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+   for (PointList::const_iterator CM = _refMarks.begin(); CM != _refMarks.end(); CM++)
+   {
+      glRasterPos2i(CM->x(),CM->y());
+      glBitmap(16,16,7,7,0,0, ref_mark_bmp);
+   }
+
+   for (PointList::const_iterator CM = _textMarks.begin(); CM != _textMarks.end(); CM++)
+   {
+      glRasterPos2i(CM->x(),CM->y());
+      glBitmap(16,16,7,7,0,0, text_mark_bmp);
+   }
+
+   for (PointList::const_iterator CM = _arefMarks.begin(); CM != _arefMarks.end(); CM++)
+   {
+      glRasterPos2i(CM->x(),CM->y());
+      glBitmap(16,16,7,7,0,0, aref_mark_bmp);
+   }
+}
+
