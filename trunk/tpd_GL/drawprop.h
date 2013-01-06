@@ -115,7 +115,7 @@ namespace layprop {
                   crc_ACTIVE     = 2, // edit in place mode, the active cell
                   crc_POSTACTIVE = 3  // edit in place mode, and we're in the active cell chain after the active cell
                 } CellRefChainType;
-
+   typedef byte LayMark[30];
    //=============================================================================
    //
    //
@@ -263,6 +263,11 @@ namespace layprop {
          bool                       adjustTextOrientation() const
                                                          {return _adjustTextOrientation;}
          byte                       cellDepthView()      {return _cellDepthView;}
+
+         const byte*                ref_mark_bmp()       {return _ref_mark_bmp ;}
+         const byte*                text_mark_bmp()      {return _text_mark_bmp;}
+         const byte*                aref_mark_bmp()      {return _aref_mark_bmp;}
+
          // Protected elsewhere
          console::ACTIVE_OP         currentOp() const    {return _currentOp;}
          void                       setCurrentOp(console::ACTIVE_OP actop)
@@ -370,8 +375,10 @@ namespace layprop {
          static const LineSettings  _dfltCellSBnd ; //! Default Selected Cell Boundary
          static const LineSettings  _dfltTextBnd  ; //! Default Text Boundary
          static const LineSettings  _dfltTextSBnd ; //! Default Selected Text Boundary
+         static const LayMark       _ref_mark_bmp ; //!
+         static const LayMark       _text_mark_bmp; //!
+         static const LayMark       _aref_mark_bmp; //!
          PropertyState              _propertyState; //type of drawing
    };
-
 }
 #endif //DRAWPROP_H

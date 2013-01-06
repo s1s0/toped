@@ -100,6 +100,12 @@ namespace trend {
          GLsizei*          _fstslix; //! array of first indexes
    };
 
+   class TenderMarks : public TrendMarks {
+      public:
+                           TenderMarks() : TrendMarks() {}
+         virtual void      draw(layprop::DrawProperties*);
+   };
+
    /**
       Toped rENDERER is the front-end class for the VBO renderer. All data parsing
       functionality is implemented in the parent class. VBO collection and drawing

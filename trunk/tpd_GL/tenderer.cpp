@@ -718,6 +718,33 @@ trend::TenderRefLay::~TenderRefLay()
 
 //=============================================================================
 //
+// class TolderMarks
+//
+
+void trend::TenderMarks::draw(layprop::DrawProperties* drawprop)
+{
+   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+   for (PointList::const_iterator CM = _refMarks.begin(); CM != _refMarks.end(); CM++)
+   {
+      glRasterPos2i(CM->x(),CM->y());
+      glBitmap(16,16,7,7,0,0, drawprop->ref_mark_bmp());
+   }
+
+   for (PointList::const_iterator CM = _textMarks.begin(); CM != _textMarks.end(); CM++)
+   {
+      glRasterPos2i(CM->x(),CM->y());
+      glBitmap(16,16,7,7,0,0, drawprop->text_mark_bmp());
+   }
+
+   for (PointList::const_iterator CM = _arefMarks.begin(); CM != _arefMarks.end(); CM++)
+   {
+      glRasterPos2i(CM->x(),CM->y());
+      glBitmap(16,16,7,7,0,0, drawprop->aref_mark_bmp());
+   }
+}
+
+//=============================================================================
+//
 // class Tenderer
 //
 trend::Tenderer::Tenderer( layprop::DrawProperties* drawprop, real UU, bool createRefLay ) :
@@ -729,7 +756,10 @@ trend::Tenderer::Tenderer( layprop::DrawProperties* drawprop, real UU, bool crea
    _sbuffer              (       0u   )
 {
    if (createRefLay)
+   {
       _refLayer = DEBUG_NEW TenderRefLay();
+      _marks    = DEBUG_NEW TenderMarks();
+   }
 }
 
 bool trend::Tenderer::chunkExists(const LayerDef& laydef, bool has_selected)
@@ -1065,7 +1095,7 @@ void trend::Tenderer::draw()
    // draw reference boxes
    if (0 < _refLayer->total_points())   _refLayer->draw(_drawprop);
    // draw marks
-   if (!_marks.empty())                 _marks.drctDraw();
+   if (!_marks->empty())                _marks->draw(_drawprop);
 
    checkOGLError("draw");
 }
