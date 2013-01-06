@@ -25,39 +25,75 @@
 //        $Author$
 //===========================================================================
 /** \file
-   Toped is a graphical application and naturally the graphic rendering is a primary
-   objective in terms of quality and speed. The Toped rENDERER (TENDERER) is the first
-   serious attempt in this project to utilize the power of todays graphic hardware via
-   openGL library. The original rendering (which is preserved) is implementing the
-   simplest possible rendering approach and is using the most basic openGL functions to
-   achieve maximum compatibility. The goal of the TrendBase is to be a base for future
-   updates in terms of graphic effects, 3D rendering, shaders etc.
+   Toped is a graphical application and naturally the graphic rendering is a
+   primary objective in terms of quality and speed. The openGL library is used
+   for low level drawing and that brings some constraints which need to be
+   addressed in the code. Those constraints are related to the various graphic
+   platforms and development history of the library. Here is the summary:
+    - The existing graphic platforms (hardware and drivers) which support openGL
+      can be sorted in 3 groups (at the time of writing):
+      -- supporting the latest openGL specification (3.30 and later) - those
+         usually include recent graphic card with proprietary driver and are
+         quite often associated with Windows desktop machines.
+      -- limited openGL support - either the hardware or the drivers support only
+         relatively old openGL revision (before 3.0). This group is normally
+         associated with Linux desktop installations with open source drivers.
+      -- basic openGL support - quite often only functionality from revision 1.1
+         of the openGL specification. A major entry to this group is the
+         virtualisation software and software for terminal emulation.
+    - OpenGL specification rev.3.30 declared obsolete virtually all the functionality
+      which does not relate to GLSL (shaders). In other words the library is
+      completely different from the original spec. and the compatibility is now
+      not a requirement. It is up to the vendor of the driver.
 
-   It must be clear that the main rendering acceleration is coming from the structure
-   of the Toped database. The QuadTree dominates by far any other rendering optimisation
-   especially on big databases where the speed really matters. This is the main reason
-   behind the fact that the original renderer demonstrates comparable results with
-   TrendBase. There are virtually no enhancements possible there though. It should be
-   noted also that each rendering view in this context is unique. Indeed, when the user
-   changes the visual window, the data stream from the Toped DB traverser can't be
-   predicted. Different objects will be streamed out depending on the location and
-   size of the visual window, but also depending on the current visual properties -
-   colours, lines, fills, layer status, cell depth, visual details etc. The assumption
-   though (and I hope it's a fact) is that the overall amount of the data is optimal
-   with respect to the quality of the image.
+   To ensure that the tool performs reasonably well on all platforms listed above
+   we need three different rederers. In the code they are called:
+      - tolder - for platforms supporting openGL < 1.4. Using only functionality
+        included in the revision 1.1.
+      - tenderer - for platforms which support VBO, but have very limited or no
+        support at all for GLSL (shaders). This implementation is using Virtual
+        Buffer Objects.
+      - toshader - for up to date platforms supporting openGL >= 3.30 This
+        implementations is using shaders.
 
-   Both renderers are sinking data from the Toped QuadTree data base and depend heavily
-   on its property to filter-out quickly and effectively all invisible objects. The
-   Toped DB is generally a hierarchical cell tree. Each cell contains a linear list
-   of layers which in turn contains a QuadTree of the layout objects. The main task
-   of the TrendBase is to convert the data stream from the DB traversing into arrays
-   of vertexes (VBOs) convenient for the graphical hardware.
+   It must be clear that the major part of the drawing acceleration is coming
+   from the structure of the Toped database. The QuadTree dominates by far any
+   rendering optimisation especially on big databases where the speed really
+   matters, and DB traversing is the same for all rendering implementations. This
+   is the main reason behind the fact that all renderers demonstrate comparable
+   results.
 
-   This is done in 3 steps:
-      1. Traversing and sorting - data coming from the Toped DB traversing is sorted
-         in the dedicated structures. Also some vital data statistics is done and some
-         references gathered which will be used during the following steps
-      2. VBO generation - the buffers are created and the sorted data is copied there.
+   There is virtually no alternative to the DB traversing though. It  should be
+   noted that each rendering view in this context is unique. Indeed, when the
+   user changes the visual window, the data stream from the Toped DB traverser
+   can't be predicted. Different objects will be streamed out depending on the
+   location and size of the visual window, but also depending on the current
+   visual properties - colours, lines, fills, layer status, cell depth, visual
+   details etc. The assumption is (and I hope it's a fact) that the overall amount
+   of the data is optimal with respect to the quality of the image and the speed
+   of the drawing.
+   The alternative to the above is to keep the entire DB in the graphic memory
+   which is considered not feasible for a number of (hopefully obvious) reasons.
+
+   All renderers are implemented as family of classes which inherit a pure virtual
+   family declared here. The major differences between those class families are
+   in the data collection and drawing (see the steps below). As already mentioned
+   above, all renderers are sinking data from the Toped QuadTree DB and depend
+   heavily on its ability to filter-out quickly and efficiently all objects
+   irrelevant to the current view. The Toped DB is generally a hierarchical cell
+   tree. Each cell contains a linear list of layers which in turn contain a
+   QuadTree of the layout objects.
+
+   The main task of the TrendBase is to convert
+   the data stream from the DB traversing into a flat collection of object
+   references (in tolder case) or in arrays of vertexes convenient for the
+   graphical hardware. This is done in 3 steps:
+      1. Traversing and sorting - data coming from the Toped DB traversing is
+         sorted in the dedicated structures. Also some vital data statistics is
+         done and some references gathered which will be used during the following
+         steps
+      2. VBO generation - the buffers are created and the sorted data is copied
+         there. This step is virtually omitted when tolder is used.
       3. Drawing
    \verbatim
                      Layer 1                Layer 2                     Layer N
@@ -91,17 +127,20 @@
                    ----------------------------------------------------------------
    \endverbatim
    Speed:
-   The first step is the most time consuming from all three, but this is mainly the
-   Toped DB traversing which is assumed optimal. The last one is the quickest one
-   and the speed there can be improved even more if shaders are used. The speed of
-   the second step depends entirely on the implementation of the TrendBase.
+   The first step is the most time consuming, but this is mainly the Toped DB
+   traversing which is assumed optimal. The last one is the quickest one and the
+   speed there depends on the current graphic platform. It is expected to improve
+   from tolder < tenderer < toshader. The speed of the second step depends entirely
+   on the implementation of the active renderer. It shall be noted that for the
+   tolder second step is virtually missing, but the third step is expected to be
+   much slower in comparison with the other two implementations.
 
    Memory usage:
-   Only the first step consumes memory but it is minimised. There is no data copying
-   instead data references are stored only. Technically the second step does consume
-   memory of course, but this is the memory consumed by the graphic driver to map the
-   VBO in the CPU memory. The TrendBase copies the data directly in the VBOs
-
+   Only the first step consumes memory but it is minimised. There is no data
+   copying instead data references are stored only. Technically the second step
+   does consume memory of course, but this is the memory consumed by the graphic
+   driver to map the VBO in the CPU memory. The TrendBase copies the data directly
+   in the VBOs.
    Note, that the flow described above allows the screen to be redrawn very quickly
    using the third step only. This opens the door to all kinds of graphical effects.
 
@@ -112,7 +151,6 @@
       cells
    - index VBO - containing the tesselation indexes of all non-convex polygons
       on this layer across all cells
-
 
    As a whole all vertex data is copied only once. Index data (polygon tesselation)
    is copied only once as well. Wire tesselation is done on the fly and data is
@@ -168,18 +206,18 @@ namespace trend {
    typedef std::list<TrxCellRef*>   RefBoxList;
 
    /**
-      Toped RENDerer Translation View - is the most fundamental class of the TrendBase.
-      It sorts and stores a layer slice of the cell data. Most of the memory
-      consumption during the first processing step (traversing and sorting) is
-      concentrated in this class and naturally most of the TrendBase data processing
-      happens in the methods of this class. The input data stream is sorted in 4
-      "bins" in a form of Tender object lists. The corresponding objects are
-      created by register* methods. Vertex or index data is not copied during this
-      process, instead only data references are stored. The exception here are the
-      wire objects which generate their contour data during the construction. Each
-      object is sorted in exactly one bin depending whether it's going to be filled
-      or not. The exception as always is the wire object which also goes to the
-      line bin because of its central line.
+      Toped RENDerer Translation View - is the most fundamental class of the
+      TrendBase. It sorts and stores a layer slice of the cell data. Most of
+      the memory consumption during the first processing step (traversing and
+      sorting) is concentrated in this class and naturally most of the TrendBase
+      data processing happens in the methods of this class. The input data stream
+      is sorted in 4 "bins" in a form of Tender object lists. The corresponding
+      objects are created by register* methods. Vertex or index data is not
+      copied during this process, instead only data references are stored. The
+      exception here are the wire objects which generate their contour data
+      during the construction. Each object is sorted in exactly one bin depending
+      whether it's going to be filled or not. The exception as always is the wire
+      object which also goes to the line bin because of its central line.
       \verbatim
       ---------------------------------------------------------------
       | TrendBase |    not filled      |        filled      |        |
@@ -333,7 +371,7 @@ namespace trend {
    /**
       Very small class which holds the reusable TrendTV chunks. Here is what it is.
       The view usually contains relatively small number of cells which are referenced
-      multiply times. They do contain the same data, but it should be visualized
+      multiply times. They do contain the same data, but it should be visualised
       using different translation matrices. The simplest case is an array of cells
       object. It would be really a waste of CPU time to traverse those cells every
       time they are referenced. This also means that the amount of processing data
@@ -411,7 +449,7 @@ namespace trend {
 
       \verbatim
        --------------------------------------------------------------
-      |  TrendBase  |  fully selected    | partially selected |        |
+      | TrendBase |  fully selected    | partially selected |        |
       |    data   |--------------------|--------------------|  enum  |
       | (indexes) |  box | poly | wire |  box | poly | wire |        |
       |-----------|------|------|------|------|------|------|--------|
@@ -555,13 +593,13 @@ namespace trend {
    typedef std::stack<TrxCellRef*> CellStack;
 
    /**
-      Toped RENDerer BASE is the front-end class, the interface to the rest of the
-      world. Pure virtual. All data collection and render views are initiated using
-      an object of this class. There should be only one object of this class at a
-      time. The object of this class must be destroyed before the next data collection
-      or rendering view is invoked. The data gathered from the previous view must be
-      considered invalid. The object structure created by this class is shown in
-      the documentation of the module.
+      Toped RENDerer BASE is the front-end class, the interface to the rest of
+      the world. Pure virtual. All data collection and render views are initiated
+      using an object of this class. There should be only one object of this
+      class at a time. The object of this class must be destroyed before the next
+      data collection or rendering view is invoked. The data gathered from the
+      previous view must be considered invalid. The object structure created by
+      this class is shown in the documentation of the module.
    */
    class TrendBase {
       public:
