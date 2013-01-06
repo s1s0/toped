@@ -468,6 +468,7 @@ trend::TrendBase::TrendBase( layprop::DrawProperties* drawprop, real UU ) :
    _cslctd_array_offset(        0u ),
    _activeCS           (      NULL ),
    _dovCorrection      (         0 ),
+   _marks              (      NULL ),
    _rmm                (      NULL )
 {
    // Initialize the cell (CTM) stack
@@ -505,7 +506,7 @@ void trend::TrendBase::pushCell(std::string cname, const CTM& trans, const DBbox
    }
    else if (!_drawprop->cellMarksHidden())
    {
-      _marks.addRefMark(overlap.p1(), _cellStack.top()->ctm());
+      _marks->addRefMark(overlap.p1(), _cellStack.top()->ctm());
    }
 }
 
@@ -559,7 +560,7 @@ void trend::TrendBase::arefOBox(std::string cname, const CTM& trans, const DBbox
 {
    if (!_drawprop->cellMarksHidden())
    {
-      _marks.addARefMark(overlap.p1(), trans * _cellStack.top()->ctm());
+      _marks->addARefMark(overlap.p1(), trans * _cellStack.top()->ctm());
    }
 
    if (selected || (!_drawprop->cellBoxHidden()))
@@ -583,7 +584,7 @@ void trend::TrendBase::text (const std::string* txt, const CTM& ftmtrx, const DB
       _clayer->text(txt, ftmtrx, &ovl, cor, false);
    if (!_drawprop->textMarksHidden())
    {
-      _marks.addTextMark(ovl.p1(),ftmtrx*_cellStack.top()->ctm());
+      _marks->addTextMark(ovl.p1(),ftmtrx*_cellStack.top()->ctm());
    }
 }
 
@@ -635,6 +636,7 @@ void trend::TrendBase::grcCleanUp()
 trend::TrendBase::~TrendBase()
 {
    if (_refLayer) delete _refLayer;
+   if (_marks)    delete _marks;
    if (_rmm)      delete _rmm;
 }
 

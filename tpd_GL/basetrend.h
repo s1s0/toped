@@ -587,6 +587,25 @@ namespace trend {
          unsigned          _asobjix; //! total number of objects that will be drawn with index related functions
    };
 
+   class TrendMarks {
+      public:
+                           TrendMarks() {}
+         virtual          ~TrendMarks() {}
+         void              addRefMark (const TP& p, const CTM& ctm) {_refMarks.push_back(p*ctm);}
+         void              addTextMark(const TP& p, const CTM& ctm) {_textMarks.push_back(p*ctm);}
+         void              addARefMark(const TP& p, const CTM& ctm) {_arefMarks.push_back(p*ctm);}
+         bool              empty() {   return ( _refMarks.empty()
+                                             && _textMarks.empty()
+                                             && _arefMarks.empty()
+                                             );}
+         virtual void      draw(layprop::DrawProperties*) = 0;
+      protected:
+         typedef std::list<TP> PointList;
+         PointList         _refMarks;
+         PointList         _textMarks;
+         PointList         _arefMarks;
+   };
+
    //-----------------------------------------------------------------------------
    //
    typedef laydata::LayerContainer<TrendLay*> DataLay;
@@ -676,7 +695,7 @@ namespace trend {
          TrxCellRef*       _activeCS;
          byte              _dovCorrection;   //!Cell ref Depth of view correction (for Edit in Place purposes)
          RefBoxList        _hiddenRefBoxes;  //!Those cRefBox objects which didn't ended in the TrendRefLay structures
-         TrxMarks          _marks;           //!All kinds of object marks
+         TrendMarks*       _marks;           //!All kinds of object marks
          CTM*              _rmm;             //!Reverse motion matrix
    };
 

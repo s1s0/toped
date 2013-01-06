@@ -71,6 +71,12 @@ namespace trend {
          virtual void      setLine(layprop::DrawProperties*, bool);
    };
 
+   class TolderMarks : public TrendMarks {
+      public:
+                           TolderMarks() : TrendMarks() {}
+         virtual void      draw(layprop::DrawProperties*);
+   };
+
    class Tolder : public TrendBase {
       public:
                            Tolder( layprop::DrawProperties* drawprop, real UU );

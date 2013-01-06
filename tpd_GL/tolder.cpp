@@ -222,6 +222,34 @@ void trend::TolderRefLay::setLine(layprop::DrawProperties* drawprop, bool select
       glLineStipple(curLine.patscale(),curLine.pattern());
    }
 }
+
+//=============================================================================
+//
+// class TolderMarks
+//
+
+void trend::TolderMarks::draw(layprop::DrawProperties* drawprop)
+{
+   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+   for (PointList::const_iterator CM = _refMarks.begin(); CM != _refMarks.end(); CM++)
+   {
+      glRasterPos2i(CM->x(),CM->y());
+      glBitmap(16,16,7,7,0,0, drawprop->ref_mark_bmp());
+   }
+
+   for (PointList::const_iterator CM = _textMarks.begin(); CM != _textMarks.end(); CM++)
+   {
+      glRasterPos2i(CM->x(),CM->y());
+      glBitmap(16,16,7,7,0,0, drawprop->text_mark_bmp());
+   }
+
+   for (PointList::const_iterator CM = _arefMarks.begin(); CM != _arefMarks.end(); CM++)
+   {
+      glRasterPos2i(CM->x(),CM->y());
+      glBitmap(16,16,7,7,0,0, drawprop->aref_mark_bmp());
+   }
+}
+
 //=============================================================================
 //
 // class Tolder
@@ -230,6 +258,7 @@ trend::Tolder::Tolder( layprop::DrawProperties* drawprop, real UU ) :
     TrendBase            (drawprop, UU)
 {
    _refLayer = DEBUG_NEW TolderRefLay();
+   _marks    = DEBUG_NEW TolderMarks();
 }
 
 
@@ -515,7 +544,7 @@ void trend::Tolder::draw()
    // draw reference boxes
    if (0 < _refLayer->total_points())  _refLayer->draw(_drawprop);
    // draw marks
-   if (!_marks.empty())                _marks.drctDraw();
+   if (!_marks->empty())                _marks->draw(_drawprop);
    checkOGLError("draw");
 }
 
@@ -545,6 +574,7 @@ void trend::Tolder::grcCleanUp()
 
 trend::Tolder::~Tolder()
 {
-//   delete _refLayer; //>> deleted by the parent constructor
+//   delete _refLayer; //>> deleted by the parent destructor
+//   delete _marks; //>> deleted by the parent destructor
 }
 
