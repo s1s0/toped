@@ -115,7 +115,7 @@ namespace layprop {
                   crc_ACTIVE     = 2, // edit in place mode, the active cell
                   crc_POSTACTIVE = 3  // edit in place mode, and we're in the active cell chain after the active cell
                 } CellRefChainType;
-   typedef byte LayMark[30];
+   typedef byte LayMark[32];
    //=============================================================================
    //
    //

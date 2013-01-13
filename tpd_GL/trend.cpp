@@ -509,6 +509,7 @@ trend::Shaders::Shaders() :
    _glslUniVarNames[glslp_VF][glslu_in_LStipple]   = "in_LStipple";
    _glslUniVarNames[glslp_VF][glslu_in_StippleEn]  = "in_StippleEn";
    _glslUniVarNames[glslp_VF][glslu_in_LStippleEn] = "in_LStippleEn";
+   _glslUniVarNames[glslp_VF][glslu_in_MStippleEn] = "in_MStippleEn";
 
    _glslUniVarNames[glslp_VG][glslu_in_CTM]        = "in_CTM";
    _glslUniVarNames[glslp_VG][glslu_in_Z]          = "in_Z";
@@ -520,6 +521,7 @@ trend::Shaders::Shaders() :
    _glslUniVarNames[glslp_VG][glslu_in_LStippleEn] = "in_LStippleEn";
    _glslUniVarNames[glslp_VG][glslu_in_ScreenSize] = "in_ScreenSize";
    _glslUniVarNames[glslp_VG][glslu_in_PatScale]   = "in_PatScale";
+   _glslUniVarNames[glslp_VG][glslu_in_MStippleEn] = "in_MStippleEn";
 
    _glslUniVarNames[glslp_PS][glslu_in_CTM]        = "in_CTM";
    _glslUniVarNames[glslp_PS][glslu_in_Z]          = "in_Z";
@@ -530,6 +532,7 @@ trend::Shaders::Shaders() :
    _glslUniVarNames[glslp_PS][glslu_in_StippleEn]  = "in_StippleEn";
    _glslUniVarNames[glslp_PS][glslu_in_LStippleEn] = "in_LStippleEn";
    _glslUniVarNames[glslp_PS][glslu_in_ScreenSize] = "in_ScreenSize";
+   _glslUniVarNames[glslp_PS][glslu_in_MStippleEn] = "in_MStippleEn";
    //
    _idPrograms[glslp_VF] = -1;
    _idPrograms[glslp_VG] = -1;
