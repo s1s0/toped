@@ -457,6 +457,18 @@ trend::TrendRefLay::~TrendRefLay()
 
 //=============================================================================
 //
+// class TrendMarks
+//
+
+unsigned trend::TrendMarks::total_points()
+{
+   return ( _refMarks.size()
+          + _textMarks.size()
+          + _arefMarks.size()
+          );
+}
+//=============================================================================
+//
 // class TrendBase
 //
 trend::TrendBase::TrendBase( layprop::DrawProperties* drawprop, real UU ) :

@@ -74,6 +74,12 @@ namespace trend {
          virtual void      setLine(layprop::DrawProperties*, bool);
    };
 
+   class ToshaderMarks : public TenderMarks {
+      public:
+                           ToshaderMarks() : TenderMarks() {}
+         virtual void      draw(layprop::DrawProperties*);
+   };
+
    class Toshader : public Tenderer {
       public:
                            Toshader( layprop::DrawProperties*, real UU);

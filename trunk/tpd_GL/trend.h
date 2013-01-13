@@ -183,9 +183,11 @@ namespace trend {
          void                   getProgramsLog(GLint);
          std::string            _fnShdrVertex;
          std::string            _fnShdrGeometry;
+         std::string            _fnShdrGeSprite;
          std::string            _fnShdrFragment;
          GLint                  _idShdrVertex;
          GLint                  _idShdrGeometry;
+         GLint                  _idShdrGeSprite;
          GLint                  _idShdrFragment;
          GlslProgramIDs         _idPrograms;
          GlslUniVarAllNames     _glslUniVarNames;
