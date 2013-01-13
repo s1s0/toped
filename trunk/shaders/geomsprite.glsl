@@ -28,28 +28,31 @@
 #version 330
 
 layout(points) in;
-layout(triangle_strip, max_vertices=4) out;
 
 uniform vec2  in_ScreenSize;
-uniform float ShSize = 14;
+uniform float ShSize = 15;
+layout(triangle_strip, max_vertices=4) out;
 
-//noperspective out vec4 gl_Position;//patternCoord;
-
+noperspective out vec2 markCoord;
 void main()
 {
    float sizeX = ShSize / in_ScreenSize.x ;
    float sizeY = ShSize / in_ScreenSize.y ;
 
-   gl_Position = gl_in[0].gl_Position + vec4(-sizeX, 0.0, 0.0, 0.0);
+   gl_Position = gl_in[0].gl_Position + vec4(-sizeX, -sizeY, 0.0, 0.0);
+   markCoord = vec2(0,0);
    EmitVertex();
    
-   gl_Position = gl_in[0].gl_Position + vec4(0.0, -sizeY, 0.0, 0.0);
+   gl_Position = gl_in[0].gl_Position + vec4(sizeX, -sizeY, 0.0, 0.0);
+   markCoord = vec2(ShSize,0);
    EmitVertex();
 
-   gl_Position = gl_in[0].gl_Position + vec4(0.0, sizeY, 0.0, 0.0);
+   gl_Position = gl_in[0].gl_Position + vec4(sizeX, sizeY, 0.0, 0.0);
+   markCoord = uvec2(ShSize,ShSize);
    EmitVertex();
 
-   gl_Position = gl_in[0].gl_Position + vec4(sizeX, 0.0, 0.0, 0.0);
+   gl_Position = gl_in[0].gl_Position + vec4(-sizeX, sizeY, 0.0, 0.0);
+   markCoord = vec2(0,ShSize);
    EmitVertex();
 
    EndPrimitive();

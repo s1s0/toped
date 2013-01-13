@@ -78,6 +78,8 @@ namespace trend {
       public:
                            ToshaderMarks() : TenderMarks() {}
          virtual void      draw(layprop::DrawProperties*);
+      private:
+         void              setStipple(const byte*);
    };
 
    class Toshader : public Tenderer {

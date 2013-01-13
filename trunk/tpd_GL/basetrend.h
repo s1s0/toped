@@ -184,6 +184,7 @@ namespace trend {
                        , glslu_in_LStipple
                        , glslu_in_StippleEn
                        , glslu_in_LStippleEn
+                       , glslu_in_MStippleEn
                        , glslu_in_ScreenSize
                        , glslu_in_PatScale
                       };
@@ -596,10 +597,6 @@ namespace trend {
          void              addTextMark(const TP& p, const CTM& ctm) {_textMarks.push_back(p*ctm);}
          void              addARefMark(const TP& p, const CTM& ctm) {_arefMarks.push_back(p*ctm);}
          unsigned          total_points();
-//         bool              empty() {   return ( _refMarks.empty()
-//                                             && _textMarks.empty()
-//                                             && _arefMarks.empty()
-//                                             );}
          virtual void      draw(layprop::DrawProperties*) = 0;
          virtual void      collect(GLuint)  { assert(false);}
       protected:

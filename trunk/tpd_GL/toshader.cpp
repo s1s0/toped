@@ -362,15 +362,45 @@ void trend::ToshaderMarks::draw(layprop::DrawProperties* drawprop)
    glEnableVertexAttribArray(TSHDR_LOC_VERTEX);
    // Set-up the offset in the binded Vertex buffer
    glVertexAttribPointer(TSHDR_LOC_VERTEX, 2, TNDR_GLENUMT, GL_FALSE, 0, 0);
-   // ... and here we go ...
-//   if (0 < (_alvrtxs + _asindxs))
-//   {
-//      assert(_firstvx); assert(_sizesvx);
-      glDrawArrays(GL_POINTS, 0, total_points());
-//   }
+   unsigned start = 0;
+   unsigned size = _refMarks.size();
+   if (0 < size)
+   {
+      setStipple(drawprop->ref_mark_bmp());
+      glDrawArrays(GL_POINTS, start, size);
+      start += size;
+   }
+   if (0 < (size = _textMarks.size()) )
+   {
+      setStipple(drawprop->text_mark_bmp());
+      glDrawArrays(GL_POINTS, start, size);
+      start += size;
+   }
+   if (0 < (size = _arefMarks.size()) )
+   {
+      setStipple(drawprop->aref_mark_bmp());
+      glDrawArrays(GL_POINTS, start, size);
+   }
    glDisableVertexAttribArray(TSHDR_LOC_VERTEX);
-   //glDisableClientState(GL_VERTEX_ARRAY);
 
+}
+
+void trend::ToshaderMarks::setStipple(const byte* markStipple)
+{
+   // the matrix above must be converted to something suitable by the shader
+   // the size of the array below should be 32 of course. The AMD platform however
+   // behaves in a weird way, so the simplest workaround is to to expand the
+   // array with one and to bind the first one to 0. The bug was reported here:
+   // http://devgurus.amd.com/thread/160053
+   // Note that the fragment shader is updated accordingly.
+   GLuint shdrStipple [33];
+   shdrStipple[0] = 0;
+   for (unsigned i = 0; i < 16; i++)
+      shdrStipple[i+1] = ((GLuint)(markStipple[2*i + 0]) << 8*1)
+                       | ((GLuint)(markStipple[2*i + 1]) << 8*0);
+   for (unsigned i = 16; i < 32; i++)
+      shdrStipple[i+1] = 0;
+   glUniform1uiv(TRENDC->getUniformLoc(glslu_in_Stipple), 33, shdrStipple);
 }
 
 //=============================================================================
@@ -490,9 +520,9 @@ void trend::Toshader::setStipple()
       shdrStipple[0] = 0;
       for (unsigned i = 0; i < 32; i++)
          shdrStipple[i+1] = ((GLuint)(tellStipple[4*i + 0]) << 8*3)
-                        | ((GLuint)(tellStipple[4*i + 1]) << 8*2)
-                        | ((GLuint)(tellStipple[4*i + 2]) << 8*1)
-                        | ((GLuint)(tellStipple[4*i + 3]) << 8*0);
+                          | ((GLuint)(tellStipple[4*i + 1]) << 8*2)
+                          | ((GLuint)(tellStipple[4*i + 2]) << 8*1)
+                          | ((GLuint)(tellStipple[4*i + 3]) << 8*0);
       glUniform1uiv(TRENDC->getUniformLoc(glslu_in_Stipple), 33, shdrStipple);
       glUniform1ui(TRENDC->getUniformLoc(glslu_in_StippleEn), 1);
    }
@@ -563,8 +593,9 @@ void trend::Toshader::draw()
    if (0 < _marks->total_points())
    {
       TRENDC->setGlslProg(glslp_PS);
-      glUniform1ui(TRENDC->getUniformLoc(glslu_in_StippleEn), 0);
+      glUniform1ui(TRENDC->getUniformLoc(glslu_in_StippleEn) , 0);
       glUniform1ui(TRENDC->getUniformLoc(glslu_in_LStippleEn), 0);
+      glUniform1ui(TRENDC->getUniformLoc(glslu_in_MStippleEn), 1);
       setColor(REF_LAY_DEF);
       float mtrxOrtho [16];
       _drawprop->topCtm().oglForm(mtrxOrtho);
