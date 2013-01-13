@@ -544,7 +544,7 @@ void trend::Tolder::draw()
    // draw reference boxes
    if (0 < _refLayer->total_points())  _refLayer->draw(_drawprop);
    // draw marks
-   if (!_marks->empty())                _marks->draw(_drawprop);
+   if (0 < _marks->total_points()   )  _marks->draw(_drawprop);
    checkOGLError("draw");
 }
 

@@ -188,8 +188,9 @@ namespace trend {
                        , glslu_in_PatScale
                       };
    enum glsl_Programs { glslp_NULL
-                       ,glslp_VF
-                       ,glslp_VG
+                       ,glslp_VF  //! Vertex and Fragment (default)
+                       ,glslp_VG  //! Vertex Geometry and Fragment (line stipple)
+                       ,glslp_PS  //! Vertex Geometry and Fragment (point sprites)
                       };
    //! The actual location of all uniform variables in the shaders after glLinkProgram
    typedef std::map<glsl_Uniforms, GLint>           GlslUniVarLoc;
@@ -594,11 +595,13 @@ namespace trend {
          void              addRefMark (const TP& p, const CTM& ctm) {_refMarks.push_back(p*ctm);}
          void              addTextMark(const TP& p, const CTM& ctm) {_textMarks.push_back(p*ctm);}
          void              addARefMark(const TP& p, const CTM& ctm) {_arefMarks.push_back(p*ctm);}
-         bool              empty() {   return ( _refMarks.empty()
-                                             && _textMarks.empty()
-                                             && _arefMarks.empty()
-                                             );}
+         unsigned          total_points();
+//         bool              empty() {   return ( _refMarks.empty()
+//                                             && _textMarks.empty()
+//                                             && _arefMarks.empty()
+//                                             );}
          virtual void      draw(layprop::DrawProperties*) = 0;
+         virtual void      collect(GLuint)  { assert(false);}
       protected:
          typedef std::list<TP> PointList;
          PointList         _refMarks;

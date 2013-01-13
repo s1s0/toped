@@ -102,8 +102,11 @@ namespace trend {
 
    class TenderMarks : public TrendMarks {
       public:
-                           TenderMarks() : TrendMarks() {}
+                           TenderMarks();
          virtual void      draw(layprop::DrawProperties*);
+         virtual void      collect(GLuint);
+      protected:
+         GLuint            _pbuffer;
    };
 
    /**

@@ -491,9 +491,11 @@ void trend::ToshaderGlfFont::drawString(const std::string& text, bool fill, layp
 trend::Shaders::Shaders() :
    _fnShdrVertex     ( "vertex.glsl"      ),
    _fnShdrGeometry   ( "geometry.glsl"    ),
+   _fnShdrGeSprite   ( "geomsprite.glsl"  ),
    _fnShdrFragment   ( "fragment.glsl"    ),
    _idShdrVertex     ( -1                 ),
    _idShdrGeometry   ( -1                 ),
+   _idShdrGeSprite   ( -1                 ),
    _idShdrFragment   ( -1                 ),
    _curProgram       ( glslp_NULL         ),
    _status           ( true               )
@@ -508,7 +510,6 @@ trend::Shaders::Shaders() :
    _glslUniVarNames[glslp_VF][glslu_in_StippleEn]  = "in_StippleEn";
    _glslUniVarNames[glslp_VF][glslu_in_LStippleEn] = "in_LStippleEn";
 
-
    _glslUniVarNames[glslp_VG][glslu_in_CTM]        = "in_CTM";
    _glslUniVarNames[glslp_VG][glslu_in_Z]          = "in_Z";
    _glslUniVarNames[glslp_VG][glslu_in_Color]      = "in_Color";
@@ -519,9 +520,20 @@ trend::Shaders::Shaders() :
    _glslUniVarNames[glslp_VG][glslu_in_LStippleEn] = "in_LStippleEn";
    _glslUniVarNames[glslp_VG][glslu_in_ScreenSize] = "in_ScreenSize";
    _glslUniVarNames[glslp_VG][glslu_in_PatScale]   = "in_PatScale";
+
+   _glslUniVarNames[glslp_PS][glslu_in_CTM]        = "in_CTM";
+   _glslUniVarNames[glslp_PS][glslu_in_Z]          = "in_Z";
+   _glslUniVarNames[glslp_PS][glslu_in_Color]      = "in_Color";
+   _glslUniVarNames[glslp_PS][glslu_in_Alpha]      = "in_Alpha";
+   _glslUniVarNames[glslp_PS][glslu_in_Stipple]    = "in_Stipple";
+   _glslUniVarNames[glslp_PS][glslu_in_LStipple]   = "in_LStipple";
+   _glslUniVarNames[glslp_PS][glslu_in_StippleEn]  = "in_StippleEn";
+   _glslUniVarNames[glslp_PS][glslu_in_LStippleEn] = "in_LStippleEn";
+   _glslUniVarNames[glslp_PS][glslu_in_ScreenSize] = "in_ScreenSize";
    //
    _idPrograms[glslp_VF] = -1;
    _idPrograms[glslp_VG] = -1;
+   _idPrograms[glslp_PS] = -1;
 }
 
 void trend::Shaders::useProgram(const glsl_Programs pType)
@@ -529,7 +541,9 @@ void trend::Shaders::useProgram(const glsl_Programs pType)
    _curProgram = pType;
    assert(-1 != _idPrograms[_curProgram]);
    glUseProgram(_idPrograms[pType]);
-   if (glslp_VG == _curProgram)
+   if (  (glslp_VG == _curProgram)
+       ||(glslp_PS == _curProgram)
+       )
    {
       // view port
       GLfloat vport[4];
@@ -553,14 +567,17 @@ void trend::Shaders::loadShadersCode(const std::string& codeDirectory)
 {
    _fnShdrVertex   = codeDirectory + _fnShdrVertex;
    _fnShdrGeometry = codeDirectory + _fnShdrGeometry;
+   _fnShdrGeSprite = codeDirectory + _fnShdrGeSprite;
    _fnShdrFragment = codeDirectory + _fnShdrFragment;
    if(  (_status &= compileShader(_fnShdrVertex  , _idShdrVertex  , GL_VERTEX_SHADER  ))
       &&(_status &= compileShader(_fnShdrGeometry, _idShdrGeometry, GL_GEOMETRY_SHADER))
+      &&(_status &= compileShader(_fnShdrGeSprite, _idShdrGeSprite, GL_GEOMETRY_SHADER))
       &&(_status &= compileShader(_fnShdrFragment, _idShdrFragment, GL_FRAGMENT_SHADER))
      )
    {
       _status &= linkProgram(glslp_VF);
       _status &= linkProgram(glslp_VG);
+      _status &= linkProgram(glslp_PS);
    }
 }
 
@@ -590,6 +607,14 @@ bool trend::Shaders::linkProgram(const glsl_Programs pType)
          glAttachShader(program, _idShdrGeometry);
          glAttachShader(program, _idShdrFragment);
          info << "GLSL program VG";
+         break;
+      }
+      case glslp_PS:
+      {
+         glAttachShader(program, _idShdrVertex  );
+         glAttachShader(program, _idShdrGeSprite);
+         glAttachShader(program, _idShdrFragment);
+         info << "GLSL program PS";
          break;
       }
       default: assert(false); break;

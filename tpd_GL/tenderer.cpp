@@ -718,8 +718,46 @@ trend::TenderRefLay::~TenderRefLay()
 
 //=============================================================================
 //
-// class TolderMarks
+// class TenderMarks
 //
+
+trend::TenderMarks::TenderMarks() :
+    TrendMarks    (      ),
+   _pbuffer       (   0u )
+{
+}
+
+void trend::TenderMarks::collect(GLuint pbuf)
+{
+   TNDR_GLDATAT* cpoint_array = NULL;
+   _pbuffer = pbuf;
+   glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
+   glBufferData(GL_ARRAY_BUFFER              ,
+                2 * total_points() * sizeof(TNDR_GLDATAT) ,
+                NULL                         ,
+                GL_DYNAMIC_DRAW               );
+   cpoint_array = (TNDR_GLDATAT*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+
+   unsigned pntindx = 0;
+   for (PointList::const_iterator CP = _refMarks.begin(); CP != _refMarks.end(); CP++)
+   {
+      cpoint_array[pntindx++] = (TNDR_GLDATAT) CP->x();
+      cpoint_array[pntindx++] = (TNDR_GLDATAT) CP->y();
+   }
+   for (PointList::const_iterator CP = _textMarks.begin(); CP != _textMarks.end(); CP++)
+   {
+      cpoint_array[pntindx++] = (TNDR_GLDATAT) CP->x();
+      cpoint_array[pntindx++] = (TNDR_GLDATAT) CP->y();
+   }
+   for (PointList::const_iterator CP = _arefMarks.begin(); CP != _arefMarks.end(); CP++)
+   {
+      cpoint_array[pntindx++] = (TNDR_GLDATAT) CP->x();
+      cpoint_array[pntindx++] = (TNDR_GLDATAT) CP->y();
+   }
+   assert(pntindx == 2 * total_points());
+   // Unmap the buffers
+   glUnmapBuffer(GL_ARRAY_BUFFER);
+}
 
 void trend::TenderMarks::draw(layprop::DrawProperties* drawprop)
 {
@@ -905,7 +943,8 @@ bool trend::Tenderer::collect()
    }
    _clayer = NULL;
    if (0 < _refLayer->total_points())  _num_ogl_buffers ++; // reference boxes
-   if (0 < num_total_slctdx      )     _num_ogl_buffers++;  // selected
+   if (0 < _marks->total_points()   )  _num_ogl_buffers ++; // reference marks
+   if (0 < num_total_slctdx      )     _num_ogl_buffers ++;  // selected
    // Check whether we have to continue after traversing
    if (0 == _num_ogl_buffers)
    {
@@ -960,6 +999,13 @@ bool trend::Tenderer::collect()
       GLuint pbuf = _ogl_buffers[current_buffer++];
       _refLayer->collect(pbuf);
    }
+   // collect reference marks
+   if (0 < _marks->total_points())
+   {
+      GLuint pbuf = _ogl_buffers[current_buffer++];
+      _marks->collect(pbuf);
+   }
+
    //
    // that's about it...
    checkOGLError("collect");
@@ -1095,7 +1141,7 @@ void trend::Tenderer::draw()
    // draw reference boxes
    if (0 < _refLayer->total_points())   _refLayer->draw(_drawprop);
    // draw marks
-   if (!_marks->empty())                _marks->draw(_drawprop);
+   if (0 < _marks->total_points()   )   _marks->draw(_drawprop);
 
    checkOGLError("draw");
 }

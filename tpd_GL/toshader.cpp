@@ -346,7 +346,32 @@ trend::ToshaderRefLay::~ToshaderRefLay()
 {
 }
 
+//=============================================================================
+//
+// class ToshaderMarks
+//
+void trend::ToshaderMarks::draw(layprop::DrawProperties* drawprop)
+{
+   // Bind the buffer
+   glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
+   // Check the state of the buffer
+   GLint bufferSize;
+   glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
+   assert(bufferSize == (GLint)(2 * total_points() * sizeof(TNDR_GLDATAT)));
 
+   glEnableVertexAttribArray(TSHDR_LOC_VERTEX);
+   // Set-up the offset in the binded Vertex buffer
+   glVertexAttribPointer(TSHDR_LOC_VERTEX, 2, TNDR_GLENUMT, GL_FALSE, 0, 0);
+   // ... and here we go ...
+//   if (0 < (_alvrtxs + _asindxs))
+//   {
+//      assert(_firstvx); assert(_sizesvx);
+      glDrawArrays(GL_POINTS, 0, total_points());
+//   }
+   glDisableVertexAttribArray(TSHDR_LOC_VERTEX);
+   //glDisableClientState(GL_VERTEX_ARRAY);
+
+}
 
 //=============================================================================
 //
@@ -356,6 +381,7 @@ trend::Toshader::Toshader( layprop::DrawProperties* drawprop, real UU) :
     Tenderer             (drawprop, UU, false )
 {
    _refLayer = DEBUG_NEW ToshaderRefLay();
+   _marks    = DEBUG_NEW ToshaderMarks();
 }
 
 bool trend::Toshader::chunkExists(const LayerDef& laydef, bool has_selected)
@@ -524,7 +550,7 @@ void trend::Toshader::draw()
       }
    }
    // draw reference boxes
-   if (0 < _refLayer->total_points())   
+   if (0 < _refLayer->total_points())
    {
       setColor(REF_LAY_DEF);
       setLine(false);
@@ -533,6 +559,19 @@ void trend::Toshader::draw()
       glUniformMatrix4fv(TRENDC->getUniformLoc(glslu_in_CTM), 1, GL_FALSE, mtrxOrtho);
       _refLayer->draw(_drawprop);
    }
+   // draw reference marks
+   if (0 < _marks->total_points())
+   {
+      TRENDC->setGlslProg(glslp_PS);
+      glUniform1ui(TRENDC->getUniformLoc(glslu_in_StippleEn), 0);
+      glUniform1ui(TRENDC->getUniformLoc(glslu_in_LStippleEn), 0);
+      setColor(REF_LAY_DEF);
+      float mtrxOrtho [16];
+      _drawprop->topCtm().oglForm(mtrxOrtho);
+      glUniformMatrix4fv(TRENDC->getUniformLoc(glslu_in_CTM), 1, GL_FALSE, mtrxOrtho);
+      _marks->draw(_drawprop);
+   }
+
    checkOGLError("draw");
    _drawprop->clearCtmStack();
 }
