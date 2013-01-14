@@ -9,17 +9,6 @@ SUBDIRS_MAIN = ui                                         \
                fonts                                      \
                icons                                      \
                tll                                        \
-               tll/user_functions                         \
-               tll/user_functions/config                  \
-               tll/user_functions/devices                 \
-               tll/user_functions/technology/             \
-               tll/user_functions/technology/mosis_SCMOS_p2m6 \
-               tll/user_functions/test/                   \
-               tll/user_functions/general                 \
-               tll/user_functions/general/examples        \
-               tll/user_functions/tools                   \
-               tll/user_functions/tools/logos             \
-               tll/user_functions/tools/logos/examples    \
                utils/cadence
 if UTILS
    SUBDIRS =   $(SUBDIRS_MAIN)                 \
