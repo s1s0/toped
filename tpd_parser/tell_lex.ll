@@ -51,7 +51,7 @@ lxt_E             [Ee][-+]?{lxt_D}+
 #include "ted_prompt.h"
 
 /* Definitions for handling multiply input buffers */
-#define MAX_INCLUDE_DEPTH 10
+#define MAX_INCLUDE_DEPTH 100
 parsercmd::lexer_files* include_stack[MAX_INCLUDE_DEPTH];
 int include_stack_ptr = 0;
 /*Global console object*/
