@@ -130,15 +130,5 @@ AC_CONFIG_FILES([
    tll/Makefile
 ])
 
-AM_COND_IF([UTILS],
-           [AC_SUBST(TOP_GDS2VRML_SRCDIR,   ['$(top_srcdir)/'"utils/gds2vrml_v0.3"]  )
-            AC_SUBST(TOP_GDS2VRML_BUILDDIR, ['$(top_builddir)/'"utils/gds2vrml_v0.3"])
-            AC_CONFIG_FILES([
-              utils/gds2vrml_v0.3/libgdsto3d/Makefile
-              utils/gds2vrml_v0.3/src/Makefile
-            ])
-           ]
-)
-
 AC_OUTPUT
 
