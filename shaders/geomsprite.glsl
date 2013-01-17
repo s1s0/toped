@@ -30,7 +30,7 @@
 layout(points) in;
 
 uniform vec2  in_ScreenSize;
-uniform float ShSize = 15;
+uniform float ShSize = 16;
 layout(triangle_strip, max_vertices=4) out;
 
 noperspective out vec2 markCoord;
@@ -47,12 +47,12 @@ void main()
    markCoord = vec2(ShSize,0);
    EmitVertex();
 
-   gl_Position = gl_in[0].gl_Position + vec4(sizeX, sizeY, 0.0, 0.0);
-   markCoord = uvec2(ShSize,ShSize);
-   EmitVertex();
-
    gl_Position = gl_in[0].gl_Position + vec4(-sizeX, sizeY, 0.0, 0.0);
    markCoord = vec2(0,ShSize);
+   EmitVertex();
+
+   gl_Position = gl_in[0].gl_Position + vec4(sizeX, sizeY, 0.0, 0.0);
+   markCoord = vec2(ShSize,ShSize);
    EmitVertex();
 
    EndPrimitive();
