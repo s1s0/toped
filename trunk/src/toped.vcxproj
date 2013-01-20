@@ -80,6 +80,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(TPD_DEV)\wxWidgets\lib\vc_lib\mswu;$(IncludePath);$(TPD_DEV)\wxWidgets\include;$(TPD_DEV)\glew\include</IncludePath>
+    <LibraryPath>$(TPD_DEV)\glew\lib64;$(TPD_DEV)\wxWidgets\lib\vc_lib64;$(VCInstallDir)lib\amd64;$(VCInstallDir)atlmfc\lib\amd64;$(WindowsSDK_LibraryPath_x64);</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
@@ -91,7 +92,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(TPD_DEV)\wxWidgets\lib\vc_lib\mswud;$(IncludePath);$(TPD_DEV)\wxWidgets\include;$(TPD_DEV)\glew\include</IncludePath>
-    <LibraryPath>$(TPD_DEV)\glew\lib;$(TPD_DEV)\wxWidgets\lib\vc_lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(TPD_DEV)\glew\lib64;$(TPD_DEV)\wxWidgets\lib\vc_lib64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>
