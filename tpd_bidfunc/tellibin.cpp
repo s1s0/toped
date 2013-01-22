@@ -726,6 +726,18 @@ void tellstdfunc::echoWrapper(telldata::TellVar* p, std::ostringstream& ost)
       }
 
    }
+   else if (telldata::tn_usertypes <= p->get_type())
+   {
+      telldata::TtUserStruct* wvar = static_cast<telldata::TtUserStruct*>(p);
+      ost << "struct members:{\n";
+      for (telldata::recfieldsNAME::const_iterator CI = wvar->fieldList().begin(); CI != wvar->fieldList().end(); CI++)
+      {
+         ost << CI->first << ": ";
+         echoWrapper(CI->second, ost);
+         ost << "\n";
+      }
+      ost << "}";
+   }
    else switch (p->get_type())
    {
       case telldata::tn_NULL      :assert(false);break;
@@ -789,18 +801,6 @@ void tellstdfunc::echoWrapper(telldata::TellVar* p, std::ostringstream& ost)
             ost << "NULL";
          else
             ost << "pointing to <TODO> function";
-         break;
-      }
-      case telldata::tn_usertypes:
-      {
-         telldata::TtUserStruct* wvar = static_cast<telldata::TtUserStruct*>(p);
-         ost << "struct members:\n";
-         for (telldata::recfieldsNAME::const_iterator CI = wvar->fieldList().begin(); CI != wvar->fieldList().end(); CI++)
-         {
-            ost << CI->first << ": ";
-            echoWrapper(CI->second, ost);
-            ost << "\n";
-         }
          break;
       }
       case telldata::tn_pnt:
