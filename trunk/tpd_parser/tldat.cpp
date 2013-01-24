@@ -397,12 +397,10 @@ bool telldata::TtList::part_assign(dword index1, dword index2, const TtList* rva
 void telldata::TtList::resize(unsigned num, TellVar* initVar)
 {
    _mlist.resize(num);
-   for (unsigned i = 0; i < num; i++)
+   for (unsigned long i = 0; i < num; i++)
    {
-//      if (NULL == _mlist[i])
-         _mlist[i] = initVar->selfcopy();
+      _mlist[i] = initVar->selfcopy();
    }
-   delete initVar;
 }
 
 bool telldata::TtList::validIndex(dword index)
