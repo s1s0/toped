@@ -418,7 +418,7 @@ namespace  parsercmd {
    class cmdLISTSIZE:public cmdVIRTUAL {
    public:
                   cmdLISTSIZE(telldata::TellVar* var);
-      virtual    ~cmdLISTSIZE() {}
+      virtual    ~cmdLISTSIZE();
       virtual int execute();
    protected:
       telldata::TellVar*  _var;

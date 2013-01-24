@@ -952,6 +952,10 @@ int parsercmd::cmdLISTSIZE::execute()
    return EXEC_NEXT;
 }
 
+parsercmd::cmdLISTSIZE::~cmdLISTSIZE()
+{
+   delete _initVar;
+}
 //=============================================================================
 int parsercmd::cmdASSIGN::execute()
 {
