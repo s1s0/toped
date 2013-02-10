@@ -120,8 +120,8 @@ namespace Oasis {
    /*! The enum values correspond to the Path Extenstion Shemes as defined in the
        standard for SS and EE bits (27.8, Table 15) The last member ex_unknown is
        added to maintain proper state in the Oasis::PathExtensions which in turn
-       is used as a base class of Cell::_mod_exs /path-start-extention/ and
-       Cell::_mod_exe /path-end-extention/ modal variables
+       is used as a base class of Cell::_mod_exs /path-start-extension/ and
+       Cell::_mod_exe /path-end-extension/ modal variables
    */
    typedef enum { ex_reuse         = 0 ,
                   ex_flush         = 1 ,
