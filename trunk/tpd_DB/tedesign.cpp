@@ -1736,7 +1736,7 @@ WordList laydata::DrcLibrary::findSelected(const std::string &cell, TP* p1)
    TdtCell* theCell = dynamic_cast<TdtCell*>(checkCell(cell));
    TP selp;
    WordList errorList;
-   laydata::AtticList* shapes;
+   laydata::AtticList* shapes = NULL;
    laydata::ShapeList *shapeList;
    TdtData *shape;
    if (theCell)

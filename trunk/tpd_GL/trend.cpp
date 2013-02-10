@@ -729,7 +729,7 @@ void trend::Shaders::getShadersLog(GLint idShader)
       infoLog = DEBUG_NEW GLchar[lenInfoLog];
       glGetShaderInfoLog(idShader, lenInfoLog, &lenFetched, infoLog);
       tell_log(console::MT_INFO,infoLog);
-      delete infoLog;
+      delete [] infoLog;
    }
 }
 
@@ -746,7 +746,7 @@ void trend::Shaders::getProgramsLog(GLint idProgram)
       infoLog = DEBUG_NEW GLchar[lenInfoLog];
       glGetProgramInfoLog(idProgram, lenInfoLog, &lenFetched, infoLog);
       tell_log(console::MT_INFO,infoLog);
-      delete infoLog;
+      delete [] infoLog;
    }
 }
 
