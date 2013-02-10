@@ -1345,7 +1345,7 @@ void tui::TopedFrame::OnCellPrev(wxCommandEvent& WXUNUSED(event))
 
 
 void tui::TopedFrame::OnGDStranslate(wxCommandEvent& WXUNUSED(event)) {
-   bool success;
+   bool success = false;
    wxString ost;
    wxRect wnd = GetRect();
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);
