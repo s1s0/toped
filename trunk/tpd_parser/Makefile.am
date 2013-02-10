@@ -21,6 +21,7 @@ BUILT_SOURCES   = tell_yacc.h
 AM_YFLAGS       = -p tell -d -y -v
 AM_LFLAGS       = -Ptell
 LEX_OUTPUT_ROOT = lex.tell
+CLEANFILES      = tell_yacc.output tell_yacc.h tell_yacc.cc tell_lex.cc
 
 ###############################################################################
 INCLUDES =                                                                    \

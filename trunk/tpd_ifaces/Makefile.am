@@ -23,6 +23,7 @@ BUILT_SOURCES   = cif_yacc.h
 AM_YFLAGS       = -p cif -d -y -v
 AM_LFLAGS       = -Pcif
 LEX_OUTPUT_ROOT = lex.cif
+CLEANFILES      = cif_yacc.output cif_yacc.h cif_yacc.cc cif_lex.cc
 
 ###############################################################################
 INCLUDES =                                                                    \
