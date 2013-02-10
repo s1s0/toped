@@ -1836,8 +1836,8 @@ void Oasis::Cell::readExtensions(OasisInFile& ofn)
 {
    byte scheme = ofn.getByte();
    if (scheme & 0xF0)
-      ofn.exception("Bad extention type (27.? - not explicitly ruled-out)");
-   // deal with the start extenstion
+      ofn.exception("Bad extension type (27.? - not explicitly ruled-out)");
+   // deal with the start extension
    byte extype = (scheme & 0x0c) >> 2;
    if (0 != extype)
    {
