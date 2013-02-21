@@ -624,7 +624,8 @@ namespace trend {
       public:
                            TrendBase( layprop::DrawProperties* drawprop, real UU );
          virtual          ~TrendBase();
-         virtual void      grid( const real, const std::string ) = 0;
+         virtual void      gridDraw() = 0;
+         bool              gridCalc(const real, const std::string, byte);
          virtual void      zeroCross( ) = 0;
          virtual void      setLayer(const LayerDef&, bool) = 0;
          virtual void      setHvrLayer(const LayerDef&) = 0;
@@ -679,6 +680,16 @@ namespace trend {
          bool              adjustTextOrientation() const {return _drawprop->adjustTextOrientation();}
          layprop::DrawProperties*&   drawprop()          {return _drawprop                         ;}
       protected:
+         struct GridSet {
+                        GridSet(unsigned size = 0, int* array = NULL, std::string color="") :
+                           _size   ( size   ),
+                           _array  ( array  ),
+                           _color  ( color  ) {};
+                       ~GridSet() {if (NULL != _array) delete [] _array;}
+            unsigned    _size;
+            int*        _array;
+            std::string _color;
+         };
          virtual void      setColor(const LayerDef& layer) = 0;
          virtual void      setStipple() = 0;
          virtual void      setLine(bool) = 0;
@@ -697,6 +708,7 @@ namespace trend {
          RefBoxList        _hiddenRefBoxes;  //!Those cRefBox objects which didn't ended in the TrendRefLay structures
          TrendMarks*       _marks;           //!All kinds of object marks
          CTM*              _rmm;             //!Reverse motion matrix
+         GridSet           _grids[3];        //!All grid points
    };
 
    void checkOGLError(std::string);

@@ -262,28 +262,20 @@ trend::Tolder::Tolder( layprop::DrawProperties* drawprop, real UU ) :
 }
 
 
-void trend::Tolder::grid( const real step, const std::string color)
+void trend::Tolder::gridDraw()
 {
-   int gridstep = (int)rint(step / _UU);
-   if ( abs((int)(_drawprop->scrCtm().a() * gridstep)) > GRID_LIMIT)
+   glBegin(GL_POINTS);
+   for (byte gridNo = 0; gridNo < 3; gridNo++)
    {
-      layprop::tellRGB theColor(_drawprop->getColor(color));
+      unsigned size = _grids[gridNo]._size;
+      if (0 == size) continue;
+      layprop::tellRGB theColor(_drawprop->getColor(_grids[gridNo]._color));
       glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
-      // set first grid step to be multiply on the step
-      TP bl = TP(_drawprop->clipRegion().p1().x(),_drawprop->clipRegion().p2().y());
-      TP tr = TP(_drawprop->clipRegion().p2().x(),_drawprop->clipRegion().p1().y());
-      int signX = (bl.x() > 0) ? 1 : -1;
-      int X_is = (int)((rint(abs(bl.x()) / gridstep)) * gridstep * signX);
-      int signY = (tr.y() > 0) ? 1 : -1;
-      int Y_is = (int)((rint(abs(tr.y()) / gridstep)) * gridstep * signY);
-
-      //... and finaly draw the grid
-      glBegin(GL_POINTS);
-      for (int i = X_is; i < tr.x()+1; i += gridstep)
-         for (int j = Y_is; j < bl.y()+1; j += gridstep)
-            glVertex2i(i,j);
-      glEnd();
+      int* theArray = _grids[gridNo]._array;
+      for (unsigned i = 0; i < size; i++)
+         glVertex2i(theArray[2*i], theArray[2*i+1]);
    }
+   glEnd();
 }
 
 void trend::Tolder::zeroCross()

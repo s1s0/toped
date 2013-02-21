@@ -862,39 +862,20 @@ void trend::Tenderer::setHvrLayer(const LayerDef& laydef)
    }
 }
 
-void trend::Tenderer::grid(const real step, const std::string color)
+void trend::Tenderer::gridDraw()
 {
-   int gridstep = (int)rint(step / _UU);
-   if ( abs((int)(_drawprop->scrCtm().a() * gridstep)) > GRID_LIMIT)
+   glEnableClientState(GL_VERTEX_ARRAY);
+   for (byte gridNo = 0; gridNo < 3; gridNo++)
    {
-      layprop::tellRGB theColor(_drawprop->getColor(color));
+      unsigned size = _grids[gridNo]._size;
+      if (0 == size) continue;
+      layprop::tellRGB theColor(_drawprop->getColor(_grids[gridNo]._color));
       glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
-      // set first grid step to be multiply on the step
-      TP bl = TP(_drawprop->clipRegion().p1().x(),_drawprop->clipRegion().p2().y());
-      TP tr = TP(_drawprop->clipRegion().p2().x(),_drawprop->clipRegion().p1().y());
-      int signX = (bl.x() > 0) ? 1 : -1;
-      int X_is = (int)((rint(abs(bl.x()) / gridstep)) * gridstep * signX);
-      int signY = (tr.y() > 0) ? 1 : -1;
-      int Y_is = (int)((rint(abs(tr.y()) / gridstep)) * gridstep * signY);
-
-      word arr_size = ( (((tr.x() - X_is + 1) / gridstep) + 1) * (((bl.y() - Y_is + 1) / gridstep) + 1) );
-      int* point_array = DEBUG_NEW int[arr_size * 2];
-      int index = 0;
-      for (int i = X_is; i < tr.x()+1; i += gridstep)
-      {
-         for (int j = Y_is; j < bl.y()+1; j += gridstep)
-         {
-            point_array[index++] = i;
-            point_array[index++] = j;
-         }
-      }
-      assert(index <= (arr_size*2));
-      glEnableClientState(GL_VERTEX_ARRAY);
-      glVertexPointer(2, GL_INT, 0, point_array);
-      glDrawArrays(GL_POINTS, 0, arr_size);
-      glDisableClientState(GL_VERTEX_ARRAY);
-      delete [] point_array;
+      int* theArray = _grids[gridNo]._array;
+      glVertexPointer(2, GL_INT, 0, theArray);
+      glDrawArrays(GL_POINTS, 0, size);
    }
+   glDisableClientState(GL_VERTEX_ARRAY);
 }
 
 void trend::Tenderer::zeroCross()
