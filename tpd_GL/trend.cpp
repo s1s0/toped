@@ -963,11 +963,16 @@ void trend::TrendCenter::drawFOnly()
 void trend::TrendCenter::drawGrid()
 {
    // render the grid
+   bool drawGrid = false;
    for (byte gridNo = 0; gridNo < 3; gridNo++)
    {
       const layprop::LayoutGrid* cgrid = PROPC->grid(gridNo);
       if ((NULL !=  cgrid) && cgrid->visual())
-         _cRenderer->grid(cgrid->step(), cgrid->color());
+         drawGrid |= _cRenderer->gridCalc(cgrid->step(), cgrid->color() , gridNo);
+   }
+   if (drawGrid)
+   {
+      _cRenderer->gridDraw();
    }
 }
 

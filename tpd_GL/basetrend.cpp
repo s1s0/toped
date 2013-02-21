@@ -492,6 +492,34 @@ void trend::TrendBase::setRmm(const CTM& mm)
    _rmm = DEBUG_NEW CTM(mm.Reversed());
 }
 
+bool trend::TrendBase::gridCalc(const real step, const std::string color, byte gridNo)
+{
+   int gridstep = (int)rint(step / _UU);
+   bool gridOn = ( abs((int)(_drawprop->scrCtm().a() * gridstep)) > GRID_LIMIT);
+   if (!gridOn) return false;
+   // set first grid step to be multiply on the step
+   TP bl = TP(_drawprop->clipRegion().p1().x(),_drawprop->clipRegion().p2().y());
+   TP tr = TP(_drawprop->clipRegion().p2().x(),_drawprop->clipRegion().p1().y());
+   int signX = (bl.x() > 0) ? 1 : -1;
+   int X_is = (int)((rint(abs(bl.x()) / gridstep)) * gridstep * signX);
+   int signY = (tr.y() > 0) ? 1 : -1;
+   int Y_is = (int)((rint(abs(tr.y()) / gridstep)) * gridstep * signY);
+
+   unsigned arr_size = ( (((tr.x() - X_is + 1) / gridstep) + 1) * (((bl.y() - Y_is + 1) / gridstep) + 1) );
+   int* point_array = DEBUG_NEW int[arr_size * 2];
+   int index = 0;
+   for (int i = X_is; i < tr.x()+1; i += gridstep)
+   {
+      for (int j = Y_is; j < bl.y()+1; j += gridstep)
+      {
+         point_array[index++] = i;
+         point_array[index++] = j;
+      }
+   }
+   _grids[gridNo] = GridSet(arr_size,point_array,color);
+   return true;
+}
+
 void trend::TrendBase::pushCell(std::string cname, const CTM& trans, const DBbox& overlap, bool active, bool selected)
 {
    TrxCellRef* cRefBox = DEBUG_NEW TrxCellRef(cname,

@@ -118,7 +118,7 @@ namespace trend {
       public:
                            Tenderer( layprop::DrawProperties* , real, bool createRefLay = true);
          virtual          ~Tenderer();
-         virtual void      grid( const real, const std::string );
+         virtual void      gridDraw();
          virtual void      zeroCross();
          virtual void      setLayer(const LayerDef&, bool);
          virtual void      setHvrLayer(const LayerDef&);
