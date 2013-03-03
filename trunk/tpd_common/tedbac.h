@@ -105,9 +105,6 @@ namespace layprop {
    class LayerSettings;
 }
 
-namespace tenderer {
-   class TenderLay;
-}
 namespace trend {
    class TrendLay;
 }
