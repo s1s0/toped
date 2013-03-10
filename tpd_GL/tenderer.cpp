@@ -1169,6 +1169,11 @@ void trend::Tenderer::grcCleanUp()
    TrendBase::grcCleanUp();
 }
 
+void trend::Tenderer::drawRulers(const DBlineList, const DBline& text_bp, const double scaledpix)
+{
+
+}
+
 void trend::Tenderer::setGrcLayer(bool setEData, const LayerDef& laydef)
 {
    if (setEData)

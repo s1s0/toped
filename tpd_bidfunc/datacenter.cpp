@@ -791,7 +791,7 @@ void DataCenter::setRecoverWire(bool rcv)
    unlockTDT(dbLibDir, true);
 }
 
-void DataCenter::render(const CTM& layCTM)
+void DataCenter::render()
 {
    if (_TEDLIB())
    {
@@ -843,7 +843,13 @@ void DataCenter::render(const CTM& layCTM)
             tell_log(console::MT_INFO,std::string("DB busy. Viewport redraw skipped"));
             cRenderer->cleanUp();
          }
-         PROPC->drawRulers(layCTM);
+         // rulers
+         layprop::RulerList const rulers = PROPC->getAllRulers();
+         if (!rulers.empty())
+         {
+            cRenderer->collectRulers(rulers, PROPC->stepDB());
+         }
+
          TRENDC->releaseCRenderer();
       }
    }
@@ -859,7 +865,9 @@ void DataCenter::motionDraw(const CTM& layCTM, TP base, TP newp)
       if ((console::op_line == currentOp) || _drawruler)
       {
          // ruller
-         PROPC->tmp_draw(layCTM, base, newp);
+         layprop::RulerList rulers;
+         rulers.push_back(layprop::SDLine(base, newp, PROPC->stepDB()));
+         mRenderer->collectRulers(rulers,PROPC->stepDB());
       }
       if ((console::op_line != currentOp)  && (NULL !=_TEDLIB()))
       {

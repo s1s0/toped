@@ -367,6 +367,7 @@ typedef  std::vector<TP>         PointVector;
 typedef  std::stack<CTM>         CtmStack;
 typedef  std::deque<CTM>         CtmQueue;
 typedef  std::list<PointVector*> pcollection; // point list collection
+typedef  std::list<DBline>       DBlineList;
 
 
 struct TpdYYLtype {

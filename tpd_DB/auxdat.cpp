@@ -562,11 +562,11 @@ void auxdata::GrcCell::reportLayData(const LayerDef& laydef, AuxDataList& dataLi
 }
 
 /*!
- * Clears all the objects on layer @lay and gathers them in the provided list @recovered.
+ * Clears all the objects on layer @laydef and gathers them in the provided list @recovered.
  * Returns:
  *    1 if the cell is not empty after the operation
  *    0 if the cell is empty after the operation
- *   -1 if the layer @lay does not contain grc data (error condition)
+ *   -1 if the layer @laydef does not contain grc data (error condition)
  */
 char auxdata::GrcCell::cleanLay(const LayerDef& laydef, AuxDataList& recovered)
 {

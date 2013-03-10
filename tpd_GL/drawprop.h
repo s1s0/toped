@@ -116,6 +116,29 @@ namespace layprop {
                   crc_POSTACTIVE = 3  // edit in place mode, and we're in the active cell chain after the active cell
                 } CellRefChainType;
    typedef byte LayMark[32];
+
+   //=============================================================================
+   //
+   //
+   //
+   class SDLine {
+   public:
+                        SDLine(const TP& p1,const TP& p2, const real);
+//      void              draw(const DBline&, const DBline&, const DBline&, const double, const real) const;
+      unsigned          nonius(const DBline&, const DBline&, real, DBlineList& llst) const;
+      void              addBaseLine(DBlineList& llst) const {llst.push_back(_ln);}
+   private:
+      DBline            _ln;
+      std::string       _value;
+      TP                _center;
+      double            _length;
+      real              _sinus;
+      real              _cosinus;
+      real              _angle;
+   };
+   typedef std::list<SDLine> RulerList;
+
+
    //=============================================================================
    //
    //

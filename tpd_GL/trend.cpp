@@ -1020,21 +1020,20 @@ void trend::TrendCenter::drawString(const std::string& text, bool fill, layprop:
    _oglFont[_activeFontName]->drawString(text, fill, drawprop);
 }
 
-void trend::TrendCenter::drawWiredString(const std::string& text)
-{
-   bindFont();
-   _oglFont[_activeFontName]->drawString(text, false,NULL);
-   unbindFont();
-
-}
-
-void trend::TrendCenter::drawSolidString(const std::string& text)
-{
-   bindFont();
-   _oglFont[_activeFontName]->drawString(text, true, NULL);
-   unbindFont();
-
-}
+//void trend::TrendCenter::drawWiredString(const std::string& text)
+//{
+//   bindFont();
+//   _oglFont[_activeFontName]->drawString(text, false,NULL);
+//   unbindFont();
+//
+//}
+//
+//void trend::TrendCenter::drawSolidString(const std::string& text)
+//{
+//   bindFont();
+//   _oglFont[_activeFontName]->drawString(text, true, NULL);
+//   unbindFont();
+//}
 
 bool trend::TrendCenter::selectFont(std::string fname)
 {

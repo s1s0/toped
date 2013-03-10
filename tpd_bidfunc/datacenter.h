@@ -74,7 +74,7 @@ public:
    void                       mouseFlip();
    void                       mouseRotate();
    void                       motionDraw(const CTM&, TP, TP);
-   void                       render(const CTM&);
+   void                       render();
    void                       mouseHooverDraw(TP&);
    void                       setRecoverPoly(bool);
    void                       setRecoverWire(bool);

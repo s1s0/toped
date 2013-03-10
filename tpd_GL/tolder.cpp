@@ -564,6 +564,38 @@ void trend::Tolder::grcCleanUp()
    TrendBase::grcCleanUp();
 }
 
+void trend::Tolder::drawRulers(const DBlineList noni_list, const DBline& text_bp, const double scaledpix)
+{
+   glColor4f((GLfloat)1, (GLfloat)1, (GLfloat)1, (GLfloat)0.7); // gray
+   glDisable(GL_POLYGON_STIPPLE);
+   glBegin(GL_LINES);
+   // draw the nonius and the ruler itself
+   for (DBlineList::const_iterator CL = noni_list.begin(); CL != noni_list.end(); CL++)
+   {
+      glVertex2i(CL->p1().x(),CL->p1().y());
+      glVertex2i(CL->p2().x(),CL->p2().y());
+   }
+   glEnd();
+
+//   CTM tmtrx;
+//   tmtrx.Rotate(_angle);
+//   tmtrx.Translate(_center.x(), _center.y());
+//   DBline central_elevation = text_bp * tmtrx;
+//
+//   glPushMatrix();
+//   glTranslatef(central_elevation.p2().x(), central_elevation.p2().y(), 0);
+//   glScalef(scaledpix, scaledpix, 1);
+//   glRotatef(_angle, 0, 0, 1);
+
+//   TRENDC->drawSolidString(_value);
+
+   glDisable(GL_POLYGON_SMOOTH); //- for solid fill
+   glEnable(GL_POLYGON_STIPPLE);
+//   glPopMatrix();
+
+
+}
+
 trend::Tolder::~Tolder()
 {
 //   delete _refLayer; //>> deleted by the parent destructor

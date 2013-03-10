@@ -661,6 +661,8 @@ namespace trend {
          virtual void      grcDraw() = 0;
          virtual void      cleanUp();
          virtual void      grcCleanUp();
+         void              collectRulers(const layprop::RulerList& rulers, int4b step);
+         virtual void      drawRulers(const DBlineList, const DBline& text_bp, const double scaledpix)=0;
 
          LayerDef          getTenderLay(const LayerDef& laydef)
                                                          {return _drawprop->getTenderLay(laydef)   ;}
@@ -693,6 +695,7 @@ namespace trend {
          virtual void      setColor(const LayerDef& layer) = 0;
          virtual void      setStipple() = 0;
          virtual void      setLine(bool) = 0;
+         void              genRulerMarks (const CTM&, DBline&, DBline&, DBline&, double&);
          layprop::DrawProperties*   _drawprop;
          real              _UU;
          DataLay           _data;            //!All editable data for drawing
