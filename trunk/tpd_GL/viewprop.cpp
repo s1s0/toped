@@ -33,98 +33,8 @@
 #include <iomanip>
 #include "ttt.h"
 #include "outbox.h"
-#include "tenderer.h"
-#include "trend.h"
 
-extern trend::TrendCenter*       TRENDC;
 layprop::PropertyCenter*         PROPC   = NULL;
-
-layprop::SDLine::SDLine(const TP& p1,const TP& p2, const real UU) : _ln(p1,p2)
-{
-   real _A = _ln.p2().y() - _ln.p1().y();
-   real _B = _ln.p1().x() - _ln.p2().x();
-//   real _C = -(_A*_ln.p1().x() + _B*_ln.p1().y());
-   _length = sqrt(_A*_A + _B*_B);
-   std::ostringstream strdist;
-   strdist << _length * UU;
-   _value = strdist.str();
-   _center = TP((_ln.p1().x() + _ln.p2().x()) / 2, (_ln.p1().y() + _ln.p2().y()) / 2 );
-   // get the angle coefficient of the ruler and calculate the corresponding
-   // functions - will be used during the drawing
-   real angle_rad = atan2(_A , -_B);
-   _sinus     = sin(angle_rad);
-   _cosinus   = cos(angle_rad);
-   real w_angle     = angle_rad * 180.0 / M_PI;
-   // normalized_angle
-   _angle = ((w_angle >= 90) || (w_angle < -90)) ? 180 + w_angle : w_angle;
-
-};
-
-void layprop::SDLine::draw(const DBline& long_mark, const DBline& short_mark, const DBline& text_bp, const double scaledpix, const real _step) const
-{
-   // calculate the nonius ticks
-   LineList noni_list;
-   nonius(short_mark, long_mark, _step, noni_list);
-
-   glColor4f((GLfloat)1, (GLfloat)1, (GLfloat)1, (GLfloat)0.7); // gray
-   glDisable(GL_POLYGON_STIPPLE);
-   glBegin(GL_LINES);
-   // draw the nonius ...
-   for (LineList::const_iterator CL = noni_list.begin(); CL != noni_list.end(); CL++)
-   {
-      glVertex2i(CL->p1().x(),CL->p1().y());
-      glVertex2i(CL->p2().x(),CL->p2().y());
-   }
-   // ... and the ruler itself
-   glVertex2i(_ln.p1().x(), _ln.p1().y());
-   glVertex2i(_ln.p2().x(), _ln.p2().y());
-   glEnd();
-
-   CTM tmtrx;
-   tmtrx.Rotate(_angle);
-   tmtrx.Translate(_center.x(), _center.y());
-   DBline central_elevation = text_bp * tmtrx;
-
-   glPushMatrix();
-   glTranslatef(central_elevation.p2().x(), central_elevation.p2().y(), 0);
-   glScalef(scaledpix, scaledpix, 1);
-   glRotatef(_angle, 0, 0, 1);
-
-   TRENDC->drawSolidString(_value);
-
-   glDisable(GL_POLYGON_SMOOTH); //- for solid fill
-   glEnable(GL_POLYGON_STIPPLE);
-   glPopMatrix();
-
-}
-
-unsigned layprop::SDLine::nonius(const DBline& short_mark, const DBline& long_mark,
-                                 const real step, LineList& llst) const
-{
-   // prepare the translation matrix for the edge point
-   CTM tmtrx;
-   tmtrx.Rotate(_angle);
-   tmtrx.Translate(_ln.p1().x(), _ln.p1().y());
-   unsigned numtics;
-   for( numtics = 0 ; (numtics * step) < _length ; numtics++ )
-   {
-      // for each tick - get the deltas ...
-      int4b deltaX = (int4b) rint(numtics * step * _cosinus);
-      int4b deltaY = (int4b) rint(numtics * step * _sinus);
-      // ... calculate the translation ...
-      CTM pmtrx = tmtrx;
-      pmtrx.Translate(deltaX, deltaY);
-      // ... create a new tick and move it to its position
-      if (numtics % 5)
-         llst.push_back(DBline(short_mark * pmtrx));
-      else
-         llst.push_back(DBline(long_mark * pmtrx));
-   }
-   // don't forget the opposite edge point
-   tmtrx.Translate(_ln.p2().x() - _ln.p1().x(), _ln.p2().y() - _ln.p1().y());
-   llst.push_back(DBline(long_mark * tmtrx));
-   return ++numtics;
-}
 
 void layprop::SupplementaryData::addRuler(TP& p1, TP& p2, real UU)
 {
@@ -136,54 +46,6 @@ void layprop::SupplementaryData::clearRulers()
    _rulers.clear();
 }
 
-void layprop::SupplementaryData::drawRulers(const CTM& LayCTM, real step)
-{
-   DBline long_mark, short_mark, text_bp;
-   double scaledpix;
-   getConsts(LayCTM, long_mark, short_mark, text_bp, scaledpix);
-   for(ruler_collection::const_iterator RA = _rulers.begin(); RA != _rulers.end(); RA++)
-      RA->draw(long_mark, short_mark, text_bp, scaledpix, step);
-}
-
-void layprop::SupplementaryData::tmp_draw(const TP& base, const TP& newp, real UU, const CTM& LayCTM, const real _step)
-{
-   if (_tmp_base)
-   {
-      DBline long_mark, short_mark, text_bp;
-      double scaledpix;
-      getConsts(LayCTM, long_mark, short_mark, text_bp, scaledpix);
-      SDLine* tmp_ruler = DEBUG_NEW SDLine(base, newp, UU);
-      tmp_ruler->draw(long_mark, short_mark, text_bp, scaledpix, _step);
-      delete tmp_ruler;
-   }
-}
-
-void layprop::SupplementaryData::getConsts(const CTM& LayCTM, DBline& long_mark, DBline& short_mark, DBline& text_bp, double& scaledpix)
-{
-   // Side ticks (segments) of the rulers has to be with constant size. The next lines
-   // are generating a segment with the size 7/3 screen pixels centered in
-   // the {0,0} point of the canvas (logical coords)
-   // the coeffitients 1e3/1e-3 are picked ramdomly attempting to reduce the
-   // error
-   const double ico = 1e3;
-   const double dco = 1/ico;
-   DBline tick_sample = DBline(TP(0,0),TP(0,7,ico)) * LayCTM;
-   double tick_size = ((double)(tick_sample.p2().y()-tick_sample.p1().y()));
-   long_mark = DBline(TP(0,-tick_size, dco),TP(0,tick_size, dco));
-
-   tick_sample = DBline(TP(0,0),TP(0,3,ico)) * LayCTM;
-   tick_size = ((double)(tick_sample.p2().y()-tick_sample.p1().y()));
-   short_mark = DBline(TP(0,-tick_size, dco),TP(0,tick_size, dco));
-
-   tick_sample = DBline(TP(0,0),TP(0,20,ico)) * LayCTM;
-   tick_size = ((double)(tick_sample.p1().y()-tick_sample.p2().y()));
-   text_bp = DBline(TP(0,0),TP(0,tick_size, dco));
-
-   // now prepare to draw the size
-   DBbox pixelbox = DBbox(TP(),TP(15,15)) * LayCTM;
-   scaledpix = ((double)(pixelbox.p2().x()-pixelbox.p1().x()));
-
-}
 void layprop::SupplementaryData::mousePoint(const TP& bp)
 {
    if (!_tmp_base)

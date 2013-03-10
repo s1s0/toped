@@ -673,6 +673,48 @@ void trend::TrendBase::grcCleanUp()
    }
 }
 
+void trend::TrendBase::collectRulers(const layprop::RulerList& rulers, int4b step)
+{
+   DBline long_mark, short_mark, text_bp;
+   double scaledpix;
+   genRulerMarks(scrCTM().Reversed(), long_mark, short_mark, text_bp, scaledpix);
+
+   DBlineList noni_list;
+   for(layprop::RulerList::const_iterator RA = rulers.begin(); RA != rulers.end(); RA++)
+   {
+      RA->nonius(short_mark, long_mark, step, noni_list);
+      RA->addBaseLine(noni_list);
+   }
+   drawRulers(noni_list, text_bp, scaledpix);
+
+}
+
+void trend::TrendBase::genRulerMarks(const CTM& LayCTM, DBline& long_mark, DBline& short_mark, DBline& text_bp, double& scaledpix)
+{
+   // Side ticks (segments) of the rulers has to be with constant size. The next
+   // lines are generating a segment with the size 7/3 screen pixels centred in
+   // the {0,0} point of the canvas (logical coordinates)
+   // The coefficients 1e3/1e-3 are picked arbitrary in an attempt to reduce the
+   // error
+   const double ico = 1e3;
+   const double dco = 1/ico;
+   DBline tick_sample = DBline(TP(0,0),TP(0,7,ico)) * LayCTM;
+   double tick_size = ((double)(tick_sample.p2().y()-tick_sample.p1().y()));
+   long_mark = DBline(TP(0,-tick_size, dco),TP(0,tick_size, dco));
+
+   tick_sample = DBline(TP(0,0),TP(0,3,ico)) * LayCTM;
+   tick_size = ((double)(tick_sample.p2().y()-tick_sample.p1().y()));
+   short_mark = DBline(TP(0,-tick_size, dco),TP(0,tick_size, dco));
+
+   tick_sample = DBline(TP(0,0),TP(0,20,ico)) * LayCTM;
+   tick_size = ((double)(tick_sample.p1().y()-tick_sample.p2().y()));
+   text_bp = DBline(TP(0,0),TP(0,tick_size, dco));
+
+   // now prepare to draw the size
+   DBbox pixelbox = DBbox(TP(),TP(15,15)) * LayCTM;
+   scaledpix = ((double)(pixelbox.p2().x()-pixelbox.p1().x()));
+}
+
 trend::TrendBase::~TrendBase()
 {
    if (_refLayer) delete _refLayer;

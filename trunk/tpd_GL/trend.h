@@ -210,14 +210,15 @@ namespace trend {
          void                   releaseHRenderer();
          void                   releaseMRenderer();
          void                   drawGrid();
+//         void                   drawRulers();
          void                   drawZeroCross();
          void                   drawFOnly();
          //Font handling
          void                   loadLayoutFont(std::string);
          void                   getStringBounds(const std::string&, DBbox*);
          void                   drawString(const std::string& str, bool fill, layprop::DrawProperties*);
-         void                   drawWiredString(const std::string& str);
-         void                   drawSolidString(const std::string& str);
+//         void                   drawWiredString(const std::string& str);
+//         void                   drawSolidString(const std::string& str);
          bool                   selectFont(std::string str);
          word                   numFonts();
          void                   bindFont();

@@ -29,9 +29,7 @@
 #include <sstream>
 #include <string>
 #include "drawprop.h"
-#include "viewprop.h"
 #include "tuidefs.h"
-
 
 const layprop::tellRGB        layprop::DrawProperties::_dfltColor(127,127,127,127);
 const layprop::LineSettings   layprop::DrawProperties::_dfltLine    ("", 0xffff, 1, 1);
@@ -81,6 +79,93 @@ const layprop::LayMark        layprop::DrawProperties::_aref_mark_bmp = {
       0x08, 0x10, 0x04, 0x20, 0x02, 0x40, 0x01, 0x80
 };
 
+
+layprop::SDLine::SDLine(const TP& p1,const TP& p2, const real UU) : _ln(p1,p2)
+{
+   real _A = _ln.p2().y() - _ln.p1().y();
+   real _B = _ln.p1().x() - _ln.p2().x();
+//   real _C = -(_A*_ln.p1().x() + _B*_ln.p1().y());
+   _length = sqrt(_A*_A + _B*_B);
+   std::ostringstream strdist;
+   strdist << _length * UU;
+   _value = strdist.str();
+   _center = TP((_ln.p1().x() + _ln.p2().x()) / 2, (_ln.p1().y() + _ln.p2().y()) / 2 );
+   // get the angle coefficient of the ruler and calculate the corresponding
+   // functions - will be used during the drawing
+   real angle_rad = atan2(_A , -_B);
+   _sinus     = sin(angle_rad);
+   _cosinus   = cos(angle_rad);
+   real w_angle     = angle_rad * 180.0 / M_PI;
+   // normalized_angle
+   _angle = ((w_angle >= 90) || (w_angle < -90)) ? 180 + w_angle : w_angle;
+
+};
+
+//void layprop::SDLine::draw(const DBline& long_mark, const DBline& short_mark, const DBline& text_bp, const double scaledpix, const real _step) const
+//{
+//   // calculate the nonius ticks
+//   DBlineList noni_list;
+//   nonius(short_mark, long_mark, _step, noni_list);
+//
+//   glColor4f((GLfloat)1, (GLfloat)1, (GLfloat)1, (GLfloat)0.7); // gray
+//   glDisable(GL_POLYGON_STIPPLE);
+//   glBegin(GL_LINES);
+//   // draw the nonius ...
+//   for (DBlineList::const_iterator CL = noni_list.begin(); CL != noni_list.end(); CL++)
+//   {
+//      glVertex2i(CL->p1().x(),CL->p1().y());
+//      glVertex2i(CL->p2().x(),CL->p2().y());
+//   }
+//   // ... and the ruler itself
+//   glVertex2i(_ln.p1().x(), _ln.p1().y());
+//   glVertex2i(_ln.p2().x(), _ln.p2().y());
+//   glEnd();
+//
+//   CTM tmtrx;
+//   tmtrx.Rotate(_angle);
+//   tmtrx.Translate(_center.x(), _center.y());
+//   DBline central_elevation = text_bp * tmtrx;
+//
+//   glPushMatrix();
+//   glTranslatef(central_elevation.p2().x(), central_elevation.p2().y(), 0);
+//   glScalef(scaledpix, scaledpix, 1);
+//   glRotatef(_angle, 0, 0, 1);
+//
+////   TRENDC->drawSolidString(_value);
+//
+//   glDisable(GL_POLYGON_SMOOTH); //- for solid fill
+//   glEnable(GL_POLYGON_STIPPLE);
+//   glPopMatrix();
+//
+//}
+
+unsigned layprop::SDLine::nonius(const DBline& short_mark, const DBline& long_mark,
+                                 const real step, DBlineList& llst) const
+{
+   // prepare the translation matrix for the edge point
+   CTM tmtrx;
+   tmtrx.Rotate(_angle);
+   tmtrx.Translate(_ln.p1().x(), _ln.p1().y());
+   unsigned numtics;
+   for( numtics = 0 ; (numtics * step) < _length ; numtics++ )
+   {
+      // for each tick - get the deltas ...
+      int4b deltaX = (int4b) rint(numtics * step * _cosinus);
+      int4b deltaY = (int4b) rint(numtics * step * _sinus);
+      // ... calculate the translation ...
+      CTM pmtrx = tmtrx;
+      pmtrx.Translate(deltaX, deltaY);
+      // ... create a new tick and move it to its position
+      if (numtics % 5)
+         llst.push_back(DBline(short_mark * pmtrx));
+      else
+         llst.push_back(DBline(long_mark * pmtrx));
+   }
+   // don't forget the opposite edge point
+   tmtrx.Translate(_ln.p2().x() - _ln.p1().x(), _ln.p2().y() - _ln.p1().y());
+   llst.push_back(DBline(long_mark * tmtrx));
+   return ++numtics;
+}
 
 //=============================================================================
 /*!

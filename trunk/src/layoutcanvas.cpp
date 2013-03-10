@@ -485,7 +485,7 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event)
          glEnable(GL_BLEND);
          glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
          glClear(GL_ACCUM_BUFFER_BIT);
-         DATC->render(_layCTM);
+         DATC->render();
          if (0 == _blinkInterval) TRENDC->drawFOnly();
          glAccum(GL_LOAD, 1.0);
          _invalidWindow = false;
@@ -1268,7 +1268,7 @@ void* tui::DrawThread::Entry(/*wxGLContext* glRC*/)
       glEnable(GL_BLEND);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glClear(GL_ACCUM_BUFFER_BIT);
-      DATC->render(_canvas->_layCTM);    // draw data
+      DATC->render();    // draw data
       glAccum(GL_LOAD, 1.0);
       _canvas->_invalidWindow = false;
       if (_canvas->_rubberBand) _canvas->rubberPaint();

@@ -663,6 +663,11 @@ void trend::Toshader::grcDraw()
    //TODO
 }
 
+void trend::Toshader::drawRulers(const DBlineList, const DBline& text_bp, const double scaledpix)
+{
+
+}
+
 void trend::Toshader::setGrcLayer(bool setEData, const LayerDef& laydef)
 {
    if (setEData)
