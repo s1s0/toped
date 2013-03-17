@@ -167,6 +167,20 @@ unsigned layprop::SDLine::nonius(const DBline& short_mark, const DBline& long_ma
    return ++numtics;
 }
 
+CTM layprop::SDLine::getFtmtrx(const DBline& text_bp, const double scaledpix) const
+{
+
+   CTM tmtrx;
+   tmtrx.Rotate(_angle);
+   tmtrx.Translate(_center.x(), _center.y());
+   DBline central_elevation = text_bp * tmtrx;
+
+   CTM ftmtrx;
+   ftmtrx.Scale(scaledpix, scaledpix);
+   ftmtrx.Rotate(_angle);
+   ftmtrx.Translate(TP(central_elevation.p2().x(), central_elevation.p2().y()));
+   return ftmtrx;
+}
 //=============================================================================
 /*!
  * The main troubles here are with the precision of the calculations. They are

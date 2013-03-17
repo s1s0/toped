@@ -328,8 +328,6 @@ namespace trend {
       public:
          typedef enum {fqss, ftrs, ftfs, ftss} NcvxTypes;
          typedef enum {cont, line, cnvx, ncvx} ObjtTypes;
-         typedef std::list<TrxText*> TrendStrings;
-         typedef std::list<TrxTextOvlBox*> RefTxtList;
                            TrendTV(TrxCellRef* const, bool, bool, unsigned, unsigned);
          virtual          ~TrendTV();
          void              registerBox   (TrxCnvx*);
@@ -662,7 +660,7 @@ namespace trend {
          virtual void      cleanUp();
          virtual void      grcCleanUp();
          void              collectRulers(const layprop::RulerList& rulers, int4b step);
-         virtual void      drawRulers(const DBlineList, const DBline& text_bp, const double scaledpix)=0;
+         virtual void      drawRulers(const DBlineList&, const TrendStrings&)=0;
 
          LayerDef          getTenderLay(const LayerDef& laydef)
                                                          {return _drawprop->getTenderLay(laydef)   ;}

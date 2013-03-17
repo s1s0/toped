@@ -564,7 +564,7 @@ void trend::Tolder::grcCleanUp()
    TrendBase::grcCleanUp();
 }
 
-void trend::Tolder::drawRulers(const DBlineList noni_list, const DBline& text_bp, const double scaledpix)
+void trend::Tolder::drawRulers(const DBlineList& noni_list, const TrendStrings& rstrings/*const DBline& text_bp, const double scaledpix*/)
 {
    glColor4f((GLfloat)1, (GLfloat)1, (GLfloat)1, (GLfloat)0.7); // gray
    glDisable(GL_POLYGON_STIPPLE);
@@ -576,24 +576,19 @@ void trend::Tolder::drawRulers(const DBlineList noni_list, const DBline& text_bp
       glVertex2i(CL->p2().x(),CL->p2().y());
    }
    glEnd();
-
-//   CTM tmtrx;
-//   tmtrx.Rotate(_angle);
-//   tmtrx.Translate(_center.x(), _center.y());
-//   DBline central_elevation = text_bp * tmtrx;
-//
-//   glPushMatrix();
-//   glTranslatef(central_elevation.p2().x(), central_elevation.p2().y(), 0);
-//   glScalef(scaledpix, scaledpix, 1);
-//   glRotatef(_angle, 0, 0, 1);
-
-//   TRENDC->drawSolidString(_value);
+   // draw the ruler value
+   for (TrendStrings::const_iterator TS = rstrings.begin(); TS != rstrings.end(); TS++)
+   {
+      glPushMatrix();
+      real ftm[16];
+      (*TS)->ctm().oglForm(ftm);
+      glMultMatrixd(ftm);
+      (*TS)->draw(false, _drawprop);
+      glPopMatrix();
+   }
 
    glDisable(GL_POLYGON_SMOOTH); //- for solid fill
    glEnable(GL_POLYGON_STIPPLE);
-//   glPopMatrix();
-
-
 }
 
 trend::Tolder::~Tolder()

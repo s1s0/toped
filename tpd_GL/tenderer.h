@@ -130,7 +130,7 @@ namespace trend {
          virtual void      grcDraw();
          virtual void      cleanUp();
          virtual void      grcCleanUp();
-         virtual void      drawRulers(const DBlineList, const DBline& text_bp, const double scaledpix);
+         virtual void      drawRulers(const DBlineList&, const TrendStrings&);
       protected:
          virtual void      setColor(const LayerDef& layer);
          virtual void      setStipple();

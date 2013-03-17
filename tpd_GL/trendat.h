@@ -223,12 +223,13 @@ namespace trend {
    class TrxText {
       public:
                            TrxText(const std::string*, const CTM&);
-         void              draw(bool, layprop::DrawProperties*);
+         void              draw(bool, layprop::DrawProperties*) const;
          const CTM&        ctm() const {return _ctm;}
       private:
          const std::string* _text;
          CTM                _ctm; //! Font Translation matrix
    };
+   typedef std::list<TrxText*> TrendStrings;
 
    /**
    *  Text reference boxes
@@ -242,6 +243,7 @@ namespace trend {
       protected:
          int4b             _obox[8];
    };
+   typedef std::list<TrxTextOvlBox*> RefTxtList;
 
 
    //==========================================================================

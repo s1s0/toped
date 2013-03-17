@@ -679,13 +679,21 @@ void trend::TrendBase::collectRulers(const layprop::RulerList& rulers, int4b ste
    double scaledpix;
    genRulerMarks(scrCTM().Reversed(), long_mark, short_mark, text_bp, scaledpix);
 
-   DBlineList noni_list;
+   DBlineList   noni_list;
+   TrendStrings text_list;
    for(layprop::RulerList::const_iterator RA = rulers.begin(); RA != rulers.end(); RA++)
    {
       RA->nonius(short_mark, long_mark, step, noni_list);
       RA->addBaseLine(noni_list);
+      const std::string* theText = RA->value();
+      TrxText* tobj = DEBUG_NEW trend::TrxText(theText, RA->getFtmtrx(text_bp, scaledpix));
+      text_list.push_back(tobj);
    }
-   drawRulers(noni_list, text_bp, scaledpix);
+   drawRulers(noni_list, text_list);
+   for (TrendStrings::const_iterator TS = text_list.begin(); TS != text_list.end(); TS++)
+   {
+      delete (*TS);
+   }
 
 }
 

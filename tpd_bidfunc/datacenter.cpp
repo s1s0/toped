@@ -866,7 +866,7 @@ void DataCenter::motionDraw(const CTM& layCTM, TP base, TP newp)
       {
          // ruller
          layprop::RulerList rulers;
-         rulers.push_back(layprop::SDLine(base, newp, PROPC->stepDB()));
+         rulers.push_back(layprop::SDLine(base, newp, PROPC->UU()));
          mRenderer->collectRulers(rulers,PROPC->stepDB());
       }
       if ((console::op_line != currentOp)  && (NULL !=_TEDLIB()))
