@@ -845,9 +845,9 @@ void DataCenter::render()
          }
          // rulers
          layprop::RulerList const rulers = PROPC->getAllRulers();
-         if (!rulers.empty())
+         if (cRenderer->collectRulers(rulers, PROPC->stepDB()))
          {
-            cRenderer->collectRulers(rulers, PROPC->stepDB());
+            cRenderer->drawRulers();
          }
 
          TRENDC->releaseCRenderer();
@@ -867,7 +867,10 @@ void DataCenter::motionDraw(const CTM& layCTM, TP base, TP newp)
          // ruller
          layprop::RulerList rulers;
          rulers.push_back(layprop::SDLine(base, newp, PROPC->UU()));
+         // here - it's clear that there is one ruler to draw, so there
+         // is no point checking what the collectRulers returns
          mRenderer->collectRulers(rulers,PROPC->stepDB());
+         mRenderer->drawRulers();
       }
       if ((console::op_line != currentOp)  && (NULL !=_TEDLIB()))
       {

@@ -466,6 +466,22 @@ bool trend::Tolder::grcCollect()
    return true;
 }
 
+bool trend::Tolder::collectRulers(const layprop::RulerList& rulers, int4b step)
+{
+   if (rulers.empty()) return false;
+   DBline long_mark, short_mark, text_bp;
+   double scaledpix;
+   genRulerMarks(scrCTM().Reversed(), long_mark, short_mark, text_bp, scaledpix);
+
+   for(layprop::RulerList::const_iterator RA = rulers.begin(); RA != rulers.end(); RA++)
+   {
+      RA->nonius(short_mark, long_mark, step, _noniList);
+      RA->addBaseLine(_noniList);
+      _rulerTexts.push_back(DEBUG_NEW trend::TrxText(RA->value(), RA->getFtmtrx(text_bp, scaledpix)));
+   }
+   return true;
+}
+
 void trend::Tolder::setColor(const LayerDef& layer)
 {
    layprop::tellRGB theColor;
@@ -564,20 +580,20 @@ void trend::Tolder::grcCleanUp()
    TrendBase::grcCleanUp();
 }
 
-void trend::Tolder::drawRulers(const DBlineList& noni_list, const TrendStrings& rstrings/*const DBline& text_bp, const double scaledpix*/)
+void trend::Tolder::drawRulers()
 {
    glColor4f((GLfloat)1, (GLfloat)1, (GLfloat)1, (GLfloat)0.7); // gray
-   glDisable(GL_POLYGON_STIPPLE);
+//   glDisable(GL_POLYGON_STIPPLE);
    glBegin(GL_LINES);
    // draw the nonius and the ruler itself
-   for (DBlineList::const_iterator CL = noni_list.begin(); CL != noni_list.end(); CL++)
+   for (DBlineList::const_iterator CL = _noniList.begin(); CL != _noniList.end(); CL++)
    {
       glVertex2i(CL->p1().x(),CL->p1().y());
       glVertex2i(CL->p2().x(),CL->p2().y());
    }
    glEnd();
    // draw the ruler value
-   for (TrendStrings::const_iterator TS = rstrings.begin(); TS != rstrings.end(); TS++)
+   for (TrendStrings::const_iterator TS = _rulerTexts.begin(); TS != _rulerTexts.end(); TS++)
    {
       glPushMatrix();
       real ftm[16];
@@ -587,8 +603,8 @@ void trend::Tolder::drawRulers(const DBlineList& noni_list, const TrendStrings& 
       glPopMatrix();
    }
 
-   glDisable(GL_POLYGON_SMOOTH); //- for solid fill
-   glEnable(GL_POLYGON_STIPPLE);
+//   glDisable(GL_POLYGON_SMOOTH); //- for solid fill
+//   glEnable(GL_POLYGON_STIPPLE);
 }
 
 trend::Tolder::~Tolder()

@@ -89,11 +89,12 @@ namespace trend {
          virtual bool      chunkExists(const LayerDef&, bool);
          virtual bool      collect();
          virtual bool      grcCollect();
+         virtual bool      collectRulers(const layprop::RulerList&, int4b);
          virtual void      draw();
          virtual void      grcDraw();
          virtual void      cleanUp();
          virtual void      grcCleanUp();
-         virtual void      drawRulers(const DBlineList&, const TrendStrings&);
+         virtual void      drawRulers();
       protected:
          virtual void      setColor(const LayerDef& layer);
          virtual void      setStipple();

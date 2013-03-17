@@ -1047,6 +1047,23 @@ bool trend::Tenderer::grcCollect()
    return true;
 }
 
+bool trend::Tenderer::collectRulers(const layprop::RulerList& rulers, int4b step)
+{
+   if (rulers.empty()) return false;
+   DBline long_mark, short_mark, text_bp;
+   double scaledpix;
+   genRulerMarks(scrCTM().Reversed(), long_mark, short_mark, text_bp, scaledpix);
+
+   for(layprop::RulerList::const_iterator RA = rulers.begin(); RA != rulers.end(); RA++)
+   {
+      RA->nonius(short_mark, long_mark, step, _noniList);
+      RA->addBaseLine(_noniList);
+      _rulerTexts.push_back(DEBUG_NEW trend::TrxText(RA->value(), RA->getFtmtrx(text_bp, scaledpix)));
+   }
+   return true;
+   //TODO - generate the VBO here
+}
+
 void trend::Tenderer::setColor(const LayerDef& layer)
 {
    layprop::tellRGB theColor;
@@ -1169,7 +1186,7 @@ void trend::Tenderer::grcCleanUp()
    TrendBase::grcCleanUp();
 }
 
-void trend::Tenderer::drawRulers(const DBlineList&, const TrendStrings&)
+void trend::Tenderer::drawRulers()
 {
 
 }

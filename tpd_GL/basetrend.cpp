@@ -673,30 +673,6 @@ void trend::TrendBase::grcCleanUp()
    }
 }
 
-void trend::TrendBase::collectRulers(const layprop::RulerList& rulers, int4b step)
-{
-   DBline long_mark, short_mark, text_bp;
-   double scaledpix;
-   genRulerMarks(scrCTM().Reversed(), long_mark, short_mark, text_bp, scaledpix);
-
-   DBlineList   noni_list;
-   TrendStrings text_list;
-   for(layprop::RulerList::const_iterator RA = rulers.begin(); RA != rulers.end(); RA++)
-   {
-      RA->nonius(short_mark, long_mark, step, noni_list);
-      RA->addBaseLine(noni_list);
-      const std::string* theText = RA->value();
-      TrxText* tobj = DEBUG_NEW trend::TrxText(theText, RA->getFtmtrx(text_bp, scaledpix));
-      text_list.push_back(tobj);
-   }
-   drawRulers(noni_list, text_list);
-   for (TrendStrings::const_iterator TS = text_list.begin(); TS != text_list.end(); TS++)
-   {
-      delete (*TS);
-   }
-
-}
-
 void trend::TrendBase::genRulerMarks(const CTM& LayCTM, DBline& long_mark, DBline& short_mark, DBline& text_bp, double& scaledpix)
 {
    // Side ticks (segments) of the rulers has to be with constant size. The next
@@ -728,6 +704,12 @@ trend::TrendBase::~TrendBase()
    if (_refLayer) delete _refLayer;
    if (_marks)    delete _marks;
    if (_rmm)      delete _rmm;
+   for (TrendStrings::const_iterator TS = _rulerTexts.begin(); TS != _rulerTexts.end(); TS++)
+   {
+      delete (*TS);
+   }
+
+
 }
 
 void trend::checkOGLError(std::string loc)

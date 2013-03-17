@@ -94,7 +94,7 @@ namespace trend {
          virtual bool      chunkExists(const LayerDef&, bool);
          virtual void      draw();
          virtual void      grcDraw();
-         virtual void      drawRulers(const DBlineList&, const TrendStrings&);
+         virtual void      drawRulers();
          //virtual void      cleanUp();
          //virtual void      grcCleanUp();
       protected:
