@@ -1169,7 +1169,7 @@ void trend::Tenderer::grcCleanUp()
    TrendBase::grcCleanUp();
 }
 
-void trend::Tenderer::drawRulers(const DBlineList, const DBline& text_bp, const double scaledpix)
+void trend::Tenderer::drawRulers(const DBlineList&, const TrendStrings&)
 {
 
 }

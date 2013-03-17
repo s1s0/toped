@@ -124,9 +124,10 @@ namespace layprop {
    class SDLine {
    public:
                         SDLine(const TP& p1,const TP& p2, const real);
-//      void              draw(const DBline&, const DBline&, const DBline&, const double, const real) const;
       unsigned          nonius(const DBline&, const DBline&, real, DBlineList& llst) const;
+      CTM               getFtmtrx (const DBline&, const double) const;
       void              addBaseLine(DBlineList& llst) const {llst.push_back(_ln);}
+      const std::string* value() const {return &_value;}
    private:
       DBline            _ln;
       std::string       _value;

@@ -374,7 +374,7 @@ trend::TrxText::TrxText(const std::string* text, const CTM& ctm) :
 {
 }
 
-void trend::TrxText::draw(bool fill, layprop::DrawProperties* drawprop)
+void trend::TrxText::draw(bool fill, layprop::DrawProperties* drawprop) const
 {
    TRENDC->drawString(*_text, fill, drawprop);
 }
