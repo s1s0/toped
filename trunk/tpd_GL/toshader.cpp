@@ -663,7 +663,7 @@ void trend::Toshader::grcDraw()
    //TODO
 }
 
-void trend::Toshader::drawRulers(const DBlineList&, const TrendStrings&)
+void trend::Toshader::drawRulers()
 {
 
 }

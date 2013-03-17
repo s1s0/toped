@@ -655,12 +655,12 @@ namespace trend {
          void              textt(const std::string*, const CTM&, const TP&);
          virtual bool      collect() = 0;
          virtual bool      grcCollect() = 0;
+         virtual bool      collectRulers(const layprop::RulerList&, int4b) = 0;
          virtual void      draw() = 0;
          virtual void      grcDraw() = 0;
+         virtual void      drawRulers()=0;
          virtual void      cleanUp();
          virtual void      grcCleanUp();
-         void              collectRulers(const layprop::RulerList& rulers, int4b step);
-         virtual void      drawRulers(const DBlineList&, const TrendStrings&)=0;
 
          LayerDef          getTenderLay(const LayerDef& laydef)
                                                          {return _drawprop->getTenderLay(laydef)   ;}
@@ -710,6 +710,9 @@ namespace trend {
          TrendMarks*       _marks;           //!All kinds of object marks
          CTM*              _rmm;             //!Reverse motion matrix
          GridSet           _grids[3];        //!All grid points
+         DBlineList        _noniList;        //!All ruler lines including Vernier ticks.
+         TrendStrings      _rulerTexts;      //!The labels on all rulers
+
    };
 
    void checkOGLError(std::string);
