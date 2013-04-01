@@ -1053,32 +1053,33 @@ bool trend::Tenderer::collectRulers(const layprop::RulerList& rulers, int4b step
    DBline long_mark, short_mark, text_bp;
    double scaledpix;
    genRulerMarks(scrCTM().Reversed(), long_mark, short_mark, text_bp, scaledpix);
-
+   DBlineList        noniList;        //!All ruler lines including Vernier ticks.
    for(layprop::RulerList::const_iterator RA = rulers.begin(); RA != rulers.end(); RA++)
    {
-      RA->nonius(short_mark, long_mark, step, _noniList);
-      RA->addBaseLine(_noniList);
+      RA->nonius(short_mark, long_mark, step, noniList);
+      RA->addBaseLine(noniList);
       _rulerTexts.push_back(DEBUG_NEW trend::TrxText(RA->value(), RA->getFtmtrx(text_bp, scaledpix)));
    }
+   _num_ruler_ticks = 2 * noniList.size();
    _ogl_rlr_buffer = DEBUG_NEW GLuint [1];
    glGenBuffers(1, _ogl_rlr_buffer);
 
    TNDR_GLDATAT* cpoint_array = NULL;
    glBindBuffer(GL_ARRAY_BUFFER, _ogl_rlr_buffer[0]);
    glBufferData(GL_ARRAY_BUFFER                       ,
-                2 * 2* _noniList.size() * sizeof(TNDR_GLDATAT),
+                2 * _num_ruler_ticks * sizeof(TNDR_GLDATAT),
                 NULL                                  ,
                 GL_DYNAMIC_DRAW                       );
    cpoint_array = (TNDR_GLDATAT*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
    unsigned pnt = 0;
-   for (DBlineList::const_iterator CL = _noniList.begin(); CL != _noniList.end(); CL++)
+   for (DBlineList::const_iterator CL = noniList.begin(); CL != noniList.end(); CL++)
    {
       cpoint_array[pnt++]= CL->p1().x();
       cpoint_array[pnt++]= CL->p1().y();
       cpoint_array[pnt++]= CL->p2().x();
       cpoint_array[pnt++]= CL->p2().y();
    }
-   assert(pnt == 4*_noniList.size());
+   assert(pnt == (2 * _num_ruler_ticks));
    // Unmap the buffers
    glUnmapBuffer(GL_ARRAY_BUFFER);
 //   glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -1227,13 +1228,13 @@ void trend::Tenderer::drawRulers()
    // Check the state of the buffer
    GLint bufferSize;
    glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
-   assert(bufferSize == (GLint)(2 * 2 * _noniList.size() * sizeof(TNDR_GLDATAT)));
+   assert(bufferSize == (GLint)(2 * _num_ruler_ticks * sizeof(TNDR_GLDATAT)));
 
    glEnableClientState(GL_VERTEX_ARRAY);
    // Set-up the offset in the binded Vertex buffer
    glVertexPointer(2, TNDR_GLENUMT, 0, 0);
    // draw
-   glDrawArrays(GL_LINES, 0, 2*_noniList.size());
+   glDrawArrays(GL_LINES, 0, _num_ruler_ticks);
 
    glBindBuffer(GL_ARRAY_BUFFER, 0);
 

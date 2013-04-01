@@ -99,6 +99,7 @@ namespace trend {
          virtual void      setColor(const LayerDef& layer);
          virtual void      setStipple();
          virtual void      setLine(bool);
+         DBlineList        _noniList;        //!All ruler lines including Vernier ticks.
    };
 
 }
