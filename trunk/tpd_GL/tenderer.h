@@ -139,6 +139,7 @@ namespace trend {
          virtual void      setLine(bool);
          unsigned          _num_ogl_buffers; //! Number of generated openGL VBOs
          unsigned          _num_ogl_grc_buffers; //!
+         unsigned          _num_ruler_ticks; //! Number of lines in _ogl_rlr_buffer
          GLuint*           _ogl_buffers;     //! Array with the "names" of all openGL buffers
          GLuint*           _ogl_grc_buffers; //! Array with the "names" of the GRC related openGL buffers
          GLuint            _sbuffer;         //! The "name" of the selected index buffer

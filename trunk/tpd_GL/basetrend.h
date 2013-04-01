@@ -711,7 +711,6 @@ namespace trend {
          TrendMarks*       _marks;           //!All kinds of object marks
          CTM*              _rmm;             //!Reverse motion matrix
          GridSet           _grids[3];        //!All grid points
-         DBlineList        _noniList;        //!All ruler lines including Vernier ticks.
          TrendStrings      _rulerTexts;      //!The labels on all rulers
 
    };
