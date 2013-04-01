@@ -691,7 +691,7 @@ namespace trend {
             int*        _array;
             std::string _color;
          };
-         virtual void      setColor(const LayerDef& layer) = 0;
+         virtual void      setLayColor(const LayerDef& layer) = 0;
          virtual void      setStipple() = 0;
          virtual void      setLine(bool) = 0;
          void              genRulerMarks (const CTM&, DBline&, DBline&, DBline&, double&);
