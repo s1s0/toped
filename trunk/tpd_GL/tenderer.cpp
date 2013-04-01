@@ -1224,6 +1224,7 @@ void trend::Tenderer::rlrCleanUp()
 
 void trend::Tenderer::drawRulers()
 {
+//   glColor4ub
    glColor4f((GLfloat)1, (GLfloat)1, (GLfloat)1, (GLfloat)0.7); // gray
    glBindBuffer(GL_ARRAY_BUFFER, _ogl_rlr_buffer[0]);
    // Check the state of the buffer
