@@ -848,6 +848,7 @@ void DataCenter::render()
          if (cRenderer->collectRulers(rulers, PROPC->stepDB()))
          {
             cRenderer->drawRulers();
+            cRenderer->rlrCleanUp();
          }
 
          TRENDC->releaseCRenderer();
@@ -871,6 +872,7 @@ void DataCenter::motionDraw(const CTM& layCTM, TP base, TP newp)
          // is no point checking what the collectRulers returns
          mRenderer->collectRulers(rulers,PROPC->stepDB());
          mRenderer->drawRulers();
+         mRenderer->rlrCleanUp();
       }
       if ((console::op_line != currentOp)  && (NULL !=_TEDLIB()))
       {

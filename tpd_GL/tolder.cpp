@@ -602,9 +602,6 @@ void trend::Tolder::drawRulers()
       (*TS)->draw(false, _drawprop);
       glPopMatrix();
    }
-
-//   glDisable(GL_POLYGON_SMOOTH); //- for solid fill
-//   glEnable(GL_POLYGON_STIPPLE);
 }
 
 trend::Tolder::~Tolder()

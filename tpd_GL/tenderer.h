@@ -132,6 +132,7 @@ namespace trend {
          virtual void      drawRulers();
          virtual void      cleanUp();
          virtual void      grcCleanUp();
+         virtual void      rlrCleanUp();
       protected:
          virtual void      setColor(const LayerDef& layer);
          virtual void      setStipple();
@@ -141,6 +142,7 @@ namespace trend {
          GLuint*           _ogl_buffers;     //! Array with the "names" of all openGL buffers
          GLuint*           _ogl_grc_buffers; //! Array with the "names" of the GRC related openGL buffers
          GLuint            _sbuffer;         //! The "name" of the selected index buffer
+         GLuint*           _ogl_rlr_buffer;  //!
    };
 
 }

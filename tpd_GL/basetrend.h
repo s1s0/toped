@@ -661,6 +661,7 @@ namespace trend {
          virtual void      drawRulers()=0;
          virtual void      cleanUp();
          virtual void      grcCleanUp();
+         virtual void      rlrCleanUp();
 
          LayerDef          getTenderLay(const LayerDef& laydef)
                                                          {return _drawprop->getTenderLay(laydef)   ;}
