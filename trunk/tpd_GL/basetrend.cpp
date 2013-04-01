@@ -673,6 +673,14 @@ void trend::TrendBase::grcCleanUp()
    }
 }
 
+void trend::TrendBase::rlrCleanUp()
+{
+   for (TrendStrings::const_iterator TS = _rulerTexts.begin(); TS != _rulerTexts.end(); TS++)
+   {
+      delete (*TS);
+   }
+}
+
 void trend::TrendBase::genRulerMarks(const CTM& LayCTM, DBline& long_mark, DBline& short_mark, DBline& text_bp, double& scaledpix)
 {
    // Side ticks (segments) of the rulers has to be with constant size. The next
@@ -704,12 +712,6 @@ trend::TrendBase::~TrendBase()
    if (_refLayer) delete _refLayer;
    if (_marks)    delete _marks;
    if (_rmm)      delete _rmm;
-   for (TrendStrings::const_iterator TS = _rulerTexts.begin(); TS != _rulerTexts.end(); TS++)
-   {
-      delete (*TS);
-   }
-
-
 }
 
 void trend::checkOGLError(std::string loc)

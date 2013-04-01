@@ -1060,8 +1060,29 @@ bool trend::Tenderer::collectRulers(const layprop::RulerList& rulers, int4b step
       RA->addBaseLine(_noniList);
       _rulerTexts.push_back(DEBUG_NEW trend::TrxText(RA->value(), RA->getFtmtrx(text_bp, scaledpix)));
    }
+   _ogl_rlr_buffer = DEBUG_NEW GLuint [1];
+   glGenBuffers(1, _ogl_rlr_buffer);
+
+   TNDR_GLDATAT* cpoint_array = NULL;
+   glBindBuffer(GL_ARRAY_BUFFER, _ogl_rlr_buffer[0]);
+   glBufferData(GL_ARRAY_BUFFER                       ,
+                2 * 2* _noniList.size() * sizeof(TNDR_GLDATAT),
+                NULL                                  ,
+                GL_DYNAMIC_DRAW                       );
+   cpoint_array = (TNDR_GLDATAT*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+   unsigned pnt = 0;
+   for (DBlineList::const_iterator CL = _noniList.begin(); CL != _noniList.end(); CL++)
+   {
+      cpoint_array[pnt++]= CL->p1().x();
+      cpoint_array[pnt++]= CL->p1().y();
+      cpoint_array[pnt++]= CL->p2().x();
+      cpoint_array[pnt++]= CL->p2().y();
+   }
+   assert(pnt == 4*_noniList.size());
+   // Unmap the buffers
+   glUnmapBuffer(GL_ARRAY_BUFFER);
+//   glBindBuffer(GL_ARRAY_BUFFER, 0);
    return true;
-   //TODO - generate the VBO here
 }
 
 void trend::Tenderer::setColor(const LayerDef& layer)
@@ -1186,9 +1207,47 @@ void trend::Tenderer::grcCleanUp()
    TrendBase::grcCleanUp();
 }
 
+void trend::Tenderer::rlrCleanUp()
+{
+   glBindBuffer(GL_ARRAY_BUFFER, 0);
+   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+   if (NULL != _ogl_rlr_buffer)
+   {
+      glDeleteBuffers(1, _ogl_rlr_buffer);
+      delete [] _ogl_rlr_buffer;
+      _ogl_rlr_buffer = NULL;
+   }
+   TrendBase::rlrCleanUp();
+}
+
 void trend::Tenderer::drawRulers()
 {
+   glColor4f((GLfloat)1, (GLfloat)1, (GLfloat)1, (GLfloat)0.7); // gray
+   glBindBuffer(GL_ARRAY_BUFFER, _ogl_rlr_buffer[0]);
+   // Check the state of the buffer
+   GLint bufferSize;
+   glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
+   assert(bufferSize == (GLint)(2 * 2 * _noniList.size() * sizeof(TNDR_GLDATAT)));
 
+   glEnableClientState(GL_VERTEX_ARRAY);
+   // Set-up the offset in the binded Vertex buffer
+   glVertexPointer(2, TNDR_GLENUMT, 0, 0);
+   // draw
+   glDrawArrays(GL_LINES, 0, 2*_noniList.size());
+
+   glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+   // draw the ruler value
+   TRENDC->bindFont();
+   for (TrendStrings::const_iterator TS = _rulerTexts.begin(); TS != _rulerTexts.end(); TS++)
+   {
+      glPushMatrix();
+      real ftm[16];
+      (*TS)->ctm().oglForm(ftm);
+      glMultMatrixd(ftm);
+      (*TS)->draw(false, _drawprop);
+      glPopMatrix();
+   }
 }
 
 void trend::Tenderer::setGrcLayer(bool setEData, const LayerDef& laydef)
