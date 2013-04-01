@@ -665,7 +665,33 @@ void trend::Toshader::grcDraw()
 
 void trend::Toshader::drawRulers()
 {
+   TRENDC->setGlslProg(glslp_VF);
+   glUniform1ui(TRENDC->getUniformLoc(glslu_in_StippleEn), 0);
 
+   _drawprop->initCtmStack();
+   float mtrxOrtho [16];
+   _drawprop->topCtm().oglForm(mtrxOrtho);
+   glUniformMatrix4fv(TRENDC->getUniformLoc(glslu_in_CTM), 1, GL_FALSE, mtrxOrtho);
+
+   glEnableVertexAttribArray(TSHDR_LOC_VERTEX);
+
+   // color
+   float oglColor[4];
+   oglColor[0] = 1.0f ;
+   oglColor[1] = 1.0f ;
+   oglColor[2] = 1.0f ;
+   oglColor[3] = 0.7f ;
+   glUniform3fv(TRENDC->getUniformLoc(glslu_in_Color), 1, oglColor);
+   glUniform1f(TRENDC->getUniformLoc(glslu_in_Alpha), oglColor[3]);
+
+   //draw
+   glBindBuffer(GL_ARRAY_BUFFER, _ogl_rlr_buffer[0]);
+   glVertexAttribPointer(TSHDR_LOC_VERTEX, 2, TNDR_GLENUMT, GL_FALSE, 0, 0);
+   glDrawArrays(GL_LINES, 0, _num_ruler_ticks);
+
+   glDisableVertexAttribArray(TSHDR_LOC_VERTEX);
+   // clean-up the buffers
+   glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void trend::Toshader::setGrcLayer(bool setEData, const LayerDef& laydef)
