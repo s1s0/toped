@@ -537,7 +537,7 @@ void trend::Toshader::zeroCross()
    //TODO
 }
 
-void trend::Toshader::setColor(const LayerDef& layer)
+void trend::Toshader::setLayColor(const LayerDef& layer)
 {
    layprop::tellRGB tellColor;
    if (_drawprop->setCurrentColor(layer, tellColor))
@@ -601,7 +601,7 @@ void trend::Toshader::draw()
    TRENDC->setGlslProg(glslp_VF);
    for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {// for every layer
-      setColor(CLAY());
+      setLayColor(CLAY());
       setLine(false);
       setStipple();
       // draw everything
@@ -621,7 +621,7 @@ void trend::Toshader::draw()
    {// for every layer
       if (0 != CLAY->total_slctdx())
       {// redraw selected contours only
-         setColor(CLAY());
+         setLayColor(CLAY());
          setLine(true);
          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _sbuffer);
          setShaderCtm(_drawprop, _activeCS);
@@ -633,7 +633,7 @@ void trend::Toshader::draw()
    // draw reference boxes
    if (0 < _refLayer->total_points())
    {
-      setColor(REF_LAY_DEF);
+      setLayColor(REF_LAY_DEF);
       setLine(false);
       float mtrxOrtho [16];
       _drawprop->topCtm().oglForm(mtrxOrtho);
@@ -647,7 +647,7 @@ void trend::Toshader::draw()
       glUniform1ui(TRENDC->getUniformLoc(glslu_in_StippleEn) , 0);
       glUniform1ui(TRENDC->getUniformLoc(glslu_in_LStippleEn), 0);
       glUniform1ui(TRENDC->getUniformLoc(glslu_in_MStippleEn), 1);
-      setColor(REF_LAY_DEF);
+      setLayColor(REF_LAY_DEF);
       float mtrxOrtho [16];
       _drawprop->topCtm().oglForm(mtrxOrtho);
       glUniformMatrix4fv(TRENDC->getUniformLoc(glslu_in_CTM), 1, GL_FALSE, mtrxOrtho);

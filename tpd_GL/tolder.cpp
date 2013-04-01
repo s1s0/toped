@@ -187,12 +187,6 @@ void trend::TolderLay::drawTexts(layprop::DrawProperties* drawprop)
 
 void trend::TolderRefLay::draw(layprop::DrawProperties* drawprop)
 {
-   layprop::tellRGB theColor;
-   if (drawprop->setCurrentColor(REF_LAY_DEF, theColor))
-      glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
-   //drawprop->setCurrentColor(REF_LAY_DEF);
-   setLine(drawprop, false);
-
    for (RefBoxList::const_iterator CSH = _cellRefBoxes.begin(); CSH != _cellRefBoxes.end(); CSH++)
    {
       if (1 < (*CSH)->alphaDepth())
@@ -205,6 +199,7 @@ void trend::TolderRefLay::draw(layprop::DrawProperties* drawprop)
    {
       (*CSH)->drctDrawContour();
    }
+   setLine(drawprop, false);
 }
 
 void trend::TolderRefLay::setLine(layprop::DrawProperties* drawprop, bool selected)
@@ -482,7 +477,7 @@ bool trend::Tolder::collectRulers(const layprop::RulerList& rulers, int4b step)
    return true;
 }
 
-void trend::Tolder::setColor(const LayerDef& layer)
+void trend::Tolder::setLayColor(const LayerDef& layer)
 {
    layprop::tellRGB theColor;
    if (_drawprop->setCurrentColor(layer, theColor))
@@ -529,7 +524,7 @@ void trend::Tolder::draw()
 {
    for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {// for every layer
-      setColor(CLAY());
+      setLayColor(CLAY());
       setStipple();
       if (0 != CLAY->total_slctdx())
       {// redraw selected contours only
@@ -550,7 +545,12 @@ void trend::Tolder::draw()
       }
    }
    // draw reference boxes
-   if (0 < _refLayer->total_points())  _refLayer->draw(_drawprop);
+   if (0 < _refLayer->total_points())
+   {
+      setLayColor(REF_LAY_DEF);
+      setLine(false);
+      _refLayer->draw(_drawprop);
+   }
    // draw marks
    if (0 < _marks->total_points()   )  _marks->draw(_drawprop);
    checkOGLError("draw");
@@ -560,7 +560,7 @@ void trend::Tolder::grcDraw()
 {
    for (DataLay::Iterator CLAY = _grcData.begin(); CLAY != _grcData.end(); CLAY++)
    {// for every layer
-      setColor(CLAY());
+      setLayColor(CLAY());
       setStipple();
       setLine(false);
       // draw everything

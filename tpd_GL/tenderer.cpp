@@ -663,10 +663,6 @@ void trend::TenderRefLay::collect(GLuint pbuf)
 
 void trend::TenderRefLay::draw(layprop::DrawProperties* drawprop)
 {
-   layprop::tellRGB theColor;
-   if (drawprop->setCurrentColor(REF_LAY_DEF, theColor))
-      glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
-   setLine(drawprop, false);
    // Bind the buffer
    glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
    // Check the state of the buffer
@@ -1086,7 +1082,7 @@ bool trend::Tenderer::collectRulers(const layprop::RulerList& rulers, int4b step
    return true;
 }
 
-void trend::Tenderer::setColor(const LayerDef& layer)
+void trend::Tenderer::setLayColor(const LayerDef& layer)
 {
    layprop::tellRGB theColor;
    if (_drawprop->setCurrentColor(layer, theColor))
@@ -1135,7 +1131,7 @@ void trend::Tenderer::draw()
 {
    for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {// for every layer
-      setColor(CLAY());
+      setLayColor(CLAY());
       setStipple();
       if (0 != CLAY->total_slctdx())
       {// redraw selected contours only
@@ -1159,7 +1155,12 @@ void trend::Tenderer::draw()
       }
    }
    // draw reference boxes
-   if (0 < _refLayer->total_points())   _refLayer->draw(_drawprop);
+   if (0 < _refLayer->total_points())
+   {
+      setLayColor(REF_LAY_DEF);
+      setLine(false);
+      _refLayer->draw(_drawprop);
+   }
    // draw marks
    if (0 < _marks->total_points()   )   _marks->draw(_drawprop);
 
@@ -1170,7 +1171,7 @@ void trend::Tenderer::grcDraw()
 {
    for (DataLay::Iterator CLAY = _grcData.begin(); CLAY != _grcData.end(); CLAY++)
    {// for every layer
-      setColor(CLAY());
+      setLayColor(CLAY());
       setStipple();
       setLine(false);
       // draw everything

@@ -134,7 +134,7 @@ namespace trend {
          virtual void      grcCleanUp();
          virtual void      rlrCleanUp();
       protected:
-         virtual void      setColor(const LayerDef& layer);
+         virtual void      setLayColor(const LayerDef& layer);
          virtual void      setStipple();
          virtual void      setLine(bool);
          unsigned          _num_ogl_buffers; //! Number of generated openGL VBOs

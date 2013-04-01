@@ -96,7 +96,7 @@ namespace trend {
          virtual void      grcCleanUp();
          virtual void      drawRulers();
       protected:
-         virtual void      setColor(const LayerDef& layer);
+         virtual void      setLayColor(const LayerDef& layer);
          virtual void      setStipple();
          virtual void      setLine(bool);
          DBlineList        _noniList;        //!All ruler lines including Vernier ticks.
