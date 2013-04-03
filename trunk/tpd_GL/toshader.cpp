@@ -692,6 +692,21 @@ void trend::Toshader::drawRulers()
    glDisableVertexAttribArray(TSHDR_LOC_VERTEX);
    // clean-up the buffers
    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+   // Now draw texts
+//   setShaderCtm(drawprop, _refCell);
+   TRENDC->bindFont();
+   for (TrendStrings::const_iterator TSTR = _rulerTexts.begin(); TSTR != _rulerTexts.end(); TSTR++)
+   {
+      _drawprop->pushCtm((*TSTR)->ctm() * _drawprop->topCtm());
+      float mtrxOrtho[16];
+      _drawprop->topCtm().oglForm(mtrxOrtho);
+      glUniformMatrix4fv(TRENDC->getUniformLoc(glslu_in_CTM), 1, GL_FALSE, mtrxOrtho);
+      (*TSTR)->draw(false, _drawprop);
+      _drawprop->popCtm();
+   }
+//   drawprop->popCtm();
+
 }
 
 void trend::Toshader::setGrcLayer(bool setEData, const LayerDef& laydef)
