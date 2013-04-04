@@ -490,18 +490,19 @@ void trend::Toshader::gridDraw()
    byte numBuffers = 0;
    for (byte gridNo = 0; gridNo < 3; gridNo++)
    {
-      unsigned size = _grids[gridNo]._size;
-      if (0 != size) numBuffers++;
+      if (NULL == _grids[gridNo]) continue;
+      if (0 !=  _grids[gridNo]->_size) numBuffers++;
    }
    GLuint* ogl_buffers = DEBUG_NEW GLuint [numBuffers];
    glGenBuffers(numBuffers, ogl_buffers);
    byte curBuffer = 1;
    for (byte gridNo = 0; gridNo < 3; gridNo++)
    {
-      unsigned size = _grids[gridNo]._size;
+      if (NULL == _grids[gridNo]) continue;
+      unsigned size = _grids[gridNo]->_size;
       if (0 == size) continue;
       // color
-      layprop::tellRGB theColor(_drawprop->getColor(_grids[gridNo]._color));
+      layprop::tellRGB theColor(_drawprop->getColor(_grids[gridNo]->_color));
       float oglColor[4];
       oglColor[0] = (float)theColor.red()   / 255.0f ;
       oglColor[1] = (float)theColor.green() / 255.0f ;
@@ -516,7 +517,7 @@ void trend::Toshader::gridDraw()
                    NULL                                  ,
                    GL_DYNAMIC_DRAW                       );
       TNDR_GLDATAT* point_array = (TNDR_GLDATAT*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-      int* theArray = _grids[gridNo]._array;
+      int* theArray = _grids[gridNo]->_array;
       for (unsigned i = 0; i < 2*size; i++)
          point_array[i] = theArray[i];
       glUnmapBuffer(GL_ARRAY_BUFFER);
