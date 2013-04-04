@@ -710,7 +710,7 @@ namespace trend {
          RefBoxList        _hiddenRefBoxes;  //!Those cRefBox objects which didn't ended in the TrendRefLay structures
          TrendMarks*       _marks;           //!All kinds of object marks
          CTM*              _rmm;             //!Reverse motion matrix
-         GridSet           _grids[3];        //!All grid points
+         GridSet*          _grids[3];        //!All grid points
          TrendStrings      _rulerTexts;      //!The labels on all rulers
 
    };

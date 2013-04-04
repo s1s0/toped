@@ -485,6 +485,9 @@ trend::TrendBase::TrendBase( layprop::DrawProperties* drawprop, real UU ) :
 {
    // Initialize the cell (CTM) stack
    _cellStack.push(DEBUG_NEW TrxCellRef());
+   for (byte i = 0; i < 3; i++)
+      _grids[i] = NULL;
+
 }
 
 void trend::TrendBase::setRmm(const CTM& mm)
@@ -516,7 +519,7 @@ bool trend::TrendBase::gridCalc(const real step, const std::string color, byte g
          point_array[index++] = j;
       }
    }
-   _grids[gridNo] = GridSet(arr_size,point_array,color);
+   _grids[gridNo] = DEBUG_NEW GridSet(arr_size,point_array,color);
    return true;
 }
 
@@ -712,6 +715,8 @@ trend::TrendBase::~TrendBase()
    if (_refLayer) delete _refLayer;
    if (_marks)    delete _marks;
    if (_rmm)      delete _rmm;
+   for (byte i = 0; i < 3; i++)
+      if (NULL != _grids[i]) delete _grids[i];
 }
 
 void trend::checkOGLError(std::string loc)

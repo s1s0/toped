@@ -863,11 +863,12 @@ void trend::Tenderer::gridDraw()
    glEnableClientState(GL_VERTEX_ARRAY);
    for (byte gridNo = 0; gridNo < 3; gridNo++)
    {
-      unsigned size = _grids[gridNo]._size;
+      if (NULL == _grids[gridNo]) continue;
+      unsigned size = _grids[gridNo]->_size;
       if (0 == size) continue;
-      layprop::tellRGB theColor(_drawprop->getColor(_grids[gridNo]._color));
+      layprop::tellRGB theColor(_drawprop->getColor(_grids[gridNo]->_color));
       glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
-      int* theArray = _grids[gridNo]._array;
+      int* theArray = _grids[gridNo]->_array;
       glVertexPointer(2, GL_INT, 0, theArray);
       glDrawArrays(GL_POINTS, 0, size);
    }

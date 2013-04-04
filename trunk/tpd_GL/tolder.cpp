@@ -262,11 +262,12 @@ void trend::Tolder::gridDraw()
    glBegin(GL_POINTS);
    for (byte gridNo = 0; gridNo < 3; gridNo++)
    {
-      unsigned size = _grids[gridNo]._size;
+      if (NULL == _grids[gridNo]) continue;
+      unsigned size = _grids[gridNo]->_size;
       if (0 == size) continue;
-      layprop::tellRGB theColor(_drawprop->getColor(_grids[gridNo]._color));
+      layprop::tellRGB theColor(_drawprop->getColor(_grids[gridNo]->_color));
       glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
-      int* theArray = _grids[gridNo]._array;
+      int* theArray = _grids[gridNo]->_array;
       for (unsigned i = 0; i < size; i++)
          glVertex2i(theArray[2*i], theArray[2*i+1]);
    }
