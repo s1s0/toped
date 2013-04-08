@@ -495,7 +495,7 @@ void trend::TrendBase::setRmm(const CTM& mm)
    _rmm = DEBUG_NEW CTM(mm.Reversed());
 }
 
-bool trend::TrendBase::gridCalc(const real step, const std::string color, byte gridNo)
+bool trend::TrendBase::grdCollect(const real step, const std::string color, byte gridNo)
 {
    int gridstep = (int)rint(step / _UU);
    bool gridOn = ( abs((int)(_drawprop->scrCtm().a() * gridstep)) > GRID_LIMIT);

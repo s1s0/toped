@@ -118,7 +118,7 @@ namespace trend {
       public:
                            Tenderer( layprop::DrawProperties* , real, bool createRefLay = true);
          virtual          ~Tenderer();
-         virtual void      gridDraw();
+         virtual void      grdDraw();
          virtual void      zeroCross();
          virtual void      setLayer(const LayerDef&, bool);
          virtual void      setHvrLayer(const LayerDef&);
@@ -126,10 +126,10 @@ namespace trend {
          virtual bool      chunkExists(const LayerDef&, bool);
          virtual bool      collect();
          virtual bool      grcCollect();
-         virtual bool      collectRulers(const layprop::RulerList&, int4b);
+         virtual bool      rlrCollect(const layprop::RulerList&, int4b);
          virtual void      draw();
          virtual void      grcDraw();
-         virtual void      drawRulers();
+         virtual void      rlrDraw();
          virtual void      cleanUp();
          virtual void      grcCleanUp();
          virtual void      rlrCleanUp();
@@ -142,8 +142,8 @@ namespace trend {
          unsigned          _num_ruler_ticks; //! Number of lines in _ogl_rlr_buffer
          GLuint*           _ogl_buffers;     //! Array with the "names" of all openGL buffers
          GLuint*           _ogl_grc_buffers; //! Array with the "names" of the GRC related openGL buffers
-         GLuint            _sbuffer;         //! The "name" of the selected index buffer
          GLuint*           _ogl_rlr_buffer;  //!
+         GLuint            _sbuffer;         //! The "name" of the selected index buffer
    };
 
 }

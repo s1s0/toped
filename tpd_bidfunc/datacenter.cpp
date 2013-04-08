@@ -798,6 +798,13 @@ void DataCenter::render()
       trend::TrendBase* cRenderer = TRENDC->getCRenderer();
       if (NULL != cRenderer)
       {
+//         // grid
+//         const layprop::LayoutGrid* allGrids[3] = {PROPC->grid(0),PROPC->grid(2),PROPC->grid(3)};
+//         if (cRenderer->grdCollect(allGrids))
+//         {
+//            cRenderer->grdDraw();
+//            cRenderer->grdCleanUp();
+//         }
          TRENDC->drawGrid();
          TRENDC->drawZeroCross();
          if (wxMUTEX_NO_ERROR == _DBLock.TryLock())
@@ -845,9 +852,9 @@ void DataCenter::render()
          }
          // rulers
          layprop::RulerList const rulers = PROPC->getAllRulers();
-         if (cRenderer->collectRulers(rulers, PROPC->stepDB()))
+         if (cRenderer->rlrCollect(rulers, PROPC->stepDB()))
          {
-            cRenderer->drawRulers();
+            cRenderer->rlrDraw();
             cRenderer->rlrCleanUp();
          }
 
@@ -870,8 +877,8 @@ void DataCenter::motionDraw(const CTM& layCTM, TP base, TP newp)
          rulers.push_back(layprop::SDLine(base, newp, PROPC->UU()));
          // here - it's clear that there is one ruler to draw, so there
          // is no point checking what the collectRulers returns
-         mRenderer->collectRulers(rulers,PROPC->stepDB());
-         mRenderer->drawRulers();
+         mRenderer->rlrCollect(rulers,PROPC->stepDB());
+         mRenderer->rlrDraw();
          mRenderer->rlrCleanUp();
       }
       if ((console::op_line != currentOp)  && (NULL !=_TEDLIB()))

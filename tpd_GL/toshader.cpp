@@ -475,7 +475,7 @@ void trend::Toshader::setHvrLayer(const LayerDef& laydef)
    }
 }
 
-void trend::Toshader::gridDraw()
+void trend::Toshader::grdDraw()
 {
    TRENDC->setGlslProg(glslp_VF);
    glUniform1ui(TRENDC->getUniformLoc(glslu_in_StippleEn), 0);
@@ -664,7 +664,7 @@ void trend::Toshader::grcDraw()
    //TODO
 }
 
-void trend::Toshader::drawRulers()
+void trend::Toshader::rlrDraw()
 {
    TRENDC->setGlslProg(glslp_VF);
    glUniform1ui(TRENDC->getUniformLoc(glslu_in_StippleEn), 0);

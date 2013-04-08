@@ -81,7 +81,7 @@ namespace trend {
       public:
                            Tolder( layprop::DrawProperties* drawprop, real UU );
          virtual          ~Tolder();
-         virtual void      gridDraw();
+         virtual void      grdDraw();
          virtual void      zeroCross();
          virtual void      setLayer(const LayerDef&, bool);
          virtual void      setHvrLayer(const LayerDef&);
@@ -89,12 +89,12 @@ namespace trend {
          virtual bool      chunkExists(const LayerDef&, bool);
          virtual bool      collect();
          virtual bool      grcCollect();
-         virtual bool      collectRulers(const layprop::RulerList&, int4b);
+         virtual bool      rlrCollect(const layprop::RulerList&, int4b);
          virtual void      draw();
          virtual void      grcDraw();
          virtual void      cleanUp();
          virtual void      grcCleanUp();
-         virtual void      drawRulers();
+         virtual void      rlrDraw();
       protected:
          virtual void      setLayColor(const LayerDef& layer);
          virtual void      setStipple();

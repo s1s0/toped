@@ -257,7 +257,7 @@ trend::Tolder::Tolder( layprop::DrawProperties* drawprop, real UU ) :
 }
 
 
-void trend::Tolder::gridDraw()
+void trend::Tolder::grdDraw()
 {
    glBegin(GL_POINTS);
    for (byte gridNo = 0; gridNo < 3; gridNo++)
@@ -462,7 +462,7 @@ bool trend::Tolder::grcCollect()
    return true;
 }
 
-bool trend::Tolder::collectRulers(const layprop::RulerList& rulers, int4b step)
+bool trend::Tolder::rlrCollect(const layprop::RulerList& rulers, int4b step)
 {
    if (rulers.empty()) return false;
    DBline long_mark, short_mark, text_bp;
@@ -581,7 +581,7 @@ void trend::Tolder::grcCleanUp()
    TrendBase::grcCleanUp();
 }
 
-void trend::Tolder::drawRulers()
+void trend::Tolder::rlrDraw()
 {
    glColor4f((GLfloat)1, (GLfloat)1, (GLfloat)1, (GLfloat)0.7); // gray
 //   glDisable(GL_POLYGON_STIPPLE);

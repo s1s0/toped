@@ -31,7 +31,6 @@
 #include <fstream>
 #include <iostream>
 #include <iomanip>
-#include "ttt.h"
 #include "outbox.h"
 
 layprop::PropertyCenter*         PROPC   = NULL;
@@ -61,32 +60,6 @@ void layprop::SupplementaryData::mouseStop()
    }
 }
 
-//*****************************************************************************
-// class LayoutGrid
-//*****************************************************************************
-//void layprop::LayoutGrid::Draw(const DrawProperties& drawprop, const real DBscale)
-//{
-//   int gridstep = (int)rint(_step / DBscale);
-//   if (_visual && ( abs((int)(drawprop.scrCtm().a() * gridstep)) > GRID_LIMIT))
-//   {
-//      drawprop.setGridColor(_color);
-//      // set first grid step to be multiply on the step
-//      TP bl = TP(drawprop.clipRegion().p1().x(),drawprop.clipRegion().p2().y());
-//      TP tr = TP(drawprop.clipRegion().p2().x(),drawprop.clipRegion().p1().y());
-//      int signX = (bl.x() > 0) ? 1 : -1;
-//      int X_is = (int)((rint(abs(bl.x()) / gridstep)) * gridstep * signX);
-//      int signY = (tr.y() > 0) ? 1 : -1;
-//      int Y_is = (int)((rint(abs(tr.y()) / gridstep)) * gridstep * signY);
-//
-//      //... and finaly draw the grid
-//      glBegin(GL_POINTS);
-//      for (int i = X_is; i < tr.x()+1; i += gridstep)
-//         for (int j = Y_is; j < bl.y()+1; j += gridstep)
-//            glVertex2i(i,j);
-//      glEnd();
-//   }
-//}
-
 //=============================================================================
 layprop::PropertyCenter::PropertyCenter() :
    _drawprop          ( DEBUG_NEW DrawProperties() ),
@@ -104,39 +77,23 @@ layprop::PropertyCenter::PropertyCenter() :
 
 }
 
-//bool layprop::PropertyCenter::isLayerExist(word layno)
-//{
-//   return (NULL != _drawprop->findLayerSettings(layno));
-//}
-
-//bool layprop::PropertyCenter::isLayerExist(std::string layname)
-//{
-//   for(LaySetList::const_iterator it = _drawprop->getCurSetList().begin(); it != _drawprop->getCurSetList().end(); ++it)
-//   {
-//      if((*it).second->name() == layname) return true;
-//   }
-//   return false;
-//}
-
-//void layprop::PropertyCenter::loadLayoutFonts(std::string ffname, std::string fname, bool vbo)
-//{
-//   fontLib = DEBUG_NEW FontLibrary(ffname, fname, vbo);
-//}
-
 void layprop::PropertyCenter::addUnpublishedLay(const LayerDef& laydef)
 {
    _uplaylist.push_back(laydef);
 }
 
-const layprop::LayoutGrid* layprop::PropertyCenter::grid(byte No) const {
-   if (_grid.end() != _grid.find(No)) {
+const layprop::LayoutGrid* layprop::PropertyCenter::grid(byte No) const
+{
+   if (_grid.end() != _grid.find(No))
+   {
       gridlist::const_iterator cg = _grid.find(No);
       return cg->second;
    }
    else return NULL;
 }
 
-void layprop::PropertyCenter::setGrid(byte No, real step, std::string colname) {
+void layprop::PropertyCenter::setGrid(byte No, real step, std::string colname)
+{
    if (_grid.end() != _grid.find(No)) // if this grid No is already defined
       _grid[No]->Init(step,colname);
    else // define a new grid
@@ -149,13 +106,6 @@ bool layprop::PropertyCenter::viewGrid(byte No, bool status) {
    else status = false;
    return status;
 }
-
-//void layprop::PropertyCenter::drawGrid(const DrawProperties* drawProp) const
-//{
-//   typedef gridlist::const_iterator CI;
-//   for(CI p = _grid.begin(); p != _grid.end(); p++)
-//      p->second->Draw(*drawProp, _UU);
-//}
 
 //void layprop::PropertyCenter::drawZeroCross(const DrawProperties* drawProp) const
 //{

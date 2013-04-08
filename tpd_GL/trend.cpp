@@ -968,11 +968,11 @@ void trend::TrendCenter::drawGrid()
    {
       const layprop::LayoutGrid* cgrid = PROPC->grid(gridNo);
       if ((NULL !=  cgrid) && cgrid->visual())
-         drawGrid |= _cRenderer->gridCalc(cgrid->step(), cgrid->color() , gridNo);
+         drawGrid |= _cRenderer->grdCollect(cgrid->step(), cgrid->color() , gridNo);
    }
    if (drawGrid)
    {
-      _cRenderer->gridDraw();
+      _cRenderer->grdDraw();
    }
 }
 

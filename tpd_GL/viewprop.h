@@ -52,7 +52,6 @@ namespace layprop {
                         LayoutGrid(real st, std::string cl) :_step(st), _color(cl),
                                                                   _visual(false) {};
       void              Init(real st, std::string cl) {_step = st; _color = cl;}
-//      void              Draw(const DrawProperties&, const real);
       real              step() const           {return _step;}
       bool              visual() const         {return _visual;}
       std::string       color() const          {return _color;}
@@ -86,16 +85,12 @@ namespace layprop {
       typedef  std::map<byte       , LayoutGrid*   >  gridlist;
                         PropertyCenter();
                        ~PropertyCenter();
-//      bool              isLayerExist(word);
-//      bool              isLayerExist(std::string);
       void              addUnpublishedLay(const LayerDef&);
       void              saveProperties(std::string);
       //
       const LayoutGrid* grid(byte) const;
       void              setGrid(byte, real, std::string);
       bool              viewGrid(byte, bool);
-//      void              drawGrid(const DrawProperties*) const;
-//      void              drawZeroCross(const DrawProperties*) const;
       void              setUU(real);
       void              setGdsLayMap(ExpLayMap* map);
       void              setCifLayMap(ExpLayMap* map);
