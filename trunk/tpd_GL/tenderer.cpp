@@ -785,8 +785,10 @@ trend::Tenderer::Tenderer( layprop::DrawProperties* drawprop, real UU, bool crea
     TrendBase            (drawprop, UU),
    _num_ogl_buffers      (       0u   ),
    _num_ogl_grc_buffers  (       0u   ),
+   _num_ruler_ticks      (       0u   ),
    _ogl_buffers          (       NULL ),
    _ogl_grc_buffers      (       NULL ),
+   _ogl_rlr_buffer       (       NULL ),
    _sbuffer              (       0u   )
 {
    if (createRefLay)
@@ -858,7 +860,7 @@ void trend::Tenderer::setHvrLayer(const LayerDef& laydef)
    }
 }
 
-void trend::Tenderer::gridDraw()
+void trend::Tenderer::grdDraw()
 {
    glEnableClientState(GL_VERTEX_ARRAY);
    for (byte gridNo = 0; gridNo < 3; gridNo++)
@@ -1044,7 +1046,7 @@ bool trend::Tenderer::grcCollect()
    return true;
 }
 
-bool trend::Tenderer::collectRulers(const layprop::RulerList& rulers, int4b step)
+bool trend::Tenderer::rlrCollect(const layprop::RulerList& rulers, int4b step)
 {
    if (rulers.empty()) return false;
    DBline long_mark, short_mark, text_bp;
@@ -1223,7 +1225,7 @@ void trend::Tenderer::rlrCleanUp()
    TrendBase::rlrCleanUp();
 }
 
-void trend::Tenderer::drawRulers()
+void trend::Tenderer::rlrDraw()
 {
 //   glColor4ub
    glColor4f((GLfloat)1, (GLfloat)1, (GLfloat)1, (GLfloat)0.7); // gray

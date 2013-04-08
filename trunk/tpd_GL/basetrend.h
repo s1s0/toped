@@ -622,8 +622,6 @@ namespace trend {
       public:
                            TrendBase( layprop::DrawProperties* drawprop, real UU );
          virtual          ~TrendBase();
-         virtual void      gridDraw() = 0;
-         bool              gridCalc(const real, const std::string, byte);
          virtual void      zeroCross( ) = 0;
          virtual void      setLayer(const LayerDef&, bool) = 0;
          virtual void      setHvrLayer(const LayerDef&) = 0;
@@ -653,12 +651,17 @@ namespace trend {
          void              arefOBox(std::string, const CTM&, const DBbox&, bool);
          void              text (const std::string*, const CTM&, const DBbox&, const TP&, bool);
          void              textt(const std::string*, const CTM&, const TP&);
+
          virtual bool      collect() = 0;
          virtual bool      grcCollect() = 0;
-         virtual bool      collectRulers(const layprop::RulerList&, int4b) = 0;
+         bool              grdCollect(const real, const std::string, byte);
+         virtual bool      rlrCollect(const layprop::RulerList&, int4b) = 0;
+
          virtual void      draw() = 0;
          virtual void      grcDraw() = 0;
-         virtual void      drawRulers()=0;
+         virtual void      grdDraw() = 0;
+         virtual void      rlrDraw()=0;
+
          virtual void      cleanUp();
          virtual void      grcCleanUp();
          virtual void      rlrCleanUp();

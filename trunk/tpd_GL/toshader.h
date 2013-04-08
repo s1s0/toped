@@ -86,7 +86,7 @@ namespace trend {
       public:
                            Toshader( layprop::DrawProperties*, real UU);
          virtual          ~Toshader();
-         virtual void      gridDraw();
+         virtual void      grdDraw();
          virtual void      zeroCross();
          virtual void      setLayer(const LayerDef&, bool);
          virtual void      setHvrLayer(const LayerDef&);
@@ -94,7 +94,7 @@ namespace trend {
          virtual bool      chunkExists(const LayerDef&, bool);
          virtual void      draw();
          virtual void      grcDraw();
-         virtual void      drawRulers();
+         virtual void      rlrDraw();
          //virtual void      cleanUp();
          //virtual void      grcCleanUp();
       protected:
