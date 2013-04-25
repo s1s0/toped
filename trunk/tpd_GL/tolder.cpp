@@ -260,17 +260,31 @@ trend::Tolder::Tolder( layprop::DrawProperties* drawprop, real UU ) :
 void trend::Tolder::grdDraw()
 {
    glBegin(GL_POINTS);
-   for (byte gridNo = 0; gridNo < 3; gridNo++)
+   TNDR_GLDATAT* cpoint_array = new TNDR_GLDATAT [_num_grid_points];
+   unsigned start = 0;
+   unsigned stop = 0;
+   for (VGrids::const_iterator VG = _grid_props.begin(); VG != _grid_props.end(); VG++)
    {
-      if (NULL == _grids[gridNo]) continue;
-      unsigned size = _grids[gridNo]->_size;
-      if (0 == size) continue;
-      layprop::tellRGB theColor(_drawprop->getColor(_grids[gridNo]->_color));
+      layprop::tellRGB theColor(_drawprop->getColor((*VG)->color()));
       glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
-      int* theArray = _grids[gridNo]->_array;
-      for (unsigned i = 0; i < size; i++)
-         glVertex2i(theArray[2*i], theArray[2*i+1]);
+      stop = (*VG)->dump(cpoint_array, start);
+      for (unsigned i = start; i < stop; i++)
+         glVertex2i(cpoint_array[2*i], cpoint_array[2*i+1]);
+      start = stop;
    }
+   assert(start == (2 * _num_grid_points));
+   delete [] cpoint_array;
+
+   //   for (TrendGrids::const_iterator CG = _grids.begin(); CG != _grids.end(); CG++)
+//   {
+//      unsigned size = (*CG)->size();
+//      if (0 == size) continue;
+//      layprop::tellRGB theColor(_drawprop->getColor((*CG)->color()));
+//      glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
+//      const int* theArray = (*CG)->array();
+//      for (unsigned i = 0; i < size; i++)
+//         glVertex2i(theArray[2*i], theArray[2*i+1]);
+//   }
    glEnd();
 }
 
@@ -460,6 +474,54 @@ bool trend::Tolder::grcCollect()
    // Check whether we have to continue after traversing
    if (0 == num_total_buffers) return false;
    return true;
+}
+
+bool trend::Tolder::grdCollect(const layprop::LayoutGrid** allGrids)
+{
+   // render the grid
+   for (byte gridNo = 0; gridNo < 3; gridNo++)
+   {
+      const layprop::LayoutGrid* cgrid = allGrids[gridNo];
+      if ((NULL !=  cgrid) && cgrid->visual())
+      {
+         int gridstep = (int)rint(cgrid->step() / _UU);
+         bool gridOn = ( abs((int)(_drawprop->scrCtm().a() * gridstep)) > GRID_LIMIT);
+         if (!gridOn) continue;
+         // set first grid step to be multiply on the step
+         TP bl = TP(_drawprop->clipRegion().p1().x(),_drawprop->clipRegion().p2().y());
+         TP tr = TP(_drawprop->clipRegion().p2().x(),_drawprop->clipRegion().p1().y());
+
+         TrendGridC* cvgrid = DEBUG_NEW TrendGridC(bl,tr,gridstep, cgrid->color());
+         _num_grid_points += cvgrid->asize();
+         _grid_props.push_back(cvgrid);
+      }
+   }
+//   TNDR_GLDATAT* cpoint_array = new TNDR_GLDATAT [_num_grid_points];
+//   unsigned pnt = 0;
+//   for (VGrids::const_iterator VG = _grid_props.begin(); VG != _grid_props.end(); VG++)
+//   {
+//      pnt = (*VG)->dump(cpoint_array, pnt);
+//   }
+//   assert(pnt == (2 * _num_grid_points));
+
+//         int signX = (bl.x() > 0) ? 1 : -1;
+//         int X_is = (int)((rint(abs(bl.x()) / gridstep)) * gridstep * signX);
+//         int signY = (tr.y() > 0) ? 1 : -1;
+//         int Y_is = (int)((rint(abs(tr.y()) / gridstep)) * gridstep * signY);
+//
+//         unsigned arr_size = ( (((tr.x() - X_is + 1) / gridstep) + 1) * (((bl.y() - Y_is + 1) / gridstep) + 1) );
+//         int* point_array = DEBUG_NEW int[arr_size * 2];
+//         int index = 0;
+//         for (int i = X_is; i < tr.x()+1; i += gridstep)
+//         {
+//            for (int j = Y_is; j < bl.y()+1; j += gridstep)
+//            {
+//               point_array[index++] = i;
+//               point_array[index++] = j;
+//            }
+//         }
+//         _grids.push_back(DEBUG_NEW TrendGrid(arr_size,point_array,cgrid->color()));
+   return (_num_grid_points > 0);
 }
 
 bool trend::Tolder::rlrCollect(const layprop::RulerList& rulers, int4b step)

@@ -118,7 +118,6 @@ namespace trend {
       public:
                            Tenderer( layprop::DrawProperties* , real, bool createRefLay = true);
          virtual          ~Tenderer();
-         virtual void      grdDraw();
          virtual void      zeroCross();
          virtual void      setLayer(const LayerDef&, bool);
          virtual void      setHvrLayer(const LayerDef&);
@@ -126,12 +125,15 @@ namespace trend {
          virtual bool      chunkExists(const LayerDef&, bool);
          virtual bool      collect();
          virtual bool      grcCollect();
+         virtual bool      grdCollect(const layprop::LayoutGrid**);
          virtual bool      rlrCollect(const layprop::RulerList&, int4b);
          virtual void      draw();
          virtual void      grcDraw();
+         virtual void      grdDraw();
          virtual void      rlrDraw();
          virtual void      cleanUp();
          virtual void      grcCleanUp();
+         virtual void      grdCleanUp();
          virtual void      rlrCleanUp();
       protected:
          virtual void      setLayColor(const LayerDef& layer);
@@ -139,10 +141,13 @@ namespace trend {
          virtual void      setLine(bool);
          unsigned          _num_ogl_buffers; //! Number of generated openGL VBOs
          unsigned          _num_ogl_grc_buffers; //!
+//         VGrids            _grid_props;      //! The properties of all visual grids
+//         unsigned          _num_grid_points; //! Number of all points in all grids
          unsigned          _num_ruler_ticks; //! Number of lines in _ogl_rlr_buffer
          GLuint*           _ogl_buffers;     //! Array with the "names" of all openGL buffers
          GLuint*           _ogl_grc_buffers; //! Array with the "names" of the GRC related openGL buffers
          GLuint*           _ogl_rlr_buffer;  //!
+         GLuint*           _ogl_grd_buffer;
          GLuint            _sbuffer;         //! The "name" of the selected index buffer
    };
 

@@ -209,8 +209,6 @@ namespace trend {
          void                   releaseCRenderer();
          void                   releaseHRenderer();
          void                   releaseMRenderer();
-         void                   drawGrid();
-//         void                   drawRulers();
          void                   drawZeroCross();
          void                   drawFOnly();
          //Font handling
