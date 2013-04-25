@@ -798,14 +798,14 @@ void DataCenter::render()
       trend::TrendBase* cRenderer = TRENDC->getCRenderer();
       if (NULL != cRenderer)
       {
-//         // grid
-//         const layprop::LayoutGrid* allGrids[3] = {PROPC->grid(0),PROPC->grid(2),PROPC->grid(3)};
-//         if (cRenderer->grdCollect(allGrids))
-//         {
-//            cRenderer->grdDraw();
-//            cRenderer->grdCleanUp();
-//         }
-         TRENDC->drawGrid();
+         // grid
+         const layprop::LayoutGrid* allGrids[3] = {PROPC->grid(0),PROPC->grid(1),PROPC->grid(2)};
+         if (cRenderer->grdCollect(allGrids))
+         {
+            cRenderer->grdDraw();
+            cRenderer->grdCleanUp();
+         }
+//         TRENDC->drawGrid();
          TRENDC->drawZeroCross();
          if (wxMUTEX_NO_ERROR == _DBLock.TryLock())
          {

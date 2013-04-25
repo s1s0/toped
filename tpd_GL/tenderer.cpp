@@ -785,10 +785,12 @@ trend::Tenderer::Tenderer( layprop::DrawProperties* drawprop, real UU, bool crea
     TrendBase            (drawprop, UU),
    _num_ogl_buffers      (       0u   ),
    _num_ogl_grc_buffers  (       0u   ),
+//   _num_grid_points      (       0u   ),
    _num_ruler_ticks      (       0u   ),
    _ogl_buffers          (       NULL ),
    _ogl_grc_buffers      (       NULL ),
    _ogl_rlr_buffer       (       NULL ),
+   _ogl_grd_buffer       (       NULL ),
    _sbuffer              (       0u   )
 {
    if (createRefLay)
@@ -862,19 +864,38 @@ void trend::Tenderer::setHvrLayer(const LayerDef& laydef)
 
 void trend::Tenderer::grdDraw()
 {
+//   glEnableClientState(GL_VERTEX_ARRAY);
+//   for (TrendGrids::const_iterator CG = _grids.begin(); CG != _grids.end(); CG++)
+//   {
+//      unsigned size = (*CG)->size();
+//      if (0 == size) continue;
+//      layprop::tellRGB theColor(_drawprop->getColor((*CG)->color()));
+//      glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
+//      const int* theArray = (*CG)->array();
+//      glVertexPointer(2, GL_INT, 0, theArray);
+//      glDrawArrays(GL_POINTS, 0, size);
+//   }
+//   glDisableClientState(GL_VERTEX_ARRAY);
+
+
    glEnableClientState(GL_VERTEX_ARRAY);
-   for (byte gridNo = 0; gridNo < 3; gridNo++)
+   glBindBuffer(GL_ARRAY_BUFFER, _ogl_grd_buffer[0]);
+   // Check the state of the buffer
+   GLint bufferSize;
+   glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
+   assert(bufferSize == (GLint)(2 * _num_grid_points * sizeof(TNDR_GLDATAT)));
+   // Set-up the offset in the binded Vertex buffer
+   glVertexPointer(2, TNDR_GLENUMT, 0, 0);
+   unsigned startP = 0;
+   for (VGrids::const_iterator CG = _grid_props.begin(); CG != _grid_props.end(); CG++)
    {
-      if (NULL == _grids[gridNo]) continue;
-      unsigned size = _grids[gridNo]->_size;
-      if (0 == size) continue;
-      layprop::tellRGB theColor(_drawprop->getColor(_grids[gridNo]->_color));
+      layprop::tellRGB theColor(_drawprop->getColor((*CG)->color()));
       glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
-      int* theArray = _grids[gridNo]->_array;
-      glVertexPointer(2, GL_INT, 0, theArray);
-      glDrawArrays(GL_POINTS, 0, size);
+      // draw
+      glDrawArrays(GL_POINTS, startP, (*CG)->asize());
+      startP += (*CG)->asize();
    }
-   glDisableClientState(GL_VERTEX_ARRAY);
+   glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void trend::Tenderer::zeroCross()
@@ -1046,6 +1067,48 @@ bool trend::Tenderer::grcCollect()
    return true;
 }
 
+bool trend::Tenderer::grdCollect(const layprop::LayoutGrid** allGrids)
+{
+//   unsigned allPoints = 0;
+   for (byte gridNo = 0; gridNo < 3; gridNo++)
+   {
+      const layprop::LayoutGrid* cgrid = allGrids[gridNo];
+      if ((NULL !=  cgrid) && cgrid->visual())
+      {
+         int gridstep = (int)rint(cgrid->step() / _UU);
+         bool gridOn = ( abs((int)(_drawprop->scrCtm().a() * gridstep)) > GRID_LIMIT);
+         if (!gridOn) continue;
+         // set first grid step to be multiply on the step
+         TP bl = TP(_drawprop->clipRegion().p1().x(),_drawprop->clipRegion().p2().y());
+         TP tr = TP(_drawprop->clipRegion().p2().x(),_drawprop->clipRegion().p1().y());
+
+         TrendGridC* cvgrid = DEBUG_NEW TrendGridC(bl,tr,gridstep, cgrid->color());
+         _num_grid_points += cvgrid->asize();
+         _grid_props.push_back(cvgrid);
+      }
+   }
+   if (0 == _num_grid_points) return false;
+   _ogl_grd_buffer = DEBUG_NEW GLuint [1];
+   glGenBuffers(1, _ogl_grd_buffer);
+
+   TNDR_GLDATAT* cpoint_array = NULL;
+   glBindBuffer(GL_ARRAY_BUFFER, _ogl_grd_buffer[0]);
+   glBufferData(GL_ARRAY_BUFFER                       ,
+                2 * _num_grid_points * sizeof(TNDR_GLDATAT)  ,
+                NULL                                  ,
+                GL_DYNAMIC_DRAW                       );
+   cpoint_array = (TNDR_GLDATAT*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+   unsigned pnt = 0;
+   for (VGrids::const_iterator VG = _grid_props.begin(); VG != _grid_props.end(); VG++)
+   {
+      pnt = (*VG)->dump(cpoint_array, pnt);
+   }
+   assert(pnt == (2 * _num_grid_points));
+   // Unmap the buffers
+   glUnmapBuffer(GL_ARRAY_BUFFER);
+   return true;
+}
+
 bool trend::Tenderer::rlrCollect(const layprop::RulerList& rulers, int4b step)
 {
    if (rulers.empty()) return false;
@@ -1210,6 +1273,24 @@ void trend::Tenderer::grcCleanUp()
       _ogl_grc_buffers = NULL;
    }
    TrendBase::grcCleanUp();
+}
+
+void trend::Tenderer::grdCleanUp()
+{
+   glBindBuffer(GL_ARRAY_BUFFER, 0);
+   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+   if (NULL != _ogl_grd_buffer)
+   {
+      glDeleteBuffers(1, _ogl_grd_buffer);
+      delete [] _ogl_grd_buffer;
+      _ogl_grd_buffer = NULL;
+   }
+   for (VGrids::const_iterator CG = _grid_props.begin(); CG != _grid_props.end(); CG++)
+   {
+      delete (*CG);
+   }
+   _grid_props.clear();
+   TrendBase::grdCleanUp();
 }
 
 void trend::Tenderer::rlrCleanUp()

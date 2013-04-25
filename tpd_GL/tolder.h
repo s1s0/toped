@@ -89,6 +89,7 @@ namespace trend {
          virtual bool      chunkExists(const LayerDef&, bool);
          virtual bool      collect();
          virtual bool      grcCollect();
+         virtual bool      grdCollect(const layprop::LayoutGrid**);
          virtual bool      rlrCollect(const layprop::RulerList&, int4b);
          virtual void      draw();
          virtual void      grcDraw();

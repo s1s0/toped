@@ -960,21 +960,6 @@ void trend::TrendCenter::drawFOnly()
 //   if (NULL != _cRenderer) _cRenderer->grcDraw(); // TODO
 }
 
-void trend::TrendCenter::drawGrid()
-{
-   // render the grid
-   bool drawGrid = false;
-   for (byte gridNo = 0; gridNo < 3; gridNo++)
-   {
-      const layprop::LayoutGrid* cgrid = PROPC->grid(gridNo);
-      if ((NULL !=  cgrid) && cgrid->visual())
-         drawGrid |= _cRenderer->grdCollect(cgrid->step(), cgrid->color() , gridNo);
-   }
-   if (drawGrid)
-   {
-      _cRenderer->grdDraw();
-   }
-}
 
 void trend::TrendCenter::drawZeroCross()
 {

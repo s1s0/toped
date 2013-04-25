@@ -487,22 +487,21 @@ void trend::Toshader::grdDraw()
 
    glEnableVertexAttribArray(TSHDR_LOC_VERTEX);
 
-   byte numBuffers = 0;
-   for (byte gridNo = 0; gridNo < 3; gridNo++)
+//   byte numBuffers = 0;
+//   for (TrendGrids::const_iterator CG = _grids.begin(); CG != _grids.end(); CG++)
+//   {
+//      if (0 !=  (*CG)->size()) numBuffers++;
+//   }
+//   GLuint* ogl_buffers = DEBUG_NEW GLuint [numBuffers];
+//   glGenBuffers(numBuffers, ogl_buffers);
+//   byte curBuffer = 1;
+//   for (TrendGrids::const_iterator CG = _grids.begin(); CG != _grids.end(); CG++)
+   glBindBuffer(GL_ARRAY_BUFFER, _ogl_grd_buffer[0]);
+   unsigned startP = 0;
+   for (VGrids::const_iterator CG = _grid_props.begin(); CG != _grid_props.end(); CG++)
    {
-      if (NULL == _grids[gridNo]) continue;
-      if (0 !=  _grids[gridNo]->_size) numBuffers++;
-   }
-   GLuint* ogl_buffers = DEBUG_NEW GLuint [numBuffers];
-   glGenBuffers(numBuffers, ogl_buffers);
-   byte curBuffer = 1;
-   for (byte gridNo = 0; gridNo < 3; gridNo++)
-   {
-      if (NULL == _grids[gridNo]) continue;
-      unsigned size = _grids[gridNo]->_size;
-      if (0 == size) continue;
       // color
-      layprop::tellRGB theColor(_drawprop->getColor(_grids[gridNo]->_color));
+      layprop::tellRGB theColor(_drawprop->getColor((*CG)->color()));
       float oglColor[4];
       oglColor[0] = (float)theColor.red()   / 255.0f ;
       oglColor[1] = (float)theColor.green() / 255.0f ;
@@ -511,26 +510,27 @@ void trend::Toshader::grdDraw()
       glUniform3fv(TRENDC->getUniformLoc(glslu_in_Color), 1, oglColor);
       glUniform1f(TRENDC->getUniformLoc(glslu_in_Alpha), oglColor[3]);
       // collect
-      glBindBuffer(GL_ARRAY_BUFFER, curBuffer++);
-      glBufferData(GL_ARRAY_BUFFER                       ,
-                   2 * size * sizeof(TNDR_GLDATAT)       ,
-                   NULL                                  ,
-                   GL_DYNAMIC_DRAW                       );
-      TNDR_GLDATAT* point_array = (TNDR_GLDATAT*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-      int* theArray = _grids[gridNo]->_array;
-      for (unsigned i = 0; i < 2*size; i++)
-         point_array[i] = theArray[i];
-      glUnmapBuffer(GL_ARRAY_BUFFER);
+//      glBindBuffer(GL_ARRAY_BUFFER, _ogl_grd_buffer[0]);
+//      glBufferData(GL_ARRAY_BUFFER                       ,
+//                   2 * size * sizeof(TNDR_GLDATAT)       ,
+//                   NULL                                  ,
+//                   GL_DYNAMIC_DRAW                       );
+//      TNDR_GLDATAT* point_array = (TNDR_GLDATAT*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+//      const int* theArray = (*CG)->array();
+//      for (unsigned i = 0; i < 2*size; i++)
+//         point_array[i] = theArray[i];
+//      glUnmapBuffer(GL_ARRAY_BUFFER);
       //draw
       glVertexAttribPointer(TSHDR_LOC_VERTEX, 2, TNDR_GLENUMT, GL_FALSE, 0, 0);
-      glDrawArrays(GL_POINTS, 0, size);
-
+//      glDrawArrays(GL_POINTS, 0, size);
+      glDrawArrays(GL_POINTS, startP, (*CG)->asize());
+      startP += (*CG)->asize();
    }
    glDisableVertexAttribArray(TSHDR_LOC_VERTEX);
    // clean-up the buffers
    glBindBuffer(GL_ARRAY_BUFFER, 0);
-   glDeleteBuffers(numBuffers, ogl_buffers);
-   delete [] ogl_buffers;
+//   glDeleteBuffers(numBuffers, ogl_buffers);
+//   delete [] ogl_buffers;
 }
 
 void trend::Toshader::zeroCross()

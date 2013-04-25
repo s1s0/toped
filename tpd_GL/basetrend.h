@@ -168,6 +168,8 @@
 // drawing from VBO
 #define VBO_BUFFER_OFFSET(i) ((char *)NULL + (i))
 
+// Forward declarations
+namespace layprop { class LayoutGrid;}
 //=============================================================================
 //
 //
@@ -604,11 +606,44 @@ namespace trend {
          PointList         _arefMarks;
    };
 
+   class TrendGrid {
+      public:
+                  TrendGrid(unsigned size = 0, int* array = NULL, std::string color="") :
+                     _size   ( size   ),
+                     _array  ( array  ),
+                     _color  ( color  ) {};
+                 ~TrendGrid() {if (NULL != _array) delete [] _array;}
+         unsigned          size () { return _size ;}
+         const int*        array() { return _array;}
+         std::string       color() { return _color;}
+      private:
+         unsigned          _size;
+         int*              _array;
+         std::string       _color;
+   };
+
+   class TrendGridC {
+      public:
+                           TrendGridC(TP, TP, int step, std::string color);
+         unsigned          dump(TNDR_GLDATAT*, unsigned);
+         unsigned          asize() {return _asize;}
+         std::string       color() {return _color;}
+      private:
+         void              calculate();
+         TP                _bl;
+         TP                _tr;
+         int               _step;
+         std::string       _color;
+         int               _X;
+         int               _Y;
+         unsigned          _asize;
+   };
    //-----------------------------------------------------------------------------
    //
    typedef laydata::LayerContainer<TrendLay*> DataLay;
    typedef std::stack<TrxCellRef*> CellStack;
-
+   typedef std::list<TrendGrid*> TrendGrids;
+   typedef std::list<TrendGridC*> VGrids;
    /**
       Toped RENDerer BASE is the front-end class, the interface to the rest of
       the world. Pure virtual. All data collection and render views are initiated
@@ -654,7 +689,7 @@ namespace trend {
 
          virtual bool      collect() = 0;
          virtual bool      grcCollect() = 0;
-         bool              grdCollect(const real, const std::string, byte);
+         virtual bool      grdCollect(const layprop::LayoutGrid**) = 0;
          virtual bool      rlrCollect(const layprop::RulerList&, int4b) = 0;
 
          virtual void      draw() = 0;
@@ -664,6 +699,7 @@ namespace trend {
 
          virtual void      cleanUp();
          virtual void      grcCleanUp();
+         virtual void      grdCleanUp();
          virtual void      rlrCleanUp();
 
          LayerDef          getTenderLay(const LayerDef& laydef)
@@ -684,16 +720,6 @@ namespace trend {
          bool              adjustTextOrientation() const {return _drawprop->adjustTextOrientation();}
          layprop::DrawProperties*&   drawprop()          {return _drawprop                         ;}
       protected:
-         struct GridSet {
-                        GridSet(unsigned size = 0, int* array = NULL, std::string color="") :
-                           _size   ( size   ),
-                           _array  ( array  ),
-                           _color  ( color  ) {};
-                       ~GridSet() {if (NULL != _array) delete [] _array;}
-            unsigned    _size;
-            int*        _array;
-            std::string _color;
-         };
          virtual void      setLayColor(const LayerDef& layer) = 0;
          virtual void      setStipple() = 0;
          virtual void      setLine(bool) = 0;
@@ -713,7 +739,9 @@ namespace trend {
          RefBoxList        _hiddenRefBoxes;  //!Those cRefBox objects which didn't ended in the TrendRefLay structures
          TrendMarks*       _marks;           //!All kinds of object marks
          CTM*              _rmm;             //!Reverse motion matrix
-         GridSet*          _grids[3];        //!All grid points
+         VGrids            _grid_props;      //! The properties of all visual grids
+         unsigned          _num_grid_points; //! Number of all points in all grids
+//         TrendGrids        _grids;           //!All grid points
          TrendStrings      _rulerTexts;      //!The labels on all rulers
 
    };

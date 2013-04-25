@@ -472,21 +472,21 @@ unsigned trend::TrendMarks::total_points()
 // class TrendBase
 //
 trend::TrendBase::TrendBase( layprop::DrawProperties* drawprop, real UU ) :
-   _drawprop           ( drawprop  ),
-   _UU                 (        UU ),
-   _clayer             (      NULL ),
-   _grcLayer           (      NULL ),
-   _refLayer           (      NULL ),
-   _cslctd_array_offset(        0u ),
-   _activeCS           (      NULL ),
-   _dovCorrection      (         0 ),
-   _marks              (      NULL ),
-   _rmm                (      NULL )
+   _drawprop             ( drawprop  ),
+   _UU                   (        UU ),
+   _clayer               (      NULL ),
+   _grcLayer             (      NULL ),
+   _refLayer             (      NULL ),
+   _cslctd_array_offset  (        0u ),
+   _activeCS             (      NULL ),
+   _dovCorrection        (         0 ),
+   _marks                (      NULL ),
+   _rmm                  (      NULL ),
+   _num_grid_points      (        0u )
+
 {
    // Initialize the cell (CTM) stack
    _cellStack.push(DEBUG_NEW TrxCellRef());
-   for (byte i = 0; i < 3; i++)
-      _grids[i] = NULL;
 
 }
 
@@ -495,33 +495,33 @@ void trend::TrendBase::setRmm(const CTM& mm)
    _rmm = DEBUG_NEW CTM(mm.Reversed());
 }
 
-bool trend::TrendBase::grdCollect(const real step, const std::string color, byte gridNo)
-{
-   int gridstep = (int)rint(step / _UU);
-   bool gridOn = ( abs((int)(_drawprop->scrCtm().a() * gridstep)) > GRID_LIMIT);
-   if (!gridOn) return false;
-   // set first grid step to be multiply on the step
-   TP bl = TP(_drawprop->clipRegion().p1().x(),_drawprop->clipRegion().p2().y());
-   TP tr = TP(_drawprop->clipRegion().p2().x(),_drawprop->clipRegion().p1().y());
-   int signX = (bl.x() > 0) ? 1 : -1;
-   int X_is = (int)((rint(abs(bl.x()) / gridstep)) * gridstep * signX);
-   int signY = (tr.y() > 0) ? 1 : -1;
-   int Y_is = (int)((rint(abs(tr.y()) / gridstep)) * gridstep * signY);
-
-   unsigned arr_size = ( (((tr.x() - X_is + 1) / gridstep) + 1) * (((bl.y() - Y_is + 1) / gridstep) + 1) );
-   int* point_array = DEBUG_NEW int[arr_size * 2];
-   int index = 0;
-   for (int i = X_is; i < tr.x()+1; i += gridstep)
-   {
-      for (int j = Y_is; j < bl.y()+1; j += gridstep)
-      {
-         point_array[index++] = i;
-         point_array[index++] = j;
-      }
-   }
-   _grids[gridNo] = DEBUG_NEW GridSet(arr_size,point_array,color);
-   return true;
-}
+//bool trend::TrendBase::grdCollect(const real step, const std::string color, byte gridNo)
+//{
+//   int gridstep = (int)rint(step / _UU);
+//   bool gridOn = ( abs((int)(_drawprop->scrCtm().a() * gridstep)) > GRID_LIMIT);
+//   if (!gridOn) return false;
+//   // set first grid step to be multiply on the step
+//   TP bl = TP(_drawprop->clipRegion().p1().x(),_drawprop->clipRegion().p2().y());
+//   TP tr = TP(_drawprop->clipRegion().p2().x(),_drawprop->clipRegion().p1().y());
+//   int signX = (bl.x() > 0) ? 1 : -1;
+//   int X_is = (int)((rint(abs(bl.x()) / gridstep)) * gridstep * signX);
+//   int signY = (tr.y() > 0) ? 1 : -1;
+//   int Y_is = (int)((rint(abs(tr.y()) / gridstep)) * gridstep * signY);
+//
+//   unsigned arr_size = ( (((tr.x() - X_is + 1) / gridstep) + 1) * (((bl.y() - Y_is + 1) / gridstep) + 1) );
+//   int* point_array = DEBUG_NEW int[arr_size * 2];
+//   int index = 0;
+//   for (int i = X_is; i < tr.x()+1; i += gridstep)
+//   {
+//      for (int j = Y_is; j < bl.y()+1; j += gridstep)
+//      {
+//         point_array[index++] = i;
+//         point_array[index++] = j;
+//      }
+//   }
+//   _grids[gridNo] = DEBUG_NEW GridSet(arr_size,point_array,color);
+//   return true;
+//}
 
 void trend::TrendBase::pushCell(std::string cname, const CTM& trans, const DBbox& overlap, bool active, bool selected)
 {
@@ -676,6 +676,14 @@ void trend::TrendBase::grcCleanUp()
    }
 }
 
+void trend::TrendBase::grdCleanUp()
+{
+//   for (TrendGrids::const_iterator CG = _grids.begin(); CG != _grids.end(); CG++)
+//   {
+//      delete (*CG);
+//   }
+}
+
 void trend::TrendBase::rlrCleanUp()
 {
    for (TrendStrings::const_iterator TS = _rulerTexts.begin(); TS != _rulerTexts.end(); TS++)
@@ -715,8 +723,41 @@ trend::TrendBase::~TrendBase()
    if (_refLayer) delete _refLayer;
    if (_marks)    delete _marks;
    if (_rmm)      delete _rmm;
-   for (byte i = 0; i < 3; i++)
-      if (NULL != _grids[i]) delete _grids[i];
+}
+
+trend::TrendGridC::TrendGridC(TP bl, TP tr, int step, std::string color) :
+   _bl    ( bl     ),
+   _tr    ( tr     ),
+   _step  ( step   ),
+   _color ( color  ),
+   _X     (      0 ),
+   _Y     (      0 ),
+   _asize (      0 )
+{
+   calculate();
+}
+
+void trend::TrendGridC::calculate()
+{
+   int signX = (_bl.x() > 0) ? 1 : -1;
+       _X    = (int)((rint(abs(_bl.x()) / _step)) * _step * signX);
+   int signY = (_tr.y() > 0) ? 1 : -1;
+       _Y = (int)((rint(abs(_tr.y()) / _step)) * _step * signY);
+
+   _asize = ( (((_tr.x() - _X + 1) / _step) + 1) * (((_bl.y() - _Y + 1) / _step) + 1) );
+}
+
+unsigned trend::TrendGridC::dump(TNDR_GLDATAT* parray, unsigned index)
+{
+   for (int i = _X; i < _tr.x()+1; i += _step)
+   {
+      for (int j = _Y; j < _bl.y()+1; j += _step)
+      {
+         parray[index++] = i;
+         parray[index++] = j;
+      }
+   }
+   return index;
 }
 
 void trend::checkOGLError(std::string loc)
