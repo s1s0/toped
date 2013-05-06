@@ -625,7 +625,6 @@ void trend::Toshader::draw()
       glUniform1ui(TRENDC->getUniformLoc(glslu_in_StippleEn) , 0);
       glUniform1ui(TRENDC->getUniformLoc(glslu_in_LStippleEn), 0);
       glUniform1ui(TRENDC->getUniformLoc(glslu_in_MStippleEn), 1);
-      setLayColor(REF_LAY_DEF);
       float mtrxOrtho [16];
       _drawprop->topCtm().oglForm(mtrxOrtho);
       glUniformMatrix4fv(TRENDC->getUniformLoc(glslu_in_CTM), 1, GL_FALSE, mtrxOrtho);
@@ -661,6 +660,8 @@ void trend::Toshader::rlrDraw()
    oglColor[3] = 0.7f ;
    glUniform3fv(TRENDC->getUniformLoc(glslu_in_Color), 1, oglColor);
    glUniform1f(TRENDC->getUniformLoc(glslu_in_Alpha), oglColor[3]);
+   //Line width
+   glLineWidth(1);
 
    //draw
    glBindBuffer(GL_ARRAY_BUFFER, _ogl_rlr_buffer[0]);
