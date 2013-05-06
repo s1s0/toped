@@ -744,7 +744,7 @@ void trend::TrendGridC::calculate()
    int signY = (_tr.y() > 0) ? 1 : -1;
        _Y = (int)((rint(abs(_tr.y()) / _step)) * _step * signY);
 
-   _asize = ( (((_tr.x() - _X + 1) / _step) + 1) * (((_bl.y() - _Y + 1) / _step) + 1) );
+   _asize = ( (((_tr.x() - _X + 1) / _step)) * (((_bl.y() - _Y + 1) / _step)) );
 }
 
 unsigned trend::TrendGridC::dump(TNDR_GLDATAT* parray, unsigned index)
@@ -757,7 +757,7 @@ unsigned trend::TrendGridC::dump(TNDR_GLDATAT* parray, unsigned index)
          parray[index++] = j;
       }
    }
-   return index;
+   return index/2;
 }
 
 void trend::checkOGLError(std::string loc)
