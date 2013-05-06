@@ -270,6 +270,19 @@ void layprop::PropertyCenter::unlockDrawProp(DrawProperties*& propDB, bool throw
    propDB = NULL;
 }
 
+DBlineList layprop::PropertyCenter::getZCross()
+{
+   DBlineList zCross;
+   if (_zeroCross)
+   {
+      DBline line1(TP(0,_drawprop->clipRegion().p1().y()), TP(0,_drawprop->clipRegion().p2().y()));
+      DBline line2(TP(_drawprop->clipRegion().p1().x(),0), TP(_drawprop->clipRegion().p2().x(),0));
+      zCross.push_back( line1 );
+      zCross.push_back( line2 );
+   }
+   return zCross;
+}
+
 layprop::PropertyCenter::~PropertyCenter()
 {
    for(gridlist::iterator GI = _grid.begin(); GI != _grid.end(); GI++)

@@ -884,11 +884,6 @@ void trend::Tenderer::grdDraw()
    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void trend::Tenderer::zeroCross()
-{
-   //TODO
-}
-
 bool trend::Tenderer::collect()
 {
    // First filter-out the layers that doesn't have any objects on them,
@@ -1095,9 +1090,9 @@ bool trend::Tenderer::grdCollect(const layprop::LayoutGrid** allGrids)
    return true;
 }
 
-bool trend::Tenderer::rlrCollect(const layprop::RulerList& rulers, int4b step)
+bool trend::Tenderer::rlrCollect(const layprop::RulerList& rulers, int4b step, const DBlineList& zcross)
 {
-   if (rulers.empty()) return false;
+   if (rulers.empty() && zcross.empty()) return false;
    DBline long_mark, short_mark, text_bp;
    double scaledpix;
    genRulerMarks(scrCTM().Reversed(), long_mark, short_mark, text_bp, scaledpix);
@@ -1108,6 +1103,11 @@ bool trend::Tenderer::rlrCollect(const layprop::RulerList& rulers, int4b step)
       RA->addBaseLine(noniList);
       _rulerTexts.push_back(DEBUG_NEW trend::TrxText(RA->value(), RA->getFtmtrx(text_bp, scaledpix)));
    }
+   for(DBlineList::const_iterator RA = zcross.begin(); RA != zcross.end(); RA++)
+   {
+      noniList.push_back(*RA);
+   }
+
    _num_ruler_ticks = 2 * noniList.size();
    _ogl_rlr_buffer = DEBUG_NEW GLuint [1];
    glGenBuffers(1, _ogl_rlr_buffer);

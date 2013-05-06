@@ -132,7 +132,7 @@ namespace layprop {
       DBline            _ln;
       std::string       _value;
       TP                _center;
-      double            _length;
+      real              _length;
       real              _sinus;
       real              _cosinus;
       real              _angle;

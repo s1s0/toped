@@ -805,8 +805,6 @@ void DataCenter::render()
             cRenderer->grdDraw();
             cRenderer->grdCleanUp();
          }
-//         TRENDC->drawGrid();
-         TRENDC->drawZeroCross();
          if (wxMUTEX_NO_ERROR == _DBLock.TryLock())
          {
             TpdPost::render_status(true);
@@ -850,9 +848,10 @@ void DataCenter::render()
             tell_log(console::MT_INFO,std::string("DB busy. Viewport redraw skipped"));
             cRenderer->cleanUp();
          }
-         // rulers
+         // rulers & zero cross
          layprop::RulerList const rulers = PROPC->getAllRulers();
-         if (cRenderer->rlrCollect(rulers, PROPC->stepDB()))
+         DBlineList const zCross = PROPC->getZCross();
+         if (cRenderer->rlrCollect(rulers, PROPC->stepDB(),zCross))
          {
             cRenderer->rlrDraw();
             cRenderer->rlrCleanUp();
@@ -874,10 +873,11 @@ void DataCenter::motionDraw(const CTM& layCTM, TP base, TP newp)
       {
          // ruller
          layprop::RulerList rulers;
+         DBlineList dummy;
          rulers.push_back(layprop::SDLine(base, newp, PROPC->UU()));
          // here - it's clear that there is one ruler to draw, so there
          // is no point checking what the collectRulers returns
-         mRenderer->rlrCollect(rulers,PROPC->stepDB());
+         mRenderer->rlrCollect(rulers,PROPC->stepDB(), dummy);
          mRenderer->rlrDraw();
          mRenderer->rlrCleanUp();
       }

@@ -209,7 +209,6 @@ namespace trend {
          void                   releaseCRenderer();
          void                   releaseHRenderer();
          void                   releaseMRenderer();
-         void                   drawZeroCross();
          void                   drawFOnly();
          //Font handling
          void                   loadLayoutFont(std::string);

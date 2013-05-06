@@ -118,7 +118,6 @@ namespace trend {
       public:
                            Tenderer( layprop::DrawProperties* , real, bool createRefLay = true);
          virtual          ~Tenderer();
-         virtual void      zeroCross();
          virtual void      setLayer(const LayerDef&, bool);
          virtual void      setHvrLayer(const LayerDef&);
          virtual void      setGrcLayer(bool, const LayerDef&);
@@ -126,7 +125,7 @@ namespace trend {
          virtual bool      collect();
          virtual bool      grcCollect();
          virtual bool      grdCollect(const layprop::LayoutGrid**);
-         virtual bool      rlrCollect(const layprop::RulerList&, int4b);
+         virtual bool      rlrCollect(const layprop::RulerList&, int4b,const DBlineList&);
          virtual void      draw();
          virtual void      grcDraw();
          virtual void      grdDraw();
