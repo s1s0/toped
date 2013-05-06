@@ -756,7 +756,13 @@ void tui::TopedFrame::initView()
    _cmdlog = DEBUG_NEW console::ted_log(logpane, ID_WIN_TXT_LOG);
    logpane->AddPage(_cmdlog, wxT("Log"));
    _cmdbrowser = DEBUG_NEW console::TELLFuncList(logpane, ID_TELL_FUNCS);
-   console::HelpObject *helpObject = DEBUG_NEW console::HelpObject(wxGetApp().globalDir()+ wxT("/funchelp.txt"));
+
+   wxFileName helpFile(wxGetApp().globalDir());
+//   rcFile.AppendDir(wxT("tll"));
+   helpFile.SetFullName(wxT("funchelp.txt"));
+   helpFile.Normalize();
+   assert(helpFile.IsOk());
+   console::HelpObject *helpObject = DEBUG_NEW console::HelpObject(helpFile/*wxGetApp().globalDir()+ wxT("funchelp.txt")*/);
    _cmdbrowser->setHelpObject(helpObject);
    logpane->AddPage(_cmdbrowser, wxT("Lib"));
    logpane->SetArtProvider(DEBUG_NEW wxAuiSimpleTabArt);

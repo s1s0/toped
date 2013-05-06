@@ -290,7 +290,7 @@ class TopedApp : public wxApp
       virtual int          OnRun();
               void         reloadInternalFunctions();
            wxString        localDir() {return _localDir;};    
-           wxString        globalDir() {return _globalDir;};
+           wxString        globalDir() {return _globalDir;}
       virtual             ~TopedApp(){};
    private:
       typedef std::list<wxDynamicLibrary*> PluginList;
