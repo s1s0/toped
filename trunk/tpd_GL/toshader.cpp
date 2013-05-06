@@ -571,8 +571,8 @@ void trend::Toshader::setLine(bool selected)
 void trend::Toshader::draw()
 {
    _drawprop->initCtmStack();
-   _drawprop->resetCurrentColor();
    TRENDC->setGlslProg(glslp_VF);
+   _drawprop->resetCurrentColor();
    for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {// for every layer
       setLayColor(CLAY());
@@ -590,6 +590,7 @@ void trend::Toshader::draw()
    }
    // Lines with stipples
    TRENDC->setGlslProg(glslp_VG);
+   _drawprop->resetCurrentColor();
    glUniform1ui(TRENDC->getUniformLoc(glslu_in_StippleEn), 0);
    for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {// for every layer
@@ -604,10 +605,10 @@ void trend::Toshader::draw()
          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
       }
    }
-   setLayColor(REF_LAY_DEF);
    // draw reference boxes
    if (0 < _refLayer->total_points())
    {
+      setLayColor(REF_LAY_DEF);
       setLine(false);
       float mtrxOrtho [16];
       _drawprop->topCtm().oglForm(mtrxOrtho);
@@ -619,6 +620,8 @@ void trend::Toshader::draw()
    if (0 < _marks->total_points())
    {
       TRENDC->setGlslProg(glslp_PS);
+      _drawprop->resetCurrentColor(); // required after changing the renderer
+      setLayColor(REF_LAY_DEF);
       glUniform1ui(TRENDC->getUniformLoc(glslu_in_StippleEn) , 0);
       glUniform1ui(TRENDC->getUniformLoc(glslu_in_LStippleEn), 0);
       glUniform1ui(TRENDC->getUniformLoc(glslu_in_MStippleEn), 1);
