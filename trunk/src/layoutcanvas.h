@@ -143,7 +143,6 @@ namespace tui {
       void           wndPaint();
       void           rubberPaint();
       void           boldOnHover();
-      void           longCursor();
       void           drawZeroMark();
       void           updateCoordWin(int coord, CVSSTATUS_TYPE postype, int dcoord, CVSSTATUS_TYPE dpostype);
       void           eventMouseClick(int button);

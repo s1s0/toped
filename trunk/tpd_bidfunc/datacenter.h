@@ -73,7 +73,7 @@ public:
    void                       mouseStop();
    void                       mouseFlip();
    void                       mouseRotate();
-   void                       motionDraw(const CTM&, TP, TP);
+   void                       motionDraw(const CTM&, TP, TP, bool, const DBlineList repers);
    void                       render();
    void                       mouseHooverDraw(TP&);
    void                       setRecoverPoly(bool);

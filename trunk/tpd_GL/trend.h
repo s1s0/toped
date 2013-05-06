@@ -203,9 +203,9 @@ namespace trend {
 //         RenderType             renderType() const {return _renderType;}
          void                   reportRenderer(RenderType) const;
          void                   initShaders(const std::string&);
-         trend::TrendBase*      getCRenderer();
-         trend::TrendBase*      getHRenderer();
-         trend::TrendBase*      getMRenderer(console::ACTIVE_OP&);
+         trend::TrendBase*      getCRenderer();//!Get current renderer
+         trend::TrendBase*      getHRenderer();//!Get hoover renderer
+         trend::TrendBase*      getMRenderer(console::ACTIVE_OP&);//!get motion renderer
          void                   releaseCRenderer();
          void                   releaseHRenderer();
          void                   releaseMRenderer();
