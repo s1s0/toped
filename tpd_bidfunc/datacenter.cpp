@@ -863,25 +863,24 @@ void DataCenter::render()
 }
 
 
-void DataCenter::motionDraw(const CTM& layCTM, TP base, TP newp)
+void DataCenter::motionDraw(const CTM& layCTM, TP base, TP newp, bool rubber, const DBlineList repers)
 {
    console::ACTIVE_OP currentOp;
    trend::TrendBase* mRenderer = TRENDC->getMRenderer(currentOp);
    if (NULL != mRenderer)
    {
-      if ((console::op_line == currentOp) || _drawruler)
+      layprop::RulerList rulers;
+      if (rubber && ((console::op_line == currentOp) || _drawruler))
       {
          // ruller
-         layprop::RulerList rulers;
-         DBlineList dummy;
          rulers.push_back(layprop::SDLine(base, newp, PROPC->UU()));
-         // here - it's clear that there is one ruler to draw, so there
-         // is no point checking what the collectRulers returns
-         mRenderer->rlrCollect(rulers,PROPC->stepDB(), dummy);
+      }
+      if (mRenderer->rlrCollect(rulers,PROPC->stepDB(), repers))
+      {
          mRenderer->rlrDraw();
          mRenderer->rlrCleanUp();
       }
-      if ((console::op_line != currentOp)  && (NULL !=_TEDLIB()))
+      if (rubber && (console::op_line != currentOp)  && (NULL !=_TEDLIB()))
       {
          if (wxMUTEX_NO_ERROR == _DBLock.TryLock())
          {

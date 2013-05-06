@@ -489,8 +489,7 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event)
          if (0 == _blinkInterval) TRENDC->drawFOnly();
          glAccum(GL_LOAD, 1.0);
          _invalidWindow = false;
-         if (_rubberBand) rubberPaint();
-         if (_reperX || _reperY) longCursor();
+         rubberPaint();
          SwapBuffers();
          if (0 < _blinkInterval)
          {
@@ -503,41 +502,12 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event)
    {
       wxPaintDC dc(this);
       glAccum(GL_RETURN, 1.0);
+      rubberPaint();
+      if (!_rubberBand && PROPC->boldOnHover()) boldOnHover();
       if       (_tmpWnd)              wndPaint();
-      else if  (_rubberBand)          rubberPaint();
-      else if  (PROPC->boldOnHover()) boldOnHover();
-      if (_reperX || _reperY)         longCursor();
       SwapBuffers();
    }
 }
-
-void tui::LayoutCanvas::longCursor()
-{
-   glColor4f(1, 1, 1, .5);
-   glBegin(GL_LINES);
-   if (_reperX)
-   {
-      glVertex2i(_lpBL.x(), _scrMark.y()) ;
-      glVertex2i(_lpTR.x(), _scrMark.y());
-   }
-   if (_reperY)
-   {
-      glVertex2i(_scrMark.x() , _lpBL.y()) ;
-      glVertex2i(_scrMark.x() , _lpTR.y());
-   }
-   glEnd();
-}
-
-// void tui::LayoutCanvas::drawInterim(const TP& cp)
-// {
-//    wxPaintDC dc(this);
-//    #ifndef __WXMOTIF__
-//       if (!GetContext()) return;
-//    #endif
-//    SetCurrent(*_glRC);
-//    _status_line.update_coords(cp);
-//    SwapBuffers();
-// }
 
 void tui::LayoutCanvas::wndPaint() {
    glColor4f((GLfloat)0.7, (GLfloat)0.7, (GLfloat)0.7, (GLfloat)0.4); // gray
@@ -550,7 +520,19 @@ void tui::LayoutCanvas::wndPaint() {
 
 void tui::LayoutCanvas::rubberPaint()
 {
-   DATC->motionDraw(_layCTM, _releasePoint, _nScrMark);
+   DBlineList repers;
+   if (_reperX)
+   {
+      DBline rX(TP(_lpBL.x(), _scrMark.y()), TP(_lpTR.x(), _scrMark.y()));
+      repers.push_back( rX );
+   }
+   if (_reperY)
+   {
+      DBline rY(TP(_scrMark.x() , _lpBL.y()), TP(_scrMark.x() , _lpTR.y()));
+      repers.push_back( rY );
+   }
+   if (_rubberBand || _reperX || _reperY)
+      DATC->motionDraw(_layCTM, _releasePoint, _nScrMark, _rubberBand, repers);
 }
 
 void tui::LayoutCanvas::boldOnHover()
@@ -1142,9 +1124,12 @@ void tui::LayoutCanvas::OnTimer(wxTimerEvent& WXUNUSED(event))
    {
       glAccum(GL_RETURN, 1.0);
       if       (_tmpWnd)              wndPaint();
-      else if  (_rubberBand)          rubberPaint();
-      else if  (PROPC->boldOnHover()) boldOnHover();
-      if (_reperX || _reperY)         longCursor();
+      rubberPaint();
+      if (!_rubberBand && PROPC->boldOnHover()) boldOnHover();
+//
+//      else if  (_rubberBand)          rubberPaint();
+//      else if  (PROPC->boldOnHover()) boldOnHover();
+//      if (_reperX || _reperY)         longCursor();
    }
    else
    {
@@ -1271,8 +1256,9 @@ void* tui::DrawThread::Entry(/*wxGLContext* glRC*/)
       DATC->render();    // draw data
       glAccum(GL_LOAD, 1.0);
       _canvas->_invalidWindow = false;
-      if (_canvas->_rubberBand) _canvas->rubberPaint();
-      if (_canvas->_reperX || _canvas->_reperY) _canvas->longCursor();
+      _canvas->rubberPaint();
+//      if (_canvas->_rubberBand) _canvas->rubberPaint();
+//      if (_canvas->_reperX || _canvas->_reperY) _canvas->longCursor();
       _canvas->SwapBuffers();
       _mutex.Unlock();
    }
