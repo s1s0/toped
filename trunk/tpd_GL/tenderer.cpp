@@ -1207,10 +1207,10 @@ void trend::Tenderer::draw()
          CLAY->drawTexts(_drawprop);
       }
    }
+   setLayColor(REF_LAY_DEF);
    // draw reference boxes
    if (0 < _refLayer->total_points())
    {
-      setLayColor(REF_LAY_DEF);
       setLine(false);
       _refLayer->draw(_drawprop);
    }
