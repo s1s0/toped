@@ -798,13 +798,20 @@ int wxCALLBACK wxListCompareFunction(TmpWxIntPtr item1, TmpWxIntPtr item2, TmpWx
    return s1.compare(s2);
 }
 
-console::HelpObject::HelpObject(const wxString &helpFile)
+console::HelpObject::HelpObject(const wxFileName &helpFN)
 {
-   wxInputStream* fstream = DEBUG_NEW wxFFileInputStream(helpFile);
+   if (!helpFN.FileExists())
+   {
+      wxString errMessage(wxT("Can't find \""));
+      errMessage += helpFN.GetFullPath() + wxT("\"\n");
+      wxMessageBox(errMessage);
+      return;
+   }
+   wxInputStream* fstream = DEBUG_NEW wxFFileInputStream(helpFN.GetFullPath());
    if(!fstream || !fstream->IsOk())
    {
-      wxString errMessage(wxT("Can't open "));
-      errMessage += helpFile + wxT("\n");
+      wxString errMessage(wxT("Can't access \""));
+      errMessage += helpFN.GetFullPath() + wxT("\"\n");
       wxMessageBox(errMessage);
       delete fstream;
       return;

@@ -30,6 +30,7 @@
 
 #include <wx/wx.h>
 #include <wx/listctrl.h>
+#include <wx/filename.h>
 #include <iostream>
 #include <list>
 //#include <sys/resource.h>
@@ -174,7 +175,7 @@ namespace console {
    class HelpObject
    {
    public:
-      HelpObject(const wxString &helpFile);
+                  HelpObject(const wxFileName&);
       wxString    getHelp(const wxString &funcName);
    private:
       typedef std::map<wxString, wxString> HelpItems;
