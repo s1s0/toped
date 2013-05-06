@@ -272,19 +272,8 @@ void trend::Tolder::grdDraw()
          glVertex2f(cpoint_array[2*i], cpoint_array[2*i+1]);
       start = stop;
    }
-   assert(start == (_num_grid_points));
+   assert(start <= (_num_grid_points));
    delete [] cpoint_array;
-
-   //   for (TrendGrids::const_iterator CG = _grids.begin(); CG != _grids.end(); CG++)
-//   {
-//      unsigned size = (*CG)->size();
-//      if (0 == size) continue;
-//      layprop::tellRGB theColor(_drawprop->getColor((*CG)->color()));
-//      glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
-//      const int* theArray = (*CG)->array();
-//      for (unsigned i = 0; i < size; i++)
-//         glVertex2i(theArray[2*i], theArray[2*i+1]);
-//   }
    glEnd();
 }
 
@@ -496,31 +485,6 @@ bool trend::Tolder::grdCollect(const layprop::LayoutGrid** allGrids)
          _grid_props.push_back(cvgrid);
       }
    }
-//   TNDR_GLDATAT* cpoint_array = new TNDR_GLDATAT [_num_grid_points];
-//   unsigned pnt = 0;
-//   for (VGrids::const_iterator VG = _grid_props.begin(); VG != _grid_props.end(); VG++)
-//   {
-//      pnt = (*VG)->dump(cpoint_array, pnt);
-//   }
-//   assert(pnt == (2 * _num_grid_points));
-
-//         int signX = (bl.x() > 0) ? 1 : -1;
-//         int X_is = (int)((rint(abs(bl.x()) / gridstep)) * gridstep * signX);
-//         int signY = (tr.y() > 0) ? 1 : -1;
-//         int Y_is = (int)((rint(abs(tr.y()) / gridstep)) * gridstep * signY);
-//
-//         unsigned arr_size = ( (((tr.x() - X_is + 1) / gridstep) + 1) * (((bl.y() - Y_is + 1) / gridstep) + 1) );
-//         int* point_array = DEBUG_NEW int[arr_size * 2];
-//         int index = 0;
-//         for (int i = X_is; i < tr.x()+1; i += gridstep)
-//         {
-//            for (int j = Y_is; j < bl.y()+1; j += gridstep)
-//            {
-//               point_array[index++] = i;
-//               point_array[index++] = j;
-//            }
-//         }
-//         _grids.push_back(DEBUG_NEW TrendGrid(arr_size,point_array,cgrid->color()));
    return (_num_grid_points > 0);
 }
 
