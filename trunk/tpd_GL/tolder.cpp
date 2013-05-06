@@ -260,19 +260,19 @@ trend::Tolder::Tolder( layprop::DrawProperties* drawprop, real UU ) :
 void trend::Tolder::grdDraw()
 {
    glBegin(GL_POINTS);
-   TNDR_GLDATAT* cpoint_array = new TNDR_GLDATAT [_num_grid_points];
+   TNDR_GLDATAT* cpoint_array = new TNDR_GLDATAT [2*_num_grid_points];
    unsigned start = 0;
    unsigned stop = 0;
    for (VGrids::const_iterator VG = _grid_props.begin(); VG != _grid_props.end(); VG++)
    {
       layprop::tellRGB theColor(_drawprop->getColor((*VG)->color()));
       glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
-      stop = (*VG)->dump(cpoint_array, start);
+      stop = (*VG)->dump(cpoint_array, 2*start);
       for (unsigned i = start; i < stop; i++)
-         glVertex2i(cpoint_array[2*i], cpoint_array[2*i+1]);
+         glVertex2f(cpoint_array[2*i], cpoint_array[2*i+1]);
       start = stop;
    }
-   assert(start == (2 * _num_grid_points));
+   assert(start == (_num_grid_points));
    delete [] cpoint_array;
 
    //   for (TrendGrids::const_iterator CG = _grids.begin(); CG != _grids.end(); CG++)

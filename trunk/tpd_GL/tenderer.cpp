@@ -1101,9 +1101,9 @@ bool trend::Tenderer::grdCollect(const layprop::LayoutGrid** allGrids)
    unsigned pnt = 0;
    for (VGrids::const_iterator VG = _grid_props.begin(); VG != _grid_props.end(); VG++)
    {
-      pnt = (*VG)->dump(cpoint_array, pnt);
+      pnt = (*VG)->dump(cpoint_array, 2*pnt);
    }
-   assert(pnt == (2 * _num_grid_points));
+   assert(pnt == (_num_grid_points));
    // Unmap the buffers
    glUnmapBuffer(GL_ARRAY_BUFFER);
    return true;
