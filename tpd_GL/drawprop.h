@@ -256,6 +256,7 @@ namespace layprop {
                                    ~DrawProperties();
          // Called during the rendering - protected in the render initialisation
          bool                       setCurrentColor(const LayerDef&, layprop::tellRGB&);
+         void                       resetCurrentColor();
          const byte*                getCurrentFill() const;
          void                       getCurrentLine(LineSettings&, bool) const;
          bool                       getAlpha(word factor, layprop::tellRGB& theColor);
@@ -389,6 +390,7 @@ namespace layprop {
          laydata::CellRefStack*     _refStack;
          CtmStack                   _tranStack;
          LayerDef                   _drawingLayer;
+         bool                       _drawingLayerValid;
          LayStateMap                _layStateMap;  //
          LayStateHistory            _layStateHistory; //! for undo purposes of layer status related TELL function
          static const tellRGB       _dfltColor;

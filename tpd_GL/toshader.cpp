@@ -571,6 +571,7 @@ void trend::Toshader::setLine(bool selected)
 void trend::Toshader::draw()
 {
    _drawprop->initCtmStack();
+   _drawprop->resetCurrentColor();
    TRENDC->setGlslProg(glslp_VF);
    for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {// for every layer

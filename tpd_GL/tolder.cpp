@@ -539,6 +539,7 @@ void trend::Tolder::setLine(bool selected)
 
 void trend::Tolder::draw()
 {
+   _drawprop->resetCurrentColor();
    for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {// for every layer
       setLayColor(CLAY());
@@ -575,6 +576,7 @@ void trend::Tolder::draw()
 
 void trend::Tolder::grcDraw()
 {
+   _drawprop->resetCurrentColor();
    for (DataLay::Iterator CLAY = _grcData.begin(); CLAY != _grcData.end(); CLAY++)
    {// for every layer
       setLayColor(CLAY());
