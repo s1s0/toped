@@ -1181,6 +1181,7 @@ void trend::Tenderer::setLine(bool selected)
 
 void trend::Tenderer::draw()
 {
+   _drawprop->resetCurrentColor();
    for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {// for every layer
       setLayColor(CLAY());
@@ -1221,6 +1222,7 @@ void trend::Tenderer::draw()
 
 void trend::Tenderer::grcDraw()
 {
+   _drawprop->resetCurrentColor();
    for (DataLay::Iterator CLAY = _grcData.begin(); CLAY != _grcData.end(); CLAY++)
    {// for every layer
       setLayColor(CLAY());

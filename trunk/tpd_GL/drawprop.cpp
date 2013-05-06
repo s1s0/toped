@@ -545,6 +545,7 @@ layprop::DrawProperties::DrawProperties() :
    _blockFill             ( false               ),
    _refStack              ( NULL                ),
    _drawingLayer          ( TLL_LAY_DEF         ),
+   _drawingLayerValid     ( false               ),
    _propertyState         ( DB                  )
 {
 }
@@ -677,14 +678,21 @@ void layprop::DrawProperties::addFill(std::string name, byte* ptrn) {
 
 bool layprop::DrawProperties::setCurrentColor(const LayerDef& laydef, layprop::tellRGB& theColor)
 {
-   if (_drawingLayer == laydef)
+   if (_drawingLayerValid && (_drawingLayer == laydef))
       return false;
    else
    {
       _drawingLayer = laydef;
+      _drawingLayerValid = true;
       theColor = getColor(_drawingLayer);
       return true;
    }
+}
+
+void layprop::DrawProperties::resetCurrentColor()
+{
+   _drawingLayer =  TLL_LAY_DEF;
+   _drawingLayerValid = false;
 }
 
 const byte* layprop::DrawProperties::getCurrentFill() const
