@@ -568,6 +568,7 @@ void trend::Tolder::draw()
    {
       setLine(false);
       _refLayer->draw(_drawprop);
+      glDisable(GL_LINE_STIPPLE);
    }
    // draw marks
    if (0 < _marks->total_points()   )  _marks->draw(_drawprop);
@@ -602,7 +603,6 @@ void trend::Tolder::grcCleanUp()
 void trend::Tolder::rlrDraw()
 {
    glColor4f((GLfloat)1, (GLfloat)1, (GLfloat)1, (GLfloat)0.7); // gray
-//   glDisable(GL_POLYGON_STIPPLE);
    glBegin(GL_LINES);
    // draw the nonius and the ruler itself
    for (DBlineList::const_iterator CL = _noniList.begin(); CL != _noniList.end(); CL++)
