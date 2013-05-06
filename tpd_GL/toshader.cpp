@@ -510,11 +510,6 @@ void trend::Toshader::grdDraw()
    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void trend::Toshader::zeroCross()
-{
-   //TODO
-}
-
 void trend::Toshader::setLayColor(const LayerDef& layer)
 {
    layprop::tellRGB tellColor;

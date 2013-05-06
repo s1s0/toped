@@ -821,34 +821,6 @@ layprop::CellRefChainType layprop::DrawProperties::preCheckCRS(const laydata::Td
    else return crc_VIEW;
 }
 
-//void layprop::DrawProperties::drawReferenceMarks(const TP& p0, const binding_marks mark_type) const
-//{
-//   GLubyte* the_mark;
-//   switch (mark_type)
-//   {
-//      case  cell_mark:if (_cellMarksHidden) return;
-//      else
-//      {
-//         glColor4f((GLfloat)1.0, (GLfloat)1.0, (GLfloat)1.0, (GLfloat)0.8);
-//         the_mark = cell_mark_bmp;
-//         break;
-//      }
-//      case array_mark:if (_cellMarksHidden) return;
-//      else
-//      {
-//         glColor4f((GLfloat)1.0, (GLfloat)1.0, (GLfloat)1.0, (GLfloat)0.8);
-//         the_mark = array_mark_bmp;
-//         break;
-//      }
-//      case  text_mark:if (_textMarksHidden) return;
-//      else the_mark = text_mark_bmp;break;
-//      default: assert(false); break;
-//   }
-//   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-//   glRasterPos2i(p0.x(),p0.y());
-//   glBitmap(16,16,7,7,0,0, the_mark);
-//}
-
 LayerDef layprop::DrawProperties::getLayerNo(std::string name) const
 {
    for (LaySetList::Iterator CL = getCurSetList().begin(); CL != getCurSetList().end(); CL++)

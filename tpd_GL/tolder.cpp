@@ -277,20 +277,6 @@ void trend::Tolder::grdDraw()
    glEnd();
 }
 
-void trend::Tolder::zeroCross()
-{
-   glLineStipple(1,0xcccc);
-   glEnable(GL_LINE_STIPPLE);
-   glBegin(GL_LINES);
-   glColor4f((GLfloat)1, (GLfloat)1, (GLfloat)1, (GLfloat)0.7); // gray
-   glVertex2i(0, _drawprop->clipRegion().p1().y());
-   glVertex2i(0, _drawprop->clipRegion().p2().y());
-   glVertex2i(_drawprop->clipRegion().p1().x(), 0);
-   glVertex2i(_drawprop->clipRegion().p2().x(), 0);
-   glEnd();
-   glDisable(GL_LINE_STIPPLE);
-}
-
 void trend::Tolder::setLayer(const LayerDef& laydef, bool has_selected)
 {
    // Reference layer is processed differently (pushCell), so make sure
@@ -488,9 +474,9 @@ bool trend::Tolder::grdCollect(const layprop::LayoutGrid** allGrids)
    return (_num_grid_points > 0);
 }
 
-bool trend::Tolder::rlrCollect(const layprop::RulerList& rulers, int4b step)
+bool trend::Tolder::rlrCollect(const layprop::RulerList& rulers, int4b step, const DBlineList& zcross)
 {
-   if (rulers.empty()) return false;
+   if (rulers.empty() && zcross.empty()) return false;
    DBline long_mark, short_mark, text_bp;
    double scaledpix;
    genRulerMarks(scrCTM().Reversed(), long_mark, short_mark, text_bp, scaledpix);
@@ -500,6 +486,10 @@ bool trend::Tolder::rlrCollect(const layprop::RulerList& rulers, int4b step)
       RA->nonius(short_mark, long_mark, step, _noniList);
       RA->addBaseLine(_noniList);
       _rulerTexts.push_back(DEBUG_NEW trend::TrxText(RA->value(), RA->getFtmtrx(text_bp, scaledpix)));
+   }
+   for(DBlineList::const_iterator RA = zcross.begin(); RA != zcross.end(); RA++)
+   {
+      _noniList.push_back(*RA);
    }
    return true;
 }

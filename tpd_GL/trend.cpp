@@ -961,12 +961,6 @@ void trend::TrendCenter::drawFOnly()
 }
 
 
-void trend::TrendCenter::drawZeroCross()
-{
-   if (PROPC->zeroCross())
-      _cRenderer->zeroCross();
-}
-
 void trend::TrendCenter::loadLayoutFont(std::string fontfile)
 {
    // Parse the font library

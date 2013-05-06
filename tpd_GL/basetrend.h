@@ -657,7 +657,6 @@ namespace trend {
       public:
                            TrendBase( layprop::DrawProperties* drawprop, real UU );
          virtual          ~TrendBase();
-         virtual void      zeroCross( ) = 0;
          virtual void      setLayer(const LayerDef&, bool) = 0;
          virtual void      setHvrLayer(const LayerDef&) = 0;
          virtual void      setGrcLayer(bool, const LayerDef&) = 0;
@@ -690,7 +689,7 @@ namespace trend {
          virtual bool      collect() = 0;
          virtual bool      grcCollect() = 0;
          virtual bool      grdCollect(const layprop::LayoutGrid**) = 0;
-         virtual bool      rlrCollect(const layprop::RulerList&, int4b) = 0;
+         virtual bool      rlrCollect(const layprop::RulerList&, int4b, const DBlineList&) = 0;
 
          virtual void      draw() = 0;
          virtual void      grcDraw() = 0;

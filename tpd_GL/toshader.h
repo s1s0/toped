@@ -87,7 +87,6 @@ namespace trend {
                            Toshader( layprop::DrawProperties*, real UU);
          virtual          ~Toshader();
          virtual void      grdDraw();
-         virtual void      zeroCross();
          virtual void      setLayer(const LayerDef&, bool);
          virtual void      setHvrLayer(const LayerDef&);
          virtual void      setGrcLayer(bool, const LayerDef&);
