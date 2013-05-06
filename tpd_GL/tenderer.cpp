@@ -1213,6 +1213,7 @@ void trend::Tenderer::draw()
    {
       setLine(false);
       _refLayer->draw(_drawprop);
+      glDisable(GL_LINE_STIPPLE);
    }
    // draw marks
    if (0 < _marks->total_points()   )   _marks->draw(_drawprop);

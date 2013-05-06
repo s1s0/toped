@@ -613,6 +613,7 @@ void trend::Toshader::draw()
       _drawprop->topCtm().oglForm(mtrxOrtho);
       glUniformMatrix4fv(TRENDC->getUniformLoc(glslu_in_CTM), 1, GL_FALSE, mtrxOrtho);
       _refLayer->draw(_drawprop);
+      glUniform1ui(TRENDC->getUniformLoc(glslu_in_LStippleEn), 0);
    }
    // draw reference marks
    if (0 < _marks->total_points())
