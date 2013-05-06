@@ -604,10 +604,10 @@ void trend::Toshader::draw()
          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
       }
    }
+   setLayColor(REF_LAY_DEF);
    // draw reference boxes
    if (0 < _refLayer->total_points())
    {
-      setLayColor(REF_LAY_DEF);
       setLine(false);
       float mtrxOrtho [16];
       _drawprop->topCtm().oglForm(mtrxOrtho);
