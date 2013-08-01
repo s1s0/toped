@@ -1,5 +1,7 @@
 ## GPL : yannick.heinrich@gmail.com ##
-
+##
+##  WARNING : To compile change BISON generated header extension from .hpp to .h
+##
 cmake_minimum_required (VERSION 2.6)
 
 SET(EXEC_NAME Toped)
@@ -7,9 +9,10 @@ project(${EXEC_NAME})
 SET(CMAKE_BUILD_TYPE Debug)
 ##GLEW
 ## Set to your glew library installation directory
-SET (glew_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/glew/include)
-SET (glew_LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/glew/lib)
-MESSAGE(${glew_LIB_DIR})
+#SET (glew_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/glew/include)
+#SET (glew_LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/glew/lib)
+#MESSAGE(${glew_LIB_DIR})
+
 #WXWIDGETS
 ##Windows
 #SET (wxWidgets_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/wxwidgets)
@@ -20,8 +23,17 @@ SET(TPD_DB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tpd_db)
 SET(TPD_IFACES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tpd_ifaces)
 SET(TPD_PARSER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tpd_parser)
 SET(TPD_BIDFUNC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tpd_bidfunc)
+SET(TPD_GL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tpd_GL)
 
-FIND_PACKAGE(OpenGL)
+
+FIND_PACKAGE(Glew REQUIRED)
+include_directories(${GLEW_INCLUDE_DIR}) 
+IF(NOT DEFINED GLEW_FOUND)
+  MESSAGE(FATAL_ERROR "Glew is not found on your system")
+ENDIF(NOT DEFINED GLEW_FOUND)
+
+FIND_PACKAGE(OpenGL REQUIRED)
+include_directories(${OPENGL_INCLUDE_DIR}) 
 IF(NOT DEFINED OPENGL_FOUND)
 	MESSAGE(FATAL_ERROR "Opengl is not found on your system")
 ENDIF(NOT DEFINED OPENGL_FOUND)
@@ -45,6 +57,7 @@ add_subdirectory(tpd_DB)
 add_subdirectory(tpd_ifaces)
 add_subdirectory(tpd_parser)
 add_subdirectory(tpd_bidfunc)
+add_subdirectory(tpd_gl)
 
 #Extrafiles
 #icons
@@ -62,7 +75,7 @@ file(GLOB user_functions "user_functions/general/*.tll")
 #Executable
 SET(toped_SOURCES src/browsers.cpp src/layoutcanvas.cpp src/main.cpp 
 src/resourcecenter.cpp src/toped.cpp src/tpdph.cpp src/tui.cpp src/techeditor.cpp)
-include_directories(tpd_common tpd_DB tpd_DB tpd_ifaces tpd_parser tpd_bidfunc ${OPENGL_INCLUDE_DIR} ${glew_INCLUDE_DIR})
+include_directories(tpd_common tpd_DB tpd_DB tpd_ifaces tpd_parser tpd_bidfunc tpd_GL ${OPENGL_INCLUDE_DIR} ${glew_INCLUDE_DIR})
 INCLUDE(${wxWidgets_USE_FILE})
 
 if(APPLE)
@@ -99,10 +112,10 @@ SET_SOURCE_FILES_PROPERTIES(
 else(APPLE)
 add_executable(${EXEC_NAME} ${toped_SOURCES} ${fonts} ${icons} ${tll} ${user_functions})
 endif(APPLE)
-link_directories(${TPD_COMMON_DIR} ${TPD_DB_DIR} ${TPD_IFACES_DIR} ${TPD_PARSER_DIR} ${TPD_BIDFUNC_DIR} ${glew_LIB_DIR})
+link_directories(${TPD_COMMON_DIR} ${TPD_DB_DIR} ${TPD_IFACES_DIR} ${TPD_PARSER_DIR} ${TPD_BIDFUNC_DIR} ${TPD_GL_DIR} ${glew_LIB_DIR})
 IF(APPLE)
 
-target_link_libraries(${EXEC_NAME} ${glew_LIB_DIR}/libGLEW.a ${wxWidgets_LIBRARIES} tpd_bidfunc tpd_parser tpd_ifaces tpd_DB tpd_common wx_osx_cocoau_gl-2.9 z) 
+target_link_libraries(${EXEC_NAME} ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} ${wxWidgets_LIBRARIES} tpd_bidfunc tpd_parser tpd_ifaces tpd_DB tpd_common wx_osx_cocoau_gl-2.9 z) 
 else(APPLE)
 target_link_libraries(${EXEC_NAME} ${wxWidgets_LIBRARIES} tpd_bidfunc tpd_parser tpd_ifaces tpd_DB tpd_common GLEW z) 
 endif(APPLE)
