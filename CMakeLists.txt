@@ -52,12 +52,13 @@ IF(NOT wxWidgets_FOUND)
 ENDIF(NOT wxWidgets_FOUND)
 
 #Compile library
+add_subdirectory(tpd_GL)
 add_subdirectory(tpd_common)
 add_subdirectory(tpd_DB)
 add_subdirectory(tpd_ifaces)
 add_subdirectory(tpd_parser)
 add_subdirectory(tpd_bidfunc)
-add_subdirectory(tpd_gl)
+
 
 #Extrafiles
 #icons
@@ -115,7 +116,7 @@ endif(APPLE)
 link_directories(${TPD_COMMON_DIR} ${TPD_DB_DIR} ${TPD_IFACES_DIR} ${TPD_PARSER_DIR} ${TPD_BIDFUNC_DIR} ${TPD_GL_DIR} ${glew_LIB_DIR})
 IF(APPLE)
 
-target_link_libraries(${EXEC_NAME} ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} ${wxWidgets_LIBRARIES} tpd_bidfunc tpd_parser tpd_ifaces tpd_DB tpd_common wx_osx_cocoau_gl-2.9 z) 
+target_link_libraries(${EXEC_NAME} ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} ${wxWidgets_LIBRARIES} tpd_bidfunc tpd_parser tpd_ifaces tpd_DB tpd_common wx_osx_cocoau_gl-2.9 tpd_GL z) 
 else(APPLE)
-target_link_libraries(${EXEC_NAME} ${wxWidgets_LIBRARIES} tpd_bidfunc tpd_parser tpd_ifaces tpd_DB tpd_common GLEW z) 
+target_link_libraries(${EXEC_NAME} ${wxWidgets_LIBRARIES} tpd_bidfunc tpd_parser tpd_ifaces tpd_DB tpd_common tpd_GL z) 
 endif(APPLE)
