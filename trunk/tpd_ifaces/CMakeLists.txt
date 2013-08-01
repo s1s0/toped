@@ -1,6 +1,6 @@
 SET(lib_LTLIBRARIES tpd_ifaces)
 SET(libtpd_ifaces_la_SOURCES cif_io.cpp 
-   gds_io.cpp tpdph.cpp oasis_io.cpp calbr_reader.cpp)
+   gds_io.cpp tpdph.cpp oasis_io.cpp calbr_reader.cpp ps_out.cpp)
 
 #Flex Bison
 
