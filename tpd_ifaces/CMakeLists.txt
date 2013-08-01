@@ -16,6 +16,6 @@ BISON_TARGET(Parser cif_yacc.yy ${CMAKE_CURRENT_SOURCE_DIR}/cif_yacc.cpp COMPILE
 ADD_FLEX_BISON_DEPENDENCY(Scanner Parser)
 
 
-include_directories(../tpd_common ../tpd_DB ${OPENGL_INCLUDE_DIR} ${glew_INCLUDE_DIR})
+include_directories(../tpd_common ../tpd_DB ../tpd_GL ${OPENGL_INCLUDE_DIR} ${glew_INCLUDE_DIR})
 INCLUDE(${wxWidgets_USE_FILE})
 add_library(${lib_LTLIBRARIES}  STATIC ${libtpd_ifaces_la_SOURCES} ${BISON_Parser_OUTPUTS} ${FLEX_Scanner_OUTPUTS}) 

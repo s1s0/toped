@@ -5,7 +5,7 @@ SET(libtpd_bidfunc_la_SOURCES tpdf_db.cpp tpdf_select.cpp datacenter.cpp
 SET(libtpd_bidfunc_la_HEADERS tpdf_common.h datacenter.h )
 
 
-include_directories(../tpd_common ../tpd_DB  ../tpd_ifaces ../tpd_parser ${OPENGL_INCLUDE_DIR} ${glew_INCLUDE_DIR})
+include_directories(../tpd_common ../tpd_DB  ../tpd_ifaces ../tpd_parser ../tpd_GL ${OPENGL_INCLUDE_DIR} ${glew_INCLUDE_DIR})
 
 INCLUDE(${wxWidgets_USE_FILE})
 add_library(${lib_LTLIBRARIES}  STATIC ${libtpd_bidfunc_la_SOURCES}) 
