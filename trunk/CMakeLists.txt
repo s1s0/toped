@@ -48,7 +48,7 @@ ENDIF(NOT ZLIB_FOUND)
 
 
 SET(wxWidgets_USE_DEBUG ON)
-FIND_PACKAGE(wxWidgets COMPONENTS core base aui REQUIRED)
+FIND_PACKAGE(wxWidgets COMPONENTS core base aui adv REQUIRED)
 IF(NOT wxWidgets_FOUND)
 	MESSAGE(FATAL_ERROR "WxWidgets is not found on your system")
 ENDIF(NOT wxWidgets_FOUND)
