@@ -7,6 +7,7 @@ cmake_minimum_required (VERSION 2.6)
 SET(EXEC_NAME Toped)
 project(${EXEC_NAME})
 SET(CMAKE_BUILD_TYPE Debug)
+SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules)
 ##GLEW
 ## Set to your glew library installation directory
 #SET (glew_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/glew/include)
@@ -25,6 +26,7 @@ SET(TPD_PARSER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tpd_parser)
 SET(TPD_BIDFUNC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tpd_bidfunc)
 SET(TPD_GL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tpd_GL)
 
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules)
 
 FIND_PACKAGE(Glew REQUIRED)
 include_directories(${GLEW_INCLUDE_DIR}) 
@@ -46,7 +48,7 @@ ENDIF(NOT ZLIB_FOUND)
 
 
 SET(wxWidgets_USE_DEBUG ON)
-FIND_PACKAGE(wxWidgets)
+FIND_PACKAGE(wxWidgets COMPONENTS core base aui REQUIRED)
 IF(NOT wxWidgets_FOUND)
 	MESSAGE(FATAL_ERROR "WxWidgets is not found on your system")
 ENDIF(NOT wxWidgets_FOUND)
