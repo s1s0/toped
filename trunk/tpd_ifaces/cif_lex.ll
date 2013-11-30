@@ -52,7 +52,7 @@ lexcif_usrsep   [ \t,]+
 #include "tpdph.h"
 #include <stdio.h>
 #include "cif_io.h"
-#include "cif_yacc.h"
+#include "cif_yacc.hh"
 #include "outbox.h"
 namespace CIFin {
    void     location_step(YYLTYPE *loc);

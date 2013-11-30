@@ -11,3 +11,4 @@ SUBDIRS_MAIN = ui                                         \
                tll                                        \
                utils/cadence
 SUBDIRS =   $(SUBDIRS_MAIN)
+ACLOCAL_AMFLAGS = -I macros

@@ -19,14 +19,14 @@ libtpd_ifaces_la_SOURCES =                                                    \
                  ps_out.cpp 
 
 METASOURCES     = AUTO
-BUILT_SOURCES   = cif_yacc.h
+BUILT_SOURCES   = cif_yacc.hh
 AM_YFLAGS       = -p cif -d -y -v
 AM_LFLAGS       = -Pcif
 LEX_OUTPUT_ROOT = lex.cif
-CLEANFILES      = cif_yacc.output cif_yacc.h cif_yacc.cc cif_lex.cc
+CLEANFILES      = cif_yacc.output cif_yacc.hh cif_yacc.cc cif_lex.cc
 
 ###############################################################################
-INCLUDES =                                                                    \
+AM_CPPFLAGS =                                                                 \
            -I$(top_srcdir)/tpd_common                                         \
            -I$(top_srcdir)/tpd_GL                                             \
            -I$(top_srcdir)/tpd_DB

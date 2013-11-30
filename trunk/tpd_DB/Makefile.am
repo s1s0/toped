@@ -27,7 +27,7 @@ libtpd_DB_la_SOURCES =                                                        \
                  auxdat.cpp
 
 ###############################################################################
-INCLUDES =                                                                    \
+AM_CPPFLAGS =                                                                 \
                  -I$(top_srcdir)/tpd_common                                   \
                  -I$(top_srcdir)/tpd_GL
 

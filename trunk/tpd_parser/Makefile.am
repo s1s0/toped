@@ -17,14 +17,14 @@ libtpd_parser_la_SOURCES =                                                    \
                  tldat.cpp
 
 METASOURCES     = AUTO
-BUILT_SOURCES   = tell_yacc.h
+BUILT_SOURCES   = tell_yacc.hh
 AM_YFLAGS       = -p tell -d -y -v
 AM_LFLAGS       = -Ptell
 LEX_OUTPUT_ROOT = lex.tell
-CLEANFILES      = tell_yacc.output tell_yacc.h tell_yacc.cc tell_lex.cc
+CLEANFILES      = tell_yacc.output tell_yacc.hh tell_yacc.cc tell_lex.cc
 
 ###############################################################################
-INCLUDES =                                                                    \
+AM_CPPFLAGS =                                                                 \
                  -I$(top_srcdir)/tpd_common
 
 libtpd_parser_la_LIBADD =                                                     \

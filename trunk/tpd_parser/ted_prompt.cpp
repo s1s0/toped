@@ -32,7 +32,7 @@
 #include <wx/filename.h>
 #include "tuidefs.h"
 #include "ted_prompt.h"
-#include "tell_yacc.h"
+#include "tell_yacc.hh"
 
 //-----------------------------------------------------------------------------
 // Some external definitions

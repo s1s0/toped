@@ -2,9 +2,10 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT(toped, 0.9.x)
+AC_INIT(toped, 0.9.9)
 AC_CONFIG_HEADERS([config.h])
-AM_INIT_AUTOMAKE
+AC_CONFIG_MACRO_DIR([macros])
+AM_INIT_AUTOMAKE([1.12])
 AC_CONFIG_SRCDIR([src/main.cpp])
 
 # Checks for programs.
@@ -24,7 +25,7 @@ LDFLAGS="$LDFLAGS -Wl,--as-needed"
 
 # Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([stddef.h stdlib.h string.h unistd.h])
+AC_CHECK_HEADERS()
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
