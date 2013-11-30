@@ -25,7 +25,7 @@ libtpd_GL_la_SOURCES =                                                        \
                  toshader.cpp
 
 ###############################################################################
-INCLUDES =                                                                    \
+AM_CPPFLAGS =                                                                 \
                  -I$(top_srcdir)/tpd_common
 
 libtpd_GL_la_LIBADD =                                                         \

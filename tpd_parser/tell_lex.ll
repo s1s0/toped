@@ -47,7 +47,7 @@ lxt_E             [Ee][-+]?{lxt_D}+
 #include <stdio.h>
 #include <string.h>
 #include "tellyzer.h"
-#include "tell_yacc.h"
+#include "tell_yacc.hh"
 #include "ted_prompt.h"
 
 /* Definitions for handling multiply input buffers */

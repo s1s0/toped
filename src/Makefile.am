@@ -20,7 +20,7 @@ toped_SOURCES =                                                               \
                  main.cpp
 
 ###############################################################################
-INCLUDES =                                                                    \
+AM_CPPFLAGS =                                                                 \
                  -I$(top_srcdir)/tpd_common                                   \
                  -I$(top_srcdir)/tpd_GL                                       \
                  -I$(top_srcdir)/tpd_DB                                       \

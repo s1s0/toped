@@ -33,7 +33,7 @@ libtpd_bidfunc_la_SOURCES =                                                   \
                  drc_tenderer.cpp 
 
 ###############################################################################
-INCLUDES =                                                                    \
+AM_CPPFLAGS =                                                                 \
                  -I$(top_srcdir)/tpd_common                                   \
                  -I$(top_srcdir)/tpd_GL                                       \
                  -I$(top_srcdir)/tpd_DB                                       \
