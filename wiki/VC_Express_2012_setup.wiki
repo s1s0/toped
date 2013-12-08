@@ -22,11 +22,10 @@ So - it should be simple.
    * create links to the third party libraries. For example:
 {{{
 mklink /j wxWidgets wxWidgets-2.9.3
-mklink /j glew flew-1.9.0
+mklink /j glew glew-1.9.0
 mklink /j zlib zlib-1.2.5
 mklink /j GnuWin32 bisonflex
 }}}
    * note that the first argument in the commands above must be repeated verbatim - those are the names used in VC setup.
 
 That should be it. VC should be able now to compile your project.
-
