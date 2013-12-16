@@ -8044,6 +8044,10 @@ _lt_linker_boilerplate=`cat conftest.err`
 $RM -r conftest*
 
 
+## CAVEAT EMPTOR:
+## There is no encapsulation within the following macros, do not change
+## the running order or otherwise move them around unless you know exactly
+## what you are doing...
 if test -n "$compiler"; then
 
 lt_prog_compiler_no_builtin_flag=
@@ -18075,7 +18079,7 @@ else
 fi
 
 
-ac_config_files="$ac_config_files Makefile ui/Makefile tpd_common/Makefile tpd_GL/Makefile tpd_DB/Makefile tpd_ifaces/Makefile tpd_parser/Makefile tpd_bidfunc/Makefile src/Makefile fonts/Makefile icons/Makefile utils/cadence/Makefile tll/Makefile"
+ac_config_files="$ac_config_files Makefile ui/Makefile tpd_common/Makefile tpd_GL/Makefile tpd_DB/Makefile tpd_ifaces/Makefile tpd_parser/Makefile tpd_bidfunc/Makefile src/Makefile fonts/Makefile icons/Makefile icons/16x16/Makefile icons/24x24/Makefile icons/32x32/Makefile icons/48x48/Makefile utils/cadence/Makefile tll/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -19204,6 +19208,10 @@ do
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
     "fonts/Makefile") CONFIG_FILES="$CONFIG_FILES fonts/Makefile" ;;
     "icons/Makefile") CONFIG_FILES="$CONFIG_FILES icons/Makefile" ;;
+    "icons/16x16/Makefile") CONFIG_FILES="$CONFIG_FILES icons/16x16/Makefile" ;;
+    "icons/24x24/Makefile") CONFIG_FILES="$CONFIG_FILES icons/24x24/Makefile" ;;
+    "icons/32x32/Makefile") CONFIG_FILES="$CONFIG_FILES icons/32x32/Makefile" ;;
+    "icons/48x48/Makefile") CONFIG_FILES="$CONFIG_FILES icons/48x48/Makefile" ;;
     "utils/cadence/Makefile") CONFIG_FILES="$CONFIG_FILES utils/cadence/Makefile" ;;
     "tll/Makefile") CONFIG_FILES="$CONFIG_FILES tll/Makefile" ;;
 

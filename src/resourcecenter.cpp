@@ -292,22 +292,16 @@ void tui::ToolItem::init(const std::string& bitmapName)
    wxImage image[ICON_SIZE_END];
    wxImage tempImage;
    std::string tempImageName;
-   IconSizes isz;
-   bool absentFile = false;
-   for(
-      isz = ICON_SIZE_16x16;
-      isz < ICON_SIZE_END;
-      isz=static_cast<IconSizes>(static_cast<int>(isz)+1))
+   bool fileMissing = false;
+   for(IconSizes isz = ICON_SIZE_16x16;  isz < ICON_SIZE_END;  isz=static_cast<IconSizes>(static_cast<int>(isz)+1))
    {
-      char temp[100];
-      sprintf(temp,"%i", IconSizesValues[isz]);
-      std::string name = bitmapName;
-      name.append(temp);
-      name.append("x");
-      name.append(temp);
-      name.append(".png");
-      (image[isz]).LoadFile(wxString(name.c_str(), wxConvFile),wxBITMAP_TYPE_PNG);
-      _bitmapNames[isz] = name;
+      wxString sizeDirName;
+      sizeDirName.Printf("%ix%i", IconSizesValues[isz], IconSizesValues[isz]);
+      wxFileName fName(wxString(bitmapName.c_str(), wxConvFile));
+      fName.AppendDir(sizeDirName);
+      fName.SetExt(wxT("png"));
+      (image[isz]).LoadFile(fName.GetFullPath(),wxBITMAP_TYPE_PNG);
+      _bitmapNames[isz] = fName.GetFullName().mb_str(wxConvFile);
       if(image[isz].IsOk())
       {
          _bitmaps[isz] = wxBitmap(image[isz]);
@@ -315,40 +309,37 @@ void tui::ToolItem::init(const std::string& bitmapName)
          if(!tempImage.IsOk())
          {
             tempImage = image[isz]; //Save temp image for filling of missing icons
-            tempImageName = name;
+            tempImageName = fName.GetFullName().mb_str(wxConvFile);
          }
       }
       else
       {
-         absentFile = true;
+         fileMissing = true;
       }
    }
 
 
-   if(absentFile)
+   if(fileMissing)
    {
       if (tempImage.IsOk())
       {
-         for(
-            isz = ICON_SIZE_16x16;
-            isz < ICON_SIZE_END;
-            isz=static_cast<IconSizes>(static_cast<int>(isz)+1))
+         for(IconSizes isz = ICON_SIZE_16x16; isz < ICON_SIZE_END; isz=static_cast<IconSizes>(static_cast<int>(isz)+1))
+         {
+            if(!image[isz].IsOk())
             {
-               if(!image[isz].IsOk())
-               {
-                  //image[isz] = tempImage.Copy();
-                  image[isz].LoadFile(wxString(tempImageName.c_str(), wxConvFile),wxBITMAP_TYPE_PNG);
-                  _bitmapNames[isz] = tempImageName;
-                  _bitmaps[isz] = wxBitmap(image[isz]);
+               //image[isz] = tempImage.Copy();
+               image[isz].LoadFile(wxString(tempImageName.c_str(), wxConvFile),wxBITMAP_TYPE_PNG);
+               _bitmapNames[isz] = tempImageName;
+               _bitmaps[isz] = wxBitmap(image[isz]);
 
-                  std::ostringstream ost;
-                  ost<<"No icon file  "<<_bitmapNames[isz];
-                  tell_log(console::MT_WARNING,ost.str());
-                  ost.clear();
-                  ost<<"Replaced";
-                  tell_log(console::MT_WARNING,ost.str());
-               }
+               std::ostringstream ost;
+               ost<<"No icon file  "<<_bitmapNames[isz];
+               tell_log(console::MT_WARNING,ost.str());
+               ost.clear();
+               ost<<"Replaced";
+               tell_log(console::MT_WARNING,ost.str());
             }
+         }
       }
       else
       {

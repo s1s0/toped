@@ -127,6 +127,10 @@ AC_CONFIG_FILES([
    src/Makefile
    fonts/Makefile
    icons/Makefile
+   icons/16x16/Makefile
+   icons/24x24/Makefile
+   icons/32x32/Makefile
+   icons/48x48/Makefile
    utils/cadence/Makefile
    tll/Makefile
 ])

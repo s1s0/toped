@@ -8,6 +8,10 @@ SUBDIRS_MAIN = ui                                         \
                src                                        \
                fonts                                      \
                icons                                      \
+               icons/16x16                                \
+               icons/24x24                                \
+               icons/32x32                                \
+               icons/48x48                                \
                tll                                        \
                utils/cadence
 SUBDIRS =   $(SUBDIRS_MAIN)
