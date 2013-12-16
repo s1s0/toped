@@ -132,41 +132,40 @@ namespace tui
    class ToolItem
    {
    public:
-      ToolItem(int toolID, const std::string &name,
-               const std::string &bitmapName,
-               const std::string &hotKey,
-               const std::string &helpString, callbackMethod cbMethod);
-      ToolItem(int toolID, const std::string &name,
-               const std::string &bitmapName,
-               const std::string &hotKey,
-               const std::string &helpString,
-               const std::string func);
+                     ToolItem(int toolID, const std::string &name,
+                              const std::string &bitmapName,
+                              const std::string &hotKey,
+                              const std::string &helpString, callbackMethod cbMethod);
+                     ToolItem(int toolID, const std::string &name,
+                              const std::string &bitmapName,
+                              const std::string &hotKey,
+                              const std::string &helpString,
+                              const std::string func);
+      virtual      ~ToolItem();
 
 //      void addIcon(const std::string &bitmapName, int size);
       //std::string  hotKey(void)      const      { return _hotKey;};
-      std::string    function(void)      const    { return _function;};
-      std::string    name(void)         const    { return _name;};
-      std::string    helpString(void)   const      { return _helpString;};
-      bool            isOk(void)         const      { return _ok;};
-      callbackMethod method(void)      const    { return _method;};
-
-      virtual ~ToolItem();
-      wxBitmap   bitmap(void)   const {return _bitmaps[_currentSize];};
-      int      ID(void)         const {return _ID;};
-      void      changeToolSize(IconSizes size);
+      void           changeToolSize(IconSizes size);
+      std::string    function(void)const          { return _function;};
+      std::string    name(void)const              { return _name;};
+      std::string    helpString(void)const        { return _helpString;};
+      bool           isOk(void)const              { return _ok;};
+      callbackMethod method(void)const            { return _method;};
+      wxBitmap       bitmap(void)const            { return _bitmaps[_currentSize];};
+      int            ID(void)const                { return _ID;};
    private:
-      void            init(const std::string& bitmapName);
+      void           init(const std::string& bitmapName);
       int            _ID;
-      std::string      _name;
-      wxBitmap         _bitmaps[ICON_SIZE_END];
-      std::string      _bitmapNames[ICON_SIZE_END];
+      std::string    _name;
+      wxBitmap       _bitmaps[ICON_SIZE_END];
+      wxString       _bitmapNames[ICON_SIZE_END];
       IconSizes      _currentSize;
 
       //std::string   _hotKey;
-      std::string      _function;
-      std::string      _helpString;
-      callbackMethod   _method;
-      bool            _ok;
+      std::string    _function;
+      std::string    _helpString;
+      callbackMethod _method;
+      bool           _ok;
    };
 
    class TpdToolBar:public wxToolBar
