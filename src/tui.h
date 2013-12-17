@@ -85,7 +85,7 @@ namespace tui {
    } IconSizes;
 
    const int IconSizesValues[ICON_SIZE_END] = {16, 24, 32, 48};
-   //Order for this enum must corresponds IconSizes order
+   //Order for this enum must correspond to IconSizes order
    enum
    {
       ICON_SIZE_16x16_V = 16,
