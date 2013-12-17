@@ -665,43 +665,44 @@ void  tui::TopedFrame::setActiveCmd()
 
 void tui::TopedFrame::initToolBars()
 {
+   //
+   //                           toolBarName, toolBarItem, iconName       , hotKey, helpString    ,  callbackMethod
+   //
    _resourceCenter->setDirection(wxAUI_DOCK_TOP);
-   _resourceCenter->appendTool("main", "new", "new", "", "new cell", &tui::TopedFrame::OnCellNew);
-   _resourceCenter->appendTool("main", "open", "open", "", "open cell", &tui::TopedFrame::OnCellOpen);
-   _resourceCenter->appendTool("main", "save", "save", "", "save design", &tui::TopedFrame::OnTDTSave);
+   _resourceCenter->appendTool(wxT("main"), wxT("new"          ), wxT("new"          ), wxT(""), wxT("new cell"       ), &tui::TopedFrame::OnCellNew      );
+   _resourceCenter->appendTool(wxT("main"), wxT("open"         ), wxT("open"         ), wxT(""), wxT("open cell"      ), &tui::TopedFrame::OnCellOpen     );
+   _resourceCenter->appendTool(wxT("main"), wxT("save"         ), wxT("save"         ), wxT(""), wxT("save design"    ), &tui::TopedFrame::OnTDTSave      );
 
    //_resourceCenter->setToolBarSize("main", ICON_SIZE_24x24);
    _resourceCenter->setDirection(wxAUI_DOCK_TOP);
+   _resourceCenter->appendTool(wxT("edit"), wxT("undo"         ), wxT("undo"         ), wxT(""), wxT("undo"           ), &tui::TopedFrame::OnUndo         );
+   _resourceCenter->appendTool(wxT("edit"), wxT("box"          ), wxT("box"          ), wxT(""), wxT("add box"        ), &tui::TopedFrame::OnDrawBox      );
+   _resourceCenter->appendTool(wxT("edit"), wxT("poly"         ), wxT("poly"         ), wxT(""), wxT("add polygon"    ), &tui::TopedFrame::OnDrawPoly     );
+   _resourceCenter->appendTool(wxT("edit"), wxT("wire"         ), wxT("wire"         ), wxT(""), wxT("add wire"       ), &tui::TopedFrame::OnDrawWire     );
+   _resourceCenter->appendTool(wxT("edit"), wxT("text"         ), wxT("text"         ), wxT(""), wxT("add text"       ), &tui::TopedFrame::OnDrawText     );
+   _resourceCenter->appendTool(wxT("edit"), wxT("delete"       ), wxT("delete"       ), wxT(""), wxT("delete"         ), &tui::TopedFrame::OnDelete       );
+   _resourceCenter->appendTool(wxT("edit"), wxT("cut_with_poly"), wxT("cut_with_poly"), wxT(""), wxT("cut"            ), &tui::TopedFrame::OnPolyCut      );
+   _resourceCenter->appendTool(wxT("edit"), wxT("copy"         ), wxT("copy"         ), wxT(""), wxT("copy"           ), &tui::TopedFrame::OnCopy         );
+   _resourceCenter->appendTool(wxT("edit"), wxT("move"         ), wxT("move"         ), wxT(""), wxT("move"           ), &tui::TopedFrame::OnMove         );
+   _resourceCenter->appendTool(wxT("edit"), wxT("rotate"       ), wxT("rotate_left"  ), wxT(""), wxT("rotate"         ), &tui::TopedFrame::OnRotate       );
+   _resourceCenter->appendTool(wxT("edit"), wxT("flipvert"     ), wxT("flipy"        ), wxT(""), wxT("flip vertical"  ), &tui::TopedFrame::OnFlipVert     );
+   _resourceCenter->appendTool(wxT("edit"), wxT("fliphor"      ), wxT("flipx"        ), wxT(""), wxT("flip horizontal"), &tui::TopedFrame::OnFlipHor      );
+   _resourceCenter->appendTool(wxT("edit"), wxT("edit_push"    ), wxT("edit_push"    ), wxT(""), wxT("edit push"      ), &tui::TopedFrame::OnCellPush     );
+   _resourceCenter->appendTool(wxT("edit"), wxT("edit_pop"     ), wxT("edit_pop"     ), wxT(""), wxT("edit pop"       ), &tui::TopedFrame::OnCellPop      );
 
-   _resourceCenter->appendTool("edit", "undo", "undo", "", "undo", &tui::TopedFrame::OnUndo);
-   //_resourceCenter->appendTool("edit", "redo", "redo", "", "redo",&tui::TopedFrame::OnUndo);
-   _resourceCenter->appendTool("edit", "box", "box", "", "add box",&tui::TopedFrame::OnDrawBox);
-   _resourceCenter->appendTool("edit", "poly", "poly", "", "add polygon",&tui::TopedFrame::OnDrawPoly);
-   _resourceCenter->appendTool("edit", "wire", "wire", "", "add wire",&tui::TopedFrame::OnDrawWire);
-   _resourceCenter->appendTool("edit", "text", "text", "", "add text",&tui::TopedFrame::OnDrawText);
-   _resourceCenter->appendTool("edit", "delete", "delete", "", "delete",&tui::TopedFrame::OnDelete);
-   _resourceCenter->appendTool("edit", "cut_with_poly", "cut_with_poly", "", "cut",&tui::TopedFrame::OnPolyCut);
-   _resourceCenter->appendTool("edit", "zoom_all", "zoom_all", "", "zoom all",&tui::TopedFrame::OnZoomAll);
-   _resourceCenter->appendTool("edit", "zoom_in", "zoom_in", "", "zoom in",&tui::TopedFrame::OnzoomIn);
-   _resourceCenter->appendTool("edit", "zoom_out", "zoom_out", "", "zoom out",&tui::TopedFrame::OnzoomOut);
-   _resourceCenter->appendTool("edit", "ruler", "ruler", "", "add ruler",&tui::TopedFrame::OnAddRuler);
-   _resourceCenter->appendTool("edit", "copy", "copy", "", "copy",&tui::TopedFrame::OnCopy);
-   _resourceCenter->appendTool("edit", "move", "move", "", "move",&tui::TopedFrame::OnMove);
-   _resourceCenter->appendTool("edit", "rotate", "rotate_left", "", "rotate",&tui::TopedFrame::OnRotate);
-   //_resourceCenter->appendTool("edit", "rotate_right", "rotate_right.png", "", "rotate",&tui::TopedFrame::OnRotate);
-   _resourceCenter->appendTool("edit", "flipvert", "flipy", "", "flip vertical",&tui::TopedFrame::OnFlipVert);
-   _resourceCenter->appendTool("edit", "fliphor", "flipx", "", "flip horizontal",&tui::TopedFrame::OnFlipHor);
-   _resourceCenter->appendTool("edit", "edit_push", "edit_push", "", "edit push",&tui::TopedFrame::OnCellPush);
-   _resourceCenter->appendTool("edit", "edit_pop", "edit_pop", "", "edit pop",&tui::TopedFrame::OnCellPop);
-
-   //_resourceCenter->setToolBarSize(_tuihorizontal, ICON_SIZE_16x16);
-  // _resourceCenter->setToolBarSize(_tuihorizontal, ICON_SIZE_32x32);
+   _resourceCenter->setDirection(wxAUI_DOCK_TOP);
+   _resourceCenter->appendTool(wxT("view"), wxT("zoom_all"     ), wxT("zoom_all"     ), wxT(""), wxT("zoom all"       ), &tui::TopedFrame::OnZoomAll      );
+   _resourceCenter->appendTool(wxT("view"), wxT("zoom_in"      ), wxT("zoom_in"      ), wxT(""), wxT("zoom in"        ), &tui::TopedFrame::OnzoomIn       );
+   _resourceCenter->appendTool(wxT("view"), wxT("zoom_out"     ), wxT("zoom_out"     ), wxT(""), wxT("zoom out"       ), &tui::TopedFrame::OnzoomOut      );
+   _resourceCenter->appendTool(wxT("view"), wxT("ruler"        ), wxT("ruler"        ), wxT(""), wxT("add ruler"      ), &tui::TopedFrame::OnAddRuler     );
+   //_resourceCenter->setToolBa rSize(_tuiho rizontal, ICON_SIZE_16x16);
+  // _resourceCenter->setToolBa rSize(_tuiho rizontal, ICON_SIZE_32x32);
    _status = DEBUG_NEW wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_FLAT|wxTB_NODIVIDER|wxTB_HORIZONTAL);
 
    _GLstatus = DEBUG_NEW CanvasStatus(_status, ID_WIN_GLSTATUS ,
-                                          wxDefaultPosition, wxDefaultSize,
-                                          wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-   _GLstatus->SetSize(wxSize(-1, 30));
+                                           wxDefaultPosition, wxDefaultSize,
+                                           wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
+   _GLstatus->SetSize(wxSize(-1 , 30));
 
    _status->AddControl((wxControl*)_GLstatus);
    _status->Realize();
@@ -2414,10 +2415,10 @@ void tui::TopedFrame::OnToolBarAddItem(wxCommandEvent& evt)
 
 void tui::TopedFrame::OnToolBarDeleteItem(wxCommandEvent& evt)
 {
-   std::string toolBarName(evt.GetString().mb_str(wxConvUTF8));
+   wxString toolBarName(evt.GetString());
    wxStringClientData *data= static_cast<wxStringClientData*>(evt.GetClientObject());
-   wxString str = data->GetData();
-   std::string toolName(str.mb_str(wxConvUTF8));
+   wxString toolName = data->GetData();
+//   std::string toolName(str.mb_str(wxConvUTF8));
 
    _resourceCenter->deleteTool(toolBarName, toolName);
 }
