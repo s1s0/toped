@@ -666,7 +666,7 @@ void  tui::TopedFrame::setActiveCmd()
 void tui::TopedFrame::initToolBars()
 {
    //
-   //                           toolBarName, toolBarItem, iconName       , hotKey, helpString    ,  callbackMethod
+   //                           toolBarName, toolBarItem             , iconName       , hotKey,       helpString        ,  callbackMethod
    //
    _resourceCenter->setDirection(wxAUI_DOCK_TOP);
    _resourceCenter->appendTool(wxT("main"), wxT("new"          ), wxT("new"          ), wxT(""), wxT("new cell"       ), &tui::TopedFrame::OnCellNew      );
@@ -681,14 +681,18 @@ void tui::TopedFrame::initToolBars()
    _resourceCenter->appendTool(wxT("edit"), wxT("wire"         ), wxT("wire"         ), wxT(""), wxT("add wire"       ), &tui::TopedFrame::OnDrawWire     );
    _resourceCenter->appendTool(wxT("edit"), wxT("text"         ), wxT("text"         ), wxT(""), wxT("add text"       ), &tui::TopedFrame::OnDrawText     );
    _resourceCenter->appendTool(wxT("edit"), wxT("delete"       ), wxT("delete"       ), wxT(""), wxT("delete"         ), &tui::TopedFrame::OnDelete       );
-   _resourceCenter->appendTool(wxT("edit"), wxT("cut_with_poly"), wxT("cut_with_poly"), wxT(""), wxT("cut"            ), &tui::TopedFrame::OnPolyCut      );
+   _resourceCenter->appendTool(wxT("edit"), wxT("cut_box"      ), wxT("cut_box"      ), wxT(""), wxT("cut with box"   ), &tui::TopedFrame::OnBoxCut       );
    _resourceCenter->appendTool(wxT("edit"), wxT("copy"         ), wxT("copy"         ), wxT(""), wxT("copy"           ), &tui::TopedFrame::OnCopy         );
    _resourceCenter->appendTool(wxT("edit"), wxT("move"         ), wxT("move"         ), wxT(""), wxT("move"           ), &tui::TopedFrame::OnMove         );
    _resourceCenter->appendTool(wxT("edit"), wxT("rotate"       ), wxT("rotate_left"  ), wxT(""), wxT("rotate"         ), &tui::TopedFrame::OnRotate       );
    _resourceCenter->appendTool(wxT("edit"), wxT("flipvert"     ), wxT("flipy"        ), wxT(""), wxT("flip vertical"  ), &tui::TopedFrame::OnFlipVert     );
    _resourceCenter->appendTool(wxT("edit"), wxT("fliphor"      ), wxT("flipx"        ), wxT(""), wxT("flip horizontal"), &tui::TopedFrame::OnFlipHor      );
-   _resourceCenter->appendTool(wxT("edit"), wxT("edit_push"    ), wxT("edit_push"    ), wxT(""), wxT("edit push"      ), &tui::TopedFrame::OnCellPush     );
-   _resourceCenter->appendTool(wxT("edit"), wxT("edit_pop"     ), wxT("edit_pop"     ), wxT(""), wxT("edit pop"       ), &tui::TopedFrame::OnCellPop      );
+//   _resourceCenter->appendTool(wxT("edit"), wxT("edit_push"    ), wxT("edit_push"    ), wxT(""), wxT("edit push"      ), &tui::TopedFrame::OnCellPush     );
+//   _resourceCenter->appendTool(wxT("edit"), wxT("edit_pop"     ), wxT("edit_pop"     ), wxT(""), wxT("edit pop"       ), &tui::TopedFrame::OnCellPop      );
+   _resourceCenter->appendTool(wxT("edit"), wxT("select"       ), wxT("select"       ), wxT(""), wxT("select"         ), &tui::TopedFrame::OnSelectIn     );
+   _resourceCenter->appendTool(wxT("edit"), wxT("unselect"     ), wxT("unselect"     ), wxT(""), wxT("unselect"       ), &tui::TopedFrame::OnUnselectIn   );
+   _resourceCenter->appendTool(wxT("edit"), wxT("group"        ), wxT("group"        ), wxT(""), wxT("group"          ), &tui::TopedFrame::OnCellGroup    );
+   _resourceCenter->appendTool(wxT("edit"), wxT("ungroup"      ), wxT("ungroup"      ), wxT(""), wxT("ungroup"        ), &tui::TopedFrame::OnCellUngroup  );
 
    _resourceCenter->setDirection(wxAUI_DOCK_TOP);
    _resourceCenter->appendTool(wxT("view"), wxT("zoom_all"     ), wxT("zoom_all"     ), wxT(""), wxT("zoom all"       ), &tui::TopedFrame::OnZoomAll      );
