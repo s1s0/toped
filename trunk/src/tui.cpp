@@ -3139,3 +3139,10 @@ void tui::tllFill2XBM(const byte* pattern, byte nfill[128])
       nfill[i] = r;
    }
 }
+
+tui::IconSizes tui::operator++(tui::IconSizes& x, int)
+{
+   assert(tui::ICON_SIZE_END > x);
+   assert(x >= tui::ICON_SIZE_16x16);
+   return (x = static_cast<tui::IconSizes>(static_cast<int>(x)+1));
+}

@@ -84,6 +84,8 @@ namespace tui {
       ICON_SIZE_END
    } IconSizes;
 
+   IconSizes operator++(IconSizes& x, int);
+
    const int IconSizesValues[ICON_SIZE_END] = {16, 24, 32, 48};
    //Order for this enum must correspond to IconSizes order
    enum
