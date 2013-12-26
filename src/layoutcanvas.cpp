@@ -575,12 +575,12 @@ void tui::LayoutCanvas::cursorControl(bool shift, bool ctl)
 void tui::LayoutCanvas::updateCoordWin(int coord, CVSSTATUS_TYPE postype, int dcoord, CVSSTATUS_TYPE dpostype) {
    wxString ws;
    wxCommandEvent eventPOSITION(wxEVT_CANVAS_STATUS);
-   ws.sprintf(wxT("%3.4f"),coord*PROPC->UU());
+   ws.sprintf(wxT("%9.3f"),coord*PROPC->UU());
    eventPOSITION.SetString(ws);
    eventPOSITION.SetInt(postype);
    wxPostEvent(this, eventPOSITION);
    if (_rubberBand) {
-      ws.sprintf(wxT("%3.4f"),dcoord*PROPC->UU());
+      ws.sprintf(wxT("%9.3f"),dcoord*PROPC->UU());
       eventPOSITION.SetString(ws);
       eventPOSITION.SetInt(dpostype);
       wxPostEvent(this, eventPOSITION);

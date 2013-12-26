@@ -31,6 +31,8 @@
 #include <vector>
 #include <wx/wx.h>
 #include <wx/laywin.h>
+#include <wx/artprov.h>
+#include <wx/aui/aui.h>
 #include "tpdf_common.h"
 #include "tui.h"
 
@@ -41,6 +43,41 @@
    In future replace "callbackMethod" type to boost::function, winni::closure
    or similar library
 */
+
+// This below is how the main stream IDs are defined
+//#define tpdART_NEW_BOX         wxART_MAKE_ART_ID(tpdART_NEW_BOX)
+// Prefer to avoid using preprocessor where possible - so
+const wxArtID tpdART_NEW_BOX         = wxT("tpdART_NEW_BOX")     ;
+const wxArtID tpdART_NEW_POLY        = wxT("tpdART_NEW_POLY")    ;
+const wxArtID tpdART_NEW_WIRE        = wxT("tpdART_NEW_WIRE")    ;
+const wxArtID tpdART_NEW_TEXT        = wxT("tpdART_NEW_TEXT")    ;
+const wxArtID tpdART_COPY            = wxT("tpdART_COPY")        ;
+const wxArtID tpdART_MOVE            = wxT("tpdART_MOVE")        ;
+const wxArtID tpdART_SELECT          = wxT("tpdART_SELECT")      ;
+const wxArtID tpdART_UNSELECT        = wxT("tpdART_UNSELECT")    ;
+const wxArtID tpdART_DELETE          = wxT("tpdART_DELETE")      ;
+const wxArtID tpdART_FLIP_HORI       = wxT("tpdART_FLIP_HORI")   ;
+const wxArtID tpdART_FLIP_VERT       = wxT("tpdART_FLIP_VERT")   ;
+const wxArtID tpdART_ROTATE_CCW      = wxT("tpdART_ROTATE_CCW")  ;
+const wxArtID tpdART_ROTATE_CW       = wxT("tpdART_ROTATE_CW")   ;
+const wxArtID tpdART_GROUP           = wxT("tpdART_GROUP")       ;
+const wxArtID tpdART_UNGROUP         = wxT("tpdART_UNGROUP")     ;
+const wxArtID tpdART_CUT_BOX         = wxT("tpdART_CUT_BOX")     ;
+const wxArtID tpdART_MERGE           = wxT("tpdART_MERGE")       ;
+const wxArtID tpdART_RULER           = wxT("tpdART_RULER")       ;
+const wxArtID tpdART_UNDO            = wxT("tpdART_UNDO")        ;
+const wxArtID tpdART_ZOOM_IN         = wxT("tpdART_ZOOM_IN")     ;
+const wxArtID tpdART_ZOOM_OUT        = wxT("tpdART_ZOOM_OUT")    ;
+const wxArtID tpdART_ZOOM_ALL        = wxT("tpdART_ZOOM_ALL")    ;
+//const wxArtID tpdART_NEW
+//const wxArtID tpdART_OPEN
+//const wxArtID tpdART_SAVE
+//const wxArtID tpdART_EDIT_POP
+//const wxArtID tpdART_EDIT_PUSH
+//const wxArtID tpdART_REDO
+
+
+
 namespace tui
 {
    const word _tuihorizontal    = 0x0000;
@@ -195,6 +232,41 @@ namespace tui
    bool checkToolSize(IconSizes size);
 
    //=============================================================================
+
+   class TpdExecResource {
+   public:
+                        TpdExecResource() {}
+      virtual          ~TpdExecResource() {}
+      virtual void      exec() {assert(false);}  //Can't be pure virtual, because is used as a type below
+   };
+
+   class TpdResCallBack : public TpdExecResource {
+   public:
+                        TpdResCallBack(callbackMethod cbMethod);
+      virtual          ~TpdResCallBack() {}
+      virtual void      exec();
+   private:
+      callbackMethod    _cbMethod;
+   };
+
+   class TpdResTellScript : public TpdExecResource {
+   public:
+                        TpdResTellScript(const wxString&);
+      virtual          ~TpdResTellScript() {}
+   private:
+      wxString          _tellScript;
+   };
+
+   class TpdArtProvider : public wxArtProvider {
+      public:
+                       TpdArtProvider(const wxString&);
+   protected:
+      virtual wxBitmap CreateBitmap(const wxArtID&, const wxArtClient&, const wxSize&);
+   private:
+      wxFileName       _rootDir[ICON_SIZE_END];//! icon root directories
+   };
+
+   //=============================================================================
    //      Resourcecenter is responsible
    //      for handling all of ui actions.
    //      Currently only menu and tool bars
@@ -203,7 +275,7 @@ namespace tui
    public:
       ResourceCenter(void);
       ~ResourceCenter(void);
-      void setIconDir(const std::string& dir) {_IconDir = dir;}
+      void setIconDir(const wxString& dir) {_IconDir = dir;}
       //Using for build of complete menu
       void buildMenu(wxMenuBar *menuBar);
       //Insert new menu item
@@ -213,13 +285,14 @@ namespace tui
       void appendMenu(const std::string &menuItem, const std::string &hotKey, callbackMethod cbMethod, const std::string &helpString);
       void appendMenuSeparator(const std::string &menuItem);
       void executeMenu(int ID);
+      void executeToolBar(int ID);
       bool checkExistence(const tui::MenuItemHandler & item);
 
       /*void appendTool(const std::string toolBarName, const std::string &toolBarItem,
                      const std::string &bitmapFileName,
                      const std::string &hotKey, callbackMethod cbMethod, int direction);*/
       void setDirection(int direction);
-      void defineToolBar(const std::string &toolBarName);
+      void defineToolBar(const wxString &toolBarName);
       void appendTool(const wxString &toolBarName, const wxString &toolBarItem,
                      const wxString &iconName,
                      const wxString &hotKey,
@@ -235,6 +308,10 @@ namespace tui
       It leads to nonsynchronized internal state of object and Setting Menu.
       Better to use toolbarsize TELL-function.*/
       void setToolBarSize(bool direction, IconSizes size);
+      wxAuiToolBar* initToolBarA(wxWindow*);
+      wxAuiToolBar* initToolBarB(wxWindow*);
+      wxAuiToolBar* initToolBarC(wxWindow*);
+
    private:
       typedef std::vector <MenuItemHandler*> ItemList;
       typedef std::vector <ToolBarHandler*>  ToolBarList;
@@ -242,16 +319,24 @@ namespace tui
       //produce lowercase string and exclude unwanted character
       std::string simplify(std::string str, char ch);
       //Function to avoid copy-paste in appendTool functions
-      ToolBarHandler* proceedTool(const wxString &toolBarName, const wxString &toolBarItem);
+      ToolBarHandler* secureToolBar(const wxString &toolBarName);
 
       ItemList          _menus      ;
       ToolBarList       _toolBars   ;
       int               _menuCount  ; //number of menu items
-      int               _toolCount  ; //number of tool items
-      std::string       _IconDir    ; //directory that contains
+      int               _toolCount  ; //number of tool items // TODO clean-up
+      int               _nextToolId ; // The ID of the next Tool
+      wxString          _IconDir    ; //directory that contains
       int               _direction  ;
+      wxSize            _curTBSize  ;
+
+      std::map<int, TpdExecResource*> _execResources;
+      void              addToolBarItem(wxAuiToolBar*, const wxString&, const wxArtID&, callbackMethod);
+
    };
+
 }
+//=============================================================================
 
 namespace tellstdfunc {
    class StringMapClientData: public wxClientData

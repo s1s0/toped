@@ -46,12 +46,12 @@
 
 namespace tui {
    //-----------------------------------------------------------------------------
-   class CanvasStatus : public wxPanel {
+   class CanvasStatus : public wxAuiToolBar {
    public:
                            CanvasStatus(wxWindow*,wxWindowID id = wxID_ANY,
                                 const wxPoint& pos = wxDefaultPosition,
                                 const wxSize& size = wxDefaultSize,
-                                long style = wxTAB_TRAVERSAL);
+                                long style = wxAUI_TB_DEFAULT_STYLE);
       virtual             ~CanvasStatus();
       void                 setXpos(wxString);
       void                 setYpos(wxString);
@@ -59,11 +59,16 @@ namespace tui {
       void                 setdYpos(wxString);
       void                 setSelected(wxString);
    private:
-      wxStaticText*        X_pos;
-      wxStaticText*        Y_pos;
-      wxStaticText*        _dX;
-      wxStaticText*        _dY;
-      wxStaticText*        _selected;
+      wxTextCtrl*          _ctrlXPos;
+      wxTextCtrl*          _ctrlYPos;
+      wxTextCtrl*          _ctrlDX;
+      wxTextCtrl*          _ctrlDY;
+      wxTextCtrl*          _ctrlSel;
+      wxString             _strX;
+      wxString             _strY;
+      wxString             _strDX;
+      wxString             _strDY;
+      wxString             _strSel;
    };
 
    class ExternalProcess : public wxProcess {
@@ -107,15 +112,16 @@ namespace tui {
       console::TELLFuncList*  cmdlist()  const {return _cmdbrowser;}
       wxFrame*                getFrame()       {return this;}
       wxAuiManager*           getAuiManager()  {return &_winManager;}
-      void                    initToolBars();
-      void                    setIconDir(const std::string& uiDir);
+      void                    setIconDir(const wxString& uiDir);
       void                    setOglThread(bool val) {_canvas->setOglThread(val);}
       void                    setActiveCmd();
+      void                    initToolBars();
    private:
+      friend class tui::ResourceCenter;
       void                    initMenuBar();
       void                    initView();
       void                    setExitAproved()              { _exitAproved = true;}
-       bool                   exitAproved() const          { return _exitAproved;}
+      bool                    exitAproved() const          { return _exitAproved;}
       bool                    checkFileOverwriting(const wxString& fileName);
       void                    USMap2wxString(ExpLayMap* inmap, wxString& outmap);
       void                    SIMap2wxString(ImpLayMap* inmap, wxString& outmap);
@@ -128,25 +134,25 @@ namespace tui {
       browsers::browserTAB*   _browsers;  // TDT/GDS/layer browsers
       ResourceCenter*         _resourceCenter;
       LayoutCanvas*           _canvas;
-      wxToolBar*              _status;
+//      wxToolBar*              _status;
       TpdPost*                _tPost;
       tui::TopedPropertySheets* _propDialog;
       wxAuiManager            _winManager;
       wxDialog*               _techEditor;
       //Menu stuff
       wxMenuBar*              menuBar;
-      wxMenu*                 fileMenu;
-      wxMenu*                 editMenu;
-      wxMenu*                 viewMenu;
-      wxMenu*                 cellMenu;
-      wxMenu*                 drawMenu;
-      wxMenu*                 selectMenu;
+//      wxMenu*                 fileMenu;
+//      wxMenu*                 editMenu;
+//      wxMenu*                 viewMenu;
+//      wxMenu*                 cellMenu;
+//      wxMenu*                 drawMenu;
+//      wxMenu*                 selectMenu;
       wxMenu*                 settingsMenu;
-      wxMenu*                 markerMenu;
-      wxMenu*                 toolbarVertSizeMenu;
+//      wxMenu*                 markerMenu;
+//      wxMenu*                 toolbarVertSizeMenu;
       wxMenu*                 toolbarHorSizeMenu;
-      wxMenu*                 gdsMenu;
-      wxMenu*                 helpMenu;
+//      wxMenu*                 gdsMenu;
+//      wxMenu*                 helpMenu;
       ExternalProcess*        _extProc;
 
       // Sash layout stuff
@@ -155,125 +161,126 @@ namespace tui {
 //      wxWindow*     mS_command;
 //      wxWindow*     mS_log;
       // Menu
-      void   OnNewDesign(wxCommandEvent&);
-      void     OnTDTRead(wxCommandEvent&);
-      void  OnTDTLoadLib(wxCommandEvent&);
-      void OnTDTUnloadLib(wxCommandEvent&);
-      void    OnTELLRead(wxCommandEvent&);
-      void     OnGDSRead(wxCommandEvent& WXUNUSED(event));
-      void   OnGDSimport(wxCommandEvent& WXUNUSED(event));
-      void   OnGDStranslate(wxCommandEvent& WXUNUSED(event));
-      void   OnGDSexportLIB(wxCommandEvent& WXUNUSED(event));
-      void   OnGDSexportCELL(wxCommandEvent& WXUNUSED(event));
-      void    OnGDSclose(wxCommandEvent& WXUNUSED(event));
+      void            OnNewDesign(wxCommandEvent&);
+      void              OnTDTRead(wxCommandEvent&);
+      void           OnTDTLoadLib(wxCommandEvent&);
+      void         OnTDTUnloadLib(wxCommandEvent&);
+      void             OnTELLRead(wxCommandEvent&);
+      void              OnGDSRead(wxCommandEvent& WXUNUSED(event));
+      void            OnGDSimport(wxCommandEvent& WXUNUSED(event));
+      void         OnGDStranslate(wxCommandEvent& WXUNUSED(event));
+      void         OnGDSexportLIB(wxCommandEvent& WXUNUSED(event));
+      void        OnGDSexportCELL(wxCommandEvent& WXUNUSED(event));
+      void             OnGDSclose(wxCommandEvent& WXUNUSED(event));
 
-      void     OnCIFexportLIB(wxCommandEvent& WXUNUSED(event));
-      void     OnCIFimport(wxCommandEvent& WXUNUSED(event));
-      void     OnCIFRead(wxCommandEvent& WXUNUSED(event));
-      void   OnCIFtranslate(wxCommandEvent& WXUNUSED(event));
-      void   OnCIFexportCELL(wxCommandEvent& WXUNUSED(event));
-      void    OnCIFclose(wxCommandEvent& WXUNUSED(event));
+      void         OnCIFexportLIB(wxCommandEvent& WXUNUSED(event));
+      void            OnCIFimport(wxCommandEvent& WXUNUSED(event));
+      void              OnCIFRead(wxCommandEvent& WXUNUSED(event));
+      void         OnCIFtranslate(wxCommandEvent& WXUNUSED(event));
+      void        OnCIFexportCELL(wxCommandEvent& WXUNUSED(event));
+      void             OnCIFclose(wxCommandEvent& WXUNUSED(event));
 
-      void     OnOASRead(wxCommandEvent& WXUNUSED(event));
-      void   OnOASimport(wxCommandEvent& WXUNUSED(event));
-      void   OnOAStranslate(wxCommandEvent& WXUNUSED(event));
-//      void   OnOASexportLIB(wxCommandEvent& WXUNUSED(event));
-//      void   OnOASexportCELL(wxCommandEvent& WXUNUSED(event));
-      void    OnOASclose(wxCommandEvent& WXUNUSED(event));
+      void              OnOASRead(wxCommandEvent& WXUNUSED(event));
+      void            OnOASimport(wxCommandEvent& WXUNUSED(event));
+      void         OnOAStranslate(wxCommandEvent& WXUNUSED(event));
+//    void         OnOASexportLIB(wxCommandEvent& WXUNUSED(event));
+//    void        OnOASexportCELL(wxCommandEvent& WXUNUSED(event));
+      void             OnOASclose(wxCommandEvent& WXUNUSED(event));
 
-      void     OnTDTSave(wxCommandEvent& WXUNUSED(event));
-      void   OnTDTSaveAs(wxCommandEvent& WXUNUSED(event));
-      void   OnPropSave(wxCommandEvent& WXUNUSED(event));
-      void OnTDTSnapshot(wxCommandEvent& WXUNUSED(event));
-      void        OnCopy(wxCommandEvent& WXUNUSED(event));
-      void        OnMove(wxCommandEvent& WXUNUSED(event));
-      void      OnDelete(wxCommandEvent& WXUNUSED(event));
-      void      OnRotate(wxCommandEvent& WXUNUSED(event));
-      void    OnFlipVert(wxCommandEvent& WXUNUSED(event));
-      void     OnFlipHor(wxCommandEvent& WXUNUSED(event));
-      void     OnPolyCut(wxCommandEvent& WXUNUSED(event));
-      void      OnBoxCut(wxCommandEvent& WXUNUSED(event));
-      void       OnMerge(wxCommandEvent& WXUNUSED(event));
-      void      OnResize(wxCommandEvent& WXUNUSED(event));
-      void  OnChangeText(wxCommandEvent& WXUNUSED(event));
+      void              OnTDTSave(wxCommandEvent& WXUNUSED(event));
+      void            OnTDTSaveAs(wxCommandEvent& WXUNUSED(event));
+      void             OnPropSave(wxCommandEvent& WXUNUSED(event));
+      void          OnTDTSnapshot(wxCommandEvent& WXUNUSED(event));
+      void                 OnCopy(wxCommandEvent& WXUNUSED(event));
+      void                 OnMove(wxCommandEvent& WXUNUSED(event));
+      void               OnDelete(wxCommandEvent& WXUNUSED(event));
+      void               OnRotate(wxCommandEvent& WXUNUSED(event));
+      void             OnFlipVert(wxCommandEvent& WXUNUSED(event));
+      void              OnFlipHor(wxCommandEvent& WXUNUSED(event));
+      void              OnPolyCut(wxCommandEvent& WXUNUSED(event));
+      void               OnBoxCut(wxCommandEvent& WXUNUSED(event));
+      void                OnMerge(wxCommandEvent& WXUNUSED(event));
+      void               OnResize(wxCommandEvent& WXUNUSED(event));
+      void           OnChangeText(wxCommandEvent& WXUNUSED(event));
 
-      void     OnCellNew(wxCommandEvent&);
-      void    OnCellOpen(wxCommandEvent& WXUNUSED(event));
-      void    OnCellRemove(wxCommandEvent&);
-      void    OnCellPush(wxCommandEvent& WXUNUSED(event));
-      void     OnCellPop(wxCommandEvent& WXUNUSED(event));
-      void     OnCellTop(wxCommandEvent& WXUNUSED(event));
-      void    OnCellPrev(wxCommandEvent& WXUNUSED(event));
-      void   OnCellRef_B(wxCommandEvent& WXUNUSED(event));
-      void   OnCellRef_M(wxCommandEvent& WXUNUSED(event));
-      void  OnCellARef_B(wxCommandEvent& WXUNUSED(event));
-      void  OnCellARef_M(wxCommandEvent& WXUNUSED(event));
-      void   OnCellGroup(wxCommandEvent& WXUNUSED(event));
-      void OnCellUngroup(wxCommandEvent& WXUNUSED(event));
-      void   OnChangeRef(wxCommandEvent& WXUNUSED(event));
+      void              OnCellNew(wxCommandEvent&);
+      void             OnCellOpen(wxCommandEvent& WXUNUSED(event));
+      void           OnCellRemove(wxCommandEvent&);
+      void             OnCellPush(wxCommandEvent& WXUNUSED(event));
+      void              OnCellPop(wxCommandEvent& WXUNUSED(event));
+      void              OnCellTop(wxCommandEvent& WXUNUSED(event));
+      void             OnCellPrev(wxCommandEvent& WXUNUSED(event));
+      void            OnCellRef_B(wxCommandEvent& WXUNUSED(event));
+      void            OnCellRef_M(wxCommandEvent& WXUNUSED(event));
+      void           OnCellARef_B(wxCommandEvent& WXUNUSED(event));
+      void           OnCellARef_M(wxCommandEvent& WXUNUSED(event));
+      void            OnCellGroup(wxCommandEvent& WXUNUSED(event));
+      void          OnCellUngroup(wxCommandEvent& WXUNUSED(event));
+      void            OnChangeRef(wxCommandEvent& WXUNUSED(event));
 
-      void        OnUndo(wxCommandEvent& WXUNUSED(event));
-      void      OnzoomIn(wxCommandEvent& WXUNUSED(event));
-      void     OnzoomOut(wxCommandEvent& WXUNUSED(event));
-      void   OnzoomEmpty(wxCommandEvent& WXUNUSED(event));
-      void     OnpanLeft(wxCommandEvent& WXUNUSED(event));
-      void    OnpanRight(wxCommandEvent& WXUNUSED(event));
-      void       OnpanUp(wxCommandEvent& WXUNUSED(event));
-      void     OnpanDown(wxCommandEvent& WXUNUSED(event));
-      void     OnZoomAll(wxCommandEvent& WXUNUSED(event));
-      void OnZoomVisible(wxCommandEvent& WXUNUSED(event));
-      void     OnDrawBox(wxCommandEvent& WXUNUSED(event));
-      void    OnDrawPoly(wxCommandEvent& WXUNUSED(event));
-      void    OnDrawWire(wxCommandEvent& WXUNUSED(event));
-      void    OnDrawText(wxCommandEvent& WXUNUSED(event));
-      void    OnSelectIn(wxCommandEvent& WXUNUSED(event));
-      void  OnUnselectIn(wxCommandEvent& WXUNUSED(event));
-      void   OnPselectIn(wxCommandEvent& WXUNUSED(event));
-      void OnPunselectIn(wxCommandEvent& WXUNUSED(event));
-      void OnUnselectAll(wxCommandEvent& WXUNUSED(event));
-      void OnReportSelected(wxCommandEvent& WXUNUSED(event));
-      void   OnSelectAll(wxCommandEvent& WXUNUSED(event));
+      void                 OnUndo(wxCommandEvent& WXUNUSED(event));
+      void               OnZoomIn(wxCommandEvent& WXUNUSED(event));
+      void              OnZoomOut(wxCommandEvent& WXUNUSED(event));
+      void            OnzoomEmpty(wxCommandEvent& WXUNUSED(event));
+      void              OnpanLeft(wxCommandEvent& WXUNUSED(event));
+      void             OnpanRight(wxCommandEvent& WXUNUSED(event));
+      void                OnpanUp(wxCommandEvent& WXUNUSED(event));
+      void              OnpanDown(wxCommandEvent& WXUNUSED(event));
+      void              OnZoomAll(wxCommandEvent& WXUNUSED(event));
+      void          OnZoomVisible(wxCommandEvent& WXUNUSED(event));
+      void              OnDrawBox(wxCommandEvent& WXUNUSED(event));
+      void             OnDrawPoly(wxCommandEvent& WXUNUSED(event));
+      void             OnDrawWire(wxCommandEvent& WXUNUSED(event));
+      void             OnDrawText(wxCommandEvent& WXUNUSED(event));
+      void             OnSelectIn(wxCommandEvent& WXUNUSED(event));
+      void           OnUnselectIn(wxCommandEvent& WXUNUSED(event));
+      void            OnPselectIn(wxCommandEvent& WXUNUSED(event));
+      void          OnPunselectIn(wxCommandEvent& WXUNUSED(event));
+      void          OnUnselectAll(wxCommandEvent& WXUNUSED(event));
+      void       OnReportSelected(wxCommandEvent& WXUNUSED(event));
+      void            OnSelectAll(wxCommandEvent& WXUNUSED(event));
       //
-      void OnPropertySheet(wxCommandEvent& WXUNUSED(event));
-      void OnHToolBarSize16(wxCommandEvent& WXUNUSED(event));
-      void OnHToolBarSize24(wxCommandEvent& WXUNUSED(event));
-      void OnHToolBarSize32(wxCommandEvent& WXUNUSED(event));
-      void OnHToolBarSize48(wxCommandEvent& WXUNUSED(event));
-      void   OnUndoDepth(wxCommandEvent& WXUNUSED(event));
-      void OnVToolBarSize16(wxCommandEvent& WXUNUSED(event));
-      void OnVToolBarSize24(wxCommandEvent& WXUNUSED(event));
-      void OnVToolBarSize32(wxCommandEvent& WXUNUSED(event));
-      void OnVToolBarSize48(wxCommandEvent& WXUNUSED(event));
+      void        OnPropertySheet(wxCommandEvent& WXUNUSED(event));
+      void       OnHToolBarSize16(wxCommandEvent& WXUNUSED(event));
+      void       OnHToolBarSize24(wxCommandEvent& WXUNUSED(event));
+      void       OnHToolBarSize32(wxCommandEvent& WXUNUSED(event));
+      void       OnHToolBarSize48(wxCommandEvent& WXUNUSED(event));
+      void            OnUndoDepth(wxCommandEvent& WXUNUSED(event));
+      void       OnVToolBarSize16(wxCommandEvent& WXUNUSED(event));
+      void       OnVToolBarSize24(wxCommandEvent& WXUNUSED(event));
+      void       OnVToolBarSize32(wxCommandEvent& WXUNUSED(event));
+      void       OnVToolBarSize48(wxCommandEvent& WXUNUSED(event));
 
 
-      void OnEditLayer(wxCommandEvent&);
-      void  OnTechEditor(wxCommandEvent& WXUNUSED(event));
-      void    OnMenu(wxCommandEvent&);
+      void            OnEditLayer(wxCommandEvent&);
+      void           OnTechEditor(wxCommandEvent& WXUNUSED(event));
+      void                 OnMenu(wxCommandEvent&);
+      void              OnToolBar(wxCommandEvent&);
 
-      void  OnGridDefine(wxCommandEvent& WXUNUSED(event));
-      void  OnAddRuler(wxCommandEvent& WXUNUSED(event));
-      void  OnClearRulers(wxCommandEvent& WXUNUSED(event));
-      void  OnCadenceConvert(wxCommandEvent& WXUNUSED(event));
-      void  OnTextLogOverflow(wxCommandEvent& WXUNUSED(event));
-      void  OnChangeLayer(wxCommandEvent& WXUNUSED(event));
-      void  OnCurrentLayer(wxCommandEvent& WXUNUSED(event));
+      void           OnGridDefine(wxCommandEvent& WXUNUSED(event));
+      void             OnAddRuler(wxCommandEvent& WXUNUSED(event));
+      void          OnClearRulers(wxCommandEvent& WXUNUSED(event));
+      void       OnCadenceConvert(wxCommandEvent& WXUNUSED(event));
+      void      OnTextLogOverflow(wxCommandEvent& WXUNUSED(event));
+      void          OnChangeLayer(wxCommandEvent& WXUNUSED(event));
+      void         OnCurrentLayer(wxCommandEvent& WXUNUSED(event));
       //
-      void  OnUpdateRenderParams(wxCommandEvent&);
-      void  OnUpdateCanvasParams(wxCommandEvent&);
-      void          OnMouseAccel(wxCommandEvent&);
-      void        OnCanvasStatus(wxCommandEvent&);
+      void   OnUpdateRenderParams(wxCommandEvent&);
+      void   OnUpdateCanvasParams(wxCommandEvent&);
+      void           OnMouseAccel(wxCommandEvent&);
+      void         OnCanvasStatus(wxCommandEvent&);
       // additional
-      void    CellRef(wxString);
-      void   CellARef(wxString);
+      void CellRef               (wxString);
+      void CellARef              (wxString);
       void OnUncapturedMouseClick(wxCommandEvent&);
-      void          OnToolBarSize(wxCommandEvent&);
-      void        OnToolBarDefine (wxCommandEvent& evt);
-      void       OnToolBarAddItem (wxCommandEvent& evt);
-      void     OnToolBarDeleteItem(wxCommandEvent& evt);
-      void     OnDRCResults(wxCommandEvent& evt);
-      void     OnIconize(wxIconizeEvent& evt);
-      void  onReloadTellFuncs(wxCommandEvent& WXUNUSED(evt));
-      void     onParseCommand(wxCommandEvent& evt);
+      void OnToolBarSize         (wxCommandEvent&);
+      void OnToolBarDefine       (wxCommandEvent&);
+      void OnToolBarAddItem      (wxCommandEvent&);
+      void OnToolBarDeleteItem   (wxCommandEvent&);
+      void OnDRCResults          (wxCommandEvent& WXUNUSED(evt));
+      void OnIconize             (wxIconizeEvent&);
+      void onReloadTellFuncs     (wxCommandEvent& WXUNUSED(evt));
+      void onParseCommand        (wxCommandEvent& evt);
       // The declaration of the associated event table
       DECLARE_EVENT_TABLE();
    };

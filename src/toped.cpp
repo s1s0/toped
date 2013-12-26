@@ -75,78 +75,89 @@ extern console::TllCmdLine*      Console;
 
 tui::CanvasStatus::CanvasStatus(wxWindow* parent, wxWindowID id ,
    const wxPoint& pos , const wxSize& size , long style)
-   : wxPanel( parent, id, pos, size, style)
+   : wxAuiToolBar( parent, id, pos, size, style)
 {
    wxFont fontX = GetFont();
    fontX.SetWeight(wxBOLD);
-   fontX.SetPointSize(9);
-   //fontX.SetFamily(wxFONTFAMILY_MODERN);
-
+   fontX.SetPointSize(12);
+   fontX.SetFamily(wxFONTFAMILY_TELETYPE);
    SetFont(fontX);
-   wxBoxSizer *thesizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
-//   SetBackgroundColour(wxColour(wxT("LIGHT_GRAY")));
-   SetForegroundColour(wxColour(wxT("BLACK")));
-   X_pos = DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("0.00"), wxDefaultPosition,wxSize(120,-1),
-                                                   wxST_NO_AUTORESIZE | wxALIGN_RIGHT );
-   Y_pos = DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("0.00"), wxDefaultPosition, wxSize(120,-1),
-                                                   wxST_NO_AUTORESIZE | wxALIGN_RIGHT );
-   _dX = DEBUG_NEW wxStaticText(this, wxID_ANY, wxT(""), wxDefaultPosition, wxSize(100,-1),
-                                                   wxST_NO_AUTORESIZE | wxALIGN_RIGHT );
-   _dY = DEBUG_NEW wxStaticText(this, wxID_ANY, wxT(""), wxDefaultPosition, wxSize(100,-1),
-                                                   wxST_NO_AUTORESIZE | wxALIGN_RIGHT );
 
-   _selected = DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("0"), wxDefaultPosition, wxSize(40,-1),
-                                                   wxST_NO_AUTORESIZE | wxALIGN_LEFT);
-   thesizer->Add(DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("Selected: ")), 0, wxALIGN_CENTER | wxALIGN_CENTER_VERTICAL, 3 );
-   thesizer->Add(_selected, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
-   thesizer->Add(10,0,0);
-   thesizer->Add(DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("dX: ")), 0, wxALIGN_CENTER_VERTICAL, 3 );
-   thesizer->Add(_dX, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
-   thesizer->Add(10,0,0);
-   thesizer->Add(DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("dY: ")), 0, wxALIGN_CENTER_VERTICAL, 3 );
-   thesizer->Add(_dY, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
-   thesizer->Add(20,0,0);
-   thesizer->Add(DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("X: ")), 0, wxALIGN_CENTER_VERTICAL, 3 );
-   thesizer->Add(X_pos, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
-   thesizer->Add(10,0,0);
-   thesizer->Add(DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("Y: ")), 0, wxALIGN_CENTER_VERTICAL, 3 );
-   thesizer->Add(Y_pos, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 3 );
-   thesizer->Add(20,0,0);
+   wxSize dSize(GetTextExtent(wxT("-999999999.999")));//2 digits more
+   dSize.SetHeight(-1);
 
-   SetSizer( thesizer );      // use the sizer for layout
-   thesizer->SetSizeHints( this );   // set size hints to honour minimum size
+   _ctrlXPos = DEBUG_NEW wxTextCtrl( this, wxID_ANY , wxEmptyString, wxDefaultPosition, dSize, wxTE_RIGHT | wxTE_READONLY,
+                           wxTextValidator(wxFILTER_NUMERIC, &_strX));
+   _ctrlXPos->SetForegroundColour(*wxWHITE);  _ctrlXPos->SetBackgroundColour(*wxBLACK);
+
+   _ctrlYPos = DEBUG_NEW wxTextCtrl( this, wxID_ANY , wxEmptyString, wxDefaultPosition, dSize, wxTE_RIGHT | wxTE_READONLY,
+                           wxTextValidator(wxFILTER_NUMERIC, &_strY));
+   _ctrlYPos->SetForegroundColour(*wxWHITE);  _ctrlYPos->SetBackgroundColour(*wxBLACK);
+
+   _ctrlDX = DEBUG_NEW wxTextCtrl( this, wxID_ANY , wxEmptyString, wxDefaultPosition, dSize, wxTE_RIGHT | wxTE_READONLY,
+                           wxTextValidator(wxFILTER_NUMERIC, &_strDX));
+   _ctrlDX->SetForegroundColour(*wxWHITE);  _ctrlDX->SetBackgroundColour(*wxBLACK);
+
+   _ctrlDY = DEBUG_NEW wxTextCtrl( this, wxID_ANY , wxEmptyString, wxDefaultPosition, dSize, wxTE_RIGHT | wxTE_READONLY,
+                           wxTextValidator(wxFILTER_NUMERIC, &_strDY));
+   _ctrlDY->SetForegroundColour(*wxWHITE);  _ctrlDY->SetBackgroundColour(*wxBLACK);
+
+   dSize = GetTextExtent(wxT("99999999999"));// 1 digit more
+   dSize.SetHeight(-1);
+   _ctrlSel = DEBUG_NEW wxTextCtrl( this, wxID_ANY , wxEmptyString, wxDefaultPosition, dSize, wxTE_RIGHT | wxTE_READONLY,
+                           wxTextValidator(wxFILTER_NUMERIC, &_strSel));
+   _ctrlSel->SetForegroundColour(*wxWHITE);  _ctrlSel->SetBackgroundColour(*wxBLACK);
+
+   AddControl( DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("X:"), wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE));
+   AddControl(_ctrlXPos    );
+   AddControl( DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("Y:"), wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE));
+   AddControl(_ctrlYPos    );
+   AddControl( DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("dX:"), wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE));
+   AddControl(_ctrlDX      );
+   AddControl( DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("dY:"), wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE));
+   AddControl(_ctrlDY      );
+   AddControl( DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("Sel:"), wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE));
+   AddControl(_ctrlSel     );
+   Realize();
 }
 
-tui::CanvasStatus::~CanvasStatus() {
-   delete X_pos;
-   delete Y_pos;
-   delete _dX;
-   delete _dY;
-   delete _selected;
+tui::CanvasStatus::~CanvasStatus()
+{
+//   delete _ctrlXPos;
+//   delete _ctrlYPos;
+//   delete _ctrlDX;
+//   delete _ctrlDY;
+//   delete _ctrlSel;
 }
 
-void tui::CanvasStatus::setXpos(wxString coordX){
-   X_pos->SetLabel(coordX);
-   X_pos->Refresh();
+void tui::CanvasStatus::setXpos(wxString coordX)
+{
+   _strX = coordX;
+   _ctrlXPos->GetValidator()->TransferToWindow();
 }
 
-void tui::CanvasStatus::setYpos(wxString coordY){
-   Y_pos->SetLabel(coordY);
-   Y_pos->Refresh();
+void tui::CanvasStatus::setYpos(wxString coordY)
+{
+   _strY = coordY;
+   _ctrlYPos->GetValidator()->TransferToWindow();
 }
 
-void tui::CanvasStatus::setdXpos(wxString coordX){
-   _dX->SetLabel(coordX);
-   _dX->Refresh();
+void tui::CanvasStatus::setdXpos(wxString coordX)
+{
+   _strDX = coordX;
+   _ctrlDX->GetValidator()->TransferToWindow();
 }
 
-void tui::CanvasStatus::setdYpos(wxString coordY){
-   _dY->SetLabel(coordY);
-   _dY->Refresh();
+void tui::CanvasStatus::setdYpos(wxString coordY)
+{
+   _strDY = coordY;
+   _ctrlDY->GetValidator()->TransferToWindow();
 }
 
-void tui::CanvasStatus::setSelected(wxString numsel) {
-   _selected->SetLabel(numsel);
+void tui::CanvasStatus::setSelected(wxString numsel)
+{
+   _strSel = numsel;
+   _ctrlSel->GetValidator()->TransferToWindow();
 }
 
 //-----------------------------------------------------------------------------
@@ -257,8 +268,8 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMEDIT_MERGE        , tui::TopedFrame::OnMerge       )
    EVT_MENU( TMEDIT_RESIZE       , tui::TopedFrame::OnResize      )
 
-   EVT_MENU( TMVIEW_ZOOMIN       , tui::TopedFrame::OnzoomIn      )
-   EVT_MENU( TMVIEW_ZOOMOUT      , tui::TopedFrame::OnzoomOut     )
+   EVT_MENU( TMVIEW_ZOOMIN       , tui::TopedFrame::OnZoomIn      )
+   EVT_MENU( TMVIEW_ZOOMOUT      , tui::TopedFrame::OnZoomOut     )
    EVT_MENU( TMVIEW_PANLEFT      , tui::TopedFrame::OnpanLeft     )
    EVT_MENU( TMVIEW_PANRIGHT     , tui::TopedFrame::OnpanRight    )
    EVT_MENU( TMVIEW_PANUP        , tui::TopedFrame::OnpanUp       )
@@ -317,8 +328,8 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMCADENCE_CONVERT   , tui::TopedFrame::OnCadenceConvert )
    EVT_MENU( TMGET_SNAPSHOT      , tui::TopedFrame::OnTDTSnapshot )
       // EVT_MENU( TMHELP_ABOUTAPP     , tui::TopedFrame::OnAbout       )
-   EVT_MENU_RANGE(TMDUMMY, TMDUMMY+TDUMMY_TOOL-1 , tui::TopedFrame::OnMenu  )
-   EVT_TOOL_RANGE(TDUMMY_TOOL, TDUMMY_TOOL+1000 , tui::TopedFrame::OnMenu  )
+   EVT_MENU_RANGE(TMDUMMY    , TMDUMMY    +999 , tui::TopedFrame::OnMenu   )
+   EVT_TOOL_RANGE(TDUMMY_TOOL, TDUMMY_TOOL+999 , tui::TopedFrame::OnToolBar)
    EVT_ICONIZE(tui::TopedFrame::OnIconize)
    EVT_CLOSE(tui::TopedFrame::OnClose)
 //   EVT_SIZE( TopedFrame::OnSize )
@@ -502,8 +513,8 @@ void tui::TopedFrame::initMenuBar() {
 
     //???Add Toolbar & StatusBar check Item
 
-   _resourceCenter->appendMenu("&View/Zoom in", "F2",  &tui::TopedFrame::OnzoomIn, "Zoom in current window" );
-   _resourceCenter->appendMenu("&View/Zoom out","F3",  &tui::TopedFrame::OnzoomOut, "Zoom out current window" );
+   _resourceCenter->appendMenu("&View/Zoom in", "F2",  &tui::TopedFrame::OnZoomIn, "Zoom in current window" );
+   _resourceCenter->appendMenu("&View/Zoom out","F3",  &tui::TopedFrame::OnZoomOut, "Zoom out current window" );
    _resourceCenter->appendMenu("&View/Zoom all","F4",  &tui::TopedFrame::OnZoomAll, "Zoom the current cell" );
    _resourceCenter->appendMenu("&View/Zoom visible","F5",  &tui::TopedFrame::OnZoomVisible, "Zoom visible objects of the current cell" );
    _resourceCenter->appendMenuSeparator("View");
@@ -653,7 +664,7 @@ void tui::TopedFrame::initMenuBar() {
 
 }
 
-void tui::TopedFrame::setIconDir(const std::string& uiDir)
+void tui::TopedFrame::setIconDir(const wxString& uiDir)
 {
    if (_resourceCenter) _resourceCenter->setIconDir(uiDir);
 }
@@ -665,79 +676,46 @@ void  tui::TopedFrame::setActiveCmd()
 
 void tui::TopedFrame::initToolBars()
 {
-   //
-   //                           toolBarName, toolBarItem             , iconName       , hotKey,       helpString        ,  callbackMethod
-   //
-   _resourceCenter->setDirection(wxAUI_DOCK_TOP);
-   _resourceCenter->appendTool(wxT("main"), wxT("new"          ), wxT("new"          ), wxT(""), wxT("new cell"       ), &tui::TopedFrame::OnCellNew      );
-   _resourceCenter->appendTool(wxT("main"), wxT("open"         ), wxT("open"         ), wxT(""), wxT("open cell"      ), &tui::TopedFrame::OnCellOpen     );
-   _resourceCenter->appendTool(wxT("main"), wxT("save"         ), wxT("save"         ), wxT(""), wxT("save design"    ), &tui::TopedFrame::OnTDTSave      );
+   wxAuiToolBar* tbA = _resourceCenter->initToolBarA(this);
+   wxAuiToolBar* tbB = _resourceCenter->initToolBarB(this);
+   wxAuiToolBar* tbC = _resourceCenter->initToolBarC(this);
+   _GLstatus = DEBUG_NEW CanvasStatus(this, ID_WIN_GLSTATUS , wxDefaultPosition, wxDefaultSize, wxAUI_TB_HORZ_TEXT);
 
-   //_resourceCenter->setToolBarSize("main", ICON_SIZE_24x24);
-   _resourceCenter->setDirection(wxAUI_DOCK_TOP);
-   _resourceCenter->appendTool(wxT("edit"), wxT("undo"         ), wxT("undo"         ), wxT(""), wxT("undo"           ), &tui::TopedFrame::OnUndo         );
-   _resourceCenter->appendTool(wxT("edit"), wxT("box"          ), wxT("box"          ), wxT(""), wxT("add box"        ), &tui::TopedFrame::OnDrawBox      );
-   _resourceCenter->appendTool(wxT("edit"), wxT("poly"         ), wxT("poly"         ), wxT(""), wxT("add polygon"    ), &tui::TopedFrame::OnDrawPoly     );
-   _resourceCenter->appendTool(wxT("edit"), wxT("wire"         ), wxT("wire"         ), wxT(""), wxT("add wire"       ), &tui::TopedFrame::OnDrawWire     );
-   _resourceCenter->appendTool(wxT("edit"), wxT("text"         ), wxT("text"         ), wxT(""), wxT("add text"       ), &tui::TopedFrame::OnDrawText     );
-   _resourceCenter->appendTool(wxT("edit"), wxT("delete"       ), wxT("delete"       ), wxT(""), wxT("delete"         ), &tui::TopedFrame::OnDelete       );
-   _resourceCenter->appendTool(wxT("edit"), wxT("cut_box"      ), wxT("cut_box"      ), wxT(""), wxT("cut with box"   ), &tui::TopedFrame::OnBoxCut       );
-   _resourceCenter->appendTool(wxT("edit"), wxT("copy"         ), wxT("copy"         ), wxT(""), wxT("copy"           ), &tui::TopedFrame::OnCopy         );
-   _resourceCenter->appendTool(wxT("edit"), wxT("move"         ), wxT("move"         ), wxT(""), wxT("move"           ), &tui::TopedFrame::OnMove         );
-   _resourceCenter->appendTool(wxT("edit"), wxT("rotate"       ), wxT("rotate_left"  ), wxT(""), wxT("rotate"         ), &tui::TopedFrame::OnRotate       );
-   _resourceCenter->appendTool(wxT("edit"), wxT("flipvert"     ), wxT("flipy"        ), wxT(""), wxT("flip vertical"  ), &tui::TopedFrame::OnFlipVert     );
-   _resourceCenter->appendTool(wxT("edit"), wxT("fliphor"      ), wxT("flipx"        ), wxT(""), wxT("flip horizontal"), &tui::TopedFrame::OnFlipHor      );
-//   _resourceCenter->appendTool(wxT("edit"), wxT("edit_push"    ), wxT("edit_push"    ), wxT(""), wxT("edit push"      ), &tui::TopedFrame::OnCellPush     );
-//   _resourceCenter->appendTool(wxT("edit"), wxT("edit_pop"     ), wxT("edit_pop"     ), wxT(""), wxT("edit pop"       ), &tui::TopedFrame::OnCellPop      );
-   _resourceCenter->appendTool(wxT("edit"), wxT("select"       ), wxT("select"       ), wxT(""), wxT("select"         ), &tui::TopedFrame::OnSelectIn     );
-   _resourceCenter->appendTool(wxT("edit"), wxT("unselect"     ), wxT("unselect"     ), wxT(""), wxT("unselect"       ), &tui::TopedFrame::OnUnselectIn   );
-   _resourceCenter->appendTool(wxT("edit"), wxT("group"        ), wxT("group"        ), wxT(""), wxT("group"          ), &tui::TopedFrame::OnCellGroup    );
-   _resourceCenter->appendTool(wxT("edit"), wxT("ungroup"      ), wxT("ungroup"      ), wxT(""), wxT("ungroup"        ), &tui::TopedFrame::OnCellUngroup  );
-
-   _resourceCenter->setDirection(wxAUI_DOCK_TOP);
-   _resourceCenter->appendTool(wxT("view"), wxT("zoom_all"     ), wxT("zoom_all"     ), wxT(""), wxT("zoom all"       ), &tui::TopedFrame::OnZoomAll      );
-   _resourceCenter->appendTool(wxT("view"), wxT("zoom_in"      ), wxT("zoom_in"      ), wxT(""), wxT("zoom in"        ), &tui::TopedFrame::OnzoomIn       );
-   _resourceCenter->appendTool(wxT("view"), wxT("zoom_out"     ), wxT("zoom_out"     ), wxT(""), wxT("zoom out"       ), &tui::TopedFrame::OnzoomOut      );
-   _resourceCenter->appendTool(wxT("view"), wxT("ruler"        ), wxT("ruler"        ), wxT(""), wxT("add ruler"      ), &tui::TopedFrame::OnAddRuler     );
-   //_resourceCenter->setToolBa rSize(_tuiho rizontal, ICON_SIZE_16x16);
-  // _resourceCenter->setToolBa rSize(_tuiho rizontal, ICON_SIZE_32x32);
-   _status = DEBUG_NEW wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_FLAT|wxTB_NODIVIDER|wxTB_HORIZONTAL);
-
-   _GLstatus = DEBUG_NEW CanvasStatus(_status, ID_WIN_GLSTATUS ,
-                                           wxDefaultPosition, wxDefaultSize,
-                                           wxNO_BORDER | wxSW_3D | wxCLIP_CHILDREN);
-   _GLstatus->SetSize(wxSize(-1 , 30));
-
-   _status->AddControl((wxControl*)_GLstatus);
-   _status->Realize();
-
-   getAuiManager()->AddPane(_status, wxAuiPaneInfo().ToolbarPane().
-                           Name(wxString("Status", wxConvUTF8)).Top().Gripper().GripperTop(false).Floatable(false).
-                           TopDockable(true).BottomDockable(true).LeftDockable(false).RightDockable(false).Row(2));
-
+   getAuiManager()->AddPane(tbA, wxAuiPaneInfo()
+                                .ToolbarPane()
+                                .Top()
+                                .Floatable()
+                                .Row(1)
+                                .Position(1)
+                           );
+   getAuiManager()->AddPane(tbB, wxAuiPaneInfo()
+                                .ToolbarPane()
+                                .Top()
+                                .Floatable()
+                                .Row(1)
+                                .Position(2)
+                           );
+   getAuiManager()->AddPane(tbC, wxAuiPaneInfo()
+                                .ToolbarPane()
+                                .Top()
+                                .Floatable()
+                                .Row(1)
+                                .Position(3)
+                           );
+   getAuiManager()->AddPane(_GLstatus, wxAuiPaneInfo()
+                                .ToolbarPane()
+                                .Top()
+                                .Floatable()
+                                .Gripper()
+                                .Name(wxT("Status"))
+                                .GripperTop(false)
+                                .TopDockable(true)
+                                .BottomDockable(true)
+                                .LeftDockable(false)
+                                .RightDockable(false)
+                                .Row(2)
+                            );
    getAuiManager()->Update();
-/*   wxToolBar* positionBar = CreateToolBar(wxTB_DOCKABLE |  wxTB_HORIZONTAL | wxNO_BORDER);
-   X_pos = DEBUG_NEW wxStaticText(positionBar, -1, "", wxDefaultPosition,
-   id   wxSize(100,32), wxST_NO_AUTORESIZE);
-   Y_pos = DEBUG_NEW wxStaticText(positionBar, -1, "", wxDefaultPosition,
-                              wxSize(100,32), wxST_NO_AUTORESIZE);
-//wxSIMPLE_BORDER | wxALIGN_RIGHT  |
-   wxFont fontX = X_pos->GetFont();
-   fontX.SetPointSize(fontX.GetPointSize()*3/2);
-   X_pos->SetFont(fontX);
-   Y_pos->SetFont(fontX);
-
-   X_pos->SetBackgroundColoidur(wxColour("WHITE"));
-   Y_pos->SetBackgroundColour(wxColour("WHITE"));
-   X_pos->SetLabel("0.00");
-   Y_pos->SetLabel("0.00");
-   X_pos->Refresh();
-   Y_pos->Refresh();
-   positionBar->AddControl(X_pos);
-   positionBar->AddSeparator();
-   positionBar->AddControl(Y_pos);
-   positionBar->AddSeparator();
-   positionBar->Realize();*/
 }
 
 void tui::TopedFrame::initView()
@@ -2272,6 +2250,11 @@ void tui::TopedFrame::OnMenu(wxCommandEvent& event)
    _resourceCenter->executeMenu(event.GetId());
 }
 
+void tui::TopedFrame::OnToolBar(wxCommandEvent& event)
+{
+   _resourceCenter->executeToolBar(event.GetId());
+}
+
 void tui::TopedFrame::OnUpdateRenderParams(wxCommandEvent& evt)
 {
    _propDialog->updateRenderSheet(evt);
@@ -2309,13 +2292,13 @@ void tui::TopedFrame::OnZoomAll(wxCommandEvent& WXUNUSED(event)) {
 
 void tui::TopedFrame::OnUndo(wxCommandEvent& WXUNUSED(event)) {Console->parseCommand(wxT("undo();"));}
 
-void tui::TopedFrame::OnzoomIn(wxCommandEvent& WXUNUSED(event)) {
+void tui::TopedFrame::OnZoomIn(wxCommandEvent& WXUNUSED(event)) {
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_IN);
    wxPostEvent(_canvas, eventZOOM);
 }
 
-void tui::TopedFrame::OnzoomOut(wxCommandEvent& WXUNUSED(event)) {
+void tui::TopedFrame::OnZoomOut(wxCommandEvent& WXUNUSED(event)) {
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
    eventZOOM.SetInt(ZOOM_OUT);
    wxPostEvent(_canvas, eventZOOM);
@@ -2402,8 +2385,8 @@ void tui::TopedFrame::OnToolBarSize(wxCommandEvent& evt)
 
 void tui::TopedFrame::OnToolBarDefine(wxCommandEvent& evt)
 {
-   std::string toolBarBame(evt.GetString().mb_str(wxConvUTF8));
-   _resourceCenter->defineToolBar(toolBarBame);
+   wxString toolBarName(evt.GetString());
+   _resourceCenter->defineToolBar(toolBarName);
 }
 
 void tui::TopedFrame::OnToolBarAddItem(wxCommandEvent& evt)
@@ -2427,7 +2410,7 @@ void tui::TopedFrame::OnToolBarDeleteItem(wxCommandEvent& evt)
    _resourceCenter->deleteTool(toolBarName, toolName);
 }
 
-void   tui::TopedFrame::OnDRCResults(wxCommandEvent& evt)
+void   tui::TopedFrame::OnDRCResults(wxCommandEvent& WXUNUSED(evt))
 {
    wxRect wnd = GetRect();
    wxPoint pos(wnd.x+wnd.width/2-100,wnd.y+wnd.height/2-50);

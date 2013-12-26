@@ -112,8 +112,9 @@ bool TopedApp::OnInit()
       // Replace the active console in the wx system with Toped console window
       console::ted_log_ctrl *logWindow = DEBUG_NEW console::ted_log_ctrl(Toped->logwin());
       delete wxLog::SetActiveTarget(logWindow);
-      // Initialize the tool bars
-      Toped->setIconDir(std::string(_tpdResourceDir.mb_str(wxConvFile)));
+      // Initialise the tool bars
+      wxArtProvider::PushBack(DEBUG_NEW tui::TpdArtProvider(_tpdResourceDir));
+//      Toped->setIconDir(_tpdResourceDir);//TODO Clean-up this!
       Toped->initToolBars();
       tellstdfunc::initFuncLib(Toped, Toped->view());
    }
@@ -250,6 +251,8 @@ int TopedApp::OnExit()
    for (PluginList::const_iterator CP = _plugins.begin(); CP != _plugins.end(); CP++)
       delete (*CP);
    delete tellPP;
+   if (_gui)
+      wxArtProvider::Pop();
 
 #ifdef DB_MEMORY_TRACE
    MemTrack::TrackDumpBlocks();
