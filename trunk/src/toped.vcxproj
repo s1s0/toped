@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -25,25 +25,25 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -80,7 +80,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(TPD_DEV)\wxWidgets\lib\vc_lib\mswu;$(IncludePath);$(TPD_DEV)\wxWidgets\include;$(TPD_DEV)\glew\include</IncludePath>
-    <LibraryPath>$(TPD_DEV)\glew\lib64;$(TPD_DEV)\wxWidgets\lib\vc_lib64;$(VCInstallDir)lib\amd64;$(VCInstallDir)atlmfc\lib\amd64;$(WindowsSDK_LibraryPath_x64);</LibraryPath>
+    <LibraryPath>$(TPD_DEV)\glew\lib\Release\x64;$(TPD_DEV)\wxWidgets\lib\vc_x64_lib;$(VCInstallDir)lib\amd64;$(VCInstallDir)atlmfc\lib\amd64;$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
@@ -92,7 +92,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(TPD_DEV)\wxWidgets\lib\vc_lib\mswud;$(IncludePath);$(TPD_DEV)\wxWidgets\include;$(TPD_DEV)\glew\include</IncludePath>
-    <LibraryPath>$(TPD_DEV)\glew\lib64;$(TPD_DEV)\wxWidgets\lib\vc_lib64;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(TPD_DEV)\wxWidgets\lib\vc_x64_lib;$(TPD_DEV)\glew\lib\Debug\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>
@@ -178,7 +178,7 @@
       <AdditionalIncludeDirectories>c:\wxWindows\include;c:\wxWindows\contrib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>odbc32.lib;odbccp32.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;winmm.lib;wxmsw29u_xrc.lib;wxregexu.lib;wxzlib.lib;wxpng.lib;wxjpeg.lib;wxtiff.lib;wxexpat.lib;wxbase29u.lib;wxbase29u_net.lib;wxmsw29u_core.lib;wxmsw29u_adv.lib;wxmsw29u_html.lib;wxbase29u_xml.lib;wxmsw29u_gl.lib;wxmsw29u_aui.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;winmm.lib;wxmsw30u_xrc.lib;wxregexu.lib;wxzlib.lib;wxpng.lib;wxjpeg.lib;wxtiff.lib;wxexpat.lib;wxbase30u.lib;wxbase30u_net.lib;wxmsw30u_core.lib;wxmsw30u_adv.lib;wxmsw30u_html.lib;wxbase30u_xml.lib;wxmsw30u_gl.lib;wxmsw30u_aui.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(SolutionDir)$(Platform)\$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>c:\wxWindows\lib;c:\wxWindows\contrib\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -227,7 +227,7 @@
       <AdditionalIncludeDirectories>c:\wxWindows\include;c:\wxWindows\contrib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>odbc32.lib;odbccp32.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;winmm.lib;wxregexud.lib;wxzlibd.lib;wxpngd.lib;wxjpegd.lib;wxtiffd.lib;wxexpatd.lib;wxbase29ud.lib;wxbase29ud_net.lib;wxmsw29ud_core.lib;wxmsw29ud_adv.lib;wxmsw29ud_html.lib;wxbase29ud_xml.lib;wxmsw29ud_gl.lib;wxmsw29ud_xrc.lib;wxmsw29ud_aui.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;winmm.lib;wxregexud.lib;wxzlibd.lib;wxpngd.lib;wxjpegd.lib;wxtiffd.lib;wxexpatd.lib;wxbase30ud.lib;wxbase30ud_net.lib;wxmsw30ud_core.lib;wxmsw30ud_adv.lib;wxmsw30ud_html.lib;wxbase30ud_xml.lib;wxmsw30ud_gl.lib;wxmsw30ud_xrc.lib;wxmsw30ud_aui.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(SolutionDir)$(Platform)\$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
@@ -276,7 +276,7 @@
       <AdditionalIncludeDirectories>c:\wxWindows\include;c:\wxWindows\contrib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>odbc32.lib;odbccp32.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;winmm.lib;wxregexud.lib;wxzlibd.lib;wxpngd.lib;wxjpegd.lib;wxtiffd.lib;wxexpatd.lib;wxbase29ud.lib;wxbase29ud_net.lib;wxmsw29ud_core.lib;wxmsw29ud_adv.lib;wxmsw29ud_html.lib;wxbase29ud_xml.lib;wxmsw29ud_gl.lib;wxmsw29ud_xrc.lib;wxmsw29ud_aui.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;winmm.lib;wxregexud.lib;wxzlibd.lib;wxpngd.lib;wxjpegd.lib;wxtiffd.lib;wxexpatd.lib;wxbase30ud.lib;wxbase30ud_net.lib;wxmsw30ud_core.lib;wxmsw30ud_adv.lib;wxmsw30ud_html.lib;wxbase30ud_xml.lib;wxmsw30ud_gl.lib;wxmsw30ud_xrc.lib;wxmsw30ud_aui.lib;glew32d.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(SolutionDir)$(Platform)\$(Configuration)\$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
