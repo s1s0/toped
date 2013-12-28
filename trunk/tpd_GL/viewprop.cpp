@@ -176,7 +176,7 @@ void layprop::PropertyCenter::saveScreenProps(FILE* prop_file) const
 }
 
 
-void layprop::PropertyCenter::saveProperties(std::string filename)
+void layprop::PropertyCenter::saveProperties(std::string filename, std::string auiMagic)
 {
    DrawProperties* drawProp;
    if (lockDrawProp(drawProp))
@@ -195,7 +195,11 @@ void layprop::PropertyCenter::saveProperties(std::string filename)
       fprintf(prop_file, "layerSetup();");
       if ((NULL != _gdsLayMap) || (NULL != _cifLayMap))
          fprintf(prop_file, "layerMaps();");
-      fprintf(prop_file, "screenSetup();\n\n");
+      fprintf(prop_file, "screenSetup();\n");
+      if (!auiMagic.empty())
+         fprintf(prop_file, "loaduiframe(\"%s\");\n\n",auiMagic.c_str());
+      else
+         fprintf(prop_file,"\n");
       fclose(prop_file);
    }
    unlockDrawProp(drawProp, false);

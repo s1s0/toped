@@ -267,6 +267,7 @@ class TpdPost {
       static void treeRenameMember(const char*, const char*);
       static void treeMarkGrcMember(const char*, bool);
       static void parseCommand(const wxString);
+      static void restoreAuiState(const wxString);
       static void tellFnAdd(const std::string, void*);
       static void tellFnSort();
       static void reloadTellFuncs();

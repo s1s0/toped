@@ -114,7 +114,6 @@ bool TopedApp::OnInit()
       delete wxLog::SetActiveTarget(logWindow);
       // Initialise the tool bars
       wxArtProvider::PushBack(DEBUG_NEW tui::TpdArtProvider(_tpdResourceDir));
-//      Toped->setIconDir(_tpdResourceDir);//TODO Clean-up this!
       Toped->initToolBars();
       tellstdfunc::initFuncLib(Toped, Toped->view());
    }
@@ -929,13 +928,17 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    mblock->addFUNC("addwire"          ,(DEBUG_NEW               tellstdfunc::stdDRAWWIRE(telldata::tn_layout,false)));
    mblock->addFUNC("addwire"          ,(DEBUG_NEW             tellstdfunc::stdDRAWWIRE_T(telldata::tn_layout,false)));
    mblock->addFUNC("addwire"          ,(DEBUG_NEW             tellstdfunc::stdDRAWWIRE_D(telldata::tn_layout,false)));
+
    mblock->addFUNC("propsave"         ,(DEBUG_NEW                 tellstdfunc::stdPROPSAVE(telldata::tn_void, true)));
-   mblock->addFUNC("addmenu"          ,(DEBUG_NEW                  tellstdfunc::stdADDMENU(telldata::tn_void, true)));
-   mblock->addFUNC("toolbarsize"      ,(DEBUG_NEW              tellstdfunc::stdTOOLBARSIZE(telldata::tn_void, true)));
-   mblock->addFUNC("definetoolbar"    ,(DEBUG_NEW            tellstdfunc::stdDEFINETOOLBAR(telldata::tn_void, true)));
-   mblock->addFUNC("toolbaradditem"   ,(DEBUG_NEW           tellstdfunc::stdTOOLBARADDITEM(telldata::tn_void, true)));
-   mblock->addFUNC("toolbaradditem"   ,(DEBUG_NEW         tellstdfunc::stdTOOLBARADDITEM_S(telldata::tn_void, true)));
-   mblock->addFUNC("toolbardeleteitem",(DEBUG_NEW        tellstdfunc::stdTOOLBARDELETEITEM(telldata::tn_void, true)));
+   mblock->addFUNC("propsave"         ,(DEBUG_NEW             tellstdfunc::stdPROPSAVE_AUI(telldata::tn_void, true)));
+   mblock->addFUNC("addmenu"          ,(DEBUG_NEW                  tellstdfunc::stdADDMENU(telldata::tn_void, true)));//TODO - check execute on recovery??
+   mblock->addFUNC("toolbarsize"      ,(DEBUG_NEW              tellstdfunc::stdTOOLBARSIZE(telldata::tn_void, true)));//TODO - check execute on recovery??
+   mblock->addFUNC("definetoolbar"    ,(DEBUG_NEW            tellstdfunc::stdDEFINETOOLBAR(telldata::tn_void, true)));//TODO - check execute on recovery??
+   mblock->addFUNC("toolbaradditem"   ,(DEBUG_NEW           tellstdfunc::stdTOOLBARADDITEM(telldata::tn_void, true)));//TODO - check execute on recovery??
+   mblock->addFUNC("toolbaradditem"   ,(DEBUG_NEW         tellstdfunc::stdTOOLBARADDITEM_S(telldata::tn_void, true)));//TODO - check execute on recovery??
+   mblock->addFUNC("toolbardeleteitem",(DEBUG_NEW        tellstdfunc::stdTOOLBARDELETEITEM(telldata::tn_void, true)));//TODO - check execute on recovery??
+   mblock->addFUNC("loaduiframe"      ,(DEBUG_NEW             tellstdfunc::stdUIFRAME_LOAD(telldata::tn_void,false)));
+
    mblock->addFUNC("setparams"        ,(DEBUG_NEW            tellstdfunc::stdSETPARAMETERS(telldata::tn_void, true)));
    mblock->addFUNC("setparams"        ,(DEBUG_NEW             tellstdfunc::stdSETPARAMETER(telldata::tn_void, true)));
    mblock->addFUNC("exec"             ,(DEBUG_NEW                     tellstdfunc::stdEXEC(telldata::tn_void, true)));

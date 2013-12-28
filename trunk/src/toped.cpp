@@ -32,6 +32,7 @@
 #include <wx/aboutdlg.h>
 #include <wx/tooltip.h>
 #include <wx/txtstrm.h>
+#include <wx/textfile.h>
 #include <math.h>
 #include "toped.h"
 #include "datacenter.h"
@@ -60,6 +61,7 @@ extern const wxEventType         wxEVT_TOOLBARSIZE;
 extern const wxEventType         wxEVT_TOOLBARDEF;
 extern const wxEventType         wxEVT_TOOLBARADDITEM;
 extern const wxEventType         wxEVT_TOOLBARDELETEITEM;
+extern const wxEventType         wxEVT_AUI_RESTORE;
 extern const wxEventType         wxEVT_EDITLAYER;
 extern const wxEventType         wxEVT_EXITAPP;
 extern const wxEventType         wxEVT_EXECEXT;
@@ -334,23 +336,24 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_CLOSE(tui::TopedFrame::OnClose)
 //   EVT_SIZE( TopedFrame::OnSize )
 //   EVT_TECUSTOM_COMMAND(  , wxID_ANY, tui::TopedFrame::OnTopedStatus)
-   EVT_TECUSTOM_COMMAND(wxEVT_CANVAS_STATUS, wxID_ANY, tui::TopedFrame::OnCanvasStatus)
-   EVT_TECUSTOM_COMMAND(wxEVT_RENDER_PARAMS, wxID_ANY, tui::TopedFrame::OnUpdateRenderParams)
-   EVT_TECUSTOM_COMMAND(wxEVT_CANVAS_PARAMS, wxID_ANY, tui::TopedFrame::OnUpdateCanvasParams)
-   EVT_TECUSTOM_COMMAND(wxEVT_MOUSE_ACCEL, wxID_ANY, tui::TopedFrame::OnMouseAccel)
-   EVT_TECUSTOM_COMMAND(wxEVT_CURRENT_LAYER, wxID_ANY, tui::TopedFrame::OnCurrentLayer)
-   EVT_COMMAND(wxID_ANY, wxEVT_COMMAND_ENTER, tui::TopedFrame::OnUncapturedMouseClick)
-   EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARSIZE, wxID_ANY, tui::TopedFrame::OnToolBarSize)
-   EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARDEF,  wxID_ANY, tui::TopedFrame::OnToolBarDefine)
-   EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARADDITEM, wxID_ANY, tui::TopedFrame::OnToolBarAddItem)
-   EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARDELETEITEM, wxID_ANY, tui::TopedFrame::OnToolBarDeleteItem)
-   EVT_TECUSTOM_COMMAND(wxEVT_EDITLAYER, wxID_ANY, tui::TopedFrame::OnEditLayer )
+   EVT_COMMAND(wxID_ANY, wxEVT_COMMAND_ENTER        , tui::TopedFrame::OnUncapturedMouseClick)
    EVT_TEXT_MAXLEN(ID_WIN_TXT_LOG, tui::TopedFrame::OnTextLogOverflow)
-   EVT_TECUSTOM_COMMAND(wxEVT_EXITAPP, wxID_ANY, tui::TopedFrame::OnExitRequest)
-   EVT_TECUSTOM_COMMAND(wxEVT_EXECEXT, wxID_ANY, tui::TopedFrame::OnExecExt)
-   EVT_TECUSTOM_COMMAND(wxEVT_EXECEXTPIPE, wxID_ANY, tui::TopedFrame::OnExecExtTextEnter)
-   EVT_TECUSTOM_COMMAND(wxEVT_RELOADTELLFUNCS, wxID_ANY, tui::TopedFrame::onReloadTellFuncs)
-   EVT_TECUSTOM_COMMAND(wxEVT_CONSOLE_PARSE, wxID_ANY, tui::TopedFrame::onParseCommand)
+   EVT_TECUSTOM_COMMAND(wxEVT_CANVAS_STATUS         , wxID_ANY, tui::TopedFrame::OnCanvasStatus       )
+   EVT_TECUSTOM_COMMAND(wxEVT_RENDER_PARAMS         , wxID_ANY, tui::TopedFrame::OnUpdateRenderParams )
+   EVT_TECUSTOM_COMMAND(wxEVT_CANVAS_PARAMS         , wxID_ANY, tui::TopedFrame::OnUpdateCanvasParams )
+   EVT_TECUSTOM_COMMAND(wxEVT_MOUSE_ACCEL           , wxID_ANY, tui::TopedFrame::OnMouseAccel         )
+   EVT_TECUSTOM_COMMAND(wxEVT_CURRENT_LAYER         , wxID_ANY, tui::TopedFrame::OnCurrentLayer       )
+   EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARSIZE           , wxID_ANY, tui::TopedFrame::OnToolBarSize        )
+   EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARDEF            , wxID_ANY, tui::TopedFrame::OnToolBarDefine      )
+   EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARADDITEM        , wxID_ANY, tui::TopedFrame::OnToolBarAddItem     )
+   EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARDELETEITEM     , wxID_ANY, tui::TopedFrame::OnToolBarDeleteItem  )
+   EVT_TECUSTOM_COMMAND(wxEVT_AUI_RESTORE           , wxID_ANY, tui::TopedFrame::OnAuiManagerRestore  )
+   EVT_TECUSTOM_COMMAND(wxEVT_EDITLAYER             , wxID_ANY, tui::TopedFrame::OnEditLayer          )
+   EVT_TECUSTOM_COMMAND(wxEVT_EXITAPP               , wxID_ANY, tui::TopedFrame::OnExitRequest        )
+   EVT_TECUSTOM_COMMAND(wxEVT_EXECEXT               , wxID_ANY, tui::TopedFrame::OnExecExt            )
+   EVT_TECUSTOM_COMMAND(wxEVT_EXECEXTPIPE           , wxID_ANY, tui::TopedFrame::OnExecExtTextEnter   )
+   EVT_TECUSTOM_COMMAND(wxEVT_RELOADTELLFUNCS       , wxID_ANY, tui::TopedFrame::onReloadTellFuncs    )
+   EVT_TECUSTOM_COMMAND(wxEVT_CONSOLE_PARSE         , wxID_ANY, tui::TopedFrame::onParseCommand       )
 END_EVENT_TABLE()
 
 tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos,
@@ -619,10 +622,10 @@ void tui::TopedFrame::initMenuBar() {
    //settingsMenu->Append         (TMSET_HTOOLSIZE   , wxT("H. toolbar size") , toolbarHorSizeMenu , wxT("Define horizontal toolbars size"));
    //settingsMenu->Append         (TMSET_VTOOLSIZE   , wxT("V. toolbar size") , toolbarVertSizeMenu , wxT("Define vertical toolbars size"));
    settingsMenu->AppendSeparator();
-   settingsMenu->Append         (TMSET_DEFCOLOR , wxT("Define Color") , wxT("Define a drawing color"));
-   settingsMenu->Append         (TMSET_DEFFILL  , wxT("Define Fill")  , wxT("Define a drawing pattern"));
-   settingsMenu->Append         (TMSET_DEFSTYLE , wxT("Define Style") , wxT("Define a style of lines"));
-   settingsMenu->Append         (TMSET_TECHEDITOR, wxT("Technology Editor")  , wxT("Define a technology"));
+   settingsMenu->Append         (TMSET_DEFCOLOR , wxT("Define Color...") , wxT("Define a drawing color"));
+   settingsMenu->Append         (TMSET_DEFFILL  , wxT("Define Fill...")  , wxT("Define a drawing pattern"));
+   settingsMenu->Append         (TMSET_DEFSTYLE , wxT("Define Style...") , wxT("Define a style of lines"));
+   settingsMenu->Append         (TMSET_TECHEDITOR, wxT("Technology Editor...")  , wxT("Define a technology"));
    //---------------------------------------------------------------------------
    // menuBar entry helpMenu
    /*helpMenu=DEBUG_NEW wxMenu();
@@ -664,11 +667,6 @@ void tui::TopedFrame::initMenuBar() {
 
 }
 
-void tui::TopedFrame::setIconDir(const wxString& uiDir)
-{
-   if (_resourceCenter) _resourceCenter->setIconDir(uiDir);
-}
-
 void  tui::TopedFrame::setActiveCmd()
 {
    _cmdline->getWidget()->SetFocus();
@@ -681,41 +679,44 @@ void tui::TopedFrame::initToolBars()
    wxAuiToolBar* tbC = _resourceCenter->initToolBarC(this);
    _GLstatus = DEBUG_NEW CanvasStatus(this, ID_WIN_GLSTATUS , wxDefaultPosition, wxDefaultSize, wxAUI_TB_HORZ_TEXT);
 
-   getAuiManager()->AddPane(tbA, wxAuiPaneInfo()
-                                .ToolbarPane()
-                                .Top()
-                                .Floatable()
-                                .Row(1)
-                                .Position(1)
+   _winManager.AddPane(tbA, wxAuiPaneInfo()
+                           .ToolbarPane()
+                           .Name(tpdPane_TB_A)
+                           .Top()
+                           .Floatable()
+                           .Row(1)
+                           .Position(1)
                            );
-   getAuiManager()->AddPane(tbB, wxAuiPaneInfo()
-                                .ToolbarPane()
-                                .Top()
-                                .Floatable()
-                                .Row(1)
-                                .Position(2)
+   _winManager.AddPane(tbB, wxAuiPaneInfo()
+                           .ToolbarPane()
+                           .Name(tpdPane_TB_B)
+                           .Top()
+                           .Floatable()
+                           .Row(1)
+                           .Position(2)
                            );
-   getAuiManager()->AddPane(tbC, wxAuiPaneInfo()
-                                .ToolbarPane()
-                                .Top()
-                                .Floatable()
-                                .Row(1)
-                                .Position(3)
+   _winManager.AddPane(tbC, wxAuiPaneInfo()
+                           .ToolbarPane()
+                           .Name(tpdPane_TB_C)
+                           .Top()
+                           .Floatable()
+                           .Row(1)
+                           .Position(3)
                            );
-   getAuiManager()->AddPane(_GLstatus, wxAuiPaneInfo()
-                                .ToolbarPane()
-                                .Top()
-                                .Floatable()
-                                .Gripper()
-                                .Name(wxT("Status"))
-                                .GripperTop(false)
-                                .TopDockable(true)
-                                .BottomDockable(true)
-                                .LeftDockable(false)
-                                .RightDockable(false)
-                                .Row(2)
+   _winManager.AddPane(_GLstatus, wxAuiPaneInfo()
+                           .ToolbarPane()
+                           .Top()
+                           .Floatable()
+                           .Gripper()
+                           .Name(tpdPane_Status)
+                           .GripperTop(false)
+                           .TopDockable(true)
+                           .BottomDockable(true)
+                           .LeftDockable(false)
+                           .RightDockable(false)
+                           .Row(2)
                             );
-   getAuiManager()->Update();
+   _winManager.Update();
 }
 
 void tui::TopedFrame::initView()
@@ -778,44 +779,48 @@ void tui::TopedFrame::initView()
 
 // cmdlineW->SetWindowStyleFlag(wxSW_3D | wxCLIP_CHILDREN);
 
-   _winManager.AddPane(_browsers,   wxAuiPaneInfo().
-                                    Left().
-                                    BestSize(wxSize(180,1000)).
-                                    Layer(1).
-                                    Caption(wxString("Project Info",wxConvUTF8)).
-                                    Floatable(true).
-                                    CloseButton(false).
-                                    CaptionVisible(true).
-                                    TopDockable(false).
-                                    BottomDockable(false).
-                                    LeftDockable(true).
-                                    RightDockable(true)
+   _winManager.AddPane(_browsers, wxAuiPaneInfo()
+                                 .Name(tpdPane_Browsers)
+                                 .Left()
+                                 .BestSize(wxSize(180,1000))
+                                 .Layer(1)
+                                 .Caption(wxT("Project Info"))
+                                 .Floatable(true)
+                                 .CloseButton(false)
+                                 .CaptionVisible(true)
+                                 .TopDockable(false)
+                                 .BottomDockable(false)
+                                 .LeftDockable(true)
+                                 .RightDockable(true)
                       );
    if (_canvas->initStatus())
-      _winManager.AddPane( _canvas,    wxAuiPaneInfo().
-                                       CentrePane().
-                                       MaximizeButton(false).
-                                       Floatable(true).
-                                       CloseButton(false)
+      _winManager.AddPane( _canvas, wxAuiPaneInfo()
+                                   .Name(tpdPane_Canvas)
+                                   .CentrePane()
+                                   .MaximizeButton(false)
+                                   .Floatable(true)
+                                   .CloseButton(false)
                         );
    //_winManager.AddPane(_GLstatus, wxAuiPaneInfo().Top().Floatable(false).//Fixed().
    //                               CloseButton(false).CaptionVisible(false).BestSize(wxSize(1000,30)));
-   _winManager.AddPane(logpane,     wxAuiPaneInfo().
-                                    Bottom().
-                                    Row(1).
-                                    Floatable(false).
-                                    BestSize(wxSize(1000, 150)).
-                                    CloseButton(false).
-                                    CaptionVisible(false)
+   _winManager.AddPane(logpane, wxAuiPaneInfo()
+                               .Name(tpdPane_Log)
+                               .Bottom()
+                               .Row(1)
+                               .Floatable(false)
+                               .BestSize(wxSize(1000, 150))
+                               .CloseButton(false)
+                               .CaptionVisible(false)
                       );
 
-   _winManager.AddPane(cmdlineW,    wxAuiPaneInfo().
-                                    Bottom().
-                                    Row(0).
-                                    BestSize(wxSize(1000,30)).
-                                    Floatable(false).
-                                    CloseButton(false).
-                                    CaptionVisible(false)
+   _winManager.AddPane(cmdlineW, wxAuiPaneInfo()
+                                .Name(tpdPane_CmdLine)
+                                .Bottom()
+                                .Row(0)
+                                .BestSize(wxSize(1000,30))
+                                .Floatable(false)
+                                .CloseButton(false)
+                                .CaptionVisible(false)
                       );
    Show();
    _winManager.Update();
@@ -1160,9 +1165,10 @@ void tui::TopedFrame::OnPropSave(wxCommandEvent& WXUNUSED(event))
          SetStatusText(wxT("Saving aborted"));
          return;
       }
-
+      wxString wxsAuiMagicString = _winManager.SavePerspective();
       wxString ost;
-      ost << wxT("propsave(\"") << filename << wxT("\");");
+      ost << wxT("propsave(\"") << filename << wxT("\", \"")
+                                << wxsAuiMagicString << wxT("\");");
       Console->parseCommand(ost);
 //      SetStatusText(wxT("Design saved in file: ")+dlg2.GetFilename());
    }
@@ -2361,7 +2367,8 @@ void tui::TopedFrame::OnToolBarSize(wxCommandEvent& evt)
    tui::IconSizes sz = static_cast<tui::IconSizes>(evt.GetInt());
    bool direction = (0l != evt.GetExtraLong());
 
-   _resourceCenter->setToolBarSize(direction, sz);
+   _resourceCenter->setToolBarSize(sz);
+   _winManager.Update();
    // update the menu state
    if (tui::_tuihorizontal == direction)
       switch (sz)
@@ -2386,7 +2393,7 @@ void tui::TopedFrame::OnToolBarSize(wxCommandEvent& evt)
 void tui::TopedFrame::OnToolBarDefine(wxCommandEvent& evt)
 {
    wxString toolBarName(evt.GetString());
-   _resourceCenter->defineToolBar(toolBarName);
+   _resourceCenter->initToolBar(this, toolBarName);
 }
 
 void tui::TopedFrame::OnToolBarAddItem(wxCommandEvent& evt)
@@ -2396,7 +2403,7 @@ void tui::TopedFrame::OnToolBarAddItem(wxCommandEvent& evt)
    std::string toolName = map->GetKey();
    std::string toolFunc = map->GetValue();
 
-   _resourceCenter->appendTool(toolBarName, toolName, toolName,  "", "", toolFunc);
+ //  _resourceCenter->appendTool(toolBarName, toolName, toolName,  "", "", toolFunc); TODO!
    delete map;
 }
 
@@ -2407,7 +2414,13 @@ void tui::TopedFrame::OnToolBarDeleteItem(wxCommandEvent& evt)
    wxString toolName = data->GetData();
 //   std::string toolName(str.mb_str(wxConvUTF8));
 
-   _resourceCenter->deleteTool(toolBarName, toolName);
+//   _resourceCenter->deleteTool(toolBarName, toolName); TODO!
+}
+
+void tui::TopedFrame::OnAuiManagerRestore(wxCommandEvent& evt)
+{
+   wxString wxsAuiMagicString(evt.GetString());
+   _winManager.LoadPerspective(wxsAuiMagicString, true);
 }
 
 void   tui::TopedFrame::OnDRCResults(wxCommandEvent& WXUNUSED(evt))
