@@ -29,6 +29,7 @@
 #include <iostream>
 #include <sstream>
 #include <iostream>
+#include <algorithm>
 #include "tedcell.h"
 #include "tedat.h"
 #include "auxdat.h"

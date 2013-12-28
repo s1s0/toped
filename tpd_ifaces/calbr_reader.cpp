@@ -30,6 +30,7 @@
 
 #include "tpdph.h"
 #include <sstream>
+#include <algorithm>
 #include <wx/regex.h>
 #include "calbr_reader.h"
 
