@@ -115,8 +115,8 @@ const int         UNDEFCELL_LIB     =  0;
 
 #ifdef WIN32
    #include <windows.h>
-   double round(double x);
-   int8b lround (double x);
+//   double round(double x);
+//   int8b lround (double x);
    #define rint  round
    #define llabs _abs64
    //#define round floor

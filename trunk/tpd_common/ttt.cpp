@@ -727,7 +727,7 @@ void CTM::oglForm(float* const oglm) const
 }
 
 #if WIN32
-
+/*
 double round(double x)
 {
    double ret;
@@ -736,10 +736,11 @@ double round(double x)
    if((x-double(y))>=0.5) ret = y+1; else ret = y;
    return ret;
 }
-
+*/
 //WARNING! This replacement is far from precise. Needs improvement.
 // There will be (most likely) differencies between Linux and
 // Windows
+/*
 int8b lround(double x)
 {
    int8b ret;
@@ -748,7 +749,7 @@ int8b lround(double x)
    if((x-double(y))>=0.5) ret = y+1; else ret = y;
    return ret;
 }
-
+*/
 #endif
 
 //Return true, if argument - space or equivalent;
