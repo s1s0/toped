@@ -259,7 +259,7 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">flex.exe -Pcif -o%(Filename).cpp %(Filename)%(Extension)
 </Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">cif_yacc.h</AdditionalInputs>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">cif_yacc.h;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">cif_yacc.hh;%(AdditionalInputs)</AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Filename).cpp</Outputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">cif_lex.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating CIF scanner</Message>
@@ -280,10 +280,10 @@
  move %(Filename).hpp %(Filename).hh
 </Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">bison.exe  -p cif -d -t -v -o %(Filename).cpp %(Filename)%(Extension)
-move %(Filename).hpp %(Filename).h
+move %(Filename).hpp %(Filename).hh
 </Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Filename).cpp;%(Filename).h</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).cpp;%(Filename).h;%(Outputs)</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).cpp;%(Filename).hh;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Generating CIF parser</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Generating CIF parser</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">bison.exe  -p cif -d -v -o %(Filename).cpp %(Filename)%(Extension)
