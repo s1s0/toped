@@ -208,13 +208,9 @@ namespace tui {
       getTextdlg(wxFrame *parent, wxWindowID id, const wxString &title, wxPoint pos);
       wxString    get_text()  const {return _text->GetValue();};
       wxString    get_size()  const {return _size->GetValue();};
-      wxString    get_angle() const {return _rotation->GetValue();};
-      bool        get_flip() const  {return _flip->GetValue();};
    protected:
       wxTextCtrl* _text;
       wxTextCtrl* _size;
-      wxTextCtrl* _rotation;
-      wxCheckBox* _flip;
    };
 
    //--------------------------------------------------------------------------

@@ -205,7 +205,7 @@ Oasis::CBlockInflate::CBlockInflate(ForeignDbFile& ifn, wxFileOffset fofset, dwo
 
 void Oasis::CBlockInflate::readUncompressedBuffer(void *pBuf, size_t nCount)
 {
-   if ((_bufOffset + nCount) > _bufSize)
+   if (wxFileOffset(_bufOffset + nCount) > _bufSize)
       throw EXPTNreadOASIS("Read past the end of current CBLOCK (internal error)");
    else
    {
@@ -592,7 +592,7 @@ int8b Oasis::OasisInFile::getInt(byte length)
             case 6: btres[bytecounter-1] |= bytein << (7-bytecounter);
                     btres[bytecounter  ]  = (bytein & cmask) >> (bytecounter + 1);
                     break;
-            case 7: btres[bytecounter-1] |= bytein;
+            case 7: btres[bytecounter-1] |= bytein; break;
             default: exception("Integer is too big (7.2.3)"); break;
          }
          if (bytecounter > length)

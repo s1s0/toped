@@ -864,7 +864,8 @@ END_EVENT_TABLE()
 
 console::TELLFuncList::TELLFuncList(wxWindow *parent, wxWindowID id,
    const wxPoint& pos, const wxSize& size, long style) :
-      wxListView(parent, id, pos, size, style)
+      wxListView(parent, id, pos, size, style),
+      _helpObject(NULL)
 {
    InsertColumn(0, wxT("type"));
    InsertColumn(1, wxT("name"));
