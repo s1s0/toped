@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -25,25 +25,25 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -78,17 +78,17 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ExecutablePath>$(TPD_DEV)\bisonflex\bin;$(ExecutablePath)</ExecutablePath>
-    <IncludePath>$(TPD_DEV)\wxWidgets\lib\vc_lib\mswu;$(TPD_DEV)\wxWidgets\include;$(IncludePath);$(TPD_DEV)\glew\include;$(TPD_DEV)\zlib</IncludePath>
+    <IncludePath>$(TPD_DEV)\wxWidgets\lib\vc_lib\mswu;$(TPD_DEV)\wxWidgets\include;$(IncludePath);$(TPD_DEV)\glew\include;$(TPD_DEV)\zlib;$(TPD_DEV)\GnuWin32\include</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <ExecutablePath>$(TPD_DEV)\bisonflex\bin;$(ExecutablePath)</ExecutablePath>
-    <IncludePath>$(TPD_DEV)\wxWidgets\lib\vc_lib\mswud;$(TPD_DEV)\wxWidgets\include;$(IncludePath);$(TPD_DEV)\glew\include;$(TPD_DEV)\zlib</IncludePath>
+    <IncludePath>$(TPD_DEV)\wxWidgets\lib\vc_lib\mswud;$(TPD_DEV)\wxWidgets\include;$(IncludePath);$(TPD_DEV)\glew\include;$(TPD_DEV)\zlib;$(TPD_DEV)\GnuWin32\include</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ExecutablePath>$(TPD_DEV)\bisonflex\bin;$(ExecutablePath)</ExecutablePath>
-    <IncludePath>$(TPD_DEV)\wxWidgets\lib\vc_lib\mswud;$(TPD_DEV)\wxWidgets\include;$(IncludePath);$(TPD_DEV)\glew\include;$(TPD_DEV)\zlib</IncludePath>
+    <IncludePath>$(TPD_DEV)\wxWidgets\lib\vc_lib\mswud;$(TPD_DEV)\wxWidgets\include;$(IncludePath);$(TPD_DEV)\glew\include;$(TPD_DEV)\zlib;$(TPD_DEV)\GnuWin32\include</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -277,7 +277,7 @@
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Generating CIF parser</Message>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating CIF parser</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">bison.exe  -p cif -d -t -v -o %(Filename).cpp %(Filename)%(Extension)
- move %(Filename).hpp %(Filename).h
+ move %(Filename).hpp %(Filename).hh
 </Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">bison.exe  -p cif -d -t -v -o %(Filename).cpp %(Filename)%(Extension)
 move %(Filename).hpp %(Filename).h
