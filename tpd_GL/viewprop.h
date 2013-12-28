@@ -86,7 +86,7 @@ namespace layprop {
                         PropertyCenter();
                        ~PropertyCenter();
       void              addUnpublishedLay(const LayerDef&);
-      void              saveProperties(std::string);
+      void              saveProperties(std::string, std::string);
       //
       const LayoutGrid* grid(byte) const;
       void              setGrid(byte, real, std::string);

@@ -33,7 +33,8 @@ namespace tellstdfunc {
    using namespace parsercmd;
    using telldata::argumentQ;
 
-   TELL_STDCMD_CLASSA(stdPROPSAVE      );
+   TELL_STDCMD_CLASSA(stdPROPSAVE_AUI  );
+   TELL_STDCMD_CLASSB(stdPROPSAVE, stdPROPSAVE_AUI);
    TELL_STDCMD_CLASSA(stdLAYPROP       );  //
    TELL_STDCMD_CLASSA(stdLAYPROP_T     );  //
    TELL_STDCMD_CLASSA(stdLINEDEF       );  //

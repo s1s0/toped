@@ -112,7 +112,6 @@ namespace tui {
       console::TELLFuncList*  cmdlist()  const {return _cmdbrowser;}
       wxFrame*                getFrame()       {return this;}
       wxAuiManager*           getAuiManager()  {return &_winManager;}
-      void                    setIconDir(const wxString& uiDir);
       void                    setOglThread(bool val) {_canvas->setOglThread(val);}
       void                    setActiveCmd();
       void                    initToolBars();
@@ -277,6 +276,7 @@ namespace tui {
       void OnToolBarDefine       (wxCommandEvent&);
       void OnToolBarAddItem      (wxCommandEvent&);
       void OnToolBarDeleteItem   (wxCommandEvent&);
+      void OnAuiManagerRestore   (wxCommandEvent&);
       void OnDRCResults          (wxCommandEvent& WXUNUSED(evt));
       void OnIconize             (wxIconizeEvent&);
       void onReloadTellFuncs     (wxCommandEvent& WXUNUSED(evt));

@@ -49,17 +49,33 @@ extern trend::TrendCenter*       TRENDC;
 extern const wxEventType         wxEVT_RENDER_PARAMS;
 extern const wxEventType         wxEVT_CANVAS_PARAMS;
 //=============================================================================
-tellstdfunc::stdPROPSAVE::stdPROPSAVE(telldata::typeID retype, bool eor) :
+tellstdfunc::stdPROPSAVE_AUI::stdPROPSAVE_AUI(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
+{
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+}
+
+int tellstdfunc::stdPROPSAVE_AUI::execute()
+{
+   std::string stdAuiMagicString = getStringValue();
+   std::string fname = getStringValue();
+   PROPC->saveProperties(fname,stdAuiMagicString);
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::stdPROPSAVE::stdPROPSAVE(telldata::typeID retype, bool eor) :
+      stdPROPSAVE_AUI(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
    _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
 }
 
 int tellstdfunc::stdPROPSAVE::execute()
 {
-   std::string fname = getStringValue();
-   PROPC->saveProperties(fname);
-   return EXEC_NEXT;
+   telldata::TtString *stdAuiMagicString = DEBUG_NEW telldata::TtString();
+   OPstack.push(stdAuiMagicString);
+   return stdPROPSAVE_AUI::execute();
 }
 
 //=============================================================================
