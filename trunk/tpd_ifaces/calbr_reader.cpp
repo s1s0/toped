@@ -126,16 +126,23 @@ Calbr::edge Calbr::drcPolygon::getZoom() const
    return ret;
 }
 
-Calbr::drcRuleCheck::drcRuleCheck(unsigned int num, const std::string &name)
-      :_num(num), _ruleCheckName(name),_borderInit(false)
+Calbr::drcRuleCheck::drcRuleCheck(unsigned int num, const std::string &name) :
+   _num              (num     ),
+   _curResCount      (0l      ),
+   _origResCount     (0l      ),
+   _ruleCheckName    (name    ),
+   _borderInit       (false   )
 {
 }
 
-Calbr::drcRuleCheck::drcRuleCheck(const drcRuleCheck& ruleCheck)
-      :_borderInit(false)
+Calbr::drcRuleCheck::drcRuleCheck(const drcRuleCheck& ruleCheck) :
+   _num              (ruleCheck._num),
+   _curResCount      (0l      ),
+   _origResCount     (0l      ),
+   _ruleCheckName    (ruleCheck._ruleCheckName),
+   _borderInit       (false)
 {
-   _num = ruleCheck._num;
-   _ruleCheckName = ruleCheck._ruleCheckName;
+
 }
 
 Calbr::drcRuleCheck::~drcRuleCheck()
@@ -230,10 +237,15 @@ Calbr::edge Calbr::drcRuleCheck::getZoom(void)
 }
 
 //-----------------------------------------------------------------------------
-Calbr::CalbrFile::CalbrFile(const std::string &fileName, drcRenderer *render)
-      :_ok(true), _render(render),_isCellNameMode(false)
+Calbr::CalbrFile::CalbrFile(const std::string &fileName, drcRenderer *render) :
+   _calbrFile        ( NULL      ),
+   _fileName         ( fileName  ),
+   _precision        ( 0         ),
+   _curRuleCheck     ( NULL      ),
+   _ok               ( true      ),
+   _render           ( render    ),
+   _isCellNameMode   ( false     )
 {
-   _fileName = fileName;
 }
 
 Calbr::CalbrFile::~CalbrFile()
@@ -569,22 +581,22 @@ bool  Calbr::CalbrFile::parseCellNameMode(const std::string &parseString)
             return false;
          }
       //Save tranformation matrix 
-      long number;
-      long a, b, c, d, tx, ty;
-      regex.GetMatch(str, 4).ToLong(&number);
-      a = number;
-      regex.GetMatch(str, 5).ToLong(&number);
-      b = number;
-      regex.GetMatch(str, 6).ToLong(&number);
-      c = number;
-      regex.GetMatch(str, 7).ToLong(&number);
-      d = number;
-      regex.GetMatch(str, 8).ToLong(&number);
-      tx = number;
-      regex.GetMatch(str, 9).ToLong(&number);
-      ty = number;
+//      long number;
+//      long a, b, c, d, tx, ty;
+//      regex.GetMatch(str, 4).ToLong(&number);
+//      a = number;
+//      regex.GetMatch(str, 5).ToLong(&number);
+//      b = number;
+//      regex.GetMatch(str, 6).ToLong(&number);
+//      c = number;
+//      regex.GetMatch(str, 7).ToLong(&number);
+//      d = number;
+//      regex.GetMatch(str, 8).ToLong(&number);
+//      tx = number;
+//      regex.GetMatch(str, 9).ToLong(&number);
+//      ty = number;
+//      CNStruct->transfMatrix.setCTM(a, b, c, d, tx, ty); TODO - Why this is replaced by the lines below?
       CTM dummy;
-//      CNStruct->transfMatrix.setCTM(a, b, c, d, tx, ty);
       CNStruct->transfMatrix.setCTM(dummy.a(), dummy.b(), dummy.c(), dummy.d(), dummy.tx(), dummy.ty());
 
       _isCellNameMode = true;

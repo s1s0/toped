@@ -2354,7 +2354,7 @@ void  browsers::DRCBrowser::addRuleCheck( const wxTreeItemId &rootId,  Calbr::dr
    std::vector <Calbr::drcPolygon> *polys = check->polygons(); 
    
    //Save polygons
-   long sz = polys->size();
+//   long sz = polys->size();
    for(std::vector <Calbr::drcPolygon>::const_iterator it = polys->begin(); it != polys->end(); ++it)
    {
       wxString str;
@@ -2364,7 +2364,7 @@ void  browsers::DRCBrowser::addRuleCheck( const wxTreeItemId &rootId,  Calbr::dr
 
    //Save Edges
    std::vector <Calbr::drcEdge> *edges = check->edges();
-   sz = edges->size();
+//   sz = edges->size();
    for(std::vector <Calbr::drcEdge>::const_iterator it = edges->begin(); it != edges->end(); ++it)
    {
       wxString str;

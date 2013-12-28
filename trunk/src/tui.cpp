@@ -405,8 +405,6 @@ tui::getTextdlg::getTextdlg(wxFrame *parent, wxWindowID id, const wxString &titl
            : wxDialog(parent, id, title, pos, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)  {
 
    _size     = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
-//   _rotation = DEBUG_NEW wxTextCtrl( this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
-//   _flip = DEBUG_NEW wxCheckBox(this, -1, wxT("Flip X"));
    _text = DEBUG_NEW wxTextCtrl(this, -1, wxT(""), wxDefaultPosition, wxDefaultSize);
    // The window layout
    wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
@@ -421,14 +419,6 @@ tui::getTextdlg::getTextdlg(wxFrame *parent, wxWindowID id, const wxString &titl
                                                   0, wxALL | wxALIGN_CENTER, 0);
    spin_sizer->Add(0,0,1); //
 
-//   spin_sizer->Add( DEBUG_NEW wxStaticText(this, -1, wxT("Rotation:"),
-//                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
-//                                                0, wxALL | wxALIGN_CENTER, 10);
-//   spin_sizer->Add(_rotation, 0, wxALL | wxALIGN_CENTER, 0);
-//   spin_sizer->Add(DEBUG_NEW sgSpinButton(this, _rotation, 90, 0, 360, 0, 0),
-//                                                  0, wxALL | wxALIGN_CENTER, 0);
-//   spin_sizer->Add(0,0,1); //
-//   spin_sizer->Add(_flip, 0, wxALL | wxALIGN_CENTER, 10);
    // Buttons
    wxBoxSizer *button_sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );

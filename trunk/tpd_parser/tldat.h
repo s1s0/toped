@@ -136,7 +136,7 @@ namespace telldata {
 
    class TCallBackType : public TType {
    public:
-                           TCallBackType(typeID ID) : TType(ID) {assert(TLCOMPOSIT_TYPE(ID));}
+                           TCallBackType(typeID ID) : TType(ID), _fType(tn_NULL) {assert(TLCOMPOSIT_TYPE(ID));}
       virtual             ~TCallBackType(){}
       void                 pushArg(typeID);
       void                 setFType(typeID ft)    {_fType = ft; }

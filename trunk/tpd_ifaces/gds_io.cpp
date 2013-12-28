@@ -1189,7 +1189,7 @@ void GDSin::GdsStructure::importText(GdsInFile* cf, ImportDB& iDB)
    // initializing
    word        font           = 0;
    word        vertJust       = 0;
-   word        horiJust       = 0;
+//   word        horiJust       = 0; TODO
    word        reflection     = 0;
    word        absMagn        = 0;
    word        absAngl        = 0;
@@ -1227,7 +1227,7 @@ void GDSin::GdsStructure::importText(GdsInFile* cf, ImportDB& iDB)
                cr->retData(&ba,0,16);
                font = ba & 0x0030; font >>= 4;
                vertJust = ba & 0x000C; vertJust >>= 2;
-               horiJust = ba & 0x0003;
+//               horiJust = ba & 0x0003;
                break;
             case gds_STRANS:
                cr->retData(&ba,0,16);
@@ -1262,8 +1262,8 @@ void GDSin::GdsStructure::importText(GdsInFile* cf, ImportDB& iDB)
 void GDSin::GdsStructure::importSref(GdsInFile* cf, ImportDB& iDB)
 {
    word           reflection     = 0;
-   word           absMagn        = 0;
-   word           absAngl        = 0;
+//   word           absMagn        = 0; //TODO
+//   word           absAngl        = 0; //TODO
    double         magnification  = 1.0;
    double         angle          = 0.0;
    TP             magnPoint;
@@ -1289,8 +1289,8 @@ void GDSin::GdsStructure::importSref(GdsInFile* cf, ImportDB& iDB)
             case gds_STRANS:
                cr->retData(&ba,0,16);
                reflection  = ba & 0x8000;//mask all bits except 0
-               absMagn     = ba & 0x0004;//mask all bits except 13
-               absAngl     = ba & 0x0002;//mask all bits except 14
+//               absMagn     = ba & 0x0004;//mask all bits except 13
+//               absAngl     = ba & 0x0002;//mask all bits except 14
                break;
             case gds_MAG: cr->retData(&magnification);
                break;
@@ -1324,8 +1324,8 @@ void GDSin::GdsStructure::importSref(GdsInFile* cf, ImportDB& iDB)
 void GDSin::GdsStructure::importAref(GdsInFile* cf, ImportDB& iDB)
 {
    word           reflection     = 0;
-   word           absMagn        = 0;
-   word           absAngl        = 0;
+//   word           absMagn        = 0; //TODO
+//   word           absAngl        = 0; //TODO
    double         magnification  = 1.0;
    double         angle          = 0.0;
    int2b          columns        = 0;
@@ -1356,8 +1356,8 @@ void GDSin::GdsStructure::importAref(GdsInFile* cf, ImportDB& iDB)
             case gds_STRANS:
                cr->retData(&ba,0,16);
                reflection  = ba & 0x8000;//mask all bits except 0
-               absMagn     = ba & 0x0004;//mask all bita except 13
-               absAngl     = ba & 0x0002;//mask all bita except 14
+//               absMagn     = ba & 0x0004;//mask all bita except 13
+//               absAngl     = ba & 0x0002;//mask all bita except 14
                break;
             case gds_MAG: cr->retData(&magnification);
                break;
@@ -1625,7 +1625,12 @@ void GDSin::GdsOutFile::updateLastRecord()
 // class GdsExportFile
 //-----------------------------------------------------------------------------
 GDSin::GdsExportFile::GdsExportFile(std::string fn, laydata::TdtCell* tcell,
-   const LayerMapExt& lmap, bool recur) : DbExportFile(fn, tcell, recur), GdsOutFile(fn), _laymap(lmap)
+                                         const LayerMapExt& lmap, bool recur) :
+   DbExportFile   ( fn, tcell, recur ),
+   GdsOutFile     ( fn               ),
+   _laymap        ( lmap             ),
+   _cGdsLayer     ( 0                ),
+   _cGdsType      ( 0                )
 {
 }
 
