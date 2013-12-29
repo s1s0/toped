@@ -1123,11 +1123,11 @@ void tui::TopedFrame::OnTDTSave(wxCommandEvent&  callingEvent)
          wxT("Toped"),
          wxYES_NO | wxICON_QUESTION);
       switch (dlg1.ShowModal()) {
-         case wxID_YES:Console->parseCommand(ost, threadExecution); //Overwrite;
+         case wxID_YES: break; /*Console->parseCommand(ost, threadExecution); */ //i.e. - Overwrite;
          case wxID_NO: return;
       }
    }
-   else Console->parseCommand(ost, threadExecution);
+   Console->parseCommand(ost, threadExecution);
 //   SetStatusText(wxT("Design saved"));
 }
 

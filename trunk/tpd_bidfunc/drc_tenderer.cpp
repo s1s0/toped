@@ -46,9 +46,16 @@ extern wxWindow*                 TopedCanvasW;
 
 extern const wxEventType         wxEVT_CANVAS_ZOOM;
 
-Calbr::drcTenderer::drcTenderer(laydata::DrcLibrary* library)
+Calbr::drcTenderer::drcTenderer(laydata::DrcLibrary* library) :
+   drcRenderer  (              ),
+   _ATDB        ( library      ),
+   _DRCCell     ( NULL         ),
+   _cell        (              ),
+   _numError    ( 0            ),
+   _max         (              ),
+   _min         (              ),
+   _startDrawing( false        )
 {
-   _ATDB = library;
    _ctm.Initialize();
 }
 

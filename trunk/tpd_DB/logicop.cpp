@@ -84,6 +84,7 @@ methods, implementing the actual logic operations*/
 logicop::logic::logic(const PointVector& poly1, const PointVector& poly2, bool looped1, bool looped2) :
    _poly1   ( poly1  ),
    _poly2   ( poly2  ),
+   _crossp  ( 0      ),
    _looped1 ( looped1),
    _looped2 ( looped2)
 {
@@ -618,7 +619,9 @@ logicop::stretcher::~stretcher()
 //-----------------------------------------------------------------------------
 /*!*/
 logicop::CrossFix::CrossFix(const PointVector& poly, bool looped) :
-                                                   _poly(poly), _looped(looped)
+   _poly    ( poly      ),
+   _crossp  ( 0         ),
+   _looped  ( looped    )
 {
    _segl = DEBUG_NEW polycross::segmentlist(poly,1, looped);
    _shape = NULL;
