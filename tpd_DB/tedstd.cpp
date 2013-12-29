@@ -832,21 +832,25 @@ std::string ENameLayerCM::printSrcLayer() const
 }
 //=============================================================================
 ImportDB::ImportDB(ForeignDbFile* src_lib, laydata::TdtLibDir* tdt_db, const LayerMapExt& theLayMap) :
-      _src_lib    ( src_lib                                    ),
-      _tdt_db     ( tdt_db                                     ),
-      _dbuCoeff   ( src_lib->libUnits() / (*_tdt_db)()->DBU()  ),
-      _crossCoeff ( _dbuCoeff                                  ),
-      _technoSize ( 0.0                                        )
+      _src_lib       ( src_lib                                    ),
+      _tdt_db        ( tdt_db                                     ),
+      _dst_structure ( NULL                                       ),
+      _grc_structure ( NULL                                       ),
+      _dbuCoeff      ( src_lib->libUnits() / (*_tdt_db)()->DBU()  ),
+      _crossCoeff    ( _dbuCoeff                                  ),
+      _technoSize    ( 0.0                                        )
 {
    _layCrossMap = DEBUG_NEW ENumberLayerCM(theLayMap);
 }
 
 ImportDB::ImportDB(ForeignDbFile* src_lib, laydata::TdtLibDir* tdt_db, const ImpLayMap& theLayMap, real techno) :
-      _src_lib    ( src_lib                                    ),
-      _tdt_db     ( tdt_db                                     ),
-      _dbuCoeff   ( src_lib->libUnits() / (*_tdt_db)()->DBU()  ),
-      _crossCoeff ( _dbuCoeff                                  ),
-      _technoSize ( techno                                     )
+      _src_lib       ( src_lib                                    ),
+      _tdt_db        ( tdt_db                                     ),
+      _dst_structure ( NULL                                       ),
+      _grc_structure ( NULL                                       ),
+      _dbuCoeff      ( src_lib->libUnits() / (*_tdt_db)()->DBU()  ),
+      _crossCoeff    ( _dbuCoeff                                  ),
+      _technoSize    ( techno                                     )
 {
    _layCrossMap = DEBUG_NEW ENameLayerCM(theLayMap);
 }

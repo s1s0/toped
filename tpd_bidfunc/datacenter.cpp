@@ -58,7 +58,7 @@
 // Global variables
 DataCenter*                      DATC  = NULL;
 extern layprop::PropertyCenter*  PROPC;
-extern Calbr::CalbrFile*         DRCData;
+//extern Calbr::CalbrFile*         DRCData;
 extern trend::TrendCenter*       TRENDC;
 
 //-----------------------------------------------------------------------------
@@ -340,6 +340,7 @@ void DataCenter::unlockTDT(laydata::TdtLibDir* tdt_db, bool throwexception)
                   throw EXPTNactive_DB();
                default: break;
             }
+            break;
          case dbmxs_dblock   :
             switch (_tdtReqMxState)
             {
@@ -349,6 +350,7 @@ void DataCenter::unlockTDT(laydata::TdtLibDir* tdt_db, bool throwexception)
                   throw EXPTNactive_cell();
                default: break;
             }
+            break;
          default             : break;
       }
    _tdtActMxState = _tdtReqMxState = dbmxs_unlocked;
