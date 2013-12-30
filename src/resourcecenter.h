@@ -87,10 +87,13 @@ const wxString tpdPane_Canvas        = wxT("_AUIP_CANVAS")         ;// Canvas
 const wxString tpdPane_Log           = wxT("_AUIP_LOG")            ;// Log
 const wxString tpdPane_CmdLine       = wxT("_AUIP_CMDLINE")        ;// Command Line
 
+typedef std::pair<wxString,wxString> WxStringPair;
+typedef std::list<WxStringPair>      WxStringPairList;
+
 
 namespace tui
 {
-   const word _tuihorizontal    = 0x0000;
+   const word _tuihorizontal    = 0x0000; //TODO Revise once again and clean-up!
    const word _tuivertical      = 0x0001;
 
    class TopedFrame;
@@ -265,6 +268,7 @@ namespace tui
    public:
                         TpdResTellScript(const wxString&);
       virtual          ~TpdResTellScript() {}
+      virtual void      exec();
    private:
       wxString          _tellScript;
    };
@@ -273,6 +277,7 @@ namespace tui
    public:
                         TpdToolBarWrap(wxWindow*, const wxSize&, const wxString&, TpdExecResourceMap*);
       void              addToolItem(int ID, const wxString&, const wxArtID&, callbackMethod);
+      void              addToolItem(int ID, const wxString&, const wxString&);
       void              changeIconSize(const wxSize&);
    private:
       std::list<int>    _itemIdList;
@@ -296,7 +301,7 @@ namespace tui
    //=============================================================================
    class ResourceCenter {
    public:
-      ResourceCenter(void);
+      ResourceCenter(wxWindow*);
       ~ResourceCenter(void);
 //      void setIconDir(const wxString& dir) {_IconDir = dir;}
       //Using for build of complete menu
@@ -331,10 +336,14 @@ namespace tui
       It leads to nonsynchronized internal state of object and Setting Menu.
       Better to use toolbarsize TELL-function.*/
       void setToolBarSize(IconSizes size);
-      wxAuiToolBar* initToolBarA(wxWindow*);
-      wxAuiToolBar* initToolBarB(wxWindow*);
-      wxAuiToolBar* initToolBarC(wxWindow*);
-      wxAuiToolBar* initToolBar(wxWindow*, const wxString&);
+      wxAuiToolBar* initToolBarA();
+      wxAuiToolBar* initToolBarB();
+      wxAuiToolBar* initToolBarC();
+//      wxAuiToolBar* initToolBar(const wxString&);
+//      wxAuiToolBar* appendTool(const wxString&, const wxString&, const wxString&);
+      wxAuiToolBar* appendTools(const wxString&, const WxStringPairList*);
+
+
 
    private:
       typedef std::vector <MenuItemHandler*> ItemList;
@@ -343,8 +352,8 @@ namespace tui
       //produce lowercase string and exclude unwanted character
       std::string simplify(std::string str, char ch);
       //Function to avoid copy-paste in appendTool functions
-//      ToolBarHandler* secureToolBar(const wxString &toolBarName);
-
+      TpdToolBarWrap* secureToolBar(const wxString&);
+      wxWindow*         _wxParent;
       ItemList          _menus      ;
 //      ToolBarList       _toolBars   ;
       int               _menuCount  ; //number of menu items
@@ -364,19 +373,19 @@ namespace tui
 //=============================================================================
 
 namespace tellstdfunc {
-   class StringMapClientData: public wxClientData
-   {
-   public:
-      StringMapClientData():_key(),_value() {};
-      StringMapClientData(const std::string &key, const std::string &value):
-         _key(key), _value(value) {};
-      void SetData(const std::string &key, const std::string &value) {_key = key; _value = value;};
-      const std::string GetKey() const {return _key;};
-      const std::string GetValue() const {return _value;};
-   private:
-      std::string _key;
-      std::string _value;
-   };
+//   class StringMapClientData: public wxClientData
+//   {
+//   public:
+//      StringMapClientData():_key(),_value() {};
+//      StringMapClientData(const std::string &key, const std::string &value):
+//         _key(key), _value(value) {};
+//      void SetData(const std::string &key, const std::string &value) {_key = key; _value = value;};
+//      const std::string GetKey() const {return _key;};
+//      const std::string GetValue() const {return _value;};
+//   private:
+//      std::string _key;
+//      std::string _value;
+//   };
 
    using parsercmd::cmdSTDFUNC;
    using telldata::argumentQ;
@@ -385,7 +394,6 @@ namespace tellstdfunc {
 
    TELL_STDCMD_CLASSA(stdADDMENU            );  //
    TELL_STDCMD_CLASSA(stdTOOLBARSIZE        );  //
-   TELL_STDCMD_CLASSA(stdDEFINETOOLBAR      );  //
    TELL_STDCMD_CLASSA(stdTOOLBARADDITEM     );  //
    TELL_STDCMD_CLASSB(stdTOOLBARADDITEM_S     , stdTOOLBARADDITEM     );  //
    TELL_STDCMD_CLASSA(stdTOOLBARDELETEITEM  );  //

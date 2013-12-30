@@ -931,13 +931,12 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
 
    mblock->addFUNC("propsave"         ,(DEBUG_NEW                 tellstdfunc::stdPROPSAVE(telldata::tn_void, true)));
    mblock->addFUNC("propsave"         ,(DEBUG_NEW             tellstdfunc::stdPROPSAVE_AUI(telldata::tn_void, true)));
-   mblock->addFUNC("addmenu"          ,(DEBUG_NEW                  tellstdfunc::stdADDMENU(telldata::tn_void, true)));//TODO - check execute on recovery??
-   mblock->addFUNC("toolbarsize"      ,(DEBUG_NEW              tellstdfunc::stdTOOLBARSIZE(telldata::tn_void, true)));//TODO - check execute on recovery??
-   mblock->addFUNC("definetoolbar"    ,(DEBUG_NEW            tellstdfunc::stdDEFINETOOLBAR(telldata::tn_void, true)));//TODO - check execute on recovery??
-   mblock->addFUNC("toolbaradditem"   ,(DEBUG_NEW           tellstdfunc::stdTOOLBARADDITEM(telldata::tn_void, true)));//TODO - check execute on recovery??
-   mblock->addFUNC("toolbaradditem"   ,(DEBUG_NEW         tellstdfunc::stdTOOLBARADDITEM_S(telldata::tn_void, true)));//TODO - check execute on recovery??
-   mblock->addFUNC("toolbardeleteitem",(DEBUG_NEW        tellstdfunc::stdTOOLBARDELETEITEM(telldata::tn_void, true)));//TODO - check execute on recovery??
    mblock->addFUNC("loaduiframe"      ,(DEBUG_NEW             tellstdfunc::stdUIFRAME_LOAD(telldata::tn_void,false)));
+   mblock->addFUNC("addmenu"          ,(DEBUG_NEW                  tellstdfunc::stdADDMENU(telldata::tn_void, true)));//TODO - check execute on recovery??
+   mblock->addFUNC("toolbarsize"      ,(DEBUG_NEW              tellstdfunc::stdTOOLBARSIZE(telldata::tn_void,false)));
+   mblock->addFUNC("toolbaradditem"   ,(DEBUG_NEW           tellstdfunc::stdTOOLBARADDITEM(telldata::tn_void,false)));
+   mblock->addFUNC("toolbaradditem"   ,(DEBUG_NEW         tellstdfunc::stdTOOLBARADDITEM_S(telldata::tn_void,false)));
+   mblock->addFUNC("toolbardeleteitem",(DEBUG_NEW        tellstdfunc::stdTOOLBARDELETEITEM(telldata::tn_void, true)));//TODO - check execute on recovery??
 
    mblock->addFUNC("setparams"        ,(DEBUG_NEW            tellstdfunc::stdSETPARAMETERS(telldata::tn_void, true)));
    mblock->addFUNC("setparams"        ,(DEBUG_NEW             tellstdfunc::stdSETPARAMETER(telldata::tn_void, true)));

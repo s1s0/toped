@@ -3243,6 +3243,12 @@ console::toped_logfile& console::toped_logfile::operator<< (const telldata::TtLM
    return *this;
 }
 
+console::toped_logfile& console::toped_logfile::operator<< (const telldata::TtHshStr& _h)
+{
+   if (_enabled)
+      _file << "{\"" << _h.key().value() << "\",\"" << _h.value().value() << "\"}";
+   return *this;
+}
 console::toped_logfile& console::toped_logfile::operator<< (const telldata::TtLayer& _l)
 {
    if (_enabled)
@@ -3284,6 +3290,9 @@ console::toped_logfile& console::toped_logfile::operator<< (const telldata::TtLi
                break;
             case telldata::tn_layer:
                *this << *(static_cast<telldata::TtLayer*>((_tl.mlist())[i]));
+               break;
+            case telldata::tn_hshstr:
+               *this << *(static_cast<telldata::TtHshStr*>((_tl.mlist())[i]));
                break;
    //         case tn_layout:
             default:assert(false); break;
