@@ -307,16 +307,6 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
 
    EVT_MENU( TMSET_ALLPROP       , tui::TopedFrame::OnPropertySheet)
 
-   EVT_MENU( TMSET_HTOOLSIZE16   , tui::TopedFrame::OnHToolBarSize16   )
-   EVT_MENU( TMSET_HTOOLSIZE24   , tui::TopedFrame::OnHToolBarSize24   )
-   EVT_MENU( TMSET_HTOOLSIZE32   , tui::TopedFrame::OnHToolBarSize32   )
-   EVT_MENU( TMSET_HTOOLSIZE48   , tui::TopedFrame::OnHToolBarSize48   )
-
-   EVT_MENU( TMSET_VTOOLSIZE16   , tui::TopedFrame::OnVToolBarSize16   )
-   EVT_MENU( TMSET_VTOOLSIZE24   , tui::TopedFrame::OnVToolBarSize24   )
-   EVT_MENU( TMSET_VTOOLSIZE32   , tui::TopedFrame::OnVToolBarSize32   )
-   EVT_MENU( TMSET_VTOOLSIZE48   , tui::TopedFrame::OnVToolBarSize48   )
-
    EVT_MENU( TMSET_UNDODEPTH     , tui::TopedFrame::OnUndoDepth   )
 
    EVT_MENU( TMSET_DEFCOLOR      , tui::TopedFrame::OnDefineColor )
@@ -600,11 +590,11 @@ void tui::TopedFrame::initMenuBar() {
    // first the sub menu
 
    //Toolbar Size sub menu
-   toolbarHorSizeMenu = DEBUG_NEW wxMenu();
-   toolbarHorSizeMenu->AppendRadioItem(TMSET_HTOOLSIZE16   ,   wxT("16x16"), wxT("Toolbar size is 16x16"));
-   toolbarHorSizeMenu->AppendRadioItem(TMSET_HTOOLSIZE24   ,   wxT("24x24"), wxT("Toolbar size is 24x24"));
-   toolbarHorSizeMenu->AppendRadioItem(TMSET_HTOOLSIZE32   ,   wxT("32x32"), wxT("Toolbar size is 32x32"));
-   toolbarHorSizeMenu->AppendRadioItem(TMSET_HTOOLSIZE48   ,   wxT("48x48"), wxT("Toolbar size is 48x48"));
+//   toolbarHorSizeMenu = DEBUG_NEW wxMenu();
+//   toolbarHorSizeMenu->AppendRadioItem(TMSET_TOOLSIZE16   ,   wxT("16x16"), wxT("Toolbar size is 16x16"));
+//   toolbarHorSizeMenu->AppendRadioItem(TMSET_TOOLSIZE24   ,   wxT("24x24"), wxT("Toolbar size is 24x24"));
+//   toolbarHorSizeMenu->AppendRadioItem(TMSET_TOOLSIZE32   ,   wxT("32x32"), wxT("Toolbar size is 32x32"));
+//   toolbarHorSizeMenu->AppendRadioItem(TMSET_TOOLSIZE48   ,   wxT("48x48"), wxT("Toolbar size is 48x48"));
 
    //toolbarVertSizeMenu = DEBUG_NEW wxMenu();
    //toolbarVertSizeMenu->AppendRadioItem(TMSET_VTOOLSIZE16   ,   wxT("16x16"), wxT("Vertical toolbars size is 16x16"));
@@ -615,7 +605,7 @@ void tui::TopedFrame::initMenuBar() {
    settingsMenu=DEBUG_NEW wxMenu();
    settingsMenu->Append         (TMSET_ALLPROP  , wxT("Properties..."), wxT("Toped Properties"));
    settingsMenu->AppendSeparator();
-   settingsMenu->Append         (TMSET_HTOOLSIZE   , wxT("Toolbar size") , toolbarHorSizeMenu , wxT("Define toolbars size"));
+//   settingsMenu->Append         (TMSET_HTOOLSIZE   , wxT("Toolbar size") , toolbarHorSizeMenu , wxT("Define toolbars size"));
    settingsMenu->Append         (TMSET_UNDODEPTH   , wxT("Undo Depth")   , wxT("Change the depth of undo stack"));
    //settingsMenu->Append         (TMSET_HTOOLSIZE   , wxT("H. toolbar size") , toolbarHorSizeMenu , wxT("Define horizontal toolbars size"));
    //settingsMenu->Append         (TMSET_VTOOLSIZE   , wxT("V. toolbar size") , toolbarVertSizeMenu , wxT("Define vertical toolbars size"));
@@ -675,6 +665,8 @@ void tui::TopedFrame::initToolBars()
    wxAuiToolBar* tbA = _resourceCenter->initToolBarA();
    wxAuiToolBar* tbB = _resourceCenter->initToolBarB();
    wxAuiToolBar* tbC = _resourceCenter->initToolBarC();
+//   Connect(wxEVT_AUITOOLBAR_TOOL_DROPDOWN, wxAuiToolBarEventHandler(TopedFrame::OnToolDropDown));
+//   Connect(wxEVT_AUITOOLBAR_OVERFLOW_CLICK, wxAuiToolBarEventHandler(TopedFrame::OnToolBarDropDown));
    _GLstatus = DEBUG_NEW CanvasStatus(this, ID_WIN_GLSTATUS , wxDefaultPosition, wxDefaultSize, wxAUI_TB_HORZ_TEXT);
 
    _winManager.AddPane(tbA, wxAuiPaneInfo()
@@ -2002,62 +1994,6 @@ void tui::TopedFrame::OnGridDefine(wxCommandEvent& WXUNUSED(event)) {
    }
 }
 
-void tui::TopedFrame::OnHToolBarSize16(wxCommandEvent& WXUNUSED(event))
-{
-   wxString ost;
-   ost << wxT("toolbarsize(_horizontal, _iconsize16);");
-   Console->parseCommand(ost);
-}
-
-void tui::TopedFrame::OnHToolBarSize24(wxCommandEvent& WXUNUSED(event))
-{
-   wxString ost;
-   ost << wxT("toolbarsize(_horizontal, _iconsize24);");
-   Console->parseCommand(ost);
-}
-
-void tui::TopedFrame::OnHToolBarSize32(wxCommandEvent& WXUNUSED(event))
-{
-   wxString ost;
-   ost << wxT("toolbarsize(_horizontal, _iconsize32);");
-   Console->parseCommand(ost);
-}
-
-void tui::TopedFrame::OnHToolBarSize48(wxCommandEvent& WXUNUSED(event))
-{
-   wxString ost;
-   ost << wxT("toolbarsize(_horizontal, _iconsize48);");
-   Console->parseCommand(ost);
-}
-
-void tui::TopedFrame::OnVToolBarSize16(wxCommandEvent& WXUNUSED(event))
-{
-   wxString ost;
-   ost << wxT("toolbarsize(_vertical, _iconsize16);");
-   Console->parseCommand(ost);
-}
-
-void tui::TopedFrame::OnVToolBarSize24(wxCommandEvent& WXUNUSED(event))
-{
-   wxString ost;
-   ost << wxT("toolbarsize(_vertical, _iconsize24);");
-   Console->parseCommand(ost);
-}
-
-void tui::TopedFrame::OnVToolBarSize32(wxCommandEvent& WXUNUSED(event))
-{
-   wxString ost;
-   ost << wxT("toolbarsize(_vertical, _iconsize32);");
-   Console->parseCommand(ost);
-}
-
-void tui::TopedFrame::OnVToolBarSize48(wxCommandEvent& WXUNUSED(event))
-{
-   wxString ost;
-   ost << wxT("toolbarsize(_vertical, _iconsize48);");
-   Console->parseCommand(ost);
-}
-
 void tui::TopedFrame::OnPropertySheet(wxCommandEvent& WXUNUSED(event))
 {
    _propDialog->Show();
@@ -2363,29 +2299,10 @@ void tui::TopedFrame::OnUncapturedMouseClick(wxCommandEvent& evt)
 void tui::TopedFrame::OnToolBarSize(wxCommandEvent& evt)
 {
    tui::IconSizes sz = static_cast<tui::IconSizes>(evt.GetInt());
-   bool direction = (0l != evt.GetExtraLong());
+   wxString tbName = evt.GetString();
 
-   _resourceCenter->setToolBarSize(sz);
+   _resourceCenter->setToolBarSize(tbName, sz);
    _winManager.Update();
-   // update the menu state
-   if (tui::_tuihorizontal == direction)
-      switch (sz)
-      {
-         case  ICON_SIZE_16x16: settingsMenu->Check(TMSET_HTOOLSIZE16 , true );break;
-         case  ICON_SIZE_24x24: settingsMenu->Check(TMSET_HTOOLSIZE24 , true );break;
-         case  ICON_SIZE_32x32: settingsMenu->Check(TMSET_HTOOLSIZE32 , true );break;
-         case  ICON_SIZE_48x48: settingsMenu->Check(TMSET_HTOOLSIZE48 , true );break;
-         default: assert(false); break;
-      }
-   else
-      switch (sz)
-      {
-         case  ICON_SIZE_16x16: settingsMenu->Check(TMSET_VTOOLSIZE16 , true );break;
-         case  ICON_SIZE_24x24: settingsMenu->Check(TMSET_VTOOLSIZE24 , true );break;
-         case  ICON_SIZE_32x32: settingsMenu->Check(TMSET_VTOOLSIZE32 , true );break;
-         case  ICON_SIZE_48x48: settingsMenu->Check(TMSET_VTOOLSIZE48 , true );break;
-         default: assert(false); break;
-      }
 }
 
 void tui::TopedFrame::OnToolBarAddItem(wxCommandEvent& evt)
@@ -2496,6 +2413,22 @@ void tui::TopedFrame::onParseCommand(wxCommandEvent& evt)
 {
    _cmdline->onParseCommand(evt);
 }
+
+
+//void tui::TopedFrame::OnToolDropDown(wxAuiToolBarEvent& tbEvent)
+//{
+//   //TODO
+//   int boza = 1;
+//   boza++;
+//}
+//
+//
+//void tui::TopedFrame::OnToolBarDropDown(wxAuiToolBarEvent& tbEvent)
+//{
+//   //TODO
+//   int boza = 1;
+//   boza++;
+//}
 
 void tui::TopedFrame::USMap2wxString(ExpLayMap* inmap, wxString& outmap)
 {

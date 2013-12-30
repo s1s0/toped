@@ -240,16 +240,7 @@ namespace tui {
       void            OnSelectAll(wxCommandEvent& WXUNUSED(event));
       //
       void        OnPropertySheet(wxCommandEvent& WXUNUSED(event));
-      void       OnHToolBarSize16(wxCommandEvent& WXUNUSED(event));
-      void       OnHToolBarSize24(wxCommandEvent& WXUNUSED(event));
-      void       OnHToolBarSize32(wxCommandEvent& WXUNUSED(event));
-      void       OnHToolBarSize48(wxCommandEvent& WXUNUSED(event));
       void            OnUndoDepth(wxCommandEvent& WXUNUSED(event));
-      void       OnVToolBarSize16(wxCommandEvent& WXUNUSED(event));
-      void       OnVToolBarSize24(wxCommandEvent& WXUNUSED(event));
-      void       OnVToolBarSize32(wxCommandEvent& WXUNUSED(event));
-      void       OnVToolBarSize48(wxCommandEvent& WXUNUSED(event));
-
 
       void            OnEditLayer(wxCommandEvent&);
       void           OnTechEditor(wxCommandEvent& WXUNUSED(event));
@@ -279,7 +270,10 @@ namespace tui {
       void OnDRCResults          (wxCommandEvent& WXUNUSED(evt));
       void OnIconize             (wxIconizeEvent&);
       void onReloadTellFuncs     (wxCommandEvent& WXUNUSED(evt));
-      void onParseCommand        (wxCommandEvent& evt);
+      void onParseCommand        (wxCommandEvent&);
+
+//      void OnToolDropDown        (wxAuiToolBarEvent&);
+//      void OnToolBarDropDown     (wxAuiToolBarEvent&);
       // The declaration of the associated event table
       DECLARE_EVENT_TABLE();
    };
