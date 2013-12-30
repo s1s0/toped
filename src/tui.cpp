@@ -3136,3 +3136,45 @@ tui::IconSizes tui::operator++(tui::IconSizes& x, int)
    assert(x >= tui::ICON_SIZE_16x16);
    return (x = static_cast<tui::IconSizes>(static_cast<int>(x)+1));
 }
+
+//=============================================================================
+
+tui::ToolBarSizeDlg::ToolBarSizeDlg(wxWindow *parent, wxWindowID id, const wxString &title
+                                    , const int csize):
+   wxDialog(parent, id, title, wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)
+{
+    static const wxString iconSize[] =
+    {
+        wxT("16x16"),
+        wxT("24x24"),
+        wxT("32x32"),
+        wxT("48x48")
+    };
+
+   _radioIconSize = DEBUG_NEW wxRadioBox(this, wxID_ANY, wxT("Icon size"),
+                                   wxDefaultPosition, wxDefaultSize,
+                                   WXSIZEOF(iconSize), iconSize, 0, wxRA_SPECIFY_COLS);
+   switch (csize)
+   {
+      case 24: _radioIconSize->SetSelection(1); break;
+      case 32: _radioIconSize->SetSelection(2); break;
+      case 48: _radioIconSize->SetSelection(3); break;
+      default: _radioIconSize->SetSelection(0); break;
+   }
+   _setAll = DEBUG_NEW wxCheckBox(this, wxID_ANY, wxT("Resize All ToolBars"));
+
+   wxBoxSizer *topsizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+   topsizer->Add( _radioIconSize , 0, wxALL, 5);
+   topsizer->Add(_setAll         , 0, wxALL, 5);
+   wxBoxSizer *hsizer2 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   hsizer2->Add(0,0,1);
+   hsizer2->Add(DEBUG_NEW wxButton( this, wxID_OK    , wxT("OK") ), 0, wxALL, 5);
+   hsizer2->Add(DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 5);
+
+   topsizer->Add( hsizer2 , 0, wxEXPAND);
+
+   SetSizer( topsizer );      // use the sizer for layout
+
+   topsizer->SetSizeHints( this );   // set size hints to honour minimum size
+
+}

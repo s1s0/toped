@@ -742,6 +742,19 @@ namespace tui {
 
    void     tllFill2XBM(const byte* pattern, byte nfill[128]);
 
+   //==========================================================================
+   class ToolBarSizeDlg : public wxDialog
+   {
+   public:
+                     ToolBarSizeDlg(wxWindow *parent, wxWindowID id, const wxString &title, const int csize);
+      virtual       ~ToolBarSizeDlg() {};
+      int            getNewSize() { return _radioIconSize->GetSelection();}
+      bool           setAll()     { return _setAll->IsChecked();}
+   private:
+      wxRadioBox*       _radioIconSize;
+      wxCheckBox*       _setAll;
+   };
+
 }
 
 //Print output of external functions

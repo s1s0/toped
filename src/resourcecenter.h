@@ -255,6 +255,28 @@ namespace tui
 
    typedef std::map<int, TpdExecResource*> TpdExecResourceMap;
 
+   class TpdToolBarWrap : public wxAuiToolBar {
+   public:
+                        TpdToolBarWrap(int, wxWindow*, const wxSize&, const wxString&, TpdExecResourceMap*);
+      wxAuiToolBarItem* addToolItem(int ID, const wxString&, const wxArtID&, callbackMethod);
+      wxAuiToolBarItem* addToolItem(int ID, const wxString&, const wxString&);
+      void              changeIconSize(const wxSize&);
+      wxSize            getIconSize() const {return _iconSize;}
+   private:
+      std::list<int>    _itemIdList;
+      wxSize            _iconSize;
+      TpdExecResourceMap* _execResourceRef;// Don't delete! It's just a reference here!
+   };
+   typedef std::list<TpdToolBarWrap*> TpdToolBarList;
+   class TpdArtProvider : public wxArtProvider {
+      public:
+                       TpdArtProvider(const wxString&);
+   protected:
+      virtual wxBitmap CreateBitmap(const wxArtID&, const wxArtClient&, const wxSize&);
+   private:
+      wxFileName       _rootDir[ICON_SIZE_END];//! icon root directories
+   };
+
    class TpdResCallBack : public TpdExecResource {
    public:
                         TpdResCallBack(callbackMethod cbMethod);
@@ -273,25 +295,13 @@ namespace tui
       wxString          _tellScript;
    };
 
-   class TpdToolBarWrap : public wxAuiToolBar {
+   class TpdResConfig : public TpdExecResource {
    public:
-                        TpdToolBarWrap(wxWindow*, const wxSize&, const wxString&, TpdExecResourceMap*);
-      void              addToolItem(int ID, const wxString&, const wxArtID&, callbackMethod);
-      void              addToolItem(int ID, const wxString&, const wxString&);
-      void              changeIconSize(const wxSize&);
+                        TpdResConfig(const TpdToolBarWrap*);
+      virtual          ~TpdResConfig() {}
+      virtual void      exec();
    private:
-      std::list<int>    _itemIdList;
-      wxSize            _iconSize;
-      TpdExecResourceMap* _execResourceRef;// Don't delete! It's just a reference here!
-   };
-   typedef std::list<TpdToolBarWrap*> TpdToolBarList;
-   class TpdArtProvider : public wxArtProvider {
-      public:
-                       TpdArtProvider(const wxString&);
-   protected:
-      virtual wxBitmap CreateBitmap(const wxArtID&, const wxArtClient&, const wxSize&);
-   private:
-      wxFileName       _rootDir[ICON_SIZE_END];//! icon root directories
+      const TpdToolBarWrap* _tbRef;
    };
 
    //=============================================================================
@@ -335,7 +345,7 @@ namespace tui
       /*Don't call setToolBarSize immediately!!!
       It leads to nonsynchronized internal state of object and Setting Menu.
       Better to use toolbarsize TELL-function.*/
-      void setToolBarSize(IconSizes size);
+      void setToolBarSize(const wxString&, IconSizes size);
       wxAuiToolBar* initToolBarA();
       wxAuiToolBar* initToolBarB();
       wxAuiToolBar* initToolBarC();
