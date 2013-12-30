@@ -941,6 +941,7 @@ namespace console{
          toped_logfile&    operator<< (const telldata::TtWnd&);
          toped_logfile&    operator<< (const telldata::TtBnd&);
          toped_logfile&    operator<< (const telldata::TtLMap&);
+         toped_logfile&    operator<< (const telldata::TtHshStr&);
          toped_logfile&    operator<< (const telldata::TtList&);
          toped_logfile&    operator<< (const telldata::TtLayer&);
          toped_logfile&    flush();

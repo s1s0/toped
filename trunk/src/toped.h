@@ -273,7 +273,6 @@ namespace tui {
       void CellARef              (wxString);
       void OnUncapturedMouseClick(wxCommandEvent&);
       void OnToolBarSize         (wxCommandEvent&);
-      void OnToolBarDefine       (wxCommandEvent&);
       void OnToolBarAddItem      (wxCommandEvent&);
       void OnToolBarDeleteItem   (wxCommandEvent&);
       void OnAuiManagerRestore   (wxCommandEvent&);

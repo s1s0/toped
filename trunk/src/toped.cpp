@@ -58,7 +58,6 @@ extern const wxEventType         wxEVT_CANVAS_PARAMS;
 extern const wxEventType         wxEVT_MOUSE_ACCEL;
 extern const wxEventType         wxEVT_CURRENT_LAYER;
 extern const wxEventType         wxEVT_TOOLBARSIZE;
-extern const wxEventType         wxEVT_TOOLBARDEF;
 extern const wxEventType         wxEVT_TOOLBARADDITEM;
 extern const wxEventType         wxEVT_TOOLBARDELETEITEM;
 extern const wxEventType         wxEVT_AUI_RESTORE;
@@ -344,7 +343,6 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_TECUSTOM_COMMAND(wxEVT_MOUSE_ACCEL           , wxID_ANY, tui::TopedFrame::OnMouseAccel         )
    EVT_TECUSTOM_COMMAND(wxEVT_CURRENT_LAYER         , wxID_ANY, tui::TopedFrame::OnCurrentLayer       )
    EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARSIZE           , wxID_ANY, tui::TopedFrame::OnToolBarSize        )
-   EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARDEF            , wxID_ANY, tui::TopedFrame::OnToolBarDefine      )
    EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARADDITEM        , wxID_ANY, tui::TopedFrame::OnToolBarAddItem     )
    EVT_TECUSTOM_COMMAND(wxEVT_TOOLBARDELETEITEM     , wxID_ANY, tui::TopedFrame::OnToolBarDeleteItem  )
    EVT_TECUSTOM_COMMAND(wxEVT_AUI_RESTORE           , wxID_ANY, tui::TopedFrame::OnAuiManagerRestore  )
@@ -364,7 +362,7 @@ tui::TopedFrame::TopedFrame(const wxString& title, const wxPoint& pos,
    wxCommandEvent dummy;
    OnzoomEmpty(dummy);
    SetStatusBar(DEBUG_NEW console::TopedStatus(this));
-   _resourceCenter = DEBUG_NEW ResourceCenter;
+   _resourceCenter = DEBUG_NEW ResourceCenter(this);
    SetStatusText( wxT( "Toped loaded..." ) );
    //Put initMenuBar() at the end because in Windows it crashes
    initMenuBar();
@@ -674,9 +672,9 @@ void  tui::TopedFrame::setActiveCmd()
 
 void tui::TopedFrame::initToolBars()
 {
-   wxAuiToolBar* tbA = _resourceCenter->initToolBarA(this);
-   wxAuiToolBar* tbB = _resourceCenter->initToolBarB(this);
-   wxAuiToolBar* tbC = _resourceCenter->initToolBarC(this);
+   wxAuiToolBar* tbA = _resourceCenter->initToolBarA();
+   wxAuiToolBar* tbB = _resourceCenter->initToolBarB();
+   wxAuiToolBar* tbC = _resourceCenter->initToolBarC();
    _GLstatus = DEBUG_NEW CanvasStatus(this, ID_WIN_GLSTATUS , wxDefaultPosition, wxDefaultSize, wxAUI_TB_HORZ_TEXT);
 
    _winManager.AddPane(tbA, wxAuiPaneInfo()
@@ -2390,21 +2388,23 @@ void tui::TopedFrame::OnToolBarSize(wxCommandEvent& evt)
       }
 }
 
-void tui::TopedFrame::OnToolBarDefine(wxCommandEvent& evt)
-{
-   wxString toolBarName(evt.GetString());
-   _resourceCenter->initToolBar(this, toolBarName);
-}
-
 void tui::TopedFrame::OnToolBarAddItem(wxCommandEvent& evt)
 {
-   std::string toolBarName(evt.GetString().mb_str(wxConvUTF8));
-   tellstdfunc::StringMapClientData* map = static_cast<tellstdfunc::StringMapClientData*>(evt.GetClientObject());
-   std::string toolName = map->GetKey();
-   std::string toolFunc = map->GetValue();
+   WxStringPairList* clientData = static_cast<WxStringPairList*>(evt.GetClientData());
+   wxAuiToolBar* tbar = _resourceCenter->appendTools(evt.GetString(), clientData);
+   delete clientData;
 
- //  _resourceCenter->appendTool(toolBarName, toolName, toolName,  "", "", toolFunc); TODO!
-   delete map;
+   wxAuiPaneInfo paneInfo = _winManager.GetPane(tbar);
+   if (!paneInfo.IsOk())
+   {
+      _winManager.AddPane(tbar, wxAuiPaneInfo()
+                              .ToolbarPane()
+                              .Name(evt.GetString())
+                              .Top()
+                              .Floatable()
+                              );
+   }
+   _winManager.Update();
 }
 
 void tui::TopedFrame::OnToolBarDeleteItem(wxCommandEvent& evt)
