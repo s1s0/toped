@@ -42,36 +42,26 @@ extern const wxEventType         wxEVT_TOOLBARSIZE;
 extern const wxEventType         wxEVT_TOOLBARADDITEM;
 extern const wxEventType         wxEVT_TOOLBARDELETEITEM;
 
-tui::MenuItemHandler::MenuItemHandler(void) :
-   _ID            ( 0      ),
-   _menuItem      ( ""     ),
-   _hotKey        ( ""     ),
-   _function      ( ""     ),
-   _inserted      ( false  ),
-   _changed       ( false  ),
-   _method        ( NULL   )
+tui::MenuItemHandler::MenuItemHandler(int ID, std::string menuItem, std::string hotKey, std::string function) :
+   _ID            ( ID        ),
+   _menuItem      ( menuItem  ),
+   _hotKey        ( hotKey    ),
+   _function      ( function  ),
+   _inserted      ( false     ),
+   _changed       ( false     ),
+   _method        ( NULL      )
 {}
 
-tui::MenuItemHandler::MenuItemHandler(int ID, std::string menuItem, std::string hotKey, std::string function)
-   :_ID(ID), _menuItem(menuItem), _hotKey(hotKey), _function(function), _method(NULL)
-{
-   _inserted   =  false;
-   _changed    =  false;
-}
-
-tui::MenuItemHandler::MenuItemHandler(int ID, std::string menuItem, std::string hotKey, callbackMethod cbMethod)
-   :_ID(ID), _menuItem(menuItem), _hotKey(hotKey), _function(""), _method(cbMethod)
-{
-   _inserted   =  false;
-   _changed    =  false;
-}
-
-tui::MenuItemHandler::MenuItemHandler(int ID, std::string menuItem, std::string hotKey, callbackMethod cbMethod, std::string helpString)
-   :_ID(ID), _menuItem(menuItem), _hotKey(hotKey), _function(""), _helpString(helpString), _method(cbMethod)
-{
-      _inserted   =  false;
-      _changed    =  false;
-}
+tui::MenuItemHandler::MenuItemHandler(int ID, std::string menuItem, std::string hotKey, callbackMethod cbMethod, std::string helpString):
+   _ID            ( ID        ),
+   _menuItem      ( menuItem  ),
+   _hotKey        ( hotKey    ),
+   _function      ( ""        ),
+   _helpString    ( helpString),
+   _inserted      ( false     ),
+   _changed       ( false     ),
+   _method        ( cbMethod  )
+{}
 
 //Build intermediate menu item (from top menu)
 //Returns place where we need insert our menu item
@@ -226,18 +216,6 @@ void  tui::MenuItemHandler::changeInterior(std::string hotKey, std::string funct
    _changed = true;
 }
 
-
-
-tui::MenuItem::MenuItem(void)
-   :MenuItemHandler()
-{
-}
-
-tui::MenuItemSeparator::MenuItemSeparator(void)
-   :MenuItemHandler()
-{
-}
-
 tui::MenuItemSeparator::MenuItemSeparator(std::string menuItem)
    :MenuItemHandler(0, menuItem, "", NULL)
 {
@@ -262,337 +240,6 @@ void tui::MenuItemSeparator::create(wxMenuBar *menuBar)
 }
 
 //=============================================================================
-
-//tui::ToolItem::ToolItem(int toolID, const wxString& name,
-//                        const wxString& bitmapName,
-//                        const wxString& hotKey,
-//                        const wxString& helpString,
-//                        callbackMethod cbMethod) :
-//   _ID            ( toolID          ),
-//   _name          ( name            ),
-//   /*_hotKey(hotKey),*/
-//   _function      ( ""              ),
-//   _helpString    ( helpString      ),
-//   _ok            ( false           ),
-//   _method        ( cbMethod        ),
-//   _currentSize   ( ICON_SIZE_16x16 )
-//{
-//   init(bitmapName);
-//}
-//
-//tui::ToolItem::ToolItem(int toolID, const wxString& name,
-//                        const wxString& bitmapName,
-//                        const wxString& hotKey,
-//                        const wxString& helpString,
-//                        const wxString func) :
-//   _ID               ( toolID          ),
-//   _name             ( name            ),
-//   /*_hotKey(hotKey),*/
-//   _function         ( func            ),
-//   _helpString       ( helpString      ),
-//   _ok               ( false           ),
-//   _method           ( NULL            ),
-//   _currentSize      ( ICON_SIZE_16x16 )
-//{
-//   init(bitmapName);
-//}
-//
-//void tui::ToolItem::init(const wxString& bitmapName)
-//{
-//   wxImage image[ICON_SIZE_END];
-//   wxImage tempImage;
-//   wxString tempImageName;
-//   bool fileMissing = false;
-//   for(IconSizes isz = ICON_SIZE_16x16;  isz < ICON_SIZE_END;  isz=static_cast<IconSizes>(static_cast<int>(isz)+1))
-//   {
-//      wxString sizeDirName;
-//      sizeDirName.Printf("%ix%i", IconSizesValues[isz], IconSizesValues[isz]);
-//      wxFileName fName(bitmapName);
-//      fName.AppendDir(sizeDirName);
-//      fName.SetExt(wxT("png"));
-//      (image[isz]).LoadFile(fName.GetFullPath(),wxBITMAP_TYPE_PNG);
-//      _bitmapNames[isz] = fName.GetFullName().mb_str(wxConvFile);
-//      if(image[isz].IsOk())
-//      {
-//         _bitmaps[isz] = wxBitmap(image[isz]);
-//         _ok = true;
-//         if(!tempImage.IsOk())
-//         {
-//            tempImage = image[isz]; //Save temp image for filling of missing icons
-//            tempImageName = fName.GetFullName();
-//         }
-//      }
-//      else
-//      {
-//         fileMissing = true;
-//      }
-//   }
-//
-//
-//   if(fileMissing)
-//   {
-//      if (tempImage.IsOk())
-//      {
-//         for(IconSizes isz = ICON_SIZE_16x16; isz < ICON_SIZE_END; isz=static_cast<IconSizes>(static_cast<int>(isz)+1))
-//         {
-//            if(!image[isz].IsOk())
-//            {
-//               //image[isz] = tempImage.Copy();
-//               image[isz].LoadFile(tempImageName, wxBITMAP_TYPE_PNG);
-//               _bitmapNames[isz] = tempImageName;
-//               _bitmaps[isz] = wxBitmap(image[isz]);
-//
-//               std::ostringstream ost;
-//               ost<<"No icon file  "<<_bitmapNames[isz];
-//               tell_log(console::MT_WARNING,ost.str());
-//               ost.clear();
-//               ost<<"Replaced";
-//               tell_log(console::MT_WARNING,ost.str());
-//            }
-//         }
-//      }
-//      else
-//      {
-//         std::ostringstream ost;
-//         ost<<"No any proper file for "<<bitmapName;
-//         tell_log(console::MT_ERROR,ost.str());
-//      }
-//   }
-//}
-//
-//
-//void tui::ToolItem::changeToolSize(IconSizes size)
-//{
-//   if(checkToolSize(size))
-//   {
-//      _currentSize = size;
-//   }
-//   else
-//   {
-//      wxString info;
-//      info << wxT("Wrong size for icon was chosen.");
-//      tell_log(console::MT_ERROR,info);
-//   }
-//}
-//
-////=============================================================================
-//tui::TpdToolBar::TpdToolBar(int ID, long style, IconSizes iconSize) :
-//   wxToolBar(Toped->getFrame(), ID, wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER|wxTB_FLAT )
-//{
-//   SetWindowStyle(style|GetWindowStyle());
-//   int sz = IconSizesValues[iconSize];
-//   SetToolBitmapSize(wxSize(sz, sz));
-//}
-//
-//tui::ToolBarHandler::ToolBarHandler(int ID, const wxString& name, int direction) :
-//   _ID            ( ID                ),
-//   _name          ( name              ),
-//   _dockDirection ( direction         ),
-//   _floating      ( false             ),
-//   _coord         ( wxDefaultPosition ),
-//   _currentSize   ( ICON_SIZE_16x16   )
-//{
-////   wxAuiPaneInfo paneInfo;
-//
-//   if((_dockDirection==wxAUI_DOCK_LEFT)||(_dockDirection==wxAUI_DOCK_RIGHT))
-//   {
-//      _toolBar = DEBUG_NEW TpdToolBar(ID, wxTB_VERTICAL, ICON_SIZE_16x16);
-////      paneInfo = Toped->getAuiManager()->GetPane(_toolBar);
-////      paneInfo.TopDockable(false).BottomDockable(false).LeftDockable(true).RightDockable(true);
-//   }
-//   else
-//   {
-//      _toolBar = DEBUG_NEW TpdToolBar(ID, wxTB_HORIZONTAL, ICON_SIZE_16x16);
-////      paneInfo = Toped->getAuiManager()->GetPane(_toolBar);
-////      paneInfo.TopDockable(true).BottomDockable(true).LeftDockable(false).RightDockable(false);
-//   }
-//   _toolBar->Hide();
-//   /*_toolBar->Realize();
-//   Toped->getAuiManager()->AddPane(_toolBar, paneInfo.ToolbarPane().
-//      Name(wxString(_name.c_str(), wxConvUTF8)).Direction(_dockDirection).Floatable(false));
-//   Toped->getAuiManager()->Update();*/
-//}
-//
-//tui::ToolBarHandler::~ToolBarHandler()
-//{
-//   for(ToolList::iterator it=_tools.begin();it!=_tools.end();it++)
-//   {
-//      delete (*it);
-//   }
-//   _tools.clear();
-//}
-//
-//void   tui::ToolBarHandler::changeToolSize(IconSizes size)
-//{
-//   _currentSize = size;
-//   wxAuiPaneInfo paneInfo = Toped->getAuiManager()->GetPane(_toolBar);
-//   _floating = paneInfo.IsFloating();
-//   if(paneInfo.IsDocked())
-//   {
-//      _dockDirection = paneInfo.dock_direction;
-//   }
-//   _coord = paneInfo.floating_pos;
-//
-//   Toped->getAuiManager()->DetachPane(_toolBar);
-//   _toolBar->Destroy();
-//
-//   Toped->getAuiManager()->Update();
-//
-//   if((_dockDirection==wxAUI_DOCK_LEFT)||(_dockDirection==wxAUI_DOCK_RIGHT))
-//   {
-//      _toolBar = DEBUG_NEW TpdToolBar(_ID, wxTB_VERTICAL, size);
-//   }
-//   else
-//   {
-//      _toolBar = DEBUG_NEW TpdToolBar(_ID, wxTB_HORIZONTAL, size);
-//   }
-//
-//   attachToAUI();
-//   for(ToolList::iterator it=_tools.begin();it!=_tools.end();it++)
-//   {
-//      (*it)->changeToolSize(_currentSize);
-//      _toolBar->AddTool((*it)->ID(),wxT(""),(*it)->bitmap(), (*it)->helpString());
-//      Toped->getAuiManager()->DetachPane(_toolBar);
-//      _toolBar->Realize();
-//      attachToAUI();
-//   }
-//}
-//
-//
-//void tui::ToolBarHandler::addTool(int ID1, const wxString &toolBarItem, const wxString &iconName,
-//                                    const wxString &iconFileName,
-//                                    const wxString hotKey,
-//                                    const wxString &helpString,
-//                                    callbackMethod cbMethod)
-//{
-//   clearTool(iconName);
-//   ToolItem *tool = DEBUG_NEW ToolItem(ID1, toolBarItem, iconFileName, hotKey, helpString, cbMethod);
-//   if (tool->isOk())
-//   {
-//      tool->changeToolSize(_currentSize);
-//      _tools.push_back(tool);
-//      _toolBar->AddTool(tool->ID(),wxT(""),tool->bitmap(), helpString);
-//
-//      Toped->getAuiManager()->DetachPane(_toolBar);
-//      _toolBar->Realize();
-//      attachToAUI();
-//   }
-//   else
-//   {
-//      delete tool;
-//   }
-//}
-//
-//void tui::ToolBarHandler::addTool(int ID1, const wxString &toolBarItem, const wxString &iconName,
-//                                    const wxString &iconFileName,
-//                                    const wxString hotKey,
-//                                    const wxString &helpString,
-//                                    const wxString &func)
-//{
-//   clearTool(iconName);
-//   ToolItem *tool = DEBUG_NEW ToolItem(ID1, toolBarItem, iconFileName, hotKey, helpString, func);
-//   if (tool->isOk())
-//   {
-//      tool->changeToolSize(_currentSize);
-//      _tools.push_back(tool);
-//      _toolBar->AddTool(tool->ID(),wxT(""),tool->bitmap(), helpString );
-//
-//      Toped->getAuiManager()->DetachPane(_toolBar);
-//      _toolBar->Realize();
-//      attachToAUI();
-//   }
-//   else
-//   {
-//      delete tool;
-//   }
-//}
-//
-//void   tui::ToolBarHandler::deleteTool(const wxString& toolBarItem)
-//{
-//   ToolList::iterator it;
-//   for(it = _tools.begin(); it != _tools.end(); it++)
-//   {
-//      if ((*it)->name() == toolBarItem)
-//      {
-//         std::ostringstream ost;
-//         ost<<"Tool item " + toolBarItem + " is deleted";
-//         tell_log(console::MT_WARNING,ost.str());
-//         _toolBar->DeleteTool((*it)->ID());
-//         delete (*it);
-//         _tools.erase(it);
-//         break;
-//      }
-//   }
-//   Toped->getAuiManager()->DetachPane(_toolBar);
-//   _toolBar->Realize();
-//   attachToAUI();
-//}
-//
-//void   tui::ToolBarHandler::clearTool(const wxString &iconName)
-//{
-//   ToolList::iterator it;
-//   for(it = _tools.begin(); it != _tools.end(); it++)
-//   {
-//      if ((*it)->name() == iconName)
-//      {
-//         std::ostringstream ost;
-//         ost<<"Tool item "+iconName+" is redefined";
-//         tell_log(console::MT_WARNING,ost.str());
-//            delete (*it);
-//         _tools.erase(it);
-//         break;
-//      }
-//   }
-//}
-//
-//void tui::ToolBarHandler::attachToAUI(void)
-//{
-//   wxAuiPaneInfo pane;
-//   pane=wxAuiPaneInfo().ToolbarPane().Name(_name).Direction(_dockDirection).Gripper().GripperTop(false).Floatable(false).
-//         TopDockable(true).BottomDockable(true).LeftDockable(false).RightDockable(false);
-//   if((_dockDirection==wxAUI_DOCK_LEFT)||(_dockDirection==wxAUI_DOCK_RIGHT))
-//   {
-//      pane.GripperTop(true).TopDockable(false).BottomDockable(false).LeftDockable(true).RightDockable(true);
-//   }
-//   else
-//   {
-//      pane.GripperTop(false).TopDockable(true).BottomDockable(true).LeftDockable(false).RightDockable(false);
-//   }
-//
-//   if(_floating)
-//   {
-//      pane.Float().FloatingPosition(_coord);
-//   }
-//   Toped->getAuiManager()->AddPane(_toolBar,pane);
-//   Toped->getAuiManager()->Update();
-//}
-//
-//
-//void   tui::ToolBarHandler::execute(int ID1)
-//{
-//   for(ToolList::iterator it = _tools.begin();it!=_tools.end(); it++)
-//   {
-//      if (((*it)->ID())==ID1)
-//      {
-//         //Priority - user defined function
-//         if (!((*it)->function()).empty())
-//         {
-//            TpdPost::parseCommand((*it)->function());
-//            return;
-//         }
-//         else if ((*it)->method()!=NULL)
-//         {
-//            callbackMethod cbMethod;
-//            wxCommandEvent cmd_event(0);
-//            cbMethod = (*it)->method();
-//            (Toped->* cbMethod)(cmd_event);
-//            return;
-//         }
-//      }
-//   }
-//}
-
-//=============================================================================
 tui::TpdResCallBack::TpdResCallBack(callbackMethod cbMethod) :
    TpdExecResource (        ),
    _cbMethod       (cbMethod)
@@ -615,7 +262,7 @@ void tui::TpdResTellScript::exec()
    TpdPost::parseCommand(_tellScript);
 }
 
-tui::TpdResConfig::TpdResConfig(const TpdToolBarWrap* tbRef) :
+tui::TpdResConfig::TpdResConfig(const TpdToolBar* tbRef) :
       _tbRef         ( tbRef     )
 {}
 
@@ -642,9 +289,9 @@ void tui::TpdResConfig::exec()
 
 }
 //=============================================================================
-tui::TpdToolBarWrap::TpdToolBarWrap(int ID, wxWindow* parent, const wxSize& iconSize, const wxString& tbName, TpdExecResourceMap* execReourceRef) :
+tui::TpdToolBar::TpdToolBar(int ID, wxWindow* parent, const wxString& tbName, TpdExecResourceMap* execReourceRef) :
    wxAuiToolBar(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_OVERFLOW),
-   _iconSize (iconSize),
+   _iconSize       (16,16         ),
    _execResourceRef(execReourceRef)
 {
    SetToolBitmapSize(_iconSize);
@@ -665,14 +312,14 @@ tui::TpdToolBarWrap::TpdToolBarWrap(int ID, wxWindow* parent, const wxSize& icon
 
 }
 
-wxAuiToolBarItem* tui::TpdToolBarWrap::addToolItem(int ID, const wxString& label, const wxArtID& artID, callbackMethod cbMethod)
+wxAuiToolBarItem* tui::TpdToolBar::addToolItem(int ID, const wxString& label, const wxArtID& artID, callbackMethod cbMethod)
 {
    (*_execResourceRef)[ID] = DEBUG_NEW TpdResCallBack(cbMethod);
    _itemIdList.push_back(ID);
    return AddTool(ID, artID , wxArtProvider::GetBitmap(artID , wxART_TOOLBAR, _iconSize), label);
 }
 
-wxAuiToolBarItem* tui::TpdToolBarWrap::addToolItem(int ID, const wxString& label, const wxString& tllCommand)
+wxAuiToolBarItem* tui::TpdToolBar::addToolItem(int ID, const wxString& label, const wxString& tllCommand)
 {
    (*_execResourceRef)[ID] = DEBUG_NEW TpdResTellScript(tllCommand);
    _itemIdList.push_back(ID);
@@ -682,13 +329,32 @@ wxAuiToolBarItem* tui::TpdToolBarWrap::addToolItem(int ID, const wxString& label
    return AddTool(ID, artID , wxArtProvider::GetBitmap(artID , wxART_TOOLBAR, _iconSize), label);
 }
 
-void tui::TpdToolBarWrap::changeIconSize(const wxSize& iconSize)
+bool tui::TpdToolBar::deleteToolItem(const wxString& label)
+{
+   for (std::list<int>::iterator CTI = _itemIdList.begin(); CTI != _itemIdList.end(); CTI++)
+   {
+      wxAuiToolBarItem* ctbItem = FindTool(*CTI);
+      wxArtID artID(label);
+      artID.UpperCase();
+      artID = wxT("tpdART_") + artID;
+      if (artID == ctbItem->GetLabel())
+      {
+         _execResourceRef->erase(*CTI);
+         _itemIdList.erase(CTI);
+         return DeleteTool(*CTI);
+      }
+   }
+   return false;
+}
+
+void tui::TpdToolBar::changeIconSize(const wxSize& iconSize)
 {
    _iconSize = iconSize;
    SetToolBitmapSize(_iconSize);
    for (std::list<int>::iterator CTI = _itemIdList.begin(); CTI != _itemIdList.end(); CTI++)
    {
       wxAuiToolBarItem* ctbItem = FindTool(*CTI);
+      if (NULL == ctbItem) break;
       wxString label = ctbItem->GetLabel();
       ctbItem->SetBitmap(wxArtProvider::GetBitmap(label , wxART_TOOLBAR, _iconSize));
    }
@@ -704,10 +370,7 @@ void tui::TpdToolBarWrap::changeIconSize(const wxSize& iconSize)
 tui::ResourceCenter::ResourceCenter(wxWindow* wxParent):
    _wxParent         ( wxParent        ),
    _menuCount        ( 0               ),
-//   _toolCount        ( 0               ),
-   _nextToolId       ( TDUMMY_TOOL     ),
-//   _direction        ( wxAUI_DOCK_TOP  ),
-   _curTBSize        (16,16            )
+   _nextToolId       ( TDUMMY_TOOL     )
 {}
 
 tui::ResourceCenter::~ResourceCenter(void)
@@ -837,7 +500,7 @@ void tui::ResourceCenter::appendMenu(const std::string &menuItem, const std::str
    std::string str = menuItem;
    str[0] = toupper(str[0]);
 
-   MenuItemHandler* mItem = DEBUG_NEW MenuItem(ID, str, hotKey, function);
+   MenuItemHandler* mItem = DEBUG_NEW MenuItemHandler(ID, str, hotKey, function);
    if (!checkExistence(*mItem))
    {
       _menus.push_back(mItem);
@@ -846,23 +509,23 @@ void tui::ResourceCenter::appendMenu(const std::string &menuItem, const std::str
 
 }
 
-void tui::ResourceCenter::appendMenu(const std::string &menuItem, const std::string &hotKey, callbackMethod cbMethod)
-{
-   int ID = TMDUMMY + _menuCount;
-
-   //Set first character in top menu into uppercase
-   //it need for simplicity
-   std::string str = menuItem;
-   str[0] = toupper(str[0]);
-
-
-   MenuItemHandler* mItem= DEBUG_NEW MenuItem(ID, str, hotKey, cbMethod);
-   if (!checkExistence(*mItem))
-   {
-      _menus.push_back(mItem);
-      _menuCount++;
-   }
-}
+//void tui::ResourceCenter::appendMenu(const std::string &menuItem, const std::string &hotKey, callbackMethod cbMethod)
+//{
+//   int ID = TMDUMMY + _menuCount;
+//
+//   //Set first character in top menu into uppercase
+//   //it need for simplicity
+//   std::string str = menuItem;
+//   str[0] = toupper(str[0]);
+//
+//
+//   MenuItemHandler* mItem= DEBUG_NEW MenuItem(ID, str, hotKey, cbMethod);
+//   if (!checkExistence(*mItem))
+//   {
+//      _menus.push_back(mItem);
+//      _menuCount++;
+//   }
+//}
 
 void tui::ResourceCenter::appendMenu(const std::string &menuItem, const std::string &hotKey, callbackMethod cbMethod, const std::string &helpString)
 {
@@ -873,7 +536,7 @@ void tui::ResourceCenter::appendMenu(const std::string &menuItem, const std::str
    std::string str = menuItem;
    str[0] = toupper(str[0]);
 
-   MenuItemHandler* mItem= DEBUG_NEW MenuItem(ID, str, hotKey, cbMethod, helpString);
+   MenuItemHandler* mItem= DEBUG_NEW MenuItemHandler(ID, str, hotKey, cbMethod, helpString);
    if (!checkExistence(*mItem))
    {
       _menus.push_back(mItem);
@@ -922,172 +585,17 @@ void tui::ResourceCenter::executeToolBar(int ID1)
    _execResources[ID1]->exec();
 }
 
-/*void tui::ResourceCenter::appendTool(const std::string toolBarName, const std::string &toolBarItem,
-                                     const std::string &bitmapFileName,
-                                     const std::string &hotKey, callbackMethod cbMethod, int direction)
-{
-   int ID;
-   std::string str = toolBarName;
-
-   std::transform(str.begin(), str.end(), str.begin(), tolower);
-   toolBarList::const_iterator it;
-   for(it=_toolBars.begin(); it!=_toolBars.end(); it++)
-   {
-      if ((*it)->name()==str)
-      {
-         break;
-      }
-   }
-
-   if (it==_toolBars.end())
-   {
-      ID = TDUMMY_TOOL + _toolCount;
-      //Create new toolbar
-      ToolBarHandler* toolBar = DEBUG_NEW ToolBarHandler(ID, str, direction);
-      _toolCount++;
-
-      ID = TDUMMY_TOOL + _toolCount;
-      ToolItem *tool = DEBUG_NEW ToolItem(ID, toolBarItem, bitmapFileName, hotKey, cbMethod);
-      _toolCount++;
-      toolBar->addTool(tool);
-   }
-
-}*/
-
-//void tui::ResourceCenter::setDirection(int direction)
-//{
-//   assert(  ( direction == wxAUI_DOCK_TOP    )
-//          ||( direction == wxAUI_DOCK_LEFT   )
-//          ||( direction == wxAUI_DOCK_BOTTOM )
-//          ||( direction == wxAUI_DOCK_RIGHT  ));
-//   _direction = direction;
-//}
-
 void tui::ResourceCenter::setToolBarSize(const wxString& tbName, IconSizes size)
 {
-   if(checkToolSize(size))
+   if(size < ICON_SIZE_END)
       for (TpdToolBarList::iterator CT = _allToolBars.begin(); CT != _allToolBars.end(); CT++)
          if ((*CT)->GetName().Matches(tbName))
             (*CT)->changeIconSize(wxSize(IconSizesValues[size],IconSizesValues[size]));
 }
 
-//void tui::ResourceCenter::defineToolBar(const wxString &toolBarName)
-//{
-//   int ID;
-//   //find toolbar
-//   wxString str = toolBarName;
-//   str.UpperCase();
-//   ToolBarList::const_iterator it;
-//   for(it=_toolBars.begin(); it!=_toolBars.end(); it++)
-//   {
-//      if ((*it)->name()==str)
-//      {
-//         std::ostringstream ost;
-//         ost<<"definetoolbar: already defined";
-//         tell_log(console::MT_WARNING,ost.str());
-//         break;
-//      }
-//   }
-//
-//   if (it==_toolBars.end())
-//   {
-//      ID = TDUMMY_TOOL + _toolCount;
-//      //Create new toolbar
-//      ToolBarHandler* toolBar = DEBUG_NEW ToolBarHandler(ID, str, _direction);
-//      _toolCount++;
-//      _toolBars.push_back(toolBar);
-//   }
-//}
-//
-//void tui::ResourceCenter::appendTool(const wxString &toolBarName, const wxString &toolBarItem,
-//                     const  wxString &iconName, const wxString &hotKey, const wxString &helpString,
-//                     callbackMethod cbMethod)
-//{
-//   //set correct filename for toolBarItem
-//   wxString fullIconName = _IconDir+iconName;
-//   //increase counter of toolItems
-//   int ID = TDUMMY_TOOL + _toolCount++;
-//
-//   ToolBarHandler* toolBar = secureToolBar(toolBarName);
-//   toolBar->addTool(ID, toolBarItem, toolBarItem, fullIconName, hotKey, helpString, cbMethod);
-//}
-//
-//void tui::ResourceCenter::appendTool(const wxString &toolBarName, const wxString &toolBarItem,
-//                     const wxString &iconName,
-//                     const wxString &hotKey,
-//                     const wxString &helpString,
-//                     wxString func)
-//{
-//   //set correct filename for toolBarItem
-//   wxString fullIconName = _IconDir+iconName;
-//   //increase counter of toolItems
-//   int ID = TDUMMY_TOOL + _toolCount++;
-//
-//   ToolBarHandler* toolBar = secureToolBar(toolBarName);
-//   toolBar->addTool(ID, toolBarItem, toolBarItem, fullIconName, hotKey, helpString, func);
-//}
-//
-//void tui::ResourceCenter::deleteTool(const wxString& toolBarName, const wxString& toolBarItem)
-//{
-//   //find toolbar
-//   wxString str = toolBarName;
-////   std::transform(str.begin(), str.end(), str.begin(), tolower);
-//   str.LowerCase();
-//   ToolBarList::const_iterator it;
-//   for(it=_toolBars.begin(); it!=_toolBars.end(); it++)
-//   {
-//      if ((*it)->name()==str)
-//      {
-//         break;
-//      }
-//   }
-//   //if toolbar doesn't exist, create it
-//   if (it==_toolBars.end())
-//   {
-//      std::ostringstream ost;
-//      ost<<"toolbardeleteitem: there is no such toolbar";
-//      tell_log(console::MT_WARNING,ost.str());
-//      return;
-//   }
-//   else
-//   {
-//      (*it)->deleteTool(toolBarItem);
-//   }
-//}
-//
-//tui::ToolBarHandler* tui::ResourceCenter::secureToolBar(const wxString &toolBarName)
-//{
-//   int ID;
-//   ToolBarHandler* toolBar = NULL;
-//
-//   //find toolbar
-//   wxString str = toolBarName;
-//   str.LowerCase();
-//   ToolBarList::const_iterator it;
-//   for(it=_toolBars.begin(); it!=_toolBars.end(); it++)
-//   {
-//      if ((*it)->name()==str)
-//      {
-//         toolBar = *it;
-//         break;
-//      }
-//   }
-//   //if toolbar doesn't exist, create it
-//   if (NULL == toolBar)
-//   {
-//      ID = TDUMMY_TOOL + _toolCount;
-//      //Create new toolbar
-//      toolBar = DEBUG_NEW ToolBarHandler(ID, str, _direction);
-//      _toolCount++;
-//      _toolBars.push_back(toolBar);
-//   }
-//
-//   return toolBar;
-//}
-
 wxAuiToolBar* tui::ResourceCenter::initToolBarA()
 {
-   TpdToolBarWrap* tbar = DEBUG_NEW TpdToolBarWrap(_nextToolId++, _wxParent, _curTBSize, tpdPane_TB_A, &_execResources);
+   TpdToolBar* tbar = DEBUG_NEW TpdToolBar(_nextToolId++, _wxParent, tpdPane_TB_A, &_execResources);
    tbar->addToolItem(_nextToolId++, wxT("new_cell") , wxART_NEW      , &tui::TopedFrame::OnCellNew       );
    tbar->addToolItem(_nextToolId++, wxT("open_cell"), wxART_FILE_OPEN, &tui::TopedFrame::OnCellOpen      );
    tbar->addToolItem(_nextToolId++, wxT("save")     , wxART_FILE_SAVE, &tui::TopedFrame::OnTDTSave       );
@@ -1098,7 +606,7 @@ wxAuiToolBar* tui::ResourceCenter::initToolBarA()
 
 wxAuiToolBar* tui::ResourceCenter::initToolBarB()
 {
-   TpdToolBarWrap* tbar = DEBUG_NEW TpdToolBarWrap(_nextToolId++, _wxParent, _curTBSize, tpdPane_TB_B, &_execResources);
+   TpdToolBar* tbar = DEBUG_NEW TpdToolBar(_nextToolId++, _wxParent, tpdPane_TB_B, &_execResources);
 
    tbar->addToolItem(_nextToolId++, wxT("undo")     , tpdART_UNDO        ,&tui::TopedFrame::OnUndo       );
    tbar->AddSeparator();
@@ -1131,7 +639,7 @@ wxAuiToolBar* tui::ResourceCenter::initToolBarB()
 
 wxAuiToolBar* tui::ResourceCenter::initToolBarC()
 {
-   TpdToolBarWrap* tbar = DEBUG_NEW TpdToolBarWrap(_nextToolId++, _wxParent, _curTBSize, tpdPane_TB_C, &_execResources);
+   TpdToolBar* tbar = DEBUG_NEW TpdToolBar(_nextToolId++, _wxParent, tpdPane_TB_C, &_execResources);
 
    tbar->addToolItem(_nextToolId++, wxT("zoom_in")    , tpdART_ZOOM_IN   ,&tui::TopedFrame::OnZoomIn     );
    tbar->addToolItem(_nextToolId++, wxT("zoom_out")   , tpdART_ZOOM_OUT  ,&tui::TopedFrame::OnZoomOut    );
@@ -1143,38 +651,23 @@ wxAuiToolBar* tui::ResourceCenter::initToolBarC()
    return tbar;
 }
 
-//wxAuiToolBar* tui::ResourceCenter::initToolBar(const wxString& tbName)
-//{
-//   TpdToolBarWrap* tbar = DEBUG_NEW TpdToolBarWrap(_wxParent, _curTBSize, tbName, &_execResources);
-//   _allToolBars.push_back(tbar);
-//   return tbar;
-//}
-
-//wxAuiToolBar* tui::ResourceCenter::appendTool(const wxString& tbName, const wxString& newItem, const wxString& tllCommand)
-//{
-//   TpdToolBarWrap* tbar = secureToolBar(tbName);
-//   tbar->addToolItem(_nextToolId++, newItem    , tllCommand     );
-//   tbar->Realize();
-//   return tbar;
-//}
-
 wxAuiToolBar* tui::ResourceCenter::appendTools(const wxString& tbName, const WxStringPairList* clientData)
 {
 
-   TpdToolBarWrap* tbar = secureToolBar(tbName);
+   TpdToolBar* tbar = secureToolBar(tbName);
    for (WxStringPairList::const_iterator CDP = clientData->begin();CDP != clientData->end(); CDP++)
    {
       tbar->addToolItem(_nextToolId++, CDP->first, CDP->second);
    }
    tbar->Realize();
+
    return tbar;
 }
 
-tui::TpdToolBarWrap* tui::ResourceCenter::secureToolBar(const wxString &tbName)
+bool tui::ResourceCenter::deleteTool(const wxString& tbName, const wxString& item)
 {
-   // first - try and find an existing toolbar with this name
    TpdToolBarList::const_iterator CTB;
-   TpdToolBarWrap* tbar = NULL;
+   TpdToolBar* tbar = NULL;
    for (CTB = _allToolBars.begin(); CTB != _allToolBars.end(); CTB++)
    {
       if (tbName == (*CTB)->GetName())
@@ -1184,31 +677,50 @@ tui::TpdToolBarWrap* tui::ResourceCenter::secureToolBar(const wxString &tbName)
    }
    if (NULL == tbar)
    {
-      tbar = DEBUG_NEW TpdToolBarWrap(_nextToolId++, _wxParent, _curTBSize, tbName, &_execResources);
+      wxString msg;
+      msg << wxT("Toolbar \"") << tbName << wxT("\" doesn't exist. Can't delete an item.");
+      tell_log(console::MT_ERROR, msg);
+   }
+   else
+   {
+      if (tbar->deleteToolItem(item))
+      {
+         tbar->Realize();
+         return true;
+      }
+      else
+      {
+         wxString msg;
+         msg << wxT("Item \"") << item   << wxT("\" not find in toolbar \"")
+                               << tbName << wxT("\". Nothing to delete");
+         tell_log(console::MT_ERROR, msg);
+      }
+   }
+   return false;
+}
+
+tui::TpdToolBar* tui::ResourceCenter::secureToolBar(const wxString &tbName)
+{
+   // first - try and find an existing toolbar with this name
+   TpdToolBarList::const_iterator CTB;
+   TpdToolBar* tbar = NULL;
+   for (CTB = _allToolBars.begin(); CTB != _allToolBars.end(); CTB++)
+   {
+      if (tbName == (*CTB)->GetName())
+      {
+         tbar = *CTB; break;
+      }
+   }
+   if (NULL == tbar)
+   {
+      tbar = DEBUG_NEW TpdToolBar(_nextToolId++, _wxParent, tbName, &_execResources);
       _allToolBars.push_back(tbar);
    }
    return tbar;
 
 }
 
-//void tui::ResourceCenter::addToolBarItem(wxAuiToolBar* tbar, const wxString& label, const wxArtID& artID, callbackMethod cbMethod)
-//{
-//   _execResources[_nextToolId] = DEBUG_NEW TpdResCallBack(cbMethod);
-//   tbar->AddTool(_nextToolId++, artID , wxArtProvider::GetBitmap(artID , wxART_TOOLBAR, _curTBSize), label);
-//}
-
 //=============================================================================
-bool tui::checkToolSize(IconSizes size)
-{
-   for(IconSizes isz = ICON_SIZE_16x16; isz < ICON_SIZE_END; isz++)
-   {
-      if(size == isz) break;
-   }
-   if(ICON_SIZE_END == size) return false;
-   else return true;
-}
-//=============================================================================
-
 tui::TpdArtProvider::TpdArtProvider(const wxString& rootDir)
 {
    for (IconSizes CI = ICON_SIZE_16x16; CI < ICON_SIZE_END; CI++)
@@ -1310,7 +822,7 @@ int tellstdfunc::stdTOOLBARSIZE::execute()
       eventToolBarSize.SetString(wxString(toolbarName.c_str(), wxConvUTF8));
       eventToolBarSize.SetInt(size);
       wxPostEvent(Toped, eventToolBarSize);
-      LogFile << LogFile.getFN() << "("<< toolbarName << "," << size << ");";LogFile.flush();
+      LogFile << LogFile.getFN() << "(\""<< toolbarName << "\"," << size << ");";LogFile.flush();
    }
    else
    {
@@ -1382,16 +894,18 @@ tellstdfunc::stdTOOLBARDELETEITEM::stdTOOLBARDELETEITEM(telldata::typeID retype,
 
 int tellstdfunc::stdTOOLBARDELETEITEM::execute()
 {
-   std::string   itemname   = getStringValue();
-   wxString utfitemname = wxString(itemname.c_str(), wxConvUTF8);
-   std::string   toolbarname   = getStringValue();
-   wxString utftoolbarname = wxString(toolbarname.c_str(), wxConvUTF8);
+   std::string   itemName      = getStringValue();
+   std::string   toolbarName   = getStringValue();
+
+   //Note! shall be destroyed in the event receiver
+   WxStringPair* clientData  = DEBUG_NEW WxStringPair(wxString(toolbarName.c_str(), wxConvUTF8),
+                                                      wxString(itemName.c_str()   , wxConvUTF8));
 
    wxCommandEvent eventToolBarDelItem(wxEVT_TOOLBARDELETEITEM);
-   eventToolBarDelItem.SetString(utftoolbarname);
-   wxStringClientData *data = DEBUG_NEW wxStringClientData(utfitemname);
-   eventToolBarDelItem.SetClientObject(data);
+   eventToolBarDelItem.SetClientData(clientData);
    wxPostEvent(Toped, eventToolBarDelItem);
+
+   LogFile << LogFile.getFN() << "(\""<< toolbarName << "\",\"" << itemName << "\");";LogFile.flush();
 
    return EXEC_NEXT;
 }
