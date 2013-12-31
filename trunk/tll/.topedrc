@@ -355,3 +355,11 @@ colorSetup();
 fillSetup();
 lineSetup();
 screenSetup();
+
+// toolbar test remainders
+//toolbardeleteitem("s1s0","boza");
+//toolbardeleteitem("_AUIP_TB_C","boza");
+//toolbardeleteitem("_AUIP_TB_C","zoom_in");
+//toolbaradditem("USER_TB_A",{{"user1","tellfn1();"},{"user2","tellfn2();"},{"user3","tellfn3();"}});
+//toolbarsize("USER_TB_A",1);
+//toolbarsize("USER_TB_A",2);

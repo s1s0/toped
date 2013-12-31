@@ -2326,12 +2326,10 @@ void tui::TopedFrame::OnToolBarAddItem(wxCommandEvent& evt)
 
 void tui::TopedFrame::OnToolBarDeleteItem(wxCommandEvent& evt)
 {
-   wxString toolBarName(evt.GetString());
-   wxStringClientData *data= static_cast<wxStringClientData*>(evt.GetClientObject());
-   wxString toolName = data->GetData();
-//   std::string toolName(str.mb_str(wxConvUTF8));
-
-//   _resourceCenter->deleteTool(toolBarName, toolName); TODO!
+   WxStringPair* clientData = static_cast<WxStringPair*>(evt.GetClientData());
+   if (_resourceCenter->deleteTool(clientData->first, clientData->second))
+      _winManager.Update();
+   delete clientData;
 }
 
 void tui::TopedFrame::OnAuiManagerRestore(wxCommandEvent& evt)

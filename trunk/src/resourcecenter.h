@@ -104,10 +104,8 @@ namespace tui
    //=================================
    class MenuItemHandler {
    public:
-                     MenuItemHandler(void);
                      MenuItemHandler(int ID, std::string menuItem, std::string hotKey, std::string function);
-                     MenuItemHandler(int ID, std::string menuItem, std::string hotKey, callbackMethod cbMethod);
-                     MenuItemHandler(int ID, std::string menuItem, std::string hotKey, callbackMethod cbMethod, std::string helpString);
+                     MenuItemHandler(int ID, std::string menuItem, std::string hotKey, callbackMethod cbMethod, std::string helpString = "");
       virtual       ~MenuItemHandler() {};
       std::string    menuItem(void) const    { return _menuItem;}
       std::string    hotKey(void)   const    { return _hotKey;}
@@ -138,264 +136,122 @@ namespace tui
    };
 
 
-   class MenuItem:public MenuItemHandler
-   {
-   public:
-                     MenuItem(void);
-                     MenuItem(int ID, std::string menuItem, std::string hotKey, std::string function)
-                        :MenuItemHandler(ID, menuItem, hotKey, function) {};
-
-                     MenuItem(int ID, std::string menuItem, std::string hotKey, callbackMethod cbMethod)
-                        :MenuItemHandler(ID, menuItem, hotKey, cbMethod) {};
-
-                     MenuItem(int ID, std::string menuItem, std::string hotKey, callbackMethod cbMethod, std::string helpString)
-                        :MenuItemHandler(ID, menuItem, hotKey, cbMethod, helpString) {};
-
-      virtual       ~MenuItem() {};
-   };
-
    class MenuItemSeparator:public MenuItemHandler
    {
    public:
-                     MenuItemSeparator(void);
+//                     MenuItemSeparator(void);
                      MenuItemSeparator(std::string menuItem);
       virtual       ~MenuItemSeparator() {};
-
       virtual void   create(wxMenuBar *menuBar);
    };
 
 
-//   //=================================
-//   //      Everything about toolbar
-//   //=================================
-//   class ToolItem {
-//   public:
-//                     ToolItem(int toolID, const wxString& name,
-//                              const wxString& bitmapName,
-//                              const wxString& hotKey,
-//                              const wxString& helpString, callbackMethod cbMethod);
-//                     ToolItem(int toolID, const wxString& name,
-//                              const wxString& bitmapName,
-//                              const wxString& hotKey,
-//                              const wxString& helpString,
-//                              const wxString  func);
-//      virtual      ~ToolItem() {}
-//
-////      void addIcon(const std::string &bitmapName, int size);
-//      void           changeToolSize(IconSizes size);
-//      int            ID(void)const                { return _ID;                     }
-//      wxString       name(void)const              { return _name;                   }
-//      wxBitmap       bitmap(void)const            { return _bitmaps[_currentSize];  }
-//      wxString       function(void)const          { return _function;               }
-//      wxString       helpString(void)const        { return _helpString;             }
-//      bool           isOk(void)const              { return _ok;                     }
-//      callbackMethod method(void)const            { return _method;                 }
-//      //std::string  hotKey(void)      const      { return _hotKey;};
-//   private:
-//      void           init(const wxString& bitmapName);
-//      int            _ID;
-//      wxString       _name;
-//      wxBitmap       _bitmaps[ICON_SIZE_END];
-//      wxString       _bitmapNames[ICON_SIZE_END];
-//      wxString       _function;
-//      wxString       _helpString;
-//      bool           _ok;
-//      callbackMethod _method;
-//      IconSizes      _currentSize;
-//      //std::string   _hotKey;
-//   };
-//
-//   class TpdToolBar:public wxToolBar {
-//   public:
-//      TpdToolBar(int ID, long style, IconSizes iconSize);
-////   private:
-//      //DECLARE_EVENT_TABLE();
-//   };
-//
-//   class ToolBarHandler {
-//   public:
-//                      ToolBarHandler(int ID, const wxString& name, int direction);
-//      virtual        ~ToolBarHandler();
-//
-//      void            addTool(int ID1, const wxString &toolBarItem, const wxString &iconName,
-//                              const wxString &iconFileName, const wxString hotKey,
-//                              const wxString &helpString, callbackMethod cbMethod);
-//      void            addTool(int ID1, const wxString &toolBarItem, const wxString &iconName,
-//                              const wxString &iconFileName, const wxString hotKey,
-//                              const wxString &helpString, const wxString &func);
-//      void            deleteTool(const wxString& toolBarItem);
-//      void            execute(int ID1);
-//      void            changeToolSize(IconSizes size);
-//      wxString        name() const        {return _name;}
-//      int             direction() const   {return _dockDirection;}
-//   private:
-//      typedef std::vector <ToolItem*>        ToolList;
-//      void            attachToAUI(void);
-//      void            clearTool(const wxString& iconName);//!Check tool and delete if exist
-//      int             _ID           ;
-//      wxString        _name         ;
-//      TpdToolBar*     _toolBar      ;
-//      ToolList        _tools        ;
-//      int             _dockDirection;
-//      bool            _floating     ;
-//      wxPoint         _coord        ;
-//      IconSizes       _currentSize  ;
-//   };
-
-   bool checkToolSize(IconSizes size);
-
    //=============================================================================
-
+   //      Everything about toolbar
+   //=============================================================================
    class TpdExecResource {
    public:
-                        TpdExecResource() {}
-      virtual          ~TpdExecResource() {}
-      virtual void      exec() {assert(false);}  //Can't be pure virtual, because is used as a type below
+                          TpdExecResource() {}
+      virtual            ~TpdExecResource() {}
+      virtual void        exec() {assert(false);}  //Can't be pure virtual, because is used as a type below
    };
 
    typedef std::map<int, TpdExecResource*> TpdExecResourceMap;
 
-   class TpdToolBarWrap : public wxAuiToolBar {
+   class TpdToolBar : public wxAuiToolBar {
    public:
-                        TpdToolBarWrap(int, wxWindow*, const wxSize&, const wxString&, TpdExecResourceMap*);
-      wxAuiToolBarItem* addToolItem(int ID, const wxString&, const wxArtID&, callbackMethod);
-      wxAuiToolBarItem* addToolItem(int ID, const wxString&, const wxString&);
-      void              changeIconSize(const wxSize&);
-      wxSize            getIconSize() const {return _iconSize;}
+                          TpdToolBar(int, wxWindow*, const wxString&, TpdExecResourceMap*);
+      wxAuiToolBarItem*   addToolItem(int ID, const wxString&, const wxArtID&, callbackMethod);
+      wxAuiToolBarItem*   addToolItem(int ID, const wxString&, const wxString&);
+      bool                deleteToolItem(const wxString&);
+      void                changeIconSize(const wxSize&);
+      wxSize              getIconSize() const {return _iconSize;}
    private:
-      std::list<int>    _itemIdList;
-      wxSize            _iconSize;
+      std::list<int>      _itemIdList;
+      wxSize              _iconSize;
       TpdExecResourceMap* _execResourceRef;// Don't delete! It's just a reference here!
    };
-   typedef std::list<TpdToolBarWrap*> TpdToolBarList;
-   class TpdArtProvider : public wxArtProvider {
-      public:
-                       TpdArtProvider(const wxString&);
-   protected:
-      virtual wxBitmap CreateBitmap(const wxArtID&, const wxArtClient&, const wxSize&);
-   private:
-      wxFileName       _rootDir[ICON_SIZE_END];//! icon root directories
-   };
+   typedef std::list<TpdToolBar*> TpdToolBarList;
 
    class TpdResCallBack : public TpdExecResource {
    public:
-                        TpdResCallBack(callbackMethod cbMethod);
-      virtual          ~TpdResCallBack() {}
-      virtual void      exec();
+                          TpdResCallBack(callbackMethod cbMethod);
+      virtual            ~TpdResCallBack() {}
+      virtual void        exec();
    private:
-      callbackMethod    _cbMethod;
+      callbackMethod      _cbMethod;
    };
 
    class TpdResTellScript : public TpdExecResource {
    public:
-                        TpdResTellScript(const wxString&);
-      virtual          ~TpdResTellScript() {}
-      virtual void      exec();
+                          TpdResTellScript(const wxString&);
+      virtual            ~TpdResTellScript() {}
+      virtual void        exec();
    private:
-      wxString          _tellScript;
+      wxString            _tellScript;
    };
 
    class TpdResConfig : public TpdExecResource {
    public:
-                        TpdResConfig(const TpdToolBarWrap*);
-      virtual          ~TpdResConfig() {}
-      virtual void      exec();
+                          TpdResConfig(const TpdToolBar*);
+      virtual            ~TpdResConfig() {}
+      virtual void        exec();
    private:
-      const TpdToolBarWrap* _tbRef;
+      const TpdToolBar*   _tbRef;
+   };
+
+   class TpdArtProvider : public wxArtProvider {
+      public:
+                          TpdArtProvider(const wxString&);
+   protected:
+      virtual wxBitmap    CreateBitmap(const wxArtID&, const wxArtClient&, const wxSize&);
+   private:
+      wxFileName          _rootDir[ICON_SIZE_END];//! icon root directories
    };
 
    //=============================================================================
-   //      Resourcecenter is responsible
+   //      ResourceCenter is responsible
    //      for handling all of ui actions.
    //      Currently only menu and tool bars
    //=============================================================================
    class ResourceCenter {
    public:
-      ResourceCenter(wxWindow*);
-      ~ResourceCenter(void);
-//      void setIconDir(const wxString& dir) {_IconDir = dir;}
-      //Using for build of complete menu
-      void buildMenu(wxMenuBar *menuBar);
-      //Insert new menu item
-      //!IMPORTANT after appending call buildMenu()
-      void appendMenu(const std::string &menuItem, const std::string &hotKey, const std::string &function);
-      void appendMenu(const std::string &menuItem, const std::string &hotKey, callbackMethod cbMethod);
-      void appendMenu(const std::string &menuItem, const std::string &hotKey, callbackMethod cbMethod, const std::string &helpString);
-      void appendMenuSeparator(const std::string &menuItem);
-      void executeMenu(int ID);
-      void executeToolBar(int ID);
-      bool checkExistence(const tui::MenuItemHandler & item);
+                          ResourceCenter(wxWindow*);
+                         ~ResourceCenter(void);
 
-      /*void appendTool(const std::string toolBarName, const std::string &toolBarItem,
-                     const std::string &bitmapFileName,
-                     const std::string &hotKey, callbackMethod cbMethod, int direction);*/
-//      void setDirection(int direction);
-//      void defineToolBar(const wxString &toolBarName);
-//      void appendTool(const wxString &toolBarName, const wxString &toolBarItem,
-//                     const wxString &iconName,
-//                     const wxString &hotKey,
-//                     const wxString &helpString,
-//                     callbackMethod cbMethod);
-//      void appendTool(const wxString &toolBarName, const wxString &toolBarItem,
-//                     const wxString &iconName,
-//                     const wxString &hotKey,
-//                     const wxString &helpString,
-//                     wxString func);
-//      void deleteTool(const wxString& toolBarName, const wxString& toolBarItem);
-      /*Don't call setToolBarSize immediately!!!
-      It leads to nonsynchronized internal state of object and Setting Menu.
-      Better to use toolbarsize TELL-function.*/
-      void setToolBarSize(const wxString&, IconSizes size);
-      wxAuiToolBar* initToolBarA();
-      wxAuiToolBar* initToolBarB();
-      wxAuiToolBar* initToolBarC();
-//      wxAuiToolBar* initToolBar(const wxString&);
-//      wxAuiToolBar* appendTool(const wxString&, const wxString&, const wxString&);
-      wxAuiToolBar* appendTools(const wxString&, const WxStringPairList*);
+      void                buildMenu(wxMenuBar*);//Used for build of complete menu
+      //Insert new menu item - !IMPORTANT! after appending call buildMenu()
+      void                appendMenu(const std::string&, const std::string&, const std::string&);
+//      void                appendMenu(const std::string&, const std::string&, callbackMethod);
+      void                appendMenu(const std::string&, const std::string&, callbackMethod, const std::string&);
+      void                appendMenuSeparator(const std::string &menuItem);
+      void                executeMenu(int);
+      void                executeToolBar(int);
 
-
-
+      void                setToolBarSize(const wxString&, IconSizes size);
+      wxAuiToolBar*       initToolBarA();
+      wxAuiToolBar*       initToolBarB();
+      wxAuiToolBar*       initToolBarC();
+      wxAuiToolBar*       appendTools(const wxString&, const WxStringPairList*);
+      bool                deleteTool(const wxString&, const wxString&);
    private:
       typedef std::vector <MenuItemHandler*> ItemList;
-//      typedef std::vector <ToolBarHandler*>  ToolBarList;
-
-      //produce lowercase string and exclude unwanted character
-      std::string simplify(std::string str, char ch);
-      //Function to avoid copy-paste in appendTool functions
-      TpdToolBarWrap* secureToolBar(const wxString&);
-      wxWindow*         _wxParent;
-      ItemList          _menus      ;
-//      ToolBarList       _toolBars   ;
-      int               _menuCount  ; //number of menu items
-//      int               _toolCount  ; //number of tool items // TODO clean-up
-      int               _nextToolId ; // The ID of the next Tool
-//      wxString          _IconDir    ; //directory that contains
-//      int               _direction  ;
-      wxSize            _curTBSize  ;
-
-      TpdExecResourceMap _execResources;
-      TpdToolBarList    _allToolBars;
-//      void              addToolBarItem(wxAuiToolBar*, const wxString&, const wxArtID&, callbackMethod);
-
+      bool                checkExistence(const tui::MenuItemHandler&);//produces  a lowercase string and excludes unwanted character
+      std::string         simplify(std::string, char);
+      TpdToolBar*         secureToolBar(const wxString&);
+      wxWindow*           _wxParent     ;
+      ItemList            _menus        ;
+      int                 _menuCount    ; //number of menu items
+      int                 _nextToolId   ; // The ID of the next Tool
+//      wxSize              _curTBSize    ;
+      TpdExecResourceMap  _execResources;
+      TpdToolBarList      _allToolBars  ;
    };
 
 }
 //=============================================================================
 
 namespace tellstdfunc {
-//   class StringMapClientData: public wxClientData
-//   {
-//   public:
-//      StringMapClientData():_key(),_value() {};
-//      StringMapClientData(const std::string &key, const std::string &value):
-//         _key(key), _value(value) {};
-//      void SetData(const std::string &key, const std::string &value) {_key = key; _value = value;};
-//      const std::string GetKey() const {return _key;};
-//      const std::string GetValue() const {return _value;};
-//   private:
-//      std::string _key;
-//      std::string _value;
-//   };
 
    using parsercmd::cmdSTDFUNC;
    using telldata::argumentQ;
