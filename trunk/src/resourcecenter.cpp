@@ -254,7 +254,8 @@ void tui::TpdResCallBack::exec()
 
 //=============================================================================
 tui::TpdResTellScript::TpdResTellScript(const wxString& tellScript) :
-   _tellScript    (tellScript)
+   TpdExecResource (          ),
+   _tellScript     (tellScript)
 {}
 
 void tui::TpdResTellScript::exec()
@@ -262,6 +263,7 @@ void tui::TpdResTellScript::exec()
    TpdPost::parseCommand(_tellScript);
 }
 
+//=============================================================================
 tui::TpdResConfig::TpdResConfig(const TpdToolBar* tbRef) :
       _tbRef         ( tbRef     )
 {}
@@ -286,8 +288,69 @@ void tui::TpdResConfig::exec()
       }
       TpdPost::parseCommand(tllcommand);
    }
-
 }
+
+//=============================================================================
+tui::TpdResTbDrop::TpdResTbDrop(const CbCommandMap& cbCommands) :
+   TpdExecResource (          ),
+   _cbMethod       ( cbCommands.begin()->second.second)
+{
+   for (CbCommandMap::const_iterator CCI = cbCommands.begin(); CCI != cbCommands.end(); CCI++)
+   {
+      wxMenuItem* mItem =  new wxMenuItem(&_tbItemMenu, CCI->first, CCI->second.first);
+      mItem->SetKind(wxITEM_RADIO);
+      _tbItemMenu.Append(mItem);
+   }
+}
+
+void tui::TpdResTbDrop::LocalMenu(wxAuiToolBarEvent& cmdEvent)
+{
+   if (cmdEvent.IsDropDownClicked())
+   {
+      wxAuiToolBar* tb = static_cast<wxAuiToolBar*>(cmdEvent.GetEventObject());
+      tb->SetToolSticky(cmdEvent.GetId(), true);
+
+      // line up our menu with the button
+      wxRect rect = tb->GetToolRect(cmdEvent.GetId());
+      wxPoint pt = tb->ClientToScreen(rect.GetBottomLeft());
+      pt = tb->ScreenToClient(pt);
+
+      tb->PopupMenu(&_tbItemMenu, pt);
+
+
+      // make sure the button is "un-stuck"
+      tb->SetToolSticky(cmdEvent.GetId(), false);
+   }
+   else
+      cmdEvent.Skip(true);
+}
+
+void tui::TpdResTbDrop::setCurrent(callbackMethod cbMethod)
+{
+   _cbMethod = cbMethod;
+}
+
+void tui::TpdResTbDrop::exec()
+{
+   wxCommandEvent cmd_event(0);
+  (Toped->*_cbMethod)(cmd_event);
+}
+
+//=============================================================================
+tui::TpdDropCallBack::TpdDropCallBack(callbackMethod cbMethod, TpdResTbDrop* dropRef) :
+   TpdResCallBack ( cbMethod ),
+   _dropRef       ( dropRef  )
+{
+}
+
+void tui::TpdDropCallBack::exec()
+{
+   wxCommandEvent cmd_event(0);
+  (Toped->*_cbMethod)(cmd_event);
+  _dropRef->setCurrent(_cbMethod);
+}
+
+
 //=============================================================================
 tui::TpdToolBar::TpdToolBar(int ID, wxWindow* parent, const wxString& tbName, TpdExecResourceMap* execReourceRef) :
    wxAuiToolBar(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_OVERFLOW),
@@ -312,11 +375,25 @@ tui::TpdToolBar::TpdToolBar(int ID, wxWindow* parent, const wxString& tbName, Tp
 
 }
 
-wxAuiToolBarItem* tui::TpdToolBar::addToolItem(int ID, const wxString& label, const wxArtID& artID, callbackMethod cbMethod)
+wxAuiToolBarItem* tui::TpdToolBar::addToolItem(int ID, const wxArtID& artID, const wxString& label, callbackMethod cbMethod)
 {
    (*_execResourceRef)[ID] = DEBUG_NEW TpdResCallBack(cbMethod);
    _itemIdList.push_back(ID);
    return AddTool(ID, artID , wxArtProvider::GetBitmap(artID , wxART_TOOLBAR, _iconSize), label);
+}
+
+void tui::TpdToolBar::addToolItem(int ID, const wxArtID& artID, const CbCommandMap& cbCommands)
+{
+   TpdResTbDrop* ddtb = DEBUG_NEW TpdResTbDrop(cbCommands);
+   Bind(wxEVT_AUITOOLBAR_TOOL_DROPDOWN, &TpdResTbDrop::LocalMenu, ddtb, ID);
+   _itemIdList.push_back(ID);
+   (*_execResourceRef)[ID] = ddtb;
+   for (CbCommandMap::const_iterator CCI = cbCommands.begin(); CCI != cbCommands.end(); CCI++)
+   {
+      (*_execResourceRef)[CCI->first] = DEBUG_NEW TpdDropCallBack(CCI->second.second, ddtb);
+   }
+   AddTool(ID, artID , wxArtProvider::GetBitmap(artID , wxART_TOOLBAR, _iconSize), cbCommands.begin()->second.first);
+   SetToolDropDown(ID, true);
 }
 
 wxAuiToolBarItem* tui::TpdToolBar::addToolItem(int ID, const wxString& label, const wxString& tllCommand)
@@ -361,11 +438,6 @@ void tui::TpdToolBar::changeIconSize(const wxSize& iconSize)
    Realize();
 }
 //=============================================================================
-//   private:
-//      std::list<int>    _itemIdList;
-//      wxSize            _iconSize;
-
-//=============================================================================
 
 tui::ResourceCenter::ResourceCenter(wxWindow* wxParent):
    _wxParent         ( wxParent        ),
@@ -380,12 +452,6 @@ tui::ResourceCenter::~ResourceCenter(void)
       delete (*mItem);
    }
    _menus.clear();
-
-//   for(ToolBarList::iterator tItem=_toolBars.begin(); tItem!=_toolBars.end(); tItem++)
-//   {
-//      delete (*tItem);
-//   }
-//   _toolBars.clear();
 
    for(TpdExecResourceMap::const_iterator CI = _execResources.begin(); CI != _execResources.end(); CI++)
       delete CI->second;
@@ -509,24 +575,6 @@ void tui::ResourceCenter::appendMenu(const std::string &menuItem, const std::str
 
 }
 
-//void tui::ResourceCenter::appendMenu(const std::string &menuItem, const std::string &hotKey, callbackMethod cbMethod)
-//{
-//   int ID = TMDUMMY + _menuCount;
-//
-//   //Set first character in top menu into uppercase
-//   //it need for simplicity
-//   std::string str = menuItem;
-//   str[0] = toupper(str[0]);
-//
-//
-//   MenuItemHandler* mItem= DEBUG_NEW MenuItem(ID, str, hotKey, cbMethod);
-//   if (!checkExistence(*mItem))
-//   {
-//      _menus.push_back(mItem);
-//      _menuCount++;
-//   }
-//}
-
 void tui::ResourceCenter::appendMenu(const std::string &menuItem, const std::string &hotKey, callbackMethod cbMethod, const std::string &helpString)
 {
    int ID = TMDUMMY + _menuCount;
@@ -550,7 +598,6 @@ void tui::ResourceCenter::appendMenuSeparator(const std::string &menuItem)
    MenuItemHandler* mItem= DEBUG_NEW MenuItemSeparator(menuItem);
    _menus.push_back(mItem);
 }
-
 
 void tui::ResourceCenter::executeMenu(int ID1)
 {
@@ -595,10 +642,21 @@ void tui::ResourceCenter::setToolBarSize(const wxString& tbName, IconSizes size)
 
 wxAuiToolBar* tui::ResourceCenter::initToolBarA()
 {
+   CbCommandMap cbMap;
    TpdToolBar* tbar = DEBUG_NEW TpdToolBar(_nextToolId++, _wxParent, tpdPane_TB_A, &_execResources);
-   tbar->addToolItem(_nextToolId++, wxT("new_cell") , wxART_NEW      , &tui::TopedFrame::OnCellNew       );
-   tbar->addToolItem(_nextToolId++, wxT("open_cell"), wxART_FILE_OPEN, &tui::TopedFrame::OnCellOpen      );
-   tbar->addToolItem(_nextToolId++, wxT("save")     , wxART_FILE_SAVE, &tui::TopedFrame::OnTDTSave       );
+
+   cbMap[_nextToolId++]= CbCommandPair(wxT("new_design")    ,&tui::TopedFrame::OnNewDesign );
+   cbMap[_nextToolId++]= CbCommandPair(wxT("new_cell")      ,&tui::TopedFrame::OnCellNew);
+   tbar->addToolItem(_nextToolId++, wxART_NEW      , cbMap);
+   cbMap.clear();
+   cbMap[_nextToolId++]= CbCommandPair(wxT("open_design")    ,&tui::TopedFrame::OnTDTRead );
+   cbMap[_nextToolId++]= CbCommandPair(wxT("open_cell")      ,&tui::TopedFrame::OnCellOpen);
+   tbar->addToolItem(_nextToolId++, wxART_FILE_OPEN      , cbMap);
+   cbMap.clear();
+   cbMap[_nextToolId++]= CbCommandPair(wxT("save")           ,&tui::TopedFrame::OnTDTSave );
+   cbMap[_nextToolId++]= CbCommandPair(wxT("save_as")        ,&tui::TopedFrame::OnTDTSaveAs);
+   cbMap[_nextToolId++]= CbCommandPair(wxT("save_properties"),&tui::TopedFrame::OnPropSave);
+   tbar->addToolItem(_nextToolId++, wxART_FILE_SAVE      , cbMap);
    _allToolBars.push_back(tbar);
    tbar->Realize();
    return tbar;
@@ -606,27 +664,38 @@ wxAuiToolBar* tui::ResourceCenter::initToolBarA()
 
 wxAuiToolBar* tui::ResourceCenter::initToolBarB()
 {
+   CbCommandMap cbMap;
    TpdToolBar* tbar = DEBUG_NEW TpdToolBar(_nextToolId++, _wxParent, tpdPane_TB_B, &_execResources);
 
-   tbar->addToolItem(_nextToolId++, wxT("undo")     , tpdART_UNDO        ,&tui::TopedFrame::OnUndo       );
+   tbar->addToolItem(_nextToolId++, tpdART_UNDO        , wxT("undo")     ,&tui::TopedFrame::OnUndo       );
    tbar->AddSeparator();
-   tbar->addToolItem(_nextToolId++, wxT("box")      , tpdART_NEW_BOX     ,&tui::TopedFrame::OnDrawBox    );
-   tbar->addToolItem(_nextToolId++, wxT("poly")     , tpdART_NEW_POLY    ,&tui::TopedFrame::OnDrawPoly   );
-   tbar->addToolItem(_nextToolId++, wxT("wire")     , tpdART_NEW_WIRE    ,&tui::TopedFrame::OnDrawWire   );
-   tbar->addToolItem(_nextToolId++, wxT("text")     , tpdART_NEW_TEXT    ,&tui::TopedFrame::OnDrawText   );
+   tbar->addToolItem(_nextToolId++, tpdART_NEW_BOX     , wxT("box")      ,&tui::TopedFrame::OnDrawBox    );
+   tbar->addToolItem(_nextToolId++, tpdART_NEW_POLY    , wxT("poly")     ,&tui::TopedFrame::OnDrawPoly   );
+   tbar->addToolItem(_nextToolId++, tpdART_NEW_WIRE    , wxT("wire")     ,&tui::TopedFrame::OnDrawWire   );
+   tbar->addToolItem(_nextToolId++, tpdART_NEW_TEXT    , wxT("text")     ,&tui::TopedFrame::OnDrawText   );
    tbar->AddSeparator();
-   tbar->addToolItem(_nextToolId++, wxT("select")    , tpdART_SELECT     ,&tui::TopedFrame::OnSelectIn   )->SetHasDropDown(true);
-   tbar->addToolItem(_nextToolId++, wxT("unselect")  , tpdART_UNSELECT   ,&tui::TopedFrame::OnUnselectIn );
-   tbar->addToolItem(_nextToolId++, wxT("move")      , tpdART_MOVE       ,&tui::TopedFrame::OnMove       );
-   tbar->addToolItem(_nextToolId++, wxT("copy")      , tpdART_COPY       ,&tui::TopedFrame::OnCopy       );
-   tbar->addToolItem(_nextToolId++, wxT("delete")    , tpdART_DELETE     ,&tui::TopedFrame::OnDelete     );
+   cbMap[_nextToolId++]= CbCommandPair(wxT("select")        ,&tui::TopedFrame::OnSelectIn );
+   cbMap[_nextToolId++]= CbCommandPair(wxT("pselect")       ,&tui::TopedFrame::OnPselectIn);
+   cbMap[_nextToolId++]= CbCommandPair(wxT("select_all")    ,&tui::TopedFrame::OnSelectAll);
+   tbar->addToolItem(_nextToolId++, tpdART_SELECT      , cbMap);
+   cbMap.clear();
+   cbMap[_nextToolId++]= CbCommandPair(wxT("unselect")      ,&tui::TopedFrame::OnUnselectIn );
+   cbMap[_nextToolId++]= CbCommandPair(wxT("punselect")     ,&tui::TopedFrame::OnPunselectIn);
+   cbMap[_nextToolId++]= CbCommandPair(wxT("unselect_all")  ,&tui::TopedFrame::OnUnselectAll);
+   tbar->addToolItem(_nextToolId++, tpdART_UNSELECT    , cbMap);
+   tbar->addToolItem(_nextToolId++, tpdART_MOVE        , wxT("move")     ,&tui::TopedFrame::OnMove       );
+   tbar->addToolItem(_nextToolId++, tpdART_COPY        , wxT("copy")     ,&tui::TopedFrame::OnCopy       );
+   tbar->addToolItem(_nextToolId++, tpdART_DELETE      , wxT("delete")   ,&tui::TopedFrame::OnDelete     );
    tbar->AddSeparator();
-   tbar->addToolItem(_nextToolId++, wxT("rotate")    , tpdART_ROTATE_CW  ,&tui::TopedFrame::OnRotate     );
-   tbar->addToolItem(_nextToolId++, wxT("flip_hori") , tpdART_FLIP_HORI  ,&tui::TopedFrame::OnFlipHor    );
-   tbar->addToolItem(_nextToolId++, wxT("flip_vert") , tpdART_FLIP_VERT  ,&tui::TopedFrame::OnFlipVert   );
+   cbMap.clear();
+   cbMap[_nextToolId++]= CbCommandPair(wxT("rotate cw")      ,&tui::TopedFrame::OnRotate270 );
+   cbMap[_nextToolId++]= CbCommandPair(wxT("rotate ccw")     ,&tui::TopedFrame::OnRotate90  );
+   tbar->addToolItem(_nextToolId++, tpdART_ROTATE_CW      , cbMap);
+   tbar->addToolItem(_nextToolId++, tpdART_FLIP_HORI   , wxT("flip_hori"),&tui::TopedFrame::OnFlipHor    );
+   tbar->addToolItem(_nextToolId++, tpdART_FLIP_VERT   , wxT("flip_vert"),&tui::TopedFrame::OnFlipVert   );
    tbar->AddSeparator();
-   tbar->addToolItem(_nextToolId++, wxT("group")     , tpdART_GROUP      ,&tui::TopedFrame::OnCellGroup  );
-   tbar->addToolItem(_nextToolId++, wxT("ungroup")   , tpdART_UNGROUP    ,&tui::TopedFrame::OnCellUngroup);
+   tbar->addToolItem(_nextToolId++, tpdART_GROUP       , wxT("group")    ,&tui::TopedFrame::OnCellGroup  );
+   tbar->addToolItem(_nextToolId++, tpdART_UNGROUP     , wxT("ungroup")  ,&tui::TopedFrame::OnCellUngroup);
 
 //   _resourceCenter->appendTool(wxT("edit"), wxT("cut_box"      ), wxT("cut_box"      ), wxT(""), wxT("cut with box"   ), &tui::TopedFrame::OnBoxCut       );
 ////   _resourceCenter->appendTool(wxT("edit"), wxT("edit_push"    ), wxT("edit_push"    ), wxT(""), wxT("edit push"      ), &tui::TopedFrame::OnCellPush     );
@@ -641,10 +710,10 @@ wxAuiToolBar* tui::ResourceCenter::initToolBarC()
 {
    TpdToolBar* tbar = DEBUG_NEW TpdToolBar(_nextToolId++, _wxParent, tpdPane_TB_C, &_execResources);
 
-   tbar->addToolItem(_nextToolId++, wxT("zoom_in")    , tpdART_ZOOM_IN   ,&tui::TopedFrame::OnZoomIn     );
-   tbar->addToolItem(_nextToolId++, wxT("zoom_out")   , tpdART_ZOOM_OUT  ,&tui::TopedFrame::OnZoomOut    );
-   tbar->addToolItem(_nextToolId++, wxT("zoom_all")   , tpdART_ZOOM_ALL  ,&tui::TopedFrame::OnZoomAll    );
-   tbar->addToolItem(_nextToolId++, wxT("add ruler")  , tpdART_RULER     ,&tui::TopedFrame::OnAddRuler   );
+   tbar->addToolItem(_nextToolId++, tpdART_ZOOM_IN     , wxT("zoom_in")  ,&tui::TopedFrame::OnZoomIn     );
+   tbar->addToolItem(_nextToolId++, tpdART_ZOOM_OUT    , wxT("zoom_out") ,&tui::TopedFrame::OnZoomOut    );
+   tbar->addToolItem(_nextToolId++, tpdART_ZOOM_ALL    , wxT("zoom_all") ,&tui::TopedFrame::OnZoomAll    );
+   tbar->addToolItem(_nextToolId++, tpdART_RULER       , wxT("add ruler"),&tui::TopedFrame::OnAddRuler   );
 
    _allToolBars.push_back(tbar);
    tbar->Realize();

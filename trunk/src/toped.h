@@ -193,7 +193,8 @@ namespace tui {
       void                 OnCopy(wxCommandEvent& WXUNUSED(event));
       void                 OnMove(wxCommandEvent& WXUNUSED(event));
       void               OnDelete(wxCommandEvent& WXUNUSED(event));
-      void               OnRotate(wxCommandEvent& WXUNUSED(event));
+      void             OnRotate90(wxCommandEvent& WXUNUSED(event));
+      void            OnRotate270(wxCommandEvent& WXUNUSED(event));
       void             OnFlipVert(wxCommandEvent& WXUNUSED(event));
       void              OnFlipHor(wxCommandEvent& WXUNUSED(event));
       void              OnPolyCut(wxCommandEvent& WXUNUSED(event));

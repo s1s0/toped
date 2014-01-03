@@ -98,6 +98,8 @@ namespace tui
 
    class TopedFrame;
    typedef void (TopedFrame::*callbackMethod)(wxCommandEvent&);
+   typedef std::pair<wxString, callbackMethod> CbCommandPair;
+   typedef std::map<int, CbCommandPair>        CbCommandMap;
 
    //=================================
    //      Everything about menu
@@ -161,8 +163,9 @@ namespace tui
    class TpdToolBar : public wxAuiToolBar {
    public:
                           TpdToolBar(int, wxWindow*, const wxString&, TpdExecResourceMap*);
-      wxAuiToolBarItem*   addToolItem(int ID, const wxString&, const wxArtID&, callbackMethod);
-      wxAuiToolBarItem*   addToolItem(int ID, const wxString&, const wxString&);
+      wxAuiToolBarItem*   addToolItem(int, const wxArtID&, const wxString&, callbackMethod);
+      void                addToolItem(int, const wxArtID&, const CbCommandMap&);
+      wxAuiToolBarItem*   addToolItem(int, const wxString&, const wxString&);
       bool                deleteToolItem(const wxString&);
       void                changeIconSize(const wxSize&);
       wxSize              getIconSize() const {return _iconSize;}
@@ -175,10 +178,10 @@ namespace tui
 
    class TpdResCallBack : public TpdExecResource {
    public:
-                          TpdResCallBack(callbackMethod cbMethod);
+                          TpdResCallBack(callbackMethod);
       virtual            ~TpdResCallBack() {}
       virtual void        exec();
-   private:
+   protected:
       callbackMethod      _cbMethod;
    };
 
@@ -198,6 +201,27 @@ namespace tui
       virtual void        exec();
    private:
       const TpdToolBar*   _tbRef;
+   };
+
+   class TpdResTbDrop : public TpdExecResource {
+   public:
+                          TpdResTbDrop(const CbCommandMap&);
+      virtual            ~TpdResTbDrop() {}
+      virtual void        exec();
+      void                LocalMenu(wxAuiToolBarEvent&);
+      void                setCurrent(callbackMethod);
+   private:
+      wxMenu              _tbItemMenu;
+      callbackMethod      _cbMethod;
+   };
+
+   class TpdDropCallBack : public TpdResCallBack {
+   public:
+                          TpdDropCallBack(callbackMethod, TpdResTbDrop*);
+      virtual            ~TpdDropCallBack() {}
+      virtual void        exec();
+   protected:
+      TpdResTbDrop*       _dropRef;
    };
 
    class TpdArtProvider : public wxArtProvider {
@@ -243,7 +267,6 @@ namespace tui
       ItemList            _menus        ;
       int                 _menuCount    ; //number of menu items
       int                 _nextToolId   ; // The ID of the next Tool
-//      wxSize              _curTBSize    ;
       TpdExecResourceMap  _execResources;
       TpdToolBarList      _allToolBars  ;
    };
