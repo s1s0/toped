@@ -262,7 +262,7 @@ BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
    EVT_MENU( TMEDIT_COPY         , tui::TopedFrame::OnCopy        )
    EVT_MENU( TMEDIT_MOVE         , tui::TopedFrame::OnMove        )
    EVT_MENU( TMEDIT_DELETE       , tui::TopedFrame::OnDelete      )
-   EVT_MENU( TMEDIT_ROTATE90     , tui::TopedFrame::OnRotate      )
+   EVT_MENU( TMEDIT_ROTATE90     , tui::TopedFrame::OnRotate90      )
    EVT_MENU( TMEDIT_FLIPX        , tui::TopedFrame::OnFlipVert    )
    EVT_MENU( TMEDIT_FLIPY        , tui::TopedFrame::OnFlipHor     )
    EVT_MENU( TMEDIT_POLYCUT      , tui::TopedFrame::OnPolyCut     )
@@ -473,7 +473,7 @@ void tui::TopedFrame::initMenuBar() {
    _resourceCenter->appendMenu("&Edit/Move",       "CTRL-M",  &tui::TopedFrame::OnMove, "Move selected shapes" );
    _resourceCenter->appendMenu("&Edit/Delete",     "CTRL-D",  &tui::TopedFrame::OnDelete, "Delete selected shapes" );
    _resourceCenter->appendMenuSeparator("Edit");
-   _resourceCenter->appendMenu("&Edit/Rotate 90",  "CTRL-9",  &tui::TopedFrame::OnRotate, "Rotate selected shapes on 90 deg. counter clockwise ");
+   _resourceCenter->appendMenu("&Edit/Rotate 90",  "CTRL-9",  &tui::TopedFrame::OnRotate90, "Rotate selected shapes on 90 deg. counter clockwise ");
    _resourceCenter->appendMenu("&Edit/Flip Vertical",     "CTRL-X",  &tui::TopedFrame::OnFlipVert, "Flip selected shapes towards X axis " );
    _resourceCenter->appendMenu("&Edit/Flip Horizontal",     "CTRL-Y",  &tui::TopedFrame::OnFlipHor, "Flip selected shapes towards Y axis " );
    _resourceCenter->appendMenu("&Edit/Cut with poly","CTRL-U",  &tui::TopedFrame::OnPolyCut, "Cut selected shapes with a polygon " );
@@ -1227,9 +1227,15 @@ void tui::TopedFrame::OnDelete(wxCommandEvent& WXUNUSED(event))
    Console->parseCommand(wxT("delete();"));
 }
 
-void tui::TopedFrame::OnRotate(wxCommandEvent& WXUNUSED(event))
+void tui::TopedFrame::OnRotate90(wxCommandEvent& WXUNUSED(event))
 {
    Console->parseCommand(wxT("rotate(90);"));
+}
+
+void tui::TopedFrame::OnRotate270(wxCommandEvent& WXUNUSED(event))
+{
+   Console->parseCommand(wxT("rotate(270);"));
+
 }
 
 void tui::TopedFrame::OnFlipVert(wxCommandEvent& WXUNUSED(event))
