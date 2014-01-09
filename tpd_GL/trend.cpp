@@ -931,6 +931,27 @@ trend::TrendBase* trend::TrendCenter::getMRenderer(console::ACTIVE_OP& curOp)
    return _mRenderer;
 }
 
+trend::TrendBase* trend::TrendCenter::getZRenderer()
+{
+	assert(NULL == _zRenderer);
+	layprop::DrawProperties* drawProp;
+	if (PROPC->tryLockDrawProp(drawProp))
+	{
+		switch (_renderType)
+		{
+		case trend::rtTocom: assert(false);          break;// shouldn't end-up here ever
+		case trend::rtTolder:
+			_zRenderer = DEBUG_NEW trend::Tolder(drawProp, PROPC->UU()); break;
+		case trend::rtTenderer:
+			_zRenderer = DEBUG_NEW trend::Tenderer(drawProp, PROPC->UU()); break;
+		case trend::rtToshader:
+			_zRenderer = DEBUG_NEW trend::Toshader(drawProp, PROPC->UU()); break;
+		default: assert(false); break;
+		}
+	}
+	return _zRenderer;
+}
+
 void trend::TrendCenter::releaseCRenderer()
 {
    assert(NULL != _cRenderer);
@@ -953,6 +974,14 @@ void trend::TrendCenter::releaseMRenderer()
    PROPC->unlockDrawProp(_mRenderer->drawprop(), false);
    delete (_mRenderer);
    _mRenderer = NULL;
+}
+
+void trend::TrendCenter::releaseZRenderer()
+{
+	assert(NULL != _zRenderer);
+	PROPC->unlockDrawProp(_zRenderer->drawprop(), false);
+	delete (_zRenderer);
+	_zRenderer = NULL;
 }
 
 void trend::TrendCenter::drawFOnly()

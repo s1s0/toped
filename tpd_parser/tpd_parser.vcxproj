@@ -229,7 +229,7 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">flex.exe -Ptell -o%(Filename).cpp %(Filename)%(Extension)</Command>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">flex.exe -Ptell -o%(Filename).cpp %(Filename)%(Extension)</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(Filename).cpp</Outputs>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).cpp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).cpp;%(Outputs)</Outputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">tell_yacc.h</AdditionalInputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">flex.exe -Ptell -o%(Filename).cpp %(Filename)%(Extension)</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(Filename).cpp</Outputs>
@@ -241,7 +241,7 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).cpp</Outputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">tell_yacc.h</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Generating Tell scanner</Message>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">tell_yacc.hh</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">tell_yacc.hh;%(AdditionalInputs)</AdditionalInputs>
     </CustomBuild>
     <CustomBuild Include="tell_yacc.yy">
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">bison.exe  -p tell -d -t -v -o %(Filename).cpp %(Filename)%(Extension) 
