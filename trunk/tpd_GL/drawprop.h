@@ -394,6 +394,7 @@ namespace layprop {
          LayStateMap                _layStateMap;  //
          LayStateHistory            _layStateHistory; //! for undo purposes of layer status related TELL function
          static const tellRGB       _dfltColor;
+         static const tellRGB       _zoomColor;
          static const byte          _dfltFill[128];
          static const LineSettings  _dfltLine     ; //! Default Line
          static const LineSettings  _dfltSLine    ; //! Default Selected Line

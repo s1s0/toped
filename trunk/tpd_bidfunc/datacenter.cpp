@@ -748,29 +748,6 @@ void DataCenter::mouseRotate()
    unlockTDT(dbLibDir);
 }
 
-void DataCenter::mouseHooverDraw(TP& position)
-{
-   if (_TEDLIB())
-   {
-      LayerDefSet unselectable = PROPC->allUnselectable();
-      trend::TrendBase* cRenderer = TRENDC->getHRenderer();
-      if (NULL != cRenderer)
-      {
-         if (wxMUTEX_NO_ERROR == _DBLock.TryLock())
-         {
-            _TEDLIB()->mouseHoover(position, *cRenderer, unselectable);
-            if (cRenderer->collect())
-            {
-               cRenderer->draw();
-            }
-            VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
-         }
-         cRenderer->cleanUp();
-         TRENDC->releaseHRenderer();
-      }
-   }
-}
-
 void DataCenter::setRecoverPoly(bool rcv)
 {
    assert(NULL != _objectRecovery);
@@ -894,6 +871,45 @@ void DataCenter::motionDraw(const CTM& layCTM, TP base, TP newp, bool rubber, co
       }
       mRenderer->cleanUp();
       TRENDC->releaseMRenderer();
+   }
+}
+
+void DataCenter::mouseHooverDraw(TP& position)
+{
+   if (_TEDLIB())
+   {
+      LayerDefSet unselectable = PROPC->allUnselectable();
+      trend::TrendBase* cRenderer = TRENDC->getHRenderer();
+      if (NULL != cRenderer)
+      {
+         if (wxMUTEX_NO_ERROR == _DBLock.TryLock())
+         {
+            _TEDLIB()->mouseHoover(position, *cRenderer, unselectable);
+            if (cRenderer->collect())
+            {
+               cRenderer->draw();
+            }
+            VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
+         }
+         cRenderer->cleanUp();
+         TRENDC->releaseHRenderer();
+      }
+   }
+}
+
+void DataCenter::zoomDraw(const TP& pA, const TP& pB)
+{
+   trend::TrendBase* zRenderer = TRENDC->getZRenderer();
+   if (NULL != zRenderer)
+   {
+      //zRenderer->setLayer();
+      //zRenderer->box();
+      //if (zRenderer->collect())
+      //{
+      //   zRenderer->draw();
+      //}
+      //zRenderer->cleanUp();
+      TRENDC->releaseZRenderer();
    }
 }
 

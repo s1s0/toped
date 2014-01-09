@@ -76,6 +76,7 @@ public:
    void                       motionDraw(const CTM&, TP, TP, bool, const DBlineList repers);
    void                       render();
    void                       mouseHooverDraw(TP&);
+   void                       zoomDraw(const TP&,const TP&);
    void                       setRecoverPoly(bool);
    void                       setRecoverWire(bool);
    void                       setCmdLayer(const LayerDef& laydef) {_curcmdlay = laydef;}

@@ -31,8 +31,9 @@
 #include "drawprop.h"
 #include "tuidefs.h"
 
-const layprop::tellRGB        layprop::DrawProperties::_dfltColor(127,127,127,127);
-const layprop::LineSettings   layprop::DrawProperties::_dfltLine    ("", 0xffff, 1, 1);
+const layprop::tellRGB        layprop::DrawProperties::_dfltColor(127, 127, 127, 127);
+const layprop::tellRGB        layprop::DrawProperties::_zoomColor(179, 179, 179, 179);
+const layprop::LineSettings   layprop::DrawProperties::_dfltLine("", 0xffff, 1, 1);
 const layprop::LineSettings   layprop::DrawProperties::_dfltSLine   ("", 0xffff, 1, 3);
 const layprop::LineSettings   layprop::DrawProperties::_dfltCellBnd ("", 0xf18f, 1, 1);
 const layprop::LineSettings   layprop::DrawProperties::_dfltCellSBnd("", 0xf18f, 1, 3);
