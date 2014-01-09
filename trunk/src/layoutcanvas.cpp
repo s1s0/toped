@@ -511,7 +511,7 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event)
 
 void tui::LayoutCanvas::wndPaint() 
 {
-	DATC->zoomDraw(_pressPoint, _nScrMark);
+   DATC->zoomDraw(_pressPoint, _nScrMark);
    //glColor4f((GLfloat)0.7, (GLfloat)0.7, (GLfloat)0.7, (GLfloat)0.4); // gray
    //glDisable(GL_POLYGON_STIPPLE);
    //glEnable(GL_POLYGON_SMOOTH);   //- for solid fill

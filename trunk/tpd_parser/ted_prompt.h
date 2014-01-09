@@ -124,7 +124,7 @@ namespace console {
       wxWindow*               _canvas;
       bool                    _canvas_invalid;
       bool                    _exitRequested;
-	  bool                     _exitAproved;
+      bool                    _exitAproved;
       wxPathList              _tllIncludePath;
       parse_thread*           _tellThread;
    };

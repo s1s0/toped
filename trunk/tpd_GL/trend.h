@@ -206,11 +206,11 @@ namespace trend {
          trend::TrendBase*      getCRenderer();//!Get current renderer
          trend::TrendBase*      getHRenderer();//!Get hoover renderer
          trend::TrendBase*      getMRenderer(console::ACTIVE_OP&);//!get motion renderer
-		 trend::TrendBase*		getZRenderer();//!Get zoom renderer
+         trend::TrendBase*      getZRenderer();//!Get zoom renderer
          void                   releaseCRenderer();
          void                   releaseHRenderer();
          void                   releaseMRenderer();
-		 void					releaseZRenderer();
+         void                   releaseZRenderer();
          void                   drawFOnly();
          //Font handling
          void                   loadLayoutFont(std::string);
@@ -230,8 +230,8 @@ namespace trend {
          trend::TrendBase*      _cRenderer;    //! current renderer
          trend::TrendBase*      _hRenderer;    //! hoover renderer
          trend::TrendBase*      _mRenderer;    //! motion renderer
-		 trend::TrendBase*      _zRenderer;    //! zoom   renderer
-		 trend::Shaders*        _cShaders;     //! the shader init object (valid in rtToshader case only)
+       trend::TrendBase*      _zRenderer;    //! zoom   renderer
+       trend::Shaders*        _cShaders;     //! the shader init object (valid in rtToshader case only)
          OglFontCollectionMap   _oglFont;
          std::string            _activeFontName;
          RenderType             _renderType;
