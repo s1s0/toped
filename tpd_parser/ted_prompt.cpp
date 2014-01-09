@@ -294,7 +294,7 @@ void* console::parse_thread::Entry()
    }
    do {
       _mutexCondition->Wait();
-	  //if (TestDestroy()) ->see the comment in console::TllCmdLine::stopParserThread()
+     //if (TestDestroy()) ->see the comment in console::TllCmdLine::stopParserThread()
       if (Console->exitAproved())
          break; // Thread Exit point
 
@@ -357,7 +357,7 @@ console::TllCmdLine::TllCmdLine(wxWindow *canvas) :
    _canvas           ( canvas                ),
    _canvas_invalid   ( false                 ),
    _exitRequested    ( false                 ),
-   _exitAproved      ( false				 )
+   _exitAproved      ( false                 )
 {
    Console = this;
    spawnTellThread();

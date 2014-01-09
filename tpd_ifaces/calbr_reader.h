@@ -112,7 +112,7 @@ namespace Calbr
    class drcRuleCheck; //forward declaration
    typedef std::vector <Calbr::drcRuleCheck*> RuleChecksVector;
 
-	
+
    struct cellNameStruct
    {
       bool              spaceCoords;
@@ -159,7 +159,7 @@ namespace Calbr
 
 
 
-	typedef std::map <std::string, cellNameStruct*> CellDRCMap;
+   typedef std::map <std::string, cellNameStruct*> CellDRCMap;
 
    class CalbrFile
    {

@@ -2044,7 +2044,7 @@ void browsers::LayerBrowser::onSaveState(wxCommandEvent& WXUNUSED(event))
    }
    else
    {
-		std::ostringstream ost;
+      std::ostringstream ost;
       ost<<"Name of Layers State is not specified";
       tell_log(console::MT_ERROR,ost.str());
       return;
@@ -2061,9 +2061,9 @@ void browsers::LayerBrowser::onLoadState(wxCommandEvent& WXUNUSED(event))
       cmd << wxT("restorelaystatus(\"") << stateName << wxT("\");");
       TpdPost::parseCommand(cmd);
    }
-	else
+   else
    {
-		std::ostringstream ost;
+      std::ostringstream ost;
       ost<<"Name of Layers State is not specified";
       tell_log(console::MT_ERROR,ost.str());
       return;
