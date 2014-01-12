@@ -935,7 +935,7 @@ trend::TrendBase* trend::TrendCenter::getZRenderer()
 {
    assert(NULL == _zRenderer);
    layprop::DrawProperties* drawProp;
-   if (PROPC->tryLockDrawProp(drawProp))
+   if (PROPC->tryLockDrawProp(drawProp, layprop::prsSCR))
    {
       switch (_renderType)
       {

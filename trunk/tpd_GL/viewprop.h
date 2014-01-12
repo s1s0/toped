@@ -97,8 +97,8 @@ namespace layprop {
       void              setOasLayMap(ExpLayMap* map);
       LayerDefSet       allUnselectable();
       DBlineList        getZCross();
-      bool              lockDrawProp(DrawProperties*&, PropertyState state = DB);
-      bool              tryLockDrawProp(DrawProperties*&, PropertyState state = DB);
+      bool              lockDrawProp(DrawProperties*&, PropertyState state = prsDB);
+      bool              tryLockDrawProp(DrawProperties*&, PropertyState state = prsDB);
       void              unlockDrawProp(DrawProperties*&, bool throwexception);
 
       void              setStep(real st)                 {_step = st;}
