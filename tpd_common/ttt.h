@@ -78,6 +78,7 @@ const LayerNumber LAST_EDITABLE_LAYNUM = 0x0000ffff;
 const LayerDType  LAST_EDITABLE_LAYTYP = 0x0000ffff;
 const LayerNumber DEFAULT_LAY          = 0x0;
 const LayerDType  DEFAULT_DTYPE        = 0x0;
+const LayerDType  ZOOM_DTYPE           = 0xffffffff;
 const byte        OPENGL_FONT_UNIT     = 128;
 const byte        GRID_LIMIT           = 5;    // if grid step is less than _GRID_LIMIT pixels, grid is hidden
 const real        DEFAULT_DBU          = 1e-9;
@@ -760,6 +761,7 @@ const LayerDef    ERR_LAY_DEF(ERR_LAY    , DEFAULT_DTYPE);
 const LayerDef    DRC_LAY_DEF(DRC_LAY    , DEFAULT_DTYPE);
 const LayerDef    GRC_LAY_DEF(GRC_LAY    , DEFAULT_DTYPE);
 const LayerDef    TMP_LAY_DEF(TMP_LAY    , DEFAULT_DTYPE);
+const LayerDef    ZOM_LAY_DEF(TMP_LAY    , ZOOM_DTYPE   );
 const LayerDef    TLL_LAY_DEF(DEFAULT_LAY, DEFAULT_DTYPE);
 
 #endif

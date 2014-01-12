@@ -109,7 +109,16 @@ namespace laydata {
 namespace layprop {
 
    typedef enum {cell_mark, array_mark, text_mark} binding_marks;
-   typedef enum {DB, DRC} PropertyState;
+   typedef enum {    prsDB
+                   , prsDRC
+                   , prsSCR
+                   , prsPROPSTATES } PropertyState;
+   const std::string defaultLaySuffix[prsPROPSTATES] = {
+                     "_UNDEF"
+                   , "_DRC"
+                   , "_SCR"
+   };
+
    typedef enum { crc_VIEW       = 0, // not in edit in place mode or not in the active cell chain
                   crc_PREACTIVE  = 1, // edit in place mode, and we're in the active cell chain before the active cell
                   crc_ACTIVE     = 2, // edit in place mode, the active cell
@@ -233,7 +242,7 @@ namespace layprop {
 
    //=============================================================================
    typedef  std::map<std::string, tellRGB*      >        ColorMap;
-   typedef  std::map<std::string, byte*         >        FillMap;
+   typedef  std::map<std::string, const byte*   >        FillMap;
    typedef  std::map<std::string, LineSettings* >        LineMap;
    typedef  laydata::LayerContainer<LayerSettings*>      LaySetList;
    typedef  std::pair <LayerDef, std::list<LayerState> > LayStateList;
@@ -266,6 +275,7 @@ namespace layprop {
          CellRefChainType           preCheckCRS(const laydata::TdtCellRef*);
 //         void                       drawReferenceMarks(const TP&, const binding_marks) const;
          LayerDef                   getTenderLay(const LayerDef&) const;//!return the same if _propertyState == DB or predefined layer otherwise
+         void                       setState (PropertyState state);
          const CTM&                 scrCtm() const       {return  _scrCtm;}
          word                       visualLimit() const  {return _visualLimit;}
          const DBbox&               clipRegion() const   {return _clipRegion;}
@@ -274,8 +284,6 @@ namespace layprop {
          void                       pushCtm(const CTM& last)   {_tranStack.push(last);}
          void                       popCtm()             {_tranStack.pop();}
          const CTM&                 topCtm() const       {assert(_tranStack.size());return _tranStack.top();}
-         void                       setState (PropertyState state)
-                                                         {_propertyState = state;};
 //         LayerNumber                drawingLayer() const {return _drawingLayer;}
          bool                       textBoxHidden() const
                                                          {return _textBoxHidden;}
@@ -314,7 +322,7 @@ namespace layprop {
          bool                       addLayer(const LayerDef&);
          LayerDef                   addLayer(std::string);
          void                       addColor(std::string name, byte R, byte G, byte B, byte A);
-         void                       addFill(std::string name, byte *ptrn);
+         void                       addFill(std::string name, const byte *ptrn);
          void                       addLine(std::string, std::string, word, byte, byte);
          void                       hideLayer(const LayerDef&, bool);
          void                       lockLayer(const LayerDef&, bool lock);
@@ -369,12 +377,20 @@ namespace layprop {
          typedef std::map<std::string, LayStateList> LayStateMap;
          const LaySetList&          getCurSetList() const;
          const LayerSettings*       findLayerSettings(const LayerDef&) const;
-         LaySetList                 _laySetDb;
-         LaySetList                 _laySetDrc;
-         ColorMap                   _layColors;
-         FillMap                    _layFill;
-         LineMap                    _lineSet;
-         LayerDef                   _curlay;       // current drawing layer
+         LaySetList                 _laySetDb             ; // all layer   definitions  (DB     related properties)
+         LaySetList                 _laySetDrc            ; // all layer   definitions  (DRC    related properties)
+         LaySetList                 _laySetScr            ; // all layer   definitions  (Screen related properties)
+         ColorMap                   _layColorsDb          ; // all colour  definitions  (DB/DRC)
+         ColorMap                   _layColorsScr         ; // all colour  definitions  (Screen)
+         FillMap                    _layFillDb            ; // all fill    definitions  (DB/DRC)
+         FillMap                    _layFillScr           ; // all fill    definitions  (Screen)
+         LineMap                    _lineSetDb            ; // all line    definitions  (DB/DRC)
+         LineMap                    _lineSetScr           ; // all line    definitions  (Screen)
+         LaySetList*                _layCurSet            ; // all layer   definitions  for the current mode
+         ColorMap*                  _layCurColors         ; // all colour  definitions  for the current mode
+         FillMap*                   _layCurFill           ; // all fill    definitions  for the current mode
+         LineMap*                   _lineCurSet           ; // all line    definitions  for the current mode
+         LayerDef                   _curlay               ; // current drawing layer
          DBbox                      _clipRegion;
          CTM                        _scrCtm;
          word                       _visualLimit;   // that would be 40 pixels
@@ -394,7 +410,6 @@ namespace layprop {
          LayStateMap                _layStateMap;  //
          LayStateHistory            _layStateHistory; //! for undo purposes of layer status related TELL function
          static const tellRGB       _dfltColor;
-         static const tellRGB       _zoomColor;
          static const byte          _dfltFill[128];
          static const LineSettings  _dfltLine     ; //! Default Line
          static const LineSettings  _dfltSLine    ; //! Default Selected Line

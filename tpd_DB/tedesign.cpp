@@ -1743,7 +1743,7 @@ WordList laydata::DrcLibrary::findSelected(const std::string &cell, TP* p1)
    {
 
       layprop::DrawProperties* drawProp;
-      if (PROPC->lockDrawProp(drawProp, layprop::DRC))
+      if (PROPC->lockDrawProp(drawProp, layprop::prsDRC))
       {
          selp = (*p1)*CTM().Reversed(); //Take identity matrix
          //??? Add here Error List construction
@@ -1802,12 +1802,12 @@ laydata::TdtDefaultCell* laydata::DrcLibrary::checkCell(std::string name)
 
 void laydata::DrcLibrary::openGlRender(trend::TrendBase& renderer, std::string cell, CTM& cctm)
 {
-   renderer.setState(layprop::DRC);
+   renderer.setState(layprop::prsDRC);
    laydata::TdtDefaultCell* dst_structure = checkCell(cell);
    if (dst_structure)
    {
       dst_structure->openGlRender(renderer, cctm, false, false);
    }
-   renderer.setState(layprop::DB);
+   renderer.setState(layprop::prsDB);
 }
 

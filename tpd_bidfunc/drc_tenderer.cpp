@@ -169,7 +169,7 @@ void Calbr::drcTenderer::showAll(void)
    if(checkCellName())
    {
       layprop::DrawProperties* drawProp;
-      if (PROPC->lockDrawProp(drawProp, layprop::DRC))
+      if (PROPC->lockDrawProp(drawProp, layprop::prsDRC))
       {
          LayerDefList lays = drawProp->getAllLayers();
          for(LayerDefList::const_iterator it = lays.begin(); it != lays.end(); ++it)
@@ -195,7 +195,7 @@ void Calbr::drcTenderer::showAll(void)
 void Calbr::drcTenderer::hideAll(void)
 {
    layprop::DrawProperties* drawProp;
-   if (PROPC->lockDrawProp(drawProp, layprop::DRC))
+   if (PROPC->lockDrawProp(drawProp, layprop::prsDRC))
    {
       LayerDefList lays = drawProp->getAllLayers();
       for(LayerDefList::const_iterator it = lays.begin(); it != lays.end(); ++it)
@@ -210,7 +210,7 @@ bool Calbr::drcTenderer::showError(unsigned int numError)
    if(checkCellName())
    {
       layprop::DrawProperties* drawProp;
-      if (PROPC->lockDrawProp(drawProp, layprop::DRC))
+      if (PROPC->lockDrawProp(drawProp, layprop::prsDRC))
       {
          drawProp->hideLayer(LayerDef(numError, DEFAULT_DTYPE), false);
       }
@@ -245,7 +245,7 @@ void Calbr::drcTenderer::endWriting()
 {
    _DRCCell->fixUnsorted();
    layprop::DrawProperties* drawProp;
-   if (PROPC->lockDrawProp(drawProp, layprop::DRC))
+   if (PROPC->lockDrawProp(drawProp, layprop::prsDRC))
    {
       if (!PROPC->upLayers().empty())
       {

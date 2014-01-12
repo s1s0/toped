@@ -32,7 +32,6 @@
 #include "tuidefs.h"
 
 const layprop::tellRGB        layprop::DrawProperties::_dfltColor(127, 127, 127, 127);
-const layprop::tellRGB        layprop::DrawProperties::_zoomColor(179, 179, 179, 179);
 const layprop::LineSettings   layprop::DrawProperties::_dfltLine("", 0xffff, 1, 1);
 const layprop::LineSettings   layprop::DrawProperties::_dfltSLine   ("", 0xffff, 1, 3);
 const layprop::LineSettings   layprop::DrawProperties::_dfltCellBnd ("", 0xf18f, 1, 1);
@@ -532,6 +531,10 @@ laydata::WireContourAux::~WireContourAux()
 
 //=============================================================================
 layprop::DrawProperties::DrawProperties() :
+   _layCurSet             (&_laySetScr          ),
+   _layCurColors          (&_layColorsScr       ),
+   _layCurFill            (&_layFillScr         ),
+   _lineCurSet            (&_lineSetScr         ),
    _curlay                ( TLL_LAY_DEF         ),
    _clipRegion            ( 0,0                 ),
    _visualLimit           ( 40                  ),
@@ -547,85 +550,64 @@ layprop::DrawProperties::DrawProperties() :
    _refStack              ( NULL                ),
    _drawingLayer          ( TLL_LAY_DEF         ),
    _drawingLayerValid     ( false               ),
-   _propertyState         ( DB                  )
+   _propertyState         ( prsSCR              )
 {
 }
 
 bool layprop::DrawProperties::addLayer( const LayerDef& laydef )
 {
+   if (_layCurSet->end() != _layCurSet->find(laydef))
+      return false;
    std::ostringstream lname;
-   switch (_propertyState)
-   {
-      case DB : if (_laySetDb.end() != _laySetDb.find(laydef)) return false;
-                lname << "_UNDEF" << laydef.num() << "_" << laydef.typ();
-                _laySetDb.add(laydef, DEBUG_NEW LayerSettings(lname.str(),"","",""));
-                return true;
-      case DRC: if (_laySetDrc.end() != _laySetDrc.find(laydef)) return false;
-                lname << "_DRC" << laydef.num() << "_" << laydef.typ();
-                _laySetDrc.add(laydef, DEBUG_NEW LayerSettings(lname.str(),"","",""));
-                return true;
-      default: assert(false);break;
-   }
-   return true; // dummy statement to prevent compilation warnings
+   lname << defaultLaySuffix[_propertyState] << laydef.num() << "_" << laydef.typ();
+   _layCurSet->add(laydef, DEBUG_NEW LayerSettings(lname.str(),"","",""));
+   return true;
 }
 
 bool layprop::DrawProperties::addLayer(std::string name, const LayerDef& laydef, std::string col,
                                        std::string fill, std::string sline)
 {
-   if ((col != "") && (_layColors.end() == _layColors.find(col)))
+   if ((col != "") && (_layCurColors->end() == _layCurColors->find(col)))
    {
       std::ostringstream ost;
       ost << "Warning! Color \""<<col<<"\" is not defined";
       tell_log(console::MT_WARNING,ost.str());
    }
-   if ((fill != "") && (_layFill.end() == _layFill.find(fill)))
+   if ((fill != "") && (_layCurFill->end() == _layCurFill->find(fill)))
    {
       std::ostringstream ost;
       ost << "Warning! Fill \""<<fill<<"\" is not defined";
       tell_log(console::MT_WARNING, ost.str());
    }
-   if ((sline != "") && (_lineSet.end() == _lineSet.find(sline)))
+   if ((sline != "") && (_lineCurSet->end() == _lineCurSet->find(sline)))
    {
       std::ostringstream ost;
       ost << "Warning! Line \""<<sline<<"\" is not defined";
       tell_log(console::MT_WARNING, ost.str());
    }
+   //
+   assert(prsDRC != _propertyState);
    bool new_layer = true;
-   switch(_propertyState)
+   if (_layCurSet->end() != _layCurSet->find(laydef))
    {
-      case DB:
-         if (_laySetDb.end() != _laySetDb.find(laydef))
-         {
-            new_layer = false;
-            delete _laySetDb[laydef];
-            _laySetDb.erase(laydef);
-            std::ostringstream ost;
-            ost << "Warning! Layer "<<laydef<<" redefined";
-            tell_log(console::MT_WARNING, ost.str());
-         }
-         _laySetDb.add(laydef, DEBUG_NEW LayerSettings(name,col,fill,sline));
-         break;
-      case DRC: assert(false); break; //User can't call DRC database directly
-      default: assert(false); break;
+      new_layer = false;
+      delete (*_layCurSet)[laydef];
+      _layCurSet->erase(laydef);
+      std::ostringstream ost;
+      ost << "Warning! Layer "<<laydef<<" redefined";
+      tell_log(console::MT_WARNING, ost.str());
    }
+   _layCurSet->add(laydef, DEBUG_NEW LayerSettings(name,col,fill,sline));
+
    return new_layer;
 }
 
 bool layprop::DrawProperties::addLayer(std::string name, const LayerDef& laydef)
 {
-   switch(_propertyState)
-   {
-      case DB:
-         if (_laySetDb.end() != _laySetDb.find(laydef)) return false;
-         _laySetDb.add(laydef, DEBUG_NEW LayerSettings(name,"","",""));
-         return true;
-      case DRC:
-         if (_laySetDrc.end() != _laySetDrc.find(laydef)) return false;
-         _laySetDrc.add(laydef, DEBUG_NEW LayerSettings(name,"","",""));
-         return true;
-      default: assert(false); break;
-   }
-   return false; // dummy statement to prevent compilation warnings
+   if (_layCurSet->end() != _layCurSet->find(laydef))
+      return false;
+   _layCurSet->add(laydef, DEBUG_NEW LayerSettings(name,"","",""));
+   return true;
 }
 
 LayerDef layprop::DrawProperties::addLayer(std::string name)
@@ -640,40 +622,44 @@ LayerDef layprop::DrawProperties::addLayer(std::string name)
 }
 
 void layprop::DrawProperties::addLine(std::string name, std::string col, word pattern,
-                                       byte patscale, byte width) {
-   if ((col != "") && (_layColors.end() == _layColors.find(col))) {
+                                       byte patscale, byte width)
+{
+   if ((col != "") && (_layCurColors->end() == _layCurColors->find(col)))
+   {
       std::ostringstream ost;
       ost << "Warning! Color \""<<col<<"\" is not defined";
       tell_log(console::MT_WARNING,ost.str());
    }
-   if (_lineSet.end() != _lineSet.find(name)) {
-      delete _lineSet[name];
+   if (_lineCurSet->end() != _lineCurSet->find(name)) {
+      delete (*_lineCurSet)[name];
       std::ostringstream ost;
       ost << "Warning! Line "<< name <<" redefined";
       tell_log(console::MT_WARNING, ost.str());
    }
-   _lineSet[name] = DEBUG_NEW LineSettings(col,pattern,patscale,width);
+   (*_lineCurSet)[name] = DEBUG_NEW LineSettings(col,pattern,patscale,width);
 }
 
-void layprop::DrawProperties::addColor(std::string name, byte R, byte G, byte B, byte A) {
-   if (_layColors.end() != _layColors.find(name)) {
-      delete _layColors[name];
+void layprop::DrawProperties::addColor(std::string name, byte R, byte G, byte B, byte A)
+{
+   if (_layCurColors->end() != _layCurColors->find(name)) {
+      delete (*_layCurColors)[name];
       std::ostringstream ost;
       ost << "Warning! Color \""<<name<<"\" redefined";
       tell_log(console::MT_WARNING, ost.str());
    }
    tellRGB* col = DEBUG_NEW tellRGB(R,G,B,A);
-   _layColors[name] = col;
+   (*_layCurColors)[name] = col;
 }
 
-void layprop::DrawProperties::addFill(std::string name, byte* ptrn) {
-   if (_layFill.end() != _layFill.find(name)) {
-      delete [] _layFill[name];
+void layprop::DrawProperties::addFill(std::string name, const byte* ptrn)
+{
+   if (_layCurFill->end() != _layCurFill->find(name)) {
+      delete [] (*_layCurFill)[name];
       std::ostringstream ost;
       ost << "Warning! Fill \""<<name<<"\" redefined";
       tell_log(console::MT_WARNING, ost.str());
    }
-   _layFill[name] = ptrn;
+   (*_layCurFill)[name] = ptrn;
 }
 
 
@@ -706,8 +692,8 @@ const byte* layprop::DrawProperties::getCurrentFill() const
    {
       if(ilayset->filled())
       { // layer is filled
-         FillMap::const_iterator ifillset = _layFill.find(ilayset->fill());
-         if (_layFill.end() == ifillset)
+         FillMap::const_iterator ifillset = _layCurFill->find(ilayset->fill());
+         if (_layCurFill->end() == ifillset)
             // no stipple defined - will use default fill
             return _dfltFill;
          else
@@ -915,13 +901,25 @@ LayerDef layprop::DrawProperties::getTenderLay(const LayerDef& laydef) const
 //   if (REF_LAY == layno) return layno;//no references yet in the DRC DB
    switch (_propertyState)
    {
-      case DB: return laydef;
-      case DRC: return DRC_LAY_DEF;
+      case  prsDB: return laydef;
+      case prsDRC: return DRC_LAY_DEF;
       default: assert(false); break;
    }
    return laydef; // dummy, to prevent warnings
 }
 
+void layprop::DrawProperties::setState(PropertyState state)
+{
+   _propertyState = state;
+   switch (_propertyState)
+   {
+      case  prsDB: {_layCurSet = &_laySetDb ; _layCurColors = &_layColorsDb ; _layCurFill = &_layFillDb ; _lineCurSet = &_lineSetDb ; break;}
+      case prsDRC: {_layCurSet = &_laySetDrc; _layCurColors = &_layColorsDb ; _layCurFill = &_layFillDb ; _lineCurSet = &_lineSetDb ; break;}
+      case prsSCR: {_layCurSet = &_laySetScr; _layCurColors = &_layColorsScr; _layCurFill = &_layFillScr; _lineCurSet = &_lineSetScr; break;}
+      default: assert(false);break;
+   }
+}
+//                                                         {_propertyState = state;};
 void layprop::DrawProperties::allLayers(NameList& alllays) const
 {
    for (LaySetList::Iterator CL = getCurSetList().begin(); CL != getCurSetList().end(); CL++)
@@ -930,19 +928,19 @@ void layprop::DrawProperties::allLayers(NameList& alllays) const
 
 void layprop::DrawProperties::allColors(NameList& colist) const
 {
-   for( ColorMap::const_iterator CI = _layColors.begin(); CI != _layColors.end(); CI++)
+   for( ColorMap::const_iterator CI = _layColorsDb.begin(); CI != _layColorsDb.end(); CI++)
       colist.push_back(CI->first);
 }
 
 void layprop::DrawProperties::allFills(NameList& filist) const
 {
-   for( FillMap::const_iterator CI = _layFill.begin(); CI != _layFill.end(); CI++)
+   for( FillMap::const_iterator CI = _layCurFill->begin(); CI != _layCurFill->end(); CI++)
       filist.push_back(CI->first);
 }
 
 void layprop::DrawProperties::allLines(NameList& linelist) const
 {
-   for( LineMap::const_iterator CI = _lineSet.begin(); CI != _lineSet.end(); CI++)
+   for( LineMap::const_iterator CI = _lineCurSet->begin(); CI != _lineCurSet->end(); CI++)
       linelist.push_back(CI->first);
 }
 
@@ -950,8 +948,8 @@ const layprop::LineSettings* layprop::DrawProperties::getLine(const LayerDef& la
 {
    const LayerSettings* ilayset = findLayerSettings(laydef);
    if (NULL == ilayset) return &_dfltSLine;
-   LineMap::const_iterator line = _lineSet.find(ilayset->sline());
-   if (_lineSet.end() == line) return &_dfltSLine;
+   LineMap::const_iterator line = _lineCurSet->find(ilayset->sline());
+   if (_lineCurSet->end() == line) return &_dfltSLine;
    return line->second;
 // All the stuff above is equivalent to
 //   return _layFill[_layset[layno]->sline()];
@@ -960,8 +958,8 @@ const layprop::LineSettings* layprop::DrawProperties::getLine(const LayerDef& la
 
 const layprop::LineSettings* layprop::DrawProperties::getLine(std::string line_name) const
 {
-   LineMap::const_iterator line = _lineSet.find(line_name);
-   if (_lineSet.end() == line) return &_dfltSLine;
+   LineMap::const_iterator line = _lineCurSet->find(line_name);
+   if (_lineCurSet->end() == line) return &_dfltSLine;
    return line->second;
 // All the stuff above is equivalent to
 //   return _layFill[_layset[layno]->sline()];
@@ -972,8 +970,8 @@ const byte* layprop::DrawProperties::getFill(const LayerDef& laydef) const
 {
    const LayerSettings* ilayset = findLayerSettings(laydef);
    if (NULL == ilayset) return &_dfltFill[0];
-   FillMap::const_iterator fill_set = _layFill.find(ilayset->fill());
-   if (_layFill.end() == fill_set) return &_dfltFill[0];
+   FillMap::const_iterator fill_set = _layCurFill->find(ilayset->fill());
+   if (_layCurFill->end() == fill_set) return &_dfltFill[0];
    return fill_set->second;
 // All the stuff above is equivalent to
 //   return _layFill[_layset[layno]->fill()];
@@ -982,8 +980,8 @@ const byte* layprop::DrawProperties::getFill(const LayerDef& laydef) const
 
 const byte* layprop::DrawProperties::getFill(std::string fill_name) const
 {
-   FillMap::const_iterator fill_set = _layFill.find(fill_name);
-   if (_layFill.end() == fill_set) return &_dfltFill[0];
+   FillMap::const_iterator fill_set = _layCurFill->find(fill_name);
+   if (_layCurFill->end() == fill_set) return &_dfltFill[0];
    return fill_set->second;
 // All the stuff above is equivalent to
 //   return _layFill[fill_name];
@@ -994,8 +992,8 @@ const layprop::tellRGB& layprop::DrawProperties::getColor(const LayerDef& laydef
 {
    const LayerSettings* ilayset = findLayerSettings(laydef);
    if (NULL == ilayset) return _dfltColor;
-   ColorMap::const_iterator col_set = _layColors.find(ilayset->color());
-   if (_layColors.end() == col_set) return _dfltColor;
+   ColorMap::const_iterator col_set = _layCurColors->find(ilayset->color());
+   if (_layCurColors->end() == col_set) return _dfltColor;
    return *(col_set->second);
 // All the stuff above is equivalent to
 //   return _layColors[_layset[layno]->color()];
@@ -1004,8 +1002,8 @@ const layprop::tellRGB& layprop::DrawProperties::getColor(const LayerDef& laydef
 
 const layprop::tellRGB& layprop::DrawProperties::getColor(std::string color_name) const
 {
-   ColorMap::const_iterator col_set = _layColors.find(color_name);
-   if (_layColors.end() == col_set) return _dfltColor;
+   ColorMap::const_iterator col_set = _layCurColors->find(color_name);
+   if (_layCurColors->end() == col_set) return _dfltColor;
    return *(col_set->second);
 // All the stuff above is equivalent to
 //   return _layColors[color_name];
@@ -1016,10 +1014,10 @@ void layprop::DrawProperties::savePatterns(FILE* prop_file) const
 {
    FillMap::const_iterator CI;
    fprintf(prop_file, "void  fillSetup() {\n");
-   for( CI = _layFill.begin(); CI != _layFill.end(); CI++)
+   for( CI = _layCurFill->begin(); CI != _layCurFill->end(); CI++)
    {
       fprintf(prop_file, "   int list _%s = {\n", CI->first.c_str());
-      byte* patdef = CI->second;
+      const byte* patdef = CI->second;
       for (byte i = 0; i < 16; i++)
       {
          fprintf(prop_file, "      ");
@@ -1034,7 +1032,7 @@ void layprop::DrawProperties::savePatterns(FILE* prop_file) const
       }
       fprintf(prop_file, "   };\n\n");
    }
-   for( CI = _layFill.begin(); CI != _layFill.end(); CI++)
+   for( CI = _layCurFill->begin(); CI != _layCurFill->end(); CI++)
    {
       fprintf(prop_file, "   definefill(\"%s\", _%s );\n", CI->first.c_str(), CI->first.c_str());
    }
@@ -1045,7 +1043,7 @@ void layprop::DrawProperties::saveColors(FILE* prop_file) const
 {
    ColorMap::const_iterator CI;
    fprintf(prop_file, "void  colorSetup() {\n");
-   for( CI = _layColors.begin(); CI != _layColors.end(); CI++)
+   for( CI = _layColorsDb.begin(); CI != _layColorsDb.end(); CI++)
    {
       tellRGB* the_color = CI->second;
       fprintf(prop_file, "   definecolor(\"%s\", %3d, %3d, %3d, %3d);\n",
@@ -1082,7 +1080,7 @@ void layprop::DrawProperties::saveLines(FILE* prop_file) const
 {
    LineMap::const_iterator CI;
    fprintf(prop_file, "void  lineSetup() {\n");
-   for( CI = _lineSet.begin(); CI != _lineSet.end(); CI++)
+   for( CI = _lineCurSet->begin(); CI != _lineCurSet->end(); CI++)
    {
       LineSettings* the_line = CI->second;
       fprintf(prop_file, "   defineline(\"%s\", \"%s\", 0x%04x , %d, %d);\n",
@@ -1124,25 +1122,16 @@ void layprop::DrawProperties::saveLayState(FILE* prop_file) const
 
 const layprop::LayerSettings*  layprop::DrawProperties::findLayerSettings(const LayerDef& laydef) const
 {
-   LaySetList::Iterator ilayset;
-   switch (_propertyState)
-   {
-      case DB : ilayset = _laySetDb.find(laydef) ; if (_laySetDb.end()  == ilayset) return NULL; break;
-      case DRC: ilayset = _laySetDrc.find(laydef); if (_laySetDrc.end() == ilayset) return NULL; break;
-      default: assert(false);break;
-   }
-   return *ilayset;
+   LaySetList::Iterator ilayset = _layCurSet->find(laydef);
+   if (_laySetDb.end()  == ilayset)
+      return NULL;
+   else
+      return *ilayset;
 }
 
 const layprop::LaySetList& layprop::DrawProperties::getCurSetList() const
 {
-   switch (_propertyState)
-   {
-      case DB : return _laySetDb;
-      case DRC: return _laySetDrc;
-      default: assert(false);break;
-   }
-   return _laySetDb; // dummy, to prevent warnings
+   return *_layCurSet;
 }
 
 
@@ -1172,18 +1161,24 @@ void  layprop::DrawProperties::fillLayer(const LayerDef& laydef, bool fill)
 
 layprop::DrawProperties::~DrawProperties() {
    //clear all databases
-   setState(layprop::DRC);
-   for (LaySetList::Iterator LSI = getCurSetList().begin(); LSI != getCurSetList().end(); LSI++)
+   for (LaySetList::Iterator LSI = _laySetDb.begin(); LSI != _laySetDb.end(); LSI++)
       delete (*LSI);
-   setState(layprop::DB);
-   for (LaySetList::Iterator LSI = getCurSetList().begin(); LSI != getCurSetList().end(); LSI++)
+   for (LaySetList::Iterator LSI = _laySetDrc.begin(); LSI != _laySetDrc.end(); LSI++)
+      delete (*LSI);
+   for (LaySetList::Iterator LSI = _laySetScr.begin(); LSI != _laySetScr.end(); LSI++)
       delete (*LSI);
 
-   for (ColorMap::iterator CMI = _layColors.begin(); CMI != _layColors.end(); CMI++)
+   for (ColorMap::iterator CMI = _layColorsDb.begin(); CMI != _layColorsDb.end(); CMI++)
       delete CMI->second;
-   for (FillMap::iterator FMI = _layFill.begin(); FMI != _layFill.end(); FMI++)
+   for (ColorMap::iterator CMI = _layColorsScr.begin(); CMI != _layColorsScr.end(); CMI++)
+      delete CMI->second;
+   for (FillMap::iterator FMI = _layFillDb.begin(); FMI != _layFillDb.end(); FMI++)
       delete [] FMI->second;
-   for (LineMap::iterator LMI = _lineSet.begin(); LMI != _lineSet.end(); LMI++)
+   for (FillMap::iterator FMI = _layFillScr.begin(); FMI != _layFillScr.end(); FMI++)
+      delete [] FMI->second;
+   for (LineMap::iterator LMI = _lineSetDb.begin(); LMI != _lineSetDb.end(); LMI++)
+      delete LMI->second;
+   for (LineMap::iterator LMI = _lineSetScr.begin(); LMI != _lineSetScr.end(); LMI++)
       delete LMI->second;
 //   if (NULL != _refStack) delete _refStack; -> deleted in EditObject
 }

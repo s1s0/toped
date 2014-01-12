@@ -897,18 +897,19 @@ void DataCenter::mouseHooverDraw(TP& position)
    }
 }
 
-void DataCenter::zoomDraw(const TP& pA, const TP& pB)
+void DataCenter::zoomDraw(const TP& base, const TP& newp)
 {
    trend::TrendBase* zRenderer = TRENDC->getZRenderer();
    if (NULL != zRenderer)
    {
-      //zRenderer->setLayer();
-      //zRenderer->box();
-      //if (zRenderer->collect())
-      //{
-      //   zRenderer->draw();
-      //}
-      //zRenderer->cleanUp();
+      zRenderer->setRmm(CTM(base - newp,1,0,false));
+      zRenderer->setLayer(ZOM_LAY_DEF, false);
+      zRenderer->boxt(base);
+      if (zRenderer->collect())
+      {
+         zRenderer->draw();
+      }
+      zRenderer->cleanUp();
       TRENDC->releaseZRenderer();
    }
 }
