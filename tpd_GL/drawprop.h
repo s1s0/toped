@@ -409,6 +409,8 @@ namespace layprop {
          bool                       _drawingLayerValid;
          LayStateMap                _layStateMap;  //
          LayStateHistory            _layStateHistory; //! for undo purposes of layer status related TELL function
+         PropertyState              _propertyState; //type of drawing
+      public:
          static const tellRGB       _dfltColor;
          static const byte          _dfltFill[128];
          static const LineSettings  _dfltLine     ; //! Default Line
@@ -420,7 +422,6 @@ namespace layprop {
          static const LayMark       _ref_mark_bmp ; //!
          static const LayMark       _text_mark_bmp; //!
          static const LayMark       _aref_mark_bmp; //!
-         PropertyState              _propertyState; //type of drawing
    };
 }
 #endif //DRAWPROP_H

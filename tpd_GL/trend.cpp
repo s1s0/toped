@@ -759,6 +759,7 @@ trend::TrendCenter::TrendCenter(bool gui, RenderType cmdLineReq, bool sprtVbo, b
    _cRenderer       (              NULL),
    _hRenderer       (              NULL),
    _mRenderer       (              NULL),
+   _zRenderer       (              NULL),
    _cShaders        (              NULL),
    _activeFontName  (                  )
 
