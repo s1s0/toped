@@ -2218,7 +2218,7 @@ void laydata::TdtCell::reportSelected(real DBscale) const
       {
          std::ostringstream ost;
          if (REF_LAY_DEF != CL())
-            ost << "layer " << *CL << " : ";
+            ost << "layer {" << CL().num() << ","<< CL().typ() << "} : ";
          DP->first->info(ost, DBscale);
          tell_log(console::MT_INFO, ost.str());
       }

@@ -41,7 +41,7 @@ namespace laydata {
        only the absolute minimum of data fields here or none at all. It was
        decided not to use the standard C++ containers for the layout objects.
        The main reason for this is the clipping algorithm and as a consequence
-       the QuadTree class as a main data holder. In bref the TdtData object
+       the QuadTree class as a main data holder. In brief the TdtData object
        doesn't know neither about the layer it belongs to nor the QuadTree it
        is sorted in. */
    class TdtData  {
@@ -93,12 +93,12 @@ namespace laydata {
       //********************
       //Next set of methods is intended for extension of regular layout data object (i.e. for TdtBoxExt  etc)
       //That is TdtBox etc must assert mistake in overwritten methods.
-      virtual   void       setLong(long extLong) {assert(true);};
-      virtual   long       getLong(void) {assert(true); return 0;};
-      virtual   void       setString(const std::string &extString) {assert(true);};
-      virtual   std::string getString(void) {assert(true); return "";};
-      virtual   void       setClientData(void* clientData) {assert(true);};
-      virtual   void*      getClientData(void) {assert(true); return NULL;};
+      virtual   void       setLong(long extLong) {assert(true);}
+      virtual   long       getLong(void) {assert(true); return 0;}
+      virtual   void       setString(const std::string &extString) {assert(true);}
+      virtual   std::string getString(void) {assert(true); return "";}
+      virtual   void       setClientData(void* clientData) {assert(true);}
+      virtual   void*      getClientData(void) {assert(true); return NULL;}
       //********************
    protected:
       virtual void         selectPoints(DBbox&, SGBitSet&) = 0;

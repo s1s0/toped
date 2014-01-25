@@ -25,13 +25,14 @@ LDFLAGS="$LDFLAGS -Wl,--as-needed"
 
 # Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS()
+AC_CHECK_HEADERS
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
 AC_C_CONST
 AC_C_INLINE
 AC_TYPE_SIZE_T
+AX_CXX_COMPILE_STDCXX_11([noext], [optional])
 
 # Checks for library functions.
 AC_FUNC_ERROR_AT_LINE
@@ -82,6 +83,10 @@ WX_CONFIG_CHECK([2.8.9], [wxWin=1],,[std,gl,aui], [--unicode])
     LDFLAGS="$LDFLAGS $WX_LIBS"
  fi
 
+# check 
+  if test $HAVE_CXX11 == 1; then
+     CXXFLAGS="$CXXFLAGS -std=c++11"
+  fi
 #Check for wx gl library and for wx threads
 #
 
@@ -96,9 +101,9 @@ AC_ARG_ENABLE([debug],
               [  --enable-debug          Turn on debugging],
               [tpd_debug="yes"])
 if test "$tpd_debug" == "yes"; then
-   CXXFLAGS="-Wall -g3 -O0 -fexceptions"
+   CXXFLAGS="$CXXFLAGS -Wall -g3 -O0 -fexceptions"
 else
-   CXXFLAGS="-Wall -O2 -fexceptions"
+   CXXFLAGS="$CXXFLAGS -Wall -O2 -fexceptions"
 fi
 
 #Check memory tracking

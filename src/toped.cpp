@@ -2418,22 +2418,6 @@ void tui::TopedFrame::onParseCommand(wxCommandEvent& evt)
    _cmdline->onParseCommand(evt);
 }
 
-
-//void tui::TopedFrame::OnToolDropDown(wxAuiToolBarEvent& tbEvent)
-//{
-//   //TODO
-//   int boza = 1;
-//   boza++;
-//}
-//
-//
-//void tui::TopedFrame::OnToolBarDropDown(wxAuiToolBarEvent& tbEvent)
-//{
-//   //TODO
-//   int boza = 1;
-//   boza++;
-//}
-
 void tui::TopedFrame::USMap2wxString(ExpLayMap* inmap, wxString& outmap)
 {
    std::string soutmap;

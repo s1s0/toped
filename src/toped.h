@@ -272,9 +272,6 @@ namespace tui {
       void OnIconize             (wxIconizeEvent&);
       void onReloadTellFuncs     (wxCommandEvent& WXUNUSED(evt));
       void onParseCommand        (wxCommandEvent&);
-
-//      void OnToolDropDown        (wxAuiToolBarEvent&);
-//      void OnToolBarDropDown     (wxAuiToolBarEvent&);
       // The declaration of the associated event table
       DECLARE_EVENT_TABLE();
    };

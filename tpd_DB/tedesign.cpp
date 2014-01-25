@@ -1409,7 +1409,7 @@ laydata::AtticList* laydata::TdtDesign::changeSelect(TP* p1, const LayerDefSet& 
       TP selp = (*p1) * _target.rARTM();
       return _target.edit()->changeSelect(selp, select ? sh_selected:sh_active, unselable);
    }
-   else return NULL;
+   return NULL;
 }
 
 

@@ -92,19 +92,20 @@ enum QuadIdentificators{ qidNW = 0,
                          qidSW = 3,
                          qidNULL = 4};
 
-// The definition below is a "strongly typed enum". Very tempting to use, but too new
-// and too risky for portability. gcc requires -std=c++0x option to stop the warnings
-// It's here just as a reminder for the future
-//   enum class SH_STATUS:byte { sh_active, sh_deleted, sh_selected, sh_partsel, sh_merged, sh_preserved } ;
-typedef enum { sh_active      , //
-               sh_deleted     , //
-               sh_selected    , //
-               sh_partsel     , //
-               sh_merged      , //
-               sh_preserved   , //
-               sh_invalid     , //
-               sh_recovered     //
-             } SH_STATUS;
+#if (__cplusplus < 201103L)
+enum SH_STATUS {
+#else
+enum SH_STATUS:byte {
+#endif
+   sh_active      , //
+   sh_deleted     , //
+   sh_selected    , //
+   sh_partsel     , //
+   sh_merged      , //
+   sh_preserved   , //
+   sh_invalid     , //
+   sh_recovered     //
+};
 
 //=============================================================================
 // Some common constants (instead of #defines)

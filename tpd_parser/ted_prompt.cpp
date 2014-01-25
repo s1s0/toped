@@ -316,7 +316,7 @@ void* console::parse_thread::Entry()
       {
          // Not sure we can make something here.flex has thrown an exception
          // but it could be the file system or dynamic memory
-         //@TODO check for available dynamic memory
+         // maybe check for available dynamic memory?
       }
    #ifdef PARSER_PROFILING
          profTimer.report("Time elapsed by the last parser run: ");
@@ -389,7 +389,7 @@ void console::TllCmdLine::getCommand(bool thread)
          {
             // Not sure we can make something here.flex has thrown an exception
             // but it could be the file system or dynamic memory
-            //@TODO check for available dynamic memory
+            // maybe check for available dynamic memory
             // see the same comment @line 307
          }
          // Make sure that exit command didn't get trough
