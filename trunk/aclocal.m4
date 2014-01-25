@@ -1057,6 +1057,7 @@ AC_SUBST([am__untar])
 
 m4_include([macros/ax_check_gl.m4])
 m4_include([macros/ax_check_glu.m4])
+m4_include([macros/ax_cxx_compile_stdcxx_11.m4])
 m4_include([macros/ax_lang_compiler_ms.m4])
 m4_include([macros/ax_pthread.m4])
 m4_include([macros/libtool.m4])

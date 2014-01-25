@@ -997,7 +997,7 @@ void trend::TrendCenter::loadLayoutFont(std::string fontfile)
    TolderGlfFont* curFont = NULL;
    switch (_renderType)
    {
-      case trend::rtTocom    : assert(false);          break;// TODO?
+      case trend::rtTocom    : assert(false);          break;
       case trend::rtTolder   :
          curFont = DEBUG_NEW trend::TolderGlfFont(fontfile, _activeFontName);
          break;
