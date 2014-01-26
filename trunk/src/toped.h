@@ -84,6 +84,22 @@ namespace tui {
          DECLARE_EVENT_TABLE();
    };
    //-----------------------------------------------------------------------------
+   class CommandPanel : public wxPanel {
+   public:
+                              CommandPanel(wxWindow* parent, wxWindowID id = wxID_ANY,
+                                 const wxPoint& pos = wxDefaultPosition,
+                                 const wxSize& size = wxDefaultSize,
+                                 long style = wxTR_DEFAULT_STYLE);
+      console::ted_log*       cmdlog()       {return _cmdlog;}
+      console::TELLFuncList*  cmdbrowser()   {return _cmdbrowser;}
+      wxTextCtrl*             cmdlineW()     {return _cmdlineW;}
+   private:
+      console::ted_log*       _cmdlog;       // log window
+      console::TELLFuncList*  _cmdbrowser;
+      wxTextCtrl*             _cmdlineW;
+   };
+
+   //-----------------------------------------------------------------------------
    class TopedFrame : public wxFrame {
    public:
                               TopedFrame(const wxString& , const wxPoint& ,
@@ -105,11 +121,11 @@ namespace tui {
 
 //      wxMenuBar*              getMenuBar(void) {return GetMenuBar();}
       ResourceCenter*         resourceCenter(void) {return _resourceCenter;}
-      console::ted_log*       logwin()   const {return _cmdlog;}
+      console::ted_log*       logwin()   const {return _cmdPanel->cmdlog();}
       LayoutCanvas*           view()     const {return _canvas;}
       console::TedCmdLine*    cmdline()  const {return _cmdline;}
       browsers::browserTAB*   browsers() const {return _browsers;}
-      console::TELLFuncList*  cmdlist()  const {return _cmdbrowser;}
+      console::TELLFuncList*  cmdlist()  const {return _cmdPanel->cmdbrowser();}
       wxFrame*                getFrame()       {return this;}
       wxAuiManager*           getAuiManager()  {return &_winManager;}
       void                    setOglThread(bool val) {_canvas->setOglThread(val);}
@@ -124,8 +140,9 @@ namespace tui {
       bool                    checkFileOverwriting(const wxString& fileName);
       void                    USMap2wxString(ExpLayMap* inmap, wxString& outmap);
       void                    SIMap2wxString(ImpLayMap* inmap, wxString& outmap);
-      console::ted_log*       _cmdlog;       // log window
-      console::TELLFuncList*  _cmdbrowser;
+//      console::ted_log*       _cmdlog;       // log window
+//      console::TELLFuncList*  _cmdbrowser;
+      CommandPanel*           _cmdPanel;
       console::TedCmdLine*    _cmdline;
       bool                    _exitAproved;
       //LayoutCanvas*           _laycanvas;
@@ -278,7 +295,7 @@ namespace tui {
 }
 
 //=============================================================================
-// The top application class. All initialization and exiting code
+// The top application class. All initialisation and exiting code
 //=============================================================================
 class TopedApp : public wxApp
 {

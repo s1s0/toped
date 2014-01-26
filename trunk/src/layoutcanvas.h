@@ -154,8 +154,8 @@ namespace tui {
       DBbox*         zoomDown();
 //      void           drawInterim(const TP&);
       CTM            _layCTM;        //! Layout translation matrix
-      TP             _scrMark;        //! Current marker position in DB units
-      TP             _scrMarkOld;     //! Old marker position  in DB units
+      TP             _scrMark;       //! Current marker position in DB units
+      TP             _scrMarkOld;    //! Old marker position  in DB units
       TP             _nScrMark;      //! Normalized marker position in DB units
       TP             _nScrMarkOld;   //! Normalized Old marker position  in DB units
       TP             _lpBL;          //! bottom left corner of the current visual window

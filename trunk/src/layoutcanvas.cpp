@@ -449,7 +449,7 @@ void tui::LayoutCanvas::OnresizeGL(wxSizeEvent& event) {
    GetClientSize(&w, &h);
    _lpBL = TP(0,0)  * _layCTM;
    _lpTR = TP(w, h) * _layCTM;
-   _invalidWindow = _glRC->resizeGL(w,h);
+   _invalidWindow |= _glRC->resizeGL(w,h);
 }
 
 
@@ -948,6 +948,7 @@ void tui::LayoutCanvas::OnZoom(wxCommandEvent& evt) {
       h = MAX_INT4B;
    }
    double sc =  ((W/H < w/h) ? w/W : h/H);
+//   sc = (0 == sc) ? 1.0 : sc;
    double tx = (((double)box->p1().x() + (double)box->p2().x()) - W*sc) / 2;
    double ty = (((double)box->p1().y() + (double)box->p2().y()) - H*sc) / 2;
    _layCTM.setCTM( sc, 0.0, 0.0, sc, tx, ty);
