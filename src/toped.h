@@ -140,8 +140,6 @@ namespace tui {
       bool                    checkFileOverwriting(const wxString& fileName);
       void                    USMap2wxString(ExpLayMap* inmap, wxString& outmap);
       void                    SIMap2wxString(ImpLayMap* inmap, wxString& outmap);
-//      console::ted_log*       _cmdlog;       // log window
-//      console::TELLFuncList*  _cmdbrowser;
       CommandPanel*           _cmdPanel;
       console::TedCmdLine*    _cmdline;
       bool                    _exitAproved;
