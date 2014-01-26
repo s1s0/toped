@@ -179,7 +179,7 @@ namespace browsers
    //===========================================================================
    class TDTbrowser : public wxPanel {
       public:
-                           TDTbrowser(wxWindow* parent, wxWindowID id = -1,
+                           TDTbrowser(wxWindow* parent, wxWindowID id = wxID_ANY,
                               const wxPoint& pos = wxDefaultPosition,
                               const wxSize& size = wxDefaultSize,
                               long style = wxTR_DEFAULT_STYLE);

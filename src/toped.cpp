@@ -223,6 +223,43 @@ void tui::ExternalProcess::OnTimer(wxTimerEvent& WXUNUSED(event))
 //   wxTextOutputStream tos(*GetOutputStream());
 }
 
+
+tui::CommandPanel::CommandPanel(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size, long style) :
+      wxPanel(parent, id, pos, size, style)
+{
+   // first - get a sizer for this panel
+   wxBoxSizer *thesizer = DEBUG_NEW wxBoxSizer( wxVERTICAL );
+
+   // make a in a notebook
+   wxNotebook* logpane = DEBUG_NEW wxNotebook(this, ID_WIN_LOG_PANE,
+         wxDefaultPosition, wxDefaultSize, wxNB_RIGHT|wxNO_BORDER);
+
+   _cmdlog = DEBUG_NEW console::ted_log(logpane, ID_WIN_TXT_LOG);
+
+   _cmdbrowser = DEBUG_NEW console::TELLFuncList(logpane, ID_TELL_FUNCS);
+   wxFileName helpFile(wxGetApp().globalDir());
+//   rcFile.AppendDir(wxT("tll"));
+   helpFile.SetFullName(wxT("funchelp.txt"));
+   helpFile.Normalize();
+   assert(helpFile.IsOk());
+   console::HelpObject *helpObject = DEBUG_NEW console::HelpObject(helpFile/*wxGetApp().globalDir()+ wxT("funchelp.txt")*/);
+   _cmdbrowser->setHelpObject(helpObject);
+
+   // the log & lib windows - in the notebook
+   logpane->AddPage(_cmdlog, wxT("Log"));
+   logpane->AddPage(_cmdbrowser, wxT("Lib"));
+
+   // The command line control
+   _cmdlineW = DEBUG_NEW wxTextCtrl( this, tui::ID_CMD_LINE, wxT(""),
+                                                wxDefaultPosition,
+                                                wxSize(1000, 30),
+                                                wxTE_PROCESS_ENTER | wxNO_BORDER );
+   thesizer->Add(logpane, 1, wxEXPAND | wxBOTTOM);
+   thesizer->Add(_cmdlineW, 0, wxEXPAND|wxTOP, 3);
+   SetSizerAndFit(thesizer);
+   thesizer->SetSizeHints( this );
+}
+
 //-----------------------------------------------------------------------------
 // The TopedFrame event table (TOPED main event table)
 BEGIN_EVENT_TABLE( tui::TopedFrame, wxFrame )
@@ -712,37 +749,13 @@ void tui::TopedFrame::initToolBars()
 void tui::TopedFrame::initView()
 {
    _winManager.SetManagedWindow(this);
-   //----------------------------------------------------------------------------
+
    //the cell & layer browsers
-   //----------------------------------------------------------------------------
    _browsers = DEBUG_NEW browsers::browserTAB(this,ID_WIN_BROWSERS,
                                         wxDefaultPosition, wxDefaultSize, wxCLIP_CHILDREN);
-//   _browsers->SetSize(wxSize(180, 1000));
    _browsers->SetArtProvider(DEBUG_NEW wxAuiSimpleTabArt);
-   //----------------------------------------------------------------------------
-   //the log & lib windows
-   //----------------------------------------------------------------------------
-   wxAuiNotebook* logpane = DEBUG_NEW wxAuiNotebook(this, ID_WIN_LOG_PANE,
-         wxDefaultPosition, wxDefaultSize, wxNB_RIGHT|wxNO_BORDER);
-         //wxAUI_NB_DEFAULT_STYLE |wxNB_RIGHT| wxAUI_NB_TAB_EXTERNAL_MOVE | wxNO_BORDER);
-//   logpane->SetSize(wxSize(1000, 150));
 
-   _cmdlog = DEBUG_NEW console::ted_log(logpane, ID_WIN_TXT_LOG);
-   logpane->AddPage(_cmdlog, wxT("Log"));
-   _cmdbrowser = DEBUG_NEW console::TELLFuncList(logpane, ID_TELL_FUNCS);
-
-   wxFileName helpFile(wxGetApp().globalDir());
-//   rcFile.AppendDir(wxT("tll"));
-   helpFile.SetFullName(wxT("funchelp.txt"));
-   helpFile.Normalize();
-   assert(helpFile.IsOk());
-   console::HelpObject *helpObject = DEBUG_NEW console::HelpObject(helpFile/*wxGetApp().globalDir()+ wxT("funchelp.txt")*/);
-   _cmdbrowser->setHelpObject(helpObject);
-   logpane->AddPage(_cmdbrowser, wxT("Lib"));
-   logpane->SetArtProvider(DEBUG_NEW wxAuiSimpleTabArt);
-   //----------------------------------------------------------------------------
    // the openGL window - the canvas
-   //----------------------------------------------------------------------------
    int gl_attrib[] = {
                         WX_GL_RGBA             ,
                         WX_GL_MIN_RED          , 8,
@@ -758,26 +771,23 @@ void tui::TopedFrame::initView()
 
    _canvas = DEBUG_NEW LayoutCanvas(this, wxDefaultPosition, wxDefaultSize, gl_attrib);
 
-   //----------------------------------------------------------------------------
-   // The command line
-   //----------------------------------------------------------------------------
-   wxTextCtrl* cmdlineW = DEBUG_NEW wxTextCtrl( this, tui::ID_CMD_LINE, wxT(""),
-                                                wxDefaultPosition,
-                                                wxSize(1000, 30),
-                                                wxTE_PROCESS_ENTER | wxNO_BORDER );
-   _cmdline = DEBUG_NEW console::TedCmdLine(_canvas, cmdlineW);
+   // The command panel
+   _cmdPanel = DEBUG_NEW CommandPanel(this);
 
-// cmdlineW->SetWindowStyleFlag(wxSW_3D | wxCLIP_CHILDREN);
+   _cmdline = DEBUG_NEW console::TedCmdLine(_canvas, _cmdPanel->cmdlineW());
 
+   //now pane management
    _winManager.AddPane(_browsers, wxAuiPaneInfo()
                                  .Name(tpdPane_Browsers)
                                  .Left()
                                  .BestSize(wxSize(180,1000))
                                  .Layer(1)
-                                 .Caption(wxT("Project Info"))
+                                 .Caption(wxT("Project Info (Toped)"))
                                  .Floatable(true)
+                                 .Gripper(true)
+                                 .GripperTop(true)
+                                 .CaptionVisible(false)
                                  .CloseButton(false)
-                                 .CaptionVisible(true)
                                  .TopDockable(false)
                                  .BottomDockable(false)
                                  .LeftDockable(true)
@@ -788,29 +798,26 @@ void tui::TopedFrame::initView()
                                    .Name(tpdPane_Canvas)
                                    .CentrePane()
                                    .MaximizeButton(false)
-                                   .Floatable(true)
+                                   .Floatable(false)
                                    .CloseButton(false)
                         );
    //_winManager.AddPane(_GLstatus, wxAuiPaneInfo().Top().Floatable(false).//Fixed().
    //                               CloseButton(false).CaptionVisible(false).BestSize(wxSize(1000,30)));
-   _winManager.AddPane(logpane, wxAuiPaneInfo()
+   _winManager.AddPane(_cmdPanel, wxAuiPaneInfo()
                                .Name(tpdPane_Log)
                                .Bottom()
-                               .Row(1)
-                               .Floatable(false)
                                .BestSize(wxSize(1000, 150))
-                               .CloseButton(false)
+                               .Row(1)
+                               .Caption(wxT("Commands (Toped)"))
+                               .Floatable(true)
+                               .Gripper(true)
+                               .GripperTop(false)
                                .CaptionVisible(false)
-                      );
-
-   _winManager.AddPane(cmdlineW, wxAuiPaneInfo()
-                                .Name(tpdPane_CmdLine)
-                                .Bottom()
-                                .Row(0)
-                                .BestSize(wxSize(1000,30))
-                                .Floatable(false)
-                                .CloseButton(false)
-                                .CaptionVisible(false)
+                               .CloseButton(false)
+                               .TopDockable(true)
+                               .BottomDockable(true)
+                               .LeftDockable(false)
+                               .RightDockable(false)
                       );
    Show();
    _winManager.Update();
@@ -2236,7 +2243,10 @@ void tui::TopedFrame::OnZoomAll(wxCommandEvent& WXUNUSED(event)) {
    DATC->unlockTDT(dbLibDir, false);
 }
 
-void tui::TopedFrame::OnUndo(wxCommandEvent& WXUNUSED(event)) {Console->parseCommand(wxT("undo();"));}
+void tui::TopedFrame::OnUndo(wxCommandEvent& WXUNUSED(event))
+{
+   Console->parseCommand(wxT("undo();"));
+}
 
 void tui::TopedFrame::OnZoomIn(wxCommandEvent& WXUNUSED(event)) {
    wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
@@ -2342,6 +2352,10 @@ void tui::TopedFrame::OnAuiManagerRestore(wxCommandEvent& evt)
 {
    wxString wxsAuiMagicString(evt.GetString());
    _winManager.LoadPerspective(wxsAuiMagicString, true);
+   wxCommandEvent eventREFRESH(wxEVT_CANVAS_ZOOM);
+   eventREFRESH.SetInt(ZOOM_REFRESH);
+   wxPostEvent(_canvas, eventREFRESH);
+//   Refresh(true); //-> doesn't make any difference!
 }
 
 void   tui::TopedFrame::OnDRCResults(wxCommandEvent& WXUNUSED(evt))
