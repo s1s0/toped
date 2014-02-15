@@ -314,9 +314,9 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos, const wxSi
       return;
    }
 #endif
-   _blinkTimer.SetOwner(this);
 #endif
-   _crossCur = MakeCursor(crosscursor,16, 16);
+   _blinkTimer.SetOwner(this);
+   _crossCur = MakeCursor(crosscursor, 16, 16);
    SetCursor(*_crossCur);
    // Running the openGL drawing in a separate thread - _oglThread
    // This appears to be a bad idea especially on some platforms.
@@ -1116,7 +1116,7 @@ void tui::LayoutCanvas::OnCMRotate(wxCommandEvent&)
 
 void tui::LayoutCanvas::OnTimer(wxTimerEvent& WXUNUSED(event))
 {
-   wxPaintDC dc(this);
+   wxClientDC dc(this);
    if (_blinkOn)
    {
       glAccum(GL_RETURN, 1.0);
@@ -1130,6 +1130,9 @@ void tui::LayoutCanvas::OnTimer(wxTimerEvent& WXUNUSED(event))
    }
    else
    {
+#ifdef _WIN32
+      glAccum(GL_RETURN, 1.0);
+#endif
       DATC->grcDraw();
 //      trend::TrendBase* cRenderer = TRENDC->getCRenderer();
 //      if (NULL != cRenderer)

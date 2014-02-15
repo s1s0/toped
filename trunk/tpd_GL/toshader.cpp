@@ -388,7 +388,7 @@ void trend::ToshaderMarks::setStipple(const byte* markStipple)
 {
    // the matrix above must be converted to something suitable by the shader
    // the size of the array below should be 32 of course. The AMD platform however
-   // behaves in a weird way, so the simplest workaround is to to expand the
+   // behaves in a weird way, so the simplest workaround is to expand the
    // array with one and to bind the first one to 0. The bug was reported here:
    // http://devgurus.amd.com/thread/160053
    // Note that the fragment shader is updated accordingly.
@@ -637,7 +637,18 @@ void trend::Toshader::draw()
 
 void trend::Toshader::grcDraw()
 {
-   //TODO
+   _drawprop->initCtmStack();
+   TRENDC->setGlslProg(glslp_VF);
+   _drawprop->resetCurrentColor();
+   for (DataLay::Iterator CLAY = _grcData.begin(); CLAY != _grcData.end(); CLAY++)
+   {// for every layer
+      setLayColor(CLAY());
+      setLine(false);
+      setStipple();
+      // draw everything
+      if (0 != CLAY->total_points())
+         CLAY->draw(_drawprop);
+   }
 }
 
 void trend::Toshader::rlrDraw()
