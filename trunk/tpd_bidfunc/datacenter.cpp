@@ -774,7 +774,7 @@ void DataCenter::render()
 {
    if (_TEDLIB())
    {
-      trend::TrendBase* cRenderer = TRENDC->getCRenderer();
+      trend::TrendBase* cRenderer = TRENDC->makeCRenderer();
       if (NULL != cRenderer)
       {
          // grid
@@ -813,11 +813,7 @@ void DataCenter::render()
                RENTIMER_REPORT("    Total elapsed rendering time: ");
             }
             cRenderer->cleanUp();
-            if (cRenderer->grcCollect())
-            {
-               cRenderer->grcDraw();
-               cRenderer->grcCleanUp();
-            }
+            cRenderer->grcCollect();
             VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
             TpdPost::render_status(false);
          }
@@ -835,7 +831,6 @@ void DataCenter::render()
             cRenderer->rlrDraw();
             cRenderer->rlrCleanUp();
          }
-
          TRENDC->releaseCRenderer();
       }
    }
@@ -845,7 +840,7 @@ void DataCenter::render()
 void DataCenter::motionDraw(const CTM& layCTM, TP base, TP newp, bool rubber, const DBlineList repers)
 {
    console::ACTIVE_OP currentOp;
-   trend::TrendBase* mRenderer = TRENDC->getMRenderer(currentOp);
+   trend::TrendBase* mRenderer = TRENDC->makeMRenderer(currentOp);
    if (NULL != mRenderer)
    {
       layprop::RulerList rulers;
@@ -870,7 +865,7 @@ void DataCenter::motionDraw(const CTM& layCTM, TP base, TP newp, bool rubber, co
          }
       }
       mRenderer->cleanUp();
-      TRENDC->releaseMRenderer();
+      TRENDC->destroyMRenderer();
    }
 }
 
@@ -879,7 +874,7 @@ void DataCenter::mouseHooverDraw(TP& position)
    if (_TEDLIB())
    {
       LayerDefSet unselectable = PROPC->allUnselectable();
-      trend::TrendBase* cRenderer = TRENDC->getHRenderer();
+      trend::TrendBase* cRenderer = TRENDC->makeHRenderer();
       if (NULL != cRenderer)
       {
          if (wxMUTEX_NO_ERROR == _DBLock.TryLock())
@@ -892,14 +887,14 @@ void DataCenter::mouseHooverDraw(TP& position)
             VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
          }
          cRenderer->cleanUp();
-         TRENDC->releaseHRenderer();
+         TRENDC->destroyHRenderer();
       }
    }
 }
 
 void DataCenter::zoomDraw(const TP& base, const TP& newp)
 {
-   trend::TrendBase* zRenderer = TRENDC->getZRenderer();
+   trend::TrendBase* zRenderer = TRENDC->makeZRenderer();
    if (NULL != zRenderer)
    {
       zRenderer->setRmm(CTM(base - newp,1,0,false));
@@ -910,7 +905,17 @@ void DataCenter::zoomDraw(const TP& base, const TP& newp)
          zRenderer->draw();
       }
       zRenderer->cleanUp();
-      TRENDC->releaseZRenderer();
+      TRENDC->destroyZRenderer();
+   }
+}
+
+void DataCenter::grcDraw()
+{
+   trend::TrendBase* cRenderer = TRENDC->getCRenderer();
+   if (NULL != cRenderer)
+   {
+      cRenderer->grcDraw();
+      TRENDC->releaseCRenderer();
    }
 }
 

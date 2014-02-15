@@ -646,6 +646,7 @@ void trend::TrendBase::grcCleanUp()
    {
       delete (*CLAY);
    }
+   _grcData.clear();
 }
 
 void trend::TrendBase::grdCleanUp()
@@ -693,9 +694,11 @@ void trend::TrendBase::genRulerMarks(const CTM& LayCTM, DBline& long_mark, DBlin
 
 trend::TrendBase::~TrendBase()
 {
+   grcCleanUp();
    if (_refLayer) delete _refLayer;
    if (_marks)    delete _marks;
    if (_rmm)      delete _rmm;
+
 }
 
 trend::TrendGridC::TrendGridC(TP bl, TP tr, int step, std::string color) :

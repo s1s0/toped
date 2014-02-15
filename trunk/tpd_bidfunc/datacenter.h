@@ -77,6 +77,7 @@ public:
    void                       render();
    void                       mouseHooverDraw(TP&);
    void                       zoomDraw(const TP&,const TP&);
+   void                       grcDraw();
    void                       setRecoverPoly(bool);
    void                       setRecoverWire(bool);
    void                       setCmdLayer(const LayerDef& laydef) {_curcmdlay = laydef;}

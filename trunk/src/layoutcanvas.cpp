@@ -44,7 +44,7 @@
 
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
-extern trend::TrendCenter*       TRENDC;
+//extern trend::TrendCenter*       TRENDC;
 extern console::TllCmdLine*      Console;
 extern const wxEventType         wxEVT_CANVAS_STATUS;
 extern const wxEventType         wxEVT_CANVAS_CURSOR;
@@ -486,7 +486,7 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event)
          glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
          glClear(GL_ACCUM_BUFFER_BIT);
          DATC->render();
-         if (0 == _blinkInterval) TRENDC->drawFOnly();
+         if (0 == _blinkInterval) DATC->grcDraw();
          glAccum(GL_LOAD, 1.0);
          _invalidWindow = false;
          rubberPaint();
@@ -1130,7 +1130,14 @@ void tui::LayoutCanvas::OnTimer(wxTimerEvent& WXUNUSED(event))
    }
    else
    {
-      TRENDC->drawFOnly();
+      DATC->grcDraw();
+//      trend::TrendBase* cRenderer = TRENDC->getCRenderer();
+//      if (NULL != cRenderer)
+//      {
+//         cRenderer->grcDraw()
+////         TRENDC->drawFOnly();
+//         TRENDC->releaseCRenderer();
+//      }
    }
    SwapBuffers();
    _blinkOn = !_blinkOn;
