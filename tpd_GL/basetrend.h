@@ -718,6 +718,9 @@ namespace trend {
          void              clearDrawRefStack()           {       _drawprop->clearDrawRefStack()    ;}
          bool              adjustTextOrientation() const {return _drawprop->adjustTextOrientation();}
          layprop::DrawProperties*&   drawprop()          {return _drawprop                         ;}
+         void              setDrawProp(layprop::DrawProperties* drawprop)
+                                                         {       _drawprop = drawprop              ;}
+         bool              grcDataEmpty()                {return _grcData.empty()                  ;}
       protected:
          virtual void      setLayColor(const LayerDef& layer) = 0;
          virtual void      setStipple() = 0;

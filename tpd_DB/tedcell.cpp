@@ -496,7 +496,7 @@ void laydata::TdtCell::openGlRender(trend::TrendBase& rend, const CTM& trans,
       // The exceptions here are:
       // - the cell references of course
       // - the DRC DB - because it is using a single layer besides it doesn't
-      //   utilize the reference mechanism at all.
+      //   utilise the reference mechanism at all.
       switch (curLayDef.num())
       {
          case GRC_LAY:

@@ -203,15 +203,17 @@ namespace trend {
 //         RenderType             renderType() const {return _renderType;}
          void                   reportRenderer(RenderType) const;
          void                   initShaders(const std::string&);
-         trend::TrendBase*      getCRenderer();//!Get current renderer
-         trend::TrendBase*      getHRenderer();//!Get hoover renderer
-         trend::TrendBase*      getMRenderer(console::ACTIVE_OP&);//!get motion renderer
-         trend::TrendBase*      getZRenderer();//!Get zoom renderer
+         trend::TrendBase*      makeCRenderer();                     //!Get current renderer
+         trend::TrendBase*      getCRenderer();
          void                   releaseCRenderer();
-         void                   releaseHRenderer();
-         void                   releaseMRenderer();
-         void                   releaseZRenderer();
-         void                   drawFOnly();
+         trend::TrendBase*      makeHRenderer();                     //!Get hover renderer
+         void                   destroyHRenderer();
+         trend::TrendBase*      makeMRenderer(console::ACTIVE_OP&);  //!get motion renderer
+         void                   destroyMRenderer();
+         trend::TrendBase*      makeZRenderer();                     //!Get zoom renderer
+         void                   destroyZRenderer();
+//         void                   destroyCRenderer();
+//         void                   drawFOnly();
          //Font handling
          void                   loadLayoutFont(std::string);
          void                   getStringBounds(const std::string&, DBbox*);
@@ -230,8 +232,8 @@ namespace trend {
          trend::TrendBase*      _cRenderer;    //! current renderer
          trend::TrendBase*      _hRenderer;    //! hoover renderer
          trend::TrendBase*      _mRenderer;    //! motion renderer
-       trend::TrendBase*      _zRenderer;    //! zoom   renderer
-       trend::Shaders*        _cShaders;     //! the shader init object (valid in rtToshader case only)
+         trend::TrendBase*      _zRenderer;    //! zoom   renderer
+         trend::Shaders*        _cShaders;     //! the shader init object (valid in rtToshader case only)
          OglFontCollectionMap   _oglFont;
          std::string            _activeFontName;
          RenderType             _renderType;

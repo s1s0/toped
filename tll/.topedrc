@@ -351,10 +351,47 @@ void screenSetup() {
    shapeangle(45);
 }
 
+void layerSetup() {
+//    colorSetup();
+//    fillSetup();
+//    lmap list cifmap;
+//    lmap list gdsmap;
+//           name         layer    Color          Fill               Selected          CIF conversion map            GDS conversion map
+   layprop("NWELL"      ,{ 1, 0} ,"yellow"      ,"Dots1"          , "selected3" );
+   layprop("LAYER0"     ,{ 0, 0} ,"past_cyan"   ,"FatDots2"       , "selected3" );
+   layprop("ACTIVE"     ,{ 2, 0} ,"blue"        ,"diagStripeBack" , "selected3" );
+   layprop("UNKWN_1"    ,{ 3, 0} ,"darkGray"    ,""               , "selected3" );
+   layprop("POLY"       ,{ 4, 0} ,"red"         ,"checkerboards"  , "selected2" );
+   layprop("N_IMPL"     ,{ 5, 0} ,"white"       ,""               , "selected3" );
+   layprop("P_IMPL"     ,{ 6, 0} ,"magenta"     ,""               , "selected3" );
+   layprop("CONTACT"    ,{ 7, 0} ,"white"       ,"diagStripeForw" , "selected3" );
+   layprop("METAL1"     ,{ 8, 0} ,"green"       ,"checkerboard"   , "selected3" );
+   layprop("PASS"       ,{ 9, 0} ,"darkGray"    ,""               , "selected3" );
+   layprop("UNKWN_2"    ,{10, 0} ,"white"       ,""               , "selected3" );
+   layprop("UNKWN_3"    ,{11, 0} ,"white"       ,""               , "selected3" );
+   layprop("UNKWN_3"    ,{12, 0} ,"white"       ,""               , "selected3" );
+   layprop("P_FIELD"    ,{13, 0} ,"white"       ,""               , "selected3" );
+   layprop("POLY1"      ,{14, 0} ,"cyan"        ,"Cross1"         , "selected3" );
+   layprop("FUSE"       ,{15, 0} ,"white"       ,""               , "selected3" );
+   layprop("VIA12"      ,{17, 0} ,"lightGray"   ,""               , "selected3" );
+   layprop("METAL2"     ,{18, 0} ,"darkMagenta" ,""               , "selected3" );
+   layprop("TEXT"       ,{60, 0} ,"darkGray"    ,""               , "selected1" );
+   layprop("TEXT"       ,{62, 0} ,"yellow"      ,"horiHash"       , "selected2" );
+   layprop("SCRIBE_LANE",{63, 0} ,"white"       ,""               , "selected3" );
+
+//    setciflaymap(cifmap);
+//    setgdslaymap(gdsmap);
+}
+
 colorSetup();
 fillSetup();
 lineSetup();
 screenSetup();
+layerSetup();
+
+setparams({"GRC_BLINK_PERIOD", "5"});
+gdsimport(gdsread("$HOME/test_toped/library/gds/known/sw134a.sf"), getgdslaymap(true), true, false );gdsclose();
+opencell("TRIM_R2");
 
 // toolbar test remainders
 //toolbardeleteitem("s1s0","boza");

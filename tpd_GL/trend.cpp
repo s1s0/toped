@@ -856,13 +856,18 @@ void trend::TrendCenter::initShaders(const std::string& codeDirectory)
    }
 }
 
-trend::TrendBase* trend::TrendCenter::getCRenderer()
+trend::TrendBase* trend::TrendCenter::makeCRenderer()
 {
+   if (NULL != _cRenderer)
+   {
+      _cRenderer->grcCleanUp();
+      delete (_cRenderer);
+      _cRenderer = NULL;
+   }
    // Don't block the drawing if the databases are
    // locked. This will block all redraw activities including UI
    // which have nothing to do with the DB. Drop a message in the log
    // and keep going!
-   assert(NULL == _cRenderer);
    layprop::DrawProperties* drawProp;
    if (PROPC->tryLockDrawProp(drawProp))
    {
@@ -889,7 +894,26 @@ trend::TrendBase* trend::TrendCenter::getCRenderer()
    return _cRenderer;
 }
 
-trend::TrendBase* trend::TrendCenter::getHRenderer()
+trend::TrendBase* trend::TrendCenter::getCRenderer()
+{
+   if (NULL != _cRenderer)
+   {
+      layprop::DrawProperties* drawProp;
+      if (PROPC->tryLockDrawProp(drawProp))
+      {
+         _cRenderer->setDrawProp(drawProp);
+         return _cRenderer;
+      }
+      else
+      {
+//         tell_log(console::MT_INFO,std::string("Property DB busy. Viewport redraw skipped"));
+         return NULL;
+      }
+   }
+   return NULL;
+}
+
+trend::TrendBase* trend::TrendCenter::makeHRenderer()
 {
    assert(NULL == _hRenderer);
    layprop::DrawProperties* drawProp;
@@ -910,7 +934,7 @@ trend::TrendBase* trend::TrendCenter::getHRenderer()
    return _hRenderer;
 }
 
-trend::TrendBase* trend::TrendCenter::getMRenderer(console::ACTIVE_OP& curOp)
+trend::TrendBase* trend::TrendCenter::makeMRenderer(console::ACTIVE_OP& curOp)
 {
    assert(NULL == _mRenderer);
    layprop::DrawProperties* drawProp;
@@ -932,7 +956,7 @@ trend::TrendBase* trend::TrendCenter::getMRenderer(console::ACTIVE_OP& curOp)
    return _mRenderer;
 }
 
-trend::TrendBase* trend::TrendCenter::getZRenderer()
+trend::TrendBase* trend::TrendCenter::makeZRenderer()
 {
    assert(NULL == _zRenderer);
    layprop::DrawProperties* drawProp;
@@ -957,11 +981,14 @@ void trend::TrendCenter::releaseCRenderer()
 {
    assert(NULL != _cRenderer);
    PROPC->unlockDrawProp(_cRenderer->drawprop(), false);
-   delete (_cRenderer);
-   _cRenderer = NULL;
+   if (_cRenderer->grcDataEmpty())
+   {
+      delete (_cRenderer);
+      _cRenderer = NULL;
+   }
 }
 
-void trend::TrendCenter::releaseHRenderer()
+void trend::TrendCenter::destroyHRenderer()
 {
    assert(NULL != _hRenderer);
    PROPC->unlockDrawProp(_hRenderer->drawprop(), false);
@@ -969,7 +996,7 @@ void trend::TrendCenter::releaseHRenderer()
    _hRenderer = NULL;
 }
 
-void trend::TrendCenter::releaseMRenderer()
+void trend::TrendCenter::destroyMRenderer()
 {
    assert(NULL != _mRenderer);
    PROPC->unlockDrawProp(_mRenderer->drawprop(), false);
@@ -977,19 +1004,13 @@ void trend::TrendCenter::releaseMRenderer()
    _mRenderer = NULL;
 }
 
-void trend::TrendCenter::releaseZRenderer()
+void trend::TrendCenter::destroyZRenderer()
 {
    assert(NULL != _zRenderer);
    PROPC->unlockDrawProp(_zRenderer->drawprop(), false);
    delete (_zRenderer);
    _zRenderer = NULL;
 }
-
-void trend::TrendCenter::drawFOnly()
-{
-//   if (NULL != _cRenderer) _cRenderer->grcDraw(); // TODO
-}
-
 
 void trend::TrendCenter::loadLayoutFont(std::string fontfile)
 {
