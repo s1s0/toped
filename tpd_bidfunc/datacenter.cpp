@@ -812,7 +812,6 @@ void DataCenter::render()
                cRenderer->draw();
                RENTIMER_REPORT("    Total elapsed rendering time: ");
             }
-            cRenderer->cleanUp();
             cRenderer->grcCollect();
             VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
             TpdPost::render_status(false);

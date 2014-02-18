@@ -860,7 +860,6 @@ trend::TrendBase* trend::TrendCenter::makeCRenderer()
 {
    if (NULL != _cRenderer)
    {
-      _cRenderer->grcCleanUp();
       delete (_cRenderer);
       _cRenderer = NULL;
    }

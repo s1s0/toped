@@ -633,8 +633,19 @@ void trend::TrendBase::cleanUp()
       delete (*CLAY);
    }
    _data.clear();
-   assert(1 == _cellStack.size());
-   delete (_cellStack.top()); _cellStack.pop();
+   if (1 == _cellStack.size())
+   {
+      delete (_cellStack.top()); _cellStack.pop();
+   }
+//   else
+//   {
+//      static int bozaInt;
+//      std::stringstream boza;
+//      boza << "Empty Stack " << bozaInt++ ;
+//      tell_log(console::MT_WARNING, boza.str());
+//   }
+//   assert(1 == _cellStack.size());
+//   delete (_cellStack.top()); _cellStack.pop();
    for (RefBoxList::const_iterator CSH = _hiddenRefBoxes.begin(); CSH != _hiddenRefBoxes.end(); CSH++)
       delete (*CSH);
    _activeCS = NULL;
@@ -694,7 +705,6 @@ void trend::TrendBase::genRulerMarks(const CTM& LayCTM, DBline& long_mark, DBlin
 
 trend::TrendBase::~TrendBase()
 {
-   grcCleanUp();
    if (_refLayer) delete _refLayer;
    if (_marks)    delete _marks;
    if (_rmm)      delete _rmm;
