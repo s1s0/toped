@@ -1123,10 +1123,6 @@ void tui::LayoutCanvas::OnTimer(wxTimerEvent& WXUNUSED(event))
       if       (_tmpWnd)              wndPaint();
       rubberPaint();
       if (!_rubberBand && PROPC->boldOnHover()) boldOnHover();
-//
-//      else if  (_rubberBand)          rubberPaint();
-//      else if  (PROPC->boldOnHover()) boldOnHover();
-//      if (_reperX || _reperY)         longCursor();
    }
    else
    {
@@ -1134,13 +1130,6 @@ void tui::LayoutCanvas::OnTimer(wxTimerEvent& WXUNUSED(event))
       glAccum(GL_RETURN, 1.0);
 #endif
       DATC->grcDraw();
-//      trend::TrendBase* cRenderer = TRENDC->getCRenderer();
-//      if (NULL != cRenderer)
-//      {
-//         cRenderer->grcDraw()
-////         TRENDC->drawFOnly();
-//         TRENDC->releaseCRenderer();
-//      }
    }
    SwapBuffers();
    _blinkOn = !_blinkOn;
