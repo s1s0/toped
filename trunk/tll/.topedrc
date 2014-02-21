@@ -389,9 +389,6 @@ lineSetup();
 screenSetup();
 layerSetup();
 
-setparams({"GRC_BLINK_PERIOD", "5"});
-gdsimport(gdsread("$HOME/test_toped/library/gds/known/sw134a.sf"), getgdslaymap(true), true, false );gdsclose();
-opencell("TRIM_R2");
 
 // toolbar test remainders
 //toolbardeleteitem("s1s0","boza");
