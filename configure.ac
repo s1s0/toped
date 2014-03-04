@@ -71,10 +71,10 @@ AC_CHECK_LIB(z, gzsetparams,
 
 #Check wxWidgets
 WX_CONFIG_OPTIONS
-WX_CONFIG_CHECK([2.8.9], [wxWin=1],,[std,gl,aui], [--unicode])
+WX_CONFIG_CHECK([3.0.0], [wxWin=1],,[std,gl,aui], [--unicode])
  if test "$wxWin" != 1 || test "$wx_ver_ok" != "yes"; then
     AC_MSG_ERROR([
-       wxWindows ver.2.8.9 or later must be installed on your system
+       wxWindows ver.3.0.0 or later must be installed on your system
        Please install or update your wxWindows
     ])
  else
