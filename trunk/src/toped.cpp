@@ -238,7 +238,7 @@ tui::CommandPanel::CommandPanel(wxWindow* parent, wxWindowID id, const wxPoint& 
 
    _cmdbrowser = DEBUG_NEW console::TELLFuncList(logpane, ID_TELL_FUNCS);
    wxFileName helpFile(wxGetApp().globalDir());
-//   rcFile.AppendDir(wxT("tll"));
+   helpFile.AppendDir(wxT("ui"));
    helpFile.SetFullName(wxT("funchelp.txt"));
    helpFile.Normalize();
    assert(helpFile.IsOk());
