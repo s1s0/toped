@@ -703,8 +703,10 @@ void   Calbr::CalbrFile::showError(const std::string& cell, const std::string& e
 }
 
 
-void   Calbr::CalbrFile::showCluster(const std::string & cell, const std::string & error)
+bool   Calbr::CalbrFile::showCluster(const std::string & cell, const std::string & error)
 {
+   if (_cellDRCMap.end() == _cellDRCMap.find(cell))
+      return false;
    Calbr::cellNameStruct* cellStruct =_cellDRCMap[cell];
    RuleChecksVector* ruleChecks = &(cellStruct->_RuleChecks);
 
@@ -712,7 +714,7 @@ void   Calbr::CalbrFile::showCluster(const std::string & cell, const std::string
    RuleChecksVector::const_iterator it;
    for(it = ruleChecks->begin(); it!= ruleChecks->end(); ++it)
    {
-      std::string x = (*it)->ruleCheckName();
+//      std::string x = (*it)->ruleCheckName();
       if((*it)->ruleCheckName() == error)
       {
          _render->hideAll();
@@ -724,13 +726,14 @@ void   Calbr::CalbrFile::showCluster(const std::string & cell, const std::string
             }
             catch (EXPTNdrc_reader&)
             {
-               return;
+               return false;
             }
             _render->zoom(zoom);
          }
       }
    }
    assert(it == ruleChecks->end());
+   return true;
 }
 
 void   Calbr::CalbrFile::showAllErrors(void)
