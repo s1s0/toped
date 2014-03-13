@@ -2358,7 +2358,7 @@ void  browsers::DRCBrowser::addRuleCheck( const wxTreeItemId &rootId,  Calbr::dr
    for(std::vector <Calbr::drcPolygon>::const_iterator it = polys->begin(); it != polys->end(); ++it)
    {
       wxString str;
-      str.Printf(wxT("%d"), (*it).ordinal());
+      str << it->ordinal();
       _errorBrowser->AppendItem(id, str, -1, -1, DEBUG_NEW DRCItemData(ITEM_ERR_NUM));
    }
 
@@ -2368,7 +2368,7 @@ void  browsers::DRCBrowser::addRuleCheck( const wxTreeItemId &rootId,  Calbr::dr
    for(std::vector <Calbr::drcEdge>::const_iterator it = edges->begin(); it != edges->end(); ++it)
    {
       wxString str;
-      str.Printf(wxT("%d"), (*it).ordinal());
+      str << it->ordinal();
       _errorBrowser->AppendItem(id, str, -1, -1, DEBUG_NEW DRCItemData(ITEM_ERR_NUM));
    }
 }

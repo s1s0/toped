@@ -1853,7 +1853,10 @@ int tellstdfunc::DRCshowcluster::execute()
       activeCell = design->activeCellName();
    DATC->unlockTDT(libDir);
 
-   DRCData->showCluster(activeCell, errorName);
+   if (!DRCData->showCluster(activeCell, errorName))
+   {
+      tell_log(console::MT_ERROR,"Can't show the errors");
+   }
    return EXEC_NEXT;
 }
 
