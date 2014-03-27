@@ -249,7 +249,7 @@ class TpdPost {
       static void addGDStab(bool);
       static void addCIFtab(bool);
       static void addOAStab(bool);
-      static void addDRCtab();
+      static void addDRCtab(bool);
       static void addTextToCmd(const std::string& text);
       static void clearGDStab();
       static void clearCIFtab();
@@ -344,6 +344,12 @@ class EXPTNactive_OASIS : public EXPTN
 {
    public:
       EXPTNactive_OASIS();
+};
+
+class EXPTNactive_DRC : public EXPTN
+{
+   public:
+      EXPTNactive_DRC();
 };
 
 class EXPTNreadGDS : public EXPTN

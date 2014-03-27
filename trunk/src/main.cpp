@@ -67,7 +67,6 @@ extern parsercmd::cmdBLOCK*      CMDBlock;
 extern parsercmd::TellPreProc*   tellPP;
 extern console::toped_logfile    LogFile;
 extern console::TllCmdLine*      Console;
-extern Calbr::CalbrFile*         DRCData;
 extern const wxEventType         wxEVT_RENDER_PARAMS;
 
 
@@ -241,7 +240,6 @@ void TopedApp::reloadInternalFunctions()
 //=============================================================================
 int TopedApp::OnExit()
 {
-   if (DRCData) delete DRCData;
    delete CMDBlock;
    delete PROPC;
    delete TRENDC;

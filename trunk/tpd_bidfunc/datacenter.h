@@ -28,6 +28,7 @@
 #ifndef DATA_HANDLER_INCLUDED
 #define DATA_HANDLER_INCLUDED
 #include "tedesign.h"
+#include "calbr_reader.h"
 
 typedef enum {
    //                        mutex     Lib   DB  cell
@@ -42,31 +43,37 @@ class DataCenter {
 public:
                               DataCenter(const std::string&, const std::string &);
                              ~DataCenter();
+
    bool                       GDSparse(std::string);
-   bool                       CIFparse(std::string filename);
+   bool                       CIFparse(std::string);
    bool                       OASParse(std::string);
+   bool                       DRCparse(std::string);
    void                       GDSclose();
    void                       CIFclose();
    void                       OASclose();
    bool                       cifGetLayers(NameList&);
    bool                       gdsGetLayers(ExtLayers&);
    bool                       oasGetLayers(ExtLayers&);
+
    bool                       lockTDT(laydata::TdtLibDir*&, TdtMutexState);
-   laydata::DrcLibrary*       lockDRC(void);
    bool                       lockGds(ForeignDbFile*&);
    bool                       lockCif(ForeignDbFile*&);
    bool                       lockOas(ForeignDbFile*&);
-   void                       deleteDRC(void);
+   bool                       lockDRC(Calbr::DrcLibrary*&);
    void                       unlockTDT(laydata::TdtLibDir*, bool throwexception = false);
-   void                       unlockDRC();
    void                       unlockGds(ForeignDbFile*&, bool throwexception = false);
    void                       unlockCif(ForeignDbFile*&, bool throwexception = false);
    void                       unlockOas(ForeignDbFile*& oasis_db, bool throwexception = false);
-   bool                       checkActiveCell();
+   void                       unlockDRC(Calbr::DrcLibrary*, bool throwexception = false);
+
    void                       bpRefreshTdtTab(bool, bool);
    void                       bpAddGdsTab(bool);
    void                       bpAddCifTab(bool);
    void                       bpAddOasTab(bool);
+   void                       bpAddDrcTab(bool);
+
+   bool                       checkActiveCell();
+
    void                       mouseStart(int input_type, std::string, const CTM, int4b, int4b, word, word);
    void                       mousePointCancel(TP&);
    void                       mousePoint(TP p);
@@ -99,7 +106,7 @@ private:
    std::string                _localDir;
    std::string                _globalDir;
    laydata::TdtLibDir         _TEDLIB;       //! catalogue of available TDT libraries
-   laydata::DrcLibrary*       _DRCDB;        //! DRC data
+   Calbr::DrcLibrary*         _DRCDB;        //! DRC data
    ForeignDbFile*             _GDSDB;        //! GDS parsed data
    ForeignDbFile*             _CIFDB;        //! CIF parsed data
    ForeignDbFile*             _OASDB;        //! OASIS parsed data

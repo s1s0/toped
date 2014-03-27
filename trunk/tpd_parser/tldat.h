@@ -45,7 +45,7 @@ namespace laydata {
 }
 
 namespace auxdata {
-   class TdtAuxData;
+   class GrcData;
 }
 //=============================================================================
 // TELL types
@@ -304,17 +304,17 @@ namespace telldata {
    public:
                            TtAuxdata(): TellVar(tn_auxilary), _data(NULL),
                              _layer(ERR_LAY_DEF) {};
-                           TtAuxdata(auxdata::TdtAuxData* pdat, const LayerDef& laydef):
+                           TtAuxdata(auxdata::GrcData* pdat, const LayerDef& laydef):
                              TellVar(tn_auxilary), _data(pdat), _layer(laydef) {};
                            TtAuxdata(const TtAuxdata& cobj);
       const TtAuxdata&     operator = (const TtAuxdata&);
       virtual void         initialize() {_data = NULL;}
       virtual void         assign(TellVar*);
       virtual TellVar*     selfcopy() const {return DEBUG_NEW TtAuxdata(*this);};
-      auxdata::TdtAuxData* data() const     {return _data;};
+      auxdata::GrcData* data() const     {return _data;};
       LayerDef             layer() const    {return _layer;};
    private:
-      auxdata::TdtAuxData* _data;
+      auxdata::GrcData* _data;
       LayerDef             _layer;
    };
 

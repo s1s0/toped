@@ -42,7 +42,6 @@
 #include "trend.h"
 #include "ps_out.h"
 #include "basetrend.h"
-#include "calbr_reader.h"
 
 
 
@@ -269,29 +268,61 @@ bool DataCenter::OASParse(std::string filename)
    return status;
 }
 
-laydata::DrcLibrary*  DataCenter::lockDRC(void)
+
+bool DataCenter::DRCparse(std::string filename)
 {
-   if (!_TEDLIB()) throw EXPTNactive_DB();
-   if (!_DRCDB)
+   bool status = true;
+   Calbr::DrcLibrary* drcDB = NULL;
+   if (lockDRC(drcDB))
    {
-         _DRCDB = DEBUG_NEW laydata::DrcLibrary("drc");
+      std::string news = "Removing existing DRC data from memory...";
+      tell_log(console::MT_WARNING,news);
+      delete drcDB;
+      drcDB = NULL;
    }
-   while (wxMUTEX_NO_ERROR != _DRCLock.TryLock());
-   return _DRCDB;
+
+   try
+   {
+      Calbr::ClbrFile(wxString(filename.c_str(), wxConvUTF8), drcDB);
+   }
+   catch (EXPTNdrc_reader&)
+   {
+      TpdPost::toped_status(console::TSTS_PRGRSBAROFF);
+      if (NULL != drcDB)
+      {
+         delete drcDB;
+         drcDB = NULL;
+      }
+      status = false;
+   }
+   unlockDRC(drcDB);
+   return status;
 }
 
-void DataCenter::unlockDRC()
+bool DataCenter::lockDRC(Calbr::DrcLibrary*& drcDb )
 {
+   if (wxMUTEX_DEAD_LOCK == _DRCLock.Lock())
+   {
+      tell_log(console::MT_ERROR,"DRC Mutex deadlocked!");
+      drcDb = _DRCDB;
+      return false;
+   }
+   else
+   {
+      drcDb = _DRCDB;
+      return (NULL != drcDb);
+   }
+}
+
+void DataCenter::unlockDRC(Calbr::DrcLibrary* drcDb, bool throwexception)
+{
+   _DRCDB = drcDb;
    VERIFY(wxMUTEX_NO_ERROR == _DRCLock.Unlock());
-}
-
-void DataCenter::deleteDRC(void)
-{
-   if (_DRCDB)
-   {
-         delete _DRCDB;
-         _DRCDB = NULL;
-   }
+   if(NULL != _bpSync)
+      _bpSync->Signal();
+   else if (throwexception && (NULL == drcDb))
+      throw EXPTNactive_DRC();
+   drcDb = NULL;
 }
 
 bool DataCenter::lockTDT(laydata::TdtLibDir*& tdt_db, TdtMutexState reqLock)
@@ -567,6 +598,35 @@ void DataCenter::bpAddOasTab(bool threadExecution )
       _bpSync->Wait();
       // Wake-up & uplock the mutex
       VERIFY(wxMUTEX_NO_ERROR == _OASLock.Unlock());
+      // clean-up behind & prepare for the consequent use
+      delete _bpSync;
+      _bpSync = NULL;
+   }
+   else
+   {
+      TpdPost::addOAStab(threadExecution);
+   }
+}
+
+void DataCenter::bpAddDrcTab(bool threadExecution )
+{
+   if (threadExecution)
+   {
+      // Lock the Mutex
+      if (wxMUTEX_DEAD_LOCK == _DRCLock.Lock())
+      {
+         tell_log(console::MT_ERROR,"DRC Mutex deadlocked!");
+         return;
+      }
+      // initialise the thread condition with the locked Mutex
+      _bpSync = DEBUG_NEW wxCondition(_DRCLock);
+      // post a message to the main thread
+      TpdPost::addDRCtab(threadExecution);
+      // Go to sleep and wait until the main thread finished
+      // updating the browser panel
+      _bpSync->Wait();
+      // Wake-up & uplock the mutex
+      VERIFY(wxMUTEX_NO_ERROR == _DRCLock.Unlock());
       // clean-up behind & prepare for the consequent use
       delete _bpSync;
       _bpSync = NULL;

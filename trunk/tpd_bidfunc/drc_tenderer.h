@@ -32,33 +32,33 @@
 
 #include "calbr_reader.h"
 
-namespace Calbr
-{
-   class drcTenderer: public drcRenderer
-   {
-      public:
-                           drcTenderer(laydata::DrcLibrary* library);
-      virtual             ~drcTenderer();
-      void                 setError(unsigned int numError);
-      void                 startWriting(const std::string &cell);
-      void                 addPoly(const CoordsVector   &coords);
-      void                 addLine(const edge &edge);
-      void                 showAll(void);
-      void                 hideAll(void);
-      bool                 showError(unsigned int numError);
-      void                 zoom(const edge &edge);
-      void                 endWriting();
-      bool                 checkCellName();
-   private:
-      laydata::DrcLibrary* _ATDB;
-      laydata::TdtCell*    _DRCCell;
-      std::string          _cell;
-      unsigned int         _numError;
-      TP                   _max;
-      TP                   _min;
-      bool                 _startDrawing; //use for initial setting of _minx, maxy etc
-   };
-
-}
+//namespace Calbr
+//{
+//   class drcTenderer: public drcRenderer
+//   {
+//      public:
+//                           drcTenderer(Calbr::DrcLibrary* library);
+//      virtual             ~drcTenderer();
+//      void                 setError(unsigned int numError);
+//      void                 startWriting(const std::string &cell);
+//      void                 addPoly(const CoordsVector   &coords);
+//      void                 addLine(const edge &edge);
+//      void                 showAll(void);
+//      void                 hideAll(void);
+//      bool                 showError(unsigned int numError);
+//      void                 zoom(const edge &edge);
+//      void                 endWriting();
+//      bool                 checkCellName();
+//   private:
+//      Calbr::DrcLibrary*   _ATDB;
+//      laydata::TdtCell*    _DRCCell;
+//      std::string          _cell;
+//      unsigned int         _numError;
+//      TP                   _max;
+//      TP                   _min;
+//      bool                 _startDrawing; //use for initial setting of _minx, maxy etc
+//   };
+//
+//}
 
 #endif //DRC_TENDERER_H_INCLUDED

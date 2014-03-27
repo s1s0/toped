@@ -539,12 +539,18 @@ void TpdPost::addOAStab(bool threadExecution)
    }
 }
 
-void TpdPost::addDRCtab()
+void TpdPost::addDRCtab(bool threadExecution)
 {
    assert(_topBrowsers);
    wxCommandEvent eventADDTAB(wxEVT_CMD_BROWSER);
    eventADDTAB.SetInt(tui::BT_ADDDRC_TAB);
-   wxPostEvent(_topBrowsers, eventADDTAB);
+   if (threadExecution)
+      wxPostEvent(_topBrowsers, eventADDTAB);
+   else
+   {
+      ::wxSafeYield(_topBrowsers);
+      _topBrowsers->GetEventHandler()->ProcessEvent(eventADDTAB);
+   }
 }
 
 //Handle double click to name of function, add the function to command line
@@ -1185,6 +1191,11 @@ EXPTNactive_OASIS::EXPTNactive_OASIS() {
    tell_log(console::MT_ERROR,news);
 };
 
+EXPTNactive_DRC::EXPTNactive_DRC() {
+   std::string news = "No DRC data in memory. Parse first";
+   tell_log(console::MT_ERROR,news);
+};
+
 EXPTNreadTDT::EXPTNreadTDT(std::string info) {
    std::string news = "Error parsing TDT file =>";
    news += info;
@@ -1223,7 +1234,7 @@ EXPTNcif_parser::EXPTNcif_parser(std::string info) {
 
 EXPTNdrc_reader::EXPTNdrc_reader(std::string info)
 {
-   std::string news = "Error in drc reader =>";
+   std::string news = "DRC parser fatal error =>";
    news += info;
    tell_log(console::MT_ERROR,news);
 };

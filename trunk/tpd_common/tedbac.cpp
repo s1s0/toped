@@ -245,8 +245,13 @@ template class laydata::LayerContainer<layprop::LayerSettings*>;
 template class laydata::LayerIterator<trend::TrendLay*>;
 template class laydata::LayerContainer<trend::TrendLay*>;
 //------------------------------------------------------------------------------
-template class laydata::LayerIterator<auxdata::QuadTree*>;
-template class laydata::LayerContainer<auxdata::QuadTree*>;
-template class laydata::LayerIterator<auxdata::QTreeTmp*>;
-template class laydata::LayerContainer<auxdata::QTreeTmp*>;
+template class laydata::LayerIterator<auxdata::QuadTreeGrc*>;
+template class laydata::LayerContainer<auxdata::QuadTreeGrc*>;
+template class laydata::LayerIterator<auxdata::QTreeTmpGrc*>;
+template class laydata::LayerContainer<auxdata::QTreeTmpGrc*>;
+
+template class laydata::LayerIterator<auxdata::QuadTreeAux*>;
+template class laydata::LayerContainer<auxdata::QuadTreeAux*>;
+//template class laydata::LayerIterator<auxdata::QTreeTmpAux*>;
+//template class laydata::LayerContainer<auxdata::QTreeTmpAux*>;
 

@@ -346,7 +346,7 @@ namespace browsers
       void                    onHideAll(wxCommandEvent&);
       void                    onExplainError(wxCommandEvent&);
    private:
-      void                    addRuleCheck( const wxTreeItemId &rootId,  Calbr::drcRuleCheck *check);
+      void                    addRuleCheck( const wxTreeItemId &rootId, std::string, Calbr::DrcRule* check);
       ErrorBrowser*           _errorBrowser;
       wxButton*               _showAllButton;
       wxButton*               _hideAllButton;

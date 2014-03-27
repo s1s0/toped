@@ -42,7 +42,7 @@
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
 extern console::toped_logfile    LogFile;
-extern Calbr::CalbrFile*         DRCData;
+//extern Calbr::CalbrFile*         DRCData;
 
 //=============================================================================
 tellstdfunc::stdNEWDESIGN::stdNEWDESIGN(telldata::typeID retype, bool eor) :
@@ -1785,30 +1785,48 @@ tellstdfunc::DRCCalibreimport::DRCCalibreimport(telldata::typeID retype, bool eo
 
 int tellstdfunc::DRCCalibreimport::execute()
 {
-//   layprop::DrawProperties* drawProp;
    std::string filename = getStringValue();
-   if(DRCData)
+//   telldata::TtList* topcells = DEBUG_NEW telldata::TtList(telldata::tn_string);
+   if (expandFileName(filename))
    {
-      DRCData->hideAllErrors();
-      delete DRCData;
-   }
-
-   laydata::DrcLibrary* drcDesign = DATC->lockDRC();
-   DRCData = DEBUG_NEW Calbr::CalbrFile(filename, new Calbr::drcTenderer(drcDesign));
-   DRCData->readFile();
-   if(DRCData->isOk())
-   {
-      TpdPost::addDRCtab();
+      if (DATC->DRCparse(filename))
+      {
+         // add DRC tab in the browser
+         DATC->bpAddDrcTab(_threadExecution);
+//         // Collect the top structures
+//         std::list<std::string> top_cell_list;
+//         ForeignDbFile* ACIFDB = NULL;
+//         if (DATC->lockCif(ACIFDB))
+//         {
+//            ACIFDB->getTopCells(top_cell_list);
+//         }
+//         else
+//         {
+//            // The ACIFDB mist exists here, because CIFparse returned cfs_POK
+//            assert(false);
+//         }
+//         DATC->unlockCif(ACIFDB);
+//         // Convert the string list to TLISTOF(telldata::tn_string)
+//         std::list<std::string>::const_iterator CN;
+//         for (CN = top_cell_list.begin(); CN != top_cell_list.end(); CN ++)
+//            topcells->add(DEBUG_NEW telldata::TtString(*CN));
+//         // Push the top structures in the data stack
+//         LogFile << LogFile.getFN() << "(\""<< filename << "\");"; LogFile.flush();
+      }
+      else
+      {
+         std::string info = "File \"" + filename + "\" doesn't seem to appear a valid ASCII DRC";
+         tell_log(console::MT_ERROR,info);
+      }
    }
    else
    {
-      delete DRCData;
-      DRCData = NULL;
-      DATC->deleteDRC();
+      std::string info = "Filename \"" + filename + "\" can't be expanded properly";
+      tell_log(console::MT_ERROR,info);
    }
-   DATC->unlockDRC();
-
+//   OPstack.push(topcells);
    return EXEC_NEXT;
+
 }
 
 //=============================================================================
@@ -1831,7 +1849,12 @@ int tellstdfunc::DRCshowerror::execute()
       activeCell = design->activeCellName();
    DATC->unlockTDT(libDir);
 
-   DRCData->showError(activeCell,errorName, errorNumber);
+   Calbr::DrcLibrary* drcDB = NULL;
+   if (DATC->lockDRC(drcDB))
+   {
+      drcDB->showError(activeCell,errorName, errorNumber);
+   }
+   DATC->unlockDRC(drcDB);
    return EXEC_NEXT;
 }
 
@@ -1853,10 +1876,15 @@ int tellstdfunc::DRCshowcluster::execute()
       activeCell = design->activeCellName();
    DATC->unlockTDT(libDir);
 
-   if (!DRCData->showCluster(activeCell, errorName))
+   Calbr::DrcLibrary* drcDB = NULL;
+   if (DATC->lockDRC(drcDB))
    {
-      tell_log(console::MT_ERROR,"Can't show the errors");
+      if (!drcDB->showCluster(activeCell, errorName))
+      {
+         tell_log(console::MT_ERROR,"Can't show the errors");
+      }
    }
+   DATC->unlockDRC(drcDB);
    return EXEC_NEXT;
 }
 
@@ -1869,9 +1897,10 @@ tellstdfunc::DRCshowallerrors::DRCshowallerrors(telldata::typeID retype, bool eo
 
 int tellstdfunc::DRCshowallerrors::execute()
 {
-   if(DRCData)
+   Calbr::DrcLibrary* drcDB = NULL;
+   if (DATC->lockDRC(drcDB))
    {
-      DRCData->showAllErrors();
+      drcDB->showAllErrors();
    }
    else
    {
@@ -1880,6 +1909,7 @@ int tellstdfunc::DRCshowallerrors::execute()
       tell_log(console::MT_ERROR,ost.str());
 
    }
+   DATC->unlockDRC(drcDB);
    return EXEC_NEXT;
 }
 
@@ -1891,9 +1921,10 @@ tellstdfunc::DRChideallerrors::DRChideallerrors(telldata::typeID retype, bool eo
 
 int tellstdfunc::DRChideallerrors::execute()
 {
-   if(DRCData)
+   Calbr::DrcLibrary* drcDB = NULL;
+   if (DATC->lockDRC(drcDB))
    {
-      DRCData->hideAllErrors();
+      drcDB->hideAllErrors();
    }
    else
    {
@@ -1902,6 +1933,7 @@ int tellstdfunc::DRChideallerrors::execute()
       tell_log(console::MT_ERROR,ost.str());
 
    }
+   DATC->unlockDRC(drcDB);
    return EXEC_NEXT;
 }
 
@@ -1928,19 +1960,23 @@ int tellstdfunc::DRCexplainerror_D::execute()
       activeCell = design->activeCellName();
    DATC->unlockTDT(libDir);
 
-   laydata::DrcLibrary* drcDesign = DATC->lockDRC();
+   Calbr::DrcLibrary* drcDesign = NULL;
+   if (DATC->lockDRC(drcDesign))
+   {
       WordList selectedl = drcDesign->findSelected(activeCell, p1DB);
       selectedl.unique();
       for(WordList::const_iterator it = selectedl.begin(); it!= selectedl.end(); ++it)
       {
-         std::ostringstream ost;
-         ost << DRCData->explainError((*it));
-         tell_log(console::MT_INFO,ost.str());
+         //TODO
+//         std::ostringstream ost;
+//         ost << DRCData->explainError((*it));
+//         tell_log(console::MT_INFO,ost.str());
       }
-   DATC->unlockDRC();
+   }
+   DATC->unlockDRC(drcDesign);
 
    delete p1; delete p1DB;
-//   UpdateLV(); <- It seems this is no necessary here. Refresh should be enough?
+//   UpdateLV(); <- It seems this is not necessary here. Refresh should be enough?
    RefreshGL();
    return EXEC_NEXT;
 }
@@ -1969,16 +2005,20 @@ int tellstdfunc::DRCexplainerror::execute()
       activeCell = design->activeCellName();
    DATC->unlockTDT(libDir);
 
-   laydata::DrcLibrary* drcDesign = DATC->lockDRC();
+   Calbr::DrcLibrary* drcDesign = NULL;
+   if (DATC->lockDRC(drcDesign))
+   {
       WordList selectedl = drcDesign->findSelected(activeCell, p1DB);
       selectedl.unique();
       for(WordList::const_iterator it = selectedl.begin(); it!= selectedl.end(); ++it)
       {
-         std::ostringstream ost;
-         ost << DRCData->explainError((*it));
-         tell_log(console::MT_INFO,ost.str());
+         //TODO
+//         std::ostringstream ost;
+//         ost << DRCData->explainError((*it));
+//         tell_log(console::MT_INFO,ost.str());
       }
-   DATC->unlockDRC();
+   }
+   DATC->unlockDRC(drcDesign);
 
    delete p1; delete p1DB;
    //   UpdateLV(); <- It seems this is no necessary here. Refresh should be enough?

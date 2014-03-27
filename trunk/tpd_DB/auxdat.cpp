@@ -31,7 +31,7 @@
 #include "auxdat.h"
 
 auxdata::TdtGrcPoly::TdtGrcPoly(const PointVector& plst) :
-   TdtAuxData(          )
+   GrcData(          )
 {
    _psize = plst.size();
    assert(_psize);
@@ -45,13 +45,13 @@ auxdata::TdtGrcPoly::TdtGrcPoly(const PointVector& plst) :
 }
 
 auxdata::TdtGrcPoly::TdtGrcPoly(int4b* pdata, unsigned psize) :
-   TdtAuxData  (           ),
+   GrcData  (           ),
    _pdata      ( pdata     ),
    _psize      ( psize     )
 {}
 
 auxdata::TdtGrcPoly::TdtGrcPoly(InputTdtFile* const tedfile) :
-   TdtAuxData  (           )
+   GrcData  (           )
 {
    _psize = tedfile->getWord();
    assert(_psize);
@@ -175,7 +175,7 @@ laydata::ShapeList* auxdata::TdtGrcPoly::getRepaired() const
 
 //==============================================================================
 auxdata::TdtGrcWire::TdtGrcWire(const PointVector& plst, WireWidth width) :
-   TdtAuxData  (           ),
+   GrcData  (           ),
    _width      (width      )
 {
    _psize = plst.size();
@@ -189,7 +189,7 @@ auxdata::TdtGrcWire::TdtGrcWire(const PointVector& plst, WireWidth width) :
 }
 
 auxdata::TdtGrcWire::TdtGrcWire(int4b* pdata, unsigned psize, WireWidth width) :
-   TdtAuxData  (           ),
+   GrcData  (           ),
    _pdata      ( pdata     ),
    _psize      ( psize     ),
    _width      ( width     )
@@ -197,7 +197,7 @@ auxdata::TdtGrcWire::TdtGrcWire(int4b* pdata, unsigned psize, WireWidth width) :
 }
 
 auxdata::TdtGrcWire::TdtGrcWire(InputTdtFile* const tedfile) :
-   TdtAuxData  (           )
+   GrcData  (           )
 {
    _psize = tedfile->getWord();
    assert(_psize);
@@ -383,7 +383,7 @@ auxdata::GrcCell::GrcCell(InputTdtFile* const tedfile, std::string name) :
 
 auxdata::GrcCell::~GrcCell()
 {
-   for (LayerHolder::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
+   for (LayerHolderGrc::Iterator lay = _layers.begin(); lay != _layers.end(); lay++)
    {
       lay->freeMemory();
       delete (*lay);
@@ -393,12 +393,12 @@ auxdata::GrcCell::~GrcCell()
 
 void auxdata::GrcCell::write(OutputTdtFile* const tedfile) const
 {
-   for (LayerHolder::Iterator wl = _layers.begin(); wl != _layers.end(); wl++)
+   for (LayerHolderGrc::Iterator wl = _layers.begin(); wl != _layers.end(); wl++)
    {
       assert(wl.editable());
       tedfile->putByte(tedf_LAYER);
       tedfile->putLayer(wl());
-      for (QuadTree::Iterator DI = wl->begin(); DI != wl->end(); DI++)
+      for (QuadTreeGrc::Iterator DI = wl->begin(); DI != wl->end(); DI++)
          DI->write(tedfile);
       tedfile->putByte(tedf_LAYEREND);
    }
@@ -406,33 +406,33 @@ void auxdata::GrcCell::write(OutputTdtFile* const tedfile) const
 
 void auxdata::GrcCell::dbExport(DbExportFile& exportf) const
 {
-   for (LayerHolder::Iterator wl = _layers.begin(); wl != _layers.end(); wl++)
+   for (LayerHolderGrc::Iterator wl = _layers.begin(); wl != _layers.end(); wl++)
    {
       assert(wl.editable());
       if ( !exportf.layerSpecification(wl()) ) continue;
-      for (QuadTree::Iterator DI = wl->begin(); DI != wl->end(); DI++)
+      for (QuadTreeGrc::Iterator DI = wl->begin(); DI != wl->end(); DI++)
          DI->dbExport(exportf);
    }
 }
 
 void auxdata::GrcCell::collectUsedLays(LayerDefList& laylist) const
 {
-   for(LayerHolder::Iterator CL = _layers.begin(); CL != _layers.end(); CL++)
+   for(LayerHolderGrc::Iterator CL = _layers.begin(); CL != _layers.end(); CL++)
       if (CL.editable())
          laylist.push_back(CL());
 }
 
-auxdata::QuadTree* auxdata::GrcCell::secureLayer(const LayerDef& laydef)
+auxdata::QuadTreeGrc* auxdata::GrcCell::secureLayer(const LayerDef& laydef)
 {
    if (_layers.end() == _layers.find(laydef))
-      _layers.add(laydef, DEBUG_NEW auxdata::QuadTree());
+      _layers.add(laydef, DEBUG_NEW auxdata::QuadTreeGrc());
    return _layers[laydef];
 }
 
-auxdata::QTreeTmp* auxdata::GrcCell::secureUnsortedLayer(const LayerDef& laydef)
+auxdata::QTreeTmpGrc* auxdata::GrcCell::secureUnsortedLayer(const LayerDef& laydef)
 {
    if (_tmpLayers.end() == _tmpLayers.find(laydef))
-      _tmpLayers.add(laydef, DEBUG_NEW auxdata::QTreeTmp(secureLayer(laydef)));
+      _tmpLayers.add(laydef, DEBUG_NEW auxdata::QTreeTmpGrc(secureLayer(laydef)));
    return _tmpLayers[laydef];
 }
 
@@ -442,7 +442,7 @@ void auxdata::GrcCell::getCellOverlap()
       _cellOverlap = DEFAULT_OVL_BOX;
    else
    {
-      LayerHolder::Iterator LCI = _layers.begin();
+      LayerHolderGrc::Iterator LCI = _layers.begin();
       _cellOverlap = LCI->overlap();
       while (++LCI != _layers.end())
          _cellOverlap.overlap(LCI->overlap());
@@ -454,7 +454,7 @@ bool auxdata::GrcCell::fixUnsorted()//FIXME! The method result is useless! the i
    bool empty = (0 == _tmpLayers.size());
    if (!empty)
    {
-      typedef TmpLayerMap::Iterator LCI;
+      typedef TmpLayerMapGrc::Iterator LCI;
       for (LCI lay = _tmpLayers.begin(); lay != _tmpLayers.end(); lay++)
       {
          lay->commit();
@@ -470,7 +470,7 @@ void auxdata::GrcCell::openGlRender(trend::TrendBase& rend, const CTM& trans,
                                      bool selected, bool active) const
 {
    // Draw figures
-   typedef LayerHolder::Iterator LCI;
+   typedef LayerHolderGrc::Iterator LCI;
    for (LCI lay = _layers.begin(); lay != _layers.end(); lay++)
    {
       //first - to check visibility of the layer
@@ -498,7 +498,7 @@ void auxdata::GrcCell::openGlRender(trend::TrendBase& rend, const CTM& trans,
 DBbox auxdata::GrcCell::getVisibleOverlap(const layprop::DrawProperties& prop)
 {
    DBbox vlOverlap(DEFAULT_OVL_BOX);
-   for (LayerHolder::Iterator LCI = _layers.begin(); LCI != _layers.end(); LCI++)
+   for (LayerHolderGrc::Iterator LCI = _layers.begin(); LCI != _layers.end(); LCI++)
    {
 //      LayerNumber  layno  = LCI->first;
 //      QuadTree* cqTree = LCI->second;
@@ -527,9 +527,9 @@ void auxdata::GrcCell::motionDraw(trend::TrendBase& rend/*, CtmQueue& transtack,
 void auxdata::GrcCell::readTdtLay(InputTdtFile* const tedfile)
 {
    byte      recordtype;
-   TdtAuxData*  newData;
+   GrcData*  newData;
    LayerDef  laydef(tedfile->getLayer());
-   QTreeTmp* tmpLayer = secureUnsortedLayer(laydef);
+   QTreeTmpGrc* tmpLayer = secureUnsortedLayer(laydef);
    while (tedf_LAYEREND != (recordtype = tedfile->getByte()))
    {
       switch (recordtype)
@@ -545,7 +545,7 @@ void auxdata::GrcCell::readTdtLay(InputTdtFile* const tedfile)
 
 void auxdata::GrcCell::reportLayers(LayerDefSet& grcLays)
 {
-   for (LayerHolder::Iterator wl = _layers.begin(); wl != _layers.end(); wl++)
+   for (LayerHolderGrc::Iterator wl = _layers.begin(); wl != _layers.end(); wl++)
    {
       grcLays.insert(wl());
    }
@@ -553,10 +553,10 @@ void auxdata::GrcCell::reportLayers(LayerDefSet& grcLays)
 
 void auxdata::GrcCell::reportLayData(const LayerDef& laydef, AuxDataList& dataList)
 {
-   LayerHolder::Iterator wl = _layers.find(laydef);
+   LayerHolderGrc::Iterator wl = _layers.find(laydef);
    if (_layers.end() != wl)
    {
-      for (QuadTree::Iterator DI = wl->begin(); DI != wl->end(); DI++)
+      for (QuadTreeGrc::Iterator DI = wl->begin(); DI != wl->end(); DI++)
          dataList.push_back(*DI);
    }
 }
@@ -570,12 +570,12 @@ void auxdata::GrcCell::reportLayData(const LayerDef& laydef, AuxDataList& dataLi
  */
 char auxdata::GrcCell::cleanLay(const LayerDef& laydef, AuxDataList& recovered)
 {
-   LayerHolder::Iterator wl = _layers.find(laydef);
+   LayerHolderGrc::Iterator wl = _layers.find(laydef);
    if (_layers.end() != wl)
    {
       // first mark all the shapes from the target layer and gather them in
       // the list provided
-      for (QuadTree::Iterator DI = wl->begin(); DI != wl->end(); DI++)
+      for (QuadTreeGrc::Iterator DI = wl->begin(); DI != wl->end(); DI++)
       {
          DI->setStatus(sh_selected);
          recovered.push_back(*DI);
@@ -597,10 +597,10 @@ char auxdata::GrcCell::cleanLay(const LayerDef& laydef, AuxDataList& recovered)
 
 bool auxdata::GrcCell::repairData(const LayerDef& laydef, laydata::ShapeList& newData)
 {
-   LayerHolder::Iterator wl = _layers.find(laydef);
+   LayerHolderGrc::Iterator wl = _layers.find(laydef);
    if (_layers.end() != wl)
    {
-      for (QuadTree::Iterator DI = wl->begin(); DI != wl->end(); DI++)
+      for (QuadTreeGrc::Iterator DI = wl->begin(); DI != wl->end(); DI++)
       {
          laydata::ShapeList* objReplacement = DI->getRepaired();
          if (NULL != objReplacement)
@@ -626,11 +626,11 @@ bool auxdata::GrcCell::repairData(const LayerDef& laydef, laydata::ShapeList& ne
 char auxdata::GrcCell::cleanRepaired(const LayerDef& laydef, AuxDataList& recovered)
 {
    DBbox old_overlap(_cellOverlap);
-   LayerHolder::Iterator wl = _layers.find(laydef);
+   LayerHolderGrc::Iterator wl = _layers.find(laydef);
    if (_layers.end() != wl)
    {
       // gather all invalid objects which had been recovered in an AuxdataList
-      for (QuadTree::Iterator DI = wl->begin(); DI != wl->end(); DI++)
+      for (QuadTreeGrc::Iterator DI = wl->begin(); DI != wl->end(); DI++)
       {
          if (sh_recovered == DI->status())
             recovered.push_back(*DI);
