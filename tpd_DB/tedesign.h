@@ -261,22 +261,6 @@ namespace laydata {
       CellMap           _udurCells;
    };
 
-   class DrcLibrary {
-   public:
-                           DrcLibrary(std::string name);
-      virtual              ~DrcLibrary();
-      TdtDefaultCell*      checkCell(std::string name);
-      void                 registerCellRead(std::string, TdtCell*);
-      WordList             findSelected(const std::string &cell, TP*); //use for DRCexplainerror
-//      void                 openGlDraw(layprop::DrawProperties&, std::string);
-      void                 openGlRender(trend::TrendBase&, std::string, CTM&);
-      std::string          name()            const {return _name;}
-   protected:
-
-      std::string          _name;         // design/library name
-      CellMap              _cells;        // list of cells in the design
-   };
-
 }
 
 #endif //TEDESIGN_H_INCLUDED

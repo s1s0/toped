@@ -949,7 +949,7 @@ void ImportDB::addPoly(PointVector& plist)
       }
       else
       {
-         auxdata::QTreeTmp* errlay = _grc_structure->secureUnsortedLayer(_layCrossMap->tdtLayNumber());
+         auxdata::QTreeTmpGrc* errlay = _grc_structure->secureUnsortedLayer(_layCrossMap->tdtLayNumber());
          errlay->put(DEBUG_NEW auxdata::TdtGrcPoly(plist));
       }
    }
@@ -972,7 +972,7 @@ void ImportDB::addPath(PointVector& plist, int4b width, short pathType, int4b bg
             tmpLayer->put(DEBUG_NEW laydata::TdtWire(plist, width));
          else
          {
-            auxdata::QTreeTmp* errlay = _grc_structure->secureUnsortedLayer(_layCrossMap->tdtLayNumber());
+            auxdata::QTreeTmpGrc* errlay = _grc_structure->secureUnsortedLayer(_layCrossMap->tdtLayNumber());
             errlay->put(DEBUG_NEW auxdata::TdtGrcWire(plist, width));
          }
       }

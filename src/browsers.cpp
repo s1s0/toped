@@ -55,7 +55,7 @@
 
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
-extern Calbr::CalbrFile*         DRCData;
+//extern Calbr::CalbrFile*         DRCData;
 extern const wxEventType         wxEVT_CMD_BROWSER;
 extern const wxEventType         wxEVT_EDITLAYER;
 
@@ -392,7 +392,7 @@ void browsers::CellBrowser::statusHighlight(wxString top, wxString active, wxStr
 
 void browsers::CellBrowser::collectInfo( bool hier)
 {
-   //Save previouse names before Unset
+   //Save previous names before Unset
    //Need for case when filter remove active cell from browser
    if(!activeCellName().IsEmpty())
       _activeCellNameBackup = activeCellName();
@@ -2113,7 +2113,7 @@ browsers::ErrorBrowser::ErrorBrowser(wxWindow* parent, wxWindowID id,
                               const wxPoint& pos,
                               const wxSize& size,
                               long style):
-                     wxTreeCtrl(parent, id, pos, size, style |wxTR_HIDE_ROOT| wxTR_FULL_ROW_HIGHLIGHT )
+                     wxTreeCtrl(parent, id, pos, size, style |/*wxTR_HIDE_ROOT|*/ wxTR_FULL_ROW_HIGHLIGHT )
 {
 }
 
@@ -2291,27 +2291,35 @@ browsers::DRCBrowser::DRCBrowser(wxWindow* parent, wxWindowID id)
    sizer2->Add(_explainButton, 1, wxEXPAND|wxBOTTOM, 3);
    thesizer->Add(sizer2, 0, wxEXPAND | wxALL);
 
-      SetSizerAndFit(thesizer);
-      Calbr::RuleChecksVector* errors = DRCData->resultsFlat();
-      _errorBrowser->AddRoot(wxT("hidden_wxroot"), -1, -1, DEBUG_NEW DRCItemData(ITEM_ROOT));
-      for(Calbr::RuleChecksVector::const_iterator it = errors->begin();it != errors->end(); ++it)
+   SetSizerAndFit(thesizer);
+
+
+   Calbr::DrcLibrary* drcDB = NULL;
+   if (DATC->lockDRC(drcDB))
+   {
+      const Calbr::RuleMap* rules = drcDB->rules();
+      _errorBrowser->AddRoot(/*wxT("hidden_wxroot")*/wxString(drcDB->name().c_str(), wxConvUTF8), -1, -1, DEBUG_NEW DRCItemData(ITEM_ROOT));
+      for(Calbr::RuleMap::const_iterator it = rules->begin();it != rules->end(); ++it)
       {
-         addRuleCheck(_errorBrowser->GetRootItem(), (*it));
+         addRuleCheck(_errorBrowser->GetRootItem(), it->first, it->second);
       }
 
-      Calbr::CellDRCMap *drcMap = DRCData->cellDRCMap();
+//      Calbr::CellDRCMap *drcMap = DRCData->cellDRCMap();
+//
+//      for(Calbr::CellDRCMap::const_iterator it = drcMap->begin();it != drcMap->end(); ++it)
+//      {
+//         std::string cellName = (*it).first;
+//         wxTreeItemId  id = _errorBrowser->AppendItem(_errorBrowser->GetRootItem(), wxString(cellName.c_str(), wxConvUTF8), -1, -1, DEBUG_NEW DRCItemData(ITEM_CELL));
+//
+//         Calbr::RuleChecksVector* errors = &((*it).second->_RuleChecks);
+//         for(Calbr::RuleChecksVector::const_iterator it2 = errors->begin();it2 != errors->end(); ++it2)
+//         {
+//            addRuleCheck(id, (*it2));
+//         }
+//      }
+   }
+   DATC->unlockDRC(drcDB);
 
-      for(Calbr::CellDRCMap::const_iterator it = drcMap->begin();it != drcMap->end(); ++it)
-      {
-         std::string cellName = (*it).first;
-         wxTreeItemId  id = _errorBrowser->AppendItem(_errorBrowser->GetRootItem(), wxString(cellName.c_str(), wxConvUTF8), -1, -1, DEBUG_NEW DRCItemData(ITEM_CELL));
-
-         Calbr::RuleChecksVector* errors = &((*it).second->_RuleChecks);
-         for(Calbr::RuleChecksVector::const_iterator it2 = errors->begin();it2 != errors->end(); ++it2)
-         {
-            addRuleCheck(id, (*it2));
-         }
-      }
 }
 
 browsers::DRCBrowser::~DRCBrowser()
@@ -2325,11 +2333,11 @@ void browsers::DRCBrowser::deleteAllItems(void)
 
 void   browsers::DRCBrowser::onShowAll(wxCommandEvent& evt)
 {
-   wxString cmd;
-   wxString cell=wxString(DRCData->topCellName().c_str(),  wxConvUTF8);
-   cmd << wxT("opencell(\"") << cell <<wxT("\");");
-   cmd << wxT("drcshowallerrors();");
-   TpdPost::parseCommand(cmd);
+//   wxString cmd;
+//   wxString cell=wxString(DRCData->topCellName().c_str(),  wxConvUTF8);
+//   cmd << wxT("opencell(\"") << cell <<wxT("\");");
+//   cmd << wxT("drcshowallerrors();");
+//   TpdPost::parseCommand(cmd);
 }
 
 void   browsers::DRCBrowser::onHideAll(wxCommandEvent& evt)
@@ -2346,29 +2354,29 @@ void   browsers::DRCBrowser::onExplainError(wxCommandEvent& evt)
    TpdPost::parseCommand(cmd);
  }
 
-void  browsers::DRCBrowser::addRuleCheck( const wxTreeItemId &rootId,  Calbr::drcRuleCheck *check)
+void  browsers::DRCBrowser::addRuleCheck( const wxTreeItemId &rootId, std::string name, Calbr::DrcRule* check)
 {
-   std::string name = check->ruleCheckName();
+//   std::string name = check->ruleCheckName();
    wxTreeItemId  id = _errorBrowser->AppendItem(rootId, wxString(name.c_str(), wxConvUTF8), -1, -1, DEBUG_NEW DRCItemData(ITEM_ERR));
-   std::vector <Calbr::drcPolygon>::iterator it2;
-   std::vector <Calbr::drcPolygon> *polys = check->polygons(); 
-   
-   //Save polygons
-//   long sz = polys->size();
-   for(std::vector <Calbr::drcPolygon>::const_iterator it = polys->begin(); it != polys->end(); ++it)
-   {
-      wxString str;
-      str << it->ordinal();
-      _errorBrowser->AppendItem(id, str, -1, -1, DEBUG_NEW DRCItemData(ITEM_ERR_NUM));
-   }
-
-   //Save Edges
-   std::vector <Calbr::drcEdge> *edges = check->edges();
-//   sz = edges->size();
-   for(std::vector <Calbr::drcEdge>::const_iterator it = edges->begin(); it != edges->end(); ++it)
-   {
-      wxString str;
-      str << it->ordinal();
-      _errorBrowser->AppendItem(id, str, -1, -1, DEBUG_NEW DRCItemData(ITEM_ERR_NUM));
-   }
+//   std::vector <Calbr::drcPolygon>::iterator it2;
+//   std::vector <Calbr::drcPolygon> *polys = check->polygons();
+//
+//   //Save polygons
+////   long sz = polys->size();
+//   for(std::vector <Calbr::drcPolygon>::const_iterator it = polys->begin(); it != polys->end(); ++it)
+//   {
+//      wxString str;
+//      str << it->ordinal();
+//      _errorBrowser->AppendItem(id, str, -1, -1, DEBUG_NEW DRCItemData(ITEM_ERR_NUM));
+//   }
+//
+//   //Save Edges
+//   std::vector <Calbr::drcEdge> *edges = check->edges();
+////   sz = edges->size();
+//   for(std::vector <Calbr::drcEdge>::const_iterator it = edges->begin(); it != edges->end(); ++it)
+//   {
+//      wxString str;
+//      str << it->ordinal();
+//      _errorBrowser->AppendItem(id, str, -1, -1, DEBUG_NEW DRCItemData(ITEM_ERR_NUM));
+//   }
 }

@@ -109,12 +109,18 @@ namespace trend {
    class TrendLay;
 }
 namespace auxdata {
-   class TdtAuxData;
-   typedef laydata::QTStoreTmpl<TdtAuxData>     QTreeTmp;
-   typedef laydata::QTreeTmpl<TdtAuxData>       QuadTree;
-   typedef laydata::LayerContainer<QuadTree*>   LayerHolder;
-//   typedef std::list<TdtAuxData*>               AuxDataList;
-   typedef laydata::LayerContainer<QTreeTmp*>   TmpLayerMap;
+   class GrcData;
+   class AuxData;
+
+   typedef laydata::QTStoreTmpl<GrcData>           QTreeTmpGrc;
+   typedef laydata::QTreeTmpl<GrcData>             QuadTreeGrc;
+   typedef laydata::LayerContainer<QuadTreeGrc*>   LayerHolderGrc;
+   typedef laydata::LayerContainer<QTreeTmpGrc*>   TmpLayerMapGrc;
+
+   typedef laydata::QTStoreTmpl<AuxData>           QTreeTmpAux;
+   typedef laydata::QTreeTmpl<AuxData>             QuadTreeAux;
+//   typedef laydata::LayerContainer<QuadTreeAux*>   LayerHolderAux;
+//   typedef laydata::LayerContainer<QTreeTmpAux*>   TmpLayerMapAux;
 }
 
 #endif //TEDBAC_H_INCLUDED

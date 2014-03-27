@@ -221,7 +221,7 @@ void tellstdfunc::grcCLEANALAYER::undo()
       {
          grcCell = DEBUG_NEW auxdata::GrcCell(tCell->name());
       }
-      auxdata::QTreeTmp* errlay = grcCell->secureUnsortedLayer(grcLayer);
+      auxdata::QTreeTmpGrc* errlay = grcCell->secureUnsortedLayer(grcLayer);
       for (auxdata::AuxDataList::const_iterator CS = grcShapes->begin(); CS != grcShapes->end(); CS++)
          errlay->put(*CS);
       bool emptyCell = grcCell->fixUnsorted();
@@ -323,7 +323,7 @@ void tellstdfunc::grcREPAIRDATA::undo()
       {
          grcCell = DEBUG_NEW auxdata::GrcCell(tCell->name());
       }
-      auxdata::QTreeTmp* errlay = grcCell->secureUnsortedLayer(grcLayer);
+      auxdata::QTreeTmpGrc* errlay = grcCell->secureUnsortedLayer(grcLayer);
       for (auxdata::AuxDataList::const_iterator CS = grcShapes->begin(); CS != grcShapes->end(); CS++)
          errlay->put(*CS);
       bool emptyCell = grcCell->fixUnsorted();

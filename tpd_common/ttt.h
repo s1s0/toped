@@ -104,7 +104,8 @@ enum SH_STATUS:byte {
    sh_merged      , //
    sh_preserved   , //
    sh_invalid     , //
-   sh_recovered     //
+   sh_recovered   , //
+   sh_drc           //
 };
 
 //=============================================================================

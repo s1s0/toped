@@ -33,10 +33,11 @@
 namespace auxdata {
 
    //==============================================================================
-   class TdtAuxData  {
+   class AuxData  {
    public:
       //! The default constructor.
-                           TdtAuxData(SH_STATUS sel = sh_invalid) : _status(sel){};
+                           AuxData(SH_STATUS sel) : _status(sel) {};
+      virtual             ~AuxData(){};
       //! Return the overlapping box of the object.
       virtual   DBbox      overlap()  const = 0;
       //! Draw request (rendering)
@@ -47,30 +48,34 @@ namespace auxdata {
       virtual   void       motionDraw(const layprop::DrawProperties&, CtmQueue&, SGBitSet*) const = 0;
       //! Print an object description on the toped console.
       virtual   void       info(std::ostringstream&, real) const = 0;
-      //! Write the TdtData object in TDT file.
-      virtual   void       write(OutputTdtFile* const tedfile) const = 0;
-      //! Export the TdtData object in external format.
-      virtual   void       dbExport(DbExportFile&) const = 0;
       //!
       virtual   bool       pointInside(const TP) const = 0;
       //!
-      virtual  PointVector dumpPoints() const = 0;
-      //!
-      virtual  laydata::ShapeList* getRepaired() const = 0;
-      //! Set the _selected flag in case the object is entirely overlapped by select_in box
-//      void                 selectInBox(DBbox&, DataList*, bool);
-//      void                 selectThis(DataList*);
-//      bool                 unselect(DBbox&, SelectDataPair&, bool);
       void                 setStatus(SH_STATUS s) {_status = s;}
       SH_STATUS            status() const {return _status;}
-//      virtual word         numPoints() const = 0;
-      virtual             ~TdtAuxData(){};
    protected:
       SH_STATUS            _status;
    };
 
+
    //==============================================================================
-   class TdtGrcPoly : public TdtAuxData   {
+   class GrcData : public AuxData {
+   public:
+      //! The default constructor.
+                           GrcData(SH_STATUS sel=sh_invalid) : AuxData(sel){};
+      virtual             ~GrcData(){};
+      //! Print an object description on the toped console.
+      virtual   void       write(OutputTdtFile* const tedfile) const = 0;
+      //! Export the TdtData object in external format.
+      virtual   void       dbExport(DbExportFile&) const = 0;
+      //!
+      virtual  PointVector dumpPoints() const = 0;
+      //!
+      virtual  laydata::ShapeList* getRepaired() const = 0;
+   };
+
+   //==============================================================================
+   class TdtGrcPoly : public GrcData   {
       public:
                            TdtGrcPoly(const PointVector&);
                            TdtGrcPoly(int4b*, unsigned);
@@ -95,7 +100,7 @@ namespace auxdata {
    };
 
    //==============================================================================
-   class TdtGrcWire : public TdtAuxData   {
+   class TdtGrcWire : public GrcData   {
       public:
                            TdtGrcWire(const PointVector&, WireWidth);
                            TdtGrcWire(int4b*, unsigned, WireWidth);
@@ -124,7 +129,7 @@ namespace auxdata {
 //   typedef laydata::QTreeTmpl<TdtAuxData>       QuadTree;
 //   typedef laydata::QTStoreTmpl<TdtAuxData>     QTreeTmp;
 //   typedef laydata::LayerContainer<QuadTree*>   LayerHolder;
-   typedef std::list<TdtAuxData*>               AuxDataList;
+   typedef std::list<GrcData*>               AuxDataList;
 //   typedef  std::map<unsigned, QTreeTmp*>       TmpLayerMap;
 
 
@@ -140,8 +145,8 @@ namespace auxdata {
          virtual void        collectUsedLays(LayerDefList&) const;
          virtual void        motionDraw(trend::TrendBase&/*, CtmQueue&, bool active=false*/) const;
          //
-         QuadTree*           secureLayer(const LayerDef&);
-         QTreeTmp*           secureUnsortedLayer(const LayerDef&);
+         QuadTreeGrc*        secureLayer(const LayerDef&);
+         QTreeTmpGrc*        secureUnsortedLayer(const LayerDef&);
          bool                fixUnsorted();
          //
          void                reportLayers(LayerDefSet&);
@@ -157,9 +162,9 @@ namespace auxdata {
          void                readTdtLay(InputTdtFile* const);
          void                getCellOverlap();
          std::string         _name;         //! cell name
-         LayerHolder         _layers;       //! all layers in the cell
+         LayerHolderGrc      _layers;       //! all layers in the cell
          DBbox               _cellOverlap;  //! Overlap of the entire cell
-         TmpLayerMap         _tmpLayers;    //! All layers with unsorted data
+         TmpLayerMapGrc      _tmpLayers;    //! All layers with unsorted data
    };
 
 }

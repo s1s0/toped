@@ -785,5 +785,6 @@ laydata::QTreeTmpl<DataT>::~QTreeTmpl()
 //==============================================================================
 // implicit template instantiation with a certain type parameter
 template class laydata::QTreeTmpl<laydata::TdtData>;
-template class laydata::QTreeTmpl<auxdata::TdtAuxData>;
+template class laydata::QTreeTmpl<auxdata::GrcData>;
+template class laydata::QTreeTmpl<auxdata::AuxData>;
 
