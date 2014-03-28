@@ -364,6 +364,28 @@ void all_refs()
    unselect_all();
 }
 
+void selectExample(layer targetLayer)
+{
+   layer list usedLayers = report_layers(true);// i.e. your current cell
+   locklayer(usedLayers,true);//i.e. lock all
+   locklayer(targetLayer,false);//unlock the one you need
+   printf("Please select the area");
+   selectmask(0xf);//i.e. all but cell references
+   layout list selObjects=select();
+   int i = 0;
+   foreach(layout curObject;selObjects)
+   {
+      point list allPoints = pointdump(curObject);
+      printf("Object %.2i: ",i);i = i+1;
+      foreach(point dodo; allPoints)
+	printf("{ X: %8.3f | Y: %8.3f }", dodo.x, dodo.y);
+      printf("\n");
+   }
+   //restore the state
+   selectmask(0xffff);//i.e. everything
+   unselect_all();
+   locklayer(usedLayers,false);
+}
 
 void embedif(int a)
 {
