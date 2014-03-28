@@ -30,7 +30,7 @@ getlayref	Returns the name of the referenced cell. \nIf the input is not a refer
 
 echo		Prints the value of a TELL variable \n void echo( variable )
 printf		Write formatted data to the Tell log \n void printf( format [,param [,param [,...]]] )
-sprintf		Write formatted data to a string. \n string sprintf( format [,param [,param [,…]]] )
+sprintf		Write formatted data to a string. \n string sprintf( format [,param [,param [,ï¿½]]] )
 status		--------------------
 undo		--------------------
 
@@ -41,7 +41,7 @@ report_ciflayers	Prints the list of used layers in a CIF structure. \n layout re
 report_oasislayers	Prints the list of used layers in an OASIS structure. \n layout report_oasislayers(string struct_name )
 
 newdesign	Create a new empty design. \n void newdesign (string design_name) \n void newdesign (string design_name, string time_created) \n void newdesign (string design_name, real DBU, real UU) \n void newdesign (string design_name, real DBU, real UU, string time_created)
-newcell		Create a new empty cell and add it to the database. \n void newcell (string cell_name)
+newcell		Create a new empty cell and add it to the database. Returns false if the cell exists.\n bool newcell (string cell_name)
 removecell	Delete existing cell structure. \n void removecell (string cell_name)
 renamecell	Rename existing cell structure. \n void renamecell (string old_name, string new_name)
 cifread		Parse a CIF file. \n string list cifread(string file_name)
@@ -82,7 +82,8 @@ loadlib		Load a TDT file as a library, relink and update the database into memor
 unloadlib	Unload a library, relink and update the database into memory.  \n void unloadlib (string lib_name)
 tdtsave		Save the current design to the disk in TDT format. \n void tdtsave() \n void tdtsave(string time_created, string time_updated)
 tdtsaveas	Save the design under a new name to the disk \n void tdtsaveas (string file_name)
-opencell	Open an existing cell for editing. \n void opencell (string cell_name)
+opencell	Open an existing cell for editing. Returns true on success. \n bool opencell (string cell_name)
+checkcell	Check a cell with this name exist and it's editable. \n bool checkcell (string cell_name, bool editable)
 editpush	Edit in place.  \n void editpush(point edit_here)
 editpop		Edit the parent cell in the current cell hierarchy. \n void editpop()
 edittop		Edit the top cell in the current cell hierarchy. \n void edittop()

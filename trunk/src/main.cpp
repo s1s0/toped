@@ -761,7 +761,7 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    mblock->addFUNC("newdesign"        ,(DEBUG_NEW               tellstdfunc::stdNEWDESIGNd(telldata::tn_void, true)));
    mblock->addFUNC("newdesign"        ,(DEBUG_NEW               tellstdfunc::stdNEWDESIGNs(telldata::tn_void, true)));
    mblock->addFUNC("newdesign"        ,(DEBUG_NEW              tellstdfunc::stdNEWDESIGNsd(telldata::tn_void, true)));
-   mblock->addFUNC("newcell"          ,(DEBUG_NEW                  tellstdfunc::stdNEWCELL(telldata::tn_void,false)));
+   mblock->addFUNC("newcell"          ,(DEBUG_NEW                  tellstdfunc::stdNEWCELL(telldata::tn_bool,false)));
    mblock->addFUNC("removecell"       ,(DEBUG_NEW               tellstdfunc::stdREMOVECELL(telldata::tn_void,false)));
 //   mblock->addFUNC("removerefdcell"   ,(DEBUG_NEW           tellstdfunc::stdREMOVEREFDCELL(telldata::tn_void,false)));
    mblock->addFUNC("renamecell"       ,(DEBUG_NEW               tellstdfunc::stdRENAMECELL(telldata::tn_void,false)));
@@ -811,7 +811,8 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    mblock->addFUNC("tdtsave"          ,(DEBUG_NEW                     tellstdfunc::TDTsave(telldata::tn_void, true)));
    mblock->addFUNC("tdtsave"          ,(DEBUG_NEW                  tellstdfunc::TDTsaveIFF(telldata::tn_void, true)));
    mblock->addFUNC("tdtsaveas"        ,(DEBUG_NEW                   tellstdfunc::TDTsaveas(telldata::tn_void, true)));
-   mblock->addFUNC("opencell"         ,(DEBUG_NEW                 tellstdfunc::stdOPENCELL(telldata::tn_void, true)));
+   mblock->addFUNC("opencell"         ,(DEBUG_NEW                 tellstdfunc::stdOPENCELL(telldata::tn_bool, true)));
+   mblock->addFUNC("checkcell"        ,(DEBUG_NEW                tellstdfunc::stdCHECKCELL(telldata::tn_bool, true)));
    mblock->addFUNC("editpush"         ,(DEBUG_NEW                 tellstdfunc::stdEDITPUSH(telldata::tn_void, true)));
    mblock->addFUNC("editpop"          ,(DEBUG_NEW                  tellstdfunc::stdEDITPOP(telldata::tn_void, true)));
    mblock->addFUNC("edittop"          ,(DEBUG_NEW                  tellstdfunc::stdEDITTOP(telldata::tn_void, true)));
