@@ -893,7 +893,16 @@ tellstdfunc::stdREPORTLAYc::stdREPORTLAYc(telldata::typeID retype, bool eor) :
 
 int tellstdfunc::stdREPORTLAYc::execute() {
    bool recursive = getBoolValue();
-   OPstack.push(DEBUG_NEW telldata::TtString(""));
+   std::string cellName;
+   laydata::TdtLibDir* dbLibDir = NULL;
+   if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
+   {
+      laydata::TdtDesign* tDesign = (*dbLibDir)();
+      laydata::TdtCell*   tCell   = tDesign->targetECell();
+      cellName = tCell->name();
+   }
+   DATC->unlockTDT(dbLibDir, true);
+   OPstack.push(DEBUG_NEW telldata::TtString(cellName));
    OPstack.push(DEBUG_NEW telldata::TtBool(recursive));
    return stdREPORTLAY::execute();
 }
