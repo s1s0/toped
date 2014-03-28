@@ -44,6 +44,7 @@ namespace tellstdfunc {
    TELL_STDCMD_CLASSA_UNDO(stdEDITTOP        );  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdGROUP          );  // undo - implemented
    TELL_STDCMD_CLASSA_UNDO(stdUNGROUP        );  // undo - implemented
-   TELL_STDCMD_CLASSA_UNDO(stdRENAMECELL     );  //
+   TELL_STDCMD_CLASSA_UNDO(stdRENAMECELL     );  // undo - implemented
+   TELL_STDCMD_CLASSA(stdCHECKCELL);
 }
 #endif

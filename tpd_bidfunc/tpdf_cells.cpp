@@ -86,6 +86,7 @@ int tellstdfunc::stdNEWCELL::execute()
 {
    std::string nm = getStringValue();
    laydata::TdtLibDir* dbLibDir = NULL;
+   bool success = false;
    if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
@@ -101,6 +102,7 @@ int tellstdfunc::stdNEWCELL::execute()
          // No undo for the first cell in the library. We don't delete the active
          // cell at the moment
          LogFile << LogFile.getFN() << "(\""<< nm << "\");"; LogFile.flush();
+         success = true;
       }
       else
       {
@@ -108,6 +110,7 @@ int tellstdfunc::stdNEWCELL::execute()
          news += nm; news += "\" already exists in the target DB";
          tell_log(console::MT_ERROR,news);
       }
+      OPstack.push(DEBUG_NEW telldata::TtBool(success));
    }
    DATC->unlockTDT(dbLibDir, true);
    return EXEC_NEXT;
@@ -301,6 +304,7 @@ int tellstdfunc::stdOPENCELL::execute()
 {
    std::string nm = getStringValue();
    laydata::TdtLibDir* dbLibDir = NULL;
+   bool success = false;
    if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
    {
       laydata::TdtDesign* tDesign = (*dbLibDir)();
@@ -339,6 +343,7 @@ int tellstdfunc::stdOPENCELL::execute()
          wxPostEvent(TopedCanvasW, eventZOOM);
          LogFile << LogFile.getFN() << "(\""<< nm << "\");"; LogFile.flush();
          UpdateLV(tDesign->numSelected());
+         success = true;
       }
       else
       {
@@ -351,6 +356,7 @@ int tellstdfunc::stdOPENCELL::execute()
          tell_log(console::MT_ERROR,news);
          if (selected) delete selected;
       }
+      OPstack.push(DEBUG_NEW telldata::TtBool(success));
    }
    DATC->unlockTDT(dbLibDir, true);
    return EXEC_NEXT;
@@ -822,6 +828,36 @@ int tellstdfunc::stdRENAMECELL::execute()
          UNDOPstack.push_front(DEBUG_NEW telldata::TtString(oldName));
          UNDOPstack.push_front(DEBUG_NEW telldata::TtString(newName));
       }
+   }
+   DATC->unlockTDT(dbLibDir, true);
+   return EXEC_NEXT;
+}
+
+
+
+
+//=============================================================================
+tellstdfunc::stdCHECKCELL::stdCHECKCELL(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
+{
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));
+}
+
+int tellstdfunc::stdCHECKCELL::execute()
+{
+   bool editable = getBoolValue();
+   std::string name = getStringValue();
+   laydata::TdtLibDir* dbLibDir = NULL;
+   bool success = false;
+   if (DATC->lockTDT(dbLibDir, dbmxs_dblock))
+   {
+      laydata::CellDefin strdefn;
+      if (dbLibDir->getCellNamePair(name, strdefn))
+      {
+         success = editable ? (TARGETDB_LIB == strdefn->libID()) : true;
+      }
+      OPstack.push(DEBUG_NEW telldata::TtBool(success));
    }
    DATC->unlockTDT(dbLibDir, true);
    return EXEC_NEXT;
