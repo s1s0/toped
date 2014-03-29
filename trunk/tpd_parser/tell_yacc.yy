@@ -81,7 +81,8 @@ std::stack<telldata::argumentQ*>  argmapstack;
 parsercmd::FuncDeclaration *cfd;
 /*number of errors in a function defintion*/
 int funcdeferrors = 0;
-
+/*Current block is a body of a loop statement- for break/continue checks*/
+bool loopbody;
 void tellerror(std::string s, TpdYYLtype loc);
 void tellerror (std::string s);
 void cleanonabort();
@@ -264,6 +265,7 @@ Ooops! Second thought!
 %token                 tknAND tknOR tknNOT tknBWAND tknBWOR tknBWNOT
 %token                 tknSW tknSE tknNE tknNW tknPREADD tknPRESUB
 %token                 tknPOSTADD tknPOSTSUB tknCONST
+%token                 tknBREAK tknCONTINUE
 %token <parsestr>      tknIDENTIFIER tknTYPEdef tknFIELD tknSTRING
 %token <real>          tknREAL
 %token <integer>       tknUINT
@@ -437,6 +439,7 @@ whilestatement:
          if (telldata::tn_bool != $4) tellerror("bool type expected", @4);
          CMDBlock = DEBUG_NEW parsercmd::cmdBLOCK();
          CMDBlock->pushblk();
+         loopbody = true;
       }
      blockstatement {
          parsercmd::cmdBLOCK* body_block = CMDBlock;
@@ -444,6 +447,7 @@ whilestatement:
          parsercmd::cmdBLOCK* cond_block = CMDBlock;
          CMDBlock = CMDBlock->popblk();
          CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdWHILE(cond_block,body_block));
+         loopbody = false;
       }
 ;
 
@@ -515,6 +519,7 @@ foreachstatement:
          foreach_stack.push(DEBUG_NEW parsercmd::cmdFOREACH(feiterator, felist_lvalue));
          CMDBlock = DEBUG_NEW parsercmd::cmdBLOCK();
          CMDBlock->pushblk();
+         loopbody = true;
       }
      blockstatement                 {
          parsercmd::cmdBLOCK* body_block = CMDBlock;
@@ -524,6 +529,7 @@ foreachstatement:
          parsercmd::cmdFOREACH* cur_foreach = foreach_stack.top(); foreach_stack.pop();
          cur_foreach->addBlocks(header_block, body_block);
          CMDBlock->pushcmd(cur_foreach);
+         loopbody = false;
       }
 ;
 
@@ -531,10 +537,12 @@ repeatstatement:
      tknREPEAT                      {
          CMDBlock = DEBUG_NEW parsercmd::cmdBLOCK();
          CMDBlock->pushblk();
+         loopbody = true;
       }
      blockstatement tknUNTIL '('   {
          CMDBlock = DEBUG_NEW parsercmd::cmdBLOCK();
          CMDBlock->pushblk();
+         loopbody = false;
       }
      expression ')'                 {
          parsercmd::cmdBLOCK* cond_block = CMDBlock;
@@ -547,6 +555,24 @@ repeatstatement:
          }
          else CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdREPEAT(cond_block,body_block));
    }
+;
+
+breakstatement:
+     tknBREAK                       {
+         if (loopbody)
+            CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdBREAK());
+         else
+            tellerror("break statement outside a loop body", @1);
+      }
+;
+
+continuestatement:
+     tknCONTINUE                    {
+         if (loopbody)
+            CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdCONTINUE());
+         else
+            tellerror("continue statement outside a loop body", @1);
+      }
 ;
 
 blockstatement:
@@ -568,6 +594,8 @@ statement:
    | whilestatement                        {CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSTACKRST());}
    | foreachstatement                      {CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSTACKRST());}
    | repeatstatement                       {CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSTACKRST());}
+   | breakstatement      ';'               { }
+   | continuestatement   ';'               { }
    | returnstatement     ';'               {/*keep the return value in the stack*/}
    | funccall            ';'               {CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSTACKRST());}
    | listremove          ';'               {CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSTACKRST());}
@@ -1208,6 +1236,7 @@ void cleanonabort()
    if (cfd)             {delete cfd;            cfd               = NULL;}
    tell_lvalue       = NULL;
    tellvar           = NULL;
+   loopbody          = false;
    while (!tellindxvar.empty()) tellindxvar.pop(); 
 }
 

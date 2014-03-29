@@ -2296,7 +2296,8 @@ int parsercmd::cmdIFELSE::execute()
 int parsercmd::cmdWHILE::execute()
 {
    TELL_DEBUG(cmdWHILE);
-   int retexec = EXEC_NEXT;
+   int retexec;
+   int retexec1 = EXEC_NEXT;
    telldata::TtBool *cond;
    bool    condvalue;
    while (true)
@@ -2305,10 +2306,11 @@ int parsercmd::cmdWHILE::execute()
       cond = static_cast<telldata::TtBool*>(OPstack.top());OPstack.pop();
       condvalue = cond->value(); delete cond;
       if (condvalue)    retexec = _body->execute();
-      else              return retexec;
-      if (EXEC_NEXT != retexec) return retexec;
+      else              break;
+
+      if (checkNextLoop(retexec, retexec1)) break;
    }
-   return EXEC_NEXT; // dummy, to prevent warnings
+   return retexec1;
 }
 
 //=============================================================================
@@ -2316,25 +2318,27 @@ int parsercmd::cmdREPEAT::execute()
 {
    TELL_DEBUG(cmdREPEAT);
    int retexec;
+   int retexec1 = EXEC_NEXT;
    telldata::TtBool *cond;
    bool    condvalue;
    while (true)
    {
       retexec = _body->execute();
-      if (EXEC_NEXT != retexec) return retexec;
+      if (checkNextLoop(retexec, retexec1)) break;
       _condblock->execute();
       cond = static_cast<telldata::TtBool*>(OPstack.top());OPstack.pop();
       condvalue = cond->value(); delete cond;
-      if (!condvalue)           return retexec;
+      if (!condvalue)            break;
    }
-   return EXEC_NEXT; // dummy, to prevent warnings
+   return retexec1;
 }
 
 //=============================================================================
 int parsercmd::cmdFOREACH::execute()
 {
    TELL_DEBUG(cmdFOREACH);
-   int retexec = EXEC_NEXT;
+   int retexec;
+   int retexec1 = EXEC_NEXT;
 
    _header->execute();
 
@@ -2356,11 +2360,12 @@ int parsercmd::cmdFOREACH::execute()
       retexec = _body->execute();
       if (listVariable)
          (*CI)->assign(_var);
-      if (EXEC_NEXT != retexec) break;
+
+      if (checkNextLoop(retexec, retexec1)) break;
    }
    if (!listVariable)
       delete clist;
-   return retexec;
+   return retexec1;
 }
 
 parsercmd::cmdFOREACH::~cmdFOREACH()
@@ -2374,6 +2379,18 @@ parsercmd::cmdFOREACH::~cmdFOREACH()
    {
       delete _body; _body = NULL;
    }
+}
+
+//=============================================================================
+int parsercmd::cmdBREAK::execute()
+{
+   return EXEC_BREAK;
+}
+
+//=============================================================================
+int parsercmd::cmdCONTINUE::execute()
+{
+  return EXEC_CONTINUE;
 }
 
 //=============================================================================
@@ -3120,6 +3137,21 @@ bool parsercmd::vplFunc(std::string fname)
    return  (   (std::string("printf")  == fname )
             || (std::string("sprintf") == fname )
            );
+}
+
+bool parsercmd::checkNextLoop(int retexec, int&retexec1)
+{
+   switch (retexec)
+   {
+      case EXEC_NEXT:
+      case EXEC_CONTINUE:
+      case EXEC_BREAK: retexec1 = EXEC_NEXT; break;
+      default: /*EXEC_RETURN & EXEC_ABORT*/retexec1 = retexec; break;
+   }
+   if ((EXEC_NEXT == retexec) || (EXEC_CONTINUE == retexec))
+      return false;
+   else
+      return true;
 }
 
 //-----------------------------------------------------------------------------
