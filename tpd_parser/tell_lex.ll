@@ -199,6 +199,8 @@ else                       return tknELSE;
 while                      return tknWHILE;
 repeat                     return tknREPEAT;
 foreach                    return tknFOREACH;
+break                      return tknBREAK;
+continue                   return tknCONTINUE;
 struct                     return tknSTRUCTdef;
 until                      return tknUNTIL;
 const                      return tknCONST;

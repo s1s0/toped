@@ -39,6 +39,8 @@
 #define  EXEC_NEXT      0
 #define  EXEC_RETURN    1
 #define  EXEC_ABORT     2
+#define  EXEC_BREAK     3
+#define  EXEC_CONTINUE  4
 
 //-----------------------------------------------------------------------------
 // Some forward declarations
@@ -820,6 +822,20 @@ namespace  parsercmd {
       cmdBLOCK*            _body;
    };
 
+   class cmdBREAK:public cmdVIRTUAL {
+   public:
+                  cmdBREAK() {}
+      virtual    ~cmdBREAK() {}
+      virtual int execute();
+   };
+
+   class cmdCONTINUE:public cmdVIRTUAL {
+   public:
+                  cmdCONTINUE() {}
+      virtual    ~cmdCONTINUE() {}
+      virtual int execute();
+   };
+
    telldata::typeID UMinus(telldata::typeID, TpdYYLtype);
    telldata::typeID   Plus(telldata::typeID, telldata::typeID, TpdYYLtype, TpdYYLtype);
    telldata::typeID  Minus(telldata::typeID, telldata::typeID, TpdYYLtype, TpdYYLtype);
@@ -839,6 +855,7 @@ namespace  parsercmd {
    bool              ListSliceCheck(telldata::typeID, TpdYYLtype, telldata::typeID, TpdYYLtype);
    void              ClearArgumentList(ArgumentLIST*);
    bool              vplFunc(std::string);
+   bool              checkNextLoop(int, int&);
 
 
    /*!
