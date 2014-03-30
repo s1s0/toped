@@ -78,7 +78,8 @@ word parsercmd::cmdBLOCK::_undoDepth = 100;
 //=============================================================================
 parsercmd::TellPreProc::TellPreProc() :
    _preDef      (""   ),
-   _lastError   (false)
+   _lastError   (false),
+   _repeatLC    (false)
 {
    _ppState.push(ppINACTIVE);
    _ifdefDepth.push(0);
@@ -305,6 +306,20 @@ void parsercmd::TellPreProc::reset()
    while (1 < _ifdefDepth.size()) _ifdefDepth.pop();
    assert(0 == _ifdefDepth.top());
    // std::string       _tllFN; <- this one can't be cleared. pragma once might be following
+}
+
+void parsercmd::TellPreProc::setRepeatLC(std::string repeatLC, const TpdYYLtype& loc)
+{
+   if (repeatLC == std::string("default"))
+      _repeatLC = false;
+   else if (repeatLC == std::string("buggy"))
+      _repeatLC = true;
+   else
+   {
+      std::ostringstream ost;
+      ost << "\"#pragma repeatloop\" - wrong argument. \"default\" or \"buggy\" expected";
+      ppError(ost.str(), loc);
+   }
 }
 
 //=============================================================================
@@ -2328,7 +2343,14 @@ int parsercmd::cmdREPEAT::execute()
       _condblock->execute();
       cond = static_cast<telldata::TtBool*>(OPstack.top());OPstack.pop();
       condvalue = cond->value(); delete cond;
-      if (!condvalue)            break;
+      if (tellPP->repeatLC() ^ condvalue) break;
+//      {
+//         if (!condvalue)            break;
+//      }
+//      else
+//      {
+//         if (condvalue)            break;
+//      }
    }
    return retexec1;
 }

@@ -85,6 +85,8 @@ namespace  parsercmd {
          std::string       popTllFileName();
          bool              pragOnce();
          void              reset();
+         void              setRepeatLC(std::string, const TpdYYLtype&);
+         bool              repeatLC() {return _repeatLC;}
       private:
          void              ppError(std::string, const TpdYYLtype&);
          void              ppWarning(std::string, const TpdYYLtype&);
@@ -100,6 +102,7 @@ namespace  parsercmd {
          StateStack        _ppState;
          DepthStack        _ifdefDepth;
          NameSet           _parsedFiles; //! parsed files which had #pragma once statement
+         bool              _repeatLC; //! see (Issue 170 http://code.google.com/p/toped/issues/detail?id=170)
    };
 
    class cmdVIRTUAL;

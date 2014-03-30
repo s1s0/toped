@@ -389,6 +389,19 @@ lineSetup();
 screenSetup();
 layerSetup();
 
+void repeattest() {
+   int i = 10;
+   repeat {
+      printf("> %.2d\n",i); i = i - 1;
+      int j = 10;
+      repeat {
+	 j = j - 1;
+//         if (i==j) continue;
+         printf(">> %.2d\n", j);
+	 if (i==j) break;
+      } until (j <= 0);
+   } until (i <= 0)
+}
 
 // toolbar test remainders
 //toolbardeleteitem("s1s0","boza");
