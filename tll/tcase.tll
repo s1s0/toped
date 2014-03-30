@@ -140,21 +140,21 @@ void repeattest() {
    bool b = true;
    repeat {
       echo(a); a = a - 1;
-   } until (a > 0);
+   } until (a <= 0);
 
    repeat {
       echo(a); 
       a = a + 1; 
       b = a < 5;
-   } until (b);
+   } until (!b);
    int i = 10;
    repeat {
       echo("outer cycle reports -> ");echo(i); i = i - 1;
       int j = 10;
       repeat {
          echo("inner -> ");echo(j); j = j - 1;
-      } until (j > 0);
-   } until (i > 0)
+      } until (j <= 0);
+   } until (i <= 0)
 //   repeat {} until(a);
 }
 
@@ -323,12 +323,12 @@ void modify_undo_bug()
    echo("8 sqare boxes should be displayed");
 }
 
-int factoriel(real stop)
+int factoriel(int stop)
 {
    if (stop > 0)
    {
-      int boza = factoriel(stop - 1);
-      return (stop * boza);
+      int result = factoriel(stop - 1);
+      return (stop * result);
    }
    return 1;
 }
@@ -337,9 +337,9 @@ void factotest()
 {
    int i = 0;
    repeat {
-      echo(factoriel(i));
+      printf("Factoriel of %2d => %8d\n",i,factoriel(i));
       i = i+1;
-   } until (i < 10)
+   } until (i >= 10)
 }
 
 void all_texts()

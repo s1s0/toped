@@ -37,6 +37,7 @@
 %x pIFED
 %x pPASS
 %x pPRAGMA
+%x pREPEATLOOP
 lex_string        \"[^"]*\"
 lex_ID            [a-zA-Z_][a-zA-Z0-9_]*
 lxt_S             [ \t]+
@@ -144,6 +145,10 @@ location_step(&telllloc);
 <pPRAGMA>fullreset       { BEGIN(INITIAL);
                            tellPP->reset();
                            TpdPost::reloadTellFuncs();
+                         }
+<pPRAGMA>repeatloop        BEGIN(pREPEATLOOP);
+<pREPEATLOOP>{lex_ID}    { BEGIN(INITIAL);
+                           tellPP->setRepeatLC(yytext, telllloc);
                          }
 #define                    BEGIN(pDEFNM);
 <pDEFNM>{lex_ID}[ \t]*\n { parsercmd::newPrepVar(yytext, true);
