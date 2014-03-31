@@ -204,6 +204,7 @@ else                       return tknELSE;
 while                      return tknWHILE;
 repeat                     return tknREPEAT;
 foreach                    return tknFOREACH;
+for                        return tknFOR;
 break                      return tknBREAK;
 continue                   return tknCONTINUE;
 struct                     return tknSTRUCTdef;
