@@ -825,6 +825,21 @@ namespace  parsercmd {
       cmdBLOCK*            _body;
    };
 
+   class cmdFOR: public cmdVIRTUAL {
+   public:
+                           cmdFOR() :
+                                       _init(NULL), _cond(NULL), _loop(NULL), _body(NULL) {};
+      virtual             ~cmdFOR();
+      void                 addBlocks(cmdBLOCK* init, cmdBLOCK* cond,  cmdBLOCK* loop,  cmdBLOCK* body)
+                                                    {_init = init; _cond = cond; _loop = loop; _body = body;}
+      virtual int          execute();
+   private:
+      cmdBLOCK*            _init;
+      cmdBLOCK*            _cond;
+      cmdBLOCK*            _loop;
+      cmdBLOCK*            _body;
+   };
+
    class cmdBREAK:public cmdVIRTUAL {
    public:
                   cmdBREAK() {}

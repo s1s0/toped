@@ -67,6 +67,7 @@ byte indexed  = 0;
 byte lindexed = 0;
 /*Current commands - parsed, but not yet in the command stack*/
 std::stack<parsercmd::cmdFOREACH*> foreach_stack;
+std::stack<parsercmd::cmdFOR*> for_stack;
 parsercmd::cmdLISTADD *listadd_command = NULL;
 /*Current tell struct definition*/
 telldata::TCompType *tellstruct = NULL;
@@ -257,7 +258,7 @@ Ooops! Second thought!
 /*---------------------------------------------------------------------------*/
 %token                 END 0 "end of command/file"
 %token                 tknERROR
-%token                 tknIF tknELSE tknWHILE tknREPEAT tknUNTIL tknFOREACH
+%token                 tknIF tknELSE tknWHILE tknREPEAT tknUNTIL tknFOREACH tknFOR
 %token                 tknSTRUCTdef tknVOIDdef tknREALdef tknBOOLdef tknINTdef
 %token                 tknSTRINGdef tknLAYOUTdef tknAUXDATAdef tknLISTdef 
 %token                 tknCALLBACKdef tknRETURN
@@ -522,6 +523,7 @@ foreachstatement:
          loopbody = true;
       }
      blockstatement                 {
+         loopbody = false;
          parsercmd::cmdBLOCK* body_block = CMDBlock;
          CMDBlock = CMDBlock->popblk();
          parsercmd::cmdBLOCK* header_block = CMDBlock;
@@ -529,7 +531,42 @@ foreachstatement:
          parsercmd::cmdFOREACH* cur_foreach = foreach_stack.top(); foreach_stack.pop();
          cur_foreach->addBlocks(header_block, body_block);
          CMDBlock->pushcmd(cur_foreach);
+      }
+;
+
+forstatement:
+     tknFOR '('                     {
+         CMDBlock = DEBUG_NEW parsercmd::cmdBLOCK();
+         CMDBlock->pushblk();
+      }
+     forphrases ';'                 {
+         CMDBlock = DEBUG_NEW parsercmd::cmdBLOCK();
+         CMDBlock->pushblk();
+      }
+     expression ';'                 {
+         CMDBlock = DEBUG_NEW parsercmd::cmdBLOCK();
+         CMDBlock->pushblk();
+      }
+     forphrases ')'                 {
+         CMDBlock = DEBUG_NEW parsercmd::cmdBLOCK();
+         CMDBlock->pushblk();
+
+         for_stack.push(DEBUG_NEW parsercmd::cmdFOR());
+         loopbody = true;
+      }
+     blockstatement                 {
          loopbody = false;
+         parsercmd::cmdBLOCK* body_block = CMDBlock;
+         CMDBlock = CMDBlock->popblk();
+         parsercmd::cmdBLOCK* loop_block = CMDBlock;
+         CMDBlock = CMDBlock->popblk();
+         parsercmd::cmdBLOCK* cond_block = CMDBlock;
+         CMDBlock = CMDBlock->popblk();
+         parsercmd::cmdBLOCK* init_block = CMDBlock;
+         CMDBlock = CMDBlock->popblk();
+         parsercmd::cmdFOR* cur_for = for_stack.top(); for_stack.pop();
+         cur_for->addBlocks(init_block, cond_block, loop_block, body_block);
+         CMDBlock->pushcmd(cur_for);
       }
 ;
 
@@ -593,6 +630,7 @@ statement:
    | ifstatement                           {CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSTACKRST());}
    | whilestatement                        {CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSTACKRST());}
    | foreachstatement                      {CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSTACKRST());}
+   | forstatement                          {CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSTACKRST());}
    | repeatstatement                       {CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSTACKRST());}
    | breakstatement      ';'               { }
    | continuestatement   ';'               { }
@@ -682,9 +720,24 @@ funcargument:
    }
 ;
 
+forphrases:
+                                           {}
+    | fornearphrases                       {}
+;
+
+fornearphrases:
+     forphrase                             {}
+   | fornearphrases ',' forphrase          {}
+;
+
+forphrase:
+     expression                            {}
+   | assignment                            {}
+;
+
 lvalue:
-     variable                               {$$ = $1;tell_lvalue = tellvar; lindexed = indexed;}
-   | variabledeclaration                    {$$ = $1;tell_lvalue = tellvar; lindexed = indexed;}
+     variable                              {$$ = $1;tell_lvalue = tellvar; lindexed = indexed;}
+   | variabledeclaration                   {$$ = $1;tell_lvalue = tellvar; lindexed = indexed;}
 ;
 
 variable:
@@ -1229,6 +1282,10 @@ void cleanonabort()
    while (!foreach_stack.empty())
    {
 	   delete(foreach_stack.top());foreach_stack.pop();
+   }
+   while (!for_stack.empty())
+   {
+      delete(for_stack.top());for_stack.pop();
    }
    if (listadd_command) {delete listadd_command;listadd_command   = NULL;}
    if (tellstruct)      {delete tellstruct;     tellstruct        = NULL;}

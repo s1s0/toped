@@ -388,21 +388,31 @@ fillSetup();
 lineSetup();
 screenSetup();
 layerSetup();
+int i;
+for(i=0; i < 10; i = i+1)
+  printf("%2d\n",i);
+printf("i = %d\n", i);
 
-void repeattest() {
-   int i = 10;
-   repeat {
-      printf("> %.2d\n",i); i = i - 1;
-      int j = 10;
-      repeat {
-	 j = j - 1;
-//         if (i==j) continue;
-         printf(">> %.2d\n", j);
-	 if (i==j) break;
-      } until (j <= 0);
-   } until (i <= 0)
+printf("==========================================\n");
+for ( i = 5, int j = 10 ; i + j < 20; i=i+1, j=j+1 )
+  printf("%2d\n",i+j);
+
+printf("==========================================\n");
+for (int i = 10; i > 0; i=i-1) 
+{
+   printf(">> %2d",i);
+   for (int j = i; j < 20; j = j+2) {
+      printf(" %2d",j);
+    }
+   printf("\n");
 }
-
+printf("==========================================\n");
+for(;;)
+{
+  printf("%2d\n",i);
+  i = i+1;
+  if (i > 100) break;
+}
 // toolbar test remainders
 //toolbardeleteitem("s1s0","boza");
 //toolbardeleteitem("_AUIP_TB_C","boza");

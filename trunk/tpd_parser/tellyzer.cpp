@@ -2404,6 +2404,52 @@ parsercmd::cmdFOREACH::~cmdFOREACH()
 }
 
 //=============================================================================
+int parsercmd::cmdFOR::execute()
+{
+   TELL_DEBUG(cmdFOR);
+   int retexec;
+   int retexec1 = EXEC_NEXT;
+   telldata::TtBool *cond;
+   bool    condvalue;
+
+   _init->execute();
+
+   while (true)
+   {
+      _cond->execute();
+      cond = static_cast<telldata::TtBool*>(OPstack.top());OPstack.pop();
+      condvalue = cond->value(); delete cond;
+      if (condvalue)    retexec = _body->execute();
+      else              break;
+      if (checkNextLoop(retexec, retexec1)) break;
+      _loop->execute();
+   }
+   return retexec1;
+
+}
+
+parsercmd::cmdFOR::~cmdFOR()
+{
+//   delete _var;
+   if (NULL != _init)
+   {
+      delete _init; _init = NULL;
+   }
+   if (NULL != _cond)
+   {
+      delete _cond; _cond = NULL;
+   }
+   if (NULL != _loop)
+   {
+      delete _loop; _loop = NULL;
+   }
+   if (NULL != _body)
+   {
+      delete _body; _body = NULL;
+   }
+}
+
+//=============================================================================
 int parsercmd::cmdBREAK::execute()
 {
    return EXEC_BREAK;
