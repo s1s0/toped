@@ -315,13 +315,13 @@ void colorSetup() {
 void layerSetup() {
     colorSetup();
     fillSetup();
-   layprop("ACTIVE"     , 3 ,"blue"        ,"diagStripeBack" , "selected3" );
-   layprop("NWELL"      , 4 ,"yellow"      ,"Dots1"          , "selected3" );
-   layprop("P_IMPL"     , 9 ,"magenta"     ,""               , "selected3" );
-   layprop("N_IMPL"     ,10 ,"white"       ,""               , "selected3" );
-   layprop("POLY"       ,13 ,"green"       ,"checkerboard"   , "selected3" );
-   layprop("METAL1"     , 8 ,"red"         ,"checkerboards"  , "selected2" );
-   layprop("CONTACT"    ,12 ,"white"       ,"diagStripeForw" , "selected3" );
+   layprop("ACTIVE"     ,{ 3, 0}, "blue"        ,"diagStripeBack" , "selected3" );
+   layprop("NWELL"      ,{ 4, 0}, "yellow"      ,"Dots1"          , "selected3" );
+   layprop("P_IMPL"     ,{ 9, 0}, "magenta"     ,""               , "selected3" );
+   layprop("N_IMPL"     ,{10, 0}, "white"       ,""               , "selected3" );
+   layprop("POLY"       ,{13, 0}, "green"       ,"checkerboard"   , "selected3" );
+   layprop("METAL1"     ,{ 8, 0}, "red"         ,"checkerboards"  , "selected2" );
+   layprop("CONTACT"    ,{12, 0}, "white"       ,"diagStripeForw" , "selected3" );
 //    	     name    	 GDS  Colour       Fill              Selected
 //   layprop("NWELL"      ,1  ,"yellow"      ,"Dots1"          , "selected3" );
 //   layprop("UNKWN_1"    ,3  ,"darkGray"    ,""               , "selected3" );
@@ -371,53 +371,53 @@ string list cif_top = cifread("/home/skr/toped/toped_NOTUSED/basic1.cif");
 //lmap list cif_layer_definition = ciflayers();
 //echo(cif_layer_definition);
 //----------------------------------------------------
-//lmap list cif_layer_definition = {  { 1 , "L1"  },
-//                                    { 2 , "L2"  },
-//                                    { 3 , "L3"  },
-//                                    {15 , "L15" },
-//                                    {21 , "L21" },
-//                                    {22 , "L22" },
-//                                    {23 , "L23" },
-//                                    {24 , "L24" },
-//                                    {30 , "L30" },
-//                                    {32 , "L32" }
+//lmap list cif_layer_definition = {  {{ 1, 0} , "L1"  },
+//                                    {{ 2, 0} , "L2"  },
+//                                    {{ 3, 0} , "L3"  },
+//                                    {{15, 0} , "L15" },
+//                                    {{21, 0} , "L21" },
+//                                    {{22, 0} , "L22" },
+//                                    {{23, 0} , "L23" },
+//                                    {{24, 0} , "L24" },
+//                                    {{30, 0} , "L30" },
+//                                    {{32, 0} , "L32" }
 //                                 };
 
-lmap list cif_layer_definition = { {  1 ,  "ACTI" }, 
-                                   {  2 ,  "BASE" }, 
-                                   {  3 ,  "BSND" }, 
-                                   {  4 ,  "CHLY" }, 
-                                   {  5 ,  "CONT" }, 
-                                   {  6 ,  "FRKT" }, 
-                                   {  7 ,  "GARD" }, 
-                                   {  8 ,  "GATE" }, 
-                                   {  9 ,  "L30"  }, 
-                                   { 10 ,  "L60"  }, 
-                                   { 11 ,  "MET1" }, 
-                                   { 12 ,  "NDRN" }, 
-                                   { 13 ,  "NWLL" }, 
-                                   { 14 ,  "PASS" }, 
-                                   { 15 ,  "PDRN" }, 
-                                   { 16 ,  "POXP" }, 
-                                   { 17 ,  "PWLL" }, 
-                                   { 30 ,  "REZ"  }, 
-                                   { 37 ,  "SCRB" }, 
-                                   { 60 ,  "TEXT" } };
+lmap list cif_layer_definition = { {{ 1, 0},  "ACTI" }, 
+                                   {{ 2, 0},  "BASE" }, 
+                                   {{ 3, 0},  "BSND" }, 
+                                   {{ 4, 0},  "CHLY" }, 
+                                   {{ 5, 0},  "CONT" }, 
+                                   {{ 6, 0},  "FRKT" }, 
+                                   {{ 7, 0},  "GARD" }, 
+                                   {{ 8, 0},  "GATE" }, 
+                                   {{ 9, 0},  "L30"  }, 
+                                   {{10, 0},  "L60"  }, 
+                                   {{11, 0},  "MET1" }, 
+                                   {{12, 0},  "NDRN" }, 
+                                   {{13, 0},  "NWLL" }, 
+                                   {{14, 0},  "PASS" }, 
+                                   {{15, 0},  "PDRN" }, 
+                                   {{16, 0},  "POXP" }, 
+                                   {{17, 0},  "PWLL" }, 
+                                   {{30, 0},  "REZ"  }, 
+                                   {{37, 0},  "SCRB" }, 
+                                   {{60, 0},  "TEXT" } };
 
 //lmap list cif_layer_definition = {
-//                                    { 1  , "REF"},
-//                                    { 2  , "CSP"},
-//                                    { 3  , "CSN"},
-//                                    { 4  , "CM1"},
-//                                    { 5  , "CCC"},
-//                                    { 6  , "CPG"},
-//                                    { 7  , "CAA"},
-//                                    { 8  , "CNS"},
-//                                    { 9  , "CPS"},
-//                                    { 10 , "CND"},
-//                                    { 11 , "CPD"},
-//                                    { 12 , "CWP"},
-//                                    { 13 , "CWN"}
+//                                    {{1 , 0}, "REF"},
+//                                    {{2 , 0}, "CSP"},
+//                                    {{3 , 0}, "CSN"},
+//                                    {{4 , 0}, "CM1"},
+//                                    {{5 , 0}, "CCC"},
+//                                    {{6 , 0}, "CPG"},
+//                                    {{7 , 0}, "CAA"},
+//                                    {{8 , 0}, "CNS"},
+//                                    {{9 , 0}, "CPS"},
+//                                    {{10, 0}, "CND"},
+//                                    {{11, 0}, "CPD"},
+//                                    {{12, 0}, "CWP"},
+//                                    {{13, 0}, "CWN"}
 //                                 };
 
 //cifimport("Start_cmiV4_3", cif_layer_definition, true);
