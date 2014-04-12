@@ -664,6 +664,7 @@ namespace  parsercmd {
       bool                       checkDbSortState(DbSortState);
       word                       undoDepth() {return _undoDepth;}
       void                       setUndoDepth(word ud) {_undoDepth = ud;}
+      bool                       empty() {return _cmdQ.empty();}
    protected:
       bool                       addCALLBACKDECL(std::string, cmdCALLBACK*, TpdYYLtype);
       cmdSTDFUNC* const          getLocalFuncBody(const char*, telldata::argumentQ*) const;

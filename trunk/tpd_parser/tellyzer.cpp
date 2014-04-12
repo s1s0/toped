@@ -2416,16 +2416,20 @@ int parsercmd::cmdFOR::execute()
 
    while (true)
    {
-      _cond->execute();
-      cond = static_cast<telldata::TtBool*>(OPstack.top());OPstack.pop();
-      condvalue = cond->value(); delete cond;
+      if (_cond->empty())
+         condvalue = true;
+      else
+      {
+         _cond->execute();
+         cond = static_cast<telldata::TtBool*>(OPstack.top());OPstack.pop();
+         condvalue = cond->value(); delete cond;
+      }
       if (condvalue)    retexec = _body->execute();
       else              break;
       if (checkNextLoop(retexec, retexec1)) break;
       _loop->execute();
    }
    return retexec1;
-
 }
 
 parsercmd::cmdFOR::~cmdFOR()

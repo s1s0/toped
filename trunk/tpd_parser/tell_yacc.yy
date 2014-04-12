@@ -543,7 +543,7 @@ forstatement:
          CMDBlock = DEBUG_NEW parsercmd::cmdBLOCK();
          CMDBlock->pushblk();
       }
-     expression ';'                 {
+     forexpression ';'                 {
          CMDBlock = DEBUG_NEW parsercmd::cmdBLOCK();
          CMDBlock->pushblk();
       }
@@ -718,6 +718,11 @@ funcargument:
       cfd->pushArg(DEBUG_NEW parsercmd::ArgumentTYPE($2,tellvar));
       delete [] $2;
    }
+;
+
+forexpression:
+                                           {}
+    | expression                           {}
 ;
 
 forphrases:
