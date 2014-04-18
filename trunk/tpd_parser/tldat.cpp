@@ -47,6 +47,7 @@ telldata::TellVar* telldata::TCompType::initfield(const typeID ID, unsigned lSiz
       switch(ID & ~telldata::tn_listmask)
       {
          case tn_void  : assert(false); break;
+         case tn_uint  : nvar = DEBUG_NEW telldata::TtUInt()   ;break;
          case tn_int   : nvar = DEBUG_NEW telldata::TtInt()    ;break;
          case tn_real  : nvar = DEBUG_NEW telldata::TtReal()   ;break;
          case tn_bool  : nvar = DEBUG_NEW telldata::TtBool()   ;break;
@@ -167,7 +168,13 @@ void telldata::TtReal::assign(TellVar* rt)
       _value = static_cast<TtInt*>(rt)->value();
       update_cstat();
    }
-//   @TODO else ERROR Run time error (or Warning) -> unexpected type in ..bla bla
+   else if (rt->get_type() == tn_uint)
+   {
+      _value = static_cast<TtUInt*>(rt)->value();
+      update_cstat();
+   }
+   else
+      assert(false);
 }
 
 const telldata::TtReal& telldata::TtReal::operator = (const TtReal& a)
@@ -198,6 +205,11 @@ void telldata::TtInt::assign(TellVar* rt)
       _value = static_cast<TtInt*>(rt)->value();
       update_cstat();
    }
+   else if (rt->get_type() == tn_uint)
+   {
+      _value = (int4b)static_cast<TtUInt*>(rt)->value();
+      update_cstat();
+   }
    else
       assert(false);
 }
@@ -215,6 +227,48 @@ const telldata::TtInt& telldata::TtInt::operator = (const TtReal& a)
 //   int4b ival = (int4b)rval;
 //   _value =
    _value = (int4b)a.value();
+   return *this;
+}
+
+//=============================================================================
+void telldata::TtUInt::assign(TellVar* rt)
+{
+   if (rt->get_type() == tn_real)
+   {
+      // Note! There is no rint() here deliberately - for compatibility
+      // with normal C. See Issue 47. There is a tell function rint() with
+      // the same functionality as the corresponding C function which
+      // shall be used for rounding
+      _value = (dword) static_cast<TtReal*>(rt)->value();
+      update_cstat();
+   }
+   else if (rt->get_type() == tn_int)
+   {
+      _value = (dword) static_cast<TtInt*>(rt)->value();
+      update_cstat();
+   }
+   else if (rt->get_type() == tn_uint)
+   {
+      _value =  static_cast<TtUInt*>(rt)->value();
+      update_cstat();
+   }
+   else
+      assert(false);
+}
+
+const telldata::TtUInt& telldata::TtUInt::operator = (const TtUInt& a)
+{
+   _value = a.value();
+   return *this;
+}
+
+const telldata::TtUInt& telldata::TtUInt::operator = (const TtReal& a)
+{
+   // if a.value outside the limits -> send a runtime error message
+//   real  rval = a.value();
+//   int4b ival = (int4b)rval;
+//   _value =
+   _value = (dword)a.value();
    return *this;
 }
 //=============================================================================
@@ -329,10 +383,35 @@ const telldata::TtList& telldata::TtList::operator =(const telldata::TtList& cob
          // The initial trouble comes from the internal conversion between int and real
          // and this introduces the risk to contaminate int lists with a real value
          // and vice versa
-         if (telldata::tn_int == localID)
-            _mlist.push_back(DEBUG_NEW TtInt(static_cast<TtReal*>(cobj._mlist[i])->value()));
+         if   (telldata::tn_uint == localID)
+         {
+            if      (telldata::tn_uint == compID)
+               _mlist.push_back(DEBUG_NEW TtUInt(static_cast<TtInt*>(cobj._mlist[i])->value()));
+            else if (telldata::tn_real == compID)
+               _mlist.push_back(DEBUG_NEW TtUInt(static_cast<TtReal*>(cobj._mlist[i])->value()));
+            else
+               assert(false);
+         }
+         else if (telldata::tn_int == localID)
+         {
+            if      (telldata::tn_uint == compID)
+               _mlist.push_back(DEBUG_NEW TtInt(static_cast<TtUInt*>(cobj._mlist[i])->value()));
+            else if (telldata::tn_real == compID)
+               _mlist.push_back(DEBUG_NEW TtInt(static_cast<TtReal*>(cobj._mlist[i])->value()));
+            else
+               assert(false);
+         }
+         else if (telldata::tn_real == localID)
+         {
+            if      (telldata::tn_uint == compID)
+               _mlist.push_back(DEBUG_NEW TtReal(static_cast<TtUInt*>(cobj._mlist[i])->value()));
+            else if (telldata::tn_int == compID)
+               _mlist.push_back(DEBUG_NEW TtReal(static_cast<TtInt*>(cobj._mlist[i])->value()));
+            else
+               assert(false);
+         }
          else
-            _mlist.push_back(DEBUG_NEW TtReal(static_cast<TtInt*>(cobj._mlist[i])->value()));
+            assert(false);
       }
       else
       {
@@ -535,12 +614,20 @@ telldata::TtUserStruct::TtUserStruct(const TCompType* tltypedef, operandSTACK& O
       {
          _fieldList.push_back(structRECNAME(CI->_fName,OPstack.top()->selfcopy()));
       }
-      else if (NUMBER_TYPE(CI->_fType) && NUMBER_TYPE(OPstack.top()->get_type()) && (CI->_fType > OPstack.top()->get_type()))
+      else if (   NUMBER_TYPE(CI->_fType)
+               && NUMBER_TYPE(OPstack.top()->get_type())
+               && (CI->_fType > OPstack.top()->get_type()))
       {
-         assert(tn_int == OPstack.top()->get_type());
-         assert(tn_real == CI->_fType);
-         TtReal* dummy = DEBUG_NEW TtReal(static_cast<TtInt*>(OPstack.top())->value());
-         _fieldList.push_back(structRECNAME(CI->_fName,dummy));
+         if (tn_real == CI->_fType)
+         {
+            TtReal* dummy = DEBUG_NEW TtReal(static_cast<TtReal*>(OPstack.top())->value());
+            _fieldList.push_back(structRECNAME(CI->_fName,dummy));
+         }
+         else if (tn_int == CI->_fType)
+         {
+            TtInt* dummy = DEBUG_NEW TtInt(static_cast<TtInt*>(OPstack.top())->value());
+            _fieldList.push_back(structRECNAME(CI->_fName,dummy));
+         }
       }
       else
          assert(false);
@@ -1054,19 +1141,20 @@ std::string telldata::echoType( const telldata::typeID tID,
    std::string atype;
    switch (tID & ~telldata::tn_listmask)
    {
-      case telldata::tn_void  : atype = "void"  ; break;
-      case telldata::tn_int   : atype = "int"   ; break;
-      case telldata::tn_real  : atype = "real"  ; break;
-      case telldata::tn_bool  : atype = "bool"  ; break;
-      case telldata::tn_string: atype = "string"; break;
-      case telldata::tn_layout: atype = "layout"; break;
-      case telldata::tn_auxilary: atype = "auxdata"; break;
-      case telldata::tn_pnt   : atype = "point" ; break;
-      case telldata::tn_box   : atype = "box"   ; break;
-      case telldata::tn_laymap: atype = "lmap"  ; break;
-      case telldata::tn_hshstr: atype = "strmap"; break;
-      case telldata::tn_layer : atype = "layer" ; break;
-      default                 :
+      case telldata::tn_void    : atype = "void"     ; break;
+      case telldata::tn_uint    : atype = "unsigned" ; break;
+      case telldata::tn_int     : atype = "int"      ; break;
+      case telldata::tn_real    : atype = "real"     ; break;
+      case telldata::tn_bool    : atype = "bool"     ; break;
+      case telldata::tn_string  : atype = "string"   ; break;
+      case telldata::tn_layout  : atype = "layout"   ; break;
+      case telldata::tn_auxilary: atype = "auxdata"  ; break;
+      case telldata::tn_pnt     : atype = "point"    ; break;
+      case telldata::tn_box     : atype = "box"      ; break;
+      case telldata::tn_laymap  : atype = "lmap"     ; break;
+      case telldata::tn_hshstr  : atype = "strmap"   ; break;
+      case telldata::tn_layer   : atype = "layer"    ; break;
+      default                   :
       {
          atype = "?UNKNOWN TYPE?";
          if (NULL != lclTypeDef)

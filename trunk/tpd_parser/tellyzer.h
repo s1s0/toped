@@ -380,9 +380,11 @@ namespace  parsercmd {
 
    class cmdBWNOT:public cmdVIRTUAL {
    public:
-                  cmdBWNOT() {}
+                  cmdBWNOT(telldata::typeID type):_type(type)  {}
       virtual    ~cmdBWNOT() {}
       virtual int execute();
+   private:
+      telldata::typeID  _type;
    };
 
    class cmdAND:public cmdVIRTUAL {
@@ -394,9 +396,11 @@ namespace  parsercmd {
 
    class cmdBWAND:public cmdVIRTUAL {
    public:
-                  cmdBWAND() {}
+                  cmdBWAND(telldata::typeID type):_type(type)  {}
       virtual    ~cmdBWAND() {}
       virtual int execute();
+   private:
+      telldata::typeID  _type;
    };
 
    class cmdOR:public cmdVIRTUAL {
@@ -408,9 +412,11 @@ namespace  parsercmd {
 
    class cmdBWOR:public cmdVIRTUAL {
    public:
-                  cmdBWOR() {}
+                  cmdBWOR(telldata::typeID type):_type(type)  {}
       virtual    ~cmdBWOR() {}
       virtual int execute();
+   private:
+      telldata::typeID  _type;
    };
 
    class cmdSTACKRST:public cmdVIRTUAL {

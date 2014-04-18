@@ -221,13 +221,31 @@ int tellstdfunc::stdFILLDEF::execute() {
       {
          // declare the array like this because otherwise it'll be wiped
          byte* ptrn = DEBUG_NEW byte[128];
-         telldata::TtInt *cmpnt;
-         for (unsigned i = 0; i < 128; i++) {
-            cmpnt = static_cast<telldata::TtInt*>((sl->mlist())[i]);
-            if (cmpnt->value() > MAX_BYTE_VALUE) {
-               tell_log(console::MT_ERROR,"Value out of range in a pattern definition");
+         const telldata::memlist dataLst = sl->mlist();
+         for (unsigned i = 0; i < sl->size();i++)
+         {
+            if (telldata::tn_uint == dataLst[i]->get_type())
+            {
+               telldata::TtUInt* wvar = static_cast<telldata::TtUInt*>(dataLst[i]);
+               if ( MAX_BYTE_VALUE < wvar->value())
+               {
+                  tell_log(console::MT_ERROR,"Value out of range in a pattern definition");
+                  ptrn[i] = 0x0;
+               }
+               else
+                  ptrn[i] = wvar->value();
             }
-            else ptrn[i] = cmpnt->value();
+            else if (telldata::tn_int == dataLst[i]->get_type())
+            {
+               telldata::TtInt* wvar = static_cast<telldata::TtInt*>(dataLst[i]);
+               if ( ( wvar->value() < 0 ) || ( MAX_BYTE_VALUE < wvar->value() ) )
+               {
+                  tell_log(console::MT_ERROR,"Value out of range in a pattern definition");
+                  ptrn[i] = 0x0;
+               }
+               else
+                  ptrn[i] = wvar->value();
+            }
          }
          // error message - included in the method
          drawProp->addFill(name, ptrn);

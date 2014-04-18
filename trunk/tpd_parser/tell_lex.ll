@@ -190,6 +190,7 @@ location_step(&telllloc);
 void                       return tknVOIDdef;
 real                       return tknREALdef;
 int                        return tknINTdef;
+unsigned                   return tknUNSIGNEDdef;
 bool                       return tknBOOLdef;
 string                     return tknSTRINGdef;
 layout                     return tknLAYOUTdef;
@@ -248,7 +249,7 @@ const                      return tknCONST;
 "="                        return '=';
 ";"                        return ';';
 0x[0-9A-Fa-f]+    |
-{lxt_D}+                 { telllval.integer = parsercmd::getllint(yytext); return tknUINT;}
+{lxt_D}+                 { telllval.uint = parsercmd::getllint(yytext); return tknUINT;}
 {lxt_D}+"."{lxt_D}*({lxt_E})?  |
 {lxt_D}*"."{lxt_D}+({lxt_E})?  |
 {lxt_D}+{lxt_E}          { telllval.real = atof(yytext); return tknREAL;}
