@@ -542,6 +542,9 @@ int tellstdfunc::replaceNextFstr(std::string& str, telldata::TellVar* val)
          case telldata::tn_int    :
             numChars = sprintf(replacement, formatChars, static_cast<telldata::TtInt*>(val)->value());
             break;
+         case telldata::tn_uint   :
+            numChars = sprintf(replacement, formatChars, static_cast<telldata::TtUInt*>(val)->value());
+            break;
          case telldata::tn_real   :
             numChars = sprintf(replacement, formatChars, static_cast<telldata::TtReal*>(val)->value());
             break;
@@ -746,6 +749,11 @@ void tellstdfunc::echoWrapper(telldata::TellVar* p, std::ostringstream& ost)
       case telldata::tn_int:
       {
          ost << static_cast<telldata::TtInt*>(p)->value();
+         break;
+      }
+      case telldata::tn_uint:
+      {
+         ost << static_cast<telldata::TtUInt*>(p)->value();
          break;
       }
       case telldata::tn_real:

@@ -33,8 +33,9 @@
 #include <algorithm>
 #include "ttt.h"
 
-#define NUMBER_TYPE(op) ((op > telldata::tn_void) && (op < telldata::tn_bool  ) && !(op & telldata::tn_listmask))
-#define PRINTF_ABLE(op) ((op > telldata::tn_void) && (op < telldata::tn_layout) && !(op & telldata::tn_listmask))
+#define NUMBER_TYPE(op) ((op > telldata::tn_void) && (op < telldata::tn_bool ))
+#define INTEGER_TYPE(op) ((op == telldata::tn_uint) || (op == telldata::tn_int ))
+#define PRINTF_ABLE(op) ((op > telldata::tn_void) && (op < telldata::tn_layout))
 #define TLISTOF(op) (op | telldata::tn_listmask)
 #define TLISALIST(op) (op & telldata::tn_listmask)
 #define TLCOMPOSIT_TYPE(op) (op > telldata::tn_composite)
@@ -52,23 +53,24 @@ namespace auxdata {
 //=============================================================================
 namespace telldata {
    typedef unsigned int typeID;
-   const typeID tn_NULL       =  0;
-   const typeID tn_void       =  1;
-   const typeID tn_int        =  2;
-   const typeID tn_real       =  3;
-   const typeID tn_bool       =  4;
-   const typeID tn_string     =  5;
-   const typeID tn_layout     =  6;
-   const typeID tn_auxilary   =  7;
-   const typeID tn_anyfref    =  9;
-   const typeID tn_composite  = 10;
-   const typeID tn_pnt        = 11;
-   const typeID tn_box        = 12;
-   const typeID tn_bnd        = 13;
-   const typeID tn_laymap     = 14;
-   const typeID tn_hshstr     = 15;
-   const typeID tn_layer      = 16;
-   const typeID tn_usertypes  = 17;
+   const typeID tn_NULL        =  0;//
+   const typeID tn_void        =  1;//
+   const typeID tn_uint        =  2;// number type
+   const typeID tn_int         =  3;// number type
+   const typeID tn_real        =  4;// number type
+   const typeID tn_bool        =  5;//
+   const typeID tn_string      =  6;//
+   const typeID tn_layout      =  7;//
+   const typeID tn_auxilary    =  8;//
+   const typeID tn_anyfref     =  9;//
+   const typeID tn_composite   = 10;// from this position on - only composites
+   const typeID tn_pnt         = 11;//
+   const typeID tn_box         = 12;//
+   const typeID tn_bnd         = 13;//
+   const typeID tn_laymap      = 14;//
+   const typeID tn_hshstr      = 15;//
+   const typeID tn_layer       = 16;//
+   const typeID tn_usertypes   = 17;//
    // the most significant bit is a mask flag
    const typeID tn_listmask = typeID(1) << (8 * sizeof(typeID) - 1);
 
@@ -239,6 +241,25 @@ namespace telldata {
       friend class TtLayer;
    private:
       int4b               _value;
+   };
+
+   //==============================================================================
+   class TtUInt:public TellVar {
+   public:
+                           TtUInt(int4b  num = 0) : TellVar(tn_uint), _value(num) {}
+                           TtUInt(const TtUInt& cobj) :
+                                          TellVar(tn_uint), _value(cobj.value()) {}
+      const TtUInt&        operator =(const TtUInt&);
+      const TtUInt&        operator =(const TtReal&);
+      virtual void         initialize() {_value = 0;}
+      virtual void         assign(TellVar*);
+      dword                value() const        {return _value;};
+      void                 uminus()             {_value  = -_value;   };
+      virtual TellVar*     selfcopy() const     {return DEBUG_NEW TtUInt(_value);};
+      void                 NOT()                {_value = ~_value;}
+//      friend class TtLayer;
+   private:
+      dword               _value;
    };
 
    //==============================================================================

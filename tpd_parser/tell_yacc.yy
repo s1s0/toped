@@ -242,7 +242,7 @@ Ooops! Second thought!
 %union {
    float                       real;
    bool                        ptypedef;
-   int                         integer;
+   unsigned int                uint;
    char*                       parsestr;
     telldata::typeID           pttname;
    parsercmd::ArgumentLIST*    pfarguments;
@@ -261,7 +261,7 @@ Ooops! Second thought!
 %token                 tknIF tknELSE tknWHILE tknREPEAT tknUNTIL tknFOREACH tknFOR
 %token                 tknSTRUCTdef tknVOIDdef tknREALdef tknBOOLdef tknINTdef
 %token                 tknSTRINGdef tknLAYOUTdef tknAUXDATAdef tknLISTdef 
-%token                 tknCALLBACKdef tknRETURN
+%token                 tknCALLBACKdef tknRETURN tknUNSIGNEDdef
 %token                 tknTRUE tknFALSE tknLEQ tknGEQ tknEQ tknNEQ
 %token                 tknAND tknOR tknNOT tknBWAND tknBWOR tknBWNOT
 %token                 tknSW tknSE tknNE tknNW tknPREADD tknPRESUB
@@ -269,7 +269,7 @@ Ooops! Second thought!
 %token                 tknBREAK tknCONTINUE
 %token <parsestr>      tknIDENTIFIER tknTYPEdef tknFIELD tknSTRING
 %token <real>          tknREAL
-%token <integer>       tknUINT
+%token <uint>          tknUINT
 /* parser types*/
 %type <pttname>        primaryexpression unaryexpression
 %type <pttname>        multiexpression addexpression expression
@@ -860,6 +860,8 @@ telltype:
      tknVOIDdef                            {$$ = telldata::tn_void;}
    | tknREALdef                            {$$ = telldata::tn_real;}
    | tknINTdef                             {$$ = telldata::tn_int;}
+   | tknUNSIGNEDdef tknINTdef              {$$ = telldata::tn_uint;}
+   | tknUNSIGNEDdef                        {$$ = telldata::tn_uint;}
    | tknBOOLdef                            {$$ = telldata::tn_bool;}
    | tknSTRINGdef                          {$$ = telldata::tn_string;}
    | tknLAYOUTdef                          {$$ = telldata::tn_layout;}
@@ -1225,8 +1227,8 @@ unaryexpression :
 primaryexpression :
      tknREAL                               {$$ = telldata::tn_real;
       CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPUSH(DEBUG_NEW telldata::TtReal($1), false, true));}
-   | tknUINT                               {$$ = telldata::tn_int;
-      CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPUSH(DEBUG_NEW telldata::TtInt($1), false, true));}
+   | tknUINT                               {$$ = telldata::tn_uint;
+      CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPUSH(DEBUG_NEW telldata::TtUInt($1), false, true));}
    | tknTRUE                               {$$ = telldata::tn_bool;
       CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdPUSH(DEBUG_NEW telldata::TtBool(true), false, true));}
    | tknFALSE                              {$$ = telldata::tn_bool;
