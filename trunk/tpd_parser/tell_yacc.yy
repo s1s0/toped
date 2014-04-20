@@ -263,7 +263,7 @@ Ooops! Second thought!
 %token                 tknSTRINGdef tknLAYOUTdef tknAUXDATAdef tknLISTdef 
 %token                 tknCALLBACKdef tknRETURN tknUNSIGNEDdef
 %token                 tknTRUE tknFALSE tknLEQ tknGEQ tknEQ tknNEQ
-%token                 tknAND tknOR tknNOT tknBWAND tknBWOR tknBWNOT
+%token                 tknAND tknOR tknNOT tknBWAND tknBWOR tknBWXOR tknBWNOT
 %token                 tknSW tknSE tknNE tknNW tknPREADD tknPRESUB
 %token                 tknPOSTADD tknPOSTSUB tknCONST
 %token                 tknBREAK tknCONTINUE
@@ -275,9 +275,9 @@ Ooops! Second thought!
 %type <pttname>        multiexpression addexpression expression
 %type <pttname>        assignment fieldname funccall telllist
 %type <pttname>        lvalue telltype telltypeID variable anonymousvar
-%type <pttname>        variabledeclaration andexpression eqexpression relexpression
+%type <pttname>        variabledeclaration andexpression xorexpression 
+%type <pttname>        eqexpression relexpression callbackanotypedef
 %type <pttname>        listindex listrange listinsert listremove listslice 
-%type <pttname>        callbackanotypedef
 %type <pfarguments>    funcarguments
 %type <parguments>     structure argument funcreference
 %type <plarguments>    nearguments arguments
@@ -1176,9 +1176,14 @@ anonymousvar:
 /*==EXPRESSION===============================================================*/
 /*orexpression*/
 expression :
-     andexpression                         {$$ = $1;}
-   | expression tknOR   andexpression      {$$ = parsercmd::BoolEx($1,$3,"||",@1,@2);}
-   | expression tknBWOR andexpression      {$$ = parsercmd::BoolEx($1,$3,"|",@1,@2);}
+     xorexpression                         {$$ = $1;}
+   | expression tknOR   xorexpression      {$$ = parsercmd::BoolEx($1,$3,"||",@1,@2);}
+   | expression tknBWOR xorexpression      {$$ = parsercmd::BoolEx($1,$3,"|",@1,@2);}
+;
+
+xorexpression :
+     andexpression
+   | xorexpression tknBWXOR andexpression   {$$ = parsercmd::BoolEx($1,$3, "^",@1,@2);}
 ;
 
 andexpression :
