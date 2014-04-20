@@ -419,6 +419,15 @@ namespace  parsercmd {
       telldata::typeID  _type;
    };
 
+   class cmdBWXOR:public cmdVIRTUAL {
+   public:
+                  cmdBWXOR(telldata::typeID type):_type(type)  {}
+      virtual    ~cmdBWXOR() {}
+      virtual int execute();
+   private:
+      telldata::typeID  _type;
+   };
+
    class cmdSTACKRST:public cmdVIRTUAL {
    public:
                   cmdSTACKRST() {}
