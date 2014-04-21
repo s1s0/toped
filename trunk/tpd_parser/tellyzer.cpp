@@ -972,7 +972,7 @@ int parsercmd::cmdOR::execute()
 //=============================================================================
 int parsercmd::cmdBWOR::execute()
 {
-   TELL_DEBUG(cmdBWAND);
+   TELL_DEBUG(cmdBWOR);
    telldata::TellVar *op1 = OPstack.top();OPstack.pop();
    telldata::TellVar *op2 = OPstack.top();OPstack.pop();
 
@@ -998,7 +998,7 @@ int parsercmd::cmdBWOR::execute()
 //=============================================================================
 int parsercmd::cmdBWXOR::execute()
 {
-   TELL_DEBUG(cmdBWAND);
+   TELL_DEBUG(cmdBWXOR);
 
    telldata::TellVar *op1 = OPstack.top();OPstack.pop();
    telldata::TellVar *op2 = OPstack.top();OPstack.pop();
@@ -1018,6 +1018,34 @@ int parsercmd::cmdBWXOR::execute()
       OPstack.push(DEBUG_NEW telldata::TtUInt(opi1->value() ^ opi2->value()));
    }
    delete(op1);
+   delete(op2);
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+int parsercmd::cmdBWSHIFT::execute()
+{
+   TELL_DEBUG(cmdBWSHIFT);
+
+   dword op1 = getIndexValue();
+   telldata::TellVar *op2 = OPstack.top();OPstack.pop();
+
+   if (telldata::tn_int == _type)
+   {
+      telldata::TtInt  *opi2 = static_cast<telldata::TtInt*>(op2);
+      if (_sright)
+         OPstack.push(DEBUG_NEW telldata::TtInt(opi2->value() >> op1));
+      else
+         OPstack.push(DEBUG_NEW telldata::TtInt(opi2->value() << op1 ));
+   }
+   else if (telldata::tn_uint == _type)
+   {
+      telldata::TtUInt  *opi2 = static_cast<telldata::TtUInt*>(op2);
+      if (_sright)
+         OPstack.push(DEBUG_NEW telldata::TtUInt(opi2->value() >> op1));
+      else
+         OPstack.push(DEBUG_NEW telldata::TtUInt(opi2->value() << op1 ));
+   }
    delete(op2);
    return EXEC_NEXT;
 }
@@ -3348,29 +3376,31 @@ telldata::typeID parsercmd::BoolEx(telldata::typeID op1, telldata::typeID op2,
       else if (ope == ">=") CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdGET());
       else if (ope == "==") CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdEQ());
       else if (ope == "!=") CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdNE());
-      else if ((telldata::tn_int == op1) && (telldata::tn_int == op2))
+      else if((ope == "<<") || (ope == ">>"))
       {
-         if      (ope == "&") CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdBWAND(telldata::tn_int));
-         else if (ope == "|") CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdBWOR(telldata::tn_int));
-         else if (ope == "^") CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdBWXOR(telldata::tn_int));
+         if (INTEGER_TYPE(op1) && INTEGER_TYPE(op2))
+         {
+
+            CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdBWSHIFT(op1,(ope == ">>")));
+            return op1;
+         }
+         else
+         {
+            tellerror("unexpected operand type",loc1);
+            return telldata::tn_void;
+         }
+      }
+      else if (INTEGER_TYPE(op1) && INTEGER_TYPE(op2) && (op1 == op2))
+      {
+         if      (ope == "&") CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdBWAND(op1));
+         else if (ope == "|") CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdBWOR(op1));
+         else if (ope == "^") CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdBWXOR(op1));
          else
          {
             tellerror("unexpected operand type",loc1);
             return telldata::tn_void;
          }
          return telldata::tn_int;
-      }
-      else if ((telldata::tn_uint == op1) && (telldata::tn_uint == op2))
-      {
-         if      (ope == "&") CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdBWAND(telldata::tn_uint));
-         else if (ope == "|") CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdBWOR(telldata::tn_uint));
-         else if (ope == "^") CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdBWXOR(telldata::tn_uint));
-         else
-         {
-            tellerror("unexpected operand type",loc1);
-            return telldata::tn_void;
-         }
-         return telldata::tn_uint;
       }
       else
       {

@@ -225,6 +225,8 @@ const                      return tknCONST;
 "^"                        return tknBWXOR;
 "!"                        return tknNOT;
 "~"                        return tknBWNOT;
+"<<"                       return tknSHL;
+">>"                       return tknSHR;
 "|/"                       return tknSW;
 "\\|"                      return tknSE;
 "/|"                       return tknNE;
