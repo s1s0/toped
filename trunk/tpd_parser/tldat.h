@@ -292,6 +292,7 @@ namespace telldata {
       const TtString&      operator = (const TtString&);
       virtual void         initialize() {_value = "";}
       virtual void         assign(TellVar*);
+      void                 part_assign(dword,TtString*);
       virtual TellVar*     selfcopy() const    {return DEBUG_NEW TtString(_value);}
       const std::string    value() const       {return _value;};
    private:

@@ -438,6 +438,15 @@ namespace  parsercmd {
       bool              _sright;
    };
 
+   class cmdSTRCMP:public cmdVIRTUAL {
+   public:
+                  cmdSTRCMP(bool eq) : _eq(eq) {};
+      virtual    ~cmdSTRCMP() {};
+      virtual int execute();
+   private:
+      bool           _eq;
+   };
+
    class cmdSTACKRST:public cmdVIRTUAL {
    public:
                   cmdSTACKRST() {}

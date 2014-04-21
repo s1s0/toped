@@ -297,6 +297,13 @@ void telldata::TtString::assign(TellVar* value)
    update_cstat();
 }
 
+void telldata::TtString::part_assign(dword idx, TtString* rpl)
+{
+   std::string wrpl = rpl->value();
+   dword length = wrpl.length();
+   _value.replace(idx,length,wrpl);
+}
+
 //=============================================================================
 telldata::TtLayout::TtLayout(const TtLayout& cobj) :
    TellVar(cobj.get_type()),

@@ -1051,6 +1051,16 @@ int parsercmd::cmdBWSHIFT::execute()
 }
 
 //=============================================================================
+int parsercmd::cmdSTRCMP::execute()
+{
+   bool equal = !_eq;
+   std::string op1 = getStringValue();
+   std::string op2 = getStringValue();
+   equal ^= (op1 == op2);
+   OPstack.push(DEBUG_NEW telldata::TtBool(equal));
+   return EXEC_NEXT;
+}
+//=============================================================================
 int parsercmd::cmdNOT::execute()
 {
    TELL_DEBUG(cmdNOT);
@@ -1160,26 +1170,61 @@ int parsercmd::cmdASSIGN::execute()
       case 1:
       {
          dword idx = getIndexValue();
-         telldata::TellVar* indexVar = static_cast<telldata::TtList*>(_var)->index_var(idx);
-         if ((NULL != indexVar) && (!_opstackerr))
+         if (telldata::tn_string == _var->get_type())
          {
-            indexVar->assign(op); OPstack.push(indexVar->selfcopy());
-            delete op;
-            return EXEC_NEXT;
+            assert(telldata::tn_string == op->get_type());
+            telldata::TtString* wsop = static_cast<telldata::TtString*>(op);
+            telldata::TtString* tstr = static_cast<telldata::TtString*>(_var);
+            if ((tstr->value().length() > idx) && (!_opstackerr) && (1 == wsop->value().length()))
+            {
+               tstr->part_assign(idx,wsop); OPstack.push(tstr->selfcopy());
+               delete op;
+               return EXEC_NEXT;
+            }
+            else
+            {
+               std::stringstream info;
+               info << "Runtime error. ";
+               if (1 != wsop->value().length())
+               {
+                  info << "Unmatched list range";
+               }
+               else
+               {
+                  unsigned maxSize = tstr->value().length();
+                  info << "Invalid index in assign lvalue. Requested: "<< idx << "; Valid: ";
+                  if (0 == maxSize)
+                     info << " none (empty list)";
+                  else if (1 == maxSize)
+                     info << "[0]";
+                  else
+                     info << "[0 - " << maxSize - 1 << "]";
+               }
+               tellerror(info.str());
+            }
          }
          else
          {
-            std::stringstream info;
-            unsigned maxSize = static_cast<telldata::TtList*>(_var)->size();
-            info << "Runtime error. Invalid index in assign lvalue. Requested: "<< idx << "; Valid: ";
-            if (0 == maxSize)
-               info << " none (empty list)";
-            else if (1 == maxSize)
-               info << "[0]";
+            telldata::TellVar* indexVar = static_cast<telldata::TtList*>(_var)->index_var(idx);
+            if ((NULL != indexVar) && (!_opstackerr))
+            {
+               indexVar->assign(op); OPstack.push(indexVar->selfcopy());
+               delete op;
+               return EXEC_NEXT;
+            }
             else
-               info << "[0 - " << maxSize - 1 << "]";
-            tellerror(info.str());
-            return EXEC_ABORT;
+            {
+               std::stringstream info;
+               unsigned maxSize = static_cast<telldata::TtList*>(_var)->size();
+               info << "Runtime error. Invalid index in assign lvalue. Requested: "<< idx << "; Valid: ";
+               if (0 == maxSize)
+                  info << " none (empty list)";
+               else if (1 == maxSize)
+                  info << "[0]";
+               else
+                  info << "[0 - " << maxSize - 1 << "]";
+               tellerror(info.str());
+            }
          }
          break;
       }
@@ -1187,22 +1232,46 @@ int parsercmd::cmdASSIGN::execute()
       {
          dword idx2 = getIndexValue();
          dword idx1 = getIndexValue();
-         telldata::TtList* theList = static_cast<telldata::TtList*>(_var);
-         telldata::TtList* newValue = static_cast<telldata::TtList*>(op);
+         if (telldata::tn_string == _var->get_type())
+         {
+            assert(telldata::tn_string == op->get_type());
+            telldata::TtString* wsop = static_cast<telldata::TtString*>(op);
+            telldata::TtString* tstr = static_cast<telldata::TtString*>(_var);
 
-         if (_opstackerr)
-            tellerror("Runtime error.Invalid Index");
-         if (idx1 >= idx2)
-            tellerror("Runtime error.Second index is expected to be bigger than the first one");
-         else if ((newValue->size() - 1) != (idx2 - idx1))
-            tellerror("Runtime error. Unmatched list range");
-         else if (!theList->part_assign(idx1, idx2, newValue))
-            tellerror("Runtime error.Invalid Index");
+            if (_opstackerr)
+               tellerror("Runtime error. Invalid Index");
+            if (idx1 >= idx2)
+               tellerror("Runtime error.Second index is expected to be bigger than the first one");
+            else if ((wsop->value().length() - 1) != (idx2 - idx1))
+               tellerror("Runtime error. Unmatched list range");
+            else if (!(tstr->value().length() > idx2))
+               tellerror("Runtime error.Invalid Index");
+            else
+            {
+               tstr->part_assign(idx1,wsop); OPstack.push(tstr->selfcopy());
+               delete op;
+               return EXEC_NEXT;
+            }
+         }
          else
          {
-            OPstack.push(theList->index_range_var(idx1,idx2));
-            delete op;
-            return EXEC_NEXT;
+            telldata::TtList* theList = static_cast<telldata::TtList*>(_var);
+            telldata::TtList* newValue = static_cast<telldata::TtList*>(op);
+
+            if (_opstackerr)
+               tellerror("Runtime error. Invalid Index");
+            if (idx1 >= idx2)
+               tellerror("Runtime error.Second index is expected to be bigger than the first one");
+            else if ((newValue->size() - 1) != (idx2 - idx1))
+               tellerror("Runtime error. Unmatched list range");
+            else if (!theList->part_assign(idx1, idx2, newValue))
+               tellerror("Runtime error.Invalid Index");
+            else
+            {
+               OPstack.push(theList->index_range_var(idx1,idx2));
+               delete op;
+               return EXEC_NEXT;
+            }
          }
          break;
       }
@@ -1432,29 +1501,55 @@ int parsercmd::cmdPUSH::execute()
       }
       case 1:
       {
-         // another class cmdLISTINDEX could be appropriate instead of the logical
-         // branch below. It looks to me that it is quite the same as above, apart
-         // from the index checks
          dword idx = getIndexValue();
-         telldata::TellVar *listcomp = static_cast<telldata::TtList*>(_var)->index_var(idx);
-         if ((NULL != listcomp) && (!_opstackerr))
+         if (telldata::tn_string == _var->get_type())
          {
-            OPstack.push(listcomp->selfcopy());
-            return EXEC_NEXT;
+            std::string wstr = static_cast<telldata::TtString*>(_var)->value();
+            if (!_opstackerr && (wstr.length() > idx))
+            {
+               char wch[2];
+               wch[0] = wstr[idx];
+               wch[1] = 0x0;
+               OPstack.push(DEBUG_NEW telldata::TtString (wch));
+               return EXEC_NEXT;
+            }
+            else
+            {
+               std::stringstream info;
+               unsigned maxSize = wstr.length();
+               info << "Runtime error. Invalid index. Requested: "<< idx << "; Valid: ";
+               if (0 == maxSize)
+                  info << " none (empty list)";
+               else if (1 == maxSize)
+                  info << "[0]";
+               else
+                  info << "[0 - " << maxSize - 1 << "]";
+               tellerror(info.str());
+               return EXEC_ABORT;
+            }
          }
          else
          {
-            std::stringstream info;
-            unsigned maxSize = static_cast<telldata::TtList*>(_var)->size();
-            info << "Runtime error. Invalid index. Requested: "<< idx << "; Valid: ";
-            if (0 == maxSize)
-               info << " none (empty list)";
-            else if (1 == maxSize)
-               info << "[0]";
+            telldata::TellVar *listcomp = static_cast<telldata::TtList*>(_var)->index_var(idx);
+            if ((NULL != listcomp) && (!_opstackerr))
+            {
+               OPstack.push(listcomp->selfcopy());
+               return EXEC_NEXT;
+            }
             else
-               info << "[0 - " << maxSize - 1 << "]";
-            tellerror(info.str());
-            return EXEC_ABORT;
+            {
+               std::stringstream info;
+               unsigned maxSize = static_cast<telldata::TtList*>(_var)->size();
+               info << "Runtime error. Invalid index. Requested: "<< idx << "; Valid: ";
+               if (0 == maxSize)
+                  info << " none (empty list)";
+               else if (1 == maxSize)
+                  info << "[0]";
+               else
+                  info << "[0 - " << maxSize - 1 << "]";
+               tellerror(info.str());
+               return EXEC_ABORT;
+            }
          }
       }
       case 2:
@@ -1463,14 +1558,31 @@ int parsercmd::cmdPUSH::execute()
          dword idx1 = getIndexValue();
          if (idx1 < idx2)
          {
-            telldata::TtList* nlist = static_cast<telldata::TtList*>(_var)->index_range_var(idx1,idx2);
-            if ((NULL != nlist) && (!_opstackerr))
+            if (telldata::tn_string == _var->get_type())
             {
-               OPstack.push(nlist);
-               return EXEC_NEXT;
+               std::string wstr = static_cast<telldata::TtString*>(_var)->value();
+               if (!_opstackerr && (wstr.length() > idx2))
+               {
+                  std::string nstr = wstr.substr(idx1, idx2-idx1+1);
+                  OPstack.push(DEBUG_NEW telldata::TtString (nstr));
+                  return EXEC_NEXT;
+               }
+               else
+               {
+                  tellerror("Runtime error. Index out of range");
+               }
             }
             else
-               tellerror("Runtime error.Index out of range");
+            {
+               telldata::TtList* nlist = static_cast<telldata::TtList*>(_var)->index_range_var(idx1,idx2);
+               if ((NULL != nlist) && (!_opstackerr))
+               {
+                  OPstack.push(nlist);
+                  return EXEC_NEXT;
+               }
+               else
+                  tellerror("Runtime error.Index out of range");
+            }
          }
          else
             tellerror("Runtime error.Second index is expected to be bigger than the first one");
@@ -3122,7 +3234,7 @@ bool parsercmd::ListIndexCheck(telldata::typeID list, TpdYYLtype lloc,
                                telldata::typeID idx, TpdYYLtype iloc)
 {
    bool checkval = false;
-   if       (!(list & telldata::tn_listmask))
+   if       (!(list & telldata::tn_listmask) && (telldata::tn_string != list))
       tellerror("list expected",lloc);
 //   else if  ((idx != telldata::tn_int) && (idx != telldata::tn_real))
    else if (!INTEGER_TYPE(idx))
@@ -3363,11 +3475,6 @@ telldata::typeID parsercmd::Uninsert(telldata::TellVar* lval, telldata::Argument
 telldata::typeID parsercmd::BoolEx(telldata::typeID op1, telldata::typeID op2,
                                  std::string ope, TpdYYLtype loc1, TpdYYLtype loc2)
 {
-//   std::ostringstream ost;
-//   ost << "bad or unsuported pair of operands in " << ope << "operator";
-//   if ((op1 != op2) and (((op1 != telldata::tn_real) and (op1 != telldata::tn_bool)) or
-//                         ((op2 != telldata::tn_real) and (op2 != telldata::tn_bool))))  {
-
    if (NUMBER_TYPE(op1) && NUMBER_TYPE(op2))
    {
       if      (ope == "<" ) CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdLT());
@@ -3415,6 +3522,16 @@ telldata::typeID parsercmd::BoolEx(telldata::typeID op1, telldata::typeID op2,
       else if (ope == "||") CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdOR());
       else if (ope == "==") CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdEQ());
       else if (ope == "!=") CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdNE());
+      else
+      {
+         tellerror("unexpected operand type",loc1);return telldata::tn_void;
+      }
+      return telldata::tn_bool;
+   }
+   else if ((telldata::tn_string == op1) && (telldata::tn_string == op2))
+   {
+      if      (ope == "==") CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSTRCMP(true));
+      else if (ope == "!=") CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSTRCMP(false));
       else
       {
          tellerror("unexpected operand type",loc1);return telldata::tn_void;
