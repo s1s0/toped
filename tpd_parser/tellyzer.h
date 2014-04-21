@@ -428,6 +428,16 @@ namespace  parsercmd {
       telldata::typeID  _type;
    };
 
+   class cmdBWSHIFT:public cmdVIRTUAL {
+   public:
+                  cmdBWSHIFT(telldata::typeID type, bool sright):_type(type), _sright(sright) {}
+      virtual    ~cmdBWSHIFT() {}
+      virtual int execute();
+   private:
+      telldata::typeID  _type;
+      bool              _sright;
+   };
+
    class cmdSTACKRST:public cmdVIRTUAL {
    public:
                   cmdSTACKRST() {}

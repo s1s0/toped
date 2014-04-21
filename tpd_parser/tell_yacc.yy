@@ -265,7 +265,7 @@ Ooops! Second thought!
 %token                 tknTRUE tknFALSE tknLEQ tknGEQ tknEQ tknNEQ
 %token                 tknAND tknOR tknNOT tknBWAND tknBWOR tknBWXOR tknBWNOT
 %token                 tknSW tknSE tknNE tknNW tknPREADD tknPRESUB
-%token                 tknPOSTADD tknPOSTSUB tknCONST
+%token                 tknPOSTADD tknPOSTSUB tknCONST tknSHR  tknSHL
 %token                 tknBREAK tknCONTINUE
 %token <parsestr>      tknIDENTIFIER tknTYPEdef tknFIELD tknSTRING
 %token <real>          tknREAL
@@ -275,9 +275,10 @@ Ooops! Second thought!
 %type <pttname>        multiexpression addexpression expression
 %type <pttname>        assignment fieldname funccall telllist
 %type <pttname>        lvalue telltype telltypeID variable anonymousvar
-%type <pttname>        variabledeclaration andexpression xorexpression 
+%type <pttname>        variabledeclaration andexpression shiftexpression
 %type <pttname>        eqexpression relexpression callbackanotypedef
-%type <pttname>        listindex listrange listinsert listremove listslice 
+%type <pttname>        listindex listrange listinsert listremove listslice
+%type <pttname>        andbitwiseexp orbitwiseexp xorbitwiseexp 
 %type <pfarguments>    funcarguments
 %type <parguments>     structure argument funcreference
 %type <plarguments>    nearguments arguments
@@ -1176,20 +1177,28 @@ anonymousvar:
 /*==EXPRESSION===============================================================*/
 /*orexpression*/
 expression :
-     xorexpression                         {$$ = $1;}
-   | expression tknOR   xorexpression      {$$ = parsercmd::BoolEx($1,$3,"||",@1,@2);}
-   | expression tknBWOR xorexpression      {$$ = parsercmd::BoolEx($1,$3,"|",@1,@2);}
-;
-
-xorexpression :
-     andexpression
-   | xorexpression tknBWXOR andexpression   {$$ = parsercmd::BoolEx($1,$3, "^",@1,@2);}
+     andexpression                         {$$ = $1;} 
+   | expression tknOR andexpression        {$$ = parsercmd::BoolEx($1,$3,"||",@1,@2);}
 ;
 
 andexpression :
+     orbitwiseexp                          {$$ = $1;} 
+   | andexpression tknAND orbitwiseexp     {$$ = parsercmd::BoolEx($1,$3,"&&",@1,@2);}
+;
+
+orbitwiseexp :
+     xorbitwiseexp                         {$$ = $1;}
+   | orbitwiseexp tknBWOR xorbitwiseexp    {$$ = parsercmd::BoolEx($1,$3,"|",@1,@2);}
+;
+
+xorbitwiseexp :
+     andbitwiseexp                         {$$ = $1;} 
+   | xorbitwiseexp tknBWXOR andbitwiseexp  {$$ = parsercmd::BoolEx($1,$3, "^",@1,@2);}
+;
+
+andbitwiseexp :
      eqexpression                          {$$ = $1;}
-   | andexpression tknAND   eqexpression   {$$ = parsercmd::BoolEx($1,$3,"&&",@1,@2);}
-   | andexpression tknBWAND eqexpression   {$$ = parsercmd::BoolEx($1,$3, "&",@1,@2);}
+   | andbitwiseexp tknBWAND eqexpression   {$$ = parsercmd::BoolEx($1,$3, "&",@1,@2);}
 ;
 
 eqexpression :
@@ -1199,11 +1208,17 @@ eqexpression :
 ;
 
 relexpression :
+     shiftexpression                       {$$ = $1;}
+   | relexpression '<' shiftexpression     {$$ = parsercmd::BoolEx($1,$3,"<",@1,@2);}
+   | relexpression '>' shiftexpression     {$$ = parsercmd::BoolEx($1,$3,">",@1,@2);}
+   | relexpression tknLEQ shiftexpression  {$$ = parsercmd::BoolEx($1,$3,"<=",@1,@2);}
+   | relexpression tknGEQ shiftexpression  {$$ = parsercmd::BoolEx($1,$3,">=",@1,@2);}
+;
+
+shiftexpression :
      addexpression                         {$$ = $1;}
-   | relexpression '<' addexpression       {$$ = parsercmd::BoolEx($1,$3,"<",@1,@2);}
-   | relexpression '>' addexpression       {$$ = parsercmd::BoolEx($1,$3,">",@1,@2);}
-   | relexpression tknLEQ addexpression    {$$ = parsercmd::BoolEx($1,$3,"<=",@1,@2);}
-   | relexpression tknGEQ addexpression    {$$ = parsercmd::BoolEx($1,$3,">=",@1,@2);}
+   | shiftexpression tknSHL addexpression  {$$ = parsercmd::BoolEx($1,$3,"<<",@1,@2);}
+   | shiftexpression tknSHR addexpression  {$$ = parsercmd::BoolEx($1,$3,">>",@1,@2);}
 ;
 
 addexpression:
