@@ -563,18 +563,20 @@ namespace  parsercmd {
 
    class cmdLISTADD : public cmdVIRTUAL {
    public:
-                  cmdLISTADD(telldata::TellVar* listarg, bool prefix, bool index) :
-                     _listarg(static_cast<telldata::TtList*>(listarg)), _prefix(prefix), _index(index), _empty_list(true){};
+                  cmdLISTADD(telldata::TellVar* arg, bool prefix, bool index) :
+                     _arg(arg), _prefix(prefix), _index(index), _empty_list(true){};
       virtual    ~cmdLISTADD(){}
       virtual int execute();
    protected:
                   cmdLISTADD(cmdLISTADD* indxcmd) :
-                     _listarg(indxcmd->_listarg),_prefix(indxcmd->_prefix), _index(indxcmd->_index), _empty_list(true) {};
-      dword       getIndex();
+                     _arg(indxcmd->_arg),_prefix(indxcmd->_prefix), _index(indxcmd->_index), _empty_list(true) {};
+      virtual int listExec(telldata::TtList*);
+      virtual int stringExec(telldata::TtString*);
+      dword       getIndex(dword);
       // don't delete this and don't get confused. It's only a pointer to a variable,
       // that normally should be in the operand stack. List operations are an exception -
       // see the comments in the parser (tell_yacc.yy)
-      telldata::TtList*     _listarg;
+      telldata::TellVar*    _arg;
       bool                  _prefix;
       bool                  _index;
       bool                  _empty_list;
