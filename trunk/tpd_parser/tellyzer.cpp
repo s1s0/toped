@@ -1286,30 +1286,39 @@ int parsercmd::cmdLISTADD::execute()
 {
    TELL_DEBUG(cmdLISTADD);
 
-   telldata::TellVar *op = OPstack.top();OPstack.pop();
-   telldata::typeID typeis = _listarg->get_type();
-   if (TLISALIST(typeis))
+   if (telldata::tn_string == _arg->get_type())
+      return stringExec(static_cast<telldata::TtString*>(_arg));
+   else
    {
-      typeis = typeis & ~telldata::tn_listmask;
+      assert(TLISALIST(_arg->get_type()));
+      return listExec(static_cast<telldata::TtList*>(_arg));
    }
+}
+
+int parsercmd::cmdLISTADD::listExec(telldata::TtList* listarg)
+{
+   telldata::TellVar *op = OPstack.top();OPstack.pop();
+   telldata::typeID typeis = listarg->get_type();
+   assert(TLISALIST(typeis));
+   typeis = typeis & ~telldata::tn_listmask;
    if ((TLCOMPOSIT_TYPE(typeis)) && (NULL == CMDBlock->getTypeByID(typeis)))
       tellerror("Bad or unsupported type in assign statement");
    else
    {
-      dword idx = getIndex();
+      dword idx = getIndex(listarg->size());
       if ((!_opstackerr) && (_empty_list) && (0 == idx))
       {
-         _listarg->insert(op);
+         listarg->insert(op);
       }
-      else if ((!_opstackerr) && (_listarg->validIndex(idx)))
+      else if ((!_opstackerr) && (listarg->validIndex(idx)))
       {
          if (!_prefix) idx++;
-         _listarg->insert(op, idx);
+         listarg->insert(op, idx);
       }
       else
       {
          std::stringstream info;
-         unsigned maxSize = _listarg->size();
+         unsigned maxSize = listarg->size();
          info << "Runtime error. Invalid index in list insert. Requested: "<< idx << "; Valid: ";
          if (0 == maxSize)
             info << " none (empty list)";
@@ -1322,21 +1331,54 @@ int parsercmd::cmdLISTADD::execute()
       }
    }
    delete op;
-   OPstack.push(_listarg->selfcopy());
+   OPstack.push(listarg->selfcopy());
    return EXEC_NEXT;
 }
 
-
-dword parsercmd::cmdLISTADD::getIndex()
+int parsercmd::cmdLISTADD::stringExec(telldata::TtString* strtarget)
 {
+   telldata::TellVar *op = OPstack.top();OPstack.pop();
+   assert(telldata::tn_string == op->get_type());
+   std::string istr = static_cast<telldata::TtString*>(op)->value();
+   std::string wstr = strtarget->value();
+   dword idx = getIndex(wstr.length());
+   //
+   if (!_prefix) idx++;
+   if (wstr.length() == idx)
+      wstr.append(istr);
+   else if (wstr.length() > idx)
+      wstr.insert(idx,istr);
+   else
+   {
+      std::stringstream info;
+      unsigned maxSize = wstr.length();
+      info << "Runtime error. Invalid index in list insert. Requested: "<< idx << "; Valid: ";
+      if (0 == maxSize)
+         info << " none (empty list)";
+      else if (1 == maxSize)
+         info << "[0]";
+      else
+         info << "[0 - " << maxSize - 1 << "]";
+      tellerror(info.str());
+      return EXEC_ABORT;
+   }
+   (*strtarget) = telldata::TtString(wstr);
+   return EXEC_NEXT;
+}
+
+dword parsercmd::cmdLISTADD::getIndex(dword lsize)
+{
+
+//   telldata::TtList* _listarg = static_cast<telldata::TtList*>(_arg);
+//   _listarg->size()
    dword idx;
-   _empty_list = (0 == _listarg->size());
+   _empty_list = (0 == lsize);
    // find the index
    if      (((!_index) && ( _prefix)) || _empty_list) // first in the list
       idx = 0;
    else if ((!_index) && (!_prefix)) // last in the list
    {
-      idx = _listarg->size();
+      idx = lsize;
       if (!_empty_list) idx--;
    }
    else                              // get the index from the operand stack
@@ -1349,27 +1391,30 @@ dword parsercmd::cmdLISTADD::getIndex()
 int parsercmd::cmdLISTUNION::execute()
 {
    TELL_DEBUG(cmdLISTUNION);
+
+   assert(TLISALIST(_arg->get_type()));
+   telldata::TtList* listarg = static_cast<telldata::TtList*>(_arg);
    telldata::TtList *op = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
-   telldata::typeID typeis = _listarg->get_type() & ~telldata::tn_listmask;
+   telldata::typeID typeis = listarg->get_type() & ~telldata::tn_listmask;
 
    if ((TLCOMPOSIT_TYPE(typeis)) && (NULL == CMDBlock->getTypeByID(typeis)))
       tellerror("Bad or unsupported type in list union statement");
    else
    {
-      dword idx = getIndex();
+      dword idx = getIndex(listarg->size());
       if ((!_opstackerr) && (_empty_list) && (0 == idx))
       {
-         _listarg->lunion(op);
+         listarg->lunion(op);
       }
-      else if ((!_opstackerr) && (_listarg->validIndex(idx)))
+      else if ((!_opstackerr) && (listarg->validIndex(idx)))
       {
          if (!_prefix) idx++;
-         _listarg->lunion(op,idx);
+         listarg->lunion(op,idx);
       }
       else
       {
          std::stringstream info;
-         unsigned maxSize = _listarg->size();
+         unsigned maxSize = listarg->size();
          info << "Runtime error. Invalid index in list union. Requested: "<< idx << "; Valid: ";
          if (0 == maxSize)
             info << " none (empty list)";
@@ -1382,7 +1427,7 @@ int parsercmd::cmdLISTUNION::execute()
       }
    }
    delete op;
-   OPstack.push(_listarg->selfcopy());
+   OPstack.push(listarg->selfcopy());
    return EXEC_NEXT;
 }
 
@@ -3394,54 +3439,61 @@ telldata::typeID parsercmd::Uninsert(telldata::TellVar* lval, telldata::Argument
    }
    telldata::typeID lvalID = lval->get_type();
    if (NULL == unins_cmd) return lvalID;
-   // Here if user structure is used - clarify that it is compatible
-   // The thing is that op2 could be a struct of a struct list or a list of
-   // tell basic types. This should be checked in the following order:
-   // 1. Get the type of the recipient (lval)
-   //    It must be a list
-   //    a) strip the list attribute and get the type of the list component
-   //    b) if the type of the lval list component is compound (struct list), check the
-   //       input structure for struct list
-   //    c) if the type of the list component is basic, check directly that
-   //       op2 is a list
-   //     d) if after all the above the op2 is still unknown i.e. not a list - try to
-   //       convert it into a structure
-   if (TLUNKNOWN_TYPE((*op2)()))
+   if (telldata::tn_string == lvalID)
    {
-      if (TLISALIST(lvalID))
-      { // we have a list lval
-         const telldata::TType* vartype;
-          vartype = CMDBlock->getTypeByID(lvalID & ~telldata::tn_listmask);
-          if (NULL != vartype) op2->userStructListCheck(vartype, true);
-          else op2->toList(true, lvalID & ~telldata::tn_listmask);
-          if (TLUNKNOWN_TYPE((*op2)()))
-             op2->userStructCheck(vartype, true);
+      if (telldata::tn_string != (*op2)())
+      {
+         tellerror("string expected as rvalue", loc);
+         return telldata::tn_void;
       }
-      else
-         // lvalue in this function must be a list
-         assert(TLISALIST(lvalID));
-   }
-   if (TLISALIST((*op2)()))
-   {  // operation is union
-
-      CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdLISTUNION(unins_cmd));
-      delete(unins_cmd);
-      return lvalID;
+      CMDBlock->pushcmd(unins_cmd);
+      return telldata::tn_string;
    }
    else
-   {  // operation is list add/insert
-      lvalID &= ~telldata::tn_listmask;
-      if ((lvalID == (*op2)()) || (NUMBER_TYPE(lvalID) && NUMBER_TYPE((*op2)())))
+   {
+      // Here if user structure is used - clarify that it is compatible
+      // The thing is that op2 could be a struct of a struct list or a list of
+      // tell basic types. This should be checked in the following order:
+      // 1. Get the type of the recipient (lval)
+      //    It must be a list
+      //    a) strip the list attribute and get the type of the list component
+      //    b) if the type of the lval list component is compound (struct list), check the
+      //       input structure for struct list
+      //    c) if the type of the list component is basic, check directly that
+      //       op2 is a list
+      //     d) if after all the above the op2 is still unknown i.e. not a list - try to
+      //       convert it into a structure
+      if (TLUNKNOWN_TYPE((*op2)()))
       {
-         // the lval is already in unins_cmd - that's why it's not used here
-         CMDBlock->pushcmd(unins_cmd);
-         return lvalID |= telldata::tn_listmask;
+         // lvalue in this function must be a list
+         assert(TLISALIST(lvalID));
+         const telldata::TType* vartype = CMDBlock->getTypeByID(lvalID & ~telldata::tn_listmask);
+         if (NULL != vartype) op2->userStructListCheck(vartype, true);
+         else op2->toList(true, lvalID & ~telldata::tn_listmask);
+         if (TLUNKNOWN_TYPE((*op2)()))
+            op2->userStructCheck(vartype, true);
+      }
+      if (TLISALIST((*op2)()))
+      {  // operation is union
+         CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdLISTUNION(unins_cmd));
+         delete(unins_cmd);
+         return lvalID;
       }
       else
-      {
-         delete unins_cmd;
-         tellerror("Incompatible operand types in list add/insert", loc);
-         return telldata::tn_void;
+      {  // operation is list add/insert
+         lvalID &= ~telldata::tn_listmask;
+         if ((lvalID == (*op2)()) || (NUMBER_TYPE(lvalID) && NUMBER_TYPE((*op2)())))
+         {
+            // the lval is already in unins_cmd - that's why it's not used here
+            CMDBlock->pushcmd(unins_cmd);
+            return lvalID |= telldata::tn_listmask;
+         }
+         else
+         {
+            delete unins_cmd;
+            tellerror("Incompatible operand types in list add/insert", loc);
+            return telldata::tn_void;
+         }
       }
    }
 }

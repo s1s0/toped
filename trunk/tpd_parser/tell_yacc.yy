@@ -1025,12 +1025,12 @@ listinsert:
       }
     }
    | variable indxb tknPREADD indxe               {
-      if ($1 & telldata::tn_listmask) {
+      if (($1 & telldata::tn_listmask) || (telldata::tn_string == $1)) {
          listadd_command = DEBUG_NEW parsercmd::cmdLISTADD(tellvar,true, false);
          $$ = $1; tell_lvalue = tellvar; lindexed = 1;
       }
       else {
-         tellerror("list expected",@1);
+         tellerror("list or string expected",@1);
          $$ = telldata::tn_NULL; listadd_command = NULL;
       }
     }
@@ -1045,12 +1045,12 @@ listinsert:
       }
     }
    | variable indxb tknPOSTADD indxe              {
-      if ($1 & telldata::tn_listmask) {
+      if (($1 & telldata::tn_listmask) || (telldata::tn_string == $1)) {
          listadd_command = DEBUG_NEW parsercmd::cmdLISTADD(tellvar,false, false);
          $$ = $1; tell_lvalue = tellvar; lindexed = 1;
       }
       else {
-         tellerror("list expected",@1);
+         tellerror("list or string expected",@1);
          $$ = telldata::tn_NULL; listadd_command = NULL;
       }
     }
