@@ -1342,6 +1342,7 @@ int parsercmd::cmdLISTADD::stringExec(telldata::TtString* strtarget)
    std::string istr = static_cast<telldata::TtString*>(op)->value();
    std::string wstr = strtarget->value();
    dword idx = getIndex(wstr.length());
+   delete(op);
    //
    if (!_prefix) idx++;
    if (wstr.length() == idx)
@@ -1368,9 +1369,6 @@ int parsercmd::cmdLISTADD::stringExec(telldata::TtString* strtarget)
 
 dword parsercmd::cmdLISTADD::getIndex(dword lsize)
 {
-
-//   telldata::TtList* _listarg = static_cast<telldata::TtList*>(_arg);
-//   _listarg->size()
    dword idx;
    _empty_list = (0 == lsize);
    // find the index
@@ -1435,6 +1433,17 @@ int parsercmd::cmdLISTUNION::execute()
 int parsercmd::cmdLISTSUB::execute()
 {
    TELL_DEBUG(cmdLISTSUB);
+   if (telldata::tn_string == _arg->get_type())
+      return stringExec(static_cast<telldata::TtString*>(_arg));
+   else
+   {
+      assert(TLISALIST(_arg->get_type()));
+      return listExec(static_cast<telldata::TtList*>(_arg));
+   }
+}
+
+int parsercmd::cmdLISTSUB::listExec(telldata::TtList* _listarg)
+{
    dword idx;
    // find the index
    if      ((!_index) && ( _prefix)) // first in the list
@@ -1465,11 +1474,121 @@ int parsercmd::cmdLISTSUB::execute()
    }
 }
 
+int parsercmd::cmdLISTSUB::stringExec(telldata::TtString* strtarget)
+{
+   std::string wstr = strtarget->value();
+   dword idx;
+   // find the index
+   if      ((!_index) && ( _prefix)) // first in the list
+      idx = 0;
+   else if ((!_index) && (!_prefix)) // last in the list
+      idx = wstr.length() - 1;
+   else                              // get the index from the operand stack
+      idx = getIndexValue();
+   //
+   if ( (!_opstackerr) && ((0 <= idx) && (idx < wstr.length())) )
+   {
+      char wch[2];
+      wch[0] = wstr[idx];
+      wch[1] = 0x0;
+      wstr.erase(idx,1);
+      (*strtarget) = telldata::TtString(wstr);
+      OPstack.push(DEBUG_NEW telldata::TtString(wch));
+      return EXEC_NEXT;
+   }
+   else
+   {
+      std::stringstream info;
+      unsigned maxSize = wstr.length();
+      info << "Runtime error. Invalid index in list reduce. Requested: "<< idx << "; Valid: ";
+      if (0 == maxSize)
+         info << " none (empty list)";
+      else if (1 == maxSize)
+         info << "[0]";
+      else
+         info << "[0 - " << maxSize - 1 << "]";
+      tellerror(info.str());
+      return EXEC_ABORT;
+   }
+}
 //=============================================================================
 int parsercmd::cmdLISTSLICE::execute()
 {
    TELL_DEBUG(cmdLISTSLICE);
-   dword idxB, idxE, size;
+   if (telldata::tn_string == _arg->get_type())
+      return stringExec(static_cast<telldata::TtString*>(_arg));
+   else
+   {
+      assert(TLISALIST(_arg->get_type()));
+      return listExec(static_cast<telldata::TtList*>(_arg));
+   }
+}
+
+int parsercmd::cmdLISTSLICE::listExec(telldata::TtList* _listarg)
+{
+   TELL_DEBUG(cmdLISTSLICE);
+   dword idxB, idxE;
+   bool idxerrors = getIndexes(_listarg->size(), idxB, idxE);
+   if ((!idxerrors) && _listarg->validIndex(idxB) && _listarg->validIndex(idxE))
+   {
+      OPstack.push(_listarg->erase(idxB, idxE));
+      return EXEC_NEXT;
+   }
+   else
+   {
+      std::stringstream info;
+      unsigned maxSize = _listarg->size();
+      info << "Runtime error. Invalid index in list slice. Requested: ["<< idxB << " - " << idxE << "]; Valid: ";
+      if (0 == maxSize)
+         info << " none (empty list)";
+      else if (1 == maxSize)
+         info << "[0]";
+      else
+         info << "[0 - " << maxSize - 1 << "]";
+      tellerror(info.str());
+      return EXEC_ABORT;
+   }
+}
+
+int parsercmd::cmdLISTSLICE::stringExec(telldata::TtString* strtarget)
+{
+   TELL_DEBUG(cmdLISTSLICE);
+   dword idxB, idxE;
+   std::string wstr = strtarget->value();
+   bool idxerrors = getIndexes(wstr.length(), idxB, idxE);
+   if ((!idxerrors) && ((0 <= idxB) && (idxB < wstr.length())) && ((0 <= idxE) && (idxE < wstr.length())))
+   {
+      char wch[idxE-idxB];
+      unsigned j=0;
+      for(unsigned i=idxB; i<= idxE; i++)
+      {
+         wch[j++] = wstr[i];
+      }
+      wch[j] = 0x0;
+      wstr.erase(idxB,idxE-idxB+1);
+      (*strtarget) = telldata::TtString(wstr);
+      OPstack.push(DEBUG_NEW telldata::TtString(wch));
+      return EXEC_NEXT;
+   }
+   else
+   {
+      std::stringstream info;
+      unsigned maxSize = wstr.length();
+      info << "Runtime error. Invalid index in list slice. Requested: ["<< idxB << " - " << idxE << "]; Valid: ";
+      if (0 == maxSize)
+         info << " none (empty list)";
+      else if (1 == maxSize)
+         info << "[0]";
+      else
+         info << "[0 - " << maxSize - 1 << "]";
+      tellerror(info.str());
+      return EXEC_ABORT;
+   }
+}
+
+bool parsercmd::cmdLISTSLICE::getIndexes(dword lsize, dword& idxB, dword& idxE)
+{
+   dword size;
    bool idxerrors = false;
    // find the index
    if ( _prefix )
@@ -1478,7 +1597,7 @@ int parsercmd::cmdLISTSLICE::execute()
       {
          idxE = getIndexValue(); idxerrors |= _opstackerr;
       }
-      else idxE = _listarg->size() - 1;
+      else idxE = lsize - 1;
       size = getIndexValue(); idxerrors |= _opstackerr;
 
       if ((0 > (idxE - size + 1)) || (0 == size))
@@ -1507,27 +1626,8 @@ int parsercmd::cmdLISTSLICE::execute()
          idxE = idxB + size - 1;
       }
    }
-   if ((!idxerrors) && _listarg->validIndex(idxB) && _listarg->validIndex(idxE))
-   {
-      OPstack.push(_listarg->erase(idxB, idxE));
-      return EXEC_NEXT;
-   }
-   else
-   {
-      std::stringstream info;
-      unsigned maxSize = _listarg->size();
-      info << "Runtime error. Invalid index in list slice. Requested: ["<< idxB << " - " << idxE << "]; Valid: ";
-      if (0 == maxSize)
-         info << " none (empty list)";
-      else if (1 == maxSize)
-         info << "[0]";
-      else
-         info << "[0 - " << maxSize - 1 << "]";
-      tellerror(info.str());
-      return EXEC_ABORT;
-   }
+   return idxerrors;
 }
-
 //=============================================================================
 int parsercmd::cmdPUSH::execute()
 {
@@ -1555,7 +1655,7 @@ int parsercmd::cmdPUSH::execute()
                char wch[2];
                wch[0] = wstr[idx];
                wch[1] = 0x0;
-               OPstack.push(DEBUG_NEW telldata::TtString (wch));
+               OPstack.push(DEBUG_NEW telldata::TtString(wch));
                return EXEC_NEXT;
             }
             else
@@ -3280,7 +3380,7 @@ bool parsercmd::ListIndexCheck(telldata::typeID list, TpdYYLtype lloc,
 {
    bool checkval = false;
    if       (!(list & telldata::tn_listmask) && (telldata::tn_string != list))
-      tellerror("list expected",lloc);
+      tellerror("list or string expected",lloc);
 //   else if  ((idx != telldata::tn_int) && (idx != telldata::tn_real))
    else if (!INTEGER_TYPE(idx))
       tellerror("index is expected to be an integer",iloc);
@@ -3292,10 +3392,9 @@ bool parsercmd::ListIndexCheck(telldata::typeID list, TpdYYLtype lloc,
 bool parsercmd::ListSliceCheck(telldata::typeID list, TpdYYLtype lloc,
    telldata::typeID idx, TpdYYLtype iloc, telldata::typeID sidx, TpdYYLtype sloc)
 {
-//   if  ((sidx != telldata::tn_int) && (sidx != telldata::tn_real))
-   if (!INTEGER_TYPE(sidx))
+   if (sidx != telldata::tn_uint)
    {
-      tellerror("slice size is expected to be an integer",iloc);
+      tellerror("slice size is expected to be a positive integer",iloc);
       return false;
    }
    else
@@ -3305,15 +3404,14 @@ bool parsercmd::ListSliceCheck(telldata::typeID list, TpdYYLtype lloc,
 bool parsercmd::ListSliceCheck(telldata::typeID list, TpdYYLtype lloc,
                                     telldata::typeID sidx, TpdYYLtype sloc)
 {
-//   if  ((sidx != telldata::tn_int) && (sidx != telldata::tn_real))
-   if (!INTEGER_TYPE(sidx))
+   if (sidx != telldata::tn_uint)
    {
-      tellerror("slice size is expected to be an integer",sloc);
+      tellerror("slice size is expected to be a positive integer",sloc);
       return false;
    }
-   else if (!(list & telldata::tn_listmask))
+   else if (!(list & telldata::tn_listmask) && (telldata::tn_string != list))
    {
-      tellerror("list expected",lloc);
+      tellerror("list or string expected",lloc);
       return false;
    }
    return true;

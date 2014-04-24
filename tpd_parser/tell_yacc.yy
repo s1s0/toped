@@ -35,7 +35,7 @@
 //
 //===========================================================================*/
 
-/*Switch on code processing locations for more acurate error messages*/
+/*Switch on code processing locations for more accurate error messages*/
 %locations
 %{
 #include "tpdph.h"
@@ -1063,10 +1063,10 @@ listremove:
       $$ = ($1 & (~telldata::tn_listmask));
     }
    | variable indxb tknPRESUB indxe               {
-      if ($1 & telldata::tn_listmask)
+      if (($1 & telldata::tn_listmask) || (telldata::tn_string == $1))
          CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdLISTSUB(tellvar,true, false));
       else
-         tellerror("list expected",@1);
+         tellerror("list or string expected",@1);
       $$ = ($1 & (~telldata::tn_listmask));
     }
    | variable indxb expression tknPOSTSUB indxe   {
@@ -1075,10 +1075,10 @@ listremove:
       $$ = ($1 & (~telldata::tn_listmask));
     }
    | variable indxb tknPOSTSUB indxe              {
-      if ($1 & telldata::tn_listmask)
+      if (($1 & telldata::tn_listmask) || (telldata::tn_string == $1))
          CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdLISTSUB(tellvar,false, false));
       else
-         tellerror("list expected",@1);
+         tellerror("list or string expected",@1);
       $$ = ($1 & (~telldata::tn_listmask));
     }
 ;

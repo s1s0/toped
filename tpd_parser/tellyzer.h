@@ -591,24 +591,29 @@ namespace  parsercmd {
 
    class cmdLISTSUB : public cmdVIRTUAL {
    public:
-                  cmdLISTSUB(telldata::TellVar* listarg, bool prefix, bool index) :
-                     _listarg(static_cast<telldata::TtList*>(listarg)), _prefix(prefix), _index(index) {};
+                  cmdLISTSUB(telldata::TellVar* arg, bool prefix, bool index) :
+                     _arg(arg), _prefix(prefix), _index(index) {};
       virtual    ~cmdLISTSUB() {}
       virtual int execute();
    private:
-      telldata::TtList*     _listarg;
+      int         listExec(telldata::TtList*);
+      int         stringExec(telldata::TtString*);
+      telldata::TellVar*    _arg;
       bool                  _prefix;
       bool                  _index;
    };
 
    class cmdLISTSLICE : public cmdVIRTUAL {
    public:
-                  cmdLISTSLICE(telldata::TellVar* listarg, bool prefix, bool index) :
-                    _listarg(static_cast<telldata::TtList*>(listarg)), _prefix(prefix), _index(index) {};
+                  cmdLISTSLICE(telldata::TellVar* arg, bool prefix, bool index) :
+                     _arg(arg), _prefix(prefix), _index(index) {};
       virtual    ~cmdLISTSLICE() {}
       virtual int execute();
    private:
-      telldata::TtList*     _listarg;
+      int         listExec(telldata::TtList*);
+      int         stringExec(telldata::TtString*);
+      bool        getIndexes(dword, dword&, dword&);
+      telldata::TellVar*    _arg;
       bool                  _prefix;
       bool                  _index;
    };
