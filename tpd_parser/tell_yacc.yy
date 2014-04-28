@@ -262,12 +262,13 @@ Ooops! Second thought!
 %token                 tknSTRUCTdef tknVOIDdef tknREALdef tknBOOLdef tknINTdef
 %token                 tknSTRINGdef tknLAYOUTdef tknAUXDATAdef tknLISTdef 
 %token                 tknCALLBACKdef tknRETURN tknUNSIGNEDdef
-%token                 tknTRUE tknFALSE tknLEQ tknGEQ tknEQ tknNEQ
+%token                 tknTRUE tknFALSE tknLEQ tknGEQ tknEQ tknNEQ tknRXEQ
 %token                 tknAND tknOR tknNOT tknBWAND tknBWOR tknBWXOR tknBWNOT
 %token                 tknSW tknSE tknNE tknNW tknPREADD tknPRESUB
 %token                 tknPOSTADD tknPOSTSUB tknCONST tknSHR  tknSHL
-%token                 tknBREAK tknCONTINUE
-%token <parsestr>      tknIDENTIFIER tknTYPEdef tknFIELD tknSTRING
+%token                 tknBREAK tknCONTINUE 
+%token <parsestr>      tknIDENTIFIER tknTYPEdef tknFIELD tknSTRING 
+%token <parsestr>      tknREXPFIND tknREXPRPLC 
 %token <real>          tknREAL
 %token <uint>          tknUINT
 /* parser types*/
@@ -278,7 +279,8 @@ Ooops! Second thought!
 %type <pttname>        variabledeclaration andexpression shiftexpression
 %type <pttname>        eqexpression relexpression callbackanotypedef
 %type <pttname>        listindex listrange listinsert listremove listslice
-%type <pttname>        andbitwiseexp orbitwiseexp xorbitwiseexp 
+%type <pttname>        andbitwiseexp orbitwiseexp xorbitwiseexp
+%type <pttname>        regexpression
 %type <pfarguments>    funcarguments
 %type <parguments>     structure argument funcreference
 %type <plarguments>    nearguments arguments
@@ -641,6 +643,7 @@ statement:
    | listslice           ';'               {CMDBlock->pushcmd(DEBUG_NEW parsercmd::cmdSTACKRST());}
    | recorddefinition    ';'               { }
    | callbacktypedef     ';'               { }
+   | regexpression       ';'               { }
 ;
 
 funccall:
@@ -1174,6 +1177,43 @@ anonymousvar:
    }
 ;
 
+regexpression:
+     lvalue tknRXEQ tknREXPFIND           {
+         if (telldata::tn_string == $1)
+         {
+            parsercmd::cmdVIRTUAL* command;
+            command = DEBUG_NEW parsercmd::cmdPUSH(DEBUG_NEW telldata::TtString($3), false, true);
+            CMDBlock->pushcmd(command);
+            delete [] $3;
+            command = DEBUG_NEW parsercmd::cmdREXPFIND(tell_lvalue);
+            CMDBlock->pushcmd(command);
+            $$ = telldata::tn_bool;
+         }
+         else
+         {
+            tellerror("String expected here", @1);
+            $$ = telldata::tn_void;
+         }
+      }
+   | lvalue tknRXEQ tknREXPRPLC           {
+         if (telldata::tn_string == $1)
+         {
+            parsercmd::cmdVIRTUAL* command;
+            command = DEBUG_NEW parsercmd::cmdPUSH(DEBUG_NEW telldata::TtString($3), false, true);
+            CMDBlock->pushcmd(command);
+            delete [] $3;
+            command = DEBUG_NEW parsercmd::cmdREXPRPLC(tell_lvalue);
+            CMDBlock->pushcmd(command);
+            $$ = telldata::tn_int;
+         }
+         else
+         {
+            tellerror("String expected here", @1);
+            $$ = telldata::tn_void;
+         }
+      }
+;
+
 /*==EXPRESSION===============================================================*/
 /*orexpression*/
 expression :
@@ -1263,6 +1303,7 @@ primaryexpression :
    | listremove                            {$$ = $1; indexed = 0;}
    | listslice                             {$$ = $1; indexed = 0;}
    | '(' expression ')'                    {$$ = $2;}
+   | regexpression                         {$$ = $1;}
    | funccall                              {$$ = $1;}
    | tknERROR                              {tellerror("Unexpected symbol", @1);}
 ;

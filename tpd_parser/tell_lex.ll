@@ -19,7 +19,7 @@
 //    Description: TELL lexer
 //---------------------------------------------------------------------------
 //  Revision info
-//---------------------------------------------------------------------------                
+//---------------------------------------------------------------------------
 //      $Revision$
 //          $Date$
 //        $Author$
@@ -39,6 +39,8 @@
 %x pPRAGMA
 %x pREPEATLOOP
 lex_string        \"[^"]*\"
+lex_rexpfind      \/[^/]+\/
+lex_rexprplc      \/[^\/]+\/[^\/]+\/
 lex_ID            [a-zA-Z_][a-zA-Z0-9_]*
 lxt_S             [ \t]+
 lxt_D             [0-9]
@@ -213,11 +215,16 @@ until                      return tknUNTIL;
 const                      return tknCONST;
 {lex_string}             { telllval.parsestr = parsercmd::charcopy(yytext, true);
                            return tknSTRING;                               }
+{lex_rexpfind}           { telllval.parsestr = parsercmd::charcopy(yytext, true);
+                           return tknREXPFIND;                             }
+{lex_rexprplc}           { telllval.parsestr = parsercmd::charcopy(yytext, true);
+                           return tknREXPRPLC;                             }
 "."{lex_ID}              { telllval.parsestr = parsercmd::charcopy(yytext);return tknFIELD;}
 "<="                       return tknLEQ;
 ">="                       return tknGEQ;
 "=="                       return tknEQ;
 "!="                       return tknNEQ;
+"=~"                       return tknRXEQ;
 "&&"                       return tknAND;
 "||"                       return tknOR;
 "&"                        return tknBWAND;
