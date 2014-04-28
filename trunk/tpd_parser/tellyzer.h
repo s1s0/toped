@@ -618,6 +618,24 @@ namespace  parsercmd {
       bool                  _index;
    };
 
+   class cmdREXPFIND :public cmdVIRTUAL {
+   public:
+                  cmdREXPFIND(telldata::TellVar* target) : _target(static_cast<telldata::TtString*>(target)) {}
+      virtual    ~cmdREXPFIND() {}
+      virtual int execute();
+   private:
+      telldata::TtString*   _target;
+   };
+
+   class cmdREXPRPLC :public cmdVIRTUAL {
+   public:
+                  cmdREXPRPLC(telldata::TellVar* target) : _target(static_cast<telldata::TtString*>(target)) {}
+      virtual    ~cmdREXPRPLC() {}
+      virtual int execute();
+   private:
+      telldata::TtString*   _target;
+   };
+
    class cmdRETURN:public cmdVIRTUAL {
    public:
                   cmdRETURN(telldata::typeID tID) : _retype(tID) {};

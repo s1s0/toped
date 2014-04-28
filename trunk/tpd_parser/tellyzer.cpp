@@ -28,6 +28,8 @@
 #include "tpdph.h"
 #include <sstream>
 #include <algorithm>
+#include <wx/string.h>
+#include <wx/regex.h>
 #include "tellyzer.h"
 #include "tldat.h"
 #include "outbox.h"
@@ -1841,6 +1843,52 @@ int parsercmd::cmdFUNCCALL::execute()
    catch (EXPTN&) {return EXEC_ABORT;}
    _funcbody->reduce_undo_stack();
    return fresult;
+}
+
+//=============================================================================
+int parsercmd::cmdREXPFIND::execute()
+{
+   std::string theExpression = getStringValue();
+   wxRegEx regex(wxString(theExpression.c_str(), wxConvUTF8));
+   if (regex.IsValid())
+   {
+      bool matches = regex.Matches(wxString(_target->value().c_str(), wxConvUTF8));
+      OPstack.push(DEBUG_NEW telldata::TtBool(matches));
+   }
+   else
+   {
+      //Syntax error in the regular expression
+      tellerror("Runtime error: syntax error in the regular expression. Matching skipped");
+      OPstack.push(DEBUG_NEW telldata::TtBool(false));
+   }
+   return EXEC_NEXT;
+}
+
+int parsercmd::cmdREXPRPLC::execute()
+{
+   std::string theExpression = getStringValue();
+   std::size_t splitPos = theExpression.find_first_of('/');
+   std::string searchEx = theExpression.substr(0, splitPos++);
+   std::string replacEx = theExpression.substr(splitPos, std::string::npos);
+
+   wxRegEx regex(wxString(searchEx.c_str(), wxConvUTF8));
+   if (regex.IsValid())
+   {
+      wxString wxTarget(_target->value().c_str(), wxConvUTF8);
+      int matches = regex.Replace(&wxTarget, wxString(replacEx.c_str(), wxConvUTF8));
+      if (matches > 0)
+      {
+         (*_target) = telldata::TtString(std::string(wxTarget.mb_str(wxConvUTF8)));
+      }
+      OPstack.push(DEBUG_NEW telldata::TtInt(matches));
+   }
+   else
+   {
+      //Syntax error in the regular expression
+      tellerror("Runtime error: syntax error in the regular expression");
+      OPstack.push(DEBUG_NEW telldata::TtInt(-1));
+   }
+   return EXEC_NEXT;
 }
 
 //=============================================================================
