@@ -743,6 +743,8 @@ void TopedApp::initInternalFunctions(parsercmd::cmdMAIN* mblock)
    mblock->addFUNC("getlaytype"       ,(DEBUG_NEW               tellstdfunc::stdGETLAYTYPE(telldata::tn_int, true )));
    mblock->addFUNC("getlaytext"       ,(DEBUG_NEW         tellstdfunc::stdGETLAYTEXTSTR(telldata::tn_string, true )));
    mblock->addFUNC("getlayref"        ,(DEBUG_NEW          tellstdfunc::stdGETLAYREFSTR(telldata::tn_string, true )));
+   mblock->addFUNC("overlap"          ,(DEBUG_NEW               tellstdfunc::stdGETOVERLAP(telldata::tn_box, true )));
+   mblock->addFUNC("overlap"          ,(DEBUG_NEW            tellstdfunc::stdGETOVERLAPLST(telldata::tn_box, true )));
    //-----------------------------------------------------------------------------------------------------------
    // toped build-in functions
    //-----------------------------------------------------------------------------------------------------------

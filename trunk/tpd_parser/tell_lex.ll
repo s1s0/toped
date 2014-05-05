@@ -38,9 +38,9 @@
 %x pPASS
 %x pPRAGMA
 %x pREPEATLOOP
-lex_string        \"[^"]*\"
-lex_rexpfind      \/[^/]+\/
-lex_rexprplc      \/[^\/]+\/[^\/]+\/
+lex_string        \"[^"\n]*\"
+lex_rexpfind      \/[^/\n]+\/
+lex_rexprplc      \/[^\/\n]+\/[^\/\n]+\/
 lex_ID            [a-zA-Z_][a-zA-Z0-9_]*
 lxt_S             [ \t]+
 lxt_D             [0-9]
@@ -215,16 +215,12 @@ until                      return tknUNTIL;
 const                      return tknCONST;
 {lex_string}             { telllval.parsestr = parsercmd::charcopy(yytext, true);
                            return tknSTRING;                               }
-{lex_rexpfind}           { telllval.parsestr = parsercmd::charcopy(yytext, true);
-                           return tknREXPFIND;                             }
-{lex_rexprplc}           { telllval.parsestr = parsercmd::charcopy(yytext, true);
-                           return tknREXPRPLC;                             }
 "."{lex_ID}              { telllval.parsestr = parsercmd::charcopy(yytext);return tknFIELD;}
 "<="                       return tknLEQ;
 ">="                       return tknGEQ;
 "=="                       return tknEQ;
 "!="                       return tknNEQ;
-"=~"                       return tknRXEQ;
+"=~"                     { CMDBlock->setRexExpected(true); return tknRXEQ;}
 "&&"                       return tknAND;
 "||"                       return tknOR;
 "&"                        return tknBWAND;
@@ -258,6 +254,22 @@ const                      return tknCONST;
 "/"                        return '/';
 "="                        return '=';
 ";"                        return ';';
+{lex_rexpfind}           { if (CMDBlock->rexExpected())
+                           {
+                              telllval.parsestr = parsercmd::charcopy(yytext, true);
+                              return tknREXPFIND;                             
+                           }
+                           else
+                              REJECT;
+                         }
+{lex_rexprplc}           { if (CMDBlock->rexExpected())
+                           {
+                              telllval.parsestr = parsercmd::charcopy(yytext, true);
+                              return tknREXPRPLC;                             
+                           }
+                           else
+                              REJECT;
+                         }
 0x[0-9A-Fa-f]+    |
 {lxt_D}+                 { telllval.uint = parsercmd::getllint(yytext); return tknUINT;}
 {lxt_D}+"."{lxt_D}*({lxt_E})?  |

@@ -31,8 +31,10 @@
 #include "tedat.h"
 #include "auxdat.h"
 #include "datacenter.h"
+#include "viewprop.h"
 
 extern DataCenter*               DATC;
+extern layprop::PropertyCenter*  PROPC;
 extern console::toped_logfile    LogFile;
 extern void tellerror(std::string s);
 
@@ -97,6 +99,52 @@ int tellstdfunc::stdGETLAYREFSTR::execute()
       delete tx;
       return EXEC_NEXT;
    }
+}
+//=============================================================================
+tellstdfunc::stdGETOVERLAP::stdGETOVERLAP(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype, eor)
+{
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtLayout()));
+}
+
+int tellstdfunc::stdGETOVERLAP::execute()
+{
+   telldata::TtLayout* layObject = static_cast<telldata::TtLayout*>(OPstack.top());OPstack.pop();
+   assert(layObject);
+   real DBscale = PROPC->DBscale();
+   DBbox ovlBox = layObject->data()->overlap();
+   telldata::TtPnt p1DB(ovlBox.p1().x()/DBscale, ovlBox.p1().y()/DBscale );
+   telldata::TtPnt p2DB(ovlBox.p2().x()/DBscale, ovlBox.p2().y()/DBscale);
+
+   OPstack.push(DEBUG_NEW telldata::TtWnd( p1DB, p2DB ));
+   delete layObject;
+   return EXEC_NEXT;
+}
+
+//=============================================================================
+tellstdfunc::stdGETOVERLAPLST::stdGETOVERLAPLST(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype, eor)
+{
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtList(telldata::tn_layout)));
+}
+
+int tellstdfunc::stdGETOVERLAPLST::execute()
+{
+   telldata::TtList* layList = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
+   assert(layList);
+
+//   DBbox ovlBox = layObject->data()->overlap();
+   real DBscale = PROPC->DBscale();
+   DBbox ovlBox(DEFAULT_OVL_BOX);
+   for (unsigned i = 0; i < layList->size(); i++)
+   {
+      ovlBox.overlap(static_cast<telldata::TtLayout*>(layList->index_var(i))->data()->overlap());
+   }
+   telldata::TtPnt p1DB(ovlBox.p1().x()/DBscale, ovlBox.p1().y()/DBscale );
+   telldata::TtPnt p2DB(ovlBox.p2().x()/DBscale, ovlBox.p2().y()/DBscale);
+   OPstack.push(DEBUG_NEW telldata::TtWnd( p1DB, p2DB ));
+   delete layList;
+   return EXEC_NEXT;
 }
 
 //=============================================================================

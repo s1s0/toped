@@ -724,6 +724,8 @@ namespace  parsercmd {
       word                       undoDepth() {return _undoDepth;}
       void                       setUndoDepth(word ud) {_undoDepth = ud;}
       bool                       empty() {return _cmdQ.empty();}
+      bool                       rexExpected() {return _rexExpected;}
+      void                       setRexExpected(bool rexExpected) {_rexExpected = rexExpected;}
    protected:
       bool                       addCALLBACKDECL(std::string, cmdCALLBACK*, TpdYYLtype);
       cmdSTDFUNC* const          getLocalFuncBody(const char*, telldata::argumentQ*) const;
@@ -737,6 +739,7 @@ namespace  parsercmd {
       static FunctionMAP        _internalFuncMap;
       static word               _undoDepth;
       static bool               _dbUnsorted;
+      static bool               _rexExpected;
       telldata::typeID          _nextLclTypeID;
    };
 
