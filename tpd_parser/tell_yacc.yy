@@ -1178,13 +1178,16 @@ anonymousvar:
 ;
 
 regexpression:
-     lvalue tknRXEQ tknREXPFIND           {
+     lvalue tknRXEQ                       {
+         CMDBlock->setRexExpected(true); /* this by itself is not enough. Lexer contains the same line*/
+     }
+     tknREXPFIND                          {
          if (telldata::tn_string == $1)
          {
             parsercmd::cmdVIRTUAL* command;
-            command = DEBUG_NEW parsercmd::cmdPUSH(DEBUG_NEW telldata::TtString($3), false, true);
+            command = DEBUG_NEW parsercmd::cmdPUSH(DEBUG_NEW telldata::TtString($4), false, true);
             CMDBlock->pushcmd(command);
-            delete [] $3;
+            delete [] $4;
             command = DEBUG_NEW parsercmd::cmdREXPFIND(tell_lvalue);
             CMDBlock->pushcmd(command);
             $$ = telldata::tn_bool;
@@ -1194,14 +1197,18 @@ regexpression:
             tellerror("String expected here", @1);
             $$ = telldata::tn_void;
          }
+         CMDBlock->setRexExpected(false);
       }
-   | lvalue tknRXEQ tknREXPRPLC           {
+   | lvalue tknRXEQ                       {
+         CMDBlock->setRexExpected(true); /* this by itself is not enough. Lexer contains the same line*/
+     }
+     tknREXPRPLC           {
          if (telldata::tn_string == $1)
          {
             parsercmd::cmdVIRTUAL* command;
-            command = DEBUG_NEW parsercmd::cmdPUSH(DEBUG_NEW telldata::TtString($3), false, true);
+            command = DEBUG_NEW parsercmd::cmdPUSH(DEBUG_NEW telldata::TtString($4), false, true);
             CMDBlock->pushcmd(command);
-            delete [] $3;
+            delete [] $4;
             command = DEBUG_NEW parsercmd::cmdREXPRPLC(tell_lvalue);
             CMDBlock->pushcmd(command);
             $$ = telldata::tn_int;
@@ -1211,6 +1218,7 @@ regexpression:
             tellerror("String expected here", @1);
             $$ = telldata::tn_void;
          }
+         CMDBlock->setRexExpected(true);
       }
 ;
 

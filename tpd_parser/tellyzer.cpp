@@ -61,6 +61,8 @@ parsercmd::FunctionMAP        parsercmd::cmdBLOCK::_internalFuncMap;
 parsercmd::BlockSTACK         parsercmd::cmdBLOCK::_blocks;
 //The state (to be) of the DB after the last function call
 bool                          parsercmd::cmdBLOCK::_dbUnsorted = false;
+//Regular expression expected (says the parser)
+bool                          parsercmd::cmdBLOCK::_rexExpected = false;
 // Operand stack
 telldata::operandSTACK        parsercmd::cmdVIRTUAL::OPstack;
 // UNDO Operand stack
@@ -2179,6 +2181,7 @@ int parsercmd::cmdBLOCK::execute()
 void parsercmd::cmdBLOCK::cleaner(bool fullreset)
 {
    TELL_DEBUG(cmdBLOCK_cleaner);
+   _rexExpected = false;
    while (!_cmdQ.empty()) {
       cmdVIRTUAL *a = _cmdQ.front();_cmdQ.pop_front();
       delete a;
