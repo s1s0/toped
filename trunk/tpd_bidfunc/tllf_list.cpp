@@ -107,6 +107,56 @@ int tellstdfunc::lytTYPEOF::execute()
 }
 
 //============================================================================
+tellstdfunc::lstSTR2UINTL::lstSTR2UINTL(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
+{
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtString()));
+}
+
+int tellstdfunc::lstSTR2UINTL::execute()
+{
+   std::string srcString = getStringValue();
+   telldata::TtList* lstTarget = DEBUG_NEW telldata::TtList(telldata::tn_uint);
+   for (unsigned i = 0; i < srcString.length(); i++)
+   {
+      lstTarget->add(DEBUG_NEW telldata::TtUInt(srcString[i]));
+   }
+
+   OPstack.push(lstTarget);
+   return EXEC_NEXT;
+}
+
+//============================================================================
+tellstdfunc::lstUINTL2STR::lstUINTL2STR(telldata::typeID retype, bool eor) :
+      cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
+{
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtList(telldata::tn_uint)));
+}
+
+int tellstdfunc::lstUINTL2STR::execute()
+{
+   telldata::TtList* srcList = static_cast<telldata::TtList*>(OPstack.top());OPstack.pop();
+   assert(TLISTOF(telldata::tn_uint) == srcList->get_type());
+   std::string tarString;
+   for (unsigned i = 0; i < srcList->size(); i++)
+   {
+      dword nextChar = static_cast<telldata::TtUInt*>(srcList->index_var(i))->value();
+      if (nextChar > 255)
+      {
+         std::stringstream wstr;
+         wstr << "Component " << i << " is out of range (" << nextChar << "). Ignored. Space inserted instead.";
+         tell_log(console::MT_WARNING, wstr.str());
+         tarString += " ";
+      }
+      else
+         tarString += nextChar;
+   }
+   OPstack.push(DEBUG_NEW telldata::TtString(tarString));
+   delete srcList;
+   return EXEC_NEXT;
+}
+
+//============================================================================
 int tellstdfunc::stdABS::argsOK(argumentQ* amap, bool& strict)
 {
    strict = true;
