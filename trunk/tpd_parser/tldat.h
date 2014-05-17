@@ -434,19 +434,19 @@ namespace telldata {
    //==============================================================================
    // Don't destruct _p1 and _p1 here. They are just pointing to the structures in
    // the parent _fieldList and obviously should be destroyed there
-   class TtWnd : public TtUserStruct {
+   class TtBox : public TtUserStruct {
    public:
-                           TtWnd( real bl_x=0.0, real bl_y=0.0,
+                           TtBox( real bl_x=0.0, real bl_y=0.0,
                                   real tr_x=0.0, real tr_y=0.0);
-                           TtWnd( TtPnt tl, TtPnt br);
-                           TtWnd(operandSTACK& OPStack);
-                           TtWnd(const TtWnd& cobj);
-      virtual TellVar*     selfcopy() const    {return DEBUG_NEW TtWnd(*this);};
+                           TtBox( TtPnt tl, TtPnt br);
+                           TtBox(operandSTACK& OPStack);
+                           TtBox(const TtBox& cobj);
+      virtual TellVar*     selfcopy() const    {return DEBUG_NEW TtBox(*this);};
       virtual void         assign(TellVar*);
       const TtPnt&         p1() const          {return *_p1;};
       const TtPnt&         p2() const          {return *_p2;};
       void                 scale(real sf)      {_p1->scale(sf); _p1->scale(sf);};
-      const TtWnd&         operator = (const TtWnd&);
+      const TtBox&         operator = (const TtBox&);
       void                 normalize(bool&, bool&);
       void                 denormalize(bool, bool);
    private:

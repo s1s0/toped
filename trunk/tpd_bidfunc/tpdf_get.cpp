@@ -116,7 +116,7 @@ int tellstdfunc::stdGETOVERLAP::execute()
    telldata::TtPnt p1DB(ovlBox.p1().x()/DBscale, ovlBox.p1().y()/DBscale );
    telldata::TtPnt p2DB(ovlBox.p2().x()/DBscale, ovlBox.p2().y()/DBscale);
 
-   OPstack.push(DEBUG_NEW telldata::TtWnd( p1DB, p2DB ));
+   OPstack.push(DEBUG_NEW telldata::TtBox( p1DB, p2DB ));
    delete layObject;
    return EXEC_NEXT;
 }
@@ -142,7 +142,7 @@ int tellstdfunc::stdGETOVERLAPLST::execute()
    }
    telldata::TtPnt p1DB(ovlBox.p1().x()/DBscale, ovlBox.p1().y()/DBscale );
    telldata::TtPnt p2DB(ovlBox.p2().x()/DBscale, ovlBox.p2().y()/DBscale);
-   OPstack.push(DEBUG_NEW telldata::TtWnd( p1DB, p2DB ));
+   OPstack.push(DEBUG_NEW telldata::TtBox( p1DB, p2DB ));
    delete layList;
    return EXEC_NEXT;
 }

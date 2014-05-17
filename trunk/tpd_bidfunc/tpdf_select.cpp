@@ -39,19 +39,19 @@ extern console::toped_logfile    LogFile;
 tellstdfunc::stdSELECT::stdSELECT(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtWnd()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBox()));
 }
 
 void tellstdfunc::stdSELECT::undo_cleanup()
 {
-   telldata::TtWnd *w = TELL_UNDOOPS_CLEAN(telldata::TtWnd*);
+   telldata::TtBox *w = TELL_UNDOOPS_CLEAN(telldata::TtBox*);
    delete w;
 }
 
 void tellstdfunc::stdSELECT::undo()
 {
    TEUNDO_DEBUG("select(box) UNDO");
-   telldata::TtWnd *w = TELL_UNDOOPS_UNDO(telldata::TtWnd*);
+   telldata::TtBox *w = TELL_UNDOOPS_UNDO(telldata::TtBox*);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -71,7 +71,7 @@ void tellstdfunc::stdSELECT::undo()
 int tellstdfunc::stdSELECT::execute()
 {
    // get the data from the stack
-   telldata::TtWnd *w = static_cast<telldata::TtWnd*>(OPstack.top());OPstack.pop();
+   telldata::TtBox *w = static_cast<telldata::TtBox*>(OPstack.top());OPstack.pop();
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -200,18 +200,18 @@ int tellstdfunc::stdSELECTIN::execute()
 tellstdfunc::stdPNTSELECT::stdPNTSELECT(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtWnd()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBox()));
 }
 
 void tellstdfunc::stdPNTSELECT::undo_cleanup()
 {
-   telldata::TtWnd *w = TELL_UNDOOPS_CLEAN(telldata::TtWnd*);
+   telldata::TtBox *w = TELL_UNDOOPS_CLEAN(telldata::TtBox*);
    delete w;
 }
 
 void tellstdfunc::stdPNTSELECT::undo() {
    TEUNDO_DEBUG("pselect(box) UNDO");
-   telldata::TtWnd *w = TELL_UNDOOPS_UNDO(telldata::TtWnd*);
+   telldata::TtBox *w = TELL_UNDOOPS_UNDO(telldata::TtBox*);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -231,7 +231,7 @@ void tellstdfunc::stdPNTSELECT::undo() {
 int tellstdfunc::stdPNTSELECT::execute()
 {
    // get the data from the stack
-   telldata::TtWnd *w = static_cast<telldata::TtWnd*>(OPstack.top());OPstack.pop();
+   telldata::TtBox *w = static_cast<telldata::TtBox*>(OPstack.top());OPstack.pop();
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -268,19 +268,19 @@ int tellstdfunc::stdPNTSELECT_I::execute() {
 tellstdfunc::stdUNSELECT::stdUNSELECT(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtWnd()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBox()));
 }
 
 void tellstdfunc::stdUNSELECT::undo_cleanup()
 {
-   telldata::TtWnd *w = TELL_UNDOOPS_CLEAN(telldata::TtWnd*);
+   telldata::TtBox *w = TELL_UNDOOPS_CLEAN(telldata::TtBox*);
    delete w;
 }
 
 void tellstdfunc::stdUNSELECT::undo()
 {
    TEUNDO_DEBUG("unselect(box) UNDO");
-   telldata::TtWnd *w = TELL_UNDOOPS_UNDO(telldata::TtWnd*);
+   telldata::TtBox *w = TELL_UNDOOPS_UNDO(telldata::TtBox*);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -300,7 +300,7 @@ void tellstdfunc::stdUNSELECT::undo()
 int tellstdfunc::stdUNSELECT::execute()
 {
    // get the data from the stack
-   telldata::TtWnd *w = static_cast<telldata::TtWnd*>(OPstack.top());OPstack.pop();
+   telldata::TtBox *w = static_cast<telldata::TtBox*>(OPstack.top());OPstack.pop();
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -428,19 +428,19 @@ int tellstdfunc::stdUNSELECTIN::execute()
 tellstdfunc::stdPNTUNSELECT::stdPNTUNSELECT(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtWnd()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBox()));
 }
 
 void tellstdfunc::stdPNTUNSELECT::undo_cleanup()
 {
-   telldata::TtWnd *w = TELL_UNDOOPS_CLEAN(telldata::TtWnd*);
+   telldata::TtBox *w = TELL_UNDOOPS_CLEAN(telldata::TtBox*);
    delete w;
 }
 
 void tellstdfunc::stdPNTUNSELECT::undo()
 {
    TEUNDO_DEBUG("punselect(box) UNDO");
-   telldata::TtWnd *w = TELL_UNDOOPS_UNDO(telldata::TtWnd*);
+   telldata::TtBox *w = TELL_UNDOOPS_UNDO(telldata::TtBox*);
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {
@@ -460,7 +460,7 @@ void tellstdfunc::stdPNTUNSELECT::undo()
 int tellstdfunc::stdPNTUNSELECT::execute()
 {
    // get the data from the stack
-   telldata::TtWnd *w = static_cast<telldata::TtWnd*>(OPstack.top());OPstack.pop();
+   telldata::TtBox *w = static_cast<telldata::TtBox*>(OPstack.top());OPstack.pop();
    laydata::TdtLibDir* dbLibDir = NULL;
    if (DATC->lockTDT(dbLibDir, dbmxs_celllock))
    {

@@ -661,18 +661,18 @@ int parsercmd::cmdSHIFTBOX::execute()
 {
    TELL_DEBUG(cmdSHIFTBOX);
    telldata::TtPnt *p;
-   telldata::TtWnd *w;
+   telldata::TtBox *w;
    if (_swapOperands)
    {
-      w = static_cast<telldata::TtWnd*>(OPstack.top());OPstack.pop();
+      w = static_cast<telldata::TtBox*>(OPstack.top());OPstack.pop();
       p = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
    }
    else
    {
       p = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
-      w = static_cast<telldata::TtWnd*>(OPstack.top());OPstack.pop();
+      w = static_cast<telldata::TtBox*>(OPstack.top());OPstack.pop();
    }
-   telldata::TtWnd* r = DEBUG_NEW telldata::TtWnd(w->p1().x() + _sign*p->x(),w->p1().y() + _sign*p->y(),
+   telldata::TtBox* r = DEBUG_NEW telldata::TtBox(w->p1().x() + _sign*p->x(),w->p1().y() + _sign*p->y(),
                         w->p2().x() + _sign*p->x(),w->p2().y() + _sign*p->y());
    OPstack.push(r);
    delete p; delete w;
@@ -684,23 +684,23 @@ int parsercmd::cmdSHIFTBOX3::execute()
 {
    TELL_DEBUG(cmdSHIFTBOX3);
    real shift = getOpValue();
-   telldata::TtWnd *w = static_cast<telldata::TtWnd*>(OPstack.top());OPstack.pop();
+   telldata::TtBox *w = static_cast<telldata::TtBox*>(OPstack.top());OPstack.pop();
    bool swapx, swapy;
    w->normalize(swapx, swapy);
-   telldata::TtWnd* r;
+   telldata::TtBox* r;
    if  (1 == _signX)
       if (1 == _signY)
-         r = DEBUG_NEW telldata::TtWnd(w->p1().x()          , w->p1().y()         ,
+         r = DEBUG_NEW telldata::TtBox(w->p1().x()          , w->p1().y()         ,
                                        w->p2().x() + shift  , w->p2().y() + shift  );
       else
-         r = DEBUG_NEW telldata::TtWnd(w->p1().x()          , w->p1().y() - shift ,
+         r = DEBUG_NEW telldata::TtBox(w->p1().x()          , w->p1().y() - shift ,
                                        w->p2().x() + shift  , w->p2().y()          );
    else
       if (1 == _signY)
-         r = DEBUG_NEW telldata::TtWnd(w->p1().x() - shift  , w->p1().y()          ,
+         r = DEBUG_NEW telldata::TtBox(w->p1().x() - shift  , w->p1().y()          ,
                                        w->p2().x()          , w->p2().y() + shift   );
       else
-         r = DEBUG_NEW telldata::TtWnd(w->p1().x() - shift  , w->p1().y() - shift  ,
+         r = DEBUG_NEW telldata::TtBox(w->p1().x() - shift  , w->p1().y() - shift  ,
                                        w->p2().x()          , w->p2().y()           );
    r->denormalize(swapx, swapy);
    OPstack.push(r);
@@ -713,23 +713,23 @@ int parsercmd::cmdSHIFTBOX4::execute()
 {
    TELL_DEBUG(cmdSHIFTBOX4);
    telldata::TtPnt *p = static_cast<telldata::TtPnt*>(OPstack.top());OPstack.pop();
-   telldata::TtWnd *w = static_cast<telldata::TtWnd*>(OPstack.top());OPstack.pop();
+   telldata::TtBox *w = static_cast<telldata::TtBox*>(OPstack.top());OPstack.pop();
    bool swapx, swapy;
    w->normalize(swapx, swapy);
-   telldata::TtWnd* r;
+   telldata::TtBox* r;
    if  (1 == _signX)
       if (1 == _signY)
-         r = DEBUG_NEW telldata::TtWnd(w->p1().x()          , w->p1().y()         ,
+         r = DEBUG_NEW telldata::TtBox(w->p1().x()          , w->p1().y()         ,
                                        w->p2().x() + p->x() , w->p2().y() + p->y() );
       else
-         r = DEBUG_NEW telldata::TtWnd(w->p1().x()          , w->p1().y() - p->y(),
+         r = DEBUG_NEW telldata::TtBox(w->p1().x()          , w->p1().y() - p->y(),
                                        w->p2().x() + p->x() , w->p2().y()          );
    else
       if (1 == _signY)
-         r = DEBUG_NEW telldata::TtWnd(w->p1().x() - p->x() , w->p1().y()          ,
+         r = DEBUG_NEW telldata::TtBox(w->p1().x() - p->x() , w->p1().y()          ,
                                        w->p2().x()          , w->p2().y() + p->y()  );
       else
-         r = DEBUG_NEW telldata::TtWnd(w->p1().x() - p->x() , w->p1().y() - p->y() ,
+         r = DEBUG_NEW telldata::TtBox(w->p1().x() - p->x() , w->p1().y() - p->y() ,
                                        w->p2().x()          , w->p2().y()           );
    r->denormalize(swapx, swapy);
    OPstack.push(r);
@@ -742,25 +742,25 @@ int parsercmd::cmdBLOWBOX::execute()
 {
    TELL_DEBUG(cmdBLOWBOX);
    real shift;
-   telldata::TtWnd *w;
+   telldata::TtBox *w;
    if (_swapOperands)
    {
-      w = static_cast<telldata::TtWnd*>(OPstack.top());OPstack.pop();
+      w = static_cast<telldata::TtBox*>(OPstack.top());OPstack.pop();
       shift = getOpValue();
    }
    else
    {
       shift = getOpValue();
-      w = static_cast<telldata::TtWnd*>(OPstack.top());OPstack.pop();
+      w = static_cast<telldata::TtBox*>(OPstack.top());OPstack.pop();
    }
    bool swapx, swapy;
    w->normalize(swapx, swapy);
-   telldata::TtWnd* r;
+   telldata::TtBox* r;
    if  (1 == _sign)
-      r = DEBUG_NEW telldata::TtWnd(w->p1().x() - shift  , w->p1().y() - shift ,
+      r = DEBUG_NEW telldata::TtBox(w->p1().x() - shift  , w->p1().y() - shift ,
                                     w->p2().x() + shift  , w->p2().y() + shift  );
    else
-      r = DEBUG_NEW telldata::TtWnd(w->p1().x() + shift  , w->p1().y() + shift  ,
+      r = DEBUG_NEW telldata::TtBox(w->p1().x() + shift  , w->p1().y() + shift  ,
                                     w->p2().x() - shift  , w->p2().y() - shift   );
    r->denormalize(swapx, swapy);
    OPstack.push(r);
@@ -837,24 +837,24 @@ int parsercmd::cmdSCALEBOX::execute()
 {
    TELL_DEBUG(cmdSCALEPNT);
    real scaleFactor;
-   telldata::TtWnd* w;
+   telldata::TtBox* w;
    if (_swapOperands)
    {
-      w = static_cast<telldata::TtWnd*>(OPstack.top());OPstack.pop();
+      w = static_cast<telldata::TtBox*>(OPstack.top());OPstack.pop();
       scaleFactor = getOpValue();
    }
    else
    {
       scaleFactor = getOpValue();
-      w = static_cast<telldata::TtWnd*>(OPstack.top());OPstack.pop();
+      w = static_cast<telldata::TtBox*>(OPstack.top());OPstack.pop();
    }
 
-   telldata::TtWnd* r;
+   telldata::TtBox* r;
    if (_up)
-      r = DEBUG_NEW telldata::TtWnd(w->p1().x() * scaleFactor , w->p1().y() * scaleFactor ,
+      r = DEBUG_NEW telldata::TtBox(w->p1().x() * scaleFactor , w->p1().y() * scaleFactor ,
                                     w->p2().x() * scaleFactor , w->p2().y() * scaleFactor  );
    else
-      r = DEBUG_NEW telldata::TtWnd(w->p1().x() / scaleFactor , w->p1().y() / scaleFactor ,
+      r = DEBUG_NEW telldata::TtBox(w->p1().x() / scaleFactor , w->p1().y() / scaleFactor ,
                                     w->p2().x() / scaleFactor , w->p2().y() / scaleFactor  );
    OPstack.push(r);
    delete w;
@@ -1124,7 +1124,7 @@ parsercmd::cmdLISTSIZE::cmdLISTSIZE(telldata::TellVar* var):
       case telldata::tn_int     : _initVar = DEBUG_NEW telldata::TtInt()    ; break;
       case telldata::tn_bool    : _initVar = DEBUG_NEW telldata::TtBool()   ; break;
       case telldata::tn_pnt     : _initVar = DEBUG_NEW telldata::TtPnt()    ; break;
-      case telldata::tn_box     : _initVar = DEBUG_NEW telldata::TtWnd()    ; break;
+      case telldata::tn_box     : _initVar = DEBUG_NEW telldata::TtBox()    ; break;
       case telldata::tn_bnd     : _initVar = DEBUG_NEW telldata::TtBnd()    ; break;
       case telldata::tn_laymap  : _initVar = DEBUG_NEW telldata::TtLMap()   ; break;
       case telldata::tn_hshstr  : _initVar = DEBUG_NEW telldata::TtHshStr() ; break;
@@ -1773,7 +1773,7 @@ int parsercmd::cmdSTRUCT::execute()
       switch( (*_arg)() )
       {
          case telldata::tn_pnt   : ustrct = DEBUG_NEW telldata::TtPnt(OPstack);break;
-         case telldata::tn_box   : ustrct = DEBUG_NEW telldata::TtWnd(OPstack);break;
+         case telldata::tn_box   : ustrct = DEBUG_NEW telldata::TtBox(OPstack);break;
          case telldata::tn_bnd   : ustrct = DEBUG_NEW telldata::TtBnd(OPstack);break;
          case telldata::tn_laymap: ustrct = DEBUG_NEW telldata::TtLMap(OPstack);break;
          case telldata::tn_hshstr: ustrct = DEBUG_NEW telldata::TtHshStr(OPstack);break;
@@ -2049,7 +2049,7 @@ telldata::TellVar* parsercmd::cmdBLOCK::newTellvar(telldata::typeID ID, const ch
       case   telldata::tn_uint  : return(DEBUG_NEW telldata::TtUInt());
       case   telldata::tn_bool  : return(DEBUG_NEW telldata::TtBool());
       case    telldata::tn_pnt  : return(DEBUG_NEW telldata::TtPnt());
-      case    telldata::tn_box  : return(DEBUG_NEW telldata::TtWnd());
+      case    telldata::tn_box  : return(DEBUG_NEW telldata::TtBox());
       case    telldata::tn_bnd  : return(DEBUG_NEW telldata::TtBnd());
       case telldata::tn_laymap  : return(DEBUG_NEW telldata::TtLMap());
       case telldata::tn_hshstr  : return(DEBUG_NEW telldata::TtHshStr());
@@ -2102,7 +2102,7 @@ telldata::TellVar* parsercmd::cmdBLOCK::newFuncArg(telldata::typeID ID, TpdYYLty
       case    telldata::tn_int  : return(DEBUG_NEW telldata::TtInt());
       case   telldata::tn_bool  : return(DEBUG_NEW telldata::TtBool());
       case    telldata::tn_pnt  : return(DEBUG_NEW telldata::TtPnt());
-      case    telldata::tn_box  : return(DEBUG_NEW telldata::TtWnd());
+      case    telldata::tn_box  : return(DEBUG_NEW telldata::TtBox());
       case    telldata::tn_bnd  : return(DEBUG_NEW telldata::TtBnd());
       case telldata::tn_laymap  : return(DEBUG_NEW telldata::TtLMap());
       case telldata::tn_hshstr  : return(DEBUG_NEW telldata::TtHshStr());
@@ -3909,7 +3909,7 @@ console::toped_logfile& console::toped_logfile::operator<< (const std::string& _
    return *this;
 }
 
-console::toped_logfile& console::toped_logfile::operator<< (const telldata::TtWnd& _w)
+console::toped_logfile& console::toped_logfile::operator<< (const telldata::TtBox& _w)
 {
    if (_enabled)
       _file << "{{" << _w.p1().x() << "," << _w.p1().y() << "}," <<
@@ -3973,7 +3973,7 @@ console::toped_logfile& console::toped_logfile::operator<< (const telldata::TtLi
                *this << *(static_cast<telldata::TtPnt*>((_tl.mlist())[i]));
                break;
             case telldata::tn_box:
-               *this << *(static_cast<telldata::TtWnd*>((_tl.mlist())[i]));
+               *this << *(static_cast<telldata::TtBox*>((_tl.mlist())[i]));
                break;
             case telldata::tn_bnd:
                *this << *(static_cast<telldata::TtBnd*>((_tl.mlist())[i]));
@@ -4097,7 +4097,7 @@ telldata::TellVar* parsercmd::newCallBackArgument(telldata::typeID ID, TpdYYLtyp
       case    telldata::tn_int  : return(DEBUG_NEW telldata::TtInt());
       case   telldata::tn_bool  : return(DEBUG_NEW telldata::TtBool());
       case    telldata::tn_pnt  : return(DEBUG_NEW telldata::TtPnt());
-      case    telldata::tn_box  : return(DEBUG_NEW telldata::TtWnd());
+      case    telldata::tn_box  : return(DEBUG_NEW telldata::TtBox());
       case    telldata::tn_bnd  : return(DEBUG_NEW telldata::TtBnd());
       case telldata::tn_laymap  : return(DEBUG_NEW telldata::TtLMap());
       case telldata::tn_hshstr  : return(DEBUG_NEW telldata::TtHshStr());

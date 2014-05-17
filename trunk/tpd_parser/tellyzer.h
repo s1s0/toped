@@ -1036,7 +1036,7 @@ namespace console{
          toped_logfile&    operator<< (const real);
          toped_logfile&    operator<< (const std::string&);
          toped_logfile&    operator<< (const telldata::TtPnt&);
-         toped_logfile&    operator<< (const telldata::TtWnd&);
+         toped_logfile&    operator<< (const telldata::TtBox&);
          toped_logfile&    operator<< (const telldata::TtBnd&);
          toped_logfile&    operator<< (const telldata::TtLMap&);
          toped_logfile&    operator<< (const telldata::TtHshStr&);

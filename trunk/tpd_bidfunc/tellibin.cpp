@@ -252,7 +252,7 @@ int tellstdfunc::stdDISTANCE_D::execute()
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(console::op_line, &OPstack)) return EXEC_ABORT;
    // get the data from the stack
-   telldata::TtWnd *w = static_cast<telldata::TtWnd*>(OPstack.top());OPstack.pop();
+   telldata::TtBox *w = static_cast<telldata::TtBox*>(OPstack.top());OPstack.pop();
    telldata::TtList* plst = DEBUG_NEW telldata::TtList(telldata::tn_pnt);
    plst->add(DEBUG_NEW telldata::TtPnt(w->p1().x(), w->p1().y()));
    plst->add(DEBUG_NEW telldata::TtPnt(w->p2().x(), w->p2().y()));
@@ -351,11 +351,11 @@ int tellstdfunc::stdZOOMWIN::execute() {
 tellstdfunc::stdZOOMWINb::stdZOOMWINb(telldata::typeID retype, bool eor) :
       stdZOOMWIN(DEBUG_NEW parsercmd::ArgumentLIST,retype, eor)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtWnd()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBox()));
 }
 
 int tellstdfunc::stdZOOMWINb::execute() {
-   telldata::TtWnd *w = static_cast<telldata::TtWnd*>(OPstack.top());OPstack.pop();
+   telldata::TtBox *w = static_cast<telldata::TtBox*>(OPstack.top());OPstack.pop();
    real DBscale = PROPC->DBscale();
    DBbox* box = DEBUG_NEW DBbox(TP(w->p1().x(), w->p1().y(), DBscale),
                           TP(w->p2().x(), w->p2().y(), DBscale));
@@ -821,7 +821,7 @@ void tellstdfunc::echoWrapper(telldata::TellVar* p, std::ostringstream& ost)
       }
       case telldata::tn_box:
       {
-         telldata::TtWnd* wvar = static_cast<telldata::TtWnd*>(p);
+         telldata::TtBox* wvar = static_cast<telldata::TtBox*>(p);
          ost << "P1: X = " << wvar->p1().x() << ": Y = " << wvar->p1().y() << " ; " <<
                 "P2: X = " << wvar->p2().x() << ": Y = " << wvar->p2().y() ;
          break;
