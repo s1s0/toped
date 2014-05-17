@@ -42,7 +42,7 @@ extern console::toped_logfile    LogFile;
 tellstdfunc::stdADDBOX::stdADDBOX(telldata::typeID retype, bool eor) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor, parsercmd::sdbrUNSORTED)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtWnd()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBox()));
    _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtLayer()));
 }
 
@@ -76,7 +76,7 @@ int tellstdfunc::stdADDBOX::execute()
    telldata::TtLayer* tlay = static_cast<telldata::TtLayer*>(OPstack.top());OPstack.pop();
    LayerDef laydef(tlay->value());
    secureLayer(laydef);
-   telldata::TtWnd*      w = static_cast<telldata::TtWnd*>(OPstack.top());OPstack.pop();
+   telldata::TtBox*      w = static_cast<telldata::TtBox*>(OPstack.top());OPstack.pop();
    real DBscale = PROPC->DBscale();
    TP* p1DB = DEBUG_NEW TP(w->p1().x(), w->p1().y(), DBscale);
    TP* p2DB = DEBUG_NEW TP(w->p2().x(), w->p2().y(), DBscale);
@@ -103,7 +103,7 @@ int tellstdfunc::stdADDBOX::execute()
 tellstdfunc::stdADDBOX_T::stdADDBOX_T(telldata::typeID retype, bool eor) :
       stdADDBOX(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor,parsercmd::sdbrUNSORTED)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtWnd()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBox()));
    _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtInt()));
 }
 
@@ -120,7 +120,7 @@ int tellstdfunc::stdADDBOX_T::execute()
 tellstdfunc::stdADDBOX_D::stdADDBOX_D(telldata::typeID retype, bool eor) :
       stdADDBOX(DEBUG_NEW parsercmd::ArgumentLIST,retype,eor,parsercmd::sdbrUNSORTED)
 {
-   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtWnd()));
+   _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBox()));
 }
 
 int tellstdfunc::stdADDBOX_D::execute()
@@ -170,7 +170,7 @@ int tellstdfunc::stdDRAWBOX::execute()
    // stop the thread and wait for input from the GUI
    if (!tellstdfunc::waitGUInput(console::op_dbox, &OPstack)) return EXEC_ABORT;
    // get the data from the stack
-   telldata::TtWnd *w = static_cast<telldata::TtWnd*>(OPstack.top());OPstack.pop();
+   telldata::TtBox *w = static_cast<telldata::TtBox*>(OPstack.top());OPstack.pop();
    // get the (final) target layer
    laydef = secureLayer();
    real DBscale = PROPC->DBscale();

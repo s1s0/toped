@@ -177,7 +177,7 @@ bool console::miniParser::getBox()
       // convert the coordinates to ttpoint ...
       pp[i] = telldata::TtPnt(p1,p2);
    }
-   client_stack->push(DEBUG_NEW telldata::TtWnd(pp[0],pp[1]));
+   client_stack->push(DEBUG_NEW telldata::TtBox(pp[0],pp[1]));
    return true;
 }
 

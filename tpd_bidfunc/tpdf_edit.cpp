@@ -114,7 +114,7 @@ int tellstdfunc::stdCOPYSEL_D::execute()
       // stop the thread and wait for input from the GUI
       if (!tellstdfunc::waitGUInput(console::op_copy, &OPstack)) return EXEC_ABORT;
       // get the data from the stack
-      telldata::TtWnd *w = static_cast<telldata::TtWnd*>(OPstack.top());OPstack.pop();
+      telldata::TtBox *w = static_cast<telldata::TtBox*>(OPstack.top());OPstack.pop();
       OPstack.push(DEBUG_NEW telldata::TtPnt(w->p1().x(), w->p1().y()));
       OPstack.push(DEBUG_NEW telldata::TtPnt(w->p2().x(), w->p2().y()));
       delete w;
@@ -244,7 +244,7 @@ int tellstdfunc::stdMOVESEL_D::execute()
       // stop the thread and wait for input from the GUI
       if (!tellstdfunc::waitGUInput(console::op_move, &OPstack)) return EXEC_ABORT;
       // get the data from the stack
-      telldata::TtWnd *w = static_cast<telldata::TtWnd*>(OPstack.top());OPstack.pop();
+      telldata::TtBox *w = static_cast<telldata::TtBox*>(OPstack.top());OPstack.pop();
       OPstack.push(DEBUG_NEW telldata::TtPnt(w->p1().x(), w->p1().y()));
       OPstack.push(DEBUG_NEW telldata::TtPnt(w->p2().x(), w->p2().y()));
       delete w;
@@ -728,7 +728,7 @@ int tellstdfunc::lgcCUTBOX_I::execute()
    {
       // stop the thread and wait for input from the GUI
       if (!tellstdfunc::waitGUInput(console::op_dbox, &OPstack)) return EXEC_ABORT;
-      telldata::TtWnd *bx = static_cast<telldata::TtWnd*>(OPstack.top());OPstack.pop();
+      telldata::TtBox *bx = static_cast<telldata::TtBox*>(OPstack.top());OPstack.pop();
 
       telldata::TtList *pl = DEBUG_NEW telldata::TtList(telldata::tn_pnt);
       pl->add(DEBUG_NEW telldata::TtPnt(bx->p1().x(), bx->p1().y()));

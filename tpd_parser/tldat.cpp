@@ -53,7 +53,7 @@ telldata::TellVar* telldata::TCompType::initfield(const typeID ID, unsigned lSiz
          case tn_bool  : nvar = DEBUG_NEW telldata::TtBool()   ;break;
          case tn_string: nvar = DEBUG_NEW telldata::TtString() ;break;
          case tn_pnt   : nvar = DEBUG_NEW telldata::TtPnt()    ;break;
-         case tn_box   : nvar = DEBUG_NEW telldata::TtWnd()    ;break;
+         case tn_box   : nvar = DEBUG_NEW telldata::TtBox()    ;break;
          case tn_bnd   : nvar = DEBUG_NEW telldata::TtBnd()    ;break;
          case tn_laymap: nvar = DEBUG_NEW telldata::TtLMap()   ;break;
          case tn_hshstr: nvar = DEBUG_NEW telldata::TtHshStr() ;break;
@@ -767,7 +767,7 @@ const telldata::TtPnt& telldata::TtPnt::operator = (const TtPnt& a)
 }
 
 //=============================================================================
-telldata::TtWnd::TtWnd( real bl_x, real bl_y, real tr_x, real tr_y ) :
+telldata::TtBox::TtBox( real bl_x, real bl_y, real tr_x, real tr_y ) :
                                                        TtUserStruct(tn_box),
                                        _p1(DEBUG_NEW telldata::TtPnt(bl_x,bl_y)),
                                        _p2(DEBUG_NEW telldata::TtPnt(tr_x,tr_y))
@@ -776,14 +776,14 @@ telldata::TtWnd::TtWnd( real bl_x, real bl_y, real tr_x, real tr_y ) :
    _fieldList.push_back(structRECNAME("p2", _p2));
 }
 
-telldata::TtWnd::TtWnd( TtPnt bl, TtPnt tr ) : TtUserStruct(tn_box),
+telldata::TtBox::TtBox( TtPnt bl, TtPnt tr ) : TtUserStruct(tn_box),
                  _p1(DEBUG_NEW telldata::TtPnt(bl)), _p2(DEBUG_NEW telldata::TtPnt(tr))
 {
    _fieldList.push_back(structRECNAME("p1", _p1));
    _fieldList.push_back(structRECNAME("p2", _p2));
 }
 
-telldata::TtWnd::TtWnd(const TtWnd& cobj) : TtUserStruct(tn_box),
+telldata::TtBox::TtBox(const TtBox& cobj) : TtUserStruct(tn_box),
     _p1(DEBUG_NEW telldata::TtPnt(cobj.p1())), _p2(DEBUG_NEW telldata::TtPnt(cobj.p2()))
 {
    _fieldList.push_back(structRECNAME("p1", _p1));
@@ -791,7 +791,7 @@ telldata::TtWnd::TtWnd(const TtWnd& cobj) : TtUserStruct(tn_box),
 }
 
 
-telldata::TtWnd::TtWnd(operandSTACK& OPstack) : TtUserStruct(telldata::tn_box)
+telldata::TtBox::TtBox(operandSTACK& OPstack) : TtUserStruct(telldata::tn_box)
 {
    // Here - just get the pointer to the points in the stack...
     _p2 = static_cast<telldata::TtPnt*>(OPstack.top());
@@ -804,19 +804,19 @@ telldata::TtWnd::TtWnd(operandSTACK& OPstack) : TtUserStruct(telldata::tn_box)
     _fieldList.push_back(structRECNAME("p2", _p2));
 }
 
-void telldata::TtWnd::assign(TellVar* rt)
+void telldata::TtBox::assign(TellVar* rt)
 {
-   (*_p1) = static_cast<TtWnd*>(rt)->p1();
-   (*_p2) = static_cast<TtWnd*>(rt)->p2();
+   (*_p1) = static_cast<TtBox*>(rt)->p1();
+   (*_p2) = static_cast<TtBox*>(rt)->p2();
 }
 
-const telldata::TtWnd& telldata::TtWnd::operator = (const TtWnd& a)
+const telldata::TtBox& telldata::TtBox::operator = (const TtBox& a)
 {
    (*_p1) = a.p1(); (*_p2) = a.p2();
    return *this;
 }
 
-void telldata::TtWnd::normalize(bool& swapx, bool& swapy)
+void telldata::TtBox::normalize(bool& swapx, bool& swapy)
 {
    real swap;
    swapx = swapy = false;
@@ -832,7 +832,7 @@ void telldata::TtWnd::normalize(bool& swapx, bool& swapy)
    }
 }
 
-void telldata::TtWnd::denormalize(bool swapx, bool swapy)
+void telldata::TtBox::denormalize(bool swapx, bool swapy)
 {
    real swap;
    if (swapx)
