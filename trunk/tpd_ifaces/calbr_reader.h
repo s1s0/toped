@@ -275,17 +275,18 @@ namespace Calbr
 
    typedef  std::map<std::string, DrcRule*>  RuleMap;
 
-   // TODO implement me!
    class DrcCell {
    public:
-                           DrcCell(/*std::string name, */CTM&);
+                           DrcCell(std::string, CTM&);
       void                 registerRuleRead(std::string, DrcRule*);
-      const RuleMap*       rules() {return &_rules;}
-      virtual             ~DrcCell();
+      void                 addResult(auxdata::AuxData*);
+//      const RuleMap*       rules() {return &_rules;}
+      const CTM&           ctm()   {return _ctm;}
+      virtual             ~DrcCell() {};
    private:
-//      std::string         _name;
+      std::string         _name;
       CTM                 _ctm;
-      RuleMap             _rules;
+//      RuleMap             _rules;
    };
 
    typedef  std::map<std::string, DrcCell*>  CellMap;
@@ -294,7 +295,8 @@ namespace Calbr
    public:
                            DrcLibrary(std::string name, real precision);
       virtual             ~DrcLibrary();
-      void                 registerCellRead(std::string, DrcRule*);
+      void                 registerRuleRead(std::string, DrcRule*);
+      DrcCell*             registerCellRead(std::string, CTM&);
       WordList             findSelected(const std::string &cell, TP*); //use for DRCexplainerror
 //      void                 openGlDraw(layprop::DrawProperties&, std::string);
       void                 openGlRender(trend::TrendBase&, std::string, CTM&);
@@ -305,15 +307,17 @@ namespace Calbr
       void                 showAllErrors(void)                                                        {/*TODO*/}
       void                 hideAllErrors(void)                                                        {/*TODO*/}
       const RuleMap*       rules() {return &_rules;}
+      const CellMap*       cells() {return &_cells;}
    protected:
       DrcRule*             checkCell(std::string name);
       std::string          _name;         // design/library name
       real                 _precision;    //
       RuleMap              _rules;        // list of all rules
+      CellMap              _cells;        // list of all cells
    };
 
    //==============================================================================
-   class   ClbrFile : public InputDBFile {
+   class ClbrFile : public InputDBFile {
       public:
                               ClbrFile(wxString, DrcLibrary*&);
          virtual             ~ClbrFile();
@@ -326,8 +330,11 @@ namespace Calbr
          void                 ruleDrcResults(DrcRule*);
          auxdata::DrcPoly*    drcPoly();
          auxdata::DrcSeg*     drcEdge();
-         void                 checkCN();
+         bool                 checkCNnP();
+         void                 readCN();
          wxTextInputStream*  _textStream;
+         DrcCell*            _cCell;
+         DrcLibrary*         _drcDB;
    };
 
 }

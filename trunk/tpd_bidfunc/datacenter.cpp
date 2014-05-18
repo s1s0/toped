@@ -633,7 +633,7 @@ void DataCenter::bpAddDrcTab(bool threadExecution )
    }
    else
    {
-      TpdPost::addOAStab(threadExecution);
+      TpdPost::addDRCtab(threadExecution);
    }
 }
 
