@@ -2268,9 +2268,9 @@ bool browsers::ErrorBrowser::checkCellName(const std::string &str)
 BEGIN_EVENT_TABLE(browsers::DRCBrowser, wxPanel)
    EVT_BUTTON(tui::BT_DRC_SHOW_ALL, browsers::DRCBrowser::onShowAll)
    EVT_BUTTON(tui::BT_DRC_HIDE_ALL, browsers::DRCBrowser::onHideAll)
-   EVT_BUTTON(tui::BT_DRC_EXPLAIN, browsers::DRCBrowser::onExplainError)
+   EVT_BUTTON(tui::BT_DRC_RULES_HIER, browsers::DRCBrowser::onRulesHierarchy)
+   EVT_BUTTON(tui::BT_DRC_CELLS_HIER, browsers::DRCBrowser::onCellsHierarchy)
 END_EVENT_TABLE()
-//====================================================================
 //====================================================================
 browsers::DRCBrowser::DRCBrowser(wxWindow* parent, wxWindowID id)
    :wxPanel(parent, id, wxDefaultPosition, wxDefaultSize)
@@ -2287,12 +2287,22 @@ browsers::DRCBrowser::DRCBrowser(wxWindow* parent, wxWindowID id)
    _errorBrowser = DEBUG_NEW ErrorBrowser(this, tui::ID_PNL_DRC);
    thesizer->Add(sizer1, 0, wxEXPAND | wxALL);
    thesizer->Add(_errorBrowser, 1, wxEXPAND | wxBOTTOM);
-   _explainButton = DEBUG_NEW wxButton( this, tui::BT_DRC_EXPLAIN, wxT("Explain error") );
-   sizer2->Add(_explainButton, 1, wxEXPAND|wxBOTTOM, 3);
+//   _explainButton = DEBUG_NEW wxButton( this, tui::BT_DRC_EXPLAIN, wxT("Explain error") );
+
+//   wxBoxSizer *sizer2   = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
+   _rulesButton = DEBUG_NEW wxButton( this, tui::BT_DRC_RULES_HIER, wxT("Rules") );
+   _cellsButton = DEBUG_NEW wxButton( this, tui::BT_DRC_CELLS_HIER, wxT("Cells") );
+   wxFont font = _rulesButton->GetFont();
+   font.SetWeight(wxFONTWEIGHT_BOLD);
+   _rulesButton->SetFont(font);
+
+   sizer2->Add(_rulesButton, 1, wxEXPAND|wxBOTTOM, 3);
+   sizer2->Add(_cellsButton, 1, wxEXPAND|wxBOTTOM, 3);
+
+//   sizer2->Add(_explainButton, 1, wxEXPAND|wxBOTTOM, 3);
    thesizer->Add(sizer2, 0, wxEXPAND | wxALL);
 
    SetSizerAndFit(thesizer);
-
 
    Calbr::DrcLibrary* drcDB = NULL;
    if (DATC->lockDRC(drcDB))
@@ -2347,12 +2357,89 @@ void   browsers::DRCBrowser::onHideAll(wxCommandEvent& evt)
    TpdPost::parseCommand(cmd);
  }
 
-void   browsers::DRCBrowser::onExplainError(wxCommandEvent& evt)
+//void   browsers::DRCBrowser::onExplainError(wxCommandEvent& evt)
+//{
+//   wxString cmd;
+//   cmd << wxT("drcexplainerror();");
+//   TpdPost::parseCommand(cmd);
+// }
+
+void   browsers::DRCBrowser::onRulesHierarchy(wxCommandEvent& evt)
 {
-   wxString cmd; 
-   cmd << wxT("drcexplainerror();");
-   TpdPost::parseCommand(cmd);
- }
+   deleteAllItems();
+
+   Calbr::DrcLibrary* drcDB = NULL;
+   if (DATC->lockDRC(drcDB))
+   {
+      const Calbr::RuleMap* rules = drcDB->rules();
+      _errorBrowser->AddRoot(/*wxT("hidden_wxroot")*/wxString(drcDB->name().c_str(), wxConvUTF8), -1, -1, DEBUG_NEW DRCItemData(ITEM_ROOT));
+      for(Calbr::RuleMap::const_iterator it = rules->begin();it != rules->end(); ++it)
+      {
+         addRuleCheck(_errorBrowser->GetRootItem(), it->first, it->second);
+      }
+
+//      Calbr::CellDRCMap *drcMap = DRCData->cellDRCMap();
+//
+//      for(Calbr::CellDRCMap::const_iterator it = drcMap->begin();it != drcMap->end(); ++it)
+//      {
+//         std::string cellName = (*it).first;
+//         wxTreeItemId  id = _errorBrowser->AppendItem(_errorBrowser->GetRootItem(), wxString(cellName.c_str(), wxConvUTF8), -1, -1, DEBUG_NEW DRCItemData(ITEM_CELL));
+//
+//         Calbr::RuleChecksVector* errors = &((*it).second->_RuleChecks);
+//         for(Calbr::RuleChecksVector::const_iterator it2 = errors->begin();it2 != errors->end(); ++it2)
+//         {
+//            addRuleCheck(id, (*it2));
+//         }
+//      }
+   }
+   DATC->unlockDRC(drcDB);
+
+
+   //Set normal font for  _rulesButton
+   wxFont font = _rulesButton->GetFont();
+   font.SetWeight(wxFONTWEIGHT_BOLD);
+   _rulesButton->SetFont(font);
+   //Set bold font for _cellsButton;
+   font = _cellsButton->GetFont();
+   font.SetWeight(wxFONTWEIGHT_NORMAL);
+   _cellsButton->SetFont(font);
+
+   Show();
+   (this->GetSizer())->Layout();
+
+}
+
+void   browsers::DRCBrowser::onCellsHierarchy(wxCommandEvent& evt)
+{
+   deleteAllItems();
+
+   Calbr::DrcLibrary* drcDB = NULL;
+   if (DATC->lockDRC(drcDB))
+   {
+      const Calbr::CellMap* cells = drcDB->cells();
+      _errorBrowser->AddRoot(wxString(drcDB->name().c_str(), wxConvUTF8), -1, -1, DEBUG_NEW DRCItemData(ITEM_ROOT));
+      for(Calbr::CellMap::const_iterator it = cells->begin();it != cells->end(); ++it)
+      {
+         addCellCheck(_errorBrowser->GetRootItem(), it->first /*, it->second*/);
+      }
+   }
+   DATC->unlockDRC(drcDB);
+
+
+
+   //Set normal font for  _rulesButton
+   wxFont font = _rulesButton->GetFont();
+   font.SetWeight(wxFONTWEIGHT_NORMAL);
+   _rulesButton->SetFont(font);
+   //Set bold font for _cellsButton;
+   font = _cellsButton->GetFont();
+   font.SetWeight(wxFONTWEIGHT_BOLD);
+   _cellsButton->SetFont(font);
+
+   Show();
+   (this->GetSizer())->Layout();
+
+}
 
 void  browsers::DRCBrowser::addRuleCheck( const wxTreeItemId &rootId, std::string name, Calbr::DrcRule* check)
 {
@@ -2379,4 +2466,10 @@ void  browsers::DRCBrowser::addRuleCheck( const wxTreeItemId &rootId, std::strin
 //      str << it->ordinal();
 //      _errorBrowser->AppendItem(id, str, -1, -1, DEBUG_NEW DRCItemData(ITEM_ERR_NUM));
 //   }
+}
+
+
+void browsers::DRCBrowser::addCellCheck( const wxTreeItemId &rootId, std::string name/*, Calbr::DrcCell* check*/)
+{
+   wxTreeItemId  id = _errorBrowser->AppendItem(rootId, wxString(name.c_str(), wxConvUTF8), -1, -1, DEBUG_NEW DRCItemData(ITEM_CELL));
 }

@@ -344,13 +344,18 @@ namespace browsers
       void                    deleteAllItems(void);
       void                    onShowAll(wxCommandEvent&);
       void                    onHideAll(wxCommandEvent&);
-      void                    onExplainError(wxCommandEvent&);
+//      void                    onExplainError(wxCommandEvent&);
+      void                    onRulesHierarchy(wxCommandEvent&);
+      void                    onCellsHierarchy(wxCommandEvent&);
    private:
       void                    addRuleCheck( const wxTreeItemId &rootId, std::string, Calbr::DrcRule* check);
+      void                    addCellCheck( const wxTreeItemId &rootId, std::string/*, Calbr::DrcRule* check*/);
       ErrorBrowser*           _errorBrowser;
       wxButton*               _showAllButton;
       wxButton*               _hideAllButton;
-      wxButton*               _explainButton;
+//      wxButton*               _explainButton;
+      wxButton*               _rulesButton;
+      wxButton*               _cellsButton;
       DECLARE_EVENT_TABLE();
    };
 

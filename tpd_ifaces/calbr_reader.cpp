@@ -1004,6 +1004,23 @@ Calbr::DrcRule::~DrcRule()
 //}
 //=============================================================================
 
+
+Calbr::DrcCell::DrcCell(std::string name, CTM& ctm) :
+   _name    ( name   ),
+   _ctm     ( ctm    )
+{
+
+}
+
+//void Calbr::DrcCell::registerRuleRead(std::string, DrcRule*)
+//{
+//
+//}
+
+void Calbr::DrcCell::addResult(auxdata::AuxData* data)
+{
+//   _tmpData->put(data); // TODO
+}
 //=============================================================================
 Calbr::ClbrFile::ClbrFile(wxString wxfname, DrcLibrary*& drcDB) : InputDBFile (wxfname, false)
 {
@@ -1021,8 +1038,11 @@ Calbr::ClbrFile::ClbrFile(wxString wxfname, DrcLibrary*& drcDB) : InputDBFile (w
    std::string cellName = getTextWord();
    if (moreData()) precision = _textStream->ReadDouble();
 
-   drcDB = DEBUG_NEW DrcLibrary(cellName, precision);
-   /*check it's not 0*/
+   _drcDB = drcDB = DEBUG_NEW DrcLibrary(cellName, precision);
+
+
+   CTM defCtm;
+   _cCell = _drcDB->registerCellRead(cellName, defCtm);
 
    // Now parse the rules
 //   unsigned int rcNum = 0;
@@ -1046,7 +1066,7 @@ Calbr::ClbrFile::ClbrFile(wxString wxfname, DrcLibrary*& drcDB) : InputDBFile (w
       ruleMetaData(curRule);
       ruleDrcResults(curRule);
       curRule->parsed();
-      drcDB->registerCellRead(ruleName, curRule);
+      drcDB->registerRuleRead(ruleName, curRule);
    } while (true);
 }
 
@@ -1104,16 +1124,21 @@ void Calbr::ClbrFile::ruleDrcResults(DrcRule* curRule)
    {
       int nextChar = _inStream->GetC();
       if (wxEOF == nextChar) return /*end of file*/;
+      auxdata::AuxData* cError = NULL;
       switch ((char) nextChar)
       {
-         case 'p' : curRule->addResult(drcPoly()); break;
-         case 'e' : curRule->addResult(drcEdge()); break;
+         case 'p' : cError = drcPoly(); break;
+         case 'e' : cError = drcEdge(); break;
          case '\n':
          case '\r':
          case ' ' : continue; break;
            default: _inStream->Ungetch((char) nextChar);return /*new rule follows*/;
       }
-
+      if (NULL!= cError)
+      {
+         curRule->addResult(cError);
+         _cCell->addResult(cError);
+      }
    } while (true);
 }
 
@@ -1124,7 +1149,7 @@ auxdata::DrcPoly* Calbr::ClbrFile::drcPoly()
    if (moreData()) ordinal = _textStream->Read32();
    if (moreData()) numVrtx = _textStream->Read32();
    int4b* pdata = DEBUG_NEW int4b [2*numVrtx];
-   checkCN();
+   while (!checkCNnP()) {};
    for (unsigned int vrtx = 0; vrtx < 2*numVrtx; vrtx++)
    {
       if (moreData()) pdata[vrtx] = _textStream->Read32();
@@ -1139,7 +1164,7 @@ auxdata::DrcSeg* Calbr::ClbrFile::drcEdge()
    if (moreData()) ordinal = _textStream->Read32();
    if (moreData()) numEdgs = _textStream->Read32();
 
-   checkCN();
+   while (!checkCNnP()) {};
    int4b* pdata = DEBUG_NEW int4b [numEdgs * 4];
    for (unsigned int vrtx = 0; vrtx < numEdgs * 4; vrtx++)
    {
@@ -1148,21 +1173,61 @@ auxdata::DrcSeg* Calbr::ClbrFile::drcEdge()
    return DEBUG_NEW auxdata::DrcSeg(pdata, numEdgs, ordinal);
 }
 
-void Calbr::ClbrFile::checkCN()
+bool Calbr::ClbrFile::checkCNnP()
 {
    int nextChar;
    std::string cnLine;
    if (moreData()) nextChar = _inStream->GetC();
-   if ('C' != (char) nextChar)
+   if (isdigit(nextChar) || ('-' == (char) nextChar))
+   {
       _inStream->Ungetch((char) nextChar);
+      return true;
+   }
+   else if ('C' != (char) nextChar)
+   {
+      _inStream->Ungetch((char) nextChar);// - should be a property!
+   }
    else
    {
       if (moreData()) nextChar = _inStream->GetC();
-      if ('N' != (char) nextChar) throw EXPTNdrc_reader("Expected CN (Cell Name) record");
+      if ('N' != (char) nextChar)
+      {
+         _inStream->Ungetch((char) nextChar);// - should be a property!
+      }
       else
       {
-         cnLine = getTextLine();
+         readCN();
+         return true;
       }
+   }
+   std::string property = getTextLine();// TODO parse a property
+   return false;
+}
+
+void Calbr::ClbrFile::readCN()
+{
+   wxString wxCellName;
+   if (moreData()) wxCellName = _textStream->ReadWord();
+   std::string cellName =  std::string(wxCellName.mb_str(wxConvUTF8));
+   if (moreData(false))
+   {
+      int nextChar;
+      do
+      {
+         nextChar = _inStream->GetC(); //_textStream->GetChar
+      } while (isspace(nextChar));
+      if ('c' == (char) nextChar)
+      {// local CTM
+         int ctmraw[6];
+         for (unsigned int vrtx = 0; vrtx < 6; vrtx++)
+         {
+            if (moreData()) ctmraw[vrtx] = _textStream->Read32();
+         }
+         CTM cCtm(ctmraw[0], ctmraw[1], ctmraw[2], ctmraw[3], ctmraw[4], ctmraw[5]);
+         _cCell = _drcDB->registerCellRead(cellName, cCtm);
+      }
+      else
+         throw EXPTNdrc_reader("Expected valid CN (Cell Name) record");
    }
 }
 
@@ -1181,7 +1246,7 @@ Calbr::ClbrFile::~ClbrFile()
 //   delete _default;
 }
 
-
+//=============================================================================
 Calbr::DrcLibrary::DrcLibrary(std::string name, real precision) :
    _name          ( name      ),
    _precision     ( precision )
@@ -1189,25 +1254,38 @@ Calbr::DrcLibrary::DrcLibrary(std::string name, real precision) :
 
 Calbr::DrcLibrary::~DrcLibrary()
 {
-   RuleMap::const_iterator wc;
-   for (wc = _rules.begin(); wc != _rules.end(); wc++)
+//   RuleMap::const_iterator wc;
+   for (RuleMap::const_iterator wc = _rules.begin(); wc != _rules.end(); wc++)
       delete wc->second;
    _rules.clear();
+   for (CellMap::const_iterator wc = _cells.begin(); wc != _cells.end(); wc++)
+      delete wc->second;
+   _cells.clear();
 }
 
-void Calbr::DrcLibrary::registerCellRead(std::string cellname, DrcRule* cell) {
-   if (_rules.end() != _rules.find(cellname))
+void Calbr::DrcLibrary::registerRuleRead(std::string rulename, DrcRule* rule)
+{
+   if (_rules.end() != _rules.find(rulename))
    {
-      assert("is that legal?");
-//      if (NULL == _cells[cellname])
-//      {
-//         cell->setOrphan(false);
-//      }
-//      else {
-//         //@FIXME case 3 -> parsing should be stopped !
-//      }
+      assert(false); // is that legal?
    }
-   _rules[cellname] = cell;
+   _rules[rulename] = rule;
+}
+
+Calbr::DrcCell* Calbr::DrcLibrary::registerCellRead(std::string cellname, CTM& cCtm)
+{
+   DrcCell* cCell;
+   if (_cells.end() != _cells.find(cellname))
+   {
+      cCell = _cells[cellname];
+//      assert(cCtm == cCell->ctm());
+   }
+   else
+   {
+      cCell = DEBUG_NEW DrcCell(cellname, cCtm);
+      _cells[cellname] = cCell;
+   }
+   return cCell;
 }
 
 WordList Calbr::DrcLibrary::findSelected(const std::string &cell, TP* p1)
