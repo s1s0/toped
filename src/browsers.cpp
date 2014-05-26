@@ -2304,36 +2304,8 @@ browsers::DRCBrowser::DRCBrowser(wxWindow* parent, wxWindowID id)
 
    SetSizerAndFit(thesizer);
 
-   Calbr::DrcLibrary* drcDB = NULL;
-   if (DATC->lockDRC(drcDB))
-   {
-      const Calbr::RuleMap* rules = drcDB->rules();
-      _errorBrowser->AddRoot(/*wxT("hidden_wxroot")*/wxString(drcDB->name().c_str(), wxConvUTF8), -1, -1, DEBUG_NEW DRCItemData(ITEM_ROOT));
-      for(Calbr::RuleMap::const_iterator it = rules->begin();it != rules->end(); ++it)
-      {
-         addRuleCheck(_errorBrowser->GetRootItem(), it->first, it->second);
-      }
+   showRuleHierarchy();
 
-//      Calbr::CellDRCMap *drcMap = DRCData->cellDRCMap();
-//
-//      for(Calbr::CellDRCMap::const_iterator it = drcMap->begin();it != drcMap->end(); ++it)
-//      {
-//         std::string cellName = (*it).first;
-//         wxTreeItemId  id = _errorBrowser->AppendItem(_errorBrowser->GetRootItem(), wxString(cellName.c_str(), wxConvUTF8), -1, -1, DEBUG_NEW DRCItemData(ITEM_CELL));
-//
-//         Calbr::RuleChecksVector* errors = &((*it).second->_RuleChecks);
-//         for(Calbr::RuleChecksVector::const_iterator it2 = errors->begin();it2 != errors->end(); ++it2)
-//         {
-//            addRuleCheck(id, (*it2));
-//         }
-//      }
-   }
-   DATC->unlockDRC(drcDB);
-
-}
-
-browsers::DRCBrowser::~DRCBrowser()
-{
 }
 
 void browsers::DRCBrowser::deleteAllItems(void)
@@ -2367,34 +2339,7 @@ void   browsers::DRCBrowser::onHideAll(wxCommandEvent& evt)
 void   browsers::DRCBrowser::onRulesHierarchy(wxCommandEvent& evt)
 {
    deleteAllItems();
-
-   Calbr::DrcLibrary* drcDB = NULL;
-   if (DATC->lockDRC(drcDB))
-   {
-      const Calbr::RuleMap* rules = drcDB->rules();
-      _errorBrowser->AddRoot(/*wxT("hidden_wxroot")*/wxString(drcDB->name().c_str(), wxConvUTF8), -1, -1, DEBUG_NEW DRCItemData(ITEM_ROOT));
-      for(Calbr::RuleMap::const_iterator it = rules->begin();it != rules->end(); ++it)
-      {
-         addRuleCheck(_errorBrowser->GetRootItem(), it->first, it->second);
-      }
-
-//      Calbr::CellDRCMap *drcMap = DRCData->cellDRCMap();
-//
-//      for(Calbr::CellDRCMap::const_iterator it = drcMap->begin();it != drcMap->end(); ++it)
-//      {
-//         std::string cellName = (*it).first;
-//         wxTreeItemId  id = _errorBrowser->AppendItem(_errorBrowser->GetRootItem(), wxString(cellName.c_str(), wxConvUTF8), -1, -1, DEBUG_NEW DRCItemData(ITEM_CELL));
-//
-//         Calbr::RuleChecksVector* errors = &((*it).second->_RuleChecks);
-//         for(Calbr::RuleChecksVector::const_iterator it2 = errors->begin();it2 != errors->end(); ++it2)
-//         {
-//            addRuleCheck(id, (*it2));
-//         }
-//      }
-   }
-   DATC->unlockDRC(drcDB);
-
-
+   showRuleHierarchy();
    //Set normal font for  _rulesButton
    wxFont font = _rulesButton->GetFont();
    font.SetWeight(wxFONTWEIGHT_BOLD);
@@ -2406,27 +2351,37 @@ void   browsers::DRCBrowser::onRulesHierarchy(wxCommandEvent& evt)
 
    Show();
    (this->GetSizer())->Layout();
-
 }
 
-void   browsers::DRCBrowser::onCellsHierarchy(wxCommandEvent& evt)
+void browsers::DRCBrowser::showRuleHierarchy()
+{
+   clbr::DrcLibrary* drcDB = NULL;
+   if (DATC->lockDRC(drcDB))
+   {
+      _errorBrowser->AddRoot(wxString(drcDB->name().c_str(), wxConvUTF8), -1, -1, DEBUG_NEW DRCItemData(ITEM_ROOT));
+
+      const clbr::RuleNameMap* ruleMap = drcDB->rules();
+      for (clbr::RuleNameMap::const_iterator CIT = ruleMap->begin(); CIT != ruleMap->end(); CIT++)
+      {
+//         wxTreeItemId cellId = addCellCheck(_errorBrowser->GetRootItem(), CIT->first);
+         wxTreeItemId cellId = _errorBrowser->AppendItem(_errorBrowser->GetRootItem(), wxString(CIT->first.c_str(), wxConvUTF8), -1, -1, DEBUG_NEW DRCItemData(ITEM_ERR));
+         const NameList* cells = CIT->second;
+         for (NameList::const_iterator CIC = cells->begin(); CIC != cells->end(); CIC++)
+         {
+//            addRuleCheck(cellId, CIC->first, CIC->second);
+            _errorBrowser->AppendItem(cellId, wxString(CIC->c_str(), wxConvUTF8), -1, -1, DEBUG_NEW DRCItemData(ITEM_CELL));
+         }
+         delete cells;
+      }
+      delete ruleMap;
+   }
+   DATC->unlockDRC(drcDB);
+}
+
+void browsers::DRCBrowser::onCellsHierarchy(wxCommandEvent& evt)
 {
    deleteAllItems();
-
-   Calbr::DrcLibrary* drcDB = NULL;
-   if (DATC->lockDRC(drcDB))
-   {
-      const Calbr::CellMap* cells = drcDB->cells();
-      _errorBrowser->AddRoot(wxString(drcDB->name().c_str(), wxConvUTF8), -1, -1, DEBUG_NEW DRCItemData(ITEM_ROOT));
-      for(Calbr::CellMap::const_iterator it = cells->begin();it != cells->end(); ++it)
-      {
-         addCellCheck(_errorBrowser->GetRootItem(), it->first /*, it->second*/);
-      }
-   }
-   DATC->unlockDRC(drcDB);
-
-
-
+   showCellHierarchy();
    //Set normal font for  _rulesButton
    wxFont font = _rulesButton->GetFont();
    font.SetWeight(wxFONTWEIGHT_NORMAL);
@@ -2438,10 +2393,31 @@ void   browsers::DRCBrowser::onCellsHierarchy(wxCommandEvent& evt)
 
    Show();
    (this->GetSizer())->Layout();
-
 }
 
-void  browsers::DRCBrowser::addRuleCheck( const wxTreeItemId &rootId, std::string name, Calbr::DrcRule* check)
+void  browsers::DRCBrowser::showCellHierarchy()
+{
+   clbr::DrcLibrary* drcDB = NULL;
+   if (DATC->lockDRC(drcDB))
+   {
+      _errorBrowser->AddRoot(wxString(drcDB->name().c_str(), wxConvUTF8), -1, -1, DEBUG_NEW DRCItemData(ITEM_ROOT));
+      const clbr::CellMap* cells = drcDB->cells();
+      for(clbr::CellMap::const_iterator CIT = cells->begin();CIT != cells->end(); ++CIT)
+      {
+
+         wxTreeItemId cellId = addCellCheck(_errorBrowser->GetRootItem(), CIT->first );
+
+         const clbr::RuleMap* rules = CIT->second->rules();
+         for(clbr::RuleMap::const_iterator RIT = rules->begin();RIT != rules->end(); ++RIT)
+         {
+            addRuleCheck(cellId, RIT->first, RIT->second);
+         }
+      }
+   }
+   DATC->unlockDRC(drcDB);
+}
+
+void  browsers::DRCBrowser::addRuleCheck( const wxTreeItemId &rootId, std::string name, clbr::DrcRule* check)
 {
 //   std::string name = check->ruleCheckName();
    wxTreeItemId  id = _errorBrowser->AppendItem(rootId, wxString(name.c_str(), wxConvUTF8), -1, -1, DEBUG_NEW DRCItemData(ITEM_ERR));
@@ -2469,7 +2445,12 @@ void  browsers::DRCBrowser::addRuleCheck( const wxTreeItemId &rootId, std::strin
 }
 
 
-void browsers::DRCBrowser::addCellCheck( const wxTreeItemId &rootId, std::string name/*, Calbr::DrcCell* check*/)
+wxTreeItemId browsers::DRCBrowser::addCellCheck( const wxTreeItemId &rootId, std::string name/*, Calbr::DrcCell* check*/)
 {
-   wxTreeItemId  id = _errorBrowser->AppendItem(rootId, wxString(name.c_str(), wxConvUTF8), -1, -1, DEBUG_NEW DRCItemData(ITEM_CELL));
+   return _errorBrowser->AppendItem(rootId, wxString(name.c_str(), wxConvUTF8), -1, -1, DEBUG_NEW DRCItemData(ITEM_CELL));
+}
+
+
+browsers::DRCBrowser::~DRCBrowser()
+{
 }

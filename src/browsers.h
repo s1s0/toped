@@ -348,8 +348,10 @@ namespace browsers
       void                    onRulesHierarchy(wxCommandEvent&);
       void                    onCellsHierarchy(wxCommandEvent&);
    private:
-      void                    addRuleCheck( const wxTreeItemId &rootId, std::string, Calbr::DrcRule* check);
-      void                    addCellCheck( const wxTreeItemId &rootId, std::string/*, Calbr::DrcRule* check*/);
+      void                    addRuleCheck( const wxTreeItemId &rootId, std::string, clbr::DrcRule* check);
+      wxTreeItemId            addCellCheck( const wxTreeItemId &rootId, std::string/*, Calbr::DrcRule* check*/);
+      void                    showRuleHierarchy();
+      void                    showCellHierarchy();
       ErrorBrowser*           _errorBrowser;
       wxButton*               _showAllButton;
       wxButton*               _hideAllButton;

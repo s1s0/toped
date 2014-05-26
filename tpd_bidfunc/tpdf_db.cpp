@@ -1858,7 +1858,7 @@ int tellstdfunc::DRCshowerror::execute()
       activeCell = design->activeCellName();
    DATC->unlockTDT(libDir);
 
-   Calbr::DrcLibrary* drcDB = NULL;
+   clbr::DrcLibrary* drcDB = NULL;
    if (DATC->lockDRC(drcDB))
    {
       drcDB->showError(activeCell,errorName, errorNumber);
@@ -1885,7 +1885,7 @@ int tellstdfunc::DRCshowcluster::execute()
       activeCell = design->activeCellName();
    DATC->unlockTDT(libDir);
 
-   Calbr::DrcLibrary* drcDB = NULL;
+   clbr::DrcLibrary* drcDB = NULL;
    if (DATC->lockDRC(drcDB))
    {
       if (!drcDB->showCluster(activeCell, errorName))
@@ -1906,7 +1906,7 @@ tellstdfunc::DRCshowallerrors::DRCshowallerrors(telldata::typeID retype, bool eo
 
 int tellstdfunc::DRCshowallerrors::execute()
 {
-   Calbr::DrcLibrary* drcDB = NULL;
+   clbr::DrcLibrary* drcDB = NULL;
    if (DATC->lockDRC(drcDB))
    {
       drcDB->showAllErrors();
@@ -1930,7 +1930,7 @@ tellstdfunc::DRChideallerrors::DRChideallerrors(telldata::typeID retype, bool eo
 
 int tellstdfunc::DRChideallerrors::execute()
 {
-   Calbr::DrcLibrary* drcDB = NULL;
+   clbr::DrcLibrary* drcDB = NULL;
    if (DATC->lockDRC(drcDB))
    {
       drcDB->hideAllErrors();
@@ -1969,7 +1969,7 @@ int tellstdfunc::DRCexplainerror_D::execute()
       activeCell = design->activeCellName();
    DATC->unlockTDT(libDir);
 
-   Calbr::DrcLibrary* drcDesign = NULL;
+   clbr::DrcLibrary* drcDesign = NULL;
    if (DATC->lockDRC(drcDesign))
    {
       WordList selectedl = drcDesign->findSelected(activeCell, p1DB);
@@ -2014,7 +2014,7 @@ int tellstdfunc::DRCexplainerror::execute()
       activeCell = design->activeCellName();
    DATC->unlockTDT(libDir);
 
-   Calbr::DrcLibrary* drcDesign = NULL;
+   clbr::DrcLibrary* drcDesign = NULL;
    if (DATC->lockDRC(drcDesign))
    {
       WordList selectedl = drcDesign->findSelected(activeCell, p1DB);

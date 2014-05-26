@@ -272,7 +272,7 @@ bool DataCenter::OASParse(std::string filename)
 bool DataCenter::DRCparse(std::string filename)
 {
    bool status = true;
-   Calbr::DrcLibrary* drcDB = NULL;
+   clbr::DrcLibrary* drcDB = NULL;
    if (lockDRC(drcDB))
    {
       std::string news = "Removing existing DRC data from memory...";
@@ -283,7 +283,7 @@ bool DataCenter::DRCparse(std::string filename)
 
    try
    {
-      Calbr::ClbrFile(wxString(filename.c_str(), wxConvUTF8), drcDB);
+      clbr::ClbrFile(wxString(filename.c_str(), wxConvUTF8), drcDB);
    }
    catch (EXPTNdrc_reader&)
    {
@@ -299,7 +299,7 @@ bool DataCenter::DRCparse(std::string filename)
    return status;
 }
 
-bool DataCenter::lockDRC(Calbr::DrcLibrary*& drcDb )
+bool DataCenter::lockDRC(clbr::DrcLibrary*& drcDb )
 {
    if (wxMUTEX_DEAD_LOCK == _DRCLock.Lock())
    {
@@ -314,7 +314,7 @@ bool DataCenter::lockDRC(Calbr::DrcLibrary*& drcDb )
    }
 }
 
-void DataCenter::unlockDRC(Calbr::DrcLibrary* drcDb, bool throwexception)
+void DataCenter::unlockDRC(clbr::DrcLibrary* drcDb, bool throwexception)
 {
    _DRCDB = drcDb;
    VERIFY(wxMUTEX_NO_ERROR == _DRCLock.Unlock());

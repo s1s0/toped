@@ -59,12 +59,12 @@ public:
    bool                       lockGds(ForeignDbFile*&);
    bool                       lockCif(ForeignDbFile*&);
    bool                       lockOas(ForeignDbFile*&);
-   bool                       lockDRC(Calbr::DrcLibrary*&);
+   bool                       lockDRC(clbr::DrcLibrary*&);
    void                       unlockTDT(laydata::TdtLibDir*, bool throwexception = false);
    void                       unlockGds(ForeignDbFile*&, bool throwexception = false);
    void                       unlockCif(ForeignDbFile*&, bool throwexception = false);
    void                       unlockOas(ForeignDbFile*& oasis_db, bool throwexception = false);
-   void                       unlockDRC(Calbr::DrcLibrary*, bool throwexception = false);
+   void                       unlockDRC(clbr::DrcLibrary*, bool throwexception = false);
 
    void                       bpRefreshTdtTab(bool, bool);
    void                       bpAddGdsTab(bool);
@@ -106,7 +106,7 @@ private:
    std::string                _localDir;
    std::string                _globalDir;
    laydata::TdtLibDir         _TEDLIB;       //! catalogue of available TDT libraries
-   Calbr::DrcLibrary*         _DRCDB;        //! DRC data
+   clbr::DrcLibrary*          _DRCDB;        //! DRC data
    ForeignDbFile*             _GDSDB;        //! GDS parsed data
    ForeignDbFile*             _CIFDB;        //! CIF parsed data
    ForeignDbFile*             _OASDB;        //! OASIS parsed data
