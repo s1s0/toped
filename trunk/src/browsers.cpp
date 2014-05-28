@@ -55,7 +55,6 @@
 
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
-//extern Calbr::CalbrFile*         DRCData;
 extern const wxEventType         wxEVT_CMD_BROWSER;
 extern const wxEventType         wxEVT_EDITLAYER;
 

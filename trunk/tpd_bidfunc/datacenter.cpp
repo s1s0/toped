@@ -57,7 +57,6 @@
 // Global variables
 DataCenter*                      DATC  = NULL;
 extern layprop::PropertyCenter*  PROPC;
-//extern Calbr::CalbrFile*         DRCData;
 extern trend::TrendCenter*       TRENDC;
 
 //-----------------------------------------------------------------------------
@@ -851,20 +850,6 @@ void DataCenter::render()
             // There is no need to check for an active cell. If there isn't one
             // the function will return silently.
             _TEDLIB()->openGlRender(*cRenderer);
-//            // Draw DRC data (if any)
-//            // TODO! clean-up the DRC stuff here - lock/unlock and more importantly
-//            // DrcLibrary <-> CalibrFile i.e. _DRCDB <-> DRCData. The end of the line shall be
-//            // the removal of the DRCData object
-//            if(_DRCDB)
-//            {
-//               if (wxMUTEX_NO_ERROR == _DRCLock.TryLock())
-//               {
-//                  std::string cellName = DRCData->cellName();
-//                  CTM cellCTM = DRCData->getCTM(cellName);
-//                  _DRCDB->openGlRender(*cRenderer, cellName, cellCTM);
-//                  VERIFY(wxMUTEX_NO_ERROR == _DRCLock.Unlock());
-//               }
-//            }
             RENTIMER_REPORT("Time elapsed for data traversing: ");
             if (cRenderer->collect())
             {
@@ -891,6 +876,14 @@ void DataCenter::render()
             cRenderer->rlrCleanUp();
          }
          TRENDC->releaseCRenderer();
+
+         // Draw DRC data (if any)
+         trend::TrendBase* dRenderer = TRENDC->getDRenderer();
+         if (NULL != dRenderer)
+         {
+            dRenderer->draw();
+            TRENDC->releaseDRenderer();
+         }
       }
    }
 }

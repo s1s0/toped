@@ -370,17 +370,27 @@ clbr::DrcCell* clbr::DrcLibrary::checkCell(std::string name)
 //   drawProp.setState(layprop::DB);
 //}
 
-void clbr::DrcLibrary::openGlRender(trend::TrendBase& renderer, std::string cell, CTM& cctm)
+//void clbr::DrcLibrary::openGlRender(trend::TrendBase& renderer, std::string cell, CTM& cctm)
+//{
+//   renderer.setState(layprop::prsDRC);
+//   DrcCell* dst_structure = checkCell(cell);
+//   if (dst_structure)
+//   {
+////      dst_structure->openGlRender(renderer, cctm, false, false); TODO
+//   }
+//   renderer.setState(layprop::prsDB);
+//
+//}
+
+void clbr::DrcLibrary::showAllErrors(trend::TrendBase& dRenderer)
 {
-   renderer.setState(layprop::prsDRC);
-   DrcCell* dst_structure = checkCell(cell);
-   if (dst_structure)
-   {
-//      dst_structure->openGlRender(renderer, cctm, false, false); TODO
-   }
-   renderer.setState(layprop::prsDB);
+   // TODO
 }
 
+//void clbr::DrcLibrary::hideAllErrors(void)
+//{
+//
+//}
 
 const clbr::RuleNameMap* clbr::DrcLibrary::rules()
 {

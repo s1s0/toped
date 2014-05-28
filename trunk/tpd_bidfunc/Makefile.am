@@ -10,8 +10,7 @@ noinst_HEADERS =                                                              \
                  tpdf_db.h                                                    \
                  tpdf_edit.h                                                  \
                  tpdf_get.h                                                   \
-                 tpdf_select.h                                                \
-                 drc_tenderer.h
+                 tpdf_select.h
 
 libtpd_bidfunc_la_HEADERS =                                                   \
                  tpdf_common.h                                                \
@@ -29,8 +28,7 @@ libtpd_bidfunc_la_SOURCES =                                                   \
                  tpdf_common.cpp                                              \
                  tpdf_edit.cpp                                                \
                  tpdf_get.cpp                                                 \
-                 tpdf_props.cpp                                               \
-                 drc_tenderer.cpp 
+                 tpdf_props.cpp
 
 ###############################################################################
 AM_CPPFLAGS =                                                                 \

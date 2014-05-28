@@ -212,6 +212,9 @@ namespace trend {
          void                   destroyMRenderer();
          trend::TrendBase*      makeZRenderer();                     //!Get zoom renderer
          void                   destroyZRenderer();
+         trend::TrendBase*      makeDRenderer();                     //!Get DRC renderer
+         trend::TrendBase*      getDRenderer();
+         void                   releaseDRenderer(bool destroy = false);
 //         void                   destroyCRenderer();
 //         void                   drawFOnly();
          //Font handling
@@ -230,9 +233,10 @@ namespace trend {
       private:
          typedef std::map<std::string, TolderGlfFont*> OglFontCollectionMap;
          trend::TrendBase*      _cRenderer;    //! current renderer
-         trend::TrendBase*      _hRenderer;    //! hoover renderer
-         trend::TrendBase*      _mRenderer;    //! motion renderer
-         trend::TrendBase*      _zRenderer;    //! zoom   renderer
+         trend::TrendBase*      _hRenderer;    //! hover   renderer
+         trend::TrendBase*      _mRenderer;    //! motion  renderer
+         trend::TrendBase*      _zRenderer;    //! zoom    renderer
+         trend::TrendBase*      _dRenderer;    //! DRC     renderer
          trend::Shaders*        _cShaders;     //! the shader init object (valid in rtToshader case only)
          OglFontCollectionMap   _oglFont;
          std::string            _activeFontName;
