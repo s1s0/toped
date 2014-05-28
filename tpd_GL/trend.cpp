@@ -760,6 +760,7 @@ trend::TrendCenter::TrendCenter(bool gui, RenderType cmdLineReq, bool sprtVbo, b
    _hRenderer       (              NULL),
    _mRenderer       (              NULL),
    _zRenderer       (              NULL),
+   _dRenderer       (              NULL),
    _cShaders        (              NULL),
    _activeFontName  (                  )
 
@@ -976,11 +977,62 @@ trend::TrendBase* trend::TrendCenter::makeZRenderer()
    return _zRenderer;
 }
 
+trend::TrendBase* trend::TrendCenter::makeDRenderer()
+{
+   assert(NULL == _dRenderer);
+   layprop::DrawProperties* drawProp;
+   if (PROPC->tryLockDrawProp(drawProp, layprop::prsDRC))
+   {
+      switch (_renderType)
+      {
+      case trend::rtTocom: assert(false);          break;// shouldn't end-up here ever
+      case trend::rtTolder:
+         _dRenderer = DEBUG_NEW trend::Tolder(drawProp, PROPC->UU()); break;
+      case trend::rtTenderer:
+         _dRenderer = DEBUG_NEW trend::Tenderer(drawProp, PROPC->UU()); break;
+      case trend::rtToshader:
+         _dRenderer = DEBUG_NEW trend::Toshader(drawProp, PROPC->UU()); break;
+      default: assert(false); break;
+      }
+   }
+   return _dRenderer;
+}
+
+trend::TrendBase* trend::TrendCenter::getDRenderer()
+{
+   if (NULL != _dRenderer)
+   {
+      layprop::DrawProperties* drawProp;
+      if (PROPC->tryLockDrawProp(drawProp, layprop::prsDRC))
+      {
+         _dRenderer->setDrawProp(drawProp);
+         return _dRenderer;
+      }
+      else
+      {
+//         tell_log(console::MT_INFO,std::string("Property DB busy. Viewport redraw skipped"));
+         return NULL;
+      }
+   }
+   return NULL;
+}
+
 void trend::TrendCenter::releaseCRenderer()
 {
    assert(NULL != _cRenderer);
    PROPC->unlockDrawProp(_cRenderer->drawprop(), false);
    if (_cRenderer->grcDataEmpty())
+   {
+      delete (_cRenderer);
+      _cRenderer = NULL;
+   }
+}
+
+void trend::TrendCenter::releaseDRenderer(bool destroy)
+{
+   assert(NULL != _dRenderer);
+   PROPC->unlockDrawProp(_dRenderer->drawprop(), false);
+   if (destroy || _dRenderer->grcDataEmpty())
    {
       delete (_cRenderer);
       _cRenderer = NULL;

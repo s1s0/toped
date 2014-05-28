@@ -149,13 +149,13 @@ namespace clbr
       virtual              ~DrcLibrary();
       DrcCell*              registerCellRead(std::string, CTM&);
       WordList              findSelected(const std::string &cell, TP*); //use for DRCexplainerror
-      void                  openGlRender(trend::TrendBase&, std::string, CTM&);
+//      void                  openGlRender(trend::TrendBase&, std::string, CTM&);
       std::string           name()            const {return _name;}
 
       void                  showError(const std::string& cell, const std::string& error, long number)  {/*TODO*/}
       bool                  showCluster(const std::string& cell, const std::string& error)             {/*TODO*/ return true;}
-      void                  showAllErrors(void)                                                        {/*TODO*/}
-      void                  hideAllErrors(void)                                                        {/*TODO*/}
+      void                  showAllErrors(trend::TrendBase&);
+//      void                  hideAllErrors(trend::TrendBase&);
       const CellMap*        cells() {return &_cells;}
       const RuleNameMap*    rules();
    protected:

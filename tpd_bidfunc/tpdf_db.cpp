@@ -34,15 +34,16 @@
 #include "oasis_io.h"
 #include "tuidefs.h"
 #include "calbr_reader.h"
-#include "drc_tenderer.h"
 #include "viewprop.h"
 #include "ps_out.h"
+#include "trend.h"
 
 
 extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
 extern console::toped_logfile    LogFile;
-//extern Calbr::CalbrFile*         DRCData;
+extern trend::TrendCenter*       TRENDC;
+
 
 //=============================================================================
 tellstdfunc::stdNEWDESIGN::stdNEWDESIGN(telldata::typeID retype, bool eor) :
@@ -1909,17 +1910,29 @@ int tellstdfunc::DRCshowallerrors::execute()
    clbr::DrcLibrary* drcDB = NULL;
    if (DATC->lockDRC(drcDB))
    {
-      drcDB->showAllErrors();
+      // Draw DRC data (if any)
+      trend::TrendBase* dRenderer = TRENDC->makeDRenderer();
+      if (NULL != dRenderer)
+      {
+         drcDB->showAllErrors(*dRenderer);
+         TRENDC->releaseDRenderer();
+      }
+      else
+      {
+         std::ostringstream ost;
+         ost << "Can't obtain a lock on the draw properties. DRC draw skipped.";
+         tell_log(console::MT_ERROR,ost.str());
+      }
    }
    else
    {
       std::ostringstream ost;
-      ost << "DRC database is not loaded";
+      ost << "No DRC data in memory";
       tell_log(console::MT_ERROR,ost.str());
-
    }
    DATC->unlockDRC(drcDB);
    return EXEC_NEXT;
+
 }
 
 //=============================================================================
@@ -1933,12 +1946,12 @@ int tellstdfunc::DRChideallerrors::execute()
    clbr::DrcLibrary* drcDB = NULL;
    if (DATC->lockDRC(drcDB))
    {
-      drcDB->hideAllErrors();
+      TRENDC->releaseDRenderer(true);
    }
    else
    {
       std::ostringstream ost;
-      ost << "DRC database is not loaded";
+      ost << "No DRC data in memory";
       tell_log(console::MT_ERROR,ost.str());
 
    }
