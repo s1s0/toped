@@ -1092,7 +1092,8 @@ int parsercmd::cmdUMINUS::execute()
    if      (telldata::tn_uint == _type)
    {
       telldata::TtUInt* varuint = static_cast<telldata::TtUInt*>(OPstack.top());OPstack.pop();
-      telldata::TtInt*  varint = DEBUG_NEW telldata::TtInt(-varuint->value());
+      int4b sval = varuint->value();
+      telldata::TtInt*  varint = DEBUG_NEW telldata::TtInt(-sval);
       OPstack.push(varint);
       delete varuint;
    }

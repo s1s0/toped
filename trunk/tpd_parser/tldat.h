@@ -254,7 +254,7 @@ namespace telldata {
       virtual void         initialize() {_value = 0;}
       virtual void         assign(TellVar*);
       dword                value() const        {return _value;};
-      void                 uminus()             {_value  = -_value;   };
+//      void                 uminus()             {_value  = -_value;   };
       virtual TellVar*     selfcopy() const     {return DEBUG_NEW TtUInt(_value);};
       void                 NOT()                {_value = ~_value;}
 //      friend class TtLayer;
