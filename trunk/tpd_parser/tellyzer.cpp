@@ -1562,7 +1562,8 @@ int parsercmd::cmdLISTSLICE::stringExec(telldata::TtString* strtarget)
    bool idxerrors = getIndexes(wstr.length(), idxB, idxE);
    if ((!idxerrors) && ((0 <= idxB) && (idxB < wstr.length())) && ((0 <= idxE) && (idxE < wstr.length())))
    {
-      char wch[idxE-idxB];
+      dword wlen = idxE - idxB;
+      char* wch = DEBUG_NEW char[wlen];
       unsigned j=0;
       for(unsigned i=idxB; i<= idxE; i++)
       {
