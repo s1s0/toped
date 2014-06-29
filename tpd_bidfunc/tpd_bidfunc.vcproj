@@ -160,10 +160,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\drc_tenderer.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\tellibin.cpp"
 				>
 			</File>
@@ -231,10 +227,6 @@
 			>
 			<File
 				RelativePath=".\datacenter.h"
-				>
-			</File>
-			<File
-				RelativePath=".\drc_tenderer.h"
 				>
 			</File>
 			<File

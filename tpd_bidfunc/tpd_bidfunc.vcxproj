@@ -167,7 +167,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="datacenter.cpp" />
-    <ClCompile Include="drc_tenderer.cpp" />
     <ClCompile Include="tellibin.cpp" />
     <ClCompile Include="tllf_list.cpp" />
     <ClCompile Include="tpdf_add.cpp" />
@@ -187,7 +186,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="datacenter.h" />
-    <ClInclude Include="drc_tenderer.h" />
     <ClInclude Include="tellibin.h" />
     <ClInclude Include="tllf_list.h" />
     <ClInclude Include="tpdf_add.h" />
