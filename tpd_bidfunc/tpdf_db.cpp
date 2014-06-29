@@ -1914,7 +1914,9 @@ int tellstdfunc::DRCshowallerrors::execute()
       trend::TrendBase* dRenderer = TRENDC->makeDRenderer();
       if (NULL != dRenderer)
       {
-         drcDB->showAllErrors(*dRenderer);
+         wxClientDC dc(this);
+         drcDB->drawAll(*dRenderer);
+         dRenderer->collect();
          TRENDC->releaseDRenderer();
       }
       else

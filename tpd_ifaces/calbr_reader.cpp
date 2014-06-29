@@ -50,7 +50,9 @@ auxdata::DrcPoly::DrcPoly(int4b* pdata, unsigned psize, unsigned ordinal) :
    _pdata      ( pdata     ),
    _psize      ( psize     ),
    _ordinal    ( ordinal   )
-{}
+{
+   _teseldata.tessellate(_pdata, _psize);
+}
 
 auxdata::DrcPoly::~DrcPoly()
 {
@@ -67,7 +69,7 @@ DBbox auxdata::DrcPoly::overlap() const
 
 void auxdata::DrcPoly::drawRequest(trend::TrendBase& rend) const
 {
-   rend.grcpoly(_pdata, _psize);
+   rend.poly(_pdata, _psize, &_teseldata);
 }
 
 void auxdata::DrcPoly::drawSRequest(trend::TrendBase& rend, const SGBitSet*) const
@@ -153,6 +155,8 @@ DBbox auxdata::DrcSeg::overlap() const
 void auxdata::DrcSeg::drawRequest(trend::TrendBase&) const
 {
    //TODO
+   int boza;
+   boza++;
 }
 
 void auxdata::DrcSeg::drawSRequest(trend::TrendBase&, const SGBitSet*) const
@@ -229,6 +233,11 @@ void clbr::DrcRule::addResults(const DrcRule& results)
    }
 }
 
+void clbr::DrcRule::drawAll(trend::TrendBase& dRenderer)
+{
+   _drcData->openGlRender(dRenderer, NULL);
+}
+
 void clbr::DrcRule::parsed()
 {
    _tmpData->commit();
@@ -243,7 +252,8 @@ clbr::DrcRule::~DrcRule()
 
 //=============================================================================
 clbr::DrcCell::DrcCell(CTM& ctm) :
-   _ctm     ( ctm    )
+   _ctm           ( ctm             ),
+   _cellOverlap   ( DEFAULT_OVL_BOX )
 {
 }
 
@@ -269,6 +279,30 @@ clbr::DrcRule* clbr::DrcCell::cloneRule(DrcRule* rule)
    clbr::DrcRule* nRule = DEBUG_NEW clbr::DrcRule(*rule);
 //   rule->parsed();
    return nRule;
+}
+
+void clbr::DrcCell::drawAll(std::string cname, trend::TrendBase& dRenderer)
+{
+   dRenderer.pushCell(cname, _ctm, _cellOverlap, false, false);
+   dRenderer.setLayer(DRC_LAY_DEF, false);
+   for (RuleMap::const_iterator CR = _rules.begin(); CR != _rules.end(); CR++)
+   {
+      CR->second->drawAll(dRenderer);
+   }
+   dRenderer.popCell();
+}
+
+void clbr::DrcCell::getCellOverlap()
+{
+   if (_rules.empty())
+      _cellOverlap = DEFAULT_OVL_BOX;
+   else
+   {
+      RuleMap::iterator LCI = _rules.begin();
+      _cellOverlap = LCI->second->overlap();
+      while (++LCI != _rules.end())
+         _cellOverlap.overlap(LCI->second->overlap());
+   }
 }
 
 clbr::DrcCell::~DrcCell()
@@ -382,9 +416,12 @@ clbr::DrcCell* clbr::DrcLibrary::checkCell(std::string name)
 //
 //}
 
-void clbr::DrcLibrary::showAllErrors(trend::TrendBase& dRenderer)
+void clbr::DrcLibrary::drawAll(trend::TrendBase& dRenderer)
 {
-   // TODO
+   for (CellMap::const_iterator CC = _cells.begin();CC != _cells.end(); CC++)
+   {
+      CC->second->drawAll(CC->first, dRenderer);
+   }
 }
 
 //void clbr::DrcLibrary::hideAllErrors(void)

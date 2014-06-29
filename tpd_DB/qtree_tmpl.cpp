@@ -562,7 +562,7 @@ template <typename DataT>
 void laydata::QTreeTmpl<DataT>::openGlRender(trend::TrendBase& rend, const TObjDataPairList* slst) const
 {
    // The drawing will be faster like this for the cells without selected shapes
-   // that will be the wast majority of the cases. A bit bigger code though.
+   // that will be the vast majority of the cases. A bit bigger code though.
    // Seems the bargain is worth it.
    if (slst)
    {
