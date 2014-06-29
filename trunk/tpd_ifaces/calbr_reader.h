@@ -57,6 +57,8 @@ namespace auxdata {
          int4b*            _pdata   ;
          unsigned          _psize   ;
          unsigned          _ordinal ;
+         TessellPoly       _teseldata;
+
    };
 
    //==============================================================================
@@ -113,9 +115,11 @@ namespace clbr
       void                  addDescrString(const std::string& str);
       void                  addResult(auxdata::AuxData*);
       void                  addResults(const DrcRule&);
+      void                  drawAll(trend::TrendBase&);
       void                  parsed();
+      DBbox                 overlap() const   {return _drcData->overlap();}
    private:
-      bool                  fixUnsorted();
+//      bool                  fixUnsorted();
       unsigned              _curResCount      ;//current result count
       unsigned              _origResCount     ;//original result count
       std::string           _timeStamp        ;
@@ -132,10 +136,13 @@ namespace clbr
       virtual              ~DrcCell();
       void                  registerRuleRead(std::string, DrcRule*&);
       DrcRule*              cloneRule(DrcRule*);
+      void                  drawAll(std::string, trend::TrendBase&);
       const RuleMap*        rules() {return &_rules;}
       const CTM&            ctm()   {return _ctm;}
    private:
+      void                  getCellOverlap();
       CTM                   _ctm;
+      DBbox                 _cellOverlap;
       RuleMap               _rules;
    };
 
@@ -154,7 +161,7 @@ namespace clbr
 
       void                  showError(const std::string& cell, const std::string& error, long number)  {/*TODO*/}
       bool                  showCluster(const std::string& cell, const std::string& error)             {/*TODO*/ return true;}
-      void                  showAllErrors(trend::TrendBase&);
+      void                  drawAll(trend::TrendBase&);
 //      void                  hideAllErrors(trend::TrendBase&);
       const CellMap*        cells() {return &_cells;}
       const RuleNameMap*    rules();
