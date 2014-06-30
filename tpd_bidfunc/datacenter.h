@@ -85,6 +85,7 @@ public:
    void                       mouseHooverDraw(TP&);
    void                       zoomDraw(const TP&,const TP&);
    void                       grcDraw();
+   void                       drcCollect(int, std::string);
    void                       setRecoverPoly(bool);
    void                       setRecoverWire(bool);
    void                       setCmdLayer(const LayerDef& laydef) {_curcmdlay = laydef;}
