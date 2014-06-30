@@ -275,6 +275,7 @@ class TpdPost {
       static void execPipe(const wxString);
       static void techEditUpdate(console::TECHEDIT_UPDATE_EVT_ENUMS id);
       static void SetTechEditWindow(wxDialog* te) {_techEditor = te;}
+      static void drcDrawPrep(int, const wxString);
       static void quitApp(int);
 
    private:
@@ -284,6 +285,7 @@ class TpdPost {
       static wxWindow*  _cllBrowser;
       static wxWindow*  _cmdLine;
       static wxWindow*  _tllFuncList;
+      static wxWindow*  _canvasWindow;
       static wxWindow*  _mainWindow;
       static wxDialog*  _techEditor;
 };

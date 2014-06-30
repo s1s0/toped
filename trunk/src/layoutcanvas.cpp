@@ -52,6 +52,8 @@ extern const wxEventType         wxEVT_CANVAS_ZOOM;
 extern const wxEventType         wxEVT_MOUSE_ACCEL;
 extern const wxEventType         wxEVT_MOUSE_INPUT;
 extern const wxEventType         wxEVT_CURRENT_LAYER;
+extern const wxEventType         wxEVT_DRCDRAWPREP;
+
 //-----------------------------------------------------------------------------
 // Static members
 //-----------------------------------------------------------------------------
@@ -260,6 +262,7 @@ BEGIN_EVENT_TABLE(tui::LayoutCanvas, wxGLCanvas)
    EVT_TECUSTOM_COMMAND (wxEVT_CANVAS_ZOOM  , wxID_ANY, tui::LayoutCanvas::OnZoom)
    EVT_TECUSTOM_COMMAND (wxEVT_MOUSE_INPUT  , wxID_ANY, tui::LayoutCanvas::OnMouseIN)
    EVT_TECUSTOM_COMMAND (wxEVT_CANVAS_CURSOR, wxID_ANY, tui::LayoutCanvas::OnCursorType)
+   EVT_TECUSTOM_COMMAND (wxEVT_DRCDRAWPREP  , wxID_ANY, tui::LayoutCanvas::OnDrcCollect)
    EVT_TIMER            (                     wxID_ANY, tui::LayoutCanvas::OnTimer)
 
    EVT_MENU(         CM_RULER, LayoutCanvas::OnCMrulerState    )
@@ -1044,6 +1047,13 @@ void tui::LayoutCanvas::OnCursorType(wxCommandEvent& event)
 {
    _longCursor = (1 == event.GetInt());
    _reperX = _reperY = _longCursor;
+}
+
+void tui::LayoutCanvas::OnDrcCollect(wxCommandEvent& event)
+{
+   int collectType = event.GetInt();
+   wxString name = event.GetString();
+   DATC->drcCollect(collectType, std::string(name.mb_str(wxConvUTF8)));
 }
 
 void tui::LayoutCanvas::OnCMcontinue(wxCommandEvent& WXUNUSED(event))

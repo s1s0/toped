@@ -131,6 +131,7 @@ namespace tui {
       void           OnCMFlip(wxCommandEvent&);
       void           OnCMRotate(wxCommandEvent&);
       void           OnCursorType(wxCommandEvent&);
+      void           OnDrcCollect(wxCommandEvent&);
       void           OnPanCenter(wxCommandEvent&);
       void           OnTimer(wxTimerEvent& WXUNUSED(event));
 

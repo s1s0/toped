@@ -71,6 +71,7 @@ BEGIN_DECLARE_EVENT_TYPES()
     DECLARE_EVENT_TYPE(wxEVT_EXECEXTDONE        , 10021)
     DECLARE_EVENT_TYPE(wxEVT_RELOADTELLFUNCS    , 10022)
     DECLARE_EVENT_TYPE(wxEVT_TECHEDITUPDATE     , 10023)
+    DECLARE_EVENT_TYPE(wxEVT_DRCDRAWPREP        , 10024)
 END_DECLARE_EVENT_TYPES()
 
 DEFINE_EVENT_TYPE(wxEVT_CANVAS_STATUS        )
@@ -97,6 +98,7 @@ DEFINE_EVENT_TYPE(wxEVT_EXECEXTPIPE          )
 DEFINE_EVENT_TYPE(wxEVT_EXECEXTDONE          )
 DEFINE_EVENT_TYPE(wxEVT_RELOADTELLFUNCS      )
 DEFINE_EVENT_TYPE(wxEVT_TECHEDITUPDATE       )
+DEFINE_EVENT_TYPE(wxEVT_DRCDRAWPREP          )
 
 console::TELLFuncList*  CmdList = NULL;
 
@@ -106,8 +108,9 @@ wxWindow*               TpdPost::_layBrowser    = NULL;
 wxWindow*               TpdPost::_cllBrowser    = NULL;
 wxWindow*               TpdPost::_cmdLine       = NULL;
 wxWindow*               TpdPost::_tllFuncList   = NULL;
-wxDialog*               TpdPost::_techEditor    = NULL;
+wxWindow*               TpdPost::_canvasWindow  = NULL;
 wxWindow*               TpdPost::_mainWindow    = NULL;
+wxDialog*               TpdPost::_techEditor    = NULL;
 
 //==============================================================================
 // The ted_log event table
@@ -413,14 +416,15 @@ void console::TopedStatus::OnSize(wxSizeEvent& event)
 
 TpdPost::TpdPost(wxWindow* mainWindow)
 {
-   _mainWindow  = mainWindow;
-   _statusBar   = _mainWindow->FindWindow(tui::ID_TPD_STATUS);
-   _topBrowsers = _mainWindow->FindWindow(tui::ID_WIN_BROWSERS);
-   _layBrowser  = _mainWindow->FindWindow(tui::ID_PNL_LAYERS);
-   _cllBrowser  = _mainWindow->FindWindow(tui::ID_PNL_CELLS);
-   _cmdLine     = _mainWindow->FindWindow(tui::ID_CMD_LINE);
-   _tllFuncList = _mainWindow->FindWindow(tui::ID_TELL_FUNCS);
-   _techEditor  = NULL;
+   _mainWindow   = mainWindow;
+   _statusBar    = _mainWindow->FindWindow(tui::ID_TPD_STATUS);
+   _topBrowsers  = _mainWindow->FindWindow(tui::ID_WIN_BROWSERS);
+   _layBrowser   = _mainWindow->FindWindow(tui::ID_PNL_LAYERS);
+   _cllBrowser   = _mainWindow->FindWindow(tui::ID_PNL_CELLS);
+   _cmdLine      = _mainWindow->FindWindow(tui::ID_CMD_LINE);
+   _tllFuncList  = _mainWindow->FindWindow(tui::ID_TELL_FUNCS);
+   _canvasWindow = _mainWindow->FindWindow(tui::ID_TPD_CANVAS);//ID_WIN_CANVAS
+   _techEditor   = NULL;
    CmdList = static_cast<console::TELLFuncList*>(_tllFuncList);
 }
 
@@ -778,6 +782,14 @@ void TpdPost::techEditUpdate(console::TECHEDIT_UPDATE_EVT_ENUMS id)
       eventUPDATE.SetId(id);
       wxPostEvent(_techEditor, eventUPDATE);
    }
+}
+
+void TpdPost::drcDrawPrep(int type, const wxString name)
+{
+   wxCommandEvent eventDRC(wxEVT_DRCDRAWPREP);
+   eventDRC.SetInt(type);
+   eventDRC.SetString(name);
+   wxPostEvent(_canvasWindow, eventDRC);
 }
 
 void TpdPost::quitApp(int exitType)

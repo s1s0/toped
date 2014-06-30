@@ -971,6 +971,35 @@ void DataCenter::grcDraw()
    }
 }
 
+void DataCenter::drcCollect(int type, std::string name)
+{
+   clbr::DrcLibrary* drcDB = NULL;
+   if (DATC->lockDRC(drcDB))
+   {
+      // Draw DRC data (if any)
+      trend::TrendBase* dRenderer = TRENDC->makeDRenderer();
+      if (NULL != dRenderer)
+      {
+         drcDB->drawAll(*dRenderer);
+         dRenderer->collect();
+         TRENDC->releaseDRenderer();
+      }
+      else
+      {
+         std::ostringstream ost;
+         ost << "Can't obtain a lock on the draw properties. DRC collect skipped.";
+         tell_log(console::MT_ERROR,ost.str());
+      }
+   }
+   else
+   {
+      std::ostringstream ost;
+      ost << "No DRC data in memory";
+      tell_log(console::MT_ERROR,ost.str());
+   }
+   DATC->unlockDRC(drcDB);
+}
+
 LayerMapCif* DataCenter::secureCifLayMap(const layprop::DrawProperties* drawProp, bool import)
 {
    const ExpLayMap* savedMap = PROPC->getCifLayMap();

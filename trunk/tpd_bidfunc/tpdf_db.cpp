@@ -1907,34 +1907,8 @@ tellstdfunc::DRCshowallerrors::DRCshowallerrors(telldata::typeID retype, bool eo
 
 int tellstdfunc::DRCshowallerrors::execute()
 {
-   clbr::DrcLibrary* drcDB = NULL;
-   if (DATC->lockDRC(drcDB))
-   {
-      // Draw DRC data (if any)
-      trend::TrendBase* dRenderer = TRENDC->makeDRenderer();
-      if (NULL != dRenderer)
-      {
-//         wxClientDC dc(this);
-         drcDB->drawAll(*dRenderer);
-         dRenderer->collect();
-         TRENDC->releaseDRenderer();
-      }
-      else
-      {
-         std::ostringstream ost;
-         ost << "Can't obtain a lock on the draw properties. DRC draw skipped.";
-         tell_log(console::MT_ERROR,ost.str());
-      }
-   }
-   else
-   {
-      std::ostringstream ost;
-      ost << "No DRC data in memory";
-      tell_log(console::MT_ERROR,ost.str());
-   }
-   DATC->unlockDRC(drcDB);
+   TpdPost::drcDrawPrep(0,wxT(""));
    return EXEC_NEXT;
-
 }
 
 //=============================================================================
