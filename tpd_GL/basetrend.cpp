@@ -508,7 +508,7 @@ void trend::TrendBase::pushCell(std::string cname, const CTM& trans, const DBbox
       // This list is to keep track of the hidden cRefBox - so we can clean
       // them up. Don't get confused - we need cRefBox during the collecting
       // and drawing phase so we can't really delete them here or after they're
-      // poped-up from _cellStack. The confusion is coming from the "duality"
+      // popped-up from _cellStack. The confusion is coming from the "duality"
       // of the TrxCellRef - once as a cell reference with CTM, view depth etc.
       // and then as a placeholder of the overlapping reference box
       _hiddenRefBoxes.push_back(cRefBox);
@@ -637,13 +637,13 @@ void trend::TrendBase::cleanUp()
    {
       delete (_cellStack.top()); _cellStack.pop();
    }
-//   else
-//   {
-//      static int bozaInt;
-//      std::stringstream boza;
-//      boza << "Empty Stack " << bozaInt++ ;
-//      tell_log(console::MT_WARNING, boza.str());
-//   }
+   else
+   {
+      static int bozaInt;
+      std::stringstream boza;
+      boza << "Empty Stack " << bozaInt++ ;
+      tell_log(console::MT_WARNING, boza.str());
+   }
 //   assert(1 == _cellStack.size());
 //   delete (_cellStack.top()); _cellStack.pop();
    for (RefBoxList::const_iterator CSH = _hiddenRefBoxes.begin(); CSH != _hiddenRefBoxes.end(); CSH++)
