@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?fileVersion 5.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage2">
+	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+		<configuration artifactName="${ProjName}" buildProperties="" description="" id="org.eclipse.linuxtools.cdt.autotools.core.toolChain.1500502066.466531877" name="Optimised" parent="org.eclipse.cdt.build.core.emptycfg">
+			<folderInfo id="org.eclipse.linuxtools.cdt.autotools.core.toolChain.1500502066.466531877." name="/" resourcePath="">
+				<toolChain id="org.eclipse.linuxtools.cdt.autotools.core.toolChain.1107509423" name="org.eclipse.linuxtools.cdt.autotools.core.toolChain" superClass="org.eclipse.linuxtools.cdt.autotools.core.toolChain">
+					<targetPlatform id="org.eclipse.linuxtools.cdt.autotools.core.toolchain.targetPlatform.434533351" isAbstract="false" name="GNU Autotools Target Platform" superClass="org.eclipse.linuxtools.cdt.autotools.core.toolchain.targetPlatform"/>
+					<builder arguments="-j6" buildPath="${workspace_loc:/toped/build_opt}" command="make" id="org.eclipse.linuxtools.cdt.autotools.core.toolchain.builder.1794735372" keepEnvironmentInBuildfile="false" managedBuildOn="false" superClass="org.eclipse.linuxtools.cdt.autotools.core.toolchain.builder"/>
+					<tool id="org.eclipse.linuxtools.cdt.autotools.core.gnu.toolchain.tool.configure.576231348" name="configure" superClass="org.eclipse.linuxtools.cdt.autotools.core.gnu.toolchain.tool.configure">
+						<option id="org.eclipse.linuxtools.cdt.autotools.core.option.configure.name.441524251" name="Name" superClass="org.eclipse.linuxtools.cdt.autotools.core.option.configure.name" value="org.eclipse.linuxtools.cdt.autotools.core.toolChain.1500502066.466531877" valueType="string"/>
+					</tool>
+					<tool id="org.eclipse.linuxtools.cdt.autotools.core.toolchain.tool.autogen.420879641" name="autogen.sh" superClass="org.eclipse.linuxtools.cdt.autotools.core.toolchain.tool.autogen"/>
+					<tool id="org.eclipse.linuxtools.cdt.autotools.core.toolchain.tool.gcc.1670336920" name="GCC C Compiler" superClass="org.eclipse.linuxtools.cdt.autotools.core.toolchain.tool.gcc">
+						<option id="gnu.c.compiler.option.include.paths.304538758" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths"/>
+						<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1548138919" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+					</tool>
+					<tool id="org.eclipse.linuxtools.cdt.autotools.core.toolchain.tool.gpp.1410092028" name="GCC C++ Compiler" superClass="org.eclipse.linuxtools.cdt.autotools.core.toolchain.tool.gpp">
+						<option id="gnu.cpp.compiler.option.include.paths.1396996422" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths"/>
+						<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1688530214" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+					</tool>
+				</toolChain>
+			</folderInfo>
+		</configuration>
+	</storageModule>
+</cproject>
