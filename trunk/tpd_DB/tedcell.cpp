@@ -637,7 +637,7 @@ laydata::AtticList* laydata::TdtCell::changeSelect(TP pnt, SH_STATUS status, con
    else return NULL;
 }
 
-void laydata::TdtCell::mouseHoover(TP& position, trend::TrendBase& rend, const LayerDefSet& unselable)
+void laydata::TdtCell::mouseHoover(TP& position, trend::TrendBase& rend, const CTM& trans, const LayerDefSet& unselable)
 {
    laydata::TdtData* prev = NULL;
    LayerDef prevlay(ERR_LAY_DEF);
@@ -659,8 +659,7 @@ void laydata::TdtCell::mouseHoover(TP& position, trend::TrendBase& rend, const L
    if (NULL == prev) return;
    assert(LayerDef(ERR_LAY_DEF) != prevlay);
    //
-   const CTM unity;
-   rend.pushCell(_name, unity, _cellOverlap, true, false);
+   rend.pushCell(_name, trans, _cellOverlap, true, false);
    rend.setHvrLayer(rend.getTenderLay(prevlay));
    prev->drawSRequest(rend, NULL);
    rend.popCell();

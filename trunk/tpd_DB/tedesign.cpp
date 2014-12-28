@@ -1419,7 +1419,7 @@ void laydata::TdtDesign::mouseHoover(TP& position, trend::TrendBase& rend, const
    {
       TP selp = position * _target.rARTM();
       rend.initDrawRefStack(_target.pEditChain());
-      _target.edit()->mouseHoover(selp, rend, unselable);
+      _target.edit()->mouseHoover(selp, rend, _target.ARTM(), unselable);
       rend.clearDrawRefStack();
    }
 }
