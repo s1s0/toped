@@ -179,7 +179,7 @@ namespace laydata {
       bool                 mergeSelected(AtticList**);
       bool                 stretchSelected(int bfactor, AtticList**);
       AtticList*           changeSelect(TP, SH_STATUS status, const LayerDefSet&);
-      void                 mouseHoover(TP&, trend::TrendBase&, const LayerDefSet&);
+      void                 mouseHoover(TP&, trend::TrendBase&, const CTM&, const LayerDefSet&);
       laydata::AtticList*  findSelected(TP);
       TdtCellRef*          getCellOver(TP, CtmStack&, CellRefStack*, const LayerDefSet&);
       SelectList*          shapeSel()        {return &_shapesel;};
