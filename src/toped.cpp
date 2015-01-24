@@ -697,11 +697,11 @@ void  tui::TopedFrame::setActiveCmd()
    _cmdline->getWidget()->SetFocus();
 }
 
-void tui::TopedFrame::initToolBars()
+void tui::TopedFrame::initToolBars(word iconSize)
 {
-   wxAuiToolBar* tbA = _resourceCenter->initToolBarA();
-   wxAuiToolBar* tbB = _resourceCenter->initToolBarB();
-   wxAuiToolBar* tbC = _resourceCenter->initToolBarC();
+   wxAuiToolBar* tbA = _resourceCenter->initToolBarA(iconSize);
+   wxAuiToolBar* tbB = _resourceCenter->initToolBarB(iconSize);
+   wxAuiToolBar* tbC = _resourceCenter->initToolBarC(iconSize);
 //   Connect(wxEVT_AUITOOLBAR_TOOL_DROPDOWN, wxAuiToolBarEventHandler(TopedFrame::OnToolDropDown));
 //   Connect(wxEVT_AUITOOLBAR_OVERFLOW_CLICK, wxAuiToolBarEventHandler(TopedFrame::OnToolBarDropDown));
    _GLstatus = DEBUG_NEW CanvasStatus(this, ID_WIN_GLSTATUS , wxDefaultPosition, wxDefaultSize, wxAUI_TB_HORZ_TEXT);

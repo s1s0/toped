@@ -352,10 +352,10 @@ void tui::TpdDropCallBack::exec()
 
 
 //=============================================================================
-tui::TpdToolBar::TpdToolBar(int ID, wxWindow* parent, const wxString& tbName, TpdExecResourceMap* execReourceRef) :
+tui::TpdToolBar::TpdToolBar(int ID, wxWindow* parent, const wxString& tbName, TpdExecResourceMap* execReourceRef, word iconSize) :
    wxAuiToolBar(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_DEFAULT_STYLE | wxAUI_TB_OVERFLOW),
-   _iconSize       (16,16         ),
-   _execResourceRef(execReourceRef)
+   _iconSize       (iconSize,iconSize ),
+   _execResourceRef(execReourceRef    )
 {
    SetToolBitmapSize(_iconSize);
    SetName(tbName);
@@ -640,10 +640,10 @@ void tui::ResourceCenter::setToolBarSize(const wxString& tbName, IconSizes size)
             (*CT)->changeIconSize(wxSize(IconSizesValues[size],IconSizesValues[size]));
 }
 
-wxAuiToolBar* tui::ResourceCenter::initToolBarA()
+wxAuiToolBar* tui::ResourceCenter::initToolBarA(word iconSize)
 {
    CbCommandMap cbMap;
-   TpdToolBar* tbar = DEBUG_NEW TpdToolBar(_nextToolId++, _wxParent, tpdPane_TB_A, &_execResources);
+   TpdToolBar* tbar = DEBUG_NEW TpdToolBar(_nextToolId++, _wxParent, tpdPane_TB_A, &_execResources, iconSize);
 
    cbMap[_nextToolId++]= CbCommandPair(wxT("new_design")    ,&tui::TopedFrame::OnNewDesign );
    cbMap[_nextToolId++]= CbCommandPair(wxT("new_cell")      ,&tui::TopedFrame::OnCellNew);
@@ -662,10 +662,10 @@ wxAuiToolBar* tui::ResourceCenter::initToolBarA()
    return tbar;
 }
 
-wxAuiToolBar* tui::ResourceCenter::initToolBarB()
+wxAuiToolBar* tui::ResourceCenter::initToolBarB(word iconSize)
 {
    CbCommandMap cbMap;
-   TpdToolBar* tbar = DEBUG_NEW TpdToolBar(_nextToolId++, _wxParent, tpdPane_TB_B, &_execResources);
+   TpdToolBar* tbar = DEBUG_NEW TpdToolBar(_nextToolId++, _wxParent, tpdPane_TB_B, &_execResources, iconSize);
 
    tbar->addToolItem(_nextToolId++, tpdART_UNDO        , wxT("undo")     ,&tui::TopedFrame::OnUndo       );
    tbar->AddSeparator();
@@ -706,9 +706,9 @@ wxAuiToolBar* tui::ResourceCenter::initToolBarB()
    return tbar;
 }
 
-wxAuiToolBar* tui::ResourceCenter::initToolBarC()
+wxAuiToolBar* tui::ResourceCenter::initToolBarC(word iconSize)
 {
-   TpdToolBar* tbar = DEBUG_NEW TpdToolBar(_nextToolId++, _wxParent, tpdPane_TB_C, &_execResources);
+   TpdToolBar* tbar = DEBUG_NEW TpdToolBar(_nextToolId++, _wxParent, tpdPane_TB_C, &_execResources, iconSize);
 
    tbar->addToolItem(_nextToolId++, tpdART_ZOOM_IN     , wxT("zoom_in")  ,&tui::TopedFrame::OnZoomIn     );
    tbar->addToolItem(_nextToolId++, tpdART_ZOOM_OUT    , wxT("zoom_out") ,&tui::TopedFrame::OnZoomOut    );

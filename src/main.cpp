@@ -78,6 +78,7 @@ bool TopedApp::OnInit()
    _forceRenderType     = trend::rtTBD;
    _noLog               = false;
    _gui                 = true;
+   _toolbarIconSize     = 32;
    wxImage::AddHandler(DEBUG_NEW wxPNGHandler);
    // Initialize Toped properties
    PROPC = DEBUG_NEW layprop::PropertyCenter();
@@ -113,7 +114,7 @@ bool TopedApp::OnInit()
       delete wxLog::SetActiveTarget(logWindow);
       // Initialise the tool bars
       wxArtProvider::PushBack(DEBUG_NEW tui::TpdArtProvider(_tpdResourceDir));
-      Toped->initToolBars();
+      Toped->initToolBars(_toolbarIconSize);
       tellstdfunc::initFuncLib(Toped, Toped->view());
    }
    else
@@ -485,18 +486,38 @@ bool TopedApp::parseCmdLineArgs()
             wxString defOnly = curar.Remove(0,2);
             tellPP->cmdlDefine( std::string(defOnly.mb_str(wxConvUTF8)) );
          }
+         else if (wxT("-iconSize")      == curar)
+         {
+            wxString wxsIconSize(argv[curarNum++]);
+            long int liIconSize;
+            if (wxsIconSize.ToCLong(&liIconSize))
+            {
+               switch(liIconSize)
+               {
+                  case 16: _toolbarIconSize = 16; break;
+                  case 24: _toolbarIconSize = 24; break;
+                  case 32: _toolbarIconSize = 32; break;
+                  case 48: _toolbarIconSize = 48; break;
+                  default:
+                     std::cout << "  -iconSize <size> : One of \"16\", \"24\", \"32\" or \"48\" expected" << std::endl;
+                     runTheTool = false;
+               }
+
+            }
+         }
          else if (wxT("-help") == curar)
          { //no idea how useful this could be for Windows users
             std::cout << "Usage: toped {options}* [tll-file]" << std::endl ;
             std::cout << "Command line options:" << std::endl ;
             std::cout << "  -ogl_thread: " << std::endl ;
 //            std::cout << "  -ogl_safe  : " << std::endl ;
-            std::cout << "  -render <type> : enforce openGL render type. One of \"basic\", \"vbo\" or \"shader\"" << std::endl;
-            std::cout << "  -nolog         : logging will be suppressed" << std::endl;
-            std::cout << "  -nogui         : GUI will not be started. Useful for TLL parsing" << std::endl ;
-            std::cout << "  -I<path>       : includes additional search paths for TLL files" << std::endl ;
-            std::cout << "  -D<macro>      : equivalent to #define <macro> " << std::endl ;
-            std::cout << "  -help          : This help message " << std::endl ;
+            std::cout << "  -render <type>   : Enforce openGL render type. One of \"basic\", \"vbo\" or \"shader\"" << std::endl;
+            std::cout << "  -iconSize <size> : Toolbar icon size on start-up. One of \"16\", \"24\", \"32\" or \"48\"" << std::endl;
+            std::cout << "  -nolog           : Logging will be suppressed" << std::endl;
+            std::cout << "  -nogui           : GUI will not be started. Useful for TLL parsing" << std::endl ;
+            std::cout << "  -I<path>         : Includes additional search paths for TLL files" << std::endl ;
+            std::cout << "  -D<macro>        : Equivalent to #define <macro> " << std::endl ;
+            std::cout << "  -help            : This help message " << std::endl ;
             runTheTool = false;
          }
          else if (!(0 == curar.Find('-')))
