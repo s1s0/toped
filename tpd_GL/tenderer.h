@@ -130,11 +130,11 @@ namespace trend {
          virtual void      grcDraw();
          virtual void      grdDraw();
          virtual void      rlrDraw();
+      protected:
          virtual void      cleanUp();
          virtual void      grcCleanUp();
          virtual void      grdCleanUp();
          virtual void      rlrCleanUp();
-      protected:
          virtual void      setLayColor(const LayerDef& layer);
          virtual void      setStipple();
          virtual void      setLine(bool);

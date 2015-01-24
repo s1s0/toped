@@ -92,10 +92,10 @@ namespace trend {
          virtual bool      rlrCollect(const layprop::RulerList&, int4b,const DBlineList&);
          virtual void      draw();
          virtual void      grcDraw();
-         virtual void      cleanUp();
-         virtual void      grcCleanUp();
          virtual void      rlrDraw();
       protected:
+         virtual void      cleanUp();
+         virtual void      grcCleanUp();
          virtual void      setLayColor(const LayerDef& layer);
          virtual void      setStipple();
          virtual void      setLine(bool);

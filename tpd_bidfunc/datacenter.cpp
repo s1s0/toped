@@ -839,10 +839,7 @@ void DataCenter::render()
          // grid
          const layprop::LayoutGrid* allGrids[3] = {PROPC->grid(0),PROPC->grid(1),PROPC->grid(2)};
          if (cRenderer->grdCollect(allGrids))
-         {
             cRenderer->grdDraw();
-            cRenderer->grdCleanUp();
-         }
          if (wxMUTEX_NO_ERROR == _DBLock.TryLock())
          {
             TpdPost::render_status(true);
@@ -865,16 +862,12 @@ void DataCenter::render()
          {
             // If DB is locked - skip the DB drawing, but draw all the property DB stuff
             tell_log(console::MT_INFO,std::string("DB busy. Viewport redraw skipped"));
-            cRenderer->cleanUp();
          }
          // rulers & zero cross
          layprop::RulerList const rulers = PROPC->getAllRulers();
          DBlineList const zCross = PROPC->getZCross();
          if (cRenderer->rlrCollect(rulers, PROPC->stepDB(),zCross))
-         {
             cRenderer->rlrDraw();
-            cRenderer->rlrCleanUp();
-         }
          TRENDC->releaseCRenderer();
 
          // Draw DRC data (if any)
@@ -902,10 +895,7 @@ void DataCenter::motionDraw(const CTM& layCTM, TP base, TP newp, bool rubber, co
          rulers.push_back(layprop::SDLine(base, newp, PROPC->UU()));
       }
       if (mRenderer->rlrCollect(rulers,PROPC->stepDB(), repers))
-      {
          mRenderer->rlrDraw();
-         mRenderer->rlrCleanUp();
-      }
       if (rubber && (console::op_line != currentOp)  && (NULL !=_TEDLIB()))
       {
          if (wxMUTEX_NO_ERROR == _DBLock.TryLock())
@@ -916,7 +906,6 @@ void DataCenter::motionDraw(const CTM& layCTM, TP base, TP newp, bool rubber, co
             VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
          }
       }
-      mRenderer->cleanUp();
       TRENDC->destroyMRenderer();
    }
 }
@@ -938,7 +927,6 @@ void DataCenter::mouseHooverDraw(TP& position)
             }
             VERIFY(wxMUTEX_NO_ERROR == _DBLock.Unlock());
          }
-         cRenderer->cleanUp();
          TRENDC->destroyHRenderer();
       }
    }
@@ -956,7 +944,6 @@ void DataCenter::zoomDraw(const TP& base, const TP& newp)
       {
          zRenderer->draw();
       }
-      zRenderer->cleanUp();
       TRENDC->destroyZRenderer();
    }
 }

@@ -633,21 +633,22 @@ void trend::TrendBase::cleanUp()
       delete (*CLAY);
    }
    _data.clear();
-   if (1 == _cellStack.size())
-   {
-      delete (_cellStack.top()); _cellStack.pop();
-   }
-   else
-   {
-      static int bozaInt;
-      std::stringstream boza;
-      boza << "Empty Stack " << bozaInt++ ;
-      tell_log(console::MT_WARNING, boza.str());
-   }
-//   assert(1 == _cellStack.size());
-//   delete (_cellStack.top()); _cellStack.pop();
+//   if (1 == _cellStack.size())
+//   {
+//      delete (_cellStack.top()); _cellStack.pop();
+//   }
+//   else
+//   {
+//      static int bozaInt;
+//      std::stringstream boza;
+//      boza << "Empty Stack " << bozaInt++ ;
+//      tell_log(console::MT_WARNING, boza.str());
+//   }
+   assert(1 == _cellStack.size());
+   delete (_cellStack.top()); _cellStack.pop();
    for (RefBoxList::const_iterator CSH = _hiddenRefBoxes.begin(); CSH != _hiddenRefBoxes.end(); CSH++)
       delete (*CSH);
+   _hiddenRefBoxes.clear();
    _activeCS = NULL;
 }
 
@@ -675,6 +676,7 @@ void trend::TrendBase::rlrCleanUp()
    {
       delete (*TS);
    }
+   _rulerTexts.clear();
 }
 
 void trend::TrendBase::genRulerMarks(const CTM& LayCTM, DBline& long_mark, DBline& short_mark, DBline& text_bp, double& scaledpix)

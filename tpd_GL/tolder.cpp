@@ -627,6 +627,8 @@ trend::Tolder::~Tolder()
 {
    cleanUp();
    grcCleanUp();
+   grdCleanUp();
+   rlrCleanUp();
 //   delete _refLayer; //>> deleted by the parent destructor
 //   delete _marks; //>> deleted by the parent destructor
 }
