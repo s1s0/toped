@@ -1246,8 +1246,8 @@ void trend::Tenderer::cleanUp()
       glDeleteBuffers(_num_ogl_buffers, _ogl_buffers);
       delete [] _ogl_buffers;
       _ogl_buffers = NULL;
-      TrendBase::cleanUp();
    }
+   TrendBase::cleanUp();
 }
 
 void trend::Tenderer::grcCleanUp()
@@ -1351,6 +1351,8 @@ trend::Tenderer::~Tenderer()
 {
    cleanUp();
    grcCleanUp();
+   grdCleanUp();
+   rlrCleanUp();
 //   delete _refLayer; //>> deleted by the parent constructor
 }
 

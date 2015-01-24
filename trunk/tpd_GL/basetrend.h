@@ -696,11 +696,6 @@ namespace trend {
          virtual void      grdDraw() = 0;
          virtual void      rlrDraw()=0;
 
-         virtual void      cleanUp();
-         virtual void      grcCleanUp();
-         virtual void      grdCleanUp();
-         virtual void      rlrCleanUp();
-
          LayerDef          getTenderLay(const LayerDef& laydef)
                                                          {return _drawprop->getTenderLay(laydef)   ;}
          void              setState(layprop::PropertyState state)
@@ -722,6 +717,10 @@ namespace trend {
                                                          {       _drawprop = drawprop              ;}
          bool              grcDataEmpty()                {return _grcData.empty()                  ;}
       protected:
+         virtual void      cleanUp();
+         virtual void      grcCleanUp();
+         virtual void      grdCleanUp();
+         virtual void      rlrCleanUp();
          virtual void      setLayColor(const LayerDef& layer) = 0;
          virtual void      setStipple() = 0;
          virtual void      setLine(bool) = 0;
