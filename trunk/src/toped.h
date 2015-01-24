@@ -130,7 +130,7 @@ namespace tui {
       wxAuiManager*           getAuiManager()  {return &_winManager;}
       void                    setOglThread(bool val) {_canvas->setOglThread(val);}
       void                    setActiveCmd();
-      void                    initToolBars();
+      void                    initToolBars(word iconSize);
    private:
       friend class tui::ResourceCenter;
       void                    initMenuBar();
@@ -331,6 +331,7 @@ class TopedApp : public wxApp
       wxString             _localDir;
       wxString             _inputTellFile;
       trend::RenderType    _forceRenderType;
+      word                 _toolbarIconSize;
       bool                 _noLog;     //! Don't create a log file
       bool                 _gui;       //! Run graphics (as opposed to a command line mode)
       PluginList           _plugins;

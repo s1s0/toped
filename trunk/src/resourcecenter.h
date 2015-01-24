@@ -162,7 +162,7 @@ namespace tui
 
    class TpdToolBar : public wxAuiToolBar {
    public:
-                          TpdToolBar(int, wxWindow*, const wxString&, TpdExecResourceMap*);
+                          TpdToolBar(int, wxWindow*, const wxString&, TpdExecResourceMap*, word iconSize=16);
       wxAuiToolBarItem*   addToolItem(int, const wxArtID&, const wxString&, callbackMethod);
       void                addToolItem(int, const wxArtID&, const CbCommandMap&);
       wxAuiToolBarItem*   addToolItem(int, const wxString&, const wxString&);
@@ -253,9 +253,9 @@ namespace tui
       void                executeToolBar(int);
 
       void                setToolBarSize(const wxString&, IconSizes size);
-      wxAuiToolBar*       initToolBarA();
-      wxAuiToolBar*       initToolBarB();
-      wxAuiToolBar*       initToolBarC();
+      wxAuiToolBar*       initToolBarA(word iconSize);
+      wxAuiToolBar*       initToolBarB(word iconSize);
+      wxAuiToolBar*       initToolBarC(word iconSize);
       wxAuiToolBar*       appendTools(const wxString&, const WxStringPairList*);
       bool                deleteTool(const wxString&, const wxString&);
    private:
