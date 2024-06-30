@@ -950,6 +950,7 @@ void DataCenter::zoomDraw(const TP& base, const TP& newp)
 
 void DataCenter::grcDraw()
 {
+    if (NULL == TRENDC) return;
    trend::TrendBase* cRenderer = TRENDC->getCRenderer();
    if (NULL != cRenderer)
    {

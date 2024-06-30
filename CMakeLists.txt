@@ -1,124 +1,168 @@
-## GPL : yannick.heinrich@gmail.com ##
-##
-##  WARNING : To compile change BISON generated header extension from .hpp to .h
-##
-cmake_minimum_required (VERSION 2.6)
+#===========================================================================
+#                                                                          =
+#   This program is free software; you can redistribute it and/or modify   =
+#   it under the terms of the GNU General Public License as published by   =
+#   the Free Software Foundation; either version 2 of the License, or      =
+#   (at your option) any later version.                                    =
+# ------------------------------------------------------------------------ =
+#                  TTTTT    OOO    PPPP    EEEE    DDDD                    =
+#                  T T T   O   O   P   P   E       D   D                   =
+#                    T    O     O  PPPP    EEE     D    D                  =
+#                    T     O   O   P       E       D   D                   =
+#                    T      OOO    P       EEEEE   DDDD                    =
+#                                                                          =
+#   This file is a part of Toped project (C) 2001-2012 Toped developers    =
+# ------------------------------------------------------------------------ =
+#           $URL$
+#        Created: Sun Feb 19 10:08:17 2012
+#     Originator: yannick.heinrich@gmail.com
+#    Description: Top configuration file of the cmake utility
+#---------------------------------------------------------------------------
+#  Revision info Rewritten from scratch (after a long break)
+#---------------------------------------------------------------------------
+#      $Revision$
+#          $Date$
+#        $Author$
+#===========================================================================
 
-SET(EXEC_NAME Toped)
-project(${EXEC_NAME})
-SET(CMAKE_BUILD_TYPE Debug)
-SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules)
-##GLEW
-## Set to your glew library installation directory
-#SET (glew_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/glew/include)
-#SET (glew_LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/glew/lib)
-#MESSAGE(${glew_LIB_DIR})
+cmake_minimum_required(VERSION 3.15)
+set(PRJ_NAME toped)
+set(TOPED_VERSION 0.98)
 
-#WXWIDGETS
-##Windows
-#SET (wxWidgets_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/wxwidgets)
-#SET (wxWidgets_LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/wxwidgets/lib)
-#Check dependance
-SET(TPD_COMMON_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tpd_common)
-SET(TPD_DB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tpd_db)
-SET(TPD_IFACES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tpd_ifaces)
-SET(TPD_PARSER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tpd_parser)
-SET(TPD_BIDFUNC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tpd_bidfunc)
-SET(TPD_GL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tpd_GL)
+project(${PRJ_NAME} VERSION ${TOPED_VERSION})
 
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules)
+#---------------------------------------------------------------------------
+# manage compiler features and flags common for all modules
+add_library(toped_compiler_flags INTERFACE)
+target_compile_features(toped_compiler_flags INTERFACE cxx_std_11)
 
-FIND_PACKAGE(Glew REQUIRED)
-include_directories(${GLEW_INCLUDE_DIR}) 
-IF(NOT DEFINED GLEW_FOUND)
-  MESSAGE(FATAL_ERROR "Glew is not found on your system")
-ENDIF(NOT DEFINED GLEW_FOUND)
+# add compiler warning flags just when building this project via
+# the BUILD_INTERFACE genex
+set(gcc_like_cxx "$<COMPILE_LANG_AND_ID:CXX,ARMClang,AppleClang,Clang,GNU,LCC>")
+set(msvc_cxx "$<COMPILE_LANG_AND_ID:CXX,MSVC>")
+target_compile_options(toped_compiler_flags INTERFACE
+  "$<${gcc_like_cxx}:$<BUILD_INTERFACE:-Wall;-Wextra;-Wshadow;-Wformat=2;-Wunused>>"
+  "$<${msvc_cxx}:$<BUILD_INTERFACE:-W3>>"
+)
 
-FIND_PACKAGE(OpenGL REQUIRED)
-include_directories(${OPENGL_INCLUDE_DIR}) 
-IF(NOT DEFINED OPENGL_FOUND)
-	MESSAGE(FATAL_ERROR "Opengl is not found on your system")
-ENDIF(NOT DEFINED OPENGL_FOUND)
-
-
-FIND_PACKAGE(ZLIB)
-IF(NOT ZLIB_FOUND)
-	MESSAGE(FATAL_ERROR "ZLIB is not found on your system")
-ENDIF(NOT ZLIB_FOUND)
-
-
-SET(wxWidgets_USE_DEBUG ON)
-FIND_PACKAGE(wxWidgets COMPONENTS core base aui adv REQUIRED)
-IF(NOT wxWidgets_FOUND)
-	MESSAGE(FATAL_ERROR "WxWidgets is not found on your system")
-ENDIF(NOT wxWidgets_FOUND)
-
-#Compile library
-add_subdirectory(tpd_GL)
+#---------------------------------------------------------------------------
+# external libraries, prerequisites for the project
+find_package(GLEW REQUIRED)
+find_package(OpenGL REQUIRED)
+find_package(ZLIB REQUIRED)
+#find_package(wxWidgets COMPONENTS core base aui adv REQUIRED)
+find_package(wxWidgets COMPONENTS core base aui gl REQUIRED)
+include(${wxWidgets_USE_FILE})
+include_directories(${wxWidgets_INCLUDE_DIRS})
+#---------------------------------------------------------------------------
+# add project modules as internal libraries
 add_subdirectory(tpd_common)
+add_subdirectory(tpd_GL)
 add_subdirectory(tpd_DB)
 add_subdirectory(tpd_ifaces)
 add_subdirectory(tpd_parser)
 add_subdirectory(tpd_bidfunc)
 
+#---------------------------------------------------------------------------
+# Packging & install
+file(GLOB TPD_ICONS      "icons/*.png")
+file(GLOB TPD_FONTS      "fonts/*.glf")
+file(GLOB TPD_TLL        "tll/*.tll")
+file(GLOB TPD_RESOURCES  "ui/*")
+file(GLOB TPD_UTILS      "user_functions/general/*.tll")
 
-#Extrafiles
-#icons
-file(GLOB icons "icons/*.png")
-
-#fonts
-file(GLOB fonts "fonts/*.glf")
-
-#Technology files
-##tll
-file(GLOB tll "tll/*.tll")
-##user_functions
-file(GLOB user_functions "user_functions/general/*.tll")
-
-#Executable
-SET(toped_SOURCES src/browsers.cpp src/layoutcanvas.cpp src/main.cpp 
-src/resourcecenter.cpp src/toped.cpp src/tpdph.cpp src/tui.cpp src/techeditor.cpp)
-include_directories(tpd_common tpd_DB tpd_DB tpd_ifaces tpd_parser tpd_bidfunc tpd_GL ${OPENGL_INCLUDE_DIR} ${glew_INCLUDE_DIR})
-INCLUDE(${wxWidgets_USE_FILE})
-
-if(APPLE)
-SET(MACOSX_BUNDLE_ICON_FILE "toped.icns")
-SET(WITH_MAC_BUNDLE_NAME "toped")
-configure_file (${CMAKE_CURRENT_SOURCE_DIR}/src/wxcocoa_config.h.cmake ${CMAKE_CURRENT_SOURCE_DIR}/src/wxcocoa_config.h)
-add_executable(${EXEC_NAME} MACOSX_BUNDLE ${toped_SOURCES} ${fonts} ${icons} ${tll} ${user_functions} "toped.icns")
-
-SET_SOURCE_FILES_PROPERTIES(	
-  ${icons}
-  PROPERTIES
-  MACOSX_PACKAGE_LOCATION MacOS/icons
+set_source_files_properties( "toped.icns"  PROPERTIES
+                             MACOSX_PACKAGE_LOCATION Resources
 )
-SET_SOURCE_FILES_PROPERTIES(	
-  ${fonts}
-  PROPERTIES
-  MACOSX_PACKAGE_LOCATION MacOS/fonts
+set_source_files_properties( ${TPD_ICONS} PROPERTIES
+                             MACOSX_PACKAGE_LOCATION MacOS/icons
 )
-SET_SOURCE_FILES_PROPERTIES(	
-  "toped.icns"
-  PROPERTIES
-  MACOSX_PACKAGE_LOCATION Resources
+set_source_files_properties( ${TPD_FONTS} PROPERTIES
+                             MACOSX_PACKAGE_LOCATION MacOS/fonts
 )
-SET_SOURCE_FILES_PROPERTIES(	
-  ${tll}
-  PROPERTIES
-  MACOSX_PACKAGE_LOCATION MacOS/tll
+set_source_files_properties( ${TPD_TLL} PROPERTIES
+                             MACOSX_PACKAGE_LOCATION MacOS/tll
 )
-SET_SOURCE_FILES_PROPERTIES(	
-  ${user_functions}
-  PROPERTIES
-  MACOSX_PACKAGE_LOCATION MacOS/tll/user_functions/general
+set_source_files_properties( ${TPD_RESOURCES} PROPERTIES
+                             MACOSX_PACKAGE_LOCATION MacOS/ui
 )
-else(APPLE)
-add_executable(${EXEC_NAME} ${toped_SOURCES} ${fonts} ${icons} ${tll} ${user_functions})
-endif(APPLE)
-link_directories(${TPD_COMMON_DIR} ${TPD_DB_DIR} ${TPD_IFACES_DIR} ${TPD_PARSER_DIR} ${TPD_BIDFUNC_DIR} ${TPD_GL_DIR} ${glew_LIB_DIR})
-IF(APPLE)
+set_source_files_properties( ${TPD_UTILS} PROPERTIES
+                             MACOSX_PACKAGE_LOCATION MacOS/tll/utils
+)
+set(MACOSX_BUNDLE_ICON_FILE "toped.icns")
+set(WITH_MAC_BUNDLE_NAME "toped")
 
-target_link_libraries(${EXEC_NAME} ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES} ${wxWidgets_LIBRARIES} tpd_bidfunc tpd_parser tpd_ifaces tpd_DB tpd_common wx_osx_cocoau_gl-2.9 tpd_GL z) 
-else(APPLE)
-target_link_libraries(${EXEC_NAME} ${wxWidgets_LIBRARIES} tpd_bidfunc tpd_parser tpd_ifaces tpd_DB tpd_common tpd_GL z) 
-endif(APPLE)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/wxcocoa_config.h.cmake ${CMAKE_CURRENT_SOURCE_DIR}/src/wxcocoa_config.h)
+
+#---------------------------------------------------------------------------
+add_executable(${PRJ_NAME} MACOSX_BUNDLE
+                      src/tpdph.cpp
+                      src/browsers.cpp
+                      src/layoutcanvas.cpp
+                      src/resourcecenter.cpp
+                      src/tui.cpp
+                      src/techeditor.cpp
+                      src/toped.cpp
+                      src/main.cpp
+                      ${TPD_FONTS} ${TPD_ICONS} ${TPD_TLL} ${TPD_UTILS} ${TPD_RESOURCES}
+)
+
+target_link_libraries(${PRJ_NAME} PUBLIC
+#                      ${OPENGL_LIBRARIES}
+#                      ${GLEW_LIBRARIES}
+#                      ${wxWidgets_LIBRARIES}
+#                      wx_osx_cocoau_gl-2.9
+                      GLEW::GLEW
+                      z
+                      toped_compiler_flags
+                      tpd_common
+                      tpd_GL
+                      tpd_DB
+                      tpd_parser
+                      tpd_bidfunc
+                      tpd_ifaces
+)
+
+target_include_directories(${PRJ_NAME} PUBLIC
+                      tpd_common
+                      tpd_GL
+                      tpd_DB
+                      tpd_parser
+                      tpd_bidfunc
+                      tpd_ifaces
+)
+
+
+
+#install(TARGETS ${PRJ_NAME}
+#        RUNTIME
+#        DESTINATION bin
+#        COMPONENT applications
+#)
+#install(FILES ${TPD_ICONS} DESTINATION icons)
+#install(FILES ${TPD_FONTS} DESTINATION fonts)
+#install(FILES ${TPD_TLL}   DESTINATION tll)
+#install(FILES ${TPD_UTILS} DESTINATION utils)
+
+#install(TARGETS mylib
+#  ARCHIVE
+#  DESTINATION lib
+#  COMPONENT libraries)
+#install(FILES mylib.h
+#  DESTINATION include
+#  COMPONENT headers)
+
+
+#set(CPACK_BUNDLE_NAME "Toped")
+#set(CPACK_BUNDLE_ICON "toped.icns")
+##set(CPACK_BUNDLE_PLIST $PRJ_NAME)
+#
+#set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "IC layout editor")
+#set(CPACK_PACKAGE_VENDOR "${CMAKE_CURRENT_SOURCE_DIR}/AUTHORS")
+#set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README")
+#set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/COPYING")
+#set(CPACK_PACKAGE_VERSION_MAJOR "0")
+#set(CPACK_PACKAGE_VERSION_MINOR "99")
+#
+#include(CPACK)
+

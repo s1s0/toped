@@ -90,8 +90,8 @@ tui::sgSliderControl::sgSliderControl(wxWindow *parent, int wId, int min, int ma
    wxString ws;
    ws.sprintf(wxT("%i"), init);
    _text = DEBUG_NEW wxTextCtrl(this, wxID_ANY, ws, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER, wxTextValidator(wxFILTER_NUMERIC));
-   controlSizer->Add(_slider, 2, wxALL| wxALIGN_CENTER | wxEXPAND);
-   controlSizer->Add(  _text, 1, wxALL| wxALIGN_CENTER | wxEXPAND);
+   controlSizer->Add(_slider, 2, wxALL /*| wxALIGN_CENTER */ | wxEXPAND);
+   controlSizer->Add(  _text, 1, wxALL /*| wxALIGN_CENTER */ | wxEXPAND);
    SetSizer(controlSizer);
    controlSizer->Fit(this);
 //  _wxText->SetValue(ws);
@@ -2412,7 +2412,7 @@ tui::TopedPropertySheets::RenderingPSheet::RenderingPSheet(wxWindow* parent) : w
       // Image details (Quality)
       wxBoxSizer *imgSizer  = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Image detail (square pixels)"));
          _imageDetail = DEBUG_NEW sgSliderControl(this, PDIMG_DETAIL, 1, 100, 40);
-      imgSizer->Add(_imageDetail, 0, wxUP | wxALIGN_CENTER | wxEXPAND,10);
+      imgSizer->Add(_imageDetail, 0, wxUP /*| wxALIGN_CENTER */| wxEXPAND,10);
 
       // Cell related rendering properties
       wxBoxSizer *topCellSizer = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Cells"));
@@ -2420,33 +2420,33 @@ tui::TopedPropertySheets::RenderingPSheet::RenderingPSheet(wxWindow* parent) : w
          wxBoxSizer *cellSizer = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
             wxCheckBox* cellOvlBox = DEBUG_NEW wxCheckBox(this, PDSET_CELLBOX , wxT("Overlapping box"));
             wxCheckBox* cellMarks  = DEBUG_NEW wxCheckBox(this, PDSET_CELLMARK, wxT("Reference marks"));
-         cellSizer->Add(cellOvlBox, 1, wxALL | wxALIGN_CENTER | wxEXPAND,5);
-         cellSizer->Add(cellMarks , 1, wxALL | wxALIGN_CENTER | wxEXPAND,5);
+         cellSizer->Add(cellOvlBox, 1, wxALL /*| wxALIGN_CENTER */| wxEXPAND,5);
+         cellSizer->Add(cellMarks , 1, wxALL /*| wxALIGN_CENTER */| wxEXPAND,5);
          // Cell Depth of view
          wxBoxSizer *cdovSizer = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Visible hierarchy depth"));
          _cbDepthOfViewLimit = DEBUG_NEW wxCheckBox(this, PDCELL_CHECKDOV , wxT("unlimited"));
          _cbDepthOfViewLimit->SetValue(true);
          _cellDepthOfView = DEBUG_NEW sgSliderControl(this, PDCELL_DOV, 1, 8, 8);
          _cellDepthOfView->Enable(false);
-         cdovSizer->Add(_cbDepthOfViewLimit, 0, wxALL| wxALIGN_CENTER | wxEXPAND, 5);
-         cdovSizer->Add(   _cellDepthOfView, 0, wxUP| wxALIGN_CENTER | wxEXPAND, 5);
+         cdovSizer->Add(_cbDepthOfViewLimit, 0, wxALL/*| wxALIGN_CENTER*/ | wxEXPAND, 5);
+         cdovSizer->Add(   _cellDepthOfView, 0, wxUP /*| wxALIGN_CENTER*/ | wxEXPAND, 5);
          // Cell Depth brightness ebb (shadow)
          wxBoxSizer *ebbSizer  = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Hierarchy depth opacity"));
             _cellDepthEbb = DEBUG_NEW sgSliderControl(this, PDCELL_DAB, 0, 80, 0);
-         ebbSizer->Add(_cellDepthEbb, 0, wxUP | wxALIGN_CENTER | wxEXPAND, 10);
+         ebbSizer->Add(_cellDepthEbb, 0, wxUP /*| wxALIGN_CENTER */ | wxEXPAND, 10);
       // Pack all cell related properties
-      topCellSizer->Add(cellSizer , 0, wxALL | wxALIGN_CENTER | wxEXPAND);
+      topCellSizer->Add(cellSizer , 0, wxALL /*| wxALIGN_CENTER */ | wxEXPAND);
       topCellSizer->Add(10,10,0);
-      topCellSizer->Add(cdovSizer , 0, wxALL | wxALIGN_CENTER | wxEXPAND);
+      topCellSizer->Add(cdovSizer , 0, wxALL /*| wxALIGN_CENTER */ | wxEXPAND);
       topCellSizer->Add(10,10,0);
-      topCellSizer->Add(ebbSizer  , 0, wxALL | wxALIGN_CENTER | wxEXPAND);
+      topCellSizer->Add(ebbSizer  , 0, wxALL /*| wxALIGN_CENTER */ | wxEXPAND);
       // Text related rendering properties
       wxBoxSizer *topTextSizer = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Texts"));
          wxBoxSizer *textSizer = DEBUG_NEW wxBoxSizer(wxHORIZONTAL);
             wxCheckBox* textOvlBox = DEBUG_NEW wxCheckBox(this, PDSET_TEXTBOX , wxT("Overlapping box"));
             wxCheckBox* textMarks  = DEBUG_NEW wxCheckBox(this, PDSET_TEXTMARK, wxT("Reference marks"));
-         textSizer->Add(textOvlBox, 1, wxALL | wxALIGN_CENTER | wxEXPAND);
-         textSizer->Add(textMarks , 1, wxALL | wxALIGN_CENTER | wxEXPAND);
+         textSizer->Add(textOvlBox, 1, wxALL /*| wxALIGN_CENTER */ | wxEXPAND);
+         textSizer->Add(textMarks , 1, wxALL /*| wxALIGN_CENTER */ | wxEXPAND);
          //
          wxCheckBox* textOrien  = DEBUG_NEW wxCheckBox(this, PDSET_TEXTORI, wxT("Adjust orientation"));
          wxArrayString allFontNames_wx;
@@ -2458,17 +2458,17 @@ tui::TopedPropertySheets::RenderingPSheet::RenderingPSheet(wxWindow* parent) : w
          wxComboBox* allFonts = DEBUG_NEW wxComboBox(this, PDSET_TEXTFONTS,
                wxT(""), wxDefaultPosition, wxDefaultSize, 0, NULL, wxCB_DROPDOWN | wxCB_READONLY | wxCB_SORT);
 #endif
-      topTextSizer->Add(textSizer, 0, wxALL | wxALIGN_CENTER | wxEXPAND);
+      topTextSizer->Add(textSizer, 0, wxALL /*| wxALIGN_CENTER */| wxEXPAND);
       topTextSizer->Add(textOrien, 0, wxALL | wxALIGN_LEFT             );
-      topTextSizer->Add(allFonts , 0, wxALL | wxALIGN_CENTER | wxEXPAND);
+      topTextSizer->Add(allFonts , 0, wxALL /*| wxALIGN_CENTER */| wxEXPAND);
       //GRC related rendering properties
       wxBoxSizer *grcSizer = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Invalid objects"));
       _cbGrcBlinkOn = DEBUG_NEW wxCheckBox(this, PDGRC_BLINKON , wxT("blinking"));
       _cbGrcBlinkOn->SetValue(false);
       _cbGrcBlinkFreq = DEBUG_NEW sgSliderControl(this, PDGRC_BLINKFREQ, 1, 10, 5);
       _cbGrcBlinkFreq->Enable(false);
-      grcSizer->Add(_cbGrcBlinkOn  , 0, wxALL| wxALIGN_CENTER | wxEXPAND);
-      grcSizer->Add(_cbGrcBlinkFreq, 0, wxALL| wxALIGN_CENTER | wxEXPAND);
+      grcSizer->Add(_cbGrcBlinkOn  , 0, wxALL /*| wxALIGN_CENTER */ | wxEXPAND);
+      grcSizer->Add(_cbGrcBlinkFreq, 0, wxALL /*| wxALIGN_CENTER */ | wxEXPAND);
 
    // Pack everything
    topSizer->Add(   imgSizer , 0, wxEXPAND | wxALL, 5);//   topSizer->Add(10,10,0);
@@ -2698,9 +2698,9 @@ tui::TopedPropertySheets::CanvasPSheet::CanvasPSheet(wxWindow* parent) : wxPanel
                                                               wxTE_RIGHT | wxTE_PROCESS_ENTER,
                                                               wxTextValidator(wxFILTER_NUMERIC));
             wxButton*     stepEnter = DEBUG_NEW wxButton(this, CDMARKER_STEP_SET, wxT("Set"));
-         stepSizer->Add(stepStatic, 0, wxTOP | wxBOTTOM | wxLEFT  | wxALIGN_CENTER | wxEXPAND, 5);
-         stepSizer->Add(stepValue , 1, wxTOP | wxBOTTOM | wxRIGHT | wxALIGN_CENTER | wxEXPAND, 5);
-         stepSizer->Add(stepEnter , 0, wxTOP | wxBOTTOM | wxRIGHT | wxALIGN_CENTER | wxEXPAND, 5);
+         stepSizer->Add(stepStatic, 0, wxTOP | wxBOTTOM | wxLEFT  /*| wxALIGN_CENTER */| wxEXPAND, 5);
+         stepSizer->Add(stepValue , 1, wxTOP | wxBOTTOM | wxRIGHT /*| wxALIGN_CENTER */| wxEXPAND, 5);
+         stepSizer->Add(stepEnter , 0, wxTOP | wxBOTTOM | wxRIGHT /*| wxALIGN_CENTER */| wxEXPAND, 5);
 
          static const wxString motionOptions[] = { wxT("Free"), wxT("45 deg"), wxT("90 deg") };
          wxRadioBox* motion = DEBUG_NEW wxRadioBox(this, CDMARKER_MOTION, wxT("Motion"),
@@ -2711,8 +2711,8 @@ tui::TopedPropertySheets::CanvasPSheet::CanvasPSheet(wxWindow* parent) : wxPanel
                                                    1,
                                                    wxRA_VERTICAL
                                                    );
-      markerSizer->Add(stepSizer, 0, wxALL | wxALIGN_CENTER | wxEXPAND);
-      markerSizer->Add(motion   , 0, wxALL | wxALIGN_CENTER | wxEXPAND);
+      markerSizer->Add(stepSizer, 0, wxALL /*| wxALIGN_CENTER */| wxEXPAND);
+      markerSizer->Add(motion   , 0, wxALL /*| wxALIGN_CENTER */| wxEXPAND);
       //
       wxBoxSizer *gridSizer = DEBUG_NEW wxStaticBoxSizer(wxVERTICAL, this, wxT("Grid Step"));
          wxBoxSizer *gr1Sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
@@ -2724,9 +2724,9 @@ tui::TopedPropertySheets::CanvasPSheet::CanvasPSheet(wxWindow* parent) : wxPanel
                                                        wxTextValidator(wxFILTER_NUMERIC));
             wxButton*  gr1Enter = DEBUG_NEW wxButton(this, CDGRID_ENTER1, wxT("Set"));
 
-            gr1Sizer->Add(gr1CBox, 0, wxTOP | wxBOTTOM | wxLEFT  | wxALIGN_CENTER | wxEXPAND, 5);
-            gr1Sizer->Add(gr1TBox ,1, wxTOP | wxBOTTOM | wxRIGHT | wxALIGN_CENTER | wxEXPAND, 5);
-            gr1Sizer->Add(gr1Enter,0, wxTOP | wxBOTTOM | wxRIGHT | wxALIGN_CENTER | wxEXPAND, 5);
+            gr1Sizer->Add(gr1CBox, 0, wxTOP | wxBOTTOM | wxLEFT  /*| wxALIGN_CENTER */ | wxEXPAND, 5);
+            gr1Sizer->Add(gr1TBox ,1, wxTOP | wxBOTTOM | wxRIGHT /*| wxALIGN_CENTER */ | wxEXPAND, 5);
+            gr1Sizer->Add(gr1Enter,0, wxTOP | wxBOTTOM | wxRIGHT /*| wxALIGN_CENTER */ | wxEXPAND, 5);
 
          wxBoxSizer *gr2Sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
             wxCheckBox* gr2CBox = DEBUG_NEW wxCheckBox(this, CDGRID_CBOX2, wxT("Set 2:"));
@@ -2737,9 +2737,9 @@ tui::TopedPropertySheets::CanvasPSheet::CanvasPSheet(wxWindow* parent) : wxPanel
                                                        wxTextValidator(wxFILTER_NUMERIC));
             wxButton*  gr2Enter = DEBUG_NEW wxButton(this, CDGRID_ENTER2, wxT("Set"));
 
-            gr2Sizer->Add(gr2CBox, 0, wxTOP | wxBOTTOM | wxLEFT  | wxALIGN_CENTER | wxEXPAND, 5);
-            gr2Sizer->Add(gr2TBox ,1, wxTOP | wxBOTTOM | wxRIGHT | wxALIGN_CENTER | wxEXPAND, 5);
-            gr2Sizer->Add(gr2Enter,0, wxTOP | wxBOTTOM | wxRIGHT | wxALIGN_CENTER | wxEXPAND, 5);
+            gr2Sizer->Add(gr2CBox, 0, wxTOP | wxBOTTOM | wxLEFT  /*| wxALIGN_CENTER */ | wxEXPAND, 5);
+            gr2Sizer->Add(gr2TBox ,1, wxTOP | wxBOTTOM | wxRIGHT /*| wxALIGN_CENTER */ | wxEXPAND, 5);
+            gr2Sizer->Add(gr2Enter,0, wxTOP | wxBOTTOM | wxRIGHT /*| wxALIGN_CENTER */ | wxEXPAND, 5);
 
          wxBoxSizer *gr3Sizer = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
             wxCheckBox* gr3CBox = DEBUG_NEW wxCheckBox(this, CDGRID_CBOX3, wxT("Set 3:"));
@@ -2750,13 +2750,13 @@ tui::TopedPropertySheets::CanvasPSheet::CanvasPSheet(wxWindow* parent) : wxPanel
                                                        wxTextValidator(wxFILTER_NUMERIC));
             wxButton*  gr3Enter = DEBUG_NEW wxButton(this, CDGRID_ENTER3, wxT("Set"));
 
-            gr3Sizer->Add(gr3CBox, 0, wxTOP | wxBOTTOM | wxLEFT  | wxALIGN_CENTER | wxEXPAND, 5);
-            gr3Sizer->Add(gr3TBox ,1, wxTOP | wxBOTTOM | wxRIGHT | wxALIGN_CENTER | wxEXPAND, 5);
-            gr3Sizer->Add(gr3Enter,0, wxTOP | wxBOTTOM | wxRIGHT | wxALIGN_CENTER | wxEXPAND, 5);
+            gr3Sizer->Add(gr3CBox, 0, wxTOP | wxBOTTOM | wxLEFT  /*| wxALIGN_CENTER */ | wxEXPAND, 5);
+            gr3Sizer->Add(gr3TBox ,1, wxTOP | wxBOTTOM | wxRIGHT /*| wxALIGN_CENTER */ | wxEXPAND, 5);
+            gr3Sizer->Add(gr3Enter,0, wxTOP | wxBOTTOM | wxRIGHT /*| wxALIGN_CENTER */ | wxEXPAND, 5);
 
-      gridSizer->Add(gr1Sizer, 0, wxALL | wxALIGN_CENTER | wxEXPAND);
-      gridSizer->Add(gr2Sizer, 0, wxALL | wxALIGN_CENTER | wxEXPAND);
-      gridSizer->Add(gr3Sizer, 0, wxALL | wxALIGN_CENTER | wxEXPAND);
+      gridSizer->Add(gr1Sizer, 0, wxALL /*| wxALIGN_CENTER */ | wxEXPAND);
+      gridSizer->Add(gr2Sizer, 0, wxALL /*| wxALIGN_CENTER */ | wxEXPAND);
+      gridSizer->Add(gr3Sizer, 0, wxALL /*| wxALIGN_CENTER */ | wxEXPAND);
 
       wxBoxSizer *recoverySizer = DEBUG_NEW wxStaticBoxSizer(wxHORIZONTAL, this, wxT("Invalid Input Objects"));
          static const wxString recoOptions[] = { wxT("Reject"), wxT("Recover")};
@@ -2776,9 +2776,9 @@ tui::TopedPropertySheets::CanvasPSheet::CanvasPSheet(wxWindow* parent) : wxPanel
                                                      1,
                                                      wxRA_HORIZONTAL
                                                     );
-         recoverySizer->Add(polyReco   , 1, wxALL | wxALIGN_CENTER | wxEXPAND, 5);
+         recoverySizer->Add(polyReco   , 1, wxALL /*| wxALIGN_CENTER */ | wxEXPAND, 5);
          recoverySizer->AddStretchSpacer(0);
-         recoverySizer->Add(wireReco   , 1, wxALL | wxALIGN_CENTER | wxEXPAND, 5);
+         recoverySizer->Add(wireReco   , 1, wxALL /*| wxALIGN_CENTER */ | wxEXPAND, 5);
 
 
       wxCheckBox* longCursor   = DEBUG_NEW wxCheckBox(this, CDMISC_LONGCURSOR  , wxT("Long Cursor"));

@@ -1,9 +1,26 @@
-#libtpd_common.la
-SET(lib_LTLIBRARIES tpd_common)
-SET(libtpd_common_la_HEADERS  avl_def.h avl.h polycross.h tpdph.h tuidefs.h)
-SET(libtpd_common_la_SOURCES avl.cpp outbox.cpp polycross.cpp tpdph.cpp ttt.cpp MemTrack.cpp tedbac.cpp)
+add_library (tpd_common
+                         MemTrack.cpp
+                         avl.cpp
+                         outbox.cpp
+                         polycross.cpp
+                         tedbac.cpp
+                         tpdph.cpp
+                         ttt.cpp
+)
+target_include_directories(tpd_common INTERFACE
+                         ${CMAKE_CURRENT_SOURCE_DIR}
+)
+target_link_libraries(tpd_common PUBLIC
+                         toped_compiler_flags
+)
 
-#OpenGL Directories
-include_directories(${OPENGL_INCLUDE_DIR} ${glew_INCLUDE_DIR})
-INCLUDE(${wxWidgets_USE_FILE})
-add_library(${lib_LTLIBRARIES} STATIC ${libtpd_common_la_SOURCES} ${libtpd_common_la_HEADERS})
+#SET(tpd_common_LIBRARY tpd_common)
+#
+##OpenGL Directories
+#include_directories(${OPENGL_INCLUDE_DIR} ${glew_INCLUDE_DIR})
+#INCLUDE(${wxWidgets_USE_FILE})
+#
+#add_library(${tpd_common_LIBRARY} #[<TYPE>] default is STATIC or SHARED based on the value of the BUILD_SHARED_LIBS variable.
+#   ${tpd_common_SOURCES}
+#   ${tpd_common_HEADERS}
+#)

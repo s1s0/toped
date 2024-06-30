@@ -1,22 +1,46 @@
-SET(lib_LTLIBRARIES tpd_parser)
-
-SET(libtpd_parser_la_HEADERS tellyzer.h tldat.h)
-SET(libtpd_parser_la_SOURCES ted_prompt.cpp  tellyzer.cpp tldat.cpp tpdph.cpp)
-#Flex Bison
-
-FIND_PACKAGE(BISON)
-FIND_PACKAGE(FLEX)
-
-SET(AM_YFLAGS "-p tell -d -y -v")
+#-------------------------------------------------------------------------------
+# setup Flex&Bison
+FIND_PACKAGE(FLEX REQUIRED)
 SET(AM_LFLAGS "-Ptell")
+FLEX_TARGET(Scanner tell_lex.ll  ${CMAKE_CURRENT_SOURCE_DIR}/tell_lex.cpp
+            COMPILE_FLAGS ${AM_LFLAGS}
+            DEFINES_FILE "${CMAKE_CURRENT_SOURCE_DIR}/tell_lex.hh"
+)
 
-
-FLEX_TARGET(Scanner tell_lex.ll ${CMAKE_CURRENT_SOURCE_DIR}/tell_lex.cpp COMPILE_FLAGS ${AM_LFLAGS})
-BISON_TARGET(Parser tell_yacc.yy ${CMAKE_CURRENT_SOURCE_DIR}/tell_yacc.cpp COMPILE_FLAGS ${AM_YFLAGS})
+FIND_PACKAGE(BISON REQUIRED)
+SET(AM_YFLAGS "-p tell -d -y -v")
+BISON_TARGET(Parser tell_yacc.yy ${CMAKE_CURRENT_SOURCE_DIR}/tell_yacc.cpp
+            COMPILE_FLAGS ${AM_YFLAGS}
+            DEFINES_FILE "${CMAKE_CURRENT_SOURCE_DIR}/tell_yacc.hh"
+)
 ADD_FLEX_BISON_DEPENDENCY(Scanner Parser)
 
+#-------------------------------------------------------------------------------
+add_library(tpd_parser
+                      ${BISON_Parser_OUTPUTS}
+                      ${FLEX_Scanner_OUTPUTS}
+                      ted_prompt.cpp
+                      tellyzer.cpp
+                      tldat.cpp
+                      tpdph.cpp
+)
 
-include_directories(../tpd_common ../tpd_DB ${OPENGL_INCLUDE_DIR} ${glew_INCLUDE_DIR})
+target_include_directories(tpd_parser PUBLIC
+                         ${CMAKE_CURRENT_SOURCE_DIR}
+                         ${CMAKE_SOURCE_DIR}/tpd_common
+)
+target_link_libraries(tpd_parser PUBLIC
+                         toped_compiler_flags
+)
 
-INCLUDE(${wxWidgets_USE_FILE})
-add_library(${lib_LTLIBRARIES}  STATIC ${libtpd_parser_la_SOURCES} ${BISON_Parser_OUTPUTS} ${FLEX_Scanner_OUTPUTS}) 
+
+
+#include_directories(../tpd_common ../tpd_DB ${OPENGL_INCLUDE_DIR} ${glew_INCLUDE_DIR})
+#
+#INCLUDE(${wxWidgets_USE_FILE})
+#add_library(${lib_LTLIBRARIES}  STATIC ${libtpd_parser_la_SOURCES} ${BISON_Parser_OUTPUTS} ${FLEX_Scanner_OUTPUTS})
+
+#SET(lib_LTLIBRARIES tpd_parser)
+#
+#SET(libtpd_parser_la_HEADERS tellyzer.h tldat.h)
+#SET(libtpd_parser_la_SOURCES ted_prompt.cpp  tellyzer.cpp tldat.cpp tpdph.cpp)
