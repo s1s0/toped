@@ -2365,9 +2365,9 @@ laydata::ShapeList* laydata::ValidWire::replacements()
                laydata::ShapeList* w2p = wire2poly(npl, _width);
                if (NULL == w2p)
                {
-                  std::ostringstream ost;
-                  ost << "Wire check fails - End segments too short, can't generate a valid shape";
-                  tell_log(console::MT_ERROR, ost.str());
+                  std::ostringstream ost1;
+                  ost1 << "Wire check fails - End segments too short, can't generate a valid shape";
+                  tell_log(console::MT_ERROR, ost1.str());
                }
                else
                {

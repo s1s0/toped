@@ -267,7 +267,7 @@ bool TopedApp::getLogFileName()
    wxString fullName;
    fullName << _tpdLogDir << wxT("toped_session.log");
    wxFileName* logFN = DEBUG_NEW wxFileName(fullName);
-   logFN->Normalize();
+   logFN->Normalize(wxPATH_NORM_ENV_VARS|wxPATH_NORM_DOTS|wxPATH_NORM_TILDE|wxPATH_NORM_ABSOLUTE );
    if (logFN->IsOk())
    {
       _logFileName = logFN->GetFullPath();
@@ -324,7 +324,7 @@ void TopedApp::defaultStartupScript()
    wxFileName rcFile(_globalDir);
    rcFile.AppendDir(wxT("tll"));
    rcFile.SetFullName(wxT(".topedrc"));
-   rcFile.Normalize();
+   rcFile.Normalize(wxPATH_NORM_ENV_VARS|wxPATH_NORM_DOTS|wxPATH_NORM_TILDE|wxPATH_NORM_ABSOLUTE );
    assert(rcFile.IsOk());
    if (rcFile.FileExists())
    {
@@ -337,7 +337,7 @@ void TopedApp::defaultStartupScript()
       rcFile.AssignDir(_localDir);
       rcFile.AppendDir(wxT("tll"));
       rcFile.SetFullName(wxT(".topedrc"));
-      rcFile.Normalize();
+      rcFile.Normalize(wxPATH_NORM_ENV_VARS|wxPATH_NORM_DOTS|wxPATH_NORM_TILDE|wxPATH_NORM_ABSOLUTE );
       assert(rcFile.IsOk());
       if (rcFile.FileExists())
       {
@@ -564,7 +564,7 @@ void TopedApp::getLocalDirs()
    // Check log directory
    wxFileName logFolder(_localDir);
    logFolder.AppendDir(wxT("log"));
-   logFolder.Normalize();
+   logFolder.Normalize(wxPATH_NORM_ENV_VARS|wxPATH_NORM_DOTS|wxPATH_NORM_TILDE|wxPATH_NORM_ABSOLUTE );
    if (logFolder.DirExists())
       _tpdLogDir = logFolder.GetFullPath();
    else
@@ -595,7 +595,7 @@ void TopedApp::getGlobalDirs()
    // Check fonts directory
    wxFileName fontsFolder(_globalDir);
    fontsFolder.AppendDir(wxT("fonts"));
-   fontsFolder.Normalize();
+   fontsFolder.Normalize(wxPATH_NORM_ENV_VARS|wxPATH_NORM_DOTS|wxPATH_NORM_TILDE|wxPATH_NORM_ABSOLUTE );
    if (fontsFolder.DirExists())
       _tpdFontDir = fontsFolder.GetFullPath();
    else
@@ -609,7 +609,7 @@ void TopedApp::getGlobalDirs()
    // Check resource directory
    wxFileName iconsFolder(_globalDir);
    iconsFolder.AppendDir(wxT("icons"));
-   iconsFolder.Normalize();
+   iconsFolder.Normalize(wxPATH_NORM_ENV_VARS|wxPATH_NORM_DOTS|wxPATH_NORM_TILDE|wxPATH_NORM_ABSOLUTE );
    if (iconsFolder.DirExists())
       _tpdResourceDir = iconsFolder.GetFullPath();
    else
@@ -623,7 +623,7 @@ void TopedApp::getGlobalDirs()
    // Check plug-ins directory
    wxFileName plugFolder(_globalDir);
    plugFolder.AppendDir(wxT("plugins"));
-   plugFolder.Normalize();
+   plugFolder.Normalize(wxPATH_NORM_ENV_VARS|wxPATH_NORM_DOTS|wxPATH_NORM_TILDE|wxPATH_NORM_ABSOLUTE );
    if (plugFolder.DirExists())
       _tpdPlugInDir = plugFolder.GetFullPath();
    else
@@ -632,7 +632,7 @@ void TopedApp::getGlobalDirs()
    // Check shaders directory
    wxFileName shadderFolder(_globalDir);
    shadderFolder.AppendDir(wxT("shaders"));
-   shadderFolder.Normalize();
+   shadderFolder.Normalize(wxPATH_NORM_ENV_VARS|wxPATH_NORM_DOTS|wxPATH_NORM_TILDE|wxPATH_NORM_ABSOLUTE );
    if (shadderFolder.DirExists())
       _tpdShadersDir = shadderFolder.GetFullPath();
    else
@@ -665,7 +665,7 @@ void TopedApp::finishSessionLog()
    wxString fullName;
    fullName << _tpdLogDir << wxT("/tpd_previous.log");
    wxFileName* lFN = DEBUG_NEW wxFileName(fullName.c_str());
-   lFN->Normalize();
+   lFN->Normalize(wxPATH_NORM_ENV_VARS|wxPATH_NORM_DOTS|wxPATH_NORM_TILDE|wxPATH_NORM_ABSOLUTE );
    assert(lFN->IsOk());
    wxRenameFile(_logFileName.c_str(), lFN->GetFullPath());
    delete lFN;
@@ -682,7 +682,7 @@ void TopedApp::saveIgnoredCrashLog()
    fullName << _tpdLogDir + wxT("/crash") + wxString(btm, wxConvUTF8) + wxT(".log");
    wxFileName* lFN = DEBUG_NEW wxFileName(fullName.c_str());
    delete [] btm;
-   lFN->Normalize();
+   lFN->Normalize(wxPATH_NORM_ENV_VARS|wxPATH_NORM_DOTS|wxPATH_NORM_TILDE|wxPATH_NORM_ABSOLUTE );
    assert(lFN->IsOk());
    wxRenameFile(_logFileName.c_str(), lFN->GetFullPath());
    delete lFN;

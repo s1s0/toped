@@ -798,7 +798,7 @@ tui::TpdArtProvider::TpdArtProvider(const wxString& rootDir)
       wxString sizeDirName;
       sizeDirName.Printf("%ix%i", IconSizesValues[CI], IconSizesValues[CI]);
       _rootDir[CI].AppendDir(sizeDirName);
-      _rootDir[CI].Normalize();
+      _rootDir[CI].Normalize(wxPATH_NORM_ENV_VARS|wxPATH_NORM_DOTS|wxPATH_NORM_TILDE|wxPATH_NORM_ABSOLUTE );
       if (!_rootDir[CI].DirExists())
       {
          std::ostringstream ost;
@@ -828,7 +828,7 @@ wxBitmap tui::TpdArtProvider::CreateBitmap(const wxArtID& id, const wxArtClient&
       wxFileName fName(_rootDir[CI]);
       fName.SetName(bname);
       fName.SetExt(wxT("png"));
-      fName.Normalize();
+      fName.Normalize(wxPATH_NORM_ENV_VARS|wxPATH_NORM_DOTS|wxPATH_NORM_TILDE|wxPATH_NORM_ABSOLUTE );
       if (fName.IsOk() && fName.FileExists())
       {
          wxBitmap tmp(fName.GetFullPath(), wxBITMAP_TYPE_PNG);

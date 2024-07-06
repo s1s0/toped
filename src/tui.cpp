@@ -1439,7 +1439,7 @@ END_EVENT_TABLE()
 
 tui::LineStyleSample::LineStyleSample(wxWindow *parent, wxWindowID id , std::string init, const layprop::DrawProperties* drawProp) :
    wxControl(parent, id),
-   _pen(wxT("black"), 3, wxUSER_DASH)
+   _pen(wxT("black"), 3, wxPENSTYLE_USER_DASH)
 {
    SetSizeHints(50,25,-1,25);
    LineStyleRecord initStyle;
@@ -1460,18 +1460,18 @@ void tui::LineStyleSample::setStyle(const tui::LineStyleRecord&  styledef)
    _pen.SetCap(wxCAP_BUTT);
    if (MAX_WORD_VALUE == pattern)
    {
-      _pen.SetStyle(wxSOLID);
+      _pen.SetStyle(wxPENSTYLE_SOLID);
    }
    else if (0 == pattern)
    {
-      _pen.SetStyle(wxTRANSPARENT);
+      _pen.SetStyle(wxPENSTYLE_TRANSPARENT);
    }
    else
    {
       wxDash* dashes = NULL;
       unsigned numElements = makePenDash(pattern, pathscale, dashes);
       wxDash* oldDashes = NULL;
-      _pen.SetStyle(wxUSER_DASH);
+      _pen.SetStyle(wxPENSTYLE_USER_DASH);
       _pen.GetDashes(&oldDashes);
       _pen.SetDashes(0, NULL);
       if (NULL != oldDashes)

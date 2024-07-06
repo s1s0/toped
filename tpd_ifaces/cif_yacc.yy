@@ -116,7 +116,7 @@ defDefineCommand:
 defStartCommand:
      tknCdefine cifBlank tknCstart cifBlank tknTint {
       if (checkPositive($5, @5))
-         CIFInFile->addStructure($5);
+         CIFInFile->addStructure((dword)$5);
    }
    | tknCdefine cifBlank tknCstart cifBlank tknTint cifSep tknTint cifSep tknTint {
       bool valid = true;
@@ -124,7 +124,7 @@ defStartCommand:
       valid &= checkPositive($7,@7);
       valid &= checkPositive($9,@9);
       if (valid)
-         CIFInFile->addStructure($5, $7, $9);
+         CIFInFile->addStructure((dword)$5, (dword)$7, (dword)$9);
    }
 ;
 
@@ -157,7 +157,7 @@ boxCommand: /*discrepancy with the formal syntax*/
       valid &= checkPositive($3,@3);
       valid &= checkPositive($5,@5);
       if (valid)
-         CIFInFile->addBox($3, $5, $7);
+         CIFInFile->addBox((dword)$3, (dword)$5, $7);
       else
       { /*@TODO clean-up the input params and flag an error!*/}
    }
@@ -166,7 +166,7 @@ boxCommand: /*discrepancy with the formal syntax*/
       valid &= checkPositive($3,@3);
       valid &= checkPositive($5,@5);
       if (valid)
-         CIFInFile->addBox($3, $5, $7, $9);
+         CIFInFile->addBox((dword)$3, (dword)$5, $7, $9);
       else
       { /*@TODO clean-up the input params and flag an error!*/}
    }
@@ -179,14 +179,14 @@ roundFlashCommand:
 wireCommand:
      tknCwire cifBlank tknTint cifSep cifPath      {
       if (checkPositive($3, @3))
-         CIFInFile->addWire($5, $3);
+         CIFInFile->addWire($5, (dword)$3);
    }
 ;
 
 callCommand: /*discrepancy with the formal syntax*/
      tknCcall cifBlank tknTint cifLtrans cifBlank {
       if (checkPositive($3, @3))
-         CIFInFile->addRef($3, $4);
+         CIFInFile->addRef((dword)$3, $4);
    }
 ;
 
@@ -224,7 +224,7 @@ UEC_labelLoc:
       It's difficult to distinguish at this point between the text
       coordinate and the text itself esspecially if the text is a number */
       char i2s[256];
-      sprintf(i2s, "%ld", $2);
+      snprintf(i2s, 256, "%ld", $2);
       CIFInFile->addLabelLoc(i2s, $4);
    }
    | tknP94 tknTuserid tknTblank cifPoint tknTblank tknTuserid {
@@ -234,7 +234,7 @@ UEC_labelLoc:
    }
    | tknP94 tknTint tknTblank cifPoint tknTblank tknTuserid {
       char i2s[256];
-      sprintf(i2s, "%ld", $2);
+      snprintf(i2s, 256, "%ld", $2);
       CIFInFile->addLabelLoc(i2s, $4, $6);
       delete $6;
    }
@@ -259,7 +259,7 @@ commentCommand:
 
 cifPoint:
      tknTint cifSep tknTint                {
-      $$ = DEBUG_NEW TP($1, $3);
+      $$ = DEBUG_NEW TP((int4b)$1, (int4b)$3);
    }
 ;
 

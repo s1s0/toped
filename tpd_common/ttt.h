@@ -173,6 +173,7 @@ public:
    bool                      operator!=(const LayerDef& cmp) const;
    const LayerDef            operator++(int)/*Postfix*/;
    bool                      operator< (const LayerDef& cmp) const;
+   LayerDef&                 operator=(const LayerDef&)=default;
    friend  std::ostream& operator <<(std::ostream &os, const LayerDef &obj);
 private:
    LayerNumber               _num;
@@ -241,6 +242,7 @@ class   CTM
 {
 public:
    CTM() {Initialize();};
+   CTM(const CTM& laydef) = default;
    void Initialize()                {_a = _d = 1.0;_b = _c = _tx = _ty = 0.0;};
    CTM(const TP&, real, real, bool);
    CTM(real va,real vb,real vc,real vd,real vtx,real vty) :
@@ -280,6 +282,7 @@ public:
    friend class DBbox;
    TP(int4b x=0, int4b y=0): _x(x), _y(y) {};
    TP(real, real, real);
+   TP(const TP&) = default;
    void     roundTO(int4b step);
    void     move(int4b dX, int4b dY) {_x += dX; _y += dY;};
    void     info(std::ostringstream&,real) const;
@@ -355,6 +358,7 @@ public:
                PSegment() : _A(0), _B(0), _C(0), _angle(0) {};
                PSegment(real A, real B, real C) : _A(A), _B(B), _C(C), _angle(0) {};
                PSegment(TP,TP);
+               PSegment(const PSegment& pseg) = default;
    byte        crossP(PSegment, TP&);
    bool        empty() {return ((0 == _A) && (0 == _B));};
    PSegment*   ortho(TP);

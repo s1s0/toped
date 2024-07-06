@@ -79,7 +79,7 @@ tui::CanvasStatus::CanvasStatus(wxWindow* parent, wxWindowID id ,
    : wxAuiToolBar( parent, id, pos, size, style)
 {
    wxFont fontX = GetFont();
-   fontX.SetWeight(wxBOLD);
+   fontX.SetWeight(wxFONTWEIGHT_BOLD);
    fontX.SetPointSize(12);
    fontX.SetFamily(wxFONTFAMILY_TELETYPE);
    SetFont(fontX);
@@ -240,7 +240,7 @@ tui::CommandPanel::CommandPanel(wxWindow* parent, wxWindowID id, const wxPoint& 
    wxFileName helpFile(wxGetApp().globalDir());
    helpFile.AppendDir(wxT("ui"));
    helpFile.SetFullName(wxT("funchelp.txt"));
-   helpFile.Normalize();
+   helpFile.Normalize(wxPATH_NORM_ENV_VARS|wxPATH_NORM_DOTS|wxPATH_NORM_TILDE|wxPATH_NORM_ABSOLUTE );
    assert(helpFile.IsOk());
    console::HelpObject *helpObject = DEBUG_NEW console::HelpObject(helpFile/*wxGetApp().globalDir()+ wxT("funchelp.txt")*/);
    _cmdbrowser->setHelpObject(helpObject);

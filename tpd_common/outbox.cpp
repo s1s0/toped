@@ -1140,7 +1140,7 @@ bool TpdTime::getStdCTime(wxString& exp) {
 bool expandFileName( std::string& filename)
 {
    wxFileName fName(wxString(filename.c_str(), wxConvFile ));
-   fName.Normalize();
+   fName.Normalize(wxPATH_NORM_ENV_VARS|wxPATH_NORM_DOTS|wxPATH_NORM_TILDE|wxPATH_NORM_ABSOLUTE );
    if (fName.IsOk())
    {
       wxString dirName = fName.GetFullPath();

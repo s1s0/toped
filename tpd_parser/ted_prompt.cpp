@@ -567,7 +567,7 @@ bool console::TllCmdLine::findTellFile(const char* fname, std::string& validName
 {
    // Check the original string first
    wxFileName inclFN(wxString(fname,wxConvUTF8));
-   inclFN.Normalize();
+   inclFN.Normalize(wxPATH_NORM_ENV_VARS|wxPATH_NORM_DOTS|wxPATH_NORM_TILDE|wxPATH_NORM_ABSOLUTE );
    if (inclFN.IsOk() && inclFN.FileExists())
    {
       validName = std::string(inclFN.GetFullPath().mb_str(wxConvFile ));

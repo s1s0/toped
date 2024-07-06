@@ -63,7 +63,7 @@ InputDBFile::InputDBFile( const wxString& fileName, bool forceSeek) :
 {
    std::ostringstream info;
    wxFileName wxImportFN(fileName);
-   wxImportFN.Normalize();
+   wxImportFN.Normalize(wxPATH_NORM_ENV_VARS|wxPATH_NORM_DOTS|wxPATH_NORM_TILDE|wxPATH_NORM_ABSOLUTE );
    _fileName = wxImportFN.GetFullPath();
    if (wxImportFN.IsOk() && wxImportFN.FileExists())
    {
@@ -118,9 +118,9 @@ InputDBFile::InputDBFile( const wxString& fileName, bool forceSeek) :
    }
    else
    {
-      std::ostringstream info;
-      info << "Invalid filename \"" << _fileName << "\"";
-      tell_log(console::MT_ERROR,info.str());
+      std::ostringstream info1;
+      info1 << "Invalid filename \"" << _fileName << "\"";
+      tell_log(console::MT_ERROR,info1.str());
    }
    if (!_status) return;
    assert(NULL != _inStream);
@@ -769,7 +769,7 @@ void ForeignDbFile::preTraverseChildren(const ForeignCellTree* root)
 std::string ForeignDbFile::getFileNameOnly() const
 {
    wxFileName fName(_fileName);
-   fName.Normalize();
+   fName.Normalize(wxPATH_NORM_ENV_VARS|wxPATH_NORM_DOTS|wxPATH_NORM_TILDE|wxPATH_NORM_ABSOLUTE );
    assert (fName.IsOk());
    wxString name = fName.GetName();
    return std::string(name.mb_str(wxConvFile ));

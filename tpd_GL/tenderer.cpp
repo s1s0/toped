@@ -414,7 +414,7 @@ bool trend::TenderLay::chunkExists(TrxCellRef* const ctrans, bool filled)
    return true;
 }
 
-void trend::TenderLay::collect(bool fill, GLuint pbuf, GLuint ibuf)
+void trend::TenderLay::collect(bool /*fill*/, GLuint pbuf, GLuint ibuf)
 {
    TNDR_GLDATAT* cpoint_array = NULL;
    unsigned int* cindex_array = NULL;
@@ -1108,7 +1108,7 @@ bool trend::Tenderer::rlrCollect(const layprop::RulerList& rulers, int4b step, c
       noniList.push_back(*RA);
    }
 
-   _num_ruler_ticks = 2 * noniList.size();
+   _num_ruler_ticks = static_cast<unsigned>(2 * noniList.size());
    _ogl_rlr_buffer = DEBUG_NEW GLuint [1];
    glGenBuffers(1, _ogl_rlr_buffer);
 

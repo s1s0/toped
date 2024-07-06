@@ -625,9 +625,9 @@ void tui::ColorListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, 
    r.height -= 2;
 
    wxColour color(col.red(), col.green(), col.blue(), col.alpha());
-   wxPen pen( color, 3, wxSOLID );
+   wxPen pen( color, 3, wxPENSTYLE_SOLID );
 
-   wxBrush brush(color, wxSOLID);
+   wxBrush brush(color, wxBRUSHSTYLE_SOLID);
    dc.SetPen( pen );
    dc.SetBrush(brush);
 
@@ -733,11 +733,11 @@ void tui::FillListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, i
    if (_fills.end() != fillSet)
       brush = tui::makeBrush(fillSet->second, col);
    else
-      brush = DEBUG_NEW wxBrush(color, wxTRANSPARENT);
+      brush = DEBUG_NEW wxBrush(color, wxBRUSHSTYLE_TRANSPARENT);
    
    if (NULL != brush)
    {
-      wxPen pen( color, 2, wxSOLID );
+      wxPen pen( color, 2, wxPENSTYLE_SOLID );
 
       brush->SetColour(color);
       dc.SetPen( pen );
@@ -813,7 +813,7 @@ tui::LineListComboBox::LineListComboBox(layprop::DrawProperties* drawProp) : wxO
    populate( drawProp );
 }
 
-void tui::LineListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, int flags ) const
+void tui::LineListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, int /*flags*/ ) const
 {
    if ( item == wxNOT_FOUND )
             return;
@@ -833,7 +833,7 @@ void tui::LineListComboBox::OnDrawItem(wxDC& dc, const wxRect& rect, int item, i
       wxDash* dashes = NULL;
       unsigned numElements= makePenDash(pattern, pathscale, dashes);
 
-      wxPen pen(wxT("black"), 1, wxUSER_DASH);
+      wxPen pen(wxT("black"), 1, wxPENSTYLE_USER_DASH);
       pen.SetDashes(numElements, dashes);
 
       dc.SetPen( pen );

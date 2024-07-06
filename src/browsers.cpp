@@ -2419,7 +2419,7 @@ void  browsers::DRCBrowser::showCellHierarchy()
 void  browsers::DRCBrowser::addRuleCheck( const wxTreeItemId &rootId, std::string name, clbr::DrcRule* /*check*/)
 {
 //   std::string name = check->ruleCheckName();
-   wxTreeItemId  id = _errorBrowser->AppendItem(rootId, wxString(name.c_str(), wxConvUTF8), -1, -1, DEBUG_NEW DRCItemData(ITEM_ERR));
+   /*wxTreeItemId  id = */_errorBrowser->AppendItem(rootId, wxString(name.c_str(), wxConvUTF8), -1, -1, DEBUG_NEW DRCItemData(ITEM_ERR));
 //   std::vector <Calbr::drcPolygon>::iterator it2;
 //   std::vector <Calbr::drcPolygon> *polys = check->polygons();
 //

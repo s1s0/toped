@@ -155,8 +155,8 @@ DBbox auxdata::DrcSeg::overlap() const
 void auxdata::DrcSeg::drawRequest(trend::TrendBase&) const
 {
    //TODO
-   int boza = 0;
-   boza++;
+//   int boza = 0;
+//   boza++;
 }
 
 void auxdata::DrcSeg::drawSRequest(trend::TrendBase&, const SGBitSet*) const
