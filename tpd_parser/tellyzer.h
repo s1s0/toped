@@ -554,7 +554,7 @@ namespace  parsercmd {
     */
    class cmdNUMFPARAMS: public cmdVIRTUAL {
    public:
-                  cmdNUMFPARAMS(const telldata::argumentQ* aq) : _numParams(aq->size()) {}
+                  cmdNUMFPARAMS(const telldata::argumentQ* aq) : _numParams(static_cast<unsigned>(aq->size())) {}
       virtual    ~cmdNUMFPARAMS()                     {/*nothing to clean-up here*/}
       virtual int execute();
    private:
@@ -710,8 +710,8 @@ namespace  parsercmd {
       telldata::TellVar*         newFuncArg(telldata::typeID, TpdYYLtype);
       bool                       defValidate(const FuncDeclaration* decl, cmdFUNC*&);
       bool                       declValidate(const FuncDeclaration*, TpdYYLtype);
-      cmdSTDFUNC*  const         getFuncBody(const char*, telldata::argumentQ*, std::string&) const;
-      cmdSTDFUNC*  const         getIntFuncBody(std::string) const;
+      cmdSTDFUNC*                getFuncBody(const char*, telldata::argumentQ*, std::string&) const;
+      cmdSTDFUNC*                getIntFuncBody(std::string) const;
       void                       pushcmd(cmdVIRTUAL* cmd) {_cmdQ.push_back(cmd);};
       void                       pushblk()                {_blocks.push_front(this);};
       cmdBLOCK*                  popblk();
@@ -728,7 +728,7 @@ namespace  parsercmd {
       void                       setRexExpected(bool rexExpected) {_rexExpected = rexExpected;}
    protected:
       bool                       addCALLBACKDECL(std::string, cmdCALLBACK*, TpdYYLtype);
-      cmdSTDFUNC* const          getLocalFuncBody(const char*, telldata::argumentQ*) const;
+      cmdSTDFUNC*                getLocalFuncBody(const char*, telldata::argumentQ*) const;
       telldata::variableMAP     _varLocal;  //! list of local variables
       telldata::typeMAP         _typeLocal; //! list of local types
       telldata::TypeList        _typeAnoLo; //! list of anonymous local types (callbacks only so far)
@@ -949,7 +949,7 @@ namespace  parsercmd {
                                           {_argList = DEBUG_NEW parsercmd::ArgumentLIST;}
                                       ~FuncDeclaration();
       const std::string                name() const     {return _name;}
-      const telldata::typeID           type() const     {return _type;}
+      telldata::typeID                 type() const     {return _type;}
       const parsercmd::ArgumentLIST*   argList() const  {return _argList;}
       void                             pushArg(parsercmd::ArgumentTYPE* arg) {_argList->push_back(arg);}
       void                             incReturns() {_numReturns++;}

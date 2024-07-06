@@ -855,7 +855,7 @@ ImportDB::ImportDB(ForeignDbFile* src_lib, laydata::TdtLibDir* tdt_db, const Imp
    _layCrossMap = DEBUG_NEW ENameLayerCM(theLayMap);
 }
 
-void ImportDB::run(const NameList& top_str_names, bool overwrite, bool reopenFile)
+void ImportDB::run(const NameList& /*top_str_names*/, bool overwrite, bool reopenFile)
 {
    if (!reopenFile || (reopenFile && _src_lib->reopenFile()))
    {

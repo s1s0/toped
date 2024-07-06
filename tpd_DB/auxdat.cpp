@@ -33,7 +33,7 @@
 auxdata::TdtGrcPoly::TdtGrcPoly(const PointVector& plst) :
    GrcData(          )
 {
-   _psize = plst.size();
+   _psize = static_cast<unsigned>(plst.size());
    assert(_psize);
    _pdata = DEBUG_NEW int4b[_psize*2];
    unsigned index = 0;
@@ -116,7 +116,7 @@ void auxdata::TdtGrcPoly::dbExport(DbExportFile& exportF) const
 }
 
 void auxdata::TdtGrcPoly::motionDraw(const layprop::DrawProperties&, CtmQueue& transtack,
-                                 SGBitSet* plst) const
+                                 SGBitSet* /*plst*/) const
 {
    CTM trans = transtack.front();
    PointVector* ptlist = DEBUG_NEW PointVector;
@@ -178,7 +178,7 @@ auxdata::TdtGrcWire::TdtGrcWire(const PointVector& plst, WireWidth width) :
    GrcData  (           ),
    _width      (width      )
 {
-   _psize = plst.size();
+   _psize = static_cast<unsigned>(plst.size());
    assert(_psize);
    _pdata = DEBUG_NEW int4b[_psize*2];
    for (unsigned i = 0; i < _psize; i++)
@@ -266,8 +266,8 @@ void auxdata::TdtGrcWire::dbExport(DbExportFile& exportF) const
    exportF.wire(_pdata, _psize, _width);
 }
 
-void auxdata::TdtGrcWire::motionDraw(const layprop::DrawProperties& drawprop,
-               CtmQueue& transtack, SGBitSet* plst) const
+void auxdata::TdtGrcWire::motionDraw(const layprop::DrawProperties& /*drawprop*/,
+               CtmQueue& transtack, SGBitSet* /*plst*/) const
 {
    CTM trans = transtack.front();
    PointVector ptlist;
@@ -466,8 +466,8 @@ bool auxdata::GrcCell::fixUnsorted()//FIXME! The method result is useless! the i
    return empty;
 }
 
-void auxdata::GrcCell::openGlRender(trend::TrendBase& rend, const CTM& trans,
-                                     bool selected, bool active) const
+void auxdata::GrcCell::openGlRender(trend::TrendBase& rend, const CTM& /*trans*/,
+                                     bool /*selected*/, bool /*active*/) const
 {
    // Draw figures
    typedef LayerHolderGrc::Iterator LCI;
@@ -508,7 +508,7 @@ DBbox auxdata::GrcCell::getVisibleOverlap(const layprop::DrawProperties& prop)
    return vlOverlap;
 }
 
-void auxdata::GrcCell::motionDraw(trend::TrendBase& rend/*, CtmQueue& transtack, bool active*/) const
+void auxdata::GrcCell::motionDraw(trend::TrendBase& /*rend*/ /*, CtmQueue& transtack, bool active*/) const
 {
    //TODO
 //   typedef LayerHolder::Iterator LCI;

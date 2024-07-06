@@ -93,7 +93,7 @@ namespace tui
                       LineListComboBox( layprop::DrawProperties* );
          virtual     ~LineListComboBox();
          virtual void OnDrawItem( wxDC& dc, const wxRect& rect, int item, int flags ) const;
-         virtual wxCoord OnMeasureItem(size_t size) const {return 24;};
+         virtual wxCoord OnMeasureItem(size_t /*size*/) const {return 24;};
          virtual void Clear();
          void         populate( layprop::DrawProperties* );
          //virtual void OnDrawBackground( wxDC& dc, const wxRect& rect, int item, int flags ) const;

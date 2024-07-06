@@ -178,7 +178,7 @@ CIFin::CifLabelSig::CifLabelSig(CifData* last, std::string label, TP* location) 
       CifLabelLoc(last, label, location)
 {}
 
-void CIFin::CifLabelSig::import(  ImportDB& iDB ) const
+void CIFin::CifLabelSig::import(  ImportDB& /*iDB*/ ) const
 {
    //TODO > what to do with those objects?
 }
@@ -776,7 +776,7 @@ void CIFin::CifExportFile::text(const std::string& label, const CTM& trans)
 {
    int loc;
    std::string labelr(label);
-   while ((loc = labelr.find(' ')) >= 0 )
+   while ((loc = static_cast<int>(labelr.find(' '))) >= 0 )
       labelr.replace(loc, 1, "_"); //@FIXME - this should be an option or ...?
 
    _file << "      94 "<< labelr << " "<< (int)trans.tx() << " " << (int)trans.ty() << ";" << std::endl;

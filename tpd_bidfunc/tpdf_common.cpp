@@ -439,7 +439,7 @@ void tellstdfunc::gridON(byte No, bool status)
 }
 
 //=============================================================================
-void tellstdfunc::updateLayerDefinitions(laydata::TdtLibDir* LIBDIR, NameList& top_cells, int libID)
+void tellstdfunc::updateLayerDefinitions(laydata::TdtLibDir* LIBDIR, NameList& top_cells, int /*libID*/)
 {
    // get all the layers used in the design and define them using the default definition
    LayerDefList ull;

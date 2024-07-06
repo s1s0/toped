@@ -775,7 +775,7 @@ void console::TedCmdLine::waitExternal(wxString cmdExt)
    TpdPost::execExt(cmdExt);
 }
 
-void console::TedCmdLine::onExternalDone(wxCommandEvent& evt)
+void console::TedCmdLine::onExternalDone(wxCommandEvent& /*event*/)
 {
    Disconnect(-1, wxEVT_EXECEXTDONE);
    _execExternal = false;
@@ -809,7 +809,7 @@ void     console::TllCCmdLine::waitGUInput(telldata::operandSTACK*,console::ACTI
 {
    assert(false);
 }
-void     console::TllCCmdLine::getGUInput(bool from_keyboard)
+void     console::TllCCmdLine::getGUInput(bool /*from_keyboard*/)
 {
 
 }

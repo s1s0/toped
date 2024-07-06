@@ -458,7 +458,7 @@ laydata::WireContourAux::WireContourAux(const PointVector& plist, const WireWidt
 
 laydata::WireContourAux::WireContourAux(const PointVector& plist, const WireWidth width, const TP extraP)
 {
-   unsigned psize = plist.size() + 1;
+   unsigned psize = static_cast<unsigned>(plist.size()) + 1;
    _ldata = DEBUG_NEW int[2 * psize];
    for (unsigned i = 0; i < (unsigned)(psize - 1); i++)
    {

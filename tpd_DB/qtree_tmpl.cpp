@@ -217,7 +217,7 @@ char laydata::QTreeTmpl<DataT>::fitSubTree(const DBbox& shovl, DBbox* maxsubbox 
 template <typename DataT>
 void laydata::QTreeTmpl<DataT>::sort(TObjList& inlist)
 {
-   unsigned int entryListSize = inlist.size();
+   unsigned entryListSize = static_cast<unsigned>(inlist.size());
    // if the input list is empty - nothing to do!
    if (0 == entryListSize) return;
    typename TObjList::iterator DI = inlist.begin();
@@ -275,7 +275,7 @@ void laydata::QTreeTmpl<DataT>::sort(TObjList& inlist)
    }
    // at this point inlist MUST contain only the shapes for this QTreeTmpl.
    // The rest was split over the underlying (maximum 4) QuadTrees.
-   _props._numObjects = inlist.size();
+   _props._numObjects = static_cast<unsigned>(inlist.size());
    assert (entryListSize == (_props._numObjects +
                              sublist[0].size()  +
                              sublist[1].size()  +
@@ -377,7 +377,7 @@ bool laydata::QTreeTmpl<DataT>::deleteMarked(SH_STATUS stat, bool partselect)
          int8b areanew = _overlap.boxarea();
          if (areaold != areanew) _props._invalid = true;
          // and finally - put the unmarked shapes back
-         _props._numObjects = unmarkedObjects.size();
+         _props._numObjects = static_cast<unsigned>(unmarkedObjects.size());
          _data = DEBUG_NEW DataT*[_props._numObjects];
          QuadsIter j = 0;
          for (typename TObjList::const_iterator DI = unmarkedObjects.begin();
@@ -449,7 +449,7 @@ bool laydata::QTreeTmpl<DataT>::deleteThis(DataT* object)
          int8b areanew = _overlap.boxarea();
          if (areaold != areanew) _props._invalid = true;
          // and finally - put the unmarked shapes back
-         _props._numObjects = unmarkedObjects.size();
+         _props._numObjects = static_cast<unsigned>(unmarkedObjects.size());
          _data = DEBUG_NEW DataT*[_props._numObjects];
          QuadsIter j = 0;
          for (typename TObjList::const_iterator DI = unmarkedObjects.begin();

@@ -243,7 +243,7 @@ void parsercmd::TellPreProc::checkEOF()
 
 void parsercmd::TellPreProc::markBOF()
 {
-   _ifdefDepth.push(_ppState.size());
+   _ifdefDepth.push(static_cast<unsigned>(_ppState.size()));
 }
 
 void parsercmd::TellPreProc::ppError(std::string msg, const TpdYYLtype& loc)
@@ -1196,7 +1196,7 @@ int parsercmd::cmdASSIGN::execute()
                }
                else
                {
-                  unsigned maxSize = tstr->value().length();
+                  unsigned maxSize = tstr->length();
                   info << "Invalid index in assign lvalue. Requested: "<< idx << "; Valid: ";
                   if (0 == maxSize)
                      info << " none (empty list)";
@@ -1346,18 +1346,18 @@ int parsercmd::cmdLISTADD::stringExec(telldata::TtString* strtarget)
    assert(telldata::tn_string == op->get_type());
    std::string istr = static_cast<telldata::TtString*>(op)->value();
    std::string wstr = strtarget->value();
-   dword idx = getIndex(wstr.length());
+   dword idx = getIndex(strtarget->length());
    delete(op);
    //
    if (!_prefix) idx++;
-   if (wstr.length() == idx)
+   if (strtarget->length() == idx)
       wstr.append(istr);
-   else if (wstr.length() > idx)
+   else if (strtarget->length() > idx)
       wstr.insert(idx,istr);
    else
    {
       std::stringstream info;
-      unsigned maxSize = wstr.length();
+      unsigned maxSize = strtarget->length();
       info << "Runtime error. Invalid index in list insert. Requested: "<< idx << "; Valid: ";
       if (0 == maxSize)
          info << " none (empty list)";
@@ -1481,18 +1481,18 @@ int parsercmd::cmdLISTSUB::listExec(telldata::TtList* _listarg)
 
 int parsercmd::cmdLISTSUB::stringExec(telldata::TtString* strtarget)
 {
-   std::string wstr = strtarget->value();
    dword idx;
    // find the index
    if      ((!_index) && ( _prefix)) // first in the list
       idx = 0;
    else if ((!_index) && (!_prefix)) // last in the list
-      idx = wstr.length() - 1;
+      idx = strtarget->length() - 1;
    else                              // get the index from the operand stack
       idx = getIndexValue();
    //
-   if ( (!_opstackerr) && ((0 <= idx) && (idx < wstr.length())) )
+   if ( (!_opstackerr) && ((0 <= idx) && (idx < strtarget->length())) )
    {
+      std::string wstr = strtarget->value();
       char wch[2];
       wch[0] = wstr[idx];
       wch[1] = 0x0;
@@ -1504,7 +1504,7 @@ int parsercmd::cmdLISTSUB::stringExec(telldata::TtString* strtarget)
    else
    {
       std::stringstream info;
-      unsigned maxSize = wstr.length();
+      unsigned maxSize = strtarget->length();
       info << "Runtime error. Invalid index in list reduce. Requested: "<< idx << "; Valid: ";
       if (0 == maxSize)
          info << " none (empty list)";
@@ -1560,8 +1560,8 @@ int parsercmd::cmdLISTSLICE::stringExec(telldata::TtString* strtarget)
    TELL_DEBUG(cmdLISTSLICE);
    dword idxB, idxE;
    std::string wstr = strtarget->value();
-   bool idxerrors = getIndexes(wstr.length(), idxB, idxE);
-   if ((!idxerrors) && ((0 <= idxB) && (idxB < wstr.length())) && ((0 <= idxE) && (idxE < wstr.length())))
+   bool idxerrors = getIndexes(strtarget->length(), idxB, idxE);
+   if ((!idxerrors) && ((0 <= idxB) && (idxB < strtarget->length())) && ((0 <= idxE) && (idxE < wstr.length())))
    {
       dword wlen = idxE - idxB;
       char* wch = DEBUG_NEW char[wlen];
@@ -1579,7 +1579,7 @@ int parsercmd::cmdLISTSLICE::stringExec(telldata::TtString* strtarget)
    else
    {
       std::stringstream info;
-      unsigned maxSize = wstr.length();
+      unsigned maxSize = strtarget->length();
       info << "Runtime error. Invalid index in list slice. Requested: ["<< idxB << " - " << idxE << "]; Valid: ";
       if (0 == maxSize)
          info << " none (empty list)";
@@ -1667,7 +1667,7 @@ int parsercmd::cmdPUSH::execute()
             else
             {
                std::stringstream info;
-               unsigned maxSize = wstr.length();
+               unsigned maxSize = static_cast<telldata::TtString*>(_var)->length();
                info << "Runtime error. Invalid index. Requested: "<< idx << "; Valid: ";
                if (0 == maxSize)
                   info << " none (empty list)";
@@ -1749,7 +1749,7 @@ telldata::TellVar* parsercmd::cmdSTRUCT::getList()
 {
    telldata::typeID comptype = (*_arg)() & ~telldata::tn_listmask;
    telldata::TtList *pl = DEBUG_NEW telldata::TtList(comptype);
-   unsigned llength = _arg->child().size();
+   unsigned llength = static_cast<unsigned>(_arg->child().size());
    pl->reserve(llength);
    telldata::TellVar  *p;
    for (unsigned i = 0; i < llength; i++) {
@@ -2159,7 +2159,7 @@ parsercmd::cmdFUNC* parsercmd::cmdBLOCK::addUSERFUNCDECL(FuncDeclaration*, TpdYY
    return NULL;
 }
 
-bool parsercmd::cmdBLOCK::addCALLBACKDECL(std::string name, cmdCALLBACK* decl, TpdYYLtype loc)
+bool parsercmd::cmdBLOCK::addCALLBACKDECL(std::string name, cmdCALLBACK* decl, TpdYYLtype /*loc*/)
 {
    TELL_DEBUG(addCALLBACKDECL);
    if ( _lclFuncMAP.end() == _lclFuncMAP.find(name) )
@@ -2291,7 +2291,7 @@ bool parsercmd::cmdBLOCK::checkDbSortState(DbSortState needsDbResort)
    else return true;
 }
 
-parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getLocalFuncBody(const char* fn, telldata::argumentQ* amap) const
+parsercmd::cmdSTDFUNC* parsercmd::cmdBLOCK::getLocalFuncBody(const char* fn, telldata::argumentQ* amap) const
 {
    // Roll back the BlockSTACK until name is found. return NULL otherwise
    typedef BlockSTACK::const_iterator BS;
@@ -2312,7 +2312,7 @@ parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getLocalFuncBody(const char* f
 }
 
 //=============================================================================
-parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
+parsercmd::cmdSTDFUNC* parsercmd::cmdBLOCK::getFuncBody
                                         (const char* fn, telldata::argumentQ* amap, std::string& errmsg) const
 {
    cmdSTDFUNC *fbody = NULL;
@@ -2402,7 +2402,7 @@ parsercmd::cmdSTDFUNC* const parsercmd::cmdBLOCK::getFuncBody
    return fbody;
 }
 
-parsercmd::cmdSTDFUNC*  const parsercmd::cmdBLOCK::getIntFuncBody(std::string funcName) const
+parsercmd::cmdSTDFUNC* parsercmd::cmdBLOCK::getIntFuncBody(std::string funcName) const
 {
    // retrieve the body of funcName
    FunctionMAP::const_iterator MM = _internalFuncMap.find(funcName);
@@ -2561,7 +2561,7 @@ int parsercmd::cmdSTDFUNC::argsOK(telldata::argumentQ* amap, bool& strict)
 // likely undefined. To prevent this we need better checks during the function definition
 // parsing
    strict = true;
-   unsigned unmapchedArgs = amap->size();
+   unsigned unmapchedArgs = static_cast<unsigned>(amap->size());
    if (unmapchedArgs != _arguments->size()) return -1;
    telldata::argumentQ UnknownArgsCopy;
    // :) - some fun here, but it might be confusing - '--' postfix operation is executed
@@ -2638,7 +2638,7 @@ NameList* parsercmd::cmdSTDFUNC::callingConv(const telldata::typeMAP* lclTypeDef
 {
    NameList* argtypes = DEBUG_NEW NameList();
    argtypes->push_back(telldata::echoType(gettype(), lclTypeDef));
-   int argnum = _arguments->size();
+   int argnum = static_cast<unsigned>(_arguments->size());
    for (int i = 0; i != argnum; i++)
       argtypes->push_back(telldata::echoType((*_arguments)[i]->second->get_type(), lclTypeDef));
    return argtypes;
@@ -2685,7 +2685,7 @@ int parsercmd::cmdFUNC::execute()
    _recursyLevel++;
    // get the arguments from the operands stack and replace the values
    // of the function arguments
-   int i = _arguments->size();
+   int i = static_cast<int>(_arguments->size());
    while (i-- > 0)
    {
       //get the argument name
@@ -3410,7 +3410,7 @@ telldata::typeID parsercmd::Divide(telldata::typeID op1, telldata::typeID op2,
 }
 
 bool parsercmd::StructTypeCheck(telldata::typeID targett,
-                                      telldata::ArgumentID* op2, TpdYYLtype loc)
+                                      telldata::ArgumentID* op2, TpdYYLtype /*loc*/)
 {
    VERIFY(TLUNKNOWN_TYPE((*op2)()));
    const telldata::TType* vartype;
@@ -3443,7 +3443,7 @@ bool parsercmd::ListIndexCheck(telldata::typeID list, TpdYYLtype lloc,
 }
 
 bool parsercmd::ListSliceCheck(telldata::typeID list, TpdYYLtype lloc,
-   telldata::typeID idx, TpdYYLtype iloc, telldata::typeID sidx, TpdYYLtype sloc)
+   telldata::typeID idx, TpdYYLtype iloc, telldata::typeID sidx, TpdYYLtype /*sloc*/)
 {
    if (sidx != telldata::tn_uint)
    {

@@ -159,8 +159,8 @@ namespace clbr
 //      void                  openGlRender(trend::TrendBase&, std::string, CTM&);
       std::string           name()            const {return _name;}
 
-      void                  showError(const std::string& cell, const std::string& error, long number)  {/*TODO*/}
-      bool                  showCluster(const std::string& cell, const std::string& error)             {/*TODO*/ return true;}
+      void                  showError(const std::string& /*cell*/, const std::string& /*error*/, long /*number*/)  {/*TODO*/}
+      bool                  showCluster(const std::string& /*cell*/, const std::string& /*error*/)             {/*TODO*/ return true;}
       void                  drawAll(trend::TrendBase&);
 //      void                  hideAllErrors(trend::TrendBase&);
       const CellMap*        cells() {return &_cells;}

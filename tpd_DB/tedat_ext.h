@@ -52,9 +52,9 @@ namespace laydata
    class TdtPolyEXT : public TdtPoly   
    {
     public:
-                          TdtPolyEXT(const PointVector& plist):TdtPoly(plist), _extInt(0), _extLong(0),  _clientData(NULL) {};
-                          TdtPolyEXT(int4b* plist, unsigned psize):TdtPoly(plist, psize), _extInt(0), _extLong(0),  _clientData(NULL) {};
-                          TdtPolyEXT(InputTdtFile* const tedfile):TdtPoly(tedfile), _extInt(0), _extLong(0),  _clientData(NULL) {};
+                          TdtPolyEXT(const PointVector& plist):TdtPoly(plist), /*_extInt(0),*/ _extLong(0),  _clientData(NULL) {};
+                          TdtPolyEXT(int4b* plist, unsigned psize):TdtPoly(plist, psize), /*_extInt(0),*/ _extLong(0),  _clientData(NULL) {};
+                          TdtPolyEXT(InputTdtFile* const tedfile):TdtPoly(tedfile), /*_extInt(0),*/ _extLong(0),  _clientData(NULL) {};
       virtual            ~TdtPolyEXT() {};
       virtual void        setLong(long extLong);
       virtual long        getLong(void);
@@ -63,7 +63,7 @@ namespace laydata
       virtual void        setClientData(void* clientData);
       virtual void*       getClientData(void);
    private:
-      int                 _extInt;
+//      int                 _extInt;
       long                _extLong;
       std::string         _extString;
       void*               _clientData;
@@ -72,9 +72,9 @@ namespace laydata
    class TdtWireEXT : public TdtWire
    {
     public:
-                          TdtWireEXT(const PointVector& plist, word layno):TdtWire(plist, layno), _extInt(0), _extLong(0),  _clientData(NULL) {};
-                          TdtWireEXT(int4b* plist, unsigned psize, word layno):TdtWire(plist, psize, layno), _extInt(0), _extLong(0),  _clientData(NULL) {};
-                          TdtWireEXT(InputTdtFile* const tedfile): TdtWire(tedfile), _extInt(0), _extLong(0),  _clientData(NULL) {};
+                          TdtWireEXT(const PointVector& plist, word layno):TdtWire(plist, layno), /*_extInt(0),*/ _extLong(0),  _clientData(NULL) {};
+                          TdtWireEXT(int4b* plist, unsigned psize, word layno):TdtWire(plist, psize, layno), /*_extInt(0),*/ _extLong(0),  _clientData(NULL) {};
+                          TdtWireEXT(InputTdtFile* const tedfile): TdtWire(tedfile), /*_extInt(0),*/ _extLong(0),  _clientData(NULL) {};
       virtual            ~TdtWireEXT() {};
       virtual void        setLong(long extLong);
       virtual long        getLong(void);
@@ -83,7 +83,7 @@ namespace laydata
       virtual void        setClientData(void* clientData);
       virtual void*       getClientData(void);
    private:
-      int                 _extInt;
+//      int                 _extInt;
       long                _extLong;
       std::string         _extString;
       void*               _clientData;

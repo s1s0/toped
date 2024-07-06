@@ -168,15 +168,15 @@ END_EVENT_TABLE()
 
 tui::ExternalProcess::ExternalProcess(wxEvtHandler* parent) :
    wxProcess     ( parent       ),
-   _idleTimer    ( this         ),
-   _tes          (         NULL ),
-   _tis          (         NULL )
+   _idleTimer    ( this         )
+//   _tes          (         NULL ),
+//   _tis          (         NULL )
 {
    Redirect();
    _idleTimer.Start(100);
 }
 
-void tui::ExternalProcess::OnTerminate(int pid, int status)
+void tui::ExternalProcess::OnTerminate(int /*pid*/, int /*status*/)
 {
    wxTextInputStream tes(*GetErrorStream());
    if (IsErrorAvailable())
@@ -840,7 +840,7 @@ void tui::TopedFrame::OnExecExt( wxCommandEvent& event )
 //           (wxCommandEventFunction)&ExternalProcess::OnTextEnter);
 //
 
-   int returnCode = wxExecute(extCmd, wxEXEC_ASYNC, _extProc);
+   long returnCode = wxExecute(extCmd, wxEXEC_ASYNC, _extProc);
    if ( 0 == returnCode )
    {
       //Post an event to notify the console, that the external command has exited
@@ -1007,7 +1007,7 @@ void tui::TopedFrame::OnTDTRead(wxCommandEvent& evt)
    else SetStatusText(wxT("Opening aborted"));
 }
 
-void tui::TopedFrame::OnTDTLoadLib(wxCommandEvent& evt)
+void tui::TopedFrame::OnTDTLoadLib(wxCommandEvent& /*event*/)
 {
    SetStatusText(wxT("Loading library..."));
    wxFileDialog dlg2(this, wxT("Select a library to open"), wxT(""), wxT(""),
@@ -1025,7 +1025,7 @@ void tui::TopedFrame::OnTDTLoadLib(wxCommandEvent& evt)
    else SetStatusText(wxT("Loading aborted"));
 }
 
-void tui::TopedFrame::OnTDTUnloadLib(wxCommandEvent& evt)
+void tui::TopedFrame::OnTDTUnloadLib(wxCommandEvent& /*event*/)
 {
    wxString libName(_browsers->tdtSelectedCellName());
 
@@ -1046,7 +1046,7 @@ void tui::TopedFrame::OnTDTUnloadLib(wxCommandEvent& evt)
    delete dlg;
 }
 
-void tui::TopedFrame::OnTELLRead(wxCommandEvent& evt)
+void tui::TopedFrame::OnTELLRead(wxCommandEvent& /*event*/)
 {
    SetStatusText(wxT("Including command file..."));
    wxFileDialog dlg2(this, wxT("Select a script to run"), wxT(""), wxT(""),
@@ -2158,7 +2158,6 @@ void tui::TopedFrame::OnChangeText( wxCommandEvent& WXUNUSED( event ))
    if ((wxID_OK == dlg.ShowModal()) && ((cname = dlg.GetValue()) != wxT("")))
    {
       SetStatusText(wxT("Change text string ..."));
-      wxString ost;
       ost << wxT("changestr(\"") << dlg.GetValue() << wxT("\");");
       Console->parseCommand(ost);
    }

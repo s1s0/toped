@@ -264,7 +264,7 @@ PsExportFile::~PsExportFile()
    _file.close();
 }
 
-void PsExportFile::libraryStart(std::string libname, TpdTime& libtime, real DBU, real UU)
+void PsExportFile::libraryStart(std::string libname, TpdTime& libtime, real /*DBU*/, real /*UU*/)
 {
    _file << "%%!PS-Adobe-2.0 \n"
          << "%%%%Title: " << libname << "\n"
@@ -539,7 +539,7 @@ void PsExportFile::defineFill(std::string pname, const byte* pat)
       if ((0 == i%4) && (i != 31))
          _file << "\n          ";
       char wstr[10];
-      sprintf(wstr, "%02x%02x%02x%02x", pat[4*i+0], pat[4*i+1], pat[4*i+2], pat[4*i+3]);
+      snprintf(wstr, 10, "%02x%02x%02x%02x", pat[4*i+0], pat[4*i+1], pat[4*i+2], pat[4*i+3]);
       _file << wstr;
    }
    _file << "\n      >}\n"

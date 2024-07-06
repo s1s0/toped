@@ -241,7 +241,7 @@ void tui::TechEditorDialog::OnChangeLayType(wxCommandEvent&)
 
 void  tui::TechEditorDialog::OnLayerSelected(wxListEvent& levent)
 {
-   _curSelect = levent.GetIndex();
+   _curSelect = static_cast<int>(levent.GetIndex());
    _layerNumber->SetEditable(false);
    _layerDtype->SetEditable(false);
    static_cast<wxCheckBox*>(FindWindow(tui::DTE_NEWLAYER))->SetValue(false);
@@ -275,7 +275,7 @@ void  tui::TechEditorDialog::updateDialog()
    _layerNumberString.ToULong(&llayNo);
    unsigned long llayTy;
    _layerDtypeString.ToULong(&llayTy);
-   LayerDef layDef(llayNo, llayTy);
+   LayerDef layDef(static_cast<int>(llayNo), static_cast<int>(llayTy));
    layprop::DrawProperties* drawProp;
    if (PROPC->lockDrawProp(drawProp))
    {
@@ -342,7 +342,7 @@ void tui::TechEditorDialog::OnLayListSort(wxListEvent& cmdEvent)
       case 1: _layerList->SortItems(tui::wxListCtrlItemCompare, 1l);break;
       case 2: _layerList->SortItems(tui::wxListCtrlItemCompare, 2l);break;
    }
-   _curSelect = _layerList->FindItem(-1, itemSel);
+   _curSelect = static_cast<int>(_layerList->FindItem(-1, itemSel));
    _layerList->Select(_curSelect, true);
    _layerList->EnsureVisible(_curSelect);
 }
@@ -528,7 +528,7 @@ void tui::LayerListPanel::updateLayerList(const LayerDef& layDef, const wxString
       _layerItems[newItem] = item;
       //
       SortItems(tui::wxListCtrlItemCompare, 0l);
-      curSelect = FindItem(-1, newItem);
+      curSelect = static_cast<int>(FindItem(-1, newItem));
       Select(curSelect, true);
       EnsureVisible(curSelect);
    }
@@ -598,7 +598,7 @@ void tui::LayerListPanel::select(LayerDef layDef, int& curSelect)
    for(LayerItems::const_iterator it = _layerItems.begin(); it != _layerItems.end(); ++it)
       if (layDef == it->second._laydef)
       {
-         curSelect = it->first;
+         curSelect = static_cast<int>(it->first);
          Select(curSelect, true);
       }
 }
@@ -931,14 +931,14 @@ void tui::DefaultLayer::OnLayListSort(wxListEvent& cmdEvent)
       case 1: _layerList->SortItems(tui::wxListCtrlItemCompare, 1l);break;
       case 2: _layerList->SortItems(tui::wxListCtrlItemCompare, 2l);break;
    }
-   _curSelect = _layerList->FindItem(-1, itemSel);
+   _curSelect = static_cast<int>(_layerList->FindItem(-1, itemSel));
    _layerList->Select(_curSelect, true);
    _layerList->EnsureVisible(_curSelect);
 }
 
 void  tui::DefaultLayer::OnLayerSelected(wxListEvent& levent)
 {
-   _curSelect = levent.GetIndex();
+   _curSelect = static_cast<int>(levent.GetIndex());
    FindWindow(wxID_OK)->Enable((!_checkValidity) || (_curSelect != _iniSelect));
 }
 

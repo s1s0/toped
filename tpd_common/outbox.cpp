@@ -225,7 +225,7 @@ void console::ted_log_ctrl::DoLog(wxLogLevel level, const wxChar *msg, time_t ti
    }
 }
 #endif
-void console::ted_log_ctrl::cmdLineLog(wxLogLevel level, const std::string& msg, time_t timestamp)
+void console::ted_log_ctrl::cmdLineLog(wxLogLevel level, const std::string& msg, time_t /*timestamp*/)
 {
    const std::string       cmd_mark   = "=> ";
    const std::string       gui_mark   = ">> ";
@@ -817,7 +817,7 @@ void TpdPost::quitApp(int exitType)
 //
 // Must be reported to wx lads!
 //
-int wxCALLBACK wxListCompareFunction(TmpWxIntPtr item1, TmpWxIntPtr item2, TmpWxIntPtr sortData)
+int wxCALLBACK wxListCompareFunction(TmpWxIntPtr item1, TmpWxIntPtr item2, TmpWxIntPtr /*sortData*/)
 {
    std::string s1 = CmdList->getItemFunc(item1);
    std::string s2 = CmdList->getItemFunc(item2);
@@ -1082,34 +1082,34 @@ bool TpdTime::getStdCTime(wxString& exp) {
    src_tmpl.Matches(exp);
    src_tmpl.GetMatch(exp).ToLong(&conversion);
    VERIFY(conversion);
-   broken_time.tm_mday = conversion;
+   broken_time.tm_mday = static_cast<int>(conversion);
    src_tmpl.ReplaceFirst(&exp,wxT(""));
    // get month
    src_tmpl.Matches(exp);
    VERIFY(src_tmpl.GetMatch(exp).ToLong(&conversion));
-   broken_time.tm_mon = conversion - 1;
+   broken_time.tm_mon = static_cast<int>(conversion) - 1;
    src_tmpl.ReplaceFirst(&exp,wxT(""));
    // get year
    VERIFY(src_tmpl.Compile(tmpl4digits));
    src_tmpl.Matches(exp);
    VERIFY(src_tmpl.GetMatch(exp).ToLong(&conversion));
-   broken_time.tm_year = conversion - 1900;
+   broken_time.tm_year = static_cast<int>(conversion) - 1900;
    src_tmpl.ReplaceFirst(&exp,wxT(""));
    // now the time - first hour
    VERIFY(src_tmpl.Compile(tmpl2digits));
    src_tmpl.Matches(exp);
    VERIFY(src_tmpl.GetMatch(exp).ToLong(&conversion));
-   broken_time.tm_hour = conversion;
+   broken_time.tm_hour = static_cast<int>(conversion);
    src_tmpl.ReplaceFirst(&exp,wxT(""));
    // minutes
    src_tmpl.Matches(exp);
    VERIFY(src_tmpl.GetMatch(exp).ToLong(&conversion));
-   broken_time.tm_min = conversion;
+   broken_time.tm_min = static_cast<int>(conversion);
    src_tmpl.ReplaceFirst(&exp,wxT(""));
    // and seconds
    src_tmpl.Matches(exp);
    VERIFY(src_tmpl.GetMatch(exp).ToLong(&conversion));
-   broken_time.tm_sec = conversion;
+   broken_time.tm_sec = static_cast<int>(conversion);
    src_tmpl.ReplaceFirst(&exp,wxT(""));
    //AM-PM
    VERIFY(src_tmpl.Compile(tmplAmPm));

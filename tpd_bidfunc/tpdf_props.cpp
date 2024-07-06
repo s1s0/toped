@@ -551,7 +551,7 @@ int tellstdfunc::stdHIDELAYERS::execute()
 }
 
 //=============================================================================
-tellstdfunc::stdHIDECELLMARK::stdHIDECELLMARK(telldata::typeID retype, bool eor) :
+tellstdfunc::stdHIDECELLMARK::stdHIDECELLMARK(telldata::typeID retype, bool /*eor*/) :
       cmdSTDFUNC(DEBUG_NEW parsercmd::ArgumentLIST,retype,true)
 {
    _arguments->push_back(DEBUG_NEW ArgumentTYPE("", DEBUG_NEW telldata::TtBool()));

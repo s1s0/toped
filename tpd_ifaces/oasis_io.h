@@ -446,9 +446,11 @@ namespace Oasis {
          virtual void         convertPrep(const NameList&, bool);
          //----------------------------------------------------------------------
          byte                 getByte();
-         qword                getUnsignedInt(byte);
-         int8b                getInt(byte);
          real                 getReal(char type = -1);
+         dword                getDword() {return static_cast<dword>(getUnsignedInt(4));}
+         int4b                getInt() {return static_cast<int4b>(getLongInt(8));}
+         int8b                getLongInt(byte);
+         qword                getUnsignedInt(byte);
          std::string          getString();
          std::string          getTextRefName(bool);
          std::string          getCellRefName(bool);
@@ -459,6 +461,8 @@ namespace Oasis {
          void                 getProperty1()     { _properties.getProperty1(*this);}
          void                 getProperty2()     { _properties.getProperty2(*this);}
       private:
+//         int8b                getInt(byte);
+//         qword                getUnsignedInt(byte);
          void                 readLibrary();
          float                getFloat();
          double               getDouble();

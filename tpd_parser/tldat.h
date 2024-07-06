@@ -115,7 +115,7 @@ namespace telldata {
       public:
                               TType(typeID ID) : _ID(ID) {}
          virtual             ~TType(){}
-         const typeID         ID() const        {return _ID;}
+         typeID               ID() const        {return _ID;}
          virtual bool         isComposite() const = 0;
       protected:
          typeID               _ID;
@@ -191,10 +191,10 @@ namespace telldata {
    public:
                            TellVar(typeID ID) : _ID(ID), _changeable(2) {}
       virtual TellVar*     selfcopy() const = 0;
-      virtual const typeID get_type() const {return _ID;}
+      virtual typeID       get_type() const {return _ID;}
       virtual void         assign(TellVar*) = 0;
-      virtual TellVar*     field_var(char*& fname) {return NULL;}
-      virtual TellVar*     index_var(dword index) {return NULL;}
+      virtual TellVar*     field_var(char*& /*event*/) {return NULL;}
+      virtual TellVar*     index_var(dword /*event*/) {return NULL;}
       virtual TtList*      index_range_var(dword, dword) {return NULL;}
       virtual void         initialize() = 0;
       void                 update_cstat() {if (1 == _changeable) _changeable = 0;}
@@ -294,7 +294,8 @@ namespace telldata {
       virtual void         assign(TellVar*);
       void                 part_assign(dword,TtString*);
       virtual TellVar*     selfcopy() const    {return DEBUG_NEW TtString(_value);}
-      const std::string    value() const       {return _value;};
+      const std::string    value() const       {return _value;}
+      unsigned            length() const     {return static_cast<unsigned>(_value.length());}
    private:
       std::string         _value;
    };
@@ -350,13 +351,13 @@ namespace telldata {
       virtual void         assign(TellVar*);
       bool                 part_assign(dword, dword, const TtList*);
       virtual TellVar*     selfcopy() const  {return DEBUG_NEW TtList(*this);}
-      virtual const typeID get_type() const  {return _ID | tn_listmask;}
+      virtual typeID       get_type() const  {return _ID | tn_listmask;}
       memlist              mlist() const     {return _mlist;}
       void                 add(TellVar* p) {_mlist.push_back(p);}
       void                 reserve(unsigned num) {_mlist.reserve(num);}
       void                 resize(unsigned num, TellVar* initVar);
       void                 reverse()         {std::reverse(_mlist.begin(), _mlist.end());}
-      unsigned             size() const      {return _mlist.size();}
+      unsigned             size() const      {return static_cast<unsigned>(_mlist.size());}
       virtual TellVar*     index_var(dword);
       virtual TtList*      index_range_var(dword, dword);
       bool                 validIndex(dword);
@@ -366,7 +367,7 @@ namespace telldata {
       void                 lunion(telldata::TtList*);
       TellVar*             erase(dword);
       TellVar*             erase(dword, dword);
-      unsigned             size() {return _mlist.size();}
+//      unsigned long        size() {return _mlist.size();}
       virtual             ~TtList();
    private:
       memlist             _mlist;    // the list itself
@@ -399,8 +400,8 @@ namespace telldata {
                            TtLayer(operandSTACK& OPStack);
       virtual TellVar*     selfcopy() const    {return DEBUG_NEW TtLayer(*this);}
       virtual void         assign(TellVar*);
-      const word           num() const             {return _num->value();}
-      const word           typ() const             {return _typ->value();}
+      word                 num() const             {return _num->value();}
+      word                 typ() const             {return _typ->value();}
       LayerDef             value() const           {return LayerDef(_num->value(), _typ->value());}
       void                 set_num(const word num) {_num->_value = num; }
       void                 set_typ(const word typ) {_typ->_value = typ; }
@@ -420,8 +421,8 @@ namespace telldata {
                            TtPnt(operandSTACK& OPStack);
       virtual TellVar*     selfcopy() const    {return DEBUG_NEW TtPnt(*this);}
       virtual void         assign(TellVar*);
-      const real           x() const           {return _x->value();}
-      const real           y() const           {return _y->value();}
+      real                 x() const           {return _x->value();}
+      real                 y() const           {return _y->value();}
       void                 scale(real sf)      {_x->_value *= sf;_y->_value *= sf;};
       void                 set_x(const real x) {_x->_value = x; }
       void                 set_y(const real y) {_y->_value = y; }

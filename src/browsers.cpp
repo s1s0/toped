@@ -161,7 +161,7 @@ void browsers::CellBrowser::showMenu(wxTreeItemId id, const wxPoint& pt)
    PopupMenu(&menu, pt);
 }
 
-void browsers::CellBrowser::onWxOpenCell(wxCommandEvent& event)
+void browsers::CellBrowser::onWxOpenCell(wxCommandEvent& /*event*/)
 {
    wxString cmd;
    cmd << wxT("opencell(\"") << GetItemText(_rbCellID) <<wxT("\");");
@@ -652,7 +652,7 @@ void browsers::CellBrowser::collectChildren(const laydata::TDTHierTree *root,
 }
 
 void browsers::CellBrowser::collectChildren(const ForeignCellTree* root,
-                                            const wxTreeItemId& lroot, bool _hierarchy_view)
+                                            const wxTreeItemId& lroot, bool hier_view)
 {
    const ForeignCellTree* Child= root->GetChild(TARGETDB_LIB);
    wxTreeItemId nroot;
@@ -660,17 +660,17 @@ void browsers::CellBrowser::collectChildren(const ForeignCellTree* root,
 
    while (Child)
    {
-      if (_hierarchy_view)
+      if (hier_view)
       {
          nroot = AppendItem(lroot, wxString(Child->GetItem()->strctName().c_str(), wxConvUTF8));
-         collectChildren(Child, nroot, _hierarchy_view);
+         collectChildren(Child, nroot, hier_view);
       }
       else
       {
          if (!findItem(wxString(Child->GetItem()->strctName().c_str(), wxConvUTF8), temp, GetRootItem()))
          {
             nroot = AppendItem(GetRootItem(), wxString(Child->GetItem()->strctName().c_str(), wxConvUTF8));
-            collectChildren(Child, nroot, _hierarchy_view);
+            collectChildren(Child, nroot, hier_view);
          }
       }
       SortChildren(lroot);
@@ -1230,7 +1230,7 @@ browsers::TDTbrowser::TDTbrowser(wxWindow *parent, wxWindowID id,
    thesizer->SetSizeHints( this );
 }
 
-void browsers::TDTbrowser::onFlatView( wxCommandEvent& event )
+void browsers::TDTbrowser::onFlatView( wxCommandEvent& /*event*/ )
 {
    _hierarchy_view = false;
    _cellFilter->Show(true); //show cell filter for flat view
@@ -1256,7 +1256,7 @@ void browsers::TDTbrowser::onFlatView( wxCommandEvent& event )
 
 }
 
-void browsers::TDTbrowser::onHierView( wxCommandEvent& event )
+void browsers::TDTbrowser::onHierView( wxCommandEvent& /*event*/ )
 {
    _hierarchy_view = true;
    _cellFilter->Show(false); //hide cell filter for hierarchy view
@@ -1364,7 +1364,7 @@ browsers::XdbBrowser::XdbBrowser(   wxWindow *parent,
    thesizer->SetSizeHints( this );
 }
 
-void browsers::XdbBrowser::onFlatView(wxCommandEvent& event)
+void browsers::XdbBrowser::onFlatView(wxCommandEvent& /*event*/)
 {
    if (!_hierarchy_view) return;
    _hierarchy_view = false;
@@ -1381,7 +1381,7 @@ void browsers::XdbBrowser::onFlatView(wxCommandEvent& event)
    _flatButton->SetFont(font);
 }
 
-void browsers::XdbBrowser::onHierView(wxCommandEvent& event)
+void browsers::XdbBrowser::onHierView(wxCommandEvent& /*event*/)
 {
    if (_hierarchy_view) return;
    _hierarchy_view = true;
@@ -1408,9 +1408,9 @@ browsers::browserTAB::browserTAB(wxWindow *parent, wxWindowID id,const wxPoint& 
    _gdsStruct   ( NULL ),
    _cifStruct   ( NULL ),
    _oasStruct   ( NULL ),
-   _drcStruct   ( NULL ),
-   _gdsPageIndex(    0 ),
-   _cifPageIndex(    0 )
+   _drcStruct   ( NULL )
+//   _gdsPageIndex(    0 ),
+//   _cifPageIndex(    0 )
 {
    _tdtStruct = DEBUG_NEW TDTbrowser(this, tui::ID_TPD_CELLTREE);
    AddPage(_tdtStruct, wxT("Cells"));
@@ -1586,7 +1586,7 @@ END_EVENT_TABLE()
 //
 //
 browsers::LayerButton::LayerButton(wxWindow* parent, wxWindowID id,  const wxPoint& pos ,
-                                   const wxSize& size, long style , const wxValidator& validator ,
+                                   const wxSize& size, long style , const wxValidator& /*validator*/ ,
                                    const wxString& name, LayerInfo* layer):wxPanel()
 {
    _layer   = DEBUG_NEW LayerInfo(*layer);
@@ -1734,7 +1734,7 @@ void browsers::LayerButton::onLeftClick(wxMouseEvent &event)
    TpdPost::parseCommand(cmd);
 }
 
-void browsers::LayerButton::onMiddleClick(wxMouseEvent &event)
+void browsers::LayerButton::onMiddleClick(wxMouseEvent& /*event*/)
 {
    wxString cmd;
    cmd << wxT("filllayer({") << _layer->laydef().num() << wxT(", ") << _layer->laydef().typ() << wxT("}, ");
@@ -1743,7 +1743,7 @@ void browsers::LayerButton::onMiddleClick(wxMouseEvent &event)
    TpdPost::parseCommand(cmd);
 }
 
-void browsers::LayerButton::onRightClick(wxMouseEvent& evt)
+void browsers::LayerButton::onRightClick(wxMouseEvent& /*event*/)
 {
    wxMenu menu(GetToolTip()->GetTip());
 //   wxString boza = ;
@@ -1770,9 +1770,9 @@ void browsers::LayerButton::hideLayer(bool hide)
    preparePicture();
 }
 
-void browsers::LayerButton::lockLayer(bool lock)
+void browsers::LayerButton::lockLayer(bool locklay)
 {
-   _locked = lock;
+   _locked = locklay;
    preparePicture();
 }
 
@@ -2172,7 +2172,7 @@ void browsers::ErrorBrowser::onItemRightClick(wxTreeEvent& event)
 //}
 
 
-void browsers::ErrorBrowser::onOpenCell(wxCommandEvent&  evt)
+void browsers::ErrorBrowser::onOpenCell(wxCommandEvent& /*event*/)
 {
    wxString cmd;
    cmd << wxT("opencell(\"") << GetItemText(_rbCellID) <<wxT("\");");
@@ -2180,7 +2180,7 @@ void browsers::ErrorBrowser::onOpenCell(wxCommandEvent&  evt)
 }
 
 
-void browsers::ErrorBrowser::onShowError(wxCommandEvent& vent)
+void browsers::ErrorBrowser::onShowError(wxCommandEvent& /*event*/)
 {
    wxString cmd;
    wxTreeItemId parent = GetItemParent(_rbCellID);
@@ -2201,7 +2201,7 @@ void browsers::ErrorBrowser::onShowError(wxCommandEvent& vent)
    TpdPost::parseCommand(cmd);
 }
 
-void browsers::ErrorBrowser::onShowCluster(wxCommandEvent& event)
+void browsers::ErrorBrowser::onShowCluster(wxCommandEvent& /*event*/)
 {
    wxString cmd;
 
@@ -2312,7 +2312,7 @@ void browsers::DRCBrowser::deleteAllItems(void)
    _errorBrowser->DeleteAllItems();
 }
 
-void   browsers::DRCBrowser::onShowAll(wxCommandEvent& evt)
+void   browsers::DRCBrowser::onShowAll(wxCommandEvent& /*event*/)
 {
    wxString cmd;
 //   wxString cell=wxString(DRCData->topCellName().c_str(),  wxConvUTF8);
@@ -2321,7 +2321,7 @@ void   browsers::DRCBrowser::onShowAll(wxCommandEvent& evt)
    TpdPost::parseCommand(cmd);
 }
 
-void   browsers::DRCBrowser::onHideAll(wxCommandEvent& evt)
+void   browsers::DRCBrowser::onHideAll(wxCommandEvent& /*eveint*/)
 {
    wxString cmd;
    cmd << wxT("drchideallerrors();");
@@ -2335,7 +2335,7 @@ void   browsers::DRCBrowser::onHideAll(wxCommandEvent& evt)
 //   TpdPost::parseCommand(cmd);
 // }
 
-void   browsers::DRCBrowser::onRulesHierarchy(wxCommandEvent& evt)
+void   browsers::DRCBrowser::onRulesHierarchy(wxCommandEvent& /*event*/)
 {
    deleteAllItems();
    showRuleHierarchy();
@@ -2377,7 +2377,7 @@ void browsers::DRCBrowser::showRuleHierarchy()
    DATC->unlockDRC(drcDB);
 }
 
-void browsers::DRCBrowser::onCellsHierarchy(wxCommandEvent& evt)
+void browsers::DRCBrowser::onCellsHierarchy(wxCommandEvent& /*event*/)
 {
    deleteAllItems();
    showCellHierarchy();
@@ -2416,7 +2416,7 @@ void  browsers::DRCBrowser::showCellHierarchy()
    DATC->unlockDRC(drcDB);
 }
 
-void  browsers::DRCBrowser::addRuleCheck( const wxTreeItemId &rootId, std::string name, clbr::DrcRule* check)
+void  browsers::DRCBrowser::addRuleCheck( const wxTreeItemId &rootId, std::string name, clbr::DrcRule* /*check*/)
 {
 //   std::string name = check->ruleCheckName();
    wxTreeItemId  id = _errorBrowser->AppendItem(rootId, wxString(name.c_str(), wxConvUTF8), -1, -1, DEBUG_NEW DRCItemData(ITEM_ERR));

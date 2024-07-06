@@ -401,7 +401,7 @@ laydata::TdtLibDir::~TdtLibDir()
 
 int laydata::TdtLibDir::getLastLibRefNo()
 {
-   return _libdirectory.size();
+   return static_cast<int>(_libdirectory.size());
 }
 
 void laydata::TdtLibDir::addLibrary(TdtLibrary* const lib, word libRef)
@@ -611,7 +611,7 @@ bool laydata::TdtLibDir::TDTcheckread(const std::string filename,
 void laydata::TdtLibDir::relink()
 {
    // relink starting from the back of the library queue
-   for (int i = _libdirectory.size() - 2; i > 0 ; i--)
+   for (int i = static_cast<int>(_libdirectory.size()) - 2; i > 0 ; i--)
    {
       _libdirectory[i]->second->relink(this);
    }
@@ -623,7 +623,7 @@ void laydata::TdtLibDir::relink()
 void laydata::TdtLibDir::reextractHierarchy()
 {
    // parse starting from the back of the library queue
-   for (int i = _libdirectory.size() - 2; i > 0 ; i--)
+   for (int i = static_cast<int>(_libdirectory.size()) - 2; i > 0 ; i--)
    {
       _libdirectory[i]->second->recreateHierarchy(this);
    }

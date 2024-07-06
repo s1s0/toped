@@ -90,7 +90,7 @@ void auxdata::DrcPoly::info(std::ostringstream& ost, real DBU) const
 }
 
 void auxdata::DrcPoly::motionDraw(const layprop::DrawProperties&, CtmQueue& transtack,
-                                 SGBitSet* plst) const
+                                 SGBitSet* /*plst*/) const
 {
    CTM trans = transtack.front();
    PointVector* ptlist = DEBUG_NEW PointVector;
@@ -334,7 +334,7 @@ clbr::DrcCell* clbr::DrcLibrary::registerCellRead(std::string cellname, CTM& cCt
    return cCell;
 }
 
-WordList clbr::DrcLibrary::findSelected(const std::string &cell, TP* p1)
+WordList clbr::DrcLibrary::findSelected(const std::string &/*cell*/, TP* /*p1*/)
 {//TODO
    //TdtDefaultCell* cell = checkCell("drc");
 //   auxdata::DrcRule* theCell = checkCell(cell);

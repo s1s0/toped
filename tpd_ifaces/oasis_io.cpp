@@ -154,7 +154,7 @@ void  Oasis::Table::getTableRecord(OasisInFile& ofn, TableMode ieMode, bool tabl
    switch (_ieMode)
    {
       case tblm_implicit: _index = _nextIndex++; break;
-      case tblm_explicit: _index = ofn.getUnsignedInt(4); break;
+      case tblm_explicit: _index = ofn.getDword(); break;
       default: assert(false);break;
    }
    if (_table.end() != _table.find(_index))
@@ -353,8 +353,8 @@ void Oasis::OasisInFile::inflateCBlock()
    byte compression_type = getUnsignedInt(2);
    if (0 != compression_type)
       exception("Unknown compression type in the CBLOCK (35.3)");
-   dword size_uncompressed = getUnsignedInt(4);
-   dword size_compressed   = getUnsignedInt(4);
+   dword size_uncompressed = getDword();
+   dword size_compressed   = getDword();
    _curCBlock = DEBUG_NEW CBlockInflate(*this , cblockfPos, size_compressed, size_uncompressed);
 }
 //------------------------------------------------------------------------------
@@ -515,7 +515,7 @@ double Oasis::OasisInFile::getDouble()
 //------------------------------------------------------------------------------
 std::string Oasis::OasisInFile::getString(/*Oasis string type check*/)
 {
-   dword   length  = getUnsignedInt(2) ; //string length
+   dword   length  = static_cast<dword>(getUnsignedInt(2)) ; //string length
    char* theString = DEBUG_NEW char[length+1];
 
    rawRead(theString,length);
@@ -563,7 +563,7 @@ qword Oasis::OasisInFile::getUnsignedInt(byte length)
    return result;
 }
 
-int8b Oasis::OasisInFile::getInt(byte length)
+int8b Oasis::OasisInFile::getLongInt(byte length)
 {
    assert((length > 0) && (length < 9));
    const byte  cmask       = 0x7f; // masks the MSB of the byte
@@ -596,7 +596,7 @@ int8b Oasis::OasisInFile::getInt(byte length)
             default: exception("Integer is too big (7.2.3)"); break;
          }
          if (bytecounter > length)
-            exception("Unsigned integer with unexpected length(7.2.3)");
+            exception("Signed integer with unexpected length(7.2.3)");
       }
       bytecounter++;
    } while (bytein & (~cmask));
@@ -616,12 +616,12 @@ real Oasis::OasisInFile::getReal(char type)
       realType = type;
    switch (realType)
    {
-      case 0: numerator   = getUnsignedInt(4); break;
-      case 1: numerator   = getUnsignedInt(4); sign = true; break;
-      case 2: denominator = getUnsignedInt(4); break;
-      case 3: denominator = getUnsignedInt(4); sign = true; break;
-      case 4: numerator   = getUnsignedInt(4); denominator = getUnsignedInt(4); break;
-      case 5: numerator   = getUnsignedInt(4); denominator = getUnsignedInt(4); sign = true; break;
+      case 0: numerator   = getDword(); break;
+      case 1: numerator   = getDword(); sign = true; break;
+      case 2: denominator = getDword(); break;
+      case 3: denominator = getDword(); sign = true; break;
+      case 4: numerator   = getDword(); denominator = getDword(); break;
+      case 5: numerator   = getDword(); denominator = getDword(); sign = true; break;
       case 6: return getFloat();
       case 7: return getDouble();
       default: exception("Unexpected \"real\" type.(7.3.3)");break;
@@ -637,7 +637,7 @@ std::string Oasis::OasisInFile::getTextRefName(bool ref)
 {
    if (ref)
    {
-      dword refnum = getUnsignedInt(4);
+      dword refnum = getDword();
       return _textStrings->getName(refnum);
    }
    else return getString();
@@ -647,7 +647,7 @@ std::string Oasis::OasisInFile::getCellRefName(bool ref)
 {
    if (ref)
    {
-      dword refnum = getUnsignedInt(4);
+      dword refnum = getDword();
       return _cellNames->getName(refnum);
    }
    else return getString();
@@ -942,20 +942,20 @@ void Oasis::Cell::readRectangle(OasisInFile& ofn, ImportDB& iDB)
 
    if ((info & Smask) && (info & Hmask))
       ofn.exception("S&H masks are ON simultaneously in rectangle info byte (25.7)");
-   if (info & Lmask) _mod_layer    = ofn.getUnsignedInt(4);
+   if (info & Lmask) _mod_layer    = ofn.getDword();
    if (info & Dmask) _mod_datatype = ofn.getUnsignedInt(2);
-   if (info & Wmask) _mod_gwidth   = ofn.getUnsignedInt(4);
-   if (info & Hmask) _mod_gheight  = ofn.getUnsignedInt(4);
+   if (info & Wmask) _mod_gwidth   = ofn.getDword();
+   if (info & Hmask) _mod_gheight  = ofn.getDword();
    else if (info & Smask) _mod_gheight  = _mod_gwidth();
    if (info & Xmask)
    {
-      if (md_absolute == _mod_xymode()) _mod_gx = ofn.getInt(8);
-      else /*md_relative*/              _mod_gx = ofn.getInt(8) + _mod_gx();
+      if (md_absolute == _mod_xymode()) _mod_gx = ofn.getInt();
+      else /*md_relative*/              _mod_gx = ofn.getInt() + _mod_gx();
    }
    if (info & Ymask)
    {
-      if (md_absolute == _mod_xymode()) _mod_gy = ofn.getInt(8);
-      else /*md_relative*/              _mod_gy = ofn.getInt(8) + _mod_gy();
+      if (md_absolute == _mod_xymode()) _mod_gy = ofn.getInt();
+      else /*md_relative*/              _mod_gy = ofn.getInt() + _mod_gy();
    }
    if (info & Rmask) readRepetitions(ofn);
 
@@ -999,18 +999,18 @@ void Oasis::Cell::readPolygon(OasisInFile& ofn, ImportDB& iDB)
 
    byte info = ofn.getByte();
 
-   if (info & Lmask) _mod_layer    = ofn.getUnsignedInt(4);
+   if (info & Lmask) _mod_layer    = ofn.getDword();
    if (info & Dmask) _mod_datatype = ofn.getUnsignedInt(2);
    if (info & Pmask) _mod_pplist   = readPointList(ofn);
    if (info & Xmask)
    {
-      if (md_absolute == _mod_xymode()) _mod_gx = ofn.getInt(8);
-      else /*md_relative*/              _mod_gx = ofn.getInt(8) + _mod_gx();
+      if (md_absolute == _mod_xymode()) _mod_gx = ofn.getInt();
+      else /*md_relative*/              _mod_gx = ofn.getInt() + _mod_gx();
    }
    if (info & Ymask)
    {
-      if (md_absolute == _mod_xymode()) _mod_gy = ofn.getInt(8);
-      else /*md_relative*/              _mod_gy = ofn.getInt(8) + _mod_gy();
+      if (md_absolute == _mod_xymode()) _mod_gy = ofn.getInt();
+      else /*md_relative*/              _mod_gy = ofn.getInt() + _mod_gy();
    }
    if (info & Rmask)  readRepetitions(ofn);
 
@@ -1050,20 +1050,20 @@ void Oasis::Cell::readPath(OasisInFile& ofn, ImportDB& iDB)
 
    byte info = ofn.getByte();
 
-   if (info & Lmask) _mod_layer    = ofn.getUnsignedInt(4);
+   if (info & Lmask) _mod_layer    = ofn.getDword();
    if (info & Dmask) _mod_datatype = ofn.getUnsignedInt(2);
-   if (info & Wmask) _mod_pathhw   = ofn.getUnsignedInt(4);
+   if (info & Wmask) _mod_pathhw   = ofn.getDword();
    if (info & Emask) readExtensions(ofn);
    if (info & Pmask) _mod_wplist   = readPointList(ofn);
    if (info & Xmask)
    {
-      if (md_absolute == _mod_xymode()) _mod_gx = ofn.getInt(8);
-      else /*md_relative*/              _mod_gx = ofn.getInt(8) + _mod_gx();
+      if (md_absolute == _mod_xymode()) _mod_gx = ofn.getInt();
+      else /*md_relative*/              _mod_gx = ofn.getInt() + _mod_gx();
    }
    if (info & Ymask)
    {
-      if (md_absolute == _mod_xymode()) _mod_gy = ofn.getInt(8);
-      else /*md_relative*/              _mod_gy = ofn.getInt(8) + _mod_gy();
+      if (md_absolute == _mod_xymode()) _mod_gy = ofn.getInt();
+      else /*md_relative*/              _mod_gy = ofn.getInt() + _mod_gy();
    }
    if (info & Rmask) readRepetitions(ofn);
 
@@ -1133,27 +1133,27 @@ void Oasis::Cell::readTrapezoid(OasisInFile& ofn, ImportDB& iDB, byte type)
 
    byte info = ofn.getByte();
 
-   if (info & Lmask) _mod_layer    = ofn.getUnsignedInt(4);
+   if (info & Lmask) _mod_layer    = ofn.getDword();
    if (info & Dmask) _mod_datatype = ofn.getUnsignedInt(2);
-   if (info & Wmask) _mod_gwidth   = ofn.getUnsignedInt(4);
-   if (info & Hmask) _mod_gheight  = ofn.getUnsignedInt(4);
+   if (info & Wmask) _mod_gwidth   = ofn.getDword();
+   if (info & Hmask) _mod_gheight  = ofn.getDword();
    switch (type)
    {
-      case 1: deltaA = ofn.getUnsignedInt(4);
-              deltaB = ofn.getUnsignedInt(4);break;
-      case 2: deltaA = ofn.getUnsignedInt(4);break;
-      case 3: deltaB = ofn.getUnsignedInt(4);break;
+      case 1: deltaA = ofn.getDword();
+              deltaB = ofn.getDword();break;
+      case 2: deltaA = ofn.getDword();break;
+      case 3: deltaB = ofn.getDword();break;
       default: assert(false); break;
    }
    if (info & Xmask)
    {
-      if (md_absolute == _mod_xymode()) _mod_gx = ofn.getInt(8);
-      else /*md_relative*/              _mod_gx = ofn.getInt(8) + _mod_gx();
+      if (md_absolute == _mod_xymode()) _mod_gx = ofn.getInt();
+      else /*md_relative*/              _mod_gx = ofn.getInt() + _mod_gx();
    }
    if (info & Ymask)
    {
-      if (md_absolute == _mod_xymode()) _mod_gy = ofn.getInt(8);
-      else /*md_relative*/              _mod_gy = ofn.getInt(8) + _mod_gy();
+      if (md_absolute == _mod_xymode()) _mod_gy = ofn.getInt();
+      else /*md_relative*/              _mod_gy = ofn.getInt() + _mod_gy();
    }
    if (info & Rmask) readRepetitions(ofn);
 
@@ -1166,8 +1166,8 @@ void Oasis::Cell::readTrapezoid(OasisInFile& ofn, ImportDB& iDB, byte type)
          for (dword rcnt = 0; rcnt < _mod_repete().bcount(); rcnt++)
          {
             PointVector laypl;
-            int8b p1xr = _mod_gx() + rptpnt[2*rcnt];
-            int8b p1yr = _mod_gy() + rptpnt[2*rcnt+1];
+            int4b p1xr = _mod_gx() + rptpnt[2*rcnt];
+            int4b p1yr = _mod_gy() + rptpnt[2*rcnt+1];
             if (info & Omask)
             {// vertically oriented
                laypl.push_back(TP(p1xr                 , p1yr                          )); // P
@@ -1221,12 +1221,12 @@ void Oasis::Cell::readCTrapezoid(OasisInFile& ofn, ImportDB& iDB)
 
    byte info = ofn.getByte();
 
-   if (info & Lmask) _mod_layer    = ofn.getUnsignedInt(4);
+   if (info & Lmask) _mod_layer    = ofn.getDword();
    if (info & Dmask) _mod_datatype = ofn.getUnsignedInt(2);
-   if (info & Tmask) _mod_trpztype = ofn.getUnsignedInt(4);
+   if (info & Tmask) _mod_trpztype = ofn.getDword();
    if (info & Wmask)
    {
-      _mod_gwidth   = ofn.getUnsignedInt(4);
+      _mod_gwidth   = ofn.getDword();
       if ( (20 == _mod_trpztype())                             ||
            (21 == _mod_trpztype())                               )
       {
@@ -1236,7 +1236,7 @@ void Oasis::Cell::readCTrapezoid(OasisInFile& ofn, ImportDB& iDB)
    }
    if (info & Hmask)
    {
-      _mod_gheight  = ofn.getUnsignedInt(4);
+      _mod_gheight  = ofn.getDword();
       if ( ((16 <= _mod_trpztype()) && (_mod_trpztype() <= 19)) ||
             (22 == _mod_trpztype())                             ||
             (23 == _mod_trpztype())                             ||
@@ -1248,13 +1248,13 @@ void Oasis::Cell::readCTrapezoid(OasisInFile& ofn, ImportDB& iDB)
    }
    if (info & Xmask)
    {
-      if (md_absolute == _mod_xymode()) _mod_gx = ofn.getInt(8);
-      else /*md_relative*/              _mod_gx = ofn.getInt(8) + _mod_gx();
+      if (md_absolute == _mod_xymode()) _mod_gx = ofn.getInt();
+      else /*md_relative*/              _mod_gx = ofn.getInt() + _mod_gx();
    }
    if (info & Ymask)
    {
-      if (md_absolute == _mod_xymode()) _mod_gy = ofn.getInt(8);
-      else /*md_relative*/              _mod_gy = ofn.getInt(8) + _mod_gy();
+      if (md_absolute == _mod_xymode()) _mod_gy = ofn.getInt();
+      else /*md_relative*/              _mod_gy = ofn.getInt() + _mod_gy();
    }
    if (info & Rmask) readRepetitions(ofn);
 
@@ -1303,17 +1303,17 @@ void Oasis::Cell::readText(OasisInFile& ofn, ImportDB& iDB)
 
    byte info = ofn.getByte();
    if (info & Cmask) _mod_text      = ofn.getTextRefName((0 != (info & Nmask)));
-   if (info & Lmask) _mod_tlayer    = ofn.getUnsignedInt(4);
+   if (info & Lmask) _mod_tlayer    = ofn.getDword();
    if (info & Tmask) _mod_tdatatype = ofn.getUnsignedInt(2);
    if (info & Xmask)
    {
-      if (md_absolute == _mod_xymode()) _mod_tx = ofn.getInt(8);
-      else /*md_relative*/              _mod_tx = ofn.getInt(8) + _mod_tx();
+      if (md_absolute == _mod_xymode()) _mod_tx = ofn.getInt();
+      else /*md_relative*/              _mod_tx = ofn.getInt() + _mod_tx();
    }
    if (info & Ymask)
    {
-      if (md_absolute == _mod_xymode()) _mod_ty = ofn.getInt(8);
-      else /*md_relative*/              _mod_ty = ofn.getInt(8) + _mod_ty();
+      if (md_absolute == _mod_xymode()) _mod_ty = ofn.getInt();
+      else /*md_relative*/              _mod_ty = ofn.getInt() + _mod_ty();
    }
    if (info & Rmask) readRepetitions(ofn);
    //
@@ -1376,13 +1376,13 @@ void Oasis::Cell::readReference(OasisInFile& ofn, ImportDB& iDB, bool exma)
          ofn.exception("Bad magnification value (22.10)");
    if (info & Xmask)
    {
-      if (md_absolute == _mod_xymode()) _mod_px = ofn.getInt(8);
-      else /*md_relative*/              _mod_px = ofn.getInt(8) + _mod_px();
+      if (md_absolute == _mod_xymode()) _mod_px = ofn.getInt();
+      else /*md_relative*/              _mod_px = ofn.getInt() + _mod_px();
    }
    if (info & Ymask)
    {
-      if (md_absolute == _mod_xymode()) _mod_py = ofn.getInt(8);
-      else /*md_relative*/              _mod_py = ofn.getInt(8) + _mod_py();
+      if (md_absolute == _mod_xymode()) _mod_py = ofn.getInt();
+      else /*md_relative*/              _mod_py = ofn.getInt() + _mod_py();
    }
 
    if (info & Rmask) readRepetitions(ofn);
@@ -1432,13 +1432,13 @@ void Oasis::Cell::skimRectangle(OasisInFile& ofn)
 
    if ((info & Smask) && (info & Hmask))
       ofn.exception("S&H masks are ON simultaneously in rectangle info byte (25.7)");
-   dword layno       = (info & Lmask) ? (_mod_layer    = ofn.getUnsignedInt(4)) : _mod_layer();
+   dword layno       = (info & Lmask) ? (_mod_layer    = ofn.getDword()) : _mod_layer();
    word  dtype       = (info & Dmask) ? (_mod_datatype = ofn.getUnsignedInt(2)) : _mod_datatype();
    updateContents(layno, dtype);
-   if (info & Wmask) ofn.getUnsignedInt(4);
-   if (info & Hmask) ofn.getUnsignedInt(4);
-   if (info & Xmask) ofn.getInt(8);
-   if (info & Ymask) ofn.getInt(8);
+   if (info & Wmask) ofn.getDword();
+   if (info & Hmask) ofn.getDword();
+   if (info & Xmask) ofn.getLongInt(8);
+   if (info & Ymask) ofn.getLongInt(8);
    if (info & Rmask) readRepetitions(ofn);
 }
 
@@ -1454,12 +1454,12 @@ void Oasis::Cell::skimPolygon(OasisInFile& ofn)
 
    byte info = ofn.getByte();
 
-   dword layno       = (info & Lmask) ? (_mod_layer    = ofn.getUnsignedInt(4)) : _mod_layer();
+   dword layno       = (info & Lmask) ? (_mod_layer    = ofn.getDword()) : _mod_layer();
    word  dtype       = (info & Dmask) ? (_mod_datatype = ofn.getUnsignedInt(2)) : _mod_datatype();
    updateContents(layno, dtype);
    if (info & Pmask) readPointList(ofn);
-   if (info & Xmask) ofn.getInt(8);
-   if (info & Ymask) ofn.getInt(8);
+   if (info & Xmask) ofn.getLongInt(8);
+   if (info & Ymask) ofn.getLongInt(8);
    if (info & Rmask) readRepetitions(ofn);
 }
 
@@ -1477,14 +1477,14 @@ void Oasis::Cell::skimPath(OasisInFile& ofn)
 
    byte info = ofn.getByte();
 
-   dword layno       = (info & Lmask) ? (_mod_layer    = ofn.getUnsignedInt(4)) : _mod_layer();
+   dword layno       = (info & Lmask) ? (_mod_layer    = ofn.getDword()) : _mod_layer();
    word  dtype       = (info & Dmask) ? (_mod_datatype = ofn.getUnsignedInt(2)) : _mod_datatype();
    updateContents(layno, dtype);
-   if (info & Wmask) ofn.getUnsignedInt(4);
+   if (info & Wmask) ofn.getDword();
    if (info & Emask) readExtensions(ofn);
    if (info & Pmask) readPointList(ofn);
-   if (info & Xmask) ofn.getInt(8);
-   if (info & Ymask) ofn.getInt(8);
+   if (info & Xmask) ofn.getLongInt(8);
+   if (info & Ymask) ofn.getLongInt(8);
    if (info & Rmask) readRepetitions(ofn);
 }
 
@@ -1502,20 +1502,20 @@ void Oasis::Cell::skimTrapezoid(OasisInFile& ofn, byte type)
 
    byte info = ofn.getByte();
 
-   dword layno       = (info & Lmask) ? (_mod_layer    = ofn.getUnsignedInt(4)) : _mod_layer();
+   dword layno       = (info & Lmask) ? (_mod_layer    = ofn.getDword()) : _mod_layer();
    word  dtype       = (info & Dmask) ? (_mod_datatype = ofn.getUnsignedInt(2)) : _mod_datatype();
    updateContents(layno, dtype);
-   if (info & Wmask) ofn.getUnsignedInt(4);
-   if (info & Hmask) ofn.getUnsignedInt(4);
+   if (info & Wmask) ofn.getDword();
+   if (info & Hmask) ofn.getDword();
    switch (type)
    {
-      case 1: ofn.getUnsignedInt(4);ofn.getUnsignedInt(4);break;
-      case 2: ofn.getUnsignedInt(4);break;
-      case 3: ofn.getUnsignedInt(4);break;
+      case 1: ofn.getDword();ofn.getDword();break;
+      case 2: ofn.getDword();break;
+      case 3: ofn.getDword();break;
       default: assert(false);break;
    }
-   if (info & Xmask) ofn.getInt(8);
-   if (info & Ymask) ofn.getInt(8);
+   if (info & Xmask) ofn.getLongInt(8);
+   if (info & Ymask) ofn.getLongInt(8);
    if (info & Rmask) readRepetitions(ofn);
 }
 
@@ -1533,14 +1533,14 @@ void Oasis::Cell::skimCTrapezoid(OasisInFile& ofn)
 
    byte info = ofn.getByte();
 
-   dword layno       = (info & Lmask) ? (_mod_layer    = ofn.getUnsignedInt(4)) : _mod_layer();
+   dword layno       = (info & Lmask) ? (_mod_layer    = ofn.getDword()) : _mod_layer();
    word  dtype       = (info & Dmask) ? (_mod_datatype = ofn.getUnsignedInt(2)) : _mod_datatype();
    updateContents(layno, dtype);
-   if (info & Tmask) ofn.getUnsignedInt(4);
-   if (info & Wmask) ofn.getUnsignedInt(4);
-   if (info & Hmask) ofn.getUnsignedInt(4);
-   if (info & Xmask) ofn.getInt(8);
-   if (info & Ymask) ofn.getInt(8);
+   if (info & Tmask) ofn.getDword();
+   if (info & Wmask) ofn.getDword();
+   if (info & Hmask) ofn.getDword();
+   if (info & Xmask) ofn.getLongInt(8);
+   if (info & Ymask) ofn.getLongInt(8);
    if (info & Rmask) readRepetitions(ofn);
 }
 //------------------------------------------------------------------------------
@@ -1556,11 +1556,11 @@ void Oasis::Cell::skimText(OasisInFile& ofn)
 
    byte info = ofn.getByte();
    if (info & Cmask) ofn.getTextRefName((0 != (info & Nmask)));
-   dword layno       = (info & Lmask) ? (_mod_layer    = ofn.getUnsignedInt(4)) : _mod_layer();
+   dword layno       = (info & Lmask) ? (_mod_layer    = ofn.getDword()) : _mod_layer();
    word  dtype       = (info & Dmask) ? (_mod_datatype = ofn.getUnsignedInt(2)) : _mod_datatype();
    updateContents(layno, dtype);
-   if (info & Xmask) ofn.getInt(8);
-   if (info & Ymask) ofn.getInt(8);
+   if (info & Xmask) ofn.getLongInt(8);
+   if (info & Ymask) ofn.getLongInt(8);
    if (info & Rmask) readRepetitions(ofn);
 }
 
@@ -1584,8 +1584,8 @@ void Oasis::Cell::skimReference(OasisInFile& ofn, bool exma)
       if (info & Amask) ofn.getReal();
       if (info & Mmask) ofn.getReal();
    }
-   if (info & Xmask) ofn.getInt(8);
-   if (info & Ymask) ofn.getInt(8);
+   if (info & Xmask) ofn.getLongInt(8);
+   if (info & Ymask) ofn.getLongInt(8);
 
    if (info & Rmask) readRepetitions(ofn);
    _referenceNames.insert(name);
@@ -1864,7 +1864,7 @@ void Oasis::Cell::linkReferences(OasisInFile& ofn)
       else
       {
          char wstr[256];
-         sprintf(wstr," Structure %s is referenced, but not defined!",CRN->c_str() );
+         snprintf(wstr, 256," Structure %s is referenced, but not defined!",CRN->c_str() );
          tell_log(console::MT_WARNING,wstr);
       }
    }
@@ -1919,7 +1919,7 @@ void Oasis::Cell::updateContents(int2b layer, int2b dtype)
 //==============================================================================
 Oasis::PointList::PointList(OasisInFile& ofn, PointListType pltype) : _pltype(pltype)
 {
-   _vcount = ofn.getUnsignedInt(4);
+   _vcount = ofn.getDword();
    _delarr = DEBUG_NEW int4b[2*_vcount];
    switch (_pltype)
    {
@@ -1962,8 +1962,8 @@ void Oasis::PointList::readManhattanH(OasisInFile& ofb)
 {
    for (dword ccrd = 0; ccrd < _vcount; ccrd++)
    {
-      if (ccrd % 2) {_delarr[2*ccrd] = 0            ; _delarr[2*ccrd+1] = ofb.getInt(8);}
-      else          {_delarr[2*ccrd] = ofb.getInt(8); _delarr[2*ccrd+1] = 0;            }
+      if (ccrd % 2) {_delarr[2*ccrd] = 0            ; _delarr[2*ccrd+1] = ofb.getInt();}
+      else          {_delarr[2*ccrd] = ofb.getInt(); _delarr[2*ccrd+1] = 0;            }
    }
 }
 
@@ -1971,8 +1971,8 @@ void Oasis::PointList::readManhattanV(OasisInFile& ofb)
 {
    for (dword ccrd = 0; ccrd < _vcount; ccrd++)
    {
-      if (ccrd % 2) {_delarr[2*ccrd] = ofb.getInt(8); _delarr[2*ccrd+1] = 0;            }
-      else          {_delarr[2*ccrd] = 0            ; _delarr[2*ccrd+1] = ofb.getInt(8);}
+      if (ccrd % 2) {_delarr[2*ccrd] = ofb.getInt(); _delarr[2*ccrd+1] = 0;            }
+      else          {_delarr[2*ccrd] = 0            ; _delarr[2*ccrd+1] = ofb.getInt();}
    }
 }
 
@@ -1984,7 +1984,7 @@ void Oasis::PointList::readManhattanE(OasisInFile& ofb)
    for (dword ccrd = 0; ccrd < _vcount; ccrd++)
    {
       data        = ofb.getUnsignedInt(8);
-      int4b idata = (data >> 2);
+      int4b idata = static_cast<int4b>(data >> 2);
       direction   = (DeltaDirections)(bdata[0] & 0x03);
       switch (direction)
       {
@@ -2005,7 +2005,7 @@ void Oasis::PointList::readOctangular(OasisInFile& ofb)
    for (dword ccrd = 0; ccrd < _vcount; ccrd++)
    {
       data        = ofb.getUnsignedInt(8);
-      int4b idata = (data >> 3);
+      int4b idata = static_cast<int4b>(data >> 3);
       direction   = (DeltaDirections)(bdata[0] & 0x07);
       switch (direction)
       {
@@ -2030,7 +2030,7 @@ void Oasis::PointList::readAllAngle(OasisInFile& ofb)
    }
 }
 
-void Oasis::PointList::readDoubleDelta(OasisInFile& ofb)
+void Oasis::PointList::readDoubleDelta(OasisInFile& /*ofb*/)
 {
    /*@TODO readDoubleDelta*/assert(false);
 }
@@ -2133,7 +2133,7 @@ void Oasis::PointList::calcAllAngle(PointVector& plst, int4b p1x, int4b p1y)
    }
 }
 
-void Oasis::PointList::calcDoubleDelta(PointVector& plst, int4b p1x, int4b p1y)
+void Oasis::PointList::calcDoubleDelta(PointVector& /*plst*/, int4b /*p1x*/, int4b /*p1y*/)
 {
    /*@TODO calcDoubleDelta*/assert(false);
 }
@@ -2178,10 +2178,10 @@ Oasis::Repetitions& Oasis::Repetitions::operator = (const Repetitions& rpts)
 
 void Oasis::Repetitions::readregXY(OasisInFile& ofn)
 {//type 1
-   dword countx = ofn.getUnsignedInt(4) + 2;
-   dword county = ofn.getUnsignedInt(4) + 2;
-   dword stepx  = ofn.getUnsignedInt(4);
-   dword stepy  = ofn.getUnsignedInt(4);
+   dword countx = ofn.getDword() + 2;
+   dword county = ofn.getDword() + 2;
+   dword stepx  = ofn.getDword();
+   dword stepy  = ofn.getDword();
    _bcount  = countx*county;
    _lcarray = DEBUG_NEW int4b[2*_bcount];
    dword p1y = 0;
@@ -2200,8 +2200,8 @@ void Oasis::Repetitions::readregXY(OasisInFile& ofn)
 
 void Oasis::Repetitions::readregX(OasisInFile& ofn)
 {//type 2
-   dword countx = ofn.getUnsignedInt(4) + 2;
-   dword stepx  = ofn.getUnsignedInt(4);
+   dword countx = ofn.getDword() + 2;
+   dword stepx  = ofn.getDword();
    _bcount  = countx;
    _lcarray = DEBUG_NEW int4b[2*_bcount];
    dword p1y = 0;
@@ -2216,8 +2216,8 @@ void Oasis::Repetitions::readregX(OasisInFile& ofn)
 
 void Oasis::Repetitions::readregY(OasisInFile& ofn)
 {//type 3
-   dword county = ofn.getUnsignedInt(4) + 2;
-   dword stepy  = ofn.getUnsignedInt(4);
+   dword county = ofn.getDword() + 2;
+   dword stepy  = ofn.getDword();
    _bcount  = county;
    _lcarray = DEBUG_NEW int4b[2*_bcount];
    dword p1y = 0;
@@ -2232,7 +2232,7 @@ void Oasis::Repetitions::readregY(OasisInFile& ofn)
 
 void Oasis::Repetitions::readvarX(OasisInFile& ofn)
 {//type 4
-   _bcount = ofn.getUnsignedInt(4) + 2;
+   _bcount = ofn.getDword() + 2;
    _lcarray = DEBUG_NEW int4b[2*_bcount];
    int4b p1x = 0;
    int4b p1y = 0;
@@ -2240,7 +2240,7 @@ void Oasis::Repetitions::readvarX(OasisInFile& ofn)
    _lcarray[1] = p1y;
    for (dword pj = 1; pj < _bcount; pj++)
    {
-      p1x = ofn.getUnsignedInt(4);
+      p1x = ofn.getDword();
       _lcarray[2*pj  ] = _lcarray[2*(pj-1)  ] + p1x;
       _lcarray[2*pj+1] = _lcarray[2*(pj-1)+1];
    }
@@ -2248,16 +2248,16 @@ void Oasis::Repetitions::readvarX(OasisInFile& ofn)
 
 void Oasis::Repetitions::readvarXxG(OasisInFile& ofn)
 {//type 5
-   _bcount = ofn.getUnsignedInt(4) + 2;
+   _bcount = ofn.getDword() + 2;
    _lcarray = DEBUG_NEW int4b[2*_bcount];
-   dword grid   = ofn.getUnsignedInt(4);
+   dword grid   = ofn.getDword();
    int4b p1x = 0;
    int4b p1y = 0;
    _lcarray[0] = p1x;
    _lcarray[1] = p1y;
    for (dword pj = 1; pj < _bcount; pj++)
    {
-      p1x = ofn.getUnsignedInt(4);
+      p1x = ofn.getDword();
       _lcarray[2*pj  ] = _lcarray[2*(pj-1)  ] + p1x * grid;
       _lcarray[2*pj+1] = _lcarray[2*(pj-1)+1];
    }
@@ -2265,7 +2265,7 @@ void Oasis::Repetitions::readvarXxG(OasisInFile& ofn)
 
 void Oasis::Repetitions::readvarY(OasisInFile& ofn)
 {//type 6
-   _bcount = ofn.getUnsignedInt(4) + 2;
+   _bcount = ofn.getDword() + 2;
    _lcarray = DEBUG_NEW int4b[2*_bcount];
    int4b p1x = 0;
    int4b p1y = 0;
@@ -2273,7 +2273,7 @@ void Oasis::Repetitions::readvarY(OasisInFile& ofn)
    _lcarray[1] = p1y;
    for (dword pj = 1; pj < _bcount; pj++)
    {
-      p1y = ofn.getUnsignedInt(4);
+      p1y = ofn.getDword();
       _lcarray[2*pj  ] = _lcarray[2*(pj-1)  ];
       _lcarray[2*pj+1] = _lcarray[2*(pj-1)+1] + p1y;
    }
@@ -2281,16 +2281,16 @@ void Oasis::Repetitions::readvarY(OasisInFile& ofn)
 
 void Oasis::Repetitions::readvarYxG(OasisInFile& ofn)
 {//type 7
-   _bcount = ofn.getUnsignedInt(4) + 2;
+   _bcount = ofn.getDword() + 2;
    _lcarray = DEBUG_NEW int4b[2*_bcount];
-   dword grid   = ofn.getUnsignedInt(4);
+   dword grid   = ofn.getDword();
    int4b p1x = 0;
    int4b p1y = 0;
    _lcarray[0] = p1x;
    _lcarray[1] = p1y;
    for (dword pj = 1; pj < _bcount; pj++)
    {
-      p1y = ofn.getUnsignedInt(4);
+      p1y = ofn.getDword();
       _lcarray[2*pj  ] = _lcarray[2*(pj-1)  ];
       _lcarray[2*pj+1] = _lcarray[2*(pj-1)+1] + p1y * grid;
    }
@@ -2298,8 +2298,8 @@ void Oasis::Repetitions::readvarYxG(OasisInFile& ofn)
 
 void Oasis::Repetitions::readregDia2D(OasisInFile& ofn)
 {//type 8
-   dword countn = ofn.getUnsignedInt(4) + 2;
-   dword countm = ofn.getUnsignedInt(4) + 2;
+   dword countn = ofn.getDword() + 2;
+   dword countm = ofn.getDword() + 2;
    int4b nx, ny, mx, my;
    readDelta (ofn, nx, ny);
    readDelta (ofn, mx, my);
@@ -2324,7 +2324,7 @@ void Oasis::Repetitions::readregDia2D(OasisInFile& ofn)
 
 void Oasis::Repetitions::readregDia1D(OasisInFile& ofn)
 {//type 9
-   _bcount = ofn.getUnsignedInt(4) + 2;
+   _bcount = ofn.getDword() + 2;
    _lcarray = DEBUG_NEW int4b[2*_bcount];
    int4b p1x = 0;
    int4b p1y = 0;
@@ -2340,7 +2340,7 @@ void Oasis::Repetitions::readregDia1D(OasisInFile& ofn)
 
 void Oasis::Repetitions::readvarAny(OasisInFile& ofn)
 {//type 10
-   _bcount = ofn.getUnsignedInt(4) + 2;
+   _bcount = ofn.getDword() + 2;
    _lcarray = DEBUG_NEW int4b[2*_bcount];
    int4b p1x = 0;
    int4b p1y = 0;
@@ -2356,9 +2356,9 @@ void Oasis::Repetitions::readvarAny(OasisInFile& ofn)
 
 void Oasis::Repetitions::readvarAnyG(OasisInFile& ofn)
 {//type 11
-   _bcount = ofn.getUnsignedInt(4) + 2;
+   _bcount = ofn.getDword() + 2;
    _lcarray = DEBUG_NEW int4b[2*_bcount];
-   dword grid   = ofn.getUnsignedInt(4);
+   dword grid   = ofn.getDword();
    int4b p1x = 0;
    int4b p1y = 0;
    _lcarray[0] = p1x;
@@ -2383,7 +2383,7 @@ void Oasis::StdProperties::getProperty1(OasisInFile& ofn)
    byte info = ofn.getByte();
 
    std::string pname = (info & Cmask) ?
-                       (info & Nmask) ? (_propName     = ofn.propNames()->getName(ofn.getUnsignedInt(4))) :
+                       (info & Nmask) ? (_propName     = ofn.propNames()->getName(ofn.getDword())) :
                                         (_propName     = ofn.getString()                                ) :
                                          _propName();
    dword numValues   = 0;
@@ -2395,7 +2395,7 @@ void Oasis::StdProperties::getProperty1(OasisInFile& ofn)
    else
    {
       if (15 == (numValues = ((info & Umask) >> 4)))
-         numValues = ofn.getUnsignedInt(2);
+         numValues = static_cast<dword>(ofn.getUnsignedInt(2));
    }
    for (word i = 0; i < numValues; i++)
    {
@@ -2405,13 +2405,13 @@ void Oasis::StdProperties::getProperty1(OasisInFile& ofn)
       switch (propValueType)
       {
          case  8: ofn.getUnsignedInt(8); break;
-         case  9: ofn.getInt(8); break;
+         case  9: ofn.getLongInt(8); break;
          case 10: ofn.getString(); break;// a-string
          case 11: ofn.getString(); break;// b-string
          case 12: ofn.getString(); break;// n-string
-         case 13: ofn.propStrings()->getName(ofn.getUnsignedInt(4)); break;// a-string
-         case 14: ofn.propStrings()->getName(ofn.getUnsignedInt(4)); break;// b-string
-         case 15: ofn.propStrings()->getName(ofn.getUnsignedInt(4)); break;// n-string
+         case 13: ofn.propStrings()->getName(ofn.getDword()); break;// a-string
+         case 14: ofn.propStrings()->getName(ofn.getDword()); break;// b-string
+         case 15: ofn.propStrings()->getName(ofn.getDword()); break;// n-string
          default: ofn.getReal(propValueType); break;
       }
    }
@@ -2430,7 +2430,7 @@ Oasis::PathExtensions::PathExtensions(OasisInFile& ofn, ExtensionTypes exType) :
    {
       case ex_flush     :
       case ex_hwidth    : break;
-      case ex_explicit  : _exEx = ofn.getInt(2); break;
+      case ex_explicit  : _exEx = static_cast<int4b>(ofn.getLongInt(2)); break;
       default: assert(false); break;
    }
 }
@@ -2454,23 +2454,23 @@ void Oasis::readDelta(OasisInFile& ofb, int4b& deltaX, int4b& deltaY)
    byte*             bdata = (byte*)&data;
    if (bdata[0] & 0x01)
    { // g delta 2
-      if (bdata[0] & 0x02) deltaX =-(int4b)(data >> 2);
-      else                 deltaX = (data >> 2);
-      deltaY = ofb.getInt(8);
+      if (bdata[0] & 0x02) deltaX =-static_cast<int4b>(data >> 2);
+      else                 deltaX = static_cast<int4b>(data >> 2);
+      deltaY = ofb.getInt();
    }
    else
    { //g delta 1
       direction = (DeltaDirections)((bdata[0] & 0x0e) >> 1);
       switch (direction)
       {
-         case dr_east     : deltaX = (data >> 4); deltaY = 0          ; break;
-         case dr_north    : deltaX = 0          ; deltaY = (data >> 4); break;
-         case dr_west     : deltaX =-(int4b)(data >> 4); deltaY = 0          ; break;
-         case dr_south    : deltaX = 0          ; deltaY =-(int4b)(data >> 4); break;
-         case dr_northeast: deltaX = (data >> 4); deltaY = (data >> 4); break;
-         case dr_northwest: deltaX =-(int4b)(data >> 4); deltaY = (data >> 4); break;
-         case dr_southeast: deltaX = (data >> 4); deltaY =-(int4b)(data >> 4); break;
-         case dr_southwest: deltaX =-(int4b)(data >> 4); deltaY =-(int4b)(data >> 4); break;
+         case dr_east     : deltaX = static_cast<int4b>(data >> 4); deltaY = 0          ; break;
+         case dr_north    : deltaX = 0                            ; deltaY = static_cast<int4b>(data >> 4); break;
+         case dr_west     : deltaX =-static_cast<int4b>(data >> 4); deltaY = 0          ; break;
+         case dr_south    : deltaX = 0                            ; deltaY =-static_cast<int4b>(data >> 4); break;
+         case dr_northeast: deltaX = static_cast<int4b>(data >> 4); deltaY = static_cast<int4b>(data >> 4); break;
+         case dr_northwest: deltaX =-static_cast<int4b>(data >> 4); deltaY = static_cast<int4b>(data >> 4); break;
+         case dr_southeast: deltaX = static_cast<int4b>(data >> 4); deltaY =-static_cast<int4b>(data >> 4); break;
+         case dr_southwest: deltaX =-static_cast<int4b>(data >> 4); deltaY =-static_cast<int4b>(data >> 4); break;
          default: assert(false); break;
       }
    }

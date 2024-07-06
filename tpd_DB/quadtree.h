@@ -125,7 +125,7 @@ namespace laydata {
                                 QTStoreTmpl(QTreeTmpl<DataT>* trunk) : _trunk(trunk) {};
        void                     put(DataT* shape);
        void                     commit();
-       unsigned                 numObjects()  {return _data.size();}
+       unsigned                 numObjects()  {return static_cast<unsigned>(_data.size());}
    private:
       typedef  std::list<DataT*>    ShapeList;
       ShapeList                 _data;

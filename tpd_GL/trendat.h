@@ -487,7 +487,7 @@ namespace trend {
                            TrxCellRef(std::string, const CTM&, const DBbox&, word);
                            TrxCellRef();
          std::string       name()         {return _name;}
-         real* const       translation()  {return _translation;}
+         real*             translation()  {return _translation;}
          const CTM&        ctm() const    {return _ctm;}
          word              alphaDepth()   {return _alphaDepth;}
          unsigned          cDataCopy(TNDR_GLDATAT*, unsigned&);

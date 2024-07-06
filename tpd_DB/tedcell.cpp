@@ -253,12 +253,12 @@ void laydata::TdtDefaultCell::openGlRender(trend::TrendBase& rend, const CTM& tr
 }
 
 
-void laydata::TdtDefaultCell::motionDraw(trend::TrendBase&, const CTM&, bool active) const
+void laydata::TdtDefaultCell::motionDraw(trend::TrendBase&, const CTM&, bool /*active*/) const
 {
 }
 
 laydata::TDTHierTree* laydata::TdtDefaultCell::hierOut(laydata::TDTHierTree*& Htree,
-                                    TdtCell* parent, CellMap* celldefs, const laydata::TdtLibDir* libdir)
+                                    TdtCell* parent, CellMap* /*celldefs*/, const laydata::TdtLibDir* /*libdir*/)
 {
    return Htree = DEBUG_NEW TDTHierTree(this, parent, Htree);
 }
@@ -272,7 +272,7 @@ bool laydata::TdtDefaultCell::relink(TdtLibDir*)
    return false;
 }
 
-void laydata::TdtDefaultCell::relinkThis(std::string, laydata::CellDefin, laydata::TdtLibDir* libdir)
+void laydata::TdtDefaultCell::relinkThis(std::string, laydata::CellDefin, laydata::TdtLibDir* /*libdir*/)
 {
 }
 

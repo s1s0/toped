@@ -105,9 +105,9 @@ TP TP::operator * (const CTM& op2) const
    int8b Xlongtmp = lround(op2.a() * (real)x() + op2.c() * (real)y() + op2.tx());
    int8b Ylongtmp = lround(op2.b() * (real)x() + op2.d() * (real)y() + op2.ty());
    int4b Xtmp = (Xlongtmp > MAX_INT4B) ? MAX_INT4B :
-                (Xlongtmp < MIN_INT4B) ? MIN_INT4B : Xlongtmp;
+                (Xlongtmp < MIN_INT4B) ? MIN_INT4B : static_cast<int4b>(Xlongtmp);
    int4b Ytmp = (Ylongtmp > MAX_INT4B) ? MAX_INT4B :
-                (Ylongtmp < MIN_INT4B) ? MIN_INT4B : Ylongtmp;
+                (Ylongtmp < MIN_INT4B) ? MIN_INT4B : static_cast<int4b>(Ylongtmp);
    return TP(Xtmp, Ytmp);
 }
 
@@ -116,9 +116,9 @@ TP TP::operator *= (const CTM& op2)
    int8b Xlongtmp = lround(op2.a() * (real)x() + op2.c() * (real)y() + op2.tx());
    int8b Ylongtmp = lround(op2.b() * (real)x() + op2.d() * (real)y() + op2.ty());
    _x = (Xlongtmp > MAX_INT4B) ? MAX_INT4B :
-        (Xlongtmp < MIN_INT4B) ? MIN_INT4B : Xlongtmp;
+        (Xlongtmp < MIN_INT4B) ? MIN_INT4B : static_cast<int4b>(Xlongtmp);
    _y = (Ylongtmp > MAX_INT4B) ? MAX_INT4B :
-        (Ylongtmp < MIN_INT4B) ? MIN_INT4B : Ylongtmp;
+        (Ylongtmp < MIN_INT4B) ? MIN_INT4B : static_cast<int4b>(Ylongtmp);
   return *this;
 }
 

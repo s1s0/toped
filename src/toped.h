@@ -79,8 +79,8 @@ namespace tui {
 //         void                 OnTextEnter(wxCommandEvent& event);
       private:
          wxTimer              _idleTimer;
-         wxTextInputStream*   _tes;
-         wxTextInputStream*   _tis;
+//         wxTextInputStream*   _tes;
+//         wxTextInputStream*   _tis;
          DECLARE_EVENT_TABLE();
    };
    //-----------------------------------------------------------------------------

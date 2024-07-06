@@ -93,11 +93,11 @@ namespace laydata {
       //********************
       //Next set of methods is intended for extension of regular layout data object (i.e. for TdtBoxExt  etc)
       //That is TdtBox etc must assert mistake in overwritten methods.
-      virtual   void       setLong(long extLong) {assert(true);}
+      virtual   void       setLong(long /*extLong*/) {assert(true);}
       virtual   long       getLong(void) {assert(true); return 0;}
-      virtual   void       setString(const std::string &extString) {assert(true);}
+      virtual   void       setString(const std::string& /*extString*/) {assert(true);}
       virtual   std::string getString(void) {assert(true); return "";}
-      virtual   void       setClientData(void* clientData) {assert(true);}
+      virtual   void       setClientData(void* /*clientData*/) {assert(true);}
       virtual   void*      getClientData(void) {assert(true); return NULL;}
       //********************
    protected:
@@ -242,7 +242,7 @@ namespace laydata {
       virtual word         numPoints() const {return 1;};
       virtual bool         pointInside(const TP);
       virtual void         polyCut(PointVector&, ShapeList**) {};
-      virtual void         stretch(int bfactor, ShapeList**) {};
+      virtual void         stretch(int /*bfactor*/, ShapeList**) {};
       virtual PointVector  shape2poly() const {return PointVector();/*return empty list*/}
       virtual PointVector  dumpPoints() const {return PointVector();/*return empty list*/}
       virtual ArrayProps   arrayProps() const {return ArrayProps();}
@@ -309,7 +309,7 @@ namespace laydata {
       virtual word         numPoints() const {return 1;};
       virtual bool         pointInside(const TP);
       virtual void         polyCut(PointVector&, ShapeList**) {};
-      virtual void         stretch(int bfactor, ShapeList**) {};
+      virtual void         stretch(int /*bfactor*/, ShapeList**) {};
       virtual PointVector  shape2poly() const {return PointVector();/*return empty list*/}
       virtual PointVector  dumpPoints() const {return PointVector();/*return empty list*/}
       virtual word         lType() const {return _lmtext;}
@@ -337,7 +337,7 @@ namespace laydata {
       virtual void         vlOverlap(const layprop::DrawProperties&, DBbox&) const;
       virtual Validator*   move(const CTM&, SGBitSet&) {assert(false);return NULL;}
       virtual void         transfer(const CTM&) {assert(false);}
-      virtual TdtData*     copy(const CTM& trans) {assert(false);return NULL;}
+      virtual TdtData*     copy(const CTM& /*trans*/) {assert(false);return NULL;}
 //       TdtCellRef*          getShapeOver(TP);
       virtual void         drawRequest(trend::TrendBase&) const;
       virtual void         drawSRequest(trend::TrendBase&, const SGBitSet*) const;
@@ -350,7 +350,7 @@ namespace laydata {
       virtual word         numPoints() const {return 1;};
       virtual bool         pointInside(const TP);
       virtual void         polyCut(PointVector&, ShapeList**) {};
-      virtual void         stretch(int bfactor, ShapeList**) {};
+      virtual void         stretch(int /*bfactor*/, ShapeList**) {};
       virtual PointVector  shape2poly() const {return PointVector();/*return empty list*/}
       virtual PointVector  dumpPoints() const {return PointVector();/*return empty list*/}
       auxdata::GrcCell*    structure() const {return _structure;}

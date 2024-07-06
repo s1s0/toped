@@ -60,7 +60,7 @@ namespace laydata {
    class WireContour {
       public:
                            WireContour(const int4b*, unsigned, const WireWidth);
-         unsigned          csize()         {return _cdata.size(); } //! return the number of the contour points
+         unsigned          csize()         {return static_cast<unsigned>(_cdata.size()); } //! return the number of the contour points
          unsigned          lsize()         {return _lsize;        } //! return the number of the central line points
          void              getArrayData(int4b*);
          void              getVectorData(PointVector&);

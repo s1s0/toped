@@ -85,7 +85,7 @@ namespace polycross
          _edge(edge), _crossingP(cp->x(), cp->y()) {};
 //         virtual ~CPoint() {delete _cp;}
          virtual VPoint*   follower(bool& direction, bool modify = false);
-         bool              inside(const PointVector&, bool touching = false) {return true;}
+         bool              inside(const PointVector&, bool /*touching = false*/) {return true;}
          char              visited() const {return _visited;}
          void              linkto(CPoint* link) {_link = link;}
          CPoint*           link() const {return _link;}
@@ -166,7 +166,7 @@ namespace polycross
          segmentlist(const PointVector&, byte, bool);
          ~segmentlist();
          polysegment*      operator [](unsigned i) const {return _segs[i];};
-         unsigned          size() const {return _segs.size();};
+         unsigned          size() const {return static_cast<unsigned>(_segs.size());};
          unsigned          normalize(const PointVector&, bool);
          VPoint*           dump_points(bool looped, const segmentlist*);
          BPoint*           insertBindPoint(unsigned segno, const TP* point);
@@ -427,7 +427,7 @@ namespace polycross
          unsigned          poly1seg() { return _poly1seg;};
          const TP*         poly0pnt() const {return _poly0pnt;}
          const TP*         poly1pnt() const {return _poly1pnt;}
-         const real        distance() const {return _distance;};
+         real              distance() const {return _distance;};
       private:
          unsigned          _poly0seg;
          unsigned          _poly1seg;

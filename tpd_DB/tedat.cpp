@@ -618,7 +618,7 @@ laydata::TdtBox::~TdtBox()
 //-----------------------------------------------------------------------------
 laydata::TdtPoly::TdtPoly(const PointVector& plst) : TdtData()
 {
-   _psize = plst.size();
+   _psize = static_cast<unsigned>(plst.size());
    assert(_psize);
    _pdata = DEBUG_NEW int4b[_psize*2];
    unsigned index = 0;
@@ -693,7 +693,7 @@ laydata::Validator* laydata::TdtPoly::move(const CTM& trans, SGBitSet& plst)
       {
          // assign the modified PointVector ONLY if the resulting shape is perfect
          delete [] _pdata;
-         _psize = nshape->size();
+         _psize = static_cast<unsigned>(nshape->size());
          _pdata = DEBUG_NEW int4b[2 * _psize];
          for (unsigned i = 0; i < _psize; i++)
          {
@@ -997,7 +997,7 @@ laydata::TdtPoly::~TdtPoly()
 laydata::TdtWire::TdtWire(const PointVector& plst, WireWidth width) :
       TdtData(), _width(width)
 {
-   _psize = plst.size();
+   _psize = static_cast<unsigned>(plst.size());
    assert(_psize);
    _pdata = DEBUG_NEW int4b[_psize*2];
    for (unsigned i = 0; i < _psize; i++)
@@ -1068,13 +1068,13 @@ float laydata::TdtWire::get_distance(TP p1, TP p2, TP p0)
       // if the segment is parallel to Y axis
       if ( ((p0.y() >= p1.y()) && (p0.y() <= p2.y()))
          ||((p0.y() <= p1.y()) && (p0.y() >= p2.y())) )
-         return fabsf(p0.x() - p1.x());
+         return fabs(p0.x() - p1.x());
       else return -1;
    else if (p1.y() == p2.y())
       // if the segment is parallel to X axis
       if ( ((p0.x() >= p1.x()) && (p0.x() <= p2.x()))
          ||((p0.x() <= p1.x()) && (p0.x() >= p2.x())) )
-         return fabsf(p0.y() - p1.y());
+         return fabs(p0.y() - p1.y());
       else return -1;
    else {
       // segment is not parallel to any axis
@@ -1119,7 +1119,7 @@ laydata::Validator* laydata::TdtWire::move(const CTM& trans, SGBitSet& plst)
       {
          // assign the modified PointVector ONLY if the resulting shape is perfect
          delete [] _pdata;
-         _psize = nshape->size();
+         _psize = static_cast<unsigned>(nshape->size());
          _pdata = DEBUG_NEW int4b[2 * _psize];
          for (unsigned i = 0; i < _psize; i++)
          {
@@ -1957,7 +1957,7 @@ void  laydata::TdtAuxRef::drawRequest(trend::TrendBase& rend) const
    _structure->openGlRender(rend, CTM(), false, false);
 }
 
-void  laydata::TdtAuxRef::drawSRequest(trend::TrendBase& rend, const SGBitSet*) const
+void  laydata::TdtAuxRef::drawSRequest(trend::TrendBase& /*rend*/, const SGBitSet*) const
 {
    // This object is not supposed to be selected.
    assert(false);
@@ -2294,7 +2294,7 @@ void laydata::ValidWire::angles()
 
 void laydata::ValidWire::endSegments()
 {
-   unsigned lastIndex = _plist.size() - 1;
+   unsigned lastIndex = static_cast<unsigned>(_plist.size()) - 1;
    assert(lastIndex > 0);
    if (lastIndex < 2) return;
    TP pA = _plist[0];
@@ -2412,9 +2412,9 @@ laydata::ShapeList* laydata::ValidWire::replacements()
    return shpRecovered;
 }
 
-laydata::ShapeList* laydata::ValidWire::wire2poly(const PointVector& plst, WireWidth width)
+laydata::ShapeList* laydata::ValidWire::wire2poly(const PointVector& plst, WireWidth /*width*/)
 {
-   unsigned lpsize = plst.size();
+   unsigned lpsize = static_cast<unsigned>(plst.size());
    assert(lpsize);
    int4b* lpdata = DEBUG_NEW int4b[lpsize*2];
    for (unsigned i = 0; i < lpsize; i++)
@@ -2570,7 +2570,7 @@ void  laydata::TdtTmpBox::addpoint(TP p)
    }
 }
 
-void  laydata::TdtTmpBox::rmpoint(TP& lp)
+void  laydata::TdtTmpBox::rmpoint(TP& /*lp*/)
 {
    if (NULL != _p2) {delete _p2; _p2 = NULL;}
    if (NULL != _p1) {delete _p1; _p1 = NULL;}

@@ -444,7 +444,7 @@ void tui::LayoutCanvas::viewshift()
 }
 
 
-void tui::LayoutCanvas::OnresizeGL(wxSizeEvent& event) {
+void tui::LayoutCanvas::OnresizeGL(wxSizeEvent& /*event*/) {
 //   // this is also necessary to update the context on some platforms
 //   wxGLCanvas::OnSize(event);
 //    // set GL viewport (not called by wxGLCanvas::OnSize on all platforms...)
@@ -456,7 +456,7 @@ void tui::LayoutCanvas::OnresizeGL(wxSizeEvent& event) {
 }
 
 
-void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& event)
+void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& /*event*/)
 {
    if (!_initialised) return;
    if (_invalidWindow)
@@ -848,7 +848,7 @@ void tui::LayoutCanvas::OnMouseLeftDClick(wxMouseEvent& event)
    wxPostEvent(this, eventMOUSEACCEL);
 }
 
-void tui::LayoutCanvas::OnMouseMiddleUp(wxMouseEvent& event)
+void tui::LayoutCanvas::OnMouseMiddleUp(wxMouseEvent& /*event*/)
 {
    if (DATC->checkActiveCell())
    {
@@ -1154,7 +1154,10 @@ DBbox* tui::LayoutCanvas::zoomIn()
    int8b trX = lround( (3.0*(double)_lpTR.x() + (double)_lpBL.x())/4.0 );
    int8b trY = lround( (3.0*(double)_lpTR.y() + (double)_lpBL.y())/4.0 );
    if ((blX != trX) && (blY != trY))
-      return DEBUG_NEW DBbox( blX, blY, trX, trY);
+      return DEBUG_NEW DBbox( static_cast<int4b>(blX),
+                              static_cast<int4b>(blY),
+                              static_cast<int4b>(trX),
+                              static_cast<int4b>(trY));
    else // i.e. the resulting box is too small - so return the existing one
    {
       tell_log(console::MT_WARNING, "Can't zoom any further");
@@ -1179,7 +1182,10 @@ DBbox* tui::LayoutCanvas::zoomOut()
    trY = (trY > MAX_INT4B) ? MAX_INT4B :
          (trY < MIN_INT4B) ? MIN_INT4B : trY;
 
-   return DEBUG_NEW DBbox( blX, blY, trX, trY);
+   return DEBUG_NEW DBbox( static_cast<int4b>(blX),
+                           static_cast<int4b>(blY),
+                           static_cast<int4b>(trX),
+                           static_cast<int4b>(trY));
 }
 
 DBbox* tui::LayoutCanvas::zoomLeft()
@@ -1193,7 +1199,8 @@ DBbox* tui::LayoutCanvas::zoomLeft()
       blX = MIN_INT4B;
       tell_log(console::MT_WARNING, "Canvas boundary reached");
    }
-   return DEBUG_NEW DBbox( trX ,_lpBL.y(), blX, _lpTR.y());
+   return DEBUG_NEW DBbox( static_cast<int4b>(trX), _lpBL.y(),
+                           static_cast<int4b>(blX), _lpTR.y());
 }
 
 DBbox* tui::LayoutCanvas::zoomRight()
@@ -1207,7 +1214,8 @@ DBbox* tui::LayoutCanvas::zoomRight()
       trX  = MAX_INT4B;
       tell_log(console::MT_WARNING, "Canvas boundary reached");
    }
-   return DEBUG_NEW DBbox( trX ,_lpBL.y(), blX, _lpTR.y());
+   return DEBUG_NEW DBbox( static_cast<int4b>(trX) ,_lpBL.y(),
+                           static_cast<int4b>(blX) , _lpTR.y());
 }
 
 DBbox* tui::LayoutCanvas::zoomUp()
@@ -1221,7 +1229,8 @@ DBbox* tui::LayoutCanvas::zoomUp()
       trY  = MAX_INT4B;
       tell_log(console::MT_WARNING, "Canvas boundary reached");
    }
-   return DEBUG_NEW DBbox(_lpBL.x(), trY, _lpTR.x(), blY);
+   return DEBUG_NEW DBbox(_lpBL.x(), static_cast<int4b>(trY),
+                          _lpTR.x(), static_cast<int4b>(blY));
 }
 
 DBbox* tui::LayoutCanvas::zoomDown()
@@ -1235,7 +1244,8 @@ DBbox* tui::LayoutCanvas::zoomDown()
       blY  = MIN_INT4B;
       tell_log(console::MT_WARNING, "Canvas boundary reached");
    }
-   return DEBUG_NEW DBbox(_lpBL.x(), trY, _lpTR.x(), blY);
+   return DEBUG_NEW DBbox(_lpBL.x(), static_cast<int4b>(trY),
+                          _lpTR.x(), static_cast<int4b>(blY));
 }
 
 tui::LayoutCanvas::~LayoutCanvas()

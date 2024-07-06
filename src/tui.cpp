@@ -127,8 +127,8 @@ void  tui::sgSliderControl::OnScroll(wxScrollEvent& event)
 void tui::sgSliderControl::OnTextEnter(wxCommandEvent& WXUNUSED(event))
 {
    wxString ws = _text->GetValue();
-   long value;
-   ws.ToLong(&value);
+   int value;
+   ws.ToInt(&value);
    _slider->SetValue(value);
    wxCommandEvent sliderEvent(wxEVT_COMMAND_ENTER, GetId());
    sliderEvent.SetInt(value);
@@ -882,7 +882,7 @@ tui::DefineColor::DefineColor(wxWindow *parent, wxWindowID id, const wxString &t
    }
 }
 
-void tui::DefineColor::OnDefineColor(wxCommandEvent& cmdevent)
+void tui::DefineColor::OnDefineColor(wxCommandEvent& /*event*/)
 {
    NameList all_names;
    wxColourData data;
@@ -1393,7 +1393,7 @@ void tui::DefineFill::OnFillNameAdded(wxCommandEvent& WXUNUSED(event))
    }
 }
 
-void tui::DefineFill::OnDefineFill(wxCommandEvent& cmdevent)
+void tui::DefineFill::OnDefineFill(wxCommandEvent& /*event*/)
 {
    DrawFillDef dialog(this, -1, wxT("Define Pattern"), wxDefaultPosition, _current_pattern);
    if (dialog.ShowModal() == wxID_OK)
@@ -1789,7 +1789,7 @@ tui::LineStyleRecord tui::DefineLineStyle::getStyle(const std::string& style_nam
   return style_set->second;
 }
 
-void tui::DefineLineStyle::OnStylePropChanged(wxCommandEvent& event)
+void tui::DefineLineStyle::OnStylePropChanged(wxCommandEvent& /*event*/)
 {
    if ((NULL == _pattern) || (NULL == _width) || (NULL == _patscale))
       return;
@@ -1807,7 +1807,7 @@ void tui::DefineLineStyle::OnStylePropChanged(wxCommandEvent& event)
    FindWindow(IDLS_BTNAPPLY)->Enable(true);
 }
 
-void tui::DefineLineStyle::OnStyleApply(wxCommandEvent& event)
+void tui::DefineLineStyle::OnStyleApply(wxCommandEvent& /*event*/)
 {
 
    wxString s_name      = _styleList->GetStringSelection();
@@ -1979,7 +1979,7 @@ tui::NameCboxList::NameCboxList(wxWindow* parent, wxWindowID id, wxPoint pnt, wx
    _laypanel = DEBUG_NEW tui::NameCboxRecords(this, wxPoint(0,line_height), panelsz, inlays, all_strings, line_height, drawProp);
    SetTargetWindow(_laypanel); // trget scrollbar window
    if (inlays.size() > (unsigned) sz.GetHeight() / (line_height + 5))
-      SetScrollbars(  0, (line_height+5),  0, inlays.size() );
+      SetScrollbars(  0, (line_height+5),  0, static_cast<int>(inlays.size()) );
 }
 
 void tui::NameCboxList::OnSize( wxSizeEvent &WXUNUSED(event) )
@@ -2042,7 +2042,7 @@ void tui::NameCbox3List::OnSize( wxSizeEvent &WXUNUSED(event) )
 
 //==========================================================================
 tui::NameEboxRecords::NameEboxRecords( wxWindow *parent, wxPoint pnt, wxSize sz,
-            const LayerDefList& inlays, wxArrayString& all_strings, int row_height, const layprop::DrawProperties* drawProp)
+            const LayerDefList& inlays, wxArrayString& /*all_strings*/, int row_height, const layprop::DrawProperties* drawProp)
             : wxPanel(parent, wxID_ANY, pnt, sz), _drawProp(drawProp)
 {
    word rowno = 0;
@@ -2116,7 +2116,7 @@ tui::NameEboxList::NameEboxList(wxWindow* parent, wxWindowID id, wxPoint pnt, wx
    _laypanel = DEBUG_NEW tui::NameEboxRecords(this, wxPoint(0,line_height), panelsz, inlays, all_strings, line_height, drawProp);
    SetTargetWindow(_laypanel); // trget scrollbar window
    if (inlays.size() > (unsigned) sz.GetHeight() / (line_height + 5))
-      SetScrollbars(  0, (line_height+5),  0, inlays.size() );
+      SetScrollbars(  0, (line_height+5),  0, static_cast<int>(inlays.size()) );
 }
 
 void tui::NameEboxList::OnSize( wxSizeEvent &WXUNUSED(event) )
@@ -2135,7 +2135,7 @@ void tui::NameEboxList::OnSize( wxSizeEvent &WXUNUSED(event) )
 
 //==========================================================================
 tui::NameEbox3Records::NameEbox3Records( wxWindow *parent, wxPoint pnt, wxSize sz,
-            const LayerDefList& inlays, wxArrayString& all_strings, int row_height, const layprop::DrawProperties* drawProp)
+            const LayerDefList& inlays, wxArrayString& /*all_strings*/, int row_height, const layprop::DrawProperties* drawProp)
             : wxPanel(parent, wxID_ANY, pnt, sz), _drawProp(drawProp)
 {
    _gdsLayMap= DATC->secureGdsLayMap(_drawProp, false);
@@ -2220,7 +2220,7 @@ tui::nameEbox3List::nameEbox3List(wxWindow* parent, wxWindowID id, wxPoint pnt, 
    _laypanel = DEBUG_NEW tui::NameEbox3Records(this, wxPoint(0,line_height), panelsz, inlays, all_strings, line_height, drawProp);
    SetTargetWindow(_laypanel); // target scrollbar window
    if (inlays.size() > (unsigned) sz.GetHeight() / (line_height + 5))
-      SetScrollbars(  0, (line_height+5),  0, inlays.size() );
+      SetScrollbars(  0, (line_height+5),  0, static_cast<int>(inlays.size()) );
 }
 
 void tui::nameEbox3List::OnSize( wxSizeEvent &WXUNUSED(event) )
@@ -2283,7 +2283,7 @@ tui::cadenceConvert::cadenceConvert(wxFrame *parent, wxWindowID id, const wxStri
    topSizer->SetSizeHints( this );
 }
 
-void  tui::cadenceConvert::onDisplayAdd(wxCommandEvent& evt)
+void  tui::cadenceConvert::onDisplayAdd(wxCommandEvent& /*event*/)
 {
    wxFileDialog dlg(this, wxT("Select a display file"), wxT(""), wxT(""),
       wxT("Display files (*.drf)|*.drf|All files(*.*)|*.*"),
@@ -2296,7 +2296,7 @@ void  tui::cadenceConvert::onDisplayAdd(wxCommandEvent& evt)
    }
 }
 
-void  tui::cadenceConvert::onTechAdd(wxCommandEvent& evt)
+void  tui::cadenceConvert::onTechAdd(wxCommandEvent& /*event*/)
 {
    wxFileDialog dlg(this, wxT("Select a tech file"), wxT(""), wxT(""),
       wxT("All files(*.*)|*.*"),
@@ -2309,7 +2309,7 @@ void  tui::cadenceConvert::onTechAdd(wxCommandEvent& evt)
    }
 }
 
-void  tui::cadenceConvert::onOutputFile(wxCommandEvent& evt)
+void  tui::cadenceConvert::onOutputFile(wxCommandEvent& /*event*/)
 {
    wxFileDialog dlg(this, wxT("Select output tell file"), wxT(""), wxT(""),
       wxT("tell files (*.tll)|*.tll|All files(*.*)|*.*"),
@@ -2322,9 +2322,9 @@ void  tui::cadenceConvert::onOutputFile(wxCommandEvent& evt)
    }
 }
 
-void ShowOutput(const wxString& cmd          ,
+void ShowOutput(const wxString& /*cmd*/          ,
                 const wxArrayString& output  ,
-                const wxString& title         )
+                const wxString& /*title*/         )
 {
     size_t count = output.GetCount();
     if ( !count )
@@ -2334,7 +2334,7 @@ void ShowOutput(const wxString& cmd          ,
        tell_log(console::MT_INFO, output[n]);
     }
 }
-void tui::cadenceConvert::onConvert(wxCommandEvent& evt)
+void tui::cadenceConvert::onConvert(wxCommandEvent& /*event*/)
 {
    if (_displayList->IsEmpty() || _techList->IsEmpty())
    {
@@ -2368,7 +2368,7 @@ void tui::cadenceConvert::onConvert(wxCommandEvent& evt)
       tell_log(console::MT_INFO, str);
 
       wxArrayString output, errors;
-      int code = wxExecute(str, output, errors);
+      long code = wxExecute(str, output, errors);
       if ( code != -1 )
       {
          ShowOutput(str, output, _T("Output"));
@@ -3035,7 +3035,7 @@ void tui::TopedPropertySheets::CanvasPSheet::update(wxCommandEvent& evt)
 }
 
 //Return brush for corresponding color and filling 
-wxBrush* tui::makeBrush(const byte* ifill, const layprop::tellRGB col)
+wxBrush* tui::makeBrush(const byte* ifill, const layprop::tellRGB /*col*/)
 {
    byte ptrn[128];
    tllFill2XBM(ifill, ptrn);
@@ -3100,7 +3100,7 @@ unsigned tui::makePenDash(word pattern, byte scale, wxDash*& dashes)
    // So if we have odd number of dashes, then obviously we start and
    // finish with ones, so the leading and trailing dashes are reduced to
    // a single one.
-   unsigned numElements = elements.size();
+   unsigned numElements = static_cast<unsigned>(elements.size());
    if (numElements % 2)
       elements[0] += elements[--numElements];
    dashes = DEBUG_NEW wxDash[numElements];

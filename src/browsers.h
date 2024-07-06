@@ -389,8 +389,8 @@ namespace browsers
          XdbBrowser*         _oasStruct;
          TDTbrowser*         _tdtStruct;
          DRCBrowser*         _drcStruct;
-         int                 _gdsPageIndex;
-         int                 _cifPageIndex;
+//         int                 _gdsPageIndex;
+//         int                 _cifPageIndex;
          LayerBrowser*       _layers;
          DECLARE_EVENT_TABLE();
    };

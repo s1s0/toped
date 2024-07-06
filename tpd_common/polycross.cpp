@@ -132,7 +132,7 @@ bool polycross::pointInside(const TP* cp, const PointVector& plist, bool touchin
 {
    TP p0, p1;
    byte cc = 0;
-   unsigned size = plist.size();
+   unsigned size = static_cast<unsigned>(plist.size());
    for (unsigned i = 0; i < size ; i++)
    {
       p0 = plist[i]; p1 = plist[(i+1) % size];
@@ -477,8 +477,8 @@ polycross::CPoint* polycross::polysegment::insertCrossPoint(const TP* pnt) {
 unsigned polycross::polysegment::normalize(const TP* p1, const TP* p2)
 {
    _lP = p1; _rP = p2;
-   unsigned numcross = _crossPoints.size();
-   if (_crossPoints.size() > 1)
+   unsigned numcross = static_cast<unsigned>(_crossPoints.size());
+   if (numcross > 1)
    {
       SortLine functor(p1,p2);
       _crossPoints.sort(functor);
@@ -573,7 +573,7 @@ polycross::polysegment::~polysegment()
 
 polycross::segmentlist::segmentlist(const PointVector& plst, byte plyn, bool looped) {
    _originalPL = &plst;
-   unsigned plysize = plst.size();
+   unsigned plysize = static_cast<unsigned>(plst.size());
    if (!looped)
    {
       plysize--;
@@ -601,7 +601,7 @@ polycross::segmentlist::~segmentlist() {
 
 unsigned polycross::segmentlist::normalize(const PointVector& plst, bool looped) {
    unsigned numcross = 0;
-   unsigned plysize = plst.size();
+   unsigned plysize = static_cast<unsigned>(plst.size());
    if (looped)
       for (unsigned i = 0; i < plysize; i++)
          numcross += _segs[i]->normalize(&(plst[i]),&(plst[(i+1)%plysize]));
@@ -785,15 +785,15 @@ TP* polycross::TEvent::oneLineSegments(polysegment* above, polysegment* below, Y
       // (above->lP(), below->rP()
       unsigned indxRP, indxLP, dummy;
       bool direction = true;
-      int numv;
+      unsigned numv;
       //
       const PointVector* aboveP = sweepL->locateOriginals(above , dummy, indxLP, direction);
-      numv = aboveP->size();
+      numv = static_cast<unsigned>(aboveP->size());
       if (!direction) indxLP = (indxLP+1) % numv;
       else (0==indxLP) ? indxLP = numv-1 : indxLP--;
 
       const PointVector* belowP = sweepL->locateOriginals(below , indxRP, dummy, direction);
-      numv = belowP->size();
+      numv = static_cast<unsigned>(belowP->size());
       if (direction) indxRP = (indxRP+1) % numv;
       else (0==indxRP) ? indxRP = numv-1 : indxRP--;
 
@@ -810,15 +810,15 @@ TP* polycross::TEvent::oneLineSegments(polysegment* above, polysegment* below, Y
       // (below->lP(), above->rP()
       unsigned indxRP, indxLP, dummy;
       bool direction = true;
-      int numv;
+      unsigned numv;
 
       const PointVector* belowP = sweepL->locateOriginals(below , dummy, indxLP, direction);
-      numv = belowP->size();
+      numv = static_cast<unsigned>(belowP->size());
       if (!direction) indxLP = (indxLP+1) % numv;
       else (0==indxLP) ? indxLP = numv-1 : indxLP--;
 
       const PointVector* aboveP = sweepL->locateOriginals(above , indxRP, dummy, direction);
-      numv = aboveP->size();
+      numv = static_cast<unsigned>(aboveP->size());
       if (direction) indxRP = (indxRP+1) % numv;
       else (0==indxRP) ? indxRP = numv-1 : indxRP--;
 
@@ -846,7 +846,7 @@ TP* polycross::TEvent::oneLineSegments(polysegment* above, polysegment* below, Y
    bool direction = true;
 
    const PointVector* insideP = sweepL->locateOriginals(inside  , indxRP, indxLP, direction);
-   int numv = insideP->size();
+   unsigned numv = static_cast<unsigned>(insideP->size());
 
    do
    {
@@ -1655,8 +1655,8 @@ int polycross::YQ::sCompare(const polysegment* seg0, const polysegment* seg1)
    const PointVector* plist0 = locateOriginals(seg0, indx0RP, dummy, dir0);
    const PointVector* plist1 = locateOriginals(seg1, indx1RP, dummy, dir1);
    unsigned indx0RNP, indx1RNP;
-   int numv0 = plist0->size();
-   int numv1 = plist1->size();
+   unsigned numv0 = static_cast<unsigned>(plist0->size());
+   unsigned numv1 = static_cast<unsigned>(plist1->size());
    int loopsentinel = (numv0 > numv1) ? numv0 : numv1;
    // 2. Now loop effectively the same (this) function for every next pair of
    //    segments until they do not coincide
@@ -1698,7 +1698,7 @@ const PointVector* polycross::YQ::locateOriginals(const polysegment* seg,
    const PointVector* plist = (1 == seg->polyNo()) ? opl1() : opl2();
 
    // ... and get the location of the inside segment in that sequence
-   int numv = plist->size();
+   unsigned numv = static_cast<unsigned>(plist->size());
    indxPP = (*(seg->lP()) == (*plist)[seg->edge()]) ? seg->edge() : (seg->edge() + 1) % numv;
    indxNP = (*(seg->rP()) == (*plist)[seg->edge()]) ? seg->edge() : (seg->edge() + 1) % numv;
 
@@ -2009,7 +2009,7 @@ bool polycross::BindCollection::compareSegments(polycross::BindSegment* seg1, po
  */
 bool polycross::BindCollection::obstructed(const BindSegment& segment, const PointVector& obs)
 {
-   unsigned plysize = obs.size();
+   unsigned plysize = static_cast<unsigned>(obs.size());
    int ori1, ori2;
    for (unsigned i = 0; i < plysize; i++)
    {

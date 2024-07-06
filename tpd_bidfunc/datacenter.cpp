@@ -882,7 +882,7 @@ void DataCenter::render()
 }
 
 
-void DataCenter::motionDraw(const CTM& layCTM, TP base, TP newp, bool rubber, const DBlineList repers)
+void DataCenter::motionDraw(const CTM& /*layCTM*/, TP base, TP newp, bool rubber, const DBlineList repers)
 {
    console::ACTIVE_OP currentOp;
    trend::TrendBase* mRenderer = TRENDC->makeMRenderer(currentOp);
@@ -959,7 +959,7 @@ void DataCenter::grcDraw()
    }
 }
 
-void DataCenter::drcCollect(int type, std::string name)
+void DataCenter::drcCollect(int /*type*/, std::string /*name*/)
 {
    clbr::DrcLibrary* drcDB = NULL;
    if (DATC->lockDRC(drcDB))

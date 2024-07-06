@@ -300,7 +300,7 @@ void telldata::TtString::assign(TellVar* value)
 void telldata::TtString::part_assign(dword idx, TtString* rpl)
 {
    std::string wrpl = rpl->value();
-   dword length = wrpl.length();
+   dword length = static_cast<dword>(wrpl.length());
    _value.replace(idx,length,wrpl);
 }
 
@@ -362,7 +362,7 @@ void telldata::TtAuxdata::assign(TellVar* data)
 telldata::TtList::TtList(const telldata::TtList& cobj) : TellVar(cobj.get_type())
 {
    // copy constructor
-   unsigned count = cobj._mlist.size();
+   unsigned count = static_cast<unsigned>(cobj._mlist.size());
    _mlist.resize(count);
    for (unsigned i = 0; i < count; i++)
       _mlist[i] = cobj._mlist[i]->selfcopy();
@@ -371,12 +371,12 @@ telldata::TtList::TtList(const telldata::TtList& cobj) : TellVar(cobj.get_type()
 
 const telldata::TtList& telldata::TtList::operator =(const telldata::TtList& cobj)
 {
-   unsigned count = _mlist.size();
+   unsigned count = static_cast<unsigned>(_mlist.size());
    unsigned i;
    for (i = 0; i < count; i++)
       delete _mlist[i];
    _mlist.clear();
-   count = cobj._mlist.size();
+   count = static_cast<unsigned>(cobj._mlist.size());
    _mlist.reserve(count);
    for (i = 0; i < count; i++)
    {
@@ -491,7 +491,7 @@ void telldata::TtList::resize(unsigned num, TellVar* initVar)
 
 bool telldata::TtList::validIndex(dword index)
 {
-   dword cursize = _mlist.size();
+   dword cursize = static_cast<dword>(_mlist.size());
    if ((0 == cursize) || (index > (cursize - 1))) return false;
    else return true;
 }
@@ -534,7 +534,7 @@ void telldata::TtList::lunion(telldata::TtList* inlist)
 void telldata::TtList::lunion(telldata::TtList* inlist, dword index)
 {
    assert(index >=0); assert(index <= _mlist.size());
-   unsigned oldSize = _mlist.size();
+   unsigned oldSize = static_cast<unsigned>(_mlist.size());
    unsigned newSize = oldSize + inlist->size();
    // avoiding the insert method - looks too dangerous and clunky in this case.
    // see https://code.google.com/p/toped/issues/detail?id=154

@@ -300,7 +300,7 @@ trend::TrxWire::TrxWire(int4b* pdata, unsigned psize, WireWidth width, bool clo)
    }
 }
 
-trend::TrxWire::TrxWire(unsigned psize, const WireWidth width, bool clo) :
+trend::TrxWire::TrxWire(unsigned psize, const WireWidth /*width*/, bool clo) :
    TrxNcvx (NULL, 0),
    _ldata    (NULL   ),
    _lsize    (psize  ),
@@ -998,9 +998,9 @@ trend::TrxTBox::~TrxTBox()
 // TrxTNcvx
 //
 trend::TrxTNcvx::TrxTNcvx(const PointVector& plist, const CTM& rmm) :
-   TrxNcvx( NULL, plist.size()+1)
+   TrxNcvx( NULL, static_cast<unsigned>(plist.size())+1)
 {
-   dword numpnts = plist.size();
+   dword numpnts = static_cast<dword>(plist.size());
    int4b* contData = DEBUG_NEW int4b[2*(numpnts+1)];
    for (word i = 0; i < numpnts; i++)
    {
@@ -1024,9 +1024,9 @@ trend::TrxTNcvx::~TrxTNcvx()
 // TrxTWire
 //
 trend::TrxTWire::TrxTWire(const PointVector& plist, WireWidth width, bool clo, const CTM& rmm) :
-   TrxWire(plist.size()+1, width, clo)
+   TrxWire(static_cast<unsigned>(plist.size())+1, width, clo)
 {
-   dword num_points = plist.size();
+   dword num_points = static_cast<dword>(plist.size());
    assert(0 < num_points);
    laydata::WireContourAux wcontour(plist, width, TP(plist[num_points-1] * rmm));
 

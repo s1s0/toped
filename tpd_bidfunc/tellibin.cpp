@@ -54,7 +54,7 @@ extern const wxEventType         wxEVT_CANVAS_CURSOR;
 int tellstdfunc::stdSPRINTF::argsOK(argumentQ* amap, bool& strict)
 {
    strict = true;
-   unsigned numArgs = amap->size();
+   unsigned numArgs = static_cast<unsigned>(amap->size());
    if (1 > numArgs) return -1; // i.e. error - at least one argument is expected
    telldata::ArgumentID carg((*(*amap)[0]));
    if (telldata::tn_string != carg()) return -1; //i.e. error - first argument must be a string
@@ -540,20 +540,20 @@ int tellstdfunc::replaceNextFstr(std::string& str, telldata::TellVar* val)
       switch (val->get_type())
       {
          case telldata::tn_int    :
-            numChars = sprintf(replacement, formatChars, static_cast<telldata::TtInt*>(val)->value());
+            numChars = snprintf(replacement, 1024, formatChars, static_cast<telldata::TtInt*>(val)->value());
             break;
          case telldata::tn_uint   :
-            numChars = sprintf(replacement, formatChars, static_cast<telldata::TtUInt*>(val)->value());
+            numChars = snprintf(replacement, 1024, formatChars, static_cast<telldata::TtUInt*>(val)->value());
             break;
          case telldata::tn_real   :
-            numChars = sprintf(replacement, formatChars, static_cast<telldata::TtReal*>(val)->value());
+            numChars = snprintf(replacement, 1024, formatChars, static_cast<telldata::TtReal*>(val)->value());
             break;
          case telldata::tn_bool   :
-            numChars = sprintf(replacement, formatChars, static_cast<telldata::TtBool*>(val)->value());
+            numChars = snprintf(replacement, 1024, formatChars, static_cast<telldata::TtBool*>(val)->value());
             break;
          case telldata::tn_string : {
             std::string interStr = static_cast<telldata::TtString*>(val)->value();
-            numChars = sprintf(replacement, formatChars, interStr.c_str());
+            numChars = snprintf(replacement, 1024, formatChars, interStr.c_str());
             break;
          }
          default: assert(false); break;

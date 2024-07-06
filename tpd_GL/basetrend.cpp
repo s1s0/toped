@@ -36,7 +36,7 @@
 // class TrendTV
 //
 trend::TrendTV::TrendTV(TrxCellRef* const refCell, bool filled, bool reusable,
-                   unsigned parray_offset, unsigned iarray_offset) :
+                   unsigned /*parray_offset*/, unsigned /*iarray_offset*/) :
    _refCell             ( refCell         ),
    _num_total_strings   ( 0u              ),
    _filled              ( filled          ),
@@ -462,10 +462,10 @@ trend::TrendRefLay::~TrendRefLay()
 
 unsigned trend::TrendMarks::total_points()
 {
-   return ( _refMarks.size()
-          + _textMarks.size()
-          + _arefMarks.size()
-          );
+   return static_cast<unsigned>(( _refMarks.size()
+                                + _textMarks.size()
+                                + _arefMarks.size()
+                               ));
 }
 //=============================================================================
 //

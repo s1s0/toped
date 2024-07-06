@@ -587,7 +587,7 @@ logicop::SSegment::~SSegment()
 /*!*/
 logicop::stretcher::stretcher(const PointVector& poly, int bfactor) : _poly(poly)
 {
-   unsigned plysize = _poly.size();
+   unsigned plysize = static_cast<unsigned>(_poly.size());
    _segl.reserve(plysize);
    for (unsigned i = 0; i < plysize; i++)
       _segl.push_back(DEBUG_NEW SSegment(_poly[i],_poly[(i+1)%plysize], bfactor ));
@@ -596,7 +596,7 @@ logicop::stretcher::stretcher(const PointVector& poly, int bfactor) : _poly(poly
 
 PointVector* logicop::stretcher::execute()
 {
-   unsigned plysize = _poly.size();
+   unsigned plysize = static_cast<unsigned>(_poly.size());
    PointVector* streched = DEBUG_NEW PointVector();
    for (unsigned i = 0; i < plysize; i++)
    {
@@ -609,7 +609,7 @@ PointVector* logicop::stretcher::execute()
 
 logicop::stretcher::~stretcher()
 {
-   unsigned segsize = _segl.size();
+   unsigned segsize = static_cast<unsigned>(_segl.size());
    for (unsigned i = 0; i < segsize; i++)
       delete _segl[i];
 }
