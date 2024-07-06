@@ -1,0 +1,17 @@
+#
+# build directories
+build/
+backup/
+#
+src/wxcocoa_config.h
+#lex/bison products
+tpd_ifaces/cif_lex.cpp
+tpd_ifaces/cif_lex.hh
+tpd_ifaces/cif_yacc.cpp
+tpd_ifaces/cif_yacc.hh
+tpd_ifaces/cif_yacc.output
+tpd_parser/tell_lex.cpp
+tpd_parser/tell_lex.hh
+tpd_parser/tell_yacc.cpp
+tpd_parser/tell_yacc.hh
+tpd_parser/tell_yacc.output
