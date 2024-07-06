@@ -65,15 +65,26 @@ add_subdirectory(tpd_bidfunc)
 
 #---------------------------------------------------------------------------
 # Packging & install
-file(GLOB TPD_ICONS      "icons/*.png")
+#file(GLOB TPD_ICONS      "ui/*.png")
+set(MACOSX_BUNDLE_ICON_FILE "toped.icns")
+set(WITH_MAC_BUNDLE_NAME "toped")
+set(APP_ICON "${CMAKE_CURRENT_SOURCE_DIR}/toped.icns")
+
 file(GLOB TPD_FONTS      "fonts/*.glf")
 file(GLOB TPD_TLL        "tll/*.tll")
 file(GLOB TPD_RESOURCES  "ui/*")
+file(GLOB TPD_ICONS_16   "icons/16x16/*")
+file(GLOB TPD_ICONS_24   "icons/24x24/*")
+file(GLOB TPD_ICONS_32   "icons/32x32/*")
+file(GLOB TPD_ICONS_48   "icons/48x48/*")
 file(GLOB TPD_UTILS      "user_functions/general/*.tll")
 
-set_source_files_properties( "toped.icns"  PROPERTIES
-                             MACOSX_PACKAGE_LOCATION Resources
-)
+#set_source_files_properties( "toped.icns"  PROPERTIES
+#                             MACOSX_PACKAGE_LOCATION Resources
+#)
+set_source_files_properties(${APP_ICON} PROPERTIES
+                             MACOSX_PACKAGE_LOCATION "Resources")
+
 set_source_files_properties( ${TPD_ICONS} PROPERTIES
                              MACOSX_PACKAGE_LOCATION MacOS/icons
 )
@@ -86,11 +97,21 @@ set_source_files_properties( ${TPD_TLL} PROPERTIES
 set_source_files_properties( ${TPD_RESOURCES} PROPERTIES
                              MACOSX_PACKAGE_LOCATION MacOS/ui
 )
+set_source_files_properties( ${TPD_ICONS_16} PROPERTIES
+                             MACOSX_PACKAGE_LOCATION MacOS/icons/16x16
+)
+set_source_files_properties( ${TPD_ICONS_24} PROPERTIES
+                             MACOSX_PACKAGE_LOCATION MacOS/icons/24x24
+)
+set_source_files_properties( ${TPD_ICONS_32} PROPERTIES
+                             MACOSX_PACKAGE_LOCATION MacOS/icons/32x32
+)
+set_source_files_properties( ${TPD_ICONS_48} PROPERTIES
+                             MACOSX_PACKAGE_LOCATION MacOS/icons/48x48
+)
 set_source_files_properties( ${TPD_UTILS} PROPERTIES
                              MACOSX_PACKAGE_LOCATION MacOS/tll/utils
 )
-set(MACOSX_BUNDLE_ICON_FILE "toped.icns")
-set(WITH_MAC_BUNDLE_NAME "toped")
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/wxcocoa_config.h.cmake ${CMAKE_CURRENT_SOURCE_DIR}/src/wxcocoa_config.h)
 
@@ -104,7 +125,8 @@ add_executable(${PRJ_NAME} MACOSX_BUNDLE
                       src/techeditor.cpp
                       src/toped.cpp
                       src/main.cpp
-                      ${TPD_FONTS} ${TPD_ICONS} ${TPD_TLL} ${TPD_UTILS} ${TPD_RESOURCES}
+                      ${TPD_FONTS} ${TPD_TLL} ${TPD_RESOURCES} ${TPD_UTILS}
+                      ${APP_ICON} ${TPD_ICONS_16} ${TPD_ICONS_24} ${TPD_ICONS_32} ${TPD_ICONS_48}
 )
 
 target_link_libraries(${PRJ_NAME} PUBLIC
@@ -165,4 +187,6 @@ target_include_directories(${PRJ_NAME} PUBLIC
 #set(CPACK_PACKAGE_VERSION_MINOR "99")
 #
 #include(CPACK)
+# NOTE: Don't include the path in MACOSX_BUNDLE_ICON_FILE -- this is
+# the property added to Info.plist
 
