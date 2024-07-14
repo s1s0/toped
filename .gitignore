@@ -1,6 +1,7 @@
 #
 # build directories
 build/
+boza/
 backup/
 #
 src/wxcocoa_config.h
