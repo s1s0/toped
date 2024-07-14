@@ -63,7 +63,7 @@ namespace tui {
    //=============================================================================
    class TpdOglContext : public wxGLContext {
    public:
-                     TpdOglContext(wxGLCanvas*);
+                     TpdOglContext(wxGLCanvas*, wxGLContextAttrs*);
       void           glewContext(LayoutCanvas*);
       void           printStatus() const;
       bool           resizeGL(int, int);
@@ -85,7 +85,7 @@ namespace tui {
    class LayoutCanvas : public wxGLCanvas  {
    public:
                      LayoutCanvas(wxWindow *parent, const wxPoint&,
-                                                const wxSize& , int* attribList);
+                                                const wxSize& , wxGLAttributes attr);
       friend class DrawThread;
       virtual       ~LayoutCanvas();
       void           snapshot(byte*&, word&, word&);
@@ -99,10 +99,10 @@ namespace tui {
    #if !wxCHECK_VERSION(2,9,0)
          return (NULL != _xVisual);
    #else
-         return true;
+         return (nullptr != _glRC);
    #endif
 #else
-         return true;
+         return (nullptr != _glRC);
 #endif
       }
       void           setBlinkInterval(word bi)   {_blinkInterval = bi;}

@@ -154,8 +154,8 @@ wxMutex          tui::DrawThread::_mutex;
 //
 //}
 
-tui::TpdOglContext::TpdOglContext(wxGLCanvas* canvas) :
-   wxGLContext               ( canvas     ),
+tui::TpdOglContext::TpdOglContext(wxGLCanvas* canvas, wxGLContextAttrs* attr) :
+   wxGLContext               ( canvas,nullptr,attr),
    _oglVersion14             ( false      ),
    _oglVersion33             ( false      ),
    _oglExtMultiDrawArrays    ( false      ),
@@ -165,13 +165,13 @@ tui::TpdOglContext::TpdOglContext(wxGLCanvas* canvas) :
    _glewInitDone             ( false      ),
    _ww                       ( 0          ),
    _wh                       ( 0          )
-{
-}
+{}
 
 void tui::TpdOglContext::glewContext(LayoutCanvas* canvas)
 {
    canvas->SetCurrent(*this);
    GLenum err = glewInit();
+   wxLogDebug("Status: Using GLEW %s", reinterpret_cast<const char *>(glewGetString(GLEW_VERSION)));
    if (GLEW_OK != err)
    {
       wxString errmessage(wxT("glewInit() returns an error: "));
@@ -192,6 +192,9 @@ void tui::TpdOglContext::glewContext(LayoutCanvas* canvas)
       _useShaders               = _oglVersion33;
       _glewInitDone             = true;
    }
+    wxLogDebug("OpenGL version: %s", reinterpret_cast<const char *>(glGetString(GL_VERSION)));
+    wxLogDebug("OpenGL vendor: %s", reinterpret_cast<const char *>(glGetString(GL_VENDOR)));
+
    TessellPoly::tenderTesel = gluNewTess();
 #ifndef WIN32
    gluTessCallback(TessellPoly::tenderTesel, GLU_TESS_BEGIN_DATA,
@@ -280,8 +283,8 @@ END_EVENT_TABLE()
 //   EVT_MENU(      CM_CHLAY, TopedFrame::OnCurrentLayer      )
 //   EVT_LEFT_DOWN        ( tui::LayoutCanvas::OnMouseLeftDown   )
 
-tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos, const wxSize& size, int* attribList):
-   wxGLCanvas(parent, ID_TPD_CANVAS, attribList, pos, size, wxFULL_REPAINT_ON_RESIZE, wxT("LayoutCanvas")),
+tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos, const wxSize& size, wxGLAttributes attr):
+   wxGLCanvas(parent, attr, ID_TPD_CANVAS, pos, size, wxFULL_REPAINT_ON_RESIZE, wxT("LayoutCanvas")),
    _whRatio         (     1 ),
    _apTrigger       ( 10    ),
    _tmpWnd          ( false ),
@@ -299,10 +302,21 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos, const wxSi
 #ifdef __WXGTK__
   ,_xVisual         ( NULL  )
 #endif
+{
+    // required Context attributes
+    wxGLContextAttrs ctxAttrs;
+    ctxAttrs.PlatformDefaults().CoreProfile().OGLVersion(3, 3).EndList();
 
-   {
    // Explicitly create a new rendering context instance for this canvas.
-   _glRC = DEBUG_NEW TpdOglContext(this);
+   _glRC = DEBUG_NEW TpdOglContext(this,&ctxAttrs);
+    if (!_glRC->IsOK()) {
+//        wxMessageBox("OpenGL 3.3 capable driver is not available. Toped graphic engine will not work properly",
+//                     "OpenGL version error", wxOK | wxICON_INFORMATION, this);
+        delete (_glRC);
+        _glRC = nullptr;
+        _crossCur = NULL;
+        return;
+    }
 //   if (!wxGLCanvas::IsDisplaySupported(attribList)) return;
 #ifdef __WXGTK__
    //  Here we'll have to check that we've got what we've asked for. It is

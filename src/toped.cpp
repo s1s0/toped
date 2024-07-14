@@ -756,20 +756,15 @@ void tui::TopedFrame::initView()
    _browsers->SetArtProvider(DEBUG_NEW wxAuiSimpleTabArt);
 
    // the openGL window - the canvas
-   int gl_attrib[] = {
-                        WX_GL_RGBA             ,
-                        WX_GL_MIN_RED          , 8,
-                        WX_GL_MIN_GREEN        , 8,
-                        WX_GL_MIN_BLUE         , 8,
-                        WX_GL_MIN_ALPHA        , 8,
-                        WX_GL_MIN_ACCUM_RED    , 8,
-                        WX_GL_MIN_ACCUM_GREEN  , 8,
-                        WX_GL_MIN_ACCUM_BLUE   , 8,
-                        WX_GL_MIN_ACCUM_ALPHA  , 8,
-                        WX_GL_DOUBLEBUFFER     ,
-                        GL_NONE };
-
-   _canvas = DEBUG_NEW LayoutCanvas(this, wxDefaultPosition, wxDefaultSize, gl_attrib);
+    wxGLAttributes vAttrs;
+    vAttrs.PlatformDefaults().Defaults().DoubleBuffer().EndList();
+    if (wxGLCanvas::IsDisplaySupported(vAttrs)) {
+        _canvas = DEBUG_NEW LayoutCanvas(this, wxDefaultPosition, wxDefaultSize, vAttrs);
+    } else {
+        _canvas = NULL;
+        wxLogDebug("Can't allocate a openGL display");
+//        return; ???
+    }
 
    // The command panel
    _cmdPanel = DEBUG_NEW CommandPanel(this);
