@@ -29,6 +29,7 @@ add_library (tpd_ifaces
 
 target_include_directories(tpd_ifaces PUBLIC
                          ${GLEW_INCLUDE_DIRS}
+#                         ${glew_SOURCE_DIR}/include
                          ${CMAKE_CURRENT_SOURCE_DIR}
                          ${CMAKE_SOURCE_DIR}/tpd_common
                          ${CMAKE_SOURCE_DIR}/tpd_DB

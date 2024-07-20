@@ -11,6 +11,7 @@ add_library(tpd_GL
 )
 
 target_include_directories(tpd_GL PUBLIC
+#                         ${glew_SOURCE_DIR}/include
                          ${GLEW_INCLUDE_DIRS}
                          ${CMAKE_CURRENT_SOURCE_DIR}
                          ${CMAKE_SOURCE_DIR}/tpd_common

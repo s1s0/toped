@@ -25,12 +25,16 @@
 #        $Author$
 #===========================================================================
 
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
+
 set(PRJ_NAME toped)
 set(TOPED_VERSION 0.98)
 
 project(${PRJ_NAME} VERSION ${TOPED_VERSION})
 
+#include(FetchContent)
+#set(CMAKE_CXX_STANDARD 17)
+#set(CMAKE_CXX_STANDARD_REQUIRED ON)
 #---------------------------------------------------------------------------
 # manage compiler features and flags common for all modules
 add_library(toped_compiler_flags INTERFACE)
@@ -45,12 +49,29 @@ target_compile_options(toped_compiler_flags INTERFACE
   "$<${msvc_cxx}:$<BUILD_INTERFACE:-W3>>"
 )
 
+
+#message(STATUS "Fetching GLEW...")
+#
+##if (UNIX AND NOT APPLE) # For Linux
+##    set(GLEW_EGL TRUE)
+##    set(OpenGL_GL_PREFERENCE GLVND)
+##endif()
+#
+#FetchContent_Declare(
+#   glew
+#    URL https://github.com/nigels-com/glew/releases/download/glew-2.2.0/glew-2.2.0.zip
+#    SOURCE_SUBDIR build/cmake
+#    DOWNLOAD_EXTRACT_TIMESTAMP ON
+#)
+#
+#FetchContent_MakeAvailable(glew)
+
+
 #---------------------------------------------------------------------------
 # external libraries, prerequisites for the project
 find_package(GLEW REQUIRED)
-find_package(OpenGL REQUIRED)
+#find_package(OpenGL REQUIRED)
 find_package(ZLIB REQUIRED)
-#find_package(wxWidgets COMPONENTS core base aui adv REQUIRED)
 find_package(wxWidgets COMPONENTS core base aui gl REQUIRED)
 include(${wxWidgets_USE_FILE})
 include_directories(${wxWidgets_INCLUDE_DIRS})
@@ -73,15 +94,13 @@ set(APP_ICON "${CMAKE_CURRENT_SOURCE_DIR}/toped.icns")
 file(GLOB TPD_FONTS      "fonts/*.glf")
 file(GLOB TPD_TLL        "tll/*.tll")
 file(GLOB TPD_RESOURCES  "ui/*")
+file(GLOB TPD_SHADERS    "shaders/*glsl")
 file(GLOB TPD_ICONS_16   "icons/16x16/*")
 file(GLOB TPD_ICONS_24   "icons/24x24/*")
 file(GLOB TPD_ICONS_32   "icons/32x32/*")
 file(GLOB TPD_ICONS_48   "icons/48x48/*")
 file(GLOB TPD_UTILS      "user_functions/general/*.tll")
 
-#set_source_files_properties( "toped.icns"  PROPERTIES
-#                             MACOSX_PACKAGE_LOCATION Resources
-#)
 set_source_files_properties(${APP_ICON} PROPERTIES
                              MACOSX_PACKAGE_LOCATION "Resources")
 
@@ -96,6 +115,9 @@ set_source_files_properties( ${TPD_TLL} PROPERTIES
 )
 set_source_files_properties( ${TPD_RESOURCES} PROPERTIES
                              MACOSX_PACKAGE_LOCATION MacOS/ui
+)
+set_source_files_properties( ${TPD_SHADERS} PROPERTIES
+                             MACOSX_PACKAGE_LOCATION MacOS/shaders
 )
 set_source_files_properties( ${TPD_ICONS_16} PROPERTIES
                              MACOSX_PACKAGE_LOCATION MacOS/icons/16x16
@@ -125,9 +147,13 @@ add_executable(${PRJ_NAME} MACOSX_BUNDLE
                       src/techeditor.cpp
                       src/toped.cpp
                       src/main.cpp
-                      ${TPD_FONTS} ${TPD_TLL} ${TPD_RESOURCES} ${TPD_UTILS}
+                      ${TPD_FONTS} ${TPD_TLL} ${TPD_RESOURCES} ${TPD_UTILS} ${TPD_SHADERS}
                       ${APP_ICON} ${TPD_ICONS_16} ${TPD_ICONS_24} ${TPD_ICONS_32} ${TPD_ICONS_48}
 )
+
+# Set a custom plist file for the app bundle - needed for Mac OS Retina display
+#set_target_properties(${PRJ_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST
+#                      ${CMAKE_CURRENT_SOURCE_DIR}/src/Info.plist)
 
 target_link_libraries(${PRJ_NAME} PUBLIC
 #                      ${OPENGL_LIBRARIES}
@@ -135,6 +161,7 @@ target_link_libraries(${PRJ_NAME} PUBLIC
 #                      ${wxWidgets_LIBRARIES}
 #                      wx_osx_cocoau_gl-2.9
                       GLEW::GLEW
+#                      glew_s
                       z
                       toped_compiler_flags
                       tpd_common
@@ -146,6 +173,7 @@ target_link_libraries(${PRJ_NAME} PUBLIC
 )
 
 target_include_directories(${PRJ_NAME} PUBLIC
+                      ${glew_SOURCE_DIR}/include
                       tpd_common
                       tpd_GL
                       tpd_DB

@@ -20,6 +20,7 @@ target_include_directories(tpd_bidfunc PUBLIC
                          ${CMAKE_SOURCE_DIR}/tpd_DB
                          ${CMAKE_SOURCE_DIR}/tpd_GL
                          ${CMAKE_SOURCE_DIR}/tpd_parser
+#                         ${glew_SOURCE_DIR}/include
                          ${GLEW_INCLUDE_DIRS}
 
 )
