@@ -851,6 +851,7 @@ void trend::TrendCenter::initShaders(const std::string& codeDirectory)
       }
       else
       {
+         wxLogDebug("Falling back to VBO rendering because of the errors above");
          tell_log(console::MT_WARNING, "Falling back to VBO rendering because of the errors above");
          _renderType = trend::rtTenderer;
       }

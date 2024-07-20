@@ -489,6 +489,7 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& /*event*/)
       {
          _blinkTimer.Stop();
          wxPaintDC dc(this);
+         SetCurrent(*_glRC);
          glMatrixMode( GL_MODELVIEW );
          glShadeModel( GL_FLAT ); // Single colour
          updateViewport();
@@ -518,6 +519,7 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& /*event*/)
    else
    {
       wxPaintDC dc(this);
+      SetCurrent(*_glRC);
       glAccum(GL_RETURN, 1.0);
       rubberPaint();
       if (!_rubberBand && PROPC->boldOnHover()) boldOnHover();
