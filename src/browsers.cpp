@@ -522,7 +522,9 @@ void browsers::CellBrowser::updateHier()
          _dbroot = AppendItem(GetRootItem(),wxString(design->name().c_str(),  wxConvUTF8));
          SetItemImage(_dbroot,BICN_TARGETDB,wxTreeItemIcon_Normal);
          // ... and the cells
-         tdtH = design->hiertree()->GetFirstRoot(TARGETDB_LIB);
+         laydata::TDTHierTree* const chTree = design->hiertree();
+         if (chTree)
+            tdtH = chTree->GetFirstRoot(TARGETDB_LIB);
          while (tdtH)
          {
             std::string str = tdtH->GetItem()->name();
