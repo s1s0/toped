@@ -34,6 +34,15 @@ uniform vec2 in_ScreenSize;
 uniform uint in_PatScale = 1u;
 
 noperspective out float patternCoord;
+noperspective out vec2 markCoord;
+
+//Implicit
+//in gl_PerVertex
+//{
+//  vec4 gl_Position;
+//  float gl_PointSize;
+//  float gl_ClipDistance[];
+//} gl_in[gl_MaxPatchVertices];
 
 void main()
 {
@@ -42,6 +51,7 @@ void main()
 
    gl_Position = gl_in[0].gl_Position;
    patternCoord = 0.0;
+   markCoord = vec2(0,0);
    EmitVertex();
    
    gl_Position = gl_in[1].gl_Position;

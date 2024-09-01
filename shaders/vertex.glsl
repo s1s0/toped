@@ -28,10 +28,22 @@
 #version 330
 
 layout (location = 0) in      vec2  in_Vertex;
+// Implicit
+//out gl_PerVertex {
+//    vec4 gl_Position;
+//    float gl_PointSize;
+//    float gl_ClipDistance[];
+//};
+//<= ERROR: Input of fragment shader 'patternCoord' not written by vertex shader
+//ERROR: Input of fragment shader 'markCoord' not written by vertex shader
+
 uniform mat4 in_CTM;
 uniform float in_Z = 0;
-
+noperspective out vec2 markCoord;
+noperspective out float patternCoord;
 void main(void)
 {
    gl_Position = in_CTM * vec4(in_Vertex, in_Z, 1.0);
+   markCoord = vec2(0,0);
+   patternCoord = 0;
 }

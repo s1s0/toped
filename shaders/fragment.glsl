@@ -27,17 +27,17 @@
 
 #version 330
 
-uniform vec3  in_Color;
-uniform float in_Alpha;
-uniform uint  in_Stipple[33];
-uniform uint  in_LStipple = uint(0x00000ff0);
-uniform bool  in_StippleEn = false;
-uniform bool  in_LStippleEn = false;
-uniform bool  in_MStippleEn = false;
+uniform vec3  in_Color                        ;
+uniform float in_Alpha                        ;
+uniform uint  in_Stipple[33]                  ;
+uniform uint  in_LStipple   = uint(0x00000ff0);
+uniform bool  in_StippleEn  = false           ;
+uniform bool  in_LStippleEn = false           ;
+uniform bool  in_MStippleEn = false           ;
 
 //in  vec4 gl_FragCoord;
-noperspective in float patternCoord;
-noperspective in vec2 markCoord;
+noperspective in float patternCoord           ;
+noperspective in vec2  markCoord              ;
 out vec4 out_Color;
 
 void main(void)

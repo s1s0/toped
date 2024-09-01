@@ -34,10 +34,12 @@ uniform float ShSize = 16;
 layout(triangle_strip, max_vertices=4) out;
 
 noperspective out vec2 markCoord;
+noperspective out float patternCoord;
 void main()
 {
    float sizeX = ShSize / in_ScreenSize.x ;
    float sizeY = ShSize / in_ScreenSize.y ;
+   patternCoord = 0;
 
    gl_Position = gl_in[0].gl_Position + vec4(-sizeX, -sizeY, 0.0, 0.0);
    markCoord = vec2(0,0);
