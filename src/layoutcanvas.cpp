@@ -165,7 +165,15 @@ tui::TpdOglContext::TpdOglContext(wxGLCanvas* canvas, wxGLContextAttrs* attr) :
    _glewInitDone             ( false      ),
    _ww                       ( 0          ),
    _wh                       ( 0          )
-{}
+{
+   GLint flags;
+   DBGL_CALL(glGetIntegerv,GL_CONTEXT_FLAGS, &flags)
+
+   if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
+      wxLogDebug("OpenGL debug context is available");
+   else
+      wxLogDebug("OpenGL debug context is not available");
+}
 
 void tui::TpdOglContext::glewContext(LayoutCanvas* canvas)
 {
@@ -305,7 +313,7 @@ tui::LayoutCanvas::LayoutCanvas(wxWindow *parent, const wxPoint& pos, const wxSi
 {
     // required Context attributes
     wxGLContextAttrs ctxAttrs;
-    ctxAttrs.PlatformDefaults().CoreProfile().OGLVersion(3, 3).EndList();
+   ctxAttrs.PlatformDefaults().CoreProfile().OGLVersion(4, 4).DebugCtx().EndList();
 
    // Explicitly create a new rendering context instance for this canvas.
    _glRC = DEBUG_NEW TpdOglContext(this,&ctxAttrs);
@@ -490,22 +498,24 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& /*event*/)
          _blinkTimer.Stop();
          wxPaintDC dc(this);
          SetCurrent(*_glRC);
-         glMatrixMode( GL_MODELVIEW );
-         glShadeModel( GL_FLAT ); // Single colour
+trend::checkOGLError("Setting the context");
+         DBGL_CALL(glMatrixMode,GL_MODELVIEW)
+         DBGL_CALL(glShadeModel,GL_FLAT)
          updateViewport();
          // CTM matrix stuff
          CTM ctmOrtho(TP(_lpBL.x(),_lpTR.y()), TP(_lpTR.x(), _lpBL.y()));
          real mtrxOrtho [16];
          ctmOrtho.oglForm(mtrxOrtho);
-         glLoadMatrixd(mtrxOrtho);
+         DBGL_CALL(glLoadMatrixd,mtrxOrtho)
 
-         glClear(GL_COLOR_BUFFER_BIT);
-         glEnable(GL_BLEND);
-         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-         glClear(GL_ACCUM_BUFFER_BIT);
+         DBGL_CALL(glClear, GL_COLOR_BUFFER_BIT)
+         DBGL_CALL(glEnable, GL_BLEND)
+         DBGL_CALL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+         DBGL_CALL(glClear, GL_ACCUM_BUFFER_BIT)
+
          DATC->render();
          if (0 == _blinkInterval) DATC->grcDraw();
-         glAccum(GL_LOAD, 1.0);
+         DBGL_CALL(glAccum, GL_LOAD, 1.0)
          _invalidWindow = false;
          rubberPaint();
          SwapBuffers();
@@ -1317,3 +1327,14 @@ wxCursor* tui::MakeCursor( const char * pXpm[36],  int HotX, int HotY )
 
    return pCursor;
 }
+
+//void  GLAPIENTRY tui::debugMessage(GLenum source,
+//                       GLenum type,
+//                       GLuint id,
+//                       GLenum severity,
+//                       GLsizei length,
+//                       const GLchar *message,
+//                       const void *userParam)
+//{
+//   wxLogDebug("Blah blah");
+//}

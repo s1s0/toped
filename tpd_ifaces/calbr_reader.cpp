@@ -99,12 +99,12 @@ void auxdata::DrcPoly::motionDraw(const layprop::DrawProperties&, CtmQueue& tran
    {
       ptlist->push_back( TP(_pdata[2*i], _pdata[2*i+1]) * trans);
    }
-   glBegin(GL_LINE_LOOP);
+   DBGL_CALL(glBegin,GL_LINE_LOOP)
    for (unsigned i = 0; i < _psize; i++)
    {
-      glVertex2i((*ptlist)[i].x(), (*ptlist)[i].y());
+      DBGL_CALL(glVertex2i,(*ptlist)[i].x(), (*ptlist)[i].y())
    }
-   glEnd();
+   DBGL_CALL0(glEnd)
    ptlist->clear();
    delete ptlist;
 }

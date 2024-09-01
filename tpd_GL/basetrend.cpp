@@ -752,10 +752,46 @@ void trend::checkOGLError(std::string loc)
 {
    std::ostringstream ost;
    GLenum ogle;
-   while ((ogle=glGetError()) != GL_NO_ERROR)
+   while (GL_NO_ERROR != (ogle=glGetError()))
    {
-      ost << "OpenGL Error: \"" << gluErrorString(ogle)
-          << "\" during " << loc;
+      ost << "OpenGL Error: \"" ;
+      std::string errString;
+      switch (ogle) {
+         case GL_INVALID_ENUM     : ost << "Unacceptable value for an enumerated argument";     break;
+         case GL_INVALID_VALUE    : ost << "Numeric argument is out of range";                  break;
+         case GL_INVALID_OPERATION: ost << "The operation is not allowed in the current state"; break;
+         case GL_STACK_OVERFLOW   : ost << "Stack overflow";                                    break;
+         case GL_STACK_UNDERFLOW  : ost << "Stack underflow";                                   break;
+         case GL_OUT_OF_MEMORY    : ost << "Out of Memory";                                     break;
+         case GL_TABLE_TOO_LARGE  : ost << "Tablesize too big";                                 break;
+         default                  : ost << "Unknown error value reported:" << ogle;             break;
+      }
+      ost << "\" during " << loc;
       tell_log(console::MT_ERROR,ost.str());
    }
+}
+
+void trend::reportOGLStatus(std::string loc)
+{
+   std::ostringstream ost;
+   ost << loc;
+   GLenum ogle;
+   if (GL_NO_ERROR != (ogle=glGetError()))
+   {
+      switch (ogle) {
+         case GL_INVALID_ENUM     : ost << "Unacceptable value for an enumerated argument";     break;
+         case GL_INVALID_VALUE    : ost << "Numeric argument is out of range";                  break;
+         case GL_INVALID_OPERATION: ost << "The operation is not allowed in the current state"; break;
+         case GL_STACK_OVERFLOW   : ost << "Stack overflow";                                    break;
+         case GL_STACK_UNDERFLOW  : ost << "Stack underflow";                                   break;
+         case GL_OUT_OF_MEMORY    : ost << "Out of Memory";                                     break;
+         case GL_TABLE_TOO_LARGE  : ost << "Tablesize too big";                                 break;
+         default                  : ost << "Unknown error value reported:" << ogle;             break;
+      }
+   }
+   else {
+      ost << " OK";
+   }
+//   tell_log(console::MT_ERROR,ost.str());
+   wxLogDebug(ost.str().c_str());
 }

@@ -95,23 +95,23 @@ void trend::TGlfSymbol::draw(bool fill)
 {
    if (fill)
    {
-      glBegin(GL_TRIANGLES);
+      DBGL_CALL(glBegin,GL_TRIANGLES)
       for (byte i = 0; i < _alchnks; i++)
       {
          for (byte j = 0; j < 3;j++)
             glVertex2f(_vdata[2*_idata[3*i+j]],_vdata[2*_idata[3*i+j]+1]);
       }
-      glEnd();
+      DBGL_CALL0(glEnd)
    }
    // Draw the contours
    word startIndex = 0;
    startIndex = 0;
    for (byte i = 0; i < _alcntrs; i++)
    {
-      glBegin(GL_LINE_LOOP);
+      DBGL_CALL(glBegin,GL_LINE_LOOP)
          for (byte j = startIndex; j < _cdata[i]+1; j++)
             glVertex2f(_vdata[2*j], _vdata[2*j+1]);
-      glEnd();
+      DBGL_CALL0(glEnd)
       startIndex += _cdata[i]+1;
    }
 }
@@ -154,12 +154,12 @@ trend::TGlfRSymbol::TGlfRSymbol(TGlfSymbol* tsym, word voffset, word ioffset)
 
 void trend::TGlfRSymbol::drawWired()
 {
-   glMultiDrawArrays(GL_LINE_LOOP, _firstvx, _csize, _alcntrs);
+   DBGL_CALL(glMultiDrawArrays,GL_LINE_LOOP, _firstvx, _csize, _alcntrs)
 }
 
 void trend::TGlfRSymbol::drawSolid()
 {
-   glDrawElements(GL_TRIANGLES, _alchnks * 3, GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_firstix));
+   DBGL_CALL(glDrawElements,GL_TRIANGLES, _alchnks * 3, GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_firstix))
 }
 
 trend::TGlfRSymbol::~TGlfRSymbol()
@@ -309,23 +309,23 @@ void trend::TenderGlfFont::collect(const word all_vertexes, const word all_index
 {
    // Create the VBO
    GLuint ogl_buffers[2];
-   glGenBuffers(2, ogl_buffers);
+   DBGL_CALL(glGenBuffers, 2, ogl_buffers)
    _pbuffer = ogl_buffers[0];
    _ibuffer = ogl_buffers[1];
    // Bind the buffers
-   glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
-   glBufferData(GL_ARRAY_BUFFER                   ,
-                2 * all_vertexes * sizeof(float) ,
-                NULL                              ,
-                GL_STATIC_DRAW                     );
-   float* cpoint_array = (float*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+   DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER,_pbuffer)
+   DBGL_CALL(glBufferData, GL_ARRAY_BUFFER                  ,
+                                  2 * all_vertexes * sizeof(float) ,
+                                  nullptr                          ,
+                                  GL_STATIC_DRAW )
+   float* cpoint_array = (float*)DBGL_CALL(glMapBuffer,GL_ARRAY_BUFFER, GL_WRITE_ONLY)
 
-   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibuffer);
-   glBufferData(GL_ELEMENT_ARRAY_BUFFER         ,
-                all_indexes * sizeof(int)       ,
-                NULL                            ,
-                GL_STATIC_DRAW                   );
-   GLuint* cindex_array = (GLuint*)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
+   DBGL_CALL(glBindBuffer,GL_ELEMENT_ARRAY_BUFFER, _ibuffer)
+   DBGL_CALL(glBufferData ,GL_ELEMENT_ARRAY_BUFFER                ,
+                                  all_indexes * sizeof(int)       ,
+                                  nullptr                         ,
+                                  GL_STATIC_DRAW                   )
+   GLuint* cindex_array = (GLuint*)DBGL_CALL(glMapBuffer,GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY)
 
    //... and collect them deleting meanwhile the temporary objects
    word vrtx_indx = 0;
@@ -342,21 +342,21 @@ void trend::TenderGlfFont::collect(const word all_vertexes, const word all_index
    _tsymbols.clear();
    assert(all_vertexes == vrtx_indx);
    assert(all_indexes  == indx_indx);
-   glUnmapBuffer(GL_ARRAY_BUFFER);
-   glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
-   glBindBuffer(GL_ARRAY_BUFFER, 0);
-   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+   DBGL_CALL(glUnmapBuffer,GL_ARRAY_BUFFER)
+   DBGL_CALL(glUnmapBuffer,GL_ELEMENT_ARRAY_BUFFER)
+   DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, 0)
+   DBGL_CALL(glBindBuffer,GL_ELEMENT_ARRAY_BUFFER, 0)
 }
 
 void trend::TenderGlfFont::bindBuffers()
 {
    if ((0 ==_pbuffer) || (0 == _ibuffer)) return;
-   glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
+   DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, _pbuffer)
 //   GLint bufferSize;
 //   glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
 //   bufferSize++;
 
-   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibuffer);
+   DBGL_CALL(glBindBuffer,GL_ELEMENT_ARRAY_BUFFER, _ibuffer)
 //   glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
 //   bufferSize++;
 }

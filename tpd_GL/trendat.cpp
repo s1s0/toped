@@ -215,10 +215,10 @@ unsigned trend::TrxCnvx::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 
 void trend::TrxCnvx::drctDrawContour()
 {
-   glBegin(GL_LINE_LOOP);
+   DBGL_CALL(glBegin,GL_LINE_LOOP)
    for (unsigned i = 0; i < _csize; i++)
-      glVertex2i(_cdata[2*i], _cdata[2*i+1]);
-   glEnd();
+      DBGL_CALL(glVertex2i,_cdata[2*i], _cdata[2*i+1])
+   DBGL_CALL0(glEnd)
 }
 
 void trend::TrxCnvx::drctDrawFill()
@@ -242,22 +242,22 @@ unsigned  trend::TrxBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 
 void trend::TrxBox::drctDrawContour()
 {
-   glBegin(GL_LINE_LOOP);
-      glVertex2i(_cdata[0], _cdata[1]);
-      glVertex2i(_cdata[2], _cdata[1]);
-      glVertex2i(_cdata[2], _cdata[3]);
-      glVertex2i(_cdata[0], _cdata[3]);
-   glEnd();
+   DBGL_CALL(glBegin,GL_LINE_LOOP)
+      DBGL_CALL(glVertex2i,_cdata[0], _cdata[1])
+      DBGL_CALL(glVertex2i,_cdata[2], _cdata[1])
+      DBGL_CALL(glVertex2i,_cdata[2], _cdata[3])
+      DBGL_CALL(glVertex2i,_cdata[0], _cdata[3])
+   DBGL_CALL0(glEnd)
 }
 
 void trend::TrxBox::drctDrawFill()
 {
-   glBegin(GL_POLYGON);
-      glVertex2i(_cdata[0], _cdata[1]);
-      glVertex2i(_cdata[2], _cdata[1]);
-      glVertex2i(_cdata[2], _cdata[3]);
-      glVertex2i(_cdata[0], _cdata[3]);
-   glEnd();
+   DBGL_CALL(glBegin,GL_POLYGON);
+      DBGL_CALL(glVertex2i,_cdata[0], _cdata[1])
+      DBGL_CALL(glVertex2i,_cdata[2], _cdata[1])
+      DBGL_CALL(glVertex2i,_cdata[2], _cdata[3])
+      DBGL_CALL(glVertex2i,_cdata[0], _cdata[3])
+   DBGL_CALL0(glEnd)
 }
 
 //=============================================================================
@@ -268,13 +268,13 @@ void trend::TrxNcvx::drctDrawFill()
 {
    for ( TeselChain::const_iterator CCH = _tdata->tdata()->begin(); CCH != _tdata->tdata()->end(); CCH++ )
    {
-      glBegin(CCH->type());
+      DBGL_CALL(glBegin,CCH->type())
       for(unsigned cindx = 0 ; cindx < CCH->size(); cindx++)
       {
          unsigned vindex = CCH->index_seq()[cindx];
-         glVertex2i(_cdata[2*vindex], _cdata[2*vindex+1]);
+         DBGL_CALL(glVertex2i,_cdata[2*vindex], _cdata[2*vindex+1])
       }
-      glEnd();
+      DBGL_CALL0(glEnd)
    }
 }
 
@@ -324,23 +324,23 @@ unsigned trend::TrxWire::lDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 
 void trend::TrxWire::drctDrawCLine()
 {
-   glBegin(GL_LINE_STRIP);
+   DBGL_CALL(glBegin,GL_LINE_STRIP)
    for (unsigned i = 0; i < _lsize; i++)
-      glVertex2i(_ldata[2*i], _ldata[2*i+1]);
-   glEnd();
+      DBGL_CALL(glVertex2i,_ldata[2*i], _ldata[2*i+1])
+   DBGL_CALL0(glEnd)
 }
 
 void trend::TrxWire::drctDrawFill()
 {
    for ( TeselChain::const_iterator TCH = _tdata->begin(); TCH != _tdata->end(); TCH++ )
    {
-      glBegin(TCH->type());
+      DBGL_CALL(glBegin,TCH->type())
       for(unsigned cindx = 0 ; cindx < TCH->size(); cindx++)
       {
          unsigned vindex = TCH->index_seq()[cindx];
-         glVertex2i(_cdata[2*vindex], _cdata[2*vindex+1]);
+         DBGL_CALL(glVertex2i,_cdata[2*vindex], _cdata[2*vindex+1])
       }
-      glEnd();
+      DBGL_CALL0(glEnd)
    }
 }
 
@@ -413,10 +413,10 @@ unsigned trend::TrxTextOvlBox::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 
 void trend::TrxTextOvlBox::drctDrawContour()
 {
-   glBegin(GL_LINE_LOOP);
+   DBGL_CALL(glBegin,GL_LINE_LOOP)
    for (unsigned i = 0; i < 4; i++)
-      glVertex2i(_obox[2*i], _obox[2*i+1]);
-   glEnd();
+      DBGL_CALL(glVertex2i,_obox[2*i], _obox[2*i+1])
+   DBGL_CALL0(glEnd)
 }
 
 
@@ -469,23 +469,23 @@ void trend::TrxSCnvx::drctDrawSlctd()
 {// same as for non-convex polygon
    if (NULL == _slist)
    {
-      glBegin(GL_LINE_LOOP);
+      DBGL_CALL(glBegin,GL_LINE_LOOP)
       for (unsigned i = 0; i < _csize; i++)
-         glVertex2i(_cdata[2*i], _cdata[2*i+1]);
-      glEnd();
+         DBGL_CALL(glVertex2i,_cdata[2*i], _cdata[2*i+1])
+      DBGL_CALL0(glEnd)
    }
    else
    {// shape is partially selected
-      glBegin(GL_LINES);
+      DBGL_CALL(glBegin,GL_LINES)
       for (unsigned i = 0; i < _csize; i++)
       {
          if (_slist->check(i) && _slist->check((i+1)%_csize))
          {
-            glVertex2i(_cdata[2*i], _cdata[2*i+1]);
-            glVertex2i(_cdata[2*((i+1)%_csize)], _cdata[2*((i+1)%_csize)+1]);
+            DBGL_CALL(glVertex2i,_cdata[2*i], _cdata[2*i+1])
+            DBGL_CALL(glVertex2i,_cdata[2*((i+1)%_csize)], _cdata[2*((i+1)%_csize)+1])
          }
       }
-      glEnd();
+      DBGL_CALL0(glEnd);
    }
 }
 
@@ -538,31 +538,31 @@ void trend::TrxSBox::drctDrawSlctd()
 {
    if (NULL == _slist)
    {// shape is fully selected
-      glBegin(GL_LINE_LOOP);
-         glVertex2i(_cdata[0], _cdata[1]);
-         glVertex2i(_cdata[2], _cdata[1]);
-         glVertex2i(_cdata[2], _cdata[3]);
-         glVertex2i(_cdata[0], _cdata[3]);
-      glEnd();
+      DBGL_CALL(glBegin,GL_LINE_LOOP)
+         DBGL_CALL(glVertex2i,_cdata[0], _cdata[1])
+         DBGL_CALL(glVertex2i,_cdata[2], _cdata[1])
+         DBGL_CALL(glVertex2i,_cdata[2], _cdata[3])
+         DBGL_CALL(glVertex2i,_cdata[0], _cdata[3])
+      DBGL_CALL0(glEnd)
    }
    else
    {// shape is partially selected
-      glBegin(GL_LINES);
+      DBGL_CALL(glBegin,GL_LINES)
       for (unsigned i = 0; i < _csize; i++)
       {
          if (_slist->check(i) && _slist->check((i+1)%_csize))
          {
             switch(i)
             {
-               case 0: glVertex2i(_cdata[0], _cdata[1]);glVertex2i(_cdata[2], _cdata[1]); break;
-               case 1: glVertex2i(_cdata[2], _cdata[1]);glVertex2i(_cdata[2], _cdata[3]); break;
-               case 2: glVertex2i(_cdata[2], _cdata[3]);glVertex2i(_cdata[0], _cdata[3]); break;
-               case 3: glVertex2i(_cdata[0], _cdata[3]);glVertex2i(_cdata[0], _cdata[1]); break;
+               case 0: DBGL_CALL(glVertex2i,_cdata[0], _cdata[1]);glVertex2i(_cdata[2], _cdata[1]); break;
+               case 1: DBGL_CALL(glVertex2i,_cdata[2], _cdata[1]);glVertex2i(_cdata[2], _cdata[3]); break;
+               case 2: DBGL_CALL(glVertex2i,_cdata[2], _cdata[3]);glVertex2i(_cdata[0], _cdata[3]); break;
+               case 3: DBGL_CALL(glVertex2i,_cdata[0], _cdata[3]);glVertex2i(_cdata[0], _cdata[1]); break;
                default: assert(false); break;
             }
          }
       }
-      glEnd();
+      DBGL_CALL0(glEnd);
    }
 }
 
@@ -615,23 +615,23 @@ void trend::TrxSNcvx::drctDrawSlctd()
 {// same as for convex polygons
    if (NULL == _slist)
    {
-      glBegin(GL_LINE_LOOP);
+      DBGL_CALL(glBegin,GL_LINE_LOOP)
       for (unsigned i = 0; i < _csize; i++)
-         glVertex2i(_cdata[2*i], _cdata[2*i+1]);
-      glEnd();
+         DBGL_CALL(glVertex2i,_cdata[2*i], _cdata[2*i+1])
+      DBGL_CALL0(glEnd)
    }
    else
    {// shape is partially selected
-      glBegin(GL_LINES);
+      DBGL_CALL(glBegin,GL_LINES)
       for (unsigned i = 0; i < _csize; i++)
       {
          if (_slist->check(i) && _slist->check((i+1)%_csize))
          {
-            glVertex2i(_cdata[2*i], _cdata[2*i+1]);
-            glVertex2i(_cdata[2*((i+1)%_csize)], _cdata[2*((i+1)%_csize)+1]);
+            DBGL_CALL(glVertex2i,_cdata[2*i], _cdata[2*i+1])
+            DBGL_CALL(glVertex2i,_cdata[2*((i+1)%_csize)], _cdata[2*((i+1)%_csize)+1])
          }
       }
-      glEnd();
+      DBGL_CALL0(glEnd);
    }
 }
 
@@ -712,20 +712,20 @@ void trend::TrxSWire::drctDrawSlctd()
 {
    if (NULL == _slist)
    {
-      glBegin(GL_LINE_STRIP);
+      DBGL_CALL(glBegin,GL_LINE_STRIP)
       for (unsigned i = 0; i < _lsize; i++)
-         glVertex2i(_ldata[2*i], _ldata[2*i+1]);
-      glEnd();
+         DBGL_CALL(glVertex2i,_ldata[2*i], _ldata[2*i+1])
+      DBGL_CALL0(glEnd)
    }
    else
    {// shape is partially selected
-      glBegin(GL_LINES);
+      DBGL_CALL(glBegin,GL_LINES)
       for (unsigned i = 0; i < _lsize - 1; i++)
       {
          if (_slist->check(i) && _slist->check(i+1))
          {
-            glVertex2i(_ldata[2*i], _ldata[2*i+1]);
-            glVertex2i(_ldata[2*(i+1)], _ldata[2*(i+1)+1]);
+            DBGL_CALL(glVertex2i,_ldata[2*i], _ldata[2*i+1])
+            DBGL_CALL(glVertex2i,_ldata[2*(i+1)], _ldata[2*(i+1)+1])
          }
       }
       if (!_celno)
@@ -733,16 +733,16 @@ void trend::TrxSWire::drctDrawSlctd()
          // And the edge points!
          if (_slist->check(0)       ) // if first point is selected
          {
-            glVertex2i(_cdata[_csize-2], _cdata[_csize-1]);
-            glVertex2i(_cdata[_csize], _cdata[_csize+1]);
+            DBGL_CALL(glVertex2i,_cdata[_csize-2], _cdata[_csize-1])
+            DBGL_CALL(glVertex2i,_cdata[_csize], _cdata[_csize+1])
          }
          if (_slist->check(_lsize-1))// if last point is selected
          {
-            glVertex2i(_cdata[0], _cdata[1]);
-            glVertex2i(_cdata[(2*_csize)-2], _cdata[(2*_csize)-1]);
+            DBGL_CALL(glVertex2i,_cdata[0], _cdata[1])
+            DBGL_CALL(glVertex2i,_cdata[(2*_csize)-2], _cdata[(2*_csize)-1])
          }
       }
-      glEnd();
+      DBGL_CALL0(glEnd)
    }
 }
 
@@ -766,10 +766,10 @@ unsigned trend::TrxTextSOvlBox::sDataCopy(unsigned* array, unsigned& pindex)
 
 void trend::TrxTextSOvlBox::drctDrawSlctd()
 {
-   glBegin(GL_LINE_LOOP);
+   DBGL_CALL(glBegin,GL_LINE_LOOP)
    for (unsigned i = 0; i < 4; i++)
-      glVertex2i(_obox[2*i], _obox[2*i+1]);
-   glEnd();
+      DBGL_CALL(glVertex2i,_obox[2*i], _obox[2*i+1])
+   DBGL_CALL0(glEnd)
 }
 
 //=============================================================================
@@ -1091,9 +1091,9 @@ unsigned trend::TrxCellRef::cDataCopy(TNDR_GLDATAT* array, unsigned& pindex)
 
 void trend::TrxCellRef::drctDrawContour()
 {
-   glBegin(GL_LINE_LOOP);
+   DBGL_CALL(glBegin,GL_LINE_LOOP)
    for (unsigned i = 0; i < 4; i++)
-      glVertex2i(_obox[2*i], _obox[2*i+1]);
-   glEnd();
+      DBGL_CALL(glVertex2i,_obox[2*i], _obox[2*i+1])
+   DBGL_CALL0(glEnd)
 }
 

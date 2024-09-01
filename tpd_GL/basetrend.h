@@ -749,24 +749,23 @@ namespace trend {
    };
 
    void checkOGLError(std::string);
-   void GLcheck(const std::string&);
-   std::string error_description(GLenum err);
+   void reportOGLStatus(std::string loc);
 
    template <typename result_t, typename... gl_args_t, typename... args_t>
    result_t dbgl_call(char* fname, int lineNo, char* varName, result_t (*fun)(gl_args_t...), args_t... args) {
       std::ostringstream info;
       info << varName << " in "<< fname << " at line " << lineNo << " : ";
       if constexpr(!std::is_same<result_t, void>::value) {
-           auto result = fun(std::forward<args_t>(args)...);
-           #ifndef NDEBUG
-               trend::GLcheck(info.str());
-           #endif
-           return result;
+         auto result = fun(std::forward<args_t>(args)...);
+#ifndef NDEBUG
+         trend::reportOGLStatus(info.str());
+#endif
+         return result;
        } else {
-           fun(std::forward<args_t>(args)...);
-           #ifndef NDEBUG
-               trend::GLcheck(info.str());
-           #endif
+         fun(std::forward<args_t>(args)...);
+#ifndef NDEBUG
+         trend::reportOGLStatus(info.str());
+#endif
        }
    }
 }

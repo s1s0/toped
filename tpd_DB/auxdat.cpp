@@ -125,12 +125,12 @@ void auxdata::TdtGrcPoly::motionDraw(const layprop::DrawProperties&, CtmQueue& t
    {
       ptlist->push_back( TP(_pdata[2*i], _pdata[2*i+1]) * trans);
    }
-   glBegin(GL_LINE_LOOP);
+   DBGL_CALL(glBegin,GL_LINE_LOOP)
    for (unsigned i = 0; i < _psize; i++)
    {
-      glVertex2i((*ptlist)[i].x(), (*ptlist)[i].y());
+      DBGL_CALL(glVertex2i,(*ptlist)[i].x(), (*ptlist)[i].y())
    }
-   glEnd();
+   DBGL_CALL0(glEnd)
    ptlist->clear();
    delete ptlist;
 }
@@ -278,16 +278,16 @@ void auxdata::TdtGrcWire::motionDraw(const layprop::DrawProperties& /*drawprop*/
    word csize = ptlist[0].y();
    // the central line
    if (0 == lsize) return;
-   glBegin(GL_LINE_STRIP);
+   DBGL_CALL(glBegin,GL_LINE_STRIP)
    for (word i = 0; i < lsize; i++)
-      glVertex2i(ptlist[i+1].x(), ptlist[i+1].y());
-   glEnd();
+      DBGL_CALL(glVertex2i,ptlist[i+1].x(), ptlist[i+1].y())
+   DBGL_CALL0(glEnd)
    // the contour
    if (0 == csize) return;
-   glBegin(GL_LINE_LOOP);
+   DBGL_CALL(glBegin,GL_LINE_LOOP)
    for (word i = lsize; i <= lsize + csize; i++)
-      glVertex2i(ptlist[i].x(), ptlist[i].y());
-   glEnd();
+      DBGL_CALL(glVertex2i,ptlist[i].x(), ptlist[i].y())
+   DBGL_CALL0(glEnd)
 }
 
 bool auxdata::TdtGrcWire::pointInside(const TP pnt)const

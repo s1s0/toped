@@ -259,22 +259,22 @@ trend::Tolder::Tolder( layprop::DrawProperties* drawprop, real UU ) :
 
 void trend::Tolder::grdDraw()
 {
-   glBegin(GL_POINTS);
+   DBGL_CALL(glBegin,GL_POINTS)
    TNDR_GLDATAT* cpoint_array = new TNDR_GLDATAT [2*_num_grid_points];
    unsigned start = 0;
    unsigned stop = 0;
    for (VGrids::const_iterator VG = _grid_props.begin(); VG != _grid_props.end(); VG++)
    {
       layprop::tellRGB theColor(_drawprop->getColor((*VG)->color()));
-      glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
+      DBGL_CALL(glColor4ub,theColor.red(), theColor.green(), theColor.blue(), theColor.alpha())
       stop = (*VG)->dump(cpoint_array, 2*start);
       for (unsigned i = start; i < stop; i++)
-         glVertex2f(cpoint_array[2*i], cpoint_array[2*i+1]);
+         DBGL_CALL(glVertex2f,cpoint_array[2*i], cpoint_array[2*i+1])
       start = stop;
    }
    assert(start <= (_num_grid_points));
    delete [] cpoint_array;
-   glEnd();
+   DBGL_CALL0(glEnd)
 }
 
 void trend::Tolder::setLayer(const LayerDef& laydef, bool has_selected)
@@ -602,24 +602,24 @@ void trend::Tolder::grcCleanUp()
 
 void trend::Tolder::rlrDraw()
 {
-   glColor4f((GLfloat)1, (GLfloat)1, (GLfloat)1, (GLfloat)0.7); // gray
-   glBegin(GL_LINES);
+   DBGL_CALL(glColor4f,(GLfloat)1, (GLfloat)1, (GLfloat)1, (GLfloat)0.7) // gray
+   DBGL_CALL(glBegin,GL_LINES)
    // draw the nonius and the ruler itself
    for (DBlineList::const_iterator CL = _noniList.begin(); CL != _noniList.end(); CL++)
    {
-      glVertex2i(CL->p1().x(),CL->p1().y());
-      glVertex2i(CL->p2().x(),CL->p2().y());
+      DBGL_CALL(glVertex2i,CL->p1().x(),CL->p1().y())
+      DBGL_CALL(glVertex2i,CL->p2().x(),CL->p2().y())
    }
-   glEnd();
+   DBGL_CALL0(glEnd)
    // draw the ruler value
    for (TrendStrings::const_iterator TS = _rulerTexts.begin(); TS != _rulerTexts.end(); TS++)
    {
-      glPushMatrix();
+      DBGL_CALL0(glPushMatrix)
       real ftm[16];
       (*TS)->ctm().oglForm(ftm);
-      glMultMatrixd(ftm);
+      DBGL_CALL(glMultMatrixd,ftm)
       (*TS)->draw(false, _drawprop);
-      glPopMatrix();
+      DBGL_CALL0(glPopMatrix)
    }
 }
 

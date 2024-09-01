@@ -937,8 +937,11 @@ bool trend::Tenderer::collect()
    //
    // generate all VBOs
    //
+
+   checkOGLError("collect");
+
    _ogl_buffers = DEBUG_NEW GLuint [_num_ogl_buffers];
-   glGenBuffers(_num_ogl_buffers, _ogl_buffers);
+   DBGL_CALL(glGenBuffers,_num_ogl_buffers,_ogl_buffers)
    unsigned current_buffer = 0;
    //
    // collect the point arrays
@@ -955,6 +958,9 @@ bool trend::Tenderer::collect()
       GLuint ibuf = (0 == CLAY->total_indexs()) ? 0u : _ogl_buffers[current_buffer++];
       CLAY->collect(_drawprop->layerFilled(CLAY()), pbuf, ibuf);
    }
+
+   checkOGLError("collect");
+
    //
    // collect the indexes of the selected objects
    if (0 < num_total_slctdx)
@@ -963,8 +969,8 @@ bool trend::Tenderer::collect()
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _sbuffer);
       glBufferData(GL_ELEMENT_ARRAY_BUFFER           ,
                    num_total_slctdx * sizeof(unsigned) ,
-                                              NULL                              ,
-                                              GL_DYNAMIC_DRAW                    );
+                   NULL                              ,
+                   GL_DYNAMIC_DRAW                    );
       unsigned int* sindex_array = (unsigned int*)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
       for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
       {
@@ -974,6 +980,9 @@ bool trend::Tenderer::collect()
       }
       glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
    }
+
+//   checkOGLError("collect");
+
    //
    // collect the reference boxes
    if (0 < _refLayer->total_points())
