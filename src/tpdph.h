@@ -23,4 +23,11 @@
       #define DEBUG_NEW new
    #endif
 #endif
+
+#define DBGL_CALL(fName, args...) \
+   trend::dbgl_call((char*)__FILE__,__LINE__,(char*)(#fName), fName, args);
+#define DBGL_CALL0(fName) \
+   trend::dbgl_call((char*)__FILE__,__LINE__,(char*)(#fName), fName);
+
+//#define GL_KHR_debug
 //using namespace std;
