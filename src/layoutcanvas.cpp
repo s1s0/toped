@@ -46,6 +46,7 @@ extern DataCenter*               DATC;
 extern layprop::PropertyCenter*  PROPC;
 //extern trend::TrendCenter*       TRENDC;
 extern console::TllCmdLine*      Console;
+extern trend::ogl_logfile        OGLLogFile; // openGL call tracking log file
 extern const wxEventType         wxEVT_CANVAS_STATUS;
 extern const wxEventType         wxEVT_CANVAS_CURSOR;
 extern const wxEventType         wxEVT_CANVAS_ZOOM;
@@ -169,17 +170,20 @@ tui::TpdOglContext::TpdOglContext(wxGLCanvas* canvas, wxGLContextAttrs* attr) :
    GLint flags;
    DBGL_CALL(glGetIntegerv,GL_CONTEXT_FLAGS, &flags)
 
-   if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
-      wxLogDebug("OpenGL debug context is available");
-   else
-      wxLogDebug("OpenGL debug context is not available");
+   if (flags & GL_CONTEXT_FLAG_DEBUG_BIT) {
+      OGLLogFile << "OpenGL debug context is available"; OGLLogFile.flush();
+   }
+   else {
+      OGLLogFile << "OpenGL debug context is not available"; OGLLogFile.flush();
+   }
 }
 
 void tui::TpdOglContext::glewContext(LayoutCanvas* canvas)
 {
    canvas->SetCurrent(*this);
    GLenum err = glewInit();
-   wxLogDebug("Status: Using GLEW %s", reinterpret_cast<const char *>(glewGetString(GLEW_VERSION)));
+   OGLLogFile << "Status: Using GLEW " << reinterpret_cast<const char *>(glewGetString(GLEW_VERSION));
+   OGLLogFile.flush();
    if (GLEW_OK != err)
    {
       wxString errmessage(wxT("glewInit() returns an error: "));
@@ -200,8 +204,12 @@ void tui::TpdOglContext::glewContext(LayoutCanvas* canvas)
       _useShaders               = _oglVersion33;
       _glewInitDone             = true;
    }
-    wxLogDebug("OpenGL version: %s", reinterpret_cast<const char *>(glGetString(GL_VERSION)));
-    wxLogDebug("OpenGL vendor: %s", reinterpret_cast<const char *>(glGetString(GL_VENDOR)));
+//    wxLogDebug("OpenGL version: %s", reinterpret_cast<const char *>(glGetString(GL_VERSION)));
+   OGLLogFile << "OpenGL version: " << reinterpret_cast<const char *>(glGetString(GL_VERSION));
+   OGLLogFile.flush();
+//    wxLogDebug("OpenGL vendor: %s", reinterpret_cast<const char *>(glGetString(GL_VENDOR)));
+   OGLLogFile << "OpenGL vendor: " << reinterpret_cast<const char *>(glGetString(GL_VENDOR));
+   OGLLogFile.flush();
 
    TessellPoly::tenderTesel = gluNewTess();
 #ifndef WIN32

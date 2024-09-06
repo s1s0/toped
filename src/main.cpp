@@ -66,6 +66,7 @@ extern trend::TrendCenter*       TRENDC;
 extern parsercmd::cmdBLOCK*      CMDBlock;
 extern parsercmd::TellPreProc*   tellPP;
 extern console::toped_logfile    LogFile;
+extern trend::ogl_logfile        OGLLogFile; // openGL call tracking log file
 extern console::TllCmdLine*      Console;
 extern const wxEventType         wxEVT_RENDER_PARAMS;
 
@@ -89,6 +90,11 @@ bool TopedApp::OnInit()
    // check command line arguments
    if (!parseCmdLineArgs())
       return false;
+
+   // Create the openGLtracking log file
+   if (!getOGLLogFileName()) return false;
+   OGLLogFile.init(std::string(_oglLogFileName.mb_str(wxConvFile)));
+   
    if (_gui)
    {
       // Get the Graphic User Interface (gui system)
@@ -271,6 +277,23 @@ bool TopedApp::getLogFileName()
    if (logFN->IsOk())
    {
       _logFileName = logFN->GetFullPath();
+      status =  true;
+   }
+   else status = false;
+   delete logFN;
+   return status;
+}
+
+bool TopedApp::getOGLLogFileName()
+{
+   bool status = false;
+   wxString fullName;
+   fullName << _tpdLogDir << wxT("toped_OGL_stream.log");
+   wxFileName* logFN = DEBUG_NEW wxFileName(fullName);
+   logFN->Normalize(wxPATH_NORM_ENV_VARS|wxPATH_NORM_DOTS|wxPATH_NORM_TILDE|wxPATH_NORM_ABSOLUTE );
+   if (logFN->IsOk())
+   {
+      _oglLogFileName = logFN->GetFullPath();
       status =  true;
    }
    else status = false;

@@ -165,6 +165,7 @@
 #include <GL/glew.h>
 #include "trendat.h"
 #include <sstream>
+#include <fstream>
 // to cast properly the indices parameter in glDrawElements when
 // drawing from VBO
 #define VBO_BUFFER_OFFSET(i) ((char *)NULL + (i))
@@ -746,6 +747,19 @@ namespace trend {
 //         TrendGrids        _grids;           //!All grid points
          TrendStrings      _rulerTexts;      //!The labels on all rulers
 
+   };
+
+   class ogl_logfile {
+      public:
+                           ogl_logfile() :_enabled(false) {};
+         void              init(const std::string logFileName);
+         void              close();
+         ogl_logfile&      operator<< (const std::string&);
+         ogl_logfile&      operator<< (const unsigned int _i);
+         ogl_logfile&      flush();
+      private:
+         std::fstream     _file;
+         bool             _enabled;
    };
 
    void checkOGLError(std::string);

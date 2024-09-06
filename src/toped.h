@@ -309,6 +309,7 @@ class TopedApp : public wxApp
       typedef std::list<wxDynamicLibrary*> PluginList;
       typedef void (*ModuleFunction)(parsercmd::cmdMAIN*);
       bool                 getLogFileName();
+      bool                 getOGLLogFileName();
       void                 loadGlfFonts();
       void                 defaultStartupScript();
       void                 loadPlugIns();
@@ -322,6 +323,7 @@ class TopedApp : public wxApp
       void                 printLogWHeader();
       void                 initInternalFunctions(parsercmd::cmdMAIN* mblock);
       wxString             _logFileName;
+      wxString             _oglLogFileName;
       wxString             _tpdLogDir;
       wxString             _tpdFontDir;
       wxString             _tpdResourceDir;

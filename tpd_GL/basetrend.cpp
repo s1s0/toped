@@ -31,6 +31,7 @@
 #include "viewprop.h"
 #include "trend.h"
 
+trend::ogl_logfile     OGLLogFile;
 //=============================================================================
 //
 // class TrendTV
@@ -748,6 +749,41 @@ unsigned trend::TrendGridC::dump(TNDR_GLDATAT* parray, unsigned index)
    return index/2;
 }
 
+void trend::ogl_logfile::init(const std::string logFN)
+{
+   char *locale=setlocale(LC_ALL, "");
+   _file.open(logFN.c_str(), std::ios::out);
+   TpdTime timec(time(NULL));
+   _file << "//   Session started: " << timec() << std::endl;
+   setlocale(LC_ALL, "English");
+   _enabled = true;
+}
+
+trend::ogl_logfile& trend::ogl_logfile::flush()
+{
+   if (_enabled) _file << std::endl;
+   return *this;
+}
+
+void trend::ogl_logfile::close()
+{
+   if (_enabled) _file.close();
+
+}
+
+trend::ogl_logfile& trend::ogl_logfile::operator<< (const std::string& info)
+{
+   if (_enabled) _file << info ;
+   return *this;
+}
+
+trend::ogl_logfile& trend::ogl_logfile::operator<< (const unsigned int _i)
+{
+   if (_enabled) _file << _i ;
+   return *this;
+}
+
+
 void trend::checkOGLError(std::string loc)
 {
    std::ostringstream ost;
@@ -773,25 +809,26 @@ void trend::checkOGLError(std::string loc)
 
 void trend::reportOGLStatus(std::string loc)
 {
-   std::ostringstream ost;
-   ost << loc;
+//   std::ostringstream ost;
+   OGLLogFile << loc;
    GLenum ogle;
    if (GL_NO_ERROR != (ogle=glGetError()))
    {
       switch (ogle) {
-         case GL_INVALID_ENUM     : ost << "Unacceptable value for an enumerated argument";     break;
-         case GL_INVALID_VALUE    : ost << "Numeric argument is out of range";                  break;
-         case GL_INVALID_OPERATION: ost << "The operation is not allowed in the current state"; break;
-         case GL_STACK_OVERFLOW   : ost << "Stack overflow";                                    break;
-         case GL_STACK_UNDERFLOW  : ost << "Stack underflow";                                   break;
-         case GL_OUT_OF_MEMORY    : ost << "Out of Memory";                                     break;
-         case GL_TABLE_TOO_LARGE  : ost << "Tablesize too big";                                 break;
-         default                  : ost << "Unknown error value reported:" << ogle;             break;
+         case GL_INVALID_ENUM     : OGLLogFile << "Unacceptable value for an enumerated argument";     break;
+         case GL_INVALID_VALUE    : OGLLogFile << "Numeric argument is out of range";                  break;
+         case GL_INVALID_OPERATION: OGLLogFile << "The operation is not allowed in the current state"; break;
+         case GL_STACK_OVERFLOW   : OGLLogFile << "Stack overflow";                                    break;
+         case GL_STACK_UNDERFLOW  : OGLLogFile << "Stack underflow";                                   break;
+         case GL_OUT_OF_MEMORY    : OGLLogFile << "Out of Memory";                                     break;
+         case GL_TABLE_TOO_LARGE  : OGLLogFile << "Tablesize too big";                                 break;
+         default                  : OGLLogFile << "Unknown error value reported:" << ogle;             break;
       }
    }
    else {
-      ost << " OK";
+      OGLLogFile << " OK";
    }
+   OGLLogFile.flush();
 //   tell_log(console::MT_ERROR,ost.str());
-   wxLogDebug(ost.str().c_str());
+//   wxLogDebug(ost.str().c_str());
 }
