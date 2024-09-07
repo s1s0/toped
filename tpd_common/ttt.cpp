@@ -786,10 +786,10 @@ std::vector<std::string> split (const std::string& str, char delim)
    {
 
       //Ignore delimiter
-      i = std::find_if(i, str.end(), std::bind2nd (std::not_equal_to<char>() , delim));
+      i = std::find_if(i, str.end(), std::bind(std::not_equal_to<char>(), std::placeholders::_1, delim));
       //find out the end of next word
 
-      iter j = std::find_if(i, str.end(), std::bind2nd (std::equal_to<char>() , delim));
+      iter j = std::find_if(i, str.end(), std::bind(std::equal_to<char>() , std::placeholders::_1, delim));
 
       //Copy character from range [i, j)
       if(i != str.end())

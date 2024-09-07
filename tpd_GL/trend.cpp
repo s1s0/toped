@@ -437,7 +437,7 @@ trend::TenderGlfFont::~TenderGlfFont()
    for (FontMap::const_iterator CS = _symbols.begin(); CS != _symbols.end(); CS++)
       delete (CS->second);
    GLuint ogl_buffers[2] = {_pbuffer, _ibuffer};
-   glDeleteBuffers(2, ogl_buffers);
+   DBGL_CALL(glDeleteBuffers,2, ogl_buffers)
 }
 
 //=============================================================================
@@ -1142,8 +1142,8 @@ void trend::TrendCenter::bindFont()
 
 void trend::TrendCenter::unbindFont()
 {
-   glBindBuffer(GL_ARRAY_BUFFER, 0);
-   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+   DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, 0)
+   DBGL_CALL(glBindBuffer,GL_ELEMENT_ARRAY_BUFFER, 0)
 }
 
 GLint trend::TrendCenter::getUniformLoc(const glsl_Uniforms var) const

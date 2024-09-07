@@ -548,7 +548,8 @@ std::string tui::ResourceCenter::simplify(std::string str, char ch)
 {
    std::transform(str.begin(), str.end(), str.begin(), tolower);
    std::string::iterator curIter;
-   curIter = std::find_if(str.begin(), str.end(), std::bind2nd(std::equal_to<char>(), ch));
+//   curIter = std::find_if(str.begin(), str.end(), std::bind2nd(std::equal_to<char>(), ch));
+   curIter = std::find_if(str.begin(), str.end(), std::bind(std::equal_to<char>(), std::placeholders::_1, ch));
    if (curIter != str.end())
    {
       str.erase(curIter);

@@ -420,29 +420,29 @@ void trend::TenderLay::collect(bool /*fill*/, GLuint pbuf, GLuint ibuf)
    unsigned int* cindex_array = NULL;
    _pbuffer = pbuf;
    _ibuffer = ibuf;
-   glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
-   glBufferData(GL_ARRAY_BUFFER                       ,
+   DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, _pbuffer)
+   DBGL_CALL(glBufferData,GL_ARRAY_BUFFER                   ,
                 2 * _num_total_points * sizeof(TNDR_GLDATAT),
-                NULL                                  ,
-                GL_DYNAMIC_DRAW                       );
-   cpoint_array = (TNDR_GLDATAT*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+                nullptr                                     ,
+                GL_DYNAMIC_DRAW                              )
+   cpoint_array = (TNDR_GLDATAT*)DBGL_CALL(glMapBuffer,GL_ARRAY_BUFFER, GL_WRITE_ONLY);
    if (0 != _ibuffer)
    {
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibuffer);
-      glBufferData(GL_ELEMENT_ARRAY_BUFFER           ,
+      DBGL_CALL(glBindBuffer,GL_ELEMENT_ARRAY_BUFFER, _ibuffer)
+      DBGL_CALL(glBufferData,GL_ELEMENT_ARRAY_BUFFER    ,
                    _num_total_indexs * sizeof(unsigned) ,
-                   NULL                              ,
-                   GL_DYNAMIC_DRAW                    );
-      cindex_array = (unsigned int*)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
+                   nullptr                              ,
+                   GL_DYNAMIC_DRAW                    )
+      cindex_array = (unsigned int*)DBGL_CALL(glMapBuffer,GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
    }
    for (TrendTVList::const_iterator TLAY = _layData.begin(); TLAY != _layData.end(); TLAY++)
       (*TLAY)->collect(cpoint_array, cindex_array);
    // Unmap the buffers
-   glUnmapBuffer(GL_ARRAY_BUFFER);
+   DBGL_CALL(glUnmapBuffer,GL_ARRAY_BUFFER)
 //   glBindBuffer(GL_ARRAY_BUFFER, 0);
    if (0 != _ibuffer)
    {
-      glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
+      DBGL_CALL(glUnmapBuffer,GL_ELEMENT_ARRAY_BUFFER)
 //      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
    }
 }
@@ -509,15 +509,15 @@ void trend::TenderLay::collectSelected(unsigned int* slctd_array)
 
 void trend::TenderLay::draw(layprop::DrawProperties* drawprop)
 {
-   glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
+   DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, _pbuffer)
    // Check the state of the buffer
    GLint bufferSize;
-   glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
+   DBGL_CALL(glGetBufferParameteriv, GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize)
    assert(bufferSize == (GLint)(2 * _num_total_points * sizeof(TNDR_GLDATAT)));
    if (0 != _ibuffer)
    {
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ibuffer);
-      glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
+      DBGL_CALL(glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, _ibuffer)
+      DBGL_CALL(glGetBufferParameteriv, GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize)
       assert(bufferSize == (GLint)(_num_total_indexs * sizeof(unsigned)));
    }
    for (TrendTVList::const_iterator TLAY = _layData.begin(); TLAY != _layData.end(); TLAY++)
@@ -529,22 +529,22 @@ void trend::TenderLay::draw(layprop::DrawProperties* drawprop)
       (*TLAY)->draw(drawprop);
    }
 
-   glBindBuffer(GL_ARRAY_BUFFER, 0);
+   DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, 0)
    if (0 != _ibuffer)
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+      DBGL_CALL(glBindBuffer,GL_ELEMENT_ARRAY_BUFFER, 0)
 }
 
 void trend::TenderLay::drawSelected()
 {
-   glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
+   DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, _pbuffer)
    // Check the state of the buffer
    GLint bufferSize;
-   glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
+   DBGL_CALL(glGetBufferParameteriv, GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize)
    assert(bufferSize == (GLint)(2 * _num_total_points * sizeof(TNDR_GLDATAT)));
 
-   glEnableClientState(GL_VERTEX_ARRAY);
-   glEnableClientState(GL_INDEX_ARRAY);
-   glVertexPointer(2, TNDR_GLENUMT, 0, (GLvoid*)(sizeof(TNDR_GLDATAT) * _stv_array_offset));
+   DBGL_CALL(glEnableClientState, GL_VERTEX_ARRAY)
+   DBGL_CALL(glEnableClientState, GL_INDEX_ARRAY)
+   DBGL_CALL(glVertexPointer, 2, TNDR_GLENUMT, 0, (GLvoid*)(sizeof(TNDR_GLDATAT) * _stv_array_offset))
 
    if (_asobjix[lstr] > 0)
    {
@@ -552,7 +552,7 @@ void trend::TenderLay::drawSelected()
       assert(_fstslix[lstr]);
       //glMultiDrawElements(GL_LINE_STRIP, _sizslix[lstr], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[lstr], _asobjix[lstr]);
       for (unsigned i= 0; i < _asobjix[lstr]; i++)
-         glDrawElements(GL_LINE_STRIP, _sizslix[lstr][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_fstslix[lstr][i]));
+         DBGL_CALL(glDrawElements,GL_LINE_STRIP, _sizslix[lstr][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_fstslix[lstr][i]))
    }
    if (_asobjix[llps] > 0)
    {
@@ -560,7 +560,7 @@ void trend::TenderLay::drawSelected()
       assert(_fstslix[llps]);
          //glMultiDrawElements(GL_LINE_LOOP     , _sizslix[llps], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[llps], _alobjix[llps]);
       for (unsigned i= 0; i < _asobjix[llps]; i++)
-         glDrawElements(GL_LINE_LOOP, _sizslix[llps][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_fstslix[llps][i]));
+         DBGL_CALL(glDrawElements, GL_LINE_LOOP, _sizslix[llps][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_fstslix[llps][i]))
    }
    if (_asobjix[lnes] > 0)
    {
@@ -568,13 +568,13 @@ void trend::TenderLay::drawSelected()
       assert(_fstslix[lnes]);
          //glMultiDrawElements(GL_LINES  , _sizslix[lnes], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[lnes], _alobjix[lnes]);
       for (unsigned i= 0; i < _asobjix[lnes]; i++)
-         glDrawElements(GL_LINES, _sizslix[lnes][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_fstslix[lnes][i]));
+         DBGL_CALL(glDrawElements,GL_LINES, _sizslix[lnes][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_fstslix[lnes][i]))
    }
-   glDisableClientState(GL_INDEX_ARRAY);
-   glDisableClientState(GL_VERTEX_ARRAY);
+   DBGL_CALL(glDisableClientState, GL_INDEX_ARRAY)
+   DBGL_CALL(glDisableClientState, GL_VERTEX_ARRAY)
 
 
-   glBindBuffer(GL_ARRAY_BUFFER, 0);
+   DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, 0);
 }
 
 void trend::TenderLay::drawTexts(layprop::DrawProperties* drawprop)
@@ -619,12 +619,12 @@ void trend::TenderRefLay::collect(GLuint pbuf)
 {
    TNDR_GLDATAT* cpoint_array = NULL;
    _pbuffer = pbuf;
-   glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
-   glBufferData(GL_ARRAY_BUFFER              ,
+   DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, _pbuffer)
+   DBGL_CALL(glBufferData, GL_ARRAY_BUFFER              ,
                 2 * total_points() * sizeof(TNDR_GLDATAT) ,
-                NULL                         ,
-                GL_DYNAMIC_DRAW               );
-   cpoint_array = (TNDR_GLDATAT*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+                nullptr                         ,
+                GL_DYNAMIC_DRAW               )
+   cpoint_array = (TNDR_GLDATAT*)DBGL_CALL(glMapBuffer,GL_ARRAY_BUFFER, GL_WRITE_ONLY)
 
    // initialise the indexing
    unsigned pntindx = 0;
@@ -664,27 +664,27 @@ void trend::TenderRefLay::collect(GLuint pbuf)
 void trend::TenderRefLay::draw(layprop::DrawProperties* drawprop)
 {
    // Bind the buffer
-   glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
+   DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, _pbuffer)
    // Check the state of the buffer
    GLint bufferSize;
-   glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
+   DBGL_CALL(glGetBufferParameteriv, GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize)
    assert(bufferSize == (GLint)(2 * total_points() * sizeof(TNDR_GLDATAT)));
 
-   glEnableClientState(GL_VERTEX_ARRAY);
-   glVertexPointer(2, TNDR_GLENUMT, 0, 0);
+   DBGL_CALL(glEnableClientState, GL_VERTEX_ARRAY)
+   DBGL_CALL(glVertexPointer, 2, TNDR_GLENUMT, 0, nullptr)
    if (0 < (_alvrtxs + _asindxs))
    {
       assert(_firstvx); assert(_sizesvx);
-      glMultiDrawArrays(GL_LINE_LOOP, _firstvx, _sizesvx, _alobjvx + _asobjix);
+      DBGL_CALL(glMultiDrawArrays, GL_LINE_LOOP, _firstvx, _sizesvx, _alobjvx + _asobjix)
       if (0 < _asindxs)
       {
          assert(_fstslix); assert(_sizslix);
          setLine(drawprop, true);
-         glMultiDrawArrays(GL_LINE_LOOP, _fstslix, _sizslix, _asobjix);
+         DBGL_CALL(glMultiDrawArrays, GL_LINE_LOOP, _fstslix, _sizslix, _asobjix)
          setLine(drawprop, false);
       }
    }
-   glDisableClientState(GL_VERTEX_ARRAY);
+   DBGL_CALL(glDisableClientState, GL_VERTEX_ARRAY)
 }
 
 void trend::TenderRefLay::setLine(layprop::DrawProperties* drawprop, bool selected)
@@ -727,11 +727,11 @@ void trend::TenderMarks::collect(GLuint pbuf)
 {
    TNDR_GLDATAT* cpoint_array = NULL;
    _pbuffer = pbuf;
-   glBindBuffer(GL_ARRAY_BUFFER, _pbuffer);
-   glBufferData(GL_ARRAY_BUFFER              ,
+   DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, _pbuffer);
+   DBGL_CALL(glBufferData, GL_ARRAY_BUFFER              ,
                 2 * total_points() * sizeof(TNDR_GLDATAT) ,
-                NULL                         ,
-                GL_DYNAMIC_DRAW               );
+                nullptr                         ,
+                GL_DYNAMIC_DRAW               )
    cpoint_array = (TNDR_GLDATAT*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 
    unsigned pntindx = 0;
@@ -752,7 +752,7 @@ void trend::TenderMarks::collect(GLuint pbuf)
    }
    assert(pntindx == 2 * total_points());
    // Unmap the buffers
-   glUnmapBuffer(GL_ARRAY_BUFFER);
+   DBGL_CALL(glUnmapBuffer, GL_ARRAY_BUFFER)
 }
 
 void trend::TenderMarks::draw(layprop::DrawProperties* drawprop)
@@ -864,24 +864,24 @@ void trend::Tenderer::setHvrLayer(const LayerDef& laydef)
 
 void trend::Tenderer::grdDraw()
 {
-   glEnableClientState(GL_VERTEX_ARRAY);
-   glBindBuffer(GL_ARRAY_BUFFER, _ogl_grd_buffer[0]);
+   DBGL_CALL(glEnableClientState, GL_VERTEX_ARRAY)
+   DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, _ogl_grd_buffer[0])
    // Check the state of the buffer
    GLint bufferSize;
-   glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
+   DBGL_CALL(glGetBufferParameteriv, GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize)
    assert(bufferSize == (GLint)(2 * _num_grid_points * sizeof(TNDR_GLDATAT)));
    // Set-up the offset in the binded Vertex buffer
-   glVertexPointer(2, TNDR_GLENUMT, 0, 0);
+   DBGL_CALL(glVertexPointer, 2, TNDR_GLENUMT, 0, nullptr)
    unsigned startP = 0;
    for (VGrids::const_iterator CG = _grid_props.begin(); CG != _grid_props.end(); CG++)
    {
       layprop::tellRGB theColor(_drawprop->getColor((*CG)->color()));
-      glColor4ub(theColor.red(), theColor.green(), theColor.blue(), theColor.alpha());
+      DBGL_CALL(glColor4ub, theColor.red(), theColor.green(), theColor.blue(), theColor.alpha())
       // draw
-      glDrawArrays(GL_POINTS, startP, (*CG)->asize());
+      DBGL_CALL(glDrawArrays, GL_POINTS, startP, (*CG)->asize())
       startP += (*CG)->asize();
    }
-   glBindBuffer(GL_ARRAY_BUFFER, 0);
+   DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, 0)
 }
 
 bool trend::Tenderer::collect()
@@ -966,19 +966,19 @@ bool trend::Tenderer::collect()
    if (0 < num_total_slctdx)
    {// selected objects buffer
       _sbuffer = _ogl_buffers[current_buffer++];
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _sbuffer);
-      glBufferData(GL_ELEMENT_ARRAY_BUFFER           ,
+      DBGL_CALL(glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, _sbuffer)
+      DBGL_CALL(glBufferData, GL_ELEMENT_ARRAY_BUFFER           ,
                    num_total_slctdx * sizeof(unsigned) ,
-                   NULL                              ,
-                   GL_DYNAMIC_DRAW                    );
-      unsigned int* sindex_array = (unsigned int*)glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY);
+                   nullptr                             ,
+                   GL_DYNAMIC_DRAW                    )
+      unsigned int* sindex_array = (unsigned int*)DBGL_CALL(glMapBuffer, GL_ELEMENT_ARRAY_BUFFER, GL_WRITE_ONLY)
       for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
       {
          if (0 == CLAY->total_slctdx())
             continue;
          CLAY->collectSelected(sindex_array);
       }
-      glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
+      DBGL_CALL(glUnmapBuffer, GL_ELEMENT_ARRAY_BUFFER)
    }
 
 //   checkOGLError("collect");
@@ -1079,15 +1079,15 @@ bool trend::Tenderer::grdCollect(const layprop::LayoutGrid** allGrids)
    }
    if (0 == _num_grid_points) return false;
    _ogl_grd_buffer = DEBUG_NEW GLuint [1];
-   glGenBuffers(1, _ogl_grd_buffer);
+   DBGL_CALL(glGenBuffers, 1, _ogl_grd_buffer)
 
    TNDR_GLDATAT* cpoint_array = NULL;
-   glBindBuffer(GL_ARRAY_BUFFER, _ogl_grd_buffer[0]);
-   glBufferData(GL_ARRAY_BUFFER                       ,
+   DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, _ogl_grd_buffer[0])
+   DBGL_CALL(glBufferData, GL_ARRAY_BUFFER                   ,
                 2 * _num_grid_points * sizeof(TNDR_GLDATAT)  ,
-                NULL                                  ,
-                GL_DYNAMIC_DRAW                       );
-   cpoint_array = (TNDR_GLDATAT*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+                nullptr                                  ,
+                GL_DYNAMIC_DRAW                       )
+   cpoint_array = (TNDR_GLDATAT*)DBGL_CALL(glMapBuffer, GL_ARRAY_BUFFER, GL_WRITE_ONLY)
    unsigned pnt = 0;
    for (VGrids::const_iterator VG = _grid_props.begin(); VG != _grid_props.end(); VG++)
    {
@@ -1095,7 +1095,7 @@ bool trend::Tenderer::grdCollect(const layprop::LayoutGrid** allGrids)
    }
    assert(pnt <= (_num_grid_points));
    // Unmap the buffers
-   glUnmapBuffer(GL_ARRAY_BUFFER);
+   DBGL_CALL(glUnmapBuffer, GL_ARRAY_BUFFER)
    return true;
 }
 
@@ -1119,15 +1119,15 @@ bool trend::Tenderer::rlrCollect(const layprop::RulerList& rulers, int4b step, c
 
    _num_ruler_ticks = static_cast<unsigned>(2 * noniList.size());
    _ogl_rlr_buffer = DEBUG_NEW GLuint [1];
-   glGenBuffers(1, _ogl_rlr_buffer);
+   DBGL_CALL(glGenBuffers, 1, _ogl_rlr_buffer)
 
    TNDR_GLDATAT* cpoint_array = NULL;
-   glBindBuffer(GL_ARRAY_BUFFER, _ogl_rlr_buffer[0]);
-   glBufferData(GL_ARRAY_BUFFER                       ,
+   DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, _ogl_rlr_buffer[0]);
+   DBGL_CALL(glBufferData, GL_ARRAY_BUFFER                       ,
                 2 * _num_ruler_ticks * sizeof(TNDR_GLDATAT),
-                NULL                                  ,
-                GL_DYNAMIC_DRAW                       );
-   cpoint_array = (TNDR_GLDATAT*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+                nullptr                                    ,
+                GL_DYNAMIC_DRAW                       )
+   cpoint_array = (TNDR_GLDATAT*)DBGL_CALL(glMapBuffer, GL_ARRAY_BUFFER, GL_WRITE_ONLY)
    unsigned pnt = 0;
    for (DBlineList::const_iterator CL = noniList.begin(); CL != noniList.end(); CL++)
    {
@@ -1138,7 +1138,7 @@ bool trend::Tenderer::rlrCollect(const layprop::RulerList& rulers, int4b step, c
    }
    assert(pnt == (2 * _num_ruler_ticks));
    // Unmap the buffers
-   glUnmapBuffer(GL_ARRAY_BUFFER);
+   DBGL_CALL(glUnmapBuffer, GL_ARRAY_BUFFER)
 //   glBindBuffer(GL_ARRAY_BUFFER, 0);
    return true;
 }
@@ -1198,12 +1198,12 @@ void trend::Tenderer::draw()
       if (0 != CLAY->total_slctdx())
       {// redraw selected contours only
          setLine(true);
-         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _sbuffer);
-         glPushMatrix();
-         glMultMatrixd(_activeCS->translation());
+         DBGL_CALL(glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, _sbuffer)
+         DBGL_CALL0(glPushMatrix);
+         DBGL_CALL(glMultMatrixd, _activeCS->translation())
          CLAY->drawSelected();
-         glPopMatrix();
-         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+         DBGL_CALL0(glPopMatrix)
+         DBGL_CALL(glBindBuffer, GL_ELEMENT_ARRAY_BUFFER, 0)
       }
       setLine(false);
       // draw everything
@@ -1222,7 +1222,7 @@ void trend::Tenderer::draw()
    {
       setLine(false);
       _refLayer->draw(_drawprop);
-      glDisable(GL_LINE_STIPPLE);
+      DBGL_CALL(glDisable, GL_LINE_STIPPLE)
    }
    // draw marks
    if (0 < _marks->total_points()   )   _marks->draw(_drawprop);
@@ -1248,11 +1248,12 @@ void trend::Tenderer::grcDraw()
 void trend::Tenderer::cleanUp()
 {
    // Clean-up the buffers
-   glBindBuffer(GL_ARRAY_BUFFER, 0);
-   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+   DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, 0)
+   DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, 0)
+   DBGL_CALL(glBindBuffer,GL_ELEMENT_ARRAY_BUFFER, 0)
    if (NULL != _ogl_buffers)
    {
-      glDeleteBuffers(_num_ogl_buffers, _ogl_buffers);
+      DBGL_CALL(glDeleteBuffers,_num_ogl_buffers, _ogl_buffers)
       delete [] _ogl_buffers;
       _ogl_buffers = NULL;
    }
@@ -1262,11 +1263,11 @@ void trend::Tenderer::cleanUp()
 void trend::Tenderer::grcCleanUp()
 {
    // Clean-up the buffers
-   glBindBuffer(GL_ARRAY_BUFFER, 0);
-   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+   DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, 0)
+   DBGL_CALL(glBindBuffer,GL_ELEMENT_ARRAY_BUFFER, 0)
    if (NULL != _ogl_grc_buffers)
    {
-      glDeleteBuffers(_num_ogl_grc_buffers, _ogl_grc_buffers);
+      DBGL_CALL(glDeleteBuffers,_num_ogl_grc_buffers, _ogl_grc_buffers)
       delete [] _ogl_grc_buffers;
       _ogl_grc_buffers = NULL;
    }
@@ -1275,11 +1276,11 @@ void trend::Tenderer::grcCleanUp()
 
 void trend::Tenderer::grdCleanUp()
 {
-   glBindBuffer(GL_ARRAY_BUFFER, 0);
-   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+   DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, 0)
+   DBGL_CALL(glBindBuffer,GL_ELEMENT_ARRAY_BUFFER, 0)
    if (NULL != _ogl_grd_buffer)
    {
-      glDeleteBuffers(1, _ogl_grd_buffer);
+      DBGL_CALL(glDeleteBuffers,1, _ogl_grd_buffer)
       delete [] _ogl_grd_buffer;
       _ogl_grd_buffer = NULL;
    }
@@ -1288,11 +1289,11 @@ void trend::Tenderer::grdCleanUp()
 
 void trend::Tenderer::rlrCleanUp()
 {
-   glBindBuffer(GL_ARRAY_BUFFER, 0);
-   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+   DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, 0)
+   DBGL_CALL(glBindBuffer,GL_ELEMENT_ARRAY_BUFFER, 0)
    if (NULL != _ogl_rlr_buffer)
    {
-      glDeleteBuffers(1, _ogl_rlr_buffer);
+      DBGL_CALL(glDeleteBuffers,1, _ogl_rlr_buffer)
       delete [] _ogl_rlr_buffer;
       _ogl_rlr_buffer = NULL;
    }
@@ -1302,31 +1303,31 @@ void trend::Tenderer::rlrCleanUp()
 void trend::Tenderer::rlrDraw()
 {
 //   glColor4ub
-   glColor4f((GLfloat)1, (GLfloat)1, (GLfloat)1, (GLfloat)0.7); // gray
-   glBindBuffer(GL_ARRAY_BUFFER, _ogl_rlr_buffer[0]);
+   DBGL_CALL(glColor4f,(GLfloat)1, (GLfloat)1, (GLfloat)1, (GLfloat)0.7) // gray
+   DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, _ogl_rlr_buffer[0])
    // Check the state of the buffer
    GLint bufferSize;
-   glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
+   DBGL_CALL(glGetBufferParameteriv, GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize)
    assert(bufferSize == (GLint)(2 * _num_ruler_ticks * sizeof(TNDR_GLDATAT)));
 
-   glEnableClientState(GL_VERTEX_ARRAY);
+   DBGL_CALL(glEnableClientState, GL_VERTEX_ARRAY)
    // Set-up the offset in the binded Vertex buffer
-   glVertexPointer(2, TNDR_GLENUMT, 0, 0);
+   DBGL_CALL(glVertexPointer, 2, TNDR_GLENUMT, 0, nullptr)
    // draw
-   glDrawArrays(GL_LINES, 0, _num_ruler_ticks);
+   DBGL_CALL(glDrawArrays, GL_LINES, 0, _num_ruler_ticks)
 
-   glBindBuffer(GL_ARRAY_BUFFER, 0);
+   DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, 0)
 
    // draw the ruler value
    TRENDC->bindFont();
    for (TrendStrings::const_iterator TS = _rulerTexts.begin(); TS != _rulerTexts.end(); TS++)
    {
-      glPushMatrix();
+      DBGL_CALL0(glPushMatrix)
       real ftm[16];
       (*TS)->ctm().oglForm(ftm);
-      glMultMatrixd(ftm);
+      DBGL_CALL(glMultMatrixd, ftm);
       (*TS)->draw(false, _drawprop);
-      glPopMatrix();
+      DBGL_CALL0(glPopMatrix)
    }
 }
 

@@ -195,7 +195,7 @@ void console::ted_log_ctrl::DoLogRecord(wxLogLevel level, const wxString& msg, c
    { // gui mode
       wxCommandEvent eventLOG(wxEVT_LOG_ERRMESSAGE);
       eventLOG.SetString(msg);
-      eventLOG.SetInt(level);
+      eventLOG.SetInt(static_cast<int>(level));
       eventLOG.SetExtraLong(info.timestamp);
       wxPostEvent(_tellLOGW, eventLOG);
    }
@@ -372,7 +372,7 @@ void console::TopedStatus::OnInitGauge(wxFileOffset* init_val)
       _progress = DEBUG_NEW wxGauge(this, wxID_ANY, ((int) 0x7ffffff), wxPoint(rect.x, rect.y), wxSize(rect.width, rect.height));
     }
     else
-      _progress = DEBUG_NEW wxGauge(this, wxID_ANY, initVal, wxPoint(rect.x, rect.y), wxSize(rect.width, rect.height));
+      _progress = DEBUG_NEW wxGauge(this, wxID_ANY, static_cast<int>(initVal), wxPoint(rect.x, rect.y), wxSize(rect.width, rect.height));
 }
 
 void console::TopedStatus::OnGaugeRun(wxFileOffset* position)
