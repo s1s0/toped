@@ -447,10 +447,14 @@ trend::ToshaderGlfFont::ToshaderGlfFont(std::string filename, std::string& fontn
 
 void trend::ToshaderGlfFont::drawString(const std::string& text, bool fill, layprop::DrawProperties* drawprop)
 {
+   GLuint VertexArrayID;
+   DBGL_CALL(glGenVertexArrays,1, &VertexArrayID)
+   DBGL_CALL(glBindVertexArray, VertexArrayID)
+
    // Activate the vertex buffers in the vertex shader ...
-   glEnableVertexAttribArray(TSHDR_LOC_VERTEX);
+   DBGL_CALL(glEnableVertexAttribArray,TSHDR_LOC_VERTEX)
    // Set-up the offset in the binded Vertex buffer
-   glVertexAttribPointer(TSHDR_LOC_VERTEX, 2, GL_FLOAT, GL_FALSE, 0, 0);
+   DBGL_CALL(glVertexAttribPointer, TSHDR_LOC_VERTEX, 2, GL_FLOAT, GL_FALSE, 0, nullptr)
    float right_of = 0.0f, left_of = 0.0f;
    for (unsigned i = 0; i < text.length() ; i++)
    {
@@ -466,7 +470,7 @@ void trend::ToshaderGlfFont::drawString(const std::string& text, bool fill, layp
          ctm *= drawprop->topCtm();
          float mtrxOrtho[16];
          ctm.oglForm(mtrxOrtho);
-         glUniformMatrix4fv(TRENDC->getUniformLoc(glslu_in_CTM), 1, GL_FALSE, mtrxOrtho);
+         DBGL_CALL(glUniformMatrix4fv, TRENDC->getUniformLoc(glslu_in_CTM), 1, GL_FALSE, mtrxOrtho)
       }
       if ((0x20 == text[i]) || (_symbols.end() == CSI))
       {
@@ -474,15 +478,16 @@ void trend::ToshaderGlfFont::drawString(const std::string& text, bool fill, layp
       }
       else
       {
-         glUniform1ui(TRENDC->getUniformLoc(glslu_in_StippleEn), 0);
+         DBGL_CALL(glUniform1ui,TRENDC->getUniformLoc(glslu_in_StippleEn), 0)
          CSI->second->drawWired();
-         glUniform1ui(TRENDC->getUniformLoc(glslu_in_StippleEn), 1);
+         DBGL_CALL(glUniform1ui,TRENDC->getUniformLoc(glslu_in_StippleEn), 1)
          if (fill)
             CSI->second->drawSolid();
          right_of += CSI->second->maxX();
       }
    }
-   glDisableVertexAttribArray(TSHDR_LOC_VERTEX);
+   DBGL_CALL(glDisableVertexAttribArray, TSHDR_LOC_VERTEX)
+   DBGL_CALL(glDeleteVertexArrays, 1, &VertexArrayID)
 }
 
 
@@ -543,7 +548,7 @@ void trend::Shaders::useProgram(const glsl_Programs pType)
 {
    _curProgram = pType;
    assert(-1 != _idPrograms[_curProgram]);
-   glUseProgram(_idPrograms[pType]);
+   DBGL_CALL(glUseProgram, _idPrograms[pType])
    if (  (glslp_VG == _curProgram)
        ||(glslp_PS == _curProgram)
        )
@@ -551,7 +556,7 @@ void trend::Shaders::useProgram(const glsl_Programs pType)
       // view port
       GLfloat vport[4];
       glGetFloatv(GL_VIEWPORT, vport);
-      glUniform2fv(getUniformLoc(glslu_in_ScreenSize), 1, &vport[2]);
+      DBGL_CALL(glUniform2fv, getUniformLoc(glslu_in_ScreenSize), 1, &vport[2])
    }
 }
 
@@ -581,6 +586,12 @@ void trend::Shaders::loadShadersCode(const std::string& codeDirectory)
       _status &= linkProgram(glslp_VF);
       _status &= linkProgram(glslp_VG);
       _status &= linkProgram(glslp_PS);
+      
+      DBGL_CALL(glDeleteShader,_idShdrVertex  )
+      DBGL_CALL(glDeleteShader,_idShdrGeometry)
+      DBGL_CALL(glDeleteShader,_idShdrGeSprite)
+      DBGL_CALL(glDeleteShader,_idShdrFragment)
+      
    }
 }
 
@@ -591,39 +602,39 @@ bool trend::Shaders::linkProgram(const glsl_Programs pType)
    {
       return false;
    }
-
+   
    // TODO bind attribute locations
-
+   
    std::stringstream info;
    switch (pType)
    {
       case glslp_VF:
       {
-         glAttachShader(program, _idShdrVertex  );
-         glAttachShader(program, _idShdrFragment);
+         DBGL_CALL(glAttachShader, program, _idShdrVertex  )
+         DBGL_CALL(glAttachShader, program, _idShdrFragment)
          info << "GLSL program VF";
          break;
       }
       case glslp_VG:
       {
-         glAttachShader(program, _idShdrVertex  );
-         glAttachShader(program, _idShdrGeometry);
-         glAttachShader(program, _idShdrFragment);
+         DBGL_CALL(glAttachShader, program, _idShdrVertex  )
+         DBGL_CALL(glAttachShader, program, _idShdrGeometry)
+         DBGL_CALL(glAttachShader, program, _idShdrFragment)
          info << "GLSL program VG";
          break;
       }
       case glslp_PS:
-      {
-         glAttachShader(program, _idShdrVertex  );
-         glAttachShader(program, _idShdrGeSprite);
-         glAttachShader(program, _idShdrFragment);
+         {
+         DBGL_CALL(glAttachShader, program, _idShdrVertex  )
+         DBGL_CALL(glAttachShader, program, _idShdrGeSprite)
+         DBGL_CALL(glAttachShader, program, _idShdrFragment)
          info << "GLSL program PS";
          break;
       }
       default: assert(false); break;
    }
    // link
-   glLinkProgram(program);
+   DBGL_CALL(glLinkProgram,program)
    GLint programOK;
    glGetProgramiv(program, GL_LINK_STATUS, &programOK);
    if (programOK)
@@ -639,6 +650,31 @@ bool trend::Shaders::linkProgram(const glsl_Programs pType)
       tell_log(console::MT_ERROR, info.str());
       getProgramsLog(program);
       return false;
+   }
+   
+   switch (pType)
+   {
+      case glslp_VF:
+      {
+         DBGL_CALL(glDetachShader, program, _idShdrVertex  )
+         DBGL_CALL(glDetachShader, program, _idShdrFragment)
+         break;
+      }
+      case glslp_VG:
+      {
+         DBGL_CALL(glDetachShader, program, _idShdrVertex  )
+         DBGL_CALL(glDetachShader, program, _idShdrGeometry)
+         DBGL_CALL(glDetachShader, program, _idShdrFragment)
+         break;
+      }
+      case glslp_PS:
+      {
+         DBGL_CALL(glDetachShader, program, _idShdrVertex  )
+         DBGL_CALL(glDetachShader, program, _idShdrGeSprite)
+         DBGL_CALL(glDetachShader, program, _idShdrFragment)
+         break;
+      }
+      default: assert(false); break;
    }
 }
 

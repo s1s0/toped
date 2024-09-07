@@ -507,14 +507,14 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& /*event*/)
          wxPaintDC dc(this);
          SetCurrent(*_glRC);
 trend::checkOGLError("Setting the context");
-         DBGL_CALL(glMatrixMode,GL_MODELVIEW)
-         DBGL_CALL(glShadeModel,GL_FLAT)
+//         DBGL_CALL(glMatrixMode,GL_MODELVIEW)
+//         DBGL_CALL(glShadeModel,GL_FLAT)
          updateViewport();
          // CTM matrix stuff
-         CTM ctmOrtho(TP(_lpBL.x(),_lpTR.y()), TP(_lpTR.x(), _lpBL.y()));
-         real mtrxOrtho [16];
-         ctmOrtho.oglForm(mtrxOrtho);
-         DBGL_CALL(glLoadMatrixd,mtrxOrtho)
+//         CTM ctmOrtho(TP(_lpBL.x(),_lpTR.y()), TP(_lpTR.x(), _lpBL.y()));
+//         real mtrxOrtho [16];
+//         ctmOrtho.oglForm(mtrxOrtho);
+//         DBGL_CALL(glLoadMatrixd,mtrxOrtho)
 
          DBGL_CALL(glClear, GL_COLOR_BUFFER_BIT)
          DBGL_CALL(glEnable, GL_BLEND)
@@ -523,7 +523,7 @@ trend::checkOGLError("Setting the context");
 
          DATC->render();
          if (0 == _blinkInterval) DATC->grcDraw();
-         DBGL_CALL(glAccum, GL_LOAD, 1.0)
+//         DBGL_CALL(glAccum, GL_LOAD, 1.0)
          _invalidWindow = false;
          rubberPaint();
          SwapBuffers();
@@ -1293,18 +1293,18 @@ void* tui::DrawThread::Entry(/*wxGLContext* glRC*/)
    if (wxMUTEX_NO_ERROR == _mutex.TryLock())
    {
       wxClientDC dc(_canvas);
-      DBGL_CALL(glMatrixMode, GL_MODELVIEW )
-      DBGL_CALL(glShadeModel, GL_FLAT ) // Single color
+//      DBGL_CALL(glMatrixMode, GL_MODELVIEW )
+//      DBGL_CALL(glShadeModel, GL_FLAT ) // Single color
       _canvas->updateViewport();
       // CTM matrix stuff
-      DBGL_CALL0(glLoadIdentity)
-      DBGL_CALL(glOrtho,_canvas->_lpBL.x(),_canvas->_lpTR.x(),_canvas->_lpTR.y(),_canvas->_lpBL.y(),-1.0,1.0)
+//      DBGL_CALL0(glLoadIdentity)
+//      DBGL_CALL(glOrtho,_canvas->_lpBL.x(),_canvas->_lpTR.x(),_canvas->_lpTR.y(),_canvas->_lpBL.y(),-1.0,1.0)
       DBGL_CALL(glClear,GL_COLOR_BUFFER_BIT)
       DBGL_CALL(glEnable,GL_BLEND)
       DBGL_CALL(glBlendFunc,GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
       DBGL_CALL(glClear,GL_ACCUM_BUFFER_BIT)
       DATC->render();    // draw data
-      DBGL_CALL(glAccum,GL_LOAD, 1.0)
+//      DBGL_CALL(glAccum,GL_LOAD, 1.0)
       _canvas->_invalidWindow = false;
       _canvas->rubberPaint();
 //      if (_canvas->_rubberBand) _canvas->rubberPaint();

@@ -55,6 +55,11 @@ void trend::ToshaderTV::draw(layprop::DrawProperties* drawprop)
    // First - deal with openGL translation matrix
    setShaderCtm(drawprop, _refCell);
    setAlpha(drawprop);
+
+   GLuint VertexArrayID;
+   DBGL_CALL(glGenVertexArrays, 1, &VertexArrayID)
+   DBGL_CALL(glBindVertexArray, VertexArrayID)
+
    // Activate the vertex buffers in the vertex shader ...
    DBGL_CALL(glEnableVertexAttribArray,TSHDR_LOC_VERTEX)
    // Set-up the offset in the binded Vertex buffer
@@ -66,6 +71,7 @@ void trend::ToshaderTV::draw(layprop::DrawProperties* drawprop)
    DBGL_CALL(glUniform1ui,TRENDC->getUniformLoc(glslu_in_StippleEn), 1)
    // Switch the vertex buffers OFF in the openGL engine ...
    DBGL_CALL(glDisableVertexAttribArray,TSHDR_LOC_VERTEX)
+   DBGL_CALL(glDeleteVertexArrays, 1, &VertexArrayID)
    // ... and finally restore the openGL translation matrix
    drawprop->popCtm();
 }
@@ -101,7 +107,7 @@ void trend::ToshaderTV::drawTriQuads()
    {// Draw convex polygons
       assert(_firstvx[cnvx]);
       assert(_sizesvx[cnvx]);
-      DBGL_CALL(glMultiDrawArrays,GL_QUADS, _firstvx[cnvx], _sizesvx[cnvx], _alobjvx[cnvx])
+      DBGL_CALL(glMultiDrawArrays, GL_QUADS, _firstvx[cnvx], _sizesvx[cnvx], _alobjvx[cnvx])
    }
    if  (_alobjvx[ncvx] > 0)
    {// Draw non-convex polygons
@@ -114,7 +120,7 @@ void trend::ToshaderTV::drawTriQuads()
          // Besides - everybody is saying that there is no speed benefit from this operation
          //glMultiDrawElements(GL_QUAD_STRIP    , _sizesix[fqss], GL_UNSIGNED_INT, (const GLvoid**)_firstix[fqss], _alobjix[fqss]);
          for (unsigned i= 0; i < _alobjix[fqss]; i++)
-            DBGL_CALL(glDrawElements,GL_QUAD_STRIP, _sizesix[fqss][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_firstix[fqss][i]))
+            DBGL_CALL(glDrawElements, GL_QUAD_STRIP, _sizesix[fqss][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_firstix[fqss][i]))
       }
       if (_alobjix[ftrs] > 0)
       {
@@ -122,7 +128,7 @@ void trend::ToshaderTV::drawTriQuads()
          assert(_firstix[ftrs]);
          //glMultiDrawElements(GL_TRIANGLES     , _sizesix[ftrs], GL_UNSIGNED_INT, (const GLvoid**)_firstix[ftrs], _alobjix[ftrs]);
          for (unsigned i= 0; i < _alobjix[ftrs]; i++)
-            DBGL_CALL(glDrawElements,GL_TRIANGLES, _sizesix[ftrs][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_firstix[ftrs][i]))
+            DBGL_CALL(glDrawElements, GL_TRIANGLES, _sizesix[ftrs][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_firstix[ftrs][i]))
       }
       if (_alobjix[ftfs] > 0)
       {
@@ -130,7 +136,7 @@ void trend::ToshaderTV::drawTriQuads()
          assert(_firstix[ftfs]);
          //glMultiDrawElements(GL_TRIANGLE_FAN  , _sizesix[ftfs], GL_UNSIGNED_INT, (const GLvoid**)_firstix[ftfs], _alobjix[ftfs]);
          for (unsigned i= 0; i < _alobjix[ftfs]; i++)
-            DBGL_CALL(glDrawElements,GL_TRIANGLE_FAN, _sizesix[ftfs][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_firstix[ftfs][i]))
+            DBGL_CALL(glDrawElements, GL_TRIANGLE_FAN, _sizesix[ftfs][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_firstix[ftfs][i]))
       }
       if (_alobjix[ftss] > 0)
       {
@@ -138,7 +144,7 @@ void trend::ToshaderTV::drawTriQuads()
          assert(_firstix[ftss]);
          //glMultiDrawElements(GL_TRIANGLE_STRIP, _sizesix[ftss], GL_UNSIGNED_INT, (const GLvoid**)_firstix[ftss], _alobjix[ftss]);
          for (unsigned i= 0; i < _alobjix[ftss]; i++)
-            DBGL_CALL(glDrawElements,GL_TRIANGLE_STRIP, _sizesix[ftss][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_firstix[ftss][i]))
+            DBGL_CALL(glDrawElements, GL_TRIANGLE_STRIP, _sizesix[ftss][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_firstix[ftss][i]))
       }
    }
 }
@@ -484,6 +490,10 @@ void trend::Toshader::grdDraw()
    _drawprop->topCtm().oglForm(mtrxOrtho);
    DBGL_CALL(glUniformMatrix4fv,TRENDC->getUniformLoc(glslu_in_CTM), 1, GL_FALSE, mtrxOrtho)
 
+   GLuint VertexArrayID;
+   DBGL_CALL(glGenVertexArrays,1, &VertexArrayID)
+   DBGL_CALL(glBindVertexArray,VertexArrayID);
+
    DBGL_CALL(glEnableVertexAttribArray,TSHDR_LOC_VERTEX)
 
    DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, _ogl_grd_buffer[0]);
@@ -507,6 +517,7 @@ void trend::Toshader::grdDraw()
    DBGL_CALL(glDisableVertexAttribArray,TSHDR_LOC_VERTEX)
    // clean-up the buffers
    DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, 0)
+   DBGL_CALL(glDeleteVertexArrays, 1, &VertexArrayID)
 }
 
 void trend::Toshader::setLayColor(const LayerDef& layer)
