@@ -15,7 +15,7 @@
 //    Description: Some basic tests of the script and the editor
 //---------------------------------------------------------------------------
 //  Revision info
-//---------------------------------------------------------------------------                
+//---------------------------------------------------------------------------
 //      $Revision$
 //          $Date$
 //        $Author$
@@ -53,13 +53,13 @@ box MOStran(point bound, real W, real L) {
    box contactL = zerobox /| _mincont;
    box contactR = zerobox |\ _mincont;
    // calculate the number of contacts
-   if (W < 2*_actOverCont + _mincont) 
+   if (W < 2*_actOverCont + _mincont)
       echo("Can't fit even a single contact !");
    else {
       usinglayer({7,0});
       real numconts = (W - 2*_actOverCont) / (_mincont + _contspace);
       while (numconts > 0) {
-         addbox(contactL+contBL); 
+         addbox(contactL+contBL);
          addbox(contactR+contBR);
          contBL.y = contBL.y + _contspace + _mincont;
          contBR.y = contBR.y + _contspace + _mincont;
@@ -92,7 +92,7 @@ void builkcont(point p1, point p2)
       real numconts = (distance.x - 2*_actOverCont) / (_mincont + _contspace);
       generated[:+] = addbox({p1.x, p1.y -actW/2}, distance.x, actW, {2, 0});
       real curcont = 0;
-      while (curcont < numconts) 
+      while (curcont < numconts)
       {
          generated[:+] = addbox({p1.x + curcont*(_contspace + _mincont) + _actOverCont, p1.y-_mincont/2},_mincont, _mincont,{7, 0});
          curcont = curcont + 1;
@@ -103,7 +103,7 @@ void builkcont(point p1, point p2)
       real numconts = (distance.y - 2*_actOverCont) / (_mincont + _contspace);
       generated[:+] = addbox({p1.x - actW/2,p1.y}, actW, distance.y,{2, 0});
       real curcont = 0;
-      while (curcont < numconts) 
+      while (curcont < numconts)
       {
          generated[:+] = addbox({p1.x -_mincont/2, p1.y + curcont*(_contspace + _mincont) + _actOverCont},_mincont, _mincont,{7, 0});
          curcont = curcont + 1;
@@ -121,8 +121,8 @@ void whiletest() {
    }
 
    while (b) {
-      echo(a); 
-      a = a + 1; 
+      echo(a);
+      a = a + 1;
       b = a < 5;
    }
    int i = 10;
@@ -143,8 +143,8 @@ void repeattest() {
    } until (a <= 0);
 
    repeat {
-      echo(a); 
-      a = a + 1; 
+      echo(a);
+      a = a + 1;
       b = a < 5;
    } until (!b);
    int i = 10;
@@ -158,21 +158,21 @@ void repeattest() {
 //   repeat {} until(a);
 }
 
-void foreachtest () 
+void foreachtest ()
 {
-   foreach (int i; (int list) {1,2}) 
-   { 
+   foreach (int i; (int list) {1,2})
+   {
       int k;
-      foreach (k; (int list) {2,3}) 
+      foreach (k; (int list) {2,3})
       {
          echo (i);
          echo (k);
-      } 
+      }
       echo(k);
    }
 }
 
-void indextest(point list a) 
+void indextest(point list a)
 {
    int i = 0;
    while (i < length(a))
@@ -288,14 +288,14 @@ void shifttest() {
    box cSE = c \| 1;
    box cNE = c /| 1;
    box cNW = c |\ 1;
-   addbox(cSW,2); addbox(cSE,4); addbox(cNW,7); addbox(cNE,8); 
+   addbox(cSW,2); addbox(cSE,4); addbox(cNW,7); addbox(cNE,8);
 
    box d = {{20,10},{20,10}};
    box dSW = d |/ b;
    box dSE = d \| b;
    box dNE = d /| b;
    box dNW = d |\ b;
-   addbox(dSW,2); addbox(dSE,4); addbox(dNW,7); addbox(dNE,8); 
+   addbox(dSW,2); addbox(dSE,4); addbox(dNW,7); addbox(dNE,8);
 
 }
 */
@@ -347,7 +347,7 @@ void all_texts()
    selectmask(_lmtext);
    layout list all_t = select_all();
    echo("Number of selected text objects");
-   echo(length(all_t));   
+   echo(length(all_t));
    foreach(layout curt; all_t)
       echo(getlaytext(curt));
    unselect_all();
@@ -358,7 +358,7 @@ void all_refs()
    selectmask(_lmref);
    layout list all_t = select_all();
    echo("Number of selected reference objects");
-   echo(length(all_t));   
+   echo(length(all_t));
    foreach(layout curt; all_t)
       echo(getlayref(curt));
    unselect_all();
@@ -417,7 +417,7 @@ void embedif(int a)
    else echo(0);
 }
 
-void roundtest() 
+void roundtest()
 {
 
   real r1 = 1;
@@ -435,11 +435,11 @@ void roundtest()
   echo("The result above should be 1");
 }
 
-void scaletest() 
+void scaletest()
 {
   int  i = 3;
   real j = 4;
-  point a = { 3,6 }; 
+  point a = { 3,6 };
   echo(a*i);
   echo(a*3);
   echo(a*j);
@@ -472,11 +472,12 @@ cellref("cell_1",{120,  0},180,true ,1);
 cellref("cell_1",{  0,  0},  0,false,1);
 cellref("cell_1",{120,-20},/*inserted comment*/  180,false ,1);
 cellref("cell_1",{  0,-20},  0,true ,1);
+zoomall();
 /*
 echo("Error below must be reported @ line 375 col 8");
-test   
-      of a    
-           multiline    
+test
+      of a
+           multiline
                           comment
      newcell("dummy", 1);
 */

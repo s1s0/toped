@@ -102,7 +102,7 @@ void trend::ToshaderTV::drawTriQuads()
    {// Draw convex polygons
       assert(_firstvx[cnvx]);
       assert(_sizesvx[cnvx]);
-      DBGL_CALL(glMultiDrawArrays, GL_QUADS, _firstvx[cnvx], _sizesvx[cnvx], _alobjvx[cnvx])
+      DBGL_CALL(glMultiDrawArrays, GL_TRIANGLE_FAN, _firstvx[cnvx], _sizesvx[cnvx], _alobjvx[cnvx])
    }
    if  (_alobjvx[ncvx] > 0)
    {// Draw non-convex polygons
@@ -160,7 +160,6 @@ void trend::ToshaderTV::drawLines()
    }
    if  (_alobjvx[ncvx] > 0)
    {// Draw non-convex polygons
-      glEnableClientState(GL_INDEX_ARRAY);
       assert(_firstvx[ncvx]);
       assert(_sizesvx[ncvx]);
       DBGL_CALL(glMultiDrawArrays, GL_LINE_LOOP, _firstvx[ncvx], _sizesvx[ncvx], _alobjvx[ncvx])
