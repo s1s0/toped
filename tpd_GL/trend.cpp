@@ -447,10 +447,6 @@ trend::ToshaderGlfFont::ToshaderGlfFont(std::string filename, std::string& fontn
 
 void trend::ToshaderGlfFont::drawString(const std::string& text, bool fill, layprop::DrawProperties* drawprop)
 {
-   GLuint VertexArrayID;
-   DBGL_CALL(glGenVertexArrays,1, &VertexArrayID)
-   DBGL_CALL(glBindVertexArray, VertexArrayID)
-
    // Activate the vertex buffers in the vertex shader ...
    DBGL_CALL(glEnableVertexAttribArray,TSHDR_LOC_VERTEX)
    // Set-up the offset in the binded Vertex buffer
@@ -487,7 +483,6 @@ void trend::ToshaderGlfFont::drawString(const std::string& text, bool fill, layp
       }
    }
    DBGL_CALL(glDisableVertexAttribArray, TSHDR_LOC_VERTEX)
-   DBGL_CALL(glDeleteVertexArrays, 1, &VertexArrayID)
 }
 
 

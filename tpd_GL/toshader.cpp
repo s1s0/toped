@@ -56,10 +56,6 @@ void trend::ToshaderTV::draw(layprop::DrawProperties* drawprop)
    setShaderCtm(drawprop, _refCell);
    setAlpha(drawprop);
 
-   GLuint VertexArrayID;
-   DBGL_CALL(glGenVertexArrays, 1, &VertexArrayID)
-   DBGL_CALL(glBindVertexArray, VertexArrayID)
-
    // Activate the vertex buffers in the vertex shader ...
    DBGL_CALL(glEnableVertexAttribArray,TSHDR_LOC_VERTEX)
    // Set-up the offset in the binded Vertex buffer
@@ -71,7 +67,6 @@ void trend::ToshaderTV::draw(layprop::DrawProperties* drawprop)
    DBGL_CALL(glUniform1ui,TRENDC->getUniformLoc(glslu_in_StippleEn), 1)
    // Switch the vertex buffers OFF in the openGL engine ...
    DBGL_CALL(glDisableVertexAttribArray,TSHDR_LOC_VERTEX)
-   DBGL_CALL(glDeleteVertexArrays, 1, &VertexArrayID)
    // ... and finally restore the openGL translation matrix
    drawprop->popCtm();
 }
@@ -490,10 +485,6 @@ void trend::Toshader::grdDraw()
    _drawprop->topCtm().oglForm(mtrxOrtho);
    DBGL_CALL(glUniformMatrix4fv,TRENDC->getUniformLoc(glslu_in_CTM), 1, GL_FALSE, mtrxOrtho)
 
-   GLuint VertexArrayID;
-   DBGL_CALL(glGenVertexArrays,1, &VertexArrayID)
-   DBGL_CALL(glBindVertexArray,VertexArrayID);
-
    DBGL_CALL(glEnableVertexAttribArray,TSHDR_LOC_VERTEX)
 
    DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, _ogl_grd_buffer[0]);
@@ -517,7 +508,6 @@ void trend::Toshader::grdDraw()
    DBGL_CALL(glDisableVertexAttribArray,TSHDR_LOC_VERTEX)
    // clean-up the buffers
    DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, 0)
-   DBGL_CALL(glDeleteVertexArrays, 1, &VertexArrayID)
 }
 
 void trend::Toshader::setLayColor(const LayerDef& layer)

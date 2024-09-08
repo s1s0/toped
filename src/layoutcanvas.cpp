@@ -507,6 +507,9 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& /*event*/)
          wxPaintDC dc(this);
          SetCurrent(*_glRC);
 trend::checkOGLError("Setting the context");
+         GLuint VertexArrayID;
+         DBGL_CALL(glGenVertexArrays, 1, &VertexArrayID)
+         DBGL_CALL(glBindVertexArray, VertexArrayID)
 //         DBGL_CALL(glMatrixMode,GL_MODELVIEW)
 //         DBGL_CALL(glShadeModel,GL_FLAT)
          updateViewport();
@@ -527,6 +530,9 @@ trend::checkOGLError("Setting the context");
          _invalidWindow = false;
          rubberPaint();
          SwapBuffers();
+         DBGL_CALL(glBindVertexArray, 0);
+         DBGL_CALL(glDeleteVertexArrays, 1, &VertexArrayID)
+
          if (0 < _blinkInterval)
          {
             _blinkOn = false;

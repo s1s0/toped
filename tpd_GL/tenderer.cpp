@@ -509,10 +509,6 @@ void trend::TenderLay::collectSelected(unsigned int* slctd_array)
 
 void trend::TenderLay::draw(layprop::DrawProperties* drawprop)
 {
-   GLuint VertexArrayID;
-   DBGL_CALL(glGenVertexArrays, 1, &VertexArrayID)
-   DBGL_CALL(glBindVertexArray, VertexArrayID)
-   
    DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, _pbuffer)
    // Check the state of the buffer
    GLint bufferSize;
@@ -536,7 +532,6 @@ void trend::TenderLay::draw(layprop::DrawProperties* drawprop)
    DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, 0)
    if (0 != _ibuffer)
       DBGL_CALL(glBindBuffer,GL_ELEMENT_ARRAY_BUFFER, 0)
-   DBGL_CALL(glDeleteVertexArrays, 1, &VertexArrayID)
 }
 
 void trend::TenderLay::drawSelected()
