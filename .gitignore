@@ -1,8 +1,8 @@
 #
 # build directories
 build/
-boza/
-backup/
+.DS_Store
+*/.DS_Store
 #
 src/wxcocoa_config.h
 #lex/bison products
