@@ -32,6 +32,8 @@
 #include "trend.h"
 
 trend::ogl_logfile     OGLLogFile;
+
+
 //=============================================================================
 //
 // class TrendTV
@@ -832,3 +834,6 @@ void trend::reportOGLStatus(std::string loc)
 //   tell_log(console::MT_ERROR,ost.str());
 //   wxLogDebug(ost.str().c_str());
 }
+
+TFPTR_DrawElementsOffset tpd_glDrawElements = (TFPTR_DrawElementsOffset)glDrawElements;
+

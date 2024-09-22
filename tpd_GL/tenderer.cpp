@@ -262,7 +262,7 @@ void trend::TenderTV::draw(layprop::DrawProperties* drawprop)
          // Besides - everybody is saying that there is no speed benefit from this operation
          //glMultiDrawElements(GL_QUAD_STRIP    , _sizesix[fqss], GL_UNSIGNED_INT, (const GLvoid**)_firstix[fqss], _alobjix[fqss]);
          for (unsigned i= 0; i < _alobjix[fqss]; i++)
-            glDrawElements(GL_QUAD_STRIP, _sizesix[fqss][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_firstix[fqss][i]));
+            DBGL_CALL(tpd_glDrawElements, GL_QUAD_STRIP, _sizesix[fqss][i], GL_UNSIGNED_INT, _firstix[fqss][i]))
       }
       if (_alobjix[ftrs] > 0)
       {
@@ -270,7 +270,7 @@ void trend::TenderTV::draw(layprop::DrawProperties* drawprop)
          assert(_firstix[ftrs]);
          //glMultiDrawElements(GL_TRIANGLES     , _sizesix[ftrs], GL_UNSIGNED_INT, (const GLvoid**)_firstix[ftrs], _alobjix[ftrs]);
          for (unsigned i= 0; i < _alobjix[ftrs]; i++)
-            glDrawElements(GL_TRIANGLES, _sizesix[ftrs][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_firstix[ftrs][i]));
+            DBGL_CALL(tpd_glDrawElements, GL_TRIANGLES, _sizesix[ftrs][i], GL_UNSIGNED_INT, _firstix[ftrs][i])
       }
       if (_alobjix[ftfs] > 0)
       {
@@ -278,7 +278,7 @@ void trend::TenderTV::draw(layprop::DrawProperties* drawprop)
          assert(_firstix[ftfs]);
          //glMultiDrawElements(GL_TRIANGLE_FAN  , _sizesix[ftfs], GL_UNSIGNED_INT, (const GLvoid**)_firstix[ftfs], _alobjix[ftfs]);
          for (unsigned i= 0; i < _alobjix[ftfs]; i++)
-            glDrawElements(GL_TRIANGLE_FAN, _sizesix[ftfs][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_firstix[ftfs][i]));
+            DBGL_CALL(tpd_glDrawElements, GL_TRIANGLE_FAN, _sizesix[ftfs][i], GL_UNSIGNED_INT, _firstix[ftfs][i])
       }
       if (_alobjix[ftss] > 0)
       {
@@ -286,7 +286,7 @@ void trend::TenderTV::draw(layprop::DrawProperties* drawprop)
          assert(_firstix[ftss]);
          //glMultiDrawElements(GL_TRIANGLE_STRIP, _sizesix[ftss], GL_UNSIGNED_INT, (const GLvoid**)_firstix[ftss], _alobjix[ftss]);
          for (unsigned i= 0; i < _alobjix[ftss]; i++)
-            glDrawElements(GL_TRIANGLE_STRIP, _sizesix[ftss][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_firstix[ftss][i]));
+            DBGL_CALL(tpd_glDrawElements, GL_TRIANGLE_STRIP, _sizesix[ftss][i], GL_UNSIGNED_INT, _firstix[ftss][i])
       }
       glDisableClientState(GL_INDEX_ARRAY);
    }
@@ -552,7 +552,7 @@ void trend::TenderLay::drawSelected()
       assert(_fstslix[lstr]);
       //glMultiDrawElements(GL_LINE_STRIP, _sizslix[lstr], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[lstr], _asobjix[lstr]);
       for (unsigned i= 0; i < _asobjix[lstr]; i++)
-         DBGL_CALL(glDrawElements,GL_LINE_STRIP, _sizslix[lstr][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_fstslix[lstr][i]))
+         DBGL_CALL(tpd_glDrawElements,GL_LINE_STRIP, _sizslix[lstr][i], GL_UNSIGNED_INT, _fstslix[lstr][i])
    }
    if (_asobjix[llps] > 0)
    {
@@ -560,7 +560,7 @@ void trend::TenderLay::drawSelected()
       assert(_fstslix[llps]);
          //glMultiDrawElements(GL_LINE_LOOP     , _sizslix[llps], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[llps], _alobjix[llps]);
       for (unsigned i= 0; i < _asobjix[llps]; i++)
-         DBGL_CALL(glDrawElements, GL_LINE_LOOP, _sizslix[llps][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_fstslix[llps][i]))
+         DBGL_CALL(tpd_glDrawElements, GL_LINE_LOOP, _sizslix[llps][i], GL_UNSIGNED_INT, _fstslix[llps][i])
    }
    if (_asobjix[lnes] > 0)
    {
@@ -568,7 +568,7 @@ void trend::TenderLay::drawSelected()
       assert(_fstslix[lnes]);
          //glMultiDrawElements(GL_LINES  , _sizslix[lnes], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[lnes], _alobjix[lnes]);
       for (unsigned i= 0; i < _asobjix[lnes]; i++)
-         DBGL_CALL(glDrawElements,GL_LINES, _sizslix[lnes][i], GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_fstslix[lnes][i]))
+         DBGL_CALL(tpd_glDrawElements,GL_LINES, _sizslix[lnes][i], GL_UNSIGNED_INT, _fstslix[lnes][i])
    }
    DBGL_CALL(glDisableClientState, GL_INDEX_ARRAY)
    DBGL_CALL(glDisableClientState, GL_VERTEX_ARRAY)

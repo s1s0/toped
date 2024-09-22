@@ -159,7 +159,7 @@ void trend::TGlfRSymbol::drawWired()
 
 void trend::TGlfRSymbol::drawSolid()
 {
-   DBGL_CALL(glDrawElements,GL_TRIANGLES, _alchnks * 3, GL_UNSIGNED_INT, VBO_BUFFER_OFFSET(_firstix))
+   DBGL_CALL(tpd_glDrawElements,GL_TRIANGLES, _alchnks * 3, GL_UNSIGNED_INT, _firstix)
 }
 
 trend::TGlfRSymbol::~TGlfRSymbol()

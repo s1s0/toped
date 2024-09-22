@@ -168,7 +168,13 @@
 #include <fstream>
 // to cast properly the indices parameter in glDrawElements when
 // drawing from VBO
-#define VBO_BUFFER_OFFSET(i) ((char *)NULL + (i))
+//#define VBO_BUFFER_OFFSET(i) ((char *)NULL + (i))
+
+// to avoid the compiler warnings the above define was replaced by this below
+// (plus the line in the basetrend.cpp). This is taken from
+// https://stackoverflow.com/questions/23177229/how-to-cast-int-to-const-glvoid
+typedef void (*TFPTR_DrawElementsOffset)(GLenum,GLsizei,GLenum,uintptr_t);
+extern TFPTR_DrawElementsOffset tpd_glDrawElements;
 
 // Forward declarations
 namespace layprop { class LayoutGrid;}
