@@ -16,15 +16,15 @@ BISON_TARGET(Parser cif_yacc.yy ${CMAKE_CURRENT_SOURCE_DIR}/cif_yacc.cpp
 
 ADD_FLEX_BISON_DEPENDENCY(Scanner Parser)
 
+file( GLOB tpd_ifaces_headers     "*.h")
+file( GLOB tpd_ifaces_sources     "*.cpp")
+
+
 add_library (tpd_ifaces
                       ${BISON_Parser_OUTPUTS}
                       ${FLEX_Scanner_OUTPUTS}
-                      calbr_reader.cpp
-                      cif_io.cpp
-                      gds_io.cpp
-                      oasis_io.cpp
-                      ps_out.cpp
-                      tpdph.cpp
+                      ${tpd_ifaces_headers}
+                      ${tpd_ifaces_sources}
 )
 
 target_include_directories(tpd_ifaces PUBLIC

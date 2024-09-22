@@ -1,14 +1,9 @@
+file( GLOB tpd_DB_headers     "*.h")
+file( GLOB tpd_DB_sources     "*.cpp")
+
 add_library(tpd_DB
-                   auxdat.cpp
-                   logicop.cpp
-                   qtree_tmpl.cpp
-                   quadtree.cpp
-                   tedat.cpp
-                   tedat_ext.cpp
-                   tedcell.cpp
-                   tedesign.cpp
-                   tedstd.cpp
-                   tpdph.cpp
+                   ${tpd_DB_sources}
+                   ${tpd_DB_headers}
 )
 
 target_include_directories(tpd_DB PUBLIC

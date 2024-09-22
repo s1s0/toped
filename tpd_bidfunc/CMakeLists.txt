@@ -1,16 +1,9 @@
+file( GLOB tpd_bidfunc_headers     "*.h")
+file( GLOB tpd_bidfunc_sources     "*.cpp")
+
 add_library(tpd_bidfunc
-                      tpdph.cpp
-                      datacenter.cpp
-                      tellibin.cpp
-                      tllf_list.cpp
-                      tpdf_add.cpp
-                      tpdf_cells.cpp
-                      tpdf_common.cpp
-                      tpdf_db.cpp
-                      tpdf_edit.cpp
-                      tpdf_get.cpp
-                      tpdf_props.cpp
-                      tpdf_select.cpp
+                      ${tpd_bidfunc_headers}
+                      ${tpd_bidfunc_sources}
 )
 
 target_include_directories(tpd_bidfunc PUBLIC

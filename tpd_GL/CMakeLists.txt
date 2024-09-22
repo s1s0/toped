@@ -1,13 +1,9 @@
+file( GLOB tpd_GL_headers     "*.h")
+file( GLOB tpd_GL_sources     "*.cpp")
+
 add_library(tpd_GL
-                   basetrend.cpp
-                   drawprop.cpp
-                   tenderer.cpp
-                   tolder.cpp
-                   toshader.cpp
-                   tpdph.cpp
-                   trend.cpp
-                   trendat.cpp
-                   viewprop.cpp
+                   ${tpd_GL_headers}
+                   ${tpd_GL_sources}
 )
 
 target_include_directories(tpd_GL PUBLIC

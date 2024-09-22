@@ -15,14 +15,14 @@ BISON_TARGET(Parser tell_yacc.yy ${CMAKE_CURRENT_SOURCE_DIR}/tell_yacc.cpp
 )
 ADD_FLEX_BISON_DEPENDENCY(Scanner Parser)
 
+file( GLOB tpd_parser_headers     "*.h")
+file( GLOB tpd_parser_sources     "*.cpp")
 #-------------------------------------------------------------------------------
 add_library(tpd_parser
                       ${BISON_Parser_OUTPUTS}
                       ${FLEX_Scanner_OUTPUTS}
-                      ted_prompt.cpp
-                      tellyzer.cpp
-                      tldat.cpp
-                      tpdph.cpp
+                      ${tpd_parser_headers}
+                      ${tpd_parser_sources}
 )
 
 target_include_directories(tpd_parser PUBLIC

@@ -1,15 +1,15 @@
+file( GLOB tpd_common_headers     "*.h")
+file( GLOB tpd_common_sources     "*.cpp")
+
 add_library (tpd_common
-                         MemTrack.cpp
-                         avl.cpp
-                         outbox.cpp
-                         polycross.cpp
-                         tedbac.cpp
-                         tpdph.cpp
-                         ttt.cpp
+                         ${tpd_common_headers}
+                         ${tpd_common_sources}
 )
+
 target_include_directories(tpd_common INTERFACE
                          ${CMAKE_CURRENT_SOURCE_DIR}
 )
+
 target_link_libraries(tpd_common PUBLIC
                          toped_compiler_flags
 )
