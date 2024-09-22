@@ -364,20 +364,20 @@ void trend::ToshaderMarks::draw(layprop::DrawProperties* drawprop)
    // Set-up the offset in the binded Vertex buffer
    DBGL_CALL(glVertexAttribPointer, TSHDR_LOC_VERTEX, 2, TNDR_GLENUMT, GL_FALSE, 0, nullptr)
    unsigned start = 0;
-   unsigned size = _refMarks.size();
+   unsigned size = static_cast<unsigned>(_refMarks.size());
    if (0 < size)
    {
       setStipple(drawprop->ref_mark_bmp());
       DBGL_CALL(glDrawArrays, GL_POINTS, start, size)
       start += size;
    }
-   if (0 < (size = _textMarks.size()) )
+   if (0 < (size = static_cast<unsigned>(_textMarks.size())) )
    {
       setStipple(drawprop->text_mark_bmp());
       DBGL_CALL(glDrawArrays, GL_POINTS, start, size)
       start += size;
    }
-   if (0 < (size = _arefMarks.size()) )
+   if (0 < (size = static_cast<unsigned>(_arefMarks.size())) )
    {
       setStipple(drawprop->aref_mark_bmp());
       DBGL_CALL(glDrawArrays, GL_POINTS, start, size)

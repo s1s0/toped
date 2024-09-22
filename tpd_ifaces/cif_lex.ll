@@ -56,7 +56,7 @@ lexcif_usrsep   [ \t,]+
 #include "outbox.h"
 namespace CIFin {
    void     location_step(YYLTYPE *loc);
-   void     location_lines(YYLTYPE *loc, int num);
+   void     location_lines(YYLTYPE *loc, unsigned long num);
    void     location_comment(YYLTYPE *loc, char* source);
    char*    charcopy(std::string source, bool quotes = false);
    long     getllint(char* source);
@@ -113,7 +113,7 @@ location_step(&ciflloc);
 4N{lexcif_usrsep}             { BEGIN( CFS_UCMD);        return tknP4N;          }
 94{lexcif_usrsep}             { BEGIN( CFS_UCMD);        return tknP94;          }
 {lexcif_digit}{1,1}           { BEGIN( CFS_UDEF);
-                                ciflval.word    = CIFin::getllint(yytext);
+                                ciflval.word    = static_cast<unsigned>(CIFin::getllint(yytext));
                                                          return tknPdigit;       }
 <CFS__CMD>-?{lexcif_digit}+  |
 <CFS_CCMD>-?{lexcif_digit}+  |
@@ -170,7 +170,7 @@ void CIFin::location_step(YYLTYPE *loc)
    loc->first_line = loc->last_line;
 }
 
-void CIFin::location_lines(YYLTYPE *loc, int num)
+void CIFin::location_lines(YYLTYPE *loc, unsigned long num)
 {
    loc->last_column = 1;
    loc->last_line += num;
@@ -207,7 +207,7 @@ long CIFin::getllint(char* source)
 
 char* CIFin::charcopy(std::string source, bool quotes)
 {
-   int length = source.length() - (quotes ? 2 : 0);
+   unsigned long length = source.length() - (quotes ? 2 : 0);
    char* newstr = DEBUG_NEW char[length+2];
    memcpy(newstr,&(source.c_str()[quotes ? 1 : 0]),length);
    newstr[length] = 0x00;

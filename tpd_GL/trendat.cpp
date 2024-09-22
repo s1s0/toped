@@ -72,7 +72,7 @@ TeselChunk::TeselChunk(const TeselChunk* data, unsigned offset)
       _index_seq[i] = copy_seq[i] + offset;
 }
 
-TeselChunk::TeselChunk(const int* data, unsigned size, unsigned offset)
+TeselChunk::TeselChunk(const int* /*data*/, unsigned size, unsigned offset)
 { // used for wire tesselation explicitly
    _size = size;
    _type = GL_QUAD_STRIP;

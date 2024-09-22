@@ -262,7 +262,7 @@ void trend::TenderTV::draw(layprop::DrawProperties* drawprop)
          // Besides - everybody is saying that there is no speed benefit from this operation
          //glMultiDrawElements(GL_QUAD_STRIP    , _sizesix[fqss], GL_UNSIGNED_INT, (const GLvoid**)_firstix[fqss], _alobjix[fqss]);
          for (unsigned i= 0; i < _alobjix[fqss]; i++)
-            DBGL_CALL(tpd_glDrawElements, GL_QUAD_STRIP, _sizesix[fqss][i], GL_UNSIGNED_INT, _firstix[fqss][i]))
+            DBGL_CALL(tpd_glDrawElements, GL_QUAD_STRIP, _sizesix[fqss][i], GL_UNSIGNED_INT, _firstix[fqss][i])
       }
       if (_alobjix[ftrs] > 0)
       {

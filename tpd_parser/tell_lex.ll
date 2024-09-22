@@ -69,7 +69,7 @@ Function declarations
 #define YY_FATAL_ERROR(msg)  parsercmd::telllex_fatal(msg)
 namespace parsercmd {
    void     location_step(YYLTYPE *loc);
-   void     location_lines(YYLTYPE *loc, int num);
+   void     location_lines(YYLTYPE *loc, unsigned long num);
    void     ccomment(YYLTYPE *loc);
    void     cppcomment(YYLTYPE *loc);
    char*    charcopy(std::string source, bool quotes = false);
@@ -309,7 +309,7 @@ void parsercmd::location_step(YYLTYPE *loc)
    loc->first_line = loc->last_line;
 }
 
-void parsercmd::location_lines(YYLTYPE *loc, int num)
+void parsercmd::location_lines(YYLTYPE *loc, unsigned long num)
 {
    loc->last_column = 1;
    loc->last_line += num;
@@ -362,7 +362,7 @@ void parsercmd::cppcomment(YYLTYPE *loc)
 //=============================================================================
 
 char* parsercmd::charcopy(std::string source, bool quotes) {
-   int length = source.length() - (quotes ? 2 : 0);
+   unsigned long length = source.length() - (quotes ? 2 : 0);
    char* newstr = DEBUG_NEW char[length+2];
    memcpy(newstr,&(source.c_str()[quotes ? 1 : 0]),length);
    newstr[length] = 0x00;
@@ -371,7 +371,7 @@ char* parsercmd::charcopy(std::string source, bool quotes) {
 
 unsigned parsercmd::getllint(char* source) {
    char* boza;
-   unsigned result = strtoul(source, &boza, 0);
+   unsigned result = static_cast<unsigned>(strtoul(source, &boza, 0));
    return result;
 }
 
@@ -478,7 +478,7 @@ bool parsercmd::checkPrepVar(const std::string source)
    if (tellPP->check(source,replacement))
    {
       const char* rchar = replacement.c_str();
-      for (int i = replacement.length() - 1; i >= 0; --i)
+      for (unsigned long i = replacement.length() - 1; i >= 0; --i)
          unput(rchar[i]);
       telllloc.last_column -= replacement.length();
       return true;
