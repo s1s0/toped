@@ -836,7 +836,7 @@ void DataCenter::render(int W, int H)
       trend::TrendBase* cRenderer = TRENDC->makeCRenderer();
       if (NULL != cRenderer)
       {
-//         cRenderer->setFrameBuffer(W, H);
+         cRenderer->setFrameBuffer(2*W, 2*H);// Not sure why is 2*???
 
          // grid
          const layprop::LayoutGrid* allGrids[3] = {PROPC->grid(0),PROPC->grid(1),PROPC->grid(2)};
@@ -872,7 +872,7 @@ void DataCenter::render(int W, int H)
             cRenderer->rlrDraw();
 
          
-//         cRenderer->drawFrameBuffer();
+         cRenderer->drawFrameBuffer();
          TRENDC->releaseCRenderer();
 
          // Draw DRC data (if any)
