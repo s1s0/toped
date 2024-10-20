@@ -493,6 +493,8 @@ trend::Shaders::Shaders() :
    _fnShdrGeometry   ( "geometry.glsl"    ),
    _fnShdrGeSprite   ( "geomsprite.glsl"  ),
    _fnShdrFragment   ( "fragment.glsl"    ),
+   _fnShdrFBVertex   ( "vertex_fb.glsl"   ),
+   _fnShdrFBFragment ( "fragment_fb.glsl" ),
    _idShdrVertex     ( -1                 ),
    _idShdrGeometry   ( -1                 ),
    _idShdrGeSprite   ( -1                 ),
@@ -550,7 +552,7 @@ void trend::Shaders::useProgram(const glsl_Programs pType)
    {
       // view port
       GLfloat vport[4];
-      glGetFloatv(GL_VIEWPORT, vport);
+      DBGL_CALL(glGetFloatv,GL_VIEWPORT, vport)
       DBGL_CALL(glUniform2fv, getUniformLoc(glslu_in_ScreenSize), 1, &vport[2])
    }
 }
@@ -568,31 +570,38 @@ GLint trend::Shaders::getUniformLoc(const glsl_Uniforms var) const
 
 void trend::Shaders::loadShadersCode(const std::string& codeDirectory)
 {
-   _fnShdrVertex   = codeDirectory + _fnShdrVertex;
-   _fnShdrGeometry = codeDirectory + _fnShdrGeometry;
-   _fnShdrGeSprite = codeDirectory + _fnShdrGeSprite;
-   _fnShdrFragment = codeDirectory + _fnShdrFragment;
-   if(  (_status &= compileShader(_fnShdrVertex  , _idShdrVertex  , GL_VERTEX_SHADER  ))
-      &&(_status &= compileShader(_fnShdrGeometry, _idShdrGeometry, GL_GEOMETRY_SHADER))
-      &&(_status &= compileShader(_fnShdrGeSprite, _idShdrGeSprite, GL_GEOMETRY_SHADER))
-      &&(_status &= compileShader(_fnShdrFragment, _idShdrFragment, GL_FRAGMENT_SHADER))
+   _fnShdrVertex     = codeDirectory + _fnShdrVertex    ;
+   _fnShdrGeometry   = codeDirectory + _fnShdrGeometry  ;
+   _fnShdrGeSprite   = codeDirectory + _fnShdrGeSprite  ;
+   _fnShdrFragment   = codeDirectory + _fnShdrFragment  ;
+   _fnShdrFBVertex   = codeDirectory + _fnShdrFBVertex  ;
+   _fnShdrFBFragment = codeDirectory + _fnShdrFBFragment;
+   if(  (_status &= compileShader(_fnShdrVertex    , _idShdrVertex    , GL_VERTEX_SHADER   ))
+      &&(_status &= compileShader(_fnShdrGeometry  , _idShdrGeometry  , GL_GEOMETRY_SHADER ))
+      &&(_status &= compileShader(_fnShdrGeSprite  , _idShdrGeSprite  , GL_GEOMETRY_SHADER ))
+      &&(_status &= compileShader(_fnShdrFragment  , _idShdrFragment  , GL_FRAGMENT_SHADER ))
+      &&(_status &= compileShader(_fnShdrFBVertex  , _idShdrFBVertex  , GL_VERTEX_SHADER   ))
+      &&(_status &= compileShader(_fnShdrFBFragment, _idShdrFBFragment, GL_FRAGMENT_SHADER ))
      )
    {
       _status &= linkProgram(glslp_VF);
       _status &= linkProgram(glslp_VG);
       _status &= linkProgram(glslp_PS);
+      _status &= linkProgram(glslp_FB);
       
-      DBGL_CALL(glDeleteShader,_idShdrVertex  )
-      DBGL_CALL(glDeleteShader,_idShdrGeometry)
-      DBGL_CALL(glDeleteShader,_idShdrGeSprite)
-      DBGL_CALL(glDeleteShader,_idShdrFragment)
+      DBGL_CALL(glDeleteShader,_idShdrVertex    )
+      DBGL_CALL(glDeleteShader,_idShdrGeometry  )
+      DBGL_CALL(glDeleteShader,_idShdrGeSprite  )
+      DBGL_CALL(glDeleteShader,_idShdrFragment  )
+      DBGL_CALL(glDeleteShader,_idShdrFBVertex  )
+      DBGL_CALL(glDeleteShader,_idShdrFBFragment)
       
    }
 }
 
 bool trend::Shaders::linkProgram(const glsl_Programs pType)
 {
-   GLint program = glCreateProgram();
+   GLint program = DBGL_CALL0(glCreateProgram)
    if (0 == program)
    {
       return false;
@@ -619,11 +628,18 @@ bool trend::Shaders::linkProgram(const glsl_Programs pType)
          break;
       }
       case glslp_PS:
-         {
+      {
          DBGL_CALL(glAttachShader, program, _idShdrVertex  )
          DBGL_CALL(glAttachShader, program, _idShdrGeSprite)
          DBGL_CALL(glAttachShader, program, _idShdrFragment)
          info << "GLSL program PS";
+         break;
+      }
+      case glslp_FB:
+      {
+         DBGL_CALL(glAttachShader, program, _idShdrFBVertex   )
+         DBGL_CALL(glAttachShader, program, _idShdrFBFragment )
+         info << "GLSL program FB";
          break;
       }
       default: assert(false); break;
@@ -631,7 +647,7 @@ bool trend::Shaders::linkProgram(const glsl_Programs pType)
    // link
    DBGL_CALL(glLinkProgram,program)
    GLint programOK;
-   glGetProgramiv(program, GL_LINK_STATUS, &programOK);
+   DBGL_CALL(glGetProgramiv,program, GL_LINK_STATUS, &programOK)
    if (programOK)
    {
       info << " linked";

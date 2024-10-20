@@ -829,13 +829,15 @@ void DataCenter::setRecoverWire(bool rcv)
    unlockTDT(dbLibDir, true);
 }
 
-void DataCenter::render()
+void DataCenter::render(int W, int H)
 {
    if (_TEDLIB())
    {
       trend::TrendBase* cRenderer = TRENDC->makeCRenderer();
       if (NULL != cRenderer)
       {
+//         cRenderer->setFrameBuffer(W, H);
+
          // grid
          const layprop::LayoutGrid* allGrids[3] = {PROPC->grid(0),PROPC->grid(1),PROPC->grid(2)};
          if (cRenderer->grdCollect(allGrids))
@@ -868,6 +870,9 @@ void DataCenter::render()
          DBlineList const zCross = PROPC->getZCross();
          if (cRenderer->rlrCollect(rulers, PROPC->stepDB(),zCross))
             cRenderer->rlrDraw();
+
+         
+//         cRenderer->drawFrameBuffer();
          TRENDC->releaseCRenderer();
 
          // Draw DRC data (if any)

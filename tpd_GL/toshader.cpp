@@ -557,7 +557,8 @@ void trend::Toshader::setLine(bool selected)
 {
    layprop::LineSettings curLine;
    _drawprop->getCurrentLine(curLine, selected);
-   glLineWidth(curLine.width());
+   GLfloat clnw = static_cast<GLfloat>(curLine.width());
+   DBGL_CALL(glLineWidth,clnw)
    if (0xffff == curLine.pattern())
       DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_LStippleEn), 0)
    else
@@ -673,7 +674,7 @@ void trend::Toshader::rlrDraw()
    DBGL_CALL(glUniform3fv, TRENDC->getUniformLoc(glslu_in_Color), 1, oglColor);
    DBGL_CALL(glUniform1f, TRENDC->getUniformLoc(glslu_in_Alpha), oglColor[3]);
    //Line width
-   glLineWidth(1);
+   DBGL_CALL(glLineWidth,1)
 
    //draw
    DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, _ogl_rlr_buffer[0])
@@ -723,6 +724,101 @@ void trend::Toshader::setGrcLayer(bool setEData, const LayerDef& laydef)
       _grcLayer = NULL;
 //      _cslctd_array_offset += _elayer->total_slctdx();
    }
+}
+
+void trend::Toshader::setFrameBuffer(int W, int H)
+{
+//   GLuint frameBuffer, renderBuffer;
+//   DBGL_CALL(glGenFramebuffers,1,&frameBuffer)
+//   DBGL_CALL(glBindFramebuffer,GL_DRAW_FRAMEBUFFER,frameBuffer)
+//
+//   DBGL_CALL(glGenRenderbuffers,1, &renderBuffer)
+//   DBGL_CALL(glBindRenderbuffer,GL_RENDERBUFFER, renderBuffer)
+//   DBGL_CALL(glRenderbufferStorage,GL_RENDERBUFFER, GL_RGBA, w, h)
+//   DBGL_CALL(glFramebufferRenderbuffer, GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, renderBuffer)
+//   //check status
+//   if (GL_FRAMEBUFFER_COMPLETE != glCheckFramebufferStatus(GL_FRAMEBUFFER))
+//   {
+//      int gogo = 1;
+//   }
+   //   glBindRenderbuffer(GL_RENDERBUFFER, 0);
+//   glBindTexture(GL_TEXTURE_2D, 0);
+//   glBindFramebuffer(GL_FRAMEBUFFER, 0);
+   unsigned int framebuffer;
+   DBGL_CALL(glGenFramebuffers, 1, &framebuffer)
+   DBGL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, framebuffer)
+   // create a color attachment texture
+//   unsigned int textureColorbuffer;
+   DBGL_CALL(glGenTextures, 1, &_textureColorBuffer)
+   DBGL_CALL(glBindTexture, GL_TEXTURE_2D, _textureColorBuffer)
+   DBGL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, GL_RGB, W, H, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr)
+   DBGL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+   DBGL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+   DBGL_CALL(glFramebufferTexture2D, GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _textureColorBuffer, 0)
+   // create a renderbuffer object for depth and stencil attachment (we won't be sampling these)
+   unsigned int rbo;
+   DBGL_CALL(glGenRenderbuffers, 1, &rbo);
+   DBGL_CALL(glBindRenderbuffer,GL_RENDERBUFFER, rbo)
+   DBGL_CALL(glRenderbufferStorage,GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, W, H) // use a single renderbuffer object for both a depth AND stencil buffer.
+   DBGL_CALL(glFramebufferRenderbuffer, GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo) // now actually attach it
+   // now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
+   if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+       std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+//   DBGL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
+}
+
+int trend::Toshader::windowVAO()
+{
+   float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+       // positions   // texCoords
+       -1.0f,  1.0f,  0.0f, 1.0f,
+       -1.0f, -1.0f,  0.0f, 0.0f,
+        1.0f, -1.0f,  1.0f, 0.0f,
+
+       -1.0f,  1.0f,  0.0f, 1.0f,
+        1.0f, -1.0f,  1.0f, 0.0f,
+        1.0f,  1.0f,  1.0f, 1.0f
+   };
+
+//   int4b quadVertices [] = {
+//      _lpBL.x(), _lpBL.x(),
+//      _lpTR.x(), _lpTR.y(),
+//      _lpTR.x(), _lpBL.y(),
+//
+//      _lpBL.x(), _lpBL.x(),
+//      _lpTR.x(), _lpTR.y(),
+//      _lpBL.x(), _lpTR.y(),
+//   };
+   
+   // screen quad VAO
+   unsigned int quadVAO, quadVBO;
+   DBGL_CALL(glGenVertexArrays, 1, &quadVAO)
+   DBGL_CALL(glGenBuffers, 1, &quadVBO)
+   DBGL_CALL(glBindVertexArray,quadVAO)
+   DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, quadVBO)
+   DBGL_CALL(glBufferData, GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW)
+   DBGL_CALL(glEnableVertexAttribArray, 0)
+   DBGL_CALL(glVertexAttribPointer, 0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0)
+   DBGL_CALL(glEnableVertexAttribArray, 1)
+   DBGL_CALL(glVertexAttribPointer, 1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)))
+   return quadVAO;
+}
+
+void trend::Toshader::drawFrameBuffer()
+{
+//   TRENDC->setGlslProg(trend::glslp_VF);
+   int glWindowVAO = windowVAO();
+   DBGL_CALL(glBindFramebuffer,GL_FRAMEBUFFER, 0)
+   DBGL_CALL(glDisable,GL_DEPTH_TEST) // disable depth test so screen-space quad isn't discarded due to depth test.
+   // clear all relevant buffers
+   DBGL_CALL(glClearColor, .5f, .5f, .5f, .5f) // set clear color to white (not really necessary actually, since we won't be able to see behind the quad anyways)
+   DBGL_CALL(glClear, GL_COLOR_BUFFER_BIT)
+
+//   screenShader.use();
+   DBGL_CALL(glBindVertexArray, glWindowVAO)
+   DBGL_CALL(glBindTexture, GL_TEXTURE_2D, _textureColorBuffer)   // use the color attachment texture as the texture of the quad plane
+   DBGL_CALL(glDrawArrays, GL_TRIANGLES, 0, 6)
+
 }
 
 trend::Toshader::~Toshader()

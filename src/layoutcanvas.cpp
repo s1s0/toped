@@ -506,7 +506,10 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& /*event*/)
          _blinkTimer.Stop();
          wxPaintDC dc(this);
          SetCurrent(*_glRC);
-trend::checkOGLError("Setting the context");
+        
+         int W, H;
+         GetClientSize(&W,&H);
+
          GLuint VertexArrayID;
          DBGL_CALL(glGenVertexArrays, 1, &VertexArrayID)
          DBGL_CALL(glBindVertexArray, VertexArrayID)
@@ -524,7 +527,7 @@ trend::checkOGLError("Setting the context");
          DBGL_CALL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
          DBGL_CALL(glClear, GL_ACCUM_BUFFER_BIT)
 
-         DATC->render();
+         DATC->render(W,H);
          if (0 == _blinkInterval) DATC->grcDraw();
 //         DBGL_CALL(glAccum, GL_LOAD, 1.0)
          _invalidWindow = false;
@@ -544,7 +547,7 @@ trend::checkOGLError("Setting the context");
    {
       wxPaintDC dc(this);
       SetCurrent(*_glRC);
-      glAccum(GL_RETURN, 1.0);
+//      glAccum(GL_RETURN, 1.0);
       rubberPaint();
       if (!_rubberBand && PROPC->boldOnHover()) boldOnHover();
       if       (_tmpWnd)              wndPaint();
@@ -574,6 +577,25 @@ void tui::LayoutCanvas::rubberPaint()
       DATC->motionDraw(_layCTM, _releasePoint, _nScrMark, _rubberBand, repers);
 }
 
+//void tui::LayoutCanvas::saveGLFrameBuf()
+//{
+//   GLuint frameBuffer;
+//   DBGL_CALL(glGenFramebuffers,1,&frameBuffer)
+//   DBGL_CALL(glBindFramebuffer, GL_DRAW_FRAMEBUFFER, frameBuffer)
+//   DBGL_CALL(glBindFramebuffer, GL_READ_FRAMEBUFFER, 0) // i.e. read from the current framebuffer
+//   DBGL_CALL(glReadBuffer,GL_COLOR_ATTACHMENT0)
+//   DBGL_CALL(glDrawBuffer,GL_COLOR_ATTACHMENT0)
+//   DBGL_CALL(glBlitFramebuffer, 0, 0, 800, 600,             // src rect
+//                               0, 0, 800, 600,             // dst rect
+//                               GL_COLOR_BUFFER_BIT,        // buffer mask
+//                               GL_LINEAR            )      // scale filter
+//}
+//
+//void tui::LayoutCanvas::restoreGLFrameBuf()
+//{
+//   
+//}
+//
 void tui::LayoutCanvas::boldOnHover()
 {
    DATC->mouseHooverDraw(_scrMark);
@@ -1020,7 +1042,7 @@ void tui::LayoutCanvas::updateViewport()
       drawProp->setClipRegion(DBbox(_lpBL.x(),_lpTR.y(), _lpTR.x(), _lpBL.y()));
    }
    PROPC->unlockDrawProp(drawProp, false);
-   glClearColor(0,0,0,0);
+   DBGL_CALL(glClearColor,0,0,0,0)
 }
 
 void tui::LayoutCanvas::OnMouseIN(wxCommandEvent& evt)
@@ -1298,7 +1320,10 @@ void* tui::DrawThread::Entry(/*wxGLContext* glRC*/)
 {
    if (wxMUTEX_NO_ERROR == _mutex.TryLock())
    {
-      wxClientDC dc(_canvas);
+//      wxClientDC dc(_canvas);
+//      int W, H;
+//      GetClientSize(&W,&H);
+
 //      DBGL_CALL(glMatrixMode, GL_MODELVIEW )
 //      DBGL_CALL(glShadeModel, GL_FLAT ) // Single color
       _canvas->updateViewport();
@@ -1309,7 +1334,7 @@ void* tui::DrawThread::Entry(/*wxGLContext* glRC*/)
       DBGL_CALL(glEnable,GL_BLEND)
       DBGL_CALL(glBlendFunc,GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
       DBGL_CALL(glClear,GL_ACCUM_BUFFER_BIT)
-      DATC->render();    // draw data
+      DATC->render(/*W,H*/0,0);    // draw data
 //      DBGL_CALL(glAccum,GL_LOAD, 1.0)
       _canvas->_invalidWindow = false;
       _canvas->rubberPaint();

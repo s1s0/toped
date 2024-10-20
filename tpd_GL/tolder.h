@@ -93,6 +93,8 @@ namespace trend {
          virtual void      draw();
          virtual void      grcDraw();
          virtual void      rlrDraw();
+         virtual void      setFrameBuffer(int /*W*/, int /*H*/) {};
+         virtual void      drawFrameBuffer() {};
       protected:
          virtual void      cleanUp();
          virtual void      grcCleanUp();

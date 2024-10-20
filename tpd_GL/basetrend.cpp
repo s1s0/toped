@@ -812,10 +812,10 @@ void trend::checkOGLError(std::string loc)
 void trend::reportOGLStatus(std::string loc)
 {
 //   std::ostringstream ost;
-   OGLLogFile << loc;
    GLenum ogle;
    if (GL_NO_ERROR != (ogle=glGetError()))
    {
+      OGLLogFile << loc;
       switch (ogle) {
          case GL_INVALID_ENUM     : OGLLogFile << "Unacceptable value for an enumerated argument";     break;
          case GL_INVALID_VALUE    : OGLLogFile << "Numeric argument is out of range";                  break;
@@ -826,13 +826,11 @@ void trend::reportOGLStatus(std::string loc)
          case GL_TABLE_TOO_LARGE  : OGLLogFile << "Tablesize too big";                                 break;
          default                  : OGLLogFile << "Unknown error value reported:" << ogle;             break;
       }
+      OGLLogFile.flush();
    }
-   else {
-      OGLLogFile << " OK";
-   }
-   OGLLogFile.flush();
-//   tell_log(console::MT_ERROR,ost.str());
-//   wxLogDebug(ost.str().c_str());
+//   else {
+//      OGLLogFile << " OK";
+//   }
 }
 
 TFPTR_DrawElementsOffset tpd_glDrawElements = (TFPTR_DrawElementsOffset)glDrawElements;

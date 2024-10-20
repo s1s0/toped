@@ -202,6 +202,7 @@ namespace trend {
                        ,glslp_VF  //! Vertex and Fragment (default)
                        ,glslp_VG  //! Vertex Geometry and Fragment (line stipple)
                        ,glslp_PS  //! Vertex Geometry and Fragment (point sprites)
+                       ,glslp_FB  //! Final rendering step when frame buffers are in use
                       };
    //! The actual location of all uniform variables in the shaders after glLinkProgram
    typedef std::map<glsl_Uniforms, GLint>           GlslUniVarLoc;
@@ -703,6 +704,9 @@ namespace trend {
          virtual void      grcDraw() = 0;
          virtual void      grdDraw() = 0;
          virtual void      rlrDraw()=0;
+      
+         virtual void      setFrameBuffer(int W, int H) = 0;
+         virtual void      drawFrameBuffer() = 0;
 
          LayerDef          getTenderLay(const LayerDef& laydef)
                                                          {return _drawprop->getTenderLay(laydef)   ;}
