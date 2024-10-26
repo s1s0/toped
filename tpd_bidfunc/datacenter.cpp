@@ -833,11 +833,9 @@ void DataCenter::render(int W, int H)
 {
    if (_TEDLIB())
    {
-      trend::TrendBase* cRenderer = TRENDC->makeCRenderer();
+      trend::TrendBase* cRenderer = TRENDC->makeCRenderer(W, H);
       if (NULL != cRenderer)
       {
-         cRenderer->setFrameBuffer(2*W, 2*H);// Not sure why is 2*???
-
          // grid
          const layprop::LayoutGrid* allGrids[3] = {PROPC->grid(0),PROPC->grid(1),PROPC->grid(2)};
          if (cRenderer->grdCollect(allGrids))
@@ -871,8 +869,6 @@ void DataCenter::render(int W, int H)
          if (cRenderer->rlrCollect(rulers, PROPC->stepDB(),zCross))
             cRenderer->rlrDraw();
 
-         
-         cRenderer->drawFrameBuffer();
          TRENDC->releaseCRenderer();
 
          // Draw DRC data (if any)

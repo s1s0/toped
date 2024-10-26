@@ -94,16 +94,12 @@ namespace trend {
          virtual void      grcDraw();
          virtual void      rlrDraw();
          virtual void      grdDraw();
-         virtual void      setFrameBuffer(int W, int H);
-         virtual void      drawFrameBuffer();
       protected:
          virtual void      setLayColor(const LayerDef& layer);
          virtual void      setStipple();
          virtual void      setLine(bool);
-         unsigned int      _textureColorBuffer;
       private:
-         int               windowVAO();
-
+         void              windowVAO();
    };
 
 }

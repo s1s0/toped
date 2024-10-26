@@ -42,6 +42,15 @@ namespace trend {
                  ,rtToshader   // shaders
                 } RenderType;
 
+   typedef struct {
+      unsigned int   quadVAO   ; // Vertex Array Object
+      unsigned int   quadVBO   ; // Vertex Buffer Object of the view port (where the textrue will be mapped)
+      unsigned int   texture   ; // The texture we're generating; effectively our layout view
+      unsigned int   RBO       ; // The RenderBuffer ID
+      unsigned int   frameBuff ; // The FrameBuffer ID
+   } FrameBuffProps;
+
+
    /**
     * This class contains a raw symbol data from the GLF font files. It is used to
     * parse the symbol data from the file and if the current renderer is the rtTolder
@@ -174,6 +183,9 @@ namespace trend {
          bool                   status() const { return _status;}
          void                   useProgram(const glsl_Programs);
          GLint                  getUniformLoc(const glsl_Uniforms) const;
+         bool                   setFrameBuffer(int W, int H);
+         void                   drawFrameBuffer();
+         void                   clearFrameBuffer();
       private:
          bool                   compileShader(const std::string&, GLint&, GLint);
          bool                   linkProgram(const glsl_Programs);
@@ -181,6 +193,7 @@ namespace trend {
          char*                  loadFile(const std::string&, GLint&);
          void                   getShadersLog(GLint);
          void                   getProgramsLog(GLint);
+         void                   windowVAO();
          std::string            _fnShdrVertex;
          std::string            _fnShdrGeometry;
          std::string            _fnShdrGeSprite;
@@ -198,6 +211,7 @@ namespace trend {
          GlslUniVarAllLoc       _glslUniVarLoc;
          glsl_Programs          _curProgram;
          bool                   _status;
+         FrameBuffProps         _fbProps;
    };
 
    class TrendCenter {
@@ -207,7 +221,7 @@ namespace trend {
 //         RenderType             renderType() const {return _renderType;}
          void                   reportRenderer(RenderType) const;
          void                   initShaders(const std::string&);
-         trend::TrendBase*      makeCRenderer();                     //!Get current renderer
+         trend::TrendBase*      makeCRenderer(int W, int H);                     //!Get current renderer
          trend::TrendBase*      getCRenderer();
          void                   releaseCRenderer();
          trend::TrendBase*      makeHRenderer();                     //!Get hover renderer

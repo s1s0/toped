@@ -513,23 +513,13 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& /*event*/)
          GLuint VertexArrayID;
          DBGL_CALL(glGenVertexArrays, 1, &VertexArrayID)
          DBGL_CALL(glBindVertexArray, VertexArrayID)
-//         DBGL_CALL(glMatrixMode,GL_MODELVIEW)
-//         DBGL_CALL(glShadeModel,GL_FLAT)
          updateViewport();
-         // CTM matrix stuff
-//         CTM ctmOrtho(TP(_lpBL.x(),_lpTR.y()), TP(_lpTR.x(), _lpBL.y()));
-//         real mtrxOrtho [16];
-//         ctmOrtho.oglForm(mtrxOrtho);
-//         DBGL_CALL(glLoadMatrixd,mtrxOrtho)
-
          DBGL_CALL(glClear, GL_COLOR_BUFFER_BIT)
          DBGL_CALL(glEnable, GL_BLEND)
          DBGL_CALL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-         DBGL_CALL(glClear, GL_ACCUM_BUFFER_BIT)
 
-         DATC->render(W,H);
+         DATC->render(W, H);
          if (0 == _blinkInterval) DATC->grcDraw();
-//         DBGL_CALL(glAccum, GL_LOAD, 1.0)
          _invalidWindow = false;
          rubberPaint();
          SwapBuffers();
@@ -547,7 +537,9 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& /*event*/)
    {
       wxPaintDC dc(this);
       SetCurrent(*_glRC);
-//      glAccum(GL_RETURN, 1.0);
+      DBGL_CALL(glClear, GL_COLOR_BUFFER_BIT)
+      DBGL_CALL(glEnable, GL_BLEND)
+      DBGL_CALL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
       rubberPaint();
       if (!_rubberBand && PROPC->boldOnHover()) boldOnHover();
       if       (_tmpWnd)              wndPaint();
@@ -1042,7 +1034,7 @@ void tui::LayoutCanvas::updateViewport()
       drawProp->setClipRegion(DBbox(_lpBL.x(),_lpTR.y(), _lpTR.x(), _lpBL.y()));
    }
    PROPC->unlockDrawProp(drawProp, false);
-   DBGL_CALL(glClearColor,0,0,0,0)
+//   DBGL_CALL(glClearColor,0,0,0,0)
 }
 
 void tui::LayoutCanvas::OnMouseIN(wxCommandEvent& evt)
@@ -1333,7 +1325,7 @@ void* tui::DrawThread::Entry(/*wxGLContext* glRC*/)
       DBGL_CALL(glClear,GL_COLOR_BUFFER_BIT)
       DBGL_CALL(glEnable,GL_BLEND)
       DBGL_CALL(glBlendFunc,GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-      DBGL_CALL(glClear,GL_ACCUM_BUFFER_BIT)
+//      DBGL_CALL(glClear,GL_ACCUM_BUFFER_BIT)
       DATC->render(/*W,H*/0,0);    // draw data
 //      DBGL_CALL(glAccum,GL_LOAD, 1.0)
       _canvas->_invalidWindow = false;

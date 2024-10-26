@@ -500,7 +500,8 @@ trend::Shaders::Shaders() :
    _idShdrGeSprite   ( -1                 ),
    _idShdrFragment   ( -1                 ),
    _curProgram       ( glslp_NULL         ),
-   _status           ( true               )
+   _status           ( true               ),
+   _fbProps          ({0,0,0,0,0}         )
 {
    // initialize all uniform variable names
    _glslUniVarNames[glslp_VF][glslu_in_CTM]        = "in_CTM";
@@ -797,9 +798,90 @@ void trend::Shaders::getProgramsLog(GLint idProgram)
    }
 }
 
+bool trend::Shaders::setFrameBuffer(int W, int H)
+{
+   if (0 != _fbProps.frameBuff)
+      clearFrameBuffer();
+   else
+      assert(!(_fbProps.RBO || _fbProps.quadVAO || _fbProps.quadVBO || _fbProps.texture));
+
+   DBGL_CALL(glGenFramebuffers, 1, &_fbProps.frameBuff)
+   DBGL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, _fbProps.frameBuff)
+   // create a color attachment texture
+   DBGL_CALL(glGenTextures, 1, &_fbProps.texture)
+   DBGL_CALL(glBindTexture, GL_TEXTURE_2D, _fbProps.texture)
+   DBGL_CALL(glTexImage2D, GL_TEXTURE_2D, 0, GL_RGB, W, H, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr)
+   DBGL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+   DBGL_CALL(glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+   DBGL_CALL(glFramebufferTexture2D, GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _fbProps.texture, 0)
+   // create a renderbuffer object for depth and stencil attachment (we won't be sampling these)
+   DBGL_CALL(glGenRenderbuffers, 1, &_fbProps.RBO);
+   DBGL_CALL(glBindRenderbuffer,GL_RENDERBUFFER, _fbProps.RBO)
+   DBGL_CALL(glRenderbufferStorage,GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, W, H) // use a single renderbuffer object for both a depth AND stencil buffer.
+   DBGL_CALL(glFramebufferRenderbuffer, GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _fbProps.RBO) // now actually attach it
+   // now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
+   if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+   {
+      std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+      return false;
+   }
+   return true;
+}
+
+void trend::Shaders::windowVAO()
+{
+   float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+       // positions   // texCoords
+       -1.0f,  1.0f,  0.0f, 1.0f,
+       -1.0f, -1.0f,  0.0f, 0.0f,
+        1.0f, -1.0f,  1.0f, 0.0f,
+
+       -1.0f,  1.0f,  0.0f, 1.0f,
+        1.0f, -1.0f,  1.0f, 0.0f,
+        1.0f,  1.0f,  1.0f, 1.0f
+   };
+
+   // screen quad VAO
+   DBGL_CALL(glGenVertexArrays, 1, &_fbProps.quadVAO)
+   DBGL_CALL(glGenBuffers, 1, &_fbProps.quadVBO)
+   DBGL_CALL(glBindVertexArray,_fbProps.quadVAO)
+   DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, _fbProps.quadVBO)
+   DBGL_CALL(glBufferData, GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW)
+   DBGL_CALL(glEnableVertexAttribArray, 0)
+   DBGL_CALL(glVertexAttribPointer, 0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0)
+   DBGL_CALL(glEnableVertexAttribArray, 1)
+   DBGL_CALL(glVertexAttribPointer, 1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)))
+}
+
+void trend::Shaders::drawFrameBuffer()
+{
+   windowVAO();
+   DBGL_CALL(glBindFramebuffer,GL_FRAMEBUFFER, 0)
+   DBGL_CALL(glDisable,GL_DEPTH_TEST) // disable depth test so screen-space quad isn't discarded due to depth test.
+   // clear all relevant buffers
+   DBGL_CALL(glClearColor, .5f, .5f, .5f, .5f) // set clear color to white (not really necessary actually, since we won't be able to see behind the quad anyways)
+   DBGL_CALL(glClear, GL_COLOR_BUFFER_BIT)
+
+   TRENDC->setGlslProg(glslp_FB);
+   DBGL_CALL(glBindVertexArray, _fbProps.quadVAO)
+   DBGL_CALL(glBindTexture, GL_TEXTURE_2D, _fbProps.texture)   // use the color attachment texture as the texture of the quad plane
+   DBGL_CALL(glDrawArrays, GL_TRIANGLES, 0, 6)
+}
+
+
+void trend::Shaders::clearFrameBuffer() {
+   glDeleteVertexArrays(1, &_fbProps.quadVAO);
+   glDeleteBuffers(1, &_fbProps.quadVBO);
+   glDeleteTextures(1, &_fbProps.texture);
+   glDeleteRenderbuffers(1, &_fbProps.RBO);
+   glDeleteFramebuffers(1, &_fbProps.frameBuff);
+   _fbProps = {0,0,0,0,0};
+}
+
 trend::Shaders::~Shaders()
 {
 }
+
 
 //=============================================================================
 trend::TrendCenter::TrendCenter(bool gui, RenderType cmdLineReq, bool sprtVbo, bool sprtShaders) :
@@ -810,7 +892,6 @@ trend::TrendCenter::TrendCenter(bool gui, RenderType cmdLineReq, bool sprtVbo, b
    _dRenderer       (              NULL),
    _cShaders        (              NULL),
    _activeFontName  (                  )
-
 {
    if      (!gui)             _renderType = trend::rtTocom;
    else if ( sprtShaders)     _renderType = trend::rtToshader;
@@ -905,7 +986,7 @@ void trend::TrendCenter::initShaders(const std::string& codeDirectory)
    }
 }
 
-trend::TrendBase* trend::TrendCenter::makeCRenderer()
+trend::TrendBase* trend::TrendCenter::makeCRenderer(int W, int H)
 {
    if (NULL != _cRenderer)
    {
@@ -927,7 +1008,12 @@ trend::TrendBase* trend::TrendCenter::makeCRenderer()
          case trend::rtTenderer :
             _cRenderer = DEBUG_NEW trend::Tenderer( drawProp, PROPC->UU() ); break;
          case trend::rtToshader : 
-            _cRenderer = DEBUG_NEW trend::Toshader( drawProp, PROPC->UU() ); break;
+            _cRenderer = DEBUG_NEW trend::Toshader( drawProp, PROPC->UU() );
+            if (!_cShaders->setFrameBuffer(2*W, 2*H)) {
+               delete _cRenderer;
+               _cRenderer = NULL;
+            }
+            break;
          default: assert(false); break;
       }
    }
@@ -996,7 +1082,9 @@ trend::TrendBase* trend::TrendCenter::makeMRenderer(console::ACTIVE_OP& curOp)
          case trend::rtTenderer :
             _mRenderer = DEBUG_NEW trend::Tenderer( drawProp, PROPC->UU() ); break;
          case trend::rtToshader :
-            _mRenderer = DEBUG_NEW trend::Toshader( drawProp, PROPC->UU() ); break;
+            _mRenderer = DEBUG_NEW trend::Toshader( drawProp, PROPC->UU() );
+            _cShaders->drawFrameBuffer();
+            break;
          default: assert(false); break;
       }
       curOp = drawProp->currentOp();
@@ -1068,6 +1156,7 @@ trend::TrendBase* trend::TrendCenter::getDRenderer()
 void trend::TrendCenter::releaseCRenderer()
 {
    assert(NULL != _cRenderer);
+   _cShaders->drawFrameBuffer();
    PROPC->unlockDrawProp(_cRenderer->drawprop(), false);
    if (_cRenderer->grcDataEmpty())
    {

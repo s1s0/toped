@@ -705,9 +705,6 @@ namespace trend {
          virtual void      grdDraw() = 0;
          virtual void      rlrDraw()=0;
       
-         virtual void      setFrameBuffer(int W, int H) = 0;
-         virtual void      drawFrameBuffer() = 0;
-
          LayerDef          getTenderLay(const LayerDef& laydef)
                                                          {return _drawprop->getTenderLay(laydef)   ;}
          void              setState(layprop::PropertyState state)
