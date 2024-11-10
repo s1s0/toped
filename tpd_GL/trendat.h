@@ -81,9 +81,9 @@ class TeselTempData {
       TeselChain*       _the_chain;
       GLenum            _ctype;
       TeselVertices     _cindexes;
-      word              _all_ftrs;
-      word              _all_ftfs;
-      word              _all_ftss;
+      word              _all_ftrs; // GL_TRIANGLES
+      word              _all_ftfs; // GL_TRIANGLE_FAN
+      word              _all_ftss; // GL_TRIANGLE_STRIP
       unsigned          _offset;
 };
 
@@ -91,6 +91,7 @@ class TessellPoly {
    public:
                         TessellPoly();
       void              tessellate(const int4b* pdata, unsigned psize);
+      void              tess2(const int4b* pdata, unsigned psize);
       const TeselChain* tdata() const              { return &_tdata;  }
       word              num_ftrs() const           { return _all_ftrs;}
       word              num_ftfs() const           { return _all_ftfs;}
@@ -107,11 +108,25 @@ class TessellPoly {
       static GLvoid     teselBegin(GLenum, GLvoid *);
       static GLvoid     teselEnd(GLvoid *);
 #endif
+      typedef std::list<word>     TriIndex;
+      typedef std::list<TriIndex> TriList;
    private:
+      void              triGroup(TriList);
       TeselChain        _tdata;
       word              _all_ftrs;
       word              _all_ftfs;
       word              _all_ftss;
+};
+
+class TriGroup {
+   public:
+      TriGroup(const TessellPoly::TriIndex&);
+      bool checkMatching(const TessellPoly::TriIndex&);
+      bool empty() { return _empty;}
+   private:
+      std::vector<word> _indxs;
+      bool              _empty;
+   
 };
 
 
