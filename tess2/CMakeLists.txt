@@ -1,20 +1,15 @@
-file( GLOB tpd_DB_headers     "*.h")
-file( GLOB tpd_DB_sources     "*.cpp")
+file( GLOB tess2_headers     "*.h")
+file( GLOB tess2_sources     "*.c")
 
-add_library(tpd_DB
-                   ${tpd_DB_sources}
-                   ${tpd_DB_headers}
+add_library(tess2
+                   ${tess2_sources}
+                   ${tess2_headers}
 )
 
-target_include_directories(tpd_DB PUBLIC
-                         ${GLEW_INCLUDE_DIRS}
-#                         ${glew_SOURCE_DIR}/include
+target_include_directories(tess2 PUBLIC
                          ${CMAKE_CURRENT_SOURCE_DIR}
-                         ${CMAKE_SOURCE_DIR}/tpd_common
-                         ${CMAKE_SOURCE_DIR}/tpd_GL
-                         ${CMAKE_SOURCE_DIR}/tess2
 )
-target_link_libraries(tpd_DB PUBLIC
+target_link_libraries(tess2 PUBLIC
                          toped_compiler_flags
 )
 
