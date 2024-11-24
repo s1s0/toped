@@ -46,7 +46,19 @@
 // Tesselation classes
 //
 //=============================================================================
+
 typedef std::list<word> TeselVertices;
+
+class TriGroup {
+   public:
+                        TriGroup(const TeselVertices&);
+      bool              checkMatching(const TeselVertices&);
+      bool              empty() { return _empty;}
+      TeselVertices     getIndexes() {return TeselVertices(_indxs.begin(), _indxs.end());}
+   private:
+      std::vector<word> _indxs;
+      bool              _empty;
+};
 
 class TeselChunk {
    public:
@@ -68,12 +80,13 @@ typedef std::list<TeselChunk> TeselChain;
 
 class TeselTempData {
    public:
-                        TeselTempData(unsigned);
+//                        TeselTempData(unsigned);
                         TeselTempData(TeselChain* tc);
       void              setChainP(TeselChain* tc)  {_the_chain = tc;}
       void              newChunk(GLenum type)      {_ctype = type; _cindexes.clear();}
       void              newIndex(word vx)          {_cindexes.push_back(vx);}
       void              storeChunk();
+      void              storeChunk(const TeselVertices&);
       word              num_ftrs()                 { return _all_ftrs;}
       word              num_ftfs()                 { return _all_ftfs;}
       word              num_ftss()                 { return _all_ftss;}
@@ -108,8 +121,7 @@ class TessellPoly {
       static GLvoid     teselBegin(GLenum, GLvoid *);
       static GLvoid     teselEnd(GLvoid *);
 #endif
-      typedef std::list<word>     TriIndex;
-      typedef std::list<TriIndex> TriList;
+   typedef std::list<TeselVertices> TriList;
    private:
       void              triGroup(TriList);
       TeselChain        _tdata;
@@ -118,16 +130,6 @@ class TessellPoly {
       word              _all_ftss;
 };
 
-class TriGroup {
-   public:
-      TriGroup(const TessellPoly::TriIndex&);
-      bool checkMatching(const TessellPoly::TriIndex&);
-      bool empty() { return _empty;}
-   private:
-      std::vector<word> _indxs;
-      bool              _empty;
-   
-};
 
 
 namespace trend {
