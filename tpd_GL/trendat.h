@@ -80,6 +80,7 @@ typedef std::list<TeselChunk> TeselChain;
 
 class TeselTempData {
    public:
+//                        TeselTempData(unsigned);
                         TeselTempData(TeselChain* tc);
       void              setChainP(TeselChain* tc)  {_the_chain = tc;}
       void              newChunk(GLenum type)      {_ctype = type; _cindexes.clear();}
@@ -103,7 +104,7 @@ class TessellPoly {
    public:
                         TessellPoly();
       void              tessellate(const int4b* pdata, unsigned psize);
-      void              tessellate_old(const int4b* pdata, unsigned psize);
+      void              tess2(const int4b* pdata, unsigned psize);
       const TeselChain* tdata() const              { return &_tdata;  }
       word              num_ftrs() const           { return _all_ftrs;}
       word              num_ftfs() const           { return _all_ftfs;}
@@ -122,7 +123,7 @@ class TessellPoly {
 #endif
    typedef std::list<TeselVertices> TriList;
    private:
-      void              triGroup(TriList, TeselTempData&);
+      void              triGroup(TriList);
       TeselChain        _tdata;
       word              _all_ftrs;
       word              _all_ftfs;
