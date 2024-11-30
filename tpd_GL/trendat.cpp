@@ -28,7 +28,6 @@
 #include "tpdph.h"
 #include "trendat.h"
 #include "trend.h"
-#include "tesselator.h"
 
 GLUtriangulatorObj*  TessellPoly::tenderTesel = NULL;
 extern trend::TrendCenter*            TRENDC;
@@ -142,81 +141,8 @@ TessellPoly::TessellPoly() : _tdata(), _all_ftrs(0), _all_ftfs(0), _all_ftss(0)
 {
 }
 
-void TessellPoly::tess2(const int4b* pdata, unsigned psize)
-{
-   TESStesselator* tess = tessNewTess(NULL/*<#TESSalloc *alloc#>*/);
-   if (tess)
-   {
-//      tessSetOption(tess, TESS_CONSTRAINED_DELAUNAY_TRIANGULATION, 1);
-//      tessSetOption(tess, TESS_REVERSE_CONTOURS, 1);
-      tessAddContour( tess, 2, pdata, 2 * sizeof(int4b), psize );
-      
-//      for (unsigned i = 0; i < psize; i++)
-//      {
-//         std::ostringstream ost;
-//         ost << i <<" = (" << pdata[2*i] << " : " << pdata[2*i+1] << ")";
-//         tell_log(console::MT_INFO, ost.str());
-//      }
-//      
-      unsigned polySize = 3;
-
-      int result = tessTesselate( tess, TESS_WINDING_ODD, TESS_POLYGONS, polySize, 2, NULL );
-
-      const TESSreal*  verts = tessGetVertices(tess);
-      const TESSindex* vinds = tessGetVertexIndices(tess);
-      const TESSindex* elems = tessGetElements(tess);
-      const int       nelems = tessGetElementCount(tess);
-
-      TriList allTriangles;
-      for (int i = 0; i < nelems; ++i)
-      {
-         const unsigned* p = &elems[i*polySize];
-//         std::ostringstream ost1;
-//         ost1 << "*Triangle" << i << "*";
-//         tell_log(console::MT_INFO, ost1.str());
-         TriIndex triIndex;
-         for (int j = 0; j < polySize && p[j] != TESS_UNDEF; ++j)
-         {
-            triIndex.push_back(vinds[p[j]]);
-   //         std::ostringstream ost;
-   //         ost << vinds[p[j]];
-   //         tell_log(console::MT_INFO,ost.str());
-         }
-         triIndex.sort();
-         allTriangles.push_back(triIndex);
-      }
-      triGroup(allTriangles);
-
-      tessDeleteTess(tess);
-   }
-}
-
-void TessellPoly::triGroup(TriList tlst)
-{
-   std::list<TriGroup> triangleStrips;
-   TriList::iterator mark = tlst.begin();
-   while (mark != tlst.end())
-   {
-      TriGroup group(*mark);// initialize the eventual group of triangles
-      TriList::iterator iter = mark;
-      iter++;
-      while(iter != tlst.end())
-      {
-         if (group.checkMatching(*iter))  iter = tlst.erase(iter);
-         else                             iter++;
-      }
-      if (!group.empty())
-      {
-         mark = tlst.erase(mark);         // eventually add it to _all_ftrs/_all_ftfs etc.
-         triangleStrips.push_back(group);
-      }
-      else                 mark++;
-   }
-}
-
 void TessellPoly::tessellate(const int4b* pdata, unsigned psize)
 {
-   tess2(pdata, psize);
    _tdata.clear();
    TeselTempData ttdata( &_tdata );
    // Start tessellation
@@ -268,58 +194,6 @@ void TessellPoly::num_indexs(unsigned& iftrs, unsigned& iftfs, unsigned& iftss) 
          default: assert(0);break;
       }
    }
-}
-
-TriGroup::TriGroup(const TessellPoly::TriIndex& initTri) :
-   _indxs(3,0) // FIXME! - put the max number of points in the polygon + 1, not 16
-  ,_empty(true)
-{
-   int j=0;
-   for (TessellPoly::TriIndex::const_iterator i = initTri.begin(); i != initTri.end(); i++)
-      _indxs[j++] = *i;
-   // Denormalize - i.e. make sure that the indexes are not consequitive
-   // they should've come here sorted, i.e. I need to "unsort" them
-   // which comes down to making sure that the last two indexes differ by more than one
-   // (reminder)
-   // - consequitive indexes describe a line from the polygon borders
-   // - in order to have a "triangle stripe" the first or last pair of pont indexes must be a diagonal
-   // - This algo implementation is (at least trying) adding points at the end of the sequence
-   if (abs(_indxs[2] - _indxs[1]) < 2)
-   {
-      word temp = _indxs[0];
-      _indxs[0] = _indxs[1];
-      _indxs[1] = _indxs[2];
-      _indxs[2] = temp;
-   }
-}
-
-/// <#Description#>j Cheking whether the incomming triangle can be combined with the triangle stripe
-/// sequence in this group
-///
-/// - Parameter triangle: <#triangle description#>
-bool TriGroup::checkMatching(const TessellPoly::TriIndex& triangle)
-{
-   word cpyTri[3]      = {(word)-1,(word)-1,(word)-1};// will contain a copy of the incomming triangle
-   word ivrtx          = 0;// index of the cpyTri defined above
-   bool indexExists[3] = {false,false,false};
-   for (TessellPoly::TriIndex::const_iterator j = triangle.begin(); j != triangle.end(); j++)
-   {
-      cpyTri[ivrtx] = *j;  // copy the vertex index locally
-      for (size_t i = _indxs.size()-2; i<_indxs.size(); i++) // check whether this index coinside with one of the last two indexes in the triangle stripe sequence
-         if (cpyTri[ivrtx] == _indxs[i]) indexExists[ivrtx] = true;
-      ivrtx++;
-   }
-   word coinum=0;
-   for (unsigned i=0; i<3; coinum += indexExists[i++] ? 1 : 0);
-   if (2==coinum) {
-      _empty = false;
-      //add the index number from triangle object which does not coinside with the rest of the vertices in the sequence
-      _indxs.resize(_indxs.size()+1);
-      for (unsigned i = 0; i < 3; i++)
-         if (!indexExists[i]) _indxs[_indxs.size()-1] = cpyTri[i];
-      return true;
-   }
-   else return false;
 }
 
 //=============================================================================
