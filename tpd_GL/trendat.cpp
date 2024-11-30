@@ -103,15 +103,15 @@ TeselChunk::~TeselChunk()
 //=============================================================================
 //
 
-//TeselTempData::TeselTempData(unsigned offset) :
-//   _the_chain   (    NULL),
-//   _ctype       (      0 ),
-//   _cindexes    (        ),
-//   _all_ftrs    (      0 ),
-//   _all_ftfs    (      0 ),
-//   _all_ftss    (      0 ),
-//   _offset      ( offset )
-//{}
+TeselTempData::TeselTempData(unsigned offset) :
+   _the_chain   (    NULL),
+   _ctype       (      0 ),
+   _cindexes    (        ),
+   _all_ftrs    (      0 ),
+   _all_ftfs    (      0 ),
+   _all_ftss    (      0 ),
+   _offset      ( offset )
+{}
 
 TeselTempData::TeselTempData(TeselChain* tc) :
    _the_chain   ( tc     ),
@@ -135,19 +135,6 @@ void TeselTempData::storeChunk()
    }
 }
 
-void TeselTempData::storeChunk(const TeselVertices& cindexes)
-{
-   _the_chain->push_back(TeselChunk(cindexes, _ctype, _offset));
-   switch (_ctype)
-   {
-      case GL_TRIANGLE_FAN   : _all_ftfs++; break;
-      case GL_TRIANGLE_STRIP : _all_ftss++; break;
-      case GL_TRIANGLES      : _all_ftrs++; break;
-      default: assert(0);break;
-   }
-}
-
-
 //=============================================================================
 // TessellPoly
 
@@ -157,13 +144,11 @@ TessellPoly::TessellPoly() : _tdata(), _all_ftrs(0), _all_ftfs(0), _all_ftss(0)
 
 void TessellPoly::tess2(const int4b* pdata, unsigned psize)
 {
-   // initialize the teselator
    TESStesselator* tess = tessNewTess(NULL/*<#TESSalloc *alloc#>*/);
    if (tess)
    {
-//      tessSetOption(tess, TESS_CONSTRAINED_DELAUNAY_TRteselatorIANGULATION, 1);
+//      tessSetOption(tess, TESS_CONSTRAINED_DELAUNAY_TRIANGULATION, 1);
 //      tessSetOption(tess, TESS_REVERSE_CONTOURS, 1);
-      // add the contour of the poligon
       tessAddContour( tess, 2, pdata, 2 * sizeof(int4b), psize );
       
 //      for (unsigned i = 0; i < psize; i++)
@@ -173,18 +158,15 @@ void TessellPoly::tess2(const int4b* pdata, unsigned psize)
 //         tell_log(console::MT_INFO, ost.str());
 //      }
 //      
-      // teselate ...
       unsigned polySize = 3;
-      int result = tessTesselate( tess, TESS_WINDING_ODD, TESS_POLYGONS, polySize, 2, NULL );
-      // .. and get the results
-//      const TESSreal*  verts = tessGetVertices(tess);
-      const TESSindex* vinds = tessGetVertexIndices(tess); // vertex indexes
-      const TESSindex* elems = tessGetElements(tess);      // the elements
-      const int       nelems = tessGetElementCount(tess);  // the number of elements
 
-      // .. now gather the data from the teselator in a list of triangle indexes
-      // I didn't manage to get out of the teselator any combination of connected poligons
-      // It just spits-out a series of triangles, which are gathered below
+      int result = tessTesselate( tess, TESS_WINDING_ODD, TESS_POLYGONS, polySize, 2, NULL );
+
+      const TESSreal*  verts = tessGetVertices(tess);
+      const TESSindex* vinds = tessGetVertexIndices(tess);
+      const TESSindex* elems = tessGetElements(tess);
+      const int       nelems = tessGetElementCount(tess);
+
       TriList allTriangles;
       for (int i = 0; i < nelems; ++i)
       {
@@ -192,19 +174,17 @@ void TessellPoly::tess2(const int4b* pdata, unsigned psize)
 //         std::ostringstream ost1;
 //         ost1 << "*Triangle" << i << "*";
 //         tell_log(console::MT_INFO, ost1.str());
-         TeselVertices triIndex;
-         for (unsigned int j = 0; j < polySize && p[j] != TESS_UNDEF; ++j)
+         TriIndex triIndex;
+         for (int j = 0; j < polySize && p[j] != TESS_UNDEF; ++j)
          {
             triIndex.push_back(vinds[p[j]]);
    //         std::ostringstream ost;
    //         ost << vinds[p[j]];
    //         tell_log(console::MT_INFO,ost.str());
          }
-         assert(3==triIndex.size());
          triIndex.sort();
          allTriangles.push_back(triIndex);
       }
-      // try to create a triangle strip sequence out of tesselated triangles
       triGroup(allTriangles);
 
       tessDeleteTess(tess);
@@ -213,7 +193,7 @@ void TessellPoly::tess2(const int4b* pdata, unsigned psize)
 
 void TessellPoly::triGroup(TriList tlst)
 {
-//   std::list<TriGroup> triangleStrips;
+   std::list<TriGroup> triangleStrips;
    TriList::iterator mark = tlst.begin();
    while (mark != tlst.end())
    {
@@ -228,43 +208,33 @@ void TessellPoly::triGroup(TriList tlst)
       if (!group.empty())
       {
          mark = tlst.erase(mark);         // eventually add it to _all_ftrs/_all_ftfs etc.
-         _tdata.clear();
-         
-         TeselTempData koko(&_tdata);
-         _tdata.clear();
-         koko.newChunk(GL_TRIANGLE_STRIP);
-         koko.storeChunk(group.getIndexes());
-//         triangleStrips.push_back(group);
+         triangleStrips.push_back(group);
       }
       else                 mark++;
-   }
-   if (!tlst.empty())
-   {
-      int koko = 1;// TODO
    }
 }
 
 void TessellPoly::tessellate(const int4b* pdata, unsigned psize)
 {
    tess2(pdata, psize);
-//   _tdata.clear();
-//   TeselTempData ttdata( &_tdata );
-//   // Start tessellation
-//   gluTessBeginPolygon(tenderTesel, &ttdata);
-//   GLdouble pv[3];
-//   pv[2] = 0;
-//   word* index_arr = DEBUG_NEW word[psize];
-//   for (unsigned i = 0; i < psize; i++ )
-//   {
-//      pv[0] = pdata[2*i]; pv[1] = pdata[2*i+1];
-//      index_arr[i] = i;
-//      gluTessVertex(tenderTesel,pv, &(index_arr[i]));
-//   }
-//   gluTessEndPolygon(tenderTesel);
-//   delete [] index_arr;
-//   _all_ftrs = ttdata.num_ftrs();
-//   _all_ftfs = ttdata.num_ftfs();
-//   _all_ftss = ttdata.num_ftss();
+   _tdata.clear();
+   TeselTempData ttdata( &_tdata );
+   // Start tessellation
+   gluTessBeginPolygon(tenderTesel, &ttdata);
+   GLdouble pv[3];
+   pv[2] = 0;
+   word* index_arr = DEBUG_NEW word[psize];
+   for (unsigned i = 0; i < psize; i++ )
+   {
+      pv[0] = pdata[2*i]; pv[1] = pdata[2*i+1];
+      index_arr[i] = i;
+      gluTessVertex(tenderTesel,pv, &(index_arr[i]));
+   }
+   gluTessEndPolygon(tenderTesel);
+   delete [] index_arr;
+   _all_ftrs = ttdata.num_ftrs();
+   _all_ftfs = ttdata.num_ftfs();
+   _all_ftss = ttdata.num_ftss();
 }
 
 
@@ -300,12 +270,12 @@ void TessellPoly::num_indexs(unsigned& iftrs, unsigned& iftfs, unsigned& iftss) 
    }
 }
 
-TriGroup::TriGroup(const TeselVertices& initTri) :
-   _indxs(3,0)
+TriGroup::TriGroup(const TessellPoly::TriIndex& initTri) :
+   _indxs(3,0) // FIXME! - put the max number of points in the polygon + 1, not 16
   ,_empty(true)
 {
    int j=0;
-   for (TeselVertices::const_iterator i = initTri.begin(); i != initTri.end(); i++)
+   for (TessellPoly::TriIndex::const_iterator i = initTri.begin(); i != initTri.end(); i++)
       _indxs[j++] = *i;
    // Denormalize - i.e. make sure that the indexes are not consequitive
    // they should've come here sorted, i.e. I need to "unsort" them
@@ -327,12 +297,12 @@ TriGroup::TriGroup(const TeselVertices& initTri) :
 /// sequence in this group
 ///
 /// - Parameter triangle: <#triangle description#>
-bool TriGroup::checkMatching(const TeselVertices& triangle)
+bool TriGroup::checkMatching(const TessellPoly::TriIndex& triangle)
 {
    word cpyTri[3]      = {(word)-1,(word)-1,(word)-1};// will contain a copy of the incomming triangle
    word ivrtx          = 0;// index of the cpyTri defined above
    bool indexExists[3] = {false,false,false};
-   for (TeselVertices::const_iterator j = triangle.begin(); j != triangle.end(); j++)
+   for (TessellPoly::TriIndex::const_iterator j = triangle.begin(); j != triangle.end(); j++)
    {
       cpyTri[ivrtx] = *j;  // copy the vertex index locally
       for (size_t i = _indxs.size()-2; i<_indxs.size(); i++) // check whether this index coinside with one of the last two indexes in the triangle stripe sequence
