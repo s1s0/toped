@@ -2460,7 +2460,7 @@ laydata::ValidWire::~ValidWire()
 int laydata::xangle(const TP& p1, const TP& p2) {
 //   printf("-- Calculating angle between X axis and (%i, %i) - (%i, %i) line\n",
 //          p1.x(), p1.y(), p2.x(), p2.y());
-   const long double Pi = 3.1415926535897932384626433832795;
+//   const long double Pi = 3.1415926535897932384626433832795;
    if (p1.x() == p2.x()) { //vertcal line
       assert(p1.y() != p2.y()); // make sure both points do not coinside
       if   (p2.y() > p1.y()) return  90;
@@ -2472,7 +2472,7 @@ int laydata::xangle(const TP& p1, const TP& p2) {
    }
    else
       return (int)rint(180 * atan2(double(p2.y() - p1.y()),
-                                   double(p2.x() - p1.x()) ) /Pi);
+                                   double(p2.x() - p1.x()) ) /M_PI);
 }
 
 //-----------------------------------------------------------------------------
