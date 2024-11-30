@@ -21,7 +21,7 @@
 //        $Author$
 //===========================================================================
 
-#include "$TPD_GLOBAL/tll/seed.tll"
+//#include "$TPD_GLOBAL/tll/seed.tll"
 // Some DRC rules defined as global variables
 const real _actOverCont = 1.5;
 const real _mincont = 2;
@@ -451,6 +451,8 @@ void scaletest()
   echo(a/4.0);
 }
 
+newdesign("tcase");
+
 newcell("Fcell");
 opencell("Fcell");
 point list pl1 =
@@ -466,6 +468,7 @@ Invertor({0,0},10,3,30,3);
 Invertor({30,0},20,2,60,2);
 cellref("Fcell", {60,30}, 270,  true, 1.0);
 
+newcell("crop");
 opencell("crop");
 cellref("cellrefs",{10,100},0,false,1);
 cellref("textrefs",{140,-70},0,false,1);

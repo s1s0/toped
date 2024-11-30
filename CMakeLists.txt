@@ -91,6 +91,8 @@ set(MACOSX_BUNDLE_ICON_FILE "toped.icns")
 set(WITH_MAC_BUNDLE_NAME "toped")
 set(APP_ICON "${CMAKE_CURRENT_SOURCE_DIR}/toped.icns")
 
+file(GLOB top_headers    "src/*.h")
+file(GLOB top_sources    "src/*.cpp")
 file(GLOB TPD_FONTS      "fonts/*.glf")
 file(GLOB TPD_TLL        "tll/*.tll")
 file(GLOB TPD_RESOURCES  "ui/*")
@@ -139,14 +141,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/wxcocoa_config.h.cmake ${CMAKE_CU
 
 #---------------------------------------------------------------------------
 add_executable(${PRJ_NAME} MACOSX_BUNDLE
-                      src/tpdph.cpp
-                      src/browsers.cpp
-                      src/layoutcanvas.cpp
-                      src/resourcecenter.cpp
-                      src/tui.cpp
-                      src/techeditor.cpp
-                      src/toped.cpp
-                      src/main.cpp
+                      ${top_sources} ${top_headers}
                       ${TPD_FONTS} ${TPD_TLL} ${TPD_RESOURCES} ${TPD_UTILS} ${TPD_SHADERS}
                       ${APP_ICON} ${TPD_ICONS_16} ${TPD_ICONS_24} ${TPD_ICONS_32} ${TPD_ICONS_48}
 )
