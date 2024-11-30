@@ -83,7 +83,6 @@ add_subdirectory(tpd_DB)
 add_subdirectory(tpd_ifaces)
 add_subdirectory(tpd_parser)
 add_subdirectory(tpd_bidfunc)
-add_subdirectory(tess2)
 
 #---------------------------------------------------------------------------
 # Packging & install
@@ -171,7 +170,6 @@ target_link_libraries(${PRJ_NAME} PUBLIC
                       tpd_parser
                       tpd_bidfunc
                       tpd_ifaces
-                      tess2
 )
 
 target_include_directories(${PRJ_NAME} PUBLIC
@@ -182,7 +180,6 @@ target_include_directories(${PRJ_NAME} PUBLIC
                       tpd_parser
                       tpd_bidfunc
                       tpd_ifaces
-                      tess2
 )
 
 

@@ -12,7 +12,6 @@ target_include_directories(tpd_DB PUBLIC
                          ${CMAKE_CURRENT_SOURCE_DIR}
                          ${CMAKE_SOURCE_DIR}/tpd_common
                          ${CMAKE_SOURCE_DIR}/tpd_GL
-                         ${CMAKE_SOURCE_DIR}/tess2
 )
 target_link_libraries(tpd_DB PUBLIC
                          toped_compiler_flags
