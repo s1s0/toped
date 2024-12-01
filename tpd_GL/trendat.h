@@ -114,7 +114,6 @@ class TessellPoly {
       word              _all_ftss;
 };
 
-
 namespace trend {
 
    typedef enum {lstr, llps, lnes} SlctTypes;

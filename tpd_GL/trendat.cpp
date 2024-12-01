@@ -196,6 +196,7 @@ void TessellPoly::num_indexs(unsigned& iftrs, unsigned& iftfs, unsigned& iftss) 
    }
 }
 
+
 //=============================================================================
 //
 // TrxCnvx
