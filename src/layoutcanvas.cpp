@@ -210,23 +210,6 @@ void tui::TpdOglContext::glewContext(LayoutCanvas* canvas)
 //    wxLogDebug("OpenGL vendor: %s", reinterpret_cast<const char *>(glGetString(GL_VENDOR)));
    OGLLogFile << "OpenGL vendor: " << reinterpret_cast<const char *>(glGetString(GL_VENDOR));
    OGLLogFile.flush();
-
-   TessellPoly::tenderTesel = gluNewTess();
-#ifndef WIN32
-   gluTessCallback(TessellPoly::tenderTesel, GLU_TESS_BEGIN_DATA,
-                   (GLvoid(*)())&TessellPoly::teselBegin);
-   gluTessCallback(TessellPoly::tenderTesel, GLU_TESS_VERTEX_DATA,
-                   (GLvoid(*)())&TessellPoly::teselVertex);
-   gluTessCallback(TessellPoly::tenderTesel, GLU_TESS_END_DATA,
-                   (GLvoid(*)())&TessellPoly::teselEnd);
-#else
-   gluTessCallback(TessellPoly::tenderTesel, GLU_TESS_BEGIN_DATA,
-                   (GLvoid(__stdcall *)())&TessellPoly::teselBegin);
-   gluTessCallback(TessellPoly::tenderTesel, GLU_TESS_VERTEX_DATA,
-                   (GLvoid(__stdcall *)())&TessellPoly::teselVertex);
-   gluTessCallback(TessellPoly::tenderTesel, GLU_TESS_END_DATA,
-                   (GLvoid(__stdcall *)())&TessellPoly::teselEnd);
-#endif
 }
 
 void tui::TpdOglContext::printStatus() const

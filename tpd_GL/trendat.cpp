@@ -30,8 +30,6 @@
 #include "trend.h"
 
 
-GLUtriangulatorObj*  TessellPoly_old::tenderTesel = NULL;
-GLUtriangulatorObj*  TessellPoly::tenderTesel = NULL;
 extern trend::TrendCenter*            TRENDC;
 
 GLubyte ref_mark_bmp[30] = {
@@ -186,23 +184,6 @@ TessellPoly::TessellPoly():
     ,_all_ftss ()
 {}
 
-GLvoid TessellPoly::teselBegin(GLenum, GLvoid*)
-{
-   // DELETE_ME
-}
-
-GLvoid TessellPoly::teselVertex(GLvoid*, GLvoid*)
-{
-   // DELETE_ME
-}
-
-GLvoid TessellPoly::teselEnd(GLvoid*)
-{
-   // DELETE_ME
-}
-
-
-
 void TessellPoly::tessellate(const int4b* pdata, unsigned psize)
 {
    assert(false); //TODO
@@ -339,103 +320,6 @@ TeselChunk::~TeselChunk()
 {
    delete [] _index_seq;
 }
-//=============================================================================
-//
-
-TeselTempData::TeselTempData(unsigned offset) :
-   _the_chain   (    NULL),
-   _ctype       (      0 ),
-   _cindexes    (        ),
-   _all_ftrs    (      0 ),
-   _all_ftfs    (      0 ),
-   _all_ftss    (      0 ),
-   _offset      ( offset )
-{}
-
-TeselTempData::TeselTempData(TeselChain* tc) :
-   _the_chain   ( tc     ),
-   _ctype       (      0 ),
-   _cindexes    (        ),
-   _all_ftrs    (      0 ),
-   _all_ftfs    (      0 ),
-   _all_ftss    (      0 ),
-   _offset      (      0 )
-{}
-
-void TeselTempData::storeChunk()
-{
-   _the_chain->push_back(TeselChunk(_cindexes, _ctype, _offset));
-   switch (_ctype)
-   {
-      case GL_TRIANGLE_FAN   : _all_ftfs++; break;
-      case GL_TRIANGLE_STRIP : _all_ftss++; break;
-      case GL_TRIANGLES      : _all_ftrs++; break;
-      default: assert(0);break;
-   }
-}
-
-//=============================================================================
-// TessellPoly
-
-TessellPoly_old::TessellPoly_old() : _tdata(), _all_ftrs(0), _all_ftfs(0), _all_ftss(0)
-{
-}
-
-void TessellPoly_old::tessellate(const int4b* pdata, unsigned psize)
-{
-   _tdata.clear();
-   TeselTempData ttdata( &_tdata );
-   // Start tessellation
-   gluTessBeginPolygon(tenderTesel, &ttdata);
-   GLdouble pv[3];
-   pv[2] = 0;
-   word* index_arr = DEBUG_NEW word[psize];
-   for (unsigned i = 0; i < psize; i++ )
-   {
-      pv[0] = pdata[2*i]; pv[1] = pdata[2*i+1];
-      index_arr[i] = i;
-      gluTessVertex(tenderTesel,pv, &(index_arr[i]));
-   }
-   gluTessEndPolygon(tenderTesel);
-   delete [] index_arr;
-   _all_ftrs = ttdata.num_ftrs();
-   _all_ftfs = ttdata.num_ftfs();
-   _all_ftss = ttdata.num_ftss();
-}
-
-
-GLvoid TessellPoly_old::teselBegin(GLenum type, GLvoid* ttmp)
-{
-   TeselTempData* ptmp = static_cast<TeselTempData*>(ttmp);
-   ptmp->newChunk(type);
-}
-
-GLvoid TessellPoly_old::teselVertex(GLvoid *pindex, GLvoid* ttmp)
-{
-   TeselTempData* ptmp = static_cast<TeselTempData*>(ttmp);
-   ptmp->newIndex(*(static_cast<word*>(pindex)));
-}
-
-GLvoid TessellPoly_old::teselEnd(GLvoid* ttmp)
-{
-   TeselTempData* ptmp = static_cast<TeselTempData*>(ttmp);
-   ptmp->storeChunk();
-}
-
-void TessellPoly_old::num_indexs(unsigned& iftrs, unsigned& iftfs, unsigned& iftss) const
-{
-   for (TeselChain::const_iterator CCH = _tdata.begin(); CCH != _tdata.end(); CCH++)
-   {
-      switch (CCH->type())
-      {
-         case GL_TRIANGLE_FAN   : iftfs += CCH->size(); break;
-         case GL_TRIANGLE_STRIP : iftss += CCH->size(); break;
-         case GL_TRIANGLES      : iftrs += CCH->size(); break;
-         default: assert(0);break;
-      }
-   }
-}
-
 
 //=============================================================================
 //

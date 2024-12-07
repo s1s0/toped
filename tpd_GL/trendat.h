@@ -65,54 +65,6 @@ class TeselChunk {
 
 typedef std::list<TeselChunk> TeselChain;
 
-class TeselTempData {
-   public:
-                        TeselTempData(unsigned);
-                        TeselTempData(TeselChain* tc);
-      void              setChainP(TeselChain* tc)  {_the_chain = tc;}
-      void              newChunk(GLenum type)      {_ctype = type; _cindexes.clear();}
-      void              newIndex(word vx)          {_cindexes.push_back(vx);}
-      void              storeChunk();
-      word              num_ftrs()                 { return _all_ftrs;}
-      word              num_ftfs()                 { return _all_ftfs;}
-      word              num_ftss()                 { return _all_ftss;}
-   private:
-      TeselChain*       _the_chain;
-      GLenum            _ctype;
-      TeselVertices     _cindexes;
-      word              _all_ftrs;
-      word              _all_ftfs;
-      word              _all_ftss;
-      unsigned          _offset;
-};
-
-class TessellPoly_old {
-   public:
-                        TessellPoly_old();
-      void              tessellate(const int4b* pdata, unsigned psize);
-      const TeselChain* tdata() const              { return &_tdata;  }
-      word              num_ftrs() const           { return _all_ftrs;}
-      word              num_ftfs() const           { return _all_ftfs;}
-      word              num_ftss() const           { return _all_ftss;}
-      bool              valid() const              { return (0 < (_all_ftrs + _all_ftfs + _all_ftss));}
-      void              num_indexs(unsigned&, unsigned&, unsigned&) const;
-      static GLUtriangulatorObj* tenderTesel; //! A pointer to the OpenGL object tesselator
-#ifdef WIN32
-      static GLvoid CALLBACK teselVertex(GLvoid *, GLvoid *);
-      static GLvoid CALLBACK teselBegin(GLenum, GLvoid *);
-      static GLvoid CALLBACK teselEnd(GLvoid *);
-#else
-      static GLvoid     teselVertex(GLvoid *, GLvoid *);
-      static GLvoid     teselBegin(GLenum, GLvoid *);
-      static GLvoid     teselEnd(GLvoid *);
-#endif
-   private:
-      TeselChain        _tdata;
-      word              _all_ftrs;
-      word              _all_ftfs;
-      word              _all_ftss;
-};
-
 //=============================================================================
 //
 // Attempt to replace the GLU tesselation
@@ -128,8 +80,6 @@ class ECVertex {
    public:
                          ECVertex(word  pidx, word idx, word nidx, const PointVector& pv);
       bool               tryClipVertex(ECV_iter, ECV_iter, const WordSet&);
-//      void               setpidx(word pidx) {_pidx = pidx;}
-//      void               setnidx(word nidx) {_nidx = nidx;}
       word               idx() {return _idx;}
       bool               pushIndex(TeselVertices&);
       int                angle() {return _angle;}
@@ -158,19 +108,6 @@ class TessellPoly {
       word              num_ftss() const { return _all_ftss;}
       const TeselChain* tdata() const    { return &_tdata;  }
       void              num_indexs(unsigned& iftrs, unsigned& iftfs, unsigned& iftss) const;
-
-   //====================================================================
-      static GLUtriangulatorObj* tenderTesel; //! A pointer to the OpenGL object tesselator
-#ifdef WIN32
-   static GLvoid CALLBACK teselVertex(GLvoid *, GLvoid *);
-   static GLvoid CALLBACK teselBegin(GLenum, GLvoid *);
-   static GLvoid CALLBACK teselEnd(GLvoid *);
-#else
-   static GLvoid     teselVertex(GLvoid *, GLvoid *);
-   static GLvoid     teselBegin(GLenum, GLvoid *);
-   static GLvoid     teselEnd(GLvoid *);
-#endif
-
    //====================================================================
    private:
       TeselChain        _tdata;

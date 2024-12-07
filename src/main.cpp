@@ -125,23 +125,6 @@ bool TopedApp::OnInit()
    }
    else
    {
-      TessellPoly::tenderTesel = gluNewTess();
-      #ifndef WIN32
-         gluTessCallback(TessellPoly::tenderTesel, GLU_TESS_BEGIN_DATA,
-                         (GLvoid(*)())&TessellPoly::teselBegin);
-         gluTessCallback(TessellPoly::tenderTesel, GLU_TESS_VERTEX_DATA,
-                         (GLvoid(*)())&TessellPoly::teselVertex);
-         gluTessCallback(TessellPoly::tenderTesel, GLU_TESS_END_DATA,
-                         (GLvoid(*)())&TessellPoly::teselEnd);
-      #else
-         gluTessCallback(TessellPoly::tenderTesel, GLU_TESS_BEGIN_DATA,
-                         (GLvoid(__stdcall *)())&TessellPoly::teselBegin);
-         gluTessCallback(TessellPoly::tenderTesel, GLU_TESS_VERTEX_DATA,
-                         (GLvoid(__stdcall *)())&TessellPoly::teselVertex);
-         gluTessCallback(TessellPoly::tenderTesel, GLU_TESS_END_DATA,
-                         (GLvoid(__stdcall *)())&TessellPoly::teselEnd);
-      #endif
-
       DEBUG_NEW console::TllCCmdLine();
       TRENDC = DEBUG_NEW trend::TrendCenter(false);
       loadGlfFonts();

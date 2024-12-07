@@ -178,7 +178,6 @@ namespace laydata {
          int4b*            _pdata;
          unsigned          _psize;
          TessellPoly       _teseldata;
-//         TessEarClip       _teseldata;
    };
 
 //==============================================================================
