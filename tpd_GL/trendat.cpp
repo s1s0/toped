@@ -30,6 +30,7 @@
 #include "trend.h"
 
 
+GLUtriangulatorObj*  TessellPoly_old::tenderTesel = NULL;
 GLUtriangulatorObj*  TessellPoly::tenderTesel = NULL;
 extern trend::TrendCenter*            TRENDC;
 
@@ -154,31 +155,60 @@ bool ECVertex::tryClipVertex(ECV_iter prev, ECV_iter next, const WordSet& clippe
    return false;
 }
 
-void ECVertex::pushIndex(TeselVertices& vrtx)
+bool ECVertex::pushIndex(TeselVertices& vrtx)
 {
    if (vrtx.empty())
    {
       vrtx.push_back(_idx);
       vrtx.push_back(_nidx);
       vrtx.push_back(_pidx);
+      return true;
    }
-   else
-      vrtx.push_back(_nidx);
+   else {
+      TeselVertices::reverse_iterator koko0 = vrtx.rbegin();
+      TeselVertices::reverse_iterator koko1 = koko0;koko1++;
+      word idx0 = *koko0;
+      word idx1 = *koko1;
+      if (((idx0 == _pidx) || (idx0 == _idx)) &&
+          ((idx1 == _pidx) || (idx1 == _idx))   )
+      {
+         vrtx.push_back(_nidx);
+         return true;
+      }
+      return false;
+   }
 }
 
-TessEarClip::TessEarClip():
+TessellPoly::TessellPoly():
      _tdata    ()
     ,_all_ftrs ()
     ,_all_ftfs ()
     ,_all_ftss ()
 {}
 
-void TessEarClip::tessellate(const PointVector& polyVertex)
-//     _tdata    ()
-//    ,_all_ftrs ()
-//    ,_all_ftfs ()
-//    ,_all_ftss ()
-//    ,_clipped  ()
+GLvoid TessellPoly::teselBegin(GLenum, GLvoid*)
+{
+   // DELETE_ME
+}
+
+GLvoid TessellPoly::teselVertex(GLvoid*, GLvoid*)
+{
+   // DELETE_ME
+}
+
+GLvoid TessellPoly::teselEnd(GLvoid*)
+{
+   // DELETE_ME
+}
+
+
+
+void TessellPoly::tessellate(const int4b* pdata, unsigned psize)
+{
+   assert(false); //TODO
+}
+
+void TessellPoly::tessellate(const PointVector& polyVertex)
 {
    // create and initialize the vertex structure we'll need to run the EarClip algo
    // for tesselation - in this case polygon triangulation
@@ -205,7 +235,12 @@ void TessEarClip::tessellate(const PointVector& polyVertex)
          if (iecv->angle())
          {
             clipped.insert(iecv->idx());   // add the vertex index to the list of clipped list
-            iecv->pushIndex(indexSequence);// add the appropriate indexes to the index sequence
+            if (!iecv->pushIndex(indexSequence))// add the appropriate indexes to the index sequence
+            {
+               _tdata.push_back(TeselChunk(indexSequence, ((3==indexSequence.size()) ? GL_TRIANGLES:GL_TRIANGLE_STRIP), 0));
+               indexSequence.clear();
+               iecv->pushIndex(indexSequence);
+            }
          }
          iecv = ecVertexList.erase(iecv);// erase the ECVertex from the list
          iecvnext++;                     // and update the iterators
@@ -240,7 +275,7 @@ void TessEarClip::tessellate(const PointVector& polyVertex)
       }
 }
 
-void TessEarClip::num_indexs(unsigned& iftrs, unsigned& iftfs, unsigned& iftss) const
+void TessellPoly::num_indexs(unsigned& iftrs, unsigned& iftfs, unsigned& iftss) const
 {
    for (TeselChain::const_iterator CCH = _tdata.begin(); CCH != _tdata.end(); CCH++)
    {
@@ -342,11 +377,11 @@ void TeselTempData::storeChunk()
 //=============================================================================
 // TessellPoly
 
-TessellPoly::TessellPoly() : _tdata(), _all_ftrs(0), _all_ftfs(0), _all_ftss(0)
+TessellPoly_old::TessellPoly_old() : _tdata(), _all_ftrs(0), _all_ftfs(0), _all_ftss(0)
 {
 }
 
-void TessellPoly::tessellate(const int4b* pdata, unsigned psize)
+void TessellPoly_old::tessellate(const int4b* pdata, unsigned psize)
 {
    _tdata.clear();
    TeselTempData ttdata( &_tdata );
@@ -369,25 +404,25 @@ void TessellPoly::tessellate(const int4b* pdata, unsigned psize)
 }
 
 
-GLvoid TessellPoly::teselBegin(GLenum type, GLvoid* ttmp)
+GLvoid TessellPoly_old::teselBegin(GLenum type, GLvoid* ttmp)
 {
    TeselTempData* ptmp = static_cast<TeselTempData*>(ttmp);
    ptmp->newChunk(type);
 }
 
-GLvoid TessellPoly::teselVertex(GLvoid *pindex, GLvoid* ttmp)
+GLvoid TessellPoly_old::teselVertex(GLvoid *pindex, GLvoid* ttmp)
 {
    TeselTempData* ptmp = static_cast<TeselTempData*>(ttmp);
    ptmp->newIndex(*(static_cast<word*>(pindex)));
 }
 
-GLvoid TessellPoly::teselEnd(GLvoid* ttmp)
+GLvoid TessellPoly_old::teselEnd(GLvoid* ttmp)
 {
    TeselTempData* ptmp = static_cast<TeselTempData*>(ttmp);
    ptmp->storeChunk();
 }
 
-void TessellPoly::num_indexs(unsigned& iftrs, unsigned& iftfs, unsigned& iftss) const
+void TessellPoly_old::num_indexs(unsigned& iftrs, unsigned& iftfs, unsigned& iftss) const
 {
    for (TeselChain::const_iterator CCH = _tdata.begin(); CCH != _tdata.end(); CCH++)
    {

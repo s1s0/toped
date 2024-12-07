@@ -627,8 +627,8 @@ laydata::TdtPoly::TdtPoly(const PointVector& plst) : TdtData()
       _pdata[index++] = plst[i].x();
       _pdata[index++] = plst[i].y();
    }
-   _teseldata.tessellate(_pdata, _psize);
-//   _teseldata.tessellate(plst);
+//   _teseldata.tessellate(_pdata, _psize);
+   _teseldata.tessellate(plst);
 }
 
 laydata::TdtPoly::TdtPoly(int4b* pdata, unsigned psize) : _pdata(pdata), _psize(psize)
