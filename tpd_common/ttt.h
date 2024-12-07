@@ -386,8 +386,10 @@ struct TpdYYLtype {
 };
 
 std::vector<std::string> split (const std::string& str, char delim);
-int8b polyarea(const PointVector& shape);
+int8b    polyarea(const PointVector& shape);
 unsigned GCD(unsigned arg1, unsigned arg2);
+int      xangle(const TP&, const TP&);
+
 
 //=============================================================================
 // A template of a cell hierarchy used for all layout databases in Toped (TDT,

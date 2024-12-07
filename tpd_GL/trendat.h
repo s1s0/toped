@@ -40,7 +40,6 @@
    #define TNDR_GLENUMT GL_INT
 #endif
 
-
 //=============================================================================
 //
 // Tesselation classes
@@ -113,6 +112,59 @@ class TessellPoly {
       word              _all_ftfs;
       word              _all_ftss;
 };
+
+//=============================================================================
+//
+// Attempt to replace the GLU tesselation
+//
+//=============================================================================
+// ear-clipping algorithm for polygon tessellation - as an alternative to
+// deprecated functionality of GLU
+class ECVertex;
+typedef std::list<ECVertex>               ECVertexList;
+typedef ECVertexList::iterator            ECV_iter;
+
+class ECVertex {
+   public:
+                         ECVertex(word  pidx, word idx, word nidx, const PointVector& pv);
+      bool               tryClipVertex(ECV_iter, ECV_iter, const WordSet&);
+//      void               setpidx(word pidx) {_pidx = pidx;}
+//      void               setnidx(word nidx) {_nidx = nidx;}
+      word               idx() {return _idx;}
+      void               pushIndex(TeselVertices&);
+      int                angle() {return _angle;}
+   protected:
+      void               checkClipable(const WordSet&);
+      bool               internalPoint(word p);
+      void               update(const WordSet&);
+   private:
+      word               _idx       ; // this vertex index
+      word               _pidx      ; // previous vertex index
+      word               _nidx      ; // next vertex index
+      const PointVector& _pv        ;
+      int                _angle     ; // the angle between the 3 vertexes
+      bool               _ecGood    ; // good for ear clipping - i.e. there is no another point of the polygon, which lies within
+};
+
+
+class TessEarClip {
+   public:
+                        TessEarClip();
+      void              tessellate(const PointVector& polyVertex);
+      bool              valid() const  { return (0 < (_all_ftrs + _all_ftfs + _all_ftss));}
+      word              num_ftrs() const { return _all_ftrs;}
+      word              num_ftfs() const {return _all_ftfs;}
+      word              num_ftss() const {return _all_ftss;}
+   void              num_indexs(unsigned& iftrs, unsigned& iftfs, unsigned& iftss) const;
+   private:
+      TeselChain        _tdata;
+      word              _all_ftrs;// GL_TRIANGLES
+      word              _all_ftfs;// GL_TRIANGLE_FAN
+      word              _all_ftss;// GL_TRIANGLE_STRIP
+//      WordSet           _clipped;
+
+};
+
 
 namespace trend {
 

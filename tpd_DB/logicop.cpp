@@ -569,7 +569,7 @@ logicop::SSegment::SSegment(const TP& p1, const TP& p2, int distance) : PSegment
    assert(0 != distance);
    DBline sample(TP(0,0), TP(distance, 0));
    CTM mtrx;
-   real rotation = laydata::xangle(p1,p2) + 270.0;
+   real rotation = xangle(p1,p2) + 270.0;
    mtrx.Rotate(rotation);
    mtrx.Translate(p1);
    sample = sample * mtrx;

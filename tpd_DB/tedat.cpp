@@ -628,7 +628,7 @@ laydata::TdtPoly::TdtPoly(const PointVector& plst) : TdtData()
       _pdata[index++] = plst[i].y();
    }
    _teseldata.tessellate(_pdata, _psize);
-   TessEarClip boza(plst);
+//   _teseldata.tessellate(plst);
 }
 
 laydata::TdtPoly::TdtPoly(int4b* pdata, unsigned psize) : _pdata(pdata), _psize(psize)
@@ -2455,26 +2455,26 @@ laydata::ValidWire::~ValidWire()
       delete _shapeFix;
 }
 
-//-----------------------------------------------------------------------------
-/*! Returns the angle between the line and the X axis
-*/
-int laydata::xangle(const TP& p1, const TP& p2) {
-//   printf("-- Calculating angle between X axis and (%i, %i) - (%i, %i) line\n",
-//          p1.x(), p1.y(), p2.x(), p2.y());
-//   const long double Pi = 3.1415926535897932384626433832795;
-   if (p1.x() == p2.x()) { //vertcal line
-      assert(p1.y() != p2.y()); // make sure both points do not coinside
-      if   (p2.y() > p1.y()) return  90;
-      else                   return -90;
-   }
-   else if (p1.y() == p2.y()) { // horizontal line
-      if (p2.x() > p1.x()) return 0;
-      else                 return 180;
-   }
-   else
-      return (int)rint(180 * atan2(double(p2.y() - p1.y()),
-                                   double(p2.x() - p1.x()) ) /M_PI);
-}
+////-----------------------------------------------------------------------------
+///*! Returns the angle between the line and the X axis
+//*/
+//int laydata::xangle(const TP& p1, const TP& p2) {
+////   printf("-- Calculating angle between X axis and (%i, %i) - (%i, %i) line\n",
+////          p1.x(), p1.y(), p2.x(), p2.y());
+////   const long double Pi = 3.1415926535897932384626433832795;
+//   if (p1.x() == p2.x()) { //vertcal line
+//      assert(p1.y() != p2.y()); // make sure both points do not coinside
+//      if   (p2.y() > p1.y()) return  90;
+//      else                   return -90;
+//   }
+//   else if (p1.y() == p2.y()) { // horizontal line
+//      if (p2.x() > p1.x()) return 0;
+//      else                 return 180;
+//   }
+//   else
+//      return (int)rint(180 * atan2(double(p2.y() - p1.y()),
+//                                   double(p2.x() - p1.x()) ) /M_PI);
+//}
 
 //-----------------------------------------------------------------------------
 // other...
@@ -2666,147 +2666,5 @@ void laydata::TdtTmpText::draw(trend::TrendBase& rend) const
    if (!wsquare.visible(ftmtrx * rend.scrCTM(), rend.visualLimit()) ) return;
    rend.textt(&_text, _translation, TP(-_overlap.p1().x(), -_overlap.p1().y()));
 
-}
-
-//=============================================================================
-// TessEarClip
-
-//ECVertex::ECVertex(word iP, word iLast, const PointVector& pv)
-//{
-//   _P = pv[iP];
-//   switch(iP)
-//   {
-//      case     0: _pP = pv[iLast]  ; _nP = pv[iP+1]; break;
-//      case iLast: _pP = pv[iLast-1]; _nP = pv[0]   ; break;
-//      default   : _pP = pv[iP-1]   ; _nP = pv[iP+1]; break;
-//   }
-//   _angle = laydata::xangle(_pP,_P) - laydata::xangle(_P,_nP);
-//}
-
-ECVertex::ECVertex(word  pidx, word idx, word nidx, const PointVector& pv) :
-  _idx  (idx)
-, _pidx (pidx)
-, _nidx (nidx)
-, _pv   (pv)
-, _angle(0)
-, _ecGood(false)
-{
-   WordSet dummy;// the list of already clipped vertices is emty at this stage
-   update(dummy);
-}
-
-void ECVertex::update(const WordSet& clipped)
-{
-   _angle = laydata::xangle(_pv[_idx],_pv[_nidx]) - laydata::xangle(_pv[_pidx],_pv[_idx]);
-   if      (_angle >  180) _angle -= 360;
-   else if (_angle < -180) _angle += 360;
-   // add the vertexes of this angle to the list of already clipped vertexes
-   WordSet tbExcluded = clipped;
-//   WordSet tbExcluded = {_pidx, _idx, _nidx};
-//   tbExcluded.merge(clipped);
-   tbExcluded.insert(_pidx);
-   tbExcluded.insert(_idx);
-   tbExcluded.insert(_nidx);
-   
-   checkClipable(tbExcluded);
-}
-
-void ECVertex::checkClipable(const WordSet& excluded)
-{
-   if (0 > _angle) return; // i.e. angle is > 180 degrees, this vertex can NOT be clipped!
-   bool overlappedVertex = false;
-   // check whether each point of _pv is eventually overlapped
-   for (word i = 0; i < _pv.size(); i++)
-   {
-      if (0==excluded.count(i))// i.e. current vertex index (i) is not to be excluded from the check from the check
-//      if (abs(_idx - i) > 1) // don't check vetices belonging to this object
-         overlappedVertex |= internalPoint(i);
-//      else continue;
-   }
-   _ecGood = !overlappedVertex;
-}
-
-// checks whether the point p is overlapped by the triangle constituted
-// by the points of this object - i.e. with vertex indexes _pP, _P, _nP
-bool ECVertex::internalPoint(word p)
-{
-   //reference:https://math.stackexchange.com/questions/51326/determining-if-an-arbitrary-point-lies-inside-a-triangle-defined-by-three-points/4624564#4624564
-
-   //   const AP = { x: point.x - a.x, y: point.y - a.y };
-   //   const AB = { x: (b.x - a.x), y: (b.y - a.y) };
-   //   const thirdTermABxAPisPositive = AB.x * AP.y - AB.y * AP.x > 0;
-   const TP AP(  _pv[p].x()-_pv[_idx].x() ,   _pv[p].y()-_pv[_idx].y());
-   const TP AB(_pv[_nidx].x()-_pv[_idx].x() , _pv[_nidx].y()-_pv[_idx].y());
-   const bool thirdTermABxAPisPositive = (AB.x() * AP.y() - AB.y() * AP.x()) > 0;
-   //   const BC = { x: (c.x - b.x), y: (c.y - b.y) };
-   //   const BP = { x: (point.x - b.x), y: (point.y - b.y) };
-   //   const thirdTermBCxBPisPositive = BC.x * BP.y - BC.y * BP.x > 0;
-   const TP BC(_pv[_pidx].x()-_pv[_nidx].x() , _pv[_pidx].y()-_pv[_nidx].y());
-   const TP BP(  _pv[p].x()-_pv[_nidx].x() ,   _pv[p].y()-_pv[_nidx].y());
-   const bool thirdTermBCxBPisPositive = (BC.x() * BP.y() - BC.y() * BP.x()) > 0;
-
-   if (thirdTermBCxBPisPositive != thirdTermABxAPisPositive)
-       return false;
-
-   //   const CA = { x: (a.x - c.x), y: (a.y - c.y) };
-   //   const CP = { x: (point.x - c.x), y: (point.y - c.y) };
-   //   const thirdTermCAxCPisPositive = CA.x * CP.y - CA.y * CP.x > 0;
-   const TP CA(_pv[_idx].x()-_pv[_pidx].x() , _pv[_idx].y()-_pv[_pidx].y());
-   const TP CP( _pv[p].x()-_pv[_pidx].x() ,  _pv[p].y()-_pv[_pidx].y());
-   const bool thirdTermCAxCPisPositive = (CA.x() * CP.y() - CA.y() * CP.x()) > 0;
-
-   return (thirdTermCAxCPisPositive == thirdTermABxAPisPositive);
-}
-bool ECVertex::tryClipVertex(ECV_iter prev, ECV_iter next, const WordSet& clipped)
-{
-   if (_ecGood) {
-      prev->_nidx =_nidx;
-      prev->update(clipped);
-      next->_pidx =_pidx;
-      next->update(clipped);
-      return true;
-   }
-   return false;
-}
-
-TessEarClip::TessEarClip(const PointVector& polyVertex):
-     _tdata    ()
-    ,_all_ftrs ()
-    ,_all_ftfs ()
-    ,_all_ftss ()
-//    ,_clipped  ()
-{
-   // create and initialize the vertex structure we'll need to run the EarClip algo
-   // for tesselation - in this case polygon triangulation
-   ECVertexList ecVertexList;
-   unsigned int lvi = (unsigned int)polyVertex.size() - 1;// last vertex index
-   for (word i = 0; i <= lvi; i++)
-   {
-      if      (  0 == i) ecVertexList.push_back(ECVertex(lvi  ,0  ,1  ,polyVertex));
-      else if (lvi == i) ecVertexList.push_back(ECVertex(lvi-1,lvi,0  ,polyVertex));
-      else               ecVertexList.push_back(ECVertex(i-1  ,i  ,i+1,polyVertex));
-   }
-   // init the iterators
-   ECV_iter iecv       = ecVertexList.begin()          ;// iterator to the first vertex
-   ECV_iter iecvprev   = ecVertexList.end(); iecvprev--;// iterator to the vlast vertex
-   ECV_iter iecvnext   = iecv; iecvnext++              ;// iterator to the second vertex
-   // start clipping the ears
-   WordSet clipped; // init the list of already clipped vertexes
-   while (3 < ecVertexList.size()) // ... until a signle triangle has left in the list
-   {
-      if (iecv->tryClipVertex(iecvprev, iecvnext, clipped))
-      { // vertex can be clipped!
-         if (iecv->angle())
-            clipped.insert(iecv->idx());   // add the vertex index to the list of clipped list
-         iecv = ecVertexList.erase(iecv);// erase the ECVertex from the list
-         iecvnext++;                     // and update the iterators
-      }
-      else
-      { // vertex can't be clipped
-         iecvprev = iecv;                // updated the iterators
-         iecv = iecvnext;
-         iecvnext++;
-      }
-   }
 }
 
