@@ -787,7 +787,7 @@ bool logicop::CrossFix::generate(pcollection& plycol, real bfactor)
          }
          current++;
       }
-      assert(the_one != -1);
+      assert(the_one != (word)-1);
       // remove all except the_one
       current = 0;
       pcollection::iterator CI = plycol.begin();

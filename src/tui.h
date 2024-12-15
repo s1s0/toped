@@ -608,8 +608,8 @@ namespace tui {
    class StyleBinaryView : public wxTextCtrl {
    public:
                      StyleBinaryView(wxWindow*, wxWindowID);
-      virtual void   ChangeValue(const word&);
-      word           GetValue();
+      virtual void   ChangeWordValue(const word&);
+      word           GetWordValue();
       void           OnKey(wxKeyEvent&);
    private:
       wxString       _patternString;

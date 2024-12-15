@@ -753,7 +753,7 @@ unsigned trend::TrendGridC::dump(TNDR_GLDATAT* parray, unsigned index)
 
 void trend::ogl_logfile::init(const std::string logFN)
 {
-   char *locale=setlocale(LC_ALL, "");
+   /*char *locale=*/setlocale(LC_ALL, "");
    _file.open(logFN.c_str(), std::ios::out);
    TpdTime timec(time(NULL));
    _file << "//   Session started: " << timec() << std::endl;

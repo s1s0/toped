@@ -1524,7 +1524,7 @@ tui::StyleBinaryView::StyleBinaryView(wxWindow *parent,  wxWindowID id) :
    SetMaxLength(16);
 }
 
-void tui::StyleBinaryView::ChangeValue(const word& value)
+void tui::StyleBinaryView::ChangeWordValue(const word& value)
 {
    //convert number to boolean string
    std::stringstream strbuf;
@@ -1569,7 +1569,7 @@ void tui::StyleBinaryView::OnKey(wxKeyEvent& kEvent)
    }
 }
 
-word tui::StyleBinaryView::GetValue()
+word tui::StyleBinaryView::GetWordValue()
 {
    unsigned dPat = 0;
    for(size_t i = 0; i < _patternString.Length(); i++)
@@ -1766,7 +1766,7 @@ void tui::DefineLineStyle::updateDialog()
    //convert number to boolean string 
    std::stringstream strbuf;
    strbuf << std::bitset<16>(_current_style.pattern);
-   _pattern->ChangeValue(_current_style.pattern);
+   _pattern->ChangeWordValue(_current_style.pattern);
 
    _widthString.Clear();
    _widthString << static_cast<unsigned int>(_current_style.width);
@@ -1799,7 +1799,7 @@ void tui::DefineLineStyle::OnStylePropChanged(wxCommandEvent& /*event*/)
    unsigned long d_width;    _widthString.ToULong(&d_width);
    unsigned long d_patscale; _patscaleString.ToULong(&d_patscale);
    LineStyleRecord tempStyle;
-   tempStyle.pattern  = _pattern->GetValue();
+   tempStyle.pattern  = _pattern->GetWordValue();
    tempStyle.width    = d_width;
    tempStyle.pscale   = d_patscale;
    _stylesample->setStyle(tempStyle);
@@ -1814,7 +1814,7 @@ void tui::DefineLineStyle::OnStyleApply(wxCommandEvent& /*event*/)
    _width->GetValidator()->TransferFromWindow();
    _patscale->GetValidator()->TransferFromWindow();
 
-   unsigned long d_pattern  =_pattern->GetValue();
+   unsigned long d_pattern  =_pattern->GetWordValue();
    unsigned long d_width;    _widthString.ToULong(&d_width);
    unsigned long d_patscale; _patscaleString.ToULong(&d_patscale);
 

@@ -38,7 +38,7 @@ project(${PRJ_NAME} VERSION ${TOPED_VERSION})
 #---------------------------------------------------------------------------
 # manage compiler features and flags common for all modules
 add_library(toped_compiler_flags INTERFACE)
-target_compile_features(toped_compiler_flags INTERFACE cxx_std_11)
+target_compile_features(toped_compiler_flags INTERFACE cxx_std_17)
 
 # add compiler warning flags just when building this project via
 # the BUILD_INTERFACE genex
