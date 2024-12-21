@@ -638,8 +638,8 @@ tui::GetGDSimport::GetGDSimport(wxFrame *parent, wxWindowID id, const wxString &
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_OK, wxT("OK") ), 0, wxALL, 10 );
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
    // TOP sizer
-   topsizer->Add(lists_sizer, 1, wxEXPAND | wxALIGN_CENTER );
-   topsizer->Add(button_sizer, 0, wxEXPAND | wxALIGN_CENTER );
+   topsizer->Add(lists_sizer, 1, wxEXPAND /*| wxALIGN_CENTER*/ );
+   topsizer->Add(button_sizer, 0, wxEXPAND /*| wxALIGN_CENTER*/ );
 
    SetSizer( topsizer );      // use the sizer for layout
 

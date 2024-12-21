@@ -191,7 +191,7 @@ namespace tui
    } ZOOM_TYPE;
 
    typedef enum  {
-      CM_CONTINUE  = 0    ,
+      CM_CONTINUE  = 1    ,
       CM_ABORT            ,
       CM_RULER            ,
       CM_CHLAY            ,

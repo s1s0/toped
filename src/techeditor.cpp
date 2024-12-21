@@ -102,7 +102,7 @@ tui::TechEditorDialog::TechEditorDialog( wxWindow* parent, wxWindowID id, const 
             layDefSizer->Add(_layerNumber, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL);
             layDefSizer->Add( DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("Name:"), wxDefaultPosition, wxDefaultSize),
                                                       0, wxLEFT | wxALIGN_CENTER_VERTICAL);
-            layDefSizer->Add(_layerName, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL | wxEXPAND);
+            layDefSizer->Add(_layerName, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL /*| wxEXPAND*/);
             layDefSizer->Add( DEBUG_NEW wxStaticText(this, wxID_ANY, wxT("Dtype:"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
                                                          0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL);
             layDefSizer->Add(_layerDtype, 0, wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL);
