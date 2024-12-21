@@ -55,128 +55,360 @@ GLubyte aref_mark_bmp[30]= {
 //=============================================================================
 // TessEarClip
 
-//ECVertex::ECVertex(word iP, word iLast, const PointVector& pv)
+//ECVertex::ECVertex(word  pidx, word idx, word nidx, const PointVector& pv) :
+//  _idx  (idx)
+//, _pidx (pidx)
+//, _nidx (nidx)
+//, _pv   (pv)
+//, _angle(0)
+//, _ecGood(false)
 //{
-//   _P = pv[iP];
-//   switch(iP)
+//   WordSet dummy;// the list of already clipped vertices is emty at this stage
+//   update(dummy);
+//}
+//
+//void ECVertex::update(const WordSet& clipped)
+//{
+////   _angle = xangle(_pv[_idx],_pv[_nidx]) - xangle(_pv[_pidx],_pv[_idx]);
+//   int angle0 = xangle(_pv[_idx],_pv[_nidx]);
+//   int angle1 = xangle(_pv[_idx],_pv[_pidx]);
+//   _angle = angle1 - angle0;
+//   if      (_angle >  180) _angle -= 360;
+//   else if (_angle < -180) _angle += 360;
+//   // add the vertexes of this angle to the list of already clipped vertexes
+//   WordSet tbExcluded = clipped;
+////   WordSet tbExcluded = {_pidx, _idx, _nidx};
+////   tbExcluded.merge(clipped);
+//   tbExcluded.insert(_pidx);
+//   tbExcluded.insert(_idx);
+//   tbExcluded.insert(_nidx);
+//   
+//   checkClipable(tbExcluded);
+//}
+//
+//void ECVertex::checkClipable(const WordSet& excluded)
+//{
+//   if (0 > _angle) return; // i.e. angle is > 180 degrees, this vertex can NOT be clipped!
+//   bool overlappedVertex = false;
+//   // check whether each point of _pv is eventually overlapped
+//   word i = 0;
+//   do
+////   for (word i = 0; i < _pv.size(); i++)
 //   {
-//      case     0: _pP = pv[iLast]  ; _nP = pv[iP+1]; break;
-//      case iLast: _pP = pv[iLast-1]; _nP = pv[0]   ; break;
-//      default   : _pP = pv[iP-1]   ; _nP = pv[iP+1]; break;
+//      if (0==excluded.count(i))// i.e. current vertex index (i) is not to be excluded from the check from the check
+//         overlappedVertex |= internalPoint(i);
 //   }
-//   _angle = laydata::xangle(_pP,_P) - laydata::xangle(_P,_nP);
+//   while ((++i < _pv.size()) & !overlappedVertex);
+//   _ecGood = !overlappedVertex;
+//}
+//
+//bool ECVertex::triangleArea(const TP& A, const TP& B, const TP& P) const
+//{
+//   typedef struct {double x; double y;} DoublePoint;
+//   
+//   DoublePoint DA = {.x = static_cast<double>(A.x()), .y = static_cast<double>(A.y())};
+//   DoublePoint DB = {.x = static_cast<double>(B.x()), .y = static_cast<double>(B.y())};
+//   DoublePoint DP = {.x = static_cast<double>(P.x()), .y = static_cast<double>(P.y())};
+//   
+//   double koko1 = DA.x * (DB.y - DP.y);
+//   double koko2 = DB.x * (DP.y - DA.y);
+//   double koko3 = DP.x * (DA.y - DB.y);
+//   double koko  = koko1 + koko2 + koko3;
+//
+//   return koko < 0;
+//}
+//
+//
+//// checks whether the point p is overlapped by the triangle constituted
+//// by the points of this object - i.e. with vertex indexes _pP, _P, _nP
+//bool ECVertex::internalPoint(word p)
+//{
+//   bool Apos = triangleArea(_pv[_pidx], _pv[ _idx], _pv[p]);// get the area sign of ABP
+//   bool Bpos = triangleArea(_pv[ _idx], _pv[_nidx], _pv[p]);// get the area sign of BCP
+//   bool Cpos = triangleArea(_pv[_nidx], _pv[_pidx], _pv[p]);// get the area sign of CAP
+//   bool internal = (Apos & Bpos & Cpos);
+//   return internal;
+////   //reference:https://math.stackexchange.com/questions/51326/determining-if-an-arbitrary-point-lies-inside-a-triangle-defined-by-three-points/4624564#4624564
+////   typedef struct {double x; double y;} DoublePoint;
+////   //   const AP = { x: point.x - a.x, y: point.y - a.y };
+////   //   const AB = { x: (b.x - a.x), y: (b.y - a.y) };
+////   //   const thirdTermABxAPisPositive = AB.x * AP.y - AB.y * AP.x > 0;
+//////   const TP AP(  _pv[p].x()-_pv[_idx].x() ,   _pv[p].y()-_pv[_idx].y());
+////   const DoublePoint AP = {.x = static_cast<double>(_pv[_nidx].x())-static_cast<double>(_pv[_idx].x())
+////                          ,.y = static_cast<double>(_pv[_nidx].y())-static_cast<double>(_pv[_idx].y())
+////                          };
+//////   const TP AB(_pv[_nidx].x()-_pv[_idx].x() , _pv[_nidx].y()-_pv[_idx].y());
+////   const DoublePoint AB = {.x = static_cast<double>(_pv[_nidx].x())-static_cast<double>(_pv[_idx].x())
+////                          ,.y = static_cast<double>(_pv[_nidx].y())-static_cast<double>(_pv[_idx].y())
+////                          };
+//////   const bool thirdTermABxAPisPositive = (AB.x() * AP.y() - AB.y() * AP.x()) > 0;
+////   const bool thirdTermABxAPisPositive = (AB.x * AP.y - AB.y * AP.x) > 0;
+////   //   const BC = { x: (c.x - b.x), y: (c.y - b.y) };
+////   //   const BP = { x: (point.x - b.x), y: (point.y - b.y) };
+////   //   const thirdTermBCxBPisPositive = BC.x * BP.y - BC.y * BP.x > 0;
+//////   const TP BC(_pv[_pidx].x()-_pv[_nidx].x() , _pv[_pidx].y()-_pv[_nidx].y());
+////   const DoublePoint BC = {.x = static_cast<double>(_pv[_pidx].x())-static_cast<double>(_pv[_nidx].x())
+////                          ,.y = static_cast<double>(_pv[_pidx].y())-static_cast<double>(_pv[_nidx].y())
+////                          };
+//////   const TP BP(    _pv[p].x()-_pv[_nidx].x() ,     _pv[p].y()-_pv[_nidx].y());
+////   const DoublePoint BP = {.x = static_cast<double>(_pv[p].x())-static_cast<double>(_pv[_nidx].x())
+////                          ,.y = static_cast<double>(_pv[p].y())-static_cast<double>(_pv[_nidx].y())
+////                          };
+//////   const bool thirdTermBCxBPisPositive = (BC.x() * BP.y() - BC.y() * BP.x()) > 0;
+////   const bool thirdTermBCxBPisPositive = (BC.x * BP.y - BC.y * BP.x) > 0;
+////
+////   if (thirdTermBCxBPisPositive != thirdTermABxAPisPositive)
+////       return false;
+////
+////   //   const CA = { x: (a.x - c.x), y: (a.y - c.y) };
+////   //   const CP = { x: (point.x - c.x), y: (point.y - c.y) };
+////   //   const thirdTermCAxCPisPositive = CA.x * CP.y - CA.y * CP.x > 0;
+//////   const TP CA(_pv[_idx].x()-_pv[_pidx].x() , _pv[_idx].y()-_pv[_pidx].y());
+////   const DoublePoint CA = {.x = static_cast<double>(_pv[_idx].x())-static_cast<double>(_pv[_pidx].x())
+////                          ,.y = static_cast<double>(_pv[_idx].y())-static_cast<double>(_pv[_pidx].y())
+////                          };
+//////   const TP CP( _pv[p].x()-_pv[_pidx].x() ,  _pv[p].y()-_pv[_pidx].y());
+////   const DoublePoint CP = {.x = static_cast<double>(_pv[p].x())-static_cast<double>(_pv[_pidx].x())
+////                          ,.y = static_cast<double>(_pv[p].y())-static_cast<double>(_pv[_pidx].y())
+////                          };
+//////   const bool thirdTermCAxCPisPositive = (CA.x() * CP.y() - CA.y() * CP.x()) > 0;
+////   const bool thirdTermCAxCPisPositive = (CA.x* CP.y- CA.y* CP.x) > 0;
+////
+////   return (thirdTermCAxCPisPositive == thirdTermABxAPisPositive);
+//}
+//
+//bool ECVertex::tryClipVertex(ECV_iter prev, ECV_iter next, const WordSet& clipped)
+//{
+//   if (_ecGood) {
+//      prev->_nidx =_nidx;
+//      prev->update(clipped);
+//      next->_pidx =_pidx;
+//      next->update(clipped);
+//      return true;
+//   }
+//   return false;
+//}
+//
+//bool ECVertex::pushIndex(TeselVertices& vrtx)
+//{
+//   if (vrtx.empty())
+//   {
+//      vrtx.push_back(_idx);
+//      vrtx.push_back(_nidx);
+//      vrtx.push_back(_pidx);
+//      return true;
+//   }
+//   else {
+//      TeselVertices::reverse_iterator koko0 = vrtx.rbegin();
+//      TeselVertices::reverse_iterator koko1 = koko0;koko1++;
+//      word idx0 = *koko0;
+//      word idx1 = *koko1;
+//      if (((idx0 == _pidx) || (idx0 == _idx)) &&
+//          ((idx1 == _pidx) || (idx1 == _idx))   )
+//      {
+//         vrtx.push_back(_nidx);
+//         return true;
+//      }
+//      return false;
+//   }
 //}
 
-ECVertex::ECVertex(word  pidx, word idx, word nidx, const PointVector& pv) :
-  _idx  (idx)
-, _pidx (pidx)
-, _nidx (nidx)
-, _pv   (pv)
-, _angle(0)
-, _ecGood(false)
+//=============================================================================
+//
+EarClipping::EarClipping(const int4b* pdata, const word psize) :
+   _data(pdata)
+  ,_size(psize)
+  ,_clippedIndexes()
 {
-   WordSet dummy;// the list of already clipped vertices is emty at this stage
-   update(dummy);
-}
-
-void ECVertex::update(const WordSet& clipped)
-{
-   _angle = xangle(_pv[_idx],_pv[_nidx]) - xangle(_pv[_pidx],_pv[_idx]);
-   if      (_angle >  180) _angle -= 360;
-   else if (_angle < -180) _angle += 360;
-   // add the vertexes of this angle to the list of already clipped vertexes
-   WordSet tbExcluded = clipped;
-//   WordSet tbExcluded = {_pidx, _idx, _nidx};
-//   tbExcluded.merge(clipped);
-   tbExcluded.insert(_pidx);
-   tbExcluded.insert(_idx);
-   tbExcluded.insert(_nidx);
-   
-   checkClipable(tbExcluded);
-}
-
-void ECVertex::checkClipable(const WordSet& excluded)
-{
-   if (0 > _angle) return; // i.e. angle is > 180 degrees, this vertex can NOT be clipped!
-   bool overlappedVertex = false;
-   // check whether each point of _pv is eventually overlapped
-   for (word i = 0; i < _pv.size(); i++)
+   // First: create a circular strucutre of the vertices containing only
+   // vertex indexes. Each item in this structure has a pointer to the previous
+   // and next vertex.
+   _first = DEBUG_NEW ECVertex(0);
+   ECVertex* pitem = _first;
+   ECVertex* item  = nullptr;
+   for(word i = 1; i < _size; i++)
    {
-      if (0==excluded.count(i))// i.e. current vertex index (i) is not to be excluded from the check from the check
-//      if (abs(_idx - i) > 1) // don't check vetices belonging to this object
-         overlappedVertex |= internalPoint(i);
-//      else continue;
+      item = DEBUG_NEW ECVertex(i);
+      pitem->set_next(item); item->set_prev(pitem);
+      pitem = item;
    }
-   _ecGood = !overlappedVertex;
+   pitem->set_next(_first); _first->set_prev(pitem);
+   //Next: for each of the vertices, update ...
+   item = _first;
+   for (word i = 0; i < _size; i++ , item = item->next())
+      update(item, true);
 }
 
-// checks whether the point p is overlapped by the triangle constituted
-// by the points of this object - i.e. with vertex indexes _pP, _P, _nP
-bool ECVertex::internalPoint(word p)
+EarClipping::~EarClipping()
 {
-   //reference:https://math.stackexchange.com/questions/51326/determining-if-an-arbitrary-point-lies-inside-a-triangle-defined-by-three-points/4624564#4624564
-
-   //   const AP = { x: point.x - a.x, y: point.y - a.y };
-   //   const AB = { x: (b.x - a.x), y: (b.y - a.y) };
-   //   const thirdTermABxAPisPositive = AB.x * AP.y - AB.y * AP.x > 0;
-   const TP AP(  _pv[p].x()-_pv[_idx].x() ,   _pv[p].y()-_pv[_idx].y());
-   const TP AB(_pv[_nidx].x()-_pv[_idx].x() , _pv[_nidx].y()-_pv[_idx].y());
-   const bool thirdTermABxAPisPositive = (AB.x() * AP.y() - AB.y() * AP.x()) > 0;
-   //   const BC = { x: (c.x - b.x), y: (c.y - b.y) };
-   //   const BP = { x: (point.x - b.x), y: (point.y - b.y) };
-   //   const thirdTermBCxBPisPositive = BC.x * BP.y - BC.y * BP.x > 0;
-   const TP BC(_pv[_pidx].x()-_pv[_nidx].x() , _pv[_pidx].y()-_pv[_nidx].y());
-   const TP BP(  _pv[p].x()-_pv[_nidx].x() ,   _pv[p].y()-_pv[_nidx].y());
-   const bool thirdTermBCxBPisPositive = (BC.x() * BP.y() - BC.y() * BP.x()) > 0;
-
-   if (thirdTermBCxBPisPositive != thirdTermABxAPisPositive)
-       return false;
-
-   //   const CA = { x: (a.x - c.x), y: (a.y - c.y) };
-   //   const CP = { x: (point.x - c.x), y: (point.y - c.y) };
-   //   const thirdTermCAxCPisPositive = CA.x * CP.y - CA.y * CP.x > 0;
-   const TP CA(_pv[_idx].x()-_pv[_pidx].x() , _pv[_idx].y()-_pv[_pidx].y());
-   const TP CP( _pv[p].x()-_pv[_pidx].x() ,  _pv[p].y()-_pv[_pidx].y());
-   const bool thirdTermCAxCPisPositive = (CA.x() * CP.y() - CA.y() * CP.x()) > 0;
-
-   return (thirdTermCAxCPisPositive == thirdTermABxAPisPositive);
+   for (unsigned i= 0; i<_size; i++)
+   {
+      ECVertex* garbage = _first;
+      _first = _first->next();
+      delete(garbage);
+   }
 }
-bool ECVertex::tryClipVertex(ECV_iter prev, ECV_iter next, const WordSet& clipped)
+
+void EarClipping::update(ECVertex*& item, bool direction)
 {
-   if (_ecGood) {
-      prev->_nidx =_nidx;
-      prev->update(clipped);
-      next->_pidx =_pidx;
-      next->update(clipped);
+   do {
+      if (3 > _size)
+      {// don't do any checks if 2 or less vertexes left in the sequence
+         item->set_vrtxInside(ECVertex::vtsVoid);
+         return;
+      }
+      TP cp = TP(_data[2*item->cidx()], _data[2*item->cidx()+1]);
+      TP pp = TP(_data[2*item->pidx()], _data[2*item->pidx()+1]);
+      TP np = TP(_data[2*item->nidx()], _data[2*item->nidx()+1]);
+      int angle0 = xangle(cp,np);
+      int angle1 = xangle(cp,pp);
+      int angle = angle1 - angle0;
+      if      (angle >  180) angle -= 360;
+      else if (angle < -180) angle += 360;
+      item->set_angle(angle);
+   } while (checkStraightLine(item, direction));
+
+   if (0 < item->angle())
+      checkClipable(item);
+   else
+      // if angle is negative, this vertex can NOT be clipped,
+      // so there is no point checking for vertexes inside the triangles
+      item->set_vrtxInside(ECVertex::vtsUnchecked);
+}
+
+// Check whether there are any vertexes lying inside the triangle constituted by this (item) vertex
+void EarClipping::checkClipable(ECVertex* item)
+{
+   if (3==_size)
+   {
+      item->set_vrtxInside(ECVertex::vtsGood);
+   }
+   // add the vertexes of this angle to the list of already clipped vertexes
+   WordSet vrtxsExcluded = _clippedIndexes;
+   vrtxsExcluded.insert(item->pidx());
+   vrtxsExcluded.insert(item->cidx());
+   vrtxsExcluded.insert(item->nidx());
+ 
+   for (word i = 0; i < _size; i++)
+   {
+      if (0<vrtxsExcluded.count(i))
+         continue;// i.e. current vertex index (i) is excluded from the check
+      else if (checkInternal(item, i))
+      {
+         item->set_vrtxInside(ECVertex::vtsBad);
+         return;
+      }
+   }
+   item->set_vrtxInside(ECVertex::vtsGood);
+}
+
+
+bool EarClipping::checkInternal(ECVertex* item, word vIndex)
+{
+   if (   triangleArea(item->pidx(), item->cidx(), vIndex)// get the area sign of ABP
+       && triangleArea(item->cidx() ,item->nidx(), vIndex)// get the area sign of BCP
+       && triangleArea(item->nidx(), item->pidx(), vIndex)// get the area sign of CAP
+      )
+      return true;
+   else return false;
+}
+
+bool EarClipping::triangleArea(word idxA, word idxB, word idxP)
+{
+   typedef struct {double x; double y;} DoublePoint;
+   
+   DoublePoint DA = {.x = static_cast<double>(_data[2*idxA]), .y = static_cast<double>(_data[2*idxA+1])};
+   DoublePoint DB = {.x = static_cast<double>(_data[2*idxB]), .y = static_cast<double>(_data[2*idxB+1])};
+   DoublePoint DP = {.x = static_cast<double>(_data[2*idxP]), .y = static_cast<double>(_data[2*idxP+1])};
+   
+   double koko1 = DA.x * (DB.y - DP.y);
+   double koko2 = DB.x * (DP.y - DA.y);
+   double koko3 = DP.x * (DA.y - DB.y);
+   double koko  = koko1 + koko2 + koko3;
+
+   return koko > 0;
+}
+
+bool EarClipping::checkStraightLine(ECVertex*& item, bool direction)
+{
+   if ((180==abs(item->angle())) || (0 == item->angle()))
+   {
+      item = clipVertex(item, direction);
       return true;
    }
+   else return false;
+}
+
+ECVertex* EarClipping::clipVertex(ECVertex* item, bool direction)
+{
+   // add to the list of clipped indexes
+   _clippedIndexes.insert(item->cidx());
+   // update the links in the circular structure
+   item->prev()->set_next(item->next());
+   item->next()->set_prev(item->prev());
+   // hold the link to prev item
+   ECVertex* prev = item->prev();
+   // destroy the clipped vertex
+   delete item;
+   _size--;
+   // now we need to update the neighboring vertices of the one we just destroyed
+   update(prev, !direction);
+   item = prev->next();
+   update(item, !direction);
+   return (direction) ? item : prev;
+}
+
+bool EarClipping::rewind()// rewind 'till a clipable vertex is found
+{
+   if (0 == _size) return false;
+   for (word i = 0; i < _size; i++, _first = _first->next())
+      if (_first->clipable()) return true;
    return false;
 }
 
-bool ECVertex::pushIndex(TeselVertices& vrtx)
+bool EarClipping::trySeqUpdate(TeselVertices& indexSeq)
 {
-   if (vrtx.empty())
-   {
-      vrtx.push_back(_idx);
-      vrtx.push_back(_nidx);
-      vrtx.push_back(_pidx);
-      return true;
+   if (indexSeq.empty())
+   {// first vertex in the sequence
+      indexSeq.push_back(_first->cidx());
+      indexSeq.push_back(_first->nidx());
+      indexSeq.push_back(_first->pidx());
    }
-   else {
-      TeselVertices::reverse_iterator koko0 = vrtx.rbegin();
+   else
+   {// try to add a vertex to the sequence
+      TeselVertices::reverse_iterator koko0 = indexSeq.rbegin();
       TeselVertices::reverse_iterator koko1 = koko0;koko1++;
       word idx0 = *koko0;
       word idx1 = *koko1;
-      if (((idx0 == _pidx) || (idx0 == _idx)) &&
-          ((idx1 == _pidx) || (idx1 == _idx))   )
-      {
-         vrtx.push_back(_nidx);
-         return true;
-      }
-      return false;
+      if (  ((idx0 == _first->pidx()) || (idx0 == _first->cidx()))
+          &&((idx1 == _first->pidx()) || (idx1 == _first->cidx()))
+         )
+         indexSeq.push_back(_first->nidx());
+      else
+         return false;// i.e. can't add a vertex to this sequence
    }
+   return true;//OK, vertex added
 }
 
+bool EarClipping::earClip(TeselVertices& indexSeq)
+{
+   if (!rewind()) return false;
+   bool koko = true;
+   while (_first->clipable())
+   {
+      if (trySeqUpdate(indexSeq))
+      {
+         _first = clipVertex(_first, koko);
+//         koko = !koko;
+      }
+      else
+         break;
+   }
+   return true;
+}
+
+//=============================================================================
+//
 TessellPoly::TessellPoly():
      _tdata    ()
     ,_all_ftrs ()
@@ -186,67 +418,17 @@ TessellPoly::TessellPoly():
 
 void TessellPoly::tessellate(const int4b* pdata, unsigned psize)
 {
-   assert(false); //TODO
-}
-
-void TessellPoly::tessellate(const PointVector& polyVertex)
-{
-   // create and initialize the vertex structure we'll need to run the EarClip algo
-   // for tesselation - in this case polygon triangulation
-   ECVertexList ecVertexList;
-   unsigned int lvi = (unsigned int)polyVertex.size() - 1;// last vertex index
-   for (word i = 0; i <= lvi; i++)
-   {
-      if      (  0 == i) ecVertexList.push_back(ECVertex(lvi  ,0  ,1  ,polyVertex));
-      else if (lvi == i) ecVertexList.push_back(ECVertex(lvi-1,lvi,0  ,polyVertex));
-      else               ecVertexList.push_back(ECVertex(i-1  ,i  ,i+1,polyVertex));
-   }
-   // init the iterators
-   ECV_iter iecv       = ecVertexList.begin()          ;// iterator to the first vertex
-   ECV_iter iecvprev   = ecVertexList.end(); iecvprev--;// iterator to the vlast vertex
-   ECV_iter iecvnext   = iecv; iecvnext++              ;// iterator to the second vertex
-   // start clipping the ears ...
-   WordSet clipped; // init the list of already clipped vertexes
-   // .. and gather indexes from tessellation
+   // initialize the vertex data structure
+   EarClipping ecVertexList(pdata, psize);
+   // start clipping
    TeselVertices indexSequence;
-   while (2 < ecVertexList.size()) // ... until a signle triangle has left in the list
-   {
-      if (iecv->tryClipVertex(iecvprev, iecvnext, clipped))
-      { // vertex can be clipped!
-         if (iecv->angle())
-         {
-            clipped.insert(iecv->idx());   // add the vertex index to the list of clipped list
-            if (!iecv->pushIndex(indexSequence))// add the appropriate indexes to the index sequence
-            {
-               _tdata.push_back(TeselChunk(indexSequence, ((3==indexSequence.size()) ? GL_TRIANGLES:GL_TRIANGLE_STRIP), 0));
-               indexSequence.clear();
-               iecv->pushIndex(indexSequence);
-            }
-         }
-         iecv = ecVertexList.erase(iecv);// erase the ECVertex from the list
-         iecvnext++;                     // and update the iterators
-         if (ecVertexList.end() == iecvnext)
-            iecvnext = ecVertexList.begin();
-      }
-      else
-      { // vertex can't be clipped
-         if (!indexSequence.empty())
-         {
-            _tdata.push_back(TeselChunk(indexSequence, ((3==indexSequence.size()) ? GL_TRIANGLES:GL_TRIANGLE_STRIP), 0));
-            indexSequence.clear();
-         }
-         iecvprev = iecv;                // updated the iterators
-         iecv = iecvnext;
-         iecvnext++;
-         if (ecVertexList.end() == iecvnext)
-            iecvnext = ecVertexList.begin();
-      }
-   }
-   if (!indexSequence.empty())
+   while (ecVertexList.earClip(indexSequence))
    {
       _tdata.push_back(TeselChunk(indexSequence, ((3==indexSequence.size()) ? GL_TRIANGLES:GL_TRIANGLE_STRIP), 0));
       indexSequence.clear();
    }
+   // clear vertex list
+   
    for (TeselChain::const_iterator i = _tdata.begin(); i != _tdata.end();i++)
       switch (i->type())
       {
@@ -254,6 +436,7 @@ void TessellPoly::tessellate(const PointVector& polyVertex)
          case GL_TRIANGLE_STRIP : _all_ftss++ ; break;
          case GL_TRIANGLES      : _all_ftrs++ ; break;
       }
+//   int boza = 1;
 }
 
 void TessellPoly::num_indexs(unsigned& iftrs, unsigned& iftfs, unsigned& iftss) const
@@ -270,6 +453,78 @@ void TessellPoly::num_indexs(unsigned& iftrs, unsigned& iftfs, unsigned& iftss) 
    }
 }
 
+
+//void TessellPoly::tessellate(const PointVector& polyVertex)
+//{
+//   // create and initialize the vertex structure we'll need to run the EarClip algo
+//   // for tesselation - in this case polygon triangulation
+//   ECVertexList ecVertexList;
+//   unsigned int lvi = (unsigned int)polyVertex.size() - 1;// last vertex index
+//   for (word i = 0; i <= lvi; i++)
+//   {
+//      if      (  0 == i) ecVertexList.push_back(ECVertex(lvi  ,0  ,1  ,polyVertex));
+//      else if (lvi == i) ecVertexList.push_back(ECVertex(lvi-1,lvi,0  ,polyVertex));
+//      else               ecVertexList.push_back(ECVertex(i-1  ,i  ,i+1,polyVertex));
+//   }
+//   // init the iterators
+//   ECV_iter iecv       = ecVertexList.begin()          ;// iterator to the first vertex
+//   ECV_iter iecvprev   = ecVertexList.end(); iecvprev--;// iterator to the vlast vertex
+//   ECV_iter iecvnext   = iecv; iecvnext++              ;// iterator to the second vertex
+//   // start clipping the ears ...
+//   WordSet clipped; // init the list of already clipped vertexes
+//   // .. and gather indexes from tessellation
+//   word noLoops = 0;
+//   word noVertexes = ecVertexList.size();
+//   TeselVertices indexSequence;
+//   while (2 < ecVertexList.size()) // ... until a signle triangle has left in the list
+//   {
+//      assert((++noLoops) < (2*noVertexes));
+//      if ( (3 == ecVertexList.size()) && (!iecv->ecGood()) )
+//         break;
+//      if (iecv->tryClipVertex(iecvprev, iecvnext, clipped))
+//      { // vertex can be clipped!
+//         if (iecv->angle())
+//         {
+//            clipped.insert(iecv->idx());   // add the vertex index to the list of clipped list
+//            if (!iecv->pushIndex(indexSequence))// add the appropriate indexes to the index sequence
+//            {
+//               _tdata.push_back(TeselChunk(indexSequence, ((3==indexSequence.size()) ? GL_TRIANGLES:GL_TRIANGLE_STRIP), 0));
+//               indexSequence.clear();
+//               iecv->pushIndex(indexSequence);
+//            }
+//         }
+//         iecv = ecVertexList.erase(iecv);// erase the ECVertex from the list
+//         iecvnext++;                     // and update the iterators
+//         if (ecVertexList.end() == iecvnext)
+//            iecvnext = ecVertexList.begin();
+//      }
+//      else
+//      { // vertex can't be clipped
+//         if (!indexSequence.empty())
+//         {
+//            _tdata.push_back(TeselChunk(indexSequence, ((3==indexSequence.size()) ? GL_TRIANGLES:GL_TRIANGLE_STRIP), 0));
+//            indexSequence.clear();
+//         }
+//         iecvprev = iecv;                // updated the iterators
+//         iecv = iecvnext;
+//         iecvnext++;
+//         if (ecVertexList.end() == iecvnext)
+//            iecvnext = ecVertexList.begin();
+//      }
+//   }
+//   if (!indexSequence.empty())
+//   {
+//      _tdata.push_back(TeselChunk(indexSequence, ((3==indexSequence.size()) ? GL_TRIANGLES:GL_TRIANGLE_STRIP), 0));
+//      indexSequence.clear();
+//   }
+//   for (TeselChain::const_iterator i = _tdata.begin(); i != _tdata.end();i++)
+//      switch (i->type())
+//      {
+//         case GL_TRIANGLE_FAN   : _all_ftfs++ ; break;
+//         case GL_TRIANGLE_STRIP : _all_ftss++ ; break;
+//         case GL_TRIANGLES      : _all_ftrs++ ; break;
+//      }
+//}
 
 //=============================================================================
 //

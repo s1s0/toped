@@ -72,35 +72,87 @@ typedef std::list<TeselChunk> TeselChain;
 //=============================================================================
 // ear-clipping algorithm for polygon tessellation - as an alternative to
 // deprecated functionality of GLU
-class ECVertex;
-typedef std::list<ECVertex>               ECVertexList;
-typedef ECVertexList::iterator            ECV_iter;
+//class ECVertex;
+//typedef std::list<ECVertex>               ECVertexList;
+//typedef ECVertexList::iterator            ECV_iter;
+//
+//class ECVertex {
+//   public:
+//                         ECVertex(word  pidx, word idx, word nidx, const PointVector& pv);
+//      bool               tryClipVertex(ECV_iter, ECV_iter, const WordSet&);
+//      bool               pushIndex(TeselVertices&);
+//      word               idx() {return _idx;}
+//      int                angle() {return _angle;}
+//      bool               ecGood() {return _ecGood;}
+//   protected:
+//      void               checkClipable(const WordSet&);
+//      bool               internalPoint(word p);
+//      bool               triangleArea(const TP& p1, const TP& p2, const TP& p3) const;
+//      void               update(const WordSet&);
+//   private:
+//      word               _idx       ; // this vertex index
+//      word               _pidx      ; // previous vertex index
+//      word               _nidx      ; // next vertex index
+//      const PointVector& _pv        ;
+//      int                _angle     ; // the angle between the 3 vertexes
+//      bool               _ecGood    ; // good for ear clipping - i.e. there is no another point of the polygon, which lies within
+//};
+//
 
 class ECVertex {
-   public:
-                         ECVertex(word  pidx, word idx, word nidx, const PointVector& pv);
-      bool               tryClipVertex(ECV_iter, ECV_iter, const WordSet&);
-      word               idx() {return _idx;}
-      bool               pushIndex(TeselVertices&);
-      int                angle() {return _angle;}
-   protected:
-      void               checkClipable(const WordSet&);
-      bool               internalPoint(word p);
-      void               update(const WordSet&);
+  public:
+     enum VTriStatus { // status of the triangle constituted by a vertex
+                        vtsUnchecked  // not checked, because the angle is bigger than 180 degree. Vertex is not clipable
+                       ,vtsGood       // checked, no vertexes lying inside the triabgle
+                       ,vtsBad        // checked, but has a vertex inside the triangle
+                       ,vtsVoid       // check is not possible, i.e. less than 3 points left in the sequence
+                      };
+                        ECVertex(const word idx) : _idx(idx), _angle(), _vrtxInside(vtsUnchecked), _next(nullptr), _prev(nullptr) {};
+      void              set_next(ECVertex* next) {_next = next;}
+      void              set_prev(ECVertex* prev) {_prev = prev;}
+      void              set_angle(int angle) {_angle = angle;}
+      void              set_vrtxInside(VTriStatus vrtxInside) {_vrtxInside = vrtxInside;}
+      ECVertex*         next() const {return _next;}
+      ECVertex*         prev() const {return _prev;}
+      word              cidx() const {return _idx;}
+      word              pidx() const {return _prev->cidx();}
+      word              nidx() const {return _next->cidx();}
+      int               angle() const {return _angle;}
+      bool              clipable() const {return ((vtsGood ==_vrtxInside) && (_angle > 0));}
    private:
-      word               _idx       ; // this vertex index
-      word               _pidx      ; // previous vertex index
-      word               _nidx      ; // next vertex index
-      const PointVector& _pv        ;
-      int                _angle     ; // the angle between the 3 vertexes
-      bool               _ecGood    ; // good for ear clipping - i.e. there is no another point of the polygon, which lies within
+      const word        _idx        ;
+      int               _angle      ;
+      VTriStatus        _vrtxInside ;
+      ECVertex*         _next       ;
+      ECVertex*         _prev       ;
 };
 
+class EarClipping {
+   public:
+                        EarClipping(const int4b*, const word size);
+                       ~EarClipping();
+      bool              earClip(TeselVertices& indexSeq);
+      word              size(){return _size;}
+   private:
+      void              update(ECVertex*& item, bool direction);
+      ECVertex*         clipVertex(ECVertex* item, bool direction);
+      bool              checkStraightLine(ECVertex*&, bool direction);
+      void              checkClipable(ECVertex* item);
+      bool              checkInternal(ECVertex* item, word vIndex);
+      bool              triangleArea(word idxA, word idxB, word idxP);
+      bool              rewind();
+      bool              trySeqUpdate(TeselVertices& indexSeq);
+
+      ECVertex*         _first;
+      const int4b*      _data;
+      word              _size;
+      WordSet           _clippedIndexes;
+};
 
 class TessellPoly {
    public:
                         TessellPoly();
-      void              tessellate(const PointVector& polyVertex);
+//      void              tessellate(const PointVector& polyVertex);
       void              tessellate(const int4b* pdata, unsigned psize);
       bool              valid() const    { return (0 < (_all_ftrs + _all_ftfs + _all_ftss));}
       word              num_ftrs() const { return _all_ftrs;}
@@ -114,7 +166,6 @@ class TessellPoly {
       word              _all_ftrs;// GL_TRIANGLES
       word              _all_ftfs;// GL_TRIANGLE_FAN
       word              _all_ftss;// GL_TRIANGLE_STRIP
-//      WordSet           _clipped;
 
 };
 
