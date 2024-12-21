@@ -50,169 +50,6 @@ GLubyte aref_mark_bmp[30]= {
    0x11, 0x10, 0x08, 0x20, 0x04, 0x40, 0x02, 0x80, 0x01, 0x00
 };
 
-
-
-//=============================================================================
-// TessEarClip
-
-//ECVertex::ECVertex(word  pidx, word idx, word nidx, const PointVector& pv) :
-//  _idx  (idx)
-//, _pidx (pidx)
-//, _nidx (nidx)
-//, _pv   (pv)
-//, _angle(0)
-//, _ecGood(false)
-//{
-//   WordSet dummy;// the list of already clipped vertices is emty at this stage
-//   update(dummy);
-//}
-//
-//void ECVertex::update(const WordSet& clipped)
-//{
-////   _angle = xangle(_pv[_idx],_pv[_nidx]) - xangle(_pv[_pidx],_pv[_idx]);
-//   int angle0 = xangle(_pv[_idx],_pv[_nidx]);
-//   int angle1 = xangle(_pv[_idx],_pv[_pidx]);
-//   _angle = angle1 - angle0;
-//   if      (_angle >  180) _angle -= 360;
-//   else if (_angle < -180) _angle += 360;
-//   // add the vertexes of this angle to the list of already clipped vertexes
-//   WordSet tbExcluded = clipped;
-////   WordSet tbExcluded = {_pidx, _idx, _nidx};
-////   tbExcluded.merge(clipped);
-//   tbExcluded.insert(_pidx);
-//   tbExcluded.insert(_idx);
-//   tbExcluded.insert(_nidx);
-//   
-//   checkClipable(tbExcluded);
-//}
-//
-//void ECVertex::checkClipable(const WordSet& excluded)
-//{
-//   if (0 > _angle) return; // i.e. angle is > 180 degrees, this vertex can NOT be clipped!
-//   bool overlappedVertex = false;
-//   // check whether each point of _pv is eventually overlapped
-//   word i = 0;
-//   do
-////   for (word i = 0; i < _pv.size(); i++)
-//   {
-//      if (0==excluded.count(i))// i.e. current vertex index (i) is not to be excluded from the check from the check
-//         overlappedVertex |= internalPoint(i);
-//   }
-//   while ((++i < _pv.size()) & !overlappedVertex);
-//   _ecGood = !overlappedVertex;
-//}
-//
-//bool ECVertex::triangleArea(const TP& A, const TP& B, const TP& P) const
-//{
-//   typedef struct {double x; double y;} DoublePoint;
-//   
-//   DoublePoint DA = {.x = static_cast<double>(A.x()), .y = static_cast<double>(A.y())};
-//   DoublePoint DB = {.x = static_cast<double>(B.x()), .y = static_cast<double>(B.y())};
-//   DoublePoint DP = {.x = static_cast<double>(P.x()), .y = static_cast<double>(P.y())};
-//   
-//   double koko1 = DA.x * (DB.y - DP.y);
-//   double koko2 = DB.x * (DP.y - DA.y);
-//   double koko3 = DP.x * (DA.y - DB.y);
-//   double koko  = koko1 + koko2 + koko3;
-//
-//   return koko < 0;
-//}
-//
-//
-//// checks whether the point p is overlapped by the triangle constituted
-//// by the points of this object - i.e. with vertex indexes _pP, _P, _nP
-//bool ECVertex::internalPoint(word p)
-//{
-//   bool Apos = triangleArea(_pv[_pidx], _pv[ _idx], _pv[p]);// get the area sign of ABP
-//   bool Bpos = triangleArea(_pv[ _idx], _pv[_nidx], _pv[p]);// get the area sign of BCP
-//   bool Cpos = triangleArea(_pv[_nidx], _pv[_pidx], _pv[p]);// get the area sign of CAP
-//   bool internal = (Apos & Bpos & Cpos);
-//   return internal;
-////   //reference:https://math.stackexchange.com/questions/51326/determining-if-an-arbitrary-point-lies-inside-a-triangle-defined-by-three-points/4624564#4624564
-////   typedef struct {double x; double y;} DoublePoint;
-////   //   const AP = { x: point.x - a.x, y: point.y - a.y };
-////   //   const AB = { x: (b.x - a.x), y: (b.y - a.y) };
-////   //   const thirdTermABxAPisPositive = AB.x * AP.y - AB.y * AP.x > 0;
-//////   const TP AP(  _pv[p].x()-_pv[_idx].x() ,   _pv[p].y()-_pv[_idx].y());
-////   const DoublePoint AP = {.x = static_cast<double>(_pv[_nidx].x())-static_cast<double>(_pv[_idx].x())
-////                          ,.y = static_cast<double>(_pv[_nidx].y())-static_cast<double>(_pv[_idx].y())
-////                          };
-//////   const TP AB(_pv[_nidx].x()-_pv[_idx].x() , _pv[_nidx].y()-_pv[_idx].y());
-////   const DoublePoint AB = {.x = static_cast<double>(_pv[_nidx].x())-static_cast<double>(_pv[_idx].x())
-////                          ,.y = static_cast<double>(_pv[_nidx].y())-static_cast<double>(_pv[_idx].y())
-////                          };
-//////   const bool thirdTermABxAPisPositive = (AB.x() * AP.y() - AB.y() * AP.x()) > 0;
-////   const bool thirdTermABxAPisPositive = (AB.x * AP.y - AB.y * AP.x) > 0;
-////   //   const BC = { x: (c.x - b.x), y: (c.y - b.y) };
-////   //   const BP = { x: (point.x - b.x), y: (point.y - b.y) };
-////   //   const thirdTermBCxBPisPositive = BC.x * BP.y - BC.y * BP.x > 0;
-//////   const TP BC(_pv[_pidx].x()-_pv[_nidx].x() , _pv[_pidx].y()-_pv[_nidx].y());
-////   const DoublePoint BC = {.x = static_cast<double>(_pv[_pidx].x())-static_cast<double>(_pv[_nidx].x())
-////                          ,.y = static_cast<double>(_pv[_pidx].y())-static_cast<double>(_pv[_nidx].y())
-////                          };
-//////   const TP BP(    _pv[p].x()-_pv[_nidx].x() ,     _pv[p].y()-_pv[_nidx].y());
-////   const DoublePoint BP = {.x = static_cast<double>(_pv[p].x())-static_cast<double>(_pv[_nidx].x())
-////                          ,.y = static_cast<double>(_pv[p].y())-static_cast<double>(_pv[_nidx].y())
-////                          };
-//////   const bool thirdTermBCxBPisPositive = (BC.x() * BP.y() - BC.y() * BP.x()) > 0;
-////   const bool thirdTermBCxBPisPositive = (BC.x * BP.y - BC.y * BP.x) > 0;
-////
-////   if (thirdTermBCxBPisPositive != thirdTermABxAPisPositive)
-////       return false;
-////
-////   //   const CA = { x: (a.x - c.x), y: (a.y - c.y) };
-////   //   const CP = { x: (point.x - c.x), y: (point.y - c.y) };
-////   //   const thirdTermCAxCPisPositive = CA.x * CP.y - CA.y * CP.x > 0;
-//////   const TP CA(_pv[_idx].x()-_pv[_pidx].x() , _pv[_idx].y()-_pv[_pidx].y());
-////   const DoublePoint CA = {.x = static_cast<double>(_pv[_idx].x())-static_cast<double>(_pv[_pidx].x())
-////                          ,.y = static_cast<double>(_pv[_idx].y())-static_cast<double>(_pv[_pidx].y())
-////                          };
-//////   const TP CP( _pv[p].x()-_pv[_pidx].x() ,  _pv[p].y()-_pv[_pidx].y());
-////   const DoublePoint CP = {.x = static_cast<double>(_pv[p].x())-static_cast<double>(_pv[_pidx].x())
-////                          ,.y = static_cast<double>(_pv[p].y())-static_cast<double>(_pv[_pidx].y())
-////                          };
-//////   const bool thirdTermCAxCPisPositive = (CA.x() * CP.y() - CA.y() * CP.x()) > 0;
-////   const bool thirdTermCAxCPisPositive = (CA.x* CP.y- CA.y* CP.x) > 0;
-////
-////   return (thirdTermCAxCPisPositive == thirdTermABxAPisPositive);
-//}
-//
-//bool ECVertex::tryClipVertex(ECV_iter prev, ECV_iter next, const WordSet& clipped)
-//{
-//   if (_ecGood) {
-//      prev->_nidx =_nidx;
-//      prev->update(clipped);
-//      next->_pidx =_pidx;
-//      next->update(clipped);
-//      return true;
-//   }
-//   return false;
-//}
-//
-//bool ECVertex::pushIndex(TeselVertices& vrtx)
-//{
-//   if (vrtx.empty())
-//   {
-//      vrtx.push_back(_idx);
-//      vrtx.push_back(_nidx);
-//      vrtx.push_back(_pidx);
-//      return true;
-//   }
-//   else {
-//      TeselVertices::reverse_iterator koko0 = vrtx.rbegin();
-//      TeselVertices::reverse_iterator koko1 = koko0;koko1++;
-//      word idx0 = *koko0;
-//      word idx1 = *koko1;
-//      if (((idx0 == _pidx) || (idx0 == _idx)) &&
-//          ((idx1 == _pidx) || (idx1 == _idx))   )
-//      {
-//         vrtx.push_back(_nidx);
-//         return true;
-//      }
-//      return false;
-//   }
-//}
-
 //=============================================================================
 //
 EarClipping::EarClipping(const int4b* pdata, const word psize) :
@@ -366,7 +203,7 @@ bool EarClipping::rewind()// rewind 'till a clipable vertex is found
    return false;
 }
 
-bool EarClipping::trySeqUpdate(TeselVertices& indexSeq)
+bool EarClipping::trySeqUpdate(WordList& indexSeq)
 {
    if (indexSeq.empty())
    {// first vertex in the sequence
@@ -376,8 +213,8 @@ bool EarClipping::trySeqUpdate(TeselVertices& indexSeq)
    }
    else
    {// try to add a vertex to the sequence
-      TeselVertices::reverse_iterator koko0 = indexSeq.rbegin();
-      TeselVertices::reverse_iterator koko1 = koko0;koko1++;
+      WordList::reverse_iterator koko0 = indexSeq.rbegin();
+      WordList::reverse_iterator koko1 = koko0;koko1++;
       word idx0 = *koko0;
       word idx1 = *koko1;
       if (  ((idx0 == _first->pidx()) || (idx0 == _first->cidx()))
@@ -390,7 +227,7 @@ bool EarClipping::trySeqUpdate(TeselVertices& indexSeq)
    return true;//OK, vertex added
 }
 
-bool EarClipping::earClip(TeselVertices& indexSeq)
+bool EarClipping::earClip(WordList& indexSeq)
 {
    if (!rewind()) return false;
    bool koko = true;
@@ -399,7 +236,6 @@ bool EarClipping::earClip(TeselVertices& indexSeq)
       if (trySeqUpdate(indexSeq))
       {
          _first = clipVertex(_first, koko);
-//         koko = !koko;
       }
       else
          break;
@@ -421,22 +257,26 @@ void TessellPoly::tessellate(const int4b* pdata, unsigned psize)
    // initialize the vertex data structure
    EarClipping ecVertexList(pdata, psize);
    // start clipping
-   TeselVertices indexSequence;
+   WordList indexSequence;
    while (ecVertexList.earClip(indexSequence))
    {
-      _tdata.push_back(TeselChunk(indexSequence, ((3==indexSequence.size()) ? GL_TRIANGLES:GL_TRIANGLE_STRIP), 0));
-      indexSequence.clear();
+      switch(indexSequence.size())
+       {
+          case 0: case 1: case 2:
+             assert(false);
+             break;
+          case 3:
+             _tdata.push_back(TeselChunk(indexSequence, GL_TRIANGLES, 0));
+             _all_ftrs++;
+             break;
+          default:
+             _tdata.push_back(TeselChunk(indexSequence, GL_TRIANGLE_STRIP, 0));
+             _all_ftss++;
+             break;
+       }
+       // clear vertex list
+       indexSequence.clear();
    }
-   // clear vertex list
-   
-   for (TeselChain::const_iterator i = _tdata.begin(); i != _tdata.end();i++)
-      switch (i->type())
-      {
-         case GL_TRIANGLE_FAN   : _all_ftfs++ ; break;
-         case GL_TRIANGLE_STRIP : _all_ftss++ ; break;
-         case GL_TRIANGLES      : _all_ftrs++ ; break;
-      }
-//   int boza = 1;
 }
 
 void TessellPoly::num_indexs(unsigned& iftrs, unsigned& iftfs, unsigned& iftss) const
@@ -453,100 +293,27 @@ void TessellPoly::num_indexs(unsigned& iftrs, unsigned& iftfs, unsigned& iftss) 
    }
 }
 
-
-//void TessellPoly::tessellate(const PointVector& polyVertex)
-//{
-//   // create and initialize the vertex structure we'll need to run the EarClip algo
-//   // for tesselation - in this case polygon triangulation
-//   ECVertexList ecVertexList;
-//   unsigned int lvi = (unsigned int)polyVertex.size() - 1;// last vertex index
-//   for (word i = 0; i <= lvi; i++)
-//   {
-//      if      (  0 == i) ecVertexList.push_back(ECVertex(lvi  ,0  ,1  ,polyVertex));
-//      else if (lvi == i) ecVertexList.push_back(ECVertex(lvi-1,lvi,0  ,polyVertex));
-//      else               ecVertexList.push_back(ECVertex(i-1  ,i  ,i+1,polyVertex));
-//   }
-//   // init the iterators
-//   ECV_iter iecv       = ecVertexList.begin()          ;// iterator to the first vertex
-//   ECV_iter iecvprev   = ecVertexList.end(); iecvprev--;// iterator to the vlast vertex
-//   ECV_iter iecvnext   = iecv; iecvnext++              ;// iterator to the second vertex
-//   // start clipping the ears ...
-//   WordSet clipped; // init the list of already clipped vertexes
-//   // .. and gather indexes from tessellation
-//   word noLoops = 0;
-//   word noVertexes = ecVertexList.size();
-//   TeselVertices indexSequence;
-//   while (2 < ecVertexList.size()) // ... until a signle triangle has left in the list
-//   {
-//      assert((++noLoops) < (2*noVertexes));
-//      if ( (3 == ecVertexList.size()) && (!iecv->ecGood()) )
-//         break;
-//      if (iecv->tryClipVertex(iecvprev, iecvnext, clipped))
-//      { // vertex can be clipped!
-//         if (iecv->angle())
-//         {
-//            clipped.insert(iecv->idx());   // add the vertex index to the list of clipped list
-//            if (!iecv->pushIndex(indexSequence))// add the appropriate indexes to the index sequence
-//            {
-//               _tdata.push_back(TeselChunk(indexSequence, ((3==indexSequence.size()) ? GL_TRIANGLES:GL_TRIANGLE_STRIP), 0));
-//               indexSequence.clear();
-//               iecv->pushIndex(indexSequence);
-//            }
-//         }
-//         iecv = ecVertexList.erase(iecv);// erase the ECVertex from the list
-//         iecvnext++;                     // and update the iterators
-//         if (ecVertexList.end() == iecvnext)
-//            iecvnext = ecVertexList.begin();
-//      }
-//      else
-//      { // vertex can't be clipped
-//         if (!indexSequence.empty())
-//         {
-//            _tdata.push_back(TeselChunk(indexSequence, ((3==indexSequence.size()) ? GL_TRIANGLES:GL_TRIANGLE_STRIP), 0));
-//            indexSequence.clear();
-//         }
-//         iecvprev = iecv;                // updated the iterators
-//         iecv = iecvnext;
-//         iecvnext++;
-//         if (ecVertexList.end() == iecvnext)
-//            iecvnext = ecVertexList.begin();
-//      }
-//   }
-//   if (!indexSequence.empty())
-//   {
-//      _tdata.push_back(TeselChunk(indexSequence, ((3==indexSequence.size()) ? GL_TRIANGLES:GL_TRIANGLE_STRIP), 0));
-//      indexSequence.clear();
-//   }
-//   for (TeselChain::const_iterator i = _tdata.begin(); i != _tdata.end();i++)
-//      switch (i->type())
-//      {
-//         case GL_TRIANGLE_FAN   : _all_ftfs++ ; break;
-//         case GL_TRIANGLE_STRIP : _all_ftss++ ; break;
-//         case GL_TRIANGLES      : _all_ftrs++ ; break;
-//      }
-//}
-
 //=============================================================================
 //
-TeselChunk::TeselChunk(const TeselVertices& data, GLenum type, unsigned offset)
+TeselChunk::TeselChunk(const WordList& data, GLenum type, unsigned offset)
 {
    _size = data.size();
    _index_seq = DEBUG_NEW unsigned[_size];
    word li = 0;
-   for(TeselVertices::const_iterator CVX = data.begin(); CVX != data.end(); CVX++)
+   for(WordList::const_iterator CVX = data.begin(); CVX != data.end(); CVX++)
       _index_seq[li++] = *CVX + offset;
    _type = type;
 }
 
-TeselChunk::TeselChunk(const TeselChunk* data, unsigned offset)
-{
-   _size = data->size();
-   _type = data->type();
-   _index_seq = DEBUG_NEW unsigned[_size];
-   const unsigned* copy_seq = data->index_seq();
-   for(unsigned i = 0; i < _size; i++)
-      _index_seq[i] = copy_seq[i] + offset;
-}
+//TeselChunk::TeselChunk(const TeselChunk* data, unsigned offset)
+//{
+//   _size = data->size();
+//   _type = data->type();
+//   _index_seq = DEBUG_NEW unsigned[_size];
+//   const unsigned* copy_seq = data->index_seq();
+//   for(unsigned i = 0; i < _size; i++)
+//      _index_seq[i] = copy_seq[i] + offset;
+//}
 
 TeselChunk::TeselChunk(const int* /*data*/, unsigned size, unsigned offset)
 { // used for wire tesselation explicitly

@@ -45,14 +45,12 @@
 // Tesselation classes
 //
 //=============================================================================
-typedef std::list<word> TeselVertices;
 
 class TeselChunk {
    public:
-                        TeselChunk(const TeselVertices&, GLenum, unsigned);
-                        TeselChunk(const TeselChunk*, unsigned);
-                        TeselChunk(const int*, unsigned, unsigned);
                         TeselChunk(const TeselChunk&); //copy constructor
+                        TeselChunk(const WordList&, GLenum, unsigned);
+                        TeselChunk(const int*, unsigned, unsigned);
                        ~TeselChunk();
       GLenum            type() const      {return _type;}
       word              size() const      {return _size;}
@@ -67,38 +65,9 @@ typedef std::list<TeselChunk> TeselChain;
 
 //=============================================================================
 //
-// Attempt to replace the GLU tesselation
+// Replacement of GLU tesselation(which is not maintained anymore)
 //
 //=============================================================================
-// ear-clipping algorithm for polygon tessellation - as an alternative to
-// deprecated functionality of GLU
-//class ECVertex;
-//typedef std::list<ECVertex>               ECVertexList;
-//typedef ECVertexList::iterator            ECV_iter;
-//
-//class ECVertex {
-//   public:
-//                         ECVertex(word  pidx, word idx, word nidx, const PointVector& pv);
-//      bool               tryClipVertex(ECV_iter, ECV_iter, const WordSet&);
-//      bool               pushIndex(TeselVertices&);
-//      word               idx() {return _idx;}
-//      int                angle() {return _angle;}
-//      bool               ecGood() {return _ecGood;}
-//   protected:
-//      void               checkClipable(const WordSet&);
-//      bool               internalPoint(word p);
-//      bool               triangleArea(const TP& p1, const TP& p2, const TP& p3) const;
-//      void               update(const WordSet&);
-//   private:
-//      word               _idx       ; // this vertex index
-//      word               _pidx      ; // previous vertex index
-//      word               _nidx      ; // next vertex index
-//      const PointVector& _pv        ;
-//      int                _angle     ; // the angle between the 3 vertexes
-//      bool               _ecGood    ; // good for ear clipping - i.e. there is no another point of the polygon, which lies within
-//};
-//
-
 class ECVertex {
   public:
      enum VTriStatus { // status of the triangle constituted by a vertex
@@ -131,7 +100,7 @@ class EarClipping {
    public:
                         EarClipping(const int4b*, const word size);
                        ~EarClipping();
-      bool              earClip(TeselVertices& indexSeq);
+      bool              earClip(WordList& indexSeq);
       word              size(){return _size;}
    private:
       void              update(ECVertex*& item, bool direction);
@@ -141,7 +110,7 @@ class EarClipping {
       bool              checkInternal(ECVertex* item, word vIndex);
       bool              triangleArea(word idxA, word idxB, word idxP);
       bool              rewind();
-      bool              trySeqUpdate(TeselVertices& indexSeq);
+      bool              trySeqUpdate(WordList& indexSeq);
 
       ECVertex*         _first;
       const int4b*      _data;
@@ -152,7 +121,6 @@ class EarClipping {
 class TessellPoly {
    public:
                         TessellPoly();
-//      void              tessellate(const PointVector& polyVertex);
       void              tessellate(const int4b* pdata, unsigned psize);
       bool              valid() const    { return (0 < (_all_ftrs + _all_ftfs + _all_ftss));}
       word              num_ftrs() const { return _all_ftrs;}
