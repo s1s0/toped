@@ -76,22 +76,22 @@ class ECVertex {
                        ,vtsBad        // checked, but has a vertex inside the triangle
                        ,vtsVoid       // check is not possible, i.e. less than 3 points left in the sequence
                       };
-                        ECVertex(const word idx) : _idx(idx), _angle(), _vrtxInside(vtsUnchecked), _next(nullptr), _prev(nullptr) {};
+                        ECVertex(const word idx) : _idx(idx), _angle(), _vrtxStatus(vtsUnchecked), _next(nullptr), _prev(nullptr) {};
       void              set_next(ECVertex* next) {_next = next;}
       void              set_prev(ECVertex* prev) {_prev = prev;}
       void              set_angle(int angle) {_angle = angle;}
-      void              set_vrtxInside(VTriStatus vrtxInside) {_vrtxInside = vrtxInside;}
+      void              set_vrtxInside(VTriStatus vrtxInside) {_vrtxStatus = vrtxInside;}
       ECVertex*         next() const {return _next;}
       ECVertex*         prev() const {return _prev;}
       word              cidx() const {return _idx;}
       word              pidx() const {return _prev->cidx();}
       word              nidx() const {return _next->cidx();}
       int               angle() const {return _angle;}
-      bool              clipable() const {return ((vtsGood ==_vrtxInside) && (_angle > 0));}
+      bool              clipable() const {return ((vtsGood ==_vrtxStatus) && (_angle > 0));}
    private:
       const word        _idx        ;
       int               _angle      ;
-      VTriStatus        _vrtxInside ;
+      VTriStatus        _vrtxStatus ;
       ECVertex*         _next       ;
       ECVertex*         _prev       ;
 };
@@ -101,7 +101,6 @@ class EarClipping {
                         EarClipping(const int4b*, const word size);
                        ~EarClipping();
       bool              earClip(WordList& indexSeq);
-      word              size(){return _size;}
    private:
       void              update(ECVertex*& item, bool direction);
       ECVertex*         clipVertex(ECVertex* item, bool direction);
@@ -114,7 +113,8 @@ class EarClipping {
 
       ECVertex*         _first;
       const int4b*      _data;
-      word              _size;
+      word              _cursize;
+      word              _initsize;
       WordSet           _clippedIndexes;
 };
 

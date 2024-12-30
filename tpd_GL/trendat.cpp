@@ -54,7 +54,8 @@ GLubyte aref_mark_bmp[30]= {
 //
 EarClipping::EarClipping(const int4b* pdata, const word psize) :
    _data(pdata)
-  ,_size(psize)
+  ,_cursize(psize)
+  ,_initsize(psize)
   ,_clippedIndexes()
 {
    // First: create a circular strucutre of the vertices containing only
@@ -63,7 +64,7 @@ EarClipping::EarClipping(const int4b* pdata, const word psize) :
    _first = DEBUG_NEW ECVertex(0);
    ECVertex* pitem = _first;
    ECVertex* item  = nullptr;
-   for(word i = 1; i < _size; i++)
+   for(word i = 1; i < _initsize; i++)
    {
       item = DEBUG_NEW ECVertex(i);
       pitem->set_next(item); item->set_prev(pitem);
@@ -72,13 +73,13 @@ EarClipping::EarClipping(const int4b* pdata, const word psize) :
    pitem->set_next(_first); _first->set_prev(pitem);
    //Next: for each of the vertices, update ...
    item = _first;
-   for (word i = 0; i < _size; i++ , item = item->next())
+   for (word i = 0; i < _cursize; i++ , item = item->next())
       update(item, true);
 }
 
 EarClipping::~EarClipping()
 {
-   for (unsigned i= 0; i<_size; i++)
+   for (unsigned i= 0; i<_cursize; i++)
    {
       ECVertex* garbage = _first;
       _first = _first->next();
@@ -88,8 +89,11 @@ EarClipping::~EarClipping()
 
 void EarClipping::update(ECVertex*& item, bool direction)
 {
+//   std::ostringstream ost;
+//   ost<<item->pidx()<<" | "<< item->cidx()<<" | "<<item->nidx();
+//   tell_log(console::MT_INFO, ost.str());
    do {
-      if (3 > _size)
+      if (3 > _cursize)
       {// don't do any checks if 2 or less vertexes left in the sequence
          item->set_vrtxInside(ECVertex::vtsVoid);
          return;
@@ -116,7 +120,7 @@ void EarClipping::update(ECVertex*& item, bool direction)
 // Check whether there are any vertexes lying inside the triangle constituted by this (item) vertex
 void EarClipping::checkClipable(ECVertex* item)
 {
-   if (3==_size)
+   if (3==_cursize)
    {
       item->set_vrtxInside(ECVertex::vtsGood);
    }
@@ -126,7 +130,7 @@ void EarClipping::checkClipable(ECVertex* item)
    vrtxsExcluded.insert(item->cidx());
    vrtxsExcluded.insert(item->nidx());
  
-   for (word i = 0; i < _size; i++)
+   for (word i = 0; i < _initsize; i++)
    {
       if (0<vrtxsExcluded.count(i))
          continue;// i.e. current vertex index (i) is excluded from the check
@@ -142,6 +146,12 @@ void EarClipping::checkClipable(ECVertex* item)
 
 bool EarClipping::checkInternal(ECVertex* item, word vIndex)
 {
+//   bool areaABP = triangleArea(item->pidx(), item->cidx(), vIndex);// get the area sign of ABP
+//   bool areaBCP = triangleArea(item->cidx() ,item->nidx(), vIndex);// get the area sign of BCP
+//   bool areaCAP = triangleArea(item->nidx(), item->pidx(), vIndex);// get the area sign of CAP
+//   if (     (areaABP && areaBCP && areaCAP)
+//       || (!(areaABP || areaBCP || areaCAP))
+//      )
    if (   triangleArea(item->pidx(), item->cidx(), vIndex)// get the area sign of ABP
        && triangleArea(item->cidx() ,item->nidx(), vIndex)// get the area sign of BCP
        && triangleArea(item->nidx(), item->pidx(), vIndex)// get the area sign of CAP
@@ -180,6 +190,10 @@ ECVertex* EarClipping::clipVertex(ECVertex* item, bool direction)
 {
    // add to the list of clipped indexes
    _clippedIndexes.insert(item->cidx());
+//   std::ostringstream ost;
+//   ost<<"---- Clipping vertex "<< item->cidx()<<" ----";
+//   tell_log(console::MT_INFO, ost.str());
+//
    // update the links in the circular structure
    item->prev()->set_next(item->next());
    item->next()->set_prev(item->prev());
@@ -187,7 +201,7 @@ ECVertex* EarClipping::clipVertex(ECVertex* item, bool direction)
    ECVertex* prev = item->prev();
    // destroy the clipped vertex
    delete item;
-   _size--;
+   _cursize--;
    // now we need to update the neighboring vertices of the one we just destroyed
    update(prev, !direction);
    item = prev->next();
@@ -197,8 +211,8 @@ ECVertex* EarClipping::clipVertex(ECVertex* item, bool direction)
 
 bool EarClipping::rewind()// rewind 'till a clipable vertex is found
 {
-   if (0 == _size) return false;
-   for (word i = 0; i < _size; i++, _first = _first->next())
+   if (0 == _cursize) return false;
+   for (word i = 0; i < _cursize; i++, _first = _first->next())
       if (_first->clipable()) return true;
    return false;
 }
