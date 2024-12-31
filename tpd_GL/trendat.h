@@ -79,18 +79,18 @@ class ECVertex {
                         ECVertex(const word idx) : _idx(idx), _angle(), _vrtxStatus(vtsUnchecked), _next(nullptr), _prev(nullptr) {};
       void              set_next(ECVertex* next) {_next = next;}
       void              set_prev(ECVertex* prev) {_prev = prev;}
-      void              set_angle(int angle) {_angle = angle;}
+      void              set_angle(double angle) {_angle = angle;}
       void              set_vrtxInside(VTriStatus vrtxInside) {_vrtxStatus = vrtxInside;}
       ECVertex*         next() const {return _next;}
       ECVertex*         prev() const {return _prev;}
       word              cidx() const {return _idx;}
       word              pidx() const {return _prev->cidx();}
       word              nidx() const {return _next->cidx();}
-      int               angle() const {return _angle;}
-      bool              clipable() const {return ((vtsGood ==_vrtxStatus) && (_angle > 0));}
+      double            angle() const {return _angle;}
+      bool              clipable() const {return ((vtsGood ==_vrtxStatus) && (_angle > 0.0));}
    private:
       const word        _idx        ;
-      int               _angle      ;
+      double            _angle      ;
       VTriStatus        _vrtxStatus ;
       ECVertex*         _next       ;
       ECVertex*         _prev       ;

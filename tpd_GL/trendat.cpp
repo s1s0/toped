@@ -101,15 +101,15 @@ void EarClipping::update(ECVertex*& item, bool direction)
       TP cp = TP(_data[2*item->cidx()], _data[2*item->cidx()+1]);
       TP pp = TP(_data[2*item->pidx()], _data[2*item->pidx()+1]);
       TP np = TP(_data[2*item->nidx()], _data[2*item->nidx()+1]);
-      int angle0 = xangle(cp,np);
-      int angle1 = xangle(cp,pp);
-      int angle = angle1 - angle0;
-      if      (angle >  180) angle -= 360;
-      else if (angle < -180) angle += 360;
+      double angle0 = xdangle(cp,np);
+      double angle1 = xdangle(cp,pp);
+      double angle = angle1 - angle0;
+      if      (angle >  180.0) angle -= 360.0;
+      else if (angle < -180.0) angle += 360.0;
       item->set_angle(angle);
    } while (checkStraightLine(item, direction));
 
-   if (0 < item->angle())
+   if (0.0 < item->angle())
       checkClipable(item);
    else
       // if angle is negative, this vertex can NOT be clipped,
@@ -146,12 +146,6 @@ void EarClipping::checkClipable(ECVertex* item)
 
 bool EarClipping::checkInternal(ECVertex* item, word vIndex)
 {
-//   bool areaABP = triangleArea(item->pidx(), item->cidx(), vIndex);// get the area sign of ABP
-//   bool areaBCP = triangleArea(item->cidx() ,item->nidx(), vIndex);// get the area sign of BCP
-//   bool areaCAP = triangleArea(item->nidx(), item->pidx(), vIndex);// get the area sign of CAP
-//   if (     (areaABP && areaBCP && areaCAP)
-//       || (!(areaABP || areaBCP || areaCAP))
-//      )
    if (   triangleArea(item->pidx(), item->cidx(), vIndex)// get the area sign of ABP
        && triangleArea(item->cidx() ,item->nidx(), vIndex)// get the area sign of BCP
        && triangleArea(item->nidx(), item->pidx(), vIndex)// get the area sign of CAP
@@ -162,23 +156,20 @@ bool EarClipping::checkInternal(ECVertex* item, word vIndex)
 
 bool EarClipping::triangleArea(word idxA, word idxB, word idxP)
 {
-   typedef struct {double x; double y;} DoublePoint;
+   DoublePoint DA(_data[2*idxA], _data[2*idxA+1] );
+   DoublePoint DB(_data[2*idxB], _data[2*idxB+1] );
+   DoublePoint DP(_data[2*idxP], _data[2*idxP+1] );
    
-   DoublePoint DA = {.x = static_cast<double>(_data[2*idxA]), .y = static_cast<double>(_data[2*idxA+1])};
-   DoublePoint DB = {.x = static_cast<double>(_data[2*idxB]), .y = static_cast<double>(_data[2*idxB+1])};
-   DoublePoint DP = {.x = static_cast<double>(_data[2*idxP]), .y = static_cast<double>(_data[2*idxP+1])};
-   
-   double koko1 = DA.x * (DB.y - DP.y);
-   double koko2 = DB.x * (DP.y - DA.y);
-   double koko3 = DP.x * (DA.y - DB.y);
-   double koko  = koko1 + koko2 + koko3;
-
-   return koko > 0;
+   double area  = DA.x() * (DB.y() - DP.y())
+                + DB.x() * (DP.y() - DA.y())
+                + DP.x() * (DA.y() - DB.y())
+                ;
+   return area > 0;
 }
 
 bool EarClipping::checkStraightLine(ECVertex*& item, bool direction)
 {
-   if ((180==abs(item->angle())) || (0 == item->angle()))
+   if ((180.0==abs(item->angle())) || (0.0 == item->angle()))
    {
       item = clipVertex(item, direction);
       return true;

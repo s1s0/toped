@@ -146,6 +146,16 @@ void TP::info(std::ostringstream& ost, real DBU) const {
 }
 
 //-----------------------------------------------------------------------------
+DoublePoint::DoublePoint(int4b x, int4b y) :
+   _x(static_cast<double>(x))
+  ,_y(static_cast<double>(y))
+{}
+
+DoublePoint::DoublePoint(const TP& p):
+   _x(static_cast<double>(p.x()))
+  ,_y(static_cast<double>(p.y()))
+{}
+//-----------------------------------------------------------------------------
 // class DBbox
 //-----------------------------------------------------------------------------
 void DBbox::overlap(const TP& p)
@@ -834,7 +844,6 @@ unsigned GCD(unsigned arg1, unsigned arg2)
 int xangle(const TP& p1, const TP& p2) {
 //   printf("-- Calculating angle between X axis and (%i, %i) - (%i, %i) line\n",
 //          p1.x(), p1.y(), p2.x(), p2.y());
-//   const long double Pi = 3.1415926535897932384626433832795;
    if (p1.x() == p2.x()) { //vertcal line
       assert(p1.y() != p2.y()); // make sure both points do not coinside
       if   (p2.y() > p1.y()) return  90;
@@ -847,4 +856,28 @@ int xangle(const TP& p1, const TP& p2) {
    else
       return (int)rint(180 * atan2(double(p2.y() - p1.y()),
                                    double(p2.x() - p1.x()) ) /M_PI);
+}
+
+//-----------------------------------------------------------------------------
+/*! Returns the angle (as double) between the line and the X axis
+ *!  ... it appears that for some operations (tessellation for example) the int precision is not good enough
+*/
+double xdangle(const TP& p1, const TP& p2) {
+//   printf("-- Calculating angle between X axis and (%i, %i) - (%i, %i) line\n",
+//          p1.x(), p1.y(), p2.x(), p2.y());
+   if (p1.x() == p2.x()) { //vertcal line
+      assert(p1.y() != p2.y()); // make sure both points do not coinside
+      if   (p2.y() > p1.y()) return  90.0;
+      else                   return -90.0;
+   }
+   else if (p1.y() == p2.y()) { // horizontal line
+      assert(p1.x() != p2.x()); // make sure both points do not coinside
+      if (p2.x() > p1.x()) return 0.0;
+      else                 return 180.0;
+   }
+   else {
+      DoublePoint dp1(p1);
+      DoublePoint dp2(p2);
+      return ( 180.0 * atan2( dp2.y() - dp1.y(), dp2.x() - dp1.x() ) / M_PI);
+   }
 }

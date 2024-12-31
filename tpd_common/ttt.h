@@ -304,6 +304,18 @@ private:
    int4b    _y;
 };
 
+class DoublePoint {
+public:
+   DoublePoint(const TP& tp);
+   DoublePoint(int4b x, int4b y);
+   double   x() {return _x;}
+   double   y() {return _y;}
+private:
+   double _x;
+   double _y;
+};
+
+   //   typedef struct {double x; double y;} DoublePoint
 //==============================================================================
 // The DBbox class is used primarily in the quadtree algo, to keep the overlap
 // variables of the DB objects and to implement the corresponding calculations.
@@ -389,6 +401,7 @@ std::vector<std::string> split (const std::string& str, char delim);
 int8b    polyarea(const PointVector& shape);
 unsigned GCD(unsigned arg1, unsigned arg2);
 int      xangle(const TP&, const TP&);
+double   xdangle(const TP& p1, const TP& p2);
 
 
 //=============================================================================
