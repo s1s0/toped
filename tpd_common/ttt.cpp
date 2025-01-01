@@ -866,12 +866,12 @@ double xdangle(const TP& p1, const TP& p2) {
 //   printf("-- Calculating angle between X axis and (%i, %i) - (%i, %i) line\n",
 //          p1.x(), p1.y(), p2.x(), p2.y());
    if (p1.x() == p2.x()) { //vertcal line
-      assert(p1.y() != p2.y()); // make sure both points do not coinside
+//      assert(p1.y() != p2.y()); // make sure both points do not coinside
+      if   (p1.y() == p2.y()) throw std::invalid_argument("points coinside");
       if   (p2.y() > p1.y()) return  90.0;
       else                   return -90.0;
    }
    else if (p1.y() == p2.y()) { // horizontal line
-      assert(p1.x() != p2.x()); // make sure both points do not coinside
       if (p2.x() > p1.x()) return 0.0;
       else                 return 180.0;
    }

@@ -101,12 +101,21 @@ void EarClipping::update(ECVertex*& item, bool direction)
       TP cp = TP(_data[2*item->cidx()], _data[2*item->cidx()+1]);
       TP pp = TP(_data[2*item->pidx()], _data[2*item->pidx()+1]);
       TP np = TP(_data[2*item->nidx()], _data[2*item->nidx()+1]);
-      double angle0 = xdangle(cp,np);
-      double angle1 = xdangle(cp,pp);
-      double angle = angle1 - angle0;
-      if      (angle >  180.0) angle -= 360.0;
-      else if (angle < -180.0) angle += 360.0;
-      item->set_angle(angle);
+      double angle0, angle1;
+      bool validAngle0 = true;
+      bool validAngle1 = true;
+      try { angle0 = xdangle(cp,np);}
+      catch (const std::invalid_argument& ) {validAngle0 = false;} // point cp and np coincide
+      try {angle1 = xdangle(cp,pp);}
+      catch (const std::invalid_argument&) {validAngle1 = false;} // point cp and pp coincide
+      if (validAngle0 && validAngle1)
+      {
+         double angle = angle1 - angle0;
+         if      (angle >  180.0) angle -= 360.0;
+         else if (angle < -180.0) angle += 360.0;
+         item->set_angle(angle);
+      }
+      else item->set_angle(0.0);
    } while (checkStraightLine(item, direction));
 
    if (0.0 < item->angle())

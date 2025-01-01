@@ -954,7 +954,8 @@ tellstdfunc::GDSgetlaymap::GDSgetlaymap(telldata::typeID retype, bool eor) :
 }
 
 int tellstdfunc::GDSgetlaymap::execute()
-{
+{  //TODO! Put a message on the console whether the existing layermap is used, or a new one (default)
+   //      is defined from the GDS in memory
    bool import = getBoolValue();
    telldata::TtList* theMap = DEBUG_NEW telldata::TtList(telldata::tn_laymap);
    const ExpLayMap* laymap = PROPC->getGdsLayMap();
