@@ -128,6 +128,7 @@ class TessellPoly {
       word              num_ftss() const { return _all_ftss;}
       const TeselChain* tdata() const    { return &_tdata;  }
       void              num_indexs(unsigned& iftrs, unsigned& iftfs, unsigned& iftss) const;
+      void              clear();
    //====================================================================
    private:
       TeselChain        _tdata;

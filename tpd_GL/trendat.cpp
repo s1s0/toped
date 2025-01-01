@@ -173,6 +173,22 @@ bool EarClipping::triangleArea(word idxA, word idxB, word idxP)
                 + DB.x() * (DP.y() - DA.y())
                 + DP.x() * (DA.y() - DB.y())
                 ;
+   if (0 == area) {
+      // the question now is where is the vertex idxP?
+      double anglePA, anglePB;
+      TP PA(_data[2*idxA], _data[2*idxA+1] );
+      TP PB(_data[2*idxB], _data[2*idxB+1] );
+      TP PP(_data[2*idxP], _data[2*idxP+1] );
+      try {anglePA = xdangle(PP, PA);}
+      catch (const std::invalid_argument& ) {return false;}// i.e. PA and PP are the same
+      try {anglePB = xdangle(PP, PB);}
+      catch (const std::invalid_argument& ) {return false;}// i.e. PB and PP are the same
+      // is it between idxA and idxB, or is outside?
+      double angle = anglePA - anglePB;
+      if (0.0 == angle) return false;// PP is outside PA-PB
+      else return true;// PP is inside PA-PB
+      
+   }
    return area > 0;
 }
 
@@ -261,13 +277,14 @@ bool EarClipping::earClip(WordList& indexSeq)
 //
 TessellPoly::TessellPoly():
      _tdata    ()
-    ,_all_ftrs ()
-    ,_all_ftfs ()
-    ,_all_ftss ()
+    ,_all_ftrs (0)
+    ,_all_ftfs (0)
+    ,_all_ftss (0)
 {}
 
 void TessellPoly::tessellate(const int4b* pdata, unsigned psize)
 {
+   assert(0 == _tdata.size()); 
    // initialize the vertex data structure
    EarClipping ecVertexList(pdata, psize);
    // start clipping
@@ -306,6 +323,13 @@ void TessellPoly::num_indexs(unsigned& iftrs, unsigned& iftfs, unsigned& iftss) 
       }
    }
 }
+
+void TessellPoly::clear() {
+   // make sure that nothing's left from possible previous tessellation
+   _all_ftfs = _all_ftrs = _all_ftss = 0;
+   _tdata.clear();
+}
+
 
 //=============================================================================
 //

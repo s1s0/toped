@@ -701,6 +701,7 @@ laydata::Validator* laydata::TdtPoly::move(const CTM& trans, SGBitSet& plst)
             _pdata[2*i] = (*nshape)[i].x();_pdata[2*i+1] = (*nshape)[i].y();
          }
          // retessellate the modified shape
+         _teseldata.clear();
          _teseldata.tessellate(_pdata, _psize);
          nshape->clear(); delete nshape;
          delete check;
@@ -768,6 +769,7 @@ void laydata::TdtPoly::transfer(const CTM& trans)
       }
    assert(index == (2*_psize));
    // retessellate the modified shape
+   _teseldata.clear();
    _teseldata.tessellate(_pdata, _psize);
 }
 
