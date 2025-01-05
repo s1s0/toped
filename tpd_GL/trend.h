@@ -47,7 +47,7 @@ namespace trend {
       unsigned int   quadVBO   ; // Vertex Buffer Object of the view port (where the textrue will be mapped)
       unsigned int   texture   ; // The texture we're generating; effectively our layout view
       unsigned int   RBO       ; // The RenderBuffer ID
-      unsigned int   frameBuff ; // The FrameBuffer ID
+      unsigned int   FBO       ; // The FrameBuffer ID
    } FrameBuffProps;
 
 
@@ -221,7 +221,7 @@ namespace trend {
 //         RenderType             renderType() const {return _renderType;}
          void                   reportRenderer(RenderType) const;
          void                   initShaders(const std::string&);
-         trend::TrendBase*      makeCRenderer(int W, int H);                     //!Get current renderer
+         trend::TrendBase*      makeCRenderer(int W, int H);         //!Get current renderer
          trend::TrendBase*      getCRenderer();
          void                   releaseCRenderer();
          trend::TrendBase*      makeHRenderer();                     //!Get hover renderer
@@ -248,6 +248,7 @@ namespace trend {
          //Shader handling
          GLint                  getUniformLoc(const glsl_Uniforms) const;
          void                   setGlslProg(const glsl_Programs) const;
+         void                   drawFrameBuffer();
       private:
          typedef std::map<std::string, TolderGlfFont*> OglFontCollectionMap;
          trend::TrendBase*      _cRenderer;    //! current renderer

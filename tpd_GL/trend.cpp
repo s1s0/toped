@@ -800,13 +800,10 @@ void trend::Shaders::getProgramsLog(GLint idProgram)
 
 bool trend::Shaders::setFrameBuffer(int W, int H)
 {
-   if (0 != _fbProps.frameBuff)
-      clearFrameBuffer();
-   else
-      assert(!(_fbProps.RBO || _fbProps.quadVAO || _fbProps.quadVBO || _fbProps.texture));
+   clearFrameBuffer();
 
-   DBGL_CALL(glGenFramebuffers, 1, &_fbProps.frameBuff)
-   DBGL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, _fbProps.frameBuff)
+   DBGL_CALL(glGenFramebuffers, 1, &_fbProps.FBO)
+   DBGL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, _fbProps.FBO)
    // create a color attachment texture
    DBGL_CALL(glGenTextures, 1, &_fbProps.texture)
    DBGL_CALL(glBindTexture, GL_TEXTURE_2D, _fbProps.texture)
@@ -870,11 +867,11 @@ void trend::Shaders::drawFrameBuffer()
 
 
 void trend::Shaders::clearFrameBuffer() {
-   glDeleteVertexArrays(1, &_fbProps.quadVAO);
-   glDeleteBuffers(1, &_fbProps.quadVBO);
-   glDeleteTextures(1, &_fbProps.texture);
-   glDeleteRenderbuffers(1, &_fbProps.RBO);
-   glDeleteFramebuffers(1, &_fbProps.frameBuff);
+   DBGL_CALL(glDeleteVertexArrays,1, &_fbProps.quadVAO)
+   DBGL_CALL(glDeleteBuffers, 1, &_fbProps.quadVBO)
+   DBGL_CALL(glDeleteTextures, 1, &_fbProps.texture)
+   DBGL_CALL(glDeleteRenderbuffers, 1, &_fbProps.RBO)
+   DBGL_CALL(glDeleteFramebuffers, 1, &_fbProps.FBO)
    _fbProps = {0,0,0,0,0};
 }
 
@@ -986,6 +983,19 @@ void trend::TrendCenter::initShaders(const std::string& codeDirectory)
    }
 }
 
+void trend::TrendCenter::drawFrameBuffer()
+{
+   switch (_renderType) {
+      case trend::rtToshader:
+         assert(_cShaders);
+         _cShaders->drawFrameBuffer();
+         break;
+      default: assert(false); // TODO handled for Toshader only at this stage
+         break;
+   }
+   
+}
+
 trend::TrendBase* trend::TrendCenter::makeCRenderer(int W, int H)
 {
    if (NULL != _cRenderer)
@@ -1009,7 +1019,8 @@ trend::TrendBase* trend::TrendCenter::makeCRenderer(int W, int H)
             _cRenderer = DEBUG_NEW trend::Tenderer( drawProp, PROPC->UU() ); break;
          case trend::rtToshader : 
             _cRenderer = DEBUG_NEW trend::Toshader( drawProp, PROPC->UU() );
-            if (!_cShaders->setFrameBuffer(2*W, 2*H)) {
+            if (!_cShaders->setFrameBuffer(W, H))
+            {
                delete _cRenderer;
                _cRenderer = NULL;
             }
@@ -1082,9 +1093,7 @@ trend::TrendBase* trend::TrendCenter::makeMRenderer(console::ACTIVE_OP& curOp)
          case trend::rtTenderer :
             _mRenderer = DEBUG_NEW trend::Tenderer( drawProp, PROPC->UU() ); break;
          case trend::rtToshader :
-            _mRenderer = DEBUG_NEW trend::Toshader( drawProp, PROPC->UU() );
-            _cShaders->drawFrameBuffer();
-            break;
+            _mRenderer = DEBUG_NEW trend::Toshader( drawProp, PROPC->UU() ); break;
          default: assert(false); break;
       }
       curOp = drawProp->currentOp();
@@ -1156,7 +1165,6 @@ trend::TrendBase* trend::TrendCenter::getDRenderer()
 void trend::TrendCenter::releaseCRenderer()
 {
    assert(NULL != _cRenderer);
-   _cShaders->drawFrameBuffer();
    PROPC->unlockDrawProp(_cRenderer->drawprop(), false);
    if (_cRenderer->grcDataEmpty())
    {

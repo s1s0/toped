@@ -47,6 +47,7 @@ extern layprop::PropertyCenter*  PROPC;
 //extern trend::TrendCenter*       TRENDC;
 extern console::TllCmdLine*      Console;
 extern trend::ogl_logfile        OGLLogFile; // openGL call tracking log file
+extern trend::TrendCenter*       TRENDC;
 extern const wxEventType         wxEVT_CANVAS_STATUS;
 extern const wxEventType         wxEVT_CANVAS_CURSOR;
 extern const wxEventType         wxEVT_CANVAS_ZOOM;
@@ -497,14 +498,10 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& /*event*/)
          DBGL_CALL(glGenVertexArrays, 1, &VertexArrayID)
          DBGL_CALL(glBindVertexArray, VertexArrayID)
          updateViewport();
-         DBGL_CALL(glClear, GL_COLOR_BUFFER_BIT)
-         DBGL_CALL(glEnable, GL_BLEND)
-         DBGL_CALL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-
-         DATC->render(W, H);
+         DATC->renderOGLBuffer(W, H);
          if (0 == _blinkInterval) DATC->grcDraw();
          _invalidWindow = false;
-         rubberPaint();
+         drawOGLBuffer();
          SwapBuffers();
          DBGL_CALL(glBindVertexArray, 0);
          DBGL_CALL(glDeleteVertexArrays, 1, &VertexArrayID)
@@ -520,11 +517,7 @@ void tui::LayoutCanvas::OnpaintGL(wxPaintEvent& /*event*/)
    {
       wxPaintDC dc(this);
       SetCurrent(*_glRC);
-      DBGL_CALL(glClear, GL_COLOR_BUFFER_BIT)
-      DBGL_CALL(glEnable, GL_BLEND)
-      DBGL_CALL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-      rubberPaint();
-      if (!_rubberBand && PROPC->boldOnHover()) boldOnHover();
+      drawOGLBuffer();
       if       (_tmpWnd)              wndPaint();
       SwapBuffers();
    }
@@ -535,8 +528,9 @@ void tui::LayoutCanvas::wndPaint()
    DATC->zoomDraw(_pressPoint, _nScrMark);
 }
 
-void tui::LayoutCanvas::rubberPaint()
+void tui::LayoutCanvas::drawOGLBuffer()
 {
+   TRENDC->drawFrameBuffer();
    DBlineList repers;
    if (_reperX)
    {
@@ -550,27 +544,11 @@ void tui::LayoutCanvas::rubberPaint()
    }
    if (_rubberBand || _reperX || _reperY)
       DATC->motionDraw(_layCTM, _releasePoint, _nScrMark, _rubberBand, repers);
+   
+   if (!_rubberBand && PROPC->boldOnHover())
+      boldOnHover();
 }
 
-//void tui::LayoutCanvas::saveGLFrameBuf()
-//{
-//   GLuint frameBuffer;
-//   DBGL_CALL(glGenFramebuffers,1,&frameBuffer)
-//   DBGL_CALL(glBindFramebuffer, GL_DRAW_FRAMEBUFFER, frameBuffer)
-//   DBGL_CALL(glBindFramebuffer, GL_READ_FRAMEBUFFER, 0) // i.e. read from the current framebuffer
-//   DBGL_CALL(glReadBuffer,GL_COLOR_ATTACHMENT0)
-//   DBGL_CALL(glDrawBuffer,GL_COLOR_ATTACHMENT0)
-//   DBGL_CALL(glBlitFramebuffer, 0, 0, 800, 600,             // src rect
-//                               0, 0, 800, 600,             // dst rect
-//                               GL_COLOR_BUFFER_BIT,        // buffer mask
-//                               GL_LINEAR            )      // scale filter
-//}
-//
-//void tui::LayoutCanvas::restoreGLFrameBuf()
-//{
-//   
-//}
-//
 void tui::LayoutCanvas::boldOnHover()
 {
    DATC->mouseHooverDraw(_scrMark);
@@ -674,7 +652,7 @@ void tui::LayoutCanvas::OnMouseMotion(wxMouseEvent& event)
       TP s_ScrMARK = _nScrMark * LayCTMR;
       TP nsp;
       if      (abs(s_ScrMARK.x() - sp_BL.x()) < _apTrigger)
-      {
+      {// move view window left
          wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
          eventZOOM.SetInt(ZOOM_LEFT);
          OnZoom(eventZOOM);
@@ -682,7 +660,7 @@ void tui::LayoutCanvas::OnMouseMotion(wxMouseEvent& event)
          WarpPointer(nsp.x(),nsp.y());return;
       }
       else  if(abs(sp_TR.x() - s_ScrMARK.x()) < _apTrigger)
-      {
+      {// move view window right
          wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
          eventZOOM.SetInt(ZOOM_RIGHT);
          OnZoom(eventZOOM);
@@ -690,7 +668,7 @@ void tui::LayoutCanvas::OnMouseMotion(wxMouseEvent& event)
          WarpPointer(nsp.x(),nsp.y());return;
       }
       else  if(abs(sp_BL.y() - s_ScrMARK.y()) < _apTrigger)
-      {
+      {// move view window up
          wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
          eventZOOM.SetInt(ZOOM_UP);
          OnZoom(eventZOOM);
@@ -698,7 +676,7 @@ void tui::LayoutCanvas::OnMouseMotion(wxMouseEvent& event)
          WarpPointer(nsp.x(),nsp.y());return;
       }
       else  if(abs(s_ScrMARK.y() - sp_TR.y()) < _apTrigger)
-      {
+      {// move view window down
          wxCommandEvent eventZOOM(wxEVT_CANVAS_ZOOM);
          eventZOOM.SetInt(ZOOM_DOWN);
          OnZoom(eventZOOM);
@@ -718,7 +696,8 @@ void tui::LayoutCanvas::OnMouseMotion(wxMouseEvent& event)
       updateCoordWin(_scrMark.y(), CNVS_POS_Y, (_nScrMark.y() - _releasePoint.y()), CNVS_DEL_Y);
 
 //   drawInterim(_ScrMark);
-   if (_tmpWnd || _mouseInput || _reperX || _reperY || PROPC->boldOnHover()) Refresh();//updateGL();
+   if (_tmpWnd || _mouseInput || _reperX || _reperY || PROPC->boldOnHover())
+      Refresh();
 }
 
 void tui::LayoutCanvas::OnMouseRightDown(wxMouseEvent& WXUNUSED(event)) {
@@ -1168,7 +1147,7 @@ void tui::LayoutCanvas::OnTimer(wxTimerEvent& WXUNUSED(event))
    {
       glAccum(GL_RETURN, 1.0);
       if       (_tmpWnd)              wndPaint();
-      rubberPaint();
+      drawOGLBuffer();
       if (!_rubberBand && PROPC->boldOnHover()) boldOnHover();
    }
    else
@@ -1309,10 +1288,10 @@ void* tui::DrawThread::Entry(/*wxGLContext* glRC*/)
       DBGL_CALL(glEnable,GL_BLEND)
       DBGL_CALL(glBlendFunc,GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 //      DBGL_CALL(glClear,GL_ACCUM_BUFFER_BIT)
-      DATC->render(/*W,H*/0,0);    // draw data
+      DATC->renderOGLBuffer(/*W,H*/0,0);    // draw data
 //      DBGL_CALL(glAccum,GL_LOAD, 1.0)
       _canvas->_invalidWindow = false;
-      _canvas->rubberPaint();
+      _canvas->drawOGLBuffer();
 //      if (_canvas->_rubberBand) _canvas->rubberPaint();
 //      if (_canvas->_reperX || _canvas->_reperY) _canvas->longCursor();
       _canvas->SwapBuffers();

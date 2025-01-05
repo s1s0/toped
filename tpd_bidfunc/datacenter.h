@@ -81,7 +81,7 @@ public:
    void                       mouseFlip();
    void                       mouseRotate();
    void                       motionDraw(const CTM&, TP, TP, bool, const DBlineList repers);
-   void                       render(int W, int H);
+   void                       renderOGLBuffer(int W, int H);
    void                       mouseHooverDraw(TP&);
    void                       zoomDraw(const TP&,const TP&);
    void                       grcDraw();

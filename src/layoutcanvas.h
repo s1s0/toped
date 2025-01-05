@@ -142,7 +142,7 @@ namespace tui {
       void           pointUpdate(int nX, int nY);
       void           updateViewport();
       void           wndPaint();
-      void           rubberPaint();
+      void           drawOGLBuffer();
       void           boldOnHover();
       void           drawZeroMark();
       void           updateCoordWin(int coord, CVSSTATUS_TYPE postype, int dcoord, CVSSTATUS_TYPE dpostype);
