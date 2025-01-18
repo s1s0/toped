@@ -128,17 +128,20 @@ console::ted_log::ted_log(wxWindow *parent, wxWindowID id): wxTextCtrl( parent, 
 }
 
 void console::ted_log::OnLOGMessage(wxCommandEvent& evt) {
-   wxColour logColour;
-   long int startPos = GetLastPosition();
+//   wxColour logColour;
+//   long int startPos = GetLastPosition();
+   // TODO - the colours of the log window!
+   // The issue is when a dark or light desktop are used (on MAC foe example)
+   // the colours are completely unadequate
    switch (evt.GetInt())
    {
       case    MT_INFO:
          *this << rply_mark << evt.GetString() << wxT("\n");
-         logColour = *wxBLACK;
+//         logColour = *wxBLACK;
          break;
       case   MT_ERROR:
          *this << rply_mark << evt.GetString() << wxT("\n");
-         logColour = *wxRED;
+//         logColour = *wxRED;
          break;
       case MT_COMMAND:
          *this << cmd_mark << evt.GetString() << wxT("\n");
@@ -148,11 +151,11 @@ void console::ted_log::OnLOGMessage(wxCommandEvent& evt) {
          break;
       case MT_SHELLINFO:
          *this << shell_mark << evt.GetString() << wxT("\n");
-         logColour = *wxBLACK;
+//         logColour = *wxBLACK;
          break;
       case MT_SHELLERROR:
          *this << shell_mark << evt.GetString() << wxT("\n");
-         logColour = *wxRED;
+//         logColour = *wxRED;
          break;
       case MT_GUIINPUT:
          *this << evt.GetString();
@@ -162,7 +165,7 @@ void console::ted_log::OnLOGMessage(wxCommandEvent& evt) {
          break;
       case MT_WARNING:
          *this << rply_mark << evt.GetString() << wxT("\n");
-         logColour = *wxBLUE;
+//         logColour = *wxBLUE;
          break;
       case MT_CELLNAME:
          *this << rply_mark << wxT(" Cell ") << evt.GetString() << wxT("\n");
@@ -172,11 +175,11 @@ void console::ted_log::OnLOGMessage(wxCommandEvent& evt) {
          break;
       default: //wx Messages
          *this <<wxT("WX MESSAGE Level:") << evt.GetInt() << wxT(" \"") << evt.GetString() << wxT("\"\n");
-         logColour = *wxLIGHT_GREY;
+//         logColour = *wxLIGHT_GREY;
          break;
    }
-   long int endPos = GetLastPosition();
-   SetStyle(startPos,endPos,wxTextAttr(logColour));
+//   long int endPos = GetLastPosition();
+//   SetStyle(startPos,endPos,wxTextAttr(logColour));
    // Truncate the log window contents from the bottom to avoid
    wxTextPos curLogSize = GetLastPosition();
    if (curLogSize > 0x7800) // 30K

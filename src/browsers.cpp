@@ -76,9 +76,11 @@ browsers::CellBrowser::CellBrowser(wxWindow *parent, wxWindowID id,
       wxTreeCtrl(parent, id, pos, size, style | wxTR_FULL_ROW_HIGHLIGHT )
 {
    _hierarchy_view   = true;
-   _listColor        = wxColor(128,128,128);
-   _editColor        = *wxBLACK;
+   _listColor        = /**wxRED;   */   wxColor(128,128,128);
+   _editColor        = /**wxYELLOW;*/ *wxBLACK;
    _corrupted        = false;
+   wxColour bgnd = GetBackgroundColour();
+   SetBackgroundColour(*wxLIGHT_GREY);
 }
 
 void browsers::CellBrowser::initialize()
@@ -1205,7 +1207,7 @@ browsers::TDTbrowser::TDTbrowser(wxWindow *parent, wxWindowID id,
 
    sizer1->Add(_hierButton, 1, wxEXPAND|wxBOTTOM, 3);
    sizer1->Add(_flatButton, 1, wxEXPAND|wxBOTTOM, 3);
-   _cellBrowser = DEBUG_NEW CellBrowser(this, tui::ID_PNL_CELLS, pos, size, style | wxTR_HIDE_ROOT | wxTR_NO_BUTTONS | wxTR_LINES_AT_ROOT);
+   _cellBrowser = DEBUG_NEW CellBrowser(this, tui::ID_PNL_CELLS, pos, size , style | wxTR_HIDE_ROOT | wxTR_NO_BUTTONS | wxTR_LINES_AT_ROOT);
    thesizer->Add(_cellFilter, 0, wxEXPAND|wxTOP, 3);
    thesizer->Add(_cellBrowser, 1, wxEXPAND | wxBOTTOM);
    thesizer->Add(sizer1, 0, wxEXPAND | wxALL);
