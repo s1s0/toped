@@ -184,8 +184,8 @@ void console::ted_log::OnLOGMessage(wxCommandEvent& evt) {
 //         logColour = *wxLIGHT_GREY;
          break;
    }
-   long int endPos = GetLastPosition();
-   SetStyle(startPos,endPos,wxTextAttr(logColour));
+//   long int endPos = GetLastPosition();
+//   SetStyle(startPos,endPos,wxTextAttr(logColour));
    // Truncate the log window contents from the bottom to avoid
    wxTextPos curLogSize = GetLastPosition();
    if (curLogSize > 0x7800) // 30K
