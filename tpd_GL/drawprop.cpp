@@ -397,7 +397,7 @@ double laydata::WireContour::getLambda(word i1, word i2, word ii)
 //-----------------------------------------------------------------------------
 /*! Returns the angle between the line and the X axis
 */
-int laydata::WireContour::xangle(word i1, word i2)
+int laydata::WireContour::xangle(word i1, word i2)// TODO! reuse the function with the same name for polygons & EarClipping
 {
    i1 *= 2; i2 *= 2;
    const long double Pi = 3.1415926535897932384626433832795;

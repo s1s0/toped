@@ -141,7 +141,10 @@ class TessellPoly {
 
 namespace trend {
 
-   typedef enum {lstr, llps, lnes} SlctTypes;
+   typedef enum {  lstr // line strip
+                  ,llps // line loops
+                  ,lnes // lines (individual)
+   } SlctTypes;
 
 
    //==========================================================================
