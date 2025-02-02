@@ -306,7 +306,7 @@ tui::getCellRef::getCellRef(wxFrame *parent, wxWindowID id, const wxString &titl
    // TOP sizer
       topsizer->Add(_nameList, 1, wxEXPAND );
 //   topsizer->Add(spin_sizer, 0, wxEXPAND );
-   topsizer->Add(button_sizer, 0, wxEXPAND | wxALIGN_CENTER );
+   topsizer->Add(button_sizer, 0, wxEXPAND );
 
    SetSizer( topsizer );      // use the sizer for layout
 
@@ -394,7 +394,7 @@ tui::getCellARef::getCellARef(wxFrame *parent, wxWindowID id, const wxString &ti
 //   topsizer->Add(spin_sizer, 0, wxEXPAND );
    topsizer->Add(num_sizer, 0, wxEXPAND );
    topsizer->Add(step_sizer, 0, wxEXPAND );
-   topsizer->Add(button_sizer, 0, wxEXPAND | wxALIGN_CENTER );
+   topsizer->Add(button_sizer, 0, wxEXPAND);
 
    SetSizer( topsizer );      // use the sizer for layout
 
@@ -425,9 +425,9 @@ tui::getTextdlg::getTextdlg(wxFrame *parent, wxWindowID id, const wxString &titl
    button_sizer->Add(0,0,1); //
    button_sizer->Add( DEBUG_NEW wxButton( this, wxID_CANCEL, wxT("Cancel") ), 0, wxALL, 10 );
    // TOP sizer
-   topsizer->Add(_text, 1, wxEXPAND | wxALIGN_CENTER, 10 );
+   topsizer->Add(_text, 1, wxEXPAND, 10 );
    topsizer->Add(spin_sizer, 0, wxEXPAND );
-   topsizer->Add(button_sizer, 0, wxEXPAND | wxALIGN_CENTER );
+   topsizer->Add(button_sizer, 0, wxEXPAND );
 
    SetSizer( topsizer );      // use the sizer for layout
 
@@ -819,33 +819,30 @@ tui::DefineColor::DefineColor(wxWindow *parent, wxWindowID id, const wxString &t
    wxBoxSizer *hsizer1 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    hsizer1->Add( DEBUG_NEW wxStaticText(this, -1, wxT("R:"),
                               wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
-                                                1, wxALL | wxALIGN_RIGHT, 5);
+                                                1, wxALL /*| wxALIGN_RIGHT*/, 5);
    hsizer1->Add( DEBUG_NEW wxTextCtrl( this, ID_REDVAL , wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
                                        wxTextValidator(wxFILTER_NUMERIC, &_red))   , 0, wxALL | wxEXPAND, 5);
    wxBoxSizer *hsizer2 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    hsizer2->Add( DEBUG_NEW wxStaticText(this, -1, wxT("G:"),
-                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
-                                                1, wxALL | wxALIGN_RIGHT, 5);
+                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT), 1, wxALL, 5);
    hsizer2->Add( DEBUG_NEW wxTextCtrl( this, ID_GREENVAL, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
                                        wxTextValidator(wxFILTER_NUMERIC, &_green)) , 0, wxALL | wxEXPAND, 5);
    wxBoxSizer *hsizer3 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    hsizer3->Add( DEBUG_NEW wxStaticText(this, -1, wxT("B:"),
-                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
-                                                1, wxALL | wxALIGN_RIGHT, 5);
+                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT), 1, wxALL, 5);
    hsizer3->Add( DEBUG_NEW wxTextCtrl( this, ID_BLUEVAL, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
                                        wxTextValidator(wxFILTER_NUMERIC, &_blue))  , 0, wxALL | wxEXPAND, 5);
    wxBoxSizer *hsizer4 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
    hsizer4->Add( DEBUG_NEW wxStaticText(this, -1, wxT("A:"),
-                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
-                                                1, wxALL | wxALIGN_RIGHT, 5);
+                              wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT), 1, wxALL , 5);
    hsizer4->Add( DEBUG_NEW wxTextCtrl( this, ID_ALPHAVAL, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_RIGHT,
                                        wxTextValidator(wxFILTER_NUMERIC, &_alpha))  , 0, wxALL | wxEXPAND, 5);
 
    wxBoxSizer *hsizer5 = DEBUG_NEW wxBoxSizer( wxHORIZONTAL );
-   hsizer5->Add(DEBUG_NEW wxButton( this, ID_BTNAPPLY , wxT(" Apply ") , wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT ), 0, wxALL | wxALIGN_RIGHT, 5);
+   hsizer5->Add(DEBUG_NEW wxButton( this, ID_BTNAPPLY , wxT(" Apply ") , wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT ), 0, wxALL, 5);
    FindWindow(ID_BTNAPPLY)->Enable(false);
 
-   hsizer5->Add(DEBUG_NEW wxButton( this, ID_BTNEDIT  , wxT(" Define "), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT ), 0, wxALL | wxALIGN_RIGHT, 5);
+   hsizer5->Add(DEBUG_NEW wxButton( this, ID_BTNEDIT  , wxT(" Define "), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT ), 0, wxALL, 5);
 
    wxBoxSizer *vsizer2 = DEBUG_NEW wxBoxSizer( wxVERTICAL );
    vsizer2->Add( _colorsample , 0, wxALL | wxEXPAND, 5);

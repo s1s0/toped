@@ -1,3 +1,21 @@
+Mac facelift related
+=====================
+
+  OpenGL
+  -------
+  * Line width - this is the last thing which remains from the OpenGL handling.
+                 There is no way to have a line wider than 1 pixel in the recent revtions of OGL
+               - In the best case - it requires updates in the shaders
+               - Can be implemented using the existing algos for converting wires to polygons
+                 in all cases
+
+  General view of the tool
+  -------------------------
+  * dark mode - wxWidgets is not offering much on the subject. The issue here are the dialog windows
+  * Application icon - not good enough for the contemporary views (too small)
+  * all icons are actually ugly and must be replaced!
+
+
 General
 =========
   * Text resize
@@ -18,13 +36,13 @@ General
 
 Dialog stuff
 ============
-   * Grid definition dialog is ugly - text windows are not resizing properly. 
-   * The number of the digits after the decimal point must be intact with the 
+   * Grid definition dialog is ugly - text windows are not resizing properly.
+   * The number of the digits after the decimal point must be intact with the
      current step. There is some piece of code left in tui.cpp (getSize::getSize)
      to be used as a starting point for this
 
 Global options of the editor
 ============================
   * Ungroup over tdtaref results in a list of tdtref's
-  * Reference point when grouping -> current (0,0), or bottom left point 
+  * Reference point when grouping -> current (0,0), or bottom left point
     of the selected shapes
