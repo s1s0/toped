@@ -43,6 +43,7 @@ noperspective out vec2 markCoord;
 noperspective out float patternCoord;
 void main(void)
 {
+//   gl_PointSize = 7 /**  inCTM*/;
    gl_Position = in_CTM * vec4(in_Vertex, in_Z, 1.0);
    markCoord = vec2(0,0);
    patternCoord = 0;

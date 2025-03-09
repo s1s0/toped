@@ -260,6 +260,8 @@ void trend::ToshaderLay::drawSelected()
    // Set-up the offset in the binded Vertex buffer
    DBGL_CALL(glVertexAttribPointer, TSHDR_LOC_VERTEX, 2, TNDR_GLENUMT, GL_FALSE, 0, (GLvoid*)(sizeof(TNDR_GLDATAT) * _stv_array_offset))
 
+//   DBGL_CALL(glEnable,GL_PROGRAM_POINT_SIZE)
+//   
    if (_asobjix[lstr] > 0)
    {
       assert(_sizslix[lstr]);
@@ -267,6 +269,7 @@ void trend::ToshaderLay::drawSelected()
       //glMultiDrawElements(GL_LINE_STRIP, _sizslix[lstr], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[lstr], _asobjix[lstr]);
       for (unsigned i= 0; i < _asobjix[lstr]; i++)
          DBGL_CALL(tpd_glDrawElements, GL_LINE_STRIP, _sizslix[lstr][i], GL_UNSIGNED_INT, _fstslix[lstr][i])
+//         DBGL_CALL(tpd_glDrawElements, GL_POINTS, _sizslix[lstr][i], GL_UNSIGNED_INT, _fstslix[lstr][i])
    }
    if (_asobjix[llps] > 0)
    {
@@ -275,6 +278,7 @@ void trend::ToshaderLay::drawSelected()
          //glMultiDrawElements(GL_LINE_LOOP     , _sizslix[llps], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[llps], _alobjix[llps]);
       for (unsigned i= 0; i < _asobjix[llps]; i++)
          DBGL_CALL(tpd_glDrawElements, GL_LINE_LOOP, _sizslix[llps][i], GL_UNSIGNED_INT, _fstslix[llps][i])
+//         DBGL_CALL(tpd_glDrawElements, GL_POINTS, _sizslix[llps][i], GL_UNSIGNED_INT, _fstslix[llps][i])
    }
    if (_asobjix[lnes] > 0)
    {
@@ -283,7 +287,9 @@ void trend::ToshaderLay::drawSelected()
          //glMultiDrawElements(GL_LINES  , _sizslix[lnes], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[lnes], _alobjix[lnes]);
       for (unsigned i= 0; i < _asobjix[lnes]; i++)
          DBGL_CALL(tpd_glDrawElements, GL_LINES, _sizslix[lnes][i], GL_UNSIGNED_INT, _fstslix[lnes][i])
+//         DBGL_CALL(tpd_glDrawElements, GL_POINTS, _sizslix[lnes][i], GL_UNSIGNED_INT, _fstslix[lnes][i])
    }
+   DBGL_CALL(glDisable,GL_PROGRAM_POINT_SIZE)
    DBGL_CALL(glDisableVertexAttribArray, TSHDR_LOC_VERTEX)
    DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, 0)
 }
@@ -558,7 +564,7 @@ void trend::Toshader::setLine(bool selected)
    layprop::LineSettings curLine;
    _drawprop->getCurrentLine(curLine, selected);
    GLfloat clnw = static_cast<GLfloat>(curLine.width());
-   DBGL_CALL(glLineWidth,clnw)
+//   DBGL_CALL(glLineWidth,clnw)
    if (0xffff == curLine.pattern())
       DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_LStippleEn), 0)
    else
@@ -592,6 +598,7 @@ void trend::Toshader::draw()
    }
    // Lines with stipples
    TRENDC->setGlslProg(glslp_VG);
+//   TRENDC->setGlslProg(glslp_PS);
    _drawprop->resetCurrentColor();
    DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_StippleEn), 0)
    for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
