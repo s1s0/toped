@@ -489,19 +489,23 @@ void trend::ToshaderGlfFont::drawString(const std::string& text, bool fill, layp
 
 //=============================================================================
 trend::Shaders::Shaders() :
-   _fnShdrVertex     ( "vertex.glsl"      ),
-   _fnShdrGeometry   ( "geometry.glsl"    ),
-   _fnShdrGeSprite   ( "geomsprite.glsl"  ),
-   _fnShdrFragment   ( "fragment.glsl"    ),
-   _fnShdrFBVertex   ( "vertex_fb.glsl"   ),
-   _fnShdrFBFragment ( "fragment_fb.glsl" ),
-   _idShdrVertex     ( -1                 ),
-   _idShdrGeometry   ( -1                 ),
-   _idShdrGeSprite   ( -1                 ),
-   _idShdrFragment   ( -1                 ),
-   _curProgram       ( glslp_NULL         ),
-   _status           ( true               ),
-   _fbProps          ({0,0,0,0,0}         )
+   _fnShdrVrtxDefault     ( "default.vrtx.glsl"),
+   _fnShdrVrtxLineW       ( "linew.vrtx.glsl"  ),
+   _fnShdrVrtxFB          ( "fb.vrtx.glsl"     ),
+   _fnShdrGeomDefault     ( "default.geom.glsl"),
+   _fnShdrGeomSprite      ( "sprite.geom.glsl" ),
+   _fnShdrFragDefault     ( "default.frag.glsl"),
+   _fnShdrFragFB          ( "fb.frag.glsl"     ),
+   _idShdrVrtxDefault     (                 -1 ),
+   _idShdrVrtxLineW       (                 -1 ),
+   _idShdrVrtxFB          (                 -1 ),
+   _idShdrGeomDefault     (                 -1 ),
+   _idShdrGeomSprite      (                 -1 ),
+   _idShdrFragDefault     (                 -1 ),
+   _idShdrFragFB          (                 -1 ),
+   _curProgram            ( glslp_NULL         ),
+   _status                ( true               ),
+   _fbProps               ({0,0,0,0,0}         )
 {
    // initialize all uniform variable names
    _glslUniVarNames[glslp_VF][glslu_in_CTM]        = "in_CTM";
@@ -571,18 +575,20 @@ GLint trend::Shaders::getUniformLoc(const glsl_Uniforms var) const
 
 void trend::Shaders::loadShadersCode(const std::string& codeDirectory)
 {
-   _fnShdrVertex     = codeDirectory + _fnShdrVertex    ;
-   _fnShdrGeometry   = codeDirectory + _fnShdrGeometry  ;
-   _fnShdrGeSprite   = codeDirectory + _fnShdrGeSprite  ;
-   _fnShdrFragment   = codeDirectory + _fnShdrFragment  ;
-   _fnShdrFBVertex   = codeDirectory + _fnShdrFBVertex  ;
-   _fnShdrFBFragment = codeDirectory + _fnShdrFBFragment;
-   if(  (_status &= compileShader(_fnShdrVertex    , _idShdrVertex    , GL_VERTEX_SHADER   ))
-      &&(_status &= compileShader(_fnShdrGeometry  , _idShdrGeometry  , GL_GEOMETRY_SHADER ))
-      &&(_status &= compileShader(_fnShdrGeSprite  , _idShdrGeSprite  , GL_GEOMETRY_SHADER ))
-      &&(_status &= compileShader(_fnShdrFragment  , _idShdrFragment  , GL_FRAGMENT_SHADER ))
-      &&(_status &= compileShader(_fnShdrFBVertex  , _idShdrFBVertex  , GL_VERTEX_SHADER   ))
-      &&(_status &= compileShader(_fnShdrFBFragment, _idShdrFBFragment, GL_FRAGMENT_SHADER ))
+   _fnShdrVrtxDefault = codeDirectory + _fnShdrVrtxDefault ;
+   _fnShdrVrtxLineW   = codeDirectory + _fnShdrVrtxLineW   ;
+   _fnShdrVrtxFB      = codeDirectory + _fnShdrVrtxFB      ;
+   _fnShdrGeomDefault = codeDirectory + _fnShdrGeomDefault ;
+   _fnShdrGeomSprite  = codeDirectory + _fnShdrGeomSprite  ;
+   _fnShdrFragDefault = codeDirectory + _fnShdrFragDefault ;
+   _fnShdrFragFB      = codeDirectory + _fnShdrFragFB      ;
+   if(  (_status &= compileShader(_fnShdrVrtxDefault , _idShdrVrtxDefault , GL_VERTEX_SHADER   ))
+      &&(_status &= compileShader(_fnShdrVrtxLineW   , _idShdrVrtxLineW   , GL_VERTEX_SHADER   ))
+      &&(_status &= compileShader(_fnShdrVrtxFB      , _idShdrVrtxFB      , GL_VERTEX_SHADER   ))
+      &&(_status &= compileShader(_fnShdrGeomDefault , _idShdrGeomDefault , GL_GEOMETRY_SHADER ))
+      &&(_status &= compileShader(_fnShdrGeomSprite  , _idShdrGeomSprite  , GL_GEOMETRY_SHADER ))
+      &&(_status &= compileShader(_fnShdrFragDefault , _idShdrFragDefault , GL_FRAGMENT_SHADER ))
+      &&(_status &= compileShader(_fnShdrFragFB      , _idShdrFragFB      , GL_FRAGMENT_SHADER ))
      )
    {
       _status &= linkProgram(glslp_VF);
@@ -590,12 +596,12 @@ void trend::Shaders::loadShadersCode(const std::string& codeDirectory)
       _status &= linkProgram(glslp_PS);
       _status &= linkProgram(glslp_FB);
       
-      DBGL_CALL(glDeleteShader,_idShdrVertex    )
-      DBGL_CALL(glDeleteShader,_idShdrGeometry  )
-      DBGL_CALL(glDeleteShader,_idShdrGeSprite  )
-      DBGL_CALL(glDeleteShader,_idShdrFragment  )
-      DBGL_CALL(glDeleteShader,_idShdrFBVertex  )
-      DBGL_CALL(glDeleteShader,_idShdrFBFragment)
+      DBGL_CALL(glDeleteShader,_idShdrVrtxDefault )
+      DBGL_CALL(glDeleteShader,_idShdrGeomDefault )
+      DBGL_CALL(glDeleteShader,_idShdrGeomSprite  )
+      DBGL_CALL(glDeleteShader,_idShdrFragDefault )
+      DBGL_CALL(glDeleteShader,_idShdrVrtxFB      )
+      DBGL_CALL(glDeleteShader,_idShdrFragFB      )
       
    }
 }
@@ -614,33 +620,33 @@ bool trend::Shaders::linkProgram(const glsl_Programs pType)
    switch (pType)
    {
       case glslp_VF:
-      {
-         DBGL_CALL(glAttachShader, program, _idShdrVertex  )
-         DBGL_CALL(glAttachShader, program, _idShdrFragment)
-         info << "GLSL program VF";
+      {//! Vertex and Fragment (default)
+         DBGL_CALL(glAttachShader, program, _idShdrVrtxDefault )
+         DBGL_CALL(glAttachShader, program, _idShdrFragDefault )
+         info << "GLSL program VF (default)";
          break;
       }
       case glslp_VG:
-      {
-         DBGL_CALL(glAttachShader, program, _idShdrVertex  )
-         DBGL_CALL(glAttachShader, program, _idShdrGeometry)
-         DBGL_CALL(glAttachShader, program, _idShdrFragment)
-         info << "GLSL program VG";
+      {//! Vertex Geometry and Fragment (line stipple)
+         DBGL_CALL(glAttachShader, program, _idShdrVrtxDefault )
+         DBGL_CALL(glAttachShader, program, _idShdrGeomDefault )
+         DBGL_CALL(glAttachShader, program, _idShdrFragDefault )
+         info << "GLSL program VG (line stipple)";
          break;
       }
       case glslp_PS:
-      {
-         DBGL_CALL(glAttachShader, program, _idShdrVertex  )
-         DBGL_CALL(glAttachShader, program, _idShdrGeSprite)
-         DBGL_CALL(glAttachShader, program, _idShdrFragment)
-         info << "GLSL program PS";
+      {//! Vertex Geometry and Fragment (point sprites)
+         DBGL_CALL(glAttachShader, program, _idShdrVrtxDefault )
+         DBGL_CALL(glAttachShader, program, _idShdrGeomSprite  )
+         DBGL_CALL(glAttachShader, program, _idShdrFragDefault )
+         info << "GLSL program PS (point sprites)";
          break;
       }
       case glslp_FB:
-      {
-         DBGL_CALL(glAttachShader, program, _idShdrFBVertex   )
-         DBGL_CALL(glAttachShader, program, _idShdrFBFragment )
-         info << "GLSL program FB";
+      {//! Final rendering step when frame buffers are in use
+         DBGL_CALL(glAttachShader, program, _idShdrVrtxFB      )
+         DBGL_CALL(glAttachShader, program, _idShdrFragFB      )
+         info << "GLSL program FB (frame buffer rendering)";
          break;
       }
       default: assert(false); break;
@@ -668,22 +674,29 @@ bool trend::Shaders::linkProgram(const glsl_Programs pType)
    {
       case glslp_VF:
       {
-         DBGL_CALL(glDetachShader, program, _idShdrVertex  )
-         DBGL_CALL(glDetachShader, program, _idShdrFragment)
+         DBGL_CALL(glDetachShader, program, _idShdrVrtxDefault )
+         DBGL_CALL(glDetachShader, program, _idShdrFragDefault )
          break;
       }
       case glslp_VG:
       {
-         DBGL_CALL(glDetachShader, program, _idShdrVertex  )
-         DBGL_CALL(glDetachShader, program, _idShdrGeometry)
-         DBGL_CALL(glDetachShader, program, _idShdrFragment)
+         DBGL_CALL(glDetachShader, program, _idShdrVrtxDefault )
+         DBGL_CALL(glDetachShader, program, _idShdrGeomDefault )
+         DBGL_CALL(glDetachShader, program, _idShdrFragDefault )
          break;
       }
       case glslp_PS:
       {
-         DBGL_CALL(glDetachShader, program, _idShdrVertex  )
-         DBGL_CALL(glDetachShader, program, _idShdrGeSprite)
-         DBGL_CALL(glDetachShader, program, _idShdrFragment)
+         DBGL_CALL(glDetachShader, program, _idShdrVrtxDefault )
+         DBGL_CALL(glDetachShader, program, _idShdrGeomSprite  )
+         DBGL_CALL(glDetachShader, program, _idShdrFragDefault )
+         break;
+      }
+      case glslp_FB:
+      {
+         DBGL_CALL(glDetachShader, program, _idShdrVrtxFB      )
+         DBGL_CALL(glDetachShader, program, _idShdrFragFB      )
+         info << "GLSL program FB";
          break;
       }
       default: assert(false); break;

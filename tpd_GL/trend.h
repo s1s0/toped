@@ -194,18 +194,20 @@ namespace trend {
          void                   getShadersLog(GLint);
          void                   getProgramsLog(GLint);
          void                   windowVAO();
-         std::string            _fnShdrVertex;
-         std::string            _fnShdrGeometry;
-         std::string            _fnShdrGeSprite;
-         std::string            _fnShdrFragment;
-         std::string            _fnShdrFBVertex;   // for framebuffer rendering
-         std::string            _fnShdrFBFragment; // for framebuffer rendering
-         GLint                  _idShdrVertex;
-         GLint                  _idShdrGeometry;
-         GLint                  _idShdrGeSprite;
-         GLint                  _idShdrFragment;
-         GLint                  _idShdrFBVertex;
-         GLint                  _idShdrFBFragment;
+         std::string            _fnShdrVrtxDefault ;
+         std::string            _fnShdrVrtxLineW   ; // for drawing selected lines
+         std::string            _fnShdrVrtxFB      ; // for framebuffer rendering
+         std::string            _fnShdrGeomDefault ;
+         std::string            _fnShdrGeomSprite  ;
+         std::string            _fnShdrFragDefault ;
+         std::string            _fnShdrFragFB      ; // for framebuffer rendering
+         GLint                  _idShdrVrtxDefault ;
+         GLint                  _idShdrVrtxLineW   ;
+         GLint                  _idShdrVrtxFB      ;
+         GLint                  _idShdrGeomDefault ;
+         GLint                  _idShdrGeomSprite  ;
+         GLint                  _idShdrFragDefault ;
+         GLint                  _idShdrFragFB      ;
          GlslProgramIDs         _idPrograms;
          GlslUniVarAllNames     _glslUniVarNames;
          GlslUniVarAllLoc       _glslUniVarLoc;
