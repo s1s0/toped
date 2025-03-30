@@ -26,16 +26,19 @@
 //===========================================================================
 // idea taken from https://stackoverflow.com/questions/3484260/opengl-line-width/59688394#59688394
 // but optimized
-#version 410
+#version 330
 
 #define vrtxNum 4
 
-uniform mat4 MVP;
-uniform vec2  u_resolution;
-uniform float u_thickness;
-in vec3 vCol[2];
+uniform mat4  in_CTM;
+uniform float in_Z = 0;
+uniform vec2  in_ScreenSize;
+uniform float in_LineWidth;
+//in vec3 vCol[2];
 in vec2 vPos[vrtxNum];
-out vec3 color;
+//out vec3 color;
+noperspective out vec2 markCoord;
+noperspective out float patternCoord;
 
 void main()
 {
@@ -47,8 +50,8 @@ void main()
 
    for (int i=0; i<vrtxNum; ++i)
    {
-      va[i] = MVP * vec4(vPos[i],0.0,1.0);
-      va[i].xy = (va[i].xy + 1.0) * 0.5 * u_resolution;
+      va[i] = in_CTM * vec4(vPos[i],in_Z,1.0);
+      va[i].xy = (va[i].xy + 1.0) * 0.5 * in_ScreenSize;
    }
 
    vec2 v_line  = normalize(va[2].xy - va[1].xy);
@@ -66,9 +69,15 @@ void main()
    }
    
    vec2 v_miter = normalize(nv_line + vec2(-v_pred.y, v_pred.x));
-   pos.xy += v_miter * u_thickness * ((gl_VertexID%2) == 0 ? -0.5 : 0.5) / dot(v_miter, nv_line);
-   pos.xy = pos.xy / u_resolution * 2.0 - 1.0;
-   
+   pos.xy += v_miter * in_LineWidth * ((gl_VertexID%2) == 0 ? -0.5 : 0.5) / dot(v_miter, nv_line);
+   pos.xy = pos.xy / in_ScreenSize * 2.0 - 1.0;
+
+   markCoord = vec2(0,0);
+   patternCoord = 0;
    gl_Position = pos;
-   color = vCol[1];
+//   color = vCol[1];
 }
+
+//WARNING: Output of vertex shader 'color' not read by fragment shader
+//ERROR: Input of fragment shader 'patternCoord' not written by vertex shader
+//ERROR: Input of fragment shader 'markCoord' not written by vertex shader

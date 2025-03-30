@@ -196,11 +196,14 @@ namespace trend {
                        , glslu_in_LStippleEn
                        , glslu_in_MStippleEn
                        , glslu_in_ScreenSize
+                       , glslu_in_LineWidth
                        , glslu_in_PatScale
+//                       , glslu_in_screenTexture TODO!
                       };
    enum glsl_Programs { glslp_NULL
                        ,glslp_VF  //! Vertex and Fragment (default)
                        ,glslp_VG  //! Vertex Geometry and Fragment (line stipple)
+                       ,glslp_LW  //! LW Vertex and Fragment (line with arbitrary width)
                        ,glslp_PS  //! Vertex Geometry and Fragment (point sprites)
                        ,glslp_FB  //! Final rendering step when frame buffers are in use
                       };

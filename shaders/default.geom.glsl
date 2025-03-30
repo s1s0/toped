@@ -48,10 +48,10 @@ void main()
 {
    vec2 p0Pos = in_ScreenSize.xy * gl_in[0].gl_Position.xy / gl_in[0].gl_Position.w;
    vec2 p1Pos = in_ScreenSize.xy * gl_in[1].gl_Position.xy / gl_in[1].gl_Position.w;
+   markCoord = vec2(0,0);
 
    gl_Position = gl_in[0].gl_Position;
    patternCoord = 0.0;
-   markCoord = vec2(0,0);
    EmitVertex();
    
    gl_Position = gl_in[1].gl_Position;

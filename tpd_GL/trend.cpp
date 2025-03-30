@@ -518,6 +518,18 @@ trend::Shaders::Shaders() :
    _glslUniVarNames[glslp_VF][glslu_in_LStippleEn] = "in_LStippleEn";
    _glslUniVarNames[glslp_VF][glslu_in_MStippleEn] = "in_MStippleEn";
 
+   _glslUniVarNames[glslp_LW][glslu_in_CTM]        = "in_CTM";
+   _glslUniVarNames[glslp_LW][glslu_in_Z]          = "in_Z";
+   _glslUniVarNames[glslp_LW][glslu_in_ScreenSize] = "in_ScreenSize";
+   _glslUniVarNames[glslp_LW][glslu_in_LineWidth]  = "in_LineWidth";
+   _glslUniVarNames[glslp_LW][glslu_in_Color]      = "in_Color";
+   _glslUniVarNames[glslp_LW][glslu_in_Alpha]      = "in_Alpha";
+   _glslUniVarNames[glslp_LW][glslu_in_Stipple]    = "in_Stipple";
+   _glslUniVarNames[glslp_LW][glslu_in_LStipple]   = "in_LStipple";
+   _glslUniVarNames[glslp_LW][glslu_in_StippleEn]  = "in_StippleEn";
+   _glslUniVarNames[glslp_LW][glslu_in_LStippleEn] = "in_LStippleEn";
+   _glslUniVarNames[glslp_LW][glslu_in_MStippleEn] = "in_MStippleEn";
+
    _glslUniVarNames[glslp_VG][glslu_in_CTM]        = "in_CTM";
    _glslUniVarNames[glslp_VG][glslu_in_Z]          = "in_Z";
    _glslUniVarNames[glslp_VG][glslu_in_Color]      = "in_Color";
@@ -542,6 +554,7 @@ trend::Shaders::Shaders() :
    _glslUniVarNames[glslp_PS][glslu_in_MStippleEn] = "in_MStippleEn";
    //
    _idPrograms[glslp_VF] = -1;
+   _idPrograms[glslp_LW] = -1;
    _idPrograms[glslp_VG] = -1;
    _idPrograms[glslp_PS] = -1;
 }
@@ -592,6 +605,7 @@ void trend::Shaders::loadShadersCode(const std::string& codeDirectory)
      )
    {
       _status &= linkProgram(glslp_VF);
+      _status &= linkProgram(glslp_LW);
       _status &= linkProgram(glslp_VG);
       _status &= linkProgram(glslp_PS);
       _status &= linkProgram(glslp_FB);
@@ -624,6 +638,13 @@ bool trend::Shaders::linkProgram(const glsl_Programs pType)
          DBGL_CALL(glAttachShader, program, _idShdrVrtxDefault )
          DBGL_CALL(glAttachShader, program, _idShdrFragDefault )
          info << "GLSL program VF (default)";
+         break;
+      }
+      case glslp_LW:
+      {// Line with arbitrary width
+         DBGL_CALL(glAttachShader, program, _idShdrVrtxLineW   )
+         DBGL_CALL(glAttachShader, program, _idShdrFragDefault )
+         info << "GLSL program LW (line width)";
          break;
       }
       case glslp_VG:
@@ -675,6 +696,12 @@ bool trend::Shaders::linkProgram(const glsl_Programs pType)
       case glslp_VF:
       {
          DBGL_CALL(glDetachShader, program, _idShdrVrtxDefault )
+         DBGL_CALL(glDetachShader, program, _idShdrFragDefault )
+         break;
+      }
+      case glslp_LW:
+      {// Line with arbitrary width
+         DBGL_CALL(glDetachShader, program, _idShdrVrtxLineW   )
          DBGL_CALL(glDetachShader, program, _idShdrFragDefault )
          break;
       }
