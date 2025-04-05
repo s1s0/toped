@@ -200,6 +200,8 @@ namespace trend {
                        , glslu_in_PatScale
 //                       , glslu_in_screenTexture TODO!
                       };
+   enum glsl_Variables { glslv_in_Vertex
+                      };
    enum glsl_Programs { glslp_NULL
                        ,glslp_VF  //! Vertex and Fragment (default)
                        ,glslp_VG  //! Vertex Geometry and Fragment (line stipple)
@@ -208,11 +210,17 @@ namespace trend {
                        ,glslp_FB  //! Final rendering step when frame buffers are in use
                       };
    //! The actual location of all uniform variables in the shaders after glLinkProgram
-   typedef std::map<glsl_Uniforms, GLint>           GlslUniVarLoc;
-   typedef std::map<glsl_Programs, GlslUniVarLoc>   GlslUniVarAllLoc;
-   typedef std::map<glsl_Uniforms, std::string>     GlslUniVarNames;
-   typedef std::map<glsl_Programs, GlslUniVarNames> GlslUniVarAllNames;
-   typedef std::map<glsl_Programs, GLint>           GlslProgramIDs;
+   typedef std::map<glsl_Uniforms, GLint>           GlslUniVarLoc       ;
+   typedef std::map<glsl_Programs, GlslUniVarLoc>   GlslUniVarAllLoc    ;
+   typedef std::map<glsl_Uniforms, std::string>     GlslUniVarNames     ;
+   typedef std::map<glsl_Programs, GlslUniVarNames> GlslUniVarAllNames  ;
+
+   typedef std::map<glsl_Variables, GLint>          GlslVarLoc          ;
+   typedef std::map<glsl_Programs , GlslVarLoc>     GlslVarAllLoc       ;
+   typedef std::map<glsl_Variables, std::string>    GlslVarNames        ;
+   typedef std::map<glsl_Programs , GlslVarNames>   GlslVarAllNames     ;
+
+   typedef std::map<glsl_Programs, GLint>           GlslProgramIDs      ;
 
 
    typedef std::list<TrxCnvx*>      SliceObjects;
@@ -569,7 +577,7 @@ namespace trend {
          unsigned          _num_total_slctdx;
          unsigned          _num_total_strings;
          // Data related to selected objects
-         SliceSelected     _slct_data;
+         SliceSelected     _slct_data;  //! All selected objects
          // index related data for selected objects
          unsigned          _asindxs[3]; //! array with the total number of indexes of selected objects
          unsigned          _asobjix[3]; //! array with the total number of selected objects

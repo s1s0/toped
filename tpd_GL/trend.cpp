@@ -448,9 +448,9 @@ trend::ToshaderGlfFont::ToshaderGlfFont(std::string filename, std::string& fontn
 void trend::ToshaderGlfFont::drawString(const std::string& text, bool fill, layprop::DrawProperties* drawprop)
 {
    // Activate the vertex buffers in the vertex shader ...
-   DBGL_CALL(glEnableVertexAttribArray,TSHDR_LOC_VERTEX)
+   DBGL_CALL(glEnableVertexAttribArray,TRENDC->getVarLoc(glslv_in_Vertex))
    // Set-up the offset in the binded Vertex buffer
-   DBGL_CALL(glVertexAttribPointer, TSHDR_LOC_VERTEX, 2, GL_FLOAT, GL_FALSE, 0, nullptr)
+   DBGL_CALL(glVertexAttribPointer, TRENDC->getVarLoc(glslv_in_Vertex), 2, GL_FLOAT, GL_FALSE, 0, nullptr)
    float right_of = 0.0f, left_of = 0.0f;
    for (unsigned i = 0; i < text.length() ; i++)
    {
@@ -482,7 +482,7 @@ void trend::ToshaderGlfFont::drawString(const std::string& text, bool fill, layp
          right_of += CSI->second->maxX();
       }
    }
-   DBGL_CALL(glDisableVertexAttribArray, TSHDR_LOC_VERTEX)
+   DBGL_CALL(glDisableVertexAttribArray, TRENDC->getVarLoc(glslv_in_Vertex))
 }
 
 
@@ -517,6 +517,8 @@ trend::Shaders::Shaders() :
    _glslUniVarNames[glslp_VF][glslu_in_StippleEn]  = "in_StippleEn";
    _glslUniVarNames[glslp_VF][glslu_in_LStippleEn] = "in_LStippleEn";
    _glslUniVarNames[glslp_VF][glslu_in_MStippleEn] = "in_MStippleEn";
+   _glslVarNames[glslp_VF][glslv_in_Vertex]        = "in_Vertex";
+
 
    _glslUniVarNames[glslp_LW][glslu_in_CTM]        = "in_CTM";
    _glslUniVarNames[glslp_LW][glslu_in_Z]          = "in_Z";
@@ -529,6 +531,7 @@ trend::Shaders::Shaders() :
    _glslUniVarNames[glslp_LW][glslu_in_StippleEn]  = "in_StippleEn";
    _glslUniVarNames[glslp_LW][glslu_in_LStippleEn] = "in_LStippleEn";
    _glslUniVarNames[glslp_LW][glslu_in_MStippleEn] = "in_MStippleEn";
+   _glslVarNames[glslp_LW][glslv_in_Vertex]        = "in_Vertex";
 
    _glslUniVarNames[glslp_VG][glslu_in_CTM]        = "in_CTM";
    _glslUniVarNames[glslp_VG][glslu_in_Z]          = "in_Z";
@@ -541,6 +544,7 @@ trend::Shaders::Shaders() :
    _glslUniVarNames[glslp_VG][glslu_in_ScreenSize] = "in_ScreenSize";
    _glslUniVarNames[glslp_VG][glslu_in_PatScale]   = "in_PatScale";
    _glslUniVarNames[glslp_VG][glslu_in_MStippleEn] = "in_MStippleEn";
+   _glslVarNames[glslp_VG][glslv_in_Vertex]        = "in_Vertex";
 
    _glslUniVarNames[glslp_PS][glslu_in_CTM]        = "in_CTM";
    _glslUniVarNames[glslp_PS][glslu_in_Z]          = "in_Z";
@@ -552,6 +556,7 @@ trend::Shaders::Shaders() :
    _glslUniVarNames[glslp_PS][glslu_in_LStippleEn] = "in_LStippleEn";
    _glslUniVarNames[glslp_PS][glslu_in_ScreenSize] = "in_ScreenSize";
    _glslUniVarNames[glslp_PS][glslu_in_MStippleEn] = "in_MStippleEn";
+   _glslVarNames[glslp_PS][glslv_in_Vertex]        = "in_Vertex";
    //
    _idPrograms[glslp_VF] = -1;
    _idPrograms[glslp_LW] = -1;
@@ -582,6 +587,17 @@ GLint trend::Shaders::getUniformLoc(const glsl_Uniforms var) const
    GlslUniVarAllLoc::const_iterator varSet = _glslUniVarLoc.find(_curProgram);
    assert(_glslUniVarLoc.end() != varSet);
    GlslUniVarLoc::const_iterator varLoc    = varSet->second.find(var);
+   assert(varSet->second.end() != varLoc);
+   return varLoc->second;
+}
+
+GLint trend::Shaders::getVarLoc(const glsl_Variables var) const
+{
+   assert((_idPrograms.end() != _idPrograms.find(_curProgram)) &&
+                         (-1 != (_idPrograms.find(_curProgram))->second));
+   GlslVarAllLoc::const_iterator varSet = _glslVarLoc.find(_curProgram);
+   assert(_glslVarLoc.end() != varSet);
+   GlslVarLoc::const_iterator varLoc    = varSet->second.find(var);
    assert(varSet->second.end() != varLoc);
    return varLoc->second;
 }
@@ -681,7 +697,7 @@ bool trend::Shaders::linkProgram(const glsl_Programs pType)
       info << " linked";
       tell_log(console::MT_INFO, info.str());
       _idPrograms[pType] = program;
-      return bindUniforms(pType);
+      return bindVarLocations(pType);
    }
    else
    {
@@ -730,7 +746,7 @@ bool trend::Shaders::linkProgram(const glsl_Programs pType)
    }
 }
 
-bool trend::Shaders::bindUniforms(const glsl_Programs pType)
+bool trend::Shaders::bindVarLocations(const glsl_Programs pType)
 {
    for (GlslUniVarNames::const_iterator CV = _glslUniVarNames[pType].begin(); CV != _glslUniVarNames[pType].end(); CV++)
    {
@@ -742,11 +758,27 @@ bool trend::Shaders::bindUniforms(const glsl_Programs pType)
       else
       {
          std::stringstream info;
+         info << "Can't bind uniform variable \"" << CV->second << "\"";
+         tell_log(console::MT_ERROR, info.str());
+         return false;
+      }
+   }
+   for (GlslVarNames::const_iterator CV = _glslVarNames[pType].begin(); CV != _glslVarNames[pType].end(); CV++)
+   {
+      GLint location = glGetAttribLocation(_idPrograms[pType], CV->second.c_str());
+      if( location >= 0 )
+      {
+         _glslVarLoc[pType][CV->first] = location;
+      }
+      else
+      {
+         std::stringstream info;
          info << "Can't bind variable \"" << CV->second << "\"";
          tell_log(console::MT_ERROR, info.str());
          return false;
       }
    }
+
    return true;
 }
 
@@ -1334,6 +1366,12 @@ GLint trend::TrendCenter::getUniformLoc(const glsl_Uniforms var) const
 {
    assert(_cShaders);
    return _cShaders->getUniformLoc(var);
+}
+
+GLint trend::TrendCenter::getVarLoc(const glsl_Variables var) const
+{
+   assert(_cShaders);
+   return _cShaders->getVarLoc(var);
 }
 
 void trend::TrendCenter::setGlslProg(const glsl_Programs prog) const

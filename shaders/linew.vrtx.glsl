@@ -35,7 +35,7 @@ uniform float in_Z = 0;
 uniform vec2  in_ScreenSize;
 uniform float in_LineWidth;
 //in vec3 vCol[2];
-in vec2 vPos[vrtxNum];
+in vec2 in_Vertex[vrtxNum];
 //out vec3 color;
 noperspective out vec2 markCoord;
 noperspective out float patternCoord;
@@ -50,7 +50,7 @@ void main()
 
    for (int i=0; i<vrtxNum; ++i)
    {
-      va[i] = in_CTM * vec4(vPos[i],in_Z,1.0);
+      va[i] = in_CTM * vec4(in_Vertex[i],in_Z,1.0);
       va[i].xy = (va[i].xy + 1.0) * 0.5 * in_ScreenSize;
    }
 

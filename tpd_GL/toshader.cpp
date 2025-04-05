@@ -57,16 +57,16 @@ void trend::ToshaderTV::draw(layprop::DrawProperties* drawprop)
    setAlpha(drawprop);
 
    // Activate the vertex buffers in the vertex shader ...
-   DBGL_CALL(glEnableVertexAttribArray,TSHDR_LOC_VERTEX)
+   DBGL_CALL(glEnableVertexAttribArray,TRENDC->getVarLoc(glslv_in_Vertex))
    // Set-up the offset in the binded Vertex buffer
-   DBGL_CALL(glVertexAttribPointer, TSHDR_LOC_VERTEX, 2, TNDR_GLENUMT, GL_FALSE, 0, (GLvoid*)(sizeof(TNDR_GLDATAT) * _point_array_offset))
+   DBGL_CALL(glVertexAttribPointer, TRENDC->getVarLoc(glslv_in_Vertex), 2, TNDR_GLENUMT, GL_FALSE, 0, (GLvoid*)(sizeof(TNDR_GLDATAT) * _point_array_offset))
    // ... and here we go ...
    drawTriQuads();
    DBGL_CALL(glUniform1ui,TRENDC->getUniformLoc(glslu_in_StippleEn), 0)
    drawLines();
    DBGL_CALL(glUniform1ui,TRENDC->getUniformLoc(glslu_in_StippleEn), 1)
    // Switch the vertex buffers OFF in the openGL engine ...
-   DBGL_CALL(glDisableVertexAttribArray,TSHDR_LOC_VERTEX)
+   DBGL_CALL(glDisableVertexAttribArray,TRENDC->getVarLoc(glslv_in_Vertex))
    // ... and finally restore the openGL translation matrix
    drawprop->popCtm();
 }
@@ -256,9 +256,9 @@ void trend::ToshaderLay::drawSelected()
    assert(bufferSize == (GLint)(2 * _num_total_points * sizeof(TNDR_GLDATAT)));
 
    // Activate the vertex buffers in the vertex shader ...
-   DBGL_CALL(glEnableVertexAttribArray, TSHDR_LOC_VERTEX)
+   DBGL_CALL(glEnableVertexAttribArray, TRENDC->getVarLoc(glslv_in_Vertex))
    // Set-up the offset in the binded Vertex buffer
-   DBGL_CALL(glVertexAttribPointer, TSHDR_LOC_VERTEX, 2, TNDR_GLENUMT, GL_FALSE, 0, (GLvoid*)(sizeof(TNDR_GLDATAT) * _stv_array_offset))
+   DBGL_CALL(glVertexAttribPointer, TRENDC->getVarLoc(glslv_in_Vertex), 2, TNDR_GLENUMT, GL_FALSE, 0, (GLvoid*)(sizeof(TNDR_GLDATAT) * _stv_array_offset))
 
 //   DBGL_CALL(glEnable,GL_PROGRAM_POINT_SIZE)
 //   
@@ -290,7 +290,7 @@ void trend::ToshaderLay::drawSelected()
 //         DBGL_CALL(tpd_glDrawElements, GL_POINTS, _sizslix[lnes][i], GL_UNSIGNED_INT, _fstslix[lnes][i])
    }
    DBGL_CALL(glDisable,GL_PROGRAM_POINT_SIZE)
-   DBGL_CALL(glDisableVertexAttribArray, TSHDR_LOC_VERTEX)
+   DBGL_CALL(glDisableVertexAttribArray, TRENDC->getVarLoc(glslv_in_Vertex))
    DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, 0)
 }
 
@@ -314,9 +314,9 @@ void trend::ToshaderRefLay::draw(layprop::DrawProperties* drawprop)
    DBGL_CALL(glGetBufferParameteriv, GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize)
    assert(bufferSize == (GLint)(2 * total_points() * sizeof(TNDR_GLDATAT)));
 
-   DBGL_CALL(glEnableVertexAttribArray, TSHDR_LOC_VERTEX)
+   DBGL_CALL(glEnableVertexAttribArray, TRENDC->getVarLoc(glslv_in_Vertex))
    // Set-up the offset in the binded Vertex buffer
-   DBGL_CALL(glVertexAttribPointer, TSHDR_LOC_VERTEX, 2, TNDR_GLENUMT, GL_FALSE, 0, nullptr)
+   DBGL_CALL(glVertexAttribPointer, TRENDC->getVarLoc(glslv_in_Vertex), 2, TNDR_GLENUMT, GL_FALSE, 0, nullptr)
    // ... and here we go ...
    if (0 < (_alvrtxs + _asindxs))
    {
@@ -330,7 +330,7 @@ void trend::ToshaderRefLay::draw(layprop::DrawProperties* drawprop)
          setLine(drawprop, false);
       }
    }
-   DBGL_CALL(glDisableVertexAttribArray, TSHDR_LOC_VERTEX)
+   DBGL_CALL(glDisableVertexAttribArray, TRENDC->getVarLoc(glslv_in_Vertex))
 }
 
 void trend::ToshaderRefLay::setLine(layprop::DrawProperties* drawprop, bool selected)
@@ -366,9 +366,9 @@ void trend::ToshaderMarks::draw(layprop::DrawProperties* drawprop)
    DBGL_CALL(glGetBufferParameteriv, GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize)
    assert(bufferSize == (GLint)(2 * total_points() * sizeof(TNDR_GLDATAT)));
 
-   DBGL_CALL(glEnableVertexAttribArray, TSHDR_LOC_VERTEX)
+   DBGL_CALL(glEnableVertexAttribArray, TRENDC->getVarLoc(glslv_in_Vertex))
    // Set-up the offset in the binded Vertex buffer
-   DBGL_CALL(glVertexAttribPointer, TSHDR_LOC_VERTEX, 2, TNDR_GLENUMT, GL_FALSE, 0, nullptr)
+   DBGL_CALL(glVertexAttribPointer, TRENDC->getVarLoc(glslv_in_Vertex), 2, TNDR_GLENUMT, GL_FALSE, 0, nullptr)
    unsigned start = 0;
    unsigned size = static_cast<unsigned>(_refMarks.size());
    if (0 < size)
@@ -388,7 +388,7 @@ void trend::ToshaderMarks::draw(layprop::DrawProperties* drawprop)
       setStipple(drawprop->aref_mark_bmp());
       DBGL_CALL(glDrawArrays, GL_POINTS, start, size)
    }
-   DBGL_CALL(glDisableVertexAttribArray, TSHDR_LOC_VERTEX)
+   DBGL_CALL(glDisableVertexAttribArray, TRENDC->getVarLoc(glslv_in_Vertex))
 
 }
 
@@ -492,7 +492,7 @@ void trend::Toshader::grdDraw()
    _drawprop->topCtm().oglForm(mtrxOrtho);
    DBGL_CALL(glUniformMatrix4fv,TRENDC->getUniformLoc(glslu_in_CTM), 1, GL_FALSE, mtrxOrtho)
 
-   DBGL_CALL(glEnableVertexAttribArray,TSHDR_LOC_VERTEX)
+   DBGL_CALL(glEnableVertexAttribArray,TRENDC->getVarLoc(glslv_in_Vertex))
 
    DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, _ogl_grd_buffer[0]);
    unsigned startP = 0;
@@ -508,11 +508,11 @@ void trend::Toshader::grdDraw()
       DBGL_CALL(glUniform3fv,TRENDC->getUniformLoc(glslu_in_Color), 1, oglColor)
       DBGL_CALL(glUniform1f,TRENDC->getUniformLoc(glslu_in_Alpha), oglColor[3])
       //draw
-      DBGL_CALL(glVertexAttribPointer,TSHDR_LOC_VERTEX, 2, TNDR_GLENUMT, GL_FALSE, 0, nullptr)
+      DBGL_CALL(glVertexAttribPointer,TRENDC->getVarLoc(glslv_in_Vertex), 2, TNDR_GLENUMT, GL_FALSE, 0, nullptr)
       DBGL_CALL(glDrawArrays,GL_POINTS, startP, (*CG)->asize())
       startP += (*CG)->asize();
    }
-   DBGL_CALL(glDisableVertexAttribArray,TSHDR_LOC_VERTEX)
+   DBGL_CALL(glDisableVertexAttribArray,TRENDC->getVarLoc(glslv_in_Vertex))
    // clean-up the buffers
    DBGL_CALL(glBindBuffer,GL_ARRAY_BUFFER, 0)
 }
@@ -670,7 +670,7 @@ void trend::Toshader::rlrDraw()
    _drawprop->topCtm().oglForm(mtrxOrtho);
    DBGL_CALL(glUniformMatrix4fv, TRENDC->getUniformLoc(glslu_in_CTM), 1, GL_FALSE, mtrxOrtho)
 
-   DBGL_CALL(glEnableVertexAttribArray, TSHDR_LOC_VERTEX)
+   DBGL_CALL(glEnableVertexAttribArray, TRENDC->getVarLoc(glslv_in_Vertex))
 
    // color
    float oglColor[4];
@@ -685,10 +685,10 @@ void trend::Toshader::rlrDraw()
 
    //draw
    DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, _ogl_rlr_buffer[0])
-   DBGL_CALL(glVertexAttribPointer, TSHDR_LOC_VERTEX, 2, TNDR_GLENUMT, GL_FALSE, 0, nullptr)
+   DBGL_CALL(glVertexAttribPointer, TRENDC->getVarLoc(glslv_in_Vertex), 2, TNDR_GLENUMT, GL_FALSE, 0, nullptr)
    DBGL_CALL(glDrawArrays, GL_LINES, 0, _num_ruler_ticks)
 
-   DBGL_CALL(glDisableVertexAttribArray, TSHDR_LOC_VERTEX)
+   DBGL_CALL(glDisableVertexAttribArray, TRENDC->getVarLoc(glslv_in_Vertex))
    // clean-up the buffers
    DBGL_CALL(glBindBuffer, GL_ARRAY_BUFFER, 0)
 

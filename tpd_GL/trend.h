@@ -31,8 +31,6 @@
 #include "ttt.h"
 #include "basetrend.h"
 
-#define TSHDR_LOC_VERTEX 0 // TODO -> get this into something like glslUniVarLoc
-
 namespace trend {
 
    typedef enum { rtTBD        // To be defined
@@ -183,13 +181,14 @@ namespace trend {
          bool                   status() const { return _status;}
          void                   useProgram(const glsl_Programs);
          GLint                  getUniformLoc(const glsl_Uniforms) const;
+         GLint                  getVarLoc(const glsl_Variables) const;
          bool                   setFrameBuffer(int W, int H);
          void                   drawFrameBuffer();
          void                   clearFrameBuffer();
       private:
          bool                   compileShader(const std::string&, GLint&, GLint);
          bool                   linkProgram(const glsl_Programs);
-         bool                   bindUniforms(const glsl_Programs pType);
+         bool                   bindVarLocations(const glsl_Programs pType);
          char*                  loadFile(const std::string&, GLint&);
          void                   getShadersLog(GLint);
          void                   getProgramsLog(GLint);
@@ -211,6 +210,8 @@ namespace trend {
          GlslProgramIDs         _idPrograms;
          GlslUniVarAllNames     _glslUniVarNames;
          GlslUniVarAllLoc       _glslUniVarLoc;
+         GlslVarAllNames        _glslVarNames;
+         GlslVarAllLoc          _glslVarLoc;
          glsl_Programs          _curProgram;
          bool                   _status;
          FrameBuffProps         _fbProps;
@@ -249,6 +250,7 @@ namespace trend {
          void                   unbindFont();
          //Shader handling
          GLint                  getUniformLoc(const glsl_Uniforms) const;
+         GLint                  getVarLoc(const glsl_Variables) const;
          void                   setGlslProg(const glsl_Programs) const;
          void                   drawFrameBuffer();
       private:
