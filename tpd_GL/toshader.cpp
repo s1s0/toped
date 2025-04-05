@@ -579,7 +579,7 @@ void trend::Toshader::setLine(bool selected)
 void trend::Toshader::draw()
 {
    _drawprop->initCtmStack();
-   TRENDC->setGlslProg(glslp_VF);
+   TRENDC->setGlslProg(glslp_VF);// i.e. default shader
    _drawprop->resetCurrentColor();
    for (DataLay::Iterator CLAY = _data.begin(); CLAY != _data.end(); CLAY++)
    {// for every layer
@@ -597,7 +597,7 @@ void trend::Toshader::draw()
       }
    }
    // Lines with stipples
-   TRENDC->setGlslProg(glslp_VG);
+   TRENDC->setGlslProg(glslp_VG);// i.e. line stipple shader
 //   TRENDC->setGlslProg(glslp_PS);
    _drawprop->resetCurrentColor();
    DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_StippleEn), 0)
@@ -628,7 +628,7 @@ void trend::Toshader::draw()
    // draw reference marks
    if (0 < _marks->total_points())
    {
-      TRENDC->setGlslProg(glslp_PS);
+      TRENDC->setGlslProg(glslp_PS); // i.e. point sprite
       _drawprop->resetCurrentColor(); // required after changing the renderer
       setLayColor(REF_LAY_DEF);
       DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_StippleEn) , 0)

@@ -453,17 +453,17 @@ void trend::TenderLay::collectSelected(unsigned int* slctd_array)
    if (0 == slct_arr_size) return;
 
    // initialise the indexing arrays of selected objects
-   if (0 < _asobjix[lstr])
+   if (0 < _asobjix[lstr])// line strip
    {
       _sizslix[lstr] = DEBUG_NEW GLsizei[_asobjix[lstr]];
       _fstslix[lstr] = DEBUG_NEW GLuint[_asobjix[lstr]];
    }
-   if (0 < _asobjix[llps])
+   if (0 < _asobjix[llps])// line loops
    {
       _sizslix[llps] = DEBUG_NEW GLsizei[_asobjix[llps]];
       _fstslix[llps] = DEBUG_NEW GLuint[_asobjix[llps]];
    }
-   if (0 < _asobjix[lnes])
+   if (0 < _asobjix[lnes]) // lines (individual)
    {
       _sizslix[lnes] = DEBUG_NEW GLsizei[_asobjix[lnes]];
       _fstslix[lnes] = DEBUG_NEW GLuint[_asobjix[lnes]];
@@ -481,7 +481,7 @@ void trend::TenderLay::collectSelected(unsigned int* slctd_array)
       TrxSelected* cchunk = *SSL;
       switch (cchunk->type())
       {
-         case lstr : // LINES
+         case lstr : // LINES_STRIP
          {
             assert(_sizslix[lstr]);
             _fstslix[lstr][size_sindex[lstr]  ] = sizeof(unsigned) * index_soffset[lstr];
@@ -495,7 +495,7 @@ void trend::TenderLay::collectSelected(unsigned int* slctd_array)
             _sizslix[llps][size_sindex[llps]++] = cchunk->sDataCopy(slctd_array, index_soffset[llps]);
             break;
          }
-         case lnes   : // LINE_STRIP
+         case lnes   : // LINE
          {
             assert(_sizslix[lnes]);
             _fstslix[lnes][size_sindex[lnes]  ] = sizeof(unsigned) * index_soffset[lnes];
