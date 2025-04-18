@@ -27,6 +27,7 @@
 
 #include "tpdph.h"
 #include <sstream>
+#include <iostream>
 #include "tenderer.h"
 #include "viewprop.h"
 #include "trend.h"
@@ -344,6 +345,11 @@ void trend::TrendLay::registerSBox (TrxSBox* sobj)
    else
    {
       _asindxs[llps] += sobj->csize();
+//      we need 4 invocations of the vertex shader for the first segment,
+//              2 invocations of the vertex shader for each consequitive segement,
+//      AND - 4 points for each invocation
+//      Number of segments for fully selected box is equal to the number of vertexes
+//      _asindxs[llps] += 4*(2 + 2*(sobj->csize()));
       _asobjix[llps]++;
    }
 }
@@ -828,9 +834,10 @@ void trend::reportOGLStatus(std::string loc)
       }
       OGLLogFile.flush();
    }
-//   else {
-//      OGLLogFile << " OK";
-//   }
+   else {
+      OGLLogFile << loc << " OK";
+      OGLLogFile.flush();
+   }
 }
 
 TFPTR_DrawElementsOffset tpd_glDrawElements = (TFPTR_DrawElementsOffset)glDrawElements;

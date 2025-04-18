@@ -263,7 +263,7 @@ void trend::ToshaderLay::drawSelected()
 //   DBGL_CALL(glEnable,GL_PROGRAM_POINT_SIZE)
 //   
    if (_asobjix[lstr] > 0)
-   {
+   {//line strip
       assert(_sizslix[lstr]);
       assert(_fstslix[lstr]);
       //glMultiDrawElements(GL_LINE_STRIP, _sizslix[lstr], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[lstr], _asobjix[lstr]);
@@ -272,7 +272,7 @@ void trend::ToshaderLay::drawSelected()
 //         DBGL_CALL(tpd_glDrawElements, GL_POINTS, _sizslix[lstr][i], GL_UNSIGNED_INT, _fstslix[lstr][i])
    }
    if (_asobjix[llps] > 0)
-   {
+   {// line loops
       assert(_sizslix[llps]);
       assert(_fstslix[llps]);
          //glMultiDrawElements(GL_LINE_LOOP     , _sizslix[llps], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[llps], _alobjix[llps]);
@@ -281,7 +281,7 @@ void trend::ToshaderLay::drawSelected()
 //         DBGL_CALL(tpd_glDrawElements, GL_POINTS, _sizslix[llps][i], GL_UNSIGNED_INT, _fstslix[llps][i])
    }
    if (_asobjix[lnes] > 0)
-   {
+   {// lines
       assert(_sizslix[lnes]);
       assert(_fstslix[lnes]);
          //glMultiDrawElements(GL_LINES  , _sizslix[lnes], GL_UNSIGNED_INT, (const GLvoid**)_fstslix[lnes], _alobjix[lnes]);
@@ -598,6 +598,7 @@ void trend::Toshader::draw()
    }
    // Lines with stipples
    TRENDC->setGlslProg(glslp_VG);// i.e. line stipple shader
+//   TRENDC->setGlslProg(glslp_LW); i.e. line stipple shader
 //   TRENDC->setGlslProg(glslp_PS);
    _drawprop->resetCurrentColor();
    DBGL_CALL(glUniform1ui, TRENDC->getUniformLoc(glslu_in_StippleEn), 0)

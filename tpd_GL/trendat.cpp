@@ -605,6 +605,111 @@ void trend::TrxTextOvlBox::drctDrawContour()
 }
 
 
+//auto fillTest (unsigned numVertices, VrtxCoords* vrtx, bool closedLoop = false)
+//{
+////   unsigned numVertices = (numSegments - (closedLoop ? 0:1)) * 4;
+//   unsigned numDataRows;
+//   VertexSet* arrData;
+//   switch (numVertices) {
+//      case 0:
+//      case 1: assert(false); // no such segment
+//      case 2: // i.e. single segment
+//         numDataRows = 4;
+//         arrData = new VertexSet[numDataRows];
+//         for (unsigned i = 0; i < numDataRows; i++)
+//            arrData[i] = {vrtx[0],vrtx[0],vrtx[1],vrtx[1]};
+//         break;
+//      default:// segment stripe/sequence
+//         static const unsigned repeats = 2;
+//         unsigned numSegments = numVertices - (closedLoop ? 0 : 1);
+//         numDataRows = repeats * numSegments + 2;
+//         arrData = new VertexSet[numDataRows];
+//         unsigned cib=0;// Current Index Base
+//         for (unsigned curSeg = 0; curSeg < numSegments ; curSeg++)
+//         {
+//            for(int i = 0; i < ((0==curSeg) ? 4 : 2); i++)
+//            {
+//               if      (0 == curSeg) // first segment - distinguish the neighboring point
+//                  arrData[cib++] = { vrtx[closedLoop ? (numVertices-1): curSeg]
+//                                    ,vrtx[(curSeg  )              ]
+//                                    ,vrtx[(curSeg+1) % numVertices]
+//                                    ,vrtx[(curSeg+2) % numVertices]
+//                  };
+//               else if (numSegments-1 == curSeg) // last segment - distinguish the neighboring point
+//                  arrData[cib++] = { vrtx[(curSeg-1)              ]
+//                                    ,vrtx[(curSeg  )              ]
+//                                    ,vrtx[(curSeg+1) % numVertices]
+//                                    ,vrtx[(curSeg+(closedLoop?2:1)) % numVertices]
+//                  };
+//               else
+//                  arrData[cib++] = { vrtx[(curSeg-1)              ]
+//                                    ,vrtx[(curSeg  )              ]
+//                                    ,vrtx[(curSeg+1) % numVertices]
+//                                    ,vrtx[(curSeg+2) % numVertices]
+//                  };
+//            }
+//         }
+//         break;
+//   }
+//   return std::make_tuple(arrData,numDataRows*sizeof(VertexSet), numDataRows);
+//}
+
+//void  trend::TrxSelected::genSIndx(unsigned* sarr, unsigned& pindex, unsigned numVertices, bool closedLoop = false)
+//{
+//   //   unsigned numVertices = (numSegments - (closedLoop ? 0:1)) * 4;
+//      unsigned numDataRows;
+////      VertexSet* arrData;
+//      switch (numVertices) {
+//         case 0:
+//         case 1: assert(false); // no such segment
+//         case 2: // i.e. single segment
+//            numDataRows = 4;
+////            arrData = new VertexSet[numDataRows];
+//            for (unsigned i = pindex; i < pindex+numDataRows; i++)
+//            {
+//               sarr[i] = {pindex+0,pindex+0,pindex+1,pindex+1};
+//            }
+//            pindex += numDataRows*4
+//            break;
+//         default:// segment stripe/sequence
+//            static const unsigned repeats = 2;
+//            unsigned numSegments = numVertices - (closedLoop ? 0 : 1);
+//            numDataRows = repeats * numSegments + 2;
+//            arrData = new VertexSet[numDataRows];
+//            unsigned cib=0;// Current Index Base
+//            for (unsigned curSeg = 0; curSeg < numSegments ; curSeg++)
+//            {
+//               for(int i = 0; i < ((0==curSeg) ? 4 : 2); i++)
+//               {
+//                  if      (0 == curSeg) // first segment - distinguish the neighboring point
+//                     arrData[cib++] = { vrtx[closedLoop ? (numVertices-1): curSeg]
+//                                       ,vrtx[(curSeg  )              ]
+//                                       ,vrtx[(curSeg+1) % numVertices]
+//                                       ,vrtx[(curSeg+2) % numVertices]
+//                     };
+//                  else if (numSegments-1 == curSeg) // last segment - distinguish the neighboring point
+//                     arrData[cib++] = { vrtx[(curSeg-1)              ]
+//                                       ,vrtx[(curSeg  )              ]
+//                                       ,vrtx[(curSeg+1) % numVertices]
+//                                       ,vrtx[(curSeg+(closedLoop?2:1)) % numVertices]
+//                     };
+//                  else
+//                     arrData[cib++] = { vrtx[(curSeg-1)              ]
+//                                       ,vrtx[(curSeg  )              ]
+//                                       ,vrtx[(curSeg+1) % numVertices]
+//                                       ,vrtx[(curSeg+2) % numVertices]
+//                     };
+//               }
+//            }
+//            break;
+//      }
+//      return std::make_tuple(arrData,numDataRows*sizeof(VertexSet), numDataRows);
+//
+//   
+//}
+
+
+
 //=============================================================================
 //
 // TrxSCnvx

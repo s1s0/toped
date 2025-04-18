@@ -226,33 +226,33 @@ void trend::TenderTV::collect(TNDR_GLDATAT* point_array, unsigned int* index_arr
 void trend::TenderTV::draw(layprop::DrawProperties* drawprop)
 {
    // First - deal with openGL translation matrix
-   glPushMatrix();
-   glMultMatrixd(_refCell->translation());
+   DBGL_CALL0(glPushMatrix)
+   DBGL_CALL(glMultMatrixd,_refCell->translation())
    setAlpha(drawprop);
    // Switch the vertex buffers ON in the openGL engine ...
-   glEnableClientState(GL_VERTEX_ARRAY);
+   DBGL_CALL(glEnableClientState,GL_VERTEX_ARRAY);
    // Set-up the offset in the binded Vertex buffer
-   glVertexPointer(2, TNDR_GLENUMT, 0, (GLvoid*)(sizeof(TNDR_GLDATAT) * _point_array_offset));
+   DBGL_CALL(glVertexPointer,2, TNDR_GLENUMT, 0, (GLvoid*)(sizeof(TNDR_GLDATAT) * _point_array_offset))
    // ... and here we go ...
    if  (_alobjvx[line] > 0)
    {// Draw the wire center lines
       assert(_firstvx[line]);
       assert(_sizesvx[line]);
-      glMultiDrawArrays(GL_LINE_STRIP, _firstvx[line], _sizesvx[line], _alobjvx[line]);
+      DBGL_CALL(glMultiDrawArrays,GL_LINE_STRIP, _firstvx[line], _sizesvx[line], _alobjvx[line])
    }
    if  (_alobjvx[cnvx] > 0)
    {// Draw convex polygons
       assert(_firstvx[cnvx]);
       assert(_sizesvx[cnvx]);
-      glMultiDrawArrays(GL_LINE_LOOP, _firstvx[cnvx], _sizesvx[cnvx], _alobjvx[cnvx]);
-      glMultiDrawArrays(GL_QUADS, _firstvx[cnvx], _sizesvx[cnvx], _alobjvx[cnvx]);
+      DBGL_CALL(glMultiDrawArrays, GL_LINE_LOOP, _firstvx[cnvx], _sizesvx[cnvx], _alobjvx[cnvx])
+      DBGL_CALL(glMultiDrawArrays, GL_QUADS    , _firstvx[cnvx], _sizesvx[cnvx], _alobjvx[cnvx])
    }
    if  (_alobjvx[ncvx] > 0)
    {// Draw non-convex polygons
-      glEnableClientState(GL_INDEX_ARRAY);
+      DBGL_CALL(glEnableClientState,GL_INDEX_ARRAY)
       assert(_firstvx[ncvx]);
       assert(_sizesvx[ncvx]);
-      glMultiDrawArrays(GL_LINE_LOOP, _firstvx[ncvx], _sizesvx[ncvx], _alobjvx[ncvx]);
+      DBGL_CALL(glMultiDrawArrays, GL_LINE_LOOP, _firstvx[ncvx], _sizesvx[ncvx], _alobjvx[ncvx])
       if (_alobjix[fqss] > 0)
       {
          assert(_sizesix[fqss]);
@@ -288,18 +288,18 @@ void trend::TenderTV::draw(layprop::DrawProperties* drawprop)
          for (unsigned i= 0; i < _alobjix[ftss]; i++)
             DBGL_CALL(tpd_glDrawElements, GL_TRIANGLE_STRIP, _sizesix[ftss][i], GL_UNSIGNED_INT, _firstix[ftss][i])
       }
-      glDisableClientState(GL_INDEX_ARRAY);
+      DBGL_CALL(glDisableClientState,GL_INDEX_ARRAY)
    }
    if (_alobjvx[cont] > 0)
    {// Draw the remaining non-filled shapes of any kind
       assert(_firstvx[cont]);
       assert(_sizesvx[cont]);
-      glMultiDrawArrays(GL_LINE_LOOP, _firstvx[cont], _sizesvx[cont], _alobjvx[cont]);
+      DBGL_CALL(glMultiDrawArrays, GL_LINE_LOOP, _firstvx[cont], _sizesvx[cont], _alobjvx[cont]);
    }
    // Switch the vertex buffers OFF in the openGL engine ...
-   glDisableClientState(GL_VERTEX_ARRAY);
+   DBGL_CALL(glDisableClientState, GL_VERTEX_ARRAY)
    // ... and finally restore the openGL translation matrix
-   glPopMatrix();
+   DBGL_CALL0(glPopMatrix)
 }
 
 void trend::TenderTV::drawTexts(layprop::DrawProperties* drawprop)
@@ -926,7 +926,7 @@ bool trend::Tenderer::collect()
    _clayer = NULL;
    if (0 < _refLayer->total_points())  _num_ogl_buffers ++; // reference boxes
    if (0 < _marks->total_points()   )  _num_ogl_buffers ++; // reference marks
-   if (0 < num_total_slctdx      )     _num_ogl_buffers ++;  // selected
+   if (0 < num_total_slctdx         )  _num_ogl_buffers ++;  // selected
    // Check whether we have to continue after traversing
    if (0 == _num_ogl_buffers)
    {
@@ -937,7 +937,6 @@ bool trend::Tenderer::collect()
    //
    // generate all VBOs
    //
-
    checkOGLError("collect");
 
    _ogl_buffers = DEBUG_NEW GLuint [_num_ogl_buffers];

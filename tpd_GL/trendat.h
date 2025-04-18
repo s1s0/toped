@@ -328,6 +328,7 @@ namespace trend {
       protected:
          const SGBitSet*   _slist;  //! A bit set array with selected vertexes
          unsigned          _offset; //! The offset of the first vertex in the point VBO
+//         void              genSIndx(unsigned* sarr, unsigned& pindex, unsigned numVertices, bool closedLoop = false);
    };
 
    /**
